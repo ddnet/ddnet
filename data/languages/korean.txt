@@ -1591,12 +1591,12 @@ Friends
 == 친구
 
 [Demo player duration]
-%d min.
-== %d 분
+%s min.
+== %s 분
 
 [Demo player duration]
-%d sec.
-== %d 초
+%s sec.
+== %s 초
 
 Folder Link
 == 폴더 주소

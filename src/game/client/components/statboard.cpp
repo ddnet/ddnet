@@ -521,7 +521,7 @@ void CStatboard::FormatStats(char *pDest, size_t DestSize)
 			m_pClient->m_aClients[pInfo->m_ClientId].m_Team, // Team
 			ReplaceCommata(m_pClient->m_aClients[pInfo->m_ClientId].m_aName).c_str(), // Name
 			ReplaceCommata(m_pClient->m_aClients[pInfo->m_ClientId].m_aClan).c_str(), // Clan
-			clamp(pInfo->m_Score, -999, 999), // Score
+			std::clamp(pInfo->m_Score, -999, 999), // Score
 			pStats->m_Frags, // Frags
 			pStats->m_Deaths, // Deaths
 			pStats->m_Suicides, // Suicides

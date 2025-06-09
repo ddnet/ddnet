@@ -112,8 +112,8 @@ CMapBasedEnvelopePointAccess::CMapBasedEnvelopePointAccess(IMap *pMap) :
 
 void CMapBasedEnvelopePointAccess::SetPointsRange(int StartPoint, int NumPoints)
 {
-	m_StartPoint = clamp(StartPoint, 0, m_NumPointsMax);
-	m_NumPoints = clamp(NumPoints, 0, maximum(m_NumPointsMax - StartPoint, 0));
+	m_StartPoint = std::clamp(StartPoint, 0, m_NumPointsMax);
+	m_NumPoints = std::clamp(NumPoints, 0, maximum(m_NumPointsMax - StartPoint, 0));
 }
 
 int CMapBasedEnvelopePointAccess::StartPoint() const
@@ -325,11 +325,11 @@ void CRenderTools::RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, std::
 			vec2 p2 = p3 + InTang;
 
 			// validate bezier curve
-			p1.x = clamp(p1.x, p0.x, p3.x);
-			p2.x = clamp(p2.x, p0.x, p3.x);
+			p1.x = std::clamp(p1.x, p0.x, p3.x);
+			p2.x = std::clamp(p2.x, p0.x, p3.x);
 
 			// solve x(a) = time for a
-			a = clamp(SolveBezier(TimeMillis, p0.x, p1.x, p2.x, p3.x), 0.0f, 1.0f);
+			a = std::clamp(SolveBezier(TimeMillis, p0.x, p1.x, p2.x, p3.x), 0.0f, 1.0f);
 
 			// value = y(t)
 			Result[c] = bezier(p0.y, p1.y, p2.y, p3.y, a);
@@ -796,7 +796,7 @@ void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				// Auto-resize text to fit inside the tile
 				float ScaledWidth = TextRender()->TextWidth(Size * Scale, aBuf, -1);
-				float Factor = clamp(Scale / ScaledWidth, 0.0f, 1.0f);
+				float Factor = std::clamp(Scale / ScaledWidth, 0.0f, 1.0f);
 				float LocalSize = Size * Factor;
 				float ToCenterOffset = (1 - LocalSize) / 2.f;
 				TextRender()->Text((mx + 0.5f) * Scale - (ScaledWidth * Factor) / 2.0f, (my + ToCenterOffset) * Scale, LocalSize * Scale, aBuf);
@@ -996,7 +996,7 @@ void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				// Auto-resize text to fit inside the tile
 				float ScaledWidth = TextRender()->TextWidth(Size * Scale, aBuf, -1);
-				float Factor = clamp(Scale / ScaledWidth, 0.0f, 1.0f);
+				float Factor = std::clamp(Scale / ScaledWidth, 0.0f, 1.0f);
 				float LocalSize = Size * Factor;
 				float ToCenterOffset = (1 - LocalSize) / 2.f;
 				TextRender()->Text((mx + 0.5f) * Scale - (ScaledWidth * Factor) / 2.0f, (my + ToCenterOffset) * Scale, LocalSize * Scale, aBuf);

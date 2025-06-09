@@ -45,14 +45,14 @@ void CSoundLoading::Run()
 
 void CSounds::UpdateChannels()
 {
-	const float NewGuiSoundVolume = g_Config.m_SndChatSoundVolume / 100.0f;
+	const float NewGuiSoundVolume = g_Config.m_SndChatVolume / 100.0f;
 	if(NewGuiSoundVolume != m_GuiSoundVolume)
 	{
 		m_GuiSoundVolume = NewGuiSoundVolume;
 		Sound()->SetChannel(CSounds::CHN_GUI, m_GuiSoundVolume, 0.0f);
 	}
 
-	const float NewGameSoundVolume = g_Config.m_SndGameSoundVolume / 100.0f;
+	const float NewGameSoundVolume = g_Config.m_SndGameVolume / 100.0f;
 	if(NewGameSoundVolume != m_GameSoundVolume)
 	{
 		m_GameSoundVolume = NewGameSoundVolume;
@@ -60,7 +60,7 @@ void CSounds::UpdateChannels()
 		Sound()->SetChannel(CSounds::CHN_GLOBAL, m_GameSoundVolume, 0.0f);
 	}
 
-	const float NewMapSoundVolume = g_Config.m_SndMapSoundVolume / 100.0f;
+	const float NewMapSoundVolume = g_Config.m_SndMapVolume / 100.0f;
 	if(NewMapSoundVolume != m_MapSoundVolume)
 	{
 		m_MapSoundVolume = NewMapSoundVolume;

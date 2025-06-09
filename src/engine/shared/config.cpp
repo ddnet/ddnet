@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include <base/log.h>
+#include <base/system.h>
 
 #include <engine/config.h>
 #include <engine/shared/config.h>

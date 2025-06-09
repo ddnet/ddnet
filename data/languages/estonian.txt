@@ -1287,12 +1287,12 @@ Go back the specified duration
 == Mine tagasi määratud kestus
 
 [Demo player duration]
-%d min.
-== %d min.
+%s min.
+== %s min.
 
 [Demo player duration]
-%d sec.
-== %d sek.
+%s sec.
+== %s sek.
 
 Change the skip duration
 == Muuda vahelejätmise kestust

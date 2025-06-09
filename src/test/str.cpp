@@ -4,6 +4,8 @@
 
 #include <game/gamecore.h>
 
+#include <limits>
+
 typedef void (*TStringArgumentFunction)(char *pStr);
 template<TStringArgumentFunction Func>
 static void TestInplace(const char *pInput, const char *pOutput)
@@ -571,6 +573,13 @@ TEST(Str, Base64)
 	EXPECT_STREQ(aBuf, "YXN1cmUu");
 	StrBase64Str(aBuf, sizeof(aBuf), "sure.");
 	EXPECT_STREQ(aBuf, "c3VyZS4=");
+
+	StrBase64Str(aBuf, 4, "pleasure.");
+	EXPECT_STREQ(aBuf, "cGx");
+	StrBase64Str(aBuf, 5, "pleasure.");
+	EXPECT_STREQ(aBuf, "cGxl");
+	StrBase64Str(aBuf, 6, "pleasure.");
+	EXPECT_STREQ(aBuf, "cGxlY");
 }
 
 TEST(Str, Base64Decode)
@@ -599,6 +608,9 @@ TEST(Str, Base64Decode)
 	str_copy(aOut, "XXXXXXXXXXXXXXXX", sizeof(aOut));
 	EXPECT_EQ(str_base64_decode(aOut, sizeof(aOut), "////"), 3);
 	EXPECT_STREQ(aOut, "\xff\xff\xffXXXXXXXXXXXXX");
+	str_copy(aOut, "XXXXXXXXXXXXXXXX", sizeof(aOut));
+	EXPECT_EQ(str_base64_decode(aOut, sizeof(aOut), "CQk+"), 3);
+	EXPECT_STREQ(aOut, "		>XXXXXXXXXXXXX");
 }
 
 TEST(Str, Base64DecodeError)
@@ -614,10 +626,17 @@ TEST(Str, Base64DecodeError)
 	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "AAA=AAAA"), 0);
 	// Invalid characters.
 	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "----"), 0);
+	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "A---"), 0);
+	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "AA--"), 0);
+	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "AAA-"), 0);
 	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "AAAA "), 0);
 	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "AAA "), 0);
 	// Invalid padding values.
 	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "//=="), 0);
+	// Wrong output buffer size.
+	EXPECT_LT(str_base64_decode(aBuf, 2, "cGxlYXN1cmUu"), 0);
+	EXPECT_LT(str_base64_decode(aBuf, 3, "cGxlYXN1cmUu"), 0);
+	EXPECT_LT(str_base64_decode(aBuf, 4, "cGxlYXN1cmUu"), 0);
 }
 
 TEST(Str, Tokenize)
@@ -669,6 +688,17 @@ TEST(Str, Format)
 	EXPECT_STREQ(aBuf, "99:");
 }
 
+TEST(Str, FormatNumber)
+{
+	char aBuf[16];
+	EXPECT_EQ(str_format(aBuf, sizeof(aBuf), "%d", 0), 1);
+	EXPECT_STREQ(aBuf, "0");
+	EXPECT_EQ(str_format(aBuf, sizeof(aBuf), "%d", std::numeric_limits<int>::min()), 11);
+	EXPECT_STREQ(aBuf, "-2147483648");
+	EXPECT_EQ(str_format(aBuf, sizeof(aBuf), "%d", std::numeric_limits<int>::max()), 10);
+	EXPECT_STREQ(aBuf, "2147483647");
+}
+
 TEST(Str, FormatTruncate)
 {
 	const char *pStr = "DDNet最好了";
@@ -717,6 +747,14 @@ TEST(Str, TrimWords)
 	EXPECT_STREQ(str_trim_words(pStr3, 3), "dddd");
 	EXPECT_STREQ(str_trim_words(pStr3, 4), "");
 	EXPECT_STREQ(str_trim_words(pStr3, 100), "");
+	const char *pStr4 = "";
+	EXPECT_STREQ(str_trim_words(pStr4, 0), "");
+	EXPECT_STREQ(str_trim_words(pStr4, 1), "");
+	EXPECT_STREQ(str_trim_words(pStr4, 2), "");
+	const char *pStr5 = "     ";
+	EXPECT_STREQ(str_trim_words(pStr5, 0), "");
+	EXPECT_STREQ(str_trim_words(pStr5, 1), "");
+	EXPECT_STREQ(str_trim_words(pStr5, 2), "");
 }
 
 TEST(Str, CopyNum)

@@ -113,8 +113,8 @@ static void Dilate(int w, int h, const uint8_t *pSrc, uint8_t *pDest)
 			int Counter = 0;
 			for(int c = 0; c < 4; c++)
 			{
-				const int ClampedX = clamp(x + aDirX[c], 0, w - 1);
-				const int ClampedY = clamp(y + aDirY[c], 0, h - 1);
+				const int ClampedX = std::clamp(x + aDirX[c], 0, w - 1);
+				const int ClampedY = std::clamp(y + aDirY[c], 0, h - 1);
 				const int SrcIndex = ClampedY * w * DILATE_BPP + ClampedX * DILATE_BPP;
 				if(pSrc[SrcIndex + DILATE_BPP - 1] > DILATE_ALPHA_THRESHOLD)
 				{
@@ -218,8 +218,8 @@ static float CubicHermite(float A, float B, float C, float D, float t)
 
 static void GetPixelClamped(const uint8_t *pSourceImage, int x, int y, uint32_t W, uint32_t H, size_t BPP, uint8_t aSample[4])
 {
-	x = clamp<int>(x, 0, (int)W - 1);
-	y = clamp<int>(y, 0, (int)H - 1);
+	x = std::clamp<int>(x, 0, (int)W - 1);
+	y = std::clamp<int>(y, 0, (int)H - 1);
 
 	mem_copy(aSample, &pSourceImage[x * BPP + (W * BPP * y)], BPP);
 }
@@ -250,7 +250,7 @@ static void SampleBicubic(const uint8_t *pSourceImage, float u, float v, uint32_
 		{
 			aRows[y] = CubicHermite(aaaSamples[0][y][i], aaaSamples[1][y][i], aaaSamples[2][y][i], aaaSamples[3][y][i], xFract);
 		}
-		aSample[i] = (uint8_t)clamp<float>(CubicHermite(aRows[0], aRows[1], aRows[2], aRows[3], yFract), 0.0f, 255.0f);
+		aSample[i] = (uint8_t)std::clamp<float>(CubicHermite(aRows[0], aRows[1], aRows[2], aRows[3], yFract), 0.0f, 255.0f);
 	}
 }
 

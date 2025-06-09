@@ -212,7 +212,7 @@ int CListBox::DoEnd()
 		if(m_ListBoxNewSelected == -1)
 			m_ListBoxNewSelected = 0;
 		else
-			m_ListBoxNewSelected = clamp(m_ListBoxNewSelected + m_ListBoxNewSelOffset, 0, m_ListBoxNumItems - 1);
+			m_ListBoxNewSelected = std::clamp(m_ListBoxNewSelected + m_ListBoxNewSelOffset, 0, m_ListBoxNumItems - 1);
 		ScrollToSelected();
 	}
 	return m_ListBoxNewSelected;

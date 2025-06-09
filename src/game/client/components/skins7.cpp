@@ -615,8 +615,8 @@ ColorRGBA CSkins7::GetTeamColor(int UseCustomColors, int PartColor, int Team, in
 	int MaxSat = 255;
 
 	int h = TeamHue;
-	int s = clamp(mix(TeamSat, PartSat, 0.2), MinSat, MaxSat);
-	int l = clamp(mix(TeamLgt, PartLgt, 0.2), (int)ColorHSLA::DARKEST_LGT7, 200);
+	int s = std::clamp(mix(TeamSat, PartSat, 0.2), MinSat, MaxSat);
+	int l = std::clamp(mix(TeamLgt, PartLgt, 0.2), (int)ColorHSLA::DARKEST_LGT7, 200);
 
 	int ColorVal = (h << 16) + (s << 8) + l;
 

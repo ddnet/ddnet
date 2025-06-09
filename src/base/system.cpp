@@ -2095,6 +2095,9 @@ void net_init()
 	WSADATA wsa_data;
 	dbg_assert(WSAStartup(MAKEWORD(1, 1), &wsa_data) == 0, "WSAStartup failure");
 #endif
+#if defined(CONF_WEBSOCKETS)
+	websocket_init();
+#endif
 }
 
 #if defined(CONF_FAMILY_UNIX)
@@ -2554,7 +2557,8 @@ int fs_remove(const char *filename)
 		{
 			return 0; // Success: Renaming failed because the original file did not exist.
 		}
-		log_error("filesystem", "Failed to rename file '%s' to '%s' for removal (%ld '%s')", wide_filename, wide_filename_temp, error, windows_format_system_message(error).c_str());
+		const std::string filename_temp = windows_wide_to_utf8(wide_filename_temp.c_str()).value_or("(invalid filename)");
+		log_error("filesystem", "Failed to rename file '%s' to '%s' for removal (%ld '%s')", filename, filename_temp.c_str(), error, windows_format_system_message(error).c_str());
 		return 1;
 	}
 	if(DeleteFileW(wide_filename_temp.c_str()) != 0)
@@ -2566,8 +2570,11 @@ int fs_remove(const char *filename)
 	{
 		return 0; // Success: Another process deleted the renamed file we were about to delete?!
 	}
-	log_error("filesystem", "Failed to remove file '%s' (%ld '%s')", wide_filename_temp, error, windows_format_system_message(error).c_str());
-	return 1;
+	const std::string filename_temp = windows_wide_to_utf8(wide_filename_temp.c_str()).value_or("(invalid filename)");
+	log_error("filesystem", "Failed to remove file '%s' (%ld '%s')", filename_temp.c_str(), error, windows_format_system_message(error).c_str());
+	// Success: While the temporary could not be deleted, this is also considered success because the original file does not exist anymore.
+	//          Callers of this function expect that the original file does not exist anymore if and only if the function succeeded.
+	return 0;
 #else
 	if(unlink(filename) == 0 || errno == ENOENT)
 	{
@@ -2652,56 +2659,50 @@ void swap_endian(void *data, unsigned elem_size, unsigned num)
 	}
 }
 
-int net_socket_read_wait(NETSOCKET sock, int time)
+int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds)
 {
+	const int64_t microseconds = std::chrono::duration_cast<std::chrono::microseconds>(nanoseconds).count();
+	dbg_assert(microseconds >= 0, "Negative wait duration %" PRId64 " not allowed", microseconds);
+
 	fd_set readfds;
 	FD_ZERO(&readfds);
-	int sockid = 0;
+
+	int maxfd = -1;
 	if(sock->ipv4sock >= 0)
 	{
 		FD_SET(sock->ipv4sock, &readfds);
-		sockid = sock->ipv4sock;
+		maxfd = sock->ipv4sock;
 	}
 	if(sock->ipv6sock >= 0)
 	{
 		FD_SET(sock->ipv6sock, &readfds);
-		if(sock->ipv6sock > sockid)
-			sockid = sock->ipv6sock;
+		maxfd = std::max(maxfd, sock->ipv6sock);
 	}
 #if defined(CONF_WEBSOCKETS)
 	if(sock->web_ipv4sock >= 0)
 	{
-		int maxfd = websocket_fd_set(sock->web_ipv4sock, &readfds);
-		if(maxfd > sockid)
-		{
-			sockid = maxfd;
-			FD_SET(sockid, &readfds);
-		}
+		maxfd = std::max(maxfd, websocket_fd_set(sock->web_ipv4sock, &readfds));
 	}
 #endif
+	if(maxfd < 0)
+	{
+		return 0;
+	}
 
-	/* don't care about writefds and exceptfds */
-	if(time < 0)
-	{
-		select(sockid + 1, &readfds, nullptr, nullptr, nullptr);
-	}
-	else
-	{
-		struct timeval tv;
-		tv.tv_sec = time / 1000000;
-		tv.tv_usec = time % 1000000;
-		select(sockid + 1, &readfds, nullptr, nullptr, &tv);
-	}
+	struct timeval tv;
+	tv.tv_sec = microseconds / 1000000;
+	tv.tv_usec = microseconds % 1000000;
+	// don't care about writefds and exceptfds
+	select(maxfd + 1, &readfds, nullptr, nullptr, &tv);
 
 	if(sock->ipv4sock >= 0 && FD_ISSET(sock->ipv4sock, &readfds))
 		return 1;
-#if defined(CONF_WEBSOCKETS)
-	if(sock->web_ipv4sock >= 0 && FD_ISSET(sockid, &readfds))
-		return 1;
-#endif
 	if(sock->ipv6sock >= 0 && FD_ISSET(sock->ipv6sock, &readfds))
 		return 1;
-
+#if defined(CONF_WEBSOCKETS)
+	if(sock->web_ipv4sock >= 0 && websocket_fd_get(sock->web_ipv4sock, &readfds))
+		return 1;
+#endif
 	return 0;
 }
 
@@ -2876,6 +2877,7 @@ int str_format_v(char *buffer, int buffer_size, const char *format, va_list args
 	return str_utf8_fix_truncation(buffer);
 }
 
+#if !defined(CONF_DEBUG)
 int str_format_int(char *buffer, size_t buffer_size, int value)
 {
 	buffer[0] = '\0'; // Fix false positive clang-analyzer-core.UndefinedBinaryOperatorResult when using result
@@ -2883,6 +2885,7 @@ int str_format_int(char *buffer, size_t buffer_size, int value)
 	result.ptr[0] = '\0';
 	return result.ptr - buffer;
 }
+#endif
 
 #undef str_format
 int str_format(char *buffer, int buffer_size, const char *format, ...)
@@ -4865,12 +4868,6 @@ void os_locale_str(char *locale, size_t length)
 std::chrono::nanoseconds time_get_nanoseconds()
 {
 	return std::chrono::nanoseconds(time_get_impl());
-}
-
-int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds)
-{
-	using namespace std::chrono_literals;
-	return ::net_socket_read_wait(sock, (nanoseconds / std::chrono::nanoseconds(1us).count()).count());
 }
 
 #if defined(CONF_FAMILY_WINDOWS)

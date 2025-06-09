@@ -1607,12 +1607,12 @@ Go back the specified duration
 == Отмотать назад на заданное время 
 
 [Demo player duration]
-%d min.
-== %d мин.
+%s min.
+== %s мин.
 
 [Demo player duration]
-%d sec.
-== %d сек.
+%s sec.
+== %s сек.
 
 Change the skip duration
 == Изменить продолжительность шага

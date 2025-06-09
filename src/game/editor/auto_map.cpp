@@ -399,15 +399,15 @@ void CAutoMapper::ProceedLocalized(CLayerTiles *pLayer, CLayerTiles *pGameLayer,
 
 	CConfiguration *pConf = &m_vConfigs[ConfigId];
 
-	int CommitFromX = clamp(X + pConf->m_StartX, 0, pLayer->m_Width);
-	int CommitFromY = clamp(Y + pConf->m_StartY, 0, pLayer->m_Height);
-	int CommitToX = clamp(X + Width + pConf->m_EndX, 0, pLayer->m_Width);
-	int CommitToY = clamp(Y + Height + pConf->m_EndY, 0, pLayer->m_Height);
+	int CommitFromX = std::clamp(X + pConf->m_StartX, 0, pLayer->m_Width);
+	int CommitFromY = std::clamp(Y + pConf->m_StartY, 0, pLayer->m_Height);
+	int CommitToX = std::clamp(X + Width + pConf->m_EndX, 0, pLayer->m_Width);
+	int CommitToY = std::clamp(Y + Height + pConf->m_EndY, 0, pLayer->m_Height);
 
-	int UpdateFromX = clamp(X + 3 * pConf->m_StartX, 0, pLayer->m_Width);
-	int UpdateFromY = clamp(Y + 3 * pConf->m_StartY, 0, pLayer->m_Height);
-	int UpdateToX = clamp(X + Width + 3 * pConf->m_EndX, 0, pLayer->m_Width);
-	int UpdateToY = clamp(Y + Height + 3 * pConf->m_EndY, 0, pLayer->m_Height);
+	int UpdateFromX = std::clamp(X + 3 * pConf->m_StartX, 0, pLayer->m_Width);
+	int UpdateFromY = std::clamp(Y + 3 * pConf->m_StartY, 0, pLayer->m_Height);
+	int UpdateToX = std::clamp(X + Width + 3 * pConf->m_EndX, 0, pLayer->m_Width);
+	int UpdateToY = std::clamp(Y + Height + 3 * pConf->m_EndY, 0, pLayer->m_Height);
 
 	CLayerTiles *pUpdateLayer = new CLayerTiles(Editor(), UpdateToX - UpdateFromX, UpdateToY - UpdateFromY);
 	CLayerTiles *pUpdateGame = new CLayerTiles(Editor(), UpdateToX - UpdateFromX, UpdateToY - UpdateFromY);

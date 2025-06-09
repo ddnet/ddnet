@@ -1573,12 +1573,12 @@ Go back the specified duration
 == Назад на выбраную працягласць
 
 [Demo player duration]
-%d min.
-== %d хв.
+%s min.
+== %s хв.
 
 [Demo player duration]
-%d sec.
-== %d сек.
+%s sec.
+== %s сек.
 
 Change the skip duration
 == Змяніць працягласць пропуску

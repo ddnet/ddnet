@@ -351,7 +351,7 @@ void CEditor::DoMapSettingsEditBox(CMapSettingsBackend::CContext *pContext, cons
 
 	// Calculate x position of the dropdown and the floating part
 	float x = ToolBar.x + Context.CurrentArgPos() - pLineInput->GetScrollOffset();
-	x = clamp(x, ToolBar.x + PartMargin, ToolBar.x + ToolBar.w);
+	x = std::clamp(x, ToolBar.x + PartMargin, ToolBar.x + ToolBar.w);
 
 	if(pLineInput->IsActive())
 	{
@@ -407,7 +407,7 @@ int CEditor::DoEditBoxDropdown(SEditBoxDropdownContext *pDropdown, CLineInput *p
 	// Do an edit box with a possible dropdown
 	// This is a generic method which can display any data we want
 
-	pDropdown->m_Selected = clamp(pDropdown->m_Selected, -1, (int)vData.size() - 1);
+	pDropdown->m_Selected = std::clamp(pDropdown->m_Selected, -1, (int)vData.size() - 1);
 
 	if(Input()->KeyPress(KEY_SPACE) && Input()->ModifierIsPressed())
 	{ // Handle Ctrl+Space to show available options

@@ -122,7 +122,7 @@ void CUuidManager::RegisterName(int Id, const char *pName)
 	CName Name;
 	Name.m_pName = pName;
 	Name.m_Uuid = CalculateUuid(pName);
-	dbg_assert(LookupUuid(Name.m_Uuid) == -1, "duplicate uuid");
+	dbg_assert(LookupUuid(Name.m_Uuid) == UUID_UNKNOWN, "duplicate uuid %s", Name.m_pName);
 
 	m_vNames.push_back(Name);
 

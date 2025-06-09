@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/hash_ctxt.h>
+#include <base/math.h>
 #include <base/system.h>
 
 #include "config.h"
@@ -50,7 +51,7 @@ bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int Ma
 	m_Address = BindAddr;
 	m_pNetBan = pNetBan;
 
-	m_MaxClients = clamp(MaxClients, 1, (int)NET_MAX_CLIENTS);
+	m_MaxClients = std::clamp(MaxClients, 1, (int)NET_MAX_CLIENTS);
 	m_MaxClientsPerIp = MaxClientsPerIp;
 
 	m_NumConAttempts = 0;
@@ -139,6 +140,12 @@ SECURITY_TOKEN CNetServer::GetToken(const NETADDR &Addr)
 		SecurityToken = 1;
 
 	return SecurityToken;
+}
+
+SECURITY_TOKEN CNetServer::GetVanillaToken(const NETADDR &Addr)
+{
+	// vanilla token/gametick shouldn't be negative
+	return absolute(GetToken(Addr));
 }
 
 void CNetServer::SendControl(NETADDR &Addr, int ControlMsg, const void *pExtra, int ExtraSize, SECURITY_TOKEN SecurityToken)

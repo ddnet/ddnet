@@ -62,9 +62,8 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, 
 		return;
 	Channels = minimum<size_t>(Channels, pItem->m_Channels, CEnvPoint::MAX_CHANNELS);
 
-	CMapBasedEnvelopePointAccess EnvelopePoints(pThis->m_pLayers->Map());
-	EnvelopePoints.SetPointsRange(pItem->m_StartPoint, pItem->m_NumPoints);
-	if(EnvelopePoints.NumPoints() == 0)
+	pThis->m_pEnvelopePoints->SetPointsRange(pItem->m_StartPoint, pItem->m_NumPoints);
+	if(pThis->m_pEnvelopePoints->NumPoints() == 0)
 		return;
 
 	static std::chrono::nanoseconds s_Time{0};
@@ -91,7 +90,7 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, 
 		s_Time += CurTime - s_LastLocalTime;
 		s_LastLocalTime = CurTime;
 	}
-	CRenderTools::RenderEvalEnvelope(&EnvelopePoints, s_Time + std::chrono::nanoseconds(std::chrono::milliseconds(TimeOffsetMillis)), Result, Channels);
+	CRenderTools::RenderEvalEnvelope(pThis->m_pEnvelopePoints.get(), s_Time + std::chrono::nanoseconds(std::chrono::milliseconds(TimeOffsetMillis)), Result, Channels);
 }
 
 static void FillTmpTile(SGraphicTile *pTmpTile, SGraphicTileTexureCoords *pTmpTex, unsigned char Flags, unsigned char Index, int x, int y, const ivec2 &Offset, int Scale)
@@ -280,6 +279,8 @@ CMapLayers::~CMapLayers()
 
 void CMapLayers::OnMapLoad()
 {
+	m_pEnvelopePoints = std::make_unique<CMapBasedEnvelopePointAccess>(m_pLayers->Map());
+
 	if(!Graphics()->IsTileBufferingEnabled() && !Graphics()->IsQuadBufferingEnabled())
 	{
 		// Find game group
@@ -999,10 +1000,10 @@ void CMapLayers::RenderKillTileBorder(int LayerIndex, const ColorRGBA &Color)
 	if(!Visuals.m_BorderKillTile.DoDraw())
 		return;
 
-	BorderX0 = clamp(BorderX0, -300, (int)Visuals.m_Width + 299);
-	BorderY0 = clamp(BorderY0, -300, (int)Visuals.m_Height + 299);
-	BorderX1 = clamp(BorderX1, -300, (int)Visuals.m_Width + 299);
-	BorderY1 = clamp(BorderY1, -300, (int)Visuals.m_Height + 299);
+	BorderX0 = std::clamp(BorderX0, -300, (int)Visuals.m_Width + 299);
+	BorderY0 = std::clamp(BorderY0, -300, (int)Visuals.m_Height + 299);
+	BorderX1 = std::clamp(BorderX1, -300, (int)Visuals.m_Width + 299);
+	BorderY1 = std::clamp(BorderY1, -300, (int)Visuals.m_Height + 299);
 
 	auto DrawKillBorder = [Color, this, LayerIndex](vec2 Offset, vec2 Scale) {
 		offset_ptr_size pOffset = (offset_ptr_size)m_vpTileLayerVisuals[LayerIndex]->m_BorderKillTile.IndexBufferByteOffset();
