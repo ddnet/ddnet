@@ -486,52 +486,57 @@ void CNetBan::ConBans(IConsole::IResult *pResult, void *pUser)
 {
 	CNetBan *pThis = static_cast<CNetBan *>(pUser);
 
-	int Page = pResult->NumArguments() > 0 ? pResult->GetInteger(0) : 1;
-	static const int s_EntriesPerPage = 20;
-	const int Start = (Page - 1) * s_EntriesPerPage;
-	const int End = Page * s_EntriesPerPage;
 	const int NumBans = pThis->m_BanAddrPool.Num() + pThis->m_BanRangePool.Num();
-	const int NumPages = NumBans / s_EntriesPerPage + 1;
-
-	char aBuf[256], aMsg[256];
-
 	if(NumBans == 0)
 	{
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "The ban list is empty.");
-
 		return;
 	}
 
+	static constexpr int ENTRIES_PER_PAGE = 20;
+	const int NumPages = std::ceil(NumBans / (float)ENTRIES_PER_PAGE);
+	const int Page = pResult->NumArguments() > 0 ? pResult->GetInteger(0) : 1;
+
+	char aBuf[256], aMsg[256];
 	if(Page <= 0 || Page > NumPages)
 	{
 		str_format(aMsg, sizeof(aMsg), "Invalid page number. There %s %d %s available.", NumPages == 1 ? "is" : "are", NumPages, NumPages == 1 ? "page" : "pages");
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", aMsg);
-
 		return;
 	}
 
+	const int Start = (Page - 1) * ENTRIES_PER_PAGE;
+	const int End = Page * ENTRIES_PER_PAGE;
 	int Count = 0;
-	for(CBanAddr *pBan = pThis->m_BanAddrPool.First(); pBan; pBan = pBan->m_pNext, Count++)
+	for(const CBanAddr *pBan = pThis->m_BanAddrPool.First(); pBan; pBan = pBan->m_pNext, Count++)
 	{
-		if(Count < Start || Count >= End)
+		if(Count < Start)
 		{
 			continue;
+		}
+		else if(Count >= End)
+		{
+			break;
 		}
 		pThis->MakeBanInfo(pBan, aBuf, sizeof(aBuf), MSGTYPE_LIST);
 		str_format(aMsg, sizeof(aMsg), "#%i %s", Count, aBuf);
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", aMsg);
 	}
-	for(CBanRange *pBan = pThis->m_BanRangePool.First(); pBan; pBan = pBan->m_pNext, Count++)
+	for(const CBanRange *pBan = pThis->m_BanRangePool.First(); pBan; pBan = pBan->m_pNext, Count++)
 	{
-		if(Count < Start || Count >= End)
+		if(Count < Start)
 		{
 			continue;
+		}
+		else if(Count >= End)
+		{
+			break;
 		}
 		pThis->MakeBanInfo(pBan, aBuf, sizeof(aBuf), MSGTYPE_LIST);
 		str_format(aMsg, sizeof(aMsg), "#%i %s", Count, aBuf);
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", aMsg);
 	}
-	str_format(aMsg, sizeof(aMsg), "%d %s, showing entries %d - %d (page %d/%d)", Count, Count == 1 ? "ban" : "bans", Start, End > Count ? Count - 1 : End - 1, Page, NumPages);
+	str_format(aMsg, sizeof(aMsg), "%d %s, showing entries %d - %d (page %d/%d)", NumBans, NumBans == 1 ? "ban" : "bans", Start, Count - 1, Page, NumPages);
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", aMsg);
 }
 
