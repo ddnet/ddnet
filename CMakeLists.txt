@@ -2008,7 +2008,7 @@ set_src(BASE GLOB_RECURSE src/base
   unicode/confusables.h
   unicode/confusables_data.h
   unicode/tolower.cpp
-  unicode/tolower.h
+  unicode/tolower_data.cpp
   unicode/tolower_data.h
   vmath.h
 )

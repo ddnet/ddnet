@@ -1,26 +1,7 @@
-#include <cstdlib>
-
-#include "tolower.h"
-
-static int compul(const void *a, const void *b)
-{
-	struct UPPER_LOWER *ul_a = (struct UPPER_LOWER *)a;
-	struct UPPER_LOWER *ul_b = (struct UPPER_LOWER *)b;
-	return ul_a->upper - ul_b->upper;
-}
+#include "tolower_data.h"
 
 int str_utf8_tolower_codepoint(int code)
 {
-	struct UPPER_LOWER key;
-	struct UPPER_LOWER *res;
-	key.upper = code;
-	res = (UPPER_LOWER *)bsearch(&key, tolowermap, NUM_TOLOWER, sizeof(struct UPPER_LOWER), compul);
-
-	if(res == nullptr)
-		return code;
-	return res->lower;
+	auto it = UPPER_TO_LOWER_CODEPOINT_MAP.find(code);
+	return it == UPPER_TO_LOWER_CODEPOINT_MAP.end() ? code : it->second;
 }
-
-#define TOLOWER_DATA
-#include "tolower_data.h"
-#undef TOLOWER_DATA
