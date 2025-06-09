@@ -94,8 +94,6 @@ void CGameContext::Construct(int Resetting)
 	m_SqlRandomMapResult = nullptr;
 
 	m_pScore = nullptr;
-	m_NumMutes = 0;
-	m_NumVoteMutes = 0;
 
 	m_VoteCreator = -1;
 	m_VoteType = VOTE_TYPE_UNKNOWN;
@@ -153,12 +151,16 @@ void CGameContext::Destruct(int Resetting)
 	}
 }
 
-CGameContext::CGameContext()
+CGameContext::CGameContext() :
+	m_Mutes("mutes"),
+	m_VoteMutes("votemutes")
 {
 	Construct(NO_RESET);
 }
 
-CGameContext::CGameContext(int Reset)
+CGameContext::CGameContext(int Reset) :
+	m_Mutes("mutes"),
+	m_VoteMutes("votemutes")
 {
 	Construct(Reset);
 }
@@ -175,6 +177,8 @@ void CGameContext::Clear()
 	CVoteOptionServer *pVoteOptionLast = m_pVoteOptionLast;
 	int NumVoteOptions = m_NumVoteOptions;
 	CTuningParams Tuning = m_Tuning;
+	CMutes Mutes = m_Mutes;
+	CMutes VoteMutes = m_VoteMutes;
 
 	m_Resetting = true;
 	this->~CGameContext();
@@ -185,6 +189,8 @@ void CGameContext::Clear()
 	m_pVoteOptionLast = pVoteOptionLast;
 	m_NumVoteOptions = NumVoteOptions;
 	m_Tuning = Tuning;
+	m_Mutes = Mutes;
+	m_VoteMutes = VoteMutes;
 }
 
 void CGameContext::TeeHistorianWrite(const void *pData, int DataSize, void *pUser)
@@ -1259,21 +1265,11 @@ void CGameContext::OnTick()
 			}
 		}
 	}
-	for(int i = 0; i < m_NumMutes; i++)
+
+	if(Server()->Tick() % (Server()->TickSpeed() / 2) == 0)
 	{
-		if(m_aMutes[i].m_Expire <= Server()->Tick())
-		{
-			m_NumMutes--;
-			m_aMutes[i] = m_aMutes[m_NumMutes];
-		}
-	}
-	for(int i = 0; i < m_NumVoteMutes; i++)
-	{
-		if(m_aVoteMutes[i].m_Expire <= Server()->Tick())
-		{
-			m_NumVoteMutes--;
-			m_aVoteMutes[i] = m_aVoteMutes[m_NumVoteMutes];
-		}
+		m_Mutes.UnmuteExpired();
+		m_VoteMutes.UnmuteExpired();
 	}
 
 	if(Server()->Tick() % (g_Config.m_SvAnnouncementInterval * Server()->TickSpeed() * 60) == 0)
@@ -1664,7 +1660,7 @@ void CGameContext::OnClientEnter(int ClientId)
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "This server has an initial chat delay, you will need to wait %d seconds before talking.", g_Config.m_SvChatInitialDelay);
 		SendChatTarget(ClientId, aBuf);
-		Mute(Server()->ClientAddr(ClientId), g_Config.m_SvChatInitialDelay, Server()->ClientName(ClientId), "Initial chat delay", true);
+		m_Mutes.Mute(Server()->ClientAddr(ClientId), g_Config.m_SvChatInitialDelay, "Initial chat delay", true);
 	}
 
 	LogEvent("Connect", ClientId);
@@ -3745,15 +3741,22 @@ void CGameContext::RegisterDDRaceCommands()
 	Console()->Register("set_team_ddr", "v[id] i[team]", CFGFLAG_SERVER, ConSetDDRTeam, this, "Set ddrace team of a player");
 	Console()->Register("uninvite", "v[id] i[team]", CFGFLAG_SERVER, ConUninvite, this, "Uninvite player from team");
 
-	Console()->Register("vote_mute", "v[id] i[seconds] ?r[reason]", CFGFLAG_SERVER, ConVoteMute, this, "Remove v's right to vote for i seconds");
-	Console()->Register("vote_unmute", "v[id]", CFGFLAG_SERVER, ConVoteUnmute, this, "Give back v's right to vote.");
-	Console()->Register("vote_mutes", "", CFGFLAG_SERVER, ConVoteMutes, this, "List the current active vote mutes.");
-	Console()->Register("mute", "", CFGFLAG_SERVER, ConMute, this, "Use either 'muteid <client_id> <seconds> <reason>' or 'muteip <ip> <seconds> <reason>'");
-	Console()->Register("muteid", "v[id] i[seconds] ?r[reason]", CFGFLAG_SERVER, ConMuteId, this, "Mute player with id");
+	Console()->Register("mute", "", CFGFLAG_SERVER, ConMute, this, "Deprecated. Use either 'muteid <client_id> <seconds> <reason>' or 'muteip <ip> <seconds> <reason>'");
+	Console()->Register("muteid", "v[id] i[seconds] ?r[reason]", CFGFLAG_SERVER, ConMuteId, this, "Mute player with client ID");
 	Console()->Register("muteip", "s[ip] i[seconds] ?r[reason]", CFGFLAG_SERVER, ConMuteIp, this, "Mute player with IP address");
-	Console()->Register("unmute", "i[muteid]", CFGFLAG_SERVER, ConUnmute, this, "Unmute mute with number from \"mutes\"");
-	Console()->Register("unmuteid", "v[id]", CFGFLAG_SERVER, ConUnmuteId, this, "Unmute player with id");
-	Console()->Register("mutes", "", CFGFLAG_SERVER, ConMutes, this, "Show all active mutes");
+	Console()->Register("unmute", "i[index]", CFGFLAG_SERVER, ConUnmute, this, "Unmute player with list index");
+	Console()->Register("unmuteid", "v[id]", CFGFLAG_SERVER, ConUnmuteId, this, "Unmute player with client ID");
+	Console()->Register("unmuteip", "s[ip]", CFGFLAG_SERVER, ConUnmuteIp, this, "Unmute player with IP address");
+	Console()->Register("mutes", "?i[page]", CFGFLAG_SERVER, ConMutes, this, "Show list of mutes (page 1 by default, 20 entries per page)");
+
+	Console()->Register("vote_mute", "", CFGFLAG_SERVER, ConVoteMute, this, "Deprecated. Use either 'vote_muteid <client_id> <seconds> <reason>' or 'vote_muteip <ip> <seconds> <reason>'");
+	Console()->Register("vote_muteid", "v[id] i[seconds] ?r[reason]", CFGFLAG_SERVER, ConVoteMuteId, this, "Remove right to vote from player with client ID");
+	Console()->Register("vote_muteip", "s[ip] i[seconds] ?r[reason]", CFGFLAG_SERVER, ConVoteMuteIp, this, "Remove right to vote from player with IP address");
+	Console()->Register("vote_unmute", "i[index]", CFGFLAG_SERVER, ConVoteUnmute, this, "Give back right to vote to player with list index");
+	Console()->Register("vote_unmuteid", "v[id]", CFGFLAG_SERVER, ConVoteUnmuteId, this, "Give back right to vote to player with client ID");
+	Console()->Register("vote_unmuteip", "s[ip]", CFGFLAG_SERVER, ConVoteUnmuteIp, this, "Give back right to vote to player with IP address");
+	Console()->Register("vote_mutes", "?i[page]", CFGFLAG_SERVER, ConVoteMutes, this, "Show list of vote mutes (page 1 by default, 20 entries per page)");
+
 	Console()->Register("moderate", "", CFGFLAG_SERVER, ConModerate, this, "Enables/disables active moderator mode for the player");
 	Console()->Register("vote_no", "", CFGFLAG_SERVER, ConVoteNo, this, "Same as \"vote no\"");
 	Console()->Register("save_dry", "", CFGFLAG_SERVER, ConDrySave, this, "Dump the current savestring");
@@ -4576,36 +4579,25 @@ bool CGameContext::ProcessSpamProtection(int ClientId, bool RespectChatInitialDe
 	else
 		m_apPlayers[ClientId]->m_LastChat = Server()->Tick();
 
-	const NETADDR *pAddr = Server()->ClientAddr(ClientId);
-
-	CMute Muted;
-	int Expires = 0;
-	for(int i = 0; i < m_NumMutes && Expires <= 0; i++)
+	const std::optional<CMute> Muted = m_Mutes.IsMuted(Server()->ClientAddr(ClientId), RespectChatInitialDelay);
+	if(Muted.has_value())
 	{
-		if(!net_addr_comp_noport(pAddr, &m_aMutes[i].m_Addr))
+		char aChatMessage[128];
+		if(Muted->m_InitialDelay)
 		{
-			if(RespectChatInitialDelay || m_aMutes[i].m_InitialChatDelay)
-			{
-				Muted = m_aMutes[i];
-				Expires = (m_aMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
-			}
+			str_format(aChatMessage, sizeof(aChatMessage), "This server has an initial chat delay, you will be able to talk in %d seconds.", Muted->SecondsLeft());
 		}
-	}
-
-	if(Expires > 0)
-	{
-		char aBuf[128];
-		if(Muted.m_InitialChatDelay)
-			str_format(aBuf, sizeof(aBuf), "This server has an initial chat delay, you will be able to talk in %d seconds.", Expires);
 		else
-			str_format(aBuf, sizeof(aBuf), "You are not permitted to talk for the next %d seconds.", Expires);
-		SendChatTarget(ClientId, aBuf);
+		{
+			str_format(aChatMessage, sizeof(aChatMessage), "You are not permitted to talk for the next %d seconds.", Muted->SecondsLeft());
+		}
+		SendChatTarget(ClientId, aChatMessage);
 		return true;
 	}
 
 	if(g_Config.m_SvSpamMuteDuration && (m_apPlayers[ClientId]->m_ChatScore += g_Config.m_SvChatPenalty) > g_Config.m_SvChatThreshold)
 	{
-		Mute(pAddr, g_Config.m_SvSpamMuteDuration, Server()->ClientName(ClientId));
+		MuteWithMessage(Server()->ClientAddr(ClientId), g_Config.m_SvSpamMuteDuration, "Spam protection", Server()->ClientName(ClientId));
 		m_apPlayers[ClientId]->m_ChatScore = 0;
 		return true;
 	}
@@ -4908,13 +4900,13 @@ void CGameContext::ForceVote(int EnforcerId, bool Success)
 		return;
 
 	m_VoteEnforce = Success ? CGameContext::VOTE_ENFORCE_YES_ADMIN : CGameContext::VOTE_ENFORCE_NO_ADMIN;
-
-	char aBuf[256];
 	const char *pOption = Success ? "yes" : "no";
-	str_format(aBuf, sizeof(aBuf), "authorized player forced vote %s", pOption);
-	SendChatTarget(-1, aBuf);
-	str_format(aBuf, sizeof(aBuf), "forcing vote %s", pOption);
-	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+
+	char aChatMessage[256];
+	str_format(aChatMessage, sizeof(aChatMessage), "Authorized player forced vote '%s'", pOption);
+	SendChatTarget(-1, aChatMessage);
+
+	log_info("server", "Forcing vote '%s'", pOption);
 }
 
 bool CGameContext::RateLimitPlayerVote(int ClientId)
@@ -4955,36 +4947,32 @@ bool CGameContext::RateLimitPlayerVote(int ClientId)
 
 	if(Now < pPlayer->m_FirstVoteTick)
 	{
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "You must wait %d seconds before making your first vote.", (int)((pPlayer->m_FirstVoteTick - Now) / TickSpeed) + 1);
-		SendChatTarget(ClientId, aBuf);
+		char aChatMessage[64];
+		str_format(aChatMessage, sizeof(aChatMessage), "You must wait %d seconds before making your first vote.", (int)((pPlayer->m_FirstVoteTick - Now) / TickSpeed) + 1);
+		SendChatTarget(ClientId, aChatMessage);
 		return true;
 	}
 
 	int TimeLeft = pPlayer->m_LastVoteCall + TickSpeed * g_Config.m_SvVoteDelay - Now;
 	if(pPlayer->m_LastVoteCall && TimeLeft > 0)
 	{
-		char aChatmsg[64];
-		str_format(aChatmsg, sizeof(aChatmsg), "You must wait %d seconds before making another vote.", (int)(TimeLeft / TickSpeed) + 1);
-		SendChatTarget(ClientId, aChatmsg);
+		char aChatMessage[64];
+		str_format(aChatMessage, sizeof(aChatMessage), "You must wait %d seconds before making another vote.", (int)(TimeLeft / TickSpeed) + 1);
+		SendChatTarget(ClientId, aChatMessage);
 		return true;
 	}
 
 	const NETADDR *pAddr = Server()->ClientAddr(ClientId);
-	int VoteMuted = 0;
-	for(int i = 0; i < m_NumVoteMutes && !VoteMuted; i++)
-		if(!net_addr_comp_noport(pAddr, &m_aVoteMutes[i].m_Addr))
-			VoteMuted = (m_aVoteMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
-	for(int i = 0; i < m_NumMutes && VoteMuted == 0; i++)
+	std::optional<CMute> Muted = m_VoteMutes.IsMuted(pAddr, true);
+	if(!Muted.has_value())
 	{
-		if(!net_addr_comp_noport(pAddr, &m_aMutes[i].m_Addr))
-			VoteMuted = (m_aMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
+		Muted = m_Mutes.IsMuted(pAddr, true);
 	}
-	if(VoteMuted > 0)
+	if(Muted.has_value())
 	{
-		char aChatmsg[64];
-		str_format(aChatmsg, sizeof(aChatmsg), "You are not permitted to vote for the next %d seconds.", VoteMuted);
-		SendChatTarget(ClientId, aChatmsg);
+		char aChatMessage[64];
+		str_format(aChatMessage, sizeof(aChatMessage), "You are not permitted to vote for the next %d seconds.", Muted->SecondsLeft());
+		SendChatTarget(ClientId, aChatMessage);
 		return true;
 	}
 	return false;
@@ -4994,10 +4982,10 @@ bool CGameContext::RateLimitPlayerMapVote(int ClientId) const
 {
 	if(!Server()->GetAuthedState(ClientId) && time_get() < m_LastMapVote + (time_freq() * g_Config.m_SvVoteMapTimeDelay))
 	{
-		char aChatmsg[512] = {0};
-		str_format(aChatmsg, sizeof(aChatmsg), "There's a %d second delay between map-votes, please wait %d seconds.",
+		char aChatMessage[128];
+		str_format(aChatMessage, sizeof(aChatMessage), "There's a %d second delay between map-votes, please wait %d seconds.",
 			g_Config.m_SvVoteMapTimeDelay, (int)((m_LastMapVote + g_Config.m_SvVoteMapTimeDelay * time_freq() - time_get()) / time_freq()));
-		SendChatTarget(ClientId, aChatmsg);
+		SendChatTarget(ClientId, aChatMessage);
 		return true;
 	}
 	return false;

@@ -3066,10 +3066,4 @@ bool shell_unregister_application(const char *executable, bool *updated);
 void shell_update();
 #endif
 
-template<>
-struct std::hash<NETADDR>
-{
-	size_t operator()(const NETADDR &Addr) const noexcept;
-};
-
 #endif

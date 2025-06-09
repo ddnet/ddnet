@@ -2751,6 +2751,7 @@ if(SERVER)
     gamemodes/mod.h
     gameworld.cpp
     gameworld.h
+    mutes.cpp
     player.cpp
     player.h
     save.cpp
