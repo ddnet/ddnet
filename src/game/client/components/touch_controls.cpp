@@ -2089,46 +2089,47 @@ CTouchControls::CUnitRect CTouchControls::FindPositionXY(std::vector<CUnitRect> 
 
 	struct STree
 	{
-		std::vector<int> m_Order;
-		std::vector<ivec4> m_Zone;
-		ivec2 *m_Res = nullptr;
+		std::vector<int> m_vOrder;
+		std::vector<ivec4> m_vZone;
+		ivec2 *m_pRes = nullptr;
 		unsigned m_Front = 0;
 		void Init(const std::vector<CUnitRect> &Rects)
 		{
 			for(const CUnitRect &Rect : Rects)
 			{
-				m_Order.emplace_back(Rect.m_Y);
-				m_Order.emplace_back(Rect.m_Y + Rect.m_H);
+				m_vOrder.emplace_back(Rect.m_Y);
+				m_vOrder.emplace_back(Rect.m_Y + Rect.m_H);
 			}
-			m_Order.emplace_back(0);
-			m_Order.emplace_back(BUTTON_SIZE_SCALE);
-			std::sort(m_Order.begin(), m_Order.end());
-			m_Order.erase(std::unique(m_Order.begin(), m_Order.end()), m_Order.end());
-			m_Zone.resize(m_Order.size() * 4, {-1, -1, 0, 0});
-			New(0, m_Order.size() - 2, 0);
-			m_Res = (ivec2 *)malloc(m_Zone.size() * sizeof(ivec2));
+			m_vOrder.emplace_back(0);
+			m_vOrder.emplace_back(BUTTON_SIZE_SCALE);
+			std::sort(m_vOrder.begin(), m_vOrder.end());
+			m_vOrder.erase(std::unique(m_vOrder.begin(), m_vOrder.end()), m_vOrder.end());
+			m_vZone.resize(m_vOrder.size() * 4, {-1, -1, 0, 0});
+			New(0, m_vOrder.size() - 2, 0);
+			m_pRes = (ivec2 *)malloc(m_vZone.size() * sizeof(ivec2));
+			if(m_pRes == nullptr)
+				dbg_assert(false, "Failed to malloc.");
 		}
 		void New(int Start, int End, unsigned Cur)
 		{
-			m_Zone.resize(maximum<size_t>(Cur + 1, m_Zone.size()), {-1, -1, 0, 0});
-			if(m_Zone[Cur].x != -1)
+			if(m_vZone[Cur].x != -1)
 				return;
-			m_Zone[Cur].x = Start;
-			m_Zone[Cur].y = End;
-			m_Zone[Cur].z = 0;
-			m_Zone[Cur].w = 0;
+			m_vZone[Cur].x = Start;
+			m_vZone[Cur].y = End;
+			m_vZone[Cur].z = 0;
+			m_vZone[Cur].w = 0;
 		}
 		void Add(int Start, int End, unsigned Cur)
 		{
-			m_Zone[Cur].z++;
-			if(m_Zone[Cur].x == Start && m_Zone[Cur].y == End)
+			m_vZone[Cur].z++;
+			if(m_vZone[Cur].x == Start && m_vZone[Cur].y == End)
 			{
-				m_Zone[Cur].w++;
+				m_vZone[Cur].w++;
 				return;
 			}
-			int Mid = (m_Zone[Cur].x + m_Zone[Cur].y) / 2;
-			New(Mid + 1, m_Zone[Cur].y, Cur * 2 + 2);
-			New(m_Zone[Cur].x, Mid, Cur * 2 + 1);
+			int Mid = (m_vZone[Cur].x + m_vZone[Cur].y) / 2;
+			New(Mid + 1, m_vZone[Cur].y, Cur * 2 + 2);
+			New(m_vZone[Cur].x, Mid, Cur * 2 + 1);
 			if(Start <= Mid)
 			{
 				Add(Start, minimum<int>(Mid, End), Cur * 2 + 1);
@@ -2140,13 +2141,13 @@ CTouchControls::CUnitRect CTouchControls::FindPositionXY(std::vector<CUnitRect> 
 		}
 		void Del(int Start, int End, unsigned Cur)
 		{
-			m_Zone[Cur].z--;
-			if(m_Zone[Cur].x == Start && m_Zone[Cur].y == End)
+			m_vZone[Cur].z--;
+			if(m_vZone[Cur].x == Start && m_vZone[Cur].y == End)
 			{
-				m_Zone[Cur].w--;
+				m_vZone[Cur].w--;
 				return;
 			}
-			int Mid = (m_Zone[Cur].x + m_Zone[Cur].y) / 2;
+			int Mid = (m_vZone[Cur].x + m_vZone[Cur].y) / 2;
 			if(Start <= Mid)
 			{
 				Del(Start, minimum<int>(Mid, End), Cur * 2 + 1);
@@ -2158,25 +2159,25 @@ CTouchControls::CUnitRect CTouchControls::FindPositionXY(std::vector<CUnitRect> 
 		}
 		void InnerQuery(unsigned Start)
 		{
-			unsigned *Dfs = (unsigned *)malloc(m_Zone.size() * sizeof(unsigned));
+			unsigned *Dfs = (unsigned *)malloc(m_vZone.size() * sizeof(unsigned));
 			unsigned Top = 0;
 			Dfs[Top++] = Start;
 			while(Top != 0)
 			{
 				unsigned Cur = Dfs[Top - 1];
 				Top--;
-				if(m_Zone[Cur].w > 0)
+				if(m_vZone[Cur].w > 0)
 				{
-					m_Res[m_Front++] = {m_Zone[Cur].x, m_Zone[Cur].y};
+					m_pRes[m_Front++] = {m_vZone[Cur].x, m_vZone[Cur].y};
 					continue;
 				}
-				if(m_Zone[Cur].x == m_Zone[Cur].y || m_Zone[Cur].z == 0)
+				if(m_vZone[Cur].x == m_vZone[Cur].y || m_vZone[Cur].z == 0)
 					continue;
-				if(m_Zone[Cur * 2 + 2].x != -1 && m_Zone[Cur * 2 + 2].z > 0)
+				if(m_vZone[Cur * 2 + 2].x != -1 && m_vZone[Cur * 2 + 2].z > 0)
 				{
 					Dfs[Top++] = Cur * 2 + 2;
 				}
-				if(m_Zone[Cur * 2 + 1].x != -1 && m_Zone[Cur * 2 + 1].z > 0)
+				if(m_vZone[Cur * 2 + 1].x != -1 && m_vZone[Cur * 2 + 1].z > 0)
 				{
 					Dfs[Top++] = Cur * 2 + 1;
 				}
@@ -2196,44 +2197,44 @@ CTouchControls::CUnitRect CTouchControls::FindPositionXY(std::vector<CUnitRect> 
 			// Inverse discretization
 			for(unsigned Index = 0; Index < m_Front; Index++)
 			{
-				m_Res[Index].x = m_Order[m_Res[Index].x];
-				m_Res[Index].y = m_Order[m_Res[Index].y + 1];
+				m_pRes[Index].x = m_vOrder[m_pRes[Index].x];
+				m_pRes[Index].y = m_vOrder[m_pRes[Index].y + 1];
 			}
-			if(m_Res[0].x < Length)
-				m_Res[0].x = 0;
+			if(m_pRes[0].x < Length)
+				m_pRes[0].x = 0;
 			// Merge segments.
 			for(unsigned Index = 1; Index < m_Front; Index++)
 			{
-				if(m_Res[Index - 1].y + Length <= m_Res[Index].x)
+				if(m_pRes[Index - 1].y + Length <= m_pRes[Index].x)
 					continue;
-				m_Res[Index].x = m_Res[Index - 1].x;
-				m_Res[Index - 1].x = -1;
+				m_pRes[Index].x = m_pRes[Index - 1].x;
+				m_pRes[Index - 1].x = -1;
 			}
-			if(m_Res[m_Front - 1].y + Length > BUTTON_SIZE_SCALE)
-				m_Res[m_Front - 1].y = BUTTON_SIZE_SCALE;
-			m_Front = std::distance(m_Res, std::remove_if(m_Res, m_Res + m_Front, [](const ivec2 &Ele) {
+			if(m_pRes[m_Front - 1].y + Length > BUTTON_SIZE_SCALE)
+				m_pRes[m_Front - 1].y = BUTTON_SIZE_SCALE;
+			m_Front = std::distance(m_pRes, std::remove_if(m_pRes, m_pRes + m_Front, [](const ivec2 &Ele) {
 				return Ele.x == -1;
 			}));
 			// Result stores obstacles, now turn it into free spaces.
 			std::vector<ivec2> Free;
 			Free.reserve(m_Front);
-			if(m_Res[0].x != 0)
-				Free.emplace_back(0, m_Res[0].x);
+			if(m_pRes[0].x != 0)
+				Free.emplace_back(0, m_pRes[0].x);
 			for(unsigned Index = 1; Index < m_Front; Index++)
 			{
-				Free.emplace_back(m_Res[Index - 1].y, m_Res[Index].x);
+				Free.emplace_back(m_pRes[Index - 1].y, m_pRes[Index].x);
 			}
-			if(m_Res[m_Front - 1].y != BUTTON_SIZE_SCALE)
-				Free.emplace_back(m_Res[m_Front - 1].y, BUTTON_SIZE_SCALE);
+			if(m_pRes[m_Front - 1].y != BUTTON_SIZE_SCALE)
+				Free.emplace_back(m_pRes[m_Front - 1].y, BUTTON_SIZE_SCALE);
 			return Free;
 		}
 		ivec2 Discretization(int Start, int End)
 		{
 			ivec2 Result;
-			auto It = std::lower_bound(m_Order.begin(), m_Order.end(), Start);
-			Result.x = std::distance(m_Order.begin(), It);
-			It = std::lower_bound(m_Order.begin(), m_Order.end(), End);
-			Result.y = std::distance(m_Order.begin(), It) - 1;
+			auto It = std::lower_bound(m_vOrder.begin(), m_vOrder.end(), Start);
+			Result.x = std::distance(m_vOrder.begin(), It);
+			It = std::lower_bound(m_vOrder.begin(), m_vOrder.end(), End);
+			Result.y = std::distance(m_vOrder.begin(), It) - 1;
 			return Result;
 		}
 	} Tree;
@@ -2243,10 +2244,14 @@ CTouchControls::CUnitRect CTouchControls::FindPositionXY(std::vector<CUnitRect> 
 	CandidateX.insert(MyRect.m_X);
 	for(const CUnitRect &Rect : vVisibleButtonRects)
 	{
-		if(Rect.m_X + MyRect.m_W + Rect.m_W <= BUTTON_SIZE_SCALE)
-			CandidateX.insert(Rect.m_X + Rect.m_W);
-		if(Rect.m_X - MyRect.m_W >= 0)
-			CandidateX.insert(Rect.m_X - MyRect.m_W);
+		// Rect right border.
+		int Pos = Rect.m_X + Rect.m_W;
+		if(Pos + MyRect.m_W <= BUTTON_SIZE_SCALE && Pos > MyRect.m_X)
+			CandidateX.insert(Pos);
+		// Rect left border.
+		Pos = Rect.m_X - MyRect.m_W;
+		if(Pos >= 0 && Pos < MyRect.m_X)
+			CandidateX.insert(Pos);
 	}
 	CandidateX.insert(CandidateX.begin(), 0);
 	CandidateX.insert(BUTTON_SIZE_SCALE - MyRect.m_W);
@@ -2262,30 +2267,21 @@ CTouchControls::CUnitRect CTouchControls::FindPositionXY(std::vector<CUnitRect> 
 	unsigned Index = 0;
 	CUnitRect Result = {-1, -1, -1, -1};
 
-	// 480000
-	unsigned long long AddTime = 0, DelTime = 0, QueryTime = 0;
 	for(int CurrentX : CandidateX)
 	{
-		auto T1 = std::chrono::steady_clock::now();
 		while(Index < vVisibleButtonRects.size() && vVisibleButtonRects[Index].m_X < CurrentX + MyRect.m_W)
 		{
 			auto Segment = Tree.Discretization(vVisibleButtonRects[Index].m_Y, vVisibleButtonRects[Index].m_Y + vVisibleButtonRects[Index].m_H);
 			Tree.Add(Segment.x, Segment.y, 0);
 			Out.emplace(Index++);
 		}
-		auto T2 = std::chrono::steady_clock::now();
-		AddTime += (T2 - T1).count();
 		while(!Out.empty() && vVisibleButtonRects[Out.top()].m_X + vVisibleButtonRects[Out.top()].m_W <= CurrentX)
 		{
 			auto Segment = Tree.Discretization(vVisibleButtonRects[Out.top()].m_Y, vVisibleButtonRects[Out.top()].m_Y + vVisibleButtonRects[Out.top()].m_H);
 			Tree.Del(Segment.x, Segment.y, 0);
 			Out.pop();
 		}
-		auto T3 = std::chrono::steady_clock::now();
-		DelTime += (T3 - T2).count();
 		auto Spaces = Tree.Query(MyRect.m_H);
-		auto T4 = std::chrono::steady_clock::now();
-		QueryTime += (T4 - T3).count();
 		int TPos = -BUTTON_SIZE_SCALE;
 		for(ivec2 &Space : Spaces)
 		{
@@ -2312,11 +2308,7 @@ CTouchControls::CUnitRect CTouchControls::FindPositionXY(std::vector<CUnitRect> 
 		else if(MyRect.Distance(Result) > MyRect.Distance(SampleRect))
 			Result = SampleRect;
 	}
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "Add=%lld,Del=%lld,Qu=%lld", AddTime, DelTime, QueryTime);
-	log_error("asd", aBuf);
-	// 4500000
-	free(Tree.m_Res);
+	free(Tree.m_pRes);
 	return Result;
 }
 
