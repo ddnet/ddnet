@@ -379,7 +379,7 @@ bool CMenus::RenderBehaviorSettingBlock(CUIRect Block)
 			// Increase & Decrease button share 1/2 width, the rest is for label.
 			EditBox.VSplitLeft(ROWSIZE, &A, &B);
 			static CButtonContainer s_ExtraMenuDecreaseButton;
-			if(DoButton_FontIcon(&s_ExtraMenuDecreaseButton, "-", 0, &A, BUTTONFLAG_LEFT))
+			if(Ui()->DoButton_FontIcon(&s_ExtraMenuDecreaseButton, "-", 0, &A, BUTTONFLAG_LEFT))
 			{
 				if(m_CachedExtraMenuNumber > 0)
 				{
@@ -393,7 +393,7 @@ bool CMenus::RenderBehaviorSettingBlock(CUIRect Block)
 			B.VSplitRight(ROWSIZE, &A, &B);
 			Ui()->DoLabel(&A, std::to_string(m_CachedExtraMenuNumber + 1).c_str(), FONTSIZE, TEXTALIGN_MC);
 			static CButtonContainer s_ExtraMenuIncreaseButton;
-			if(DoButton_FontIcon(&s_ExtraMenuIncreaseButton, "+", 0, &B, BUTTONFLAG_LEFT))
+			if(Ui()->DoButton_FontIcon(&s_ExtraMenuIncreaseButton, "+", 0, &B, BUTTONFLAG_LEFT))
 			{
 				if(m_CachedExtraMenuNumber < 4)
 				{
@@ -445,7 +445,7 @@ bool CMenus::RenderBehaviorSettingBlock(CUIRect Block)
 				EditBox.VSplitLeft(ROWSIZE, &B, &EditBox);
 				EditBox.VSplitLeft(SUBMARGIN, nullptr, &A);
 				Ui()->DoLabel(&A, Localize("Add command"), FONTSIZE, TEXTALIGN_ML);
-				if(DoButton_FontIcon(&m_vBehaviorElements[CommandIndex].m_BindToggleAddButtons, "+", 0, &B, BUTTONFLAG_LEFT))
+				if(Ui()->DoButton_FontIcon(&m_vBehaviorElements[CommandIndex].m_BindToggleAddButtons, "+", 0, &B, BUTTONFLAG_LEFT))
 				{
 					m_vBehaviorElements.emplace(m_vBehaviorElements.begin() + CommandIndex, GameClient());
 					m_vBehaviorElements[CommandIndex].UpdateInputs();
@@ -455,7 +455,7 @@ bool CMenus::RenderBehaviorSettingBlock(CUIRect Block)
 				C.VSplitLeft(ROWSIZE, &B, &C);
 				C.VSplitLeft(SUBMARGIN, nullptr, &A);
 				Ui()->DoLabel(&A, Localize("Delete command"), FONTSIZE, TEXTALIGN_ML);
-				if(DoButton_FontIcon(&m_vBehaviorElements[CommandIndex].m_BindToggleDeleteButtons, FontIcons::FONT_ICON_TRASH, 0, &B, BUTTONFLAG_LEFT))
+				if(Ui()->DoButton_FontIcon(&m_vBehaviorElements[CommandIndex].m_BindToggleDeleteButtons, FontIcons::FONT_ICON_TRASH, 0, &B, BUTTONFLAG_LEFT))
 				{
 					if(m_vBehaviorElements.size() > 2)
 					{
@@ -548,7 +548,7 @@ bool CMenus::RenderBehaviorSettingBlock(CUIRect Block)
 			EditBox.VSplitLeft(SUBMARGIN, nullptr, &A);
 			Ui()->DoLabel(&A, Localize("Add command"), FONTSIZE, TEXTALIGN_ML);
 			static CButtonContainer s_FinalAddButton;
-			if(DoButton_FontIcon(&s_FinalAddButton, "+", 0, &B, BUTTONFLAG_LEFT))
+			if(Ui()->DoButton_FontIcon(&s_FinalAddButton, "+", 0, &B, BUTTONFLAG_LEFT))
 			{
 				m_vBehaviorElements.emplace_back(GameClient());
 				Changed = true;
@@ -997,7 +997,7 @@ void CMenus::RenderTouchControlsEditor(CUIRect MainView)
 	Ui()->DoLabel(&Label, Localize("Edit touch controls"), 20.0f, TEXTALIGN_MC);
 
 	static CButtonContainer s_OpenHelpButton;
-	if(DoButton_FontIcon(&s_OpenHelpButton, FontIcons::FONT_ICON_QUESTION, 0, &Button, BUTTONFLAG_LEFT))
+	if(Ui()->DoButton_FontIcon(&s_OpenHelpButton, FontIcons::FONT_ICON_QUESTION, 0, &Button, BUTTONFLAG_LEFT))
 	{
 		Client()->ViewLink(Localize("https://wiki.ddnet.org/wiki/Touch_controls"));
 	}
@@ -1366,10 +1366,10 @@ void CMenus::SaveCachedSettingsToTarget(CTouchControls::CTouchButton *pTargetBut
 		GameClient()->m_TouchControls.SetSelectedButton(pTargetButton);
 	}
 
-	pTargetButton->m_UnitRect.m_W = clamp(m_InputW.GetInteger(), CTouchControls::BUTTON_SIZE_MINIMUM, CTouchControls::BUTTON_SIZE_MAXIMUM);
-	pTargetButton->m_UnitRect.m_H = clamp(m_InputH.GetInteger(), CTouchControls::BUTTON_SIZE_MINIMUM, CTouchControls::BUTTON_SIZE_MAXIMUM);
-	pTargetButton->m_UnitRect.m_X = clamp(m_InputX.GetInteger(), 0, CTouchControls::BUTTON_SIZE_SCALE - pTargetButton->m_UnitRect.m_W);
-	pTargetButton->m_UnitRect.m_Y = clamp(m_InputY.GetInteger(), 0, CTouchControls::BUTTON_SIZE_SCALE - pTargetButton->m_UnitRect.m_H);
+	pTargetButton->m_UnitRect.m_W = std::clamp(m_InputW.GetInteger(), CTouchControls::BUTTON_SIZE_MINIMUM, CTouchControls::BUTTON_SIZE_MAXIMUM);
+	pTargetButton->m_UnitRect.m_H = std::clamp(m_InputH.GetInteger(), CTouchControls::BUTTON_SIZE_MINIMUM, CTouchControls::BUTTON_SIZE_MAXIMUM);
+	pTargetButton->m_UnitRect.m_X = std::clamp(m_InputX.GetInteger(), 0, CTouchControls::BUTTON_SIZE_SCALE - pTargetButton->m_UnitRect.m_W);
+	pTargetButton->m_UnitRect.m_Y = std::clamp(m_InputY.GetInteger(), 0, CTouchControls::BUTTON_SIZE_SCALE - pTargetButton->m_UnitRect.m_H);
 	pTargetButton->m_vVisibilities.clear();
 	for(unsigned Iterator = (unsigned)CTouchControls::EButtonVisibility::INGAME; Iterator < (unsigned)CTouchControls::EButtonVisibility::NUM_VISIBILITIES; ++Iterator)
 	{
@@ -1423,7 +1423,7 @@ void CMenus::InputPosFunction(CLineInputNumber *pInput)
 {
 	int InputValue = pInput->GetInteger();
 	// Deal with the "-1" FindPositionXY give.
-	InputValue = clamp(InputValue, 0, CTouchControls::BUTTON_SIZE_SCALE);
+	InputValue = std::clamp(InputValue, 0, CTouchControls::BUTTON_SIZE_SCALE);
 	pInput->SetInteger(InputValue);
 	SetUnsavedChanges(true);
 }

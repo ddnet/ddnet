@@ -1963,8 +1963,8 @@ void CTouchControls::EditButtons(const std::vector<IInput::CTouchFingerState> &v
 			UnitWHDelta.y = (std::abs(m_ActiveFingerState.value().m_Position.y - m_ZoomFingerState.value().m_Position.y) - std::abs(m_ZoomStartPos.y)) * BUTTON_SIZE_SCALE;
 			(*m_ShownRect).m_W = m_pSampleButton->m_UnitRect.m_W + UnitWHDelta.x;
 			(*m_ShownRect).m_H = m_pSampleButton->m_UnitRect.m_H + UnitWHDelta.y;
-			(*m_ShownRect).m_W = clamp((*m_ShownRect).m_W, BUTTON_SIZE_MINIMUM, BUTTON_SIZE_MAXIMUM);
-			(*m_ShownRect).m_H = clamp((*m_ShownRect).m_H, BUTTON_SIZE_MINIMUM, BUTTON_SIZE_MAXIMUM);
+			(*m_ShownRect).m_W = std::clamp((*m_ShownRect).m_W, BUTTON_SIZE_MINIMUM, BUTTON_SIZE_MAXIMUM);
+			(*m_ShownRect).m_H = std::clamp((*m_ShownRect).m_H, BUTTON_SIZE_MINIMUM, BUTTON_SIZE_MAXIMUM);
 			if((*m_ShownRect).m_W + (*m_ShownRect).m_X > BUTTON_SIZE_SCALE)
 				(*m_ShownRect).m_W = BUTTON_SIZE_SCALE - (*m_ShownRect).m_X;
 			if((*m_ShownRect).m_H + (*m_ShownRect).m_Y > BUTTON_SIZE_SCALE)
@@ -2072,8 +2072,8 @@ void CTouchControls::RenderButtonsWhileInEditor()
 CTouchControls::CUnitRect CTouchControls::FindPositionXY(std::vector<CUnitRect> &vVisibleButtonRects, CUnitRect MyRect)
 {
 	{
-		MyRect.m_X = clamp(MyRect.m_X, 0, BUTTON_SIZE_SCALE - MyRect.m_W);
-		MyRect.m_Y = clamp(MyRect.m_Y, 0, BUTTON_SIZE_SCALE - MyRect.m_H);
+		MyRect.m_X = std::clamp(MyRect.m_X, 0, BUTTON_SIZE_SCALE - MyRect.m_W);
+		MyRect.m_Y = std::clamp(MyRect.m_Y, 0, BUTTON_SIZE_SCALE - MyRect.m_H);
 		bool IfOverlap = std::any_of(vVisibleButtonRects.begin(), vVisibleButtonRects.end(), [&MyRect](const auto &Rect) {
 			return MyRect.IsOverlap(Rect);
 		});
