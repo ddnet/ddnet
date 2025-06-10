@@ -1070,11 +1070,37 @@ void CCharacter::HandleTiles(int Index)
 
 void CCharacter::HandleTuneLayer()
 {
-	int CurrentIndex = Collision()->GetMapIndex(m_Pos);
-	SetTuneZone(GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(CurrentIndex) : 0);
+	if(!GameWorld()->m_WorldConfig.m_UseTuneZones)
+	{
+		SetTuneZone(0);
+	}
+	else
+	{
+		int CurrentIndex = Collision()->GetMapIndex(m_Pos);
+		int Type = Collision()->GetTuneType(CurrentIndex);
+		int Number = Collision()->GetTuneNumber(CurrentIndex);
 
-	if(m_IsLocal)
-		GameWorld()->m_Core.m_aTuning[g_Config.m_ClDummy] = *GetTuning(GetOverriddenTuneZone()); // throw tunings (from specific zone if in a tunezone) into gamecore if the character is local
+		if(m_TuneZoneOverride == -1)
+		{
+			SetTuneZone(Collision()->IsTune(CurrentIndex));
+		}
+		else
+		{
+			SetTuneZone(0);
+		}
+
+		if(Type == TILE_TUNE_LOCK_ENABLE)
+		{
+			m_TuneZoneOverride = Number;
+		}
+		if(Type == TILE_TUNE_LOCK_DISABLE)
+		{
+			m_TuneZoneOverride = -1;
+		}
+	}
+
+	if(m_IsLocal && m_TuneZoneOverride == -1)
+		GameWorld()->m_Core.m_aTuning[g_Config.m_ClDummy] = *GetTuning(m_TuneZone); // throw tunings (from specific zone if in a tunezone) into gamecore if the character is local
 	m_Core.m_Tuning = *GetTuning(GetOverriddenTuneZone());
 }
 
@@ -1492,7 +1518,15 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 	m_AttackTick = pChar->m_AttackTick;
 	m_LastSnapWeapon = pChar->m_Weapon;
 
-	SetTuneZone(GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0);
+	if(GameWorld()->m_WorldConfig.m_UseTuneZones)
+	{
+		if(m_TuneZoneOverride == -1)
+			SetTuneZone(Collision()->IsTune(Collision()->GetMapIndex(m_Pos)));
+	}
+	else
+	{
+		SetTuneZone(0);
+	}
 
 	// set the current weapon
 	if(pChar->m_Weapon != WEAPON_NINJA)
