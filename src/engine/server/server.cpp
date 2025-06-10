@@ -216,7 +216,6 @@ void CServer::CClient::Reset()
 	// reset input
 	for(auto &Input : m_aInputs)
 		Input.m_GameTick = -1;
-	m_CurrentInput = 0;
 	mem_zero(&m_LatestInput, sizeof(m_LatestInput));
 
 	m_Snapshots.PurgeAll();
@@ -1791,6 +1790,15 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			const int LastAckedSnapshot = Unpacker.GetInt();
 			int IntendedTick = Unpacker.GetInt();
 			int Size = Unpacker.GetInt();
+
+			int BufferPosition = IntendedTick % 200;
+			// The client is not allowed to change inputs for a tick they have already sent to the server
+			// This is done to minimize client trust but could be removed if there is a useful reason
+			if(m_aClients[ClientId].m_aInputs[BufferPosition].m_GameTick == IntendedTick)
+			{
+				return;
+			}
+
 			if(Unpacker.Error() || Size / 4 > MAX_INPUT_SIZE || IntendedTick < MIN_TICK || IntendedTick >= MAX_TICK)
 			{
 				return;
@@ -1818,10 +1826,18 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 			m_aClients[ClientId].m_LastInputTick = IntendedTick;
 
-			CClient::CInput *pInput = &m_aClients[ClientId].m_aInputs[m_aClients[ClientId].m_CurrentInput];
-
+			// TODO: This should probably not be here, the most recent input can be found by looping over the ring buffer
+			// so we should not need to correct the timing of the input at this point
 			if(IntendedTick <= Tick())
 				IntendedTick = Tick() + 1;
+
+			// Check once again that we are not overriding an input the client has already sent
+			// This is a workaround while the above code is still able to change IntendedTick
+			BufferPosition = IntendedTick % 200;
+			if(m_aClients[ClientId].m_aInputs[BufferPosition].m_GameTick == IntendedTick)
+				return;
+
+			CClient::CInput *pInput = &m_aClients[ClientId].m_aInputs[BufferPosition];
 
 			pInput->m_GameTick = IntendedTick;
 
@@ -1836,9 +1852,6 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 			GameServer()->OnClientPrepareInput(ClientId, pInput->m_aData);
 			mem_copy(m_aClients[ClientId].m_LatestInput.m_aData, pInput->m_aData, MAX_INPUT_SIZE * sizeof(int));
-
-			m_aClients[ClientId].m_CurrentInput++;
-			m_aClients[ClientId].m_CurrentInput %= 200;
 
 			// call the mod with the fresh input data
 			if(m_aClients[ClientId].m_State == CClient::STATE_INGAME)
@@ -2884,7 +2897,6 @@ void CServer::UpdateDebugDummies(bool ForceDisconnect)
 			Client.m_aInputs[0].m_GameTick = Tick() + 1;
 			mem_copy(Client.m_aInputs[0].m_aData, &Input, minimum(sizeof(Input), sizeof(Client.m_aInputs[0].m_aData)));
 			Client.m_LatestInput = Client.m_aInputs[0];
-			Client.m_CurrentInput = 0;
 		}
 	}
 

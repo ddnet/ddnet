@@ -148,7 +148,6 @@ public:
 
 		CInput m_LatestInput;
 		CInput m_aInputs[200]; // TODO: handle input better
-		int m_CurrentInput;
 
 		char m_aName[MAX_NAME_LENGTH];
 		char m_aClan[MAX_CLAN_LENGTH];
