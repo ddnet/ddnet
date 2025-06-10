@@ -61,6 +61,7 @@ protected:
 
 	void UseTexture(IGraphics::CTextureHandle TextureHandle) const;
 	virtual IGraphics::CTextureHandle GetTexture() const = 0;
+	void RenderLoading() const;
 
 	class IGraphics *m_pGraphics = nullptr;
 	class IMap *m_pMap = nullptr;
