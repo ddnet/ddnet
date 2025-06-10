@@ -216,7 +216,6 @@ void CServer::CClient::Reset()
 	// reset input
 	for(auto &Input : m_aInputs)
 		Input.m_GameTick = -1;
-	mem_zero(&m_LatestInput, sizeof(m_LatestInput));
 
 	m_Snapshots.PurgeAll();
 	m_LastAckedSnapshot = -1;
@@ -1854,11 +1853,10 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			}
 
 			GameServer()->OnClientPrepareInput(ClientId, pInput->m_aData);
-			mem_copy(m_aClients[ClientId].m_LatestInput.m_aData, pInput->m_aData, MAX_INPUT_SIZE * sizeof(int));
 
 			// call the mod with the fresh input data
 			if(m_aClients[ClientId].m_State == CClient::STATE_INGAME)
-				GameServer()->OnClientDirectInput(ClientId, m_aClients[ClientId].m_LatestInput.m_aData);
+				GameServer()->OnClientDirectInput(ClientId, pInput->m_aData);
 		}
 		else if(Msg == NETMSG_RCON_CMD)
 		{
@@ -2899,7 +2897,6 @@ void CServer::UpdateDebugDummies(bool ForceDisconnect)
 			Input.m_Direction = (ClientId & 1) ? -1 : 1;
 			Client.m_aInputs[0].m_GameTick = Tick() + 1;
 			mem_copy(Client.m_aInputs[0].m_aData, &Input, minimum(sizeof(Input), sizeof(Client.m_aInputs[0].m_aData)));
-			Client.m_LatestInput = Client.m_aInputs[0];
 		}
 	}
 

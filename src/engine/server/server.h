@@ -146,8 +146,7 @@ public:
 		int m_LastInputTick;
 		CSnapshotStorage m_Snapshots;
 
-		CInput m_LatestInput;
-		CInput m_aInputs[200]; // TODO: handle input better
+		CInput m_aInputs[200];
 
 		char m_aName[MAX_NAME_LENGTH];
 		char m_aClan[MAX_CLAN_LENGTH];
