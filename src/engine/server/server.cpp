@@ -1804,7 +1804,10 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				return;
 			}
 
-			m_aClients[ClientId].m_LastAckedSnapshot = LastAckedSnapshot;
+			// The LastAckedSnapshot should only increase incase an input arrives late
+			if(LastAckedSnapshot > m_aClients[ClientId].m_LastAckedSnapshot || LastAckedSnapshot < 0)
+				m_aClients[ClientId].m_LastAckedSnapshot = LastAckedSnapshot;
+
 			if(m_aClients[ClientId].m_LastAckedSnapshot > 0)
 				m_aClients[ClientId].m_SnapRate = CClient::SNAPRATE_FULL;
 
