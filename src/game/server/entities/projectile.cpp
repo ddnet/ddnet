@@ -51,6 +51,11 @@ CProjectile::CProjectile(
 	GameWorld()->InsertEntity(this);
 }
 
+void CProjectile::EarlyStartTick()
+{
+	m_StartTick--;
+}
+
 void CProjectile::Reset()
 {
 	m_MarkedForDestroy = true;
