@@ -185,6 +185,7 @@ class CRenderLayerQuads : public CRenderLayer
 public:
 	CRenderLayerQuads(int GroupId, int LayerId, IGraphics::CTextureHandle TextureHandle, int Flags, CMapItemLayerQuads *pLayerQuads);
 	virtual void Init() override;
+	bool IsValid() const override { return m_pLayerQuads->m_NumQuads > 0; }
 	virtual void Render(const CRenderLayerParams &Params) override;
 	virtual bool DoRender(const CRenderLayerParams &Params) const override;
 
@@ -207,7 +208,16 @@ protected:
 	CMapItemLayerQuads *m_pLayerQuads;
 
 	std::vector<SQuadRenderInfo> m_vQuadRenderInfo;
-	bool m_ContainsEnvelopes;
+
+	bool m_Grouped;
+	class CQuadRenderGroup
+	{
+	public:
+		int m_PosEnv;
+		float m_PosEnvOffset;
+		int m_ColorEnv;
+		float m_ColorEnvOffset;
+	} m_QuadRenderGroup;
 
 private:
 	IGraphics::CTextureHandle m_TextureHandle;

@@ -762,7 +762,7 @@ CRenderLayerQuads::CRenderLayerQuads(int GroupId, int LayerId, IGraphics::CTextu
 	CRenderLayer(GroupId, LayerId, Flags)
 {
 	m_pLayerQuads = pLayerQuads;
-	m_ContainsEnvelopes = false;
+	m_Grouped = false;
 }
 
 void CRenderLayerQuads::RenderQuadLayer(bool Force)
@@ -778,7 +778,7 @@ void CRenderLayerQuads::RenderQuadLayer(bool Force)
 
 	size_t QuadsRenderCount = 0;
 	size_t CurQuadOffset = 0;
-	if(m_ContainsEnvelopes)
+	if(!m_Grouped)
 	{
 		for(int i = 0; i < m_pLayerQuads->m_NumQuads; ++i)
 		{
@@ -819,11 +819,28 @@ void CRenderLayerQuads::RenderQuadLayer(bool Force)
 	}
 	else
 	{
-		for(CurQuadOffset = 0; CurQuadOffset < (size_t)m_pLayerQuads->m_NumQuads; CurQuadOffset += gs_GraphicsMaxQuadsRenderCount)
+		SQuadRenderInfo &QInfo = m_vQuadRenderInfo[0];
+
+		if(m_QuadRenderGroup.m_ColorEnv >= 0)
 		{
-			QuadsRenderCount = std::min((size_t)m_pLayerQuads->m_NumQuads - CurQuadOffset, gs_GraphicsMaxQuadsRenderCount);
-			m_pGraphics->RenderQuadLayer(Visuals.m_BufferContainerIndex, m_vQuadRenderInfo.data(), QuadsRenderCount, CurQuadOffset);
+			ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+			CMapLayers::EnvelopeEval(m_QuadRenderGroup.m_ColorEnvOffset, m_QuadRenderGroup.m_ColorEnv, Color, 4, m_pMap, m_pEnvelopePoints.get(), m_pClient, m_pGameClient, m_OnlineOnly);
+
+			if(Color.a <= 0.0f)
+				return;
+			QInfo.m_Color = Color;
 		}
+
+		if(m_QuadRenderGroup.m_PosEnv >= 0)
+		{
+			ColorRGBA Position = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+			CMapLayers::EnvelopeEval(m_QuadRenderGroup.m_PosEnvOffset, m_QuadRenderGroup.m_PosEnv, Position, 3, m_pMap, m_pEnvelopePoints.get(), m_pClient, m_pGameClient, m_OnlineOnly);
+
+			QInfo.m_Offsets.x = Position.r;
+			QInfo.m_Offsets.y = Position.g;
+			QInfo.m_Rotation = Position.b / 180.0f * pi;
+		}
+		m_pGraphics->RenderQuadLayer(Visuals.m_BufferContainerIndex, &QInfo, (size_t)m_pLayerQuads->m_NumQuads, 0, true);
 	}
 }
 
@@ -853,12 +870,20 @@ void CRenderLayerQuads::Init()
 	m_vQuadRenderInfo.resize(m_pLayerQuads->m_NumQuads);
 	CQuad *pQuads = (CQuad *)m_pMap->GetDataSwapped(m_pLayerQuads->m_Data);
 
+	// try to create a quad render group
+	m_Grouped = true;
+	m_QuadRenderGroup.m_ColorEnv = pQuads[0].m_ColorEnv;
+	m_QuadRenderGroup.m_ColorEnvOffset = pQuads[0].m_ColorEnvOffset;
+	m_QuadRenderGroup.m_PosEnv = pQuads[0].m_PosEnv;
+	m_QuadRenderGroup.m_PosEnvOffset = pQuads[0].m_PosEnvOffset;
+
 	for(int i = 0; i < m_pLayerQuads->m_NumQuads; ++i)
 	{
 		CQuad *pQuad = &pQuads[i];
 
-		if(pQuads[i].m_ColorEnv >= 0 || pQuads[i].m_PosEnv >= 0)
-			m_ContainsEnvelopes = true;
+		// give up on grouping if envelopes missmatch
+		if(m_Grouped && (pQuad->m_ColorEnv != m_QuadRenderGroup.m_ColorEnv || pQuad->m_ColorEnvOffset != m_QuadRenderGroup.m_ColorEnvOffset || pQuad->m_PosEnv != m_QuadRenderGroup.m_PosEnv || pQuad->m_PosEnvOffset != m_QuadRenderGroup.m_PosEnvOffset))
+			m_Grouped = false;
 
 		// init for envelopeless quad layers
 		SQuadRenderInfo &QInfo = m_vQuadRenderInfo[i];
@@ -901,6 +926,12 @@ void CRenderLayerQuads::Init()
 				vTmpQuadsTextured[i].m_aVertices[j].m_A = (unsigned char)pQuad->m_aColors[QuadIdX].a;
 			}
 		}
+	}
+
+	// we can directly push, only one render info is needed
+	if(m_Grouped)
+	{
+		m_vQuadRenderInfo.resize(1);
 	}
 
 	size_t UploadDataSize = 0;
