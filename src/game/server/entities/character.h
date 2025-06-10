@@ -67,7 +67,7 @@ public:
 	void HandleJetpack();
 
 	void OnPredictedInput(CNetObj_PlayerInput *pNewInput);
-	void OnDirectInput(CNetObj_PlayerInput *pNewInput);
+	void OnDirectInput();
 	void ReleaseHook();
 	void ResetHook();
 	void ResetInput();
@@ -146,6 +146,7 @@ private:
 	CNetObj_PlayerInput m_Input;
 	CNetObj_PlayerInput m_SavedInput;
 	int m_NumInputs;
+	int m_LastPredictedInputTick;
 
 	int m_DamageTakenTick;
 

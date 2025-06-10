@@ -556,6 +556,11 @@ void CPlayer::OnDisconnect()
 
 void CPlayer::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 {
+	m_PlayerFlags = pNewInput->m_PlayerFlags;
+
+	if(!m_pCharacter && m_Team != TEAM_SPECTATORS && (pNewInput->m_Fire & 1))
+		m_Spawning = true;
+
 	// skip the input if chat is active
 	if((m_PlayerFlags & PLAYERFLAG_CHATTING) && (pNewInput->m_PlayerFlags & PLAYERFLAG_CHATTING))
 		return;
@@ -591,21 +596,6 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 		m_LastActionTick = Server()->Tick();
 		m_LastTargetInit = true;
 	}
-}
-
-void CPlayer::OnPredictedEarlyInput(CNetObj_PlayerInput *pNewInput)
-{
-	m_PlayerFlags = pNewInput->m_PlayerFlags;
-
-	if(!m_pCharacter && m_Team != TEAM_SPECTATORS && (pNewInput->m_Fire & 1))
-		m_Spawning = true;
-
-	// skip the input if chat is active
-	if(m_PlayerFlags & PLAYERFLAG_CHATTING)
-		return;
-
-	if(m_pCharacter && !m_Paused && !(m_PlayerFlags & PLAYERFLAG_SPEC_CAM))
-		m_pCharacter->OnDirectInput(pNewInput);
 }
 
 int CPlayer::GetClientVersion() const
