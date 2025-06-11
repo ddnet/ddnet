@@ -73,7 +73,7 @@
 #include <process.h>
 #include <share.h>
 #include <shellapi.h>
-#include <shlobj.h> // SHChangeNotify
+#include <shlobj.h> // SHChangeNotify, SHGetKnownFolderPath
 #include <shlwapi.h>
 #include <wincrypt.h>
 #else
@@ -2277,16 +2277,19 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
 int fs_storage_path(const char *appname, char *path, int max)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WCHAR *wide_home = _wgetenv(L"APPDATA");
-	if(!wide_home)
+	WCHAR *wide_home = nullptr;
+	if(SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, /* current user */ nullptr, &wide_home) != S_OK)
 	{
+		log_error("filesystem", "ERROR: could not determine location of Roaming/AppData folder");
+		CoTaskMemFree(wide_home);
 		path[0] = '\0';
 		return -1;
 	}
 	const std::optional<std::string> home = windows_wide_to_utf8(wide_home);
+	CoTaskMemFree(wide_home);
 	if(!home.has_value())
 	{
-		log_error("filesystem", "ERROR: the APPDATA environment variable contains invalid UTF-16");
+		log_error("filesystem", "ERROR: path of Roaming/AppData folder contains invalid UTF-16");
 		path[0] = '\0';
 		return -1;
 	}
