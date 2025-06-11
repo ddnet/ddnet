@@ -836,25 +836,16 @@ void CPlayers::OnRender()
 		if((m_pClient->m_aClients[i].m_RenderCur.m_Weapon == WEAPON_NINJA || (Frozen && !m_pClient->m_GameInfo.m_NoSkinChangeForFrozen)) && g_Config.m_ClShowNinja)
 		{
 			// change the skin for the player to the ninja
-			const auto *pSkin = m_pClient->m_Skins.FindOrNullptr("x_ninja");
-			if(pSkin != nullptr)
+			aRenderInfo[i].m_aSixup[g_Config.m_ClDummy].Reset();
+			aRenderInfo[i].ApplySkin(NinjaTeeRenderInfo()->TeeRenderInfo());
+			aRenderInfo[i].m_CustomColoredSkin = IsTeamPlay;
+			if(!IsTeamPlay)
 			{
-				aRenderInfo[i].m_aSixup[g_Config.m_ClDummy].Reset();
-
-				aRenderInfo[i].Apply(pSkin);
-				aRenderInfo[i].m_CustomColoredSkin = IsTeamPlay;
-				if(!IsTeamPlay)
-				{
-					aRenderInfo[i].m_ColorBody = ColorRGBA(1, 1, 1);
-					aRenderInfo[i].m_ColorFeet = ColorRGBA(1, 1, 1);
-				}
+				aRenderInfo[i].m_ColorBody = ColorRGBA(1, 1, 1);
+				aRenderInfo[i].m_ColorFeet = ColorRGBA(1, 1, 1);
 			}
 		}
 	}
-	CTeeRenderInfo RenderInfoSpec;
-	RenderInfoSpec.Apply(m_pClient->m_Skins.Find("x_spec"));
-	RenderInfoSpec.m_Size = 64.0f;
-	const int LocalClientId = m_pClient->m_Snap.m_LocalClientId;
 
 	// get screen edges to avoid rendering offscreen
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
@@ -870,6 +861,7 @@ void CPlayers::OnRender()
 	ScreenY1 += BorderBuffer;
 
 	// render everyone else's hook, then our own
+	const int LocalClientId = m_pClient->m_Snap.m_LocalClientId;
 	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
 		if(ClientId == LocalClientId || !m_pClient->m_Snap.m_aCharacters[ClientId].m_Active || !IsPlayerInfoAvailable(ClientId))
@@ -898,7 +890,7 @@ void CPlayers::OnRender()
 		{
 			Alpha = g_Config.m_ClRaceGhostAlpha / 100.f;
 		}
-		RenderTools()->RenderTee(CAnimState::GetIdle(), &RenderInfoSpec, EMOTE_BLINK, vec2(1, 0), Client.m_SpecChar, Alpha);
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &SpectatorTeeRenderInfo()->TeeRenderInfo(), EMOTE_BLINK, vec2(1, 0), Client.m_SpecChar, Alpha);
 	}
 
 	// render everyone else's tee, then either our own or the tee we are spectating.
@@ -925,6 +917,26 @@ void CPlayers::OnRender()
 		RenderHookCollLine(&pClientData->m_RenderPrev, &pClientData->m_RenderCur, RenderLastId);
 		RenderPlayer(&pClientData->m_RenderPrev, &pClientData->m_RenderCur, &aRenderInfo[RenderLastId], RenderLastId);
 	}
+}
+
+void CPlayers::CreateNinjaTeeRenderInfo()
+{
+	CTeeRenderInfo NinjaTeeRenderInfo;
+	NinjaTeeRenderInfo.m_Size = 64.0f;
+	CSkinDescriptor NinjaSkinDescriptor;
+	NinjaSkinDescriptor.m_Flags |= CSkinDescriptor::FLAG_SIX;
+	str_copy(NinjaSkinDescriptor.m_aSkinName, "x_ninja");
+	m_pNinjaTeeRenderInfo = GameClient()->CreateManagedTeeRenderInfo(NinjaTeeRenderInfo, NinjaSkinDescriptor);
+}
+
+void CPlayers::CreateSpectatorTeeRenderInfo()
+{
+	CTeeRenderInfo SpectatorTeeRenderInfo;
+	SpectatorTeeRenderInfo.m_Size = 64.0f;
+	CSkinDescriptor SpectatorSkinDescriptor;
+	SpectatorSkinDescriptor.m_Flags |= CSkinDescriptor::FLAG_SIX;
+	str_copy(SpectatorSkinDescriptor.m_aSkinName, "x_spec");
+	m_pSpectatorTeeRenderInfo = GameClient()->CreateManagedTeeRenderInfo(SpectatorTeeRenderInfo, SpectatorSkinDescriptor);
 }
 
 void CPlayers::OnInit()
@@ -998,4 +1010,7 @@ void CPlayers::OnInit()
 
 	Graphics()->QuadsSetSubset(0.f, 0.f, 1.f, 1.f);
 	Graphics()->QuadsSetRotation(0.f);
+
+	CreateNinjaTeeRenderInfo();
+	CreateSpectatorTeeRenderInfo();
 }

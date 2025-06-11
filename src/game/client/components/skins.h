@@ -109,7 +109,7 @@ public:
 		};
 
 		CSkinContainer(CSkinContainer &&Other) = default;
-		CSkinContainer(CSkins *pSkins, const char *pName, EType Type, int StorageType);
+		CSkinContainer(CSkins *pSkins, const char *pName, const char *pNormalizedName, EType Type, int StorageType);
 		~CSkinContainer();
 
 		bool operator<(const CSkinContainer &Other) const;
@@ -255,10 +255,17 @@ public:
 
 	void RandomizeSkin(int Dummy);
 
-	static bool IsVanillaSkin(const char *pName);
 	static bool IsSpecialSkin(const char *pName);
 
 private:
+	static bool IsVanillaSkinNormalized(const char *pNormalizedName);
+	static bool IsSpecialSkinNormalized(const char *pNormalizedName);
+
+	/**
+	 * Names of all vanilla and special skins.
+	 *
+	 * The names have to be in lower case for efficient comparison.
+	 */
 	constexpr static const char *VANILLA_SKINS[] = {"bluekitty", "bluestripe", "brownbear",
 		"cammo", "cammostripes", "coala", "default", "limekitty",
 		"pinky", "redbopp", "redstripe", "saddo", "toptri",
