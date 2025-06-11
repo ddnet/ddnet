@@ -885,8 +885,7 @@ void CCommandProcessorFragment_OpenGL3_3::AppendIndices(unsigned int NewIndicesC
 	glDeleteBuffers(1, &m_QuadDrawIndexBufferId);
 	m_QuadDrawIndexBufferId = NewIndexBufferId;
 
-	for(unsigned int &i : m_aLastIndexBufferBound)
-		i = 0;
+	std::fill(std::begin(m_aLastIndexBufferBound), std::end(m_aLastIndexBufferBound), 0);
 	for(auto &BufferContainer : m_vBufferContainers)
 	{
 		BufferContainer.m_LastIndexBufferBound = 0;

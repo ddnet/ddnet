@@ -602,7 +602,7 @@ int CServer::Init()
 	m_CurrentGameTick = MIN_TICK;
 
 	m_AnnouncementLastLine = -1;
-	mem_zero(m_aPrevStates, sizeof(m_aPrevStates));
+	std::fill(std::begin(m_aPrevStates), std::end(m_aPrevStates), 0);
 
 	return 0;
 }
