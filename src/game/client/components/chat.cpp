@@ -137,7 +137,7 @@ void CChat::Reset()
 	m_EditingNewLine = true;
 	m_ServerSupportsCommandInfo = false;
 	m_ServerCommandsNeedSorting = false;
-	mem_zero(m_aCurrentInputText, sizeof(m_aCurrentInputText));
+	m_aCurrentInputText[0] = '\0';
 	DisableMode();
 	m_vServerCommands.clear();
 

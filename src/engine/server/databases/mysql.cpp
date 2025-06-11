@@ -152,7 +152,7 @@ CMysqlConnection::CMysqlConnection(CMysqlConfig Config) :
 	g_MysqlNumConnections += 1;
 	dbg_assert(g_MysqlState == MYSQLSTATE_INITIALIZED, "MySQL library not in initialized state");
 
-	mem_zero(m_aErrorDetail, sizeof(m_aErrorDetail));
+	m_aErrorDetail[0] = '\0';
 	mem_zero(&m_Mysql, sizeof(m_Mysql));
 	mysql_init(&m_Mysql);
 }
