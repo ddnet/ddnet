@@ -175,11 +175,9 @@ int CNetClient::Flush()
 	return m_Connection.Flush();
 }
 
-int CNetClient::GotProblems(int64_t MaxLatency) const
+bool CNetClient::GotProblems(int64_t MaxLatency) const
 {
-	if(time_get() - m_Connection.LastRecvTime() > MaxLatency)
-		return 1;
-	return 0;
+	return time_get() - m_Connection.LastRecvTime() > MaxLatency;
 }
 
 const char *CNetClient::ErrorString() const

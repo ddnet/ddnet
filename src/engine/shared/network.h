@@ -584,7 +584,7 @@ public:
 	int State();
 	const NETADDR *ServerAddress() const { return m_Connection.PeerAddress(); }
 	void ConnectAddresses(const NETADDR **ppAddrs, int *pNumAddrs) const { m_Connection.ConnectAddresses(ppAddrs, pNumAddrs); }
-	int GotProblems(int64_t MaxLatency) const;
+	bool GotProblems(int64_t MaxLatency) const;
 	const char *ErrorString() const;
 
 	// stun
