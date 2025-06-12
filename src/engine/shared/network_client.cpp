@@ -24,51 +24,48 @@ bool CNetClient::Open(NETADDR BindAddr)
 	return true;
 }
 
-int CNetClient::Close()
+void CNetClient::Close()
 {
 	if(!m_Socket)
-		return 0;
+	{
+		return;
+	}
 	if(m_pStun)
 	{
 		delete m_pStun;
 		m_pStun = nullptr;
 	}
-	return net_udp_close(m_Socket);
+	net_udp_close(m_Socket);
+	m_Socket = nullptr;
 }
 
-int CNetClient::Disconnect(const char *pReason)
+void CNetClient::Disconnect(const char *pReason)
 {
-	//dbg_msg("netclient", "disconnected. reason=\"%s\"", pReason);
 	m_Connection.Disconnect(pReason);
-	return 0;
 }
 
-int CNetClient::Update()
+void CNetClient::Update()
 {
 	m_Connection.Update();
 	if(m_Connection.State() == NET_CONNSTATE_ERROR)
 		Disconnect(m_Connection.ErrorString());
 	m_pStun->Update();
 	m_TokenCache.Update();
-	return 0;
 }
 
-int CNetClient::Connect(const NETADDR *pAddr, int NumAddrs)
+void CNetClient::Connect(const NETADDR *pAddr, int NumAddrs)
 {
 	m_Connection.Connect(pAddr, NumAddrs);
-	return 0;
 }
 
-int CNetClient::Connect7(const NETADDR *pAddr, int NumAddrs)
+void CNetClient::Connect7(const NETADDR *pAddr, int NumAddrs)
 {
 	m_Connection.Connect7(pAddr, NumAddrs);
-	return 0;
 }
 
-int CNetClient::ResetErrorString()
+void CNetClient::ResetErrorString()
 {
 	m_Connection.ResetErrorString();
-	return 0;
 }
 
 int CNetClient::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken, bool Sixup)
@@ -178,11 +175,9 @@ int CNetClient::Flush()
 	return m_Connection.Flush();
 }
 
-int CNetClient::GotProblems(int64_t MaxLatency) const
+bool CNetClient::GotProblems(int64_t MaxLatency) const
 {
-	if(time_get() - m_Connection.LastRecvTime() > MaxLatency)
-		return 1;
-	return 0;
+	return time_get() - m_Connection.LastRecvTime() > MaxLatency;
 }
 
 const char *CNetClient::ErrorString() const

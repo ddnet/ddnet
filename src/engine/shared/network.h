@@ -350,7 +350,7 @@ private:
 	char m_aLineEnding[3];
 
 public:
-	void Init(NETSOCKET Socket, const NETADDR *pAddr);
+	int Init(NETSOCKET Socket, const NETADDR *pAddr);
 	void Disconnect(const char *pReason);
 
 	int State() const { return m_State; }
@@ -410,8 +410,6 @@ class CNetServer
 	NETFUNC_CLIENTREJOIN m_pfnClientRejoin;
 	void *m_pUser;
 
-	int m_NumConAttempts; // log flooding attacks
-	int64_t m_TimeNumConAttempts;
 	unsigned char m_aSecurityTokenSeed[16];
 
 	// vanilla connect flood detection
@@ -441,15 +439,15 @@ public:
 
 	//
 	bool Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int MaxClientsPerIp);
-	int Close();
+	void Close();
 
 	//
 	int Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken);
 	int Send(CNetChunk *pChunk);
-	int Update();
+	void Update();
 
 	//
-	int Drop(int ClientId, const char *pReason);
+	void Drop(int ClientId, const char *pReason);
 
 	// status requests
 	const NETADDR *ClientAddr(int ClientId) const { return m_aSlots[ClientId].m_Connection.PeerAddress(); }
@@ -468,7 +466,7 @@ public:
 	bool SetTimedOut(int ClientId, int OrigId);
 	void SetTimeoutProtected(int ClientId);
 
-	int ResetErrorString(int ClientId);
+	void ResetErrorString(int ClientId);
 	const char *ErrorString(int ClientId);
 
 	// anti spoof
@@ -499,16 +497,16 @@ public:
 
 	//
 	bool Open(NETADDR BindAddr, CNetBan *pNetBan);
-	int Close();
+	void Close();
 
 	//
 	int Recv(char *pLine, int MaxLength, int *pClientId = nullptr);
 	int Send(int ClientId, const char *pLine);
-	int Update();
+	void Update();
 
 	//
 	int AcceptClient(NETSOCKET Socket, const NETADDR *pAddr);
-	int Drop(int ClientId, const char *pReason);
+	void Drop(int ClientId, const char *pReason);
 
 	// status requests
 	const NETADDR *ClientAddr(int ClientId) const { return m_aSlots[ClientId].m_Connection.PeerAddress(); }
@@ -562,29 +560,29 @@ public:
 	NETSOCKET m_Socket;
 	// openness
 	bool Open(NETADDR BindAddr);
-	int Close();
+	void Close();
 
 	// connection state
-	int Disconnect(const char *pReason);
-	int Connect(const NETADDR *pAddr, int NumAddrs);
-	int Connect7(const NETADDR *pAddr, int NumAddrs);
+	void Disconnect(const char *pReason);
+	void Connect(const NETADDR *pAddr, int NumAddrs);
+	void Connect7(const NETADDR *pAddr, int NumAddrs);
 
 	// communication
 	int Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken, bool Sixup);
 	int Send(CNetChunk *pChunk);
 
 	// pumping
-	int Update();
+	void Update();
 	int Flush();
 
-	int ResetErrorString();
+	void ResetErrorString();
 
 	// error and state
 	int NetType() const { return net_socket_type(m_Socket); }
 	int State();
 	const NETADDR *ServerAddress() const { return m_Connection.PeerAddress(); }
 	void ConnectAddresses(const NETADDR **ppAddrs, int *pNumAddrs) const { m_Connection.ConnectAddresses(ppAddrs, pNumAddrs); }
-	int GotProblems(int64_t MaxLatency) const;
+	bool GotProblems(int64_t MaxLatency) const;
 	const char *ErrorString() const;
 
 	// stun

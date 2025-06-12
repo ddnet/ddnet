@@ -25,15 +25,19 @@ void CConsoleNetConnection::Reset()
 #endif
 }
 
-void CConsoleNetConnection::Init(NETSOCKET Socket, const NETADDR *pAddr)
+int CConsoleNetConnection::Init(NETSOCKET Socket, const NETADDR *pAddr)
 {
 	Reset();
 
-	m_Socket = Socket;
-	net_set_non_blocking(m_Socket);
+	if(net_set_non_blocking(Socket) != 0)
+	{
+		return -1;
+	}
 
+	m_Socket = Socket;
 	m_PeerAddr = *pAddr;
 	m_State = NET_CONNSTATE_ONLINE;
+	return 0;
 }
 
 void CConsoleNetConnection::Disconnect(const char *pReason)
