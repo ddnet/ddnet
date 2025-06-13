@@ -13,6 +13,7 @@
 #include <game/generated/protocol.h>
 #include <game/generated/server_data.h>
 #include <game/mapitems.h>
+#include <game/team_state.h>
 
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
@@ -972,7 +973,7 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
 	// send the kill message
-	if(SendKillMsg && (Team() == TEAM_FLOCK || Teams()->TeamFlock(Team()) || Teams()->Count(Team()) == 1 || Teams()->GetTeamState(Team()) == CGameTeams::TEAMSTATE_OPEN || !Teams()->TeamLocked(Team())))
+	if(SendKillMsg && (Team() == TEAM_FLOCK || Teams()->TeamFlock(Team()) || Teams()->Count(Team()) == 1 || Teams()->GetTeamState(Team()) == ETeamState::OPEN || !Teams()->TeamLocked(Team())))
 	{
 		CNetMsg_Sv_KillMsg Msg;
 		Msg.m_Killer = Killer;
