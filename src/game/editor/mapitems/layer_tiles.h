@@ -177,6 +177,7 @@ public:
 
 	int m_FillGameTile = -1;
 	bool m_LiveGameTiles = false;
+	EGameTileOp m_SelectedGameTileOp = EGameTileOp::NONE;
 	int m_AutoMapperConfig;
 	int m_AutoMapperReference;
 	int m_Seed;
