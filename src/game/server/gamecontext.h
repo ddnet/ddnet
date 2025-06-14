@@ -349,6 +349,8 @@ public:
 	void OnClientPredictedInput(int ClientId, void *pInput) override;
 	void OnClientPredictedEarlyInput(int ClientId, void *pInput) override;
 
+	void PreInputClients(int ClientId, bool *pClients) override;
+
 	void TeehistorianRecordAntibot(const void *pData, int DataSize) override;
 	void TeehistorianRecordPlayerJoin(int ClientId, bool Sixup) override;
 	void TeehistorianRecordPlayerDrop(int ClientId, const char *pReason) override;
