@@ -47,6 +47,7 @@ PickupFlags = [
 LaserTypes = ["RIFLE", "SHOTGUN", "DOOR", "FREEZE", "DRAGGER", "GUN", "PLASMA"]
 DraggerTypes = ["WEAK", "WEAK_NW", "NORMAL", "NORMAL_NW", "STRONG", "STRONG_NW"]
 GunTypes = ["UNFREEZE", "EXPLOSIVE", "FREEZE", "EXPFREEZE"]
+TargetSwitchTypes = ["OPEN", "CLOSE", "ALTERNATE"]
 
 Emoticons = ["OOP", "EXCLAMATION", "HEARTS", "DROP", "DOTDOT", "MUSIC", "SORRY", "GHOST", "SUSHI", "SPLATTEE", "DEVILTEE", "ZOMG", "ZZZ", "WTF", "EYES", "QUESTION"]
 
@@ -88,6 +89,7 @@ Enums = [
 	Enum("LASERTYPE", LaserTypes),
 	Enum("LASERDRAGGERTYPE", DraggerTypes),
 	Enum("LASERGUNTYPE", GunTypes),
+	Enum("TARGETSWITCHTYPE", TargetSwitchTypes),
 	Enum("TEAM", Teams, -2),
 ]
 
@@ -321,6 +323,15 @@ Objects = [
 		NetIntRange("m_Type", 0, 'max_int'),
 		NetIntRange("m_Subtype", 0, 'max_int'),
 		NetIntAny("m_SwitchNumber"),
+		NetIntAny("m_Flags", default=0),
+	]),
+
+	NetObjectEx("DDNetTargetSwitch", "targetswitch@netobj.ddnet.tw", [
+		NetIntAny("m_X"),
+		NetIntAny("m_Y"),
+		NetIntRange("m_Type", 0, 'max_int'),
+		NetIntAny("m_SwitchNumber"),
+		NetIntAny("m_SwitchDelay"),
 		NetIntAny("m_Flags", default=0),
 	]),
 

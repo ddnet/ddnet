@@ -764,6 +764,10 @@ public:
 		IGraphics::CTextureHandle m_SpriteNinjaBarEmpty;
 		IGraphics::CTextureHandle m_SpriteNinjaBarEmptyRight;
 
+		// target switches
+		IGraphics::CTextureHandle m_TargetSwitchOpen;
+		IGraphics::CTextureHandle m_TargetSwitchClose;
+
 		bool IsSixup()
 		{
 			return m_SpriteNinjaBarFullLeft.IsValid();

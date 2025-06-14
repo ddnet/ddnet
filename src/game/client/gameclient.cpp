@@ -3731,6 +3731,8 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupNinja);
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupGun);
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupHammer);
+		Graphics()->UnloadTexture(&m_GameSkin.m_TargetSwitchOpen);
+		Graphics()->UnloadTexture(&m_GameSkin.m_TargetSwitchClose);
 
 		for(auto &SpritePickupWeapon : m_GameSkin.m_aSpritePickupWeapons)
 		{
@@ -3873,6 +3875,9 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 		m_GameSkin.m_SpritePickupArmorGrenade = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_PICKUP_ARMOR_GRENADE]);
 		m_GameSkin.m_SpritePickupArmorNinja = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_PICKUP_ARMOR_NINJA]);
 		m_GameSkin.m_SpritePickupArmorLaser = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_PICKUP_ARMOR_LASER]);
+
+		m_GameSkin.m_TargetSwitchOpen = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_TARGETSWITCH_OPEN]);
+		m_GameSkin.m_TargetSwitchClose = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_TARGETSWITCH_CLOSE]);
 
 		m_GameSkin.m_aSpritePickupWeapons[0] = m_GameSkin.m_SpritePickupHammer;
 		m_GameSkin.m_aSpritePickupWeapons[1] = m_GameSkin.m_SpritePickupGun;
@@ -4471,7 +4476,10 @@ void CGameClient::SnapCollectEntities()
 		const IClient::CSnapItem Item = Client()->SnapGetItem(IClient::SNAP_CURRENT, Index);
 		if(Item.m_Type == NETOBJTYPE_ENTITYEX)
 			vItemEx.push_back({Item, nullptr});
-		else if(Item.m_Type == NETOBJTYPE_PICKUP || Item.m_Type == NETOBJTYPE_DDNETPICKUP || Item.m_Type == NETOBJTYPE_LASER || Item.m_Type == NETOBJTYPE_DDNETLASER || Item.m_Type == NETOBJTYPE_PROJECTILE || Item.m_Type == NETOBJTYPE_DDRACEPROJECTILE || Item.m_Type == NETOBJTYPE_DDNETPROJECTILE)
+		else if(Item.m_Type == NETOBJTYPE_PICKUP || Item.m_Type == NETOBJTYPE_DDNETPICKUP ||
+				Item.m_Type == NETOBJTYPE_LASER || Item.m_Type == NETOBJTYPE_DDNETLASER ||
+				Item.m_Type == NETOBJTYPE_PROJECTILE || Item.m_Type == NETOBJTYPE_DDRACEPROJECTILE ||
+				Item.m_Type == NETOBJTYPE_DDNETPROJECTILE || Item.m_Type == NETOBJTYPE_DDNETTARGETSWITCH)
 			vItemData.push_back({Item, nullptr});
 	}
 

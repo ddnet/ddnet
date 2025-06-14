@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "projectile.h"
 #include "character.h"
+#include "targetswitch.h"
 
 #include <engine/shared/config.h>
 
@@ -127,6 +128,11 @@ void CProjectile::Tick()
 	if(pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit)
 		pTargetChr = GameServer()->m_World.IntersectCharacter(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pOwnerChar, m_Owner);
 
+	CTargetSwitch *pTargetTargetSwitch = nullptr; // target TargetSwitch :)
+
+	if(pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit)
+	pTargetTargetSwitch = GameServer()->m_World.IntersectTargetSwitch(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos);
+
 	if(m_LifeSpan > -1)
 		m_LifeSpan--;
 
@@ -151,7 +157,11 @@ void CProjectile::Tick()
 		return;
 	}
 
-	if(((pTargetChr && (pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar)) || Collide || GameLayerClipped(CurPos)) && !IsWeaponCollide)
+	if(
+		(((pTargetChr || pTargetTargetSwitch) &&
+			(pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar || pTargetTargetSwitch)) ||
+		Collide || GameLayerClipped(CurPos)) &&
+		!IsWeaponCollide)
 	{
 		if(m_Explosive /*??*/ && (!pTargetChr || (pTargetChr && (!m_Freeze || (m_Type == WEAPON_SHOTGUN && Collide)))))
 		{
@@ -166,6 +176,7 @@ void CProjectile::Tick()
 					(m_Owner != -1) ? TeamMask : CClientMask().set());
 				GameServer()->CreateSound(ColPos, m_SoundImpact,
 					(m_Owner != -1) ? TeamMask : CClientMask().set());
+				// Don't handle target switch GetHit(), it's handled in CreateExplosion
 			}
 		}
 		else if(m_Freeze)
@@ -181,6 +192,8 @@ void CProjectile::Tick()
 		}
 		else if(pTargetChr)
 			pTargetChr->TakeDamage(vec2(0, 0), 0, m_Owner, m_Type);
+		else if(pTargetTargetSwitch)
+			pTargetTargetSwitch->GetHit(pOwnerChar->Team());
 
 		if(pOwnerChar && !GameLayerClipped(ColPos) &&
 			((m_Type == WEAPON_GRENADE && pOwnerChar->HasTelegunGrenade()) || (m_Type == WEAPON_GUN && pOwnerChar->HasTelegunGun())))

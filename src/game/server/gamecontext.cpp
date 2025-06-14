@@ -30,6 +30,7 @@
 #include <game/generated/protocolglue.h>
 
 #include "entities/character.h"
+#include "entities/targetswitch.h"
 #include "gamemodes/DDRace.h"
 #include "gamemodes/mod.h"
 #include "player.h"
@@ -361,6 +362,25 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 			pChr->TakeDamage(ForceDir * Dmg * 2, (int)Dmg, Owner, Weapon);
 		}
 	}
+
+	CEntity *apTargetEnts[MAX_CLIENTS];
+	// Targets need a bigger force to activate
+	Radius = 60.0f;
+	Num = m_World.FindEntities(Pos, Radius, apTargetEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_HITTABLE);
+	for(int i = 0; i < Num; i++)
+	{
+		auto *pTarget = static_cast<CTargetSwitch *>(apTargetEnts[i]);
+		if((GetPlayerChar(Owner) ? !GetPlayerChar(Owner)->GrenadeHitDisabled() : g_Config.m_SvHit) || NoDamage)
+		{
+			int PlayerTeam = GetDDRaceTeam(Owner);
+			if((GetPlayerChar(Owner) ? GetPlayerChar(Owner)->GrenadeHitDisabled() : !g_Config.m_SvHit) || NoDamage)
+			{
+				continue;
+			}
+
+			pTarget->GetHit(PlayerTeam);
+		}
+	}
 }
 
 void CGameContext::CreatePlayerSpawn(vec2 Pos, CClientMask Mask)
@@ -569,6 +589,48 @@ bool CGameContext::SnapPickup(const CSnapContext &Context, int SnapId, const vec
 			}
 		}
 		pPickup->m_Subtype = SubType;
+	}
+
+	return true;
+}
+
+bool CGameContext::SnapTargetSwitch(const CSnapContext &Context, int SnapId, const vec2 &Pos, int Type, int SwitchNumber, int SwitchDelay, int Flags) const
+{
+	// Send a shield for backwards compat. for now
+	if(Context.IsSixup())
+	{
+		protocol7::CNetObj_Pickup *pPickup = Server()->SnapNewItem<protocol7::CNetObj_Pickup>(SnapId);
+		if(!pPickup)
+			return false;
+
+		pPickup->m_X = (int)Pos.x;
+		pPickup->m_Y = (int)Pos.y;
+		pPickup->m_Type = PickupType_SixToSeven(POWERUP_ARMOR, 0);
+	}
+	else if(Context.GetClientVersion() >= 0)
+	{
+		CNetObj_DDNetTargetSwitch *pTargetSwitch = Server()->SnapNewItem<CNetObj_DDNetTargetSwitch>(SnapId);
+		if(!pTargetSwitch)
+			return false;
+
+		pTargetSwitch->m_X = (int)Pos.x;
+		pTargetSwitch->m_Y = (int)Pos.y;
+		pTargetSwitch->m_Type = Type;
+		pTargetSwitch->m_SwitchNumber = SwitchNumber;
+		pTargetSwitch->m_SwitchDelay = SwitchDelay;
+		pTargetSwitch->m_Flags = Flags;
+	}
+	else
+	{
+		CNetObj_Pickup *pPickup = Server()->SnapNewItem<CNetObj_Pickup>(SnapId);
+		if(!pPickup)
+			return false;
+
+		pPickup->m_X = (int)Pos.x;
+		pPickup->m_Y = (int)Pos.y;
+
+		pPickup->m_Type = POWERUP_ARMOR;
+		pPickup->m_Subtype = 0;
 	}
 
 	return true;
@@ -4164,7 +4226,7 @@ void CGameContext::CreateAllEntities(bool Initial)
 				// if(SwitchType == TILE_DOOR_OFF)
 				if(SwitchType >= ENTITY_OFFSET)
 				{
-					m_pController->OnEntity(SwitchType - ENTITY_OFFSET, x, y, LAYER_SWITCH, pSwitch[Index].m_Flags, Initial, pSwitch[Index].m_Number);
+					m_pController->OnEntity(SwitchType - ENTITY_OFFSET, x, y, LAYER_SWITCH, pSwitch[Index].m_Flags, Initial, pSwitch[Index].m_Number, pSwitch[Index].m_Delay);
 				}
 			}
 		}
