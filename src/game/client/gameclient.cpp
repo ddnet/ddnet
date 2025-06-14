@@ -1338,8 +1338,9 @@ void CGameClient::ProcessEvents()
 	{
 		const IClient::CSnapItem Item = Client()->SnapGetItem(SnapType, Index);
 
-		// We don't have enough info about us, others, to know a correct alpha value.
-		float Alpha = 1.0f;
+		// We don't have enough info about us, others, to know a correct alpha or volume value.
+		const float Alpha = 1.0f;
+		const float Volume = 1.0f;
 
 		if(Item.m_Type == NETEVENTTYPE_DAMAGEIND)
 		{
@@ -1354,7 +1355,7 @@ void CGameClient::ProcessEvents()
 		else if(Item.m_Type == NETEVENTTYPE_HAMMERHIT)
 		{
 			const CNetEvent_HammerHit *pEvent = (const CNetEvent_HammerHit *)Item.m_pData;
-			m_Effects.HammerHit(vec2(pEvent->m_X, pEvent->m_Y), Alpha);
+			m_Effects.HammerHit(vec2(pEvent->m_X, pEvent->m_Y), Alpha, Volume);
 		}
 		else if(Item.m_Type == NETEVENTTYPE_BIRTHDAY)
 		{
@@ -1369,7 +1370,7 @@ void CGameClient::ProcessEvents()
 		else if(Item.m_Type == NETEVENTTYPE_SPAWN)
 		{
 			const CNetEvent_Spawn *pEvent = (const CNetEvent_Spawn *)Item.m_pData;
-			m_Effects.PlayerSpawn(vec2(pEvent->m_X, pEvent->m_Y), Alpha);
+			m_Effects.PlayerSpawn(vec2(pEvent->m_X, pEvent->m_Y), Alpha, Volume);
 		}
 		else if(Item.m_Type == NETEVENTTYPE_DEATH)
 		{
@@ -2253,7 +2254,8 @@ void CGameClient::OnNewSnapshot()
 				float Alpha = 1.0f;
 				if(IsOtherTeam(i))
 					Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
-				m_Effects.AirJump(Pos, Alpha);
+				const float Volume = IsOtherTeam(i) ? g_Config.m_SndGameVolumeOthers / 100.0f : 1.0f;
+				m_Effects.AirJump(Pos, Alpha, Volume);
 			}
 
 	if(g_Config.m_ClFreezeStars && !m_SuppressEvents)
@@ -2459,7 +2461,7 @@ void CGameClient::OnPredict()
 			int Events = pLocalChar->Core()->m_TriggeredEvents;
 			if(g_Config.m_ClPredict && !m_SuppressEvents)
 				if(Events & COREEVENT_AIR_JUMP)
-					m_Effects.AirJump(Pos, 1.0f);
+					m_Effects.AirJump(Pos, 1.0f, 1.0f);
 			if(g_Config.m_SndGame && !m_SuppressEvents)
 			{
 				if(Events & COREEVENT_GROUND_JUMP)
@@ -2479,7 +2481,7 @@ void CGameClient::OnPredict()
 			int Events = pDummyChar->Core()->m_TriggeredEvents;
 			if(g_Config.m_ClPredict && !m_SuppressEvents)
 				if(Events & COREEVENT_AIR_JUMP)
-					m_Effects.AirJump(Pos, 1.0f);
+					m_Effects.AirJump(Pos, 1.0f, 1.0f);
 		}
 	}
 
