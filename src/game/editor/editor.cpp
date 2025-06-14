@@ -8697,6 +8697,8 @@ void CEditor::Reset(bool CreateDefault)
 	for(CEditorComponent &Component : m_vComponents)
 		Component.OnReset();
 
+	m_ToolbarPreviewSound = -1;
+
 	// create default layers
 	if(CreateDefault)
 	{
