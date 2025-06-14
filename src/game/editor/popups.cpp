@@ -860,11 +860,32 @@ CUi::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
 
-	// aspect ratio button
+	// randomize buttons
 	View.HSplitBottom(10.0f, &View, nullptr);
 	View.HSplitBottom(12.0f, &View, &Button);
+	static int s_RandomOffsetButtonBoth = 0;
+	static int s_RandomOffsetButtonColor = 0;
+	static int s_RandomOffsetButtonPosition = 0;
+
+	if(pEditor->DoButton_Editor(&s_RandomOffsetButtonBoth, "Randomize Both", 0, &Button, BUTTONFLAG_LEFT, ""))
+		CLayerQuads::RandomizeQuadOffsets(pEditor, vpQuads[0], vpQuads.size(), true, true);
+	View.HSplitBottom(4.0f, &View, nullptr);
+	View.HSplitBottom(12.0f, &View, &Button);
+
+	if(pEditor->DoButton_Editor(&s_RandomOffsetButtonColor, "Randomize Color Offset", 0, &Button, BUTTONFLAG_LEFT, "."))
+		CLayerQuads::RandomizeQuadOffsets(pEditor, vpQuads[0], vpQuads.size(), false, true);
+
+	View.HSplitBottom(4.0f, &View, nullptr);
+	View.HSplitBottom(12.0f, &View, &Button);
+
+	if(pEditor->DoButton_Editor(&s_RandomOffsetButtonPosition, "Randomize Position Offset", 0, &Button, BUTTONFLAG_LEFT, ""))
+		CLayerQuads::RandomizeQuadOffsets(pEditor, vpQuads[0], vpQuads.size(), true, false);
+
+	// aspect ratio button
 	if(pLayer && pLayer->m_Image >= 0 && (size_t)pLayer->m_Image < pEditor->m_Map.m_vpImages.size())
 	{
+		View.HSplitBottom(10.0f, &View, nullptr);
+		View.HSplitBottom(12.0f, &View, &Button);
 		static int s_AspectRatioButton = 0;
 		if(pEditor->DoButton_Editor(&s_AspectRatioButton, "Aspect ratio", 0, &Button, BUTTONFLAG_LEFT, "Resize the current quad based on the aspect ratio of its image."))
 		{
@@ -902,9 +923,13 @@ CUi::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 			return CUi::POPUP_CLOSE_CURRENT;
 		}
 	}
+	else
+	{
+		View.HSplitBottom(6.0f, &View, nullptr);
+	}
 
 	// center pivot button
-	View.HSplitBottom(6.0f, &View, nullptr);
+	View.HSplitBottom(4.0f, &View, nullptr);
 	View.HSplitBottom(12.0f, &View, &Button);
 	static int s_CenterButton = 0;
 	if(pEditor->DoButton_Editor(&s_CenterButton, "Center pivot", 0, &Button, BUTTONFLAG_LEFT, "Center the pivot of the current quad."))
@@ -935,7 +960,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 	}
 
 	// align button
-	View.HSplitBottom(6.0f, &View, nullptr);
+	View.HSplitBottom(4.0f, &View, nullptr);
 	View.HSplitBottom(12.0f, &View, &Button);
 	static int s_AlignButton = 0;
 	if(pEditor->DoButton_Editor(&s_AlignButton, "Align", 0, &Button, BUTTONFLAG_LEFT, "Align coordinates of the quad points."))
@@ -955,7 +980,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 	}
 
 	// square button
-	View.HSplitBottom(6.0f, &View, nullptr);
+	View.HSplitBottom(4.0f, &View, nullptr);
 	View.HSplitBottom(12.0f, &View, &Button);
 	static int s_Button = 0;
 	if(pEditor->DoButton_Editor(&s_Button, "Square", 0, &Button, BUTTONFLAG_LEFT, "Square the current quad."))
@@ -995,7 +1020,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 	}
 
 	// slice button
-	View.HSplitBottom(6.0f, &View, nullptr);
+	View.HSplitBottom(4.0f, &View, nullptr);
 	View.HSplitBottom(12.0f, &View, &Button);
 	static int s_SliceButton = 0;
 	if(pEditor->DoButton_Editor(&s_SliceButton, "Slice", 0, &Button, BUTTONFLAG_LEFT, "Enable quad knife mode."))
