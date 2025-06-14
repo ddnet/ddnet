@@ -2203,13 +2203,13 @@ Dragger Inner Color
 
 [Spectating]
 Following %d: %s
-== 
+== Seguindo %d: %s
 
 Loading map
-== 
+== Carregando mapa
 
 Error checking player name
-== 
+== Erro ao verificar nome de jogador
 
 Could not check for existing player with your name. Check your internet connection.
-== 
+== Não foi possível verificar se há um jogador com o seu nome. Verifique sua conexão de internet. 
