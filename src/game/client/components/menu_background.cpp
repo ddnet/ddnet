@@ -307,9 +307,6 @@ bool CMenuBackground::Render()
 	if(!m_Loaded)
 		return false;
 
-	if(Client()->State() == IClient::STATE_ONLINE || Client()->State() == IClient::STATE_DEMOPLAYBACK)
-		return false;
-
 	m_Camera.m_Zoom = 0.7f;
 
 	float DistToCenter = distance(m_Camera.m_Center, m_RotationCenter);
