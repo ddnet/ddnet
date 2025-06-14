@@ -146,6 +146,19 @@ void CProjectile::Tick()
 		}
 		m_MarkedForDestroy = true;
 	}
+
+	// predict if the projectile goes through the weapon teleport, only when there's 1 exit, because the out tele is random
+	int Index = Collision()->GetIndex(PrevPos, CurPos);
+	int TeleNumber;
+	if(g_Config.m_SvOldTeleportWeapons)
+		TeleNumber = Collision()->IsTeleport(Index);
+	else
+		TeleNumber = Collision()->IsTeleportWeapon(Index);
+	if(TeleNumber && Collision()->TeleOuts(TeleNumber - 1).size() == 1)
+	{
+		m_Pos = Collision()->TeleOuts(TeleNumber - 1)[0];
+		m_StartTick = GameWorld()->GameTick();
+	}
 }
 
 // DDRace
