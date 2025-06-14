@@ -5,6 +5,7 @@
 #include <engine/shared/config.h>
 #include <game/race_state.h>
 #include <game/server/gamecontext.h>
+#include <game/team_state.h>
 #include <game/teamscore.h>
 
 class CCharacter;
@@ -16,7 +17,7 @@ class CGameTeams
 	// `m_TeeStarted` is used to keep track whether a given tee has hit the
 	// start of the map yet. If a tee that leaves hasn't hit the start line
 	// yet, the team will be marked as "not allowed to finish"
-	// (`TEAMSTATE_STARTED_UNFINISHABLE`). If this were not the case, tees
+	// (`ETeamState::STARTED_UNFINISHABLE`). If this were not the case, tees
 	// could go around the startline on a map, leave one tee behind at
 	// start, go to the finish line, let the tee start and kill, allowing
 	// the team to finish instantly.
@@ -24,7 +25,7 @@ class CGameTeams
 	bool m_aTeeFinished[MAX_CLIENTS];
 	int m_aLastChat[MAX_CLIENTS];
 
-	int m_aTeamState[NUM_DDRACE_TEAMS];
+	ETeamState m_aTeamState[NUM_DDRACE_TEAMS];
 	bool m_aTeamLocked[NUM_DDRACE_TEAMS];
 	bool m_aTeamFlock[NUM_DDRACE_TEAMS];
 	CClientMask m_aInvited[NUM_DDRACE_TEAMS];
@@ -52,17 +53,6 @@ class CGameTeams
 	void OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp);
 
 public:
-	enum
-	{
-		TEAMSTATE_EMPTY,
-		TEAMSTATE_OPEN,
-		TEAMSTATE_STARTED,
-		// Happens when a tee that hasn't hit the start tiles leaves
-		// the team.
-		TEAMSTATE_STARTED_UNFINISHABLE,
-		TEAMSTATE_FINISHED
-	};
-
 	CTeamsCore m_Core;
 
 	CGameTeams(CGameContext *pGameContext);
@@ -96,7 +86,7 @@ public:
 	const char *SetCharacterTeam(int ClientId, int Team);
 	void CheckTeamFinished(int Team);
 
-	void ChangeTeamState(int Team, int State);
+	void ChangeTeamState(int Team, ETeamState State);
 
 	CClientMask TeamMask(int Team, int ExceptId = -1, int Asker = -1, int VersionFlags = CGameContext::FLAG_SIX | CGameContext::FLAG_SIXUP);
 
@@ -140,7 +130,7 @@ public:
 		return m_aTeeFinished[ClientId];
 	}
 
-	int GetTeamState(int Team)
+	ETeamState GetTeamState(int Team)
 	{
 		return m_aTeamState[Team];
 	}
@@ -168,7 +158,7 @@ public:
 
 	bool IsStarted(int Team)
 	{
-		return m_aTeamState[Team] == CGameTeams::TEAMSTATE_STARTED;
+		return m_aTeamState[Team] == ETeamState::STARTED;
 	}
 
 	void SetStarted(int ClientId, bool Started)
