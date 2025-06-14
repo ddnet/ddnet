@@ -2008,9 +2008,6 @@ Active: Hook
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
 == "%s" pnglite ile uyumlu değil ve eski DDnet versiyonları tarafından yüklenemiyor:
 
-Loading background map
-== Arkaplan haritası yükleniyor
-
 [Spectating Camera Mode Icon]
 AUTO
 == OTOMATİK
@@ -2203,3 +2200,16 @@ Dragger Inner Color
 
 AntiPing: prediction margin
 == AntiPing: tahmin marjı
+
+[Spectating]
+Following %d: %s
+== 
+
+Loading map
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
+== 

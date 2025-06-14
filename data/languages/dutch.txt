@@ -1266,9 +1266,6 @@ Restarting. Please wait…
 Loading skin files
 == Skin-bestanden laden
 
-Loading background map
-== Achtergrondmap laden
-
 Searching
 == Zoeken
 
@@ -2123,7 +2120,20 @@ Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom
 No demo with this filename exists
 == 
 
+[Spectating]
+Following %d: %s
+== 
+
+Loading map
+== 
+
 This name cannot be used for files and folders
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
 == 
 
 Map size

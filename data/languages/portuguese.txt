@@ -942,9 +942,6 @@ Restarting. Please wait…
 Loading skin files
 == A carregar os ficheiros de skin
 
-Loading background map
-== A carregar o mapa de fundo
-
 Searching
 == A pesquisar
 
@@ -2070,7 +2067,20 @@ Active
 Loading maps…
 == 
 
+[Spectating]
+Following %d: %s
+== 
+
+Loading map
+== 
+
 This name cannot be used for files and folders
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
 == 
 
 Map size

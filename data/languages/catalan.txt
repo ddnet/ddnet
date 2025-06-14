@@ -1247,9 +1247,6 @@ Restarting. Please wait…
 Loading skin files
 == 
 
-Loading background map
-== 
-
 Auto-sync player camera
 == 
 
@@ -1319,6 +1316,10 @@ Multi-View
 == 
 
 [Spectating]
+Following %d: %s
+== 
+
+[Spectating]
 Following %s
 == 
 
@@ -1330,6 +1331,9 @@ Team %d
 == 
 
 Some map images could not be loaded. Check the local console for details.
+== 
+
+Loading map
 == 
 
 Uploading map data to GPU
@@ -1390,6 +1394,15 @@ Videos directory
 == 
 
 Video was saved to '%s'
+== 
+
+Cancel
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
 == 
 
 Unable to save the skin with a reserved name
@@ -1493,11 +1506,11 @@ Go back the specified duration
 == 
 
 [Demo player duration]
-%d min.
+%s min.
 == 
 
 [Demo player duration]
-%d sec.
+%s sec.
 == 
 
 Change the skip duration
@@ -1834,9 +1847,6 @@ Reset controls
 == 
 
 Are you sure that you want to reset the controls to their defaults?
-== 
-
-Cancel
 == 
 
 Allows maps to render with more detail

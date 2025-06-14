@@ -1903,9 +1903,6 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 Some fonts could not be loaded. Check the local console for details.
 == .ﺪﯿﻨﻛ ﯽﺳﺭﺮﺑ ﺍﺭ ﯽﻠﺤﻣ ﻝﻮﺴﻨﻛ ،ﺮﺘﺸﯿﺑ ﺕﺎﯿﺋﺰﺟ ىﺍﺮﺑ .ﺪﻧﺪﺸﻧ ىﺭﺍﺬﮔﺭﺎﺑ ﺎﻫﺖﻧﻮﻓ ﯽﺧﺮﺑ
 
-Loading background map
-== ﻪﻨﯿﻣﺯﺲﭘ ﻪﺸﻘﻧ ىﺭﺍﺬﮔﺭﺎﺑ ﻝﺎﺣ ﺭﺩ
-
 [Spectating Camera Mode Icon]
 AUTO
 == ﺭﺎﻛﺩﻮﺧ
@@ -2069,7 +2066,20 @@ Active
 Loading maps…
 == 
 
+[Spectating]
+Following %d: %s
+== 
+
+Loading map
+== 
+
 This name cannot be used for files and folders
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
 == 
 
 Map size

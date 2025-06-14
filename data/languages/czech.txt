@@ -1920,9 +1920,6 @@ No demo with this filename exists
 Some fonts could not be loaded. Check the local console for details.
 == 
 
-Loading background map
-== 
-
 Auto-sync player camera
 == 
 
@@ -1949,11 +1946,24 @@ Active
 Loading maps…
 == 
 
+[Spectating]
+Following %d: %s
+== 
+
 [Spectating Camera Mode Icon]
 AUTO
 == 
 
+Loading map
+== 
+
 This name cannot be used for files and folders
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
 == 
 
 Online friends (%d)
