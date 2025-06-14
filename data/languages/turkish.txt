@@ -2203,13 +2203,13 @@ AntiPing: prediction margin
 
 [Spectating]
 Following %d: %s
-== 
+== İzleniyor %d: %s
 
 Loading map
-== 
+== Harita yükleniyor
 
 Error checking player name
-== 
+== Oyuncu adı kontrol edilirken hata
 
 Could not check for existing player with your name. Check your internet connection.
-== 
+== Adınıza sahip mevcut oyuncu olup olmadığı kontrol edilemedi. İnternet bağlantınızı kontrol edin.
