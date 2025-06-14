@@ -80,6 +80,7 @@ public:
 		IDemoPlayer::CInfo m_Info;
 
 		int64_t m_LastUpdate;
+		int64_t m_LastScan;
 		int64_t m_CurrentTime;
 
 		int m_NextTick;
@@ -88,6 +89,10 @@ public:
 		float m_IntraTick;
 		float m_IntraTickSincePrev;
 		float m_TickTime;
+
+		bool m_LiveStateUpdating;
+		int m_LiveStateFailedCount;
+		int m_LiveStateUnchangedCount;
 	};
 
 private:
@@ -144,7 +149,13 @@ private:
 	};
 	EReadChunkHeaderResult ReadChunkHeader(int *pType, int *pSize, int *pTick);
 	void DoTick();
-	bool ScanFile();
+	enum class EScanFileResult
+	{
+		SUCCESS,
+		ERROR_RECOVERABLE,
+		ERROR_UNRECOVERABLE,
+	};
+	EScanFileResult ScanFile();
 	void UpdateTimes();
 
 	int64_t Time();
@@ -179,7 +190,7 @@ public:
 	const char *Filename() const { return m_aFilename; }
 	const char *ErrorMessage() const override { return m_aErrorMessage; }
 
-	int Update(bool RealTime = true);
+	void Update(bool RealTime = true);
 	bool IsSixup() const { return m_Sixup; }
 
 	const CPlaybackInfo *Info() const { return &m_Info; }
