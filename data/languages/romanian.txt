@@ -2010,9 +2010,6 @@ https://wiki.ddnet.org/wiki/Mapping
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
 == "%s" nu este compatibilă cu pnglite și nu poate fi încărcată de versiunile vechi DDNet:
 
-Loading background map
-== Se încarcă harta de fundal
-
 [Spectating Camera Mode Icon]
 AUTO
 == AUTO
@@ -2182,7 +2179,20 @@ AntiPing: prediction margin
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
 == 
 
+[Spectating]
+Following %d: %s
+== 
+
+Loading map
+== 
+
 This name cannot be used for files and folders
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
 == 
 
 This skin name cannot be used.

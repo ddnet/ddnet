@@ -2008,9 +2008,6 @@ Active: Hook
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
 == "%s" pnglite ilə uyğun gəlmir və köhnə DDnet versiyaları tərəfindən yüklənə bilmir.
 
-Loading background map
-== Fon xəritəsi yüklənir
-
 [Spectating Camera Mode Icon]
 AUTO
 == AVTOMATİK
@@ -2121,7 +2118,20 @@ Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom
 No demo with this filename exists
 == 
 
+[Spectating]
+Following %d: %s
+== 
+
+Loading map
+== 
+
 This name cannot be used for files and folders
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
 == 
 
 Map size

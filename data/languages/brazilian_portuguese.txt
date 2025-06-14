@@ -2008,9 +2008,6 @@ Active: Hook
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
 == "%s" não é compatível com pnglite e não pode ser carregado por versões antigas do DDNet:
 
-Loading background map
-== Carregando mapa de fundo
-
 [Spectating Camera Mode Icon]
 AUTO
 == AUTO
@@ -2203,3 +2200,16 @@ Dragger Outline Color
 
 Dragger Inner Color
 == Cor interna do dragger
+
+[Spectating]
+Following %d: %s
+== 
+
+Loading map
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
+== 

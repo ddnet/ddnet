@@ -2008,9 +2008,6 @@ Active: Hook
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
 == "%s" не совместим с pnglite и не может быть загружен старыми версиями DDNet:
 
-Loading background map
-== Загрузка карты фона
-
 Auto-sync player camera
 == Автоматически синхронизировать камеру игрока
 
@@ -2203,3 +2200,16 @@ Dragger Outline Color
 
 Dragger Inner Color
 == Цвет драггера
+
+[Spectating]
+Following %d: %s
+== 
+
+Loading map
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
+== 
