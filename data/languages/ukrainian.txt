@@ -2203,13 +2203,13 @@ AntiPing: prediction margin
 
 [Spectating]
 Following %d: %s
-== 
+== Спостерігає за %d: %s
 
 Loading map
-== 
+== Завантаження мапи
 
 Error checking player name
-== 
+== Помилка перевірки імені гравця
 
 Could not check for existing player with your name. Check your internet connection.
-== 
+== Не вдалося перевірити, чи існує гравець із таким іменем. Перевірте з'єднання з інтернетом.
