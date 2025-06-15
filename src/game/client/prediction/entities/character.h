@@ -69,7 +69,6 @@ public:
 	bool Freeze();
 	bool UnFreeze();
 	void GiveAllWeapons();
-	void ResetPickups();
 	int Team();
 	bool CanCollide(int ClientId) override;
 	bool SameTeam(int ClientId);
