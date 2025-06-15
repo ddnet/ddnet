@@ -869,7 +869,7 @@ int CTouchControls::NextActiveAction(int Action) const
 
 int CTouchControls::NextDirectTouchAction() const
 {
-	if(m_pClient->m_Snap.m_SpecInfo.m_Active)
+	if(GameClient()->m_Snap.m_SpecInfo.m_Active)
 	{
 		switch(m_DirectTouchSpectate)
 		{
@@ -1080,11 +1080,11 @@ void CTouchControls::UpdateButtons(const std::vector<IInput::CTouchFingerState> 
 	// Update mouse position based on the finger responsible for the last active action.
 	if(GotDirectFingerState)
 	{
-		const float Zoom = m_pClient->m_Snap.m_SpecInfo.m_Active ? m_pClient->m_Camera.m_Zoom : 1.0f;
+		const float Zoom = GameClient()->m_Snap.m_SpecInfo.m_Active ? GameClient()->m_Camera.m_Zoom : 1.0f;
 		vec2 WorldScreenSize;
 		RenderTools()->CalcScreenParams(Graphics()->ScreenAspect(), Zoom, &WorldScreenSize.x, &WorldScreenSize.y);
 		CControls &Controls = GameClient()->m_Controls;
-		if(m_pClient->m_Snap.m_SpecInfo.m_Active)
+		if(GameClient()->m_Snap.m_SpecInfo.m_Active)
 		{
 			Controls.m_aMousePos[g_Config.m_ClDummy] += -DirectFingerState.m_Delta * WorldScreenSize;
 			Controls.m_aMousePos[g_Config.m_ClDummy].x = std::clamp(Controls.m_aMousePos[g_Config.m_ClDummy].x, -201.0f * 32, (Collision()->GetWidth() + 201.0f) * 32.0f);
