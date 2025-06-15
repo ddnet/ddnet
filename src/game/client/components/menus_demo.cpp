@@ -124,7 +124,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	};
 
 	static constexpr float SKIP_DURATIONS_SECONDS[] = {0.1f, 0.5f, 1.0f, 5.0f, 10.0f, 30.0f, 60.0f, 5.0f * 60.0f, 10.0f * 60.0f};
-	static constexpr const char *SKIP_DURATIONS_STRINGS[] = {"0.1", "0.5", "1", "5", "10", "30", "60", "5", "10"};
+	static constexpr const char *SKIP_DURATIONS_STRINGS[] = {"0.1", "0.5", "1", "5", "10", "30", "1", "5", "10"};
 	static_assert(SKIP_DURATIONS_SECONDS[DEFAULT_SKIP_DURATION_INDEX] == 5.0f);
 	static_assert(std::size(SKIP_DURATIONS_SECONDS) == std::size(SKIP_DURATIONS_STRINGS));
 
