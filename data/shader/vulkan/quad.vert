@@ -19,7 +19,7 @@ struct SQuadUniformEl {
 	float gRotation;
 };
 
-#ifndef TW_PUSH_CONST
+#ifndef TW_QUAD_GROUPED
 #define TW_MAX_QUADS 256
 
 layout (std140, set = UBOSetIndex, binding = 1) uniform SOffBO {
@@ -32,20 +32,20 @@ layout (std140, set = UBOSetIndex, binding = 1) uniform SOffBO {
 
 layout(push_constant) uniform SPosBO {
 	layout(offset = 0) uniform mat4x2 gPos;
-#ifdef TW_PUSH_CONST
+#ifdef TW_QUAD_GROUPED
 	layout(offset = 32) uniform SQuadUniformEl gUniEls[1];
-	layout(offset = 64) uniform int gQuadOffset;
 #else
 	layout(offset = 32) uniform int gQuadOffset;
 #endif
 } gPosBO;
 
 layout (location = 0) noperspective out vec4 QuadColor;
-#ifndef TW_PUSH_CONST
+#ifndef TW_QUAD_GROUPED
 layout (location = 1) flat out int QuadIndex;
 #endif
+
 #ifdef TW_QUAD_TEXTURED
-#ifndef TW_PUSH_CONST
+#ifndef TW_QUAD_GROUPED
 layout (location = 2) noperspective out vec2 TexCoord;
 #else
 layout (location = 1) noperspective out vec2 TexCoord;
@@ -56,7 +56,7 @@ void main()
 {
 	vec2 FinalPos = vec2(inVertex.xy);
 
-#ifndef TW_PUSH_CONST
+#ifndef TW_QUAD_GROUPED
 	int TmpQuadIndex = int(gl_VertexIndex / 4) - gPosBO.gQuadOffset;
 #endif
 
@@ -74,7 +74,7 @@ void main()
 
 	gl_Position = vec4(gPosBO.gPos * vec4(FinalPos, 0.0, 1.0), 0.0, 1.0);
 	QuadColor = inColor;
-#ifndef TW_PUSH_CONST
+#ifndef TW_QUAD_GROUPED
 	QuadIndex = TmpQuadIndex;
 #endif
 #ifdef TW_QUAD_TEXTURED

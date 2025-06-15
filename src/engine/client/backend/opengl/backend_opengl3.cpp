@@ -104,6 +104,8 @@ bool CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	m_pBorderTileProgramTextured = new CGLSLTileProgram;
 	m_pQuadProgram = new CGLSLQuadProgram;
 	m_pQuadProgramTextured = new CGLSLQuadProgram;
+	m_pQuadProgramGrouped = new CGLSLQuadProgram;
+	m_pQuadProgramTexturedGrouped = new CGLSLQuadProgram;
 	m_pTextProgram = new CGLSLTextProgram;
 	m_pPrimitiveExProgram = new CGLSLPrimitiveExProgram;
 	m_pPrimitiveExProgramTextured = new CGLSLPrimitiveExProgram;
@@ -315,6 +317,48 @@ bool CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	{
 		CGLSL VertexShader;
 		CGLSL FragmentShader;
+		ShaderCompiler.AddDefine("TW_QUAD_GROUPED", "");
+		VertexShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/quad.vert", GL_VERTEX_SHADER);
+		FragmentShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/quad.frag", GL_FRAGMENT_SHADER);
+		ShaderCompiler.ClearDefines();
+
+		m_pQuadProgramGrouped->CreateProgram();
+		m_pQuadProgramGrouped->AddShader(&VertexShader);
+		m_pQuadProgramGrouped->AddShader(&FragmentShader);
+		m_pQuadProgramGrouped->LinkProgram();
+
+		UseProgram(m_pQuadProgramGrouped);
+
+		m_pQuadProgramGrouped->m_LocPos = m_pQuadProgramGrouped->GetUniformLoc("gPos");
+		m_pQuadProgramGrouped->m_LocColors = m_pQuadProgramGrouped->GetUniformLoc("gVertColors");
+		m_pQuadProgramGrouped->m_LocRotations = m_pQuadProgramGrouped->GetUniformLoc("gRotations");
+		m_pQuadProgramGrouped->m_LocOffsets = m_pQuadProgramGrouped->GetUniformLoc("gOffsets");
+	}
+	{
+		CGLSL VertexShader;
+		CGLSL FragmentShader;
+		ShaderCompiler.AddDefine("TW_QUAD_TEXTURED", "");
+		ShaderCompiler.AddDefine("TW_QUAD_GROUPED", "");
+		VertexShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/quad.vert", GL_VERTEX_SHADER);
+		FragmentShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/quad.frag", GL_FRAGMENT_SHADER);
+		ShaderCompiler.ClearDefines();
+
+		m_pQuadProgramTexturedGrouped->CreateProgram();
+		m_pQuadProgramTexturedGrouped->AddShader(&VertexShader);
+		m_pQuadProgramTexturedGrouped->AddShader(&FragmentShader);
+		m_pQuadProgramTexturedGrouped->LinkProgram();
+
+		UseProgram(m_pQuadProgramTexturedGrouped);
+
+		m_pQuadProgramTexturedGrouped->m_LocPos = m_pQuadProgramTexturedGrouped->GetUniformLoc("gPos");
+		m_pQuadProgramTexturedGrouped->m_LocTextureSampler = m_pQuadProgramTexturedGrouped->GetUniformLoc("gTextureSampler");
+		m_pQuadProgramTexturedGrouped->m_LocColors = m_pQuadProgramTexturedGrouped->GetUniformLoc("gVertColors");
+		m_pQuadProgramTexturedGrouped->m_LocRotations = m_pQuadProgramTexturedGrouped->GetUniformLoc("gRotations");
+		m_pQuadProgramTexturedGrouped->m_LocOffsets = m_pQuadProgramTexturedGrouped->GetUniformLoc("gOffsets");
+	}
+	{
+		CGLSL VertexShader;
+		CGLSL FragmentShader;
 		VertexShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/text.vert", GL_VERTEX_SHADER);
 		FragmentShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/text.frag", GL_FRAGMENT_SHADER);
 
@@ -435,6 +479,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Shutdown(const SCommand_Shutdown *
 	m_pBorderTileProgramTextured->DeleteProgram();
 	m_pQuadProgram->DeleteProgram();
 	m_pQuadProgramTextured->DeleteProgram();
+	m_pQuadProgramGrouped->DeleteProgram();
+	m_pQuadProgramTexturedGrouped->DeleteProgram();
 	m_pTileProgram->DeleteProgram();
 	m_pTileProgramTextured->DeleteProgram();
 	m_pPrimitive3DProgram->DeleteProgram();
@@ -453,6 +499,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Shutdown(const SCommand_Shutdown *
 	delete m_pBorderTileProgramTextured;
 	delete m_pQuadProgram;
 	delete m_pQuadProgramTextured;
+	delete m_pQuadProgramGrouped;
+	delete m_pQuadProgramTexturedGrouped;
 	delete m_pTileProgram;
 	delete m_pTileProgramTextured;
 	delete m_pPrimitive3DProgram;
@@ -1072,7 +1120,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderTileLayer(const CCommandBuff
 	}
 }
 
-void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadLayer(const CCommandBuffer::SCommand_RenderQuadLayer *pCommand)
+void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadLayer(const CCommandBuffer::SCommand_RenderQuadLayer *pCommand, bool Grouped)
 {
 	int Index = pCommand->m_BufferContainerIndex;
 	// if space not there return
@@ -1089,12 +1137,24 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadLayer(const CCommandBuff
 	}
 
 	CGLSLQuadProgram *pProgram = NULL;
-	if(IsTexturedState(pCommand->m_State))
+	if(Grouped)
 	{
-		pProgram = m_pQuadProgramTextured;
+		if(IsTexturedState(pCommand->m_State))
+		{
+			pProgram = m_pQuadProgramTexturedGrouped;
+		}
+		else
+			pProgram = m_pQuadProgramGrouped;
 	}
 	else
-		pProgram = m_pQuadProgram;
+	{
+		if(IsTexturedState(pCommand->m_State))
+		{
+			pProgram = m_pQuadProgramTextured;
+		}
+		else
+			pProgram = m_pQuadProgram;
+	}
 
 	UseProgram(pProgram);
 	SetState(pCommand->m_State, pProgram);
@@ -1111,29 +1171,42 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadLayer(const CCommandBuff
 	// the extra offset is not related to the information from the command, but an actual offset in the buffer
 	size_t QuadOffsetExtra = pCommand->m_QuadOffset;
 
-	vec4 aColors[ms_MaxQuadsPossible];
-	vec2 aOffsets[ms_MaxQuadsPossible];
-	float aRotations[ms_MaxQuadsPossible];
-
-	while(QuadsLeft > 0)
+	if(!Grouped)
 	{
-		int ActualQuadCount = minimum<int>(QuadsLeft, m_MaxQuadsAtOnce);
+		vec4 aColors[ms_MaxQuadsPossible];
+		vec2 aOffsets[ms_MaxQuadsPossible];
+		float aRotations[ms_MaxQuadsPossible];
 
-		for(size_t i = 0; i < (size_t)ActualQuadCount; ++i)
+		while(QuadsLeft > 0)
 		{
-			aColors[i] = pCommand->m_pQuadInfo[i + QuadOffset].m_Color;
-			aOffsets[i] = pCommand->m_pQuadInfo[i + QuadOffset].m_Offsets;
-			aRotations[i] = pCommand->m_pQuadInfo[i + QuadOffset].m_Rotation;
+			int ActualQuadCount = minimum<int>(QuadsLeft, m_MaxQuadsAtOnce);
+			for(size_t i = 0; i < (size_t)ActualQuadCount; ++i)
+			{
+				aColors[i] = pCommand->m_pQuadInfo[i + QuadOffset].m_Color;
+				aOffsets[i] = pCommand->m_pQuadInfo[i + QuadOffset].m_Offsets;
+				aRotations[i] = pCommand->m_pQuadInfo[i + QuadOffset].m_Rotation;
+			}
+
+			pProgram->SetUniformVec4(pProgram->m_LocColors, ActualQuadCount, (float *)aColors);
+			pProgram->SetUniformVec2(pProgram->m_LocOffsets, ActualQuadCount, (float *)aOffsets);
+			pProgram->SetUniform(pProgram->m_LocRotations, ActualQuadCount, (float *)aRotations);
+			pProgram->SetUniform(pProgram->m_LocQuadOffset, (int)(QuadOffset + QuadOffsetExtra));
+			glDrawElements(GL_TRIANGLES, ActualQuadCount * 6, GL_UNSIGNED_INT, (void *)((QuadOffset + QuadOffsetExtra) * 6 * sizeof(unsigned int)));
+
+			QuadsLeft -= ActualQuadCount;
+			QuadOffset += (size_t)ActualQuadCount;
 		}
+	}
+	else
+	{
+		vec4 Colors = pCommand->m_pQuadInfo[0].m_Color;
+		vec2 Offsets = pCommand->m_pQuadInfo[0].m_Offsets;
+		float Rotations = pCommand->m_pQuadInfo[0].m_Rotation;
 
-		pProgram->SetUniformVec4(pProgram->m_LocColors, ActualQuadCount, (float *)aColors);
-		pProgram->SetUniformVec2(pProgram->m_LocOffsets, ActualQuadCount, (float *)aOffsets);
-		pProgram->SetUniform(pProgram->m_LocRotations, ActualQuadCount, (float *)aRotations);
-		pProgram->SetUniform(pProgram->m_LocQuadOffset, (int)(QuadOffset + QuadOffsetExtra));
-		glDrawElements(GL_TRIANGLES, ActualQuadCount * 6, GL_UNSIGNED_INT, (void *)((QuadOffset + QuadOffsetExtra) * 6 * sizeof(unsigned int)));
-
-		QuadsLeft -= ActualQuadCount;
-		QuadOffset += (size_t)ActualQuadCount;
+		pProgram->SetUniformVec4(pProgram->m_LocColors, 1, (float *)(&Colors));
+		pProgram->SetUniformVec2(pProgram->m_LocOffsets, 1, (float *)(&Offsets));
+		pProgram->SetUniform(pProgram->m_LocRotations, 1, &Rotations);
+		glDrawElements(GL_TRIANGLES, QuadsLeft * 6, GL_UNSIGNED_INT, (void *)((QuadOffset + QuadOffsetExtra) * 6 * sizeof(unsigned int)));
 	}
 }
 
