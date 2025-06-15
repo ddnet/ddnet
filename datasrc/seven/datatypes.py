@@ -234,21 +234,35 @@ class NetObject:
 			lines += ["\t"+line for line in v.emit_declaration()]
 		lines += ["};"]
 		return lines
-	def emit_validate(self, objects):
-		lines = [f"case {self.enum_name}:"]
-		lines += ["{"]
-		lines += [f"\t{self.struct_name} *pObj = ({self.struct_name} *)pData;"]
-		lines += ["\tif(sizeof(*pObj) != Size) return -1;"]
-
+	def members_from_this_and_parents(self, objects):
 		variables = self.variables
 		next_base_name = self.base
 		while next_base_name is not None:
 			base_item = only([i for i in objects if i.name == next_base_name])
 			variables = base_item.variables + variables
 			next_base_name = base_item.base
-
+		return variables
+	def emit_validate(self, objects):
+		lines = [f"case {self.enum_name}:"]
+		lines += ["{"]
+		lines += [f"\t{self.struct_name} *pObj = ({self.struct_name} *)pData;"]
+		lines += ["\tif(sizeof(*pObj) != Size) return -1;"]
+		variables = self.members_from_this_and_parents(objects)
 		for v in variables:
 			lines += ["\t"+line for line in v.emit_validate()]
+		lines += ["\treturn 0;"]
+		lines += ["}"]
+		return lines
+	def emit_dump(self, objects):
+		lines = [f"case {self.enum_name}:"]
+		lines += ["{"]
+		lines += [f"\t{self.struct_name} *pObj = ({self.struct_name} *)pData;"]
+		lines += ["\tif(sizeof(*pObj) != Size) return -1;"]
+		variables = self.members_from_this_and_parents(objects)
+		offset = 0
+		for v in variables:
+			lines += ["\t"+line for line in v.emit_dump(offset)]
+			offset += 1
 		lines += ["\treturn 0;"]
 		lines += ["}"]
 		return lines
@@ -312,6 +326,8 @@ class NetVariable:
 		return []
 	def emit_unpack_check(self):
 		return []
+	def emit_dump(self, offset):
+		return [f"str_format(aRawData, sizeof(aRawData), \"\\t\\t%3d %12d\\t%08x\", {offset}, ((const int *)pData)[{offset}], ((const int *)pData)[{offset}]);"]
 
 class NetString(NetVariable):
 	def emit_declaration(self):
@@ -338,6 +354,9 @@ class NetIntAny(NetVariable):
 		return [f"pMsg->{self.name} = pUnpacker->GetIntOrDefault({self.default});"]
 	def emit_pack(self):
 		return [f"pPacker->AddInt({self.name});"]
+	def emit_dump(self, offset):
+		return NetVariable(self.name).emit_dump(offset) + \
+			[f"dbg_msg(\"snapshot\", \"%s\\t{self.name}=%d\", aRawData, pObj->{self.name});"]
 
 class NetIntRange(NetIntAny):
 	def __init__(self, name, min_val, max_val, default=None):
@@ -348,6 +367,23 @@ class NetIntRange(NetIntAny):
 		return [f"if(!CheckInt(\"{self.name}\", pObj->{self.name}, {self.min}, {self.max})) return -1;"]
 	def emit_unpack_check(self):
 		return [f"if(!CheckInt(\"{self.name}\", pMsg->{self.name}, {self.min}, {self.max})) break;"]
+	def emit_dump(self, offset):
+		min_fmt=f"min={self.min}"
+		min_arg = ''
+		try:
+			int(self.min)
+		except ValueError:
+			min_fmt = f"min={self.min}(%d)"
+			min_arg = f", (int){self.min}"
+		max_fmt=f"max={self.max}"
+		max_arg = ''
+		try:
+			int(self.max)
+		except ValueError:
+			max_fmt = f"max={self.max}(%d)"
+			max_arg = f", (int){self.max}"
+		return NetVariable(self.name).emit_dump(offset) + \
+			[f"dbg_msg(\"snapshot\", \"%s\\t{self.name}=%d ({min_fmt} {max_fmt})\", aRawData, pObj->{self.name}{min_arg}{max_arg});"]
 
 class NetEnum(NetIntRange):
 	def __init__(self, name, enum):
@@ -366,6 +402,9 @@ class NetFlag(NetIntAny):
 		return [f"if(!CheckFlag(\"{self.name}\", pObj->{self.name}, {self.mask})) return -1;"]
 	def emit_unpack_check(self):
 		return [f"if(!CheckFlag(\"{self.name}\", pMsg->{self.name}, {self.mask})) break;"]
+	def emit_dump(self, offset):
+		return NetVariable(self.name).emit_dump(offset) + \
+			[f"dbg_msg(\"snapshot\", \"%s\\t{self.name}=%d (mask=%d)\", aRawData, pObj->{self.name}, {self.mask});"]
 
 class NetBool(NetIntRange):
 	def __init__(self, name, default=None):

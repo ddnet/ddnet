@@ -348,6 +348,9 @@ public:
 	virtual const char *Version() const = 0;
 	virtual const char *NetVersion() const = 0;
 
+	virtual CNetObjHandler *GetNetObjHandler() = 0;
+	virtual protocol7::CNetObjHandler *GetNetObjHandler7() = 0;
+
 	// DDRace
 
 	virtual void OnPreTickTeehistorian() = 0;
