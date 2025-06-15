@@ -251,9 +251,6 @@ private:
 	bool m_GamePaused = false;
 	int m_PrevLocalId = -1;
 
-	// Preserved for spectating when snap data unavailable
-	int m_aLocalStrongWeakId[NUM_DUMMIES];
-
 public:
 	IKernel *Kernel() { return IInterface::Kernel(); }
 	IEngine *Engine() const { return m_pEngine; }
@@ -295,7 +292,6 @@ public:
 		return m_NetObjHandler.NumObjCorrections();
 	}
 	const char *NetobjCorrectedOn() { return m_NetObjHandler.CorrectedObjOn(); }
-	int LocalStrongWeakId(int Dummy) const { return m_aLocalStrongWeakId[Dummy]; }
 
 	bool m_SuppressEvents;
 	bool m_NewTick;

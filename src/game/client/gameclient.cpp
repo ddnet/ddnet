@@ -618,7 +618,6 @@ void CGameClient::OnReset()
 	m_LastFlagCarrierBlue = -4;
 
 	std::fill(std::begin(m_aCheckInfo), std::end(m_aCheckInfo), -1);
-	std::fill(std::begin(m_aLocalStrongWeakId), std::end(m_aLocalStrongWeakId), -1);
 
 	// m_aDDNetVersionStr is initialized once in OnInit
 
@@ -1119,18 +1118,6 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		// reset character prediction
 		if(!(m_GameWorld.m_WorldConfig.m_IsFNG && pMsg->m_Weapon == WEAPON_LASER))
 		{
-			// update saved strong/weak ids if our character isn't on screen
-			for(int DummyId = 0; DummyId < NUM_DUMMIES; DummyId++)
-			{
-				if(m_aLocalIds[DummyId] == -1)
-					continue;
-
-				if(pMsg->m_Victim == m_aLocalIds[DummyId])
-					m_aLocalStrongWeakId[DummyId] = 0;
-				else if(m_CharOrder.HasStrongAgainst(m_aLocalIds[DummyId], pMsg->m_Victim))
-					m_aLocalStrongWeakId[DummyId]++;
-			}
-
 			m_CharOrder.GiveWeak(pMsg->m_Victim);
 			if(CCharacter *pChar = m_GameWorld.GetCharacterById(pMsg->m_Victim))
 				pChar->ResetPrediction();
@@ -1172,18 +1159,6 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		{
 			if(m_Teams.Team(i) == pMsg->m_Team)
 			{
-				// update saved strong/weak ids if our character isn't on screen
-				for(int DummyId = 0; DummyId < NUM_DUMMIES; DummyId++)
-				{
-					if(m_aLocalIds[DummyId] == -1)
-						continue;
-
-					if(i == m_aLocalIds[DummyId])
-						m_aLocalStrongWeakId[DummyId] = 0;
-					else if(m_CharOrder.HasStrongAgainst(m_aLocalIds[DummyId], i))
-						m_aLocalStrongWeakId[DummyId]++;
-				}
-
 				if(CCharacter *pChar = m_GameWorld.GetCharacterById(i))
 				{
 					pChar->ResetPrediction();
@@ -1773,14 +1748,6 @@ void CGameClient::OnNewSnapshot()
 					if(pCharacterData->m_JumpedTotal != -1)
 					{
 						m_Snap.m_aCharacters[Item.m_Id].m_HasExtendedDisplayInfo = true;
-					}
-
-					// Store local player's StrongWeakId for when snap data is unavailable
-					auto *it = std::find(std::begin(m_aLocalIds), std::end(m_aLocalIds), Item.m_Id);
-					if(it != std::end(m_aLocalIds))
-					{
-						int Dummy = it - std::begin(m_aLocalIds);
-						m_aLocalStrongWeakId[Dummy] = pCharacterData->m_StrongWeakId;
 					}
 					CClientData *pClient = &m_aClients[Item.m_Id];
 					// Collision
