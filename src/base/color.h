@@ -301,4 +301,7 @@ constexpr T color_invert(const T &col)
 template<typename T>
 std::optional<T> color_parse(const char *pStr);
 
+template<typename T>
+std::optional<T> color_parse_console(const char *pStr, float DarkestLighting);
+
 #endif
