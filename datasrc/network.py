@@ -47,6 +47,7 @@ PickupFlags = [
 LaserTypes = ["RIFLE", "SHOTGUN", "DOOR", "FREEZE", "DRAGGER", "GUN", "PLASMA"]
 DraggerTypes = ["WEAK", "WEAK_NW", "NORMAL", "NORMAL_NW", "STRONG", "STRONG_NW"]
 GunTypes = ["UNFREEZE", "EXPLOSIVE", "FREEZE", "EXPFREEZE"]
+SaveStates = ["PENDING", "DONE", "FALLBACKFILE", "WARNING", "ERROR"]
 
 Emoticons = ["OOP", "EXCLAMATION", "HEARTS", "DROP", "DOTDOT", "MUSIC", "SORRY", "GHOST", "SUSHI", "SPLATTEE", "DEVILTEE", "ZOMG", "ZZZ", "WTF", "EYES", "QUESTION"]
 
@@ -89,6 +90,7 @@ Enums = [
 	Enum("LASERDRAGGERTYPE", DraggerTypes),
 	Enum("LASERGUNTYPE", GunTypes),
 	Enum("TEAM", Teams, -2),
+	Enum("SAVESTATE", SaveStates),
 ]
 
 Flags = [
@@ -614,5 +616,15 @@ Messages = [
 
 	NetMessageEx("Sv_MapSoundGlobal", "map-sound-global@netmsg.ddnet.org", [
 		NetIntAny("m_SoundId"),
+	]),
+
+	NetMessageEx("Sv_SaveCode", "save-code@netmsg.ddnet.org", [
+		NetIntRange("m_State", 'SAVESTATE_PENDING', 'SAVESTATE_ERROR'),
+		NetStringStrict("m_pError"),
+		NetStringStrict("m_pSaveRequester"),
+		NetStringStrict("m_pServerName"),
+		NetStringStrict("m_pGeneratedCode"),
+		NetStringStrict("m_pCode"),
+		NetStringStrict("m_pTeamMembers"),
 	]),
 ]
