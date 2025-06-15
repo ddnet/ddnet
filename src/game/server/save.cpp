@@ -1,13 +1,14 @@
-#include "save.h"
+#include <engine/shared/config.h>
+#include <engine/shared/protocol.h>
+#include <game/server/entities/character.h>
+#include <game/server/gamemodes/DDRace.h>
+#include <game/team_state.h>
 
 #include <cstdio> // sscanf
 
-#include "entities/character.h"
-#include "gamemodes/DDRace.h"
 #include "player.h"
+#include "save.h"
 #include "teams.h"
-#include <engine/shared/config.h>
-#include <engine/shared/protocol.h>
 
 CSaveTee::CSaveTee() = default;
 
@@ -532,7 +533,7 @@ ESaveResult CSaveTeam::Save(CGameContext *pGameServer, int Team, bool Dry, bool 
 
 	m_TeamState = pTeams->GetTeamState(Team);
 
-	if(m_TeamState != CGameTeams::TEAMSTATE_STARTED && !Force)
+	if(m_TeamState != ETeamState::STARTED && !Force)
 	{
 		return ESaveResult::NOT_STARTED;
 	}
