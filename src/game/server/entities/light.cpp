@@ -114,11 +114,12 @@ void CLight::Snap(int SnappingClient)
 	{
 		From = m_Pos;
 	}
-	else if(pChr && m_Layer == LAYER_SWITCH && Switchers()[m_Number].m_aStatus[pChr->Team()])
+	else if(pChr && m_Layer == LAYER_SWITCH && m_Number > 0 && Switchers()[m_Number].m_aStatus[pChr->Team()])
 	{
 		From = m_To;
 	}
-	else if(m_Layer != LAYER_SWITCH)
+	// light on game and switch layer with a number 0 is always on
+	else if(m_Layer != LAYER_SWITCH || (m_Layer == LAYER_SWITCH && m_Number == 0))
 	{
 		From = m_To;
 	}
