@@ -7,6 +7,10 @@
 
 static NETADDR KeyAddress(NETADDR Addr)
 {
+	if(Addr.type == NETTYPE_WEBSOCKET_IPV4)
+	{
+		Addr.type = NETTYPE_IPV4;
+	}
 	Addr.port = 0;
 	return Addr;
 }
