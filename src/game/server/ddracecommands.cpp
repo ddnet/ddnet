@@ -92,14 +92,12 @@ void CGameContext::ConKillPlayer(IConsole::IResult *pResult, void *pUserData)
 		pSelf->m_apPlayers[Victim]->KillCharacter(WEAPON_GAME);
 		char aBuf[512];
 		if(pResult->NumArguments() == 2)
-			str_format(aBuf, sizeof(aBuf), "%s was killed by %s (%s)",
+			str_format(aBuf, sizeof(aBuf), "%s was killed by authorized player (%s)",
 				pSelf->Server()->ClientName(Victim),
-				pSelf->Server()->ClientName(pResult->m_ClientId),
 				pResult->GetString(1));
 		else
-			str_format(aBuf, sizeof(aBuf), "%s was killed by %s",
-				pSelf->Server()->ClientName(Victim),
-				pSelf->Server()->ClientName(pResult->m_ClientId));
+			str_format(aBuf, sizeof(aBuf), "%s was killed by authorized player",
+				pSelf->Server()->ClientName(Victim));
 		pSelf->SendChat(-1, TEAM_ALL, aBuf);
 	}
 }
