@@ -1225,7 +1225,8 @@ void CCharacter::Snap(int SnappingClient)
 		return;
 	}
 
-	if(!IsSnappingCharacterInView(SnappingClient))
+	// always snap the snapping client, even if it is not in view
+	if(!IsSnappingCharacterInView(SnappingClient) && Id != SnappingClient)
 		return;
 
 	SnapCharacter(SnappingClient, Id);
