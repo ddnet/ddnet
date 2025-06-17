@@ -1026,7 +1026,7 @@ float CMenus::RenderSettingsControlsJoystick(CUIRect View)
 			}
 
 			DoLine_RadioMenu(View, Localize("Ingame controller mode"),
-				vButtonsContainersJoystickAbsolute,
+				m_vButtonContainersJoystickAbsolute,
 				{Localize("Relative", "Ingame controller mode"), Localize("Absolute", "Ingame controller mode")},
 				{0, 1},
 				g_Config.m_InpControllerAbsolute);
@@ -2785,7 +2785,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		{
 			int Pressed = (g_Config.m_ClNamePlates ? 2 : 0) + (g_Config.m_ClNamePlatesOwn ? 1 : 0);
 			if(DoLine_RadioMenu(LeftView, Localize("Show name plates"),
-				   vButtonsContainersNamePlateShow,
+				   m_vButtonContainersNamePlateShow,
 				   {Localize("None", "Show name plates"), Localize("Own", "Show name plates"), Localize("Others", "Show name plates"), Localize("All", "Show name plates")},
 				   {0, 1, 2, 3},
 				   Pressed))
@@ -2848,7 +2848,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
 
 		DoLine_RadioMenu(LeftView, Localize("Show players' key presses"),
-			vButtonsContainersNamePlateKeyPresses,
+			m_vButtonContainersNamePlateKeyPresses,
 			{Localize("None", "Show players' key presses"), Localize("Own", "Show players' key presses"), Localize("Others", "Show players' key presses"), Localize("All", "Show players' key presses")},
 			{0, 3, 1, 2},
 			g_Config.m_ClShowDirection);

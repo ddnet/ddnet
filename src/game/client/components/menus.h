@@ -622,9 +622,9 @@ protected:
 	void RenderSettings(CUIRect MainView);
 	void RenderSettingsCustom(CUIRect MainView);
 
-	std::vector<CButtonContainer> vButtonsContainersJoystickAbsolute = {{}, {}};
-	std::vector<CButtonContainer> vButtonsContainersNamePlateShow = {{}, {}, {}, {}};
-	std::vector<CButtonContainer> vButtonsContainersNamePlateKeyPresses = {{}, {}, {}, {}};
+	std::vector<CButtonContainer> m_vButtonContainersJoystickAbsolute = {{}, {}};
+	std::vector<CButtonContainer> m_vButtonContainersNamePlateShow = {{}, {}, {}, {}};
+	std::vector<CButtonContainer> m_vButtonContainersNamePlateKeyPresses = {{}, {}, {}, {}};
 
 	class CMapListItem
 	{
