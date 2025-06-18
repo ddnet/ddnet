@@ -191,6 +191,44 @@ void CRenderLayer::RenderLoading() const
 }
 
 /**************
+ * Group *
+ **************/
+
+CRenderLayerGroup::CRenderLayerGroup(int GroupId, CMapItemGroup *pGroup) :
+	CRenderLayer(GroupId, 0, 0), m_pGroup(pGroup) {}
+
+bool CRenderLayerGroup::DoRender(const CRenderLayerParams &Params) const
+{
+	if(!g_Config.m_GfxNoclip || Params.m_RenderType == CMapLayers::TYPE_FULL_DESIGN)
+	{
+		m_pGraphics->ClipDisable();
+		if(m_pGroup->m_Version >= 2 && m_pGroup->m_UseClipping)
+		{
+			// set clipping
+			float aPoints[4];
+			m_pRenderTools->MapScreenToInterface(Params.m_Center.x, Params.m_Center.y, Params.m_Zoom);
+			m_pGraphics->GetScreen(&aPoints[0], &aPoints[1], &aPoints[2], &aPoints[3]);
+			float x0 = (m_pGroup->m_ClipX - aPoints[0]) / (aPoints[2] - aPoints[0]);
+			float y0 = (m_pGroup->m_ClipY - aPoints[1]) / (aPoints[3] - aPoints[1]);
+			float x1 = ((m_pGroup->m_ClipX + m_pGroup->m_ClipW) - aPoints[0]) / (aPoints[2] - aPoints[0]);
+			float y1 = ((m_pGroup->m_ClipY + m_pGroup->m_ClipH) - aPoints[1]) / (aPoints[3] - aPoints[1]);
+
+			if(x1 < 0.0f || x0 > 1.0f || y1 < 0.0f || y0 > 1.0f)
+				return false;
+
+			m_pGraphics->ClipEnable((int)(x0 * m_pGraphics->ScreenWidth()), (int)(y0 * m_pGraphics->ScreenHeight()),
+				(int)((x1 - x0) * m_pGraphics->ScreenWidth()), (int)((y1 - y0) * m_pGraphics->ScreenHeight()));
+		}
+	}
+	return true;
+}
+
+void CRenderLayerGroup::Render(const CRenderLayerParams &Params)
+{
+	m_pRenderTools->MapScreenToGroup(Params.m_Center.x, Params.m_Center.y, m_pGroup, Params.m_Zoom);
+}
+
+/**************
  * Tile Layer *
  **************/
 
