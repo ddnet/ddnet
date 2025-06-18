@@ -1013,8 +1013,8 @@ int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds);
  *
  * @param sock Socket whose type should be determined.
  *
- * @return The socket type, a bitset of `NETTYPE_IPV4`, `NETTYPE_IPV6` and `NETTYPE_WEBSOCKET_IPV4`,
- *         or `NETTYPE_INVALID` if the socket is invalid.
+ * @return The socket type, a bitset of `NETTYPE_IPV4`, `NETTYPE_IPV6`, `NETTYPE_WEBSOCKET_IPV4`
+ *         and `NETTYPE_WEBSOCKET_IPV6`, or `NETTYPE_INVALID` if the socket is invalid.
  */
 int net_socket_type(NETSOCKET sock);
 

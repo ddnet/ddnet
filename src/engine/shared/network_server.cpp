@@ -482,14 +482,7 @@ void CNetServer::OnTokenCtrlMsg(NETADDR &Addr, int ControlMsg, const CNetPacketC
 	if(ClientExists(Addr))
 		return; // silently ignore
 
-	if(Addr.type == NETTYPE_WEBSOCKET_IPV4)
-	{
-		// websocket client doesn't send token
-		// direct accept
-		SendControl(Addr, NET_CTRLMSG_CONNECTACCEPT, SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC), NET_SECURITY_TOKEN_UNSUPPORTED);
-		TryAcceptClient(Addr, NET_SECURITY_TOKEN_UNSUPPORTED);
-	}
-	else if(ControlMsg == NET_CTRLMSG_CONNECT)
+	if(ControlMsg == NET_CTRLMSG_CONNECT)
 	{
 		// response connection request with token
 		SECURITY_TOKEN Token = GetToken(Addr);
