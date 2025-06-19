@@ -1988,6 +1988,8 @@ set_src(BASE GLOB_RECURSE src/base
   crashdump.cpp
   detect.h
   dynamic.h
+  enum_iterator.h
+  enum_map.h
   hash.cpp
   hash.h
   hash_bundled.cpp
