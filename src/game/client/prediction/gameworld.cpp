@@ -7,6 +7,7 @@
 #include "entities/dragger.h"
 #include "entities/laser.h"
 #include "entities/pickup.h"
+#include "entities/plasma.h"
 #include "entities/projectile.h"
 #include "entity.h"
 #include <engine/shared/config.h>
@@ -353,7 +354,7 @@ void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage,
 		float l = length(Diff);
 		if(l)
 			ForceDir = normalize(Diff);
-		l = 1 - clamp((l - InnerRadius) / (Radius - InnerRadius), 0.0f, 1.0f);
+		l = 1 - std::clamp((l - InnerRadius) / (Radius - InnerRadius), 0.0f, 1.0f);
 		float Strength;
 		if(Owner == -1 || !GetCharacterById(Owner))
 			Strength = Tuning()->m_ExplosionStrength;
@@ -479,6 +480,8 @@ void CGameWorld::NetObjAdd(int ObjId, int ObjType, const void *pObjData, const C
 	else if((ObjType == NETOBJTYPE_PICKUP || ObjType == NETOBJTYPE_DDNETPICKUP) && m_WorldConfig.m_PredictWeapons)
 	{
 		CPickupData Data = ExtractPickupInfo(ObjType, pObjData, pDataEx);
+		if(Data.m_Flags & PICKUPFLAG_NO_PREDICT)
+			return;
 		CPickup NetPickup = CPickup(this, ObjId, &Data);
 		if(CPickup *pPickup = (CPickup *)GetEntity(ObjId, ENTTYPE_PICKUP))
 		{
@@ -559,6 +562,19 @@ void CGameWorld::NetObjAdd(int ObjId, int ObjType, const void *pObjData, const C
 			}
 			CDoor *pEnt = new CDoor(NetDoor);
 			pEnt->ResetCollision();
+			InsertEntity(pEnt);
+		}
+		else if(Data.m_Type == LASERTYPE_PLASMA)
+		{
+			CPlasma NetPlasma = CPlasma(this, ObjId, &Data);
+			auto *pPlasma = dynamic_cast<CPlasma *>(GetEntity(ObjId, ENTTYPE_PLASMA));
+			if(pPlasma && NetPlasma.Match(pPlasma))
+			{
+				pPlasma->Keep();
+				pPlasma->Read(&Data);
+				return;
+			}
+			CPlasma *pEnt = new CPlasma(NetPlasma);
 			InsertEntity(pEnt);
 		}
 	}
@@ -643,6 +659,8 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 				pCopy = new CCharacter(*((CCharacter *)pEnt));
 			else if(Type == ENTTYPE_PICKUP)
 				pCopy = new CPickup(*((CPickup *)pEnt));
+			else if(Type == ENTTYPE_PLASMA)
+				pCopy = new CPlasma(*((CPlasma *)pEnt));
 			if(pCopy)
 			{
 				pCopy->m_pParent = pEnt;
@@ -703,6 +721,14 @@ CEntity *CGameWorld::FindMatch(int ObjId, int ObjType, const void *pObjData)
 		{
 			CDoor *pEnt = (CDoor *)GetEntity(ObjId, ENTTYPE_DOOR);
 			if(pEnt && CDoor(this, ObjId, &Data).Match(pEnt))
+			{
+				return pEnt;
+			}
+		}
+		else if(Data.m_Type == LASERTYPE_PLASMA)
+		{
+			CPlasma *pEnt = (CPlasma *)GetEntity(ObjId, ENTTYPE_PLASMA);
+			if(pEnt && CPlasma(this, ObjId, &Data).Match(pEnt))
 			{
 				return pEnt;
 			}

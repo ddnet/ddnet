@@ -42,8 +42,6 @@
 using namespace FontIcons;
 using namespace std::chrono_literals;
 
-CMenusKeyBinder CMenus::m_Binder;
-
 CMenusKeyBinder::CMenusKeyBinder()
 {
 	m_pKeyReaderId = nullptr;
@@ -1028,7 +1026,7 @@ float CMenus::RenderSettingsControlsJoystick(CUIRect View)
 			}
 
 			DoLine_RadioMenu(View, Localize("Ingame controller mode"),
-				vButtonsContainersJoystickAbsolute,
+				m_vButtonContainersJoystickAbsolute,
 				{Localize("Relative", "Ingame controller mode"), Localize("Absolute", "Ingame controller mode")},
 				{0, 1},
 				g_Config.m_InpControllerAbsolute);
@@ -1463,15 +1461,15 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	if(OldWindowMode != NewWindowMode)
 	{
 		if(NewWindowMode == 0)
-			Client()->SetWindowParams(0, false);
+			Graphics()->SetWindowParams(0, false);
 		else if(NewWindowMode == 1)
-			Client()->SetWindowParams(0, true);
+			Graphics()->SetWindowParams(0, true);
 		else if(NewWindowMode == 2)
-			Client()->SetWindowParams(3, false);
+			Graphics()->SetWindowParams(3, false);
 		else if(NewWindowMode == 3)
-			Client()->SetWindowParams(2, false);
+			Graphics()->SetWindowParams(2, false);
 		else if(NewWindowMode == 4)
-			Client()->SetWindowParams(1, false);
+			Graphics()->SetWindowParams(1, false);
 	}
 
 	if(Graphics()->GetNumScreens() > 1)
@@ -1498,7 +1496,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		s_ScreenDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_ScreenDropDownScrollRegion;
 		const int NewScreen = Ui()->DoDropDown(&ScreenDropDown, g_Config.m_GfxScreen, s_vpScreenNames.data(), s_vpScreenNames.size(), s_ScreenDropDownState);
 		if(NewScreen != g_Config.m_GfxScreen)
-			Client()->SwitchWindowScreen(NewScreen);
+			Graphics()->SwitchWindowScreen(NewScreen);
 	}
 
 	MainView.HSplitTop(2.0f, nullptr, &MainView);
@@ -1506,7 +1504,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	str_format(aBuf, sizeof(aBuf), "%s (%s)", Localize("V-Sync"), Localize("may cause delay"));
 	if(DoButton_CheckBox(&g_Config.m_GfxVsync, aBuf, g_Config.m_GfxVsync, &Button))
 	{
-		Client()->ToggleWindowVSync();
+		Graphics()->SetVSync(!g_Config.m_GfxVsync);
 	}
 
 	bool MultiSamplingChanged = false;
@@ -1819,21 +1817,21 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 	{
 		MainView.HSplitTop(5.0f, nullptr, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
-		Ui()->DoScrollbarOption(&g_Config.m_SndGameSoundVolume, &g_Config.m_SndGameSoundVolume, &Button, Localize("Game sound volume"), 0, 100, &CUi::ms_LogarithmicScrollbarScale, 0u, "%");
+		Ui()->DoScrollbarOption(&g_Config.m_SndGameVolume, &g_Config.m_SndGameVolume, &Button, Localize("Game sound volume"), 0, 100, &CUi::ms_LogarithmicScrollbarScale, 0u, "%");
 	}
 
 	// volume slider gui sounds
 	{
 		MainView.HSplitTop(5.0f, nullptr, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
-		Ui()->DoScrollbarOption(&g_Config.m_SndChatSoundVolume, &g_Config.m_SndChatSoundVolume, &Button, Localize("Chat sound volume"), 0, 100, &CUi::ms_LogarithmicScrollbarScale, 0u, "%");
+		Ui()->DoScrollbarOption(&g_Config.m_SndChatVolume, &g_Config.m_SndChatVolume, &Button, Localize("Chat sound volume"), 0, 100, &CUi::ms_LogarithmicScrollbarScale, 0u, "%");
 	}
 
 	// volume slider map sounds
 	{
 		MainView.HSplitTop(5.0f, nullptr, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
-		Ui()->DoScrollbarOption(&g_Config.m_SndMapSoundVolume, &g_Config.m_SndMapSoundVolume, &Button, Localize("Map sound volume"), 0, 100, &CUi::ms_LogarithmicScrollbarScale, 0u, "%");
+		Ui()->DoScrollbarOption(&g_Config.m_SndMapVolume, &g_Config.m_SndMapVolume, &Button, Localize("Map sound volume"), 0, 100, &CUi::ms_LogarithmicScrollbarScale, 0u, "%");
 	}
 
 	// volume slider background music
@@ -2787,7 +2785,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		{
 			int Pressed = (g_Config.m_ClNamePlates ? 2 : 0) + (g_Config.m_ClNamePlatesOwn ? 1 : 0);
 			if(DoLine_RadioMenu(LeftView, Localize("Show name plates"),
-				   vButtonsContainersNamePlateShow,
+				   m_vButtonContainersNamePlateShow,
 				   {Localize("None", "Show name plates"), Localize("Own", "Show name plates"), Localize("Others", "Show name plates"), Localize("All", "Show name plates")},
 				   {0, 1, 2, 3},
 				   Pressed))
@@ -2850,7 +2848,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
 
 		DoLine_RadioMenu(LeftView, Localize("Show players' key presses"),
-			vButtonsContainersNamePlateKeyPresses,
+			m_vButtonContainersNamePlateKeyPresses,
 			{Localize("None", "Show players' key presses"), Localize("Own", "Show players' key presses"), Localize("Others", "Show players' key presses"), Localize("All", "Show players' key presses")},
 			{0, 3, 1, 2},
 			g_Config.m_ClShowDirection);
@@ -3350,12 +3348,12 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 	static CButtonContainer s_BackgroundEntitiesMapPicker, s_BackgroundEntitiesReload;
 
-	if(DoButton_FontIcon(&s_BackgroundEntitiesReload, FONT_ICON_ARROW_ROTATE_RIGHT, 0, &ReloadButton, BUTTONFLAG_LEFT))
+	if(Ui()->DoButton_FontIcon(&s_BackgroundEntitiesReload, FONT_ICON_ARROW_ROTATE_RIGHT, 0, &ReloadButton, BUTTONFLAG_LEFT))
 	{
 		m_pClient->m_Background.LoadBackground();
 	}
 
-	if(DoButton_FontIcon(&s_BackgroundEntitiesMapPicker, FONT_ICON_FOLDER, 0, &Button, BUTTONFLAG_LEFT))
+	if(Ui()->DoButton_FontIcon(&s_BackgroundEntitiesMapPicker, FONT_ICON_FOLDER, 0, &Button, BUTTONFLAG_LEFT))
 	{
 		static SPopupMenuId s_PopupMapPickerId;
 		static CPopupMapPickerContext s_PopupMapPickerContext;

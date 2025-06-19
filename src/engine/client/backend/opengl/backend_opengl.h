@@ -115,7 +115,7 @@ protected:
 
 	virtual void Cmd_RenderTileLayer(const CCommandBuffer::SCommand_RenderTileLayer *pCommand) { dbg_assert(false, "Call of unsupported Cmd_RenderTileLayer"); }
 	virtual void Cmd_RenderBorderTile(const CCommandBuffer::SCommand_RenderBorderTile *pCommand) { dbg_assert(false, "Call of unsupported Cmd_RenderBorderTile"); }
-	virtual void Cmd_RenderQuadLayer(const CCommandBuffer::SCommand_RenderQuadLayer *pCommand) { dbg_assert(false, "Call of unsupported Cmd_RenderQuadLayer"); }
+	virtual void Cmd_RenderQuadLayer(const CCommandBuffer::SCommand_RenderQuadLayer *pCommand, bool Grouped) { dbg_assert(false, "Call of unsupported Cmd_RenderQuadLayer"); }
 	virtual void Cmd_RenderText(const CCommandBuffer::SCommand_RenderText *pCommand) { dbg_assert(false, "Call of unsupported Cmd_RenderText"); }
 	virtual void Cmd_RenderQuadContainer(const CCommandBuffer::SCommand_RenderQuadContainer *pCommand) { dbg_assert(false, "Call of unsupported Cmd_RenderQuadContainer"); }
 	virtual void Cmd_RenderQuadContainerEx(const CCommandBuffer::SCommand_RenderQuadContainerEx *pCommand) { dbg_assert(false, "Call of unsupported Cmd_RenderQuadContainerEx"); }

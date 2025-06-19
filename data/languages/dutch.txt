@@ -1266,9 +1266,6 @@ Restarting. Please wait…
 Loading skin files
 == Skin-bestanden laden
 
-Loading background map
-== Achtergrondmap laden
-
 Searching
 == Zoeken
 
@@ -1480,12 +1477,12 @@ Go back the specified duration
 == Ga terug met de opgegeven duur
 
 [Demo player duration]
-%d min.
-== %d min.
+%s min.
+== %s min.
 
 [Demo player duration]
-%d sec.
-== %d sec.
+%s sec.
+== %s sec.
 
 Change the skip duration
 == Wijzig de skipduur
@@ -2123,7 +2120,20 @@ Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom
 No demo with this filename exists
 == 
 
+[Spectating]
+Following %d: %s
+== 
+
+Loading map
+== 
+
 This name cannot be used for files and folders
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
 == 
 
 Map size

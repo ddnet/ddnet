@@ -25,7 +25,7 @@
 
 void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemId)
 {
-	int CurWeapon = clamp(pCurrent->m_Type, 0, NUM_WEAPONS - 1);
+	int CurWeapon = std::clamp(pCurrent->m_Type, 0, NUM_WEAPONS - 1);
 
 	// get positions
 	float Curvature = 0;
@@ -103,7 +103,7 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemId)
 	// don't check for validity of the projectile for the current weapon here, so particle effects are rendered for mod compatibility
 	if(CurWeapon == WEAPON_GRENADE)
 	{
-		m_pClient->m_Effects.SmokeTrail(Pos, Vel * -1, Alpha);
+		m_pClient->m_Effects.SmokeTrail(Pos, Vel * -1, Alpha, 0.0f);
 		static float s_Time = 0.0f;
 		static float s_LastLocalTime = LocalTime();
 
@@ -124,7 +124,7 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemId)
 	}
 	else
 	{
-		m_pClient->m_Effects.BulletTrail(Pos, Alpha);
+		m_pClient->m_Effects.BulletTrail(Pos, Alpha, 0.0f);
 
 		if(length(Vel) > 0.00001f)
 			Graphics()->QuadsSetRotation(angle(Vel));
@@ -140,11 +140,10 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemId)
 	}
 }
 
-void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCurrent, bool IsPredicted)
+void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCurrent, bool IsPredicted, int Flags)
 {
-	int CurWeapon = clamp(pCurrent->m_Subtype, 0, NUM_WEAPONS - 1);
+	int CurWeapon = std::clamp(pCurrent->m_Subtype, 0, NUM_WEAPONS - 1);
 	int QuadOffset = 2;
-	float Angle = 0.0f;
 	float IntraTick = IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
 	vec2 Pos = mix(vec2(pPrev->m_X, pPrev->m_Y), vec2(pCurrent->m_X, pCurrent->m_Y), IntraTick);
 	if(pCurrent->m_Type == POWERUP_HEALTH)
@@ -165,8 +164,11 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 	else if(pCurrent->m_Type == POWERUP_NINJA)
 	{
 		QuadOffset = m_PickupNinjaOffset;
-		m_pClient->m_Effects.PowerupShine(Pos, vec2(96, 18), 1.0f);
-		Pos.x -= 10.0f;
+		if(Flags & PICKUPFLAG_ROTATE)
+			m_pClient->m_Effects.PowerupShine(Pos, vec2(18, 96), 1.0f);
+		else
+			m_pClient->m_Effects.PowerupShine(Pos, vec2(96, 18), 1.0f);
+
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpritePickupNinja);
 	}
 	else if(pCurrent->m_Type >= POWERUP_ARMOR_SHOTGUN && pCurrent->m_Type <= POWERUP_ARMOR_LASER)
@@ -176,7 +178,37 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 	}
 	Graphics()->QuadsSetRotation(0);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
-	Graphics()->QuadsSetRotation(Angle);
+
+	vec2 Scale = vec2(1, 1);
+	if(Flags & PICKUPFLAG_XFLIP)
+		Scale.x = -Scale.x;
+
+	if(Flags & PICKUPFLAG_YFLIP)
+		Scale.y = -Scale.y;
+
+	if(Flags & PICKUPFLAG_ROTATE)
+	{
+		Graphics()->QuadsSetRotation(90.f * (pi / 180));
+		std::swap(Scale.x, Scale.y);
+
+		if(pCurrent->m_Type == POWERUP_NINJA)
+		{
+			if(Flags & PICKUPFLAG_XFLIP)
+				Pos.y += 10.0f;
+			else
+				Pos.y -= 10.0f;
+		}
+	}
+	else
+	{
+		if(pCurrent->m_Type == POWERUP_NINJA)
+		{
+			if(Flags & PICKUPFLAG_XFLIP)
+				Pos.x += 10.0f;
+			else
+				Pos.x -= 10.0f;
+		}
+	}
 
 	static float s_Time = 0.0f;
 	static float s_LastLocalTime = LocalTime();
@@ -195,7 +227,8 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 	Pos += direction(s_Time * 2.0f + Offset) * 2.5f;
 	s_LastLocalTime = LocalTime();
 
-	Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, QuadOffset, Pos.x, Pos.y);
+	Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, QuadOffset, Pos.x, Pos.y, Scale.x, Scale.y);
+	Graphics()->QuadsSetRotation(0);
 }
 
 void CItems::RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent, const CNetObj_GameData *pPrevGameData, const CNetObj_GameData *pCurGameData)
@@ -242,7 +275,7 @@ void CItems::RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent,
 
 void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 {
-	int Type = clamp(pCurrent->m_Type, -1, NUM_LASERTYPES - 1);
+	int Type = std::clamp(pCurrent->m_Type, -1, NUM_LASERTYPES - 1);
 	int ColorIn, ColorOut;
 	switch(Type)
 	{
@@ -292,6 +325,7 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 	const ColorRGBA InnerColor = color_cast<ColorRGBA>(ColorHSLA(ColorIn).WithAlpha(Alpha));
 
 	float Ticks;
+	float TicksHead = Client()->GameTick(g_Config.m_ClDummy);
 	if(Type == LASERTYPE_DOOR)
 	{
 		Ticks = 1.0f;
@@ -300,11 +334,14 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 	{
 		int PredictionTick = Client()->GetPredictionTick();
 		Ticks = (float)(PredictionTick - pCurrent->m_StartTick) + Client()->PredIntraGameTick(g_Config.m_ClDummy);
+		TicksHead += Client()->PredIntraGameTick(g_Config.m_ClDummy);
 	}
 	else
+	{
 		Ticks = (float)(Client()->GameTick(g_Config.m_ClDummy) - pCurrent->m_StartTick) + Client()->IntraGameTick(g_Config.m_ClDummy);
+		TicksHead += Client()->IntraGameTick(g_Config.m_ClDummy);
+	}
 
-	float TicksHead = Client()->GameTick(g_Config.m_ClDummy);
 	if(Type == LASERTYPE_DRAGGER)
 	{
 		TicksHead *= (((pCurrent->m_Subtype >> 1) % 3) * 4.0f) + 1;
@@ -324,13 +361,13 @@ void CItems::RenderLaser(vec2 From, vec2 Pos, ColorRGBA OuterColor, ColorRGBA In
 		{
 			// rubber band effect
 			float Thickness = std::sqrt(Len) / 5.f;
-			TicksBody = clamp(Thickness, 1.0f, 5.0f);
+			TicksBody = std::clamp(Thickness, 1.0f, 5.0f);
 		}
 		vec2 Dir = normalize_pre_length(Pos - From, Len);
 
 		float Ms = TicksBody * 1000.0f / Client()->GameTickSpeed();
 		float a = Ms / m_pClient->GetTuning(TuneZone)->m_LaserBounceDelay;
-		a = clamp(a, 0.0f, 1.0f);
+		a = std::clamp(a, 0.0f, 1.0f);
 		float Ia = 1 - a;
 
 		Graphics()->TextureClear();
@@ -349,13 +386,15 @@ void CItems::RenderLaser(vec2 From, vec2 Pos, ColorRGBA OuterColor, ColorRGBA In
 
 		// do inner
 		Out = vec2(Dir.y, -Dir.x) * (5.0f * Ia);
+		vec2 ExtraOutlinePos = Dir;
+		vec2 ExtraOutlineFrom = Type == LASERTYPE_DOOR ? vec2(0, 0) : Dir;
 		Graphics()->SetColor(InnerColor); // center
 
 		Freeform = IGraphics::CFreeformItem(
-			From.x - Out.x, From.y - Out.y,
-			From.x + Out.x, From.y + Out.y,
-			Pos.x - Out.x, Pos.y - Out.y,
-			Pos.x + Out.x, Pos.y + Out.y);
+			From.x - Out.x + ExtraOutlineFrom.x, From.y - Out.y + ExtraOutlineFrom.y,
+			From.x + Out.x + ExtraOutlineFrom.x, From.y + Out.y + ExtraOutlineFrom.y,
+			Pos.x - Out.x - ExtraOutlinePos.x, Pos.y - Out.y - ExtraOutlinePos.y,
+			Pos.x + Out.x - ExtraOutlinePos.x, Pos.y + Out.y - ExtraOutlinePos.y);
 		Graphics()->QuadsDrawFreeform(&Freeform, 1);
 
 		Graphics()->QuadsEnd();
@@ -397,6 +436,19 @@ void CItems::RenderLaser(vec2 From, vec2 Pos, ColorRGBA OuterColor, ColorRGBA In
 				Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_PulleyHeadOffset, From.x + Offset.x, From.y + Offset.y, Size, Size);
 			}
 		}
+	}
+	else if(Type == LASERTYPE_FREEZE)
+	{
+		float Pulsation = 6.f / 5.f + 1.f / 10.f * std::sin(TicksHead / 2.f);
+		float Angle = angle(Pos - From);
+		Graphics()->TextureSet(GameClient()->m_ExtrasSkin.m_SpriteHectagon);
+		Graphics()->QuadsSetRotation(Angle);
+		Graphics()->SetColor(OuterColor);
+		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_FreezeHeadOffset, Pos.x, Pos.y, 6.f / 5.f * Pulsation, 6.f / 5.f * Pulsation);
+		Graphics()->TextureSet(GameClient()->m_ExtrasSkin.m_SpriteParticleSnowflake);
+		// snowflakes are white
+		Graphics()->SetColor(ColorRGBA(1.f, 1.f, 1.f));
+		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_FreezeHeadOffset, Pos.x, Pos.y, Pulsation, Pulsation);
 	}
 	else
 	{
@@ -459,7 +511,7 @@ void CItems::OnRender()
 					CNetObj_Pickup Data, Prev;
 					pPickup->FillInfo(&Data);
 					pPrev->FillInfo(&Prev);
-					RenderPickup(&Prev, &Data, true);
+					RenderPickup(&Prev, &Data, true, pPickup->Flags());
 				}
 			}
 		}
@@ -512,7 +564,7 @@ void CItems::OnRender()
 			}
 			const void *pPrev = Client()->SnapFindItem(IClient::SNAP_PREV, Item.m_Type, Item.m_Id);
 			if(pPrev)
-				RenderPickup((const CNetObj_Pickup *)pPrev, (const CNetObj_Pickup *)pData);
+				RenderPickup((const CNetObj_Pickup *)pPrev, (const CNetObj_Pickup *)pData, false, Data.m_Flags);
 		}
 		else if(Item.m_Type == NETOBJTYPE_LASER || Item.m_Type == NETOBJTYPE_DDNETLASER)
 		{
@@ -647,6 +699,10 @@ void CItems::OnInit()
 	RenderTools()->GetSpriteScale(SPRITE_PART_PULLEY, ScaleX, ScaleY);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	m_PulleyHeadOffset = RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 20.f * ScaleX);
+
+	RenderTools()->GetSpriteScale(SPRITE_PART_HECTAGON, ScaleX, ScaleY);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	m_FreezeHeadOffset = RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 20.f * ScaleX);
 
 	IGraphics::CQuadItem Brick(0, 0, 16.0f, 16.0f);
 	m_DoorHeadOffset = Graphics()->QuadContainerAddQuads(m_ItemsQuadContainerIndex, &Brick, 1);

@@ -1657,12 +1657,12 @@ Go back the specified duration
 == Saut arrière de la durée spécifiée
 
 [Demo player duration]
-%d min.
-== %d min.
+%s min.
+== %s min.
 
 [Demo player duration]
-%d sec.
-== %d sec.
+%s sec.
+== %s sec.
 
 Change the skip duration
 == Modifier la durée du saut
@@ -2021,9 +2021,6 @@ No demo with this filename exists
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
 == 
 
-Loading background map
-== 
-
 Auto-sync player camera
 == 
 
@@ -2050,11 +2047,24 @@ Active
 Loading maps…
 == 
 
+[Spectating]
+Following %d: %s
+== 
+
 [Spectating Camera Mode Icon]
 AUTO
 == 
 
+Loading map
+== 
+
 This name cannot be used for files and folders
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
 == 
 
 Toggle auto camera

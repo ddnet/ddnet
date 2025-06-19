@@ -375,9 +375,15 @@ bool CNetBan::IsBanned(const NETADDR *pOrigAddr, char *pBuf, unsigned BufferSize
 	const NETADDR *pAddr = pOrigAddr;
 	if(pOrigAddr->type == NETTYPE_WEBSOCKET_IPV4)
 	{
-		mem_copy(&Addr, pOrigAddr, sizeof(NETADDR));
+		Addr = *pOrigAddr;
 		pAddr = &Addr;
 		Addr.type = NETTYPE_IPV4;
+	}
+	else if(pOrigAddr->type == NETTYPE_WEBSOCKET_IPV6)
+	{
+		Addr = *pOrigAddr;
+		pAddr = &Addr;
+		Addr.type = NETTYPE_IPV6;
 	}
 	CNetHash aHash[17];
 	int Length = CNetHash::MakeHashArray(pAddr, aHash);
@@ -411,7 +417,7 @@ void CNetBan::ConBan(IConsole::IResult *pResult, void *pUser)
 	CNetBan *pThis = static_cast<CNetBan *>(pUser);
 
 	const char *pStr = pResult->GetString(0);
-	int Minutes = pResult->NumArguments() > 1 ? clamp(pResult->GetInteger(1), 0, 525600) : 30;
+	int Minutes = pResult->NumArguments() > 1 ? std::clamp(pResult->GetInteger(1), 0, 525600) : 30;
 	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "No reason given";
 
 	NETADDR Addr;
@@ -427,7 +433,7 @@ void CNetBan::ConBanRange(IConsole::IResult *pResult, void *pUser)
 
 	const char *pStr1 = pResult->GetString(0);
 	const char *pStr2 = pResult->GetString(1);
-	int Minutes = pResult->NumArguments() > 2 ? clamp(pResult->GetInteger(2), 0, 525600) : 30;
+	int Minutes = pResult->NumArguments() > 2 ? std::clamp(pResult->GetInteger(2), 0, 525600) : 30;
 	const char *pReason = pResult->NumArguments() > 3 ? pResult->GetString(3) : "No reason given";
 
 	CNetRange Range;

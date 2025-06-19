@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/hash_ctxt.h>
+#include <base/math.h>
 #include <base/system.h>
 
 #include "config.h"
@@ -50,11 +51,8 @@ bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int Ma
 	m_Address = BindAddr;
 	m_pNetBan = pNetBan;
 
-	m_MaxClients = clamp(MaxClients, 1, (int)NET_MAX_CLIENTS);
+	m_MaxClients = std::clamp(MaxClients, 1, (int)NET_MAX_CLIENTS);
 	m_MaxClientsPerIp = MaxClientsPerIp;
-
-	m_NumConAttempts = 0;
-	m_TimeNumConAttempts = time_get();
 
 	m_VConnNum = 0;
 	m_VConnFirst = 0;
@@ -85,14 +83,17 @@ int CNetServer::SetCallbacks(NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_NEWCLIENT_N
 	return 0;
 }
 
-int CNetServer::Close()
+void CNetServer::Close()
 {
 	if(!m_Socket)
-		return 0;
-	return net_udp_close(m_Socket);
+	{
+		return;
+	}
+	net_udp_close(m_Socket);
+	m_Socket = nullptr;
 }
 
-int CNetServer::Drop(int ClientId, const char *pReason)
+void CNetServer::Drop(int ClientId, const char *pReason)
 {
 	// TODO: insert lots of checks here
 
@@ -100,11 +101,9 @@ int CNetServer::Drop(int ClientId, const char *pReason)
 		m_pfnDelClient(ClientId, pReason, m_pUser);
 
 	m_aSlots[ClientId].m_Connection.Disconnect(pReason);
-
-	return 0;
 }
 
-int CNetServer::Update()
+void CNetServer::Update()
 {
 	for(int i = 0; i < MaxClients(); i++)
 	{
@@ -116,8 +115,6 @@ int CNetServer::Update()
 			Drop(i, m_aSlots[i].m_Connection.ErrorString());
 		}
 	}
-
-	return 0;
 }
 
 SECURITY_TOKEN CNetServer::GetGlobalToken()
@@ -139,6 +136,12 @@ SECURITY_TOKEN CNetServer::GetToken(const NETADDR &Addr)
 		SecurityToken = 1;
 
 	return SecurityToken;
+}
+
+SECURITY_TOKEN CNetServer::GetVanillaToken(const NETADDR &Addr)
+{
+	// vanilla token/gametick shouldn't be negative
+	return absolute(GetToken(Addr));
 }
 
 void CNetServer::SendControl(NETADDR &Addr, int ControlMsg, const void *pExtra, int ExtraSize, SECURITY_TOKEN SecurityToken)
@@ -293,27 +296,6 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 {
 	bool IsCtrl = Packet.m_Flags & NET_PACKETFLAG_CONTROL;
 	int CtrlMsg = m_RecvUnpacker.m_Data.m_aChunkData[0];
-
-	// log flooding
-	//TODO: remove
-	if(g_Config.m_Debug)
-	{
-		int64_t Now = time_get();
-
-		if(Now - m_TimeNumConAttempts > time_freq())
-			// reset
-			m_NumConAttempts = 0;
-
-		m_NumConAttempts++;
-
-		if(m_NumConAttempts > 100)
-		{
-			dbg_msg("security", "flooding detected");
-
-			m_TimeNumConAttempts = Now;
-			m_NumConAttempts = 0;
-		}
-	}
 
 	if(IsCtrl && CtrlMsg == NET_CTRLMSG_CONNECT)
 	{
@@ -500,14 +482,7 @@ void CNetServer::OnTokenCtrlMsg(NETADDR &Addr, int ControlMsg, const CNetPacketC
 	if(ClientExists(Addr))
 		return; // silently ignore
 
-	if(Addr.type == NETTYPE_WEBSOCKET_IPV4)
-	{
-		// websocket client doesn't send token
-		// direct accept
-		SendControl(Addr, NET_CTRLMSG_CONNECTACCEPT, SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC), NET_SECURITY_TOKEN_UNSUPPORTED);
-		TryAcceptClient(Addr, NET_SECURITY_TOKEN_UNSUPPORTED);
-	}
-	else if(ControlMsg == NET_CTRLMSG_CONNECT)
+	if(ControlMsg == NET_CTRLMSG_CONNECT)
 	{
 		// response connection request with token
 		SECURITY_TOKEN Token = GetToken(Addr);
@@ -764,13 +739,7 @@ void CNetServer::SendTokenSixup(NETADDR &Addr, SECURITY_TOKEN Token)
 
 void CNetServer::SetMaxClientsPerIp(int Max)
 {
-	// clamp
-	if(Max < 1)
-		Max = 1;
-	else if(Max > NET_MAX_CLIENTS)
-		Max = NET_MAX_CLIENTS;
-
-	m_MaxClientsPerIp = Max;
+	m_MaxClientsPerIp = std::clamp<int>(Max, 1, NET_MAX_CLIENTS);
 }
 
 bool CNetServer::SetTimedOut(int ClientId, int OrigId)
@@ -788,10 +757,9 @@ void CNetServer::SetTimeoutProtected(int ClientId)
 	m_aSlots[ClientId].m_Connection.m_TimeoutProtected = true;
 }
 
-int CNetServer::ResetErrorString(int ClientId)
+void CNetServer::ResetErrorString(int ClientId)
 {
 	m_aSlots[ClientId].m_Connection.ResetErrorString();
-	return 0;
 }
 
 const char *CNetServer::ErrorString(int ClientId)

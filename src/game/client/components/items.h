@@ -11,7 +11,7 @@ class CLaserData;
 class CItems : public CComponent
 {
 	void RenderProjectile(const CProjectileData *pCurrent, int ItemId);
-	void RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCurrent, bool IsPredicted = false);
+	void RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCurrent, bool IsPredicted, int Flags);
 	void RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent, const CNetObj_GameData *pPrevGameData, const CNetObj_GameData *pCurGameData);
 	void RenderLaser(const CLaserData *pCurrent, bool IsPredicted = false);
 
@@ -37,6 +37,7 @@ private:
 	int m_aParticleSplatOffset[3];
 	int m_DoorHeadOffset;
 	int m_PulleyHeadOffset;
+	int m_FreezeHeadOffset;
 };
 
 #endif

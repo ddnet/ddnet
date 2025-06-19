@@ -65,7 +65,7 @@ void CDamageInd::OnRender()
 		}
 		else
 		{
-			vec2 Pos = mix(m_aItems[i].m_Pos + m_aItems[i].m_Dir * 75.0f, m_aItems[i].m_Pos, clamp((m_aItems[i].m_RemainingLife - 0.60f) / 0.15f, 0.0f, 1.0f));
+			vec2 Pos = mix(m_aItems[i].m_Pos + m_aItems[i].m_Dir * 75.0f, m_aItems[i].m_Pos, std::clamp((m_aItems[i].m_RemainingLife - 0.60f) / 0.15f, 0.0f, 1.0f));
 			const float LifeAlpha = m_aItems[i].m_RemainingLife / 0.1f;
 			Graphics()->SetColor(m_aItems[i].m_Color.WithMultipliedAlpha(LifeAlpha));
 			Graphics()->QuadsSetRotation(m_aItems[i].m_StartAngle + m_aItems[i].m_RemainingLife * 2.0f);

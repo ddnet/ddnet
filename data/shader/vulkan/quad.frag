@@ -17,7 +17,7 @@ struct SQuadUniformEl {
 	float gRotation;
 };
 
-#ifndef TW_PUSH_CONST
+#ifndef TW_QUAD_GROUPED
 #define TW_MAX_QUADS 256
 
 layout (std140, set = UBOSetIndex, binding = 1) uniform SOffBO {
@@ -30,20 +30,19 @@ layout (std140, set = UBOSetIndex, binding = 1) uniform SOffBO {
 
 layout(push_constant) uniform SPosBO {
 	layout(offset = 0) uniform mat4x2 gPos;
-#ifdef TW_PUSH_CONST
+#ifdef TW_QUAD_GROUPED
 	layout(offset = 32) uniform SQuadUniformEl gUniEls[1];
-	layout(offset = 64) uniform int gQuadOffset;
 #else
 	layout(offset = 32) uniform int gQuadOffset;
 #endif
 } gPosBO;
 
 layout (location = 0) noperspective in vec4 QuadColor;
-#ifndef TW_PUSH_CONST
+#ifndef TW_QUAD_GROUPED
 layout (location = 1) flat in int QuadIndex;
 #endif
 #ifdef TW_QUAD_TEXTURED
-#ifndef TW_PUSH_CONST
+#ifndef TW_QUAD_GROUPED
 layout (location = 2) noperspective in vec2 TexCoord;
 #else
 layout (location = 1) noperspective in vec2 TexCoord;

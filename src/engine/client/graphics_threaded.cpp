@@ -146,10 +146,10 @@ void CGraphics_Threaded::ClipEnable(int x, int y, int w, int h)
 	if(y < 0)
 		h += y;
 
-	x = clamp(x, 0, ScreenWidth());
-	y = clamp(y, 0, ScreenHeight());
-	w = clamp(w, 0, ScreenWidth() - x);
-	h = clamp(h, 0, ScreenHeight() - y);
+	x = std::clamp(x, 0, ScreenWidth());
+	y = std::clamp(y, 0, ScreenHeight());
+	w = std::clamp(w, 0, ScreenWidth() - x);
+	h = std::clamp(h, 0, ScreenHeight() - y);
 
 	m_State.m_ClipEnable = true;
 	m_State.m_ClipX = x;
@@ -785,7 +785,7 @@ void CGraphics_Threaded::QuadsSetRotation(float Angle)
 
 static unsigned char NormalizeColorComponent(float ColorComponent)
 {
-	return (unsigned char)(clamp(ColorComponent, 0.0f, 1.0f) * 255.0f + 0.5f); // +0.5f to round to nearest
+	return (unsigned char)(std::clamp(ColorComponent, 0.0f, 1.0f) * 255.0f + 0.5f); // +0.5f to round to nearest
 }
 
 void CGraphics_Threaded::SetColorVertex(const CColorVertex *pArray, size_t Num)
@@ -1395,25 +1395,37 @@ void CGraphics_Threaded::RenderBorderTiles(int BufferContainerIndex, const Color
 	m_pCommandBuffer->AddRenderCalls(1);
 }
 
-void CGraphics_Threaded::RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, size_t QuadNum, int QuadOffset)
+void CGraphics_Threaded::RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, size_t QuadNum, int QuadOffset, bool Grouped)
 {
 	if(QuadNum == 0)
 		return;
 
 	// add the VertexArrays and draw
-	CCommandBuffer::SCommand_RenderQuadLayer Cmd;
+	CCommandBuffer::SCommand_RenderQuadLayer Cmd(Grouped);
 	Cmd.m_State = m_State;
 	Cmd.m_QuadNum = QuadNum;
 	Cmd.m_QuadOffset = QuadOffset;
 	Cmd.m_BufferContainerIndex = BufferContainerIndex;
-	Cmd.m_pQuadInfo = (SQuadRenderInfo *)AllocCommandBufferData(Cmd.m_QuadNum * sizeof(SQuadRenderInfo));
+	if(!Grouped)
+	{
+		Cmd.m_pQuadInfo = (SQuadRenderInfo *)AllocCommandBufferData(Cmd.m_QuadNum * sizeof(SQuadRenderInfo));
+		AddCmd(Cmd, [&] {
+			Cmd.m_pQuadInfo = (SQuadRenderInfo *)m_pCommandBuffer->AllocData(QuadNum * sizeof(SQuadRenderInfo));
+			return Cmd.m_pQuadInfo != nullptr;
+		});
 
-	AddCmd(Cmd, [&] {
-		Cmd.m_pQuadInfo = (SQuadRenderInfo *)m_pCommandBuffer->AllocData(QuadNum * sizeof(SQuadRenderInfo));
-		return Cmd.m_pQuadInfo != nullptr;
-	});
+		mem_copy(Cmd.m_pQuadInfo, pQuadInfo, sizeof(SQuadRenderInfo) * QuadNum);
+	}
+	else
+	{
+		Cmd.m_pQuadInfo = (SQuadRenderInfo *)AllocCommandBufferData(sizeof(SQuadRenderInfo));
+		AddCmd(Cmd, [&] {
+			Cmd.m_pQuadInfo = (SQuadRenderInfo *)m_pCommandBuffer->AllocData(sizeof(SQuadRenderInfo));
+			return Cmd.m_pQuadInfo != nullptr;
+		});
 
-	mem_copy(Cmd.m_pQuadInfo, pQuadInfo, sizeof(SQuadRenderInfo) * QuadNum);
+		*Cmd.m_pQuadInfo = *pQuadInfo;
+	}
 
 	m_pCommandBuffer->AddRenderCalls(((QuadNum - 1) / gs_GraphicsMaxQuadsRenderCount) + 1);
 }
@@ -2152,9 +2164,7 @@ void CGraphics_Threaded::IndicesNumRequiredNotify(unsigned int RequiredIndicesCo
 
 int CGraphics_Threaded::IssueInit()
 {
-	int Flags = 0;
-
-	bool IsPurlyWindowed = g_Config.m_GfxFullscreen == 0;
+	bool IsPurelyWindowed = g_Config.m_GfxFullscreen == 0;
 	bool IsExclusiveFullscreen = g_Config.m_GfxFullscreen == 1;
 	bool IsDesktopFullscreen = g_Config.m_GfxFullscreen == 2;
 #ifndef CONF_FAMILY_WINDOWS
@@ -2162,20 +2172,21 @@ int CGraphics_Threaded::IssueInit()
 	IsDesktopFullscreen |= g_Config.m_GfxFullscreen == 3;
 #endif
 
+	int Flags = 0;
 	if(g_Config.m_GfxBorderless)
 		Flags |= IGraphicsBackend::INITFLAG_BORDERLESS;
 	if(IsExclusiveFullscreen)
 		Flags |= IGraphicsBackend::INITFLAG_FULLSCREEN;
 	else if(IsDesktopFullscreen)
 		Flags |= IGraphicsBackend::INITFLAG_DESKTOP_FULLSCREEN;
-	if(IsPurlyWindowed || IsExclusiveFullscreen || IsDesktopFullscreen)
+	if(IsPurelyWindowed)
 		Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
 	if(g_Config.m_GfxVsync)
 		Flags |= IGraphicsBackend::INITFLAG_VSYNC;
 
-	int r = m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, &g_Config.m_GfxScreenRefreshRate, &g_Config.m_GfxFsaaSamples, Flags, &g_Config.m_GfxDesktopWidth, &g_Config.m_GfxDesktopHeight, &m_ScreenWidth, &m_ScreenHeight, m_pStorage);
+	const int Result = m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, &g_Config.m_GfxScreenRefreshRate, &g_Config.m_GfxFsaaSamples, Flags, &g_Config.m_GfxDesktopWidth, &g_Config.m_GfxDesktopHeight, &m_ScreenWidth, &m_ScreenHeight, m_pStorage);
 	AddBackEndWarningIfExists();
-	if(r == 0)
+	if(Result == 0)
 	{
 		m_GLUseTrianglesAsQuad = m_pBackend->UseTrianglesAsQuad();
 		m_GLTileBufferingEnabled = m_pBackend->HasTileBuffering();
@@ -2187,7 +2198,7 @@ int CGraphics_Threaded::IssueInit()
 		m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
 		m_ScreenRefreshRate = g_Config.m_GfxScreenRefreshRate;
 	}
-	return r;
+	return Result;
 }
 
 void CGraphics_Threaded::AdjustViewport(bool SendViewportChangeToBackend)
@@ -2491,7 +2502,10 @@ void CGraphics_Threaded::WarnPngliteIncompatibleImages(bool Warn)
 
 void CGraphics_Threaded::SetWindowParams(int FullscreenMode, bool IsBorderless)
 {
-	m_pBackend->SetWindowParams(FullscreenMode, IsBorderless);
+	g_Config.m_GfxFullscreen = std::clamp(FullscreenMode, 0, 3);
+	g_Config.m_GfxBorderless = (int)IsBorderless;
+
+	m_pBackend->SetWindowParams(g_Config.m_GfxFullscreen, g_Config.m_GfxBorderless);
 	CVideoMode CurMode;
 	m_pBackend->GetCurrentVideoMode(CurMode, m_ScreenHiDPIScale, g_Config.m_GfxDesktopWidth, g_Config.m_GfxDesktopHeight, g_Config.m_GfxScreen);
 	GotResized(CurMode.m_WindowWidth, CurMode.m_WindowHeight, CurMode.m_RefreshRate);
@@ -2513,6 +2527,34 @@ bool CGraphics_Threaded::SetWindowScreen(int Index)
 	for(auto &PropChangedListener : m_vPropChangeListeners)
 		PropChangedListener();
 
+	return true;
+}
+
+bool CGraphics_Threaded::SwitchWindowScreen(int Index)
+{
+	const int IsFullscreen = g_Config.m_GfxFullscreen;
+	const int IsBorderless = g_Config.m_GfxBorderless;
+
+	if(!SetWindowScreen(Index))
+	{
+		return false;
+	}
+
+	// Prevent window from being stretched over multiple monitors by temporarily switching to
+	// windowed fullscreen mode on Windows, which is desktop fullscreen mode on other systems.
+	SetWindowParams(3, false);
+
+	CVideoMode CurMode;
+	GetCurrentVideoMode(CurMode, Index);
+
+	g_Config.m_GfxColorDepth = CurMode.m_Red + CurMode.m_Green + CurMode.m_Blue > 16 ? 24 : 16;
+	g_Config.m_GfxScreenWidth = CurMode.m_WindowWidth;
+	g_Config.m_GfxScreenHeight = CurMode.m_WindowHeight;
+	g_Config.m_GfxScreenRefreshRate = CurMode.m_RefreshRate;
+
+	ResizeToScreen();
+
+	SetWindowParams(IsFullscreen, IsBorderless);
 	return true;
 }
 
@@ -2746,6 +2788,8 @@ bool CGraphics_Threaded::SetVSync(bool State)
 	if(!m_pCommandBuffer)
 		return true;
 
+	const bool OldState = State;
+
 	// add vsync command
 	bool RetOk = false;
 	CCommandBuffer::SCommand_VSync Cmd;
@@ -2756,6 +2800,8 @@ bool CGraphics_Threaded::SetVSync(bool State)
 	// kick the command buffer
 	KickCommandBuffer();
 	WaitForIdle();
+
+	g_Config.m_GfxVsync = RetOk ? State : OldState;
 	return RetOk;
 }
 

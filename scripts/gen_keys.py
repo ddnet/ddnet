@@ -8,7 +8,7 @@ for i in range(key_first, key_last):
 	keynames += [f"&{int(i)}"]
 
 num_mouse_buttons = 9
-num_joystick_buttons = 12
+num_joystick_buttons = 24
 num_joystick_hats = 2
 num_joystick_axes = 12
 

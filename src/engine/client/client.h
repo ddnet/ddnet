@@ -163,6 +163,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	SHA256_DIGEST m_MapDetailsSha256 = SHA256_ZEROED;
 	char m_aMapDetailsUrl[256] = "";
 
+	EInfoState m_InfoState = EInfoState::ERROR;
 	std::shared_ptr<CHttpRequest> m_pDDNetInfoTask = nullptr;
 
 	// time
@@ -380,6 +381,7 @@ public:
 	void ResetMapDownload(bool ResetActive);
 	void FinishMapDownload();
 
+	EInfoState InfoState() const override { return m_InfoState; }
 	void RequestDDNetInfo() override;
 	void ResetDDNetInfoTask();
 	void LoadDDNetInfo();
@@ -488,9 +490,6 @@ public:
 	virtual int HandleChecksum(int Conn, CUuid Uuid, CUnpacker *pUnpacker);
 
 	// gfx
-	void SwitchWindowScreen(int Index) override;
-	void SetWindowParams(int FullscreenMode, bool IsBorderless) override;
-	void ToggleWindowVSync() override;
 	void Notify(const char *pTitle, const char *pMessage) override;
 	void OnWindowResize() override;
 	void BenchmarkQuit(int Seconds, const char *pFilename);

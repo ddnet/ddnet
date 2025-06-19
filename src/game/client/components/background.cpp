@@ -34,11 +34,6 @@ CBackgroundEngineMap *CBackground::CreateBGMap()
 	return new CBackgroundEngineMap;
 }
 
-const char *CBackground::LoadingTitle() const
-{
-	return Localize("Loading background map");
-}
-
 void CBackground::OnInit()
 {
 	m_pBackgroundMap = CreateBGMap();

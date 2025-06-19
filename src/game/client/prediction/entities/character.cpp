@@ -1091,6 +1091,7 @@ bool CCharacter::Freeze(int Seconds)
 	{
 		m_FreezeTime = Seconds * GameWorld()->GameTickSpeed();
 		m_Core.m_FreezeStart = GameWorld()->GameTick();
+		m_Core.m_FreezeEnd = m_Core.m_DeepFrozen ? -1 : m_FreezeTime == 0 ? 0 : GameWorld()->GameTick() + m_FreezeTime;
 		return true;
 	}
 	return false;
@@ -1109,6 +1110,7 @@ bool CCharacter::UnFreeze()
 			m_Core.m_ActiveWeapon = WEAPON_GUN;
 		m_FreezeTime = 0;
 		m_Core.m_FreezeStart = 0;
+		m_Core.m_FreezeEnd = m_Core.m_DeepFrozen ? -1 : 0;
 		m_FrozenLastTick = true;
 		return true;
 	}

@@ -50,10 +50,10 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 	int FTile3 = GameServer()->Collision()->GetFrontTileIndex(S3);
 	int FTile4 = GameServer()->Collision()->GetFrontTileIndex(S4);
 
-	const int PlayerDDRaceState = pChr->m_DDRaceState;
+	const ERaceState PlayerDDRaceState = pChr->m_DDRaceState;
 	bool IsOnStartTile = (TileIndex == TILE_START) || (TileFIndex == TILE_START) || FTile1 == TILE_START || FTile2 == TILE_START || FTile3 == TILE_START || FTile4 == TILE_START || Tile1 == TILE_START || Tile2 == TILE_START || Tile3 == TILE_START || Tile4 == TILE_START;
 	// start
-	if(IsOnStartTile && PlayerDDRaceState != DDRACE_CHEAT)
+	if(IsOnStartTile && PlayerDDRaceState != ERaceState::CHEATED)
 	{
 		const int Team = GameServer()->GetDDRaceTeam(ClientId);
 		if(Teams().GetSaving(Team))
@@ -89,7 +89,7 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 	}
 
 	// finish
-	if(((TileIndex == TILE_FINISH) || (TileFIndex == TILE_FINISH) || FTile1 == TILE_FINISH || FTile2 == TILE_FINISH || FTile3 == TILE_FINISH || FTile4 == TILE_FINISH || Tile1 == TILE_FINISH || Tile2 == TILE_FINISH || Tile3 == TILE_FINISH || Tile4 == TILE_FINISH) && PlayerDDRaceState == DDRACE_STARTED)
+	if(((TileIndex == TILE_FINISH) || (TileFIndex == TILE_FINISH) || FTile1 == TILE_FINISH || FTile2 == TILE_FINISH || FTile3 == TILE_FINISH || FTile4 == TILE_FINISH || Tile1 == TILE_FINISH || Tile2 == TILE_FINISH || Tile3 == TILE_FINISH || Tile4 == TILE_FINISH) && PlayerDDRaceState == ERaceState::STARTED)
 		Teams().OnCharacterFinish(ClientId);
 
 	// unlock team
@@ -114,7 +114,7 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 
 void CGameControllerDDRace::SetArmorProgress(CCharacter *pCharacter, int Progress)
 {
-	pCharacter->SetArmor(clamp(10 - (Progress / 15), 0, 10));
+	pCharacter->SetArmor(std::clamp(10 - (Progress / 15), 0, 10));
 }
 
 void CGameControllerDDRace::OnPlayerConnect(CPlayer *pPlayer)

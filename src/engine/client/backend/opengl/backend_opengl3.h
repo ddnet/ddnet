@@ -30,6 +30,8 @@ protected:
 	CGLSLPrimitiveProgram *m_pPrimitiveProgramTextured;
 	CGLSLQuadProgram *m_pQuadProgram;
 	CGLSLQuadProgram *m_pQuadProgramTextured;
+	CGLSLQuadProgram *m_pQuadProgramGrouped;
+	CGLSLQuadProgram *m_pQuadProgramTexturedGrouped;
 	CGLSLTextProgram *m_pTextProgram;
 	CGLSLPrimitiveExProgram *m_pPrimitiveExProgram;
 	CGLSLPrimitiveExProgram *m_pPrimitiveExProgramTextured;
@@ -104,7 +106,7 @@ protected:
 
 	void Cmd_RenderTileLayer(const CCommandBuffer::SCommand_RenderTileLayer *pCommand) override;
 	void Cmd_RenderBorderTile(const CCommandBuffer::SCommand_RenderBorderTile *pCommand) override;
-	void Cmd_RenderQuadLayer(const CCommandBuffer::SCommand_RenderQuadLayer *pCommand) override;
+	void Cmd_RenderQuadLayer(const CCommandBuffer::SCommand_RenderQuadLayer *pCommand, bool Grouped) override;
 	void Cmd_RenderText(const CCommandBuffer::SCommand_RenderText *pCommand) override;
 	void Cmd_RenderQuadContainer(const CCommandBuffer::SCommand_RenderQuadContainer *pCommand) override;
 	void Cmd_RenderQuadContainerEx(const CCommandBuffer::SCommand_RenderQuadContainerEx *pCommand) override;
