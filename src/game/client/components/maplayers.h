@@ -66,7 +66,6 @@ public:
 	bool AddCustomEntitiesLayer(int LayerId, int Data, int ImageId, int TileSize, int TileIndexOffset, int FlagsOffset, int Width, int Height);
 
 private:
-
 	struct SCustomEntitiesLayer
 	{
 		int LayerId;
@@ -82,6 +81,7 @@ private:
 	std::vector<std::unique_ptr<CRenderLayer>> m_vRenderLayers;
 	int GetLayerType(const CMapItemLayer *pLayer) const;
 	bool RenderGroup(const CRenderLayerParams &Params, int GroupId);
+	void RenderCustomEntitiesLayer(const SCustomEntitiesLayer &CustomLayer, float Alpha);
 };
 
 #endif

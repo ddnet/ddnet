@@ -273,11 +273,11 @@ void CMapLayers::OnRender()
 		pRenderLayer->Render(Params);
 	}
 
-	if(EntityOverlayVal)
+	if(Params.EntityOverlayVal)
 	{
 		for(auto &CustomEntitiesLayer : m_vCustomEntitiesLayers)
 		{
-			RenderCustomEntitiesLayer(CustomEntitiesLayer, EntityOverlayVal / 100.0f);
+			RenderCustomEntitiesLayer(CustomEntitiesLayer, Params.EntityOverlayVal / 100.0f);
 		}
 	}
 
@@ -347,78 +347,6 @@ bool CMapLayers::RenderGroup(const CRenderLayerParams &Params, int GroupId)
 	return true;
 }
 
-void CMapLayers::RenderTilelayerWithTileBuffer(int ImageIndex, int LayerType, int TileLayerCounter, const ColorRGBA &Color)
-{
-	switch(LayerType)
-	{
-	case LAYER_GAME:
-		Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
-		Graphics()->BlendNormal();
-		RenderKillTileBorder(TileLayerCounter - 1, Color.Multiply(GetDeathBorderColor()));
-		RenderTileLayer(TileLayerCounter - 1, Color);
-		break;
-
-	case LAYER_TELE:
-		Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
-		Graphics()->BlendNormal();
-		RenderTileLayer(TileLayerCounter - 2, Color);
-		if(g_Config.m_ClTextEntities)
-		{
-			Graphics()->TextureSet(m_pImages->GetOverlayCenter());
-			RenderTileLayer(TileLayerCounter - 1, Color);
-		}
-		break;
-
-	case LAYER_SPEEDUP:
-		// draw arrow -- clamp to the edge of the arrow image
-		Graphics()->WrapClamp();
-		Graphics()->TextureSet(m_pImages->GetSpeedupArrow());
-		RenderTileLayer(TileLayerCounter - 3, Color);
-		Graphics()->WrapNormal();
-
-		if(g_Config.m_ClTextEntities)
-		{
-			Graphics()->TextureSet(m_pImages->GetOverlayBottom());
-			RenderTileLayer(TileLayerCounter - 2, Color);
-			Graphics()->TextureSet(m_pImages->GetOverlayTop());
-			RenderTileLayer(TileLayerCounter - 1, Color);
-		}
-		break;
-
-	case LAYER_SWITCH:
-		Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH));
-		Graphics()->BlendNormal();
-		RenderTileLayer(TileLayerCounter - 3, Color);
-		if(g_Config.m_ClTextEntities)
-		{
-			Graphics()->TextureSet(m_pImages->GetOverlayTop());
-			RenderTileLayer(TileLayerCounter - 2, Color);
-			Graphics()->TextureSet(m_pImages->GetOverlayBottom());
-			RenderTileLayer(TileLayerCounter - 1, Color);
-		}
-		break;
-
-	case LAYER_FRONT:
-	case LAYER_TUNE:
-		Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
-		Graphics()->BlendNormal();
-		RenderTileLayer(TileLayerCounter - 1, Color);
-		break;
-
-	case LAYER_DEFAULT_TILESET:
-		if(ImageIndex != -1)
-			Graphics()->TextureSet(m_pImages->Get(ImageIndex));
-		else
-			Graphics()->TextureClear();
-		Graphics()->BlendNormal();
-		RenderTileLayer(TileLayerCounter - 1, Color);
-		break;
-
-	default:
-		dbg_assert(false, "Unknown LayerType %d", LayerType);
-	}
-}
-
 void CMapLayers::RenderCustomEntitiesLayer(const SCustomEntitiesLayer &CustomLayer, float Alpha)
 {
 	if(CustomLayer.m_ImageId != -1)
@@ -431,107 +359,4 @@ void CMapLayers::RenderCustomEntitiesLayer(const SCustomEntitiesLayer &CustomLay
 	RenderTools()->RenderCustomEntitiesTilemap(CustomLayer.m_pData, CustomLayer.m_TileSize, CustomLayer.m_TileIndexOffset, CustomLayer.m_FlagsOffset, CustomLayer.m_Width, CustomLayer.m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_OPAQUE);
 	Graphics()->BlendNormal();
 	RenderTools()->RenderCustomEntitiesTilemap(CustomLayer.m_pData, CustomLayer.m_TileSize, CustomLayer.m_TileIndexOffset, CustomLayer.m_FlagsOffset, CustomLayer.m_Width, CustomLayer.m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_TRANSPARENT);
-}
-
-void CMapLayers::RenderTilelayerNoTileBuffer(int ImageIndex, int LayerType, void *pTilesData, CMapItemLayerTilemap *pLayerTilemap, const ColorRGBA &Color)
-{
-	int OverlayRenderFlags = g_Config.m_ClTextEntities ? OVERLAYRENDERFLAG_TEXT : 0;
-
-	switch(LayerType)
-	{
-	case LAYER_GAME:
-	{
-		Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
-		CTile *pGameTiles = (CTile *)pTilesData;
-		Graphics()->BlendNone();
-		RenderTools()->RenderTilemap(pGameTiles, pLayerTilemap->m_Width, pLayerTilemap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_OPAQUE);
-		Graphics()->BlendNormal();
-		RenderTools()->RenderTileRectangle(-201, -201, pLayerTilemap->m_Width + 402, pLayerTilemap->m_Height + 402,
-			TILE_AIR, TILE_DEATH, // display air inside, death outside
-			32.0f, Color.Multiply(GetDeathBorderColor()), TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_TRANSPARENT);
-
-		RenderTools()->RenderTilemap(pGameTiles, pLayerTilemap->m_Width, pLayerTilemap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_TRANSPARENT);
-	}
-	break;
-
-	case LAYER_TELE:
-	{
-		Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
-		CTeleTile *pTeleTiles = (CTeleTile *)pTilesData;
-		Graphics()->BlendNone();
-		RenderTools()->RenderTelemap(pTeleTiles, pLayerTilemap->m_Width, pLayerTilemap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_OPAQUE);
-		Graphics()->BlendNormal();
-		RenderTools()->RenderTelemap(pTeleTiles, pLayerTilemap->m_Width, pLayerTilemap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_TRANSPARENT);
-		RenderTools()->RenderTeleOverlay(pTeleTiles, pLayerTilemap->m_Width, pLayerTilemap->m_Height, 32.0f, OverlayRenderFlags, Color.a);
-	}
-	break;
-
-	case LAYER_SPEEDUP:
-	{
-		Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
-		CSpeedupTile *pSpeedupTiles = (CSpeedupTile *)pTilesData;
-		RenderTools()->RenderSpeedupOverlay(pSpeedupTiles, pLayerTilemap->m_Width, pLayerTilemap->m_Height, 32.0f, OverlayRenderFlags, Color.a);
-	}
-	break;
-
-	case LAYER_SWITCH:
-	{
-		Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH));
-		CSwitchTile *pSwitchTiles = (CSwitchTile *)pTilesData;
-		Graphics()->BlendNone();
-		RenderTools()->RenderSwitchmap(pSwitchTiles, pLayerTilemap->m_Width, pLayerTilemap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_OPAQUE);
-		Graphics()->BlendNormal();
-		RenderTools()->RenderSwitchmap(pSwitchTiles, pLayerTilemap->m_Width, pLayerTilemap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_TRANSPARENT);
-		RenderTools()->RenderSwitchOverlay(pSwitchTiles, pLayerTilemap->m_Width, pLayerTilemap->m_Height, 32.0f, OverlayRenderFlags, Color.a);
-	}
-	break;
-
-	case LAYER_TUNE:
-	{
-		Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
-		CTuneTile *pTuneTiles = (CTuneTile *)pTilesData;
-		Graphics()->BlendNone();
-		RenderTools()->RenderTunemap(pTuneTiles, pLayerTilemap->m_Width, pLayerTilemap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_OPAQUE);
-		Graphics()->BlendNormal();
-		RenderTools()->RenderTunemap(pTuneTiles, pLayerTilemap->m_Width, pLayerTilemap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_TRANSPARENT);
-	}
-	break;
-
-	case LAYER_FRONT:
-	{
-		Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
-		CTile *pTiles = (CTile *)pTilesData;
-		Graphics()->BlendNone();
-		RenderTools()->RenderTilemap(pTiles, pLayerTilemap->m_Width, pLayerTilemap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_OPAQUE);
-		Graphics()->BlendNormal();
-		RenderTools()->RenderTilemap(pTiles, pLayerTilemap->m_Width, pLayerTilemap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_TRANSPARENT);
-	}
-	break;
-
-	case LAYER_DEFAULT_TILESET:
-	{
-		if(ImageIndex != -1)
-			Graphics()->TextureSet(m_pImages->Get(ImageIndex));
-		else
-			Graphics()->TextureClear();
-		CTile *pTiles = (CTile *)pTilesData;
-		Graphics()->BlendNone();
-		RenderTools()->RenderTilemap(pTiles, pLayerTilemap->m_Width, pLayerTilemap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_OPAQUE);
-		Graphics()->BlendNormal();
-		RenderTools()->RenderTilemap(pTiles, pLayerTilemap->m_Width, pLayerTilemap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_TRANSPARENT);
-	}
-	break;
-
-	default:
-		dbg_assert(false, "Unknown LayerType %d", LayerType);
-	}
-}
-
-ColorRGBA CMapLayers::GetDeathBorderColor() const
-{
-	// draw kill tiles outside the entity clipping rectangle
-	// slow blinking to hint that it's not a part of the map
-	float Seconds = time_get() / (float)time_freq();
-	float Alpha = 0.3f + 0.35f * (1.f + std::sin(2.f * pi * Seconds / 3.f));
-	return ColorRGBA(1.f, 1.f, 1.f, Alpha);
 }
