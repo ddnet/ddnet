@@ -48,6 +48,43 @@ const char *CMapLayers::LoadingTitle() const
 	return GameClient()->DemoPlayer()->IsPlaying() ? Localize("Preparing demo playback") : Localize("Connected");
 }
 
+bool CMapLayers::AddCustomEntitiesLayer(int LayerId, int Data, int ImageId, int TileSize, int TileIndexOffset, int FlagsOffset, int Width, int Height)
+{
+	if(m_vCustomEntitiesLayers.size() >= MAX_CUSTOM_ENTITIES_LAYERS)
+		return false; // Too many custom entities layers
+
+	for(auto &CustomEntitiesLayer : m_vCustomEntitiesLayers)
+	{
+		if(CustomEntitiesLayer.LayerId == LayerId)
+		{
+			return false; // Layer already exists
+		}
+	}
+
+	SCustomEntitiesLayer CustomLayer;
+
+	CustomLayer.m_pData = m_pLayers->Map()->GetData(Data); // "m_Data" for custom layers may be different from a normal tile layer
+
+	if(!CustomLayer.m_pData)
+		return false;
+
+	CustomLayer.LayerId = LayerId; //Set Id so we dont repeat layers
+	CustomLayer.m_ImageId = ImageId;
+	CustomLayer.m_TileSize = TileSize; //Tile size may be different from CTile
+	CustomLayer.m_TileIndexOffset = TileIndexOffset; //Tile m_Index position
+	CustomLayer.m_FlagsOffset = FlagsOffset; //Tile m_Flags position
+	CustomLayer.m_Width = Width;
+	CustomLayer.m_Height = Height;
+
+	int Size = m_pLayers->Map()->GetDataSize(Data);
+
+	if(Size < CustomLayer.m_Width * CustomLayer.m_Height * TileSize)
+		return false;
+
+	m_vCustomEntitiesLayers.push_back(CustomLayer);
+	return true;
+}
+
 void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels, void *pUser)
 {
 	CMapLayers *pThis = (CMapLayers *)pUser;
@@ -359,6 +396,8 @@ void CMapLayers::OnMapLoad()
 
 	m_vvLayerCount.clear();
 	m_vvLayerCount.resize(m_pLayers->NumGroups());
+
+	m_vCustomEntitiesLayers.clear();
 
 	int TileLayerCounter = 0;
 	int QuadLayerCounter = 0;
@@ -1259,6 +1298,14 @@ void CMapLayers::OnRender()
 			Graphics()->ClipDisable();
 	}
 
+	if(EntityOverlayVal)
+	{
+		for(auto &CustomEntitiesLayer : m_vCustomEntitiesLayers)
+		{
+			RenderCustomEntitiesLayer(CustomEntitiesLayer, EntityOverlayVal / 100.0f);
+		}
+	}
+
 	if(!g_Config.m_GfxNoclip || m_Type == TYPE_FULL_DESIGN)
 		Graphics()->ClipDisable();
 
@@ -1405,6 +1452,20 @@ void CMapLayers::RenderTilelayerWithTileBuffer(int ImageIndex, int LayerType, in
 	default:
 		dbg_assert(false, "Unknown LayerType %d", LayerType);
 	}
+}
+
+void CMapLayers::RenderCustomEntitiesLayer(const SCustomEntitiesLayer &CustomLayer, float Alpha)
+{
+	if(CustomLayer.m_ImageId != -1)
+		Graphics()->TextureSet(m_pImages->Get(CustomLayer.m_ImageId));
+	else
+		Graphics()->TextureClear();
+
+	ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, Alpha);
+	Graphics()->BlendNone();
+	RenderTools()->RenderCustomEntitiesTilemap(CustomLayer.m_pData, CustomLayer.m_TileSize, CustomLayer.m_TileIndexOffset, CustomLayer.m_FlagsOffset, CustomLayer.m_Width, CustomLayer.m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_OPAQUE);
+	Graphics()->BlendNormal();
+	RenderTools()->RenderCustomEntitiesTilemap(CustomLayer.m_pData, CustomLayer.m_TileSize, CustomLayer.m_TileIndexOffset, CustomLayer.m_FlagsOffset, CustomLayer.m_Width, CustomLayer.m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_TRANSPARENT);
 }
 
 void CMapLayers::RenderTilelayerNoTileBuffer(int ImageIndex, int LayerType, void *pTilesData, CMapItemLayerTilemap *pLayerTilemap, const ColorRGBA &Color)

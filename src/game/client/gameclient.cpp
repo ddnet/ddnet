@@ -1189,6 +1189,12 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		CNetMsg_Sv_MapSoundGlobal *pMsg = (CNetMsg_Sv_MapSoundGlobal *)pRawMsg;
 		m_MapSounds.Play(CSounds::CHN_GLOBAL, pMsg->m_SoundId);
 	}
+	else if(MsgId == NETMSGTYPE_SV_CUSTOMENTITIESLAYER)
+	{
+		CNetMsg_Sv_CustomEntitiesLayer *pMsg = (CNetMsg_Sv_CustomEntitiesLayer *)pRawMsg;
+
+		m_MapLayersForeground.AddCustomEntitiesLayer(pMsg->m_LayerId, pMsg->m_Data, pMsg->m_ImageId, pMsg->m_TileSize, pMsg->m_TileIndexOffset, pMsg->m_FlagsOffset, pMsg->m_Width, pMsg->m_Height);
+	}
 }
 
 void CGameClient::OnStateChange(int NewState, int OldState)

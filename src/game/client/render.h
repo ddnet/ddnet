@@ -327,6 +327,7 @@ public:
 	void RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, ColorRGBA Color, int RenderFlags) const;
 	void RenderSwitchmap(CSwitchTile *pSwitch, int w, int h, float Scale, ColorRGBA Color, int RenderFlags) const;
 	void RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, ColorRGBA Color, int RenderFlags) const;
+	void RenderCustomEntitiesTilemap(void *pTiles, int TileSize, int IndexOffset, int FlagsOffset, int w, int h, float Scale, ColorRGBA Color, int RenderFlags) const;
 };
 
 #endif

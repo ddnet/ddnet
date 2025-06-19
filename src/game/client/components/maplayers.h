@@ -10,6 +10,7 @@
 #define INDEX_BUFFER_GROUP_WIDTH 12
 #define INDEX_BUFFER_GROUP_HEIGHT 9
 #define INDEX_BORDER_BUFFER_GROUP_SIZE 20
+#define MAX_CUSTOM_ENTITIES_LAYERS 8
 
 typedef char *offset_ptr_size;
 typedef uintptr_t offset_ptr;
@@ -126,6 +127,18 @@ class CMapLayers : public CComponent
 	};
 	std::vector<SQuadLayerVisuals *> m_vpQuadLayerVisuals;
 	std::vector<std::vector<int>> m_vvLayerCount;
+	struct SCustomEntitiesLayer
+	{
+		int LayerId;
+		void *m_pData;
+		int m_ImageId;
+		int m_TileSize;
+		int m_TileIndexOffset;
+		int m_FlagsOffset;
+		int m_Width;
+		int m_Height;
+	};
+	std::vector<SCustomEntitiesLayer> m_vCustomEntitiesLayers;
 	int m_GameGroup;
 
 	virtual CCamera *GetCurCamera();
@@ -148,6 +161,8 @@ public:
 	virtual void OnRender() override;
 	virtual void OnMapLoad() override;
 
+	bool AddCustomEntitiesLayer(int LayerId, int Data, int ImageId, int TileSize, int TileIndexOffset, int FlagsOffset, int Width, int Height);
+
 	static void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels, void *pUser);
 
 private:
@@ -161,6 +176,7 @@ private:
 
 	void RenderTilelayerNoTileBuffer(int ImageIndex, int LayerType, void *pTilesData, CMapItemLayerTilemap *pLayerTilemap, const ColorRGBA &Color);
 	void RenderTilelayerWithTileBuffer(int ImageIndex, int LayerType, int TileLayerCounter, const ColorRGBA &Color);
+	void RenderCustomEntitiesLayer(const SCustomEntitiesLayer &CustomLayer, float Alpha);
 	ColorRGBA GetDeathBorderColor() const;
 };
 
