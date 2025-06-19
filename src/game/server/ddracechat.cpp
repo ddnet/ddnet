@@ -773,26 +773,32 @@ void CGameContext::ConUnPractice(IConsole::IResult *pResult, void *pUserData)
 
 void CGameContext::ConPracticeCmdList(IConsole::IResult *pResult, void *pUserData)
 {
-	CGameContext *pSelf = (CGameContext *)pUserData;
+	IConsole *pConsole = static_cast<CGameContext *>(pUserData)->Console();
+	char aBuf[240] = "";
+	int Used = 0;
 
-	char aPracticeCommands[256];
-	mem_zero(aPracticeCommands, sizeof(aPracticeCommands));
-	str_append(aPracticeCommands, "Available practice commands: ");
-	for(const IConsole::CCommandInfo *pCmd = pSelf->Console()->FirstCommandInfo(IConsole::ACCESS_LEVEL_USER, CMDFLAG_PRACTICE);
-		pCmd; pCmd = pCmd->NextCommandInfo(IConsole::ACCESS_LEVEL_USER, CMDFLAG_PRACTICE))
+	for(const IConsole::CCommandInfo *pCommand = pConsole->FirstCommandInfo(IConsole::ACCESS_LEVEL_USER, CMDFLAG_PRACTICE); pCommand; pCommand = pCommand->NextCommandInfo(IConsole::ACCESS_LEVEL_USER, CMDFLAG_PRACTICE))
 	{
-		char aCommand[64];
-
-		str_format(aCommand, sizeof(aCommand), "/%s%s", pCmd->m_pName, pCmd->NextCommandInfo(IConsole::ACCESS_LEVEL_USER, CMDFLAG_PRACTICE) ? ", " : "");
-
-		if(str_length(aCommand) + str_length(aPracticeCommands) > 255)
+		int Length = str_length(pCommand->m_pName);
+		if(Used + Length + 2 < (int)(sizeof(aBuf)))
 		{
-			pSelf->SendChatTarget(pResult->m_ClientId, aPracticeCommands);
-			mem_zero(aPracticeCommands, sizeof(aPracticeCommands));
+			if(Used > 0)
+			{
+				Used += 2;
+				str_append(aBuf, ", ");
+			}
+			str_append(aBuf, pCommand->m_pName);
+			Used += Length;
 		}
-		str_append(aPracticeCommands, aCommand);
+		else
+		{
+			pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
+			str_copy(aBuf, pCommand->m_pName);
+			Used = Length;
+		}
 	}
-	pSelf->SendChatTarget(pResult->m_ClientId, aPracticeCommands);
+	if(Used > 0)
+		pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 }
 
 void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
