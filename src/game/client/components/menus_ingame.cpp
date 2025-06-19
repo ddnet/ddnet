@@ -657,12 +657,12 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 		str_format(aBuf, sizeof(aBuf), "%s:", Localize("Community"));
 		Ui()->DoLabel(&Label, aBuf, FontSizeBody, TEXTALIGN_ML);
 
-		const SCommunityIcon *pIcon = FindCommunityIcon(pCommunity->Id());
+		const CCommunityIcon *pIcon = m_CommunityIcons.Find(pCommunity->Id());
 		if(pIcon != nullptr)
 		{
 			Label.VSplitLeft(TextRender()->TextWidth(FontSizeBody, aBuf) + 8.0f, nullptr, &Label);
 			Label.VSplitLeft(2.0f * Label.h, &Label, nullptr);
-			RenderCommunityIcon(pIcon, Label, true);
+			m_CommunityIcons.Render(pIcon, Label, true);
 			static char s_CommunityTooltipButtonId;
 			Ui()->DoButtonLogic(&s_CommunityTooltipButtonId, 0, &Label, BUTTONFLAG_NONE);
 			GameClient()->m_Tooltips.DoToolTip(&s_CommunityTooltipButtonId, &Label, pCommunity->Name());
@@ -1181,7 +1181,7 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 	{
 		TabBar.VSplitLeft(75.0f, &Button, &TabBar);
 		const int Page = PAGE_FAVORITE_COMMUNITY_1 + FavoriteCommunityIndex;
-		if(DoButton_MenuTab(&s_aFavoriteCommunityButtons[FavoriteCommunityIndex], FONT_ICON_ELLIPSIS, g_Config.m_UiPage == Page, &Button, IGraphics::CORNER_NONE, nullptr, nullptr, nullptr, nullptr, 10.0f, FindCommunityIcon(pCommunity->Id())))
+		if(DoButton_MenuTab(&s_aFavoriteCommunityButtons[FavoriteCommunityIndex], FONT_ICON_ELLIPSIS, g_Config.m_UiPage == Page, &Button, IGraphics::CORNER_NONE, nullptr, nullptr, nullptr, nullptr, 10.0f, m_CommunityIcons.Find(pCommunity->Id())))
 		{
 			NewPage = Page;
 		}

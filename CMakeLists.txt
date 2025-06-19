@@ -2333,6 +2333,8 @@ if(CLIENT)
     components/camera.h
     components/chat.cpp
     components/chat.h
+    components/community_icons.cpp
+    components/community_icons.h
     components/console.cpp
     components/console.h
     components/controls.cpp
