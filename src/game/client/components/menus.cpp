@@ -156,7 +156,7 @@ int CMenus::DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText,
 	return Ui()->DoButtonLogic(pButtonContainer, Checked, pRect, Flags);
 }
 
-int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator, const ColorRGBA *pDefaultColor, const ColorRGBA *pActiveColor, const ColorRGBA *pHoverColor, float EdgeRounding, const SCommunityIcon *pCommunityIcon)
+int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator, const ColorRGBA *pDefaultColor, const ColorRGBA *pActiveColor, const ColorRGBA *pHoverColor, float EdgeRounding, const CCommunityIcon *pCommunityIcon)
 {
 	const bool MouseInside = Ui()->HotItem() == pButtonContainer;
 	CUIRect Rect = *pRect;
@@ -233,7 +233,7 @@ int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pTe
 	{
 		CUIRect CommunityIcon;
 		Rect.Margin(2.0f, &CommunityIcon);
-		RenderCommunityIcon(pCommunityIcon, CommunityIcon, true);
+		m_CommunityIcons.Render(pCommunityIcon, CommunityIcon, true);
 	}
 	else
 	{
@@ -713,7 +713,7 @@ void CMenus::RenderMenubar(CUIRect Box, IClient::EClientState ClientState)
 				break;
 			Box.VSplitLeft(BrowserButtonWidth, &Button, &Box);
 			const int Page = PAGE_FAVORITE_COMMUNITY_1 + FavoriteCommunityIndex;
-			if(DoButton_MenuTab(&s_aFavoriteCommunityButtons[FavoriteCommunityIndex], FONT_ICON_ELLIPSIS, ActivePage == Page, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIT_TAB_FAVORITE_COMMUNITY_1 + FavoriteCommunityIndex], nullptr, nullptr, nullptr, 10.0f, FindCommunityIcon(pCommunity->Id())))
+			if(DoButton_MenuTab(&s_aFavoriteCommunityButtons[FavoriteCommunityIndex], FONT_ICON_ELLIPSIS, ActivePage == Page, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIT_TAB_FAVORITE_COMMUNITY_1 + FavoriteCommunityIndex], nullptr, nullptr, nullptr, 10.0f, m_CommunityIcons.Find(pCommunity->Id())))
 			{
 				NewPage = Page;
 			}
@@ -881,6 +881,7 @@ void CMenus::RenderNews(CUIRect MainView)
 void CMenus::OnInterfacesInit(CGameClient *pClient)
 {
 	CComponentInterfaces::OnInterfacesInit(pClient);
+	m_CommunityIcons.OnInterfacesInit(pClient);
 	m_MenusStart.OnInterfacesInit(pClient);
 }
 
@@ -950,9 +951,7 @@ void CMenus::OnInit()
 	m_vMenuImages.clear();
 	Storage()->ListDirectory(IStorage::TYPE_ALL, "menuimages", MenuImageScan, this);
 
-	// load community icons
-	m_vCommunityIcons.clear();
-	Storage()->ListDirectory(IStorage::TYPE_ALL, "communityicons", CommunityIconScan, this);
+	m_CommunityIcons.Load();
 
 	// Quad for the direction arrows above the player
 	m_DirectionQuadContainerIndex = Graphics()->CreateQuadContainer(false);
@@ -1063,7 +1062,7 @@ void CMenus::Render()
 	}
 	else
 	{
-		UpdateCommunityIcons();
+		m_CommunityIcons.Update();
 	}
 
 	if(ServerBrowser()->DDNetInfoAvailable())
@@ -1507,7 +1506,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		if(pEntry != nullptr && pEntry->m_GotInfo)
 		{
 			const CCommunity *pCommunity = ServerBrowser()->Community(pEntry->m_Info.m_aCommunityId);
-			const SCommunityIcon *pIcon = pCommunity == nullptr ? nullptr : FindCommunityIcon(pCommunity->Id());
+			const CCommunityIcon *pIcon = pCommunity == nullptr ? nullptr : m_CommunityIcons.Find(pCommunity->Id());
 
 			Box.HSplitBottom(32.0f, &Box, nullptr);
 			Box.HSplitBottom(24.0f, &Box, &Part);
@@ -1520,7 +1519,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 				CUIRect Icon;
 				static char s_CommunityTooltipButtonId;
 				Name.VSplitLeft(2.5f * Name.h, &Icon, &Name);
-				RenderCommunityIcon(pIcon, Icon, true);
+				m_CommunityIcons.Render(pIcon, Icon, true);
 				Ui()->DoButtonLogic(&s_CommunityTooltipButtonId, 0, &Icon, BUTTONFLAG_NONE);
 				GameClient()->m_Tooltips.DoToolTip(&s_CommunityTooltipButtonId, &Icon, pCommunity->Name());
 			}
@@ -2238,8 +2237,7 @@ void CMenus::OnReset()
 
 void CMenus::OnShutdown()
 {
-	m_CommunityIconLoadJobs.clear();
-	m_CommunityIconDownloadJobs.clear();
+	m_CommunityIcons.Shutdown();
 }
 
 bool CMenus::OnCursorMove(float x, float y, IInput::ECursorType CursorType)

@@ -16,9 +16,6 @@
 #include <engine/friends.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
-#include <engine/shared/http.h>
-#include <engine/shared/jobs.h>
-#include <engine/shared/linereader.h>
 #include <engine/textrender.h>
 
 #include <game/client/component.h>
@@ -28,6 +25,7 @@
 #include <game/client/ui.h>
 #include <game/voting.h>
 
+#include <game/client/components/community_icons.h>
 #include <game/client/components/menus_start.h>
 #include <game/client/components/skins7.h>
 
@@ -43,14 +41,6 @@ public:
 	CMenusKeyBinder();
 	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual bool OnInput(const IInput::CEvent &Event) override;
-};
-
-struct SCommunityIcon
-{
-	char m_aCommunityId[CServerInfo::MAX_COMMUNITY_ID_LENGTH];
-	SHA256_DIGEST m_Sha256;
-	IGraphics::CTextureHandle m_OrgTexture;
-	IGraphics::CTextureHandle m_GreyTexture;
 };
 
 class CMenus : public CComponent
@@ -69,7 +59,7 @@ class CMenus : public CComponent
 public:
 	int DoButton_Toggle(const void *pId, int Checked, const CUIRect *pRect, bool Active, unsigned Flags = BUTTONFLAG_LEFT);
 	int DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, unsigned Flags = BUTTONFLAG_LEFT, const char *pImageName = nullptr, int Corners = IGraphics::CORNER_ALL, float Rounding = 5.0f, float FontFactor = 0.0f, ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f));
-	int DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator = nullptr, const ColorRGBA *pDefaultColor = nullptr, const ColorRGBA *pActiveColor = nullptr, const ColorRGBA *pHoverColor = nullptr, float EdgeRounding = 10.0f, const SCommunityIcon *pCommunityIcon = nullptr);
+	int DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator = nullptr, const ColorRGBA *pDefaultColor = nullptr, const ColorRGBA *pActiveColor = nullptr, const ColorRGBA *pHoverColor = nullptr, float EdgeRounding = 10.0f, const CCommunityIcon *pCommunityIcon = nullptr);
 
 	int DoButton_CheckBox_Common(const void *pId, const char *pText, const char *pBoxText, const CUIRect *pRect, unsigned Flags);
 	int DoButton_CheckBox(const void *pId, const char *pText, int Checked, const CUIRect *pRect);
@@ -541,59 +531,6 @@ protected:
 	static void ConchainUiPageUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	void UpdateCommunityCache(bool Force);
 
-	// community icons
-	class CAbstractCommunityIconJob
-	{
-	protected:
-		CMenus *m_pMenus;
-		char m_aCommunityId[CServerInfo::MAX_COMMUNITY_ID_LENGTH];
-		char m_aPath[IO_MAX_PATH_LENGTH];
-		int m_StorageType;
-		bool m_Success = false;
-		SHA256_DIGEST m_Sha256;
-
-		CAbstractCommunityIconJob(CMenus *pMenus, const char *pCommunityId, int StorageType);
-
-	public:
-		const char *CommunityId() const { return m_aCommunityId; }
-		bool Success() const { return m_Success; }
-		const SHA256_DIGEST &Sha256() const { return m_Sha256; }
-		virtual ~CAbstractCommunityIconJob() = default;
-	};
-
-	class CCommunityIconLoadJob : public IJob, public CAbstractCommunityIconJob
-	{
-		CImageInfo m_ImageInfo;
-		CImageInfo m_ImageInfoGrayscale;
-
-	protected:
-		void Run() override;
-
-	public:
-		CCommunityIconLoadJob(CMenus *pMenus, const char *pCommunityId, int StorageType);
-		~CCommunityIconLoadJob();
-
-		CImageInfo &ImageInfo() { return m_ImageInfo; }
-		CImageInfo &ImageInfoGrayscale() { return m_ImageInfoGrayscale; }
-	};
-
-	class CCommunityIconDownloadJob : public CHttpRequest, public CAbstractCommunityIconJob
-	{
-	public:
-		CCommunityIconDownloadJob(CMenus *pMenus, const char *pCommunityId, const char *pUrl, const SHA256_DIGEST &Sha256);
-	};
-
-	std::vector<SCommunityIcon> m_vCommunityIcons;
-	std::deque<std::shared_ptr<CCommunityIconLoadJob>> m_CommunityIconLoadJobs;
-	std::deque<std::shared_ptr<CCommunityIconDownloadJob>> m_CommunityIconDownloadJobs;
-	SHA256_DIGEST m_CommunityIconsInfoSha256 = SHA256_ZEROED;
-	static int CommunityIconScan(const char *pName, int IsDir, int DirType, void *pUser);
-	const SCommunityIcon *FindCommunityIcon(const char *pCommunityId);
-	bool LoadCommunityIconFile(const char *pPath, int DirType, CImageInfo &Info, CImageInfo &InfoGrayscale, SHA256_DIGEST &Sha256);
-	void LoadCommunityIconFinish(const char *pCommunityId, CImageInfo &Info, CImageInfo &InfoGrayscale, const SHA256_DIGEST &Sha256);
-	void RenderCommunityIcon(const SCommunityIcon *pIcon, CUIRect Rect, bool Active);
-	void UpdateCommunityIcons();
-
 	// found in menus_settings.cpp
 	void RenderLanguageSettings(CUIRect MainView);
 	bool RenderLanguageSelection(CUIRect MainView);
@@ -833,6 +770,7 @@ public:
 	void ShowQuitPopup();
 
 private:
+	CCommunityIcons m_CommunityIcons;
 	CMenusStart m_MenusStart;
 
 	static int GhostlistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser);
