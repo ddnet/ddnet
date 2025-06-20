@@ -24,20 +24,158 @@
 #include "hud.h"
 #include "voting.h"
 
+CHud::CMovementInfoHud::CMovementInfoHud()
+{
+	for(int i = 0; i < 2; i++)
+	{
+		m_aPlayerPositionContainers[i].Reset();
+		m_aPlayerSpeedTextContainers[i].Reset();
+		m_aPlayerPrevPosition[i] = -INFINITY;
+		m_aPlayerPrevSpeed[i] = -INFINITY;
+		m_aPlayerPrevSnapSpeed[i] = 0;
+		m_aPlayerSpeedChange[i] = ESpeedChange::NONE;
+	}
+	m_PlayerAngleTextContainerIndex.Reset();
+	m_PlayerPrevAngle = -INFINITY;
+}
+
+void CHud::CMovementInfoHud::Reset(CHud &This)
+{
+	for(int i = 0; i < 2; i++)
+	{
+		This.TextRender()->DeleteTextContainer(m_aPlayerPositionContainers[i]);
+		This.TextRender()->DeleteTextContainer(m_aPlayerSpeedTextContainers[i]);
+		m_aPlayerPrevPosition[i] = -INFINITY;
+		m_aPlayerPrevSpeed[i] = -INFINITY;
+	}
+	This.TextRender()->DeleteTextContainer(m_PlayerAngleTextContainerIndex);
+	m_PlayerPrevAngle = -INFINITY;
+}
+
+void CHud::CMovementInfoHud::OnNewSnapshot(CHud &This, int ClientId)
+{
+	const CNetObj_Character *pPrevChar = &This.m_pClient->m_Snap.m_aCharacters[ClientId].m_Prev;
+	const CNetObj_Character *pCurChar = &This.m_pClient->m_Snap.m_aCharacters[ClientId].m_Cur;
+	const float IntraTick = This.Client()->IntraGameTick(g_Config.m_ClDummy);
+	ivec2 Vel = mix(ivec2(pPrevChar->m_VelX, pPrevChar->m_VelY), ivec2(pCurChar->m_VelX, pCurChar->m_VelY), IntraTick);
+
+	CCharacter *pChar = This.m_pClient->m_PredictedWorld.GetCharacterById(ClientId);
+	if(pChar && pChar->IsGrounded())
+		Vel.y = 0;
+
+	int aVels[2] = {Vel.x, Vel.y};
+
+	for(int i = 0; i < 2; i++)
+	{
+		int AbsVel = abs(aVels[i]);
+		if(AbsVel > m_aPlayerPrevSnapSpeed[i])
+		{
+			m_aPlayerSpeedChange[i] = ESpeedChange::INCREASE;
+		}
+		if(AbsVel < m_aPlayerPrevSnapSpeed[i])
+		{
+			m_aPlayerSpeedChange[i] = ESpeedChange::DECREASE;
+		}
+		if(AbsVel < 2)
+		{
+			m_aPlayerSpeedChange[i] = ESpeedChange::NONE;
+		}
+		m_aPlayerPrevSnapSpeed[i] = AbsVel;
+	}
+}
+
+void CHud::CMovementInfoHud::UpdateTextContainers(CHud &This, float FontSize, int ClientId, int Conn)
+{
+	// Get Information
+	vec2 Pos = vec2(0.0f, 0.0f);
+	vec2 Speed = vec2(0.0f, 0.0f);
+	float Angle = 0.0f;
+	if(ClientId == SPEC_FREEVIEW)
+	{
+		Pos = This.m_pClient->m_Camera.m_Center / 32.0f;
+	}
+	else if(This.m_pClient->m_aClients[ClientId].m_SpecCharPresent)
+	{
+		Pos = This.m_pClient->m_aClients[ClientId].m_SpecChar / 32.0f;
+	}
+	else
+	{
+		const CNetObj_Character *pPrevChar = &This.m_pClient->m_Snap.m_aCharacters[ClientId].m_Prev;
+		const CNetObj_Character *pCurChar = &This.m_pClient->m_Snap.m_aCharacters[ClientId].m_Cur;
+		const float IntraTick = This.Client()->IntraGameTick(Conn);
+
+		// To make the player position relative to blocks we need to divide by the block size
+		Pos = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pCurChar->m_X, pCurChar->m_Y), IntraTick) / 32.0f;
+
+		const vec2 Vel = mix(vec2(pPrevChar->m_VelX, pPrevChar->m_VelY), vec2(pCurChar->m_VelX, pCurChar->m_VelY), IntraTick);
+
+		float VelspeedX = Vel.x / 256.0f * This.Client()->GameTickSpeed();
+		if(Vel.x >= -1.0f && Vel.x <= 1.0f)
+		{
+			VelspeedX = 0.0f;
+		}
+		float VelspeedY = Vel.y / 256.0f * This.Client()->GameTickSpeed();
+		if(Vel.y >= -128.0f && Vel.y <= 128.0f)
+		{
+			VelspeedY = 0.0f;
+		}
+		// We show the speed in Blocks per Second (Bps) and therefore have to divide by the block size
+		Speed.x = VelspeedX / 32.0f;
+		float VelspeedLength = length(vec2(Vel.x, Vel.y) / 256.0f) * This.Client()->GameTickSpeed();
+		// Todo: Use Velramp tuning of each individual player
+		// Since these tuning parameters are almost never changed, the default values are sufficient in most cases
+		float Ramp = VelocityRamp(VelspeedLength, This.m_pClient->m_aTuning[Conn].m_VelrampStart, This.m_pClient->m_aTuning[Conn].m_VelrampRange, This.m_pClient->m_aTuning[Conn].m_VelrampCurvature);
+		Speed.x *= Ramp;
+		Speed.y = VelspeedY / 32.0f;
+
+		Angle = This.m_pClient->m_Players.GetPlayerTargetAngle(pPrevChar, pCurChar, ClientId, IntraTick);
+		if(Angle < 0.0f)
+		{
+			Angle += 2.0f * pi;
+		}
+		Angle = Angle * 180.0f / pi;
+	}
+	// Update text containers
+	auto UpdateTextContainer = [&](STextContainerIndex &TextContainer, float Value, float &PrevValue) {
+		Value = std::round(Value * 100.0f) / 100.0f; // Round to 2dp
+		if(TextContainer.Valid() && PrevValue == Value)
+			return;
+		PrevValue = Value;
+
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "%.2f", Value);
+
+		CTextCursor Cursor;
+		This.TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, FontSize, TEXTFLAG_RENDER);
+		This.TextRender()->RecreateTextContainer(TextContainer, &Cursor, aBuf);
+	};
+	if(g_Config.m_ClShowhudPlayerPosition)
+	{
+		UpdateTextContainer(m_aPlayerPositionContainers[0], Pos.x, m_aPlayerPrevPosition[0]);
+		UpdateTextContainer(m_aPlayerPositionContainers[1], Pos.y, m_aPlayerPrevPosition[1]);
+	}
+	if(g_Config.m_ClShowhudPlayerSpeed)
+	{
+		for(int i = 0; i < 2; ++i)
+		{
+			if(m_aPlayerSpeedChange[i] == ESpeedChange::INCREASE)
+				This.TextRender()->TextColor(ColorRGBA(0.0f, 1.0f, 0.0f, 1.0f));
+			if(m_aPlayerSpeedChange[i] == ESpeedChange::DECREASE)
+				This.TextRender()->TextColor(ColorRGBA(1.0f, 0.5f, 0.5f, 1.0f));
+			UpdateTextContainer(m_aPlayerSpeedTextContainers[i], i == 0 ? Speed.x : Speed.y, m_aPlayerPrevSpeed[i]);
+			This.TextRender()->TextColor(This.TextRender()->DefaultTextColor());
+		}
+	}
+	if(g_Config.m_ClShowhudPlayerAngle)
+	{
+		UpdateTextContainer(m_PlayerAngleTextContainerIndex, Angle, m_PlayerPrevAngle);
+	}
+}
+
 CHud::CHud()
 {
 	m_FPSTextContainerIndex.Reset();
 	m_DDRaceEffectsTextContainerIndex.Reset();
-	m_PlayerAngleTextContainerIndex.Reset();
-	m_PlayerPrevAngle = -INFINITY;
-
-	for(int i = 0; i < 2; i++)
-	{
-		m_aPlayerSpeedTextContainers[i].Reset();
-		m_aPlayerPrevSpeed[i] = -INFINITY;
-		m_aPlayerPositionContainers[i].Reset();
-		m_aPlayerPrevPosition[i] = -INFINITY;
-	}
 }
 
 void CHud::ResetHudContainers()
@@ -54,15 +192,7 @@ void CHud::ResetHudContainers()
 
 	TextRender()->DeleteTextContainer(m_FPSTextContainerIndex);
 	TextRender()->DeleteTextContainer(m_DDRaceEffectsTextContainerIndex);
-	TextRender()->DeleteTextContainer(m_PlayerAngleTextContainerIndex);
-	m_PlayerPrevAngle = -INFINITY;
-	for(int i = 0; i < 2; i++)
-	{
-		TextRender()->DeleteTextContainer(m_aPlayerSpeedTextContainers[i]);
-		m_aPlayerPrevSpeed[i] = -INFINITY;
-		TextRender()->DeleteTextContainer(m_aPlayerPositionContainers[i]);
-		m_aPlayerPrevPosition[i] = -INFINITY;
-	}
+	m_MovementInfoHud.Reset(*this);
 }
 
 void CHud::OnWindowResize()
@@ -80,13 +210,11 @@ void CHud::OnReset()
 	m_ServerRecord = -1.0f;
 	m_aPlayerRecord[0] = -1.0f;
 	m_aPlayerRecord[1] = -1.0f;
-	m_aPlayerSpeed[0] = 0;
-	m_aPlayerSpeed[1] = 0;
-	m_aLastPlayerSpeedChange[0] = ESpeedChange::NONE;
-	m_aLastPlayerSpeedChange[1] = ESpeedChange::NONE;
 	m_LastSpectatorCountTick = 0;
 
 	ResetHudContainers();
+
+	m_MovementInfoHud = CMovementInfoHud();
 }
 
 void CHud::OnInit()
@@ -1386,80 +1514,6 @@ inline float CHud::GetMovementInformationBoxHeight()
 	return BoxHeight;
 }
 
-void CHud::UpdateMovementInformationTextContainer(STextContainerIndex &TextContainer, float FontSize, float Value, float &PrevValue)
-{
-	Value = std::round(Value * 100.0f) / 100.0f; // Round to 2dp
-	if(TextContainer.Valid() && PrevValue == Value)
-		return;
-	PrevValue = Value;
-
-	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "%.2f", Value);
-
-	CTextCursor Cursor;
-	TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, FontSize, TEXTFLAG_RENDER);
-	TextRender()->RecreateTextContainer(TextContainer, &Cursor, aBuf);
-}
-
-void CHud::RenderMovementInformationTextContainer(STextContainerIndex &TextContainer, const ColorRGBA &Color, float X, float Y)
-{
-	if(TextContainer.Valid())
-	{
-		TextRender()->RenderTextContainer(TextContainer, Color, TextRender()->DefaultTextOutlineColor(), X - TextRender()->GetBoundingBoxTextContainer(TextContainer).m_W, Y);
-	}
-}
-
-CHud::CMovementInformation CHud::GetMovementInformation(int ClientId, int Conn) const
-{
-	CMovementInformation Out;
-	if(ClientId == SPEC_FREEVIEW)
-	{
-		Out.m_Pos = m_pClient->m_Camera.m_Center / 32.0f;
-	}
-	else if(m_pClient->m_aClients[ClientId].m_SpecCharPresent)
-	{
-		Out.m_Pos = m_pClient->m_aClients[ClientId].m_SpecChar / 32.0f;
-	}
-	else
-	{
-		const CNetObj_Character *pPrevChar = &m_pClient->m_Snap.m_aCharacters[ClientId].m_Prev;
-		const CNetObj_Character *pCurChar = &m_pClient->m_Snap.m_aCharacters[ClientId].m_Cur;
-		const float IntraTick = Client()->IntraGameTick(Conn);
-
-		// To make the player position relative to blocks we need to divide by the block size
-		Out.m_Pos = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pCurChar->m_X, pCurChar->m_Y), IntraTick) / 32.0f;
-
-		const vec2 Vel = mix(vec2(pPrevChar->m_VelX, pPrevChar->m_VelY), vec2(pCurChar->m_VelX, pCurChar->m_VelY), IntraTick);
-
-		float VelspeedX = Vel.x / 256.0f * Client()->GameTickSpeed();
-		if(Vel.x >= -1.0f && Vel.x <= 1.0f)
-		{
-			VelspeedX = 0.0f;
-		}
-		float VelspeedY = Vel.y / 256.0f * Client()->GameTickSpeed();
-		if(Vel.y >= -128.0f && Vel.y <= 128.0f)
-		{
-			VelspeedY = 0.0f;
-		}
-		// We show the speed in Blocks per Second (Bps) and therefore have to divide by the block size
-		Out.m_Speed.x = VelspeedX / 32.0f;
-		float VelspeedLength = length(vec2(Vel.x, Vel.y) / 256.0f) * Client()->GameTickSpeed();
-		// Todo: Use Velramp tuning of each individual player
-		// Since these tuning parameters are almost never changed, the default values are sufficient in most cases
-		float Ramp = VelocityRamp(VelspeedLength, m_pClient->m_aTuning[Conn].m_VelrampStart, m_pClient->m_aTuning[Conn].m_VelrampRange, m_pClient->m_aTuning[Conn].m_VelrampCurvature);
-		Out.m_Speed.x *= Ramp;
-		Out.m_Speed.y = VelspeedY / 32.0f;
-
-		float Angle = m_pClient->m_Players.GetPlayerTargetAngle(pPrevChar, pCurChar, ClientId, IntraTick);
-		if(Angle < 0.0f)
-		{
-			Angle += 2.0f * pi;
-		}
-		Out.m_Angle = Angle * 180.0f / pi;
-	}
-	return Out;
-}
-
 void CHud::RenderMovementInformation()
 {
 	const int ClientId = m_pClient->m_Snap.m_SpecInfo.m_Active ? m_pClient->m_Snap.m_SpecInfo.m_SpectatorId : m_pClient->m_Snap.m_LocalClientId;
@@ -1471,7 +1525,7 @@ void CHud::RenderMovementInformation()
 		return;
 	}
 	const float LineSpacer = 1.0f; // above and below each entry
-	const float Fontsize = 6.0f;
+	const float FontSize = 6.0f;
 
 	float BoxHeight = GetMovementInformationBoxHeight();
 	const float BoxWidth = 62.0f;
@@ -1485,7 +1539,12 @@ void CHud::RenderMovementInformation()
 
 	Graphics()->DrawRect(StartX, StartY, BoxWidth, BoxHeight, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_L, 5.0f);
 
-	const CMovementInformation Info = GetMovementInformation(ClientId, g_Config.m_ClDummy);
+	m_MovementInfoHud.UpdateTextContainers(*this, FontSize, m_pClient->m_aLocalIds[g_Config.m_ClDummy], g_Config.m_ClDummy);
+
+	auto RenderTextContainer = [&](STextContainerIndex &TextContainer, float X, float Y, ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f)) {
+		if(TextContainer.Valid())
+			TextRender()->RenderTextContainer(TextContainer, Color, TextRender()->DefaultTextOutlineColor(), X - TextRender()->GetBoundingBoxTextContainer(TextContainer).m_W, Y);
+	};
 
 	float y = StartY + LineSpacer * 2.0f;
 	float xl = StartX + 2.0f;
@@ -1493,17 +1552,15 @@ void CHud::RenderMovementInformation()
 
 	if(g_Config.m_ClShowhudPlayerPosition)
 	{
-		TextRender()->Text(xl, y, Fontsize, Localize("Position:"), -1.0f);
+		TextRender()->Text(xl, y, FontSize, Localize("Position:"), -1.0f);
 		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 
-		TextRender()->Text(xl, y, Fontsize, "X:", -1.0f);
-		UpdateMovementInformationTextContainer(m_aPlayerPositionContainers[0], Fontsize, Info.m_Pos.x, m_aPlayerPrevPosition[0]);
-		RenderMovementInformationTextContainer(m_aPlayerPositionContainers[0], TextRender()->DefaultTextColor(), xr, y);
+		TextRender()->Text(xl, y, FontSize, "X:", -1.0f);
+		RenderTextContainer(m_MovementInfoHud.m_aPlayerPositionContainers[0], xr, y);
 		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 
-		TextRender()->Text(xl, y, Fontsize, "Y:", -1.0f);
-		UpdateMovementInformationTextContainer(m_aPlayerPositionContainers[1], Fontsize, Info.m_Pos.y, m_aPlayerPrevPosition[1]);
-		RenderMovementInformationTextContainer(m_aPlayerPositionContainers[1], TextRender()->DefaultTextColor(), xr, y);
+		TextRender()->Text(xl, y, FontSize, "Y:", -1.0f);
+		RenderTextContainer(m_MovementInfoHud.m_aPlayerPositionContainers[1], xr, y);
 		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 	}
 
@@ -1512,33 +1569,28 @@ void CHud::RenderMovementInformation()
 
 	if(g_Config.m_ClShowhudPlayerSpeed)
 	{
-		TextRender()->Text(xl, y, Fontsize, Localize("Speed:"), -1.0f);
+		TextRender()->Text(xl, y, FontSize, Localize("Speed:"), -1.0f);
 		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 
 		const char aaCoordinates[][4] = {"X:", "Y:"};
 		for(int i = 0; i < 2; i++)
 		{
 			ColorRGBA Color(1.0f, 1.0f, 1.0f, 1.0f);
-			if(m_aLastPlayerSpeedChange[i] == ESpeedChange::INCREASE)
+			if(m_MovementInfoHud.m_aPlayerSpeedChange[i] == CMovementInfoHud::ESpeedChange::INCREASE)
 				Color = ColorRGBA(0.0f, 1.0f, 0.0f, 1.0f);
-			if(m_aLastPlayerSpeedChange[i] == ESpeedChange::DECREASE)
+			if(m_MovementInfoHud.m_aPlayerSpeedChange[i] == CMovementInfoHud::ESpeedChange::DECREASE)
 				Color = ColorRGBA(1.0f, 0.5f, 0.5f, 1.0f);
-			TextRender()->Text(xl, y, Fontsize, aaCoordinates[i], -1.0f);
-			UpdateMovementInformationTextContainer(m_aPlayerSpeedTextContainers[i], Fontsize, i == 0 ? Info.m_Speed.x : Info.m_Speed.y, m_aPlayerPrevSpeed[i]);
-			RenderMovementInformationTextContainer(m_aPlayerSpeedTextContainers[i], Color, xr, y);
+			TextRender()->Text(xl, y, FontSize, aaCoordinates[i], -1.0f);
+			RenderTextContainer(m_MovementInfoHud.m_aPlayerSpeedTextContainers[i], xr, y, Color);
 			y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 		}
-
-		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 	if(g_Config.m_ClShowhudPlayerAngle)
 	{
-		TextRender()->Text(xl, y, Fontsize, Localize("Angle:"), -1.0f);
+		TextRender()->Text(xl, y, FontSize, Localize("Angle:"), -1.0f);
 		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
-
-		UpdateMovementInformationTextContainer(m_PlayerAngleTextContainerIndex, Fontsize, Info.m_Angle, m_PlayerPrevAngle);
-		RenderMovementInformationTextContainer(m_PlayerAngleTextContainerIndex, TextRender()->DefaultTextColor(), xr, y);
+		RenderTextContainer(m_MovementInfoHud.m_PlayerAngleTextContainerIndex, xr, y);
 	}
 }
 
@@ -1619,34 +1671,7 @@ void CHud::OnNewSnapshot()
 	if(ClientId == -1)
 		return;
 
-	const CNetObj_Character *pPrevChar = &m_pClient->m_Snap.m_aCharacters[ClientId].m_Prev;
-	const CNetObj_Character *pCurChar = &m_pClient->m_Snap.m_aCharacters[ClientId].m_Cur;
-	const float IntraTick = Client()->IntraGameTick(g_Config.m_ClDummy);
-	ivec2 Vel = mix(ivec2(pPrevChar->m_VelX, pPrevChar->m_VelY), ivec2(pCurChar->m_VelX, pCurChar->m_VelY), IntraTick);
-
-	CCharacter *pChar = m_pClient->m_PredictedWorld.GetCharacterById(ClientId);
-	if(pChar && pChar->IsGrounded())
-		Vel.y = 0;
-
-	int aVels[2] = {Vel.x, Vel.y};
-
-	for(int i = 0; i < 2; i++)
-	{
-		int AbsVel = abs(aVels[i]);
-		if(AbsVel > m_aPlayerSpeed[i])
-		{
-			m_aLastPlayerSpeedChange[i] = ESpeedChange::INCREASE;
-		}
-		if(AbsVel < m_aPlayerSpeed[i])
-		{
-			m_aLastPlayerSpeedChange[i] = ESpeedChange::DECREASE;
-		}
-		if(AbsVel < 2)
-		{
-			m_aLastPlayerSpeedChange[i] = ESpeedChange::NONE;
-		}
-		m_aPlayerSpeed[i] = AbsVel;
-	}
+	m_MovementInfoHud.OnNewSnapshot(*this, ClientId);
 }
 
 void CHud::OnRender()
