@@ -121,6 +121,7 @@ private:
 	union UParameterExtra
 	{
 		int i;
+		int64_t i64;
 		unsigned long ul;
 		float f;
 	};
@@ -397,11 +398,11 @@ void CMysqlConnection::BindInt64(int Idx, int64_t Value)
 	Idx -= 1;
 	dbg_assert(0 <= Idx && Idx < (int)m_vStmtParameters.size(), "index out of bounds");
 
-	m_vStmtParameterExtras[Idx].i = Value;
+	m_vStmtParameterExtras[Idx].i64 = Value;
 	MYSQL_BIND *pParam = &m_vStmtParameters[Idx];
 	pParam->buffer_type = MYSQL_TYPE_LONGLONG;
-	pParam->buffer = &m_vStmtParameterExtras[Idx].i;
-	pParam->buffer_length = sizeof(m_vStmtParameterExtras[Idx].i);
+	pParam->buffer = &m_vStmtParameterExtras[Idx].i64;
+	pParam->buffer_length = sizeof(m_vStmtParameterExtras[Idx].i64);
 	pParam->length = nullptr;
 	pParam->is_null = nullptr;
 	pParam->is_unsigned = false;
