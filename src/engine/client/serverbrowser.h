@@ -256,6 +256,7 @@ public:
 	void Refresh(int Type, bool Force = false) override;
 	bool IsRefreshing() const override;
 	bool IsGettingServerlist() const override;
+	bool IsServerlistError() const override;
 	int LoadingProgression() const override;
 	void RequestResort() { m_NeedResort = true; }
 
