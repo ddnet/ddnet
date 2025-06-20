@@ -114,6 +114,48 @@ void CProjectile::Tick()
 					pChr->Freeze();
 			}
 		}
+
+		if(pOwnerChar && !GameLayerClipped(ColPos) &&
+			((m_Type == WEAPON_GRENADE && pOwnerChar->GetCore().m_HasTelegunGrenade) || (m_Type == WEAPON_GUN && pOwnerChar->GetCore().m_HasTelegunGun)))
+		{
+			int MapIndex = Collision()->GetPureMapIndex(pTargetChr ? pTargetChr->m_Pos : ColPos);
+			int TileFIndex = Collision()->GetFrontTileIndex(MapIndex);
+			bool IsSwitchTeleGun = Collision()->GetSwitchType(MapIndex) == TILE_ALLOW_TELE_GUN;
+			bool IsBlueSwitchTeleGun = Collision()->GetSwitchType(MapIndex) == TILE_ALLOW_BLUE_TELE_GUN;
+
+			if(IsSwitchTeleGun || IsBlueSwitchTeleGun)
+			{
+				// Delay specifies which weapon the tile should work for.
+				// Delay = 0 means all.
+				int delay = Collision()->GetSwitchDelay(MapIndex);
+
+				if(delay == 1 && m_Type != WEAPON_GUN)
+					IsSwitchTeleGun = IsBlueSwitchTeleGun = false;
+				if(delay == 2 && m_Type != WEAPON_GRENADE)
+					IsSwitchTeleGun = IsBlueSwitchTeleGun = false;
+				if(delay == 3 && m_Type != WEAPON_LASER)
+					IsSwitchTeleGun = IsBlueSwitchTeleGun = false;
+			}
+
+			if(TileFIndex == TILE_ALLOW_TELE_GUN || TileFIndex == TILE_ALLOW_BLUE_TELE_GUN || IsSwitchTeleGun || IsBlueSwitchTeleGun || pTargetChr)
+			{
+				bool Found;
+				vec2 PossiblePos;
+
+				if(!Collide)
+					Found = GetNearestAirPosPlayer(pTargetChr ? pTargetChr->m_Pos : ColPos, &PossiblePos);
+				else
+					Found = GetNearestAirPos(NewPos, CurPos, &PossiblePos);
+
+				if(Found)
+				{
+					pOwnerChar->m_TeleGunPos = PossiblePos;
+					pOwnerChar->m_TeleGunTeleport = true;
+					pOwnerChar->m_IsBlueTeleGunTeleport = TileFIndex == TILE_ALLOW_BLUE_TELE_GUN || IsBlueSwitchTeleGun;
+				}
+			}
+		}
+
 		if(Collide && m_Bouncing != 0)
 		{
 			m_StartTick = GameWorld()->GameTick();
