@@ -1065,7 +1065,17 @@ static void sockaddr_to_netaddr(const sockaddr *src, socklen_t src_len, NETADDR 
 
 int net_addr_comp(const NETADDR *a, const NETADDR *b)
 {
-	return mem_comp(a, b, sizeof(NETADDR));
+	int diff = a->type - b->type;
+	if(diff != 0)
+	{
+		return diff;
+	}
+	diff = mem_comp(a->ip, b->ip, sizeof(a->ip));
+	if(diff != 0)
+	{
+		return diff;
+	}
+	return a->port - b->port;
 }
 
 bool NETADDR::operator==(const NETADDR &other) const
@@ -1085,15 +1095,20 @@ bool NETADDR::operator<(const NETADDR &other) const
 
 size_t std::hash<NETADDR>::operator()(const NETADDR &Addr) const noexcept
 {
-	return std::hash<std::string_view>{}(std::string_view((const char *)&Addr, sizeof(Addr)));
+	size_t seed = std::hash<unsigned int>{}(Addr.type);
+	seed ^= std::hash<std::string_view>{}(std::string_view(reinterpret_cast<const char *>(Addr.ip), sizeof(Addr.ip))) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+	seed ^= std::hash<unsigned short>{}(Addr.port) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+	return seed;
 }
 
 int net_addr_comp_noport(const NETADDR *a, const NETADDR *b)
 {
-	NETADDR ta = *a, tb = *b;
-	ta.port = tb.port = 0;
-
-	return net_addr_comp(&ta, &tb);
+	int diff = a->type - b->type;
+	if(diff != 0)
+	{
+		return diff;
+	}
+	return mem_comp(a->ip, b->ip, sizeof(a->ip));
 }
 
 void net_addr_str_v6(const unsigned short ip[8], int port, char *buffer, int buffer_size)
