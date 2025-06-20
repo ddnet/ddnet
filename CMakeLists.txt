@@ -829,6 +829,13 @@ if(NOT CRYPTO_FOUND)
   set(DEP_MD5 $<TARGET_OBJECTS:md5>)
 endif()
 
+if(TARGET_OS STREQUAL "windows")
+    set_src(DEP_WINTOAST_SRC GLOB src/engine/external/wintoast wintoastlib.cpp wintoastlib.h)
+    add_library(wintoast EXCLUDE_FROM_ALL OBJECT ${DEP_WINTOAST_SRC})
+    list(APPEND TARGETS_DEP wintoast)
+    set(DEP_WINTOAST $<TARGET_OBJECTS:wintoast>)
+endif()
+
 ########################################################################
 # RUST
 ########################################################################
@@ -2195,6 +2202,10 @@ set(GAME_GENERATED_SHARED
   src/game/generated/protocolglue.h
 )
 set(DEPS ${DEP_JSON} ${DEP_MD5} ${ZLIB_DEP})
+
+if(TARGET_OS STREQUAL "windows")
+    list(APPEND DEPS ${DEP_WINTOAST})
+endif()
 
 # Libraries
 set(LIBS
