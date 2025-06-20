@@ -68,7 +68,13 @@ void CNotifications::Notify(const char *pTitle, const char *pMessage)
 		g_object_unref(G_OBJECT(pNotif));
 	}
 #elif defined(CONF_FAMILY_WINDOWS)
-	WinToastTemplate Toast(WinToastTemplate::Text01);
+	WinToastTemplate Toast(WinToastTemplate::ImageAndText01);
+	char aFullPath[IO_MAX_PATH_LENGTH];
+	if(fs_getcwd(aFullPath, sizeof(aFullPath)))
+	{
+		str_append(aFullPath, "/data/logo.png", sizeof(aFullPath));
+	}
+	Toast.setImagePath(windows_utf8_to_wide(aFullPath));
 	Toast.setTextField(windows_utf8_to_wide(pMessage), WinToastTemplate::FirstLine);
 	Toast.setAttributionText(windows_utf8_to_wide(pTitle));
 	Toast.setDuration(WinToastTemplate::Duration::System);
