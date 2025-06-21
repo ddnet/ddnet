@@ -1356,24 +1356,7 @@ void CGameContext::OnClientDirectInput(int ClientId, void *pInput)
 
 void CGameContext::OnClientPredictedInput(int ClientId, void *pInput)
 {
-	// early return if no input at all has been sent by a player
-	if(pInput == nullptr && !m_aPlayerHasInput[ClientId])
-		return;
-
-	// set to last sent input when no new input has been sent
-	CNetObj_PlayerInput *pApplyInput = (CNetObj_PlayerInput *)pInput;
-	if(pApplyInput == nullptr)
-	{
-		pApplyInput = &m_aLastPlayerInput[ClientId];
-	}
-
-	if(!m_World.m_Paused)
-		m_apPlayers[ClientId]->OnPredictedInput(pApplyInput);
-}
-
-void CGameContext::OnClientPredictedEarlyInput(int ClientId, void *pInput)
-{
-	// early return if no input at all has been sent by a player
+	// early return if no input has ever been sent by a player
 	if(pInput == nullptr && !m_aPlayerHasInput[ClientId])
 		return;
 
@@ -1385,16 +1368,12 @@ void CGameContext::OnClientPredictedEarlyInput(int ClientId, void *pInput)
 	}
 	else
 	{
-		// Store input in this function and not in `OnClientPredictedInput`,
-		// because this function is called on all inputs, while
-		// `OnClientPredictedInput` is only called on the first input of each
-		// tick.
 		mem_copy(&m_aLastPlayerInput[ClientId], pApplyInput, sizeof(m_aLastPlayerInput[ClientId]));
 		m_aPlayerHasInput[ClientId] = true;
 	}
 
 	if(!m_World.m_Paused)
-		m_apPlayers[ClientId]->OnPredictedEarlyInput(pApplyInput);
+		m_apPlayers[ClientId]->OnPredictedInput(pApplyInput);
 
 	if(m_TeeHistorianActive)
 	{
