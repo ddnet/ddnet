@@ -1,9 +1,3 @@
-#include "score.h"
-#include "gamemodes/DDRace.h"
-#include "player.h"
-#include "save.h"
-#include "scoreworker.h"
-
 #include <base/system.h>
 #include <engine/server/databases/connection_pool.h>
 #include <engine/shared/config.h>
@@ -11,8 +5,15 @@
 #include <engine/shared/linereader.h>
 #include <engine/storage.h>
 #include <game/generated/wordlist.h>
+#include <game/server/gamemodes/DDRace.h>
+#include <game/team_state.h>
 
 #include <memory>
+
+#include "player.h"
+#include "save.h"
+#include "score.h"
+#include "scoreworker.h"
 
 class IDbConnection;
 
@@ -352,7 +353,7 @@ void CScore::LoadTeam(const char *pCode, int ClientId)
 		GameServer()->SendChatTarget(ClientId, "You have to be in a team (from 1-63)");
 		return;
 	}
-	if(pController->Teams().GetTeamState(Team) != CGameTeams::TEAMSTATE_OPEN)
+	if(pController->Teams().GetTeamState(Team) != ETeamState::OPEN)
 	{
 		GameServer()->SendChatTarget(ClientId, "Team can't be loaded while racing");
 		return;

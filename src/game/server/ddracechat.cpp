@@ -1,14 +1,15 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
-#include "gamecontext.h"
 #include <base/log.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
 #include <game/mapitems.h>
+#include <game/server/entities/character.h>
 #include <game/server/gamemodes/DDRace.h>
 #include <game/server/teams.h>
+#include <game/team_state.h>
 #include <game/version.h>
 
-#include "entities/character.h"
+#include "gamecontext.h"
 #include "player.h"
 #include "score.h"
 
@@ -1322,7 +1323,7 @@ void CGameContext::ConTeam0Mode(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	if(pController->Teams().GetTeamState(Team) != CGameTeams::TEAMSTATE_OPEN)
+	if(pController->Teams().GetTeamState(Team) != ETeamState::OPEN)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientId, "Team mode can't be changed while racing");
 		return;

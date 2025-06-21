@@ -2,9 +2,9 @@
 #define GAME_SERVER_SAVE_H
 
 #include <base/vmath.h>
-
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
+#include <game/team_state.h>
 
 class IGameController;
 class CGameContext;
@@ -195,7 +195,7 @@ private:
 	};
 	SSimpleSwitchers *m_pSwitchers = nullptr;
 
-	int m_TeamState = 0;
+	ETeamState m_TeamState = ETeamState::EMPTY;
 	int m_MembersCount = 0;
 	int m_HighestSwitchNumber = 0;
 	int m_TeamLocked = 0;
