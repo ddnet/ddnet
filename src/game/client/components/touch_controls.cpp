@@ -721,9 +721,7 @@ void CTouchControls::OnWindowResize()
 
 bool CTouchControls::OnTouchState(const std::vector<IInput::CTouchFingerState> &vTouchFingerStates)
 {
-	if(!g_Config.m_ClTouchControls)
-		return false;
-	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if(!IsActive())
 		return false;
 	if(GameClient()->m_Chat.IsActive() ||
 		GameClient()->m_GameConsole.IsActive() ||
@@ -741,9 +739,7 @@ bool CTouchControls::OnTouchState(const std::vector<IInput::CTouchFingerState> &
 
 void CTouchControls::OnRender()
 {
-	if(!g_Config.m_ClTouchControls)
-		return;
-	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if(!IsActive())
 		return;
 	if(GameClient()->m_Chat.IsActive() ||
 		GameClient()->m_Emoticon.IsActive() ||
@@ -756,6 +752,21 @@ void CTouchControls::OnRender()
 	Graphics()->MapScreen(0.0f, 0.0f, ScreenSize.x, ScreenSize.y);
 
 	RenderButtons();
+}
+
+bool CTouchControls::IsActive() const
+{
+	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	{
+		return false;
+	}
+#if defined(CONF_VIDEORECORDER)
+	if(IVideo::Current())
+	{
+		return g_Config.m_ClVideoTouchControls;
+	}
+#endif
+	return g_Config.m_ClTouchControls;
 }
 
 bool CTouchControls::LoadConfigurationFromFile(int StorageType)
