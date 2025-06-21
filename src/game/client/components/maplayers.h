@@ -64,7 +64,6 @@ public:
 private:
 	std::vector<std::unique_ptr<CRenderLayer>> m_vRenderLayers;
 	int GetLayerType(const CMapItemLayer *pLayer) const;
-	bool RenderGroup(const CRenderLayerParams &Params, int GroupId);
 };
 
 #endif

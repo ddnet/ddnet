@@ -35,6 +35,7 @@ public:
 	int m_RenderType;
 	int EntityOverlayVal;
 	vec2 m_Center;
+	float m_Zoom;
 };
 
 class CRenderLayer
@@ -48,6 +49,7 @@ public:
 	virtual void Render(const CRenderLayerParams &Params) = 0;
 	virtual bool DoRender(const CRenderLayerParams &Params) const = 0;
 	virtual bool IsValid() const { return true; }
+	virtual bool IsGroup() const { return false; }
 
 	int GetGroup() const { return m_GroupId; }
 
@@ -70,6 +72,23 @@ protected:
 	class IClient *m_pClient = nullptr;
 	class CGameClient *m_pGameClient = nullptr;
 	std::shared_ptr<CMapBasedEnvelopePointAccess> m_pEnvelopePoints;
+};
+
+class CRenderLayerGroup : public CRenderLayer
+{
+public:
+	CRenderLayerGroup(int GroupId, CMapItemGroup *pGroup);
+	virtual ~CRenderLayerGroup() = default;
+	void Init() override {}
+	void Render(const CRenderLayerParams &Params) override;
+	bool DoRender(const CRenderLayerParams &Params) const override;
+	bool IsValid() const override { return m_pGroup != nullptr; }
+	bool IsGroup() const override { return true; }
+
+protected:
+	IGraphics::CTextureHandle GetTexture() const override { return IGraphics::CTextureHandle(); }
+
+	CMapItemGroup *m_pGroup;
 };
 
 class CRenderLayerTile : public CRenderLayer
