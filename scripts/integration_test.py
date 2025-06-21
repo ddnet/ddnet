@@ -97,7 +97,7 @@ class TestRunner:
 		self.ddnet_server = ddnet_server
 		self.ddnet_mastersrv = ddnet_mastersrv
 		self.repo_dir = repo_dir
-		self.data_dir = os.path.join(repo_dir, "data")
+		self.data_dir = os.path.join(dir, "data")
 		self.dir = dir
 		self.extra_env_vars = {}
 		self.keep_tmpdirs = keep_tmpdirs
