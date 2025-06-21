@@ -546,10 +546,6 @@ if(EXCEPTION_HANDLING)
   find_package(Crashdump)
 endif()
 
-if(SECURITY_COMPILER_FLAGS)
-  find_package(SSP)
-endif()
-
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   find_program(CMAKE_OTOOL otool)
   find_program(DMGBUILD dmgbuild)
