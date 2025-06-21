@@ -76,11 +76,49 @@ CCamera *CMapLayers::GetCurCamera()
 	return &m_pClient->m_Camera;
 }
 
+bool CMapLayers::AddCustomEntitiesLayer(int LayerId, int Data, int ImageId, int TileSize, int TileIndexOffset, int FlagsOffset, int Width, int Height)
+{
+	if(m_vCustomEntitiesLayers.size() >= MAX_CUSTOM_ENTITIES_LAYERS)
+		return false; // Too many custom entities layers
+
+	for(auto &CustomEntitiesLayer : m_vCustomEntitiesLayers)
+	{
+		if(CustomEntitiesLayer.LayerId == LayerId)
+		{
+			return false; // Layer already exists
+		}
+	}
+
+	SCustomEntitiesLayer CustomLayer;
+
+	CustomLayer.m_pData = m_pLayers->Map()->GetData(Data); // "m_Data" for custom layers may be different from a normal tile layer
+
+	if(!CustomLayer.m_pData)
+		return false;
+
+	CustomLayer.LayerId = LayerId; //Set Id so we dont repeat layers
+	CustomLayer.m_ImageId = ImageId;
+	CustomLayer.m_TileSize = TileSize; //Tile size may be different from CTile
+	CustomLayer.m_TileIndexOffset = TileIndexOffset; //Tile m_Index position
+	CustomLayer.m_FlagsOffset = FlagsOffset; //Tile m_Flags position
+	CustomLayer.m_Width = Width;
+	CustomLayer.m_Height = Height;
+
+	int Size = m_pLayers->Map()->GetDataSize(Data);
+
+	if(Size < CustomLayer.m_Width * CustomLayer.m_Height * TileSize)
+		return false;
+
+	m_vCustomEntitiesLayers.push_back(CustomLayer);
+	return true;
+}
+
 void CMapLayers::OnMapLoad()
 {
 	m_pEnvelopePoints = std::make_shared<CMapBasedEnvelopePointAccess>(m_pLayers->Map());
 	bool PassedGameLayer = false;
 	m_vRenderLayers.clear();
+	m_vCustomEntitiesLayers.clear();
 
 	const char *pLoadingTitle = Localize("Loading map");
 	const char *pLoadingMessage = Localize("Uploading map data to GPU");
@@ -235,6 +273,14 @@ void CMapLayers::OnRender()
 		pRenderLayer->Render(Params);
 	}
 
+	if(Params.EntityOverlayVal)
+	{
+		for(auto &CustomEntitiesLayer : m_vCustomEntitiesLayers)
+		{
+			RenderCustomEntitiesLayer(CustomEntitiesLayer, Params.EntityOverlayVal / 100.0f);
+		}
+	}
+
 	DisableClip();
 
 	// don't reset screen on background
@@ -299,4 +345,18 @@ bool CMapLayers::RenderGroup(const CRenderLayerParams &Params, int GroupId)
 
 	RenderTools()->MapScreenToGroup(Params.m_Center.x, Params.m_Center.y, pGroup, GetCurCamera()->m_Zoom);
 	return true;
+}
+
+void CMapLayers::RenderCustomEntitiesLayer(const SCustomEntitiesLayer &CustomLayer, float Alpha)
+{
+	if(CustomLayer.m_ImageId != -1)
+		Graphics()->TextureSet(m_pImages->Get(CustomLayer.m_ImageId));
+	else
+		Graphics()->TextureClear();
+
+	ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, Alpha);
+	Graphics()->BlendNone();
+	RenderTools()->RenderCustomEntitiesTilemap(CustomLayer.m_pData, CustomLayer.m_TileSize, CustomLayer.m_TileIndexOffset, CustomLayer.m_FlagsOffset, CustomLayer.m_Width, CustomLayer.m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_OPAQUE);
+	Graphics()->BlendNormal();
+	RenderTools()->RenderCustomEntitiesTilemap(CustomLayer.m_pData, CustomLayer.m_TileSize, CustomLayer.m_TileIndexOffset, CustomLayer.m_FlagsOffset, CustomLayer.m_Width, CustomLayer.m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_TRANSPARENT);
 }

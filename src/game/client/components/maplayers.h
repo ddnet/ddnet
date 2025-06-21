@@ -10,6 +10,8 @@
 #include <memory>
 #include <vector>
 
+#define MAX_CUSTOM_ENTITIES_LAYERS 8
+
 class CCamera;
 class CLayers;
 class CMapImages;
@@ -61,10 +63,25 @@ public:
 
 	virtual CCamera *GetCurCamera();
 
+	bool AddCustomEntitiesLayer(int LayerId, int Data, int ImageId, int TileSize, int TileIndexOffset, int FlagsOffset, int Width, int Height);
+
 private:
+	struct SCustomEntitiesLayer
+	{
+		int LayerId;
+		void *m_pData;
+		int m_ImageId;
+		int m_TileSize;
+		int m_TileIndexOffset;
+		int m_FlagsOffset;
+		int m_Width;
+		int m_Height;
+	};
+	std::vector<SCustomEntitiesLayer> m_vCustomEntitiesLayers;
 	std::vector<std::unique_ptr<CRenderLayer>> m_vRenderLayers;
 	int GetLayerType(const CMapItemLayer *pLayer) const;
 	bool RenderGroup(const CRenderLayerParams &Params, int GroupId);
+	void RenderCustomEntitiesLayer(const SCustomEntitiesLayer &CustomLayer, float Alpha);
 };
 
 #endif
