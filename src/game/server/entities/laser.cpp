@@ -1,15 +1,15 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include "laser.h"
-#include "character.h"
-
 #include <engine/shared/config.h>
-
+#include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
 #include <game/mapitems.h>
-
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
+#include <game/server/player.h>
+
+#include "character.h"
+#include "laser.h"
 
 CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
@@ -30,6 +30,21 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	m_TeamMask = pOwnerChar ? pOwnerChar->TeamMask() : CClientMask();
 	m_BelongsToPracticeTeam = pOwnerChar && pOwnerChar->Teams()->IsPractice(pOwnerChar->Team());
+
+	CPlayer *pOwnerPlayer = (Owner >= 0 && Owner < MAX_CLIENTS) ? GameServer()->m_apPlayers[m_Owner] : nullptr;
+	m_InteractState.Init(GameServer(), Owner, pOwnerPlayer ? pOwnerPlayer->GetUniqueCid() : 0);
+	if(pOwnerPlayer)
+	{
+		m_InteractState.FillOwnerConnected(
+			pOwnerChar && pOwnerChar->IsAlive(),
+			pOwnerPlayer ? GameServer()->GetDDRaceTeam(m_Owner) : 0,
+			pOwnerChar && pOwnerChar->Core()->m_Solo,
+			pOwnerChar && pOwnerChar->Core()->m_LaserHitDisabled);
+	}
+	else
+	{
+		m_InteractState.FillOwnerDisconnected();
+	}
 
 	GameWorld()->InsertEntity(this);
 	DoBounce();
@@ -266,9 +281,27 @@ void CLaser::Reset()
 
 void CLaser::Tick()
 {
+	CPlayer *pOwnerPlayer = (m_Owner >= 0 && m_Owner < MAX_CLIENTS) ? GameServer()->m_apPlayers[m_Owner] : nullptr;
+	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+
+	// as long as the owner is connected
+	// refill the state on tick
+	// as soon as the owner disconnects keep that state
+	if(pOwnerPlayer)
+	{
+		m_InteractState.FillOwnerConnected(
+			pOwnerChar && pOwnerChar->IsAlive(),
+			pOwnerPlayer ? GameServer()->GetDDRaceTeam(m_Owner) : 0,
+			pOwnerChar && pOwnerChar->Core()->m_Solo,
+			pOwnerChar && pOwnerChar->Core()->m_LaserHitDisabled);
+	}
+	else
+	{
+		m_InteractState.FillOwnerDisconnected();
+	}
+
 	if((g_Config.m_SvDestroyLasersOnDeath || m_BelongsToPracticeTeam) && m_Owner >= 0)
 	{
-		CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 		if(!(pOwnerChar && pOwnerChar->IsAlive()))
 		{
 			Reset();
@@ -294,22 +327,8 @@ void CLaser::Snap(int SnappingClient)
 {
 	if(NetworkClipped(SnappingClient) && NetworkClipped(SnappingClient, m_From))
 		return;
-	CCharacter *pOwnerChar = nullptr;
-	if(m_Owner >= 0)
-		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	if(!pOwnerChar)
-		return;
 
-	pOwnerChar = nullptr;
-	CClientMask TeamMask = CClientMask().set();
-
-	if(m_Owner >= 0)
-		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-
-	if(pOwnerChar && pOwnerChar->IsAlive())
-		TeamMask = pOwnerChar->TeamMask();
-
-	if(SnappingClient != SERVER_DEMO_CLIENT && !TeamMask.test(SnappingClient))
+	if(SnappingClient != SERVER_DEMO_CLIENT && !m_InteractState.CanSeeMask().test(SnappingClient))
 		return;
 
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);

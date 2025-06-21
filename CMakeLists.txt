@@ -2748,6 +2748,8 @@ if(SERVER)
     gamemodes/mod.h
     gameworld.cpp
     gameworld.h
+    interact_state.cpp
+    interact_state.h
     mutes.cpp
     player.cpp
     player.h
