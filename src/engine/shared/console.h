@@ -178,6 +178,9 @@ public:
 
 	void SetAccessLevel(int AccessLevel) override;
 
+	template<typename T>
+	static std::optional<T> ColorParse(const char *pStr, float DarkestLighting);
+
 	// DDRace
 
 	static void ConUserCommandStatus(IConsole::IResult *pResult, void *pUser);
