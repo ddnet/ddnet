@@ -146,10 +146,10 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 			return -2;
 
 		CNetObj_ClientInfo Info6 = {};
-		StrToInts(&Info6.m_Name0, 4, Client.m_aName);
-		StrToInts(&Info6.m_Clan0, 3, Client.m_aClan);
+		StrToInts(Info6.m_aName, 4, Client.m_aName);
+		StrToInts(Info6.m_aClan, 3, Client.m_aClan);
 		Info6.m_Country = Client.m_Country;
-		StrToInts(&Info6.m_Skin0, 6, Client.m_aSkinName);
+		StrToInts(Info6.m_aSkin, 6, Client.m_aSkinName);
 		Info6.m_UseCustomColor = Client.m_UseCustomColor;
 		Info6.m_ColorBody = Client.m_ColorBody;
 		Info6.m_ColorFeet = Client.m_ColorFeet;
