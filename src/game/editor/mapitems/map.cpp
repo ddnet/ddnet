@@ -65,8 +65,8 @@ void CEditorMap::InsertEnvelope(int Index, std::shared_ptr<CEnvelope> &pEnvelope
 {
 	if(Index < 0 || Index >= (int)m_vpEnvelopes.size() + 1)
 		return;
-	m_pEditor->m_Map.m_vpEnvelopes.push_back(pEnvelope);
-	m_pEditor->m_SelectedEnvelope = m_pEditor->m_Map.MoveEnvelope((int)m_pEditor->m_Map.m_vpEnvelopes.size() - 1, Index);
+	m_vpEnvelopes.push_back(pEnvelope);
+	m_pEditor->m_SelectedEnvelope = MoveEnvelope((int)m_vpEnvelopes.size() - 1, Index);
 }
 
 void CEditorMap::UpdateEnvelopeReferences(int Index, std::shared_ptr<CEnvelope> &pEnvelope, std::vector<std::shared_ptr<IEditorEnvelopeReference>> &vpEditorObjectReferences)
@@ -180,8 +180,7 @@ std::vector<std::shared_ptr<IEditorEnvelopeReference>> CEditorMap::VisitEnvelope
 std::shared_ptr<CLayerGroup> CEditorMap::NewGroup()
 {
 	OnModify();
-	std::shared_ptr<CLayerGroup> pGroup = std::make_shared<CLayerGroup>();
-	pGroup->m_pMap = this;
+	std::shared_ptr<CLayerGroup> pGroup = std::make_shared<CLayerGroup>(this);
 	m_vpGroups.push_back(pGroup);
 	return pGroup;
 }
@@ -267,7 +266,7 @@ void CEditorMap::CreateDefault()
 	std::shared_ptr<CLayerGroup> pGroup = NewGroup();
 	pGroup->m_ParallaxX = 0;
 	pGroup->m_ParallaxY = 0;
-	std::shared_ptr<CLayerQuads> pLayer = std::make_shared<CLayerQuads>(m_pEditor);
+	std::shared_ptr<CLayerQuads> pLayer = std::make_shared<CLayerQuads>(this);
 	CQuad *pQuad = pLayer->NewQuad(0, 0, 1600, 1200);
 	pQuad->m_aColors[0].r = pQuad->m_aColors[1].r = 94;
 	pQuad->m_aColors[0].g = pQuad->m_aColors[1].g = 132;
@@ -279,7 +278,7 @@ void CEditorMap::CreateDefault()
 
 	// Add game group and layer
 	MakeGameGroup(NewGroup());
-	MakeGameLayer(std::make_shared<CLayerGame>(m_pEditor, 50, 50));
+	MakeGameLayer(std::make_shared<CLayerGame>(this, 50, 50));
 	m_pGameGroup->AddLayer(m_pGameLayer);
 
 	ResetModifiedState();
@@ -288,7 +287,6 @@ void CEditorMap::CreateDefault()
 void CEditorMap::MakeGameLayer(const std::shared_ptr<CLayer> &pLayer)
 {
 	m_pGameLayer = std::static_pointer_cast<CLayerGame>(pLayer);
-	m_pGameLayer->m_pEditor = m_pEditor;
 }
 
 void CEditorMap::MakeGameGroup(std::shared_ptr<CLayerGroup> pGroup)
@@ -301,31 +299,26 @@ void CEditorMap::MakeGameGroup(std::shared_ptr<CLayerGroup> pGroup)
 void CEditorMap::MakeTeleLayer(const std::shared_ptr<CLayer> &pLayer)
 {
 	m_pTeleLayer = std::static_pointer_cast<CLayerTele>(pLayer);
-	m_pTeleLayer->m_pEditor = m_pEditor;
 }
 
 void CEditorMap::MakeSpeedupLayer(const std::shared_ptr<CLayer> &pLayer)
 {
 	m_pSpeedupLayer = std::static_pointer_cast<CLayerSpeedup>(pLayer);
-	m_pSpeedupLayer->m_pEditor = m_pEditor;
 }
 
 void CEditorMap::MakeFrontLayer(const std::shared_ptr<CLayer> &pLayer)
 {
 	m_pFrontLayer = std::static_pointer_cast<CLayerFront>(pLayer);
-	m_pFrontLayer->m_pEditor = m_pEditor;
 }
 
 void CEditorMap::MakeSwitchLayer(const std::shared_ptr<CLayer> &pLayer)
 {
 	m_pSwitchLayer = std::static_pointer_cast<CLayerSwitch>(pLayer);
-	m_pSwitchLayer->m_pEditor = m_pEditor;
 }
 
 void CEditorMap::MakeTuneLayer(const std::shared_ptr<CLayer> &pLayer)
 {
 	m_pTuneLayer = std::static_pointer_cast<CLayerTune>(pLayer);
-	m_pTuneLayer->m_pEditor = m_pEditor;
 }
 
 std::shared_ptr<CEditorImage> CEditorMap::SelectedImage() const

@@ -2,8 +2,8 @@
 
 #include <game/editor/editor.h>
 
-CLayerSpeedup::CLayerSpeedup(CEditor *pEditor, int w, int h) :
-	CLayerTiles(pEditor, w, h)
+CLayerSpeedup::CLayerSpeedup(CEditorMap *pMap, int w, int h) :
+	CLayerTiles(pMap, w, h)
 {
 	str_copy(m_aName, "Speedup");
 	m_HasSpeedup = true;
@@ -45,14 +45,14 @@ void CLayerSpeedup::Resize(int NewW, int NewH)
 	CLayerTiles::Resize(NewW, NewH);
 
 	// resize gamelayer too
-	if(m_pEditor->m_Map.m_pGameLayer->m_Width != NewW || m_pEditor->m_Map.m_pGameLayer->m_Height != NewH)
-		m_pEditor->m_Map.m_pGameLayer->Resize(NewW, NewH);
+	if(Map()->m_pGameLayer->m_Width != NewW || Map()->m_pGameLayer->m_Height != NewH)
+		Map()->m_pGameLayer->Resize(NewW, NewH);
 }
 
 void CLayerSpeedup::Shift(EShiftDirection Direction)
 {
 	CLayerTiles::Shift(Direction);
-	ShiftImpl(m_pSpeedupTile, Direction, m_pEditor->m_ShiftBy);
+	ShiftImpl(m_pSpeedupTile, Direction, Editor()->m_ShiftBy);
 }
 
 bool CLayerSpeedup::IsEmpty() const
@@ -66,7 +66,7 @@ bool CLayerSpeedup::IsEmpty() const
 			{
 				continue;
 			}
-			if(m_pEditor->IsAllowPlaceUnusedTiles() || IsValidSpeedupTile(Index))
+			if(Editor()->IsAllowPlaceUnusedTiles() || IsValidSpeedupTile(Index))
 			{
 				return false;
 			}
@@ -83,14 +83,14 @@ void CLayerSpeedup::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 	CLayerSpeedup *pSpeedupLayer = static_cast<CLayerSpeedup *>(pBrush);
 	int sx = ConvertX(WorldPos.x);
 	int sy = ConvertY(WorldPos.y);
-	if(str_comp(pSpeedupLayer->m_aFilename, m_pEditor->m_aFilename))
+	if(str_comp(pSpeedupLayer->m_aFilename, Editor()->m_aFilename))
 	{
-		m_pEditor->m_SpeedupAngle = pSpeedupLayer->m_SpeedupAngle;
-		m_pEditor->m_SpeedupForce = pSpeedupLayer->m_SpeedupForce;
-		m_pEditor->m_SpeedupMaxSpeed = pSpeedupLayer->m_SpeedupMaxSpeed;
+		Editor()->m_SpeedupAngle = pSpeedupLayer->m_SpeedupAngle;
+		Editor()->m_SpeedupForce = pSpeedupLayer->m_SpeedupForce;
+		Editor()->m_SpeedupMaxSpeed = pSpeedupLayer->m_SpeedupMaxSpeed;
 	}
 
-	bool Destructive = m_pEditor->m_BrushDrawDestructive || pSpeedupLayer->IsEmpty();
+	bool Destructive = Editor()->m_BrushDrawDestructive || pSpeedupLayer->IsEmpty();
 
 	for(int y = 0; y < pSpeedupLayer->m_Height; y++)
 		for(int x = 0; x < pSpeedupLayer->m_Width; x++)
@@ -114,13 +114,13 @@ void CLayerSpeedup::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 				m_pSpeedupTile[TgtIndex].m_Type,
 				m_pTiles[TgtIndex].m_Index};
 
-			if((m_pEditor->IsAllowPlaceUnusedTiles() || IsValidSpeedupTile(pSpeedupLayer->m_pTiles[SrcIndex].m_Index)) && pSpeedupLayer->m_pTiles[SrcIndex].m_Index != TILE_AIR)
+			if((Editor()->IsAllowPlaceUnusedTiles() || IsValidSpeedupTile(pSpeedupLayer->m_pTiles[SrcIndex].m_Index)) && pSpeedupLayer->m_pTiles[SrcIndex].m_Index != TILE_AIR)
 			{
-				if(m_pEditor->m_SpeedupAngle != pSpeedupLayer->m_SpeedupAngle || m_pEditor->m_SpeedupForce != pSpeedupLayer->m_SpeedupForce || m_pEditor->m_SpeedupMaxSpeed != pSpeedupLayer->m_SpeedupMaxSpeed)
+				if(Editor()->m_SpeedupAngle != pSpeedupLayer->m_SpeedupAngle || Editor()->m_SpeedupForce != pSpeedupLayer->m_SpeedupForce || Editor()->m_SpeedupMaxSpeed != pSpeedupLayer->m_SpeedupMaxSpeed)
 				{
-					m_pSpeedupTile[TgtIndex].m_Force = m_pEditor->m_SpeedupForce;
-					m_pSpeedupTile[TgtIndex].m_MaxSpeed = m_pEditor->m_SpeedupMaxSpeed;
-					m_pSpeedupTile[TgtIndex].m_Angle = m_pEditor->m_SpeedupAngle;
+					m_pSpeedupTile[TgtIndex].m_Force = Editor()->m_SpeedupForce;
+					m_pSpeedupTile[TgtIndex].m_MaxSpeed = Editor()->m_SpeedupMaxSpeed;
+					m_pSpeedupTile[TgtIndex].m_Angle = Editor()->m_SpeedupAngle;
 					m_pSpeedupTile[TgtIndex].m_Type = pSpeedupLayer->m_pTiles[SrcIndex].m_Index;
 					m_pTiles[TgtIndex].m_Index = pSpeedupLayer->m_pTiles[SrcIndex].m_Index;
 				}
@@ -132,11 +132,11 @@ void CLayerSpeedup::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 					m_pSpeedupTile[TgtIndex].m_Type = pSpeedupLayer->m_pTiles[SrcIndex].m_Index;
 					m_pTiles[TgtIndex].m_Index = pSpeedupLayer->m_pTiles[SrcIndex].m_Index;
 				}
-				else if(m_pEditor->m_SpeedupForce)
+				else if(Editor()->m_SpeedupForce)
 				{
-					m_pSpeedupTile[TgtIndex].m_Force = m_pEditor->m_SpeedupForce;
-					m_pSpeedupTile[TgtIndex].m_MaxSpeed = m_pEditor->m_SpeedupMaxSpeed;
-					m_pSpeedupTile[TgtIndex].m_Angle = m_pEditor->m_SpeedupAngle;
+					m_pSpeedupTile[TgtIndex].m_Force = Editor()->m_SpeedupForce;
+					m_pSpeedupTile[TgtIndex].m_MaxSpeed = Editor()->m_SpeedupMaxSpeed;
+					m_pSpeedupTile[TgtIndex].m_Angle = Editor()->m_SpeedupAngle;
 					m_pSpeedupTile[TgtIndex].m_Type = pSpeedupLayer->m_pTiles[SrcIndex].m_Index;
 					m_pTiles[TgtIndex].m_Index = pSpeedupLayer->m_pTiles[SrcIndex].m_Index;
 				}
@@ -264,7 +264,7 @@ void CLayerSpeedup::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 
 	CLayerSpeedup *pLt = static_cast<CLayerSpeedup *>(pBrush);
 
-	bool Destructive = m_pEditor->m_BrushDrawDestructive || Empty || pLt->IsEmpty();
+	bool Destructive = Editor()->m_BrushDrawDestructive || Empty || pLt->IsEmpty();
 
 	for(int y = 0; y < h; y++)
 	{
@@ -289,7 +289,7 @@ void CLayerSpeedup::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 				m_pSpeedupTile[TgtIndex].m_Type,
 				m_pTiles[TgtIndex].m_Index};
 
-			if(Empty || (!m_pEditor->IsAllowPlaceUnusedTiles() && !IsValidSpeedupTile((pLt->m_pTiles[SrcIndex]).m_Index))) // no speed up tile chosen: reset
+			if(Empty || (!Editor()->IsAllowPlaceUnusedTiles() && !IsValidSpeedupTile((pLt->m_pTiles[SrcIndex]).m_Index))) // no speed up tile chosen: reset
 			{
 				m_pTiles[TgtIndex].m_Index = 0;
 				m_pSpeedupTile[TgtIndex].m_Force = 0;
@@ -307,18 +307,18 @@ void CLayerSpeedup::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 				{
 					m_pSpeedupTile[TgtIndex].m_Type = m_pTiles[TgtIndex].m_Index;
 
-					if((pLt->m_pSpeedupTile[SrcIndex].m_Force == 0 && m_pEditor->m_SpeedupForce) || m_pEditor->m_SpeedupForce != pLt->m_SpeedupForce)
-						m_pSpeedupTile[TgtIndex].m_Force = m_pEditor->m_SpeedupForce;
+					if((pLt->m_pSpeedupTile[SrcIndex].m_Force == 0 && Editor()->m_SpeedupForce) || Editor()->m_SpeedupForce != pLt->m_SpeedupForce)
+						m_pSpeedupTile[TgtIndex].m_Force = Editor()->m_SpeedupForce;
 					else
 						m_pSpeedupTile[TgtIndex].m_Force = pLt->m_pSpeedupTile[SrcIndex].m_Force;
 
-					if((pLt->m_pSpeedupTile[SrcIndex].m_Angle == 0 && m_pEditor->m_SpeedupAngle) || m_pEditor->m_SpeedupAngle != pLt->m_SpeedupAngle)
-						m_pSpeedupTile[TgtIndex].m_Angle = m_pEditor->m_SpeedupAngle;
+					if((pLt->m_pSpeedupTile[SrcIndex].m_Angle == 0 && Editor()->m_SpeedupAngle) || Editor()->m_SpeedupAngle != pLt->m_SpeedupAngle)
+						m_pSpeedupTile[TgtIndex].m_Angle = Editor()->m_SpeedupAngle;
 					else
 						m_pSpeedupTile[TgtIndex].m_Angle = pLt->m_pSpeedupTile[SrcIndex].m_Angle;
 
-					if((pLt->m_pSpeedupTile[SrcIndex].m_MaxSpeed == 0 && m_pEditor->m_SpeedupMaxSpeed) || m_pEditor->m_SpeedupMaxSpeed != pLt->m_SpeedupMaxSpeed)
-						m_pSpeedupTile[TgtIndex].m_MaxSpeed = m_pEditor->m_SpeedupMaxSpeed;
+					if((pLt->m_pSpeedupTile[SrcIndex].m_MaxSpeed == 0 && Editor()->m_SpeedupMaxSpeed) || Editor()->m_SpeedupMaxSpeed != pLt->m_SpeedupMaxSpeed)
+						m_pSpeedupTile[TgtIndex].m_MaxSpeed = Editor()->m_SpeedupMaxSpeed;
 					else
 						m_pSpeedupTile[TgtIndex].m_MaxSpeed = pLt->m_pSpeedupTile[SrcIndex].m_MaxSpeed;
 				}

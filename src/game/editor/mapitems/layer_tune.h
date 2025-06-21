@@ -17,7 +17,7 @@ struct STuneTileStateChange
 class CLayerTune : public CLayerTiles
 {
 public:
-	CLayerTune(CEditor *pEditor, int w, int h);
+	CLayerTune(CEditorMap *pMap, int w, int h);
 	CLayerTune(const CLayerTune &Other);
 	~CLayerTune() override;
 

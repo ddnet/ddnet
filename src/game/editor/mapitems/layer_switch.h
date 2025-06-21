@@ -19,7 +19,7 @@ struct SSwitchTileStateChange
 class CLayerSwitch : public CLayerTiles
 {
 public:
-	CLayerSwitch(CEditor *pEditor, int w, int h);
+	CLayerSwitch(CEditorMap *pMap, int w, int h);
 	CLayerSwitch(const CLayerSwitch &Other);
 	~CLayerSwitch() override;
 

@@ -3,10 +3,12 @@
 
 #include "layer.h"
 
+#include <game/editor/map_object.h>
+
 #include <memory>
 #include <vector>
 
-class CLayerGroup
+class CLayerGroup : public CMapObject
 {
 public:
 	class CEditorMap *m_pMap;
@@ -30,12 +32,12 @@ public:
 	bool m_Visible;
 	bool m_Collapse;
 
-	CLayerGroup();
-	~CLayerGroup();
+	explicit CLayerGroup(CEditorMap *pMap);
+	void OnAttach(CEditorMap *pMap) override;
 
 	void Convert(CUIRect *pRect) const;
 	void Render();
-	void MapScreen() const;
+	void MapScreen();
 	void Mapping(float *pPoints) const;
 
 	void GetSize(float *pWidth, float *pHeight) const;

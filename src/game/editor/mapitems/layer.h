@@ -5,6 +5,7 @@
 
 #include <game/client/ui.h>
 #include <game/client/ui_rect.h>
+#include <game/editor/map_object.h>
 #include <game/mapitems.h>
 
 #include <memory>
@@ -13,36 +14,11 @@ using FIndexModifyFunction = std::function<void(int *pIndex)>;
 
 class CLayerGroup;
 
-class CLayer
+class CLayer : public CMapObject
 {
 public:
-	class CEditor *m_pEditor;
-	const class IGraphics *Graphics() const;
-	class IGraphics *Graphics();
-	const class ITextRender *TextRender() const;
-	class ITextRender *TextRender();
-
-	explicit CLayer(CEditor *pEditor)
-	{
-		m_Type = LAYERTYPE_INVALID;
-		str_copy(m_aName, "(invalid)");
-		m_Visible = true;
-		m_Readonly = false;
-		m_Flags = 0;
-		m_pEditor = pEditor;
-	}
-
-	CLayer(const CLayer &Other)
-	{
-		str_copy(m_aName, Other.m_aName);
-		m_Flags = Other.m_Flags;
-		m_pEditor = Other.m_pEditor;
-		m_Type = Other.m_Type;
-		m_Visible = true;
-		m_Readonly = false;
-	}
-
-	virtual ~CLayer() = default;
+	explicit CLayer(CEditorMap *pMap, int Type);
+	CLayer(const CLayer &Other);
 
 	virtual void BrushSelecting(CUIRect Rect) {}
 	virtual int BrushGrab(CLayerGroup *pBrush, CUIRect Rect) { return 0; }
@@ -70,13 +46,12 @@ public:
 		*pWidth = 0;
 		*pHeight = 0;
 	}
-
-	char m_aName[12];
 	int m_Type;
-	int m_Flags;
+	char m_aName[12] = "";
+	int m_Flags = 0;
 
-	bool m_Readonly;
-	bool m_Visible;
+	bool m_Readonly = false;
+	bool m_Visible = true;
 };
 
 #endif

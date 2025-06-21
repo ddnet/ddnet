@@ -3,12 +3,12 @@
 
 #include <base/types.h>
 
-#include <game/editor/component.h>
+#include <game/editor/map_object.h>
 
-class CEditorSound : public CEditorComponent
+class CEditorSound : public CMapObject
 {
 public:
-	explicit CEditorSound(CEditor *pEditor);
+	explicit CEditorSound(CEditorMap *pMap);
 	~CEditorSound() override;
 
 	int m_SoundId = -1;
