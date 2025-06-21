@@ -243,6 +243,10 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 				str_format(aBuf, sizeof(aBuf), Localize("No local servers found (ports %d-%d)"), IServerBrowser::LAN_PORT_BEGIN, IServerBrowser::LAN_PORT_END);
 				Ui()->DoLabel(&View, aBuf, 16.0f, TEXTALIGN_MC);
 			}
+			else if(ServerBrowser()->IsServerlistError())
+			{
+				Ui()->DoLabel(&View, Localize("Could not get server list from master server"), 16.0f, TEXTALIGN_MC);
+			}
 			else
 			{
 				Ui()->DoLabel(&View, Localize("No servers found"), 16.0f, TEXTALIGN_MC);
