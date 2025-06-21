@@ -1111,7 +1111,8 @@ bool CCharacter::UnFreeze()
 		m_FreezeTime = 0;
 		m_Core.m_FreezeStart = 0;
 		m_Core.m_FreezeEnd = m_Core.m_DeepFrozen ? -1 : 0;
-		m_FrozenLastTick = true;
+		if(GameWorld()->m_WorldConfig.m_PredictDDRace)
+			m_FrozenLastTick = true;
 		return true;
 	}
 	return false;
