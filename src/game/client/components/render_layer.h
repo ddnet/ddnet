@@ -35,6 +35,7 @@ public:
 	int m_RenderType;
 	int EntityOverlayVal;
 	vec2 m_Center;
+	int m_GameLayersOverride;
 };
 
 class CRenderLayer

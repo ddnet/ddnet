@@ -63,20 +63,22 @@ public:
 
 	virtual CCamera *GetCurCamera();
 
-	bool AddCustomEntitiesLayer(int LayerId, int Data, int ImageId, int TileSize, int TileIndexOffset, int FlagsOffset, int Width, int Height);
+	bool AddCustomEntitiesLayer(int LayerIndex, int Data, int ImageId, int TileSize, int TileIndexOffset, int TileFlagsOffset);
+	int GetCustomEntitiesOverride() const { return m_CustomEntitiesOverride; }
 
 private:
 	struct SCustomEntitiesLayer
 	{
-		int LayerId;
+		int LayerIndex;
 		void *m_pData;
 		int m_ImageId;
 		int m_TileSize;
 		int m_TileIndexOffset;
-		int m_FlagsOffset;
+		int m_TileFlagsOffset;
 		int m_Width;
 		int m_Height;
 	};
+	int m_CustomEntitiesOverride = 0; // Override Game Layers
 	std::vector<SCustomEntitiesLayer> m_vCustomEntitiesLayers;
 	std::vector<std::unique_ptr<CRenderLayer>> m_vRenderLayers;
 	int GetLayerType(const CMapItemLayer *pLayer) const;

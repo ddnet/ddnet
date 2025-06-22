@@ -617,13 +617,11 @@ Messages = [
 	]),
  
 	NetMessageEx("Sv_CustomEntitiesLayer", "map-custom-entities-layer@netmsg.ddnet.org", [
-		NetIntAny("m_LayerId"),
+		NetIntAny("m_LayerIndex"),
 		NetIntAny("m_Data"),
 		NetIntAny("m_ImageId"),
 		NetIntAny("m_TileSize"),
 		NetIntAny("m_TileIndexOffset"),
-		NetIntAny("m_FlagsOffset"),
-		NetIntAny("m_Width"),
-		NetIntAny("m_Height"),
+		NetIntAny("m_TileFlagsOffset"),
 	]),
 ]

@@ -1193,7 +1193,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 	{
 		CNetMsg_Sv_CustomEntitiesLayer *pMsg = (CNetMsg_Sv_CustomEntitiesLayer *)pRawMsg;
 
-		m_MapLayersForeground.AddCustomEntitiesLayer(pMsg->m_LayerId, pMsg->m_Data, pMsg->m_ImageId, pMsg->m_TileSize, pMsg->m_TileIndexOffset, pMsg->m_FlagsOffset, pMsg->m_Width, pMsg->m_Height);
+		m_MapLayersForeground.AddCustomEntitiesLayer(pMsg->m_LayerIndex, pMsg->m_Data, pMsg->m_ImageId, pMsg->m_TileSize, pMsg->m_TileIndexOffset, pMsg->m_TileFlagsOffset);
 	}
 }
 
