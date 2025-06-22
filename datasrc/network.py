@@ -615,4 +615,13 @@ Messages = [
 	NetMessageEx("Sv_MapSoundGlobal", "map-sound-global@netmsg.ddnet.org", [
 		NetIntAny("m_SoundId"),
 	]),
+ 
+	NetMessageEx("Sv_CustomEntitiesLayer", "map-custom-entities-layer@netmsg.ddnet.org", [
+		NetIntAny("m_LayerIndex"),
+		NetIntAny("m_Data"),
+		NetIntAny("m_ImageId"),
+		NetIntAny("m_TileSize"),
+		NetIntAny("m_TileIndexOffset"),
+		NetIntAny("m_TileFlagsOffset"),
+	]),
 ]

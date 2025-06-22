@@ -464,6 +464,11 @@ bool CRenderLayerTile::DoRender(const CRenderLayerParams &Params) const
 	// skip rendering if detail layers if not wanted
 	if(m_Flags & LAYERFLAG_DETAIL && !g_Config.m_GfxHighDetail && Params.m_RenderType != CMapLayers::TYPE_FULL_DESIGN) // detail but no details
 		return false;
+
+	// skip rendering if custom entities replaced it
+	if(m_pLayerTilemap->m_Flags & Params.m_GameLayersOverride)
+		return false;
+
 	return true;
 }
 

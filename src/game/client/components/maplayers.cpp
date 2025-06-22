@@ -76,11 +76,74 @@ CCamera *CMapLayers::GetCurCamera()
 	return &m_pClient->m_Camera;
 }
 
+bool CMapLayers::AddCustomEntitiesLayer(int LayerIndex, int Data, int ImageId, int TileSize, int TileIndexOffset, int TileFlagsOffset)
+{
+	if(m_vCustomEntitiesLayers.size() >= MAX_CUSTOM_ENTITIES_LAYERS)
+		return false; // Too many custom entities layers
+
+	if(LayerIndex < 0 || LayerIndex >= m_pLayers->NumLayers())
+		return false; // Invalid layer index
+
+	if(TileIndexOffset >= TileSize || TileIndexOffset < 0)
+		return false; // Invalid tile index offset
+
+	if(TileFlagsOffset >= TileSize || TileFlagsOffset < 0)
+		return false; // Invalid flags offset
+
+	CMapItemLayer *pLayer = m_pLayers->GetLayer(LayerIndex);
+	
+	if(!pLayer)
+		return false;
+
+	if(pLayer->m_Type != LAYERTYPE_TILES)
+		return false; // Only tile layers
+
+	CMapItemLayerTilemap *pTileLayer = (CMapItemLayerTilemap *)pLayer;
+
+	for(auto &CustomEntitiesLayer : m_vCustomEntitiesLayers)
+	{
+		if(CustomEntitiesLayer.LayerIndex == LayerIndex)
+		{
+			return false; // Layer already exists
+		}
+	}
+
+	SCustomEntitiesLayer CustomLayer;
+
+	CustomLayer.m_pData = m_pLayers->Map()->GetData(Data); // "m_Data" for custom layers may be different from a normal tile layer
+
+	if(!CustomLayer.m_pData)
+		return false;
+
+	CustomLayer.LayerIndex = LayerIndex; //Set Id so we dont repeat layers
+	CustomLayer.m_ImageId = ImageId;
+	CustomLayer.m_TileSize = TileSize; //Tile size may be different from CTile
+	CustomLayer.m_TileIndexOffset = TileIndexOffset; //Tile m_Index position
+	CustomLayer.m_TileFlagsOffset = TileFlagsOffset; //Tile m_Flags position
+	CustomLayer.m_Width = pTileLayer->m_Width;
+	CustomLayer.m_Height = pTileLayer->m_Height;
+
+	int Size = m_pLayers->Map()->GetDataSize(Data);
+
+	if(Size < CustomLayer.m_Width * CustomLayer.m_Height * TileSize)
+		return false;
+
+	if(GetLayerType(pLayer) != LAYER_DEFAULT_TILESET)
+	{
+		m_CustomEntitiesOverride |= pTileLayer->m_Flags; // Override Game Layers
+	}
+
+	m_vCustomEntitiesLayers.push_back(CustomLayer);
+	return true;
+}
+
 void CMapLayers::OnMapLoad()
 {
 	m_pEnvelopePoints = std::make_shared<CMapBasedEnvelopePointAccess>(m_pLayers->Map());
 	bool PassedGameLayer = false;
 	m_vRenderLayers.clear();
+	m_CustomEntitiesOverride = 0;
+	m_vCustomEntitiesLayers.clear();
 
 	const char *pLoadingTitle = Localize("Loading map");
 	const char *pLoadingMessage = Localize("Uploading map data to GPU");
@@ -212,6 +275,7 @@ void CMapLayers::OnRender()
 	Params.EntityOverlayVal = m_Type == TYPE_FULL_DESIGN ? 0 : g_Config.m_ClOverlayEntities;
 	Params.m_RenderType = m_Type;
 	Params.m_Center = GetCurCamera()->m_Center;
+	Params.m_GameLayersOverride = m_CustomEntitiesOverride;
 
 	auto DisableClip = [&]() {
 		if(!g_Config.m_GfxNoclip || Params.m_RenderType == CMapLayers::TYPE_FULL_DESIGN)
@@ -233,6 +297,14 @@ void CMapLayers::OnRender()
 			continue;
 
 		pRenderLayer->Render(Params);
+	}
+
+	if(Params.EntityOverlayVal)
+	{
+		for(auto &CustomEntitiesLayer : m_vCustomEntitiesLayers)
+		{
+			RenderCustomEntitiesLayer(CustomEntitiesLayer, Params.EntityOverlayVal / 100.0f);
+		}
 	}
 
 	DisableClip();
@@ -299,4 +371,18 @@ bool CMapLayers::RenderGroup(const CRenderLayerParams &Params, int GroupId)
 
 	RenderTools()->MapScreenToGroup(Params.m_Center.x, Params.m_Center.y, pGroup, GetCurCamera()->m_Zoom);
 	return true;
+}
+
+void CMapLayers::RenderCustomEntitiesLayer(const SCustomEntitiesLayer &CustomLayer, float Alpha)
+{
+	if(CustomLayer.m_ImageId != -1)
+		Graphics()->TextureSet(m_pImages->Get(CustomLayer.m_ImageId));
+	else
+		Graphics()->TextureClear();
+
+	ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, Alpha);
+	Graphics()->BlendNone();
+	RenderTools()->RenderCustomEntitiesTilemap(CustomLayer.m_pData, CustomLayer.m_TileSize, CustomLayer.m_TileIndexOffset, CustomLayer.m_TileFlagsOffset, CustomLayer.m_Width, CustomLayer.m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_OPAQUE);
+	Graphics()->BlendNormal();
+	RenderTools()->RenderCustomEntitiesTilemap(CustomLayer.m_pData, CustomLayer.m_TileSize, CustomLayer.m_TileIndexOffset, CustomLayer.m_TileFlagsOffset, CustomLayer.m_Width, CustomLayer.m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_TRANSPARENT);
 }
