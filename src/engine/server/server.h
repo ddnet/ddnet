@@ -146,6 +146,7 @@ public:
 		int m_LastInputTick;
 		CSnapshotStorage m_Snapshots;
 
+		CNetMsg_Sv_PreInput m_LastPreInput = {};
 		CInput m_LatestInput;
 		CInput m_aInputs[200]; // TODO: handle input better
 		int m_CurrentInput;
