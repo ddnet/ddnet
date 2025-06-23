@@ -729,10 +729,10 @@ void CRenderTools::MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup 
 	Graphics()->MapScreen(aPoints[0], aPoints[1], aPoints[2], aPoints[3]);
 }
 
-void CRenderTools::MapScreenToInterface(float CenterX, float CenterY)
+void CRenderTools::MapScreenToInterface(float CenterX, float CenterY, float Zoom)
 {
 	float aPoints[4];
 	MapScreenToWorld(CenterX, CenterY, 100.0f, 100.0f, 100.0f,
-		0, 0, Graphics()->ScreenAspect(), 1.0f, aPoints);
+		0, 0, Graphics()->ScreenAspect(), Zoom, aPoints);
 	Graphics()->MapScreen(aPoints[0], aPoints[1], aPoints[2], aPoints[3]);
 }
