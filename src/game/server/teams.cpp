@@ -1249,22 +1249,22 @@ int CGameTeams::GetFirstEmptyTeam() const
 	return -1;
 }
 
-bool CGameTeams::TeeStarted(int ClientId)
+bool CGameTeams::TeeStarted(int ClientId) const
 {
 	return m_aTeeStarted[ClientId];
 }
 
-bool CGameTeams::TeeFinished(int ClientId)
+bool CGameTeams::TeeFinished(int ClientId) const
 {
 	return m_aTeeFinished[ClientId];
 }
 
-ETeamState CGameTeams::GetTeamState(int Team)
+ETeamState CGameTeams::GetTeamState(int Team) const
 {
 	return m_aTeamState[Team];
 }
 
-bool CGameTeams::TeamLocked(int Team)
+bool CGameTeams::TeamLocked(int Team) const
 {
 	if(Team <= TEAM_FLOCK || Team >= TEAM_SUPER)
 		return false;
@@ -1272,7 +1272,7 @@ bool CGameTeams::TeamLocked(int Team)
 	return m_aTeamLocked[Team];
 }
 
-bool CGameTeams::TeamFlock(int Team)
+bool CGameTeams::TeamFlock(int Team) const
 {
 	if(Team <= TEAM_FLOCK || Team >= TEAM_SUPER)
 		return false;
@@ -1280,12 +1280,12 @@ bool CGameTeams::TeamFlock(int Team)
 	return m_aTeamFlock[Team];
 }
 
-bool CGameTeams::IsInvited(int Team, int ClientId)
+bool CGameTeams::IsInvited(int Team, int ClientId) const
 {
 	return m_aInvited[Team].test(ClientId);
 }
 
-bool CGameTeams::IsStarted(int Team)
+bool CGameTeams::IsStarted(int Team) const
 {
 	return m_aTeamState[Team] == ETeamState::STARTED;
 }
@@ -1305,7 +1305,7 @@ void CGameTeams::SetSaving(int TeamId, std::shared_ptr<CScoreSaveResult> &SaveRe
 	m_apSaveTeamResult[TeamId] = SaveResult;
 }
 
-bool CGameTeams::GetSaving(int TeamId)
+bool CGameTeams::GetSaving(int TeamId) const
 {
 	if(TeamId < TEAM_FLOCK || TeamId >= TEAM_SUPER)
 		return false;
