@@ -3,7 +3,6 @@
 #ifndef GAME_CLIENT_GAMECLIENT_H
 #define GAME_CLIENT_GAMECLIENT_H
 
-#include "render.h"
 #include <base/color.h>
 #include <base/vmath.h>
 #include <engine/client.h>
@@ -19,49 +18,11 @@
 
 #include <game/client/prediction/gameworld.h>
 #include <game/client/race.h>
+#include <game/client/render.h>
+#include <game/client/ui.h>
 
 #include <game/generated/protocol7.h>
 #include <game/generated/protocolglue.h>
-
-// components
-#include "components/background.h"
-#include "components/binds.h"
-#include "components/broadcast.h"
-#include "components/camera.h"
-#include "components/chat.h"
-#include "components/console.h"
-#include "components/controls.h"
-#include "components/countryflags.h"
-#include "components/damageind.h"
-#include "components/debughud.h"
-#include "components/effects.h"
-#include "components/emoticon.h"
-#include "components/flow.h"
-#include "components/freezebars.h"
-#include "components/ghost.h"
-#include "components/hud.h"
-#include "components/infomessages.h"
-#include "components/items.h"
-#include "components/local_server.h"
-#include "components/mapimages.h"
-#include "components/maplayers.h"
-#include "components/mapsounds.h"
-#include "components/menu_background.h"
-#include "components/menus.h"
-#include "components/motd.h"
-#include "components/nameplates.h"
-#include "components/particles.h"
-#include "components/players.h"
-#include "components/race_demo.h"
-#include "components/scoreboard.h"
-#include "components/skins.h"
-#include "components/skins7.h"
-#include "components/sounds.h"
-#include "components/spectator.h"
-#include "components/statboard.h"
-#include "components/tooltips.h"
-#include "components/touch_controls.h"
-#include "components/voting.h"
 
 #include <vector>
 
@@ -127,55 +88,24 @@ enum class EClientIdFormat
 	INDENT_FORCE, // for rendering settings preview
 };
 
+#define COMPONENT(x) class C##x;
+#define SUBCOMPONENT(x, y) ;
+#include "component_list.h"
+#undef COMPONENT
+#undef SUBCOMPONENT
 class CGameClient : public IGameClient
 {
+#define COMPONENT(x) std::unique_ptr<class C##x> m_p##x;
+#define SUBCOMPONENT(x, y) ;
+#include "component_list.h"
+#undef COMPONENT
+#undef SUBCOMPONENT
 public:
-	// all components
-	CInfoMessages m_InfoMessages;
-	CCamera m_Camera;
-	CChat m_Chat;
-	CMotd m_Motd;
-	CBroadcast m_Broadcast;
-	CGameConsole m_GameConsole;
-	CBinds m_Binds;
-	CParticles m_Particles;
-	CMenus m_Menus;
-	CSkins m_Skins;
-	CSkins7 m_Skins7;
-	CCountryFlags m_CountryFlags;
-	CFlow m_Flow;
-	CHud m_Hud;
-	CDebugHud m_DebugHud;
-	CControls m_Controls;
-	CEffects m_Effects;
-	CScoreboard m_Scoreboard;
-	CStatboard m_Statboard;
-	CSounds m_Sounds;
-	CEmoticon m_Emoticon;
-	CDamageInd m_DamageInd;
-	CTouchControls m_TouchControls;
-	CVoting m_Voting;
-	CSpectator m_Spectator;
-
-	CPlayers m_Players;
-	CNamePlates m_NamePlates;
-	CFreezeBars m_FreezeBars;
-	CItems m_Items;
-	CMapImages m_MapImages;
-
-	CMapLayers m_MapLayersBackground = CMapLayers{CMapLayers::TYPE_BACKGROUND};
-	CMapLayers m_MapLayersForeground = CMapLayers{CMapLayers::TYPE_FOREGROUND};
-	CBackground m_Background;
-	CMenuBackground m_MenuBackground;
-
-	CMapSounds m_MapSounds;
-
-	CRaceDemo m_RaceDemo;
-	CGhost m_Ghost;
-
-	CTooltips m_Tooltips;
-
-	CLocalServer m_LocalServer;
+#define COMPONENT(x) class C##x &m_##x;
+#define SUBCOMPONENT(x, y) ;
+#include "component_list.h"
+#undef COMPONENT
+#undef SUBCOMPONENT
 
 private:
 	std::vector<class CComponent *> m_vpAll;
@@ -255,6 +185,8 @@ private:
 	int m_PrevLocalId = -1;
 
 public:
+	CGameClient();
+
 	IKernel *Kernel() { return IInterface::Kernel(); }
 	IEngine *Engine() const { return m_pEngine; }
 	class IGraphics *Graphics() const { return m_pGraphics; }

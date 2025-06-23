@@ -6,7 +6,7 @@
 #include <game/client/render.h>
 
 #include "render_layer.h"
-#include <cstdint>
+
 #include <memory>
 #include <vector>
 
@@ -64,6 +64,20 @@ public:
 private:
 	std::vector<std::unique_ptr<CRenderLayer>> m_vRenderLayers;
 	int GetLayerType(const CMapItemLayer *pLayer) const;
+};
+
+class CMapLayersBackground : public CMapLayers
+{
+public:
+	CMapLayersBackground() :
+		CMapLayers{CMapLayers::TYPE_BACKGROUND} {}
+};
+
+class CMapLayersForeground : public CMapLayers
+{
+public:
+	CMapLayersForeground() :
+		CMapLayers{CMapLayers::TYPE_FOREGROUND} {}
 };
 
 #endif

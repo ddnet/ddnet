@@ -14,6 +14,8 @@
 #include <engine/shared/http.h>
 #include <engine/storage.h>
 
+#include <game/client/components/menus.h>
+
 #include <game/client/gameclient.h>
 #include <game/generated/client_data.h>
 #include <game/localization.h>

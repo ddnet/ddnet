@@ -1,4 +1,8 @@
+#include <engine/client/client.h>
+#include <engine/serverbrowser.h>
 #include <engine/shared/masterserver.h>
+#include <engine/shared/network.h>
+
 #include <game/client/gameclient.h>
 
 void CClient::PreprocessConnlessPacket7(CNetChunk *pPacket)

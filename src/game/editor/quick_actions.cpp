@@ -1,4 +1,7 @@
 #include <engine/keys.h>
+
+#include <game/client/components/local_server.h>
+#include <game/client/components/menus.h>
 #include <game/client/gameclient.h>
 #include <game/mapitems.h>
 

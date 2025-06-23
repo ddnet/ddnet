@@ -12,7 +12,19 @@
 #include <engine/storage.h>
 #include <engine/textrender.h>
 
+#include <game/client/components/camera.h>
+#include <game/client/components/chat.h>
 #include <game/client/components/console.h>
+#include <game/client/components/damageind.h>
+#include <game/client/components/infomessages.h>
+#include <game/client/components/maplayers.h>
+#include <game/client/components/menu_background.h>
+#include <game/client/components/particles.h>
+#include <game/client/components/scoreboard.h>
+#include <game/client/components/sounds.h>
+#include <game/client/components/statboard.h>
+#include <game/client/components/tooltips.h>
+
 #include <game/client/gameclient.h>
 #include <game/client/render.h>
 #include <game/client/ui.h>
@@ -20,7 +32,6 @@
 #include <game/generated/client_data.h>
 #include <game/localization.h>
 
-#include "maplayers.h"
 #include "menus.h"
 
 #include <chrono>

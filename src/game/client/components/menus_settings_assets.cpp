@@ -1,5 +1,6 @@
 #include <base/system.h>
 
+#include <engine/keys.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
@@ -7,6 +8,9 @@
 #include <game/client/gameclient.h>
 #include <game/client/ui_listbox.h>
 #include <game/localization.h>
+
+#include <game/client/components/console.h>
+#include <game/client/components/tooltips.h>
 
 #include "menus.h"
 

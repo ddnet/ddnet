@@ -5,8 +5,13 @@
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
 
-#include <game/client/animstate.h>
+#include <game/client/components/camera.h>
+#include <game/client/components/controls.h>
+#include <game/client/components/players.h>
 #include <game/client/components/scoreboard.h>
+#include <game/client/components/voting.h>
+
+#include <game/client/animstate.h>
 #include <game/client/gameclient.h>
 #include <game/client/prediction/entities/character.h>
 #include <game/client/render.h>
@@ -18,11 +23,7 @@
 
 #include <cmath>
 
-#include "binds.h"
-#include "camera.h"
-#include "controls.h"
 #include "hud.h"
-#include "voting.h"
 
 CHud::CHud()
 {

@@ -1,5 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <engine/editor.h>
 #include <engine/graphics.h>
 #include <engine/keys.h>
 #include <engine/serverbrowser.h>
@@ -10,6 +11,12 @@
 
 #include <game/client/gameclient.h>
 #include <game/client/ui.h>
+
+#include <game/client/components/console.h>
+#include <game/client/components/local_server.h>
+#include <game/client/components/menu_background.h>
+#include <game/client/components/menus.h>
+#include <game/client/components/tooltips.h>
 
 #include <game/generated/client_data.h>
 #include <game/localization.h>

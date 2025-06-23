@@ -6,7 +6,9 @@
 #include <engine/sound.h>
 
 #include <game/client/components/camera.h>
+#include <game/client/components/maplayers.h>
 #include <game/client/components/sounds.h>
+
 #include <game/client/gameclient.h>
 #include <game/layers.h>
 #include <game/localization.h>

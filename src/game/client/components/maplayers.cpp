@@ -1,7 +1,12 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <game/client/components/camera.h>
+#include <game/client/components/menus.h>
+
 #include <game/client/gameclient.h>
 #include <game/localization.h>
+
+#include <engine/map.h>
 
 #include "maplayers.h"
 

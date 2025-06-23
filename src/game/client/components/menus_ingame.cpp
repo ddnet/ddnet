@@ -16,9 +16,13 @@
 #include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
 
-#include <game/client/animstate.h>
+#include <game/client/components/camera.h>
+#include <game/client/components/console.h>
 #include <game/client/components/countryflags.h>
+#include <game/client/components/tooltips.h>
 #include <game/client/components/touch_controls.h>
+
+#include <game/client/animstate.h>
 #include <game/client/gameclient.h>
 #include <game/client/render.h>
 #include <game/client/ui.h>
@@ -26,11 +30,11 @@
 #include <game/client/ui_scrollregion.h>
 #include <game/localization.h>
 
+#include "ghost.h"
 #include "menus.h"
 #include "motd.h"
 #include "voting.h"
 
-#include "ghost.h"
 #include <engine/keys.h>
 #include <engine/storage.h>
 

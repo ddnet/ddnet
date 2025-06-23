@@ -12,8 +12,12 @@
 #include <engine/shared/localization.h>
 #include <engine/textrender.h>
 
-#include <game/client/animstate.h>
 #include <game/client/components/countryflags.h>
+#include <game/client/components/menu_background.h>
+#include <game/client/components/skins.h>
+#include <game/client/components/tooltips.h>
+
+#include <game/client/animstate.h>
 #include <game/client/gameclient.h>
 #include <game/client/render.h>
 #include <game/client/ui.h>

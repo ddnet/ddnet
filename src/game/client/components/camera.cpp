@@ -6,13 +6,15 @@
 #include <base/log.h>
 #include <base/math.h>
 #include <base/vmath.h>
+
+#include <game/client/components/controls.h>
+
 #include <game/client/gameclient.h>
 #include <game/collision.h>
 #include <game/localization.h>
 #include <game/mapitems.h>
 
 #include "camera.h"
-#include "controls.h"
 
 #include <limits>
 

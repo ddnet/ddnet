@@ -1,9 +1,12 @@
-#include "render_layer.h"
-#include "maplayers.h"
-
 #include <engine/graphics.h>
+#include <engine/map.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
+
+#include <game/client/components/mapimages.h>
+#include <game/client/components/maplayers.h>
+#include <game/client/components/menus.h>
+#include <game/client/components/render_layer.h>
 
 #include <game/client/gameclient.h>
 #include <game/layers.h>

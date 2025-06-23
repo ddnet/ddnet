@@ -25,15 +25,17 @@
 #include <game/generated/client_data7.h>
 #include <game/generated/protocol.h>
 
+#include <game/client/lineinput.h>
+#include <game/client/race.h>
+#include <game/client/render.h>
+
 #include <base/log.h>
 #include <base/math.h>
 #include <base/system.h>
 #include <base/vmath.h>
 
-#include "gameclient.h"
-#include "lineinput.h"
-#include "race.h"
-#include "render.h"
+#include <game/client/prediction/entities/character.h>
+#include <game/client/prediction/entities/projectile.h>
 
 #include <game/localization.h>
 #include <game/mapitems.h>
@@ -42,6 +44,7 @@
 #include <game/generated/protocol7.h>
 #include <game/generated/protocolglue.h>
 
+// Components
 #include "components/background.h"
 #include "components/binds.h"
 #include "components/broadcast.h"
@@ -54,11 +57,13 @@
 #include "components/debughud.h"
 #include "components/effects.h"
 #include "components/emoticon.h"
+#include "components/flow.h"
 #include "components/freezebars.h"
 #include "components/ghost.h"
 #include "components/hud.h"
 #include "components/infomessages.h"
 #include "components/items.h"
+#include "components/local_server.h"
 #include "components/mapimages.h"
 #include "components/maplayers.h"
 #include "components/mapsounds.h"
@@ -75,9 +80,11 @@
 #include "components/sounds.h"
 #include "components/spectator.h"
 #include "components/statboard.h"
+#include "components/tooltips.h"
+#include "components/touch_controls.h"
 #include "components/voting.h"
-#include "prediction/entities/character.h"
-#include "prediction/entities/projectile.h"
+
+#include "gameclient.h"
 
 using namespace std::chrono_literals;
 
@@ -88,6 +95,21 @@ int CGameClient::DDNetVersion() const { return DDNET_VERSION_NUMBER; }
 const char *CGameClient::DDNetVersionStr() const { return m_aDDNetVersionStr; }
 int CGameClient::ClientVersion7() const { return CLIENT_VERSION7; }
 const char *CGameClient::GetItemName(int Type) const { return m_NetObjHandler.GetObjName(Type); }
+
+CGameClient::CGameClient() :
+#define COMPONENT(x) m_p##x(std::make_unique<C##x>()),
+#define SUBCOMPONENT(x, y)
+#include "component_list.h"
+#undef COMPONENT
+#undef SUBCOMPONENT
+#define COMPONENT(x) m_##x(*m_p##x),
+#define SUBCOMPONENT(x, y)
+#include "component_list.h"
+#undef COMPONENT
+#undef SUBCOMPONENT
+	m_pEngine(nullptr) // Prevent error from trailing comma
+{
+}
 
 void CGameClient::OnConsoleInit()
 {
@@ -113,50 +135,17 @@ void CGameClient::OnConsoleInit()
 	m_pHttp = Kernel()->RequestInterface<IHttp>();
 
 	// make a list of all the systems, make sure to add them in the correct render order
-	m_vpAll.insert(m_vpAll.end(), {&m_Skins,
-					      &m_Skins7,
-					      &m_CountryFlags,
-					      &m_MapImages,
-					      &m_Effects, // doesn't render anything, just updates effects
-					      &m_Binds,
-					      &m_Binds.m_SpecialBinds,
-					      &m_Controls,
-					      &m_Camera,
-					      &m_Sounds,
-					      &m_Voting,
-					      &m_Particles, // doesn't render anything, just updates all the particles
-					      &m_RaceDemo,
-					      &m_MapSounds,
-					      &m_Background, // render instead of m_MapLayersBackground when g_Config.m_ClOverlayEntities == 100
-					      &m_MapLayersBackground, // first to render
-					      &m_Particles.m_RenderTrail,
-					      &m_Particles.m_RenderTrailExtra,
-					      &m_Items,
-					      &m_Ghost,
-					      &m_Players,
-					      &m_MapLayersForeground,
-					      &m_Particles.m_RenderExplosions,
-					      &m_NamePlates,
-					      &m_Particles.m_RenderExtra,
-					      &m_Particles.m_RenderGeneral,
-					      &m_FreezeBars,
-					      &m_DamageInd,
-					      &m_Hud,
-					      &m_Spectator,
-					      &m_Emoticon,
-					      &m_InfoMessages,
-					      &m_Chat,
-					      &m_Broadcast,
-					      &m_DebugHud,
-					      &m_TouchControls,
-					      &m_Scoreboard,
-					      &m_Statboard,
-					      &m_Motd,
-					      &m_Menus,
-					      &m_Tooltips,
-					      &m_Menus.m_Binder,
-					      &m_GameConsole,
-					      &m_MenuBackground});
+	for(CComponent *pComponent : {
+#define PART(x) std::is_base_of<CComponent, decltype(x)>::value ? (CComponent *)&x : nullptr,
+#define COMPONENT(x) PART(m_##x)
+#define SUBCOMPONENT(x, y) PART(m_##x.y)
+#include "component_list.h"
+#undef PART
+#undef COMPONENT
+#undef SUBCOMPONENT
+	    })
+		if(pComponent)
+			m_vpAll.push_back(pComponent);
 
 	// build the input stack
 	m_vpInput.insert(m_vpInput.end(), {&m_Menus.m_Binder, // this will take over all input when we want to bind a key

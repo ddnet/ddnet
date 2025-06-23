@@ -12,6 +12,9 @@
 #include <engine/textrender.h>
 #include <limits>
 
+#include <game/client/components/local_server.h>
+#include <game/client/components/menus.h>
+
 #include <game/client/gameclient.h>
 #include <game/client/ui_scrollregion.h>
 #include <game/editor/mapitems/image.h>
