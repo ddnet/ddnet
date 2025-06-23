@@ -826,6 +826,26 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 	m_pGameContext->CreateFinishEffect(pChar->m_Pos, pChar->TeamMask());
 }
 
+CCharacter *CGameTeams::Character(int ClientId)
+{
+	return GameServer()->GetPlayerChar(ClientId);
+}
+
+CPlayer *CGameTeams::GetPlayer(int ClientId)
+{
+	return GameServer()->m_apPlayers[ClientId];
+}
+
+class CGameContext *CGameTeams::GameServer()
+{
+	return m_pGameContext;
+}
+
+class IServer *CGameTeams::Server()
+{
+	return m_pGameContext->Server();
+}
+
 void CGameTeams::RequestTeamSwap(CPlayer *pPlayer, CPlayer *pTargetPlayer, int Team)
 {
 	if(!pPlayer || !pTargetPlayer)
@@ -1227,4 +1247,95 @@ int CGameTeams::GetFirstEmptyTeam() const
 		if(m_aTeamState[i] == ETeamState::EMPTY)
 			return i;
 	return -1;
+}
+
+bool CGameTeams::TeeStarted(int ClientId) const
+{
+	return m_aTeeStarted[ClientId];
+}
+
+bool CGameTeams::TeeFinished(int ClientId) const
+{
+	return m_aTeeFinished[ClientId];
+}
+
+ETeamState CGameTeams::GetTeamState(int Team) const
+{
+	return m_aTeamState[Team];
+}
+
+bool CGameTeams::TeamLocked(int Team) const
+{
+	if(Team <= TEAM_FLOCK || Team >= TEAM_SUPER)
+		return false;
+
+	return m_aTeamLocked[Team];
+}
+
+bool CGameTeams::TeamFlock(int Team) const
+{
+	if(Team <= TEAM_FLOCK || Team >= TEAM_SUPER)
+		return false;
+
+	return m_aTeamFlock[Team];
+}
+
+bool CGameTeams::IsInvited(int Team, int ClientId) const
+{
+	return m_aInvited[Team].test(ClientId);
+}
+
+bool CGameTeams::IsStarted(int Team) const
+{
+	return m_aTeamState[Team] == ETeamState::STARTED;
+}
+
+void CGameTeams::SetStarted(int ClientId, bool Started)
+{
+	m_aTeeStarted[ClientId] = Started;
+}
+
+void CGameTeams::SetFinished(int ClientId, bool Finished)
+{
+	m_aTeeFinished[ClientId] = Finished;
+}
+
+void CGameTeams::SetSaving(int TeamId, std::shared_ptr<CScoreSaveResult> &SaveResult)
+{
+	m_apSaveTeamResult[TeamId] = SaveResult;
+}
+
+bool CGameTeams::GetSaving(int TeamId) const
+{
+	if(TeamId < TEAM_FLOCK || TeamId >= TEAM_SUPER)
+		return false;
+	if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && TeamId == TEAM_FLOCK)
+		return false;
+
+	return m_apSaveTeamResult[TeamId] != nullptr;
+}
+
+void CGameTeams::SetPractice(int Team, bool Enabled)
+{
+	if(Team < TEAM_FLOCK || Team >= TEAM_SUPER)
+		return;
+	if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team == TEAM_FLOCK)
+		return;
+
+	m_aPractice[Team] = Enabled;
+}
+
+bool CGameTeams::IsPractice(int Team)
+{
+	if(Team < TEAM_FLOCK || Team >= TEAM_SUPER)
+		return false;
+	if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team == TEAM_FLOCK)
+	{
+		if(GameServer()->PracticeByDefault())
+			return true;
+
+		return false;
+	}
+
+	return m_aPractice[Team];
 }

@@ -2,7 +2,7 @@
 #ifndef GAME_SERVER_TEAMS_H
 #define GAME_SERVER_TEAMS_H
 
-#include <engine/shared/config.h>
+#include <engine/shared/protocol.h>
 #include <game/race_state.h>
 #include <game/server/gamecontext.h>
 #include <game/team_state.h>
@@ -58,23 +58,10 @@ public:
 	CGameTeams(CGameContext *pGameContext);
 
 	// helper methods
-	CCharacter *Character(int ClientId)
-	{
-		return GameServer()->GetPlayerChar(ClientId);
-	}
-	CPlayer *GetPlayer(int ClientId)
-	{
-		return GameServer()->m_apPlayers[ClientId];
-	}
-
-	class CGameContext *GameServer()
-	{
-		return m_pGameContext;
-	}
-	class IServer *Server()
-	{
-		return m_pGameContext->Server();
-	}
+	CCharacter *Character(int ClientId);
+	CPlayer *GetPlayer(int ClientId);
+	class CGameContext *GameServer();
+	class IServer *Server();
 
 	void OnCharacterStart(int ClientId);
 	void OnCharacterFinish(int ClientId);
@@ -117,99 +104,20 @@ public:
 	void SwapTeamCharacters(CPlayer *pPrimaryPlayer, CPlayer *pTargetPlayer, int Team);
 	void CancelTeamSwap(CPlayer *pPlayer, int Team);
 	void ProcessSaveTeam();
-
 	int GetFirstEmptyTeam() const;
-
-	bool TeeStarted(int ClientId)
-	{
-		return m_aTeeStarted[ClientId];
-	}
-
-	bool TeeFinished(int ClientId)
-	{
-		return m_aTeeFinished[ClientId];
-	}
-
-	ETeamState GetTeamState(int Team)
-	{
-		return m_aTeamState[Team];
-	}
-
-	bool TeamLocked(int Team)
-	{
-		if(Team <= TEAM_FLOCK || Team >= TEAM_SUPER)
-			return false;
-
-		return m_aTeamLocked[Team];
-	}
-
-	bool TeamFlock(int Team)
-	{
-		if(Team <= TEAM_FLOCK || Team >= TEAM_SUPER)
-			return false;
-
-		return m_aTeamFlock[Team];
-	}
-
-	bool IsInvited(int Team, int ClientId)
-	{
-		return m_aInvited[Team].test(ClientId);
-	}
-
-	bool IsStarted(int Team)
-	{
-		return m_aTeamState[Team] == ETeamState::STARTED;
-	}
-
-	void SetStarted(int ClientId, bool Started)
-	{
-		m_aTeeStarted[ClientId] = Started;
-	}
-
-	void SetFinished(int ClientId, bool Finished)
-	{
-		m_aTeeFinished[ClientId] = Finished;
-	}
-
-	void SetSaving(int TeamId, std::shared_ptr<CScoreSaveResult> &SaveResult)
-	{
-		m_apSaveTeamResult[TeamId] = SaveResult;
-	}
-
-	bool GetSaving(int TeamId)
-	{
-		if(TeamId < TEAM_FLOCK || TeamId >= TEAM_SUPER)
-			return false;
-		if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && TeamId == TEAM_FLOCK)
-			return false;
-
-		return m_apSaveTeamResult[TeamId] != nullptr;
-	}
-
-	void SetPractice(int Team, bool Enabled)
-	{
-		if(Team < TEAM_FLOCK || Team >= TEAM_SUPER)
-			return;
-		if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team == TEAM_FLOCK)
-			return;
-
-		m_aPractice[Team] = Enabled;
-	}
-
-	bool IsPractice(int Team)
-	{
-		if(Team < TEAM_FLOCK || Team >= TEAM_SUPER)
-			return false;
-		if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team == TEAM_FLOCK)
-		{
-			if(m_pGameContext->PracticeByDefault())
-				return true;
-
-			return false;
-		}
-
-		return m_aPractice[Team];
-	}
+	bool TeeStarted(int ClientId) const;
+	bool TeeFinished(int ClientId) const;
+	ETeamState GetTeamState(int Team) const;
+	bool TeamLocked(int Team) const;
+	bool TeamFlock(int Team) const;
+	bool IsInvited(int Team, int ClientId) const;
+	bool IsStarted(int Team) const;
+	void SetStarted(int ClientId, bool Started);
+	void SetFinished(int ClientId, bool Finished);
+	void SetSaving(int TeamId, std::shared_ptr<CScoreSaveResult> &SaveResult);
+	bool GetSaving(int TeamId) const;
+	void SetPractice(int Team, bool Enabled);
+	bool IsPractice(int Team);
 };
 
 #endif
