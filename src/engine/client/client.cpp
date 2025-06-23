@@ -993,6 +993,9 @@ void CClient::RenderGraphs()
 	float sp = Graphics()->ScreenWidth() / 100.0f;
 	float x = Graphics()->ScreenWidth() - w - sp;
 
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
+	TextRender()->Text(x, sp * 5 - 12.0f - 10.0f, 12.0f, Localize("Press Ctrl+Shift+G to disable debug graphs."));
+
 	m_FpsGraph.Scale(time_freq());
 	m_FpsGraph.Render(Graphics(), TextRender(), x, sp * 5, w, h, "FPS");
 	m_InputtimeMarginGraph.Scale(5 * time_freq());
