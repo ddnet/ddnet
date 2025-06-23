@@ -42,6 +42,7 @@
 #include "components/hud.h"
 #include "components/infomessages.h"
 #include "components/items.h"
+#include "components/local_server.h"
 #include "components/mapimages.h"
 #include "components/maplayers.h"
 #include "components/mapsounds.h"
@@ -173,6 +174,8 @@ public:
 	CGhost m_Ghost;
 
 	CTooltips m_Tooltips;
+
+	CLocalServer m_LocalServer;
 
 private:
 	std::vector<class CComponent *> m_vpAll;
@@ -306,8 +309,6 @@ public:
 	};
 	int m_ServerMode;
 	CGameInfo m_GameInfo;
-
-	char m_aSavedLocalRconPassword[sizeof(g_Config.m_SvRconPassword)] = "";
 
 	int m_DemoSpecId;
 

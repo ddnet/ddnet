@@ -39,7 +39,7 @@ void CBackground::OnInit()
 	m_pBackgroundMap = CreateBGMap();
 	m_pMap = m_pBackgroundMap;
 
-	m_pImages->m_pClient = GameClient();
+	m_pImages->OnInterfacesInit(GameClient());
 	Kernel()->RegisterInterface(m_pBackgroundMap);
 	if(g_Config.m_ClBackgroundEntities[0] != '\0' && str_comp(g_Config.m_ClBackgroundEntities, CURRENT_MAP))
 		LoadBackground();

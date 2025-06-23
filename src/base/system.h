@@ -2638,33 +2638,6 @@ void cmdline_fix(int *argc, const char ***argv);
  */
 void cmdline_free(int argc, const char **argv);
 
-#if defined(CONF_FAMILY_WINDOWS)
-/**
- * A handle for a process.
- *
- * @ingroup Shell
- */
-typedef void *PROCESS;
-/**
- * A handle that denotes an invalid process.
- *
- * @ingroup Shell
- */
-constexpr PROCESS INVALID_PROCESS = nullptr;
-#else
-/**
- * A handle for a process.
- *
- * @ingroup Shell
- */
-typedef pid_t PROCESS;
-/**
- * A handle that denotes an invalid process.
- *
- * @ingroup Shell
- */
-constexpr PROCESS INVALID_PROCESS = 0;
-#endif
 #if !defined(CONF_PLATFORM_ANDROID)
 /**
  * Determines the initial window state when using @link shell_execute @endlink

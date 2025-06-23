@@ -156,7 +156,7 @@ int CMenus::DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText,
 	return Ui()->DoButtonLogic(pButtonContainer, Checked, pRect, Flags);
 }
 
-int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator, const ColorRGBA *pDefaultColor, const ColorRGBA *pActiveColor, const ColorRGBA *pHoverColor, float EdgeRounding, const SCommunityIcon *pCommunityIcon)
+int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator, const ColorRGBA *pDefaultColor, const ColorRGBA *pActiveColor, const ColorRGBA *pHoverColor, float EdgeRounding, const CCommunityIcon *pCommunityIcon)
 {
 	const bool MouseInside = Ui()->HotItem() == pButtonContainer;
 	CUIRect Rect = *pRect;
@@ -233,7 +233,7 @@ int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pTe
 	{
 		CUIRect CommunityIcon;
 		Rect.Margin(2.0f, &CommunityIcon);
-		RenderCommunityIcon(pCommunityIcon, CommunityIcon, true);
+		m_CommunityIcons.Render(pCommunityIcon, CommunityIcon, true);
 	}
 	else
 	{
@@ -336,7 +336,7 @@ void CMenus::DoLaserPreview(const CUIRect *pRect, const ColorHSLA LaserOutlineCo
 	case LASERTYPE_DRAGGER:
 	{
 		CTeeRenderInfo TeeRenderInfo;
-		TeeRenderInfo.Apply(m_pClient->m_Skins.Find(g_Config.m_ClPlayerSkin));
+		TeeRenderInfo.Apply(GameClient()->m_Skins.Find(g_Config.m_ClPlayerSkin));
 		TeeRenderInfo.ApplyColors(g_Config.m_ClPlayerUseCustomColor, g_Config.m_ClPlayerColorBody, g_Config.m_ClPlayerColorFeet);
 		TeeRenderInfo.m_Size = 64.0f;
 		RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeRenderInfo, EMOTE_NORMAL, vec2(-1, 0), Pos);
@@ -346,9 +346,9 @@ void CMenus::DoLaserPreview(const CUIRect *pRect, const ColorHSLA LaserOutlineCo
 	{
 		CTeeRenderInfo TeeRenderInfo;
 		if(g_Config.m_ClShowNinja)
-			TeeRenderInfo.Apply(m_pClient->m_Skins.Find("x_ninja"));
+			TeeRenderInfo.Apply(GameClient()->m_Skins.Find("x_ninja"));
 		else
-			TeeRenderInfo.Apply(m_pClient->m_Skins.Find(g_Config.m_ClPlayerSkin));
+			TeeRenderInfo.Apply(GameClient()->m_Skins.Find(g_Config.m_ClPlayerSkin));
 		TeeRenderInfo.m_TeeRenderFlags = TEE_EFFECT_FROZEN;
 		TeeRenderInfo.m_Size = 64.0f;
 		TeeRenderInfo.m_ColorBody = ColorRGBA(1, 1, 1);
@@ -569,7 +569,7 @@ void CMenus::RenderMenubar(CUIRect Box, IClient::EClientState ClientState)
 	ColorRGBA QuitColor(1, 0, 0, 0.5f);
 	if(DoButton_MenuTab(&s_QuitButton, FONT_ICON_POWER_OFF, 0, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_QUIT], nullptr, nullptr, &QuitColor, 10.0f))
 	{
-		if(m_pClient->Editor()->HasUnsavedData() || (GameClient()->CurrentRaceTime() / 60 >= g_Config.m_ClConfirmQuitTime && g_Config.m_ClConfirmQuitTime >= 0))
+		if(GameClient()->Editor()->HasUnsavedData() || (GameClient()->CurrentRaceTime() / 60 >= g_Config.m_ClConfirmQuitTime && g_Config.m_ClConfirmQuitTime >= 0))
 		{
 			m_Popup = POPUP_QUIT;
 		}
@@ -713,7 +713,7 @@ void CMenus::RenderMenubar(CUIRect Box, IClient::EClientState ClientState)
 				break;
 			Box.VSplitLeft(BrowserButtonWidth, &Button, &Box);
 			const int Page = PAGE_FAVORITE_COMMUNITY_1 + FavoriteCommunityIndex;
-			if(DoButton_MenuTab(&s_aFavoriteCommunityButtons[FavoriteCommunityIndex], FONT_ICON_ELLIPSIS, ActivePage == Page, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIT_TAB_FAVORITE_COMMUNITY_1 + FavoriteCommunityIndex], nullptr, nullptr, nullptr, 10.0f, FindCommunityIcon(pCommunity->Id())))
+			if(DoButton_MenuTab(&s_aFavoriteCommunityButtons[FavoriteCommunityIndex], FONT_ICON_ELLIPSIS, ActivePage == Page, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIT_TAB_FAVORITE_COMMUNITY_1 + FavoriteCommunityIndex], nullptr, nullptr, nullptr, 10.0f, m_CommunityIcons.Find(pCommunity->Id())))
 			{
 				NewPage = Page;
 			}
@@ -878,6 +878,13 @@ void CMenus::RenderNews(CUIRect MainView)
 	}
 }
 
+void CMenus::OnInterfacesInit(CGameClient *pClient)
+{
+	CComponentInterfaces::OnInterfacesInit(pClient);
+	m_CommunityIcons.OnInterfacesInit(pClient);
+	m_MenusStart.OnInterfacesInit(pClient);
+}
+
 void CMenus::OnInit()
 {
 	if(g_Config.m_ClShowWelcome)
@@ -944,9 +951,7 @@ void CMenus::OnInit()
 	m_vMenuImages.clear();
 	Storage()->ListDirectory(IStorage::TYPE_ALL, "menuimages", MenuImageScan, this);
 
-	// load community icons
-	m_vCommunityIcons.clear();
-	Storage()->ListDirectory(IStorage::TYPE_ALL, "communityicons", CommunityIconScan, this);
+	m_CommunityIcons.Load();
 
 	// Quad for the direction arrows above the player
 	m_DirectionQuadContainerIndex = Graphics()->CreateQuadContainer(false);
@@ -960,8 +965,8 @@ void CMenus::ConchainBackgroundEntities(IConsole::IResult *pResult, void *pUserD
 	if(pResult->NumArguments())
 	{
 		CMenus *pSelf = (CMenus *)pUserData;
-		if(str_comp(g_Config.m_ClBackgroundEntities, pSelf->m_pClient->m_Background.MapName()) != 0)
-			pSelf->m_pClient->m_Background.LoadBackground();
+		if(str_comp(g_Config.m_ClBackgroundEntities, pSelf->GameClient()->m_Background.MapName()) != 0)
+			pSelf->GameClient()->m_Background.LoadBackground();
 	}
 }
 
@@ -976,10 +981,10 @@ void CMenus::ConchainUpdateMusicState(IConsole::IResult *pResult, void *pUserDat
 void CMenus::UpdateMusicState()
 {
 	const bool ShouldPlay = Client()->State() == IClient::STATE_OFFLINE && g_Config.m_SndEnable && g_Config.m_SndMusic;
-	if(ShouldPlay && !m_pClient->m_Sounds.IsPlaying(SOUND_MENU))
-		m_pClient->m_Sounds.Enqueue(CSounds::CHN_MUSIC, SOUND_MENU);
-	else if(!ShouldPlay && m_pClient->m_Sounds.IsPlaying(SOUND_MENU))
-		m_pClient->m_Sounds.Stop(SOUND_MENU);
+	if(ShouldPlay && !GameClient()->m_Sounds.IsPlaying(SOUND_MENU))
+		GameClient()->m_Sounds.Enqueue(CSounds::CHN_MUSIC, SOUND_MENU);
+	else if(!ShouldPlay && GameClient()->m_Sounds.IsPlaying(SOUND_MENU))
+		GameClient()->m_Sounds.Stop(SOUND_MENU);
 }
 
 void CMenus::PopupMessage(const char *pTitle, const char *pMessage, const char *pButtonLabel, int NextPopup, FPopupButtonCallback pfnButtonCallback)
@@ -1057,7 +1062,7 @@ void CMenus::Render()
 	}
 	else
 	{
-		UpdateCommunityIcons();
+		m_CommunityIcons.Update();
 	}
 
 	if(ServerBrowser()->DDNetInfoAvailable())
@@ -1138,7 +1143,7 @@ void CMenus::Render()
 		}
 		else if(m_ShowStart)
 		{
-			RenderStartMenu(Screen);
+			m_MenusStart.RenderStartMenu(Screen);
 		}
 		else
 		{
@@ -1420,7 +1425,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 
 		// additional info
 		Box.VMargin(20.f, &Box);
-		if(m_pClient->Editor()->HasUnsavedData())
+		if(GameClient()->Editor()->HasUnsavedData())
 		{
 			str_format(aBuf, sizeof(aBuf), "%s\n\n%s", Localize("There's an unsaved map in the editor, you might want to save it."), Localize("Continue anyway?"));
 			Props.m_MaxWidth = Part.w - 20.0f;
@@ -1501,7 +1506,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		if(pEntry != nullptr && pEntry->m_GotInfo)
 		{
 			const CCommunity *pCommunity = ServerBrowser()->Community(pEntry->m_Info.m_aCommunityId);
-			const SCommunityIcon *pIcon = pCommunity == nullptr ? nullptr : FindCommunityIcon(pCommunity->Id());
+			const CCommunityIcon *pIcon = pCommunity == nullptr ? nullptr : m_CommunityIcons.Find(pCommunity->Id());
 
 			Box.HSplitBottom(32.0f, &Box, nullptr);
 			Box.HSplitBottom(24.0f, &Box, &Part);
@@ -1514,7 +1519,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 				CUIRect Icon;
 				static char s_CommunityTooltipButtonId;
 				Name.VSplitLeft(2.5f * Name.h, &Icon, &Name);
-				RenderCommunityIcon(pIcon, Icon, true);
+				m_CommunityIcons.Render(pIcon, Icon, true);
 				Ui()->DoButtonLogic(&s_CommunityTooltipButtonId, 0, &Icon, BUTTONFLAG_NONE);
 				GameClient()->m_Tooltips.DoToolTip(&s_CommunityTooltipButtonId, &Icon, pCommunity->Name());
 			}
@@ -1880,7 +1885,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 			{
 				PopupMessage(Localize("Error"), Localize("Unable to save the skin with a reserved name"), Localize("Ok"), POPUP_SAVE_SKIN);
 			}
-			else if(!m_pClient->m_Skins7.SaveSkinfile(m_SkinNameInput.GetString(), m_Dummy))
+			else if(!GameClient()->m_Skins7.SaveSkinfile(m_SkinNameInput.GetString(), m_Dummy))
 			{
 				PopupMessage(Localize("Error"), Localize("Unable to save the skin"), Localize("Ok"), POPUP_SAVE_SKIN);
 			}
@@ -2205,24 +2210,24 @@ void CMenus::SetActive(bool Active)
 	{
 		if(m_NeedSendinfo)
 		{
-			m_pClient->SendInfo(false);
+			GameClient()->SendInfo(false);
 			m_NeedSendinfo = false;
 		}
 
 		if(m_NeedSendDummyinfo)
 		{
-			m_pClient->SendDummyInfo(false);
+			GameClient()->SendDummyInfo(false);
 			m_NeedSendDummyinfo = false;
 		}
 
 		if(Client()->State() == IClient::STATE_ONLINE)
 		{
-			m_pClient->OnRelease();
+			GameClient()->OnRelease();
 		}
 	}
 	else if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
-		m_pClient->OnRelease();
+		GameClient()->OnRelease();
 	}
 }
 
@@ -2232,9 +2237,7 @@ void CMenus::OnReset()
 
 void CMenus::OnShutdown()
 {
-	KillServer();
-	m_CommunityIconLoadJobs.clear();
-	m_CommunityIconDownloadJobs.clear();
+	m_CommunityIcons.Shutdown();
 }
 
 bool CMenus::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
@@ -2312,7 +2315,7 @@ void CMenus::OnRender()
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		SetActive(true);
 
-	if(Client()->State() == IClient::STATE_ONLINE && m_pClient->m_ServerMode == CGameClient::SERVERMODE_PUREMOD)
+	if(Client()->State() == IClient::STATE_ONLINE && GameClient()->m_ServerMode == CGameClient::SERVERMODE_PUREMOD)
 	{
 		Client()->Disconnect();
 		SetActive(true);
@@ -2434,13 +2437,6 @@ void CMenus::RenderBackground()
 
 	// restore screen
 	Ui()->MapScreen();
-}
-
-bool CMenus::CheckHotKey(int Key) const
-{
-	return !Input()->ShiftIsPressed() && !Input()->ModifierIsPressed() && !Input()->AltIsPressed() && // no modifier
-	       Input()->KeyPress(Key) &&
-	       !m_pClient->m_GameConsole.IsActive();
 }
 
 int CMenus::DoButton_CheckBox_Tristate(const void *pId, const char *pText, TRISTATE Checked, const CUIRect *pRect)
@@ -2575,4 +2571,19 @@ void CMenus::RefreshBrowserTab(bool Force)
 			UpdateCommunityCache(true);
 		}
 	}
+}
+
+void CMenus::ForceRefreshLanPage()
+{
+	m_ForceRefreshLanPage = true;
+}
+
+void CMenus::SetShowStart(bool ShowStart)
+{
+	m_ShowStart = ShowStart;
+}
+
+void CMenus::ShowQuitPopup()
+{
+	m_Popup = POPUP_QUIT;
 }

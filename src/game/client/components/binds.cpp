@@ -20,7 +20,7 @@ bool CBinds::CBindsSpecial::OnInput(const IInput::CEvent &Event)
 	// only handle F and composed F binds
 	// do not handle F5 bind while menu is active
 	if(((Event.m_Key >= KEY_F1 && Event.m_Key <= KEY_F12) || (Event.m_Key >= KEY_F13 && Event.m_Key <= KEY_F24)) &&
-		(Event.m_Key != KEY_F5 || !m_pClient->m_Menus.IsActive()))
+		(Event.m_Key != KEY_F5 || !GameClient()->m_Menus.IsActive()))
 	{
 		return m_pBinds->OnInput(Event);
 	}

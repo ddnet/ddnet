@@ -286,10 +286,10 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 		m_Dummy = true;
 	}
 
-	if(Client()->State() == IClient::STATE_ONLINE && m_pClient->m_NextChangeInfo && m_pClient->m_NextChangeInfo > Client()->GameTick(g_Config.m_ClDummy))
+	if(Client()->State() == IClient::STATE_ONLINE && GameClient()->m_NextChangeInfo && GameClient()->m_NextChangeInfo > Client()->GameTick(g_Config.m_ClDummy))
 	{
 		char aChangeInfo[128], aTimeLeft[32];
-		str_format(aTimeLeft, sizeof(aTimeLeft), Localize("%ds left"), (m_pClient->m_NextChangeInfo - Client()->GameTick(g_Config.m_ClDummy) + Client()->GameTickSpeed() - 1) / Client()->GameTickSpeed());
+		str_format(aTimeLeft, sizeof(aTimeLeft), Localize("%ds left"), (GameClient()->m_NextChangeInfo - Client()->GameTick(g_Config.m_ClDummy) + Client()->GameTickSpeed() - 1) / Client()->GameTickSpeed());
 		str_format(aChangeInfo, sizeof(aChangeInfo), "%s: %s", Localize("Player info change cooldown"), aTimeLeft);
 		Ui()->DoLabel(&ChangeInfo, aChangeInfo, 10.f, TEXTALIGN_ML);
 	}
@@ -342,9 +342,9 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	static CLineInputBuffered<25> s_FlagFilterInput;
 
 	std::vector<const CCountryFlags::CCountryFlag *> vpFilteredFlags;
-	for(size_t i = 0; i < m_pClient->m_CountryFlags.Num(); ++i)
+	for(size_t i = 0; i < GameClient()->m_CountryFlags.Num(); ++i)
 	{
-		const CCountryFlags::CCountryFlag *pEntry = m_pClient->m_CountryFlags.GetByIndex(i);
+		const CCountryFlags::CCountryFlag *pEntry = GameClient()->m_CountryFlags.GetByIndex(i);
 		if(!str_find_nocase(pEntry->m_aCountryCodeString, s_FlagFilterInput.GetString()))
 			continue;
 		vpFilteredFlags.push_back(pEntry);
@@ -377,7 +377,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 		const float OldWidth = FlagRect.w;
 		FlagRect.w = FlagRect.h * 2;
 		FlagRect.x += (OldWidth - FlagRect.w) / 2.0f;
-		m_pClient->m_CountryFlags.Render(pEntry->m_CountryCode, ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), FlagRect.x, FlagRect.y, FlagRect.w, FlagRect.h);
+		GameClient()->m_CountryFlags.Render(pEntry->m_CountryCode, ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), FlagRect.x, FlagRect.y, FlagRect.w, FlagRect.h);
 
 		if(pEntry->m_Texture.IsValid())
 		{
@@ -392,7 +392,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 		SetNeedSendInfo();
 	}
 
-	Ui()->DoEditBox_Search(&s_FlagFilterInput, &QuickSearch, 14.0f, !Ui()->IsPopupOpen() && !m_pClient->m_GameConsole.IsActive());
+	Ui()->DoEditBox_Search(&s_FlagFilterInput, &QuickSearch, 14.0f, !Ui()->IsPopupOpen() && !GameClient()->m_GameConsole.IsActive());
 }
 
 void CMenus::RenderSettingsTee(CUIRect MainView)
@@ -417,10 +417,10 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		m_SkinListScrollToSelected = true;
 	}
 
-	if(Client()->State() == IClient::STATE_ONLINE && m_pClient->m_NextChangeInfo && m_pClient->m_NextChangeInfo > Client()->GameTick(g_Config.m_ClDummy))
+	if(Client()->State() == IClient::STATE_ONLINE && GameClient()->m_NextChangeInfo && GameClient()->m_NextChangeInfo > Client()->GameTick(g_Config.m_ClDummy))
 	{
 		char aChangeInfo[128], aTimeLeft[32];
-		str_format(aTimeLeft, sizeof(aTimeLeft), Localize("%ds left"), (m_pClient->m_NextChangeInfo - Client()->GameTick(g_Config.m_ClDummy) + Client()->GameTickSpeed() - 1) / Client()->GameTickSpeed());
+		str_format(aTimeLeft, sizeof(aTimeLeft), Localize("%ds left"), (GameClient()->m_NextChangeInfo - Client()->GameTick(g_Config.m_ClDummy) + Client()->GameTickSpeed() - 1) / Client()->GameTickSpeed());
 		str_format(aChangeInfo, sizeof(aChangeInfo), "%s: %s", Localize("Player info change cooldown"), aTimeLeft);
 		Ui()->DoLabel(&ChangeInfo, aChangeInfo, 10.f, TEXTALIGN_ML);
 	}
@@ -827,7 +827,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		}
 	}
 
-	if(Ui()->DoEditBox_Search(&s_SkinFilterInput, &QuickSearch, 14.0f, !Ui()->IsPopupOpen() && !m_pClient->m_GameConsole.IsActive()))
+	if(Ui()->DoEditBox_Search(&s_SkinFilterInput, &QuickSearch, 14.0f, !Ui()->IsPopupOpen() && !GameClient()->m_GameConsole.IsActive()))
 	{
 		SkinList.ForceRefresh();
 	}
@@ -859,7 +859,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	if(ShouldRefresh)
 	{
-		m_pClient->RefreshSkins(CSkinDescriptor::FLAG_SIX);
+		GameClient()->RefreshSkins(CSkinDescriptor::FLAG_SIX);
 	}
 }
 
@@ -943,9 +943,9 @@ void CMenus::DoSettingsControlsButtons(int Start, int Stop, CUIRect View)
 		if(NewId != OldId || NewModifierCombination != OldModifierCombination)
 		{
 			if(OldId != 0 || NewId == 0)
-				m_pClient->m_Binds.Bind(OldId, "", false, OldModifierCombination);
+				GameClient()->m_Binds.Bind(OldId, "", false, OldModifierCombination);
 			if(NewId != 0)
-				m_pClient->m_Binds.Bind(NewId, Key.m_pCommand, false, NewModifierCombination);
+				GameClient()->m_Binds.Bind(NewId, Key.m_pCommand, false, NewModifierCombination);
 		}
 
 		View.HSplitTop(2.0f, nullptr, &View);
@@ -1159,7 +1159,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	{
 		for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
 		{
-			const char *pBind = m_pClient->m_Binds.Get(KeyId, Mod);
+			const char *pBind = GameClient()->m_Binds.Get(KeyId, Mod);
 			if(!pBind[0])
 				continue;
 
@@ -1345,7 +1345,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 
 void CMenus::ResetSettingsControls()
 {
-	m_pClient->m_Binds.SetDefaults();
+	GameClient()->m_Binds.SetDefaults();
 
 	g_Config.m_InpMousesens = 200;
 	g_Config.m_UiMousesens = 200;
@@ -1917,7 +1917,7 @@ bool CMenus::RenderLanguageSelection(CUIRect MainView)
 		Item.m_Rect.VSplitLeft(Item.m_Rect.h * 2.0f, &FlagRect, &Label);
 		FlagRect.VMargin(6.0f, &FlagRect);
 		FlagRect.HMargin(3.0f, &FlagRect);
-		m_pClient->m_CountryFlags.Render(Language.m_CountryCode, ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), FlagRect.x, FlagRect.y, FlagRect.w, FlagRect.h);
+		GameClient()->m_CountryFlags.Render(Language.m_CountryCode, ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), FlagRect.x, FlagRect.y, FlagRect.w, FlagRect.h);
 
 		Ui()->DoLabel(&Label, Language.m_Name.c_str(), 16.0f, TEXTALIGN_ML);
 	}
@@ -2049,7 +2049,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 		static CButtonContainer s_RestartButton;
 		if(DoButton_Menu(&s_RestartButton, Localize("Restart"), 0, &RestartButton))
 		{
-			if(Client()->State() == IClient::STATE_ONLINE || m_pClient->Editor()->HasUnsavedData())
+			if(Client()->State() == IClient::STATE_ONLINE || GameClient()->Editor()->HasUnsavedData())
 			{
 				m_Popup = POPUP_RESTART;
 			}
@@ -2961,12 +2961,12 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		};
 
 		CTeeRenderInfo OwnSkinInfo;
-		OwnSkinInfo.Apply(m_pClient->m_Skins.Find(g_Config.m_ClPlayerSkin));
+		OwnSkinInfo.Apply(GameClient()->m_Skins.Find(g_Config.m_ClPlayerSkin));
 		OwnSkinInfo.ApplyColors(g_Config.m_ClPlayerUseCustomColor, g_Config.m_ClPlayerColorBody, g_Config.m_ClPlayerColorFeet);
 		OwnSkinInfo.m_Size = 50.0f;
 
 		CTeeRenderInfo DummySkinInfo;
-		DummySkinInfo.Apply(m_pClient->m_Skins.Find(g_Config.m_ClDummySkin));
+		DummySkinInfo.Apply(GameClient()->m_Skins.Find(g_Config.m_ClDummySkin));
 		DummySkinInfo.ApplyColors(g_Config.m_ClDummyUseCustomColor, g_Config.m_ClDummyColorBody, g_Config.m_ClDummyColorFeet);
 		DummySkinInfo.m_Size = 50.0f;
 
@@ -2997,7 +2997,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		// Render unhookable tile
 		Graphics()->TextureClear();
-		Graphics()->TextureSet(m_pClient->m_MapImages.GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
+		Graphics()->TextureSet(GameClient()->m_MapImages.GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
 		Graphics()->BlendNormal();
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		RenderTools()->RenderTile(NoHookTileRect.x, NoHookTileRect.y, TILE_NOHOOK, TileScale, ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
@@ -3016,7 +3016,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		// Render hookable tile
 		Graphics()->TextureClear();
-		Graphics()->TextureSet(m_pClient->m_MapImages.GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
+		Graphics()->TextureSet(GameClient()->m_MapImages.GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
 		Graphics()->BlendNormal();
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		RenderTools()->RenderTile(HookTileRect.x, HookTileRect.y, TILE_SOLID, TileScale, ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
@@ -3256,7 +3256,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	if(g_Config.m_ClTextEntities)
 	{
 		if(Ui()->DoScrollbarOption(&g_Config.m_ClTextEntitiesSize, &g_Config.m_ClTextEntitiesSize, &Button, Localize("Size"), 0, 100))
-			m_pClient->m_MapImages.SetTextureScale(g_Config.m_ClTextEntitiesSize);
+			GameClient()->m_MapImages.SetTextureScale(g_Config.m_ClTextEntitiesSize);
 	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);
@@ -3285,7 +3285,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 	Right.HSplitTop(20.0f, &Button, &Right);
 	if(Ui()->DoScrollbarOption(&g_Config.m_ClDefaultZoom, &g_Config.m_ClDefaultZoom, &Button, Localize("Default zoom"), 0, 20))
-		m_pClient->m_Camera.SetZoom(CCamera::ZoomStepsToValue(g_Config.m_ClDefaultZoom - 10), g_Config.m_ClSmoothZoomTime, true);
+		GameClient()->m_Camera.SetZoom(CCamera::ZoomStepsToValue(g_Config.m_ClDefaultZoom - 10), g_Config.m_ClSmoothZoomTime, true);
 
 	Right.HSplitTop(20.0f, &Button, &Right);
 	if(DoButton_CheckBox(&g_Config.m_ClAntiPing, Localize("AntiPing"), g_Config.m_ClAntiPing, &Button))
@@ -3350,7 +3350,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 	if(Ui()->DoButton_FontIcon(&s_BackgroundEntitiesReload, FONT_ICON_ARROW_ROTATE_RIGHT, 0, &ReloadButton, BUTTONFLAG_LEFT))
 	{
-		m_pClient->m_Background.LoadBackground();
+		GameClient()->m_Background.LoadBackground();
 	}
 
 	if(Ui()->DoButton_FontIcon(&s_BackgroundEntitiesMapPicker, FONT_ICON_FOLDER, 0, &Button, BUTTONFLAG_LEFT))
@@ -3371,7 +3371,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 			g_Config.m_ClBackgroundEntities[0] = '\0';
 		else
 			str_copy(g_Config.m_ClBackgroundEntities, CURRENT_MAP);
-		m_pClient->m_Background.LoadBackground();
+		GameClient()->m_Background.LoadBackground();
 	}
 
 	Background.HSplitTop(20.0f, &Button, &Background);
@@ -3522,7 +3522,7 @@ CUi::EPopupMenuFunctionResult CMenus::PopupMapPicker(void *pContext, CUIRect Vie
 		else
 		{
 			str_format(g_Config.m_ClBackgroundEntities, sizeof(g_Config.m_ClBackgroundEntities), "%s/%s", pPopupContext->m_aCurrentMapFolder, SelectedItem.m_aFilename);
-			pMenus->m_pClient->m_Background.LoadBackground();
+			pMenus->GameClient()->m_Background.LoadBackground();
 			return CUi::POPUP_CLOSE_CURRENT;
 		}
 	}

@@ -2333,6 +2333,8 @@ if(CLIENT)
     components/camera.h
     components/chat.cpp
     components/chat.h
+    components/community_icons.cpp
+    components/community_icons.h
     components/console.cpp
     components/console.h
     components/controls.cpp
@@ -2359,6 +2361,8 @@ if(CLIENT)
     components/infomessages.h
     components/items.cpp
     components/items.h
+    components/local_server.cpp
+    components/local_server.h
     components/mapimages.cpp
     components/mapimages.h
     components/maplayers.cpp
@@ -2376,6 +2380,7 @@ if(CLIENT)
     components/menus_settings7.cpp
     components/menus_settings_assets.cpp
     components/menus_start.cpp
+    components/menus_start.h
     components/motd.cpp
     components/motd.h
     components/nameplates.cpp

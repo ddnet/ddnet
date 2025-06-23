@@ -22,7 +22,7 @@ void CMapSounds::Play(int Channel, int SoundId)
 	if(SoundId < 0 || SoundId >= m_Count)
 		return;
 
-	m_pClient->m_Sounds.PlaySample(Channel, m_aSounds[SoundId], 0, 1.0f);
+	GameClient()->m_Sounds.PlaySample(Channel, m_aSounds[SoundId], 0, 1.0f);
 }
 
 void CMapSounds::PlayAt(int Channel, int SoundId, vec2 Position)
@@ -30,7 +30,7 @@ void CMapSounds::PlayAt(int Channel, int SoundId, vec2 Position)
 	if(SoundId < 0 || SoundId >= m_Count)
 		return;
 
-	m_pClient->m_Sounds.PlaySampleAt(Channel, m_aSounds[SoundId], 0, 1.0f, Position);
+	GameClient()->m_Sounds.PlaySampleAt(Channel, m_aSounds[SoundId], 0, 1.0f, Position);
 }
 
 void CMapSounds::OnMapLoad()
@@ -138,10 +138,10 @@ void CMapSounds::OnRender()
 	for(auto &Source : m_vSourceQueue)
 	{
 		static float s_Time = 0.0f;
-		if(m_pClient->m_Snap.m_pGameInfoObj) // && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED))
+		if(GameClient()->m_Snap.m_pGameInfoObj) // && !(GameClient()->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED))
 		{
-			s_Time = mix((Client()->PrevGameTick(g_Config.m_ClDummy) - m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick) / (float)Client()->GameTickSpeed(),
-				(Client()->GameTick(g_Config.m_ClDummy) - m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick) / (float)Client()->GameTickSpeed(),
+			s_Time = mix((Client()->PrevGameTick(g_Config.m_ClDummy) - GameClient()->m_Snap.m_pGameInfoObj->m_RoundStartTick) / (float)Client()->GameTickSpeed(),
+				(Client()->GameTick(g_Config.m_ClDummy) - GameClient()->m_Snap.m_pGameInfoObj->m_RoundStartTick) / (float)Client()->GameTickSpeed(),
 				Client()->IntraGameTick(g_Config.m_ClDummy));
 		}
 		float Offset = s_Time - Source.m_pSource->m_TimeDelay;
@@ -161,7 +161,7 @@ void CMapSounds::OnRender()
 				if(!Source.m_pSource->m_Pan)
 					Flags |= ISound::FLAG_NO_PANNING;
 
-				Source.m_Voice = m_pClient->m_Sounds.PlaySampleAt(CSounds::CHN_MAPSOUND, m_aSounds[Source.m_Sound], Flags, 1.0f, vec2(fx2f(Source.m_pSource->m_Position.x), fx2f(Source.m_pSource->m_Position.y)));
+				Source.m_Voice = GameClient()->m_Sounds.PlaySampleAt(CSounds::CHN_MAPSOUND, m_aSounds[Source.m_Sound], Flags, 1.0f, vec2(fx2f(Source.m_pSource->m_Position.x), fx2f(Source.m_pSource->m_Position.y)));
 				Sound()->SetVoiceTimeOffset(Source.m_Voice, Offset);
 				Sound()->SetVoiceFalloff(Source.m_Voice, Source.m_pSource->m_Falloff / 255.0f);
 				switch(Source.m_pSource->m_Shape.m_Type)
@@ -188,7 +188,7 @@ void CMapSounds::OnRender()
 		}
 	}
 
-	const vec2 Center = m_pClient->m_Camera.m_Center;
+	const vec2 Center = GameClient()->m_Camera.m_Center;
 	for(const auto &Source : m_vSourceQueue)
 	{
 		if(!Source.m_Voice.IsValid())
