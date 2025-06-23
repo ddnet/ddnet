@@ -488,7 +488,8 @@ void CSaveHotReloadTee::Save(CCharacter *pChr, bool AddPenalty)
 	m_SaveTee.Save(pChr, AddPenalty);
 	m_Super = pChr->m_Core.m_Super;
 	m_Invincible = pChr->m_Core.m_Invincible;
-	m_SavedTeleTee = pChr->m_pPlayer->m_LastTeleTee;
+	m_SavedTeleTee = pChr->GetPlayer()->m_LastTeleTee;
+	m_LastDeath = pChr->GetPlayer()->m_LastDeath;
 }
 
 bool CSaveHotReloadTee::Load(CCharacter *pChr, int Team, bool IsSwap)
@@ -497,6 +498,7 @@ bool CSaveHotReloadTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 	pChr->SetSuper(m_Super);
 	pChr->m_Core.m_Invincible = m_Invincible;
 	pChr->GetPlayer()->m_LastTeleTee = m_SavedTeleTee;
+	pChr->GetPlayer()->m_LastDeath = m_LastDeath;
 
 	return Result;
 }

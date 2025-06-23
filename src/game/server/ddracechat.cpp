@@ -1883,6 +1883,23 @@ void CGameContext::ConRescueMode(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CGameContext::ConBack(IConsole::IResult *pResult, void *pUserData)
+{
+	auto *pSelf = static_cast<CGameContext *>(pUserData);
+	if(auto *pChr = pSelf->GetPracticeCharacter(pResult))
+	{
+		auto *pPlayer = pChr->GetPlayer();
+		if(!pPlayer->m_LastDeath.has_value())
+		{
+			pSelf->SendChatTarget(pPlayer->GetCid(), "There is nowhere to go back to.");
+			return;
+		}
+		pChr->GetLastRescueTeeRef(pPlayer->m_RescueMode) = pPlayer->m_LastDeath.value();
+		pChr->Rescue();
+		pChr->UnFreeze();
+	}
+}
+
 void CGameContext::ConTeleTo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
