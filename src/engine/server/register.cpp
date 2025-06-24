@@ -22,7 +22,10 @@ class CRegister : public IRegister
 		STATUS_NEEDCHALLENGE,
 		STATUS_NEEDINFO,
 		STATUS_ERROR,
+	};
 
+	enum
+	{
 		PROTOCOL_TW6_IPV6 = 0,
 		PROTOCOL_TW6_IPV4,
 		PROTOCOL_TW7_IPV6,

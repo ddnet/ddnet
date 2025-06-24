@@ -133,7 +133,10 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 		COL_FRIENDS,
 		COL_PLAYERS,
 		COL_PING,
+	};
 
+	enum
+	{
 		UI_ELEM_LOCK_ICON = 0,
 		UI_ELEM_FAVORITE_ICON,
 		UI_ELEM_NAME_1,

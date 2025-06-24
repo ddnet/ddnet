@@ -34,7 +34,10 @@ enum
 	DO_CHAT = 0,
 	DO_BROADCAST,
 	DO_SPECIAL,
+};
 
+enum
+{
 	PARA_NONE = 0,
 	PARA_I,
 	PARA_II,
