@@ -351,7 +351,7 @@ int CSnapshotDelta::CreateDelta(const CSnapshot *pFrom, const CSnapshot *pTo, vo
 				*pData++ = pCurItem->Id();
 				if(IncludeSize)
 					*pData++ = ItemSize / sizeof(int32_t);
-				pData += ItemSize / sizeof(int32_t);
+				pData += ItemSize / sizeof(int32_t); // NOLINT(bugprone-sizeof-expression)
 				pDelta->m_NumUpdateItems++;
 			}
 		}
@@ -363,7 +363,7 @@ int CSnapshotDelta::CreateDelta(const CSnapshot *pFrom, const CSnapshot *pTo, vo
 				*pData++ = ItemSize / sizeof(int32_t);
 
 			mem_copy(pData, pCurItem->Data(), ItemSize);
-			pData += ItemSize / sizeof(int32_t);
+			pData += ItemSize / sizeof(int32_t); // NOLINT(bugprone-sizeof-expression)
 			pDelta->m_NumUpdateItems++;
 		}
 	}
@@ -602,7 +602,7 @@ int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const vo
 		}
 		m_aSnapshotDataUpdates[Type]++;
 
-		pData += ItemSize / sizeof(int32_t);
+		pData += ItemSize / sizeof(int32_t); // NOLINT(bugprone-sizeof-expression)
 	}
 
 	// finish up
