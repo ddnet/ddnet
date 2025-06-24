@@ -22,14 +22,27 @@ jobs:
     - name: Prepare Linux
       run: |
         sudo apt-get update -y
-        sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev clang-tidy libvulkan-dev glslang-tools spirv-tools libglew-dev -y
+        sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev libvulkan-dev glslang-tools spirv-tools libglew-dev -y
 
     - name: Cache Rust dependencies
       uses: Swatinem/rust-cache@v2
+
+    - name: Install Clang 20
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget gnupg lsb-release
+        wget https://apt.llvm.org/llvm.sh
+        chmod +x llvm.sh
+        sudo ./llvm.sh 20 all
 
     - name: Build with clang-tidy
       run: |
         mkdir clang-tidy
         cd clang-tidy
-        cmake -G Ninja -DCMAKE_CXX_CLANG_TIDY="clang-tidy;-warnings-as-errors=*" -DCMAKE_C_CLANG_TIDY="clang-tidy;-warnings-as-errors=*" -DCMAKE_BUILD_TYPE=Debug -Werror=dev -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. ..
+        cmake -G Ninja \
+          -DCMAKE_CXX_CLANG_TIDY="clang-tidy-20;-warnings-as-errors=*" \
+          -DCMAKE_C_CLANG_TIDY="clang-tidy-20;-warnings-as-errors=*" \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -Werror=dev \
+          -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. ..
         cmake --build . --config Debug --target everything -- -k 0
