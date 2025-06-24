@@ -2166,6 +2166,18 @@ const char *fs_filename(const char *path);
 void fs_split_file_extension(const char *filename, char *name, size_t name_size, char *extension = nullptr, size_t extension_size = 0);
 
 /**
+ * Normalizes the given path: replaces backslashes with regular slashes
+ * and removes trailing slashes.
+ *
+ * @ingroup Filesystem
+ *
+ * @param path Path to normalize.
+ *
+ * @remark The strings are treated as null-terminated strings.
+ */
+void fs_normalize_path(char *path);
+
+/**
  * Get the parent directory of a directory.
  *
  * @ingroup Filesystem

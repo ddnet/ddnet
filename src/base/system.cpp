@@ -2417,7 +2417,10 @@ int fs_storage_path(const char *appname, char *path, int max)
 		path[0] = '\0';
 		return -1;
 	}
-	str_format(path, max, "%s/%s", home.value().c_str(), appname);
+	str_copy(path, home.value().c_str(), max);
+	fs_normalize_path(path);
+	str_append(path, "/", max);
+	str_append(path, appname, max);
 	return 0;
 #else
 	char *home = getenv("HOME");
@@ -2606,6 +2609,7 @@ char *fs_getcwd(char *buffer, int buffer_size)
 		return nullptr;
 	}
 	str_copy(buffer, current_dir.value().c_str(), buffer_size);
+	fs_normalize_path(buffer);
 	return buffer;
 #else
 	char *result = getcwd(buffer, buffer_size);
@@ -2648,6 +2652,26 @@ void fs_split_file_extension(const char *filename, char *name, size_t name_size,
 			str_copy(extension, last_dot + 1, extension_size);
 		if(name != nullptr)
 			str_truncate(name, name_size, filename, last_dot - filename);
+	}
+}
+
+void fs_normalize_path(char *path)
+{
+	for(int i = 0; path[i] != '\0';)
+	{
+		if(path[i] == '\\')
+		{
+			path[i] = '/';
+		}
+		if(i > 0 && path[i] == '/' && path[i + 1] == '\0')
+		{
+			path[i] = '\0';
+			--i;
+		}
+		else
+		{
+			++i;
+		}
 	}
 }
 
