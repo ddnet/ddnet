@@ -13,7 +13,7 @@ public:
 	int m_TilePosY;
 };
 
-bool OpenMap(const char pMapName[64], CDataFileReader &InputMap)
+static bool OpenMap(const char pMapName[64], CDataFileReader &InputMap)
 {
 	std::unique_ptr<IStorage> pStorage = CreateLocalStorage();
 	if(!pStorage)
@@ -30,7 +30,7 @@ bool OpenMap(const char pMapName[64], CDataFileReader &InputMap)
 	return true;
 }
 
-bool GetLayerGroupIds(CDataFileReader &InputMap, const int LayerNumber, int &GroupId, int &LayerRelativeId)
+static bool GetLayerGroupIds(CDataFileReader &InputMap, const int LayerNumber, int &GroupId, int &LayerRelativeId)
 {
 	int Start, Num;
 	InputMap.GetType(MAPITEMTYPE_GROUP, &Start, &Num);
@@ -49,12 +49,12 @@ bool GetLayerGroupIds(CDataFileReader &InputMap, const int LayerNumber, int &Gro
 	return false;
 }
 
-int FxToTilePos(const int FxPos)
+static int FxToTilePos(const int FxPos)
 {
 	return std::floor(fx2f(FxPos) / 32);
 }
 
-bool GetEnvelopedQuads(const CQuad *pQuads, const int NumQuads, const int EnvId, const int GroupId, const int LayerId, int &QuadsCounter, CEnvelopedQuad pEnvQuads[1024])
+static bool GetEnvelopedQuads(const CQuad *pQuads, const int NumQuads, const int EnvId, const int GroupId, const int LayerId, int &QuadsCounter, CEnvelopedQuad pEnvQuads[1024])
 {
 	bool Found = false;
 	for(int i = 0; i < NumQuads; i++)
@@ -74,7 +74,7 @@ bool GetEnvelopedQuads(const CQuad *pQuads, const int NumQuads, const int EnvId,
 	return Found;
 }
 
-void PrintEnvelopedQuads(const CEnvelopedQuad pEnvQuads[1024], const int EnvId, const int QuadsCounter)
+static void PrintEnvelopedQuads(const CEnvelopedQuad pEnvQuads[1024], const int EnvId, const int QuadsCounter)
 {
 	if(!QuadsCounter)
 	{
@@ -87,7 +87,7 @@ void PrintEnvelopedQuads(const CEnvelopedQuad pEnvQuads[1024], const int EnvId, 
 		dbg_msg("map_find_env", "%*d. Group: #%d - Layer: #%d - Pos: %d,%d", (int)(std::log10(absolute(QuadsCounter))) + 1, i + 1, pEnvQuads[i].m_GroupId, pEnvQuads[i].m_LayerId, pEnvQuads[i].m_TilePosX, pEnvQuads[i].m_TilePosY);
 }
 
-bool FindEnv(const char aFilename[64], const int EnvId)
+static bool FindEnv(const char aFilename[64], const int EnvId)
 {
 	CDataFileReader InputMap;
 	if(!OpenMap(aFilename, InputMap))

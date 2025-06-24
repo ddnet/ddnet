@@ -8,7 +8,7 @@
 #include <game/mapitems.h>
 #include <vector>
 
-void ClearTransparentPixels(uint8_t *pImg, int Width, int Height)
+static void ClearTransparentPixels(uint8_t *pImg, int Width, int Height)
 {
 	for(int y = 0; y < Height; ++y)
 	{
@@ -25,7 +25,7 @@ void ClearTransparentPixels(uint8_t *pImg, int Width, int Height)
 	}
 }
 
-void CopyOpaquePixels(uint8_t *pDestImg, uint8_t *pSrcImg, int Width, int Height)
+static void CopyOpaquePixels(uint8_t *pDestImg, uint8_t *pSrcImg, int Width, int Height)
 {
 	for(int y = 0; y < Height; ++y)
 	{
@@ -40,7 +40,7 @@ void CopyOpaquePixels(uint8_t *pDestImg, uint8_t *pSrcImg, int Width, int Height
 	}
 }
 
-void ClearPixelsTile(uint8_t *pImg, int Width, int Height, int TileIndex)
+static void ClearPixelsTile(uint8_t *pImg, int Width, int Height, int TileIndex)
 {
 	int WTile = Width / 16;
 	int HTile = Height / 16;
@@ -60,7 +60,7 @@ void ClearPixelsTile(uint8_t *pImg, int Width, int Height, int TileIndex)
 	}
 }
 
-void GetImageSHA256(uint8_t *pImgBuff, int ImgSize, int Width, int Height, char *pSHA256Str, size_t SHA256StrSize)
+static void GetImageSHA256(uint8_t *pImgBuff, int ImgSize, int Width, int Height, char *pSHA256Str, size_t SHA256StrSize)
 {
 	uint8_t *pNewImgBuff = (uint8_t *)malloc(ImgSize);
 

@@ -9,4 +9,5 @@ if git_hash is not None:
 	definition = f'"{git_hash}"'
 else:
 	definition = "0"
+print("#include <game/version.h>")
 print(f"const char *GIT_SHORTREV_HASH = {definition};")

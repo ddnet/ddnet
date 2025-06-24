@@ -47,12 +47,12 @@
 
 using namespace FontIcons;
 
-float fxt2f(int t)
+static float fxt2f(int t)
 {
 	return t / 1000.0f;
 }
 
-int f2fxt(float t)
+static int f2fxt(float t)
 {
 	return static_cast<int>(t * 1000.0f);
 }
