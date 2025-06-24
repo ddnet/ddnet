@@ -2453,19 +2453,22 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatOld, Localize("Use old chat style"), &g_Config.m_ClChatOld, &LeftView, LineSize))
 			GameClient()->m_Chat.RebuildChat();
 
-		LeftView.HSplitTop(LineSize * 2.0f, &Button, &LeftView);
-		if(Ui()->DoScrollbarOption(&g_Config.m_ClChatFontSize, &g_Config.m_ClChatFontSize, &Button, Localize("Chat font size"), 10, 100, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE))
+		LeftView.HSplitTop(LineSize, &Button, &LeftView);
+		if(Ui()->DoScrollbarOption(&g_Config.m_ClChatFontSize, &g_Config.m_ClChatFontSize, &Button, Localize("Chat font size"), 10, 100))
 		{
 			Chat.EnsureCoherentWidth();
 			Chat.RebuildChat();
 		}
 
-		LeftView.HSplitTop(LineSize * 2.0f, &Button, &LeftView);
-		if(Ui()->DoScrollbarOption(&g_Config.m_ClChatWidth, &g_Config.m_ClChatWidth, &Button, Localize("Chat width"), 120, 400, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE))
+		LeftView.HSplitTop(LineSize, &Button, &LeftView);
+		if(Ui()->DoScrollbarOption(&g_Config.m_ClChatWidth, &g_Config.m_ClChatWidth, &Button, Localize("Chat width"), 120, 400))
 		{
 			Chat.EnsureCoherentFontSize();
 			Chat.RebuildChat();
 		}
+
+		static CButtonContainer s_BackgroundColor;
+		DoLine_ColorPicker(&s_BackgroundColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &LeftView, Localize("Chat background color"), &g_Config.m_ClChatBackgroundColor, static_cast<ColorRGBA>(ColorHSLA(CConfig::ms_ClChatBackgroundColor, true)), false, nullptr, true);
 
 		// ***** Messages ***** //
 		Ui()->DoLabel_AutoLineSize(Localize("Messages"), HeadlineFontSize,
@@ -2698,7 +2701,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		{
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
-			Graphics()->SetColor(0, 0, 0, 0.12f);
+			Graphics()->SetColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClChatBackgroundColor, true)));
 
 			float TempY = Y;
 			const float RealBackgroundRounding = Chat.MessageRounding() * 2.0f;
