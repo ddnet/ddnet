@@ -6,17 +6,20 @@ CLayerTune::CLayerTune(CEditor *pEditor, int w, int h) :
 	CLayerTiles(pEditor, w, h)
 {
 	str_copy(m_aName, "Tune");
-	m_Tune = 1;
+	m_HasTune = true;
 
 	m_pTuneTile = new CTuneTile[w * h];
 	mem_zero(m_pTuneTile, (size_t)w * h * sizeof(CTuneTile));
+
+	m_GotoTuneOffset = 0;
+	m_GotoTuneLastPos = ivec2(-1, -1);
 }
 
 CLayerTune::CLayerTune(const CLayerTune &Other) :
 	CLayerTiles(Other)
 {
 	str_copy(m_aName, "Tune copy");
-	m_Tune = 1;
+	m_HasTune = true;
 
 	m_pTuneTile = new CTuneTile[m_Width * m_Height];
 	mem_copy(m_pTuneTile, Other.m_pTuneTile, (size_t)m_Width * m_Height * sizeof(CTuneTile));
@@ -59,20 +62,20 @@ bool CLayerTune::IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer)
 {
 	for(int y = 0; y < pLayer->m_Height; y++)
 		for(int x = 0; x < pLayer->m_Width; x++)
-			if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidTuneTile(pLayer->GetTile(x, y).m_Index))
+			if(m_pEditor->IsAllowPlaceUnusedTiles() || IsValidTuneTile(pLayer->GetTile(x, y).m_Index))
 				return false;
 
 	return true;
 }
 
-void CLayerTune::BrushDraw(std::shared_ptr<CLayer> pBrush, float wx, float wy)
+void CLayerTune::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 {
 	if(m_Readonly)
 		return;
 
 	std::shared_ptr<CLayerTune> pTuneLayer = std::static_pointer_cast<CLayerTune>(pBrush);
-	int sx = ConvertX(wx);
-	int sy = ConvertY(wy);
+	int sx = ConvertX(WorldPos.x);
+	int sy = ConvertY(WorldPos.y);
 	if(str_comp(pTuneLayer->m_aFileName, m_pEditor->m_aFileName))
 	{
 		m_pEditor->m_TuningNum = pTuneLayer->m_TuningNumber;
@@ -92,50 +95,52 @@ void CLayerTune::BrushDraw(std::shared_ptr<CLayer> pBrush, float wx, float wy)
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			int Index = fy * m_Width + fx;
-			STuneTileStateChange::SData Previous{
-				m_pTuneTile[Index].m_Number,
-				m_pTuneTile[Index].m_Type,
-				m_pTiles[Index].m_Index};
+			const int SrcIndex = y * pTuneLayer->m_Width + x;
+			const int TgtIndex = fy * m_Width + fx;
 
-			if((m_pEditor->m_AllowPlaceUnusedTiles || IsValidTuneTile(pTuneLayer->m_pTiles[y * pTuneLayer->m_Width + x].m_Index)) && pTuneLayer->m_pTiles[y * pTuneLayer->m_Width + x].m_Index != TILE_AIR)
+			STuneTileStateChange::SData Previous{
+				m_pTuneTile[TgtIndex].m_Number,
+				m_pTuneTile[TgtIndex].m_Type,
+				m_pTiles[TgtIndex].m_Index};
+
+			if((m_pEditor->IsAllowPlaceUnusedTiles() || IsValidTuneTile(pTuneLayer->m_pTiles[SrcIndex].m_Index)) && pTuneLayer->m_pTiles[SrcIndex].m_Index != TILE_AIR)
 			{
 				if(m_pEditor->m_TuningNum != pTuneLayer->m_TuningNumber)
 				{
-					m_pTuneTile[Index].m_Number = m_pEditor->m_TuningNum;
+					m_pTuneTile[TgtIndex].m_Number = m_pEditor->m_TuningNum;
 				}
-				else if(pTuneLayer->m_pTuneTile[y * pTuneLayer->m_Width + x].m_Number)
-					m_pTuneTile[Index].m_Number = pTuneLayer->m_pTuneTile[y * pTuneLayer->m_Width + x].m_Number;
+				else if(pTuneLayer->m_pTuneTile[SrcIndex].m_Number)
+					m_pTuneTile[TgtIndex].m_Number = pTuneLayer->m_pTuneTile[SrcIndex].m_Number;
 				else
 				{
 					if(!m_pEditor->m_TuningNum)
 					{
-						m_pTuneTile[Index].m_Number = 0;
-						m_pTuneTile[Index].m_Type = 0;
-						m_pTiles[Index].m_Index = 0;
+						m_pTuneTile[TgtIndex].m_Number = 0;
+						m_pTuneTile[TgtIndex].m_Type = 0;
+						m_pTiles[TgtIndex].m_Index = 0;
 						continue;
 					}
 					else
-						m_pTuneTile[Index].m_Number = m_pEditor->m_TuningNum;
+						m_pTuneTile[TgtIndex].m_Number = m_pEditor->m_TuningNum;
 				}
 
-				m_pTuneTile[Index].m_Type = pTuneLayer->m_pTiles[y * pTuneLayer->m_Width + x].m_Index;
-				m_pTiles[Index].m_Index = pTuneLayer->m_pTiles[y * pTuneLayer->m_Width + x].m_Index;
+				m_pTuneTile[TgtIndex].m_Type = pTuneLayer->m_pTiles[SrcIndex].m_Index;
+				m_pTiles[TgtIndex].m_Index = pTuneLayer->m_pTiles[SrcIndex].m_Index;
 			}
 			else
 			{
-				m_pTuneTile[Index].m_Number = 0;
-				m_pTuneTile[Index].m_Type = 0;
-				m_pTiles[Index].m_Index = 0;
+				m_pTuneTile[TgtIndex].m_Number = 0;
+				m_pTuneTile[TgtIndex].m_Type = 0;
+				m_pTiles[TgtIndex].m_Index = 0;
 
-				if(pTuneLayer->m_pTiles[y * pTuneLayer->m_Width + x].m_Index != TILE_AIR)
+				if(pTuneLayer->m_pTiles[SrcIndex].m_Index != TILE_AIR)
 					ShowPreventUnusedTilesWarning();
 			}
 
 			STuneTileStateChange::SData Current{
-				m_pTuneTile[Index].m_Number,
-				m_pTuneTile[Index].m_Type,
-				m_pTiles[Index].m_Index};
+				m_pTuneTile[TgtIndex].m_Number,
+				m_pTuneTile[TgtIndex].m_Type,
+				m_pTiles[TgtIndex].m_Index};
 
 			RecordStateChange(fx, fy, Previous, Current);
 		}
@@ -233,7 +238,7 @@ void CLayerTune::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRe
 				m_pTuneTile[TgtIndex].m_Type,
 				m_pTiles[TgtIndex].m_Index};
 
-			if(Empty || (!m_pEditor->m_AllowPlaceUnusedTiles && !IsValidTuneTile((pLt->m_pTiles[SrcIndex]).m_Index)))
+			if(Empty || (!m_pEditor->IsAllowPlaceUnusedTiles() && !IsValidTuneTile((pLt->m_pTiles[SrcIndex]).m_Index)))
 			{
 				m_pTiles[TgtIndex].m_Index = 0;
 				m_pTuneTile[TgtIndex].m_Type = 0;
@@ -245,7 +250,7 @@ void CLayerTune::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRe
 			else
 			{
 				m_pTiles[TgtIndex] = pLt->m_pTiles[SrcIndex];
-				if(pLt->m_Tune && m_pTiles[TgtIndex].m_Index > 0)
+				if(pLt->m_HasTune && m_pTiles[TgtIndex].m_Index > 0)
 				{
 					m_pTuneTile[TgtIndex].m_Type = m_pTiles[fy * m_Width + fx].m_Index;
 
@@ -253,6 +258,12 @@ void CLayerTune::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRe
 						m_pTuneTile[TgtIndex].m_Number = m_pEditor->m_TuningNum;
 					else
 						m_pTuneTile[TgtIndex].m_Number = pLt->m_pTuneTile[SrcIndex].m_Number;
+				}
+				else
+				{
+					m_pTiles[TgtIndex].m_Index = 0;
+					m_pTuneTile[TgtIndex].m_Type = 0;
+					m_pTuneTile[TgtIndex].m_Number = 0;
 				}
 			}
 
@@ -266,6 +277,86 @@ void CLayerTune::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRe
 	}
 
 	FlagModified(sx, sy, w, h);
+}
+
+int CLayerTune::FindNextFreeNumber() const
+{
+	for(int i = 1; i <= 255; i++)
+	{
+		if(!ContainsElementWithId(i))
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
+bool CLayerTune::ContainsElementWithId(int Id) const
+{
+	for(int y = 0; y < m_Height; ++y)
+	{
+		for(int x = 0; x < m_Width; ++x)
+		{
+			if(IsValidTuneTile(m_pTuneTile[y * m_Width + x].m_Type) && m_pTuneTile[y * m_Width + x].m_Number == Id)
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+void CLayerTune::GetPos(int Number, int Offset, ivec2 &Pos)
+{
+	int Match = -1;
+	ivec2 MatchPos = ivec2(-1, -1);
+	Pos = ivec2(-1, -1);
+
+	auto FindTile = [this, &Match, &MatchPos, &Number, &Offset]() {
+		for(int x = 0; x < m_Width; x++)
+		{
+			for(int y = 0; y < m_Height; y++)
+			{
+				int i = y * m_Width + x;
+				int Tune = m_pTuneTile[i].m_Number;
+				if(Number == Tune)
+				{
+					Match++;
+					if(Offset != -1)
+					{
+						if(Match == Offset)
+						{
+							MatchPos = ivec2(x, y);
+							m_GotoTuneOffset = Match;
+							return;
+						}
+						continue;
+					}
+					MatchPos = ivec2(x, y);
+					if(m_GotoTuneLastPos != ivec2(-1, -1))
+					{
+						if(distance(m_GotoTuneLastPos, MatchPos) < 10.0f)
+						{
+							m_GotoTuneOffset++;
+							continue;
+						}
+					}
+					m_GotoTuneLastPos = MatchPos;
+					if(Match == m_GotoTuneOffset)
+						return;
+				}
+			}
+		}
+	};
+	FindTile();
+
+	if(MatchPos == ivec2(-1, -1))
+		return;
+	if(Match < m_GotoTuneOffset)
+		m_GotoTuneOffset = -1;
+	Pos = MatchPos;
+	m_GotoTuneOffset++;
 }
 
 std::shared_ptr<CLayer> CLayerTune::Duplicate() const

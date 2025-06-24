@@ -22,9 +22,9 @@
 public: \
 	void *operator new(size_t Size) \
 	{ \
-		void *p = malloc(Size); \
-		mem_zero(p, Size); \
-		return p; \
+		void *pObj = malloc(Size); \
+		mem_zero(pObj, Size); \
+		return pObj; \
 	} \
 	void operator delete(void *pPtr) \
 	{ \
@@ -35,9 +35,9 @@ private:
 
 #define MACRO_ALLOC_POOL_ID() \
 public: \
-	void *operator new(size_t Size, int id); \
-	void operator delete(void *p, int id); \
-	void operator delete(void *p); /* NOLINT(misc-new-delete-overloads) */ \
+	void *operator new(size_t Size, int Id); \
+	void operator delete(void *pObj, int Id); \
+	void operator delete(void *pObj); /* NOLINT(misc-new-delete-overloads) */ \
 \
 private:
 
@@ -51,30 +51,30 @@ private:
 	static char gs_PoolData##POOLTYPE[PoolSize][MACRO_ALLOC_GET_SIZE(POOLTYPE)] = {{0}}; \
 	static int gs_PoolUsed##POOLTYPE[PoolSize] = {0}; \
 	MAYBE_UNUSED static int gs_PoolDummy##POOLTYPE = (ASAN_POISON_MEMORY_REGION(gs_PoolData##POOLTYPE, sizeof(gs_PoolData##POOLTYPE)), 0); \
-	void *POOLTYPE::operator new(size_t Size, int id) \
+	void *POOLTYPE::operator new(size_t Size, int Id) \
 	{ \
 		dbg_assert(sizeof(POOLTYPE) >= Size, "size error"); \
-		dbg_assert(!gs_PoolUsed##POOLTYPE[id], "already used"); \
-		ASAN_UNPOISON_MEMORY_REGION(gs_PoolData##POOLTYPE[id], sizeof(gs_PoolData##POOLTYPE[id])); \
-		gs_PoolUsed##POOLTYPE[id] = 1; \
-		mem_zero(gs_PoolData##POOLTYPE[id], sizeof(gs_PoolData##POOLTYPE[id])); \
-		return gs_PoolData##POOLTYPE[id]; \
+		dbg_assert(!gs_PoolUsed##POOLTYPE[Id], "already used"); \
+		ASAN_UNPOISON_MEMORY_REGION(gs_PoolData##POOLTYPE[Id], sizeof(gs_PoolData##POOLTYPE[Id])); \
+		gs_PoolUsed##POOLTYPE[Id] = 1; \
+		mem_zero(gs_PoolData##POOLTYPE[Id], sizeof(gs_PoolData##POOLTYPE[Id])); \
+		return gs_PoolData##POOLTYPE[Id]; \
 	} \
-	void POOLTYPE::operator delete(void *p, int id) \
+	void POOLTYPE::operator delete(void *pObj, int Id) \
 	{ \
-		dbg_assert(gs_PoolUsed##POOLTYPE[id], "not used"); \
-		dbg_assert(id == (POOLTYPE *)p - (POOLTYPE *)gs_PoolData##POOLTYPE, "invalid id"); \
-		gs_PoolUsed##POOLTYPE[id] = 0; \
-		mem_zero(gs_PoolData##POOLTYPE[id], sizeof(gs_PoolData##POOLTYPE[id])); \
-		ASAN_POISON_MEMORY_REGION(gs_PoolData##POOLTYPE[id], sizeof(gs_PoolData##POOLTYPE[id])); \
+		dbg_assert(gs_PoolUsed##POOLTYPE[Id], "not used"); \
+		dbg_assert(Id == (POOLTYPE *)pObj - (POOLTYPE *)gs_PoolData##POOLTYPE, "invalid id"); \
+		gs_PoolUsed##POOLTYPE[Id] = 0; \
+		mem_zero(gs_PoolData##POOLTYPE[Id], sizeof(gs_PoolData##POOLTYPE[Id])); \
+		ASAN_POISON_MEMORY_REGION(gs_PoolData##POOLTYPE[Id], sizeof(gs_PoolData##POOLTYPE[Id])); \
 	} \
-	void POOLTYPE::operator delete(void *p) /* NOLINT(misc-new-delete-overloads) */ \
+	void POOLTYPE::operator delete(void *pObj) /* NOLINT(misc-new-delete-overloads) */ \
 	{ \
-		int id = (POOLTYPE *)p - (POOLTYPE *)gs_PoolData##POOLTYPE; \
-		dbg_assert(gs_PoolUsed##POOLTYPE[id], "not used"); \
-		gs_PoolUsed##POOLTYPE[id] = 0; \
-		mem_zero(gs_PoolData##POOLTYPE[id], sizeof(gs_PoolData##POOLTYPE[id])); \
-		ASAN_POISON_MEMORY_REGION(gs_PoolData##POOLTYPE[id], sizeof(gs_PoolData##POOLTYPE[id])); \
+		int Id = (POOLTYPE *)pObj - (POOLTYPE *)gs_PoolData##POOLTYPE; \
+		dbg_assert(gs_PoolUsed##POOLTYPE[Id], "not used"); \
+		gs_PoolUsed##POOLTYPE[Id] = 0; \
+		mem_zero(gs_PoolData##POOLTYPE[Id], sizeof(gs_PoolData##POOLTYPE[Id])); \
+		ASAN_POISON_MEMORY_REGION(gs_PoolData##POOLTYPE[Id], sizeof(gs_PoolData##POOLTYPE[Id])); \
 	}
 
 #endif

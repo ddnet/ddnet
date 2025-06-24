@@ -36,7 +36,7 @@ void CBroadcast::OnRender()
 
 void CBroadcast::RenderServerBroadcast()
 {
-	if(m_pClient->m_Scoreboard.Active() || m_pClient->m_Motd.IsActive() || !g_Config.m_ClShowBroadcasts)
+	if(GameClient()->m_Scoreboard.IsActive() || GameClient()->m_Motd.IsActive() || !g_Config.m_ClShowBroadcasts)
 		return;
 	const float SecondsRemaining = (m_BroadcastTick - Client()->GameTick(g_Config.m_ClDummy)) / (float)Client()->GameTickSpeed();
 	if(SecondsRemaining <= 0.0f)
@@ -74,26 +74,26 @@ void CBroadcast::OnMessage(int MsgType, void *pRawMsg)
 {
 	if(MsgType == NETMSGTYPE_SV_BROADCAST)
 	{
-		OnBroadcastMessage((CNetMsg_Sv_Broadcast *)pRawMsg);
+		const CNetMsg_Sv_Broadcast *pMsg = (CNetMsg_Sv_Broadcast *)pRawMsg;
+		DoBroadcast(pMsg->m_pMessage);
 	}
 }
 
-void CBroadcast::OnBroadcastMessage(const CNetMsg_Sv_Broadcast *pMsg)
+void CBroadcast::DoBroadcast(const char *pText)
 {
-	str_copy(m_aBroadcastText, pMsg->m_pMessage);
+	str_copy(m_aBroadcastText, pText);
 	m_BroadcastTick = Client()->GameTick(g_Config.m_ClDummy) + Client()->GameTickSpeed() * 10;
 	m_BroadcastRenderOffset = -1.0f;
 	TextRender()->DeleteTextContainer(m_TextContainerIndex);
 
 	if(g_Config.m_ClPrintBroadcasts)
 	{
-		const char *pText = m_aBroadcastText;
 		char aLine[sizeof(m_aBroadcastText)];
 		while((pText = str_next_token(pText, "\n", aLine, sizeof(aLine))))
 		{
 			if(aLine[0] != '\0')
 			{
-				m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aLine, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
+				GameClient()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aLine, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
 			}
 		}
 	}

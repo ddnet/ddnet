@@ -3,17 +3,21 @@
 
 #include "gameworld.h"
 #include "entities/character.h"
+#include "entities/door.h"
 #include "entities/dragger.h"
 #include "entities/laser.h"
 #include "entities/pickup.h"
+#include "entities/plasma.h"
 #include "entities/projectile.h"
 #include "entity.h"
-#include <algorithm>
 #include <engine/shared/config.h>
 #include <game/client/laser_data.h>
 #include <game/client/pickup_data.h>
 #include <game/client/projectile_data.h>
+#include <game/mapbugs.h>
 #include <game/mapitems.h>
+
+#include <algorithm>
 #include <utility>
 
 //////////////////////////////////////////////////
@@ -22,13 +26,13 @@
 CGameWorld::CGameWorld()
 {
 	for(auto &pFirstEntityType : m_apFirstEntityTypes)
-		pFirstEntityType = 0;
+		pFirstEntityType = nullptr;
 	for(auto &pCharacter : m_apCharacters)
-		pCharacter = 0;
-	m_pCollision = 0;
+		pCharacter = nullptr;
+	m_pCollision = nullptr;
 	m_GameTick = 0;
-	m_pParent = 0;
-	m_pChild = 0;
+	m_pParent = nullptr;
+	m_pChild = nullptr;
 }
 
 CGameWorld::~CGameWorld()
@@ -37,15 +41,15 @@ CGameWorld::~CGameWorld()
 	if(m_pChild && m_pChild->m_pParent == this)
 	{
 		OnModified();
-		m_pChild->m_pParent = 0;
+		m_pChild->m_pParent = nullptr;
 	}
 	if(m_pParent && m_pParent->m_pChild == this)
-		m_pParent->m_pChild = 0;
+		m_pParent->m_pChild = nullptr;
 }
 
 CEntity *CGameWorld::FindFirst(int Type)
 {
-	return Type < 0 || Type >= NUM_ENTTYPES ? 0 : m_apFirstEntityTypes[Type];
+	return Type < 0 || Type >= NUM_ENTTYPES ? nullptr : m_apFirstEntityTypes[Type];
 }
 
 CEntity *CGameWorld::FindLast(int Type)
@@ -81,8 +85,8 @@ int CGameWorld::FindEntities(vec2 Pos, float Radius, CEntity **ppEnts, int Max, 
 void CGameWorld::InsertEntity(CEntity *pEnt, bool Last)
 {
 	pEnt->m_pGameWorld = this;
-	pEnt->m_pNextTypeEntity = 0x0;
-	pEnt->m_pPrevTypeEntity = 0x0;
+	pEnt->m_pNextTypeEntity = nullptr;
+	pEnt->m_pPrevTypeEntity = nullptr;
 
 	// insert it
 	if(!Last)
@@ -90,7 +94,7 @@ void CGameWorld::InsertEntity(CEntity *pEnt, bool Last)
 		if(m_apFirstEntityTypes[pEnt->m_ObjType])
 			m_apFirstEntityTypes[pEnt->m_ObjType]->m_pPrevTypeEntity = pEnt;
 		pEnt->m_pNextTypeEntity = m_apFirstEntityTypes[pEnt->m_ObjType];
-		pEnt->m_pPrevTypeEntity = 0x0;
+		pEnt->m_pPrevTypeEntity = nullptr;
 		m_apFirstEntityTypes[pEnt->m_ObjType] = pEnt;
 	}
 	else
@@ -106,7 +110,7 @@ void CGameWorld::InsertEntity(CEntity *pEnt, bool Last)
 		else
 			m_apFirstEntityTypes[pEnt->m_ObjType] = pEnt;
 		pEnt->m_pPrevTypeEntity = pLast;
-		pEnt->m_pNextTypeEntity = 0x0;
+		pEnt->m_pNextTypeEntity = nullptr;
 	}
 
 	if(pEnt->m_ObjType == ENTTYPE_CHARACTER)
@@ -140,8 +144,8 @@ void CGameWorld::RemoveEntity(CEntity *pEnt)
 	if(m_pNextTraverseEntity == pEnt)
 		m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 
-	pEnt->m_pNextTypeEntity = 0;
-	pEnt->m_pPrevTypeEntity = 0;
+	pEnt->m_pNextTypeEntity = nullptr;
+	pEnt->m_pPrevTypeEntity = nullptr;
 
 	if(pEnt->m_pParent)
 	{
@@ -162,8 +166,8 @@ void CGameWorld::RemoveCharacter(CCharacter *pChar)
 	int Id = pChar->GetCid();
 	if(Id >= 0 && Id < MAX_CLIENTS)
 	{
-		m_apCharacters[Id] = 0;
-		m_Core.m_apCharacters[Id] = 0;
+		m_apCharacters[Id] = nullptr;
+		m_Core.m_apCharacters[Id] = nullptr;
 	}
 }
 
@@ -223,7 +227,7 @@ void CGameWorld::Tick()
 	// update switch state
 	for(auto &Switcher : Switchers())
 	{
-		for(int j = 0; j < MAX_CLIENTS; ++j)
+		for(int j = 0; j < NUM_DDRACE_TEAMS; ++j)
 		{
 			if(Switcher.m_aEndTick[j] <= GameTick() && Switcher.m_aType[j] == TILE_SWITCHTIMEDOPEN)
 			{
@@ -243,37 +247,40 @@ void CGameWorld::Tick()
 	OnModified();
 }
 
-// TODO: should be more general
 CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, const CCharacter *pNotThis, int CollideWith, const CCharacter *pThisOnly)
 {
-	// Find other players
+	return (CCharacter *)IntersectEntity(Pos0, Pos1, Radius, ENTTYPE_CHARACTER, NewPos, pNotThis, CollideWith, pThisOnly);
+}
+
+CEntity *CGameWorld::IntersectEntity(vec2 Pos0, vec2 Pos1, float Radius, int Type, vec2 &NewPos, const CEntity *pNotThis, int CollideWith, const CEntity *pThisOnly)
+{
 	float ClosestLen = distance(Pos0, Pos1) * 100.0f;
-	CCharacter *pClosest = 0;
+	CEntity *pClosest = nullptr;
 
-	CCharacter *p = (CCharacter *)FindFirst(ENTTYPE_CHARACTER);
-	for(; p; p = (CCharacter *)p->TypeNext())
+	CEntity *pEntity = FindFirst(Type);
+	for(; pEntity; pEntity = pEntity->TypeNext())
 	{
-		if(p == pNotThis)
+		if(pEntity == pNotThis)
 			continue;
 
-		if(pThisOnly && p != pThisOnly)
+		if(pThisOnly && pEntity != pThisOnly)
 			continue;
 
-		if(CollideWith != -1 && !p->CanCollide(CollideWith))
+		if(CollideWith != -1 && !pEntity->CanCollide(CollideWith))
 			continue;
 
 		vec2 IntersectPos;
-		if(closest_point_on_line(Pos0, Pos1, p->m_Pos, IntersectPos))
+		if(closest_point_on_line(Pos0, Pos1, pEntity->m_Pos, IntersectPos))
 		{
-			float Len = distance(p->m_Pos, IntersectPos);
-			if(Len < p->m_ProximityRadius + Radius)
+			float Len = distance(pEntity->m_Pos, IntersectPos);
+			if(Len < pEntity->m_ProximityRadius + Radius)
 			{
 				Len = distance(Pos0, IntersectPos);
 				if(Len < ClosestLen)
 				{
 					NewPos = IntersectPos;
 					ClosestLen = Len;
-					pClosest = p;
+					pClosest = pEntity;
 				}
 			}
 		}
@@ -326,7 +333,7 @@ CEntity *CGameWorld::GetEntity(int Id, int EntityType)
 	for(CEntity *pEnt = m_apFirstEntityTypes[EntityType]; pEnt; pEnt = pEnt->m_pNextTypeEntity)
 		if(pEnt->m_Id == Id)
 			return pEnt;
-	return 0;
+	return nullptr;
 }
 
 void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, CClientMask Mask)
@@ -347,7 +354,7 @@ void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage,
 		float l = length(Diff);
 		if(l)
 			ForceDir = normalize(Diff);
-		l = 1 - clamp((l - InnerRadius) / (Radius - InnerRadius), 0.0f, 1.0f);
+		l = 1 - std::clamp((l - InnerRadius) / (Radius - InnerRadius), 0.0f, 1.0f);
 		float Strength;
 		if(Owner == -1 || !GetCharacterById(Owner))
 			Strength = Tuning()->m_ExplosionStrength;
@@ -451,7 +458,7 @@ void CGameWorld::NetObjAdd(int ObjId, int ObjType, const void *pObjData, const C
 				const vec2 NetPos = NetProj.m_Pos - normalize(NetProj.m_Direction) * CCharacterCore::PhysicalSize() * 0.75;
 				const bool Prev = (GameTick() - NetProj.m_StartTick) > 1;
 				float First = 200.0f, Second = 200.0f;
-				CCharacter *pClosest = 0;
+				CCharacter *pClosest = nullptr;
 				for(CCharacter *pChar = (CCharacter *)FindFirst(ENTTYPE_CHARACTER); pChar; pChar = (CCharacter *)pChar->TypeNext())
 				{
 					float Dist = distance(Prev ? pChar->m_PrevPrevPos : pChar->m_PrevPos, NetPos);
@@ -473,6 +480,8 @@ void CGameWorld::NetObjAdd(int ObjId, int ObjType, const void *pObjData, const C
 	else if((ObjType == NETOBJTYPE_PICKUP || ObjType == NETOBJTYPE_DDNETPICKUP) && m_WorldConfig.m_PredictWeapons)
 	{
 		CPickupData Data = ExtractPickupInfo(ObjType, pObjData, pDataEx);
+		if(Data.m_Flags & PICKUPFLAG_NO_PREDICT)
+			return;
 		CPickup NetPickup = CPickup(this, ObjId, &Data);
 		if(CPickup *pPickup = (CPickup *)GetEntity(ObjId, ENTTYPE_PICKUP))
 		{
@@ -497,7 +506,7 @@ void CGameWorld::NetObjAdd(int ObjId, int ObjType, const void *pObjData, const C
 		if(Data.m_Type == LASERTYPE_RIFLE || Data.m_Type == LASERTYPE_SHOTGUN || Data.m_Type < 0)
 		{
 			CLaser NetLaser = CLaser(this, ObjId, &Data);
-			CLaser *pMatching = 0;
+			CLaser *pMatching = nullptr;
 			if(CLaser *pLaser = dynamic_cast<CLaser *>(GetEntity(ObjId, ENTTYPE_LASER)))
 				if(NetLaser.Match(pLaser))
 					pMatching = pLaser;
@@ -541,6 +550,33 @@ void CGameWorld::NetObjAdd(int ObjId, int ObjType, const void *pObjData, const C
 				InsertEntity(pEnt);
 			}
 		}
+		else if(Data.m_Type == LASERTYPE_DOOR)
+		{
+			CDoor NetDoor = CDoor(this, ObjId, &Data);
+			auto *pDoor = dynamic_cast<CDoor *>(GetEntity(ObjId, ENTTYPE_DOOR));
+			if(pDoor && NetDoor.Match(pDoor))
+			{
+				pDoor->Keep();
+				pDoor->Read(&Data);
+				return;
+			}
+			CDoor *pEnt = new CDoor(NetDoor);
+			pEnt->ResetCollision();
+			InsertEntity(pEnt);
+		}
+		else if(Data.m_Type == LASERTYPE_PLASMA)
+		{
+			CPlasma NetPlasma = CPlasma(this, ObjId, &Data);
+			auto *pPlasma = dynamic_cast<CPlasma *>(GetEntity(ObjId, ENTTYPE_PLASMA));
+			if(pPlasma && NetPlasma.Match(pPlasma))
+			{
+				pPlasma->Keep();
+				pPlasma->Read(&Data);
+				return;
+			}
+			CPlasma *pEnt = new CPlasma(NetPlasma);
+			InsertEntity(pEnt);
+		}
 	}
 }
 
@@ -565,8 +601,8 @@ void CGameWorld::NetObjEnd()
 	// Update character IDs and pointers
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		m_apCharacters[i] = 0;
-		m_Core.m_apCharacters[i] = 0;
+		m_apCharacters[i] = nullptr;
+		m_Core.m_apCharacters[i] = nullptr;
 	}
 	for(CCharacter *pChar = (CCharacter *)FindFirst(ENTTYPE_CHARACTER); pChar; pChar = (CCharacter *)pChar->TypeNext())
 	{
@@ -597,21 +633,22 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 		m_Core.m_aTuning[i] = pFrom->m_Core.m_aTuning[i];
 	}
 	m_pTuningList = pFrom->m_pTuningList;
+	m_pMapBugs = pFrom->m_pMapBugs;
 	m_Teams = pFrom->m_Teams;
 	m_Core.m_vSwitchers = pFrom->m_Core.m_vSwitchers;
 	// delete the previous entities
 	Clear();
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		m_apCharacters[i] = 0;
-		m_Core.m_apCharacters[i] = 0;
+		m_apCharacters[i] = nullptr;
+		m_Core.m_apCharacters[i] = nullptr;
 	}
 	// copy and add the new entities
 	for(int Type = 0; Type < NUM_ENTTYPES; Type++)
 	{
 		for(CEntity *pEnt = pFrom->FindLast(Type); pEnt; pEnt = pEnt->TypePrev())
 		{
-			CEntity *pCopy = 0;
+			CEntity *pCopy = nullptr;
 			if(Type == ENTTYPE_PROJECTILE)
 				pCopy = new CProjectile(*((CProjectile *)pEnt));
 			else if(Type == ENTTYPE_LASER)
@@ -622,6 +659,8 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 				pCopy = new CCharacter(*((CCharacter *)pEnt));
 			else if(Type == ENTTYPE_PICKUP)
 				pCopy = new CPickup(*((CPickup *)pEnt));
+			else if(Type == ENTTYPE_PLASMA)
+				pCopy = new CPlasma(*((CPlasma *)pEnt));
 			if(pCopy)
 			{
 				pCopy->m_pParent = pEnt;
@@ -644,7 +683,7 @@ CEntity *CGameWorld::FindMatch(int ObjId, int ObjType, const void *pObjData)
 		{
 			return pEnt;
 		}
-		return 0;
+		return nullptr;
 	}
 	case NETOBJTYPE_PROJECTILE:
 	case NETOBJTYPE_DDRACEPROJECTILE:
@@ -656,7 +695,7 @@ CEntity *CGameWorld::FindMatch(int ObjId, int ObjType, const void *pObjData)
 		{
 			return pEnt;
 		}
-		return 0;
+		return nullptr;
 	}
 	case NETOBJTYPE_LASER:
 	case NETOBJTYPE_DDNETLASER:
@@ -678,7 +717,23 @@ CEntity *CGameWorld::FindMatch(int ObjId, int ObjType, const void *pObjData)
 				return pEnt;
 			}
 		}
-		return 0;
+		else if(Data.m_Type == LASERTYPE_DOOR)
+		{
+			CDoor *pEnt = (CDoor *)GetEntity(ObjId, ENTTYPE_DOOR);
+			if(pEnt && CDoor(this, ObjId, &Data).Match(pEnt))
+			{
+				return pEnt;
+			}
+		}
+		else if(Data.m_Type == LASERTYPE_PLASMA)
+		{
+			CPlasma *pEnt = (CPlasma *)GetEntity(ObjId, ENTTYPE_PLASMA);
+			if(pEnt && CPlasma(this, ObjId, &Data).Match(pEnt))
+			{
+				return pEnt;
+			}
+		}
+		return nullptr;
 	}
 	case NETOBJTYPE_PICKUP:
 	case NETOBJTYPE_DDNETPICKUP:
@@ -689,10 +744,10 @@ CEntity *CGameWorld::FindMatch(int ObjId, int ObjType, const void *pObjData)
 		{
 			return pEnt;
 		}
-		return 0;
+		return nullptr;
 	}
 	}
-	return 0;
+	return nullptr;
 }
 
 void CGameWorld::OnModified() const
@@ -707,4 +762,9 @@ void CGameWorld::Clear()
 	for(auto &pFirstEntityType : m_apFirstEntityTypes)
 		while(pFirstEntityType)
 			delete pFirstEntityType; // NOLINT(clang-analyzer-cplusplus.NewDelete)
+}
+
+bool CGameWorld::EmulateBug(int Bug) const
+{
+	return m_pMapBugs->Contains(Bug);
 }

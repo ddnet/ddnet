@@ -70,18 +70,18 @@ void CEcon::Init(CConfig *pConfig, IConsole *pConsole, CNetBan *pNetBan)
 	}
 
 	NETADDR BindAddr;
-	if(g_Config.m_EcBindaddr[0] == '\0')
+	if(g_Config.m_EcBindaddr[0] && net_host_lookup(g_Config.m_EcBindaddr, &BindAddr, NETTYPE_ALL) == 0)
 	{
-		mem_zero(&BindAddr, sizeof(BindAddr));
+		// got bindaddr
+		BindAddr.port = g_Config.m_EcPort;
 	}
-	else if(net_host_lookup(g_Config.m_EcBindaddr, &BindAddr, NETTYPE_ALL) != 0)
+	else
 	{
 		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "The configured bindaddr '%s' cannot be resolved.", g_Config.m_Bindaddr);
+		str_format(aBuf, sizeof(aBuf), "The configured bindaddr '%s' cannot be resolved.", g_Config.m_EcBindaddr);
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "econ", aBuf);
+		return;
 	}
-	BindAddr.type = NETTYPE_ALL;
-	BindAddr.port = g_Config.m_EcPort;
 
 	if(m_NetConsole.Open(BindAddr, pNetBan))
 	{
@@ -130,7 +130,7 @@ void CEcon::Update()
 					if(!g_Config.m_EcBantime)
 						m_NetConsole.Drop(ClientId, "Too many authentication tries");
 					else
-						m_NetConsole.NetBan()->BanAddr(m_NetConsole.ClientAddr(ClientId), g_Config.m_EcBantime * 60, "Too many authentication tries");
+						m_NetConsole.NetBan()->BanAddr(m_NetConsole.ClientAddr(ClientId), g_Config.m_EcBantime * 60, "Too many authentication tries", false);
 				}
 			}
 		}

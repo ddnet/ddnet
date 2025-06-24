@@ -1,16 +1,3 @@
-##### authors #####
-#originally created by:
-#
-#modified by:
-#	khubajsn		2010-05-31 16:54:03
-#	Petr			2011-04-02 23:02:33
-#	Medik & Petr	2011-07-02 19:37:05
-#	TeeWorlds-org	2011-07-15 00:34:19
-#	dobrykafe		2024-06-09 00:00:00
-##### /authors #####
-
-##### translated strings #####
-
 %ds left
 == zbývá %ds
 
@@ -281,9 +268,6 @@ Player
 Player country:
 == Země hráčů:
 
-Player options
-== Možnosti hráčů
-
 Players
 == Hráči
 
@@ -401,9 +385,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == Server používá nestandardní nastavení pro základní módy.
 
-Time limit
-== Časový limit
-
 Time limit: %d min
 == Časový limit: %d min
 
@@ -501,9 +482,6 @@ Your skin
 
 Reset to defaults
 == Obnovit výchozí
-
-Round
-== Kolo
 
 Lht.
 == Jas
@@ -649,9 +627,6 @@ Connecting dummy
 Connect Dummy
 == Připojit dummyho
 
-Reload
-== Znovu načíst
-
 Deactivate
 == Deaktivovat
 
@@ -753,9 +728,6 @@ may cause delay
 
 Screen
 == Obrazovka
-
-Use high DPI
-== Použít vysoké DPI
 
 Enable game sounds
 == Povolit zvuky hry
@@ -870,9 +842,6 @@ AntiPing: predict grenade paths
 
 Show other players' hook collision lines
 == Zobrazit čáru kolize háků ostatních hráčů
-
-Show other players' key presses
-== Zobrazit stisknutí kláves ostatních hráčů
 
 Show tiles layers from BG map
 == Zobrazit vrstvy dlaždic z mapy BG
@@ -1073,10 +1042,6 @@ Update failed! Check log…
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == Inicializace se nezdařila. Zkuste změnit gfx_backend na OpenGL nebo Vulkan v settings_ddnet.cfg v adresáři s konfigurací a zkuste to znovu.
-
-[Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== Nedostatek VRAM. Zkuste odebrat vlastní aktiva (skins, entity, atd.), zejména ty s vysokým rozlišením.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
@@ -1325,9 +1290,6 @@ Leak IP
 No server selected
 == Není vybrán žádný server
 
-Online players (%d)
-== Online hráči (%d)
-
 Online clanmates (%d)
 == Online členové klanu (%d)
 
@@ -1343,9 +1305,6 @@ Click to remove this player from your friends list.
 
 Click to remove this clan from your friends list.
 == Kliknutím odeberete tento klan ze seznamu přátel.
-
-None
-== Žádný
 
 Are you sure that you want to remove the player '%s' from your friends list?
 == Opravdu chcete odstranit hráče '%s' ze seznamu přátel?
@@ -1375,12 +1334,12 @@ Go back the specified duration
 == Vrátit se o zadanou dobu
 
 [Demo player duration]
-%d min.
-== %d min.
+%s min.
+== %s min.
 
 [Demo player duration]
-%d sec.
-== %d sec.
+%s sec.
+== %s sec.
 
 Change the skip duration
 == Změnit dobu přeskočení
@@ -1637,9 +1596,6 @@ Show local time always
 DDRace HUD
 == DDRace HUD
 
-Show client IDs in scoreboard
-== Zobrazit ID klientů ve výsledkové tabulce
-
 Show DDRace HUD
 == Zobrazit DDRace HUD
 
@@ -1673,9 +1629,6 @@ Chat width
 Preview
 == Náhled
 
-Show local player's key presses
-== Zobrazit stisknutí kláves místních hráčů
-
 Authed name color in scoreboard
 == Barva ověřeného hráče ve výsledkové tabulce
 
@@ -1684,9 +1637,6 @@ Same clan color in scoreboard
 
 Hook collision line
 == Čára kolize háku
-
-Hook collision line width
-== Šířka čáry kolize háku
 
 Hook collision line opacity
 == Neprůhlednost čáry kolize háku
@@ -1757,7 +1707,7 @@ Opacity
 Only save improvements
 == Ukládat pouze vylepšení
 
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == Neprůhlednost entit patřících jiným týmům jako jsou hráči a jmenovky
 
 Quads are used for background decoration
@@ -1829,9 +1779,6 @@ Player info change cooldown
 Always show chat
 == Vždy zobrazit chat
 
-Show friend mark (♥) in name plates
-== Zobrazit značku přítele (♥) ve jmenovkách
-
 Show hook strength icon indicator
 == Zobrazit sílu háku pomocí ikony
 
@@ -1855,3 +1802,416 @@ Tee
 
 Show only chat messages from team members
 == Zobrazit pouze zprávy od členů týmu
+
+Could not resolve connect address '%s'. See local console for details.
+== Nelze získat adresu k připojení '%s'. Podrobnosti najdete v místní konzoli.
+
+Connect address error
+== Chyba v adrese k připojení
+
+Could not connect dummy
+== Nepodařilo se připojit dummyho
+
+[Spectating]
+Following %s
+== Sledujete %s
+
+Example of usage
+== Příklad použití
+
+Dummy is not allowed on this server
+== Dummy není na tomto serveru povolen
+
+Please wait…
+== Čekejte prosím…
+
+Show client IDs (scoreboard, chat, spectator)
+== Zobrazit ID klientů (výsledková tabulka, chat, divák)
+
+Are you sure that you want to delete '%s'?
+== Jste si jisti, že chcete smazat '%s'?
+
+Delete skin
+== Odstranit skin
+
+Basic
+== Základní
+
+Custom
+== Vlastní
+
+Unable to delete skin
+== Nelze odstranit skin
+
+Round %d/%d
+== Kolo %d/%d
+
+[Spectators]
+%d others…
+== %d dalších…
+
+[Team and size]
+%d\n(%d/%d)
+== %d\n(%d/%d)
+
+Team %d (%d/%d)
+== Tým %d (%d/%d)
+
+https://wiki.ddnet.org/wiki/Mapping
+== https://wiki.ddnet.org/wiki/Mapping
+
+Save skin
+== Uložit skin
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== Opravdu chcete uložit svůj skin? Pokud skin s tímto názvem již existuje, bude nahrazen.
+
+Unable to save the skin
+== Nelze uložit skin
+
+Unable to save the skin with a reserved name
+== Nelze uložit skin s rezervovaným názvem
+
+No local servers found (ports %d-%d)
+== Žádný místní server nenalezen (porty %d-%d)
+
+[Hertz]
+Hz
+== Hz
+
+[skins]
+Body
+== Tělo
+
+[skins]
+Marking
+== Značení
+
+[skins]
+Decoration
+== Dekorace
+
+[skins]
+Hands
+== Ruce
+
+[skins]
+Feet
+== Chodidla
+
+[skins]
+Eyes
+== Oči
+
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Czech translation by khubajsn, Petr, Medik, TeeWorlds-org and dobrykafe
+
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+No demo with this filename exists
+== 
+
+"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
+== 
+
+Some fonts could not be loaded. Check the local console for details.
+== 
+
+Auto-sync player camera
+== 
+
+[Auto camera]
+Disabled
+== 
+
+[Auto camera]
+Enabled
+== 
+
+[Auto camera]
+Unavailable for this player
+== 
+
+[Auto camera]
+Inactive
+== 
+
+[Auto camera]
+Active
+== 
+
+Loading maps…
+== 
+
+[Spectating]
+Following %d: %s
+== 
+
+[Spectating Camera Mode Icon]
+AUTO
+== 
+
+Loading map
+== 
+
+This name cannot be used for files and folders
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
+== 
+
+Online friends (%d)
+== 
+
+Add friends by entering their name below or by clicking their name in the player list.
+== 
+
+Add clanmates by entering their clan below and leaving the name blank.
+== 
+
+Toggle auto camera
+== 
+
+Map size
+== 
+
+Edit touch controls
+== 
+
+Close
+== 
+
+https://wiki.ddnet.org/wiki/Touch_controls
+== 
+
+Save changes
+== 
+
+Error saving touch controls
+== 
+
+Could not save touch controls to file. See local console for details.
+== 
+
+Unsaved changes
+== 
+
+Discard changes
+== 
+
+Are you sure that you want to discard the current changes to the touch controls?
+== 
+
+Are you sure that you want to reset the touch controls to default?
+== 
+
+Import from clipboard
+== 
+
+Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
+== 
+
+Export to clipboard
+== 
+
+Direct touch input while ingame
+== 
+
+[Direct touch input]
+Disabled
+== 
+
+[Direct touch input]
+Active action
+== 
+
+[Direct touch input]
+Aim
+== 
+
+[Direct touch input]
+Fire
+== 
+
+[Direct touch input]
+Hook
+== 
+
+Direct touch input while spectating
+== 
+
+Error loading touch controls
+== 
+
+Could not load touch controls from file. See local console for details.
+== 
+
+Could not load default touch controls from file. See local console for details.
+== 
+
+Could not load touch controls from clipboard. See local console for details.
+== 
+
+Community
+== 
+
+[Team status]
+forbidden
+== 
+
+[Team status]
+solo
+== 
+
+[Team status]
+allowed
+== 
+
+[Team status]
+required
+== 
+
+Teams
+== 
+
+[Team size]
+minimum
+== 
+
+[Team size]
+maximum
+== 
+
+Saves file
+== 
+
+Open the saves file
+== 
+
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
+No skins match your filter criteria
+== 
+
+Show FPS
+== 
+
+Renders your frame rate in the top right
+== 
+
+Show spectator cursor
+== 
+
+Show number of spectators
+== 
+
+[Show name plates]
+None
+== 
+
+[Show name plates]
+Own
+== 
+
+[Show name plates]
+Others
+== 
+
+[Show name plates]
+All
+== 
+
+Name plates offset
+== 
+
+Show friend icon in name plates
+== 
+
+Show client IDs in name plates
+== 
+
+Show client IDs on a seperate line
+== 
+
+Client IDs size
+== 
+
+Hook Strength
+== 
+
+Size of hook strength icon and number indicator
+== 
+
+Key Presses
+== 
+
+Show players' key presses
+== 
+
+[Show players' key presses]
+None
+== 
+
+[Show players' key presses]
+Own
+== 
+
+[Show players' key presses]
+Others
+== 
+
+[Show players' key presses]
+All
+== 
+
+Size of key press icons
+== 
+
+Preview player's name plate
+== 
+
+Preview dummy's name plate
+== 
+
+Width of your own hook collision line
+== 
+
+Width of others' hook collision line
+== 
+
+Preview 'Hook collisions' being pressed
+== 
+
+Dragger Outline Color
+== 
+
+Dragger Inner Color
+== 
+
+AntiPing: prediction margin
+== 
+
+Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
+== 
+
+Aim
+== 
+
+Active: Fire
+== 
+
+Active: Hook
+== 

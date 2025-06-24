@@ -6,7 +6,8 @@
 #include "serverbrowser_ping_cache.h"
 
 #include <algorithm>
-#include <unordered_set>
+#include <map>
+#include <set>
 #include <vector>
 
 #include <base/hash_ctxt.h>
@@ -17,6 +18,7 @@
 #include <engine/shared/json.h>
 #include <engine/shared/masterserver.h>
 #include <engine/shared/network.h>
+#include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
 #include <engine/shared/serverinfo.h>
 
@@ -26,9 +28,6 @@
 #include <engine/friends.h>
 #include <engine/http.h>
 #include <engine/storage.h>
-
-static constexpr const char *COMMUNITY_COUNTRY_NONE = "none";
-static constexpr const char *COMMUNITY_TYPE_NONE = "None";
 
 class CSortWrap
 {
@@ -113,8 +112,8 @@ void CServerBrowser::RegisterCommands()
 	m_pConsole->Register("remove_favorite_community", "s[community_id]", CFGFLAG_CLIENT, Con_RemoveFavoriteCommunity, this, "Remove a community from the favorites");
 	m_pConsole->Register("add_excluded_community", "s[community_id]", CFGFLAG_CLIENT, Con_AddExcludedCommunity, this, "Add a community to the exclusion filter");
 	m_pConsole->Register("remove_excluded_community", "s[community_id]", CFGFLAG_CLIENT, Con_RemoveExcludedCommunity, this, "Remove a community from the exclusion filter");
-	m_pConsole->Register("add_excluded_country", "s[community_id] s[country_code]", CFGFLAG_CLIENT, Con_AddExcludedCountry, this, "Add a country to the exclusion filter for a specific community");
-	m_pConsole->Register("remove_excluded_country", "s[community_id] s[country_code]", CFGFLAG_CLIENT, Con_RemoveExcludedCountry, this, "Remove a country from the exclusion filter for a specific community");
+	m_pConsole->Register("add_excluded_country", "s[community_id] s[country_code]", CFGFLAG_CLIENT, Con_AddExcludedCountry, this, "Add a country to the exclusion filter for a specific community (ISO 3166-1 numeric)");
+	m_pConsole->Register("remove_excluded_country", "s[community_id] s[country_code]", CFGFLAG_CLIENT, Con_RemoveExcludedCountry, this, "Remove a country from the exclusion filter for a specific community (ISO 3166-1 numeric)");
 	m_pConsole->Register("add_excluded_type", "s[community_id] s[type]", CFGFLAG_CLIENT, Con_AddExcludedType, this, "Add a type to the exclusion filter for a specific community");
 	m_pConsole->Register("remove_excluded_type", "s[community_id] s[type]", CFGFLAG_CLIENT, Con_RemoveExcludedType, this, "Remove a type from the exclusion filter for a specific community");
 	m_pConsole->Register("leak_ip_address_to_all_servers", "", CFGFLAG_CLIENT, Con_LeakIpAddress, this, "Leaks your IP address to all servers by pinging each of them, also acquiring the latency in the process");
@@ -685,29 +684,22 @@ void CServerBrowser::QueueRequest(CServerEntry *pEntry)
 	m_NumRequests++;
 }
 
-void ServerBrowserFormatAddresses(char *pBuffer, int BufferSize, NETADDR *pAddrs, int NumAddrs)
+static void ServerBrowserFormatAddresses(char *pBuffer, int BufferSize, NETADDR *pAddrs, int NumAddrs)
 {
+	pBuffer[0] = '\0';
 	for(int i = 0; i < NumAddrs; i++)
 	{
 		if(i != 0)
 		{
-			if(BufferSize <= 1)
-			{
-				return;
-			}
-			pBuffer[0] = ',';
-			pBuffer[1] = '\0';
-			pBuffer += 1;
-			BufferSize -= 1;
+			str_append(pBuffer, ",", BufferSize);
 		}
-		if(BufferSize <= 1)
+		if(pAddrs[i].type & NETTYPE_TW7)
 		{
-			return;
+			str_append(pBuffer, "tw-0.7+udp://", BufferSize);
 		}
-		net_addr_str(&pAddrs[i], pBuffer, BufferSize, true);
-		int Length = str_length(pBuffer);
-		pBuffer += Length;
-		BufferSize -= Length;
+		char aIpAddr[NETADDR_MAXSTRSIZE];
+		net_addr_str(&pAddrs[i], aIpAddr, sizeof(aIpAddr), true);
+		str_append(pBuffer, aIpAddr, BufferSize);
 	}
 }
 
@@ -739,11 +731,11 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info) cons
 
 	class CPlayerScoreNameLess
 	{
-		const int ScoreKind;
+		const int m_ScoreKind;
 
 	public:
 		CPlayerScoreNameLess(int ClientScoreKind) :
-			ScoreKind(ClientScoreKind)
+			m_ScoreKind(ClientScoreKind)
 		{
 		}
 
@@ -758,7 +750,7 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info) cons
 			int Score0 = p0.m_Score;
 			int Score1 = p1.m_Score;
 
-			if(ScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME || ScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME_BACKCOMPAT)
+			if(m_ScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME || m_ScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME_BACKCOMPAT)
 			{
 				// Sort unfinished (-9999) and still connecting players (-1) after others
 				if(Score0 < 0 && Score1 >= 0)
@@ -770,7 +762,7 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info) cons
 			if(Score0 != Score1)
 			{
 				// Handle the sign change introduced with CLIENT_SCORE_KIND_TIME
-				if(ScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME)
+				if(m_ScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME)
 					return Score0 < Score1;
 				else
 					return Score0 > Score1;
@@ -865,6 +857,34 @@ CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR *pAddrs, int Num
 	return pEntry;
 }
 
+CServerBrowser::CServerEntry *CServerBrowser::ReplaceEntry(CServerEntry *pEntry, const NETADDR *pAddrs, int NumAddrs)
+{
+	for(int i = 0; i < pEntry->m_Info.m_NumAddresses; i++)
+	{
+		m_ByAddr.erase(pEntry->m_Info.m_aAddresses[i]);
+	}
+
+	// set the info
+	mem_copy(pEntry->m_Info.m_aAddresses, pAddrs, NumAddrs * sizeof(pAddrs[0]));
+	pEntry->m_Info.m_NumAddresses = NumAddrs;
+
+	pEntry->m_Info.m_Latency = 999;
+	pEntry->m_Info.m_HasRank = CServerInfo::RANK_UNAVAILABLE;
+	ServerBrowserFormatAddresses(pEntry->m_Info.m_aAddress, sizeof(pEntry->m_Info.m_aAddress), pEntry->m_Info.m_aAddresses, pEntry->m_Info.m_NumAddresses);
+	UpdateServerCommunity(&pEntry->m_Info);
+	str_copy(pEntry->m_Info.m_aName, pEntry->m_Info.m_aAddress, sizeof(pEntry->m_Info.m_aName));
+
+	pEntry->m_Info.m_Favorite = m_pFavorites->IsFavorite(pEntry->m_Info.m_aAddresses, pEntry->m_Info.m_NumAddresses);
+	pEntry->m_Info.m_FavoriteAllowPing = m_pFavorites->IsPingAllowed(pEntry->m_Info.m_aAddresses, pEntry->m_Info.m_NumAddresses);
+
+	for(int i = 0; i < NumAddrs; i++)
+	{
+		m_ByAddr[pAddrs[i]] = pEntry->m_Info.m_ServerIndex;
+	}
+
+	return pEntry;
+}
+
 void CServerBrowser::OnServerInfoUpdate(const NETADDR &Addr, int Token, const CServerInfo *pInfo)
 {
 	int BasicToken = Token;
@@ -879,9 +899,29 @@ void CServerBrowser::OnServerInfoUpdate(const NETADDR &Addr, int Token, const CS
 
 	if(m_ServerlistType == IServerBrowser::TYPE_LAN)
 	{
-		NETADDR Broadcast;
-		mem_zero(&Broadcast, sizeof(Broadcast));
-		Broadcast.type = m_pNetClient->NetType() | NETTYPE_LINK_BROADCAST;
+		if(!pEntry)
+		{
+			NETADDR LookupAddr = Addr;
+			if(Addr.type & NETTYPE_TW7)
+			{
+				// don't add 0.7 server if 0.6 server with the same IP and port already exists
+				LookupAddr.type &= ~NETTYPE_TW7;
+				pEntry = Find(LookupAddr);
+				if(pEntry)
+					return;
+			}
+			else
+			{
+				// replace 0.7 bridge server with 0.6
+				LookupAddr.type |= NETTYPE_TW7;
+				pEntry = Find(LookupAddr);
+				if(pEntry)
+					pEntry = ReplaceEntry(pEntry, &Addr, 1);
+			}
+		}
+
+		NETADDR Broadcast = NETADDR_ZEROED;
+		Broadcast.type = (m_pNetClient->NetType() & ~(NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6)) | NETTYPE_LINK_BROADCAST;
 		int TokenBC = GenerateToken(Broadcast);
 		bool Drop = false;
 		Drop = Drop || BasicToken != GetBasicToken(TokenBC);
@@ -956,13 +996,11 @@ void CServerBrowser::Refresh(int Type, bool Force)
 		CNetChunk Packet;
 
 		/* do the broadcast version */
-		Packet.m_ClientId = -1;
 		mem_zero(&Packet, sizeof(Packet));
-		Packet.m_Address.type = m_pNetClient->NetType() | NETTYPE_LINK_BROADCAST;
+		Packet.m_Address.type = (m_pNetClient->NetType() & ~(NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6)) | NETTYPE_LINK_BROADCAST;
 		Packet.m_Flags = NETSENDFLAG_CONNLESS | NETSENDFLAG_EXTENDED;
 		Packet.m_DataSize = sizeof(aBuffer);
 		Packet.m_pData = aBuffer;
-		mem_zero(&Packet.m_aExtraData, sizeof(Packet.m_aExtraData));
 
 		int Token = GenerateToken(Packet.m_Address);
 		mem_copy(aBuffer, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
@@ -973,10 +1011,25 @@ void CServerBrowser::Refresh(int Type, bool Force)
 
 		m_BroadcastTime = time_get();
 
-		for(int i = 8303; i <= 8310; i++)
+		CPacker Packer;
+		Packer.Reset();
+		Packer.AddRaw(SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
+		Packer.AddInt(Token);
+
+		CNetChunk Packet7;
+		mem_zero(&Packet7, sizeof(Packet7));
+		Packet7.m_Address.type = (m_pNetClient->NetType() & ~(NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6)) | NETTYPE_TW7 | NETTYPE_LINK_BROADCAST;
+		Packet7.m_Flags = NETSENDFLAG_CONNLESS;
+		Packet7.m_DataSize = Packer.Size();
+		Packet7.m_pData = Packer.Data();
+
+		for(int Port = LAN_PORT_BEGIN; Port <= LAN_PORT_END; Port++)
 		{
-			Packet.m_Address.port = i;
+			Packet.m_Address.port = Port;
 			m_pNetClient->Send(&Packet);
+
+			Packet7.m_Address.port = Port;
+			m_pNetClient->Send(&Packet7);
 		}
 
 		if(g_Config.m_Debug)
@@ -1027,21 +1080,41 @@ void CServerBrowser::RequestImpl(const NETADDR &Addr, CServerEntry *pEntry, int 
 		*pBasicToken = GetBasicToken(Token);
 	}
 
-	unsigned char aBuffer[sizeof(SERVERBROWSE_GETINFO) + 1];
-	mem_copy(aBuffer, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
-	aBuffer[sizeof(SERVERBROWSE_GETINFO)] = GetBasicToken(Token);
+	if(Addr.type & NETTYPE_TW7)
+	{
+		CPacker Packer;
+		Packer.Reset();
+		Packer.AddRaw(SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
+		Packer.AddInt(Token);
 
-	CNetChunk Packet;
-	Packet.m_ClientId = -1;
-	Packet.m_Address = Addr;
-	Packet.m_Flags = NETSENDFLAG_CONNLESS | NETSENDFLAG_EXTENDED;
-	Packet.m_DataSize = sizeof(aBuffer);
-	Packet.m_pData = aBuffer;
-	mem_zero(&Packet.m_aExtraData, sizeof(Packet.m_aExtraData));
-	Packet.m_aExtraData[0] = GetExtraToken(Token) >> 8;
-	Packet.m_aExtraData[1] = GetExtraToken(Token) & 0xff;
+		CNetChunk Packet;
+		Packet.m_ClientId = -1;
+		Packet.m_Address = Addr;
+		Packet.m_Flags = NETSENDFLAG_CONNLESS;
+		Packet.m_DataSize = Packer.Size();
+		Packet.m_pData = Packer.Data();
+		mem_zero(&Packet.m_aExtraData, sizeof(Packet.m_aExtraData));
 
-	m_pNetClient->Send(&Packet);
+		m_pNetClient->Send(&Packet);
+	}
+	else
+	{
+		unsigned char aBuffer[sizeof(SERVERBROWSE_GETINFO) + 1];
+		mem_copy(aBuffer, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
+		aBuffer[sizeof(SERVERBROWSE_GETINFO)] = GetBasicToken(Token);
+
+		CNetChunk Packet;
+		Packet.m_ClientId = -1;
+		Packet.m_Address = Addr;
+		Packet.m_Flags = NETSENDFLAG_CONNLESS | NETSENDFLAG_EXTENDED;
+		Packet.m_DataSize = sizeof(aBuffer);
+		Packet.m_pData = aBuffer;
+		mem_zero(&Packet.m_aExtraData, sizeof(Packet.m_aExtraData));
+		Packet.m_aExtraData[0] = GetExtraToken(Token) >> 8;
+		Packet.m_aExtraData[1] = GetExtraToken(Token) & 0xff;
+
+		m_pNetClient->Send(&Packet);
+	}
 
 	if(pEntry)
 		pEntry->m_RequestTime = time_get();
@@ -1080,7 +1153,6 @@ void CServerBrowser::UpdateFromHttp()
 	}
 
 	int NumServers = m_pHttp->NumServers();
-	int NumLegacyServers = m_pHttp->NumLegacyServers();
 	std::function<bool(const NETADDR *, int)> Want = [](const NETADDR *pAddrs, int NumAddrs) { return true; };
 	if(m_ServerlistType == IServerBrowser::TYPE_FAVORITES)
 	{
@@ -1139,16 +1211,6 @@ void CServerBrowser::UpdateFromHttp()
 		pEntry->m_RequestIgnoreInfo = true;
 	}
 
-	for(int i = 0; i < NumLegacyServers; i++)
-	{
-		NETADDR Addr = m_pHttp->LegacyServer(i);
-		if(!Want(&Addr, 1))
-		{
-			continue;
-		}
-		QueueRequest(Add(&Addr, 1));
-	}
-
 	if(m_ServerlistType == IServerBrowser::TYPE_FAVORITES)
 	{
 		const IFavorites::CEntry *pFavorites;
@@ -1171,7 +1233,7 @@ void CServerBrowser::UpdateFromHttp()
 			}
 			// (Also add favorites we're not allowed to ping.)
 			CServerEntry *pEntry = Add(pFavorites[i].m_aAddrs, pFavorites[i].m_NumAddrs);
-			if(pFavorites->m_AllowPing)
+			if(pFavorites[i].m_AllowPing)
 			{
 				QueueRequest(pEntry);
 			}
@@ -1464,15 +1526,21 @@ void CServerBrowser::LoadDDNetServers()
 		const json_value &IconUrl = Icon["url"];
 		const json_value &Name = Community["name"];
 		const json_value HasFinishes = Community["has_finishes"];
-		const json_value *pFinishes = &Icon["finishes"];
+		const json_value *pFinishes = &Community["finishes"];
 		const json_value *pServers = &Community["servers"];
-		// We accidentally set servers to be part of icon, so support that as a
-		// fallback for now. Can be removed in a few versions when the
-		// communities.json has been updated.
+		// We accidentally set finishes/servers to be part of icon in
+		// the past, so support that, too. Can be removed once we make
+		// a breaking change to the whole thing, necessitating a new
+		// endpoint.
+		if(pFinishes->type == json_none)
+		{
+			pServers = &Icon["finishes"];
+		}
 		if(pServers->type == json_none)
 		{
 			pServers = &Icon["servers"];
 		}
+		// Backward compatibility.
 		if(pFinishes->type == json_none)
 		{
 			if(str_comp(Id, COMMUNITY_DDNET) == 0)
@@ -1480,7 +1548,6 @@ void CServerBrowser::LoadDDNetServers()
 				pFinishes = &(*m_pDDNetInfo)["maps"];
 			}
 		}
-		// Backward compatibility.
 		if(pServers->type == json_none)
 		{
 			if(str_comp(Id, COMMUNITY_DDNET) == 0)
@@ -1631,6 +1698,11 @@ bool CServerBrowser::IsRefreshing() const
 bool CServerBrowser::IsGettingServerlist() const
 {
 	return m_pHttp->IsRefreshing();
+}
+
+bool CServerBrowser::IsServerlistError() const
+{
+	return m_pHttp->IsError();
 }
 
 int CServerBrowser::LoadingProgression() const
@@ -1879,7 +1951,7 @@ const std::vector<CCommunityId> &CFavoriteCommunityFilterList::Entries() const
 }
 
 template<typename TNamedElement, typename TElementName>
-static bool IsSubsetEquals(const std::vector<const TNamedElement *> &vpLeft, const std::unordered_set<TElementName> &Right)
+static bool IsSubsetEquals(const std::vector<const TNamedElement *> &vpLeft, const std::set<TElementName> &Right)
 {
 	return vpLeft.size() <= Right.size() && std::all_of(vpLeft.begin(), vpLeft.end(), [&](const TNamedElement *pElem) {
 		return Right.count(TElementName(pElem->Name())) > 0;
@@ -2073,7 +2145,7 @@ void CExcludedCommunityCountryFilterList::Clean(const std::vector<CCommunity> &v
 			}
 		}
 		// Prevent filter that would exclude all allowed countries
-		std::unordered_set<CCommunityCountryName> UniqueCountries;
+		std::set<CCommunityCountryName> UniqueCountries;
 		for(const CCommunity &AllowedCommunity : vAllowedCommunities)
 		{
 			for(const CCommunityCountry &Country : AllowedCommunity.Countries())
@@ -2289,16 +2361,6 @@ bool CServerBrowser::IsRegistered(const NETADDR &Addr)
 			}
 		}
 	}
-
-	const int NumLegacyServers = m_pHttp->NumLegacyServers();
-	for(int i = 0; i < NumLegacyServers; i++)
-	{
-		if(net_addr_comp(&m_pHttp->LegacyServer(i), &Addr) == 0)
-		{
-			return true;
-		}
-	}
-
 	return false;
 }
 
@@ -2343,17 +2405,4 @@ bool CServerInfo::ParseLocation(int *pResult, const char *pString)
 		}
 	}
 	return true;
-}
-
-void CServerInfo::InfoToString(char *pBuffer, int BufferSize) const
-{
-	str_format(
-		pBuffer,
-		BufferSize,
-		"%s\n"
-		"Address: ddnet://%s\n"
-		"My IGN: %s\n",
-		m_aName,
-		m_aAddress,
-		g_Config.m_PlayerName);
 }

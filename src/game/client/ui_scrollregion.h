@@ -133,6 +133,7 @@ public:
 	bool AddRect(const CUIRect &Rect, bool ShouldScrollHere = false); // returns true if the added rect is visible (not clipped)
 	void ScrollHere(EScrollOption Option = SCROLLHERE_KEEP_IN_VIEW);
 	void ScrollRelative(EScrollRelative Direction, float SpeedMultiplier = 1.0f);
+	void ScrollRelativeDirect(float ScrollAmount);
 	const CUIRect *ClipRect() const { return &m_ClipRect; }
 	void DoEdgeScrolling();
 	bool RectClipped(const CUIRect &Rect) const;

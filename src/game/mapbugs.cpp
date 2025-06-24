@@ -45,7 +45,7 @@ static CMapBugsInternal MAP_BUGS[] =
 	{
 		{{"Binary", 2022597, s("65b410e197fd2298ec270e89a84b762f6739d1d18089529f8ef6cf2104d3d600")}, BugToFlag(BUG_GRENADE_DOUBLEEXPLOSION)}};
 
-CMapBugs GetMapBugs(const char *pName, int Size, SHA256_DIGEST Sha256)
+CMapBugs CMapBugs::Create(const char *pName, int Size, SHA256_DIGEST Sha256)
 {
 	CMapDescription Map = {pName, Size, Sha256};
 	CMapBugs Result;
@@ -58,7 +58,7 @@ CMapBugs GetMapBugs(const char *pName, int Size, SHA256_DIGEST Sha256)
 			return Result;
 		}
 	}
-	Result.m_pData = 0;
+	Result.m_pData = nullptr;
 	return Result;
 }
 
@@ -72,7 +72,7 @@ bool CMapBugs::Contains(int Bug) const
 	return IsBugFlagSet(Bug, pInternal->m_BugFlags);
 }
 
-int CMapBugs::Update(const char *pBug)
+EMapBugUpdate CMapBugs::Update(const char *pBug)
 {
 	CMapBugsInternal *pInternal = (CMapBugsInternal *)m_pData;
 	int Bug = -1;
@@ -83,14 +83,14 @@ int CMapBugs::Update(const char *pBug)
 #undef MAPBUG
 	if(Bug == -1)
 	{
-		return MAPBUGUPDATE_NOTFOUND;
+		return EMapBugUpdate::NOTFOUND;
 	}
 	if(pInternal)
 	{
-		return MAPBUGUPDATE_OVERRIDDEN;
+		return EMapBugUpdate::OVERRIDDEN;
 	}
 	m_Extra |= BugToFlag(Bug);
-	return MAPBUGUPDATE_OK;
+	return EMapBugUpdate::OK;
 }
 
 void CMapBugs::Dump() const

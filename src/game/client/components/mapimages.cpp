@@ -15,29 +15,11 @@
 #include <game/localization.h>
 #include <game/mapitems.h>
 
-const char *const gs_apModEntitiesNames[] = {
-	"ddnet",
-	"ddrace",
-	"race",
-	"blockworlds",
-	"fng",
-	"vanilla",
-	"f-ddrace",
-};
-
-CMapImages::CMapImages() :
-	CMapImages(100)
-{
-}
-
-CMapImages::CMapImages(int TextureSize)
+CMapImages::CMapImages()
 {
 	m_Count = 0;
-	m_TextureScale = TextureSize;
 	mem_zero(m_aEntitiesIsLoaded, sizeof(m_aEntitiesIsLoaded));
 	m_SpeedupArrowIsLoaded = false;
-
-	mem_zero(m_aTextureUsedByTileOrQuadLayerFlag, sizeof(m_aTextureUsedByTileOrQuadLayerFlag));
 
 	str_copy(m_aEntitiesPath, "editor/entities_clear");
 
@@ -46,6 +28,7 @@ CMapImages::CMapImages(int TextureSize)
 
 void CMapImages::OnInit()
 {
+	m_TextureScale = g_Config.m_ClTextEntitiesSize;
 	InitOverlayTextures();
 
 	if(str_comp(g_Config.m_ClAssetsEntities, "default") == 0)
@@ -54,6 +37,8 @@ void CMapImages::OnInit()
 	{
 		str_format(m_aEntitiesPath, sizeof(m_aEntitiesPath), "assets/entities/%s", g_Config.m_ClAssetsEntities);
 	}
+
+	Console()->Chain("cl_text_entities_size", ConchainClTextEntitiesSize, this);
 }
 
 void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
@@ -61,41 +46,44 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 	// unload all textures
 	for(int i = 0; i < m_Count; i++)
 	{
-		Graphics()->UnloadTexture(&(m_aTextures[i]));
-		m_aTextureUsedByTileOrQuadLayerFlag[i] = 0;
+		Graphics()->UnloadTexture(&m_aTextures[i]);
 	}
-	m_Count = 0;
 
 	int Start;
 	pMap->GetType(MAPITEMTYPE_IMAGE, &Start, &m_Count);
+	m_Count = std::clamp<int>(m_Count, 0, MAX_MAPIMAGES);
 
-	m_Count = clamp<int>(m_Count, 0, MAX_MAPIMAGES);
-
-	for(int g = 0; g < pLayers->NumGroups(); g++)
+	unsigned char aTextureUsedByTileOrQuadLayerFlag[MAX_MAPIMAGES] = {0}; // 0: nothing, 1(as flag): tile layer, 2(as flag): quad layer
+	for(int GroupIndex = 0; GroupIndex < pLayers->NumGroups(); GroupIndex++)
 	{
-		CMapItemGroup *pGroup = pLayers->GetGroup(g);
+		const CMapItemGroup *pGroup = pLayers->GetGroup(GroupIndex);
 		if(!pGroup)
 		{
 			continue;
 		}
 
-		for(int l = 0; l < pGroup->m_NumLayers; l++)
+		for(int LayerIndex = 0; LayerIndex < pGroup->m_NumLayers; LayerIndex++)
 		{
-			CMapItemLayer *pLayer = pLayers->GetLayer(pGroup->m_StartLayer + l);
+			const CMapItemLayer *pLayer = pLayers->GetLayer(pGroup->m_StartLayer + LayerIndex);
+			if(!pLayer)
+			{
+				continue;
+			}
+
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
-				CMapItemLayerTilemap *pTLayer = (CMapItemLayerTilemap *)pLayer;
-				if(pTLayer->m_Image >= 0 && pTLayer->m_Image < m_Count)
+				const CMapItemLayerTilemap *pLayerTilemap = reinterpret_cast<const CMapItemLayerTilemap *>(pLayer);
+				if(pLayerTilemap->m_Image >= 0 && pLayerTilemap->m_Image < m_Count)
 				{
-					m_aTextureUsedByTileOrQuadLayerFlag[pTLayer->m_Image] |= 1;
+					aTextureUsedByTileOrQuadLayerFlag[pLayerTilemap->m_Image] |= 1;
 				}
 			}
 			else if(pLayer->m_Type == LAYERTYPE_QUADS)
 			{
-				CMapItemLayerQuads *pQLayer = (CMapItemLayerQuads *)pLayer;
-				if(pQLayer->m_Image >= 0 && pQLayer->m_Image < m_Count)
+				const CMapItemLayerQuads *pLayerQuads = reinterpret_cast<const CMapItemLayerQuads *>(pLayer);
+				if(pLayerQuads->m_Image >= 0 && pLayerQuads->m_Image < m_Count)
 				{
-					m_aTextureUsedByTileOrQuadLayerFlag[pQLayer->m_Image] |= 2;
+					aTextureUsedByTileOrQuadLayerFlag[pLayerQuads->m_Image] |= 2;
 				}
 			}
 		}
@@ -107,8 +95,14 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 	bool ShowWarning = false;
 	for(int i = 0; i < m_Count; i++)
 	{
-		const int LoadFlag = (((m_aTextureUsedByTileOrQuadLayerFlag[i] & 1) != 0) ? TextureLoadFlag : 0) | (((m_aTextureUsedByTileOrQuadLayerFlag[i] & 2) != 0) ? 0 : (Graphics()->HasTextureArraysSupport() ? IGraphics::TEXLOAD_NO_2D_TEXTURE : 0));
-		const CMapItemImage_v2 *pImg = (CMapItemImage_v2 *)pMap->GetItem(Start + i);
+		if(aTextureUsedByTileOrQuadLayerFlag[i] == 0)
+		{
+			// skip loading unused images
+			continue;
+		}
+
+		const int LoadFlag = (((aTextureUsedByTileOrQuadLayerFlag[i] & 1) != 0) ? TextureLoadFlag : 0) | (((aTextureUsedByTileOrQuadLayerFlag[i] & 2) != 0) ? 0 : (Graphics()->HasTextureArraysSupport() ? IGraphics::TEXLOAD_NO_2D_TEXTURE : 0));
+		const CMapItemImage_v2 *pImg = static_cast<const CMapItemImage_v2 *>(pMap->GetItem(Start + i));
 
 		const char *pName = pMap->GetDataString(pImg->m_ImageName);
 		if(pName == nullptr || pName[0] == '\0')
@@ -132,7 +126,16 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 		if(pImg->m_External)
 		{
 			char aPath[IO_MAX_PATH_LENGTH];
-			str_format(aPath, sizeof(aPath), "mapres/%s.png", pName);
+			bool Translated = false;
+			if(Client()->IsSixup())
+			{
+				Translated =
+					!str_comp(pName, "grass_doodads") ||
+					!str_comp(pName, "grass_main") ||
+					!str_comp(pName, "winter_main") ||
+					!str_comp(pName, "generic_unhookable");
+			}
+			str_format(aPath, sizeof(aPath), "mapres/%s%s.png", pName, Translated ? "_0.7" : "");
 			m_aTextures[i] = Graphics()->LoadTexture(aPath, IStorage::TYPE_ALL, LoadFlag);
 		}
 		else
@@ -142,10 +145,20 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 			ImageInfo.m_Height = pImg->m_Height;
 			ImageInfo.m_Format = CImageInfo::FORMAT_RGBA;
 			ImageInfo.m_pData = static_cast<uint8_t *>(pMap->GetData(pImg->m_ImageData));
-			char aTexName[IO_MAX_PATH_LENGTH];
-			str_format(aTexName, sizeof(aTexName), "embedded: %s", pName);
-			m_aTextures[i] = Graphics()->LoadTextureRaw(ImageInfo, LoadFlag, aTexName);
-			pMap->UnloadData(pImg->m_ImageData);
+			if(ImageInfo.m_pData && (size_t)pMap->GetDataSize(pImg->m_ImageData) >= ImageInfo.DataSize())
+			{
+				char aTexName[IO_MAX_PATH_LENGTH];
+				str_format(aTexName, sizeof(aTexName), "embedded: %s", pName);
+				m_aTextures[i] = Graphics()->LoadTextureRaw(ImageInfo, LoadFlag, aTexName);
+				pMap->UnloadData(pImg->m_ImageData);
+			}
+			else
+			{
+				pMap->UnloadData(pImg->m_ImageData);
+				log_error("mapimages", "Failed to load map image %d: failed to load data.", i);
+				ShowWarning = true;
+				continue;
+			}
 		}
 		pMap->UnloadData(pImg->m_ImageName);
 		ShowWarning = ShowWarning || m_aTextures[i].IsNullTexture();
@@ -159,7 +172,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 void CMapImages::OnMapLoad()
 {
 	IMap *pMap = Kernel()->RequestInterface<IMap>();
-	CLayers *pLayers = m_pClient->Layers();
+	CLayers *pLayers = GameClient()->Layers();
 	OnMapLoadImpl(pLayers, pMap);
 }
 
@@ -197,7 +210,7 @@ static bool IsValidTile(int LayerType, bool EntitiesAreMasked, EMapImageModType 
 
 	if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET || EntitiesModType == MAP_IMAGE_MOD_TYPE_DDRACE)
 	{
-		if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET || TileIndex != TILE_BOOST)
+		if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET || TileIndex != TILE_SPEED_BOOST_OLD)
 		{
 			if(LayerType == MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH &&
 				!IsValidGameTile(TileIndex) &&
@@ -292,7 +305,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 						const size_t CopyHeight = ImgInfo.m_Height / 16;
 						const size_t OffsetX = (size_t)(TileIndex % 16) * CopyWidth;
 						const size_t OffsetY = (size_t)(TileIndex / 16) * CopyHeight;
-						Graphics()->CopyTextureBufferSub(BuildImageInfo.m_pData, ImgInfo, OffsetX, OffsetY, CopyWidth, CopyHeight);
+						BuildImageInfo.CopyRectFrom(ImgInfo, OffsetX, OffsetY, CopyWidth, CopyHeight, OffsetX, OffsetY);
 					}
 				}
 
@@ -348,15 +361,20 @@ void CMapImages::ChangeEntitiesPath(const char *pPath)
 		{
 			for(int LayerType = 0; LayerType < MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT; ++LayerType)
 			{
-				if(m_aaEntitiesTextures[ModType][LayerType].IsValid())
-				{
-					Graphics()->UnloadTexture(&(m_aaEntitiesTextures[ModType][LayerType]));
-				}
-				m_aaEntitiesTextures[ModType][LayerType] = IGraphics::CTextureHandle();
+				Graphics()->UnloadTexture(&m_aaEntitiesTextures[ModType][LayerType]);
 			}
-
 			m_aEntitiesIsLoaded[ModType] = false;
 		}
+	}
+}
+
+void CMapImages::ConchainClTextEntitiesSize(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments())
+	{
+		CMapImages *pThis = static_cast<CMapImages *>(pUserData);
+		pThis->SetTextureScale(g_Config.m_ClTextEntitiesSize);
 	}
 }
 
@@ -373,10 +391,6 @@ void CMapImages::SetTextureScale(int Scale)
 		Graphics()->UnloadTexture(&m_OverlayBottomTexture);
 		Graphics()->UnloadTexture(&m_OverlayTopTexture);
 		Graphics()->UnloadTexture(&m_OverlayCenterTexture);
-
-		m_OverlayBottomTexture = IGraphics::CTextureHandle();
-		m_OverlayTopTexture = IGraphics::CTextureHandle();
-		m_OverlayCenterTexture = IGraphics::CTextureHandle();
 
 		InitOverlayTextures();
 	}
@@ -428,7 +442,7 @@ void CMapImages::UpdateEntityLayerText(CImageInfo &TextImage, int TextureSize, i
 		float y = (CurrentNumber / 16) * 64;
 
 		int ApproximateTextWidth = TextRender()->CalculateTextWidth(aBuf, DigitsCount, 0, UniversalSuitableFontSize);
-		int XOffSet = (MaxWidth - clamp(ApproximateTextWidth, 0, MaxWidth)) / 2;
+		int XOffSet = (MaxWidth - std::clamp(ApproximateTextWidth, 0, MaxWidth)) / 2;
 
 		TextRender()->UploadEntityLayerText(TextImage, (TextImage.m_Width / 16) - XOffSet, (TextImage.m_Height / 16) - YOffset, aBuf, DigitsCount, x + XOffSet, y + YOffset, UniversalSuitableFontSize);
 	}
@@ -437,7 +451,7 @@ void CMapImages::UpdateEntityLayerText(CImageInfo &TextImage, int TextureSize, i
 void CMapImages::InitOverlayTextures()
 {
 	int TextureSize = 64 * m_TextureScale / 100;
-	TextureSize = clamp(TextureSize, 2, 64);
+	TextureSize = std::clamp(TextureSize, 2, 64);
 	int TextureToVerticalCenterOffset = (64 - TextureSize) / 2; // should be used to move texture to the center of 64 pixels area
 
 	if(!m_OverlayBottomTexture.IsValid())

@@ -3,6 +3,8 @@
 #ifndef ENGINE_SHARED_PROTOCOL7_H
 #define ENGINE_SHARED_PROTOCOL7_H
 
+#include <base/types.h>
+
 namespace protocol7 {
 
 enum
@@ -52,6 +54,16 @@ enum
 	NETMSG_MAPLIST_ENTRY_REM,
 };
 
-}
+enum
+{
+	MAX_NAME_LENGTH = 16,
+	MAX_NAME_ARRAY_SIZE = MAX_NAME_LENGTH * UTF8_BYTE_LENGTH + 1,
+	MAX_CLAN_LENGTH = 12,
+	MAX_CLAN_ARRAY_SIZE = MAX_CLAN_LENGTH * UTF8_BYTE_LENGTH + 1,
+	MAX_SKIN_LENGTH = 24,
+	MAX_SKIN_ARRAY_SIZE = MAX_SKIN_LENGTH * UTF8_BYTE_LENGTH + 1,
+};
+
+} // namespace protocol7
 
 #endif

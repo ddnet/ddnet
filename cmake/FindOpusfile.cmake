@@ -29,12 +29,21 @@ set(OPUSFILE_INCLUDE_DIRS ${OPUSFILE_INCLUDEDIR})
 if(OPUSFILE_FOUND)
   is_bundled(OPUSFILE_BUNDLED "${OPUSFILE_LIBRARY}")
   if(OPUSFILE_BUNDLED AND TARGET_OS STREQUAL "windows")
-    set(OPUSFILE_COPY_FILES
-      "${EXTRA_OPUSFILE_LIBDIR}/libogg.dll"
-      "${EXTRA_OPUSFILE_LIBDIR}/libopus.dll"
-      "${EXTRA_OPUSFILE_LIBDIR}/libopusfile.dll"
-      "${EXTRA_OPUSFILE_LIBDIR}/libwinpthread-1.dll"
-    )
+    if (TARGET_CPU_ARCHITECTURE STREQUAL "arm64")
+      set(OPUSFILE_COPY_FILES
+        "${EXTRA_OPUSFILE_LIBDIR}/libopusfile-0.dll"
+        "${EXTRA_OPUSFILE_LIBDIR}/libopus-0.dll"
+        "${EXTRA_OPUSFILE_LIBDIR}/libogg-0.dll"
+        "${EXTRA_OPUSFILE_LIBDIR}/libwinpthread-1.dll"
+      )
+    else()
+      set(OPUSFILE_COPY_FILES
+        "${EXTRA_OPUSFILE_LIBDIR}/libogg.dll"
+        "${EXTRA_OPUSFILE_LIBDIR}/libopus.dll"
+        "${EXTRA_OPUSFILE_LIBDIR}/libopusfile.dll"
+        "${EXTRA_OPUSFILE_LIBDIR}/libwinpthread-1.dll"
+      )
+    endif()
     if(TARGET_BITS EQUAL 32)
       list(APPEND OPUSFILE_COPY_FILES
         "${EXTRA_OPUSFILE_LIBDIR}/libgcc_s_sjlj-1.dll"

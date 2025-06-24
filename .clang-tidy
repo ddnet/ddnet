@@ -20,21 +20,21 @@ Checks: >
   bugprone-*,
   -bugprone-assignment-in-if-condition,
   -bugprone-branch-clone,
+  -bugprone-casting-through-void,
   -bugprone-easily-swappable-parameters,
   -bugprone-implicit-widening-of-multiplication-result,
   -bugprone-incorrect-roundings,
   -bugprone-integer-division,
   -bugprone-macro-parentheses,
+  -bugprone-multi-level-implicit-pointer-conversion,
   -bugprone-narrowing-conversions,
   -bugprone-parent-virtual-call,
   -bugprone-reserved-identifier,
   -bugprone-suspicious-include,
-  -bugprone-unhandled-self-assignment,
   -bugprone-suspicious-realloc-usage,
   -bugprone-switch-missing-default-case,
-  -bugprone-casting-through-void,
-  -bugprone-multi-level-implicit-pointer-conversion,
   -bugprone-unchecked-optional-access,
+  -bugprone-unhandled-self-assignment,
   clang-analyzer-*,
   -clang-analyzer-optin.cplusplus.UninitializedObject,
   -clang-analyzer-optin.cplusplus.VirtualCall,
@@ -49,19 +49,19 @@ Checks: >
   cppcoreguidelines-virtual-class-destructor,
   misc-*,
   -misc-const-correctness,
+  -misc-include-cleaner,
   -misc-no-recursion,
   -misc-non-private-member-variables-in-classes,
   -misc-static-assert,
   -misc-unused-parameters,
   -misc-use-anonymous-namespace,
-  -misc-include-cleaner,
   modernize-avoid-bind,
   modernize-concat-nested-namespaces,
   modernize-deprecated-headers,
   modernize-deprecated-ios-base-aliases,
   modernize-loop-convert,
-  modernize-make-unique,
   modernize-make-shared,
+  modernize-make-unique,
   modernize-redundant-void-arg,
   modernize-replace-auto-ptr,
   modernize-replace-disallow-copy-and-assign-macro,
@@ -76,6 +76,7 @@ Checks: >
   modernize-use-transparent-functors,
   modernize-use-uncaught-exceptions,
   readability-*,
+  -readability-avoid-nested-conditional-operator,
   -readability-braces-around-statements,
   -readability-convert-member-functions-to-static,
   -readability-else-after-return,
@@ -85,16 +86,16 @@ Checks: >
   -readability-implicit-bool-conversion,
   -readability-isolate-declaration,
   -readability-magic-numbers,
+  -readability-math-missing-parentheses,
   -readability-named-parameter,
   -readability-non-const-parameter,
   -readability-simplify-boolean-expr,
   -readability-suspicious-call-argument,
   -readability-uppercase-literal-suffix,
   -readability-use-std-min-max,
-  -readability-avoid-nested-conditional-operator,
   performance-*,
-  -performance-no-int-to-ptr,
   -performance-enum-size,
+  -performance-no-int-to-ptr,
   portability-*,
 
 WarningsAsErrors:
@@ -110,9 +111,15 @@ CheckOptions:
   - key:             readability-identifier-naming.LocalConstantCase
     value:           CamelCase
   - key:             readability-identifier-naming.ClassMemberCase
+    value:           UPPER_CASE
+  - key:             readability-identifier-naming.MemberCase
     value:           CamelCase
-  - key:             readability-identifier-naming.ClassMemberPrefix
+  - key:             readability-identifier-naming.MemberPrefix
     value:           m_
+  - key:             readability-identifier-naming.MemberIgnoredRegexp
+    value:           '^(m_ap|m_v|m_p|m_a|ms_p|[a-z]$).*'
+  - key:             readability-identifier-naming.StaticVariablePrefix
+    value:           s_
   - key:             readability-identifier-naming.ClassMethodCase
     value:           CamelCase
   - key:             readability-identifier-naming.ClassCase
@@ -122,19 +129,19 @@ CheckOptions:
   - key:             readability-identifier-naming.StructPrefix
     value:           S
   - key:             readability-identifier-naming.StructIgnoredRegexp
-    value:           '^([CS]|MapObject$|EnvelopedQuad$).*'
+    value:           '^C.*'
   - key:             readability-identifier-naming.ClassIgnoredRegexp
     value:           '^(I|CCommandProcessorFragment_Vulkan$).*'
   - key:             readability-identifier-naming.ParameterCase
     value:           CamelCase
   - key:             readability-identifier-naming.ParameterIgnoredRegexp
-    value:           '^(p|a|v|[a-z]$|s[hw]$|warning_msg$|error_msg$|string$|integer$|boolean$|object$|index$|rhs$|lhs$|[xy]off$|id$|mode$|rgb$|[xy][0123]$|width$|height$|[sdw][xy]$|ownId$|fnMatchCallback$).*'
+    value:           '^(p|a|v|[a-z]$|[xy][0123]$).*'
   - key:             readability-identifier-naming.ClassMethodIgnoredRegexp
     value:           '^(Con_).*'
   - key:             readability-identifier-naming.ClassMemberIgnoredRegexp
-    value:           '^(ms_aStandardScreen$|s_1024x1024ImgSize$|s_ImageBufferCacheId$|s_VertexBufferCacheId$|s_StagingBufferImageCacheId$|REPLACEMENT_CHARACTER$|(MAX|MIN)_FONT_SIZE$|MAXIMUM_ATLAS_DIMENSION$|INITIAL_ATLAS_DIMENSION$|MAX_SECTION_DIMENSION_MAPPED$|MIN_SECTION_DIMENSION$|s_StagingBufferCacheId$|ms_MainThreadIndex$).*'
+    value:           '^(m_a|m_v|m_p|ms_p|ms_a|ms_v|s_1024x1024ImgSize$|s_ImageBufferCacheId$|s_VertexBufferCacheId$|s_StagingBufferImageCacheId$|REPLACEMENT_CHARACTER$|(MAX|MIN)_FONT_SIZE$|MAXIMUM_ATLAS_DIMENSION$|INITIAL_ATLAS_DIMENSION$|MAX_SECTION_DIMENSION_MAPPED$|MIN_SECTION_DIMENSION$|s_StagingBufferCacheId$).*'
   - key:             readability-identifier-naming.LocalConstantIgnoredRegexp
     value:           '^(p|a|v|s_|MAX_ANIM_SPEED$|DATA_OFFSET$|HEADER_LEN$|MIN_ANIM_SPEED$|[hwdcbqstf]$|[xt][0123]$|result$|sub$|it$|len$|d[xy]$).*'
   - key:             readability-identifier-naming.LocalVariableIgnoredRegexp
-    value:           '^(p|a|s_|FT_|TB_|s_|ul_|v|[xy]i$|[zijklxyhmrgbacwestnduvqf]$|[dmpwsitcf][xy]$|(ch|skel)[0-2]?$|it$|tw$|dt$|th$|ls$|func$|res$|shader$|len$|maxLength$|length$|offset$|offpos$|result$|bg$|sp$|url$|index$|ctxt$|key$|null$|logger$|LAST_MODIFIED$|teleNr$|target$|id$|hit$|hsl[0-2]?$|rgb[0-2]?$|dir$|tmp$|sub$|ret$|rendered$|(lower|upper)(16|26|24|32)|size$|isWeaponCollide$|zerochar$|dist$|sound$|match$|best_matches$|matches$|nohook$|btn$|savedLayers$|l[hw]$|evilz$|sec$|min$|to2$|delay$|mode$|maxModes$|numModes$|[xy]Fract$|[xy]Int$|imgg[xy]$|skip$|localPlayer$|fdratio$|[rgbat][0-2]$|[xy][0-3]$|x[rl]$).*'
+    value:           '^(p|a|s_|FT_|TB_|s_|ul_|v|[xy]i$|[zijklxyhmrgbacwestnduvqf]$|[dmpwsitcf][xy]$|(ch|skel)[0-2]?$|it$|tw$|dt$|th$|ls$|func$|res$|shader$|len$|maxLength$|length$|offset$|offpos$|result$|bg$|sp$|url$|index$|ctxt$|key$|null$|logger$|LAST_MODIFIED$|teleNr$|target$|id$|hit$|hsl[0-2]?$|rgb[0-2]?$|dir$|tmp$|sub$|ret$|rendered$|size$|isWeaponCollide$|zerochar$|dist$|sound$|match$|best_matches$|matches$|nohook$|btn$|savedLayers$|l[hw]$|evilz$|sec$|min$|to2$|delay$|[xy]Fract$|[xy]Int$|imgg[xy]$|skip$|localPlayer$|fdratio$|[rgbat][0-2]$|[xy][0-3]$|x[rl]$).*'
 

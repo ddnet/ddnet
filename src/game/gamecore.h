@@ -11,6 +11,7 @@
 
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
+#include <game/teamscore.h>
 
 #include "prng.h"
 
@@ -120,7 +121,6 @@ enum
 	COREEVENT_HOOK_ATTACH_GROUND = 0x10,
 	COREEVENT_HOOK_HIT_NOHOOK = 0x20,
 	COREEVENT_HOOK_RETRACT = 0x40,
-	// COREEVENT_HOOK_TELE=0x80,
 };
 
 // show others values - do not change them
@@ -134,11 +134,11 @@ enum
 
 struct SSwitchers
 {
-	bool m_aStatus[MAX_CLIENTS];
+	bool m_aStatus[NUM_DDRACE_TEAMS];
 	bool m_Initial;
-	int m_aEndTick[MAX_CLIENTS];
-	int m_aType[MAX_CLIENTS];
-	int m_aLastUpdateTick[MAX_CLIENTS];
+	int m_aEndTick[NUM_DDRACE_TEAMS];
+	int m_aType[NUM_DDRACE_TEAMS];
+	int m_aLastUpdateTick[NUM_DDRACE_TEAMS];
 };
 
 class CWorldCore
@@ -257,6 +257,7 @@ public:
 	bool m_ShotgunHitDisabled;
 	bool m_HookHitDisabled;
 	bool m_Super;
+	bool m_Invincible;
 	bool m_HasTelegunGun;
 	bool m_HasTelegunGrenade;
 	bool m_HasTelegunLaser;

@@ -19,24 +19,23 @@ CDoor::CDoor(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
 	m_Direction = vec2(std::sin(Rotation), std::cos(Rotation));
 	vec2 To = Pos + normalize(m_Direction) * m_Length;
 
-	GameServer()->Collision()->IntersectNoLaser(Pos, To, &this->m_To, 0);
+	GameServer()->Collision()->IntersectNoLaser(Pos, To, &this->m_To, nullptr);
 	ResetCollision();
 	GameWorld()->InsertEntity(this);
 }
 
 void CDoor::ResetCollision()
 {
+	if(GameServer()->Collision()->GetTile(m_Pos.x, m_Pos.y) || GameServer()->Collision()->GetFrontTile(m_Pos.x, m_Pos.y))
+		return;
+
 	for(int i = 0; i < m_Length - 1; i++)
 	{
-		vec2 CurrentPos(m_Pos.x + (m_Direction.x * i),
-			m_Pos.y + (m_Direction.y * i));
-		if(GameServer()->Collision()->CheckPoint(CurrentPos) || GameServer()->Collision()->GetTile(m_Pos.x, m_Pos.y) || GameServer()->Collision()->GetFTile(m_Pos.x, m_Pos.y))
+		vec2 CurrentPos = m_Pos + m_Direction * i;
+		if(GameServer()->Collision()->CheckPoint(CurrentPos))
 			break;
 		else
-			GameServer()->Collision()->SetDCollisionAt(
-				m_Pos.x + (m_Direction.x * i),
-				m_Pos.y + (m_Direction.y * i), TILE_STOPA, 0 /*Flags*/,
-				m_Number);
+			GameServer()->Collision()->SetDoorCollisionAt(CurrentPos.x, CurrentPos.y, TILE_STOPA, 0, m_Number);
 	}
 }
 

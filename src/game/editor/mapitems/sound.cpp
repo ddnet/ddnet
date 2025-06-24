@@ -4,7 +4,7 @@
 
 CEditorSound::CEditorSound(CEditor *pEditor)
 {
-	Init(pEditor);
+	OnInit(pEditor);
 }
 
 CEditorSound::~CEditorSound()

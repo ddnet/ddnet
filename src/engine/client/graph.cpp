@@ -13,6 +13,9 @@ CGraph::CGraph(int MaxEntries) :
 
 void CGraph::Init(float Min, float Max)
 {
+	m_Entries.Clear();
+	m_pFirstScaled = nullptr;
+	m_RenderedTotalTime = 0;
 	SetMin(Min);
 	SetMax(Max);
 }

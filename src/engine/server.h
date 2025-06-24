@@ -3,6 +3,7 @@
 #ifndef ENGINE_SERVER_H
 #define ENGINE_SERVER_H
 
+#include <array>
 #include <optional>
 #include <type_traits>
 
@@ -12,6 +13,7 @@
 
 #include "kernel.h"
 #include "message.h"
+#include <engine/shared/jsonwriter.h>
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
 #include <game/generated/protocol7.h>
@@ -57,10 +59,11 @@ public:
 	virtual int ClientCountry(int ClientId) const = 0;
 	virtual bool ClientSlotEmpty(int ClientId) const = 0;
 	virtual bool ClientIngame(int ClientId) const = 0;
-	virtual bool ClientAuthed(int ClientId) const = 0;
 	virtual bool GetClientInfo(int ClientId, CClientInfo *pInfo) const = 0;
 	virtual void SetClientDDNetVersion(int ClientId, int DDNetVersion) = 0;
-	virtual void GetClientAddr(int ClientId, char *pAddrStr, int Size) const = 0;
+	virtual const NETADDR *ClientAddr(int ClientId) const = 0;
+	virtual const std::array<char, NETADDR_MAXSTRSIZE> &ClientAddrStringImpl(int ClientId, bool IncludePort) const = 0;
+	inline const char *ClientAddrString(int ClientId, bool IncludePort) const { return ClientAddrStringImpl(ClientId, IncludePort).data(); }
 
 	/**
 	 * Returns the version of the client with the given client ID.
@@ -210,7 +213,7 @@ public:
 			return true;
 		if(GetClientVersion(Client) >= VERSION_DDNET_OLD)
 			return true;
-		Target = clamp(Target, 0, VANILLA_MAX_CLIENTS - 1);
+		Target = std::clamp(Target, 0, VANILLA_MAX_CLIENTS - 1);
 		int *pMap = GetIdMap(Client);
 		if(pMap[Target] == -1)
 			return false;
@@ -249,10 +252,12 @@ public:
 	virtual void SetRconCid(int ClientId) = 0;
 	virtual int GetAuthedState(int ClientId) const = 0;
 	virtual const char *GetAuthName(int ClientId) const = 0;
+	virtual bool HasAuthHidden(int ClientId) const = 0;
 	virtual void Kick(int ClientId, const char *pReason) = 0;
-	virtual void Ban(int ClientId, int Seconds, const char *pReason) = 0;
-	virtual void RedirectClient(int ClientId, int Port, bool Verbose = false) = 0;
+	virtual void Ban(int ClientId, int Seconds, const char *pReason, bool VerbatimReason) = 0;
+	virtual void RedirectClient(int ClientId, int Port) = 0;
 	virtual void ChangeMap(const char *pMap) = 0;
+	virtual void ReloadMap() = 0;
 
 	virtual void DemoRecorder_HandleAutoStart() = 0;
 
@@ -264,14 +269,12 @@ public:
 	virtual bool IsRecording(int ClientId) = 0;
 	virtual void StopDemos() = 0;
 
-	virtual void GetClientAddr(int ClientId, NETADDR *pAddr) const = 0;
-
 	virtual int *GetIdMap(int ClientId) = 0;
 
 	virtual bool DnsblWhite(int ClientId) = 0;
 	virtual bool DnsblPending(int ClientId) = 0;
 	virtual bool DnsblBlack(int ClientId) = 0;
-	virtual const char *GetAnnouncementLine(const char *pFileName) = 0;
+	virtual const char *GetAnnouncementLine() = 0;
 	virtual bool ClientPrevIngame(int ClientId) = 0;
 	virtual const char *GetNetErrorString(int ClientId) = 0;
 	virtual void ResetNetErrorString(int ClientId) = 0;
@@ -299,7 +302,8 @@ public:
 	// is instantiated.
 	virtual void OnInit(const void *pPersistentData) = 0;
 	virtual void OnConsoleInit() = 0;
-	virtual void OnMapChange(char *pNewMapName, int MapNameSize) = 0;
+	// Returns `true` if map change accepted.
+	[[nodiscard]] virtual bool OnMapChange(char *pNewMapName, int MapNameSize) = 0;
 	// `pPersistentData` may be null if this is the last time `IGameServer`
 	// is destroyed.
 	virtual void OnShutdown(void *pPersistentData) = 0;
@@ -334,6 +338,8 @@ public:
 	virtual void OnClientPredictedInput(int ClientId, void *pInput) = 0;
 	virtual void OnClientPredictedEarlyInput(int ClientId, void *pInput) = 0;
 
+	virtual void PreInputClients(int ClientId, bool *pClients) = 0;
+
 	virtual bool IsClientReady(int ClientId) const = 0;
 	virtual bool IsClientPlayer(int ClientId) const = 0;
 
@@ -365,10 +371,10 @@ public:
 	/**
 	 * Used to report custom player info to master servers.
 	 *
-	 * @param aBuf Should be the json key values to add, starting with a ',' beforehand, like: ',"skin": "default", "team": 1'
+	 * @param pJsonWriter A pointer to a CJsonStringWriter which the custom data will be added to.
 	 * @param i The client id.
 	 */
-	virtual void OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int Id) = 0;
+	virtual void OnUpdatePlayerServerInfo(CJsonStringWriter *pJSonWriter, int Id) = 0;
 };
 
 extern IGameServer *CreateGameServer();

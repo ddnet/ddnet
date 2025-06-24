@@ -8,6 +8,7 @@
 #include <game/alloc.h>
 
 #include "gameworld.h"
+#include "save.h"
 
 class CCollision;
 class CGameContext;
@@ -139,6 +140,15 @@ public: // TODO: Maybe make protected
 	virtual void SwapClients(int Client1, int Client2) {}
 
 	/*
+		Function: BlocksSave
+			Called to check if a team can be saved
+
+		Arguments:
+			ClientId - Client ID
+	*/
+	virtual ESaveResult BlocksSave(int ClientId) { return ESaveResult::SUCCESS; }
+
+	/*
 		Function GetOwnerId
 		Returns:
 			ClientId of the initiator from this entity. -1 created by map.
@@ -167,6 +177,7 @@ public: // TODO: Maybe make protected
 	bool NetworkClippedLine(int SnappingClient, vec2 StartPos, vec2 EndPos) const;
 
 	bool GameLayerClipped(vec2 CheckPos);
+	virtual bool CanCollide(int ClientId) { return true; };
 
 	// DDRace
 

@@ -1,46 +1,46 @@
 #include <base/system.h>
 #include <engine/shared/json.h>
 
-const struct _json_value *json_object_get(const json_value *object, const char *index)
+const struct _json_value *json_object_get(const json_value *pObject, const char *pIndex)
 {
 	unsigned int i;
 
-	if(object->type != json_object)
+	if(pObject->type != json_object)
 		return &json_value_none;
 
-	for(i = 0; i < object->u.object.length; ++i)
-		if(!str_comp(object->u.object.values[i].name, index))
-			return object->u.object.values[i].value;
+	for(i = 0; i < pObject->u.object.length; ++i)
+		if(!str_comp(pObject->u.object.values[i].name, pIndex))
+			return pObject->u.object.values[i].value;
 
 	return &json_value_none;
 }
 
-const struct _json_value *json_array_get(const json_value *array, int index)
+const struct _json_value *json_array_get(const json_value *pArray, int Index)
 {
-	if(array->type != json_array || index >= (int)array->u.array.length)
+	if(pArray->type != json_array || Index >= (int)pArray->u.array.length)
 		return &json_value_none;
 
-	return array->u.array.values[index];
+	return pArray->u.array.values[Index];
 }
 
-int json_array_length(const json_value *array)
+int json_array_length(const json_value *pArray)
 {
-	return array->u.array.length;
+	return pArray->u.array.length;
 }
 
-const char *json_string_get(const json_value *string)
+const char *json_string_get(const json_value *pString)
 {
-	return string->u.string.ptr;
+	return pString->u.string.ptr;
 }
 
-int json_int_get(const json_value *integer)
+int json_int_get(const json_value *pInteger)
 {
-	return integer->u.integer;
+	return pInteger->u.integer;
 }
 
-int json_boolean_get(const json_value *boolean)
+int json_boolean_get(const json_value *pBoolean)
 {
-	return boolean->u.boolean != 0;
+	return pBoolean->u.boolean != 0;
 }
 
 static char EscapeJsonChar(char c)

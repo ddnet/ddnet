@@ -22,6 +22,35 @@
 
 using namespace std::chrono_literals;
 
+int IEnvelopePointAccess::FindPointIndex(double TimeMillis) const
+{
+	// binary search for the interval around TimeMillis
+	int Low = 0;
+	int High = NumPoints() - 2;
+	int FoundIndex = -1;
+
+	while(Low <= High)
+	{
+		int Mid = Low + (High - Low) / 2;
+		const CEnvPoint *pMid = GetPoint(Mid);
+		const CEnvPoint *pNext = GetPoint(Mid + 1);
+		if(TimeMillis >= pMid->m_Time && TimeMillis < pNext->m_Time)
+		{
+			FoundIndex = Mid;
+			break;
+		}
+		else if(TimeMillis < pMid->m_Time)
+		{
+			High = Mid - 1;
+		}
+		else
+		{
+			Low = Mid + 1;
+		}
+	}
+	return FoundIndex;
+}
+
 CMapBasedEnvelopePointAccess::CMapBasedEnvelopePointAccess(CDataFileReader *pReader)
 {
 	bool FoundBezierEnvelope = false;
@@ -30,7 +59,7 @@ CMapBasedEnvelopePointAccess::CMapBasedEnvelopePointAccess(CDataFileReader *pRea
 	for(int EnvIndex = 0; EnvIndex < EnvNum; EnvIndex++)
 	{
 		CMapItemEnvelope *pEnvelope = static_cast<CMapItemEnvelope *>(pReader->GetItem(EnvStart + EnvIndex));
-		if(pEnvelope->m_Version >= CMapItemEnvelope_v3::CURRENT_VERSION)
+		if(pEnvelope->m_Version >= CMapItemEnvelope::VERSION_TEEWORLDS_BEZIER)
 		{
 			FoundBezierEnvelope = true;
 			break;
@@ -83,8 +112,8 @@ CMapBasedEnvelopePointAccess::CMapBasedEnvelopePointAccess(IMap *pMap) :
 
 void CMapBasedEnvelopePointAccess::SetPointsRange(int StartPoint, int NumPoints)
 {
-	m_StartPoint = clamp(StartPoint, 0, m_NumPointsMax);
-	m_NumPoints = clamp(NumPoints, 0, maximum(m_NumPointsMax - StartPoint, 0));
+	m_StartPoint = std::clamp(StartPoint, 0, m_NumPointsMax);
+	m_NumPoints = std::clamp(NumPoints, 0, maximum(m_NumPointsMax - StartPoint, 0));
 }
 
 int CMapBasedEnvelopePointAccess::StartPoint() const
@@ -122,16 +151,6 @@ const CEnvPointBezier *CMapBasedEnvelopePointAccess::GetBezier(int Index) const
 	if(m_pPointsBezierUpstream != nullptr)
 		return &m_pPointsBezierUpstream[Index + m_StartPoint].m_Bezier;
 	return nullptr;
-}
-
-static double CubicRoot(double x)
-{
-	if(x == 0.0)
-		return 0.0;
-	else if(x < 0.0)
-		return -std::exp(std::log(-x) / 3.0);
-	else
-		return std::exp(std::log(x) / 3.0);
 }
 
 static float SolveBezier(float x, float p0, float p1, float p2, float p3)
@@ -193,12 +212,12 @@ static float SolveBezier(float x, float p0, float p1, float p2, float p3)
 		{
 			// only one 'real' solution
 			const double s = std::sqrt(D);
-			return CubicRoot(s - q) - CubicRoot(s + q) - sub;
+			return std::cbrt(s - q) - std::cbrt(s + q) - sub;
 		}
 		else if(D == 0.0)
 		{
 			// one single, one double solution or triple solution
-			const double s = CubicRoot(-q);
+			const double s = std::cbrt(-q);
 			const double t = 2.0 * s - sub;
 
 			if(0.0 <= t && t <= 1.0001)
@@ -251,84 +270,83 @@ void CRenderTools::RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, std::
 		TimeNanos = decltype(TimeNanos)::zero();
 
 	const double TimeMillis = TimeNanos.count() / (double)std::chrono::nanoseconds(1ms).count();
-	for(int i = 0; i < NumPoints - 1; i++)
+
+	int FoundIndex = pPoints->FindPointIndex(TimeMillis);
+	if(FoundIndex == -1)
 	{
-		const CEnvPoint *pCurrentPoint = pPoints->GetPoint(i);
-		const CEnvPoint *pNextPoint = pPoints->GetPoint(i + 1);
-		if(TimeMillis >= pCurrentPoint->m_Time && TimeMillis < pNextPoint->m_Time)
+		for(size_t c = 0; c < Channels; c++)
 		{
-			const float Delta = pNextPoint->m_Time - pCurrentPoint->m_Time;
-			float a = (float)(TimeMillis - pCurrentPoint->m_Time) / Delta;
-
-			switch(pCurrentPoint->m_Curvetype)
-			{
-			case CURVETYPE_STEP:
-				a = 0.0f;
-				break;
-
-			case CURVETYPE_SLOW:
-				a = a * a * a;
-				break;
-
-			case CURVETYPE_FAST:
-				a = 1.0f - a;
-				a = 1.0f - a * a * a;
-				break;
-
-			case CURVETYPE_SMOOTH:
-				a = -2.0f * a * a * a + 3.0f * a * a; // second hermite basis
-				break;
-
-			case CURVETYPE_BEZIER:
-			{
-				const CEnvPointBezier *pCurrentPointBezier = pPoints->GetBezier(i);
-				const CEnvPointBezier *pNextPointBezier = pPoints->GetBezier(i + 1);
-				if(pCurrentPointBezier == nullptr || pNextPointBezier == nullptr)
-					break; // fallback to linear
-				for(size_t c = 0; c < Channels; c++)
-				{
-					// monotonic 2d cubic bezier curve
-					const vec2 p0 = vec2(pCurrentPoint->m_Time, fx2f(pCurrentPoint->m_aValues[c]));
-					const vec2 p3 = vec2(pNextPoint->m_Time, fx2f(pNextPoint->m_aValues[c]));
-
-					const vec2 OutTang = vec2(pCurrentPointBezier->m_aOutTangentDeltaX[c], fx2f(pCurrentPointBezier->m_aOutTangentDeltaY[c]));
-					const vec2 InTang = vec2(pNextPointBezier->m_aInTangentDeltaX[c], fx2f(pNextPointBezier->m_aInTangentDeltaY[c]));
-
-					vec2 p1 = p0 + OutTang;
-					vec2 p2 = p3 + InTang;
-
-					// validate bezier curve
-					p1.x = clamp(p1.x, p0.x, p3.x);
-					p2.x = clamp(p2.x, p0.x, p3.x);
-
-					// solve x(a) = time for a
-					a = clamp(SolveBezier(TimeMillis, p0.x, p1.x, p2.x, p3.x), 0.0f, 1.0f);
-
-					// value = y(t)
-					Result[c] = bezier(p0.y, p1.y, p2.y, p3.y, a);
-				}
-				return;
-			}
-
-			case CURVETYPE_LINEAR: [[fallthrough]];
-			default:
-				break;
-			}
-
-			for(size_t c = 0; c < Channels; c++)
-			{
-				const float v0 = fx2f(pCurrentPoint->m_aValues[c]);
-				const float v1 = fx2f(pNextPoint->m_aValues[c]);
-				Result[c] = v0 + (v1 - v0) * a;
-			}
-
-			return;
+			Result[c] = fx2f(pLastPoint->m_aValues[c]);
 		}
+		return;
+	}
+
+	const CEnvPoint *pCurrentPoint = pPoints->GetPoint(FoundIndex);
+	const CEnvPoint *pNextPoint = pPoints->GetPoint(FoundIndex + 1);
+
+	const float Delta = pNextPoint->m_Time - pCurrentPoint->m_Time;
+	float a = (float)(TimeMillis - pCurrentPoint->m_Time) / Delta;
+
+	switch(pCurrentPoint->m_Curvetype)
+	{
+	case CURVETYPE_STEP:
+		a = 0.0f;
+		break;
+
+	case CURVETYPE_SLOW:
+		a = a * a * a;
+		break;
+
+	case CURVETYPE_FAST:
+		a = 1.0f - a;
+		a = 1.0f - a * a * a;
+		break;
+
+	case CURVETYPE_SMOOTH:
+		a = -2.0f * a * a * a + 3.0f * a * a; // second hermite basis
+		break;
+
+	case CURVETYPE_BEZIER:
+	{
+		const CEnvPointBezier *pCurrentPointBezier = pPoints->GetBezier(FoundIndex);
+		const CEnvPointBezier *pNextPointBezier = pPoints->GetBezier(FoundIndex + 1);
+		if(pCurrentPointBezier == nullptr || pNextPointBezier == nullptr)
+			break; // fallback to linear
+		for(size_t c = 0; c < Channels; c++)
+		{
+			// monotonic 2d cubic bezier curve
+			const vec2 p0 = vec2(pCurrentPoint->m_Time, fx2f(pCurrentPoint->m_aValues[c]));
+			const vec2 p3 = vec2(pNextPoint->m_Time, fx2f(pNextPoint->m_aValues[c]));
+
+			const vec2 OutTang = vec2(pCurrentPointBezier->m_aOutTangentDeltaX[c], fx2f(pCurrentPointBezier->m_aOutTangentDeltaY[c]));
+			const vec2 InTang = vec2(pNextPointBezier->m_aInTangentDeltaX[c], fx2f(pNextPointBezier->m_aInTangentDeltaY[c]));
+
+			vec2 p1 = p0 + OutTang;
+			vec2 p2 = p3 + InTang;
+
+			// validate bezier curve
+			p1.x = std::clamp(p1.x, p0.x, p3.x);
+			p2.x = std::clamp(p2.x, p0.x, p3.x);
+
+			// solve x(a) = time for a
+			a = std::clamp(SolveBezier(TimeMillis, p0.x, p1.x, p2.x, p3.x), 0.0f, 1.0f);
+
+			// value = y(t)
+			Result[c] = bezier(p0.y, p1.y, p2.y, p3.y, a);
+		}
+		return;
+	}
+
+	case CURVETYPE_LINEAR: [[fallthrough]];
+	default:
+		break;
 	}
 
 	for(size_t c = 0; c < Channels; c++)
 	{
-		Result[c] = fx2f(pLastPoint->m_aValues[c]);
+		const float v0 = fx2f(pCurrentPoint->m_aValues[c]);
+		const float v1 = fx2f(pNextPoint->m_aValues[c]);
+		Result[c] = v0 + (v1 - v0) * a;
 	}
 }
 
@@ -667,9 +685,76 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, Color
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale, float Alpha) const
+void CRenderTools::RenderTile(int x, int y, unsigned char Index, float Scale, ColorRGBA Color) const
 {
-	if(!g_Config.m_ClTextEntities)
+	if(Graphics()->HasTextureArraysSupport())
+		Graphics()->QuadsTex3DBegin();
+	else
+		Graphics()->QuadsBegin();
+
+	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+
+	// calculate the final pixelsize for the tiles
+	float TilePixelSize = 1024 / Scale;
+	float FinalTileSize = Scale / (ScreenX1 - ScreenX0) * Graphics()->ScreenWidth();
+	float FinalTilesetScale = FinalTileSize / TilePixelSize;
+
+	float TexSize = 1024.0f;
+	float Frac = (1.25f / TexSize) * (1 / FinalTilesetScale);
+	float Nudge = (0.5f / TexSize) * (1 / FinalTilesetScale);
+
+	int tx = Index % 16;
+	int ty = Index / 16;
+	int Px0 = tx * (1024 / 16);
+	int Py0 = ty * (1024 / 16);
+	int Px1 = Px0 + (1024 / 16) - 1;
+	int Py1 = Py0 + (1024 / 16) - 1;
+
+	float x0 = Nudge + Px0 / TexSize + Frac;
+	float y0 = Nudge + Py0 / TexSize + Frac;
+	float x1 = Nudge + Px1 / TexSize - Frac;
+	float y1 = Nudge + Py0 / TexSize + Frac;
+	float x2 = Nudge + Px1 / TexSize - Frac;
+	float y2 = Nudge + Py1 / TexSize - Frac;
+	float x3 = Nudge + Px0 / TexSize + Frac;
+	float y3 = Nudge + Py1 / TexSize - Frac;
+
+	if(Graphics()->HasTextureArraysSupport())
+	{
+		x0 = 0;
+		y0 = 0;
+		x1 = x0 + 1;
+		y1 = y0;
+		x2 = x0 + 1;
+		y2 = y0 + 1;
+		x3 = x0;
+		y3 = y0 + 1;
+	}
+
+	if(Graphics()->HasTextureArraysSupport())
+	{
+		Graphics()->QuadsSetSubsetFree(x0, y0, x1, y1, x2, y2, x3, y3, Index);
+		IGraphics::CQuadItem QuadItem(x, y, Scale, Scale);
+		Graphics()->QuadsTex3DDrawTL(&QuadItem, 1);
+	}
+	else
+	{
+		Graphics()->QuadsSetSubsetFree(x0, y0, x1, y1, x2, y2, x3, y3);
+		IGraphics::CQuadItem QuadItem(x, y, Scale, Scale);
+		Graphics()->QuadsDrawTL(&QuadItem, 1);
+	}
+
+	if(Graphics()->HasTextureArraysSupport())
+		Graphics()->QuadsTex3DEnd();
+	else
+		Graphics()->QuadsEnd();
+	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+}
+
+void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale, int OverlayRenderFlag, float Alpha) const
+{
+	if(!(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT))
 		return;
 
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
@@ -711,7 +796,7 @@ void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				// Auto-resize text to fit inside the tile
 				float ScaledWidth = TextRender()->TextWidth(Size * Scale, aBuf, -1);
-				float Factor = clamp(Scale / ScaledWidth, 0.0f, 1.0f);
+				float Factor = std::clamp(Scale / ScaledWidth, 0.0f, 1.0f);
 				float LocalSize = Size * Factor;
 				float ToCenterOffset = (1 - LocalSize) / 2.f;
 				TextRender()->Text((mx + 0.5f) * Scale - (ScaledWidth * Factor) / 2.0f, (my + ToCenterOffset) * Scale, LocalSize * Scale, aBuf);
@@ -722,7 +807,7 @@ void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, float Scale, float Alpha) const
+void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -760,26 +845,46 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 
 			int Force = (int)pSpeedup[c].m_Force;
 			int MaxSpeed = (int)pSpeedup[c].m_MaxSpeed;
-			if(Force)
+			int Type = (int)pSpeedup[c].m_Type;
+			int Angle = (int)pSpeedup[c].m_Angle;
+			if((Force && Type == TILE_SPEED_BOOST_OLD) || ((Force || MaxSpeed) && Type == TILE_SPEED_BOOST) || (OverlayRenderFlag & OVERLAYRENDERFLAG_EDITOR && (Type || Force || MaxSpeed || Angle)))
 			{
-				// draw arrow
-				Graphics()->TextureSet(g_pData->m_aImages[IMAGE_SPEEDUP_ARROW].m_Id);
-				Graphics()->QuadsBegin();
-				Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
-				SelectSprite(SPRITE_SPEEDUP_ARROW);
-				Graphics()->QuadsSetRotation(pSpeedup[c].m_Angle * (pi / 180.0f));
-				DrawSprite(mx * Scale + 16, my * Scale + 16, 35.0f);
-				Graphics()->QuadsEnd();
-
-				// draw force and max speed
-				if(g_Config.m_ClTextEntities)
+				if(IsValidSpeedupTile(Type))
 				{
-					str_format(aBuf, sizeof(aBuf), "%d", Force);
-					TextRender()->Text(mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
-					if(MaxSpeed)
+					// draw arrow
+					Graphics()->TextureSet(g_pData->m_aImages[IMAGE_SPEEDUP_ARROW].m_Id);
+					Graphics()->QuadsBegin();
+					Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
+					SelectSprite(SPRITE_SPEEDUP_ARROW);
+					Graphics()->QuadsSetRotation(pSpeedup[c].m_Angle * (pi / 180.0f));
+					DrawSprite(mx * Scale + 16, my * Scale + 16, 35.0f);
+					Graphics()->QuadsEnd();
+
+					// draw force and max speed
+					if(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT)
 					{
+						str_format(aBuf, sizeof(aBuf), "%d", Force);
+						TextRender()->Text(mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
+						if(MaxSpeed)
+						{
+							str_format(aBuf, sizeof(aBuf), "%d", MaxSpeed);
+							TextRender()->Text(mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
+						}
+					}
+				}
+				else
+				{
+					// draw all three values
+					if(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT)
+					{
+						float LineSpacing = Size * Scale / 3.f;
+						float BaseY = (my + ToCenterOffset) * Scale;
+						str_format(aBuf, sizeof(aBuf), "%d", Force);
+						TextRender()->Text(mx * Scale, BaseY, LineSpacing, aBuf);
 						str_format(aBuf, sizeof(aBuf), "%d", MaxSpeed);
-						TextRender()->Text(mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
+						TextRender()->Text(mx * Scale, BaseY + LineSpacing, LineSpacing, aBuf);
+						str_format(aBuf, sizeof(aBuf), "%d", Angle);
+						TextRender()->Text(mx * Scale, BaseY + 2 * LineSpacing, LineSpacing, aBuf);
 					}
 				}
 			}
@@ -789,9 +894,9 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float Scale, float Alpha) const
+void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float Scale, int OverlayRenderFlag, float Alpha) const
 {
-	if(!g_Config.m_ClTextEntities)
+	if(!(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT))
 		return;
 
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
@@ -847,9 +952,9 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale, float Alpha) const
+void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale, int OverlayRenderFlag, float Alpha) const
 {
-	if(!g_Config.m_ClTextEntities)
+	if(!(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT))
 		return;
 
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
@@ -863,7 +968,7 @@ void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale
 	if(EndX - StartX > Graphics()->ScreenWidth() / g_Config.m_GfxTextOverlay || EndY - StartY > Graphics()->ScreenHeight() / g_Config.m_GfxTextOverlay)
 		return; // its useless to render text at this distance
 
-	float Size = g_Config.m_ClTextEntitiesSize / 100.f;
+	float Size = g_Config.m_ClTextEntitiesSize / 200.f;
 	char aBuf[16];
 
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
@@ -889,7 +994,12 @@ void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale
 			if(Index)
 			{
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
-				TextRender()->Text(mx * Scale + 11.f, my * Scale + 6.f, Size * Scale / 1.5f - 5.f, aBuf); // numbers shouldn't be too big and in the center of the tile
+				// Auto-resize text to fit inside the tile
+				float ScaledWidth = TextRender()->TextWidth(Size * Scale, aBuf, -1);
+				float Factor = std::clamp(Scale / ScaledWidth, 0.0f, 1.0f);
+				float LocalSize = Size * Factor;
+				float ToCenterOffset = (1 - LocalSize) / 2.f;
+				TextRender()->Text((mx + 0.5f) * Scale - (ScaledWidth * Factor) / 2.0f, (my + ToCenterOffset) * Scale, LocalSize * Scale, aBuf);
 			}
 		}
 	}
@@ -955,123 +1065,6 @@ void CRenderTools::RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, Co
 			int c = mx + my * w;
 
 			unsigned char Index = pTele[c].m_Type;
-			if(Index)
-			{
-				bool Render = false;
-				if(RenderFlags & LAYERRENDERFLAG_TRANSPARENT)
-					Render = true;
-
-				if(Render)
-				{
-					int tx = Index % 16;
-					int ty = Index / 16;
-					int Px0 = tx * (1024 / 16);
-					int Py0 = ty * (1024 / 16);
-					int Px1 = Px0 + (1024 / 16) - 1;
-					int Py1 = Py0 + (1024 / 16) - 1;
-
-					float x0 = Nudge + Px0 / TexSize + Frac;
-					float y0 = Nudge + Py0 / TexSize + Frac;
-					float x1 = Nudge + Px1 / TexSize - Frac;
-					float y1 = Nudge + Py0 / TexSize + Frac;
-					float x2 = Nudge + Px1 / TexSize - Frac;
-					float y2 = Nudge + Py1 / TexSize - Frac;
-					float x3 = Nudge + Px0 / TexSize + Frac;
-					float y3 = Nudge + Py1 / TexSize - Frac;
-
-					if(Graphics()->HasTextureArraysSupport())
-					{
-						x0 = 0;
-						y0 = 0;
-						x1 = x0 + 1;
-						y1 = y0;
-						x2 = x0 + 1;
-						y2 = y0 + 1;
-						x3 = x0;
-						y3 = y0 + 1;
-					}
-
-					if(Graphics()->HasTextureArraysSupport())
-					{
-						Graphics()->QuadsSetSubsetFree(x0, y0, x1, y1, x2, y2, x3, y3, Index);
-						IGraphics::CQuadItem QuadItem(x * Scale, y * Scale, Scale, Scale);
-						Graphics()->QuadsTex3DDrawTL(&QuadItem, 1);
-					}
-					else
-					{
-						Graphics()->QuadsSetSubsetFree(x0, y0, x1, y1, x2, y2, x3, y3);
-						IGraphics::CQuadItem QuadItem(x * Scale, y * Scale, Scale, Scale);
-						Graphics()->QuadsDrawTL(&QuadItem, 1);
-					}
-				}
-			}
-		}
-
-	if(Graphics()->HasTextureArraysSupport())
-		Graphics()->QuadsTex3DEnd();
-	else
-		Graphics()->QuadsEnd();
-	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
-}
-
-void CRenderTools::RenderSpeedupmap(CSpeedupTile *pSpeedupTile, int w, int h, float Scale, ColorRGBA Color, int RenderFlags) const
-{
-	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-
-	// calculate the final pixelsize for the tiles
-	float TilePixelSize = 1024 / 32.0f;
-	float FinalTileSize = Scale / (ScreenX1 - ScreenX0) * Graphics()->ScreenWidth();
-	float FinalTilesetScale = FinalTileSize / TilePixelSize;
-
-	if(Graphics()->HasTextureArraysSupport())
-		Graphics()->QuadsTex3DBegin();
-	else
-		Graphics()->QuadsBegin();
-	Graphics()->SetColor(Color);
-
-	int StartY = (int)(ScreenY0 / Scale) - 1;
-	int StartX = (int)(ScreenX0 / Scale) - 1;
-	int EndY = (int)(ScreenY1 / Scale) + 1;
-	int EndX = (int)(ScreenX1 / Scale) + 1;
-
-	// adjust the texture shift according to mipmap level
-	float TexSize = 1024.0f;
-	float Frac = (1.25f / TexSize) * (1 / FinalTilesetScale);
-	float Nudge = (0.5f / TexSize) * (1 / FinalTilesetScale);
-
-	for(int y = StartY; y < EndY; y++)
-		for(int x = StartX; x < EndX; x++)
-		{
-			int mx = x;
-			int my = y;
-
-			if(RenderFlags & TILERENDERFLAG_EXTEND)
-			{
-				if(mx < 0)
-					mx = 0;
-				if(mx >= w)
-					mx = w - 1;
-				if(my < 0)
-					my = 0;
-				if(my >= h)
-					my = h - 1;
-			}
-			else
-			{
-				if(mx < 0)
-					continue; // mx = 0;
-				if(mx >= w)
-					continue; // mx = w-1;
-				if(my < 0)
-					continue; // my = 0;
-				if(my >= h)
-					continue; // my = h-1;
-			}
-
-			int c = mx + my * w;
-
-			unsigned char Index = pSpeedupTile[c].m_Type;
 			if(Index)
 			{
 				bool Render = false;

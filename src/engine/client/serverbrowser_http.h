@@ -14,15 +14,14 @@ public:
 
 	virtual void Update() = 0;
 
-	virtual bool IsRefreshing() = 0;
+	virtual bool IsRefreshing() const = 0;
+	virtual bool IsError() const = 0;
 	virtual void Refresh() = 0;
 
 	virtual bool GetBestUrl(const char **pBestUrl) const = 0;
 
 	virtual int NumServers() const = 0;
 	virtual const CServerInfo &Server(int Index) const = 0;
-	virtual int NumLegacyServers() const = 0;
-	virtual const NETADDR &LegacyServer(int Index) const = 0;
 };
 
 IServerBrowserHttp *CreateServerBrowserHttp(IEngine *pEngine, IStorage *pStorage, IHttp *pHttp, const char *pPreviousBestUrl);

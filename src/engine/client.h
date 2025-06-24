@@ -8,11 +8,18 @@
 #include "message.h"
 #include <base/hash.h>
 
-#include <game/generated/protocol.h>
-
+#include <engine/client/enums.h>
 #include <engine/friends.h>
-#include <engine/shared/snapshot.h>
+#include <engine/shared/translation_context.h>
+
+#include <game/generated/protocol.h>
+#include <game/generated/protocol7.h>
+
 #include <functional>
+#include <optional>
+
+#define CONNECTLINK_DOUBLE_SLASH "ddnet://"
+#define CONNECTLINK_NO_SLASH "ddnet:"
 
 struct SWarning;
 
@@ -23,8 +30,6 @@ enum
 	RECORDER_RACE = 2,
 	RECORDER_REPLAYS = 3,
 	RECORDER_MAX = 4,
-
-	NUM_DUMMIES = 2,
 };
 
 typedef bool (*CLIENTFUNC_FILTER)(const void *pData, int DataSize, void *pUser);
@@ -55,9 +60,9 @@ public:
 	};
 
 	/**
-	* More precise state for @see STATE_LOADING
-	* Sets what is actually happening in the client right now
-	*/
+	 * More precise state for @see STATE_LOADING
+	 * Sets what is actually happening in the client right now
+	 */
 	enum ELoadingStateDetail
 	{
 		LOADING_STATE_DETAIL_INITIAL,
@@ -73,6 +78,7 @@ public:
 		LOADING_CALLBACK_DETAIL_DEMO,
 	};
 	typedef std::function<void(ELoadingCallbackDetail Detail)> TLoadingCallback;
+	CTranslationContext m_TranslationContext;
 
 protected:
 	// quick access to state of the client
@@ -93,7 +99,7 @@ protected:
 	float m_LocalTime = 0.0f;
 	float m_GlobalTime = 0.0f;
 	float m_RenderFrameTime = 0.0001f;
-	float m_FrameTimeAvg = 0.0001f;
+	float m_FrameTimeAverage = 0.0001f;
 
 	TLoadingCallback m_LoadingCallback = nullptr;
 
@@ -107,6 +113,7 @@ public:
 	public:
 		int m_Type;
 		int m_Id;
+		const void *m_pData;
 		int m_DataSize;
 	};
 
@@ -151,7 +158,7 @@ public:
 	inline float RenderFrameTime() const { return m_RenderFrameTime; }
 	inline float LocalTime() const { return m_LocalTime; }
 	inline float GlobalTime() const { return m_GlobalTime; }
-	inline float FrameTimeAvg() const { return m_FrameTimeAvg; }
+	inline float FrameTimeAverage() const { return m_FrameTimeAverage; }
 
 	// actions
 	virtual void Connect(const char *pAddress, const char *pPassword = nullptr) = 0;
@@ -162,6 +169,7 @@ public:
 	virtual void DummyConnect() = 0;
 	virtual bool DummyConnected() const = 0;
 	virtual bool DummyConnecting() const = 0;
+	virtual bool DummyConnectingDelayed() const = 0;
 	virtual bool DummyAllowed() const = 0;
 
 	virtual void Restart() = 0;
@@ -180,9 +188,6 @@ public:
 	virtual void ServerBrowserUpdate() = 0;
 
 	// gfx
-	virtual void SwitchWindowScreen(int Index) = 0;
-	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless) = 0;
-	virtual void ToggleWindowVSync() = 0;
 	virtual void Notify(const char *pTitle, const char *pMessage) = 0;
 	virtual void OnWindowResize() = 0;
 
@@ -203,17 +208,22 @@ public:
 	virtual int *GetInput(int Tick, int IsDummy = 0) const = 0;
 
 	// remote console
-	virtual void RconAuth(const char *pUsername, const char *pPassword) = 0;
+	virtual void RconAuth(const char *pUsername, const char *pPassword, bool Dummy) = 0;
 	virtual bool RconAuthed() const = 0;
 	virtual bool UseTempRconCommands() const = 0;
 	virtual void Rcon(const char *pLine) = 0;
 	virtual bool ReceivingRconCommands() const = 0;
 	virtual float GotRconCommandsPercentage() const = 0;
+	virtual bool ReceivingMaplist() const = 0;
+	virtual float GotMaplistPercentage() const = 0;
+	virtual const std::vector<std::string> &MaplistEntries() const = 0;
 
 	// server info
 	virtual void GetServerInfo(class CServerInfo *pServerInfo) const = 0;
+	virtual bool ServerCapAnyPlayerFlag() const = 0;
 
 	virtual int GetPredictionTime() = 0;
+	virtual int GetPredictionTick() = 0;
 
 	// snapshot interface
 
@@ -227,33 +237,42 @@ public:
 	// TODO: Refactor: should redo this a bit i think, too many virtual calls
 	virtual int SnapNumItems(int SnapId) const = 0;
 	virtual const void *SnapFindItem(int SnapId, int Type, int Id) const = 0;
-	virtual void *SnapGetItem(int SnapId, int Index, CSnapItem *pItem) const = 0;
-	virtual int SnapItemSize(int SnapId, int Index) const = 0;
+	virtual CSnapItem SnapGetItem(int SnapId, int Index) const = 0;
 
 	virtual void SnapSetStaticsize(int ItemType, int Size) = 0;
+	virtual void SnapSetStaticsize7(int ItemType, int Size) = 0;
 
 	virtual int SendMsg(int Conn, CMsgPacker *pMsg, int Flags) = 0;
 	virtual int SendMsgActive(CMsgPacker *pMsg, int Flags) = 0;
 
 	template<class T>
-	int SendPackMsgActive(T *pMsg, int Flags)
+	int SendPackMsgActive(T *pMsg, int Flags, bool NoTranslate = false)
 	{
-		CMsgPacker Packer(T::ms_MsgId, false);
+		CMsgPacker Packer(T::ms_MsgId, false, NoTranslate);
 		if(pMsg->Pack(&Packer))
 			return -1;
 		return SendMsgActive(&Packer, Flags);
 	}
 
+	template<class T>
+	int SendPackMsg(int Conn, T *pMsg, int Flags, bool NoTranslate = false)
+	{
+		CMsgPacker Packer(T::ms_MsgId, false, NoTranslate);
+		if(pMsg->Pack(&Packer))
+			return -1;
+		return SendMsg(Conn, &Packer, Flags);
+	}
+
 	//
 	virtual const char *PlayerName() const = 0;
-	virtual const char *DummyName() const = 0;
+	virtual const char *DummyName() = 0;
 	virtual const char *ErrorString() const = 0;
 	virtual const char *LatestVersion() const = 0;
 	virtual bool ConnectionProblems() const = 0;
 
 	virtual IGraphics::CTextureHandle GetDebugFont() const = 0; // TODO: remove this function
 
-	//DDRace
+	// DDRace
 
 	virtual const char *GetCurrentMap() const = 0;
 	virtual const char *GetCurrentMapPath() const = 0;
@@ -264,7 +283,8 @@ public:
 	int Points() const { return m_Points; }
 	int64_t ReconnectTime() const { return m_ReconnectTime; }
 	void SetReconnectTime(int64_t ReconnectTime) { m_ReconnectTime = ReconnectTime; }
-	virtual int GetCurrentRaceTime() = 0;
+
+	virtual bool IsSixup() const = 0;
 
 	virtual void RaceRecord_Start(const char *pFilename) = 0;
 	virtual void RaceRecord_Stop() = 0;
@@ -274,6 +294,13 @@ public:
 	virtual void DemoSliceEnd() = 0;
 	virtual void DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser) = 0;
 
+	enum class EInfoState
+	{
+		LOADING,
+		SUCCESS,
+		ERROR,
+	};
+	virtual EInfoState InfoState() const = 0;
 	virtual void RequestDDNetInfo() = 0;
 	virtual bool EditorHasUnsavedData() const = 0;
 
@@ -284,10 +311,31 @@ public:
 	virtual void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount) = 0;
 
 	virtual void AddWarning(const SWarning &Warning) = 0;
-	virtual SWarning *GetCurWarning() = 0;
+	virtual std::optional<SWarning> CurrentWarning() = 0;
 
 	virtual CChecksumData *ChecksumData() = 0;
 	virtual int UdpConnectivity(int NetType) = 0;
+
+	/**
+	 * Opens a link in the browser.
+	 *
+	 * @param pLink The link to open in a browser.
+	 *
+	 * @return `true` on success, `false` on failure.
+	 *
+	 * @remark This may not be called with untrusted input or it'll result in arbitrary code execution, especially on Windows.
+	 */
+	virtual bool ViewLink(const char *pLink) = 0;
+	/**
+	 * Opens a file or directory with the default program.
+	 *
+	 * @param pFilename The file or folder to open with the default program.
+	 *
+	 * @return `true` on success, `false` on failure.
+	 *
+	 * @remark This may not be called with untrusted input or it'll result in arbitrary code execution, especially on Windows.
+	 */
+	virtual bool ViewFile(const char *pFilename) = 0;
 
 #if defined(CONF_FAMILY_WINDOWS)
 	virtual void ShellRegister() = 0;
@@ -330,11 +378,11 @@ public:
 	virtual int OnSnapInput(int *pData, bool Dummy, bool Force) = 0;
 	virtual void OnDummySwap() = 0;
 	virtual void SendDummyInfo(bool Start) = 0;
-	virtual int GetLastRaceTick() const = 0;
 
 	virtual const char *GetItemName(int Type) const = 0;
 	virtual const char *Version() const = 0;
 	virtual const char *NetVersion() const = 0;
+	virtual const char *NetVersion7() const = 0;
 	virtual int DDNetVersion() const = 0;
 	virtual const char *DDNetVersionStr() const = 0;
 
@@ -346,9 +394,18 @@ public:
 	virtual void RenderShutdownMessage() = 0;
 
 	virtual CNetObjHandler *GetNetObjHandler() = 0;
+	virtual protocol7::CNetObjHandler *GetNetObjHandler7() = 0;
+
+	virtual int ClientVersion7() const = 0;
+
+	virtual void ApplySkin7InfoFromSnapObj(const protocol7::CNetObj_De_ClientInfo *pObj, int ClientId) = 0;
+	virtual int OnDemoRecSnap7(class CSnapshot *pFrom, class CSnapshot *pTo, int Conn) = 0;
+	virtual int TranslateSnap(class CSnapshot *pSnapDstSix, class CSnapshot *pSnapSrcSeven, int Conn, bool Dummy) = 0;
+
+	virtual void InitializeLanguage() = 0;
 };
 
-void SnapshotRemoveExtraProjectileInfo(CSnapshot *pSnap);
+void SnapshotRemoveExtraProjectileInfo(class CSnapshot *pSnap);
 
 extern IGameClient *CreateGameClient();
 #endif

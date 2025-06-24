@@ -18,6 +18,8 @@ class CRingBufferBase
 		int m_Size;
 	};
 
+	CItem *m_pBuffer;
+
 	CItem *m_pProduce;
 	CItem *m_pConsume;
 
@@ -52,6 +54,8 @@ public:
 		FLAG_RECYCLE = 1
 	};
 	static constexpr int ITEM_SIZE = sizeof(CItem);
+
+	void Clear();
 };
 
 template<typename T>

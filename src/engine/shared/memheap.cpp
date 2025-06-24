@@ -1,21 +1,24 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "memheap.h"
+
+#include <base/math.h>
 #include <base/system.h>
+
 #include <cstdint>
 #include <cstdlib>
 
 // allocates a new chunk to be used
-void CHeap::NewChunk()
+void CHeap::NewChunk(size_t ChunkSize)
 {
 	// the chunk structure is located in the beginning of the chunk
 	// init it and return the chunk
-	CChunk *pChunk = static_cast<CChunk *>(malloc(sizeof(CChunk) + CHUNK_SIZE));
+	CChunk *pChunk = static_cast<CChunk *>(malloc(sizeof(CChunk) + ChunkSize));
 	if(!pChunk)
 		return;
 	pChunk->m_pMemory = static_cast<char *>(static_cast<void *>(pChunk + 1));
 	pChunk->m_pCurrent = pChunk->m_pMemory;
-	pChunk->m_pEnd = pChunk->m_pMemory + CHUNK_SIZE;
+	pChunk->m_pEnd = pChunk->m_pMemory + ChunkSize;
 	pChunk->m_pNext = nullptr;
 
 	pChunk->m_pNext = m_pCurrent;
@@ -54,7 +57,7 @@ CHeap::~CHeap()
 void CHeap::Reset()
 {
 	Clear();
-	NewChunk();
+	NewChunk(CHUNK_SIZE);
 }
 
 // destroys the heap
@@ -76,7 +79,7 @@ void *CHeap::Allocate(unsigned Size, unsigned Alignment)
 	if(!pMem)
 	{
 		// allocate new chunk and add it to the heap
-		NewChunk();
+		NewChunk(maximum<size_t>(CHUNK_SIZE, Size + Alignment));
 
 		// try to allocate again
 		pMem = AllocateFromChunk(Size, Alignment);

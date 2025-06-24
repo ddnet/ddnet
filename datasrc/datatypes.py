@@ -325,7 +325,7 @@ class NetMessageEx(NetMessage):
 
 
 class NetVariable:
-	def __init__(self, name, default=None):
+	def __init__(self, name, *, default=None):
 		self.name = name
 		self.default = None if default is None else str(default)
 	def emit_declaration(self):
@@ -386,7 +386,7 @@ class NetIntAny(NetVariable):
 		return [f"pPacker->AddInt({self.name});"]
 
 class NetIntRange(NetIntAny):
-	def __init__(self, name, min_val, max_val, default=None):
+	def __init__(self, name, min_val, max_val, *, default=None):
 		NetIntAny.__init__(self,name,default=default)
 		self.min = str(min_val)
 		self.max = str(max_val)
@@ -396,17 +396,17 @@ class NetIntRange(NetIntAny):
 		return [f"if(pData->{self.name} < {self.min} || pData->{self.name} > {self.max}) {{ m_pMsgFailedOn = \"{self.name}\"; break; }}"]
 
 class NetBool(NetIntRange):
-	def __init__(self, name, default=None):
+	def __init__(self, name, *, default=None):
 		default = None if default is None else int(default)
 		NetIntRange.__init__(self,name,0,1,default=default)
 
 class NetTick(NetIntAny):
-	def __init__(self, name, default=None):
+	def __init__(self, name, *, default=None):
 		NetIntAny.__init__(self,name,default=default)
 
 class NetArray(NetVariable):
 	def __init__(self, var, size):
-		NetVariable.__init__(self,var.name,var.default)
+		NetVariable.__init__(self,var.name,default=var.default)
 		self.base_name = var.name
 		self.var = var
 		self.size = size

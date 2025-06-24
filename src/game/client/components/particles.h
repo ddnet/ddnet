@@ -68,6 +68,7 @@ public:
 	enum
 	{
 		GROUP_PROJECTILE_TRAIL = 0,
+		GROUP_TRAIL_EXTRA,
 		GROUP_EXPLOSIONS,
 		GROUP_EXTRA,
 		GROUP_GENERAL,
@@ -96,6 +97,9 @@ private:
 	int m_FirstFree;
 	int m_aFirstPart[NUM_GROUPS];
 
+	float m_FrictionFraction = 0.0f;
+	int64_t m_LastRenderTime = 0;
+
 	void RenderGroup(int Group);
 	void Update(float TimePassed);
 
@@ -108,7 +112,10 @@ private:
 		virtual void OnRender() override { m_pParts->RenderGroup(TGROUP); }
 	};
 
+	// behind players
 	CRenderGroup<GROUP_PROJECTILE_TRAIL> m_RenderTrail;
+	CRenderGroup<GROUP_TRAIL_EXTRA> m_RenderTrailExtra;
+	// in front of players
 	CRenderGroup<GROUP_EXPLOSIONS> m_RenderExplosions;
 	CRenderGroup<GROUP_EXTRA> m_RenderExtra;
 	CRenderGroup<GROUP_GENERAL> m_RenderGeneral;

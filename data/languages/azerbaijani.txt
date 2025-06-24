@@ -1,0 +1,2215 @@
+%ds left
+== %ds qaldı
+
+%i minute left
+== %i dəqiqə qaldı
+
+%i minutes left
+== %i dəqiqə qaldı
+
+%i second left
+== %i saniyə qaldı
+
+%i seconds left
+== %i saniyə qaldı
+
+%s wins!
+== %s qalibdir!
+
+Abort
+== Ləğv edin
+
+Add
+== Əlavə etmək
+
+Add Friend
+== Dost əlavə et
+
+Address
+== Ünvan
+
+All
+== Hamısı
+
+Are you sure that you want to quit?
+== Çıxmaq istədiyinizə əminsiniz?
+
+Automatically record demos
+== Demoları avtomatik olaraq qeyd edin
+
+Automatically take game over screenshot
+== Avtomatik olaraq oyun sonu ekran görüntüsü al
+
+Blue team
+== Mavi qrup
+
+Blue team wins!
+== Mavi qrup qazandı!
+
+Body
+== Bədən
+
+Call vote
+== Səsvermə
+
+Change settings
+== Parametrləri dəyişdirin
+
+Chat
+== Söhbət
+
+Clan
+== Klan
+
+Client
+== Klient
+
+Connecting to
+== Bağlanmaq
+
+Connection Problems…
+== Bağlantı Xətası…
+
+Console
+== Konsol
+
+Controls
+== Kontroller
+
+Count players only
+== Sadəcə oyunçuları say
+
+Current
+== İndi
+
+Custom colors
+== Xüsusi rənglər
+
+Delete
+== Sil
+
+Delete demo
+== Demo sil
+
+Demofile: %s
+== Demo faylı: %s
+
+Demos
+== Demolar
+
+Disconnect
+== Bağlantını kəsin
+
+Disconnected
+== Bağlantı kəsildi
+
+Downloading map
+== Xəritə yüklənir
+
+Draw!
+== Bərabərə!
+
+Dynamic Camera
+== Dinamik Kamera
+
+Emoticon
+== Emosiya 
+
+Error
+== Xəta
+
+Error loading demo
+== Demo yüklənərkən xəta baş verdi
+
+Favorite
+== Favori
+
+Favorites
+== Favorilər
+
+Feet
+== Ayaq
+
+Fire
+== Atəş
+
+Folder
+== Qovluq
+
+Force vote
+== Məcburi səsvermə
+
+Free-View
+== Sərbəst baxış
+
+Fullscreen
+== Tam ekran
+
+Game
+== Oyun
+
+Game info
+== Oyun haqqında
+
+Game over
+== Oyun bitdi
+
+Game type
+== Oyun növü
+
+Game types:
+== Oyun növləri:
+
+General
+== Ümumi
+
+Graphics
+== Qrafikalar
+
+Grenade
+== Qumbara
+
+Hammer
+== Çəkic
+
+Has people playing
+== Var olan oyunçu
+
+High Detail
+== Yüksək Detal
+
+Hook
+== Qarmaq
+
+Invalid Demo
+== Etibarsız demo
+
+Join blue
+== Maviye daxil ol
+
+Join red
+== Qırmızıya daxil ol
+
+Jump
+== Tullanma
+
+Kick player
+== Oyunçu At
+
+Language
+== Dil
+
+MOTD
+== MOTD
+
+Map
+== Xəritə
+
+Move left
+== Sola get
+
+Move player to spectators
+== Tamaşaçılara qoşulun
+
+Move right
+== Sağa get
+
+Movement
+== Hərəkat
+
+Mute when not active
+== Aktif değilken sessizleştir
+
+Name
+== Server adı
+
+Next weapon
+== Növbəti silah
+
+Nickname
+== Ləqəb
+
+No
+== Yox
+
+No password
+== Parol yox
+
+No servers found
+== Server  tapıla bilmədi
+
+No servers match your filter criteria
+== Filtre kriterlerinize uygun sunucu bulunamadı
+
+Ok
+== Yaxşı
+
+Parent Folder
+== Ana Kataloq
+
+Password
+== Parol
+
+Password incorrect
+== Səhv Parol
+
+Ping
+== Ping
+
+Pistol
+== Tapança 
+
+Play background music
+== Fon musiqisini çal
+
+Player
+== Oyunçu
+
+Players
+== Oyunçular
+
+Please balance teams!
+== Qrupları balanslaşdırın!
+
+Prev. weapon
+== Əvvəlki silah
+
+Quit
+== Çıxmaq
+
+Reason:
+== Səbəb:
+
+Red team
+== Qırmızı qruq
+
+Red team wins!
+== Qırmızı qruq qazandı!
+
+Remote console
+== Uzaq Konsol
+
+Remove
+== Çıxarmaq
+
+Remove friend
+== Dostu çıxarın
+
+Rename demo
+== Demonun adını dəyişdirin
+
+Reset filter
+== Filtrləri sıfırlayın
+
+Score
+== Xal
+
+Score limit
+== Xal limiti
+
+Scoreboard
+== Xal lövhəsi
+
+Screenshot
+== Ekran görüntüsü
+
+Server address:
+== Server ünvanı:
+
+Server info
+== Server haqqında 
+
+Server not full
+== Sunucu dolu deyil
+
+Shotgun
+== Tüfəng
+
+Show chat
+== Söhbəti göstər
+
+Show friends only
+== Yalnız dostlar göstərin
+
+Show ingame HUD
+== Oyundaxili HUD göstərin
+
+Show name plates
+== Oyunçu adlarını göstərin
+
+Sound
+== Səs
+
+Sound error
+== Səs xətası
+
+Spectate
+== Tamaşa
+
+Spectate next
+== Sonra ki tamaşa
+
+Spectate previous
+== Avvəlki tamaşa
+
+Spectator mode
+== Tamaşaçı rejimi
+
+Spectators
+== İzleyiciler
+
+Stop record
+== Qeydi dayandırın
+
+Strict gametype filter
+== Ciddi oyun növü filtri
+
+Sudden Death
+== Ani ölüm
+
+Switch weapon on pickup
+== Silah alındıqda yeni silahdan istifadə edin
+
+Team
+== Qrup
+
+Team chat
+== Qrup söhbəti
+
+The audio device couldn't be initialised.
+== Ses aparatı işə sala bilmədi.
+
+The server is running a non-standard tuning on a pure game type.
+== Bu server təmiz oyun janrında qeyri-standart parametrdən istifadə edir.
+
+Time limit: %d min
+== Vaxt məhdudiyyəti: %d dəqiqə
+
+Try again
+== Yenidən cəhd elə
+
+Type
+== Növü
+
+Unable to rename the demo
+== Demonun adını dəyişdirmək olmaz
+
+Use sounds
+== Səslərdən istifadə edin
+
+Use team colors for name plates
+== Ad etiketlərində komanda rənglərindən istifadə edin
+
+V-Sync
+== V-Sync
+
+Version
+== Versiya
+
+Vote command:
+== Səs Əmr:
+
+Vote description:
+== Şərh:
+
+Vote no
+== Yox
+
+Vote yes
+== Hə
+
+Voting
+== Səsvermə
+
+Warmup
+== İstiləşmə
+
+Weapon
+== Silah
+
+Yes
+== Bəli
+
+You must restart the game for all settings to take effect.
+== Bütün parametrlərin aktiv olması üçün oyunu yenidən başlatmalısınız.
+
+New name:
+== Yeni ad:
+
+Sat.
+== Doygunluk
+
+Miscellaneous
+== Müxtəlif
+
+Internet
+== Internet
+
+Max demos
+== Maksimum Demo sayı
+
+News
+== Xəbərlər
+
+Join game
+== Oyuna daxil ol
+
+FSAA samples
+== FSAA nümunələri
+
+Sound volume
+== Ses səviyyəsi
+
+Max Screenshots
+== Maksimum Ekran Görüntüsü Sayısı
+
+Laser
+== Lazer
+
+Hue
+== Rəng
+
+Record demo
+== Demo qeyd
+
+Your skin
+== Şəxsi görünüş
+
+Reset to defaults
+== Defoltlara sıfırlayın
+
+Lht.
+== Parlaqlıq
+
+UI Color
+== Menu rəngi
+
+Alpha
+== Şəffaflıq
+
+LAN
+== LAN
+
+Name plates size
+== Ölçü
+
+Successfully saved the replay!
+== Uğurla yadda saxlandı!
+
+Replay feature is disabled!
+== Təkrar oxutma funksiyası deaktiv edildi!
+
+Game paused
+== Oyun dayandı
+
+Server best:
+== Ən yaxşı server:
+
+Personal best:
+== Ən yaxşı şəxsi:
+
+Learn
+== Öyrən
+
+Browser
+== Serverlər
+
+Ghost
+== Ruh
+
+Loading DDNet Client
+== DDNet Klient Yüklənir
+
+Reconnect in %d sec
+== %d saniyə ərzində yenidən qoşulacaq
+
+Render demo
+== Render demo
+
+Replace video
+== Video üzərinə yaz
+
+File already exists, do you want to overwrite it?
+== Fayl hal-hazırda mövcuddur, üzərinə qeyd edilsin?
+
+Are you sure that you want to disconnect?
+== Çıxmağa razısan?
+
+Disconnect Dummy
+== Dummy Ayrıl
+
+Are you sure that you want to disconnect your dummy?
+== Dummy Bağlantını kəsmək istədiyinizə əminsiniz?
+
+Welcome to DDNet
+== DDNet’ə xoş gəldiniz!
+
+DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
+== DDraceNetwork korperativ onlayn oyundur, bu xəritədə məqsəd siz və sizin qrupunuzun ən qısa zamanda finiş nöqtəsinə çatmağıdır. Yeni gələn oyunçular üçün asan xəritələrdə yəni  Novice(Təcrübəsiz) serverlərdə oynamağını tövsiyyə edirik. Hər hansı bir server seçmədən əvvəl, sizə yaxın bir server seçmək üçün ping-i nəzərdən keçirin.
+
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== İntihar etmək (yenidən başlamaq) üçün k düyməsi, oyunu dayandırıb digər oyunçuları izləmək üçün q düyməsini istifadə edə bilərsiniz. Digər düymələrə parametrlərdən baxa bilərsiniz. 
+
+It's recommended that you check the settings to adjust them to your liking before joining a server.
+== Serverlərə qoşulmadan əvvəl parametrləri nəzərdən keçirib özünüzə uyğun konfiqurasiya etməyinizi tövsiyyə edirik.
+
+Please enter your nickname below.
+== Xahiş edirik istifadəçi adınızı daxil edin
+
+Video name:
+== Video adı:
+
+Show DDNet map finishes in server browser
+== Tamamlanan DDNet xəritələrini server listində göstər
+
+transmits your player name to info.ddnet.org
+== istifadəçi adını info.ddnet.org ilə paylaş
+
+Search
+== Ara
+
+Exclude
+== Qəric 
+
+Player country:
+== Oyunçu ölkəsi
+
+Filter connecting players
+== Qoşulmuş oyunçuların sayılması
+
+Indicate map finish
+== Tamamlanmış xəritələri göstərin
+
+Unfinished map
+== Natamam xəritə
+
+Countries
+== Ölkəlar
+
+Types
+== Növləri
+
+DDNet %s is out!
+== DDNet %s nəşr olundu!
+
+Downloading %s:
+== Endirilir %s:
+
+Update failed! Check log…
+== Yeniləmə zamanı xəta baş verdi!
+
+DDNet Client updated!
+== DDNet Klient yeniləndi!
+
+Update now
+== yeniləmə
+
+Restart
+== Yenidən başlatmaq 
+
+Remove chat
+== Söhbəti silin
+
+%.2f MiB
+== %.2f MiB
+
+%.2f KiB
+== %.2f KiB
+
+Demo
+== Demo
+
+Markers
+== İşaretler
+
+Length
+== Uzunluq
+
+Date
+== Tarix
+
+Fetch Info
+== Məlumat haqqında
+
+Connecting dummy
+== Dummy bağlanmaq
+
+Connect Dummy
+== Dummy daxil ol
+
+Deactivate
+== Qeyri-aktiv etmək 
+
+Activate
+== Aktivləşdirmək 
+
+Save
+== Saxla
+
+Switch weapon when out of ammo
+== Mərmi bitəndə silahı dəyiş
+
+Show only chat messages from friends
+== Sadəcə dostlarından gələn mesajları göstər
+
+Show clan above name plates
+== İstifadəçi adının üzərində klan adını göstər
+
+Clan plates size
+== Ölçü
+
+Refresh Rate
+== Yenileme Hızı
+
+Automatically take statboard screenshot
+== Avtomatik olaraq xal lövhəsinin ekran görüntüsünü al
+
+Automatically create statboard csv
+== Avtomatik olaraq xal lövhəsini csv olaraq yarat
+
+Max CSVs
+== Maksimum CSVs
+
+Vanilla skins only
+== Ancaq vanilla skinləri
+
+Fat skins (DDFat)
+== Şişman skinlər (DDFat)
+
+Skin prefix
+== Skin üzü
+
+Hook collisions
+== Qarmaq izi
+
+Pause
+== Dayandır
+
+Kill
+== Ölmək
+
+Zoom in
+== Yaxınlaşdır
+
+Zoom out
+== Uzaqlaşdır
+
+Default zoom
+== Defolt yaxınlaşdırma
+
+Show others
+== Digərlərini göstər
+
+Show all
+== Hər kəsi göstər
+
+Toggle dyncam
+== Dinamik kamera
+
+Toggle dummy
+== Dummyden istifadə edin
+
+Toggle ghost
+== Ruhu göstər
+
+Dummy copy
+== Dummy kopya
+
+Hammerfly dummy
+== Hammerfly dummy
+
+Converse
+== Qonuşma
+
+Statboard
+== Skor Tablosu
+
+Lock team
+== Qrubu kilidlən
+
+Show entities
+== Binaları göstər
+
+Show HUD
+== İnterfeysi göstər
+
+may cause delay
+== gecikmələrə səbəb ola bilər
+
+Screen
+== Ekran
+
+Enable game sounds
+== Oyun səsini aktivləşdirin
+
+Enable gun sound
+== Silah səsini aktivləşdirin
+
+Enable long pain sound (used when shooting in freeze)
+== Uzun qışqırıq səsini aktivləşdirin (freeze zamanı atəş edərkən istifadə olunur)
+
+Enable server message sound
+== Server mesajının səsini aktivləşdirin
+
+Enable regular chat sound
+== Ümumi mesaj səsini aktivləşdirin
+
+Enable team chat sound
+== Qrup mesajının səsini aktivləşdirin
+
+Enable highlighted chat sound
+== Vurğulanmış mesaj səsini aktivləşdirin
+
+Map sound volume
+== Xəritə səs səviyyəsi
+
+HUD
+== interfeys 
+
+DDNet
+== DDNet
+
+DDNet Client needs to be restarted to complete update!
+== Yeniləmənin tamamlanması üçün oyunu yenidən başlatmaq lazımdır!
+
+Show score
+== Xal göstər
+
+Show names in chat in team colors
+== Çatda adları komanda rənglərində göstərin
+
+Show kill messages
+== Ölüm mesajlarını göstərin
+
+Show votes window after voting
+== Səsvermədən sonra səslər pəncərəsini göstərin
+
+Messages
+== Mesajlar
+
+System message
+== Sistem mesajı
+
+Reset
+== Sıfırlayın
+
+Highlighted message
+== Vurğulanan mesaj
+
+Team message
+== Qrup mesajı
+
+Friend message
+== Dost mesajı
+
+Normal message
+== Normal mesaj
+
+Client message
+== Klient mesajı
+
+Save the best demo of each race
+== Hər yarış üçün ən yaxşı demonu yadda saxlayın
+
+Default length
+== Standart uzunluq
+
+Enable replays
+== Təkrarları aktivləşdirin
+
+Show ghost
+== Ruhu göstər
+
+Save ghost
+== Ruhu xilas et
+
+Gameplay
+== Oyunda
+
+Overlay entities
+== Üst təbəqə strukturları
+
+Size
+== Ölçü
+
+Show text entities
+== Post strukturlarını göstərin
+
+Show others (own team only)
+== Başqalarını göstər (yalnız öz komanda)
+
+Show quads
+== Dördbucaqlı strukturları göstərin
+
+AntiPing
+== AntiPing
+
+AntiPing: predict other players
+== AntiPing: predict other players
+
+AntiPing: predict weapons
+== AntiPing: predict weapons
+
+AntiPing: predict grenade paths
+== AntiPing: predict grenade paths
+
+Show other players' hook collision lines
+== Show other players' hook collision lines
+
+Show tiles layers from BG map
+== Show tiles layers from BG map
+
+DDNet %s is available:
+== DDNet %s Nəşr olundu:
+
+Updating…
+== Yenilənir…
+
+No updates available
+== Güncəlləmə mövcud deyil
+
+Check now
+== Yoxlayın
+
+New random timeout code
+== New random timeout code
+
+Time
+== Müddət
+
+Follow
+== İzləyin
+
+Frags
+== Frags
+
+Deaths
+== Ölümler
+
+Suicides
+== İntiharlar
+
+Ratio
+== Oran
+
+Net
+== Net
+
+FPM
+== FPM
+
+Spree
+== Spree
+
+Best
+== Ən yaxşı
+
+Grabs
+== Yakalama
+
+1 new mention
+== 1 yeni bildiriş
+
+%d new mentions
+== %d yeni bildiriş
+
+9+ new mentions
+== 9+ yeni bildiriş
+
+Manual
+== Manual
+
+Race
+== Yarış
+
+Auto
+== Avtomatik
+
+Replay
+== Yeniden oynatma
+
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== An error during command recording occurred. Try to update your GPU drivers.
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== Render komutu başarısız oldu. GPU sürücülerini güncellemeyi deneyin.
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== Submitting the render commands failed. Try to update your GPU drivers.
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== Failed to swap framebuffers. Try to update your GPU drivers.
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== Could not initialize the given graphics backend, reverting to the default backend now.
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+
+Could not save downloaded map. Try manually deleting this file: %s
+== Could not save downloaded map. Try manually deleting this file: %s
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+
+The format of texture %s is not RGBA which will cause visual bugs.
+== The format of texture %s is not RGBA which will cause visual bugs.
+
+Preparing demo playback
+== Demo oynamağa hazırlaşır
+
+Connected
+== Əlaqədar
+
+Loading map file from storage
+== Xəritə faylı yüklənir
+
+Why are you slowmo replaying to read this?
+== Bunu oxumaq üçün niyə yavaş çəkilişdə baxırsan?
+
+Initializing components
+== Komponentlər işə salınır
+
+Initializing assets
+== Resurslar yüklənir
+
+Initializing map logic
+== Xəritə məzmunu yüklənir
+
+Sending initial client info
+== İlkin məlumatlar kliente göndərilir
+
+Warning
+== Xəbərdarlıq 
+
+Quitting. Please wait…
+== Çıxılır. Zəhmət olmasa, gözləyin…
+
+Restarting. Please wait…
+== Yenidən işə salınır. Zəhmət olmasa, gözləyin…
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== Sazlama rejimi aktivdir. Onu söndürmək üçün Ctrl+Shift+D düymələrini sıxın.
+
+Position:
+== Vəzifə:
+
+Speed:
+== Sürət:
+
+Angle:
+== Açı:
+
+Multi-View
+== Coxlu izləmə
+
+Team %d
+== Qrup %d
+
+Uploading map data to GPU
+== Uploading map data to GPU
+
+Trying to determine UDP connectivity…
+== Trying to determine UDP connectivity…
+
+UDP seems to be filtered.
+== UDP seems to be filtered.
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+
+No answer from server yet.
+== Hələlik serverdən heç bir cavab gəlməyib.
+
+Getting game info
+== Oyun məlumatlarının alınır
+
+Requesting to join the game
+== Oyuna girməyə çalışır
+
+Rename folder
+== Qovluğun adını dəyişdirin
+
+Existing Player
+== Mövcud oyunçu
+
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== Sizin '%s' ləqəbiniz başqası tərəfindən istifadə olunur (%d xal). Hələ də istifadə etmək istəyirsən?
+
+Checking for existing player with your name
+== Eyni adlı mövcud oyunçular yoxlanılır
+
+A demo with this name already exists
+== Eyni adlı demo hal-hazırda mövcuddur
+
+A folder with this name already exists
+== Eyni adlı qovluq hal-hazırda mövcuddur
+
+Unable to rename the folder
+== Qovluğun adı dəyişdirilə bilmədi
+
+File '%s' already exists, do you want to overwrite it?
+==  '%s' faylı hal-hazırda mövcuddur, əvəz edilsin??
+
+(paused)
+== (fasilədə)
+
+Speed
+== Sürət
+
+Join Tutorial Server
+== Öyrədici derverə daxil olun
+
+Skip Tutorial
+== Dərsi keçin
+
+Theme
+== Tema
+
+Loading menu images
+== Menyu şəkilləri yüklənir
+
+AFR
+== AFR
+
+ASI
+== ASI
+
+AUS
+== AUS
+
+EUR
+== EUR
+
+NA
+== NA
+
+SA
+== SA
+
+CHN
+== CHN
+
+Getting server list from master server
+== Master serverdən server siyahısı əldə edilir
+
+%d of %d servers
+== %2$d serverdən %1$d ədədi
+
+%d of %d server
+== %2$d serverdən %1$d ədədi
+
+%d players
+== %d oyunçu
+
+%d player
+== %d oyunçu
+
+Are you sure that you want to disconnect and switch to a different server?
+== Bağlantını kəsib başqa serverə daxil olmaq istədiyinizə əminsiniz?
+
+Copy info
+== Məlumatı kopyalayın
+
+Leak IP
+== IP-i sızdır
+
+No server selected
+== Heç bir server seçilmədi
+
+Online clanmates (%d)
+== Onlayn klandaşlar (%d)
+
+[friends (server browser)]
+Offline (%d)
+== Oflayn (%d)
+
+Click to select server. Double click to join your friend.
+== Server seçmək üçün klikləyin. Dostunuza qoşulmaq üçün iki dəfə klikləyin.
+
+Click to remove this player from your friends list.
+== Bu oyunçunu dostlarınızın siyahısından silmək üçün klikləyin.
+
+Click to remove this clan from your friends list.
+== Bu klanı dostlarınızın siyahısından silmək üçün klikləyin.
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== '%s' oyunçu dostlarınız siyahısından silmək istədiyinizə əminsiniz?
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== '%s' klanı dostlarınız siyahısından silmək istədiyinizə əminsiniz?
+
+Add Clan
+== Klan əlavə edin
+
+Play the current demo
+== Cari demoyu oynayın
+
+Pause the current demo
+== Demoya fasilə ver
+
+Stop the current demo
+== Demoyu dayandır
+
+Go back one tick
+== Bir tik geri qayıt
+
+Go forward one tick
+== Bir tik irəli get
+
+Slow down the demo
+== Demoyu yavaşlat
+
+Speed up the demo
+== Demoyu sürətləndir
+
+Mark the beginning of a cut (right click to reset)
+== Kəsim başlanğıcını işarələ (sağ kliklə sıfırla)
+
+Mark the end of a cut (right click to reset)
+== Kəsim sonunu işarələ (sol kliklə sıfırla)
+
+Export cut as a separate demo
+== Kəsimi ayrıca demo kimi ixrac et
+
+Go back one marker
+== Bir işarə geri qayıt
+
+Go forward one marker
+== Bir işarə irəli get
+
+Close the demo player
+== Demo pleyeri bağla
+
+Toggle keyboard shortcuts
+== Klaviatura qısayollarına keçid
+
+Export demo cut
+== Demo kəsimini ixrac et
+
+Cut interval
+== Kəsim intervalı
+
+Cut length
+== Kəsim müddəti
+
+Loading demo files
+== Demo fayllarının yüklənməsi
+
+All combined
+== Hamısı bir yerdə
+
+Folder Link
+== Qovluğa keçid
+
+Demos directory
+== Demolara keçid
+
+Open the directory that contains the demo files
+== Demo faylları olan qovluğu aç
+
+Are you sure that you want to delete the folder '%s'?
+== '%s' qovluğunu silmək istədiyinizə əminsinizmi?
+
+Are you sure that you want to delete the demo '%s'?
+== '%s' demosunu silmək istədiyinizə əminsinizmi?
+
+Delete folder
+== Qovluğu silin
+
+Unable to delete the demo '%s'
+== '%s' demosu silinə bilmədi.
+
+Unable to delete the folder '%s'. Make sure it's empty first.
+==  '%s' qovluğu silinə bilmədi. Əvvəlcə boş olduğundan əmin olun.
+
+Loading ghost files
+== Ruh faylların yüklənməsi
+
+Menu opened. Press Esc key again to close menu.
+== Menyu açıqdır. Menyuyu yenidən bağlamaq üçün Esc klavişini sıxın.
+
+Smooth Dynamic Camera
+== Hamar Dinamik Kamera
+
+Skip the main menu
+== Əsas menyudan keçin
+
+Save power by lowering refresh rate (higher input latency)
+== Yeniləmə sürətini azaltmaqla enerjiyə qənaət edin (daha yüksək giriş gecikməsi)
+
+Settings file
+== Parametrlər faylı
+
+Open the settings file
+== Parametrlər faylını açın
+
+Config directory
+== Konfiqurasiya qovluğu
+
+Open the directory that contains the configuration and user files
+== Konfiqurasiya və istifadəçi faylları olan qovluğu açın
+
+Themes directory
+== Mövzu qovluğu
+
+Open the directory to add custom themes
+== Fərdi mövzular əlavə etmək üçün qovluğu açın
+
+Loading skin files
+== Skin faylların yüklənməsi
+
+Download skins
+== Skinleri yükləyin
+
+Download community skins
+== İcma skinlerini yükləyin
+
+Choose default eyes when joining a server
+== Serverə daxil olarkən istifadə etmək üçün standart gözləri seçin
+
+Create a random skin
+== Təsadüfi skin yaradın
+
+Skin Database
+== Skin verilənlər bazası 
+
+Skins directory
+== Skin qovluq
+
+Open the directory to add custom skins
+==  Xüsusi örtük(?) etmək üçün kataloqu açın.
+
+Chat command
+== Söhbət əmri
+
+Enable controller
+== Kontrolleri aktivləşdir
+
+Controller
+== Kontroller
+
+Ingame controller mode
+== Oyundaxili kontroller rejimi
+
+[Ingame controller mode]
+Relative
+== Nisbi
+
+[Ingame controller mode]
+Absolute
+== Mütləq
+
+Ingame controller sens.
+== Oyundaxili kontroller həssaslığı.
+
+UI controller sens.
+== UI kontroller həssaslığı.
+
+Controller jitter tolerance
+== Kontroller gecikmə əmsalı
+
+No controller found. Plug in a controller.
+== Kontroller tapılmadı. Kontrolleri qoşun
+
+Axis
+== Ox
+
+Status
+== Vəziyyət
+
+Aim bind
+== Nişan almaq
+
+Mouse
+== Mouse
+
+Ingame mouse sens.
+== Oyun hassasiyeti
+
+UI mouse sens.
+== Arayüz hassasiyeti
+
+Reset controls
+== Kontrolleri sıfırla
+
+Are you sure that you want to reset the controls to their defaults?
+== Kontrolleri varsayılan değerlerine döndürmek istediğine emin misin?
+
+Cancel
+== İmtina etmək 
+
+Dummy
+== Dummy
+
+Windowed
+== Pəncərəli
+
+Windowed borderless
+== Sərhədsiz pəncərəli
+
+Windowed fullscreen
+== Pəncərəli tam ekran
+
+Desktop fullscreen
+== Tam ekran
+
+Allows maps to render with more detail
+== Haritaların daha detaylı işlenmesine izin ver
+
+Renderer
+== İşləyici
+
+default
+== defolt
+
+custom
+== xüsusi
+
+Graphics card
+== Video kart 
+
+auto
+== avtomatik 
+
+Game sound volume
+== Oyun səs səviyyəsi
+
+Chat sound volume
+== Söhbət səs səviyyəsi
+
+Background music volume
+== Arxa plan musiqi səs səviyyəsi
+
+Appearance
+== Görüntü
+
+Assets
+== Mənbələr
+
+Name Plate
+==  İstifadəçi adı
+
+Hook Collisions
+== Qarmaq kəsişmələri
+
+Show health, shields and ammo
+== Can, qalxan və sursatı göstər
+
+DDRace HUD
+== DDRace interfeysi
+
+Show DDRace HUD
+== DDRace interfeysi göstər 
+
+Show jumps indicator
+== Neçə tullanma qaldığını göstər
+
+Show dummy actions
+== Dummy hərəkətlərini göstər
+
+Show player position
+== Oyunçu pozisyalarını göstər 
+
+Show player speed
+== Oyunçu sürətini göstər
+
+Show player target angle
+== Oyunçunun hədəf bucağını göstər
+
+Show freeze bars
+== Freeze barını göstər
+
+Opacity of freeze bars inside freeze
+== Freeze içindəykən freeze barının qeyri-şəffaflığı
+
+Use old chat style
+== Köhnə söhbət stilini istifadə et
+
+Preview
+== Önizləmə
+
+Hook collision line
+== Qarmaq izi
+
+Hook collision line opacity
+== Kanca çizgisi opaklığı
+
+Colors of the hook collision line, in case of a possible collision with:
+== OMümkün bir kəsişmə nəticəsində qarmaq izinin rəngləri:
+
+Your movements are not taken into account when calculating the line colors
+== Rəngləri hesablanarkən hərəkətləriniz diqqətə (qeydə) alınmaz
+
+Nothing hookable
+== Qarmaq atıla bilməz
+
+Something hookable
+== Qarmaq atıla bilər
+
+A Tee
+== Bir tee
+
+Normal Color
+== Normal rəngi
+
+Highlight Color
+== Vurğu rəngi
+
+Weapons
+== Silahlar
+
+Rifle Laser Outline Color
+== Tüfəng lazerinin çöl rəngi
+
+Rifle Laser Inner Color
+== Tüfəng lazerinin iç rəngi
+
+Shotgun Laser Outline Color
+== Ov tüfəngi lazerinin çöl rəngi
+
+Shotgun Laser Inner Color
+== Ov tüfəngi lazerinin çöl rəngi
+
+Entities
+== Binalar
+
+Door Laser Outline Color
+== Qapı lazerinin çöl rəngi
+
+Door Laser Inner Color
+== Qapı lazerinin iç rəngi
+
+Freeze Laser Outline Color
+== Freeze lazerinin çöl rəngi
+
+Freeze Laser Inner Color
+== Freeze lazerinin iç rəngi
+
+Set all to Rifle
+== Hamısını tüfəngə quraşdır
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== Başlanğıc xəttini keçdiyiniz zaman ən yaxşı vaxtınızın hərəkətlərini kopyalayan bir kabus tee göstər
+
+Opacity
+== Şəffaflıq
+
+Adjust the opacity of entities belonging to other teams, such as tees and name plates
+== Teelər və istifadəçi adları kimi digər qruplara aid varlıqların qeyri-şəffaflığını düzəldin
+
+Quads are used for background decoration
+== Dördbucaq binalar arxa plan dekorasiyası üçün istifadə edilir
+
+Tries to predict other entities to give a feel of low latency
+== Kiçik gecikmə hissi vermək üçün digər binaları təxmin etməyə çalışdır 
+
+Background
+== Arxa fon
+
+Use current map as background
+== Cari xəritəni fon kimi istifadə edin
+
+Run on join
+== Qoşulduqda çalışdır
+
+Chat command (e.g. showall 1)
+== Söhbət komandası (məs. showall 1)
+
+Unregister protocol and file extensions
+== Protokol və fayl uzantılarının qeydiyyatını sil
+
+Emoticons
+== Emosiyalar (İfadələr)
+
+Particles
+== Hissəciklər
+
+Extras
+== Əlavələr
+
+Loading assets
+== Aktivlər yüklənir
+
+Assets directory
+== Mənbə qovluğu
+
+Open the directory to add custom assets
+== Xüsusi mənbə əlavə etmək üçün qovluq açın
+
+Discord
+== Discord
+
+https://ddnet.org/discord
+== https://ddnet.org/discord
+
+Tutorial
+== Təlimat
+
+Can't find a Tutorial server
+== Təlimat server tapmaq mümkün deyil
+
+Website
+== Web-sayt
+
+Settings
+== Parametrlər
+
+Stop server
+== Serveri dayandırın
+
+Run server
+== Açıq server
+
+Server executable not found, can't run server
+== Server icra edilə bilən tapılmadı, serveri işə salmaq mümkün deyil
+
+Editor
+== Redaktor
+
+[Start menu]
+Play
+== Oynamaq
+
+Loading race demo files
+== Yarış demo faylları yüklənir
+
+Super
+== Əla
+
+Loading sound files
+== Səs faylları yükləni
+
+Moved ingame
+== Hərəkət edildi
+
+Go back the specified duration
+== Verilən zaman qədər geri qayıt
+
+[Demo player duration]
+%s min.
+== %s dəq.
+
+[Demo player duration]
+%s sec.
+== %s san.
+
+Change the skip duration
+== Keçiləcək zamanı dəyişdir
+
+Go forward the specified duration
+== Verilən zaman qədər irəli get
+
+Render cut to video
+== Kəsiyi (hissəni) videoya çevir
+
+Error playing demo
+== Demo açılarkən xəta baş verdi
+
+Failed saving the replay!
+== Təkrar yaddaşda saxlanılmadı ! (qeydə alınmadı)
+
+Saving settings to '%s' failed
+== Parametrlər ‘%s’ qovluğuna qeyd edilmədi
+
+Error saving settings
+== Parametrləri qeyd edərkən xəta baş verdi
+
+Searching
+== Axtarış
+
+Enter Username
+== İstifadəçi adınızı daxil edin
+
+Enter Password
+== Parola daxil edin
+
+NOT CONNECTED
+== BAĞLANTI YOXDUR
+
+Match %d of %d
+== Uyğunluq %d dən %d
+
+No results
+== Heç bir nəticə yoxdur
+
+Lines %d - %d (%s)
+== Xətlər %d - %d (%s)
+
+Locked
+== Kilidli
+
+Following
+== İzləyir
+
+Loading commands…
+== Komandalar yüklənir…
+
+Some map images could not be loaded. Check the local console for details.
+== Bəzi fotolar yüklənmədi. Detallar üçün konsola nəzət yetirin.
+
+Some map sounds could not be loaded. Check the local console for details.
+== Bəzi səslər yüklənmədi. Detallar üçün konsola nəzər yetirin.
+
+Loading menu themes
+== Temalar yüklənir
+
+Press a key…
+== Bir düyməni basın…
+
+Main menu
+== Əsas menyu
+
+Render complete
+== Videonun işlənməsi tamamlandı
+
+Are you sure that you want to restart?
+== Yenidən başlamaq istədiyinizə əminsiniz?
+
+There's an unsaved map in the editor, you might want to save it.
+== Redaktorda saxlanmamış xəritə var, onu saxlamaq istəyə bilərsiniz
+
+Continue anyway?
+== Yenə də davam et?
+
+Videos directory
+== Video kataloqu
+
+Video was saved to '%s'
+== Video '%s' yolunda xilas oldu
+
+Communities
+== İcmalar
+
+Server filter
+== Server filtri
+
+Friends
+== Dostlar
+
+Please use a different filename
+== Fərqli fayl adı istifadə edin
+
+No demo selected
+== Demo seçilməyib
+
+Created
+== Yaradılmışdır
+
+Loading…
+== Yüklənir…
+
+Ghosts directory
+== Ruh kataloqu
+
+Activate all
+== Tümünü etkinleştir
+
+Deactivate all
+== Tümünü devre dışı bırak
+
+Info Messages
+== Məlumat Mesajları
+
+Show local time always
+== Yerli saat həmişə göstərmək
+
+Chat font size
+== Şrift ölçüsü
+
+Chat width
+== Söhbət eni
+
+Authed name color in scoreboard
+== Xal lövhəsində səlahiyyətli ad rəngi
+
+Same clan color in scoreboard
+== Xal lövhəsində eyni qlan rəngi
+
+Show finish messages
+== Bitirmə mesajlarını göstərin
+
+Enable ghost
+== Ruhu aktivləşdirin
+
+Only save improvements
+== Sadəcə təkmilləşdirmələri saxlayın
+
+Regular background color
+== Normal fon rəngi
+
+Entities background color
+== Struktur fon rəngi
+
+Loading demo file from storage
+== Demo faylı yaddaşdan yüklənir
+
+No login required
+== Giriş tələb olunmur
+
+Netversion
+== Netversion
+
+Player info change cooldown
+== Oyunçu məlumatını dəyişmək üçün gözləmə vaxtı
+
+Always show chat
+== Həmişə söhbəti göstərin
+
+Show hook strength icon indicator
+== Qarmaq gücü işarəsi göstəricisini göstər
+
+Show hook strength number indicator
+== Qarmaq gücü say göstəricisini göstər
+
+Show own player's hook collision line
+== Oyunçunun qarmaq toqquşma sərhədini göstər
+
+Always show own player's hook collision line
+== Oyunçunun qarmaq toqquşma sərhədini həmişə göstər
+
+Always show other players' hook collision lines
+== Digər oyunçuların qarmaq toqquşma sərhədini həmişə göstər
+
+%d/%d KiB (%.1f KiB/s)
+== %d/%d KiB (%.1f KiB/s)
+
+[Demo details]
+map not included
+== xəritə daxil deyil
+
+Tee
+== Tee
+
+Show only chat messages from team members
+== Yalnız komanda üzvlərinin mesajlarını göstərin
+
+[Spectating]
+Following %s
+== izlənilməkdədir %s
+
+Example of usage
+== İstifadə nümunəsi
+
+Round %d/%d
+== Yumru %d/%d
+
+[Spectators]
+%d others…
+== %d başqaları
+
+[Team and size]
+%d\n(%d/%d)
+== %d\n(%d/%d)
+
+Team %d (%d/%d)
+== Komanda %d (%d/%d
+
+https://wiki.ddnet.org/wiki/Mapping
+== https://wiki.ddnet.org/wiki/Mapping
+
+Could not resolve connect address '%s'. See local console for details.
+== '%s' Link ünvanını həll etmək mümkün olmadı. Ətraflı məlumat üçün yerli konsola baxın
+
+Connect address error
+== Link ünvanı xətası
+
+Could not connect dummy
+== Dummy qoşula bilmədi
+
+Dummy is not allowed on this server
+== Bu serverdə dummy icazə verilmir
+
+Please wait…
+== Zəhmət olmasa gözləyin…
+
+Show client IDs (scoreboard, chat, spectator)
+== Klient ID'sini göstərin (aparıcı lövhə, söhbət, izləyici)
+
+Are you sure that you want to delete '%s'?
+== '%s' Bunu silmək istədiyinizə əminsiniz?
+
+Delete skin
+== Skini silin
+
+Basic
+== Sadə
+
+Custom
+== Xüsusi
+
+Unable to delete skin
+== Skin silinə bilməz
+
+Save skin
+== Skini saxla
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== Skini xilas etmək istəyirsiniz? Bu adda başqa bir skin varsa, mövcud skin əvəzinə bu skin xilas olacaq.
+
+Unable to save the skin
+== Skini xilas etmək mümkün deyil
+
+Unable to save the skin with a reserved name
+== Skin xilas edilir, artıq bu adda skin vardı.
+
+No local servers found (ports %d-%d)
+== Yerli server tapılmadı (port %d-%d)
+
+[Hertz]
+Hz
+== Hz
+
+[skins]
+Body
+== Gövdə 
+
+[skins]
+Marking
+== İşarələmə
+
+[skins]
+Decoration
+== Dekorasiya
+
+[skins]
+Hands
+== Əl
+
+[skins]
+Feet
+== Ayaq
+
+[skins]
+Eyes
+== Göz
+
+Some fonts could not be loaded. Check the local console for details.
+== Bəzi yazı fontları yüklənə bilmir. Ətraflı məlumat üçün əsas konsolu yoxlayın.
+
+Online friends (%d)
+== Onlayn dostlar (%d)
+
+Add friends by entering their name below or by clicking their name in the player list.
+== Aşağıya ad yazaraq və ya oyunçu siyahısından adlarına tıklayaraq dost əlavə edin.
+
+Add clanmates by entering their clan below and leaving the name blank.
+== Klan yoldaşlarınızı klan adını aşağıya yazaraq və ad hissəsini boş buraxaraq əlavə edin.
+
+Edit touch controls
+== Toxunuş idarəetmələrini düzəlt
+
+Close
+== Bağla
+
+Save changes
+== Dəyişiklikləri yadda saxla
+
+Error saving touch controls
+== Toxunuş idarəetmələri saxlanılarkən xəta baş verdi
+
+Could not save touch controls to file. See local console for details.
+== Toxunuş idarəetmələrini fayllara yadda saxlamaq mümkün olmadı. Ətraflı məlumat üçün konsola baxın.
+
+Unsaved changes
+== Yadda saxlanılmamış dəyişikliklər
+
+Discard changes
+== Dəyişiklikləri ləğv et
+
+Are you sure that you want to discard the current changes to the touch controls?
+== Toxunuş idarəetmələrindəki dəyişiklikləri ləğv etmək istədiyinizə əminsinizmi?
+
+Are you sure that you want to reset the touch controls to default?
+== oxunuş idarəetmələrini varsayılan parametrlərə qaytarmaq istədiyinizə əminsinizmi?
+
+Import from clipboard
+== Panodan içəri idxal et
+
+Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
+== Toxunuş idarəetmələrini panodan idxal etmək istədiyinizə əminsinizmi? Bu, mövcud idarəetmələrin üzərinə yazılacaq.
+
+Export to clipboard
+== Panoya ixrac et
+
+Direct touch input while ingame
+== Oyun içində olarkən birbaşa toxunuş girişi
+
+[Direct touch input]
+Disabled
+== Deaktiv edilib
+
+[Direct touch input]
+Active action
+== Aktiv hərəkət
+
+[Direct touch input]
+Aim
+== Aim
+
+[Direct touch input]
+Fire
+== Atəş
+
+[Direct touch input]
+Hook
+== Qarmaq
+
+Direct touch input while spectating
+== İzləmə rejimində olarkən birbaşa toxunuş girişi
+
+Error loading touch controls
+== Toxunuş idarəetmələri yüklənərkən xəta baş verdi
+
+Could not load touch controls from file. See local console for details.
+== Toxunuş idarəetmələrini fayllardan yükləmək mümkün olmadı. Ətraflı məlumat üçün konsola baxın.
+
+Could not load default touch controls from file. See local console for details.
+== Varsayılan toxunuş idarəetmələrini fayllardan yükləmək mümkün olmadı. Ətraflı məlumat üçün konsola baxın.
+
+Could not load touch controls from clipboard. See local console for details.
+== Toxunuş idarəetmələrini panodan yükləmək mümkün olmadı. Ətraflı məlumat üçün konsola baxın.
+
+Width of your own hook collision line
+== Öz qarmağınızın toqquşma xəttinin qalınlığı
+
+Width of others' hook collision line
+== Başqalarının qarmaqlarının toqquşma xəttinin qalınlığı
+
+Preview 'Hook collisions' being pressed
+== ‘Qarmaq toqquşmaları’ basılarkən önizləmə
+
+Aim
+== Aim
+
+Active: Fire
+== Aktiv: Atəş
+
+Active: Hook
+== Aktiv: Qarmaq
+
+"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
+== "%s" pnglite ilə uyğun gəlmir və köhnə DDnet versiyaları tərəfindən yüklənə bilmir.
+
+[Spectating Camera Mode Icon]
+AUTO
+== AVTOMATİK
+
+Toggle auto camera
+== Avtomatik kameraya keç
+
+https://wiki.ddnet.org/wiki/Touch_controls
+== https://wiki.ddnet.org/wiki/Touch_controls
+
+Show client IDs in name plates
+== Müştəri ID-sini ad bölməsində göstər
+
+Hook Strength
+== Qarmaq gücü
+
+Size of hook strength icon and number indicator
+== Qarmaq gücü simvolu və rəqəm göstəricisinin ölçüşü
+
+Key Presses
+== Klaviş Basışları
+
+Size of key press icons
+== Klaviş basma simvolunun ölçüsü
+
+Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
+== Server başladıla bilmir. Serverin fonda işləməsi üçün parametrlərdə bildiriş icazəsini aktivləşdirdiyinizə əmin olun.
+
+Auto-sync player camera
+== Avto-sinxron oyunçu kamerası
+
+[Auto camera]
+Disabled
+== Qeyri-aktiv
+
+[Auto camera]
+Enabled
+== Aktiv
+
+[Auto camera]
+Unavailable for this player
+== Bu oyunçu üçün mövcud deyil
+
+[Auto camera]
+Inactive
+== Qeyri-aktiv
+
+[Auto camera]
+Active
+== Aktiv
+
+Loading maps…
+== Xəritələr yüklənir…
+
+Community
+== İcma
+
+[Team status]
+forbidden
+== qadağa olunmuş
+
+[Team status]
+solo
+== tək
+
+[Team status]
+allowed
+== icazəli
+
+[Team status]
+required
+== tələb olunur
+
+Teams
+== Komandalar
+
+[Team size]
+minimum
+== minimum
+
+[Team size]
+maximum
+== maksimum
+
+Saves file
+== Qeydlər faylı
+
+Open the saves file
+== Qeydlər faylını aç
+
+Show FPS
+== FPS-i göstər
+
+Renders your frame rate in the top right
+== Üst sağda FPS-i göstərir
+
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Azərbaycan dilinə tərcümə: seishiroon, Aykhan [EN07Z] və Gokturk tərəfindən
+
+Show spectator cursor
+== Tamaşaçı kursorunu göstər
+
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+No demo with this filename exists
+== 
+
+[Spectating]
+Following %d: %s
+== 
+
+Loading map
+== 
+
+This name cannot be used for files and folders
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
+== 
+
+Map size
+== 
+
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
+No skins match your filter criteria
+== 
+
+Show number of spectators
+== 
+
+[Show name plates]
+None
+== 
+
+[Show name plates]
+Own
+== 
+
+[Show name plates]
+Others
+== 
+
+[Show name plates]
+All
+== 
+
+Name plates offset
+== 
+
+Show friend icon in name plates
+== 
+
+Show client IDs on a seperate line
+== 
+
+Client IDs size
+== 
+
+Show players' key presses
+== 
+
+[Show players' key presses]
+None
+== 
+
+[Show players' key presses]
+Own
+== 
+
+[Show players' key presses]
+Others
+== 
+
+[Show players' key presses]
+All
+== 
+
+Preview player's name plate
+== 
+
+Preview dummy's name plate
+== 
+
+Dragger Outline Color
+== 
+
+Dragger Inner Color
+== 
+
+AntiPing: prediction margin
+== 

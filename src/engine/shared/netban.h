@@ -81,6 +81,7 @@ protected:
 		};
 		int64_t m_Expires;
 		char m_aReason[REASON_LENGTH];
+		bool m_VerbatimReason;
 	};
 
 	template<class T>
@@ -123,14 +124,14 @@ protected:
 					return pBan;
 			}
 
-			return 0;
+			return nullptr;
 		}
 		CBan<CDataType> *Get(int Index) const;
 
 	private:
 		enum
 		{
-			MAX_BANS = 1024,
+			MAX_BANS = 2048,
 		};
 
 		CBan<CDataType> *m_aapHashList[HashCount][256];
@@ -150,7 +151,7 @@ protected:
 	template<class T>
 	void MakeBanInfo(const CBan<T> *pBan, char *pBuf, unsigned BuffSize, int Type) const;
 	template<class T>
-	int Ban(T *pBanPool, const typename T::CDataType *pData, int Seconds, const char *pReason);
+	int Ban(T *pBanPool, const typename T::CDataType *pData, int Seconds, const char *pReason, bool VerbatimReason);
 	template<class T>
 	int Unban(T *pBanPool, const typename T::CDataType *pData);
 
@@ -176,7 +177,7 @@ public:
 	void Init(class IConsole *pConsole, class IStorage *pStorage);
 	void Update();
 
-	virtual int BanAddr(const NETADDR *pAddr, int Seconds, const char *pReason);
+	virtual int BanAddr(const NETADDR *pAddr, int Seconds, const char *pReason, bool VerbatimReason);
 	virtual int BanRange(const CNetRange *pRange, int Seconds, const char *pReason);
 	int UnbanByAddr(const NETADDR *pAddr);
 	int UnbanByRange(const CNetRange *pRange);
@@ -190,13 +191,14 @@ public:
 	static void ConUnbanRange(class IConsole::IResult *pResult, void *pUser);
 	static void ConUnbanAll(class IConsole::IResult *pResult, void *pUser);
 	static void ConBans(class IConsole::IResult *pResult, void *pUser);
+	static void ConBansFind(class IConsole::IResult *pResult, void *pUser);
 	static void ConBansSave(class IConsole::IResult *pResult, void *pUser);
 };
 
 template<class T>
 void CNetBan::MakeBanInfo(const CBan<T> *pBan, char *pBuf, unsigned BuffSize, int Type) const
 {
-	if(pBan == 0 || pBuf == 0)
+	if(pBan == nullptr || pBuf == nullptr)
 	{
 		if(BuffSize > 0)
 			pBuf[0] = 0;
@@ -227,7 +229,7 @@ void CNetBan::MakeBanInfo(const CBan<T> *pBan, char *pBuf, unsigned BuffSize, in
 	}
 
 	// add info part
-	if(pBan->m_Info.m_Expires != CBanInfo::EXPIRES_NEVER)
+	if(!pBan->m_Info.m_VerbatimReason && pBan->m_Info.m_Expires != CBanInfo::EXPIRES_NEVER)
 	{
 		int Mins = ((pBan->m_Info.m_Expires - time_timestamp()) + 59) / 60;
 		if(Mins <= 1)

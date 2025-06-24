@@ -1,38 +1,63 @@
-set(WASM_CXX_ENGINE_FLAGS "")
-set(WASM_ENGINE_FLAGS "")
-set(WASM_ENGINE_FLAGS "-s LLD_REPORT_UNDEFINED -s USE_PTHREADS=1")
-# needed for loading files in a c-like style
-set(WASM_ENGINE_FLAGS "${WASM_ENGINE_FLAGS} -s FILESYSTEM=1 -s FORCE_FILESYSTEM=1")
-# load data directory to the filesystem
-set(WASM_ENGINE_FLAGS "${WASM_ENGINE_FLAGS} --preload-file data")
-# remove some annoyance for now, TODO
-set(WASM_ENGINE_FLAGS "${WASM_ENGINE_FLAGS} --allow-multiple-definition -Wl,--shared-memory,--no-check-features")
-# TODO
-#set(WASM_ENGINE_FLAGS "${WASM_ENGINE_FLAGS} -lwebsocket.js -s PROXY_POSIX_SOCKETS=1")
-# use Web Assembly & a WebGL2 compatible GLES3 implementation
-set(WASM_ENGINE_FLAGS "${WASM_ENGINE_FLAGS} -s WASM=1")
-set(WASM_ENGINE_FLAGS "${WASM_ENGINE_FLAGS} -s USE_WEBGL2=1")
-set(WASM_ENGINE_FLAGS "${WASM_ENGINE_FLAGS} -s FULL_ES3=1")
-set(WASM_ENGINE_FLAGS "${WASM_ENGINE_FLAGS} -s DEFAULT_LIBRARY_FUNCS_TO_INCLUDE=[\"$autoResumeAudioContext, $dynCall\"]")
-# this flag is the most important one. It tells SDL2 to call emscripten functions when polling event
-set(WASM_ENGINE_FLAGS "${WASM_ENGINE_FLAGS} -s ASYNCIFY=1")
-# TODO, has to be fixed in SDL2, can improve responsivness of the site
-#set(WASM_ENGINE_FLAGS "${WASM_ENGINE_FLAGS} -s PROXY_TO_PTHREAD=1")
-# SDL2 is compiled by the gen_libs.sh script for easy up to date code
-#set(WASM_ENGINE_FLAGS "${WASM_ENGINE_FLAGS} -s USE_SDL=2")
-#set(WASM_CXX_ENGINE_FLAGS "${WASM_CXX_ENGINE_FLAGS} -s USE_SDL=2")
-# even if slower, memory growth has the advantage of using less resources, keep it on for now (instead of a static memory pool)
-set(WASM_ENGINE_FLAGS "${WASM_ENGINE_FLAGS} -s ALLOW_MEMORY_GROWTH=1")
-#set(WASM_ENGINE_FLAGS "${WASM_ENGINE_FLAGS} -s INITIAL_MEMORY=2000MB")
-set(WASM_ENGINE_FLAGS "${WASM_ENGINE_FLAGS} -s MAXIMUM_MEMORY=2000MB")
-# not optimal but required so that threads are created on fly (instead of delayed when the next javascript calls come in)
-set(WASM_ENGINE_FLAGS "${WASM_ENGINE_FLAGS} -s PTHREAD_POOL_SIZE=10")
-if(NOT (CMAKE_BUILD_TYPE STREQUAL "Debug"))
-	# will drastically reduce code size
-	set(WASM_ENGINE_FLAGS "${WASM_ENGINE_FLAGS} -flto")
+set(WASM_CXX_FLAGS "")
+set(WASM_LINKER_FLAGS "")
+
+# Enable pthreads. Use thread pool of fixed sized, as workers cannot be created while our code is running.
+set(WASM_CXX_FLAGS "${WASM_CXX_FLAGS} -pthread")
+set(WASM_LINKER_FLAGS "-s LLD_REPORT_UNDEFINED -s USE_PTHREADS=1 -pthread")
+set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s PTHREAD_POOL_SIZE=10")
+# Abort if we try to create too many threads, instead of likely causing a deadlock in our code.
+set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s PTHREAD_POOL_SIZE_STRICT=2")
+# TODO: Not supported in SDL2 currently. May also require `OFFSCREENCANVAS_SUPPORT` and/or `OFFSCREEN_FRAMEBUFFER` but canvas/context cannot be proxied to the thread.
+#set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s PROXY_TO_PTHREAD=1")
+# Bad, but we sometimes need to block on the main thread because PROXY_TO_PTHREAD is not supported yet.
+set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s ALLOW_BLOCKING_ON_MAIN_THREAD=1")
+
+# Filesystem support for loading files with C API functions.
+set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s FILESYSTEM=1 -s FORCE_FILESYSTEM=1")
+
+# TODO: Networking not supported. Full socket proxying is also blocked by PROXY_TO_PTHREAD not being supported.
+#set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -lwebsocket.js -s PROXY_POSIX_SOCKETS=1")
+
+# Use Web Assembly & a WebGL2 compatible GLES3 implementation.
+set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s WASM=1")
+set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s USE_WEBGL2=1")
+set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s FULL_ES3=1")
+
+# Make sure C callback functions are available to JS.
+set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s DEFAULT_LIBRARY_FUNCS_TO_INCLUDE=[\\$autoResumeAudioContext,\\$dynCall]")
+
+# Very important: use same stack size that other platforms have, as the default of 64 KiB that Emscripten uses is too small for our code and causes stack overflows.
+set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s STACK_SIZE=1MB")
+# Even if slower, memory growth has the advantage of using less resources, keep it on for now (instead of a static memory pool).
+set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s ALLOW_MEMORY_GROWTH=1")
+# Maximum of ~2 GiB with WASM32. Using more with WASM64 isn't well supported yet.
+set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s MAXIMUM_MEMORY=2000MB")
+# TODO: Without `--no-check-features` compilation fails with `--shared-memory is disallowed by "cxx.o" because it was not compiled with 'atomics' or 'bulk-memory' features.`
+set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s SHARED_MEMORY=1 -Wl,--no-check-features")
+
+# Very important: allow SDL2 and our code to call Emscripten functions to yield control to the browser main thread.
+set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s ASYNCIFY=1")
+set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s ASYNCIFY_STACK_SIZE=1MB")
+
+set(WASM_CXX_FLAGS "${WASM_CXX_FLAGS} -D_REENTRANT")
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	# Add debug information, disable optimization and enable various additional checks.
+	set(WASM_CXX_FLAGS "${WASM_CXX_FLAGS} -g")
+	# We need at least O1 else launch fails with `wasm streaming compile failed: CompileError: wasm validation error: at offset 36632790: too many locals`
+	set(WASM_CXX_FLAGS "${WASM_CXX_FLAGS} -O1")
+	set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s ASSERTIONS=2")
+	set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s STACK_OVERFLOW_CHECK=2")
+	set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s SAFE_HEAP=1")
+	set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s GL_ASSERTIONS=1")
+	# TODO: With `emmalloc-memvalidate` launch fails with `Assertion failed: multithreadingLock == 1, at: /emsdk/emscripten/system/lib/emmalloc.c,407,validate_memory_regions`
+	set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s MALLOC=emmalloc-debug")
+else()
+	# Will drastically reduce code size but also increases compile and link time significantly.
+	set(WASM_CXX_FLAGS "${WASM_CXX_FLAGS} -O3")
+	set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -flto")
 endif()
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -D_REENTRANT -g -O3 ${WASM_CXX_ENGINE_FLAGS}")
-set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -pthread -D_REENTRANT -g -O3 ${WASM_CXX_ENGINE_FLAGS}")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pthread ${WASM_ENGINE_FLAGS}")
-set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${WASM_ENGINE_FLAGS}")
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WASM_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WASM_CXX_FLAGS}")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${WASM_LINKER_FLAGS}")
 set(CMAKE_RUST_COMPILER_TARGET wasm32-unknown-emscripten)

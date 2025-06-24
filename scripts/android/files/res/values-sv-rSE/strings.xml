@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="app_name">DDNet</string>
+	<string name="shortcut_play_vulkan_short">Öppna (Vulkan)</string>
+	<string name="shortcut_play_gles_short">Öppna (OpenGL ES)</string>
+	<string name="server_name">DDNet-Server</string>
+	<string name="server_notification_description_default">DDNet-Servern körs…</string>
+	<string name="server_notification_description_stopping">DDNet-Servern avslutar…</string>
+	<string name="server_notification_action_stop">Stoppa</string>
+	<string name="server_notification_action_run_command">Kör kommando</string>
+	<string name="server_notification_channel_description">Notifikation för att kontrollera den lokala DDNet-Servern medan den körs.</string>
+	<string name="server_error_external_files_inaccessible">Felmeddelande vid start av DDNet-Servern: kunde inte läsa av externa filer mappen.</string>
+	<string name="server_error_exit_code">DDNet-Servern avslutades med felkoden \'%1$d\'.</string>
+</resources>

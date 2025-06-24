@@ -36,7 +36,7 @@ void CTestInfo::Filename(char *pBuffer, size_t BufferLength, const char *pSuffix
 	str_format(pBuffer, BufferLength, "%s%s", m_aFilenamePrefix, pSuffix);
 }
 
-IStorage *CTestInfo::CreateTestStorage()
+std::unique_ptr<IStorage> CTestInfo::CreateTestStorage()
 {
 	bool Error = fs_makedir(m_aFilename);
 	EXPECT_FALSE(Error);
@@ -44,7 +44,10 @@ IStorage *CTestInfo::CreateTestStorage()
 	{
 		return nullptr;
 	}
-	return CreateTempStorage(m_aFilename);
+	char aTestPath[IO_MAX_PATH_LENGTH];
+	str_copy(aTestPath, ::testing::internal::GetArgvs().front().c_str());
+	const char *apArgs[] = {aTestPath};
+	return CreateTempStorage(m_aFilename, std::size(apArgs), apArgs);
 }
 
 class CTestInfoPath
@@ -59,7 +62,7 @@ public:
 		{
 			return m_IsDirectory < Other.m_IsDirectory;
 		}
-		return str_comp(m_aData, Other.m_aData) < 0;
+		return str_comp(m_aData, Other.m_aData) > 0;
 	}
 };
 
@@ -146,4 +149,33 @@ int main(int argc, const char **argv)
 	int Result = RUN_ALL_TESTS();
 	secure_random_uninit();
 	return Result;
+}
+
+TEST(TestInfo, Sort)
+{
+	std::vector<CTestInfoPath> vEntries;
+	vEntries.resize(3);
+
+	const char aBasePath[] = "test_dir";
+	const char aSubPath[] = "test_dir/subdir";
+	const char aFilePath[] = "test_dir/subdir/file.txt";
+
+	vEntries[0].m_IsDirectory = true;
+	str_copy(vEntries[0].m_aData, aBasePath);
+
+	vEntries[1].m_IsDirectory = true;
+	str_copy(vEntries[1].m_aData, aSubPath);
+
+	vEntries[2].m_IsDirectory = false;
+	str_copy(vEntries[2].m_aData, aFilePath);
+
+	// Sorts directories after files.
+	std::sort(vEntries.begin(), vEntries.end());
+
+	EXPECT_FALSE(vEntries[0].m_IsDirectory);
+	EXPECT_EQ(str_comp(vEntries[0].m_aData, aFilePath), 0);
+	EXPECT_TRUE(vEntries[1].m_IsDirectory);
+	EXPECT_EQ(str_comp(vEntries[1].m_aData, aSubPath), 0);
+	EXPECT_TRUE(vEntries[2].m_IsDirectory);
+	EXPECT_EQ(str_comp(vEntries[2].m_aData, aBasePath), 0);
 }

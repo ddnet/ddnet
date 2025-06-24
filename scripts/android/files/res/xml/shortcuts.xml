@@ -1,0 +1,30 @@
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+	<shortcut
+		android:shortcutId="play-vulkan"
+		android:enabled="true"
+		android:icon="@mipmap/ic_launcher"
+		android:shortcutShortLabel="@string/shortcut_play_vulkan_short">
+		<intent
+			android:action="android.intent.action.VIEW"
+			android:targetPackage="org.ddnet.client"
+			android:targetClass="org.ddnet.client.NativeMain">
+			<extra
+				android:name="gfx-backend"
+				android:value="Vulkan" />
+		</intent>
+	</shortcut>
+	<shortcut
+		android:shortcutId="play-gles"
+		android:enabled="true"
+		android:icon="@mipmap/ic_launcher"
+		android:shortcutShortLabel="@string/shortcut_play_gles_short">
+		<intent
+			android:action="android.intent.action.VIEW"
+			android:targetPackage="org.ddnet.client"
+			android:targetClass="org.ddnet.client.NativeMain">
+			<extra
+				android:name="gfx-backend"
+				android:value="GLES" />
+		</intent>
+	</shortcut>
+</shortcuts>

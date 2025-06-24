@@ -78,10 +78,14 @@ int main(int argc, const char **argv)
 	CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 
-	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_BASIC, argc, argv);
-	if(!pStorage || argc <= 1 || argc > 3)
+	std::unique_ptr<IStorage> pStorage = std::unique_ptr<IStorage>(CreateStorage(IStorage::EInitializationType::BASIC, argc, argv));
+	if(!pStorage)
 	{
-		dbg_msg("map_optimize", "Invalid parameters or other unknown error.");
+		log_error("map_optimize", "Error creating basic storage");
+		return -1;
+	}
+	if(argc <= 1 || argc > 3)
+	{
 		dbg_msg("map_optimize", "Usage: map_optimize <source map filepath> [<dest map filepath>]");
 		return -1;
 	}
@@ -102,14 +106,14 @@ int main(int argc, const char **argv)
 	}
 
 	CDataFileReader Reader;
-	if(!Reader.Open(pStorage, argv[1], IStorage::TYPE_ABSOLUTE))
+	if(!Reader.Open(pStorage.get(), argv[1], IStorage::TYPE_ABSOLUTE))
 	{
 		dbg_msg("map_optimize", "Failed to open source file.");
 		return -1;
 	}
 
 	CDataFileWriter Writer;
-	if(!Writer.Open(pStorage, aFileName, IStorage::TYPE_ABSOLUTE))
+	if(!Writer.Open(pStorage.get(), aFileName, IStorage::TYPE_ABSOLUTE))
 	{
 		dbg_msg("map_optimize", "Failed to open target file.");
 		return -1;
@@ -190,7 +194,7 @@ int main(int argc, const char **argv)
 		else if(Type == MAPITEMTYPE_IMAGE)
 		{
 			CMapItemImage_v2 *pImg = (CMapItemImage_v2 *)pPtr;
-			if(!pImg->m_External && pImg->m_Version < CMapItemImage_v2::CURRENT_VERSION)
+			if(!pImg->m_External && pImg->m_Version < 2)
 			{
 				SMapOptimizeItem Item;
 				Item.m_pImage = pImg;

@@ -83,7 +83,7 @@ void CProjectile::Tick()
 	CCharacter *pTargetChr = GameWorld()->IntersectCharacter(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pOwnerChar, m_Owner);
 
 	if(GameWorld()->m_WorldConfig.m_IsSolo && !(m_Type == WEAPON_SHOTGUN && GameWorld()->m_WorldConfig.m_IsDDRace))
-		pTargetChr = 0;
+		pTargetChr = nullptr;
 
 	if(m_LifeSpan > -1)
 		m_LifeSpan--;

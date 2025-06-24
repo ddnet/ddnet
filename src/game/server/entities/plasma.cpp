@@ -58,7 +58,7 @@ bool CPlasma::HitCharacter(CCharacter *pTarget)
 {
 	vec2 IntersectPos;
 	CCharacter *pHitPlayer = GameServer()->m_World.IntersectCharacter(
-		m_Pos, m_Pos + m_Core, 0.0f, IntersectPos, 0, m_ForClientId);
+		m_Pos, m_Pos + m_Core, 0.0f, IntersectPos, nullptr, m_ForClientId);
 	if(!pHitPlayer)
 	{
 		return false;
@@ -85,7 +85,7 @@ bool CPlasma::HitCharacter(CCharacter *pTarget)
 bool CPlasma::HitObstacle(CCharacter *pTarget)
 {
 	// Check if the plasma bullet is stopped by a solid block or a laser stopper
-	int HasIntersection = GameServer()->Collision()->IntersectNoLaser(m_Pos, m_Pos + m_Core, 0, 0);
+	int HasIntersection = GameServer()->Collision()->IntersectNoLaser(m_Pos, m_Pos + m_Core, nullptr, nullptr);
 	if(HasIntersection)
 	{
 		if(m_Explosive)
@@ -122,7 +122,7 @@ void CPlasma::Snap(int SnappingClient)
 
 	int Subtype = (m_Explosive ? 1 : 0) | (m_Freeze ? 2 : 0);
 	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetId(),
-		m_Pos, m_Pos, m_EvalTick, -1, LASERTYPE_PLASMA, Subtype, m_Number);
+		m_Pos, m_Pos, m_EvalTick, m_ForClientId, LASERTYPE_PLASMA, Subtype, m_Number);
 }
 
 void CPlasma::SwapClients(int Client1, int Client2)

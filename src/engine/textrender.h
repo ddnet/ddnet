@@ -47,7 +47,7 @@ enum ETextRenderFlags
 	TEXT_RENDER_FLAG_NO_X_BEARING = 1 << 0,
 	TEXT_RENDER_FLAG_NO_Y_BEARING = 1 << 1,
 	TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH = 1 << 2,
-	TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT = 1 << 3,
+	TEXT_RENDER_FLAG_NO_PIXEL_ALIGNMENT = 1 << 3,
 	TEXT_RENDER_FLAG_KERNING = 1 << 4,
 	TEXT_RENDER_FLAG_NO_OVERSIZE = 1 << 5,
 	TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING = 1 << 6,
@@ -82,6 +82,7 @@ MAYBE_UNUSED static const char *FONT_ICON_SQUARE_MINUS = "\xEF\x85\x86";
 MAYBE_UNUSED static const char *FONT_ICON_SQUARE_PLUS = "\xEF\x83\xBE";
 MAYBE_UNUSED static const char *FONT_ICON_SORT_UP = "\xEF\x83\x9E";
 MAYBE_UNUSED static const char *FONT_ICON_SORT_DOWN = "\xEF\x83\x9D";
+MAYBE_UNUSED static const char *FONT_ICON_TRIANGLE_EXCLAMATION = "\xEF\x81\xB1";
 
 MAYBE_UNUSED static const char *FONT_ICON_HOUSE = "\xEF\x80\x95";
 MAYBE_UNUSED static const char *FONT_ICON_NEWSPAPER = "\xEF\x87\xAA";
@@ -93,6 +94,7 @@ MAYBE_UNUSED static const char *FONT_ICON_EARTH_AMERICAS = "\xEF\x95\xBD";
 MAYBE_UNUSED static const char *FONT_ICON_NETWORK_WIRED = "\xEF\x9B\xBF";
 MAYBE_UNUSED static const char *FONT_ICON_LIST_UL = "\xEF\x83\x8A";
 MAYBE_UNUSED static const char *FONT_ICON_INFO = "\xEF\x84\xA9";
+MAYBE_UNUSED static const char *FONT_ICON_TERMINAL = "\xEF\x84\xA0";
 
 MAYBE_UNUSED static const char *FONT_ICON_SLASH = "\xEF\x9C\x95";
 MAYBE_UNUSED static const char *FONT_ICON_PLAY = "\xEF\x81\x8B";
@@ -148,6 +150,8 @@ MAYBE_UNUSED static const char *FONT_ICON_REDO = "\xEF\x8B\xB9";
 
 MAYBE_UNUSED static const char *FONT_ICON_ARROWS_ROTATE = "\xEF\x80\xA1";
 MAYBE_UNUSED static const char *FONT_ICON_QUESTION = "?";
+
+MAYBE_UNUSED static const char *FONT_ICON_CAMERA = "\xEF\x80\xB0";
 } // end namespace FontIcons
 
 enum ETextCursorSelectionMode
@@ -315,7 +319,7 @@ public:
 	virtual void MoveCursor(CTextCursor *pCursor, float x, float y) const = 0;
 	virtual void SetCursorPosition(CTextCursor *pCursor, float x, float y) const = 0;
 
-	virtual void LoadFonts() = 0;
+	virtual bool LoadFonts() = 0;
 	virtual void SetFontPreset(EFontPreset FontPreset) = 0;
 	virtual void SetFontLanguageVariant(const char *pLanguageFile) = 0;
 
@@ -351,11 +355,11 @@ public:
 
 	// old foolish interface
 	virtual void TextColor(float r, float g, float b, float a) = 0;
-	virtual void TextColor(ColorRGBA rgb) = 0;
+	virtual void TextColor(ColorRGBA Color) = 0;
 	virtual void TextOutlineColor(float r, float g, float b, float a) = 0;
-	virtual void TextOutlineColor(ColorRGBA rgb) = 0;
+	virtual void TextOutlineColor(ColorRGBA Color) = 0;
 	virtual void TextSelectionColor(float r, float g, float b, float a) = 0;
-	virtual void TextSelectionColor(ColorRGBA rgb) = 0;
+	virtual void TextSelectionColor(ColorRGBA Color) = 0;
 	virtual void Text(float x, float y, float Size, const char *pText, float LineWidth = -1.0f) = 0;
 	virtual float TextWidth(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0, const STextSizeProperties &TextSizeProps = {}) = 0;
 	virtual STextBoundingBox TextBoundingBox(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, float LineSpacing = 0.0f, int Flags = 0) = 0;

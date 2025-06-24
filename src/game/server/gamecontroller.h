@@ -64,8 +64,6 @@ protected:
 	int m_RoundCount;
 
 	int m_GameFlags;
-	int m_UnbalancedTick;
-	bool m_ForceBalanced;
 
 public:
 	const char *m_pGameType;
@@ -95,6 +93,7 @@ public:
 	virtual void OnCharacterSpawn(class CCharacter *pChr);
 
 	virtual void HandleCharacterTiles(class CCharacter *pChr, int MapIndex);
+	virtual void SetArmorProgress(CCharacter *pCharacter, int Progress){};
 
 	/*
 		Function: OnEntity
@@ -116,19 +115,15 @@ public:
 	virtual void OnReset();
 
 	// game
-	void DoWarmup(int Seconds);
+	virtual void DoWarmup(int Seconds);
 
 	void StartRound();
 	void EndRound();
 	void ChangeMap(const char *pToMap);
 
-	bool IsForceBalanced();
-
 	/*
 
 	*/
-	virtual bool CanBeMovedOnBalance(int ClientId);
-
 	virtual void Tick();
 
 	virtual void Snap(int SnappingClient);
@@ -137,6 +132,9 @@ public:
 	virtual bool CanSpawn(int Team, vec2 *pOutPos, int DDTeam);
 
 	virtual void DoTeamChange(class CPlayer *pPlayer, int Team, bool DoChatMsg = true);
+
+	int TileFlagsToPickupFlags(int TileFlags) const;
+
 	/*
 
 	*/
@@ -147,7 +145,7 @@ public:
 
 	CClientMask GetMaskForPlayerWorldEvent(int Asker, int ExceptID = -1);
 
-	bool IsTeamPlay() { return m_GameFlags & GAMEFLAG_TEAMS; }
+	bool IsTeamPlay() const { return m_GameFlags & GAMEFLAG_TEAMS; }
 	// DDRace
 
 	float m_CurrentRecord;

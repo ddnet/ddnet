@@ -64,7 +64,7 @@ void CAntibot::Init()
 	m_pServer = Kernel()->RequestInterface<IServer>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	dbg_assert(m_pServer && m_pConsole, "antibot requires server and console");
-	dbg_assert(AntibotAbiVersion() == ANTIBOT_ABI_VERSION, "antibot abi version mismatch");
+	dbg_assert(AntibotAbiVersion() == ANTIBOT_ABI_VERSION, "antibot abi version mismatch (antibot=%d server=%d)", AntibotAbiVersion(), ANTIBOT_ABI_VERSION);
 
 	mem_zero(&m_Data, sizeof(m_Data));
 	CAntibotVersion Version = ANTIBOT_VERSION;
@@ -166,10 +166,10 @@ void CAntibot::OnEngineTick()
 	Update();
 	AntibotOnEngineTick();
 }
-void CAntibot::OnEngineClientJoin(int ClientId, bool Sixup)
+void CAntibot::OnEngineClientJoin(int ClientId)
 {
 	Update();
-	AntibotOnEngineClientJoin(ClientId, Sixup);
+	AntibotOnEngineClientJoin(ClientId);
 }
 void CAntibot::OnEngineClientDrop(int ClientId, const char *pReason)
 {
@@ -212,7 +212,7 @@ bool CAntibot::OnEngineSimulateClientMessage(int *pClientId, void *pBuffer, int 
 }
 #else
 CAntibot::CAntibot() :
-	m_pServer(0), m_pConsole(0), m_pGameServer(0), m_Initialized(false)
+	m_pServer(nullptr), m_pConsole(nullptr), m_pGameServer(nullptr), m_Initialized(false)
 {
 }
 CAntibot::~CAntibot() = default;
@@ -228,7 +228,7 @@ void CAntibot::RoundStart(IGameServer *pGameServer)
 }
 void CAntibot::RoundEnd()
 {
-	m_pGameServer = 0;
+	m_pGameServer = nullptr;
 }
 void CAntibot::ConsoleCommand(const char *pCommand)
 {
@@ -256,7 +256,7 @@ void CAntibot::OnCharacterTick(int ClientId) {}
 void CAntibot::OnHookAttach(int ClientId, bool Player) {}
 
 void CAntibot::OnEngineTick() {}
-void CAntibot::OnEngineClientJoin(int ClientId, bool Sixup) {}
+void CAntibot::OnEngineClientJoin(int ClientId) {}
 void CAntibot::OnEngineClientDrop(int ClientId, const char *pReason) {}
 bool CAntibot::OnEngineClientMessage(int ClientId, const void *pData, int Size, int Flags) { return false; }
 bool CAntibot::OnEngineServerMessage(int ClientId, const void *pData, int Size, int Flags) { return false; }

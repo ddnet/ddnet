@@ -11,8 +11,8 @@
 #include <engine/shared/memheap.h>
 
 #include <functional>
-#include <unordered_map>
-#include <unordered_set>
+#include <map>
+#include <set>
 
 typedef struct _json_value json_value;
 class CNetClient;
@@ -42,6 +42,11 @@ public:
 	{
 		return str_comp(Id(), Other.Id()) == 0;
 	}
+
+	bool operator<(const CCommunityId &Other) const
+	{
+		return str_comp(Id(), Other.Id()) < 0;
+	}
 };
 
 template<>
@@ -69,6 +74,11 @@ public:
 	{
 		return str_comp(Name(), Other.Name()) == 0;
 	}
+
+	bool operator<(const CCommunityCountryName &Other) const
+	{
+		return str_comp(Name(), Other.Name()) < 0;
+	}
 };
 
 template<>
@@ -95,6 +105,11 @@ public:
 	bool operator==(const CCommunityTypeName &Other) const
 	{
 		return str_comp(Name(), Other.Name()) == 0;
+	}
+
+	bool operator<(const CCommunityTypeName &Other) const
+	{
+		return str_comp(Name(), Other.Name()) < 0;
 	}
 };
 
@@ -154,7 +169,7 @@ public:
 	void Save(IConfigManager *pConfigManager) const;
 
 private:
-	std::unordered_set<CCommunityId> m_Entries;
+	std::set<CCommunityId> m_Entries;
 };
 
 class CExcludedCommunityCountryFilterList : public IFilterList
@@ -177,7 +192,7 @@ public:
 
 private:
 	const ICommunityCache *m_pCommunityCache;
-	std::unordered_map<CCommunityId, std::unordered_set<CCommunityCountryName>> m_Entries;
+	std::map<CCommunityId, std::set<CCommunityCountryName>> m_Entries;
 };
 
 class CExcludedCommunityTypeFilterList : public IFilterList
@@ -200,7 +215,7 @@ public:
 
 private:
 	const ICommunityCache *m_pCommunityCache;
-	std::unordered_map<CCommunityId, std::unordered_set<CCommunityTypeName>> m_Entries;
+	std::map<CCommunityId, std::set<CCommunityTypeName>> m_Entries;
 };
 
 class CCommunityCache : public ICommunityCache
@@ -234,18 +249,6 @@ public:
 class CServerBrowser : public IServerBrowser
 {
 public:
-	class CServerEntry
-	{
-	public:
-		int64_t m_RequestTime;
-		bool m_RequestIgnoreInfo;
-		int m_GotInfo;
-		CServerInfo m_Info;
-
-		CServerEntry *m_pPrevReq; // request list
-		CServerEntry *m_pNextReq;
-	};
-
 	CServerBrowser();
 	virtual ~CServerBrowser();
 
@@ -253,6 +256,7 @@ public:
 	void Refresh(int Type, bool Force = false) override;
 	bool IsRefreshing() const override;
 	bool IsGettingServerlist() const override;
+	bool IsServerlistError() const override;
 	int LoadingProgression() const override;
 	void RequestResort() { m_NeedResort = true; }
 
@@ -307,7 +311,7 @@ public:
 	void OnInit();
 
 	void QueueRequest(CServerEntry *pEntry);
-	CServerEntry *Find(const NETADDR &Addr);
+	CServerEntry *Find(const NETADDR &Addr) override;
 	int GetCurrentType() override { return m_ServerlistType; }
 	bool IsRegistered(const NETADDR &Addr);
 
@@ -389,6 +393,7 @@ private:
 
 	void UpdateFromHttp();
 	CServerEntry *Add(const NETADDR *pAddrs, int NumAddrs);
+	CServerEntry *ReplaceEntry(CServerEntry *pEntry, const NETADDR *pAddrs, int NumAddrs);
 
 	void RemoveRequest(CServerEntry *pEntry);
 

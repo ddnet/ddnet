@@ -1,29 +1,3 @@
-##### authors #####
-#originally created by:
-#	kaddyd
-#modified by:
-#	carzil		2011-04-05 19:19:06
-#	RaZeR[RT]	2011-04-12 17:57:02
-#	BotanEgg	2011-05-02 19:07:35
-#	Bananbl4	2011-07-07 02:03:04
-#	Arion WT	2011-07-07 09:39:05
-#	Arion WT	2011-08-07 12:16:28
-#	gerdoe		2020-07-01 22:04:21
-#	gerdoe		2020-09-14 20:53:53
-#	gerdoe		2020-09-17 22:49:22
-#	Vy0x2		2021-06-08 15:48:25
-#	Anime.pdf	2021-06-13 13:08:50
-#	banan		2022-06-12 11:36:50
-#	ban			2023-01-05 10:22:50
-#	unban		2023-03-10 21:50:50
-#	eblan		2023-08-07 14:27:00
-#	kaban		2023-09-21 19:00:00
-#	ByFox		2023-11-14 11:24:00
-#	Sedonya		2024-06-20 03:18:10
-##### /authors #####
-
-##### translated strings #####
-
 %ds left
 == осталось %d сек
 
@@ -294,9 +268,6 @@ Player
 Player country:
 == Страна игрока:
 
-Player options
-== Опции игрока
-
 Players
 == Игроки
 
@@ -406,7 +377,7 @@ Switch weapon when out of ammo
 == Переключать оружие без патронов
 
 Show only chat messages from friends
-== Показывать только дружеские с.
+== Показывать только сообщения от друзей
 
 Show clan above name plates
 == Показывать клан
@@ -425,9 +396,6 @@ The audio device couldn't be initialised.
 
 The server is running a non-standard tuning on a pure game type.
 == Сервер запущен с нестандартными настройками на стандартном типе игры.
-
-Time limit
-== Лимит времени
 
 Time limit: %d min
 == Лимит времени: %d
@@ -570,9 +538,6 @@ Your skin
 Reset to defaults
 == Сбросить настройки
 
-Round
-== Раунд
-
 Lht.
 == Ярк.
 
@@ -610,7 +575,7 @@ Game paused
 == Пауза
 
 Team message
-== Командное с.
+== Командное
 
 Automatically create statboard csv
 == Записывать результаты в CSV
@@ -622,7 +587,7 @@ Remove chat
 == Удалить чат
 
 System message
-== Системное с.
+== Системное
 
 Updating…
 == Обновление…
@@ -637,7 +602,7 @@ Loading DDNet Client
 == Загрузка DDNet Client
 
 Normal message
-== Обычное с.
+== Обычное
 
 Connecting dummy
 == Подключение дамми
@@ -649,10 +614,10 @@ Save ghost
 == Сохранять тень
 
 DDNet Client updated!
-== DDNet Client обновлён!
+== DDNet клиент обновлён!
 
 Highlighted message
-== Выделенное с.
+== Выделенное
 
 Demo
 == Демо
@@ -730,7 +695,7 @@ Downloading %s:
 == Скачивание %s:
 
 Update failed! Check log…
-== Ошибка. Проверьте логи…
+== Не удалось обновиться! Подробности в логах…
 
 Restart
 == Рестарт
@@ -752,9 +717,6 @@ Fetch Info
 
 Connect Dummy
 == Подключить дамми
-
-Reload
-== Перезагрузить
 
 Deactivate
 == Выключить
@@ -808,7 +770,7 @@ Toggle dyncam
 == Смена дин. камеры
 
 Toggle dummy
-== Смена Tee
+== Переключение дамми
 
 Toggle ghost
 == Переключить тень
@@ -840,9 +802,6 @@ may cause delay
 Screen
 == Экран
 
-Use high DPI
-== Использовать высокий DPI
-
 Enable long pain sound (used when shooting in freeze)
 == Включить звук продолжительной боли (при стрельбе во фризе)
 
@@ -853,7 +812,7 @@ DDNet
 == DDNet
 
 Friend message
-== Дружеское с.
+== Дружеское
 
 Save the best demo of each race
 == Сохранять лучшее демо каждой карты
@@ -894,9 +853,6 @@ AntiPing: predict weapons
 AntiPing: predict grenade paths
 == Предсказывать траекторию гранат
 
-Show other players' key presses
-== Показывать действия игроков
-
 Show tiles layers from BG map
 == Показывать тайловые слои фона
 
@@ -925,10 +881,10 @@ Ratio
 == Соотношение
 
 Net
-== Сеть
+== Сальдо
 
 FPM
-== FPM
+== У/мин
 
 Spree
 == Серия
@@ -949,7 +905,7 @@ Grabs
 == 9+ упоминаний
 
 Client message
-== Клиентское с.
+== Клиентское
 
 Warning
 == Предупреждение
@@ -982,7 +938,7 @@ Run server
 == Запустить сервер
 
 Server executable not found, can't run server
-== Файл сервера не найден, невозможно запустить
+== Файл сервера не найден, не удалось запустить сервер
 
 Editor
 == Редактор
@@ -1144,9 +1100,6 @@ Desktop fullscreen
 Are you sure that you want to disconnect and switch to a different server?
 == Вы уверены, что хотите отключиться и перейти на другой сервер?
 
-Show local player's key presses
-== Показывать нажатия клавиш игрока
-
 The format of texture %s is not RGBA which will cause visual bugs.
 == Формат текстуры %s не соотвествует RGBA, что может повлечь артефакты.
 
@@ -1273,10 +1226,10 @@ Show player target angle
 == Показывать угол прицела игрока
 
 Show freeze bars
-== Показывать полоску фриза
+== Показывать индикатор фриза
 
 Opacity of freeze bars inside freeze
-== Прозрачность полоски фриза внутри фриза
+== Прозрачность индикатора фриза
 
 Normal Color
 == Обычный цвет
@@ -1290,7 +1243,7 @@ When you cross the start line, show a ghost tee replicating the movements of you
 Opacity
 == Прозр.
 
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == Регулирует прозрачность объектов другой команды, такие как Tee и имена.
 
 Quads are used for background decoration
@@ -1365,9 +1318,6 @@ Show health, shields and ammo
 DDRace HUD
 == DDRace HUD
 
-Show client IDs in scoreboard
-== Показывать ид. игроков
-
 Show DDRace HUD
 == Показывать DDRace HUD
 
@@ -1377,26 +1327,23 @@ Show jumps indicator
 Hook collision line
 == Линия коллизии крюка
 
-Hook collision line width
-== Ширина линии
-
 Hook collision line opacity
 == Прозрачность линии
 
 Colors of the hook collision line, in case of a possible collision with:
-== Цвет линии коллизии крюка при:
+== Цвет линии коллизии крюка если
 
 Your movements are not taken into account when calculating the line colors
-== Ваше перемещение не учитываются при расчете цвета линии коллизии
+== Ваше перемещение не учитывается при расчете цвета линии коллизии
 
 Nothing hookable
-== Невозможности зацепиться
+== Невозможно зацепиться
 
 Something hookable
-== Возможности зацепиться
+== Можно зацепиться
 
 A Tee
-== Пересечении игрока
+== Задевает игрока
 
 Loading assets
 == Загрузка ресурсов
@@ -1480,13 +1427,13 @@ Go back one tick
 == Отмотать назад на один тик
 
 Go forward one tick
-== Отмотать вперед на один тик
+== Промотать вперед на один тик
 
 Go back one marker
-== Отмотать назад на один маркер
+== Вернуться назад на один маркер
 
 Go forward one marker
-== Отмотать вперед на один маркер
+== Пройти вперед на один маркер
 
 Are you sure that you want to delete the demo '%s'?
 == Вы уверены, что хотите удалить демо '%s'?
@@ -1498,15 +1445,11 @@ Reset controls
 == Сброс настроек
 
 Are you sure that you want to reset the controls to their defaults?
-== Вы уверены, что хотите сбросить настройки по умолчанию?
+== Вы уверены, что хотите сбросить игру до настроек по умолчанию?
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == Ошибка во время инициализации. Попробуйте изменить gfx_backend на OpenGL или Vulkan в settings_ddnet.cfg в папке конфигурационных файлов и повторите попытку.
-
-[Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== Нехватка памяти VRAM. Попробуйте удалить пользовательские ресурсы (скины, тайлы и т.д.), особенно те, которые имеют высокое разрешение.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
@@ -1572,9 +1515,6 @@ Copy info
 Create a random skin
 == Создать случайный скин
 
-Online players (%d)
-== Друзья (%d)
-
 Online clanmates (%d)
 == Участники клана (%d)
 
@@ -1586,13 +1526,10 @@ Click to select server. Double click to join your friend.
 == Нажмите, чтобы выбрать сервер. Нажмите дважды, чтобы присоединиться.
 
 Click to remove this player from your friends list.
-== Нажмите, чтобы убрать игрока из списка друзей.
+== Нажмите, чтобы удалить игрока из списка друзей.
 
 Click to remove this clan from your friends list.
-== Нажмите, чтобы Исключить клан из списка.
-
-None
-== Пусто
+== Нажмите, чтобы исключить клан из списка.
 
 Add Clan
 == Добавить клан
@@ -1670,18 +1607,18 @@ Go back the specified duration
 == Отмотать назад на заданное время 
 
 [Demo player duration]
-%d min.
-== %d мин.
+%s min.
+== %s мин.
 
 [Demo player duration]
-%d sec.
-== %d сек.
+%s sec.
+== %s сек.
 
 Change the skip duration
-== Изменение времени перехода
+== Изменить продолжительность шага
 
 Go forward the specified duration
-== Отмотать вперед на заданное время
+== Промотать вперед на заданное время
 
 Render cut to video
 == Рендеринг отрезка в видео
@@ -1799,7 +1736,7 @@ Authed name color in scoreboard
 == Цвет администратора в табло
 
 Same clan color in scoreboard
-== Цвет клан в табло
+== Цвет клана в табло
 
 Show finish messages
 == Показывать сообщения о финишах
@@ -1808,7 +1745,7 @@ Failed saving the replay!
 == Не удалось сохранить запись!
 
 Error saving settings
-== Ошибка сохранения настроек
+== Ошибка при сохранении настроек
 
 Following
 == Текущие
@@ -1838,33 +1775,441 @@ No login required
 == Без логина
 
 Player info change cooldown
-== Задержка смены информации об игроке
+== Кулдаун смены данных об игроке
 
 Tee
-== Ти
+== Тии
 
 Always show chat
 == Всегда показывать чат
 
 Show only chat messages from team members
-== Показывать сообщения только от членов команды
-
-Show friend mark (♥) in name plates
-== Показывать знак дружбы (♥) в имени друга
+== Показывать сообщения только от команды
 
 Show hook strength icon indicator
-== Показывать индикатор вида крюка
+== Показывать иконку индикатора силы крюка
 
 Show hook strength number indicator
-== Показывать индикатор номера вида крюка
+== Показывать номер индикатора силы крюка
 
 Show own player's hook collision line
-== Показывать собственную линию коллизии крюка
+== Показывать линию крюка
 
 Always show own player's hook collision line
-== Всегда показывать собственную линию коллизии крюка
+== Всегда показывать линию крюка
 
 Always show other players' hook collision lines
-== Всегда показывать линию коллизии крюка других игроков
+== Всегда показывать линию крюка других игроков
 
-#### need translate ####
+[Spectating]
+Following %s
+== Наблюдение за %s
+
+Example of usage
+== Пример использования
+
+Round %d/%d
+== Раунд %d/%d
+
+[Spectators]
+%d others…
+== %d остальных…
+
+[Team and size]
+%d\n(%d/%d)
+== %d\n(%d/%d)
+
+Team %d (%d/%d)
+== Команда %d (%d/%d)
+
+https://wiki.ddnet.org/wiki/Mapping
+== https://wiki.ddnet.org/wiki/Mapping/ru
+
+Could not resolve connect address '%s'. See local console for details.
+== Не удалось определить адрес подключения '%s'. Подробности в локальной консоли.
+
+Connect address error
+== Ошибка адреса подключения
+
+Could not connect dummy
+== Невозможно подключить дамми
+
+Dummy is not allowed on this server
+== Дамми не разрешен на этом сервере
+
+Please wait…
+== Пожалуйста, подождите…
+
+Show client IDs (scoreboard, chat, spectator)
+== Показывать ID клиента (табло, чат, наблюдатель)
+
+Are you sure that you want to delete '%s'?
+== Вы уверены, что хотите удалить '%s'?
+
+Delete skin
+== Удалить скин
+
+Basic
+== Пресеты
+
+Custom
+== Кастомизация
+
+Unable to delete skin
+== Невозможно удалить скин
+
+Some fonts could not be loaded. Check the local console for details.
+== Некоторые шрифты не удалось загрузить. Проверьте детали в локальной консоли.
+
+Save skin
+== Сохранить скин
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== Вы уверены, что хотите сохранить ваш скин? Если скин с этим именем уже существует, он будет заменен.
+
+Unable to save the skin
+== Не удалось сохранить скин
+
+Unable to save the skin with a reserved name
+== Не удалось сохранить скин с зарезервированным именем
+
+No local servers found (ports %d-%d)
+== Локальные серверы не найдены (порты %d-%d)
+
+[Hertz]
+Hz
+== Гц
+
+[skins]
+Body
+== Тело
+
+[skins]
+Marking
+== Отметка
+
+[skins]
+Decoration
+== Украшение
+
+[skins]
+Hands
+== Руки
+
+[skins]
+Feet
+== Ноги
+
+[skins]
+Eyes
+== Глаза
+
+Online friends (%d)
+== Друзья в сети (%d)
+
+Add friends by entering their name below or by clicking their name in the player list.
+== Чтобы добавить друзей, впишите их имена ниже или нажимите по их имени в списке игроков.
+
+Add clanmates by entering their clan below and leaving the name blank.
+== Чтобы добавить соклановцев, впишите их клан и оставьте имя пустым.
+
+Edit touch controls
+== Изменить сенсорное управление
+
+Close
+== Закрыть
+
+Save changes
+== Сохранить изменение
+
+Error saving touch controls
+== Ошибка при сохранении сенсорного управления
+
+Could not save touch controls to file. See local console for details.
+== Не удалось сохранить сенсорное управление в файл. Просмотрите локальную консоль для подробностей.
+
+Unsaved changes
+== Несохранённые изменения
+
+Discard changes
+== Отменить изменения
+
+Are you sure that you want to discard the current changes to the touch controls?
+== Вы уверены что хотите отменить изменения сенсорного управления?
+
+Are you sure that you want to reset the touch controls to default?
+== Вы уверены, что хотите сбросить сенсорное управление
+
+Import from clipboard
+== Импортировать из буфера обмена
+
+Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
+== Вы уверены, что хотите импортировать сенсорное управление из буфера обмена? Это перезапишет ваше действующее сенсорное управление.
+
+Export to clipboard
+== Экспортировать в буфер обмена
+
+Direct touch input while ingame
+== Сенсорный ввод напрямую пока вы находитесь в игре
+
+[Direct touch input]
+Disabled
+== Отменено
+
+[Direct touch input]
+Active action
+== Активное действие
+
+[Direct touch input]
+Aim
+== Прицеливаться
+
+[Direct touch input]
+Fire
+== Стрелять
+
+[Direct touch input]
+Hook
+== Крюк
+
+Direct touch input while spectating
+== Сенсорный ввод напрямую пока вы в режиме наблюдателя
+
+Error loading touch controls
+== Ошибка при загрузке сенсорного управления
+
+Could not load touch controls from file. See local console for details.
+== Не удалось загрузить сенсорное управление из файла. Просмотрите локальную консоль для подробностей.
+
+Could not load default touch controls from file. See local console for details.
+== Не удалось загрузить стандартное сенсорное управление из файла. Просмотрите локальную консоль для подробностей.
+
+Could not load touch controls from clipboard. See local console for details.
+== Не удалось загрузить сенсорное управление из буфера обмена. Просмотрите локальную консоль для подробностей.
+
+Width of your own hook collision line
+== Ширина вашей линии коллизий крюка
+
+Width of others' hook collision line
+== Ширина чужих линий коллизий крюка
+
+Preview 'Hook collisions' being pressed
+== Предпросмотр нажатия 'Коллизий крюка'
+
+Aim
+== Прицеливаться
+
+Active: Fire
+== Активно: Стрелять
+
+Active: Hook
+== Активно: Крюк
+
+"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
+== "%s" не совместим с pnglite и не может быть загружен старыми версиями DDNet:
+
+Auto-sync player camera
+== Автоматически синхронизировать камеру игрока
+
+[Auto camera]
+Disabled
+== Выключено
+
+[Auto camera]
+Enabled
+== Включено
+
+[Auto camera]
+Unavailable for this player
+== Недостуно для этого игрока
+
+[Auto camera]
+Inactive
+== Неактивно
+
+[Auto camera]
+Active
+== Активно
+
+Loading maps…
+== Загрузка карт…
+
+[Spectating Camera Mode Icon]
+AUTO
+== АВТО
+
+Toggle auto camera
+== Включить авто камеру
+
+https://wiki.ddnet.org/wiki/Touch_controls
+== https://wiki.ddnet.org/wiki/Touch_controls
+
+Community
+== Сообщество
+
+[Team status]
+forbidden
+== запрещены
+
+[Team status]
+solo
+== соло
+
+[Team status]
+allowed
+== разрешены
+
+[Team status]
+required
+== требуются
+
+Teams
+== Команды
+
+[Team size]
+minimum
+== минимум
+
+[Team size]
+maximum
+== максимум
+
+Saves file
+== Файл сохранения
+
+Open the saves file
+== Открыть файл сохранения
+
+Show FPS
+== Показывать FPS
+
+Renders your frame rate in the top right
+== Отображает частоту кадров в правом верхнем углу
+
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Русский перевод выполнен: kaddyd, carzil, RaZeR[RT], BotanEgg, Bananbl4, Arion WT, gerdoe, Vy0x2, Anime.pdf, ban+eblan, ByFox, Sedonya, WTF, Риксед и oxyzo
+
+Show spectator cursor
+== Показывать курсор других при наблюдении
+
+Show client IDs in name plates
+== Показывать ID клиента в именах
+
+Hook Strength
+== Сила крюка
+
+Size of hook strength icon and number indicator
+== Размер иконки силы крюка и индикатора числа
+
+Key Presses
+== Действия игроков
+
+Size of key press icons
+== Размер иконок действий игроков
+
+Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
+== Не удалось запустить сервер. Убедитесь, что вы предоставили разрешение на уведомления в настройках приложения, чтобы сервер мог работать в фоновом режиме.
+
+No demo with this filename exists
+== Демо с таким именем не существует
+
+Map size
+== Размер карты
+
+Show number of spectators
+== Показывать количество наблюдателей
+
+[Show name plates]
+None
+== Нет
+
+[Show name plates]
+Own
+== Свои
+
+[Show name plates]
+Others
+== Других
+
+[Show name plates]
+All
+== Всех
+
+Name plates offset
+== Смещение имён
+
+Show friend icon in name plates
+== Показывать иконку друга в именах
+
+Show client IDs on a seperate line
+== Показывать ID клиента на отдельной линее
+
+Client IDs size
+== Размер ID клиента
+
+Show players' key presses
+== Показывать действия игроков
+
+[Show players' key presses]
+None
+== Нет
+
+[Show players' key presses]
+Own
+== Свои
+
+[Show players' key presses]
+Others
+== Других
+
+[Show players' key presses]
+All
+== Всех
+
+Preview dummy's name plate
+== Просмотр дамми
+
+AntiPing: prediction margin
+== Антипинг: Предел предсказаний
+
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== Не хватает VRAM. Попробуйте установить 'cl_skins_loaded_max' на меньшее значение или удалить пользовательские файлы (скины, наложения и т. д.), особенно те, которые имеют высокое разрешение.
+
+This name cannot be used for files and folders
+== Это имя не может быть использовано для файлов и папок.
+
+This skin name cannot be used.
+== Это имя скина не может быть использовано.
+
+Skin could not be loaded due to an error. Check the local console for details.
+== Скин не мог быть загружен. Проверьте детали в локальной консоли.
+
+Skin could not be found.
+== Скин не найден.
+
+No skins match your filter criteria
+== Нет скинов, подходящих под ваш фильтр
+
+Preview player's name plate
+== Просмотр игрока
+
+Dragger Outline Color
+== Цвет обводки драггера
+
+Dragger Inner Color
+== Цвет драггера
+
+[Spectating]
+Following %d: %s
+== 
+
+Loading map
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
+== 

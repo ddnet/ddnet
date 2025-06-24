@@ -45,13 +45,21 @@ pub const CFGFLAG_NONTEEHISTORIC: i32 = 1 << 9;
 /// Has no effect on other commands or config variables.
 pub const CFGFLAG_COLLIGHT: i32 = 1 << 10;
 
+/// Color config variable that can only have lightness (61/255) to 1.0.
+///
+/// This is achieved by dividing the lightness channel by and adding (61/255), i.e.
+/// remapping all the colors.
+///
+/// Has no effect on other commands or config variables.
+pub const CFGFLAG_COLLIGHT7: i32 = 1 << 11;
+
 /// Color config variable that includes an alpha (opacity) value.
 ///
 /// Has no effect on other commands or config variables.
-pub const CFGFLAG_COLALPHA: i32 = 1 << 11;
+pub const CFGFLAG_COLALPHA: i32 = 1 << 12;
 
 /// Config variable with insensitive data that can be included in client
 /// integrity checks.
 ///
 /// This should only be set on config variables the server could observe anyway.
-pub const CFGFLAG_INSENSITIVE: i32 = 1 << 12;
+pub const CFGFLAG_INSENSITIVE: i32 = 1 << 13;

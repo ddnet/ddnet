@@ -8,7 +8,8 @@
 #include <game/client/render.h>
 class CInfoMessages : public CComponent
 {
-	int m_SpriteQuadContainerIndex;
+	int m_SpriteQuadContainerIndex = -1;
+	int m_QuadOffsetRaceFlag = -1;
 
 	enum
 	{
@@ -31,11 +32,11 @@ class CInfoMessages : public CComponent
 		int m_VictimDDTeam;
 		char m_aVictimName[64];
 		STextContainerIndex m_VictimTextContainerIndex;
-		CTeeRenderInfo m_aVictimRenderInfo[MAX_KILLMSG_TEAM_MEMBERS];
+		std::shared_ptr<CManagedTeeRenderInfo> m_apVictimManagedTeeRenderInfos[MAX_KILLMSG_TEAM_MEMBERS];
 		int m_KillerId;
 		char m_aKillerName[64];
 		STextContainerIndex m_KillerTextContainerIndex;
-		CTeeRenderInfo m_KillerRenderInfo;
+		std::shared_ptr<CManagedTeeRenderInfo> m_pKillerManagedTeeRenderInfo;
 
 		// kill msg
 		int m_Weapon;
@@ -66,11 +67,11 @@ class CInfoMessages : public CComponent
 
 	void CreateTextContainersIfNotCreated(CInfoMsg &InfoMsg);
 	void DeleteTextContainers(CInfoMsg &InfoMsg);
+	void ResetMessage(CInfoMsg &InfoMsg);
 
 public:
 	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnWindowResize() override;
-	virtual void OnRefreshSkins() override;
 	virtual void OnReset() override;
 	virtual void OnRender() override;
 	virtual void OnMessage(int MsgType, void *pRawMsg) override;

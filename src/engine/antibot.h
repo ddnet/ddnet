@@ -35,7 +35,7 @@ public:
 
 	// Hooks
 	virtual void OnEngineTick() = 0;
-	virtual void OnEngineClientJoin(int ClientId, bool Sixup) = 0;
+	virtual void OnEngineClientJoin(int ClientId) = 0;
 	virtual void OnEngineClientDrop(int ClientId, const char *pReason) = 0;
 	virtual bool OnEngineClientMessage(int ClientId, const void *pData, int Size, int Flags) = 0;
 	virtual bool OnEngineServerMessage(int ClientId, const void *pData, int Size, int Flags) = 0;

@@ -19,8 +19,8 @@ CEntity::CEntity(CGameWorld *pGameWorld, int ObjType, vec2 Pos, int ProximityRad
 	m_MarkedForDestroy = false;
 	m_Id = -1;
 
-	m_pPrevTypeEntity = 0;
-	m_pNextTypeEntity = 0;
+	m_pPrevTypeEntity = nullptr;
+	m_pNextTypeEntity = nullptr;
 	m_SnapTicks = -1;
 
 	// DDRace

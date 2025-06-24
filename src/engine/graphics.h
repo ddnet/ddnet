@@ -3,6 +3,7 @@
 #ifndef ENGINE_GRAPHICS_H
 #define ENGINE_GRAPHICS_H
 
+#include "image.h"
 #include "kernel.h"
 #include "warning.h"
 
@@ -12,6 +13,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <optional>
 #include <vector>
 
 #define GRAPHICS_TYPE_UNSIGNED_BYTE 0x1401
@@ -62,66 +64,6 @@ struct SGraphicTileTexureCoords
 	ubvec4 m_TexCoordTopRight;
 	ubvec4 m_TexCoordBottomRight;
 	ubvec4 m_TexCoordBottomLeft;
-};
-
-class CImageInfo
-{
-public:
-	enum EImageFormat
-	{
-		FORMAT_ERROR = -1,
-		FORMAT_RGB = 0,
-		FORMAT_RGBA = 1,
-		FORMAT_SINGLE_COMPONENT = 2,
-	};
-
-	/**
-	 * Contains the width of the image
-	 */
-	size_t m_Width = 0;
-
-	/**
-	 * Contains the height of the image
-	 */
-	size_t m_Height = 0;
-
-	/**
-	 * Contains the format of the image.
-	 *
-	 * @see EImageFormat
-	 */
-	EImageFormat m_Format = FORMAT_ERROR;
-
-	/**
-	 * Pointer to the image data.
-	 */
-	uint8_t *m_pData = nullptr;
-
-	void Free()
-	{
-		m_Width = 0;
-		m_Height = 0;
-		m_Format = FORMAT_ERROR;
-		free(m_pData);
-		m_pData = nullptr;
-	}
-
-	static size_t PixelSize(EImageFormat Format)
-	{
-		dbg_assert(Format != FORMAT_ERROR, "Format invalid");
-		static const size_t s_aSizes[] = {3, 4, 1};
-		return s_aSizes[(int)Format];
-	}
-
-	size_t PixelSize() const
-	{
-		return PixelSize(m_Format);
-	}
-
-	size_t DataSize() const
-	{
-		return m_Width * m_Height * PixelSize(m_Format);
-	}
 };
 
 /*
@@ -250,11 +192,9 @@ protected:
 public:
 	enum
 	{
-		TEXLOAD_NOMIPMAPS = 1 << 1,
-		TEXLOAD_NO_COMPRESSION = 1 << 2,
-		TEXLOAD_TO_3D_TEXTURE = (1 << 3),
-		TEXLOAD_TO_2D_ARRAY_TEXTURE = (1 << 4),
-		TEXLOAD_NO_2D_TEXTURE = (1 << 5),
+		TEXLOAD_TO_3D_TEXTURE = 1 << 0,
+		TEXLOAD_TO_2D_ARRAY_TEXTURE = 1 << 1,
+		TEXLOAD_NO_2D_TEXTURE = 1 << 2,
 	};
 
 	class CTextureHandle
@@ -284,6 +224,7 @@ public:
 	virtual void WarnPngliteIncompatibleImages(bool Warn) = 0;
 	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless) = 0;
 	virtual bool SetWindowScreen(int Index) = 0;
+	virtual bool SwitchWindowScreen(int Index) = 0;
 	virtual bool SetVSync(bool State) = 0;
 	virtual bool SetMultiSampling(uint32_t ReqMultiSamplingCount, uint32_t &MultiSamplingCountBackend) = 0;
 	virtual int GetWindowScreen() = 0;
@@ -292,6 +233,7 @@ public:
 	virtual void ResizeToScreen() = 0;
 	virtual void GotResized(int w, int h, int RefreshRate) = 0;
 	virtual void UpdateViewport(int X, int Y, int W, int H, bool ByResize) = 0;
+	virtual bool IsScreenKeyboardShown() = 0;
 
 	/**
 	* Listens to a resize event of the canvas, which is usually caused by a window resize.
@@ -330,29 +272,22 @@ public:
 	virtual const TTwGraphicsGpuList &GetGpus() const = 0;
 
 	virtual bool LoadPng(CImageInfo &Image, const char *pFilename, int StorageType) = 0;
+	virtual bool LoadPng(CImageInfo &Image, const uint8_t *pData, size_t DataSize, const char *pContextName) = 0;
 
-	virtual bool CheckImageDivisibility(const char *pFileName, CImageInfo &Img, int DivX, int DivY, bool AllowResize) = 0;
-	virtual bool IsImageFormatRGBA(const char *pFileName, CImageInfo &Img) = 0;
+	virtual bool CheckImageDivisibility(const char *pContextName, CImageInfo &Image, int DivX, int DivY, bool AllowResize) = 0;
+	virtual bool IsImageFormatRgba(const char *pContextName, const CImageInfo &Image) = 0;
 
-	// destination and source buffer require to have the same width and height
-	virtual void CopyTextureBufferSub(uint8_t *pDestBuffer, const CImageInfo &SourceImage, size_t SubOffsetX, size_t SubOffsetY, size_t SubCopyWidth, size_t SubCopyHeight) = 0;
-
-	// destination width must be equal to the subwidth of the source
-	virtual void CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, size_t DestWidth, size_t DestHeight, const CImageInfo &SourceImage, size_t SrcSubOffsetX, size_t SrcSubOffsetY, size_t SrcSubCopyWidth, size_t SrcSubCopyHeight) = 0;
-
-	virtual int UnloadTexture(CTextureHandle *pIndex) = 0;
+	virtual void UnloadTexture(CTextureHandle *pIndex) = 0;
 	virtual CTextureHandle LoadTextureRaw(const CImageInfo &Image, int Flags, const char *pTexName = nullptr) = 0;
 	virtual CTextureHandle LoadTextureRawMove(CImageInfo &Image, int Flags, const char *pTexName = nullptr) = 0;
-	virtual int LoadTextureRawSub(CTextureHandle TextureId, int x, int y, const CImageInfo &Image) = 0;
 	virtual CTextureHandle LoadTexture(const char *pFilename, int StorageType, int Flags = 0) = 0;
-	virtual CTextureHandle NullTexture() const = 0;
 	virtual void TextureSet(CTextureHandle Texture) = 0;
 	void TextureClear() { TextureSet(CTextureHandle()); }
 
 	// pTextData & pTextOutlineData are automatically free'd
 	virtual bool LoadTextTextures(size_t Width, size_t Height, CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture, uint8_t *pTextData, uint8_t *pTextOutlineData) = 0;
 	virtual bool UnloadTextTextures(CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture) = 0;
-	virtual bool UpdateTextTexture(CTextureHandle TextureId, int x, int y, size_t Width, size_t Height, const uint8_t *pData) = 0;
+	virtual bool UpdateTextTexture(CTextureHandle TextureId, int x, int y, size_t Width, size_t Height, uint8_t *pData, bool IsMovedPointer) = 0;
 
 	virtual CTextureHandle LoadSpriteTexture(const CImageInfo &FromImageInfo, const struct CDataSprite *pSprite) = 0;
 
@@ -365,7 +300,7 @@ public:
 	// specific render functions
 	virtual void RenderTileLayer(int BufferContainerIndex, const ColorRGBA &Color, char **pOffsets, unsigned int *pIndicedVertexDrawNum, size_t NumIndicesOffset) = 0;
 	virtual void RenderBorderTiles(int BufferContainerIndex, const ColorRGBA &Color, char *pIndexBufferOffset, const vec2 &Offset, const vec2 &Scale, uint32_t DrawNum) = 0;
-	virtual void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, size_t QuadNum, int QuadOffset) = 0;
+	virtual void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, size_t QuadNum, int QuadOffset, bool Grouped = false) = 0;
 	virtual void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor) = 0;
 
 	// opengl 3.3 functions
@@ -437,26 +372,11 @@ public:
 		CQuadItem() {}
 		CQuadItem(float x, float y, float w, float h) :
 			m_X(x), m_Y(y), m_Width(w), m_Height(h) {}
-		void Set(float x, float y, float w, float h)
-		{
-			m_X = x;
-			m_Y = y;
-			m_Width = w;
-			m_Height = h;
-		}
-
-		CFreeformItem ToFreeForm() const
-		{
-			return CFreeformItem(m_X, m_Y, m_X + m_Width, m_Y, m_X, m_Y + m_Height, m_X + m_Width, m_Y + m_Height);
-		}
 	};
 	virtual void QuadsDraw(CQuadItem *pArray, int Num) = 0;
 	virtual void QuadsDrawTL(const CQuadItem *pArray, int Num) = 0;
 
 	virtual void QuadsTex3DDrawTL(const CQuadItem *pArray, int Num) = 0;
-
-	virtual const GL_STexCoord *GetCurTextureCoordinates() = 0;
-	virtual const GL_SColor *GetCurColor() = 0;
 
 	virtual int CreateQuadContainer(bool AutomaticUpload = true) = 0;
 	virtual void QuadContainerChangeAutomaticUpload(int ContainerIndex, bool AutomaticUpload) = 0;
@@ -550,7 +470,7 @@ public:
 	// this function always returns the pixels in RGB
 	virtual TGLBackendReadPresentedImageData &GetReadPresentedImageDataFuncUnsafe() = 0;
 
-	virtual SWarning *GetCurWarning() = 0;
+	virtual std::optional<SWarning> CurrentWarning() = 0;
 
 	// returns true if the error msg was shown
 	virtual bool ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg) = 0;

@@ -185,7 +185,7 @@ turkish
 == 792
 == tr
 
-azerbaijanese
+azerbaijani
 == Azərbaycan
 == 31
 == az

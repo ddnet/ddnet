@@ -15,6 +15,7 @@ CACHEDIR.TAG
 CMakeCache.txt
 CMakeFiles
 CMakeSettings*
+CMakeUserPresets.json
 CPackConfig.cmake
 CPackSourceConfig.cmake
 CTestTestfile.cmake
@@ -61,7 +62,6 @@ dilate
 dummy_map
 fake_server
 map_convert_07
-map_create_pixelart
 map_diff
 map_extract
 map_find_env
@@ -107,11 +107,6 @@ out
 tags
 # don't ignore this, it's used for the vscode workspace that ddnet provides
 !ddnet-cmake-tools-kits.json
-
-# bam ignores
-/.bam
-/config.lua
-/objs
 
 *.a
 *.cmd

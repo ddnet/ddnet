@@ -146,14 +146,14 @@ if(NOT FOUND_MATCHING_SHA256_FILE)
   generate_shader_file("" "" "${PROJECT_SOURCE_DIR}/data/shader/vulkan/quad.frag" "data/shader/vulkan/quad.frag.spv")
   generate_shader_file("" "" "${PROJECT_SOURCE_DIR}/data/shader/vulkan/quad.vert" "data/shader/vulkan/quad.vert.spv")
   
-  generate_shader_file("-DTW_PUSH_CONST" "" "${PROJECT_SOURCE_DIR}/data/shader/vulkan/quad.frag" "data/shader/vulkan/quad_push.frag.spv")
-  generate_shader_file("-DTW_PUSH_CONST" "" "${PROJECT_SOURCE_DIR}/data/shader/vulkan/quad.vert" "data/shader/vulkan/quad_push.vert.spv")
+  generate_shader_file("-DTW_QUAD_GROUPED" "" "${PROJECT_SOURCE_DIR}/data/shader/vulkan/quad.frag" "data/shader/vulkan/quad_grouped.frag.spv")
+  generate_shader_file("-DTW_QUAD_GROUPED" "" "${PROJECT_SOURCE_DIR}/data/shader/vulkan/quad.vert" "data/shader/vulkan/quad_grouped.vert.spv")
   
   generate_shader_file("-DTW_QUAD_TEXTURED" "" "${PROJECT_SOURCE_DIR}/data/shader/vulkan/quad.frag" "data/shader/vulkan/quad_textured.frag.spv")
   generate_shader_file("-DTW_QUAD_TEXTURED" "" "${PROJECT_SOURCE_DIR}/data/shader/vulkan/quad.vert" "data/shader/vulkan/quad_textured.vert.spv")
   
-  generate_shader_file("-DTW_QUAD_TEXTURED" "-DTW_PUSH_CONST" "${PROJECT_SOURCE_DIR}/data/shader/vulkan/quad.frag" "data/shader/vulkan/quad_push_textured.frag.spv")
-  generate_shader_file("-DTW_QUAD_TEXTURED" "-DTW_PUSH_CONST" "${PROJECT_SOURCE_DIR}/data/shader/vulkan/quad.vert" "data/shader/vulkan/quad_push_textured.vert.spv")
+  generate_shader_file("-DTW_QUAD_TEXTURED" "-DTW_QUAD_GROUPED" "${PROJECT_SOURCE_DIR}/data/shader/vulkan/quad.frag" "data/shader/vulkan/quad_grouped_textured.frag.spv")
+  generate_shader_file("-DTW_QUAD_TEXTURED" "-DTW_QUAD_GROUPED" "${PROJECT_SOURCE_DIR}/data/shader/vulkan/quad.vert" "data/shader/vulkan/quad_grouped_textured.vert.spv")
 
   execute_process(${GLSLANG_VALIDATOR_COMMAND_LIST} RESULT_VARIABLE STATUS)
   if(STATUS AND NOT STATUS EQUAL 0)

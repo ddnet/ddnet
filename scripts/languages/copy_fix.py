@@ -7,6 +7,8 @@ import twlang
 def copy_fix(infile, delete_unused, append_missing, delete_empty):
 	with open(infile, encoding="utf-8") as f:
 		content = f.readlines()
+		if content and not content[-1].endswith("\n"):
+			content[-1] += "\n"
 	trans = twlang.translations(infile)
 	if delete_unused or append_missing:
 		local = twlang.localizes()

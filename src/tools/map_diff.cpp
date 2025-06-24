@@ -13,33 +13,33 @@ bool Process(IStorage *pStorage, const char **pMapNames)
 	{
 		if(!aMaps[i].Open(pStorage, pMapNames[i], IStorage::TYPE_ABSOLUTE))
 		{
-			dbg_msg("map_compare", "error opening map '%s'", pMapNames[i]);
+			dbg_msg("map_diff", "error opening map '%s'", pMapNames[i]);
 			return false;
 		}
 
 		const CMapItemVersion *pVersion = static_cast<CMapItemVersion *>(aMaps[i].FindItem(MAPITEMTYPE_VERSION, 0));
-		if(pVersion == nullptr || pVersion->m_Version != CMapItemVersion::CURRENT_VERSION)
+		if(pVersion == nullptr || pVersion->m_Version != 1)
 		{
-			dbg_msg("map_compare", "unsupported map version '%s'", pMapNames[i]);
+			dbg_msg("map_diff", "unsupported map version '%s'", pMapNames[i]);
 			return false;
 		}
 	}
 
-	int aStart[2], aNum[2];
+	int aStart[2], aLayersNum[2];
 	for(int i = 0; i < 2; ++i)
-		aMaps[i].GetType(MAPITEMTYPE_LAYER, &aStart[i], &aNum[i]);
+		aMaps[i].GetType(MAPITEMTYPE_LAYER, &aStart[i], &aLayersNum[i]);
 
 	// ensure basic layout
-	if(aNum[0] != aNum[1])
+	if(aLayersNum[0] != aLayersNum[1])
 	{
-		dbg_msg("map_compare", "different layer numbers:");
+		dbg_msg("map_diff", "different layer numbers:");
 		for(int i = 0; i < 2; ++i)
-			dbg_msg("map_compare", "  \"%s\": %d layers", pMapNames[i], aNum[i]);
+			dbg_msg("map_diff", "  \"%s\": %d layers", pMapNames[i], aLayersNum[i]);
 		return false;
 	}
 
 	// preload data
-	for(int j = 0; j < aNum[0]; ++j)
+	for(int j = 0; j < aLayersNum[0]; ++j)
 	{
 		for(int i = 0; i < 2; ++i)
 		{
@@ -50,7 +50,7 @@ bool Process(IStorage *pStorage, const char **pMapNames)
 	}
 
 	// compare
-	for(int j = 0; j < aNum[0]; ++j)
+	for(int j = 0; j < aLayersNum[0]; ++j)
 	{
 		CMapItemLayer *apItem[2];
 		for(int i = 0; i < 2; ++i)
@@ -70,9 +70,9 @@ bool Process(IStorage *pStorage, const char **pMapNames)
 
 		if(str_comp(aaName[0], aaName[1]) != 0 || apTilemap[0]->m_Width != apTilemap[1]->m_Width || apTilemap[0]->m_Height != apTilemap[1]->m_Height)
 		{
-			dbg_msg("map_compare", "different tile layers:");
+			dbg_msg("map_diff", "different tile layers:");
 			for(int i = 0; i < 2; ++i)
-				dbg_msg("map_compare", "  \"%s\" (%dx%d)", aaName[i], apTilemap[i]->m_Width, apTilemap[i]->m_Height);
+				dbg_msg("map_diff", "  \"%s\" (%dx%d)", aaName[i], apTilemap[i]->m_Width, apTilemap[i]->m_Height);
 			return false;
 		}
 		CTile *apTile[2];
@@ -86,7 +86,7 @@ bool Process(IStorage *pStorage, const char **pMapNames)
 				int Pos = y * apTilemap[0]->m_Width + x;
 				if(apTile[0][Pos].m_Index != apTile[1][Pos].m_Index || apTile[0][Pos].m_Flags != apTile[1][Pos].m_Flags)
 				{
-					dbg_msg("map_compare", "[%d:%s] %dx%d: (index: %d, flags: %d) != (index: %d, flags: %d)", aNum[0], aaName[0], x, y, apTile[0][Pos].m_Index, apTile[0][Pos].m_Flags, apTile[1][Pos].m_Index, apTile[0][Pos].m_Flags);
+					dbg_msg("map_diff", "[%d:%s] %dx%d: (index: %d, flags: %d) != (index: %d, flags: %d)", aLayersNum[0], aaName[0], x, y, apTile[0][Pos].m_Index, apTile[0][Pos].m_Flags, apTile[1][Pos].m_Index, apTile[1][Pos].m_Flags);
 				}
 			}
 		}
@@ -117,9 +117,12 @@ int main(int argc, const char *argv[])
 		return -1;
 	}
 
-	IStorage *pStorage = CreateLocalStorage();
+	std::unique_ptr<IStorage> pStorage = CreateLocalStorage();
 	if(!pStorage)
+	{
+		log_error("map_diff", "Error creating local storage");
 		return -1;
+	}
 
-	return Process(pStorage, &argv[1]) ? 0 : 1;
+	return Process(pStorage.get(), &argv[1]) ? 0 : 1;
 }

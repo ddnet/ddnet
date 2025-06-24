@@ -14,6 +14,7 @@ CParticles::CParticles()
 {
 	OnReset();
 	m_RenderTrail.m_pParts = this;
+	m_RenderTrailExtra.m_pParts = this;
 	m_RenderExplosions.m_pParts = this;
 	m_RenderExtra.m_pParts = this;
 	m_RenderGeneral.m_pParts = this;
@@ -46,7 +47,7 @@ void CParticles::Add(int Group, CParticle *pPart, float TimePassed)
 	}
 	else
 	{
-		if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED)
+		if(GameClient()->m_Snap.m_pGameInfoObj && GameClient()->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED)
 			return;
 	}
 
@@ -78,17 +79,16 @@ void CParticles::Update(float TimePassed)
 	if(TimePassed <= 0.0f)
 		return;
 
-	static float FrictionFraction = 0;
-	FrictionFraction += TimePassed;
+	m_FrictionFraction += TimePassed;
 
-	if(FrictionFraction > 2.0f) // safety measure
-		FrictionFraction = 0;
+	if(m_FrictionFraction > 2.0f) // safety measure
+		m_FrictionFraction = 0;
 
 	int FrictionCount = 0;
-	while(FrictionFraction > 0.05f)
+	while(m_FrictionFraction > 0.05f)
 	{
 		FrictionCount++;
-		FrictionFraction -= 0.05f;
+		m_FrictionFraction -= 0.05f;
 	}
 
 	for(int &FirstPart : m_aFirstPart)
@@ -107,7 +107,7 @@ void CParticles::Update(float TimePassed)
 			vec2 Vel = m_aParticles[i].m_Vel * TimePassed;
 			if(m_aParticles[i].m_Collides)
 			{
-				Collision()->MovePoint(&m_aParticles[i].m_Pos, &Vel, random_float(0.1f, 1.0f), NULL);
+				Collision()->MovePoint(&m_aParticles[i].m_Pos, &Vel, random_float(0.1f, 1.0f), nullptr);
 			}
 			else
 			{
@@ -149,22 +149,21 @@ void CParticles::OnRender()
 		return;
 
 	set_new_tick();
-	static int64_t LastTime = 0;
 	int64_t t = time();
 
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
 		if(!pInfo->m_Paused)
-			Update((float)((t - LastTime) / (double)time_freq()) * pInfo->m_Speed);
+			Update((float)((t - m_LastRenderTime) / (double)time_freq()) * pInfo->m_Speed);
 	}
 	else
 	{
-		if(m_pClient->m_Snap.m_pGameInfoObj && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED))
-			Update((float)((t - LastTime) / (double)time_freq()));
+		if(GameClient()->m_Snap.m_pGameInfoObj && !(GameClient()->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED))
+			Update((float)((t - m_LastRenderTime) / (double)time_freq()));
 	}
 
-	LastTime = t;
+	m_LastRenderTime = t;
 }
 
 void CParticles::OnInit()
@@ -183,9 +182,12 @@ void CParticles::OnInit()
 
 	m_ExtraParticleQuadContainerIndex = Graphics()->CreateQuadContainer(false);
 
-	// TODO: Use a loop similar to the one for m_ParticleQuadContainerIndex if you add more additional particles
-	Graphics()->QuadsSetSubset(0, 0, 1, 1);
-	RenderTools()->QuadContainerAddSprite(m_ExtraParticleQuadContainerIndex, 1.f);
+	for(int i = 0; i <= (SPRITE_PART_SPARKLE - SPRITE_PART_SNOWFLAKE); ++i)
+	{
+		Graphics()->QuadsSetSubset(0, 0, 1, 1);
+		RenderTools()->QuadContainerAddSprite(m_ExtraParticleQuadContainerIndex, 1.f);
+	}
+
 	Graphics()->QuadContainerUpload(m_ExtraParticleQuadContainerIndex);
 }
 
@@ -209,7 +211,7 @@ void CParticles::RenderGroup(int Group)
 	IGraphics::CTextureHandle *aParticles = GameClient()->m_ParticlesSkin.m_aSpriteParticles;
 	int FirstParticleOffset = SPRITE_PART_SLICE;
 	int ParticleQuadContainerIndex = m_ParticleQuadContainerIndex;
-	if(Group == GROUP_EXTRA)
+	if(Group == GROUP_EXTRA || Group == GROUP_TRAIL_EXTRA)
 	{
 		aParticles = GameClient()->m_ExtrasSkin.m_aSpriteParticles;
 		FirstParticleOffset = SPRITE_PART_SNOWFLAKE;

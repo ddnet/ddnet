@@ -2,18 +2,28 @@
 
 #include <base/system.h>
 
-TEST(NetAddr, FromUrlString)
+TEST(NetAddr, FromUrlStringInvalid)
 {
 	NETADDR Addr;
-	char aBuf1[NETADDR_MAXSTRSIZE];
-	char aBuf2[NETADDR_MAXSTRSIZE];
 
 	EXPECT_EQ(net_addr_from_url(&Addr, "tw-0.6+udp://127.0", nullptr, 0), -1); // invalid ip
 	EXPECT_EQ(net_addr_from_url(&Addr, "tw-0.6+udp://ddnet.org", nullptr, 0), -1); // invalid ip
 	EXPECT_EQ(net_addr_from_url(&Addr, "127.0.0.1", nullptr, 0), 1); // not a URL
 	EXPECT_EQ(net_addr_from_url(&Addr, "tw-0.9+udp://127.0.0.1", nullptr, 0), 1); // invalid tw protocol
-	EXPECT_EQ(net_addr_from_url(&Addr, "tw-0.7+udp://127.0.0.1", nullptr, 0), 1); // unsupported tw protocol
 	EXPECT_EQ(net_addr_from_url(&Addr, "tw-0.6+tcp://127.0.0.1", nullptr, 0), 1); // invalid internet protocol
+}
+
+TEST(NetAddr, FromUrlStringValid)
+{
+	NETADDR Addr;
+	char aBuf1[NETADDR_MAXSTRSIZE];
+	char aBuf2[NETADDR_MAXSTRSIZE];
+
+	EXPECT_EQ(net_addr_from_url(&Addr, "tw-0.7+udp://127.0.0.1", nullptr, 0), 0);
+	net_addr_str(&Addr, aBuf1, sizeof(aBuf1), true);
+	net_addr_str(&Addr, aBuf2, sizeof(aBuf2), false);
+	EXPECT_STREQ(aBuf1, "127.0.0.1:0");
+	EXPECT_STREQ(aBuf2, "127.0.0.1");
 
 	EXPECT_EQ(net_addr_from_url(&Addr, "tw-0.6+udp://127.0.0.1", nullptr, 0), 0);
 	net_addr_str(&Addr, aBuf1, sizeof(aBuf1), true);
@@ -124,13 +134,44 @@ TEST(NetAddr, FromStrInvalid)
 	EXPECT_TRUE(net_addr_from_str(&Addr, "[::]:c"));
 }
 
-TEST(NetAddr, StrInvalid)
+TEST(NetAddrDeathTest, StrInvalid1)
 {
-	NETADDR Addr = {0};
-	char aBuf1[NETADDR_MAXSTRSIZE];
-	char aBuf2[NETADDR_MAXSTRSIZE];
-	net_addr_str(&Addr, aBuf1, sizeof(aBuf1), true);
-	EXPECT_STREQ(aBuf1, "unknown type 0");
-	net_addr_str(&Addr, aBuf2, sizeof(aBuf2), false);
-	EXPECT_STREQ(aBuf2, "unknown type 0");
+	ASSERT_DEATH({
+		NETADDR Addr = {0};
+		char aBuf[NETADDR_MAXSTRSIZE];
+		net_addr_str(&Addr, aBuf, sizeof(aBuf), true);
+	},
+		"");
+}
+
+TEST(NetAddrDeathTest, StrInvalid2)
+{
+	ASSERT_DEATH({
+		NETADDR Addr = {0};
+		char aBuf[NETADDR_MAXSTRSIZE];
+		net_addr_str(&Addr, aBuf, sizeof(aBuf), false);
+	},
+		"");
+}
+
+TEST(NetAddr, IsLocal)
+{
+	NETADDR Addr;
+	net_addr_from_str(&Addr, "127.0.0.1");
+	EXPECT_TRUE(net_addr_is_local(&Addr));
+
+	net_addr_from_str(&Addr, "[::1]");
+	EXPECT_TRUE(net_addr_is_local(&Addr));
+
+	net_addr_from_str(&Addr, "192.168.1.1");
+	EXPECT_TRUE(net_addr_is_local(&Addr));
+
+	net_addr_from_str(&Addr, "10.0.0.1");
+	EXPECT_TRUE(net_addr_is_local(&Addr));
+
+	net_addr_from_str(&Addr, "8.8.8.8");
+	EXPECT_FALSE(net_addr_is_local(&Addr));
+
+	net_addr_from_str(&Addr, "[2001:db8::1]");
+	EXPECT_FALSE(net_addr_is_local(&Addr));
 }

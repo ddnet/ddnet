@@ -6,6 +6,7 @@
 
 #include <atomic>
 #include <memory>
+#include <string>
 #include <vector>
 
 typedef void *IOHANDLE;
@@ -245,6 +246,30 @@ public:
 	void Log(const CLogMessage *pMessage) override REQUIRES(!m_PendingLock);
 	void GlobalFinish() override;
 	void OnFilterChange() override;
+};
+
+/**
+ * @ingroup Log
+ *
+ * Logger that collects messages in memory. This is useful to collect the log
+ * messages for a particular operation and show them in a user interface when
+ * the operation failed. Use only temporarily with @link CLogScope @endlink
+ * or it will result in excessive memory usage.
+ *
+ * Messages are also forwarded to the parent logger if it's set, regardless
+ * of this logger's filter.
+ */
+class CMemoryLogger : public ILogger
+{
+	ILogger *m_pParentLogger = nullptr;
+	std::vector<CLogMessage> m_vMessages GUARDED_BY(m_MessagesMutex);
+	CLock m_MessagesMutex;
+
+public:
+	void SetParent(ILogger *pParentLogger) { m_pParentLogger = pParentLogger; }
+	void Log(const CLogMessage *pMessage) override REQUIRES(!m_MessagesMutex);
+	std::vector<CLogMessage> Lines() REQUIRES(!m_MessagesMutex);
+	std::string ConcatenatedLines() REQUIRES(!m_MessagesMutex);
 };
 
 /**

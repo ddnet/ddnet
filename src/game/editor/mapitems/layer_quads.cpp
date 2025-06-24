@@ -138,7 +138,7 @@ int CLayerQuads::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 	return pGrabbed->m_vQuads.empty() ? 0 : 1;
 }
 
-void CLayerQuads::BrushPlace(std::shared_ptr<CLayer> pBrush, float wx, float wy)
+void CLayerQuads::BrushPlace(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 {
 	std::shared_ptr<CLayerQuads> pQuadLayer = std::static_pointer_cast<CLayerQuads>(pBrush);
 	std::vector<CQuad> vAddedQuads;
@@ -148,8 +148,8 @@ void CLayerQuads::BrushPlace(std::shared_ptr<CLayer> pBrush, float wx, float wy)
 
 		for(auto &Point : n.m_aPoints)
 		{
-			Point.x += f2fx(wx);
-			Point.y += f2fx(wy);
+			Point.x += f2fx(WorldPos.x);
+			Point.y += f2fx(WorldPos.y);
 		}
 
 		m_vQuads.push_back(n);

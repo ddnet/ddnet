@@ -247,7 +247,7 @@ const char *CLocalizationDatabase::FindString(unsigned Hash, unsigned ContextHas
 	CString String;
 	String.m_Hash = Hash;
 	String.m_ContextHash = ContextHash;
-	String.m_pReplacement = 0x0;
+	String.m_pReplacement = nullptr;
 	auto Range1 = std::equal_range(m_vStrings.begin(), m_vStrings.end(), String);
 	if(std::distance(Range1.first, Range1.second) == 1)
 		return Range1.first->m_pReplacement;

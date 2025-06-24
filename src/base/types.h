@@ -1,7 +1,15 @@
 #ifndef BASE_TYPES_H
 #define BASE_TYPES_H
 
+#include <cstdint>
 #include <ctime>
+#include <functional>
+
+#include <base/detect.h>
+
+#if defined(CONF_FAMILY_UNIX)
+#include <sys/types.h> // pid_t
+#endif
 
 enum class TRISTATE
 {
@@ -10,6 +18,11 @@ enum class TRISTATE
 	ALL,
 };
 
+/**
+ * Handle for input/output files/streams.
+ *
+ * @ingroup File-IO
+ */
 typedef void *IOHANDLE;
 
 typedef int (*FS_LISTDIR_CALLBACK)(const char *name, int is_dir, int dir_type, void *user);
@@ -39,15 +52,20 @@ enum
 
 	NETADDR_MAXSTRSIZE = 1 + (8 * 4 + 7) + 1 + 1 + 5 + 1, // [XXXX:XXXX:XXXX:XXXX:XXXX:XXXX:XXXX:XXXX]:XXXXX
 
-	NETTYPE_LINK_BROADCAST = 4,
-
 	NETTYPE_INVALID = 0,
-	NETTYPE_IPV4 = 1,
-	NETTYPE_IPV6 = 2,
-	NETTYPE_WEBSOCKET_IPV4 = 8,
+	NETTYPE_IPV4 = 1 << 0,
+	NETTYPE_IPV6 = 1 << 1,
+	NETTYPE_WEBSOCKET_IPV4 = 1 << 2,
+	NETTYPE_WEBSOCKET_IPV6 = 1 << 3,
+	NETTYPE_LINK_BROADCAST = 1 << 4,
+	/**
+	 * 0.7 address. This is a flag in NETADDR to avoid introducing a parameter to every networking function
+	 * to differenciate between 0.6 and 0.7 connections.
+	 */
+	NETTYPE_TW7 = 1 << 5,
 
-	NETTYPE_ALL = NETTYPE_IPV4 | NETTYPE_IPV6 | NETTYPE_WEBSOCKET_IPV4,
-	NETTYPE_MASK = NETTYPE_ALL | NETTYPE_LINK_BROADCAST,
+	NETTYPE_ALL = NETTYPE_IPV4 | NETTYPE_IPV6 | NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6,
+	NETTYPE_MASK = NETTYPE_ALL | NETTYPE_LINK_BROADCAST | NETTYPE_TW7,
 };
 
 /**
@@ -60,6 +78,53 @@ typedef struct NETADDR
 	unsigned short port;
 
 	bool operator==(const NETADDR &other) const;
-	bool operator!=(const NETADDR &other) const { return !(*this == other); }
+	bool operator!=(const NETADDR &other) const;
+	bool operator<(const NETADDR &other) const;
 } NETADDR;
+
+template<>
+struct std::hash<NETADDR>
+{
+	size_t operator()(const NETADDR &Addr) const noexcept;
+};
+
+/**
+ * @ingroup Network-General
+ */
+typedef struct NETSTATS
+{
+	uint64_t sent_packets;
+	uint64_t sent_bytes;
+	uint64_t recv_packets;
+	uint64_t recv_bytes;
+} NETSTATS;
+
+#if defined(CONF_FAMILY_WINDOWS)
+/**
+ * A handle for a process.
+ *
+ * @ingroup Shell
+ */
+typedef void *PROCESS;
+/**
+ * A handle that denotes an invalid process.
+ *
+ * @ingroup Shell
+ */
+constexpr PROCESS INVALID_PROCESS = nullptr;
+#else
+/**
+ * A handle for a process.
+ *
+ * @ingroup Shell
+ */
+typedef pid_t PROCESS;
+/**
+ * A handle that denotes an invalid process.
+ *
+ * @ingroup Shell
+ */
+constexpr PROCESS INVALID_PROCESS = 0;
+#endif
+
 #endif // BASE_TYPES_H

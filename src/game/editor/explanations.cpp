@@ -137,13 +137,15 @@ const char *CEditor::ExplainDDNet(int Tile, int Layer)
 		if(Layer == LAYER_TELE)
 			return "TELEPORT TO: Destination tile for FROMs, WEAPON & HOOK TELEPORTs with the same numbers.";
 		break;
-	case TILE_BOOST:
+	case TILE_SPEED_BOOST_OLD:
 		if(Layer == LAYER_SPEEDUP)
-			return "SPEEDUP: Gives tee defined speed. Arrow shows direction and angle.";
+			return "OLD SPEEDUP: Gives tee defined speed. Arrow shows direction and angle. Deprecated.";
 		break;
-	case TILE_TELECHECK:
+	case TILE_TELECHECK: // also TILE_SPEED_BOOST
 		if(Layer == LAYER_TELE)
 			return "CHECKPOINT TELEPORT: After having touched this tile, any CFRM will teleport you to CTO with the same number.";
+		if(Layer == LAYER_SPEEDUP)
+			return "SPEEDUP: Gives tee defined speed. Arrow shows direction and angle.";
 		break;
 	case TILE_TELECHECKOUT:
 		if(Layer == LAYER_TELE)
@@ -508,35 +510,35 @@ const char *CEditor::ExplainFNG(int Tile, int Layer)
 		break;
 	case TILE_FNG_SPIKE_GOLD:
 		if(Layer == LAYER_GAME)
-			return "GOLDEN SPIKE: Kills the tee and gives points to the killer. (Amount of points given is set inside the server)";
+			return "GOLDEN SPIKE: Kills the tee and gives points to the killer. Amount of points given is set inside the server.";
 		break;
 	case TILE_FNG_SPIKE_NORMAL:
 		if(Layer == LAYER_GAME)
-			return "NORMAL SPIKE: Kills the tee and gives points to the killer. (Amount of points given is set inside the server)";
+			return "NORMAL SPIKE: Kills the tee and gives points to the killer. Amount of points given is set inside the server.";
 		break;
 	case TILE_FNG_SPIKE_RED:
 		if(Layer == LAYER_GAME)
-			return "RED SPIKE: Red team spikes. Gives negative points when killer is in blue team (Amount of points given is set inside the server)";
+			return "RED SPIKE: Red team spikes. Gives negative points when killer is in blue team. Amount of points given is set inside the server.";
 		break;
 	case TILE_FNG_SPIKE_BLUE:
 		if(Layer == LAYER_GAME)
-			return "BLUE SPIKE: Blue team spikes. Gives negative points when killer is in red team (Amount of points given is set inside the server)";
+			return "BLUE SPIKE: Blue team spikes. Gives negative points when killer is in red team. Amount of points given is set inside the server.";
 		break;
 	case TILE_FNG_SCORE_RED:
 		if(Layer == LAYER_GAME)
-			return "SCORE: Old tile used for showing red team score using laser text. No longer usable in FNG2";
+			return "SCORE: Old tile used for showing red team score using laser text. No longer usable in FNG2.";
 		break;
 	case TILE_FNG_SCORE_BLUE:
 		if(Layer == LAYER_GAME)
-			return "SCORE: Old tile used for showing blue team score using laser text. No longer usable in FNG2";
+			return "SCORE: Old tile used for showing blue team score using laser text. No longer usable in FNG2.";
 		break;
 	case TILE_FNG_SPIKE_GREEN:
 		if(Layer == LAYER_GAME)
-			return "GREEN SPIKE: Kills the tee and gives points to the killer. (Amount of points given is set inside the server)";
+			return "GREEN SPIKE: Kills the tee and gives points to the killer. Amount of points given is set inside the server.";
 		break;
 	case TILE_FNG_SPIKE_PURPLE:
 		if(Layer == LAYER_GAME)
-			return "PURPLE SPIKE: Kills the tee and gives points to the killer. (Amount of points given is set inside the server)";
+			return "PURPLE SPIKE: Kills the tee and gives points to the killer. Amount of points given is set inside the server.";
 		break;
 	case TILE_FNG_SPAWN:
 		if(Layer == LAYER_GAME)

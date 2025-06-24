@@ -78,7 +78,7 @@ bool IsTeleTileNumberUsedAny(int Index)
 
 bool IsValidSpeedupTile(int Index)
 {
-	return Index == TILE_BOOST;
+	return Index == TILE_SPEED_BOOST_OLD || Index == TILE_SPEED_BOOST;
 }
 
 bool IsValidSwitchTile(int Index)
@@ -148,7 +148,9 @@ bool IsRotatableTile(int Index)
 		Index == TILE_ENTITIES_OFF_1 ||
 		Index == TILE_ENTITIES_OFF_2 ||
 		Index - ENTITY_OFFSET == ENTITY_CRAZY_SHOTGUN_EX ||
-		Index - ENTITY_OFFSET == ENTITY_CRAZY_SHOTGUN);
+		Index - ENTITY_OFFSET == ENTITY_CRAZY_SHOTGUN ||
+		(Index - ENTITY_OFFSET >= ENTITY_ARMOR_1 && Index - ENTITY_OFFSET <= ENTITY_WEAPON_LASER) ||
+		(Index - ENTITY_OFFSET >= ENTITY_ARMOR_SHOTGUN && Index - ENTITY_OFFSET <= ENTITY_ARMOR_LASER));
 }
 
 bool IsCreditsTile(int TileIndex)

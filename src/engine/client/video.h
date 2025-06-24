@@ -20,8 +20,6 @@ class IGraphics;
 class ISound;
 class IStorage;
 
-extern CLock g_WriteLock;
-
 // a wrapper around a single output AVStream
 class COutputStream
 {
@@ -46,7 +44,7 @@ public:
 	CVideo(IGraphics *pGraphics, ISound *pSound, IStorage *pStorage, int Width, int Height, const char *pName);
 	~CVideo();
 
-	bool Start() override REQUIRES(!g_WriteLock);
+	bool Start() override REQUIRES(!m_WriteLock);
 	void Stop() override;
 	void Pause(bool Pause) override;
 	bool IsRecording() override { return m_Recording; }
@@ -62,11 +60,11 @@ public:
 	static void Init();
 
 private:
-	void RunVideoThread(size_t ParentThreadIndex, size_t ThreadIndex) REQUIRES(!g_WriteLock);
-	void FillVideoFrame(size_t ThreadIndex) REQUIRES(!g_WriteLock);
+	void RunVideoThread(size_t ParentThreadIndex, size_t ThreadIndex) REQUIRES(!m_WriteLock);
+	void FillVideoFrame(size_t ThreadIndex) REQUIRES(!m_WriteLock);
 	void UpdateVideoBufferFromGraphics(size_t ThreadIndex);
 
-	void RunAudioThread(size_t ParentThreadIndex, size_t ThreadIndex) REQUIRES(!g_WriteLock);
+	void RunAudioThread(size_t ParentThreadIndex, size_t ThreadIndex) REQUIRES(!m_WriteLock);
 	void FillAudioFrame(size_t ThreadIndex);
 
 	bool OpenVideo();
@@ -74,7 +72,7 @@ private:
 	AVFrame *AllocPicture(enum AVPixelFormat PixFmt, int Width, int Height);
 	AVFrame *AllocAudioFrame(enum AVSampleFormat SampleFmt, uint64_t ChannelLayout, int SampleRate, int NbSamples);
 
-	void WriteFrame(COutputStream *pStream, size_t ThreadIndex) REQUIRES(g_WriteLock);
+	void WriteFrame(COutputStream *pStream, size_t ThreadIndex) REQUIRES(m_WriteLock);
 	void FinishFrames(COutputStream *pStream);
 	void CloseStream(COutputStream *pStream);
 
@@ -96,6 +94,7 @@ private:
 	bool m_Stopped;
 	bool m_Recording;
 
+	CLock m_WriteLock;
 	size_t m_VideoThreads = 2;
 	size_t m_CurVideoThreadIndex = 0;
 	size_t m_AudioThreads = 2;

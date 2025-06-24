@@ -4,10 +4,11 @@
 #define ENGINE_SHARED_CONSOLE_H
 
 #include "memheap.h"
-#include <base/math.h>
-#include <base/system.h>
+
 #include <engine/console.h>
 #include <engine/storage.h>
+
+#include <vector>
 
 class CConsole : public IConsole
 {
@@ -22,7 +23,7 @@ class CConsole : public IConsole
 
 		const CCommandInfo *NextCommandInfo(int AccessLevel, int FlagMask) const override;
 
-		void SetAccessLevel(int AccessLevel) { m_AccessLevel = clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_USER)); }
+		void SetAccessLevel(int AccessLevel);
 	};
 
 	class CChain
@@ -84,47 +85,16 @@ class CConsole : public IConsole
 		const char *m_pCommand;
 		const char *m_apArgs[MAX_PARTS];
 
-		CResult()
+		CResult(int ClientId);
+		CResult(const CResult &Other);
 
-		{
-			mem_zero(m_aStringStorage, sizeof(m_aStringStorage));
-			m_pArgsStart = 0;
-			m_pCommand = 0;
-			mem_zero(m_apArgs, sizeof(m_apArgs));
-		}
-
-		CResult &operator=(const CResult &Other)
-		{
-			if(this != &Other)
-			{
-				IResult::operator=(Other);
-				mem_copy(m_aStringStorage, Other.m_aStringStorage, sizeof(m_aStringStorage));
-				m_pArgsStart = m_aStringStorage + (Other.m_pArgsStart - Other.m_aStringStorage);
-				m_pCommand = m_aStringStorage + (Other.m_pCommand - Other.m_aStringStorage);
-				for(unsigned i = 0; i < Other.m_NumArgs; ++i)
-					m_apArgs[i] = m_aStringStorage + (Other.m_apArgs[i] - Other.m_aStringStorage);
-			}
-			return *this;
-		}
-
-		void AddArgument(const char *pArg)
-		{
-			m_apArgs[m_NumArgs++] = pArg;
-		}
+		void AddArgument(const char *pArg);
+		void RemoveArgument(unsigned Index) override;
 
 		const char *GetString(unsigned Index) const override;
 		int GetInteger(unsigned Index) const override;
 		float GetFloat(unsigned Index) const override;
-		ColorHSLA GetColor(unsigned Index, bool Light) const override;
-
-		void RemoveArgument(unsigned Index) override
-		{
-			dbg_assert(Index < m_NumArgs, "invalid argument index");
-			for(unsigned i = Index; i < m_NumArgs - 1; i++)
-				m_apArgs[i] = m_apArgs[i + 1];
-
-			m_apArgs[m_NumArgs--] = 0;
-		}
+		std::optional<ColorHSLA> GetColor(unsigned Index, float DarkestLighting) const override;
 
 		// DDRace
 
@@ -144,7 +114,16 @@ class CConsole : public IConsole
 	};
 
 	int ParseStart(CResult *pResult, const char *pString, int Length);
-	int ParseArgs(CResult *pResult, const char *pFormat);
+
+	enum
+	{
+		PARSEARGS_OK = 0,
+		PARSEARGS_MISSING_VALUE,
+		PARSEARGS_INVALID_INTEGER,
+		PARSEARGS_INVALID_FLOAT,
+	};
+
+	int ParseArgs(CResult *pResult, const char *pFormat, bool IsColor = false);
 
 	/*
 	this function will set pFormat to the next parameter (i,s,r,v,?) it contains and
@@ -154,35 +133,16 @@ class CConsole : public IConsole
 	*/
 	char NextParam(const char *&pFormat);
 
-	class CExecutionQueue
+	class CExecutionQueueEntry
 	{
-		CHeap m_Queue;
-
 	public:
-		struct CQueueEntry
-		{
-			CQueueEntry *m_pNext;
-			CCommand *m_pCommand;
-			CResult m_Result;
-		} * m_pFirst, *m_pLast;
-
-		void AddEntry()
-		{
-			CQueueEntry *pEntry = m_Queue.Allocate<CQueueEntry>();
-			pEntry->m_pNext = 0;
-			if(!m_pFirst)
-				m_pFirst = pEntry;
-			if(m_pLast)
-				m_pLast->m_pNext = pEntry;
-			m_pLast = pEntry;
-			(void)new(&(pEntry->m_Result)) CResult;
-		}
-		void Reset()
-		{
-			m_Queue.Reset();
-			m_pFirst = m_pLast = 0;
-		}
-	} m_ExecutionQueue;
+		CCommand *m_pCommand;
+		CResult m_Result;
+		CExecutionQueueEntry(CCommand *pCommand, const CResult &Result) :
+			m_pCommand(pCommand),
+			m_Result(Result) {}
+	};
+	std::vector<CExecutionQueueEntry> m_vExecutionQueue;
 
 	void AddCommandSorted(CCommand *pCommand);
 	CCommand *FindCommand(const char *pName, int FlagMask);
@@ -211,13 +171,12 @@ public:
 	void ExecuteLineFlag(const char *pStr, int FlagMask, int ClientId = -1, bool InterpretSemicolons = true) override;
 	bool ExecuteFile(const char *pFilename, int ClientId = -1, bool LogFailure = false, int StorageType = IStorage::TYPE_ALL) override;
 
-	char *Format(char *pBuf, int Size, const char *pFrom, const char *pStr) override;
 	void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = gs_ConsoleDefaultColor) const override;
 	void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser) override;
 	void SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, void *pUser) override;
 	void InitChecksum(CChecksumData *pData) const override;
 
-	void SetAccessLevel(int AccessLevel) override { m_AccessLevel = clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_USER)); }
+	void SetAccessLevel(int AccessLevel) override;
 
 	// DDRace
 

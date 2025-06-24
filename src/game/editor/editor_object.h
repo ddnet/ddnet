@@ -28,7 +28,7 @@ public:
 	 * Needs to be the first function that is called.
 	 * The default implentation also resets the component.
 	 */
-	virtual void Init(CEditor *pEditor);
+	virtual void OnInit(CEditor *pEditor);
 
 	/**
 	 * Maybe calls `OnHot` or `OnActive`.

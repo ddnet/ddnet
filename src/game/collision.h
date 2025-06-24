@@ -9,6 +9,14 @@
 #include <map>
 #include <vector>
 
+class CTile;
+class CLayers;
+class CTeleTile;
+class CSpeedupTile;
+class CSwitchTile;
+class CTuneTile;
+class CDoorTile;
+
 enum
 {
 	CANTMOVE_LEFT = 1 << 0,
@@ -28,9 +36,9 @@ public:
 	CCollision();
 	~CCollision();
 
-	void Init(class CLayers *pLayers);
+	void Init(CLayers *pLayers);
 	void Unload();
-	void FillAntibot(CAntibotMapData *pMapData);
+	void FillAntibot(CAntibotMapData *pMapData) const;
 
 	bool CheckPoint(float x, float y) const { return IsSolid(round_to_int(x), round_to_int(y)); }
 	bool CheckPoint(vec2 Pos) const { return CheckPoint(Pos.x, Pos.y); }
@@ -45,28 +53,25 @@ public:
 	bool TestBox(vec2 Pos, vec2 Size) const;
 
 	// DDRace
-	void SetCollisionAt(float x, float y, int id);
-	void SetDTile(float x, float y, bool State);
-	void SetDCollisionAt(float x, float y, int Type, int Flags, int Number);
-	int GetDTileIndex(int Index) const;
-	int GetDTileFlags(int Index) const;
-	int GetDTileNumber(int Index) const;
-	int GetFCollisionAt(float x, float y) const { return GetFTile(round_to_int(x), round_to_int(y)); }
+	void SetCollisionAt(float x, float y, int Index);
+	void SetDoorCollisionAt(float x, float y, int Type, int Flags, int Number);
+	void GetDoorTile(int Index, CDoorTile *pDoorTile) const;
+	int GetFrontCollisionAt(float x, float y) const { return GetFrontTile(round_to_int(x), round_to_int(y)); }
 	int IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const;
-	int IntersectNoLaserNW(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const;
+	int IntersectNoLaserNoWalls(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const;
 	int IntersectAir(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const;
 	int GetIndex(int x, int y) const;
 	int GetIndex(vec2 PrevPos, vec2 Pos) const;
-	int GetFIndex(int x, int y) const;
+	int GetFrontIndex(int x, int y) const;
 
 	int GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance = 18.0f, int OverrideCenterTileIndex = -1) const;
-	int GetMoveRestrictions(vec2 Pos, float Distance = 18.0f)
+	int GetMoveRestrictions(vec2 Pos, float Distance = 18.0f) const
 	{
 		return GetMoveRestrictions(nullptr, nullptr, Pos, Distance);
 	}
 
 	int GetTile(int x, int y) const;
-	int GetFTile(int x, int y) const;
+	int GetFrontTile(int x, int y) const;
 	int Entity(int x, int y, int Layer) const;
 	int GetPureMapIndex(float x, float y) const;
 	int GetPureMapIndex(vec2 Pos) const { return GetPureMapIndex(Pos.x, Pos.y); }
@@ -76,9 +81,9 @@ public:
 	bool TileExistsNext(int Index) const;
 	vec2 GetPos(int Index) const;
 	int GetTileIndex(int Index) const;
-	int GetFTileIndex(int Index) const;
+	int GetFrontTileIndex(int Index) const;
 	int GetTileFlags(int Index) const;
-	int GetFTileFlags(int Index) const;
+	int GetFrontTileFlags(int Index) const;
 	int IsTeleport(int Index) const;
 	int IsEvilTeleport(int Index) const;
 	bool IsCheckTeleport(int Index) const;
@@ -88,29 +93,31 @@ public:
 	int IsTeleCheckpoint(int Index) const;
 	int IsSpeedup(int Index) const;
 	int IsTune(int Index) const;
-	void GetSpeedup(int Index, vec2 *pDir, int *pForce, int *pMaxSpeed) const;
+	void GetSpeedup(int Index, vec2 *pDir, int *pForce, int *pMaxSpeed, int *pType) const;
 	int GetSwitchType(int Index) const;
 	int GetSwitchNumber(int Index) const;
 	int GetSwitchDelay(int Index) const;
 
 	int IsSolid(int x, int y) const;
-	bool IsThrough(int x, int y, int xoff, int yoff, vec2 pos0, vec2 pos1) const;
-	bool IsHookBlocker(int x, int y, vec2 pos0, vec2 pos1) const;
+	bool IsThrough(int x, int y, int OffsetX, int OffsetY, vec2 Pos0, vec2 Pos1) const;
+	bool IsHookBlocker(int x, int y, vec2 Pos0, vec2 Pos1) const;
 	int IsWallJump(int Index) const;
 	int IsNoLaser(int x, int y) const;
-	int IsFNoLaser(int x, int y) const;
+	int IsFrontNoLaser(int x, int y) const;
 
 	int IsTimeCheckpoint(int Index) const;
-	int IsFTimeCheckpoint(int Index) const;
+	int IsFrontTimeCheckpoint(int Index) const;
 
-	int IsMover(int x, int y, int *pFlags) const;
+	int MoverSpeed(int x, int y, vec2 *pSpeed) const;
 
-	vec2 CpSpeed(int index, int Flags = 0) const;
+	const CLayers *Layers() const { return m_pLayers; }
+	const CTile *GameLayer() const { return m_pTiles; }
+	const CTeleTile *TeleLayer() const { return m_pTele; }
+	const CSpeedupTile *SpeedupLayer() const { return m_pSpeedup; }
+	const CTile *FrontLayer() const { return m_pFront; }
+	const CSwitchTile *SwitchLayer() const { return m_pSwitch; }
+	const CTuneTile *TuneLayer() const { return m_pTune; }
 
-	class CTeleTile *TeleLayer() { return m_pTele; }
-	class CSwitchTile *SwitchLayer() { return m_pSwitch; }
-	class CTuneTile *TuneLayer() { return m_pTune; }
-	class CLayers *Layers() { return m_pLayers; }
 	int m_HighestSwitchNumber;
 
 	/**
@@ -137,10 +144,18 @@ public:
 	const std::vector<vec2> &TeleOthers(int Number) { return m_TeleOthers[Number]; }
 
 private:
-	class CTile *m_pTiles;
+	CLayers *m_pLayers;
+
 	int m_Width;
 	int m_Height;
-	class CLayers *m_pLayers;
+
+	CTile *m_pTiles;
+	CTeleTile *m_pTele;
+	CSpeedupTile *m_pSpeedup;
+	CTile *m_pFront;
+	CSwitchTile *m_pSwitch;
+	CTuneTile *m_pTune;
+	CDoorTile *m_pDoor;
 
 	// TILE_TELEIN
 	std::map<int, std::vector<vec2>> m_TeleIns;
@@ -150,13 +165,6 @@ private:
 	std::map<int, std::vector<vec2>> m_TeleCheckOuts;
 	// TILE_TELEINEVIL, TILE_TELECHECK, TILE_TELECHECKIN, TILE_TELECHECKINEVIL
 	std::map<int, std::vector<vec2>> m_TeleOthers;
-
-	class CTeleTile *m_pTele;
-	class CSpeedupTile *m_pSpeedup;
-	class CTile *m_pFront;
-	class CSwitchTile *m_pSwitch;
-	class CTuneTile *m_pTune;
-	class CDoorTile *m_pDoor;
 };
 
 void ThroughOffset(vec2 Pos0, vec2 Pos1, int *pOffsetX, int *pOffsetY);

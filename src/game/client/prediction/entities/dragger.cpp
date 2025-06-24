@@ -13,12 +13,7 @@ void CDragger::Tick()
 {
 	if(GameWorld()->GameTick() % (int)(GameWorld()->GameTickSpeed() * 0.15f) == 0)
 	{
-		int Flags;
-		int index = Collision()->IsMover(m_Pos.x, m_Pos.y, &Flags);
-		if(index)
-		{
-			m_Core = Collision()->CpSpeed(index, Flags);
-		}
+		Collision()->MoverSpeed(m_Pos.x, m_Pos.y, &m_Core);
 		m_Pos += m_Core;
 
 		LookForPlayersToDrag();
@@ -62,8 +57,8 @@ void CDragger::LookForPlayersToDrag()
 		// Dragger beams can be created only for reachable, alive players
 		int IsReachable =
 			m_IgnoreWalls ?
-				!Collision()->IntersectNoLaserNW(m_Pos, pTarget->m_Pos, 0, 0) :
-				!Collision()->IntersectNoLaser(m_Pos, pTarget->m_Pos, 0, 0);
+				!Collision()->IntersectNoLaserNoWalls(m_Pos, pTarget->m_Pos, nullptr, nullptr) :
+				!Collision()->IntersectNoLaser(m_Pos, pTarget->m_Pos, nullptr, nullptr);
 		if(IsReachable)
 		{
 			const int &TargetClientId = pTarget->GetCid();
@@ -114,8 +109,8 @@ void CDragger::DraggerBeamTick()
 	// When the dragger can no longer reach the target player, the dragger beam dissolves
 	int IsReachable =
 		m_IgnoreWalls ?
-			!Collision()->IntersectNoLaserNW(m_Pos, pTarget->m_Pos, 0, 0) :
-			!Collision()->IntersectNoLaser(m_Pos, pTarget->m_Pos, 0, 0);
+			!Collision()->IntersectNoLaserNoWalls(m_Pos, pTarget->m_Pos, nullptr, nullptr) :
+			!Collision()->IntersectNoLaser(m_Pos, pTarget->m_Pos, nullptr, nullptr);
 	if(!IsReachable || distance(pTarget->m_Pos, m_Pos) >= g_Config.m_SvDraggerRange)
 	{
 		DraggerBeamReset();

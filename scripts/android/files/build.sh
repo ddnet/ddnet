@@ -45,11 +45,14 @@ sed -i "s/TW_KEY_NAME/${TW_KEY_NAME_ESCAPED}/g" build.gradle
 sed -i "s/TW_KEY_PW/${TW_KEY_PW_ESCAPED}/g" build.gradle
 sed -i "s/TW_KEY_ALIAS/${TW_KEY_ALIAS_ESCAPED}/g" build.gradle
 
-sed -i "s/TW_NDK_VERSION/${ANDROID_NDK_VERSION}/g" build.gradle
 sed -i "s/TW_VERSION_CODE/${TW_VERSION_CODE}/g" build.gradle
 sed -i "s/TW_VERSION_NAME/${TW_VERSION_NAME}/g" build.gradle
 
-sed -i "s/DDNet/${APK_BASENAME}/g" src/main/res/values/strings.xml
+for f in src/main/res/values*; do
+	sed -i "s/DDNet/${APK_BASENAME}/g" "$f/strings.xml"
+done
+
+sed -i "s/org.ddnet.client/${APK_PACKAGE_NAME}/g" src/main/res/xml/shortcuts.xml
 
 sed -i "s/\"DDNet\"/\"${APK_BASENAME}\"/g" src/main/AndroidManifest.xml
 sed -i "s/org.ddnet.client/${APK_PACKAGE_NAME}/g" src/main/AndroidManifest.xml
@@ -58,7 +61,8 @@ if [ "${APK_PACKAGE_FOLDER}" != "org/ddnet/client" ]; then
 	mv src/main/java/org/ddnet/client src/main/java/"${APK_PACKAGE_FOLDER}"
 fi
 
-sed -i "s/org.ddnet.client/${APK_PACKAGE_NAME}/g" src/main/java/"${APK_PACKAGE_FOLDER}"/NativeMain.java
+sed -i "s/org.ddnet.client/${APK_PACKAGE_NAME}/g" src/main/java/"${APK_PACKAGE_FOLDER}"/ClientActivity.java
+sed -i "s/org.ddnet.client/${APK_PACKAGE_NAME}/g" src/main/java/"${APK_PACKAGE_FOLDER}"/ServerService.java
 sed -i "s/org.ddnet.client/${APK_PACKAGE_NAME}/g" proguard-rules.pro
 
 # disable hid manager for now
@@ -69,7 +73,7 @@ if [[ "${APK_BUILD_TYPE}" == "Debug" ]]; then
 fi
 
 function build_gradle() {
-	java "-Dorg.gradle.appname=Gradle" -classpath gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain --warning-mode all "$1"
+	./gradlew --warning-mode all "$1"
 }
 
 if [[ "${APK_BUILD_TYPE}" == "Debug" ]]; then

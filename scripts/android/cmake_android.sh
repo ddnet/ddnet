@@ -1,18 +1,25 @@
 #!/bin/bash
+set -e
 
-# $HOME must be used instead of ~ else cargo-ndk cannot find the folder
-export ANDROID_HOME=$HOME/Android/Sdk
-MAKEFLAGS=-j$(nproc)
-export MAKEFLAGS
+# Ensure that binaries from MSYS2 are preferred over Windows-native commands like find and sort which work differently.
+PATH="/usr/bin/:$PATH"
+
+# $ANDROID_HOME can be used-defined, else the default location is used. Important notes:
+# - The path must not contain spaces on Windows.
+# - $HOME must be used instead of ~ else cargo-ndk cannot find the folder.
+ANDROID_HOME="${ANDROID_HOME:-$HOME/Android/Sdk}"
+export ANDROID_HOME
+
+BUILD_FLAGS="${BUILD_FLAGS:--j$(nproc)}"
+export BUILD_FLAGS
 
 ANDROID_NDK_VERSION="$(cd "$ANDROID_HOME/ndk" && find . -maxdepth 1 | sort -n | tail -1)"
 ANDROID_NDK_VERSION="${ANDROID_NDK_VERSION:2}"
-# ANDROID_NDK_VERSION must be exported for build.sh step
-export ANDROID_NDK_VERSION
 # ANDROID_NDK_HOME must be exported for cargo-ndk
 export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION"
 
-ANDROID_API_LEVEL=34
+# ANDROID_API_LEVEL must specify the _minimum_ supported SDK version, otherwise this will cause linking errors at launch
+ANDROID_API_LEVEL=24
 ANDROID_SUB_BUILD_DIR=build_arch
 
 COLOR_RED="\e[1;31m"
@@ -22,48 +29,63 @@ COLOR_RESET="\e[0m"
 
 SHOW_USAGE_INFO=0
 
+log_info() {
+	printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "$1"
+}
+
+log_warn() {
+	printf "${COLOR_YELLOW}%s${COLOR_RESET}\n" "$1" 1>&2
+}
+
+log_error() {
+	printf "${COLOR_RED}%s${COLOR_RESET}\n" "$1" 1>&2
+}
+
 if [ -z ${1+x} ]; then
 	SHOW_USAGE_INFO=1
-	printf "${COLOR_RED}%s${COLOR_RESET}\n" "Did not pass Android build type"
+	log_error "Did not pass Android build type"
 else
 	ANDROID_BUILD=$1
-	printf "${COLOR_YELLOW}%s${COLOR_RESET}\n" "Android build type: ${ANDROID_BUILD}"
+	if [[ "${ANDROID_BUILD}" == "x64" ]]; then
+		ANDROID_BUILD="x86_64"
+	fi
+	log_warn "Android build type: ${ANDROID_BUILD}"
 fi
 
 if [ -z ${2+x} ]; then
 	SHOW_USAGE_INFO=1
-	printf "${COLOR_RED}%s${COLOR_RESET}\n" "Did not pass game name"
+	log_error "Did not pass game name"
 else
 	GAME_NAME=$2
-	printf "${COLOR_YELLOW}%s${COLOR_RESET}\n" "Game name: ${GAME_NAME}"
+	log_warn "Game name: ${GAME_NAME}"
 fi
 
 if [ -z ${3+x} ]; then
 	SHOW_USAGE_INFO=1
-	printf "${COLOR_RED}%s${COLOR_RESET}\n" "Did not pass package name"
+	log_error "Did not pass package name"
 else
 	PACKAGE_NAME=$3
-	printf "${COLOR_YELLOW}%s${COLOR_RESET}\n" "Package name: ${PACKAGE_NAME}"
+	log_warn "Package name: ${PACKAGE_NAME}"
 fi
 
 if [ -z ${4+x} ]; then
 	SHOW_USAGE_INFO=1
-	printf "${COLOR_RED}%s${COLOR_RESET}\n" "Did not pass build type"
+	log_error "Did not pass build type"
 else
 	BUILD_TYPE=$4
-	printf "${COLOR_YELLOW}%s${COLOR_RESET}\n" "Build type: ${BUILD_TYPE}"
+	log_warn "Build type: ${BUILD_TYPE}"
 fi
 
 if [ -z ${5+x} ]; then
 	SHOW_USAGE_INFO=1
-	printf "${COLOR_RED}%s${COLOR_RESET}\n" "Did not pass build folder"
+	log_error "Did not pass build folder"
 else
 	BUILD_FOLDER=$5
-	printf "${COLOR_YELLOW}%s${COLOR_RESET}\n" "Build folder: ${BUILD_FOLDER}"
+	log_warn "Build folder: ${BUILD_FOLDER}"
 fi
 
 if [ $SHOW_USAGE_INFO == 1 ]; then
-	printf "${COLOR_RED}%s${COLOR_RESET}\n" "Usage: ./cmake_android.sh <x86/x86_64/arm/arm64/all> <Game name> <Package name> <Debug/Release> <Build folder>"
+	log_error "Usage: ./cmake_android.sh <x86/x86_64/arm/arm64/all> <Game name> <Package name> <Debug/Release> <Build folder>"
 	exit 1
 fi
 
@@ -75,17 +97,17 @@ DEFAULT_KEY_PW=android
 DEFAULT_KEY_ALIAS=androiddebugkey
 
 if [ -z ${TW_KEY_NAME+x} ]; then
-	printf "${COLOR_YELLOW}%s${COLOR_RESET}\n" "Did not pass a key path for the APK signer, using default: ${DEFAULT_KEY_NAME}"
+	log_warn "Did not pass a key path for the APK signer, using default: ${DEFAULT_KEY_NAME}"
 else
 	DEFAULT_KEY_NAME=$TW_KEY_NAME
 fi
 if [ -z ${TW_KEY_PW+x} ]; then
-	printf "${COLOR_YELLOW}%s${COLOR_RESET}\n" "Did not pass a key password for the APK signer, using default: ${DEFAULT_KEY_PW}"
+	log_warn "Did not pass a key password for the APK signer, using default: ${DEFAULT_KEY_PW}"
 else
 	DEFAULT_KEY_PW=$TW_KEY_PW
 fi
 if [ -z ${TW_KEY_ALIAS+x} ]; then
-	printf "${COLOR_YELLOW}%s${COLOR_RESET}\n" "Did not pass a key alias for the APK signer, using default: ${DEFAULT_KEY_ALIAS}"
+	log_warn "Did not pass a key alias for the APK signer, using default: ${DEFAULT_KEY_ALIAS}"
 else
 	DEFAULT_KEY_ALIAS=$TW_KEY_ALIAS
 fi
@@ -100,7 +122,7 @@ if [ -z ${TW_VERSION_CODE+x} ]; then
 	if [ -z ${ANDROID_VERSION_CODE+x} ]; then
 		ANDROID_VERSION_CODE=1
 	fi
-	printf "${COLOR_YELLOW}%s${COLOR_RESET}\n" "Did not pass a version code, using default: ${ANDROID_VERSION_CODE}"
+	log_warn "Did not pass a version code, using default: ${ANDROID_VERSION_CODE}"
 else
 	ANDROID_VERSION_CODE=$TW_VERSION_CODE
 fi
@@ -109,18 +131,16 @@ export TW_VERSION_CODE=$ANDROID_VERSION_CODE
 
 ANDROID_VERSION_NAME="1.0"
 if [ -z ${TW_VERSION_NAME+x} ]; then
-	ANDROID_VERSION_NAME="$(grep '#define GAME_RELEASE_VERSION' src/game/version.h | awk '{print $3}' | tr -d '"')"
+	ANDROID_VERSION_NAME="$(grep '#define GAME_RELEASE_VERSION_INTERNAL' src/game/version.h | awk '{print $3}')"
 	if [ -z ${ANDROID_VERSION_NAME+x} ]; then
 		ANDROID_VERSION_NAME="1.0"
 	fi
-	printf "${COLOR_YELLOW}%s${COLOR_RESET}\n" "Did not pass a version name, using default: ${ANDROID_VERSION_NAME}"
+	log_warn "Did not pass a version name, using default: ${ANDROID_VERSION_NAME}"
 else
 	ANDROID_VERSION_NAME=$TW_VERSION_NAME
 fi
 
 export TW_VERSION_NAME=$ANDROID_VERSION_NAME
-
-printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "Building cmake..."
 
 function build_for_type() {
 	cmake \
@@ -133,6 +153,7 @@ function build_for_type() {
 		-DANDROID_NDK="$ANDROID_NDK_HOME" \
 		-DANDROID_ABI="${2}" \
 		-DANDROID_ARM_NEON=TRUE \
+		-DANDROID_PACKAGE_NAME="${PACKAGE_NAME//./_}" \
 		-DCMAKE_ANDROID_NDK="$ANDROID_NDK_HOME" \
 		-DCMAKE_SYSTEM_NAME=Android \
 		-DCMAKE_SYSTEM_VERSION="$ANDROID_API_LEVEL" \
@@ -140,7 +161,7 @@ function build_for_type() {
 		-DCARGO_NDK_TARGET="${3}" \
 		-DCARGO_NDK_API="$ANDROID_API_LEVEL" \
 		-B"${BUILD_FOLDER}/$ANDROID_SUB_BUILD_DIR/$1" \
-		-DSERVER=OFF \
+		-DSERVER=ON \
 		-DTOOLS=OFF \
 		-DDEV=TRUE \
 		-DCMAKE_CROSSCOMPILING=ON \
@@ -148,56 +169,40 @@ function build_for_type() {
 		-DVIDEORECORDER=OFF
 	(
 		cd "${BUILD_FOLDER}/$ANDROID_SUB_BUILD_DIR/$1" || exit 1
-		cmake --build . --target game-client
+		# We want word splitting
+		# shellcheck disable=SC2086
+		cmake --build . --target game-client game-server $BUILD_FLAGS
 	)
 }
 
 mkdir -p "${BUILD_FOLDER}"
 
 if [[ "${ANDROID_BUILD}" == "arm" || "${ANDROID_BUILD}" == "all" ]]; then
-	build_for_type arm armeabi-v7a armv7-linux-androideabi &
-	PID_BUILD_ARM=$!
+	log_info "Building cmake (arm)..."
+	build_for_type arm armeabi-v7a armv7-linux-androideabi
 fi
 
 if [[ "${ANDROID_BUILD}" == "arm64" || "${ANDROID_BUILD}" == "all" ]]; then
-	build_for_type arm64 arm64-v8a aarch64-linux-android &
-	PID_BUILD_ARM64=$!
+	log_info "Building cmake (arm64)..."
+	build_for_type arm64 arm64-v8a aarch64-linux-android
 fi
 
 if [[ "${ANDROID_BUILD}" == "x86" || "${ANDROID_BUILD}" == "all" ]]; then
-	build_for_type x86 x86 i686-linux-android &
-	PID_BUILD_X86=$!
+	log_info "Building cmake (x86)..."
+	build_for_type x86 x86 i686-linux-android
 fi
 
-if [[ "${ANDROID_BUILD}" == "x86_64" || "${ANDROID_BUILD}" == "x64" || "${ANDROID_BUILD}" == "all" ]]; then
-	build_for_type x86_64 x86_64 x86_64-linux-android &
-	PID_BUILD_X86_64=$!
+if [[ "${ANDROID_BUILD}" == "x86_64" || "${ANDROID_BUILD}" == "all" ]]; then
+	log_info "Building cmake (x86_64)..."
+	build_for_type x86_64 x86_64 x86_64-linux-android
 fi
 
-if [ -n "$PID_BUILD_ARM" ] && ! wait "$PID_BUILD_ARM"; then
-	printf "${COLOR_RED}%s${COLOR_RESET}\n" "Building for arm failed"
-	exit 1
-fi
-if [ -n "$PID_BUILD_ARM64" ] && ! wait "$PID_BUILD_ARM64"; then
-	printf "${COLOR_RED}%s${COLOR_RESET}\n" "Building for arm64 failed"
-	exit 1
-fi
-if [ -n "$PID_BUILD_X86" ] && ! wait "$PID_BUILD_X86"; then
-	printf "${COLOR_RED}%s${COLOR_RESET}\n" "Building for x86 failed"
-	exit 1
-fi
-if [ -n "$PID_BUILD_X86_64" ] && ! wait "$PID_BUILD_X86_64"; then
-	printf "${COLOR_RED}%s${COLOR_RESET}\n" "Building for x86_64 failed"
-	exit 1
-fi
-
-printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "Copying project files..."
+log_info "Copying project files..."
 
 cd "${BUILD_FOLDER}" || exit 1
 
 mkdir -p src/main
-mkdir -p src/main/res/values
-mkdir -p src/main/res/mipmap
+mkdir -p gradle/wrapper
 
 function copy_dummy_files() {
 	rm -f ./"$2"
@@ -205,22 +210,29 @@ function copy_dummy_files() {
 }
 
 copy_dummy_files scripts/android/files/build.sh build.sh
-copy_dummy_files scripts/android/files/gradle-wrapper.jar gradle-wrapper.jar
 copy_dummy_files scripts/android/files/build.gradle build.gradle
-copy_dummy_files scripts/android/files/gradle-wrapper.properties gradle-wrapper.properties
+copy_dummy_files scripts/android/files/gradlew gradlew
+copy_dummy_files scripts/android/files/gradlew.bat gradlew.bat
+copy_dummy_files scripts/android/files/gradle/wrapper/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.jar
+copy_dummy_files scripts/android/files/gradle/wrapper/gradle-wrapper.properties gradle/wrapper/gradle-wrapper.properties
 copy_dummy_files scripts/android/files/gradle.properties gradle.properties
 copy_dummy_files scripts/android/files/proguard-rules.pro proguard-rules.pro
 copy_dummy_files scripts/android/files/settings.gradle settings.gradle
 copy_dummy_files scripts/android/files/AndroidManifest.xml src/main/AndroidManifest.xml
-copy_dummy_files scripts/android/files/res/values/strings.xml src/main/res/values/strings.xml
-copy_dummy_files other/icons/DDNet_256x256x32.png src/main/res/mipmap/ic_launcher.png
-copy_dummy_files other/icons/DDNet_256x256x32.png src/main/res/mipmap/ic_launcher_round.png
 
-printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "Copying libraries..."
+rm -R -f src/main/res
+cp -R ../scripts/android/files/res src/main/
+mkdir -p src/main/res/mipmap
+cp ../other/icons/DDNet_256x256x32.png src/main/res/mipmap/ic_launcher.png
+cp ../other/icons/DDNet_256x256x32.png src/main/res/mipmap/ic_launcher_round.png
+chmod +x ./gradlew
+
+log_info "Copying libraries..."
 
 function copy_libs() {
 	mkdir -p "lib/$2"
 	cp "$ANDROID_SUB_BUILD_DIR/$1/libDDNet.so" "lib/$2" || exit 1
+	cp "$ANDROID_SUB_BUILD_DIR/$1/libDDNet-Server.so" "lib/$2" || exit 1
 }
 
 if [[ "${ANDROID_BUILD}" == "arm" || "${ANDROID_BUILD}" == "all" ]]; then
@@ -235,7 +247,7 @@ if [[ "${ANDROID_BUILD}" == "x86" || "${ANDROID_BUILD}" == "all" ]]; then
 	copy_libs x86 x86
 fi
 
-if [[ "${ANDROID_BUILD}" == "x86_64" || "${ANDROID_BUILD}" == "x64" || "${ANDROID_BUILD}" == "all" ]]; then
+if [[ "${ANDROID_BUILD}" == "x86_64" || "${ANDROID_BUILD}" == "all" ]]; then
 	copy_libs x86_64 x86_64
 fi
 
@@ -244,25 +256,19 @@ if [[ "${ANDROID_BUILD}" == "all" ]]; then
 	ANDROID_BUILD_DUMMY=arm
 fi
 
-printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "Copying data folder..."
+log_info "Copying data folder..."
 mkdir -p assets/asset_integrity_files
 cp -R "$ANDROID_SUB_BUILD_DIR/$ANDROID_BUILD_DUMMY/data" ./assets/asset_integrity_files
 
-printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "Downloading certificate..."
+log_info "Downloading certificate..."
 curl -s -S --remote-name --time-cond cacert.pem https://curl.se/ca/cacert.pem
 cp ./cacert.pem ./assets/asset_integrity_files/data/cacert.pem || exit 1
 
-printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "Creating integrity index file..."
+log_info "Creating integrity index file..."
 (
 	cd assets/asset_integrity_files || exit 1
-
 	tmpfile="$(mktemp /tmp/hash_strings.XXX)"
-
-	find data -iname "*" -type f -print0 | while IFS= read -r -d $'\0' file; do
-		sha_hash=$(sha256sum "$file" | cut -d' ' -f 1)
-		echo "$file $sha_hash" >> "$tmpfile"
-	done
-
+	find data -iname "*" -type f -print0 | xargs -0 sha256sum | awk '{gsub(/^\*/, "", $2); print substr($0, index($0, $2)), $1}' > "$tmpfile"
 	full_hash="$(sha256sum "$tmpfile" | cut -d' ' -f 1)"
 
 	rm -f "integrity.txt"
@@ -272,7 +278,7 @@ printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "Creating integrity index file..."
 	} > "integrity.txt"
 )
 
-printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "Preparing gradle build..."
+log_info "Preparing gradle build..."
 
 rm -R -f src/main/java/org
 mkdir -p src/main/java

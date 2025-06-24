@@ -300,9 +300,6 @@ Kill
 Pause
 == Paŭzi
 
-Player options
-== Ludantaj agordoj
-
 Player
 == Ludanto
 
@@ -529,12 +526,16 @@ Deaths
 9+ new mentions
 == 9+ novaj mencioj
 
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Esperanto translation by dannyhpy
+
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == 
 
 [Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
 == 
 
 [Graphics error]
@@ -565,7 +566,16 @@ Could not initialize the given graphics backend, reverting to the default backen
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
 == 
 
+Could not resolve connect address '%s'. See local console for details.
+== 
+
+Connect address error
+== 
+
 Could not save downloaded map. Try manually deleting this file: %s
+== 
+
+Could not connect dummy
 == 
 
 Error playing demo
@@ -592,7 +602,13 @@ Error saving settings
 Replay feature is disabled!
 == 
 
+No demo with this filename exists
+== 
+
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
+"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
 == 
 
 The format of texture %s is not RGBA which will cause visual bugs.
@@ -604,10 +620,13 @@ Preparing demo playback
 Loading demo file from storage
 == 
 
-Why are you slowmo replaying to read this?
+Some fonts could not be loaded. Check the local console for details.
 == 
 
 Initializing components
+== 
+
+Why are you slowmo replaying to read this?
 == 
 
 Initializing assets
@@ -626,6 +645,29 @@ Restarting. Please wait…
 == 
 
 Loading skin files
+== 
+
+Auto-sync player camera
+== 
+
+[Auto camera]
+Disabled
+== 
+
+[Auto camera]
+Enabled
+== 
+
+[Auto camera]
+Unavailable for this player
+== 
+
+[Auto camera]
+Inactive
+== 
+
+[Auto camera]
+Active
 == 
 
 Searching
@@ -658,6 +700,9 @@ Following
 Loading commands…
 == 
 
+Loading maps…
+== 
+
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 
 
@@ -673,6 +718,18 @@ Angle:
 Multi-View
 == 
 
+[Spectating]
+Following %d: %s
+== 
+
+[Spectating]
+Following %s
+== 
+
+[Spectating Camera Mode Icon]
+AUTO
+== 
+
 Server best:
 == 
 
@@ -683,6 +740,9 @@ Team %d
 == 
 
 Some map images could not be loaded. Check the local console for details.
+== 
+
+Loading map
 == 
 
 Uploading map data to GPU
@@ -733,10 +793,19 @@ Use k key to kill (restart), q to pause and watch other players. See settings fo
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == 
 
+Save skin
+== 
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== 
+
 There's an unsaved map in the editor, you might want to save it.
 == 
 
 Continue anyway?
+== 
+
+This name cannot be used for files and folders
 == 
 
 A demo with this name already exists
@@ -778,6 +847,21 @@ Show DDNet map finishes in server browser
 transmits your player name to info.ddnet.org
 == 
 
+Cancel
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
+== 
+
+Unable to save the skin with a reserved name
+== 
+
+Unable to save the skin
+== 
+
 Trying to determine UDP connectivity…
 == 
 
@@ -808,7 +892,13 @@ The server is running a non-standard tuning on a pure game type.
 Loading menu images
 == 
 
+No local servers found (ports %d-%d)
+== 
+
 Reset filter
+== 
+
+Example of usage
 == 
 
 Has people playing
@@ -850,7 +940,7 @@ Leak IP
 No server selected
 == 
 
-Online players (%d)
+Online friends (%d)
 == 
 
 Online clanmates (%d)
@@ -869,7 +959,10 @@ Click to remove this player from your friends list.
 Click to remove this clan from your friends list.
 == 
 
-None
+Add friends by entering their name below or by clicking their name in the player list.
+== 
+
+Add clanmates by entering their clan below and leaving the name blank.
 == 
 
 Are you sure that you want to remove the player '%s' from your friends list?
@@ -903,11 +996,11 @@ Go back the specified duration
 == 
 
 [Demo player duration]
-%d min.
+%s min.
 == 
 
 [Demo player duration]
-%d sec.
+%s sec.
 == 
 
 Change the skip duration
@@ -947,6 +1040,9 @@ Close the demo player
 == 
 
 Toggle keyboard shortcuts
+== 
+
+Toggle auto camera
 == 
 
 Demofile: %s
@@ -1000,23 +1096,26 @@ Invalid Demo
 Created
 == 
 
-Markers
-== 
-
-Netversion
-== 
-
 Size
-== 
-
-[Demo details]
-map not included
 == 
 
 %.2f MiB
 == 
 
 %.2f KiB
+== 
+
+Markers
+== 
+
+Netversion
+== 
+
+Map size
+== 
+
+[Demo details]
+map not included
 == 
 
 Fetch Info
@@ -1046,16 +1145,141 @@ Unable to delete the demo '%s'
 Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
+Dummy is not allowed on this server
+== 
+
+Please wait…
+== 
+
 Stop record
 == 
 
 Record demo
 == 
 
+Edit touch controls
+== 
+
+Close
+== 
+
+Remote console
+== 
+
+Console
+== 
+
+https://wiki.ddnet.org/wiki/Touch_controls
+== 
+
+Save changes
+== 
+
+Error saving touch controls
+== 
+
+Could not save touch controls to file. See local console for details.
+== 
+
+Unsaved changes
+== 
+
+Discard changes
+== 
+
+Are you sure that you want to discard the current changes to the touch controls?
+== 
+
+Reset to defaults
+== 
+
+Are you sure that you want to reset the touch controls to default?
+== 
+
+Import from clipboard
+== 
+
+Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
+== 
+
+Export to clipboard
+== 
+
+Direct touch input while ingame
+== 
+
+[Direct touch input]
+Disabled
+== 
+
+[Direct touch input]
+Active action
+== 
+
+[Direct touch input]
+Aim
+== 
+
+[Direct touch input]
+Fire
+== 
+
+[Direct touch input]
+Hook
+== 
+
+Direct touch input while spectating
+== 
+
+Error loading touch controls
+== 
+
+Could not load touch controls from file. See local console for details.
+== 
+
+Could not load default touch controls from file. See local console for details.
+== 
+
+Could not load touch controls from clipboard. See local console for details.
+== 
+
+Community
+== 
+
 Score limit
 == 
 
-Time limit
+Time limit: %d min
+== 
+
+Round %d/%d
+== 
+
+[Team status]
+forbidden
+== 
+
+[Team status]
+solo
+== 
+
+[Team status]
+allowed
+== 
+
+[Team status]
+required
+== 
+
+Teams
+== 
+
+[Team size]
+minimum
+== 
+
+[Team size]
+maximum
 == 
 
 Loading…
@@ -1106,6 +1330,10 @@ Client
 Skip the main menu
 == 
 
+[Hertz]
+Hz
+== 
+
 Refresh Rate
 == 
 
@@ -1116,6 +1344,12 @@ Settings file
 == 
 
 Open the settings file
+== 
+
+Saves file
+== 
+
+Open the saves file
 == 
 
 Config directory
@@ -1172,6 +1406,15 @@ Skin prefix
 Your skin
 == 
 
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
 Create a random skin
 == 
 
@@ -1185,6 +1428,9 @@ Body
 == 
 
 Feet
+== 
+
+No skins match your filter criteria
 == 
 
 Open the directory to add custom skins
@@ -1248,12 +1494,6 @@ Spectate next
 == 
 
 Spectate previous
-== 
-
-Console
-== 
-
-Remote console
 == 
 
 Screenshot
@@ -1321,16 +1561,10 @@ UI mouse sens.
 Movement
 == 
 
-Reset to defaults
-== 
-
 Reset controls
 == 
 
 Are you sure that you want to reset the controls to their defaults?
-== 
-
-Cancel
 == 
 
 Voting
@@ -1372,7 +1606,10 @@ High Detail
 Allows maps to render with more detail
 == 
 
-Use high DPI
+Show FPS
+== 
+
+Renders your frame rate in the top right
 == 
 
 UI Color
@@ -1468,19 +1705,31 @@ Show score
 Show local time always
 == 
 
+Show spectator cursor
+== 
+
 Show votes window after voting
+== 
+
+Authed name color in scoreboard
+== 
+
+Same clan color in scoreboard
 == 
 
 DDRace HUD
 == 
 
-Show client IDs in scoreboard
+Show client IDs (scoreboard, chat, spectator)
 == 
 
 Show DDRace HUD
 == 
 
 Show jumps indicator
+== 
+
+Show number of spectators
 == 
 
 Show player position
@@ -1534,7 +1783,26 @@ Client message
 Show name plates
 == 
 
+[Show name plates]
+None
+== 
+
+[Show name plates]
+Own
+== 
+
+[Show name plates]
+Others
+== 
+
+[Show name plates]
+All
+== 
+
 Name plates size
+== 
+
+Name plates offset
 == 
 
 Show clan above name plates
@@ -1546,7 +1814,19 @@ Clan plates size
 Use team colors for name plates
 == 
 
-Show friend mark (♥) in name plates
+Show friend icon in name plates
+== 
+
+Show client IDs in name plates
+== 
+
+Show client IDs on a seperate line
+== 
+
+Client IDs size
+== 
+
+Hook Strength
 == 
 
 Show hook strength icon indicator
@@ -1555,16 +1835,38 @@ Show hook strength icon indicator
 Show hook strength number indicator
 == 
 
-Show other players' key presses
+Size of hook strength icon and number indicator
 == 
 
-Show local player's key presses
+Key Presses
 == 
 
-Authed name color in scoreboard
+Show players' key presses
 == 
 
-Same clan color in scoreboard
+[Show players' key presses]
+None
+== 
+
+[Show players' key presses]
+Own
+== 
+
+[Show players' key presses]
+Others
+== 
+
+[Show players' key presses]
+All
+== 
+
+Size of key press icons
+== 
+
+Preview player's name plate
+== 
+
+Preview dummy's name plate
 == 
 
 Hook collision line
@@ -1582,7 +1884,10 @@ Show other players' hook collision lines
 Always show other players' hook collision lines
 == 
 
-Hook collision line width
+Width of your own hook collision line
+== 
+
+Width of others' hook collision line
 == 
 
 Hook collision line opacity
@@ -1598,6 +1903,9 @@ Nothing hookable
 == 
 
 Something hookable
+== 
+
+Preview 'Hook collisions' being pressed
 == 
 
 Show kill messages
@@ -1642,6 +1950,12 @@ Freeze Laser Outline Color
 Freeze Laser Inner Color
 == 
 
+Dragger Outline Color
+== 
+
+Dragger Inner Color
+== 
+
 Set all to Rifle
 == 
 
@@ -1681,7 +1995,7 @@ Overlay entities
 Show text entities
 == 
 
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == 
 
 Show others (own team only)
@@ -1708,6 +2022,9 @@ AntiPing: predict weapons
 AntiPing: predict grenade paths
 == 
 
+AntiPing: prediction margin
+== 
+
 Background
 == 
 
@@ -1715,9 +2032,6 @@ Regular background color
 == 
 
 Entities background color
-== 
-
-Reload
 == 
 
 Use current map as background
@@ -1744,6 +2058,21 @@ DDNet Client updated!
 No updates available
 == 
 
+Basic
+== 
+
+Custom
+== 
+
+Are you sure that you want to delete '%s'?
+== 
+
+Delete skin
+== 
+
+Unable to delete skin
+== 
+
 Emoticons
 == 
 
@@ -1765,28 +2094,33 @@ Open the directory to add custom assets
 Can't find a Tutorial server
 == 
 
-Server executable not found, can't run server
+Update failed! Check log…
 == 
 
-Update failed! Check log…
+Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
+== 
+
+Server executable not found, can't run server
 == 
 
 Loading race demo files
 == 
 
-Time limit: %d min
-== 
-
-Round
-== 
-
-Game over
+[Spectators]
+%d others…
 == 
 
 Score
 == 
 
 Super
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
 == 
 
 Manual
@@ -1801,16 +2135,43 @@ Auto
 Replay
 == 
 
-Draw!
+Red team wins!
 == 
 
 %s wins!
 == 
 
-Red team wins!
+Blue team wins!
 == 
 
-Blue team wins!
+Draw!
+== 
+
+Game over
+== 
+
+[skins]
+Body
+== 
+
+[skins]
+Marking
+== 
+
+[skins]
+Decoration
+== 
+
+[skins]
+Hands
+== 
+
+[skins]
+Feet
+== 
+
+[skins]
+Eyes
 == 
 
 Loading sound files
@@ -1840,5 +2201,17 @@ Best
 Grabs
 == 
 
+Aim
+== 
+
+Active: Fire
+== 
+
+Active: Hook
+== 
+
 Moved ingame
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
 == 

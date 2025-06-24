@@ -3,17 +3,23 @@
 
 #include <base/vmath.h>
 
+class CGameClient;
+
 class CRaceHelper
 {
+	const CGameClient *m_pGameClient;
+
+	int m_aFlagIndex[2] = {-1, -1};
+
 public:
-	static int ms_aFlagIndex[2];
+	void Init(const CGameClient *pGameClient);
 
 	// these functions return the time in milliseconds, time -1 is invalid
 	static int TimeFromSecondsStr(const char *pStr); // x.xxx
 	static int TimeFromStr(const char *pStr); // x minute(s) x.xxx second(s)
 	static int TimeFromFinishMessage(const char *pStr, char *pNameBuf, int NameBufSize); // xxx finished in: x minute(s) x.xxx second(s)
 
-	static bool IsStart(class CGameClient *pClient, vec2 Prev, vec2 Pos);
+	bool IsStart(vec2 Prev, vec2 Pos) const;
 };
 
 #endif // GAME_CLIENT_RACE_H

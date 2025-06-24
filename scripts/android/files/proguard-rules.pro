@@ -16,7 +16,7 @@
 # debugging stack traces.
 -keepattributes SourceFile,LineNumberTable
 
--keepclassmembers, allowoptimization public class org.ddnet.client.NativeMain {
+-keepclassmembers, allowoptimization public class org.ddnet.client.* {
 	*;
 }
 

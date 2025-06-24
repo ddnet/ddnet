@@ -6,29 +6,25 @@
 #include "kernel.h"
 
 #include <base/types.h>
+#include <base/vmath.h>
 
+#include <chrono>
 #include <cstdint>
 #include <functional>
-
-const int g_MaxKeys = 512;
-extern const char g_aaKeyStrings[g_MaxKeys][20];
+#include <string>
+#include <vector>
 
 class IInput : public IInterface
 {
 	MACRO_INTERFACE("input")
 public:
-	enum
-	{
-		INPUT_TEXT_SIZE = 32 * UTF8_BYTE_LENGTH + 1,
-	};
-
 	class CEvent
 	{
 	public:
 		int m_Flags;
 		int m_Key;
 		uint32_t m_InputCount;
-		char m_aText[INPUT_TEXT_SIZE];
+		char m_aText[32]; // SDL_TEXTINPUTEVENT_TEXT_SIZE
 	};
 
 	enum
@@ -43,15 +39,12 @@ public:
 		CURSOR_MOUSE,
 		CURSOR_JOYSTICK,
 	};
-	enum
-	{
-		MAX_COMPOSITION_ARRAY_SIZE = 32, // SDL2 limitation
-
-		COMP_LENGTH_INACTIVE = -1,
-	};
 
 	// events
 	virtual void ConsumeEvents(std::function<void(const CEvent &Event)> Consumer) const = 0;
+	/**
+	 * Clears the events and @link KeyPress @endlink state for this frame. Must be called at the end of each frame.
+	 */
 	virtual void Clear() = 0;
 
 	/**
@@ -64,9 +57,32 @@ public:
 	virtual bool ModifierIsPressed() const = 0;
 	virtual bool ShiftIsPressed() const = 0;
 	virtual bool AltIsPressed() const = 0;
+	/**
+	 * Returns whether the given key is currently pressed down. This directly represents the state of pressed keys
+	 * based on all handled input events.
+	 *
+	 * This function should be used to trigger behavior continuously while a specific key is held down, e.g. for
+	 * showing a list of all keys that are currently being pressed.
+	 *
+	 * @param Key The key code (see `keys.h`).
+	 *
+	 * @return `true` if key is currently pressed down, `false` otherwise.
+	 */
 	virtual bool KeyIsPressed(int Key) const = 0;
-	virtual bool KeyPress(int Key, bool CheckCounter = false) const = 0;
-	const char *KeyName(int Key) const { return (Key >= 0 && Key < g_MaxKeys) ? g_aaKeyStrings[Key] : g_aaKeyStrings[0]; }
+	/**
+	 * Returns whether the given key was pressed down during input updates for current frame. This state is
+	 * cleared at the end of each frame by calling the @link Clear @endlink function.
+	 *
+	 * This function should be used to trigger behavior only once per key press event per frame, e.g. for menu
+	 * hotkeys that should activate behavior once per key press.
+	 *
+	 * @param Key The key code (see `keys.h`).
+	 *
+	 * @return `true` if key was pressed down during input updates for the current frame, `false` otherwise.
+	 */
+	virtual bool KeyPress(int Key) const = 0;
+	virtual const char *KeyName(int Key) const = 0;
+	virtual int FindKeyByName(const char *pKeyName) const = 0;
 
 	// joystick
 	class IJoystick
@@ -79,7 +95,7 @@ public:
 		virtual int GetNumBalls() const = 0;
 		virtual int GetNumHats() const = 0;
 		virtual float GetAxisValue(int Axis) = 0;
-		virtual void GetHatValue(int Hat, int (&HatKeys)[2]) = 0;
+		virtual void GetHatValue(int Hat, int (&aHatKeys)[2]) = 0;
 		virtual bool Relative(float *pX, float *pY) = 0;
 		virtual bool Absolute(float *pX, float *pY) = 0;
 	};
@@ -89,19 +105,80 @@ public:
 	virtual void SetActiveJoystick(size_t Index) = 0;
 
 	// mouse
-	virtual void NativeMousePos(int *pX, int *pY) const = 0;
-	virtual bool NativeMousePressed(int Index) = 0;
+	virtual vec2 NativeMousePos() const = 0;
+	virtual bool NativeMousePressed(int Index) const = 0;
 	virtual void MouseModeRelative() = 0;
 	virtual void MouseModeAbsolute() = 0;
 	virtual bool MouseRelative(float *pX, float *pY) = 0;
 
+	// touch
+	/**
+	 * Represents a unique finger for a current touch event. If there are multiple touch input devices, they
+	 * are handled transparently like different fingers. The concrete values of the member variables of this
+	 * class are arbitrary based on the touch device driver and should only be used to uniquely identify touch
+	 * fingers. Note that once a finger has been released, the same finger value may also be reused again.
+	 */
+	class CTouchFinger
+	{
+		friend class CInput;
+
+		int64_t m_DeviceId;
+		int64_t m_FingerId;
+
+	public:
+		bool operator==(const CTouchFinger &Other) const { return m_DeviceId == Other.m_DeviceId && m_FingerId == Other.m_FingerId; }
+		bool operator!=(const CTouchFinger &Other) const { return !(*this == Other); }
+	};
+	/**
+	 * Represents the state of a particular touch finger currently being pressed down on a touch device.
+	 */
+	class CTouchFingerState
+	{
+	public:
+		/**
+		 * The unique finger which this state is associated with.
+		 */
+		CTouchFinger m_Finger;
+		/**
+		 * The current position of the finger. The x- and y-components of the position are normalized to the
+		 * range `0.0f`-`1.0f` representing the absolute position of the finger on the current touch device.
+		 */
+		vec2 m_Position;
+		/**
+		 * The current delta of the finger. The x- and y-components of the delta are normalized to the
+		 * range `-1.0f`-`1.0f` representing the absolute delta of the finger on the current touch device.
+		 *
+		 * @remark This is reset to zero at the end of each frame.
+		 */
+		vec2 m_Delta;
+		/**
+		 * The time when this finger was first pressed down.
+		 */
+		std::chrono::nanoseconds m_PressTime;
+	};
+	/**
+	 * Returns a vector of the states of all touch fingers currently being pressed down on touch devices.
+	 * Note that this only contains fingers which are pressed down, i.e. released fingers are never stored.
+	 * The order of the fingers in this vector is based on the order in which the fingers where pressed.
+	 *
+	 * @return vector of all touch finger states
+	 */
+	virtual const std::vector<CTouchFingerState> &TouchFingerStates() const = 0;
+	/**
+	 * Must be called after the touch finger states have been used during the client update to ensure that
+	 * touch deltas are only accumulated until the next update. If the touch states are only used during
+	 * rendering, i.e. for user interfaces, then this is called automatically by calling @link Clear @endlink.
+	 */
+	virtual void ClearTouchDeltas() = 0;
+
 	// clipboard
-	virtual const char *GetClipboardText() = 0;
+	virtual std::string GetClipboardText() = 0;
 	virtual void SetClipboardText(const char *pText) = 0;
 
 	// text editing
 	virtual void StartTextInput() = 0;
 	virtual void StopTextInput() = 0;
+	virtual void EnsureScreenKeyboardShown() = 0;
 	virtual const char *GetComposition() const = 0;
 	virtual bool HasComposition() const = 0;
 	virtual int GetCompositionCursor() const = 0;

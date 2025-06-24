@@ -39,6 +39,7 @@ public:
 	void Tick() override;
 	void Snap(int SnappingClient) override;
 	void SwapClients(int Client1, int Client2) override;
+	ESaveResult BlocksSave(int ClientId) override;
 };
 
 #endif // GAME_SERVER_ENTITIES_DRAGGER_BEAM_H

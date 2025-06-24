@@ -68,12 +68,12 @@ int main(int argc, const char **argv)
 		return -1;
 	}
 
-	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_BASIC, argc, argv);
+	std::unique_ptr<IStorage> pStorage = std::unique_ptr<IStorage>(CreateStorage(IStorage::EInitializationType::BASIC, argc, argv));
 	if(!pStorage)
 	{
 		log_error(TOOL_NAME, "Error creating basic storage");
 		return -1;
 	}
 
-	return ResaveMap(argv[1], argv[2], pStorage);
+	return ResaveMap(argv[1], argv[2], pStorage.get());
 }

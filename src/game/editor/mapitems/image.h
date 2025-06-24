@@ -12,9 +12,9 @@ public:
 	explicit CEditorImage(CEditor *pEditor);
 	~CEditorImage();
 
-	void Init(CEditor *pEditor) override;
+	void OnInit(CEditor *pEditor) override;
 	void AnalyseTileFlags();
-	bool DataEquals(const CEditorImage &Other) const;
+	void Free();
 
 	IGraphics::CTextureHandle m_Texture;
 	int m_External = 0;

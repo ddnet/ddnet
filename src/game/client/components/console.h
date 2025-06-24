@@ -10,6 +10,7 @@
 
 #include <game/client/component.h>
 #include <game/client/lineinput.h>
+#include <game/client/ui.h>
 
 enum
 {
@@ -69,8 +70,10 @@ class CGameConsole : public CComponent
 		float m_CompletionRenderOffset;
 		float m_CompletionRenderOffsetChange;
 		int m_CompletionArgumentPosition;
+		int m_CompletionCommandStart = 0;
+		int m_CompletionCommandEnd = 0;
 
-		char m_aUser[32];
+		char m_aUser[64];
 		bool m_UserGot;
 		bool m_UsernameReq;
 
@@ -109,16 +112,30 @@ class CGameConsole : public CComponent
 		void PrintLine(const char *pLine, int Len, ColorRGBA PrintColor) REQUIRES(!m_BacklogPendingLock);
 		int GetLinesToScroll(int Direction, int LinesToScroll);
 		void ScrollToCenter(int StartLine, int EndLine);
-		void ClearSearch();
 		void Dump() REQUIRES(!m_BacklogPendingLock);
 
 		const char *GetString() const { return m_Input.GetString(); }
+		/**
+		 * Gets the command at the current cursor including surrounding spaces.
+		 * Commands are split by semicolons.
+		 *
+		 * So if the current console input is for example "hello; world ;foo"
+		 *                                                        ^
+		 *                   and the cursor is here  -------------/
+		 * The result would be " world "
+		 *
+		 * @param pInput the console input line
+		 * @param aCmd the command the cursor is at
+		 */
+		void GetCommand(const char *pInput, char (&aCmd)[IConsole::CMDLINE_LENGTH]);
 		static void PossibleCommandsCompleteCallback(int Index, const char *pStr, void *pUser);
 		static void PossibleArgumentsCompleteCallback(int Index, const char *pStr, void *pUser);
 
 		void UpdateEntryTextAttributes(CBacklogEntry *pEntry) const;
 
 	private:
+		void SetSearching(bool Searching);
+		void ClearSearch();
 		void UpdateSearch();
 
 		friend class CGameConsole;
@@ -130,6 +147,7 @@ class CGameConsole : public CComponent
 	CInstance m_LocalConsole;
 	CInstance m_RemoteConsole;
 
+	CInstance *ConsoleForType(int ConsoleType);
 	CInstance *CurrentConsole();
 
 	int m_ConsoleType;
@@ -138,11 +156,12 @@ class CGameConsole : public CComponent
 	float m_StateChangeDuration;
 
 	bool m_WantsSelectionCopy = false;
+	CUi::CTouchState m_TouchState;
 
-	static const ColorRGBA ms_SearchHighlightColor;
-	static const ColorRGBA ms_SearchSelectedColor;
+	static inline constexpr ColorRGBA ms_SearchHighlightColor = ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f);
+	static inline constexpr ColorRGBA ms_SearchSelectedColor = ColorRGBA(1.0f, 1.0f, 0.0f, 1.0f);
 
-	void Toggle(int Type);
+	int PossibleMaps(const char *pStr, IConsole::FPossibleCallback pfnCallback = IConsole::EmptyPossibleCommandCallback, void *pUser = nullptr);
 
 	static void PossibleCommandsRenderCallback(int Index, const char *pStr, void *pUser);
 	static void ConToggleLocalConsole(IConsole::IResult *pResult, void *pUserData);
@@ -153,6 +172,8 @@ class CGameConsole : public CComponent
 	static void ConDumpRemoteConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConConsolePageUp(IConsole::IResult *pResult, void *pUserData);
 	static void ConConsolePageDown(IConsole::IResult *pResult, void *pUserData);
+	static void ConConsolePageTop(IConsole::IResult *pResult, void *pUserData);
+	static void ConConsolePageBottom(IConsole::IResult *pResult, void *pUserData);
 	static void ConchainConsoleOutputLevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 public:
@@ -160,6 +181,7 @@ public:
 	{
 		CONSOLETYPE_LOCAL = 0,
 		CONSOLETYPE_REMOTE,
+		NUM_CONSOLETYPES
 	};
 
 	CGameConsole();
@@ -178,6 +200,7 @@ public:
 	virtual bool OnInput(const IInput::CEvent &Event) override;
 	void Prompt(char (&aPrompt)[32]);
 
-	bool IsClosed() { return m_ConsoleState == CONSOLE_CLOSED; }
+	void Toggle(int Type);
+	bool IsActive() const { return m_ConsoleState != CONSOLE_CLOSED; }
 };
 #endif

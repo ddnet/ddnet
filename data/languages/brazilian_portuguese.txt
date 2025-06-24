@@ -1,42 +1,3 @@
-##### authors #####
-#originally created by:
-# slinack
-#modified by:
-# yemDX               2010-05-29 17:22:42
-# yemDX               2010-05-30 02:51:34
-# slinack             2010-06-02 20:57:46
-# slinack             2011-05-02 18:24:12
-# Isadora             2011-05-09 17:26:02
-# slinack             2011-07-03 00:23:26
-# Ryomou Hentai Girl  2011-07-11 11:33:42
-# Isadora             2011-07-20 21:47:11
-# HeroiAmarelo        2012-08-01 15:50:18
-# Rafael Fontenelle   2014-11-21 13:31:06
-# Rafael Fontenelle   2016-12-12 13:31:06
-# Rafael Fontenelle   2017-09-06 09:51:00
-# Rafael Fontenelle   2018-07-04 07:38:13
-# Rafael Fontenelle   2019-04-06 16:49:12
-# Rafael Fontenelle   2019-12-18 02:47:58
-# Rafael Fontenelle   2020-08-27 12:38:07
-# Rafael Fontenelle   2020-09-20 11:00:38
-# Rafael Fontenelle   2021-02-13 07:00:00
-# Rafael Fontenelle   2021-06-10 12:00:00
-# pv                  2022-06-01 20:44:00
-# Rafael Fontenelle   2022-09-17 23:23:00
-# Rafael Fontenelle   2022-10-25 11:22:00
-# Rafael Fontenelle   2023-01-09 10:33:00
-# Rafael Fontenelle   2023-03-26 19:11:00
-# Rafael Fontenelle   2023-07-07 12:11:00
-# Rafael Fontenelle   2023-08-14 14:17:00
-# Rafael Fontenelle   2023-09-25 14:23:00
-# Rafael Fontenelle   2023-12-05 17:01:00
-# Rafael Fontenelle   2024-03-02 16:20:00
-# Rafael Fontenelle   2024-04-30 14:52:00
-# Rafael Fontenelle   2024-06-11 22:43:00
-##### /authors #####
-
-##### translated strings #####
-
 %ds left
 == Faltam %ds
 
@@ -310,9 +271,6 @@ Player
 Player country:
 == País do jogador:
 
-Player options
-== Opções do jogador
-
 Players
 == Jogadores
 
@@ -432,9 +390,6 @@ The audio device couldn't be initialised.
 
 The server is running a non-standard tuning on a pure game type.
 == O servidor está rodando com modificações em um tipo de jogo oficial.
-
-Time limit
-== Limite de tempo
 
 Time limit: %d min
 == Limite de tempo: %d minutos
@@ -595,9 +550,6 @@ Gameplay
 Restart
 == Reiniciar
 
-Round
-== Turno
-
 Browser
 == Navegar
 
@@ -648,9 +600,6 @@ Frags
 
 AntiPing: predict other players
 == AntiPing: prever outros jogadores
-
-Show other players' key presses
-== Mostrar teclas pressionadas de outros jogadores
 
 Automatically take statboard screenshot
 == Automaticamente capturar imagem do statboard
@@ -820,9 +769,6 @@ Show DDNet map finishes in server browser
 transmits your player name to info.ddnet.org
 == transmite seu nome de jogador para info.ddnet.org
 
-Reload
-== Recarregar
-
 Time
 == Tempo
 
@@ -964,9 +910,6 @@ Video name:
 Connect Dummy
 == Conectar dummy
 
-Use high DPI
-== Usar DPI alta
-
 Client message
 == Mensagem do cliente
 
@@ -1041,7 +984,7 @@ Background music volume
 == Volume da música de fundo
 
 Assets
-== Ativos
+== Recursos
 
 Use current map as background
 == Usar o mapa atual como plano de fundo
@@ -1056,7 +999,7 @@ Particles
 == Partículas
 
 Assets directory
-== Diretório de ativos
+== Diretório de recursos
 
 Manual
 == Manual
@@ -1154,9 +1097,6 @@ https://ddnet.org/discord
 Are you sure that you want to disconnect and switch to a different server?
 == Tem certeza que deseja desconectar e trocar para um servidor diferente?
 
-Show local player's key presses
-== Mostrar pressionamento de teclas de jogadores locais
-
 The format of texture %s is not RGBA which will cause visual bugs.
 == O formato da textura %s não é RGBA, o que vai causar falhas visuais.
 
@@ -1211,7 +1151,7 @@ When you cross the start line, show a ghost tee replicating the movements of you
 Opacity
 == Opacidade
 
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == Ajustar a opacidade das entidades pertencentes a outros times, tais como tees e placas de identificação
 
 Quads are used for background decoration
@@ -1334,7 +1274,7 @@ Initializing components
 == Inicializando componentes
 
 Initializing assets
-== Inicializando ativos
+== Inicializando recursos
 
 Initializing map logic
 == Inicializando lógica de mapa
@@ -1378,9 +1318,6 @@ Show health, shields and ammo
 DDRace HUD
 == HUD do DDRace
 
-Show client IDs in scoreboard
-== Mostrar IDs de cliente no placar
-
 Show DDRace HUD
 == Mostrar HUD do DDRace
 
@@ -1389,9 +1326,6 @@ Show jumps indicator
 
 Hook collision line
 == Linha de colisão do gancho
-
-Hook collision line width
-== Largura da linha de colisão do gancho
 
 Hook collision line opacity
 == Opacidade da linha de colisão do gancho
@@ -1412,7 +1346,7 @@ A Tee
 == Um tee
 
 Loading assets
-== Carregando ativos
+== Carregando recursos
 
 Loading race demo files
 == Carregando arquivos de demo de corrida
@@ -1448,7 +1382,7 @@ Rifle Laser Outline Color
 == Cor de contorno do laser do rifle
 
 Rifle Laser Inner Color
-== Cor de interna do laser do rifle
+== Cor interna do laser do rifle
 
 Shotgun Laser Outline Color
 == Cor contorno do laser da espingarda
@@ -1515,10 +1449,6 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 == Falha durante a inicialização. Tente alterar gfx_backend para OpenGL ou Vulkan em settings_ddnet.cfg no diretório de configuração e tente novamente.
 
 [Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== VRAM insuficiente. Tente remover ativos personalizados (skins, entidades, etc.), especialmente aqueles com alta resolução.
-
-[Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
 == Ocorreu um erro durante a gravação do comando. Tente atualizar seus drivers de GPU.
 
@@ -1567,7 +1497,7 @@ Unregister protocol and file extensions
 == Protoloco e arquivos de extensões não registrados
 
 Open the directory to add custom assets
-== Abre o diretório para adicionar os ativos personalizados
+== Abre o diretório para adicionar os recursos personalizados
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
@@ -1588,9 +1518,6 @@ A demo with this name already exists
 No server selected
 == Nenhum serviço selecionado
 
-Online players (%d)
-== Jogadores online (%d)
-
 Online clanmates (%d)
 == Colegas de clã online (%d)
 
@@ -1606,9 +1533,6 @@ Click to remove this player from your friends list.
 
 Click to remove this clan from your friends list.
 == Clique para remover este clã a partir de sua lista de amigos.
-
-None
-== Ninguém
 
 Add Clan
 == Adicionar clã
@@ -1680,12 +1604,12 @@ Go back the specified duration
 == Voltar na duração especificada
 
 [Demo player duration]
-%d min.
-== %d min.
+%s min.
+== %s min.
 
 [Demo player duration]
-%d sec.
-== %d seg.
+%s sec.
+== %s seg.
 
 Change the skip duration
 == Alterar a duração de pulo
@@ -1853,9 +1777,6 @@ Player info change cooldown
 Always show chat
 == Sempre mostrar o chat
 
-Show friend mark (♥) in name plates
-== Mostrar marca de amigo (♥) em apelidos
-
 Show hook strength icon indicator
 == Mostrar indicador de ícone de força do gancho
 
@@ -1879,3 +1800,416 @@ Tee
 
 Show only chat messages from team members
 == Mostrar apenas mensagens de chat de membros do time
+
+[Spectating]
+Following %s
+== Seguindo %s
+
+Example of usage
+== Exemplo de uso
+
+Round %d/%d
+== Rodada %d/%d
+
+[Spectators]
+%d others…
+== %d outros…
+
+[Team and size]
+%d\n(%d/%d)
+== %d\n(%d/%d)
+
+Team %d (%d/%d)
+== Time %d (%d/%d)
+
+https://wiki.ddnet.org/wiki/Mapping
+== https://wiki.ddnet.org/wiki/Mapping
+
+Could not resolve connect address '%s'. See local console for details.
+== Não foi possível resolver o endereço de conexão '%s'. Veja o console local para detalhes.
+
+Connect address error
+== Erro no endereço de conexão
+
+Could not connect dummy
+== Não foi possível conectar o dummy
+
+Dummy is not allowed on this server
+== Dummy não é permitido neste servidor
+
+Please wait…
+== Por favor, aguarde…
+
+Show client IDs (scoreboard, chat, spectator)
+== Mostrar IDs de clientes (placar, chat, observador)
+
+Are you sure that you want to delete '%s'?
+== Tem certeza que deseja excluir '%s'?
+
+Delete skin
+== Excluir skin
+
+Basic
+== Básico
+
+Custom
+== Personalizado
+
+Unable to delete skin
+== Não foi possível excluir skin
+
+Save skin
+== Salvar skin
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== Tem certeza de que deseja salvar sua skin? Se uma skin com esse nome já existir, ela será substituída.
+
+Unable to save the skin
+== Não foi possível salvar a skin
+
+Unable to save the skin with a reserved name
+== Não foi possível salvar a skin com um nome reservado
+
+No local servers found (ports %d-%d)
+== Nenhum servidor local encontrado (portas %d-%d)
+
+[Hertz]
+Hz
+== Hz
+
+[skins]
+Body
+== Corpo
+
+[skins]
+Marking
+== Marca
+
+[skins]
+Decoration
+== Decoração
+
+[skins]
+Hands
+== Mãos
+
+[skins]
+Feet
+== Pés
+
+[skins]
+Eyes
+== Olhos
+
+Some fonts could not be loaded. Check the local console for details.
+== Algumas fontes não puderam ser carregadas. Verifique o console local para detalhes.
+
+Online friends (%d)
+== Amigos online (%d)
+
+Add friends by entering their name below or by clicking their name in the player list.
+== Adicione amigos digitando o nome deles abaixo ou clicando no nome deles na lista de jogadores.
+
+Add clanmates by entering their clan below and leaving the name blank.
+== Adicione companheiros de clã inserindo o clã deles abaixo e deixando o nome em branco.
+
+Edit touch controls
+== Editar controles de toque
+
+Close
+== Fechar
+
+Save changes
+== Salvar alterações
+
+Error saving touch controls
+== Erro ao salvar controles de toque
+
+Could not save touch controls to file. See local console for details.
+== Não foi possível salvar os controles de toque no arquivo. Veja o console local para detalhes.
+
+Unsaved changes
+== Alterações não salvas
+
+Discard changes
+== Descartar alterações
+
+Are you sure that you want to discard the current changes to the touch controls?
+== Tem certeza de que deseja descartar as alterações atuais nos controles de toque?
+
+Are you sure that you want to reset the touch controls to default?
+== Tem certeza de que deseja redefinir os controles de toque para o padrão?
+
+Import from clipboard
+== Importar da área de transferência
+
+Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
+== Tem certeza de que deseja importar os controles de toque da área de transferência? Isso substituirá seus controles de toque atuais.
+
+Export to clipboard
+== Exportar para área de transferência
+
+Direct touch input while ingame
+== Entrada de toque direto durante o jogo
+
+[Direct touch input]
+Disabled
+== Desabilitada
+
+[Direct touch input]
+Active action
+== Ação ativa
+
+[Direct touch input]
+Aim
+== Mira
+
+[Direct touch input]
+Fire
+== Atirar
+
+[Direct touch input]
+Hook
+== Gancho
+
+Direct touch input while spectating
+== Entrada de toque direto durante observação
+
+Error loading touch controls
+== Erro ao carregar controles de toque
+
+Could not load touch controls from file. See local console for details.
+== Não foi possível carregar controles de toque do arquivo. Veja o console local para detalhes.
+
+Could not load default touch controls from file. See local console for details.
+== Não foi possível carregar controles de toque padrão do arquivo. Veja o console local para detalhes.
+
+Could not load touch controls from clipboard. See local console for details.
+== Não foi possível carregar controles de toque da área de transferência. Veja o console local para detalhes.
+
+Width of your own hook collision line
+== Largura de sua própria linha de colisão do gancho
+
+Width of others' hook collision line
+== Largura de linha de colisão do gancho dos outros
+
+Preview 'Hook collisions' being pressed
+== Prévia de 'colisões de gancho' sendo pressionada
+
+Aim
+== Mira
+
+Active: Fire
+== Ativo: atirar
+
+Active: Hook
+== Ativo: Gancho
+
+"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
+== "%s" não é compatível com pnglite e não pode ser carregado por versões antigas do DDNet:
+
+[Spectating Camera Mode Icon]
+AUTO
+== AUTO
+
+Toggle auto camera
+== Alternar câmera automática
+
+https://wiki.ddnet.org/wiki/Touch_controls
+== https://wiki.ddnet.org/wiki/Touch_controls
+
+Show client IDs in name plates
+== Mostrar IDs de clientes em placas de identificação
+
+Hook Strength
+== Força do gancho
+
+Size of hook strength icon and number indicator
+== Tamanho do ícone de força do gancho e indicador de número
+
+Key Presses
+== Teclas pressionadas
+
+Size of key press icons
+== Tamanho dos ícones de pressionamento de tecla
+
+Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
+== O servidor não pôde ser iniciado. Certifique-se de conceder a permissão de notificação nas configurações do aplicativo para que o servidor possa ser executado em segundo plano.
+
+Auto-sync player camera
+== Sincroniza automaticamente a câmera do jogador
+
+[Auto camera]
+Disabled
+== Desabilitada
+
+[Auto camera]
+Enabled
+== Habilitada
+
+[Auto camera]
+Unavailable for this player
+== Não disponível para este jogador
+
+[Auto camera]
+Inactive
+== Inativa
+
+[Auto camera]
+Active
+== Ativa
+
+Loading maps…
+== Carregando mapas…
+
+Community
+== Comunidade
+
+[Team status]
+forbidden
+== proibido
+
+[Team status]
+solo
+== solo
+
+[Team status]
+allowed
+== permitido
+
+[Team status]
+required
+== exigido
+
+Teams
+== Times
+
+[Team size]
+minimum
+== mínimo
+
+[Team size]
+maximum
+== máximo
+
+Saves file
+== Arquivo de salvamentos
+
+Open the saves file
+== Abre o arquivo de salvamentos
+
+Show FPS
+== Mostrar FPS
+
+Renders your frame rate in the top right
+== Renderiza sua taxa de quadros no canto direito superior
+
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Brazilian Portuguese translation by Isadora (slinack), yemDX, Ryomou Hentai Girl, HeroiAmarelo, Rafael Fontenelle, pv and DrafaKiller
+
+Show spectator cursor
+== Mostrar cursor do observador
+
+No demo with this filename exists
+== Não existe nnhuma demo com esse nome
+
+Map size
+== Tamanho do mapa
+
+Show number of spectators
+== Mostrar número de observadores
+
+[Show name plates]
+None
+== Nenhum
+
+[Show name plates]
+Own
+== Próprio
+
+[Show name plates]
+Others
+== Outros
+
+[Show name plates]
+All
+== Todos
+
+Name plates offset
+== Posição de placas de nome
+
+Show friend icon in name plates
+== Mostrar ícone de amigo em placas de nome
+
+Show client IDs on a seperate line
+== Mostrar IDs de clientes em uma linha separada
+
+Client IDs size
+== Tamanho de IDs de cliente
+
+Show players' key presses
+== Mostrar pressionamentos de teclas dos jogadores
+
+[Show players' key presses]
+None
+== Nenhum
+
+[Show players' key presses]
+Own
+== Próprio
+
+[Show players' key presses]
+Others
+== Outros
+
+[Show players' key presses]
+All
+== Todos
+
+Preview dummy's name plate
+== Pré-visualizar placas de nome do dummy
+
+AntiPing: prediction margin
+== AntiPing: margem de previsão
+
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== Sem VRAM. Tente definir 'cl_skins_loaded_max' para um valor menor ou remova recursos personalizados (skins, entidades, etc.), especialmente aqueles com alta resolução.
+
+This name cannot be used for files and folders
+== Este nome não pode ser usado para arquivos e pastas
+
+This skin name cannot be used.
+== Este nome de skin não pode ser usado.
+
+Skin could not be loaded due to an error. Check the local console for details.
+== Não foi possível carregar a skin devido a um erro. Verifique o console local para detalhes.
+
+Skin could not be found.
+== Não foi possível encontrar a skin.
+
+No skins match your filter criteria
+== Nenhuma skin corresponde aos seus critérios de filtro
+
+Preview player's name plate
+== Pré-visualizar placa de identificação do jogador
+
+Dragger Outline Color
+== Cor de contorno do dragger
+
+Dragger Inner Color
+== Cor interna do dragger
+
+[Spectating]
+Following %d: %s
+== Seguindo %d: %s
+
+Loading map
+== Carregando mapa
+
+Error checking player name
+== Erro ao verificar nome de jogador
+
+Could not check for existing player with your name. Check your internet connection.
+== Não foi possível verificar se há um jogador com o seu nome. Verifique sua conexão de internet. 

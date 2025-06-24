@@ -128,7 +128,7 @@ TEST_F(Jobs, LookupHostWebsocket)
 	EXPECT_EQ(pJob->Nettype(), NETTYPE);
 	if(pJob->Result() == 0)
 	{
-		EXPECT_EQ(pJob->Addr().type & NETTYPE_WEBSOCKET_IPV4, pJob->Addr().type);
+		EXPECT_EQ(pJob->Addr().type & (NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6), pJob->Addr().type);
 	}
 }
 

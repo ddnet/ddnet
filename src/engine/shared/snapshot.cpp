@@ -10,6 +10,7 @@
 #include <base/math.h>
 #include <base/system.h>
 
+#include <game/generated/protocol7.h>
 #include <game/generated/protocolglue.h>
 
 // CSnapshot
@@ -63,6 +64,11 @@ int CSnapshot::GetItemIndex(int Key) const
 			return i;
 	}
 	return -1;
+}
+
+void CSnapshot::InvalidateItem(int Index)
+{
+	((CSnapshotItem *)(DataStart() + Offsets()[Index]))->Invalidate();
 }
 
 const void *CSnapshot::FindItem(int Type, int Id) const
@@ -129,8 +135,15 @@ void CSnapshot::DebugDump() const
 bool CSnapshot::IsValid(size_t ActualSize) const
 {
 	// validate total size
-	if(ActualSize < sizeof(CSnapshot) || m_NumItems < 0 || m_DataSize < 0 || ActualSize != TotalSize())
+	if(ActualSize < sizeof(CSnapshot) ||
+		ActualSize > MAX_SIZE ||
+		m_NumItems < 0 ||
+		m_NumItems > MAX_ITEMS ||
+		m_DataSize < 0 ||
+		ActualSize != TotalSize())
+	{
 		return false;
+	}
 
 	// validate item offsets
 	const int *pOffsets = Offsets();
@@ -217,7 +230,7 @@ int CSnapshotDelta::DiffItem(const int *pPast, const int *pCurrent, int *pOut, i
 	return Needed;
 }
 
-void CSnapshotDelta::UndiffItem(const int *pPast, const int *pDiff, int *pOut, int Size, int *pDataRate)
+void CSnapshotDelta::UndiffItem(const int *pPast, const int *pDiff, int *pOut, int Size, uint64_t *pDataRate)
 {
 	while(Size)
 	{
@@ -230,7 +243,7 @@ void CSnapshotDelta::UndiffItem(const int *pPast, const int *pDiff, int *pOut, i
 		{
 			unsigned char aBuf[CVariableInt::MAX_BYTES_PACKED];
 			unsigned char *pEnd = CVariableInt::Pack(aBuf, *pDiff, sizeof(aBuf));
-			*pDataRate += (int)(pEnd - (unsigned char *)aBuf) * 8;
+			*pDataRate += (uint64_t)(pEnd - (unsigned char *)aBuf) * 8;
 		}
 
 		pOut++;
@@ -243,6 +256,7 @@ void CSnapshotDelta::UndiffItem(const int *pPast, const int *pDiff, int *pOut, i
 CSnapshotDelta::CSnapshotDelta()
 {
 	mem_zero(m_aItemSizes, sizeof(m_aItemSizes));
+	mem_zero(m_aItemSizes7, sizeof(m_aItemSizes7));
 	mem_zero(m_aSnapshotDataRate, sizeof(m_aSnapshotDataRate));
 	mem_zero(m_aSnapshotDataUpdates, sizeof(m_aSnapshotDataUpdates));
 	mem_zero(&m_Empty, sizeof(m_Empty));
@@ -251,6 +265,7 @@ CSnapshotDelta::CSnapshotDelta()
 CSnapshotDelta::CSnapshotDelta(const CSnapshotDelta &Old)
 {
 	mem_copy(m_aItemSizes, Old.m_aItemSizes, sizeof(m_aItemSizes));
+	mem_copy(m_aItemSizes7, Old.m_aItemSizes7, sizeof(m_aItemSizes7));
 	mem_copy(m_aSnapshotDataRate, Old.m_aSnapshotDataRate, sizeof(m_aSnapshotDataRate));
 	mem_copy(m_aSnapshotDataUpdates, Old.m_aSnapshotDataUpdates, sizeof(m_aSnapshotDataUpdates));
 	mem_zero(&m_Empty, sizeof(m_Empty));
@@ -261,6 +276,13 @@ void CSnapshotDelta::SetStaticsize(int ItemType, size_t Size)
 	dbg_assert(ItemType >= 0 && ItemType < MAX_NETOBJSIZES, "ItemType invalid");
 	dbg_assert(Size <= (size_t)std::numeric_limits<int16_t>::max(), "Size invalid");
 	m_aItemSizes[ItemType] = Size;
+}
+
+void CSnapshotDelta::SetStaticsize7(int ItemType, size_t Size)
+{
+	dbg_assert(ItemType >= 0 && ItemType < MAX_NETOBJSIZES, "ItemType invalid");
+	dbg_assert(Size <= (size_t)std::numeric_limits<int16_t>::max(), "Size invalid");
+	m_aItemSizes7[ItemType] = Size;
 }
 
 const CSnapshotDelta::CData *CSnapshotDelta::EmptyDelta() const
@@ -484,7 +506,7 @@ int CSnapshotDelta::DebugDumpDelta(const void *pSrcData, int DataSize)
 	return 0;
 }
 
-int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const void *pSrcData, int DataSize)
+int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const void *pSrcData, int DataSize, bool Sixup)
 {
 	CData *pDelta = (CData *)pSrcData;
 	int *pData = (int *)pDelta->m_aData;
@@ -542,8 +564,9 @@ int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const vo
 			return -203;
 
 		int ItemSize;
-		if(Type < MAX_NETOBJSIZES && m_aItemSizes[Type])
-			ItemSize = m_aItemSizes[Type];
+		const short *pItemSizes = Sixup ? m_aItemSizes7 : m_aItemSizes;
+		if(Type < MAX_NETOBJSIZES && pItemSizes[Type])
+			ItemSize = pItemSizes[Type];
 		else
 		{
 			if(pData + 1 > pEnd)
@@ -719,8 +742,11 @@ int *CSnapshotBuilder::GetItemData(int Key)
 {
 	for(int i = 0; i < m_NumItems; i++)
 	{
-		if(GetItem(i)->Key() == Key)
-			return GetItem(i)->Data();
+		CSnapshotItem *pItem = GetItem(i);
+		if(pItem->Key() == Key)
+		{
+			return pItem->Data();
+		}
 	}
 	return nullptr;
 }
@@ -728,12 +754,15 @@ int *CSnapshotBuilder::GetItemData(int Key)
 int CSnapshotBuilder::Finish(void *pSnapData)
 {
 	// flatten and make the snapshot
+	dbg_assert(m_NumItems <= CSnapshot::MAX_ITEMS, "Too many snap items");
 	CSnapshot *pSnap = (CSnapshot *)pSnapData;
 	pSnap->m_DataSize = m_DataSize;
 	pSnap->m_NumItems = m_NumItems;
+	const size_t TotalSize = pSnap->TotalSize();
+	dbg_assert(TotalSize <= (size_t)CSnapshot::MAX_SIZE, "Snapshot too large");
 	mem_copy(pSnap->Offsets(), m_aOffsets, pSnap->OffsetSize());
 	mem_copy(pSnap->DataStart(), m_aData, m_DataSize);
-	return pSnap->TotalSize();
+	return TotalSize;
 }
 
 int CSnapshotBuilder::GetTypeFromIndex(int Index) const
@@ -741,17 +770,22 @@ int CSnapshotBuilder::GetTypeFromIndex(int Index) const
 	return CSnapshot::MAX_TYPE - Index;
 }
 
-void CSnapshotBuilder::AddExtendedItemType(int Index)
+bool CSnapshotBuilder::AddExtendedItemType(int Index)
 {
 	dbg_assert(0 <= Index && Index < m_NumExtendedItemTypes, "index out of range");
-	int TypeId = m_aExtendedItemTypes[Index];
-	CUuid Uuid = g_UuidManager.GetUuid(TypeId);
-	int *pUuidItem = (int *)NewItem(0, GetTypeFromIndex(Index), sizeof(Uuid)); // NETOBJTYPE_EX
-	if(pUuidItem)
+	int *pUuidItem = static_cast<int *>(NewItem(0, GetTypeFromIndex(Index), sizeof(CUuid))); // NETOBJTYPE_EX
+	if(pUuidItem == nullptr)
 	{
-		for(size_t i = 0; i < sizeof(CUuid) / sizeof(int32_t); i++)
-			pUuidItem[i] = bytes_be_to_uint(&Uuid.m_aData[i * sizeof(int32_t)]);
+		return false;
 	}
+
+	const int TypeId = m_aExtendedItemTypes[Index];
+	const CUuid Uuid = g_UuidManager.GetUuid(TypeId);
+	for(size_t i = 0; i < sizeof(CUuid) / sizeof(int32_t); i++)
+	{
+		pUuidItem[i] = bytes_be_to_uint(&Uuid.m_aData[i * sizeof(int32_t)]);
+	}
+	return true;
 }
 
 int CSnapshotBuilder::GetExtendedItemTypeIndex(int TypeId)
@@ -767,8 +801,12 @@ int CSnapshotBuilder::GetExtendedItemTypeIndex(int TypeId)
 	int Index = m_NumExtendedItemTypes;
 	m_NumExtendedItemTypes++;
 	m_aExtendedItemTypes[Index] = TypeId;
-	AddExtendedItemType(Index);
-	return Index;
+	if(AddExtendedItemType(Index))
+	{
+		return Index;
+	}
+	m_NumExtendedItemTypes--;
+	return -1;
 }
 
 void *CSnapshotBuilder::NewItem(int Type, int Id, int Size)
@@ -778,19 +816,27 @@ void *CSnapshotBuilder::NewItem(int Type, int Id, int Size)
 		return nullptr;
 	}
 
-	if(m_DataSize + sizeof(CSnapshotItem) + Size >= CSnapshot::MAX_SIZE ||
-		m_NumItems + 1 >= CSnapshot::MAX_ITEMS)
+	if(m_NumItems >= CSnapshot::MAX_ITEMS)
 	{
-		dbg_assert(m_DataSize < CSnapshot::MAX_SIZE, "too much data");
-		dbg_assert(m_NumItems < CSnapshot::MAX_ITEMS, "too many items");
 		return nullptr;
 	}
 
-	bool Extended = false;
-	if(Type >= OFFSET_UUID)
+	const size_t OffsetSize = (m_NumItems + 1) * sizeof(int);
+	const size_t ItemSize = sizeof(CSnapshotItem) + Size;
+	if(sizeof(CSnapshot) + OffsetSize + m_DataSize + ItemSize > CSnapshot::MAX_SIZE)
 	{
-		Extended = true;
-		Type = GetTypeFromIndex(GetExtendedItemTypeIndex(Type));
+		return nullptr;
+	}
+
+	const bool Extended = Type >= OFFSET_UUID;
+	if(Extended)
+	{
+		const int ExtendedItemTypeIndex = GetExtendedItemTypeIndex(Type);
+		if(ExtendedItemTypeIndex == -1)
+		{
+			return nullptr;
+		}
+		Type = GetTypeFromIndex(ExtendedItemTypeIndex);
 	}
 
 	CSnapshotItem *pObj = (CSnapshotItem *)(m_aData + m_DataSize);
@@ -808,11 +854,11 @@ void *CSnapshotBuilder::NewItem(int Type, int Id, int Size)
 	else if(Type < 0)
 		return nullptr;
 
-	mem_zero(pObj, sizeof(CSnapshotItem) + Size);
 	pObj->m_TypeAndId = (Type << 16) | Id;
 	m_aOffsets[m_NumItems] = m_DataSize;
-	m_DataSize += sizeof(CSnapshotItem) + Size;
+	m_DataSize += ItemSize;
 	m_NumItems++;
 
+	mem_zero(pObj->Data(), Size);
 	return pObj->Data();
 }

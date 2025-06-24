@@ -54,9 +54,10 @@ enum
 	CFGFLAG_GAME = 1 << 8,
 	CFGFLAG_NONTEEHISTORIC = 1 << 9,
 	CFGFLAG_COLLIGHT = 1 << 10,
-	CFGFLAG_COLALPHA = 1 << 11,
-	CFGFLAG_INSENSITIVE = 1 << 12,
-	CMDFLAG_PRACTICE = 1 << 13,
+	CFGFLAG_COLLIGHT7 = 1 << 11,
+	CFGFLAG_COLALPHA = 1 << 12,
+	CFGFLAG_INSENSITIVE = 1 << 13,
+	CMDFLAG_PRACTICE = 1 << 14,
 };
 
 struct SConfigVariable
@@ -133,7 +134,7 @@ struct SColorConfigVariable : public SConfigVariable
 {
 	unsigned *m_pVariable;
 	unsigned m_Default;
-	bool m_Light;
+	float m_DarkestLighting;
 	bool m_Alpha;
 	unsigned m_OldValue;
 
@@ -141,11 +142,22 @@ struct SColorConfigVariable : public SConfigVariable
 		SConfigVariable(pConsole, pScriptName, Type, Flags, pHelp),
 		m_pVariable(pVariable),
 		m_Default(Default),
-		m_Light(Flags & CFGFLAG_COLLIGHT),
 		m_Alpha(Flags & CFGFLAG_COLALPHA),
 		m_OldValue(Default)
 	{
 		*m_pVariable = m_Default;
+		if(Flags & CFGFLAG_COLLIGHT)
+		{
+			m_DarkestLighting = ColorHSLA::DARKEST_LGT;
+		}
+		else if(Flags & CFGFLAG_COLLIGHT7)
+		{
+			m_DarkestLighting = ColorHSLA::DARKEST_LGT7;
+		}
+		else
+		{
+			m_DarkestLighting = 0.0f;
+		}
 	}
 
 	~SColorConfigVariable() override = default;

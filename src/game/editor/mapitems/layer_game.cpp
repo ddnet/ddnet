@@ -3,12 +3,13 @@
 #include "layer_game.h"
 
 #include <game/editor/editor.h>
+#include <game/editor/editor_actions.h>
 
 CLayerGame::CLayerGame(CEditor *pEditor, int w, int h) :
 	CLayerTiles(pEditor, w, h)
 {
 	str_copy(m_aName, "Game");
-	m_Game = 1;
+	m_HasGame = true;
 }
 
 CLayerGame::~CLayerGame() = default;
@@ -35,6 +36,9 @@ void CLayerGame::SetTile(int x, int y, CTile Tile)
 			std::shared_ptr<CLayer> pLayerFront = std::make_shared<CLayerFront>(m_pEditor, m_Width, m_Height);
 			m_pEditor->m_Map.MakeFrontLayer(pLayerFront);
 			m_pEditor->m_Map.m_pGameGroup->AddLayer(pLayerFront);
+			int GameGroupIndex = std::find(m_pEditor->m_Map.m_vpGroups.begin(), m_pEditor->m_Map.m_vpGroups.end(), m_pEditor->m_Map.m_pGameGroup) - m_pEditor->m_Map.m_vpGroups.begin();
+			int LayerIndex = m_pEditor->m_Map.m_vpGroups[GameGroupIndex]->m_vpLayers.size() - 1;
+			m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(m_pEditor, GameGroupIndex, LayerIndex));
 		}
 		CTile nohook = {TILE_NOHOOK};
 		CLayerTiles::SetTile(x, y, nohook);
@@ -48,7 +52,7 @@ void CLayerGame::SetTile(int x, int y, CTile Tile)
 			CTile air = {TILE_AIR};
 			m_pEditor->m_Map.m_pFrontLayer->CLayerTiles::SetTile(x, y, air); // NOLINT(bugprone-parent-virtual-call)
 		}
-		if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidGameTile(Tile.m_Index))
+		if(m_pEditor->IsAllowPlaceUnusedTiles() || IsValidGameTile(Tile.m_Index))
 		{
 			CLayerTiles::SetTile(x, y, Tile);
 		}

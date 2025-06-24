@@ -136,7 +136,24 @@ public:
 	void Draw(ColorRGBA Color, int Corners, float Rounding) const;
 	void Draw4(ColorRGBA ColorTopLeft, ColorRGBA ColorTopRight, ColorRGBA ColorBottomLeft, ColorRGBA ColorBottomRight, int Corners, float Rounding) const;
 
-	vec2 Center() const { return vec2(x + w / 2.0f, y + h / 2.0f); }
+	/**
+	 * Returns the top-left position of *this* CUIRect as a vec2.
+	 *
+	 * @return Top-left position as vec2.
+	 */
+	vec2 TopLeft() const { return vec2(x, y); }
+	/**
+	 * Returns the size of *this* CUIRect as a vec2.
+	 *
+	 * @return Size as vec2.
+	 */
+	vec2 Size() const { return vec2(w, h); }
+	/**
+	 * Returns the center position of *this* CUIRect as a vec2.
+	 *
+	 * @return Center position as vec2.
+	 */
+	vec2 Center() const { return TopLeft() + Size() / 2.0f; }
 };
 
 #endif

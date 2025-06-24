@@ -1,38 +1,3 @@
-##### authors #####
-#originally created by:
-#	SiuFu
-#modified by:
-# 2020-08-19 TsFreddie
-# 2020-08-20 Dan_cao
-# 2020-11-12 TsFreddie
-# 2021-06-01 TsFreddie
-# 2021-11-19 cheeser0613
-# 2021-12-21 cheeser0613
-# 2022-02-07 cheeser0613
-# 2022-03-19 cheeser0613
-# 2022-03-22 cheeser0613
-# 2022-03-24 cheeser0613
-# 2022-05-14 cheeser0613
-# 2022-06-16 cheeser0613
-# 2022-06-27 cheeser0613
-# 2022-08-08 cheeser0613
-# 2022-09-17 cheeser0613
-# 2022-10-24 cheeser0613
-# 2022-12-11 cheeser0613
-# 2023-01-11 cheeser0613
-# 2023-04-01 cheeser0613
-# 2023-05-25 cheeser0613
-# 2023-07-20 By
-# 2023-08-11 By
-# 2023-11-25 By
-# 2024-01-15 By
-# 2024-03-05 By
-# 2024-04-21 By
-# 2024-06-10 By
-##### /authors #####
-
-##### translated strings #####
-
 %ds left
 == 還剩%d秒
 
@@ -330,9 +295,6 @@ HUD
 Player country:
 == 玩家國家/地區：
 
-Player options
-== 玩家選項
-
 Players
 == 玩家
 
@@ -462,9 +424,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == 此伺服器執行著經過調整的非標準遊戲模式。
 
-Time limit
-== 規定時限
-
 Time limit: %d min
 == 規定時限：%d 分鐘
 
@@ -482,6 +441,9 @@ Use sounds
 
 Use team colors for name plates
 == 用隊伍顏色顯示暱稱
+
+Show friend icon in name plates
+== 在暱稱中顯示好友圖示
 
 V-Sync
 == 垂直同步
@@ -573,9 +535,6 @@ Your skin
 Reset to defaults
 == 恢復預設設定
 
-Round
-== 回合
-
 Lht.
 == 亮度
 
@@ -593,6 +552,9 @@ LAN
 
 Name plates size
 == 暱稱大小
+
+Name plates offset
+== 暱稱距離
 
 Show score
 == 顯示比分
@@ -662,9 +624,6 @@ AntiPing: predict grenade paths
 
 Show other players' hook collision lines
 == 顯示其他玩家的鉤索輔助線
-
-Show other players' key presses
-== 顯示其他玩家的按鍵
 
 Show tiles layers from BG map
 == 顯示實體層背景地圖的圖塊層
@@ -822,9 +781,6 @@ Show DDNet map finishes in server browser
 transmits your player name to info.ddnet.org
 == 將會發送你的玩家名稱到 info.ddnet.org
 
-Reload
-== 重新整理
-
 Enable replays
 == 啟用短時回放
 
@@ -947,9 +903,6 @@ Server best:
 
 Learn
 == 教程Wiki
-
-Use high DPI
-== 使用高 DPI
 
 Personal best:
 == 個人最佳
@@ -1156,9 +1109,6 @@ https://ddnet.org/discord
 Are you sure that you want to disconnect and switch to a different server?
 == 確定要中斷此伺服器并嘗試加入其他伺服器嗎？
 
-Show local player's key presses
-== 顯示周圍玩家的按鍵輸入
-
 Settings file
 == 設定檔案
 
@@ -1210,7 +1160,7 @@ When you cross the start line, show a ghost tee replicating the movements of you
 Opacity
 == 不透明度
 
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == 調整單人區域或其他隊伍中玩家的不透明度
 
 Quads are used for background decoration
@@ -1229,7 +1179,7 @@ Team %d
 == 隊伍 %d
 
 Position:
-== 坐標	
+== 坐標
 
 Speed:
 == 速度
@@ -1380,20 +1330,17 @@ Show health, shields and ammo
 DDRace HUD
 == DDRace HUD
 
-Show client IDs in scoreboard
-== 顯示客戶端 IDs (計分板中)
-
 Show DDRace HUD
 == 顯示 DDRace HUD
 
 Show jumps indicator
 == 顯示跳躍次數
 
+Show number of spectators
+== 顯示旁觀者人數
+
 Hook collision line
 == 鉤索輔助線
-
-Hook collision line width
-== 輔助線寬度
 
 Hook collision line opacity
 == 輔助線不透明度
@@ -1514,11 +1461,7 @@ Are you sure that you want to reset the controls to their defaults?
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 初始化失敗。請嘗試打開配置目錄中的設定檔案 (settings_ddnet.cfg) 并將“gfx_backend OpenGL”修改為“gfx_backend Vulkan” (若沒有前者則可直接輸入後者) 再重試。
-
-[Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== 顯存不足。請嘗試移除自定義材質 (如外觀，實體層等等)，尤其高分辨率的自定義材質。
+== 初始化失敗。請嘗試打開配置目錄中的設定檔案 (settings_ddnet.cfg) 并將 “gfx_backend” 設定為 “gfx_backend OpenGL” 或 “gfx_backend Vulkan” 再重試。
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
@@ -1538,7 +1481,7 @@ Failed to swap framebuffers. Try to update your GPU drivers.
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 未知錯誤。請嘗試打開配置目錄中的設定檔案 (settings_ddnet.cfg) 并將“gfx_backend OpenGL”修改為“gfx_backend Vulkan” (若沒有前者則可直接輸入後者) 再重試。
+== 未知錯誤。請嘗試打開配置目錄中的設定檔案 (settings_ddnet.cfg) 并將 “gfx_backend” 設定為 “gfx_backend OpenGL” 或 “gfx_backend Vulkan” 再重試。
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
@@ -1566,7 +1509,7 @@ No controller found. Plug in a controller.
 == 未檢測到任何控制器。請嘗試重新連接控制器。
 
 Unregister protocol and file extensions
-== 未注冊的協議與擴充檔案
+== 解除連結與檔案類型關聯
 
 Open the directory to add custom assets
 == 打開用以新增自定義材質的資料夾路徑
@@ -1584,9 +1527,6 @@ Copy info
 Create a random skin
 == 隨機創造外觀
 
-Online players (%d)
-== 在綫玩家 (%d)
-
 Online clanmates (%d)
 == 在綫戰隊隊友 (%d)
 
@@ -1602,9 +1542,6 @@ Click to remove this player from your friends list.
 
 Click to remove this clan from your friends list.
 == 點擊以將此戰隊從好友列表中移除
-
-None
-== 無
 
 Add Clan
 == 新增戰隊
@@ -1703,12 +1640,12 @@ Go back the specified duration
 == 倒轉指定時長
 
 [Demo player duration]
-%d min.
-== %d 分
+%s min.
+== %s 分
 
 [Demo player duration]
-%d sec.
-== %d 秒
+%s sec.
+== %s 秒
 
 Change the skip duration
 == 變更指定時長
@@ -1855,9 +1792,6 @@ Player info change cooldown
 Always show chat
 == 始終顯示聊天框
 
-Show friend mark (♥) in name plates
-== 在暱稱上顯示好友標記 (♥)
-
 Show hook strength icon indicator
 == 顯示鉤索強度圖示
 
@@ -1881,3 +1815,407 @@ Tee
 
 Show only chat messages from team members
 == 只顯示隊伍聊天訊息
+
+[Spectating]
+Following %s
+== 正在旁觀 %s
+
+Example of usage
+== 用途示例
+
+Round %d/%d
+== 輪次 %d/%d
+
+[Spectators]
+%d others…
+== %d 其他…
+
+[Team and size]
+%d\n(%d/%d)
+== %d\n(%d/%d)
+
+Team %d (%d/%d)
+== 隊伍 %d (%d/%d)
+
+https://wiki.ddnet.org/wiki/Mapping
+== https://wiki.ddnet.org/index.php?title=Mapping/zh&variant=zh-hant
+
+Could not resolve connect address '%s'. See local console for details.
+== 無法解析連線地址 '%s'。檢查本機控制台以取得詳情。
+
+Connect address error
+== 連線地址錯誤
+
+Could not connect dummy
+== 無法連線分身
+
+Dummy is not allowed on this server
+== 此服務器禁止使用分身
+
+Please wait…
+== 請稍等…
+
+Show client IDs (scoreboard, chat, spectator)
+== 顯示客戶端 ID（計分板、聊天、旁觀者）
+
+Are you sure that you want to delete '%s'?
+== 你確定要刪除'%s'嗎？
+
+Delete skin
+== 刪除外觀
+
+Basic
+== 基本
+
+Custom
+== 自定義
+
+Unable to delete skin
+== 無法刪除外觀
+
+Save skin
+== 保存外觀
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== 你確定要保存外觀嗎？如果已存在同名外觀，將會被替換。
+
+Unable to save the skin
+== 無法保存外觀
+
+Unable to save the skin with a reserved name
+== 無法保存使用保留名稱的外觀
+
+No local servers found (ports %d-%d)
+== 未找到本地伺服器（端口 %d-%d）
+
+[Hertz]
+Hz
+== Hz
+
+[skins]
+Body
+== 身體
+
+[skins]
+Marking
+== 標記
+
+[skins]
+Decoration
+== 裝飾
+
+[skins]
+Hands
+== 手
+
+[skins]
+Feet
+== 腳
+
+[skins]
+Eyes
+== 眼睛
+
+Some fonts could not be loaded. Check the local console for details.
+== 未能載入某些字體。檢查本機控制台以取得詳情。
+
+Online friends (%d)
+== 在線好友（%d人）
+
+Add friends by entering their name below or by clicking their name in the player list.
+== 在下方輸入好友名稱或點擊玩家列表中的好友的名稱即可添加好友
+
+Add clanmates by entering their clan below and leaving the name blank.
+== 在下方輸入戰隊名並留空名稱即可添加戰隊
+
+Edit touch controls
+== 編輯觸控設置
+
+Close
+== 關閉
+
+Save changes
+== 保存更改
+
+Error saving touch controls
+== 保存觸控設置錯誤
+
+Could not save touch controls to file. See local console for details.
+== 無法將觸控設置保存到文件。檢查本機控制台以取得詳情。
+
+Unsaved changes
+== 更改未保存
+
+Discard changes
+== 放棄更改
+
+Are you sure that you want to discard the current changes to the touch controls?
+== 確定要放棄當前對觸控設置的更改嗎？
+
+Are you sure that you want to reset the touch controls to default?
+== 確定要將觸控設置重置為默認設置嗎？
+
+Import from clipboard
+== 從剪貼簿導入
+
+Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
+== 確定要從剪貼簿導入觸控設置嗎？這將覆蓋當前的觸控設置。
+
+Export to clipboard
+== 導出到剪貼簿
+
+Direct touch input while ingame
+== 遊戲時直接觸摸操作
+
+[Direct touch input]
+Disabled
+== 禁用
+
+[Direct touch input]
+Active action
+== 當前行為
+
+[Direct touch input]
+Aim
+== 瞄準
+
+[Direct touch input]
+Fire
+== 開火
+
+[Direct touch input]
+Hook
+== 鉤索
+
+Direct touch input while spectating
+== 旁觀時直接觸摸操作
+
+Error loading touch controls
+== 加載觸控設置錯誤
+
+Could not load touch controls from file. See local console for details.
+== 無法從文件加載觸控設置。檢查本機控制台以取得詳情。
+
+Could not load default touch controls from file. See local console for details.
+== 無法從文件加載默認觸控設置。檢查本機控制台以取得詳情。
+
+Could not load touch controls from clipboard. See local console for details.
+== 無法從剪貼板加載觸控設置。檢查本機控制台以取得詳情。
+
+Width of your own hook collision line
+== 自己的鉤索輔助線寬度
+
+Width of others' hook collision line
+== 其他玩家的鉤索輔助線寬度
+
+Preview 'Hook collisions' being pressed
+== 預覽按下時的鉤索輔助線
+
+Aim
+== 瞄準
+
+Active: Fire
+== 當前：開火
+
+Active: Hook
+== 當前：鉤鎖
+
+"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
+== "%s" 與 pnglite 不兼容，無法被舊版本 DDNet 加載
+
+[Spectating Camera Mode Icon]
+AUTO
+== 自動
+
+Toggle auto camera
+== 切換自動視角
+
+https://wiki.ddnet.org/wiki/Touch_controls
+== https://wiki.ddnet.org/index.php?title=Touch_controls/zh&variant=zh-hant
+
+Show client IDs in name plates
+== 顯示客戶端 ID
+
+Show client IDs on a seperate line
+== 客户端 ID 換行顯示
+
+Client IDs size
+== 客户端 ID 大小
+
+Hook Strength
+== 鉤索強度
+
+Size of hook strength icon and number indicator
+== 鉤索強度圖示與數值的大小
+
+Key Presses
+== 按鍵顯示
+
+Show players' key presses
+== 顯示按鍵
+
+Size of key press icons
+== 按鍵顯示圖示大小
+
+Preview dummy's name plate
+== 預覽分身暱稱
+
+Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
+== 伺服器無法啟動。請確保在應用程式設置中授予通知權限，以便伺服器可以在後台運行。
+
+Auto-sync player camera
+== 自動同步玩家視角
+
+[Auto camera]
+Disabled
+== 已禁用
+
+[Auto camera]
+Enabled
+== 已啟用
+
+[Auto camera]
+Unavailable for this player
+== 此玩家不可用
+
+[Auto camera]
+Inactive
+== 未啟用
+
+[Auto camera]
+Active
+== 已啟用
+
+Loading maps…
+== 加載地圖中…
+
+Community
+== 社群
+
+[Team status]
+forbidden
+== 禁止
+
+[Team status]
+solo
+== 單人
+
+[Team status]
+allowed
+== 允許
+
+[Team status]
+required
+== 強制
+
+Teams
+== 組隊
+
+[Team size]
+minimum
+== 最小人數
+
+[Team size]
+maximum
+== 最大人數
+
+Saves file
+== 存檔密碼文件
+
+Open the saves file
+== 打開存檔密碼文件
+
+Show FPS
+== 顯示 FPS
+
+Renders your frame rate in the top right
+== 在右上角顯示幀率
+
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== 繁體中文翻譯由以下人員貢獻：SiuFu, TsFreddie, Dan_cao, cheeser0613, By, Pioooooo, 豆腐渣, XCWQW1, Bamcane, ZerolAcqua
+
+Show spectator cursor
+== 顯示旁觀者指標
+
+No demo with this filename exists
+== 此回放檔案不存在
+
+Map size
+== 地圖佔用空間
+
+[Show name plates]
+None
+== 禁用
+
+[Show name plates]
+Own
+== 自身
+
+[Show name plates]
+Others
+== 他人
+
+[Show name plates]
+All
+== 全部
+
+[Show players' key presses]
+None
+== 禁用
+
+[Show players' key presses]
+Own
+== 自身
+
+[Show players' key presses]
+Others
+== 他人
+
+[Show players' key presses]
+All
+== 全部
+
+AntiPing: prediction margin
+== AntiPing：預測容差
+
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== 顯示記憶體不足。請嘗試將 'cl_skins_loaded_max' 設定為較低的值，或移除自定義資源（如外觀、實體等），尤其是高解析度的資源。
+
+This name cannot be used for files and folders
+== 此名稱不能用於檔案和資料夾
+
+This skin name cannot be used.
+== 此外觀名稱不能使用。
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 載入外觀時出錯。檢查本機控制台以取得詳情。
+
+Skin could not be found.
+== 未找到外觀。
+
+No skins match your filter criteria
+== 沒有外觀符合設定的篩選條件
+
+Preview player's name plate
+== 預覽玩家暱稱
+
+Dragger Outline Color
+== 光索外框顏色
+
+Dragger Inner Color
+== 光索實心顏色
+
+[Spectating]
+Following %d: %s
+== 
+
+Loading map
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
+== 

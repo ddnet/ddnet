@@ -6,24 +6,18 @@
 #include <game/client/prediction/entity.h>
 
 #include <game/gamecore.h>
+#include <game/generated/protocol.h>
+#include <game/race_state.h>
 
 enum
 {
-	WEAPON_GAME = -3, // team switching etc
-	WEAPON_SELF = -2, // console kill command
-	WEAPON_WORLD = -1, // death tiles etc
-};
-
-enum
-{
-	FAKETUNE_FREEZE = 1,
-	FAKETUNE_SOLO = 2,
-	FAKETUNE_NOJUMP = 4,
-	FAKETUNE_NOCOLL = 8,
-	FAKETUNE_NOHOOK = 16,
-	FAKETUNE_JETPACK = 32,
-	FAKETUNE_NOHAMMER = 64,
-
+	FAKETUNE_FREEZE = 1 << 0,
+	FAKETUNE_SOLO = 1 << 1,
+	FAKETUNE_NOJUMP = 1 << 2,
+	FAKETUNE_NOCOLL = 1 << 3,
+	FAKETUNE_NOHOOK = 1 << 4,
+	FAKETUNE_JETPACK = 1 << 5,
+	FAKETUNE_NOHAMMER = 1 << 6,
 };
 
 class CCharacter : public CEntity
@@ -76,12 +70,11 @@ public:
 	bool UnFreeze();
 	void GiveAllWeapons();
 	int Team();
-	bool CanCollide(int ClientId);
+	bool CanCollide(int ClientId) override;
 	bool SameTeam(int ClientId);
 	bool m_NinjaJetpack;
 	int m_FreezeTime;
 	bool m_FrozenLastTick;
-	int m_TuneZone;
 	vec2 m_PrevPos;
 	vec2 m_PrevPrevPos;
 	int m_TeleCheckpoint;
@@ -120,12 +113,11 @@ public:
 	int GetAttackTick() { return m_AttackTick; }
 	int GetStrongWeakId() { return m_StrongWeakId; }
 
-	CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended = 0);
+	CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended = nullptr);
 	void Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal);
 	void SetCoreWorld(CGameWorld *pGameWorld);
 
 	int m_LastSnapWeapon;
-	int m_LastJetpackStrength;
 	bool m_KeepHooked;
 	int m_GameTeam;
 	bool m_CanMoveInFreeze;
@@ -133,6 +125,8 @@ public:
 	bool Match(CCharacter *pChar) const;
 	void ResetPrediction();
 	void SetTuneZone(int Zone);
+	int GetOverriddenTuneZone() const;
+	int GetPureTuneZone() const;
 
 	bool HammerHitDisabled() { return m_Core.m_HammerHitDisabled; }
 	bool ShotgunHitDisabled() { return m_Core.m_ShotgunHitDisabled; }
@@ -165,6 +159,10 @@ private:
 
 	int m_NumInputs;
 
+	// tune
+	int m_TuneZone;
+	int m_TuneZoneOverride;
+
 	// the player core for the physics
 	CCharacterCore m_Core;
 
@@ -183,14 +181,6 @@ private:
 
 	int m_LastWeaponSwitchTick;
 	int m_LastTuneZoneTick;
-};
-
-enum
-{
-	DDRACE_NONE = 0,
-	DDRACE_STARTED,
-	DDRACE_CHEAT, // no time and won't start again unless ordered by a mod or death
-	DDRACE_FINISHED
 };
 
 #endif

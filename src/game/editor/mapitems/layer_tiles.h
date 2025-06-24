@@ -2,6 +2,7 @@
 #define GAME_EDITOR_MAPITEMS_LAYER_TILES_H
 
 #include <game/editor/editor_trackers.h>
+#include <game/editor/enums.h>
 #include <map>
 
 #include "layer.h"
@@ -122,7 +123,9 @@ public:
 	void BrushSelecting(CUIRect Rect) override;
 	int BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect) override;
 	void FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect) override;
-	void BrushDraw(std::shared_ptr<CLayer> pBrush, float wx, float wy) override;
+	void FillGameTiles(EGameTileOp Fill);
+	bool CanFillGameTiles() const;
+	void BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos) override;
 	void BrushFlipX() override;
 	void BrushFlipY() override;
 	void BrushRotate(float Amount) override;
@@ -161,7 +164,7 @@ public:
 
 	void FlagModified(int x, int y, int w, int h);
 
-	int m_Game;
+	bool m_HasGame;
 	int m_Image;
 	int m_Width;
 	int m_Height;
@@ -172,14 +175,17 @@ public:
 
 	// DDRace
 
+	int m_FillGameTile = -1;
+	bool m_LiveGameTiles = false;
 	int m_AutoMapperConfig;
+	int m_AutoMapperReference;
 	int m_Seed;
 	bool m_AutoAutoMap;
-	int m_Tele;
-	int m_Speedup;
-	int m_Front;
-	int m_Switch;
-	int m_Tune;
+	bool m_HasTele;
+	bool m_HasSpeedup;
+	bool m_HasFront;
+	bool m_HasSwitch;
+	bool m_HasTune;
 	char m_aFileName[IO_MAX_PATH_LENGTH];
 
 	EditorTileStateChangeHistory<STileStateChange> m_TilesHistory;

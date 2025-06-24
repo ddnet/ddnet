@@ -169,7 +169,7 @@ constexpr inline bool closest_point_on_line(vector2_base<T> line_pointA, vector2
 		vector2_base<T> AP = target_point - line_pointA;
 		T APdotAB = dot(AP, AB);
 		T t = APdotAB / SquaredMagnitudeAB;
-		out_pos = line_pointA + AB * clamp(t, (T)0, (T)1);
+		out_pos = line_pointA + AB * std::clamp(t, (T)0, (T)1);
 		return true;
 	}
 	else

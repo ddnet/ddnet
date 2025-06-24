@@ -16,6 +16,7 @@
 #include "gameworld.h"
 #include "teehistorian.h"
 
+#include <map>
 #include <memory>
 #include <string>
 
@@ -40,11 +41,6 @@
 			All players (CPlayer::snap)
 
 */
-
-enum
-{
-	NUM_TUNEZONES = 256
-};
 
 class CCharacter;
 class IConfigManager;
@@ -73,6 +69,34 @@ struct CSnapContext
 private:
 	int m_ClientVersion;
 	bool m_Sixup;
+};
+
+class CMute
+{
+public:
+	int64_t m_Expire;
+	bool m_Initialized = false;
+	bool m_InitialDelay;
+	char m_aReason[128];
+
+	int SecondsLeft() const;
+};
+
+class CMutes
+{
+public:
+	CMutes(const char *pSystemName);
+
+	bool Mute(const NETADDR *pAddr, int Seconds, const char *pReason, bool InitialDelay);
+	void UnmuteIndex(int Index);
+	void UnmuteAddr(const NETADDR *pAddr);
+	void UnmuteExpired();
+	std::optional<CMute> IsMuted(const NETADDR *pAddr, bool RespectInitialDelay) const;
+	void Print(int Page) const;
+
+private:
+	const char *m_pSystemName;
+	std::map<NETADDR, CMute> m_Mutes;
 };
 
 class CGameContext : public IGameServer
@@ -124,6 +148,7 @@ class CGameContext : public IGameServer
 	static void ConSay(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetTeamAll(IConsole::IResult *pResult, void *pUserData);
+	static void ConHotReload(IConsole::IResult *pResult, void *pUserData);
 	static void ConAddVote(IConsole::IResult *pResult, void *pUserData);
 	static void ConRemoveVote(IConsole::IResult *pResult, void *pUserData);
 	static void ConForceVote(IConsole::IResult *pResult, void *pUserData);
@@ -153,6 +178,7 @@ class CGameContext : public IGameServer
 	{
 		bool m_IsSpectator;
 		bool m_IsAfk;
+		int m_LastWhisperTo;
 	};
 
 public:
@@ -180,6 +206,9 @@ public:
 	// keep last input to always apply when none is sent
 	CNetObj_PlayerInput m_aLastPlayerInput[MAX_CLIENTS];
 	bool m_aPlayerHasInput[MAX_CLIENTS];
+	CSaveTeam *m_apSavedTeams[MAX_CLIENTS];
+	CSaveHotReloadTee *m_apSavedTees[MAX_CLIENTS];
+	int m_aTeamMapping[MAX_CLIENTS];
 
 	// returns last input if available otherwise nulled PlayerInput object
 	// ClientId has to be valid
@@ -190,7 +219,7 @@ public:
 
 	// helper functions
 	class CCharacter *GetPlayerChar(int ClientId);
-	bool EmulateBug(int Bug);
+	bool EmulateBug(int Bug) const;
 	std::vector<SSwitchers> &Switchers() { return m_World.m_Core.m_vSwitchers; }
 
 	// voting
@@ -239,25 +268,26 @@ public:
 	void CreateHammerHit(vec2 Pos, CClientMask Mask = CClientMask().set());
 	void CreatePlayerSpawn(vec2 Pos, CClientMask Mask = CClientMask().set());
 	void CreateDeath(vec2 Pos, int ClientId, CClientMask Mask = CClientMask().set());
-	void CreateFinishConfetti(vec2 Pos, CClientMask Mask = CClientMask().set());
+	void CreateBirthdayEffect(vec2 Pos, CClientMask Mask = CClientMask().set());
+	void CreateFinishEffect(vec2 Pos, CClientMask Mask = CClientMask().set());
 	void CreateSound(vec2 Pos, int Sound, CClientMask Mask = CClientMask().set());
 	void CreateSoundGlobal(int Sound, int Target = -1) const;
 
 	void SnapSwitchers(int SnappingClient);
 	bool SnapLaserObject(const CSnapContext &Context, int SnapId, const vec2 &To, const vec2 &From, int StartTick, int Owner = -1, int LaserType = -1, int Subtype = -1, int SwitchNumber = -1) const;
-	bool SnapPickup(const CSnapContext &Context, int SnapId, const vec2 &Pos, int Type, int SubType, int SwitchNumber) const;
+	bool SnapPickup(const CSnapContext &Context, int SnapId, const vec2 &Pos, int Type, int SubType, int SwitchNumber, int Flags) const;
 
 	enum
 	{
-		CHAT_SIX = 1 << 0,
-		CHAT_SIXUP = 1 << 1,
+		FLAG_SIX = 1 << 0,
+		FLAG_SIXUP = 1 << 1,
 	};
 
 	// network
-	void CallVote(int ClientId, const char *pDesc, const char *pCmd, const char *pReason, const char *pChatmsg, const char *pSixupDesc = 0);
-	void SendChatTarget(int To, const char *pText, int Flags = CHAT_SIX | CHAT_SIXUP) const;
+	void CallVote(int ClientId, const char *pDesc, const char *pCmd, const char *pReason, const char *pChatmsg, const char *pSixupDesc = nullptr);
+	void SendChatTarget(int To, const char *pText, int VersionFlags = FLAG_SIX | FLAG_SIXUP) const;
 	void SendChatTeam(int Team, const char *pText) const;
-	void SendChat(int ClientId, int Team, const char *pText, int SpamProtectionClientId = -1, int Flags = CHAT_SIX | CHAT_SIXUP);
+	void SendChat(int ClientId, int Team, const char *pText, int SpamProtectionClientId = -1, int VersionFlags = FLAG_SIX | FLAG_SIXUP);
 	void SendStartWarning(int ClientId, const char *pMessage);
 	void SendEmoticon(int ClientId, int Emoticon, int TargetClientId) const;
 	void SendWeaponPickup(int ClientId, int Weapon) const;
@@ -282,7 +312,7 @@ public:
 	void OnConsoleInit() override;
 	void RegisterDDRaceCommands();
 	void RegisterChatCommands();
-	void OnMapChange(char *pNewMapName, int MapNameSize) override;
+	[[nodiscard]] bool OnMapChange(char *pNewMapName, int MapNameSize) override;
 	void OnShutdown(void *pPersistentData) override;
 
 	void OnTick() override;
@@ -303,6 +333,7 @@ public:
 	void OnShowOthersLegacyNetMessage(const CNetMsg_Cl_ShowOthersLegacy *pMsg, int ClientId);
 	void OnShowOthersNetMessage(const CNetMsg_Cl_ShowOthers *pMsg, int ClientId);
 	void OnShowDistanceNetMessage(const CNetMsg_Cl_ShowDistance *pMsg, int ClientId);
+	void OnCameraInfoNetMessage(const CNetMsg_Cl_CameraInfo *pMsg, int ClientId);
 	void OnSetSpectatorModeNetMessage(const CNetMsg_Cl_SetSpectatorMode *pMsg, int ClientId);
 	void OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId);
 	void OnEmoticonNetMessage(const CNetMsg_Cl_Emoticon *pMsg, int ClientId);
@@ -317,6 +348,8 @@ public:
 	void OnClientDirectInput(int ClientId, void *pInput) override;
 	void OnClientPredictedInput(int ClientId, void *pInput) override;
 	void OnClientPredictedEarlyInput(int ClientId, void *pInput) override;
+
+	void PreInputClients(int ClientId, bool *pClients) override;
 
 	void TeehistorianRecordAntibot(const void *pData, int DataSize) override;
 	void TeehistorianRecordPlayerJoin(int ClientId, bool Sixup) override;
@@ -356,13 +389,16 @@ public:
 	bool RateLimitPlayerVote(int ClientId);
 	bool RateLimitPlayerMapVote(int ClientId) const;
 
-	void OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int Id) override;
+	void OnUpdatePlayerServerInfo(CJsonStringWriter *pJSonWriter, int Id) override;
+	void ReadCensorList();
+
+	bool PracticeByDefault() const;
 
 	std::shared_ptr<CScoreRandomMapResult> m_SqlRandomMapResult;
 
 private:
 	// starting 1 to make 0 the special value "no client id"
-	uint32_t NextUniqueClientId = 1;
+	uint32_t m_NextUniqueClientId = 1;
 	bool m_VoteWillPass;
 	CScore *m_pScore;
 
@@ -384,15 +420,19 @@ private:
 	static void ConUnLiveFreeze(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnSuper(IConsole::IResult *pResult, void *pUserData);
 	static void ConSuper(IConsole::IResult *pResult, void *pUserData);
+	static void ConToggleInvincible(IConsole::IResult *pResult, void *pUserData);
 	static void ConShotgun(IConsole::IResult *pResult, void *pUserData);
 	static void ConGrenade(IConsole::IResult *pResult, void *pUserData);
 	static void ConLaser(IConsole::IResult *pResult, void *pUserData);
 	static void ConJetpack(IConsole::IResult *pResult, void *pUserData);
+	static void ConEndlessJump(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetJumps(IConsole::IResult *pResult, void *pUserData);
 	static void ConWeapons(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnShotgun(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnGrenade(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnLaser(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnJetpack(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnEndlessJump(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnWeapons(IConsole::IResult *pResult, void *pUserData);
 	static void ConAddWeapon(IConsole::IResult *pResult, void *pUserData);
 	static void ConRemoveWeapon(IConsole::IResult *pResult, void *pUserData);
@@ -429,11 +469,14 @@ private:
 	static void ConTimeCP(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConDND(IConsole::IResult *pResult, void *pUserData);
+	static void ConWhispers(IConsole::IResult *pResult, void *pUserData);
 	static void ConMapInfo(IConsole::IResult *pResult, void *pUserData);
 	static void ConTimeout(IConsole::IResult *pResult, void *pUserData);
 	static void ConPractice(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnPractice(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeCmdList(IConsole::IResult *pResult, void *pUserData);
 	static void ConSwap(IConsole::IResult *pResult, void *pUserData);
+	static void ConCancelSwap(IConsole::IResult *pResult, void *pUserData);
 	static void ConSave(IConsole::IResult *pResult, void *pUserData);
 	static void ConLoad(IConsole::IResult *pResult, void *pUserData);
 	static void ConMap(IConsole::IResult *pResult, void *pUserData);
@@ -460,75 +503,75 @@ private:
 	static void ConSetTimerType(IConsole::IResult *pResult, void *pUserData);
 	static void ConRescue(IConsole::IResult *pResult, void *pUserData);
 	static void ConRescueMode(IConsole::IResult *pResult, void *pUserData);
+	static void ConBack(IConsole::IResult *pResult, void *pUserData);
 	static void ConTeleTo(IConsole::IResult *pResult, void *pUserData);
 	static void ConTeleXY(IConsole::IResult *pResult, void *pUserData);
 	static void ConTeleCursor(IConsole::IResult *pResult, void *pUserData);
 	static void ConLastTele(IConsole::IResult *pResult, void *pUserData);
 
 	// Chat commands for practice mode
+	static void ConPracticeToTeleporter(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeToCheckTeleporter(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeUnSolo(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeSolo(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeUnDeep(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeDeep(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeUnLiveFreeze(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeLiveFreeze(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeShotgun(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeGrenade(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeLaser(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeJetpack(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeEndlessJump(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeSetJumps(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeWeapons(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeUnShotgun(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeUnGrenade(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeUnLaser(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeUnJetpack(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeUnEndlessJump(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeUnWeapons(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeNinja(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeUnNinja(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeEndlessHook(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeUnEndlessHook(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeToggleInvincible(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConPracticeAddWeapon(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeRemoveWeapon(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConProtectedKill(IConsole::IResult *pResult, void *pUserData);
-
-	static void ConVoteMute(IConsole::IResult *pResult, void *pUserData);
-	static void ConVoteUnmute(IConsole::IResult *pResult, void *pUserData);
-	static void ConVoteMutes(IConsole::IResult *pResult, void *pUserData);
-	static void ConMute(IConsole::IResult *pResult, void *pUserData);
-	static void ConMuteId(IConsole::IResult *pResult, void *pUserData);
-	static void ConMuteIp(IConsole::IResult *pResult, void *pUserData);
-	static void ConUnmute(IConsole::IResult *pResult, void *pUserData);
-	static void ConUnmuteId(IConsole::IResult *pResult, void *pUserData);
-	static void ConMutes(IConsole::IResult *pResult, void *pUserData);
 	static void ConModerate(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConList(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetDDRTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConUninvite(IConsole::IResult *pResult, void *pUserData);
-	static void ConFreezeHammer(IConsole::IResult *pResult, void *pUserData);
-	static void ConUnFreezeHammer(IConsole::IResult *pResult, void *pUserData);
+
+	static void ConReloadCensorlist(IConsole::IResult *pResult, void *pUserData);
 
 	CCharacter *GetPracticeCharacter(IConsole::IResult *pResult);
 
-	enum
-	{
-		MAX_MUTES = 128,
-		MAX_VOTE_MUTES = 128,
-	};
-	struct CMute
-	{
-		NETADDR m_Addr;
-		int m_Expire;
-		char m_aReason[128];
-		bool m_InitialChatDelay;
-	};
+	CMutes m_Mutes;
+	CMutes m_VoteMutes;
+	void MuteWithMessage(const NETADDR *pAddr, int Seconds, const char *pReason, const char *pDisplayName);
+	void VoteMuteWithMessage(const NETADDR *pAddr, int Seconds, const char *pReason, const char *pDisplayName);
 
-	CMute m_aMutes[MAX_MUTES];
-	int m_NumMutes;
-	CMute m_aVoteMutes[MAX_VOTE_MUTES];
-	int m_NumVoteMutes;
-	bool TryMute(const NETADDR *pAddr, int Secs, const char *pReason, bool InitialChatDelay);
-	void Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName, const char *pReason = "", bool InitialChatDelay = false);
-	bool TryVoteMute(const NETADDR *pAddr, int Secs, const char *pReason);
-	void VoteMute(const NETADDR *pAddr, int Secs, const char *pReason, const char *pDisplayName, int AuthedId);
-	bool VoteUnmute(const NETADDR *pAddr, const char *pDisplayName, int AuthedId);
+	static void ConMute(IConsole::IResult *pResult, void *pUserData);
+	static void ConMuteId(IConsole::IResult *pResult, void *pUserData);
+	static void ConMuteIp(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnmute(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnmuteId(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnmuteIp(IConsole::IResult *pResult, void *pUserData);
+	static void ConMutes(IConsole::IResult *pResult, void *pUserData);
+
+	static void ConVoteMute(IConsole::IResult *pResult, void *pUserData);
+	static void ConVoteMuteId(IConsole::IResult *pResult, void *pUserData);
+	static void ConVoteMuteIp(IConsole::IResult *pResult, void *pUserData);
+	static void ConVoteUnmute(IConsole::IResult *pResult, void *pUserData);
+	static void ConVoteUnmuteId(IConsole::IResult *pResult, void *pUserData);
+	static void ConVoteUnmuteIp(IConsole::IResult *pResult, void *pUserData);
+	static void ConVoteMutes(IConsole::IResult *pResult, void *pUserData);
+
 	void Whisper(int ClientId, char *pStr);
 	void WhisperId(int ClientId, int VictimId, const char *pMessage);
 	void Converse(int ClientId, char *pStr);
@@ -567,16 +610,21 @@ public:
 		VOTE_TYPE_SPECTATE,
 	};
 	int m_VoteVictim;
-	int m_VoteEnforcer;
 
 	inline bool IsOptionVote() const { return m_VoteType == VOTE_TYPE_OPTION; }
 	inline bool IsKickVote() const { return m_VoteType == VOTE_TYPE_KICK; }
 	inline bool IsSpecVote() const { return m_VoteType == VOTE_TYPE_SPECTATE; }
 
 	void SendRecord(int ClientId);
+	void SendFinish(int ClientId, float Time, float PreviousBestTime);
 	void OnSetAuthed(int ClientId, int Level) override;
 
 	void ResetTuning();
 };
+
+static inline bool CheckClientId(int ClientId)
+{
+	return ClientId >= 0 && ClientId < MAX_CLIENTS;
+}
 
 #endif

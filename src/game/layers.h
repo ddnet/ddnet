@@ -3,19 +3,17 @@
 #ifndef GAME_LAYERS_H
 #define GAME_LAYERS_H
 
-class IKernel;
 class IMap;
 
-struct CMapItemGroup;
-struct CMapItemLayer;
-struct CMapItemLayerTilemap;
+class CMapItemGroup;
+class CMapItemLayer;
+class CMapItemLayerTilemap;
 
 class CLayers
 {
 public:
 	CLayers();
-	void Init(IKernel *pKernel);
-	void InitBackground(IMap *pMap);
+	void Init(IMap *pMap, bool GameOnly);
 	void Unload();
 
 	int NumGroups() const { return m_GroupsNum; }

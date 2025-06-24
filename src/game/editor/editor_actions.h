@@ -336,6 +336,20 @@ private:
 	std::vector<int> m_vImageIndexMap;
 };
 
+// --------------
+
+class CEditorActionQuadArt : public IEditorAction
+{
+public:
+	CEditorActionQuadArt(CEditor *pEditor, CQuadArtParameters Parameters);
+
+	void Undo() override;
+	void Redo() override;
+
+private:
+	CQuadArtParameters m_Parameters;
+};
+
 // ----------------------
 
 class CEditorCommandAction : public IEditorAction

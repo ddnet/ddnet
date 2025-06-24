@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="app_name">DDNet</string>
+	<string name="shortcut_play_vulkan_short">Oyna (Vulkan)</string>
+	<string name="shortcut_play_gles_short">Oyna (OpenGL ES)</string>
+	<string name="server_name">DDNet-Sunucu</string>
+	<string name="server_notification_description_default">DDNet-Sunucu çalıştırılıyor…</string>
+	<string name="server_notification_description_stopping">DDNet-Sunucu durduruluyor…</string>
+	<string name="server_notification_action_stop">Durdur</string>
+	<string name="server_notification_action_run_command">Komudu çalıştır</string>
+	<string name="server_notification_channel_description">Yerel DDNet-Sunucu çalışırken kontrol etmek için bildirim.</string>
+	<string name="server_error_external_files_inaccessible">DDNet-Sunucu çalıştırılırken hata oluştu: harici dosyalar dizinine erişilemedi.</string>
+	<string name="server_error_exit_code">DDNet-Sunucu \'%1$d\' hata kodu ile durduruldu.</string>
+</resources>

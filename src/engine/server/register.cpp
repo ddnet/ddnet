@@ -465,9 +465,16 @@ void CRegister::CProtocol::CJob::Run()
 	}
 	{
 		CLockScope ls(m_pShared->m_Lock);
-		if(Status != STATUS_OK || Status != m_pShared->m_LatestResponseStatus)
+		if(Status != m_pShared->m_LatestResponseStatus)
 		{
-			log_debug(ProtocolToSystem(m_Protocol), "status: %s", (const char *)StatusString);
+			if(Status != STATUS_OK)
+			{
+				log_debug(ProtocolToSystem(m_Protocol), "status: %s", (const char *)StatusString);
+			}
+			else
+			{
+				log_info(ProtocolToSystem(m_Protocol), "successfully registered");
+			}
 		}
 		if(Status == m_pShared->m_LatestResponseStatus && Status == STATUS_NEEDCHALLENGE)
 		{

@@ -63,12 +63,10 @@ void CSound::Mix(short *pFinalOut, unsigned Frames)
 		if(Voice.m_Flags & ISound::FLAG_POS && Voice.m_pChannel->m_Pan)
 		{
 			// TODO: we should respect the channel panning value
-			const int dx = Voice.m_X - m_CenterX.load(std::memory_order_relaxed);
-			const int dy = Voice.m_Y - m_CenterY.load(std::memory_order_relaxed);
-			float FalloffX = 0.0f;
-			float FalloffY = 0.0f;
+			const vec2 Delta = Voice.m_Position - vec2(m_ListenerPositionX.load(std::memory_order_relaxed), m_ListenerPositionY.load(std::memory_order_relaxed));
+			vec2 Falloff = vec2(0.0f, 0.0f);
 
-			int RangeX = 0; // for panning
+			float RangeX = 0.0f; // for panning
 			bool InVoiceField = false;
 
 			switch(Voice.m_Shape)
@@ -78,50 +76,34 @@ void CSound::Mix(short *pFinalOut, unsigned Frames)
 				const float Radius = Voice.m_Circle.m_Radius;
 				RangeX = Radius;
 
-				// dx and dy can be larger than 46341 and thus the calculation would go beyond the limits of a integer,
-				// therefore we cast them into float
-				const int Dist = (int)length(vec2(dx, dy));
+				const float Dist = length(Delta);
 				if(Dist < Radius)
 				{
 					InVoiceField = true;
 
 					// falloff
-					int FalloffDistance = Radius * Voice.m_Falloff;
-					if(Dist > FalloffDistance)
-						FalloffX = FalloffY = (Radius - Dist) / (Radius - FalloffDistance);
-					else
-						FalloffX = FalloffY = 1.0f;
+					const float FalloffDistance = Radius * Voice.m_Falloff;
+					Falloff.x = Falloff.y = Dist > FalloffDistance ? (Radius - Dist) / (Radius - FalloffDistance) : 1.0f;
 				}
-				else
-					InVoiceField = false;
-
 				break;
 			}
 
 			case ISound::SHAPE_RECTANGLE:
 			{
-				RangeX = Voice.m_Rectangle.m_Width / 2.0f;
+				const vec2 AbsoluteDelta = vec2(absolute(Delta.x), absolute(Delta.y));
+				const float w = Voice.m_Rectangle.m_Width / 2.0f;
+				const float h = Voice.m_Rectangle.m_Height / 2.0f;
+				RangeX = w;
 
-				const int abs_dx = absolute(dx);
-				const int abs_dy = absolute(dy);
-
-				const int w = Voice.m_Rectangle.m_Width / 2.0f;
-				const int h = Voice.m_Rectangle.m_Height / 2.0f;
-
-				if(abs_dx < w && abs_dy < h)
+				if(AbsoluteDelta.x < w && AbsoluteDelta.y < h)
 				{
 					InVoiceField = true;
 
 					// falloff
-					int fx = Voice.m_Falloff * w;
-					int fy = Voice.m_Falloff * h;
-
-					FalloffX = abs_dx > fx ? (float)(w - abs_dx) / (w - fx) : 1.0f;
-					FalloffY = abs_dy > fy ? (float)(h - abs_dy) / (h - fy) : 1.0f;
+					const vec2 FalloffDistance = vec2(w, h) * Voice.m_Falloff;
+					Falloff.x = AbsoluteDelta.x > FalloffDistance.x ? (w - AbsoluteDelta.x) / (w - FalloffDistance.x) : 1.0f;
+					Falloff.y = AbsoluteDelta.y > FalloffDistance.y ? (h - AbsoluteDelta.y) / (h - FalloffDistance.y) : 1.0f;
 				}
-				else
-					InVoiceField = false;
-
 				break;
 			}
 			};
@@ -131,15 +113,15 @@ void CSound::Mix(short *pFinalOut, unsigned Frames)
 				// panning
 				if(!(Voice.m_Flags & ISound::FLAG_NO_PANNING))
 				{
-					if(dx > 0)
-						VolumeL = ((RangeX - absolute(dx)) * VolumeL) / RangeX;
+					if(Delta.x > 0)
+						VolumeL = ((RangeX - absolute(Delta.x)) * VolumeL) / RangeX;
 					else
-						VolumeR = ((RangeX - absolute(dx)) * VolumeR) / RangeX;
+						VolumeR = ((RangeX - absolute(Delta.x)) * VolumeR) / RangeX;
 				}
 
 				{
-					VolumeL *= FalloffX * FalloffY;
-					VolumeR *= FalloffX * FalloffY;
+					VolumeL *= Falloff.x * Falloff.y;
+					VolumeR *= Falloff.x * Falloff.y;
 				}
 			}
 			else
@@ -176,7 +158,7 @@ void CSound::Mix(short *pFinalOut, unsigned Frames)
 
 	// clamp accumulated values
 	for(unsigned i = 0; i < Frames * 2; i++)
-		pFinalOut[i] = clamp<int>(((m_pMixBuffer[i] * MasterVol) / 101) >> 8, std::numeric_limits<short>::min(), std::numeric_limits<short>::max());
+		pFinalOut[i] = std::clamp<int>(((m_pMixBuffer[i] * MasterVol) / 101) >> 8, std::numeric_limits<short>::min(), std::numeric_limits<short>::max());
 
 #if defined(CONF_ARCH_ENDIAN_BIG)
 	swap_endian(pFinalOut, sizeof(short), Frames * 2);
@@ -209,6 +191,7 @@ int CSound::Init()
 
 	// Initialize sample indices. We always need them to load sounds in
 	// the editor even if sound is disabled or failed to be enabled.
+	const CLockScope LockScope(m_SoundLock);
 	m_FirstFreeSampleIndex = 0;
 	for(size_t i = 0; i < std::size(m_aSamples) - 1; ++i)
 	{
@@ -228,10 +211,8 @@ int CSound::Init()
 		return -1;
 	}
 
-	m_MixingRate = g_Config.m_SndRate;
-
 	SDL_AudioSpec Format, FormatOut;
-	Format.freq = m_MixingRate;
+	Format.freq = g_Config.m_SndRate;
 	Format.format = AUDIO_S16;
 	Format.channels = 2;
 	Format.samples = g_Config.m_SndBufferSize;
@@ -239,7 +220,7 @@ int CSound::Init()
 	Format.userdata = this;
 
 	// Open the audio device and start playing sound!
-	m_Device = SDL_OpenAudioDevice(nullptr, 0, &Format, &FormatOut, 0);
+	m_Device = SDL_OpenAudioDevice(nullptr, 0, &Format, &FormatOut, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE);
 	if(m_Device == 0)
 	{
 		dbg_msg("sound", "unable to open audio: %s", SDL_GetError());
@@ -248,16 +229,17 @@ int CSound::Init()
 	else
 		dbg_msg("sound", "sound init successful using audio driver '%s'", SDL_GetCurrentAudioDriver());
 
+	m_MixingRate = FormatOut.freq;
 	m_MaxFrames = FormatOut.samples * 2;
 #if defined(CONF_VIDEORECORDER)
 	m_MaxFrames = maximum<uint32_t>(m_MaxFrames, 1024 * 2); // make the buffer bigger just in case
 #endif
 	m_pMixBuffer = (int *)calloc(m_MaxFrames * 2, sizeof(int));
 
-	SDL_PauseAudioDevice(m_Device, 0);
-
 	m_SoundEnabled = true;
 	Update();
+
+	SDL_PauseAudioDevice(m_Device, 0);
 	return 0;
 }
 
@@ -277,30 +259,36 @@ void CSound::UpdateVolume()
 
 void CSound::Shutdown()
 {
-	for(unsigned SampleId = 0; SampleId < NUM_SAMPLES; SampleId++)
-	{
-		UnloadSample(SampleId);
-	}
+	StopAll();
 
+	// Stop sound callback before freeing sample data
 	SDL_CloseAudioDevice(m_Device);
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
+	m_Device = 0;
+
+	const CLockScope LockScope(m_SoundLock);
+	for(auto &Sample : m_aSamples)
+	{
+		free(Sample.m_pData);
+		Sample.m_pData = nullptr;
+	}
+
 	free(m_pMixBuffer);
 	m_pMixBuffer = nullptr;
+	m_SoundEnabled = false;
 }
 
 CSample *CSound::AllocSample()
 {
+	const CLockScope LockScope(m_SoundLock);
 	if(m_FirstFreeSampleIndex == SAMPLE_INDEX_FULL)
 		return nullptr;
 
 	CSample *pSample = &m_aSamples[m_FirstFreeSampleIndex];
-	if(pSample->m_pData != nullptr || pSample->m_NextFreeSampleIndex == SAMPLE_INDEX_USED)
-	{
-		char aError[128];
-		str_format(aError, sizeof(aError), "Sample was not unloaded (index=%d, next=%d, duration=%f, data=%p)",
-			pSample->m_Index, pSample->m_NextFreeSampleIndex, pSample->TotalTime(), pSample->m_pData);
-		dbg_assert(false, aError);
-	}
+	dbg_assert(
+		pSample->m_pData == nullptr && pSample->m_NextFreeSampleIndex != SAMPLE_INDEX_USED,
+		"Sample was not unloaded (index=%d, next=%d, duration=%f, data=%p)",
+		pSample->m_Index, pSample->m_NextFreeSampleIndex, pSample->TotalTime(), pSample->m_pData);
 	m_FirstFreeSampleIndex = pSample->m_NextFreeSampleIndex;
 	pSample->m_NextFreeSampleIndex = SAMPLE_INDEX_USED;
 	return pSample;
@@ -308,7 +296,7 @@ CSample *CSound::AllocSample()
 
 void CSound::RateConvert(CSample &Sample) const
 {
-	dbg_assert(Sample.m_pData != nullptr, "Sample is not loaded");
+	dbg_assert(Sample.IsLoaded(), "Sample not loaded");
 	// make sure that we need to convert this sound
 	if(Sample.m_Rate == m_MixingRate)
 		return;
@@ -533,9 +521,6 @@ int CSound::LoadOpus(const char *pFilename, int StorageType)
 	if(!m_SoundEnabled)
 		return -1;
 
-	if(!m_pStorage)
-		return -1;
-
 	CSample *pSample = AllocSample();
 	if(!pSample)
 	{
@@ -573,9 +558,6 @@ int CSound::LoadWV(const char *pFilename, int StorageType)
 	if(!m_SoundEnabled)
 		return -1;
 
-	if(!m_pStorage)
-		return -1;
-
 	CSample *pSample = AllocSample();
 	if(!pSample)
 	{
@@ -607,13 +589,10 @@ int CSound::LoadWV(const char *pFilename, int StorageType)
 	return pSample->m_Index;
 }
 
-int CSound::LoadOpusFromMem(const void *pData, unsigned DataSize, bool FromEditor = false)
+int CSound::LoadOpusFromMem(const void *pData, unsigned DataSize, bool ForceLoad = false)
 {
 	// no need to load sound when we are running with no sound
-	if(!m_SoundEnabled && !FromEditor)
-		return -1;
-
-	if(!pData)
+	if(!m_SoundEnabled && !ForceLoad)
 		return -1;
 
 	CSample *pSample = AllocSample();
@@ -630,13 +609,10 @@ int CSound::LoadOpusFromMem(const void *pData, unsigned DataSize, bool FromEdito
 	return pSample->m_Index;
 }
 
-int CSound::LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor = false)
+int CSound::LoadWVFromMem(const void *pData, unsigned DataSize, bool ForceLoad = false)
 {
 	// no need to load sound when we are running with no sound
-	if(!m_SoundEnabled && !FromEditor)
-		return -1;
-
-	if(!pData)
+	if(!m_SoundEnabled && !ForceLoad)
 		return -1;
 
 	CSample *pSample = AllocSample();
@@ -655,15 +631,28 @@ int CSound::LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor 
 
 void CSound::UnloadSample(int SampleId)
 {
-	if(SampleId == -1 || SampleId >= NUM_SAMPLES)
+	if(SampleId == -1)
 		return;
 
-	Stop(SampleId);
-
-	// Free data
+	dbg_assert(SampleId >= 0 && SampleId < NUM_SAMPLES, "SampleId invalid");
+	const CLockScope LockScope(m_SoundLock);
 	CSample &Sample = m_aSamples[SampleId];
-	free(Sample.m_pData);
-	Sample.m_pData = nullptr;
+
+	if(Sample.IsLoaded())
+	{
+		// Stop voices using this sample
+		for(auto &Voice : m_aVoices)
+		{
+			if(Voice.m_pSample == &Sample)
+			{
+				Voice.m_pSample = nullptr;
+			}
+		}
+
+		// Free data
+		free(Sample.m_pData);
+		Sample.m_pData = nullptr;
+	}
 
 	// Free slot
 	if(Sample.m_NextFreeSampleIndex == SAMPLE_INDEX_USED)
@@ -675,18 +664,19 @@ void CSound::UnloadSample(int SampleId)
 
 float CSound::GetSampleTotalTime(int SampleId)
 {
-	if(SampleId == -1 || SampleId >= NUM_SAMPLES)
-		return 0.0f;
+	dbg_assert(SampleId >= 0 && SampleId < NUM_SAMPLES, "SampleId invalid");
 
+	const CLockScope LockScope(m_SoundLock);
+	dbg_assert(m_aSamples[SampleId].IsLoaded(), "Sample not loaded");
 	return m_aSamples[SampleId].TotalTime();
 }
 
 float CSound::GetSampleCurrentTime(int SampleId)
 {
-	if(SampleId == -1 || SampleId >= NUM_SAMPLES)
-		return 0.0f;
+	dbg_assert(SampleId >= 0 && SampleId < NUM_SAMPLES, "SampleId invalid");
 
 	const CLockScope LockScope(m_SoundLock);
+	dbg_assert(m_aSamples[SampleId].IsLoaded(), "Sample not loaded");
 	CSample *pSample = &m_aSamples[SampleId];
 	for(auto &Voice : m_aVoices)
 	{
@@ -701,10 +691,10 @@ float CSound::GetSampleCurrentTime(int SampleId)
 
 void CSound::SetSampleCurrentTime(int SampleId, float Time)
 {
-	if(SampleId == -1 || SampleId >= NUM_SAMPLES)
-		return;
+	dbg_assert(SampleId >= 0 && SampleId < NUM_SAMPLES, "SampleId invalid");
 
 	const CLockScope LockScope(m_SoundLock);
+	dbg_assert(m_aSamples[SampleId].IsLoaded(), "Sample not loaded");
 	CSample *pSample = &m_aSamples[SampleId];
 	for(auto &Voice : m_aVoices)
 	{
@@ -720,14 +710,17 @@ void CSound::SetSampleCurrentTime(int SampleId, float Time)
 
 void CSound::SetChannel(int ChannelId, float Vol, float Pan)
 {
+	dbg_assert(ChannelId >= 0 && ChannelId < NUM_CHANNELS, "ChannelId invalid");
+
+	const CLockScope LockScope(m_SoundLock);
 	m_aChannels[ChannelId].m_Vol = (int)(Vol * 255.0f);
 	m_aChannels[ChannelId].m_Pan = (int)(Pan * 255.0f); // TODO: this is only on and off right now
 }
 
-void CSound::SetListenerPos(float x, float y)
+void CSound::SetListenerPosition(vec2 Position)
 {
-	m_CenterX.store((int)x, std::memory_order_relaxed);
-	m_CenterY.store((int)y, std::memory_order_relaxed);
+	m_ListenerPositionX.store(Position.x, std::memory_order_relaxed);
+	m_ListenerPositionY.store(Position.y, std::memory_order_relaxed);
 }
 
 void CSound::SetVoiceVolume(CVoiceHandle Voice, float Volume)
@@ -741,7 +734,7 @@ void CSound::SetVoiceVolume(CVoiceHandle Voice, float Volume)
 	if(m_aVoices[VoiceId].m_Age != Voice.Age())
 		return;
 
-	Volume = clamp(Volume, 0.0f, 1.0f);
+	Volume = std::clamp(Volume, 0.0f, 1.0f);
 	m_aVoices[VoiceId].m_Vol = (int)(Volume * 255.0f);
 }
 
@@ -756,11 +749,11 @@ void CSound::SetVoiceFalloff(CVoiceHandle Voice, float Falloff)
 	if(m_aVoices[VoiceId].m_Age != Voice.Age())
 		return;
 
-	Falloff = clamp(Falloff, 0.0f, 1.0f);
+	Falloff = std::clamp(Falloff, 0.0f, 1.0f);
 	m_aVoices[VoiceId].m_Falloff = Falloff;
 }
 
-void CSound::SetVoiceLocation(CVoiceHandle Voice, float x, float y)
+void CSound::SetVoicePosition(CVoiceHandle Voice, vec2 Position)
 {
 	if(!Voice.IsValid())
 		return;
@@ -771,8 +764,7 @@ void CSound::SetVoiceLocation(CVoiceHandle Voice, float x, float y)
 	if(m_aVoices[VoiceId].m_Age != Voice.Age())
 		return;
 
-	m_aVoices[VoiceId].m_X = x;
-	m_aVoices[VoiceId].m_Y = y;
+	m_aVoices[VoiceId].m_Position = Position;
 }
 
 void CSound::SetVoiceTimeOffset(CVoiceHandle Voice, float TimeOffset)
@@ -795,7 +787,7 @@ void CSound::SetVoiceTimeOffset(CVoiceHandle Voice, float TimeOffset)
 	if(m_aVoices[VoiceId].m_pSample->m_NumFrames > 0 && IsLooping)
 		Tick = TickOffset % m_aVoices[VoiceId].m_pSample->m_NumFrames;
 	else
-		Tick = clamp(TickOffset, (uint64_t)0, (uint64_t)m_aVoices[VoiceId].m_pSample->m_NumFrames);
+		Tick = std::clamp(TickOffset, (uint64_t)0, (uint64_t)m_aVoices[VoiceId].m_pSample->m_NumFrames);
 
 	// at least 200msec off, else depend on buffer size
 	float Threshold = maximum(0.2f * m_aVoices[VoiceId].m_pSample->m_Rate, (float)m_MaxFrames);
@@ -840,7 +832,7 @@ void CSound::SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height)
 	m_aVoices[VoiceId].m_Rectangle.m_Height = maximum(0.0f, Height);
 }
 
-ISound::CVoiceHandle CSound::Play(int ChannelId, int SampleId, int Flags, float x, float y)
+ISound::CVoiceHandle CSound::Play(int ChannelId, int SampleId, int Flags, float Volume, vec2 Position)
 {
 	const CLockScope LockScope(m_SoundLock);
 
@@ -856,54 +848,54 @@ ISound::CVoiceHandle CSound::Play(int ChannelId, int SampleId, int Flags, float 
 			break;
 		}
 	}
-
-	// voice found, use it
-	int Age = -1;
-	if(VoiceId != -1)
+	if(VoiceId == -1)
 	{
-		m_aVoices[VoiceId].m_pSample = &m_aSamples[SampleId];
-		m_aVoices[VoiceId].m_pChannel = &m_aChannels[ChannelId];
-		if(Flags & FLAG_LOOP)
-		{
-			m_aVoices[VoiceId].m_Tick = m_aSamples[SampleId].m_PausedAt;
-		}
-		else if(Flags & FLAG_PREVIEW)
-		{
-			m_aVoices[VoiceId].m_Tick = m_aSamples[SampleId].m_PausedAt;
-			m_aSamples[SampleId].m_PausedAt = 0;
-		}
-		else
-		{
-			m_aVoices[VoiceId].m_Tick = 0;
-		}
-		m_aVoices[VoiceId].m_Vol = 255;
-		m_aVoices[VoiceId].m_Flags = Flags;
-		m_aVoices[VoiceId].m_X = (int)x;
-		m_aVoices[VoiceId].m_Y = (int)y;
-		m_aVoices[VoiceId].m_Falloff = 0.0f;
-		m_aVoices[VoiceId].m_Shape = ISound::SHAPE_CIRCLE;
-		m_aVoices[VoiceId].m_Circle.m_Radius = 1500;
-		Age = m_aVoices[VoiceId].m_Age;
+		return CreateVoiceHandle(-1, -1);
 	}
 
-	return CreateVoiceHandle(VoiceId, Age);
+	// voice found, use it
+	m_aVoices[VoiceId].m_pSample = &m_aSamples[SampleId];
+	m_aVoices[VoiceId].m_pChannel = &m_aChannels[ChannelId];
+	if(Flags & FLAG_LOOP)
+	{
+		m_aVoices[VoiceId].m_Tick = m_aSamples[SampleId].m_PausedAt;
+	}
+	else if(Flags & FLAG_PREVIEW)
+	{
+		m_aVoices[VoiceId].m_Tick = m_aSamples[SampleId].m_PausedAt;
+		m_aSamples[SampleId].m_PausedAt = 0;
+	}
+	else
+	{
+		m_aVoices[VoiceId].m_Tick = 0;
+	}
+	m_aVoices[VoiceId].m_Vol = (int)(std::clamp(Volume, 0.0f, 1.0f) * 255.0f);
+	m_aVoices[VoiceId].m_Flags = Flags;
+	m_aVoices[VoiceId].m_Position = Position;
+	m_aVoices[VoiceId].m_Falloff = 0.0f;
+	m_aVoices[VoiceId].m_Shape = ISound::SHAPE_CIRCLE;
+	m_aVoices[VoiceId].m_Circle.m_Radius = 1500;
+	return CreateVoiceHandle(VoiceId, m_aVoices[VoiceId].m_Age);
 }
 
-ISound::CVoiceHandle CSound::PlayAt(int ChannelId, int SampleId, int Flags, float x, float y)
+ISound::CVoiceHandle CSound::PlayAt(int ChannelId, int SampleId, int Flags, float Volume, vec2 Position)
 {
-	return Play(ChannelId, SampleId, Flags | ISound::FLAG_POS, x, y);
+	return Play(ChannelId, SampleId, Flags | ISound::FLAG_POS, Volume, Position);
 }
 
-ISound::CVoiceHandle CSound::Play(int ChannelId, int SampleId, int Flags)
+ISound::CVoiceHandle CSound::Play(int ChannelId, int SampleId, int Flags, float Volume)
 {
-	return Play(ChannelId, SampleId, Flags, 0, 0);
+	return Play(ChannelId, SampleId, Flags, Volume, vec2(0.0f, 0.0f));
 }
 
 void CSound::Pause(int SampleId)
 {
+	dbg_assert(SampleId >= 0 && SampleId < NUM_SAMPLES, "SampleId invalid");
+
 	// TODO: a nice fade out
 	const CLockScope LockScope(m_SoundLock);
 	CSample *pSample = &m_aSamples[SampleId];
+	dbg_assert(m_aSamples[SampleId].IsLoaded(), "Sample not loaded");
 	for(auto &Voice : m_aVoices)
 	{
 		if(Voice.m_pSample == pSample)
@@ -916,9 +908,12 @@ void CSound::Pause(int SampleId)
 
 void CSound::Stop(int SampleId)
 {
+	dbg_assert(SampleId >= 0 && SampleId < NUM_SAMPLES, "SampleId invalid");
+
 	// TODO: a nice fade out
 	const CLockScope LockScope(m_SoundLock);
 	CSample *pSample = &m_aSamples[SampleId];
+	dbg_assert(m_aSamples[SampleId].IsLoaded(), "Sample not loaded");
 	for(auto &Voice : m_aVoices)
 	{
 		if(Voice.m_pSample == pSample)
@@ -966,8 +961,10 @@ void CSound::StopVoice(CVoiceHandle Voice)
 
 bool CSound::IsPlaying(int SampleId)
 {
+	dbg_assert(SampleId >= 0 && SampleId < NUM_SAMPLES, "SampleId invalid");
 	const CLockScope LockScope(m_SoundLock);
 	const CSample *pSample = &m_aSamples[SampleId];
+	dbg_assert(m_aSamples[SampleId].IsLoaded(), "Sample not loaded");
 	return std::any_of(std::begin(m_aVoices), std::end(m_aVoices), [pSample](const auto &Voice) { return Voice.m_pSample == pSample; });
 }
 

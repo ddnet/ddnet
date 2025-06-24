@@ -6,6 +6,7 @@
 #include <engine/console.h>
 
 #include <game/client/component.h>
+#include <game/client/ui.h>
 
 class CSpectator : public CComponent
 {
@@ -17,17 +18,15 @@ class CSpectator : public CComponent
 
 	bool m_Active;
 	bool m_WasActive;
-	bool m_Clicked;
 
 	int m_SelectedSpectatorId;
 	vec2 m_SelectorMouse;
 
-	float m_OldMouseX;
-	float m_OldMouseY;
+	CUi::CTouchState m_TouchState;
 
 	float m_MultiViewActivateDelay;
 
-	bool CanChangeSpectator();
+	bool CanChangeSpectatorId();
 	void SpectateNext(bool Reverse);
 
 	static void ConKeySpectator(IConsole::IResult *pResult, void *pUserData);
@@ -43,13 +42,15 @@ public:
 
 	virtual void OnConsoleInit() override;
 	virtual bool OnCursorMove(float x, float y, IInput::ECursorType CursorType) override;
+	virtual bool OnInput(const IInput::CEvent &Event) override;
 	virtual void OnRender() override;
 	virtual void OnRelease() override;
 	virtual void OnReset() override;
-	virtual bool OnInput(const IInput::CEvent &Event) override;
 
 	void Spectate(int SpectatorId);
 	void SpectateClosest();
+
+	bool IsActive() const { return m_Active; }
 };
 
 #endif

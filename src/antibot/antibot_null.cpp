@@ -1,6 +1,6 @@
 #define ANTIBOTAPI DYNAMIC_EXPORT
 
-#include "antibot_interface.h"
+#include <antibot/antibot_interface.h>
 
 #include <cstring>
 
@@ -12,9 +12,9 @@ int AntibotAbiVersion()
 {
 	return ANTIBOT_ABI_VERSION;
 }
-void AntibotInit(CAntibotData *pData)
+void AntibotInit(CAntibotData *pCallbackData)
 {
-	g_pData = pData;
+	g_pData = pCallbackData;
 	g_pData->m_pfnLog("null antibot initialized", g_pData->m_pUser);
 }
 void AntibotRoundStart(CAntibotRoundData *pRoundData){};
@@ -42,7 +42,7 @@ void AntibotOnDirectInput(int /*ClientId*/) {}
 void AntibotOnCharacterTick(int /*ClientId*/) {}
 void AntibotOnHookAttach(int /*ClientId*/, bool /*Player*/) {}
 void AntibotOnEngineTick(void) {}
-void AntibotOnEngineClientJoin(int /*ClientId*/, bool /*Sixup*/) {}
+void AntibotOnEngineClientJoin(int /*ClientId*/) {}
 void AntibotOnEngineClientDrop(int /*ClientId*/, const char * /*pReason*/) {}
 bool AntibotOnEngineClientMessage(int /*ClientId*/, const void * /*pData*/, int /*Size*/, int /*Flags*/) { return false; }
 bool AntibotOnEngineServerMessage(int /*ClientId*/, const void * /*pData*/, int /*Size*/, int /*Flags*/) { return false; }

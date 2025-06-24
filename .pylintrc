@@ -23,3 +23,4 @@ disable=
   W0511, # fixme
   W0603, # global-statement
   R0022, # useless-option-value
+  R0917, # too-many-positional-arguments

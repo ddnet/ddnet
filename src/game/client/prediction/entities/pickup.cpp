@@ -29,7 +29,9 @@ void CPickup::Tick()
 			switch(m_Type)
 			{
 			case POWERUP_HEALTH:
-				//pChr->Freeze();
+				if(!GameWorld()->m_WorldConfig.m_PredictDDRace)
+					continue;
+				pChr->Freeze();
 				break;
 
 			case POWERUP_ARMOR:
@@ -133,12 +135,9 @@ void CPickup::Move()
 {
 	if(GameWorld()->GameTick() % (int)(GameWorld()->GameTickSpeed() * 0.15f) == 0)
 	{
-		int Flags;
-		int index = Collision()->IsMover(m_Pos.x, m_Pos.y, &Flags);
-		if(index)
+		if(Collision()->MoverSpeed(m_Pos.x, m_Pos.y, &m_Core))
 		{
 			m_IsCoreActive = true;
-			m_Core = Collision()->CpSpeed(index, Flags);
 		}
 		m_Pos += m_Core;
 	}
@@ -155,6 +154,7 @@ CPickup::CPickup(CGameWorld *pGameWorld, int Id, const CPickupData *pPickup) :
 	m_Id = Id;
 	m_Number = pPickup->m_SwitchNumber;
 	m_Layer = m_Number > 0 ? LAYER_SWITCH : LAYER_GAME;
+	m_Flags = pPickup->m_Flags;
 }
 
 void CPickup::FillInfo(CNetObj_Pickup *pPickup)

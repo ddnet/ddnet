@@ -9,6 +9,8 @@
 
 #include <game/gamecore.h>
 
+#include <memory>
+
 static const char *TOOL_NAME = "demo_extract_chat";
 
 class CClientSnapshotHandler
@@ -20,23 +22,17 @@ public:
 	};
 	CClientData m_aClients[MAX_CLIENTS];
 
-	CSnapshotStorage::CHolder m_aDemoSnapshotHolders[IClient::NUM_SNAPSHOT_TYPES];
-	char m_aaaDemoSnapshotData[IClient::NUM_SNAPSHOT_TYPES][2][CSnapshot::MAX_SIZE];
-	CSnapshotStorage::CHolder *m_apSnapshots[IClient::NUM_SNAPSHOT_TYPES];
+	char m_aaDemoSnapshotData[IClient::NUM_SNAPSHOT_TYPES][CSnapshot::MAX_SIZE];
+	CSnapshot *m_apAltSnapshots[IClient::NUM_SNAPSHOT_TYPES];
 
 	CClientSnapshotHandler() :
-		m_aClients(), m_aDemoSnapshotHolders()
+		m_aClients()
 	{
-		mem_zero(m_aaaDemoSnapshotData, sizeof(m_aaaDemoSnapshotData));
+		mem_zero(m_aaDemoSnapshotData, sizeof(m_aaDemoSnapshotData));
 
 		for(int SnapshotType = 0; SnapshotType < IClient::NUM_SNAPSHOT_TYPES; SnapshotType++)
 		{
-			m_apSnapshots[SnapshotType] = &m_aDemoSnapshotHolders[SnapshotType];
-			m_apSnapshots[SnapshotType]->m_pSnap = (CSnapshot *)&m_aaaDemoSnapshotData[SnapshotType][0];
-			m_apSnapshots[SnapshotType]->m_pAltSnap = (CSnapshot *)&m_aaaDemoSnapshotData[SnapshotType][1];
-			m_apSnapshots[SnapshotType]->m_SnapSize = 0;
-			m_apSnapshots[SnapshotType]->m_AltSnapSize = 0;
-			m_apSnapshots[SnapshotType]->m_Tick = -1;
+			m_apAltSnapshots[SnapshotType] = (CSnapshot *)&m_aaDemoSnapshotData[SnapshotType];
 		}
 	}
 
@@ -74,19 +70,20 @@ public:
 	int SnapNumItems(int SnapId)
 	{
 		dbg_assert(SnapId >= 0 && SnapId < IClient::NUM_SNAPSHOT_TYPES, "invalid SnapId");
-		if(!m_apSnapshots[SnapId])
-			return 0;
-		return m_apSnapshots[SnapId]->m_pAltSnap->NumItems();
+		return m_apAltSnapshots[SnapId]->NumItems();
 	}
 
-	void *SnapGetItem(int SnapId, int Index, IClient::CSnapItem *pItem)
+	IClient::CSnapItem SnapGetItem(int SnapId, int Index)
 	{
 		dbg_assert(SnapId >= 0 && SnapId < IClient::NUM_SNAPSHOT_TYPES, "invalid SnapId");
-		const CSnapshotItem *pSnapshotItem = m_apSnapshots[SnapId]->m_pAltSnap->GetItem(Index);
-		pItem->m_DataSize = m_apSnapshots[SnapId]->m_pAltSnap->GetItemSize(Index);
-		pItem->m_Type = m_apSnapshots[SnapId]->m_pAltSnap->GetItemType(Index);
-		pItem->m_Id = pSnapshotItem->Id();
-		return (void *)pSnapshotItem->Data();
+		const CSnapshot *pSnapshot = m_apAltSnapshots[SnapId];
+		const CSnapshotItem *pSnapshotItem = m_apAltSnapshots[SnapId]->GetItem(Index);
+		IClient::CSnapItem Item;
+		Item.m_Type = pSnapshot->GetItemType(Index);
+		Item.m_Id = pSnapshotItem->Id();
+		Item.m_pData = pSnapshotItem->Data();
+		Item.m_DataSize = pSnapshot->GetItemSize(Index);
+		return Item;
 	}
 
 	void OnNewSnapshot()
@@ -94,12 +91,11 @@ public:
 		int Num = SnapNumItems(IClient::SNAP_CURRENT);
 		for(int i = 0; i < Num; i++)
 		{
-			IClient::CSnapItem Item;
-			const void *pData = SnapGetItem(IClient::SNAP_CURRENT, i, &Item);
+			const IClient::CSnapItem Item = SnapGetItem(IClient::SNAP_CURRENT, i);
 
 			if(Item.m_Type == NETOBJTYPE_CLIENTINFO)
 			{
-				const CNetObj_ClientInfo *pInfo = (const CNetObj_ClientInfo *)pData;
+				const CNetObj_ClientInfo *pInfo = (const CNetObj_ClientInfo *)Item.m_pData;
 				int ClientId = Item.m_Id;
 				if(ClientId < MAX_CLIENTS)
 				{
@@ -118,9 +114,8 @@ public:
 		if(AltSnapSize < 0)
 			return;
 
-		std::swap(m_apSnapshots[IClient::SNAP_PREV], m_apSnapshots[IClient::SNAP_CURRENT]);
-		mem_copy(m_apSnapshots[IClient::SNAP_CURRENT]->m_pSnap, pData, Size);
-		mem_copy(m_apSnapshots[IClient::SNAP_CURRENT]->m_pAltSnap, pAltSnapBuffer, AltSnapSize);
+		std::swap(m_apAltSnapshots[IClient::SNAP_PREV], m_apAltSnapshots[IClient::SNAP_CURRENT]);
+		mem_copy(m_apAltSnapshots[IClient::SNAP_CURRENT], pAltSnapBuffer, AltSnapSize);
 
 		OnNewSnapshot();
 	}
@@ -158,6 +153,10 @@ public:
 			if(!pRawMsg)
 				return;
 
+			const IDemoPlayer::CInfo &Info = m_pDemoPlayer->Info()->m_Info;
+			char aTime[20];
+			str_time((int64_t)(Info.m_CurrentTick - Info.m_FirstTick) / SERVER_TICK_SPEED * 100, TIME_HOURS, aTime, sizeof(aTime));
+
 			if(Msg == NETMSGTYPE_SV_CHAT)
 			{
 				CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
@@ -169,16 +168,16 @@ public:
 
 				if(pMsg->m_ClientId < 0)
 				{
-					printf("%s: *** %s\n", Prefix, pMsg->m_pMessage);
+					printf("[%s] %s: *** %s\n", aTime, Prefix, pMsg->m_pMessage);
 					return;
 				}
 
 				if(pMsg->m_Team == TEAM_WHISPER_SEND)
-					printf("%s: -> %s: %s\n", Prefix, m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientId].m_aName, pMsg->m_pMessage);
+					printf("[%s] %s: -> %s: %s\n", aTime, Prefix, m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientId].m_aName, pMsg->m_pMessage);
 				else if(pMsg->m_Team == TEAM_WHISPER_RECV)
-					printf("%s: <- %s: %s\n", Prefix, m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientId].m_aName, pMsg->m_pMessage);
+					printf("[%s] %s: <- %s: %s\n", aTime, Prefix, m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientId].m_aName, pMsg->m_pMessage);
 				else
-					printf("%s: %s: %s\n", Prefix, m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientId].m_aName, pMsg->m_pMessage);
+					printf("[%s] %s: %s: %s\n", aTime, Prefix, m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientId].m_aName, pMsg->m_pMessage);
 			}
 			else if(Msg == NETMSGTYPE_SV_BROADCAST)
 			{
@@ -188,7 +187,7 @@ public:
 				{
 					if(aBroadcast[0] != '\0')
 					{
-						printf("broadcast: %s\n", aBroadcast);
+						printf("[%s] broadcast: %s\n", aTime, aBroadcast);
 					}
 				}
 			}
@@ -198,8 +197,8 @@ public:
 
 static int ExtractDemoChat(const char *pDemoFilePath, IStorage *pStorage)
 {
-	CSnapshotDelta DemoSnapshotDelta;
-	CDemoPlayer DemoPlayer(&DemoSnapshotDelta, false);
+	std::unique_ptr<CSnapshotDelta> pDemoSnapshotDelta = std::make_unique<CSnapshotDelta>();
+	CDemoPlayer DemoPlayer(pDemoSnapshotDelta.get(), false);
 
 	if(DemoPlayer.Load(pStorage, nullptr, pDemoFilePath, IStorage::TYPE_ALL_OR_ABSOLUTE) == -1)
 	{
@@ -232,7 +231,7 @@ static int ExtractDemoChat(const char *pDemoFilePath, IStorage *pStorage)
 int main(int argc, const char *argv[])
 {
 	// Create storage before setting logger to avoid log messages from storage creation
-	IStorage *pStorage = CreateLocalStorage();
+	std::unique_ptr<IStorage> pStorage = CreateLocalStorage();
 
 	CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
@@ -249,5 +248,5 @@ int main(int argc, const char *argv[])
 		return -1;
 	}
 
-	return ExtractDemoChat(argv[1], pStorage);
+	return ExtractDemoChat(argv[1], pStorage.get());
 }

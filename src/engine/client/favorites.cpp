@@ -1,3 +1,4 @@
+#include <base/log.h>
 #include <base/system.h>
 #include <engine/favorites.h>
 #include <engine/shared/config.h>
@@ -42,7 +43,21 @@ void CFavorites::OnConfigSave(IConfigManager *pConfigManager)
 		{
 			char aAddr[NETADDR_MAXSTRSIZE];
 			char aBuffer[128];
-			net_addr_str(&Entry.m_aAddrs[i], aAddr, sizeof(aAddr), true);
+			net_addr_str(&Entry.m_aAddrs[i], aBuffer, sizeof(aBuffer), true);
+
+			if(Entry.m_aAddrs[i].type & NETTYPE_TW7)
+			{
+				str_format(
+					aAddr,
+					sizeof(aAddr),
+					"tw-0.7+udp://%s",
+					aBuffer);
+			}
+			else
+			{
+				str_copy(aAddr, aBuffer);
+			}
+
 			if(!Entry.m_AllowPing)
 			{
 				str_format(aBuffer, sizeof(aBuffer), "add_favorite %s", aAddr);
@@ -131,6 +146,11 @@ TRISTATE CFavorites::IsPingAllowed(const NETADDR *pAddrs, int NumAddrs) const
 
 void CFavorites::Add(const NETADDR *pAddrs, int NumAddrs)
 {
+	if(NumAddrs == 0)
+	{
+		log_error("client", "discarding empty favorite group");
+		return;
+	}
 	// First make sure that all the addresses are not registered for some
 	// other favorite.
 	for(int i = 0; i < NumAddrs; i++)

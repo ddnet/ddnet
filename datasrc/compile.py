@@ -86,6 +86,13 @@ def gen_network_header():
 	EmitEnum([f"WEAPON_{i.name.value.upper()}" for i in content.container.weapons.id.items], "NUM_WEAPONS")
 
 	print("""
+enum
+{
+	WEAPON_GAME = -3, // team switching etc
+	WEAPON_SELF = -2, // console kill command
+	WEAPON_WORLD = -1, // death tiles etc
+};
+
 class CNetObjHandler
 {
 	const char *m_pMsgFailedOn;

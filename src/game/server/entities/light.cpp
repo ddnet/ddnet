@@ -30,7 +30,7 @@ CLight::CLight(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
 
 bool CLight::HitCharacter()
 {
-	std::vector<CCharacter *> vpHitCharacters = GameServer()->m_World.IntersectedCharacters(m_Pos, m_To, 0.0f, 0);
+	std::vector<CCharacter *> vpHitCharacters = GameServer()->m_World.IntersectedCharacters(m_Pos, m_To, 0.0f, nullptr);
 	if(vpHitCharacters.empty())
 		return false;
 	for(auto *pChar : vpHitCharacters)
@@ -74,7 +74,7 @@ void CLight::Step()
 	Move();
 	vec2 dir(std::sin(m_Rotation), std::cos(m_Rotation));
 	vec2 to2 = m_Pos + normalize(dir) * m_CurveLength;
-	GameServer()->Collision()->IntersectNoLaser(m_Pos, to2, &m_To, 0);
+	GameServer()->Collision()->IntersectNoLaser(m_Pos, to2, &m_To, nullptr);
 }
 
 void CLight::Reset()
@@ -86,14 +86,8 @@ void CLight::Tick()
 {
 	if(Server()->Tick() % (int)(Server()->TickSpeed() * 0.15f) == 0)
 	{
-		int Flags;
 		m_EvalTick = Server()->Tick();
-		int index = GameServer()->Collision()->IsMover(m_Pos.x, m_Pos.y,
-			&Flags);
-		if(index)
-		{
-			m_Core = GameServer()->Collision()->CpSpeed(index, Flags);
-		}
+		GameServer()->Collision()->MoverSpeed(m_Pos.x, m_Pos.y, &m_Core);
 		m_Pos += m_Core;
 		Step();
 	}
@@ -120,11 +114,12 @@ void CLight::Snap(int SnappingClient)
 	{
 		From = m_Pos;
 	}
-	else if(pChr && m_Layer == LAYER_SWITCH && Switchers()[m_Number].m_aStatus[pChr->Team()])
+	else if(pChr && m_Layer == LAYER_SWITCH && m_Number > 0 && Switchers()[m_Number].m_aStatus[pChr->Team()])
 	{
 		From = m_To;
 	}
-	else if(m_Layer != LAYER_SWITCH)
+	// light on game and switch layer with a number 0 is always on
+	else if(m_Layer != LAYER_SWITCH || (m_Layer == LAYER_SWITCH && m_Number == 0))
 	{
 		From = m_To;
 	}

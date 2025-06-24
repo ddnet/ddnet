@@ -6,3 +6,80 @@
    fun:_ZN13CDemoRecorder5WriteEiPKvi
    ...
 }
+
+{
+   LoggerStdout
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:_Z17log_logger_stdoutv
+   fun:main
+}
+
+{
+   LoggerNoop
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:_Z15log_logger_noopv
+   fun:main
+}
+
+{
+   LoggerUniquePtr
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:_Znwm
+   fun:_ZNSt15__new_allocatorISt19_Sp_counted_deleterIP7ILoggerSt14default_deleteIS1_ESaIvELN9__gnu_cxx12_Lock_policyE2EEE8allocateEmPKv
+   fun:_ZNSt16allocator_traitsISaISt19_Sp_counted_deleterIP7ILoggerSt14default_deleteIS1_ESaIvELN9__gnu_cxx12_Lock_policyE2EEEE8allocateERS9_m
+   fun:_ZNSt14__shared_countILN9__gnu_cxx12_Lock_policyE2EEC1I7ILoggerSt14default_deleteIS4_EEEOSt10unique_ptrIT_T0_E
+   fun:_ZNSt12__shared_ptrI7ILoggerLN9__gnu_cxx12_Lock_policyE2EEC1IS0_St14default_deleteIS0_EvEEOSt10unique_ptrIT_T0_E
+   fun:_ZNSt10shared_ptrI7ILoggerEC1IS0_St14default_deleteIS0_EvEEOSt10unique_ptrIT_T0_E
+   fun:main
+}
+
+{
+   LoggerVectorMain
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:_ZNSt6vectorISt10shared_ptrI7ILoggerESaIS2_EE9push_backEOS2_
+   fun:main
+}
+
+{
+   LoggerCollection
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:_Z21log_logger_collectionOSt6vectorISt10shared_ptrI7ILoggerESaIS2_EE
+   fun:main
+}
+
+{
+   AssertionLoggerLog
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:_Z21CreateAssertionLoggerP8IStoragePKc
+   fun:main
+}
+
+
+{
+   ServerLogger
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:_ZSt11make_sharedI13CServerLoggerJRP7CServerEESt10shared_ptrINSt9enable_ifIXntsrSt8is_arrayIT_E5valueES7_E4typeEEDpOT0_
+   fun:main
+}
+
+{
+   FutureLoggerMain
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:_ZSt11make_sharedI13CFutureLoggerJEESt10shared_ptrINSt9enable_ifIXntsrSt8is_arrayIT_E5valueES4_E4typeEEDpOT0_
+   fun:main
+}

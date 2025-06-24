@@ -173,6 +173,7 @@ void CCharacterCore::Reset()
 	m_ShotgunHitDisabled = false;
 	m_HookHitDisabled = false;
 	m_Super = false;
+	m_Invincible = false;
 	m_HasTelegunGun = false;
 	m_HasTelegunGrenade = false;
 	m_HasTelegunLaser = false;
@@ -189,7 +190,7 @@ void CCharacterCore::Reset()
 
 void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 {
-	m_MoveRestrictions = m_pCollision->GetMoveRestrictions(UseInput ? IsSwitchActiveCb : 0, this, m_Pos);
+	m_MoveRestrictions = m_pCollision->GetMoveRestrictions(UseInput ? IsSwitchActiveCb : nullptr, this, m_Pos);
 	m_TriggeredEvents = 0;
 
 	// get ground state
@@ -330,9 +331,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		bool GoingToRetract = false;
 		bool GoingThroughTele = false;
 		int teleNr = 0;
-		int Hit = m_pCollision->IntersectLineTeleHook(m_HookPos, NewPos, &NewPos, 0, &teleNr);
-
-		// m_NewHook = false;
+		int Hit = m_pCollision->IntersectLineTeleHook(m_HookPos, NewPos, &NewPos, nullptr, &teleNr);
 
 		if(Hit)
 		{
@@ -346,7 +345,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		}
 
 		// Check against other players first
-		if(!this->m_HookHitDisabled && m_pWorld && m_Tuning.m_PlayerHooking && (m_HookState == HOOK_FLYING || !m_NewHook))
+		if(!m_HookHitDisabled && m_pWorld && m_Tuning.m_PlayerHooking && (m_HookState == HOOK_FLYING || !m_NewHook))
 		{
 			float Distance = 0.0f;
 			for(int i = 0; i < MAX_CLIENTS; i++)
@@ -418,10 +417,6 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 				m_HookState = HOOK_RETRACTED;
 				m_HookPos = m_Pos;
 			}
-
-			// keep players hooked for a max of 1.5sec
-			// if(Server()->Tick() > hook_tick+(Server()->TickSpeed()*3)/2)
-			// release_hooked();
 		}
 
 		// don't do this hook routine when we are already hooked to a player
@@ -443,7 +438,8 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 			vec2 NewVel = m_Vel + HookVel;
 
 			// check if we are under the legal limit for the hook
-			if(length(NewVel) < m_Tuning.m_HookDragSpeed || length(NewVel) < length(m_Vel))
+			const float NewVelLength = length(NewVel);
+			if(NewVelLength < m_Tuning.m_HookDragSpeed || NewVelLength < length(m_Vel))
 				m_Vel = NewVel; // no problem. apply
 		}
 
@@ -471,9 +467,6 @@ void CCharacterCore::TickDeferred()
 			if(!pCharCore)
 				continue;
 
-			// player *p = (player*)ent;
-			// if(pCharCore == this) // || !(p->flags&FLAG_ALIVE)
-
 			if(pCharCore == this || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, i)))
 				continue; // make sure that we don't nudge our self
 
@@ -488,7 +481,7 @@ void CCharacterCore::TickDeferred()
 
 				bool CanCollide = (m_Super || pCharCore->m_Super) || (!m_CollisionDisabled && !pCharCore->m_CollisionDisabled && m_Tuning.m_PlayerCollision);
 
-				if(CanCollide && Distance < PhysicalSize() * 1.25f && Distance > 0.0f)
+				if(CanCollide && Distance < PhysicalSize() * 1.25f)
 				{
 					float a = (PhysicalSize() * 1.45f - Distance);
 					float Velocity = 0.5f;
@@ -505,7 +498,7 @@ void CCharacterCore::TickDeferred()
 				// handle hook influence
 				if(!m_HookHitDisabled && m_HookedPlayer == i && m_Tuning.m_PlayerHooking)
 				{
-					if(Distance > PhysicalSize() * 1.50f) // TODO: fix tweakable variable
+					if(Distance > PhysicalSize() * 1.50f)
 					{
 						float HookAccel = m_Tuning.m_HookDragAccel * (Distance / m_Tuning.m_HookLength);
 						float DragSpeed = m_Tuning.m_HookDragSpeed;
@@ -589,7 +582,7 @@ void CCharacterCore::Move()
 					if((!(pCharCore->m_Super || m_Super) && (m_Solo || pCharCore->m_Solo || pCharCore->m_CollisionDisabled || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, p)))))
 						continue;
 					float D = distance(Pos, pCharCore->m_Pos);
-					if(D < PhysicalSize() && D >= 0.0f)
+					if(D < PhysicalSize())
 					{
 						if(a > 0.0f)
 							m_Pos = LastPos;
@@ -655,6 +648,7 @@ void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 	m_LaserHitDisabled = pObjDDNet->m_Flags & CHARACTERFLAG_LASER_HIT_DISABLED;
 	m_HookHitDisabled = pObjDDNet->m_Flags & CHARACTERFLAG_HOOK_HIT_DISABLED;
 	m_Super = pObjDDNet->m_Flags & CHARACTERFLAG_SUPER;
+	m_Invincible = pObjDDNet->m_Flags & CHARACTERFLAG_INVINCIBLE;
 
 	// Endless
 	m_EndlessHook = pObjDDNet->m_Flags & CHARACTERFLAG_ENDLESS_HOOK;
@@ -755,7 +749,7 @@ void CWorldCore::InitSwitchers(int HighestSwitchNumber)
 	for(auto &Switcher : m_vSwitchers)
 	{
 		Switcher.m_Initial = true;
-		for(int j = 0; j < MAX_CLIENTS; j++)
+		for(int j = 0; j < NUM_DDRACE_TEAMS; j++)
 		{
 			Switcher.m_aStatus[j] = true;
 			Switcher.m_aEndTick[j] = 0;

@@ -10,6 +10,7 @@
 #include <game/mapitems.h>
 
 #include <game/server/gamecontext.h>
+#include <game/server/save.h>
 
 CDraggerBeam::CDraggerBeam(CGameWorld *pGameWorld, CDragger *pDragger, vec2 Pos, float Strength, bool IgnoreWalls,
 	int ForClientId, int Layer, int Number) :
@@ -60,8 +61,8 @@ void CDraggerBeam::Tick()
 	// When the dragger can no longer reach the target player, the dragger beam dissolves
 	int IsReachable =
 		m_IgnoreWalls ?
-			!GameServer()->Collision()->IntersectNoLaserNW(m_Pos, pTarget->m_Pos, 0, 0) :
-			!GameServer()->Collision()->IntersectNoLaser(m_Pos, pTarget->m_Pos, 0, 0);
+			!GameServer()->Collision()->IntersectNoLaserNoWalls(m_Pos, pTarget->m_Pos, nullptr, nullptr) :
+			!GameServer()->Collision()->IntersectNoLaser(m_Pos, pTarget->m_Pos, nullptr, nullptr);
 	if(!IsReachable ||
 		distance(pTarget->m_Pos, m_Pos) >= g_Config.m_SvDraggerRange || !pTarget->IsAlive())
 	{
@@ -108,7 +109,7 @@ void CDraggerBeam::Snap(int SnappingClient)
 		return;
 	}
 
-	int Subtype = (m_IgnoreWalls ? 1 : 0) | (clamp(round_to_int(m_Strength - 1.f), 0, 2) << 1);
+	int Subtype = (m_IgnoreWalls ? 1 : 0) | (std::clamp(round_to_int(m_Strength - 1.f), 0, 2) << 1);
 
 	int StartTick = m_EvalTick;
 	if(StartTick < Server()->Tick() - 4)
@@ -139,4 +140,9 @@ void CDraggerBeam::Snap(int SnappingClient)
 void CDraggerBeam::SwapClients(int Client1, int Client2)
 {
 	m_ForClientId = m_ForClientId == Client1 ? Client2 : m_ForClientId == Client2 ? Client1 : m_ForClientId;
+}
+
+ESaveResult CDraggerBeam::BlocksSave(int ClientId)
+{
+	return m_ForClientId == ClientId ? ESaveResult::DRAGGER_ACTIVE : ESaveResult::SUCCESS;
 }

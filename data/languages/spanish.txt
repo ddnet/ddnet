@@ -1,31 +1,3 @@
-##### authors #####
-#originally created by:
-#	ReGnuM
-#modified by:
-#	Ninja Style		2011-04-06 23:22:06
-#	Alexandre		2011-07-11 11:30:00
-#	GaBOr			2011-07-15 01:23:39
-#	HeroiAmarelo	2012-08-01 15:52:45
-#	Mortcheck		2012-11-03 22:58:43
-#	FeaRZ		2020-07-07 12:09:00
-#	Ryozuki         2020-07-09 12:06:00
-# Headshot        2020-11-07 12:40:00
-# Headshot        2021-05-30 17:00:00
-# Deëivid!        2021-10-27 00:49:00
-# Deëivid!        2022-02-05 21:53:00
-# Deëivid!        2022-03-27 18:40:00
-# Deëivid!        2022-05-13 18:44:00
-# Deëivid!        2022-06-22 19:26:00
-# Deëivid!        2022-07-05 22:30:00
-# Deëivid!        2022-10-08 19:20:00
-# Deëivid!        2023-01-05 21:05:00
-# Deëivid!        2023-02-26 00:35:00
-# Deëivid!        2023-05-22 19:54:00
-# Deëivid!        2023-07-01 22:52:00
-##### /authors #####
-
-##### translated strings #####
-
 %ds left
 == %ds restantes
 
@@ -299,9 +271,6 @@ Player
 Player country:
 == País del jugador
 
-Player options
-== Opciones de jugador
-
 Players
 == Jugadores
 
@@ -372,7 +341,7 @@ Show ingame HUD
 == Mostrar HUD durante el juego
 
 Show name plates
-== Mostrar apodos
+== Mostrar nombres
 
 Show only chat messages from friends
 == Recibir mensajes solo de amigos
@@ -422,9 +391,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == El servidor está ejecutando una configuración no estándar en un tipo de juego puro.
 
-Time limit
-== Tiempo límite
-
 Time limit: %d min
 == Tiempo límite: %d minutos
 
@@ -441,7 +407,7 @@ Use sounds
 == Usar sonidos
 
 Use team colors for name plates
-== Usar el color de equipo en los apodos
+== Usar el color de equipo en los nombres
 
 V-Sync
 == V-Sync
@@ -523,9 +489,6 @@ Your skin
 Reset to defaults
 == Resetear por defecto
 
-Round
-== Ronda
-
 Lht.
 == Lum.
 
@@ -539,7 +502,7 @@ LAN
 == LAN
 
 Name plates size
-== Tamaño de la fuente de los apodos
+== Tamaño de la fuente de los nombres
 
 Successfully saved the replay!
 == ¡Repetición guardada con éxito!
@@ -629,7 +592,7 @@ Types
 == Tipos
 
 DDNet %s is out!
-== ¡DDNet %s ya esta disponible!
+== ¡DDNet %s ya está disponible!
 
 Downloading %s:
 == Descargando %s:
@@ -675,9 +638,6 @@ Connecting dummy
 
 Connect Dummy
 == Conectar Dummy
-
-Reload
-== Recargar
 
 Deactivate
 == Desactivar
@@ -777,9 +737,6 @@ may cause delay
 
 Screen
 == Pantalla
-
-Use high DPI
-== Usar DPI alto
 
 Enable game sounds
 == Habilitar sonidos del juego
@@ -894,9 +851,6 @@ AntiPing: predict grenade paths
 
 Show other players' hook collision lines
 == Mostrar las líneas de colisión de gancho de otros jugadores
-
-Show other players' key presses
-== Mostrar las pulsaciones de teclas de otros jugadores
 
 Show tiles layers from BG map
 == Mostrar capas de tiles del mapa de fondo
@@ -1145,9 +1099,6 @@ https://ddnet.org/discord
 Are you sure that you want to disconnect and switch to a different server?
 == ¿Seguro que quieres desconectarte y cambiar de servidor?
 
-Show local player's key presses
-== Mostrar las teclas presionadas por el jugador local
-
 Settings file
 == Archivo de configuraciones
 
@@ -1294,7 +1245,7 @@ Show player speed
 Show player target angle
 == Mostrar el ángulo de la mira del jugador
 
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == Ajusta la opacidad de entidades pertenecientes a otros equipos, como los tees y los nombres.
 
 Opacity of freeze bars inside freeze
@@ -1393,9 +1344,6 @@ Show health, shields and ammo
 DDRace HUD
 == HUD DDRace
 
-Show client IDs in scoreboard
-== Mostrar IDs de cliente en la tabla de puntuación
-
 Show DDRace HUD
 == Mostrar el HUD DDRace
 
@@ -1404,9 +1352,6 @@ Show jumps indicator
 
 Hook collision line
 == Línea de colisión del gancho
-
-Hook collision line width
-== Ancho de la línea de colisión del gancho
 
 Hook collision line opacity
 == Opacidad de la lína de colisión del gancho
@@ -1506,10 +1451,6 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 == Error durante la iniciación. Intenta cambiar gfx_backend a OpenGL o Vulkan desde settings_ddnet.cfg en la carpeta de configuraciones e inténtalo otra vez.
 
 [Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== La VRAM se ha llenado. Intenta quitar recursos personalizados (skins, entidades, etc.), especialmente los de resolución alta.
-
-[Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
 == Ocurrió un error durante la grabación de comandos. Intenta actualizar los controladores de tu GPU.
 
@@ -1573,9 +1514,6 @@ Copy info
 Create a random skin
 == Crear skin aleatoria
 
-Online players (%d)
-== Jugadores en línea (%d)
-
 Online clanmates (%d)
 == Compañeros de clan en línea (%d)
 
@@ -1591,9 +1529,6 @@ Click to remove this player from your friends list.
 
 Click to remove this clan from your friends list.
 == Haz clic para quitar este clan de tu lista de amigos.
-
-None
-== Ninguno
 
 Add Clan
 == Agregar clan
@@ -1671,12 +1606,12 @@ Go back the specified duration
 == Retroceder el tiempo especificado
 
 [Demo player duration]
-%d min.
-== %d min.
+%s min.
+== %s min.
 
 [Demo player duration]
-%d sec.
-== %d seg.
+%s sec.
+== %s seg.
 
 Change the skip duration
 == Cambiar duración del salto
@@ -1844,9 +1779,6 @@ Player info change cooldown
 Always show chat
 == Siempre mostrar chat
 
-Show friend mark (♥) in name plates
-== Mostrar marca de amigos (♥) en los nombres
-
 Show hook strength icon indicator
 == Mostrar indicador de fuerza del gancho
 
@@ -1870,3 +1802,416 @@ Tee
 
 Show only chat messages from team members
 == Mostrar solo los mensajes de miembros del equipo
+
+[Spectating]
+Following %s
+== Viendo a %s
+
+Example of usage
+== Ejemplo de uso
+
+Round %d/%d
+== Ronda %d/%d
+
+[Spectators]
+%d others…
+== otros %d
+
+[Team and size]
+%d\n(%d/%d)
+== %d\n(%d/%d)
+
+Team %d (%d/%d)
+== Equipo %d (%d/%d)
+
+https://wiki.ddnet.org/wiki/Mapping
+== https://wiki.ddnet.org/wiki/Mapping/es
+
+Could not resolve connect address '%s'. See local console for details.
+== No se pudo resolver la dirección de conexión '%s'. Ver la consola local para más detalles.
+
+Connect address error
+== Error de dirección de conexión
+
+Could not connect dummy
+== No se pudo conectar tu dummy
+
+Dummy is not allowed on this server
+== No se permiten dummys en este servidor
+
+Please wait…
+== Espera por favor…
+
+Show client IDs (scoreboard, chat, spectator)
+== Mostrar IDs de cliente (scoreboard, chat, espectador)
+
+Are you sure that you want to delete '%s'?
+== ¿Estás seguro de que quieres eliminar '%s'?
+
+Delete skin
+== Eliminar skin
+
+Basic
+== Básico
+
+Custom
+== Personalizado
+
+Unable to delete skin
+== No se pudo borrar la skin
+
+Save skin
+== Guardar skin
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== ¿Estás seguro de que quieres guardar tu skin? Si una skin con este nombre ya existe, esta será reemplazada.
+
+Unable to save the skin
+== No se pudo guardar la skin
+
+Unable to save the skin with a reserved name
+== No se pudo guardar la skin con un nombre reservado
+
+No local servers found (ports %d-%d)
+== No se encontraron servidores locales (puertos %d-%d)
+
+[Hertz]
+Hz
+== Hz
+
+[skins]
+Body
+== Cuerpo
+
+[skins]
+Marking
+== Marcas
+
+[skins]
+Decoration
+== Decoración
+
+[skins]
+Hands
+== Manos
+
+[skins]
+Feet
+== Pies
+
+[skins]
+Eyes
+== Ojos
+
+Some fonts could not be loaded. Check the local console for details.
+== No se pudieron cargar algunas fuentes. Revisa la consola local para más detalles.
+
+Online friends (%d)
+== Amigos en línea (%d)
+
+Add friends by entering their name below or by clicking their name in the player list.
+== Agrega amigos ingresando su nombre aquí abajo o haciendo clic en su nombre en la lista de jugadores.
+
+Add clanmates by entering their clan below and leaving the name blank.
+== Agrega compañeros de clan ingresando el nombre del clan aquí abajo y dejando el campo del nombre en blanco.
+
+Edit touch controls
+== Editar controles táctiles
+
+Close
+== Cerrar
+
+Save changes
+== Guardar cambios
+
+Error saving touch controls
+== Error al guardar los controles táctiles
+
+Could not save touch controls to file. See local console for details.
+== No se pudieron guardar los controles táctiles. Revisa la consola local para más detalles
+
+Unsaved changes
+== Cambios sin guardar
+
+Discard changes
+== Descartar cambios
+
+Are you sure that you want to discard the current changes to the touch controls?
+== ¿Estás seguro de que quieres descartar los cambios actuales a los controles táctiles?
+
+Are you sure that you want to reset the touch controls to default?
+== ¿Estás seguro de que quieres restablecer los controles táctiles a su configuración predeterminada?
+
+Import from clipboard
+== Importar desde el portapapeles
+
+Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
+== ¿Estás seguro de que quieres importar los controles táctiles desde el portapapeles? Esto sobreescribirá tus controles táctiles actuales.
+
+Export to clipboard
+== Exportar al portapapeles
+
+Direct touch input while ingame
+== Entrada táctil directa dentro del juego
+
+[Direct touch input]
+Disabled
+== Desactivado
+
+[Direct touch input]
+Active action
+== Acción activa
+
+[Direct touch input]
+Aim
+== Apuntar
+
+[Direct touch input]
+Fire
+== Disparar
+
+[Direct touch input]
+Hook
+== Gancho
+
+Direct touch input while spectating
+== Entrada táctil directa en espectador
+
+Error loading touch controls
+== Error al cargar los controles táctiles
+
+Could not load touch controls from file. See local console for details.
+== No se pudieron cargar los controles táctiles desde el archivo. Revisa la consola local para más detalles.
+
+Could not load default touch controls from file. See local console for details.
+== No se pudieron cargar los controles táctiles predeterminados desde el archivo. Revisa la consola local para más detalles.
+
+Could not load touch controls from clipboard. See local console for details.
+== No se pudieron cargar los controles táctiles desde el portapapeles. Revisa la consola local para más detalles.
+
+Width of your own hook collision line
+== Ancho de tu propia línea de colisión del gancho
+
+Width of others' hook collision line
+== Ancho de la línea de colisión del gancho de los demás
+
+Preview 'Hook collisions' being pressed
+== Vista previa al presionar 'Colisiones de gancho'
+
+Aim
+== Apuntar
+
+Active: Fire
+== Activo: Disparar
+
+Active: Hook
+== Activo: Gancho
+
+"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
+== "%s" no es compatible con pnglite y no puede ser cargado por versiones de DDNet antiguas:
+
+[Spectating Camera Mode Icon]
+AUTO
+== AUTO
+
+Toggle auto camera
+== Alternar cámara automática
+
+https://wiki.ddnet.org/wiki/Touch_controls
+== https://wiki.ddnet.org/wiki/Touch_controls/es
+
+Show client IDs in name plates
+== Mostrar IDs de cliente en los nombres
+
+Hook Strength
+== Fuerza del gancho
+
+Size of hook strength icon and number indicator
+== Tamaño del icono de fuerza del gancho y del indicador numérico
+
+Key Presses
+== Pulsaciones de teclas
+
+Size of key press icons
+== Tamaño de los iconos de las pulsaciones de teclas
+
+Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
+== No se pudo iniciar el servidor. Asegúrate de otorgar el permiso de notificaciones en la configuración de la aplicación para que el servidor pueda ejecutarse en segundo plano.
+
+Auto-sync player camera
+== Sincronización automática de la cámara del jugador
+
+[Auto camera]
+Disabled
+== Desactivado
+
+[Auto camera]
+Enabled
+== Activado
+
+[Auto camera]
+Unavailable for this player
+== No disponible para este jugador
+
+[Auto camera]
+Inactive
+== Inactivo
+
+[Auto camera]
+Active
+== Activo
+
+Loading maps…
+== Cargando mapas…
+
+Community
+== Comunidad
+
+[Team status]
+forbidden
+== prohibido
+
+[Team status]
+solo
+== solo
+
+[Team status]
+allowed
+== permitido
+
+[Team status]
+required
+== requerido
+
+Teams
+== Equipos
+
+[Team size]
+minimum
+== mínimo
+
+[Team size]
+maximum
+== máximo
+
+Saves file
+== Archivo de guardados
+
+Open the saves file
+== Abrir el archivo de guardados
+
+Show FPS
+== Mostrar FPS
+
+Renders your frame rate in the top right
+== Muestra tu tasa de fotogramas en la esquina superior derecha
+
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Traducción al español por ReGnuM, Ninja Style, Alexandre, GaBOr, HeroiAmarelo, Mortcheck, FeaRZ, Ryozuki, Headshot y Deëivid!
+
+Show spectator cursor
+== Mostrar cursor de espectador
+
+No demo with this filename exists
+== No existe una demo con este nombre
+
+Map size
+== Tamaño del mapa
+
+Show number of spectators
+== Mostrar el número de espectadores
+
+[Show name plates]
+None
+== Ninguno
+
+[Show name plates]
+Own
+== El propio
+
+[Show name plates]
+Others
+== De otros
+
+[Show name plates]
+All
+== De todos
+
+Name plates offset
+== Desplazamiento del nombre
+
+Show friend icon in name plates
+== Mostrar icono de amigo en los nombres
+
+Show client IDs on a seperate line
+== Mostrar las IDs de cliente en una línea separada
+
+Client IDs size
+== Tamaño de las IDs de cliente
+
+Show players' key presses
+== Mostrar las teclas presionadas por los jugadores
+
+[Show players' key presses]
+None
+== Ninguna
+
+[Show players' key presses]
+Own
+== Las propias
+
+[Show players' key presses]
+Others
+== De otros
+
+[Show players' key presses]
+All
+== De todos
+
+Preview dummy's name plate
+== Previsualizar el nombre del dummy
+
+AntiPing: prediction margin
+== AntiPing: margen de predicción
+
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== Memoria de video agotada. Intenta reducir el valor de 'cl_skins_loaded_max' o elimina recursos personalizados (skins, entidades, etc.), especialmente aquellos con alta resolución.
+
+This name cannot be used for files and folders
+== Este nombre no se puede usar para archivos y carpetas
+
+This skin name cannot be used.
+== No se puede utilizar este nombre de skin.
+
+Skin could not be loaded due to an error. Check the local console for details.
+== No se pudo cargar la skin debido a un error. Revisa la consola local para más detalles.
+
+Skin could not be found.
+== No se pudo encontrar la skin.
+
+No skins match your filter criteria
+== Ninguna skin coincide con tus criterios de filtro.
+
+Preview player's name plate
+== Previsualizar el nombre del jugador
+
+Dragger Outline Color
+== Color externo del arrastrador
+
+Dragger Inner Color
+== Color interno del arrastrador
+
+[Spectating]
+Following %d: %s
+== 
+
+Loading map
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
+== 

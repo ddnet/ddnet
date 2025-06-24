@@ -45,7 +45,7 @@ public:
 	CDemoRecorder() {}
 	~CDemoRecorder() override;
 
-	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, const SHA256_DIGEST &Sha256, unsigned MapCrc, const char *pType, unsigned MapSize, unsigned char *pMapData, IOHANDLE MapFile = nullptr, DEMOFUNC_FILTER pfnFilter = nullptr, void *pUser = nullptr);
+	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, const SHA256_DIGEST &Sha256, unsigned MapCrc, const char *pType, unsigned MapSize, unsigned char *pMapData, IOHANDLE MapFile, DEMOFUNC_FILTER pfnFilter, void *pUser);
 	int Stop(IDemoRecorder::EStopMode Mode, const char *pTargetFilename = "") override;
 
 	void AddDemoMarker();
@@ -71,8 +71,9 @@ public:
 		virtual void OnDemoPlayerMessage(void *pData, int Size) = 0;
 	};
 
-	struct CPlaybackInfo
+	class CPlaybackInfo
 	{
+	public:
 		CDemoHeader m_Header;
 		CTimelineMarkers m_TimelineMarkers;
 
@@ -95,12 +96,13 @@ private:
 	TUpdateIntraTimesFunc m_UpdateIntraTimesFunc;
 
 	// Playback
-	struct SKeyFrame
+	class CKeyFrame
 	{
-		long m_Filepos;
+	public:
+		int64_t m_Filepos;
 		int m_Tick;
 
-		SKeyFrame(long Filepos, int Tick) :
+		CKeyFrame(int64_t Filepos, int Tick) :
 			m_Filepos(Filepos), m_Tick(Tick)
 		{
 		}
@@ -108,10 +110,10 @@ private:
 
 	class IConsole *m_pConsole;
 	IOHANDLE m_File;
-	long m_MapOffset;
+	int64_t m_MapOffset;
 	char m_aFilename[IO_MAX_PATH_LENGTH];
 	char m_aErrorMessage[256];
-	std::vector<SKeyFrame> m_vKeyFrames;
+	std::vector<CKeyFrame> m_vKeyFrames;
 	CMapInfo m_MapInfo;
 	int m_SpeedIndex;
 
@@ -143,8 +145,10 @@ private:
 	EReadChunkHeaderResult ReadChunkHeader(int *pType, int *pSize, int *pTick);
 	void DoTick();
 	bool ScanFile();
+	void UpdateTimes();
 
 	int64_t Time();
+	bool m_Sixup;
 
 public:
 	CDemoPlayer(class CSnapshotDelta *pSnapshotDelta, bool UseVideo);
@@ -158,7 +162,7 @@ public:
 	int Load(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, int StorageType);
 	unsigned char *GetMapData(class IStorage *pStorage);
 	bool ExtractMap(class IStorage *pStorage);
-	int Play();
+	void Play();
 	void Pause() override;
 	void Unpause() override;
 	void Stop(const char *pErrorMessage = "");
@@ -176,6 +180,7 @@ public:
 	const char *ErrorMessage() const override { return m_aErrorMessage; }
 
 	int Update(bool RealTime = true);
+	bool IsSixup() const { return m_Sixup; }
 
 	const CPlaybackInfo *Info() const { return &m_Info; }
 	bool IsPlaying() const override { return m_File != nullptr; }
@@ -187,10 +192,9 @@ class CDemoEditor : public IDemoEditor
 	IConsole *m_pConsole;
 	IStorage *m_pStorage;
 	class CSnapshotDelta *m_pSnapshotDelta;
-	const char *m_pNetVersion;
 
 public:
-	virtual void Init(const char *pNetVersion, class CSnapshotDelta *pSnapshotDelta, class IConsole *pConsole, class IStorage *pStorage);
+	virtual void Init(class CSnapshotDelta *pSnapshotDelta, class IConsole *pConsole, class IStorage *pStorage);
 	bool Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, DEMOFUNC_FILTER pfnFilter, void *pUser) override;
 };
 

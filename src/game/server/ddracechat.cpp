@@ -1,64 +1,47 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
-#include "gamecontext.h"
+#include <base/log.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
 #include <game/mapitems.h>
+#include <game/server/entities/character.h>
 #include <game/server/gamemodes/DDRace.h>
 #include <game/server/teams.h>
+#include <game/team_state.h>
 #include <game/version.h>
 
-#include "entities/character.h"
+#include "gamecontext.h"
 #include "player.h"
 #include "score.h"
-
-#include <optional>
-
-bool CheckClientId(int ClientId);
 
 void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"DDNet is run by the DDNet staff (DDNet.org/staff)");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"Great maps and many ideas from the great community");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"Help and code by eeeee, HMH, east, CookieMichal, Learath2,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"Savander, laxa, Tobii, BeaR, Wohoo, nuborn, timakro, Shiki,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"trml, Soreu, hi_leute_gll, Lady Saavik, Chairn, heinrich5991,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"swick, oy, necropotame, Ryozuki, Redix, d3fault, marcelherd,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"BannZay, ACTom, SiuFuWong, PathosEthosLogos, TsFreddie,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"Jupeyy, noby, ChillerDragon, ZombieToad, weez15, z6zzz,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"Piepow, QingGo, RafaelFF, sctt, jao, daverck, fokkonaut,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"Bojidar, FallenKN, ardadem, archimede67, sirius1242, Aerll,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"trafilaw, Zwelf, Patiga, Konsti, ElXreno, MikiGamer,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"Fireball, Banana090, axblk, yangfl, Kaffeine,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"Zodiac, c0d3d3v, GiuCcc, Ravie, Robyt3, simpygirl,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"sjrc6, Cellegen, srdante, Nouaa, Voxel, luk51,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"Vy0x2, Avolicious, louis, Marmare314, hus3h,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"ArijanJ, tarunsamanta2k20, Possseidon, M0REKZ,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"Teero, furo, dobrykafe, Moiman, JSaurusRex,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"Steinchen, ewancg, gerdoe-jr, BlaiZephyr & others");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"Based on DDRace by the DDRace developers,");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"which is a mod of Teeworlds by the Teeworlds developers.");
+	static constexpr const char *CREDITS[] = {
+		"DDNet is run by the DDNet staff (DDNet.org/staff)",
+		"Great maps and many ideas from the great community",
+		"Help and code by eeeee, HMH, east, CookieMichal, Learath2,",
+		"Savander, laxa, Tobii, BeaR, Wohoo, nuborn, timakro, Shiki,",
+		"trml, Soreu, hi_leute_gll, Lady Saavik, Chairn, heinrich5991,",
+		"swick, oy, necropotame, Ryozuki, Redix, d3fault, marcelherd,",
+		"BannZay, ACTom, SiuFuWong, PathosEthosLogos, TsFreddie,",
+		"Jupeyy, noby, ChillerDragon, ZombieToad, weez15, z6zzz,",
+		"Piepow, QingGo, RafaelFF, sctt, jao, daverck, fokkonaut,",
+		"Bojidar, FallenKN, ardadem, archimede67, sirius1242, Aerll,",
+		"trafilaw, Zwelf, Patiga, Konsti, ElXreno, MikiGamer,",
+		"Fireball, Banana090, axblk, yangfl, Kaffeine, Zodiac,",
+		"c0d3d3v, GiuCcc, Ravie, Robyt3, simpygirl, sjrc6, Cellegen,",
+		"srdante, Nouaa, Voxel, luk51, Vy0x2, Avolicious, louis,",
+		"Marmare314, hus3h, ArijanJ, tarunsamanta2k20, Possseidon,",
+		"M0REKZ, Teero, furo, dobrykafe, Moiman, JSaurusRex,",
+		"Steinchen, ewancg, gerdoe-jr, BlaiZephyr, KebsCS, bencie,",
+		"DynamoFox, MilkeeyCat, iMilchshake, SchrodingerZhu,",
+		"catseyenebulous, Rei-Tw, Matodor, Emilcha, art0007i, SollyBunny,",
+		"0xfaulty & others",
+		"Based on DDRace by the DDRace developers,",
+		"which is a mod of Teeworlds by the Teeworlds developers.",
+	};
+	for(const char *pLine : CREDITS)
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", pLine);
 }
 
 void CGameContext::ConInfo(IConsole::IResult *pResult, void *pUserData)
@@ -111,7 +94,7 @@ void CGameContext::ConHelp(IConsole::IResult *pResult, void *pUserData)
 	{
 		const char *pArg = pResult->GetString(0);
 		const IConsole::CCommandInfo *pCmdInfo =
-			pSelf->Console()->GetCommandInfo(pArg, CFGFLAG_SERVER, false);
+			pSelf->Console()->GetCommandInfo(pArg, CFGFLAG_SERVER | CFGFLAG_CHAT, false);
 		if(pCmdInfo)
 		{
 			if(pCmdInfo->m_pParams)
@@ -125,10 +108,11 @@ void CGameContext::ConHelp(IConsole::IResult *pResult, void *pUserData)
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", pCmdInfo->m_pHelp);
 		}
 		else
-			pSelf->Console()->Print(
-				IConsole::OUTPUT_LEVEL_STANDARD,
-				"chatresp",
-				"Command is either unknown or you have given a blank command without any parameters.");
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "Unknown command %s", pArg);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
+		}
 	}
 }
 
@@ -295,7 +279,7 @@ void CGameContext::ConRules(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
-void ToggleSpecPause(IConsole::IResult *pResult, void *pUserData, int PauseType)
+static void ToggleSpecPause(IConsole::IResult *pResult, void *pUserData, int PauseType)
 {
 	if(!CheckClientId(pResult->m_ClientId))
 		return;
@@ -335,7 +319,7 @@ void ToggleSpecPause(IConsole::IResult *pResult, void *pUserData, int PauseType)
 	}
 }
 
-void ToggleSpecPauseVoted(IConsole::IResult *pResult, void *pUserData, int PauseType)
+static void ToggleSpecPauseVoted(IConsole::IResult *pResult, void *pUserData, int PauseType)
 {
 	if(!CheckClientId(pResult->m_ClientId))
 		return;
@@ -373,7 +357,24 @@ void ToggleSpecPauseVoted(IConsole::IResult *pResult, void *pUserData, int Pause
 
 void CGameContext::ConToggleSpec(IConsole::IResult *pResult, void *pUserData)
 {
-	ToggleSpecPause(pResult, pUserData, g_Config.m_SvPauseable ? CPlayer::PAUSE_SPEC : CPlayer::PAUSE_PAUSED);
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return;
+
+	int PauseType = g_Config.m_SvPauseable ? CPlayer::PAUSE_SPEC : CPlayer::PAUSE_PAUSED;
+
+	if(pPlayer->GetCharacter())
+	{
+		CGameTeams &Teams = pSelf->m_pController->Teams();
+		if(Teams.IsPractice(Teams.m_Core.Team(pResult->m_ClientId)))
+			PauseType = CPlayer::PAUSE_SPEC;
+	}
+
+	ToggleSpecPause(pResult, pUserData, PauseType);
 }
 
 void CGameContext::ConToggleSpecVoted(IConsole::IResult *pResult, void *pUserData)
@@ -505,16 +506,22 @@ void CGameContext::ConDND(IConsole::IResult *pResult, void *pUserData)
 	if(!pPlayer)
 		return;
 
-	if(pPlayer->m_DND)
-	{
-		pPlayer->m_DND = false;
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "You will receive global chat and server messages");
-	}
-	else
-	{
-		pPlayer->m_DND = true;
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "You will not receive any further global chat and server messages");
-	}
+	pPlayer->m_DND = pResult->NumArguments() == 0 ? !pPlayer->m_DND : pResult->GetInteger(0);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", pPlayer->m_DND ? "You will not receive any further global chat and server messages" : "You will receive global chat and server messages");
+}
+
+void CGameContext::ConWhispers(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return;
+
+	pPlayer->m_Whispers = pResult->NumArguments() == 0 ? !pPlayer->m_Whispers : pResult->GetInteger(0);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", pPlayer->m_Whispers ? "You will receive whispers" : "You will not receive any further whispers");
 }
 
 void CGameContext::ConMap(IConsole::IResult *pResult, void *pUserData)
@@ -559,7 +566,7 @@ void CGameContext::ConMapInfo(IConsole::IResult *pResult, void *pUserData)
 	if(pResult->NumArguments() > 0)
 		pSelf->Score()->MapInfo(pResult->m_ClientId, pResult->GetString(0));
 	else
-		pSelf->Score()->MapInfo(pResult->m_ClientId, g_Config.m_SvMap);
+		pSelf->Score()->MapInfo(pResult->m_ClientId, pSelf->Server()->GetMapName());
 }
 
 void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
@@ -699,6 +706,72 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CGameContext::ConUnPractice(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return;
+
+	if(pSelf->ProcessSpamProtection(pResult->m_ClientId, false))
+		return;
+
+	CGameTeams &Teams = pSelf->m_pController->Teams();
+
+	int Team = Teams.m_Core.Team(pResult->m_ClientId);
+
+	if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team == TEAM_FLOCK)
+	{
+		log_info("chatresp", "Practice mode can't be disabled for team 0");
+		return;
+	}
+
+	if(!Teams.IsPractice(Team))
+	{
+		log_info("chatresp", "Team isn't in practice mode");
+		return;
+	}
+
+	if(Teams.GetSaving(Team))
+	{
+		log_info("chatresp", "Practice mode can't be disabled while team save or load is in progress");
+		return;
+	}
+
+	if(Teams.Count(Team) > g_Config.m_SvMaxTeamSize && pSelf->m_pController->Teams().TeamLocked(Team))
+	{
+		log_info("chatresp", "Can't disable practice. This team exceeds the maximum allowed size of %d players for regular team", g_Config.m_SvMaxTeamSize);
+		return;
+	}
+
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(Teams.m_Core.Team(i) == Team)
+		{
+			CPlayer *pPlayer2 = pSelf->m_apPlayers[i];
+			if(pPlayer2)
+			{
+				if(pPlayer2->m_VotedForPractice)
+					pPlayer2->m_VotedForPractice = false;
+
+				if(!g_Config.m_SvPauseable && pPlayer2->IsPaused() == -1 * CPlayer::PAUSE_SPEC)
+					pPlayer2->Pause(CPlayer::PAUSE_PAUSED, true);
+			}
+		}
+	}
+
+	// send before kill, in case team isn't locked
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "'%s' disabled practice mode for your team", pSelf->Server()->ClientName(pResult->m_ClientId));
+	pSelf->SendChatTeam(Team, aBuf);
+
+	Teams.KillCharacterOrTeam(pResult->m_ClientId, Team);
+	Teams.SetPractice(Team, false);
+}
+
 void CGameContext::ConPracticeCmdList(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -741,6 +814,15 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 			IConsole::OUTPUT_LEVEL_STANDARD,
 			"chatresp",
 			"Swap is disabled on this server.");
+		return;
+	}
+
+	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
+	{
+		pSelf->Console()->Print(
+			IConsole::OUTPUT_LEVEL_STANDARD,
+			"chatresp",
+			"Swap is not available on forced solo servers.");
 		return;
 	}
 
@@ -804,11 +886,11 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	CPlayer *pSwapPlayer = pSelf->m_apPlayers[TargetClientId];
-	if((Team == TEAM_FLOCK || Teams.TeamFlock(Team)) && g_Config.m_SvTeam != 3)
+	if(Team == TEAM_FLOCK || Teams.TeamFlock(Team))
 	{
 		CCharacter *pChr = pPlayer->GetCharacter();
 		CCharacter *pSwapChr = pSwapPlayer->GetCharacter();
-		if(!pChr || !pSwapChr || pChr->m_DDRaceState != DDRACE_STARTED || pSwapChr->m_DDRaceState != DDRACE_STARTED)
+		if(!pChr || !pSwapChr || pChr->m_DDRaceState != ERaceState::STARTED || pSwapChr->m_DDRaceState != ERaceState::STARTED)
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "You and other player need to have started the map");
 			return;
@@ -836,6 +918,62 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	Teams.SwapTeamCharacters(pPlayer, pSwapPlayer, Team);
+}
+
+void CGameContext::ConCancelSwap(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return;
+
+	if(!g_Config.m_SvSwap)
+	{
+		pSelf->Console()->Print(
+			IConsole::OUTPUT_LEVEL_STANDARD,
+			"chatresp",
+			"Swap is disabled on this server.");
+		return;
+	}
+
+	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
+	{
+		pSelf->Console()->Print(
+			IConsole::OUTPUT_LEVEL_STANDARD,
+			"chatresp",
+			"Swap is not available on forced solo servers.");
+		return;
+	}
+
+	CGameTeams &Teams = pSelf->m_pController->Teams();
+
+	int Team = Teams.m_Core.Team(pResult->m_ClientId);
+
+	if(Team < TEAM_FLOCK || Team >= TEAM_SUPER)
+	{
+		pSelf->Console()->Print(
+			IConsole::OUTPUT_LEVEL_STANDARD,
+			"chatresp",
+			"Join a team to use swap feature, which means you can swap positions with each other.");
+		return;
+	}
+
+	bool SwapPending = pPlayer->m_SwapTargetsClientId != -1 && !pSelf->Server()->ClientSlotEmpty(pPlayer->m_SwapTargetsClientId);
+
+	if(!SwapPending)
+	{
+		pSelf->Console()->Print(
+			IConsole::OUTPUT_LEVEL_STANDARD,
+			"chatresp",
+			"You do not have a pending swap request.");
+		return;
+	}
+
+	Teams.CancelTeamSwap(pPlayer, Team);
 }
 
 void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
@@ -1028,14 +1166,14 @@ void CGameContext::AttemptJoinTeam(int ClientId, int Team)
 		pPlayer->GetCharacter()->m_LastStartWarning = Server()->Tick();
 	}
 
-	if(pPlayer->GetCharacter() == 0)
+	if(pPlayer->GetCharacter() == nullptr)
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 			"You can't change teams while you are dead/a spectator.");
 	}
 	else
 	{
-		if(Team < 0 || Team >= MAX_CLIENTS)
+		if(Team < 0 || Team >= TEAM_SUPER)
 			Team = m_pController->Teams().GetFirstEmptyTeam();
 
 		if(pPlayer->m_Last_Team + (int64_t)Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay > Server()->Tick())
@@ -1062,6 +1200,13 @@ void CGameContext::AttemptJoinTeam(int ClientId, int Team)
 		}
 		else
 		{
+			if(PracticeByDefault())
+			{
+				// joined an empty team
+				if(m_pController->Teams().Count(Team) == 1)
+					m_pController->Teams().SetPractice(Team, true);
+			}
+
 			char aBuf[512];
 			str_format(aBuf, sizeof(aBuf), "'%s' joined team %d",
 				Server()->ClientName(pPlayer->GetCid()),
@@ -1178,7 +1323,7 @@ void CGameContext::ConTeam0Mode(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	if(pController->Teams().GetTeamState(Team) != CGameTeams::TEAMSTATE_OPEN)
+	if(pController->Teams().GetTeamState(Team) != ETeamState::OPEN)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientId, "Team mode can't be changed while racing");
 		return;
@@ -1241,18 +1386,25 @@ void CGameContext::ConTeam(IConsole::IResult *pResult, void *pUserData)
 		char aBuf[512];
 		if(!pPlayer->IsPlaying())
 		{
-			pSelf->Console()->Print(
-				IConsole::OUTPUT_LEVEL_STANDARD,
-				"chatresp",
-				"You can't check your team while you are dead/a spectator.");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "You can't check your team while you are dead/a spectator.");
 		}
 		else
 		{
-			str_format(
-				aBuf,
-				sizeof(aBuf),
-				"You are in team %d",
-				pSelf->GetDDRaceTeam(pResult->m_ClientId));
+			int TeamSize = 0;
+			const int PlayerTeam = pSelf->GetDDRaceTeam(pResult->m_ClientId);
+
+			// Count players in team
+			for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+			{
+				const CPlayer *pOtherPlayer = pSelf->m_apPlayers[ClientId];
+				if(!pOtherPlayer || !pOtherPlayer->IsPlaying())
+					continue;
+
+				if(pSelf->GetDDRaceTeam(ClientId) == PlayerTeam)
+					TeamSize++;
+			}
+
+			str_format(aBuf, sizeof(aBuf), "You are in team %d having %d %s", PlayerTeam, TeamSize, TeamSize > 1 ? "players" : "player");
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 		}
 	}
@@ -1409,7 +1561,7 @@ void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData)
 
 		int Duration = 1;
 		if(pResult->NumArguments() > 1)
-			Duration = clamp(pResult->GetInteger(1), 1, 86400);
+			Duration = std::clamp(pResult->GetInteger(1), 1, 86400);
 
 		pPlayer->OverrideDefaultEmote(EmoteType, pSelf->Server()->Tick() + Duration * pSelf->Server()->TickSpeed());
 	}
@@ -1497,11 +1649,6 @@ void CGameContext::ConSpecTeam(IConsole::IResult *pResult, void *pUserData)
 		pPlayer->m_SpecTeam = !pPlayer->m_SpecTeam;
 }
 
-bool CheckClientId(int ClientId)
-{
-	return ClientId >= 0 && ClientId < MAX_CLIENTS;
-}
-
 void CGameContext::ConSayTime(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -1534,7 +1681,7 @@ void CGameContext::ConSayTime(IConsole::IResult *pResult, void *pUserData)
 	CCharacter *pChr = pPlayer->GetCharacter();
 	if(!pChr)
 		return;
-	if(pChr->m_DDRaceState != DDRACE_STARTED)
+	if(pChr->m_DDRaceState != ERaceState::STARTED)
 		return;
 
 	char aBufTime[32];
@@ -1557,7 +1704,7 @@ void CGameContext::ConSayTimeAll(IConsole::IResult *pResult, void *pUserData)
 	CCharacter *pChr = pPlayer->GetCharacter();
 	if(!pChr)
 		return;
-	if(pChr->m_DDRaceState != DDRACE_STARTED)
+	if(pChr->m_DDRaceState != ERaceState::STARTED)
 		return;
 
 	char aBufTime[32];
@@ -1736,6 +1883,23 @@ void CGameContext::ConRescueMode(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CGameContext::ConBack(IConsole::IResult *pResult, void *pUserData)
+{
+	auto *pSelf = static_cast<CGameContext *>(pUserData);
+	if(auto *pChr = pSelf->GetPracticeCharacter(pResult))
+	{
+		auto *pPlayer = pChr->GetPlayer();
+		if(!pPlayer->m_LastDeath.has_value())
+		{
+			pSelf->SendChatTarget(pPlayer->GetCid(), "There is nowhere to go back to.");
+			return;
+		}
+		pChr->GetLastRescueTeeRef(pPlayer->m_RescueMode) = pPlayer->m_LastDeath.value();
+		pChr->Rescue();
+		pChr->UnFreeze();
+	}
+}
+
 void CGameContext::ConTeleTo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -1895,10 +2059,12 @@ void CGameContext::ConTeleCursor(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
+	// default to view pos when character is not available
 	vec2 Pos = pPlayer->m_ViewPos;
-	if(pResult->NumArguments() == 0 && !pPlayer->IsPaused())
+	if(pResult->NumArguments() == 0 && !pPlayer->IsPaused() && pPlayer->GetCharacter() && pPlayer->GetCharacter()->IsAlive())
 	{
-		Pos += vec2(pChr->Core()->m_Input.m_TargetX, pChr->Core()->m_Input.m_TargetY);
+		vec2 Target = vec2(pChr->Core()->m_Input.m_TargetX, pChr->Core()->m_Input.m_TargetY);
+		Pos = pPlayer->m_CameraInfo.ConvertTargetToWorld(pPlayer->GetCharacter()->GetPos(), Target);
 	}
 	else if(pResult->NumArguments() > 0)
 	{
@@ -1975,6 +2141,46 @@ CCharacter *CGameContext::GetPracticeCharacter(IConsole::IResult *pResult)
 		return nullptr;
 	}
 	return pChr;
+}
+
+void CGameContext::ConPracticeToTeleporter(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(pChr)
+	{
+		if(pSelf->Collision()->TeleOuts(pResult->GetInteger(0) - 1).empty())
+		{
+			pSelf->SendChatTarget(pChr->GetPlayer()->GetCid(), "There is no teleporter with that index on the map.");
+			return;
+		}
+
+		ConToTeleporter(pResult, pUserData);
+		pChr->ResetJumps();
+		pChr->UnFreeze();
+		pChr->ResetVelocity();
+		pChr->GetPlayer()->m_LastTeleTee.Save(pChr);
+	}
+}
+
+void CGameContext::ConPracticeToCheckTeleporter(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(pChr)
+	{
+		if(pSelf->Collision()->TeleCheckOuts(pResult->GetInteger(0) - 1).empty())
+		{
+			pSelf->SendChatTarget(pChr->GetPlayer()->GetCid(), "There is no checkpoint teleporter with that index on the map.");
+			return;
+		}
+
+		ConToCheckTeleporter(pResult, pUserData);
+		pChr->ResetJumps();
+		pChr->UnFreeze();
+		pChr->ResetVelocity();
+		pChr->GetPlayer()->m_LastTeleTee.Save(pChr);
+	}
 }
 
 void CGameContext::ConPracticeUnSolo(IConsole::IResult *pResult, void *pUserData)
@@ -2054,6 +2260,26 @@ void CGameContext::ConPracticeDeep(IConsole::IResult *pResult, void *pUserData)
 	pChr->SetDeepFrozen(true);
 }
 
+void CGameContext::ConPracticeUnLiveFreeze(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	auto *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+
+	pChr->SetLiveFrozen(false);
+}
+
+void CGameContext::ConPracticeLiveFreeze(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	auto *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+
+	pChr->SetLiveFrozen(true);
+}
+
 void CGameContext::ConPracticeShotgun(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -2080,6 +2306,20 @@ void CGameContext::ConPracticeJetpack(IConsole::IResult *pResult, void *pUserDat
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(pSelf->GetPracticeCharacter(pResult))
 		ConJetpack(pResult, pUserData);
+}
+
+void CGameContext::ConPracticeEndlessJump(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
+		ConEndlessJump(pResult, pUserData);
+}
+
+void CGameContext::ConPracticeSetJumps(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
+		ConSetJumps(pResult, pUserData);
 }
 
 void CGameContext::ConPracticeWeapons(IConsole::IResult *pResult, void *pUserData)
@@ -2117,6 +2357,13 @@ void CGameContext::ConPracticeUnJetpack(IConsole::IResult *pResult, void *pUserD
 		ConUnJetpack(pResult, pUserData);
 }
 
+void CGameContext::ConPracticeUnEndlessJump(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
+		ConUnEndlessJump(pResult, pUserData);
+}
+
 void CGameContext::ConPracticeUnWeapons(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -2130,11 +2377,33 @@ void CGameContext::ConPracticeNinja(IConsole::IResult *pResult, void *pUserData)
 	if(pSelf->GetPracticeCharacter(pResult))
 		ConNinja(pResult, pUserData);
 }
+
 void CGameContext::ConPracticeUnNinja(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(pSelf->GetPracticeCharacter(pResult))
 		ConUnNinja(pResult, pUserData);
+}
+
+void CGameContext::ConPracticeEndlessHook(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
+		ConEndlessHook(pResult, pUserData);
+}
+
+void CGameContext::ConPracticeUnEndlessHook(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
+		ConUnEndlessHook(pResult, pUserData);
+}
+
+void CGameContext::ConPracticeToggleInvincible(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
+		ConToggleInvincible(pResult, pUserData);
 }
 
 void CGameContext::ConPracticeAddWeapon(IConsole::IResult *pResult, void *pUserData)
@@ -2164,7 +2433,7 @@ void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	int CurrTime = (pSelf->Server()->Tick() - pChr->m_StartTime) / pSelf->Server()->TickSpeed();
-	if(g_Config.m_SvKillProtection != 0 && CurrTime >= (60 * g_Config.m_SvKillProtection) && pChr->m_DDRaceState == DDRACE_STARTED)
+	if(g_Config.m_SvKillProtection != 0 && CurrTime >= (60 * g_Config.m_SvKillProtection) && pChr->m_DDRaceState == ERaceState::STARTED)
 	{
 		pPlayer->KillCharacter(WEAPON_SELF);
 	}

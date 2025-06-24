@@ -22,7 +22,7 @@
 #undef ERROR
 #endif
 
-int CurlDebug(CURL *pHandle, curl_infotype Type, char *pData, size_t DataSize, void *pUser)
+static int CurlDebug(CURL *pHandle, curl_infotype Type, char *pData, size_t DataSize, void *pUser)
 {
 	char TypeChar;
 	switch(Type)
@@ -51,7 +51,7 @@ int CurlDebug(CURL *pHandle, curl_infotype Type, char *pData, size_t DataSize, v
 
 void EscapeUrl(char *pBuf, int Size, const char *pStr)
 {
-	char *pEsc = curl_easy_escape(0, pStr, 0);
+	char *pEsc = curl_easy_escape(nullptr, pStr, 0);
 	str_copy(pBuf, pEsc, Size);
 	curl_free(pEsc);
 }
@@ -75,19 +75,68 @@ CHttpRequest::~CHttpRequest()
 	free(m_pBuffer);
 	curl_slist_free_all((curl_slist *)m_pHeaders);
 	free(m_pBody);
+	if(m_State == EHttpState::DONE && m_ValidateBeforeOverwrite)
+	{
+		OnValidation(false);
+	}
+}
+
+static bool CalculateSha256(const char *pAbsoluteFilename, SHA256_DIGEST *pSha256)
+{
+	IOHANDLE File = io_open(pAbsoluteFilename, IOFLAG_READ);
+	if(!File)
+	{
+		return false;
+	}
+	SHA256_CTX Sha256Ctxt;
+	sha256_init(&Sha256Ctxt);
+	unsigned char aBuffer[64 * 1024];
+	while(true)
+	{
+		unsigned Bytes = io_read(File, aBuffer, sizeof(aBuffer));
+		if(Bytes == 0)
+			break;
+		sha256_update(&Sha256Ctxt, aBuffer, Bytes);
+	}
+	io_close(File);
+	*pSha256 = sha256_finish(&Sha256Ctxt);
+	return true;
+}
+
+bool CHttpRequest::ShouldSkipRequest()
+{
+	if(m_WriteToFile && m_ExpectedSha256 != SHA256_ZEROED)
+	{
+		SHA256_DIGEST Sha256;
+		if(CalculateSha256(m_aDestAbsolute, &Sha256) && Sha256 == m_ExpectedSha256)
+		{
+			log_debug("http", "skipping download because expected file already exists: %s", m_aDest);
+			return true;
+		}
+	}
+	return false;
 }
 
 bool CHttpRequest::BeforeInit()
 {
 	if(m_WriteToFile)
 	{
-		if(fs_makedir_rec_for(m_aDestAbsolute) < 0)
+		if(m_SkipByFileTime)
+		{
+			time_t FileCreatedTime, FileModifiedTime;
+			if(fs_file_time(m_aDestAbsolute, &FileCreatedTime, &FileModifiedTime) == 0)
+			{
+				m_IfModifiedSince = FileModifiedTime;
+			}
+		}
+
+		if(fs_makedir_rec_for(m_aDestAbsoluteTmp) < 0)
 		{
 			log_error("http", "i/o error, cannot create folder for: %s", m_aDest);
 			return false;
 		}
 
-		m_File = io_open(m_aDestAbsolute, IOFLAG_WRITE);
+		m_File = io_open(m_aDestAbsoluteTmp, IOFLAG_WRITE);
 		if(!m_File)
 		{
 			log_error("http", "i/o error, cannot open file: %s", m_aDest);
@@ -118,13 +167,18 @@ bool CHttpRequest::ConfigureHandle(void *pHandle)
 
 	curl_easy_setopt(pH, CURLOPT_ERRORBUFFER, m_aErr);
 
-	curl_easy_setopt(pH, CURLOPT_CONNECTTIMEOUT_MS, m_Timeout.ConnectTimeoutMs);
-	curl_easy_setopt(pH, CURLOPT_TIMEOUT_MS, m_Timeout.TimeoutMs);
-	curl_easy_setopt(pH, CURLOPT_LOW_SPEED_LIMIT, m_Timeout.LowSpeedLimit);
-	curl_easy_setopt(pH, CURLOPT_LOW_SPEED_TIME, m_Timeout.LowSpeedTime);
+	curl_easy_setopt(pH, CURLOPT_CONNECTTIMEOUT_MS, m_Timeout.m_ConnectTimeoutMs);
+	curl_easy_setopt(pH, CURLOPT_TIMEOUT_MS, m_Timeout.m_TimeoutMs);
+	curl_easy_setopt(pH, CURLOPT_LOW_SPEED_LIMIT, m_Timeout.m_LowSpeedLimit);
+	curl_easy_setopt(pH, CURLOPT_LOW_SPEED_TIME, m_Timeout.m_LowSpeedTime);
 	if(m_MaxResponseSize >= 0)
 	{
 		curl_easy_setopt(pH, CURLOPT_MAXFILESIZE_LARGE, (curl_off_t)m_MaxResponseSize);
+	}
+	if(m_IfModifiedSince >= 0)
+	{
+		curl_easy_setopt(pH, CURLOPT_TIMEVALUE_LARGE, (curl_off_t)m_IfModifiedSince);
+		curl_easy_setopt(pH, CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);
 	}
 
 	// ‘CURLOPT_PROTOCOLS’ is deprecated: since 7.85.0. Use CURLOPT_PROTOCOLS_STR
@@ -263,14 +317,17 @@ size_t CHttpRequest::OnData(char *pData, size_t DataSize)
 		return 0;
 	}
 
+	if(DataSize == 0)
+	{
+		return DataSize;
+	}
+
 	sha256_update(&m_ActualSha256Ctx, pData, DataSize);
 
-	if(!m_WriteToFile)
+	size_t Result = DataSize;
+
+	if(m_WriteToMemory)
 	{
-		if(DataSize == 0)
-		{
-			return DataSize;
-		}
 		size_t NewBufferSize = maximum((size_t)1024, m_BufferSize);
 		while(m_ResponseLength + DataSize > NewBufferSize)
 		{
@@ -282,14 +339,13 @@ size_t CHttpRequest::OnData(char *pData, size_t DataSize)
 			m_BufferSize = NewBufferSize;
 		}
 		mem_copy(m_pBuffer + m_ResponseLength, pData, DataSize);
-		m_ResponseLength += DataSize;
-		return DataSize;
 	}
-	else
+	if(m_WriteToFile)
 	{
-		m_ResponseLength += DataSize;
-		return io_write(m_File, pData, DataSize);
+		Result = io_write(m_File, pData, DataSize);
 	}
+	m_ResponseLength += DataSize;
+	return Result;
 }
 
 size_t CHttpRequest::HeaderCallback(char *pData, size_t Size, size_t Number, void *pUser)
@@ -370,7 +426,44 @@ void CHttpRequest::OnCompletionInternal(void *pHandle, unsigned int Result)
 
 		if(State == EHttpState::ERROR || State == EHttpState::ABORTED)
 		{
-			fs_remove(m_aDestAbsolute);
+			fs_remove(m_aDestAbsoluteTmp);
+		}
+		else if(m_IfModifiedSince >= 0 && m_StatusCode == 304) // 304 Not Modified
+		{
+			fs_remove(m_aDestAbsoluteTmp);
+			if(m_WriteToMemory)
+			{
+				free(m_pBuffer);
+				m_pBuffer = nullptr;
+				m_ResponseLength = 0;
+				void *pBuffer;
+				unsigned Length;
+				IOHANDLE File = io_open(m_aDestAbsolute, IOFLAG_READ);
+				bool Success = File && io_read_all(File, &pBuffer, &Length);
+				if(File)
+				{
+					io_close(File);
+				}
+				if(Success)
+				{
+					m_pBuffer = (unsigned char *)pBuffer;
+					m_ResponseLength = Length;
+				}
+				else
+				{
+					log_error("http", "i/o error, cannot read existing file: %s", m_aDest);
+					State = EHttpState::ERROR;
+				}
+			}
+		}
+		else if(!m_ValidateBeforeOverwrite)
+		{
+			if(fs_rename(m_aDestAbsoluteTmp, m_aDestAbsolute))
+			{
+				log_error("http", "i/o error, cannot move file: %s", m_aDest);
+				State = EHttpState::ERROR;
+				fs_remove(m_aDestAbsoluteTmp);
+			}
 		}
 	}
 
@@ -378,13 +471,44 @@ void CHttpRequest::OnCompletionInternal(void *pHandle, unsigned int Result)
 	// or other threads may try to access the result of a completed HTTP request,
 	// before the result has been initialized/updated in OnCompletion.
 	OnCompletion(State);
-	m_State = State;
+	{
+		std::unique_lock WaitLock(m_WaitMutex);
+		m_State = State;
+	}
+	m_WaitCondition.notify_all();
+}
+
+void CHttpRequest::OnValidation(bool Success)
+{
+	dbg_assert(m_ValidateBeforeOverwrite, "this function is illegal to call without having set ValidateBeforeOverwrite");
+	m_ValidateBeforeOverwrite = false;
+	if(Success)
+	{
+		if(m_IfModifiedSince >= 0 && m_StatusCode == 304) // 304 Not Modified
+		{
+			fs_remove(m_aDestAbsoluteTmp);
+			return;
+		}
+		if(fs_rename(m_aDestAbsoluteTmp, m_aDestAbsolute))
+		{
+			log_error("http", "i/o error, cannot move file: %s", m_aDest);
+			m_State = EHttpState::ERROR;
+			fs_remove(m_aDestAbsoluteTmp);
+		}
+	}
+	else
+	{
+		m_State = EHttpState::ERROR;
+		fs_remove(m_aDestAbsoluteTmp);
+	}
 }
 
 void CHttpRequest::WriteToFile(IStorage *pStorage, const char *pDest, int StorageType)
 {
+	m_WriteToMemory = false;
 	m_WriteToFile = true;
 	str_copy(m_aDest, pDest);
+	m_StorageType = StorageType;
 	if(StorageType == -2)
 	{
 		pStorage->GetBinaryPath(m_aDest, m_aDestAbsolute, sizeof(m_aDestAbsolute));
@@ -393,6 +517,13 @@ void CHttpRequest::WriteToFile(IStorage *pStorage, const char *pDest, int Storag
 	{
 		pStorage->GetCompletePath(StorageType, m_aDest, m_aDestAbsolute, sizeof(m_aDestAbsolute));
 	}
+	IStorage::FormatTmpPath(m_aDestAbsoluteTmp, sizeof(m_aDestAbsoluteTmp), m_aDestAbsolute);
+}
+
+void CHttpRequest::WriteToFileAndMemory(IStorage *pStorage, const char *pDest, int StorageType)
+{
+	WriteToFile(pStorage, pDest, StorageType);
+	m_WriteToMemory = true;
 }
 
 void CHttpRequest::Header(const char *pNameColonValue)
@@ -402,24 +533,17 @@ void CHttpRequest::Header(const char *pNameColonValue)
 
 void CHttpRequest::Wait()
 {
-	using namespace std::chrono_literals;
-
-	// This is so uncommon that polling just might work
-	for(;;)
-	{
+	std::unique_lock Lock(m_WaitMutex);
+	m_WaitCondition.wait(Lock, [this]() {
 		EHttpState State = m_State.load(std::memory_order_seq_cst);
-		if(State != EHttpState::QUEUED && State != EHttpState::RUNNING)
-		{
-			return;
-		}
-		std::this_thread::sleep_for(10ms);
-	}
+		return State != EHttpState::QUEUED && State != EHttpState::RUNNING;
+	});
 }
 
 void CHttpRequest::Result(unsigned char **ppResult, size_t *pResultLength) const
 {
 	dbg_assert(State() == EHttpState::DONE, "Request not done");
-	dbg_assert(!m_WriteToFile, "Result not usable together with WriteToFile");
+	dbg_assert(m_WriteToMemory, "Result only usable when written to memory");
 	*ppResult = m_pBuffer;
 	*pResultLength = m_ResponseLength;
 }
@@ -582,6 +706,18 @@ void CHttp::RunLoop()
 			if(g_Config.m_DbgCurl)
 				log_debug("http", "task: %s %s", CHttpRequest::GetRequestType(pRequest->m_Type), pRequest->m_aUrl);
 
+			if(pRequest->ShouldSkipRequest())
+			{
+				pRequest->OnCompletion(EHttpState::DONE);
+				{
+					std::unique_lock WaitLock(pRequest->m_WaitMutex);
+					pRequest->m_State = EHttpState::DONE;
+				}
+				pRequest->m_WaitCondition.notify_all();
+				NewRequests.pop_front();
+				continue;
+			}
+
 			CURL *pEH = curl_easy_init();
 			if(!pEH)
 			{
@@ -604,6 +740,10 @@ void CHttp::RunLoop()
 				goto error_configure;
 			}
 
+			{
+				std::unique_lock WaitLock(pRequest->m_WaitMutex);
+				pRequest->m_State = EHttpState::RUNNING;
+			}
 			m_RunningRequests.emplace(pEH, std::move(pRequest));
 			NewRequests.pop_front();
 			continue;

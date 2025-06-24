@@ -1,31 +1,3 @@
-##### authors #####
-#originally created by:
-#	Dominik Geyer
-#modified by:
-#	Fujnky			2010-06-03 11:30:05
-#	Fujnky			2010-06-03 17:41:45
-#	Fujnky			2010-06-05 23:36:52
-#	Fujnky			2010-06-07 16:17:40
-#	Fujnky			2010-06-11 09:50:47
-#	Sworddragon		2010-11-21 14:25:00
-#	Fujnky			2011-01-02 19:49:22
-#	heinrich5991	2011-01-23 17:53:42
-#	Sworddragon		2011-02-09 12:54:50
-#	heinrich5991	2011-04-03 23:46:51
-#	ghost91			2011-04-04 20:47:01
-#	andi103			2011-05-02 19:12:27
-#	andi103			2011-05-03 23:25:20
-#	heinrich5991	2011-07-02 09:10:21
-#	Yared Hufkens	2012-02-03 19:57:59
-#	andi103			2012-07-14 11:31:11
-#	timakro			2014-06-30 18:26:59
-#	deen			2020-06-26 18:32:00
-#	bluesky			2022-07-05 21:00:00
-# BlaiZephyr 2024-03-23 20:55:00
-##### /authors #####
-
-##### translated strings #####
-
 %ds left
 == Noch %ds
 
@@ -90,7 +62,7 @@ Client
 == Client
 
 Colors of the hook collision line, in case of a possible collision with:
-== Die Farbe der Hakenkollisionlinie bei einer möglichen Kollision mit:
+== Die Farbe der Hakenkollisionslinie bei einer möglichen Kollision mit:
 
 Connecting to
 == Verbinden mit
@@ -299,9 +271,6 @@ Player
 Player country:
 == Spielerland:
 
-Player options
-== Spieleroptionen
-
 Players
 == Spieler
 
@@ -365,9 +334,6 @@ Shotgun
 Show chat
 == Chat anzeigen
 
-Show client IDs in scoreboard
-== Client-IDs in der Punktetafel anzeigen
-
 Show DDRace HUD
 == DDRace-HUD anzeigen
 
@@ -430,9 +396,6 @@ The audio device couldn't be initialised.
 
 The server is running a non-standard tuning on a pure game type.
 == Der Server läuft nicht mit Standardeinstellungen.
-
-Time limit
-== Zeitlimit
 
 Time limit: %d min
 == Zeitlimit: %d min
@@ -529,9 +492,6 @@ Your skin
 
 Reset to defaults
 == Standardeinstellung
-
-Round
-== Runde
 
 Lht.
 == Hell.
@@ -640,9 +600,6 @@ DDNet Client updated!
 
 AntiPing: predict other players
 == Anti-Ping: Andere Spieler vorberechnen
-
-Show other players' key presses
-== Tastendrücke von anderen Spielern anzeigen
 
 System message
 == Server-Nachricht
@@ -818,9 +775,6 @@ Skin prefix
 Show HUD
 == HUD zeigen
 
-Reload
-== Neu laden
-
 9+ new mentions
 == 9+ Erwähnungen
 
@@ -859,9 +813,6 @@ Hook collision line
 
 Hook collision line opacity
 == Deckkraft der Hakenkollisionslinie
-
-Hook collision line width
-== Breite der Hakenkollisionslinie
 
 Fetch Info
 == Neu laden
@@ -970,9 +921,6 @@ Please enter your nickname below.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Es wird empfohlen die Einstellungen nach deinem Geschmack anzupassen bevor du einem Server beitrittst.
-
-Use high DPI
-== Hohe DPI nutzen
 
 Learn
 == Lernen
@@ -1182,9 +1130,6 @@ A Tee
 Are you sure that you want to disconnect and switch to a different server?
 == Bist du sicher, dass du die Verbindung trennen und zu einem anderen Server wechseln möchtest?
 
-Show local player's key presses
-== Tastendrücke des eigenen Spielers anzeigen
-
 Settings file
 == Einstellungen-Datei
 
@@ -1251,7 +1196,7 @@ Super
 Team %d
 == Team %d
 
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == Deckkraft von Entitäten die zu einem anderen Team gehören, z.B. Tees und Namensschilder
 
 Position:
@@ -1504,10 +1449,6 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 == Fehler während der Initialisierung. Versuch gfx_backend zu OpenGL oder Vulkan zu ändern in settings_ddnet.cfg im Konfigurations-Ordner und versuche es erneut.
 
 [Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== Kein VRAM mehr verfügbar. Versuch eigene Assets (Skins, Entitäten, usw.) zu löschen, insbesondere solche mit hoher Auflösung.
-
-[Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
 == Ein Fehler ist währen dem Aufnahme-Befehl aufgetreten. Versuch deinen Grafiktreiber zu aktualisieren.
 
@@ -1571,9 +1512,6 @@ Open the settings file
 Create a random skin
 == Erstelle einen zufälligen Skin
 
-Online players (%d)
-== Online-Spieler (%d)
-
 Online clanmates (%d)
 == Online-Clanmitglieder (%d)
 
@@ -1589,9 +1527,6 @@ Click to remove this player from your friends list.
 
 Click to remove this clan from your friends list.
 == Klicke um diesen Clan aus deiner Freundesliste zu entfernen.
-
-None
-== Keine
 
 Add Clan
 == Clan hinzufügen
@@ -1669,12 +1604,12 @@ Go back the specified duration
 == Gesetzte Dauer zurück
 
 [Demo player duration]
-%d min.
-== %d Min.
+%s min.
+== %s Min.
 
 [Demo player duration]
-%d sec.
-== %d Sek.
+%s sec.
+== %s Sek.
 
 Change the skip duration
 == Überspring-Dauer ändern
@@ -1842,9 +1777,6 @@ Player info change cooldown
 Always show chat
 == Immer Chat anzeigen
 
-Show friend mark (♥) in name plates
-== Freund-Zeichen (♥) im Namen anzeigen
-
 Show hook strength icon indicator
 == Hakenstärke Icon anzeigen
 
@@ -1868,3 +1800,416 @@ Tee
 
 Show only chat messages from team members
 == Nur Nachrichten von Teammitgliedern anzeigen
+
+[Spectating]
+Following %s
+== %s folgen
+
+Example of usage
+== Beispielnutzung
+
+Round %d/%d
+== Runde %d/%d
+
+[Spectators]
+%d others…
+== %d andere…
+
+[Team and size]
+%d\n(%d/%d)
+== %d\n(%d/%d)
+
+Team %d (%d/%d)
+== Team %d (%d/%d)
+
+Could not resolve connect address '%s'. See local console for details.
+== Konnte Verbindungsadresse '%s' nicht auflösen, siehe lokale Konsole für Details.
+
+Connect address error
+== Fehler in Verbindungsadresse
+
+Could not connect dummy
+== Konnte Dummy nicht verbinden
+
+Dummy is not allowed on this server
+== Dummy ist auf diesem Server nicht erlaubt
+
+Please wait…
+== Bitte warten…
+
+Show client IDs (scoreboard, chat, spectator)
+== Client-IDs anzeigen (Punktetafel, Chat, Beobachter)
+
+Are you sure that you want to delete '%s'?
+== Bist du sicher dass du '%s' löschen willst?
+
+Delete skin
+== Skin löschen
+
+Basic
+== Einfach
+
+Custom
+== Individuell
+
+Unable to delete skin
+== Kann Skin nicht löschen
+
+Save skin
+== Skin speichern
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== Willst du den Skin wirklich speichern? Wenn ein Skin mit diesem Namen bereits existiert, wird dieser ersetzt.
+
+Unable to save the skin
+== Konnte Skin nicht speichern
+
+Unable to save the skin with a reserved name
+== Konnte Skin nicht mit reserviertem Namen speichern
+
+No local servers found (ports %d-%d)
+== Keine lokalen Server gefunden (Ports %d-%d)
+
+[Hertz]
+Hz
+== Hz
+
+[skins]
+Body
+== Körper
+
+[skins]
+Marking
+== Markierung
+
+[skins]
+Decoration
+== Dekoration
+
+[skins]
+Hands
+== Hände
+
+[skins]
+Feet
+== Füße
+
+[skins]
+Eyes
+== Augen
+
+https://wiki.ddnet.org/wiki/Mapping
+== https://wiki.ddnet.org/wiki/Mapping
+
+Some fonts could not be loaded. Check the local console for details.
+== Einige Schriften konnten nicht geladen werden. Prüf die lokale Konsole für Details.
+
+Online friends (%d)
+== Online-Freunde (%d)
+
+Add friends by entering their name below or by clicking their name in the player list.
+== Freunde hinzufügen durch Eingabe des Namens oder durch Klicken auf ihren Namen in Spielerliste.
+
+Add clanmates by entering their clan below and leaving the name blank.
+== Clanmitglieder hinzufügen durch Eingabe des Clans und Leerlassen des Namens.
+
+Edit touch controls
+== Berührungseingaben bearbeiten
+
+Close
+== Schließen
+
+Save changes
+== Änderungen speichern
+
+Error saving touch controls
+== Berührungseingaben konnten nicht gespeichert werden
+
+Could not save touch controls to file. See local console for details.
+== Konnte Berührungseingaben nicht in Datei speichern. Siehe lokale Konsole für Details.
+
+Unsaved changes
+== Ungespeicherte Änderungen
+
+Discard changes
+== Änderungen verwerfen
+
+Are you sure that you want to discard the current changes to the touch controls?
+== Willst du wirklich die aktuellen Änderungen zu Berührungseingaben verwerfen?
+
+Are you sure that you want to reset the touch controls to default?
+== Willst du wirklich die Berührungseingaben zurücksetzen?
+
+Import from clipboard
+== Aus Zwischenablage importieren
+
+Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
+== Willst du wirklich Berührungseingaben aus der Zwischenablage importieren? Dies überschreibt deine aktuellen Berührungseingaben.
+
+Export to clipboard
+== In Zwischenablage exportieren
+
+Direct touch input while ingame
+== Direkte Berührungseingaben beim Spielen
+
+[Direct touch input]
+Disabled
+== Deaktiviert
+
+[Direct touch input]
+Active action
+== Aktive Aktion
+
+[Direct touch input]
+Aim
+== Zielen
+
+[Direct touch input]
+Fire
+== Feuern
+
+[Direct touch input]
+Hook
+== Haken
+
+Direct touch input while spectating
+== Direkte Berührungseingaben beim Zuschauen
+
+Error loading touch controls
+== Konnte Berührungssteuerung nicht laden
+
+Could not load touch controls from file. See local console for details.
+== Konnte Berührungssteuerung nicht von Datei laden. Siehe Details in der lokalen Konsole.
+
+Could not load default touch controls from file. See local console for details.
+== Konnte Standard-Berührungssteuerung nicht von Datei laden. Siehe Details in der lokalen Konsole.
+
+Could not load touch controls from clipboard. See local console for details.
+== Konnte Berührungssteuerung nicht von Zwischenablage laden. Siehe Details in der lokalen Konsole.
+
+Width of your own hook collision line
+== Breite der eigenen Hakenkollisionslinie
+
+Width of others' hook collision line
+== Breite der Hakenkollisionslinie anderer
+
+Aim
+== Zielen
+
+Active: Fire
+== Aktiv: Feuern
+
+Active: Hook
+== Aktiv: Haken
+
+Preview 'Hook collisions' being pressed
+== Vorschau für 'Hakenkollisionen' gedrückt
+
+[Spectating Camera Mode Icon]
+AUTO
+== AUTO
+
+Toggle auto camera
+== Auto-Kamera wechseln
+
+https://wiki.ddnet.org/wiki/Touch_controls
+== https://wiki.ddnet.org/wiki/Touch_controls
+
+Show client IDs in name plates
+== Client-IDs in Spielernamen anzeigen
+
+Hook Strength
+== Hakenstärke
+
+Size of hook strength icon and number indicator
+== Größe des Hakenstärke-Symbole und der Zahl
+
+Key Presses
+== Tastendrücke
+
+Size of key press icons
+== Größe der Tastendruck-Symbole
+
+Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
+== Server konnte nicht gestartet werden. Erlaub Benachrichtigungen in den App-Einstellungen so dass der Server im Hintergrund laufen kann.
+
+"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
+== "%s" is nicht mit pnglite kompatibel und kann in alten DDNet-Versionen nicht geladen werden:
+
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Deutsche Übersetzung von Dominik Geyer, Fujnky, Sworddragon, heinrich5991, ghost91, andi103, Yared Hufkens, timakro, deen, bluesky, BlaiZephyr, Robyt3
+
+Auto-sync player camera
+== Spieler-Kamera automatisch synchronisieren
+
+[Auto camera]
+Disabled
+== Deaktiviert
+
+[Auto camera]
+Enabled
+== Aktiviert
+
+[Auto camera]
+Unavailable for this player
+== Für diesen Spieler nicht verfügbar
+
+[Auto camera]
+Inactive
+== Inaktiv
+
+[Auto camera]
+Active
+== Aktiv
+
+Loading maps…
+== Karten laden…
+
+Community
+== Community
+
+[Team status]
+forbidden
+== verboten
+
+[Team status]
+solo
+== Solo
+
+[Team status]
+allowed
+== erlaubt
+
+[Team status]
+required
+== nötig
+
+Teams
+== Teams
+
+[Team size]
+minimum
+== Minimum
+
+[Team size]
+maximum
+== Maximum
+
+Saves file
+== Saves-Datei
+
+Open the saves file
+== Saves-Datei öffnen
+
+Show FPS
+== FPS anzeigen
+
+Renders your frame rate in the top right
+== Rendert deine Framerate oben rechts
+
+Show spectator cursor
+== Zuschauer-Markierung anzeigen
+
+No demo with this filename exists
+== Keine Demo mit diesem Dateinamen existiert
+
+Map size
+== Kartengröße
+
+Show number of spectators
+== Anzahl der Zuschauer zeigen
+
+[Show name plates]
+None
+== Keine
+
+[Show name plates]
+Own
+== Eigene
+
+[Show name plates]
+Others
+== Andere
+
+[Show name plates]
+All
+== Alle
+
+Name plates offset
+== Spielername-Abstand
+
+Show friend icon in name plates
+== Freund-Icon in Spielername zeigen
+
+Show client IDs on a seperate line
+== Client-IDs in eigener Linie zeigen
+
+Client IDs size
+== Client-ID-Größe
+
+Show players' key presses
+== Tastendruck-Symbole von Spielern zeigen
+
+[Show players' key presses]
+None
+== Keine
+
+[Show players' key presses]
+Own
+== Eigene
+
+[Show players' key presses]
+Others
+== Ander
+
+[Show players' key presses]
+All
+== Alle
+
+Preview dummy's name plate
+== Dummy-Spielernamen vorher zeigen
+
+AntiPing: prediction margin
+== Anti-Ping: Vorhersagespanne
+
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== VRAM ausgegangen. Versuch 'cl_skins_loaded_max' auf einen niedrigeren Wert zu setzen oder entferne eigene Assets (Skins, Entitäten, usw.), insbesondere solche mit hoher Auflösung.
+
+This name cannot be used for files and folders
+== Dieser Name kann nicht für Dateien und Ordner genutzt werden
+
+This skin name cannot be used.
+== Dieser Skin-Name kann nicht genutzt werden.
+
+Skin could not be loaded due to an error. Check the local console for details.
+== Skin konnte wegen einem Fehler nicht geladen werden. Prüfe die lokale Konsole für Details.
+
+Skin could not be found.
+== Skin konnte nicht gefunden werden.
+
+No skins match your filter criteria
+== Keine Skins entsprechen deinen Filterkriterien.
+
+Preview player's name plate
+== Vorschau von Spielernamen
+
+Dragger Outline Color
+== Dragger-Außenfarbe
+
+Dragger Inner Color
+== Dragger-Innenfarbe
+
+[Spectating]
+Following %d: %s
+== Folge %d: %s
+
+Loading map
+== Karte laden
+
+Error checking player name
+== Fehler beim Prüfen des Spielernamens
+
+Could not check for existing player with your name. Check your internet connection.
+== Konnte nicht prüfen ob ein Spieler mit deinem Namen existiert. Prüfe deine Internetverbindung.

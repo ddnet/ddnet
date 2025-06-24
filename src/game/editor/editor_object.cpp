@@ -2,7 +2,7 @@
 
 #include "editor.h"
 
-void CEditorObject::Init(CEditor *pEditor)
+void CEditorObject::OnInit(CEditor *pEditor)
 {
 	m_pEditor = pEditor;
 	OnReset();

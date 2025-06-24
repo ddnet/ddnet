@@ -105,7 +105,7 @@ int CMapGrid::Factor() const
 
 void CMapGrid::SetFactor(int Factor)
 {
-	m_GridFactor = clamp(Factor, MIN_GRID_FACTOR, MAX_GRID_FACTOR);
+	m_GridFactor = std::clamp(Factor, MIN_GRID_FACTOR, MAX_GRID_FACTOR);
 }
 
 void CMapGrid::DoSettingsPopup(vec2 Position)
@@ -140,7 +140,7 @@ CUi::EPopupMenuFunctionResult CMapGrid::PopupGridSettings(void *pContext, CUIRec
 	View.HSplitBottom(12.0f, &View, &Button);
 
 	static char s_DefaultButton;
-	if(pMapGrid->Editor()->DoButton_Ex(&s_DefaultButton, "Default", 0, &Button, 0, "Normal grid size", IGraphics::CORNER_ALL))
+	if(pMapGrid->Editor()->DoButton_Ex(&s_DefaultButton, "Default", 0, &Button, BUTTONFLAG_LEFT, "Reset to normal grid size.", IGraphics::CORNER_ALL))
 	{
 		pMapGrid->SetFactor(1);
 	}

@@ -1,7 +1,5 @@
 #include "android_main.h"
 
-#include <SDL.h>
-
 #include <base/hash.h>
 #include <base/log.h>
 #include <base/system.h>
@@ -10,6 +8,10 @@
 
 #include <string>
 #include <vector>
+
+#include <jni.h>
+
+#include <SDL.h>
 
 static bool UnpackAsset(const char *pFilename)
 {
@@ -216,12 +218,106 @@ const char *InitAndroid()
 		}
 	}
 
+	for(size_t i = 1; i < vIntegritySaveLines.size(); ++i)
+	{
+		const CIntegrityFileLine &IntegritySaveLine = vIntegritySaveLines[i];
+
+		// Check if the asset was deleted since the last unpacking
+		const bool LineFound = std::any_of(vIntegrityLines.begin(), vIntegrityLines.end(), [&](const CIntegrityFileLine &Line) {
+			return str_comp(Line.m_aFilename, IntegritySaveLine.m_aFilename) == 0;
+		});
+		if(LineFound)
+		{
+			continue;
+		}
+
+		if(fs_remove(IntegritySaveLine.m_aFilename) != 0)
+		{
+			log_warn("android", "Failed to delete unused asset '%s'", IntegritySaveLine.m_aFilename);
+		}
+	}
+
 	// The integrity file will be unpacked every time when launching,
 	// so we can simply rename it to update the saved integrity file.
-	if((fs_is_file(INTEGRITY_INDEX_SAVE) && fs_remove(INTEGRITY_INDEX_SAVE) != 0) || fs_rename(INTEGRITY_INDEX, INTEGRITY_INDEX_SAVE) != 0)
+	if(fs_remove(INTEGRITY_INDEX_SAVE) != 0 || fs_rename(INTEGRITY_INDEX, INTEGRITY_INDEX_SAVE) != 0)
 	{
 		return "Failed to update the saved integrity index file.";
 	}
 
 	return nullptr;
+}
+
+// See ClientActivity.java
+constexpr uint32_t COMMAND_USER = 0x8000;
+constexpr uint32_t COMMAND_RESTART_APP = COMMAND_USER + 1;
+
+void RestartAndroidApp()
+{
+	SDL_AndroidSendMessage(COMMAND_RESTART_APP, 0);
+}
+
+bool StartAndroidServer(const char **ppArguments, size_t NumArguments)
+{
+	// We need the notification-permission to show a notification for the foreground service.
+	// We use SDL for this instead of doing it on the Java side because this function blocks
+	// until the user made a choice, which is easier to handle. Only Android 13 (API 33) and
+	// newer support requesting this permission at runtime.
+	if(SDL_GetAndroidSDKVersion() >= 33 && !SDL_AndroidRequestPermission("android.permission.POST_NOTIFICATIONS"))
+	{
+		return false;
+	}
+
+	JNIEnv *pEnv = static_cast<JNIEnv *>(SDL_AndroidGetJNIEnv());
+	jobject Activity = (jobject)SDL_AndroidGetActivity();
+	jclass ActivityClass = pEnv->GetObjectClass(Activity);
+
+	jclass StringClass = pEnv->FindClass("java/lang/String");
+	jobjectArray ArgumentsArray = pEnv->NewObjectArray(NumArguments, StringClass, nullptr);
+	pEnv->DeleteLocalRef(StringClass);
+	for(size_t ArgumentIndex = 0; ArgumentIndex < NumArguments; ArgumentIndex++)
+	{
+		jstring ArgumentString = pEnv->NewStringUTF(ppArguments[ArgumentIndex]);
+		pEnv->SetObjectArrayElement(ArgumentsArray, ArgumentIndex, ArgumentString);
+		pEnv->DeleteLocalRef(ArgumentString);
+	}
+
+	jmethodID MethodId = pEnv->GetMethodID(ActivityClass, "startServer", "([Ljava/lang/String;)V");
+	pEnv->CallVoidMethod(Activity, MethodId, ArgumentsArray);
+
+	pEnv->DeleteLocalRef(ArgumentsArray);
+	pEnv->DeleteLocalRef(Activity);
+	pEnv->DeleteLocalRef(ActivityClass);
+
+	return true;
+}
+
+void ExecuteAndroidServerCommand(const char *pCommand)
+{
+	JNIEnv *pEnv = static_cast<JNIEnv *>(SDL_AndroidGetJNIEnv());
+	jobject Activity = (jobject)SDL_AndroidGetActivity();
+	jclass ActivityClass = pEnv->GetObjectClass(Activity);
+
+	jstring Command = pEnv->NewStringUTF(pCommand);
+
+	jmethodID MethodId = pEnv->GetMethodID(ActivityClass, "executeCommand", "(Ljava/lang/String;)V");
+	pEnv->CallVoidMethod(Activity, MethodId, Command);
+
+	pEnv->DeleteLocalRef(Command);
+	pEnv->DeleteLocalRef(Activity);
+	pEnv->DeleteLocalRef(ActivityClass);
+}
+
+bool IsAndroidServerRunning()
+{
+	JNIEnv *pEnv = static_cast<JNIEnv *>(SDL_AndroidGetJNIEnv());
+	jobject Activity = (jobject)SDL_AndroidGetActivity();
+	jclass ActivityClass = pEnv->GetObjectClass(Activity);
+
+	jmethodID MethodId = pEnv->GetMethodID(ActivityClass, "isServerRunning", "()Z");
+	const bool Result = pEnv->CallBooleanMethod(Activity, MethodId);
+
+	pEnv->DeleteLocalRef(Activity);
+	pEnv->DeleteLocalRef(ActivityClass);
+
+	return Result;
 }

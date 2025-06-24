@@ -2,6 +2,10 @@
 #include <base/system.h>
 #include <engine/shared/stun.h>
 
+#include <chrono>
+
+using namespace std::chrono_literals;
+
 int main(int argc, const char **argv)
 {
 	CCmdlineFix CmdlineFix(&argc, &argv);
@@ -49,7 +53,7 @@ int main(int argc, const char **argv)
 	unsigned char *pResponse;
 	while(true)
 	{
-		if(!net_socket_read_wait(Socket, 1000000))
+		if(!net_socket_read_wait(Socket, 1s))
 		{
 			log_error("stun", "no udp message received from server until timeout");
 			return 3;
@@ -83,7 +87,7 @@ int main(int argc, const char **argv)
 		if(Success)
 		{
 			char aStunAddr[NETADDR_MAXSTRSIZE];
-			net_addr_str(&StunAddr, aStunAddr, sizeof(aStunAddr), 1);
+			net_addr_str(&StunAddr, aStunAddr, sizeof(aStunAddr), true);
 			log_info("stun", "public ip address: %s", aStunAddr);
 			break;
 		}

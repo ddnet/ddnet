@@ -9,7 +9,7 @@
 
 #include <memory>
 
-static const ColorRGBA gs_ConsoleDefaultColor(1, 1, 1, 1);
+static constexpr ColorRGBA gs_ConsoleDefaultColor(1, 1, 1, 1);
 
 enum LEVEL : char;
 struct CChecksumData;
@@ -30,7 +30,7 @@ public:
 		ACCESS_LEVEL_HELPER,
 		ACCESS_LEVEL_USER,
 
-		TEMPCMD_NAME_LENGTH = 32,
+		TEMPCMD_NAME_LENGTH = 64,
 		TEMPCMD_HELP_LENGTH = 192,
 		TEMPCMD_PARAMS_LENGTH = 96,
 
@@ -38,6 +38,8 @@ public:
 
 		CLIENT_ID_GAME = -2,
 		CLIENT_ID_NO_GAME = -3,
+
+		FILE_RECURSION_LIMIT = 16,
 	};
 
 	// TODO: rework this interface to reduce the amount of virtual calls
@@ -47,13 +49,18 @@ public:
 		unsigned m_NumArgs;
 
 	public:
-		IResult() { m_NumArgs = 0; }
+		IResult(int ClientId) :
+			m_NumArgs(0),
+			m_ClientId(ClientId) {}
+		IResult(const IResult &Other) :
+			m_NumArgs(Other.m_NumArgs),
+			m_ClientId(Other.m_ClientId) {}
 		virtual ~IResult() {}
 
 		virtual int GetInteger(unsigned Index) const = 0;
 		virtual float GetFloat(unsigned Index) const = 0;
 		virtual const char *GetString(unsigned Index) const = 0;
-		virtual ColorHSLA GetColor(unsigned Index, bool Light) const = 0;
+		virtual std::optional<ColorHSLA> GetColor(unsigned Index, float DarkestLighting) const = 0;
 
 		virtual void RemoveArgument(unsigned Index) = 0;
 
@@ -83,7 +90,6 @@ public:
 	};
 
 	typedef void (*FTeeHistorianCommandCallback)(int ClientId, int FlagMask, const char *pCmd, IResult *pResult, void *pUser);
-	typedef void (*FPrintCallback)(const char *pStr, void *pUser, ColorRGBA PrintColor);
 	typedef void (*FPossibleCallback)(int Index, const char *pCmd, void *pUser);
 	typedef void (*FCommandCallback)(IResult *pResult, void *pUserData);
 	typedef void (*FChainCommandCallback)(IResult *pResult, void *pUserData, FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -111,7 +117,12 @@ public:
 	virtual void ExecuteLineStroked(int Stroke, const char *pStr, int ClientId = -1, bool InterpretSemicolons = true) = 0;
 	virtual bool ExecuteFile(const char *pFilename, int ClientId = -1, bool LogFailure = false, int StorageType = IStorage::TYPE_ALL) = 0;
 
-	virtual char *Format(char *pBuf, int Size, const char *pFrom, const char *pStr) = 0;
+	/**
+	 * @deprecated Prefer using the `log_*` functions from base/log.h instead of this function for the following reasons:
+	 * - They support `printf`-formatting without a separate buffer.
+	 * - They support all five log levels.
+	 * - They do not require a pointer to `IConsole` to be used.
+	 */
 	virtual void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = gs_ConsoleDefaultColor) const = 0;
 	virtual void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser) = 0;
 	virtual void SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, void *pUser) = 0;

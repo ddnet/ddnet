@@ -17,7 +17,7 @@ EInputPriority CLineInput::ms_ActiveInputPriority = EInputPriority::NONE;
 vec2 CLineInput::ms_CompositionWindowPosition = vec2(0.0f, 0.0f);
 float CLineInput::ms_CompositionLineHeight = 0.0f;
 
-char CLineInput::ms_aStars[128] = {'\0'};
+char CLineInput::ms_aStars[128] = "";
 
 void CLineInput::SetBuffer(char *pStr, size_t MaxSize, size_t MaxChars)
 {
@@ -59,8 +59,8 @@ void CLineInput::SetRange(const char *pString, size_t Begin, size_t End)
 {
 	if(Begin > End)
 		std::swap(Begin, End);
-	Begin = clamp<size_t>(Begin, 0, m_Len);
-	End = clamp<size_t>(End, 0, m_Len);
+	Begin = std::clamp<size_t>(Begin, 0, m_Len);
+	End = std::clamp<size_t>(End, 0, m_Len);
 
 	size_t RemovedCharSize, RemovedCharCount;
 	str_utf8_stats(m_pStr + Begin, End - Begin + 1, m_MaxChars, &RemovedCharSize, &RemovedCharCount);
@@ -158,7 +158,7 @@ void CLineInput::MoveCursor(EMoveDirection Direction, bool MoveWord, const char 
 
 void CLineInput::SetCursorOffset(size_t Offset)
 {
-	m_SelectionStart = m_SelectionEnd = m_LastCompositionCursorPos = m_CursorPos = clamp<size_t>(Offset, 0, m_Len);
+	m_SelectionStart = m_SelectionEnd = m_LastCompositionCursorPos = m_CursorPos = std::clamp<size_t>(Offset, 0, m_Len);
 	m_WasCursorChanged = true;
 }
 
@@ -167,8 +167,8 @@ void CLineInput::SetSelection(size_t Start, size_t End)
 	dbg_assert(m_CursorPos == Start || m_CursorPos == End, "Selection and cursor offset got desynchronized");
 	if(Start > End)
 		std::swap(Start, End);
-	m_SelectionStart = clamp<size_t>(Start, 0, m_Len);
-	m_SelectionEnd = clamp<size_t>(End, 0, m_Len);
+	m_SelectionStart = std::clamp<size_t>(Start, 0, m_Len);
+	m_SelectionEnd = std::clamp<size_t>(End, 0, m_Len);
 	m_WasCursorChanged = true;
 }
 
@@ -196,9 +196,10 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 	const size_t SelectionLength = GetSelectionLength();
 	bool KeyHandled = false;
 
-	if((Event.m_Flags & IInput::FLAG_TEXT) && !(KEY_LCTRL <= Event.m_Key && Event.m_Key <= KEY_RGUI))
+	if(Event.m_Flags & IInput::FLAG_TEXT)
 	{
 		SetRange(Event.m_aText, m_SelectionStart, m_SelectionEnd);
+		KeyHandled = true;
 	}
 
 	if(Event.m_Flags & IInput::FLAG_PRESS)
@@ -231,6 +232,7 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 				}
 				m_SelectionStart = m_SelectionEnd = m_CursorPos;
 			}
+			KeyHandled = true;
 		}
 		else if(Event.m_Key == KEY_DELETE)
 		{
@@ -251,6 +253,7 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 				}
 				m_SelectionStart = m_SelectionEnd = m_CursorPos;
 			}
+			KeyHandled = true;
 		}
 		else if(Event.m_Key == KEY_LEFT)
 		{
@@ -271,7 +274,10 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 			}
 
 			if(!Selecting)
+			{
 				m_SelectionStart = m_SelectionEnd = m_CursorPos;
+			}
+			KeyHandled = true;
 		}
 		else if(Event.m_Key == KEY_RIGHT)
 		{
@@ -292,7 +298,10 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 			}
 
 			if(!Selecting)
+			{
 				m_SelectionStart = m_SelectionEnd = m_CursorPos;
+			}
+			KeyHandled = true;
 		}
 		else if(Event.m_Key == KEY_HOME)
 		{
@@ -305,6 +314,7 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 				m_SelectionEnd = 0;
 			m_CursorPos = 0;
 			m_SelectionStart = 0;
+			KeyHandled = true;
 		}
 		else if(Event.m_Key == KEY_END)
 		{
@@ -317,13 +327,13 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 				m_SelectionStart = m_Len;
 			m_CursorPos = m_Len;
 			m_SelectionEnd = m_Len;
+			KeyHandled = true;
 		}
 		else if(ModPressed && !AltPressed && Event.m_Key == KEY_V)
 		{
-			const char *pClipboardText = Input()->GetClipboardText();
-			if(pClipboardText)
+			std::string ClipboardText = Input()->GetClipboardText();
+			if(!ClipboardText.empty())
 			{
-				std::string ClipboardText = Input()->GetClipboardText();
 				if(m_pfnClipboardLineCallback)
 				{
 					// Split clipboard text into multiple lines. Send all complete lines to callback.
@@ -348,6 +358,7 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 								Line = GetString();
 							}
 							Begin = i + 1;
+							str_sanitize_cc(Line.data());
 							m_pfnClipboardLineCallback(Line.c_str());
 						}
 					}
@@ -381,12 +392,13 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 		{
 			m_SelectionStart = 0;
 			m_SelectionEnd = m_CursorPos = m_Len;
+			KeyHandled = true;
 		}
 	}
 
 	m_WasCursorChanged |= OldCursorPos != m_CursorPos;
 	m_WasCursorChanged |= SelectionLength != GetSelectionLength();
-	return m_WasChanged || m_WasCursorChanged || KeyHandled;
+	return KeyHandled;
 }
 
 STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Align, bool Changed, float LineWidth, float LineSpacing, const std::vector<STextColorSplit> &vColorSplits)

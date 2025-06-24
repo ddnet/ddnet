@@ -10,39 +10,30 @@
 
 #include "uuid_manager.h"
 
-#include <array>
+#include <cstdint>
+#include <map>
 #include <vector>
 
 enum
 {
-	ITEMTYPE_EX = 0xffff,
+	ITEMTYPE_EX = 0xFFFF,
 };
 
 // raw datafile access
 class CDataFileReader
 {
-	struct CDatafile *m_pDataFile;
-	void *GetDataImpl(int Index, bool Swap);
-	int GetFileDataSize(int Index) const;
+	class CDatafile *m_pDataFile = nullptr;
 
 	int GetExternalItemType(int InternalType, CUuid *pUuid);
 	int GetInternalItemType(int ExternalType);
 
 public:
-	CDataFileReader() :
-		m_pDataFile(nullptr) {}
-	~CDataFileReader() { Close(); }
+	~CDataFileReader();
+	CDataFileReader &operator=(CDataFileReader &&Other);
 
-	CDataFileReader &operator=(CDataFileReader &&Other)
-	{
-		m_pDataFile = Other.m_pDataFile;
-		Other.m_pDataFile = nullptr;
-		return *this;
-	}
-
-	bool Open(class IStorage *pStorage, const char *pFilename, int StorageType);
-	bool Close();
-	bool IsOpen() const { return m_pDataFile != nullptr; }
+	[[nodiscard]] bool Open(class IStorage *pStorage, const char *pFilename, int StorageType);
+	void Close();
+	bool IsOpen() const;
 	IOHANDLE File() const;
 
 	int GetDataSize(int Index) const;
@@ -76,8 +67,9 @@ public:
 	};
 
 private:
-	struct CDataInfo
+	class CDataInfo
 	{
+	public:
 		void *m_pUncompressedData;
 		int m_UncompressedSize;
 		void *m_pCompressedData;
@@ -85,8 +77,9 @@ private:
 		ECompressionLevel m_CompressionLevel;
 	};
 
-	struct CItemInfo
+	class CItemInfo
 	{
+	public:
 		int m_Type;
 		int m_Id;
 		int m_Size;
@@ -95,26 +88,23 @@ private:
 		void *m_pData;
 	};
 
-	struct CItemTypeInfo
+	class CItemTypeInfo
 	{
-		int m_Num;
-		int m_First;
-		int m_Last;
+	public:
+		int m_Num = 0;
+		int m_First = -1;
+		int m_Last = -1;
 	};
 
-	struct CExtendedItemType
+	class CExtendedItemType
 	{
+	public:
 		int m_Type;
 		CUuid m_Uuid;
 	};
 
-	enum
-	{
-		MAX_ITEM_TYPES = 0x10000,
-	};
-
 	IOHANDLE m_File;
-	std::array<CItemTypeInfo, MAX_ITEM_TYPES> m_aItemTypes;
+	std::map<uint16_t, CItemTypeInfo, std::less<>> m_ItemTypes; // item types must be sorted in ascending order
 	std::vector<CItemInfo> m_vItems;
 	std::vector<CDataInfo> m_vDatas;
 	std::vector<CExtendedItemType> m_vExtendedItemTypes;
@@ -127,15 +117,15 @@ public:
 	CDataFileWriter(CDataFileWriter &&Other)
 	{
 		m_File = Other.m_File;
-		Other.m_File = 0;
-		m_aItemTypes = std::move(Other.m_aItemTypes);
+		Other.m_File = nullptr;
+		m_ItemTypes = std::move(Other.m_ItemTypes);
 		m_vItems = std::move(Other.m_vItems);
 		m_vDatas = std::move(Other.m_vDatas);
 		m_vExtendedItemTypes = std::move(Other.m_vExtendedItemTypes);
 	}
 	~CDataFileWriter();
 
-	bool Open(class IStorage *pStorage, const char *pFilename, int StorageType = IStorage::TYPE_SAVE);
+	[[nodiscard]] bool Open(class IStorage *pStorage, const char *pFilename, int StorageType = IStorage::TYPE_SAVE);
 	int AddItem(int Type, int Id, size_t Size, const void *pData, const CUuid *pUuid = nullptr);
 	int AddData(size_t Size, const void *pData, ECompressionLevel CompressionLevel = COMPRESSION_DEFAULT);
 	int AddDataSwapped(size_t Size, const void *pData);
