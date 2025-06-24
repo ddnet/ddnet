@@ -100,6 +100,7 @@ Checks: >
 
 WarningsAsErrors:
   readability-identifier-naming,
+  modernize-use-override,
 
 CheckOptions:
   - key:             readability-identifier-naming.LocalVariableCase
