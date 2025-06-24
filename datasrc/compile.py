@@ -355,24 +355,6 @@ bool CNetObjHandler::TeeHistorianRecordMsg(int Type)
 		print(line)
 
 
-	lines = []
-	lines += ["""\
-void RegisterGameUuids(CUuidManager *pManager)
-{
-	"""]
-
-	for item in network.Objects + network.Messages:
-		if item.ex is not None:
-			lines += [f'\tpManager->RegisterName({item.enum_name}, "{item.ex}");']
-
-	lines += ["""
-	RegisterMapItemTypeUuids(pManager);
-}
-	"""]
-	for line in lines:
-		print(line)
-
-
 def gen_common_content_types_header():
 	# print some includes
 	print('#include <engine/graphics.h>')
