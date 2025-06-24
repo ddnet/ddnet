@@ -9284,7 +9284,7 @@ bool CEditor::Append(const char *pFileName, int StorageType, bool IgnoreHistory)
 	s_ReplacedMap.clear();
 	for(auto NewMapIt = NewMap.m_vpImages.begin(); NewMapIt != NewMap.m_vpImages.end(); ++NewMapIt)
 	{
-		auto pNewImage = *NewMapIt;
+		const auto &pNewImage = *NewMapIt;
 		auto NameIsTaken = [pNewImage](const std::shared_ptr<CEditorImage> &OtherImage) { return str_comp(pNewImage->m_aName, OtherImage->m_aName) == 0; };
 		auto MatchInCurrentMap = std::find_if(m_Map.m_vpImages.begin(), m_Map.m_vpImages.end(), NameIsTaken);
 

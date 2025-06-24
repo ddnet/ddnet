@@ -810,7 +810,7 @@ void CGameClient::OnRender()
 		}
 		if(Warning.has_value())
 		{
-			const SWarning TheWarning = Warning.value();
+			const SWarning &TheWarning = Warning.value();
 			m_Menus.PopupWarning(TheWarning.m_aWarningTitle[0] == '\0' ? Localize("Warning") : TheWarning.m_aWarningTitle, TheWarning.m_aWarningMsg, Localize("Ok"), TheWarning.m_AutoHide ? 10s : 0s);
 		}
 	}
