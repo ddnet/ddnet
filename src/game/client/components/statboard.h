@@ -22,12 +22,12 @@ private:
 
 public:
 	CStatboard();
-	virtual int Sizeof() const override { return sizeof(*this); }
-	virtual void OnReset() override;
-	virtual void OnConsoleInit() override;
-	virtual void OnRender() override;
-	virtual void OnRelease() override;
-	virtual void OnMessage(int MsgType, void *pRawMsg) override;
+	int Sizeof() const override { return sizeof(*this); }
+	void OnReset() override;
+	void OnConsoleInit() override;
+	void OnRender() override;
+	void OnRelease() override;
+	void OnMessage(int MsgType, void *pRawMsg) override;
 	bool IsActive() const;
 };
 

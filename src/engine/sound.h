@@ -117,7 +117,7 @@ class IEngineSound : public ISound
 public:
 	virtual int Init() = 0;
 	virtual int Update() = 0;
-	virtual void Shutdown() override = 0;
+	void Shutdown() override = 0;
 };
 
 extern IEngineSound *CreateEngineSound();
