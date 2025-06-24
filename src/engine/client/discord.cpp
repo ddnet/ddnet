@@ -186,7 +186,7 @@ public:
 	}
 };
 
-IDiscord *CreateDiscordImpl()
+static IDiscord *CreateDiscordImpl()
 {
 	FDiscordCreate pfnDiscordCreate = GetDiscordCreate();
 	if(!pfnDiscordCreate)
@@ -202,7 +202,7 @@ IDiscord *CreateDiscordImpl()
 	return pDiscord;
 }
 #else
-IDiscord *CreateDiscordImpl()
+static IDiscord *CreateDiscordImpl()
 {
 	return nullptr;
 }

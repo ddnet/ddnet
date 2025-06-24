@@ -357,7 +357,7 @@ bool CNetObjHandler::TeeHistorianRecordMsg(int Type)
 
 	lines = []
 	lines += ["""\
-void RegisterGameUuids(CUuidManager *pManager)
+void RegisterGameUuids(CUuidManager *pManager) // NOLINT(misc-use-internal-linkage)
 {
 	"""]
 
@@ -402,7 +402,7 @@ def gen_common_content_header():
 	EmitEnum([f"SPRITE_{i.name.value.upper()}" for i in content.container.sprites.items], "NUM_SPRITES")
 
 def gen_common_content_source():
-	EmitDefinition(content.container, "datacontainer")
+	EmitDefinition(content.container, "datacontainer // NOLINT(misc-use-internal-linkage)")
 	print('CDataContainer *g_pData = &datacontainer;')
 
 

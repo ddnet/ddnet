@@ -15,19 +15,19 @@
 	Usage: map_convert_07 <source map filepath> <dest map filepath>
 */
 
-CDataFileReader g_DataReader;
-CDataFileWriter g_DataWriter;
+static CDataFileReader g_DataReader;
+static CDataFileWriter g_DataWriter;
 
 // global new image data (set by ReplaceImageItem)
-int g_aNewDataSize[MAX_MAPIMAGES];
-void *g_apNewData[MAX_MAPIMAGES];
+static int g_aNewDataSize[MAX_MAPIMAGES];
+static void *g_apNewData[MAX_MAPIMAGES];
 
-int g_Index = 0;
-int g_NextDataItemId = -1;
+static int g_Index = 0;
+static int g_NextDataItemId = -1;
 
-int g_aImageIds[MAX_MAPIMAGES];
+static int g_aImageIds[MAX_MAPIMAGES];
 
-bool CheckImageDimensions(void *pLayerItem, int LayerType, const char *pFilename)
+static bool CheckImageDimensions(void *pLayerItem, int LayerType, const char *pFilename)
 {
 	if(LayerType != MAPITEMTYPE_LAYER)
 		return true;
@@ -58,7 +58,7 @@ bool CheckImageDimensions(void *pLayerItem, int LayerType, const char *pFilename
 	return false;
 }
 
-void *ReplaceImageItem(int Index, CMapItemImage *pImgItem, CMapItemImage *pNewImgItem)
+static void *ReplaceImageItem(int Index, CMapItemImage *pImgItem, CMapItemImage *pNewImgItem)
 {
 	if(!pImgItem->m_External)
 		return pImgItem;

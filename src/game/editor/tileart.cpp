@@ -5,7 +5,7 @@
 
 #include <array>
 
-bool operator<(const ColorRGBA &Left, const ColorRGBA &Right)
+static bool operator<(const ColorRGBA &Left, const ColorRGBA &Right) // NOLINT(unused-function)
 {
 	if(Left.r != Right.r)
 		return Left.r < Right.r;

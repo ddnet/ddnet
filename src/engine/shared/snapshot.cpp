@@ -174,7 +174,7 @@ struct CItemList
 	int m_aIndex[HASHLIST_BUCKET_SIZE];
 };
 
-inline size_t CalcHashId(int Key)
+static inline size_t CalcHashId(int Key)
 {
 	// djb2 (http://www.cse.yorku.ca/~oz/hash.html)
 	unsigned Hash = 5381;

@@ -77,7 +77,7 @@ def main():
 		if gen_server_content_source:
 			print('#include "server_data.h"')
 		print("namespace client_data7 {")
-		EmitDefinition(content.container, "datacontainer")
+		EmitDefinition(content.container, "datacontainer // NOLINT(misc-use-internal-linkage)")
 		print('CDataContainer *g_pData = &datacontainer;')
 		print("}")
 

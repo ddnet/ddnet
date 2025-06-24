@@ -7,7 +7,7 @@ enum
 	NUM_SOCKETS = 64
 };
 
-void Run(NETADDR Dest)
+static void Run(NETADDR Dest)
 {
 	NETSOCKET aSockets[NUM_SOCKETS];
 

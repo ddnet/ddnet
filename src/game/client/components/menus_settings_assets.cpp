@@ -247,7 +247,7 @@ static const CMenus::SCustomItem *GetCustomItem(int CurTab, size_t Index)
 }
 
 template<typename TName>
-void ClearAssetList(std::vector<TName> &vList, IGraphics *pGraphics)
+static void ClearAssetList(std::vector<TName> &vList, IGraphics *pGraphics)
 {
 	for(TName &Asset : vList)
 	{
@@ -311,7 +311,7 @@ void CMenus::ClearCustomItems(int CurTab)
 }
 
 template<typename TName, typename TCaller>
-void InitAssetList(std::vector<TName> &vAssetList, const char *pAssetPath, const char *pAssetName, FS_LISTDIR_CALLBACK pfnCallback, IGraphics *pGraphics, IStorage *pStorage, TCaller Caller)
+static void InitAssetList(std::vector<TName> &vAssetList, const char *pAssetPath, const char *pAssetName, FS_LISTDIR_CALLBACK pfnCallback, IGraphics *pGraphics, IStorage *pStorage, TCaller Caller)
 {
 	if(vAssetList.empty())
 	{
@@ -329,7 +329,7 @@ void InitAssetList(std::vector<TName> &vAssetList, const char *pAssetPath, const
 }
 
 template<typename TName>
-int InitSearchList(std::vector<const TName *> &vpSearchList, std::vector<TName> &vAssetList)
+static int InitSearchList(std::vector<const TName *> &vpSearchList, std::vector<TName> &vAssetList)
 {
 	vpSearchList.clear();
 	int ListSize = vAssetList.size();

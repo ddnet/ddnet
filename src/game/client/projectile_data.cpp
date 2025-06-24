@@ -9,7 +9,7 @@
 
 #include <game/collision.h>
 
-bool UseProjectileExtraInfo(const CNetObj_Projectile *pProj)
+static bool UseProjectileExtraInfo(const CNetObj_Projectile *pProj)
 {
 	return pProj->m_VelY >= 0 && (pProj->m_VelY & LEGACYPROJECTILEFLAG_IS_DDNET) != 0;
 }
@@ -104,7 +104,7 @@ CProjectileData ExtractProjectileInfoDDNet(const CNetObj_DDNetProjectile *pProj)
 	return Result;
 }
 
-void SnapshotRemoveExtraProjectileInfo(CSnapshot *pSnap)
+void SnapshotRemoveExtraProjectileInfo(CSnapshot *pSnap) // NOLINT(misc-use-internal-linkage,unused-function)
 {
 	for(int Index = 0; Index < pSnap->NumItems(); Index++)
 	{
