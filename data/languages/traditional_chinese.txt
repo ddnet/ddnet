@@ -2209,13 +2209,13 @@ Dragger Inner Color
 
 [Spectating]
 Following %d: %s
-== 
+== 正在旁觀 %d: %s
 
 Loading map
-== 
+== 加載地圖
 
 Error checking player name
-== 
+== 檢查玩家暱稱時出錯
 
 Could not check for existing player with your name. Check your internet connection.
-== 
+== 無法驗證是否已存在相同暱稱的玩家。請檢查你的網路連線。
