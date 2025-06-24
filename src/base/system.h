@@ -96,12 +96,6 @@ void
 dbg_assert_imp(const char *filename, int line, const char *fmt, ...)
 	GNUC_ATTRIBUTE((format(printf, 3, 4)));
 
-#ifdef __clang_analyzer__
-#include <cassert>
-#undef dbg_assert
-#define dbg_assert(test, fmt, ...) assert(test)
-#endif
-
 /**
  * Checks whether the program is currently shutting down due to a failed
  * assert.
