@@ -63,14 +63,14 @@ private:
 	void POOLTYPE::operator delete(void *pObj, int Id) \
 	{ \
 		dbg_assert(gs_PoolUsed##POOLTYPE[Id], "not used"); \
-		dbg_assert(Id == (POOLTYPE *)pObj - (POOLTYPE *)gs_PoolData##POOLTYPE, "invalid id"); \
+		dbg_assert(Id == (POOLTYPE *)pObj - (POOLTYPE *)gs_PoolData##POOLTYPE, "invalid id"); /* NOLINT(bugprone-pointer-arithmetic-on-polymorphic-object) */ \
 		gs_PoolUsed##POOLTYPE[Id] = 0; \
 		mem_zero(gs_PoolData##POOLTYPE[Id], sizeof(gs_PoolData##POOLTYPE[Id])); \
 		ASAN_POISON_MEMORY_REGION(gs_PoolData##POOLTYPE[Id], sizeof(gs_PoolData##POOLTYPE[Id])); \
 	} \
 	void POOLTYPE::operator delete(void *pObj) /* NOLINT(misc-new-delete-overloads) */ \
 	{ \
-		int Id = (POOLTYPE *)pObj - (POOLTYPE *)gs_PoolData##POOLTYPE; \
+		int Id = (POOLTYPE *)pObj - (POOLTYPE *)gs_PoolData##POOLTYPE; /* NOLINT(bugprone-pointer-arithmetic-on-polymorphic-object) */ \
 		dbg_assert(gs_PoolUsed##POOLTYPE[Id], "not used"); \
 		gs_PoolUsed##POOLTYPE[Id] = 0; \
 		mem_zero(gs_PoolData##POOLTYPE[Id], sizeof(gs_PoolData##POOLTYPE[Id])); \
