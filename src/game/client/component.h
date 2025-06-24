@@ -15,6 +15,8 @@ class CComponentInterfaces
 {
 public:
 	virtual void OnInterfacesInit(CGameClient *pClient);
+	
+	virtual ~CComponentInterfaces() = default;
 
 protected:
 	/**
@@ -158,13 +160,6 @@ private:
 class CComponent : public CComponentInterfaces
 {
 public:
-	/**
-	 * The component virtual destructor.
-	 */
-	virtual ~CComponent()
-	{
-	}
-
 	/**
 	 * Gets the size of the non-abstract component.
 	 */
