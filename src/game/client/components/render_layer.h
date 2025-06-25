@@ -35,6 +35,7 @@ public:
 	int m_RenderType;
 	int EntityOverlayVal;
 	vec2 m_Center;
+	float m_Zoom;
 };
 
 class CRenderLayer
@@ -48,6 +49,7 @@ public:
 	virtual void Render(const CRenderLayerParams &Params) = 0;
 	virtual bool DoRender(const CRenderLayerParams &Params) const = 0;
 	virtual bool IsValid() const { return true; }
+	virtual bool IsGroup() const { return false; }
 
 	int GetGroup() const { return m_GroupId; }
 
@@ -61,6 +63,7 @@ protected:
 
 	void UseTexture(IGraphics::CTextureHandle TextureHandle) const;
 	virtual IGraphics::CTextureHandle GetTexture() const = 0;
+	void RenderLoading() const;
 
 	class IGraphics *m_pGraphics = nullptr;
 	class IMap *m_pMap = nullptr;
@@ -69,6 +72,23 @@ protected:
 	class IClient *m_pClient = nullptr;
 	class CGameClient *m_pGameClient = nullptr;
 	std::shared_ptr<CMapBasedEnvelopePointAccess> m_pEnvelopePoints;
+};
+
+class CRenderLayerGroup : public CRenderLayer
+{
+public:
+	CRenderLayerGroup(int GroupId, CMapItemGroup *pGroup);
+	virtual ~CRenderLayerGroup() = default;
+	void Init() override {}
+	void Render(const CRenderLayerParams &Params) override;
+	bool DoRender(const CRenderLayerParams &Params) const override;
+	bool IsValid() const override { return m_pGroup != nullptr; }
+	bool IsGroup() const override { return true; }
+
+protected:
+	IGraphics::CTextureHandle GetTexture() const override { return IGraphics::CTextureHandle(); }
+
+	CMapItemGroup *m_pGroup;
 };
 
 class CRenderLayerTile : public CRenderLayer
@@ -184,6 +204,7 @@ class CRenderLayerQuads : public CRenderLayer
 public:
 	CRenderLayerQuads(int GroupId, int LayerId, IGraphics::CTextureHandle TextureHandle, int Flags, CMapItemLayerQuads *pLayerQuads);
 	virtual void Init() override;
+	bool IsValid() const override { return m_pLayerQuads->m_NumQuads > 0; }
 	virtual void Render(const CRenderLayerParams &Params) override;
 	virtual bool DoRender(const CRenderLayerParams &Params) const override;
 
@@ -206,7 +227,16 @@ protected:
 	CMapItemLayerQuads *m_pLayerQuads;
 
 	std::vector<SQuadRenderInfo> m_vQuadRenderInfo;
-	bool m_ContainsEnvelopes;
+
+	bool m_Grouped;
+	class CQuadRenderGroup
+	{
+	public:
+		int m_PosEnv;
+		float m_PosEnvOffset;
+		int m_ColorEnv;
+		float m_ColorEnvOffset;
+	} m_QuadRenderGroup;
 
 private:
 	IGraphics::CTextureHandle m_TextureHandle;

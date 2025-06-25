@@ -899,7 +899,10 @@ if(NOT CMAKE_OSX_ARCHITECTURES AND (DEFINED CMAKE_RUST_COMPILER_TARGET OR RUST_N
 endif()
 set(CARGO_BUILD_DIR_DEBUG "${CARGO_BUILD_DIR}debug")
 set(CARGO_BUILD_DIR_RELEASE "${CARGO_BUILD_DIR}release")
-if(GENERATOR_IS_MULTI_CONFIG)
+
+# We can't check this directly; it is a cmake property, not a variable
+get_cmake_property(MULTI_CONFIG_BUILD GENERATOR_IS_MULTI_CONFIG)
+if(MULTI_CONFIG_BUILD)
   if(CMAKE_VERSION VERSION_LESS 3.20)
     message(SEND_ERROR "Multi-config generators only supported from CMake 3.20 and up")
   else()
@@ -2160,6 +2163,7 @@ set_src(GAME_SHARED GLOB src/game
   prng.cpp
   prng.h
   race_state.h
+  team_state.h
   teamscore.cpp
   teamscore.h
   tuning.h
@@ -2329,6 +2333,8 @@ if(CLIENT)
     components/camera.h
     components/chat.cpp
     components/chat.h
+    components/community_icons.cpp
+    components/community_icons.h
     components/console.cpp
     components/console.h
     components/controls.cpp
@@ -2355,6 +2361,8 @@ if(CLIENT)
     components/infomessages.h
     components/items.cpp
     components/items.h
+    components/local_server.cpp
+    components/local_server.h
     components/mapimages.cpp
     components/mapimages.h
     components/maplayers.cpp
@@ -2372,6 +2380,7 @@ if(CLIENT)
     components/menus_settings7.cpp
     components/menus_settings_assets.cpp
     components/menus_start.cpp
+    components/menus_start.h
     components/motd.cpp
     components/motd.h
     components/nameplates.cpp
@@ -3520,6 +3529,11 @@ foreach(target ${TARGETS})
     target_compile_options(${target} PRIVATE /GS) # Protect the stack pointer.
     target_compile_options(${target} PRIVATE /wd4996) # Use of non-_s functions.
     target_compile_options(${target} PRIVATE /utf-8) # Use UTF-8 for source files.
+    # Enable Edit & Continue (Hot Reload) support
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.25)
+      set_property(TARGET ${target} PROPERTY MSVC_DEBUG_INFORMATION_FORMAT $<$<CONFIG:Debug>:EditAndContinue>)
+      target_link_options(${target} PRIVATE $<$<CONFIG:Debug>:/INCREMENTAL>)
+    endif()
   endif()
   if(OUR_FLAGS_LINK)
     target_link_libraries(${target} ${OUR_FLAGS_LINK})

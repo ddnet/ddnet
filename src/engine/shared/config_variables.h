@@ -21,6 +21,7 @@ MACRO_CONFIG_INT(ClAntiPingGrenade, cl_antiping_grenade, 1, 0, 1, CFGFLAG_CLIENT
 MACRO_CONFIG_INT(ClAntiPingWeapons, cl_antiping_weapons, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Predict weapon projectiles (only enabled if cl_antiping is set to 1)")
 MACRO_CONFIG_INT(ClAntiPingSmooth, cl_antiping_smooth, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Make the prediction of other player's movement smoother")
 MACRO_CONFIG_INT(ClAntiPingGunfire, cl_antiping_gunfire, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Predict gunfire and show predicted weapon physics (with cl_antiping_grenade 1 and cl_antiping_weapons 1)")
+MACRO_CONFIG_INT(ClAntiPingPreInput, cl_antiping_preinput, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Predict other players using preinputs for more accurate input prediction")
 MACRO_CONFIG_INT(ClPredictionMargin, cl_prediction_margin, 10, 1, 300, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Prediction margin in ms (adds latency, can reduce lag from ping jumps)")
 MACRO_CONFIG_INT(ClSubTickAiming, cl_sub_tick_aiming, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Send aiming data at sub-tick accuracy")
 #if defined(CONF_PLATFORM_ANDROID)
@@ -455,6 +456,7 @@ MACRO_CONFIG_STR(SvMap, sv_map, 128, "Sunny Side Up", CFGFLAG_SERVER, "Map to us
 MACRO_CONFIG_INT(SvMaxClients, sv_max_clients, SERVER_MAX_CLIENTS, 1, SERVER_MAX_CLIENTS, CFGFLAG_SERVER, "Maximum number of clients that are allowed on a server")
 MACRO_CONFIG_INT(SvMaxClientsPerIp, sv_max_clients_per_ip, 4, 1, SERVER_MAX_CLIENTS, CFGFLAG_SERVER, "Maximum number of clients with the same IP that can connect to the server")
 MACRO_CONFIG_INT(SvHighBandwidth, sv_high_bandwidth, 0, 0, 1, CFGFLAG_SERVER, "Use high bandwidth mode. Doubles the bandwidth required for the server. LAN use only")
+MACRO_CONFIG_INT(SvPreInput, sv_preinput, 1, 0, 1, CFGFLAG_SERVER, "Sends client inputs to other clients before their correct tick. Increases the bandwidth required for the server")
 MACRO_CONFIG_STR(SvRegister, sv_register, 16, "1", CFGFLAG_SERVER, "Register server with master server for public listing, can also accept a comma-separated list of protocols to register on, like 'ipv4,ipv6'")
 MACRO_CONFIG_STR(SvRegisterExtra, sv_register_extra, 256, "", CFGFLAG_SERVER, "Extra headers to send to the register endpoint, comma-separated 'Header: Value' pairs")
 MACRO_CONFIG_STR(SvRegisterUrl, sv_register_url, 128, "https://master1.ddnet.org/ddnet/15/register", CFGFLAG_SERVER, "Masterserver URL to register to")
@@ -711,6 +713,7 @@ MACRO_CONFIG_INT(ClChatReset, cl_chat_reset, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_S
 MACRO_CONFIG_INT(ClChatOld, cl_chat_old, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Old chat style: No tee, no background")
 MACRO_CONFIG_INT(ClChatFontSize, cl_chat_size, 60, 10, 100, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Chat font size")
 MACRO_CONFIG_INT(ClChatWidth, cl_chat_width, 200, 140, 400, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Chat width")
+MACRO_CONFIG_COL(ClChatBackgroundColor, cl_chat_background_color, 201326592, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLALPHA, "Chat background color")
 
 MACRO_CONFIG_INT(ClShowDirection, cl_show_direction, 1, 0, 3, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Show key presses (1 = other players', 2 = everyone, 3 = only your own")
 MACRO_CONFIG_INT(ClDirectionSize, cl_direction_size, 30, -50, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Size of key press icons")

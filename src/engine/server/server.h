@@ -147,6 +147,7 @@ public:
 		CSnapshotStorage m_Snapshots;
 
 		CInput m_aInputs[200];
+		CNetMsg_Sv_PreInput m_LastPreInput = {};
 
 		char m_aName[MAX_NAME_LENGTH];
 		char m_aClan[MAX_CLAN_LENGTH];

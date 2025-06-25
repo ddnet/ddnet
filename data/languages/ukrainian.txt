@@ -1024,9 +1024,6 @@ Loading…
 Loading assets
 == Завантаження текстур
 
-Loading background map
-== Завантаження мапи-тла
-
 Loading commands…
 == Завантаження команд…
 
@@ -2203,3 +2200,16 @@ Dragger Inner Color
 
 AntiPing: prediction margin
 == AntiPing: допуск передбачення
+
+[Spectating]
+Following %d: %s
+== Спостерігає за %d: %s
+
+Loading map
+== Завантаження мапи
+
+Error checking player name
+== Помилка перевірки імені гравця
+
+Could not check for existing player with your name. Check your internet connection.
+== Не вдалося перевірити, чи існує гравець із таким іменем. Перевірте з'єднання з інтернетом.

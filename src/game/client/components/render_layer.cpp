@@ -183,6 +183,51 @@ void CRenderLayer::UseTexture(IGraphics::CTextureHandle TextureHandle) const
 		m_pGraphics->TextureClear();
 }
 
+void CRenderLayer::RenderLoading() const
+{
+	const char *pLoadingTitle = Localize("Loading map");
+	const char *pLoadingMessage = Localize("Uploading map data to GPU");
+	m_pGameClient->m_Menus.RenderLoading(pLoadingTitle, pLoadingMessage, 0);
+}
+
+/**************
+ * Group *
+ **************/
+
+CRenderLayerGroup::CRenderLayerGroup(int GroupId, CMapItemGroup *pGroup) :
+	CRenderLayer(GroupId, 0, 0), m_pGroup(pGroup) {}
+
+bool CRenderLayerGroup::DoRender(const CRenderLayerParams &Params) const
+{
+	if(!g_Config.m_GfxNoclip || Params.m_RenderType == CMapLayers::TYPE_FULL_DESIGN)
+	{
+		m_pGraphics->ClipDisable();
+		if(m_pGroup->m_Version >= 2 && m_pGroup->m_UseClipping)
+		{
+			// set clipping
+			float aPoints[4];
+			m_pRenderTools->MapScreenToInterface(Params.m_Center.x, Params.m_Center.y, Params.m_Zoom);
+			m_pGraphics->GetScreen(&aPoints[0], &aPoints[1], &aPoints[2], &aPoints[3]);
+			float x0 = (m_pGroup->m_ClipX - aPoints[0]) / (aPoints[2] - aPoints[0]);
+			float y0 = (m_pGroup->m_ClipY - aPoints[1]) / (aPoints[3] - aPoints[1]);
+			float x1 = ((m_pGroup->m_ClipX + m_pGroup->m_ClipW) - aPoints[0]) / (aPoints[2] - aPoints[0]);
+			float y1 = ((m_pGroup->m_ClipY + m_pGroup->m_ClipH) - aPoints[1]) / (aPoints[3] - aPoints[1]);
+
+			if(x1 < 0.0f || x0 > 1.0f || y1 < 0.0f || y0 > 1.0f)
+				return false;
+
+			m_pGraphics->ClipEnable((int)(x0 * m_pGraphics->ScreenWidth()), (int)(y0 * m_pGraphics->ScreenHeight()),
+				(int)((x1 - x0) * m_pGraphics->ScreenWidth()), (int)((y1 - y0) * m_pGraphics->ScreenHeight()));
+		}
+	}
+	return true;
+}
+
+void CRenderLayerGroup::Render(const CRenderLayerParams &Params)
+{
+	m_pRenderTools->MapScreenToGroup(Params.m_Center.x, Params.m_Center.y, m_pGroup, Params.m_Zoom);
+}
+
 /**************
  * Tile Layer *
  **************/
@@ -712,6 +757,7 @@ void CRenderLayerTile::UploadTileData(std::optional<CTileLayerVisuals> &VisualsO
 		// and finally inform the backend how many indices are required
 		m_pGraphics->IndicesNumRequiredNotify(vTmpTiles.size() * 6);
 	}
+	RenderLoading();
 }
 
 int CRenderLayerTile::GetDataIndex(unsigned int &TileSize) const
@@ -754,7 +800,7 @@ CRenderLayerQuads::CRenderLayerQuads(int GroupId, int LayerId, IGraphics::CTextu
 	CRenderLayer(GroupId, LayerId, Flags)
 {
 	m_pLayerQuads = pLayerQuads;
-	m_ContainsEnvelopes = false;
+	m_Grouped = false;
 }
 
 void CRenderLayerQuads::RenderQuadLayer(bool Force)
@@ -770,7 +816,7 @@ void CRenderLayerQuads::RenderQuadLayer(bool Force)
 
 	size_t QuadsRenderCount = 0;
 	size_t CurQuadOffset = 0;
-	if(m_ContainsEnvelopes)
+	if(!m_Grouped)
 	{
 		for(int i = 0; i < m_pLayerQuads->m_NumQuads; ++i)
 		{
@@ -811,11 +857,28 @@ void CRenderLayerQuads::RenderQuadLayer(bool Force)
 	}
 	else
 	{
-		for(CurQuadOffset = 0; CurQuadOffset < (size_t)m_pLayerQuads->m_NumQuads; CurQuadOffset += gs_GraphicsMaxQuadsRenderCount)
+		SQuadRenderInfo &QInfo = m_vQuadRenderInfo[0];
+
+		if(m_QuadRenderGroup.m_ColorEnv >= 0)
 		{
-			QuadsRenderCount = std::min((size_t)m_pLayerQuads->m_NumQuads - CurQuadOffset, gs_GraphicsMaxQuadsRenderCount);
-			m_pGraphics->RenderQuadLayer(Visuals.m_BufferContainerIndex, m_vQuadRenderInfo.data(), QuadsRenderCount, CurQuadOffset);
+			ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+			CMapLayers::EnvelopeEval(m_QuadRenderGroup.m_ColorEnvOffset, m_QuadRenderGroup.m_ColorEnv, Color, 4, m_pMap, m_pEnvelopePoints.get(), m_pClient, m_pGameClient, m_OnlineOnly);
+
+			if(Color.a <= 0.0f)
+				return;
+			QInfo.m_Color = Color;
 		}
+
+		if(m_QuadRenderGroup.m_PosEnv >= 0)
+		{
+			ColorRGBA Position = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+			CMapLayers::EnvelopeEval(m_QuadRenderGroup.m_PosEnvOffset, m_QuadRenderGroup.m_PosEnv, Position, 3, m_pMap, m_pEnvelopePoints.get(), m_pClient, m_pGameClient, m_OnlineOnly);
+
+			QInfo.m_Offsets.x = Position.r;
+			QInfo.m_Offsets.y = Position.g;
+			QInfo.m_Rotation = Position.b / 180.0f * pi;
+		}
+		m_pGraphics->RenderQuadLayer(Visuals.m_BufferContainerIndex, &QInfo, (size_t)m_pLayerQuads->m_NumQuads, 0, true);
 	}
 }
 
@@ -845,12 +908,20 @@ void CRenderLayerQuads::Init()
 	m_vQuadRenderInfo.resize(m_pLayerQuads->m_NumQuads);
 	CQuad *pQuads = (CQuad *)m_pMap->GetDataSwapped(m_pLayerQuads->m_Data);
 
+	// try to create a quad render group
+	m_Grouped = true;
+	m_QuadRenderGroup.m_ColorEnv = pQuads[0].m_ColorEnv;
+	m_QuadRenderGroup.m_ColorEnvOffset = pQuads[0].m_ColorEnvOffset;
+	m_QuadRenderGroup.m_PosEnv = pQuads[0].m_PosEnv;
+	m_QuadRenderGroup.m_PosEnvOffset = pQuads[0].m_PosEnvOffset;
+
 	for(int i = 0; i < m_pLayerQuads->m_NumQuads; ++i)
 	{
 		CQuad *pQuad = &pQuads[i];
 
-		if(pQuads[i].m_ColorEnv >= 0 || pQuads[i].m_PosEnv >= 0)
-			m_ContainsEnvelopes = true;
+		// give up on grouping if envelopes missmatch
+		if(m_Grouped && (pQuad->m_ColorEnv != m_QuadRenderGroup.m_ColorEnv || pQuad->m_ColorEnvOffset != m_QuadRenderGroup.m_ColorEnvOffset || pQuad->m_PosEnv != m_QuadRenderGroup.m_PosEnv || pQuad->m_PosEnvOffset != m_QuadRenderGroup.m_PosEnvOffset))
+			m_Grouped = false;
 
 		// init for envelopeless quad layers
 		SQuadRenderInfo &QInfo = m_vQuadRenderInfo[i];
@@ -893,6 +964,12 @@ void CRenderLayerQuads::Init()
 				vTmpQuadsTextured[i].m_aVertices[j].m_A = (unsigned char)pQuad->m_aColors[QuadIdX].a;
 			}
 		}
+	}
+
+	// we can directly push, only one render info is needed
+	if(m_Grouped)
+	{
+		m_vQuadRenderInfo.resize(1);
 	}
 
 	size_t UploadDataSize = 0;
@@ -943,6 +1020,7 @@ void CRenderLayerQuads::Init()
 		// and finally inform the backend how many indices are required
 		m_pGraphics->IndicesNumRequiredNotify(m_pLayerQuads->m_NumQuads * 6);
 	}
+	RenderLoading();
 }
 
 void CRenderLayerQuads::Render(const CRenderLayerParams &Params)

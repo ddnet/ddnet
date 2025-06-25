@@ -217,6 +217,8 @@ void CServer::CClient::Reset()
 	for(auto &Input : m_aInputs)
 		Input.m_GameTick = -1;
 
+	mem_zero(&m_LastPreInput, sizeof(m_LastPreInput));
+
 	m_Snapshots.PurgeAll();
 	m_LastAckedSnapshot = -1;
 	m_LastInputTick = -1;
@@ -1695,8 +1697,17 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					return;
 				}
 
+				int NumConnectedClients = 0;
+				for(int i = 0; i < MaxClients(); ++i)
+				{
+					if(m_aClients[i].m_State != CClient::STATE_EMPTY)
+					{
+						NumConnectedClients++;
+					}
+				}
+
 				// reserved slot
-				if(ClientId >= MaxClients() - Config()->m_SvReservedSlots && !CheckReservedSlotAuth(ClientId, pPassword))
+				if(NumConnectedClients > MaxClients() - Config()->m_SvReservedSlots && !CheckReservedSlotAuth(ClientId, pPassword))
 				{
 					m_NetServer.Drop(ClientId, "This server is full");
 					return;
@@ -1850,6 +1861,45 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			if(Unpacker.Error())
 			{
 				return;
+			}
+
+			if(g_Config.m_SvPreInput)
+			{
+				// send preinputs of ClientId to valid clients
+				bool aPreInputClients[MAX_CLIENTS] = {};
+				GameServer()->PreInputClients(ClientId, aPreInputClients);
+
+				CNetMsg_Sv_PreInput PreInput = {};
+				mem_zero(&PreInput, sizeof(PreInput));
+				CNetObj_PlayerInput *pInputData = (CNetObj_PlayerInput *)&pInput->m_aData;
+
+				PreInput.m_Direction = pInputData->m_Direction;
+				PreInput.m_Jump = pInputData->m_Jump;
+				PreInput.m_Fire = pInputData->m_Fire;
+				PreInput.m_Hook = pInputData->m_Hook;
+				PreInput.m_WantedWeapon = pInputData->m_WantedWeapon;
+				PreInput.m_NextWeapon = pInputData->m_NextWeapon;
+				PreInput.m_PrevWeapon = pInputData->m_PrevWeapon;
+
+				if(mem_comp(&m_aClients[ClientId].m_LastPreInput, &PreInput, sizeof(CNetMsg_Sv_PreInput)) != 0)
+				{
+					m_aClients[ClientId].m_LastPreInput = PreInput;
+
+					PreInput.m_Owner = ClientId;
+					PreInput.m_IntendedTick = IntendedTick;
+
+					// target angle isn't updated all the time to save bandwidth
+					PreInput.m_TargetX = pInputData->m_TargetX;
+					PreInput.m_TargetY = pInputData->m_TargetY;
+
+					for(int Id = 0; Id < MAX_CLIENTS; Id++)
+					{
+						if(!aPreInputClients[Id])
+							continue;
+
+						SendPackMsg(&PreInput, MSGFLAG_VITAL | MSGFLAG_NORECORD, Id);
+					}
+				}
 			}
 
 			GameServer()->OnClientPrepareInput(ClientId, pInput->m_aData);
@@ -2766,10 +2816,14 @@ int CServer::LoadMap(const char *pMapName)
 
 	char aBuf[IO_MAX_PATH_LENGTH];
 	str_format(aBuf, sizeof(aBuf), "maps/%s.map", pMapName);
-	GameServer()->OnMapChange(aBuf, sizeof(aBuf));
-
-	if(!m_pMap->Load(aBuf))
+	if(!GameServer()->OnMapChange(aBuf, sizeof(aBuf)))
+	{
 		return 0;
+	}
+	if(!m_pMap->Load(aBuf))
+	{
+		return 0;
+	}
 
 	// reinit snapshot ids
 	m_IdPool.TimeoutIds();

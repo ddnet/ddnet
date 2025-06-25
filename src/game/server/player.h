@@ -234,6 +234,7 @@ public:
 	int m_RescueMode;
 
 	CSaveTee m_LastTeleTee;
+	std::optional<CSaveTee> m_LastDeath;
 };
 
 #endif

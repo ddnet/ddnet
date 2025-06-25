@@ -1395,25 +1395,37 @@ void CGraphics_Threaded::RenderBorderTiles(int BufferContainerIndex, const Color
 	m_pCommandBuffer->AddRenderCalls(1);
 }
 
-void CGraphics_Threaded::RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, size_t QuadNum, int QuadOffset)
+void CGraphics_Threaded::RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, size_t QuadNum, int QuadOffset, bool Grouped)
 {
 	if(QuadNum == 0)
 		return;
 
 	// add the VertexArrays and draw
-	CCommandBuffer::SCommand_RenderQuadLayer Cmd;
+	CCommandBuffer::SCommand_RenderQuadLayer Cmd(Grouped);
 	Cmd.m_State = m_State;
 	Cmd.m_QuadNum = QuadNum;
 	Cmd.m_QuadOffset = QuadOffset;
 	Cmd.m_BufferContainerIndex = BufferContainerIndex;
-	Cmd.m_pQuadInfo = (SQuadRenderInfo *)AllocCommandBufferData(Cmd.m_QuadNum * sizeof(SQuadRenderInfo));
+	if(!Grouped)
+	{
+		Cmd.m_pQuadInfo = (SQuadRenderInfo *)AllocCommandBufferData(Cmd.m_QuadNum * sizeof(SQuadRenderInfo));
+		AddCmd(Cmd, [&] {
+			Cmd.m_pQuadInfo = (SQuadRenderInfo *)m_pCommandBuffer->AllocData(QuadNum * sizeof(SQuadRenderInfo));
+			return Cmd.m_pQuadInfo != nullptr;
+		});
 
-	AddCmd(Cmd, [&] {
-		Cmd.m_pQuadInfo = (SQuadRenderInfo *)m_pCommandBuffer->AllocData(QuadNum * sizeof(SQuadRenderInfo));
-		return Cmd.m_pQuadInfo != nullptr;
-	});
+		mem_copy(Cmd.m_pQuadInfo, pQuadInfo, sizeof(SQuadRenderInfo) * QuadNum);
+	}
+	else
+	{
+		Cmd.m_pQuadInfo = (SQuadRenderInfo *)AllocCommandBufferData(sizeof(SQuadRenderInfo));
+		AddCmd(Cmd, [&] {
+			Cmd.m_pQuadInfo = (SQuadRenderInfo *)m_pCommandBuffer->AllocData(sizeof(SQuadRenderInfo));
+			return Cmd.m_pQuadInfo != nullptr;
+		});
 
-	mem_copy(Cmd.m_pQuadInfo, pQuadInfo, sizeof(SQuadRenderInfo) * QuadNum);
+		*Cmd.m_pQuadInfo = *pQuadInfo;
+	}
 
 	m_pCommandBuffer->AddRenderCalls(((QuadNum - 1) / gs_GraphicsMaxQuadsRenderCount) + 1);
 }

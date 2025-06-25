@@ -22,7 +22,7 @@ TEST(Datafile, ExtendedType)
 
 	{
 		CDataFileWriter Writer;
-		Writer.Open(pStorage.get(), Info.m_aFilename);
+		ASSERT_TRUE(Writer.Open(pStorage.get(), Info.m_aFilename));
 
 		Writer.AddItem(MAPITEMTYPE_TEST, 0x8000, sizeof(ItemTest), &ItemTest);
 
@@ -31,7 +31,7 @@ TEST(Datafile, ExtendedType)
 
 	{
 		CDataFileReader Reader;
-		Reader.Open(pStorage.get(), Info.m_aFilename, IStorage::TYPE_ALL);
+		ASSERT_TRUE(Reader.Open(pStorage.get(), Info.m_aFilename, IStorage::TYPE_ALL));
 
 		int Start, Num;
 		Reader.GetType(MAPITEMTYPE_TEST, &Start, &Num);
@@ -72,7 +72,7 @@ TEST(Datafile, StringData)
 
 	{
 		CDataFileWriter Writer;
-		Writer.Open(pStorage.get(), Info.m_aFilename);
+		ASSERT_TRUE(Writer.Open(pStorage.get(), Info.m_aFilename));
 
 		EXPECT_EQ(Writer.AddDataString(""), -1); // Empty string is not added
 		EXPECT_EQ(Writer.AddDataString("Abc"), 0);
@@ -88,7 +88,7 @@ TEST(Datafile, StringData)
 
 	{
 		CDataFileReader Reader;
-		Reader.Open(pStorage.get(), Info.m_aFilename, IStorage::TYPE_ALL);
+		ASSERT_TRUE(Reader.Open(pStorage.get(), Info.m_aFilename, IStorage::TYPE_ALL));
 
 		EXPECT_EQ(Reader.GetDataString(-1000), nullptr);
 		EXPECT_STREQ(Reader.GetDataString(-1), "");

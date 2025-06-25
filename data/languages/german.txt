@@ -2005,9 +2005,6 @@ Active: Hook
 Preview 'Hook collisions' being pressed
 == Vorschau für 'Hakenkollisionen' gedrückt
 
-Loading background map
-== Hintergrund-Karte laden
-
 [Spectating Camera Mode Icon]
 AUTO
 == AUTO
@@ -2203,3 +2200,16 @@ Dragger Outline Color
 
 Dragger Inner Color
 == Dragger-Innenfarbe
+
+[Spectating]
+Following %d: %s
+== Folge %d: %s
+
+Loading map
+== Karte laden
+
+Error checking player name
+== Fehler beim Prüfen des Spielernamens
+
+Could not check for existing player with your name. Check your internet connection.
+== Konnte nicht prüfen ob ein Spieler mit deinem Namen existiert. Prüfe deine Internetverbindung.

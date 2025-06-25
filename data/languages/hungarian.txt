@@ -1559,9 +1559,6 @@ Quitting. Please wait…
 Restarting. Please wait…
 == 
 
-Loading background map
-== 
-
 Auto-sync player camera
 == 
 
@@ -1622,6 +1619,10 @@ Multi-View
 == 
 
 [Spectating]
+Following %d: %s
+== 
+
+[Spectating]
 Following %s
 == 
 
@@ -1630,6 +1631,9 @@ AUTO
 == 
 
 Some map images could not be loaded. Check the local console for details.
+== 
+
+Loading map
 == 
 
 Some map sounds could not be loaded. Check the local console for details.
@@ -1684,6 +1688,12 @@ Videos directory
 == 
 
 Video was saved to '%s'
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
 == 
 
 Unable to save the skin with a reserved name
@@ -1748,11 +1758,11 @@ Go back the specified duration
 == 
 
 [Demo player duration]
-%d min.
+%s min.
 == 
 
 [Demo player duration]
-%d sec.
+%s sec.
 == 
 
 Change the skip duration

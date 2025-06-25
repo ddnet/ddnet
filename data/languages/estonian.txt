@@ -1848,9 +1848,6 @@ No demo with this filename exists
 Some fonts could not be loaded. Check the local console for details.
 == 
 
-Loading background map
-== 
-
 Auto-sync player camera
 == 
 
@@ -1877,8 +1874,15 @@ Active
 Loading maps…
 == 
 
+[Spectating]
+Following %d: %s
+== 
+
 [Spectating Camera Mode Icon]
 AUTO
+== 
+
+Loading map
 == 
 
 Save skin
@@ -1888,6 +1892,12 @@ Are you sure you want to save your skin? If a skin with this name already exists
 == 
 
 This name cannot be used for files and folders
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
 == 
 
 Unable to save the skin with a reserved name

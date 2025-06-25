@@ -1909,9 +1909,6 @@ https://wiki.ddnet.org/wiki/Mapping
 Some fonts could not be loaded. Check the local console for details.
 == Nie można załadować niektórych czcionek. Sprawdź konsolę, aby uzyskać szczegóły.
 
-Loading background map
-== Ładowanie tła mapy
-
 [Spectating Camera Mode Icon]
 AUTO
 == AUTO
@@ -2205,3 +2202,16 @@ Dragger Outline Color
 
 Dragger Inner Color
 == Kolor zewnętrzny draggera
+
+[Spectating]
+Following %d: %s
+== 
+
+Loading map
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
+== 

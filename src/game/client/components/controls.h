@@ -42,5 +42,11 @@ public:
 	int SnapInput(int *pData);
 	void ClampMousePos();
 	void ResetInput(int Dummy);
+
+private:
+	static void ConKeyInputState(IConsole::IResult *pResult, void *pUserData);
+	static void ConKeyInputCounter(IConsole::IResult *pResult, void *pUserData);
+	static void ConKeyInputSet(IConsole::IResult *pResult, void *pUserData);
+	static void ConKeyInputNextPrevWeapon(IConsole::IResult *pResult, void *pUserData);
 };
 #endif

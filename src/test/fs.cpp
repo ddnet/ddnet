@@ -60,6 +60,28 @@ TEST(Filesystem, SplitFileExtension)
 	EXPECT_STREQ(aExt, "");
 }
 
+static void TestNormalizePath(const char *pInput, const char *pExpectedOutput)
+{
+	char aNormalized[256];
+	str_copy(aNormalized, pInput);
+	fs_normalize_path(aNormalized);
+	EXPECT_STREQ(aNormalized, pExpectedOutput);
+}
+
+TEST(Filesystem, NormalizePath)
+{
+	TestNormalizePath("", "");
+	TestNormalizePath("/", "/");
+	TestNormalizePath("\\", "/");
+	TestNormalizePath("//", "/");
+	TestNormalizePath("/////", "/");
+	TestNormalizePath("\\\\\\\\\\", "/");
+	TestNormalizePath("/a/b/c", "/a/b/c");
+	TestNormalizePath("\\a\\b\\c", "/a/b/c");
+	TestNormalizePath("C:\\Users", "C:/Users");
+	TestNormalizePath("C:\\", "C:");
+}
+
 TEST(Filesystem, StoragePath)
 {
 	char aStoragePath[IO_MAX_PATH_LENGTH];

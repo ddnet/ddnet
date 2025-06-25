@@ -713,37 +713,17 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 		const CGameClient::CSnapState::CCharacterInfo &Selected = GameClient()->m_Snap.m_aCharacters[SelectedId];
 		const CGameClient::CSnapState::CCharacterInfo &Other = GameClient()->m_Snap.m_aCharacters[pPlayerInfo->m_ClientId];
 
-		const bool ShouldShowIndicator = Other.m_HasExtendedData && (GameClient()->m_Snap.m_pLocalInfo && (GameClient()->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS || Following));
-
-		if(ShouldShowIndicator)
+		if((Selected.m_HasExtendedData || GameClient()->m_aClients[SelectedId].m_SpecCharPresent) && Other.m_HasExtendedData)
 		{
+			int SelectedStrongWeakId = Selected.m_HasExtendedData ? Selected.m_ExtendedData.m_StrongWeakId : 0;
 			Data.m_HookStrongWeakId = Other.m_ExtendedData.m_StrongWeakId;
 			Data.m_ShowHookStrongWeakId = g_Config.m_Debug || g_Config.m_ClNamePlatesStrong == 2;
-
-			// Get selected player's StrongWeakId from snap data or saved local data
-			int SelectedStrongWeakId = 0;
-			bool HasSelectedId = false;
-
-			if(Selected.m_HasExtendedData)
+			if(SelectedId == pPlayerInfo->m_ClientId)
+				Data.m_ShowHookStrongWeak = Data.m_ShowHookStrongWeakId;
+			else
 			{
-				SelectedStrongWeakId = Selected.m_ExtendedData.m_StrongWeakId;
-				HasSelectedId = true;
-			}
-			else if(!Following && GameClient()->LocalStrongWeakId(g_Config.m_ClDummy) != -1)
-			{
-				SelectedStrongWeakId = GameClient()->LocalStrongWeakId(g_Config.m_ClDummy);
-				HasSelectedId = true;
-			}
-
-			if(HasSelectedId)
-			{
-				if(SelectedId == pPlayerInfo->m_ClientId)
-					Data.m_ShowHookStrongWeak = Data.m_ShowHookStrongWeakId;
-				else
-				{
-					Data.m_HookStrongWeakState = SelectedStrongWeakId > Other.m_ExtendedData.m_StrongWeakId ? EHookStrongWeakState::STRONG : EHookStrongWeakState::WEAK;
-					Data.m_ShowHookStrongWeak = g_Config.m_Debug || g_Config.m_ClNamePlatesStrong > 0;
-				}
+				Data.m_HookStrongWeakState = SelectedStrongWeakId > Other.m_ExtendedData.m_StrongWeakId ? EHookStrongWeakState::STRONG : EHookStrongWeakState::WEAK;
+				Data.m_ShowHookStrongWeak = g_Config.m_Debug || g_Config.m_ClNamePlatesStrong > 0;
 			}
 		}
 	}
@@ -806,12 +786,12 @@ void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
 	CTeeRenderInfo TeeRenderInfo;
 	if(Dummy == 0)
 	{
-		TeeRenderInfo.Apply(m_pClient->m_Skins.Find(g_Config.m_ClPlayerSkin));
+		TeeRenderInfo.Apply(GameClient()->m_Skins.Find(g_Config.m_ClPlayerSkin));
 		TeeRenderInfo.ApplyColors(g_Config.m_ClPlayerUseCustomColor, g_Config.m_ClPlayerColorBody, g_Config.m_ClPlayerColorFeet);
 	}
 	else
 	{
-		TeeRenderInfo.Apply(m_pClient->m_Skins.Find(g_Config.m_ClDummySkin));
+		TeeRenderInfo.Apply(GameClient()->m_Skins.Find(g_Config.m_ClDummySkin));
 		TeeRenderInfo.ApplyColors(g_Config.m_ClDummyUseCustomColor, g_Config.m_ClDummyColorBody, g_Config.m_ClDummyColorFeet);
 	}
 	TeeRenderInfo.m_Size = 64.0f;

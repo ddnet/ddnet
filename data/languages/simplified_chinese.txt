@@ -2023,9 +2023,6 @@ Active: Hook
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
 == "%s" 与 pnglite 不兼容，无法被旧版本 DDNet 加载
 
-Loading background map
-== 加载背景地图
-
 [Spectating Camera Mode Icon]
 AUTO
 == 自动
@@ -2136,7 +2133,7 @@ Renders your frame rate in the top right
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== 简体中文翻译由以下人员贡献：MK124, CarolVlCznYu, MC_TYH, Yangfl, Eki, Night_L, TsFreddie, Dan_cao, Momo, cheeser0613, By, Bamcane, Pioooooo, 豆腐渣, XCWQW1
+== 简体中文翻译由以下人员贡献：MK124, CarolVlCznYu, MC_TYH, Yangfl, Eki, Night_L, TsFreddie, Dan_cao, Momo, cheeser0613, By, Bamcane, Pioooooo, 豆腐渣, XCWQW1, Zerol Acqua
 
 Show spectator cursor
 == 显示旁观者光标
@@ -2209,3 +2206,16 @@ Dragger Outline Color
 
 Dragger Inner Color
 == 光索实心颜色
+
+[Spectating]
+Following %d: %s
+== 正在旁观 %d: %s
+
+Loading map
+== 加载地图
+
+Error checking player name
+== 检查玩家名称时出错
+
+Could not check for existing player with your name. Check your internet connection.
+== 无法验证是否已存在相同名称的玩家。请检查你的网络连接。

@@ -1847,9 +1847,6 @@ No demo with this filename exists
 Some fonts could not be loaded. Check the local console for details.
 == Некаторыя шрыфты не атрымалася загрузіць. Для атрымання дэталей праверце лакальную кансоль.
 
-Loading background map
-== Загрузка фонавай карты
-
 Auto-sync player camera
 == Аўтасінхранізацыя з камерай гульца
 
@@ -2180,7 +2177,20 @@ Active: Hook
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
 == 
 
+[Spectating]
+Following %d: %s
+== 
+
+Loading map
+== 
+
 This name cannot be used for files and folders
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
 == 
 
 This skin name cannot be used.

@@ -1517,9 +1517,6 @@ Quitting. Please wait…
 Restarting. Please wait…
 == 재시작 중입니다. 잠시만 기다려 주십시오…
 
-Loading background map
-== 배경 맵 로딩 중
-
 Searching
 == 검색
 
@@ -2126,7 +2123,20 @@ Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom
 No demo with this filename exists
 == 
 
+[Spectating]
+Following %d: %s
+== 
+
+Loading map
+== 
+
 This name cannot be used for files and folders
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
 == 
 
 Map size

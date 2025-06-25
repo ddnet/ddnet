@@ -56,7 +56,7 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, 
 
 void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels)
 {
-	EnvelopeEval(TimeOffsetMillis, Env, Result, Channels, this->m_pLayers->Map(), this->m_pEnvelopePoints.get(), this->Client(), this->m_pClient, this->m_OnlineOnly);
+	EnvelopeEval(TimeOffsetMillis, Env, Result, Channels, this->m_pLayers->Map(), this->m_pEnvelopePoints.get(), this->Client(), this->GameClient(), this->m_OnlineOnly);
 }
 
 CMapLayers::CMapLayers(int Type, bool OnlineOnly)
@@ -68,12 +68,12 @@ CMapLayers::CMapLayers(int Type, bool OnlineOnly)
 void CMapLayers::OnInit()
 {
 	m_pLayers = Layers();
-	m_pImages = &m_pClient->m_MapImages;
+	m_pImages = &GameClient()->m_MapImages;
 }
 
 CCamera *CMapLayers::GetCurCamera()
 {
-	return &m_pClient->m_Camera;
+	return &GameClient()->m_Camera;
 }
 
 void CMapLayers::OnMapLoad()
@@ -84,12 +84,14 @@ void CMapLayers::OnMapLoad()
 
 	const char *pLoadingTitle = Localize("Loading map");
 	const char *pLoadingMessage = Localize("Uploading map data to GPU");
-	m_pClient->m_Menus.RenderLoading(pLoadingTitle, pLoadingMessage, 0);
+	GameClient()->m_Menus.RenderLoading(pLoadingTitle, pLoadingMessage, 0);
 
 	for(int g = 0; g < m_pLayers->NumGroups(); g++)
 	{
 		CMapItemGroup *pGroup = m_pLayers->GetGroup(g);
-		if(!pGroup)
+		std::unique_ptr<CRenderLayer> pRenderLayerGroup = std::make_unique<CRenderLayerGroup>(g, pGroup);
+		pRenderLayerGroup->OnInit(Graphics(), m_pLayers->Map(), RenderTools(), m_pImages, m_pEnvelopePoints, Client(), GameClient(), m_OnlineOnly);
+		if(!pRenderLayerGroup->IsValid())
 		{
 			dbg_msg("maplayers", "error group was null, group number = %d, total groups = %d", g, m_pLayers->NumGroups());
 			dbg_msg("maplayers", "this is here to prevent a crash but the source of this is unknown, please report this for it to get fixed");
@@ -113,6 +115,9 @@ void CMapLayers::OnMapLoad()
 				if(!PassedGameLayer)
 					continue;
 			}
+
+			if(pRenderLayerGroup)
+				m_vRenderLayers.push_back(std::move(pRenderLayerGroup));
 
 			std::unique_ptr<CRenderLayer> pRenderLayer;
 
@@ -189,7 +194,7 @@ void CMapLayers::OnMapLoad()
 			// just ignore invalid layers from rendering
 			if(pRenderLayer)
 			{
-				pRenderLayer->OnInit(Graphics(), m_pLayers->Map(), RenderTools(), m_pImages, m_pEnvelopePoints, Client(), m_pClient, m_OnlineOnly);
+				pRenderLayer->OnInit(Graphics(), m_pLayers->Map(), RenderTools(), m_pImages, m_pEnvelopePoints, Client(), GameClient(), m_OnlineOnly);
 				if(pRenderLayer->IsValid())
 				{
 					pRenderLayer->Init();
@@ -212,22 +217,13 @@ void CMapLayers::OnRender()
 	Params.EntityOverlayVal = m_Type == TYPE_FULL_DESIGN ? 0 : g_Config.m_ClOverlayEntities;
 	Params.m_RenderType = m_Type;
 	Params.m_Center = GetCurCamera()->m_Center;
+	Params.m_Zoom = GetCurCamera()->m_Zoom;
 
-	auto DisableClip = [&]() {
-		if(!g_Config.m_GfxNoclip || Params.m_RenderType == CMapLayers::TYPE_FULL_DESIGN)
-			Graphics()->ClipDisable();
-	};
-
-	int CurrentGroup = -1;
 	bool DoRenderGroup = true;
 	for(auto &&pRenderLayer : m_vRenderLayers)
 	{
-		if(CurrentGroup != pRenderLayer->GetGroup())
-		{
-			DisableClip(); // disable clip of previous group
-			CurrentGroup = pRenderLayer->GetGroup();
-			DoRenderGroup = RenderGroup(Params, CurrentGroup);
-		}
+		if(pRenderLayer->IsGroup())
+			DoRenderGroup = pRenderLayer->DoRender(Params);
 
 		if(!DoRenderGroup)
 			continue;
@@ -235,7 +231,8 @@ void CMapLayers::OnRender()
 		pRenderLayer->Render(Params);
 	}
 
-	DisableClip();
+	// Reset clip from last group
+	Graphics()->ClipDisable();
 
 	// don't reset screen on background
 	if(m_Type != TYPE_BACKGROUND && m_Type != TYPE_BACKGROUND_FORCE)
@@ -243,10 +240,10 @@ void CMapLayers::OnRender()
 		// reset the screen like it was before
 		Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
 	}
-	// apply game group again
 	else
 	{
-		RenderTools()->MapScreenToGroup(Params.m_Center.x, Params.m_Center.y, m_pLayers->GameGroup(), GetCurCamera()->m_Zoom);
+		// reset the screen to the default interface
+		RenderTools()->MapScreenToInterface(Params.m_Center.x, Params.m_Center.y, Params.m_Zoom);
 	}
 }
 
@@ -265,38 +262,4 @@ int CMapLayers::GetLayerType(const CMapItemLayer *pLayer) const
 	else if(pLayer == (CMapItemLayer *)m_pLayers->TuneLayer())
 		return LAYER_TUNE;
 	return LAYER_DEFAULT_TILESET;
-}
-
-bool CMapLayers::RenderGroup(const CRenderLayerParams &Params, int GroupId)
-{
-	CMapItemGroup *pGroup = m_pLayers->GetGroup(GroupId);
-
-	if(!pGroup)
-	{
-		dbg_msg("maplayers", "error group was null, group number = %d, total groups = %d", GroupId, m_pLayers->NumGroups());
-		dbg_msg("maplayers", "this is here to prevent a crash but the source of this is unknown, please report this for it to get fixed");
-		dbg_msg("maplayers", "we need mapname and crc and the map that caused this if possible, and anymore info you think is relevant");
-		return false;
-	}
-
-	if((!g_Config.m_GfxNoclip || Params.m_RenderType == CMapLayers::TYPE_FULL_DESIGN) && pGroup->m_Version >= 2 && pGroup->m_UseClipping)
-	{
-		// set clipping
-		float aPoints[4];
-		RenderTools()->MapScreenToGroup(Params.m_Center.x, Params.m_Center.y, m_pLayers->GameGroup(), GetCurCamera()->m_Zoom);
-		Graphics()->GetScreen(&aPoints[0], &aPoints[1], &aPoints[2], &aPoints[3]);
-		float x0 = (pGroup->m_ClipX - aPoints[0]) / (aPoints[2] - aPoints[0]);
-		float y0 = (pGroup->m_ClipY - aPoints[1]) / (aPoints[3] - aPoints[1]);
-		float x1 = ((pGroup->m_ClipX + pGroup->m_ClipW) - aPoints[0]) / (aPoints[2] - aPoints[0]);
-		float y1 = ((pGroup->m_ClipY + pGroup->m_ClipH) - aPoints[1]) / (aPoints[3] - aPoints[1]);
-
-		if(x1 < 0.0f || x0 > 1.0f || y1 < 0.0f || y0 > 1.0f)
-			return false;
-
-		Graphics()->ClipEnable((int)(x0 * Graphics()->ScreenWidth()), (int)(y0 * Graphics()->ScreenHeight()),
-			(int)((x1 - x0) * Graphics()->ScreenWidth()), (int)((y1 - y0) * Graphics()->ScreenHeight()));
-	}
-
-	RenderTools()->MapScreenToGroup(Params.m_Center.x, Params.m_Center.y, pGroup, GetCurCamera()->m_Zoom);
-	return true;
 }

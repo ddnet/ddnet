@@ -13,6 +13,7 @@
 #include <game/generated/protocol.h>
 #include <game/generated/server_data.h>
 #include <game/mapitems.h>
+#include <game/team_state.h>
 
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
@@ -980,6 +981,8 @@ void CCharacter::StopRecording()
 
 void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 {
+	if(Killer != WEAPON_GAME && m_SetSavePos[RESCUEMODE_AUTO])
+		GetPlayer()->m_LastDeath = m_RescueTee[RESCUEMODE_AUTO];
 	StopRecording();
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, GameServer()->m_apPlayers[Killer], Weapon);
 
@@ -990,7 +993,7 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
 	// send the kill message
-	if(SendKillMsg && (Team() == TEAM_FLOCK || Teams()->TeamFlock(Team()) || Teams()->Count(Team()) == 1 || Teams()->GetTeamState(Team()) == CGameTeams::TEAMSTATE_OPEN || !Teams()->TeamLocked(Team())))
+	if(SendKillMsg && (Team() == TEAM_FLOCK || Teams()->TeamFlock(Team()) || Teams()->Count(Team()) == 1 || Teams()->GetTeamState(Team()) == ETeamState::OPEN || !Teams()->TeamLocked(Team())))
 	{
 		CNetMsg_Sv_KillMsg Msg;
 		Msg.m_Killer = Killer;
@@ -1243,7 +1246,8 @@ void CCharacter::Snap(int SnappingClient)
 		return;
 	}
 
-	if(!IsSnappingCharacterInView(SnappingClient))
+	// always snap the snapping client, even if it is not in view
+	if(!IsSnappingCharacterInView(SnappingClient) && Id != SnappingClient)
 		return;
 
 	SnapCharacter(SnappingClient, Id);
@@ -1953,13 +1957,13 @@ void CCharacter::HandleTiles(int Index)
 		m_LastBonus = false;
 	}
 
-	int TeleNumber = Collision()->IsTeleport(MapIndex);
-	if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && TeleNumber && !Collision()->TeleOuts(TeleNumber - 1).empty())
+	int z = Collision()->IsTeleport(MapIndex);
+	if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && z && !Collision()->TeleOuts(z - 1).empty())
 	{
 		if(m_Core.m_Super || m_Core.m_Invincible)
 			return;
-		int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleOuts(TeleNumber - 1).size());
-		m_Core.m_Pos = Collision()->TeleOuts(TeleNumber - 1)[TeleOut];
+		int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleOuts(z - 1).size());
+		m_Core.m_Pos = Collision()->TeleOuts(z - 1)[TeleOut];
 		if(!g_Config.m_SvTeleportHoldHook)
 		{
 			ResetHook();
@@ -1968,13 +1972,13 @@ void CCharacter::HandleTiles(int Index)
 			ResetPickups();
 		return;
 	}
-	int EvilTeleNumber = Collision()->IsEvilTeleport(MapIndex);
-	if(EvilTeleNumber && !Collision()->TeleOuts(EvilTeleNumber - 1).empty())
+	int evilz = Collision()->IsEvilTeleport(MapIndex);
+	if(evilz && !Collision()->TeleOuts(evilz - 1).empty())
 	{
 		if(m_Core.m_Super || m_Core.m_Invincible)
 			return;
-		int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleOuts(EvilTeleNumber - 1).size());
-		m_Core.m_Pos = Collision()->TeleOuts(EvilTeleNumber - 1)[TeleOut];
+		int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleOuts(evilz - 1).size());
+		m_Core.m_Pos = Collision()->TeleOuts(evilz - 1)[TeleOut];
 		if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons)
 		{
 			m_Core.m_Vel = vec2(0, 0);
@@ -2494,7 +2498,7 @@ void CCharacter::Rescue()
 		}
 
 		m_LastRescue = Server()->Tick();
-		float StartTime = m_StartTime;
+		int StartTime = m_StartTime;
 		m_RescueTee[GetPlayer()->m_RescueMode].Load(this, Team());
 		// Don't load these from saved tee:
 		m_Core.m_Vel = vec2(0, 0);

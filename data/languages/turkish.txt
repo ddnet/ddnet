@@ -596,7 +596,7 @@ Downloading %s:
 == İndiriliyor %s:
 
 Update failed! Check log…
-== Güncelleme sırasında hata oluştu!
+== Güncelleme sırasında hata oluştu…
 
 DDNet Client updated!
 == DDNet İstemcisi güncellendi!
@@ -2008,9 +2008,6 @@ Active: Hook
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
 == "%s" pnglite ile uyumlu değil ve eski DDnet versiyonları tarafından yüklenemiyor:
 
-Loading background map
-== Arkaplan haritası yükleniyor
-
 [Spectating Camera Mode Icon]
 AUTO
 == OTOMATİK
@@ -2203,3 +2200,16 @@ Dragger Inner Color
 
 AntiPing: prediction margin
 == AntiPing: tahmin marjı
+
+[Spectating]
+Following %d: %s
+== İzleniyor %d: %s
+
+Loading map
+== Harita yükleniyor
+
+Error checking player name
+== Oyuncu adı kontrol edilirken hata oluştu
+
+Could not check for existing player with your name. Check your internet connection.
+== Adınıza sahip mevcut oyuncu olup olmadığı kontrol edilemedi. İnternet bağlantınızı kontrol edin.

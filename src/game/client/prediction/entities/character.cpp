@@ -749,10 +749,6 @@ void CCharacter::HandleTiles(int Index)
 		return;
 	}
 
-	int TeleCheckpoint = Collision()->IsTeleCheckpoint(MapIndex);
-	if(TeleCheckpoint)
-		m_TeleCheckpoint = TeleCheckpoint;
-
 	// handle switch tiles
 	if(Collision()->GetSwitchType(MapIndex) == TILE_SWITCHOPEN && Team() != TEAM_SUPER && Collision()->GetSwitchNumber(MapIndex) > 0)
 	{
@@ -969,103 +965,6 @@ void CCharacter::HandleTiles(int Index)
 	{
 		m_LastRefillJumps = false;
 	}
-
-	int TeleNumber = Collision()->IsTeleport(MapIndex);
-	if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && TeleNumber && !Collision()->TeleOuts(TeleNumber - 1).empty())
-	{
-		if(m_Core.m_Super || m_Core.m_Invincible)
-			return;
-		if(Collision()->TeleOuts(TeleNumber - 1).size() == 1)
-		{
-			m_Core.m_Pos = Collision()->TeleOuts(TeleNumber - 1)[0];
-			if(!g_Config.m_SvTeleportHoldHook)
-			{
-				ResetHook();
-			}
-			if(g_Config.m_SvTeleportLoseWeapons)
-				ResetPickups();
-		}
-		return;
-	}
-	int EvilTeleNumber = Collision()->IsEvilTeleport(MapIndex);
-	if(EvilTeleNumber && !Collision()->TeleOuts(EvilTeleNumber - 1).empty())
-	{
-		if(m_Core.m_Super || m_Core.m_Invincible)
-			return;
-		if(Collision()->TeleOuts(EvilTeleNumber - 1).size() == 1)
-		{
-			m_Core.m_Pos = Collision()->TeleOuts(EvilTeleNumber - 1)[0];
-			if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons)
-			{
-				m_Core.m_Vel = vec2(0, 0);
-
-				if(!g_Config.m_SvTeleportHoldHook)
-				{
-					ResetHook();
-					GameWorld()->ReleaseHooked(GetCid());
-				}
-				if(g_Config.m_SvTeleportLoseWeapons)
-				{
-					ResetPickups();
-				}
-			}
-		}
-		return;
-	}
-	if(Collision()->IsCheckEvilTeleport(MapIndex))
-	{
-		if(m_Core.m_Super || m_Core.m_Invincible)
-			return;
-		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
-		for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
-		{
-			if(Collision()->TeleCheckOuts(k).size() == 1)
-			{
-				m_Core.m_Pos = Collision()->TeleCheckOuts(k)[0];
-				m_Core.m_Vel = vec2(0, 0);
-
-				if(!g_Config.m_SvTeleportHoldHook)
-				{
-					ResetHook();
-					GameWorld()->ReleaseHooked(GetCid());
-				}
-
-				return;
-			}
-			if(!Collision()->TeleCheckOuts(k).empty())
-			{
-				return;
-			}
-		}
-		// if no checkpointout have been found (or if there no recorded checkpoint), teleport to start
-		return;
-	}
-	if(Collision()->IsCheckTeleport(MapIndex))
-	{
-		if(m_Core.m_Super || m_Core.m_Invincible)
-			return;
-		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
-		for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
-		{
-			if(Collision()->TeleCheckOuts(k).size() == 1)
-			{
-				m_Core.m_Pos = Collision()->TeleCheckOuts(k)[0];
-
-				if(!g_Config.m_SvTeleportHoldHook)
-				{
-					ResetHook();
-				}
-
-				return;
-			}
-			if(!Collision()->TeleCheckOuts(k).empty())
-			{
-				return;
-			}
-		}
-		// if no checkpointout have been found (or if there no recorded checkpoint), teleport to start
-		return;
-	}
 }
 
 void CCharacter::HandleTuneLayer()
@@ -1212,7 +1111,8 @@ bool CCharacter::UnFreeze()
 		m_FreezeTime = 0;
 		m_Core.m_FreezeStart = 0;
 		m_Core.m_FreezeEnd = m_Core.m_DeepFrozen ? -1 : 0;
-		m_FrozenLastTick = true;
+		if(GameWorld()->m_WorldConfig.m_PredictDDRace)
+			m_FrozenLastTick = true;
 		return true;
 	}
 	return false;
@@ -1247,16 +1147,6 @@ void CCharacter::GiveAllWeapons()
 	for(int i = WEAPON_GUN; i < NUM_WEAPONS - 1; i++)
 	{
 		GiveWeapon(i);
-	}
-}
-
-void CCharacter::ResetPickups()
-{
-	for(int i = WEAPON_SHOTGUN; i < NUM_WEAPONS - 1; i++)
-	{
-		m_Core.m_aWeapons[i].m_Got = false;
-		if(m_Core.m_ActiveWeapon == i)
-			m_Core.m_ActiveWeapon = WEAPON_GUN;
 	}
 }
 

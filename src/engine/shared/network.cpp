@@ -517,7 +517,7 @@ void CNetTokenCache::AddToken(const NETADDR *pAddr, TOKEN Token)
 
 	NETADDR NullAddr = NETADDR_ZEROED;
 	NullAddr.port = pAddr->port;
-	NullAddr.type = pAddr->type | NETTYPE_LINK_BROADCAST;
+	NullAddr.type = (pAddr->type & ~(NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6)) | NETTYPE_LINK_BROADCAST;
 
 	for(auto Iter = m_ConnlessPackets.begin(); Iter != m_ConnlessPackets.end();)
 	{

@@ -314,7 +314,7 @@ float CClient::GotMaplistPercentage() const
 
 bool CClient::ConnectionProblems() const
 {
-	return m_aNetClient[g_Config.m_ClDummy].GotProblems(MaxLatencyTicks() * time_freq() / GameTickSpeed()) != 0;
+	return m_aNetClient[g_Config.m_ClDummy].GotProblems(MaxLatencyTicks() * time_freq() / GameTickSpeed());
 }
 
 void CClient::SendInput()
@@ -992,6 +992,9 @@ void CClient::RenderGraphs()
 	float h = Graphics()->ScreenHeight() / 6.0f;
 	float sp = Graphics()->ScreenWidth() / 100.0f;
 	float x = Graphics()->ScreenWidth() - w - sp;
+
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
+	TextRender()->Text(x, sp * 5 - 12.0f - 10.0f, 12.0f, Localize("Press Ctrl+Shift+G to disable debug graphs."));
 
 	m_FpsGraph.Scale(time_freq());
 	m_FpsGraph.Render(Graphics(), TextRender(), x, sp * 5, w, h, "FPS");

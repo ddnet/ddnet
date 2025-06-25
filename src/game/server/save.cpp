@@ -1,13 +1,14 @@
-#include "save.h"
+#include <engine/shared/config.h>
+#include <engine/shared/protocol.h>
+#include <game/server/entities/character.h>
+#include <game/server/gamemodes/DDRace.h>
+#include <game/team_state.h>
 
 #include <cstdio> // sscanf
 
-#include "entities/character.h"
-#include "gamemodes/DDRace.h"
 #include "player.h"
+#include "save.h"
 #include "teams.h"
-#include <engine/shared/config.h>
-#include <engine/shared/protocol.h>
 
 CSaveTee::CSaveTee() = default;
 
@@ -487,7 +488,8 @@ void CSaveHotReloadTee::Save(CCharacter *pChr, bool AddPenalty)
 	m_SaveTee.Save(pChr, AddPenalty);
 	m_Super = pChr->m_Core.m_Super;
 	m_Invincible = pChr->m_Core.m_Invincible;
-	m_SavedTeleTee = pChr->m_pPlayer->m_LastTeleTee;
+	m_SavedTeleTee = pChr->GetPlayer()->m_LastTeleTee;
+	m_LastDeath = pChr->GetPlayer()->m_LastDeath;
 }
 
 bool CSaveHotReloadTee::Load(CCharacter *pChr, int Team, bool IsSwap)
@@ -496,6 +498,7 @@ bool CSaveHotReloadTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 	pChr->SetSuper(m_Super);
 	pChr->m_Core.m_Invincible = m_Invincible;
 	pChr->GetPlayer()->m_LastTeleTee = m_SavedTeleTee;
+	pChr->GetPlayer()->m_LastDeath = m_LastDeath;
 
 	return Result;
 }
@@ -532,7 +535,7 @@ ESaveResult CSaveTeam::Save(CGameContext *pGameServer, int Team, bool Dry, bool 
 
 	m_TeamState = pTeams->GetTeamState(Team);
 
-	if(m_TeamState != CGameTeams::TEAMSTATE_STARTED && !Force)
+	if(m_TeamState != ETeamState::STARTED && !Force)
 	{
 		return ESaveResult::NOT_STARTED;
 	}
