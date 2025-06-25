@@ -1878,7 +1878,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 						if(!aPreInputClients[Id])
 							continue;
 
-						SendPackMsg(&PreInput, MSGFLAG_VITAL | MSGFLAG_NORECORD, Id);
+						SendPackMsg(&PreInput, MSGFLAG_FLUSH | MSGFLAG_NORECORD, Id);
 					}
 				}
 			}

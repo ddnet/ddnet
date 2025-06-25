@@ -100,11 +100,11 @@ enum
 	MAX_SKIN_LENGTH = 24,
 
 	// message packing
-	MSGFLAG_VITAL = 1,
-	MSGFLAG_FLUSH = 2,
-	MSGFLAG_NORECORD = 4,
-	MSGFLAG_RECORD = 8,
-	MSGFLAG_NOSEND = 16
+	MSGFLAG_VITAL = 1, // guaranteed to be delivered, resent on packet loss
+	MSGFLAG_FLUSH = 2, // makes the msg be sent immediately, without it it's delayed until the next flush
+	MSGFLAG_NORECORD = 4, // don't write msg to demo recorders
+	MSGFLAG_RECORD = 8, // write msg to demo recorders
+	MSGFLAG_NOSEND = 16 // don't send the msg to client/server, useful combined with MSGFLAG_RECORD to record a msg without sending it
 };
 
 enum
