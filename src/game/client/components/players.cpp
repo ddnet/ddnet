@@ -825,14 +825,32 @@ void CPlayers::OnRender()
 	{
 		aRenderInfo[i] = GameClient()->m_aClients[i].m_RenderInfo;
 		aRenderInfo[i].m_TeeRenderFlags = 0;
-		if(GameClient()->m_aClients[i].m_Predicted.m_FreezeEnd != 0)
-			aRenderInfo[i].m_TeeRenderFlags |= TEE_EFFECT_FROZEN | TEE_NO_WEAPON;
-		if(GameClient()->m_aClients[i].m_Predicted.m_LiveFrozen)
-			aRenderInfo[i].m_TeeRenderFlags |= TEE_EFFECT_FROZEN;
-		if(GameClient()->m_aClients[i].m_Predicted.m_Invincible)
-			aRenderInfo[i].m_TeeRenderFlags |= TEE_EFFECT_SPARKLE;
 
-		const bool Frozen = GameClient()->m_aClients[i].m_Predicted.m_FreezeEnd != 0;
+		// predict freeze skin only for local players
+		bool Frozen = false;
+		if(i == GameClient()->m_aLocalIds[0] || i == GameClient()->m_aLocalIds[1])
+		{
+			if(GameClient()->m_aClients[i].m_Predicted.m_FreezeEnd != 0)
+				aRenderInfo[i].m_TeeRenderFlags |= TEE_EFFECT_FROZEN | TEE_NO_WEAPON;
+			if(GameClient()->m_aClients[i].m_Predicted.m_LiveFrozen)
+				aRenderInfo[i].m_TeeRenderFlags |= TEE_EFFECT_FROZEN;
+			if(GameClient()->m_aClients[i].m_Predicted.m_Invincible)
+				aRenderInfo[i].m_TeeRenderFlags |= TEE_EFFECT_SPARKLE;
+
+			Frozen = GameClient()->m_aClients[i].m_Predicted.m_FreezeEnd != 0;
+		}
+		else
+		{
+			if(GameClient()->m_aClients[i].m_FreezeEnd != 0)
+				aRenderInfo[i].m_TeeRenderFlags |= TEE_EFFECT_FROZEN | TEE_NO_WEAPON;
+			if(GameClient()->m_aClients[i].m_LiveFrozen)
+				aRenderInfo[i].m_TeeRenderFlags |= TEE_EFFECT_FROZEN;
+			if(GameClient()->m_aClients[i].m_Invincible)
+				aRenderInfo[i].m_TeeRenderFlags |= TEE_EFFECT_SPARKLE;
+
+			Frozen = GameClient()->m_Snap.m_aCharacters[i].m_HasExtendedData && GameClient()->m_Snap.m_aCharacters[i].m_ExtendedData.m_FreezeEnd != 0;
+		}
+
 		if((GameClient()->m_aClients[i].m_RenderCur.m_Weapon == WEAPON_NINJA || (Frozen && !GameClient()->m_GameInfo.m_NoSkinChangeForFrozen)) && g_Config.m_ClShowNinja)
 		{
 			// change the skin for the player to the ninja
