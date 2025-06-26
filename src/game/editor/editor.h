@@ -506,6 +506,15 @@ public:
 
 	void HandleCursorMovement();
 	void OnMouseMove(vec2 MousePos);
+	void MouseAxisLock(vec2 &CursorRel);
+	vec2 m_MouseAxisInitialPos = vec2(0.0f, 0.0f);
+	enum class EAxisLock
+	{
+		Start,
+		None,
+		Horizontal,
+		Vertical
+	} m_MouseAxisLockState = EAxisLock::Start;
 	void HandleAutosave();
 	bool PerformAutosave();
 	void HandleWriterFinishJobs();
