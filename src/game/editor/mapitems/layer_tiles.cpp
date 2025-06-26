@@ -106,8 +106,7 @@ void CLayerTiles::SetTile(int x, int y, CTile Tile)
 		}
 
 		bool HasTile = Tile.m_Index != 0;
-		const CTile ResultTile = {(unsigned char)(HasTile ? m_FillGameTile : TILE_AIR)};
-		pLayer->SetTile(x, y, ResultTile);
+		pLayer->SetTile(x, y, CTile{(unsigned char)(HasTile ? m_FillGameTile : TILE_AIR)});
 	}
 }
 
@@ -839,8 +838,7 @@ void CLayerTiles::FillGameTiles(EGameTileOp Fill)
 				{
 					if(GetTile(x, y).m_Index)
 					{
-						const CTile ResultTile = {(unsigned char)Result};
-						pGLayer->SetTile(x + OffsetX, y + OffsetY, ResultTile);
+						pGLayer->SetTile(x + OffsetX, y + OffsetY, CTile{(unsigned char)Result});
 						Changes++;
 					}
 				}

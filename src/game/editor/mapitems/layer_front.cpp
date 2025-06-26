@@ -11,13 +11,11 @@ void CLayerFront::SetTile(int x, int y, CTile Tile)
 {
 	if(Tile.m_Index == TILE_THROUGH_CUT)
 	{
-		CTile nohook = {TILE_NOHOOK};
-		m_pEditor->m_Map.m_pGameLayer->CLayerTiles::SetTile(x, y, nohook); // NOLINT(bugprone-parent-virtual-call)
+		m_pEditor->m_Map.m_pGameLayer->CLayerTiles::SetTile(x, y, CTile{TILE_NOHOOK}); // NOLINT(bugprone-parent-virtual-call)
 	}
 	else if(Tile.m_Index == TILE_AIR && CLayerTiles::GetTile(x, y).m_Index == TILE_THROUGH_CUT)
 	{
-		CTile air = {TILE_AIR};
-		m_pEditor->m_Map.m_pGameLayer->CLayerTiles::SetTile(x, y, air); // NOLINT(bugprone-parent-virtual-call)
+		m_pEditor->m_Map.m_pGameLayer->CLayerTiles::SetTile(x, y, CTile{TILE_AIR}); // NOLINT(bugprone-parent-virtual-call)
 	}
 	if(m_pEditor->IsAllowPlaceUnusedTiles() || IsValidFrontTile(Tile.m_Index))
 	{
@@ -25,8 +23,7 @@ void CLayerFront::SetTile(int x, int y, CTile Tile)
 	}
 	else
 	{
-		CTile air = {TILE_AIR};
-		CLayerTiles::SetTile(x, y, air);
+		CLayerTiles::SetTile(x, y, CTile{TILE_AIR});
 		ShowPreventUnusedTilesWarning();
 	}
 }
