@@ -8953,6 +8953,42 @@ void CEditor::OnMouseMove(vec2 MousePos)
 	Ui()->MapScreen();
 }
 
+void CEditor::MouseAxisLock(vec2 &CursorRel)
+{
+	if(Input()->AltIsPressed())
+	{
+		const vec2 CurrentWorldPos = vec2(Ui()->MouseWorldX(), Ui()->MouseWorldY()) / 32.0f;
+
+		if(m_MouseAxisLockState == EAxisLock::Start)
+		{
+			m_MouseAxisInitialPos = CurrentWorldPos;
+			m_MouseAxisLockState = EAxisLock::None;
+			return; // delta would be 0, calculate it in next frame
+		}
+
+		const vec2 Delta = CurrentWorldPos - m_MouseAxisInitialPos;
+
+		// lock to axis if moved mouse by 1 block
+		if(m_MouseAxisLockState == EAxisLock::None && (std::abs(Delta.x) > 1.0f || std::abs(Delta.y) > 1.0f))
+		{
+			m_MouseAxisLockState = (std::abs(Delta.x) > std::abs(Delta.y)) ? EAxisLock::Horizontal : EAxisLock::Vertical;
+		}
+
+		if(m_MouseAxisLockState == EAxisLock::Horizontal)
+		{
+			CursorRel.y = 0;
+		}
+		else if(m_MouseAxisLockState == EAxisLock::Vertical)
+		{
+			CursorRel.x = 0;
+		}
+	}
+	else
+	{
+		m_MouseAxisLockState = EAxisLock::Start;
+	}
+}
+
 void CEditor::HandleAutosave()
 {
 	const float Time = Client()->GlobalTime();
@@ -9085,6 +9121,7 @@ void CEditor::OnUpdate()
 	if(CursorType != IInput::CURSOR_NONE)
 	{
 		Ui()->ConvertMouseMove(&CursorRel.x, &CursorRel.y, CursorType);
+		MouseAxisLock(CursorRel);
 		Ui()->OnCursorMove(CursorRel.x, CursorRel.y);
 	}
 
