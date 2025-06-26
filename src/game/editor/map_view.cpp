@@ -145,11 +145,11 @@ void CMapView::ZoomMouseTarget(float ZoomFactor)
 	float WorldWidth = aPoints[2] - aPoints[0];
 	float WorldHeight = aPoints[3] - aPoints[1];
 
-	float Mwx = aPoints[0] + WorldWidth * (Ui()->MouseX() / Ui()->Screen()->w);
-	float Mwy = aPoints[1] + WorldHeight * (Ui()->MouseY() / Ui()->Screen()->h);
+	float MouseWorldX = aPoints[0] + WorldWidth * (Ui()->MouseX() / Ui()->Screen()->w);
+	float MouseWorldY = aPoints[1] + WorldHeight * (Ui()->MouseY() / Ui()->Screen()->h);
 
 	// adjust camera
-	OffsetWorld((vec2(Mwx, Mwy) - GetWorldOffset()) * (1.0f - ZoomFactor));
+	OffsetWorld((vec2(MouseWorldX, MouseWorldY) - GetWorldOffset()) * (1.0f - ZoomFactor));
 }
 
 void CMapView::UpdateZoom()

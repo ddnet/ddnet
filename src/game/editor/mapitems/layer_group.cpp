@@ -141,14 +141,14 @@ void CLayerGroup::DuplicateLayer(int Index)
 
 void CLayerGroup::GetSize(float *pWidth, float *pHeight) const
 {
-	*pWidth = 0;
-	*pHeight = 0;
+	*pWidth = 0.0f;
+	*pHeight = 0.0f;
 	for(const auto &pLayer : m_vpLayers)
 	{
-		float lw, lh;
-		pLayer->GetSize(&lw, &lh);
-		*pWidth = maximum(*pWidth, lw);
-		*pHeight = maximum(*pHeight, lh);
+		float LayerWidth, LayerHeight;
+		pLayer->GetSize(&LayerWidth, &LayerHeight);
+		*pWidth = maximum(*pWidth, LayerWidth);
+		*pHeight = maximum(*pHeight, LayerHeight);
 	}
 }
 
