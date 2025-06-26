@@ -74,22 +74,7 @@ CQuad *CLayerQuads::NewQuad(int x, int y, int Width, int Height)
 	pQuad->m_aTexcoords[3].x = i2fx(1);
 	pQuad->m_aTexcoords[3].y = i2fx(1);
 
-	pQuad->m_aColors[0].r = 255;
-	pQuad->m_aColors[0].g = 255;
-	pQuad->m_aColors[0].b = 255;
-	pQuad->m_aColors[0].a = 255;
-	pQuad->m_aColors[1].r = 255;
-	pQuad->m_aColors[1].g = 255;
-	pQuad->m_aColors[1].b = 255;
-	pQuad->m_aColors[1].a = 255;
-	pQuad->m_aColors[2].r = 255;
-	pQuad->m_aColors[2].g = 255;
-	pQuad->m_aColors[2].b = 255;
-	pQuad->m_aColors[2].a = 255;
-	pQuad->m_aColors[3].r = 255;
-	pQuad->m_aColors[3].g = 255;
-	pQuad->m_aColors[3].b = 255;
-	pQuad->m_aColors[3].a = 255;
+	std::fill(std::begin(pQuad->m_aColors), std::end(pQuad->m_aColors), CColor{255, 255, 255, 255});
 
 	return pQuad;
 }
