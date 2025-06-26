@@ -120,7 +120,7 @@ void CProofMode::RenderScreenSizes()
 
 			if(i == 0)
 			{
-				IGraphics::CLineItem aArray[2] = {
+				IGraphics::CLineItem aArray[] = {
 					IGraphics::CLineItem(aPoints[0], aPoints[1], aPoints[2], aPoints[1]),
 					IGraphics::CLineItem(aPoints[0], aPoints[3], aPoints[2], aPoints[3])};
 				Graphics()->LinesDraw(aArray, std::size(aArray));
@@ -128,7 +128,7 @@ void CProofMode::RenderScreenSizes()
 
 			if(i != 0)
 			{
-				IGraphics::CLineItem aArray[4] = {
+				IGraphics::CLineItem aArray[] = {
 					IGraphics::CLineItem(aPoints[0], aPoints[1], aLastPoints[0], aLastPoints[1]),
 					IGraphics::CLineItem(aPoints[2], aPoints[1], aLastPoints[2], aLastPoints[1]),
 					IGraphics::CLineItem(aPoints[0], aPoints[3], aLastPoints[0], aLastPoints[3]),
@@ -138,7 +138,7 @@ void CProofMode::RenderScreenSizes()
 
 			if(i == NumSteps)
 			{
-				IGraphics::CLineItem aArray[2] = {
+				IGraphics::CLineItem aArray[] = {
 					IGraphics::CLineItem(aPoints[0], aPoints[1], aPoints[0], aPoints[3]),
 					IGraphics::CLineItem(aPoints[2], aPoints[1], aPoints[2], aPoints[3])};
 				Graphics()->LinesDraw(aArray, std::size(aArray));
@@ -146,37 +146,29 @@ void CProofMode::RenderScreenSizes()
 
 			mem_copy(aLastPoints, aPoints, sizeof(aPoints));
 		}
+		Graphics()->LinesEnd();
 
 		// two screen sizes (green and red border)
 		{
 			Graphics()->SetColor(1, 0, 0, 1);
-			for(int i = 0; i < 2; i++)
+			for(int Pass = 0; Pass < 2; Pass++)
 			{
 				float aPoints[4];
 				const float aAspects[] = {4.0f / 3.0f, 16.0f / 10.0f, 5.0f / 4.0f, 16.0f / 9.0f};
-				float Aspect = aAspects[i];
-
+				const ColorRGBA aColors[] = {ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f), ColorRGBA(0.0f, 1.0f, 0.0f, 1.0f)};
 				float Zoom = (m_ProofBorders == PROOF_BORDER_MENU) ? 0.7f : 1.0f;
 				RenderTools()->MapScreenToWorld(
 					WorldOffset.x, WorldOffset.y,
-					100.0f, 100.0f, 100.0f, 0.0f, 0.0f, Aspect, Zoom, aPoints);
+					100.0f, 100.0f, 100.0f, 0.0f, 0.0f, aAspects[Pass], Zoom, aPoints);
 
-				CUIRect r;
-				r.x = aPoints[0];
-				r.y = aPoints[1];
-				r.w = aPoints[2] - aPoints[0];
-				r.h = aPoints[3] - aPoints[1];
-
-				IGraphics::CLineItem aArray[4] = {
-					IGraphics::CLineItem(r.x, r.y, r.x + r.w, r.y),
-					IGraphics::CLineItem(r.x + r.w, r.y, r.x + r.w, r.y + r.h),
-					IGraphics::CLineItem(r.x + r.w, r.y + r.h, r.x, r.y + r.h),
-					IGraphics::CLineItem(r.x, r.y + r.h, r.x, r.y)};
-				Graphics()->LinesDraw(aArray, std::size(aArray));
-				Graphics()->SetColor(0, 1, 0, 1);
+				CUIRect Rect;
+				Rect.x = aPoints[0];
+				Rect.y = aPoints[1];
+				Rect.w = aPoints[2] - aPoints[0];
+				Rect.h = aPoints[3] - aPoints[1];
+				Rect.DrawOutline(aColors[Pass]);
 			}
 		}
-		Graphics()->LinesEnd();
 
 		// tee position (blue circle) and other screen positions
 		{

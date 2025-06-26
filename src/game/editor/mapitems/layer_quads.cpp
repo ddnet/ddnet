@@ -96,16 +96,7 @@ CQuad *CLayerQuads::NewQuad(int x, int y, int Width, int Height)
 
 void CLayerQuads::BrushSelecting(CUIRect Rect)
 {
-	// draw selection rectangle
-	IGraphics::CLineItem Array[4] = {
-		IGraphics::CLineItem(Rect.x, Rect.y, Rect.x + Rect.w, Rect.y),
-		IGraphics::CLineItem(Rect.x + Rect.w, Rect.y, Rect.x + Rect.w, Rect.y + Rect.h),
-		IGraphics::CLineItem(Rect.x + Rect.w, Rect.y + Rect.h, Rect.x, Rect.y + Rect.h),
-		IGraphics::CLineItem(Rect.x, Rect.y + Rect.h, Rect.x, Rect.y)};
-	Graphics()->TextureClear();
-	Graphics()->LinesBegin();
-	Graphics()->LinesDraw(Array, 4);
-	Graphics()->LinesEnd();
+	Rect.DrawOutline(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
 }
 
 int CLayerQuads::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)

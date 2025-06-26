@@ -175,3 +175,17 @@ void CUIRect::Draw4(ColorRGBA ColorTopLeft, ColorRGBA ColorTopRight, ColorRGBA C
 {
 	s_pGraphics->DrawRect4(x, y, w, h, ColorTopLeft, ColorTopRight, ColorBottomLeft, ColorBottomRight, Corners, Rounding);
 }
+
+void CUIRect::DrawOutline(ColorRGBA Color) const
+{
+	const IGraphics::CLineItem aArray[] = {
+		IGraphics::CLineItem(x, y, x + w, y),
+		IGraphics::CLineItem(x + w, y, x + w, y + h),
+		IGraphics::CLineItem(x + w, y + h, x, y + h),
+		IGraphics::CLineItem(x, y + h, x, y)};
+	s_pGraphics->TextureClear();
+	s_pGraphics->LinesBegin();
+	s_pGraphics->SetColor(Color);
+	s_pGraphics->LinesDraw(aArray, std::size(aArray));
+	s_pGraphics->LinesEnd();
+}
