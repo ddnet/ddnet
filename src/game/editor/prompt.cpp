@@ -43,7 +43,9 @@ void CPrompt::SetInactive()
 	m_ResetFilterResults = true;
 	m_PromptInput.Clear();
 	if(Editor()->m_Dialog == DIALOG_QUICK_PROMPT)
-		Editor()->m_Dialog = DIALOG_NONE;
+	{
+		Editor()->OnDialogClose();
+	}
 	CEditorComponent::SetInactive();
 }
 
