@@ -230,8 +230,6 @@ void CLayerSwitch::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUI
 	if(m_Readonly || (!Empty && pBrush->m_Type != LAYERTYPE_TILES))
 		return;
 
-	Snap(&Rect); // corrects Rect; no need of <=
-
 	Snap(&Rect);
 
 	int sx = ConvertX(Rect.x);
