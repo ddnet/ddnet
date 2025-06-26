@@ -81,11 +81,11 @@ int CMapGrid::GridLineDistance() const
 		return 512;
 }
 
-void CMapGrid::SnapToGrid(float &x, float &y) const
+void CMapGrid::SnapToGrid(vec2 &Position) const
 {
 	const int GridDistance = GridLineDistance() * m_GridFactor;
-	x = (int)((x + (x >= 0 ? 1.0f : -1.0f) * GridDistance / 2) / GridDistance) * GridDistance;
-	y = (int)((y + (y >= 0 ? 1.0f : -1.0f) * GridDistance / 2) / GridDistance) * GridDistance;
+	Position.x = (int)((Position.x + (Position.x >= 0 ? 1.0f : -1.0f) * GridDistance / 2) / GridDistance) * GridDistance;
+	Position.y = (int)((Position.y + (Position.y >= 0 ? 1.0f : -1.0f) * GridDistance / 2) / GridDistance) * GridDistance;
 }
 
 bool CMapGrid::IsEnabled() const

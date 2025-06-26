@@ -1502,12 +1502,13 @@ void CEditor::DoSoundSource(int LayerIndex, CSoundSource *pSource, int Index)
 		{
 			if(s_Operation == ESoundSourceOp::OP_MOVE)
 			{
-				float x = wx;
-				float y = wy;
+				vec2 Pos = vec2(wx, wy);
 				if(MapView()->MapGrid()->IsEnabled() && !IgnoreGrid)
-					MapView()->MapGrid()->SnapToGrid(x, y);
-				pSource->m_Position.x = f2fx(x);
-				pSource->m_Position.y = f2fx(y);
+				{
+					MapView()->MapGrid()->SnapToGrid(Pos);
+				}
+				pSource->m_Position.x = f2fx(Pos.x);
+				pSource->m_Position.y = f2fx(Pos.y);
 			}
 		}
 
@@ -2068,15 +2069,14 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 	const bool IgnoreGrid = Input()->AltIsPressed();
 
 	auto &&GetDragOffset = [&]() -> ivec2 {
-		float x = wx;
-		float y = wy;
+		vec2 Pos = vec2(wx, wy);
 		if(MapView()->MapGrid()->IsEnabled() && !IgnoreGrid)
-			MapView()->MapGrid()->SnapToGrid(x, y);
-
-		int OffsetX = f2fx(x) - s_OriginalPosition.x;
-		int OffsetY = f2fx(y) - s_OriginalPosition.y;
-
-		return {OffsetX, OffsetY};
+		{
+			MapView()->MapGrid()->SnapToGrid(Pos);
+		}
+		int OffsetX = f2fx(Pos.x) - s_OriginalPosition.x;
+		int OffsetY = f2fx(Pos.y) - s_OriginalPosition.y;
+		return ivec2(OffsetX, OffsetY);
 	};
 
 	// draw selection background
@@ -2390,15 +2390,14 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 	const bool IgnoreGrid = Input()->AltIsPressed();
 
 	auto &&GetDragOffset = [&]() -> ivec2 {
-		float x = wx;
-		float y = wy;
+		vec2 Pos = vec2(wx, wy);
 		if(MapView()->MapGrid()->IsEnabled() && !IgnoreGrid)
-			MapView()->MapGrid()->SnapToGrid(x, y);
-
-		int OffsetX = f2fx(x) - s_OriginalPoint.x;
-		int OffsetY = f2fx(y) - s_OriginalPoint.y;
-
-		return {OffsetX, OffsetY};
+		{
+			MapView()->MapGrid()->SnapToGrid(Pos);
+		}
+		int OffsetX = f2fx(Pos.x) - s_OriginalPoint.x;
+		int OffsetY = f2fx(Pos.y) - s_OriginalPoint.y;
+		return ivec2(OffsetX, OffsetY);
 	};
 
 	if(Ui()->CheckActiveItem(pId))
@@ -2634,8 +2633,8 @@ void CEditor::DoQuadKnife(int QuadIndex)
 	if(MapView()->MapGrid()->IsEnabled() && !IgnoreGrid)
 	{
 		float CellSize = MapView()->MapGrid()->GridLineDistance();
-		vec2 OnGrid(Mouse.x, Mouse.y);
-		MapView()->MapGrid()->SnapToGrid(OnGrid.x, OnGrid.y);
+		vec2 OnGrid = Mouse;
+		MapView()->MapGrid()->SnapToGrid(OnGrid);
 
 		if(IsInTriangle(OnGrid, v[0], v[1], v[2]) || IsInTriangle(OnGrid, v[0], v[3], v[2]))
 			Point = OnGrid;
@@ -2996,11 +2995,10 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 		{
 			if(MapView()->MapGrid()->IsEnabled() && !IgnoreGrid)
 			{
-				float x = wx;
-				float y = wy;
-				MapView()->MapGrid()->SnapToGrid(x, y);
-				pEnvelope->m_vPoints[PIndex].m_aValues[0] = f2fx(x) - pQuad->m_aPoints[4].x;
-				pEnvelope->m_vPoints[PIndex].m_aValues[1] = f2fx(y) - pQuad->m_aPoints[4].y;
+				vec2 Pos = vec2(wx, wy);
+				MapView()->MapGrid()->SnapToGrid(Pos);
+				pEnvelope->m_vPoints[PIndex].m_aValues[0] = f2fx(Pos.x) - pQuad->m_aPoints[4].x;
+				pEnvelope->m_vPoints[PIndex].m_aValues[1] = f2fx(Pos.y) - pQuad->m_aPoints[4].y;
 			}
 			else
 			{
