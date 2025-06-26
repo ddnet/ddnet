@@ -4733,24 +4733,23 @@ bool CEditor::ReplaceSoundCallback(const char *pFileName, int StorageType, void 
 bool CEditor::IsAssetUsed(int FileType, int Index, void *pUser)
 {
 	CEditor *pEditor = (CEditor *)pUser;
-	for(int g = 0; g < (int)pEditor->m_Map.m_vpGroups.size(); g++)
+	for(const auto &pGroup : pEditor->m_Map.m_vpGroups)
 	{
-		for(int i = 0; i < (int)pEditor->m_Map.m_vpGroups[g]->m_vpLayers.size(); i++)
+		for(const auto &pLayer : pGroup->m_vpLayers)
 		{
-			int LayerType = pEditor->m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Type;
 			if(FileType == FILETYPE_IMG)
 			{
-				if(LayerType == LAYERTYPE_TILES)
+				if(pLayer->m_Type == LAYERTYPE_TILES)
 				{
-					std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(pEditor->m_Map.m_vpGroups[g]->m_vpLayers[i]);
+					std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
 					if(pTiles->m_Image == Index)
 					{
 						return true;
 					}
 				}
-				else if(LayerType == LAYERTYPE_QUADS)
+				else if(pLayer->m_Type == LAYERTYPE_QUADS)
 				{
-					std::shared_ptr<CLayerQuads> pQuads = std::static_pointer_cast<CLayerQuads>(pEditor->m_Map.m_vpGroups[g]->m_vpLayers[i]);
+					std::shared_ptr<CLayerQuads> pQuads = std::static_pointer_cast<CLayerQuads>(pLayer);
 					if(pQuads->m_Image == Index)
 					{
 						return true;
@@ -4759,10 +4758,10 @@ bool CEditor::IsAssetUsed(int FileType, int Index, void *pUser)
 			}
 			else if(FileType == FILETYPE_SOUND)
 			{
-				if(LayerType == LAYERTYPE_SOUNDS)
+				if(pLayer->m_Type == LAYERTYPE_SOUNDS)
 				{
-					std::shared_ptr<CLayerSounds> pSounds = std::static_pointer_cast<CLayerSounds>(pEditor->m_Map.m_vpGroups[g]->m_vpLayers[i]);
-					if(pSounds->m_Sound == pEditor->m_SelectedImage)
+					std::shared_ptr<CLayerSounds> pSounds = std::static_pointer_cast<CLayerSounds>(pLayer);
+					if(pSounds->m_Sound == Index)
 					{
 						return true;
 					}
