@@ -167,7 +167,7 @@ void CEditor::AddTileart(bool IgnoreHistory)
 
 	m_TileartImageInfo.Free();
 	m_Map.OnModify();
-	m_Dialog = DIALOG_NONE;
+	OnDialogClose();
 }
 
 void CEditor::TileartCheckColors()

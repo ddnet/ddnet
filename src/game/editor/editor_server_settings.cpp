@@ -1008,7 +1008,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 	if(DoButton_Editor(&s_ConfirmButton, "Confirm", CanConfirm ? 0 : -1, &ConfimButton, BUTTONFLAG_LEFT, nullptr) || (CanConfirm && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
 	{
 		Execute();
-		m_Dialog = DIALOG_NONE;
+		OnDialogClose();
 	}
 
 	// Cancel - we load a new empty map
@@ -1016,7 +1016,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 	{
 		Reset();
 		m_aFileName[0] = 0;
-		m_Dialog = DIALOG_NONE;
+		OnDialogClose();
 	}
 }
 

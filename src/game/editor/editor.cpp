@@ -798,7 +798,9 @@ bool CEditor::CallbackOpenMap(const char *pFileName, int StorageType, void *pUse
 	{
 		pEditor->m_ValidSaveFilename = StorageType == IStorage::TYPE_SAVE && (pEditor->m_pFileDialogPath == pEditor->m_aFileDialogCurrentFolder || (pEditor->m_pFileDialogPath == pEditor->m_aFileDialogCurrentLink && str_comp(pEditor->m_aFileDialogCurrentLink, "themes") == 0));
 		if(pEditor->m_Dialog == DIALOG_FILE)
-			pEditor->m_Dialog = DIALOG_NONE;
+		{
+			pEditor->OnDialogClose();
+		}
 		return true;
 	}
 	else
@@ -813,7 +815,7 @@ bool CEditor::CallbackAppendMap(const char *pFileName, int StorageType, void *pU
 	CEditor *pEditor = (CEditor *)pUser;
 	if(pEditor->Append(pFileName, StorageType))
 	{
-		pEditor->m_Dialog = DIALOG_NONE;
+		pEditor->OnDialogClose();
 		return true;
 	}
 	else
@@ -858,7 +860,7 @@ bool CEditor::CallbackSaveMap(const char *pFileName, int StorageType, void *pUse
 			return false;
 	}
 
-	pEditor->m_Dialog = DIALOG_NONE;
+	pEditor->OnDialogClose();
 	return true;
 }
 
@@ -877,7 +879,7 @@ bool CEditor::CallbackSaveCopyMap(const char *pFileName, int StorageType, void *
 
 	if(pEditor->Save(pFileName))
 	{
-		pEditor->m_Dialog = DIALOG_NONE;
+		pEditor->OnDialogClose();
 		return true;
 	}
 	else
@@ -905,7 +907,7 @@ bool CEditor::CallbackSaveImage(const char *pFileName, int StorageType, void *pU
 
 	if(CImageLoader::SavePng(pEditor->Storage()->OpenFile(pFileName, IOFLAG_WRITE, StorageType), pFileName, *pImg))
 	{
-		pEditor->m_Dialog = DIALOG_NONE;
+		pEditor->OnDialogClose();
 		return true;
 	}
 	else
@@ -936,7 +938,6 @@ bool CEditor::CallbackSaveSound(const char *pFileName, int StorageType, void *pU
 		io_write(File, pSound->m_pData, pSound->m_DataSize);
 		io_close(File);
 		pEditor->OnDialogClose();
-		pEditor->m_Dialog = DIALOG_NONE;
 		return true;
 	}
 	pEditor->ShowFileDialogError("Failed to open file '%s'.", pFileName);
@@ -970,7 +971,7 @@ bool CEditor::CallbackCustomEntities(const char *pFileName, int StorageType, voi
 	pEditor->Graphics()->UnloadTexture(&pEditor->m_EntitiesTexture);
 	pEditor->m_EntitiesTexture = pEditor->Graphics()->LoadTextureRawMove(ImgInfo, pEditor->GetTextureUsageFlag());
 
-	pEditor->m_Dialog = DIALOG_NONE;
+	pEditor->OnDialogClose();
 	return true;
 }
 
@@ -4552,7 +4553,7 @@ bool CEditor::ReplaceImage(const char *pFileName, int StorageType, bool CheckDup
 		if(!str_comp(m_Map.m_vpImages[i]->m_aName, pImg->m_aName))
 			m_SelectedImage = i;
 	}
-	m_Dialog = DIALOG_NONE;
+	OnDialogClose();
 	return true;
 }
 
@@ -4621,7 +4622,7 @@ bool CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 				break;
 			}
 	}
-	pEditor->m_Dialog = DIALOG_NONE;
+	pEditor->OnDialogClose();
 	return true;
 }
 
@@ -4685,7 +4686,6 @@ bool CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 	}
 
 	pEditor->OnDialogClose();
-	pEditor->m_Dialog = DIALOG_NONE;
 	return true;
 }
 
@@ -4742,7 +4742,6 @@ bool CEditor::ReplaceSound(const char *pFileName, int StorageType, bool CheckDup
 	pSound->m_DataSize = DataSize;
 
 	OnDialogClose();
-	m_Dialog = DIALOG_NONE;
 	return true;
 }
 
@@ -5624,7 +5623,6 @@ void CEditor::RenderFileDialog()
 	if(DoButton_Editor(&s_CancelButton, "Cancel", 0, &Button, BUTTONFLAG_LEFT, nullptr) || (s_ListBox.Active() && Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE)))
 	{
 		OnDialogClose();
-		m_Dialog = DIALOG_NONE;
 	}
 
 	ButtonBar.VSplitRight(ButtonSpacing, &ButtonBar, nullptr);
@@ -9209,6 +9207,7 @@ void CEditor::OnClose()
 
 void CEditor::OnDialogClose()
 {
+	m_Dialog = DIALOG_NONE;
 	Graphics()->UnloadTexture(&m_FilePreviewImage);
 	Sound()->UnloadSample(m_FilePreviewSound);
 	m_FilePreviewSound = -1;

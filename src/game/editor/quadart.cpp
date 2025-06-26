@@ -192,7 +192,7 @@ void CEditor::AddQuadArt(bool IgnoreHistory)
 		m_EditorHistory.RecordAction(std::make_shared<CEditorActionQuadArt>(this, m_QuadArtParameters));
 
 	m_Map.OnModify();
-	m_Dialog = DIALOG_NONE;
+	OnDialogClose();
 }
 
 bool CEditor::CallbackAddQuadArt(const char *pFilepath, int StorageType, void *pUser)
