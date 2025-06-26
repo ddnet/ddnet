@@ -27,7 +27,6 @@ void CMapView::OnReset()
 
 	m_ProofMode.OnReset();
 	m_MapGrid.OnReset();
-	m_ShowPicker = false;
 }
 
 void CMapView::OnMapLoad()
