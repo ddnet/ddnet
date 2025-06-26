@@ -777,39 +777,27 @@ void CLayerTiles::FillGameTiles(EGameTileOp Fill)
 	if(!CanFillGameTiles())
 		return;
 
-	int Result = (int)Fill;
-	switch(Fill)
-	{
-	case EGameTileOp::HOOKTHROUGH:
-		Result = TILE_THROUGH_CUT;
-		break;
-	case EGameTileOp::FREEZE:
-		Result = TILE_FREEZE;
-		break;
-	case EGameTileOp::UNFREEZE:
-		Result = TILE_UNFREEZE;
-		break;
-	case EGameTileOp::DEEP_FREEZE:
-		Result = TILE_DFREEZE;
-		break;
-	case EGameTileOp::DEEP_UNFREEZE:
-		Result = TILE_DUNFREEZE;
-		break;
-	case EGameTileOp::BLUE_CHECK_TELE:
-		Result = TILE_TELECHECKIN;
-		break;
-	case EGameTileOp::RED_CHECK_TELE:
-		Result = TILE_TELECHECKINEVIL;
-		break;
-	case EGameTileOp::LIVE_FREEZE:
-		Result = TILE_LFREEZE;
-		break;
-	case EGameTileOp::LIVE_UNFREEZE:
-		Result = TILE_LUNFREEZE;
-		break;
-	default:
-		break;
-	}
+	auto GameTileOpToIndex = [](EGameTileOp Op) -> int {
+		switch(Op)
+		{
+		case EGameTileOp::AIR: return TILE_AIR;
+		case EGameTileOp::HOOKABLE: return TILE_SOLID;
+		case EGameTileOp::DEATH: return TILE_DEATH;
+		case EGameTileOp::UNHOOKABLE: return TILE_NOHOOK;
+		case EGameTileOp::HOOKTHROUGH: return TILE_THROUGH_CUT;
+		case EGameTileOp::FREEZE: return TILE_FREEZE;
+		case EGameTileOp::UNFREEZE: return TILE_UNFREEZE;
+		case EGameTileOp::DEEP_FREEZE: return TILE_DFREEZE;
+		case EGameTileOp::DEEP_UNFREEZE: return TILE_DUNFREEZE;
+		case EGameTileOp::BLUE_CHECK_TELE: return TILE_TELECHECKIN;
+		case EGameTileOp::RED_CHECK_TELE: return TILE_TELECHECKINEVIL;
+		case EGameTileOp::LIVE_FREEZE: return TILE_LFREEZE;
+		case EGameTileOp::LIVE_UNFREEZE: return TILE_LUNFREEZE;
+		default: return -1;
+		}
+	};
+
+	int Result = GameTileOpToIndex(Fill);
 	if(Result > -1)
 	{
 		std::shared_ptr<CLayerGroup> pGroup = m_pEditor->m_Map.m_vpGroups[m_pEditor->m_SelectedGroup];
@@ -860,7 +848,7 @@ void CLayerTiles::FillGameTiles(EGameTileOp Fill)
 
 			vpActions.push_back(std::make_shared<CEditorBrushDrawAction>(m_pEditor, GameGroupIndex));
 			char aDisplay[256];
-			str_format(aDisplay, sizeof(aDisplay), "Construct '%s' game tiles (x%d)", g_apGametileOpNames[(int)Fill], Changes);
+			str_format(aDisplay, sizeof(aDisplay), "Construct '%s' game tiles (x%d)", GAME_TILE_OP_NAMES[(int)Fill], Changes);
 			m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionBulk>(m_pEditor, vpActions, aDisplay, true));
 		}
 		else
@@ -984,7 +972,35 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	{
 		pToolBox->HSplitBottom(12.0f, pToolBox, &Button);
 		static int s_GameTilesButton = 0;
-		if(m_pEditor->DoButton_Editor(&s_GameTilesButton, "Game tiles", 0, &Button, BUTTONFLAG_LEFT, "Construct game tiles from this layer."))
+
+		auto GameTileToOp = [](int TileIndex) -> EGameTileOp {
+			switch(TileIndex)
+			{
+			case TILE_AIR: return EGameTileOp::AIR;
+			case TILE_SOLID: return EGameTileOp::HOOKABLE;
+			case TILE_DEATH: return EGameTileOp::DEATH;
+			case TILE_NOHOOK: return EGameTileOp::UNHOOKABLE;
+			case TILE_THROUGH_CUT: return EGameTileOp::HOOKTHROUGH;
+			case TILE_FREEZE: return EGameTileOp::FREEZE;
+			case TILE_UNFREEZE: return EGameTileOp::UNFREEZE;
+			case TILE_DFREEZE: return EGameTileOp::DEEP_FREEZE;
+			case TILE_DUNFREEZE: return EGameTileOp::DEEP_UNFREEZE;
+			case TILE_TELECHECKIN: return EGameTileOp::BLUE_CHECK_TELE;
+			case TILE_TELECHECKINEVIL: return EGameTileOp::RED_CHECK_TELE;
+			case TILE_LFREEZE: return EGameTileOp::LIVE_FREEZE;
+			case TILE_LUNFREEZE: return EGameTileOp::LIVE_UNFREEZE;
+			default: return EGameTileOp::AIR;
+			}
+		};
+
+		char aBuf[128] = "Game tiles";
+		if(m_LiveGameTiles)
+		{
+			auto TileOp = GameTileToOp(m_FillGameTile);
+			if(TileOp != EGameTileOp::AIR)
+				str_format(aBuf, sizeof(aBuf), "Game tiles: %s", GAME_TILE_OP_NAMES[(size_t)TileOp]);
+		}
+		if(m_pEditor->DoButton_Editor(&s_GameTilesButton, aBuf, 0, &Button, BUTTONFLAG_LEFT, "Construct game tiles from this layer."))
 			m_pEditor->PopupSelectGametileOpInvoke(m_pEditor->Ui()->MouseX(), m_pEditor->Ui()->MouseY());
 		const int Selected = m_pEditor->PopupSelectGameTileOpResult();
 		FillGameTiles((EGameTileOp)Selected);

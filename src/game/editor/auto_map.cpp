@@ -470,7 +470,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, CLayerTiles *pGameLayer, int Refe
 
 	static const int s_aTileIndex[] = {TILE_SOLID, TILE_DEATH, TILE_NOHOOK, TILE_FREEZE, TILE_UNFREEZE, TILE_DFREEZE, TILE_DUNFREEZE, TILE_LFREEZE, TILE_LUNFREEZE};
 
-	static_assert(std::size(g_apAutoMapReferenceNames) == std::size(s_aTileIndex) + 1, "g_apAutoMapReferenceNames and s_aTileIndex must include the same items");
+	static_assert(std::size(AUTOMAP_REFERENCE_NAMES) == std::size(s_aTileIndex) + 1, "AUTOMAP_REFERENCE_NAMES and s_aTileIndex must include the same items");
 
 	// for every run: copy tiles, automap, overwrite tiles
 	for(size_t h = 0; h < pConf->m_vRuns.size(); ++h)
