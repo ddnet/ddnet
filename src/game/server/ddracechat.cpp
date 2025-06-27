@@ -2230,10 +2230,9 @@ void CGameContext::ConPracticeSolo(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConPracticeUnDeep(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	auto *pChr = pSelf->GetPracticeCharacter(pResult);
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
 	if(!pChr)
 		return;
-
 	pChr->SetDeepFrozen(false);
 	pChr->UnFreeze();
 }
@@ -2241,171 +2240,210 @@ void CGameContext::ConPracticeUnDeep(IConsole::IResult *pResult, void *pUserData
 void CGameContext::ConPracticeDeep(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	auto *pChr = pSelf->GetPracticeCharacter(pResult);
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
 	if(!pChr)
 		return;
-
 	pChr->SetDeepFrozen(true);
 }
 
 void CGameContext::ConPracticeUnLiveFreeze(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	auto *pChr = pSelf->GetPracticeCharacter(pResult);
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
 	if(!pChr)
 		return;
-
 	pChr->SetLiveFrozen(false);
 }
 
 void CGameContext::ConPracticeLiveFreeze(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	auto *pChr = pSelf->GetPracticeCharacter(pResult);
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
 	if(!pChr)
 		return;
-
 	pChr->SetLiveFrozen(true);
 }
 
 void CGameContext::ConPracticeShotgun(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(pSelf->GetPracticeCharacter(pResult))
-		ConShotgun(pResult, pUserData);
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_SHOTGUN, false);
 }
 
 void CGameContext::ConPracticeGrenade(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(pSelf->GetPracticeCharacter(pResult))
-		ConGrenade(pResult, pUserData);
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_GRENADE, false);
 }
 
 void CGameContext::ConPracticeLaser(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(pSelf->GetPracticeCharacter(pResult))
-		ConLaser(pResult, pUserData);
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_LASER, false);
 }
 
 void CGameContext::ConPracticeJetpack(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(pSelf->GetPracticeCharacter(pResult))
-		ConJetpack(pResult, pUserData);
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+	pChr->SetJetpack(true);
 }
 
 void CGameContext::ConPracticeEndlessJump(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(pSelf->GetPracticeCharacter(pResult))
-		ConEndlessJump(pResult, pUserData);
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+	pChr->SetEndlessJump(true);
 }
 
 void CGameContext::ConPracticeSetJumps(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(pSelf->GetPracticeCharacter(pResult))
-		ConSetJumps(pResult, pUserData);
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+	pChr->SetJumps(pResult->GetInteger(0));
 }
 
 void CGameContext::ConPracticeWeapons(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(pSelf->GetPracticeCharacter(pResult))
-		ConWeapons(pResult, pUserData);
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+	pChr->SetJumps(pResult->GetInteger(0));
 }
 
 void CGameContext::ConPracticeUnShotgun(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(pSelf->GetPracticeCharacter(pResult))
-		ConUnShotgun(pResult, pUserData);
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_SHOTGUN, true);
 }
 
 void CGameContext::ConPracticeUnGrenade(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(pSelf->GetPracticeCharacter(pResult))
-		ConUnGrenade(pResult, pUserData);
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_GRENADE, true);
 }
 
 void CGameContext::ConPracticeUnLaser(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(pSelf->GetPracticeCharacter(pResult))
-		ConUnLaser(pResult, pUserData);
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_LASER, true);
 }
 
 void CGameContext::ConPracticeUnJetpack(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(pSelf->GetPracticeCharacter(pResult))
-		ConUnJetpack(pResult, pUserData);
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+	pChr->SetJetpack(false);
 }
 
 void CGameContext::ConPracticeUnEndlessJump(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(pSelf->GetPracticeCharacter(pResult))
-		ConUnEndlessJump(pResult, pUserData);
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+	pChr->SetEndlessJump(false);
 }
 
 void CGameContext::ConPracticeUnWeapons(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(pSelf->GetPracticeCharacter(pResult))
-		ConUnWeapons(pResult, pUserData);
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+	pSelf->ModifyWeapons(pResult, pUserData, -1, true);
+
 }
 
 void CGameContext::ConPracticeNinja(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(pSelf->GetPracticeCharacter(pResult))
-		ConNinja(pResult, pUserData);
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_NINJA, false);
 }
 
 void CGameContext::ConPracticeUnNinja(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(pSelf->GetPracticeCharacter(pResult))
-		ConUnNinja(pResult, pUserData);
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_NINJA, true);
 }
 
 void CGameContext::ConPracticeEndlessHook(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(pSelf->GetPracticeCharacter(pResult))
-		ConEndlessHook(pResult, pUserData);
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+	pChr->SetEndlessHook(true);
 }
 
 void CGameContext::ConPracticeUnEndlessHook(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(pSelf->GetPracticeCharacter(pResult))
-		ConUnEndlessHook(pResult, pUserData);
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+	pChr->SetEndlessHook(false);
 }
 
 void CGameContext::ConPracticeToggleInvincible(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(pSelf->GetPracticeCharacter(pResult))
-		ConToggleInvincible(pResult, pUserData);
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+	pChr->SetInvincible(true);
 }
 
 void CGameContext::ConPracticeAddWeapon(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(pSelf->GetPracticeCharacter(pResult))
-		ConAddWeapon(pResult, pUserData);
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+	pSelf->ModifyWeapons(pResult, pUserData, pResult->GetInteger(0), false);
 }
 
 void CGameContext::ConPracticeRemoveWeapon(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(pSelf->GetPracticeCharacter(pResult))
-		ConRemoveWeapon(pResult, pUserData);
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+	pSelf->ModifyWeapons(pResult, pUserData, pResult->GetInteger(0), true);
+
 }
 
 void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)

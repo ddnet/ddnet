@@ -10,7 +10,7 @@
 #include <game/server/save.h>
 #include <game/server/teams.h>
 
-void CGameContext::ConGoLeft(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConPracticeGoLeft(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Tiles = pResult->NumArguments() == 1 ? pResult->GetInteger(0) : 1;
@@ -20,7 +20,7 @@ void CGameContext::ConGoLeft(IConsole::IResult *pResult, void *pUserData)
 	pSelf->MoveCharacter(pResult->m_ClientId, -1 * Tiles, 0);
 }
 
-void CGameContext::ConGoRight(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConPracticeGoRight(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Tiles = pResult->NumArguments() == 1 ? pResult->GetInteger(0) : 1;
@@ -30,7 +30,7 @@ void CGameContext::ConGoRight(IConsole::IResult *pResult, void *pUserData)
 	pSelf->MoveCharacter(pResult->m_ClientId, Tiles, 0);
 }
 
-void CGameContext::ConGoDown(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConPracticeGoDown(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Tiles = pResult->NumArguments() == 1 ? pResult->GetInteger(0) : 1;
@@ -40,7 +40,7 @@ void CGameContext::ConGoDown(IConsole::IResult *pResult, void *pUserData)
 	pSelf->MoveCharacter(pResult->m_ClientId, 0, Tiles);
 }
 
-void CGameContext::ConGoUp(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConPracticeGoUp(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Tiles = pResult->NumArguments() == 1 ? pResult->GetInteger(0) : 1;
@@ -48,24 +48,6 @@ void CGameContext::ConGoUp(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientId(pResult->m_ClientId))
 		return;
 	pSelf->MoveCharacter(pResult->m_ClientId, 0, -1 * Tiles);
-}
-
-void CGameContext::ConMove(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientId(pResult->m_ClientId))
-		return;
-	pSelf->MoveCharacter(pResult->m_ClientId, pResult->GetInteger(0),
-		pResult->GetInteger(1));
-}
-
-void CGameContext::ConMoveRaw(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientId(pResult->m_ClientId))
-		return;
-	pSelf->MoveCharacter(pResult->m_ClientId, pResult->GetInteger(0),
-		pResult->GetInteger(1), true);
 }
 
 void CGameContext::MoveCharacter(int ClientId, int X, int Y, bool Raw)
@@ -98,42 +80,6 @@ void CGameContext::ConKillPlayer(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
-void CGameContext::ConNinja(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_NINJA, false);
-}
-
-void CGameContext::ConUnNinja(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_NINJA, true);
-}
-
-void CGameContext::ConEndlessHook(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientId(pResult->m_ClientId))
-		return;
-	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
-	if(pChr)
-	{
-		pChr->SetEndlessHook(true);
-	}
-}
-
-void CGameContext::ConUnEndlessHook(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientId(pResult->m_ClientId))
-		return;
-	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
-	if(pChr)
-	{
-		pChr->SetEndlessHook(false);
-	}
-}
-
 void CGameContext::ConSuper(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -159,195 +105,20 @@ void CGameContext::ConUnSuper(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
-void CGameContext::ConToggleInvincible(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConPracticeFreeze(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
-	if(pChr)
-		pChr->SetInvincible(pResult->NumArguments() == 0 ? !pChr->Core()->m_Invincible : pResult->GetInteger(0));
-}
-
-void CGameContext::ConSolo(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientId(pResult->m_ClientId))
-		return;
-	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
-	if(pChr)
-		pChr->SetSolo(true);
-}
-
-void CGameContext::ConUnSolo(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientId(pResult->m_ClientId))
-		return;
-	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
-	if(pChr)
-		pChr->SetSolo(false);
-}
-
-void CGameContext::ConFreeze(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientId(pResult->m_ClientId))
-		return;
-	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
 	if(pChr)
 		pChr->Freeze();
 }
 
-void CGameContext::ConUnFreeze(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConPracticeUnFreeze(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientId(pResult->m_ClientId))
-		return;
-	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
 	if(pChr)
 		pChr->UnFreeze();
-}
-
-void CGameContext::ConDeep(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientId(pResult->m_ClientId))
-		return;
-	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
-	if(pChr)
-		pChr->SetDeepFrozen(true);
-}
-
-void CGameContext::ConUnDeep(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientId(pResult->m_ClientId))
-		return;
-	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
-	if(pChr)
-	{
-		pChr->SetDeepFrozen(false);
-		pChr->UnFreeze();
-	}
-}
-
-void CGameContext::ConLiveFreeze(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientId(pResult->m_ClientId))
-		return;
-	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
-	if(pChr)
-		pChr->SetLiveFrozen(true);
-}
-
-void CGameContext::ConUnLiveFreeze(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientId(pResult->m_ClientId))
-		return;
-	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
-	if(pChr)
-		pChr->SetLiveFrozen(false);
-}
-
-void CGameContext::ConShotgun(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_SHOTGUN, false);
-}
-
-void CGameContext::ConGrenade(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_GRENADE, false);
-}
-
-void CGameContext::ConLaser(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_LASER, false);
-}
-
-void CGameContext::ConJetpack(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
-	if(pChr)
-		pChr->SetJetpack(true);
-}
-
-void CGameContext::ConEndlessJump(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
-	if(pChr)
-		pChr->SetEndlessJump(true);
-}
-
-void CGameContext::ConSetJumps(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
-	if(pChr)
-		pChr->SetJumps(pResult->GetInteger(0));
-}
-
-void CGameContext::ConWeapons(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->ModifyWeapons(pResult, pUserData, -1, false);
-}
-
-void CGameContext::ConUnShotgun(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_SHOTGUN, true);
-}
-
-void CGameContext::ConUnGrenade(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_GRENADE, true);
-}
-
-void CGameContext::ConUnLaser(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_LASER, true);
-}
-
-void CGameContext::ConUnJetpack(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
-	if(pChr)
-		pChr->SetJetpack(false);
-}
-
-void CGameContext::ConUnEndlessJump(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
-	if(pChr)
-		pChr->SetEndlessJump(false);
-}
-
-void CGameContext::ConUnWeapons(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->ModifyWeapons(pResult, pUserData, -1, true);
-}
-
-void CGameContext::ConAddWeapon(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->ModifyWeapons(pResult, pUserData, pResult->GetInteger(0), false);
-}
-
-void CGameContext::ConRemoveWeapon(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->ModifyWeapons(pResult, pUserData, pResult->GetInteger(0), true);
 }
 
 void CGameContext::ModifyWeapons(IConsole::IResult *pResult, void *pUserData,
