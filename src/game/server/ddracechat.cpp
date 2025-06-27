@@ -989,7 +989,7 @@ void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 
 	if(!g_Config.m_SvSaveGames)
 	{
-		pSelf->SendChatTarget(pResult->m_ClientId, "Save-function is disabled on this server");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Save-function is disabled on this server");
 		return;
 	}
 
@@ -1008,7 +1008,7 @@ void CGameContext::ConLoad(IConsole::IResult *pResult, void *pUserData)
 
 	if(!g_Config.m_SvSaveGames)
 	{
-		pSelf->SendChatTarget(pResult->m_ClientId, "Save-function is disabled on this server");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Save-function is disabled on this server");
 		return;
 	}
 
@@ -1796,7 +1796,7 @@ void CGameContext::ConSetTimerType(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 }
 
-void CGameContext::ConRescue(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConPracticeRescue(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(!CheckClientId(pResult->m_ClientId))
@@ -1812,7 +1812,7 @@ void CGameContext::ConRescue(IConsole::IResult *pResult, void *pUserData)
 	int Team = pSelf->GetDDRaceTeam(pResult->m_ClientId);
 	if(!g_Config.m_SvRescue && !Teams.IsPractice(Team))
 	{
-		pSelf->SendChatTarget(pPlayer->GetCid(), "Rescue is not enabled on this server and you're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Rescue is not enabled on this server and you're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
 		return;
 	}
 
@@ -1831,30 +1831,22 @@ void CGameContext::ConRescue(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
-void CGameContext::ConRescueMode(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConPracticeRescueMode(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientId(pResult->m_ClientId))
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
 		return;
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
 	if(!pPlayer)
 		return;
-
-	CGameTeams &Teams = pSelf->m_pController->Teams();
-	int Team = pSelf->GetDDRaceTeam(pResult->m_ClientId);
-	if(!g_Config.m_SvRescue && !Teams.IsPractice(Team))
-	{
-		pSelf->SendChatTarget(pPlayer->GetCid(), "Rescue is not enabled on this server and you're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
-		return;
-	}
 
 	if(str_comp_nocase(pResult->GetString(0), "auto") == 0)
 	{
 		if(pPlayer->m_RescueMode != RESCUEMODE_AUTO)
 		{
 			pPlayer->m_RescueMode = RESCUEMODE_AUTO;
-
-			pSelf->SendChatTarget(pPlayer->GetCid(), "Rescue mode changed to auto.");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Rescue mode changed to auto.");
 		}
 
 		return;
@@ -1865,8 +1857,7 @@ void CGameContext::ConRescueMode(IConsole::IResult *pResult, void *pUserData)
 		if(pPlayer->m_RescueMode != RESCUEMODE_MANUAL)
 		{
 			pPlayer->m_RescueMode = RESCUEMODE_MANUAL;
-
-			pSelf->SendChatTarget(pPlayer->GetCid(), "Rescue mode changed to manual.");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Rescue mode changed to manual.");
 		}
 
 		return;
@@ -1874,24 +1865,25 @@ void CGameContext::ConRescueMode(IConsole::IResult *pResult, void *pUserData)
 
 	if(str_comp_nocase(pResult->GetString(0), "list") == 0)
 	{
-		pSelf->SendChatTarget(pPlayer->GetCid(), "Available rescue modes: auto, manual");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Available rescue modes: auto, manual");
 	}
 	else if(str_comp_nocase(pResult->GetString(0), "") == 0)
 	{
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "Current rescue mode: %s.", pPlayer->m_RescueMode == RESCUEMODE_MANUAL ? "manual" : "auto");
-		pSelf->SendChatTarget(pPlayer->GetCid(), aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 	}
 	else
 	{
-		pSelf->SendChatTarget(pPlayer->GetCid(), "Unknown argument. Check '/rescuemode list'");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Unknown argument. Check '/rescuemode list'");
 	}
 }
 
-void CGameContext::ConTeleTo(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConPracticeTeleTo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientId(pResult->m_ClientId))
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
 		return;
 	CPlayer *pCallingPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
 	if(!pCallingPlayer)
@@ -1899,14 +1891,6 @@ void CGameContext::ConTeleTo(IConsole::IResult *pResult, void *pUserData)
 	CCharacter *pCallingCharacter = pCallingPlayer->GetCharacter();
 	if(!pCallingCharacter)
 		return;
-
-	CGameTeams &Teams = pSelf->m_pController->Teams();
-	int Team = pSelf->GetDDRaceTeam(pResult->m_ClientId);
-	if(!Teams.IsPractice(Team))
-	{
-		pSelf->SendChatTarget(pCallingPlayer->GetCid(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
-		return;
-	}
 
 	vec2 Pos = {};
 
@@ -1926,7 +1910,7 @@ void CGameContext::ConTeleTo(IConsole::IResult *pResult, void *pUserData)
 		}
 		if(ClientId == MAX_CLIENTS)
 		{
-			pSelf->SendChatTarget(pCallingPlayer->GetCid(), "No player with this name found.");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "No player with this name found.");
 			return;
 		}
 
@@ -1949,10 +1933,11 @@ void CGameContext::ConTeleTo(IConsole::IResult *pResult, void *pUserData)
 	pCallingPlayer->m_LastTeleTee.Save(pCallingCharacter);
 }
 
-void CGameContext::ConTeleXY(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConPracticeTeleXY(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientId(pResult->m_ClientId))
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
 		return;
 	CPlayer *pCallingPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
 	if(!pCallingPlayer)
@@ -1961,19 +1946,11 @@ void CGameContext::ConTeleXY(IConsole::IResult *pResult, void *pUserData)
 	if(!pCallingCharacter)
 		return;
 
-	CGameTeams &Teams = pSelf->m_pController->Teams();
-	int Team = pSelf->GetDDRaceTeam(pResult->m_ClientId);
-	if(!Teams.IsPractice(Team))
-	{
-		pSelf->SendChatTarget(pCallingPlayer->GetCid(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
-		return;
-	}
-
 	vec2 Pos = {};
 
 	if(pResult->NumArguments() != 2)
 	{
-		pSelf->SendChatTarget(pCallingPlayer->GetCid(), "Can't recognize specified arguments. Usage: /tpxy x y, e.g. /tpxy 9 3.");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Can't recognize specified arguments. Usage: /tpxy x y, e.g. /tpxy 9 3.");
 		return;
 	}
 	else
@@ -2007,12 +1984,12 @@ void CGameContext::ConTeleXY(IConsole::IResult *pResult, void *pUserData)
 
 		if(!DetermineCoordinateRelativity(pResult->GetString(0), pCallingPlayer->m_ViewPos.x, BaseX))
 		{
-			pSelf->SendChatTarget(pCallingPlayer->GetCid(), "Invalid X coordinate.");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Invalid X coordinate.");
 			return;
 		}
 		if(!DetermineCoordinateRelativity(pResult->GetString(1), pCallingPlayer->m_ViewPos.y, BaseY))
 		{
-			pSelf->SendChatTarget(pCallingPlayer->GetCid(), "Invalid Y coordinate.");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Invalid Y coordinate.");
 			return;
 		}
 
@@ -2027,25 +2004,15 @@ void CGameContext::ConTeleXY(IConsole::IResult *pResult, void *pUserData)
 	pCallingPlayer->m_LastTeleTee.Save(pCallingCharacter);
 }
 
-void CGameContext::ConTeleCursor(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConPracticeTeleCursor(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientId(pResult->m_ClientId))
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
 		return;
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
 	if(!pPlayer)
 		return;
-	CCharacter *pChr = pPlayer->GetCharacter();
-	if(!pChr)
-		return;
-
-	CGameTeams &Teams = pSelf->m_pController->Teams();
-	int Team = pSelf->GetDDRaceTeam(pResult->m_ClientId);
-	if(!Teams.IsPractice(Team))
-	{
-		pSelf->SendChatTarget(pPlayer->GetCid(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
-		return;
-	}
 
 	// default to view pos when character is not available
 	vec2 Pos = pPlayer->m_ViewPos;
@@ -2064,7 +2031,7 @@ void CGameContext::ConTeleCursor(IConsole::IResult *pResult, void *pUserData)
 		}
 		if(ClientId == MAX_CLIENTS)
 		{
-			pSelf->SendChatTarget(pPlayer->GetCid(), "No player with this name found.");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "No player with this name found.");
 			return;
 		}
 		CPlayer *pPlayerTo = pSelf->m_apPlayers[ClientId];
@@ -2082,28 +2049,19 @@ void CGameContext::ConTeleCursor(IConsole::IResult *pResult, void *pUserData)
 	pPlayer->m_LastTeleTee.Save(pChr);
 }
 
-void CGameContext::ConLastTele(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConPracticeLastTele(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientId(pResult->m_ClientId))
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
 		return;
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
 	if(!pPlayer)
 		return;
-	CCharacter *pChr = pPlayer->GetCharacter();
-	if(!pChr)
-		return;
 
-	CGameTeams &Teams = pSelf->m_pController->Teams();
-	int Team = pSelf->GetDDRaceTeam(pResult->m_ClientId);
-	if(!Teams.IsPractice(Team))
-	{
-		pSelf->SendChatTarget(pPlayer->GetCid(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
-		return;
-	}
 	if(!pPlayer->m_LastTeleTee.GetPos().x)
 	{
-		pSelf->SendChatTarget(pPlayer->GetCid(), "You haven't previously teleported. Use /tp before using this command.");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "You haven't previously teleported. Use /tp before using this command.");
 		return;
 	}
 	pPlayer->m_LastTeleTee.Load(pChr, pChr->Team(), true);
@@ -2125,7 +2083,7 @@ CCharacter *CGameContext::GetPracticeCharacter(IConsole::IResult *pResult)
 	int Team = GetDDRaceTeam(pResult->m_ClientId);
 	if(!Teams.IsPractice(Team))
 	{
-		SendChatTarget(pPlayer->GetCid(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
 		return nullptr;
 	}
 	return pChr;
@@ -2135,20 +2093,19 @@ void CGameContext::ConPracticeToTeleporter(IConsole::IResult *pResult, void *pUs
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
-	if(pChr)
+	if(!pChr)
+		return;
+	if(pSelf->Collision()->TeleOuts(pResult->GetInteger(0) - 1).empty())
 	{
-		if(pSelf->Collision()->TeleOuts(pResult->GetInteger(0) - 1).empty())
-		{
-			pSelf->SendChatTarget(pChr->GetPlayer()->GetCid(), "There is no teleporter with that index on the map.");
-			return;
-		}
-
-		ConToTeleporter(pResult, pUserData);
-		pChr->ResetJumps();
-		pChr->UnFreeze();
-		pChr->ResetVelocity();
-		pChr->GetPlayer()->m_LastTeleTee.Save(pChr);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "There is no teleporter with that index on the map.");
+		return;
 	}
+
+	ConToTeleporter(pResult, pUserData);
+	pChr->ResetJumps();
+	pChr->UnFreeze();
+	pChr->ResetVelocity();
+	pChr->GetPlayer()->m_LastTeleTee.Save(pChr);
 }
 
 void CGameContext::ConPracticeToCheckTeleporter(IConsole::IResult *pResult, void *pUserData)
@@ -2159,7 +2116,7 @@ void CGameContext::ConPracticeToCheckTeleporter(IConsole::IResult *pResult, void
 	{
 		if(pSelf->Collision()->TeleCheckOuts(pResult->GetInteger(0) - 1).empty())
 		{
-			pSelf->SendChatTarget(pChr->GetPlayer()->GetCid(), "There is no checkpoint teleporter with that index on the map.");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "There is no checkpoint teleporter with that index on the map.");
 			return;
 		}
 
@@ -2174,56 +2131,30 @@ void CGameContext::ConPracticeToCheckTeleporter(IConsole::IResult *pResult, void
 void CGameContext::ConPracticeUnSolo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientId(pResult->m_ClientId))
-		return;
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
-	if(!pPlayer)
-		return;
-	CCharacter *pChr = pPlayer->GetCharacter();
-	if(!pChr)
-		return;
-
 	if(g_Config.m_SvTeam == SV_TEAM_FORBIDDEN || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
 	{
-		pSelf->SendChatTarget(pPlayer->GetCid(), "Command is not available on solo servers");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Command is not available on solo servers.");
 		return;
 	}
 
-	CGameTeams &Teams = pSelf->m_pController->Teams();
-	int Team = pSelf->GetDDRaceTeam(pResult->m_ClientId);
-	if(!Teams.IsPractice(Team))
-	{
-		pSelf->SendChatTarget(pPlayer->GetCid(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
 		return;
-	}
 	pChr->SetSolo(false);
 }
 
 void CGameContext::ConPracticeSolo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientId(pResult->m_ClientId))
-		return;
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
-	if(!pPlayer)
-		return;
-	CCharacter *pChr = pPlayer->GetCharacter();
-	if(!pChr)
-		return;
-
 	if(g_Config.m_SvTeam == SV_TEAM_FORBIDDEN || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
 	{
-		pSelf->SendChatTarget(pPlayer->GetCid(), "Command is not available on solo servers");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Command is not available on solo servers.");
 		return;
 	}
 
-	CGameTeams &Teams = pSelf->m_pController->Teams();
-	int Team = pSelf->GetDDRaceTeam(pResult->m_ClientId);
-	if(!Teams.IsPractice(Team))
-	{
-		pSelf->SendChatTarget(pPlayer->GetCid(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
+	CCharacter *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
 		return;
-	}
 	pChr->SetSolo(true);
 }
 

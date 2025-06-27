@@ -471,14 +471,14 @@ private:
 	static void ConSayTimeAll(IConsole::IResult *pResult, void *pUserData);
 	static void ConTime(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetTimerType(IConsole::IResult *pResult, void *pUserData);
-	static void ConRescue(IConsole::IResult *pResult, void *pUserData);
-	static void ConRescueMode(IConsole::IResult *pResult, void *pUserData);
-	static void ConTeleTo(IConsole::IResult *pResult, void *pUserData);
-	static void ConTeleXY(IConsole::IResult *pResult, void *pUserData);
-	static void ConTeleCursor(IConsole::IResult *pResult, void *pUserData);
-	static void ConLastTele(IConsole::IResult *pResult, void *pUserData);
 
 	// Chat commands for practice mode
+	static void ConPracticeRescue(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeRescueMode(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeTeleTo(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeTeleXY(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeTeleCursor(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeLastTele(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeToTeleporter(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeToCheckTeleporter(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeUnSolo(IConsole::IResult *pResult, void *pUserData);
