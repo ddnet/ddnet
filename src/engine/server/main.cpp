@@ -30,7 +30,7 @@
 
 static volatile sig_atomic_t InterruptSignaled = 0;
 
-bool IsInterrupted() // NOLINT(misc-use-internal-linkage)
+bool IsInterrupted()
 {
 	return InterruptSignaled;
 }
