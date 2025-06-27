@@ -180,7 +180,7 @@ public:
 
 	// DDRace
 
-	static void ConUserCommandStatus(IConsole::IResult *pResult, void *pUser);
+	static void ConCmdList(IConsole::IResult *pResult, void *pUser);
 
 	bool Cheated() const override { return m_Cheated; }
 

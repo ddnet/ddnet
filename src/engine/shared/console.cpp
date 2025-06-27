@@ -356,12 +356,12 @@ int IConsole::ToLogLevelFilter(int Level)
 	return Level + 2;
 }
 
-LOG_COLOR ColorToLogColor(ColorRGBA Color)
+static LOG_COLOR ColorToLogColor(ColorRGBA Color)
 {
 	return LOG_COLOR{
-		(uint8_t)(Color.r * 255.0),
-		(uint8_t)(Color.g * 255.0),
-		(uint8_t)(Color.b * 255.0)};
+		(uint8_t)(Color.r * 255.0f),
+		(uint8_t)(Color.g * 255.0f),
+		(uint8_t)(Color.b * 255.0f)};
 }
 
 void CConsole::Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor) const
@@ -764,8 +764,7 @@ void CConsole::ConCommandAccess(IResult *pResult, void *pUser)
 void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 {
 	CConsole *pConsole = static_cast<CConsole *>(pUser);
-	char aBuf[240];
-	mem_zero(aBuf, sizeof(aBuf));
+	char aBuf[240] = "";
 	int Used = 0;
 
 	for(CCommand *pCommand = pConsole->m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
@@ -786,7 +785,6 @@ void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 			else
 			{
 				pConsole->Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
-				mem_zero(aBuf, sizeof(aBuf));
 				str_copy(aBuf, pCommand->m_pName);
 				Used = Length;
 			}
@@ -796,16 +794,37 @@ void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 		pConsole->Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 }
 
-void CConsole::ConUserCommandStatus(IResult *pResult, void *pUser)
+void CConsole::ConCmdList(IResult *pResult, void *pUser)
 {
 	CConsole *pConsole = static_cast<CConsole *>(pUser);
-	CResult Result(pResult->m_ClientId);
-	Result.m_pCommand = "access_status";
-	char aBuf[4];
-	str_format(aBuf, sizeof(aBuf), "%d", (int)IConsole::ACCESS_LEVEL_USER);
-	Result.AddArgument(aBuf);
+	char aBuf[240] = "";
+	int Used = 0;
 
-	CConsole::ConCommandStatus(&Result, pConsole);
+	for(CCommand *pCommand = pConsole->m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
+	{
+		if(pCommand->m_Flags & CFGFLAG_SERVER && (pCommand->m_Flags & CMDFLAG_PRACTICE) == 0 && pCommand->GetAccessLevel() == ACCESS_LEVEL_USER)
+		{
+			int Length = str_length(pCommand->m_pName);
+			if(Used + Length + 2 < (int)(sizeof(aBuf)))
+			{
+				if(Used > 0)
+				{
+					Used += 2;
+					str_append(aBuf, ", ");
+				}
+				str_append(aBuf, pCommand->m_pName);
+				Used += Length;
+			}
+			else
+			{
+				pConsole->Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
+				str_copy(aBuf, pCommand->m_pName);
+				Used = Length;
+			}
+		}
+	}
+	if(Used > 0)
+		pConsole->Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 }
 
 void CConsole::TraverseChain(FCommandCallback *ppfnCallback, void **ppUserData)
@@ -840,7 +859,7 @@ CConsole::CConsole(int FlagMask)
 
 	Register("access_level", "s[command] ?i[accesslevel]", CFGFLAG_SERVER, ConCommandAccess, this, "Specify command accessibility (admin = 0, moderator = 1, helper = 2, all = 3)");
 	Register("access_status", "i[accesslevel]", CFGFLAG_SERVER, ConCommandStatus, this, "List all commands which are accessible for admin = 0, moderator = 1, helper = 2, all = 3");
-	Register("cmdlist", "", CFGFLAG_SERVER | CFGFLAG_CHAT, ConUserCommandStatus, this, "List all commands which are accessible for users");
+	Register("cmdlist", "", CFGFLAG_SERVER | CFGFLAG_CHAT, ConCmdList, this, "List all commands which are accessible for users");
 
 	// DDRace
 
