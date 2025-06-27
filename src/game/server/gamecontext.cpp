@@ -3666,7 +3666,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("say", "r[message]", CFGFLAG_SERVER, ConSay, this, "Say in chat");
 	Console()->Register("set_team", "i[id] i[team-id] ?i[delay in minutes]", CFGFLAG_SERVER, ConSetTeam, this, "Set team of player to team");
 	Console()->Register("set_team_all", "i[team-id]", CFGFLAG_SERVER, ConSetTeamAll, this, "Set team of all players to team");
-	Console()->Register("hot_reload", "", CFGFLAG_CHAT | CFGFLAG_SERVER | CMDFLAG_PRACTICE, ConHotReload, this, "Reload the map while preserving the state of tees and teams");
+	Console()->Register("hot_reload", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConHotReload, this, "Reload the map while preserving the state of tees and teams");
 	Console()->Register("reload_censorlist", "", CFGFLAG_SERVER, ConReloadCensorlist, this, "Reload the censorlist");
 
 	Console()->Register("add_vote", "s[name] r[command]", CFGFLAG_SERVER, ConAddVote, this, "Add a voting option");
