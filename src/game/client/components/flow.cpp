@@ -18,26 +18,20 @@ void CFlow::DbgRender()
 	if(!m_pCells)
 		return;
 
-	IGraphics::CLineItem Array[1024];
-	int NumItems = 0;
 	Graphics()->TextureClear();
-	Graphics()->LinesBegin();
+	IGraphics::CLineItemBatch LineItemBatch;
+	Graphics()->LinesBatchBegin(&LineItemBatch);
 	for(int y = 0; y < m_Height; y++)
+	{
 		for(int x = 0; x < m_Width; x++)
 		{
 			vec2 Pos(x * m_Spacing, y * m_Spacing);
 			vec2 Vel = m_pCells[y * m_Width + x].m_Vel * 0.01f;
-			Array[NumItems++] = IGraphics::CLineItem(Pos.x, Pos.y, Pos.x + Vel.x, Pos.y + Vel.y);
-			if(NumItems == 1024)
-			{
-				Graphics()->LinesDraw(Array, 1024);
-				NumItems = 0;
-			}
+			const IGraphics::CLineItem Item = IGraphics::CLineItem(Pos.x, Pos.y, Pos.x + Vel.x, Pos.y + Vel.y);
+			Graphics()->LinesBatchDraw(&LineItemBatch, &Item, 1);
 		}
-
-	if(NumItems)
-		Graphics()->LinesDraw(Array, NumItems);
-	Graphics()->LinesEnd();
+	}
+	Graphics()->LinesBatchEnd(&LineItemBatch);
 }
 
 void CFlow::Init()

@@ -243,24 +243,59 @@ void CGraphics_Threaded::LinesEnd()
 	m_Drawing = 0;
 }
 
-void CGraphics_Threaded::LinesDraw(const CLineItem *pArray, int Num)
+void CGraphics_Threaded::LinesDraw(const CLineItem *pArray, size_t Num)
 {
 	dbg_assert(m_Drawing == DRAWING_LINES, "called Graphics()->LinesDraw without begin");
 
-	for(int i = 0; i < Num; ++i)
+	size_t VertexIndex = m_NumVertices;
+	for(size_t i = 0; i < Num; ++i)
 	{
-		m_aVertices[m_NumVertices + 2 * i].m_Pos.x = pArray[i].m_X0;
-		m_aVertices[m_NumVertices + 2 * i].m_Pos.y = pArray[i].m_Y0;
-		m_aVertices[m_NumVertices + 2 * i].m_Tex = m_aTexture[0];
-		SetColor(&m_aVertices[m_NumVertices + 2 * i], 0);
+		m_aVertices[VertexIndex].m_Pos.x = pArray[i].m_X0;
+		m_aVertices[VertexIndex].m_Pos.y = pArray[i].m_Y0;
+		m_aVertices[VertexIndex].m_Tex = m_aTexture[0];
+		SetColor(&m_aVertices[VertexIndex], 0);
+		++VertexIndex;
 
-		m_aVertices[m_NumVertices + 2 * i + 1].m_Pos.x = pArray[i].m_X1;
-		m_aVertices[m_NumVertices + 2 * i + 1].m_Pos.y = pArray[i].m_Y1;
-		m_aVertices[m_NumVertices + 2 * i + 1].m_Tex = m_aTexture[1];
-		SetColor(&m_aVertices[m_NumVertices + 2 * i + 1], 1);
+		m_aVertices[VertexIndex].m_Pos.x = pArray[i].m_X1;
+		m_aVertices[VertexIndex].m_Pos.y = pArray[i].m_Y1;
+		m_aVertices[VertexIndex].m_Tex = m_aTexture[1];
+		SetColor(&m_aVertices[VertexIndex], 1);
+		++VertexIndex;
 	}
 
 	AddVertices(2 * Num);
+}
+
+void CGraphics_Threaded::LinesBatchBegin(CLineItemBatch *pBatch)
+{
+	pBatch->m_NumItems = 0;
+	LinesBegin();
+}
+
+void CGraphics_Threaded::LinesBatchEnd(CLineItemBatch *pBatch)
+{
+	if(pBatch->m_NumItems > 0)
+	{
+		LinesDraw(pBatch->m_aItems, pBatch->m_NumItems);
+		pBatch->m_NumItems = 0;
+	}
+	LinesEnd();
+}
+
+void CGraphics_Threaded::LinesBatchDraw(CLineItemBatch *pBatch, const CLineItem *pArray, size_t Num)
+{
+	if(pBatch->m_NumItems + Num >= std::size(pBatch->m_aItems))
+	{
+		LinesDraw(pBatch->m_aItems, pBatch->m_NumItems);
+		pBatch->m_NumItems = 0;
+	}
+	if(Num >= std::size(pBatch->m_aItems))
+	{
+		LinesDraw(pArray, Num);
+		return;
+	}
+	std::copy(pArray, pArray + Num, pBatch->m_aItems + pBatch->m_NumItems);
+	pBatch->m_NumItems += Num;
 }
 
 IGraphics::CTextureHandle CGraphics_Threaded::FindFreeTextureIndex()

@@ -2775,14 +2775,14 @@ void CEditor::DoQuadKnife(int QuadIndex)
 	Graphics()->TextureClear();
 	Graphics()->LinesBegin();
 
-	IGraphics::CLineItem aEdges[4] = {
+	IGraphics::CLineItem aEdges[] = {
 		IGraphics::CLineItem(v[0].x, v[0].y, v[1].x, v[1].y),
 		IGraphics::CLineItem(v[1].x, v[1].y, v[2].x, v[2].y),
 		IGraphics::CLineItem(v[2].x, v[2].y, v[3].x, v[3].y),
 		IGraphics::CLineItem(v[3].x, v[3].y, v[0].x, v[0].y)};
 
 	Graphics()->SetColor(1.f, 0.5f, 0.f, 1.f);
-	Graphics()->LinesDraw(aEdges, 4);
+	Graphics()->LinesDraw(aEdges, std::size(aEdges));
 
 	IGraphics::CLineItem aLines[4];
 	int LineCount = maximum(m_QuadKnifeCount - 1, 0);
@@ -2844,10 +2844,9 @@ void CEditor::DoQuadEnvelopes(const std::vector<CQuad> &vQuads, IGraphics::CText
 
 	// Draw Lines
 	Graphics()->TextureClear();
-	Graphics()->LinesBegin();
+	IGraphics::CLineItemBatch LineItemBatch;
+	Graphics()->LinesBatchBegin(&LineItemBatch);
 	Graphics()->SetColor(80.0f / 255, 150.0f / 255, 230.f / 255, 0.5f);
-	IGraphics::CLineItem aLineItems[128];
-	size_t NumLineItems = 0;
 	for(size_t j = 0; j < Num; j++)
 	{
 		if(!apEnvelope[j] || apEnvelope[j]->m_vPoints.empty())
@@ -2881,24 +2880,14 @@ void CEditor::DoQuadEnvelopes(const std::vector<CQuad> &vQuads, IGraphics::CText
 
 			const vec2 Pos1 = PivotPoint + vec2(Result.r, Result.g);
 
-			aLineItems[NumLineItems] = IGraphics::CLineItem(Pos0.x, Pos0.y, Pos1.x, Pos1.y);
-			NumLineItems++;
-			if(NumLineItems == std::size(aLineItems))
-			{
-				Graphics()->LinesDraw(aLineItems, NumLineItems);
-				NumLineItems = 0;
-			}
+			const IGraphics::CLineItem Item = IGraphics::CLineItem(Pos0.x, Pos0.y, Pos1.x, Pos1.y);
+			Graphics()->LinesBatchDraw(&LineItemBatch, &Item, 1);
 
 			Pos0 = Pos1;
 			PrevTime = CurrentTime;
 		}
 	}
-	if(NumLineItems)
-	{
-		Graphics()->LinesDraw(aLineItems, NumLineItems);
-	}
-	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-	Graphics()->LinesEnd();
+	Graphics()->LinesBatchEnd(&LineItemBatch);
 
 	// Draw Quads
 	Graphics()->TextureSet(Texture);
@@ -2961,10 +2950,10 @@ void CEditor::DoQuadEnvelopes(const std::vector<CQuad> &vQuads, IGraphics::CText
 		}
 	}
 	Graphics()->QuadsEnd();
-	Graphics()->TextureClear();
-	Graphics()->QuadsBegin();
 
 	// Draw QuadPoints
+	Graphics()->TextureClear();
+	Graphics()->QuadsBegin();
 	for(size_t j = 0; j < Num; j++)
 	{
 		if(!apEnvelope[j])
@@ -6836,7 +6825,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 			Ui()->ClipEnable(&View);
 			Graphics()->TextureClear();
-			Graphics()->LinesBegin();
+			IGraphics::CLineItemBatch LineItemBatch;
+			Graphics()->LinesBatchBegin(&LineItemBatch);
 			for(int c = 0; c < pEnvelope->GetChannels(); c++)
 			{
 				if(s_ActiveChannels & (1 << c))
@@ -6847,9 +6837,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				const int Steps = static_cast<int>(((EndX - StartX) / Ui()->Screen()->w) * Graphics()->ScreenWidth());
 				const float StepTime = (EndTime - StartTime) / static_cast<float>(Steps);
 				const float StepSize = (EndX - StartX) / static_cast<float>(Steps);
-
-				IGraphics::CLineItem aLineItems[128];
-				size_t NumLineItems = 0;
 
 				ColorRGBA Channels = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
 				pEnvelope->Eval(StartTime, Channels, c + 1);
@@ -6871,22 +6858,14 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 					const float CurrentX = StartX + Step * StepSize;
 					const float CurrentY = EnvelopeToScreenY(View, Channels[c]);
 
-					aLineItems[NumLineItems] = IGraphics::CLineItem(PrevX, PrevY, CurrentX, CurrentY);
-					NumLineItems++;
-					if(NumLineItems == std::size(aLineItems))
-					{
-						Graphics()->LinesDraw(aLineItems, NumLineItems);
-						NumLineItems = 0;
-					}
+					const IGraphics::CLineItem Item = IGraphics::CLineItem(PrevX, PrevY, CurrentX, CurrentY);
+					Graphics()->LinesBatchDraw(&LineItemBatch, &Item, 1);
 
 					PrevTime = CurrentTime;
 					PrevX = CurrentX;
 					PrevY = CurrentY;
 				}
-				if(NumLineItems)
-				{
-					Graphics()->LinesDraw(aLineItems, NumLineItems);
-				}
+				Graphics()->LinesBatchEnd(&LineItemBatch);
 			}
 			Graphics()->LinesEnd();
 			Ui()->ClipDisable();

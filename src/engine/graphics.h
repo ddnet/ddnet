@@ -335,8 +335,9 @@ public:
 	virtual const char *GetVersionString() = 0;
 	virtual const char *GetRendererString() = 0;
 
-	struct CLineItem
+	class CLineItem
 	{
+	public:
 		float m_X0, m_Y0, m_X1, m_Y1;
 		CLineItem() {}
 		CLineItem(float x0, float y0, float x1, float y1) :
@@ -344,7 +345,17 @@ public:
 	};
 	virtual void LinesBegin() = 0;
 	virtual void LinesEnd() = 0;
-	virtual void LinesDraw(const CLineItem *pArray, int Num) = 0;
+	virtual void LinesDraw(const CLineItem *pArray, size_t Num) = 0;
+
+	class CLineItemBatch
+	{
+	public:
+		IGraphics::CLineItem m_aItems[256];
+		size_t m_NumItems = 0;
+	};
+	virtual void LinesBatchBegin(CLineItemBatch *pBatch) = 0;
+	virtual void LinesBatchEnd(CLineItemBatch *pBatch) = 0;
+	virtual void LinesBatchDraw(CLineItemBatch *pBatch, const CLineItem *pArray, size_t Num) = 0;
 
 	virtual void QuadsBegin() = 0;
 	virtual void QuadsEnd() = 0;
