@@ -51,7 +51,7 @@ void GetGameAreaDistance(const float[2][2][2], const CMapObject[2], const float[
 void GetSignificantScreenPos(const CMapObject &, const float[2][2], const float[2][2], float[2]);
 void ConvertToTiles(const float[2][2], int[2][2]);
 
-bool GetLineIntersection(const float[2], const float[2], float[2] = nullptr);
+bool GetLineIntersection(const float[2], const float[2], float[2]);
 bool GetLineIntersection(const float[2], float);
 void SetInexistent(float *, int);
 bool IsInexistent(const float *, int);
