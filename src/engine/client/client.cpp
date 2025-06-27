@@ -49,6 +49,7 @@
 
 #include <engine/shared/protocolglue.h>
 
+#include <game/client/projectile_data.h>
 #include <game/localization.h>
 #include <game/version.h>
 
