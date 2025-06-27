@@ -137,6 +137,13 @@ public:
 	void Draw4(ColorRGBA ColorTopLeft, ColorRGBA ColorTopRight, ColorRGBA ColorBottomLeft, ColorRGBA ColorBottomRight, int Corners, float Rounding) const;
 
 	/**
+	 * Draws the outline of *this* CUIRect using lines.
+	 *
+	 * @param Color The color to draw the outline in.
+	 */
+	void DrawOutline(ColorRGBA Color) const;
+
+	/**
 	 * Returns the top-left position of *this* CUIRect as a vec2.
 	 *
 	 * @return Top-left position as vec2.

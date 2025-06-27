@@ -63,18 +63,11 @@ void CMapView::RenderGroupBorder()
 			std::shared_ptr<CLayer> pLayer = Editor()->GetSelectedLayerType(i, LAYERTYPE_TILES);
 			if(pLayer)
 			{
-				float w, h;
-				pLayer->GetSize(&w, &h);
-
-				IGraphics::CLineItem aArray[4] = {
-					IGraphics::CLineItem(0, 0, w, 0),
-					IGraphics::CLineItem(w, 0, w, h),
-					IGraphics::CLineItem(w, h, 0, h),
-					IGraphics::CLineItem(0, h, 0, 0)};
-				Graphics()->TextureClear();
-				Graphics()->LinesBegin();
-				Graphics()->LinesDraw(aArray, std::size(aArray));
-				Graphics()->LinesEnd();
+				CUIRect BorderRect;
+				BorderRect.x = 0.0f;
+				BorderRect.y = 0.0f;
+				pLayer->GetSize(&BorderRect.w, &BorderRect.h);
+				BorderRect.DrawOutline(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
 			}
 		}
 	}
