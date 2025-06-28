@@ -53,6 +53,9 @@ public:
 	int m_Number;
 	int m_Layer;
 
+	bool GetNearestAirPos(vec2 Pos, vec2 PrevPos, vec2 *pOutPos);
+	bool GetNearestAirPosPlayer(vec2 PlayerPos, vec2 *pOutPos);
+
 	int m_SnapTicks;
 	int m_DestroyTick;
 	int m_LastRenderTick;
