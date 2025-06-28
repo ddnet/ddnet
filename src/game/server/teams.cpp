@@ -620,10 +620,16 @@ CClientMask CGameTeams::TeamMask(int Team, int ExceptId, int Asker, int VersionF
 		}
 		else
 		{ // Freeview
-			if(GetPlayer(i)->m_SpecTeam)
+			const int SpecTeam = GetPlayer(i)->m_SpecTeam;
+			if(SpecTeam == CPlayer::SPECTEAM_OWN)
 			{ // Show only players in own team when spectating
 				if(m_Core.Team(i) != Team && m_Core.Team(i) != TEAM_SUPER)
 					continue; // in different teams
+			}
+			else if(SpecTeam >= 0)
+			{
+				if(m_Core.Team(i) != SpecTeam && m_Core.Team(i) != TEAM_SUPER)
+					continue;
 			}
 		}
 

@@ -183,7 +183,12 @@ public:
 	bool m_ShowAll;
 	bool m_EnableSpectatorCount;
 	vec2 m_ShowDistance;
-	bool m_SpecTeam;
+	enum
+	{
+		SPECTEAM_ALL = -1,
+		SPECTEAM_OWN = -2,
+	};
+	int m_SpecTeam;
 	bool m_NinjaJetpack;
 
 	// camera info is used sparingly for converting aim target to absolute world coordinates
