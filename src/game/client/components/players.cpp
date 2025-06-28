@@ -256,6 +256,13 @@ void CPlayers::RenderHookCollLine(
 
 				int Tele;
 				int Hit = Collision()->IntersectLineTeleHook(OldPos, NewPos, &FinishPos, nullptr, &Tele);
+
+				if(ClientId >= 0 && GameClient()->IntersectCharacter(OldPos, FinishPos, FinishPos, ClientId) != -1)
+				{
+					HookCollColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorTeeColl));
+					break;
+				}
+
 				if(!DoBreak && Hit == TILE_TELEINHOOK)
 				{
 					if(Collision()->TeleOuts(Tele - 1).size() != 1)
@@ -278,12 +285,6 @@ void CPlayers::RenderHookCollLine(
 					{
 						HookCollColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorHookableColl));
 					}
-				}
-
-				if(ClientId >= 0 && GameClient()->IntersectCharacter(OldPos, FinishPos, FinishPos, ClientId) != -1)
-				{
-					HookCollColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorTeeColl));
-					break;
 				}
 
 				if(Hit && Hit != TILE_TELEINHOOK)
