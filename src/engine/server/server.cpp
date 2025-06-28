@@ -3890,9 +3890,9 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 
 	CMysqlConfig Config;
 	bool Write;
-	if(str_comp_nocase(pResult->GetString(0), "w") == 0)
+	if(str_comp_nocase(pResult->GetString(0), "r") == 0)
 		Write = false;
-	else if(str_comp_nocase(pResult->GetString(0), "r") == 0)
+	else if(str_comp_nocase(pResult->GetString(0), "w") == 0)
 		Write = true;
 	else
 	{
