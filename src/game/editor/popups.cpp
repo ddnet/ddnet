@@ -2921,7 +2921,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupTune(void *pContext, CUIRect View, b
 	enum
 	{
 		PROP_TUNE_NUMBER = 0,
-		PROP_TUNE_VIEW = 1,
+		PROP_TUNE_VIEW,
 		NUM_PROPS,
 	};
 

@@ -6,7 +6,7 @@
 
 #include "prompt.h"
 
-bool FuzzyMatch(const char *pHaystack, const char *pNeedle)
+static bool FuzzyMatch(const char *pHaystack, const char *pNeedle)
 {
 	if(!pNeedle || !pNeedle[0])
 		return false;

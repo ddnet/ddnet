@@ -5,7 +5,7 @@
 #include <game/gamecore.h>
 #include <game/mapitems.h>
 
-bool Process(IStorage *pStorage, const char **pMapNames)
+static bool Process(IStorage *pStorage, const char **pMapNames)
 {
 	CDataFileReader aMaps[2];
 

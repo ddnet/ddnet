@@ -9,7 +9,7 @@
 
 #include <zlib.h>
 
-void CreateEmptyMap(IStorage *pStorage)
+static void CreateEmptyMap(IStorage *pStorage)
 {
 	const char *pMapName = "maps/dummy3.map";
 

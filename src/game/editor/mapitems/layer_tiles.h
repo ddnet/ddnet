@@ -117,7 +117,7 @@ public:
 	void Snap(CUIRect *pRect) const;
 	void Clamp(RECTi *pRect) const;
 
-	virtual bool IsEntitiesLayer() const override;
+	bool IsEntitiesLayer() const override;
 
 	virtual bool IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer);
 	void BrushSelecting(CUIRect Rect) override;

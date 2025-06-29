@@ -377,7 +377,7 @@ class IEngineTextRender : public ITextRender
 	MACRO_INTERFACE("enginetextrender")
 public:
 	virtual void Init() = 0;
-	virtual void Shutdown() override = 0;
+	void Shutdown() override = 0;
 };
 
 extern IEngineTextRender *CreateEngineTextRender();

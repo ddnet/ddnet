@@ -18,18 +18,18 @@ class CMotd : public CComponent
 
 public:
 	CMotd();
-	virtual int Sizeof() const override { return sizeof(*this); }
+	int Sizeof() const override { return sizeof(*this); }
 
 	const char *ServerMotd() const { return m_aServerMotd; }
 	int64_t ServerMotdUpdateTime() const { return m_ServerMotdUpdateTime; }
 	void Clear();
 	bool IsActive() const;
 
-	virtual void OnRender() override;
-	virtual void OnStateChange(int NewState, int OldState) override;
-	virtual void OnWindowResize() override;
-	virtual void OnMessage(int MsgType, void *pRawMsg) override;
-	virtual bool OnInput(const IInput::CEvent &Event) override;
+	void OnRender() override;
+	void OnStateChange(int NewState, int OldState) override;
+	void OnWindowResize() override;
+	void OnMessage(int MsgType, void *pRawMsg) override;
+	bool OnInput(const IInput::CEvent &Event) override;
 };
 
 #endif

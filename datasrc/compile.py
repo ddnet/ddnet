@@ -137,6 +137,7 @@ def gen_network_source():
 #include "protocol.h"
 
 #include <base/system.h>
+#include <engine/uuid.h>
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
 #include <engine/shared/uuid_manager.h>
@@ -402,7 +403,7 @@ def gen_common_content_header():
 	EmitEnum([f"SPRITE_{i.name.value.upper()}" for i in content.container.sprites.items], "NUM_SPRITES")
 
 def gen_common_content_source():
-	EmitDefinition(content.container, "datacontainer")
+	EmitDefinition(content.container, "datacontainer // NOLINT(misc-use-internal-linkage)")
 	print('CDataContainer *g_pData = &datacontainer;')
 
 

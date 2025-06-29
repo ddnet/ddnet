@@ -54,10 +54,10 @@ public:
 	void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels);
 
 	CMapLayers(int Type, bool OnlineOnly = true);
-	virtual int Sizeof() const override { return sizeof(*this); }
-	virtual void OnInit() override;
-	virtual void OnRender() override;
-	virtual void OnMapLoad() override;
+	int Sizeof() const override { return sizeof(*this); }
+	void OnInit() override;
+	void OnRender() override;
+	void OnMapLoad() override;
 
 	virtual CCamera *GetCurCamera();
 

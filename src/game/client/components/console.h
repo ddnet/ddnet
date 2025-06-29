@@ -186,18 +186,18 @@ public:
 
 	CGameConsole();
 	~CGameConsole();
-	virtual int Sizeof() const override { return sizeof(*this); }
+	int Sizeof() const override { return sizeof(*this); }
 
 	void PrintLine(int Type, const char *pLine);
 	void RequireUsername(bool UsernameReq);
 
-	virtual void OnStateChange(int NewState, int OldState) override;
-	virtual void OnConsoleInit() override;
-	virtual void OnInit() override;
-	virtual void OnReset() override;
-	virtual void OnRender() override;
-	virtual void OnMessage(int MsgType, void *pRawMsg) override;
-	virtual bool OnInput(const IInput::CEvent &Event) override;
+	void OnStateChange(int NewState, int OldState) override;
+	void OnConsoleInit() override;
+	void OnInit() override;
+	void OnReset() override;
+	void OnRender() override;
+	void OnMessage(int MsgType, void *pRawMsg) override;
+	bool OnInput(const IInput::CEvent &Event) override;
 	void Prompt(char (&aPrompt)[32]);
 
 	void Toggle(int Type);

@@ -28,14 +28,14 @@
 
 #include <csignal>
 
-volatile sig_atomic_t InterruptSignaled = 0;
+static volatile sig_atomic_t InterruptSignaled = 0;
 
 bool IsInterrupted()
 {
 	return InterruptSignaled;
 }
 
-void HandleSigIntTerm(int Param)
+static void HandleSigIntTerm(int Param)
 {
 	InterruptSignaled = 1;
 
