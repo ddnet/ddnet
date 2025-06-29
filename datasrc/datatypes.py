@@ -274,7 +274,7 @@ class NetObject:
 		offset = 0
 		for v in variables:
 			unpack_lines += ["\t"+line for line in v.emit_dump(offset)]
-			offset += 1
+			offset += v.num_emit_dump_offsets()
 
 		if len(unpack_lines) > 0:
 			lines += unpack_lines
@@ -364,6 +364,8 @@ class NetVariable:
 		return []
 	def emit_unpack_msg_check(self):
 		return []
+	def num_emit_dump_offsets(self):
+		return 1
 	def emit_dump(self, offset):
 		return [f"str_format(aRawData, sizeof(aRawData), \"\\t\\t%3d %12d\\t%08x\", {offset}, ((const int *)pData)[{offset}], ((const int *)pData)[{offset}]);"]
 
@@ -493,6 +495,14 @@ class NetArray(NetVariable):
 			self.var.name = self.base_name + f"[{int(i)}]"
 			lines += self.var.emit_unpack_msg_check()
 		return lines
+	def num_emit_dump_offsets(self):
+		return self.size
+	def emit_dump(self, offset):
+		result = []
+		for i in range(0, self.size):
+			result += NetVariable(self.var).emit_dump(offset + i)
+			result += [f"dbg_msg(\"snapshot\", \"%s\\t{self.base_name}[{int(i)}]=%d\", aRawData, pObj->{self.base_name}[{int(i)}]);"]
+		return result
 
 class NetTwIntString(NetArray):
 	def __init__(self, name, size_chars):
@@ -500,6 +510,10 @@ class NetTwIntString(NetArray):
 			raise ValueError(f"NetTwIntString '{name}' size must be divisible by 4 but is {size_chars}")
 		NetArray.__init__(self, NetIntAny(name), size_chars // 4)
 	def emit_dump(self, offset):
-		return NetVariable(self.name).emit_dump(offset) + \
-			[f"IntsToStr(pObj->{self.base_name}, std::size(pObj->{self.base_name}), aStr, std::size(aStr));"] + \
-			[f"dbg_msg(\"snapshot\", \"%s\\t{self.base_name}=%d\\tIntToStr: %s\", aRawData, pObj->{self.base_name}, aStr);"]
+		result = []
+		for i in range(0, self.size):
+			result += [f"aInts[0] = pObj->{self.base_name}[{int(i)}];"]
+			result += ["IntsToStr(aInts, std::size(aInts), aStr, std::size(aStr));"]
+			result += NetVariable(self.var).emit_dump(offset + i)
+			result += [f"dbg_msg(\"snapshot\", \"%s\\t{self.base_name}[{int(i)}]=%d\\tIntToStr: %s\", aRawData, pObj->{self.base_name}[{int(i)}], aStr);"]
+		return result
