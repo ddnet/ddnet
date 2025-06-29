@@ -97,8 +97,6 @@ static const char *FILETYPE_EXTENSIONS[CEditor::NUM_FILETYPES] = {
 	".png",
 	".opus"};
 
-const void *CEditor::ms_pUiGotContext;
-
 void CEditor::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels, void *pUser)
 {
 	CEditor *pThis = (CEditor *)pUser;
@@ -192,7 +190,7 @@ int CEditor::DoButton_Editor_Common(const void *pId, const char *pText, int Chec
 	if(Ui()->MouseInside(pRect))
 	{
 		if(Flags & BUTTONFLAG_RIGHT)
-			ms_pUiGotContext = pId;
+			m_pUiGotContext = pId;
 	}
 
 	UpdateTooltip(pId, pRect, pToolTip);
@@ -279,7 +277,7 @@ int CEditor::DoButton_DraggableEx(const void *pId, const char *pText, int Checke
 	if(Ui()->MouseInside(pRect))
 	{
 		if(Flags & BUTTONFLAG_RIGHT)
-			ms_pUiGotContext = pId;
+			m_pUiGotContext = pId;
 	}
 
 	UpdateTooltip(pId, pRect, pToolTip);
@@ -1541,7 +1539,7 @@ void CEditor::DoSoundSource(int LayerIndex, CSoundSource *pSource, int Index)
 	}
 	else if(Ui()->HotItem() == pId)
 	{
-		ms_pUiGotContext = pId;
+		m_pUiGotContext = pId;
 
 		Graphics()->SetColor(1, 1, 1, 1);
 		str_copy(m_aTooltip, "Left mouse button to move. Hold alt to ignore grid.");
@@ -2312,7 +2310,7 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 	}
 	else if(Ui()->HotItem() == pId)
 	{
-		ms_pUiGotContext = pId;
+		m_pUiGotContext = pId;
 
 		Graphics()->SetColor(1, 1, 1, 1);
 		str_copy(m_aTooltip, "Left mouse button to move. Hold shift to move pivot. Hold alt to ignore grid. Shift+right click to delete.");
@@ -2550,7 +2548,7 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 	}
 	else if(Ui()->HotItem() == pId)
 	{
-		ms_pUiGotContext = pId;
+		m_pUiGotContext = pId;
 
 		Graphics()->SetColor(1, 1, 1, 1);
 		str_copy(m_aTooltip, "Left mouse button to move. Hold shift to move the texture. Hold alt to ignore grid.");
@@ -3038,7 +3036,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 	}
 	else if(Ui()->HotItem() == pId && m_CurrentQuadIndex == QIndex)
 	{
-		ms_pUiGotContext = pId;
+		m_pUiGotContext = pId;
 
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		str_copy(m_aTooltip, "Left mouse button to move. Hold ctrl to rotate. Hold alt to ignore grid.");
@@ -4735,24 +4733,23 @@ bool CEditor::ReplaceSoundCallback(const char *pFileName, int StorageType, void 
 bool CEditor::IsAssetUsed(int FileType, int Index, void *pUser)
 {
 	CEditor *pEditor = (CEditor *)pUser;
-	for(int g = 0; g < (int)pEditor->m_Map.m_vpGroups.size(); g++)
+	for(const auto &pGroup : pEditor->m_Map.m_vpGroups)
 	{
-		for(int i = 0; i < (int)pEditor->m_Map.m_vpGroups[g]->m_vpLayers.size(); i++)
+		for(const auto &pLayer : pGroup->m_vpLayers)
 		{
-			int LayerType = pEditor->m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Type;
 			if(FileType == FILETYPE_IMG)
 			{
-				if(LayerType == LAYERTYPE_TILES)
+				if(pLayer->m_Type == LAYERTYPE_TILES)
 				{
-					std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(pEditor->m_Map.m_vpGroups[g]->m_vpLayers[i]);
+					std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
 					if(pTiles->m_Image == Index)
 					{
 						return true;
 					}
 				}
-				else if(LayerType == LAYERTYPE_QUADS)
+				else if(pLayer->m_Type == LAYERTYPE_QUADS)
 				{
-					std::shared_ptr<CLayerQuads> pQuads = std::static_pointer_cast<CLayerQuads>(pEditor->m_Map.m_vpGroups[g]->m_vpLayers[i]);
+					std::shared_ptr<CLayerQuads> pQuads = std::static_pointer_cast<CLayerQuads>(pLayer);
 					if(pQuads->m_Image == Index)
 					{
 						return true;
@@ -4761,10 +4758,10 @@ bool CEditor::IsAssetUsed(int FileType, int Index, void *pUser)
 			}
 			else if(FileType == FILETYPE_SOUND)
 			{
-				if(LayerType == LAYERTYPE_SOUNDS)
+				if(pLayer->m_Type == LAYERTYPE_SOUNDS)
 				{
-					std::shared_ptr<CLayerSounds> pSounds = std::static_pointer_cast<CLayerSounds>(pEditor->m_Map.m_vpGroups[g]->m_vpLayers[i]);
-					if(pSounds->m_Sound == pEditor->m_SelectedImage)
+					std::shared_ptr<CLayerSounds> pSounds = std::static_pointer_cast<CLayerSounds>(pLayer);
+					if(pSounds->m_Sound == Index)
 					{
 						return true;
 					}
@@ -5969,7 +5966,7 @@ void CEditor::RenderTooltip(CUIRect TooltipRect)
 		return;
 
 	char aBuf[256];
-	if(ms_pUiGotContext && ms_pUiGotContext == Ui()->HotItem())
+	if(m_pUiGotContext && m_pUiGotContext == Ui()->HotItem())
 		str_format(aBuf, sizeof(aBuf), "%s Right click for context menu.", m_aTooltip);
 	else
 		str_copy(aBuf, m_aTooltip);
@@ -7204,7 +7201,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 							m_ShowEnvelopePreview = SHOWENV_SELECTED;
 							Graphics()->SetColor(1, 1, 1, 1);
 							str_copy(m_aTooltip, "Envelope point. Left mouse to drag. Hold ctrl to be more precise. Hold shift to alter time. Shift+right click to delete.");
-							ms_pUiGotContext = pId;
+							m_pUiGotContext = pId;
 						}
 						else
 							Graphics()->SetColor(aColors[c].r, aColors[c].g, aColors[c].b, 1.0f);
@@ -7339,7 +7336,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 								m_ShowEnvelopePreview = SHOWENV_SELECTED;
 								Graphics()->SetColor(1, 1, 1, 1);
 								str_copy(m_aTooltip, "Bezier out-tangent. Left mouse to drag. Hold ctrl to be more precise. Shift+right click to reset.");
-								ms_pUiGotContext = pId;
+								m_pUiGotContext = pId;
 							}
 							else
 								Graphics()->SetColor(aColors[c].r, aColors[c].g, aColors[c].b, 1.0f);
@@ -7472,7 +7469,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 								m_ShowEnvelopePreview = SHOWENV_SELECTED;
 								Graphics()->SetColor(1, 1, 1, 1);
 								str_copy(m_aTooltip, "Bezier in-tangent. Left mouse to drag. Hold ctrl to be more precise. Shift+right click to reset.");
-								ms_pUiGotContext = pId;
+								m_pUiGotContext = pId;
 							}
 							else
 								Graphics()->SetColor(aColors[c].r, aColors[c].g, aColors[c].b, 1.0f);
@@ -8422,7 +8419,7 @@ void CEditor::RenderMousePointer()
 	{
 		Graphics()->QuadsSetRotation(pi / 2.0f);
 	}
-	if(ms_pUiGotContext == Ui()->HotItem())
+	if(m_pUiGotContext == Ui()->HotItem())
 	{
 		Graphics()->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
 	}
@@ -9140,7 +9137,7 @@ void CEditor::OnRender()
 	else
 		m_AnimateTime = 0;
 
-	ms_pUiGotContext = nullptr;
+	m_pUiGotContext = nullptr;
 	Ui()->StartCheck();
 
 	Ui()->Update(m_MouseWorldPos);

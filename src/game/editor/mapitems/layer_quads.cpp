@@ -74,22 +74,7 @@ CQuad *CLayerQuads::NewQuad(int x, int y, int Width, int Height)
 	pQuad->m_aTexcoords[3].x = i2fx(1);
 	pQuad->m_aTexcoords[3].y = i2fx(1);
 
-	pQuad->m_aColors[0].r = 255;
-	pQuad->m_aColors[0].g = 255;
-	pQuad->m_aColors[0].b = 255;
-	pQuad->m_aColors[0].a = 255;
-	pQuad->m_aColors[1].r = 255;
-	pQuad->m_aColors[1].g = 255;
-	pQuad->m_aColors[1].b = 255;
-	pQuad->m_aColors[1].a = 255;
-	pQuad->m_aColors[2].r = 255;
-	pQuad->m_aColors[2].g = 255;
-	pQuad->m_aColors[2].b = 255;
-	pQuad->m_aColors[2].a = 255;
-	pQuad->m_aColors[3].r = 255;
-	pQuad->m_aColors[3].g = 255;
-	pQuad->m_aColors[3].b = 255;
-	pQuad->m_aColors[3].a = 255;
+	std::fill(std::begin(pQuad->m_aColors), std::end(pQuad->m_aColors), CColor{255, 255, 255, 255});
 
 	return pQuad;
 }
@@ -106,23 +91,21 @@ int CLayerQuads::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 	pGrabbed->m_Image = m_Image;
 	pBrush->AddLayer(pGrabbed);
 
-	//dbg_msg("", "%f %f %f %f", rect.x, rect.y, rect.w, rect.h);
 	for(const auto &Quad : m_vQuads)
 	{
-		float px = fx2f(Quad.m_aPoints[4].x);
-		float py = fx2f(Quad.m_aPoints[4].y);
+		float PointX = fx2f(Quad.m_aPoints[4].x);
+		float PointY = fx2f(Quad.m_aPoints[4].y);
 
-		if(px > Rect.x && px < Rect.x + Rect.w && py > Rect.y && py < Rect.y + Rect.h)
+		if(PointX > Rect.x && PointX < Rect.x + Rect.w && PointY > Rect.y && PointY < Rect.y + Rect.h)
 		{
-			CQuad n = Quad;
-
-			for(auto &Point : n.m_aPoints)
+			CQuad NewQuad = Quad;
+			for(auto &Point : NewQuad.m_aPoints)
 			{
 				Point.x -= f2fx(Rect.x);
 				Point.y -= f2fx(Rect.y);
 			}
 
-			pGrabbed->m_vQuads.push_back(n);
+			pGrabbed->m_vQuads.push_back(NewQuad);
 		}
 	}
 
@@ -135,16 +118,15 @@ void CLayerQuads::BrushPlace(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 	std::vector<CQuad> vAddedQuads;
 	for(const auto &Quad : pQuadLayer->m_vQuads)
 	{
-		CQuad n = Quad;
-
-		for(auto &Point : n.m_aPoints)
+		CQuad NewQuad = Quad;
+		for(auto &Point : NewQuad.m_aPoints)
 		{
 			Point.x += f2fx(WorldPos.x);
 			Point.y += f2fx(WorldPos.y);
 		}
 
-		m_vQuads.push_back(n);
-		vAddedQuads.push_back(n);
+		m_vQuads.push_back(NewQuad);
+		vAddedQuads.push_back(NewQuad);
 	}
 	m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionQuadPlace>(m_pEditor, m_pEditor->m_SelectedGroup, m_pEditor->m_vSelectedLayers[0], vAddedQuads));
 	m_pEditor->m_Map.OnModify();

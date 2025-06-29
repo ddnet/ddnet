@@ -18,8 +18,7 @@ CTile CLayerGame::GetTile(int x, int y)
 {
 	if(m_pEditor->m_Map.m_pFrontLayer && m_pEditor->m_Map.m_pFrontLayer->GetTile(x, y).m_Index == TILE_THROUGH_CUT)
 	{
-		CTile ThroughCut = {TILE_THROUGH_CUT};
-		return ThroughCut;
+		return CTile{TILE_THROUGH_CUT};
 	}
 	else
 	{
@@ -40,17 +39,14 @@ void CLayerGame::SetTile(int x, int y, CTile Tile)
 			int LayerIndex = m_pEditor->m_Map.m_vpGroups[GameGroupIndex]->m_vpLayers.size() - 1;
 			m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(m_pEditor, GameGroupIndex, LayerIndex));
 		}
-		CTile nohook = {TILE_NOHOOK};
-		CLayerTiles::SetTile(x, y, nohook);
-		CTile ThroughCut = {TILE_THROUGH_CUT};
-		m_pEditor->m_Map.m_pFrontLayer->CLayerTiles::SetTile(x, y, ThroughCut); // NOLINT(bugprone-parent-virtual-call)
+		CLayerTiles::SetTile(x, y, CTile{TILE_NOHOOK});
+		m_pEditor->m_Map.m_pFrontLayer->CLayerTiles::SetTile(x, y, CTile{TILE_THROUGH_CUT}); // NOLINT(bugprone-parent-virtual-call)
 	}
 	else
 	{
 		if(m_pEditor->m_SelectEntitiesImage == "DDNet" && m_pEditor->m_Map.m_pFrontLayer && m_pEditor->m_Map.m_pFrontLayer->GetTile(x, y).m_Index == TILE_THROUGH_CUT)
 		{
-			CTile air = {TILE_AIR};
-			m_pEditor->m_Map.m_pFrontLayer->CLayerTiles::SetTile(x, y, air); // NOLINT(bugprone-parent-virtual-call)
+			m_pEditor->m_Map.m_pFrontLayer->CLayerTiles::SetTile(x, y, CTile{TILE_AIR}); // NOLINT(bugprone-parent-virtual-call)
 		}
 		if(m_pEditor->IsAllowPlaceUnusedTiles() || IsValidGameTile(Tile.m_Index))
 		{
@@ -58,8 +54,7 @@ void CLayerGame::SetTile(int x, int y, CTile Tile)
 		}
 		else
 		{
-			CTile air = {TILE_AIR};
-			CLayerTiles::SetTile(x, y, air);
+			CLayerTiles::SetTile(x, y, CTile{TILE_AIR});
 			ShowPreventUnusedTilesWarning();
 		}
 	}

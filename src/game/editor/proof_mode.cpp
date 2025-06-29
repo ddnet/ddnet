@@ -95,7 +95,7 @@ void CProofMode::RenderScreenSizes()
 	const vec2 WorldOffset = Editor()->MapView()->GetWorldOffset();
 
 	// render screen sizes
-	if(m_ProofBorders != PROOF_BORDER_OFF && !Editor()->MapView()->m_ShowPicker)
+	if(m_ProofBorders != PROOF_BORDER_OFF)
 	{
 		std::shared_ptr<CLayerGroup> pGameGroup = Editor()->m_Map.m_pGameGroup;
 		pGameGroup->MapScreen();

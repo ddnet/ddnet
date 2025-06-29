@@ -448,8 +448,6 @@ public:
 
 		m_CursorType = CURSOR_NORMAL;
 
-		ms_pUiGotContext = nullptr;
-
 		// DDRace
 
 		m_TeleNumber = 1;
@@ -860,7 +858,7 @@ public:
 	std::shared_ptr<CLayerTiles> m_pTilesetPicker;
 	std::shared_ptr<CLayerQuads> m_pQuadsetPicker;
 
-	static const void *ms_pUiGotContext;
+	const void *m_pUiGotContext = nullptr;
 
 	CEditorMap m_Map;
 	std::deque<std::shared_ptr<CDataFileWriterFinishJob>> m_WriterFinishJobs;
