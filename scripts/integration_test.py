@@ -601,7 +601,7 @@ def smoke_test(test_env):
 		rcon unban_all
 		rcon say the end
 	""".strip().split("\n")))
-	client1.wait_for_log_exact("chat/server: *** the end")
+	client1.wait_for_log_exact("chat/server: *** the end", timeout=3)
 
 	server.command("stoprecord")
 	client1.command("stoprecord")
