@@ -414,13 +414,6 @@ class NetIntAny(NetVariable):
 		return NetVariable(self.name).emit_dump(offset) + \
 			[f"dbg_msg(\"snapshot\", \"%s\\t{self.name}=%d\", aRawData, pObj->{self.name});"]
 
-class NetTwIntString(NetIntAny):
-	def emit_dump(self, offset):
-		return NetVariable(self.name).emit_dump(offset) + \
-			[f"aInts[0] = pObj->{self.name};"] + \
-			["IntsToStr(aInts, std::size(aInts), aStr, std::size(aStr));"] + \
-			[f"dbg_msg(\"snapshot\", \"%s\\t{self.name}=%d\\tIntToStr: %s\", aRawData, pObj->{self.name}, aStr);"]
-
 class NetIntRange(NetIntAny):
 	def __init__(self, name, min_val, max_val, *, default=None):
 		NetIntAny.__init__(self,name,default=default)
@@ -500,3 +493,13 @@ class NetArray(NetVariable):
 			self.var.name = self.base_name + f"[{int(i)}]"
 			lines += self.var.emit_unpack_msg_check()
 		return lines
+
+class NetTwIntString(NetArray):
+	def __init__(self, name, size_chars):
+		if size_chars % 4 != 0:
+			raise ValueError(f"NetTwIntString '{name}' size must be divisible by 4 but is {size_chars}")
+		NetArray.__init__(self, NetIntAny(name), size_chars // 4)
+	def emit_dump(self, offset):
+		return NetVariable(self.name).emit_dump(offset) + \
+			[f"IntsToStr(pObj->{self.base_name}, std::size(pObj->{self.base_name}), aStr, std::size(aStr));"] + \
+			[f"dbg_msg(\"snapshot\", \"%s\\t{self.base_name}=%d\\tIntToStr: %s\", aRawData, pObj->{self.base_name}, aStr);"]

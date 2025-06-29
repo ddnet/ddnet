@@ -284,6 +284,7 @@ void CNetObjHandler::DebugDumpSnapshot(const CSnapshot *pSnap) const
 	lines += ['int CNetObjHandler::DumpObj(int Type, const void *pData, int Size) const']
 	lines += ['{']
 	lines += ["\tchar aRawData[512];"]
+	lines += ["\tchar aStr[128];"]
 	lines += ['\tswitch(Type)']
 	lines += ['\t{']
 
