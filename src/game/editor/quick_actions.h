@@ -217,7 +217,11 @@ REGISTER_QUICK_ACTION(
 REGISTER_QUICK_ACTION(
 	SaveAs,
 	"Save as",
-	[&]() { InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save as", "maps", true, CEditor::CallbackSaveMap, this); },
+	[&]() {
+		char aDefaultName[IO_MAX_PATH_LENGTH];
+		fs_split_file_extension(fs_filename(m_aFileName), aDefaultName, sizeof(aDefaultName));
+		m_FileBrowser.ShowFileDialog(IStorage::TYPE_SAVE, CFileBrowser::EFileType::MAP, "Save map", "Save as", "maps", aDefaultName, CallbackSaveMap, this);
+	},
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
@@ -267,7 +271,7 @@ REGISTER_QUICK_ACTION(
 REGISTER_QUICK_ACTION(
 	AddImage,
 	"Add image",
-	[&]() { InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_IMG, "Add Image", "Add", "mapres", false, AddImage, this); },
+	[&]() { m_FileBrowser.ShowFileDialog(IStorage::TYPE_ALL, CFileBrowser::EFileType::IMAGE, "Add image", "Add", "mapres", "", AddImage, this); },
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,

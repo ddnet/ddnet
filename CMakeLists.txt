@@ -2484,6 +2484,8 @@ if(CLIENT)
     enums.h
     explanations.cpp
     explanations.h
+    file_browser.cpp
+    file_browser.h
     font_typer.cpp
     font_typer.h
     layer_selector.cpp
