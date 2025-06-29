@@ -1,8 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <algorithm>
-
 #include <base/color.h>
 #include <base/system.h>
 
@@ -17,12 +15,17 @@
 #include <engine/graphics.h>
 #include <engine/input.h>
 #include <engine/keys.h>
+#include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
 #include <engine/shared/filecollection.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
 
 #include <game/client/components/camera.h>
+#include <game/client/components/items.h>
+#include <game/client/components/mapimages.h>
+#include <game/client/components/sounds.h>
+
 #include <game/client/gameclient.h>
 #include <game/client/lineinput.h>
 #include <game/client/render.h>
@@ -40,6 +43,7 @@
 #include "editor.h"
 #include "editor_actions.h"
 
+#include <algorithm>
 #include <chrono>
 #include <iterator>
 #include <limits>

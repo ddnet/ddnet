@@ -1,6 +1,5 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -12,6 +11,8 @@
 #include <base/vmath.h>
 
 #include <engine/client.h>
+#include <engine/client/serverbrowser.h>
+#include <engine/client/updater.h>
 #include <engine/config.h>
 #include <engine/editor.h>
 #include <engine/friends.h>
@@ -23,18 +24,20 @@
 #include <engine/storage.h>
 #include <engine/textrender.h>
 
-#include <game/generated/protocol.h>
-
-#include <engine/client/updater.h>
-
-#include <game/client/animstate.h>
 #include <game/client/components/binds.h>
 #include <game/client/components/console.h>
+#include <game/client/components/effects.h>
+#include <game/client/components/items.h>
 #include <game/client/components/menu_background.h>
+#include <game/client/components/skins.h>
 #include <game/client/components/sounds.h>
+#include <game/client/components/tooltips.h>
+
+#include <game/client/animstate.h>
 #include <game/client/gameclient.h>
 #include <game/client/ui_listbox.h>
 #include <game/generated/client_data.h>
+#include <game/generated/protocol.h>
 #include <game/localization.h>
 
 #include "menus.h"

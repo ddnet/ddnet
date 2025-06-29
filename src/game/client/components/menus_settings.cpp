@@ -4,6 +4,7 @@
 #include <base/math.h>
 #include <base/system.h>
 
+#include <engine/editor.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
@@ -15,10 +16,19 @@
 
 #include <game/generated/protocol.h>
 
-#include <game/client/animstate.h>
+#include <game/client/components/binds.h>
 #include <game/client/components/chat.h>
+#include <game/client/components/console.h>
+#include <game/client/components/countryflags.h>
+#include <game/client/components/emoticon.h>
 #include <game/client/components/menu_background.h>
+#include <game/client/components/menus.h>
+#include <game/client/components/nameplates.h>
+#include <game/client/components/skins.h>
 #include <game/client/components/sounds.h>
+#include <game/client/components/tooltips.h>
+
+#include <game/client/animstate.h>
 #include <game/client/gameclient.h>
 #include <game/client/render.h>
 #include <game/client/skin.h>
@@ -26,11 +36,6 @@
 #include <game/client/ui_listbox.h>
 #include <game/client/ui_scrollregion.h>
 #include <game/localization.h>
-
-#include "binds.h"
-#include "countryflags.h"
-#include "menus.h"
-#include "skins.h"
 
 #include <array>
 #include <chrono>

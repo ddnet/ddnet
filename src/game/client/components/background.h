@@ -5,8 +5,6 @@
 
 #include <game/client/components/maplayers.h>
 
-#include <cstdint>
-
 class CLayers;
 class CMapImages;
 

@@ -3,17 +3,22 @@
 
 #include <limits>
 
+#include <engine/demo.h>
 #include <engine/graphics.h>
+#include <engine/keys.h>
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
 
 #include <game/generated/protocol.h>
 
+#include <game/client/components/camera.h>
+#include <game/client/components/console.h>
+#include <game/client/components/menus.h>
+
 #include <game/client/animstate.h>
 #include <game/client/render.h>
 #include <game/localization.h>
 
-#include "camera.h"
 #include "spectator.h"
 
 #include <game/client/gameclient.h>
