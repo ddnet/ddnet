@@ -285,6 +285,7 @@ void CNetObjHandler::DebugDumpSnapshot(const CSnapshot *pSnap) const
 	lines += ['{']
 	lines += ["\tchar aRawData[512];"]
 	lines += ["\tchar aStr[128];"]
+	lines += ["\tint aInts[2] = {0x0, (int)0x80808080};"]
 	lines += ['\tswitch(Type)']
 	lines += ['\t{']
 
