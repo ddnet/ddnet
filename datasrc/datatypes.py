@@ -233,6 +233,15 @@ class NetObject:
 		lines += ["};"]
 		return lines
 
+	def members_from_this_and_parents(self, objects):
+		variables = self.variables
+		next_base_name = self.base
+		while next_base_name is not None:
+			base_item = only([i for i in objects if i.name == next_base_name])
+			variables = base_item.variables + variables
+			next_base_name = base_item.base
+		return variables
+
 	def emit_uncompressed_unpack_and_validate(self, objects):
 		lines = []
 		lines += [f"case {self.enum_name}:"]
@@ -240,12 +249,7 @@ class NetObject:
 		lines += [f"\t{self.struct_name} *pData = ({self.struct_name} *)m_aUnpackedData;"]
 		unpack_lines = []
 
-		variables = self.variables
-		next_base_name = self.base
-		while next_base_name is not None:
-			base_item = only([i for i in objects if i.name == next_base_name])
-			variables = base_item.variables + variables
-			next_base_name = base_item.base
+		variables = self.members_from_this_and_parents(objects)
 		for v in variables:
 			if not self.validate_size and v.default is None:
 				raise ValueError(f"{v.name} in {self.name} has no default value. Member variables that do not have a default value cannot be used in a structure whose size is not validated.")
@@ -258,6 +262,26 @@ class NetObject:
 		else:
 			lines += ["\t(void)pData;"]
 		lines += ["} break;"]
+		return lines
+
+	def emit_dump(self, objects):
+		lines = []
+		lines += [f"case {self.enum_name}:"]
+		lines += ["{"]
+		lines += [f"\t{self.struct_name} *pObj = ({self.struct_name} *)pData;"]
+		unpack_lines = []
+		variables = self.members_from_this_and_parents(objects)
+		offset = 0
+		for v in variables:
+			unpack_lines += ["\t"+line for line in v.emit_dump(offset)]
+			offset += v.num_emit_dump_offsets()
+
+		if len(unpack_lines) > 0:
+			lines += unpack_lines
+		else:
+			lines += ["\t(void)pData;"]
+		lines += ["return 0;"]
+		lines += ["};"]
 		return lines
 
 class NetEvent(NetObject):
@@ -340,6 +364,10 @@ class NetVariable:
 		return []
 	def emit_unpack_msg_check(self):
 		return []
+	def num_emit_dump_offsets(self):
+		return 1
+	def emit_dump(self, offset):
+		return [f"str_format(aRawData, sizeof(aRawData), \"\\t\\t%3d %12d\\t%08x\", {offset}, ((const int *)pData)[{offset}], ((const int *)pData)[{offset}]);"]
 
 class NetString(NetVariable):
 	def emit_declaration(self):
@@ -384,6 +412,9 @@ class NetIntAny(NetVariable):
 		return [f"pData->{self.name} = pUnpacker->GetIntOrDefault({self.default});"]
 	def emit_pack(self):
 		return [f"pPacker->AddInt({self.name});"]
+	def emit_dump(self, offset):
+		return NetVariable(self.name).emit_dump(offset) + \
+			[f"dbg_msg(\"snapshot\", \"%s\\t{self.name}=%d\", aRawData, pObj->{self.name});"]
 
 class NetIntRange(NetIntAny):
 	def __init__(self, name, min_val, max_val, *, default=None):
@@ -394,6 +425,23 @@ class NetIntRange(NetIntAny):
 		return [f"pData->{self.name} = ClampInt(\"{self.name}\", pData->{self.name}, {self.min}, {self.max});"]
 	def emit_unpack_msg_check(self):
 		return [f"if(pData->{self.name} < {self.min} || pData->{self.name} > {self.max}) {{ m_pMsgFailedOn = \"{self.name}\"; break; }}"]
+	def emit_dump(self, offset):
+		min_fmt=f"min={self.min}"
+		min_arg = ''
+		try:
+			int(self.min)
+		except ValueError:
+			min_fmt = f"min={self.min}(%d)"
+			min_arg = f", (int){self.min}"
+		max_fmt=f"max={self.max}"
+		max_arg = ''
+		try:
+			int(self.max)
+		except ValueError:
+			max_fmt = f"max={self.max}(%d)"
+			max_arg = f", (int){self.max}"
+		return NetVariable(self.name).emit_dump(offset) + \
+			[f"dbg_msg(\"snapshot\", \"%s\\t{self.name}=%d ({min_fmt} {max_fmt})\", aRawData, pObj->{self.name}{min_arg}{max_arg});"]
 
 class NetBool(NetIntRange):
 	def __init__(self, name, *, default=None):
@@ -403,6 +451,9 @@ class NetBool(NetIntRange):
 class NetTick(NetIntAny):
 	def __init__(self, name, *, default=None):
 		NetIntAny.__init__(self,name,default=default)
+	def emit_dump(self, offset):
+		return NetVariable(self.name).emit_dump(offset) + \
+			[f"dbg_msg(\"snapshot\", \"%s\\t{self.name}=%d (NetTick)\", aRawData, pObj->{self.name});"]
 
 class NetArray(NetVariable):
 	def __init__(self, var, size):
@@ -444,3 +495,25 @@ class NetArray(NetVariable):
 			self.var.name = self.base_name + f"[{int(i)}]"
 			lines += self.var.emit_unpack_msg_check()
 		return lines
+	def num_emit_dump_offsets(self):
+		return self.size
+	def emit_dump(self, offset):
+		result = []
+		for i in range(0, self.size):
+			result += NetVariable(self.var).emit_dump(offset + i)
+			result += [f"dbg_msg(\"snapshot\", \"%s\\t{self.base_name}[{int(i)}]=%d\", aRawData, pObj->{self.base_name}[{int(i)}]);"]
+		return result
+
+class NetTwIntString(NetArray):
+	def __init__(self, name, size_chars):
+		if size_chars % 4 != 0:
+			raise ValueError(f"NetTwIntString '{name}' size must be divisible by 4 but is {size_chars}")
+		NetArray.__init__(self, NetIntAny(name), size_chars // 4)
+	def emit_dump(self, offset):
+		result = []
+		for i in range(0, self.size):
+			result += [f"aInts[0] = pObj->{self.base_name}[{int(i)}];"]
+			result += ["IntsToStr(aInts, std::size(aInts), aStr, std::size(aStr));"]
+			result += NetVariable(self.var).emit_dump(offset + i)
+			result += [f"dbg_msg(\"snapshot\", \"%s\\t{self.base_name}[{int(i)}]=%d\\tIntToStr: %s\", aRawData, pObj->{self.base_name}[{int(i)}], aStr);"]
+		return result
