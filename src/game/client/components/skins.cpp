@@ -797,7 +797,7 @@ CSkins::CSkinList &CSkins::SkinList()
 			}
 			NameMatch = std::make_pair<int, int>(pNameMatchStart - pSkinContainer->Name(), pNameMatchEnd - pNameMatchStart);
 		}
-		m_SkinList.m_vSkins.emplace_back(pSkinContainer.get(), m_Favorites.find(pSkinContainer->NormalizedName()) != m_Favorites.end(), SelectedMain, SelectedDummy, NameMatch);
+		m_SkinList.m_vSkins.emplace_back(pSkinContainer.get(), m_Favorites.contains(pSkinContainer->NormalizedName()), SelectedMain, SelectedDummy, NameMatch);
 	}
 
 	std::sort(m_SkinList.m_vSkins.begin(), m_SkinList.m_vSkins.end());
@@ -902,7 +902,7 @@ bool CSkins::IsFavorite(const char *pName) const
 {
 	char aNormalizedName[NORMALIZED_SKIN_NAME_LENGTH];
 	str_utf8_tolower(pName, aNormalizedName, sizeof(aNormalizedName));
-	return m_Favorites.find(aNormalizedName) != m_Favorites.end();
+	return m_Favorites.contains(aNormalizedName);
 }
 
 void CSkins::RandomizeSkin(int Dummy)

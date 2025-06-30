@@ -453,7 +453,8 @@ void CEditorActionBulk::Undo()
 {
 	if(m_Reverse)
 	{
-		for(auto pIt = m_vpActions.rbegin(); pIt != m_vpActions.rend(); pIt++)
+		// reverse_view is not supported in gcc 10
+		for(auto pIt = m_vpActions.rbegin(); pIt != m_vpActions.rend(); pIt++) // NOLINT: modernize-loop-convert
 		{
 			auto &pAction = *pIt;
 			pAction->Undo();

@@ -1252,28 +1252,28 @@ int CCollision::IsFrontTimeCheckpoint(int Index) const
 
 vec2 CCollision::TeleAllGet(int Number, size_t Offset)
 {
-	if(m_TeleIns.count(Number) > 0)
+	if(m_TeleIns.contains(Number))
 	{
 		if(m_TeleIns[Number].size() > Offset)
 			return m_TeleIns[Number][Offset];
 		else
 			Offset -= m_TeleIns[Number].size();
 	}
-	if(m_TeleOuts.count(Number) > 0)
+	if(m_TeleOuts.contains(Number))
 	{
 		if(m_TeleOuts[Number].size() > Offset)
 			return m_TeleOuts[Number][Offset];
 		else
 			Offset -= m_TeleOuts[Number].size();
 	}
-	if(m_TeleCheckOuts.count(Number) > 0)
+	if(m_TeleCheckOuts.contains(Number))
 	{
 		if(m_TeleCheckOuts[Number].size() > Offset)
 			return m_TeleCheckOuts[Number][Offset];
 		else
 			Offset -= m_TeleCheckOuts[Number].size();
 	}
-	if(m_TeleOthers.count(Number) > 0)
+	if(m_TeleOthers.contains(Number))
 	{
 		if(m_TeleOthers[Number].size() > Offset)
 			return m_TeleOthers[Number][Offset];
@@ -1284,13 +1284,13 @@ vec2 CCollision::TeleAllGet(int Number, size_t Offset)
 size_t CCollision::TeleAllSize(int Number)
 {
 	size_t Total = 0;
-	if(m_TeleIns.count(Number) > 0)
+	if(m_TeleIns.contains(Number))
 		Total += m_TeleIns[Number].size();
-	if(m_TeleOuts.count(Number) > 0)
+	if(m_TeleOuts.contains(Number))
 		Total += m_TeleOuts[Number].size();
-	if(m_TeleCheckOuts.count(Number) > 0)
+	if(m_TeleCheckOuts.contains(Number))
 		Total += m_TeleCheckOuts[Number].size();
-	if(m_TeleOthers.count(Number) > 0)
+	if(m_TeleOthers.contains(Number))
 		Total += m_TeleOthers[Number].size();
 	return Total;
 }
