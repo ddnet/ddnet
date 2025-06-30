@@ -27,84 +27,71 @@
 #include <base/color.h>
 #include <base/math.h>
 
-void CPlayers::RenderHand(const CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float AngleOffset, vec2 PostRotOffset, float Alpha)
+static float CalculateHandAngle(vec2 Dir, float AngleOffset)
 {
-	if(pInfo->m_aSixup[g_Config.m_ClDummy].PartTexture(protocol7::SKINPART_BODY).IsValid())
-		RenderHand7(pInfo, CenterPos, Dir, AngleOffset, PostRotOffset, Alpha);
+	const float Angle = angle(Dir);
+	if(Dir.x < 0.0f)
+	{
+		return Angle - AngleOffset;
+	}
 	else
-		RenderHand6(pInfo, CenterPos, Dir, AngleOffset, PostRotOffset, Alpha);
+	{
+		return Angle + AngleOffset;
+	}
 }
 
-void CPlayers::RenderHand7(const CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float AngleOffset, vec2 PostRotOffset, float Alpha)
+static vec2 CalculateHandPosition(vec2 CenterPos, vec2 Dir, vec2 PostRotOffset)
+{
+	vec2 DirY = vec2(-Dir.y, Dir.x);
+	if(Dir.x < 0.0f)
+	{
+		DirY = -DirY;
+	}
+	return CenterPos + Dir + Dir * PostRotOffset.x + DirY * PostRotOffset.y;
+}
+
+void CPlayers::RenderHand(const CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float AngleOffset, vec2 PostRotOffset, float Alpha)
+{
+	const vec2 HandPos = CalculateHandPosition(CenterPos, Dir, PostRotOffset);
+	const float HandAngle = CalculateHandAngle(Dir, AngleOffset);
+	if(pInfo->m_aSixup[g_Config.m_ClDummy].PartTexture(protocol7::SKINPART_HANDS).IsValid())
+	{
+		RenderHand7(pInfo, HandPos, HandAngle, Alpha);
+	}
+	else
+	{
+		RenderHand6(pInfo, HandPos, HandAngle, Alpha);
+	}
+}
+
+void CPlayers::RenderHand7(const CTeeRenderInfo *pInfo, vec2 HandPos, float HandAngle, float Alpha)
 {
 	// in-game hand size is 15 when tee size is 64
-	float BaseSize = 15.0f * (pInfo->m_Size / 64.0f);
-
-	vec2 HandPos = CenterPos + Dir;
-	float Angle = angle(Dir);
-	if(Dir.x < 0)
-		Angle -= AngleOffset;
-	else
-		Angle += AngleOffset;
-
-	vec2 DirX = Dir;
-	vec2 DirY(-Dir.y, Dir.x);
-
-	if(Dir.x < 0)
-		DirY = -DirY;
-
-	HandPos += DirX * PostRotOffset.x;
-	HandPos += DirY * PostRotOffset.y;
-
-	ColorRGBA Color = pInfo->m_aSixup[g_Config.m_ClDummy].m_aColors[protocol7::SKINPART_HANDS];
-	Color.a = Alpha;
+	const float BaseSize = 15.0f * (pInfo->m_Size / 64.0f);
 	IGraphics::CQuadItem QuadOutline(HandPos.x, HandPos.y, 2 * BaseSize, 2 * BaseSize);
 	IGraphics::CQuadItem QuadHand = QuadOutline;
 
 	Graphics()->TextureSet(pInfo->m_aSixup[g_Config.m_ClDummy].PartTexture(protocol7::SKINPART_HANDS));
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(Color);
-	Graphics()->QuadsSetRotation(Angle);
-
+	Graphics()->SetColor(pInfo->m_aSixup[g_Config.m_ClDummy].m_aColors[protocol7::SKINPART_HANDS].WithAlpha(Alpha));
+	Graphics()->QuadsSetRotation(HandAngle);
 	RenderTools()->SelectSprite7(client_data7::SPRITE_TEE_HAND_OUTLINE);
 	Graphics()->QuadsDraw(&QuadOutline, 1);
 	RenderTools()->SelectSprite7(client_data7::SPRITE_TEE_HAND);
 	Graphics()->QuadsDraw(&QuadHand, 1);
-
-	Graphics()->QuadsSetRotation(0);
 	Graphics()->QuadsEnd();
 }
 
-void CPlayers::RenderHand6(const CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float AngleOffset, vec2 PostRotOffset, float Alpha)
+void CPlayers::RenderHand6(const CTeeRenderInfo *pInfo, vec2 HandPos, float HandAngle, float Alpha)
 {
-	vec2 HandPos = CenterPos + Dir;
-	float Angle = angle(Dir);
-	if(Dir.x < 0)
-		Angle -= AngleOffset;
-	else
-		Angle += AngleOffset;
-
-	vec2 DirX = Dir;
-	vec2 DirY(-Dir.y, Dir.x);
-
-	if(Dir.x < 0)
-		DirY = -DirY;
-
-	HandPos += DirX * PostRotOffset.x;
-	HandPos += DirY * PostRotOffset.y;
-
 	const CSkin::CSkinTextures *pSkinTextures = pInfo->m_CustomColoredSkin ? &pInfo->m_ColorableRenderSkin : &pInfo->m_OriginalRenderSkin;
 
-	Graphics()->SetColor(pInfo->m_ColorBody.r, pInfo->m_ColorBody.g, pInfo->m_ColorBody.b, Alpha);
-
-	// two passes
-	for(int i = 0; i < 2; i++)
-	{
-		int QuadOffset = NUM_WEAPONS * 2 + i;
-		Graphics()->QuadsSetRotation(Angle);
-		Graphics()->TextureSet(i == 0 ? pSkinTextures->m_HandsOutline : pSkinTextures->m_Hands);
-		Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, HandPos.x, HandPos.y);
-	}
+	Graphics()->SetColor(pInfo->m_ColorBody.WithAlpha(Alpha));
+	Graphics()->QuadsSetRotation(HandAngle);
+	Graphics()->TextureSet(pSkinTextures->m_HandsOutline);
+	Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, NUM_WEAPONS * 2, HandPos.x, HandPos.y);
+	Graphics()->TextureSet(pSkinTextures->m_Hands);
+	Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, NUM_WEAPONS * 2 + 1, HandPos.x, HandPos.y);
 }
 
 float CPlayers::GetPlayerTargetAngle(
