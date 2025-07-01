@@ -496,6 +496,11 @@ std::unique_ptr<ILogger> log_logger_noop()
 	return std::make_unique<CLoggerNoOp>();
 }
 
+#ifdef __GNUC__
+// atomic_compare_exchange_strong_explicit is deprecated
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
 void CFutureLogger::Set(std::shared_ptr<ILogger> pLogger)
 {
 	const CLockScope LockScope(m_PendingLock);
@@ -549,6 +554,10 @@ void CFutureLogger::OnFilterChange()
 		pLogger->SetFilter(m_Filter);
 	}
 }
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 void CMemoryLogger::Log(const CLogMessage *pMessage)
 {
