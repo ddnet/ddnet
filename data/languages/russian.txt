@@ -2143,7 +2143,7 @@ Show friend icon in name plates
 == Показывать иконку друга в именах
 
 Show client IDs on a seperate line
-== Показывать ID клиента на отдельной линее
+== Показывать ID клиента на отдельной линии
 
 Client IDs size
 == Размер ID клиента
