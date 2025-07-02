@@ -582,7 +582,12 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 		m_ViewPos = vec2(pNewInput->m_TargetX, pNewInput->m_TargetY);
 
 	// check for activity
-	if(mem_comp(pNewInput, m_pLastTarget, sizeof(CNetObj_PlayerInput)))
+	// if a player is killed, their scoreboard opens automatically, so ignore that flag
+	CNetObj_PlayerInput NewWithoutScoreboard = *pNewInput;
+	CNetObj_PlayerInput LastWithoutScoreboard = *m_pLastTarget;
+	NewWithoutScoreboard.m_PlayerFlags &= ~PLAYERFLAG_SCOREBOARD;
+	LastWithoutScoreboard.m_PlayerFlags &= ~PLAYERFLAG_SCOREBOARD;
+	if(mem_comp(&NewWithoutScoreboard, &LastWithoutScoreboard, sizeof(CNetObj_PlayerInput)))
 	{
 		mem_copy(m_pLastTarget, pNewInput, sizeof(CNetObj_PlayerInput));
 		// Ignore the first direct input and keep the player afk as it is sent automatically
