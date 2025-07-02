@@ -146,11 +146,12 @@ void CGraph::Render(IGraphics *pGraphics, ITextRender *pTextRender, float x, flo
 		IGraphics::CLineItem(x, y + (h * 3) / 4, x + w, y + (h * 3) / 4),
 		IGraphics::CLineItem(x, y + h / 4, x + w, y + h / 4)};
 	pGraphics->LinesDraw(aLineItems, std::size(aLineItems));
+	pGraphics->LinesEnd();
 
 	if(m_pFirstScaled != nullptr)
 	{
-		IGraphics::CLineItem aValueLineItems[128];
-		size_t NumValueLineItems = 0;
+		IGraphics::CLineItemBatch LineItemBatch;
+		pGraphics->LinesBatchBegin(&LineItemBatch);
 
 		const int64_t StartTime = m_pFirstScaled->m_Time;
 
@@ -168,35 +169,23 @@ void CGraph::Render(IGraphics *pGraphics, ITextRender *pTextRender, float x, flo
 
 			if(pEntry1->m_ApplyColor)
 			{
-				if(NumValueLineItems)
-				{
-					pGraphics->LinesDraw(aValueLineItems, NumValueLineItems);
-					NumValueLineItems = 0;
-				}
+				pGraphics->LinesBatchEnd(&LineItemBatch);
+				pGraphics->LinesBatchBegin(&LineItemBatch);
 
-				IGraphics::CColorVertex aColorVertices[2] = {
+				IGraphics::CColorVertex aColorVertices[] = {
 					IGraphics::CColorVertex(0, pEntry0->m_Color.r, pEntry0->m_Color.g, pEntry0->m_Color.b, pEntry0->m_Color.a),
 					IGraphics::CColorVertex(1, pEntry1->m_Color.r, pEntry1->m_Color.g, pEntry1->m_Color.b, pEntry1->m_Color.a)};
 				pGraphics->SetColorVertex(aColorVertices, std::size(aColorVertices));
 			}
-			if(NumValueLineItems == std::size(aValueLineItems))
-			{
-				pGraphics->LinesDraw(aValueLineItems, NumValueLineItems);
-				NumValueLineItems = 0;
-			}
-			aValueLineItems[NumValueLineItems] = IGraphics::CLineItem(x + a0, y + h - v0, x + a1, y + h - v1);
-			++NumValueLineItems;
+			const IGraphics::CLineItem Item = IGraphics::CLineItem(x + a0, y + h - v0, x + a1, y + h - v1);
+			pGraphics->LinesBatchDraw(&LineItemBatch, &Item, 1);
 
 			pEntry0 = pEntry1;
 			a0 = a1;
 			v0 = v1;
 		}
-		if(NumValueLineItems)
-		{
-			pGraphics->LinesDraw(aValueLineItems, NumValueLineItems);
-		}
+		pGraphics->LinesBatchEnd(&LineItemBatch);
 	}
-	pGraphics->LinesEnd();
 
 	const float FontSize = 12.0f;
 	const float Spacing = 2.0f;

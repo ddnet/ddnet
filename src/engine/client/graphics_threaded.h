@@ -934,7 +934,11 @@ public:
 
 	void LinesBegin() override;
 	void LinesEnd() override;
-	void LinesDraw(const CLineItem *pArray, int Num) override;
+	void LinesDraw(const CLineItem *pArray, size_t Num) override;
+
+	void LinesBatchBegin(CLineItemBatch *pBatch) override;
+	void LinesBatchEnd(CLineItemBatch *pBatch) override;
+	void LinesBatchDraw(CLineItemBatch *pBatch, const CLineItem *pArray, size_t Num) override;
 
 	IGraphics::CTextureHandle FindFreeTextureIndex();
 	void FreeTextureIndex(CTextureHandle *pIndex);
