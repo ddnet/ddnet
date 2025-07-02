@@ -875,6 +875,7 @@ void CInput::ProcessSystemMessage(SDL_SysWMmsg *pMsg)
 			m_vCandidates.clear();
 			if(pCandidateList && Size > 0)
 			{
+				m_vCandidates.reserve(std::min(pCandidateList->dwCount - pCandidateList->dwPageStart, pCandidateList->dwPageSize));
 				for(DWORD i = pCandidateList->dwPageStart; i < pCandidateList->dwCount && (int)m_vCandidates.size() < (int)pCandidateList->dwPageSize; i++)
 				{
 					LPCWSTR pCandidate = (LPCWSTR)((DWORD_PTR)pCandidateList + pCandidateList->dwOffset[i]);

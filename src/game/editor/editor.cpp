@@ -564,7 +564,7 @@ void CEditor::DeleteSelectedQuads()
 
 	std::vector<int> vSelectedQuads(m_vSelectedQuads);
 	std::vector<CQuad> vDeletedQuads;
-
+	vDeletedQuads.reserve(m_vSelectedQuads.size());
 	for(int i = 0; i < (int)m_vSelectedQuads.size(); ++i)
 	{
 		auto const &Quad = pLayer->m_vQuads[m_vSelectedQuads[i]];

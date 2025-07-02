@@ -1021,10 +1021,7 @@ void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pBu
 {
 	// no multiline support for console
 	std::string BodyStr = pBody;
-	while(BodyStr.find('\n') != std::string::npos)
-	{
-		BodyStr.replace(BodyStr.find('\n'), 1, " ");
-	}
+	std::replace(BodyStr.begin(), BodyStr.end(), '\n', ' ');
 	log_warn("client", "%s: %s", pTopic, BodyStr.c_str());
 
 	Ui()->SetActiveItem(nullptr);
