@@ -1369,6 +1369,7 @@ std::optional<CTouchControls::CTouchButton> CTouchControls::ParseButton(const js
 		return {};
 	}
 	std::vector<CButtonVisibility> vParsedVisibilities;
+	vParsedVisibilities.reserve(Visibilities.u.array.length);
 	for(unsigned VisibilityIndex = 0; VisibilityIndex < Visibilities.u.array.length; ++VisibilityIndex)
 	{
 		const json_value &Visibility = Visibilities[VisibilityIndex];
