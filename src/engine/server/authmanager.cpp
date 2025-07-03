@@ -35,6 +35,11 @@ void CAuthManager::Init()
 		NumDefaultKeys++;
 	if(g_Config.m_SvRconHelperPassword[0])
 		NumDefaultKeys++;
+
+	auto It = std::find_if(m_vKeys.begin(), m_vKeys.end(), [](CKey Key) { return str_comp(Key.m_aIdent, DEFAULT_SAVED_RCON_USER) == 0; });
+	if(It != m_vKeys.end())
+		NumDefaultKeys++;
+
 	if(m_vKeys.size() == NumDefaultKeys && !g_Config.m_SvRconPassword[0])
 	{
 		secure_random_password(g_Config.m_SvRconPassword, sizeof(g_Config.m_SvRconPassword), 6);

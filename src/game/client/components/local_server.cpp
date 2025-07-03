@@ -8,8 +8,6 @@
 #include <android/android_main.h>
 #endif
 
-static constexpr const char *DEFAULT_SAVED_RCON_USER = "local-server";
-
 void CLocalServer::RunServer(const std::vector<const char *> &vpArguments)
 {
 	secure_random_password(m_aRconPassword, sizeof(m_aRconPassword), 16);
