@@ -28,12 +28,12 @@ public:
 	/**
 	 * Move assignment.
 	 */
-	CImageInfo &operator=(CImageInfo &&Other);
+	CImageInfo &operator=(CImageInfo &&Other) noexcept;
 
 	/**
 	 * Move constructor.
 	 */
-	CImageInfo(CImageInfo &&Other);
+	CImageInfo(CImageInfo &&Other) noexcept;
 
 	/**
 	 * Width of the image.

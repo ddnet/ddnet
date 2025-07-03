@@ -29,7 +29,7 @@ class CDataFileReader
 
 public:
 	~CDataFileReader();
-	CDataFileReader &operator=(CDataFileReader &&Other);
+	CDataFileReader &operator=(CDataFileReader &&Other) noexcept;
 
 	[[nodiscard]] bool Open(class IStorage *pStorage, const char *pFilename, int StorageType);
 	void Close();

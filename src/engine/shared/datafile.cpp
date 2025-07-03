@@ -435,7 +435,7 @@ CDataFileReader::~CDataFileReader()
 	Close();
 }
 
-CDataFileReader &CDataFileReader::operator=(CDataFileReader &&Other)
+CDataFileReader &CDataFileReader::operator=(CDataFileReader &&Other) noexcept
 {
 	m_pDataFile = Other.m_pDataFile;
 	Other.m_pDataFile = nullptr;

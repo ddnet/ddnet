@@ -2,12 +2,12 @@
 
 #include <engine/image.h>
 
-CImageInfo::CImageInfo(CImageInfo &&Other)
+CImageInfo::CImageInfo(CImageInfo &&Other) noexcept
 {
 	*this = std::move(Other);
 }
 
-CImageInfo &CImageInfo::operator=(CImageInfo &&Other)
+CImageInfo &CImageInfo::operator=(CImageInfo &&Other) noexcept
 {
 	m_Width = Other.m_Width;
 	m_Height = Other.m_Height;
