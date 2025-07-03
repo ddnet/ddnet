@@ -870,7 +870,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		{
 			char aBuf[1024];
 			str_format(aBuf, sizeof(aBuf), "%s: %s", CurrentLine.m_aName, CurrentLine.m_aText);
-			Client()->Notify("DDNet Chat", aBuf);
+			Client()->Notify(Localize("DDNet Chat"), aBuf);
 			if(g_Config.m_SndHighlight)
 			{
 				GameClient()->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 1.0f);
