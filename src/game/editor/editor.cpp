@@ -6824,9 +6824,9 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			Ui()->ClipEnable(&View);
 			Graphics()->TextureClear();
 			IGraphics::CLineItemBatch LineItemBatch;
-			Graphics()->LinesBatchBegin(&LineItemBatch);
 			for(int c = 0; c < pEnvelope->GetChannels(); c++)
 			{
+				Graphics()->LinesBatchBegin(&LineItemBatch);
 				if(s_ActiveChannels & (1 << c))
 					Graphics()->SetColor(aColors[c].r, aColors[c].g, aColors[c].b, 1);
 				else
@@ -6865,7 +6865,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				}
 				Graphics()->LinesBatchEnd(&LineItemBatch);
 			}
-			Graphics()->LinesEnd();
 			Ui()->ClipDisable();
 		}
 
