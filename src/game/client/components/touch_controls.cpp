@@ -1024,8 +1024,9 @@ void CTouchControls::UpdateButtons(const std::vector<IInput::CTouchFingerState> 
 				const auto ActiveFinger = std::find_if(vRemainingTouchFingerStates.begin(), vRemainingTouchFingerStates.end(), [&](const IInput::CTouchFingerState &TouchFingerState) {
 					return TouchFingerState.m_Finger == TouchButton.m_pBehavior->m_Finger;
 				});
-				dbg_assert(ActiveFinger != vRemainingTouchFingerStates.end(), "Active button finger not found");
-				vRemainingTouchFingerStates.erase(ActiveFinger);
+				// ActiveFinger could be released during this progress.
+				if(ActiveFinger != vRemainingTouchFingerStates.end())
+					vRemainingTouchFingerStates.erase(ActiveFinger);
 			}
 			TouchButton.m_pBehavior->SetInactive();
 			continue;
