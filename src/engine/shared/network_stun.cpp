@@ -73,7 +73,7 @@ void CStun::CProtocol::Update()
 	m_NumUnsuccessfulTries += 1;
 	unsigned char aBuf[32];
 	int Size = StunMessagePrepare(aBuf, sizeof(aBuf), &m_Stun);
-	if(net_udp_send(m_Socket, &m_StunServer, aBuf, Size) == -1)
+	if(CNetBase::IO_CALLBACKS.UdpSend(m_Socket, &m_StunServer, aBuf, Size) == -1)
 	{
 		log_debug(IndexToSystem(m_Index), "couldn't send stun request");
 		return;

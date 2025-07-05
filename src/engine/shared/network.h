@@ -7,6 +7,7 @@
 #include "stun.h"
 
 #include <base/types.h>
+#include <engine/shared/io_callbacks.h>
 
 #include <array>
 
@@ -410,6 +411,8 @@ class CNetServer
 	NETFUNC_CLIENTREJOIN m_pfnClientRejoin;
 	void *m_pUser;
 
+	CIoCallbacks m_IoCallbacks;
+
 	unsigned char m_aSecurityTokenSeed[16];
 
 	// vanilla connect flood detection
@@ -438,7 +441,7 @@ public:
 	int SetCallbacks(NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_NEWCLIENT_NOAUTH pfnNewClientNoAuth, NETFUNC_CLIENTREJOIN pfnClientRejoin, NETFUNC_DELCLIENT pfnDelClient, void *pUser);
 
 	//
-	bool Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int MaxClientsPerIp);
+	bool Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int MaxClientsPerIp, CIoCallbacks *pIoCallbacks);
 	void Close();
 
 	//
@@ -599,9 +602,11 @@ class CNetBase
 	static CHuffman ms_Huffman;
 
 public:
+	static CIoCallbacks IO_CALLBACKS;
+
 	static void OpenLog(IOHANDLE DataLogSent, IOHANDLE DataLogRecv);
 	static void CloseLog();
-	static void Init();
+	static void Init(CIoCallbacks *pIoCallbacks);
 	static int Compress(const void *pData, int DataSize, void *pOutput, int OutputSize);
 	static int Decompress(const void *pData, int DataSize, void *pOutput, int OutputSize);
 

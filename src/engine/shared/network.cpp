@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/system.h>
 #include <base/types.h>
+#include <engine/shared/io_callbacks.h>
 
 #include "config.h"
 #include "huffman.h"
@@ -119,7 +120,7 @@ void CNetBase::SendPacketConnless(NETSOCKET Socket, NETADDR *pAddr, const void *
 		mem_copy(aBuffer + sizeof(NET_HEADER_EXTENDED), aExtra, 4);
 	}
 	mem_copy(aBuffer + DATA_OFFSET, pData, DataSize);
-	net_udp_send(Socket, pAddr, aBuffer, DataSize + DATA_OFFSET);
+	IO_CALLBACKS.UdpSend(Socket, pAddr, aBuffer, DataSize + DATA_OFFSET);
 }
 
 void CNetBase::SendPacketConnlessWithToken7(NETSOCKET Socket, NETADDR *pAddr, const void *pData, int DataSize, SECURITY_TOKEN Token, SECURITY_TOKEN ResponseToken)
@@ -132,7 +133,7 @@ void CNetBase::SendPacketConnlessWithToken7(NETSOCKET Socket, NETADDR *pAddr, co
 	WriteSecurityToken(aBuffer + 1, Token);
 	WriteSecurityToken(aBuffer + 5, ResponseToken);
 	mem_copy(aBuffer + DATA_OFFSET, pData, DataSize);
-	net_udp_send(Socket, pAddr, aBuffer, DataSize + DATA_OFFSET);
+	IO_CALLBACKS.UdpSend(Socket, pAddr, aBuffer, DataSize + DATA_OFFSET);
 }
 
 void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken, bool Sixup, bool NoCompress)
@@ -202,7 +203,7 @@ void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct 
 		aBuffer[0] = ((pPacket->m_Flags << 2) & 0xfc) | ((pPacket->m_Ack >> 8) & 0x3);
 		aBuffer[1] = pPacket->m_Ack & 0xff;
 		aBuffer[2] = pPacket->m_NumChunks;
-		net_udp_send(Socket, pAddr, aBuffer, FinalSize);
+		IO_CALLBACKS.UdpSend(Socket, pAddr, aBuffer, FinalSize);
 
 		// log raw socket data
 		if(ms_DataLogSent)
@@ -414,6 +415,7 @@ bool CNetBase::IsSeqInBackroom(int Seq, int Ack)
 IOHANDLE CNetBase::ms_DataLogSent = nullptr;
 IOHANDLE CNetBase::ms_DataLogRecv = nullptr;
 CHuffman CNetBase::ms_Huffman;
+CIoCallbacks CNetBase::IO_CALLBACKS;
 
 void CNetBase::OpenLog(IOHANDLE DataLogSent, IOHANDLE DataLogRecv)
 {
@@ -461,9 +463,10 @@ int CNetBase::Decompress(const void *pData, int DataSize, void *pOutput, int Out
 	return ms_Huffman.Decompress(pData, DataSize, pOutput, OutputSize);
 }
 
-void CNetBase::Init()
+void CNetBase::Init(CIoCallbacks *pIoCallbacks)
 {
 	ms_Huffman.Init();
+	IO_CALLBACKS = *pIoCallbacks;
 }
 
 void CNetTokenCache::Init(NETSOCKET Socket)
