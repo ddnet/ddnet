@@ -36,6 +36,7 @@
 #include "editor_server_settings.h"
 #include "editor_trackers.h"
 #include "editor_ui.h"
+#include "font_typer.h"
 #include "layer_selector.h"
 #include "map_view.h"
 #include "quadart.h"
@@ -66,6 +67,11 @@ enum
 	DIALOG_FILE,
 	DIALOG_MAPSETTINGS_ERROR,
 	DIALOG_QUICK_PROMPT,
+
+	// The font typer component sets m_Dialog
+	// while it is active to make sure no other component
+	// interprets the key presses
+	DIALOG_PSEUDO_FONT_TYPER,
 };
 
 class CEditorImage;
@@ -293,6 +299,7 @@ class CEditor : public IEditor
 	CMapView m_MapView;
 	CLayerSelector m_LayerSelector;
 	CPrompt m_Prompt;
+	CFontTyper m_FontTyper;
 
 	bool m_EditorWasUsedBefore = false;
 
