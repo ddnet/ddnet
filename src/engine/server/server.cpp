@@ -1210,6 +1210,8 @@ int CServer::DelClientCallback(int ClientId, const char *pReason, void *pUser)
 	const NETADDR Addr = *pThis->ClientAddr(ClientId);
 #endif
 
+	pThis->Antibot()->OnEngineClientDrop(ClientId, pReason);
+
 	// notify the mod about the drop
 	if(pThis->m_aClients[ClientId].m_State >= CClient::STATE_READY)
 		pThis->GameServer()->OnClientDrop(ClientId, pReason);
@@ -1235,7 +1237,6 @@ int CServer::DelClientCallback(int ClientId, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientId].m_HasPersistentData = false;
 
 	pThis->GameServer()->TeehistorianRecordPlayerDrop(ClientId, pReason);
-	pThis->Antibot()->OnEngineClientDrop(ClientId, pReason);
 #if defined(CONF_FAMILY_UNIX)
 	pThis->SendConnLoggingCommand(CLOSE_SESSION, &Addr);
 #endif
