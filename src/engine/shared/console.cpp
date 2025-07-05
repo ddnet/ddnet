@@ -703,7 +703,7 @@ bool CConsole::ExecuteFile(const char *pFilename, int ClientId, bool LogFailure,
 		str_format(aBuf, sizeof(aBuf), "executing '%s'", pFilename);
 		Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 
-		while(const char *pLine = LineReader.Get())
+		while(const char *pLine = LineReader.Get(true))
 		{
 			ExecuteLine(pLine, ClientId);
 		}

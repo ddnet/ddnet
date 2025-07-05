@@ -4,7 +4,7 @@
 #include <base/system.h>
 #include <engine/shared/linereader.h>
 
-void TestFileLineReaderRaw(const char *pWritten, unsigned WrittenLength, std::initializer_list<const char *> pReads, bool ExpectSuccess, bool WriteBom)
+void TestFileLineReaderRaw(const char *pWritten, unsigned WrittenLength, std::initializer_list<const char *> pReads, bool ExpectSuccess, bool WriteBom, bool Multiline)
 {
 	CTestInfo Info;
 	IOHANDLE File = io_open(Info.m_aFilename, IOFLAG_WRITE);
@@ -24,25 +24,25 @@ void TestFileLineReaderRaw(const char *pWritten, unsigned WrittenLength, std::in
 	{
 		for(const char *pRead : pReads)
 		{
-			const char *pReadLine = LineReader.Get();
+			const char *pReadLine = LineReader.Get(Multiline);
 			ASSERT_TRUE(pReadLine) << "Line reader returned less lines than expected";
 			EXPECT_STREQ(pReadLine, pRead) << "Line reader returned unexpected line";
 		}
-		EXPECT_FALSE(LineReader.Get()) << "Line reader returned more lines than expected";
+		EXPECT_FALSE(LineReader.Get(Multiline)) << "Line reader returned more lines than expected";
 	}
 
 	fs_remove(Info.m_aFilename);
 }
 
-void TestFileLineReaderRaw(const char *pWritten, unsigned WrittenLength, std::initializer_list<const char *> pReads, bool ExpectSuccess)
+void TestFileLineReaderRaw(const char *pWritten, unsigned WrittenLength, std::initializer_list<const char *> pReads, bool ExpectSuccess, bool Multiline)
 {
-	TestFileLineReaderRaw(pWritten, WrittenLength, pReads, ExpectSuccess, false);
-	TestFileLineReaderRaw(pWritten, WrittenLength, pReads, ExpectSuccess, true);
+	TestFileLineReaderRaw(pWritten, WrittenLength, pReads, ExpectSuccess, false, Multiline);
+	TestFileLineReaderRaw(pWritten, WrittenLength, pReads, ExpectSuccess, true, Multiline);
 }
 
-void TestFileLineReader(const char *pWritten, std::initializer_list<const char *> pReads)
+void TestFileLineReader(const char *pWritten, std::initializer_list<const char *> pReads, bool Multiline = false)
 {
-	TestFileLineReaderRaw(pWritten, str_length(pWritten), pReads, true);
+	TestFileLineReaderRaw(pWritten, str_length(pWritten), pReads, true, Multiline);
 }
 
 TEST(LineReader, NormalNewline)
@@ -86,7 +86,14 @@ TEST(LineReader, Invalid)
 TEST(LineReader, NullBytes)
 {
 	// Line reader does not read any lines if the file contains null bytes
-	TestFileLineReaderRaw("foo\0\nbar\nbaz", 12, {}, false);
-	TestFileLineReaderRaw("foo\nbar\0\nbaz", 12, {}, false);
-	TestFileLineReaderRaw("foo\nbar\nbaz\0", 12, {}, false);
+	TestFileLineReaderRaw("foo\0\nbar\nbaz", 12, {}, false, false);
+	TestFileLineReaderRaw("foo\nbar\0\nbaz", 12, {}, false, false);
+	TestFileLineReaderRaw("foo\nbar\nbaz\0", 12, {}, false, false);
+}
+
+TEST(LineReader, Multiline)
+{
+	TestFileLineReader("1\\\r\n2\\\n3\n4", {"1   2  3", "4"}, true);
+	TestFileLineReader("foo\nbar\nbaz\\\n", {"foo", "bar", "baz  "}, true);
+	TestFileLineReader("foo\nbar\nbaz\\", {"foo", "bar", "baz\\"}, true);
 }
