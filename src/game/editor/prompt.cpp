@@ -78,6 +78,9 @@ void CPrompt::OnRender(CUIRect _)
 		return;
 	}
 
+	// Prevent UI elements below the prompt dialog from being activated.
+	Ui()->SetHotItem(this);
+
 	static CListBox s_ListBox;
 	CUIRect Prompt, PromptBox;
 	CUIRect Suggestions;
