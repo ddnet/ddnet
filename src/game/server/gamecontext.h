@@ -616,6 +616,9 @@ public:
 	inline bool IsKickVote() const { return m_VoteType == VOTE_TYPE_KICK; }
 	inline bool IsSpecVote() const { return m_VoteType == VOTE_TYPE_SPECTATE; }
 
+	bool IsRunningVote(int ClientId) const;
+	bool IsRunningKickOrSpecVote(int ClientId) const;
+
 	void SendRecord(int ClientId);
 	void SendFinish(int ClientId, float Time, float PreviousBestTime);
 	void OnSetAuthed(int ClientId, int Level) override;
