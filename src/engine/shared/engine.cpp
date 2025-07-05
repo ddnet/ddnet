@@ -7,6 +7,7 @@
 #include <engine/console.h>
 #include <engine/engine.h>
 #include <engine/shared/config.h>
+#include <engine/shared/io_callbacks.h>
 #include <engine/shared/jobs.h>
 #include <engine/shared/network.h>
 #include <engine/storage.h>
@@ -65,7 +66,9 @@ public:
 
 			// init the network
 			net_init();
-			CNetBase::Init();
+			CIoCallbacks IoCallbacks;
+			IoCallbacks.Init();
+			CNetBase::Init(&IoCallbacks);
 		}
 
 #if defined(CONF_PLATFORM_EMSCRIPTEN)

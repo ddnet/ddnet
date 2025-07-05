@@ -3,6 +3,7 @@
 
 #include <engine/client.h>
 #include <engine/shared/demo.h>
+#include <engine/shared/io_callbacks.h>
 #include <engine/shared/network.h>
 #include <engine/shared/snapshot.h>
 #include <engine/storage.h>
@@ -213,7 +214,9 @@ static int ExtractDemoChat(const char *pDemoFilePath, IStorage *pStorage)
 	DemoPlayer.SetListener(&Listener);
 
 	const CDemoPlayer::CPlaybackInfo *pInfo = DemoPlayer.Info();
-	CNetBase::Init();
+	CIoCallbacks IoCallbacks;
+	IoCallbacks.Init();
+	CNetBase::Init(&IoCallbacks);
 	DemoPlayer.Play();
 
 	while(DemoPlayer.IsPlaying())

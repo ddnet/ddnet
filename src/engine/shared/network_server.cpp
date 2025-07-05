@@ -37,14 +37,16 @@ const unsigned char g_aDummyMapData[] = {
 	0x78, 0x9C, 0x63, 0x64, 0x60, 0x60, 0x60, 0x44, 0xC2, 0x00, 0x00, 0x38,
 	0x00, 0x05};
 
-bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int MaxClientsPerIp)
+bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int MaxClientsPerIp, CIoCallbacks *pIoCallbacks)
 {
 	// zero out the whole structure
 	this->~CNetServer();
 	new(this) CNetServer{};
 
+	m_IoCallbacks = *pIoCallbacks;
+
 	// open socket
-	m_Socket = net_udp_create(BindAddr);
+	m_Socket = m_IoCallbacks.UdpCreate(BindAddr);
 	if(!m_Socket)
 		return false;
 
@@ -89,7 +91,7 @@ void CNetServer::Close()
 	{
 		return;
 	}
-	net_udp_close(m_Socket);
+	m_IoCallbacks.UdpClose(m_Socket);
 	m_Socket = nullptr;
 }
 
@@ -596,7 +598,7 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 
 		// TODO: empty the recvinfo
 		unsigned char *pData;
-		int Bytes = net_udp_recv(m_Socket, &Addr, &pData);
+		int Bytes = m_IoCallbacks.UdpRecv(m_Socket, &Addr, &pData);
 
 		// no more packets for now
 		if(Bytes <= 0)

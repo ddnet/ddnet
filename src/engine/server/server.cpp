@@ -23,6 +23,7 @@
 #include <engine/shared/filecollection.h>
 #include <engine/shared/host_lookup.h>
 #include <engine/shared/http.h>
+#include <engine/shared/io_callbacks.h>
 #include <engine/shared/json.h>
 #include <engine/shared/jsonwriter.h>
 #include <engine/shared/masterserver.h>
@@ -3003,7 +3004,9 @@ int CServer::Run()
 	BindAddr.type = Config()->m_SvIpv4Only ? NETTYPE_IPV4 : NETTYPE_ALL;
 
 	int Port = Config()->m_SvPort;
-	for(BindAddr.port = Port != 0 ? Port : 8303; !m_NetServer.Open(BindAddr, &m_ServerBan, Config()->m_SvMaxClients, Config()->m_SvMaxClientsPerIp); BindAddr.port++)
+	CIoCallbacks IoCallbacks;
+	IoCallbacks.Init();
+	for(BindAddr.port = Port != 0 ? Port : 8303; !m_NetServer.Open(BindAddr, &m_ServerBan, Config()->m_SvMaxClients, Config()->m_SvMaxClientsPerIp, &IoCallbacks); BindAddr.port++)
 	{
 		if(Port != 0 || BindAddr.port >= 8310)
 		{
@@ -3326,14 +3329,14 @@ int CServer::Run()
 				!m_aDemoRecorder[RECORDER_MANUAL].IsRecording() &&
 				!m_aDemoRecorder[RECORDER_AUTO].IsRecording())
 			{
-				PacketWaiting = net_socket_read_wait(m_NetServer.Socket(), 1s);
+				PacketWaiting = CNetBase::IO_CALLBACKS.SocketReadWait(m_NetServer.Socket(), 1s);
 			}
 			else
 			{
 				set_new_tick();
 				LastTime = time_get();
 				const auto MicrosecondsToWait = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::nanoseconds(TickStartTime(m_CurrentGameTick + 1) - LastTime)) + 1us;
-				PacketWaiting = MicrosecondsToWait > 0us ? net_socket_read_wait(m_NetServer.Socket(), MicrosecondsToWait) : true;
+				PacketWaiting = MicrosecondsToWait > 0us ? CNetBase::IO_CALLBACKS.SocketReadWait(m_NetServer.Socket(), MicrosecondsToWait) : true;
 			}
 			if(IsInterrupted())
 			{
