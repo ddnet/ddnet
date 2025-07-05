@@ -69,8 +69,12 @@ public:
 	void OnCharacterDeath(int ClientId, int Weapon);
 	void Tick();
 
-	// returns nullptr if successful, error string if failed
-	const char *SetCharacterTeam(int ClientId, int Team);
+	// sets pError to an empty string on success (true)
+	// and sets pError if it returns false
+	bool CanJoinTeam(int ClientId, int Team, char *pError, int ErrorSize);
+
+	// returns true if successful. Writes error into pError on failure
+	bool SetCharacterTeam(int ClientId, int Team, char *pError, int ErrorSize);
 	void CheckTeamFinished(int Team);
 
 	void ChangeTeamState(int Team, ETeamState State);

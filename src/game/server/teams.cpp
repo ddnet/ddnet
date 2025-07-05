@@ -4,6 +4,7 @@
 #include <game/mapitems.h>
 #include <game/server/entities/character.h>
 #include <game/team_state.h>
+#include <game/teamscore.h>
 
 #include "gamecontroller.h"
 #include "player.h"
@@ -377,35 +378,97 @@ void CGameTeams::CheckTeamFinished(int Team)
 	}
 }
 
-const char *CGameTeams::SetCharacterTeam(int ClientId, int Team)
+bool CGameTeams::CanJoinTeam(int ClientId, int Team, char *pError, int ErrorSize)
 {
+	pError[0] = '\0';
 	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
-		return "Invalid client ID";
-	if(Team < 0 || Team > NUM_DDRACE_TEAMS)
-		return "Invalid team number";
-	if(Team != TEAM_SUPER && m_aTeamState[Team] > ETeamState::OPEN && !m_aPractice[Team] && !m_aTeamFlock[Team])
-		return "This team started already";
-	if(m_Core.Team(ClientId) == Team)
-		return "You are in this team already";
+	{
+		str_copy(pError, "Invalid client ID", ErrorSize);
+		return false;
+	}
+	if(Team != TEAM_SUPER && GameServer()->IsRunningKickOrSpecVote(ClientId))
+	{
+		str_copy(pError, "You are running a vote please try again after the vote is done!", ErrorSize);
+		return false;
+	}
+	if(Team != TEAM_SUPER && Team != TEAM_FLOCK && (g_Config.m_SvTeam == SV_TEAM_FORBIDDEN || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO))
+	{
+		str_copy(pError, "Teams are disabled", ErrorSize);
+		return false;
+	}
 	if(!Character(ClientId))
-		return "Your character is not valid";
+	{
+		str_copy(pError, "You can't change teams while you are dead/a spectator.", ErrorSize);
+		return false;
+	}
+	if(Team < 0 || Team > NUM_DDRACE_TEAMS)
+	{
+		str_copy(pError, "Invalid team number", ErrorSize);
+		return false;
+	}
+	if(Team != TEAM_SUPER && Team != TEAM_FLOCK && (TeamLocked(Team) && !IsInvited(Team, ClientId)))
+	{
+		if(g_Config.m_SvInvite)
+			str_copy(pError, "This team is locked using /lock. Only members of the team can unlock it using /lock.", ErrorSize);
+		else
+			str_copy(pError, "This team is locked using /lock. Only members of the team can invite you or unlock it using /lock.", ErrorSize);
+		return false;
+	}
+	if(Team != TEAM_SUPER && Team != TEAM_FLOCK && (Count(Team) >= g_Config.m_SvMaxTeamSize && !TeamFlock(Team) && !IsPractice(Team)))
+	{
+		str_format(pError, ErrorSize, "This team already has the maximum allowed size of %d players", g_Config.m_SvMaxTeamSize);
+		return false;
+	}
+	if(Team != TEAM_SUPER && m_aTeamState[Team] > ETeamState::OPEN && !m_aPractice[Team] && !m_aTeamFlock[Team])
+	{
+		str_copy(pError, "This team started already", ErrorSize);
+		return false;
+	}
+	if(m_Core.Team(ClientId) == Team)
+	{
+		str_copy(pError, "You are in this team already", ErrorSize);
+		return false;
+	}
 	if(Team == TEAM_SUPER && !Character(ClientId)->IsSuper())
-		return "You can't join super team if you don't have super rights";
+	{
+		str_copy(pError, "You can't join super team if you don't have super rights", ErrorSize);
+		return false;
+	}
 	if(Team != TEAM_SUPER && Character(ClientId)->m_DDRaceState != ERaceState::NONE)
-		return "You have started racing already";
+	{
+		str_copy(pError, "You have started racing already", ErrorSize);
+		return false;
+	}
 	// No cheating through noob filter with practice and then leaving team
 	if(m_aPractice[m_Core.Team(ClientId)] && !m_pGameContext->PracticeByDefault())
-		return "You have used practice mode already";
+	{
+		str_copy(pError, "You have used practice mode already", ErrorSize);
+		return false;
+	}
 
 	// you can not join a team which is currently in the process of saving,
 	// because the save-process can fail and then the team is reset into the game
 	if(Team != TEAM_SUPER && GetSaving(Team))
-		return "Your team is currently saving";
+	{
+		str_copy(pError, "Your team is currently saving", ErrorSize);
+		return false;
+	}
 	if(m_Core.Team(ClientId) != TEAM_SUPER && GetSaving(m_Core.Team(ClientId)))
-		return "This team is currently saving";
+	{
+		str_copy(pError, "This team is currently saving", ErrorSize);
+		return false;
+	}
+
+	return true;
+}
+
+bool CGameTeams::SetCharacterTeam(int ClientId, int Team, char *pError, int ErrorSize)
+{
+	if(!CanJoinTeam(ClientId, Team, pError, ErrorSize))
+		return false;
 
 	SetForceCharacterTeam(ClientId, Team);
-	return nullptr;
+	return true;
 }
 
 void CGameTeams::SetForceCharacterTeam(int ClientId, int Team)
