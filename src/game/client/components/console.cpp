@@ -1376,7 +1376,7 @@ void CGameConsole::OnRender()
 
 				auto CurrentSelectedOccurrence = pConsole->m_vSearchMatches[pConsole->m_CurrentMatchIndex];
 
-				std::vector<STextColorSplit> vColorSplits;
+				Cursor.m_vColorSplits.reserve(vMatches.size());
 				for(const auto &Match : vMatches)
 				{
 					bool IsSelected = CurrentSelectedOccurrence.m_EntryLine == Match.m_EntryLine && CurrentSelectedOccurrence.m_Pos == Match.m_Pos;

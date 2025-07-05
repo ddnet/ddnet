@@ -217,6 +217,7 @@ void CInfoMessages::OnMessage(int MsgType, void *pRawMsg)
 void CInfoMessages::OnTeamKillMessage(const CNetMsg_Sv_KillMsgTeam *pMsg)
 {
 	std::vector<std::pair<int, int>> vStrongWeakSorted;
+	vStrongWeakSorted.reserve(MAX_CLIENTS);
 	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
 		if(GameClient()->m_aClients[ClientId].m_Active &&
