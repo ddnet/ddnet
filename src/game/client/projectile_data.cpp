@@ -9,7 +9,7 @@
 
 #include <game/collision.h>
 
-bool UseProjectileExtraInfo(const CNetObj_Projectile *pProj)
+static bool UseProjectileExtraInfo(const CNetObj_Projectile *pProj)
 {
 	return pProj->m_VelY >= 0 && (pProj->m_VelY & LEGACYPROJECTILEFLAG_IS_DDNET) != 0;
 }

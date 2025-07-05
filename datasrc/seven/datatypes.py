@@ -191,7 +191,7 @@ def EmitTypeDeclaration(root):
 def EmitDefinition(root, name):
 	for l in root.EmitPreDefinition(name):
 		print(l)
-	print(f"{root.TypeName()} {name} = ")
+	print(f"static {root.TypeName()} {name} = ")
 	for l in root.EmitDefinition(name):
 		print(l)
 	print(";")

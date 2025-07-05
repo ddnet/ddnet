@@ -10,7 +10,7 @@
 
 #include <vector>
 
-void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
+static void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 {
 	CLineReader LineReader;
 	if(!LineReader.OpenFile(pStorage->OpenFile(pConfigName, IOFLAG_READ, IStorage::TYPE_ABSOLUTE)))

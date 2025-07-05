@@ -22,7 +22,7 @@ static constexpr int MAX_ITEM_TYPE = 0xFFFF;
 static constexpr int MAX_ITEM_ID = 0xFFFF;
 static constexpr int OFFSET_UUID_TYPE = 0x8000;
 
-inline void SwapEndianInPlace(void *pObj, size_t Size)
+static inline void SwapEndianInPlace(void *pObj, size_t Size)
 {
 #if defined(CONF_ARCH_ENDIAN_BIG)
 	swap_endian(pObj, sizeof(int), Size / sizeof(int));
@@ -30,13 +30,13 @@ inline void SwapEndianInPlace(void *pObj, size_t Size)
 }
 
 template<typename T>
-inline void SwapEndianInPlace(T *pObj)
+static inline void SwapEndianInPlace(T *pObj)
 {
 	static_assert(sizeof(T) % sizeof(int) == 0);
 	SwapEndianInPlace(pObj, sizeof(T));
 }
 
-inline int SwapEndianInt(int Number)
+static inline int SwapEndianInt(int Number)
 {
 	SwapEndianInPlace(&Number);
 	return Number;

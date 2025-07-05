@@ -70,12 +70,12 @@ class CInfoMessages : public CComponent
 	void ResetMessage(CInfoMsg &InfoMsg);
 
 public:
-	virtual int Sizeof() const override { return sizeof(*this); }
-	virtual void OnWindowResize() override;
-	virtual void OnReset() override;
-	virtual void OnRender() override;
-	virtual void OnMessage(int MsgType, void *pRawMsg) override;
-	virtual void OnInit() override;
+	int Sizeof() const override { return sizeof(*this); }
+	void OnWindowResize() override;
+	void OnReset() override;
+	void OnRender() override;
+	void OnMessage(int MsgType, void *pRawMsg) override;
+	void OnInit() override;
 };
 
 #endif

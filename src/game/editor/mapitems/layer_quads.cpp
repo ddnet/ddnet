@@ -152,7 +152,7 @@ void CLayerQuads::BrushFlipY()
 	m_pEditor->m_Map.OnModify();
 }
 
-void Rotate(vec2 *pCenter, vec2 *pPoint, float Rotation)
+static void Rotate(vec2 *pCenter, vec2 *pPoint, float Rotation)
 {
 	float x = pPoint->x - pCenter->x;
 	float y = pPoint->y - pCenter->y;
