@@ -2324,6 +2324,7 @@ if(CLIENT)
     animstate.h
     component.cpp
     component.h
+    component_list.h
     components/background.cpp
     components/background.h
     components/binds.cpp

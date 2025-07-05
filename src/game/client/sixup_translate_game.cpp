@@ -1,10 +1,18 @@
 #include <base/system.h>
+
 #include <engine/shared/protocol7.h>
+
 #include <game/gamecore.h>
 #include <game/generated/protocol7.h>
 #include <game/localization.h>
 
 #include <game/client/gameclient.h>
+
+#include <game/client/components/broadcast.h>
+#include <game/client/components/chat.h>
+#include <game/client/components/skins7.h>
+#include <game/client/components/sounds.h>
+#include <game/client/components/voting.h>
 
 enum
 {

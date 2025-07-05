@@ -10,6 +10,10 @@
 #include <game/client/gameclient.h>
 #include <game/client/prediction/entities/character.h>
 
+#include <game/client/components/camera.h>
+#include <game/client/components/controls.h>
+#include <game/client/components/skins.h>
+
 #include <memory>
 #include <vector>
 

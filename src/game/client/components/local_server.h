@@ -1,6 +1,8 @@
 #ifndef GAME_CLIENT_COMPONENTS_LOCAL_SERVER_H
 #define GAME_CLIENT_COMPONENTS_LOCAL_SERVER_H
 
+#include <engine/shared/config.h>
+
 #include <base/types.h>
 
 #include <game/client/component.h>

@@ -5,6 +5,8 @@
 
 #include <engine/shared/protocol.h>
 
+#include <game/generated/protocol.h>
+
 #include <game/client/component.h>
 
 enum class EHookStrongWeakState

@@ -18,8 +18,9 @@
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
 
-#include <game/client/component.h>
 #include <game/client/components/mapimages.h>
+
+#include <game/client/component.h>
 #include <game/client/lineinput.h>
 #include <game/client/render.h>
 #include <game/client/ui.h>

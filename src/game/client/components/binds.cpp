@@ -1,13 +1,16 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "binds.h"
+
 #include <base/log.h>
 #include <base/system.h>
+
 #include <engine/config.h>
 #include <engine/shared/config.h>
 
 #include <game/client/components/chat.h>
 #include <game/client/components/console.h>
+#include <game/client/components/menus.h>
 #include <game/client/gameclient.h>
 
 static constexpr LOG_COLOR BIND_PRINT_COLOR{255, 255, 204};
