@@ -78,43 +78,7 @@ std::optional<ColorHSLA> CConsole::CResult::GetColor(unsigned Index, float Darke
 {
 	if(Index >= m_NumArgs)
 		return std::nullopt;
-
-	const char *pStr = m_apArgs[Index];
-	if(str_isallnum(pStr) || ((pStr[0] == '-' || pStr[0] == '+') && str_isallnum(pStr + 1))) // Teeworlds Color (Packed HSL)
-	{
-		unsigned long Value = str_toulong_base(pStr, 10);
-		if(Value == std::numeric_limits<unsigned long>::max())
-			return std::nullopt;
-		return ColorHSLA(Value, true).UnclampLighting(DarkestLighting);
-	}
-	else if(*pStr == '$') // Hex RGB/RGBA
-	{
-		auto ParsedColor = color_parse<ColorRGBA>(pStr + 1);
-		if(ParsedColor)
-			return color_cast<ColorHSLA>(ParsedColor.value());
-		else
-			return std::nullopt;
-	}
-	else if(!str_comp_nocase(pStr, "red"))
-		return ColorHSLA(0.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "yellow"))
-		return ColorHSLA(1.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "green"))
-		return ColorHSLA(2.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "cyan"))
-		return ColorHSLA(3.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "blue"))
-		return ColorHSLA(4.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "magenta"))
-		return ColorHSLA(5.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "white"))
-		return ColorHSLA(0, 0, 1);
-	else if(!str_comp_nocase(pStr, "gray"))
-		return ColorHSLA(0, 0, .5f);
-	else if(!str_comp_nocase(pStr, "black"))
-		return ColorHSLA(0, 0, 0);
-
-	return std::nullopt;
+	return ColorParse(m_apArgs[Index], DarkestLighting);
 }
 
 const IConsole::CCommandInfo *CConsole::CCommand::NextCommandInfo(int AccessLevel, int FlagMask) const
@@ -1128,4 +1092,43 @@ void CConsole::CResult::SetVictim(const char *pVictim)
 		m_Victim = VICTIM_ALL;
 	else
 		m_Victim = std::clamp<int>(str_toint(pVictim), 0, MAX_CLIENTS - 1);
+}
+
+std::optional<ColorHSLA> CConsole::ColorParse(const char *pStr, float DarkestLighting)
+{
+	if(str_isallnum(pStr) || ((pStr[0] == '-' || pStr[0] == '+') && str_isallnum(pStr + 1))) // Teeworlds Color (Packed HSL)
+	{
+		unsigned long Value = str_toulong_base(pStr, 10);
+		if(Value == std::numeric_limits<unsigned long>::max())
+			return std::nullopt;
+		return ColorHSLA(Value, true).UnclampLighting(DarkestLighting);
+	}
+	else if(*pStr == '$') // Hex RGB/RGBA
+	{
+		auto ParsedColor = color_parse<ColorRGBA>(pStr + 1);
+		if(ParsedColor)
+			return color_cast<ColorHSLA>(ParsedColor.value());
+		else
+			return std::nullopt;
+	}
+	else if(!str_comp_nocase(pStr, "red"))
+		return ColorHSLA(0.0f / 6.0f, 1.0f, 0.5f);
+	else if(!str_comp_nocase(pStr, "yellow"))
+		return ColorHSLA(1.0f / 6.0f, 1.0f, 0.5f);
+	else if(!str_comp_nocase(pStr, "green"))
+		return ColorHSLA(2.0f / 6.0f, 1.0f, 0.5f);
+	else if(!str_comp_nocase(pStr, "cyan"))
+		return ColorHSLA(3.0f / 6.0f, 1.0f, 0.5f);
+	else if(!str_comp_nocase(pStr, "blue"))
+		return ColorHSLA(4.0f / 6.0f, 1.0f, 0.5f);
+	else if(!str_comp_nocase(pStr, "magenta"))
+		return ColorHSLA(5.0f / 6.0f, 1.0f, 0.5f);
+	else if(!str_comp_nocase(pStr, "white"))
+		return ColorHSLA(0.0f, 0.0f, 1.0f);
+	else if(!str_comp_nocase(pStr, "gray"))
+		return ColorHSLA(0.0f, 0.0f, 0.5f);
+	else if(!str_comp_nocase(pStr, "black"))
+		return ColorHSLA(0.0f, 0.0f, 0.0f);
+
+	return std::nullopt;
 }
