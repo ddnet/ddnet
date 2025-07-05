@@ -259,5 +259,11 @@ TEST_F(CTestGameWorld, BasicTick)
 	const int StartTeam = GameServer()->m_pController->GetAutoTeam(ClientId);
 	GameServer()->CreatePlayer(ClientId, StartTeam, Afk, LastWhisperTo);
 
+	EXPECT_EQ(StartTeam, TEAM_SPECTATORS);
+	char aError[512];
+	bool CanJoin = GameServer()->m_pController->CanJoinTeam(TEAM_RED, ClientId, aError, sizeof(aError));
+	EXPECT_EQ(CanJoin, false);
+	EXPECT_STREQ(aError, "Only 0 active players are allowed");
+
 	GameServer()->OnTick();
 }
