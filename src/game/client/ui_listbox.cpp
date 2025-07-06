@@ -22,12 +22,6 @@ CListBox::CListBox()
 	m_Active = true;
 }
 
-void CListBox::DoBegin(const CUIRect *pRect)
-{
-	// setup the variables
-	m_ListBoxView = *pRect;
-}
-
 void CListBox::DoHeader(const CUIRect *pRect, const char *pTitle, float HeaderHeight, float Spacing)
 {
 	CUIRect View = *pRect;

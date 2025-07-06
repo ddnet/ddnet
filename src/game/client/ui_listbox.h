@@ -46,7 +46,6 @@ protected:
 public:
 	CListBox();
 
-	void DoBegin(const CUIRect *pRect);
 	void DoHeader(const CUIRect *pRect, const char *pTitle, float HeaderHeight = 20.0f, float Spacing = 2.0f);
 	void DoAutoSpacing(float Spacing = 20.0f) { m_AutoSpacing = Spacing; }
 	void DoSpacing(float Spacing = 20.0f);
