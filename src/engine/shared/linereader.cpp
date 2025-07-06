@@ -45,7 +45,7 @@ void CLineReader::OpenBuffer(char *pBuffer)
 	}
 }
 
-const char *CLineReader::Get()
+const char *CLineReader::Get(bool Multiline)
 {
 	dbg_assert(m_pBuffer != nullptr, "Line reader not initialized");
 	if(m_ReadLastLine)
@@ -64,6 +64,18 @@ const char *CLineReader::Get()
 			}
 			else
 			{
+				if(Multiline && m_BufferPos >= 1 && m_pBuffer[m_BufferPos - 1] == '\\')
+				{
+					m_pBuffer[m_BufferPos - 1] = ' ';
+					if(m_pBuffer[m_BufferPos] == '\r')
+					{
+						m_pBuffer[m_BufferPos] = ' ';
+						++m_BufferPos;
+					}
+					m_pBuffer[m_BufferPos] = ' ';
+					++m_BufferPos;
+					continue;
+				}
 				if(m_pBuffer[m_BufferPos] == '\r')
 				{
 					m_pBuffer[m_BufferPos] = '\0';

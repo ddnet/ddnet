@@ -18,6 +18,6 @@ public:
 	bool OpenFile(IOHANDLE File);
 	void OpenBuffer(char *pBuffer); // Buffer must have been allocated with malloc, will be freed by the line reader
 
-	const char *Get(); // Returned string is valid until the line reader is destroyed
+	const char *Get(bool Multiline = false); // Returned string is valid until the line reader is destroyed
 };
 #endif
