@@ -178,6 +178,8 @@ public:
 
 	void SetAccessLevel(int AccessLevel) override;
 
+	static std::optional<ColorHSLA> ColorParse(const char *pStr, float DarkestLighting);
+
 	// DDRace
 
 	static void ConUserCommandStatus(IConsole::IResult *pResult, void *pUser);
