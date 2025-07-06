@@ -2482,6 +2482,7 @@ if(CLIENT)
     editor_ui.h
     enums.h
     explanations.cpp
+    explanations.h
     font_typer.cpp
     font_typer.h
     layer_selector.cpp
