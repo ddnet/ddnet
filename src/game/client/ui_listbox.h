@@ -29,8 +29,6 @@ private:
 	bool m_ListBoxItemSelected;
 	bool m_ListBoxItemActivated;
 	bool m_ScrollbarShown;
-	const char *m_pBottomText;
-	float m_FooterHeight;
 	float m_AutoSpacing;
 	CScrollRegion m_ScrollRegion;
 	vec2 m_ScrollOffset;
@@ -49,7 +47,6 @@ public:
 	void DoHeader(const CUIRect *pRect, const char *pTitle, float HeaderHeight = 20.0f, float Spacing = 2.0f);
 	void DoAutoSpacing(float Spacing = 20.0f) { m_AutoSpacing = Spacing; }
 	void DoSpacing(float Spacing = 20.0f);
-	void DoFooter(const char *pBottomText, float FooterHeight = 20.0f); // call before DoStart to create a footer
 	void DoStart(float RowHeight, int NumItems, int ItemsPerRow, int RowsPerScroll, int SelectedIndex, const CUIRect *pRect = nullptr, bool Background = true, int BackgroundCorners = IGraphics::CORNER_ALL, bool ForceShowScrollbar = false);
 	void ScrollToSelected() { m_ListBoxUpdateScroll = true; }
 	CListboxItem DoNextItem(const void *pId, bool Selected = false, float CornerRadius = 5.0f);
