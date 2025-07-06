@@ -12,12 +12,19 @@
 
 CListBox::CListBox()
 {
+	Reset();
+}
+
+void CListBox::Reset()
+{
+	m_ListBoxView = m_RowView = CUIRect{0.0f, 0.0f, 0.0f, 0.0f};
 	m_ListBoxUpdateScroll = false;
+	m_ScrollbarShown = false;
+	m_AutoSpacing = 0.0f;
+	m_ScrollRegion.Reset();
 	m_ScrollbarWidth = 20.0f;
 	m_ScrollbarMargin = 5.0f;
 	m_HasHeader = false;
-	m_AutoSpacing = 0.0f;
-	m_ScrollbarShown = false;
 	m_Active = true;
 }
 
