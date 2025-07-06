@@ -863,7 +863,7 @@ int CTouchControls::NextActiveAction(int Action) const
 		return ACTION_FIRE;
 	default:
 		dbg_assert(false, "Action invalid for NextActiveAction");
-		return NUM_ACTIONS;
+		dbg_break();
 	}
 }
 

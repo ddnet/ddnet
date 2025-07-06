@@ -14,6 +14,8 @@
 #   We don't want to use anonymous namespaces instead of static functions.
 # bugprone-suspicious-realloc-usage
 #   We generally don't handle memory allocation failures.
+# performance-noexcept-*
+#   Exceptions may be disabled later, adding noexcept is just noise
 
 Checks: >
   -*,
@@ -96,6 +98,7 @@ Checks: >
   performance-*,
   -performance-enum-size,
   -performance-no-int-to-ptr,
+  -performance-noexcept-*,
   portability-*,
 
 WarningsAsErrors:

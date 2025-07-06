@@ -72,7 +72,7 @@ long CVariableInt::Decompress(const void *pSrc_, int SrcSize, void *pDst_, int D
 	const unsigned char *pSrc = (unsigned char *)pSrc_;
 	const unsigned char *pSrcEnd = pSrc + SrcSize;
 	int *pDst = (int *)pDst_;
-	const int *pDstEnd = pDst + DstSize / sizeof(int);
+	const int *pDstEnd = pDst + DstSize / sizeof(int); // NOLINT(bugprone-sizeof-expression)
 	while(pSrc < pSrcEnd)
 	{
 		if(pDst >= pDstEnd)

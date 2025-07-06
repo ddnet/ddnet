@@ -16,16 +16,16 @@
 		new image filepath must be absolute or relative to the current position
 */
 
-CDataFileReader g_DataReader;
+static CDataFileReader g_DataReader;
 
 // global new image data (set by ReplaceImageItem)
-int g_NewNameId = -1;
-char g_aNewName[128];
-int g_NewDataId = -1;
-int g_NewDataSize = 0;
-void *g_pNewData = nullptr;
+static int g_NewNameId = -1;
+static char g_aNewName[128];
+static int g_NewDataId = -1;
+static int g_NewDataSize = 0;
+static void *g_pNewData = nullptr;
 
-void *ReplaceImageItem(int Index, CMapItemImage *pImgItem, const char *pImgName, const char *pImgFile, CMapItemImage *pNewImgItem)
+static void *ReplaceImageItem(int Index, CMapItemImage *pImgItem, const char *pImgName, const char *pImgFile, CMapItemImage *pNewImgItem)
 {
 	const char *pName = g_DataReader.GetDataString(pImgItem->m_ImageName);
 	if(pName == nullptr || pName[0] == '\0')

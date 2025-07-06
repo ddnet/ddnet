@@ -41,12 +41,12 @@ public:
 	bool operator()(int a, int b) { return (g_Config.m_BrSortOrder ? (m_pThis->*m_pfnSort)(b, a) : (m_pThis->*m_pfnSort)(a, b)); }
 };
 
-bool matchesPart(const char *a, const char *b)
+static bool MatchesPart(const char *a, const char *b)
 {
 	return str_utf8_find_nocase(a, b) != nullptr;
 }
 
-bool matchesExactly(const char *a, const char *b)
+static bool MatchesExactly(const char *a, const char *b)
 {
 	return str_comp(a, &b[1]) == 0;
 }
@@ -493,12 +493,12 @@ void CServerBrowser::Filter()
 					{
 						continue;
 					}
-					auto MatchesFn = matchesPart;
+					auto MatchesFn = MatchesPart;
 					const int FilterLen = str_length(aFilterStrTrimmed);
 					if(aFilterStrTrimmed[0] == '"' && aFilterStrTrimmed[FilterLen - 1] == '"')
 					{
 						aFilterStrTrimmed[FilterLen - 1] = '\0';
-						MatchesFn = matchesExactly;
+						MatchesFn = MatchesExactly;
 					}
 
 					// match against server name
@@ -549,12 +549,12 @@ void CServerBrowser::Filter()
 					{
 						continue;
 					}
-					auto MatchesFn = matchesPart;
+					auto MatchesFn = MatchesPart;
 					const int FilterLen = str_length(aExcludeStrTrimmed);
 					if(aExcludeStrTrimmed[0] == '"' && aExcludeStrTrimmed[FilterLen - 1] == '"')
 					{
 						aExcludeStrTrimmed[FilterLen - 1] = '\0';
-						MatchesFn = matchesExactly;
+						MatchesFn = MatchesExactly;
 					}
 
 					// match against server name

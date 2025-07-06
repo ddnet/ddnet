@@ -137,6 +137,7 @@ def gen_network_source():
 #include "protocol.h"
 
 #include <base/system.h>
+#include <engine/uuid.h>
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
 #include <engine/shared/uuid_manager.h>
