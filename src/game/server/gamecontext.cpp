@@ -3226,6 +3226,38 @@ void CGameContext::ConBroadcast(IConsole::IResult *pResult, void *pUserData)
 	pSelf->SendBroadcast(aBuf, -1);
 }
 
+void CGameContext::ConBroadcastId(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	const int Victim = pResult->GetVictim();
+	if(!CheckClientId(Victim) || !pSelf->m_apPlayers[Victim])
+	{
+		log_info("broadcast", "Client ID not found: %d", Victim);
+		return;
+	}
+
+	char aBuf[1024];
+	str_copy(aBuf, pResult->GetString(1), sizeof(aBuf));
+
+	int i, j;
+	for(i = 0, j = 0; aBuf[i]; i++, j++)
+	{
+		if(aBuf[i] == '\\' && aBuf[i + 1] == 'n')
+		{
+			aBuf[j] = '\n';
+			i++;
+		}
+		else if(i != j)
+		{
+			aBuf[j] = aBuf[i];
+		}
+	}
+	aBuf[j] = '\0';
+
+	pSelf->SendBroadcast(aBuf, Victim);
+}
+
 void CGameContext::ConSay(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -3691,6 +3723,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("random_unfinished_map", "?i[stars]", CFGFLAG_SERVER | CFGFLAG_STORE, ConRandomUnfinishedMap, this, "Random unfinished map");
 	Console()->Register("restart", "?i[seconds]", CFGFLAG_SERVER | CFGFLAG_STORE, ConRestart, this, "Restart in x seconds (0 = abort)");
 	Console()->Register("broadcast", "r[message]", CFGFLAG_SERVER, ConBroadcast, this, "Broadcast message");
+	Console()->Register("broadcastid", "v[id] r[message]", CFGFLAG_SERVER, ConBroadcastId, this, "Broadcast message to player with client ID");
 	Console()->Register("say", "r[message]", CFGFLAG_SERVER, ConSay, this, "Say in chat");
 	Console()->Register("set_team", "i[id] i[team-id] ?i[delay in minutes]", CFGFLAG_SERVER, ConSetTeam, this, "Set team of player to team");
 	Console()->Register("set_team_all", "i[team-id]", CFGFLAG_SERVER, ConSetTeamAll, this, "Set team of all players to team");
