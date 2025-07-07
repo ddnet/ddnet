@@ -474,9 +474,6 @@ ColorRGBA CRenderLayerTile::GetRenderColor(const CRenderLayerParams &Params) con
 
 void CRenderLayerTile::Render(const CRenderLayerParams &Params)
 {
-	if(!DoRender(Params))
-		return;
-
 	UseTexture(GetTexture());
 	ColorRGBA Color = GetRenderColor(Params);
 	if(m_pGraphics->IsTileBufferingEnabled())
