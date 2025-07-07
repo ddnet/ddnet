@@ -270,6 +270,8 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, boo
 
 void CNetServer::SendMsgs(NETADDR &Addr, const CPacker **ppMsgs, int Num)
 {
+	dbg_assert(Num > 0 && Num <= NET_MAX_PACKET_CHUNKS, "Number of messages invalid: %d", Num);
+
 	CNetPacketConstruct Construct;
 	mem_zero(&Construct, sizeof(Construct));
 	unsigned char *pChunkData = &Construct.m_aChunkData[Construct.m_DataSize];
