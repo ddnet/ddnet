@@ -407,8 +407,7 @@ void CMenus::RenderSkinPartSelection7(CUIRect MainView)
 	}
 
 	static int s_OldSelected = -1;
-	s_ListBox.DoBegin(&MainView);
-	s_ListBox.DoStart(72.0f, s_paList[m_TeePartSelected].size(), 4, 1, s_OldSelected, nullptr, false, IGraphics::CORNER_NONE, true);
+	s_ListBox.DoStart(72.0f, s_paList[m_TeePartSelected].size(), 4, 1, s_OldSelected, &MainView, false, IGraphics::CORNER_NONE, true);
 
 	for(int i = 0; i < (int)s_paList[m_TeePartSelected].size(); ++i)
 	{

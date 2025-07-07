@@ -12,20 +12,20 @@
 
 CListBox::CListBox()
 {
-	m_ScrollOffset = vec2(0.0f, 0.0f);
+	Reset();
+}
+
+void CListBox::Reset()
+{
+	m_ListBoxView = m_RowView = CUIRect{0.0f, 0.0f, 0.0f, 0.0f};
 	m_ListBoxUpdateScroll = false;
+	m_ScrollbarShown = false;
+	m_AutoSpacing = 0.0f;
+	m_ScrollRegion.Reset();
 	m_ScrollbarWidth = 20.0f;
 	m_ScrollbarMargin = 5.0f;
 	m_HasHeader = false;
-	m_AutoSpacing = 0.0f;
-	m_ScrollbarShown = false;
 	m_Active = true;
-}
-
-void CListBox::DoBegin(const CUIRect *pRect)
-{
-	// setup the variables
-	m_ListBoxView = *pRect;
 }
 
 void CListBox::DoHeader(const CUIRect *pRect, const char *pTitle, float HeaderHeight, float Spacing)
@@ -55,12 +55,6 @@ void CListBox::DoSpacing(float Spacing)
 	m_ListBoxView = View;
 }
 
-void CListBox::DoFooter(const char *pBottomText, float FooterHeight)
-{
-	m_pBottomText = pBottomText;
-	m_FooterHeight = FooterHeight;
-}
-
 void CListBox::DoStart(float RowHeight, int NumItems, int ItemsPerRow, int RowsPerScroll, int SelectedIndex, const CUIRect *pRect, bool Background, int BackgroundCorners, bool ForceShowScrollbar)
 {
 	CUIRect View;
@@ -73,15 +67,6 @@ void CListBox::DoStart(float RowHeight, int NumItems, int ItemsPerRow, int RowsP
 	m_BackgroundCorners = BackgroundCorners;
 	if(Background)
 		View.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), m_BackgroundCorners & (m_HasHeader ? IGraphics::CORNER_B : IGraphics::CORNER_ALL), 5.0f);
-
-	// draw footers
-	if(m_pBottomText)
-	{
-		CUIRect Footer;
-		View.HSplitBottom(m_FooterHeight, &View, &Footer);
-		Footer.VSplitLeft(10.0f, nullptr, &Footer);
-		Ui()->DoLabel(&Footer, m_pBottomText, Footer.h * CUi::ms_FontmodHeight * 0.8f, TEXTALIGN_MC);
-	}
 
 	// setup the variables
 	m_ListBoxView = View;
@@ -118,14 +103,14 @@ void CListBox::DoStart(float RowHeight, int NumItems, int ItemsPerRow, int RowsP
 	}
 
 	// setup the scrollbar
-	m_ScrollOffset = vec2(0.0f, 0.0f);
+	vec2 ScrollOffset = vec2(0.0f, 0.0f);
 	CScrollRegionParams ScrollParams;
 	ScrollParams.m_ScrollbarWidth = ScrollbarWidthMax();
 	ScrollParams.m_ScrollbarMargin = ScrollbarMargin();
 	ScrollParams.m_ScrollUnit = (m_ListBoxRowHeight + m_AutoSpacing) * RowsPerScroll;
 	ScrollParams.m_Flags = ForceShowScrollbar ? CScrollRegionParams::FLAG_CONTENT_STATIC_WIDTH : 0;
-	m_ScrollRegion.Begin(&m_ListBoxView, &m_ScrollOffset, &ScrollParams);
-	m_ListBoxView.y += m_ScrollOffset.y;
+	m_ScrollRegion.Begin(&m_ListBoxView, &ScrollOffset, &ScrollParams);
+	m_ListBoxView.y += ScrollOffset.y;
 }
 
 CListboxItem CListBox::DoNextRow()

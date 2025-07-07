@@ -11,6 +11,11 @@
 
 CScrollRegion::CScrollRegion()
 {
+	Reset();
+}
+
+void CScrollRegion::Reset()
+{
 	m_ScrollY = 0.0f;
 	m_ContentH = 0.0f;
 	m_RequestScrollY = -1.0f;
@@ -22,6 +27,7 @@ CScrollRegion::CScrollRegion()
 	m_AnimInitScrollY = 0.0f;
 	m_AnimTargetScrollY = 0.0f;
 
+	m_ClipRect = m_RailRect = m_LastAddedRect = CUIRect{0.0f, 0.0f, 0.0f, 0.0f};
 	m_SliderGrabPos = 0.0f;
 	m_ContentScrollOff = vec2(0.0f, 0.0f);
 	m_Params = CScrollRegionParams();
