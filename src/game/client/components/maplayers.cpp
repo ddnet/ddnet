@@ -90,7 +90,7 @@ void CMapLayers::OnMapLoad()
 	{
 		CMapItemGroup *pGroup = m_pLayers->GetGroup(g);
 		std::unique_ptr<CRenderLayer> pRenderLayerGroup = std::make_unique<CRenderLayerGroup>(g, pGroup);
-		pRenderLayerGroup->OnInit(Graphics(), m_pLayers->Map(), RenderTools(), m_pImages, m_pEnvelopePoints, Client(), GameClient(), m_OnlineOnly);
+		pRenderLayerGroup->OnInit(GameClient(), m_pLayers->Map(), m_pImages, m_pEnvelopePoints, m_OnlineOnly);
 		if(!pRenderLayerGroup->IsValid())
 		{
 			dbg_msg("maplayers", "error group was null, group number = %d, total groups = %d", g, m_pLayers->NumGroups());
@@ -194,7 +194,7 @@ void CMapLayers::OnMapLoad()
 			// just ignore invalid layers from rendering
 			if(pRenderLayer)
 			{
-				pRenderLayer->OnInit(Graphics(), m_pLayers->Map(), RenderTools(), m_pImages, m_pEnvelopePoints, Client(), GameClient(), m_OnlineOnly);
+				pRenderLayer->OnInit(GameClient(), m_pLayers->Map(), m_pImages, m_pEnvelopePoints, m_OnlineOnly);
 				if(pRenderLayer->IsValid())
 				{
 					pRenderLayer->Init();

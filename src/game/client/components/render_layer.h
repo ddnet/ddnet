@@ -14,6 +14,7 @@ using offset_ptr32 = unsigned int;
 #include <base/color.h>
 #include <engine/graphics.h>
 
+#include <game/client/component.h>
 #include <game/client/render.h>
 #include <game/mapitems.h>
 #include <game/mapitems_ex.h>
@@ -23,9 +24,6 @@ class CMapItemLayerTilemap;
 class CMapItemLayerQuads;
 class IMap;
 class CMapImages;
-class CRenderTools;
-class IClient;
-class CGameClient;
 
 constexpr int BorderRenderDistance = 201;
 
@@ -38,12 +36,12 @@ public:
 	float m_Zoom;
 };
 
-class CRenderLayer
+class CRenderLayer : public CComponentInterfaces
 {
 public:
 	CRenderLayer(int GroupId, int LayerId, int Flags);
 	virtual ~CRenderLayer() = default;
-	void OnInit(IGraphics *pGraphics, IMap *pMap, CRenderTools *pRenderTools, CMapImages *pMapImages, std::shared_ptr<CMapBasedEnvelopePointAccess> &pEvelopePoints, IClient *pClient, CGameClient *pGameClient, bool OnlineOnly);
+	void OnInit(CGameClient *pGameClient, IMap *pMap, CMapImages *pMapImages, std::shared_ptr<CMapBasedEnvelopePointAccess> &pEvelopePoints, bool OnlineOnly);
 
 	virtual void Init() = 0;
 	virtual void Render(const CRenderLayerParams &Params) = 0;
@@ -65,12 +63,8 @@ protected:
 	virtual IGraphics::CTextureHandle GetTexture() const = 0;
 	void RenderLoading() const;
 
-	class IGraphics *m_pGraphics = nullptr;
 	class IMap *m_pMap = nullptr;
-	class CRenderTools *m_pRenderTools = nullptr;
 	class CMapImages *m_pMapImages = nullptr;
-	class IClient *m_pClient = nullptr;
-	class CGameClient *m_pGameClient = nullptr;
 	std::shared_ptr<CMapBasedEnvelopePointAccess> m_pEnvelopePoints;
 };
 
