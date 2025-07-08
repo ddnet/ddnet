@@ -769,7 +769,7 @@ endif()
 ########################################################################
 
 if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
-  set(DDNET_GTEST_VERSION 3d73dee972d0db344bda9b659836612aba6a3564)
+  set(DDNET_GTEST_VERSION e5443e5c65f23bfd2a9d56a30bb5b1de91a48ff9)
   configure_file(cmake/Download_GTest_CMakeLists.txt.in googletest-download/CMakeLists.txt)
   execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
     RESULT_VARIABLE result
@@ -3074,7 +3074,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
   add_custom_target(run_tests
     DEPENDS run_cxx_tests
   )
-  if(NOT MSVC OR CMAKE_BUILD_TYPE STREQUAL Release)
+  if((NOT MSVC OR CMAKE_BUILD_TYPE STREQUAL Release) AND NOT MINGW)
     # On MSVC, Rust tests only work in the release mode because we link our C++
     # code with the debug C standard library (/MTd) but Rust only supports
     # linking to the release C standard library (/MT).
