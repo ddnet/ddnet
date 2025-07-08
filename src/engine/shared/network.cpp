@@ -211,12 +211,23 @@ void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct 
 	}
 }
 
+std::optional<int> CNetBase::UnpackPacketFlags(unsigned char *pBuffer, int Size)
+{
+	if(Size < NET_PACKETHEADERSIZE || Size > NET_MAX_PACKETSIZE)
+	{
+		return std::nullopt;
+	}
+	return pBuffer[0] >> 2;
+}
+
 // TODO: rename this function
 int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool &Sixup, SECURITY_TOKEN *pSecurityToken, SECURITY_TOKEN *pResponseToken)
 {
-	// check the size
-	if(Size < NET_PACKETHEADERSIZE || Size > NET_MAX_PACKETSIZE)
+	std::optional<int> Flags = UnpackPacketFlags(pBuffer, Size);
+	if(!Flags)
+	{
 		return -1;
+	}
 
 	// log the data
 	if(ms_DataLogRecv)
@@ -229,7 +240,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 	}
 
 	// read the packet
-	pPacket->m_Flags = pBuffer[0] >> 2;
+	pPacket->m_Flags = *Flags;
 
 	if(pPacket->m_Flags & NET_PACKETFLAG_CONNLESS)
 	{
