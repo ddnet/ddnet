@@ -3,6 +3,8 @@
 #include <base/system.h>
 #include <base/types.h>
 
+#include <engine/shared/protocolglue.h>
+
 #include "config.h"
 #include "huffman.h"
 #include "network.h"
@@ -185,14 +187,7 @@ void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct 
 
 	if(Sixup)
 	{
-		unsigned Flags = 0;
-		if(pPacket->m_Flags & NET_PACKETFLAG_CONTROL)
-			Flags |= 1;
-		if(pPacket->m_Flags & NET_PACKETFLAG_RESEND)
-			Flags |= 2;
-		if(pPacket->m_Flags & NET_PACKETFLAG_COMPRESSION)
-			Flags |= 4;
-		pPacket->m_Flags = Flags;
+		pPacket->m_Flags = PacketFlags_SixToSeven(pPacket->m_Flags);
 	}
 
 	// set header and send the packet if all things are good
@@ -279,15 +274,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 
 		if(Sixup)
 		{
-			unsigned Flags = 0;
-			if(pPacket->m_Flags & 1)
-				Flags |= NET_PACKETFLAG_CONTROL;
-			if(pPacket->m_Flags & 2)
-				Flags |= NET_PACKETFLAG_RESEND;
-			if(pPacket->m_Flags & 4)
-				Flags |= NET_PACKETFLAG_COMPRESSION;
-			pPacket->m_Flags = Flags;
-
+			pPacket->m_Flags = PacketFlags_SevenToSix(pPacket->m_Flags);
 			*pSecurityToken = ToSecurityToken(pBuffer + 3);
 		}
 
