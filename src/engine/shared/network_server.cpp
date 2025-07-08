@@ -546,20 +546,16 @@ int CNetServer::OnSixupCtrlMsg(NETADDR &Addr, CNetChunk *pChunk, int ControlMsg,
 
 int CNetServer::GetClientSlot(const NETADDR &Addr)
 {
-	int Slot = -1;
-
 	for(int i = 0; i < MaxClients(); i++)
 	{
 		if(m_aSlots[i].m_Connection.State() != NET_CONNSTATE_OFFLINE &&
 			m_aSlots[i].m_Connection.State() != NET_CONNSTATE_ERROR &&
 			net_addr_comp(m_aSlots[i].m_Connection.PeerAddress(), &Addr) == 0)
-
 		{
-			Slot = i;
+			return i;
 		}
 	}
-
-	return Slot;
+	return -1;
 }
 
 static bool IsDDNetControlMsg(const CNetPacketConstruct *pPacket)
