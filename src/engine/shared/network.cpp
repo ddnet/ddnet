@@ -278,10 +278,18 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 			*pSecurityToken = ToSecurityToken(pBuffer + 3);
 		}
 
+		const bool Control = (pPacket->m_Flags & NET_PACKETFLAG_CONTROL) != 0;
+
+		// Drop invalid control packets. At least one byte is required as the control message code.
+		if(Control && pPacket->m_DataSize == 0)
+		{
+			return -1;
+		}
+
 		if(pPacket->m_Flags & NET_PACKETFLAG_COMPRESSION)
 		{
 			// Don't allow compressed control packets.
-			if(pPacket->m_Flags & NET_PACKETFLAG_CONTROL)
+			if(Control)
 			{
 				return -1;
 			}
