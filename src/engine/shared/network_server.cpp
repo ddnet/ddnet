@@ -108,7 +108,7 @@ void CNetServer::Update()
 	for(int i = 0; i < MaxClients(); i++)
 	{
 		m_aSlots[i].m_Connection.Update();
-		if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_ERROR &&
+		if(m_aSlots[i].m_Connection.State() == CNetConnection::EState::ERROR &&
 			(!m_aSlots[i].m_Connection.m_TimeoutProtected ||
 				!m_aSlots[i].m_Connection.m_TimeoutSituation))
 		{
@@ -154,8 +154,8 @@ int CNetServer::NumClientsWithAddr(NETADDR Addr)
 	int FoundAddr = 0;
 	for(int i = 0; i < MaxClients(); ++i)
 	{
-		if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE ||
-			(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_ERROR &&
+		if(m_aSlots[i].m_Connection.State() == CNetConnection::EState::OFFLINE ||
+			(m_aSlots[i].m_Connection.State() == CNetConnection::EState::ERROR &&
 				(!m_aSlots[i].m_Connection.m_TimeoutProtected ||
 					!m_aSlots[i].m_Connection.m_TimeoutSituation)))
 			continue;
@@ -228,7 +228,7 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, boo
 	int Slot = -1;
 	for(int i = 0; i < MaxClients(); i++)
 	{
-		if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE)
+		if(m_aSlots[i].m_Connection.State() == CNetConnection::EState::OFFLINE)
 		{
 			Slot = i;
 			break;
@@ -548,8 +548,8 @@ int CNetServer::GetClientSlot(const NETADDR &Addr)
 {
 	for(int i = 0; i < MaxClients(); i++)
 	{
-		if(m_aSlots[i].m_Connection.State() != NET_CONNSTATE_OFFLINE &&
-			m_aSlots[i].m_Connection.State() != NET_CONNSTATE_ERROR &&
+		if(m_aSlots[i].m_Connection.State() != CNetConnection::EState::OFFLINE &&
+			m_aSlots[i].m_Connection.State() != CNetConnection::EState::ERROR &&
 			net_addr_comp(m_aSlots[i].m_Connection.PeerAddress(), &Addr) == 0)
 		{
 			return i;
@@ -730,7 +730,7 @@ void CNetServer::SetMaxClientsPerIp(int Max)
 
 bool CNetServer::SetTimedOut(int ClientId, int OrigId)
 {
-	if(m_aSlots[ClientId].m_Connection.State() != NET_CONNSTATE_ERROR)
+	if(m_aSlots[ClientId].m_Connection.State() != CNetConnection::EState::ERROR)
 		return false;
 
 	m_aSlots[ClientId].m_Connection.SetTimedOut(ClientAddr(OrigId), m_aSlots[OrigId].m_Connection.SeqSequence(), m_aSlots[OrigId].m_Connection.AckSequence(), m_aSlots[OrigId].m_Connection.SecurityToken(), m_aSlots[OrigId].m_Connection.ResendBuffer(), m_aSlots[OrigId].m_Connection.m_Sixup);
