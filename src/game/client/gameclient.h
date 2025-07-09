@@ -481,7 +481,7 @@ public:
 		CNetObj_Character m_Snapped;
 		CNetObj_Character m_Evolved;
 
-		CNetMsg_Sv_PreInput m_PreInput[200];
+		CNetMsg_Sv_PreInput m_aPreInputs[200];
 
 		// rendered characters
 		CNetObj_Character m_RenderCur;
