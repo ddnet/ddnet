@@ -29,6 +29,7 @@
 #include <game/client/ui.h>
 #include <game/client/ui_listbox.h>
 #include <game/client/ui_scrollregion.h>
+#include <game/editor/explanations.h>
 #include <game/generated/client_data.h>
 #include <game/localization.h>
 
@@ -3262,23 +3263,23 @@ void CEditor::DoMapEditor(CUIRect View)
 				else
 					Layer = NUM_LAYERS;
 
-				EExplanation Explanation;
+				CExplanations::EGametype ExplanationGametype;
 				if(m_SelectEntitiesImage == "DDNet")
-					Explanation = EExplanation::DDNET;
+					ExplanationGametype = CExplanations::EGametype::DDNET;
 				else if(m_SelectEntitiesImage == "FNG")
-					Explanation = EExplanation::FNG;
+					ExplanationGametype = CExplanations::EGametype::FNG;
 				else if(m_SelectEntitiesImage == "Race")
-					Explanation = EExplanation::RACE;
+					ExplanationGametype = CExplanations::EGametype::RACE;
 				else if(m_SelectEntitiesImage == "Vanilla")
-					Explanation = EExplanation::VANILLA;
+					ExplanationGametype = CExplanations::EGametype::VANILLA;
 				else if(m_SelectEntitiesImage == "blockworlds")
-					Explanation = EExplanation::BLOCKWORLDS;
+					ExplanationGametype = CExplanations::EGametype::BLOCKWORLDS;
 				else
-					Explanation = EExplanation::NONE;
+					ExplanationGametype = CExplanations::EGametype::NONE;
 
 				if(Layer != NUM_LAYERS)
 				{
-					const char *pExplanation = Explain(Explanation, (int)wx / 32 + (int)wy / 32 * 16, Layer);
+					const char *pExplanation = CExplanations::Explain(ExplanationGametype, (int)wx / 32 + (int)wy / 32 * 16, Layer);
 					if(pExplanation)
 						str_copy(m_aTooltip, pExplanation);
 				}
