@@ -471,6 +471,7 @@ public:
 		m_SpeedupAngle = 0;
 		m_LargeLayerWasWarned = false;
 		m_PreventUnusedTilesWasWarned = false;
+		m_ReloadMapWithUnused = false;
 		m_AllowPlaceUnusedTiles = EUnusedEntities::NOT_ALLOWED;
 		m_BrushDrawDestructive = true;
 	}
@@ -623,6 +624,7 @@ public:
 		POPEVENT_SAVE_SOUND,
 		POPEVENT_LARGELAYER,
 		POPEVENT_PREVENTUNUSEDTILES,
+		POPEVENT_RELOAD_WITH_UNUSED,
 		POPEVENT_IMAGEDIV16,
 		POPEVENT_IMAGE_MAX,
 		POPEVENT_SOUND_MAX,
@@ -642,6 +644,7 @@ public:
 	int m_PopupEventWasActivated;
 	bool m_LargeLayerWasWarned;
 	bool m_PreventUnusedTilesWasWarned;
+	bool m_ReloadMapWithUnused;
 
 	enum class EUnusedEntities
 	{
