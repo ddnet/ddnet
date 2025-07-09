@@ -1392,6 +1392,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 	m_pRemoveFriend = nullptr;
 	for(auto &vFriends : m_avFriends)
 		vFriends.clear();
+	m_avFriends[FRIEND_OFF].reserve(GameClient()->Friends()->NumFriends());
 	for(int FriendIndex = 0; FriendIndex < GameClient()->Friends()->NumFriends(); ++FriendIndex)
 	{
 		m_avFriends[FRIEND_OFF].emplace_back(GameClient()->Friends()->GetFriend(FriendIndex));

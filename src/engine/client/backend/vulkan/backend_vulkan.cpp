@@ -3491,6 +3491,7 @@ public:
 			return false;
 		}
 
+		vVKExtensions.reserve(ExtCount);
 		for(uint32_t i = 0; i < ExtCount; i++)
 		{
 			vVKExtensions.emplace_back(vExtensionList[i]);
@@ -3552,8 +3553,7 @@ public:
 		vVKLayers.clear();
 		for(const auto &LayerName : vVKInstanceLayers)
 		{
-			auto it = ReqLayerNames.find(std::string(LayerName.layerName));
-			if(it != ReqLayerNames.end())
+			if(ReqLayerNames.contains(std::string(LayerName.layerName)))
 			{
 				vVKLayers.emplace_back(LayerName.layerName);
 			}
@@ -3914,8 +3914,7 @@ public:
 
 		for(const auto &CurExtProp : vDevPropList)
 		{
-			auto it = OurDevExt.find(std::string(CurExtProp.extensionName));
-			if(it != OurDevExt.end())
+			if(OurDevExt.contains(std::string(CurExtProp.extensionName)))
 			{
 				vDevPropCNames.emplace_back(CurExtProp.extensionName);
 			}
@@ -7550,6 +7549,7 @@ public:
 				ThreadCommandList.reserve(256);
 			}
 
+			m_vpRenderThreads.reserve(m_ThreadCount - 1);
 			for(size_t i = 0; i < m_ThreadCount - 1; ++i)
 			{
 				auto *pRenderThread = new SRenderThread();

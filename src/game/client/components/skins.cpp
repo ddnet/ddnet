@@ -251,8 +251,7 @@ int CSkins::SkinScan(const char *pName, int IsDir, int StorageType, void *pUser)
 
 	char aNormalizedName[NORMALIZED_SKIN_NAME_LENGTH];
 	str_utf8_tolower(aSkinName, aNormalizedName, sizeof(aNormalizedName));
-	auto ExistingSkin = pSelf->m_Skins.find(aNormalizedName);
-	if(ExistingSkin != pSelf->m_Skins.end())
+	if(pSelf->m_Skins.contains(aNormalizedName))
 	{
 		return 0;
 	}
@@ -467,8 +466,7 @@ void CSkins::LoadSkinDirect(const char *pName)
 {
 	char aNormalizedName[NORMALIZED_SKIN_NAME_LENGTH];
 	str_utf8_tolower(pName, aNormalizedName, sizeof(aNormalizedName));
-	auto ExistingSkin = m_Skins.find(aNormalizedName);
-	if(ExistingSkin != m_Skins.end())
+	if(m_Skins.contains(aNormalizedName))
 	{
 		return;
 	}
@@ -765,6 +763,7 @@ CSkins::CSkinList &CSkins::SkinList()
 	char aDummySkin[NORMALIZED_SKIN_NAME_LENGTH];
 	str_utf8_tolower(g_Config.m_ClPlayerSkin, aPlayerSkin, sizeof(aPlayerSkin));
 	str_utf8_tolower(g_Config.m_ClDummySkin, aDummySkin, sizeof(aDummySkin));
+	m_SkinList.m_vSkins.reserve(m_Skins.size());
 	for(const auto &[_, pSkinContainer] : m_Skins)
 	{
 		if(pSkinContainer->IsSpecial())
