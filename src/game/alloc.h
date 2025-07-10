@@ -50,7 +50,7 @@ private:
 #define MACRO_ALLOC_POOL_ID_IMPL(POOLTYPE, PoolSize) \
 	static char gs_PoolData##POOLTYPE[PoolSize][MACRO_ALLOC_GET_SIZE(POOLTYPE)] = {{0}}; \
 	static int gs_PoolUsed##POOLTYPE[PoolSize] = {0}; \
-	MAYBE_UNUSED static int gs_PoolDummy##POOLTYPE = (ASAN_POISON_MEMORY_REGION(gs_PoolData##POOLTYPE, sizeof(gs_PoolData##POOLTYPE)), 0); \
+	[[maybe_unused]] static int gs_PoolDummy##POOLTYPE = (ASAN_POISON_MEMORY_REGION(gs_PoolData##POOLTYPE, sizeof(gs_PoolData##POOLTYPE)), 0); \
 	void *POOLTYPE::operator new(size_t Size, int Id) \
 	{ \
 		dbg_assert(sizeof(POOLTYPE) >= Size, "size error"); \

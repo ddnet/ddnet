@@ -3529,6 +3529,7 @@ set(TARGETS ${TARGETS_OWN} ${TARGETS_DEP})
 foreach(target ${TARGETS})
   if(MSVC)
     set_property(TARGET ${target} PROPERTY MSVC_RUNTIME_LIBRARY MultiThreaded$<${DBG}:Debug>) # Use static CRT
+    target_compile_options(${target} PRIVATE /Zc:__cplusplus) # Fixes the __cplusplus macro
     target_compile_options(${target} PRIVATE /MP) # Use multiple cores
     target_compile_options(${target} PRIVATE /EHsc) # Only catch C++ exceptions with catch.
     target_compile_options(${target} PRIVATE /GS) # Protect the stack pointer.

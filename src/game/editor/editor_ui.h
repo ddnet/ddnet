@@ -16,7 +16,7 @@ struct SEditBoxDropdownContext
 };
 
 namespace EditorFontSizes {
-MAYBE_UNUSED static constexpr float MENU = 10.0f;
+[[maybe_unused]] static constexpr float MENU = 10.0f;
 }
 
 #endif
