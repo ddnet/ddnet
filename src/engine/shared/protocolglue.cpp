@@ -1,8 +1,45 @@
+#include <engine/shared/network.h>
+
 #include <game/generated/protocol.h>
 #include <game/generated/protocol7.h>
 #include <game/generated/protocolglue.h>
 
 #include "protocolglue.h"
+
+namespace protocol7 {
+
+enum
+{
+	NET_PACKETFLAG_CONTROL = 1,
+	NET_PACKETFLAG_RESEND = 2,
+	NET_PACKETFLAG_COMPRESSION = 4,
+};
+
+}
+
+int PacketFlags_SixToSeven(int Flags)
+{
+	int Seven = 0;
+	if(Flags & ::NET_PACKETFLAG_CONTROL)
+		Seven |= protocol7::NET_PACKETFLAG_CONTROL;
+	if(Flags & ::NET_PACKETFLAG_RESEND)
+		Seven |= protocol7::NET_PACKETFLAG_RESEND;
+	if(Flags & ::NET_PACKETFLAG_COMPRESSION)
+		Seven |= protocol7::NET_PACKETFLAG_COMPRESSION;
+	return Seven;
+}
+
+int PacketFlags_SevenToSix(int Flags)
+{
+	int Six = 0;
+	if(Flags & protocol7::NET_PACKETFLAG_CONTROL)
+		Six |= ::NET_PACKETFLAG_CONTROL;
+	if(Flags & protocol7::NET_PACKETFLAG_RESEND)
+		Six |= ::NET_PACKETFLAG_RESEND;
+	if(Flags & protocol7::NET_PACKETFLAG_COMPRESSION)
+		Six |= ::NET_PACKETFLAG_COMPRESSION;
+	return Six;
+}
 
 int GameFlags_ClampToSix(int Flags)
 {

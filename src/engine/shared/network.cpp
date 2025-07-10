@@ -3,6 +3,8 @@
 #include <base/system.h>
 #include <base/types.h>
 
+#include <engine/shared/protocolglue.h>
+
 #include "config.h"
 #include "huffman.h"
 #include "network.h"
@@ -185,14 +187,7 @@ void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct 
 
 	if(Sixup)
 	{
-		unsigned Flags = 0;
-		if(pPacket->m_Flags & NET_PACKETFLAG_CONTROL)
-			Flags |= 1;
-		if(pPacket->m_Flags & NET_PACKETFLAG_RESEND)
-			Flags |= 2;
-		if(pPacket->m_Flags & NET_PACKETFLAG_COMPRESSION)
-			Flags |= 4;
-		pPacket->m_Flags = Flags;
+		pPacket->m_Flags = PacketFlags_SixToSeven(pPacket->m_Flags);
 	}
 
 	// set header and send the packet if all things are good
@@ -216,12 +211,23 @@ void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct 
 	}
 }
 
+std::optional<int> CNetBase::UnpackPacketFlags(unsigned char *pBuffer, int Size)
+{
+	if(Size < NET_PACKETHEADERSIZE || Size > NET_MAX_PACKETSIZE)
+	{
+		return std::nullopt;
+	}
+	return pBuffer[0] >> 2;
+}
+
 // TODO: rename this function
 int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool &Sixup, SECURITY_TOKEN *pSecurityToken, SECURITY_TOKEN *pResponseToken)
 {
-	// check the size
-	if(Size < NET_PACKETHEADERSIZE || Size > NET_MAX_PACKETSIZE)
+	std::optional<int> Flags = UnpackPacketFlags(pBuffer, Size);
+	if(!Flags)
+	{
 		return -1;
+	}
 
 	// log the data
 	if(ms_DataLogRecv)
@@ -234,7 +240,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 	}
 
 	// read the packet
-	pPacket->m_Flags = pBuffer[0] >> 2;
+	pPacket->m_Flags = *Flags;
 
 	if(pPacket->m_Flags & NET_PACKETFLAG_CONNLESS)
 	{
@@ -279,22 +285,22 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 
 		if(Sixup)
 		{
-			unsigned Flags = 0;
-			if(pPacket->m_Flags & 1)
-				Flags |= NET_PACKETFLAG_CONTROL;
-			if(pPacket->m_Flags & 2)
-				Flags |= NET_PACKETFLAG_RESEND;
-			if(pPacket->m_Flags & 4)
-				Flags |= NET_PACKETFLAG_COMPRESSION;
-			pPacket->m_Flags = Flags;
-
+			pPacket->m_Flags = PacketFlags_SevenToSix(pPacket->m_Flags);
 			*pSecurityToken = ToSecurityToken(pBuffer + 3);
+		}
+
+		const bool Control = (pPacket->m_Flags & NET_PACKETFLAG_CONTROL) != 0;
+
+		// Drop invalid control packets. At least one byte is required as the control message code.
+		if(Control && pPacket->m_DataSize == 0)
+		{
+			return -1;
 		}
 
 		if(pPacket->m_Flags & NET_PACKETFLAG_COMPRESSION)
 		{
 			// Don't allow compressed control packets.
-			if(pPacket->m_Flags & NET_PACKETFLAG_CONTROL)
+			if(Control)
 			{
 				return -1;
 			}

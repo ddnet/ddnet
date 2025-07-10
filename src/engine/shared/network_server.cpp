@@ -546,20 +546,16 @@ int CNetServer::OnSixupCtrlMsg(NETADDR &Addr, CNetChunk *pChunk, int ControlMsg,
 
 int CNetServer::GetClientSlot(const NETADDR &Addr)
 {
-	int Slot = -1;
-
 	for(int i = 0; i < MaxClients(); i++)
 	{
 		if(m_aSlots[i].m_Connection.State() != NET_CONNSTATE_OFFLINE &&
 			m_aSlots[i].m_Connection.State() != NET_CONNSTATE_ERROR &&
 			net_addr_comp(m_aSlots[i].m_Connection.PeerAddress(), &Addr) == 0)
-
 		{
-			Slot = i;
+			return i;
 		}
 	}
-
-	return Slot;
+	return -1;
 }
 
 static bool IsDDNetControlMsg(const CNetPacketConstruct *pPacket)
@@ -611,8 +607,17 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 			continue;
 		}
 
+		// Check size and unpack packet flags early so we can determine the sixup
+		// state correctly for connection-oriented packets before unpacking them.
+		std::optional<int> Flags = CNetBase::UnpackPacketFlags(pData, Bytes);
+		if(!Flags)
+		{
+			continue;
+		}
+
 		SECURITY_TOKEN Token;
-		bool Sixup = false;
+		int Slot = (*Flags & NET_PACKETFLAG_CONNLESS) == 0 ? GetClientSlot(Addr) : -1;
+		bool Sixup = Slot != -1 && m_aSlots[Slot].m_Connection.m_Sixup;
 		if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvUnpacker.m_Data, Sixup, &Token, pResponseToken) == 0)
 		{
 			if(m_RecvUnpacker.m_Data.m_Flags & NET_PACKETFLAG_CONNLESS)
@@ -632,27 +637,10 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 				}
 				return 1;
 			}
-			else
+			else // connection-oriented packet
 			{
-				// drop invalid ctrl packets
-				if(m_RecvUnpacker.m_Data.m_Flags & NET_PACKETFLAG_CONTROL &&
-					m_RecvUnpacker.m_Data.m_DataSize == 0)
-					continue;
-
-				// normal packet, find matching slot
-				int Slot = GetClientSlot(Addr);
-
-				if(!Sixup && Slot != -1 && m_aSlots[Slot].m_Connection.m_Sixup)
+				if(Slot != -1) // connection found
 				{
-					Sixup = true;
-					if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvUnpacker.m_Data, Sixup, &Token))
-						continue;
-				}
-
-				if(Slot != -1)
-				{
-					// found
-
 					// control
 					if(m_RecvUnpacker.m_Data.m_Flags & NET_PACKETFLAG_CONTROL)
 						OnConnCtrlMsg(Addr, Slot, m_RecvUnpacker.m_Data.m_aChunkData[0], m_RecvUnpacker.m_Data);
@@ -663,10 +651,8 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 							m_RecvUnpacker.Start(&Addr, &m_aSlots[Slot].m_Connection, Slot);
 					}
 				}
-				else
+				else // connection not found, client that wants to connect
 				{
-					// not found, client that wants to connect
-
 					if(Sixup)
 					{
 						// got 0.7 control msg
