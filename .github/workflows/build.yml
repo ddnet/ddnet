@@ -119,6 +119,11 @@ jobs:
     
     - name: Cache Rust dependencies
       uses: Swatinem/rust-cache@v2
+      with:
+          workspaces: |
+              src/mastersrv
+              src/masterping
+              ./
 
     - name: Build mastersrv
       if: "!contains(matrix.os, 'ubuntu-22.04')"
@@ -282,6 +287,11 @@ jobs:
 
     - name: Cache Rust dependencies
       uses: Swatinem/rust-cache@v2
+      with:
+          workspaces: |
+              src/mastersrv
+              src/masterping
+              ./
 
     - name: Build Android app
       env:
