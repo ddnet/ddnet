@@ -4570,7 +4570,7 @@ static void ShowMessageBox(const char *pTitle, const char *pMessage, IClient::EM
 extern "C" int TWMain(int argc, const char **argv)
 #elif defined(CONF_PLATFORM_ANDROID)
 static int gs_AndroidStarted = false;
-extern "C" __attribute__((visibility("default"))) int SDL_main(int argc, char *argv[]);
+extern "C" [[gnu::visibility("default")]] int SDL_main(int argc, char *argv[]);
 int SDL_main(int argc, char *argv2[])
 #else
 int main(int argc, const char **argv)
