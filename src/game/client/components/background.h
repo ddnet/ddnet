@@ -4,6 +4,7 @@
 #include <engine/shared/map.h>
 
 #include <game/client/components/maplayers.h>
+#include <game/map/map_render.h>
 
 #include <cstdint>
 
@@ -33,7 +34,7 @@ protected:
 	virtual CBackgroundEngineMap *CreateBGMap();
 
 public:
-	CBackground(int MapType = CMapLayers::TYPE_BACKGROUND_FORCE, bool OnlineOnly = true);
+	CBackground(int MapType = MapRender::TYPE_BACKGROUND_FORCE, bool OnlineOnly = true);
 	virtual ~CBackground();
 	int Sizeof() const override { return sizeof(*this); }
 

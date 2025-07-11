@@ -1,5 +1,5 @@
-#ifndef GAME_CLIENT_COMPONENTS_RENDER_LAYER_H
-#define GAME_CLIENT_COMPONENTS_RENDER_LAYER_H
+#ifndef GAME_MAP_RENDER_LAYER_H
+#define GAME_MAP_RENDER_LAYER_H
 
 #include <cstdint>
 
@@ -18,12 +18,13 @@ using offset_ptr32 = unsigned int;
 #include <game/client/render.h>
 #include <game/mapitems.h>
 #include <game/mapitems_ex.h>
+#include "image_container.h"
+#include "map_data_container.h"
 
 class CMapLayers;
 class CMapItemLayerTilemap;
 class CMapItemLayerQuads;
-class IMap;
-class CMapImages;
+//class IMap;
 
 constexpr int BorderRenderDistance = 201;
 
@@ -34,6 +35,11 @@ public:
 	int EntityOverlayVal;
 	vec2 m_Center;
 	float m_Zoom;
+	int m_OverlayRenderFlags;
+
+	// TODO this could be flags
+	bool m_DisableTileBuffer;
+	bool m_RenderBorder;
 };
 
 class CRenderLayer : public CComponentInterfaces
@@ -41,7 +47,7 @@ class CRenderLayer : public CComponentInterfaces
 public:
 	CRenderLayer(int GroupId, int LayerId, int Flags);
 	virtual ~CRenderLayer() = default;
-	void OnInit(CGameClient *pGameClient, IMap *pMap, CMapImages *pMapImages, std::shared_ptr<CMapBasedEnvelopePointAccess> &pEvelopePoints, bool OnlineOnly);
+	void OnInit(CGameClient *pGameClient, IMapData *pMap, IImageContainer *pMapImages, bool OnlineOnly);
 
 	virtual void Init() = 0;
 	virtual void Render(const CRenderLayerParams &Params) = 0;
@@ -51,21 +57,22 @@ public:
 
 	int GetGroup() const { return m_GroupId; }
 
+	virtual void SetTexture(IGraphics::CTextureHandle TextureHandle){}
+	virtual IGraphics::CTextureHandle GetTexture() const = 0;
+
 protected:
 	static void EnvelopeEvalRenderLayer(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels, void *pUser);
+	void UseTexture(IGraphics::CTextureHandle TextureHandle) const;
 
 	int m_GroupId;
 	int m_LayerId;
 	int m_Flags;
 	bool m_OnlineOnly;
 
-	void UseTexture(IGraphics::CTextureHandle TextureHandle) const;
-	virtual IGraphics::CTextureHandle GetTexture() const = 0;
 	void RenderLoading() const;
 
-	class IMap *m_pMap = nullptr;
-	class CMapImages *m_pMapImages = nullptr;
-	std::shared_ptr<CMapBasedEnvelopePointAccess> m_pEnvelopePoints;
+	IMapData *m_pMap = nullptr;
+	IImageContainer *m_pMapImages = nullptr;
 };
 
 class CRenderLayerGroup : public CRenderLayer
@@ -78,10 +85,9 @@ public:
 	bool DoRender(const CRenderLayerParams &Params) const override;
 	bool IsValid() const override { return m_pGroup != nullptr; }
 	bool IsGroup() const override { return true; }
-
-protected:
 	IGraphics::CTextureHandle GetTexture() const override { return IGraphics::CTextureHandle(); }
 
+protected:
 	CMapItemGroup *m_pGroup;
 };
 
@@ -89,6 +95,7 @@ class CRenderLayerTile : public CRenderLayer
 {
 public:
 	CRenderLayerTile(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
+	CRenderLayerTile(int GroupId, int LayerId, int Flags, CColor Color, int Height, int Width, int DataIndex, int ImageIndex, int ColorEnv, int ColorEnvOffset);
 	virtual ~CRenderLayerTile() = default;
 	void Render(const CRenderLayerParams &Params) override;
 	bool DoRender(const CRenderLayerParams &Params) const override;
@@ -97,6 +104,10 @@ public:
 	virtual int GetDataIndex(unsigned int &TileSize) const;
 	bool IsValid() const override { return GetRawData() != nullptr; }
 
+	void SetTexture(IGraphics::CTextureHandle TextureHandle) override { m_TextureHandle = TextureHandle; }
+	IGraphics::CTextureHandle GetTexture() const override { return m_TextureHandle; }
+	void SetColor(ColorRGBA Color) { m_Color = Color; }
+
 protected:
 	virtual void *GetRawData() const;
 	template<class T>
@@ -104,7 +115,6 @@ protected:
 
 	virtual ColorRGBA GetRenderColor(const CRenderLayerParams &Params) const;
 	virtual void GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const;
-	IGraphics::CTextureHandle GetTexture() const override { return m_TextureHandle; }
 
 private:
 	IGraphics::CTextureHandle m_TextureHandle;
@@ -181,15 +191,21 @@ protected:
 
 	void UploadTileData(std::optional<CTileLayerVisuals> &VisualsOptional, int CurOverlay, bool AddAsSpeedup, bool IsGameLayer = false);
 
-	virtual void RenderTileLayerWithTileBuffer(const ColorRGBA &Color);
-	virtual void RenderTileLayerNoTileBuffer(const ColorRGBA &Color);
+	virtual void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params);
+	virtual void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params);
 
-	void RenderTileLayer(const ColorRGBA &Color, CTileLayerVisuals *pTileLayerVisuals = nullptr);
+	void RenderTileLayer(const ColorRGBA &Color, const CRenderLayerParams &Params, CTileLayerVisuals *pTileLayerVisuals = nullptr);
 	void RenderTileBorder(const ColorRGBA &Color, int BorderX0, int BorderY0, int BorderX1, int BorderY1);
 	void RenderKillTileBorder(const ColorRGBA &Color);
 
 	std::optional<CRenderLayerTile::CTileLayerVisuals> m_VisualTiles;
-	CMapItemLayerTilemap *m_pLayerTilemap;
+	//CMapItemLayerTilemap *m_pLayerTilemap;
+	size_t m_Height;
+	size_t m_Width;
+	int m_DataIndex;
+	int m_ImageIndex;
+	int m_ColorEnvOffset;
+	int m_ColorEnv;
 	ColorRGBA m_Color;
 };
 
@@ -201,10 +217,9 @@ public:
 	bool IsValid() const override { return m_pLayerQuads->m_NumQuads > 0; }
 	virtual void Render(const CRenderLayerParams &Params) override;
 	virtual bool DoRender(const CRenderLayerParams &Params) const override;
-
-protected:
 	virtual IGraphics::CTextureHandle GetTexture() const override { return m_TextureHandle; }
 
+protected:
 	class CQuadLayerVisuals
 	{
 	public:
@@ -242,10 +257,10 @@ public:
 	CRenderLayerEntityBase(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
 	virtual ~CRenderLayerEntityBase() = default;
 	bool DoRender(const CRenderLayerParams &Params) const override;
+	IGraphics::CTextureHandle GetTexture() const override;
 
 protected:
 	ColorRGBA GetRenderColor(const CRenderLayerParams &Params) const override { return ColorRGBA(1.0f, 1.0f, 1.0f, Params.EntityOverlayVal / 100.0f); }
-	IGraphics::CTextureHandle GetTexture() const override;
 };
 
 class CRenderLayerEntityGame final : public CRenderLayerEntityBase
@@ -255,8 +270,8 @@ public:
 	void Init() override;
 
 protected:
-	void RenderTileLayerWithTileBuffer(const ColorRGBA &Color) override;
-	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color) override;
+	void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
+	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
 
 private:
 	ColorRGBA GetDeathBorderColor() const;
@@ -277,8 +292,8 @@ public:
 	void Init() override;
 
 protected:
-	void RenderTileLayerWithTileBuffer(const ColorRGBA &Color) override;
-	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color) override;
+	void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
+	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
 	void GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const override;
 
 private:
@@ -291,12 +306,12 @@ public:
 	CRenderLayerEntitySpeedup(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex(unsigned int &TileSize) const override;
 	void Init() override;
+	IGraphics::CTextureHandle GetTexture() const override;
 
 protected:
-	void RenderTileLayerWithTileBuffer(const ColorRGBA &Color) override;
-	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color) override;
+	void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
+	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
 	void GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const override;
-	IGraphics::CTextureHandle GetTexture() const override;
 
 private:
 	std::optional<CRenderLayerTile::CTileLayerVisuals> m_VisualForce;
@@ -309,12 +324,12 @@ public:
 	CRenderLayerEntitySwitch(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex(unsigned int &TileSize) const override;
 	void Init() override;
+	IGraphics::CTextureHandle GetTexture() const override;
 
 protected:
-	void RenderTileLayerWithTileBuffer(const ColorRGBA &Color) override;
-	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color) override;
+	void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
+	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
 	void GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const override;
-	IGraphics::CTextureHandle GetTexture() const override;
 
 private:
 	std::optional<CRenderLayerTile::CTileLayerVisuals> m_VisualSwitchNumberTop;
@@ -328,7 +343,7 @@ public:
 	int GetDataIndex(unsigned int &TileSize) const override;
 
 protected:
-	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color) override;
+	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
 	void GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const override;
 };
 #endif

@@ -4,6 +4,7 @@
 #include <game/editor/editor_trackers.h>
 #include <game/editor/enums.h>
 #include <map>
+#include <game/map/render_layer.h>
 
 #include "layer.h"
 
@@ -31,7 +32,7 @@ struct RECTi
 	int w, h;
 };
 
-class CLayerTiles : public CLayer
+class CLayerTiles : public CLayer, public IMapData
 {
 protected:
 	template<typename T>
@@ -95,6 +96,8 @@ protected:
 			for(int x = 0; x < m_Width; x++)
 				std::swap(pTiles[y * m_Width + x], pTiles[(m_Height - 1 - y) * m_Width + x]);
 	}
+
+	std::unique_ptr<CRenderLayerTile> m_pRenderLayer;
 
 public:
 	CLayerTiles(CEditor *pEditor, int w, int h);
@@ -193,6 +196,12 @@ public:
 	inline virtual void ClearHistory() { m_TilesHistory.clear(); }
 
 	static bool HasAutomapEffect(ETilesProp Prop);
+
+	// IMapData
+	void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels, bool OnlineOnly) override;
+  CQuad *GetQuads(int DataIndex) override { dbg_assert(false, "I am a tilelayer"); return nullptr; }
+  void *GetTileDataRaw(int DataIndex) override { return (void*)m_pTiles; }
+  size_t GetTileDataSize(int DataIndex) override { return (size_t)(m_Height * m_Width) * sizeof(CTile); }
 
 protected:
 	void RecordStateChange(int x, int y, CTile Previous, CTile Tile);

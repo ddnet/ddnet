@@ -7,6 +7,7 @@
 
 #include "datafile.h"
 #include <engine/map.h>
+#include <game/map/map_render.h>
 
 class CMap : public IEngineMap
 {

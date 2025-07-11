@@ -8,6 +8,7 @@
 #include <game/editor/editor.h>
 #include <game/editor/editor_actions.h>
 #include <game/editor/enums.h>
+//#include <game/client/components/render_layer.h>
 
 #include <iterator>
 #include <numeric>
@@ -42,6 +43,9 @@ CLayerTiles::CLayerTiles(CEditor *pEditor, int w, int h) :
 
 	m_pTiles = new CTile[m_Width * m_Height];
 	mem_zero(m_pTiles, (size_t)m_Width * m_Height * sizeof(CTile));
+
+	m_pRenderLayer = std::make_unique<CRenderLayerTile>(0, 0, 0, m_Color, m_Height, m_Width, 0, m_Image, m_ColorEnv, m_ColorEnvOffset);
+	m_pRenderLayer->OnInit(m_pEditor->GameClient(), this, m_pEditor, false);
 }
 
 CLayerTiles::CLayerTiles(const CLayerTiles &Other) :
@@ -69,6 +73,14 @@ CLayerTiles::CLayerTiles(const CLayerTiles &Other) :
 	m_HasTune = Other.m_HasTune;
 
 	str_copy(m_aFileName, Other.m_aFileName);
+
+	if(!m_HasGame && !m_HasTele && !m_HasSpeedup && !m_HasFront && !m_HasSwitch && !m_HasTune)
+	{
+		m_pRenderLayer = std::make_unique<CRenderLayerTile>(0, 0, 0, m_Color, m_Height, m_Width, 0, m_Image, m_ColorEnv, m_ColorEnvOffset);
+		m_pRenderLayer->OnInit(m_pEditor->GameClient(), this, m_pEditor, false);
+		m_pRenderLayer->Init();
+		dbg_msg("dbg", "this happens");
+	}
 }
 
 CLayerTiles::~CLayerTiles()
@@ -170,11 +182,41 @@ void CLayerTiles::Render(bool Tileset)
 		Texture = m_pEditor->GetSwitchTexture();
 	else if(m_HasTune)
 		Texture = m_pEditor->GetTuneTexture();
-	Graphics()->TextureSet(Texture);
 
 	ColorRGBA ColorEnv = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 	CEditor::EnvelopeEval(m_ColorEnvOffset, m_ColorEnv, ColorEnv, 4, m_pEditor);
 	const ColorRGBA Color = ColorRGBA(m_Color.r / 255.0f, m_Color.g / 255.0f, m_Color.b / 255.0f, m_Color.a / 255.0f).Multiply(ColorEnv);
+
+	if(m_pRenderLayer)
+	{
+		m_pRenderLayer->SetColor(Color);
+
+		CRenderLayerParams Params;
+		Params.EntityOverlayVal = 0;
+		Params.m_Center = vec2(0, 0);
+		Params.m_DisableTileBuffer = true;
+		Params.m_RenderBorder = false;
+		Params.m_Zoom = 1.0f;
+		Params.m_RenderType = MapRender::TYPE_FULL_DESIGN;
+		Params.m_OverlayRenderFlags = (g_Config.m_ClTextEntitiesEditor ? OVERLAYRENDERFLAG_TEXT : 0) | OVERLAYRENDERFLAG_EDITOR;
+
+		// TODO this is ugly, should be done when image is switched
+		if(m_pRenderLayer->GetTexture().Id() != Texture.Id())
+		{
+			m_pRenderLayer->SetTexture(Texture);
+			//m_pRenderLayer->Init();
+		}
+
+		m_pRenderLayer->Render(Params);
+		return;
+	}
+
+	Graphics()->TextureSet(Texture);
+
+	/*this->m_pTiles;
+	CMapItemLayerTilemap tmap;
+	tmap.
+	CRenderLayerTile(0, 0, 0, this)*/
 
 	Graphics()->BlendNone();
 	m_pEditor->RenderTools()->RenderTilemap(m_pTiles, m_Width, m_Height, 32.0f, Color, LAYERRENDERFLAG_OPAQUE);
@@ -1419,4 +1461,9 @@ bool CLayerTiles::HasAutomapEffect(ETilesProp Prop)
 		return false;
 	}
 	return false;
+}
+
+void CLayerTiles::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels, bool OnlineOnly)
+{
+	CEditor::EnvelopeEval(m_ColorEnvOffset, m_ColorEnv, Result, Channels, m_pEditor);
 }

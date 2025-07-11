@@ -280,7 +280,9 @@ public:
 	const char *GetTempFileName() const { return m_aTempFileName; }
 };
 
-class CEditor : public IEditor
+class CGameClient;
+
+class CEditor : public IEditor, public IImageContainer
 {
 	class IInput *m_pInput = nullptr;
 	class IClient *m_pClient = nullptr;
@@ -1198,6 +1200,19 @@ public:
 	IGraphics::CTextureHandle GetSpeedupTexture();
 	IGraphics::CTextureHandle GetSwitchTexture();
 	IGraphics::CTextureHandle GetTuneTexture();
+
+	// IImageContainer
+	IGraphics::CTextureHandle Get(int Index) const override;
+	int Num() const override;
+
+	IGraphics::CTextureHandle GetEntities(EMapImageEntityLayerType EntityLayerType) override;
+	IGraphics::CTextureHandle GetSpeedupArrow() override;
+
+	IGraphics::CTextureHandle GetOverlayBottom() override;
+	IGraphics::CTextureHandle GetOverlayTop() override;
+	IGraphics::CTextureHandle GetOverlayCenter() override;
+
+	CGameClient* GameClient();
 
 	unsigned char m_TeleNumber;
 	unsigned char m_TeleCheckpointNumber;
