@@ -63,7 +63,7 @@ mod ffi {
         /// # result = result_param;
         /// assert_eq!(result.GetInteger(0), 1337);
         /// assert_eq!(result.GetInteger(1), 0); // unparsable
-        /// assert_eq!(result.GetInteger(2), -7331); // parsable start
+        /// assert_eq!(result.GetInteger(2), 0); // unparsable
         /// assert_eq!(result.GetInteger(3), 0); // out of range
         /// # }
         /// # assert!(executed);
@@ -97,7 +97,7 @@ mod ffi {
         /// # result = result_param;
         /// assert_eq!(result.GetFloat(0), 13.37);
         /// assert_eq!(result.GetFloat(1), 0.0); // unparsable
-        /// assert_eq!(result.GetFloat(2), -73.31); // parsable start
+        /// assert_eq!(result.GetFloat(2), 0.0); // unparsable
         /// assert_eq!(result.GetFloat(3), 0.0); // out of range
         /// # }
         /// # assert!(executed);
