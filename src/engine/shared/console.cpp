@@ -62,16 +62,14 @@ const char *CConsole::CResult::GetString(unsigned Index) const
 
 int CConsole::CResult::GetInteger(unsigned Index) const
 {
-	if(Index >= m_NumArgs)
-		return 0;
-	return str_toint(m_apArgs[Index]);
+	int Out;
+	return Index < m_NumArgs && str_toint(m_apArgs[Index], &Out) ? Out : 0;
 }
 
 float CConsole::CResult::GetFloat(unsigned Index) const
 {
-	if(Index >= m_NumArgs)
-		return 0.0f;
-	return str_tofloat(m_apArgs[Index]);
+	float Out;
+	return Index < m_NumArgs && str_tofloat(m_apArgs[Index], &Out) ? Out : 0.0f;
 }
 
 std::optional<ColorHSLA> CConsole::CResult::GetColor(unsigned Index, float DarkestLighting) const
