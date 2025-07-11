@@ -467,7 +467,14 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 			return;
 
 		if(!*Result.m_pCommand)
+		{
+			if(pNextPart)
+			{
+				pStr = pNextPart;
+				continue;
+			}
 			return;
+		}
 
 		CCommand *pCommand;
 		if(ClientId == IConsole::CLIENT_ID_GAME)
