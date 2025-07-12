@@ -73,6 +73,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	mem_zero(&m_LatestPrevPrevInput, sizeof(m_LatestPrevPrevInput));
 	m_LatestPrevPrevInput.m_TargetY = -1;
 	m_NumInputs = 0;
+	m_LastPredictedInputTick = -1;
 	m_SpawnTick = Server()->Tick();
 	m_WeaponChangeTick = Server()->Tick();
 	Antibot()->OnSpawn(m_pPlayer->GetCid());
@@ -420,7 +421,7 @@ void CCharacter::HandleWeaponSwitch()
 	DoWeaponSwitch();
 }
 
-void CCharacter::FireWeapon()
+void CCharacter::FireWeapon(bool EarlyTick)
 {
 	if(m_ReloadTimer != 0)
 	{
@@ -544,7 +545,7 @@ void CCharacter::FireWeapon()
 		{
 			int Lifetime = (int)(Server()->TickSpeed() * GetTuning(m_TuneZone)->m_GunLifetime);
 
-			new CProjectile(
+			CProjectile *pProjectile = new CProjectile(
 				GameWorld(),
 				WEAPON_GUN, //Type
 				m_pPlayer->GetCid(), //Owner
@@ -556,6 +557,8 @@ void CCharacter::FireWeapon()
 				-1, //SoundImpact
 				MouseTarget //InitDir
 			);
+			if(EarlyTick)
+				pProjectile->EarlyStartTick();
 
 			GameServer()->CreateSound(m_Pos, SOUND_GUN_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 		}
@@ -566,7 +569,10 @@ void CCharacter::FireWeapon()
 	{
 		float LaserReach = GetTuning(m_TuneZone)->m_LaserReach;
 
-		new CLaser(&GameServer()->m_World, m_Pos, Direction, LaserReach, m_pPlayer->GetCid(), WEAPON_SHOTGUN);
+		CLaser *pLaser = new CLaser(&GameServer()->m_World, m_Pos, Direction, LaserReach, m_pPlayer->GetCid(), WEAPON_SHOTGUN);
+		if(EarlyTick)
+			pLaser->EarlyEvalTick();
+
 		GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 	}
 	break;
@@ -575,7 +581,7 @@ void CCharacter::FireWeapon()
 	{
 		int Lifetime = (int)(Server()->TickSpeed() * GetTuning(m_TuneZone)->m_GrenadeLifetime);
 
-		new CProjectile(
+		CProjectile *pProjectile = new CProjectile(
 			GameWorld(),
 			WEAPON_GRENADE, //Type
 			m_pPlayer->GetCid(), //Owner
@@ -587,6 +593,8 @@ void CCharacter::FireWeapon()
 			SOUND_GRENADE_EXPLODE, //SoundImpact
 			MouseTarget // MouseTarget
 		);
+		if(EarlyTick)
+			pProjectile->EarlyStartTick();
 
 		GameServer()->CreateSound(m_Pos, SOUND_GRENADE_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 	}
@@ -596,7 +604,10 @@ void CCharacter::FireWeapon()
 	{
 		float LaserReach = GetTuning(m_TuneZone)->m_LaserReach;
 
-		new CLaser(GameWorld(), m_Pos, Direction, LaserReach, m_pPlayer->GetCid(), WEAPON_LASER);
+		CLaser *pLaser = new CLaser(GameWorld(), m_Pos, Direction, LaserReach, m_pPlayer->GetCid(), WEAPON_LASER);
+		if(EarlyTick)
+			pLaser->EarlyEvalTick();
+
 		GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 	}
 	break;
@@ -616,6 +627,8 @@ void CCharacter::FireWeapon()
 	}
 
 	m_AttackTick = Server()->Tick();
+	if(EarlyTick)
+		m_AttackTick--;
 
 	if(!m_ReloadTimer)
 	{
@@ -642,7 +655,7 @@ void CCharacter::HandleWeapons()
 	}
 
 	// fire Weapon, if wanted
-	FireWeapon();
+	FireWeapon(false);
 }
 
 void CCharacter::GiveNinja()
@@ -685,6 +698,7 @@ void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 
 	// copy new input
 	mem_copy(&m_Input, pNewInput, sizeof(m_Input));
+	m_LastPredictedInputTick = Server()->Tick();
 
 	// it is not allowed to aim in the center
 	if(m_Input.m_TargetX == 0 && m_Input.m_TargetY == 0)
@@ -693,10 +707,13 @@ void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 	mem_copy(&m_SavedInput, &m_Input, sizeof(m_SavedInput));
 }
 
-void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
+void CCharacter::OnDirectInput()
 {
+	if(m_LastPredictedInputTick != Server()->Tick())
+		return;
+
 	mem_copy(&m_LatestPrevInput, &m_LatestInput, sizeof(m_LatestInput));
-	mem_copy(&m_LatestInput, pNewInput, sizeof(m_LatestInput));
+	mem_copy(&m_LatestInput, &m_Input, sizeof(m_LatestInput));
 	m_NumInputs++;
 
 	// it is not allowed to aim in the center
@@ -707,8 +724,9 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 
 	if(m_NumInputs > 1 && m_pPlayer->GetTeam() != TEAM_SPECTATORS)
 	{
+		// Requires m_LatestInput and m_LatestPrevInput to be real values (m_NumInputs > 1)
 		HandleWeaponSwitch();
-		FireWeapon();
+		FireWeapon(true);
 	}
 
 	mem_copy(&m_LatestPrevPrevInput, &m_LatestPrevInput, sizeof(m_LatestInput));
