@@ -121,6 +121,9 @@ public:
 	void OnMessage(int MsgType, void *pRawMsg) override;
 	void RenderNinjaBarPos(float x, float y, float Width, float Height, float Progress, float Alpha = 1.0f);
 
+	float GetServerRecord() const { return m_ServerRecord; }
+	float GetPlayerRecord(int Dummy) const { return m_aPlayerRecord[Dummy]; }
+
 private:
 	void RenderRecord();
 	void RenderDDRaceEffects();
