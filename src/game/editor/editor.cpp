@@ -4,6 +4,7 @@
 #include <algorithm>
 
 #include <base/color.h>
+#include <base/log.h>
 #include <base/system.h>
 
 #if defined(CONF_FAMILY_UNIX)
@@ -9233,6 +9234,8 @@ bool CEditor::Load(const char *pFileName, int StorageType)
 
 		for(CEditorComponent &Component : m_vComponents)
 			Component.OnMapLoad();
+
+		log_info("editor/load", "Loaded map '%s'", m_aFileName);
 	}
 	else
 	{
