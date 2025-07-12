@@ -72,11 +72,7 @@ void log_set_scope_logger(ILogger *logger)
 	}
 }
 
-// Separate declaration, as attributes are not allowed on function definitions
-void log_log_impl(LEVEL level, bool have_color, LOG_COLOR color, const char *sys, const char *fmt, va_list args)
-	GNUC_ATTRIBUTE((format(printf, 5, 0)));
-
-void log_log_impl(LEVEL level, bool have_color, LOG_COLOR color, const char *sys, const char *fmt, va_list args)
+[[gnu::format(printf, 5, 0)]] static void log_log_impl(LEVEL level, bool have_color, LOG_COLOR color, const char *sys, const char *fmt, va_list args)
 {
 	// Make sure we're not logging recursively.
 	if(in_logger)
