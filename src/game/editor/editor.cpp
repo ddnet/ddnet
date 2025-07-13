@@ -472,9 +472,13 @@ std::vector<CQuad *> CEditor::GetSelectedQuads()
 	std::vector<CQuad *> vpQuads;
 	if(!pQuadLayer)
 		return vpQuads;
-	vpQuads.resize(m_vSelectedQuads.size());
-	for(int i = 0; i < (int)m_vSelectedQuads.size(); ++i)
-		vpQuads[i] = &pQuadLayer->m_vQuads[m_vSelectedQuads[i]];
+	vpQuads.reserve(m_vSelectedQuads.size());
+	for(const auto &SelectedQuad : m_vSelectedQuads)
+	{
+		if(SelectedQuad >= (int)pQuadLayer->m_vQuads.size())
+			continue;
+		vpQuads.push_back(&pQuadLayer->m_vQuads[SelectedQuad]);
+	}
 	return vpQuads;
 }
 
