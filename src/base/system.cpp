@@ -16,6 +16,7 @@
 
 #include "lock.h"
 #include "logger.h"
+#include "random.h"
 #include "system.h"
 
 #include <sys/types.h>
@@ -4736,77 +4737,6 @@ int open_file(const char *path)
 }
 #endif // !defined(CONF_PLATFORM_ANDROID)
 
-struct SECURE_RANDOM_DATA
-{
-	int initialized;
-#if defined(CONF_FAMILY_WINDOWS)
-	HCRYPTPROV provider;
-#else
-	IOHANDLE urandom;
-#endif
-};
-
-static struct SECURE_RANDOM_DATA secure_random_data = {0};
-
-int secure_random_init()
-{
-	if(secure_random_data.initialized)
-	{
-		return 0;
-	}
-#if defined(CONF_FAMILY_WINDOWS)
-	if(CryptAcquireContext(&secure_random_data.provider, nullptr, nullptr, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
-	{
-		secure_random_data.initialized = 1;
-		return 0;
-	}
-	else
-	{
-		return 1;
-	}
-#else
-	secure_random_data.urandom = io_open("/dev/urandom", IOFLAG_READ);
-	if(secure_random_data.urandom)
-	{
-		secure_random_data.initialized = 1;
-		return 0;
-	}
-	else
-	{
-		return 1;
-	}
-#endif
-}
-
-int secure_random_uninit()
-{
-	if(!secure_random_data.initialized)
-	{
-		return 0;
-	}
-#if defined(CONF_FAMILY_WINDOWS)
-	if(CryptReleaseContext(secure_random_data.provider, 0))
-	{
-		secure_random_data.initialized = 0;
-		return 0;
-	}
-	else
-	{
-		return 1;
-	}
-#else
-	if(!io_close(secure_random_data.urandom))
-	{
-		secure_random_data.initialized = 0;
-		return 0;
-	}
-	else
-	{
-		return 1;
-	}
-#endif
-}
-
 void generate_password(char *buffer, unsigned length, const unsigned short *random, unsigned random_length)
 {
 	static const char VALUES[] = "ABCDEFGHKLMNPRSTUVWXYZabcdefghjkmnopqt23456789";
@@ -4842,65 +4772,6 @@ void secure_random_password(char *buffer, unsigned length, unsigned pw_length)
 }
 
 #undef MAX_PASSWORD_LENGTH
-
-void secure_random_fill(void *bytes, unsigned length)
-{
-	if(!secure_random_data.initialized)
-	{
-		dbg_msg("secure", "called secure_random_fill before secure_random_init");
-		dbg_break();
-	}
-#if defined(CONF_FAMILY_WINDOWS)
-	if(!CryptGenRandom(secure_random_data.provider, length, (unsigned char *)bytes))
-	{
-		const DWORD LastError = GetLastError();
-		const std::string ErrorMsg = windows_format_system_message(LastError);
-		dbg_msg("secure", "CryptGenRandom failed: %ld %s", LastError, ErrorMsg.c_str());
-		dbg_break();
-	}
-#else
-	if(length != io_read(secure_random_data.urandom, bytes, length))
-	{
-		dbg_msg("secure", "io_read returned with a short read");
-		dbg_break();
-	}
-#endif
-}
-
-int secure_rand()
-{
-	unsigned int i;
-	secure_random_fill(&i, sizeof(i));
-	return (int)(i % RAND_MAX);
-}
-
-// From https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2.
-static unsigned int find_next_power_of_two_minus_one(unsigned int n)
-{
-	n--;
-	n |= n >> 1;
-	n |= n >> 2;
-	n |= n >> 4;
-	n |= n >> 4;
-	n |= n >> 16;
-	return n;
-}
-
-int secure_rand_below(int below)
-{
-	unsigned int mask = find_next_power_of_two_minus_one(below);
-	dbg_assert(below > 0, "below must be positive");
-	while(true)
-	{
-		unsigned int n;
-		secure_random_fill(&n, sizeof(n));
-		n &= mask;
-		if((int)n < below)
-		{
-			return n;
-		}
-	}
-}
 
 bool os_version_str(char *version, size_t length)
 {

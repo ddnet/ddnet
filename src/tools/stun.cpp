@@ -1,4 +1,5 @@
 #include <base/logger.h>
+#include <base/random.h>
 #include <base/system.h>
 #include <engine/shared/stun.h>
 
@@ -11,11 +12,6 @@ int main(int argc, const char **argv)
 	CCmdlineFix CmdlineFix(&argc, &argv);
 
 	log_set_global_logger_default();
-	if(secure_random_init() != 0)
-	{
-		log_error("stun", "could not initialize secure RNG");
-		return -1;
-	}
 
 	if(argc < 2)
 	{

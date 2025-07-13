@@ -2750,25 +2750,6 @@ int open_file(const char *path);
 void generate_password(char *buffer, unsigned length, const unsigned short *random, unsigned random_length);
 
 /**
- * Initializes the secure random module.
- * You *MUST* check the return value of this function.
- *
- * @ingroup Secure-Random
- *
- * @return `0` on success.
- */
-[[nodiscard]] int secure_random_init();
-
-/**
- * Uninitializes the secure random module.
- *
- * @ingroup Secure-Random
- *
- * @return `0` on success.
- */
-int secure_random_uninit();
-
-/**
  * Fills the buffer with the specified amount of random password characters.
  *
  * @ingroup Secure-Random
@@ -2781,39 +2762,6 @@ int secure_random_uninit();
  *         even and smaller or equal to 128.
  */
 void secure_random_password(char *buffer, unsigned length, unsigned pw_length);
-
-/**
- * Fills the buffer with the specified amount of random bytes.
- *
- * @ingroup Secure-Random
- *
- * @param buffer Pointer to the start of the buffer.
- * @param length Length of the buffer.
- */
-void secure_random_fill(void *bytes, unsigned length);
-
-/**
- * Returns random `int`.
- *
- * @ingroup Secure-Random
- *
- * @return Random int.
- *
- * @remark Can be used as a replacement for the `rand` function.
- */
-int secure_rand();
-
-/**
- * Returns a random nonnegative integer below the given number,
- * with a uniform distribution.
- *
- * @ingroup Secure-Random
- *
- * @param below Upper limit (exclusive) of integers to return.
- *
- * @return Random nonnegative below the given number.
- */
-int secure_rand_below(int below);
 
 /**
  * Returns a human-readable version string of the operating system.

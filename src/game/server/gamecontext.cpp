@@ -8,6 +8,7 @@
 #include <antibot/antibot_data.h>
 #include <base/logger.h>
 #include <base/math.h>
+#include <base/random.h>
 #include <base/system.h>
 #include <engine/console.h>
 #include <engine/engine.h>

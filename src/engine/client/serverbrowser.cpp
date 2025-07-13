@@ -12,6 +12,7 @@
 
 #include <base/hash_ctxt.h>
 #include <base/log.h>
+#include <base/random.h>
 #include <base/system.h>
 
 #include <engine/shared/config.h>

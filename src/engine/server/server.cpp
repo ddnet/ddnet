@@ -5,6 +5,7 @@
 
 #include <base/logger.h>
 #include <base/math.h>
+#include <base/random.h>
 #include <base/system.h>
 
 #include <engine/config.h>

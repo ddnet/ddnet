@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 
 #include <base/logger.h>
+#include <base/random.h>
 #include <base/system.h>
 #include <engine/storage.h>
 
@@ -141,13 +142,7 @@ int main(int argc, const char **argv)
 	log_set_global_logger_default();
 	::testing::InitGoogleTest(&argc, const_cast<char **>(argv));
 	net_init();
-	if(secure_random_init())
-	{
-		fprintf(stderr, "random init failed\n");
-		return 1;
-	}
 	int Result = RUN_ALL_TESTS();
-	secure_random_uninit();
 	return Result;
 }
 

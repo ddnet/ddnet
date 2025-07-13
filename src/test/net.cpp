@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <base/random.h>
 #include <base/system.h>
 
 #include <chrono>

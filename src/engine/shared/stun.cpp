@@ -1,5 +1,6 @@
 #include "stun.h"
 
+#include <base/random.h>
 #include <base/system.h>
 
 // STUN header (from RFC 5389, section 6, figure 2):
