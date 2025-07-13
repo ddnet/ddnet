@@ -3767,9 +3767,8 @@ void CEditor::DoColorPickerButton(const void *pId, const CUIRect *pRect, ColorRG
 		m_pColorPickerPopupActiveId = nullptr;
 		if(m_ColorPickerPopupContext.m_State == EEditState::EDITING)
 		{
-			ColorRGBA c = color_cast<ColorRGBA>(m_ColorPickerPopupContext.m_HsvaColor);
 			m_ColorPickerPopupContext.m_State = EEditState::END;
-			SetColor(c);
+			SetColor(m_ColorPickerPopupContext.m_RgbaColor);
 			m_ColorPickerPopupContext.m_State = EEditState::NONE;
 		}
 	}
