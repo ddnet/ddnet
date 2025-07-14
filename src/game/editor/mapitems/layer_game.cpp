@@ -14,7 +14,7 @@ CLayerGame::CLayerGame(CEditor *pEditor, int w, int h) :
 
 CLayerGame::~CLayerGame() = default;
 
-CTile CLayerGame::GetTile(int x, int y)
+CTile CLayerGame::GetTile(int x, int y) const
 {
 	if(m_pEditor->m_Map.m_pFrontLayer && m_pEditor->m_Map.m_pFrontLayer->GetTile(x, y).m_Index == TILE_THROUGH_CUT)
 	{

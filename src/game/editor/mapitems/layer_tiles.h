@@ -101,7 +101,7 @@ public:
 	CLayerTiles(const CLayerTiles &Other);
 	~CLayerTiles();
 
-	virtual CTile GetTile(int x, int y);
+	[[nodiscard]] virtual CTile GetTile(int x, int y) const;
 	virtual void SetTile(int x, int y, CTile Tile);
 	void SetTileIgnoreHistory(int x, int y, CTile Tile) const;
 

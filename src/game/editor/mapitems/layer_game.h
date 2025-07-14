@@ -9,7 +9,7 @@ public:
 	CLayerGame(CEditor *pEditor, int w, int h);
 	~CLayerGame();
 
-	CTile GetTile(int x, int y) override;
+	[[nodiscard]] CTile GetTile(int x, int y) const override;
 	void SetTile(int x, int y, CTile Tile) override;
 	const char *TypeName() const override;
 

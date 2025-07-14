@@ -76,7 +76,7 @@ CLayerTiles::~CLayerTiles()
 	delete[] m_pTiles;
 }
 
-CTile CLayerTiles::GetTile(int x, int y)
+CTile CLayerTiles::GetTile(int x, int y) const
 {
 	return m_pTiles[y * m_Width + x];
 }
