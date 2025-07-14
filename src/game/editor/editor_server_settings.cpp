@@ -1370,8 +1370,8 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pLineInputStr, const c
 
 	// Also keep track of the visual X position of each argument within the input
 	float PosX = 0;
-	const float WW = m_pBackend->TextRender()->TextWidth(m_FontSize, " ");
-	PosX += m_pBackend->TextRender()->TextWidth(m_FontSize, m_aCommand);
+	const float WW = m_pLineInput != nullptr ? m_pBackend->TextRender()->TextWidth(m_FontSize, " ") : 0.0f;
+	PosX += m_pLineInput != nullptr ? m_pBackend->TextRender()->TextWidth(m_FontSize, m_aCommand) : 0.0f;
 
 	// Parsing beings
 	while(*pIterator)
@@ -1535,7 +1535,7 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pLineInputStr, const c
 			}
 		}
 
-		PosX += m_pBackend->TextRender()->TextWidth(m_FontSize, pArgStart, Length); // Advance argument position
+		PosX += m_pLineInput != nullptr ? m_pBackend->TextRender()->TextWidth(m_FontSize, pArgStart, Length) : 0.0f; // Advance argument position
 		ArgIndex++;
 	}
 }
