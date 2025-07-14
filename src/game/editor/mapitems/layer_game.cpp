@@ -60,6 +60,26 @@ void CLayerGame::SetTile(int x, int y, CTile Tile)
 	}
 }
 
+bool CLayerGame::IsEmpty() const
+{
+	for(int y = 0; y < m_Height; y++)
+	{
+		for(int x = 0; x < m_Width; x++)
+		{
+			const int Index = GetTile(x, y).m_Index;
+			if(Index == 0)
+			{
+				continue;
+			}
+			if(m_pEditor->IsAllowPlaceUnusedTiles() || IsValidGameTile(Index))
+			{
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
 CUi::EPopupMenuFunctionResult CLayerGame::RenderProperties(CUIRect *pToolbox)
 {
 	const CUi::EPopupMenuFunctionResult Result = CLayerTiles::RenderProperties(pToolbox);

@@ -55,13 +55,23 @@ void CLayerSpeedup::Shift(int Direction)
 	ShiftImpl(m_pSpeedupTile, Direction, m_pEditor->m_ShiftBy);
 }
 
-bool CLayerSpeedup::IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer)
+bool CLayerSpeedup::IsEmpty() const
 {
-	for(int y = 0; y < pLayer->m_Height; y++)
-		for(int x = 0; x < pLayer->m_Width; x++)
-			if(m_pEditor->IsAllowPlaceUnusedTiles() || IsValidSpeedupTile(pLayer->GetTile(x, y).m_Index))
+	for(int y = 0; y < m_Height; y++)
+	{
+		for(int x = 0; x < m_Width; x++)
+		{
+			const int Index = GetTile(x, y).m_Index;
+			if(Index == 0)
+			{
+				continue;
+			}
+			if(m_pEditor->IsAllowPlaceUnusedTiles() || IsValidSpeedupTile(Index))
+			{
 				return false;
-
+			}
+		}
+	}
 	return true;
 }
 
@@ -80,7 +90,7 @@ void CLayerSpeedup::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 		m_pEditor->m_SpeedupMaxSpeed = pSpeedupLayer->m_SpeedupMaxSpeed;
 	}
 
-	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(pSpeedupLayer);
+	bool Destructive = m_pEditor->m_BrushDrawDestructive || pSpeedupLayer->IsEmpty();
 
 	for(int y = 0; y < pSpeedupLayer->m_Height; y++)
 		for(int x = 0; x < pSpeedupLayer->m_Width; x++)
@@ -254,7 +264,7 @@ void CLayerSpeedup::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CU
 
 	std::shared_ptr<CLayerSpeedup> pLt = std::static_pointer_cast<CLayerSpeedup>(pBrush);
 
-	bool Destructive = m_pEditor->m_BrushDrawDestructive || Empty || IsEmpty(pLt);
+	bool Destructive = m_pEditor->m_BrushDrawDestructive || Empty || pLt->IsEmpty();
 
 	for(int y = 0; y < h; y++)
 	{

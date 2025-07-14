@@ -38,6 +38,26 @@ void CLayerFront::Resize(int NewW, int NewH)
 		m_pEditor->m_Map.m_pGameLayer->Resize(NewW, NewH);
 }
 
+bool CLayerFront::IsEmpty() const
+{
+	for(int y = 0; y < m_Height; y++)
+	{
+		for(int x = 0; x < m_Width; x++)
+		{
+			const int Index = GetTile(x, y).m_Index;
+			if(Index == 0)
+			{
+				continue;
+			}
+			if(m_pEditor->IsAllowPlaceUnusedTiles() || IsValidFrontTile(Index))
+			{
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
 const char *CLayerFront::TypeName() const
 {
 	return "front";

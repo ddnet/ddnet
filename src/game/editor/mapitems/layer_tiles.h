@@ -119,7 +119,7 @@ public:
 
 	bool IsEntitiesLayer() const override;
 
-	virtual bool IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer);
+	[[nodiscard]] virtual bool IsEmpty() const;
 	void BrushSelecting(CUIRect Rect) override;
 	int BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect) override;
 	void FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect) override;
