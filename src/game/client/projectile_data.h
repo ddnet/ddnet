@@ -32,6 +32,6 @@ CProjectileData ExtractProjectileInfo(int NetObjType, const void *pData, class C
 CProjectileData ExtractProjectileInfoDDRace(const CNetObj_DDRaceProjectile *pProj, class CGameWorld *pGameWorld, const CNetObj_EntityEx *pEntEx);
 CProjectileData ExtractProjectileInfoDDNet(const CNetObj_DDNetProjectile *pProj);
 
-void SnapshotRemoveExtraProjectileInfo(class CSnapshot *pSnap);
+void DemoObjectRemoveExtraProjectileInfo(CNetObj_Projectile *pProj);
 
 #endif // GAME_CLIENT_PROJECTILE_DATA_H
