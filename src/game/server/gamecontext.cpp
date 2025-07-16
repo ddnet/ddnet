@@ -1792,7 +1792,7 @@ void CGameContext::OnClientDrop(int ClientId, const char *pReason)
 	for(auto &pPlayer : m_apPlayers)
 	{
 		if(pPlayer && pPlayer->m_SpectatorId == ClientId)
-			pPlayer->m_SpectatorId = SPEC_FREEVIEW;
+			pPlayer->SetSpectatorId(SPEC_FREEVIEW);
 	}
 
 	// update conversation targets
@@ -2661,7 +2661,7 @@ void CGameContext::OnSetSpectatorModeNetMessage(const CNetMsg_Cl_SetSpectatorMod
 	if(SpectatorId >= 0 && (!m_apPlayers[SpectatorId] || m_apPlayers[SpectatorId]->GetTeam() == TEAM_SPECTATORS))
 		SendChatTarget(ClientId, "Invalid spectator id used");
 	else
-		pPlayer->m_SpectatorId = SpectatorId;
+		pPlayer->SetSpectatorId(SpectatorId);
 }
 
 void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId)

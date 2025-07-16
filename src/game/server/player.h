@@ -75,6 +75,7 @@ public:
 
 	// used for spectator mode
 	int m_SpectatorId;
+	void SetSpectatorId(int Id);
 
 	bool m_IsReady;
 
