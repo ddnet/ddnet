@@ -3723,7 +3723,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("random_unfinished_map", "?i[stars]", CFGFLAG_SERVER | CFGFLAG_STORE, ConRandomUnfinishedMap, this, "Random unfinished map");
 	Console()->Register("restart", "?i[seconds]", CFGFLAG_SERVER | CFGFLAG_STORE, ConRestart, this, "Restart in x seconds (0 = abort)");
 	Console()->Register("broadcast", "r[message]", CFGFLAG_SERVER, ConBroadcast, this, "Broadcast message");
-	Console()->Register("broadcastid", "v[id] r[message]", CFGFLAG_SERVER, ConBroadcastId, this, "Broadcast message to player with client ID");
+	Console()->Register("broadcast_pl", "v[id] r[message]", CFGFLAG_SERVER, ConBroadcastId, this, "Broadcast message to player with client ID");
 	Console()->Register("say", "r[message]", CFGFLAG_SERVER, ConSay, this, "Say in chat");
 	Console()->Register("set_team", "i[id] i[team-id] ?i[delay in minutes]", CFGFLAG_SERVER, ConSetTeam, this, "Set team of player to team");
 	Console()->Register("set_team_all", "i[team-id]", CFGFLAG_SERVER, ConSetTeamAll, this, "Set team of all players to team");
