@@ -137,11 +137,9 @@ void CNetBase::SendPacketConnlessWithToken7(NETSOCKET Socket, NETADDR *pAddr, co
 	net_udp_send(Socket, pAddr, aBuffer, DataSize + DATA_OFFSET);
 }
 
-void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken, bool Sixup, bool NoCompress)
+void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken, bool Sixup)
 {
 	unsigned char aBuffer[NET_MAX_PACKETSIZE];
-	int CompressedSize = -1;
-	int FinalSize = -1;
 
 	// log the data
 	if(ms_DataLogSent)
@@ -167,12 +165,16 @@ void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct 
 		pPacket->m_DataSize += sizeof(SecurityToken);
 	}
 
-	// compress
-	if(!NoCompress)
+	// only compress non-control packets
+	int CompressedSize = -1;
+	if((pPacket->m_Flags & NET_PACKETFLAG_CONTROL) == 0)
+	{
 		CompressedSize = ms_Huffman.Compress(pPacket->m_aChunkData, pPacket->m_DataSize, &aBuffer[HeaderSize], NET_MAX_PACKETSIZE - HeaderSize);
+	}
 
 	// check if the compression was enabled, successful and good enough
-	if(!NoCompress && CompressedSize > 0 && CompressedSize < pPacket->m_DataSize)
+	int FinalSize;
+	if(CompressedSize > 0 && CompressedSize < pPacket->m_DataSize)
 	{
 		FinalSize = CompressedSize;
 		pPacket->m_Flags |= NET_PACKETFLAG_COMPRESSION;
@@ -355,8 +357,7 @@ void CNetBase::SendControlMsg(NETSOCKET Socket, NETADDR *pAddr, int Ack, int Con
 	if(pExtra)
 		mem_copy(&Construct.m_aChunkData[1], pExtra, ExtraSize);
 
-	// send the control message
-	CNetBase::SendPacket(Socket, pAddr, &Construct, SecurityToken, Sixup, true);
+	CNetBase::SendPacket(Socket, pAddr, &Construct, SecurityToken, Sixup);
 }
 
 void CNetBase::SendControlMsgWithToken7(NETSOCKET Socket, NETADDR *pAddr, TOKEN Token, int Ack, int ControlMsg, TOKEN MyToken, bool Extended)
