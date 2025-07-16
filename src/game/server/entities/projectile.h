@@ -53,6 +53,7 @@ private:
 
 public:
 	void SetBouncing(int Value);
+	void EarlyStartTick();
 	bool FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj);
 	void FillExtraInfo(CNetObj_DDNetProjectile *pProj);
 

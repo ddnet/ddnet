@@ -6,6 +6,7 @@
 #include "entity.h"
 #include "gamecontext.h"
 #include "gamecontroller.h"
+#include "player.h"
 
 #include <engine/shared/config.h>
 
@@ -211,6 +212,17 @@ void CGameWorld::Tick()
 
 	if(!m_Paused)
 	{
+		// This is placed here so that firing physics can happen before the regular Charecter Tick() to preserve physics accuracy
+		// It is done in client order to preserve previous behavior but entity order might be better
+		for(auto &pPlayer : GameServer()->m_apPlayers)
+		{
+			if(!pPlayer)
+				continue;
+			CCharacter *pChar = pPlayer->GetCharacter();
+			if(pChar)
+				pChar->OnDirectInput();
+		}
+
 		// update all objects
 		for(int i = 0; i < NUM_ENTTYPES; i++)
 		{

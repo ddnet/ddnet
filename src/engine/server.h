@@ -336,7 +336,6 @@ public:
 	virtual void OnClientPrepareInput(int ClientId, void *pInput) = 0;
 	virtual void OnClientDirectInput(int ClientId, void *pInput) = 0;
 	virtual void OnClientPredictedInput(int ClientId, void *pInput) = 0;
-	virtual void OnClientPredictedEarlyInput(int ClientId, void *pInput) = 0;
 
 	virtual void PreInputClients(int ClientId, bool *pClients) = 0;
 
