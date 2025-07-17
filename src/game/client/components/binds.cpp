@@ -54,14 +54,14 @@ void CBinds::Bind(int KeyId, const char *pStr, bool FreeOnly, int ModifierCombin
 	GetKeyBindModifiersName(ModifierCombination, aModifiers, sizeof(aModifiers));
 	if(!pStr[0])
 	{
-		log_info_color(BIND_PRINT_COLOR, "binds", "unbound %s%s (%d)", aModifiers, Input()->KeyName(KeyId), KeyId);
+		log_info_color(BIND_PRINT_COLOR, "binds", "unbound %s%s", aModifiers, Input()->KeyName(KeyId));
 	}
 	else
 	{
 		int Size = str_length(pStr) + 1;
 		m_aapKeyBindings[ModifierCombination][KeyId] = (char *)malloc(Size);
 		str_copy(m_aapKeyBindings[ModifierCombination][KeyId], pStr, Size);
-		log_info_color(BIND_PRINT_COLOR, "binds", "bound %s%s (%d) = %s", aModifiers, Input()->KeyName(KeyId), KeyId, m_aapKeyBindings[ModifierCombination][KeyId]);
+		log_info_color(BIND_PRINT_COLOR, "binds", "bound %s%s = %s", aModifiers, Input()->KeyName(KeyId), m_aapKeyBindings[ModifierCombination][KeyId]);
 	}
 }
 
@@ -329,12 +329,7 @@ void CBinds::ConBind(IConsole::IResult *pResult, void *pUserData)
 
 	if(pResult->NumArguments() == 1)
 	{
-		const char *pKeyName = pResult->GetString(0);
-
-		if(!pBinds->m_aapKeyBindings[BindSlot.m_ModifierMask][BindSlot.m_Key])
-			log_info_color(BIND_PRINT_COLOR, "binds", "%s (%d) is not bound", pKeyName, BindSlot.m_Key);
-		else
-			log_info_color(BIND_PRINT_COLOR, "binds", "%s (%d) = %s", pKeyName, BindSlot.m_Key, pBinds->m_aapKeyBindings[BindSlot.m_ModifierMask][BindSlot.m_Key]);
+		ConBinds(pResult, pUserData);
 		return;
 	}
 
@@ -355,9 +350,15 @@ void CBinds::ConBinds(IConsole::IResult *pResult, void *pUserData)
 		else
 		{
 			if(!pBinds->m_aapKeyBindings[BindSlot.m_ModifierMask][BindSlot.m_Key])
-				log_info_color(BIND_PRINT_COLOR, "binds", "%s (%d) is not bound", pKeyName, BindSlot.m_Key);
+				log_info_color(BIND_PRINT_COLOR, "binds", "%s is not bound", pKeyName);
 			else
-				log_info_color(BIND_PRINT_COLOR, "binds", "%s (%d) = %s", pKeyName, BindSlot.m_Key, pBinds->m_aapKeyBindings[BindSlot.m_ModifierMask][BindSlot.m_Key]);
+			{
+				int Size = str_length(pBinds->m_aapKeyBindings[BindSlot.m_ModifierMask][BindSlot.m_Key]) * 2 + 30;
+				auto *pBuf = static_cast<char *>(malloc(Size));
+				pBinds->GetKeyBindCommand(BindSlot.m_ModifierMask, BindSlot.m_Key, pBuf, Size);
+				log_info_color(BIND_PRINT_COLOR, "binds", pBuf);
+				free(pBuf);
+			}
 		}
 	}
 	else
@@ -371,7 +372,11 @@ void CBinds::ConBinds(IConsole::IResult *pResult, void *pUserData)
 				if(!pBinds->m_aapKeyBindings[Modifier][Key])
 					continue;
 
-				log_info_color(BIND_PRINT_COLOR, "binds", "%s%s (%d) = %s", aModifiers, pBinds->Input()->KeyName(Key), Key, pBinds->m_aapKeyBindings[Modifier][Key]);
+				int Size = str_length(pBinds->m_aapKeyBindings[Modifier][Key]) * 2 + 30;
+				auto *pBuf = static_cast<char *>(malloc(Size));
+				pBinds->GetKeyBindCommand(Modifier, Key, pBuf, Size);
+				log_info_color(BIND_PRINT_COLOR, "binds", pBuf);
+				free(pBuf);
 			}
 		}
 	}
@@ -456,6 +461,17 @@ void CBinds::GetKeyBindModifiersName(int ModifierCombination, char *pBuf, size_t
 	}
 }
 
+void CBinds::GetKeyBindCommand(int ModifierCombination, int Key, char *pBuf, size_t BufSize) const
+{
+	char aModifiers[128];
+	GetKeyBindModifiersName(ModifierCombination, aModifiers, sizeof(aModifiers));
+	str_format(pBuf, BufSize, "bind %s%s \"", aModifiers, Input()->KeyName(Key));
+	char *pDst = pBuf + str_length(pBuf);
+	// process the string. we need to escape some characters
+	str_escape(&pDst, m_aapKeyBindings[ModifierCombination][Key], pBuf + BufSize);
+	str_append(pBuf, "\"", BufSize);
+}
+
 void CBinds::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData)
 {
 	CBinds *pSelf = (CBinds *)pUserData;
@@ -472,17 +488,10 @@ void CBinds::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData)
 
 			// worst case the str_escape can double the string length
 			int Size = str_length(pSelf->m_aapKeyBindings[Modifier][Key]) * 2 + 30;
-			char *pBuffer = (char *)malloc(Size);
-			char *pEnd = pBuffer + Size;
-
-			str_format(pBuffer, Size, "bind %s%s \"", aModifiers, pSelf->Input()->KeyName(Key));
-			// process the string. we need to escape some characters
-			char *pDst = pBuffer + str_length(pBuffer);
-			str_escape(&pDst, pSelf->m_aapKeyBindings[Modifier][Key], pEnd);
-			str_append(pBuffer, "\"", Size);
-
-			pConfigManager->WriteLine(pBuffer);
-			free(pBuffer);
+			auto *pBuf = static_cast<char *>(malloc(Size));
+			pSelf->GetKeyBindCommand(Modifier, Key, pBuf, Size);
+			pConfigManager->WriteLine(pBuf);
+			free(pBuf);
 		}
 	}
 }
