@@ -204,6 +204,7 @@ public:
 
 protected:
 	virtual IGraphics::CTextureHandle GetTexture() const override { return m_TextureHandle; }
+	void CalculateClipping();
 
 	class CQuadLayerVisuals
 	{
@@ -230,6 +231,13 @@ protected:
 		float m_PosEnvOffset;
 		int m_ColorEnv;
 		float m_ColorEnvOffset;
+
+		// quad clipping
+		bool m_Clipped;
+		float m_ClipX;
+		float m_ClipY;
+		float m_ClipWidth;
+		float m_ClipHeight;
 	} m_QuadRenderGroup;
 
 private:
