@@ -36,6 +36,9 @@ class CBinds : public CComponent
 	};
 	CBindSlot GetBindSlot(const char *pBindString) const;
 
+	// free buffer after use
+	char *GetKeyBindCommand(int ModifierCombination, int Key) const;
+
 public:
 	CBinds();
 	~CBinds();
