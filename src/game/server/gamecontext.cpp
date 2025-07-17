@@ -445,8 +445,8 @@ void CGameContext::SnapSwitchers(int SnappingClient)
 	CPlayer *pPlayer = SnappingClient != SERVER_DEMO_CLIENT ? m_apPlayers[SnappingClient] : nullptr;
 	int Team = pPlayer && pPlayer->GetCharacter() ? pPlayer->GetCharacter()->Team() : 0;
 
-	if(pPlayer && (pPlayer->GetTeam() == TEAM_SPECTATORS || pPlayer->IsPaused()) && pPlayer->m_SpectatorId != SPEC_FREEVIEW && m_apPlayers[pPlayer->m_SpectatorId] && m_apPlayers[pPlayer->m_SpectatorId]->GetCharacter())
-		Team = m_apPlayers[pPlayer->m_SpectatorId]->GetCharacter()->Team();
+	if(pPlayer && (pPlayer->GetTeam() == TEAM_SPECTATORS || pPlayer->IsPaused()) && pPlayer->SpectatorId() != SPEC_FREEVIEW && m_apPlayers[pPlayer->SpectatorId()] && m_apPlayers[pPlayer->SpectatorId()]->GetCharacter())
+		Team = m_apPlayers[pPlayer->SpectatorId()]->GetCharacter()->Team();
 
 	if(Team == TEAM_SUPER)
 		return;
@@ -1791,7 +1791,7 @@ void CGameContext::OnClientDrop(int ClientId, const char *pReason)
 	// update spectator modes
 	for(auto &pPlayer : m_apPlayers)
 	{
-		if(pPlayer && pPlayer->m_SpectatorId == ClientId)
+		if(pPlayer && pPlayer->SpectatorId() == ClientId)
 			pPlayer->SetSpectatorId(SPEC_FREEVIEW);
 	}
 
