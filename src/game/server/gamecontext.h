@@ -58,17 +58,19 @@ struct CScoreRandomMapResult;
 
 struct CSnapContext
 {
-	CSnapContext(int Version, bool Sixup = false) :
-		m_ClientVersion(Version), m_Sixup(Sixup)
+	CSnapContext(int Version, bool Sixup, int ClientId) :
+		m_ClientVersion(Version), m_Sixup(Sixup), m_ClientId(ClientId)
 	{
 	}
 
 	int GetClientVersion() const { return m_ClientVersion; }
 	bool IsSixup() const { return m_Sixup; }
+	bool ClientId() const { return m_ClientId; }
 
 private:
 	int m_ClientVersion;
 	bool m_Sixup;
+	int m_ClientId;
 };
 
 class CMute
