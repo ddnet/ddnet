@@ -212,7 +212,7 @@ static bool IsValidTile(int LayerType, bool EntitiesAreMasked, EMapImageModType 
 	{
 		if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET || TileIndex != TILE_SPEED_BOOST_OLD)
 		{
-			if(LayerType == MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH &&
+			if(LayerType == IImageContainer::MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH &&
 				!IsValidGameTile(TileIndex) &&
 				!IsValidFrontTile(TileIndex) &&
 				!IsValidSpeedupTile(TileIndex) &&
@@ -221,7 +221,7 @@ static bool IsValidTile(int LayerType, bool EntitiesAreMasked, EMapImageModType 
 			{
 				return false;
 			}
-			else if(LayerType == MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH &&
+			else if(LayerType == IImageContainer::MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH &&
 				!IsValidSwitchTile(TileIndex))
 			{
 				return false;

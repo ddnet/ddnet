@@ -20,6 +20,8 @@
 #include <game/client/prediction/gameworld.h>
 #include <game/client/race.h>
 
+#include <game/map/map_render.h>
+
 #include <game/generated/protocol7.h>
 #include <game/generated/protocolglue.h>
 
@@ -163,8 +165,8 @@ public:
 	CItems m_Items;
 	CMapImages m_MapImages;
 
-	CMapLayers m_MapLayersBackground = CMapLayers{CMapLayers::TYPE_BACKGROUND};
-	CMapLayers m_MapLayersForeground = CMapLayers{CMapLayers::TYPE_FOREGROUND};
+	CMapLayers m_MapLayersBackground = CMapLayers{MapRender::TYPE_BACKGROUND};
+	CMapLayers m_MapLayersForeground = CMapLayers{MapRender::TYPE_FOREGROUND};
 	CBackground m_Background;
 	CMenuBackground m_MenuBackground;
 
