@@ -1,6 +1,7 @@
 #include "uuid_manager.h"
 
 #include <base/hash_ctxt.h>
+#include <base/random.h>
 #include <base/system.h>
 #include <engine/shared/packer.h>
 

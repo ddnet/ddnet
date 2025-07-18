@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "config.h"
 #include "network.h"
+#include <base/random.h>
 #include <base/system.h>
 
 void CNetConnection::SetPeerAddr(const NETADDR *pAddr)

@@ -1,4 +1,5 @@
 #include <base/logger.h>
+#include <base/random.h>
 #include <base/system.h>
 
 #include <engine/console.h>
@@ -92,11 +93,6 @@ int main(int argc, const char **argv)
 	vpLoggers.push_back(pFutureAssertionLogger);
 	log_set_global_logger(log_logger_collection(std::move(vpLoggers)).release());
 
-	if(secure_random_init() != 0)
-	{
-		log_error("secure", "could not initialize secure RNG");
-		return -1;
-	}
 	if(MysqlInit() != 0)
 	{
 		log_error("mysql", "failed to initialize MySQL library");
@@ -211,7 +207,6 @@ int main(int argc, const char **argv)
 	delete pKernel;
 
 	MysqlUninit();
-	secure_random_uninit();
 
 	return Ret;
 }

@@ -2004,6 +2004,8 @@ set_src(BASE GLOB_RECURSE src/base
   log.h
   logger.h
   math.h
+  random.cpp
+  random.h
   rust.h
   system.cpp
   system.h
