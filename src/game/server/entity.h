@@ -124,12 +124,6 @@ public: // TODO: Maybe make protected
 	virtual void Snap(int SnappingClient) {}
 
 	/*
-		Function: PostSnap
-			Called after all clients received their snapshot.
-	*/
-	virtual void PostSnap() {}
-
-	/*
 		Function: SwapClients
 			Called when two players have swapped their client ids.
 

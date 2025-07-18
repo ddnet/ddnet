@@ -318,9 +318,8 @@ public:
 	void OnShutdown(void *pPersistentData) override;
 
 	void OnTick() override;
-	void OnPreSnap() override;
-	void OnSnap(int ClientId) override;
-	void OnPostSnap() override;
+	void OnSnap(int ClientId, bool GlobalSnap) override;
+	void OnPostGlobalSnap() override;
 
 	void UpdatePlayerMaps();
 
@@ -363,6 +362,8 @@ public:
 
 	bool IsClientReady(int ClientId) const override;
 	bool IsClientPlayer(int ClientId) const override;
+	// Whether the client is allowed to have high bandwidth.
+	bool IsClientHighBandwidth(int ClientId) const override;
 	int PersistentDataSize() const override { return sizeof(CPersistentData); }
 	int PersistentClientDataSize() const override { return sizeof(CPersistentClientData); }
 
