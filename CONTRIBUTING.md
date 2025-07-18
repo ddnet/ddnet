@@ -312,6 +312,16 @@ src/game/FooBar.cpp
 src/game/foo_bar.cpp
 ```
 
+## Code documentation
+
+Code documentation is required for all public declarations of functions, classes etc. in the `base` folder.
+For other code, documentation is recommended for functions, classes etc. intended for reuse or when it improves clarity.
+
+We use [doxygen](https://www.doxygen.nl/) to generate code documentation.
+The documentation is updated regularly and available at https://codedoc.ddnet.org/
+
+We use [Javadoc style block comments](https://www.doxygen.nl/manual/docblocks.html) and prefix [doxygen commands](https://www.doxygen.nl/manual/commands.html) with `@`, not with `\`.
+
 ## Commit messages
 
 Describe the change your contribution is making for the player/user instead of talking about what you did in a technical sense. Your PR messages will ideally be in a format that can directly be used in the [change log](https://ddnet.org/downloads/).
