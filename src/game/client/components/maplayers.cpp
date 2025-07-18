@@ -188,7 +188,9 @@ void CMapLayers::OnMapLoad()
 					g, l,
 					TextureHandle,
 					pLayer->m_Flags,
-					pQLayer);
+					pQLayer,
+					pGroup->m_ParallaxX,
+					pGroup->m_ParallaxY);
 			}
 
 			// just ignore invalid layers from rendering

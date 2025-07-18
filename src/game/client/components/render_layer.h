@@ -196,7 +196,7 @@ protected:
 class CRenderLayerQuads : public CRenderLayer
 {
 public:
-	CRenderLayerQuads(int GroupId, int LayerId, IGraphics::CTextureHandle TextureHandle, int Flags, CMapItemLayerQuads *pLayerQuads);
+	CRenderLayerQuads(int GroupId, int LayerId, IGraphics::CTextureHandle TextureHandle, int Flags, CMapItemLayerQuads *pLayerQuads, int ParallaxX, int ParallaxY);
 	virtual void Init() override;
 	bool IsValid() const override { return m_pLayerQuads->m_NumQuads > 0; }
 	virtual void Render(const CRenderLayerParams &Params) override;
@@ -230,7 +230,17 @@ protected:
 		float m_PosEnvOffset;
 		int m_ColorEnv;
 		float m_ColorEnvOffset;
+
+		// quad clipping
+		bool m_Clipped;
+		float m_ClipX;
+		float m_ClipY;
+		float m_ClipWidth;
+		float m_ClipHeight;
 	} m_QuadRenderGroup;
+
+	int m_ParallaxX;
+	int m_ParallaxY;
 
 private:
 	IGraphics::CTextureHandle m_TextureHandle;

@@ -790,11 +790,20 @@ void CRenderLayerTile::GetTileData(unsigned char *pIndex, unsigned char *pFlags,
  * Quad Layer *
  **************/
 
-CRenderLayerQuads::CRenderLayerQuads(int GroupId, int LayerId, IGraphics::CTextureHandle TextureHandle, int Flags, CMapItemLayerQuads *pLayerQuads) :
+CRenderLayerQuads::CRenderLayerQuads(int GroupId, int LayerId, IGraphics::CTextureHandle TextureHandle, int Flags, CMapItemLayerQuads *pLayerQuads, int ParallaxX, int ParallaxY) :
 	CRenderLayer(GroupId, LayerId, Flags)
 {
 	m_pLayerQuads = pLayerQuads;
 	m_Grouped = false;
+
+	m_ParallaxX = ParallaxX;
+	m_ParallaxY = ParallaxY;
+
+	m_QuadRenderGroup.m_ClipX = 0;
+	m_QuadRenderGroup.m_ClipY = 0;
+	m_QuadRenderGroup.m_ClipHeight = 0;
+	m_QuadRenderGroup.m_ClipWidth = 0;
+	m_QuadRenderGroup.m_Clipped = false;
 }
 
 void CRenderLayerQuads::RenderQuadLayer(bool Force)
@@ -963,7 +972,93 @@ void CRenderLayerQuads::Init()
 	// we can directly push, only one render info is needed
 	if(m_Grouped)
 	{
+		m_QuadRenderGroup.m_Clipped = m_ParallaxX != 0 && m_ParallaxY != 0;
 		m_vQuadRenderInfo.resize(1);
+	}
+
+	// calculate clipping if not too expensive
+	if(m_Grouped && m_QuadRenderGroup.m_Clipped)
+	{
+		// calculate envelope position offsets
+		int EnvOffsetXMin = 0, EnvOffsetXMax = 0, EnvOffsetYMin = 0, EnvOffsetYMax = 0;
+		if(m_QuadRenderGroup.m_PosEnv != -1)
+		{
+			int EnvStart, EnvNum;
+			m_pMap->GetType(MAPITEMTYPE_ENVELOPE, &EnvStart, &EnvNum);
+			const CMapItemEnvelope *pItem = (CMapItemEnvelope *)m_pMap->GetItem(EnvStart + m_QuadRenderGroup.m_PosEnv);
+
+			dbg_assert(pItem->m_Channels == 3, "Env is not a position envelope");
+
+			EnvOffsetXMin = std::numeric_limits<int>::max();
+			EnvOffsetXMax = std::numeric_limits<int>::min();
+			EnvOffsetYMin = std::numeric_limits<int>::max();
+			EnvOffsetYMax = std::numeric_limits<int>::min();
+
+			for(int PointId = pItem->m_StartPoint; PointId < pItem->m_StartPoint + pItem->m_NumPoints; ++PointId)
+			{
+				const CEnvPoint *pEnvPoint = m_pEnvelopePoints->GetPoint(PointId);
+
+				// rotation is not implemented for clipping
+				if(pEnvPoint->m_aValues[2] != 0)
+				{
+					m_QuadRenderGroup.m_Clipped = false;
+					break;
+				}
+
+				EnvOffsetXMin = std::min(pEnvPoint->m_aValues[0], EnvOffsetXMin);
+				EnvOffsetXMax = std::max(pEnvPoint->m_aValues[0], EnvOffsetXMax);
+				EnvOffsetYMin = std::min(pEnvPoint->m_aValues[1], EnvOffsetYMin);
+				EnvOffsetYMax = std::max(pEnvPoint->m_aValues[1], EnvOffsetYMax);
+
+				// bezier curves can have offsets beyond the fixed points
+				// using the bezier position is just an estimate, but clipping like this is good enough
+				if(pEnvPoint->m_Curvetype == CURVETYPE_BEZIER)
+				{
+					const CEnvPointBezier *pEnvPointBezier = m_pEnvelopePoints->GetBezier(PointId);
+					// we are only interested in the height not in the time, meaning we only need delta Y
+					EnvOffsetXMin = std::min(pEnvPoint->m_aValues[0] + pEnvPointBezier->m_aOutTangentDeltaY[0], EnvOffsetXMin);
+					EnvOffsetXMax = std::max(pEnvPoint->m_aValues[0] + pEnvPointBezier->m_aOutTangentDeltaY[0], EnvOffsetXMax);
+					EnvOffsetYMin = std::min(pEnvPoint->m_aValues[1] + pEnvPointBezier->m_aOutTangentDeltaY[1], EnvOffsetYMin);
+					EnvOffsetYMax = std::max(pEnvPoint->m_aValues[1] + pEnvPointBezier->m_aOutTangentDeltaY[1], EnvOffsetYMax);
+				}
+
+				if(PointId > 0 && m_pEnvelopePoints->GetPoint(PointId - 1)->m_Curvetype == CURVETYPE_BEZIER)
+				{
+					const CEnvPointBezier *pEnvPointBezier = m_pEnvelopePoints->GetBezier(PointId);
+					// we are only interested in the height not in the time, meaning we only need delta Y
+					EnvOffsetXMin = std::min(pEnvPoint->m_aValues[0] + pEnvPointBezier->m_aInTangentDeltaY[0], EnvOffsetXMin);
+					EnvOffsetXMax = std::max(pEnvPoint->m_aValues[0] + pEnvPointBezier->m_aInTangentDeltaY[0], EnvOffsetXMax);
+					EnvOffsetYMin = std::min(pEnvPoint->m_aValues[1] + pEnvPointBezier->m_aInTangentDeltaY[1], EnvOffsetYMin);
+					EnvOffsetYMax = std::max(pEnvPoint->m_aValues[1] + pEnvPointBezier->m_aInTangentDeltaY[1], EnvOffsetYMax);
+				}
+			}
+		}
+
+		// calculate quad position offsets
+		int ClipLeftX = pQuads[0].m_aPoints[0].x;
+		int ClipRightX = pQuads[0].m_aPoints[0].x;
+		int ClipTopY = pQuads[0].m_aPoints[0].y;
+		int ClipBottomY = pQuads[0].m_aPoints[0].y;
+
+		for(int i = 0; i < m_pLayerQuads->m_NumQuads && m_QuadRenderGroup.m_Clipped; ++i)
+		{
+			CQuad *pQuad = &pQuads[i];
+
+			// calculate clip region
+			for(int QuadIdPoint = 0; QuadIdPoint < 4; ++QuadIdPoint)
+			{
+				ClipLeftX = std::min(ClipLeftX, pQuad->m_aPoints[QuadIdPoint].x);
+				ClipRightX = std::max(ClipRightX, pQuad->m_aPoints[QuadIdPoint].x);
+				ClipTopY = std::min(ClipTopY, pQuad->m_aPoints[QuadIdPoint].y);
+				ClipBottomY = std::max(ClipBottomY, pQuad->m_aPoints[QuadIdPoint].y);
+			}
+		}
+
+		// update clips
+		m_QuadRenderGroup.m_ClipX = fx2f(ClipLeftX) + fx2f(EnvOffsetXMin);
+		m_QuadRenderGroup.m_ClipY = fx2f(ClipTopY) + fx2f(EnvOffsetYMin);
+		m_QuadRenderGroup.m_ClipWidth = fx2f(ClipRightX) - fx2f(ClipLeftX) + fx2f(EnvOffsetXMax) - fx2f(EnvOffsetXMin);
+		m_QuadRenderGroup.m_ClipHeight = fx2f(ClipBottomY) - fx2f(ClipTopY) + fx2f(EnvOffsetYMax) - fx2f(EnvOffsetYMin);
 	}
 
 	size_t UploadDataSize = 0;
@@ -1059,6 +1154,24 @@ bool CRenderLayerQuads::DoRender(const CRenderLayerParams &Params) const
 	// skip rendering if detail layers if not wanted
 	if(m_Flags & LAYERFLAG_DETAIL && !g_Config.m_GfxHighDetail && Params.m_RenderType != CMapLayers::TYPE_FULL_DESIGN) // detail but no details
 		return false;
+
+	if(m_QuadRenderGroup.m_Clipped)
+	{
+		CUIRect Screen;
+		Graphics()->GetScreen(&Screen.x, &Screen.y, &Screen.w, &Screen.h);
+
+		float aPoints[4];
+		RenderTools()->MapScreenToWorld(Params.m_Center.x, Params.m_Center.y, m_ParallaxX, m_ParallaxY, 100.f, 0, 0, Graphics()->ScreenAspect(), Params.m_Zoom, aPoints);
+		Graphics()->GetScreen(&aPoints[0], &aPoints[1], &aPoints[2], &aPoints[3]);
+		Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+		float x0 = (m_QuadRenderGroup.m_ClipX - aPoints[0]) / (aPoints[2] - aPoints[0]);
+		float y0 = (m_QuadRenderGroup.m_ClipY - aPoints[1]) / (aPoints[3] - aPoints[1]);
+		float x1 = ((m_QuadRenderGroup.m_ClipX + m_QuadRenderGroup.m_ClipWidth) - aPoints[0]) / (aPoints[2] - aPoints[0]);
+		float y1 = ((m_QuadRenderGroup.m_ClipY + m_QuadRenderGroup.m_ClipHeight) - aPoints[1]) / (aPoints[3] - aPoints[1]);
+
+		if(x1 < 0.0f || x0 > 1.0f || y1 < 0.0f || y0 > 1.0f)
+			return false;
+	}
 	return true;
 }
 
