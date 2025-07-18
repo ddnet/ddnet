@@ -214,10 +214,13 @@ void CMapLayers::OnRender()
 	Graphics()->GetScreen(&Screen.x, &Screen.y, &Screen.w, &Screen.h);
 
 	CRenderLayerParams Params;
-	Params.EntityOverlayVal = m_Type == TYPE_FULL_DESIGN ? 0 : g_Config.m_ClOverlayEntities;
+	Params.m_EntityOverlayVal = m_Type == TYPE_FULL_DESIGN ? 0 : g_Config.m_ClOverlayEntities;
 	Params.m_RenderType = m_Type;
 	Params.m_Center = GetCurCamera()->m_Center;
 	Params.m_Zoom = GetCurCamera()->m_Zoom;
+	Params.m_DisableBuffering = false;
+	Params.m_RenderBorder = true;
+	Params.m_OverlayRenderFlags = g_Config.m_ClTextEntities ? OVERLAYRENDERFLAG_TEXT : 0;
 
 	bool DoRenderGroup = true;
 	for(auto &&pRenderLayer : m_vRenderLayers)
