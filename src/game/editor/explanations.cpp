@@ -449,6 +449,10 @@ const char *CExplanations::ExplainDDNet(int Tile, int Layer)
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
 			return "LASER LENGTH CHANGE: Put next to LASER LENGTH, causes it to length and shorten constantly. Works only on (NON-)SPINNING LASER, not on DOOR. Shorten, fast.";
 		break;
+	case ENTITY_OFFSET + ENTITY_LASER_LEN:
+		if(Layer == LAYER_SWITCH)
+			return "LASER LENGTH: Put next to DOOR or SPINNING LASER, makes it NUMBER / 4 tiles long.";
+		break;
 	case ENTITY_OFFSET + ENTITY_PLASMAE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
 			return "PLASMA TURRET: Shoots plasma bullets at the closest tee. They explode on an obstactle they hit (wall or tee).";
