@@ -35,6 +35,7 @@
 #include "race.h"
 #include "render.h"
 
+#include <game/client/projectile_data.h>
 #include <game/localization.h>
 #include <game/mapitems.h>
 #include <game/version.h>
@@ -1300,6 +1301,33 @@ void CGameClient::RenderShutdownMessage()
 	Ui()->DoLabel(Ui()->Screen(), pMessage, 16.0f, TEXTALIGN_MC);
 	Graphics()->Swap();
 	Graphics()->Clear(0.0f, 0.0f, 0.0f);
+}
+
+void CGameClient::ProcessDemoSnapshot(CSnapshot *pSnap)
+{
+	for(int Index = 0; Index < pSnap->NumItems(); Index++)
+	{
+		const CSnapshotItem *pItem = pSnap->GetItem(Index);
+		int ItemType = pSnap->GetItemType(Index);
+
+		if(ItemType == NETOBJTYPE_PROJECTILE)
+		{
+			// for antiping: if the projectile netobjects from the server contains extra data, this is removed and the original content restored before recording demo
+			CNetObj_Projectile *pProj = (CNetObj_Projectile *)((void *)pItem->Data());
+			DemoObjectRemoveExtraProjectileInfo(pProj);
+		}
+		else if(ItemType == NETOBJTYPE_DDNETSPECTATORINFO)
+		{
+			// always record local camera info as follow mode
+			CNetObj_DDNetSpectatorInfo *pProj = (CNetObj_DDNetSpectatorInfo *)((void *)pItem->Data());
+			pProj->m_HasCameraInfo = true;
+			pProj->m_Zoom = (m_Camera.m_Zooming ? m_Camera.m_ZoomSmoothingTarget : m_Camera.m_Zoom) * 1000.0f;
+			pProj->m_Deadzone = m_Camera.Deadzone();
+			pProj->m_FollowFactor = m_Camera.FollowFactor();
+			// this also removes spectator count since it has lost its context
+			pProj->m_SpectatorCount = 0;
+		}
+	}
 }
 
 void CGameClient::OnRconType(bool UsernameReq)

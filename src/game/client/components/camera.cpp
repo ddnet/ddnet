@@ -44,7 +44,7 @@ CCamera::CCamera()
 
 	m_AutoSpecCamera = true;
 	m_AutoSpecCameraZooming = false;
-	m_IsSpectatingPlayer = false;
+	m_CanUseCameraInfo = false;
 	m_UsingAutoSpecCamera = false;
 
 	mem_zero(m_aAutoSpecCameraTooltip, sizeof(m_aAutoSpecCameraTooltip));
@@ -115,23 +115,24 @@ void CCamera::ResetAutoSpecCamera()
 void CCamera::UpdateCamera()
 {
 	// use hardcoded smooth camera for spectating unless player explictly turn it off
-	bool IsSpectatingPlayer = !GameClient()->m_MultiViewActivated;
+	bool CanUseCameraInfo = !GameClient()->m_MultiViewActivated;
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
-		IsSpectatingPlayer = IsSpectatingPlayer && (!GameClient()->m_Snap.m_SpecInfo.m_Active || GameClient()->m_Snap.m_SpecInfo.m_SpectatorId >= 0);
+		// only follow mode have the correct camera info
+		CanUseCameraInfo = CanUseCameraInfo && GameClient()->m_DemoSpecId == SPEC_FOLLOW;
 	}
 	else
 	{
-		IsSpectatingPlayer = IsSpectatingPlayer && GameClient()->m_Snap.m_SpecInfo.m_Active &&
-				     GameClient()->m_Snap.m_SpecInfo.m_SpectatorId >= 0 &&
-				     GameClient()->m_Snap.m_SpecInfo.m_SpectatorId != GameClient()->m_aLocalIds[0] &&
-				     (!GameClient()->Client()->DummyConnected() || GameClient()->m_Snap.m_SpecInfo.m_SpectatorId != GameClient()->m_aLocalIds[1]);
+		CanUseCameraInfo = CanUseCameraInfo && GameClient()->m_Snap.m_SpecInfo.m_Active &&
+				   GameClient()->m_Snap.m_SpecInfo.m_SpectatorId >= 0 &&
+				   GameClient()->m_Snap.m_SpecInfo.m_SpectatorId != GameClient()->m_aLocalIds[0] &&
+				   (!GameClient()->Client()->DummyConnected() || GameClient()->m_Snap.m_SpecInfo.m_SpectatorId != GameClient()->m_aLocalIds[1]);
 	}
 
 	bool UsingAutoSpecCamera = m_AutoSpecCamera && CanUseAutoSpecCamera();
 	float CurrentZoom = m_Zooming ? m_ZoomSmoothingTarget : m_Zoom;
 	bool ZoomChanged = false;
-	if(IsSpectatingPlayer && UsingAutoSpecCamera && CurrentZoom != GameClient()->m_Snap.m_SpecInfo.m_Zoom)
+	if(CanUseCameraInfo && UsingAutoSpecCamera && CurrentZoom != GameClient()->m_Snap.m_SpecInfo.m_Zoom)
 	{
 		// start spectating player / turn on auto spec camera
 		bool ChangeTarget = m_PrevSpecId != GameClient()->m_Snap.m_SpecInfo.m_SpectatorId;
@@ -139,11 +140,11 @@ void CCamera::UpdateCamera()
 		ChangeZoom(GameClient()->m_Snap.m_SpecInfo.m_Zoom, SmoothTime, false);
 
 		// it is auto spec camera zooming if only the zoom is changed during activation, not at the start of the activation
-		m_AutoSpecCameraZooming = !ChangeTarget && IsSpectatingPlayer && m_UsingAutoSpecCamera;
+		m_AutoSpecCameraZooming = !ChangeTarget && CanUseCameraInfo && m_UsingAutoSpecCamera;
 
 		ZoomChanged = true;
 	}
-	else if((IsSpectatingPlayer && !UsingAutoSpecCamera) && CurrentZoom != m_UserZoomTarget)
+	else if((CanUseCameraInfo && !UsingAutoSpecCamera) && CurrentZoom != m_UserZoomTarget)
 	{
 		// turning off auto spec camera
 		ChangeZoom(m_UserZoomTarget, g_Config.m_ClSmoothZoomTime, false);
@@ -151,7 +152,7 @@ void CCamera::UpdateCamera()
 
 		ZoomChanged = true;
 	}
-	else if(!IsSpectatingPlayer && CurrentZoom != m_UserZoomTarget)
+	else if(!CanUseCameraInfo && CurrentZoom != m_UserZoomTarget)
 	{
 		// stop spectating player
 		if(!GameClient()->m_MultiViewActivated)
@@ -207,15 +208,15 @@ void CCamera::UpdateCamera()
 	if(GameClient()->m_Snap.m_SpecInfo.m_Active && !GameClient()->m_Snap.m_SpecInfo.m_UsePosition)
 	{
 		m_aDyncamCurrentCameraOffset[g_Config.m_ClDummy] = vec2(0, 0);
-		m_IsSpectatingPlayer = IsSpectatingPlayer;
+		m_CanUseCameraInfo = CanUseCameraInfo;
 		m_UsingAutoSpecCamera = UsingAutoSpecCamera;
 		return;
 	}
 
-	vec2 TargetPos = IsSpectatingPlayer ? GameClient()->m_CursorInfo.Target() : GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy];
-	int Smoothness = IsSpectatingPlayer ? 50 : g_Config.m_ClDyncamSmoothness;
-	int Stabilizing = IsSpectatingPlayer ? 50 : g_Config.m_ClDyncamStabilizing;
-	bool IsDyncam = IsSpectatingPlayer ? true : g_Config.m_ClDyncam;
+	vec2 TargetPos = CanUseCameraInfo ? GameClient()->m_CursorInfo.Target() : GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy];
+	int Smoothness = CanUseCameraInfo ? 50 : g_Config.m_ClDyncamSmoothness;
+	int Stabilizing = CanUseCameraInfo ? 50 : g_Config.m_ClDyncamStabilizing;
+	bool IsDyncam = CanUseCameraInfo ? true : g_Config.m_ClDyncam;
 
 	float DeltaTime = Client()->RenderFrameTime();
 
@@ -244,7 +245,7 @@ void CCamera::UpdateCamera()
 		float CurrentFollowFactor = FollowFactor();
 
 		// use provided camera setting from server
-		if(IsSpectatingPlayer)
+		if(CanUseCameraInfo)
 		{
 			CurrentDeadzone = GameClient()->m_Snap.m_SpecInfo.m_Deadzone;
 			CurrentFollowFactor = GameClient()->m_Snap.m_SpecInfo.m_FollowFactor;
@@ -259,7 +260,7 @@ void CCamera::UpdateCamera()
 
 		float OffsetAmount = maximum(l - CurrentDeadzone, 0.0f) * (CurrentFollowFactor / 100.0f);
 
-		if(IsSpectatingPlayer)
+		if(CanUseCameraInfo)
 		{
 			OffsetAmount = minimum(OffsetAmount, 350.0f * m_Zoom);
 		}
@@ -276,13 +277,13 @@ void CCamera::UpdateCamera()
 		CurrentCameraOffset = m_DyncamTargetCameraOffset;
 
 	// directly put the camera in place when switching in and out of freeview or spectate mode
-	if(m_IsSpectatingPlayer != IsSpectatingPlayer)
+	if(m_CanUseCameraInfo != CanUseCameraInfo)
 	{
 		CurrentCameraOffset = m_DyncamTargetCameraOffset;
 	}
 
 	m_aDyncamCurrentCameraOffset[g_Config.m_ClDummy] = CurrentCameraOffset;
-	m_IsSpectatingPlayer = IsSpectatingPlayer;
+	m_CanUseCameraInfo = CanUseCameraInfo;
 	m_UsingAutoSpecCamera = UsingAutoSpecCamera;
 }
 
@@ -459,7 +460,7 @@ void CCamera::ConZoom(IConsole::IResult *pResult, void *pUserData)
 
 	float TargetLevel = !IsReset ? pResult->GetFloat(0) : g_Config.m_ClDefaultZoom;
 
-	if(!pSelf->CanUseAutoSpecCamera() || !pSelf->m_IsSpectatingPlayer)
+	if(!pSelf->CanUseAutoSpecCamera() || !pSelf->m_CanUseCameraInfo)
 		pSelf->ChangeZoom(CCamera::ZoomStepsToValue(TargetLevel - 10.0f), pSelf->GameClient()->m_Snap.m_SpecInfo.m_Active && pSelf->GameClient()->m_MultiViewActivated ? g_Config.m_ClMultiViewZoomSmoothness : g_Config.m_ClSmoothZoomTime, true);
 	else
 		pSelf->m_UserZoomTarget = CCamera::ZoomStepsToValue(TargetLevel - 10.0f);
