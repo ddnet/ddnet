@@ -14,7 +14,7 @@ CLayerGame::CLayerGame(CEditor *pEditor, int w, int h) :
 
 CLayerGame::~CLayerGame() = default;
 
-CTile CLayerGame::GetTile(int x, int y)
+CTile CLayerGame::GetTile(int x, int y) const
 {
 	if(m_pEditor->m_Map.m_pFrontLayer && m_pEditor->m_Map.m_pFrontLayer->GetTile(x, y).m_Index == TILE_THROUGH_CUT)
 	{
@@ -58,6 +58,26 @@ void CLayerGame::SetTile(int x, int y, CTile Tile)
 			ShowPreventUnusedTilesWarning();
 		}
 	}
+}
+
+bool CLayerGame::IsEmpty() const
+{
+	for(int y = 0; y < m_Height; y++)
+	{
+		for(int x = 0; x < m_Width; x++)
+		{
+			const int Index = GetTile(x, y).m_Index;
+			if(Index == 0)
+			{
+				continue;
+			}
+			if(m_pEditor->IsAllowPlaceUnusedTiles() || IsValidGameTile(Index))
+			{
+				return false;
+			}
+		}
+	}
+	return true;
 }
 
 CUi::EPopupMenuFunctionResult CLayerGame::RenderProperties(CUIRect *pToolbox)

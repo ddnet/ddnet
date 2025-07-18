@@ -76,7 +76,7 @@ CLayerTiles::~CLayerTiles()
 	delete[] m_pTiles;
 }
 
-CTile CLayerTiles::GetTile(int x, int y)
+CTile CLayerTiles::GetTile(int x, int y) const
 {
 	return m_pTiles[y * m_Width + x];
 }
@@ -248,31 +248,18 @@ bool CLayerTiles::IsEntitiesLayer() const
 	return m_pEditor->m_Map.m_pGameLayer.get() == this || m_pEditor->m_Map.m_pTeleLayer.get() == this || m_pEditor->m_Map.m_pSpeedupLayer.get() == this || m_pEditor->m_Map.m_pFrontLayer.get() == this || m_pEditor->m_Map.m_pSwitchLayer.get() == this || m_pEditor->m_Map.m_pTuneLayer.get() == this;
 }
 
-bool CLayerTiles::IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer)
+bool CLayerTiles::IsEmpty() const
 {
-	for(int y = 0; y < pLayer->m_Height; y++)
+	for(int y = 0; y < m_Height; y++)
 	{
-		for(int x = 0; x < pLayer->m_Width; x++)
+		for(int x = 0; x < m_Width; x++)
 		{
-			int Index = pLayer->GetTile(x, y).m_Index;
-			if(Index)
+			if(GetTile(x, y).m_Index != 0)
 			{
-				if(pLayer->m_HasGame)
-				{
-					if(m_pEditor->IsAllowPlaceUnusedTiles() || IsValidGameTile(Index))
-						return false;
-				}
-				else if(pLayer->m_HasFront)
-				{
-					if(m_pEditor->IsAllowPlaceUnusedTiles() || IsValidFrontTile(Index))
-						return false;
-				}
-				else
-					return false;
+				return false;
 			}
 		}
 	}
-
 	return true;
 }
 
@@ -530,7 +517,7 @@ void CLayerTiles::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIR
 
 	std::shared_ptr<CLayerTiles> pLt = std::static_pointer_cast<CLayerTiles>(pBrush);
 
-	bool Destructive = m_pEditor->m_BrushDrawDestructive || Empty || IsEmpty(pLt);
+	bool Destructive = m_pEditor->m_BrushDrawDestructive || Empty || pLt->IsEmpty();
 
 	for(int y = 0; y < h; y++)
 	{
@@ -574,7 +561,7 @@ void CLayerTiles::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 	int sx = ConvertX(WorldPos.x);
 	int sy = ConvertY(WorldPos.y);
 
-	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(pTileLayer);
+	bool Destructive = m_pEditor->m_BrushDrawDestructive || pTileLayer->IsEmpty();
 
 	for(int y = 0; y < pTileLayer->m_Height; y++)
 		for(int x = 0; x < pTileLayer->m_Width; x++)
