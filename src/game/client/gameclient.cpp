@@ -2072,7 +2072,7 @@ void CGameClient::OnNewSnapshot()
 			m_ServerMode = SERVERMODE_PUREMOD;
 	}
 
-	// add tuning to demo when new recording was started, because server tune message was already received before
+	// add msgs to demos when a new recording is started, as they were received before the recording began
 	std::bitset<RECORDER_MAX> CurrentRecordings;
 	for(int i = 0; i < RECORDER_MAX; i++)
 	{
@@ -2085,11 +2085,23 @@ void CGameClient::OnNewSnapshot()
 	m_ActiveRecordings = CurrentRecordings;
 	if(HasNewRecordings)
 	{
-		CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
+		CMsgPacker MsgTune(NETMSGTYPE_SV_TUNEPARAMS);
 		int *pParams = (int *)&m_aTuning[g_Config.m_ClDummy];
 		for(unsigned i = 0; i < sizeof(m_aTuning[0]) / sizeof(int); i++)
-			Msg.AddInt(pParams[i]);
-		Client()->SendMsgActive(&Msg, MSGFLAG_RECORD | MSGFLAG_NOSEND);
+			MsgTune.AddInt(pParams[i]);
+		Client()->SendMsgActive(&MsgTune, MSGFLAG_RECORD | MSGFLAG_NOSEND);
+
+		for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
+		{
+			if(Dummy == IClient::CONN_DUMMY && !Client()->DummyConnected())
+				continue;
+			CNetMsg_Sv_Record MsgRecord;
+			MsgRecord.m_ServerTimeBest = m_Hud.GetServerRecord() * 100;
+			MsgRecord.m_PlayerTimeBest = m_Hud.GetPlayerRecord(Dummy) * 100;
+			CMsgPacker Packer(&MsgRecord);
+			MsgRecord.Pack(&Packer);
+			Client()->SendMsg(Dummy, &Packer, MSGFLAG_RECORD | MSGFLAG_NOSEND);
+		}
 	}
 
 	for(int i = 0; i < 2; i++)
