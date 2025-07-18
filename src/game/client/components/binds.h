@@ -73,6 +73,7 @@ public:
 	static int GetModifierMaskOfKey(int Key);
 	static const char *GetModifierName(int Modifier);
 	static void GetKeyBindModifiersName(int ModifierCombination, char *pBuf, size_t BufSize);
+	void GetKeyBindCommand(int ModifierCombination, int Key, char *pBuf, size_t BufSize) const;
 
 	void OnConsoleInit() override;
 	bool OnInput(const IInput::CEvent &Event) override;
