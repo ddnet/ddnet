@@ -97,9 +97,13 @@ void CNetConnection::SignalResend()
 
 int CNetConnection::Flush()
 {
-	int NumChunks = m_Construct.m_NumChunks;
-	if(!NumChunks && !m_Construct.m_Flags)
+	// Only flush the connection if there is at least one chunk to flush,
+	// or if a resend should be signaled.
+	const int NumChunks = m_Construct.m_NumChunks;
+	if(!NumChunks && (m_Construct.m_Flags & NET_PACKETFLAG_RESEND) == 0)
+	{
 		return 0;
+	}
 
 	// send of the packets
 	m_Construct.m_Ack = m_Ack;
@@ -121,8 +125,11 @@ int CNetConnection::QueueChunkEx(int Flags, int DataSize, const void *pData, int
 	unsigned char *pChunkData;
 
 	// check if we have space for it, if not, flush the connection
-	if(m_Construct.m_DataSize + DataSize + NET_MAX_CHUNKHEADERSIZE > (int)sizeof(m_Construct.m_aChunkData) - (int)sizeof(SECURITY_TOKEN))
+	if(m_Construct.m_DataSize + DataSize + NET_MAX_CHUNKHEADERSIZE > (int)sizeof(m_Construct.m_aChunkData) - (int)sizeof(SECURITY_TOKEN) ||
+		m_Construct.m_NumChunks == NET_MAX_PACKET_CHUNKS)
+	{
 		Flush();
+	}
 
 	// pack all the data
 	CNetChunkHeader Header;

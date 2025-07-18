@@ -139,6 +139,20 @@ void CNetBase::SendPacketConnlessWithToken7(NETSOCKET Socket, NETADDR *pAddr, co
 
 void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken, bool Sixup)
 {
+	if((pPacket->m_Flags & NET_PACKETFLAG_CONTROL) != 0)
+	{
+		dbg_assert(pPacket->m_NumChunks == 0,
+			"Number of chunks in control packet must be zero. NumChunks=%d Flags=%d", pPacket->m_NumChunks, pPacket->m_Flags);
+	}
+	else
+	{
+		// Packets are allowed to contain no chunks if they are used to request a resend,
+		// otherwise at least one chunk is required or the packet would have no effect.
+		const int MinChunks = (pPacket->m_Flags & NET_PACKETFLAG_RESEND) != 0 ? 0 : 1;
+		dbg_assert(pPacket->m_NumChunks >= MinChunks && pPacket->m_NumChunks <= NET_MAX_PACKET_CHUNKS,
+			"Number of chunks in non-control packet invalid. NumChunks=%d Flags=%d", pPacket->m_NumChunks, pPacket->m_Flags);
+	}
+
 	unsigned char aBuffer[NET_MAX_PACKETSIZE];
 
 	// log the data
@@ -293,8 +307,13 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 
 		const bool Control = (pPacket->m_Flags & NET_PACKETFLAG_CONTROL) != 0;
 
-		// Drop invalid control packets. At least one byte is required as the control message code.
-		if(Control && pPacket->m_DataSize == 0)
+		// Drop invalid packets:
+		// - At least one byte is required as the control message code in control packets.
+		// - Control packets always contain zero chunks.
+		// - Non-control packets always contain at least 1 chunk unless they are resend requests.
+		if((Control && pPacket->m_DataSize == 0) ||
+			(Control && pPacket->m_NumChunks != 0) ||
+			(!Control && pPacket->m_NumChunks == 0 && (pPacket->m_Flags & NET_PACKETFLAG_RESEND) == 0))
 		{
 			return -1;
 		}
