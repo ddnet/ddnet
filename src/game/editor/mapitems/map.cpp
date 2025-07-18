@@ -1,12 +1,44 @@
-#include <game/editor/editor.h>
+#include "map.h"
 
-#include "image.h"
+#include <base/system.h>
+
+#include <game/editor/editor.h>
+#include <game/editor/mapitems/layer_front.h>
+#include <game/editor/mapitems/layer_game.h>
+#include <game/editor/mapitems/layer_group.h>
+#include <game/editor/mapitems/layer_quads.h>
+#include <game/editor/mapitems/layer_sounds.h>
+#include <game/editor/mapitems/layer_tiles.h>
+
+void CEditorMap::CMapInfo::Reset()
+{
+	m_aAuthor[0] = '\0';
+	m_aVersion[0] = '\0';
+	m_aCredits[0] = '\0';
+	m_aLicense[0] = '\0';
+}
+
+void CEditorMap::CMapInfo::Copy(const CMapInfo &Source)
+{
+	str_copy(m_aAuthor, Source.m_aAuthor);
+	str_copy(m_aVersion, Source.m_aVersion);
+	str_copy(m_aCredits, Source.m_aCredits);
+	str_copy(m_aLicense, Source.m_aLicense);
+}
 
 void CEditorMap::OnModify()
 {
 	m_Modified = true;
 	m_ModifiedAuto = true;
 	m_LastModifiedTime = m_pEditor->Client()->GlobalTime();
+}
+
+std::shared_ptr<CEnvelope> CEditorMap::NewEnvelope(CEnvelope::EType Type)
+{
+	OnModify();
+	std::shared_ptr<CEnvelope> pEnv = std::make_shared<CEnvelope>(Type);
+	m_vpEnvelopes.push_back(pEnv);
+	return pEnv;
 }
 
 void CEditorMap::DeleteEnvelope(int Index)
@@ -81,17 +113,55 @@ void CEditorMap::VisitEnvelopeReferences(F &&Visitor)
 	}
 }
 
-void CEditorMap::MakeGameLayer(const std::shared_ptr<CLayer> &pLayer)
+std::shared_ptr<CLayerGroup> CEditorMap::NewGroup()
 {
-	m_pGameLayer = std::static_pointer_cast<CLayerGame>(pLayer);
-	m_pGameLayer->m_pEditor = m_pEditor;
+	OnModify();
+	std::shared_ptr<CLayerGroup> pGroup = std::make_shared<CLayerGroup>();
+	pGroup->m_pMap = this;
+	m_vpGroups.push_back(pGroup);
+	return pGroup;
 }
 
-void CEditorMap::MakeGameGroup(std::shared_ptr<CLayerGroup> pGroup)
+int CEditorMap::SwapGroups(int Index0, int Index1)
 {
-	m_pGameGroup = std::move(pGroup);
-	m_pGameGroup->m_GameGroup = true;
-	str_copy(m_pGameGroup->m_aName, "Game");
+	if(Index0 < 0 || Index0 >= (int)m_vpGroups.size())
+		return Index0;
+	if(Index1 < 0 || Index1 >= (int)m_vpGroups.size())
+		return Index0;
+	if(Index0 == Index1)
+		return Index0;
+	OnModify();
+	std::swap(m_vpGroups[Index0], m_vpGroups[Index1]);
+	return Index1;
+}
+
+void CEditorMap::DeleteGroup(int Index)
+{
+	if(Index < 0 || Index >= (int)m_vpGroups.size())
+		return;
+	OnModify();
+	m_vpGroups.erase(m_vpGroups.begin() + Index);
+}
+
+void CEditorMap::ModifyImageIndex(const FIndexModifyFunction &pfnFunc)
+{
+	OnModify();
+	for(auto &pGroup : m_vpGroups)
+		pGroup->ModifyImageIndex(pfnFunc);
+}
+
+void CEditorMap::ModifyEnvelopeIndex(const FIndexModifyFunction &pfnFunc)
+{
+	OnModify();
+	for(auto &pGroup : m_vpGroups)
+		pGroup->ModifyEnvelopeIndex(pfnFunc);
+}
+
+void CEditorMap::ModifySoundIndex(const FIndexModifyFunction &pfnFunc)
+{
+	OnModify();
+	for(auto &pGroup : m_vpGroups)
+		pGroup->ModifySoundIndex(pfnFunc);
 }
 
 void CEditorMap::Clean()
@@ -100,23 +170,21 @@ void CEditorMap::Clean()
 	m_vpEnvelopes.clear();
 	m_vpImages.clear();
 	m_vpSounds.clear();
-
-	m_MapInfo.Reset();
-	m_MapInfoTmp.Reset();
-
 	m_vSettings.clear();
 
-	m_pGameLayer = nullptr;
 	m_pGameGroup = nullptr;
-
-	m_Modified = false;
-	m_ModifiedAuto = false;
-
+	m_pGameLayer = nullptr;
 	m_pTeleLayer = nullptr;
 	m_pSpeedupLayer = nullptr;
 	m_pFrontLayer = nullptr;
 	m_pSwitchLayer = nullptr;
 	m_pTuneLayer = nullptr;
+
+	m_MapInfo.Reset();
+	m_MapInfoTmp.Reset();
+
+	m_Modified = false;
+	m_ModifiedAuto = false;
 }
 
 void CEditorMap::CreateDefault(IGraphics::CTextureHandle EntitiesTexture)
@@ -139,12 +207,19 @@ void CEditorMap::CreateDefault(IGraphics::CTextureHandle EntitiesTexture)
 	MakeGameGroup(NewGroup());
 	MakeGameLayer(std::make_shared<CLayerGame>(m_pEditor, 50, 50));
 	m_pGameGroup->AddLayer(m_pGameLayer);
+}
 
-	m_pFrontLayer = nullptr;
-	m_pTeleLayer = nullptr;
-	m_pSpeedupLayer = nullptr;
-	m_pSwitchLayer = nullptr;
-	m_pTuneLayer = nullptr;
+void CEditorMap::MakeGameLayer(const std::shared_ptr<CLayer> &pLayer)
+{
+	m_pGameLayer = std::static_pointer_cast<CLayerGame>(pLayer);
+	m_pGameLayer->m_pEditor = m_pEditor;
+}
+
+void CEditorMap::MakeGameGroup(std::shared_ptr<CLayerGroup> pGroup)
+{
+	m_pGameGroup = std::move(pGroup);
+	m_pGameGroup->m_GameGroup = true;
+	str_copy(m_pGameGroup->m_aName, "Game");
 }
 
 void CEditorMap::MakeTeleLayer(const std::shared_ptr<CLayer> &pLayer)

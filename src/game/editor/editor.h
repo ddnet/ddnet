@@ -24,6 +24,7 @@
 #include <game/editor/mapitems/layer_tele.h>
 #include <game/editor/mapitems/layer_tiles.h>
 #include <game/editor/mapitems/layer_tune.h>
+#include <game/editor/mapitems/map.h>
 
 #include <engine/console.h>
 #include <engine/editor.h>
@@ -51,7 +52,6 @@
 #include <string>
 #include <vector>
 
-typedef std::function<void(int *pIndex)> FIndexModifyFunction;
 template<typename T>
 using FDropdownRenderCallback = std::function<void(const T &, char (&aOutput)[128], std::vector<STextColorSplit> &)>;
 
@@ -72,158 +72,6 @@ enum
 	// while it is active to make sure no other component
 	// interprets the key presses
 	DIALOG_PSEUDO_FONT_TYPER,
-};
-
-class CEditorImage;
-class CEditorSound;
-
-class CEditorMap
-{
-	void MakeGameGroup(std::shared_ptr<CLayerGroup> pGroup);
-	void MakeGameLayer(const std::shared_ptr<CLayer> &pLayer);
-
-public:
-	CEditor *m_pEditor;
-
-	CEditorMap()
-	{
-		Clean();
-	}
-
-	~CEditorMap()
-	{
-		Clean();
-	}
-
-	bool m_Modified; // unsaved changes in manual save
-	bool m_ModifiedAuto; // unsaved changes in autosave
-	float m_LastModifiedTime;
-	float m_LastSaveTime;
-	float m_LastAutosaveUpdateTime;
-	void OnModify();
-
-	std::vector<std::shared_ptr<CLayerGroup>> m_vpGroups;
-	std::vector<std::shared_ptr<CEditorImage>> m_vpImages;
-	std::vector<std::shared_ptr<CEnvelope>> m_vpEnvelopes;
-	std::vector<std::shared_ptr<CEditorSound>> m_vpSounds;
-
-	class CMapInfo
-	{
-	public:
-		char m_aAuthor[32];
-		char m_aVersion[16];
-		char m_aCredits[128];
-		char m_aLicense[32];
-
-		void Reset()
-		{
-			m_aAuthor[0] = '\0';
-			m_aVersion[0] = '\0';
-			m_aCredits[0] = '\0';
-			m_aLicense[0] = '\0';
-		}
-
-		void Copy(const CMapInfo &Source)
-		{
-			str_copy(m_aAuthor, Source.m_aAuthor);
-			str_copy(m_aVersion, Source.m_aVersion);
-			str_copy(m_aCredits, Source.m_aCredits);
-			str_copy(m_aLicense, Source.m_aLicense);
-		}
-	};
-	CMapInfo m_MapInfo;
-	CMapInfo m_MapInfoTmp;
-
-	std::vector<CEditorMapSetting> m_vSettings;
-
-	std::shared_ptr<class CLayerGame> m_pGameLayer;
-	std::shared_ptr<CLayerGroup> m_pGameGroup;
-
-	std::shared_ptr<CEnvelope> NewEnvelope(CEnvelope::EType Type)
-	{
-		OnModify();
-		std::shared_ptr<CEnvelope> pEnv = std::make_shared<CEnvelope>(Type);
-		m_vpEnvelopes.push_back(pEnv);
-		return pEnv;
-	}
-
-	void DeleteEnvelope(int Index);
-	void SwapEnvelopes(int Index0, int Index1);
-	template<typename F>
-	void VisitEnvelopeReferences(F &&Visitor);
-
-	std::shared_ptr<CLayerGroup> NewGroup()
-	{
-		OnModify();
-		std::shared_ptr<CLayerGroup> pGroup = std::make_shared<CLayerGroup>();
-		pGroup->m_pMap = this;
-		m_vpGroups.push_back(pGroup);
-		return pGroup;
-	}
-
-	int SwapGroups(int Index0, int Index1)
-	{
-		if(Index0 < 0 || Index0 >= (int)m_vpGroups.size())
-			return Index0;
-		if(Index1 < 0 || Index1 >= (int)m_vpGroups.size())
-			return Index0;
-		if(Index0 == Index1)
-			return Index0;
-		OnModify();
-		std::swap(m_vpGroups[Index0], m_vpGroups[Index1]);
-		return Index1;
-	}
-
-	void DeleteGroup(int Index)
-	{
-		if(Index < 0 || Index >= (int)m_vpGroups.size())
-			return;
-		OnModify();
-		m_vpGroups.erase(m_vpGroups.begin() + Index);
-	}
-
-	void ModifyImageIndex(FIndexModifyFunction pfnFunc)
-	{
-		OnModify();
-		for(auto &pGroup : m_vpGroups)
-			pGroup->ModifyImageIndex(pfnFunc);
-	}
-
-	void ModifyEnvelopeIndex(FIndexModifyFunction pfnFunc)
-	{
-		OnModify();
-		for(auto &pGroup : m_vpGroups)
-			pGroup->ModifyEnvelopeIndex(pfnFunc);
-	}
-
-	void ModifySoundIndex(FIndexModifyFunction pfnFunc)
-	{
-		OnModify();
-		for(auto &pGroup : m_vpGroups)
-			pGroup->ModifySoundIndex(pfnFunc);
-	}
-
-	void Clean();
-	void CreateDefault(IGraphics::CTextureHandle EntitiesTexture);
-
-	// io
-	bool Save(const char *pFilename, const std::function<void(const char *pErrorMessage)> &ErrorHandler);
-	bool PerformPreSaveSanityChecks(const std::function<void(const char *pErrorMessage)> &ErrorHandler);
-	bool Load(const char *pFilename, int StorageType, const std::function<void(const char *pErrorMessage)> &ErrorHandler);
-	void PerformSanityChecks(const std::function<void(const char *pErrorMessage)> &ErrorHandler);
-
-	// DDRace
-
-	std::shared_ptr<class CLayerTele> m_pTeleLayer;
-	std::shared_ptr<class CLayerSpeedup> m_pSpeedupLayer;
-	std::shared_ptr<class CLayerFront> m_pFrontLayer;
-	std::shared_ptr<class CLayerSwitch> m_pSwitchLayer;
-	std::shared_ptr<class CLayerTune> m_pTuneLayer;
-	void MakeTeleLayer(const std::shared_ptr<CLayer> &pLayer);
-	void MakeSpeedupLayer(const std::shared_ptr<CLayer> &pLayer);
-	void MakeFrontLayer(const std::shared_ptr<CLayer> &pLayer);
-	void MakeSwitchLayer(const std::shared_ptr<CLayer> &pLayer);
-	void MakeTuneLayer(const std::shared_ptr<CLayer> &pLayer);
 };
 
 class CProperty
@@ -255,29 +103,6 @@ enum
 	PROPTYPE_SOUND,
 	PROPTYPE_AUTOMAPPER,
 	PROPTYPE_AUTOMAPPER_REFERENCE,
-};
-
-class CDataFileWriterFinishJob : public IJob
-{
-	char m_aRealFileName[IO_MAX_PATH_LENGTH];
-	char m_aTempFileName[IO_MAX_PATH_LENGTH];
-	CDataFileWriter m_Writer;
-
-	void Run() override
-	{
-		m_Writer.Finish();
-	}
-
-public:
-	CDataFileWriterFinishJob(const char *pRealFileName, const char *pTempFileName, CDataFileWriter &&Writer) :
-		m_Writer(std::move(Writer))
-	{
-		str_copy(m_aRealFileName, pRealFileName);
-		str_copy(m_aTempFileName, pTempFileName);
-	}
-
-	const char *GetRealFileName() const { return m_aRealFileName; }
-	const char *GetTempFileName() const { return m_aTempFileName; }
 };
 
 class CEditor : public IEditor
@@ -371,6 +196,7 @@ public:
 #undef REGISTER_QUICK_ACTION
 		m_ZoomEnvelopeX(1.0f, 0.1f, 600.0f),
 		m_ZoomEnvelopeY(640.0f, 0.1f, 32000.0f),
+		m_Map(this),
 		m_MapSettingsCommandContext(m_MapSettingsBackend.NewContext(&m_SettingsCommandInput))
 	{
 		m_EntitiesTexture.Invalidate();
