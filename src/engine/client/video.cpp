@@ -48,8 +48,7 @@ static LEVEL AvLevelToLogLevel(int Level)
 	}
 }
 
-GNUC_ATTRIBUTE((format(printf, 3, 0)))
-static void AvLogCallback(void *pUser, int Level, const char *pFormat, va_list VarArgs)
+[[gnu::format(printf, 3, 0)]] static void AvLogCallback(void *pUser, int Level, const char *pFormat, va_list VarArgs)
 {
 	const LEVEL LogLevel = AvLevelToLogLevel(Level);
 	if(LogLevel <= LEVEL_INFO)
