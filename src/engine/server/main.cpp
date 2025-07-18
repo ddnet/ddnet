@@ -67,7 +67,7 @@ int main(int argc, const char **argv)
 #endif
 
 #if defined(CONF_FAMILY_WINDOWS)
-	CWindowsComLifecycle WindowsComLifecycle(false);
+	CWindowsComRtLifecycle WindowsComRtLifecycle(false);
 #endif
 
 	std::vector<std::shared_ptr<ILogger>> vpLoggers;
