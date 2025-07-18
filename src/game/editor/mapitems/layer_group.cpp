@@ -37,30 +37,30 @@ void CLayerGroup::Convert(CUIRect *pRect) const
 void CLayerGroup::Mapping(float *pPoints) const
 {
 	float NormalParallaxZoom = std::clamp((double)(maximum(m_ParallaxX, m_ParallaxY)), 0., 100.);
-	float ParallaxZoom = m_pMap->m_pEditor->m_PreviewZoom ? NormalParallaxZoom : 100.0f;
+	float ParallaxZoom = m_pMap->Editor()->m_PreviewZoom ? NormalParallaxZoom : 100.0f;
 
-	m_pMap->m_pEditor->RenderTools()->MapScreenToWorld(
-		m_pMap->m_pEditor->MapView()->GetWorldOffset().x, m_pMap->m_pEditor->MapView()->GetWorldOffset().y,
+	m_pMap->Editor()->RenderTools()->MapScreenToWorld(
+		m_pMap->Editor()->MapView()->GetWorldOffset().x, m_pMap->Editor()->MapView()->GetWorldOffset().y,
 		m_ParallaxX, m_ParallaxY, ParallaxZoom, m_OffsetX, m_OffsetY,
-		m_pMap->m_pEditor->Graphics()->ScreenAspect(), m_pMap->m_pEditor->MapView()->GetWorldZoom(), pPoints);
+		m_pMap->Editor()->Graphics()->ScreenAspect(), m_pMap->Editor()->MapView()->GetWorldZoom(), pPoints);
 
-	pPoints[0] += m_pMap->m_pEditor->MapView()->GetEditorOffset().x;
-	pPoints[1] += m_pMap->m_pEditor->MapView()->GetEditorOffset().y;
-	pPoints[2] += m_pMap->m_pEditor->MapView()->GetEditorOffset().x;
-	pPoints[3] += m_pMap->m_pEditor->MapView()->GetEditorOffset().y;
+	pPoints[0] += m_pMap->Editor()->MapView()->GetEditorOffset().x;
+	pPoints[1] += m_pMap->Editor()->MapView()->GetEditorOffset().y;
+	pPoints[2] += m_pMap->Editor()->MapView()->GetEditorOffset().x;
+	pPoints[3] += m_pMap->Editor()->MapView()->GetEditorOffset().y;
 }
 
 void CLayerGroup::MapScreen() const
 {
 	float aPoints[4];
 	Mapping(aPoints);
-	m_pMap->m_pEditor->Graphics()->MapScreen(aPoints[0], aPoints[1], aPoints[2], aPoints[3]);
+	m_pMap->Editor()->Graphics()->MapScreen(aPoints[0], aPoints[1], aPoints[2], aPoints[3]);
 }
 
 void CLayerGroup::Render()
 {
 	MapScreen();
-	IGraphics *pGraphics = m_pMap->m_pEditor->Graphics();
+	IGraphics *pGraphics = m_pMap->Editor()->Graphics();
 
 	if(m_UseClipping)
 	{
@@ -86,14 +86,14 @@ void CLayerGroup::Render()
 				if(g_Config.m_EdShowIngameEntities && pLayer->IsEntitiesLayer() && (pLayer == m_pMap->m_pGameLayer || pLayer == m_pMap->m_pFrontLayer || pLayer == m_pMap->m_pSwitchLayer))
 				{
 					if(pLayer != m_pMap->m_pSwitchLayer)
-						m_pMap->m_pEditor->RenderGameEntities(pTiles);
-					m_pMap->m_pEditor->RenderSwitchEntities(pTiles);
+						m_pMap->Editor()->RenderGameEntities(pTiles);
+					m_pMap->Editor()->RenderSwitchEntities(pTiles);
 				}
 
 				if(pTiles->m_HasGame || pTiles->m_HasFront || pTiles->m_HasTele || pTiles->m_HasSpeedup || pTiles->m_HasTune || pTiles->m_HasSwitch)
 					continue;
 			}
-			if(m_pMap->m_pEditor->m_ShowDetail || !(pLayer->m_Flags & LAYERFLAG_DETAIL))
+			if(m_pMap->Editor()->m_ShowDetail || !(pLayer->m_Flags & LAYERFLAG_DETAIL))
 				pLayer->Render();
 		}
 	}
