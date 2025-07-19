@@ -47,7 +47,7 @@ void CNetClient::Disconnect(const char *pReason)
 void CNetClient::Update()
 {
 	m_Connection.Update();
-	if(m_Connection.State() == NET_CONNSTATE_ERROR)
+	if(m_Connection.State() == CNetConnection::EState::ERROR)
 		Disconnect(m_Connection.ErrorString());
 	m_pStun->Update();
 	m_TokenCache.Update();
@@ -116,7 +116,7 @@ int CNetClient::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken, bool Six
 			}
 			else
 			{
-				if(m_Connection.State() != NET_CONNSTATE_OFFLINE && m_Connection.State() != NET_CONNSTATE_ERROR && m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr, Token, *pResponseToken))
+				if(m_Connection.State() != CNetConnection::EState::OFFLINE && m_Connection.State() != CNetConnection::EState::ERROR && m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr, Token, *pResponseToken))
 					m_RecvUnpacker.Start(&Addr, &m_Connection, 0);
 			}
 		}
@@ -163,9 +163,9 @@ int CNetClient::Send(CNetChunk *pChunk)
 
 int CNetClient::State()
 {
-	if(m_Connection.State() == NET_CONNSTATE_ONLINE)
+	if(m_Connection.State() == CNetConnection::EState::ONLINE)
 		return NETSTATE_ONLINE;
-	if(m_Connection.State() == NET_CONNSTATE_OFFLINE)
+	if(m_Connection.State() == CNetConnection::EState::OFFLINE)
 		return NETSTATE_OFFLINE;
 	return NETSTATE_CONNECTING;
 }
