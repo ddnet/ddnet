@@ -29,6 +29,18 @@ public:
 	int m_SoundEnvOffset;
 };
 
+void CDataFileWriterFinishJob::Run()
+{
+	m_Writer.Finish();
+}
+
+CDataFileWriterFinishJob::CDataFileWriterFinishJob(const char *pRealFileName, const char *pTempFileName, CDataFileWriter &&Writer) :
+	m_Writer(std::move(Writer))
+{
+	str_copy(m_aRealFileName, pRealFileName);
+	str_copy(m_aTempFileName, pTempFileName);
+}
+
 bool CEditorMap::Save(const char *pFileName, const std::function<void(const char *pErrorMessage)> &ErrorHandler)
 {
 	char aFileNameTmp[IO_MAX_PATH_LENGTH];

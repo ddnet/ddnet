@@ -8764,7 +8764,6 @@ void CEditor::Init()
 	m_RenderTools.Init(m_pGraphics, m_pTextRender);
 	m_ZoomEnvelopeX.OnInit(this);
 	m_ZoomEnvelopeY.OnInit(this);
-	m_Map.m_pEditor = this;
 
 	m_vComponents.emplace_back(m_MapView);
 	m_vComponents.emplace_back(m_MapSettingsBackend);
@@ -9249,8 +9248,7 @@ bool CEditor::Load(const char *pFileName, int StorageType)
 
 bool CEditor::Append(const char *pFileName, int StorageType, bool IgnoreHistory)
 {
-	CEditorMap NewMap;
-	NewMap.m_pEditor = this;
+	CEditorMap NewMap(this);
 
 	const auto &&ErrorHandler = [this](const char *pErrorMessage) {
 		ShowFileDialogError("%s", pErrorMessage);
