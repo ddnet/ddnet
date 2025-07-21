@@ -1,5 +1,10 @@
 // This file can be included several times.
 
+#ifndef UUID
+// This helps IDEs properly syntax highlight the uses of the macro below.
+#define UUID(Id, Name)
+#endif
+
 UUID(TEEHISTORIAN_TEST, "teehistorian-test@ddnet.tw")
 UUID(TEEHISTORIAN_DDNETVER_OLD, "teehistorian-ddnetver-old@ddnet.tw")
 UUID(TEEHISTORIAN_DDNETVER, "teehistorian-ddnetver@ddnet.tw")
