@@ -61,9 +61,9 @@ std::pair<float, float> CEnvelope::GetValueRange(int ChannelMask)
 {
 	float Top = -std::numeric_limits<float>::infinity();
 	float Bottom = std::numeric_limits<float>::infinity();
-	CEnvPoint_runtime *pPrevPoint = nullptr;
-	for(auto &Point : m_vPoints)
+	for(size_t PointIndex = 0; PointIndex < m_vPoints.size(); ++PointIndex)
 	{
+		const auto &Point = m_vPoints[PointIndex];
 		for(int c = 0; c < GetChannels(); c++)
 		{
 			if(ChannelMask & (1 << c))
@@ -75,7 +75,7 @@ std::pair<float, float> CEnvelope::GetValueRange(int ChannelMask)
 					Bottom = minimum(Bottom, v);
 				}
 
-				if(Point.m_Curvetype == CURVETYPE_BEZIER)
+				if(PointIndex < m_vPoints.size() - 1 && Point.m_Curvetype == CURVETYPE_BEZIER)
 				{
 					// out-tangent handle
 					const float v = fx2f(Point.m_aValues[c] + Point.m_Bezier.m_aOutTangentDeltaY[c]);
@@ -83,7 +83,7 @@ std::pair<float, float> CEnvelope::GetValueRange(int ChannelMask)
 					Bottom = minimum(Bottom, v);
 				}
 
-				if(pPrevPoint != nullptr && pPrevPoint->m_Curvetype == CURVETYPE_BEZIER)
+				if(PointIndex > 0 && m_vPoints[PointIndex - 1].m_Curvetype == CURVETYPE_BEZIER)
 				{
 					// in-tangent handle
 					const float v = fx2f(Point.m_aValues[c] + Point.m_Bezier.m_aInTangentDeltaY[c]);
@@ -92,9 +92,7 @@ std::pair<float, float> CEnvelope::GetValueRange(int ChannelMask)
 				}
 			}
 		}
-		pPrevPoint = &Point;
 	}
-
 	return {Bottom, Top};
 }
 
