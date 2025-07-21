@@ -6653,8 +6653,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 					// add point
 					float Time = ScreenToEnvelopeX(View, Ui()->MouseX());
 					ColorRGBA Channels = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
-					if(in_range(Time, 0.0f, pEnvelope->EndTime()))
-						pEnvelope->Eval(Time, Channels, 4);
+					pEnvelope->Eval(std::clamp(Time, 0.0f, pEnvelope->EndTime()), Channels, 4);
 
 					int FixedTime = std::round(Time * 1000.0f);
 					bool TimeFound = false;
