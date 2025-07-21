@@ -3,6 +3,7 @@
 #include "network.h"
 #include <base/system.h>
 #include <base/types.h>
+#include <engine/shared/protocol7.h>
 
 bool CNetClient::Open(NETADDR BindAddr)
 {
@@ -96,7 +97,7 @@ int CNetClient::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken, bool Six
 		{
 			if(Sixup)
 				Addr.type |= NETTYPE_TW7;
-			if(m_RecvUnpacker.m_Data.m_aChunkData[0] == NET_CTRLMSG_TOKEN)
+			if(m_RecvUnpacker.m_Data.m_aChunkData[0] == protocol7::NET_CTRLMSG_TOKEN)
 			{
 				m_TokenCache.AddToken(&Addr, *pResponseToken);
 			}
