@@ -1,6 +1,7 @@
 #include "opengl_sl.h"
 
 #include <base/detect.h>
+#include <base/log.h>
 
 #if defined(BACKEND_AS_OPENGL_ES) || !defined(CONF_BACKEND_OPENGL_ES)
 
@@ -106,27 +107,34 @@ bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char 
 
 	delete[] ShaderCode;
 
-	int CompilationStatus;
+	TWGLint CompilationStatus;
 	glGetShaderiv(ShaderId, GL_COMPILE_STATUS, &CompilationStatus);
 
 	if(CompilationStatus == GL_FALSE)
 	{
-		char aBuf[3000];
-
-		TWGLint maxLength = 0;
-		glGetShaderiv(ShaderId, GL_INFO_LOG_LENGTH, &maxLength);
-
-		glGetShaderInfoLog(ShaderId, maxLength, &maxLength, aBuf);
-
-		dbg_msg("glsl", "%s: %s", pFile, aBuf);
+		TWGLint LogLength = 0;
+		glGetShaderiv(ShaderId, GL_INFO_LOG_LENGTH, &LogLength);
+		if(LogLength > 0)
+		{
+			std::string Log(LogLength, '\0');
+			glGetShaderInfoLog(ShaderId, Log.size(), nullptr, &Log.front());
+			if(Log[Log.size() - 2] == '\n')
+			{
+				Log[Log.size() - 2] = '\0';
+			}
+			log_error("gfx/opengl/shader", "Failed to compile shader file '%s'. The compiler returned:\n%s", pFile, Log.c_str());
+		}
+		else
+		{
+			log_error("gfx/opengl/shader", "Failed to compile shader file '%s'. The compiler did not return an error.", pFile);
+		}
 		glDeleteShader(ShaderId);
 		return false;
 	}
+
 	m_Type = Type;
 	m_IsLoaded = true;
-
 	m_ShaderId = ShaderId;
-
 	return true;
 }
 
