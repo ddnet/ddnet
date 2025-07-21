@@ -73,8 +73,8 @@ public:
 
 	int m_SentSnaps = 0;
 
-	// used for spectator mode
-	int m_SpectatorId;
+	int SpectatorId() const { return m_SpectatorId; }
+	void SetSpectatorId(int Id);
 
 	bool m_IsReady;
 
@@ -132,6 +132,9 @@ private:
 	bool m_WeakHookSpawn;
 	int m_ClientId;
 	int m_Team;
+
+	// used for spectator mode
+	int m_SpectatorId;
 
 	int m_Paused;
 	int64_t m_ForcePauseTime;
