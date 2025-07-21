@@ -1,6 +1,7 @@
 // This file can be included several times.
 
 #ifndef REGISTER_QUICK_ACTION
+// This helps IDEs properly syntax highlight the uses of the macro below.
 #define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, button_color, description)
 #endif
 

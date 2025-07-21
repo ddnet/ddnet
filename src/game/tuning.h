@@ -4,6 +4,7 @@
 // This file can be included several times.
 
 #ifndef MACRO_TUNING_PARAM
+// This helps IDEs properly syntax highlight the uses of the macro below.
 #define MACRO_TUNING_PARAM(Name, ScriptName, Value, Description)
 #endif
 
