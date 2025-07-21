@@ -4,6 +4,7 @@
 // This file can be included several times.
 
 #ifndef MACRO_TUNING_PARAM
+#error "The config macro must be defined"
 #define MACRO_TUNING_PARAM(Name, ScriptName, Value, Description)
 #endif
 
