@@ -292,13 +292,13 @@ void CRenderLayerTile::RenderTileLayer(const ColorRGBA &Color, CTileLayerVisuals
 
 	if(ScreenRectX1 > (int)Visuals.m_Width || ScreenRectY1 > (int)Visuals.m_Height || ScreenRectX0 < 0 || ScreenRectY0 < 0)
 	{
-		RenderTileBorder(Color, ScreenRectX0, ScreenRectY0, ScreenRectX1, ScreenRectY1);
+		RenderTileBorder(Color, ScreenRectX0, ScreenRectY0, ScreenRectX1, ScreenRectY1, &Visuals);
 	}
 }
 
-void CRenderLayerTile::RenderTileBorder(const ColorRGBA &Color, int BorderX0, int BorderY0, int BorderX1, int BorderY1)
+void CRenderLayerTile::RenderTileBorder(const ColorRGBA &Color, int BorderX0, int BorderY0, int BorderX1, int BorderY1, CTileLayerVisuals *pTileLayerVisuals)
 {
-	CTileLayerVisuals &Visuals = m_VisualTiles.value();
+	CTileLayerVisuals &Visuals = *pTileLayerVisuals;
 
 	int Y0 = std::max(0, BorderY0);
 	int X0 = std::max(0, BorderX0);
