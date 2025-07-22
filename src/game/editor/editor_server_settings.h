@@ -199,8 +199,6 @@ public: // General methods
 	CMapSettingsBackend() = default;
 
 	void OnInit(CEditor *pEditor) override;
-	bool OnInput(const IInput::CEvent &Event) override;
-	void OnUpdate() override;
 	void OnMapLoad() override;
 
 public: // Constraints methods
@@ -281,7 +279,6 @@ public: // CContext
 		void ParseArgs(const char *pLineInputStr, const char *pStr);
 		bool OnInput(const IInput::CEvent &Event);
 		const char *InputString() const;
-		void UpdateCompositionString();
 
 		template<int N>
 		void FormatDisplayValue(const char *pValue, char (&aOut)[N]);
@@ -386,8 +383,6 @@ private: // Backend fields
 	std::map<std::shared_ptr<IMapSetting>, std::vector<SParsedMapSettingArg>> m_ParsedCommandArgs; // Parsed available settings arguments, used for validation
 	TSettingsArgumentValues m_PossibleValuesPerCommand;
 	std::map<std::string, FLoaderFunction> m_LoaderFunctions;
-
-	static CContext *ms_pActiveContext;
 
 	friend class CEditor;
 
