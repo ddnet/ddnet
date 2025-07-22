@@ -56,23 +56,10 @@ public:
 
 	void AddLayer(const std::shared_ptr<CLayer> &pLayer);
 
-	void ModifyImageIndex(FIndexModifyFunction Func)
-	{
-		for(auto &pLayer : m_vpLayers)
-			pLayer->ModifyImageIndex(Func);
-	}
 
-	void ModifyEnvelopeIndex(FIndexModifyFunction Func)
-	{
-		for(auto &pLayer : m_vpLayers)
-			pLayer->ModifyEnvelopeIndex(Func);
-	}
-
-	void ModifySoundIndex(FIndexModifyFunction Func)
-	{
-		for(auto &pLayer : m_vpLayers)
-			pLayer->ModifySoundIndex(Func);
-	}
+	void ModifyImageIndex(const FIndexModifyFunction &IndexModifyFunction);
+	void ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction);
+	void ModifySoundIndex(const FIndexModifyFunction &IndexModifyFunction);
 };
 
 #endif

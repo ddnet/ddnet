@@ -143,25 +143,31 @@ void CEditorMap::DeleteGroup(int Index)
 	m_vpGroups.erase(m_vpGroups.begin() + Index);
 }
 
-void CEditorMap::ModifyImageIndex(const FIndexModifyFunction &pfnFunc)
+void CEditorMap::ModifyImageIndex(const FIndexModifyFunction &IndexModifyFunction)
 {
 	OnModify();
 	for(auto &pGroup : m_vpGroups)
-		pGroup->ModifyImageIndex(pfnFunc);
+	{
+		pGroup->ModifyImageIndex(IndexModifyFunction);
+	}
 }
 
-void CEditorMap::ModifyEnvelopeIndex(const FIndexModifyFunction &pfnFunc)
+void CEditorMap::ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction)
 {
 	OnModify();
 	for(auto &pGroup : m_vpGroups)
-		pGroup->ModifyEnvelopeIndex(pfnFunc);
+	{
+		pGroup->ModifyEnvelopeIndex(IndexModifyFunction);
+	}
 }
 
-void CEditorMap::ModifySoundIndex(const FIndexModifyFunction &pfnFunc)
+void CEditorMap::ModifySoundIndex(const FIndexModifyFunction &IndexModifyFunction)
 {
 	OnModify();
 	for(auto &pGroup : m_vpGroups)
-		pGroup->ModifySoundIndex(pfnFunc);
+	{
+		pGroup->ModifySoundIndex(IndexModifyFunction);
+	}
 }
 
 void CEditorMap::Clean()

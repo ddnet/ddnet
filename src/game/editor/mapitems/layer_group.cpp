@@ -164,3 +164,27 @@ int CLayerGroup::SwapLayers(int Index0, int Index1)
 	std::swap(m_vpLayers[Index0], m_vpLayers[Index1]);
 	return Index1;
 }
+
+void CLayerGroup::ModifyImageIndex(const FIndexModifyFunction &IndexModifyFunction)
+{
+	for(auto &pLayer : m_vpLayers)
+	{
+		pLayer->ModifyImageIndex(IndexModifyFunction);
+	}
+}
+
+void CLayerGroup::ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction)
+{
+	for(auto &pLayer : m_vpLayers)
+	{
+		pLayer->ModifyEnvelopeIndex(IndexModifyFunction);
+	}
+}
+
+void CLayerGroup::ModifySoundIndex(const FIndexModifyFunction &IndexModifyFunction)
+{
+	for(auto &pLayer : m_vpLayers)
+	{
+		pLayer->ModifySoundIndex(IndexModifyFunction);
+	}
+}
