@@ -185,7 +185,7 @@ protected:
 	virtual void RenderTileLayerNoTileBuffer(const ColorRGBA &Color);
 
 	void RenderTileLayer(const ColorRGBA &Color, CTileLayerVisuals *pTileLayerVisuals = nullptr);
-	void RenderTileBorder(const ColorRGBA &Color, int BorderX0, int BorderY0, int BorderX1, int BorderY1);
+	void RenderTileBorder(const ColorRGBA &Color, int BorderX0, int BorderY0, int BorderX1, int BorderY1, CTileLayerVisuals *pTileLayerVisuals);
 	void RenderKillTileBorder(const ColorRGBA &Color);
 
 	std::optional<CRenderLayerTile::CTileLayerVisuals> m_VisualTiles;
