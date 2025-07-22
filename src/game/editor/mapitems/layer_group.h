@@ -40,22 +40,13 @@ public:
 
 	void GetSize(float *pWidth, float *pHeight) const;
 
+	void AddLayer(const std::shared_ptr<CLayer> &pLayer);
 	void DeleteLayer(int Index);
 	void DuplicateLayer(int Index);
 	int SwapLayers(int Index0, int Index1);
 
-	bool IsEmpty() const
-	{
-		return m_vpLayers.empty();
-	}
-
-	void Clear()
-	{
-		m_vpLayers.clear();
-	}
-
-	void AddLayer(const std::shared_ptr<CLayer> &pLayer);
-
+	bool IsEmpty() const;
+	void Clear();
 
 	void ModifyImageIndex(const FIndexModifyFunction &IndexModifyFunction);
 	void ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction);

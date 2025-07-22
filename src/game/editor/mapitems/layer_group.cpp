@@ -165,6 +165,16 @@ int CLayerGroup::SwapLayers(int Index0, int Index1)
 	return Index1;
 }
 
+bool CLayerGroup::IsEmpty() const
+{
+	return m_vpLayers.empty();
+}
+
+void CLayerGroup::Clear()
+{
+	m_vpLayers.clear();
+}
+
 void CLayerGroup::ModifyImageIndex(const FIndexModifyFunction &IndexModifyFunction)
 {
 	for(auto &pLayer : m_vpLayers)
