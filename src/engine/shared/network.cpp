@@ -129,19 +129,21 @@ bool CNetBase::IsValidConnectionOrientedPacket(const CNetPacketConstruct *pPacke
 
 static const unsigned char NET_HEADER_EXTENDED[] = {'x', 'e'};
 // packs the data tight and sends it
-void CNetBase::SendPacketConnless(NETSOCKET Socket, NETADDR *pAddr, const void *pData, int DataSize, bool Extended, unsigned char aExtra[4])
+void CNetBase::SendPacketConnless(NETSOCKET Socket, NETADDR *pAddr, const void *pData, int DataSize, bool Extended, unsigned char aExtra[NET_CONNLESS_EXTRA_SIZE])
 {
 	unsigned char aBuffer[NET_MAX_PACKETSIZE];
-	const int DATA_OFFSET = 6;
-	if(!Extended)
+	const int DATA_OFFSET = sizeof(NET_HEADER_EXTENDED) + NET_CONNLESS_EXTRA_SIZE;
+	dbg_assert(DataSize <= (int)sizeof(aBuffer) - DATA_OFFSET,
+		"Invalid DataSize for CNetBase::SendPacketConnless: %d > %d", DataSize, (int)sizeof(aBuffer) - DATA_OFFSET);
+
+	if(Extended)
 	{
-		for(int i = 0; i < DATA_OFFSET; i++)
-			aBuffer[i] = 0xff;
+		mem_copy(aBuffer, NET_HEADER_EXTENDED, sizeof(NET_HEADER_EXTENDED));
+		mem_copy(aBuffer + sizeof(NET_HEADER_EXTENDED), aExtra, NET_CONNLESS_EXTRA_SIZE);
 	}
 	else
 	{
-		mem_copy(aBuffer, NET_HEADER_EXTENDED, sizeof(NET_HEADER_EXTENDED));
-		mem_copy(aBuffer + sizeof(NET_HEADER_EXTENDED), aExtra, 4);
+		std::fill(aBuffer, aBuffer + DATA_OFFSET, 0xFF);
 	}
 	mem_copy(aBuffer + DATA_OFFSET, pData, DataSize);
 	net_udp_send(Socket, pAddr, aBuffer, DataSize + DATA_OFFSET);
@@ -150,12 +152,13 @@ void CNetBase::SendPacketConnless(NETSOCKET Socket, NETADDR *pAddr, const void *
 void CNetBase::SendPacketConnlessWithToken7(NETSOCKET Socket, NETADDR *pAddr, const void *pData, int DataSize, SECURITY_TOKEN Token, SECURITY_TOKEN ResponseToken)
 {
 	unsigned char aBuffer[NET_MAX_PACKETSIZE];
+	const int DATA_OFFSET = 1 + 2 * sizeof(SECURITY_TOKEN);
+	dbg_assert(DataSize <= (int)sizeof(aBuffer) - DATA_OFFSET,
+		"Invalid DataSize for CNetBase::SendPacketConnlessWithToken7: %d > %d", DataSize, (int)sizeof(aBuffer) - DATA_OFFSET);
+
 	aBuffer[0] = (NET_PACKETFLAG_CONNLESS << 2) | 1;
-
-	const int DATA_OFFSET = 9;
-
 	WriteSecurityToken(aBuffer + 1, Token);
-	WriteSecurityToken(aBuffer + 5, ResponseToken);
+	WriteSecurityToken(aBuffer + 1 + sizeof(SECURITY_TOKEN), ResponseToken);
 	mem_copy(aBuffer + DATA_OFFSET, pData, DataSize);
 	net_udp_send(Socket, pAddr, aBuffer, DataSize + DATA_OFFSET);
 }
