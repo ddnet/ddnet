@@ -51,14 +51,14 @@ void CMapView::Focus()
 
 void CMapView::RenderGroupBorder()
 {
-	std::shared_ptr<CLayerGroup> pGroup = Editor()->Map()->SelectedGroup();
+	std::shared_ptr<CLayerGroup> pGroup = Map()->SelectedGroup();
 	if(pGroup)
 	{
 		pGroup->MapScreen();
 
-		for(size_t i = 0; i < Editor()->Map()->m_vSelectedLayers.size(); i++)
+		for(size_t i = 0; i < Map()->m_vSelectedLayers.size(); i++)
 		{
-			std::shared_ptr<CLayer> pLayer = Editor()->Map()->SelectedLayerType(i, LAYERTYPE_TILES);
+			std::shared_ptr<CLayer> pLayer = Map()->SelectedLayerType(i, LAYERTYPE_TILES);
 			if(pLayer)
 			{
 				CUIRect BorderRect;
@@ -76,46 +76,46 @@ void CMapView::RenderEditorMap()
 	if(Editor()->m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->ShiftIsPressed() && !Input()->ModifierIsPressed() && Input()->KeyPress(KEY_G))
 	{
 		const bool AnyHidden =
-			!Editor()->Map()->m_pGameLayer->m_Visible ||
-			(Editor()->Map()->m_pFrontLayer && !Editor()->Map()->m_pFrontLayer->m_Visible) ||
-			(Editor()->Map()->m_pTeleLayer && !Editor()->Map()->m_pTeleLayer->m_Visible) ||
-			(Editor()->Map()->m_pSpeedupLayer && !Editor()->Map()->m_pSpeedupLayer->m_Visible) ||
-			(Editor()->Map()->m_pTuneLayer && !Editor()->Map()->m_pTuneLayer->m_Visible) ||
-			(Editor()->Map()->m_pSwitchLayer && !Editor()->Map()->m_pSwitchLayer->m_Visible);
-		Editor()->Map()->m_pGameLayer->m_Visible = AnyHidden;
-		if(Editor()->Map()->m_pFrontLayer)
-			Editor()->Map()->m_pFrontLayer->m_Visible = AnyHidden;
-		if(Editor()->Map()->m_pTeleLayer)
-			Editor()->Map()->m_pTeleLayer->m_Visible = AnyHidden;
-		if(Editor()->Map()->m_pSpeedupLayer)
-			Editor()->Map()->m_pSpeedupLayer->m_Visible = AnyHidden;
-		if(Editor()->Map()->m_pTuneLayer)
-			Editor()->Map()->m_pTuneLayer->m_Visible = AnyHidden;
-		if(Editor()->Map()->m_pSwitchLayer)
-			Editor()->Map()->m_pSwitchLayer->m_Visible = AnyHidden;
+			!Map()->m_pGameLayer->m_Visible ||
+			(Map()->m_pFrontLayer && !Map()->m_pFrontLayer->m_Visible) ||
+			(Map()->m_pTeleLayer && !Map()->m_pTeleLayer->m_Visible) ||
+			(Map()->m_pSpeedupLayer && !Map()->m_pSpeedupLayer->m_Visible) ||
+			(Map()->m_pTuneLayer && !Map()->m_pTuneLayer->m_Visible) ||
+			(Map()->m_pSwitchLayer && !Map()->m_pSwitchLayer->m_Visible);
+		Map()->m_pGameLayer->m_Visible = AnyHidden;
+		if(Map()->m_pFrontLayer)
+			Map()->m_pFrontLayer->m_Visible = AnyHidden;
+		if(Map()->m_pTeleLayer)
+			Map()->m_pTeleLayer->m_Visible = AnyHidden;
+		if(Map()->m_pSpeedupLayer)
+			Map()->m_pSpeedupLayer->m_Visible = AnyHidden;
+		if(Map()->m_pTuneLayer)
+			Map()->m_pTuneLayer->m_Visible = AnyHidden;
+		if(Map()->m_pSwitchLayer)
+			Map()->m_pSwitchLayer->m_Visible = AnyHidden;
 	}
 
-	for(auto &pGroup : Editor()->Map()->m_vpGroups)
+	for(auto &pGroup : Map()->m_vpGroups)
 	{
 		if(pGroup->m_Visible)
 			pGroup->Render();
 	}
 
 	// render the game, tele, speedup, front, tune and switch above everything else
-	if(Editor()->Map()->m_pGameGroup->m_Visible)
+	if(Map()->m_pGameGroup->m_Visible)
 	{
-		Editor()->Map()->m_pGameGroup->MapScreen();
-		for(auto &pLayer : Editor()->Map()->m_pGameGroup->m_vpLayers)
+		Map()->m_pGameGroup->MapScreen();
+		for(auto &pLayer : Map()->m_pGameGroup->m_vpLayers)
 		{
 			if(pLayer->m_Visible && pLayer->IsEntitiesLayer())
 				pLayer->Render();
 		}
 	}
 
-	std::shared_ptr<CLayerTiles> pSelectedTilesLayer = std::static_pointer_cast<CLayerTiles>(Editor()->Map()->SelectedLayerType(0, LAYERTYPE_TILES));
+	std::shared_ptr<CLayerTiles> pSelectedTilesLayer = std::static_pointer_cast<CLayerTiles>(Map()->SelectedLayerType(0, LAYERTYPE_TILES));
 	if(Editor()->m_ShowTileInfo != CEditor::SHOW_TILE_OFF && pSelectedTilesLayer && pSelectedTilesLayer->m_Visible && m_Zoom.GetValue() <= 300.0f)
 	{
-		Editor()->Map()->SelectedGroup()->MapScreen();
+		Map()->SelectedGroup()->MapScreen();
 		pSelectedTilesLayer->ShowInfo();
 	}
 }

@@ -1838,7 +1838,7 @@ void CMapSettingsBackend::CContext::ColorArguments(std::vector<STextColorSplit> 
 
 int CMapSettingsBackend::CContext::CheckCollision(ECollisionCheckResult &Result) const
 {
-	return CheckCollision(m_pBackend->Editor()->Map()->m_vSettings, Result);
+	return CheckCollision(m_pBackend->Map()->m_vSettings, Result);
 }
 
 int CMapSettingsBackend::CContext::CheckCollision(const std::vector<CEditorMapSetting> &vSettings, ECollisionCheckResult &Result) const
@@ -2088,7 +2088,7 @@ void CMapSettingsBackend::OnMapLoad()
 	// Load & validate all map settings
 	m_LoadedMapSettings.Reset();
 
-	auto &vLoadedMapSettings = Editor()->Map()->m_vSettings;
+	auto &vLoadedMapSettings = Map()->m_vSettings;
 
 	// Keep a vector of valid map settings, to check collision against: m_vValidLoadedMapSettings
 
