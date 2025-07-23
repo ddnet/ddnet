@@ -104,14 +104,17 @@ void CMapSounds::OnMapLoad()
 				continue;
 
 			const CMapItemLayerSounds *pSoundLayer = reinterpret_cast<const CMapItemLayerSounds *>(pLayer);
-			if(pSoundLayer->m_Version < 1 || pSoundLayer->m_Version > 2)
+			if(pSoundLayer->m_Version < 1 || pSoundLayer->m_Version > 3)
 				continue;
 			if(pSoundLayer->m_Sound < 0 || pSoundLayer->m_Sound >= m_Count || m_aSounds[pSoundLayer->m_Sound] == -1)
 				continue;
 
-			const CSoundSource *pSources = static_cast<CSoundSource *>(Layers()->Map()->GetDataSwapped(pSoundLayer->m_Data));
+			CSoundSource *pSources = static_cast<CSoundSource *>(Layers()->Map()->GetDataSwapped(pSoundLayer->m_Data));
 			if(!pSources)
 				continue;
+
+			if(pSoundLayer->m_Version < 3)
+				pSources->m_TimeDelay *= 1000;
 
 			const size_t NumSources = minimum<size_t>(pSoundLayer->m_NumSources, Layers()->Map()->GetDataSize(pSoundLayer->m_Data) / sizeof(CSoundSource));
 			for(size_t SourceIndex = 0; SourceIndex < NumSources; SourceIndex++)
@@ -144,7 +147,7 @@ void CMapSounds::OnRender()
 				(Client()->GameTick(g_Config.m_ClDummy) - GameClient()->m_Snap.m_pGameInfoObj->m_RoundStartTick) / (float)Client()->GameTickSpeed(),
 				Client()->IntraGameTick(g_Config.m_ClDummy));
 		}
-		float Offset = s_Time - Source.m_pSource->m_TimeDelay;
+		float Offset = s_Time - Source.m_pSource->m_TimeDelay / 1000.0f;
 		if(!DemoPlayerPaused && Offset >= 0.0f && g_Config.m_SndEnable && (g_Config.m_GfxHighDetail || !Source.m_HighDetail))
 		{
 			if(Source.m_Voice.IsValid())

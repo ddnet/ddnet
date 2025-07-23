@@ -475,7 +475,7 @@ public:
 	CPoint m_Position;
 	int m_Loop;
 	int m_Pan; // 0 - no panning, 1 - panning
-	int m_TimeDelay; // in s
+	int m_TimeDelay; // in s (version <= 2), in ms (version 3)
 	int m_Falloff; // [0,255] // 0 - No falloff, 255 - full
 
 	int m_PosEnv;

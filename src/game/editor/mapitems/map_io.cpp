@@ -21,7 +21,7 @@ class CSoundSourceDeprecated
 public:
 	CPoint m_Position;
 	int m_Loop;
-	int m_TimeDelay; // in s
+	int m_TimeDelay; // in s (version < 3), in ms
 	int m_FalloffDistance;
 	int m_PosEnv;
 	int m_PosEnvOffset;
@@ -298,7 +298,7 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 				m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving sounds layer");
 				std::shared_ptr<CLayerSounds> pLayerSounds = std::static_pointer_cast<CLayerSounds>(pLayer);
 				CMapItemLayerSounds Item;
-				Item.m_Version = 2;
+				Item.m_Version = 3;
 				Item.m_Layer.m_Version = 0; // was previously uninitialized, do not rely on it being 0
 				Item.m_Layer.m_Flags = pLayerSounds->m_Flags;
 				Item.m_Layer.m_Type = pLayerSounds->m_Type;
@@ -889,8 +889,8 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 				}
 				else if(pLayerItem->m_Type == LAYERTYPE_SOUNDS)
 				{
-					const CMapItemLayerSounds *pSoundsItem = (CMapItemLayerSounds *)pLayerItem;
-					if(pSoundsItem->m_Version < 1 || pSoundsItem->m_Version > 2)
+					CMapItemLayerSounds *pSoundsItem = (CMapItemLayerSounds *)pLayerItem;
+					if(pSoundsItem->m_Version < 1 || pSoundsItem->m_Version > 3)
 						continue;
 
 					std::shared_ptr<CLayerSounds> pSounds = std::make_shared<CLayerSounds>(m_pEditor);
@@ -913,13 +913,24 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 						DataFile.UnloadData(pSoundsItem->m_Data);
 					}
 
+					// update time delay for old versions
+					if(pSoundsItem->m_Version < 3)
+					{
+						for(int i = 0; i < pSoundsItem->m_NumSources; i++)
+						{
+							CSoundSource &Source = pSounds->m_vSources[i];
+							Source.m_TimeDelay *= 1000;
+						}
+						pSoundsItem->m_Version = 3;
+					}
+
 					pGroup->AddLayer(pSounds);
 				}
 				else if(pLayerItem->m_Type == LAYERTYPE_SOUNDS_DEPRECATED)
 				{
 					// compatibility with old sound layers
-					const CMapItemLayerSounds *pSoundsItem = (CMapItemLayerSounds *)pLayerItem;
-					if(pSoundsItem->m_Version < 1 || pSoundsItem->m_Version > 2)
+					CMapItemLayerSounds *pSoundsItem = (CMapItemLayerSounds *)pLayerItem;
+					if(pSoundsItem->m_Version < 1 || pSoundsItem->m_Version > 3)
 						continue;
 
 					std::shared_ptr<CLayerSounds> pSounds = std::make_shared<CLayerSounds>(m_pEditor);
@@ -947,6 +958,12 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 						Source.m_Loop = pOldSource->m_Loop;
 						Source.m_Pan = true;
 						Source.m_TimeDelay = pOldSource->m_TimeDelay;
+						if(pSoundsItem->m_Version < 3)
+						{
+							Source.m_TimeDelay *= 1000;
+							pSoundsItem->m_Version = 3;
+						}
+
 						Source.m_Falloff = 0;
 
 						Source.m_PosEnv = pOldSource->m_PosEnv;
