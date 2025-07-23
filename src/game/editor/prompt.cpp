@@ -27,14 +27,12 @@ static bool FuzzyMatch(const char *pHaystack, const char *pNeedle)
 
 bool CPrompt::IsActive()
 {
-	return CEditorComponent::IsActive() || Editor()->m_Dialog == DIALOG_QUICK_PROMPT;
+	return Editor()->m_Dialog == DIALOG_QUICK_PROMPT;
 }
 
 void CPrompt::SetActive()
 {
 	Editor()->m_Dialog = DIALOG_QUICK_PROMPT;
-	CEditorComponent::SetActive();
-
 	Ui()->ClosePopupMenus();
 	Ui()->SetActiveItem(&m_PromptInput);
 }
@@ -47,7 +45,6 @@ void CPrompt::SetInactive()
 	{
 		Editor()->OnDialogClose();
 	}
-	CEditorComponent::SetInactive();
 }
 
 bool CPrompt::OnInput(const IInput::CEvent &Event)
