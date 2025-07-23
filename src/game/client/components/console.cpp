@@ -212,6 +212,12 @@ CGameConsole::CInstance::CInstance(int Type)
 		if(pEntry->m_LineCount != -1)
 		{
 			m_NewLineCounter -= pEntry->m_LineCount;
+			for(auto &SearchMatch : m_vSearchMatches)
+			{
+				SearchMatch.m_StartLine += pEntry->m_LineCount;
+				SearchMatch.m_EndLine += pEntry->m_LineCount;
+				SearchMatch.m_EntryLine += pEntry->m_LineCount;
+			}
 		}
 	});
 
