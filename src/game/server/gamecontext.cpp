@@ -927,11 +927,10 @@ void CGameContext::CheckPureTuning()
 		str_comp(m_pController->m_pGameType, "TDM") == 0 ||
 		str_comp(m_pController->m_pGameType, "CTF") == 0)
 	{
-		CTuningParams p;
-		if(mem_comp(&p, &m_Tuning, sizeof(p)) != 0)
+		if(mem_comp(&CTuningParams::DEFAULT, &m_Tuning, sizeof(CTuningParams)) != 0)
 		{
 			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "resetting tuning due to pure server");
-			m_Tuning = p;
+			m_Tuning = CTuningParams::DEFAULT;
 		}
 	}
 }
@@ -2996,8 +2995,8 @@ void CGameContext::ConTuneReset(IConsole::IResult *pResult, void *pUserData)
 		const char *pParamName = pResult->GetString(0);
 		float DefaultValue = 0.0f;
 		char aBuf[256];
-		CTuningParams TuningParams;
-		if(TuningParams.Get(pParamName, &DefaultValue) && pSelf->Tuning()->Set(pParamName, DefaultValue) && pSelf->Tuning()->Get(pParamName, &DefaultValue))
+
+		if(CTuningParams::DEFAULT.Get(pParamName, &DefaultValue) && pSelf->Tuning()->Set(pParamName, DefaultValue) && pSelf->Tuning()->Get(pParamName, &DefaultValue))
 		{
 			str_format(aBuf, sizeof(aBuf), "%s reset to %.2f", pParamName, DefaultValue);
 			pSelf->SendTuningParams(-1);
@@ -3071,13 +3070,12 @@ void CGameContext::ConTuneDumpZone(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConTuneResetZone(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	CTuningParams TuningParams;
 	if(pResult->NumArguments())
 	{
 		int List = pResult->GetInteger(0);
 		if(List >= 0 && List < NUM_TUNEZONES)
 		{
-			pSelf->TuningList()[List] = TuningParams;
+			pSelf->TuningList()[List] = CTuningParams::DEFAULT;
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "Tunezone %d reset", List);
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
@@ -3088,7 +3086,7 @@ void CGameContext::ConTuneResetZone(IConsole::IResult *pResult, void *pUserData)
 	{
 		for(int i = 0; i < NUM_TUNEZONES; i++)
 		{
-			*(pSelf->TuningList() + i) = TuningParams;
+			*(pSelf->TuningList() + i) = CTuningParams::DEFAULT;
 			pSelf->SendTuningParams(-1, i);
 		}
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "All Tunezones reset");
@@ -3967,10 +3965,9 @@ void CGameContext::OnInit(const void *pPersistentData)
 	m_MapBugs = CMapBugs::Create(aMapName, MapSize, MapSha256);
 
 	// Reset Tunezones
-	CTuningParams TuningParams;
 	for(int i = 0; i < NUM_TUNEZONES; i++)
 	{
-		TuningList()[i] = TuningParams;
+		TuningList()[i] = CTuningParams::DEFAULT;
 		TuningList()[i].Set("gun_curvature", 0);
 		TuningList()[i].Set("gun_speed", 1400);
 		TuningList()[i].Set("shotgun_curvature", 0);
@@ -4456,8 +4453,7 @@ void CGameContext::LoadMapSettings()
 void CGameContext::OnSnap(int ClientId)
 {
 	// add tuning to demo
-	CTuningParams StandardTuning;
-	if(Server()->IsRecording(ClientId > -1 ? ClientId : MAX_CLIENTS) && mem_comp(&StandardTuning, &m_Tuning, sizeof(CTuningParams)) != 0)
+	if(Server()->IsRecording(ClientId > -1 ? ClientId : MAX_CLIENTS) && mem_comp(&CTuningParams::DEFAULT, &m_Tuning, sizeof(CTuningParams)) != 0)
 	{
 		CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
 		int *pParams = (int *)&m_Tuning;
@@ -4705,8 +4701,7 @@ int CGameContext::GetDDRaceTeam(int ClientId) const
 
 void CGameContext::ResetTuning()
 {
-	CTuningParams TuningParams;
-	m_Tuning = TuningParams;
+	m_Tuning = CTuningParams::DEFAULT;
 	Tuning()->Set("gun_speed", 1400);
 	Tuning()->Set("gun_curvature", 0);
 	Tuning()->Set("shotgun_speed", 500);
