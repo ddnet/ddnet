@@ -15,8 +15,8 @@
 static constexpr int64_t GRAPH_MAX_VALUES = 128;
 
 CDebugHud::CDebugHud() :
-	m_RampGraph(GRAPH_MAX_VALUES),
-	m_ZoomedInGraph(GRAPH_MAX_VALUES)
+	m_RampGraph(GRAPH_MAX_VALUES, 2, false),
+	m_ZoomedInGraph(GRAPH_MAX_VALUES, 2, false)
 {
 }
 
@@ -170,9 +170,10 @@ void CDebugHud::RenderTuning()
 
 	// Render Velspeed.X * Ramp Graphs
 	Graphics()->MapScreen(0.0f, 0.0f, Graphics()->ScreenWidth(), Graphics()->ScreenHeight());
-	const float GraphSpacing = Graphics()->ScreenWidth() / 100.0f;
-	const float GraphW = Graphics()->ScreenWidth() / 4.0f;
-	const float GraphH = Graphics()->ScreenHeight() / 6.0f;
+	// Make sure graph positions and sizes are aligned with pixels to avoid lines overlapping graph edges
+	const float GraphSpacing = std::round(Graphics()->ScreenWidth() / 100.0f);
+	const float GraphW = std::round(Graphics()->ScreenWidth() / 4.0f);
+	const float GraphH = std::round(Graphics()->ScreenHeight() / 6.0f);
 	const float GraphX = GraphW;
 	const float GraphY = Graphics()->ScreenHeight() - GraphH - GraphSpacing;
 
@@ -238,7 +239,7 @@ void CDebugHud::RenderTuning()
 	str_format(aBuf, sizeof(aBuf), "Velspeed.X * Ramp in Bps (Velspeed %d to %d)", StepSizeRampGraph / 32, 128 * StepSizeRampGraph / 32);
 	m_RampGraph.Render(Graphics(), TextRender(), GraphX, GraphY, GraphW, GraphH, aBuf);
 	str_format(aBuf, sizeof(aBuf), "Max Velspeed before it ramps off:  %.2f Bps", m_SpeedTurningPoint / 32);
-	TextRender()->Text(GraphX, GraphY - GraphFontSize, GraphFontSize, aBuf);
+	TextRender()->Text(GraphX + 2.0f, GraphY + GraphH - GraphFontSize - 2.0f, GraphFontSize, aBuf);
 	str_format(aBuf, sizeof(aBuf), "Zoomed in on turning point (Velspeed %d to %d)", ((int)m_MiddleOfZoomedInGraph - 64 * StepSizeZoomedInGraph) / 32, ((int)m_MiddleOfZoomedInGraph + 64 * StepSizeZoomedInGraph) / 32);
 	m_ZoomedInGraph.Render(Graphics(), TextRender(), GraphX + GraphW + GraphSpacing, GraphY, GraphW, GraphH, aBuf);
 }
