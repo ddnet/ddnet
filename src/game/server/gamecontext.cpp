@@ -1371,33 +1371,38 @@ void CGameContext::PreInputClients(int ClientId, bool *pClients)
 // Server hooks
 void CGameContext::OnClientPrepareInput(int ClientId, void *pInput)
 {
-	auto *pPlayerInput = (CNetObj_PlayerInput *)pInput;
+	CNetObj_PlayerInput *pPlayerInput = static_cast<CNetObj_PlayerInput *>(pInput);
+
 	if(Server()->IsSixup(ClientId))
 		pPlayerInput->m_PlayerFlags = PlayerFlags_SevenToSix(pPlayerInput->m_PlayerFlags);
 }
 
-void CGameContext::OnClientDirectInput(int ClientId, void *pInput)
+void CGameContext::OnClientDirectInput(int ClientId, const void *pInput)
 {
-	if(!m_World.m_Paused)
-		m_apPlayers[ClientId]->OnDirectInput((CNetObj_PlayerInput *)pInput);
+	const CNetObj_PlayerInput *pPlayerInput = static_cast<const CNetObj_PlayerInput *>(pInput);
 
-	int Flags = ((CNetObj_PlayerInput *)pInput)->m_PlayerFlags;
+	if(!m_World.m_Paused)
+		m_apPlayers[ClientId]->OnDirectInput(pPlayerInput);
+
+	int Flags = pPlayerInput->m_PlayerFlags;
 	if((Flags & 256) || (Flags & 512))
 	{
 		Server()->Kick(ClientId, "please update your client or use DDNet client");
 	}
 }
 
-void CGameContext::OnClientPredictedInput(int ClientId, void *pInput)
+void CGameContext::OnClientPredictedInput(int ClientId, const void *pInput)
 {
-	// early return if no input at all has been sent by a player
-	if(pInput == nullptr && !m_aPlayerHasInput[ClientId])
-		return;
+	const CNetObj_PlayerInput *pApplyInput = static_cast<const CNetObj_PlayerInput *>(pInput);
 
-	// set to last sent input when no new input has been sent
-	CNetObj_PlayerInput *pApplyInput = (CNetObj_PlayerInput *)pInput;
 	if(pApplyInput == nullptr)
 	{
+		// early return if no input at all has been sent by a player
+		if(!m_aPlayerHasInput[ClientId])
+		{
+			return;
+		}
+		// set to last sent input when no new input has been sent
 		pApplyInput = &m_aLastPlayerInput[ClientId];
 	}
 
@@ -1405,16 +1410,18 @@ void CGameContext::OnClientPredictedInput(int ClientId, void *pInput)
 		m_apPlayers[ClientId]->OnPredictedInput(pApplyInput);
 }
 
-void CGameContext::OnClientPredictedEarlyInput(int ClientId, void *pInput)
+void CGameContext::OnClientPredictedEarlyInput(int ClientId, const void *pInput)
 {
-	// early return if no input at all has been sent by a player
-	if(pInput == nullptr && !m_aPlayerHasInput[ClientId])
-		return;
+	const CNetObj_PlayerInput *pApplyInput = static_cast<const CNetObj_PlayerInput *>(pInput);
 
-	// set to last sent input when no new input has been sent
-	CNetObj_PlayerInput *pApplyInput = (CNetObj_PlayerInput *)pInput;
 	if(pApplyInput == nullptr)
 	{
+		// early return if no input at all has been sent by a player
+		if(!m_aPlayerHasInput[ClientId])
+		{
+			return;
+		}
+		// set to last sent input when no new input has been sent
 		pApplyInput = &m_aLastPlayerInput[ClientId];
 	}
 	else
