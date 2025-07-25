@@ -728,13 +728,7 @@ void CEditorActionEditGroupProp::Undo()
 
 	if(m_Prop == EGroupProp::PROP_ORDER)
 	{
-		int CurrentOrder = m_Current;
-		bool Dir = m_Current > m_Previous;
-		while(CurrentOrder != m_Previous)
-		{
-			CurrentOrder = m_pEditor->m_Map.SwapGroups(CurrentOrder, Dir ? CurrentOrder - 1 : CurrentOrder + 1);
-		}
-		m_pEditor->m_SelectedGroup = m_Previous;
+		m_pEditor->m_SelectedGroup = m_pEditor->m_Map.MoveGroup(m_Current, m_Previous);
 	}
 	else
 		Apply(m_Previous);
@@ -746,13 +740,7 @@ void CEditorActionEditGroupProp::Redo()
 
 	if(m_Prop == EGroupProp::PROP_ORDER)
 	{
-		int CurrentOrder = m_Previous;
-		bool Dir = m_Previous > m_Current;
-		while(CurrentOrder != m_Current)
-		{
-			CurrentOrder = m_pEditor->m_Map.SwapGroups(CurrentOrder, Dir ? CurrentOrder - 1 : CurrentOrder + 1);
-		}
-		m_pEditor->m_SelectedGroup = m_Current;
+		m_pEditor->m_SelectedGroup = m_pEditor->m_Map.MoveGroup(m_Previous, m_Current);
 	}
 	else
 		Apply(m_Current);
@@ -808,7 +796,7 @@ void CEditorActionEditLayerProp::Undo()
 
 	if(m_Prop == ELayerProp::PROP_ORDER)
 	{
-		m_pEditor->SelectLayer(pCurrentGroup->SwapLayers(m_Current, m_Previous));
+		m_pEditor->SelectLayer(pCurrentGroup->MoveLayer(m_Current, m_Previous));
 	}
 	else
 		Apply(m_Previous);
@@ -820,7 +808,7 @@ void CEditorActionEditLayerProp::Redo()
 
 	if(m_Prop == ELayerProp::PROP_ORDER)
 	{
-		m_pEditor->SelectLayer(pCurrentGroup->SwapLayers(m_Previous, m_Current));
+		m_pEditor->SelectLayer(pCurrentGroup->MoveLayer(m_Previous, m_Current));
 	}
 	else
 		Apply(m_Current);

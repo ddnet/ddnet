@@ -670,7 +670,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 
 	if(Prop == EGroupProp::PROP_ORDER)
 	{
-		pEditor->m_SelectedGroup = pEditor->m_Map.SwapGroups(pEditor->m_SelectedGroup, NewVal);
+		pEditor->m_SelectedGroup = pEditor->m_Map.MoveGroup(pEditor->m_SelectedGroup, NewVal);
 	}
 
 	// these can not be changed on the game group
@@ -809,8 +809,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupLayer(void *pContext, CUIRect View, 
 
 	if(Prop == ELayerProp::PROP_ORDER)
 	{
-		int NewIndex = pCurrentGroup->SwapLayers(pEditor->m_vSelectedLayers[0], NewVal);
-		pEditor->SelectLayer(NewIndex);
+		pEditor->SelectLayer(pCurrentGroup->MoveLayer(pEditor->m_vSelectedLayers[0], NewVal));
 	}
 	else if(Prop == ELayerProp::PROP_GROUP)
 	{

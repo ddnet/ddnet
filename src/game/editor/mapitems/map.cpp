@@ -122,17 +122,19 @@ std::shared_ptr<CLayerGroup> CEditorMap::NewGroup()
 	return pGroup;
 }
 
-int CEditorMap::SwapGroups(int Index0, int Index1)
+int CEditorMap::MoveGroup(int IndexFrom, int IndexTo)
 {
-	if(Index0 < 0 || Index0 >= (int)m_vpGroups.size())
-		return Index0;
-	if(Index1 < 0 || Index1 >= (int)m_vpGroups.size())
-		return Index0;
-	if(Index0 == Index1)
-		return Index0;
+	if(IndexFrom < 0 || IndexFrom >= (int)m_vpGroups.size())
+		return IndexFrom;
+	if(IndexTo < 0 || IndexTo >= (int)m_vpGroups.size())
+		return IndexFrom;
+	if(IndexFrom == IndexTo)
+		return IndexFrom;
 	OnModify();
-	std::swap(m_vpGroups[Index0], m_vpGroups[Index1]);
-	return Index1;
+	auto pMovedGroup = m_vpGroups[IndexFrom];
+	m_vpGroups.erase(m_vpGroups.begin() + IndexFrom);
+	m_vpGroups.insert(m_vpGroups.begin() + IndexTo, pMovedGroup);
+	return IndexTo;
 }
 
 void CEditorMap::DeleteGroup(int Index)
