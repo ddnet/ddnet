@@ -6,6 +6,7 @@
 #include <base/log.h>
 #include <base/logger.h>
 #include <base/math.h>
+#include <base/random.h>
 #include <base/system.h>
 
 #include <engine/external/json-parser/json.h>
@@ -4669,10 +4670,6 @@ int main(int argc, const char **argv)
 		PerformFinalCleanup();
 	};
 
-	const bool RandInitFailed = secure_random_init() != 0;
-	if(!RandInitFailed)
-		CleanerFunctions.emplace([]() { secure_random_uninit(); });
-
 	// Register SDL for cleanup before creating the kernel and client,
 	// so SDL is shutdown after kernel and client. Otherwise the client
 	// may crash when shutting down after SDL is already shutdown.
@@ -4755,7 +4752,7 @@ int main(int argc, const char **argv)
 		crashdump_init_if_available(aBufPath);
 	}
 
-	if(RandInitFailed)
+	if(!CSecureRandom::Initialized())
 	{
 		const char *pError = "Failed to initialize the secure RNG.";
 		log_error("secure", "%s", pError);

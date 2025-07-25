@@ -1,3 +1,4 @@
+#include <base/random.h>
 #include <base/system.h>
 #include <engine/server/databases/connection_pool.h>
 #include <engine/shared/config.h>
