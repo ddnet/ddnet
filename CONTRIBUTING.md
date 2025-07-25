@@ -109,6 +109,8 @@ C-style function pointers are pointers, but `std::function` are not.
 | `p` | Both raw and smart pointers | `char *pName`, `void **ppUserData`, `std::unique_ptr<IStorage> pStorage` |
 | `a` | Fixed sized arrays and `std::array`s | `float aWeaponInitialOffset[NUM_WEAPONS]`, `std::array<char, 12> aOriginalData` |
 | `v` | Vectors (`std::vector`) | `std::vector<CLanguage> m_vLanguages` |
+| `pfn` | Function pointers (NOT `std::function`) | `m_pfnUnknownCommandCallback = pfnCallback` |
+| `F` | Function type definitions | `typedef void (*FCommandCallback)(IResult *pResult, void *pUserData)`, `typedef std::function<int()> FButtonColorCallback` |
 
 Combine these appropriately
 
