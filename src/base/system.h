@@ -1319,7 +1319,10 @@ void str_truncate(char *dst, int dst_size, const char *src, int truncation_len);
  *
  * @return Length of string in bytes excluding the null-termination.
  */
-int str_length(const char *str);
+[[nodiscard]] constexpr int str_length(const char *str)
+{
+	return static_cast<int>(std::char_traits<char>::length(str));
+}
 
 /**
  * Performs printf formatting into a buffer.
