@@ -42,7 +42,7 @@ public:
 
 	void DeleteLayer(int Index);
 	void DuplicateLayer(int Index);
-	int SwapLayers(int Index0, int Index1);
+	int MoveLayer(int IndexFrom, int IndexTo);
 
 	bool IsEmpty() const
 	{

@@ -97,7 +97,7 @@ public:
 	void VisitEnvelopeReferences(F &&Visitor);
 
 	std::shared_ptr<CLayerGroup> NewGroup();
-	int SwapGroups(int Index0, int Index1);
+	int MoveGroup(int IndexFrom, int IndexTo);
 	void DeleteGroup(int Index);
 	void ModifyImageIndex(const FIndexModifyFunction &pfnFunc);
 	void ModifyEnvelopeIndex(const FIndexModifyFunction &pfnFunc);
