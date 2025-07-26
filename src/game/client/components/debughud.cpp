@@ -94,7 +94,6 @@ void CDebugHud::RenderTuning()
 
 	const CCharacter *pCharacter = GameClient()->m_GameWorld.GetCharacterById(GameClient()->m_Snap.m_LocalClientId);
 
-	const CTuningParams StandardTuning;
 	const CTuningParams *pGlobalTuning = GameClient()->GetTuning(0);
 	const CTuningParams *pZoneTuning = !GameClient()->m_GameWorld.m_WorldConfig.m_UseTuneZones || pCharacter == nullptr ? nullptr : GameClient()->GetTuning(pCharacter->GetOverriddenTuneZone());
 	const CTuningParams *pActiveTuning = pZoneTuning == nullptr ? pGlobalTuning : pZoneTuning;
@@ -135,7 +134,7 @@ void CDebugHud::RenderTuning()
 			CurrentZone = 0.0f;
 		else
 			pZoneTuning->Get(i, &CurrentZone);
-		StandardTuning.Get(i, &Standard);
+		CTuningParams::DEFAULT.Get(i, &Standard);
 
 		if(g_Config.m_DbgTuning == DBG_TUNING_SHOW_CHANGED && Standard == CurrentGlobal && (pZoneTuning == nullptr || Standard == CurrentZone))
 			continue; // skip unchanged params

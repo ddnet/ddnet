@@ -2061,12 +2061,11 @@ void CGameClient::OnNewSnapshot()
 		}
 	}
 
-	CTuningParams StandardTuning;
 	if(ServerInfo.m_aGameType[0] != '0')
 	{
 		if(str_comp(ServerInfo.m_aGameType, "DM") != 0 && str_comp(ServerInfo.m_aGameType, "TDM") != 0 && str_comp(ServerInfo.m_aGameType, "CTF") != 0)
 			m_ServerMode = SERVERMODE_MOD;
-		else if(mem_comp(&StandardTuning, &m_aTuning[g_Config.m_ClDummy], 33) == 0)
+		else if(mem_comp(&CTuningParams::DEFAULT, &m_aTuning[g_Config.m_ClDummy], 33) == 0)
 			m_ServerMode = SERVERMODE_PURE;
 		else
 			m_ServerMode = SERVERMODE_PUREMOD;
@@ -4394,10 +4393,9 @@ void CGameClient::LoadMapSettings()
 	m_MapBugs = CMapBugs::Create(Client()->GetCurrentMap(), pMap->MapSize(), pMap->Sha256());
 
 	// Reset Tunezones
-	CTuningParams TuningParams;
 	for(int TuneZone = 0; TuneZone < NUM_TUNEZONES; TuneZone++)
 	{
-		TuningList()[TuneZone] = TuningParams;
+		TuningList()[TuneZone] = CTuningParams::DEFAULT;
 		TuningList()[TuneZone].Set("gun_curvature", 0);
 		TuningList()[TuneZone].Set("gun_speed", 1400);
 		TuningList()[TuneZone].Set("shotgun_curvature", 0);

@@ -64,6 +64,8 @@ public:
 	bool Get(const char *pName, float *pValue) const;
 	static const char *Name(int Index) { return ms_apNames[Index]; }
 	float GetWeaponFireDelay(int Weapon) const;
+
+	static const CTuningParams DEFAULT;
 };
 
 // Do not use these function unless for legacy code!
