@@ -78,6 +78,7 @@ public:
 	constexpr bool operator!=(const vector2_base &vec) const { return x != vec.x || y != vec.y; }
 
 	constexpr T &operator[](const int index) { return index ? y : x; }
+	constexpr const T &operator[](const int index) const { return index ? y : x; }
 };
 
 template<Numeric T>
