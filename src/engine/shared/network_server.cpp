@@ -510,7 +510,7 @@ void CNetServer::OnTokenCtrlMsg(NETADDR &Addr, int ControlMsg, const CNetPacketC
 
 int CNetServer::OnSixupCtrlMsg(NETADDR &Addr, CNetChunk *pChunk, int ControlMsg, const CNetPacketConstruct &Packet, SECURITY_TOKEN &ResponseToken, SECURITY_TOKEN Token)
 {
-	if(m_RecvUnpacker.m_Data.m_DataSize < 5 || ClientExists(Addr))
+	if(m_RecvUnpacker.m_Data.m_DataSize < 1 + (int)sizeof(SECURITY_TOKEN) || ClientExists(Addr))
 		return 0; // silently ignore
 
 	ResponseToken = ToSecurityToken(Packet.m_aChunkData + 1);

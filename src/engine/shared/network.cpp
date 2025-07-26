@@ -323,9 +323,9 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 	// set the response token (a bit hacky because this function shouldn't know about control packets)
 	if(pPacket->m_Flags & NET_PACKETFLAG_CONTROL)
 	{
-		if(pPacket->m_DataSize >= 5) // control byte + token
+		if(pPacket->m_DataSize >= 1 + (int)sizeof(SECURITY_TOKEN)) // control byte + token
 		{
-			if(pPacket->m_aChunkData[0] == NET_CTRLMSG_CONNECT || pPacket->m_aChunkData[0] == protocol7::NET_CTRLMSG_TOKEN)
+			if(pPacket->m_aChunkData[0] == NET_CTRLMSG_CONNECT || (Sixup && pPacket->m_aChunkData[0] == protocol7::NET_CTRLMSG_TOKEN))
 			{
 				*pResponseToken = ToSecurityToken(&pPacket->m_aChunkData[1]);
 			}
