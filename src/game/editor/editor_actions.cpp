@@ -1488,7 +1488,7 @@ void CEditorActionEnvelopeEdit::Undo()
 	{
 	case EEditType::ORDER:
 	{
-		m_pEditor->m_Map.SwapEnvelopes(m_Current, m_Previous);
+		m_pEditor->m_Map.MoveEnvelope(m_Current, m_Previous);
 		break;
 	}
 	case EEditType::SYNC:
@@ -1507,7 +1507,7 @@ void CEditorActionEnvelopeEdit::Redo()
 	{
 	case EEditType::ORDER:
 	{
-		m_pEditor->m_Map.SwapEnvelopes(m_Previous, m_Current);
+		m_pEditor->m_Map.MoveEnvelope(m_Previous, m_Current);
 		break;
 	}
 	case EEditType::SYNC:

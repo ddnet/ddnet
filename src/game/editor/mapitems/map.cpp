@@ -58,14 +58,31 @@ void CEditorMap::DeleteEnvelope(int Index)
 	m_vpEnvelopes.erase(m_vpEnvelopes.begin() + Index);
 }
 
-void CEditorMap::SwapEnvelopes(int Index0, int Index1)
+int CEditorMap::MoveEnvelope(int IndexFrom, int IndexTo)
+{
+	if(IndexFrom < 0 || IndexFrom >= (int)m_vpEnvelopes.size())
+		return IndexFrom;
+	if(IndexTo < 0 || IndexTo >= (int)m_vpEnvelopes.size())
+		return IndexFrom;
+	if(IndexFrom == IndexTo)
+		return IndexFrom;
+	int CurrentIndex = IndexFrom;
+	bool Dir = IndexFrom > IndexTo;
+	while(CurrentIndex != IndexTo)
+	{
+		CurrentIndex = m_pEditor->m_Map.SwapEnvelopes(CurrentIndex, Dir ? CurrentIndex - 1 : CurrentIndex + 1);
+	}
+	return CurrentIndex;
+}
+
+int CEditorMap::SwapEnvelopes(int Index0, int Index1)
 {
 	if(Index0 < 0 || Index0 >= (int)m_vpEnvelopes.size())
-		return;
+		return Index0;
 	if(Index1 < 0 || Index1 >= (int)m_vpEnvelopes.size())
-		return;
+		return Index0;
 	if(Index0 == Index1)
-		return;
+		return Index0;
 
 	OnModify();
 
@@ -77,6 +94,7 @@ void CEditorMap::SwapEnvelopes(int Index0, int Index1)
 	});
 
 	std::swap(m_vpEnvelopes[Index0], m_vpEnvelopes[Index1]);
+	return Index1;
 }
 
 template<typename F>

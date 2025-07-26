@@ -6382,11 +6382,13 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
 			ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
 			static int s_MoveRightButton = 0;
-			if(DoButton_Ex(&s_MoveRightButton, "→", 0, &Button, BUTTONFLAG_LEFT, "Move this envelope to the right.", IGraphics::CORNER_R))
+			int Checked = (m_SelectedEnvelope == m_Map.m_vpEnvelopes.size() - 1 ? -1 : 0);
+			if(DoButton_Ex(&s_MoveRightButton, "→", Checked, &Button, BUTTONFLAG_LEFT, "Move this envelope to the right.", IGraphics::CORNER_R))
 			{
-				m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeEdit>(this, m_SelectedEnvelope, CEditorActionEnvelopeEdit::EEditType::ORDER, m_SelectedEnvelope, m_SelectedEnvelope + 1));
-				m_Map.SwapEnvelopes(m_SelectedEnvelope, m_SelectedEnvelope + 1);
-				m_SelectedEnvelope = std::clamp<int>(m_SelectedEnvelope + 1, 0, m_Map.m_vpEnvelopes.size() - 1);
+				int MoveTo = m_SelectedEnvelope + 1;
+				int MoveFrom = m_SelectedEnvelope;
+				m_SelectedEnvelope = m_Map.MoveEnvelope(m_SelectedEnvelope, MoveTo);
+				m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeEdit>(this, m_SelectedEnvelope, CEditorActionEnvelopeEdit::EEditType::ORDER, MoveFrom, m_SelectedEnvelope));
 				pEnvelope = m_Map.m_vpEnvelopes[m_SelectedEnvelope];
 				m_Map.OnModify();
 			}
@@ -6394,11 +6396,13 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			// Move left button
 			ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
 			static int s_MoveLeftButton = 0;
-			if(DoButton_Ex(&s_MoveLeftButton, "←", 0, &Button, BUTTONFLAG_LEFT, "Move this envelope to the left.", IGraphics::CORNER_L))
+			Checked = m_SelectedEnvelope == 0 ? -1 : 0;
+			if(DoButton_Ex(&s_MoveLeftButton, "←", Checked, &Button, BUTTONFLAG_LEFT, "Move this envelope to the left.", IGraphics::CORNER_L))
 			{
-				m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeEdit>(this, m_SelectedEnvelope, CEditorActionEnvelopeEdit::EEditType::ORDER, m_SelectedEnvelope, m_SelectedEnvelope - 1));
-				m_Map.SwapEnvelopes(m_SelectedEnvelope - 1, m_SelectedEnvelope);
-				m_SelectedEnvelope = std::clamp<int>(m_SelectedEnvelope - 1, 0, m_Map.m_vpEnvelopes.size() - 1);
+				int MoveTo = m_SelectedEnvelope - 1;
+				int MoveFrom = m_SelectedEnvelope;
+				m_SelectedEnvelope = m_Map.MoveEnvelope(m_SelectedEnvelope, MoveTo);
+				m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeEdit>(this, m_SelectedEnvelope, CEditorActionEnvelopeEdit::EEditType::ORDER, MoveFrom, m_SelectedEnvelope));
 				pEnvelope = m_Map.m_vpEnvelopes[m_SelectedEnvelope];
 				m_Map.OnModify();
 			}
