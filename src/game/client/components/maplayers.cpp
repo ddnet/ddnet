@@ -63,6 +63,12 @@ CMapLayers::CMapLayers(int Type, bool OnlineOnly)
 {
 	m_Type = Type;
 	m_OnlineOnly = OnlineOnly;
+
+	// static parameters for ingame rendering
+	m_Params.m_RenderType = m_Type;
+	m_Params.m_RenderInvalidTiles = false;
+	m_Params.m_TileAndQuadBuffering = true;
+	m_Params.m_RenderTileBorder = true;
 }
 
 void CMapLayers::OnInit()
@@ -213,23 +219,23 @@ void CMapLayers::OnRender()
 	CUIRect Screen;
 	Graphics()->GetScreen(&Screen.x, &Screen.y, &Screen.w, &Screen.h);
 
-	CRenderLayerParams Params;
-	Params.EntityOverlayVal = m_Type == TYPE_FULL_DESIGN ? 0 : g_Config.m_ClOverlayEntities;
-	Params.m_RenderType = m_Type;
-	Params.m_Center = GetCurCamera()->m_Center;
-	Params.m_Zoom = GetCurCamera()->m_Zoom;
+	// dynamic parameters for ingame rendering
+	m_Params.m_EntityOverlayVal = m_Type == TYPE_FULL_DESIGN ? 0 : g_Config.m_ClOverlayEntities;
+	m_Params.m_Center = GetCurCamera()->m_Center;
+	m_Params.m_Zoom = GetCurCamera()->m_Zoom;
+	m_Params.m_RenderText = g_Config.m_ClTextEntities;
 
 	bool DoRenderGroup = true;
 	for(auto &&pRenderLayer : m_vRenderLayers)
 	{
 		if(pRenderLayer->IsGroup())
-			DoRenderGroup = pRenderLayer->DoRender(Params);
+			DoRenderGroup = pRenderLayer->DoRender(m_Params);
 
 		if(!DoRenderGroup)
 			continue;
 
-		if(pRenderLayer->DoRender(Params))
-			pRenderLayer->Render(Params);
+		if(pRenderLayer->DoRender(m_Params))
+			pRenderLayer->Render(m_Params);
 	}
 
 	// Reset clip from last group
@@ -244,7 +250,7 @@ void CMapLayers::OnRender()
 	else
 	{
 		// reset the screen to the default interface
-		RenderTools()->MapScreenToInterface(Params.m_Center.x, Params.m_Center.y, Params.m_Zoom);
+		RenderTools()->MapScreenToInterface(m_Params.m_Center.x, m_Params.m_Center.y, m_Params.m_Zoom);
 	}
 }
 
