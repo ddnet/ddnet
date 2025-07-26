@@ -4591,6 +4591,10 @@ void CGameContext::OnSetAuthed(int ClientId, int Level)
 	}
 }
 
+void CGameContext::OnSetTimedOut(int ClientId)
+{
+}
+
 bool CGameContext::IsRunningVote(int ClientId) const
 {
 	return m_VoteCloseTime && m_VoteCreator == ClientId;
