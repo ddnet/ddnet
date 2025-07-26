@@ -894,6 +894,7 @@ public:
 	void RenderTooltip(CUIRect TooltipRect);
 
 	void RenderEnvelopeEditor(CUIRect View);
+	void RenderEnvelopeEditorColorBar(CUIRect ColorBar, const std::shared_ptr<CEnvelope> &pEnvelope);
 
 	void RenderMapSettingsErrorDialog();
 	void RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEditorLast);
