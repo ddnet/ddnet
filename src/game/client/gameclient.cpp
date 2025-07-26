@@ -1053,6 +1053,10 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 				m_Chat.OnMessage(MsgId, pRawMsg);
 			}
 		}
+		if(MsgId == NETMSGTYPE_SV_BROADCAST)
+		{
+			m_Broadcast.OnMessage(MsgId, pRawMsg);
+		}
 		return; // no need of all that stuff for the dummy
 	}
 
