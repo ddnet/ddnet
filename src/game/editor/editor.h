@@ -970,8 +970,7 @@ public:
 	CEnvelopeEditorOperationTracker m_EnvOpTracker;
 
 private:
-	void UndoLastAction();
-	void RedoLastAction();
+	CEditorHistory &ActiveHistory();
 
 	std::map<int, CPoint[5]> m_QuadDragOriginalPoints;
 };

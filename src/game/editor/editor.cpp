@@ -7984,9 +7984,9 @@ void CEditor::Render()
 	{
 		// handle undo/redo hotkeys
 		if(Input()->KeyPress(KEY_Z) && Input()->ModifierIsPressed() && !Input()->ShiftIsPressed())
-			UndoLastAction();
+			ActiveHistory().Undo();
 		if((Input()->KeyPress(KEY_Y) && Input()->ModifierIsPressed()) || (Input()->KeyPress(KEY_Z) && Input()->ModifierIsPressed() && Input()->ShiftIsPressed()))
-			RedoLastAction();
+			ActiveHistory().Redo();
 
 		// handle brush save/load hotkeys
 		for(int i = KEY_1; i <= KEY_0; i++)
@@ -9380,24 +9380,20 @@ bool CEditor::Append(const char *pFileName, int StorageType, bool IgnoreHistory)
 	return true;
 }
 
-void CEditor::UndoLastAction()
+CEditorHistory &CEditor::ActiveHistory()
 {
 	if(m_ActiveExtraEditor == EXTRAEDITOR_SERVER_SETTINGS)
-		m_ServerSettingsHistory.Undo();
+	{
+		return m_ServerSettingsHistory;
+	}
 	else if(m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES)
-		m_EnvelopeEditorHistory.Undo();
+	{
+		return m_EnvelopeEditorHistory;
+	}
 	else
-		m_EditorHistory.Undo();
-}
-
-void CEditor::RedoLastAction()
-{
-	if(m_ActiveExtraEditor == EXTRAEDITOR_SERVER_SETTINGS)
-		m_ServerSettingsHistory.Redo();
-	else if(m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES)
-		m_EnvelopeEditorHistory.Redo();
-	else
-		m_EditorHistory.Redo();
+	{
+		return m_EditorHistory;
+	}
 }
 
 void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
