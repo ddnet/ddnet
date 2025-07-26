@@ -92,7 +92,7 @@ public:
 
 	std::shared_ptr<CEnvelope> NewEnvelope(CEnvelope::EType Type);
 	void DeleteEnvelope(int Index);
-	void SwapEnvelopes(int Index0, int Index1);
+	int MoveEnvelope(int IndexFrom, int IndexTo);
 	template<typename F>
 	void VisitEnvelopeReferences(F &&Visitor);
 
