@@ -1384,14 +1384,14 @@ void CLayerTiles::FlagModified(int x, int y, int w, int h)
 	}
 }
 
-void CLayerTiles::ModifyImageIndex(FIndexModifyFunction Func)
+void CLayerTiles::ModifyImageIndex(const FIndexModifyFunction &IndexModifyFunction)
 {
-	Func(&m_Image);
+	IndexModifyFunction(&m_Image);
 }
 
-void CLayerTiles::ModifyEnvelopeIndex(FIndexModifyFunction Func)
+void CLayerTiles::ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction)
 {
-	Func(&m_ColorEnv);
+	IndexModifyFunction(&m_ColorEnv);
 }
 
 void CLayerTiles::ShowPreventUnusedTilesWarning()

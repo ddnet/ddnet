@@ -188,17 +188,17 @@ CUi::EPopupMenuFunctionResult CLayerSounds::RenderProperties(CUIRect *pToolBox)
 	return CUi::POPUP_KEEP_OPEN;
 }
 
-void CLayerSounds::ModifySoundIndex(FIndexModifyFunction Func)
+void CLayerSounds::ModifySoundIndex(const FIndexModifyFunction &IndexModifyFunction)
 {
-	Func(&m_Sound);
+	IndexModifyFunction(&m_Sound);
 }
 
-void CLayerSounds::ModifyEnvelopeIndex(FIndexModifyFunction Func)
+void CLayerSounds::ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction)
 {
 	for(auto &Source : m_vSources)
 	{
-		Func(&Source.m_SoundEnv);
-		Func(&Source.m_PosEnv);
+		IndexModifyFunction(&Source.m_SoundEnv);
+		IndexModifyFunction(&Source.m_PosEnv);
 	}
 }
 

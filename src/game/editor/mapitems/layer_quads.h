@@ -23,8 +23,8 @@ public:
 
 	CUi::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
 
-	void ModifyImageIndex(FIndexModifyFunction pfnFunc) override;
-	void ModifyEnvelopeIndex(FIndexModifyFunction pfnFunc) override;
+	void ModifyImageIndex(const FIndexModifyFunction &IndexModifyFunction) override;
+	void ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction) override;
 
 	void GetSize(float *pWidth, float *pHeight) override;
 	std::shared_ptr<CLayer> Duplicate() const override;

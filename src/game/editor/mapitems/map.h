@@ -99,9 +99,9 @@ public:
 	std::shared_ptr<CLayerGroup> NewGroup();
 	int SwapGroups(int Index0, int Index1);
 	void DeleteGroup(int Index);
-	void ModifyImageIndex(const FIndexModifyFunction &pfnFunc);
-	void ModifyEnvelopeIndex(const FIndexModifyFunction &pfnFunc);
-	void ModifySoundIndex(const FIndexModifyFunction &pfnFunc);
+	void ModifyImageIndex(const FIndexModifyFunction &IndexModifyFunction);
+	void ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction);
+	void ModifySoundIndex(const FIndexModifyFunction &IndexModifyFunction);
 
 	void Clean();
 	void CreateDefault(IGraphics::CTextureHandle EntitiesTexture);

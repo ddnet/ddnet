@@ -150,8 +150,8 @@ public:
 	};
 	static CUi::EPopupMenuFunctionResult RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, std::vector<std::shared_ptr<CLayerTiles>> &vpLayers, std::vector<int> &vLayerIndices);
 
-	void ModifyImageIndex(FIndexModifyFunction pfnFunc) override;
-	void ModifyEnvelopeIndex(FIndexModifyFunction pfnFunc) override;
+	void ModifyImageIndex(const FIndexModifyFunction &IndexModifyFunction) override;
+	void ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction) override;
 
 	void PrepareForSave();
 	void ExtractTiles(int TilemapItemVersion, const CTile *pSavedTiles, size_t SavedTilesSize) const;

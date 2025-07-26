@@ -57,9 +57,9 @@ public:
 	virtual void Render(bool Tileset = false) {}
 	virtual CUi::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) { return CUi::POPUP_KEEP_OPEN; }
 
-	virtual void ModifyImageIndex(FIndexModifyFunction pfnFunc) {}
-	virtual void ModifyEnvelopeIndex(FIndexModifyFunction pfnFunc) {}
-	virtual void ModifySoundIndex(FIndexModifyFunction pfnFunc) {}
+	virtual void ModifyImageIndex(const FIndexModifyFunction &IndexModifyFunction) {}
+	virtual void ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction) {}
+	virtual void ModifySoundIndex(const FIndexModifyFunction &IndexModifyFunction) {}
 
 	virtual std::shared_ptr<CLayer> Duplicate() const = 0;
 	virtual const char *TypeName() const = 0;
