@@ -2889,6 +2889,7 @@ void CServer::UpdateDebugDummies(bool ForceDisconnect)
 		CClient &Client = m_aClients[ClientId];
 		if(AddDummy && m_aClients[ClientId].m_State == CClient::STATE_EMPTY)
 		{
+			Client.m_DebugDummy = true;
 			NewClientCallback(ClientId, this, false);
 			Client.m_DebugDummy = true;
 
