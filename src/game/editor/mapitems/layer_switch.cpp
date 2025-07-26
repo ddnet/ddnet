@@ -57,13 +57,23 @@ void CLayerSwitch::Shift(int Direction)
 	ShiftImpl(m_pSwitchTile, Direction, m_pEditor->m_ShiftBy);
 }
 
-bool CLayerSwitch::IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer)
+bool CLayerSwitch::IsEmpty() const
 {
-	for(int y = 0; y < pLayer->m_Height; y++)
-		for(int x = 0; x < pLayer->m_Width; x++)
-			if(m_pEditor->IsAllowPlaceUnusedTiles() || IsValidSwitchTile(pLayer->GetTile(x, y).m_Index))
+	for(int y = 0; y < m_Height; y++)
+	{
+		for(int x = 0; x < m_Width; x++)
+		{
+			const int Index = GetTile(x, y).m_Index;
+			if(Index == 0)
+			{
+				continue;
+			}
+			if(m_pEditor->IsAllowPlaceUnusedTiles() || IsValidSwitchTile(Index))
+			{
 				return false;
-
+			}
+		}
+	}
 	return true;
 }
 
@@ -81,7 +91,7 @@ void CLayerSwitch::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 		m_pEditor->m_SwitchDelay = pSwitchLayer->m_SwitchDelay;
 	}
 
-	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(pSwitchLayer);
+	bool Destructive = m_pEditor->m_BrushDrawDestructive || pSwitchLayer->IsEmpty();
 
 	for(int y = 0; y < pSwitchLayer->m_Height; y++)
 		for(int x = 0; x < pSwitchLayer->m_Width; x++)
@@ -239,7 +249,7 @@ void CLayerSwitch::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUI
 
 	std::shared_ptr<CLayerSwitch> pLt = std::static_pointer_cast<CLayerSwitch>(pBrush);
 
-	bool Destructive = m_pEditor->m_BrushDrawDestructive || Empty || IsEmpty(pLt);
+	bool Destructive = m_pEditor->m_BrushDrawDestructive || Empty || pLt->IsEmpty();
 
 	for(int y = 0; y < h; y++)
 	{
