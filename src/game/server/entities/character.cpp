@@ -229,18 +229,12 @@ void CCharacter::HandleJetpack()
 {
 	vec2 Direction = normalize(vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY));
 
-	bool FullAuto = false;
-	if(m_Core.m_ActiveWeapon == WEAPON_GRENADE || m_Core.m_ActiveWeapon == WEAPON_SHOTGUN || m_Core.m_ActiveWeapon == WEAPON_LASER)
-		FullAuto = true;
-	if(m_Core.m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN)
-		FullAuto = true;
-
 	// check if we gonna fire
 	bool WillFire = false;
 	if(CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
 		WillFire = true;
 
-	if(FullAuto && (m_LatestInput.m_Fire & 1) && m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
+	if(IsFullAutoWeapon() && (m_LatestInput.m_Fire & 1) && m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
 		WillFire = true;
 
 	if(!WillFire)
@@ -420,6 +414,19 @@ void CCharacter::HandleWeaponSwitch()
 	DoWeaponSwitch();
 }
 
+bool CCharacter::IsFullAutoWeapon() const
+{
+	if(m_Core.m_ActiveWeapon == WEAPON_GRENADE || m_Core.m_ActiveWeapon == WEAPON_SHOTGUN || m_Core.m_ActiveWeapon == WEAPON_LASER)
+		return true;
+	if(m_Core.m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN)
+		return true;
+	// allow firing directly after coming out of freeze or being unfrozen
+	// by something
+	if(m_FrozenLastTick)
+		return true;
+	return false;
+}
+
 void CCharacter::FireWeapon()
 {
 	if(m_ReloadTimer != 0)
@@ -435,16 +442,6 @@ void CCharacter::FireWeapon()
 	vec2 MouseTarget = vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY);
 	vec2 Direction = normalize(MouseTarget);
 
-	bool FullAuto = false;
-	if(m_Core.m_ActiveWeapon == WEAPON_GRENADE || m_Core.m_ActiveWeapon == WEAPON_SHOTGUN || m_Core.m_ActiveWeapon == WEAPON_LASER)
-		FullAuto = true;
-	if(m_Core.m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN)
-		FullAuto = true;
-	// allow firing directly after coming out of freeze or being unfrozen
-	// by something
-	if(m_FrozenLastTick)
-		FullAuto = true;
-
 	// don't fire hammer when player is deep and sv_deepfly is disabled
 	if(!g_Config.m_SvDeepfly && m_Core.m_ActiveWeapon == WEAPON_HAMMER && m_Core.m_DeepFrozen)
 		return;
@@ -454,7 +451,7 @@ void CCharacter::FireWeapon()
 	if(CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
 		WillFire = true;
 
-	if(FullAuto && (m_LatestInput.m_Fire & 1) && m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
+	if(IsFullAutoWeapon() && (m_LatestInput.m_Fire & 1) && m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
 		WillFire = true;
 
 	if(!WillFire)

@@ -71,6 +71,12 @@ public:
 	void ReleaseHook();
 	void ResetHook();
 	void ResetInput();
+
+	// returns true if the player can just hold down
+	// the fire button to keep shooting
+	// returns false if the player has to repress the
+	// fire button to shoot with the current active weapon
+	bool IsFullAutoWeapon() const;
 	void FireWeapon();
 
 	void Die(int Killer, int Weapon, bool SendKillMsg = true);

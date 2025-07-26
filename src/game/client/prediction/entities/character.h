@@ -48,6 +48,7 @@ public:
 	void ReleaseHook();
 	void ResetHook();
 	void ResetInput();
+	bool IsFullAutoWeapon() const;
 	void FireWeapon();
 
 	bool TakeDamage(vec2 Force, int Dmg, int From, int Weapon);
