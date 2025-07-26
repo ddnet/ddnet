@@ -49,7 +49,6 @@
 
 #include <engine/shared/protocolglue.h>
 
-#include <game/client/projectile_data.h>
 #include <game/localization.h>
 #include <game/version.h>
 
@@ -2077,8 +2076,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 
 					if(!Dummy)
 					{
-						// for antiping: if the projectile netobjects from the server contains extra data, this is removed and the original content restored before recording demo
-						SnapshotRemoveExtraProjectileInfo(pTmpBuffer3);
+						GameClient()->ProcessDemoSnapshot(pTmpBuffer3);
 
 						unsigned char aSnapSeven[CSnapshot::MAX_SIZE];
 						CSnapshot *pSnapSeven = (CSnapshot *)aSnapSeven;

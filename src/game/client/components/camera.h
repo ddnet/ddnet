@@ -54,7 +54,7 @@ private:
 
 	vec2 m_LastTargetPos;
 	float m_DyncamSmoothingSpeedBias;
-	bool m_IsSpectatingPlayer;
+	bool m_CanUseCameraInfo;
 	bool m_UsingAutoSpecCamera;
 
 	char m_aAutoSpecCameraTooltip[512];
@@ -105,7 +105,7 @@ public:
 
 	void UpdateCamera();
 	void ResetAutoSpecCamera();
-	bool SpectatingPlayer() const { return m_IsSpectatingPlayer; }
+	bool SpectatingPlayer() const { return m_CanUseCameraInfo; }
 	bool CanUseAutoSpecCamera() const;
 	void ToggleAutoSpecCamera();
 	void UpdateAutoSpecCameraTooltip();
