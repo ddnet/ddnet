@@ -325,7 +325,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 	{
 		if(pPacket->m_DataSize >= 5) // control byte + token
 		{
-			if(pPacket->m_aChunkData[0] == NET_CTRLMSG_CONNECT || pPacket->m_aChunkData[0] == NET_CTRLMSG_TOKEN)
+			if(pPacket->m_aChunkData[0] == NET_CTRLMSG_CONNECT || pPacket->m_aChunkData[0] == protocol7::NET_CTRLMSG_TOKEN)
 			{
 				*pResponseToken = ToSecurityToken(&pPacket->m_aChunkData[1]);
 			}
@@ -515,7 +515,7 @@ void CNetTokenCache::SendPacketConnless(CNetChunk *pChunk)
 
 void CNetTokenCache::FetchToken(NETADDR *pAddr)
 {
-	CNetBase::SendControlMsgWithToken7(m_Socket, pAddr, NET_TOKEN_NONE, 0, NET_CTRLMSG_TOKEN, GenerateToken(), true);
+	CNetBase::SendControlMsgWithToken7(m_Socket, pAddr, NET_TOKEN_NONE, 0, protocol7::NET_CTRLMSG_TOKEN, GenerateToken(), true);
 }
 
 void CNetTokenCache::AddToken(const NETADDR *pAddr, TOKEN Token)

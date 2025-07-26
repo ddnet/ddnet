@@ -515,7 +515,7 @@ int CNetServer::OnSixupCtrlMsg(NETADDR &Addr, CNetChunk *pChunk, int ControlMsg,
 
 	ResponseToken = ToSecurityToken(Packet.m_aChunkData + 1);
 
-	if(ControlMsg == NET_CTRLMSG_TOKEN)
+	if(ControlMsg == protocol7::NET_CTRLMSG_TOKEN)
 	{
 		if(m_RecvUnpacker.m_Data.m_DataSize >= (int)NET_TOKENREQUEST_DATASIZE)
 		{
@@ -719,7 +719,7 @@ void CNetServer::SendTokenSixup(NETADDR &Addr, SECURITY_TOKEN Token)
 	unsigned char aRequestTokenBuf[NET_TOKENREQUEST_DATASIZE] = {};
 	WriteSecurityToken(aRequestTokenBuf, GetToken(Addr));
 	const int Size = Token == NET_SECURITY_TOKEN_UNKNOWN ? sizeof(aRequestTokenBuf) : sizeof(SECURITY_TOKEN);
-	CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_TOKEN, aRequestTokenBuf, Size, Token, true);
+	CNetBase::SendControlMsg(m_Socket, &Addr, 0, protocol7::NET_CTRLMSG_TOKEN, aRequestTokenBuf, Size, Token, true);
 }
 
 void CNetServer::SetMaxClientsPerIp(int Max)

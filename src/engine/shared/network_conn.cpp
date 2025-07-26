@@ -244,7 +244,7 @@ int CNetConnection::Connect7(const NETADDR *pAddr, int NumAddrs)
 	SetToken7(GenerateToken7(pAddr));
 	mem_zero(m_aErrorString, sizeof(m_aErrorString));
 	m_State = EState::WANT_TOKEN;
-	SendControlWithToken7(NET_CTRLMSG_TOKEN, NET_TOKEN_NONE);
+	SendControlWithToken7(protocol7::NET_CTRLMSG_TOKEN, NET_TOKEN_NONE);
 	m_Sixup = true;
 	return 0;
 }
@@ -403,7 +403,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 		}
 		else
 		{
-			if(CtrlMsg == NET_CTRLMSG_TOKEN)
+			if(CtrlMsg == protocol7::NET_CTRLMSG_TOKEN)
 			{
 				if(State() == EState::WANT_TOKEN)
 				{
