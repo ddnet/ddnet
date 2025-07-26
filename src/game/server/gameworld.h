@@ -156,12 +156,6 @@ public:
 	void Snap(int SnappingClient);
 
 	/*
-		Function: PostSnap
-			Called after all clients received their snapshot.
-	*/
-	void PostSnap();
-
-	/*
 		Function: Tick
 			Calls Tick on all the entities in the world to progress
 			the world to the next tick.
