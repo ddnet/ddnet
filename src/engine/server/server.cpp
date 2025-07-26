@@ -1139,7 +1139,6 @@ int CServer::NewClientCallback(int ClientId, void *pUser, bool Sixup)
 	pThis->m_aClients[ClientId].m_DDNetVersion = VERSION_NONE;
 	pThis->m_aClients[ClientId].m_GotDDNetVersionPacket = false;
 	pThis->m_aClients[ClientId].m_DDNetVersionSettled = false;
-	mem_zero(&pThis->m_aClients[ClientId].m_Addr, sizeof(NETADDR));
 	pThis->m_aClients[ClientId].Reset();
 	pThis->m_aClients[ClientId].m_Sixup = Sixup;
 
