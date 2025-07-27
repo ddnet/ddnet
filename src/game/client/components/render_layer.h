@@ -52,6 +52,7 @@ public:
 	virtual bool DoRender(const CRenderLayerParams &Params) const = 0;
 	virtual bool IsValid() const { return true; }
 	virtual bool IsGroup() const { return false; }
+	virtual void Unload() = 0;
 
 	int GetGroup() const { return m_GroupId; }
 
@@ -82,6 +83,7 @@ public:
 	bool DoRender(const CRenderLayerParams &Params) const override;
 	bool IsValid() const override { return m_pGroup != nullptr; }
 	bool IsGroup() const override { return true; }
+	void Unload() override {}
 
 protected:
 	IGraphics::CTextureHandle GetTexture() const override { return IGraphics::CTextureHandle(); }
@@ -100,6 +102,7 @@ public:
 
 	virtual int GetDataIndex(unsigned int &TileSize) const;
 	bool IsValid() const override { return GetRawData() != nullptr; }
+	void Unload() override;
 
 protected:
 	virtual void *GetRawData() const;
@@ -114,7 +117,7 @@ private:
 	IGraphics::CTextureHandle m_TextureHandle;
 
 protected:
-	class CTileLayerVisuals
+	class CTileLayerVisuals : public CComponentInterfaces
 	{
 	public:
 		CTileLayerVisuals()
@@ -126,6 +129,7 @@ protected:
 		}
 
 		bool Init(unsigned int Width, unsigned int Height);
+		void Unload();
 
 		class CTileVisual
 		{
@@ -205,16 +209,18 @@ public:
 	bool IsValid() const override { return m_pLayerQuads->m_NumQuads > 0; }
 	virtual void Render(const CRenderLayerParams &Params) override;
 	virtual bool DoRender(const CRenderLayerParams &Params) const override;
+	void Unload() override;
 
 protected:
 	virtual IGraphics::CTextureHandle GetTexture() const override { return m_TextureHandle; }
 	void CalculateClipping();
 
-	class CQuadLayerVisuals
+	class CQuadLayerVisuals : public CComponentInterfaces
 	{
 	public:
 		CQuadLayerVisuals() :
 			m_QuadNum(0), m_BufferContainerIndex(-1), m_IsTextured(false) {}
+		void Unload();
 
 		int m_QuadNum;
 		int m_BufferContainerIndex;
@@ -287,6 +293,7 @@ public:
 	CRenderLayerEntityTele(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex(unsigned int &TileSize) const override;
 	void Init() override;
+	void Unload() override;
 
 protected:
 	void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
@@ -303,6 +310,7 @@ public:
 	CRenderLayerEntitySpeedup(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex(unsigned int &TileSize) const override;
 	void Init() override;
+	void Unload() override;
 
 protected:
 	void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
@@ -321,6 +329,7 @@ public:
 	CRenderLayerEntitySwitch(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex(unsigned int &TileSize) const override;
 	void Init() override;
+	void Unload() override;
 
 protected:
 	void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;

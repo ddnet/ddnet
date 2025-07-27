@@ -71,6 +71,13 @@ CMapLayers::CMapLayers(int Type, bool OnlineOnly)
 	m_Params.m_RenderTileBorder = true;
 }
 
+void CMapLayers::Unload()
+{
+	for(auto &pLayer : m_vRenderLayers)
+		pLayer->Unload();
+	m_vRenderLayers.clear();
+}
+
 void CMapLayers::OnInit()
 {
 	m_pLayers = Layers();
@@ -86,7 +93,7 @@ void CMapLayers::OnMapLoad()
 {
 	m_pEnvelopePoints = std::make_shared<CMapBasedEnvelopePointAccess>(m_pLayers->Map());
 	bool PassedGameLayer = false;
-	m_vRenderLayers.clear();
+	Unload();
 
 	const char *pLoadingTitle = Localize("Loading map");
 	const char *pLoadingMessage = Localize("Uploading map data to GPU");

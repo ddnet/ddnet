@@ -15,6 +15,7 @@ class CComponentInterfaces
 {
 public:
 	virtual void OnInterfacesInit(CGameClient *pClient);
+	virtual ~CComponentInterfaces() = default;
 
 protected:
 	/**
