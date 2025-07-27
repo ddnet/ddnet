@@ -343,7 +343,7 @@ public:
 #endif
 
 	virtual std::optional<int> ShowMessageBox(const IGraphics::CMessageBox &MessageBox) = 0;
-	virtual void GetGpuInfoString(char (&aGpuInfo)[256]) = 0;
+	virtual void GetGpuInfoString(char (&aGpuInfo)[512]) = 0;
 };
 
 class IGameClient : public IInterface

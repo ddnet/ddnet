@@ -537,7 +537,7 @@ public:
 #endif
 
 	std::optional<int> ShowMessageBox(const IGraphics::CMessageBox &MessageBox) override;
-	void GetGpuInfoString(char (&aGpuInfo)[256]) override;
+	void GetGpuInfoString(char (&aGpuInfo)[512]) override;
 	void SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr<ILogger> &&pStdoutLogger);
 };
 
