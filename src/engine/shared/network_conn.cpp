@@ -2,6 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "config.h"
 #include "network.h"
+
+#include <base/log.h>
 #include <base/system.h>
 
 void CNetConnection::SetPeerAddr(const NETADDR *pAddr)
@@ -403,7 +405,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 		}
 		else
 		{
-			if(CtrlMsg == protocol7::NET_CTRLMSG_TOKEN)
+			if(m_Sixup && CtrlMsg == protocol7::NET_CTRLMSG_TOKEN)
 			{
 				if(State() == EState::WANT_TOKEN)
 				{
@@ -411,10 +413,15 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 					m_State = EState::CONNECT;
 					m_SecurityToken = ResponseToken;
 					SendControlWithToken7(NET_CTRLMSG_CONNECT, m_SecurityToken);
-					dbg_msg("connection", "got token, replying, token=%x mytoken=%x", m_SecurityToken, m_Token);
+					if(g_Config.m_Debug)
+					{
+						log_debug("connection", "got token, replying, token=%x mytoken=%x", m_SecurityToken, m_Token);
+					}
 				}
 				else if(g_Config.m_Debug)
-					dbg_msg("connection", "got token, token=%x", ResponseToken);
+				{
+					log_debug("connection", "got token, token=%x", ResponseToken);
+				}
 			}
 			else
 			{

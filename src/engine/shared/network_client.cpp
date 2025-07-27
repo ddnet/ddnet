@@ -96,10 +96,8 @@ int CNetClient::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken, bool Six
 		if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvUnpacker.m_Data, Sixup, &Token, pResponseToken) == 0)
 		{
 			if(Sixup)
-				Addr.type |= NETTYPE_TW7;
-			if(m_RecvUnpacker.m_Data.m_aChunkData[0] == protocol7::NET_CTRLMSG_TOKEN)
 			{
-				m_TokenCache.AddToken(&Addr, *pResponseToken);
+				Addr.type |= NETTYPE_TW7;
 			}
 			if(m_RecvUnpacker.m_Data.m_Flags & NET_PACKETFLAG_CONNLESS)
 			{
@@ -117,8 +115,19 @@ int CNetClient::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken, bool Six
 			}
 			else
 			{
-				if(m_Connection.State() != CNetConnection::EState::OFFLINE && m_Connection.State() != CNetConnection::EState::ERROR && m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr, Token, *pResponseToken))
+				if(Sixup &&
+					(m_RecvUnpacker.m_Data.m_Flags & NET_PACKETFLAG_CONTROL) != 0 &&
+					m_RecvUnpacker.m_Data.m_DataSize >= 1 + (int)sizeof(SECURITY_TOKEN) &&
+					m_RecvUnpacker.m_Data.m_aChunkData[0] == protocol7::NET_CTRLMSG_TOKEN)
+				{
+					m_TokenCache.AddToken(&Addr, *pResponseToken);
+				}
+				if(m_Connection.State() != CNetConnection::EState::OFFLINE &&
+					m_Connection.State() != CNetConnection::EState::ERROR &&
+					m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr, Token, *pResponseToken))
+				{
 					m_RecvUnpacker.Start(&Addr, &m_Connection, 0);
+				}
 			}
 		}
 	}
