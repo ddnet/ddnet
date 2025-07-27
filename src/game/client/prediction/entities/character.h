@@ -33,7 +33,7 @@ public:
 
 	bool IsGrounded();
 
-	void SetWeapon(int W);
+	void SetWeapon(int Weapon);
 	void SetSolo(bool Solo);
 	void SetSuper(bool Super);
 	void HandleWeaponSwitch();
@@ -88,7 +88,7 @@ public:
 	int GetLastWeapon() { return m_LastWeapon; }
 	void SetLastWeapon(int LastWeap) { m_LastWeapon = LastWeap; }
 	int GetActiveWeapon() { return m_Core.m_ActiveWeapon; }
-	void SetActiveWeapon(int ActiveWeap);
+	void SetActiveWeapon(int ActiveWeapon);
 	CCharacterCore GetCore() { return m_Core; }
 	void SetCore(CCharacterCore Core) { m_Core = Core; }
 	const CCharacterCore *Core() const { return &m_Core; }
