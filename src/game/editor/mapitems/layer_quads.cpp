@@ -225,17 +225,17 @@ CUi::EPopupMenuFunctionResult CLayerQuads::RenderProperties(CUIRect *pToolBox)
 	return CUi::POPUP_KEEP_OPEN;
 }
 
-void CLayerQuads::ModifyImageIndex(FIndexModifyFunction Func)
+void CLayerQuads::ModifyImageIndex(const FIndexModifyFunction &IndexModifyFunction)
 {
-	Func(&m_Image);
+	IndexModifyFunction(&m_Image);
 }
 
-void CLayerQuads::ModifyEnvelopeIndex(FIndexModifyFunction Func)
+void CLayerQuads::ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction)
 {
 	for(auto &Quad : m_vQuads)
 	{
-		Func(&Quad.m_PosEnv);
-		Func(&Quad.m_ColorEnv);
+		IndexModifyFunction(&Quad.m_PosEnv);
+		IndexModifyFunction(&Quad.m_ColorEnv);
 	}
 }
 

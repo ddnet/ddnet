@@ -19,8 +19,8 @@ public:
 
 	CUi::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
 
-	void ModifyEnvelopeIndex(FIndexModifyFunction pfnFunc) override;
-	void ModifySoundIndex(FIndexModifyFunction pfnFunc) override;
+	void ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction) override;
+	void ModifySoundIndex(const FIndexModifyFunction &IndexModifyFunction) override;
 
 	std::shared_ptr<CLayer> Duplicate() const override;
 	const char *TypeName() const override;
