@@ -6,6 +6,7 @@
 
 enum
 {
+	INVALID_TEAM = -1,
 	TEAM_FLOCK = 0,
 	TEAM_SUPER = 64,
 	NUM_DDRACE_TEAMS = TEAM_SUPER + 1,
