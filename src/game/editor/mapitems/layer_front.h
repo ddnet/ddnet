@@ -8,8 +8,10 @@ class CLayerFront : public CLayerTiles
 public:
 	CLayerFront(CEditor *pEditor, int w, int h);
 
-	void Resize(int NewW, int NewH) override;
 	void SetTile(int x, int y, CTile Tile) override;
+	void Resize(int NewW, int NewH) override;
+	[[nodiscard]] bool IsEmpty() const override;
+
 	const char *TypeName() const override;
 };
 

@@ -58,13 +58,23 @@ void CLayerTele::Shift(int Direction)
 	ShiftImpl(m_pTeleTile, Direction, m_pEditor->m_ShiftBy);
 }
 
-bool CLayerTele::IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer)
+bool CLayerTele::IsEmpty() const
 {
-	for(int y = 0; y < pLayer->m_Height; y++)
-		for(int x = 0; x < pLayer->m_Width; x++)
-			if(m_pEditor->IsAllowPlaceUnusedTiles() || IsValidTeleTile(pLayer->GetTile(x, y).m_Index))
+	for(int y = 0; y < m_Height; y++)
+	{
+		for(int x = 0; x < m_Width; x++)
+		{
+			const int Index = GetTile(x, y).m_Index;
+			if(Index == 0)
+			{
+				continue;
+			}
+			if(m_pEditor->IsAllowPlaceUnusedTiles() || IsValidTeleTile(Index))
+			{
 				return false;
-
+			}
+		}
+	}
 	return true;
 }
 
@@ -79,7 +89,7 @@ void CLayerTele::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 	if(str_comp(pTeleLayer->m_aFileName, m_pEditor->m_aFileName))
 		m_pEditor->m_TeleNumber = pTeleLayer->m_TeleNum;
 
-	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(pTeleLayer);
+	bool Destructive = m_pEditor->m_BrushDrawDestructive || pTeleLayer->IsEmpty();
 
 	for(int y = 0; y < pTeleLayer->m_Height; y++)
 		for(int x = 0; x < pTeleLayer->m_Width; x++)
@@ -229,7 +239,7 @@ void CLayerTele::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRe
 
 	std::shared_ptr<CLayerTele> pLt = std::static_pointer_cast<CLayerTele>(pBrush);
 
-	bool Destructive = m_pEditor->m_BrushDrawDestructive || Empty || IsEmpty(pLt);
+	bool Destructive = m_pEditor->m_BrushDrawDestructive || Empty || pLt->IsEmpty();
 
 	for(int y = 0; y < h; y++)
 	{
