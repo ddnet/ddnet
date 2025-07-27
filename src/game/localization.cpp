@@ -4,6 +4,7 @@
 #include "localization.h"
 
 #include <base/log.h>
+#include <base/system.h>
 
 #include <engine/console.h>
 #include <engine/shared/linereader.h>
