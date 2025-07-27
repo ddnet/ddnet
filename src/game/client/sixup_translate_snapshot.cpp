@@ -533,8 +533,7 @@ int CGameClient::OnDemoRecSnap7(CSnapshot *pFrom, CSnapshot *pTo, int Conn)
 	}
 
 	// add tuning
-	CTuningParams StandardTuning;
-	if(mem_comp(&StandardTuning, &m_aTuning[Conn], sizeof(CTuningParams)) != 0)
+	if(mem_comp(&CTuningParams::DEFAULT, &m_aTuning[Conn], sizeof(CTuningParams)) != 0)
 	{
 		void *pItem = Builder.NewItem(protocol7::NETOBJTYPE_DE_TUNEPARAMS, 0, sizeof(protocol7::CNetObj_De_TuneParams));
 		if(!pItem)
