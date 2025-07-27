@@ -58,6 +58,7 @@ public:
 	void OnInit() override;
 	void OnRender() override;
 	void OnMapLoad() override;
+	void Unload();
 
 	virtual CCamera *GetCurCamera();
 

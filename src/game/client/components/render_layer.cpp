@@ -548,6 +548,7 @@ void CRenderLayerTile::UploadTileData(std::optional<CTileLayerVisuals> &VisualsO
 
 	// create the visual and set it in the optional, afterwards get it
 	CTileLayerVisuals v;
+	v.OnInterfacesInit(GameClient());
 	VisualsOptional = v;
 	CTileLayerVisuals &Visuals = VisualsOptional.value();
 
@@ -756,6 +757,17 @@ void CRenderLayerTile::UploadTileData(std::optional<CTileLayerVisuals> &VisualsO
 	RenderLoading();
 }
 
+void CRenderLayerTile::Unload()
+{
+	m_VisualTiles->Unload();
+	m_VisualTiles = std::nullopt;
+}
+
+void CRenderLayerTile::CTileLayerVisuals::Unload()
+{
+	Graphics()->DeleteBufferContainer(m_BufferContainerIndex);
+}
+
 int CRenderLayerTile::GetDataIndex(unsigned int &TileSize) const
 {
 	TileSize = sizeof(CTile);
@@ -897,6 +909,7 @@ void CRenderLayerQuads::Init()
 	std::vector<CTmpQuad> vTmpQuads;
 	std::vector<CTmpQuadTextured> vTmpQuadsTextured;
 	CQuadLayerVisuals v;
+	v.OnInterfacesInit(GameClient());
 	m_VisualQuad = v;
 	CQuadLayerVisuals *pQLayerVisuals = &(m_VisualQuad.value());
 
@@ -1025,6 +1038,17 @@ void CRenderLayerQuads::Init()
 		Graphics()->IndicesNumRequiredNotify(m_pLayerQuads->m_NumQuads * 6);
 	}
 	RenderLoading();
+}
+
+void CRenderLayerQuads::Unload()
+{
+	m_VisualQuad->Unload();
+	m_VisualQuad = std::nullopt;
+}
+
+void CRenderLayerQuads::CQuadLayerVisuals::Unload()
+{
+	Graphics()->DeleteBufferContainer(m_BufferContainerIndex);
 }
 
 void CRenderLayerQuads::CalculateClipping()

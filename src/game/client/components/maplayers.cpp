@@ -71,10 +71,23 @@ CMapLayers::CMapLayers(int Type, bool OnlineOnly)
 	m_Params.m_RenderTileBorder = true;
 }
 
+void CMapLayers::Unload()
+{
+	for(auto &&It : m_vRenderLayers)
+		It->Unload();
+	m_vRenderLayers.clear();
+}
+
 void CMapLayers::OnInit()
 {
 	m_pLayers = Layers();
-	m_pImages = &GameClient()->m_MapImages;
+
+	if(m_pImages != &GameClient()->m_MapImages)
+	{
+		if(m_pImages)
+			m_pImages->Unload();
+		m_pImages = &GameClient()->m_MapImages;
+	}
 }
 
 CCamera *CMapLayers::GetCurCamera()
@@ -86,7 +99,7 @@ void CMapLayers::OnMapLoad()
 {
 	m_pEnvelopePoints = std::make_shared<CMapBasedEnvelopePointAccess>(m_pLayers->Map());
 	bool PassedGameLayer = false;
-	m_vRenderLayers.clear();
+	Unload();
 
 	const char *pLoadingTitle = Localize("Loading map");
 	const char *pLoadingMessage = Localize("Uploading map data to GPU");

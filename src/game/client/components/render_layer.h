@@ -52,6 +52,7 @@ public:
 	virtual bool DoRender(const CRenderLayerParams &Params) const = 0;
 	virtual bool IsValid() const { return true; }
 	virtual bool IsGroup() const { return false; }
+	virtual void Unload() {}
 
 	int GetGroup() const { return m_GroupId; }
 
@@ -100,6 +101,7 @@ public:
 
 	virtual int GetDataIndex(unsigned int &TileSize) const;
 	bool IsValid() const override { return GetRawData() != nullptr; }
+	void Unload() override;
 
 protected:
 	virtual void *GetRawData() const;
@@ -114,7 +116,7 @@ private:
 	IGraphics::CTextureHandle m_TextureHandle;
 
 protected:
-	class CTileLayerVisuals
+	class CTileLayerVisuals : public CComponentInterfaces
 	{
 	public:
 		CTileLayerVisuals()
@@ -124,8 +126,10 @@ protected:
 			m_BufferContainerIndex = -1;
 			m_IsTextured = false;
 		}
+		virtual ~CTileLayerVisuals() = default;
 
 		bool Init(unsigned int Width, unsigned int Height);
+		void Unload();
 
 		class CTileVisual
 		{
@@ -205,16 +209,19 @@ public:
 	bool IsValid() const override { return m_pLayerQuads->m_NumQuads > 0; }
 	virtual void Render(const CRenderLayerParams &Params) override;
 	virtual bool DoRender(const CRenderLayerParams &Params) const override;
+	void Unload() override;
 
 protected:
 	virtual IGraphics::CTextureHandle GetTexture() const override { return m_TextureHandle; }
 	void CalculateClipping();
 
-	class CQuadLayerVisuals
+	class CQuadLayerVisuals : public CComponentInterfaces
 	{
 	public:
 		CQuadLayerVisuals() :
 			m_QuadNum(0), m_BufferContainerIndex(-1), m_IsTextured(false) {}
+		virtual ~CQuadLayerVisuals() = default;
+		void Unload();
 
 		int m_QuadNum;
 		int m_BufferContainerIndex;
