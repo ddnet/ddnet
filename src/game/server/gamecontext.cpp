@@ -4457,8 +4457,11 @@ void CGameContext::LoadMapSettings()
 	Console()->ExecuteFile(aBuf, IConsole::CLIENT_ID_NO_GAME);
 }
 
-void CGameContext::OnSnap(int ClientId)
+void CGameContext::OnSnap(int ClientId, bool GlobalSnap)
 {
+	// sixup should only snap during global snap
+	dbg_assert(!Server()->IsSixup(ClientId) || GlobalSnap, "sixup should only snap during global snap");
+
 	// add tuning to demo
 	if(Server()->IsRecording(ClientId > -1 ? ClientId : MAX_CLIENTS) && mem_comp(&CTuningParams::DEFAULT, &m_Tuning, sizeof(CTuningParams)) != 0)
 	{
@@ -4481,12 +4484,21 @@ void CGameContext::OnSnap(int ClientId)
 		m_apPlayers[ClientId]->FakeSnap();
 
 	m_World.Snap(ClientId);
-	m_Events.Snap(ClientId);
+
+	// events are only sent on global snapshots
+	if(GlobalSnap)
+	{
+		m_Events.Snap(ClientId);
+	}
 }
-void CGameContext::OnPreSnap() {}
-void CGameContext::OnPostSnap()
+
+void CGameContext::OnPostGlobalSnap()
 {
-	m_World.PostSnap();
+	for(auto &pPlayer : m_apPlayers)
+	{
+		if(pPlayer && pPlayer->GetCharacter())
+			pPlayer->GetCharacter()->PostGlobalSnap();
+	}
 	m_Events.Clear();
 }
 
@@ -4559,6 +4571,13 @@ bool CGameContext::IsClientReady(int ClientId) const
 bool CGameContext::IsClientPlayer(int ClientId) const
 {
 	return m_apPlayers[ClientId] && m_apPlayers[ClientId]->GetTeam() != TEAM_SPECTATORS;
+}
+
+bool CGameContext::IsClientHighBandwidth(int ClientId) const
+{
+	// force high bandwidth is not supported for sixup
+	return m_apPlayers[ClientId] && !Server()->IsSixup(ClientId) && Server()->GetAuthedState(ClientId) &&
+	       (m_apPlayers[ClientId]->GetTeam() == TEAM_SPECTATORS || m_apPlayers[ClientId]->IsPaused());
 }
 
 CUuid CGameContext::GameUuid() const { return m_GameUuid; }
