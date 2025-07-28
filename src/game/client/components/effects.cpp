@@ -417,14 +417,14 @@ void CEffects::OnRender()
 		Speed = DemoPlayer()->BaseInfo()->m_Speed;
 
 	const int64_t Now = time();
-	auto FUpdateClock = [&](bool &Add, int64_t &LastUpdate, int Frequency) {
+	auto UpdateClock = [&](bool &Add, int64_t &LastUpdate, int Frequency) {
 		Add = Now - LastUpdate > time_freq() / ((float)Frequency * Speed);
 		if(Add)
 			LastUpdate = Now;
 	};
-	FUpdateClock(m_Add5hz, m_LastUpdate5hz, 5);
-	FUpdateClock(m_Add50hz, m_LastUpdate50hz, 50);
-	FUpdateClock(m_Add100hz, m_LastUpdate100hz, 100);
+	UpdateClock(m_Add5hz, m_LastUpdate5hz, 5);
+	UpdateClock(m_Add50hz, m_LastUpdate50hz, 50);
+	UpdateClock(m_Add100hz, m_LastUpdate100hz, 100);
 
 	if(m_Add50hz)
 		GameClient()->m_Flow.Update();
