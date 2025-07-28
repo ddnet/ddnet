@@ -20,6 +20,7 @@
 #include <engine/input.h>
 #include <engine/keys.h>
 #include <engine/map.h>
+#include <engine/notifications.h>
 #include <engine/serverbrowser.h>
 #include <engine/sound.h>
 #include <engine/steam.h>
@@ -56,7 +57,6 @@
 #include "client.h"
 #include "demoedit.h"
 #include "friends.h"
-#include "notifications.h"
 #include "serverbrowser.h"
 
 #if defined(CONF_VIDEORECORDER)
@@ -76,7 +76,6 @@
 
 #include <chrono>
 #include <limits>
-#include <new>
 #include <stack>
 #include <thread>
 #include <tuple>

@@ -5,7 +5,6 @@
 
 #include <base/vmath.h>
 
-#include <map>
 #include <set>
 #include <vector>
 
