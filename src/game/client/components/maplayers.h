@@ -5,7 +5,9 @@
 #include <game/client/component.h>
 #include <game/client/render.h>
 
-#include "render_layer.h"
+#include <game/map/envelope_eval.h>
+#include <game/map/render_layer.h>
+
 #include <cstdint>
 #include <memory>
 #include <vector>
@@ -35,7 +37,7 @@ class CMapLayers : public CComponent
 
 	CLayers *m_pLayers;
 	CMapImages *m_pImages;
-	std::shared_ptr<CMapBasedEnvelopePointAccess> m_pEnvelopePoints;
+	std::shared_ptr<IEnvelopeEval> m_pEnvelopePointAccess;
 
 	int m_Type;
 	bool m_OnlineOnly;
@@ -50,9 +52,7 @@ public:
 		TYPE_ALL = -1,
 	};
 
-	static void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels, IMap *pMap, CMapBasedEnvelopePointAccess *pEnvelopePoints, IClient *pClient, CGameClient *pGameClient, bool OnlineOnly);
 	void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels);
-
 	CMapLayers(int Type, bool OnlineOnly = true);
 	int Sizeof() const override { return sizeof(*this); }
 	void OnInit() override;

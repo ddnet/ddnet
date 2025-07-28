@@ -26,6 +26,7 @@ public:
 	float EndTime() const;
 	int GetChannels() const;
 	EType Type() const { return m_Type; }
+	const IEnvelopePointAccess &PointAccess() const { return m_PointsAccess; }
 
 private:
 	void Resort();

@@ -1,5 +1,5 @@
-#ifndef GAME_CLIENT_COMPONENTS_RENDER_LAYER_H
-#define GAME_CLIENT_COMPONENTS_RENDER_LAYER_H
+#ifndef GAME_MAP_RENDER_LAYER_H
+#define GAME_MAP_RENDER_LAYER_H
 
 #include <cstdint>
 
@@ -18,6 +18,8 @@ using offset_ptr32 = unsigned int;
 #include <game/client/render.h>
 #include <game/mapitems.h>
 #include <game/mapitems_ex.h>
+
+#include "envelope_eval.h"
 
 class CMapLayers;
 class CMapItemLayerTilemap;
@@ -45,7 +47,7 @@ class CRenderLayer : public CComponentInterfaces
 public:
 	CRenderLayer(int GroupId, int LayerId, int Flags);
 	virtual ~CRenderLayer() = default;
-	void OnInit(CGameClient *pGameClient, IMap *pMap, CMapImages *pMapImages, std::shared_ptr<CMapBasedEnvelopePointAccess> &pEvelopePoints, bool OnlineOnly);
+	void OnInit(CGameClient *pGameClient, IMap *pMap, CMapImages *pMapImages, std::shared_ptr<IEnvelopeEval> &pEvelopePoints, bool OnlineOnly);
 
 	virtual void Init() = 0;
 	virtual void Render(const CRenderLayerParams &Params) = 0;
@@ -69,7 +71,7 @@ protected:
 
 	class IMap *m_pMap = nullptr;
 	class CMapImages *m_pMapImages = nullptr;
-	std::shared_ptr<CMapBasedEnvelopePointAccess> m_pEnvelopePoints;
+	std::shared_ptr<IEnvelopeEval> m_pEnvelopeEval;
 };
 
 class CRenderLayerGroup : public CRenderLayer

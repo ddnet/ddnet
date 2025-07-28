@@ -102,14 +102,7 @@ static const char *FILETYPE_EXTENSIONS[CEditor::NUM_FILETYPES] = {
 void CEditor::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels, void *pUser)
 {
 	CEditor *pThis = (CEditor *)pUser;
-	if(Env < 0 || Env >= (int)pThis->m_Map.m_vpEnvelopes.size())
-		return;
-
-	std::shared_ptr<CEnvelope> pEnv = pThis->m_Map.m_vpEnvelopes[Env];
-	float Time = pThis->m_AnimateTime;
-	Time *= pThis->m_AnimateSpeed;
-	Time += (TimeOffsetMillis / 1000.0f);
-	pEnv->Eval(Time, Result, Channels);
+	pThis->m_pEnvelopeEval->EnvelopeEval(TimeOffsetMillis, Env, Result, Channels, false);
 }
 
 /********************************************************
@@ -8781,6 +8774,8 @@ void CEditor::Init()
 
 	m_pBrush = std::make_shared<CLayerGroup>();
 	m_pBrush->m_pMap = &m_Map;
+
+	m_pEnvelopeEval = std::make_shared<CEnvelopeEvalEditor>(this);
 
 	Reset(false);
 }

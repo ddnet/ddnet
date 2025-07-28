@@ -1,5 +1,4 @@
 #include "render_layer.h"
-#include "maplayers.h"
 
 #include <base/log.h>
 
@@ -135,7 +134,7 @@ static void mem_copy_special(void *pDest, void *pSource, size_t Size, size_t Cou
 void CRenderLayer::EnvelopeEvalRenderLayer(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels, void *pUser)
 {
 	CRenderLayer *pRenderLayer = (CRenderLayer *)pUser;
-	CMapLayers::EnvelopeEval(TimeOffsetMillis, Env, Result, Channels, pRenderLayer->m_pMap, pRenderLayer->m_pEnvelopePoints.get(), pRenderLayer->Client(), pRenderLayer->GameClient(), pRenderLayer->m_OnlineOnly);
+	pRenderLayer->m_pEnvelopeEval->EnvelopeEval(TimeOffsetMillis, Env, Result, Channels, pRenderLayer->m_OnlineOnly);
 }
 
 bool CRenderLayerTile::CTileLayerVisuals::Init(unsigned int Width, unsigned int Height)
@@ -165,12 +164,12 @@ bool CRenderLayerTile::CTileLayerVisuals::Init(unsigned int Width, unsigned int 
 CRenderLayer::CRenderLayer(int GroupId, int LayerId, int Flags) :
 	m_GroupId(GroupId), m_LayerId(LayerId), m_Flags(Flags) {}
 
-void CRenderLayer::OnInit(CGameClient *pGameClient, IMap *pMap, CMapImages *pMapImages, std::shared_ptr<CMapBasedEnvelopePointAccess> &pEvelopePoints, bool OnlineOnly)
+void CRenderLayer::OnInit(CGameClient *pGameClient, IMap *pMap, CMapImages *pMapImages, std::shared_ptr<IEnvelopeEval> &pEvelopePoints, bool OnlineOnly)
 {
 	OnInterfacesInit(pGameClient);
 	m_pMap = pMap;
 	m_pMapImages = pMapImages;
-	m_pEnvelopePoints = pEvelopePoints;
+	m_pEnvelopeEval = pEvelopePoints;
 	m_OnlineOnly = OnlineOnly;
 }
 
@@ -466,7 +465,7 @@ ColorRGBA CRenderLayerTile::GetRenderColor(const CRenderLayerParams &Params) con
 		Color.a *= (100 - Params.m_EntityOverlayVal) / 100.0f;
 
 	ColorRGBA ColorEnv = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-	CMapLayers::EnvelopeEval(m_pLayerTilemap->m_ColorEnvOffset, m_pLayerTilemap->m_ColorEnv, ColorEnv, 4, m_pMap, m_pEnvelopePoints.get(), Client(), GameClient(), m_OnlineOnly);
+	m_pEnvelopeEval->EnvelopeEval(m_pLayerTilemap->m_ColorEnvOffset, m_pLayerTilemap->m_ColorEnv, ColorEnv, 4, m_OnlineOnly);
 	Color = Color.Multiply(ColorEnv);
 	return Color;
 }
@@ -825,7 +824,7 @@ void CRenderLayerQuads::RenderQuadLayer(bool Force)
 			CQuad *pQuad = &pQuads[i];
 
 			ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-			CMapLayers::EnvelopeEval(pQuad->m_ColorEnvOffset, pQuad->m_ColorEnv, Color, 4, m_pMap, m_pEnvelopePoints.get(), Client(), GameClient(), m_OnlineOnly);
+			m_pEnvelopeEval->EnvelopeEval(pQuad->m_ColorEnvOffset, pQuad->m_ColorEnv, Color, 4, m_OnlineOnly);
 
 			const bool IsFullyTransparent = Color.a <= 0.0f;
 			const bool NeedsFlush = QuadsRenderCount == gs_GraphicsMaxQuadsRenderCount || IsFullyTransparent;
@@ -846,7 +845,7 @@ void CRenderLayerQuads::RenderQuadLayer(bool Force)
 			if(!IsFullyTransparent)
 			{
 				ColorRGBA Position = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
-				CMapLayers::EnvelopeEval(pQuad->m_PosEnvOffset, pQuad->m_PosEnv, Position, 3, m_pMap, m_pEnvelopePoints.get(), Client(), GameClient(), m_OnlineOnly);
+				m_pEnvelopeEval->EnvelopeEval(pQuad->m_PosEnvOffset, pQuad->m_PosEnv, Position, 3, m_OnlineOnly);
 
 				SQuadRenderInfo &QInfo = m_vQuadRenderInfo[QuadsRenderCount++];
 				QInfo.m_Color = Color;
@@ -864,7 +863,7 @@ void CRenderLayerQuads::RenderQuadLayer(bool Force)
 		if(m_QuadRenderGroup.m_ColorEnv >= 0)
 		{
 			ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-			CMapLayers::EnvelopeEval(m_QuadRenderGroup.m_ColorEnvOffset, m_QuadRenderGroup.m_ColorEnv, Color, 4, m_pMap, m_pEnvelopePoints.get(), Client(), GameClient(), m_OnlineOnly);
+			m_pEnvelopeEval->EnvelopeEval(m_QuadRenderGroup.m_ColorEnvOffset, m_QuadRenderGroup.m_ColorEnv, Color, 4, m_OnlineOnly);
 
 			if(Color.a <= 0.0f)
 				return;
@@ -874,7 +873,7 @@ void CRenderLayerQuads::RenderQuadLayer(bool Force)
 		if(m_QuadRenderGroup.m_PosEnv >= 0)
 		{
 			ColorRGBA Position = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
-			CMapLayers::EnvelopeEval(m_QuadRenderGroup.m_PosEnvOffset, m_QuadRenderGroup.m_PosEnv, Position, 3, m_pMap, m_pEnvelopePoints.get(), Client(), GameClient(), m_OnlineOnly);
+			m_pEnvelopeEval->EnvelopeEval(m_QuadRenderGroup.m_PosEnvOffset, m_QuadRenderGroup.m_PosEnv, Position, 3, m_OnlineOnly);
 
 			QInfo.m_Offsets.x = Position.r;
 			QInfo.m_Offsets.y = Position.g;
@@ -1039,56 +1038,56 @@ void CRenderLayerQuads::CalculateClipping()
 	int aEnvOffsetMax[2] = {0, 0};
 	if(m_QuadRenderGroup.m_PosEnv >= 0)
 	{
-		int EnvStart, EnvNum;
-		m_pMap->GetType(MAPITEMTYPE_ENVELOPE, &EnvStart, &EnvNum);
-		const CMapItemEnvelope *pItem = static_cast<const CMapItemEnvelope *>(m_pMap->GetItem(EnvStart + m_QuadRenderGroup.m_PosEnv));
-
-		if(pItem->m_Channels != 3)
+		std::shared_ptr<const CMapItemEnvelope> pItem = m_pEnvelopeEval->GetEnvelope(m_QuadRenderGroup.m_PosEnv);
+		if(pItem)
 		{
-			// fall back to no clip, because this is either not a position envelope or the map contains invalid data
-			log_warn("maprender", "quad layer at group %d, layer %d contains an invalid channel count (%d) for automatic quad clipping.", m_GroupId, m_LayerId, pItem->m_Channels);
-			m_QuadRenderGroup.m_Clipped = false;
-			return;
-		}
-
-		for(int Channel = 0; Channel < 2; ++Channel)
-		{
-			aEnvOffsetMin[Channel] = std::numeric_limits<int>::max(); // minimum of channel
-			aEnvOffsetMax[Channel] = std::numeric_limits<int>::min(); // maximum of channel
-		}
-
-		for(int PointId = pItem->m_StartPoint; PointId < pItem->m_StartPoint + pItem->m_NumPoints; ++PointId)
-		{
-			const CEnvPoint *pEnvPoint = m_pEnvelopePoints->GetPoint(PointId);
-
-			// rotation is not implemented for clipping
-			if(pEnvPoint->m_aValues[2] != 0)
+			if(pItem->m_Channels != 3)
 			{
+				// fall back to no clip, because this is either not a position envelope or the map contains invalid data
+				log_warn("maprender", "quad layer at group %d, layer %d contains an invalid channel count (%d) for automatic quad clipping.", m_GroupId, m_LayerId, pItem->m_Channels);
 				m_QuadRenderGroup.m_Clipped = false;
 				return;
 			}
 
 			for(int Channel = 0; Channel < 2; ++Channel)
 			{
-				aEnvOffsetMin[Channel] = std::min(pEnvPoint->m_aValues[Channel], aEnvOffsetMin[Channel]);
-				aEnvOffsetMax[Channel] = std::max(pEnvPoint->m_aValues[Channel], aEnvOffsetMax[Channel]);
+				aEnvOffsetMin[Channel] = std::numeric_limits<int>::max(); // minimum of channel
+				aEnvOffsetMax[Channel] = std::numeric_limits<int>::min(); // maximum of channel
+			}
 
-				// bezier curves can have offsets beyond the fixed points
-				// using the bezier position is just an estimate, but clipping like this is good enough
-				if(PointId < pItem->m_StartPoint + pItem->m_NumPoints - 1 && pEnvPoint->m_Curvetype == CURVETYPE_BEZIER)
+			for(int PointId = pItem->m_StartPoint; PointId < pItem->m_StartPoint + pItem->m_NumPoints; ++PointId)
+			{
+				const CEnvPoint *pEnvPoint = m_pEnvelopeEval->PointAccess(m_QuadRenderGroup.m_PosEnv).GetPoint(PointId);
+
+				// rotation is not implemented for clipping
+				if(pEnvPoint->m_aValues[2] != 0)
 				{
-					const CEnvPointBezier *pEnvPointBezier = m_pEnvelopePoints->GetBezier(PointId);
-					// we are only interested in the height not in the time, meaning we only need delta Y
-					aEnvOffsetMin[Channel] = std::min(pEnvPoint->m_aValues[Channel] + pEnvPointBezier->m_aOutTangentDeltaY[Channel], aEnvOffsetMin[Channel]);
-					aEnvOffsetMax[Channel] = std::max(pEnvPoint->m_aValues[Channel] + pEnvPointBezier->m_aOutTangentDeltaY[Channel], aEnvOffsetMax[Channel]);
+					m_QuadRenderGroup.m_Clipped = false;
+					return;
 				}
 
-				if(PointId > 0 && m_pEnvelopePoints->GetPoint(PointId - 1)->m_Curvetype == CURVETYPE_BEZIER)
+				for(int Channel = 0; Channel < 2; ++Channel)
 				{
-					const CEnvPointBezier *pEnvPointBezier = m_pEnvelopePoints->GetBezier(PointId);
-					// we are only interested in the height not in the time, meaning we only need delta Y
-					aEnvOffsetMin[Channel] = std::min(pEnvPoint->m_aValues[Channel] + pEnvPointBezier->m_aInTangentDeltaY[Channel], aEnvOffsetMin[Channel]);
-					aEnvOffsetMax[Channel] = std::max(pEnvPoint->m_aValues[Channel] + pEnvPointBezier->m_aInTangentDeltaY[Channel], aEnvOffsetMax[Channel]);
+					aEnvOffsetMin[Channel] = std::min(pEnvPoint->m_aValues[Channel], aEnvOffsetMin[Channel]);
+					aEnvOffsetMax[Channel] = std::max(pEnvPoint->m_aValues[Channel], aEnvOffsetMax[Channel]);
+
+					// bezier curves can have offsets beyond the fixed points
+					// using the bezier position is just an estimate, but clipping like this is good enough
+					if(PointId < pItem->m_StartPoint + pItem->m_NumPoints - 1 && pEnvPoint->m_Curvetype == CURVETYPE_BEZIER)
+					{
+						const CEnvPointBezier *pEnvPointBezier = m_pEnvelopeEval->PointAccess(m_QuadRenderGroup.m_PosEnv).GetBezier(PointId);
+						// we are only interested in the height not in the time, meaning we only need delta Y
+						aEnvOffsetMin[Channel] = std::min(pEnvPoint->m_aValues[Channel] + pEnvPointBezier->m_aOutTangentDeltaY[Channel], aEnvOffsetMin[Channel]);
+						aEnvOffsetMax[Channel] = std::max(pEnvPoint->m_aValues[Channel] + pEnvPointBezier->m_aOutTangentDeltaY[Channel], aEnvOffsetMax[Channel]);
+					}
+
+					if(PointId > 0 && m_pEnvelopeEval->PointAccess(m_QuadRenderGroup.m_PosEnv).GetPoint(PointId - 1)->m_Curvetype == CURVETYPE_BEZIER)
+					{
+						const CEnvPointBezier *pEnvPointBezier = m_pEnvelopeEval->PointAccess(m_QuadRenderGroup.m_PosEnv).GetBezier(PointId);
+						// we are only interested in the height not in the time, meaning we only need delta Y
+						aEnvOffsetMin[Channel] = std::min(pEnvPoint->m_aValues[Channel] + pEnvPointBezier->m_aInTangentDeltaY[Channel], aEnvOffsetMin[Channel]);
+						aEnvOffsetMax[Channel] = std::max(pEnvPoint->m_aValues[Channel] + pEnvPointBezier->m_aInTangentDeltaY[Channel], aEnvOffsetMax[Channel]);
+					}
 				}
 			}
 		}

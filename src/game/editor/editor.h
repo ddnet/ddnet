@@ -26,6 +26,8 @@
 #include <game/editor/mapitems/layer_tune.h>
 #include <game/editor/mapitems/map.h>
 
+#include <game/map/envelope_eval.h>
+
 #include <engine/console.h>
 #include <engine/editor.h>
 #include <engine/engine.h>
@@ -698,6 +700,7 @@ public:
 	int m_ShiftBy;
 
 	static void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels, void *pUser);
+	std::shared_ptr<IEnvelopeEval> m_pEnvelopeEval;
 
 	CLineInputBuffered<256> m_SettingsCommandInput;
 	CMapSettingsBackend m_MapSettingsBackend;
