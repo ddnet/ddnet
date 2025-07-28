@@ -41,6 +41,7 @@
 
 #include <engine/graphics.h>
 
+#include <algorithm>
 #include <cstdlib>
 
 class IStorage;
@@ -814,7 +815,62 @@ void CGraphicsBackend_SDL_GL::ClampDriverVersion(EBackendType BackendType)
 	}
 }
 
-bool CGraphicsBackend_SDL_GL::ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg)
+static Uint32 MessageBoxTypeToSdlFlags(IGraphics::EMessageBoxType Type)
+{
+	switch(Type)
+	{
+	case IGraphics::EMessageBoxType::ERROR:
+		return SDL_MESSAGEBOX_ERROR;
+	case IGraphics::EMessageBoxType::WARNING:
+		return SDL_MESSAGEBOX_WARNING;
+	case IGraphics::EMessageBoxType::INFO:
+		return SDL_MESSAGEBOX_INFORMATION;
+	}
+	dbg_assert(false, "Type invalid");
+	return 0;
+}
+
+static std::optional<int> ShowMessageBoxImpl(const IGraphics::CMessageBox &MessageBox, SDL_Window *pWindow)
+{
+	dbg_assert(!MessageBox.m_vButtons.empty(), "At least one button is required");
+
+	std::vector<SDL_MessageBoxButtonData> vButtonData;
+	vButtonData.reserve(MessageBox.m_vButtons.size());
+	for(const auto &Button : MessageBox.m_vButtons)
+	{
+		SDL_MessageBoxButtonData ButtonData{};
+		ButtonData.buttonid = vButtonData.size();
+		ButtonData.flags = (Button.m_Confirm ? SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT : 0) | (Button.m_Cancel ? SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT : 0);
+		ButtonData.text = Button.m_pLabel;
+		vButtonData.emplace_back(ButtonData);
+	}
+#if defined(CONF_FAMILY_WINDOWS)
+	// TODO SDL3: The order of buttons is not defined by default, but the flags returned by MessageBoxTypeToSdlFlags do not work together
+	//            with SDL_MESSAGEBOX_BUTTONS_LEFT_TO_RIGHT with SDL2 on various platforms. Windows appears to be the only platform that
+	//            lays out buttons from right to left by default, so we reverse the order manually.
+	std::reverse(vButtonData.begin(), vButtonData.end());
+#endif
+	SDL_MessageBoxData MessageBoxData{};
+	MessageBoxData.title = MessageBox.m_pTitle;
+	MessageBoxData.message = MessageBox.m_pMessage;
+	MessageBoxData.flags = MessageBoxTypeToSdlFlags(MessageBox.m_Type);
+	MessageBoxData.numbuttons = vButtonData.size();
+	MessageBoxData.buttons = vButtonData.data();
+	MessageBoxData.window = pWindow;
+	int ButtonId = -1;
+	if(SDL_ShowMessageBox(&MessageBoxData, &ButtonId) != 0)
+	{
+		return std::nullopt;
+	}
+	return ButtonId;
+}
+
+std::optional<int> ShowMessageBoxWithoutGraphics(const IGraphics::CMessageBox &MessageBox)
+{
+	return ShowMessageBoxImpl(MessageBox, nullptr);
+}
+
+std::optional<int> CGraphicsBackend_SDL_GL::ShowMessageBox(const IGraphics::CMessageBox &MessageBox)
 {
 	if(m_pProcessor != nullptr)
 	{
@@ -828,7 +884,7 @@ bool CGraphicsBackend_SDL_GL::ShowMessageBox(unsigned Type, const char *pTitle, 
 		SDL_DestroyWindow(m_pWindow);
 		m_pWindow = nullptr;
 	}
-	return SDL_ShowSimpleMessageBox(Type, pTitle, pMsg, nullptr) == 0;
+	return ShowMessageBoxImpl(MessageBox, m_pWindow);
 }
 
 bool CGraphicsBackend_SDL_GL::IsModernAPI(EBackendType BackendType)

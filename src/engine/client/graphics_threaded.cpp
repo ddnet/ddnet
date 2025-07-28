@@ -2898,12 +2898,14 @@ std::optional<SWarning> CGraphics_Threaded::CurrentWarning()
 	}
 }
 
-bool CGraphics_Threaded::ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg)
+std::optional<int> CGraphics_Threaded::ShowMessageBox(const CMessageBox &MessageBox)
 {
 	if(m_pBackend == nullptr)
-		return false;
+	{
+		return std::nullopt;
+	}
 	m_pBackend->WaitForIdle();
-	return m_pBackend->ShowMessageBox(Type, pTitle, pMsg);
+	return m_pBackend->ShowMessageBox(MessageBox);
 }
 
 bool CGraphics_Threaded::IsBackendInitialized()
