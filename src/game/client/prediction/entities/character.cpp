@@ -11,17 +11,14 @@
 
 // Character, "physical" player's part
 
-void CCharacter::SetWeapon(int W)
+void CCharacter::SetWeapon(int Weapon)
 {
-	if(W == m_Core.m_ActiveWeapon)
+	if(Weapon == m_Core.m_ActiveWeapon)
 		return;
 
 	m_LastWeapon = m_Core.m_ActiveWeapon;
 	m_QueuedWeapon = -1;
-	SetActiveWeapon(W);
-
-	if(m_Core.m_ActiveWeapon < 0 || m_Core.m_ActiveWeapon >= NUM_WEAPONS)
-		SetActiveWeapon(0);
+	SetActiveWeapon(Weapon);
 }
 
 void CCharacter::SetSolo(bool Solo)
@@ -1362,8 +1359,10 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 			}
 		}
 		// add weapon
-		if(pChar->m_Weapon != WEAPON_NINJA)
+		if(pChar->m_Weapon >= 0 && pChar->m_Weapon != WEAPON_NINJA)
+		{
 			m_Core.m_aWeapons[pChar->m_Weapon].m_Got = true;
+		}
 
 		// without ddnetcharacter we don't know if we have jetpack, so try to predict jetpack if strength isn't 0, on vanilla it's always 0
 		if(GameWorld()->m_WorldConfig.m_PredictWeapons && Tuning()->m_JetpackStrength != 0)
@@ -1433,7 +1432,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 	SetTuneZone(GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0);
 
 	// set the current weapon
-	if(pChar->m_Weapon != WEAPON_NINJA)
+	if(pChar->m_Weapon >= 0 && pChar->m_Weapon != WEAPON_NINJA)
 	{
 		m_Core.m_aWeapons[pChar->m_Weapon].m_Ammo = (GameWorld()->m_WorldConfig.m_InfiniteAmmo || pChar->m_Weapon == WEAPON_HAMMER) ? -1 : pChar->m_AmmoCount;
 		if(pChar->m_Weapon != m_Core.m_ActiveWeapon)
@@ -1484,9 +1483,16 @@ bool CCharacter::Match(CCharacter *pChar) const
 	return distance(pChar->m_Core.m_Pos, m_Core.m_Pos) <= 32.f;
 }
 
-void CCharacter::SetActiveWeapon(int ActiveWeap)
+void CCharacter::SetActiveWeapon(int ActiveWeapon)
 {
-	m_Core.m_ActiveWeapon = ActiveWeap;
+	if(ActiveWeapon < WEAPON_HAMMER || ActiveWeapon >= NUM_WEAPONS)
+	{
+		m_Core.m_ActiveWeapon = WEAPON_HAMMER;
+	}
+	else
+	{
+		m_Core.m_ActiveWeapon = ActiveWeapon;
+	}
 	m_LastWeaponSwitchTick = GameWorld()->GameTick();
 }
 
