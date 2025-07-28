@@ -193,8 +193,9 @@ public:
 	void SetHookedPlayer(int HookedPlayer);
 
 	int m_ActiveWeapon;
-	struct WeaponStat
+	class CWeaponStat
 	{
+	public:
 		int m_AmmoRegenStart;
 		int m_Ammo;
 		int m_Ammocost;
