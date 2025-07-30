@@ -23,7 +23,6 @@ public:
 
 	// Commands
 	virtual void ConsoleCommand(const char *pCommand) = 0;
-
 	virtual ~IAntibot() = default;
 };
 

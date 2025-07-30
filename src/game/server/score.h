@@ -40,7 +40,6 @@ class CScore
 
 public:
 	CScore(CGameContext *pGameServer, CDbConnectionPool *pPool);
-	~CScore() = default;
 
 	CPlayerData *PlayerData(int Id) { return &m_aPlayerData[Id]; }
 
