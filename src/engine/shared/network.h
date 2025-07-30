@@ -264,7 +264,7 @@ private:
 	// client 0.7
 	static TOKEN GenerateToken7(const NETADDR *pPeerAddr);
 	class CNetBase *m_pNetBase;
-	bool IsSixup() { return m_Sixup; }
+	bool IsSixup() const { return m_Sixup; }
 
 	//
 	void SetPeerAddr(const NETADDR *pAddr);
