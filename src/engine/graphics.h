@@ -483,8 +483,81 @@ public:
 
 	virtual std::optional<SWarning> CurrentWarning() = 0;
 
-	// returns true if the error msg was shown
-	virtual bool ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg) = 0;
+	/**
+	 * Type of a message box popup.
+	 *
+	 * @see CMessageBox
+	 */
+	enum class EMessageBoxType
+	{
+		ERROR,
+		WARNING,
+		INFO,
+	};
+	/**
+	 * Description of a message box popup button.
+	 *
+	 * @see CMessageBox
+	 */
+	class CMessageBoxButton
+	{
+	public:
+		/**
+		 * The label of this button.
+		 *
+		 * @remark This needs to be short because some systems do not increase the button sizes.
+		 */
+		const char *m_pLabel = nullptr;
+		/**
+		 * Whether the enter key activates this button.
+		 */
+		bool m_Confirm = false;
+		/**
+		 * Whether the escape key activates this button.
+		 *
+		 * @remark Closing the popup with the window manager will also cause this button to be activated.
+		 */
+		bool m_Cancel = false;
+	};
+	/**
+	 * Description of a message box popup.
+	 *
+	 * @see ShowMessageBox
+	 */
+	class CMessageBox
+	{
+	public:
+		/**
+		 * Title of the message box.
+		 */
+		const char *m_pTitle = nullptr;
+		/**
+		 * Main message of the message box.
+		 */
+		const char *m_pMessage = nullptr;
+		/**
+		 * Type of the message box.
+		 */
+		EMessageBoxType m_Type = EMessageBoxType::ERROR;
+		/**
+		 * Buttons shown in the message box. At least one button is required.
+		 * The buttons are layed out from left to right.
+		 */
+		std::vector<CMessageBoxButton> m_vButtons = {{.m_pLabel = "OK", .m_Confirm = true, .m_Cancel = true}};
+	};
+	/**
+	 * Shows a modal message box with configuration title, message and buttons.
+	 *
+	 * @param MessageBox Description of the message box.
+	 *
+	 * @return Optional containing the index of the pressed button if the popup was shown successfully.
+	 * @return Empty optional if the message box was not shown successfully.
+	 *
+	 * @remark Note that calling this function will destroy the current window,
+	 *         so it only makes sense for fatal errors at the moment.
+	 */
+	virtual std::optional<int> ShowMessageBox(const CMessageBox &MessageBox) = 0;
+
 	virtual bool IsBackendInitialized() = 0;
 
 protected:
@@ -511,5 +584,12 @@ public:
 };
 
 extern IEngineGraphics *CreateEngineGraphicsThreaded();
+
+/**
+ * This function should only be used when the graphics are not initialized or when @link IGraphics::ShowMessageBox @endlink failed.
+ *
+ * @see IGraphics::ShowMessageBox
+ */
+extern std::optional<int> ShowMessageBoxWithoutGraphics(const IGraphics::CMessageBox &MessageBox);
 
 #endif

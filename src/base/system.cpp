@@ -138,7 +138,7 @@ void dbg_assert_imp(const char *filename, int line, const char *fmt, ...)
 	va_list args;
 	va_start(args, fmt);
 	str_format_v(msg, sizeof(msg), fmt, args);
-	char error[512];
+	char error[1024];
 	str_format(error, sizeof(error), "%s(%d): %s", filename, line, msg);
 	va_end(args);
 	log_error("assert", "%s", error);

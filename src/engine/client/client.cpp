@@ -3048,7 +3048,7 @@ void CClient::Run()
 	if(!InitNetworkClient(aNetworkError, sizeof(aNetworkError)))
 	{
 		log_error("client", "%s", aNetworkError);
-		ShowMessageBox("Network Error", aNetworkError);
+		ShowMessageBox({.m_pTitle = "Network Error", .m_pMessage = aNetworkError});
 		return;
 	}
 
@@ -3056,7 +3056,7 @@ void CClient::Run()
 	{
 		const char *pErrorMessage = "Failed to initialize the HTTP client.";
 		log_error("client", "%s", pErrorMessage);
-		ShowMessageBox("HTTP Error", pErrorMessage);
+		ShowMessageBox({.m_pTitle = "HTTP Error", .m_pMessage = pErrorMessage});
 		return;
 	}
 
@@ -3067,7 +3067,7 @@ void CClient::Run()
 	if(m_pGraphics->Init() != 0)
 	{
 		log_error("client", "couldn't init graphics");
-		ShowMessageBox("Graphics Error", "The graphics could not be initialized.");
+		ShowMessageBox({.m_pTitle = "Graphics Error", .m_pMessage = "The graphics could not be initialized."});
 		return;
 	}
 
@@ -4533,26 +4533,6 @@ static bool SaveUnknownCommandCallback(const char *pCommand, void *pUser)
 	return true;
 }
 
-static Uint32 GetSdlMessageBoxFlags(IClient::EMessageBoxType Type)
-{
-	switch(Type)
-	{
-	case IClient::MESSAGE_BOX_TYPE_ERROR:
-		return SDL_MESSAGEBOX_ERROR;
-	case IClient::MESSAGE_BOX_TYPE_WARNING:
-		return SDL_MESSAGEBOX_WARNING;
-	case IClient::MESSAGE_BOX_TYPE_INFO:
-		return SDL_MESSAGEBOX_INFORMATION;
-	}
-	dbg_assert(false, "Type invalid");
-	return 0;
-}
-
-static void ShowMessageBox(const char *pTitle, const char *pMessage, IClient::EMessageBoxType Type = IClient::MESSAGE_BOX_TYPE_ERROR)
-{
-	SDL_ShowSimpleMessageBox(GetSdlMessageBoxFlags(Type), pTitle, pMessage, nullptr);
-}
-
 /*
 	Server Time
 	Client Mirror Time
@@ -4583,7 +4563,7 @@ int main(int argc, const char **argv)
 	// not to be initialized correctly when starting the app again.
 	if(gs_AndroidStarted)
 	{
-		::ShowMessageBox("Android Error", "The app was started, but not closed properly, this causes bugs. Please restart or manually close this task.");
+		ShowMessageBoxWithoutGraphics({.m_pTitle = "Android Error", .m_pMessage = "The app was started, but not closed properly, this causes bugs. Please restart or manually close this task."});
 		std::exit(0);
 	}
 	gs_AndroidStarted = true;
@@ -4628,7 +4608,7 @@ int main(int argc, const char **argv)
 	if(pAndroidInitError != nullptr)
 	{
 		log_error("android", "%s", pAndroidInitError);
-		::ShowMessageBox("Android Error", pAndroidInitError);
+		ShowMessageBoxWithoutGraphics({.m_pTitle = "Android Error", .m_pMessage = pAndroidInitError});
 		std::exit(0);
 	}
 #endif
@@ -4695,23 +4675,73 @@ int main(int argc, const char **argv)
 	dbg_assert_set_handler([MainThreadId, pClient](const char *pMsg) {
 		if(MainThreadId != std::this_thread::get_id())
 			return;
-		char aVersionStr[128];
-		if(!os_version_str(aVersionStr, sizeof(aVersionStr)))
-			str_copy(aVersionStr, "unknown");
-		char aGpuInfo[256];
+		char aOsVersionString[128];
+		if(!os_version_str(aOsVersionString, sizeof(aOsVersionString)))
+		{
+			str_copy(aOsVersionString, "unknown");
+		}
+		char aGpuInfo[512];
 		pClient->GetGpuInfoString(aGpuInfo);
-		char aMessage[768];
+		char aMessage[2048];
 		str_format(aMessage, sizeof(aMessage),
 			"An assertion error occurred. Please write down or take a screenshot of the following information and report this error.\n"
-			"Please also share the assert log which you should find in the 'dumps' folder in your config directory.\n\n"
+			"Please also share the assert log"
+#if defined(CONF_CRASHDUMP)
+			" and crash log"
+#endif
+			" which you should find in the 'dumps' folder in your config directory.\n\n"
 			"%s\n\n"
-			"Platform: %s\n"
-			"Game version: %s %s\n"
+			"Platform: %s (%s)\n"
+			"Configuration: base"
+#if defined(CONF_AUTOUPDATE)
+			" + autoupdate"
+#endif
+#if defined(CONF_CRASHDUMP)
+			" + crashdump"
+#endif
+#if defined(CONF_DEBUG)
+			" + debug"
+#endif
+#if defined(CONF_DISCORD)
+			" + discord"
+#endif
+#if defined(CONF_VIDEORECORDER)
+			" + videorecorder"
+#endif
+#if defined(CONF_WEBSOCKETS)
+			" + websockets"
+#endif
+			"\n"
+			"Game version: %s %s %s\n"
 			"OS version: %s\n\n"
 			"%s", // GPU info
-			pMsg, CONF_PLATFORM_STRING, GAME_RELEASE_VERSION, GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "", aVersionStr,
+			pMsg,
+			CONF_PLATFORM_STRING, CONF_ARCH_ENDIAN_STRING,
+			GAME_NAME, GAME_RELEASE_VERSION, GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "",
+			aOsVersionString,
 			aGpuInfo);
-		pClient->ShowMessageBox("Assertion Error", aMessage);
+		// Also log all of this information to the assertion log file
+		log_error("assertion", "%s", aMessage);
+		std::vector<IGraphics::CMessageBoxButton> vButtons;
+		// Storage may not have been initialized yet and viewing files is not supported on Android yet
+#if !defined(CONF_PLATFORM_ANDROID)
+		if(pClient->Storage() != nullptr)
+		{
+			vButtons.push_back({.m_pLabel = "Show dumps"});
+		}
+#endif
+		vButtons.push_back({.m_pLabel = "OK", .m_Confirm = true, .m_Cancel = true});
+		const std::optional<int> MessageResult = pClient->ShowMessageBox({.m_pTitle = "Assertion Error", .m_pMessage = aMessage, .m_vButtons = vButtons});
+#if !defined(CONF_PLATFORM_ANDROID)
+		if(pClient->Storage() != nullptr && MessageResult && *MessageResult == 0)
+		{
+			char aDumpsPath[IO_MAX_PATH_LENGTH];
+			pClient->Storage()->GetCompletePath(IStorage::TYPE_SAVE, "dumps", aDumpsPath, sizeof(aDumpsPath));
+			pClient->ViewFile(aDumpsPath);
+		}
+#else
+		(void)MessageResult;
+#endif
 		// Client will crash due to assertion, don't call PerformAllCleanup in this inconsistent state
 	});
 
@@ -4735,7 +4765,7 @@ int main(int argc, const char **argv)
 		{
 			log_error("client", "Failed to initialize the storage location (see details above)");
 			std::string Message = "Failed to initialize the storage location. See details below.\n\n" + MemoryLogger.ConcatenatedLines();
-			pClient->ShowMessageBox("Storage Error", Message.c_str());
+			pClient->ShowMessageBox({.m_pTitle = "Storage Error", .m_pMessage = Message.c_str()});
 			PerformAllCleanup();
 			return -1;
 		}
@@ -4758,7 +4788,7 @@ int main(int argc, const char **argv)
 	{
 		const char *pError = "Failed to initialize the secure RNG.";
 		log_error("secure", "%s", pError);
-		pClient->ShowMessageBox("Secure RNG Error", pError);
+		pClient->ShowMessageBox({.m_pTitle = "Secure RNG Error", .m_pMessage = pError});
 		PerformAllCleanup();
 		return -1;
 	}
@@ -4819,7 +4849,7 @@ int main(int argc, const char **argv)
 		{
 			const char *pError = "Failed to load config from '" CONFIG_FILE "'.";
 			log_error("client", "%s", pError);
-			pClient->ShowMessageBox("Config File Error", pError);
+			pClient->ShowMessageBox({.m_pTitle = "Config File Error", .m_pMessage = pError});
 			PerformAllCleanup();
 			return -1;
 		}
@@ -4917,7 +4947,7 @@ int main(int argc, const char **argv)
 		char aError[256];
 		str_format(aError, sizeof(aError), "Unable to initialize SDL base: %s", SDL_GetError());
 		log_error("client", "%s", aError);
-		pClient->ShowMessageBox("SDL Error", aError);
+		pClient->ShowMessageBox({.m_pTitle = "SDL Error", .m_pMessage = aError});
 		PerformAllCleanup();
 		return -1;
 	}
@@ -4941,7 +4971,7 @@ int main(int argc, const char **argv)
 
 	for(const SWarning &Warning : vQuittingWarnings)
 	{
-		::ShowMessageBox(Warning.m_aWarningTitle, Warning.m_aWarningMsg);
+		ShowMessageBoxWithoutGraphics({.m_pTitle = Warning.m_aWarningTitle, .m_pMessage = Warning.m_aWarningMsg});
 	}
 
 	if(Restarting)
@@ -5252,21 +5282,42 @@ void CClient::ShellUnregister()
 }
 #endif
 
-void CClient::ShowMessageBox(const char *pTitle, const char *pMessage, EMessageBoxType Type)
+std::optional<int> CClient::ShowMessageBox(const IGraphics::CMessageBox &MessageBox)
 {
-	if(m_pGraphics == nullptr || !m_pGraphics->ShowMessageBox(GetSdlMessageBoxFlags(Type), pTitle, pMessage))
-		::ShowMessageBox(pTitle, pMessage, Type);
+	std::optional<int> Result = m_pGraphics == nullptr ? std::nullopt : m_pGraphics->ShowMessageBox(MessageBox);
+	if(!Result)
+	{
+		Result = ShowMessageBoxWithoutGraphics(MessageBox);
+	}
+	return Result;
 }
 
-void CClient::GetGpuInfoString(char (&aGpuInfo)[256])
+void CClient::GetGpuInfoString(char (&aGpuInfo)[512])
 {
-	if(m_pGraphics != nullptr && m_pGraphics->IsBackendInitialized())
+	if(m_pGraphics == nullptr || !m_pGraphics->IsBackendInitialized())
 	{
-		str_format(aGpuInfo, std::size(aGpuInfo), "GPU: %s - %s - %s", m_pGraphics->GetVendorString(), m_pGraphics->GetRendererString(), m_pGraphics->GetVersionString());
+		str_format(aGpuInfo, std::size(aGpuInfo),
+			"Graphics backend: %s %d.%d.%d\n"
+			"Graphics %s not yet initialized.",
+			g_Config.m_GfxBackend, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch,
+			m_pGraphics == nullptr ? "were" : "backend was");
 	}
 	else
 	{
-		str_copy(aGpuInfo, "Graphics backend was not yet initialized.");
+		// TODO: Even better would be if the backend could return its name and version, because the config variables can be outdated when the client was not restarted.
+		str_format(aGpuInfo, std::size(aGpuInfo),
+			"Graphics backend: %s %d.%d.%d\n"
+			"GPU: %s - %s - %s\n"
+			"Texture: %" PRIu64 " MiB, "
+			"Buffer: %" PRIu64 " MiB, "
+			"Streamed: %" PRIu64 " MiB, "
+			"Staging: %" PRIu64 " MiB",
+			g_Config.m_GfxBackend, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch,
+			m_pGraphics->GetVendorString(), m_pGraphics->GetRendererString(), m_pGraphics->GetVersionString(),
+			m_pGraphics->TextureMemoryUsage() / 1024 / 1024,
+			m_pGraphics->BufferMemoryUsage() / 1024 / 1024,
+			m_pGraphics->StreamedMemoryUsage() / 1024 / 1024,
+			m_pGraphics->StagingMemoryUsage() / 1024 / 1024);
 	}
 }
 
