@@ -52,10 +52,8 @@ public:
 		IResult(int ClientId) :
 			m_NumArgs(0),
 			m_ClientId(ClientId) {}
-		IResult(const IResult &Other) :
-			m_NumArgs(Other.m_NumArgs),
-			m_ClientId(Other.m_ClientId) {}
-		virtual ~IResult() {}
+		IResult(const IResult &Other) = default;
+		virtual ~IResult() = default;
 
 		virtual int GetInteger(unsigned Index) const = 0;
 		virtual float GetFloat(unsigned Index) const = 0;
@@ -79,7 +77,7 @@ public:
 
 	public:
 		CCommandInfo() { m_AccessLevel = ACCESS_LEVEL_ADMIN; }
-		virtual ~CCommandInfo() {}
+		virtual ~CCommandInfo() = default;
 		const char *m_pName;
 		const char *m_pHelp;
 		const char *m_pParams;

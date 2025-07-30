@@ -42,7 +42,7 @@ class CDemoRecorder : public IDemoRecorder
 
 public:
 	CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool NoMapData = false);
-	CDemoRecorder() {}
+	CDemoRecorder() = default;
 	~CDemoRecorder() override;
 
 	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, const SHA256_DIGEST &Sha256, unsigned MapCrc, const char *pType, unsigned MapSize, unsigned char *pMapData, IOHANDLE MapFile, DEMOFUNC_FILTER pfnFilter, void *pUser);
@@ -66,7 +66,7 @@ public:
 	class IListener
 	{
 	public:
-		virtual ~IListener() {}
+		virtual ~IListener() = default;
 		virtual void OnDemoPlayerSnapshot(void *pData, int Size) = 0;
 		virtual void OnDemoPlayerMessage(void *pData, int Size) = 0;
 	};

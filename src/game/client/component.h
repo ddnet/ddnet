@@ -161,9 +161,7 @@ public:
 	/**
 	 * The component virtual destructor.
 	 */
-	virtual ~CComponent()
-	{
-	}
+	virtual ~CComponent() = default;
 
 	/**
 	 * Gets the size of the non-abstract component.
