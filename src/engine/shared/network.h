@@ -604,9 +604,9 @@ public:
 // TODO: both, fix these. This feels like a junk class for stuff that doesn't fit anywhere
 class CNetBase
 {
-	static IOHANDLE ms_DataLogSent;
-	static IOHANDLE ms_DataLogRecv;
-	static CHuffman ms_Huffman;
+	static IOHANDLE DATA_LOG_SENT;
+	static IOHANDLE DATA_LOG_RECV;
+	static CHuffman HUFFMAN;
 
 public:
 	static void OpenLog(IOHANDLE DataLogSent, IOHANDLE DataLogRecv);
