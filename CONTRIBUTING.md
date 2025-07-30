@@ -15,6 +15,15 @@ A non-exhaustive list of things that usually get rejected:
 	- Existing maps should not break.
 	- New gameplay should not make runs easier on already completed maps.
 
+Check the [list of issues](https://github.com/ddnet/ddnet/issues) to find issues to work on.
+Unlabeled issues have not been triaged yet and are usually not good candidates.
+Furthermore, the label https://github.com/ddnet/ddnet/labels/needs-discussion indicate issues that still need discussion before they can be implemented and issues with the label https://github.com/ddnet/ddnet/labels/fix-changes-physics are too involved for new contributors.
+Working on issues with the labels https://github.com/ddnet/ddnet/labels/good%20first%20issue, https://github.com/ddnet/ddnet/labels/bug and https://github.com/ddnet/ddnet/labels/feature-accepted is recommended.
+Make sure the issue is not already being worked on by someone else, by checking its assignment and whether there are open pull requests linked to it.
+If you would like to work on an issue, please comment on it to be assigned to it or if you have any questions.
+
+Adding new features generally requires the support of at least two maintainers to avoid feature creep.
+
 ## Programming languages
 
 We currently use the following languages to develop DDNet.
