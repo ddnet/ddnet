@@ -11,6 +11,7 @@
 #include <cstring>
 #include <iomanip> // std::get_time
 #include <iterator> // std::size
+#include <random>
 #include <sstream> // std::istringstream
 #include <string_view>
 
@@ -2702,7 +2703,9 @@ int fs_remove(const char *filename)
 	}
 	const std::wstring wide_filename = windows_utf8_to_wide(filename);
 
-	unsigned random_num = secure_rand();
+	thread_local std::mt19937 rand_generator(std::random_device{}());
+	std::uniform_int_distribution<unsigned> rand_distribution(std::numeric_limits<unsigned>::min(), std::numeric_limits<unsigned>::max());
+	unsigned random_num = rand_distribution(rand_generator);
 	std::wstring wide_filename_temp;
 	do
 	{
