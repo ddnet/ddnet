@@ -2088,7 +2088,7 @@ Renders your frame rate in the top right
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Русский перевод выполнен: kaddyd, carzil, RaZeR[RT], BotanEgg, Bananbl4, Arion WT, gerdoe, Vy0x2, Anime.pdf, ban+eblan, ByFox, Sedonya, WTF, Риксед и oxyzo
+== Русский перевод выполнен: kaddyd, carzil, RaZeR[RT], BotanEgg, Bananbl4, Arion WT, gerdoe, Vy0x2, Anime.pdf, ban+eblan, ByFox, Sedonya, WTF, Риксед, oxyzo и 4ipset
 
 Show spectator cursor
 == Показывать курсор других при наблюдении
@@ -2203,13 +2203,13 @@ Dragger Inner Color
 
 [Spectating]
 Following %d: %s
-== 
+== Наблюдение за %d: %s
 
 Loading map
-== 
+== Загрузка карты
 
 Error checking player name
-== 
+== Ошибка при проверке имени игрока
 
 Could not check for existing player with your name. Check your internet connection.
-== 
+== Не удалось проверить, существует ли игрок с вашим именем. Проверьте подключение к Интернету.
