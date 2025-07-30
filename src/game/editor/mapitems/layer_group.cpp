@@ -152,17 +152,19 @@ void CLayerGroup::GetSize(float *pWidth, float *pHeight) const
 	}
 }
 
-int CLayerGroup::SwapLayers(int Index0, int Index1)
+int CLayerGroup::MoveLayer(int IndexFrom, int IndexTo)
 {
-	if(Index0 < 0 || Index0 >= (int)m_vpLayers.size())
-		return Index0;
-	if(Index1 < 0 || Index1 >= (int)m_vpLayers.size())
-		return Index0;
-	if(Index0 == Index1)
-		return Index0;
+	if(IndexFrom < 0 || IndexFrom >= (int)m_vpLayers.size())
+		return IndexFrom;
+	if(IndexTo < 0 || IndexTo >= (int)m_vpLayers.size())
+		return IndexFrom;
+	if(IndexFrom == IndexTo)
+		return IndexFrom;
 	m_pMap->OnModify();
-	std::swap(m_vpLayers[Index0], m_vpLayers[Index1]);
-	return Index1;
+	auto pMovedLayer = m_vpLayers[IndexFrom];
+	m_vpLayers.erase(m_vpLayers.begin() + IndexFrom);
+	m_vpLayers.insert(m_vpLayers.begin() + IndexTo, pMovedLayer);
+	return IndexTo;
 }
 
 bool CLayerGroup::IsEmpty() const
