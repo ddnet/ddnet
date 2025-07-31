@@ -1450,25 +1450,23 @@ void CEditorActionEnvelopeAdd::Redo()
 	m_pEditor->m_SelectedEnvelope = m_pEditor->m_Map.m_vpEnvelopes.size() - 1;
 }
 
-CEditorActionEveloppeDelete::CEditorActionEveloppeDelete(CEditor *pEditor, int EnvelopeIndex) :
-	IEditorAction(pEditor), m_EnvelopeIndex(EnvelopeIndex), m_pEnv(pEditor->m_Map.m_vpEnvelopes[EnvelopeIndex])
+CEditorActionEnvelopeDelete::CEditorActionEnvelopeDelete(CEditor *pEditor, int EnvelopeIndex, std::vector<std::shared_ptr<IEditorEnvelopeReference>> &vpObjectReferences, std::shared_ptr<CEnvelope> &pEnvelope) :
+	IEditorAction(pEditor), m_EnvelopeIndex(EnvelopeIndex), m_pEnv(pEnvelope), m_vpObjectReferences(vpObjectReferences)
 {
 	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Delete envelope %d", m_EnvelopeIndex);
 }
 
-void CEditorActionEveloppeDelete::Undo()
+void CEditorActionEnvelopeDelete::Undo()
 {
 	// Undo is adding back the envelope
-	m_pEditor->m_Map.m_vpEnvelopes.insert(m_pEditor->m_Map.m_vpEnvelopes.begin() + m_EnvelopeIndex, m_pEnv);
-	m_pEditor->m_SelectedEnvelope = m_EnvelopeIndex;
+	m_pEditor->m_Map.InsertEnvelope(m_EnvelopeIndex, m_pEnv);
+	m_pEditor->m_Map.UpdateEnvelopeReferences(m_EnvelopeIndex, m_pEnv, m_vpObjectReferences);
 }
 
-void CEditorActionEveloppeDelete::Redo()
+void CEditorActionEnvelopeDelete::Redo()
 {
 	// Redo is erasing the same envelope index
-	m_pEditor->m_Map.m_vpEnvelopes.erase(m_pEditor->m_Map.m_vpEnvelopes.begin() + m_EnvelopeIndex);
-	if(m_pEditor->m_SelectedEnvelope >= (int)m_pEditor->m_Map.m_vpEnvelopes.size())
-		m_pEditor->m_SelectedEnvelope = m_pEditor->m_Map.m_vpEnvelopes.size() - 1;
+	m_pEditor->m_Map.DeleteEnvelope(m_EnvelopeIndex);
 }
 
 CEditorActionEnvelopeEdit::CEditorActionEnvelopeEdit(CEditor *pEditor, int EnvelopeIndex, EEditType EditType, int Previous, int Current) :
