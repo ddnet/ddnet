@@ -9,7 +9,6 @@
 #include <game/version.h>
 
 #include <limits>
-#include <thread>
 
 #if !defined(CONF_FAMILY_WINDOWS)
 #include <csignal>
