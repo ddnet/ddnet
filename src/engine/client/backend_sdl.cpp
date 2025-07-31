@@ -213,7 +213,6 @@ bool CCommandProcessorFragment_General::RunCommand(const CCommandBuffer::SComman
 {
 	switch(pBaseCommand->m_Cmd)
 	{
-	case CCommandBuffer::CMD_NOP: break;
 	case CCommandBuffer::CMD_SIGNAL: Cmd_Signal(static_cast<const CCommandBuffer::SCommand_Signal *>(pBaseCommand)); break;
 	default: return false;
 	}
