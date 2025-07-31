@@ -6006,16 +6006,18 @@ void CEditor::RemoveUnusedEnvelopes()
 {
 	m_EnvelopeEditorHistory.BeginBulk();
 	int DeletedCount = 0;
-	for(size_t Envelope = 0; Envelope < m_Map.m_vpEnvelopes.size();)
+	for(size_t EnvelopeIndex = 0; EnvelopeIndex < m_Map.m_vpEnvelopes.size();)
 	{
-		if(IsEnvelopeUsed(Envelope))
+		if(IsEnvelopeUsed(EnvelopeIndex))
 		{
-			++Envelope;
+			++EnvelopeIndex;
 		}
 		else
 		{
-			m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEveloppeDelete>(this, Envelope));
-			m_Map.DeleteEnvelope(Envelope);
+			// deleting removes the shared ptr from the map
+			std::shared_ptr<CEnvelope> Envelope = m_Map.m_vpEnvelopes[EnvelopeIndex];
+			auto ObjectReferences = m_Map.DeleteEnvelope(EnvelopeIndex);
+			m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeDelete>(this, EnvelopeIndex, ObjectReferences, Envelope));
 			DeletedCount++;
 		}
 	}
@@ -6370,8 +6372,10 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			static int s_DeleteButton = 0;
 			if(DoButton_Editor(&s_DeleteButton, "✗", 0, &Button, BUTTONFLAG_LEFT, "Delete this envelope."))
 			{
-				m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEveloppeDelete>(this, m_SelectedEnvelope));
-				m_Map.DeleteEnvelope(m_SelectedEnvelope);
+				// deleting removes the shared ptr from the map
+				std::shared_ptr<CEnvelope> Envelope = m_Map.m_vpEnvelopes[m_SelectedEnvelope];
+				auto ObjectReferences = m_Map.DeleteEnvelope(m_SelectedEnvelope);
+				m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeDelete>(this, m_SelectedEnvelope, ObjectReferences, Envelope));
 				if(m_SelectedEnvelope >= (int)m_Map.m_vpEnvelopes.size())
 					m_SelectedEnvelope = m_Map.m_vpEnvelopes.size() - 1;
 				pEnvelope = m_SelectedEnvelope >= 0 ? m_Map.m_vpEnvelopes[m_SelectedEnvelope] : nullptr;
