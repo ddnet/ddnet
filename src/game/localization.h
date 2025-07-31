@@ -32,7 +32,7 @@ class CLocalizationDatabase
 		unsigned m_ContextHash;
 		const char *m_pReplacement;
 
-		CString() {}
+		CString() = default;
 		CString(unsigned Hash, unsigned ContextHash, const char *pReplacement) :
 			m_Hash(Hash), m_ContextHash(ContextHash), m_pReplacement(pReplacement)
 		{

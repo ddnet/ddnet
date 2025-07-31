@@ -39,9 +39,7 @@ public:
 		m_Readonly = false;
 	}
 
-	virtual ~CLayer()
-	{
-	}
+	virtual ~CLayer() = default;
 
 	virtual void BrushSelecting(CUIRect Rect) {}
 	virtual int BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect) { return 0; }

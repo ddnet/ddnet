@@ -37,7 +37,6 @@ public:
 		CInput *Input() { return m_pInput; }
 
 	public:
-		CJoystick() {}
 		CJoystick(CInput *pInput, int Index, SDL_Joystick *pDelegate);
 		virtual ~CJoystick() = default;
 
