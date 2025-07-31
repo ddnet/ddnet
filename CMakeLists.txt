@@ -2533,6 +2533,8 @@ if(CLIENT)
     quick_action.h
     quick_actions.cpp
     quick_actions.h
+    references.cpp
+    references.h
     smooth_value.cpp
     smooth_value.h
     tileart.cpp
