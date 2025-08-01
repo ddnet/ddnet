@@ -60,6 +60,7 @@ public:
 	void OnMapLoadImpl(class CLayers *pLayers, class IMap *pMap);
 	void OnMapLoad() override;
 	void OnInit() override;
+	void Unload();
 	void LoadBackground(class CLayers *pLayers, class IMap *pMap);
 
 	// DDRace

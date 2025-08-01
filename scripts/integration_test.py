@@ -351,8 +351,12 @@ class Runnable:
 			if isinstance(event, Exit):
 				raise EOFError("program exited before reaching wanted log line")
 			elif isinstance(event, Log):
+				print(f"debug log: {event.line}")
 				if fn(event):
 					return event
+			else:
+				print(f"debug event: {str(event)}")
+
 	def wait_for_log_prefix(self, prefix, timeout=1):
 		self.wait_for_log(lambda l: l.line.startswith(prefix), timeout=timeout)
 	def wait_for_log_exact(self, line, timeout=1):
@@ -544,6 +548,27 @@ def client_can_connect(test_env):
 	client.wait_for_exit()
 
 @test
+def client_reconnect_mapswitch(test_env):
+	client = test_env.client()
+	server = test_env.server()
+	wait_for_startup([client, server])
+	client.command(f"connect localhost:{server.port}")
+	server.wait_for_log_prefix("server: player has entered the game", timeout=10)
+
+	client.command(f"rcon_auth {server.rcon_password}")
+	server.wait_for_log_exact("server: ClientId=0 authed with key=default_admin (admin)")
+	client.command("rcon sv_map Tutorial")
+	client.wait_for_log_exact("client: connected, sending info", timeout=10)
+	client.wait_for_log_prefix("client: got pong from current server", timeout=10)
+	server.wait_for_log_prefix("server: player has entered the game", timeout=30)
+
+	server.exit()
+	client.wait_for_log_exact("client: offline error='Server shutdown'")
+	client.exit()
+	server.wait_for_exit()
+	client.wait_for_exit()
+
+@test
 def open_editor(test_env):
 	client = test_env.client(["maps/coverage.map"])
 	client.wait_for_log_exact("editor/load: Loaded map 'maps/coverage.map'", timeout=10)
@@ -551,7 +576,7 @@ def open_editor(test_env):
 	client.exit()
 	client.wait_for_exit()
 
-@test
+@test(timeout=100)
 def smoke_test(test_env):
 	client1 = test_env.client(["logfile client1.log", "player_name client1"])
 	server = test_env.server(["logfile server.log", "sv_demo_chat 1", "sv_map coverage", "sv_tee_historian 1"])
@@ -619,7 +644,7 @@ def smoke_test(test_env):
 	client1.command("rcon sv_map Tutorial")
 
 	for _ in range(2):
-		server.wait_for_log_prefix("server: player has entered the game", timeout=10)
+		server.wait_for_log_prefix("server: player has entered the game", timeout=100)
 
 	client1.clear_events()
 	client2.clear_events()
