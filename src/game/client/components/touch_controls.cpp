@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <functional>
+#include <iterator>
 #include <queue>
 
 using namespace std::chrono_literals;
@@ -2054,18 +2055,105 @@ void CTouchControls::RenderButtonsEditor()
 	}
 }
 
-CTouchControls::CUnitRect CTouchControls::FindPositionXY(std::vector<CUnitRect> &vVisibleButtonRects, CUnitRect MyRect) const
+CTouchControls::CUnitRect CTouchControls::FindPositionXY(std::vector<CUnitRect> &vVisibleButtonRects, CUnitRect MyRect)
 {
+	// Border clamp
+	MyRect.m_X = std::clamp(MyRect.m_X, 0, BUTTON_SIZE_SCALE - MyRect.m_W);
+	MyRect.m_Y = std::clamp(MyRect.m_Y, 0, BUTTON_SIZE_SCALE - MyRect.m_H);
+	// Not overlapping with any rects
 	{
-		MyRect.m_X = std::clamp(MyRect.m_X, 0, BUTTON_SIZE_SCALE - MyRect.m_W);
-		MyRect.m_Y = std::clamp(MyRect.m_Y, 0, BUTTON_SIZE_SCALE - MyRect.m_H);
 		bool IfOverlap = std::any_of(vVisibleButtonRects.begin(), vVisibleButtonRects.end(), [&MyRect](const auto &Rect) {
 			return MyRect.IsOverlap(Rect);
 		});
 		if(!IfOverlap)
 			return MyRect;
 	}
-	std::sort(vVisibleButtonRects.begin(), vVisibleButtonRects.end(), [](CUnitRect Lhs, CUnitRect Rhs) {
+	if(vVisibleButtonRects != m_vLastUpdateRects || MyRect.m_W != m_vLastWidth || MyRect.m_H != m_vLastHeight)
+	{
+		m_vLastWidth = MyRect.m_W;
+		m_vLastHeight = MyRect.m_H;
+		m_vLastUpdateRects = vVisibleButtonRects;
+		BuildPositionXY(m_vLastUpdateRects, MyRect);
+	}
+	CUnitRect Result = {-1, -1, MyRect.m_W, MyRect.m_H}, SampleRect;
+	for(const ivec2 &Target : m_vTargets)
+	{
+		SampleRect = {Target.x, Target.y, MyRect.m_W, MyRect.m_H};
+		if(Result.m_X == -1 || MyRect.Distance(Result) > MyRect.Distance(SampleRect))
+			Result = SampleRect;
+	}
+	int BestXPosition = -BUTTON_SIZE_SCALE, BestYPosition = -BUTTON_SIZE_SCALE, Cur = 0;
+	std::vector<CUnitRect> vTargetRects;
+	vTargetRects.reserve(m_vLastUpdateRects.size());
+	std::copy_if(m_vXSortedRects.begin(), m_vXSortedRects.end(), std::back_inserter(vTargetRects), [&](const CUnitRect &Rect) {
+		return !(Rect.m_Y + Rect.m_H <= MyRect.m_Y || MyRect.m_Y + MyRect.m_H <= Rect.m_Y);
+	});
+	for(const CUnitRect &Rect : vTargetRects)
+	{
+		if(Cur >= Rect.m_X + Rect.m_W)
+			continue;
+		SampleRect = {Cur, MyRect.m_Y, MyRect.m_W, MyRect.m_H};
+		if(Cur + MyRect.m_W <= BUTTON_SIZE_SCALE && !SampleRect.IsOverlap(Rect))
+		{
+			BestXPosition = std::abs(Cur - MyRect.m_X) < std::abs(BestXPosition - MyRect.m_X) ? Cur : BestXPosition;
+			BestXPosition = std::abs(Rect.m_X - MyRect.m_W - MyRect.m_X) < std::abs(BestXPosition - MyRect.m_X) ? Rect.m_X - MyRect.m_W : BestXPosition;
+		}
+		Cur = Rect.m_X + Rect.m_W;
+	}
+	if(Cur + MyRect.m_W <= BUTTON_SIZE_SCALE)
+	{
+		BestXPosition = std::abs(Cur - MyRect.m_X) < std::abs(BestXPosition - MyRect.m_X) ? Cur : BestXPosition;
+	}
+
+	vTargetRects.clear();
+	std::copy_if(m_vYSortedRects.begin(), m_vYSortedRects.end(), std::back_inserter(vTargetRects), [&](const CUnitRect &Rect) {
+		return !(Rect.m_X + Rect.m_W <= MyRect.m_X || MyRect.m_X + MyRect.m_W <= Rect.m_X);
+	});
+	Cur = 0;
+	for(const CUnitRect &Rect : vTargetRects)
+	{
+		if(Cur >= Rect.m_Y + Rect.m_H)
+			continue;
+		SampleRect = {MyRect.m_X, Cur, MyRect.m_W, MyRect.m_H};
+		if(Cur + MyRect.m_H <= BUTTON_SIZE_SCALE && !SampleRect.IsOverlap(Rect))
+		{
+			BestYPosition = std::abs(Cur - MyRect.m_Y) < std::abs(BestYPosition - MyRect.m_Y) ? Cur : BestYPosition;
+			BestYPosition = std::abs(Rect.m_Y - MyRect.m_H - MyRect.m_Y) < std::abs(BestYPosition - MyRect.m_Y) ? Rect.m_Y - MyRect.m_H : BestYPosition;
+		}
+		Cur = Rect.m_Y + Rect.m_H;
+	}
+	if(Cur + MyRect.m_H <= BUTTON_SIZE_SCALE)
+	{
+		BestYPosition = std::abs(Cur - MyRect.m_Y) < std::abs(BestYPosition - MyRect.m_Y) ? Cur : BestYPosition;
+	}
+
+	if(BestXPosition != -BUTTON_SIZE_SCALE)
+	{
+		SampleRect = {BestXPosition, MyRect.m_Y, MyRect.m_W, MyRect.m_H};
+		if(Result.m_X == -1 || MyRect.Distance(Result) > MyRect.Distance(SampleRect))
+			Result = SampleRect;
+	}
+	if(BestYPosition != -BUTTON_SIZE_SCALE)
+	{
+		SampleRect = {MyRect.m_X, BestYPosition, MyRect.m_W, MyRect.m_H};
+		if(Result.m_X == -1 || MyRect.Distance(Result) > MyRect.Distance(SampleRect))
+			Result = SampleRect;
+	}
+	return Result;
+}
+
+void CTouchControls::BuildPositionXY(std::vector<CUnitRect> vVisibleButtonRects, CUnitRect MyRect)
+{
+	m_vTargets.clear();
+	m_vTargets.reserve(vVisibleButtonRects.size() * 4);
+	m_vXSortedRects = m_vYSortedRects = vVisibleButtonRects;
+	std::sort(m_vXSortedRects.begin(), m_vXSortedRects.end(), [](const CUnitRect &Lhs, const CUnitRect &Rhs) {
+		return Lhs.m_X < Rhs.m_X;
+	});
+	std::sort(m_vYSortedRects.begin(), m_vYSortedRects.end(), [](const CUnitRect &Lhs, const CUnitRect &Rhs) {
+		return Lhs.m_Y < Rhs.m_Y;
+	});
+	std::sort(vVisibleButtonRects.begin(), vVisibleButtonRects.end(), [](const CUnitRect &Lhs, const CUnitRect &Rhs) {
 		return Lhs.m_X < Rhs.m_X;
 	});
 	class CTree
@@ -2219,16 +2307,15 @@ CTouchControls::CUnitRect CTouchControls::FindPositionXY(std::vector<CUnitRect> 
 	} Tree;
 
 	std::set<int> CandidateX;
-	CandidateX.insert(MyRect.m_X);
 	for(const CUnitRect &Rect : vVisibleButtonRects)
 	{
 		// Rect right border.
 		int Pos = Rect.m_X + Rect.m_W;
-		if(Pos + MyRect.m_W <= BUTTON_SIZE_SCALE && Pos > MyRect.m_X)
+		if(Pos + MyRect.m_W <= BUTTON_SIZE_SCALE)
 			CandidateX.insert(Pos);
 		// Rect left border.
 		Pos = Rect.m_X - MyRect.m_W;
-		if(Pos >= 0 && Pos < MyRect.m_X)
+		if(Pos >= 0)
 			CandidateX.insert(Pos);
 	}
 	CandidateX.insert(CandidateX.begin(), 0);
@@ -2241,7 +2328,6 @@ CTouchControls::CUnitRect CTouchControls::FindPositionXY(std::vector<CUnitRect> 
 	std::priority_queue<int, std::vector<int>, decltype(Cmp)> Out(Cmp);
 
 	unsigned Index = 0;
-	CUnitRect Result = {-1, -1, -1, -1};
 
 	for(int CurrentX : CandidateX)
 	{
@@ -2258,33 +2344,12 @@ CTouchControls::CUnitRect CTouchControls::FindPositionXY(std::vector<CUnitRect> 
 			Out.pop();
 		}
 		auto Spaces = Tree.Query(MyRect.m_H);
-		int BestYPosition = -BUTTON_SIZE_SCALE;
 		for(ivec2 &Space : Spaces)
 		{
-			if(MyRect.m_Y >= Space.x && MyRect.m_Y + MyRect.m_H <= Space.y)
-			{
-				BestYPosition = MyRect.m_Y;
-				break;
-			}
-			if(std::abs(Space.x - MyRect.m_Y) < std::abs(BestYPosition - MyRect.m_Y))
-			{
-				BestYPosition = Space.x;
-			}
-			Space.y -= MyRect.m_H;
-			if(std::abs(Space.y - MyRect.m_Y) < std::abs(BestYPosition - MyRect.m_Y))
-			{
-				BestYPosition = Space.y;
-			}
+			m_vTargets.emplace_back(CurrentX, Space.x);
+			m_vTargets.emplace_back(CurrentX, Space.y - MyRect.m_H);
 		}
-		if(BestYPosition == -BUTTON_SIZE_SCALE)
-			continue;
-		CUnitRect SampleRect = {CurrentX, BestYPosition, MyRect.m_W, MyRect.m_H};
-		if(Result.m_X == -1)
-			Result = SampleRect;
-		else if(MyRect.Distance(Result) > MyRect.Distance(SampleRect))
-			Result = SampleRect;
 	}
-	return Result;
 }
 
 // Create a new button and push_back to m_vTouchButton, then return a pointer.
@@ -2339,7 +2404,7 @@ bool CTouchControls::IsRectOverlapping(CUnitRect MyRect) const
 	return false;
 }
 
-CTouchControls::CUnitRect CTouchControls::UpdatePosition(CUnitRect MyRect, bool Ignore) const
+CTouchControls::CUnitRect CTouchControls::UpdatePosition(CUnitRect MyRect, bool Ignore)
 {
 	std::vector<CUnitRect> vVisibleButtonRects;
 	for(const auto &TouchButton : m_vTouchButtons)

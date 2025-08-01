@@ -83,6 +83,10 @@ public:
 		{
 			return (m_X < Other.m_X + Other.m_W) && (m_X + m_W > Other.m_X) && (m_Y < Other.m_Y + Other.m_H) && (m_Y + m_H > Other.m_Y);
 		}
+		bool operator==(const CUnitRect &Other) const
+		{
+			return m_X == Other.m_X && m_Y == Other.m_Y && m_W == Other.m_W && m_H == Other.m_H;
+		}
 	};
 
 	enum class EButtonVisibility
@@ -588,7 +592,14 @@ private:
 	std::unique_ptr<CBindToggleTouchButtonBehavior> ParseBindToggleBehavior(const json_value *pBehaviorObject);
 	void WriteConfiguration(CJsonWriter *pWriter);
 
-	CUnitRect FindPositionXY(std::vector<CUnitRect> &vVisibleButtonRects, CUnitRect MyRect) const;
+	std::vector<ivec2> m_vTargets;
+	std::vector<CUnitRect> m_vLastUpdateRects;
+	std::vector<CUnitRect> m_vXSortedRects;
+	std::vector<CUnitRect> m_vYSortedRects;
+	int m_vLastWidth = -10;
+	int m_vLastHeight = -10;
+	void BuildPositionXY(std::vector<CUnitRect> vVisibleButtonRects, CUnitRect MyRect);
+	CUnitRect FindPositionXY(std::vector<CUnitRect> &vVisibleButtonRects, CUnitRect MyRect);
 
 	// This is how editor render buttons.
 	void RenderButtonsEditor();
@@ -619,7 +630,7 @@ public:
 	CTouchButton *NewButton();
 	void DeleteSelectedButton();
 	bool IsRectOverlapping(CUnitRect MyRect = {0, 0, BUTTON_SIZE_MINIMUM, BUTTON_SIZE_MINIMUM}) const;
-	CUnitRect UpdatePosition(CUnitRect MyRect, bool Ignore = false) const; // If Ignore == true, then the function will also try to avoid m_pSelectedButton.
+	CUnitRect UpdatePosition(CUnitRect MyRect, bool Ignore = false); // If Ignore == true, then the function will also try to avoid m_pSelectedButton.
 	void ResetButtonPointers();
 	void ResetVirtualVisibilities();
 	CUIRect CalculateScreenFromUnitRect(CUnitRect Unit, EButtonShape Shape = EButtonShape::RECT) const;
