@@ -169,13 +169,13 @@ void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct 
 	unsigned char aBuffer[NET_MAX_PACKETSIZE];
 
 	// log the data
-	if(ms_DataLogSent)
+	if(DATA_LOG_SENT)
 	{
 		int Type = 1;
-		io_write(ms_DataLogSent, &Type, sizeof(Type));
-		io_write(ms_DataLogSent, &pPacket->m_DataSize, sizeof(pPacket->m_DataSize));
-		io_write(ms_DataLogSent, &pPacket->m_aChunkData, pPacket->m_DataSize);
-		io_flush(ms_DataLogSent);
+		io_write(DATA_LOG_SENT, &Type, sizeof(Type));
+		io_write(DATA_LOG_SENT, &pPacket->m_DataSize, sizeof(pPacket->m_DataSize));
+		io_write(DATA_LOG_SENT, &pPacket->m_aChunkData, pPacket->m_DataSize);
+		io_flush(DATA_LOG_SENT);
 	}
 
 	int HeaderSize = NET_PACKETHEADERSIZE;
@@ -196,7 +196,7 @@ void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct 
 	int CompressedSize = -1;
 	if((pPacket->m_Flags & NET_PACKETFLAG_CONTROL) == 0)
 	{
-		CompressedSize = ms_Huffman.Compress(pPacket->m_aChunkData, pPacket->m_DataSize, &aBuffer[HeaderSize], NET_MAX_PACKETSIZE - HeaderSize);
+		CompressedSize = HUFFMAN.Compress(pPacket->m_aChunkData, pPacket->m_DataSize, &aBuffer[HeaderSize], NET_MAX_PACKETSIZE - HeaderSize);
 	}
 
 	// check if the compression was enabled, successful and good enough
@@ -228,13 +228,13 @@ void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct 
 		net_udp_send(Socket, pAddr, aBuffer, FinalSize);
 
 		// log raw socket data
-		if(ms_DataLogSent)
+		if(DATA_LOG_SENT)
 		{
 			int Type = 0;
-			io_write(ms_DataLogSent, &Type, sizeof(Type));
-			io_write(ms_DataLogSent, &FinalSize, sizeof(FinalSize));
-			io_write(ms_DataLogSent, aBuffer, FinalSize);
-			io_flush(ms_DataLogSent);
+			io_write(DATA_LOG_SENT, &Type, sizeof(Type));
+			io_write(DATA_LOG_SENT, &FinalSize, sizeof(FinalSize));
+			io_write(DATA_LOG_SENT, aBuffer, FinalSize);
+			io_flush(DATA_LOG_SENT);
 		}
 	}
 }
@@ -258,13 +258,13 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 	}
 
 	// log the data
-	if(ms_DataLogRecv)
+	if(DATA_LOG_RECV)
 	{
 		int Type = 0;
-		io_write(ms_DataLogRecv, &Type, sizeof(Type));
-		io_write(ms_DataLogRecv, &Size, sizeof(Size));
-		io_write(ms_DataLogRecv, pBuffer, Size);
-		io_flush(ms_DataLogRecv);
+		io_write(DATA_LOG_RECV, &Type, sizeof(Type));
+		io_write(DATA_LOG_RECV, &Size, sizeof(Size));
+		io_write(DATA_LOG_RECV, pBuffer, Size);
+		io_flush(DATA_LOG_RECV);
 	}
 
 	// read the packet
@@ -324,7 +324,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 
 		if((pPacket->m_Flags & NET_PACKETFLAG_COMPRESSION) != 0)
 		{
-			pPacket->m_DataSize = ms_Huffman.Decompress(&pBuffer[DataStart], pPacket->m_DataSize, pPacket->m_aChunkData, sizeof(pPacket->m_aChunkData));
+			pPacket->m_DataSize = HUFFMAN.Decompress(&pBuffer[DataStart], pPacket->m_DataSize, pPacket->m_aChunkData, sizeof(pPacket->m_aChunkData));
 			if(pPacket->m_DataSize < 0)
 			{
 				return -1;
@@ -349,13 +349,13 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 	}
 
 	// log the data
-	if(ms_DataLogRecv)
+	if(DATA_LOG_RECV)
 	{
 		int Type = 1;
-		io_write(ms_DataLogRecv, &Type, sizeof(Type));
-		io_write(ms_DataLogRecv, &pPacket->m_DataSize, sizeof(pPacket->m_DataSize));
-		io_write(ms_DataLogRecv, pPacket->m_aChunkData, pPacket->m_DataSize);
-		io_flush(ms_DataLogRecv);
+		io_write(DATA_LOG_RECV, &Type, sizeof(Type));
+		io_write(DATA_LOG_RECV, &pPacket->m_DataSize, sizeof(pPacket->m_DataSize));
+		io_write(DATA_LOG_RECV, pPacket->m_aChunkData, pPacket->m_DataSize);
+		io_flush(DATA_LOG_RECV);
 	}
 
 	// return success
@@ -435,15 +435,15 @@ bool CNetBase::IsSeqInBackroom(int Seq, int Ack)
 	return false;
 }
 
-IOHANDLE CNetBase::ms_DataLogSent = nullptr;
-IOHANDLE CNetBase::ms_DataLogRecv = nullptr;
-CHuffman CNetBase::ms_Huffman;
+IOHANDLE CNetBase::DATA_LOG_SENT = nullptr;
+IOHANDLE CNetBase::DATA_LOG_RECV = nullptr;
+CHuffman CNetBase::HUFFMAN;
 
 void CNetBase::OpenLog(IOHANDLE DataLogSent, IOHANDLE DataLogRecv)
 {
 	if(DataLogSent)
 	{
-		ms_DataLogSent = DataLogSent;
+		DATA_LOG_SENT = DataLogSent;
 		dbg_msg("network", "logging sent packages");
 	}
 	else
@@ -451,7 +451,7 @@ void CNetBase::OpenLog(IOHANDLE DataLogSent, IOHANDLE DataLogRecv)
 
 	if(DataLogRecv)
 	{
-		ms_DataLogRecv = DataLogRecv;
+		DATA_LOG_RECV = DataLogRecv;
 		dbg_msg("network", "logging recv packages");
 	}
 	else
@@ -460,34 +460,34 @@ void CNetBase::OpenLog(IOHANDLE DataLogSent, IOHANDLE DataLogRecv)
 
 void CNetBase::CloseLog()
 {
-	if(ms_DataLogSent)
+	if(DATA_LOG_SENT)
 	{
 		dbg_msg("network", "stopped logging sent packages");
-		io_close(ms_DataLogSent);
-		ms_DataLogSent = nullptr;
+		io_close(DATA_LOG_SENT);
+		DATA_LOG_SENT = nullptr;
 	}
 
-	if(ms_DataLogRecv)
+	if(DATA_LOG_RECV)
 	{
 		dbg_msg("network", "stopped logging recv packages");
-		io_close(ms_DataLogRecv);
-		ms_DataLogRecv = nullptr;
+		io_close(DATA_LOG_RECV);
+		DATA_LOG_RECV = nullptr;
 	}
 }
 
 int CNetBase::Compress(const void *pData, int DataSize, void *pOutput, int OutputSize)
 {
-	return ms_Huffman.Compress(pData, DataSize, pOutput, OutputSize);
+	return HUFFMAN.Compress(pData, DataSize, pOutput, OutputSize);
 }
 
 int CNetBase::Decompress(const void *pData, int DataSize, void *pOutput, int OutputSize)
 {
-	return ms_Huffman.Decompress(pData, DataSize, pOutput, OutputSize);
+	return HUFFMAN.Decompress(pData, DataSize, pOutput, OutputSize);
 }
 
 void CNetBase::Init()
 {
-	ms_Huffman.Init();
+	HUFFMAN.Init();
 }
 
 void CNetTokenCache::Init(NETSOCKET Socket)
