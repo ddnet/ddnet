@@ -102,7 +102,6 @@ public:
 // takes care of implementation independent operations
 class CCommandProcessorFragment_General
 {
-	void Cmd_Nop();
 	void Cmd_Signal(const CCommandBuffer::SCommand_Signal *pCommand);
 
 public:

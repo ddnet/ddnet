@@ -83,15 +83,10 @@ public:
 		CMDGROUP_PLATFORM_GL = 10000, // commands specific to a platform
 		CMDGROUP_PLATFORM_SDL = 20000,
 
-		//
 		CMD_FIRST = CMDGROUP_CORE,
-		CMD_NOP = CMD_FIRST,
-
-		//
-		CMD_RUNBUFFER,
 
 		// synchronization
-		CMD_SIGNAL,
+		CMD_SIGNAL = CMD_FIRST,
 
 		// texture commands
 		CMD_TEXTURE_CREATE,
@@ -225,13 +220,6 @@ public:
 		SCommand_Signal() :
 			SCommand(CMD_SIGNAL) {}
 		CSemaphore *m_pSemaphore;
-	};
-
-	struct SCommand_RunBuffer : public SCommand
-	{
-		SCommand_RunBuffer() :
-			SCommand(CMD_RUNBUFFER) {}
-		CCommandBuffer *m_pOtherBuffer;
 	};
 
 	struct SCommand_Render : public SCommand
