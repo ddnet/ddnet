@@ -1207,7 +1207,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			MouseSettings.HSplitTop(2.0f, nullptr, &MouseSettings);
 
 			MouseSettings.HSplitTop(20.0f, &Button, &MouseSettings);
-			Ui()->DoScrollbarOption(&g_Config.m_UiMousesens, &g_Config.m_UiMousesens, &Button, Localize("UI mouse sens."), 1, 500, &CUi::ms_LogarithmicScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE);
+			Ui()->DoScrollbarOption(&g_Config.m_UiMousesens, &g_Config.m_UiMousesens, &Button, Localize("UI mouse sens."), 1, 500, &CUi::ms_LogarithmicScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE | CUi::SCROLLBAR_OPTION_DELAYUPDATE);
 		}
 	}
 
