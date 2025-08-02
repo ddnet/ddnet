@@ -22,9 +22,9 @@
 
 using namespace std::chrono_literals;
 
-int IEnvelopePointAccess::FindPointIndex(double TimeMillis) const
+int IEnvelopePointAccess::FindPointIndex(int Time) const
 {
-	// binary search for the interval around TimeMillis
+	// binary search for the interval around Time
 	int Low = 0;
 	int High = NumPoints() - 2;
 	int FoundIndex = -1;
@@ -34,12 +34,12 @@ int IEnvelopePointAccess::FindPointIndex(double TimeMillis) const
 		int Mid = Low + (High - Low) / 2;
 		const CEnvPoint *pMid = GetPoint(Mid);
 		const CEnvPoint *pNext = GetPoint(Mid + 1);
-		if(TimeMillis >= pMid->m_Time && TimeMillis < pNext->m_Time)
+		if(Time >= pMid->m_Time && Time < pNext->m_Time)
 		{
 			FoundIndex = Mid;
 			break;
 		}
-		else if(TimeMillis < pMid->m_Time)
+		else if(Time < pMid->m_Time)
 		{
 			High = Mid - 1;
 		}

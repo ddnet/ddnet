@@ -129,6 +129,11 @@ float CEnvelope::EndTime() const
 	return m_vPoints.back().m_Time / 1000.0f;
 }
 
+int CEnvelope::FindPointIndex(int Time) const
+{
+	return m_PointsAccess.FindPointIndex(Time);
+}
+
 int CEnvelope::GetChannels() const
 {
 	switch(m_Type)

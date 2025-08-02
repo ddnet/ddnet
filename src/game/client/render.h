@@ -233,7 +233,7 @@ public:
 	virtual int NumPoints() const = 0;
 	virtual const CEnvPoint *GetPoint(int Index) const = 0;
 	virtual const CEnvPointBezier *GetBezier(int Index) const = 0;
-	int FindPointIndex(double TimeMillis) const;
+	int FindPointIndex(int Time) const;
 };
 
 class CMapBasedEnvelopePointAccess : public IEnvelopePointAccess
