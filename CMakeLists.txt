@@ -2394,8 +2394,6 @@ if(CLIENT)
     components/players.h
     components/race_demo.cpp
     components/race_demo.h
-    components/render_layer.cpp
-    components/render_layer.h
     components/scoreboard.cpp
     components/scoreboard.h
     components/skins.cpp
@@ -2537,6 +2535,12 @@ if(CLIENT)
     smooth_value.h
     tileart.cpp
   )
+  set(GAME_MAP
+    src/game/map/envelope_eval.cpp
+    src/game/map/envelope_eval.h
+    src/game/map/render_layer.cpp
+    src/game/map/render_layer.h
+  )
   set(GAME_GENERATED_CLIENT
     src/game/generated/checksum.cpp
     src/game/generated/client_data.cpp
@@ -2544,7 +2548,7 @@ if(CLIENT)
     src/game/generated/client_data7.cpp
     src/game/generated/client_data7.h
   )
-  set(CLIENT_SRC ${ENGINE_CLIENT} ${PLATFORM_CLIENT} ${GAME_CLIENT} ${GAME_EDITOR} ${GAME_GENERATED_CLIENT})
+  set(CLIENT_SRC ${ENGINE_CLIENT} ${PLATFORM_CLIENT} ${GAME_CLIENT} ${GAME_EDITOR} ${GAME_MAP} ${GAME_GENERATED_CLIENT})
 
   set(DEPS_CLIENT ${DEPS} ${GLEW_DEP} ${WAVPACK_DEP})
 
