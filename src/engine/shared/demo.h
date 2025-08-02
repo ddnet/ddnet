@@ -180,10 +180,10 @@ public:
 	void SetSpeed(float Speed) override;
 	void SetSpeedIndex(int SpeedIndex) override;
 	void AdjustSpeedIndex(int Offset) override;
-	int SeekPercent(float Percent) override;
-	int SeekTime(float Seconds) override;
-	int SeekTick(ETickOffset TickOffset) override;
-	int SetPos(int WantedTick) override;
+	bool SeekPercent(float Percent) override;
+	bool SeekTime(float Seconds) override;
+	bool SeekTick(ETickOffset TickOffset) override;
+	bool SetPos(int WantedTick) override;
 	const CInfo *BaseInfo() const override { return &m_Info.m_Info; }
 	void GetDemoName(char *pBuffer, size_t BufferSize) const override;
 	bool GetDemoInfo(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo, IOHANDLE *pFile = nullptr, char *pErrorMessage = nullptr, size_t ErrorMessageSize = 0) const override;
