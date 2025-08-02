@@ -218,13 +218,13 @@ private:
 
 		void Reset();
 		void SetActive(const IInput::CTouchFingerState &FingerState);
-		void SetInactive();
+		void SetInactive(bool ByFinger);
 		bool IsActive() const;
 		bool IsActive(const IInput::CTouchFinger &Finger) const;
 
 		virtual CButtonLabel GetLabel() const = 0;
 		virtual void OnActivate() {}
-		virtual void OnDeactivate() {}
+		virtual void OnDeactivate(bool ByFinger) {}
 		virtual void OnUpdate() {}
 		virtual void WriteToConfiguration(CJsonWriter *pWriter) = 0;
 	};
@@ -261,7 +261,7 @@ private:
 			CPredefinedTouchButtonBehavior(BEHAVIOR_ID) {}
 
 		CButtonLabel GetLabel() const override;
-		void OnDeactivate() override;
+		void OnDeactivate(bool ByFinger) override;
 	};
 
 	class CExtraMenuTouchButtonBehavior : public CPredefinedTouchButtonBehavior
@@ -272,7 +272,7 @@ private:
 		CExtraMenuTouchButtonBehavior(int Number);
 
 		CButtonLabel GetLabel() const override;
-		void OnDeactivate() override;
+		void OnDeactivate(bool ByFinger) override;
 		void WriteToConfiguration(CJsonWriter *pWriter) override;
 
 	private:
@@ -289,7 +289,7 @@ private:
 			CPredefinedTouchButtonBehavior(BEHAVIOR_ID) {}
 
 		CButtonLabel GetLabel() const override;
-		void OnDeactivate() override;
+		void OnDeactivate(bool ByFinger) override;
 	};
 
 	class CSpectateTouchButtonBehavior : public CPredefinedTouchButtonBehavior
@@ -301,7 +301,7 @@ private:
 			CPredefinedTouchButtonBehavior(BEHAVIOR_ID) {}
 
 		CButtonLabel GetLabel() const override;
-		void OnDeactivate() override;
+		void OnDeactivate(bool ByFinger) override;
 	};
 
 	class CSwapActionTouchButtonBehavior : public CPredefinedTouchButtonBehavior
@@ -314,7 +314,7 @@ private:
 
 		CButtonLabel GetLabel() const override;
 		void OnActivate() override;
-		void OnDeactivate() override;
+		void OnDeactivate(bool ByFinger) override;
 
 	private:
 		int m_ActiveAction = NUM_ACTIONS;
@@ -330,7 +330,7 @@ private:
 
 		CButtonLabel GetLabel() const override;
 		void OnActivate() override;
-		void OnDeactivate() override;
+		void OnDeactivate(bool ByFinger) override;
 
 	private:
 		int m_ActiveAction = NUM_ACTIONS;
@@ -344,7 +344,7 @@ private:
 
 		CButtonLabel GetLabel() const override;
 		void OnActivate() override;
-		void OnDeactivate() override;
+		void OnDeactivate(bool ByFinger) override;
 		void OnUpdate() override;
 		int ActiveAction() const { return m_ActiveAction; }
 		virtual int SelectedAction() const = 0;
@@ -413,7 +413,7 @@ private:
 
 		CButtonLabel GetLabel() const override;
 		void OnActivate() override;
-		void OnDeactivate() override;
+		void OnDeactivate(bool ByFinger) override;
 		void OnUpdate() override;
 		void WriteToConfiguration(CJsonWriter *pWriter) override;
 
