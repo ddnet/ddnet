@@ -347,13 +347,13 @@ void CTouchControls::CTouchButtonBehavior::SetActive(const IInput::CTouchFingerS
 	}
 }
 
-void CTouchControls::CTouchButtonBehavior::SetInactive()
+void CTouchControls::CTouchButtonBehavior::SetInactive(bool ByFinger)
 {
-	if(m_Active)
+	if(m_Active && ByFinger)
 	{
-		m_Active = false;
 		OnDeactivate();
 	}
+	m_Active = false;
 }
 
 bool CTouchControls::CTouchButtonBehavior::IsActive() const
@@ -1005,7 +1005,7 @@ void CTouchControls::UpdateButtons(const std::vector<IInput::CTouchFingerState> 
 		});
 		if(PrevActiveTouchButton != m_vTouchButtons.end())
 		{
-			PrevActiveTouchButton->m_pBehavior->SetInactive();
+			PrevActiveTouchButton->m_pBehavior->SetInactive(true);
 		}
 		TouchButton.m_pBehavior->SetActive(*FingerInsideButton);
 	}
@@ -1028,7 +1028,7 @@ void CTouchControls::UpdateButtons(const std::vector<IInput::CTouchFingerState> 
 				if(ActiveFinger != vRemainingTouchFingerStates.end())
 					vRemainingTouchFingerStates.erase(ActiveFinger);
 			}
-			TouchButton.m_pBehavior->SetInactive();
+			TouchButton.m_pBehavior->SetInactive(false);
 			continue;
 		}
 		if(!TouchButton.m_pBehavior->IsActive())
@@ -1040,7 +1040,7 @@ void CTouchControls::UpdateButtons(const std::vector<IInput::CTouchFingerState> 
 		});
 		if(ActiveFinger == vRemainingTouchFingerStates.end())
 		{
-			TouchButton.m_pBehavior->SetInactive();
+			TouchButton.m_pBehavior->SetInactive(true);
 		}
 		else
 		{
