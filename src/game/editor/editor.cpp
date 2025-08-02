@@ -6518,12 +6518,11 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		}
 	}
 
-	bool ShowColorBar = false;
-	if(pEnvelope && pEnvelope->GetChannels() == 4)
+	const bool ShowColorBar = pEnvelope && pEnvelope->GetChannels() == 4;
+	if(ShowColorBar)
 	{
-		ShowColorBar = true;
 		View.HSplitTop(20.0f, &ColorBar, &View);
-		ColorBar.Margin(2.0f, &ColorBar);
+		ColorBar.HMargin(2.0f, &ColorBar);
 	}
 
 	RenderBackground(View, m_CheckerTexture, 32.0f, 0.1f);
@@ -6920,45 +6919,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		// render colorbar
 		if(ShowColorBar)
 		{
-			Ui()->ClipEnable(&ColorBar);
-
-			float StartX = maximum(EnvelopeToScreenX(View, 0), ColorBar.x);
-			float EndX = EnvelopeToScreenX(View, pEnvelope->EndTime());
-			CUIRect BackgroundView{
-				StartX,
-				ColorBar.y,
-				minimum(EndX - StartX, ColorBar.x + ColorBar.w - StartX),
-				ColorBar.h};
-			RenderBackground(BackgroundView, m_CheckerTexture, 16.0f, 1.0f);
-
-			Graphics()->TextureClear();
-			Graphics()->QuadsBegin();
-			for(int i = 0; i < (int)pEnvelope->m_vPoints.size() - 1; i++)
-			{
-				float r0 = fx2f(pEnvelope->m_vPoints[i].m_aValues[0]);
-				float g0 = fx2f(pEnvelope->m_vPoints[i].m_aValues[1]);
-				float b0 = fx2f(pEnvelope->m_vPoints[i].m_aValues[2]);
-				float a0 = fx2f(pEnvelope->m_vPoints[i].m_aValues[3]);
-				float r1 = fx2f(pEnvelope->m_vPoints[i + 1].m_aValues[0]);
-				float g1 = fx2f(pEnvelope->m_vPoints[i + 1].m_aValues[1]);
-				float b1 = fx2f(pEnvelope->m_vPoints[i + 1].m_aValues[2]);
-				float a1 = fx2f(pEnvelope->m_vPoints[i + 1].m_aValues[3]);
-
-				IGraphics::CColorVertex aArray[] = {
-					IGraphics::CColorVertex(0, r0, g0, b0, a0),
-					IGraphics::CColorVertex(1, r1, g1, b1, a1),
-					IGraphics::CColorVertex(2, r1, g1, b1, a1),
-					IGraphics::CColorVertex(3, r0, g0, b0, a0)};
-				Graphics()->SetColorVertex(aArray, std::size(aArray));
-
-				float x0 = EnvelopeToScreenX(View, fxt2f(pEnvelope->m_vPoints[i].m_Time));
-				float x1 = EnvelopeToScreenX(View, fxt2f(pEnvelope->m_vPoints[i + 1].m_Time));
-
-				IGraphics::CQuadItem QuadItem(x0, ColorBar.y, x1 - x0, ColorBar.h);
-				Graphics()->QuadsDrawTL(&QuadItem, 1);
-			}
-			Graphics()->QuadsEnd();
-			Ui()->ClipDisable();
+			RenderEnvelopeEditorColorBar(ColorBar, pEnvelope);
 		}
 
 		// render handles
@@ -7649,6 +7610,104 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			}
 		}
 	}
+}
+
+void CEditor::RenderEnvelopeEditorColorBar(CUIRect ColorBar, const std::shared_ptr<CEnvelope> &pEnvelope)
+{
+	if(pEnvelope->m_vPoints.size() < 2)
+	{
+		return;
+	}
+	const float ViewStartTime = ScreenToEnvelopeX(ColorBar, ColorBar.x);
+	const float ViewEndTime = ScreenToEnvelopeX(ColorBar, ColorBar.x + ColorBar.w);
+	if(ViewEndTime < 0.0f || ViewStartTime > pEnvelope->EndTime())
+	{
+		return;
+	}
+	const float StartX = maximum(EnvelopeToScreenX(ColorBar, 0.0f), ColorBar.x);
+	const float TotalWidth = minimum(EnvelopeToScreenX(ColorBar, pEnvelope->EndTime()) - StartX, ColorBar.x + ColorBar.w - StartX);
+
+	Ui()->ClipEnable(&ColorBar);
+	CUIRect ColorBarBackground = CUIRect{StartX, ColorBar.y, TotalWidth, ColorBar.h};
+	RenderBackground(ColorBarBackground, m_CheckerTexture, ColorBarBackground.h, 1.0f);
+	Graphics()->TextureClear();
+	Graphics()->QuadsBegin();
+
+	int PointBeginIndex = pEnvelope->FindPointIndex(f2fxt(ViewStartTime));
+	if(PointBeginIndex == -1)
+	{
+		PointBeginIndex = 0;
+	}
+	int PointEndIndex = pEnvelope->FindPointIndex(f2fxt(ViewEndTime));
+	if(PointEndIndex == -1)
+	{
+		PointEndIndex = (int)pEnvelope->m_vPoints.size() - 2;
+	}
+	for(int PointIndex = PointBeginIndex; PointIndex <= PointEndIndex; PointIndex++)
+	{
+		const auto &PointStart = pEnvelope->m_vPoints[PointIndex];
+		const auto &PointEnd = pEnvelope->m_vPoints[PointIndex + 1];
+		const float PointStartTime = fxt2f(PointStart.m_Time);
+		const float PointEndTime = fxt2f(PointEnd.m_Time);
+
+		int Steps;
+		if(PointStart.m_Curvetype == CURVETYPE_LINEAR || PointStart.m_Curvetype == CURVETYPE_STEP)
+		{
+			Steps = 1; // let the GPU do the work
+		}
+		else
+		{
+			const float ClampedPointStartX = maximum(EnvelopeToScreenX(ColorBar, PointStartTime), ColorBar.x);
+			const float ClampedPointEndX = minimum(EnvelopeToScreenX(ColorBar, PointEndTime), ColorBar.x + ColorBar.w);
+			Steps = std::clamp((int)std::sqrt(5.0f * (ClampedPointEndX - ClampedPointStartX)), 1, 250);
+		}
+		const float OverallSectionStartTime = Steps == 1 ? PointStartTime : maximum(PointStartTime, ViewStartTime);
+		const float OverallSectionEndTime = Steps == 1 ? PointEndTime : minimum(PointEndTime, ViewEndTime);
+		float SectionStartTime = OverallSectionStartTime;
+		float SectionStartX = EnvelopeToScreenX(ColorBar, SectionStartTime);
+		for(int Step = 1; Step <= Steps; Step++)
+		{
+			const float SectionEndTime = OverallSectionStartTime + (OverallSectionEndTime - OverallSectionStartTime) * (Step / (float)Steps);
+			const float SectionEndX = EnvelopeToScreenX(ColorBar, SectionEndTime);
+
+			ColorRGBA StartColor;
+			if(Step == 1 && OverallSectionStartTime == PointStartTime)
+			{
+				StartColor = ColorRGBA(fx2f(PointStart.m_aValues[0]), fx2f(PointStart.m_aValues[1]), fx2f(PointStart.m_aValues[2]), fx2f(PointStart.m_aValues[3]));
+			}
+			else
+			{
+				StartColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+				pEnvelope->Eval(SectionStartTime, StartColor, 4);
+			}
+
+			ColorRGBA EndColor;
+			if(PointStart.m_Curvetype == CURVETYPE_STEP)
+			{
+				EndColor = StartColor;
+			}
+			else if(Step == Steps && OverallSectionEndTime == PointEndTime)
+			{
+				EndColor = ColorRGBA(fx2f(PointEnd.m_aValues[0]), fx2f(PointEnd.m_aValues[1]), fx2f(PointEnd.m_aValues[2]), fx2f(PointEnd.m_aValues[3]));
+			}
+			else
+			{
+				EndColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+				pEnvelope->Eval(SectionEndTime, EndColor, 4);
+			}
+
+			Graphics()->SetColor4(StartColor, EndColor, StartColor, EndColor);
+			const IGraphics::CQuadItem QuadItem(SectionStartX, ColorBar.y, SectionEndX - SectionStartX, ColorBar.h);
+			Graphics()->QuadsDrawTL(&QuadItem, 1);
+
+			SectionStartTime = SectionEndTime;
+			SectionStartX = SectionEndX;
+		}
+	}
+	Graphics()->QuadsEnd();
+	Ui()->ClipDisable();
+	ColorBarBackground.h -= Ui()->Screen()->h / Graphics()->ScreenHeight(); // hack to fix alignment of bottom border
+	ColorBarBackground.DrawOutline(ColorRGBA(0.7f, 0.7f, 0.7f, 1.0f));
 }
 
 void CEditor::RenderEditorHistory(CUIRect View)
