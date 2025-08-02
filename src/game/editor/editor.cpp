@@ -1391,7 +1391,8 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		std::shared_ptr<CLayer> pLayer = GetSelectedLayer(0);
 		if(pLayer && (pLayer->m_Type == LAYERTYPE_QUADS || pLayer->m_Type == LAYERTYPE_SOUNDS))
 		{
-			TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
+			// "Add sound source" button needs more space or the font size will be scaled down
+			TB_Bottom.VSplitLeft((pLayer->m_Type == LAYERTYPE_QUADS) ? 60.0f : 100.0f, &Button, &TB_Bottom);
 
 			if(pLayer->m_Type == LAYERTYPE_QUADS)
 			{
