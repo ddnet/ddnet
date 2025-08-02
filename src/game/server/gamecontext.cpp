@@ -4584,6 +4584,7 @@ CUuid CGameContext::GameUuid() const { return m_GameUuid; }
 const char *CGameContext::GameType() const { return m_pController && m_pController->m_pGameType ? m_pController->m_pGameType : ""; }
 const char *CGameContext::Version() const { return GAME_VERSION; }
 const char *CGameContext::NetVersion() const { return GAME_NETVERSION; }
+EScoreKind CGameContext::ScoreKind() const { return m_pController ? m_pController->m_ScoreKind : EScoreKind::SCORE_UNKNOWN; }
 
 IGameServer *CreateGameServer() { return new CGameContext; }
 

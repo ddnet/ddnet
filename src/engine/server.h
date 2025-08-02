@@ -293,6 +293,13 @@ public:
 	virtual bool IsSixup(int ClientId) const = 0;
 };
 
+enum class EScoreKind
+{
+	SCORE_UNKNOWN = -1,
+	SCORE_TIME,
+	SCORE_POINTS
+};
+
 class IGameServer : public IInterface
 {
 	MACRO_INTERFACE("gameserver")
@@ -360,6 +367,7 @@ public:
 	virtual const char *GameType() const = 0;
 	virtual const char *Version() const = 0;
 	virtual const char *NetVersion() const = 0;
+	virtual EScoreKind ScoreKind() const = 0;
 
 	// DDRace
 

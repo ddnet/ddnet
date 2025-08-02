@@ -67,6 +67,7 @@ protected:
 
 public:
 	const char *m_pGameType;
+	EScoreKind m_ScoreKind;
 
 	IGameController(class CGameContext *pGameServer);
 	virtual ~IGameController();

@@ -373,6 +373,7 @@ public:
 	const char *GameType() const override;
 	const char *Version() const override;
 	const char *NetVersion() const override;
+	EScoreKind ScoreKind() const override;
 
 	// DDRace
 	void OnPreTickTeehistorian() override;

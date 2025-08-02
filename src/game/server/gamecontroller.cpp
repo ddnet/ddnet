@@ -27,6 +27,7 @@ IGameController::IGameController(class CGameContext *pGameServer) :
 	m_pConfig = m_pGameServer->Config();
 	m_pServer = m_pGameServer->Server();
 	m_pGameType = "unknown";
+	m_ScoreKind = EScoreKind::SCORE_UNKNOWN;
 
 	//
 	DoWarmup(g_Config.m_SvWarmup);
@@ -608,7 +609,6 @@ void IGameController::Snap(int SnappingClient)
 		return;
 
 	pGameInfoEx->m_Flags =
-		GAMEINFOFLAG_TIMESCORE |
 		GAMEINFOFLAG_GAMETYPE_RACE |
 		GAMEINFOFLAG_GAMETYPE_DDRACE |
 		GAMEINFOFLAG_GAMETYPE_DDNET |
@@ -625,6 +625,8 @@ void IGameController::Snap(int SnappingClient)
 		GAMEINFOFLAG_ENTITIES_DDRACE |
 		GAMEINFOFLAG_ENTITIES_RACE |
 		GAMEINFOFLAG_RACE;
+	if(m_ScoreKind == EScoreKind::SCORE_TIME)
+		pGameInfoEx->m_Flags |= GAMEINFOFLAG_TIMESCORE;
 	pGameInfoEx->m_Flags2 = GAMEINFOFLAG2_HUD_DDRACE | GAMEINFOFLAG2_DDRACE_TEAM;
 	if(g_Config.m_SvNoWeakHook)
 		pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_NO_WEAK_HOOK;
