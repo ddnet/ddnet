@@ -218,7 +218,7 @@ private:
 
 		void Reset();
 		void SetActive(const IInput::CTouchFingerState &FingerState);
-		void SetInactive();
+		void SetInactive(bool ByFinger);
 		bool IsActive() const;
 		bool IsActive(const IInput::CTouchFinger &Finger) const;
 
