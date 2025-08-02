@@ -133,7 +133,7 @@ void CDraggerBeam::Snap(int SnappingClient)
 		SnapObjId = m_pDragger->GetId();
 	}
 
-	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, false, SnappingClient), SnapObjId,
+	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Server()->IsSixup(SnappingClient), SnappingClient), SnapObjId,
 		TargetPos, m_Pos, StartTick, m_ForClientId, LASERTYPE_DRAGGER, Subtype, m_Number);
 }
 
