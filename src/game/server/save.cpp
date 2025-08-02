@@ -132,7 +132,7 @@ void CSaveTee::Save(CCharacter *pChr, bool AddPenalty)
 	FormatUuid(pChr->GameServer()->GameUuid(), m_aGameUuid, sizeof(m_aGameUuid));
 }
 
-bool CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
+bool CSaveTee::Load(CCharacter *pChr, bool LoadTeam, int Team)
 {
 	bool Valid = true;
 
@@ -141,7 +141,7 @@ bool CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 	pChr->m_Alive = m_Alive;
 	pChr->m_NeededFaketuning = m_NeededFaketuning;
 
-	if(!IsSwap)
+	if(LoadTeam)
 	{
 		pChr->Teams()->SetForceCharacterTeam(pChr->m_pPlayer->GetCid(), Team);
 		pChr->Teams()->SetStarted(pChr->m_pPlayer->GetCid(), m_TeeStarted);
@@ -245,7 +245,7 @@ bool CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 
 	pChr->SetSolo(m_IsSolo);
 
-	if(!IsSwap)
+	if(LoadTeam)
 	{
 		// Always create a rescue tee at the exact location we loaded from so that
 		// the old one gets overwritten.
@@ -492,9 +492,9 @@ void CSaveHotReloadTee::Save(CCharacter *pChr, bool AddPenalty)
 	m_LastDeath = pChr->GetPlayer()->m_LastDeath;
 }
 
-bool CSaveHotReloadTee::Load(CCharacter *pChr, int Team, bool IsSwap)
+bool CSaveHotReloadTee::Load(CCharacter *pChr, int Team)
 {
-	bool Result = m_SaveTee.Load(pChr, Team, IsSwap);
+	bool Result = m_SaveTee.Load(pChr, true, Team);
 	pChr->SetSuper(m_Super);
 	pChr->m_Core.m_Invincible = m_Invincible;
 	pChr->GetPlayer()->m_LastTeleTee = m_SavedTeleTee;
@@ -634,7 +634,7 @@ bool CSaveTeam::Load(CGameContext *pGameServer, int Team, bool KeepCurrentWeakSt
 			if(pGameServer->m_apPlayers[ClientId] && pTeams->m_Core.Team(ClientId) == Team)
 			{
 				CCharacter *pChr = MatchCharacter(pGameServer, m_pSavedTees[i].GetClientId(), i, KeepCurrentWeakStrong);
-				ContainsInvalidPlayer |= !m_pSavedTees[i].Load(pChr, Team);
+				ContainsInvalidPlayer |= !m_pSavedTees[i].Load(pChr, true, Team);
 			}
 		}
 	}
