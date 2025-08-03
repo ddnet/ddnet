@@ -3695,7 +3695,10 @@ void CEditor::SetHotQuadPoint(const std::shared_ptr<CLayerQuads> &pLayer)
 	{
 		CQuad &Quad = pLayer->m_vQuads.at(i);
 
-		if(m_ShowTileInfo != SHOW_TILE_OFF && m_ShowEnvelopePreview != SHOWENV_NONE && Quad.m_PosEnv >= 0)
+		if(m_ShowTileInfo != SHOW_TILE_OFF &&
+			m_ShowEnvelopePreview != SHOWENV_NONE &&
+			Quad.m_PosEnv >= 0 &&
+			Quad.m_PosEnv < (int)m_Map.m_vpEnvelopes.size())
 		{
 			for(auto &EnvPoint : m_Map.m_vpEnvelopes[Quad.m_PosEnv]->m_vPoints)
 			{

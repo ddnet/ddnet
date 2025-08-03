@@ -243,8 +243,10 @@ SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pPro
 			Shifter.VSplitRight(10.0f, &Shifter, &Inc);
 			Shifter.VSplitLeft(10.0f, &Dec, &Shifter);
 
-			if(CurValue <= 0)
+			if(CurValue <= 0 || CurValue > (int)m_Map.m_vpEnvelopes.size())
+			{
 				str_copy(aBuf, "None:");
+			}
 			else if(m_Map.m_vpEnvelopes[CurValue - 1]->m_aName[0])
 			{
 				str_format(aBuf, sizeof(aBuf), "%s:", m_Map.m_vpEnvelopes[CurValue - 1]->m_aName);
@@ -255,7 +257,9 @@ SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pPro
 				}
 			}
 			else
+			{
 				aBuf[0] = '\0';
+			}
 
 			auto NewValueRes = UiDoValueSelector((char *)&pIds[i], &Shifter, aBuf, CurValue, 0, m_Map.m_vpEnvelopes.size(), 1, 1.0f, "Select envelope.", false, false, IGraphics::CORNER_NONE);
 			int NewVal = NewValueRes.m_Value;
