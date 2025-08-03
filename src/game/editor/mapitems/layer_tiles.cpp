@@ -1277,6 +1277,13 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 			if(pLayer->m_Height > State.m_Height)
 				State.m_Height = pLayer->m_Height;
 		}
+
+		int Color = 0;
+		Color |= vpLayers[0]->m_Color.r << 24;
+		Color |= vpLayers[0]->m_Color.g << 16;
+		Color |= vpLayers[0]->m_Color.b << 8;
+		Color |= vpLayers[0]->m_Color.a;
+		State.m_Color = Color;
 	}
 
 	{
