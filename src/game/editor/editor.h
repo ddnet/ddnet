@@ -246,7 +246,6 @@ public:
 		m_AnimateSpeed = 1;
 		m_AnimateUpdatePopup = false;
 
-		m_ShowEnvelopePreview = SHOWENV_NONE;
 		m_SelectedQuadEnvelope = -1;
 
 		m_vSelectedEnvelopePoints = {};
@@ -516,13 +515,14 @@ public:
 	float m_aExtraEditorSplits[NUM_EXTRAEDITORS] = {250.0f, 250.0f, 250.0f};
 	float m_ToolBoxWidth = 100.0f;
 
-	enum EShowEnvelope
+	bool m_ShowEnvelopePreview = false;
+	enum class EEnvelopePreview
 	{
-		SHOWENV_NONE = 0,
-		SHOWENV_SELECTED,
-		SHOWENV_ALL
+		NONE,
+		SELECTED,
+		ALL,
 	};
-	EShowEnvelope m_ShowEnvelopePreview;
+	EEnvelopePreview m_ActiveEnvelopePreview = EEnvelopePreview::NONE;
 	bool m_ShowPicker;
 
 	std::vector<int> m_vSelectedLayers;
