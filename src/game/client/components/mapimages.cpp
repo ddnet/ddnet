@@ -41,13 +41,18 @@ void CMapImages::OnInit()
 	Console()->Chain("cl_text_entities_size", ConchainClTextEntitiesSize, this);
 }
 
-void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
+void CMapImages::Unload()
 {
 	// unload all textures
 	for(int i = 0; i < m_Count; i++)
 	{
 		Graphics()->UnloadTexture(&m_aTextures[i]);
 	}
+}
+
+void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
+{
+	Unload();
 
 	int Start;
 	pMap->GetType(MAPITEMTYPE_IMAGE, &Start, &m_Count);
