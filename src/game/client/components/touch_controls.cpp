@@ -347,12 +347,12 @@ void CTouchControls::CTouchButtonBehavior::SetActive(const IInput::CTouchFingerS
 	}
 }
 
-void CTouchControls::CTouchButtonBehavior::SetInactive()
+void CTouchControls::CTouchButtonBehavior::SetInactive(bool ByFinger)
 {
 	if(m_Active)
 	{
 		m_Active = false;
-		OnDeactivate();
+		OnDeactivate(ByFinger);
 	}
 }
 
@@ -381,8 +381,10 @@ CTouchControls::CButtonLabel CTouchControls::CIngameMenuTouchButtonBehavior::Get
 	return {CButtonLabel::EType::ICON, "\xEF\x85\x8E"};
 }
 
-void CTouchControls::CIngameMenuTouchButtonBehavior::OnDeactivate()
+void CTouchControls::CIngameMenuTouchButtonBehavior::OnDeactivate(bool ByFinger)
 {
+	if(!ByFinger)
+		return;
 	m_pTouchControls->GameClient()->m_Menus.SetActive(true);
 }
 
@@ -415,8 +417,10 @@ CTouchControls::CButtonLabel CTouchControls::CExtraMenuTouchButtonBehavior::GetL
 	}
 }
 
-void CTouchControls::CExtraMenuTouchButtonBehavior::OnDeactivate()
+void CTouchControls::CExtraMenuTouchButtonBehavior::OnDeactivate(bool ByFinger)
 {
+	if(!ByFinger)
+		return;
 	if(time_get_nanoseconds() - m_ActivationStartTime >= LONG_TOUCH_DURATION)
 	{
 		m_pTouchControls->GameClient()->m_Menus.SetActive(true);
@@ -441,8 +445,10 @@ CTouchControls::CButtonLabel CTouchControls::CEmoticonTouchButtonBehavior::GetLa
 	return {CButtonLabel::EType::LOCALIZED, Localizable("Emoticon")};
 }
 
-void CTouchControls::CEmoticonTouchButtonBehavior::OnDeactivate()
+void CTouchControls::CEmoticonTouchButtonBehavior::OnDeactivate(bool ByFinger)
 {
+	if(!ByFinger)
+		return;
 	m_pTouchControls->Console()->ExecuteLineStroked(1, "+emote");
 }
 
@@ -452,8 +458,10 @@ CTouchControls::CButtonLabel CTouchControls::CSpectateTouchButtonBehavior::GetLa
 	return {CButtonLabel::EType::LOCALIZED, Localizable("Spectator mode")};
 }
 
-void CTouchControls::CSpectateTouchButtonBehavior::OnDeactivate()
+void CTouchControls::CSpectateTouchButtonBehavior::OnDeactivate(bool ByFinger)
 {
+	if(!ByFinger)
+		return;
 	m_pTouchControls->Console()->ExecuteLineStroked(1, "+spectate");
 }
 
@@ -488,7 +496,7 @@ void CTouchControls::CSwapActionTouchButtonBehavior::OnActivate()
 	}
 }
 
-void CTouchControls::CSwapActionTouchButtonBehavior::OnDeactivate()
+void CTouchControls::CSwapActionTouchButtonBehavior::OnDeactivate(bool ByFinger)
 {
 	if(m_ActiveAction != NUM_ACTIONS)
 	{
@@ -513,7 +521,7 @@ void CTouchControls::CUseActionTouchButtonBehavior::OnActivate()
 	m_pTouchControls->Console()->ExecuteLineStroked(1, ACTION_COMMANDS[m_ActiveAction]);
 }
 
-void CTouchControls::CUseActionTouchButtonBehavior::OnDeactivate()
+void CTouchControls::CUseActionTouchButtonBehavior::OnDeactivate(bool ByFinger)
 {
 	m_pTouchControls->Console()->ExecuteLineStroked(0, ACTION_COMMANDS[m_ActiveAction]);
 	m_ActiveAction = NUM_ACTIONS;
@@ -539,7 +547,7 @@ void CTouchControls::CJoystickTouchButtonBehavior::OnActivate()
 	}
 }
 
-void CTouchControls::CJoystickTouchButtonBehavior::OnDeactivate()
+void CTouchControls::CJoystickTouchButtonBehavior::OnDeactivate(bool ByFinger)
 {
 	if(m_ActiveAction != ACTION_AIM)
 	{
@@ -614,7 +622,7 @@ void CTouchControls::CBindTouchButtonBehavior::OnActivate()
 	m_Repeating = false;
 }
 
-void CTouchControls::CBindTouchButtonBehavior::OnDeactivate()
+void CTouchControls::CBindTouchButtonBehavior::OnDeactivate(bool ByFinger)
 {
 	m_pTouchControls->Console()->ExecuteLineStroked(0, m_Command.c_str());
 }
@@ -1005,7 +1013,7 @@ void CTouchControls::UpdateButtons(const std::vector<IInput::CTouchFingerState> 
 		});
 		if(PrevActiveTouchButton != m_vTouchButtons.end())
 		{
-			PrevActiveTouchButton->m_pBehavior->SetInactive();
+			PrevActiveTouchButton->m_pBehavior->SetInactive(true);
 		}
 		TouchButton.m_pBehavior->SetActive(*FingerInsideButton);
 	}
@@ -1028,7 +1036,7 @@ void CTouchControls::UpdateButtons(const std::vector<IInput::CTouchFingerState> 
 				if(ActiveFinger != vRemainingTouchFingerStates.end())
 					vRemainingTouchFingerStates.erase(ActiveFinger);
 			}
-			TouchButton.m_pBehavior->SetInactive();
+			TouchButton.m_pBehavior->SetInactive(false);
 			continue;
 		}
 		if(!TouchButton.m_pBehavior->IsActive())
@@ -1040,7 +1048,7 @@ void CTouchControls::UpdateButtons(const std::vector<IInput::CTouchFingerState> 
 		});
 		if(ActiveFinger == vRemainingTouchFingerStates.end())
 		{
-			TouchButton.m_pBehavior->SetInactive();
+			TouchButton.m_pBehavior->SetInactive(true);
 		}
 		else
 		{
