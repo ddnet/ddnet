@@ -63,7 +63,7 @@ public:
 	virtual CCamera *GetCurCamera();
 
 private:
-	std::vector<std::unique_ptr<CRenderLayer>> m_vRenderLayers;
+	std::vector<std::unique_ptr<CRenderLayer>> m_vpRenderLayers;
 	int GetLayerType(const CMapItemLayer *pLayer) const;
 	CRenderLayerParams m_Params;
 };

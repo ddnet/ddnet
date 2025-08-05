@@ -73,9 +73,9 @@ CMapLayers::CMapLayers(int Type, bool OnlineOnly)
 
 void CMapLayers::Unload()
 {
-	for(auto &pLayer : m_vRenderLayers)
+	for(auto &pLayer : m_vpRenderLayers)
 		pLayer->Unload();
-	m_vRenderLayers.clear();
+	m_vpRenderLayers.clear();
 }
 
 void CMapLayers::OnInit()
@@ -130,7 +130,7 @@ void CMapLayers::OnMapLoad()
 			}
 
 			if(pRenderLayerGroup)
-				m_vRenderLayers.push_back(std::move(pRenderLayerGroup));
+				m_vpRenderLayers.push_back(std::move(pRenderLayerGroup));
 
 			std::unique_ptr<CRenderLayer> pRenderLayer;
 
@@ -211,7 +211,7 @@ void CMapLayers::OnMapLoad()
 				if(pRenderLayer->IsValid())
 				{
 					pRenderLayer->Init();
-					m_vRenderLayers.push_back(std::move(pRenderLayer));
+					m_vpRenderLayers.push_back(std::move(pRenderLayer));
 				}
 			}
 		}
@@ -233,7 +233,7 @@ void CMapLayers::OnRender()
 	m_Params.m_RenderText = g_Config.m_ClTextEntities;
 
 	bool DoRenderGroup = true;
-	for(auto &&pRenderLayer : m_vRenderLayers)
+	for(auto &pRenderLayer : m_vpRenderLayers)
 	{
 		if(pRenderLayer->IsGroup())
 			DoRenderGroup = pRenderLayer->DoRender(m_Params);
