@@ -204,19 +204,28 @@ bool CRenderLayerGroup::DoRender(const CRenderLayerParams &Params) const
 		if(m_pGroup->m_Version >= 2 && m_pGroup->m_UseClipping)
 		{
 			// set clipping
-			float aPoints[4];
 			RenderTools()->MapScreenToInterface(Params.m_Center.x, Params.m_Center.y, Params.m_Zoom);
-			Graphics()->GetScreen(&aPoints[0], &aPoints[1], &aPoints[2], &aPoints[3]);
-			float x0 = (m_pGroup->m_ClipX - aPoints[0]) / (aPoints[2] - aPoints[0]);
-			float y0 = (m_pGroup->m_ClipY - aPoints[1]) / (aPoints[3] - aPoints[1]);
-			float x1 = ((m_pGroup->m_ClipX + m_pGroup->m_ClipW) - aPoints[0]) / (aPoints[2] - aPoints[0]);
-			float y1 = ((m_pGroup->m_ClipY + m_pGroup->m_ClipH) - aPoints[1]) / (aPoints[3] - aPoints[1]);
 
-			if(x1 < 0.0f || x0 > 1.0f || y1 < 0.0f || y0 > 1.0f)
+			float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+			Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+			float ScreenWidth = ScreenX1 - ScreenX0;
+			float ScreenHeight = ScreenY1 - ScreenY0;
+			float Left = m_pGroup->m_ClipX - ScreenX0;
+			float Top = m_pGroup->m_ClipY - ScreenY0;
+			float Right = m_pGroup->m_ClipX + m_pGroup->m_ClipW - ScreenX0;
+			float Bottom = m_pGroup->m_ClipY + m_pGroup->m_ClipH - ScreenY0;
+
+			if(Right < 0.0f || Left > ScreenWidth || Bottom < 0.0f || Top > ScreenHeight)
 				return false;
 
-			Graphics()->ClipEnable((int)(x0 * Graphics()->ScreenWidth()), (int)(y0 * Graphics()->ScreenHeight()),
-				(int)((x1 - x0) * Graphics()->ScreenWidth()), (int)((y1 - y0) * Graphics()->ScreenHeight()));
+			int ClipX = (int)std::round(Left * Graphics()->ScreenWidth() / ScreenWidth);
+			int ClipY = (int)std::round(Top * Graphics()->ScreenHeight() / ScreenHeight);
+
+			Graphics()->ClipEnable(
+				ClipX,
+				ClipY,
+				(int)std::round(Right * Graphics()->ScreenWidth() / ScreenWidth) - ClipX,
+				(int)std::round(Bottom * Graphics()->ScreenHeight() / ScreenHeight) - ClipY);
 		}
 	}
 	return true;
