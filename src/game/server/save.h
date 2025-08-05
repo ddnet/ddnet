@@ -3,7 +3,9 @@
 
 #include <base/vmath.h>
 #include <engine/shared/protocol.h>
-#include <game/generated/protocol.h>
+
+#include <generated/protocol.h>
+
 #include <game/team_state.h>
 
 #include <optional>

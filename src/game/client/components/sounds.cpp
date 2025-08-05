@@ -6,10 +6,12 @@
 #include <engine/engine.h>
 #include <engine/shared/config.h>
 #include <engine/sound.h>
+
+#include <generated/client_data.h>
+
 #include <game/client/components/camera.h>
 #include <game/client/components/menus.h>
 #include <game/client/gameclient.h>
-#include <game/generated/client_data.h>
 #include <game/localization.h>
 
 CSoundLoading::CSoundLoading(CGameClient *pGameClient, bool Render) :

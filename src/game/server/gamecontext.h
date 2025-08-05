@@ -6,8 +6,9 @@
 #include <engine/console.h>
 #include <engine/server.h>
 
+#include <generated/protocol.h>
+
 #include <game/collision.h>
-#include <game/generated/protocol.h>
 #include <game/layers.h>
 #include <game/mapbugs.h>
 #include <game/voting.h>

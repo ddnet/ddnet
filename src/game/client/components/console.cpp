@@ -6,7 +6,7 @@
 #include <base/math.h>
 #include <base/system.h>
 
-#include <game/generated/client_data.h>
+#include <generated/client_data.h>
 
 #include <engine/console.h>
 #include <engine/engine.h>

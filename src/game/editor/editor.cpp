@@ -23,6 +23,8 @@
 #include <engine/storage.h>
 #include <engine/textrender.h>
 
+#include <generated/client_data.h>
+
 #include <game/client/components/camera.h>
 #include <game/client/gameclient.h>
 #include <game/client/lineinput.h>
@@ -30,7 +32,6 @@
 #include <game/client/ui_listbox.h>
 #include <game/client/ui_scrollregion.h>
 #include <game/editor/explanations.h>
-#include <game/generated/client_data.h>
 #include <game/localization.h>
 
 #include <game/editor/editor_history.h>

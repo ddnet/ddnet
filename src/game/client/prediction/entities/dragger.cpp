@@ -4,9 +4,10 @@
 
 #include <engine/shared/config.h>
 
+#include <generated/protocol.h>
+
 #include <game/client/laser_data.h>
 #include <game/collision.h>
-#include <game/generated/protocol.h>
 #include <game/mapitems.h>
 
 void CDragger::Tick()

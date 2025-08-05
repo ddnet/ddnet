@@ -4,9 +4,10 @@
 #include "projectile_data.h"
 
 #include <engine/shared/snapshot.h>
-#include <game/client/prediction/gameworld.h>
-#include <game/generated/protocol.h>
 
+#include <generated/protocol.h>
+
+#include <game/client/prediction/gameworld.h>
 #include <game/collision.h>
 
 static bool UseProjectileExtraInfo(const CNetObj_Projectile *pProj)

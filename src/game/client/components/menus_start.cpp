@@ -8,10 +8,10 @@
 #include <engine/client/updater.h>
 #include <engine/shared/config.h>
 
+#include <generated/client_data.h>
+
 #include <game/client/gameclient.h>
 #include <game/client/ui.h>
-
-#include <game/generated/client_data.h>
 #include <game/localization.h>
 #include <game/version.h>
 

@@ -5,8 +5,10 @@
 #include <engine/client.h>
 #include <engine/shared/protocol.h>
 #include <engine/textrender.h>
+
+#include <generated/protocol.h>
+
 #include <game/client/component.h>
-#include <game/generated/protocol.h>
 
 struct SScoreInfo
 {

@@ -8,8 +8,8 @@
 #include <engine/shared/csv.h>
 #include <engine/textrender.h>
 
-#include <game/generated/protocol.h>
-#include <game/generated/protocol7.h>
+#include <generated/protocol.h>
+#include <generated/protocol7.h>
 
 #include <game/client/animstate.h>
 #include <game/client/components/scoreboard.h>

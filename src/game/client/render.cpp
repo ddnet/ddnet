@@ -10,10 +10,10 @@
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 
-#include <game/generated/client_data.h>
-#include <game/generated/client_data7.h>
-#include <game/generated/protocol.h>
-#include <game/generated/protocol7.h>
+#include <generated/client_data.h>
+#include <generated/client_data7.h>
+#include <generated/protocol.h>
+#include <generated/protocol7.h>
 
 #include <game/mapitems.h>
 

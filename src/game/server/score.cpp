@@ -4,7 +4,9 @@
 #include <engine/shared/console.h>
 #include <engine/shared/linereader.h>
 #include <engine/storage.h>
-#include <game/generated/wordlist.h>
+
+#include <generated/wordlist.h>
+
 #include <game/server/gamemodes/DDRace.h>
 #include <game/team_state.h>
 

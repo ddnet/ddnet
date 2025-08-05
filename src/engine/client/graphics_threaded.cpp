@@ -20,8 +20,8 @@
 #include <engine/shared/jobs.h>
 #include <engine/storage.h>
 
-#include <game/generated/client_data.h>
-#include <game/generated/client_data7.h>
+#include <generated/data_types.h>
+
 #include <game/localization.h>
 
 #if defined(CONF_VIDEORECORDER)

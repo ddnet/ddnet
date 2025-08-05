@@ -12,11 +12,12 @@
 #include <engine/storage.h>
 #include <engine/textrender.h>
 
+#include <generated/client_data.h>
+
 #include <game/client/components/console.h>
 #include <game/client/gameclient.h>
 #include <game/client/ui.h>
 #include <game/client/ui_listbox.h>
-#include <game/generated/client_data.h>
 #include <game/localization.h>
 
 #include "maplayers.h"

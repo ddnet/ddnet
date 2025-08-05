@@ -12,6 +12,7 @@
 #include <base/vmath.h>
 
 #include <engine/client.h>
+#include <engine/client/updater.h>
 #include <engine/config.h>
 #include <engine/editor.h>
 #include <engine/friends.h>
@@ -23,9 +24,8 @@
 #include <engine/storage.h>
 #include <engine/textrender.h>
 
-#include <game/generated/protocol.h>
-
-#include <engine/client/updater.h>
+#include <generated/client_data.h>
+#include <generated/protocol.h>
 
 #include <game/client/animstate.h>
 #include <game/client/components/binds.h>
@@ -34,7 +34,6 @@
 #include <game/client/components/sounds.h>
 #include <game/client/gameclient.h>
 #include <game/client/ui_listbox.h>
-#include <game/generated/client_data.h>
 #include <game/localization.h>
 
 #include "menus.h"

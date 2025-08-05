@@ -26,8 +26,8 @@
 #include <game/mapitems.h>
 #include <game/version.h>
 
-#include <game/generated/protocol7.h>
-#include <game/generated/protocolglue.h>
+#include <generated/protocol7.h>
+#include <generated/protocolglue.h>
 
 #include "entities/character.h"
 #include "gamemodes/DDRace.h"

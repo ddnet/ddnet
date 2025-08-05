@@ -3,9 +3,11 @@
 #include <base/color.h>
 #include <engine/demo.h>
 #include <engine/graphics.h>
+
+#include <generated/client_data.h>
+#include <generated/protocol.h>
+
 #include <game/client/gameclient.h>
-#include <game/generated/client_data.h>
-#include <game/generated/protocol.h>
 
 #include "damageind.h"
 
