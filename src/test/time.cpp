@@ -23,7 +23,7 @@ TEST(Time, Season)
 TEST(Time, Nanoseconds)
 {
 	const std::chrono::nanoseconds Time1 = time_get_nanoseconds();
-	std::this_thread::sleep_for(std::chrono::microseconds(1));
+	std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	const std::chrono::nanoseconds Time2 = time_get_nanoseconds();
 	EXPECT_LT(Time1, Time2);
 }
