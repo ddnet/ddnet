@@ -294,10 +294,6 @@ void CEditor::DoMapSettingsEditBox(CMapSettingsBackend::CContext *pContext, cons
 	auto &Context = *pContext;
 	Context.SetFontSize(FontSize);
 
-	// Set current active context if input is active
-	if(pLineInput->IsActive())
-		CMapSettingsBackend::ms_pActiveContext = pContext;
-
 	// Small utility to render a floating part above the input rect.
 	// Use to display either the error or the current argument name
 	const float PartMargin = 4.0f;
@@ -1049,8 +1045,6 @@ void CEditor::MapSettingsDropdownRenderCallback(const SPossibleValueMatch &Match
 }
 
 // ----------------------------------------
-
-CMapSettingsBackend::CContext *CMapSettingsBackend::ms_pActiveContext = nullptr;
 
 void CMapSettingsBackend::OnInit(CEditor *pEditor)
 {
@@ -2075,28 +2069,6 @@ void CMapSettingsBackend::CContext::GetCommandHelpText(char *pStr, int Length) c
 	str_copy(pStr, m_pCurrentSetting->m_pHelp, Length);
 }
 
-void CMapSettingsBackend::CContext::UpdateCompositionString()
-{
-	if(!m_pLineInput)
-		return;
-
-	const bool HasComposition = m_pBackend->Input()->HasComposition();
-
-	if(HasComposition)
-	{
-		const size_t CursorOffset = m_pLineInput->GetCursorOffset();
-		const size_t DisplayCursorOffset = m_pLineInput->OffsetFromActualToDisplay(CursorOffset);
-		const std::string DisplayStr = std::string(m_pLineInput->GetString());
-		std::string CompositionBuffer = DisplayStr.substr(0, DisplayCursorOffset) + m_pBackend->Input()->GetComposition() + DisplayStr.substr(DisplayCursorOffset);
-		if(CompositionBuffer != m_CompositionStringBuffer)
-		{
-			m_CompositionStringBuffer = CompositionBuffer;
-			Update();
-			UpdateCursor();
-		}
-	}
-}
-
 template<int N>
 void CMapSettingsBackend::CContext::FormatDisplayValue(const char *pValue, char (&aOut)[N])
 {
@@ -2110,20 +2082,6 @@ void CMapSettingsBackend::CContext::FormatDisplayValue(const char *pValue, char 
 	{
 		str_copy(aOut, pValue);
 	}
-}
-
-bool CMapSettingsBackend::OnInput(const IInput::CEvent &Event)
-{
-	if(ms_pActiveContext)
-		return ms_pActiveContext->OnInput(Event);
-
-	return false;
-}
-
-void CMapSettingsBackend::OnUpdate()
-{
-	if(ms_pActiveContext && ms_pActiveContext->m_pLineInput && ms_pActiveContext->m_pLineInput->IsActive())
-		ms_pActiveContext->UpdateCompositionString();
 }
 
 void CMapSettingsBackend::OnMapLoad()
