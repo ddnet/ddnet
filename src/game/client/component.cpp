@@ -55,6 +55,11 @@ class CRenderTools *CComponentInterfaces::RenderTools() const
 	return m_pClient->RenderTools();
 }
 
+class CRenderMap *CComponentInterfaces::RenderMap() const
+{
+	return m_pClient->RenderMap();
+}
+
 class IConfigManager *CComponentInterfaces::ConfigManager() const
 {
 	return m_pClient->ConfigManager();

@@ -1,5 +1,7 @@
 #include "envelope.h"
 
+#include <base/system.h>
+
 #include <algorithm>
 #include <chrono>
 #include <limits>
@@ -99,7 +101,7 @@ std::pair<float, float> CEnvelope::GetValueRange(int ChannelMask)
 void CEnvelope::Eval(float Time, ColorRGBA &Result, size_t Channels)
 {
 	Channels = minimum<size_t>(Channels, GetChannels(), CEnvPoint::MAX_CHANNELS);
-	CRenderTools::RenderEvalEnvelope(&m_PointsAccess, std::chrono::nanoseconds((int64_t)((double)Time * (double)std::chrono::nanoseconds(1s).count())), Result, Channels);
+	CRenderMap::RenderEvalEnvelope(&m_PointsAccess, std::chrono::nanoseconds((int64_t)((double)Time * (double)std::chrono::nanoseconds(1s).count())), Result, Channels);
 }
 
 void CEnvelope::AddPoint(int Time, int v0, int v1, int v2, int v3)

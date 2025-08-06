@@ -1,8 +1,9 @@
 #ifndef GAME_EDITOR_MAPITEMS_ENVELOPE_H
 #define GAME_EDITOR_MAPITEMS_ENVELOPE_H
 
-#include <game/client/render.h>
+#include <game/map/render_map.h>
 #include <game/mapitems.h>
+#include <vector>
 
 class CEnvelope
 {

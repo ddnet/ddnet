@@ -4,6 +4,7 @@
 #define GAME_CLIENT_COMPONENTS_MAPLAYERS_H
 #include <game/client/component.h>
 #include <game/client/render.h>
+#include <game/map/render_map.h>
 
 #include "render_layer.h"
 #include <cstdint>
@@ -66,6 +67,7 @@ private:
 	std::vector<std::unique_ptr<CRenderLayer>> m_vpRenderLayers;
 	int GetLayerType(const CMapItemLayer *pLayer) const;
 	CRenderLayerParams m_Params;
+	CRenderMap m_RenderMap;
 };
 
 #endif

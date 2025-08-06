@@ -16,6 +16,7 @@ using offset_ptr32 = unsigned int;
 
 #include <game/client/component.h>
 #include <game/client/render.h>
+#include <game/map/render_map.h>
 #include <game/mapitems.h>
 #include <game/mapitems_ex.h>
 
@@ -42,10 +43,13 @@ public:
 
 class CRenderLayer : public CComponentInterfaces
 {
+	CRenderMap *m_pRenderMap;
+
 public:
 	CRenderLayer(int GroupId, int LayerId, int Flags);
 	virtual ~CRenderLayer() = default;
-	void OnInit(CGameClient *pGameClient, IMap *pMap, CMapImages *pMapImages, std::shared_ptr<CMapBasedEnvelopePointAccess> &pEvelopePoints, bool OnlineOnly);
+	void OnInit(CGameClient *pGameClient, IMap *pMap, CMapImages *pMapImages, std::shared_ptr<CMapBasedEnvelopePointAccess> &pEvelopePoints, bool OnlineOnly, CRenderMap *pRenderMap);
+	CRenderMap *RenderMap() { return m_pRenderMap; }
 
 	virtual void Init() = 0;
 	virtual void Render(const CRenderLayerParams &Params) = 0;

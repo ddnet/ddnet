@@ -176,7 +176,7 @@ void CParticles::OnInit()
 	for(int i = 0; i <= (SPRITE_PART9 - SPRITE_PART_SLICE); ++i)
 	{
 		Graphics()->QuadsSetSubset(0, 0, 1, 1);
-		RenderTools()->QuadContainerAddSprite(m_ParticleQuadContainerIndex, 1.f);
+		Graphics()->QuadContainerAddSprite(m_ParticleQuadContainerIndex, 1.f);
 	}
 	Graphics()->QuadContainerUpload(m_ParticleQuadContainerIndex);
 
@@ -185,7 +185,7 @@ void CParticles::OnInit()
 	for(int i = 0; i <= (SPRITE_PART_SPARKLE - SPRITE_PART_SNOWFLAKE); ++i)
 	{
 		Graphics()->QuadsSetSubset(0, 0, 1, 1);
-		RenderTools()->QuadContainerAddSprite(m_ExtraParticleQuadContainerIndex, 1.f);
+		Graphics()->QuadContainerAddSprite(m_ExtraParticleQuadContainerIndex, 1.f);
 	}
 
 	Graphics()->QuadContainerUpload(m_ExtraParticleQuadContainerIndex);

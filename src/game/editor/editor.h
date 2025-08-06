@@ -6,7 +6,6 @@
 #include <base/bezier.h>
 #include <base/system.h>
 
-#include <game/client/render.h>
 #include <game/client/ui.h>
 #include <game/client/ui_listbox.h>
 #include <game/mapitems.h>
@@ -26,6 +25,8 @@
 #include <game/editor/mapitems/layer_tiles.h>
 #include <game/editor/mapitems/layer_tune.h>
 #include <game/editor/mapitems/map.h>
+
+#include <game/map/render_map.h>
 
 #include <engine/console.h>
 #include <engine/editor.h>
@@ -118,7 +119,7 @@ class CEditor : public IEditor
 	class ITextRender *m_pTextRender = nullptr;
 	class ISound *m_pSound = nullptr;
 	class IStorage *m_pStorage = nullptr;
-	CRenderTools m_RenderTools;
+	CRenderMap m_RenderMap;
 	CUi m_UI;
 
 	std::vector<std::reference_wrapper<CEditorComponent>> m_vComponents;
@@ -162,7 +163,7 @@ public:
 	class ITextRender *TextRender() const { return m_pTextRender; }
 	class IStorage *Storage() const { return m_pStorage; }
 	CUi *Ui() { return &m_UI; }
-	CRenderTools *RenderTools() { return &m_RenderTools; }
+	CRenderMap *RenderMap() { return &m_RenderMap; }
 
 	CMapView *MapView() { return &m_MapView; }
 	const CMapView *MapView() const { return &m_MapView; }
