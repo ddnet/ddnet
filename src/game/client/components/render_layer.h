@@ -214,6 +214,8 @@ public:
 protected:
 	virtual IGraphics::CTextureHandle GetTexture() const override { return m_TextureHandle; }
 	void CalculateClipping();
+	void CalculateEnvelopeClipping(int aEnvelopeOffsetMin[2], int aEnvelopeOffsetMax[2]);
+	void CalculateQuadClipping(int aQuadOffsetMin[2], int aQuadOffsetMax[2]);
 
 	class CQuadLayerVisuals : public CComponentInterfaces
 	{
