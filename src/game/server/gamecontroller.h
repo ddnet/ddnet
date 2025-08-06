@@ -141,7 +141,7 @@ public:
 	virtual const char *GetTeamName(int Team);
 	virtual int GetAutoTeam(int NotThisId);
 	virtual bool CanJoinTeam(int Team, int NotThisId, char *pErrorReason, int ErrorReasonSize);
-	int ClampTeam(int Team);
+	virtual int ClampTeam(int Team);
 
 	CClientMask GetMaskForPlayerWorldEvent(int Asker, int ExceptID = -1);
 
