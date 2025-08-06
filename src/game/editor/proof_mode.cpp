@@ -114,7 +114,7 @@ void CProofMode::RenderScreenSizes()
 			float Aspect = Start + (End - Start) * (i / (float)NumSteps);
 
 			float Zoom = (m_ProofBorders == PROOF_BORDER_MENU) ? 0.7f : 1.0f;
-			RenderTools()->MapScreenToWorld(
+			Graphics()->MapScreenToWorld(
 				WorldOffset.x, WorldOffset.y,
 				100.0f, 100.0f, 100.0f, 0.0f, 0.0f, Aspect, Zoom, aPoints);
 
@@ -157,7 +157,7 @@ void CProofMode::RenderScreenSizes()
 				const float aAspects[] = {4.0f / 3.0f, 16.0f / 10.0f, 5.0f / 4.0f, 16.0f / 9.0f};
 				const ColorRGBA aColors[] = {ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f), ColorRGBA(0.0f, 1.0f, 0.0f, 1.0f)};
 				float Zoom = (m_ProofBorders == PROOF_BORDER_MENU) ? 0.7f : 1.0f;
-				RenderTools()->MapScreenToWorld(
+				Graphics()->MapScreenToWorld(
 					WorldOffset.x, WorldOffset.y,
 					100.0f, 100.0f, 100.0f, 0.0f, 0.0f, aAspects[Pass], Zoom, aPoints);
 

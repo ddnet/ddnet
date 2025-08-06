@@ -562,7 +562,7 @@ void CTouchControls::CJoystickTouchButtonBehavior::OnUpdate()
 	if(m_pTouchControls->GameClient()->m_Snap.m_SpecInfo.m_Active)
 	{
 		vec2 WorldScreenSize;
-		m_pTouchControls->RenderTools()->CalcScreenParams(m_pTouchControls->Graphics()->ScreenAspect(), m_pTouchControls->GameClient()->m_Camera.m_Zoom, &WorldScreenSize.x, &WorldScreenSize.y);
+		m_pTouchControls->Graphics()->CalcScreenParams(m_pTouchControls->Graphics()->ScreenAspect(), m_pTouchControls->GameClient()->m_Camera.m_Zoom, &WorldScreenSize.x, &WorldScreenSize.y);
 		Controls.m_aMousePos[g_Config.m_ClDummy] += -m_AccumulatedDelta * WorldScreenSize;
 		Controls.m_aMousePos[g_Config.m_ClDummy].x = std::clamp(Controls.m_aMousePos[g_Config.m_ClDummy].x, -201.0f * 32, (m_pTouchControls->Collision()->GetWidth() + 201.0f) * 32.0f);
 		Controls.m_aMousePos[g_Config.m_ClDummy].y = std::clamp(Controls.m_aMousePos[g_Config.m_ClDummy].y, -201.0f * 32, (m_pTouchControls->Collision()->GetHeight() + 201.0f) * 32.0f);
@@ -1091,7 +1091,7 @@ void CTouchControls::UpdateButtons(const std::vector<IInput::CTouchFingerState> 
 	{
 		const float Zoom = GameClient()->m_Snap.m_SpecInfo.m_Active ? GameClient()->m_Camera.m_Zoom : 1.0f;
 		vec2 WorldScreenSize;
-		RenderTools()->CalcScreenParams(Graphics()->ScreenAspect(), Zoom, &WorldScreenSize.x, &WorldScreenSize.y);
+		Graphics()->CalcScreenParams(Graphics()->ScreenAspect(), Zoom, &WorldScreenSize.x, &WorldScreenSize.y);
 		CControls &Controls = GameClient()->m_Controls;
 		if(GameClient()->m_Snap.m_SpecInfo.m_Active)
 		{

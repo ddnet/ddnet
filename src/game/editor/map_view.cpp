@@ -3,7 +3,6 @@
 #include <engine/keys.h>
 #include <engine/shared/config.h>
 
-#include <game/client/render.h>
 #include <game/client/ui.h>
 
 #include "editor.h"
@@ -72,7 +71,7 @@ void CMapView::RenderGroupBorder()
 	}
 }
 
-void CMapView::RenderMap()
+void CMapView::RenderEditorMap()
 {
 	if(Editor()->m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->ShiftIsPressed() && !Input()->ModifierIsPressed() && Input()->KeyPress(KEY_G))
 	{
@@ -137,7 +136,7 @@ void CMapView::ZoomMouseTarget(float ZoomFactor)
 	// zoom to the current mouse position
 	// get absolute mouse position
 	float aPoints[4];
-	RenderTools()->MapScreenToWorld(
+	Graphics()->MapScreenToWorld(
 		GetWorldOffset().x, GetWorldOffset().y,
 		100.0f, 100.0f, 100.0f, 0.0f, 0.0f, Graphics()->ScreenAspect(), m_WorldZoom, aPoints);
 

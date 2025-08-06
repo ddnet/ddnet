@@ -75,9 +75,9 @@ void CPlayers::RenderHand7(const CTeeRenderInfo *pInfo, vec2 HandPos, float Hand
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(pInfo->m_aSixup[g_Config.m_ClDummy].m_aColors[protocol7::SKINPART_HANDS].WithAlpha(Alpha));
 	Graphics()->QuadsSetRotation(HandAngle);
-	RenderTools()->SelectSprite7(client_data7::SPRITE_TEE_HAND_OUTLINE);
+	Graphics()->SelectSprite7(client_data7::SPRITE_TEE_HAND_OUTLINE);
 	Graphics()->QuadsDraw(&QuadOutline, 1);
-	RenderTools()->SelectSprite7(client_data7::SPRITE_TEE_HAND);
+	Graphics()->SelectSprite7(client_data7::SPRITE_TEE_HAND);
 	Graphics()->QuadsDraw(&QuadHand, 1);
 	Graphics()->QuadsEnd();
 }
@@ -954,29 +954,29 @@ void CPlayers::OnInit()
 	for(int i = 0; i < NUM_WEAPONS; ++i)
 	{
 		float ScaleX, ScaleY;
-		RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[i].m_pSpriteBody, ScaleX, ScaleY);
+		Graphics()->GetSpriteScale(g_pData->m_Weapons.m_aId[i].m_pSpriteBody, ScaleX, ScaleY);
 		Graphics()->QuadsSetSubset(0, 0, 1, 1);
-		RenderTools()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleX, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleY);
+		Graphics()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleX, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleY);
 		Graphics()->QuadsSetSubset(0, 1, 1, 0);
-		RenderTools()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleX, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleY);
+		Graphics()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleX, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleY);
 	}
 	float ScaleX, ScaleY;
 
 	// at the end the hand
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
-	RenderTools()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, 20.f);
+	Graphics()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, 20.f);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
-	RenderTools()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, 20.f);
+	Graphics()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, 20.f);
 
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
-	RenderTools()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, -12.f, -8.f, 24.f, 16.f);
+	Graphics()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, -12.f, -8.f, 24.f, 16.f);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
-	RenderTools()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, -12.f, -8.f, 24.f, 16.f);
+	Graphics()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, -12.f, -8.f, 24.f, 16.f);
 
 	for(int i = 0; i < NUM_EMOTICONS; ++i)
 	{
 		Graphics()->QuadsSetSubset(0, 0, 1, 1);
-		RenderTools()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, 64.f);
+		Graphics()->QuadContainerAddSprite(m_WeaponEmoteQuadContainerIndex, 64.f);
 	}
 	Graphics()->QuadContainerUpload(m_WeaponEmoteQuadContainerIndex);
 
@@ -990,10 +990,10 @@ void CPlayers::OnInit()
 				if(i == WEAPON_GUN || i == WEAPON_SHOTGUN)
 				{
 					// TODO: hardcoded for now to get the same particle size as before
-					RenderTools()->GetSpriteScaleImpl(96, 64, ScaleX, ScaleY);
+					Graphics()->GetSpriteScaleImpl(96, 64, ScaleX, ScaleY);
 				}
 				else
-					RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[i].m_aSpriteMuzzles[n], ScaleX, ScaleY);
+					Graphics()->GetSpriteScale(g_pData->m_Weapons.m_aId[i].m_aSpriteMuzzles[n], ScaleX, ScaleY);
 			}
 
 			float SWidth = (g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleX) * (4.0f / 3.0f);
@@ -1001,15 +1001,15 @@ void CPlayers::OnInit()
 
 			Graphics()->QuadsSetSubset(0, 0, 1, 1);
 			if(WEAPON_NINJA == i)
-				RenderTools()->QuadContainerAddSprite(m_aWeaponSpriteMuzzleQuadContainerIndex[i], 160.f * ScaleX, 160.f * ScaleY);
+				Graphics()->QuadContainerAddSprite(m_aWeaponSpriteMuzzleQuadContainerIndex[i], 160.f * ScaleX, 160.f * ScaleY);
 			else
-				RenderTools()->QuadContainerAddSprite(m_aWeaponSpriteMuzzleQuadContainerIndex[i], SWidth, SHeight);
+				Graphics()->QuadContainerAddSprite(m_aWeaponSpriteMuzzleQuadContainerIndex[i], SWidth, SHeight);
 
 			Graphics()->QuadsSetSubset(0, 1, 1, 0);
 			if(WEAPON_NINJA == i)
-				RenderTools()->QuadContainerAddSprite(m_aWeaponSpriteMuzzleQuadContainerIndex[i], 160.f * ScaleX, 160.f * ScaleY);
+				Graphics()->QuadContainerAddSprite(m_aWeaponSpriteMuzzleQuadContainerIndex[i], 160.f * ScaleX, 160.f * ScaleY);
 			else
-				RenderTools()->QuadContainerAddSprite(m_aWeaponSpriteMuzzleQuadContainerIndex[i], SWidth, SHeight);
+				Graphics()->QuadContainerAddSprite(m_aWeaponSpriteMuzzleQuadContainerIndex[i], SWidth, SHeight);
 		}
 		Graphics()->QuadContainerUpload(m_aWeaponSpriteMuzzleQuadContainerIndex[i]);
 	}

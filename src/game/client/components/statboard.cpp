@@ -236,13 +236,13 @@ void CStatboard::RenderGlobalStats()
 		if(!aDisplayWeapon[i])
 			continue;
 		float ScaleX, ScaleY;
-		RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[i].m_pSpriteBody, ScaleX, ScaleY);
+		Graphics()->GetSpriteScale(g_pData->m_Weapons.m_aId[i].m_pSpriteBody, ScaleX, ScaleY);
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteWeapons[i]);
 		Graphics()->QuadsBegin();
 		if(i == 0)
-			RenderTools()->DrawSprite(x + px, y + 10, g_pData->m_Weapons.m_aId[i].m_VisualSize * 0.8f * ScaleX, g_pData->m_Weapons.m_aId[i].m_VisualSize * 0.8f * ScaleY);
+			Graphics()->DrawSprite(x + px, y + 10, g_pData->m_Weapons.m_aId[i].m_VisualSize * 0.8f * ScaleX, g_pData->m_Weapons.m_aId[i].m_VisualSize * 0.8f * ScaleY);
 		else
-			RenderTools()->DrawSprite(x + px, y + 10, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleX, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleY);
+			Graphics()->DrawSprite(x + px, y + 10, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleX, g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleY);
 		px += 80;
 		Graphics()->QuadsEnd();
 	}
@@ -251,10 +251,10 @@ void CStatboard::RenderGlobalStats()
 	{
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteFlagRed);
 		float ScaleX, ScaleY;
-		RenderTools()->GetSpriteScale(SPRITE_FLAG_RED, ScaleX, ScaleY);
+		Graphics()->GetSpriteScale(SPRITE_FLAG_RED, ScaleX, ScaleY);
 		Graphics()->QuadsBegin();
 		Graphics()->QuadsSetRotation(0.78f);
-		RenderTools()->DrawSprite(x + px, y + 15, 48 * ScaleX, 48 * ScaleY);
+		Graphics()->DrawSprite(x + px, y + 15, 48 * ScaleX, 48 * ScaleY);
 		Graphics()->QuadsEnd();
 	}
 

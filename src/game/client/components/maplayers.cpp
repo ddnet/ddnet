@@ -51,7 +51,7 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, 
 		s_Time += CurTime - s_LastLocalTime;
 		s_LastLocalTime = CurTime;
 	}
-	CRenderTools::RenderEvalEnvelope(pEnvelopePoints, s_Time + std::chrono::nanoseconds(std::chrono::milliseconds(TimeOffsetMillis)), Result, Channels);
+	CRenderMap::RenderEvalEnvelope(pEnvelopePoints, s_Time + std::chrono::nanoseconds(std::chrono::milliseconds(TimeOffsetMillis)), Result, Channels);
 }
 
 void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels)
@@ -257,7 +257,7 @@ void CMapLayers::OnRender()
 	else
 	{
 		// reset the screen to the default interface
-		RenderTools()->MapScreenToInterface(m_Params.m_Center.x, m_Params.m_Center.y, m_Params.m_Zoom);
+		Graphics()->MapScreenToInterface(m_Params.m_Center.x, m_Params.m_Center.y, m_Params.m_Zoom);
 	}
 }
 
