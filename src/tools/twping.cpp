@@ -12,11 +12,6 @@ int main(int argc, const char **argv)
 	CCmdlineFix CmdlineFix(&argc, &argv);
 
 	log_set_global_logger_default();
-	if(secure_random_init() != 0)
-	{
-		log_error("twping", "could not initialize secure RNG");
-		return -1;
-	}
 
 	net_init();
 	NETADDR BindAddr;

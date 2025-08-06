@@ -4741,7 +4741,6 @@ int open_file(const char *path)
 
 struct SECURE_RANDOM_DATA
 {
-	int initialized;
 #if defined(CONF_FAMILY_WINDOWS)
 	HCRYPTPROV provider;
 #else
@@ -4751,63 +4750,25 @@ struct SECURE_RANDOM_DATA
 
 static struct SECURE_RANDOM_DATA secure_random_data = {0};
 
-int secure_random_init()
+static int secure_random_init()
 {
-	if(secure_random_data.initialized)
-	{
-		return 0;
-	}
+	bool success;
 #if defined(CONF_FAMILY_WINDOWS)
-	if(CryptAcquireContext(&secure_random_data.provider, nullptr, nullptr, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
-	{
-		secure_random_data.initialized = 1;
-		return 0;
-	}
-	else
-	{
-		return 1;
-	}
+	success = (bool)CryptAcquireContext(&secure_random_data.provider, nullptr, nullptr, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
 #else
 	secure_random_data.urandom = io_open("/dev/urandom", IOFLAG_READ);
-	if(secure_random_data.urandom)
-	{
-		secure_random_data.initialized = 1;
-		return 0;
-	}
-	else
-	{
-		return 1;
-	}
+	success = (bool)secure_random_data.urandom;
 #endif
+	dbg_assert(success, "couldn't initialize secure randomness");
+	return 0;
 }
 
-int secure_random_uninit()
+static void ensure_secure_random_init()
 {
-	if(!secure_random_data.initialized)
-	{
-		return 0;
-	}
-#if defined(CONF_FAMILY_WINDOWS)
-	if(CryptReleaseContext(secure_random_data.provider, 0))
-	{
-		secure_random_data.initialized = 0;
-		return 0;
-	}
-	else
-	{
-		return 1;
-	}
-#else
-	if(!io_close(secure_random_data.urandom))
-	{
-		secure_random_data.initialized = 0;
-		return 0;
-	}
-	else
-	{
-		return 1;
-	}
-#endif
+	// Use a static to ensure that `secure_random_init()` is called exactly
+	// once and on one thread only.
+	static int _unused = secure_random_init();
+	(void)_unused;
 }
 
 void generate_password(char *buffer, unsigned length, const unsigned short *random, unsigned random_length)
@@ -4848,11 +4809,7 @@ void secure_random_password(char *buffer, unsigned length, unsigned pw_length)
 
 void secure_random_fill(void *bytes, unsigned length)
 {
-	if(!secure_random_data.initialized)
-	{
-		dbg_msg("secure", "called secure_random_fill before secure_random_init");
-		dbg_break();
-	}
+	ensure_secure_random_init();
 #if defined(CONF_FAMILY_WINDOWS)
 	if(!CryptGenRandom(secure_random_data.provider, length, (unsigned char *)bytes))
 	{
