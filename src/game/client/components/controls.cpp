@@ -22,7 +22,7 @@ CControls::CControls()
 	mem_zero(m_aMousePos, sizeof(m_aMousePos));
 	mem_zero(m_aMousePosOnAction, sizeof(m_aMousePosOnAction));
 	mem_zero(m_aTargetPos, sizeof(m_aTargetPos));
-	mem_zero(m_aInputType, sizeof(m_aInputType));
+	std::fill(std::begin(m_aInputType), std::end(m_aInputType), EInputType::ABSOLUTE);
 }
 
 void CControls::OnReset()
@@ -200,13 +200,13 @@ int CControls::SnapInput(int *pData)
 
 	switch(m_aInputType[g_Config.m_ClDummy])
 	{
-	case CControls::EInputType::INPUT_TYPE_AUTOMATED:
+	case CControls::EInputType::AUTOMATED:
 		m_aInputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_INPUT_ABSOLUTE;
 		break;
-	case CControls::EInputType::INPUT_TYPE_ABSOLUTE:
+	case CControls::EInputType::ABSOLUTE:
 		m_aInputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_INPUT_ABSOLUTE | PLAYERFLAG_INPUT_MANUAL;
 		break;
-	case CControls::EInputType::INPUT_TYPE_RELATIVE:
+	case CControls::EInputType::RELATIVE:
 		m_aInputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_INPUT_MANUAL;
 		break;
 	}
@@ -386,7 +386,7 @@ bool CControls::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 		if(Input()->GetActiveJoystick()->Absolute(&AbsoluteDirection.x, &AbsoluteDirection.y))
 		{
 			m_aMousePos[g_Config.m_ClDummy] = AbsoluteDirection * GetMaxMouseDistance();
-			GameClient()->m_Controls.m_aInputType[g_Config.m_ClDummy] = CControls::INPUT_TYPE_ABSOLUTE;
+			GameClient()->m_Controls.m_aInputType[g_Config.m_ClDummy] = CControls::EInputType::ABSOLUTE;
 		}
 		return true;
 	}
@@ -417,7 +417,7 @@ bool CControls::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 		Factor *= GameClient()->m_Camera.m_Zoom;
 
 	m_aMousePos[g_Config.m_ClDummy] += vec2(x, y) * Factor;
-	GameClient()->m_Controls.m_aInputType[g_Config.m_ClDummy] = CControls::INPUT_TYPE_RELATIVE;
+	GameClient()->m_Controls.m_aInputType[g_Config.m_ClDummy] = CControls::EInputType::RELATIVE;
 	ClampMousePos();
 	return true;
 }

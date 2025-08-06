@@ -323,7 +323,7 @@ void CCamera::OnRender()
 		{
 			m_aLastPos[g_Config.m_ClDummy] = GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy];
 			GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy] = m_PrevCenter;
-			GameClient()->m_Controls.m_aInputType[g_Config.m_ClDummy] = CControls::INPUT_TYPE_AUTOMATED;
+			GameClient()->m_Controls.m_aInputType[g_Config.m_ClDummy] = CControls::EInputType::AUTOMATED;
 			GameClient()->m_Controls.ClampMousePos();
 			m_CamType = CAMTYPE_SPEC;
 		}
@@ -334,7 +334,7 @@ void CCamera::OnRender()
 		if(m_CamType != CAMTYPE_PLAYER)
 		{
 			GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy] = m_aLastPos[g_Config.m_ClDummy];
-			GameClient()->m_Controls.m_aInputType[g_Config.m_ClDummy] = CControls::INPUT_TYPE_AUTOMATED;
+			GameClient()->m_Controls.m_aInputType[g_Config.m_ClDummy] = CControls::EInputType::AUTOMATED;
 			GameClient()->m_Controls.ClampMousePos();
 			m_CamType = CAMTYPE_PLAYER;
 		}
@@ -347,7 +347,7 @@ void CCamera::OnRender()
 
 	if(m_ForceFreeview && m_CamType == CAMTYPE_SPEC)
 	{
-		GameClient()->m_Controls.m_aInputType[g_Config.m_ClDummy] = CControls::INPUT_TYPE_AUTOMATED;
+		GameClient()->m_Controls.m_aInputType[g_Config.m_ClDummy] = CControls::EInputType::AUTOMATED;
 		m_Center = GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy] = m_ForceFreeviewPos;
 		m_ForceFreeview = false;
 	}
