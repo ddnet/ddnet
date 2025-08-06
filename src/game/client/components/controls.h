@@ -18,11 +18,11 @@ public:
 	float GetMinMouseDistance() const;
 	float GetMaxMouseDistance() const;
 
-	enum EInputType
+	enum class EInputType
 	{
-		INPUT_TYPE_ABSOLUTE,
-		INPUT_TYPE_RELATIVE,
-		INPUT_TYPE_AUTOMATED,
+		ABSOLUTE,
+		RELATIVE,
+		AUTOMATED,
 	};
 
 	vec2 m_aMousePos[NUM_DUMMIES];

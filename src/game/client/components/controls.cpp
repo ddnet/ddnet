@@ -23,7 +23,7 @@ CControls::CControls()
 	std::fill(std::begin(m_aMousePos), std::end(m_aMousePos), vec2(0.0f, 0.0f));
 	std::fill(std::begin(m_aMousePosOnAction), std::end(m_aMousePosOnAction), vec2(0.0f, 0.0f));
 	std::fill(std::begin(m_aTargetPos), std::end(m_aTargetPos), vec2(0.0f, 0.0f));
-	std::fill(std::begin(m_aInputType), std::end(m_aInputType), INPUT_TYPE_ABSOLUTE);
+	std::fill(std::begin(m_aInputType), std::end(m_aInputType), EInputType::ABSOLUTE);
 }
 
 void CControls::OnReset()
@@ -201,13 +201,13 @@ int CControls::SnapInput(int *pData)
 
 	switch(m_aInputType[g_Config.m_ClDummy])
 	{
-	case CControls::EInputType::INPUT_TYPE_AUTOMATED:
+	case CControls::EInputType::AUTOMATED:
 		m_aInputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_INPUT_ABSOLUTE;
 		break;
-	case CControls::EInputType::INPUT_TYPE_ABSOLUTE:
+	case CControls::EInputType::ABSOLUTE:
 		m_aInputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_INPUT_ABSOLUTE | PLAYERFLAG_INPUT_MANUAL;
 		break;
-	case CControls::EInputType::INPUT_TYPE_RELATIVE:
+	case CControls::EInputType::RELATIVE:
 		m_aInputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_INPUT_MANUAL;
 		break;
 	}
@@ -387,7 +387,7 @@ bool CControls::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 		if(Input()->GetActiveJoystick()->Absolute(&AbsoluteDirection.x, &AbsoluteDirection.y))
 		{
 			m_aMousePos[g_Config.m_ClDummy] = AbsoluteDirection * GetMaxMouseDistance();
-			GameClient()->m_Controls.m_aInputType[g_Config.m_ClDummy] = CControls::INPUT_TYPE_ABSOLUTE;
+			GameClient()->m_Controls.m_aInputType[g_Config.m_ClDummy] = CControls::EInputType::ABSOLUTE;
 		}
 		return true;
 	}
@@ -418,7 +418,7 @@ bool CControls::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 		Factor *= GameClient()->m_Camera.m_Zoom;
 
 	m_aMousePos[g_Config.m_ClDummy] += vec2(x, y) * Factor;
-	GameClient()->m_Controls.m_aInputType[g_Config.m_ClDummy] = CControls::INPUT_TYPE_RELATIVE;
+	GameClient()->m_Controls.m_aInputType[g_Config.m_ClDummy] = CControls::EInputType::RELATIVE;
 	ClampMousePos();
 	return true;
 }
