@@ -1296,8 +1296,6 @@ CUi::EPopupMenuFunctionResult CEditor::PopupPoint(void *pContext, CUIRect View, 
 	CQuad *pCurrentQuad = vpQuads[pEditor->m_SelectedQuadIndex];
 	std::shared_ptr<CLayerQuads> pLayer = std::static_pointer_cast<CLayerQuads>(pEditor->GetSelectedLayerType(0, LAYERTYPE_QUADS));
 
-	int Color = PackColor(pCurrentQuad->m_aColors[pEditor->m_SelectedQuadPoint]);
-
 	const int X = fx2i(pCurrentQuad->m_aPoints[pEditor->m_SelectedQuadPoint].x);
 	const int Y = fx2i(pCurrentQuad->m_aPoints[pEditor->m_SelectedQuadPoint].y);
 	const int TextureU = fx2f(pCurrentQuad->m_aTexcoords[pEditor->m_SelectedQuadPoint].x) * 1024;
@@ -1306,7 +1304,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupPoint(void *pContext, CUIRect View, 
 	CProperty aProps[] = {
 		{"Pos X", X, PROPTYPE_INT, -1000000, 1000000},
 		{"Pos Y", Y, PROPTYPE_INT, -1000000, 1000000},
-		{"Color", Color, PROPTYPE_COLOR, 0, 0},
+		{"Color", PackColor(pCurrentQuad->m_aColors[pEditor->m_SelectedQuadPoint]), PROPTYPE_COLOR, 0, 0},
 		{"Tex U", TextureU, PROPTYPE_INT, -1000000, 1000000},
 		{"Tex V", TextureV, PROPTYPE_INT, -1000000, 1000000},
 		{nullptr},
@@ -1341,10 +1339,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupPoint(void *pContext, CUIRect View, 
 			{
 				if(pEditor->IsQuadCornerSelected(v))
 				{
-					pQuad->m_aColors[v].r = (NewVal >> 24) & 0xff;
-					pQuad->m_aColors[v].g = (NewVal >> 16) & 0xff;
-					pQuad->m_aColors[v].b = (NewVal >> 8) & 0xff;
-					pQuad->m_aColors[v].a = NewVal & 0xff;
+					pQuad->m_aColors[v] = UnpackColor(NewVal);
 				}
 			}
 		}

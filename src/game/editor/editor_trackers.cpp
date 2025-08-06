@@ -149,8 +149,7 @@ void CQuadEditTracker::AddQuadPointPropTrack(EQuadPointProp Prop)
 			{
 				if(m_SelectedQuadPoints & (1 << v))
 				{
-					int Color = PackColor(Quad.m_aColors[v]);
-					m_PreviousValuesPoint[QuadIndex][v][Prop] = Color;
+					m_PreviousValuesPoint[QuadIndex][v][Prop] = PackColor(Quad.m_aColors[v]);
 				}
 			}
 		}
