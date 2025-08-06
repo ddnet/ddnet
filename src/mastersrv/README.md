@@ -1,5 +1,6 @@
-mastersrv
-=========
+# mastersrv
+
+@page mastersrv
 
 The mastersrv maintains a list of all registered DDNet (and Teeworlds) servers.
 Game servers try to register themselves with the mastersrv via an HTTP POST
@@ -17,22 +18,19 @@ the `src/mastersrv` folder. The resulting binary should appear in
 
 Use `--help` to see some of the options of the mastersrv.
 
-servers.json
-============
+## servers.json
 
 The `servers.json` file produced by the mastersrv is not actually served
 automatically, it needs to be served by another HTTPS server, probably by the
 same as the reverse proxy handling HTTPS for the mastersrv. It is suggested to
 serve the `servers.json` file at the path `/ddnet/15/servers.json`.
 
-Logs
-====
+## Logs
 
 To enable logs, set the environment variable `RUST_LOG=mastersrv,info`. Logs
 should appear already when just starting the mastersrv.
 
-Reverse proxy
-=============
+## Reverse proxy
 
 In order to run this mastersrv in production, you must put it behind a reverse
 proxy that handles HTTPS, such as nginx, Caddy, or Apache.
