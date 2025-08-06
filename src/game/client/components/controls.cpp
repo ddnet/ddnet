@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
+#include <base/vmath.h>
 
 #include <engine/client.h>
 #include <engine/shared/config.h>
@@ -11,8 +12,7 @@
 #include <game/client/components/scoreboard.h>
 #include <game/client/gameclient.h>
 #include <game/collision.h>
-
-#include <base/vmath.h>
+#include <game/generated/protocol.h>
 
 #include "controls.h"
 
@@ -198,9 +198,17 @@ int CControls::SnapInput(int *pData)
 	if(Client()->ServerCapAnyPlayerFlag() && GameClient()->m_Camera.CamType() == CCamera::CAMTYPE_SPEC)
 		m_aInputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_SPEC_CAM;
 
-	if(m_aInputType[g_Config.m_ClDummy] != CControls::INPUT_TYPE_RELATIVE)
+	switch(m_aInputType[g_Config.m_ClDummy])
 	{
+	case CControls::EInputType::INPUT_TYPE_AUTOMATED:
 		m_aInputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_INPUT_ABSOLUTE;
+		break;
+	case CControls::EInputType::INPUT_TYPE_ABSOLUTE:
+		m_aInputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_INPUT_ABSOLUTE | PLAYERFLAG_INPUT_MANUAL;
+		break;
+	case CControls::EInputType::INPUT_TYPE_RELATIVE:
+		m_aInputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_INPUT_MANUAL;
+		break;
 	}
 
 	bool Send = m_aLastData[g_Config.m_ClDummy].m_PlayerFlags != m_aInputData[g_Config.m_ClDummy].m_PlayerFlags;
