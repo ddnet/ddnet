@@ -8,6 +8,8 @@
 #include <engine/client.h>
 #include <engine/shared/config.h>
 
+#include <generated/protocol.h>
+
 #include <game/client/components/camera.h>
 #include <game/client/components/chat.h>
 #include <game/client/components/menus.h>
@@ -197,9 +199,17 @@ int CControls::SnapInput(int *pData)
 	if(Client()->ServerCapAnyPlayerFlag() && GameClient()->m_Camera.CamType() == CCamera::CAMTYPE_SPEC)
 		m_aInputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_SPEC_CAM;
 
-	if(m_aInputType[g_Config.m_ClDummy] != CControls::INPUT_TYPE_RELATIVE)
+	switch(m_aInputType[g_Config.m_ClDummy])
 	{
+	case CControls::EInputType::INPUT_TYPE_AUTOMATED:
 		m_aInputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_INPUT_ABSOLUTE;
+		break;
+	case CControls::EInputType::INPUT_TYPE_ABSOLUTE:
+		m_aInputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_INPUT_ABSOLUTE | PLAYERFLAG_INPUT_MANUAL;
+		break;
+	case CControls::EInputType::INPUT_TYPE_RELATIVE:
+		m_aInputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_INPUT_MANUAL;
+		break;
 	}
 
 	bool Send = m_aLastData[g_Config.m_ClDummy].m_PlayerFlags != m_aInputData[g_Config.m_ClDummy].m_PlayerFlags;
