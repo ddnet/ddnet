@@ -2910,20 +2910,46 @@ std::wstring windows_utf8_to_wide(const char *str);
 std::optional<std::string> windows_wide_to_utf8(const wchar_t *wide_str);
 
 /**
- * This is a RAII wrapper to initialize/uninitialize the Windows COM library,
- * which may be necessary for using the @link open_file @endlink and
- * @link open_link @endlink functions.
+ * Creates a start menu shortcut for the application.
+ * 
+ * @ingroup Shell
+ * 
+ * @param name Name of the shortcut to create.
+ * @param executable The absolute path of the executable.
+ * 
+ * @remark The shortcut will be created in the start menu folder of the current user.
+ */
+void windows_create_shortcut(const char *name, const char *executable);
+
+/*
+* Deletes a start menu shortcut for the application.
+ * 
+ * @ingroup Shell
+ * 
+ * @param name Name of the shortcut to delete.
+ * 
+ * @remark The shortcut will be deleted from the start menu folder of the current user.
+ */
+void windows_remove_shortcut(const char *name);
+
+/**
+ * This is a RAII wrapper to initialize/uninitialize the Windows COM and WinRT libraries,
+ * which may be necessary for using modern Windows APIs and features like
+ * @link open_file @endlink and @link open_link @endlink functions.
  * Must be used on every thread. It's automatically used on threads created
  * with @link thread_init @endlink. Pass `true` to the constructor on threads
  * that own a window (i.e. pump a message queue).
  *
  * @ingroup Shell
  */
-class CWindowsComLifecycle
+class CWindowsComRtLifecycle
 {
 public:
-	CWindowsComLifecycle(bool HasWindow);
-	~CWindowsComLifecycle();
+	CWindowsComRtLifecycle(bool HasWindow);
+	~CWindowsComRtLifecycle();
+
+private:
+	bool m_RoInitialized = false;
 };
 
 /**
