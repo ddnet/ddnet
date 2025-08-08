@@ -4583,6 +4583,11 @@ int main(int argc, const char **argv)
 		{
 			Silent = true;
 		}
+		else
+		{
+			std::printf("Usage: %s [-s/--silent]\n", argv[0]);
+			return 1;
+		}
 	}
 	if(!Silent)
 	{

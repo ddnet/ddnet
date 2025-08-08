@@ -52,7 +52,6 @@ int main(int argc, const char **argv)
 
 #if !defined(CONF_PLATFORM_ANDROID)
 	bool Silent = false;
-
 	for(int i = 1; i < argc; i++)
 	{
 		if(str_comp("-s", argv[i]) == 0 || str_comp("--silent", argv[i]) == 0)
@@ -61,7 +60,11 @@ int main(int argc, const char **argv)
 #if defined(CONF_FAMILY_WINDOWS)
 			ShowWindow(GetConsoleWindow(), SW_HIDE);
 #endif
-			break;
+		}
+		else
+		{
+			std::printf("Usage: %s [-s/--silent]\n", argv[0]);
+			return 1;
 		}
 	}
 #endif
