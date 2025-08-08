@@ -1319,13 +1319,11 @@ void CGameClient::ProcessDemoSnapshot(CSnapshot *pSnap)
 		else if(ItemType == NETOBJTYPE_DDNETSPECTATORINFO)
 		{
 			// always record local camera info as follow mode
-			CNetObj_DDNetSpectatorInfo *pProj = (CNetObj_DDNetSpectatorInfo *)((void *)pItem->Data());
-			pProj->m_HasCameraInfo = true;
-			pProj->m_Zoom = (m_Camera.m_Zooming ? m_Camera.m_ZoomSmoothingTarget : m_Camera.m_Zoom) * 1000.0f;
-			pProj->m_Deadzone = m_Camera.Deadzone();
-			pProj->m_FollowFactor = m_Camera.FollowFactor();
-			// this also removes spectator count since it has lost its context
-			pProj->m_SpectatorCount = 0;
+			CNetObj_DDNetSpectatorInfo *pDDNetSpectatorInfo = (CNetObj_DDNetSpectatorInfo *)((void *)pItem->Data());
+			pDDNetSpectatorInfo->m_HasCameraInfo = true;
+			pDDNetSpectatorInfo->m_Zoom = (m_Camera.m_Zooming ? m_Camera.m_ZoomSmoothingTarget : m_Camera.m_Zoom) * 1000.0f;
+			pDDNetSpectatorInfo->m_Deadzone = m_Camera.Deadzone();
+			pDDNetSpectatorInfo->m_FollowFactor = m_Camera.FollowFactor();
 		}
 	}
 }
