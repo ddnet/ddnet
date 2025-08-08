@@ -384,7 +384,7 @@ bool CConfigManager::Save()
 	char aLineBuf[2048];
 	for(const SConfigVariable *pVariable : m_vpAllVariables)
 	{
-		if((pVariable->m_Flags & CFGFLAG_SAVE) != 0 && !pVariable->IsDefault())
+		if((pVariable->m_Flags & CFGFLAG_SAVE) != 0)
 		{
 			pVariable->Serialize(aLineBuf, sizeof(aLineBuf));
 			WriteLine(aLineBuf);
