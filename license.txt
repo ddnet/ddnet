@@ -49,6 +49,13 @@ Developer: Celestial Phineas
 
 Glow Sans fonts are released under SIL Open Font License 1.1.
 
+NotoEmoji-Regular.ttf:
+----------------------
+
+Copyright 2013 Google LLC
+
+Noto Emoji is licensed under the SIL Open Font License, Version 1.1.
+
 SourceHanSans.ttc:
 ------------------
 
