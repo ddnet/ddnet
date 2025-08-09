@@ -58,6 +58,7 @@ bool CServerInfo2::Validate() const
 
 bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 {
+	static constexpr const char *SKIN_PART_NAMES[protocol7::NUM_SKINPARTS] = {"body", "marking", "decoration", "hands", "feet", "eyes"};
 	mem_zero(pOut, sizeof(*pOut));
 	bool Error;
 
@@ -151,6 +152,7 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 				const json_value &SkinName = SkinObj["name"];
 				const json_value &SkinBodyColor = SkinObj["color_body"];
 				const json_value &SkinFeetColor = SkinObj["color_feet"];
+				// 0.6 skin
 				if(SkinName.type == json_string)
 				{
 					HasSkin = true;
@@ -171,12 +173,50 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 						pClient->m_CustomSkinColors = false;
 					}
 				}
+				// 0.7 skin
+				else if(SkinObj[SKIN_PART_NAMES[protocol7::SKINPART_BODY]].type == json_object)
+				{
+					for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
+					{
+						const json_value &SkinPartObj = SkinObj[SKIN_PART_NAMES[Part]];
+						if(SkinPartObj.type == json_object)
+						{
+							const json_value &SkinPartName = SkinPartObj["name"];
+							const json_value &SkinPartColor = SkinPartObj["color"];
+							if(SkinPartName.type == json_string)
+							{
+								HasSkin = true;
+								str_copy(pClient->m_aaSkin7[Part], SkinPartName.u.string.ptr);
+								if(pClient->m_aaSkin7[Part][0] == '\0' && Part != protocol7::SKINPART_MARKING && Part != protocol7::SKINPART_DECORATION)
+									str_copy(pClient->m_aaSkin7[Part], "standard");
+							}
+							else
+							{
+								HasSkin = false;
+							}
+							if(SkinPartColor.type == json_integer)
+							{
+								pClient->m_aUseCustomSkinColor7[Part] = true;
+								pClient->m_aCustomSkinColor7[Part] = SkinPartColor.u.integer;
+							}
+							else
+							{
+								pClient->m_aUseCustomSkinColor7[Part] = false;
+							}
+						}
+						else
+						{
+							HasSkin = false;
+						}
+					}
+				}
 			}
 
 			// else make it null terminated
 			if(!HasSkin)
 			{
 				pClient->m_aSkin[0] = '\0';
+				pClient->m_aaSkin7[protocol7::SKINPART_BODY][0] = '\0';
 			}
 		}
 
@@ -249,10 +289,18 @@ CServerInfo2::operator CServerInfo() const
 		Result.m_aClients[i].m_Player = m_aClients[i].m_IsPlayer;
 		Result.m_aClients[i].m_Afk = m_aClients[i].m_IsAfk;
 
+		// 0.6 skin
 		str_copy(Result.m_aClients[i].m_aSkin, m_aClients[i].m_aSkin);
 		Result.m_aClients[i].m_CustomSkinColors = m_aClients[i].m_CustomSkinColors;
 		Result.m_aClients[i].m_CustomSkinColorBody = m_aClients[i].m_CustomSkinColorBody;
 		Result.m_aClients[i].m_CustomSkinColorFeet = m_aClients[i].m_CustomSkinColorFeet;
+		// 0.7 skin
+		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
+		{
+			str_copy(Result.m_aClients[i].m_aaSkin7[Part], m_aClients[i].m_aaSkin7[Part]);
+			Result.m_aClients[i].m_aUseCustomSkinColor7[Part] = m_aClients[i].m_aUseCustomSkinColor7[Part];
+			Result.m_aClients[i].m_aCustomSkinColor7[Part] = m_aClients[i].m_aCustomSkinColor7[Part];
+		}
 	}
 
 	Result.m_NumReceivedClients = minimum(m_NumClients, (int)SERVERINFO_MAX_CLIENTS);
