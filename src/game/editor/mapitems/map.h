@@ -11,6 +11,7 @@
 #include <game/editor/editor_server_settings.h>
 #include <game/editor/mapitems/envelope.h>
 #include <game/editor/mapitems/layer.h>
+#include <game/editor/references.h>
 
 #include <functional>
 #include <memory>
@@ -91,10 +92,12 @@ public:
 	CMapInfo m_MapInfoTmp;
 
 	std::shared_ptr<CEnvelope> NewEnvelope(CEnvelope::EType Type);
-	void DeleteEnvelope(int Index);
+	void InsertEnvelope(int Index, std::shared_ptr<CEnvelope> &pEnvelope);
+	void UpdateEnvelopeReferences(int Index, std::shared_ptr<CEnvelope> &pEnvelope, std::vector<std::shared_ptr<IEditorEnvelopeReference>> &vpEditorObjectReferences);
+	std::vector<std::shared_ptr<IEditorEnvelopeReference>> DeleteEnvelope(int Index);
 	int MoveEnvelope(int IndexFrom, int IndexTo);
 	template<typename F>
-	void VisitEnvelopeReferences(F &&Visitor);
+	std::vector<std::shared_ptr<IEditorEnvelopeReference>> VisitEnvelopeReferences(F &&Visitor);
 
 	std::shared_ptr<CLayerGroup> NewGroup();
 	int MoveGroup(int IndexFrom, int IndexTo);
