@@ -112,10 +112,13 @@ jobs:
     - name: Prepare Windows MinGW
       if: contains(matrix.os, 'windows') && contains(matrix.name, 'mingw')
       run: |
+        C:\msys64\usr\bin\pacman -Sy --noconfirm
+        C:\msys64\usr\bin\pacman -S --needed --noconfirm mingw-w64-x86_64-toolchain mingw-w64-x86_64-cppwinrt
         rustup toolchain install stable-x86_64-pc-windows-gnu
         rustup target add x86_64-pc-windows-gnu
         rustup default stable-x86_64-pc-windows-gnu
         rustup set default-host x86_64-pc-windows-gnu
+        echo "C:\msys64\mingw64\bin" >> $GITHUB_PATH
     
     - name: Cache Rust dependencies
       uses: Swatinem/rust-cache@v2

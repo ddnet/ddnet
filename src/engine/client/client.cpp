@@ -4567,7 +4567,7 @@ int main(int argc, const char **argv)
 	}
 	gs_AndroidStarted = true;
 #elif defined(CONF_FAMILY_WINDOWS)
-	CWindowsComLifecycle WindowsComLifecycle(true);
+	CWindowsComRtLifecycle WindowsComRtLifecycle(true);
 #endif
 	CCmdlineFix CmdlineFix(&argc, &argv);
 
@@ -4830,7 +4830,7 @@ int main(int argc, const char **argv)
 	pEngine->Init();
 	pConsole->Init();
 	pConfigManager->Init();
-	pNotifications->Init(GAME_NAME " Client");
+	pNotifications->Init(GAME_NAME);
 
 	// register all console commands
 	pClient->RegisterCommands();
@@ -5244,6 +5244,8 @@ void CClient::ShellRegister()
 		return;
 	}
 
+	windows_create_shortcut(GAME_NAME, aFullPath);
+
 	bool Updated = false;
 	if(!shell_register_protocol("ddnet", aFullPath, &Updated))
 		log_error("client", "Failed to register ddnet protocol");
@@ -5266,6 +5268,8 @@ void CClient::ShellUnregister()
 		log_error("client", "Failed to unregister protocol and file extensions: could not determine absolute path");
 		return;
 	}
+
+	windows_remove_shortcut(GAME_NAME);
 
 	bool Updated = false;
 	if(!shell_unregister_class("ddnet", &Updated))
