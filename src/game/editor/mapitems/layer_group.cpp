@@ -39,7 +39,7 @@ void CLayerGroup::Mapping(float *pPoints) const
 	float NormalParallaxZoom = std::clamp((double)(maximum(m_ParallaxX, m_ParallaxY)), 0., 100.);
 	float ParallaxZoom = m_pMap->Editor()->m_PreviewZoom ? NormalParallaxZoom : 100.0f;
 
-	m_pMap->Editor()->RenderTools()->MapScreenToWorld(
+	m_pMap->Editor()->Graphics()->MapScreenToWorld(
 		m_pMap->Editor()->MapView()->GetWorldOffset().x, m_pMap->Editor()->MapView()->GetWorldOffset().y,
 		m_ParallaxX, m_ParallaxY, ParallaxZoom, m_OffsetX, m_OffsetY,
 		m_pMap->Editor()->Graphics()->ScreenAspect(), m_pMap->Editor()->MapView()->GetWorldZoom(), pPoints);

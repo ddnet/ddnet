@@ -51,7 +51,7 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, 
 		s_Time += CurTime - s_LastLocalTime;
 		s_LastLocalTime = CurTime;
 	}
-	CRenderTools::RenderEvalEnvelope(pEnvelopePoints, s_Time + std::chrono::nanoseconds(std::chrono::milliseconds(TimeOffsetMillis)), Result, Channels);
+	CRenderMap::RenderEvalEnvelope(pEnvelopePoints, s_Time + std::chrono::nanoseconds(std::chrono::milliseconds(TimeOffsetMillis)), Result, Channels);
 }
 
 void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels)
@@ -91,6 +91,7 @@ CCamera *CMapLayers::GetCurCamera()
 
 void CMapLayers::OnMapLoad()
 {
+	m_RenderMap.Init(Graphics(), TextRender());
 	m_pEnvelopePoints = std::make_shared<CMapBasedEnvelopePointAccess>(m_pLayers->Map());
 	bool PassedGameLayer = false;
 	Unload();
@@ -103,7 +104,7 @@ void CMapLayers::OnMapLoad()
 	{
 		CMapItemGroup *pGroup = m_pLayers->GetGroup(g);
 		std::unique_ptr<CRenderLayer> pRenderLayerGroup = std::make_unique<CRenderLayerGroup>(g, pGroup);
-		pRenderLayerGroup->OnInit(GameClient(), m_pLayers->Map(), m_pImages, m_pEnvelopePoints, m_OnlineOnly);
+		pRenderLayerGroup->OnInit(GameClient(), m_pLayers->Map(), m_pImages, m_pEnvelopePoints, m_OnlineOnly, &m_RenderMap);
 		if(!pRenderLayerGroup->IsValid())
 		{
 			dbg_msg("maplayers", "error group was null, group number = %d, total groups = %d", g, m_pLayers->NumGroups());
@@ -207,7 +208,7 @@ void CMapLayers::OnMapLoad()
 			// just ignore invalid layers from rendering
 			if(pRenderLayer)
 			{
-				pRenderLayer->OnInit(GameClient(), m_pLayers->Map(), m_pImages, m_pEnvelopePoints, m_OnlineOnly);
+				pRenderLayer->OnInit(GameClient(), m_pLayers->Map(), m_pImages, m_pEnvelopePoints, m_OnlineOnly, &m_RenderMap);
 				if(pRenderLayer->IsValid())
 				{
 					pRenderLayer->Init();
@@ -257,7 +258,7 @@ void CMapLayers::OnRender()
 	else
 	{
 		// reset the screen to the default interface
-		RenderTools()->MapScreenToInterface(m_Params.m_Center.x, m_Params.m_Center.y, m_Params.m_Zoom);
+		Graphics()->MapScreenToInterface(m_Params.m_Center.x, m_Params.m_Center.y, m_Params.m_Zoom);
 	}
 }
 

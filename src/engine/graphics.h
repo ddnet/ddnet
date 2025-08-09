@@ -255,6 +255,13 @@ public:
 	virtual void ClipDisable() = 0;
 
 	virtual void MapScreen(float TopLeftX, float TopLeftY, float BottomRightX, float BottomRightY) = 0;
+
+	// helper functions
+	void CalcScreenParams(float Aspect, float Zoom, float *pWidth, float *pHeight);
+	void MapScreenToWorld(float CenterX, float CenterY, float ParallaxX, float ParallaxY,
+		float ParallaxZoom, float OffsetX, float OffsetY, float Aspect, float Zoom, float *pPoints);
+	void MapScreenToInterface(float CenterX, float CenterY, float Zoom = 1.0f);
+
 	virtual void GetScreen(float *pTopLeftX, float *pTopLeftY, float *pBottomRightX, float *pBottomRightY) = 0;
 
 	// TODO: These should perhaps not be virtuals
@@ -412,6 +419,26 @@ public:
 
 	virtual void QuadsDrawFreeform(const CFreeformItem *pArray, int Num) = 0;
 	virtual void QuadsText(float x, float y, float Size, const char *pText) = 0;
+
+	// sprites
+	enum
+	{
+		SPRITE_FLAG_FLIP_Y = 1,
+		SPRITE_FLAG_FLIP_X = 2,
+	};
+	virtual void SelectSprite(int Id, int Flags = 0) = 0;
+	virtual void SelectSprite7(int Id, int Flags = 0) = 0;
+
+	virtual void GetSpriteScale(int Id, float &ScaleX, float &ScaleY) const = 0;
+	virtual void GetSpriteScaleImpl(int Width, int Height, float &ScaleX, float &ScaleY) const = 0;
+
+	virtual void DrawSprite(float x, float y, float Size) = 0;
+	virtual void DrawSprite(float x, float y, float ScaledWidth, float ScaledHeight) = 0;
+
+	virtual int QuadContainerAddSprite(int QuadContainerIndex, float x, float y, float Size) = 0;
+	virtual int QuadContainerAddSprite(int QuadContainerIndex, float Size) = 0;
+	virtual int QuadContainerAddSprite(int QuadContainerIndex, float Width, float Height) = 0;
+	virtual int QuadContainerAddSprite(int QuadContainerIndex, float X, float Y, float Width, float Height) = 0;
 
 	enum
 	{

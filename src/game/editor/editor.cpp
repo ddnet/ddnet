@@ -26,7 +26,6 @@
 #include <game/client/components/camera.h>
 #include <game/client/gameclient.h>
 #include <game/client/lineinput.h>
-#include <game/client/render.h>
 #include <game/client/ui.h>
 #include <game/client/ui_listbox.h>
 #include <game/client/ui_scrollregion.h>
@@ -3050,7 +3049,7 @@ void CEditor::DoMapEditor(CUIRect View)
 	// render all good stuff
 	if(!m_ShowPicker)
 	{
-		MapView()->RenderMap();
+		MapView()->RenderEditorMap();
 	}
 	else
 	{
@@ -7756,37 +7755,37 @@ void CEditor::RenderGameEntities(const std::shared_ptr<CLayerTiles> &pTiles)
 			else if(Index == ENTITY_ARMOR_1)
 			{
 				Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmor);
-				RenderTools()->GetSpriteScale(SPRITE_PICKUP_HEALTH, Scale.x, Scale.y);
+				Graphics()->GetSpriteScale(SPRITE_PICKUP_HEALTH, Scale.x, Scale.y);
 				VisualSize = 64;
 			}
 			else if(Index == ENTITY_HEALTH_1)
 			{
 				Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupHealth);
-				RenderTools()->GetSpriteScale(SPRITE_PICKUP_HEALTH, Scale.x, Scale.y);
+				Graphics()->GetSpriteScale(SPRITE_PICKUP_HEALTH, Scale.x, Scale.y);
 				VisualSize = 64;
 			}
 			else if(Index == ENTITY_WEAPON_SHOTGUN)
 			{
 				Graphics()->TextureSet(pGameClient->m_GameSkin.m_aSpritePickupWeapons[WEAPON_SHOTGUN]);
-				RenderTools()->GetSpriteScale(SPRITE_PICKUP_SHOTGUN, Scale.x, Scale.y);
+				Graphics()->GetSpriteScale(SPRITE_PICKUP_SHOTGUN, Scale.x, Scale.y);
 				VisualSize = g_pData->m_Weapons.m_aId[WEAPON_SHOTGUN].m_VisualSize;
 			}
 			else if(Index == ENTITY_WEAPON_GRENADE)
 			{
 				Graphics()->TextureSet(pGameClient->m_GameSkin.m_aSpritePickupWeapons[WEAPON_GRENADE]);
-				RenderTools()->GetSpriteScale(SPRITE_PICKUP_GRENADE, Scale.x, Scale.y);
+				Graphics()->GetSpriteScale(SPRITE_PICKUP_GRENADE, Scale.x, Scale.y);
 				VisualSize = g_pData->m_Weapons.m_aId[WEAPON_GRENADE].m_VisualSize;
 			}
 			else if(Index == ENTITY_WEAPON_LASER)
 			{
 				Graphics()->TextureSet(pGameClient->m_GameSkin.m_aSpritePickupWeapons[WEAPON_LASER]);
-				RenderTools()->GetSpriteScale(SPRITE_PICKUP_LASER, Scale.x, Scale.y);
+				Graphics()->GetSpriteScale(SPRITE_PICKUP_LASER, Scale.x, Scale.y);
 				VisualSize = g_pData->m_Weapons.m_aId[WEAPON_LASER].m_VisualSize;
 			}
 			else if(Index == ENTITY_POWERUP_NINJA)
 			{
 				Graphics()->TextureSet(pGameClient->m_GameSkin.m_aSpritePickupWeapons[WEAPON_NINJA]);
-				RenderTools()->GetSpriteScale(SPRITE_PICKUP_NINJA, Scale.x, Scale.y);
+				Graphics()->GetSpriteScale(SPRITE_PICKUP_NINJA, Scale.x, Scale.y);
 				VisualSize = 128;
 			}
 			else if(DDNetOrCustomEntities)
@@ -7794,25 +7793,25 @@ void CEditor::RenderGameEntities(const std::shared_ptr<CLayerTiles> &pTiles)
 				if(Index == ENTITY_ARMOR_SHOTGUN)
 				{
 					Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmorShotgun);
-					RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_SHOTGUN, Scale.x, Scale.y);
+					Graphics()->GetSpriteScale(SPRITE_PICKUP_ARMOR_SHOTGUN, Scale.x, Scale.y);
 					VisualSize = 64;
 				}
 				else if(Index == ENTITY_ARMOR_GRENADE)
 				{
 					Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmorGrenade);
-					RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_GRENADE, Scale.x, Scale.y);
+					Graphics()->GetSpriteScale(SPRITE_PICKUP_ARMOR_GRENADE, Scale.x, Scale.y);
 					VisualSize = 64;
 				}
 				else if(Index == ENTITY_ARMOR_NINJA)
 				{
 					Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmorNinja);
-					RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_NINJA, Scale.x, Scale.y);
+					Graphics()->GetSpriteScale(SPRITE_PICKUP_ARMOR_NINJA, Scale.x, Scale.y);
 					VisualSize = 64;
 				}
 				else if(Index == ENTITY_ARMOR_LASER)
 				{
 					Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmorLaser);
-					RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_LASER, Scale.x, Scale.y);
+					Graphics()->GetSpriteScale(SPRITE_PICKUP_ARMOR_LASER, Scale.x, Scale.y);
 					VisualSize = 64;
 				}
 				else
@@ -8043,7 +8042,7 @@ void CEditor::Init()
 	m_UI.SetPopupMenuClosedCallback([this]() {
 		m_PopupEventWasActivated = false;
 	});
-	m_RenderTools.Init(m_pGraphics, m_pTextRender);
+	m_RenderMap.Init(m_pGraphics, m_pTextRender);
 	m_ZoomEnvelopeX.OnInit(this);
 	m_ZoomEnvelopeY.OnInit(this);
 
