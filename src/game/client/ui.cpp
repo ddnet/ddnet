@@ -80,6 +80,12 @@ void CUIElement::SUIElementRect::Draw(const CUIRect *pRect, ColorRGBA Color, int
 		0, -1, m_X, m_Y, 1, 1);
 }
 
+void SLabelProperties::SetColor(const ColorRGBA &Color)
+{
+	m_vColorSplits.clear();
+	m_vColorSplits.emplace_back(0, -1, Color);
+}
+
 /********************************************************
  UI
 *********************************************************/

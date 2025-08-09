@@ -215,6 +215,8 @@ struct SLabelProperties
 	bool m_EllipsisAtEnd = false;
 	bool m_EnableWidthCheck = true;
 	std::vector<STextColorSplit> m_vColorSplits = {};
+
+	void SetColor(const ColorRGBA &Color);
 };
 
 enum EButtonFlags : unsigned
