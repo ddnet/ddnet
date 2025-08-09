@@ -1061,78 +1061,81 @@ void CRenderLayerQuads::CQuadLayerVisuals::Unload()
 	Graphics()->DeleteBufferContainer(m_BufferContainerIndex);
 }
 
-void CRenderLayerQuads::CalculateClipping()
+void CRenderLayerQuads::CalculateEnvelopeClipping(int aEnvelopeOffsetMin[2], int aEnvelopeOffsetMax[2])
 {
-	// calculate clipping if not too expensive
-	if(!m_Grouped)
-		return;
-
 	// calculate envelope position offsets
 	// consider first two channels (X and Y offsets)
-	int aEnvOffsetMin[2] = {0, 0};
-	int aEnvOffsetMax[2] = {0, 0};
-	if(m_QuadRenderGroup.m_PosEnv >= 0)
-	{
-		int EnvStart, EnvNum;
-		m_pMap->GetType(MAPITEMTYPE_ENVELOPE, &EnvStart, &EnvNum);
-		const CMapItemEnvelope *pItem = static_cast<const CMapItemEnvelope *>(m_pMap->GetItem(EnvStart + m_QuadRenderGroup.m_PosEnv));
+	if(m_QuadRenderGroup.m_PosEnv < 0)
+		return;
 
-		if(pItem->m_Channels != 3)
+	int EnvStart, EnvNum;
+	m_pMap->GetType(MAPITEMTYPE_ENVELOPE, &EnvStart, &EnvNum);
+	const CMapItemEnvelope *pItem = static_cast<const CMapItemEnvelope *>(m_pMap->GetItem(EnvStart + m_QuadRenderGroup.m_PosEnv));
+
+	if(!pItem)
+		return;
+
+	if(pItem->m_Channels != 3)
+	{
+		// fall back to no clip, because this is either not a position envelope or the map contains invalid data
+		log_warn("maprender", "quad layer at group %d, layer %d contains an invalid channel count (%d) for automatic quad clipping.", m_GroupId, m_LayerId, pItem->m_Channels);
+		m_QuadRenderGroup.m_Clipped = false;
+		return;
+	}
+
+	for(int Channel = 0; Channel < 2; ++Channel)
+	{
+		aEnvelopeOffsetMin[Channel] = std::numeric_limits<int>::max(); // minimum of channel
+		aEnvelopeOffsetMax[Channel] = std::numeric_limits<int>::min(); // maximum of channel
+	}
+
+	for(int PointId = pItem->m_StartPoint; PointId < pItem->m_StartPoint + pItem->m_NumPoints; ++PointId)
+	{
+		const CEnvPoint *pEnvPoint = m_pEnvelopePoints->GetPoint(PointId);
+
+		// rotation is not implemented for clipping
+		if(pEnvPoint->m_aValues[2] != 0)
 		{
-			// fall back to no clip, because this is either not a position envelope or the map contains invalid data
-			log_warn("maprender", "quad layer at group %d, layer %d contains an invalid channel count (%d) for automatic quad clipping.", m_GroupId, m_LayerId, pItem->m_Channels);
 			m_QuadRenderGroup.m_Clipped = false;
 			return;
 		}
 
 		for(int Channel = 0; Channel < 2; ++Channel)
 		{
-			aEnvOffsetMin[Channel] = std::numeric_limits<int>::max(); // minimum of channel
-			aEnvOffsetMax[Channel] = std::numeric_limits<int>::min(); // maximum of channel
-		}
+			aEnvelopeOffsetMin[Channel] = std::min(pEnvPoint->m_aValues[Channel], aEnvelopeOffsetMin[Channel]);
+			aEnvelopeOffsetMax[Channel] = std::max(pEnvPoint->m_aValues[Channel], aEnvelopeOffsetMax[Channel]);
 
-		for(int PointId = pItem->m_StartPoint; PointId < pItem->m_StartPoint + pItem->m_NumPoints; ++PointId)
-		{
-			const CEnvPoint *pEnvPoint = m_pEnvelopePoints->GetPoint(PointId);
-
-			// rotation is not implemented for clipping
-			if(pEnvPoint->m_aValues[2] != 0)
+			// bezier curves can have offsets beyond the fixed points
+			// using the bezier position is just an estimate, but clipping like this is good enough
+			if(PointId < pItem->m_StartPoint + pItem->m_NumPoints - 1 && pEnvPoint->m_Curvetype == CURVETYPE_BEZIER)
 			{
-				m_QuadRenderGroup.m_Clipped = false;
-				return;
+				const CEnvPointBezier *pEnvPointBezier = m_pEnvelopePoints->GetBezier(PointId);
+				// we are only interested in the height not in the time, meaning we only need delta Y
+				aEnvelopeOffsetMin[Channel] = std::min(pEnvPoint->m_aValues[Channel] + pEnvPointBezier->m_aOutTangentDeltaY[Channel], aEnvelopeOffsetMin[Channel]);
+				aEnvelopeOffsetMax[Channel] = std::max(pEnvPoint->m_aValues[Channel] + pEnvPointBezier->m_aOutTangentDeltaY[Channel], aEnvelopeOffsetMax[Channel]);
 			}
 
-			for(int Channel = 0; Channel < 2; ++Channel)
+			if(PointId > 0 && m_pEnvelopePoints->GetPoint(PointId - 1)->m_Curvetype == CURVETYPE_BEZIER)
 			{
-				aEnvOffsetMin[Channel] = std::min(pEnvPoint->m_aValues[Channel], aEnvOffsetMin[Channel]);
-				aEnvOffsetMax[Channel] = std::max(pEnvPoint->m_aValues[Channel], aEnvOffsetMax[Channel]);
-
-				// bezier curves can have offsets beyond the fixed points
-				// using the bezier position is just an estimate, but clipping like this is good enough
-				if(PointId < pItem->m_StartPoint + pItem->m_NumPoints - 1 && pEnvPoint->m_Curvetype == CURVETYPE_BEZIER)
-				{
-					const CEnvPointBezier *pEnvPointBezier = m_pEnvelopePoints->GetBezier(PointId);
-					// we are only interested in the height not in the time, meaning we only need delta Y
-					aEnvOffsetMin[Channel] = std::min(pEnvPoint->m_aValues[Channel] + pEnvPointBezier->m_aOutTangentDeltaY[Channel], aEnvOffsetMin[Channel]);
-					aEnvOffsetMax[Channel] = std::max(pEnvPoint->m_aValues[Channel] + pEnvPointBezier->m_aOutTangentDeltaY[Channel], aEnvOffsetMax[Channel]);
-				}
-
-				if(PointId > 0 && m_pEnvelopePoints->GetPoint(PointId - 1)->m_Curvetype == CURVETYPE_BEZIER)
-				{
-					const CEnvPointBezier *pEnvPointBezier = m_pEnvelopePoints->GetBezier(PointId);
-					// we are only interested in the height not in the time, meaning we only need delta Y
-					aEnvOffsetMin[Channel] = std::min(pEnvPoint->m_aValues[Channel] + pEnvPointBezier->m_aInTangentDeltaY[Channel], aEnvOffsetMin[Channel]);
-					aEnvOffsetMax[Channel] = std::max(pEnvPoint->m_aValues[Channel] + pEnvPointBezier->m_aInTangentDeltaY[Channel], aEnvOffsetMax[Channel]);
-				}
+				const CEnvPointBezier *pEnvPointBezier = m_pEnvelopePoints->GetBezier(PointId);
+				// we are only interested in the height not in the time, meaning we only need delta Y
+				aEnvelopeOffsetMin[Channel] = std::min(pEnvPoint->m_aValues[Channel] + pEnvPointBezier->m_aInTangentDeltaY[Channel], aEnvelopeOffsetMin[Channel]);
+				aEnvelopeOffsetMax[Channel] = std::max(pEnvPoint->m_aValues[Channel] + pEnvPointBezier->m_aInTangentDeltaY[Channel], aEnvelopeOffsetMax[Channel]);
 			}
 		}
 	}
+}
 
+void CRenderLayerQuads::CalculateQuadClipping(int aQuadOffsetMin[2], int aQuadOffsetMax[2])
+{
 	const CQuad *pQuads = static_cast<CQuad *>(m_pMap->GetDataSwapped(m_pLayerQuads->m_Data));
 
 	// calculate quad position offsets
-	int aQuadOffsetMin[2] = {pQuads[0].m_aPoints[0].x, pQuads[0].m_aPoints[0].y};
-	int aQuadOffsetMax[2] = {pQuads[0].m_aPoints[0].x, pQuads[0].m_aPoints[0].y};
+	for(int Channel = 0; Channel < 2; ++Channel)
+	{
+		aQuadOffsetMin[Channel] = std::numeric_limits<int>::max(); // minimum of channel
+		aQuadOffsetMax[Channel] = std::numeric_limits<int>::min(); // maximum of channel
+	}
 
 	for(int i = 0; i < m_pLayerQuads->m_NumQuads; ++i)
 	{
@@ -1148,9 +1151,27 @@ void CRenderLayerQuads::CalculateClipping()
 			}
 		}
 	}
+}
 
-	// update clips
+void CRenderLayerQuads::CalculateClipping()
+{
+	// calculate clipping if not too expensive
+	if(!m_Grouped)
+		return;
+
+	// enable clipping
 	m_QuadRenderGroup.m_Clipped = true;
+
+	int aEnvOffsetMin[2];
+	int aEnvOffsetMax[2];
+	int aQuadOffsetMin[2];
+	int aQuadOffsetMax[2];
+	CalculateEnvelopeClipping(aEnvOffsetMin, aEnvOffsetMax);
+	CalculateQuadClipping(aQuadOffsetMin, aQuadOffsetMax);
+
+	// check if clipping was disabled
+	if(!m_QuadRenderGroup.m_Clipped)
+		return;
 
 	// X channel
 	m_QuadRenderGroup.m_ClipX = fx2f(aQuadOffsetMin[0]) + fx2f(aEnvOffsetMin[0]);
