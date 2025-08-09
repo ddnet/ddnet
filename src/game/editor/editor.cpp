@@ -221,7 +221,7 @@ int CEditor::DoButton_Env(const void *pId, const char *pText, int Checked, const
 
 int CEditor::DoButton_MenuItem(const void *pId, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
 {
-	if(Ui()->HotItem() == pId || Checked)
+	if((Ui()->HotItem() == pId && Checked == 0) || Checked > 0)
 		pRect->Draw(GetButtonColor(pId, Checked), IGraphics::CORNER_ALL, 3.0f);
 
 	CUIRect Rect;
@@ -230,6 +230,10 @@ int CEditor::DoButton_MenuItem(const void *pId, const char *pText, int Checked, 
 	SLabelProperties Props;
 	Props.m_MaxWidth = Rect.w;
 	Props.m_EllipsisAtEnd = true;
+	if(Checked < 0)
+	{
+		Props.SetColor(ColorRGBA(0.6f, 0.6f, 0.6f, 1.0f));
+	}
 	Ui()->DoLabel(&Rect, pText, 10.0f, TEXTALIGN_ML, Props);
 
 	return DoButton_Editor_Common(pId, pText, Checked, pRect, Flags, pToolTip);
