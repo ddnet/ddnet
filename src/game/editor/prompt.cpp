@@ -35,6 +35,7 @@ void CPrompt::SetActive()
 	Editor()->m_Dialog = DIALOG_QUICK_PROMPT;
 	CEditorComponent::SetActive();
 
+	Ui()->ClosePopupMenus();
 	Ui()->SetActiveItem(&m_PromptInput);
 }
 
