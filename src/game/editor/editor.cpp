@@ -7363,17 +7363,9 @@ void CEditor::Render()
 		{
 			if(ShiftPressed)
 			{
-				if(HasUnsavedData())
+				if(!m_QuickActionLoadCurrentMap.Disabled())
 				{
-					if(!m_PopupEventWasActivated)
-					{
-						m_PopupEventType = POPEVENT_LOADCURRENT;
-						m_PopupEventActivated = true;
-					}
-				}
-				else
-				{
-					LoadCurrentMap();
+					m_QuickActionLoadCurrentMap.Call();
 				}
 			}
 			else

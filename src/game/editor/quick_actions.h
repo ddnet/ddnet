@@ -232,18 +232,21 @@ REGISTER_QUICK_ACTION(
 	[&]() {
 		if(HasUnsavedData())
 		{
-			m_PopupEventType = POPEVENT_LOADCURRENT;
-			m_PopupEventActivated = true;
+			if(!m_PopupEventWasActivated)
+			{
+				m_PopupEventType = POPEVENT_LOADCURRENT;
+				m_PopupEventActivated = true;
+			}
 		}
 		else
 		{
 			LoadCurrentMap();
 		}
 	},
-	ALWAYS_FALSE,
+	[&]() -> bool { return Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK; },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"[Ctrl+Alt+L] Open the current ingame map for editing.")
+	"[Ctrl+Shift+L] Open the current ingame map for editing.")
 REGISTER_QUICK_ACTION(
 	Envelopes,
 	"Envelopes",
