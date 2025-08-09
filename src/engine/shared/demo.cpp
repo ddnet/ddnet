@@ -959,24 +959,25 @@ void CDemoPlayer::Play()
 	m_Info.m_LastUpdate = Time();
 }
 
-int CDemoPlayer::SeekPercent(float Percent)
+bool CDemoPlayer::SeekPercent(float Percent)
 {
 	int WantedTick = m_Info.m_Info.m_FirstTick + round_truncate((m_Info.m_Info.m_LastTick - m_Info.m_Info.m_FirstTick) * Percent);
 	return SetPos(WantedTick);
 }
 
-int CDemoPlayer::SeekTime(float Seconds)
+bool CDemoPlayer::SeekTime(float Seconds)
 {
 	int WantedTick = m_Info.m_Info.m_CurrentTick + round_truncate(Seconds * (float)SERVER_TICK_SPEED);
 	return SetPos(WantedTick);
 }
 
-int CDemoPlayer::SeekTick(ETickOffset TickOffset)
+bool CDemoPlayer::SeekTick(ETickOffset TickOffset)
 {
 	int WantedTick;
 	switch(TickOffset)
 	{
 	case TICK_CURRENT:
+		// TODO: WantedTick == m_Info.m_NextTick is used to update spectator info when paused so seeking must be done
 		WantedTick = m_Info.m_Info.m_CurrentTick;
 		break;
 	case TICK_PREVIOUS:
@@ -996,40 +997,53 @@ int CDemoPlayer::SeekTick(ETickOffset TickOffset)
 	return SetPos(WantedTick + 1);
 }
 
-int CDemoPlayer::SetPos(int WantedTick)
+bool CDemoPlayer::SetPos(int WantedTick)
 {
 	if(!m_File)
-		return -1;
+		return false;
+
+	// TODO: WantedTick == m_Info.m_NextTick is used to update spectator info when paused so seeking must be done
+
+	// Just the next tick
+	if(WantedTick == m_Info.m_NextTick + 1)
+	{
+		// This does handle looping correctly
+		DoTick();
+		Play();
+		return true;
+	}
 
 	WantedTick = std::clamp(WantedTick, m_Info.m_Info.m_FirstTick, m_Info.m_Info.m_LastTick);
 	const int KeyFrameWantedTick = WantedTick - 5; // -5 because we have to have a current tick and previous tick when we do the playback
 	const float Percent = (KeyFrameWantedTick - m_Info.m_Info.m_FirstTick) / (float)(m_Info.m_Info.m_LastTick - m_Info.m_Info.m_FirstTick);
 
-	// get correct key frame
+	// Get correct key frame
 	size_t KeyFrame = std::clamp<size_t>(m_vKeyFrames.size() * Percent, 0, m_vKeyFrames.size() - 1);
 	while(KeyFrame < m_vKeyFrames.size() - 1 && m_vKeyFrames[KeyFrame].m_Tick < KeyFrameWantedTick)
 		KeyFrame++;
 	while(KeyFrame > 0 && m_vKeyFrames[KeyFrame].m_Tick > KeyFrameWantedTick)
 		KeyFrame--;
 
-	// seek to the correct key frame
-	if(io_seek(m_File, m_vKeyFrames[KeyFrame].m_Filepos, IOSEEK_START) != 0)
+	// If seeking backwards or the current tick is not in this keyframe, seek to the keyframe
+	if(KeyFrameWantedTick < m_Info.m_Info.m_CurrentTick || m_Info.m_Info.m_CurrentTick > m_vKeyFrames[KeyFrame].m_Tick)
 	{
-		Stop("Error seeking keyframe position");
-		return -1;
+		if(io_seek(m_File, m_vKeyFrames[KeyFrame].m_Filepos, IOSEEK_START) != 0)
+		{
+			Stop("Error seeking keyframe position");
+			return false;
+		}
+		m_Info.m_NextTick = -1;
+		m_Info.m_Info.m_CurrentTick = -1;
+		m_Info.m_PreviousTick = -1;
 	}
 
-	m_Info.m_NextTick = -1;
-	m_Info.m_Info.m_CurrentTick = -1;
-	m_Info.m_PreviousTick = -1;
-
-	// playback everything until we hit our tick
+	// Playback everything until we hit our tick
 	while(m_Info.m_NextTick < WantedTick && IsPlaying())
 		DoTick();
 
 	Play();
 
-	return 0;
+	return true;
 }
 
 void CDemoPlayer::SetSpeed(float Speed)
