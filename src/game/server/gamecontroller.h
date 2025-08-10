@@ -49,8 +49,8 @@ protected:
 		float m_Score;
 	};
 
-	float EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos, int DDTeam);
-	void EvaluateSpawnType(CSpawnEval *pEval, int Type, int DDTeam);
+	virtual float EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos, int DDTeam);
+	virtual void EvaluateSpawnType(CSpawnEval *pEval, int Type, int DDTeam);
 
 	void ResetGame();
 
