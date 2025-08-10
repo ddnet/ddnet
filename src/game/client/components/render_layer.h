@@ -45,7 +45,7 @@ class CRenderLayer : public CComponentInterfaces
 public:
 	CRenderLayer(int GroupId, int LayerId, int Flags);
 	virtual ~CRenderLayer() = default;
-	void OnInit(CGameClient *pGameClient, IMap *pMap, CMapImages *pMapImages, std::shared_ptr<CMapBasedEnvelopePointAccess> &pEvelopePoints, bool OnlineOnly);
+	virtual void OnInit(CGameClient *pGameClient, IMap *pMap, CMapImages *pMapImages, std::shared_ptr<CMapBasedEnvelopePointAccess> &pEvelopePoints, bool OnlineOnly);
 
 	virtual void Init() = 0;
 	virtual void Render(const CRenderLayerParams &Params) = 0;
@@ -99,6 +99,7 @@ public:
 	void Render(const CRenderLayerParams &Params) override;
 	bool DoRender(const CRenderLayerParams &Params) const override;
 	void Init() override;
+	void OnInit(CGameClient *pGameClient, IMap *pMap, CMapImages *pMapImages, std::shared_ptr<CMapBasedEnvelopePointAccess> &pEvelopePoints, bool OnlineOnly) override;
 
 	virtual int GetDataIndex(unsigned int &TileSize) const;
 	bool IsValid() const override { return GetRawData() != nullptr; }
@@ -110,8 +111,10 @@ protected:
 	T *GetData() const;
 
 	virtual ColorRGBA GetRenderColor(const CRenderLayerParams &Params) const;
+	virtual void InitTileData();
 	virtual void GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const;
 	IGraphics::CTextureHandle GetTexture() const override { return m_TextureHandle; }
+	CTile *m_pTiles;
 
 private:
 	IGraphics::CTextureHandle m_TextureHandle;
@@ -293,6 +296,7 @@ public:
 	CRenderLayerEntityTele(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex(unsigned int &TileSize) const override;
 	void Init() override;
+	void InitTileData() override;
 	void Unload() override;
 
 protected:
@@ -302,6 +306,7 @@ protected:
 
 private:
 	std::optional<CRenderLayerTile::CTileLayerVisuals> m_VisualTeleNumbers;
+	CTeleTile *m_pTeleTiles;
 };
 
 class CRenderLayerEntitySpeedup final : public CRenderLayerEntityBase
@@ -310,6 +315,7 @@ public:
 	CRenderLayerEntitySpeedup(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex(unsigned int &TileSize) const override;
 	void Init() override;
+	void InitTileData() override;
 	void Unload() override;
 
 protected:
@@ -321,6 +327,7 @@ protected:
 private:
 	std::optional<CRenderLayerTile::CTileLayerVisuals> m_VisualForce;
 	std::optional<CRenderLayerTile::CTileLayerVisuals> m_VisualMaxSpeed;
+	CSpeedupTile *m_pSpeedupTiles;
 };
 
 class CRenderLayerEntitySwitch final : public CRenderLayerEntityBase
@@ -329,6 +336,7 @@ public:
 	CRenderLayerEntitySwitch(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex(unsigned int &TileSize) const override;
 	void Init() override;
+	void InitTileData() override;
 	void Unload() override;
 
 protected:
@@ -340,6 +348,7 @@ protected:
 private:
 	std::optional<CRenderLayerTile::CTileLayerVisuals> m_VisualSwitchNumberTop;
 	std::optional<CRenderLayerTile::CTileLayerVisuals> m_VisualSwitchNumberBottom;
+	CSwitchTile *m_pSwitchTiles;
 };
 
 class CRenderLayerEntityTune final : public CRenderLayerEntityBase
@@ -347,9 +356,13 @@ class CRenderLayerEntityTune final : public CRenderLayerEntityBase
 public:
 	CRenderLayerEntityTune(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex(unsigned int &TileSize) const override;
+	void InitTileData() override;
 
 protected:
 	void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
 	void GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const override;
+
+private:
+	CTuneTile *m_pTuneTiles;
 };
 #endif
