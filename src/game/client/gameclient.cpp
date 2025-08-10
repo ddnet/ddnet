@@ -259,6 +259,7 @@ void CGameClient::OnConsoleInit()
 
 	Console()->Chain("cl_skin_download_url", ConchainRefreshSkins, this);
 	Console()->Chain("cl_skin_community_download_url", ConchainRefreshSkins, this);
+	Console()->Chain("cl_skin_prefix", ConchainRefreshSkins, this);
 	Console()->Chain("cl_download_skins", ConchainRefreshSkins, this);
 	Console()->Chain("cl_download_community_skins", ConchainRefreshSkins, this);
 	Console()->Chain("cl_vanilla_skins_only", ConchainRefreshSkins, this);
@@ -4347,10 +4348,40 @@ void CGameClient::RefreshSkins(int SkinDescriptorFlags)
 
 void CGameClient::OnSkinUpdate(const char *pSkinName)
 {
+	// If the refreshed skin's name starts with the current skin prefix, we also have to
+	// refresh skins matching the unprefixed skin name, e.g. if "santa_cammo" is refreshed
+	// with prefix "santa" we need to refresh both "santa_cammo" and "cammo".
+	const char *pSkinPrefix = m_Skins.SkinPrefix();
+	const int SkinPrefixLength = str_length(pSkinPrefix);
+	char aSkinNameWithoutPrefix[MAX_SKIN_LENGTH];
+	if(SkinPrefixLength > 0 &&
+		str_utf8_comp_nocase_num(pSkinName, pSkinPrefix, SkinPrefixLength) == 0 &&
+		pSkinName[SkinPrefixLength] == '_' &&
+		pSkinName[SkinPrefixLength + 1] != '\0')
+	{
+		str_copy(aSkinNameWithoutPrefix, &pSkinName[SkinPrefixLength + 1]);
+	}
+	else
+	{
+		aSkinNameWithoutPrefix[0] = '\0';
+	}
+	const auto &&NameMatches = [&](const char *pCheckName) {
+		if(str_utf8_comp_nocase(pCheckName, pSkinName) == 0)
+		{
+			return true;
+		}
+		if(aSkinNameWithoutPrefix[0] != '\0' &&
+			str_utf8_comp_nocase(pCheckName, aSkinNameWithoutPrefix) == 0)
+		{
+			return true;
+		}
+		return false;
+	};
+
 	for(std::shared_ptr<CManagedTeeRenderInfo> &pManagedTeeRenderInfo : m_vpManagedTeeRenderInfos)
 	{
 		if(!(pManagedTeeRenderInfo->SkinDescriptor().m_Flags & CSkinDescriptor::FLAG_SIX) ||
-			str_utf8_comp_nocase(pManagedTeeRenderInfo->SkinDescriptor().m_aSkinName, pSkinName) != 0)
+			!NameMatches(pManagedTeeRenderInfo->SkinDescriptor().m_aSkinName))
 		{
 			continue;
 		}

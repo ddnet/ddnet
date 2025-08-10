@@ -246,7 +246,7 @@ public:
 	CSkinList &SkinList();
 
 	const CSkinContainer *FindContainerOrNullptr(const char *pName);
-	const CSkin *FindOrNullptr(const char *pName, bool IgnorePrefix = false);
+	const CSkin *FindOrNullptr(const char *pName);
 	const CSkin *Find(const char *pName);
 
 	void AddFavorite(const char *pName);
@@ -254,6 +254,8 @@ public:
 	bool IsFavorite(const char *pName) const;
 
 	void RandomizeSkin(int Dummy);
+
+	const char *SkinPrefix() const;
 
 	static bool IsSpecialSkin(const char *pName);
 
@@ -315,7 +317,7 @@ private:
 	bool LoadSkinData(const char *pName, CSkinLoadData &Data) const;
 	void LoadSkinFinish(CSkinContainer *pSkinContainer, const CSkinLoadData &Data);
 	void LoadSkinDirect(const char *pName);
-	const CSkin *FindImpl(const char *pName);
+	const CSkinContainer *FindContainerImpl(const char *pName);
 	static int SkinScan(const char *pName, int IsDir, int StorageType, void *pUser);
 
 	void UpdateUnloadSkins(CSkinLoadingStats &Stats);
