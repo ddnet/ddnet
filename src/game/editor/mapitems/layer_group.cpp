@@ -66,13 +66,21 @@ void CLayerGroup::Render()
 	{
 		float aPoints[4];
 		m_pMap->m_pGameGroup->Mapping(aPoints);
-		float x0 = (m_ClipX - aPoints[0]) / (aPoints[2] - aPoints[0]);
-		float y0 = (m_ClipY - aPoints[1]) / (aPoints[3] - aPoints[1]);
-		float x1 = ((m_ClipX + m_ClipW) - aPoints[0]) / (aPoints[2] - aPoints[0]);
-		float y1 = ((m_ClipY + m_ClipH) - aPoints[1]) / (aPoints[3] - aPoints[1]);
+		float ScreenWidth = aPoints[2] - aPoints[0];
+		float ScreenHeight = aPoints[3] - aPoints[1];
+		float Left = m_ClipX - aPoints[0];
+		float Top = m_ClipY - aPoints[1];
+		float Right = (m_ClipX + m_ClipW) - aPoints[0];
+		float Bottom = (m_ClipY + m_ClipH) - aPoints[1];
 
-		pGraphics->ClipEnable((int)(x0 * pGraphics->ScreenWidth()), (int)(y0 * pGraphics->ScreenHeight()),
-			(int)((x1 - x0) * pGraphics->ScreenWidth()), (int)((y1 - y0) * pGraphics->ScreenHeight()));
+		int ClipX = (int)std::round(Left * pGraphics->ScreenWidth() / ScreenWidth);
+		int ClipY = (int)std::round(Top * pGraphics->ScreenHeight() / ScreenHeight);
+
+		pGraphics->ClipEnable(
+			ClipX,
+			ClipY,
+			(int)std::round(Right * pGraphics->ScreenWidth() / ScreenWidth) - ClipX,
+			(int)std::round(Bottom * pGraphics->ScreenHeight() / ScreenHeight) - ClipY);
 	}
 
 	for(auto &pLayer : m_vpLayers)
