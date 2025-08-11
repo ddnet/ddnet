@@ -77,6 +77,10 @@
 #include <shlobj.h> // SHChangeNotify, SHGetKnownFolderPath
 #include <shlwapi.h>
 #include <wincrypt.h>
+
+#include <propkey.h> // PKEY_AppUserModel_ID
+#include <propvarutil.h> // InitPropVariantFromString
+#include <roapi.h>
 #else
 #error NOT IMPLEMENTED
 #endif
@@ -817,7 +821,7 @@ static unsigned long __stdcall thread_run(void *user)
 #endif
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	CWindowsComLifecycle WindowsComLifecycle(false);
+	CWindowsComRtLifecycle WindowsComRtLifecycle(false);
 #endif
 	struct THREAD_RUN *data = (THREAD_RUN *)user;
 	void (*threadfunc)(void *) = data->threadfunc;
@@ -5079,15 +5083,119 @@ std::optional<std::string> windows_wide_to_utf8(const wchar_t *wide_str)
 	return string;
 }
 
+void windows_create_shortcut(const char *name, const char *executable)
+{
+	IShellLinkW *shell_link = nullptr;
+	IPersistFile *persist_file = nullptr;
+	IPropertyStore *property_store = nullptr;
+
+	if(FAILED(CoCreateInstance(CLSID_ShellLink, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&shell_link))))
+		return;
+
+	std::wstring wide_exe = windows_utf8_to_wide(executable);
+	shell_link->SetPath(wide_exe.c_str());
+
+	// extract directory from executable path and set as working directory
+	std::wstring::size_type pos = wide_exe.find_last_of(L"\\/");
+	if(pos != std::wstring::npos)
+	{
+		std::wstring working_dir = wide_exe.substr(0, pos);
+		shell_link->SetWorkingDirectory(working_dir.c_str());
+	}
+
+	// set AUMID for the shortcut
+	if(SUCCEEDED(shell_link->QueryInterface(IID_PPV_ARGS(&property_store))))
+	{
+		PROPVARIANT pv;
+		InitPropVariantFromString(windows_utf8_to_wide(name).c_str(), &pv);
+		property_store->SetValue(PKEY_AppUserModel_ID, pv);
+		PropVariantClear(&pv);
+		property_store->Commit();
+		property_store->Release();
+	}
+
+	wchar_t *wide_programs = nullptr;
+	if(SHGetKnownFolderPath(FOLDERID_Programs, 0, nullptr, &wide_programs) == S_OK)
+	{
+		const std::optional<std::string> programs = windows_wide_to_utf8(wide_programs);
+		CoTaskMemFree(wide_programs);
+
+		if(programs.has_value())
+		{
+			if(SUCCEEDED(shell_link->QueryInterface(IID_PPV_ARGS(&persist_file))))
+			{
+				char shortcut_path[IO_MAX_PATH_LENGTH];
+				str_format(shortcut_path, sizeof(shortcut_path), "%s\\%s.lnk", programs.value().c_str(), name);
+				persist_file->Save(windows_utf8_to_wide(shortcut_path).c_str(), true);
+				persist_file->Release();
+			}
+		}
+	}
+
+	shell_link->Release();
+}
+
+void windows_remove_shortcut(const char *name)
+{
+	WCHAR *wide_programs = nullptr;
+	if(SHGetKnownFolderPath(FOLDERID_Programs, 0, nullptr, &wide_programs) != S_OK)
+		return;
+
+	std::optional<std::string> programs = windows_wide_to_utf8(wide_programs);
+	CoTaskMemFree(wide_programs);
+
+	if(!programs.has_value())
+		return;
+
+	char shortcut_path[IO_MAX_PATH_LENGTH];
+	str_format(shortcut_path, sizeof(shortcut_path), "%s\\%s.lnk", programs.value().c_str(), name);
+
+	fs_remove(shortcut_path);
+}
+
 // See https://learn.microsoft.com/en-us/windows/win32/learnwin32/initializing-the-com-library
-CWindowsComLifecycle::CWindowsComLifecycle(bool HasWindow)
+CWindowsComRtLifecycle::CWindowsComRtLifecycle(bool HasWindow)
 {
 	HRESULT result = CoInitializeEx(nullptr, (HasWindow ? COINIT_APARTMENTTHREADED : COINIT_MULTITHREADED) | COINIT_DISABLE_OLE1DDE);
 	dbg_assert(result != S_FALSE, "COM library already initialized on this thread");
 	dbg_assert(result == S_OK, "COM library initialization failed");
+
+	HINSTANCE lib_combase = LoadLibraryW(L"combase.dll");
+	if(lib_combase)
+	{
+#ifdef __MINGW32__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
+#endif
+		auto RoInitialize_func = reinterpret_cast<HRESULT(WINAPI *)(RO_INIT_TYPE)>(GetProcAddress(lib_combase, "RoInitialize"));
+#ifdef __MINGW32__
+#pragma GCC diagnostic pop
+#endif
+		HRESULT winrt_result = RoInitialize_func(HasWindow ? RO_INIT_SINGLETHREADED : RO_INIT_MULTITHREADED);
+		m_RoInitialized = SUCCEEDED(winrt_result);
+		FreeLibrary(lib_combase);
+	}
 }
-CWindowsComLifecycle::~CWindowsComLifecycle()
+CWindowsComRtLifecycle::~CWindowsComRtLifecycle()
 {
+	if(m_RoInitialized)
+	{
+		HINSTANCE lib_combase = LoadLibraryW(L"combase.dll");
+		if(lib_combase)
+		{
+#ifdef __MINGW32__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
+#endif
+			auto RoUninitialize_func = reinterpret_cast<void(WINAPI *)()>(GetProcAddress(lib_combase, "RoUninitialize"));
+#ifdef __MINGW32__
+#pragma GCC diagnostic pop
+#endif
+			RoUninitialize_func();
+			m_RoInitialized = false;
+			FreeLibrary(lib_combase);
+		}
+	}
 	CoUninitialize();
 }
 
