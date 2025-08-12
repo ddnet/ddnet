@@ -41,21 +41,41 @@ std::shared_ptr<CEnvelope> CEditorMap::NewEnvelope(CEnvelope::EType Type)
 	return pEnv;
 }
 
-void CEditorMap::DeleteEnvelope(int Index)
+void CEditorMap::InsertEnvelope(int Index, std::shared_ptr<CEnvelope> &pEnvelope)
+{
+	if(Index < 0 || Index >= (int)m_vpEnvelopes.size() + 1)
+		return;
+	m_pEditor->m_Map.m_vpEnvelopes.push_back(pEnvelope);
+	m_pEditor->m_SelectedEnvelope = m_pEditor->m_Map.MoveEnvelope((int)m_pEditor->m_Map.m_vpEnvelopes.size() - 1, Index);
+}
+
+void CEditorMap::UpdateEnvelopeReferences(int Index, std::shared_ptr<CEnvelope> &pEnvelope, std::vector<std::shared_ptr<IEditorEnvelopeReference>> &vpEditorObjectReferences)
+{
+	// update unrestored quad and soundsource references
+	for(auto &pEditorObjRef : vpEditorObjectReferences)
+		pEditorObjRef->SetEnvelope(pEnvelope, Index);
+}
+
+std::vector<std::shared_ptr<IEditorEnvelopeReference>> CEditorMap::DeleteEnvelope(int Index)
 {
 	if(Index < 0 || Index >= (int)m_vpEnvelopes.size())
-		return;
+		return std::vector<std::shared_ptr<IEditorEnvelopeReference>>();
 
 	OnModify();
 
-	VisitEnvelopeReferences([Index](int &ElementIndex) {
+	std::vector<std::shared_ptr<IEditorEnvelopeReference>> vpEditorObjectReferences = VisitEnvelopeReferences([Index](int &ElementIndex) {
 		if(ElementIndex == Index)
+		{
 			ElementIndex = -1;
+			return true;
+		}
 		else if(ElementIndex > Index)
 			ElementIndex--;
+		return false;
 	});
 
 	m_vpEnvelopes.erase(m_vpEnvelopes.begin() + Index);
+	return vpEditorObjectReferences;
 }
 
 int CEditorMap::MoveEnvelope(int IndexFrom, int IndexTo)
@@ -76,6 +96,7 @@ int CEditorMap::MoveEnvelope(int IndexFrom, int IndexTo)
 			ElementIndex--;
 		else if(IndexTo < IndexFrom && ElementIndex < IndexFrom && ElementIndex >= IndexTo)
 			ElementIndex++;
+		return false;
 	});
 
 	auto pMovedEnvelope = m_vpEnvelopes[IndexFrom];
@@ -86,8 +107,9 @@ int CEditorMap::MoveEnvelope(int IndexFrom, int IndexTo)
 }
 
 template<typename F>
-void CEditorMap::VisitEnvelopeReferences(F &&Visitor)
+std::vector<std::shared_ptr<IEditorEnvelopeReference>> CEditorMap::VisitEnvelopeReferences(F &&Visitor)
 {
+	std::vector<std::shared_ptr<IEditorEnvelopeReference>> vpUpdatedReferences;
 	for(auto &pGroup : m_vpGroups)
 	{
 		for(auto &pLayer : pGroup->m_vpLayers)
@@ -95,28 +117,44 @@ void CEditorMap::VisitEnvelopeReferences(F &&Visitor)
 			if(pLayer->m_Type == LAYERTYPE_QUADS)
 			{
 				std::shared_ptr<CLayerQuads> pLayerQuads = std::static_pointer_cast<CLayerQuads>(pLayer);
-				for(auto &Quad : pLayerQuads->m_vQuads)
+				std::shared_ptr<CLayerQuadsEnvelopeReference> pQuadLayerReference = std::make_shared<CLayerQuadsEnvelopeReference>(pLayerQuads);
+				for(int QuadId = 0; QuadId < (int)pLayerQuads->m_vQuads.size(); ++QuadId)
 				{
-					Visitor(Quad.m_PosEnv);
-					Visitor(Quad.m_ColorEnv);
+					auto &Quad = pLayerQuads->m_vQuads[QuadId];
+					if(Visitor(Quad.m_PosEnv))
+						pQuadLayerReference->AddQuadIndex(QuadId);
+					if(Visitor(Quad.m_ColorEnv))
+						pQuadLayerReference->AddQuadIndex(QuadId);
 				}
+				if(!pQuadLayerReference->Empty())
+					vpUpdatedReferences.push_back(pQuadLayerReference);
 			}
 			else if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
 				std::shared_ptr<CLayerTiles> pLayerTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
-				Visitor(pLayerTiles->m_ColorEnv);
+				std::shared_ptr<CLayerTilesEnvelopeReference> pTileLayerReference = std::make_shared<CLayerTilesEnvelopeReference>(pLayerTiles);
+				if(Visitor(pLayerTiles->m_ColorEnv))
+					vpUpdatedReferences.push_back(pTileLayerReference);
 			}
 			else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
 			{
 				std::shared_ptr<CLayerSounds> pLayerSounds = std::static_pointer_cast<CLayerSounds>(pLayer);
-				for(auto &Source : pLayerSounds->m_vSources)
+				std::shared_ptr<CLayerSoundEnvelopeReference> pSoundLayerReference = std::make_shared<CLayerSoundEnvelopeReference>(pLayerSounds);
+
+				for(int SourceId = 0; SourceId < (int)pLayerSounds->m_vSources.size(); ++SourceId)
 				{
-					Visitor(Source.m_PosEnv);
-					Visitor(Source.m_SoundEnv);
+					auto &Source = pLayerSounds->m_vSources[SourceId];
+					if(Visitor(Source.m_PosEnv))
+						pSoundLayerReference->AddSoundSourceIndex(SourceId);
+					if(Visitor(Source.m_SoundEnv))
+						pSoundLayerReference->AddSoundSourceIndex(SourceId);
 				}
+				if(!pSoundLayerReference->Empty())
+					vpUpdatedReferences.push_back(pSoundLayerReference);
 			}
 		}
 	}
+	return vpUpdatedReferences;
 }
 
 std::shared_ptr<CLayerGroup> CEditorMap::NewGroup()

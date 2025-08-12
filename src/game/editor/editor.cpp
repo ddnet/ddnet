@@ -5227,16 +5227,18 @@ void CEditor::RemoveUnusedEnvelopes()
 {
 	m_EnvelopeEditorHistory.BeginBulk();
 	int DeletedCount = 0;
-	for(size_t Envelope = 0; Envelope < m_Map.m_vpEnvelopes.size();)
+	for(size_t EnvelopeIndex = 0; EnvelopeIndex < m_Map.m_vpEnvelopes.size();)
 	{
-		if(IsEnvelopeUsed(Envelope))
+		if(IsEnvelopeUsed(EnvelopeIndex))
 		{
-			++Envelope;
+			++EnvelopeIndex;
 		}
 		else
 		{
-			m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEveloppeDelete>(this, Envelope));
-			m_Map.DeleteEnvelope(Envelope);
+			// deleting removes the shared ptr from the map
+			std::shared_ptr<CEnvelope> pEnvelope = m_Map.m_vpEnvelopes[EnvelopeIndex];
+			auto vpObjectReferences = m_Map.DeleteEnvelope(EnvelopeIndex);
+			m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeDelete>(this, EnvelopeIndex, vpObjectReferences, pEnvelope));
 			DeletedCount++;
 		}
 	}
@@ -5504,14 +5506,8 @@ void CEditor::SetHotEnvelopePoint(const CUIRect &View, const std::shared_ptr<CEn
 
 void CEditor::RenderEnvelopeEditor(CUIRect View)
 {
-	if(m_SelectedEnvelope < 0)
-		m_SelectedEnvelope = 0;
-	if(m_SelectedEnvelope >= (int)m_Map.m_vpEnvelopes.size())
-		m_SelectedEnvelope = m_Map.m_vpEnvelopes.size() - 1;
-
-	std::shared_ptr<CEnvelope> pEnvelope = nullptr;
-	if(m_SelectedEnvelope >= 0 && m_SelectedEnvelope < (int)m_Map.m_vpEnvelopes.size())
-		pEnvelope = m_Map.m_vpEnvelopes[m_SelectedEnvelope];
+	m_SelectedEnvelope = m_Map.m_vpEnvelopes.empty() ? -1 : std::clamp(m_SelectedEnvelope, 0, (int)m_Map.m_vpEnvelopes.size() - 1);
+	std::shared_ptr<CEnvelope> pEnvelope = m_Map.m_vpEnvelopes.empty() ? nullptr : m_Map.m_vpEnvelopes[m_SelectedEnvelope];
 
 	static EEnvelopeEditorOp s_Operation = EEnvelopeEditorOp::OP_NONE;
 	static std::vector<float> s_vAccurateDragValuesX = {};
@@ -5591,14 +5587,18 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			static int s_DeleteButton = 0;
 			if(DoButton_Editor(&s_DeleteButton, "✗", 0, &Button, BUTTONFLAG_LEFT, "Delete this envelope."))
 			{
-				m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEveloppeDelete>(this, m_SelectedEnvelope));
-				m_Map.DeleteEnvelope(m_SelectedEnvelope);
-				if(m_SelectedEnvelope >= (int)m_Map.m_vpEnvelopes.size())
-					m_SelectedEnvelope = m_Map.m_vpEnvelopes.size() - 1;
-				pEnvelope = m_SelectedEnvelope >= 0 ? m_Map.m_vpEnvelopes[m_SelectedEnvelope] : nullptr;
+				auto vpObjectReferences = m_Map.DeleteEnvelope(m_SelectedEnvelope);
+				m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeDelete>(this, m_SelectedEnvelope, vpObjectReferences, pEnvelope));
+
+				m_SelectedEnvelope = m_Map.m_vpEnvelopes.empty() ? -1 : std::clamp(m_SelectedEnvelope, 0, (int)m_Map.m_vpEnvelopes.size() - 1);
+				pEnvelope = m_Map.m_vpEnvelopes.empty() ? nullptr : m_Map.m_vpEnvelopes[m_SelectedEnvelope];
 				m_Map.OnModify();
 			}
+		}
 
+		// check again, because the last envelope might has been deleted
+		if(m_SelectedEnvelope >= 0)
+		{
 			// Move right button
 			ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
 			ToolBar.VSplitRight(25.0f, &ToolBar, &Button);

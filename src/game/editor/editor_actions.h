@@ -3,6 +3,7 @@
 
 #include "editor.h"
 #include "editor_action.h"
+#include <game/editor/references.h>
 
 class CEditorActionLayerBase : public IEditorAction
 {
@@ -391,10 +392,10 @@ private:
 	std::shared_ptr<CEnvelope> m_pEnv;
 };
 
-class CEditorActionEveloppeDelete : public IEditorAction
+class CEditorActionEnvelopeDelete : public IEditorAction
 {
 public:
-	CEditorActionEveloppeDelete(CEditor *pEditor, int EnvelopeIndex);
+	CEditorActionEnvelopeDelete(CEditor *pEditor, int EnvelopeIndex, std::vector<std::shared_ptr<IEditorEnvelopeReference>> &vpObjectReferences, std::shared_ptr<CEnvelope> &pEnvelope);
 
 	void Undo() override;
 	void Redo() override;
@@ -402,6 +403,7 @@ public:
 private:
 	int m_EnvelopeIndex;
 	std::shared_ptr<CEnvelope> m_pEnv;
+	std::vector<std::shared_ptr<IEditorEnvelopeReference>> m_vpObjectReferences;
 };
 
 class CEditorActionEnvelopeEdit : public IEditorAction
