@@ -13,6 +13,7 @@ const int LAYER_DEFAULT_TILESET = -1;
 
 void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels, IMap *pMap, CMapBasedEnvelopePointAccess *pEnvelopePoints, IClient *pClient, CGameClient *pGameClient, bool OnlineOnly)
 {
+	using namespace std::chrono;
 	int EnvStart, EnvNum;
 	pMap->GetType(MAPITEMTYPE_ENVELOPE, &EnvStart, &EnvNum);
 	if(Env < 0 || Env >= EnvNum)
@@ -27,31 +28,83 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, 
 	if(pEnvelopePoints->NumPoints() == 0)
 		return;
 
-	static std::chrono::nanoseconds s_Time{0};
-	static auto s_LastLocalTime = time_get_nanoseconds();
-	if(OnlineOnly && (pItem->m_Version < 2 || pItem->m_Synchronized))
+	// online rendering
+	if(OnlineOnly)
 	{
-		if(pGameClient->m_Snap.m_pGameInfoObj)
+		// we are doing time integration for smoother animations
+		static nanoseconds s_OnlineTime{0};
+		static int s_SynchronizationTick = 0;
+
+		static const nanoseconds s_NanosPerTick = nanoseconds(1s) / static_cast<int64_t>(pClient->GameTickSpeed());
+		static int s_LastPredTick = 0;
+
+		double IntraGameTick = pClient->PredIntraGameTick(g_Config.m_ClDummy);
+		nanoseconds IntraTick = duration_cast<nanoseconds>(s_NanosPerTick * IntraGameTick);
+
+		const int WarmupTimer = pGameClient->m_Snap.m_pGameInfoObj && pGameClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_RACETIME ? pGameClient->m_Snap.m_pGameInfoObj->m_WarmupTimer : 0;
+		bool IsSynchronized = pItem->m_Synchronized && pItem->m_Version >= 2;
+
+		const int CurTick = pClient->GameTick(g_Config.m_ClDummy);
+		const int PredTick = pClient->PredGameTick(g_Config.m_ClDummy);
+
+		// we may have missed the sync tick
+		if(WarmupTimer < 0 && WarmupTimer + s_SynchronizationTick != 0)
+			s_SynchronizationTick = -WarmupTimer;
+
+		// Reset if times desync too much (for example map reload or server switch)
+		if(s_LastPredTick != PredTick && s_LastPredTick != PredTick - 1)
 		{
-			// get the lerp of the current tick and prev
-			const auto TickToNanoSeconds = std::chrono::nanoseconds(1s) / (int64_t)pClient->GameTickSpeed();
-			const int MinTick = pClient->PrevGameTick(g_Config.m_ClDummy) - pGameClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
-			const int CurTick = pClient->GameTick(g_Config.m_ClDummy) - pGameClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
-			s_Time = std::chrono::nanoseconds((int64_t)(mix<double>(
-									    0,
-									    (CurTick - MinTick),
-									    (double)pClient->IntraGameTick(g_Config.m_ClDummy)) *
-								    TickToNanoSeconds.count())) +
-				 MinTick * TickToNanoSeconds;
+			s_OnlineTime = nanoseconds::zero();
+			s_LastPredTick = 0;
 		}
+
+		// detect if we hit the start line
+		bool DoResync = IsSynchronized && WarmupTimer + CurTick == 0;
+
+		// Reset synchronization
+		if(DoResync)
+		{
+			// save pred tick on startline
+			s_SynchronizationTick = CurTick;
+		}
+
+		// resync to server time on each tick
+		if(s_LastPredTick < PredTick)
+		{
+			// resync time
+			s_OnlineTime = s_NanosPerTick * PredTick;
+			s_LastPredTick = PredTick;
+		}
+
+		if(IsSynchronized)
+		{
+			nanoseconds SynchronizationOffset = s_NanosPerTick * s_SynchronizationTick;
+
+			// prevent flickering on the start line, minimal flicker due to missing intratick offset, almost unnoticable
+			if(DoResync)
+			{
+				// don't use online time on resync because this will cause flickering
+				CRenderMap::RenderEvalEnvelope(pEnvelopePoints, milliseconds(TimeOffsetMillis), Result, Channels);
+			}
+			else
+				CRenderMap::RenderEvalEnvelope(pEnvelopePoints, s_OnlineTime - SynchronizationOffset + IntraTick + milliseconds(TimeOffsetMillis), Result, Channels);
+		}
+		else
+			CRenderMap::RenderEvalEnvelope(pEnvelopePoints, s_OnlineTime + IntraTick + milliseconds(TimeOffsetMillis), Result, Channels);
 	}
-	else
+	else // offline rendering (like menu background) relies on local time
 	{
-		const auto CurTime = time_get_nanoseconds();
+		// integrate over time deltas for smoother animations
+		static auto s_LastLocalTime = time_get_nanoseconds();
+		nanoseconds CurTime = time_get_nanoseconds();
+		static nanoseconds s_Time{0};
 		s_Time += CurTime - s_LastLocalTime;
+
+		CRenderMap::RenderEvalEnvelope(pEnvelopePoints, s_Time + milliseconds(TimeOffsetMillis), Result, Channels);
+
+		// update local timer
 		s_LastLocalTime = CurTime;
 	}
-	CRenderMap::RenderEvalEnvelope(pEnvelopePoints, s_Time + std::chrono::nanoseconds(std::chrono::milliseconds(TimeOffsetMillis)), Result, Channels);
 }
 
 void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels)
