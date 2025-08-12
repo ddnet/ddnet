@@ -3702,6 +3702,39 @@ void CGameContext::ConchainSettingUpdate(IConsole::IResult *pResult, void *pUser
 	}
 }
 
+void CGameContext::ConchainPracticeByDefaultUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	const int OldValue = g_Config.m_SvPracticeByDefault;
+	pfnCallback(pResult, pCallbackUserData);
+
+	if(pResult->NumArguments() && g_Config.m_SvTestingCommands)
+	{
+		CGameContext *pSelf = (CGameContext *)pUserData;
+
+		if(pSelf->m_pController == nullptr)
+			return;
+
+		const int Enable = pResult->GetInteger(0);
+		if(Enable == OldValue)
+			return;
+
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "Practice is %s by default.", Enable ? "enabled" : "disabled");
+		if(Enable)
+			str_append(aBuf, " Join a team and /unpractice to turn it off for your team.");
+
+		pSelf->SendChat(-1, TEAM_ALL, aBuf);
+
+		for(int Team = 0; Team < NUM_DDRACE_TEAMS; Team++)
+		{
+			if(Team == TEAM_FLOCK || pSelf->m_pController->Teams().Count(Team) == 0)
+			{
+				pSelf->m_pController->Teams().SetPractice(Team, Enable);
+			}
+		}
+	}
+}
+
 void CGameContext::OnConsoleInit()
 {
 	m_pServer = Kernel()->RequestInterface<IServer>();
@@ -3827,6 +3860,8 @@ void CGameContext::RegisterDDRaceCommands()
 	Console()->Register("vote_no", "", CFGFLAG_SERVER, ConVoteNo, this, "Same as \"vote no\"");
 	Console()->Register("save_dry", "", CFGFLAG_SERVER, ConDrySave, this, "Dump the current savestring");
 	Console()->Register("dump_log", "?i[seconds]", CFGFLAG_SERVER, ConDumpLog, this, "Show logs of the last i seconds");
+
+	Console()->Chain("sv_practice_by_default", ConchainPracticeByDefaultUpdate, this);
 }
 
 void CGameContext::RegisterChatCommands()

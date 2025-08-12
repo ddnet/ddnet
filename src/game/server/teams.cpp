@@ -1320,7 +1320,11 @@ void CGameTeams::SetPractice(int Team, bool Enabled)
 	if(Team < TEAM_FLOCK || Team >= TEAM_SUPER)
 		return;
 	if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team == TEAM_FLOCK)
-		return;
+	{
+		// allow to enable practice in team 0, for practice by default
+		if(!g_Config.m_SvTestingCommands)
+			return;
+	}
 
 	m_aPractice[Team] = Enabled;
 }
