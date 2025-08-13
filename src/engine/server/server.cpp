@@ -1096,7 +1096,7 @@ int CServer::NewClientNoAuthCallback(int ClientId, void *pUser)
 {
 	CServer *pThis = (CServer *)pUser;
 
-	pThis->m_aClients[ClientId].m_DnsblState = CClient::DNSBL_STATE_NONE;
+	pThis->m_aClients[ClientId].m_DnsblState = EDnsblState::NONE;
 
 	pThis->m_aClients[ClientId].m_State = CClient::STATE_CONNECTING;
 	pThis->m_aClients[ClientId].m_aName[0] = 0;
@@ -1131,7 +1131,7 @@ int CServer::NewClientCallback(int ClientId, void *pUser, bool Sixup)
 {
 	CServer *pThis = (CServer *)pUser;
 	pThis->m_aClients[ClientId].m_State = CClient::STATE_PREAUTH;
-	pThis->m_aClients[ClientId].m_DnsblState = CClient::DNSBL_STATE_NONE;
+	pThis->m_aClients[ClientId].m_DnsblState = EDnsblState::NONE;
 	pThis->m_aClients[ClientId].m_aName[0] = 0;
 	pThis->m_aClients[ClientId].m_aClan[0] = 0;
 	pThis->m_aClients[ClientId].m_Country = -1;
@@ -1184,7 +1184,7 @@ void CServer::InitDnsbl(int ClientId)
 
 	m_aClients[ClientId].m_pDnsblLookup = std::make_shared<CHostLookup>(aBuf, NETTYPE_IPV4);
 	Engine()->AddJob(m_aClients[ClientId].m_pDnsblLookup);
-	m_aClients[ClientId].m_DnsblState = CClient::DNSBL_STATE_PENDING;
+	m_aClients[ClientId].m_DnsblState = EDnsblState::PENDING;
 }
 
 #ifdef CONF_FAMILY_UNIX
@@ -2536,9 +2536,9 @@ void CServer::FillAntibot(CAntibotRoundData *pData)
 			static_assert(std::is_same_v<decltype(CServer{}.ClientAddrStringImpl(ClientId, true)), const std::array<char, NETADDR_MAXSTRSIZE> &>);
 			mem_copy(pPlayer->m_aAddress, ClientAddrStringImpl(ClientId, true).data(), NETADDR_MAXSTRSIZE);
 			pPlayer->m_Sixup = m_aClients[ClientId].m_Sixup;
-			pPlayer->m_DnsblNone = m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_NONE;
-			pPlayer->m_DnsblPending = m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_PENDING;
-			pPlayer->m_DnsblBlacklisted = m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED;
+			pPlayer->m_DnsblNone = m_aClients[ClientId].m_DnsblState == EDnsblState::NONE;
+			pPlayer->m_DnsblPending = m_aClients[ClientId].m_DnsblState == EDnsblState::PENDING;
+			pPlayer->m_DnsblBlacklisted = m_aClients[ClientId].m_DnsblState == EDnsblState::BLACKLISTED;
 			pPlayer->m_Authed = m_aClients[ClientId].m_Authed > AUTHED_NO;
 		}
 	}
@@ -3244,18 +3244,18 @@ int CServer::Run()
 						if(m_aClients[ClientId].m_State == CClient::STATE_EMPTY)
 							continue;
 
-						if(m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_NONE)
+						if(m_aClients[ClientId].m_DnsblState == EDnsblState::NONE)
 						{
 							// initiate dnsbl lookup
 							InitDnsbl(ClientId);
 						}
-						else if(m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_PENDING &&
+						else if(m_aClients[ClientId].m_DnsblState == EDnsblState::PENDING &&
 							m_aClients[ClientId].m_pDnsblLookup->State() == IJob::STATE_DONE)
 						{
 							if(m_aClients[ClientId].m_pDnsblLookup->Result() != 0)
 							{
 								// entry not found -> whitelisted
-								m_aClients[ClientId].m_DnsblState = CClient::DNSBL_STATE_WHITELISTED;
+								m_aClients[ClientId].m_DnsblState = EDnsblState::WHITELISTED;
 
 								str_format(aBuf, sizeof(aBuf), "ClientId=%d addr=<{%s}> secure=%s whitelisted", ClientId, ClientAddrString(ClientId, true), m_NetServer.HasSecurityToken(ClientId) ? "yes" : "no");
 								Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "dnsbl", aBuf);
@@ -3263,7 +3263,7 @@ int CServer::Run()
 							else
 							{
 								// entry found -> blacklisted
-								m_aClients[ClientId].m_DnsblState = CClient::DNSBL_STATE_BLACKLISTED;
+								m_aClients[ClientId].m_DnsblState = EDnsblState::BLACKLISTED;
 
 								str_format(aBuf, sizeof(aBuf), "ClientId=%d addr=<{%s}> secure=%s blacklisted", ClientId, ClientAddrString(ClientId, true), m_NetServer.HasSecurityToken(ClientId) ? "yes" : "no");
 								Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "dnsbl", aBuf);
@@ -3409,9 +3409,9 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 			aDnsblStr[0] = '\0';
 			if(pThis->Config()->m_SvDnsbl)
 			{
-				const char *pDnsblStr = pThis->m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_WHITELISTED ? "white" :
-																pThis->m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED ? "black" :
-																									pThis->m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_PENDING ? "pending" : "n/a";
+				const char *pDnsblStr = pThis->m_aClients[i].m_DnsblState == EDnsblState::WHITELISTED ? "white" :
+															pThis->m_aClients[i].m_DnsblState == EDnsblState::BLACKLISTED ? "black" :
+																							pThis->m_aClients[i].m_DnsblState == EDnsblState::PENDING ? "pending" : "n/a";
 
 				str_format(aDnsblStr, sizeof(aDnsblStr), " dnsbl=%s", pDnsblStr);
 			}
