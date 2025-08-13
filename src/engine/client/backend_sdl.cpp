@@ -632,97 +632,94 @@ static bool BackendInitGlew(EBackendType BackendType, int &GlewMajor, int &GlewM
 
 static int IsVersionSupportedGlew(EBackendType BackendType, int VersionMajor, int VersionMinor, int VersionPatch, int GlewMajor, int GlewMinor, int GlewPatch)
 {
-	int InitError = 0;
-
 	if(BackendType == BACKEND_TYPE_OPENGL)
 	{
 		if(VersionMajor >= 4 && GlewMajor < 4)
 		{
-			InitError = -1;
+			return -1;
 		}
 		else if(VersionMajor >= 3 && GlewMajor < 3)
 		{
-			InitError = -1;
+			return -1;
 		}
 		else if(VersionMajor == 3 && GlewMajor == 3)
 		{
 			if(VersionMinor >= 3 && GlewMinor < 3)
 			{
-				InitError = -1;
+				return -1;
 			}
 			if(VersionMinor >= 2 && GlewMinor < 2)
 			{
-				InitError = -1;
+				return -1;
 			}
 			if(VersionMinor >= 1 && GlewMinor < 1)
 			{
-				InitError = -1;
+				return -1;
 			}
 			if(VersionMinor >= 0 && GlewMinor < 0)
 			{
-				InitError = -1;
+				return -1;
 			}
 		}
 		else if(VersionMajor >= 2 && GlewMajor < 2)
 		{
-			InitError = -1;
+			return -1;
 		}
 		else if(VersionMajor == 2 && GlewMajor == 2)
 		{
 			if(VersionMinor >= 1 && GlewMinor < 1)
 			{
-				InitError = -1;
+				return -1;
 			}
 			if(VersionMinor >= 0 && GlewMinor < 0)
 			{
-				InitError = -1;
+				return -1;
 			}
 		}
 		else if(VersionMajor >= 1 && GlewMajor < 1)
 		{
-			InitError = -1;
+			return -1;
 		}
 		else if(VersionMajor == 1 && GlewMajor == 1)
 		{
 			if(VersionMinor >= 5 && GlewMinor < 5)
 			{
-				InitError = -1;
+				return -1;
 			}
 			if(VersionMinor >= 4 && GlewMinor < 4)
 			{
-				InitError = -1;
+				return -1;
 			}
 			if(VersionMinor >= 3 && GlewMinor < 3)
 			{
-				InitError = -1;
+				return -1;
 			}
 			if(VersionMinor >= 2 && GlewMinor < 2)
 			{
-				InitError = -1;
+				return -1;
 			}
 			else if(VersionMinor == 2 && GlewMinor == 2)
 			{
 				if(VersionPatch >= 1 && GlewPatch < 1)
 				{
-					InitError = -1;
+					return -1;
 				}
 				if(VersionPatch >= 0 && GlewPatch < 0)
 				{
-					InitError = -1;
+					return -1;
 				}
 			}
 			if(VersionMinor >= 1 && GlewMinor < 1)
 			{
-				InitError = -1;
+				return -1;
 			}
 			if(VersionMinor >= 0 && GlewMinor < 0)
 			{
-				InitError = -1;
+				return -1;
 			}
 		}
 	}
-
-	return InitError;
+	return 0;
 }
 #endif // !CONF_HEADLESS_CLIENT
 
