@@ -868,6 +868,8 @@ CRenderLayerQuads::CRenderLayerQuads(int GroupId, int LayerId, IGraphics::CTextu
 	m_QuadRenderGroup.m_ClipHeight = 0;
 	m_QuadRenderGroup.m_ClipWidth = 0;
 	m_QuadRenderGroup.m_Clipped = false;
+
+	m_pQuads = nullptr;
 }
 
 void CRenderLayerQuads::RenderQuadLayer(bool Force)
@@ -949,6 +951,14 @@ void CRenderLayerQuads::RenderQuadLayer(bool Force)
 	}
 }
 
+void CRenderLayerQuads::OnInit(CGameClient *pGameClient, IMap *pMap, CMapImages *pMapImages, std::shared_ptr<CMapBasedEnvelopePointAccess> &pEvelopePoints, bool OnlineOnly)
+{
+	CRenderLayer::OnInit(pGameClient, pMap, pMapImages, pEvelopePoints, OnlineOnly);
+	int DataSize = m_pMap->GetDataSize(m_pLayerQuads->m_Data);
+	if(m_pLayerQuads->m_NumQuads > 0 && DataSize / (int)sizeof(CQuad) >= m_pLayerQuads->m_NumQuads)
+		m_pQuads = (CQuad *)m_pMap->GetDataSwapped(m_pLayerQuads->m_Data);
+}
+
 void CRenderLayerQuads::Init()
 {
 	if(m_pLayerQuads->m_Image >= 0 && m_pLayerQuads->m_Image < m_pMapImages->Num())
@@ -974,18 +984,17 @@ void CRenderLayerQuads::Init()
 		vTmpQuads.resize(m_pLayerQuads->m_NumQuads);
 
 	m_vQuadRenderInfo.resize(m_pLayerQuads->m_NumQuads);
-	CQuad *pQuads = (CQuad *)m_pMap->GetDataSwapped(m_pLayerQuads->m_Data);
 
 	// try to create a quad render group
 	m_Grouped = true;
-	m_QuadRenderGroup.m_ColorEnv = pQuads[0].m_ColorEnv;
-	m_QuadRenderGroup.m_ColorEnvOffset = pQuads[0].m_ColorEnvOffset;
-	m_QuadRenderGroup.m_PosEnv = pQuads[0].m_PosEnv;
-	m_QuadRenderGroup.m_PosEnvOffset = pQuads[0].m_PosEnvOffset;
+	m_QuadRenderGroup.m_ColorEnv = m_pQuads[0].m_ColorEnv;
+	m_QuadRenderGroup.m_ColorEnvOffset = m_pQuads[0].m_ColorEnvOffset;
+	m_QuadRenderGroup.m_PosEnv = m_pQuads[0].m_PosEnv;
+	m_QuadRenderGroup.m_PosEnvOffset = m_pQuads[0].m_PosEnvOffset;
 
 	for(int i = 0; i < m_pLayerQuads->m_NumQuads; ++i)
 	{
-		CQuad *pQuad = &pQuads[i];
+		const CQuad *pQuad = &m_pQuads[i];
 
 		// give up on grouping if envelopes missmatch
 		if(m_Grouped && (pQuad->m_ColorEnv != m_QuadRenderGroup.m_ColorEnv || pQuad->m_ColorEnvOffset != m_QuadRenderGroup.m_ColorEnvOffset || pQuad->m_PosEnv != m_QuadRenderGroup.m_PosEnv || pQuad->m_PosEnvOffset != m_QuadRenderGroup.m_PosEnvOffset))
@@ -1174,15 +1183,13 @@ void CRenderLayerQuads::CalculateClipping()
 		}
 	}
 
-	const CQuad *pQuads = static_cast<CQuad *>(m_pMap->GetDataSwapped(m_pLayerQuads->m_Data));
-
 	// calculate quad position offsets
-	int aQuadOffsetMin[2] = {pQuads[0].m_aPoints[0].x, pQuads[0].m_aPoints[0].y};
-	int aQuadOffsetMax[2] = {pQuads[0].m_aPoints[0].x, pQuads[0].m_aPoints[0].y};
+	int aQuadOffsetMin[2] = {m_pQuads[0].m_aPoints[0].x, m_pQuads[0].m_aPoints[0].y};
+	int aQuadOffsetMax[2] = {m_pQuads[0].m_aPoints[0].x, m_pQuads[0].m_aPoints[0].y};
 
 	for(int i = 0; i < m_pLayerQuads->m_NumQuads; ++i)
 	{
-		const CQuad *pQuad = &pQuads[i];
+		const CQuad *pQuad = &m_pQuads[i];
 
 		// calculate clip region
 		for(int QuadIdPoint = 0; QuadIdPoint < 4; ++QuadIdPoint)
@@ -1210,7 +1217,6 @@ void CRenderLayerQuads::CalculateClipping()
 void CRenderLayerQuads::Render(const CRenderLayerParams &Params)
 {
 	UseTexture(GetTexture());
-	CQuad *pQuads = (CQuad *)m_pMap->GetDataSwapped(m_pLayerQuads->m_Data);
 	if(Params.m_RenderType == CMapLayers::TYPE_BACKGROUND_FORCE || Params.m_RenderType == CMapLayers::TYPE_FULL_DESIGN)
 	{
 		if(g_Config.m_ClShowQuads || Params.m_RenderType == CMapLayers::TYPE_FULL_DESIGN)
@@ -1218,7 +1224,7 @@ void CRenderLayerQuads::Render(const CRenderLayerParams &Params)
 			if(!Graphics()->IsQuadBufferingEnabled() || !Params.m_TileAndQuadBuffering)
 			{
 				Graphics()->BlendNormal();
-				RenderMap()->ForceRenderQuads(pQuads, m_pLayerQuads->m_NumQuads, LAYERRENDERFLAG_TRANSPARENT, EnvelopeEvalRenderLayer, this, 1.f);
+				RenderMap()->ForceRenderQuads(m_pQuads, m_pLayerQuads->m_NumQuads, LAYERRENDERFLAG_TRANSPARENT, EnvelopeEvalRenderLayer, this, 1.f);
 			}
 			else
 			{
@@ -1231,7 +1237,7 @@ void CRenderLayerQuads::Render(const CRenderLayerParams &Params)
 		if(!Graphics()->IsQuadBufferingEnabled() || !Params.m_TileAndQuadBuffering)
 		{
 			Graphics()->BlendNormal();
-			RenderMap()->RenderQuads(pQuads, m_pLayerQuads->m_NumQuads, LAYERRENDERFLAG_TRANSPARENT, EnvelopeEvalRenderLayer, this);
+			RenderMap()->RenderQuads(m_pQuads, m_pLayerQuads->m_NumQuads, LAYERRENDERFLAG_TRANSPARENT, EnvelopeEvalRenderLayer, this);
 		}
 		else
 		{
