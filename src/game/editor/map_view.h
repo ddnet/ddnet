@@ -21,7 +21,7 @@ public:
 	void UpdateZoom();
 
 	void RenderGroupBorder();
-	void RenderMap();
+	void RenderEditorMap();
 
 	bool IsFocused();
 	void Focus();

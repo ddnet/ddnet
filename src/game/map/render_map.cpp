@@ -10,7 +10,7 @@
 #include <engine/shared/datafile.h>
 #include <engine/shared/map.h>
 
-#include "render.h"
+#include "render_map.h"
 
 #include <game/generated/client_data.h>
 
@@ -244,7 +244,13 @@ static float SolveBezier(float x, float p0, float p1, float p2, float p3)
 	}
 }
 
-void CRenderTools::RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, std::chrono::nanoseconds TimeNanos, ColorRGBA &Result, size_t Channels)
+void CRenderMap::Init(IGraphics *pGraphics, ITextRender *pTextRender)
+{
+	m_pGraphics = pGraphics;
+	m_pTextRender = pTextRender;
+}
+
+void CRenderMap::RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, std::chrono::nanoseconds TimeNanos, ColorRGBA &Result, size_t Channels)
 {
 	const int NumPoints = pPoints->NumPoints();
 	if(NumPoints == 0)
@@ -358,7 +364,7 @@ static void Rotate(const CPoint *pCenter, CPoint *pPoint, float Rotation)
 	pPoint->y = (int)(x * std::sin(Rotation) + y * std::cos(Rotation) + pCenter->y);
 }
 
-void CRenderTools::RenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser) const
+void CRenderMap::RenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser)
 {
 	if(!g_Config.m_ClShowQuads || g_Config.m_ClOverlayEntities == 100)
 		return;
@@ -366,7 +372,7 @@ void CRenderTools::RenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, ENV
 	ForceRenderQuads(pQuads, NumQuads, RenderFlags, pfnEval, pUser, (100 - g_Config.m_ClOverlayEntities) / 100.0f);
 }
 
-void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser, float Alpha) const
+void CRenderMap::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser, float Alpha)
 {
 	Graphics()->TrianglesBegin();
 	float Conv = 1 / 255.0f;
@@ -431,9 +437,9 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 	Graphics()->TrianglesEnd();
 }
 
-void CRenderTools::RenderTileRectangle(int RectX, int RectY, int RectW, int RectH,
+void CRenderMap::RenderTileRectangle(int RectX, int RectY, int RectW, int RectH,
 	unsigned char IndexIn, unsigned char IndexOut,
-	float Scale, ColorRGBA Color, int RenderFlags) const
+	float Scale, ColorRGBA Color, int RenderFlags)
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -524,7 +530,74 @@ void CRenderTools::RenderTileRectangle(int RectX, int RectY, int RectW, int Rect
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, ColorRGBA Color, int RenderFlags) const
+void CRenderMap::RenderTile(int x, int y, unsigned char Index, float Scale, ColorRGBA Color)
+{
+	if(Graphics()->HasTextureArraysSupport())
+		Graphics()->QuadsTex3DBegin();
+	else
+		Graphics()->QuadsBegin();
+
+	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+
+	// calculate the final pixelsize for the tiles
+	float TilePixelSize = 1024 / Scale;
+	float FinalTileSize = Scale / (ScreenX1 - ScreenX0) * Graphics()->ScreenWidth();
+	float FinalTilesetScale = FinalTileSize / TilePixelSize;
+
+	float TexSize = 1024.0f;
+	float Frac = (1.25f / TexSize) * (1 / FinalTilesetScale);
+	float Nudge = (0.5f / TexSize) * (1 / FinalTilesetScale);
+
+	int tx = Index % 16;
+	int ty = Index / 16;
+	int Px0 = tx * (1024 / 16);
+	int Py0 = ty * (1024 / 16);
+	int Px1 = Px0 + (1024 / 16) - 1;
+	int Py1 = Py0 + (1024 / 16) - 1;
+
+	float x0 = Nudge + Px0 / TexSize + Frac;
+	float y0 = Nudge + Py0 / TexSize + Frac;
+	float x1 = Nudge + Px1 / TexSize - Frac;
+	float y1 = Nudge + Py0 / TexSize + Frac;
+	float x2 = Nudge + Px1 / TexSize - Frac;
+	float y2 = Nudge + Py1 / TexSize - Frac;
+	float x3 = Nudge + Px0 / TexSize + Frac;
+	float y3 = Nudge + Py1 / TexSize - Frac;
+
+	if(Graphics()->HasTextureArraysSupport())
+	{
+		x0 = 0;
+		y0 = 0;
+		x1 = x0 + 1;
+		y1 = y0;
+		x2 = x0 + 1;
+		y2 = y0 + 1;
+		x3 = x0;
+		y3 = y0 + 1;
+	}
+
+	if(Graphics()->HasTextureArraysSupport())
+	{
+		Graphics()->QuadsSetSubsetFree(x0, y0, x1, y1, x2, y2, x3, y3, Index);
+		IGraphics::CQuadItem QuadItem(x, y, Scale, Scale);
+		Graphics()->QuadsTex3DDrawTL(&QuadItem, 1);
+	}
+	else
+	{
+		Graphics()->QuadsSetSubsetFree(x0, y0, x1, y1, x2, y2, x3, y3);
+		IGraphics::CQuadItem QuadItem(x, y, Scale, Scale);
+		Graphics()->QuadsDrawTL(&QuadItem, 1);
+	}
+
+	if(Graphics()->HasTextureArraysSupport())
+		Graphics()->QuadsTex3DEnd();
+	else
+		Graphics()->QuadsEnd();
+	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+}
+
+void CRenderMap::RenderTilemap(CTile *pTiles, int w, int h, float Scale, ColorRGBA Color, int RenderFlags)
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -685,74 +758,7 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, Color
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderTile(int x, int y, unsigned char Index, float Scale, ColorRGBA Color) const
-{
-	if(Graphics()->HasTextureArraysSupport())
-		Graphics()->QuadsTex3DBegin();
-	else
-		Graphics()->QuadsBegin();
-
-	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-
-	// calculate the final pixelsize for the tiles
-	float TilePixelSize = 1024 / Scale;
-	float FinalTileSize = Scale / (ScreenX1 - ScreenX0) * Graphics()->ScreenWidth();
-	float FinalTilesetScale = FinalTileSize / TilePixelSize;
-
-	float TexSize = 1024.0f;
-	float Frac = (1.25f / TexSize) * (1 / FinalTilesetScale);
-	float Nudge = (0.5f / TexSize) * (1 / FinalTilesetScale);
-
-	int tx = Index % 16;
-	int ty = Index / 16;
-	int Px0 = tx * (1024 / 16);
-	int Py0 = ty * (1024 / 16);
-	int Px1 = Px0 + (1024 / 16) - 1;
-	int Py1 = Py0 + (1024 / 16) - 1;
-
-	float x0 = Nudge + Px0 / TexSize + Frac;
-	float y0 = Nudge + Py0 / TexSize + Frac;
-	float x1 = Nudge + Px1 / TexSize - Frac;
-	float y1 = Nudge + Py0 / TexSize + Frac;
-	float x2 = Nudge + Px1 / TexSize - Frac;
-	float y2 = Nudge + Py1 / TexSize - Frac;
-	float x3 = Nudge + Px0 / TexSize + Frac;
-	float y3 = Nudge + Py1 / TexSize - Frac;
-
-	if(Graphics()->HasTextureArraysSupport())
-	{
-		x0 = 0;
-		y0 = 0;
-		x1 = x0 + 1;
-		y1 = y0;
-		x2 = x0 + 1;
-		y2 = y0 + 1;
-		x3 = x0;
-		y3 = y0 + 1;
-	}
-
-	if(Graphics()->HasTextureArraysSupport())
-	{
-		Graphics()->QuadsSetSubsetFree(x0, y0, x1, y1, x2, y2, x3, y3, Index);
-		IGraphics::CQuadItem QuadItem(x, y, Scale, Scale);
-		Graphics()->QuadsTex3DDrawTL(&QuadItem, 1);
-	}
-	else
-	{
-		Graphics()->QuadsSetSubsetFree(x0, y0, x1, y1, x2, y2, x3, y3);
-		IGraphics::CQuadItem QuadItem(x, y, Scale, Scale);
-		Graphics()->QuadsDrawTL(&QuadItem, 1);
-	}
-
-	if(Graphics()->HasTextureArraysSupport())
-		Graphics()->QuadsTex3DEnd();
-	else
-		Graphics()->QuadsEnd();
-	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
-}
-
-void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale, int OverlayRenderFlag, float Alpha) const
+void CRenderMap::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
 {
 	if(!(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT))
 		return;
@@ -807,7 +813,7 @@ void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
+void CRenderMap::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -855,9 +861,9 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 					Graphics()->TextureSet(g_pData->m_aImages[IMAGE_SPEEDUP_ARROW].m_Id);
 					Graphics()->QuadsBegin();
 					Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
-					SelectSprite(SPRITE_SPEEDUP_ARROW);
+					Graphics()->SelectSprite(SPRITE_SPEEDUP_ARROW);
 					Graphics()->QuadsSetRotation(pSpeedup[c].m_Angle * (pi / 180.0f));
-					DrawSprite(mx * Scale + 16, my * Scale + 16, 35.0f);
+					Graphics()->DrawSprite(mx * Scale + 16, my * Scale + 16, 35.0f);
 					Graphics()->QuadsEnd();
 
 					// draw force and max speed
@@ -894,7 +900,7 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float Scale, int OverlayRenderFlag, float Alpha) const
+void CRenderMap::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
 {
 	if(!(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT))
 		return;
@@ -952,7 +958,7 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale, int OverlayRenderFlag, float Alpha) const
+void CRenderMap::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
 {
 	if(!(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT))
 		return;
@@ -1007,7 +1013,7 @@ void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, ColorRGBA Color, int RenderFlags) const
+void CRenderMap::RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, ColorRGBA Color, int RenderFlags)
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -1124,7 +1130,7 @@ void CRenderTools::RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, Co
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderSwitchmap(CSwitchTile *pSwitchTile, int w, int h, float Scale, ColorRGBA Color, int RenderFlags) const
+void CRenderMap::RenderSwitchmap(CSwitchTile *pSwitchTile, int w, int h, float Scale, ColorRGBA Color, int RenderFlags)
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -1284,7 +1290,7 @@ void CRenderTools::RenderSwitchmap(CSwitchTile *pSwitchTile, int w, int h, float
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, ColorRGBA Color, int RenderFlags) const
+void CRenderMap::RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, ColorRGBA Color, int RenderFlags)
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);

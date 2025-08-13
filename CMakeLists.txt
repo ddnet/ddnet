@@ -2030,6 +2030,7 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   favorites.h
   friends.h
   ghost.h
+  graphics.cpp
   graphics.h
   http.h
   image.h
@@ -2295,6 +2296,7 @@ if(CLIENT)
     graphics_defines.h
     graphics_threaded.cpp
     graphics_threaded.h
+    graphics_threaded_sprites.cpp
     input.cpp
     input.h
     keynames.cpp
@@ -2446,7 +2448,6 @@ if(CLIENT)
     race.h
     render.cpp
     render.h
-    render_map.cpp
     sixup_translate_connless.cpp
     sixup_translate_game.cpp
     sixup_translate_snapshot.cpp
@@ -2541,6 +2542,10 @@ if(CLIENT)
     smooth_value.h
     tileart.cpp
   )
+  set_src(GAME_MAP GLOB_RECURSE src/game/map
+    render_map.cpp
+    render_map.h
+  )
   set(GAME_GENERATED_CLIENT
     src/game/generated/checksum.cpp
     src/game/generated/client_data.cpp
@@ -2548,7 +2553,7 @@ if(CLIENT)
     src/game/generated/client_data7.cpp
     src/game/generated/client_data7.h
   )
-  set(CLIENT_SRC ${ENGINE_CLIENT} ${PLATFORM_CLIENT} ${GAME_CLIENT} ${GAME_EDITOR} ${GAME_GENERATED_CLIENT})
+  set(CLIENT_SRC ${ENGINE_CLIENT} ${PLATFORM_CLIENT} ${GAME_CLIENT} ${GAME_EDITOR} ${GAME_MAP} ${GAME_GENERATED_CLIENT})
 
   set(DEPS_CLIENT ${DEPS} ${GLEW_DEP} ${WAVPACK_DEP})
 

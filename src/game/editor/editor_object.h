@@ -17,6 +17,7 @@ class ISound;
 class ITextRender;
 class IStorage;
 class CRenderTools;
+class CRenderMap;
 
 class CEditorObject
 {
@@ -76,7 +77,7 @@ public:
 	ITextRender *TextRender();
 	IStorage *Storage();
 	CUi *Ui();
-	CRenderTools *RenderTools();
+	CRenderMap *RenderMap();
 
 private:
 	CEditor *m_pEditor;

@@ -1109,6 +1109,29 @@ public:
 	void RenderQuadContainerAsSprite(int ContainerIndex, int QuadOffset, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) override;
 	void RenderQuadContainerAsSpriteMultiple(int ContainerIndex, int QuadOffset, int DrawCount, SRenderSpriteInfo *pRenderInfo) override;
 
+	// sprites
+private:
+	vec2 m_SpriteScale = vec2(-1.0f, -1.0f);
+
+protected:
+	void SelectSprite(const CDataSprite *pSprite, int Flags);
+
+public:
+	void SelectSprite(int Id, int Flags = 0) override;
+	void SelectSprite7(int Id, int Flags = 0) override;
+
+	void GetSpriteScale(const CDataSprite *pSprite, float &ScaleX, float &ScaleY) const override;
+	void GetSpriteScale(int Id, float &ScaleX, float &ScaleY) const override;
+	void GetSpriteScaleImpl(int Width, int Height, float &ScaleX, float &ScaleY) const override;
+
+	void DrawSprite(float x, float y, float Size) override;
+	void DrawSprite(float x, float y, float ScaledWidth, float ScaledHeight) override;
+
+	int QuadContainerAddSprite(int QuadContainerIndex, float x, float y, float Size) override;
+	int QuadContainerAddSprite(int QuadContainerIndex, float Size) override;
+	int QuadContainerAddSprite(int QuadContainerIndex, float Width, float Height) override;
+	int QuadContainerAddSprite(int QuadContainerIndex, float X, float Y, float Width, float Height) override;
+
 	template<typename TName>
 	void FlushVerticesImpl(bool KeepVertices, int &PrimType, size_t &PrimCount, size_t &NumVerts, TName &Command, size_t VertSize)
 	{

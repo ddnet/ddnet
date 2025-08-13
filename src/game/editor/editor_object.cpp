@@ -75,4 +75,4 @@ ISound *CEditorObject::Sound() { return m_pEditor->Sound(); }
 ITextRender *CEditorObject::TextRender() { return m_pEditor->TextRender(); }
 IStorage *CEditorObject::Storage() { return m_pEditor->Storage(); }
 CUi *CEditorObject::Ui() { return m_pEditor->Ui(); }
-CRenderTools *CEditorObject::RenderTools() { return m_pEditor->RenderTools(); }
+CRenderMap *CEditorObject::RenderMap() { return m_pEditor->RenderMap(); }

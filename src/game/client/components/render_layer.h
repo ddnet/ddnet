@@ -15,7 +15,7 @@ using offset_ptr32 = unsigned int;
 #include <engine/graphics.h>
 
 #include <game/client/component.h>
-#include <game/client/render.h>
+#include <game/map/render_map.h>
 #include <game/mapitems.h>
 #include <game/mapitems_ex.h>
 
