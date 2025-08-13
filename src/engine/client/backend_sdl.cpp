@@ -472,6 +472,7 @@ const SGfxWarningContainer &CCommandProcessor_SDL_GL::GetWarning() const
 
 // ------------ CGraphicsBackend_SDL_GL
 
+#if !defined(CONF_HEADLESS_CLIENT)
 static bool BackendInitGlew(EBackendType BackendType, int &GlewMajor, int &GlewMinor, int &GlewPatch)
 {
 	if(BackendType == BACKEND_TYPE_OPENGL)
@@ -723,6 +724,7 @@ static int IsVersionSupportedGlew(EBackendType BackendType, int VersionMajor, in
 
 	return InitError;
 }
+#endif // !CONF_HEADLESS_CLIENT
 
 EBackendType CGraphicsBackend_SDL_GL::DetectBackend()
 {
@@ -1102,13 +1104,15 @@ CGraphicsBackend_SDL_GL::CGraphicsBackend_SDL_GL(TTranslateFunc &&TranslateFunc)
 int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, int *pHeight, int *pRefreshRate, int *pFsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, IStorage *pStorage)
 {
 #if defined(CONF_HEADLESS_CLIENT)
+	m_BackendType = BACKEND_TYPE_OPENGL;
+	g_Config.m_GfxGLMajor = 0;
+	g_Config.m_GfxGLMinor = 0;
+	g_Config.m_GfxGLPatch = 0;
 	int InitError = 0;
-	const char *pErrorStr = NULL;
 	int GlewMajor = 0;
 	int GlewMinor = 0;
 	int GlewPatch = 0;
-	IsVersionSupportedGlew(m_BackendType, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch, GlewMajor, GlewMinor, GlewPatch);
-	BackendInitGlew(m_BackendType, GlewMajor, GlewMinor, GlewPatch);
+	log_info("gfx", "Created headless context");
 #else
 	// print sdl version
 	{
@@ -1141,29 +1145,24 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	EBackendType OldBackendType = m_BackendType;
 	m_BackendType = DetectBackend();
 	// little fallback for Vulkan
-	if(OldBackendType != BACKEND_TYPE_AUTO)
+	if(OldBackendType != BACKEND_TYPE_AUTO &&
+		m_BackendType == BACKEND_TYPE_VULKAN)
 	{
-		if(m_BackendType == BACKEND_TYPE_VULKAN)
-		{
-			// try default opengl settings
-			str_copy(g_Config.m_GfxBackend, "OpenGL");
-			g_Config.m_GfxGLMajor = 3;
-			g_Config.m_GfxGLMinor = 0;
-			g_Config.m_GfxGLPatch = 0;
-			// do another analysis round too, just in case
-			g_Config.m_Gfx3DTextureAnalysisRan = 0;
-			g_Config.m_GfxDriverIsBlocked = 0;
-
-			SDL_setenv("DDNET_DRIVER", "OpenGL", 1);
-			m_BackendType = DetectBackend();
-		}
+		// try default opengl settings
+		str_copy(g_Config.m_GfxBackend, "OpenGL");
+		g_Config.m_GfxGLMajor = 3;
+		g_Config.m_GfxGLMinor = 0;
+		g_Config.m_GfxGLPatch = 0;
+		// do another analysis round too, just in case
+		g_Config.m_Gfx3DTextureAnalysisRan = 0;
+		g_Config.m_GfxDriverIsBlocked = 0;
+		m_BackendType = DetectBackend();
 	}
 
 	ClampDriverVersion(m_BackendType);
 
-	bool UseModernGL = IsModernAPI(m_BackendType);
-
-	bool IsOpenGLFamilyBackend = m_BackendType == BACKEND_TYPE_OPENGL || m_BackendType == BACKEND_TYPE_OPENGL_ES;
+	const bool UseModernGL = IsModernAPI(m_BackendType);
+	const bool IsOpenGLFamilyBackend = m_BackendType == BACKEND_TYPE_OPENGL || m_BackendType == BACKEND_TYPE_OPENGL_ES;
 
 	if(IsOpenGLFamilyBackend)
 	{
@@ -1350,10 +1349,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		}
 	}
 
-	int InitError = 0;
-	const char *pErrorStr = nullptr;
-
-	InitError = IsVersionSupportedGlew(m_BackendType, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch, GlewMajor, GlewMinor, GlewPatch);
+	int InitError = IsVersionSupportedGlew(m_BackendType, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch, GlewMajor, GlewMinor, GlewPatch);
 
 	// SDL_GL_GetDrawableSize reports HiDPI resolution even with SDL_WINDOW_ALLOW_HIGHDPI not set, which is wrong
 	if(SdlFlags & SDL_WINDOW_ALLOW_HIGHDPI)
@@ -1392,7 +1388,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 
 		return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_GL_VERSION_FAILED;
 	}
-#endif // CONF_HEADLESS_CLIENT
+#endif // !CONF_HEADLESS_CLIENT
 
 	// start the command processor
 	dbg_assert(m_pProcessor == nullptr, "Processor was not cleaned up properly.");
@@ -1422,6 +1418,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	WaitForIdle();
 	CmdBuffer.Reset();
 
+	const char *pErrorStr = nullptr;
 	if(InitError == 0)
 	{
 		CCommandProcessorFragment_GLBase::SCommand_Init CmdGL;
@@ -1508,7 +1505,6 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		CCommandBuffer::SCommand_Update_Viewport CmdSDL2;
 		CmdSDL2.m_X = 0;
 		CmdSDL2.m_Y = 0;
-
 		CmdSDL2.m_Width = *pCurrentWidth;
 		CmdSDL2.m_Height = *pCurrentHeight;
 		CmdSDL2.m_ByResize = true;
@@ -1518,7 +1514,6 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		CmdBuffer.Reset();
 	}
 
-	// return
 	return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_NONE;
 }
 
