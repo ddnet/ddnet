@@ -26,7 +26,7 @@
 #include <game/editor/mapitems/layer_tune.h>
 #include <game/editor/mapitems/map.h>
 
-#include <game/map/render_map.h>
+#include <game/map/render_interfaces.h>
 
 #include <engine/console.h>
 #include <engine/editor.h>
@@ -107,7 +107,7 @@ enum
 	PROPTYPE_AUTOMAPPER_REFERENCE,
 };
 
-class CEditor : public IEditor
+class CEditor : public IEditor, public IEnvelopeEval
 {
 	class IInput *m_pInput = nullptr;
 	class IClient *m_pClient = nullptr;
@@ -572,7 +572,7 @@ public:
 
 	int m_ShiftBy;
 
-	static void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels, void *pUser);
+	void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels) override;
 
 	CLineInputBuffered<256> m_SettingsCommandInput;
 	CMapSettingsBackend m_MapSettingsBackend;

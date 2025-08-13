@@ -7,15 +7,8 @@
 #include <engine/graphics.h>
 
 #include <game/client/component.h>
+#include <game/map/render_interfaces.h>
 #include <game/mapitems.h>
-
-enum EMapImageEntityLayerType
-{
-	MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH = 0,
-	MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH,
-
-	MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT,
-};
 
 enum EMapImageModType
 {
@@ -40,7 +33,7 @@ constexpr const char *const gs_apModEntitiesNames[] = {
 	"f-ddrace",
 };
 
-class CMapImages : public CComponent
+class CMapImages : public CComponent, public IMapImages
 {
 	friend class CBackground;
 	friend class CMenuBackground;
@@ -54,8 +47,8 @@ public:
 	CMapImages();
 	int Sizeof() const override { return sizeof(*this); }
 
-	IGraphics::CTextureHandle Get(int Index) const { return m_aTextures[Index]; }
-	int Num() const { return m_Count; }
+	IGraphics::CTextureHandle Get(int Index) const override { return m_aTextures[Index]; }
+	int Num() const override { return m_Count; }
 
 	void OnMapLoadImpl(class CLayers *pLayers, class IMap *pMap);
 	void OnMapLoad() override;
@@ -64,12 +57,12 @@ public:
 	void LoadBackground(class CLayers *pLayers, class IMap *pMap);
 
 	// DDRace
-	IGraphics::CTextureHandle GetEntities(EMapImageEntityLayerType EntityLayerType);
-	IGraphics::CTextureHandle GetSpeedupArrow();
+	IGraphics::CTextureHandle GetEntities(EMapImageEntityLayerType EntityLayerType) override;
+	IGraphics::CTextureHandle GetSpeedupArrow() override;
 
-	IGraphics::CTextureHandle GetOverlayBottom();
-	IGraphics::CTextureHandle GetOverlayTop();
-	IGraphics::CTextureHandle GetOverlayCenter();
+	IGraphics::CTextureHandle GetOverlayBottom() override;
+	IGraphics::CTextureHandle GetOverlayTop() override;
+	IGraphics::CTextureHandle GetOverlayCenter() override;
 
 	void SetTextureScale(int Scale);
 	int GetTextureScale() const;

@@ -93,15 +93,14 @@ bool CEditor::IsVanillaImage(const char *pImage)
 	return std::any_of(std::begin(VANILLA_IMAGES), std::end(VANILLA_IMAGES), [pImage](const char *pVanillaImage) { return str_comp(pImage, pVanillaImage) == 0; });
 }
 
-void CEditor::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels, void *pUser)
+void CEditor::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels)
 {
-	CEditor *pThis = (CEditor *)pUser;
-	if(Env < 0 || Env >= (int)pThis->m_Map.m_vpEnvelopes.size())
+	if(Env < 0 || Env >= (int)m_Map.m_vpEnvelopes.size())
 		return;
 
-	std::shared_ptr<CEnvelope> pEnv = pThis->m_Map.m_vpEnvelopes[Env];
-	float Time = pThis->m_AnimateTime;
-	Time *= pThis->m_AnimateSpeed;
+	std::shared_ptr<CEnvelope> pEnv = m_Map.m_vpEnvelopes[Env];
+	float Time = m_AnimateTime;
+	Time *= m_AnimateSpeed;
 	Time += (TimeOffsetMillis / 1000.0f);
 	pEnv->Eval(Time, Result, Channels);
 }
