@@ -112,6 +112,8 @@ public:
 		WHITELISTED,
 	};
 
+	static const char *DnsblStateStr(EDnsblState State);
+
 	class CClient
 	{
 	public:

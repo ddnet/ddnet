@@ -295,6 +295,22 @@ CServer::~CServer()
 	delete m_pConnectionPool;
 }
 
+const char *CServer::DnsblStateStr(EDnsblState State)
+{
+	switch(State)
+	{
+	case EDnsblState::NONE:
+		return "n/a";
+	case EDnsblState::PENDING:
+		return "pending";
+	case EDnsblState::BLACKLISTED:
+		return "black";
+	case EDnsblState::WHITELISTED:
+		return "white";
+	}
+	return "n/a";
+}
+
 bool CServer::IsClientNameAvailable(int ClientId, const char *pNameRequest)
 {
 	// check for empty names
@@ -3409,11 +3425,7 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 			aDnsblStr[0] = '\0';
 			if(pThis->Config()->m_SvDnsbl)
 			{
-				const char *pDnsblStr = pThis->m_aClients[i].m_DnsblState == EDnsblState::WHITELISTED ? "white" :
-															pThis->m_aClients[i].m_DnsblState == EDnsblState::BLACKLISTED ? "black" :
-																							pThis->m_aClients[i].m_DnsblState == EDnsblState::PENDING ? "pending" : "n/a";
-
-				str_format(aDnsblStr, sizeof(aDnsblStr), " dnsbl=%s", pDnsblStr);
+				str_format(aDnsblStr, sizeof(aDnsblStr), " dnsbl=%s", DnsblStateStr(pThis->m_aClients[i].m_DnsblState));
 			}
 
 			char aAuthStr[128];
