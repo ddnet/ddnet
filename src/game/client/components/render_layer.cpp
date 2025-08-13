@@ -17,24 +17,51 @@
 /************************
  * Render Buffer Helper *
  ************************/
+class CTexCoords
+{
+public:
+	std::array<uint8_t, 4> m_aTexX;
+	std::array<uint8_t, 4> m_aTexY;
+};
+
+constexpr static CTexCoords CalculateTexCoords(unsigned int Flags)
+{
+	CTexCoords TexCoord;
+	TexCoord.m_aTexX = {0, 1, 1, 0};
+	TexCoord.m_aTexY = {0, 0, 1, 1};
+
+	if(Flags & TILEFLAG_XFLIP)
+		std::rotate(std::begin(TexCoord.m_aTexX), std::begin(TexCoord.m_aTexX) + 2, std::end(TexCoord.m_aTexX));
+
+	if(Flags & TILEFLAG_YFLIP)
+		std::rotate(std::begin(TexCoord.m_aTexY), std::begin(TexCoord.m_aTexY) + 2, std::end(TexCoord.m_aTexY));
+
+	if(Flags & (TILEFLAG_ROTATE >> 1))
+	{
+		std::rotate(std::begin(TexCoord.m_aTexX), std::begin(TexCoord.m_aTexX) + 3, std::end(TexCoord.m_aTexX));
+		std::rotate(std::begin(TexCoord.m_aTexY), std::begin(TexCoord.m_aTexY) + 3, std::end(TexCoord.m_aTexY));
+	}
+	return TexCoord;
+}
+
+template<std::size_t N>
+constexpr static std::array<CTexCoords, N> MakeTexCoordsTable()
+{
+	std::array<CTexCoords, N> aTexCoords = {};
+	for(std::size_t i = 0; i < N; ++i)
+		aTexCoords[i] = CalculateTexCoords(i);
+	return aTexCoords;
+}
+
+constexpr std::array<CTexCoords, 8> TEX_COORDS_TABLE = MakeTexCoordsTable<8>();
+
 static void FillTmpTile(SGraphicTile *pTmpTile, SGraphicTileTexureCoords *pTmpTex, unsigned char Flags, unsigned char Index, int x, int y, const ivec2 &Offset, int Scale)
 {
 	if(pTmpTex)
 	{
-		unsigned char aTexX[]{0, 1, 1, 0};
-		unsigned char aTexY[]{0, 0, 1, 1};
-
-		if(Flags & TILEFLAG_XFLIP)
-			std::rotate(std::begin(aTexX), std::begin(aTexX) + 2, std::end(aTexX));
-
-		if(Flags & TILEFLAG_YFLIP)
-			std::rotate(std::begin(aTexY), std::begin(aTexY) + 2, std::end(aTexY));
-
-		if(Flags & TILEFLAG_ROTATE)
-		{
-			std::rotate(std::begin(aTexX), std::begin(aTexX) + 3, std::end(aTexX));
-			std::rotate(std::begin(aTexY), std::begin(aTexY) + 3, std::end(aTexY));
-		}
+		uint8_t TableFlag = (Flags & (TILEFLAG_XFLIP | TILEFLAG_YFLIP)) + ((Flags & TILEFLAG_ROTATE) >> 1);
+		const auto &aTexX = TEX_COORDS_TABLE[TableFlag].m_aTexX;
+		const auto &aTexY = TEX_COORDS_TABLE[TableFlag].m_aTexY;
 
 		pTmpTex->m_TexCoordTopLeft.x = aTexX[0];
 		pTmpTex->m_TexCoordTopLeft.y = aTexY[0];
