@@ -1905,313 +1905,313 @@ Eyes
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Czech translation by khubajsn, Petr, Medik, TeeWorlds-org and dobrykafe
+== Český překlad od khubajsn, Petr, Medik, TeeWorlds-org a dobrykafe
 
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== Nedostatek VRAM. Zkuste nastavit 'cl_skins_loaded_max' na nižší hodnotu nebo odstranit vlastní aktiva (skiny, entity, atd.), zejména ty s vysokým rozlišením.
 
 No demo with this filename exists
-== 
+== Neexistuje žádný záznam s tímto názvem
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
-== 
+== "%s" není kompatibilní s pnglite a nelze jej načíst starými DDNet verzemi:
 
 Some fonts could not be loaded. Check the local console for details.
-== 
+== Některá písma nemohla být načtena. Podrobnosti najdete v místní konzole.
 
 Auto-sync player camera
-== 
+== Synchronizovat kameru hráče
 
 [Auto camera]
 Disabled
-== 
+== Zakázána
 
 [Auto camera]
 Enabled
-== 
+== Povolena
 
 [Auto camera]
 Unavailable for this player
-== 
+== Není k dispozici pro tohoto hráče
 
 [Auto camera]
 Inactive
-== 
+== Neaktivní
 
 [Auto camera]
 Active
-== 
+== Aktivní
 
 Loading maps…
-== 
+== Načítání map…
 
 [Spectating]
 Following %d: %s
-== 
+== Sledujete %d: %s
 
 [Spectating Camera Mode Icon]
 AUTO
-== 
+== AUTO
 
 Loading map
-== 
+== Načítání mapy
 
 This name cannot be used for files and folders
-== 
+== Tento název nelze použít pro soubory a složky
 
 Error checking player name
-== 
+== Chyba při kontrole jména hráče
 
 Could not check for existing player with your name. Check your internet connection.
-== 
+== Nepodařilo se vyhledat existujícího hráče s vaším jménem. Zkontrolujte připojení k internetu.
 
 Online friends (%d)
-== 
+== Online přátelé (%d)
 
 Add friends by entering their name below or by clicking their name in the player list.
-== 
+== Přidejte přátele zadáním jejich jména níže nebo kliknutím na jejich jméno v seznamu hráčů.
 
 Add clanmates by entering their clan below and leaving the name blank.
-== 
+== Přidejte členy klanu zadáním jejich klanu níže a ponecháním prázdného jména.
 
 Toggle auto camera
-== 
+== Přepnout automatickou kameru
 
 Map size
-== 
+== Velikost mapy
 
 Edit touch controls
-== 
+== Upravit dotykové ovládání
 
 Close
-== 
+== Zavřít
 
 https://wiki.ddnet.org/wiki/Touch_controls
-== 
+== https://wiki.ddnet.org/wiki/Touch_controls
 
 Save changes
-== 
+== Uložit změny
 
 Error saving touch controls
-== 
+== Chyba při ukládání dotykového ovládání
 
 Could not save touch controls to file. See local console for details.
-== 
+== Nepodařilo se uložit dotykové ovládání do souboru. Podrobnosti naleznete v místní konzoli.
 
 Unsaved changes
-== 
+== Neuložené změny
 
 Discard changes
-== 
+== Zahodit změny
 
 Are you sure that you want to discard the current changes to the touch controls?
-== 
+== Opravdu chcete zahodit aktuální změny dotykového ovládání?
 
 Are you sure that you want to reset the touch controls to default?
-== 
+== Opravdu chcete resetovat dotykové ovládání na výchozí nastavení?
 
 Import from clipboard
-== 
+== Vložit ze schránky
 
 Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
-== 
+== Opravdu chcete vložit dotykové ovládání ze schránky? Tímto se přepíše vaše aktuální dotykové ovládání.
 
 Export to clipboard
-== 
+== Uložit do schránky
 
 Direct touch input while ingame
-== 
+== Přímý dotykový vstup během hry
 
 [Direct touch input]
 Disabled
-== 
+== Zakázán
 
 [Direct touch input]
 Active action
-== 
+== Aktivní akce
 
 [Direct touch input]
 Aim
-== 
+== Míření
 
 [Direct touch input]
 Fire
-== 
+== Střelba
 
 [Direct touch input]
 Hook
-== 
+== Hák
 
 Direct touch input while spectating
-== 
+== Přímý dotykový vstup během sledování
 
 Error loading touch controls
-== 
+== Chyba při načítání dotykového ovládání
 
 Could not load touch controls from file. See local console for details.
-== 
+== Nelze načíst dotykové ovládání ze souboru. Podrobnosti naleznete v místní konzoli.
 
 Could not load default touch controls from file. See local console for details.
-== 
+== Nelze načíst výchozí dotykové ovládání ze souboru. Podrobnosti naleznete v místní konzoli.
 
 Could not load touch controls from clipboard. See local console for details.
-== 
+== Nelze načíst dotykové ovládání ze schránky. Podrobnosti naleznete v místní konzoli.
 
 Community
-== 
+== Komunita
 
 [Team status]
 forbidden
-== 
+== zakázány
 
 [Team status]
 solo
-== 
+== sólo
 
 [Team status]
 allowed
-== 
+== povoleny
 
 [Team status]
 required
-== 
+== požadovány
 
 Teams
-== 
+== Týmy
 
 [Team size]
 minimum
-== 
+== minimálně
 
 [Team size]
 maximum
-== 
+== maximálně
 
 Saves file
-== 
+== Soubor s uloženými hrami
 
 Open the saves file
-== 
+== Otevřít soubor s uloženými hrami
 
 This skin name cannot be used.
-== 
+== Tento název skinu nelze použít.
 
 Skin could not be loaded due to an error. Check the local console for details.
-== 
+== Skin se nepodařilo načíst kvůli chybě. Podrobnosti naleznete v místní konzoli.
 
 Skin could not be found.
-== 
+== Skin se nepodařilo najít.
 
 No skins match your filter criteria
-== 
+== Žádné skiny neodpovídají vašim kritériím filtru
 
 Show FPS
-== 
+== Ukázat FPS
 
 Renders your frame rate in the top right
-== 
+== Zobrazí snímkovou frekvenci v pravém horním rohu
 
 Show spectator cursor
-== 
+== Zobrazit kurzor při sledování
 
 Show number of spectators
-== 
+== Zobrazit počet diváků
 
 [Show name plates]
 None
-== 
+== Žádné
 
 [Show name plates]
 Own
-== 
+== Vlastní
 
 [Show name plates]
 Others
-== 
+== Ostatní
 
 [Show name plates]
 All
-== 
+== Všechny
 
 Name plates offset
-== 
+== Odsazení jmenovek
 
 Show friend icon in name plates
-== 
+== Zobrazit ikonu přítele na jmenovkách
 
 Show client IDs in name plates
-== 
+== Zobrazit ID klientů na jmenovkách
 
 Show client IDs on a seperate line
-== 
+== Zobrazit ID klientů na samostatném řádku
 
 Client IDs size
-== 
+== Velikost ID klientů
 
 Hook Strength
-== 
+== Síla háku
 
 Size of hook strength icon and number indicator
-== 
+== Velikost ikony síly háku a číselného ukazatele
 
 Key Presses
-== 
+== Stisknutí kláves
 
 Show players' key presses
-== 
+== Zobrazit stisknuté klávesy hráčů
 
 [Show players' key presses]
 None
-== 
+== Žádné
 
 [Show players' key presses]
 Own
-== 
+== Vlastní
 
 [Show players' key presses]
 Others
-== 
+== Ostatní
 
 [Show players' key presses]
 All
-== 
+== Všechny
 
 Size of key press icons
-== 
+== Velikost ikon stisknutí kláves
 
 Preview player's name plate
-== 
+== Náhled jmenovky hráče
 
 Preview dummy's name plate
-== 
+== Náhled jmenovky dummyho
 
 Width of your own hook collision line
-== 
+== Šířka vlastní čáry kolize háku
 
 Width of others' hook collision line
-== 
+== Šířka ostatních čar kolize háku
 
 Preview 'Hook collisions' being pressed
-== 
+== Náhled stisknutí tlačítka 'Kolize háku'
 
 Dragger Outline Color
-== 
+== Vnější Barva Tahače
 
 Dragger Inner Color
-== 
+== Vnitřní Barva Tahače
 
 AntiPing: prediction margin
-== 
+== AntiPing: marže predikce
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
-== 
+== Server se nepodařilo spustit. Ujistěte se, že jste v nastavení aplikace povolili oznámení, aby server mohl běžet na pozadí.
 
 Aim
-== 
+== Míření
 
 Active: Fire
-== 
+== Aktivní: Střelba
 
 Active: Hook
-== 
+== Aktivní: Hák
