@@ -3,6 +3,7 @@
 #ifndef GAME_MAPITEMS_H
 #define GAME_MAPITEMS_H
 
+#include <base/color.h>
 #include <base/vmath.h>
 
 // layer types
@@ -382,6 +383,9 @@ public:
 	int m_aValues[MAX_CHANNELS]; // 1-4 depending on envelope (22.10 fixed point)
 
 	bool operator<(const CEnvPoint &Other) const { return m_Time < Other.m_Time; }
+
+	ColorRGBA ColorValue() const;
+	void SetColorValue(const ColorRGBA &Color);
 };
 
 // Represents additional envelope point information for CURVETYPE_BEZIER.

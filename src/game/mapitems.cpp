@@ -1,5 +1,18 @@
 #include <game/mapitems.h>
 
+ColorRGBA CEnvPoint::ColorValue() const
+{
+	return ColorRGBA(fx2f(m_aValues[0]), fx2f(m_aValues[1]), fx2f(m_aValues[2]), fx2f(m_aValues[3]));
+}
+
+void CEnvPoint::SetColorValue(const ColorRGBA &Color)
+{
+	m_aValues[0] = f2fx(Color.r);
+	m_aValues[1] = f2fx(Color.g);
+	m_aValues[2] = f2fx(Color.b);
+	m_aValues[3] = f2fx(Color.a);
+}
+
 bool IsValidGameTile(int Index)
 {
 	return (

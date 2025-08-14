@@ -1548,11 +1548,8 @@ void CEditorActionEnvelopeEditPoint::Apply(int Value)
 
 		if(m_pEnv->GetChannels() == 4)
 		{
-			auto *pValues = m_pEnv->m_vPoints[m_PointIndex].m_aValues;
-			const ColorRGBA Color = ColorRGBA(fx2f(pValues[0]), fx2f(pValues[1]), fx2f(pValues[2]), fx2f(pValues[3]));
-
-			m_pEditor->m_ColorPickerPopupContext.m_RgbaColor = Color;
-			m_pEditor->m_ColorPickerPopupContext.m_HslaColor = color_cast<ColorHSLA>(Color);
+			m_pEditor->m_ColorPickerPopupContext.m_RgbaColor = m_pEnv->m_vPoints[m_PointIndex].ColorValue();
+			m_pEditor->m_ColorPickerPopupContext.m_HslaColor = color_cast<ColorHSLA>(m_pEditor->m_ColorPickerPopupContext.m_RgbaColor);
 			m_pEditor->m_ColorPickerPopupContext.m_HsvaColor = color_cast<ColorHSVA>(m_pEditor->m_ColorPickerPopupContext.m_HslaColor);
 		}
 	}
