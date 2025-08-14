@@ -2280,6 +2280,13 @@ void CGameContext::ConPracticeUnEndlessHook(IConsole::IResult *pResult, void *pU
 		ConUnEndlessHook(pResult, pUserData);
 }
 
+void CGameContext::ConPracticeSetSwitch(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
+		ConSetSwitch(pResult, pUserData);
+}
+
 void CGameContext::ConPracticeToggleInvincible(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
