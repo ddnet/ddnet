@@ -308,7 +308,9 @@ const char *CServer::DnsblStateStr(EDnsblState State)
 	case EDnsblState::WHITELISTED:
 		return "white";
 	}
-	return "n/a";
+
+	dbg_assert(false, "unreachable");
+	dbg_break();
 }
 
 bool CServer::IsClientNameAvailable(int ClientId, const char *pNameRequest)
@@ -2303,7 +2305,7 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 	case SERVERINFO_64_LEGACY: Remaining = 24; break;
 	case SERVERINFO_VANILLA: Remaining = VANILLA_MAX_CLIENTS; break;
 	case SERVERINFO_INGAME: Remaining = VANILLA_MAX_CLIENTS; break;
-	default: dbg_assert(0, "caught earlier, unreachable"); return;
+	default: dbg_assert(false, "unreachable"); return;
 	}
 
 	// Use the following strategy for sending:
