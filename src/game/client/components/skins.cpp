@@ -547,7 +547,7 @@ void CSkins::OnUpdate()
 	}
 	m_ContainerUpdateTime = StartTime;
 
-	// Update loaded state of managed skins which are not retrieved with the FindImpl function
+	// Update loaded state of managed skins which are not retrieved with the FindOrNullptr function
 	GameClient()->CollectManagedTeeRenderInfos([&](const char *pSkinName) {
 		// This will update the loaded state of the container
 		dbg_assert(FindContainerOrNullptr(pSkinName) != nullptr, "No skin container found for managed tee render info: %s", pSkinName);
@@ -820,6 +820,23 @@ const CSkin *CSkins::Find(const char *pName)
 
 const CSkins::CSkinContainer *CSkins::FindContainerOrNullptr(const char *pName)
 {
+	const char *pSkinPrefix = SkinPrefix();
+	if(pSkinPrefix[0] != '\0')
+	{
+		char aNameWithPrefix[2 * MAX_SKIN_LENGTH + 2]; // Larger than skin name length to allow IsValidName to check if it's too long
+		str_format(aNameWithPrefix, sizeof(aNameWithPrefix), "%s_%s", pSkinPrefix, pName);
+		// If we find something, use it, otherwise fall back to normal skins.
+		const CSkinContainer *pSkinContainer = FindContainerImpl(aNameWithPrefix);
+		if(pSkinContainer != nullptr && pSkinContainer->State() == CSkinContainer::EState::LOADED)
+		{
+			return pSkinContainer;
+		}
+	}
+	return FindContainerImpl(pName);
+}
+
+const CSkins::CSkinContainer *CSkins::FindContainerImpl(const char *pName)
+{
 	if(!CSkin::IsValidName(pName))
 	{
 		return nullptr;
@@ -839,25 +856,7 @@ const CSkins::CSkinContainer *CSkins::FindContainerOrNullptr(const char *pName)
 	return ExistingSkin->second.get();
 }
 
-const CSkin *CSkins::FindOrNullptr(const char *pName, bool IgnorePrefix)
-{
-	const char *pSkinPrefix = m_aEventSkinPrefix[0] != '\0' ? m_aEventSkinPrefix : g_Config.m_ClSkinPrefix;
-	if(!g_Config.m_ClVanillaSkinsOnly && !IgnorePrefix && pSkinPrefix[0] != '\0')
-	{
-		char aNameWithPrefix[2 * MAX_SKIN_LENGTH + 2]; // Larger than skin name length to allow IsValidName to check if it's too long
-		str_format(aNameWithPrefix, sizeof(aNameWithPrefix), "%s_%s", pSkinPrefix, pName);
-		// If we find something, use it, otherwise fall back to normal skins.
-		const auto *pResult = FindImpl(aNameWithPrefix);
-		if(pResult != nullptr)
-		{
-			return pResult;
-		}
-	}
-
-	return FindImpl(pName);
-}
-
-const CSkin *CSkins::FindImpl(const char *pName)
+const CSkin *CSkins::FindOrNullptr(const char *pName)
 {
 	const CSkinContainer *pSkinContainer = FindContainerOrNullptr(pName);
 	if(pSkinContainer == nullptr || pSkinContainer->m_State != CSkinContainer::EState::LOADED)
@@ -955,6 +954,19 @@ void CSkins::RandomizeSkin(int Dummy)
 	const size_t SkinNameSize = Dummy ? sizeof(g_Config.m_ClDummySkin) : sizeof(g_Config.m_ClPlayerSkin);
 	str_copy(pSkinName, pRandomSkin, SkinNameSize);
 	m_SkinList.ForceRefresh();
+}
+
+const char *CSkins::SkinPrefix() const
+{
+	if(g_Config.m_ClVanillaSkinsOnly)
+	{
+		return "";
+	}
+	if(m_aEventSkinPrefix[0] != '\0')
+	{
+		return m_aEventSkinPrefix;
+	}
+	return g_Config.m_ClSkinPrefix;
 }
 
 void CSkins::CSkinLoadJob::Run()

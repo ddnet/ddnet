@@ -518,7 +518,10 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 		SkinPrefix.HSplitTop(20.0f, &Button, &SkinPrefix);
 		static CLineInput s_SkinPrefixInput(g_Config.m_ClSkinPrefix, sizeof(g_Config.m_ClSkinPrefix));
-		Ui()->DoClearableEditBox(&s_SkinPrefixInput, &Button, 14.0f);
+		if(Ui()->DoClearableEditBox(&s_SkinPrefixInput, &Button, 14.0f))
+		{
+			ShouldRefresh = true;
+		}
 
 		SkinPrefix.HSplitTop(2.0f, nullptr, &SkinPrefix);
 
@@ -531,6 +534,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			if(DoButton_Menu(&s_aPrefixButtons[i], s_apSkinPrefixes[i], 0, &Button))
 			{
 				str_copy(g_Config.m_ClSkinPrefix, s_apSkinPrefixes[i]);
+				ShouldRefresh = true;
 			}
 		}
 	}
