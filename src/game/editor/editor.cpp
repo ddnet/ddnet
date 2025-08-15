@@ -6896,7 +6896,7 @@ void CEditor::RenderEnvelopeEditorColorBar(CUIRect ColorBar, const std::shared_p
 			ColorRGBA StartColor;
 			if(Step == 1 && OverallSectionStartTime == PointStartTime)
 			{
-				StartColor = ColorRGBA(fx2f(PointStart.m_aValues[0]), fx2f(PointStart.m_aValues[1]), fx2f(PointStart.m_aValues[2]), fx2f(PointStart.m_aValues[3]));
+				StartColor = PointStart.ColorValue();
 			}
 			else
 			{
@@ -6911,7 +6911,7 @@ void CEditor::RenderEnvelopeEditorColorBar(CUIRect ColorBar, const std::shared_p
 			}
 			else if(Step == Steps && OverallSectionEndTime == PointEndTime)
 			{
-				EndColor = ColorRGBA(fx2f(PointEnd.m_aValues[0]), fx2f(PointEnd.m_aValues[1]), fx2f(PointEnd.m_aValues[2]), fx2f(PointEnd.m_aValues[3]));
+				EndColor = PointEnd.ColorValue();
 			}
 			else
 			{
