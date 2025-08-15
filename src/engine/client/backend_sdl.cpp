@@ -472,21 +472,35 @@ const SGfxWarningContainer &CCommandProcessor_SDL_GL::GetWarning() const
 
 // ------------ CGraphicsBackend_SDL_GL
 
+#if !defined(CONF_HEADLESS_CLIENT)
 static bool BackendInitGlew(EBackendType BackendType, int &GlewMajor, int &GlewMinor, int &GlewPatch)
 {
 	if(BackendType == BACKEND_TYPE_OPENGL)
 	{
-#ifndef CONF_BACKEND_OPENGL_ES
-		// support graphic cards that are pretty old(and linux)
+#if !defined(CONF_BACKEND_OPENGL_ES)
+		// Support graphic cards that are pretty old (and Linux)
 		glewExperimental = GL_TRUE;
 #ifdef CONF_GLEW_HAS_CONTEXT_INIT
-		if(GLEW_OK != glewContextInit())
-#else
-		GLenum InitResult = glewInit();
-		const char *pVideoDriver = SDL_GetCurrentVideoDriver();
-		if(GLEW_OK != InitResult && pVideoDriver && !str_comp(pVideoDriver, "wayland") && GLEW_ERROR_NO_GLX_DISPLAY != InitResult)
-#endif
+		const GLenum InitResult = glewContextInit();
+		if(InitResult != GLEW_OK)
+		{
+			log_error("gfx", "Unable to init glew (glewContextInit): %s", glewGetErrorString(InitResult));
 			return false;
+		}
+#else
+		const GLenum InitResult = glewInit();
+		if(InitResult != GLEW_OK)
+		{
+			// With wayland the glewInit function is allowed to fail with GLEW_ERROR_NO_GLX_DISPLAY,
+			// as it will already have initialized the context with glewContextInit internally.
+			const char *pVideoDriver = SDL_GetCurrentVideoDriver();
+			if(pVideoDriver == nullptr || str_comp(pVideoDriver, "wayland") != 0 || InitResult != GLEW_ERROR_NO_GLX_DISPLAY)
+			{
+				log_error("gfx", "Unable to init glew (glewInit): %s", glewGetErrorString(InitResult));
+				return false;
+			}
+		}
+#endif
 
 #ifdef GLEW_VERSION_4_6
 		if(GLEW_VERSION_4_6)
@@ -622,107 +636,108 @@ static bool BackendInitGlew(EBackendType BackendType, int &GlewMajor, int &GlewM
 		GlewMajor = 3;
 		GlewMinor = 0;
 		GlewPatch = 0;
-
 		return true;
 	}
+	else
+	{
+		dbg_assert(false, "Invalid backend type for glew: %d", (int)BackendType);
+	}
 
-	return true;
+	return false;
 }
 
 static int IsVersionSupportedGlew(EBackendType BackendType, int VersionMajor, int VersionMinor, int VersionPatch, int GlewMajor, int GlewMinor, int GlewPatch)
 {
-	int InitError = 0;
-
 	if(BackendType == BACKEND_TYPE_OPENGL)
 	{
 		if(VersionMajor >= 4 && GlewMajor < 4)
 		{
-			InitError = -1;
+			return -1;
 		}
 		else if(VersionMajor >= 3 && GlewMajor < 3)
 		{
-			InitError = -1;
+			return -1;
 		}
 		else if(VersionMajor == 3 && GlewMajor == 3)
 		{
 			if(VersionMinor >= 3 && GlewMinor < 3)
 			{
-				InitError = -1;
+				return -1;
 			}
 			if(VersionMinor >= 2 && GlewMinor < 2)
 			{
-				InitError = -1;
+				return -1;
 			}
 			if(VersionMinor >= 1 && GlewMinor < 1)
 			{
-				InitError = -1;
+				return -1;
 			}
 			if(VersionMinor >= 0 && GlewMinor < 0)
 			{
-				InitError = -1;
+				return -1;
 			}
 		}
 		else if(VersionMajor >= 2 && GlewMajor < 2)
 		{
-			InitError = -1;
+			return -1;
 		}
 		else if(VersionMajor == 2 && GlewMajor == 2)
 		{
 			if(VersionMinor >= 1 && GlewMinor < 1)
 			{
-				InitError = -1;
+				return -1;
 			}
 			if(VersionMinor >= 0 && GlewMinor < 0)
 			{
-				InitError = -1;
+				return -1;
 			}
 		}
 		else if(VersionMajor >= 1 && GlewMajor < 1)
 		{
-			InitError = -1;
+			return -1;
 		}
 		else if(VersionMajor == 1 && GlewMajor == 1)
 		{
 			if(VersionMinor >= 5 && GlewMinor < 5)
 			{
-				InitError = -1;
+				return -1;
 			}
 			if(VersionMinor >= 4 && GlewMinor < 4)
 			{
-				InitError = -1;
+				return -1;
 			}
 			if(VersionMinor >= 3 && GlewMinor < 3)
 			{
-				InitError = -1;
+				return -1;
 			}
 			if(VersionMinor >= 2 && GlewMinor < 2)
 			{
-				InitError = -1;
+				return -1;
 			}
 			else if(VersionMinor == 2 && GlewMinor == 2)
 			{
 				if(VersionPatch >= 1 && GlewPatch < 1)
 				{
-					InitError = -1;
+					return -1;
 				}
 				if(VersionPatch >= 0 && GlewPatch < 0)
 				{
-					InitError = -1;
+					return -1;
 				}
 			}
 			if(VersionMinor >= 1 && GlewMinor < 1)
 			{
-				InitError = -1;
+				return -1;
 			}
 			if(VersionMinor >= 0 && GlewMinor < 0)
 			{
-				InitError = -1;
+				return -1;
 			}
 		}
 	}
-
-	return InitError;
+	return 0;
 }
+#endif // !CONF_HEADLESS_CLIENT
 
 EBackendType CGraphicsBackend_SDL_GL::DetectBackend()
 {
@@ -1102,13 +1117,15 @@ CGraphicsBackend_SDL_GL::CGraphicsBackend_SDL_GL(TTranslateFunc &&TranslateFunc)
 int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, int *pHeight, int *pRefreshRate, int *pFsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, IStorage *pStorage)
 {
 #if defined(CONF_HEADLESS_CLIENT)
+	m_BackendType = BACKEND_TYPE_OPENGL;
+	g_Config.m_GfxGLMajor = 0;
+	g_Config.m_GfxGLMinor = 0;
+	g_Config.m_GfxGLPatch = 0;
 	int InitError = 0;
-	const char *pErrorStr = NULL;
 	int GlewMajor = 0;
 	int GlewMinor = 0;
 	int GlewPatch = 0;
-	IsVersionSupportedGlew(m_BackendType, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch, GlewMajor, GlewMinor, GlewPatch);
-	BackendInitGlew(m_BackendType, GlewMajor, GlewMinor, GlewPatch);
+	log_info("gfx", "Created headless context");
 #else
 	// print sdl version
 	{
@@ -1141,29 +1158,24 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	EBackendType OldBackendType = m_BackendType;
 	m_BackendType = DetectBackend();
 	// little fallback for Vulkan
-	if(OldBackendType != BACKEND_TYPE_AUTO)
+	if(OldBackendType != BACKEND_TYPE_AUTO &&
+		m_BackendType == BACKEND_TYPE_VULKAN)
 	{
-		if(m_BackendType == BACKEND_TYPE_VULKAN)
-		{
-			// try default opengl settings
-			str_copy(g_Config.m_GfxBackend, "OpenGL");
-			g_Config.m_GfxGLMajor = 3;
-			g_Config.m_GfxGLMinor = 0;
-			g_Config.m_GfxGLPatch = 0;
-			// do another analysis round too, just in case
-			g_Config.m_Gfx3DTextureAnalysisRan = 0;
-			g_Config.m_GfxDriverIsBlocked = 0;
-
-			SDL_setenv("DDNET_DRIVER", "OpenGL", 1);
-			m_BackendType = DetectBackend();
-		}
+		// try default opengl settings
+		str_copy(g_Config.m_GfxBackend, "OpenGL");
+		g_Config.m_GfxGLMajor = 3;
+		g_Config.m_GfxGLMinor = 0;
+		g_Config.m_GfxGLPatch = 0;
+		// do another analysis round too, just in case
+		g_Config.m_Gfx3DTextureAnalysisRan = 0;
+		g_Config.m_GfxDriverIsBlocked = 0;
+		m_BackendType = DetectBackend();
 	}
 
 	ClampDriverVersion(m_BackendType);
 
-	bool UseModernGL = IsModernAPI(m_BackendType);
-
-	bool IsOpenGLFamilyBackend = m_BackendType == BACKEND_TYPE_OPENGL || m_BackendType == BACKEND_TYPE_OPENGL_ES;
+	const bool UseModernGL = IsModernAPI(m_BackendType);
+	const bool IsOpenGLFamilyBackend = m_BackendType == BACKEND_TYPE_OPENGL || m_BackendType == BACKEND_TYPE_OPENGL_ES;
 
 	if(IsOpenGLFamilyBackend)
 	{
@@ -1346,14 +1358,11 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 			SDL_GL_DeleteContext(m_GLContext);
 			SDL_DestroyWindow(m_pWindow);
 			m_pWindow = nullptr;
-			return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_UNKNOWN;
+			return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_GLEW_INIT_FAILED;
 		}
 	}
 
-	int InitError = 0;
-	const char *pErrorStr = nullptr;
-
-	InitError = IsVersionSupportedGlew(m_BackendType, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch, GlewMajor, GlewMinor, GlewPatch);
+	int InitError = IsVersionSupportedGlew(m_BackendType, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch, GlewMajor, GlewMinor, GlewPatch);
 
 	// SDL_GL_GetDrawableSize reports HiDPI resolution even with SDL_WINDOW_ALLOW_HIGHDPI not set, which is wrong
 	if(SdlFlags & SDL_WINDOW_ALLOW_HIGHDPI)
@@ -1392,7 +1401,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 
 		return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_GL_VERSION_FAILED;
 	}
-#endif // CONF_HEADLESS_CLIENT
+#endif // !CONF_HEADLESS_CLIENT
 
 	// start the command processor
 	dbg_assert(m_pProcessor == nullptr, "Processor was not cleaned up properly.");
@@ -1422,6 +1431,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	WaitForIdle();
 	CmdBuffer.Reset();
 
+	const char *pErrorStr = nullptr;
 	if(InitError == 0)
 	{
 		CCommandProcessorFragment_GLBase::SCommand_Init CmdGL;
@@ -1508,7 +1518,6 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		CCommandBuffer::SCommand_Update_Viewport CmdSDL2;
 		CmdSDL2.m_X = 0;
 		CmdSDL2.m_Y = 0;
-
 		CmdSDL2.m_Width = *pCurrentWidth;
 		CmdSDL2.m_Height = *pCurrentHeight;
 		CmdSDL2.m_ByResize = true;
@@ -1518,7 +1527,6 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		CmdBuffer.Reset();
 	}
 
-	// return
 	return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_NONE;
 }
 
