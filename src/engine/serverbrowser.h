@@ -9,6 +9,8 @@
 #include <engine/map.h>
 #include <engine/shared/protocol.h>
 
+#include <game/generated/protocol7.h>
+
 #include "kernel.h"
 
 #include <unordered_set>
@@ -70,14 +72,16 @@ public:
 		int m_Score;
 		bool m_Player;
 		bool m_Afk;
-
-		// skin info
+		int m_FriendState;
+		// skin info 0.6
 		char m_aSkin[MAX_SKIN_LENGTH];
 		bool m_CustomSkinColors;
 		int m_CustomSkinColorBody;
 		int m_CustomSkinColorFeet;
-
-		int m_FriendState;
+		// skin info 0.7
+		char m_aaSkin7[protocol7::NUM_SKINPARTS][protocol7::MAX_SKIN_LENGTH];
+		bool m_aUseCustomSkinColor7[protocol7::NUM_SKINPARTS];
+		int m_aCustomSkinColor7[protocol7::NUM_SKINPARTS];
 	};
 
 	int m_ServerIndex;
