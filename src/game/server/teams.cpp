@@ -933,8 +933,8 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPrimaryPlayer, CPlayer *pTargetPla
 	CSaveTee SecondarySavedTee;
 	SecondarySavedTee.Save(pTargetPlayer->GetCharacter());
 
-	PrimarySavedTee.Load(pTargetPlayer->GetCharacter(), Team, true);
-	SecondarySavedTee.Load(pPrimaryPlayer->GetCharacter(), Team, true);
+	PrimarySavedTee.Load(pTargetPlayer->GetCharacter());
+	SecondarySavedTee.Load(pPrimaryPlayer->GetCharacter());
 
 	if(Team >= 1 && !m_aTeamFlock[Team])
 	{
