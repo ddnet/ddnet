@@ -92,6 +92,9 @@ CCamera *CMapLayers::GetCurCamera()
 void CMapLayers::OnMapLoad()
 {
 	m_pEnvelopePoints = std::make_shared<CMapBasedEnvelopePointAccess>(m_pLayers->Map());
+	FRenderUploadCallback FRenderCallback = [&](const char *pTitle, const char *pMessage, int IncreaseCounter) { GameClient()->m_Menus.RenderLoading(pTitle, pMessage, IncreaseCounter); };
+	auto FRenderCallbackOptional = std::make_optional<FRenderUploadCallback>(FRenderCallback);
+
 	bool PassedGameLayer = false;
 	Unload();
 
@@ -103,7 +106,7 @@ void CMapLayers::OnMapLoad()
 	{
 		CMapItemGroup *pGroup = m_pLayers->GetGroup(g);
 		std::unique_ptr<CRenderLayer> pRenderLayerGroup = std::make_unique<CRenderLayerGroup>(g, pGroup);
-		pRenderLayerGroup->OnInit(GameClient(), m_pLayers->Map(), m_pImages, m_pEnvelopePoints, m_OnlineOnly);
+		pRenderLayerGroup->OnInit(Graphics(), TextRender(), RenderMap(), this, m_pLayers->Map(), m_pImages, m_pEnvelopePoints, FRenderCallbackOptional);
 		if(!pRenderLayerGroup->IsValid())
 		{
 			dbg_msg("maplayers", "error group was null, group number = %d, total groups = %d", g, m_pLayers->NumGroups());
@@ -118,12 +121,12 @@ void CMapLayers::OnMapLoad()
 			int LayerType = GetLayerType(pLayer);
 			PassedGameLayer |= LayerType == LAYER_GAME;
 
-			if(m_Type == TYPE_BACKGROUND_FORCE || m_Type == TYPE_BACKGROUND)
+			if(m_Type == ERenderType::RENDERTYPE_BACKGROUND_FORCE || m_Type == ERenderType::RENDERTYPE_BACKGROUND)
 			{
 				if(PassedGameLayer)
 					return;
 			}
-			else if(m_Type == TYPE_FOREGROUND)
+			else if(m_Type == ERenderType::RENDERTYPE_FOREGROUND)
 			{
 				if(!PassedGameLayer)
 					continue;
@@ -207,7 +210,7 @@ void CMapLayers::OnMapLoad()
 			// just ignore invalid layers from rendering
 			if(pRenderLayer)
 			{
-				pRenderLayer->OnInit(GameClient(), m_pLayers->Map(), m_pImages, m_pEnvelopePoints, m_OnlineOnly);
+				pRenderLayer->OnInit(Graphics(), TextRender(), RenderMap(), this, m_pLayers->Map(), m_pImages, m_pEnvelopePoints, FRenderCallbackOptional);
 				if(pRenderLayer->IsValid())
 				{
 					pRenderLayer->Init();
@@ -227,7 +230,7 @@ void CMapLayers::OnRender()
 	Graphics()->GetScreen(&Screen.x, &Screen.y, &Screen.w, &Screen.h);
 
 	// dynamic parameters for ingame rendering
-	m_Params.m_EntityOverlayVal = m_Type == TYPE_FULL_DESIGN ? 0 : g_Config.m_ClOverlayEntities;
+	m_Params.m_EntityOverlayVal = m_Type == RENDERTYPE_FULL_DESIGN ? 0 : g_Config.m_ClOverlayEntities;
 	m_Params.m_Center = GetCurCamera()->m_Center;
 	m_Params.m_Zoom = GetCurCamera()->m_Zoom;
 	m_Params.m_RenderText = g_Config.m_ClTextEntities;
@@ -249,7 +252,7 @@ void CMapLayers::OnRender()
 	Graphics()->ClipDisable();
 
 	// don't reset screen on background
-	if(m_Type != TYPE_BACKGROUND && m_Type != TYPE_BACKGROUND_FORCE)
+	if(m_Type != ERenderType::RENDERTYPE_BACKGROUND && m_Type != ERenderType::RENDERTYPE_BACKGROUND_FORCE)
 	{
 		// reset the screen like it was before
 		Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);

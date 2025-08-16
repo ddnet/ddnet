@@ -2396,8 +2396,6 @@ if(CLIENT)
     components/players.h
     components/race_demo.cpp
     components/race_demo.h
-    components/render_layer.cpp
-    components/render_layer.h
     components/scoreboard.cpp
     components/scoreboard.h
     components/skins.cpp
@@ -2543,6 +2541,11 @@ if(CLIENT)
     tileart.cpp
   )
   set_src(GAME_MAP GLOB_RECURSE src/game/map
+    render_component.cpp
+    render_component.h
+    render_interfaces.h
+    render_layer.cpp
+    render_layer.h
     render_map.cpp
     render_map.h
   )

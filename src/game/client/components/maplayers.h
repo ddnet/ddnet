@@ -2,10 +2,10 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_MAPLAYERS_H
 #define GAME_CLIENT_COMPONENTS_MAPLAYERS_H
-#include <game/client/component.h>
-#include <game/map/render_map.h>
 
-#include "render_layer.h"
+#include <game/client/component.h>
+#include <game/map/render_layer.h>
+
 #include <cstdint>
 #include <memory>
 #include <vector>
@@ -14,24 +14,16 @@ class CCamera;
 class CLayers;
 class CMapImages;
 class ColorRGBA;
+
 class CMapItemGroup;
 class CMapItemLayer;
 class CMapItemLayerTilemap;
 class CMapItemLayerQuads;
 
-class CMapLayers : public CComponent
+class CMapLayers : public CComponent, public IEnvelopeEval
 {
 	friend class CBackground;
 	friend class CMenuBackground;
-	friend class CRenderLayer;
-	friend class CRenderLayerTile;
-	friend class CRenderLayerQuads;
-	friend class CRenderLayerEntityGame;
-	friend class CRenderLayerEntityFront;
-	friend class CRenderLayerEntityTele;
-	friend class CRenderLayerEntitySpeedup;
-	friend class CRenderLayerEntitySwitch;
-	friend class CRenderLayerEntityTune;
 
 	CLayers *m_pLayers;
 	CMapImages *m_pImages;
@@ -41,17 +33,8 @@ class CMapLayers : public CComponent
 	bool m_OnlineOnly;
 
 public:
-	enum
-	{
-		TYPE_BACKGROUND = 0,
-		TYPE_BACKGROUND_FORCE,
-		TYPE_FOREGROUND,
-		TYPE_FULL_DESIGN,
-		TYPE_ALL = -1,
-	};
-
 	static void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels, IMap *pMap, CMapBasedEnvelopePointAccess *pEnvelopePoints, IClient *pClient, CGameClient *pGameClient, bool OnlineOnly);
-	void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels);
+	void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels) override;
 
 	CMapLayers(int Type, bool OnlineOnly = true);
 	int Sizeof() const override { return sizeof(*this); }

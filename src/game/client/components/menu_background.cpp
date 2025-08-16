@@ -52,7 +52,7 @@ std::array<vec2, CMenuBackground::NUM_POS> GenerateMenuBackgroundPositions()
 }
 
 CMenuBackground::CMenuBackground() :
-	CBackground(CMapLayers::TYPE_FULL_DESIGN, false)
+	CBackground(ERenderType::RENDERTYPE_FULL_DESIGN, false)
 {
 	m_RotationCenter = vec2(0.0f, 0.0f);
 	m_AnimationStartPos = vec2(0.0f, 0.0f);
