@@ -1,7 +1,8 @@
 #include <base/log.h>
-
 #include <engine/engine.h>
 #include <engine/external/json-parser/json.h>
+#include <engine/shared/config.h>
+
 #include <optional>
 #include <utility>
 
@@ -35,6 +36,13 @@ static void ReplaceWords(char *pBuffer, const std::vector<std::string> &vWords, 
 	}
 }
 
+void CCensor::ConchainRefreshCensorList(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments() && str_comp(g_Config.m_ClCensorUrl, pResult->GetString(1)))
+		((CCensor *)pUserData)->Reset();
+}
+
 CCensor::CCensor()
 {
 	m_vCensoredWords = {};
@@ -43,6 +51,11 @@ CCensor::CCensor()
 void CCensor::OnInit()
 {
 	Reset();
+}
+
+void CCensor::OnConsoleInit()
+{
+	Console()->Chain("cl_censor_url", ConchainRefreshCensorList, this);
 }
 
 void CCensor::Reset()
