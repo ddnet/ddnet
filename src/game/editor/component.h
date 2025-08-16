@@ -1,23 +1,41 @@
 #ifndef GAME_EDITOR_COMPONENT_H
 #define GAME_EDITOR_COMPONENT_H
 
-#include "editor_object.h"
+#include <engine/input.h>
 
+#include <game/client/ui_rect.h>
+#include <game/editor/editor_object.h>
+
+#include <functional>
 #include <vector>
 
 class CEditorComponent : public CEditorObject
 {
 public:
 	/**
-	 * Gets called before `OnRender`. Should return true
-	 * if the event was consumed. By default the events
-	 * are forwarded to the subcomponents.
+	 * Initialize the component and interface pointers.
+	 * Needs to be the first function that is called.
+	 * The default implentation also resets the component.
 	 */
-	bool OnInput(const IInput::CEvent &Event) override;
+	void OnInit(CEditor *pEditor) override;
+
+	virtual void OnReset();
+
+	virtual void OnMapLoad();
 
 	/**
-	 * Initialise all registered subcomponents.
-	 * Needs to be called after the interfaces have been initialised.
+	 * Gets called before @link OnRender @endlink. Should return `true`
+	 * if the event was consumed.
+	 */
+	virtual bool OnInput(const IInput::CEvent &Event);
+
+	virtual void OnUpdate();
+
+	virtual void OnRender(CUIRect View);
+
+	/**
+	 * Initialize all registered subcomponents.
+	 * Needs to be called after the interfaces have been initialized.
 	 */
 	void InitSubComponents();
 
