@@ -1532,29 +1532,32 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 
 int CGraphicsBackend_SDL_GL::Shutdown()
 {
-	// issue a shutdown command
-	CCommandBuffer CmdBuffer(1024, 512);
-	CCommandProcessorFragment_GLBase::SCommand_Shutdown CmdGL;
-	CmdBuffer.AddCommandUnsafe(CmdGL);
-	RunBuffer(&CmdBuffer);
-	WaitForIdle();
-	CmdBuffer.Reset();
+	if(m_pProcessor != nullptr)
+	{
+		// issue a shutdown command
+		CCommandBuffer CmdBuffer(1024, 512);
+		CCommandProcessorFragment_GLBase::SCommand_Shutdown CmdGL;
+		CmdBuffer.AddCommandUnsafe(CmdGL);
+		RunBuffer(&CmdBuffer);
+		WaitForIdle();
+		CmdBuffer.Reset();
 
-	CCommandProcessorFragment_SDL::SCommand_Shutdown Cmd;
-	CmdBuffer.AddCommandUnsafe(Cmd);
-	RunBuffer(&CmdBuffer);
-	WaitForIdle();
-	CmdBuffer.Reset();
+		CCommandProcessorFragment_SDL::SCommand_Shutdown Cmd;
+		CmdBuffer.AddCommandUnsafe(Cmd);
+		RunBuffer(&CmdBuffer);
+		WaitForIdle();
+		CmdBuffer.Reset();
 
-	CCommandProcessorFragment_GLBase::SCommand_PostShutdown CmdPost;
-	CmdBuffer.AddCommandUnsafe(CmdPost);
-	RunBufferSingleThreadedUnsafe(&CmdBuffer);
-	CmdBuffer.Reset();
+		CCommandProcessorFragment_GLBase::SCommand_PostShutdown CmdPost;
+		CmdBuffer.AddCommandUnsafe(CmdPost);
+		RunBufferSingleThreadedUnsafe(&CmdBuffer);
+		CmdBuffer.Reset();
 
-	// stop and delete the processor
-	StopProcessor();
-	delete m_pProcessor;
-	m_pProcessor = nullptr;
+		// stop and delete the processor
+		StopProcessor();
+		delete m_pProcessor;
+		m_pProcessor = nullptr;
+	}
 
 	if(m_GLContext != nullptr)
 		SDL_GL_DeleteContext(m_GLContext);

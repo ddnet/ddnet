@@ -3063,11 +3063,21 @@ void CClient::Run()
 	m_pGraphics = CreateEngineGraphicsThreaded();
 	Kernel()->RegisterInterface(m_pGraphics); // IEngineGraphics
 	Kernel()->RegisterInterface(static_cast<IGraphics *>(m_pGraphics), false);
-	if(m_pGraphics->Init() != 0)
 	{
-		log_error("client", "couldn't init graphics");
-		ShowMessageBox({.m_pTitle = "Graphics Error", .m_pMessage = "The graphics could not be initialized."});
-		return;
+		CMemoryLogger MemoryLogger;
+		MemoryLogger.SetParent(log_get_scope_logger());
+		bool Success;
+		{
+			CLogScope LogScope(&MemoryLogger);
+			Success = m_pGraphics->Init() == 0;
+		}
+		if(!Success)
+		{
+			log_error("client", "Failed to initialize the graphics (see details above)");
+			std::string Message = std::string("Failed to initialize the graphics. See details below.\n\n") + MemoryLogger.ConcatenatedLines();
+			ShowMessageBox({.m_pTitle = "Graphics Error", .m_pMessage = Message.c_str()});
+			return;
+		}
 	}
 
 	// make sure the first frame just clears everything to prevent undesired colors when waiting for io
@@ -4763,7 +4773,7 @@ int main(int argc, const char **argv)
 		if(!pStorage)
 		{
 			log_error("client", "Failed to initialize the storage location (see details above)");
-			std::string Message = "Failed to initialize the storage location. See details below.\n\n" + MemoryLogger.ConcatenatedLines();
+			std::string Message = std::string("Failed to initialize the storage location. See details below.\n\n") + MemoryLogger.ConcatenatedLines();
 			pClient->ShowMessageBox({.m_pTitle = "Storage Error", .m_pMessage = Message.c_str()});
 			PerformAllCleanup();
 			return -1;
