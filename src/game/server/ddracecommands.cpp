@@ -4,6 +4,7 @@
 #include <engine/antibot.h>
 
 #include <engine/shared/config.h>
+#include <game/mapitems.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamemodes/DDRace.h>
 #include <game/server/player.h>
@@ -334,6 +335,31 @@ void CGameContext::ConUnEndlessJump(IConsole::IResult *pResult, void *pUserData)
 	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
 	if(pChr)
 		pChr->SetEndlessJump(false);
+}
+
+void CGameContext::ConSetSwitch(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
+	if(!pChr)
+		return;
+	int Team = pChr->Team();
+	int Switch = pResult->GetInteger(0);
+	bool State = pResult->GetInteger(1) != 0;
+	if(!in_range(Switch, (int)pSelf->Switchers().size() - 1))
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "invalid switch id");
+		return;
+	}
+	int EndTick = 0;
+	if(pResult->NumArguments() == 3)
+		EndTick = pSelf->Server()->Tick() + 1 + pResult->GetInteger(2) * pSelf->Server()->TickSpeed();
+	pSelf->Switchers()[Switch].m_aStatus[Team] = State;
+	pSelf->Switchers()[Switch].m_aEndTick[Team] = EndTick;
+	if(State)
+		pSelf->Switchers()[Switch].m_aType[Team] = EndTick ? TILE_SWITCHTIMEDOPEN : TILE_SWITCHOPEN;
+	else
+		pSelf->Switchers()[Switch].m_aType[Team] = EndTick ? TILE_SWITCHTIMEDCLOSE : TILE_SWITCHCLOSE;
 }
 
 void CGameContext::ConUnWeapons(IConsole::IResult *pResult, void *pUserData)
