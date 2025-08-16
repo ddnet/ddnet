@@ -1004,7 +1004,7 @@ void CSkins::CSkinDownloadJob::Run()
 	EscapeUrl(aEscapedName, m_aName);
 
 	char aUrl[IO_MAX_PATH_LENGTH];
-	str_format(aUrl, sizeof(aUrl), "%s%s.png", pBaseUrl, aEscapedName);
+	str_format(aUrl, sizeof(aUrl), "%s%s%s.png", pBaseUrl, str_endswith(pBaseUrl, "/") ? "" : "/", aEscapedName);
 
 	char aPathReal[IO_MAX_PATH_LENGTH];
 	str_format(aPathReal, sizeof(aPathReal), "downloadedskins/%s.png", m_aName);
