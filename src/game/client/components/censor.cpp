@@ -90,6 +90,12 @@ std::optional<std::vector<std::string>> CCensor::LoadCensorList(const char *pFil
 	pData = json_parse_ex(&JsonSettings, static_cast<json_char *>(pFileData), FileSize, aError);
 	free(pFileData);
 
+	if(!pData)
+	{
+		log_error("censor", "loaded file doesn't have the correct format: invalid json");
+		return std::nullopt;
+	}
+
 	if(pData->type != json_object)
 	{
 		log_error("censor", "loaded file doesn't have the correct format: not an object");
