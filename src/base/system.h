@@ -997,7 +997,7 @@ int net_socket_type(NETSOCKET sock);
  *
  * @param bindaddr Address to bind the socket to.
  *
- * @return On success it returns an handle to the socket. On failure it returns `NETSOCKET_INVALID`
+ * @return On success it returns an handle to the socket. On failure it returns `nullptr`.
  */
 NETSOCKET net_udp_create(NETADDR bindaddr);
 
@@ -1050,7 +1050,7 @@ void net_udp_close(NETSOCKET sock);
  *
  * @param bindaddr Address to bind the socket to.
  *
- * @return On success it returns an handle to the socket. On failure it returns NETSOCKET_INVALID.
+ * @return On success it returns an handle to the socket. On failure it returns `nullptr`.
  */
 NETSOCKET net_tcp_create(NETADDR bindaddr);
 
