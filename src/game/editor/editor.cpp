@@ -3573,23 +3573,6 @@ void CEditor::DoMapEditor(CUIRect View)
 			}
 		}
 
-		if(Ui()->CheckActiveItem(&m_MapEditorId) && m_pContainerPanned == nullptr)
-		{
-			// release mouse
-			if(!Ui()->MouseButton(0))
-			{
-				if(s_Operation == OP_BRUSH_DRAW)
-				{
-					std::shared_ptr<IEditorAction> Action = std::make_shared<CEditorBrushDrawAction>(this, m_SelectedGroup);
-
-					if(!Action->IsEmpty()) // Avoid recording tile draw action when placing quads only
-						m_EditorHistory.RecordAction(Action);
-				}
-
-				s_Operation = OP_NONE;
-				Ui()->SetActiveItem(nullptr);
-			}
-		}
 		if(!Input()->ModifierIsPressed() && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr)
 		{
 			float PanSpeed = Input()->ShiftIsPressed() ? 200.0f : 64.0f;
@@ -3603,11 +3586,20 @@ void CEditor::DoMapEditor(CUIRect View)
 				MapView()->OffsetWorld({0, PanSpeed * m_MouseWorldScale});
 		}
 	}
-	else if(Ui()->CheckActiveItem(&m_MapEditorId) && m_pContainerPanned == nullptr)
+
+	if(Ui()->CheckActiveItem(&m_MapEditorId) && m_pContainerPanned == nullptr)
 	{
 		// release mouse
 		if(!Ui()->MouseButton(0))
 		{
+			if(s_Operation == OP_BRUSH_DRAW)
+			{
+				std::shared_ptr<IEditorAction> pAction = std::make_shared<CEditorBrushDrawAction>(this, m_SelectedGroup);
+
+				if(!pAction->IsEmpty()) // Avoid recording tile draw action when placing quads only
+					m_EditorHistory.RecordAction(pAction);
+			}
+
 			s_Operation = OP_NONE;
 			Ui()->SetActiveItem(nullptr);
 		}
