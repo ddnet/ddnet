@@ -41,12 +41,15 @@ private:
 
 	std::shared_ptr<CBlacklistDownloadJob> m_pBlackListDownloadJob = nullptr;
 
+	static void ConchainRefreshCensorList(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+
 public:
 	CCensor();
 	int Sizeof() const override { return sizeof(*this); }
 
 	void Reset();
 	void OnInit() override;
+	void OnConsoleInit() override;
 	void OnRender() override;
 
 	std::optional<std::vector<std::string>> LoadCensorList(const char *pFilePath) const;
