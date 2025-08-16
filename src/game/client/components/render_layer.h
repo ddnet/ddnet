@@ -208,8 +208,9 @@ class CRenderLayerQuads : public CRenderLayer
 {
 public:
 	CRenderLayerQuads(int GroupId, int LayerId, IGraphics::CTextureHandle TextureHandle, int Flags, CMapItemLayerQuads *pLayerQuads);
+	void OnInit(CGameClient *pGameClient, IMap *pMap, CMapImages *pMapImages, std::shared_ptr<CMapBasedEnvelopePointAccess> &pEvelopePoints, bool OnlineOnly) override;
 	virtual void Init() override;
-	bool IsValid() const override { return m_pLayerQuads->m_NumQuads > 0; }
+	bool IsValid() const override { return m_pLayerQuads->m_NumQuads > 0 && m_pQuads; }
 	virtual void Render(const CRenderLayerParams &Params) override;
 	virtual bool DoRender(const CRenderLayerParams &Params) const override;
 	void Unload() override;
@@ -252,6 +253,8 @@ protected:
 		float m_ClipWidth;
 		float m_ClipHeight;
 	} m_QuadRenderGroup;
+
+	CQuad *m_pQuads;
 
 private:
 	IGraphics::CTextureHandle m_TextureHandle;
