@@ -817,7 +817,7 @@ void CMenus::RenderServerInfoMotd(CUIRect Motd)
 	if(!m_MotdTextContainerIndex.Valid() || s_MotdLastUpdateTime == -1 || s_MotdLastUpdateTime != GameClient()->m_Motd.ServerMotdUpdateTime())
 	{
 		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, MotdFontSize, TEXTFLAG_RENDER);
+		Cursor.m_FontSize = MotdFontSize;
 		Cursor.m_LineWidth = Motd.w;
 		TextRender()->RecreateTextContainer(m_MotdTextContainerIndex, &Cursor, GameClient()->m_Motd.ServerMotd());
 		s_MotdHeight = Cursor.Height();

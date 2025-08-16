@@ -260,7 +260,7 @@ protected:
 		else
 			str_format(m_aText, sizeof(m_aText), "%d:", m_ClientId);
 		CTextCursor Cursor;
-		This.TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, m_FontSize, TEXTFLAG_RENDER);
+		Cursor.m_FontSize = m_FontSize;
 		This.TextRender()->CreateOrAppendTextContainer(m_TextContainerIndex, &Cursor, m_aText);
 	}
 
@@ -291,7 +291,7 @@ protected:
 		m_FontSize = Data.m_FontSize;
 		CTextCursor Cursor;
 		This.TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
-		This.TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, m_FontSize, TEXTFLAG_RENDER);
+		Cursor.m_FontSize = m_FontSize;
 		This.TextRender()->CreateOrAppendTextContainer(m_TextContainerIndex, &Cursor, FontIcons::FONT_ICON_HEART);
 		This.TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 	}
@@ -324,7 +324,7 @@ protected:
 		m_FontSize = Data.m_FontSize;
 		str_copy(m_aText, Data.m_pName, sizeof(m_aText));
 		CTextCursor Cursor;
-		This.TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, m_FontSize, TEXTFLAG_RENDER);
+		Cursor.m_FontSize = m_FontSize;
 		This.TextRender()->CreateOrAppendTextContainer(m_TextContainerIndex, &Cursor, m_aText);
 	}
 
@@ -353,7 +353,7 @@ protected:
 		m_FontSize = Data.m_FontSizeClan;
 		str_copy(m_aText, Data.m_pClan, sizeof(m_aText));
 		CTextCursor Cursor;
-		This.TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, m_FontSize, TEXTFLAG_RENDER);
+		Cursor.m_FontSize = m_FontSize;
 		This.TextRender()->CreateOrAppendTextContainer(m_TextContainerIndex, &Cursor, m_aText);
 	}
 
@@ -433,7 +433,7 @@ protected:
 		m_StrongWeakId = Data.m_HookStrongWeakId;
 		str_format(m_aText, sizeof(m_aText), "%d", m_StrongWeakId);
 		CTextCursor Cursor;
-		This.TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, m_FontSize, TEXTFLAG_RENDER);
+		Cursor.m_FontSize = m_FontSize;
 		This.TextRender()->CreateOrAppendTextContainer(m_TextContainerIndex, &Cursor, m_aText);
 	}
 

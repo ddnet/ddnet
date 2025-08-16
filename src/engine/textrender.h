@@ -206,85 +206,50 @@ struct STextColorSplit
 class CTextCursor
 {
 public:
-	int m_Flags;
-	int m_LineCount;
-	int m_GlyphCount;
-	int m_CharCount;
-	int m_MaxLines;
+	int m_Flags = TEXTFLAG_RENDER;
+	int m_LineCount = 1;
+	int m_GlyphCount = 0;
+	int m_CharCount = 0;
+	int m_MaxLines = 0;
 
-	float m_StartX;
-	float m_StartY;
-	float m_LineWidth;
-	float m_X, m_Y;
-	float m_MaxCharacterHeight;
-	float m_LongestLineWidth;
+	float m_StartX = 0.0f;
+	float m_StartY = 0.0f;
+	float m_LineWidth = -1.0f;
+	float m_X = 0.0f;
+	float m_Y = 0.0f;
+	float m_MaxCharacterHeight = 0.0f;
+	float m_LongestLineWidth = 0.0f;
 
-	float m_FontSize;
-	float m_AlignedFontSize;
-	float m_LineSpacing;
-	float m_AlignedLineSpacing;
+	float m_FontSize = 0.0f;
+	float m_AlignedFontSize = 0.0f;
+	float m_LineSpacing = 0.0f;
+	float m_AlignedLineSpacing = 0.0f;
 
-	ETextCursorSelectionMode m_CalculateSelectionMode;
-	float m_SelectionHeightFactor;
+	ETextCursorSelectionMode m_CalculateSelectionMode = TEXT_CURSOR_SELECTION_MODE_NONE;
+	float m_SelectionHeightFactor = 1.0f;
 
 	// these coordinates are respected if selection mode is set to calculate @see ETextCursorSelectionMode
-	vec2 m_PressMouse;
+	vec2 m_PressMouse = vec2(0.0f, 0.0f);
 	// these coordinates are respected if selection/cursor mode is set to calculate @see ETextCursorSelectionMode / @see ETextCursorCursorMode
-	vec2 m_ReleaseMouse;
+	vec2 m_ReleaseMouse = vec2(0.0f, 0.0f);
 
 	// note m_SelectionStart can be bigger than m_SelectionEnd, depending on how the mouse cursor was dragged
 	// also note, that these are the character offsets decoded
-	int m_SelectionStart;
-	int m_SelectionEnd;
+	int m_SelectionStart = 0;
+	int m_SelectionEnd = 0;
 
-	ETextCursorCursorMode m_CursorMode;
-	bool m_ForceCursorRendering;
+	ETextCursorCursorMode m_CursorMode = TEXT_CURSOR_CURSOR_MODE_NONE;
+	bool m_ForceCursorRendering = false;
 	// note this is the decoded character offset
-	int m_CursorCharacter;
-	vec2 m_CursorRenderedPosition;
+	int m_CursorCharacter = -1;
+	vec2 m_CursorRenderedPosition = vec2(-1.0f, -1.0f);
 
 	// Color splits of the cursor to allow multicolored text
-	std::vector<STextColorSplit> m_vColorSplits;
+	std::vector<STextColorSplit> m_vColorSplits = {};
 
-	float Height() const
-	{
-		return m_LineCount * (m_AlignedFontSize + m_AlignedLineSpacing);
-	}
-
-	STextBoundingBox BoundingBox() const
-	{
-		return {m_StartX, m_StartY, m_LongestLineWidth, Height()};
-	}
-
-	void Reset()
-	{
-		m_Flags = 0;
-		m_LineCount = 0;
-		m_GlyphCount = 0;
-		m_CharCount = 0;
-		m_MaxLines = 0;
-		m_StartX = 0;
-		m_StartY = 0;
-		m_LineWidth = 0;
-		m_X = 0;
-		m_Y = 0;
-		m_MaxCharacterHeight = 0;
-		m_LongestLineWidth = 0;
-		m_FontSize = 0;
-		m_AlignedFontSize = 0;
-		m_LineSpacing = 0;
-		m_CalculateSelectionMode = TEXT_CURSOR_SELECTION_MODE_NONE;
-		m_SelectionHeightFactor = 0;
-		m_PressMouse = vec2();
-		m_ReleaseMouse = vec2();
-		m_SelectionStart = 0;
-		m_SelectionEnd = 0;
-		m_CursorMode = TEXT_CURSOR_CURSOR_MODE_NONE;
-		m_ForceCursorRendering = false;
-		m_CursorCharacter = 0;
-		m_CursorRenderedPosition = vec2();
-		m_vColorSplits.clear();
-	}
+	float Height() const;
+	STextBoundingBox BoundingBox() const;
+	void SetPosition(vec2 Position);
 };
 
 struct STextContainerUsages
@@ -315,10 +280,6 @@ class ITextRender : public IInterface
 {
 	MACRO_INTERFACE("textrender")
 public:
-	virtual void SetCursor(CTextCursor *pCursor, float x, float y, float FontSize, int Flags) const = 0;
-	virtual void MoveCursor(CTextCursor *pCursor, float x, float y) const = 0;
-	virtual void SetCursorPosition(CTextCursor *pCursor, float x, float y) const = 0;
-
 	virtual bool LoadFonts() = 0;
 	virtual void SetFontPreset(EFontPreset FontPreset) = 0;
 	virtual void SetFontLanguageVariant(const char *pLanguageFile) = 0;
