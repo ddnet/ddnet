@@ -4492,10 +4492,11 @@ void CClient::HandleConnectLink(const char *pLink)
 {
 	// Chrome works fine with ddnet:// but not with ddnet:
 	// Check ddnet:// before ddnet: because we don't want the // as part of connect command
-	if(str_startswith(pLink, CONNECTLINK_DOUBLE_SLASH))
-		str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK_DOUBLE_SLASH) - 1);
-	else if(str_startswith(pLink, CONNECTLINK_NO_SLASH))
-		str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK_NO_SLASH) - 1);
+	const char *pConnectLink = nullptr;
+	if((pConnectLink = str_startswith(pLink, CONNECTLINK_DOUBLE_SLASH)))
+		str_copy(m_aCmdConnect, pConnectLink);
+	else if((pConnectLink = str_startswith(pLink, CONNECTLINK_NO_SLASH)))
+		str_copy(m_aCmdConnect, pConnectLink);
 	else
 		str_copy(m_aCmdConnect, pLink);
 	// Edge appends / to the URL
