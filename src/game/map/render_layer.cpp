@@ -689,60 +689,51 @@ void CRenderLayerTile::UploadTileData(std::optional<CTileLayerVisuals> &VisualsO
 			Visuals.m_BorderKillTile.Draw(true);
 	}
 
+	// inserts and clears tiles and tile 'Texure' coords
+	auto InsertTiles = [&](std::vector<SGraphicTile> &vTiles, std::vector<SGraphicTileTexureCoords> &vTexCoords) {
+		vTmpTiles.insert(vTmpTiles.end(), vTiles.begin(), vTiles.end());
+		vTmpTileTexCoords.insert(vTmpTileTexCoords.end(), vTexCoords.begin(), vTexCoords.end());
+		vTiles.clear();
+		vTexCoords.clear();
+	};
+
 	// add the border corners, then the borders and fix their byte offsets
 	int TilesHandledCount = vTmpTiles.size();
 	Visuals.m_BorderTopLeft.AddIndexBufferByteOffset(TilesHandledCount);
 	Visuals.m_BorderTopRight.AddIndexBufferByteOffset(TilesHandledCount);
 	Visuals.m_BorderBottomLeft.AddIndexBufferByteOffset(TilesHandledCount);
 	Visuals.m_BorderBottomRight.AddIndexBufferByteOffset(TilesHandledCount);
+
 	// add the Corners to the tiles
-	vTmpTiles.insert(vTmpTiles.end(), vTmpBorderCorners.begin(), vTmpBorderCorners.end());
-	vTmpTileTexCoords.insert(vTmpTileTexCoords.end(), vTmpBorderCornersTexCoords.begin(), vTmpBorderCornersTexCoords.end());
+	InsertTiles(vTmpBorderCorners, vTmpBorderCornersTexCoords);
 
 	// now the borders
-	TilesHandledCount = vTmpTiles.size();
-	if(m_pLayerTilemap->m_Width > 0)
-	{
-		for(int i = 0; i < m_pLayerTilemap->m_Width; ++i)
-		{
-			Visuals.m_vBorderTop[i].AddIndexBufferByteOffset(TilesHandledCount);
-		}
-	}
-	vTmpTiles.insert(vTmpTiles.end(), vTmpBorderTopTiles.begin(), vTmpBorderTopTiles.end());
-	vTmpTileTexCoords.insert(vTmpTileTexCoords.end(), vTmpBorderTopTilesTexCoords.begin(), vTmpBorderTopTilesTexCoords.end());
+	int TilesHandledCountTop = vTmpTiles.size();
+	int TilesHandledCountBottom = TilesHandledCountTop + vTmpBorderTopTiles.size();
+	int TilesHandledCountLeft = TilesHandledCountBottom + vTmpBorderBottomTiles.size();
+	int TilesHandledCountRight = TilesHandledCountLeft + vTmpBorderLeftTiles.size();
 
-	TilesHandledCount = vTmpTiles.size();
-	if(m_pLayerTilemap->m_Width > 0)
+	if(m_pLayerTilemap->m_Width > 0 && m_pLayerTilemap->m_Height > 0)
 	{
-		for(int i = 0; i < m_pLayerTilemap->m_Width; ++i)
+		for(int i = 0; i < std::max(m_pLayerTilemap->m_Width, m_pLayerTilemap->m_Height); ++i)
 		{
-			Visuals.m_vBorderBottom[i].AddIndexBufferByteOffset(TilesHandledCount);
+			if(i < m_pLayerTilemap->m_Width)
+			{
+				Visuals.m_vBorderTop[i].AddIndexBufferByteOffset(TilesHandledCountTop);
+				Visuals.m_vBorderBottom[i].AddIndexBufferByteOffset(TilesHandledCountBottom);
+			}
+			if(i < m_pLayerTilemap->m_Height)
+			{
+				Visuals.m_vBorderLeft[i].AddIndexBufferByteOffset(TilesHandledCountLeft);
+				Visuals.m_vBorderRight[i].AddIndexBufferByteOffset(TilesHandledCountRight);
+			}
 		}
 	}
-	vTmpTiles.insert(vTmpTiles.end(), vTmpBorderBottomTiles.begin(), vTmpBorderBottomTiles.end());
-	vTmpTileTexCoords.insert(vTmpTileTexCoords.end(), vTmpBorderBottomTilesTexCoords.begin(), vTmpBorderBottomTilesTexCoords.end());
 
-	TilesHandledCount = vTmpTiles.size();
-	if(m_pLayerTilemap->m_Height > 0)
-	{
-		for(int i = 0; i < m_pLayerTilemap->m_Height; ++i)
-		{
-			Visuals.m_vBorderLeft[i].AddIndexBufferByteOffset(TilesHandledCount);
-		}
-	}
-	vTmpTiles.insert(vTmpTiles.end(), vTmpBorderLeftTiles.begin(), vTmpBorderLeftTiles.end());
-	vTmpTileTexCoords.insert(vTmpTileTexCoords.end(), vTmpBorderLeftTilesTexCoords.begin(), vTmpBorderLeftTilesTexCoords.end());
-
-	TilesHandledCount = vTmpTiles.size();
-	if(m_pLayerTilemap->m_Height > 0)
-	{
-		for(int i = 0; i < m_pLayerTilemap->m_Height; ++i)
-		{
-			Visuals.m_vBorderRight[i].AddIndexBufferByteOffset(TilesHandledCount);
-		}
-	}
-	vTmpTiles.insert(vTmpTiles.end(), vTmpBorderRightTiles.begin(), vTmpBorderRightTiles.end());
-	vTmpTileTexCoords.insert(vTmpTileTexCoords.end(), vTmpBorderRightTilesTexCoords.begin(), vTmpBorderRightTilesTexCoords.end());
+	InsertTiles(vTmpBorderTopTiles, vTmpBorderTopTilesTexCoords);
+	InsertTiles(vTmpBorderBottomTiles, vTmpBorderBottomTilesTexCoords);
+	InsertTiles(vTmpBorderLeftTiles, vTmpBorderLeftTilesTexCoords);
+	InsertTiles(vTmpBorderRightTiles, vTmpBorderRightTilesTexCoords);
 
 	// setup params
 	float *pTmpTiles = vTmpTiles.empty() ? nullptr : (float *)vTmpTiles.data();
