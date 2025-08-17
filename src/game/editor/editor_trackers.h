@@ -86,7 +86,7 @@ private:
 	struct SPointData
 	{
 		bool m_Used;
-		int m_Time;
+		CFixedTime m_Time;
 		std::map<int, int> m_Values;
 	};
 

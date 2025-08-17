@@ -22,7 +22,7 @@
 
 using namespace std::chrono_literals;
 
-int IEnvelopePointAccess::FindPointIndex(int Time) const
+int IEnvelopePointAccess::FindPointIndex(CFixedTime Time) const
 {
 	// binary search for the interval around Time
 	int Low = 0;
@@ -269,7 +269,7 @@ void CRenderMap::RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, std::ch
 	}
 
 	const CEnvPoint *pLastPoint = pPoints->GetPoint(NumPoints - 1);
-	const int64_t MaxPointTime = (int64_t)pLastPoint->m_Time * std::chrono::nanoseconds(1ms).count();
+	const int64_t MaxPointTime = (int64_t)pLastPoint->m_Time.GetInternal() * std::chrono::nanoseconds(1ms).count();
 	if(MaxPointTime > 0) // TODO: remove this check when implementing a IO check for maps(in this case broken envelopes)
 		TimeNanos = std::chrono::nanoseconds(TimeNanos.count() % MaxPointTime);
 	else
@@ -277,7 +277,7 @@ void CRenderMap::RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, std::ch
 
 	const double TimeMillis = TimeNanos.count() / (double)std::chrono::nanoseconds(1ms).count();
 
-	int FoundIndex = pPoints->FindPointIndex(TimeMillis);
+	int FoundIndex = pPoints->FindPointIndex(CFixedTime(TimeMillis));
 	if(FoundIndex == -1)
 	{
 		for(size_t c = 0; c < Channels; c++)
@@ -290,8 +290,17 @@ void CRenderMap::RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, std::ch
 	const CEnvPoint *pCurrentPoint = pPoints->GetPoint(FoundIndex);
 	const CEnvPoint *pNextPoint = pPoints->GetPoint(FoundIndex + 1);
 
-	const float Delta = pNextPoint->m_Time - pCurrentPoint->m_Time;
-	float a = (float)(TimeMillis - pCurrentPoint->m_Time) / Delta;
+	const CFixedTime Delta = pNextPoint->m_Time - pCurrentPoint->m_Time;
+	if(Delta <= CFixedTime(0))
+	{
+		for(size_t c = 0; c < Channels; c++)
+		{
+			Result[c] = fx2f(pCurrentPoint->m_aValues[c]);
+		}
+		return;
+	}
+
+	float a = (float)(TimeMillis - pCurrentPoint->m_Time.GetInternal()) / Delta.GetInternal();
 
 	switch(pCurrentPoint->m_Curvetype)
 	{
@@ -321,11 +330,11 @@ void CRenderMap::RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, std::ch
 		for(size_t c = 0; c < Channels; c++)
 		{
 			// monotonic 2d cubic bezier curve
-			const vec2 p0 = vec2(pCurrentPoint->m_Time, fx2f(pCurrentPoint->m_aValues[c]));
-			const vec2 p3 = vec2(pNextPoint->m_Time, fx2f(pNextPoint->m_aValues[c]));
+			const vec2 p0 = vec2(pCurrentPoint->m_Time.GetInternal(), fx2f(pCurrentPoint->m_aValues[c]));
+			const vec2 p3 = vec2(pNextPoint->m_Time.GetInternal(), fx2f(pNextPoint->m_aValues[c]));
 
-			const vec2 OutTang = vec2(pCurrentPointBezier->m_aOutTangentDeltaX[c], fx2f(pCurrentPointBezier->m_aOutTangentDeltaY[c]));
-			const vec2 InTang = vec2(pNextPointBezier->m_aInTangentDeltaX[c], fx2f(pNextPointBezier->m_aInTangentDeltaY[c]));
+			const vec2 OutTang = vec2(pCurrentPointBezier->m_aOutTangentDeltaX[c].GetInternal(), fx2f(pCurrentPointBezier->m_aOutTangentDeltaY[c]));
+			const vec2 InTang = vec2(pNextPointBezier->m_aInTangentDeltaX[c].GetInternal(), fx2f(pNextPointBezier->m_aInTangentDeltaY[c]));
 
 			vec2 p1 = p0 + OutTang;
 			vec2 p2 = p3 + InTang;

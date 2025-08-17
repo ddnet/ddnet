@@ -3024,6 +3024,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     jsonwriter.cpp
     linereader.cpp
     mapbugs.cpp
+    mapitems.cpp
     math.cpp
     memory.cpp
     name_ban.cpp

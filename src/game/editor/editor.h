@@ -396,7 +396,7 @@ public:
 	bool IsTangentInSelected() const;
 	bool IsTangentOutSelected() const;
 	bool IsTangentSelected() const;
-	std::pair<int, int> EnvGetSelectedTimeAndValue() const;
+	std::pair<CFixedTime, int> EnvGetSelectedTimeAndValue() const;
 
 	template<typename E>
 	SEditResult<E> DoPropertiesWithState(CUIRect *pToolbox, CProperty *pProps, int *pIds, int *pNewVal, const std::vector<ColorRGBA> &vColors = {});

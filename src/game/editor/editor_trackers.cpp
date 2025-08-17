@@ -340,7 +340,7 @@ void CEnvelopeEditorOperationTracker::HandlePointDragEnd(bool Switch)
 
 		if(Data.m_Time != Point.m_Time)
 		{ // Save time
-			vpActions.push_back(std::make_shared<CEditorActionEnvelopeEditPoint>(m_pEditor, EnvIndex, PointIndex, 0, CEditorActionEnvelopeEditPoint::EEditType::TIME, Data.m_Time, Point.m_Time));
+			vpActions.push_back(std::make_shared<CEditorActionEnvelopeEditPointTime>(m_pEditor, EnvIndex, PointIndex, Data.m_Time, Point.m_Time));
 		}
 
 		for(auto Value : Data.m_Values)
