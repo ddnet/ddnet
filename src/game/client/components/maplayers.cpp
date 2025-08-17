@@ -194,15 +194,8 @@ void CMapLayers::OnMapLoad()
 			{
 				CMapItemLayerQuads *pQLayer = (CMapItemLayerQuads *)pLayer;
 
-				IGraphics::CTextureHandle TextureHandle;
-				if(pQLayer->m_Image >= 0 && pQLayer->m_Image < m_pImages->Num())
-					TextureHandle = m_pImages->Get(pQLayer->m_Image);
-				else
-					TextureHandle.Invalidate();
-
 				pRenderLayer = std::make_unique<CRenderLayerQuads>(
 					g, l,
-					TextureHandle,
 					pLayer->m_Flags,
 					pQLayer);
 			}

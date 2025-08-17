@@ -843,7 +843,7 @@ void CRenderLayerTile::GetTileData(unsigned char *pIndex, unsigned char *pFlags,
  * Quad Layer *
  **************/
 
-CRenderLayerQuads::CRenderLayerQuads(int GroupId, int LayerId, IGraphics::CTextureHandle TextureHandle, int Flags, CMapItemLayerQuads *pLayerQuads) :
+CRenderLayerQuads::CRenderLayerQuads(int GroupId, int LayerId, int Flags, CMapItemLayerQuads *pLayerQuads) :
 	CRenderLayer(GroupId, LayerId, Flags)
 {
 	m_pLayerQuads = pLayerQuads;

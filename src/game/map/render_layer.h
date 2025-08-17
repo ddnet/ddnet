@@ -208,7 +208,7 @@ protected:
 class CRenderLayerQuads : public CRenderLayer
 {
 public:
-	CRenderLayerQuads(int GroupId, int LayerId, IGraphics::CTextureHandle TextureHandle, int Flags, CMapItemLayerQuads *pLayerQuads);
+	CRenderLayerQuads(int GroupId, int LayerId, int Flags, CMapItemLayerQuads *pLayerQuads);
 	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, IEnvelopeEval *pEnvelopeEval, IMap *pMap, IMapImages *pMapImages, std::shared_ptr<CMapBasedEnvelopePointAccess> &pEnvelopePoints, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional) override;
 	virtual void Init() override;
 	bool IsValid() const override { return m_pLayerQuads->m_NumQuads > 0 && m_pQuads; }
