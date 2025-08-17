@@ -50,16 +50,18 @@ struct SQuadRenderInfo
 	float m_Padding;
 };
 
-struct SGraphicTile
+class CGraphicTile
 {
+public:
 	vec2 m_TopLeft;
 	vec2 m_TopRight;
 	vec2 m_BottomRight;
 	vec2 m_BottomLeft;
 };
 
-struct SGraphicTileTexureCoords
+class CGraphicTileTextureCoords
 {
+public:
 	ubvec4 m_TexCoordTopLeft;
 	ubvec4 m_TexCoordTopRight;
 	ubvec4 m_TexCoordBottomRight;
