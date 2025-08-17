@@ -54,7 +54,7 @@ constexpr static std::array<CTexCoords, N> MakeTexCoordsTable()
 
 constexpr std::array<CTexCoords, 8> TEX_COORDS_TABLE = MakeTexCoordsTable<8>();
 
-static void FillTmpTile(SGraphicTile *pTmpTile, SGraphicTileTexureCoords *pTmpTex, unsigned char Flags, unsigned char Index, int x, int y, const ivec2 &Offset, int Scale)
+static void FillTmpTile(CGraphicTile *pTmpTile, CGraphicTileTextureCoords *pTmpTex, unsigned char Flags, unsigned char Index, int x, int y, const ivec2 &Offset, int Scale)
 {
 	if(pTmpTex)
 	{
@@ -93,24 +93,24 @@ static void FillTmpTile(SGraphicTile *pTmpTile, SGraphicTileTexureCoords *pTmpTe
 	pTmpTile->m_BottomRight = BottomRight;
 }
 
-static void FillTmpTileSpeedup(SGraphicTile *pTmpTile, SGraphicTileTexureCoords *pTmpTex, unsigned char Flags, int x, int y, const ivec2 &Offset, int Scale, short AngleRotate)
+static void FillTmpTileSpeedup(CGraphicTile *pTmpTile, CGraphicTileTextureCoords *pTmpTex, unsigned char Flags, int x, int y, const ivec2 &Offset, int Scale, short AngleRotate)
 {
 	int Angle = AngleRotate % 360;
 	FillTmpTile(pTmpTile, pTmpTex, Angle >= 270 ? ROTATION_270 : (Angle >= 180 ? ROTATION_180 : (Angle >= 90 ? ROTATION_90 : 0)), AngleRotate % 90, x, y, Offset, Scale);
 }
 
-static bool AddTile(std::vector<SGraphicTile> &vTmpTiles, std::vector<SGraphicTileTexureCoords> &vTmpTileTexCoords, unsigned char Index, unsigned char Flags, int x, int y, bool DoTextureCoords, bool FillSpeedup = false, int AngleRotate = -1, const ivec2 &Offset = ivec2{0, 0}, int Scale = 32)
+static bool AddTile(std::vector<CGraphicTile> &vTmpTiles, std::vector<CGraphicTileTextureCoords> &vTmpTileTexCoords, unsigned char Index, unsigned char Flags, int x, int y, bool DoTextureCoords, bool FillSpeedup = false, int AngleRotate = -1, const ivec2 &Offset = ivec2{0, 0}, int Scale = 32)
 {
 	if(Index <= 0)
 		return false;
 
 	vTmpTiles.emplace_back();
-	SGraphicTile &Tile = vTmpTiles.back();
-	SGraphicTileTexureCoords *pTileTex = nullptr;
+	CGraphicTile &Tile = vTmpTiles.back();
+	CGraphicTileTextureCoords *pTileTex = nullptr;
 	if(DoTextureCoords)
 	{
 		vTmpTileTexCoords.emplace_back();
-		SGraphicTileTexureCoords &TileTex = vTmpTileTexCoords.back();
+		CGraphicTileTextureCoords &TileTex = vTmpTileTexCoords.back();
 		pTileTex = &TileTex;
 	}
 	if(FillSpeedup)
@@ -566,18 +566,18 @@ void CRenderLayerTile::UploadTileData(std::optional<CTileLayerVisuals> &VisualsO
 		return;
 
 	// prepare all visuals for all tile layers
-	std::vector<SGraphicTile> vTmpTiles;
-	std::vector<SGraphicTileTexureCoords> vTmpTileTexCoords;
-	std::vector<SGraphicTile> vTmpBorderTopTiles;
-	std::vector<SGraphicTileTexureCoords> vTmpBorderTopTilesTexCoords;
-	std::vector<SGraphicTile> vTmpBorderLeftTiles;
-	std::vector<SGraphicTileTexureCoords> vTmpBorderLeftTilesTexCoords;
-	std::vector<SGraphicTile> vTmpBorderRightTiles;
-	std::vector<SGraphicTileTexureCoords> vTmpBorderRightTilesTexCoords;
-	std::vector<SGraphicTile> vTmpBorderBottomTiles;
-	std::vector<SGraphicTileTexureCoords> vTmpBorderBottomTilesTexCoords;
-	std::vector<SGraphicTile> vTmpBorderCorners;
-	std::vector<SGraphicTileTexureCoords> vTmpBorderCornersTexCoords;
+	std::vector<CGraphicTile> vTmpTiles;
+	std::vector<CGraphicTileTextureCoords> vTmpTileTexCoords;
+	std::vector<CGraphicTile> vTmpBorderTopTiles;
+	std::vector<CGraphicTileTextureCoords> vTmpBorderTopTilesTexCoords;
+	std::vector<CGraphicTile> vTmpBorderLeftTiles;
+	std::vector<CGraphicTileTextureCoords> vTmpBorderLeftTilesTexCoords;
+	std::vector<CGraphicTile> vTmpBorderRightTiles;
+	std::vector<CGraphicTileTextureCoords> vTmpBorderRightTilesTexCoords;
+	std::vector<CGraphicTile> vTmpBorderBottomTiles;
+	std::vector<CGraphicTileTextureCoords> vTmpBorderBottomTilesTexCoords;
+	std::vector<CGraphicTile> vTmpBorderCorners;
+	std::vector<CGraphicTileTextureCoords> vTmpBorderCornersTexCoords;
 
 	const bool DoTextureCoords = GetTexture().IsValid();
 
@@ -689,8 +689,8 @@ void CRenderLayerTile::UploadTileData(std::optional<CTileLayerVisuals> &VisualsO
 			Visuals.m_BorderKillTile.Draw(true);
 	}
 
-	// inserts and clears tiles and tile 'Texure' coords
-	auto InsertTiles = [&](std::vector<SGraphicTile> &vTiles, std::vector<SGraphicTileTexureCoords> &vTexCoords) {
+	// inserts and clears tiles and tile texture coords
+	auto InsertTiles = [&](std::vector<CGraphicTile> &vTiles, std::vector<CGraphicTileTextureCoords> &vTexCoords) {
 		vTmpTiles.insert(vTmpTiles.end(), vTiles.begin(), vTiles.end());
 		vTmpTileTexCoords.insert(vTmpTileTexCoords.end(), vTexCoords.begin(), vTexCoords.end());
 		vTiles.clear();
@@ -740,7 +740,7 @@ void CRenderLayerTile::UploadTileData(std::optional<CTileLayerVisuals> &VisualsO
 	unsigned char *pTmpTileTexCoords = vTmpTileTexCoords.empty() ? nullptr : (unsigned char *)vTmpTileTexCoords.data();
 
 	Visuals.m_BufferContainerIndex = -1;
-	size_t UploadDataSize = vTmpTileTexCoords.size() * sizeof(SGraphicTileTexureCoords) + vTmpTiles.size() * sizeof(SGraphicTile);
+	size_t UploadDataSize = vTmpTileTexCoords.size() * sizeof(CGraphicTileTextureCoords) + vTmpTiles.size() * sizeof(CGraphicTile);
 	if(UploadDataSize > 0)
 	{
 		char *pUploadData = (char *)malloc(sizeof(char) * UploadDataSize);
