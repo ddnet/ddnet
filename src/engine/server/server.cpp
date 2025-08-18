@@ -3458,19 +3458,6 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 	}
 }
 
-static int GetAuthLevel(const char *pLevel)
-{
-	int Level = -1;
-	if(!str_comp_nocase(pLevel, "admin"))
-		Level = AUTHED_ADMIN;
-	else if(str_startswith(pLevel, "mod"))
-		Level = AUTHED_MOD;
-	else if(!str_comp_nocase(pLevel, "helper"))
-		Level = AUTHED_HELPER;
-
-	return Level;
-}
-
 void CServer::AuthRemoveKey(int KeySlot)
 {
 	m_AuthManager.RemoveKey(KeySlot);

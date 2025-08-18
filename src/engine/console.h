@@ -138,6 +138,14 @@ public:
 	virtual void SetFlagMask(int FlagMask) = 0;
 };
 
+/**
+ * Converts auth level string to auth level enum (integer)
+ *
+ * @param pLevel should be either "admin", "mod", "moderator" or "helper"
+ * @return -1 on error otherwise one of the auth enums such as `AUTHED_ADMIN`
+ */
+int GetAuthLevel(const char *pLevel);
+
 std::unique_ptr<IConsole> CreateConsole(int FlagMask);
 
 #endif // FILE_ENGINE_CONSOLE_H

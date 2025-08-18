@@ -7,8 +7,10 @@
 #include <base/system.h>
 
 #include <engine/client/checksum.h>
+#include <engine/console.h>
 #include <engine/shared/protocol.h>
 #include <engine/storage.h>
+#include <game/generated/protocol.h>
 
 #include "config.h"
 #include "console.h"
@@ -1067,6 +1069,19 @@ const IConsole::CCommandInfo *CConsole::GetCommandInfo(const char *pName, int Fl
 	}
 
 	return nullptr;
+}
+
+int GetAuthLevel(const char *pLevel)
+{
+	int Level = -1;
+	if(!str_comp_nocase(pLevel, "admin"))
+		Level = AUTHED_ADMIN;
+	else if(!str_comp_nocase(pLevel, "mod") || !str_comp_nocase(pLevel, "moderator"))
+		Level = AUTHED_MOD;
+	else if(!str_comp_nocase(pLevel, "helper"))
+		Level = AUTHED_HELPER;
+
+	return Level;
 }
 
 std::unique_ptr<IConsole> CreateConsole(int FlagMask) { return std::make_unique<CConsole>(FlagMask); }
