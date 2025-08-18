@@ -114,6 +114,9 @@ int CLayerQuads::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 
 void CLayerQuads::BrushPlace(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 {
+	if(m_Readonly)
+		return;
+
 	std::shared_ptr<CLayerQuads> pQuadLayer = std::static_pointer_cast<CLayerQuads>(pBrush);
 	std::vector<CQuad> vAddedQuads;
 	for(const auto &Quad : pQuadLayer->m_vQuads)
