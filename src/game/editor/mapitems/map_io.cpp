@@ -169,7 +169,7 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 		GItem.m_NumLayers = 0;
 
 		// save group name
-		StrToInts(GItem.m_aName, std::size(GItem.m_aName), pGroup->m_aName);
+		StrToInts(GItem.m_aName, std::size(GItem.m_aName), pGroup->m_aGroupName);
 
 		for(const std::shared_ptr<CLayer> &pLayer : pGroup->m_vpLayers)
 		{
@@ -183,7 +183,7 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 				Item.m_Version = 3;
 
 				Item.m_Layer.m_Version = 0; // was previously uninitialized, do not rely on it being 0
-				Item.m_Layer.m_Flags = pLayerTiles->m_Flags;
+				Item.m_Layer.m_Flags = pLayerTiles->CLayer::m_Flags;
 				Item.m_Layer.m_Type = pLayerTiles->m_Type;
 
 				Item.m_Color = pLayerTiles->m_Color;
@@ -238,7 +238,7 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 					Item.m_Data = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile), pLayerTiles->m_pTiles);
 
 				// save layer name
-				StrToInts(Item.m_aName, std::size(Item.m_aName), pLayerTiles->m_aName);
+				StrToInts(Item.m_aName, std::size(Item.m_aName), pLayerTiles->m_aLayerName);
 
 				// save item
 				Writer.AddItem(MAPITEMTYPE_LAYER, LayerCount, sizeof(Item), &Item);
@@ -288,7 +288,7 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 				}
 
 				// save layer name
-				StrToInts(Item.m_aName, std::size(Item.m_aName), pLayerQuads->m_aName);
+				StrToInts(Item.m_aName, std::size(Item.m_aName), pLayerQuads->m_aLayerName);
 
 				// save item
 				Writer.AddItem(MAPITEMTYPE_LAYER, LayerCount, sizeof(Item), &Item);
@@ -320,7 +320,7 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 				}
 
 				// save layer name
-				StrToInts(Item.m_aName, std::size(Item.m_aName), pLayerSounds->m_aName);
+				StrToInts(Item.m_aName, std::size(Item.m_aName), pLayerSounds->m_aLayerName);
 
 				// save item
 				Writer.AddItem(MAPITEMTYPE_LAYER, LayerCount, sizeof(Item), &Item);
@@ -682,7 +682,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 
 			// load group name
 			if(pGItem->m_Version >= 3)
-				IntsToStr(pGItem->m_aName, std::size(pGItem->m_aName), pGroup->m_aName, std::size(pGroup->m_aName));
+				IntsToStr(pGItem->m_aName, std::size(pGItem->m_aName), pGroup->m_aGroupName, std::size(pGroup->m_aGroupName));
 
 			for(int l = 0; l < pGItem->m_NumLayers; l++)
 			{
@@ -750,7 +750,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 						pTiles->m_ColorEnvOffset = pTilemapItem->m_ColorEnvOffset;
 					}
 
-					pTiles->m_Flags = pLayerItem->m_Flags;
+					pTiles->CLayer::m_Flags = pLayerItem->m_Flags;
 
 					pGroup->AddLayer(pTiles);
 					pTiles->m_Image = pTilemapItem->m_Image;
@@ -764,7 +764,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 
 					// load layer name
 					if(pTilemapItem->m_Version >= 3)
-						IntsToStr(pTilemapItem->m_aName, std::size(pTilemapItem->m_aName), pTiles->m_aName, std::size(pTiles->m_aName));
+						IntsToStr(pTilemapItem->m_aName, std::size(pTilemapItem->m_aName), pTiles->m_aLayerName, std::size(pTiles->m_aLayerName));
 
 					if(pTiles->m_HasTele)
 					{
@@ -885,7 +885,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 
 					// load layer name
 					if(pQuadsItem->m_Version >= 2)
-						IntsToStr(pQuadsItem->m_aName, std::size(pQuadsItem->m_aName), pQuads->m_aName, std::size(pQuads->m_aName));
+						IntsToStr(pQuadsItem->m_aName, std::size(pQuadsItem->m_aName), pQuads->m_aLayerName, std::size(pQuads->m_aLayerName));
 
 					if(pQuadsItem->m_NumQuads > 0)
 					{
@@ -914,7 +914,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 					}
 
 					// load layer name
-					IntsToStr(pSoundsItem->m_aName, std::size(pSoundsItem->m_aName), pSounds->m_aName, std::size(pSounds->m_aName));
+					IntsToStr(pSoundsItem->m_aName, std::size(pSoundsItem->m_aName), pSounds->m_aLayerName, std::size(pSounds->m_aLayerName));
 
 					// load data
 					if(pSoundsItem->m_NumSources > 0)
@@ -945,7 +945,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 					}
 
 					// load layer name
-					IntsToStr(pSoundsItem->m_aName, std::size(pSoundsItem->m_aName), pSounds->m_aName, std::size(pSounds->m_aName));
+					IntsToStr(pSoundsItem->m_aName, std::size(pSoundsItem->m_aName), pSounds->m_aLayerName, std::size(pSounds->m_aLayerName));
 
 					// load data
 					CSoundSourceDeprecated *pData = (CSoundSourceDeprecated *)DataFile.GetDataSwapped(pSoundsItem->m_Data);
@@ -1080,7 +1080,7 @@ void CEditorMap::PerformSanityChecks(const std::function<void(const char *pError
 						{
 							pLayerTiles->m_Image = -1;
 							char aBuf[IO_MAX_PATH_LENGTH + 128];
-							str_format(aBuf, sizeof(aBuf), "Error: The image '%s' (size %" PRIzu "x%" PRIzu ") has a width or height that is not divisible by 16 and therefore cannot be used for tile layers. The image of layer #%" PRIzu " '%s' in group #%" PRIzu " '%s' has been unset.", pImage->m_aName, pImage->m_Width, pImage->m_Height, LayerIndex, pLayer->m_aName, GroupIndex, pGroup->m_aName);
+							str_format(aBuf, sizeof(aBuf), "Error: The image '%s' (size %" PRIzu "x%" PRIzu ") has a width or height that is not divisible by 16 and therefore cannot be used for tile layers. The image of layer #%" PRIzu " '%s' in group #%" PRIzu " '%s' has been unset.", pImage->m_aName, pImage->m_Width, pImage->m_Height, LayerIndex, pLayer->m_aLayerName, GroupIndex, pGroup->m_aGroupName);
 							ErrorHandler(aBuf);
 						}
 					}

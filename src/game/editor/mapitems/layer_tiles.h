@@ -31,7 +31,7 @@ struct RECTi
 	int w, h;
 };
 
-class CLayerTiles : public CLayer
+class CLayerTiles : public CLayer, public CMapItemLayerTilemap
 {
 protected:
 	template<typename T>
@@ -165,12 +165,6 @@ public:
 	void FlagModified(int x, int y, int w, int h);
 
 	bool m_HasGame;
-	int m_Image;
-	int m_Width;
-	int m_Height;
-	CColor m_Color;
-	int m_ColorEnv;
-	int m_ColorEnvOffset;
 	CTile *m_pTiles;
 
 	// DDRace

@@ -3,7 +3,7 @@
 
 #include "layer.h"
 
-class CLayerSounds : public CLayer
+class CLayerSounds : public CLayer, public CMapItemLayerSounds
 {
 public:
 	explicit CLayerSounds(CEditor *pEditor);
@@ -25,7 +25,6 @@ public:
 	std::shared_ptr<CLayer> Duplicate() const override;
 	const char *TypeName() const override;
 
-	int m_Sound;
 	std::vector<CSoundSource> m_vSources;
 };
 

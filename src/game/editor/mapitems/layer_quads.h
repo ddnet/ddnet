@@ -3,7 +3,7 @@
 
 #include "layer.h"
 
-class CLayerQuads : public CLayer
+class CLayerQuads : public CLayer, public CMapItemLayerQuads
 {
 public:
 	explicit CLayerQuads(CEditor *pEditor);
@@ -30,7 +30,6 @@ public:
 	std::shared_ptr<CLayer> Duplicate() const override;
 	const char *TypeName() const override;
 
-	int m_Image;
 	std::vector<CQuad> m_vQuads;
 };
 

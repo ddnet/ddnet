@@ -5,7 +5,7 @@
 CLayerTele::CLayerTele(CEditor *pEditor, int w, int h) :
 	CLayerTiles(pEditor, w, h)
 {
-	str_copy(m_aName, "Tele");
+	str_copy(m_aLayerName, "Tele");
 	m_HasTele = true;
 
 	m_pTeleTile = new CTeleTile[w * h];
@@ -18,7 +18,7 @@ CLayerTele::CLayerTele(CEditor *pEditor, int w, int h) :
 CLayerTele::CLayerTele(const CLayerTele &Other) :
 	CLayerTiles(Other)
 {
-	str_copy(m_aName, "Tele copy");
+	str_copy(m_aLayerName, "Tele copy");
 	m_HasTele = true;
 
 	m_pTeleTile = new CTeleTile[m_Width * m_Height];

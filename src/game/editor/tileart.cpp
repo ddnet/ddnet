@@ -122,7 +122,7 @@ static std::shared_ptr<CLayerTiles> AddLayerWithImage(CEditor *pEditor, const st
 	pEditor->m_Map.m_vpImages.push_back(pEditorImage);
 
 	std::shared_ptr<CLayerTiles> pLayer = std::make_shared<CLayerTiles>(pEditor, Width, Height);
-	str_copy(pLayer->m_aName, pName);
+	str_copy(pLayer->m_aLayerName, pName);
 	pLayer->m_Image = pEditor->m_Map.m_vpImages.size() - 1;
 	pGroup->AddLayer(pLayer);
 
@@ -144,7 +144,7 @@ void CEditor::AddTileart(bool IgnoreHistory)
 	IStorage::StripPathAndExtension(m_aTileartFilename, aTileArtFileName, sizeof(aTileArtFileName));
 
 	std::shared_ptr<CLayerGroup> pGroup = m_Map.NewGroup();
-	str_copy(pGroup->m_aName, aTileArtFileName);
+	str_copy(pGroup->m_aGroupName, aTileArtFileName);
 
 	int ImageCount = m_Map.m_vpImages.size();
 

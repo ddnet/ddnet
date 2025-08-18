@@ -271,7 +271,7 @@ void CEditorMap::MakeGameGroup(std::shared_ptr<CLayerGroup> pGroup)
 {
 	m_pGameGroup = std::move(pGroup);
 	m_pGameGroup->m_GameGroup = true;
-	str_copy(m_pGameGroup->m_aName, "Game");
+	str_copy(m_pGameGroup->m_aGroupName, "Game");
 }
 
 void CEditorMap::MakeTeleLayer(const std::shared_ptr<CLayer> &pLayer)

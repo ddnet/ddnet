@@ -11,12 +11,12 @@ CLayerQuads::CLayerQuads(CEditor *pEditor) :
 	CLayer(pEditor)
 {
 	m_Type = LAYERTYPE_QUADS;
-	m_aName[0] = '\0';
+	m_aLayerName[0] = '\0';
 	m_Image = -1;
 }
 
 CLayerQuads::CLayerQuads(const CLayerQuads &Other) :
-	CLayer(Other)
+	CLayer(Other), CMapItemLayerQuads(Other)
 {
 	m_Image = Other.m_Image;
 	m_vQuads = Other.m_vQuads;

@@ -10,12 +10,12 @@ CLayerSounds::CLayerSounds(CEditor *pEditor) :
 	CLayer(pEditor)
 {
 	m_Type = LAYERTYPE_SOUNDS;
-	m_aName[0] = '\0';
+	m_aLayerName[0] = '\0';
 	m_Sound = -1;
 }
 
 CLayerSounds::CLayerSounds(const CLayerSounds &Other) :
-	CLayer(Other)
+	CLayer(Other), CMapItemLayerSounds(Other)
 {
 	m_Sound = Other.m_Sound;
 	m_vSources = Other.m_vSources;
