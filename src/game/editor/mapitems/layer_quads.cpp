@@ -12,13 +12,13 @@ CLayerQuads::CLayerQuads(CEditor *pEditor) :
 {
 	m_Type = LAYERTYPE_QUADS;
 	m_aName[0] = '\0';
-	m_Image = -1;
+	m_LayerQuads.m_Image = -1;
 }
 
 CLayerQuads::CLayerQuads(const CLayerQuads &Other) :
 	CLayer(Other)
 {
-	m_Image = Other.m_Image;
+	m_LayerQuads.m_Image = Other.m_LayerQuads.m_Image;
 	m_vQuads = Other.m_vQuads;
 }
 
@@ -27,8 +27,8 @@ CLayerQuads::~CLayerQuads() = default;
 void CLayerQuads::Render(bool QuadPicker)
 {
 	Graphics()->TextureClear();
-	if(m_Image >= 0 && (size_t)m_Image < m_pEditor->m_Map.m_vpImages.size())
-		Graphics()->TextureSet(m_pEditor->m_Map.m_vpImages[m_Image]->m_Texture);
+	if(m_LayerQuads.m_Image >= 0 && (size_t)m_LayerQuads.m_Image < m_pEditor->m_Map.m_vpImages.size())
+		Graphics()->TextureSet(m_pEditor->m_Map.m_vpImages[m_LayerQuads.m_Image]->m_Texture);
 
 	Graphics()->BlendNone();
 	m_pEditor->RenderMap()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_OPAQUE, m_pEditor);
@@ -88,7 +88,7 @@ int CLayerQuads::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 {
 	// create new layers
 	std::shared_ptr<CLayerQuads> pGrabbed = std::make_shared<CLayerQuads>(m_pEditor);
-	pGrabbed->m_Image = m_Image;
+	pGrabbed->m_LayerQuads.m_Image = m_LayerQuads.m_Image;
 	pBrush->AddLayer(pGrabbed);
 
 	for(const auto &Quad : m_vQuads)
@@ -200,7 +200,7 @@ void CLayerQuads::GetSize(float *pWidth, float *pHeight)
 CUi::EPopupMenuFunctionResult CLayerQuads::RenderProperties(CUIRect *pToolBox)
 {
 	CProperty aProps[] = {
-		{"Image", m_Image, PROPTYPE_IMAGE, -1, 0},
+		{"Image", m_LayerQuads.m_Image, PROPTYPE_IMAGE, -1, 0},
 		{nullptr},
 	};
 
@@ -218,9 +218,9 @@ CUi::EPopupMenuFunctionResult CLayerQuads::RenderProperties(CUIRect *pToolBox)
 	if(Prop == ELayerQuadsProp::PROP_IMAGE)
 	{
 		if(NewVal >= 0)
-			m_Image = NewVal % m_pEditor->m_Map.m_vpImages.size();
+			m_LayerQuads.m_Image = NewVal % m_pEditor->m_Map.m_vpImages.size();
 		else
-			m_Image = -1;
+			m_LayerQuads.m_Image = -1;
 	}
 
 	s_Tracker.End(Prop, State);
@@ -230,7 +230,7 @@ CUi::EPopupMenuFunctionResult CLayerQuads::RenderProperties(CUIRect *pToolBox)
 
 void CLayerQuads::ModifyImageIndex(const FIndexModifyFunction &IndexModifyFunction)
 {
-	IndexModifyFunction(&m_Image);
+	IndexModifyFunction(&m_LayerQuads.m_Image);
 }
 
 void CLayerQuads::ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction)

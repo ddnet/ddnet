@@ -11,16 +11,16 @@ CLayerGroup::CLayerGroup()
 	m_Visible = true;
 	m_Collapse = false;
 	m_GameGroup = false;
-	m_OffsetX = 0;
-	m_OffsetY = 0;
-	m_ParallaxX = 100;
-	m_ParallaxY = 100;
+	m_ItemGroup.m_OffsetX = 0;
+	m_ItemGroup.m_OffsetY = 0;
+	m_ItemGroup.m_ParallaxX = 100;
+	m_ItemGroup.m_ParallaxY = 100;
 
-	m_UseClipping = 0;
-	m_ClipX = 0;
-	m_ClipY = 0;
-	m_ClipW = 0;
-	m_ClipH = 0;
+	m_ItemGroup.m_UseClipping = 0;
+	m_ItemGroup.m_ClipX = 0;
+	m_ItemGroup.m_ClipY = 0;
+	m_ItemGroup.m_ClipW = 0;
+	m_ItemGroup.m_ClipH = 0;
 }
 
 CLayerGroup::~CLayerGroup()
@@ -30,18 +30,18 @@ CLayerGroup::~CLayerGroup()
 
 void CLayerGroup::Convert(CUIRect *pRect) const
 {
-	pRect->x += m_OffsetX;
-	pRect->y += m_OffsetY;
+	pRect->x += m_ItemGroup.m_OffsetX;
+	pRect->y += m_ItemGroup.m_OffsetY;
 }
 
 void CLayerGroup::Mapping(float *pPoints) const
 {
-	float NormalParallaxZoom = std::clamp((double)(maximum(m_ParallaxX, m_ParallaxY)), 0., 100.);
+	float NormalParallaxZoom = std::clamp((double)(maximum(m_ItemGroup.m_ParallaxX, m_ItemGroup.m_ParallaxY)), 0., 100.);
 	float ParallaxZoom = m_pMap->Editor()->m_PreviewZoom ? NormalParallaxZoom : 100.0f;
 
 	m_pMap->Editor()->Graphics()->MapScreenToWorld(
 		m_pMap->Editor()->MapView()->GetWorldOffset().x, m_pMap->Editor()->MapView()->GetWorldOffset().y,
-		m_ParallaxX, m_ParallaxY, ParallaxZoom, m_OffsetX, m_OffsetY,
+		m_ItemGroup.m_ParallaxX, m_ItemGroup.m_ParallaxY, ParallaxZoom, m_ItemGroup.m_OffsetX, m_ItemGroup.m_OffsetY,
 		m_pMap->Editor()->Graphics()->ScreenAspect(), m_pMap->Editor()->MapView()->GetWorldZoom(), pPoints);
 
 	pPoints[0] += m_pMap->Editor()->MapView()->GetEditorOffset().x;
@@ -62,16 +62,16 @@ void CLayerGroup::Render()
 	MapScreen();
 	IGraphics *pGraphics = m_pMap->Editor()->Graphics();
 
-	if(m_UseClipping)
+	if(m_ItemGroup.m_UseClipping)
 	{
 		float aPoints[4];
 		m_pMap->m_pGameGroup->Mapping(aPoints);
 		float ScreenWidth = aPoints[2] - aPoints[0];
 		float ScreenHeight = aPoints[3] - aPoints[1];
-		float Left = m_ClipX - aPoints[0];
-		float Top = m_ClipY - aPoints[1];
-		float Right = (m_ClipX + m_ClipW) - aPoints[0];
-		float Bottom = (m_ClipY + m_ClipH) - aPoints[1];
+		float Left = m_ItemGroup.m_ClipX - aPoints[0];
+		float Top = m_ItemGroup.m_ClipY - aPoints[1];
+		float Right = (m_ItemGroup.m_ClipX + m_ItemGroup.m_ClipW) - aPoints[0];
+		float Bottom = (m_ItemGroup.m_ClipY + m_ItemGroup.m_ClipH) - aPoints[1];
 
 		int ClipX = (int)std::round(Left * pGraphics->ScreenWidth() / ScreenWidth);
 		int ClipY = (int)std::round(Top * pGraphics->ScreenHeight() / ScreenHeight);
@@ -118,7 +118,7 @@ void CLayerGroup::Render()
 		}
 	}
 
-	if(m_UseClipping)
+	if(m_ItemGroup.m_UseClipping)
 		pGraphics->ClipDisable();
 }
 

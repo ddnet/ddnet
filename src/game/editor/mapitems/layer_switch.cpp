@@ -20,8 +20,8 @@ CLayerSwitch::CLayerSwitch(const CLayerSwitch &Other) :
 	str_copy(m_aName, "Switch copy");
 	m_HasSwitch = true;
 
-	m_pSwitchTile = new CSwitchTile[m_Width * m_Height];
-	mem_copy(m_pSwitchTile, Other.m_pSwitchTile, (size_t)m_Width * m_Height * sizeof(CSwitchTile));
+	m_pSwitchTile = new CSwitchTile[m_LayerTilemap.m_Width * m_LayerTilemap.m_Height];
+	mem_copy(m_pSwitchTile, Other.m_pSwitchTile, (size_t)m_LayerTilemap.m_Width * m_LayerTilemap.m_Height * sizeof(CSwitchTile));
 }
 
 CLayerSwitch::~CLayerSwitch()
@@ -36,8 +36,8 @@ void CLayerSwitch::Resize(int NewW, int NewH)
 	mem_zero(pNewSwitchData, (size_t)NewW * NewH * sizeof(CSwitchTile));
 
 	// copy old data
-	for(int y = 0; y < minimum(NewH, m_Height); y++)
-		mem_copy(&pNewSwitchData[y * NewW], &m_pSwitchTile[y * m_Width], minimum(m_Width, NewW) * sizeof(CSwitchTile));
+	for(int y = 0; y < minimum(NewH, m_LayerTilemap.m_Height); y++)
+		mem_copy(&pNewSwitchData[y * NewW], &m_pSwitchTile[y * m_LayerTilemap.m_Width], minimum(m_LayerTilemap.m_Width, NewW) * sizeof(CSwitchTile));
 
 	// replace old
 	delete[] m_pSwitchTile;
@@ -47,7 +47,7 @@ void CLayerSwitch::Resize(int NewW, int NewH)
 	CLayerTiles::Resize(NewW, NewH);
 
 	// resize gamelayer too
-	if(m_pEditor->m_Map.m_pGameLayer->m_Width != NewW || m_pEditor->m_Map.m_pGameLayer->m_Height != NewH)
+	if(m_pEditor->m_Map.m_pGameLayer->m_LayerTilemap.m_Width != NewW || m_pEditor->m_Map.m_pGameLayer->m_LayerTilemap.m_Height != NewH)
 		m_pEditor->m_Map.m_pGameLayer->Resize(NewW, NewH);
 }
 
@@ -59,9 +59,9 @@ void CLayerSwitch::Shift(EShiftDirection Direction)
 
 bool CLayerSwitch::IsEmpty() const
 {
-	for(int y = 0; y < m_Height; y++)
+	for(int y = 0; y < m_LayerTilemap.m_Height; y++)
 	{
-		for(int x = 0; x < m_Width; x++)
+		for(int x = 0; x < m_LayerTilemap.m_Width; x++)
 		{
 			const int Index = GetTile(x, y).m_Index;
 			if(Index == 0)
@@ -93,20 +93,20 @@ void CLayerSwitch::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 
 	bool Destructive = m_pEditor->m_BrushDrawDestructive || pSwitchLayer->IsEmpty();
 
-	for(int y = 0; y < pSwitchLayer->m_Height; y++)
-		for(int x = 0; x < pSwitchLayer->m_Width; x++)
+	for(int y = 0; y < pSwitchLayer->m_LayerTilemap.m_Height; y++)
+		for(int x = 0; x < pSwitchLayer->m_LayerTilemap.m_Width; x++)
 		{
 			int fx = x + sx;
 			int fy = y + sy;
 
-			if(fx < 0 || fx >= m_Width || fy < 0 || fy >= m_Height)
+			if(fx < 0 || fx >= m_LayerTilemap.m_Width || fy < 0 || fy >= m_LayerTilemap.m_Height)
 				continue;
 
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			const int SrcIndex = y * pSwitchLayer->m_Width + x;
-			const int TgtIndex = fy * m_Width + fx;
+			const int SrcIndex = y * pSwitchLayer->m_LayerTilemap.m_Width + x;
+			const int TgtIndex = fy * m_LayerTilemap.m_Width + fx;
 
 			SSwitchTileStateChange::SData Previous{
 				m_pSwitchTile[TgtIndex].m_Number,
@@ -172,7 +172,7 @@ void CLayerSwitch::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 
 			RecordStateChange(fx, fy, Previous, Current);
 		}
-	FlagModified(sx, sy, pSwitchLayer->m_Width, pSwitchLayer->m_Height);
+	FlagModified(sx, sy, pSwitchLayer->m_LayerTilemap.m_Width, pSwitchLayer->m_LayerTilemap.m_Height);
 }
 
 void CLayerSwitch::RecordStateChange(int x, int y, SSwitchTileStateChange::SData Previous, SSwitchTileStateChange::SData Current)
@@ -204,17 +204,17 @@ void CLayerSwitch::BrushRotate(float Amount)
 	if(Rotation == 1 || Rotation == 3)
 	{
 		// 90° rotation
-		CSwitchTile *pTempData1 = new CSwitchTile[m_Width * m_Height];
-		CTile *pTempData2 = new CTile[m_Width * m_Height];
-		mem_copy(pTempData1, m_pSwitchTile, (size_t)m_Width * m_Height * sizeof(CSwitchTile));
-		mem_copy(pTempData2, m_pTiles, (size_t)m_Width * m_Height * sizeof(CTile));
+		CSwitchTile *pTempData1 = new CSwitchTile[m_LayerTilemap.m_Width * m_LayerTilemap.m_Height];
+		CTile *pTempData2 = new CTile[m_LayerTilemap.m_Width * m_LayerTilemap.m_Height];
+		mem_copy(pTempData1, m_pSwitchTile, (size_t)m_LayerTilemap.m_Width * m_LayerTilemap.m_Height * sizeof(CSwitchTile));
+		mem_copy(pTempData2, m_pTiles, (size_t)m_LayerTilemap.m_Width * m_LayerTilemap.m_Height * sizeof(CTile));
 		CSwitchTile *pDst1 = m_pSwitchTile;
 		CTile *pDst2 = m_pTiles;
-		for(int x = 0; x < m_Width; ++x)
-			for(int y = m_Height - 1; y >= 0; --y, ++pDst1, ++pDst2)
+		for(int x = 0; x < m_LayerTilemap.m_Width; ++x)
+			for(int y = m_LayerTilemap.m_Height - 1; y >= 0; --y, ++pDst1, ++pDst2)
 			{
-				*pDst1 = pTempData1[y * m_Width + x];
-				*pDst2 = pTempData2[y * m_Width + x];
+				*pDst1 = pTempData1[y * m_LayerTilemap.m_Width + x];
+				*pDst2 = pTempData2[y * m_LayerTilemap.m_Width + x];
 				if(IsRotatableTile(pDst2->m_Index))
 				{
 					if(pDst2->m_Flags & TILEFLAG_ROTATE)
@@ -223,7 +223,7 @@ void CLayerSwitch::BrushRotate(float Amount)
 				}
 			}
 
-		std::swap(m_Width, m_Height);
+		std::swap(m_LayerTilemap.m_Width, m_LayerTilemap.m_Height);
 		delete[] pTempData1;
 		delete[] pTempData2;
 	}
@@ -258,14 +258,14 @@ void CLayerSwitch::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUI
 			int fx = x + sx;
 			int fy = y + sy;
 
-			if(fx < 0 || fx >= m_Width || fy < 0 || fy >= m_Height)
+			if(fx < 0 || fx >= m_LayerTilemap.m_Width || fy < 0 || fy >= m_LayerTilemap.m_Height)
 				continue;
 
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			const int SrcIndex = Empty ? 0 : (y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height);
-			const int TgtIndex = fy * m_Width + fx;
+			const int SrcIndex = Empty ? 0 : (y * pLt->m_LayerTilemap.m_Width + x % pLt->m_LayerTilemap.m_Width) % (pLt->m_LayerTilemap.m_Width * pLt->m_LayerTilemap.m_Height);
+			const int TgtIndex = fy * m_LayerTilemap.m_Width + fx;
 
 			SSwitchTileStateChange::SData Previous{
 				m_pSwitchTile[TgtIndex].m_Number,
@@ -345,11 +345,11 @@ int CLayerSwitch::FindNextFreeNumber() const
 
 bool CLayerSwitch::ContainsElementWithId(int Id) const
 {
-	for(int y = 0; y < m_Height; ++y)
+	for(int y = 0; y < m_LayerTilemap.m_Height; ++y)
 	{
-		for(int x = 0; x < m_Width; ++x)
+		for(int x = 0; x < m_LayerTilemap.m_Width; ++x)
 		{
-			if(IsSwitchTileNumberUsed(m_pSwitchTile[y * m_Width + x].m_Type) && m_pSwitchTile[y * m_Width + x].m_Number == Id)
+			if(IsSwitchTileNumberUsed(m_pSwitchTile[y * m_LayerTilemap.m_Width + x].m_Type) && m_pSwitchTile[y * m_LayerTilemap.m_Width + x].m_Number == Id)
 			{
 				return true;
 			}
@@ -366,11 +366,11 @@ void CLayerSwitch::GetPos(int Number, int Offset, ivec2 &SwitchPos)
 	SwitchPos = ivec2(-1, -1);
 
 	auto FindTile = [this, &Match, &MatchPos, &Number, &Offset]() {
-		for(int x = 0; x < m_Width; x++)
+		for(int x = 0; x < m_LayerTilemap.m_Width; x++)
 		{
-			for(int y = 0; y < m_Height; y++)
+			for(int y = 0; y < m_LayerTilemap.m_Height; y++)
 			{
-				int i = y * m_Width + x;
+				int i = y * m_LayerTilemap.m_Width + x;
 				int Switch = m_pSwitchTile[i].m_Number;
 				if(Number == Switch)
 				{

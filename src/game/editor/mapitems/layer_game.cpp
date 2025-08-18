@@ -32,7 +32,7 @@ void CLayerGame::SetTile(int x, int y, CTile Tile)
 	{
 		if(!m_pEditor->m_Map.m_pFrontLayer)
 		{
-			std::shared_ptr<CLayer> pLayerFront = std::make_shared<CLayerFront>(m_pEditor, m_Width, m_Height);
+			std::shared_ptr<CLayer> pLayerFront = std::make_shared<CLayerFront>(m_pEditor, m_LayerTilemap.m_Width, m_LayerTilemap.m_Height);
 			m_pEditor->m_Map.MakeFrontLayer(pLayerFront);
 			m_pEditor->m_Map.m_pGameGroup->AddLayer(pLayerFront);
 			int GameGroupIndex = std::find(m_pEditor->m_Map.m_vpGroups.begin(), m_pEditor->m_Map.m_vpGroups.end(), m_pEditor->m_Map.m_pGameGroup) - m_pEditor->m_Map.m_vpGroups.begin();
@@ -62,9 +62,9 @@ void CLayerGame::SetTile(int x, int y, CTile Tile)
 
 bool CLayerGame::IsEmpty() const
 {
-	for(int y = 0; y < m_Height; y++)
+	for(int y = 0; y < m_LayerTilemap.m_Height; y++)
 	{
-		for(int x = 0; x < m_Width; x++)
+		for(int x = 0; x < m_LayerTilemap.m_Width; x++)
 		{
 			const int Index = GetTile(x, y).m_Index;
 			if(Index == 0)
@@ -83,7 +83,7 @@ bool CLayerGame::IsEmpty() const
 CUi::EPopupMenuFunctionResult CLayerGame::RenderProperties(CUIRect *pToolbox)
 {
 	const CUi::EPopupMenuFunctionResult Result = CLayerTiles::RenderProperties(pToolbox);
-	m_Image = -1;
+	m_LayerTilemap.m_Image = -1;
 	return Result;
 }
 

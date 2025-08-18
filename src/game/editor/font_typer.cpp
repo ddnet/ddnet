@@ -38,7 +38,7 @@ bool CFontTyper::OnInput(const IInput::CEvent &Event)
 			TextModeOff();
 		return false;
 	}
-	if(pLayer->m_Image == -1)
+	if(pLayer->m_LayerTilemap.m_Image == -1)
 		return false;
 
 	if(!IsActive())
@@ -115,7 +115,7 @@ bool CFontTyper::OnInput(const IInput::CEvent &Event)
 		{
 			while(pLayer->GetTile(m_TextIndex.x, m_TextIndex.y).m_Index)
 			{
-				if(m_TextIndex.x < 1 || m_TextIndex.x > pLayer->m_Width - 2)
+				if(m_TextIndex.x < 1 || m_TextIndex.x > pLayer->m_LayerTilemap.m_Width - 2)
 					break;
 				m_TextIndex.x--;
 				m_TextLineLen--;
@@ -130,7 +130,7 @@ bool CFontTyper::OnInput(const IInput::CEvent &Event)
 		{
 			while(pLayer->GetTile(m_TextIndex.x, m_TextIndex.y).m_Index)
 			{
-				if(m_TextIndex.x < 1 || m_TextIndex.x > pLayer->m_Width - 2)
+				if(m_TextIndex.x < 1 || m_TextIndex.x > pLayer->m_LayerTilemap.m_Width - 2)
 					break;
 				m_TextIndex.x++;
 				m_TextLineLen++;
@@ -141,8 +141,8 @@ bool CFontTyper::OnInput(const IInput::CEvent &Event)
 		m_TextIndex.y--;
 	if(Event.m_Key == KEY_DOWN)
 		m_TextIndex.y++;
-	m_TextIndex.x = std::clamp(m_TextIndex.x, 0, pLayer->m_Width - 1);
-	m_TextIndex.y = std::clamp(m_TextIndex.y, 0, pLayer->m_Height - 1);
+	m_TextIndex.x = std::clamp(m_TextIndex.x, 0, pLayer->m_LayerTilemap.m_Width - 1);
+	m_TextIndex.y = std::clamp(m_TextIndex.y, 0, pLayer->m_LayerTilemap.m_Height - 1);
 	m_CursorRenderTime = time_get_nanoseconds() - 501ms;
 	float Dist = distance(
 		vec2(m_TextIndex.x, m_TextIndex.y),
@@ -161,7 +161,7 @@ void CFontTyper::TextModeOn()
 	std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(Editor()->GetSelectedLayerType(0, LAYERTYPE_TILES));
 	if(!pLayer)
 		return;
-	if(pLayer->m_Image == -1)
+	if(pLayer->m_LayerTilemap.m_Image == -1)
 		return;
 
 	SetCursor();
@@ -227,8 +227,8 @@ void CFontTyper::OnRender(CUIRect View)
 		return;
 	}
 	m_pLastLayer = pLayer;
-	m_TextIndex.x = std::clamp(m_TextIndex.x, 0, pLayer->m_Width - 1);
-	m_TextIndex.y = std::clamp(m_TextIndex.y, 0, pLayer->m_Height - 1);
+	m_TextIndex.x = std::clamp(m_TextIndex.x, 0, pLayer->m_LayerTilemap.m_Width - 1);
+	m_TextIndex.y = std::clamp(m_TextIndex.y, 0, pLayer->m_LayerTilemap.m_Height - 1);
 
 	const auto CurTime = time_get_nanoseconds();
 	if((CurTime - m_CursorRenderTime) > 1s)

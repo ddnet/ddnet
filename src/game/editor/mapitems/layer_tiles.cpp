@@ -19,16 +19,16 @@ CLayerTiles::CLayerTiles(CEditor *pEditor, int w, int h) :
 {
 	m_Type = LAYERTYPE_TILES;
 	m_aName[0] = '\0';
-	m_Width = w;
-	m_Height = h;
-	m_Image = -1;
+	m_LayerTilemap.m_Width = w;
+	m_LayerTilemap.m_Height = h;
+	m_LayerTilemap.m_Image = -1;
 	m_HasGame = false;
-	m_Color.r = 255;
-	m_Color.g = 255;
-	m_Color.b = 255;
-	m_Color.a = 255;
-	m_ColorEnv = -1;
-	m_ColorEnvOffset = 0;
+	m_LayerTilemap.m_Color.r = 255;
+	m_LayerTilemap.m_Color.g = 255;
+	m_LayerTilemap.m_Color.b = 255;
+	m_LayerTilemap.m_Color.a = 255;
+	m_LayerTilemap.m_ColorEnv = -1;
+	m_LayerTilemap.m_ColorEnvOffset = 0;
 
 	m_HasTele = false;
 	m_HasSpeedup = false;
@@ -40,23 +40,23 @@ CLayerTiles::CLayerTiles(CEditor *pEditor, int w, int h) :
 	m_Seed = 0;
 	m_AutoAutoMap = false;
 
-	m_pTiles = new CTile[m_Width * m_Height];
-	mem_zero(m_pTiles, (size_t)m_Width * m_Height * sizeof(CTile));
+	m_pTiles = new CTile[m_LayerTilemap.m_Width * m_LayerTilemap.m_Height];
+	mem_zero(m_pTiles, (size_t)m_LayerTilemap.m_Width * m_LayerTilemap.m_Height * sizeof(CTile));
 }
 
 CLayerTiles::CLayerTiles(const CLayerTiles &Other) :
 	CLayer(Other)
 {
-	m_Width = Other.m_Width;
-	m_Height = Other.m_Height;
-	m_pTiles = new CTile[m_Width * m_Height];
-	mem_copy(m_pTiles, Other.m_pTiles, (size_t)m_Width * m_Height * sizeof(CTile));
+	m_LayerTilemap.m_Width = Other.m_LayerTilemap.m_Width;
+	m_LayerTilemap.m_Height = Other.m_LayerTilemap.m_Height;
+	m_pTiles = new CTile[m_LayerTilemap.m_Width * m_LayerTilemap.m_Height];
+	mem_copy(m_pTiles, Other.m_pTiles, (size_t)m_LayerTilemap.m_Width * m_LayerTilemap.m_Height * sizeof(CTile));
 
-	m_Image = Other.m_Image;
+	m_LayerTilemap.m_Image = Other.m_LayerTilemap.m_Image;
 	m_HasGame = Other.m_HasGame;
-	m_Color = Other.m_Color;
-	m_ColorEnv = Other.m_ColorEnv;
-	m_ColorEnvOffset = Other.m_ColorEnvOffset;
+	m_LayerTilemap.m_Color = Other.m_LayerTilemap.m_Color;
+	m_LayerTilemap.m_ColorEnv = Other.m_LayerTilemap.m_ColorEnv;
+	m_LayerTilemap.m_ColorEnvOffset = Other.m_LayerTilemap.m_ColorEnvOffset;
 
 	m_AutoMapperConfig = Other.m_AutoMapperConfig;
 	m_AutoMapperReference = Other.m_AutoMapperReference;
@@ -78,12 +78,12 @@ CLayerTiles::~CLayerTiles()
 
 CTile CLayerTiles::GetTile(int x, int y) const
 {
-	return m_pTiles[y * m_Width + x];
+	return m_pTiles[y * m_LayerTilemap.m_Width + x];
 }
 
 void CLayerTiles::SetTile(int x, int y, CTile Tile)
 {
-	auto CurrentTile = m_pTiles[y * m_Width + x];
+	auto CurrentTile = m_pTiles[y * m_LayerTilemap.m_Width + x];
 	SetTileIgnoreHistory(x, y, Tile);
 	RecordStateChange(x, y, CurrentTile, Tile);
 
@@ -94,7 +94,7 @@ void CLayerTiles::SetTile(int x, int y, CTile Tile)
 		{
 			if(!m_pEditor->m_Map.m_pTeleLayer)
 			{
-				std::shared_ptr<CLayerTele> pLayerTele = std::make_shared<CLayerTele>(m_pEditor, m_Width, m_Height);
+				std::shared_ptr<CLayerTele> pLayerTele = std::make_shared<CLayerTele>(m_pEditor, m_LayerTilemap.m_Width, m_LayerTilemap.m_Height);
 				m_pEditor->m_Map.MakeTeleLayer(pLayerTele);
 				m_pEditor->m_Map.m_pGameGroup->AddLayer(pLayerTele);
 				int GameGroupIndex = std::find(m_pEditor->m_Map.m_vpGroups.begin(), m_pEditor->m_Map.m_vpGroups.end(), m_pEditor->m_Map.m_pGameGroup) - m_pEditor->m_Map.m_vpGroups.begin();
@@ -112,7 +112,7 @@ void CLayerTiles::SetTile(int x, int y, CTile Tile)
 
 void CLayerTiles::SetTileIgnoreHistory(int x, int y, CTile Tile) const
 {
-	m_pTiles[y * m_Width + x] = Tile;
+	m_pTiles[y * m_LayerTilemap.m_Width + x] = Tile;
 }
 
 void CLayerTiles::RecordStateChange(int x, int y, CTile Previous, CTile Tile)
@@ -125,21 +125,21 @@ void CLayerTiles::RecordStateChange(int x, int y, CTile Previous, CTile Tile)
 
 void CLayerTiles::PrepareForSave()
 {
-	for(int y = 0; y < m_Height; y++)
-		for(int x = 0; x < m_Width; x++)
-			m_pTiles[y * m_Width + x].m_Flags &= TILEFLAG_XFLIP | TILEFLAG_YFLIP | TILEFLAG_ROTATE;
+	for(int y = 0; y < m_LayerTilemap.m_Height; y++)
+		for(int x = 0; x < m_LayerTilemap.m_Width; x++)
+			m_pTiles[y * m_LayerTilemap.m_Width + x].m_Flags &= TILEFLAG_XFLIP | TILEFLAG_YFLIP | TILEFLAG_ROTATE;
 
-	if(m_Image != -1 && m_Color.a == 255)
+	if(m_LayerTilemap.m_Image != -1 && m_LayerTilemap.m_Color.a == 255)
 	{
-		for(int y = 0; y < m_Height; y++)
-			for(int x = 0; x < m_Width; x++)
-				m_pTiles[y * m_Width + x].m_Flags |= m_pEditor->m_Map.m_vpImages[m_Image]->m_aTileFlags[m_pTiles[y * m_Width + x].m_Index];
+		for(int y = 0; y < m_LayerTilemap.m_Height; y++)
+			for(int x = 0; x < m_LayerTilemap.m_Width; x++)
+				m_pTiles[y * m_LayerTilemap.m_Width + x].m_Flags |= m_pEditor->m_Map.m_vpImages[m_LayerTilemap.m_Image]->m_aTileFlags[m_pTiles[y * m_LayerTilemap.m_Width + x].m_Index];
 	}
 }
 
 void CLayerTiles::ExtractTiles(int TilemapItemVersion, const CTile *pSavedTiles, size_t SavedTilesSize) const
 {
-	const size_t DestSize = (size_t)m_Width * m_Height;
+	const size_t DestSize = (size_t)m_LayerTilemap.m_Width * m_LayerTilemap.m_Height;
 	if(TilemapItemVersion >= CMapItemLayerTilemap::VERSION_TEEWORLDS_TILESKIP)
 		CMap::ExtractTiles(m_pTiles, DestSize, pSavedTiles, SavedTilesSize);
 	else if(SavedTilesSize >= DestSize)
@@ -148,16 +148,16 @@ void CLayerTiles::ExtractTiles(int TilemapItemVersion, const CTile *pSavedTiles,
 
 void CLayerTiles::MakePalette() const
 {
-	for(int y = 0; y < m_Height; y++)
-		for(int x = 0; x < m_Width; x++)
-			m_pTiles[y * m_Width + x].m_Index = y * 16 + x;
+	for(int y = 0; y < m_LayerTilemap.m_Height; y++)
+		for(int x = 0; x < m_LayerTilemap.m_Width; x++)
+			m_pTiles[y * m_LayerTilemap.m_Width + x].m_Index = y * 16 + x;
 }
 
 void CLayerTiles::Render(bool Tileset)
 {
 	IGraphics::CTextureHandle Texture;
-	if(m_Image >= 0 && (size_t)m_Image < m_pEditor->m_Map.m_vpImages.size())
-		Texture = m_pEditor->m_Map.m_vpImages[m_Image]->m_Texture;
+	if(m_LayerTilemap.m_Image >= 0 && (size_t)m_LayerTilemap.m_Image < m_pEditor->m_Map.m_vpImages.size())
+		Texture = m_pEditor->m_Map.m_vpImages[m_LayerTilemap.m_Image]->m_Texture;
 	else if(m_HasGame)
 		Texture = m_pEditor->GetEntitiesTexture();
 	else if(m_HasFront)
@@ -173,26 +173,26 @@ void CLayerTiles::Render(bool Tileset)
 	Graphics()->TextureSet(Texture);
 
 	ColorRGBA ColorEnv = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-	m_pEditor->EnvelopeEval(m_ColorEnvOffset, m_ColorEnv, ColorEnv, 4);
-	const ColorRGBA Color = ColorRGBA(m_Color.r / 255.0f, m_Color.g / 255.0f, m_Color.b / 255.0f, m_Color.a / 255.0f).Multiply(ColorEnv);
+	m_pEditor->EnvelopeEval(m_LayerTilemap.m_ColorEnvOffset, m_LayerTilemap.m_ColorEnv, ColorEnv, 4);
+	const ColorRGBA Color = ColorRGBA(m_LayerTilemap.m_Color.r / 255.0f, m_LayerTilemap.m_Color.g / 255.0f, m_LayerTilemap.m_Color.b / 255.0f, m_LayerTilemap.m_Color.a / 255.0f).Multiply(ColorEnv);
 
 	Graphics()->BlendNone();
-	m_pEditor->RenderMap()->RenderTilemap(m_pTiles, m_Width, m_Height, 32.0f, Color, LAYERRENDERFLAG_OPAQUE);
+	m_pEditor->RenderMap()->RenderTilemap(m_pTiles, m_LayerTilemap.m_Width, m_LayerTilemap.m_Height, 32.0f, Color, LAYERRENDERFLAG_OPAQUE);
 	Graphics()->BlendNormal();
-	m_pEditor->RenderMap()->RenderTilemap(m_pTiles, m_Width, m_Height, 32.0f, Color, LAYERRENDERFLAG_TRANSPARENT);
+	m_pEditor->RenderMap()->RenderTilemap(m_pTiles, m_LayerTilemap.m_Width, m_LayerTilemap.m_Height, 32.0f, Color, LAYERRENDERFLAG_TRANSPARENT);
 
 	// Render DDRace Layers
 	if(!Tileset)
 	{
 		int OverlayRenderFlags = (g_Config.m_ClTextEntitiesEditor ? OVERLAYRENDERFLAG_TEXT : 0) | OVERLAYRENDERFLAG_EDITOR;
 		if(m_HasTele)
-			m_pEditor->RenderMap()->RenderTeleOverlay(static_cast<CLayerTele *>(this)->m_pTeleTile, m_Width, m_Height, 32.0f, OverlayRenderFlags);
+			m_pEditor->RenderMap()->RenderTeleOverlay(static_cast<CLayerTele *>(this)->m_pTeleTile, m_LayerTilemap.m_Width, m_LayerTilemap.m_Height, 32.0f, OverlayRenderFlags);
 		if(m_HasSpeedup)
-			m_pEditor->RenderMap()->RenderSpeedupOverlay(static_cast<CLayerSpeedup *>(this)->m_pSpeedupTile, m_Width, m_Height, 32.0f, OverlayRenderFlags);
+			m_pEditor->RenderMap()->RenderSpeedupOverlay(static_cast<CLayerSpeedup *>(this)->m_pSpeedupTile, m_LayerTilemap.m_Width, m_LayerTilemap.m_Height, 32.0f, OverlayRenderFlags);
 		if(m_HasSwitch)
-			m_pEditor->RenderMap()->RenderSwitchOverlay(static_cast<CLayerSwitch *>(this)->m_pSwitchTile, m_Width, m_Height, 32.0f, OverlayRenderFlags);
+			m_pEditor->RenderMap()->RenderSwitchOverlay(static_cast<CLayerSwitch *>(this)->m_pSwitchTile, m_LayerTilemap.m_Width, m_LayerTilemap.m_Height, 32.0f, OverlayRenderFlags);
 		if(m_HasTune)
-			m_pEditor->RenderMap()->RenderTuneOverlay(static_cast<CLayerTune *>(this)->m_pTuneTile, m_Width, m_Height, 32.0f, OverlayRenderFlags);
+			m_pEditor->RenderMap()->RenderTuneOverlay(static_cast<CLayerTune *>(this)->m_pTuneTile, m_LayerTilemap.m_Width, m_LayerTilemap.m_Height, 32.0f, OverlayRenderFlags);
 	}
 }
 
@@ -231,11 +231,11 @@ void CLayerTiles::Clamp(RECTi *pRect) const
 		pRect->y = 0;
 	}
 
-	if(pRect->x + pRect->w > m_Width)
-		pRect->w = m_Width - pRect->x;
+	if(pRect->x + pRect->w > m_LayerTilemap.m_Width)
+		pRect->w = m_LayerTilemap.m_Width - pRect->x;
 
-	if(pRect->y + pRect->h > m_Height)
-		pRect->h = m_Height - pRect->y;
+	if(pRect->y + pRect->h > m_LayerTilemap.m_Height)
+		pRect->h = m_LayerTilemap.m_Height - pRect->y;
 
 	if(pRect->h < 0)
 		pRect->h = 0;
@@ -250,9 +250,9 @@ bool CLayerTiles::IsEntitiesLayer() const
 
 bool CLayerTiles::IsEmpty() const
 {
-	for(int y = 0; y < m_Height; y++)
+	for(int y = 0; y < m_LayerTilemap.m_Height; y++)
 	{
-		for(int x = 0; x < m_Width; x++)
+		for(int x = 0; x < m_LayerTilemap.m_Width; x++)
 		{
 			if(GetTile(x, y).m_Index != 0)
 			{
@@ -281,7 +281,7 @@ template<typename T>
 static void InitGrabbedLayer(std::shared_ptr<T> &pLayer, CLayerTiles *pThisLayer)
 {
 	pLayer->m_pEditor = pThisLayer->m_pEditor;
-	pLayer->m_Image = pThisLayer->m_Image;
+	pLayer->m_LayerTilemap.m_Image = pThisLayer->m_LayerTilemap.m_Image;
 	pLayer->m_HasGame = pThisLayer->m_HasGame;
 	pLayer->m_HasFront = pThisLayer->m_HasFront;
 	pLayer->m_HasTele = pThisLayer->m_HasTele;
@@ -290,8 +290,8 @@ static void InitGrabbedLayer(std::shared_ptr<T> &pLayer, CLayerTiles *pThisLayer
 	pLayer->m_HasTune = pThisLayer->m_HasTune;
 	if(pThisLayer->m_pEditor->m_BrushColorEnabled)
 	{
-		pLayer->m_Color = pThisLayer->m_Color;
-		pLayer->m_Color.a = 255;
+		pLayer->m_LayerTilemap.m_Color = pThisLayer->m_LayerTilemap.m_Color;
+		pLayer->m_LayerTilemap.m_Color.a = 255;
 	}
 };
 
@@ -317,28 +317,28 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 			for(int x = 0; x < r.w; x++)
 			{
 				// copy the tiles
-				pGrabbed->m_pTiles[y * pGrabbed->m_Width + x] = GetTile(r.x + x, r.y + y);
+				pGrabbed->m_pTiles[y * pGrabbed->m_LayerTilemap.m_Width + x] = GetTile(r.x + x, r.y + y);
 
 				// copy the tele data
 				if(!m_pEditor->Input()->KeyIsPressed(KEY_SPACE))
 				{
-					pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x] = static_cast<CLayerTele *>(this)->m_pTeleTile[(r.y + y) * m_Width + (r.x + x)];
-					unsigned char TgtIndex = pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type;
+					pGrabbed->m_pTeleTile[y * pGrabbed->m_LayerTilemap.m_Width + x] = static_cast<CLayerTele *>(this)->m_pTeleTile[(r.y + y) * m_LayerTilemap.m_Width + (r.x + x)];
+					unsigned char TgtIndex = pGrabbed->m_pTeleTile[y * pGrabbed->m_LayerTilemap.m_Width + x].m_Type;
 					if(IsValidTeleTile(TgtIndex))
 					{
 						if(IsTeleTileNumberUsed(TgtIndex, false))
-							m_pEditor->m_TeleNumber = pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Number;
+							m_pEditor->m_TeleNumber = pGrabbed->m_pTeleTile[y * pGrabbed->m_LayerTilemap.m_Width + x].m_Number;
 						else if(IsTeleTileNumberUsed(TgtIndex, true))
-							m_pEditor->m_TeleCheckpointNumber = pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Number;
+							m_pEditor->m_TeleCheckpointNumber = pGrabbed->m_pTeleTile[y * pGrabbed->m_LayerTilemap.m_Width + x].m_Number;
 					}
 				}
 				else
 				{
-					const CTile &Tile = pGrabbed->m_pTiles[y * pGrabbed->m_Width + x];
+					const CTile &Tile = pGrabbed->m_pTiles[y * pGrabbed->m_LayerTilemap.m_Width + x];
 					if(IsValidTeleTile(Tile.m_Index) && IsTeleTileNumberUsedAny(Tile.m_Index))
 					{
-						pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type = Tile.m_Index;
-						pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Number = IsTeleTileCheckpoint(Tile.m_Index) ? m_pEditor->m_TeleCheckpointNumber : m_pEditor->m_TeleNumber;
+						pGrabbed->m_pTeleTile[y * pGrabbed->m_LayerTilemap.m_Width + x].m_Type = Tile.m_Index;
+						pGrabbed->m_pTeleTile[y * pGrabbed->m_LayerTilemap.m_Width + x].m_Number = IsTeleTileCheckpoint(Tile.m_Index) ? m_pEditor->m_TeleCheckpointNumber : m_pEditor->m_TeleNumber;
 					}
 				}
 			}
@@ -361,28 +361,28 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 			for(int x = 0; x < r.w; x++)
 			{
 				// copy the tiles
-				pGrabbed->m_pTiles[y * pGrabbed->m_Width + x] = GetTile(r.x + x, r.y + y);
+				pGrabbed->m_pTiles[y * pGrabbed->m_LayerTilemap.m_Width + x] = GetTile(r.x + x, r.y + y);
 
 				// copy the speedup data
 				if(!m_pEditor->Input()->KeyIsPressed(KEY_SPACE))
 				{
-					pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x] = static_cast<CLayerSpeedup *>(this)->m_pSpeedupTile[(r.y + y) * m_Width + (r.x + x)];
-					if(IsValidSpeedupTile(pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Type))
+					pGrabbed->m_pSpeedupTile[y * pGrabbed->m_LayerTilemap.m_Width + x] = static_cast<CLayerSpeedup *>(this)->m_pSpeedupTile[(r.y + y) * m_LayerTilemap.m_Width + (r.x + x)];
+					if(IsValidSpeedupTile(pGrabbed->m_pSpeedupTile[y * pGrabbed->m_LayerTilemap.m_Width + x].m_Type))
 					{
-						m_pEditor->m_SpeedupAngle = pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Angle;
-						m_pEditor->m_SpeedupForce = pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Force;
-						m_pEditor->m_SpeedupMaxSpeed = pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_MaxSpeed;
+						m_pEditor->m_SpeedupAngle = pGrabbed->m_pSpeedupTile[y * pGrabbed->m_LayerTilemap.m_Width + x].m_Angle;
+						m_pEditor->m_SpeedupForce = pGrabbed->m_pSpeedupTile[y * pGrabbed->m_LayerTilemap.m_Width + x].m_Force;
+						m_pEditor->m_SpeedupMaxSpeed = pGrabbed->m_pSpeedupTile[y * pGrabbed->m_LayerTilemap.m_Width + x].m_MaxSpeed;
 					}
 				}
 				else
 				{
-					const CTile &Tile = pGrabbed->m_pTiles[y * pGrabbed->m_Width + x];
+					const CTile &Tile = pGrabbed->m_pTiles[y * pGrabbed->m_LayerTilemap.m_Width + x];
 					if(IsValidSpeedupTile(Tile.m_Index))
 					{
-						pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Type = Tile.m_Index;
-						pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Angle = m_pEditor->m_SpeedupAngle;
-						pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Force = m_pEditor->m_SpeedupForce;
-						pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_MaxSpeed = m_pEditor->m_SpeedupMaxSpeed;
+						pGrabbed->m_pSpeedupTile[y * pGrabbed->m_LayerTilemap.m_Width + x].m_Type = Tile.m_Index;
+						pGrabbed->m_pSpeedupTile[y * pGrabbed->m_LayerTilemap.m_Width + x].m_Angle = m_pEditor->m_SpeedupAngle;
+						pGrabbed->m_pSpeedupTile[y * pGrabbed->m_LayerTilemap.m_Width + x].m_Force = m_pEditor->m_SpeedupForce;
+						pGrabbed->m_pSpeedupTile[y * pGrabbed->m_LayerTilemap.m_Width + x].m_MaxSpeed = m_pEditor->m_SpeedupMaxSpeed;
 					}
 				}
 			}
@@ -405,27 +405,27 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 			for(int x = 0; x < r.w; x++)
 			{
 				// copy the tiles
-				pGrabbed->m_pTiles[y * pGrabbed->m_Width + x] = GetTile(r.x + x, r.y + y);
+				pGrabbed->m_pTiles[y * pGrabbed->m_LayerTilemap.m_Width + x] = GetTile(r.x + x, r.y + y);
 
 				// copy the switch data
 				if(!m_pEditor->Input()->KeyIsPressed(KEY_SPACE))
 				{
-					pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x] = static_cast<CLayerSwitch *>(this)->m_pSwitchTile[(r.y + y) * m_Width + (r.x + x)];
-					if(IsValidSwitchTile(pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type))
+					pGrabbed->m_pSwitchTile[y * pGrabbed->m_LayerTilemap.m_Width + x] = static_cast<CLayerSwitch *>(this)->m_pSwitchTile[(r.y + y) * m_LayerTilemap.m_Width + (r.x + x)];
+					if(IsValidSwitchTile(pGrabbed->m_pSwitchTile[y * pGrabbed->m_LayerTilemap.m_Width + x].m_Type))
 					{
-						m_pEditor->m_SwitchNum = pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Number;
-						m_pEditor->m_SwitchDelay = pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Delay;
+						m_pEditor->m_SwitchNum = pGrabbed->m_pSwitchTile[y * pGrabbed->m_LayerTilemap.m_Width + x].m_Number;
+						m_pEditor->m_SwitchDelay = pGrabbed->m_pSwitchTile[y * pGrabbed->m_LayerTilemap.m_Width + x].m_Delay;
 					}
 				}
 				else
 				{
-					const CTile &Tile = pGrabbed->m_pTiles[y * pGrabbed->m_Width + x];
+					const CTile &Tile = pGrabbed->m_pTiles[y * pGrabbed->m_LayerTilemap.m_Width + x];
 					if(IsValidSwitchTile(Tile.m_Index))
 					{
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type = Tile.m_Index;
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Number = m_pEditor->m_SwitchNum;
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Delay = m_pEditor->m_SwitchDelay;
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Flags = Tile.m_Flags;
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_LayerTilemap.m_Width + x].m_Type = Tile.m_Index;
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_LayerTilemap.m_Width + x].m_Number = m_pEditor->m_SwitchNum;
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_LayerTilemap.m_Width + x].m_Delay = m_pEditor->m_SwitchDelay;
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_LayerTilemap.m_Width + x].m_Flags = Tile.m_Flags;
 					}
 				}
 			}
@@ -448,23 +448,23 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 		{
 			for(int x = 0; x < r.w; x++)
 			{
-				pGrabbed->m_pTiles[y * pGrabbed->m_Width + x] = GetTile(r.x + x, r.y + y);
+				pGrabbed->m_pTiles[y * pGrabbed->m_LayerTilemap.m_Width + x] = GetTile(r.x + x, r.y + y);
 
 				if(!m_pEditor->Input()->KeyIsPressed(KEY_SPACE))
 				{
-					pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x] = static_cast<CLayerTune *>(this)->m_pTuneTile[(r.y + y) * m_Width + (r.x + x)];
-					if(IsValidTuneTile(pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Type))
+					pGrabbed->m_pTuneTile[y * pGrabbed->m_LayerTilemap.m_Width + x] = static_cast<CLayerTune *>(this)->m_pTuneTile[(r.y + y) * m_LayerTilemap.m_Width + (r.x + x)];
+					if(IsValidTuneTile(pGrabbed->m_pTuneTile[y * pGrabbed->m_LayerTilemap.m_Width + x].m_Type))
 					{
-						m_pEditor->m_TuningNum = pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Number;
+						m_pEditor->m_TuningNum = pGrabbed->m_pTuneTile[y * pGrabbed->m_LayerTilemap.m_Width + x].m_Number;
 					}
 				}
 				else
 				{
-					const CTile &Tile = pGrabbed->m_pTiles[y * pGrabbed->m_Width + x];
+					const CTile &Tile = pGrabbed->m_pTiles[y * pGrabbed->m_LayerTilemap.m_Width + x];
 					if(IsValidTuneTile(Tile.m_Index))
 					{
-						pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Type = Tile.m_Index;
-						pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Number = m_pEditor->m_TuningNum;
+						pGrabbed->m_pTuneTile[y * pGrabbed->m_LayerTilemap.m_Width + x].m_Type = Tile.m_Index;
+						pGrabbed->m_pTuneTile[y * pGrabbed->m_LayerTilemap.m_Width + x].m_Number = m_pEditor->m_TuningNum;
 					}
 				}
 			}
@@ -483,7 +483,7 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 		// copy the tiles
 		for(int y = 0; y < r.h; y++)
 			for(int x = 0; x < r.w; x++)
-				pGrabbed->m_pTiles[y * pGrabbed->m_Width + x] = GetTile(r.x + x, r.y + y);
+				pGrabbed->m_pTiles[y * pGrabbed->m_LayerTilemap.m_Width + x] = GetTile(r.x + x, r.y + y);
 		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
 	}
 	else
@@ -496,7 +496,7 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 		// copy the tiles
 		for(int y = 0; y < r.h; y++)
 			for(int x = 0; x < r.w; x++)
-				pGrabbed->m_pTiles[y * pGrabbed->m_Width + x] = GetTile(r.x + x, r.y + y);
+				pGrabbed->m_pTiles[y * pGrabbed->m_LayerTilemap.m_Width + x] = GetTile(r.x + x, r.y + y);
 		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
 	}
 
@@ -526,11 +526,11 @@ void CLayerTiles::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIR
 			int fx = x + sx;
 			int fy = y + sy;
 
-			if(fx < 0 || fx >= m_Width || fy < 0 || fy >= m_Height)
+			if(fx < 0 || fx >= m_LayerTilemap.m_Width || fy < 0 || fy >= m_LayerTilemap.m_Height)
 				continue;
 
 			bool HasTile = GetTile(fx, fy).m_Index;
-			if(!Empty && pLt->GetTile(x % pLt->m_Width, y % pLt->m_Height).m_Index == TILE_THROUGH_CUT)
+			if(!Empty && pLt->GetTile(x % pLt->m_LayerTilemap.m_Width, y % pLt->m_LayerTilemap.m_Height).m_Index == TILE_THROUGH_CUT)
 			{
 				if(m_HasGame && m_pEditor->m_Map.m_pFrontLayer)
 				{
@@ -545,7 +545,7 @@ void CLayerTiles::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIR
 			if(!Destructive && HasTile)
 				continue;
 
-			SetTile(fx, fy, Empty ? CTile{TILE_AIR} : pLt->m_pTiles[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)]);
+			SetTile(fx, fy, Empty ? CTile{TILE_AIR} : pLt->m_pTiles[(y * pLt->m_LayerTilemap.m_Width + x % pLt->m_LayerTilemap.m_Width) % (pLt->m_LayerTilemap.m_Width * pLt->m_LayerTilemap.m_Height)]);
 		}
 	}
 	FlagModified(sx, sy, w, h);
@@ -563,13 +563,13 @@ void CLayerTiles::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 
 	bool Destructive = m_pEditor->m_BrushDrawDestructive || pTileLayer->IsEmpty();
 
-	for(int y = 0; y < pTileLayer->m_Height; y++)
-		for(int x = 0; x < pTileLayer->m_Width; x++)
+	for(int y = 0; y < pTileLayer->m_LayerTilemap.m_Height; y++)
+		for(int x = 0; x < pTileLayer->m_LayerTilemap.m_Width; x++)
 		{
 			int fx = x + sx;
 			int fy = y + sy;
 
-			if(fx < 0 || fx >= m_Width || fy < 0 || fy >= m_Height)
+			if(fx < 0 || fx >= m_LayerTilemap.m_Width || fy < 0 || fy >= m_LayerTilemap.m_Height)
 				continue;
 
 			bool HasTile = GetTile(fx, fy).m_Index;
@@ -591,7 +591,7 @@ void CLayerTiles::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 			SetTile(fx, fy, pTileLayer->GetTile(x, y));
 		}
 
-	FlagModified(sx, sy, pTileLayer->m_Width, pTileLayer->m_Height);
+	FlagModified(sx, sy, pTileLayer->m_LayerTilemap.m_Width, pTileLayer->m_LayerTilemap.m_Height);
 }
 
 void CLayerTiles::BrushFlipX()
@@ -602,12 +602,12 @@ void CLayerTiles::BrushFlipX()
 		return;
 
 	bool Rotate = !(m_HasGame || m_HasFront || m_HasSwitch) || m_pEditor->IsAllowPlaceUnusedTiles();
-	for(int y = 0; y < m_Height; y++)
-		for(int x = 0; x < m_Width; x++)
-			if(!Rotate && !IsRotatableTile(m_pTiles[y * m_Width + x].m_Index))
-				m_pTiles[y * m_Width + x].m_Flags = 0;
+	for(int y = 0; y < m_LayerTilemap.m_Height; y++)
+		for(int x = 0; x < m_LayerTilemap.m_Width; x++)
+			if(!Rotate && !IsRotatableTile(m_pTiles[y * m_LayerTilemap.m_Width + x].m_Index))
+				m_pTiles[y * m_LayerTilemap.m_Width + x].m_Flags = 0;
 			else
-				m_pTiles[y * m_Width + x].m_Flags ^= (m_pTiles[y * m_Width + x].m_Flags & TILEFLAG_ROTATE) ? TILEFLAG_YFLIP : TILEFLAG_XFLIP;
+				m_pTiles[y * m_LayerTilemap.m_Width + x].m_Flags ^= (m_pTiles[y * m_LayerTilemap.m_Width + x].m_Flags & TILEFLAG_ROTATE) ? TILEFLAG_YFLIP : TILEFLAG_XFLIP;
 }
 
 void CLayerTiles::BrushFlipY()
@@ -618,12 +618,12 @@ void CLayerTiles::BrushFlipY()
 		return;
 
 	bool Rotate = !(m_HasGame || m_HasFront || m_HasSwitch) || m_pEditor->IsAllowPlaceUnusedTiles();
-	for(int y = 0; y < m_Height; y++)
-		for(int x = 0; x < m_Width; x++)
-			if(!Rotate && !IsRotatableTile(m_pTiles[y * m_Width + x].m_Index))
-				m_pTiles[y * m_Width + x].m_Flags = 0;
+	for(int y = 0; y < m_LayerTilemap.m_Height; y++)
+		for(int x = 0; x < m_LayerTilemap.m_Width; x++)
+			if(!Rotate && !IsRotatableTile(m_pTiles[y * m_LayerTilemap.m_Width + x].m_Index))
+				m_pTiles[y * m_LayerTilemap.m_Width + x].m_Flags = 0;
 			else
-				m_pTiles[y * m_Width + x].m_Flags ^= (m_pTiles[y * m_Width + x].m_Flags & TILEFLAG_ROTATE) ? TILEFLAG_XFLIP : TILEFLAG_YFLIP;
+				m_pTiles[y * m_LayerTilemap.m_Width + x].m_Flags ^= (m_pTiles[y * m_LayerTilemap.m_Width + x].m_Flags & TILEFLAG_ROTATE) ? TILEFLAG_XFLIP : TILEFLAG_YFLIP;
 }
 
 void CLayerTiles::BrushRotate(float Amount)
@@ -635,14 +635,14 @@ void CLayerTiles::BrushRotate(float Amount)
 	if(Rotation == 1 || Rotation == 3)
 	{
 		// 90° rotation
-		CTile *pTempData = new CTile[m_Width * m_Height];
-		mem_copy(pTempData, m_pTiles, (size_t)m_Width * m_Height * sizeof(CTile));
+		CTile *pTempData = new CTile[m_LayerTilemap.m_Width * m_LayerTilemap.m_Height];
+		mem_copy(pTempData, m_pTiles, (size_t)m_LayerTilemap.m_Width * m_LayerTilemap.m_Height * sizeof(CTile));
 		CTile *pDst = m_pTiles;
 		bool Rotate = !(m_HasGame || m_HasFront) || m_pEditor->IsAllowPlaceUnusedTiles();
-		for(int x = 0; x < m_Width; ++x)
-			for(int y = m_Height - 1; y >= 0; --y, ++pDst)
+		for(int x = 0; x < m_LayerTilemap.m_Width; ++x)
+			for(int y = m_LayerTilemap.m_Height - 1; y >= 0; --y, ++pDst)
 			{
-				*pDst = pTempData[y * m_Width + x];
+				*pDst = pTempData[y * m_LayerTilemap.m_Width + x];
 				if(!Rotate && !IsRotatableTile(pDst->m_Index))
 					pDst->m_Flags = 0;
 				else
@@ -653,7 +653,7 @@ void CLayerTiles::BrushRotate(float Amount)
 				}
 			}
 
-		std::swap(m_Width, m_Height);
+		std::swap(m_LayerTilemap.m_Width, m_LayerTilemap.m_Height);
 		delete[] pTempData;
 	}
 
@@ -680,33 +680,33 @@ void CLayerTiles::Resize(int NewW, int NewH)
 	mem_zero(pNewData, (size_t)NewW * NewH * sizeof(CTile));
 
 	// copy old data
-	for(int y = 0; y < minimum(NewH, m_Height); y++)
-		mem_copy(&pNewData[y * NewW], &m_pTiles[y * m_Width], minimum(m_Width, NewW) * sizeof(CTile));
+	for(int y = 0; y < minimum(NewH, m_LayerTilemap.m_Height); y++)
+		mem_copy(&pNewData[y * NewW], &m_pTiles[y * m_LayerTilemap.m_Width], minimum(m_LayerTilemap.m_Width, NewW) * sizeof(CTile));
 
 	// replace old
 	delete[] m_pTiles;
 	m_pTiles = pNewData;
-	m_Width = NewW;
-	m_Height = NewH;
+	m_LayerTilemap.m_Width = NewW;
+	m_LayerTilemap.m_Height = NewH;
 
 	// resize tele layer if available
-	if(m_HasGame && m_pEditor->m_Map.m_pTeleLayer && (m_pEditor->m_Map.m_pTeleLayer->m_Width != NewW || m_pEditor->m_Map.m_pTeleLayer->m_Height != NewH))
+	if(m_HasGame && m_pEditor->m_Map.m_pTeleLayer && (m_pEditor->m_Map.m_pTeleLayer->m_LayerTilemap.m_Width != NewW || m_pEditor->m_Map.m_pTeleLayer->m_LayerTilemap.m_Height != NewH))
 		m_pEditor->m_Map.m_pTeleLayer->Resize(NewW, NewH);
 
 	// resize speedup layer if available
-	if(m_HasGame && m_pEditor->m_Map.m_pSpeedupLayer && (m_pEditor->m_Map.m_pSpeedupLayer->m_Width != NewW || m_pEditor->m_Map.m_pSpeedupLayer->m_Height != NewH))
+	if(m_HasGame && m_pEditor->m_Map.m_pSpeedupLayer && (m_pEditor->m_Map.m_pSpeedupLayer->m_LayerTilemap.m_Width != NewW || m_pEditor->m_Map.m_pSpeedupLayer->m_LayerTilemap.m_Height != NewH))
 		m_pEditor->m_Map.m_pSpeedupLayer->Resize(NewW, NewH);
 
 	// resize front layer
-	if(m_HasGame && m_pEditor->m_Map.m_pFrontLayer && (m_pEditor->m_Map.m_pFrontLayer->m_Width != NewW || m_pEditor->m_Map.m_pFrontLayer->m_Height != NewH))
+	if(m_HasGame && m_pEditor->m_Map.m_pFrontLayer && (m_pEditor->m_Map.m_pFrontLayer->m_LayerTilemap.m_Width != NewW || m_pEditor->m_Map.m_pFrontLayer->m_LayerTilemap.m_Height != NewH))
 		m_pEditor->m_Map.m_pFrontLayer->Resize(NewW, NewH);
 
 	// resize switch layer if available
-	if(m_HasGame && m_pEditor->m_Map.m_pSwitchLayer && (m_pEditor->m_Map.m_pSwitchLayer->m_Width != NewW || m_pEditor->m_Map.m_pSwitchLayer->m_Height != NewH))
+	if(m_HasGame && m_pEditor->m_Map.m_pSwitchLayer && (m_pEditor->m_Map.m_pSwitchLayer->m_LayerTilemap.m_Width != NewW || m_pEditor->m_Map.m_pSwitchLayer->m_LayerTilemap.m_Height != NewH))
 		m_pEditor->m_Map.m_pSwitchLayer->Resize(NewW, NewH);
 
 	// resize tune layer if available
-	if(m_HasGame && m_pEditor->m_Map.m_pTuneLayer && (m_pEditor->m_Map.m_pTuneLayer->m_Width != NewW || m_pEditor->m_Map.m_pTuneLayer->m_Height != NewH))
+	if(m_HasGame && m_pEditor->m_Map.m_pTuneLayer && (m_pEditor->m_Map.m_pTuneLayer->m_LayerTilemap.m_Width != NewW || m_pEditor->m_Map.m_pTuneLayer->m_LayerTilemap.m_Height != NewH))
 		m_pEditor->m_Map.m_pTuneLayer->Resize(NewW, NewH);
 }
 
@@ -724,13 +724,13 @@ void CLayerTiles::ShowInfo()
 
 	int StartY = maximum(0, (int)(ScreenY0 / 32.0f) - 1);
 	int StartX = maximum(0, (int)(ScreenX0 / 32.0f) - 1);
-	int EndY = minimum((int)(ScreenY1 / 32.0f) + 1, m_Height);
-	int EndX = minimum((int)(ScreenX1 / 32.0f) + 1, m_Width);
+	int EndY = minimum((int)(ScreenY1 / 32.0f) + 1, m_LayerTilemap.m_Height);
+	int EndX = minimum((int)(ScreenX1 / 32.0f) + 1, m_LayerTilemap.m_Width);
 
 	for(int y = StartY; y < EndY; y++)
 		for(int x = StartX; x < EndX; x++)
 		{
-			int c = x + y * m_Width;
+			int c = x + y * m_LayerTilemap.m_Width;
 			if(m_pTiles[c].m_Index)
 			{
 				char aBuf[4];
@@ -788,8 +788,8 @@ void CLayerTiles::FillGameTiles(EGameTileOp Fill)
 	{
 		std::shared_ptr<CLayerGroup> pGroup = m_pEditor->m_Map.m_vpGroups[m_pEditor->m_SelectedGroup];
 		m_FillGameTile = Result;
-		const int OffsetX = -pGroup->m_OffsetX / 32;
-		const int OffsetY = -pGroup->m_OffsetY / 32;
+		const int OffsetX = -pGroup->m_ItemGroup.m_OffsetX / 32;
+		const int OffsetY = -pGroup->m_ItemGroup.m_OffsetY / 32;
 
 		std::vector<std::shared_ptr<IEditorAction>> vpActions;
 		std::shared_ptr<CLayerTiles> pGLayer = m_pEditor->m_Map.m_pGameLayer;
@@ -798,16 +798,16 @@ void CLayerTiles::FillGameTiles(EGameTileOp Fill)
 
 		if(Result != TILE_TELECHECKIN && Result != TILE_TELECHECKINEVIL)
 		{
-			if(pGLayer->m_Width < m_Width + OffsetX || pGLayer->m_Height < m_Height + OffsetY)
+			if(pGLayer->m_LayerTilemap.m_Width < m_LayerTilemap.m_Width + OffsetX || pGLayer->m_LayerTilemap.m_Height < m_LayerTilemap.m_Height + OffsetY)
 			{
 				std::map<int, std::shared_ptr<CLayer>> savedLayers;
 				savedLayers[LAYERTYPE_TILES] = pGLayer->Duplicate();
 				savedLayers[LAYERTYPE_GAME] = savedLayers[LAYERTYPE_TILES];
 
-				int PrevW = pGLayer->m_Width;
-				int PrevH = pGLayer->m_Height;
-				const int NewW = pGLayer->m_Width < m_Width + OffsetX ? m_Width + OffsetX : pGLayer->m_Width;
-				const int NewH = pGLayer->m_Height < m_Height + OffsetY ? m_Height + OffsetY : pGLayer->m_Height;
+				int PrevW = pGLayer->m_LayerTilemap.m_Width;
+				int PrevH = pGLayer->m_LayerTilemap.m_Height;
+				const int NewW = pGLayer->m_LayerTilemap.m_Width < m_LayerTilemap.m_Width + OffsetX ? m_LayerTilemap.m_Width + OffsetX : pGLayer->m_LayerTilemap.m_Width;
+				const int NewH = pGLayer->m_LayerTilemap.m_Height < m_LayerTilemap.m_Height + OffsetY ? m_LayerTilemap.m_Height + OffsetY : pGLayer->m_LayerTilemap.m_Height;
 				pGLayer->Resize(NewW, NewH);
 				vpActions.push_back(std::make_shared<CEditorActionEditLayerTilesProp>(m_pEditor, GameGroupIndex, GameLayerIndex, ETilesProp::PROP_WIDTH, PrevW, NewW));
 				const std::shared_ptr<CEditorActionEditLayerTilesProp> &Action1 = std::static_pointer_cast<CEditorActionEditLayerTilesProp>(vpActions[vpActions.size() - 1]);
@@ -819,9 +819,9 @@ void CLayerTiles::FillGameTiles(EGameTileOp Fill)
 			}
 
 			int Changes = 0;
-			for(int y = OffsetY < 0 ? -OffsetY : 0; y < m_Height; y++)
+			for(int y = OffsetY < 0 ? -OffsetY : 0; y < m_LayerTilemap.m_Height; y++)
 			{
-				for(int x = OffsetX < 0 ? -OffsetX : 0; x < m_Width; x++)
+				for(int x = OffsetX < 0 ? -OffsetX : 0; x < m_LayerTilemap.m_Width; x++)
 				{
 					if(GetTile(x, y).m_Index)
 					{
@@ -840,31 +840,31 @@ void CLayerTiles::FillGameTiles(EGameTileOp Fill)
 		{
 			if(!m_pEditor->m_Map.m_pTeleLayer)
 			{
-				std::shared_ptr<CLayerTele> pLayer = std::make_shared<CLayerTele>(m_pEditor, m_Width, m_Height);
+				std::shared_ptr<CLayerTele> pLayer = std::make_shared<CLayerTele>(m_pEditor, m_LayerTilemap.m_Width, m_LayerTilemap.m_Height);
 				m_pEditor->m_Map.MakeTeleLayer(pLayer);
 				m_pEditor->m_Map.m_pGameGroup->AddLayer(pLayer);
 
 				vpActions.push_back(std::make_shared<CEditorActionAddLayer>(m_pEditor, GameGroupIndex, m_pEditor->m_Map.m_pGameGroup->m_vpLayers.size() - 1));
 
-				if(m_Width != pGLayer->m_Width || m_Height > pGLayer->m_Height)
+				if(m_LayerTilemap.m_Width != pGLayer->m_LayerTilemap.m_Width || m_LayerTilemap.m_Height > pGLayer->m_LayerTilemap.m_Height)
 				{
 					std::map<int, std::shared_ptr<CLayer>> savedLayers;
 					savedLayers[LAYERTYPE_TILES] = pGLayer->Duplicate();
 					savedLayers[LAYERTYPE_GAME] = savedLayers[LAYERTYPE_TILES];
 
-					int NewW = pGLayer->m_Width;
-					int NewH = pGLayer->m_Height;
-					if(m_Width > pGLayer->m_Width)
+					int NewW = pGLayer->m_LayerTilemap.m_Width;
+					int NewH = pGLayer->m_LayerTilemap.m_Height;
+					if(m_LayerTilemap.m_Width > pGLayer->m_LayerTilemap.m_Width)
 					{
-						NewW = m_Width;
+						NewW = m_LayerTilemap.m_Width;
 					}
-					if(m_Height > pGLayer->m_Height)
+					if(m_LayerTilemap.m_Height > pGLayer->m_LayerTilemap.m_Height)
 					{
-						NewH = m_Height;
+						NewH = m_LayerTilemap.m_Height;
 					}
 
-					int PrevW = pGLayer->m_Width;
-					int PrevH = pGLayer->m_Height;
+					int PrevW = pGLayer->m_LayerTilemap.m_Width;
+					int PrevH = pGLayer->m_LayerTilemap.m_Height;
 					pLayer->Resize(NewW, NewH);
 					vpActions.push_back(std::make_shared<CEditorActionEditLayerTilesProp>(m_pEditor, GameGroupIndex, GameLayerIndex, ETilesProp::PROP_WIDTH, PrevW, NewW));
 					const std::shared_ptr<CEditorActionEditLayerTilesProp> &Action1 = std::static_pointer_cast<CEditorActionEditLayerTilesProp>(vpActions[vpActions.size() - 1]);
@@ -879,16 +879,16 @@ void CLayerTiles::FillGameTiles(EGameTileOp Fill)
 			std::shared_ptr<CLayerTele> pTLayer = m_pEditor->m_Map.m_pTeleLayer;
 			int TeleLayerIndex = std::find(m_pEditor->m_Map.m_pGameGroup->m_vpLayers.begin(), m_pEditor->m_Map.m_pGameGroup->m_vpLayers.end(), pTLayer) - m_pEditor->m_Map.m_pGameGroup->m_vpLayers.begin();
 
-			if(pTLayer->m_Width < m_Width + OffsetX || pTLayer->m_Height < m_Height + OffsetY)
+			if(pTLayer->m_LayerTilemap.m_Width < m_LayerTilemap.m_Width + OffsetX || pTLayer->m_LayerTilemap.m_Height < m_LayerTilemap.m_Height + OffsetY)
 			{
 				std::map<int, std::shared_ptr<CLayer>> savedLayers;
 				savedLayers[LAYERTYPE_TILES] = pTLayer->Duplicate();
 				savedLayers[LAYERTYPE_TELE] = savedLayers[LAYERTYPE_TILES];
 
-				int PrevW = pTLayer->m_Width;
-				int PrevH = pTLayer->m_Height;
-				int NewW = pTLayer->m_Width < m_Width + OffsetX ? m_Width + OffsetX : pTLayer->m_Width;
-				int NewH = pTLayer->m_Height < m_Height + OffsetY ? m_Height + OffsetY : pTLayer->m_Height;
+				int PrevW = pTLayer->m_LayerTilemap.m_Width;
+				int PrevH = pTLayer->m_LayerTilemap.m_Height;
+				int NewW = pTLayer->m_LayerTilemap.m_Width < m_LayerTilemap.m_Width + OffsetX ? m_LayerTilemap.m_Width + OffsetX : pTLayer->m_LayerTilemap.m_Width;
+				int NewH = pTLayer->m_LayerTilemap.m_Height < m_LayerTilemap.m_Height + OffsetY ? m_LayerTilemap.m_Height + OffsetY : pTLayer->m_LayerTilemap.m_Height;
 				pTLayer->Resize(NewW, NewH);
 				std::shared_ptr<CEditorActionEditLayerTilesProp> Action1, Action2;
 				vpActions.push_back(Action1 = std::make_shared<CEditorActionEditLayerTilesProp>(m_pEditor, GameGroupIndex, TeleLayerIndex, ETilesProp::PROP_WIDTH, PrevW, NewW));
@@ -899,13 +899,13 @@ void CLayerTiles::FillGameTiles(EGameTileOp Fill)
 			}
 
 			int Changes = 0;
-			for(int y = OffsetY < 0 ? -OffsetY : 0; y < m_Height; y++)
+			for(int y = OffsetY < 0 ? -OffsetY : 0; y < m_LayerTilemap.m_Height; y++)
 			{
-				for(int x = OffsetX < 0 ? -OffsetX : 0; x < m_Width; x++)
+				for(int x = OffsetX < 0 ? -OffsetX : 0; x < m_LayerTilemap.m_Width; x++)
 				{
 					if(GetTile(x, y).m_Index)
 					{
-						auto TileIndex = (y + OffsetY) * pTLayer->m_Width + x + OffsetX;
+						auto TileIndex = (y + OffsetY) * pTLayer->m_LayerTilemap.m_Width + x + OffsetX;
 						Changes++;
 
 						STeleTileStateChange::SData Previous{
@@ -944,7 +944,7 @@ bool CLayerTiles::CanFillGameTiles() const
 	std::shared_ptr<CLayerGroup> pGroup = m_pEditor->m_Map.m_vpGroups[m_pEditor->m_SelectedGroup];
 
 	// Game tiles can only be constructed if the layer is relative to the game layer
-	return !(pGroup->m_OffsetX % 32) && !(pGroup->m_OffsetY % 32) && pGroup->m_ParallaxX == 100 && pGroup->m_ParallaxY == 100;
+	return !(pGroup->m_ItemGroup.m_OffsetX % 32) && !(pGroup->m_ItemGroup.m_OffsetY % 32) && pGroup->m_ItemGroup.m_ParallaxX == 100 && pGroup->m_ItemGroup.m_ParallaxY == 100;
 }
 
 CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
@@ -993,7 +993,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 
 	if(m_pEditor->m_Map.m_pGameLayer.get() != this)
 	{
-		if(m_Image >= 0 && (size_t)m_Image < m_pEditor->m_Map.m_vpImages.size() && m_pEditor->m_Map.m_vpImages[m_Image]->m_AutoMapper.IsLoaded() && m_AutoMapperConfig != -1)
+		if(m_LayerTilemap.m_Image >= 0 && (size_t)m_LayerTilemap.m_Image < m_pEditor->m_Map.m_vpImages.size() && m_pEditor->m_Map.m_vpImages[m_LayerTilemap.m_Image]->m_AutoMapper.IsLoaded() && m_AutoMapperConfig != -1)
 		{
 			pToolBox->HSplitBottom(2.0f, pToolBox, nullptr);
 			pToolBox->HSplitBottom(12.0f, pToolBox, &Button);
@@ -1006,7 +1006,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 				if(m_pEditor->DoButton_Editor(&s_AutoMapperButtonAuto, "A", m_AutoAutoMap, &ButtonAuto, BUTTONFLAG_LEFT, "Automatically run the automapper after modifications."))
 				{
 					m_AutoAutoMap = !m_AutoAutoMap;
-					FlagModified(0, 0, m_Width, m_Height);
+					FlagModified(0, 0, m_LayerTilemap.m_Width, m_LayerTilemap.m_Height);
 					if(!m_TilesHistory.empty()) // Sometimes pressing that button causes the automap to run so we should be able to undo that
 					{
 						// record undo
@@ -1019,7 +1019,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 			static int s_AutoMapperButton = 0;
 			if(m_pEditor->DoButton_Editor(&s_AutoMapperButton, "Automap", 0, &Button, BUTTONFLAG_LEFT, "Run the automapper."))
 			{
-				m_pEditor->m_Map.m_vpImages[m_Image]->m_AutoMapper.Proceed(this, m_pEditor->m_Map.m_pGameLayer.get(), m_AutoMapperReference, m_AutoMapperConfig, m_Seed);
+				m_pEditor->m_Map.m_vpImages[m_LayerTilemap.m_Image]->m_AutoMapper.Proceed(this, m_pEditor->m_Map.m_pGameLayer.get(), m_AutoMapperReference, m_AutoMapperConfig, m_Seed);
 				// record undo
 				m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(m_pEditor, m_pEditor->m_SelectedGroup, m_pEditor->m_vSelectedLayers[0], "Auto map", m_TilesHistory));
 				ClearHistory();
@@ -1029,15 +1029,15 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	}
 
 	CProperty aProps[] = {
-		{"Width", m_Width, PROPTYPE_INT, 1, 100000},
-		{"Height", m_Height, PROPTYPE_INT, 1, 100000},
+		{"Width", m_LayerTilemap.m_Width, PROPTYPE_INT, 1, 100000},
+		{"Height", m_LayerTilemap.m_Height, PROPTYPE_INT, 1, 100000},
 		{"Shift", 0, PROPTYPE_SHIFT, 0, 0},
 		{"Shift by", m_pEditor->m_ShiftBy, PROPTYPE_INT, 1, 100000},
-		{"Image", m_Image, PROPTYPE_IMAGE, 0, 0},
-		{"Color", PackColor(m_Color), PROPTYPE_COLOR, 0, 0},
-		{"Color Env", m_ColorEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
-		{"Color TO", m_ColorEnvOffset, PROPTYPE_INT, -1000000, 1000000},
-		{"Auto Rule", m_AutoMapperConfig, PROPTYPE_AUTOMAPPER, m_Image, 0},
+		{"Image", m_LayerTilemap.m_Image, PROPTYPE_IMAGE, 0, 0},
+		{"Color", PackColor(m_LayerTilemap.m_Color), PROPTYPE_COLOR, 0, 0},
+		{"Color Env", m_LayerTilemap.m_ColorEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
+		{"Color TO", m_LayerTilemap.m_ColorEnvOffset, PROPTYPE_INT, -1000000, 1000000},
+		{"Auto Rule", m_AutoMapperConfig, PROPTYPE_AUTOMAPPER, m_LayerTilemap.m_Image, 0},
 		{"Reference", m_AutoMapperReference, PROPTYPE_AUTOMAPPER_REFERENCE, 0, 0},
 		{"Live Gametiles", m_LiveGameTiles, PROPTYPE_BOOL, 0, 1},
 		{"Seed", m_Seed, PROPTYPE_INT, 0, 1000000000},
@@ -1051,7 +1051,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		aProps[(int)ETilesProp::PROP_AUTOMAPPER].m_pName = nullptr;
 		aProps[(int)ETilesProp::PROP_AUTOMAPPER_REFERENCE].m_pName = nullptr;
 	}
-	if(m_Image == -1)
+	if(m_LayerTilemap.m_Image == -1)
 	{
 		aProps[(int)ETilesProp::PROP_AUTOMAPPER].m_pName = nullptr;
 		aProps[(int)ETilesProp::PROP_AUTOMAPPER_REFERENCE].m_pName = nullptr;
@@ -1074,7 +1074,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 			m_pEditor->m_PopupEventActivated = true;
 			m_pEditor->m_LargeLayerWasWarned = true;
 		}
-		Resize(NewVal, m_Height);
+		Resize(NewVal, m_LayerTilemap.m_Height);
 	}
 	else if(Prop == ETilesProp::PROP_HEIGHT && NewVal > 1)
 	{
@@ -1084,7 +1084,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 			m_pEditor->m_PopupEventActivated = true;
 			m_pEditor->m_LargeLayerWasWarned = true;
 		}
-		Resize(m_Width, NewVal);
+		Resize(m_LayerTilemap.m_Width, NewVal);
 	}
 	else if(Prop == ETilesProp::PROP_SHIFT)
 	{
@@ -1096,39 +1096,39 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	}
 	else if(Prop == ETilesProp::PROP_IMAGE)
 	{
-		m_Image = NewVal;
+		m_LayerTilemap.m_Image = NewVal;
 		if(NewVal == -1)
 		{
-			m_Image = -1;
+			m_LayerTilemap.m_Image = -1;
 		}
 		else
 		{
-			m_Image = NewVal % m_pEditor->m_Map.m_vpImages.size();
+			m_LayerTilemap.m_Image = NewVal % m_pEditor->m_Map.m_vpImages.size();
 			m_AutoMapperConfig = -1;
 
-			if(m_pEditor->m_Map.m_vpImages[m_Image]->m_Width % 16 != 0 || m_pEditor->m_Map.m_vpImages[m_Image]->m_Height % 16 != 0)
+			if(m_pEditor->m_Map.m_vpImages[m_LayerTilemap.m_Image]->m_Width % 16 != 0 || m_pEditor->m_Map.m_vpImages[m_LayerTilemap.m_Image]->m_Height % 16 != 0)
 			{
 				m_pEditor->m_PopupEventType = CEditor::POPEVENT_IMAGEDIV16;
 				m_pEditor->m_PopupEventActivated = true;
-				m_Image = -1;
+				m_LayerTilemap.m_Image = -1;
 			}
 		}
 	}
 	else if(Prop == ETilesProp::PROP_COLOR)
 	{
-		m_Color = UnpackColor(NewVal);
+		m_LayerTilemap.m_Color = UnpackColor(NewVal);
 	}
 	else if(Prop == ETilesProp::PROP_COLOR_ENV)
 	{
 		int Index = std::clamp(NewVal - 1, -1, (int)m_pEditor->m_Map.m_vpEnvelopes.size() - 1);
-		const int Step = (Index - m_ColorEnv) % 2;
+		const int Step = (Index - m_LayerTilemap.m_ColorEnv) % 2;
 		if(Step != 0)
 		{
 			for(; Index >= -1 && Index < (int)m_pEditor->m_Map.m_vpEnvelopes.size(); Index += Step)
 			{
 				if(Index == -1 || m_pEditor->m_Map.m_vpEnvelopes[Index]->GetChannels() == 4)
 				{
-					m_ColorEnv = Index;
+					m_LayerTilemap.m_ColorEnv = Index;
 					break;
 				}
 			}
@@ -1136,7 +1136,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	}
 	else if(Prop == ETilesProp::PROP_COLOR_ENV_OFFSET)
 	{
-		m_ColorEnvOffset = NewVal;
+		m_LayerTilemap.m_ColorEnvOffset = NewVal;
 	}
 	else if(Prop == ETilesProp::PROP_SEED)
 	{
@@ -1144,8 +1144,8 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	}
 	else if(Prop == ETilesProp::PROP_AUTOMAPPER)
 	{
-		if(m_Image >= 0 && m_pEditor->m_Map.m_vpImages[m_Image]->m_AutoMapper.ConfigNamesNum() > 0 && NewVal >= 0)
-			m_AutoMapperConfig = NewVal % m_pEditor->m_Map.m_vpImages[m_Image]->m_AutoMapper.ConfigNamesNum();
+		if(m_LayerTilemap.m_Image >= 0 && m_pEditor->m_Map.m_vpImages[m_LayerTilemap.m_Image]->m_AutoMapper.ConfigNamesNum() > 0 && NewVal >= 0)
+			m_AutoMapperConfig = NewVal % m_pEditor->m_Map.m_vpImages[m_LayerTilemap.m_Image]->m_AutoMapper.ConfigNamesNum();
 		else
 			m_AutoMapperConfig = -1;
 	}
@@ -1163,7 +1163,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	// Check if modified property could have an effect on automapper
 	if((State == EEditState::END || State == EEditState::ONE_GO) && HasAutomapEffect(Prop))
 	{
-		FlagModified(0, 0, m_Width, m_Height);
+		FlagModified(0, 0, m_LayerTilemap.m_Width, m_LayerTilemap.m_Height);
 
 		// Record undo if automapper was ran
 		if(m_AutoAutoMap && !m_TilesHistory.empty())
@@ -1219,8 +1219,8 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 							SavedLayers[LAYERTYPE_GAME] = pEditor->m_Map.m_pGameLayer->Duplicate();
 					}
 
-					int PrevW = pLayer->m_Width;
-					int PrevH = pLayer->m_Height;
+					int PrevW = pLayer->m_LayerTilemap.m_Width;
+					int PrevH = pLayer->m_LayerTilemap.m_Height;
 					pLayer->Resize(State.m_Width, State.m_Height);
 
 					if(PrevW != State.m_Width)
@@ -1240,12 +1240,12 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 
 				if(HasModifiedColor && !pLayer->IsEntitiesLayer())
 				{
-					const int PackedColor = PackColor(pLayer->m_Color);
-					pLayer->m_Color = UnpackColor(State.m_Color);
+					const int PackedColor = PackColor(pLayer->m_LayerTilemap.m_Color);
+					pLayer->m_LayerTilemap.m_Color = UnpackColor(State.m_Color);
 					vpActions.push_back(std::make_shared<CEditorActionEditLayerTilesProp>(pEditor, GroupIndex, LayerIndex, ETilesProp::PROP_COLOR, PackedColor, State.m_Color));
 				}
 
-				pLayer->FlagModified(0, 0, pLayer->m_Width, pLayer->m_Height);
+				pLayer->FlagModified(0, 0, pLayer->m_LayerTilemap.m_Width, pLayer->m_LayerTilemap.m_Height);
 			}
 			State.m_Modified = 0;
 
@@ -1258,13 +1258,13 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 	{
 		for(auto &pLayer : vpLayers)
 		{
-			if(pLayer->m_Width > State.m_Width)
-				State.m_Width = pLayer->m_Width;
-			if(pLayer->m_Height > State.m_Height)
-				State.m_Height = pLayer->m_Height;
+			if(pLayer->m_LayerTilemap.m_Width > State.m_Width)
+				State.m_Width = pLayer->m_LayerTilemap.m_Width;
+			if(pLayer->m_LayerTilemap.m_Height > State.m_Height)
+				State.m_Height = pLayer->m_LayerTilemap.m_Height;
 		}
 
-		State.m_Color = PackColor(vpLayers[0]->m_Color);
+		State.m_Color = PackColor(vpLayers[0]->m_LayerTilemap.m_Color);
 	}
 
 	{
@@ -1353,20 +1353,20 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 void CLayerTiles::FlagModified(int x, int y, int w, int h)
 {
 	m_pEditor->m_Map.OnModify();
-	if(m_Seed != 0 && m_AutoMapperConfig != -1 && m_AutoAutoMap && m_Image >= 0)
+	if(m_Seed != 0 && m_AutoMapperConfig != -1 && m_AutoAutoMap && m_LayerTilemap.m_Image >= 0)
 	{
-		m_pEditor->m_Map.m_vpImages[m_Image]->m_AutoMapper.ProceedLocalized(this, m_pEditor->m_Map.m_pGameLayer.get(), m_AutoMapperReference, m_AutoMapperConfig, m_Seed, x, y, w, h);
+		m_pEditor->m_Map.m_vpImages[m_LayerTilemap.m_Image]->m_AutoMapper.ProceedLocalized(this, m_pEditor->m_Map.m_pGameLayer.get(), m_AutoMapperReference, m_AutoMapperConfig, m_Seed, x, y, w, h);
 	}
 }
 
 void CLayerTiles::ModifyImageIndex(const FIndexModifyFunction &IndexModifyFunction)
 {
-	IndexModifyFunction(&m_Image);
+	IndexModifyFunction(&m_LayerTilemap.m_Image);
 }
 
 void CLayerTiles::ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction)
 {
-	IndexModifyFunction(&m_ColorEnv);
+	IndexModifyFunction(&m_LayerTilemap.m_ColorEnv);
 }
 
 void CLayerTiles::ShowPreventUnusedTilesWarning()
