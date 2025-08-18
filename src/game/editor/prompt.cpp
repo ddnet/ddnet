@@ -49,7 +49,7 @@ void CPrompt::SetInactive()
 
 bool CPrompt::OnInput(const IInput::CEvent &Event)
 {
-	if(Input()->ModifierIsPressed() && Input()->KeyIsPressed(KEY_P))
+	if(Editor()->m_Dialog == DIALOG_NONE && Input()->ModifierIsPressed() && Input()->KeyPress(KEY_P))
 	{
 		SetActive();
 	}
