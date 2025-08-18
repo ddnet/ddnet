@@ -11,13 +11,13 @@ CLayerSounds::CLayerSounds(CEditor *pEditor) :
 {
 	m_Type = LAYERTYPE_SOUNDS;
 	m_aName[0] = '\0';
-	m_Sound = -1;
+	m_LayerSounds.m_Sound = -1;
 }
 
 CLayerSounds::CLayerSounds(const CLayerSounds &Other) :
 	CLayer(Other)
 {
-	m_Sound = Other.m_Sound;
+	m_LayerSounds.m_Sound = Other.m_LayerSounds.m_Sound;
 	m_vSources = Other.m_vSources;
 }
 
@@ -119,7 +119,7 @@ int CLayerSounds::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 {
 	// create new layer
 	std::shared_ptr<CLayerSounds> pGrabbed = std::make_shared<CLayerSounds>(m_pEditor);
-	pGrabbed->m_Sound = m_Sound;
+	pGrabbed->m_LayerSounds.m_Sound = m_LayerSounds.m_Sound;
 	pBrush->AddLayer(pGrabbed);
 
 	for(const auto &Source : m_vSources)
@@ -160,7 +160,7 @@ void CLayerSounds::BrushPlace(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 CUi::EPopupMenuFunctionResult CLayerSounds::RenderProperties(CUIRect *pToolBox)
 {
 	CProperty aProps[] = {
-		{"Sound", m_Sound, PROPTYPE_SOUND, -1, 0},
+		{"Sound", m_LayerSounds.m_Sound, PROPTYPE_SOUND, -1, 0},
 		{nullptr},
 	};
 
@@ -178,9 +178,9 @@ CUi::EPopupMenuFunctionResult CLayerSounds::RenderProperties(CUIRect *pToolBox)
 	if(Prop == ELayerSoundsProp::PROP_SOUND)
 	{
 		if(NewVal >= 0)
-			m_Sound = NewVal % m_pEditor->m_Map.m_vpSounds.size();
+			m_LayerSounds.m_Sound = NewVal % m_pEditor->m_Map.m_vpSounds.size();
 		else
-			m_Sound = -1;
+			m_LayerSounds.m_Sound = -1;
 	}
 
 	s_Tracker.End(Prop, State);
@@ -190,7 +190,7 @@ CUi::EPopupMenuFunctionResult CLayerSounds::RenderProperties(CUIRect *pToolBox)
 
 void CLayerSounds::ModifySoundIndex(const FIndexModifyFunction &IndexModifyFunction)
 {
-	IndexModifyFunction(&m_Sound);
+	IndexModifyFunction(&m_LayerSounds.m_Sound);
 }
 
 void CLayerSounds::ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction)

@@ -37,8 +37,8 @@ void CEditor::AddQuadOrSound()
 	int y = aMapping[1] + (aMapping[3] - aMapping[1]) / 2;
 	if(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_Q) && Input()->ModifierIsPressed())
 	{
-		x += Ui()->MouseWorldX() - (MapView()->GetWorldOffset().x * pGroup->m_ParallaxX / 100) - pGroup->m_OffsetX;
-		y += Ui()->MouseWorldY() - (MapView()->GetWorldOffset().y * pGroup->m_ParallaxY / 100) - pGroup->m_OffsetY;
+		x += Ui()->MouseWorldX() - (MapView()->GetWorldOffset().x * pGroup->m_ItemGroup.m_ParallaxX / 100) - pGroup->m_ItemGroup.m_OffsetX;
+		y += Ui()->MouseWorldY() - (MapView()->GetWorldOffset().y * pGroup->m_ItemGroup.m_ParallaxY / 100) - pGroup->m_ItemGroup.m_OffsetY;
 	}
 
 	if(pLayer->m_Type == LAYERTYPE_QUADS)
@@ -66,7 +66,7 @@ void CEditor::AddSoundLayer()
 
 void CEditor::AddTileLayer()
 {
-	std::shared_ptr<CLayer> pTileLayer = std::make_shared<CLayerTiles>(this, m_Map.m_pGameLayer->m_Width, m_Map.m_pGameLayer->m_Height);
+	std::shared_ptr<CLayer> pTileLayer = std::make_shared<CLayerTiles>(this, m_Map.m_pGameLayer->m_LayerTilemap.m_Width, m_Map.m_pGameLayer->m_LayerTilemap.m_Height);
 	pTileLayer->m_pEditor = this;
 	m_Map.m_vpGroups[m_SelectedGroup]->AddLayer(pTileLayer);
 	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
@@ -87,7 +87,7 @@ void CEditor::AddQuadsLayer()
 
 void CEditor::AddSwitchLayer()
 {
-	std::shared_ptr<CLayer> pSwitchLayer = std::make_shared<CLayerSwitch>(this, m_Map.m_pGameLayer->m_Width, m_Map.m_pGameLayer->m_Height);
+	std::shared_ptr<CLayer> pSwitchLayer = std::make_shared<CLayerSwitch>(this, m_Map.m_pGameLayer->m_LayerTilemap.m_Width, m_Map.m_pGameLayer->m_LayerTilemap.m_Height);
 	m_Map.MakeSwitchLayer(pSwitchLayer);
 	m_Map.m_vpGroups[m_SelectedGroup]->AddLayer(pSwitchLayer);
 	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
@@ -98,7 +98,7 @@ void CEditor::AddSwitchLayer()
 
 void CEditor::AddFrontLayer()
 {
-	std::shared_ptr<CLayer> pFrontLayer = std::make_shared<CLayerFront>(this, m_Map.m_pGameLayer->m_Width, m_Map.m_pGameLayer->m_Height);
+	std::shared_ptr<CLayer> pFrontLayer = std::make_shared<CLayerFront>(this, m_Map.m_pGameLayer->m_LayerTilemap.m_Width, m_Map.m_pGameLayer->m_LayerTilemap.m_Height);
 	m_Map.MakeFrontLayer(pFrontLayer);
 	m_Map.m_vpGroups[m_SelectedGroup]->AddLayer(pFrontLayer);
 	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
@@ -109,7 +109,7 @@ void CEditor::AddFrontLayer()
 
 void CEditor::AddTuneLayer()
 {
-	std::shared_ptr<CLayer> pTuneLayer = std::make_shared<CLayerTune>(this, m_Map.m_pGameLayer->m_Width, m_Map.m_pGameLayer->m_Height);
+	std::shared_ptr<CLayer> pTuneLayer = std::make_shared<CLayerTune>(this, m_Map.m_pGameLayer->m_LayerTilemap.m_Width, m_Map.m_pGameLayer->m_LayerTilemap.m_Height);
 	m_Map.MakeTuneLayer(pTuneLayer);
 	m_Map.m_vpGroups[m_SelectedGroup]->AddLayer(pTuneLayer);
 	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
@@ -120,7 +120,7 @@ void CEditor::AddTuneLayer()
 
 void CEditor::AddSpeedupLayer()
 {
-	std::shared_ptr<CLayer> pSpeedupLayer = std::make_shared<CLayerSpeedup>(this, m_Map.m_pGameLayer->m_Width, m_Map.m_pGameLayer->m_Height);
+	std::shared_ptr<CLayer> pSpeedupLayer = std::make_shared<CLayerSpeedup>(this, m_Map.m_pGameLayer->m_LayerTilemap.m_Width, m_Map.m_pGameLayer->m_LayerTilemap.m_Height);
 	m_Map.MakeSpeedupLayer(pSpeedupLayer);
 	m_Map.m_vpGroups[m_SelectedGroup]->AddLayer(pSpeedupLayer);
 	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
@@ -131,7 +131,7 @@ void CEditor::AddSpeedupLayer()
 
 void CEditor::AddTeleLayer()
 {
-	std::shared_ptr<CLayer> pTeleLayer = std::make_shared<CLayerTele>(this, m_Map.m_pGameLayer->m_Width, m_Map.m_pGameLayer->m_Height);
+	std::shared_ptr<CLayer> pTeleLayer = std::make_shared<CLayerTele>(this, m_Map.m_pGameLayer->m_LayerTilemap.m_Width, m_Map.m_pGameLayer->m_LayerTilemap.m_Height);
 	m_Map.MakeTeleLayer(pTeleLayer);
 	m_Map.m_vpGroups[m_SelectedGroup]->AddLayer(pTeleLayer);
 	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
@@ -170,7 +170,7 @@ void CEditor::LayerSelectImage()
 	static SLayerPopupContext s_LayerPopupContext = {};
 	s_LayerPopupContext.m_pEditor = this;
 	Ui()->DoPopupMenu(&s_LayerPopupContext, Ui()->MouseX(), Ui()->MouseY(), 150, 300, &s_LayerPopupContext, PopupLayer);
-	PopupSelectImageInvoke(pTiles->m_Image, Ui()->MouseX(), Ui()->MouseY());
+	PopupSelectImageInvoke(pTiles->m_LayerTilemap.m_Image, Ui()->MouseX(), Ui()->MouseY());
 }
 
 void CEditor::MapDetails()

@@ -133,7 +133,7 @@ std::vector<std::shared_ptr<IEditorEnvelopeReference>> CEditorMap::VisitEnvelope
 			{
 				std::shared_ptr<CLayerTiles> pLayerTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
 				std::shared_ptr<CLayerTilesEnvelopeReference> pTileLayerReference = std::make_shared<CLayerTilesEnvelopeReference>(pLayerTiles);
-				if(Visitor(pLayerTiles->m_ColorEnv))
+				if(Visitor(pLayerTiles->m_LayerTilemap.m_ColorEnv))
 					vpUpdatedReferences.push_back(pTileLayerReference);
 			}
 			else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
@@ -243,8 +243,8 @@ void CEditorMap::CreateDefault(IGraphics::CTextureHandle EntitiesTexture)
 {
 	// add background
 	std::shared_ptr<CLayerGroup> pGroup = NewGroup();
-	pGroup->m_ParallaxX = 0;
-	pGroup->m_ParallaxY = 0;
+	pGroup->m_ItemGroup.m_ParallaxX = 0;
+	pGroup->m_ItemGroup.m_ParallaxY = 0;
 	std::shared_ptr<CLayerQuads> pLayer = std::make_shared<CLayerQuads>(m_pEditor);
 	CQuad *pQuad = pLayer->NewQuad(0, 0, 1600, 1200);
 	pQuad->m_aColors[0].r = pQuad->m_aColors[1].r = 94;
