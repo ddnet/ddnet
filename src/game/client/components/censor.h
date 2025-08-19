@@ -19,10 +19,10 @@ class CCensor : public CComponent
 private:
 	std::vector<std::string> m_vCensoredWords;
 
-	class CBlacklistDownloadJob : public IJob
+	class CCensorListDownloadJob : public IJob
 	{
 	public:
-		CBlacklistDownloadJob(CCensor *pCensor, const char *pUrl, const char *pSaveFilePath);
+		CCensorListDownloadJob(CCensor *pCensor, const char *pUrl, const char *pSaveFilePath);
 
 		bool Abort() override REQUIRES(!m_Lock);
 
@@ -39,7 +39,7 @@ private:
 		std::shared_ptr<CHttpRequest> m_pGetRequest;
 	};
 
-	std::shared_ptr<CBlacklistDownloadJob> m_pBlackListDownloadJob = nullptr;
+	std::shared_ptr<CCensorListDownloadJob> m_pCensorListDownloadJob = nullptr;
 
 	static void ConchainRefreshCensorList(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
@@ -51,8 +51,10 @@ public:
 	void OnInit() override;
 	void OnConsoleInit() override;
 	void OnRender() override;
+	void OnShutdown() override;
 
-	std::optional<std::vector<std::string>> LoadCensorList(const char *pFilePath) const;
+	std::optional<std::vector<std::string>> LoadCensorListFromFile(const char *pFilePath) const;
+	std::optional<std::vector<std::string>> LoadCensorList(const void *pListText, size_t ListTextLen) const;
 	void CensorMessage(char *pMessage) const;
 };
 

@@ -213,7 +213,7 @@ MACRO_CONFIG_STR(ClDummy7SkinFeet, dummy7_skin_feet, protocol7::MAX_SKIN_ARRAY_S
 MACRO_CONFIG_STR(ClDummy7SkinEyes, dummy7_skin_eyes, protocol7::MAX_SKIN_ARRAY_SIZE, "standard", CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_INSENSITIVE, "Dummy skin eyes")
 
 // Client-side word censoring
-MACRO_CONFIG_INT(ClCensorChat, cl_censor_chat, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles chat censoring (0 = Disabled, 1 = Enabled)")
+MACRO_CONFIG_INT(ClCensorChat, cl_censor_chat, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles chat censoring")
 MACRO_CONFIG_STR(ClCensorUrl, cl_censor_url, 100, "https://info.ddnet.org/censor.json", CFGFLAG_CLIENT | CFGFLAG_SAVE, "URL used to download words to censor (must start with https://)")
 
 MACRO_CONFIG_INT(UiPage, ui_page, 6, 6, 13, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Interface page")
