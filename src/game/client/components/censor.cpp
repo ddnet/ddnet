@@ -61,17 +61,31 @@ void CCensor::OnConsoleInit()
 void CCensor::Reset()
 {
 	m_vCensoredWords.clear();
-	m_pBlackListDownloadJob = std::make_shared<CBlacklistDownloadJob>(this, g_Config.m_ClCensorUrl, "censored_words_online.json");
-	Engine()->AddJob(m_pBlackListDownloadJob);
+
+	if(m_pCensorListDownloadJob)
+	{
+		m_pCensorListDownloadJob->Abort();
+	}
+
+	m_pCensorListDownloadJob = std::make_shared<CCensorListDownloadJob>(this, g_Config.m_ClCensorUrl, "censored_words_online.json");
+	Engine()->AddJob(m_pCensorListDownloadJob);
 }
 
 void CCensor::OnRender()
 {
-	if(m_pBlackListDownloadJob && m_pBlackListDownloadJob->Done())
+	if(m_pCensorListDownloadJob && m_pCensorListDownloadJob->Done())
 	{
-		if(m_pBlackListDownloadJob->m_vLoadedWords)
-			m_vCensoredWords = std::move(*m_pBlackListDownloadJob->m_vLoadedWords);
-		m_pBlackListDownloadJob = nullptr;
+		if(m_pCensorListDownloadJob->m_vLoadedWords)
+			m_vCensoredWords = std::move(*m_pCensorListDownloadJob->m_vLoadedWords);
+		m_pCensorListDownloadJob = nullptr;
+	}
+}
+
+void CCensor::OnShutdown()
+{
+	if(m_pCensorListDownloadJob)
+	{
+		m_pCensorListDownloadJob->Abort();
 	}
 }
 
@@ -105,13 +119,13 @@ std::optional<std::vector<std::string>> CCensor::LoadCensorList(const char *pFil
 
 	if(!pData)
 	{
-		log_error("censor", "loaded file doesn't have the correct format: invalid json");
+		log_error("censor", "Failed to parse censor list '%s': %s", pFilePath, aError);
 		return std::nullopt;
 	}
 
 	if(pData->type != json_object)
 	{
-		log_error("censor", "loaded file doesn't have the correct format: not an object");
+		log_error("censor", "Censor list '%s' malformed: root must be an object", pFilePath);
 		return std::nullopt;
 	}
 
@@ -119,7 +133,7 @@ std::optional<std::vector<std::string>> CCensor::LoadCensorList(const char *pFil
 
 	if(Words.type != json_array)
 	{
-		log_error("censor", "loaded file doesn't have the correct format: words must be an array");
+		log_error("censor", "Censor list '%s' malformed: 'words' must be an array", pFilePath);
 		return std::nullopt;
 	}
 	int Length = Words.u.array.length;
@@ -130,7 +144,7 @@ std::optional<std::vector<std::string>> CCensor::LoadCensorList(const char *pFil
 
 		if(JsonWord.type != json_string)
 		{
-			log_error("censor", "loaded file doesn't have the correct format: words should be a array of strings");
+			log_error("censor", "Censor list '%s' malformed: 'words' must be an array of strings (error at index %d)", pFilePath, i);
 			return std::nullopt;
 		}
 
@@ -148,7 +162,7 @@ std::optional<std::vector<std::string>> CCensor::LoadCensorList(const char *pFil
 	return vWordList;
 }
 
-CCensor::CBlacklistDownloadJob::CBlacklistDownloadJob(CCensor *pCensor, const char *pUrl, const char *pSaveFilePath) :
+CCensor::CCensorListDownloadJob::CCensorListDownloadJob(CCensor *pCensor, const char *pUrl, const char *pSaveFilePath) :
 	m_pCensor(pCensor)
 {
 	str_copy(m_aUrl, pUrl);
@@ -157,7 +171,7 @@ CCensor::CBlacklistDownloadJob::CBlacklistDownloadJob(CCensor *pCensor, const ch
 	Abortable(true);
 }
 
-bool CCensor::CBlacklistDownloadJob::Abort()
+bool CCensor::CCensorListDownloadJob::Abort()
 {
 	if(!IJob::Abort())
 	{
@@ -173,7 +187,7 @@ bool CCensor::CBlacklistDownloadJob::Abort()
 	return true;
 }
 
-void CCensor::CBlacklistDownloadJob::Run()
+void CCensor::CCensorListDownloadJob::Run()
 {
 	const CTimeout Timeout{10000, 0, 8192, 10};
 	const size_t MaxResponseSize = 50 * 1024 * 1024; // 50 MiB
@@ -182,13 +196,13 @@ void CCensor::CBlacklistDownloadJob::Run()
 	pGet->Timeout(Timeout);
 	pGet->MaxResponseSize(MaxResponseSize);
 	pGet->SkipByFileTime(true);
-	pGet->ValidateBeforeOverwrite(false);
+	pGet->ValidateBeforeOverwrite(true);
+	pGet->FailOnErrorStatus(false);
 	pGet->LogProgress(HTTPLOG::ALL);
 	{
 		const CLockScope LockScope(m_Lock);
 		m_pGetRequest = pGet;
 	}
-	log_info("censor", "starting word censor blacklist download with url %s to path %s", m_aUrl, m_aSaveFilePath);
 	m_pCensor->Http()->Run(pGet);
 
 	// Load existing file while waiting for the HTTP request
@@ -201,24 +215,26 @@ void CCensor::CBlacklistDownloadJob::Run()
 		const CLockScope LockScope(m_Lock);
 		m_pGetRequest = nullptr;
 	}
-	if(pGet->State() != EHttpState::DONE || State() == IJob::STATE_ABORTED || pGet->StatusCode() >= 400)
+	if(pGet->State() != EHttpState::DONE || State() == IJob::STATE_ABORTED)
 	{
-		log_info("censor", "bad status");
+		return;
+	}
+	if(pGet->StatusCode() >= 400)
+	{
+		log_info("censor", "got http error %d", pGet->StatusCode());
 		return;
 	}
 
 	if(pGet->StatusCode() == 304) // 304 Not Modified
 	{
-		log_info("censor", "online blacklist not modified");
 		return;
 	}
 
 	if(State() == IJob::STATE_ABORTED)
 	{
-		log_info("censor", "aborted");
 		return;
 	}
 
-	log_info("censor", "downloaded word censor blacklist successfully");
+	pGet->OnValidation(true);
 	m_vLoadedWords = m_pCensor->LoadCensorList(m_aSaveFilePath);
 }
