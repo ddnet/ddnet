@@ -24,7 +24,7 @@ private:
 static const char TEEHISTORIAN_NAME[] = "teehistorian@ddnet.tw";
 static const CUuid TEEHISTORIAN_UUID = CalculateUuid(TEEHISTORIAN_NAME);
 static const char TEEHISTORIAN_VERSION[] = "2";
-static const char TEEHISTORIAN_VERSION_MINOR[] = "11";
+static const char TEEHISTORIAN_VERSION_MINOR[] = "12";
 
 #define UUID(id, name) static const CUuid UUID_##id = CalculateUuid(name);
 #include <engine/shared/teehistorian_ex_chunks.h>
