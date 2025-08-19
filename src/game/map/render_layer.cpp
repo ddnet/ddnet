@@ -1102,6 +1102,16 @@ void CRenderLayerQuads::CQuadLayerVisuals::Unload()
 
 bool CRenderLayerQuads::CalculateEnvelopeClipping(int aEnvelopeOffsetMin[2], int aEnvelopeOffsetMax[2])
 {
+	if(m_QuadRenderGroup.m_PosEnv == -1)
+	{
+		for(int Channel = 0; Channel < 2; ++Channel)
+		{
+			aEnvelopeOffsetMin[Channel] = 0;
+			aEnvelopeOffsetMax[Channel] = 0;
+		}
+		return true;
+	}
+
 	int EnvStart, EnvNum;
 	m_pMap->GetType(MAPITEMTYPE_ENVELOPE, &EnvStart, &EnvNum);
 
