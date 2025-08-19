@@ -629,6 +629,7 @@ public:
 	void SendRecord(int ClientId);
 	void SendFinish(int ClientId, float Time, float PreviousBestTime);
 	void OnSetAuthed(int ClientId, int Level) override;
+	void OnSetTimedOut(int ClientId) override;
 
 	void ResetTuning();
 };
