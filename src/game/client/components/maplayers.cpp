@@ -109,6 +109,7 @@ void CMapLayers::OnRender()
 	m_Params.m_RenderText = g_Config.m_ClTextEntities;
 	m_Params.m_DebugRenderGroupClips = g_Config.m_DbgRenderGroupClips;
 	m_Params.m_DebugRenderQuadClips = g_Config.m_DbgRenderQuadClips;
+	m_Params.m_DebugRenderClusterClips = g_Config.m_DbgRenderClusterClips;
 
 	m_MapRenderer.Render(m_Params);
 }
