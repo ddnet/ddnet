@@ -1730,7 +1730,7 @@ bool CScoreWorker::SaveTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 			else
 			{
 				str_copy(pResult->m_aBroadcast,
-					"Database connection failed, teamsave written to a file instead. Admins will add it manually in a few days.",
+					"Database connection failed, teamsave written to a file instead. On official DDNet servers this will automatically be inserted into the database every full hour.",
 					sizeof(pResult->m_aBroadcast));
 				if(str_comp(pData->m_aServer, g_Config.m_SvSqlServerName) == 0)
 				{
