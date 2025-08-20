@@ -242,9 +242,27 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 		{
 			if(ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_LAN)
 			{
+				CUIRect Label, Button;
+				View.HMargin((View.h - (16.0f + 18.0f + 8.0f)) / 2.0f, &Label);
+				Label.HSplitTop(16.0f, &Label, &Button);
+				Button.HSplitTop(8.0f, nullptr, &Button);
+				Button.VMargin((Button.w - 320.0f) / 2.0f, &Button);
 				char aBuf[128];
 				str_format(aBuf, sizeof(aBuf), Localize("No local servers found (ports %d-%d)"), IServerBrowser::LAN_PORT_BEGIN, IServerBrowser::LAN_PORT_END);
-				Ui()->DoLabel(&View, aBuf, 16.0f, TEXTALIGN_MC);
+				Ui()->DoLabel(&Label, aBuf, 16.0f, TEXTALIGN_MC);
+				static CButtonContainer s_StartLocalServerButton;
+				if(DoButton_Menu(&s_StartLocalServerButton, Localize("Start and connect to local server"), 0, &Button))
+				{
+					if(GameClient()->m_LocalServer.IsServerRunning())
+					{
+						RefreshBrowserTab(true);
+						Connect("localhost");
+					}
+					else if(GameClient()->m_LocalServer.RunServer({}))
+					{
+						Connect("localhost");
+					}
+				}
 			}
 			else if(ServerBrowser()->IsServerlistError())
 			{
@@ -1806,6 +1824,11 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		break;
 	case PAGE_LAN:
 		GameClient()->m_MenuBackground.ChangePosition(CMenuBackground::POS_BROWSER_LAN);
+		if(m_ForceRefreshLanPage)
+		{
+			RefreshBrowserTab(true);
+			m_ForceRefreshLanPage = false;
+		}
 		break;
 	case PAGE_FAVORITES:
 		GameClient()->m_MenuBackground.ChangePosition(CMenuBackground::POS_BROWSER_FAVORITES);
@@ -1818,7 +1841,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		GameClient()->m_MenuBackground.ChangePosition(g_Config.m_UiPage - PAGE_FAVORITE_COMMUNITY_1 + CMenuBackground::POS_BROWSER_CUSTOM0);
 		break;
 	default:
-		dbg_assert_failed("ui_page invalid for RenderServerbrowser");
+		dbg_assert_failed("ui_page invalid for RenderServerbrowser: %d", g_Config.m_UiPage);
 	}
 
 	// clang-format off

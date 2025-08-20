@@ -7,7 +7,7 @@
 #include <android/android_main.h>
 #endif
 
-void CLocalServer::RunServer(const std::vector<const char *> &vpArguments)
+bool CLocalServer::RunServer(const std::vector<const char *> &vpArguments)
 {
 	secure_random_password(m_aRconPassword, sizeof(m_aRconPassword), 16);
 	char aAuthCommand[64 + sizeof(m_aRconPassword)];
@@ -20,11 +20,13 @@ void CLocalServer::RunServer(const std::vector<const char *> &vpArguments)
 	if(StartAndroidServer(vpArgumentsWithAuth.data(), vpArgumentsWithAuth.size()))
 	{
 		GameClient()->m_Menus.ForceRefreshLanPage();
+		return true;
 	}
 	else
 	{
 		Client()->AddWarning(SWarning(Localize("Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.")));
 		mem_zero(m_aRconPassword, sizeof(m_aRconPassword));
+		return false;
 	}
 #else
 	char aBuf[IO_MAX_PATH_LENGTH];
@@ -36,17 +38,20 @@ void CLocalServer::RunServer(const std::vector<const char *> &vpArguments)
 		if(m_Process != INVALID_PROCESS)
 		{
 			GameClient()->m_Menus.ForceRefreshLanPage();
+			return true;
 		}
 		else
 		{
 			Client()->AddWarning(SWarning(Localize("Server could not be started")));
 			mem_zero(m_aRconPassword, sizeof(m_aRconPassword));
+			return false;
 		}
 	}
 	else
 	{
 		Client()->AddWarning(SWarning(Localize("Server executable not found, can't run server")));
 		mem_zero(m_aRconPassword, sizeof(m_aRconPassword));
+		return false;
 	}
 #endif
 }

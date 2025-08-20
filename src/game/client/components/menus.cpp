@@ -2487,9 +2487,9 @@ void CMenus::SetMenuPage(int NewPage)
 	{
 		g_Config.m_UiPage = NewPage;
 		bool ForceRefresh = false;
-		if(m_ForceRefreshLanPage)
+		if(m_ForceRefreshLanPage && NewPage == PAGE_LAN)
 		{
-			ForceRefresh = NewPage == PAGE_LAN;
+			ForceRefresh = true;
 			m_ForceRefreshLanPage = false;
 		}
 		if(OldPage != NewPage || ForceRefresh)
