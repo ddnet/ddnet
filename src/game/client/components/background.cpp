@@ -12,7 +12,7 @@
 
 #include "background.h"
 
-CBackground::CBackground(int MapType, bool OnlineOnly) :
+CBackground::CBackground(ERenderType MapType, bool OnlineOnly) :
 	CMapLayers(MapType, OnlineOnly)
 {
 	m_pLayers = new CLayers;

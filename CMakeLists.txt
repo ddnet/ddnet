@@ -2541,6 +2541,8 @@ if(CLIENT)
     tileart.cpp
   )
   set_src(GAME_MAP GLOB_RECURSE src/game/map
+    map_renderer.cpp
+    map_renderer.h
     render_component.cpp
     render_component.h
     render_interfaces.h
