@@ -1,5 +1,7 @@
 #include <base/log.h>
 
+#include <game/map/envelope_manager.h>
+
 #include "map_renderer.h"
 
 const int LAYER_DEFAULT_TILESET = -1;
@@ -15,14 +17,14 @@ void CMapRenderer::Load(ERenderType Type, CLayers *pLayers, IMapImages *pMapImag
 {
 	Clear();
 
-	std::shared_ptr<CMapBasedEnvelopePointAccess> pEnvelopePoints = std::make_shared<CMapBasedEnvelopePointAccess>(pLayers->Map());
+	std::shared_ptr<CEnvelopeManager> pEnvelopeManager = std::make_shared<CEnvelopeManager>(pEnvelopeEval, pLayers->Map());
 	bool PassedGameLayer = false;
 
 	for(int GroupId = 0; GroupId < pLayers->NumGroups(); GroupId++)
 	{
 		CMapItemGroup *pGroup = pLayers->GetGroup(GroupId);
 		std::unique_ptr<CRenderLayer> pRenderLayerGroup = std::make_unique<CRenderLayerGroup>(GroupId, pGroup);
-		pRenderLayerGroup->OnInit(Graphics(), TextRender(), RenderMap(), pEnvelopeEval, pLayers->Map(), pMapImages, pEnvelopePoints, RenderCallbackOptional);
+		pRenderLayerGroup->OnInit(Graphics(), TextRender(), RenderMap(), pEnvelopeManager, pLayers->Map(), pMapImages, RenderCallbackOptional);
 		if(!pRenderLayerGroup->IsValid())
 		{
 			log_error("map_renderer", "error group was null, group number = %d, total groups = %d", GroupId, pLayers->NumGroups());
@@ -127,7 +129,7 @@ void CMapRenderer::Load(ERenderType Type, CLayers *pLayers, IMapImages *pMapImag
 			// just ignore invalid layers from rendering
 			if(pRenderLayer)
 			{
-				pRenderLayer->OnInit(Graphics(), TextRender(), RenderMap(), pEnvelopeEval, pLayers->Map(), pMapImages, pEnvelopePoints, RenderCallbackOptional);
+				pRenderLayer->OnInit(Graphics(), TextRender(), RenderMap(), pEnvelopeManager, pLayers->Map(), pMapImages, RenderCallbackOptional);
 				if(pRenderLayer->IsValid())
 				{
 					pRenderLayer->Init();
