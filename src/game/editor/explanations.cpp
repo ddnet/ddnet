@@ -264,6 +264,14 @@ const char *CExplanations::ExplainDDNet(int Tile, int Layer)
 		if(Layer == LAYER_TUNE)
 			return "TUNE ZONE: Area where defined tunes work.";
 		break;
+	case TILE_TUNE_LOCK_ENABLE:
+		if(Layer == LAYER_TUNE)
+			return "TUNE LOCK: Lock the tune zone values of the given tune zone on the player.";
+		break;
+	case TILE_TUNE_LOCK_DISABLE:
+		if(Layer == LAYER_TUNE)
+			return "TUNE LOCK OFF: Unlock the tune zone values on the player.";
+		break;
 	case TILE_OLDLASER:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "GLOBAL OLD SHOTGUN: Shotgun drags others always towards the shooter, even after having bounced. Shooter can't hit themselves. Place only one tile somewhere on the map.";
