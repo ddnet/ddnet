@@ -2738,25 +2738,6 @@ int open_file(const char *path);
 void generate_password(char *buffer, unsigned length, const unsigned short *random, unsigned random_length);
 
 /**
- * Initializes the secure random module.
- * You *MUST* check the return value of this function.
- *
- * @ingroup Secure-Random
- *
- * @return `0` on success.
- */
-[[nodiscard]] int secure_random_init();
-
-/**
- * Uninitializes the secure random module.
- *
- * @ingroup Secure-Random
- *
- * @return `0` on success.
- */
-int secure_random_uninit();
-
-/**
  * Fills the buffer with the specified amount of random password characters.
  *
  * @ingroup Secure-Random
