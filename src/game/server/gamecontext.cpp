@@ -36,8 +36,17 @@
 #include <game/gamecore.h>
 #include <game/mapitems.h>
 #include <game/version.h>
-
 #include <vector>
+
+#include <generated/protocol7.h>
+#include <generated/protocolglue.h>
+
+#include "entities/character.h"
+#include "entities/targetswitch.h"
+#include "gamemodes/DDRace.h"
+#include "gamemodes/mod.h"
+#include "player.h"
+#include "score.h"
 
 // Not thread-safe!
 class CClientChatLogger : public ILogger
@@ -345,6 +354,25 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 			pChr->TakeDamage(ForceDir * Dmg * 2, (int)Dmg, Owner, Weapon);
 		}
 	}
+
+	CEntity *apTargetEnts[MAX_CLIENTS];
+	// Targets need a bigger force to activate
+	Radius = 60.0f;
+	Num = m_World.FindEntities(Pos, Radius, apTargetEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_HITTABLE);
+	for(int i = 0; i < Num; i++)
+	{
+		auto *pTarget = static_cast<CTargetSwitch *>(apTargetEnts[i]);
+		if((GetPlayerChar(Owner) ? !GetPlayerChar(Owner)->GrenadeHitDisabled() : g_Config.m_SvHit) || NoDamage)
+		{
+			int PlayerTeam = GetDDRaceTeam(Owner);
+			if((GetPlayerChar(Owner) ? GetPlayerChar(Owner)->GrenadeHitDisabled() : !g_Config.m_SvHit) || NoDamage)
+			{
+				continue;
+			}
+
+			pTarget->GetHit(PlayerTeam);
+		}
+	}
 }
 
 void CGameContext::CreatePlayerSpawn(vec2 Pos, CClientMask Mask)
@@ -381,6 +409,16 @@ void CGameContext::CreateBirthdayEffect(vec2 Pos, CClientMask Mask)
 void CGameContext::CreateFinishEffect(vec2 Pos, CClientMask Mask)
 {
 	CNetEvent_Finish *pEvent = m_Events.Create<CNetEvent_Finish>(Mask);
+	if(pEvent)
+	{
+		pEvent->m_X = (int)Pos.x;
+		pEvent->m_Y = (int)Pos.y;
+	}
+}
+
+void CGameContext::CreateTargetHit(vec2 Pos, CClientMask Mask)
+{
+	CNetEvent_TargetHit *pEvent = m_Events.Create<CNetEvent_TargetHit>(Mask);
 	if(pEvent)
 	{
 		pEvent->m_X = (int)Pos.x;
@@ -553,6 +591,62 @@ bool CGameContext::SnapPickup(const CSnapContext &Context, int SnapId, const vec
 			}
 		}
 		pPickup->m_Subtype = SubType;
+	}
+
+	return true;
+}
+
+bool CGameContext::SnapTargetSwitch(const CSnapContext &Context, int SnapId, const vec2 &Pos, int Type, int SwitchNumber, int SwitchDelay, int Flags)
+{
+	if(Context.GetClientVersion() >= VERSION_DDNET_TARGETSWITCH)
+	{
+		CNetObj_DDNetTargetSwitch *pTargetSwitch = Server()->SnapNewItem<CNetObj_DDNetTargetSwitch>(SnapId);
+		if(!pTargetSwitch)
+			return false;
+
+		pTargetSwitch->m_X = (int)Pos.x;
+		pTargetSwitch->m_Y = (int)Pos.y;
+		pTargetSwitch->m_Type = Type;
+		pTargetSwitch->m_SwitchNumber = SwitchNumber;
+		pTargetSwitch->m_SwitchDelay = SwitchDelay;
+		pTargetSwitch->m_Flags = Flags;
+		return true;
+	}
+
+	int CompatPowerup = 0;
+	switch(Type)
+	{
+	case TARGETSWITCHTYPE_OPEN:
+		CompatPowerup = POWERUP_HEALTH;
+		break;
+	case TARGETSWITCHTYPE_CLOSE:
+		CompatPowerup = POWERUP_ARMOR;
+		break;
+	case TARGETSWITCHTYPE_ALTERNATE:
+		CompatPowerup = Switchers()[SwitchNumber].m_aStatus[GetDDRaceTeam(Context.ClientId())] ? POWERUP_HEALTH : POWERUP_ARMOR;
+		break;
+	}
+
+	if(Context.IsSixup())
+	{
+		protocol7::CNetObj_Pickup *pPickup = Server()->SnapNewItem<protocol7::CNetObj_Pickup>(SnapId);
+		if(!pPickup)
+			return false;
+
+		pPickup->m_X = (int)Pos.x;
+		pPickup->m_Y = (int)Pos.y;
+		pPickup->m_Type = PickupType_SixToSeven(CompatPowerup, 0);
+	}
+	else
+	{
+		CNetObj_Pickup *pPickup = Server()->SnapNewItem<CNetObj_Pickup>(SnapId);
+		if(!pPickup)
+			return false;
+
+		pPickup->m_X = (int)Pos.x;
+		pPickup->m_Y = (int)Pos.y;
+		pPickup->m_Type = CompatPowerup;
+		pPickup->m_Subtype = 0;
 	}
 
 	return true;
@@ -4365,7 +4459,7 @@ void CGameContext::CreateAllEntities(bool Initial)
 				// if(SwitchType == TILE_DOOR_OFF)
 				if(SwitchType >= ENTITY_OFFSET)
 				{
-					m_pController->OnEntity(SwitchType - ENTITY_OFFSET, x, y, LAYER_SWITCH, pSwitch[Index].m_Flags, Initial, pSwitch[Index].m_Number);
+					m_pController->OnEntity(SwitchType - ENTITY_OFFSET, x, y, LAYER_SWITCH, pSwitch[Index].m_Flags, Initial, pSwitch[Index].m_Number, pSwitch[Index].m_Delay);
 				}
 			}
 		}

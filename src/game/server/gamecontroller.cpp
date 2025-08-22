@@ -9,6 +9,7 @@
 #include "entities/light.h"
 #include "entities/pickup.h"
 #include "entities/projectile.h"
+#include "entities/targetswitch.h"
 #include "gamecontext.h"
 #include "player.h"
 
@@ -180,7 +181,7 @@ bool IGameController::CanSpawn(int Team, vec2 *pOutPos, int ClientId)
 	return Eval.m_Got;
 }
 
-bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
+bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number, int Delay)
 {
 	dbg_assert(Index >= 0, "Invalid entity index");
 
@@ -386,6 +387,18 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 	else if(Index == ENTITY_PLASMAU)
 	{
 		new CGun(&GameServer()->m_World, Pos, false, false, Layer, Number);
+	}
+	else if(Index == ENTITY_TARGET_SWITCH_CLOSE)
+	{
+		new CTargetSwitch(&GameServer()->m_World, Pos, TARGETSWITCHTYPE_CLOSE, Layer, Number, Flags, Delay);
+	}
+	else if(Index == ENTITY_TARGET_SWITCH_OPEN)
+	{
+		new CTargetSwitch(&GameServer()->m_World, Pos, TARGETSWITCHTYPE_OPEN, Layer, Number, Flags, Delay);
+	}
+	else if(Index == ENTITY_TARGET_SWITCH_ALTERNATE)
+	{
+		new CTargetSwitch(&GameServer()->m_World, Pos, TARGETSWITCHTYPE_ALTERNATE, Layer, Number, Flags, Delay);
 	}
 
 	if(Type != -1) // NOLINT(clang-analyzer-unix.Malloc)

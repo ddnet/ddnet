@@ -5,6 +5,7 @@
 #include "laser.h"
 #include "pickup.h"
 #include "projectile.h"
+#include "targetswitch.h"
 
 #include <antibot/antibot_data.h>
 
@@ -376,6 +377,35 @@ void CCharacter::HandleNinja()
 
 				pChr->TakeDamage(vec2(0, -10.0f), g_pData->m_Weapons.m_Ninja.m_pBase->m_Damage, m_pPlayer->GetCid(), WEAPON_NINJA);
 			}
+
+			CEntity *apTargetEnts[MAX_CLIENTS];
+			Radius = GetProximityRadius() * 2.0f;
+			Num = GameServer()->m_World.FindEntities(OldPos, Radius, apTargetEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_HITTABLE);
+
+			for(int i = 0; i < Num; ++i)
+			{
+				auto *pTarget = static_cast<CTargetSwitch *>(apTargetEnts[i]);
+
+				// make sure we haven't Hit this object before
+				bool AlreadyHit = false;
+				for(int j = 0; j < m_NumObjectsHit; j++)
+				{
+					if(m_apHitObjects[j] == pTarget)
+						AlreadyHit = true;
+				}
+				if(AlreadyHit)
+					continue;
+
+				if(distance(pTarget->m_Pos, m_Pos) > (Radius))
+					continue;
+
+				// TODO: consider if this is good behavior
+				GameServer()->CreateSound(pTarget->m_Pos, SOUND_NINJA_HIT, TeamMask());
+				if(m_NumObjectsHit < 10)
+					m_apHitObjects[m_NumObjectsHit++] = pTarget;
+
+				pTarget->GetHit(m_pPlayer->GetTeam());
+			}
 		}
 
 		return;
@@ -542,6 +572,20 @@ void CCharacter::FireWeapon()
 
 			Antibot()->OnHammerHit(m_pPlayer->GetCid(), pTarget->GetPlayer()->GetCid());
 
+			Hits++;
+		}
+
+		CEntity *apTargetEnts[MAX_CLIENTS];
+		Num = GameServer()->m_World.FindEntities(ProjStartPos, GetProximityRadius() * 0.5f, apTargetEnts,
+			MAX_CLIENTS, CGameWorld::ENTTYPE_HITTABLE);
+
+		for(int i = 0; i < Num; ++i)
+		{
+			auto *pTarget = static_cast<CTargetSwitch *>(apTargetEnts[i]);
+
+			int Team = Teams()->m_Core.Team(m_Core.m_Id);
+			pTarget->GetHit(Team);
+			GameServer()->CreateHammerHit(pTarget->m_Pos, TeamMask());
 			Hits++;
 		}
 

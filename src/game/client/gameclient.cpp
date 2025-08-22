@@ -1423,6 +1423,11 @@ void CGameClient::ProcessEvents()
 
 			m_MapSounds.PlayAt(CSounds::CHN_WORLD, pEvent->m_SoundId, vec2(pEvent->m_X, pEvent->m_Y));
 		}
+		else if(Item.m_Type == NETEVENTTYPE_TARGETHIT)
+		{
+			const CNetEvent_TargetHit *pEvent = (const CNetEvent_TargetHit *)Item.m_pData;
+			m_Effects.TargetHit(vec2(pEvent->m_X, pEvent->m_Y), Alpha);
+		}
 	}
 }
 
@@ -4320,6 +4325,8 @@ void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTexture(&m_ExtrasSkin.m_SpriteParticleSparkle);
 		Graphics()->UnloadTexture(&m_ExtrasSkin.m_SpritePulley);
 		Graphics()->UnloadTexture(&m_ExtrasSkin.m_SpriteHectagon);
+		Graphics()->UnloadTexture(&m_ExtrasSkin.m_TargetSwitchOpen);
+		Graphics()->UnloadTexture(&m_ExtrasSkin.m_TargetSwitchClose);
 
 		for(auto &SpriteParticle : m_ExtrasSkin.m_aSpriteParticles)
 			SpriteParticle = IGraphics::CTextureHandle();
@@ -4362,6 +4369,9 @@ void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 		m_ExtrasSkin.m_aSpriteParticles[1] = m_ExtrasSkin.m_SpriteParticleSparkle;
 		m_ExtrasSkin.m_aSpriteParticles[2] = m_ExtrasSkin.m_SpritePulley;
 		m_ExtrasSkin.m_aSpriteParticles[3] = m_ExtrasSkin.m_SpriteHectagon;
+
+		m_ExtrasSkin.m_TargetSwitchOpen = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_TARGETSWITCH_OPEN]);
+		m_ExtrasSkin.m_TargetSwitchClose = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_TARGETSWITCH_CLOSE]);
 
 		m_ExtrasSkinLoaded = true;
 	}
@@ -4700,7 +4710,10 @@ void CGameClient::SnapCollectEntities()
 		const IClient::CSnapItem Item = Client()->SnapGetItem(IClient::SNAP_CURRENT, Index);
 		if(Item.m_Type == NETOBJTYPE_ENTITYEX)
 			vItemEx.push_back({Item, nullptr});
-		else if(Item.m_Type == NETOBJTYPE_PICKUP || Item.m_Type == NETOBJTYPE_DDNETPICKUP || Item.m_Type == NETOBJTYPE_LASER || Item.m_Type == NETOBJTYPE_DDNETLASER || Item.m_Type == NETOBJTYPE_PROJECTILE || Item.m_Type == NETOBJTYPE_DDRACEPROJECTILE || Item.m_Type == NETOBJTYPE_DDNETPROJECTILE)
+		else if(Item.m_Type == NETOBJTYPE_PICKUP || Item.m_Type == NETOBJTYPE_DDNETPICKUP ||
+			Item.m_Type == NETOBJTYPE_LASER || Item.m_Type == NETOBJTYPE_DDNETLASER ||
+			Item.m_Type == NETOBJTYPE_PROJECTILE || Item.m_Type == NETOBJTYPE_DDRACEPROJECTILE ||
+			Item.m_Type == NETOBJTYPE_DDNETPROJECTILE || Item.m_Type == NETOBJTYPE_DDNETTARGETSWITCH)
 			vItemData.push_back({Item, nullptr});
 	}
 

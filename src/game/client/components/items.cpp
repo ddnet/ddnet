@@ -13,6 +13,9 @@
 #include <game/client/gameclient.h>
 #include <game/client/laser_data.h>
 #include <game/client/pickup_data.h>
+#include <game/client/projectile_data.h>
+#include <game/client/targetswitch_data.h>
+
 #include <game/client/prediction/entities/laser.h>
 #include <game/client/prediction/entities/pickup.h>
 #include <game/client/prediction/entities/projectile.h>
@@ -234,6 +237,21 @@ void CItems::RenderFlags()
 		RenderFlag(GameClient()->m_Snap.m_apPrevFlags[Flag], GameClient()->m_Snap.m_apFlags[Flag],
 			GameClient()->m_Snap.m_pPrevGameDataObj, GameClient()->m_Snap.m_pGameDataObj);
 	}
+}
+
+void CItems::RenderTargetSwitch(const CTargetSwitchData *pData)
+{
+	const vec2 Pos = pData->m_Pos;
+	const int SwitchState = GameClient()->Switchers()[pData->m_SwitchNumber].m_aStatus[GameClient()->SwitchStateTeam()];
+	const bool Open = pData->m_Type == TARGETSWITCHTYPE_OPEN || (pData->m_Type == TARGETSWITCHTYPE_ALTERNATE && SwitchState);
+	const int QuadOffset = Open ? m_TargetSwitchOpenOffset : m_TargetSwitchCloseOffset;
+	Graphics()->TextureSet(Open ? GameClient()->m_ExtrasSkin.m_TargetSwitchOpen : GameClient()->m_ExtrasSkin.m_TargetSwitchClose);
+
+	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+	Graphics()->QuadsSetRotation(0);
+	vec2 Scale = vec2(1.2, 1.2);
+	Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, QuadOffset, Pos.x, Pos.y, Scale.x, Scale.y);
+	Graphics()->QuadsSetRotation(0);
 }
 
 void CItems::RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent, const CNetObj_GameData *pPrevGameData, const CNetObj_GameData *pCurGameData)
@@ -623,6 +641,11 @@ void CItems::OnRender()
 
 			RenderLaser(&Data);
 		}
+		else if(Item.m_Type == NETOBJTYPE_DDNETTARGETSWITCH)
+		{
+			CTargetSwitchData Data = ExtractTargetSwitchInfo(pData);
+			RenderTargetSwitch(&Data);
+		}
 	}
 
 	RenderFlags();
@@ -687,6 +710,14 @@ void CItems::OnInit()
 	Graphics()->GetSpriteScale(SPRITE_PART_HECTAGON, ScaleX, ScaleY);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	m_FreezeHeadOffset = Graphics()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 20.f * ScaleX);
+
+	Graphics()->GetSpriteScale(SPRITE_TARGETSWITCH_CLOSE, ScaleX, ScaleY);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	m_TargetSwitchCloseOffset = Graphics()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 64.f * ScaleX, 64.f * ScaleY);
+
+	Graphics()->GetSpriteScale(SPRITE_TARGETSWITCH_OPEN, ScaleX, ScaleY);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	m_TargetSwitchOpenOffset = Graphics()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 64.f * ScaleX, 64.f * ScaleY);
 
 	IGraphics::CQuadItem Brick(0, 0, 16.0f, 16.0f);
 	m_DoorHeadOffset = Graphics()->QuadContainerAddQuads(m_ItemsQuadContainerIndex, &Brick, 1);
