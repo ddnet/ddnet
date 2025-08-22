@@ -11,6 +11,7 @@
 
 class CEntity;
 class CCharacter;
+class CTargetSwitch;
 
 /*
 	Class: Game World
@@ -27,6 +28,7 @@ public:
 		ENTTYPE_PICKUP,
 		ENTTYPE_FLAG,
 		ENTTYPE_CHARACTER,
+		ENTTYPE_HITTABLE,
 		NUM_ENTTYPES
 	};
 
@@ -90,6 +92,20 @@ public:
 	 * @return Pointer to the closest hit or `nullptr` if there is no intersection.
 	 */
 	CCharacter *IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, const CCharacter *pNotThis = nullptr, int CollideWith = -1, const CCharacter *pThisOnly = nullptr);
+
+	/**
+	 * Finds the CTargetSwitch that intersects the line.
+	 *
+	 * @see IntersectEntity
+	 *
+	 * @param Pos0 Start position
+	 * @param Pos1 End position
+	 * @param Radius How far from the line the @link CTargetSwitch @endlink is allowed to be
+	 * @param NewPos Intersection position
+	 *
+	 * @return Pointer to the closest hit or `nullptr` if there is no intersection.
+	 */
+	CTargetSwitch *IntersectTargetSwitch(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos);
 
 	/**
 	 * Finds the CEntity that intersects the line.
