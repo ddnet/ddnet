@@ -4,6 +4,7 @@
 #include "gameworld.h"
 
 #include "entities/character.h"
+#include "entities/targetswitch.h"
 #include "entity.h"
 #include "gamecontext.h"
 #include "gamecontroller.h"
@@ -293,6 +294,11 @@ void CGameWorld::SwapClients(int Client1, int Client2)
 CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, const CCharacter *pNotThis, int CollideWith, const CCharacter *pThisOnly)
 {
 	return (CCharacter *)IntersectEntity(Pos0, Pos1, Radius, ENTTYPE_CHARACTER, NewPos, pNotThis, CollideWith, pThisOnly);
+}
+
+CTargetSwitch *CGameWorld::IntersectTargetSwitch(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos)
+{
+	return (CTargetSwitch *)IntersectEntity(Pos0, Pos1, Radius, ENTTYPE_HITTABLE, NewPos);
 }
 
 CEntity *CGameWorld::IntersectEntity(vec2 Pos0, vec2 Pos1, float Radius, int Type, vec2 &NewPos, const CEntity *pNotThis, int CollideWith, const CEntity *pThisOnly)
