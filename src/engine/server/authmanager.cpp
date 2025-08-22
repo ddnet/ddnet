@@ -177,6 +177,8 @@ bool CAuthManager::IsGenerated() const
 
 int CAuthManager::NumNonDefaultKeys() const
 {
-	int DefaultCount = (m_aDefault[0] >= 0) + (m_aDefault[1] >= 0) + (m_aDefault[2] >= 0);
+	int DefaultCount = std::count_if(std::begin(m_aDefault), std::end(m_aDefault), [](int Slot) {
+		return Slot >= 0;
+	});
 	return m_vKeys.size() - DefaultCount;
 }
