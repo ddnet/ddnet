@@ -50,7 +50,7 @@ Body
 == Gövde
 
 Call vote
-== Oylama
+== Oy kullan
 
 Change settings
 == Ayarları değiştir
@@ -62,7 +62,7 @@ Clan
 == Klan
 
 Client
-== İstemci
+== Oyun Uygulaması
 
 Connecting to
 == Bağlanılıyor
@@ -89,13 +89,13 @@ Delete
 == Sil
 
 Delete demo
-== Demoyu sil
+== Kaydı sil
 
 Demofile: %s
-== Demo dosyası: %s
+== Kayıt dosyası: %s
 
 Demos
-== Demolar
+== Kayıtlar
 
 Disconnect
 == Bağlantıyı kes
@@ -113,13 +113,13 @@ Dynamic Camera
 == Dinamik Kamera
 
 Emoticon
-== İfade
+== İfadeler
 
 Error
 == Hata
 
 Error loading demo
-== Demo yüklenirken hata oluştu
+== Kayıt yüklenirken hata oluştu
 
 Favorite
 == Favori
@@ -179,10 +179,10 @@ High Detail
 == Yüksek Detay
 
 Hook
-== Kanca
+== Kanca/Çengel
 
 Invalid Demo
-== Geçersiz Demo
+== Geçersiz kayıt
 
 Join blue
 == Maviye katıl
@@ -254,7 +254,7 @@ Password incorrect
 == Hatalı şifre
 
 Ping
-== Ping
+== Gecikme (Ping)
 
 Pistol
 == Tabanca
@@ -293,10 +293,10 @@ Remove
 == Çıkar
 
 Remove friend
-== Arkadaşı sil
+== Arkadaşı çıkar
 
 Rename demo
-== Demonun adını değiştir
+== Kaydın adını değiştir
 
 Reset filter
 == Filtreleri sıfırla
@@ -392,7 +392,7 @@ Type
 == Tür
 
 Unable to rename the demo
-== Demonun ismi değiştirilemiyor
+== Kaydın ismi değiştirilemiyor
 
 Use sounds
 == Sesleri kullan
@@ -470,7 +470,7 @@ Hue
 == Renk
 
 Record demo
-== Demo kaydet
+== Kaydı kaydet
 
 Your skin
 == Sizin görünüşünüz
@@ -503,16 +503,16 @@ Game paused
 == Oyun durduruldu
 
 Server best:
-== Sunucu en iyi:
+== Sunucu en iyisi:
 
 Personal best:
-== Bireysel en iyi:
+== Bireysel en iyisi:
 
 Learn
 == Öğren
 
 Browser
-== Sunucular
+== Arama motoru
 
 Ghost
 == Hayalet
@@ -524,7 +524,7 @@ Reconnect in %d sec
 == %d saniye içinde yeniden bağlanılacak
 
 Render demo
-== Demo'yu işle
+== Kaydı işle
 
 Replace video
 == Video üzerine yaz
@@ -536,10 +536,10 @@ Are you sure that you want to disconnect?
 == Ayrılmak istediğinizden emin misiniz?
 
 Disconnect Dummy
-== Dummy Ayrıl
+== Yardımcı karakterden Ayrıl
 
 Are you sure that you want to disconnect your dummy?
-== Dummy'nin bağlantısını koparmak istediğinizden emin misiniz?
+== Yardımcı karakterin bağlantısını koparmak istediğinizden emin misiniz?
 
 Welcome to DDNet
 == DDNet'e hoş geldiniz
@@ -569,7 +569,7 @@ Search
 == Ara
 
 Exclude
-== Hariç
+== Hariç tut
 
 Player country:
 == Oyuncu ülkesi:
@@ -617,7 +617,7 @@ Remove chat
 == %.2f KiB
 
 Demo
-== Demo
+== Kayıt
 
 Markers
 == İşaretler
@@ -632,10 +632,10 @@ Fetch Info
 == Bilgileri göster
 
 Connecting dummy
-== Dummy bağlanıyor
+== Yardımcı karakter bağlanıyor
 
 Connect Dummy
-== Dummy Katıl
+== İkiz Katıl
 
 Deactivate
 == Devre dışı bırak
@@ -671,10 +671,10 @@ Max CSVs
 == Maksimum CSVs
 
 Vanilla skins only
-== Sadece vanilla skinleri
+== Sadece vanildışgörünüşler
 
 Fat skins (DDFat)
-== Şişko skinler (DDFat)
+== Şişko görünüşler (DDFat)
 
 Skin prefix
 == Skin sıfatı
@@ -707,16 +707,16 @@ Toggle dyncam
 == Dinamik kamera
 
 Toggle dummy
-== Dummy kullan
+== Yardımcı karakter kullan
 
 Toggle ghost
 == Hayaleti göster
 
 Dummy copy
-== Dummy kopyala
+== İkiz kopyala
 
 Hammerfly dummy
-== Çekiç uçuşu dummy
+== Çekiç uçuşu ikiz
 
 Converse
 == Konuşma
@@ -746,7 +746,7 @@ Enable gun sound
 == Silah sesini etkinleştir
 
 Enable long pain sound (used when shooting in freeze)
-== Uzun ağlama sesini etkinleştir (freeze iken ateş edince kullanılır)
+== Uzun ağlama sesini etkinleştir (donmada iken ateş edince kullanılır)
 
 Enable server message sound
 == Sunucu mesaj sesini etkinleştir
@@ -905,7 +905,7 @@ Best
 == En iyi
 
 Grabs
-== Yakalama
+== Yakalamalar
 
 1 new mention
 == 1 yeni bildirim
@@ -1223,7 +1223,7 @@ Demos directory
 == Demo klasörü
 
 Open the directory that contains the demo files
-== Demo dosyalarını içeren klasörü aç
+== kayıt dosyalarını içeren klasörü aç
 
 Are you sure that you want to delete the folder '%s'?
 == '%s' klasörünü silmek istediğine emin misin?
@@ -1235,7 +1235,7 @@ Delete folder
 == Klasörü sil
 
 Unable to delete the demo '%s'
-== '%s' demosu silinemiyor
+== '%s' kayıtı silinemiyor
 
 Unable to delete the folder '%s'. Make sure it's empty first.
 == '%s' klasörü silinemiyor. Önce boş olduğundan emin olun.
@@ -2003,7 +2003,7 @@ Active: Fire
 == Aktif: Ateş etme
 
 Active: Hook
-== Aktif: Kanca
+== Aktif: Kanca/Çengel
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
 == "%s" pnglite ile uyumlu değil ve eski DDnet versiyonları tarafından yüklenemiyor:
@@ -2045,7 +2045,7 @@ Disabled
 
 [Auto camera]
 Enabled
-== Etkin
+== Etkinleştirildi
 
 [Auto camera]
 Unavailable for this player
@@ -2067,7 +2067,7 @@ Community
 
 [Team status]
 forbidden
-== yasak
+== yasaklı
 
 [Team status]
 solo
@@ -2106,7 +2106,7 @@ Renders your frame rate in the top right
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Türkçe çeviri Learath2, ardadem, h-kaan, eghwand, Gokturk ve WarHammer tarafından yapıldı
+== Türkçe çeviri Learath2, ardadem, h-kaan, eghwand, Gokturk, WarHammer ve janpasak408 tarafından yapıldı
 
 Show spectator cursor
 == İzlenenin imlecini göster
@@ -2116,7 +2116,7 @@ Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom
 == VRAM bitmiş. 'cl_skins_loaded_max' değerini daha düşük bir değere ayarlamayı veya özel varlıkları (kaplamalar, varlıklar vb.), özellikle de yüksek çözünürlüklü olanları kaldırmayı deneyin.
 
 No demo with this filename exists
-== Bu isimle bir demo bulunmuyor
+== Bu isimle bir kayıt bulunmuyor
 
 This name cannot be used for files and folders
 == Bu isim dosya ve klasörler için kullanılamıyor
@@ -2193,10 +2193,10 @@ Preview dummy's name plate
 == Dummy ismini ön izle
 
 Dragger Outline Color
-== Dragger Ana hat Rengi
+== Sürükleyici Ana hat Rengi
 
 Dragger Inner Color
-== Dragger İç Rengi
+== Sürükleyici İç Rengi
 
 AntiPing: prediction margin
 == AntiPing: tahmin marjı
