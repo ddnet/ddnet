@@ -21,7 +21,6 @@
 #include <game/version.h>
 
 #include <game/client/gameclient.h>
-#include <game/client/render.h>
 #include <game/client/ui.h>
 
 #include <iterator>

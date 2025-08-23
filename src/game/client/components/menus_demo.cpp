@@ -14,7 +14,6 @@
 
 #include <game/client/components/console.h>
 #include <game/client/gameclient.h>
-#include <game/client/render.h>
 #include <game/client/ui.h>
 #include <game/client/ui_listbox.h>
 #include <game/generated/client_data.h>

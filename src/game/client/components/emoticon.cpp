@@ -7,7 +7,6 @@
 #include "chat.h"
 #include "emoticon.h"
 #include <game/client/animstate.h>
-#include <game/client/render.h>
 #include <game/client/ui.h>
 
 #include <game/client/gameclient.h>

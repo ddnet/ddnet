@@ -10,7 +10,6 @@
 #include <game/client/components/scoreboard.h>
 #include <game/client/components/sounds.h>
 #include <game/client/gameclient.h>
-#include <game/client/render.h>
 #include <game/generated/protocol.h>
 #include <game/localization.h>
 
