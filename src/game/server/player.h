@@ -239,6 +239,13 @@ public:
 
 	CSaveTee m_LastTeleTee;
 	std::optional<CSaveTee> m_LastDeath;
+
+	//<FoxNet
+	void FoxNetTick();
+
+
+
+	// FoxNet>
 };
 
 #endif

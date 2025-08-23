@@ -3013,4 +3013,7 @@ bool shell_unregister_application(const char *executable, bool *updated);
 void shell_update();
 #endif
 
+char str_lowercase(char c);
+void str_lower(char *pOut);
+
 #endif

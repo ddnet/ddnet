@@ -5451,3 +5451,19 @@ void shell_update()
 	SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, nullptr, nullptr);
 }
 #endif
+
+char str_lowercase(char c)
+{
+	if(c >= 'a' && c <= 'z')
+		return 'A' + (c - 'a');
+	return c;
+}
+
+void str_lower(char *pOut)
+{
+	while(*pOut)
+	{
+		*pOut = str_lowercase(*pOut);
+		pOut++;
+	}
+}

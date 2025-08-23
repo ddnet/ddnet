@@ -19,6 +19,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include "foxnet/accounts.h"
 
 /*
 	Tick
@@ -631,6 +632,21 @@ public:
 	void OnSetAuthed(int ClientId, int Level) override;
 
 	void ResetTuning();
+
+	CAccountSession m_Account[MAX_CLIENTS];
+	CAccounts m_AccountManager;
+
+	//<FoxNet
+	void FoxNetTick();
+	void RegisterFoxNetCommands();
+
+	void SendLoginState(int ClientId) const;
+	static void ConAccRegister(IConsole::IResult *pResult, void *pUserData);
+	static void ConAccPassword(IConsole::IResult *pResult, void *pUserData);
+	static void ConAccLogin(IConsole::IResult *pResult, void *pUserData);
+	static void ConAccLogout(IConsole::IResult *pResult, void *pUserData);
+	static void ConAccProfile(IConsole::IResult *pResult, void *pUserData);
+	// FoxNet>
 };
 
 static inline bool CheckClientId(int ClientId)

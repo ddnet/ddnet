@@ -2060,6 +2060,9 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   config.cpp
   config.h
   config_variables.h
+  #<FoxNet
+  config_variables_foxnet.h
+  # FoxNet>
   console.cpp
   console.h
   csv.cpp
@@ -2770,7 +2773,11 @@ if(SERVER)
     entity.cpp
     entity.h
     eventhandler.cpp
-    eventhandler.h
+    eventhandler.h  
+    #<FoxNet
+    foxnet/accounts.cpp
+    foxnet/accounts.h
+    # FoxNet>
     gamecontext.cpp
     gamecontext.h
     gamecontroller.cpp
