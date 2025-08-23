@@ -132,10 +132,9 @@ void CProjectile::Tick()
 		return;
 	}
 
-	if(
-		(((pTargetChr || pTargetTargetSwitch) &&
-			 (pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar || pTargetTargetSwitch)) ||
-			Collide || GameLayerClipped(CurPos)) &&
+	if((((pTargetChr || pTargetTargetSwitch) &&
+		    (pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar || pTargetTargetSwitch)) ||
+		   Collide || GameLayerClipped(CurPos)) &&
 		!IsWeaponCollide)
 	{
 		if(m_Explosive /*??*/ && (!pTargetChr || (pTargetChr && (!m_Freeze || (m_Type == WEAPON_SHOTGUN && Collide)))))

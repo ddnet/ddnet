@@ -298,7 +298,7 @@ CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, v
 
 CTargetSwitch *CGameWorld::IntersectTargetSwitch(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos)
 {
-	return (CTargetSwitch *)IntersectEntity(Pos0, Pos1, Radius, ENTTYPE_HITTABLE, NewPos);
+	return (CTargetSwitch *)IntersectEntity(Pos0, Pos1, Radius, ENTTYPE_TARGETSWITCH, NewPos);
 }
 
 CEntity *CGameWorld::IntersectEntity(vec2 Pos0, vec2 Pos1, float Radius, int Type, vec2 &NewPos, const CEntity *pNotThis, int CollideWith, const CEntity *pThisOnly)
