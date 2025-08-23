@@ -358,7 +358,7 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 	CEntity *apTargetEnts[MAX_CLIENTS];
 	// Targets need a bigger force to activate
 	Radius = 60.0f;
-	Num = m_World.FindEntities(Pos, Radius, apTargetEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_HITTABLE);
+	Num = m_World.FindEntities(Pos, Radius, apTargetEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_TARGETSWITCH);
 	for(int i = 0; i < Num; i++)
 	{
 		auto *pTarget = static_cast<CTargetSwitch *>(apTargetEnts[i]);

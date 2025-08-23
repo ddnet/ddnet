@@ -1,5 +1,3 @@
-/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
-/* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "targetswitch.h"
 #include "character.h"
 
@@ -14,7 +12,7 @@
 static constexpr int gs_TargetSwitchSize = 30;
 
 CTargetSwitch::CTargetSwitch(CGameWorld *pGameWorld, vec2 Pos, int Type, int Layer, int Number, int Flags, int Delay) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_HITTABLE, Pos, gs_TargetSwitchSize)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_TARGETSWITCH, Pos, gs_TargetSwitchSize)
 {
 	m_Core = vec2(0.0f, 0.0f);
 	m_Type = Type;
@@ -65,35 +63,24 @@ void CTargetSwitch::GetHit(int TeamHitFrom, bool Weakly)
 
 	bool PreviousSwitchStatus = Switchers()[m_Number].m_aStatus[TeamHitFrom];
 	const int EndTick = m_Delay ? Server()->Tick() + 1 + m_Delay * Server()->TickSpeed() : 0;
-
+	Switchers()[m_Number].m_aLastUpdateTick[TeamHitFrom] = Server()->Tick();
 	if(m_Type == TARGETSWITCHTYPE_CLOSE)
 	{
 		Switchers()[m_Number].m_aStatus[TeamHitFrom] = true;
 		Switchers()[m_Number].m_aEndTick[TeamHitFrom] = EndTick;
 		Switchers()[m_Number].m_aType[TeamHitFrom] = m_Delay ? TILE_SWITCHTIMEDOPEN : TILE_SWITCHCLOSE;
-		Switchers()[m_Number].m_aLastUpdateTick[TeamHitFrom] = Server()->Tick();
 	}
 	else if(m_Type == TARGETSWITCHTYPE_OPEN)
 	{
 		Switchers()[m_Number].m_aStatus[TeamHitFrom] = false;
 		Switchers()[m_Number].m_aEndTick[TeamHitFrom] = EndTick;
 		Switchers()[m_Number].m_aType[TeamHitFrom] = m_Delay ? TILE_SWITCHTIMEDCLOSE : TILE_SWITCHOPEN;
-		Switchers()[m_Number].m_aLastUpdateTick[TeamHitFrom] = Server()->Tick();
 	}
 	else if(m_Type == TARGETSWITCHTYPE_ALTERNATE)
 	{
 		Switchers()[m_Number].m_aStatus[TeamHitFrom] = !Switchers()[m_Number].m_aStatus[TeamHitFrom];
 		Switchers()[m_Number].m_aEndTick[TeamHitFrom] = 0; // no delay on alternating targets
 		Switchers()[m_Number].m_aType[TeamHitFrom] = (Switchers()[m_Number].m_aType[TeamHitFrom] == TILE_SWITCHCLOSE) ? TILE_SWITCHCLOSE : TILE_SWITCHOPEN;
-
-		/*
-		Switchers()[m_Number].m_aEndTick[TeamHitFrom] = EndTick;
-		if(m_Delay)
-			Switchers()[m_Number].m_aType[TeamHitFrom] = (Switchers()[m_Number].m_aType[TeamHitFrom] == TILE_SWITCHCLOSE) ? TILE_SWITCHOPEN : TILE_SWITCHCLOSE;
-		else
-			Switchers()[m_Number].m_aType[TeamHitFrom] = (Switchers()[m_Number].m_aType[TeamHitFrom] == TILE_SWITCHCLOSE) ? TILE_SWITCHCLOSE : TILE_SWITCHOPEN;
-			*/
-		Switchers()[m_Number].m_aLastUpdateTick[TeamHitFrom] = Server()->Tick();
 	}
 
 	// Hitting this switch changed something, provide feedback
