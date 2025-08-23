@@ -9,7 +9,6 @@
 #include <game/client/components/scoreboard.h>
 #include <game/client/gameclient.h>
 #include <game/client/prediction/entities/character.h>
-#include <game/client/render.h>
 #include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
 
