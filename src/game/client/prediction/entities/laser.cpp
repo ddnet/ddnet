@@ -8,6 +8,7 @@
 
 #include <generated/protocol.h>
 
+#include "targetswitch.h"
 #include <game/client/laser_data.h>
 #include <game/collision.h>
 #include <game/mapitems.h>
@@ -92,6 +93,25 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	return true;
 }
 
+bool CLaser::HitTargetSwitch(vec2 From, vec2 To)
+{
+	vec2 At;
+	CCharacter *pOwnerChar = GameWorld()->GetCharacterById(m_Owner);
+	CTargetSwitch *pHit = nullptr;
+
+	if(pOwnerChar ? (!pOwnerChar->LaserHitDisabled() && m_Type == WEAPON_LASER) || (!pOwnerChar->ShotgunHitDisabled() && m_Type == WEAPON_SHOTGUN) : g_Config.m_SvHit)
+		pHit = GameWorld()->IntersectTargetSwitch(m_Pos, To, 0.f, At);
+
+	if(!pHit)
+		return false;
+
+	pHit->GetHit(GameWorld()->Teams()->Team(m_Owner));
+	m_From = From;
+	m_Pos = At;
+	m_Energy = -1;
+	return true;
+}
+
 void CLaser::DoBounce()
 {
 	m_EvalTick = GameWorld()->GameTick();
@@ -111,7 +131,7 @@ void CLaser::DoBounce()
 
 	if(Res)
 	{
-		if(!HitCharacter(m_Pos, To))
+		if(!HitCharacter(m_Pos, To) && !HitTargetSwitch(m_Pos, To))
 		{
 			// intersected
 			m_From = m_Pos;
@@ -156,7 +176,7 @@ void CLaser::DoBounce()
 	}
 	else
 	{
-		if(!HitCharacter(m_Pos, To))
+		if(!HitCharacter(m_Pos, To) && !HitTargetSwitch(m_Pos, To))
 		{
 			m_From = m_Pos;
 			m_Pos = To;

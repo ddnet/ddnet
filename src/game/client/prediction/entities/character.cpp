@@ -11,6 +11,7 @@
 
 #include <game/collision.h>
 #include <game/mapitems.h>
+#include "targetswitch.h"
 
 // Character, "physical" player's part
 
@@ -168,7 +169,7 @@ void CCharacter::HandleNinja()
 					continue;
 
 				// check so we are sufficiently close
-				if(distance(pChr->m_Pos, m_Pos) > (m_ProximityRadius * 2.0f))
+				if(distance(pChr->m_Pos, m_Pos) > Radius)
 					continue;
 
 				// Hit a player, give them damage and stuffs...
@@ -179,6 +180,34 @@ void CCharacter::HandleNinja()
 				CCharacter *pChar = GameWorld()->GetCharacterById(pChr->GetCid());
 				if(pChar)
 					pChar->TakeDamage(vec2(0, -10.0f), g_pData->m_Weapons.m_Ninja.m_pBase->m_Damage, GetCid(), WEAPON_NINJA);
+			}
+
+			CEntity *apTargetEnts[MAX_CLIENTS];
+			Radius = GetProximityRadius() * 2.0f;
+			Num = GameWorld()->FindEntities(OldPos, Radius, apTargetEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_TARGETSWITCH);
+
+			for(int i = 0; i < Num; ++i)
+			{
+				auto *pTarget = static_cast<CTargetSwitch *>(apTargetEnts[i]);
+
+				// make sure we haven't Hit this object before
+				bool AlreadyHit = false;
+				for(int j = 0; j < m_NumObjectsHit; j++)
+				{
+					if(m_aHitObjects[j] == pTarget->GetId())
+						AlreadyHit = true;
+				}
+				if(AlreadyHit)
+					continue;
+
+				if(distance(pTarget->m_Pos, m_Pos) > Radius)
+					continue;
+
+				// TODO: consider if this is good behavior
+				if(m_NumObjectsHit < 10)
+					m_aHitObjects[m_NumObjectsHit++] = pTarget->GetId();
+
+				pTarget->GetHit(Team());
 			}
 		}
 
@@ -349,6 +378,17 @@ void CCharacter::FireWeapon()
 				GetCid(), m_Core.m_ActiveWeapon);
 			pTarget->UnFreeze();
 
+			Hits++;
+		}
+
+		CEntity *apTargetEnts[MAX_CLIENTS];
+		Num = GameWorld()->FindEntities(ProjStartPos, GetProximityRadius() * 0.5f, apTargetEnts,
+			MAX_CLIENTS, CGameWorld::ENTTYPE_TARGETSWITCH);
+
+		for(int i = 0; i < Num; ++i)
+		{
+			auto *pTarget = static_cast<CTargetSwitch *>(apTargetEnts[i]);
+			pTarget->GetHit(Team());
 			Hits++;
 		}
 
