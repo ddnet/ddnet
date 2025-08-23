@@ -348,7 +348,7 @@ void CCharacter::HandleNinja()
 					continue;
 
 				// check so we are sufficiently close
-				if(distance(pChr->m_Pos, m_Pos) > (Radius))
+				if(distance(pChr->m_Pos, m_Pos) > Radius)
 					continue;
 
 				// Hit a player, give them damage and stuffs...
@@ -362,7 +362,7 @@ void CCharacter::HandleNinja()
 
 			CEntity *apTargetEnts[MAX_CLIENTS];
 			Radius = GetProximityRadius() * 2.0f;
-			Num = GameServer()->m_World.FindEntities(OldPos, Radius, apTargetEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_HITTABLE);
+			Num = GameServer()->m_World.FindEntities(OldPos, Radius, apTargetEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_TARGETSWITCH);
 
 			for(int i = 0; i < Num; ++i)
 			{
@@ -378,7 +378,7 @@ void CCharacter::HandleNinja()
 				if(AlreadyHit)
 					continue;
 
-				if(distance(pTarget->m_Pos, m_Pos) > (Radius))
+				if(distance(pTarget->m_Pos, m_Pos) > Radius)
 					continue;
 
 				// TODO: consider if this is good behavior
@@ -562,12 +562,11 @@ void CCharacter::FireWeapon()
 
 		CEntity *apTargetEnts[MAX_CLIENTS];
 		Num = GameServer()->m_World.FindEntities(ProjStartPos, GetProximityRadius() * 0.5f, apTargetEnts,
-			MAX_CLIENTS, CGameWorld::ENTTYPE_HITTABLE);
+			MAX_CLIENTS, CGameWorld::ENTTYPE_TARGETSWITCH);
 
 		for(int i = 0; i < Num; ++i)
 		{
 			auto *pTarget = static_cast<CTargetSwitch *>(apTargetEnts[i]);
-
 			int Team = Teams()->m_Core.Team(m_Core.m_Id);
 			pTarget->GetHit(Team);
 			GameServer()->CreateHammerHit(pTarget->m_Pos, TeamMask());
