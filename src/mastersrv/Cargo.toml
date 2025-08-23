@@ -22,7 +22,7 @@ headers = "0.3.7"
 hex = "0.4.3"
 ipnet = "2.9.0"
 libloc = "0.1.0"
-log = "0.4.17"
+log = "0.4.27"
 mime = "0.3.16"
 rand = "0.8.4"
 serde = { version = "1.0.126", features = ["derive"] }
