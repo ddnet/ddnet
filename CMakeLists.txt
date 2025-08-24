@@ -2777,6 +2777,8 @@ if(SERVER)
     #<FoxNet
     foxnet/accounts.cpp
     foxnet/accounts.h
+    foxnet/votemenu.cpp
+    foxnet/votemenu.h
     # FoxNet>
     gamecontext.cpp
     gamecontext.h

@@ -19,7 +19,9 @@
 #include <map>
 #include <memory>
 #include <string>
+
 #include "foxnet/accounts.h"
+#include "foxnet/votemenu.h"
 
 /*
 	Tick
@@ -635,6 +637,8 @@ public:
 
 	CAccountSession m_Account[MAX_CLIENTS];
 	CAccounts m_AccountManager;
+
+	CVoteMenu m_VoteMenu;
 
 	//<FoxNet
 	void FoxNetTick();

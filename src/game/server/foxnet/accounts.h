@@ -35,6 +35,7 @@ struct CAccountSession
 	int m_Port = 0;
 	int ClientId = -1;
 	uint64_t m_Flags = 0;
+	uint64_t m_VoteMenuFlags = 0;
 	uint64_t m_Playtime = 0; // Minutes
 	uint64_t m_Deaths = 0;
 	uint64_t m_Kills = 0;

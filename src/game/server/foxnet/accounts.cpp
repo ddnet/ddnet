@@ -3,6 +3,8 @@
 #include <base/hash.h>
 #include <base/hash_ctxt.h>
 #include <base/system.h>
+#include <corecrt.h>
+#include <ctime>
 #include <engine/server.h>
 #include <engine/shared/config.h>
 #include <sqlite3.h>
@@ -11,6 +13,7 @@ IServer *CAccounts::Server() const { return GameServer()->Server(); }
 
 constexpr const char *SQLITE_TABLE = R"(
         CREATE TABLE IF NOT EXISTS Accounts (
+			Version INTEGER NOT NULL DEFAULT 1,
             Username TEXT NOT NULL COLLATE NOCASE,
             Password TEXT NOT NULL,
             RegisterDate INTEGER NOT NULL,
@@ -23,6 +26,7 @@ constexpr const char *SQLITE_TABLE = R"(
             Port INTEGER DEFAULT 0,
             ClientId INTEGER DEFAULT -1,
             Flags INTEGER DEFAULT 0,
+            VoteMenuFlags INTEGER DEFAULT 0,
 			Playtime INTEGER DEFAULT 0,
 			Deaths INTEGER DEFAULT 0,
 			Kills INTEGER DEFAULT 0,
@@ -113,7 +117,7 @@ bool CAccounts::ForceLogin(int ClientId, const char *pUsername)
 		return false;
 
 	const char *SelectQuery = R"(
-        SELECT LoggedIn, Username, Flags, Playtime, Deaths, Kills, Level, XP, Money, Inventory
+		SELECT Username, RegisterDate, PlayerName, LastPlayerName, CurrentIP, LastIP, LoggedIn, LastLogin, Port, ClientId, Flags, VoteMenuFlags, Playtime, Deaths, Kills, Level, XP, Money, Inventory
         FROM Accounts
         WHERE Username = ?;
     )";
@@ -134,16 +138,28 @@ bool CAccounts::ForceLogin(int ClientId, const char *pUsername)
 		}
 
 		CAccountSession &Acc = GameServer()->m_Account[ClientId];
+		time_t Now;
+		time(&Now);
+
+		str_copy(Acc.m_Username, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 0)));
+		Acc.m_RegisterDate = sqlite3_column_int64(stmt, 1);
+		str_copy(Acc.m_Name, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 2)));
+		str_copy(Acc.m_LastName, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 3)));
+		str_copy(Acc.CurrentIp, Server()->ClientAddrString(ClientId, false));
+		str_copy(Acc.LastIp, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 5)));
 		Acc.m_LoggedIn = true;
-		str_copy(Acc.m_Username, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 1)));
-		Acc.m_Flags = sqlite3_column_int64(stmt, 2);
-		Acc.m_Playtime = sqlite3_column_int64(stmt, 3);
-		Acc.m_Deaths = sqlite3_column_int64(stmt, 4);
-		Acc.m_Kills = sqlite3_column_int64(stmt, 5);
-		Acc.m_Level = sqlite3_column_int64(stmt, 6);
-		Acc.m_XP = sqlite3_column_int64(stmt, 7);
-		Acc.m_Money = sqlite3_column_int64(stmt, 8);
-		str_copy(Acc.m_Inventory, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 9)));
+		Acc.m_LastLogin = Now;
+		Acc.m_Port = Server()->Port();
+		Acc.ClientId = ClientId;
+		Acc.m_Flags = sqlite3_column_int64(stmt, 10);
+		Acc.m_VoteMenuFlags = sqlite3_column_int64(stmt, 11);
+		Acc.m_Playtime = sqlite3_column_int64(stmt, 12);
+		Acc.m_Deaths = sqlite3_column_int64(stmt, 13);
+		Acc.m_Kills = sqlite3_column_int64(stmt, 14);
+		Acc.m_Level = sqlite3_column_int64(stmt, 15);
+		Acc.m_XP = sqlite3_column_int64(stmt, 16);
+		Acc.m_Money = sqlite3_column_int64(stmt, 17);
+		str_copy(Acc.m_Inventory, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 18)));
 
 		OnLogin(ClientId, pUsername);
 		sqlite3_finalize(stmt);
@@ -163,7 +179,7 @@ bool CAccounts::Login(int ClientId, const char *pUsername, const char *pPassword
 		return false;
 
 	const char *SelectQuery = R"(
-		SELECT Username, RegisterDate, PlayerName, LastPlayerName, CurrentIP, LastIP, LoggedIn, LastLogin, Port, ClientId, Flags, Playtime, Deaths, Kills, Level, XP, Money, Inventory
+		SELECT Username, RegisterDate, PlayerName, LastPlayerName, CurrentIP, LastIP, LoggedIn, LastLogin, Port, ClientId, Flags, VoteMenuFlags, Playtime, Deaths, Kills, Level, XP, Money, Inventory
         FROM Accounts
         WHERE Username = ? AND Password = ?;
     )";
@@ -188,25 +204,28 @@ bool CAccounts::Login(int ClientId, const char *pUsername, const char *pPassword
 			GameServer()->SendChatTarget(ClientId, "Account is already logged in");
 			return false;
 		}
+		time_t Now;
+		time(&Now);
 
 		str_copy(Acc.m_Username, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 0)));
 		Acc.m_RegisterDate = sqlite3_column_int64(stmt, 1);
 		str_copy(Acc.m_Name, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 2)));
 		str_copy(Acc.m_LastName, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 3)));
-		str_copy(Acc.CurrentIp, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 4)));
+		str_copy(Acc.CurrentIp, Server()->ClientAddrString(ClientId, false));
 		str_copy(Acc.LastIp, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 5)));
-		Acc.m_LoggedIn = sqlite3_column_int(stmt, 6);
-		Acc.m_LastLogin = sqlite3_column_int64(stmt, 7);
-		Acc.m_Port = sqlite3_column_int(stmt, 8);
-		Acc.ClientId = sqlite3_column_int(stmt, 9);
+		Acc.m_LoggedIn = true;
+		Acc.m_LastLogin = Now;
+		Acc.m_Port = Server()->Port();
+		Acc.ClientId = ClientId;
 		Acc.m_Flags = sqlite3_column_int64(stmt, 10);
-		Acc.m_Playtime = sqlite3_column_int64(stmt, 11);
-		Acc.m_Deaths = sqlite3_column_int64(stmt, 12);
-		Acc.m_Kills = sqlite3_column_int64(stmt, 13);
-		Acc.m_Level = sqlite3_column_int64(stmt, 14);
-		Acc.m_XP = sqlite3_column_int64(stmt, 15);
-		Acc.m_Money = sqlite3_column_int64(stmt, 16);
-		str_copy(Acc.m_Inventory, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 17)));
+		Acc.m_VoteMenuFlags = sqlite3_column_int64(stmt, 11);
+		Acc.m_Playtime = sqlite3_column_int64(stmt, 12);
+		Acc.m_Deaths = sqlite3_column_int64(stmt, 13);
+		Acc.m_Kills = sqlite3_column_int64(stmt, 14);
+		Acc.m_Level = sqlite3_column_int64(stmt, 15);
+		Acc.m_XP = sqlite3_column_int64(stmt, 16);
+		Acc.m_Money = sqlite3_column_int64(stmt, 17);
+		str_copy(Acc.m_Inventory, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 18)));
 
 		OnLogin(ClientId, pUsername);
 		sqlite3_finalize(stmt);
@@ -296,6 +315,7 @@ void CAccounts::OnLogout(int ClientId, const CAccountSession AccInfo)
 			LastPlayerName = PlayerName,
 			LastIP = CurrentIP,
 			Flags = ?,
+			VoteMenuFlags = ?,
 			Playtime = ?,
 			Deaths = ?,
 			Kills = ?,
@@ -313,14 +333,15 @@ void CAccounts::OnLogout(int ClientId, const CAccountSession AccInfo)
 		time(&Now);
 
 		sqlite3_bind_int64(stmt, 1, AccInfo.m_Flags);
-		sqlite3_bind_int64(stmt, 2, AccInfo.m_Playtime);
-		sqlite3_bind_int64(stmt, 3, AccInfo.m_Deaths);
-		sqlite3_bind_int64(stmt, 4, AccInfo.m_Kills);
-		sqlite3_bind_int64(stmt, 5, AccInfo.m_Level);
-		sqlite3_bind_int64(stmt, 6, AccInfo.m_XP);
-		sqlite3_bind_int64(stmt, 7, AccInfo.m_Money);
-		sqlite3_bind_text(stmt, 8, AccInfo.m_Inventory, -1, SQLITE_STATIC);
-		sqlite3_bind_text(stmt, 9, AccInfo.m_Username, -1, SQLITE_STATIC);
+		sqlite3_bind_int64(stmt, 2, AccInfo.m_VoteMenuFlags);
+		sqlite3_bind_int64(stmt, 3, AccInfo.m_Playtime);
+		sqlite3_bind_int64(stmt, 4, AccInfo.m_Deaths);
+		sqlite3_bind_int64(stmt, 5, AccInfo.m_Kills);
+		sqlite3_bind_int64(stmt, 6, AccInfo.m_Level);
+		sqlite3_bind_int64(stmt, 7, AccInfo.m_XP);
+		sqlite3_bind_int64(stmt, 8, AccInfo.m_Money);
+		sqlite3_bind_text(stmt, 9, AccInfo.m_Inventory, -1, SQLITE_STATIC);
+		sqlite3_bind_text(stmt, 10, AccInfo.m_Username, -1, SQLITE_STATIC);
 		sqlite3_step(stmt);
 		sqlite3_finalize(stmt);
 	}
@@ -339,6 +360,8 @@ void CAccounts::LogoutAllAccountsPort(int Port)
 	const char *UpdateQuery = R"(
 		UPDATE Accounts
 		SET
+			LastPlayerName = PlayerName,
+			LastIP = CurrentIP,
 			LoggedIn = 0,
 			Port = 0,
 			ClientId = -1
@@ -370,13 +393,11 @@ bool CAccounts::Register(int ClientId, const char *pUsername, const char *pPassw
 		GameServer()->SendChatTarget(ClientId, "Username or password is empty");
 		return false;
 	}
-
 	if(str_comp(pPassword, pPassword2) != 0)
 	{
 		GameServer()->SendChatTarget(ClientId, "[Err] Passwords do not match");
 		return false;
 	}
-
 	if(str_length(pUsername) > ACC_MAX_USERNAME_LENGTH - 1)
 	{
 		GameServer()->SendChatTarget(ClientId, "[Err] Username is too long");
@@ -678,6 +699,7 @@ void CAccounts::SaveAccountsInfo(int ClientId, const CAccountSession AccInfo)
 			LastPlayerName = PlayerName,
 			LastIP = CurrentIP,
 			Flags = ?,
+			VoteMenuFlags = ?,
 			Playtime = ?,
 			Deaths = ?,
 			Kills = ?,
@@ -695,14 +717,15 @@ void CAccounts::SaveAccountsInfo(int ClientId, const CAccountSession AccInfo)
 		time(&Now);
 
 		sqlite3_bind_int64(stmt, 1, AccInfo.m_Flags);
-		sqlite3_bind_int64(stmt, 2, AccInfo.m_Playtime);
-		sqlite3_bind_int64(stmt, 3, AccInfo.m_Deaths);
-		sqlite3_bind_int64(stmt, 4, AccInfo.m_Kills);
-		sqlite3_bind_int64(stmt, 5, AccInfo.m_Level);
-		sqlite3_bind_int64(stmt, 6, AccInfo.m_XP);
-		sqlite3_bind_int64(stmt, 7, AccInfo.m_Money);
-		sqlite3_bind_text(stmt, 8, AccInfo.m_Inventory, -1, SQLITE_STATIC);
-		sqlite3_bind_text(stmt, 9, AccInfo.m_Username, -1, SQLITE_STATIC);
+		sqlite3_bind_int64(stmt, 2, AccInfo.m_VoteMenuFlags);
+		sqlite3_bind_int64(stmt, 3, AccInfo.m_Playtime);
+		sqlite3_bind_int64(stmt, 4, AccInfo.m_Deaths);
+		sqlite3_bind_int64(stmt, 5, AccInfo.m_Kills);
+		sqlite3_bind_int64(stmt, 6, AccInfo.m_Level);
+		sqlite3_bind_int64(stmt, 7, AccInfo.m_XP);
+		sqlite3_bind_int64(stmt, 8, AccInfo.m_Money);
+		sqlite3_bind_text(stmt, 9, AccInfo.m_Inventory, -1, SQLITE_STATIC);
+		sqlite3_bind_text(stmt, 10, AccInfo.m_Username, -1, SQLITE_STATIC);
 		sqlite3_step(stmt);
 		sqlite3_finalize(stmt);
 	}
@@ -756,7 +779,7 @@ void CAccounts::SetPlayerName(int ClientId, const char *pName) // When player ch
 //		return std::nullopt;
 //
 //	const char *SelectQuery = R"(
-//		SELECT Username, RegisterDate, PlayerName, LastPlayerName, CurrentIP, LastIP, LoggedIn, LastLogin, Port, ClientId, Flags, Playtime, Deaths, Kills, Level, XP, Money, Inventory
+//		SELECT Username, RegisterDate, PlayerName, LastPlayerName, CurrentIP, LastIP, LoggedIn, LastLogin, Port, ClientId, Flags, VoteMenuFlags Playtime, Deaths, Kills, Level, XP, Money, Inventory
 //		FROM Accounts
 //		WHERE Username;
 //	)";
@@ -782,13 +805,14 @@ void CAccounts::SetPlayerName(int ClientId, const char *pName) // When player ch
 //		Acc.m_Port = sqlite3_column_int(stmt, 8);
 //		Acc.ClientId = sqlite3_column_int(stmt, 9);
 //		Acc.m_Flags = sqlite3_column_int64(stmt, 10);
-//		Acc.m_Playtime = sqlite3_column_int64(stmt, 11);
-//		Acc.m_Deaths = sqlite3_column_int64(stmt, 12);
-//		Acc.m_Kills = sqlite3_column_int64(stmt, 13);
-//		Acc.m_Level = sqlite3_column_int64(stmt, 14);
-//		Acc.m_XP = sqlite3_column_int64(stmt, 15);
-//		Acc.m_Money = sqlite3_column_int64(stmt, 16);
-//		str_copy(Acc.m_Inventory, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 17)));
+//		Acc.m_VoteMenuFlags = sqlite3_column_int64(stmt, 11);
+//		Acc.m_Playtime = sqlite3_column_int64(stmt, 12);
+//		Acc.m_Deaths = sqlite3_column_int64(stmt, 13);
+//		Acc.m_Kills = sqlite3_column_int64(stmt, 14);
+//		Acc.m_Level = sqlite3_column_int64(stmt, 15);
+//		Acc.m_XP = sqlite3_column_int64(stmt, 16);
+//		Acc.m_Money = sqlite3_column_int64(stmt, 17);
+//		str_copy(Acc.m_Inventory, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 18)));
 //
 //		sqlite3_finalize(stmt);
 //		return Acc;

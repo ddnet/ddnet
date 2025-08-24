@@ -2287,6 +2287,9 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 	if(RateLimitPlayerVote(ClientId) || m_VoteCloseTime)
 		return;
 
+	if(m_VoteMenu.OnCallVote(pMsg, ClientId))
+		return; // If player voted for custom option
+
 	m_apPlayers[ClientId]->UpdatePlaytime();
 
 	m_VoteType = VOTE_TYPE_UNKNOWN;
@@ -2296,9 +2299,7 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 	char aCmd[VOTE_CMD_LENGTH] = {0};
 	char aReason[VOTE_REASON_LENGTH] = "No reason given";
 	if(pMsg->m_pReason[0])
-	{
 		str_copy(aReason, pMsg->m_pReason, sizeof(aReason));
-	}
 	int Authed = Server()->GetAuthedState(ClientId);
 
 	if(str_comp_nocase(pMsg->m_pType, "option") == 0)
@@ -4182,8 +4183,8 @@ void CGameContext::OnInit(const void *pPersistentData)
 
 	m_pAntibot->RoundStart(this);
 
-	// FoxNet
 	m_AccountManager.Init(this);
+	m_VoteMenu.Init(this);
 }
 
 void CGameContext::CreateAllEntities(bool Initial)
@@ -5358,13 +5359,12 @@ void CGameContext::FoxNetTick()
 
 void CGameContext::RegisterFoxNetCommands()
 {
+	Console()->Register("force_login", "r[Username]", CFGFLAG_SERVER, ConForceLogin, this, "Show someones profile");
+
 	Console()->Register("register", "s[username] s[password] s[password2]", CFGFLAG_CHAT, ConAccRegister, this, "Register a account");
 	Console()->Register("password", "s[oldpass] s[password] s[password2]", CFGFLAG_CHAT, ConAccPassword, this, "Change your password");
 	Console()->Register("login", "s[username] r[password]", CFGFLAG_CHAT, ConAccLogin, this, "Login to your account");
 	Console()->Register("logout", "", CFGFLAG_CHAT, ConAccLogout, this, "Logout of your account");
 	Console()->Register("profile", "?s[Name]", CFGFLAG_CHAT, ConAccProfile, this, "Show someones profile");
-
-	
-	Console()->Register("force_login", "r[Username]", CFGFLAG_CHAT, ConForceLogin, this, "Show someones profile");
 }
 //FoxNet>
