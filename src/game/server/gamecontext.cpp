@@ -35,6 +35,8 @@
 #include "player.h"
 #include "score.h"
 
+#include "foxnet/votemenu.h"
+
 // Not thread-safe!
 class CClientChatLogger : public ILogger
 {
@@ -1467,6 +1469,11 @@ void CGameContext::ProgressVoteOptions(int ClientId)
 	if(pPl->m_SendVoteIndex > m_NumVoteOptions)
 		return; // shouldn't happen / fail silently
 
+	int test = 1 << 15;
+
+	if(m_VoteMenu.GetPage(ClientId) != VOTES)
+		return;
+
 	int VotesLeft = m_NumVoteOptions - pPl->m_SendVoteIndex;
 	int NumVotesToSend = minimum(g_Config.m_SvSendVotesPerTick, VotesLeft);
 
@@ -1550,7 +1557,10 @@ void CGameContext::OnClientEnter(int ClientId)
 		m_TeeHistorian.RecordPlayerReady(ClientId);
 	}
 	m_pController->OnPlayerConnect(m_apPlayers[ClientId]);
+
+	//<FoxNet
 	m_AccountManager.AutoLogin(ClientId);
+	//FoxNet>
 
 	{
 		CNetMsg_Sv_CommandInfoGroupStart Msg;
@@ -2284,11 +2294,11 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientId, con
 
 void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int ClientId)
 {
-	if(RateLimitPlayerVote(ClientId) || m_VoteCloseTime)
-		return;
-
 	if(m_VoteMenu.OnCallVote(pMsg, ClientId))
 		return; // If player voted for custom option
+
+	if(RateLimitPlayerVote(ClientId) || m_VoteCloseTime)
+		return;
 
 	m_apPlayers[ClientId]->UpdatePlaytime();
 
@@ -2931,8 +2941,9 @@ void CGameContext::OnStartInfoNetMessage(const CNetMsg_Cl_StartInfo *pMsg, int C
 		pPlayer->m_TeeInfos.ToSixup();
 
 	// send clear vote options
-	CNetMsg_Sv_VoteClearOptions ClearMsg;
-	Server()->SendPackMsg(&ClearMsg, MSGFLAG_VITAL, ClientId);
+	// <FoxNet
+	ClearVotes(ClientId);
+	// FoxNet>
 
 	// begin sending vote options
 	pPlayer->m_SendVoteIndex = 0;
@@ -3429,8 +3440,9 @@ void CGameContext::ConRemoveVote(IConsole::IResult *pResult, void *pUserData)
 
 	// start reloading vote option list
 	// clear vote options
-	CNetMsg_Sv_VoteClearOptions VoteClearOptionsMsg;
-	pSelf->Server()->SendPackMsg(&VoteClearOptionsMsg, MSGFLAG_VITAL, -1);
+	// <FoxNet
+	pSelf->ClearVotes(-1);
+	// FoxNet>
 
 	// reset sending of vote options
 	for(auto &pPlayer : pSelf->m_apPlayers)
@@ -3547,8 +3559,9 @@ void CGameContext::ConClearVotes(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	CNetMsg_Sv_VoteClearOptions VoteClearOptionsMsg;
-	pSelf->Server()->SendPackMsg(&VoteClearOptionsMsg, MSGFLAG_VITAL, -1);
+	// <FoxNet
+	pSelf->ClearVotes(-1);
+	// FoxNet>
 	pSelf->m_pVoteOptionHeap->Reset();
 	pSelf->m_pVoteOptionFirst = nullptr;
 	pSelf->m_pVoteOptionLast = nullptr;
@@ -4662,6 +4675,10 @@ void CGameContext::OnSetAuthed(int ClientId, int Level)
 			m_TeeHistorian.RecordAuthLogout(ClientId);
 		}
 	}
+
+	// <FoxNet
+	ClearVotes(ClientId); // Resend Votes
+	// FoxNet>
 }
 
 bool CGameContext::IsRunningVote(int ClientId) const
@@ -5355,6 +5372,23 @@ void CGameContext::ConForceLogin(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::FoxNetTick()
 {
 	// 
+}
+
+void CGameContext::ClearVotes(int ClientId)
+{
+	if(ClientId == -1)
+	{
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(m_apPlayers[i] && !Server()->ClientSlotEmpty(i))
+				ClearVotes(i);
+		}
+		return;
+	}
+
+	CNetMsg_Sv_VoteClearOptions ClearMsg;
+	Server()->SendPackMsg(&ClearMsg, MSGFLAG_VITAL, ClientId);
+	m_VoteMenu.AddHeader(ClientId);
 }
 
 void CGameContext::RegisterFoxNetCommands()

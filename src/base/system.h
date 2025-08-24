@@ -3013,7 +3013,13 @@ bool shell_unregister_application(const char *executable, bool *updated);
 void shell_update();
 #endif
 
+#endif
+// <FoxNet
 char str_lowercase(char c);
 void str_lower(char *pOut);
 
-#endif
+const char *str_skip_voting_menu_prefixes(const char *pVote);
+
+void SetFlag(uint32_t &Flags, int n, bool Value);
+bool IsFlagSet(uint32_t Flags, int n);
+// FoxNet>

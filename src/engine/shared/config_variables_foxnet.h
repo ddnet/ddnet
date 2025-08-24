@@ -11,8 +11,10 @@
 #define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Save, Desc)
 #endif
 
-MACRO_CONFIG_INT(FoxExampleInt, fox_example_int, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Example integer config variable")
-MACRO_CONFIG_STR(FoxExampleStr, fox_example_str, 100, "FoxNet", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Example string config variable")
+MACRO_CONFIG_INT(FoxExampleInt, fox_example_int, 0, 0, 1, CFGFLAG_SERVER | CFGFLAG_SAVE, "Example integer config variable")
+MACRO_CONFIG_STR(FoxExampleStr, fox_example_str, 100, "FoxNet", CFGFLAG_SERVER | CFGFLAG_SAVE, "Example string config variable")
+
+MACRO_CONFIG_INT(SvVoteMenuFlags, sv_vote_menu_flags, 0, 0, 32768, CFGFLAG_SERVER | CFGFLAG_SAVE, "Flags for what Pages to show in the vote menu")
 
 MACRO_CONFIG_INT(SvAccounts, sv_accounts, 1, 0, 1, CFGFLAG_SERVER | CFGFLAG_SAVE, "Enable optional player accounts")
 

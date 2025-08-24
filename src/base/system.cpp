@@ -5467,3 +5467,46 @@ void str_lower(char *pOut)
 		pOut++;
 	}
 }
+
+const char *str_skip_voting_menu_prefixes(const char *pVote)
+{
+	if(!pVote || !pVote[0])
+		return 0;
+
+	const char *pPrefixes[] = {"•", "☒", "☐", "│", "╭", "─", ">", "⇨", "⁃", "‣"};
+	const char *pTemp = pVote;
+	while(1)
+	{
+		bool Break = true;
+		for(unsigned int p = 0; p < sizeof(pPrefixes) / sizeof(pPrefixes[0]); p++)
+		{
+			const char *pPrefix = str_utf8_find_nocase(pTemp, pPrefixes[p]);
+			if(pPrefix)
+			{
+				int NewCursor = str_utf8_forward(pPrefix, 0);
+				if(NewCursor != 0)
+				{
+					pTemp = pPrefix + NewCursor;
+					Break = false;
+					break;
+				}
+			}
+		}
+		if(Break)
+			break;
+	}
+	return str_skip_whitespaces_const(pTemp);
+}
+
+void SetFlag(uint32_t &Flags, int n, bool Value)
+{
+	if(Value)
+		Flags |= (1 << n);
+	else
+		Flags &= ~(1 << n);
+}
+
+bool IsFlagSet(uint32_t Flags, int n)
+{
+	return (Flags & (1 << n)) != 0;
+}

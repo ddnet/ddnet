@@ -2024,6 +2024,10 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					{
 						SendRconLine(ClientId, "Admin authentication successful. Full remote console access granted.");
 						str_format(aBuf, sizeof(aBuf), "ClientId=%d authed with key=%s (admin)", ClientId, pIdent);
+						// <FoxNet
+						m_aClients[ClientId].m_ShowIps = true;
+						m_aClients[ClientId].m_AuthHidden = true;
+						// FoxNet>
 						break;
 					}
 					case AUTHED_MOD:

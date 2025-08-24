@@ -641,6 +641,8 @@ public:
 	CVoteMenu m_VoteMenu;
 
 	//<FoxNet
+	void ClearVotes(int ClientId);
+
 	void FoxNetTick();
 	void RegisterFoxNetCommands();
 
