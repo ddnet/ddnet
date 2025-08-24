@@ -2,7 +2,6 @@
 #include "../gamecontext.h"
 #include <base/hash.h>
 #include <base/hash_ctxt.h>
-#include <corecrt.h>
 #include <ctime>
 #include <engine/server.h>
 #include <engine/shared/config.h>
