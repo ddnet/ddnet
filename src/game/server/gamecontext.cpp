@@ -3377,10 +3377,7 @@ void CGameContext::AddVote(const char *pDescription, const char *pCommand)
 	{
 		if(str_comp_nocase(pDescription, pOption->m_aDescription) == 0)
 		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "option '%s' already exists", pDescription);
-			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
-			return;
+			str_append(pOption->m_aDescription, " "); // If option already exists, make it unique
 		}
 		pOption = pOption->m_pNext;
 	}
