@@ -2777,6 +2777,7 @@ if(SERVER)
     #<FoxNet
     foxnet/accounts.cpp
     foxnet/accounts.h
+    foxnet/commands.cpp
     foxnet/votemenu.cpp
     foxnet/votemenu.h
     # FoxNet>

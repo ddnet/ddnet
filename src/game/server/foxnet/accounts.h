@@ -1,6 +1,7 @@
 #ifndef GAME_SERVER_FOXNET_ACCOUNTS_H
 #define GAME_SERVER_FOXNET_ACCOUNTS_H
 
+#include <base/system.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
 #include <engine/storage.h>

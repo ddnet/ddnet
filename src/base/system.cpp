@@ -5510,3 +5510,22 @@ bool IsFlagSet(uint32_t Flags, int n)
 {
 	return (Flags & (1 << n)) != 0;
 }
+
+bool FormatUnixTime(uint64_t unixSeconds, char *out, size_t outSize, const char *fmt)
+{
+	time_t tt;
+	if(unixSeconds > static_cast<uint64_t>(std::numeric_limits<time_t>::max()))
+		tt = std::numeric_limits<time_t>::max();
+	else
+		tt = static_cast<time_t>(unixSeconds);
+
+	std::tm tmLocal{};
+#if defined(_WIN32)
+	if(localtime_s(&tmLocal, &tt) != 0)
+		return false;
+#else
+	if(localtime_r(&tt, &tmLocal) == nullptr)
+		return false;
+#endif
+	return std::strftime(out, outSize, fmt, &tmLocal) != 0;
+}

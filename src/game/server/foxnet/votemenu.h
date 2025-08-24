@@ -1,6 +1,7 @@
 #ifndef GAME_SERVER_FOXNET_VOTEMENU_H
 #define GAME_SERVER_FOXNET_VOTEMENU_H
 
+#include "accounts.h"
 #include <array>
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
@@ -10,6 +11,8 @@ class IServer;
 
 enum Pages
 {
+	NONE = -1,
+
 	VOTES = 0,
 	SETTINGS,
 	ACCOUNT,
@@ -17,6 +20,16 @@ enum Pages
 	INVENTORY,
 	ADMIN,
 	NUM_PAGES
+};
+
+enum Prefixes
+{
+	DOT = 0,
+	DASH,
+	GREATER_THAN,
+	ARROW,
+	RECTANGLE_BULLET,
+	TRIANGLE_BULLET
 };
 
 struct CVoteMenu
@@ -29,15 +42,37 @@ struct CVoteMenu
 	struct ClientData
 	{
 		int m_Page = VOTES;
-	} m_aClientData[MAX_CLIENTS];
+
+		bool m_ShowAll = false;
+		CAccountSession m_Account = CAccountSession();
+	};
+	ClientData m_aClientData[MAX_CLIENTS];
+	std::vector<std::string> m_vDescriptions;
+
+	bool IsPageAllowed(int ClientId, int Page) const;
+
+	void PrepareVoteOptions(int ClientId, int Page);
+
+	void AddDescription(const char *pDesc) { m_vDescriptions.emplace_back(pDesc); }
+	void AddDescriptionPrefix(const char *pDesc, int Prefix);
+	void AddDescriptionCheckBox(const char *pDesc, bool Checked);
+
+	void SendPageSettings(int ClientId);
+	void SendPageAccount(int ClientId);
+	void SendPageShop(int ClientId);
+	void SendPageInventory(int ClientId);
+	void SendPageAdmin(int ClientId);
+
+	void UpdatePages(int ClientId, int Page);
 
 public:
-
 	int GetPage(int ClientId) const;
 	void SetPage(int ClientId, int Page);
 
 	void AddHeader(int ClientId);
 
+	void Tick();
+	void OnClientEnter(int ClientId);
 	void Init(CGameContext *pGameServer);
 	bool OnCallVote(const CNetMsg_Cl_CallVote *pMsg, int ClientId);
 };

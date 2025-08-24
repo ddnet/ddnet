@@ -281,7 +281,7 @@ void CGameContext::FillAntibot(CAntibotRoundData *pData)
 void CGameContext::CreateDamageInd(vec2 Pos, float Angle, int Amount, CClientMask Mask)
 {
 	float a = 3 * pi / 2 + Angle;
-	//float a = get_angle(dir);
+	// float a = get_angle(dir);
 	float s = a - pi / 3;
 	float e = a + pi / 3;
 	for(int i = 0; i < Amount; i++)
@@ -1062,7 +1062,7 @@ void CGameContext::OnTick()
 
 	UpdatePlayerMaps();
 
-	//if(world.paused) // make sure that the game object always updates
+	// if(world.paused) // make sure that the game object always updates
 	m_pController->Tick();
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -1469,10 +1469,10 @@ void CGameContext::ProgressVoteOptions(int ClientId)
 	if(pPl->m_SendVoteIndex > m_NumVoteOptions)
 		return; // shouldn't happen / fail silently
 
-	int test = 1 << 15;
-
+	// <FoxNet
 	if(m_VoteMenu.GetPage(ClientId) != VOTES)
 		return;
+	// FoxNet>
 
 	int VotesLeft = m_NumVoteOptions - pPl->m_SendVoteIndex;
 	int NumVotesToSend = minimum(g_Config.m_SvSendVotesPerTick, VotesLeft);
@@ -1560,7 +1560,8 @@ void CGameContext::OnClientEnter(int ClientId)
 
 	//<FoxNet
 	m_AccountManager.AutoLogin(ClientId);
-	//FoxNet>
+	m_VoteMenu.OnClientEnter(ClientId);
+	// FoxNet>
 
 	{
 		CNetMsg_Sv_CommandInfoGroupStart Msg;
@@ -2057,7 +2058,8 @@ void *CGameContext::PreProcessMsg(int *pMsgId, CUnpacker *pUnpacker, int ClientI
 			if(pMsg7->m_Force)
 			{
 				str_format(s_aRawMsg, sizeof(s_aRawMsg), "force_vote \"%s\" \"%s\" \"%s\"", pMsg7->m_pType, pMsg7->m_pValue, pMsg7->m_pReason);
-				Console()->SetAccessLevel(Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER);
+				Console()->SetAccessLevel(Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD :
+																	 IConsole::ACCESS_LEVEL_HELPER);
 				Console()->ExecuteLine(s_aRawMsg, ClientId, false);
 				Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
 				return nullptr;
@@ -2264,7 +2266,8 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientId, con
 			Console()->SetFlagMask(CFGFLAG_CHAT);
 			int Authed = Server()->GetAuthedState(ClientId);
 			if(Authed)
-				Console()->SetAccessLevel(Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER);
+				Console()->SetAccessLevel(Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD :
+																	 IConsole::ACCESS_LEVEL_HELPER);
 			else
 				Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_USER);
 
@@ -2712,8 +2715,6 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 
 		Server()->SetClientName(ClientId, pMsg->m_pName);
 
-
-
 		char aChatText[256];
 		str_format(aChatText, sizeof(aChatText), "'%s' changed name to '%s'", aOldName, Server()->ClientName(ClientId));
 		SendChat(-1, TEAM_ALL, aChatText);
@@ -2725,11 +2726,11 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 
 		SixupNeedsUpdate = true;
 
-		LogEvent("Name change", ClientId);	
+		LogEvent("Name change", ClientId);
 
 		//<FoxNet
 		m_AccountManager.SetPlayerName(ClientId, Server()->ClientName(ClientId));
-		//FoxNet>
+		// FoxNet>
 	}
 
 	if(Server()->WouldClientClanChange(ClientId, pMsg->m_pClan))
@@ -3989,8 +3990,6 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("unendless", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeUnEndlessHook, this, "Removes endless hook from you");
 	Console()->Register("invincible", "?i['0'|'1']", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeToggleInvincible, this, "Toggles invincible mode");
 	Console()->Register("kill", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConProtectedKill, this, "Kill yourself when kill-protected during a long game (use f1, kill for regular kill)");
-
-
 }
 
 void CGameContext::OnInit(const void *pPersistentData)
@@ -4696,7 +4695,7 @@ void CGameContext::SendRecord(int ClientId)
 	CNetMsg_Sv_Record Msg;
 	CNetMsg_Sv_RecordLegacy MsgLegacy;
 	MsgLegacy.m_PlayerTimeBest = Msg.m_PlayerTimeBest = Score()->PlayerData(ClientId)->m_BestTime * 100.0f;
-	MsgLegacy.m_ServerTimeBest = Msg.m_ServerTimeBest = m_pController->m_CurrentRecord * 100.0f; //TODO: finish this
+	MsgLegacy.m_ServerTimeBest = Msg.m_ServerTimeBest = m_pController->m_CurrentRecord * 100.0f; // TODO: finish this
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientId);
 	if(!Server()->IsSixup(ClientId) && GetClientVersion(ClientId) < VERSION_DDNET_MSG_LEGACY)
 	{
@@ -5226,7 +5225,8 @@ void CGameContext::OnUpdatePlayerServerInfo(CJsonStringWriter *pJSonWriter, int 
 	pJSonWriter->WriteAttribute("afk");
 	pJSonWriter->WriteBoolValue(m_apPlayers[Id]->IsAfk());
 
-	const int Team = m_pController->IsTeamPlay() ? m_apPlayers[Id]->GetTeam() : m_apPlayers[Id]->GetTeam() == TEAM_SPECTATORS ? -1 : GetDDRaceTeam(Id);
+	const int Team = m_pController->IsTeamPlay() ? m_apPlayers[Id]->GetTeam() : m_apPlayers[Id]->GetTeam() == TEAM_SPECTATORS ? -1 :
+																    GetDDRaceTeam(Id);
 
 	pJSonWriter->WriteAttribute("team");
 	pJSonWriter->WriteIntValue(Team);
@@ -5270,108 +5270,9 @@ void CGameContext::SendLoginState(int ClientId) const
 	}
 }
 
-void CGameContext::ConAccRegister(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	const int ClientId = pResult->m_ClientId;
-	if(!g_Config.m_SvAccounts)
-	{
-		pSelf->SendChatTarget(ClientId, "Account registration is disabled.");
-		return;
-	}
-
-	if(pSelf->m_Account[ClientId].m_LoggedIn)
-	{
-		pSelf->SendChatTarget(ClientId, "You are already logged in");
-		return;
-	}
-	const char *pUser = pResult->GetString(0);
-	const char *pPass = pResult->GetString(1);
-	const char *pPass2 = pResult->GetString(2);
-
-	pSelf->m_AccountManager.Register(ClientId, pUser, pPass, pPass2);
-}
-
-void CGameContext::ConAccPassword(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	const int ClientId = pResult->m_ClientId;
-	if(!g_Config.m_SvAccounts)
-	{
-		pSelf->SendChatTarget(ClientId, "Accounts are disabled");
-		return;
-	}
-
-	if(!pSelf->m_Account[ClientId].m_LoggedIn)
-	{
-		pSelf->SendChatTarget(ClientId, "You aren't logged in");
-		return;
-	}
-	const char *pOldPass = pResult->GetString(0);
-	const char *pPass = pResult->GetString(1);
-	const char *pPass2 = pResult->GetString(2);
-
-	pSelf->m_AccountManager.ChangePassword(ClientId, pOldPass, pPass, pPass2);
-}
-
-void CGameContext::ConAccLogin(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	const int ClientId = pResult->m_ClientId;
-	if(!g_Config.m_SvAccounts)
-	{
-		pSelf->SendChatTarget(ClientId, "Accounts are disabled");
-		return;
-
-	}
-
-	if(pSelf->m_Account[ClientId].m_LoggedIn)
-	{
-		pSelf->SendChatTarget(ClientId, "You are already logged in");
-		return;
-	}
-
-	const char *pUser = pResult->GetString(0);
-	const char *pPass = pResult->GetString(1);
-
-	if(!pSelf->m_AccountManager.Login(ClientId, pUser, pPass))
-	{
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "Login failed");
-		pSelf->SendChatTarget(ClientId, aBuf);
-		return;
-	}
-	
-	pSelf->SendChatTarget(ClientId, "Login successful");
-}
-
-void CGameContext::ConAccLogout(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	const int ClientId = pResult->m_ClientId;
-	if(pSelf->m_AccountManager.Logout(ClientId))
-		pSelf->SendChatTarget(ClientId, "Logged out");
-	else
-		pSelf->SendChatTarget(ClientId, "Not logged in");
-}
-
-void CGameContext::ConAccProfile(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	const char *pName = pResult->NumArguments() ? pResult->GetString(0) : pSelf->Server()->ClientName(pResult->m_ClientId);
-	pSelf->m_AccountManager.ShowAccProfile(pResult->m_ClientId, pName);
-}
-
-void CGameContext::ConForceLogin(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	const char *pName = pResult->GetString(0);
-	pSelf->m_AccountManager.ForceLogin(pResult->m_ClientId, pName);
-}
-
 void CGameContext::FoxNetTick()
 {
-	// 
+	m_VoteMenu.Tick();
 }
 
 void CGameContext::ClearVotes(int ClientId)
@@ -5401,4 +5302,4 @@ void CGameContext::RegisterFoxNetCommands()
 	Console()->Register("logout", "", CFGFLAG_CHAT, ConAccLogout, this, "Logout of your account");
 	Console()->Register("profile", "?s[Name]", CFGFLAG_CHAT, ConAccProfile, this, "Show someones profile");
 }
-//FoxNet>
+// FoxNet>
