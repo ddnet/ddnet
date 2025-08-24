@@ -14,7 +14,6 @@
 #include <game/client/components/motd.h>
 #include <game/client/components/statboard.h>
 #include <game/client/gameclient.h>
-#include <game/client/render.h>
 #include <game/client/ui.h>
 #include <game/generated/client_data7.h>
 #include <game/localization.h>

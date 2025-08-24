@@ -13,7 +13,6 @@
 #include <game/client/laser_data.h>
 #include <game/client/pickup_data.h>
 #include <game/client/projectile_data.h>
-#include <game/client/render.h>
 
 #include <game/client/prediction/entities/laser.h>
 #include <game/client/prediction/entities/pickup.h>
