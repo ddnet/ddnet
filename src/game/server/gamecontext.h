@@ -646,6 +646,7 @@ public:
 	static void ConAccLogin(IConsole::IResult *pResult, void *pUserData);
 	static void ConAccLogout(IConsole::IResult *pResult, void *pUserData);
 	static void ConAccProfile(IConsole::IResult *pResult, void *pUserData);
+	static void ConForceLogin(IConsole::IResult *pResult, void *pUserData);
 	// FoxNet>
 };
 

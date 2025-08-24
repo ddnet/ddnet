@@ -2701,6 +2701,8 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 
 		Server()->SetClientName(ClientId, pMsg->m_pName);
 
+
+
 		char aChatText[256];
 		str_format(aChatText, sizeof(aChatText), "'%s' changed name to '%s'", aOldName, Server()->ClientName(ClientId));
 		SendChat(-1, TEAM_ALL, aChatText);
@@ -2712,7 +2714,11 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 
 		SixupNeedsUpdate = true;
 
-		LogEvent("Name change", ClientId);
+		LogEvent("Name change", ClientId);	
+
+		//<FoxNet
+		m_AccountManager.SetPlayerName(ClientId, Server()->ClientName(ClientId));
+		//FoxNet>
 	}
 
 	if(Server()->WouldClientClanChange(ClientId, pMsg->m_pClan))
@@ -5338,6 +5344,13 @@ void CGameContext::ConAccProfile(IConsole::IResult *pResult, void *pUserData)
 	pSelf->m_AccountManager.ShowAccProfile(pResult->m_ClientId, pName);
 }
 
+void CGameContext::ConForceLogin(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	const char *pName = pResult->GetString(0);
+	pSelf->m_AccountManager.ForceLogin(pResult->m_ClientId, pName);
+}
+
 void CGameContext::FoxNetTick()
 {
 	// 
@@ -5350,5 +5363,8 @@ void CGameContext::RegisterFoxNetCommands()
 	Console()->Register("login", "s[username] r[password]", CFGFLAG_CHAT, ConAccLogin, this, "Login to your account");
 	Console()->Register("logout", "", CFGFLAG_CHAT, ConAccLogout, this, "Logout of your account");
 	Console()->Register("profile", "?s[Name]", CFGFLAG_CHAT, ConAccProfile, this, "Show someones profile");
+
+	
+	Console()->Register("force_login", "r[Username]", CFGFLAG_CHAT, ConForceLogin, this, "Show someones profile");
 }
-// FoxNet>
+//FoxNet>

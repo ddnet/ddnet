@@ -22,8 +22,16 @@ enum
 
 struct CAccountSession
 {
-	bool m_LoggedIn = false;
 	char m_Username[ACC_MAX_USERNAME_LENGTH] = "";
+	uint64_t m_RegisterDate = 0;
+	char m_Name[MAX_NAME_LENGTH] = "";
+	char m_LastName[MAX_NAME_LENGTH] = "";
+	char CurrentIp[128] = "";
+	char LastIp[128] = "";
+	bool m_LoggedIn = false;
+	uint64_t m_LastLogin = 0;
+	int m_Port = 0;
+	int ClientId = -1;
 	uint64_t m_Flags = 0;
 	uint64_t m_Playtime = 0; // Minutes
 	uint64_t m_Deaths = 0;
@@ -33,12 +41,6 @@ struct CAccountSession
 	uint64_t m_Money = 0;
 	char m_Inventory[1028] = "";
 
-	char CurrentIp[128] = "";
-	char LastIp[128] = "";
-
-	char m_Name[MAX_NAME_LENGTH] = "";
-	char m_LastName[MAX_NAME_LENGTH] = "";
-	uint64_t m_LastLogin = 0;
 };
 
 class CAccounts
@@ -69,11 +71,21 @@ public:
 	void OnLogin(int ClientId, const char *pUsername);
 	void OnLogout(int ClientId, const CAccountSession AccInfo);
 
+	void SaveAccountsInfo(int ClientId, const CAccountSession AccInfo);
+
 	void LogoutAllAccountsPort(int Port);
 	void ShowAccProfile(int ClientId, const char *pName);
 
+	void SaveAllAccounts();
+
 	std::optional<CAccountSession> GetAccount(const char *pUsername);
-	CAccountSession GetAccount(int ClientId);
 	std::optional<CAccountSession> GetAccountCurName(const char *pLastName);
+
+	CAccountSession GetAccount(int ClientId);
+
+
+	void SetPlayerName(int ClientId, const char *pName);
+
+	// std::optional<CAccountSession> AccountInfoUsername(const char *pUsername);
 
 };
