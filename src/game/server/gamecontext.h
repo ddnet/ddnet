@@ -127,6 +127,7 @@ class CGameContext : public IGameServer
 
 	bool m_Resetting;
 
+	static std::vector<int> ClientsForVictim(int ClientId, int Victim, void *pUser);
 	static void CommandCallback(int ClientId, int FlagMask, const char *pCmd, IConsole::IResult *pResult, void *pUser);
 	static void TeeHistorianWrite(const void *pData, int DataSize, void *pUser);
 
