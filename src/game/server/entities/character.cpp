@@ -978,8 +978,9 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 		SendDeathMessageIfNotInLockedTeam(Killer, Weapon, ModeSpecial);
 	}
 
-	// a nice sound
+	// a nice sound, and bursting tee death effect
 	GameServer()->CreateSound(m_Pos, SOUND_PLAYER_DIE, TeamMask());
+	GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCid(), TeamMask());
 
 	// this is to rate limit respawning to 3 secs
 	m_pPlayer->m_PreviousDieTick = m_pPlayer->m_DieTick;
@@ -990,7 +991,6 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 
 	GameServer()->m_World.RemoveEntity(this);
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCid()] = nullptr;
-	GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCid(), TeamMask());
 	Teams()->OnCharacterDeath(GetPlayer()->GetCid(), Weapon);
 	CancelSwapRequests();
 }
