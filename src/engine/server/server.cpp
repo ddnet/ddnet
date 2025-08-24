@@ -1467,24 +1467,23 @@ int CServer::NumRconCommands(int ClientId)
 	return Num;
 }
 
-void CServer::UpdateClientRconCommands(int ClientId)
+void CServer::UpdateClientRconCommands()
 {
-	CClient &Client = m_aClients[ClientId];
-	if(Client.m_State != CClient::STATE_INGAME ||
-		!Client.m_Authed ||
-		Client.m_pRconCmdToSend == nullptr)
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
-		return;
-	}
-
-	const int ConsoleAccessLevel = Client.ConsoleAccessLevel();
-	for(int i = 0; i < MAX_RCONCMD_SEND && Client.m_pRconCmdToSend; ++i)
-	{
-		SendRconCmdAdd(Client.m_pRconCmdToSend, ClientId);
-		Client.m_pRconCmdToSend = Client.m_pRconCmdToSend->NextCommandInfo(ConsoleAccessLevel, CFGFLAG_SERVER);
-		if(Client.m_pRconCmdToSend == nullptr)
+		if(m_aClients[ClientId].m_State != CClient::STATE_EMPTY && m_aClients[ClientId].m_Authed)
 		{
-			SendRconCmdGroupEnd(ClientId);
+			int ConsoleAccessLevel = m_aClients[ClientId].ConsoleAccessLevel();
+			for(int i = 0; i < MAX_RCONCMD_SEND && m_aClients[ClientId].m_pRconCmdToSend; ++i)
+			{
+				SendRconCmdAdd(m_aClients[ClientId].m_pRconCmdToSend, ClientId);
+				m_aClients[ClientId].m_pRconCmdToSend = m_aClients[ClientId].m_pRconCmdToSend->NextCommandInfo(ConsoleAccessLevel, CFGFLAG_SERVER);
+				if(m_aClients[ClientId].m_pRconCmdToSend == nullptr)
+				{
+					CMsgPacker Msg(NETMSG_RCON_CMD_GROUP_END, true);
+					SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+				}
+			}
 		}
 	}
 }
@@ -3232,8 +3231,8 @@ int CServer::Run()
 			{
 				DoSnapshot();
 
+				UpdateClientRconCommands();
 				const int CommandSendingClientId = Tick() % MAX_CLIENTS;
-				UpdateClientRconCommands(CommandSendingClientId);
 				UpdateClientMaplistEntries(CommandSendingClientId);
 
 				m_Fifo.Update();

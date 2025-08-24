@@ -360,7 +360,7 @@ public:
 	void SendRconCmdGroupStart(int ClientId);
 	void SendRconCmdGroupEnd(int ClientId);
 	int NumRconCommands(int ClientId);
-	void UpdateClientRconCommands(int ClientId);
+	void UpdateClientRconCommands();
 
 	class CMaplistEntry
 	{
