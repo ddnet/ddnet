@@ -1,13 +1,11 @@
 ﻿#include "accounts.h"
-#include "engine/server/databases/connection_pool.h"
+#include "../gamecontext.h"
+#include <base/hash.h>
 #include <base/hash_ctxt.h>
 #include <base/system.h>
-#include <engine/server/server.h>
+#include <engine/server.h>
 #include <engine/shared/config.h>
-#include <engine/shared/json.h>
-#include <engine/shared/linereader.h>
-
-#include "../gamecontext.h"
+#include <sqlite3.h>
 
 IServer *CAccounts::Server() const { return GameServer()->Server(); }
 
@@ -127,7 +125,7 @@ bool CAccounts::ForceLogin(int ClientId, const char *pUsername)
 	sqlite3_bind_text(stmt, 1, pUsername, -1, SQLITE_STATIC);
 
 	if(sqlite3_step(stmt) == SQLITE_ROW)
-	{		
+	{
 		if(sqlite3_column_int(stmt, 0))
 		{
 			sqlite3_finalize(stmt);
@@ -170,7 +168,6 @@ bool CAccounts::Login(int ClientId, const char *pUsername, const char *pPassword
         WHERE Username = ? AND Password = ?;
     )";
 	sqlite3_stmt *stmt;
-
 
 	if(sqlite3_prepare_v2(m_AccDatabase, SelectQuery, -1, &stmt, nullptr) != SQLITE_OK)
 		return false;
@@ -720,7 +717,6 @@ void CAccounts::SaveAllAccounts()
 		if(GameServer()->m_Account[i].m_LoggedIn)
 			SaveAccountsInfo(i, GameServer()->m_Account[i]);
 	}
-
 }
 
 void CAccounts::SetPlayerName(int ClientId, const char *pName) // When player changes name
@@ -753,7 +749,8 @@ void CAccounts::SetPlayerName(int ClientId, const char *pName) // When player ch
 	sqlite3_step(stmt);
 	sqlite3_finalize(stmt);
 }
-	//std::optional<CAccountSession> CAccounts::AccountInfoUsername(const char *pUsername)
+
+// std::optional<CAccountSession> CAccounts::AccountInfoUsername(const char *pUsername)
 //{
 //	if(!m_AccDatabase)
 //		return std::nullopt;

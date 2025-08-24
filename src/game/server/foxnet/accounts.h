@@ -1,4 +1,6 @@
-#pragma once
+#ifndef GAME_SERVER_FOXNET_ACCOUNTS_H
+#define GAME_SERVER_FOXNET_ACCOUNTS_H
+
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
 #include <engine/storage.h>
@@ -40,7 +42,6 @@ struct CAccountSession
 	uint64_t m_XP = 0;
 	uint64_t m_Money = 0;
 	char m_Inventory[1028] = "";
-
 };
 
 class CAccounts
@@ -52,7 +53,6 @@ class CAccounts
 	sqlite3 *m_AccDatabase;
 
 public:
-
 	void Init(CGameContext *pGameServer);
 	void OnShutdown();
 
@@ -83,9 +83,9 @@ public:
 
 	CAccountSession GetAccount(int ClientId);
 
-
 	void SetPlayerName(int ClientId, const char *pName);
 
 	// std::optional<CAccountSession> AccountInfoUsername(const char *pUsername);
-
 };
+
+#endif // GAME_SERVER_FOXNET_ACCOUNTS_H
