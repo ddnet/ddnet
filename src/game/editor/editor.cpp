@@ -5854,7 +5854,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			}
 			else if(s_EnvelopeEditorButtonUsed == 0)
 			{
-				if(Ui()->DoDoubleClickLogic(&s_EnvelopeEditorId))
+				if(Ui()->DoDoubleClickLogic(&s_EnvelopeEditorId) && !Input()->ModifierIsPressed())
 				{
 					// add point
 					float Time = ScreenToEnvelopeX(View, Ui()->MouseX());
