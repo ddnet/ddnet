@@ -185,14 +185,13 @@ bool CRenderLayerTile::CTileLayerVisuals::Init(unsigned int Width, unsigned int 
 CRenderLayer::CRenderLayer(int GroupId, int LayerId, int Flags) :
 	m_GroupId(GroupId), m_LayerId(LayerId), m_Flags(Flags) {}
 
-void CRenderLayer::OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, IEnvelopeEval *pEnvelopeEval, IMap *pMap, IMapImages *pMapImages, std::shared_ptr<CMapBasedEnvelopePointAccess> &pEnvelopePoints, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional)
+void CRenderLayer::OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeHandler> &pEnvelopeHandler, IMap *pMap, IMapImages *pMapImages, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional)
 {
 	CRenderComponent::OnInit(pGraphics, pTextRender, pRenderMap);
 	m_pMap = pMap;
 	m_pMapImages = pMapImages;
 	m_RenderUploadCallback = FRenderUploadCallbackOptional;
-	m_pEnvelopeEval = pEnvelopeEval;
-	m_pEnvelopePoints = pEnvelopePoints;
+	m_pEnvelopeHandler = pEnvelopeHandler;
 }
 
 void CRenderLayer::UseTexture(IGraphics::CTextureHandle TextureHandle)
@@ -502,7 +501,7 @@ ColorRGBA CRenderLayerTile::GetRenderColor(const CRenderLayerParams &Params) con
 		Color.a *= (100 - Params.m_EntityOverlayVal) / 100.0f;
 
 	ColorRGBA ColorEnv = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-	m_pEnvelopeEval->EnvelopeEval(m_pLayerTilemap->m_ColorEnvOffset, m_pLayerTilemap->m_ColorEnv, ColorEnv, 4);
+	m_pEnvelopeHandler->EnvelopeEval(m_pLayerTilemap->m_ColorEnvOffset, m_pLayerTilemap->m_ColorEnv, ColorEnv, 4);
 	Color = Color.Multiply(ColorEnv);
 	return Color;
 }
@@ -816,9 +815,9 @@ void *CRenderLayerTile::GetRawData() const
 	return pTiles;
 }
 
-void CRenderLayerTile::OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, IEnvelopeEval *pEnvelopeEval, IMap *pMap, IMapImages *pMapImages, std::shared_ptr<CMapBasedEnvelopePointAccess> &pEnvelopePoints, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional)
+void CRenderLayerTile::OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeHandler> &pEnvelopeHandler, IMap *pMap, IMapImages *pMapImages, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional)
 {
-	CRenderLayer::OnInit(pGraphics, pTextRender, pRenderMap, pEnvelopeEval, pMap, pMapImages, pEnvelopePoints, FRenderUploadCallbackOptional);
+	CRenderLayer::OnInit(pGraphics, pTextRender, pRenderMap, pEnvelopeHandler, pMap, pMapImages, FRenderUploadCallbackOptional);
 	InitTileData();
 }
 
@@ -847,13 +846,12 @@ CRenderLayerQuads::CRenderLayerQuads(int GroupId, int LayerId, int Flags, CMapIt
 	CRenderLayer(GroupId, LayerId, Flags)
 {
 	m_pLayerQuads = pLayerQuads;
-	m_Grouped = false;
 
-	m_QuadRenderGroup.m_ClipX = 0;
-	m_QuadRenderGroup.m_ClipY = 0;
-	m_QuadRenderGroup.m_ClipHeight = 0;
-	m_QuadRenderGroup.m_ClipWidth = 0;
-	m_QuadRenderGroup.m_Clipped = false;
+	m_LayerClip.m_ClipX = 0;
+	m_LayerClip.m_ClipY = 0;
+	m_LayerClip.m_ClipHeight = 0;
+	m_LayerClip.m_ClipWidth = 0;
+	m_LayerClip.m_Clipped = false;
 
 	m_pQuads = nullptr;
 }
@@ -867,77 +865,71 @@ void CRenderLayerQuads::RenderQuadLayer(bool Force)
 	if(!Force && (!g_Config.m_ClShowQuads || g_Config.m_ClOverlayEntities == 100))
 		return;
 
-	size_t QuadsRenderCount = 0;
-	size_t CurQuadOffset = 0;
-	if(!m_Grouped)
+	for(auto &QuadCluster : m_vQuadClusters)
 	{
-		for(int i = 0; i < m_pLayerQuads->m_NumQuads; ++i)
+		if(!ShowClipped(QuadCluster.m_ClipRegion))
+			continue;
+
+		if(!QuadCluster.m_Grouped)
 		{
-			CQuad *pQuad = &m_pQuads[i];
-
-			ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-			m_pEnvelopeEval->EnvelopeEval(pQuad->m_ColorEnvOffset, pQuad->m_ColorEnv, Color, 4);
-
-			const bool IsFullyTransparent = Color.a <= 0.0f;
-			const bool NeedsFlush = QuadsRenderCount == gs_GraphicsMaxQuadsRenderCount || IsFullyTransparent;
-
-			if(NeedsFlush)
+			bool AnyVisible = false;
+			for(int QuadClusterId = 0; QuadClusterId < QuadCluster.m_NumQuads; ++QuadClusterId)
 			{
-				// render quads of the current offset directly(cancel batching)
-				Graphics()->RenderQuadLayer(Visuals.m_BufferContainerIndex, m_vQuadRenderInfo.data(), QuadsRenderCount, CurQuadOffset);
-				QuadsRenderCount = 0;
-				CurQuadOffset = i;
-				if(IsFullyTransparent)
+				CQuad *pQuad = &m_pQuads[QuadCluster.m_StartIndex + QuadClusterId];
+
+				ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+				m_pEnvelopeHandler->EnvelopeEval(pQuad->m_ColorEnvOffset, pQuad->m_ColorEnv, Color, 4);
+
+				SQuadRenderInfo &QInfo = QuadCluster.m_vQuadRenderInfo[QuadClusterId];
+				if(Color.a < 0.0f)
+					Color.a = 0.0f;
+				QInfo.m_Color = Color;
+				const bool IsVisible = Color.a >= 0.0f;
+				AnyVisible |= IsVisible;
+
+				if(IsVisible)
 				{
-					// since this quad is ignored, the offset is the next quad
-					++CurQuadOffset;
+					ColorRGBA Position = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+					m_pEnvelopeHandler->EnvelopeEval(pQuad->m_PosEnvOffset, pQuad->m_PosEnv, Position, 3);
+					QInfo.m_Offsets.x = Position.r;
+					QInfo.m_Offsets.y = Position.g;
+					QInfo.m_Rotation = Position.b / 180.0f * pi;
 				}
 			}
+			if(AnyVisible)
+				Graphics()->RenderQuadLayer(Visuals.m_BufferContainerIndex, QuadCluster.m_vQuadRenderInfo.data(), QuadCluster.m_NumQuads, QuadCluster.m_StartIndex);
+		}
+		else
+		{
+			SQuadRenderInfo &QInfo = QuadCluster.m_vQuadRenderInfo[0];
 
-			if(!IsFullyTransparent)
+			if(QuadCluster.m_ColorEnv >= 0)
+			{
+				ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+				m_pEnvelopeHandler->EnvelopeEval(QuadCluster.m_ColorEnvOffset, QuadCluster.m_ColorEnv, Color, 4);
+
+				if(Color.a <= 0.0f)
+					continue;
+				QInfo.m_Color = Color;
+			}
+
+			if(QuadCluster.m_PosEnv >= 0)
 			{
 				ColorRGBA Position = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
-				m_pEnvelopeEval->EnvelopeEval(pQuad->m_PosEnvOffset, pQuad->m_PosEnv, Position, 3);
+				m_pEnvelopeHandler->EnvelopeEval(QuadCluster.m_PosEnvOffset, QuadCluster.m_PosEnv, Position, 3);
 
-				SQuadRenderInfo &QInfo = m_vQuadRenderInfo[QuadsRenderCount++];
-				QInfo.m_Color = Color;
 				QInfo.m_Offsets.x = Position.r;
 				QInfo.m_Offsets.y = Position.g;
 				QInfo.m_Rotation = Position.b / 180.0f * pi;
 			}
+			Graphics()->RenderQuadLayer(Visuals.m_BufferContainerIndex, &QInfo, (size_t)QuadCluster.m_NumQuads, QuadCluster.m_StartIndex, true);
 		}
-		Graphics()->RenderQuadLayer(Visuals.m_BufferContainerIndex, m_vQuadRenderInfo.data(), QuadsRenderCount, CurQuadOffset);
-	}
-	else
-	{
-		SQuadRenderInfo &QInfo = m_vQuadRenderInfo[0];
-
-		if(m_QuadRenderGroup.m_ColorEnv >= 0)
-		{
-			ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-			m_pEnvelopeEval->EnvelopeEval(m_QuadRenderGroup.m_ColorEnvOffset, m_QuadRenderGroup.m_ColorEnv, Color, 4);
-
-			if(Color.a <= 0.0f)
-				return;
-			QInfo.m_Color = Color;
-		}
-
-		if(m_QuadRenderGroup.m_PosEnv >= 0)
-		{
-			ColorRGBA Position = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
-			m_pEnvelopeEval->EnvelopeEval(m_QuadRenderGroup.m_PosEnvOffset, m_QuadRenderGroup.m_PosEnv, Position, 3);
-
-			QInfo.m_Offsets.x = Position.r;
-			QInfo.m_Offsets.y = Position.g;
-			QInfo.m_Rotation = Position.b / 180.0f * pi;
-		}
-		Graphics()->RenderQuadLayer(Visuals.m_BufferContainerIndex, &QInfo, (size_t)m_pLayerQuads->m_NumQuads, 0, true);
 	}
 }
 
-void CRenderLayerQuads::OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, IEnvelopeEval *pEnvelopeEval, IMap *pMap, IMapImages *pMapImages, std::shared_ptr<CMapBasedEnvelopePointAccess> &pEnvelopePoints, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional)
+void CRenderLayerQuads::OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeHandler> &pEnvelopeHandler, IMap *pMap, IMapImages *pMapImages, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional)
 {
-	CRenderLayer::OnInit(pGraphics, pTextRender, pRenderMap, pEnvelopeEval, pMap, pMapImages, pEnvelopePoints, FRenderUploadCallbackOptional);
+	CRenderLayer::OnInit(pGraphics, pTextRender, pRenderMap, pEnvelopeHandler, pMap, pMapImages, FRenderUploadCallbackOptional);
 	int DataSize = m_pMap->GetDataSize(m_pLayerQuads->m_Data);
 	if(m_pLayerQuads->m_NumQuads > 0 && DataSize / (int)sizeof(CQuad) >= m_pLayerQuads->m_NumQuads)
 		m_pQuads = (CQuad *)m_pMap->GetDataSwapped(m_pLayerQuads->m_Data);
@@ -967,29 +959,17 @@ void CRenderLayerQuads::Init()
 	else
 		vTmpQuads.resize(m_pLayerQuads->m_NumQuads);
 
-	m_vQuadRenderInfo.resize(m_pLayerQuads->m_NumQuads);
-
-	// try to create a quad render group
-	m_Grouped = true;
-	m_QuadRenderGroup.m_ColorEnv = m_pQuads[0].m_ColorEnv;
-	m_QuadRenderGroup.m_ColorEnvOffset = m_pQuads[0].m_ColorEnvOffset;
-	m_QuadRenderGroup.m_PosEnv = m_pQuads[0].m_PosEnv;
-	m_QuadRenderGroup.m_PosEnvOffset = m_pQuads[0].m_PosEnvOffset;
-
-	for(int i = 0; i < m_pLayerQuads->m_NumQuads; ++i)
-	{
-		const CQuad *pQuad = &m_pQuads[i];
-
-		// give up on grouping if envelopes missmatch
-		if(m_Grouped && (pQuad->m_ColorEnv != m_QuadRenderGroup.m_ColorEnv || pQuad->m_ColorEnvOffset != m_QuadRenderGroup.m_ColorEnvOffset || pQuad->m_PosEnv != m_QuadRenderGroup.m_PosEnv || pQuad->m_PosEnvOffset != m_QuadRenderGroup.m_PosEnvOffset))
-			m_Grouped = false;
+	auto SetQuadRenderInfo = [&](SQuadRenderInfo &QInfo, int QuadId, bool InitInfo) {
+		CQuad *pQuad = &m_pQuads[QuadId];
 
 		// init for envelopeless quad layers
-		SQuadRenderInfo &QInfo = m_vQuadRenderInfo[i];
-		QInfo.m_Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-		QInfo.m_Offsets.x = 0;
-		QInfo.m_Offsets.y = 0;
-		QInfo.m_Rotation = 0;
+		if(InitInfo)
+		{
+			QInfo.m_Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+			QInfo.m_Offsets.x = 0;
+			QInfo.m_Offsets.y = 0;
+			QInfo.m_Rotation = 0;
+		}
 
 		for(int j = 0; j < 4; ++j)
 		{
@@ -1001,40 +981,102 @@ void CRenderLayerQuads::Init()
 			if(!Textured)
 			{
 				// ignore the conversion for the position coordinates
-				vTmpQuads[i].m_aVertices[j].m_X = (pQuad->m_aPoints[QuadIdX].x);
-				vTmpQuads[i].m_aVertices[j].m_Y = (pQuad->m_aPoints[QuadIdX].y);
-				vTmpQuads[i].m_aVertices[j].m_CenterX = (pQuad->m_aPoints[4].x);
-				vTmpQuads[i].m_aVertices[j].m_CenterY = (pQuad->m_aPoints[4].y);
-				vTmpQuads[i].m_aVertices[j].m_R = (unsigned char)pQuad->m_aColors[QuadIdX].r;
-				vTmpQuads[i].m_aVertices[j].m_G = (unsigned char)pQuad->m_aColors[QuadIdX].g;
-				vTmpQuads[i].m_aVertices[j].m_B = (unsigned char)pQuad->m_aColors[QuadIdX].b;
-				vTmpQuads[i].m_aVertices[j].m_A = (unsigned char)pQuad->m_aColors[QuadIdX].a;
+				vTmpQuads[QuadId].m_aVertices[j].m_X = (pQuad->m_aPoints[QuadIdX].x);
+				vTmpQuads[QuadId].m_aVertices[j].m_Y = (pQuad->m_aPoints[QuadIdX].y);
+				vTmpQuads[QuadId].m_aVertices[j].m_CenterX = (pQuad->m_aPoints[4].x);
+				vTmpQuads[QuadId].m_aVertices[j].m_CenterY = (pQuad->m_aPoints[4].y);
+				vTmpQuads[QuadId].m_aVertices[j].m_R = (unsigned char)pQuad->m_aColors[QuadIdX].r;
+				vTmpQuads[QuadId].m_aVertices[j].m_G = (unsigned char)pQuad->m_aColors[QuadIdX].g;
+				vTmpQuads[QuadId].m_aVertices[j].m_B = (unsigned char)pQuad->m_aColors[QuadIdX].b;
+				vTmpQuads[QuadId].m_aVertices[j].m_A = (unsigned char)pQuad->m_aColors[QuadIdX].a;
 			}
 			else
 			{
 				// ignore the conversion for the position coordinates
-				vTmpQuadsTextured[i].m_aVertices[j].m_X = (pQuad->m_aPoints[QuadIdX].x);
-				vTmpQuadsTextured[i].m_aVertices[j].m_Y = (pQuad->m_aPoints[QuadIdX].y);
-				vTmpQuadsTextured[i].m_aVertices[j].m_CenterX = (pQuad->m_aPoints[4].x);
-				vTmpQuadsTextured[i].m_aVertices[j].m_CenterY = (pQuad->m_aPoints[4].y);
-				vTmpQuadsTextured[i].m_aVertices[j].m_U = fx2f(pQuad->m_aTexcoords[QuadIdX].x);
-				vTmpQuadsTextured[i].m_aVertices[j].m_V = fx2f(pQuad->m_aTexcoords[QuadIdX].y);
-				vTmpQuadsTextured[i].m_aVertices[j].m_R = (unsigned char)pQuad->m_aColors[QuadIdX].r;
-				vTmpQuadsTextured[i].m_aVertices[j].m_G = (unsigned char)pQuad->m_aColors[QuadIdX].g;
-				vTmpQuadsTextured[i].m_aVertices[j].m_B = (unsigned char)pQuad->m_aColors[QuadIdX].b;
-				vTmpQuadsTextured[i].m_aVertices[j].m_A = (unsigned char)pQuad->m_aColors[QuadIdX].a;
+				vTmpQuadsTextured[QuadId].m_aVertices[j].m_X = (pQuad->m_aPoints[QuadIdX].x);
+				vTmpQuadsTextured[QuadId].m_aVertices[j].m_Y = (pQuad->m_aPoints[QuadIdX].y);
+				vTmpQuadsTextured[QuadId].m_aVertices[j].m_CenterX = (pQuad->m_aPoints[4].x);
+				vTmpQuadsTextured[QuadId].m_aVertices[j].m_CenterY = (pQuad->m_aPoints[4].y);
+				vTmpQuadsTextured[QuadId].m_aVertices[j].m_U = fx2f(pQuad->m_aTexcoords[QuadIdX].x);
+				vTmpQuadsTextured[QuadId].m_aVertices[j].m_V = fx2f(pQuad->m_aTexcoords[QuadIdX].y);
+				vTmpQuadsTextured[QuadId].m_aVertices[j].m_R = (unsigned char)pQuad->m_aColors[QuadIdX].r;
+				vTmpQuadsTextured[QuadId].m_aVertices[j].m_G = (unsigned char)pQuad->m_aColors[QuadIdX].g;
+				vTmpQuadsTextured[QuadId].m_aVertices[j].m_B = (unsigned char)pQuad->m_aColors[QuadIdX].b;
+				vTmpQuadsTextured[QuadId].m_aVertices[j].m_A = (unsigned char)pQuad->m_aColors[QuadIdX].a;
 			}
 		}
-	}
+	};
 
-	// we can directly push, only one render info is needed
-	if(m_Grouped)
+	m_vQuadClusters.clear();
+	CQuadCluster QuadCluster;
+
+	const int MaxQuadDistance = f2fx(1048 * 32); // magic number
+	const int QuadClusterSplit = gs_GraphicsMaxQuadsRenderCount / 1 + 1; // you can make the clusters smaller, but the backend cluster limit is already too small for this to be useful
+
+	// create quad clusters
+	int QuadStart = 0;
+	while(QuadStart < m_pLayerQuads->m_NumQuads)
 	{
-		m_vQuadRenderInfo.resize(1);
+		QuadCluster.m_StartIndex = QuadStart;
+		QuadCluster.m_Grouped = true;
+		QuadCluster.m_ColorEnv = m_pQuads[QuadStart].m_ColorEnv;
+		QuadCluster.m_ColorEnvOffset = m_pQuads[QuadStart].m_ColorEnvOffset;
+		QuadCluster.m_PosEnv = m_pQuads[QuadStart].m_PosEnv;
+		QuadCluster.m_PosEnvOffset = m_pQuads[QuadStart].m_PosEnvOffset;
+		QuadCluster.m_ClipRegion.m_Clipped = false;
+		QuadCluster.m_ClipRegion.m_ClipX = 0;
+		QuadCluster.m_ClipRegion.m_ClipY = 0;
+		QuadCluster.m_ClipRegion.m_ClipWidth = 0;
+		QuadCluster.m_ClipRegion.m_ClipHeight = 0;
+
+		int QuadOffset = 0;
+		for(int QuadClusterId = 0; QuadClusterId < m_pLayerQuads->m_NumQuads - QuadStart; ++QuadClusterId)
+		{
+			const CQuad *pQuad = &m_pQuads[QuadStart + QuadClusterId];
+			bool IsGrouped = QuadCluster.m_Grouped && pQuad->m_ColorEnv == QuadCluster.m_ColorEnv && pQuad->m_ColorEnvOffset == QuadCluster.m_ColorEnvOffset && pQuad->m_PosEnv == QuadCluster.m_PosEnv && pQuad->m_PosEnvOffset == QuadCluster.m_PosEnvOffset;
+
+			// quad distance limit for better culling
+			if((QuadClusterId % QuadClusterSplit) == 0 && !IsGrouped)
+			{
+				// split stop adding quads to this quad cluster, as they are too far away and may benefit from culling
+				if(std::abs(pQuad->m_aPoints[0].x - m_pQuads[QuadStart].m_aPoints[0].x) > MaxQuadDistance || std::abs(pQuad->m_aPoints[0].y - m_pQuads[QuadStart].m_aPoints[0].y) > MaxQuadDistance)
+					break;
+			}
+
+			// we are reaching gpu batch limit, here we break and close the QuadCluster if it's ungrouped
+			if(QuadClusterId >= (int)gs_GraphicsMaxQuadsRenderCount)
+			{
+				// expand a cluster, if it's grouped
+				if(!IsGrouped)
+					break;
+			}
+			QuadOffset++;
+			QuadCluster.m_Grouped = IsGrouped;
+		}
+		QuadCluster.m_NumQuads = QuadOffset;
+
+		// fill cluster info
+		if(QuadCluster.m_Grouped)
+		{
+			// grouped quads only need one render info, because all there envs and env offsets are equal
+			QuadCluster.m_vQuadRenderInfo.resize(1);
+			for(int QuadClusterId = 0; QuadClusterId < QuadCluster.m_NumQuads; ++QuadClusterId)
+				SetQuadRenderInfo(QuadCluster.m_vQuadRenderInfo[0], QuadCluster.m_StartIndex + QuadClusterId, QuadClusterId == 0);
+		}
+		else
+		{
+			QuadCluster.m_vQuadRenderInfo.resize(QuadCluster.m_NumQuads);
+			for(int QuadClusterId = 0; QuadClusterId < QuadCluster.m_NumQuads; ++QuadClusterId)
+				SetQuadRenderInfo(QuadCluster.m_vQuadRenderInfo[QuadClusterId], QuadCluster.m_StartIndex + QuadClusterId, true);
+		}
+
+		CalculateClipping(QuadCluster);
+
+		m_vQuadClusters.push_back(QuadCluster);
+		QuadStart += QuadOffset;
 	}
 
-	CalculateClipping();
-
+	// gpu upload
 	size_t UploadDataSize = 0;
 	if(Textured)
 		UploadDataSize = vTmpQuadsTextured.size() * sizeof(CTmpQuadTextured);
@@ -1100,76 +1142,16 @@ void CRenderLayerQuads::CQuadLayerVisuals::Unload()
 	Graphics()->DeleteBufferContainer(m_BufferContainerIndex);
 }
 
-bool CRenderLayerQuads::CalculateEnvelopeClipping(int aEnvelopeOffsetMin[2], int aEnvelopeOffsetMax[2])
+bool CRenderLayerQuads::CalculateQuadClipping(CQuadCluster &QuadCluster, int aQuadOffsetMin[2], int aQuadOffsetMax[2])
 {
-	if(m_QuadRenderGroup.m_PosEnv == -1)
+	// check if the grouped clipping is available for early exit
+	if(QuadCluster.m_Grouped)
 	{
-		for(int Channel = 0; Channel < 2; ++Channel)
-		{
-			aEnvelopeOffsetMin[Channel] = 0;
-			aEnvelopeOffsetMax[Channel] = 0;
-		}
-		return true;
-	}
-
-	int EnvStart, EnvNum;
-	m_pMap->GetType(MAPITEMTYPE_ENVELOPE, &EnvStart, &EnvNum);
-
-	if(m_QuadRenderGroup.m_PosEnv < 0 || m_QuadRenderGroup.m_PosEnv >= EnvNum)
-		return false;
-
-	const CMapItemEnvelope *pItem = static_cast<const CMapItemEnvelope *>(m_pMap->GetItem(EnvStart + m_QuadRenderGroup.m_PosEnv));
-
-	if(pItem->m_Channels != 3)
-	{
-		// fall back to no clip, because this is either not a position envelope or the map contains invalid data
-		log_warn("maprender", "quad layer at group %d, layer %d contains an invalid channel count (%d) for automatic quad clipping.", m_GroupId, m_LayerId, pItem->m_Channels);
-		return false;
-	}
-
-	for(int Channel = 0; Channel < 2; ++Channel)
-	{
-		aEnvelopeOffsetMin[Channel] = std::numeric_limits<int>::max(); // minimum of channel
-		aEnvelopeOffsetMax[Channel] = std::numeric_limits<int>::min(); // maximum of channel
-	}
-
-	for(int PointId = pItem->m_StartPoint; PointId < pItem->m_StartPoint + pItem->m_NumPoints; ++PointId)
-	{
-		const CEnvPoint *pEnvPoint = m_pEnvelopePoints->GetPoint(PointId);
-
-		// rotation is not implemented for clipping
-		if(pEnvPoint->m_aValues[2] != 0)
+		const CEnvelopeHandler::CEnvelopeExtrema &Extrema = m_pEnvelopeHandler->GetExtrema(QuadCluster.m_PosEnv);
+		if(!Extrema.m_Available)
 			return false;
-
-		for(int Channel = 0; Channel < 2; ++Channel)
-		{
-			aEnvelopeOffsetMin[Channel] = std::min(pEnvPoint->m_aValues[Channel], aEnvelopeOffsetMin[Channel]);
-			aEnvelopeOffsetMax[Channel] = std::max(pEnvPoint->m_aValues[Channel], aEnvelopeOffsetMax[Channel]);
-
-			// bezier curves can have offsets beyond the fixed points
-			// using the bezier position is just an estimate, but clipping like this is good enough
-			if(PointId < pItem->m_StartPoint + pItem->m_NumPoints - 1 && pEnvPoint->m_Curvetype == CURVETYPE_BEZIER)
-			{
-				const CEnvPointBezier *pEnvPointBezier = m_pEnvelopePoints->GetBezier(PointId);
-				// we are only interested in the height not in the time, meaning we only need delta Y
-				aEnvelopeOffsetMin[Channel] = std::min(pEnvPoint->m_aValues[Channel] + pEnvPointBezier->m_aOutTangentDeltaY[Channel], aEnvelopeOffsetMin[Channel]);
-				aEnvelopeOffsetMax[Channel] = std::max(pEnvPoint->m_aValues[Channel] + pEnvPointBezier->m_aOutTangentDeltaY[Channel], aEnvelopeOffsetMax[Channel]);
-			}
-
-			if(PointId > 0 && m_pEnvelopePoints->GetPoint(PointId - 1)->m_Curvetype == CURVETYPE_BEZIER)
-			{
-				const CEnvPointBezier *pEnvPointBezier = m_pEnvelopePoints->GetBezier(PointId);
-				// we are only interested in the height not in the time, meaning we only need delta Y
-				aEnvelopeOffsetMin[Channel] = std::min(pEnvPoint->m_aValues[Channel] + pEnvPointBezier->m_aInTangentDeltaY[Channel], aEnvelopeOffsetMin[Channel]);
-				aEnvelopeOffsetMax[Channel] = std::max(pEnvPoint->m_aValues[Channel] + pEnvPointBezier->m_aInTangentDeltaY[Channel], aEnvelopeOffsetMax[Channel]);
-			}
-		}
 	}
-	return true;
-}
 
-void CRenderLayerQuads::CalculateQuadClipping(int aQuadOffsetMin[2], int aQuadOffsetMax[2])
-{
 	// calculate quad position offsets
 	for(int Channel = 0; Channel < 2; ++Channel)
 	{
@@ -1177,51 +1159,83 @@ void CRenderLayerQuads::CalculateQuadClipping(int aQuadOffsetMin[2], int aQuadOf
 		aQuadOffsetMax[Channel] = std::numeric_limits<int>::min(); // maximum of channel
 	}
 
-	for(int i = 0; i < m_pLayerQuads->m_NumQuads; ++i)
+	for(int QuadId = QuadCluster.m_StartIndex; QuadId < QuadCluster.m_StartIndex + QuadCluster.m_NumQuads; ++QuadId)
 	{
-		const CQuad *pQuad = &m_pQuads[i];
+		const CQuad *pQuad = &m_pQuads[QuadId];
 
 		// calculate clip region
 		for(int QuadIdPoint = 0; QuadIdPoint < 4; ++QuadIdPoint)
 		{
 			for(int Channel = 0; Channel < 2; ++Channel)
 			{
-				aQuadOffsetMin[Channel] = std::min(aQuadOffsetMin[Channel], pQuad->m_aPoints[QuadIdPoint][Channel]);
-				aQuadOffsetMax[Channel] = std::max(aQuadOffsetMax[Channel], pQuad->m_aPoints[QuadIdPoint][Channel]);
+				int OffsetMinimum = pQuad->m_aPoints[QuadIdPoint][Channel];
+				int OffsetMaximum = pQuad->m_aPoints[QuadIdPoint][Channel];
+
+				// calculate env offsets for every ungrouped quad
+				if(!QuadCluster.m_Grouped && pQuad->m_PosEnv >= 0)
+				{
+					const CEnvelopeHandler::CEnvelopeExtrema &Extrema = m_pEnvelopeHandler->GetExtrema(pQuad->m_PosEnv);
+					if(!Extrema.m_Available)
+						return false;
+					OffsetMinimum += Extrema.m_Minima[Channel];
+					OffsetMaximum += Extrema.m_Maxima[Channel];
+				}
+				aQuadOffsetMin[Channel] = std::min(aQuadOffsetMin[Channel], OffsetMinimum);
+				aQuadOffsetMax[Channel] = std::max(aQuadOffsetMax[Channel], OffsetMaximum);
 			}
 		}
 	}
+
+	// add env offsets for the quad group
+	if(QuadCluster.m_Grouped && QuadCluster.m_PosEnv >= 0)
+	{
+		for(int Channel = 0; Channel < 2; ++Channel)
+		{
+			const CEnvelopeHandler::CEnvelopeExtrema &Extrema = m_pEnvelopeHandler->GetExtrema(QuadCluster.m_PosEnv);
+			aQuadOffsetMin[Channel] += Extrema.m_Minima[Channel];
+			aQuadOffsetMax[Channel] += Extrema.m_Maxima[Channel];
+		}
+	}
+	return true;
 }
 
-void CRenderLayerQuads::CalculateClipping()
+void CRenderLayerQuads::CalculateClipping(CQuadCluster &QuadCluster)
 {
-	// calculate clipping if not too expensive
-	if(!m_Grouped)
-		return;
+	CClipRegion &ClipRegion = QuadCluster.m_ClipRegion;
 
 	// enable clipping
-	m_QuadRenderGroup.m_Clipped = true;
+	ClipRegion.m_Clipped = true;
 
-	int aEnvOffsetMin[2];
-	int aEnvOffsetMax[2];
 	int aQuadOffsetMin[2];
 	int aQuadOffsetMax[2];
 
-	m_QuadRenderGroup.m_Clipped = CalculateEnvelopeClipping(aEnvOffsetMin, aEnvOffsetMax);
+	ClipRegion.m_Clipped = CalculateQuadClipping(QuadCluster, aQuadOffsetMin, aQuadOffsetMax);
 
-	// check if clipping was disabled
-	if(!m_QuadRenderGroup.m_Clipped)
+	if(!ClipRegion.m_Clipped)
 		return;
 
-	CalculateQuadClipping(aQuadOffsetMin, aQuadOffsetMax);
-
 	// X channel
-	m_QuadRenderGroup.m_ClipX = fx2f(aQuadOffsetMin[0]) + fx2f(aEnvOffsetMin[0]);
-	m_QuadRenderGroup.m_ClipWidth = fx2f(aQuadOffsetMax[0]) - fx2f(aQuadOffsetMin[0]) + fx2f(aEnvOffsetMax[0]) - fx2f(aEnvOffsetMin[0]);
+	ClipRegion.m_ClipX = fx2f(aQuadOffsetMin[0]);
+	ClipRegion.m_ClipWidth = fx2f(aQuadOffsetMax[0]) - fx2f(aQuadOffsetMin[0]);
 
 	// Y channel
-	m_QuadRenderGroup.m_ClipY = fx2f(aQuadOffsetMin[1]) + fx2f(aEnvOffsetMin[1]);
-	m_QuadRenderGroup.m_ClipHeight = fx2f(aQuadOffsetMax[1]) - fx2f(aQuadOffsetMin[1]) + fx2f(aEnvOffsetMax[1]) - fx2f(aEnvOffsetMin[1]);
+	ClipRegion.m_ClipY = fx2f(aQuadOffsetMin[1]);
+	ClipRegion.m_ClipHeight = fx2f(aQuadOffsetMax[1]) - fx2f(aQuadOffsetMin[1]);
+
+	// update layer clip
+	if(!m_LayerClip.m_Clipped)
+	{
+		m_LayerClip = ClipRegion;
+	}
+	else
+	{
+		int ClipRight = std::max(ClipRegion.m_ClipX + ClipRegion.m_ClipWidth, m_LayerClip.m_ClipX + m_LayerClip.m_ClipWidth);
+		int ClipBottom = std::max(ClipRegion.m_ClipY + ClipRegion.m_ClipHeight, m_LayerClip.m_ClipY + m_LayerClip.m_ClipHeight);
+		m_LayerClip.m_ClipX = std::min(ClipRegion.m_ClipX, m_LayerClip.m_ClipX);
+		m_LayerClip.m_ClipY = std::min(ClipRegion.m_ClipY, m_LayerClip.m_ClipY);
+		m_LayerClip.m_ClipWidth = ClipRight - m_LayerClip.m_ClipX;
+		m_LayerClip.m_ClipHeight = ClipBottom - m_LayerClip.m_ClipY;
+	}
 }
 
 void CRenderLayerQuads::Render(const CRenderLayerParams &Params)
@@ -1234,7 +1248,7 @@ void CRenderLayerQuads::Render(const CRenderLayerParams &Params)
 			if(!Graphics()->IsQuadBufferingEnabled() || !Params.m_TileAndQuadBuffering)
 			{
 				Graphics()->BlendNormal();
-				RenderMap()->ForceRenderQuads(m_pQuads, m_pLayerQuads->m_NumQuads, LAYERRENDERFLAG_TRANSPARENT, m_pEnvelopeEval, 1.f);
+				RenderMap()->ForceRenderQuads(m_pQuads, m_pLayerQuads->m_NumQuads, LAYERRENDERFLAG_TRANSPARENT, m_pEnvelopeHandler.get(), 1.f);
 			}
 			else
 			{
@@ -1247,13 +1261,31 @@ void CRenderLayerQuads::Render(const CRenderLayerParams &Params)
 		if(!Graphics()->IsQuadBufferingEnabled() || !Params.m_TileAndQuadBuffering)
 		{
 			Graphics()->BlendNormal();
-			RenderMap()->RenderQuads(m_pQuads, m_pLayerQuads->m_NumQuads, LAYERRENDERFLAG_TRANSPARENT, m_pEnvelopeEval);
+			RenderMap()->RenderQuads(m_pQuads, m_pLayerQuads->m_NumQuads, LAYERRENDERFLAG_TRANSPARENT, m_pEnvelopeHandler.get());
 		}
 		else
 		{
 			RenderQuadLayer(false);
 		}
 	}
+}
+
+bool CRenderLayerQuads::ShowClipped(const CClipRegion &ClipRegion)
+{
+	// always show unclipped regions
+	if(!ClipRegion.m_Clipped)
+		return true;
+
+	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+	float ScreenWidth = ScreenX1 - ScreenX0;
+	float ScreenHeight = ScreenY1 - ScreenY0;
+	float Left = ClipRegion.m_ClipX - ScreenX0;
+	float Top = ClipRegion.m_ClipY - ScreenY0;
+	float Right = ClipRegion.m_ClipX + ClipRegion.m_ClipWidth - ScreenX0;
+	float Bottom = ClipRegion.m_ClipY + ClipRegion.m_ClipHeight - ScreenY0;
+
+	return Right >= 0.0f && Left <= ScreenWidth && Bottom >= 0.0f && Top <= ScreenHeight;
 }
 
 bool CRenderLayerQuads::DoRender(const CRenderLayerParams &Params)
@@ -1266,21 +1298,7 @@ bool CRenderLayerQuads::DoRender(const CRenderLayerParams &Params)
 	if(m_Flags & LAYERFLAG_DETAIL && !g_Config.m_GfxHighDetail && Params.m_RenderType != ERenderType::RENDERTYPE_FULL_DESIGN) // detail but no details
 		return false;
 
-	if(m_QuadRenderGroup.m_Clipped)
-	{
-		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-		float ScreenWidth = ScreenX1 - ScreenX0;
-		float ScreenHeight = ScreenY1 - ScreenY0;
-		float Left = m_QuadRenderGroup.m_ClipX - ScreenX0;
-		float Top = m_QuadRenderGroup.m_ClipY - ScreenY0;
-		float Right = m_QuadRenderGroup.m_ClipX + m_QuadRenderGroup.m_ClipWidth - ScreenX0;
-		float Bottom = m_QuadRenderGroup.m_ClipY + m_QuadRenderGroup.m_ClipHeight - ScreenY0;
-
-		if(Right < 0.0f || Left > ScreenWidth || Bottom < 0.0f || Top > ScreenHeight)
-			return false;
-	}
-	return true;
+	return ShowClipped(m_LayerClip);
 }
 
 /****************

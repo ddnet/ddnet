@@ -14,6 +14,7 @@ using offset_ptr32 = unsigned int;
 #include <base/color.h>
 #include <engine/graphics.h>
 
+#include <game/map/envelope_handler.h>
 #include <game/map/render_component.h>
 #include <game/map/render_map.h>
 #include <game/mapitems.h>
@@ -47,7 +48,7 @@ class CRenderLayer : public CRenderComponent
 public:
 	CRenderLayer(int GroupId, int LayerId, int Flags);
 	virtual ~CRenderLayer() = default;
-	virtual void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, IEnvelopeEval *pEnvelopeEval, IMap *pMap, IMapImages *pMapImages, std::shared_ptr<CMapBasedEnvelopePointAccess> &pEnvelopePoints, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional);
+	virtual void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeHandler> &pEnvelopeHandler, IMap *pMap, IMapImages *pMapImages, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional);
 
 	virtual void Init() = 0;
 	virtual void Render(const CRenderLayerParams &Params) = 0;
@@ -69,9 +70,8 @@ protected:
 
 	class IMap *m_pMap = nullptr;
 	IMapImages *m_pMapImages = nullptr;
-	IEnvelopeEval *m_pEnvelopeEval = nullptr;
+	std::shared_ptr<CEnvelopeHandler> m_pEnvelopeHandler;
 	std::optional<FRenderUploadCallback> m_RenderUploadCallback;
-	std::shared_ptr<CMapBasedEnvelopePointAccess> m_pEnvelopePoints;
 };
 
 class CRenderLayerGroup : public CRenderLayer
@@ -100,7 +100,7 @@ public:
 	void Render(const CRenderLayerParams &Params) override;
 	bool DoRender(const CRenderLayerParams &Params) override;
 	void Init() override;
-	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, IEnvelopeEval *pEnvelopeEval, IMap *pMap, IMapImages *pMapImages, std::shared_ptr<CMapBasedEnvelopePointAccess> &pEnvelopePoints, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional) override;
+	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeHandler> &pEnvelopeHandler, IMap *pMap, IMapImages *pMapImages, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional) override;
 
 	virtual int GetDataIndex(unsigned int &TileSize) const;
 	bool IsValid() const override { return GetRawData() != nullptr; }
@@ -209,7 +209,7 @@ class CRenderLayerQuads : public CRenderLayer
 {
 public:
 	CRenderLayerQuads(int GroupId, int LayerId, int Flags, CMapItemLayerQuads *pLayerQuads);
-	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, IEnvelopeEval *pEnvelopeEval, IMap *pMap, IMapImages *pMapImages, std::shared_ptr<CMapBasedEnvelopePointAccess> &pEnvelopePoints, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional) override;
+	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeHandler> &pEnvelopeHandler, IMap *pMap, IMapImages *pMapImages, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional) override;
 	virtual void Init() override;
 	bool IsValid() const override { return m_pLayerQuads->m_NumQuads > 0 && m_pQuads; }
 	virtual void Render(const CRenderLayerParams &Params) override;
@@ -218,9 +218,6 @@ public:
 
 protected:
 	virtual IGraphics::CTextureHandle GetTexture() const override { return m_TextureHandle; }
-	void CalculateClipping();
-	bool CalculateEnvelopeClipping(int aEnvelopeOffsetMin[2], int aEnvelopeOffsetMax[2]);
-	void CalculateQuadClipping(int aQuadOffsetMin[2], int aQuadOffsetMax[2]);
 
 	class CQuadLayerVisuals : public CRenderComponent
 	{
@@ -238,24 +235,37 @@ protected:
 	std::optional<CRenderLayerQuads::CQuadLayerVisuals> m_VisualQuad;
 	CMapItemLayerQuads *m_pLayerQuads;
 
-	std::vector<SQuadRenderInfo> m_vQuadRenderInfo;
-
-	bool m_Grouped;
-	class CQuadRenderGroup
+	class CClipRegion
 	{
 	public:
-		int m_PosEnv;
-		float m_PosEnvOffset;
-		int m_ColorEnv;
-		float m_ColorEnvOffset;
-
-		// quad clipping
 		bool m_Clipped;
 		float m_ClipX;
 		float m_ClipY;
 		float m_ClipWidth;
 		float m_ClipHeight;
-	} m_QuadRenderGroup;
+	} m_LayerClip;
+
+	class CQuadCluster
+	{
+	public:
+		bool m_Grouped;
+		int m_StartIndex;
+		int m_NumQuads;
+
+		int m_PosEnv;
+		float m_PosEnvOffset;
+		int m_ColorEnv;
+		float m_ColorEnvOffset;
+
+		std::vector<SQuadRenderInfo> m_vQuadRenderInfo;
+		CClipRegion m_ClipRegion;
+	};
+
+	bool ShowClipped(const CClipRegion &ClipRegion);
+	void CalculateClipping(CQuadCluster &QuadCluster);
+	bool CalculateQuadClipping(CQuadCluster &QuadCluster, int aQuadOffsetMin[2], int aQuadOffsetMax[2]);
+
+	std::vector<CQuadCluster> m_vQuadClusters;
 
 	CQuad *m_pQuads;
 
