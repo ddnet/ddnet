@@ -10,6 +10,7 @@
 
 #include "teeinfo.h"
 
+#include "foxnet/accounts.h"
 #include <memory>
 #include <optional>
 
@@ -232,7 +233,7 @@ public:
 	bool m_NotEligibleForFinish;
 	int64_t m_EligibleForFinishCheck;
 	bool m_VotedForPractice;
-	int m_SwapTargetsClientId; //Client ID of the swap target for the given player
+	int m_SwapTargetsClientId; // Client Id of the swap target for the given player
 	bool m_BirthdayAnnounced;
 
 	int m_RescueMode;
@@ -243,7 +244,12 @@ public:
 	//<FoxNet
 	void FoxNetTick();
 
+	CAccountSession *Acc();
 
+	void GivePlaytime(int Amount);
+	void GiveXP(int64_t Amount, const char *pMessage = "");
+	bool CheckLevelUp(int64_t Amount, bool Silent = false);
+	void GiveMoney(int64_t Amount, const char *pMessage = "");
 
 	// FoxNet>
 };

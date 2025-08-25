@@ -5529,3 +5529,12 @@ bool FormatUnixTime(uint64_t unixSeconds, char *out, size_t outSize, const char 
 #endif
 	return std::strftime(out, outSize, fmt, &tmLocal) != 0;
 }
+
+bool IsWeekend()
+{
+	time_t CurrentTime = time(nullptr);
+	tm *LocalTime = localtime(&CurrentTime);
+	if(LocalTime->tm_wday == 0 || LocalTime->tm_wday == 6)
+		return true;
+	return false;
+}

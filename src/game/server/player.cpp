@@ -1,4 +1,4 @@
-/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
+﻿/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "player.h"
 #include "entities/character.h"
@@ -12,8 +12,10 @@
 #include <engine/server.h>
 #include <engine/shared/config.h>
 
+#include "foxnet/accounts.h"
 #include <game/gamecore.h>
 #include <game/teamscore.h>
+#include <algorithm>
 
 MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
 
@@ -175,6 +177,8 @@ void CPlayer::Tick()
 
 	if(!Server()->ClientIngame(m_ClientId))
 		return;
+
+	FoxNetTick();
 
 	if(m_ChatScore > 0)
 		m_ChatScore--;
@@ -1043,4 +1047,117 @@ void CPlayer::CCameraInfo::Reset()
 	m_Zoom = 1.0f;
 	m_Deadzone = 0.0f;
 	m_FollowFactor = 0.0f;
+}
+
+void CPlayer::FoxNetTick()
+{
+	if(Acc()->m_LoggedIn)
+	{
+		if(!IsAfk() && (Server()->Tick() - Acc()->m_LoginTick) % (Server()->TickSpeed() * 60) == 0 && Acc()->m_LoginTick != Server()->Tick())
+		{
+			GivePlaytime(1);
+			int XP = 1;
+			GiveXP(XP, "");
+		}
+	}
+}
+
+CAccountSession *CPlayer::Acc()
+{
+	return &GameServer()->m_Account[m_ClientId];
+}
+
+void CPlayer::GivePlaytime(int Amount)
+{
+	if(!Acc()->m_LoggedIn)
+		return;
+
+	Acc()->m_Playtime++;
+	if(Acc()->m_Playtime % 100 == 0)
+	{
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "for reaching %d Minutes of Playtime!", Acc()->m_Playtime);
+		GiveMoney(g_Config.m_SvPlaytimeMoney, aBuf);
+	}
+}
+
+void CPlayer::GiveXP(int64_t Amount, const char *pMessage)
+{
+	if(!Acc()->m_LoggedIn)
+		return;
+
+	if(IsWeekend())
+		Amount *= 2;
+
+	Acc()->m_XP += Amount;
+
+	char aBuf[256];
+
+	if(pMessage[0])
+	{
+		str_format(aBuf, sizeof(aBuf), "+%lld XP %s%s", Amount, pMessage, ""); // IsDoubleXp ? " (doubled xp)" : "");
+		GameServer()->SendChatTarget(m_ClientId, aBuf);
+	}
+
+	CheckLevelUp(Amount);
+}
+
+bool CPlayer::CheckLevelUp(int64_t Amount, bool Silent)
+{
+	bool LeveledUp = false;
+	char aBuf[256];
+
+	// ╔╦╦╦╦═════════════╗
+	// ╚╩╩╩╩═════════════╝
+
+    int ClampedLevel = std::clamp((int)Acc()->m_Level, 0, 4);
+	int NeededXp = GameServer()->m_AccountManager.m_NeededXp[ClampedLevel];
+
+	while(Acc()->m_XP >= NeededXp)
+	{
+		Acc()->m_Level++;
+		Acc()->m_XP -= NeededXp;
+
+		GiveMoney(g_Config.m_SvLevelUpMoney);
+		LeveledUp = true;
+	}
+	if(LeveledUp && !Silent)
+	{
+		str_format(aBuf, sizeof(aBuf), "You are now level %d!", Acc()->m_Level);
+		GameServer()->SendChatTarget(m_ClientId, aBuf);
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(i != m_ClientId && GameServer()->GetPlayerChar(i) && i < g_Config.m_SvMaxClients)
+			{
+				// send a level up message to everyone except for the player who leveled up
+				str_format(aBuf, sizeof(aBuf), "%s is not level %d!", Server()->ClientName(m_ClientId), Acc()->m_Level);
+				GameServer()->SendChatTarget(i, aBuf);
+			}
+		}
+		GameServer()->m_AccountManager.SaveAccountsInfo(m_ClientId, *Acc());
+		GameServer()->CreateBirthdayEffect(m_pCharacter->GetPos(), m_pCharacter->TeamMask());
+	}
+
+	return LeveledUp;
+}
+
+void CPlayer::GiveMoney(int64_t Amount, const char *pMessage)
+{
+	if(!Acc()->m_LoggedIn)
+		return;
+
+	if(IsWeekend())
+		Amount *= 2.0f;
+
+	Acc()->m_Money += Amount;
+
+	char aBuf[256];
+
+	if(pMessage[0])
+	{
+		str_format(aBuf, sizeof(aBuf), "+%lld %s %s", Amount, g_Config.m_SvCurrencyName, pMessage);
+		GameServer()->SendChatTarget(m_ClientId, aBuf);
+	}
+
+	GameServer()->m_AccountManager.SaveAccountsInfo(m_ClientId, *Acc());
 }

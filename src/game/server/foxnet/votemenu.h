@@ -32,6 +32,15 @@ enum Prefixes
 	TRIANGLE_BULLET
 };
 
+enum Flags
+{
+	FLAG_VOTES = 1 << VOTES,
+	FLAG_SETTINGS = 1 << SETTINGS,
+	FLAG_ACCOUNT = 1 << ACCOUNT,
+	FLAG_SHOP = 1 << SHOP,
+	FLAG_INVENTORY = 1 << INVENTORY,
+};
+
 struct CVoteMenu
 {
 	CGameContext *m_pGameServer;
@@ -43,7 +52,7 @@ struct CVoteMenu
 	{
 		int m_Page = VOTES;
 
-		bool m_ShowAll = false;
+		// Comparison data for auto updates
 		CAccountSession m_Account = CAccountSession();
 	};
 	ClientData m_aClientData[MAX_CLIENTS];
@@ -63,7 +72,7 @@ struct CVoteMenu
 	void SendPageInventory(int ClientId);
 	void SendPageAdmin(int ClientId);
 
-	void UpdatePages(int ClientId, int Page);
+	void UpdatePages(int ClientId);
 
 public:
 	int GetPage(int ClientId) const;
@@ -72,7 +81,7 @@ public:
 	void AddHeader(int ClientId);
 
 	void Tick();
-	void OnClientEnter(int ClientId);
+	void OnClientDrop(int ClientId);
 	void Init(CGameContext *pGameServer);
 	bool OnCallVote(const CNetMsg_Cl_CallVote *pMsg, int ClientId);
 };

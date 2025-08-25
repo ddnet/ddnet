@@ -91,9 +91,29 @@ void CGameContext::ConAccProfile(IConsole::IResult *pResult, void *pUserData)
 	pSelf->m_AccountManager.ShowAccProfile(pResult->m_ClientId, pName);
 }
 
-void CGameContext::ConForceLogin(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConAccEdit(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	const char *pUser = pResult->GetString(0);
+	const char *pVariable = pResult->GetString(1);
+	const char *pValue = pResult->GetString(2);
+
+	pSelf->m_AccountManager.EditAccount(pUser, pVariable, pValue);
+}
+
+void CGameContext::ConAccForceLogin(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	const char *pName = pResult->GetString(0);
 	pSelf->m_AccountManager.ForceLogin(pResult->m_ClientId, pName);
 }
+
+void CGameContext::ConAccForceLogout(IConsole::IResult *pResult, void *pUserData) 
+{ // Logs out Current Acc Session, does not work across servers
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int ClientId = pResult->GetInteger(0);
+	if(!CheckClientId(ClientId))
+		return;
+	pSelf->m_AccountManager.Logout(ClientId);
+}
+

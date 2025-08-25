@@ -7,6 +7,7 @@
 
 #include <game/race_state.h>
 #include <game/server/save.h>
+#include <game/server/foxnet/accounts.h>
 
 class CGameTeams;
 class CGameWorld;
@@ -271,6 +272,11 @@ public:
 
 	CSaveTee &GetLastRescueTeeRef(int Mode = RESCUEMODE_AUTO) { return m_RescueTee[Mode]; }
 	CTuningParams *GetTuning(int Zone) { return Zone ? &TuningList()[Zone] : Tuning(); }
+
+	// <FoxNet
+	CAccountSession *Acc();
+	void OnDie(int Killer, int Weapon, bool SendKillMsg);
+	// FoxNet>
 };
 
 #endif

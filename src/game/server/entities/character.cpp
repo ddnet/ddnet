@@ -21,6 +21,7 @@
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/server/teams.h>
+#include <game/server/foxnet/accounts.h>
 
 MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
 
@@ -993,6 +994,10 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 	GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCid(), TeamMask());
 	Teams()->OnCharacterDeath(GetPlayer()->GetCid(), Weapon);
 	CancelSwapRequests();
+
+	// <FoxNet
+	OnDie(Killer, Weapon, SendKillMsg);
+	// FoxNet>
 }
 
 bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
@@ -2552,4 +2557,16 @@ void CCharacter::SwapClients(int Client1, int Client2)
 {
 	const int HookedPlayer = m_Core.HookedPlayer();
 	m_Core.SetHookedPlayer(HookedPlayer == Client1 ? Client2 : HookedPlayer == Client2 ? Client1 : HookedPlayer);
+}
+
+// <FoxNet
+CAccountSession *CCharacter::Acc()
+{
+	return &GameServer()->m_Account[GetPlayer()->GetCid()];
+}
+
+void CCharacter::OnDie(int Killer, int Weapon, bool SendKillMsg)
+{
+	if(Acc()->m_LoggedIn)
+		Acc()->m_Deaths++;
 }

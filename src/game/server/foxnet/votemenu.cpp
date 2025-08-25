@@ -109,18 +109,20 @@ void CVoteMenu::Tick()
 		if(!GameServer()->m_apPlayers[ClientId] || Server()->ClientSlotEmpty(ClientId))
 			continue;
 
-		UpdatePages(ClientId, m_aClientData[ClientId].m_Page);
+		if(GameServer()->m_apPlayers[ClientId]->m_PlayerFlags & PLAYERFLAG_IN_MENU)
+			UpdatePages(ClientId);
 	}
 }
 
-void CVoteMenu::OnClientEnter(int ClientId)
+void CVoteMenu::OnClientDrop(int ClientId)
 {
-	m_aClientData[ClientId].m_Page = VOTES;
+	SetPage(ClientId, Pages::VOTES);
 }
 
-void CVoteMenu::UpdatePages(int ClientId, int Page)
+void CVoteMenu::UpdatePages(int ClientId)
 {
 	CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
+	const int Page = GetPage(ClientId);
 
 	bool Changes = false;
 
@@ -130,21 +132,30 @@ void CVoteMenu::UpdatePages(int ClientId, int Page)
 			SetPage(ClientId, Pages::VOTES);
 		return;
 	}
+	CAccountSession Acc = GameServer()->m_Account[ClientId];
 
-	if(pPl->m_ShowAll != m_aClientData[ClientId].m_ShowAll)
-	{
-		m_aClientData[ClientId].m_ShowAll = pPl->m_ShowAll;
+	if(Acc.m_LoggedIn != m_aClientData[ClientId].m_Account.m_LoggedIn) // Check login status change
 		Changes = true;
+
+	if(Page == Pages::VOTES)
+		return;
+
+	if(Page == Pages::SETTINGS)
+	{
+		if(Acc.m_Flags != m_aClientData[ClientId].m_Account.m_Flags)
+			Changes = true;
 	}
-	CAccountSession Acc = m_aClientData[ClientId].m_Account;
-	if(mem_comp(&Acc, &GameServer()->m_Account[ClientId], sizeof(Acc)))
+	else if(Page == Pages::ACCOUNT)
 	{
-		m_aClientData[ClientId].m_Account = GameServer()->m_Account[ClientId];
-		Changes = true;
+		if(mem_comp(&Acc, &m_aClientData[ClientId].m_Account, sizeof(Acc)) != 0)
+			Changes = true;
 	}
 
 	if(Changes)
+	{
+		m_aClientData[ClientId].m_Account = GameServer()->m_Account[ClientId];
 		PrepareVoteOptions(ClientId, Page);
+	}
 }
 
 bool CVoteMenu::IsPageAllowed(int ClientId, int Page) const
@@ -171,7 +182,6 @@ void CVoteMenu::PrepareVoteOptions(int ClientId, int Page)
 		return;
 
 	GameServer()->ClearVotes(ClientId);
-
 	m_vDescriptions.clear();
 
 	switch(Page)
@@ -231,6 +241,9 @@ void CVoteMenu::SetPage(int ClientId, int Page)
 		return;
 
 	m_aClientData[ClientId].m_Page = Page;
+	CAccountSession &Acc = GameServer()->m_Account[ClientId];
+	if(Acc.m_LoggedIn)
+		Acc.m_VoteMenuPage = Page;
 
 	PrepareVoteOptions(ClientId, Page);
 }
@@ -284,15 +297,17 @@ void CVoteMenu::SendPageAccount(int ClientId)
 	str_format(aBuf, sizeof(aBuf), "│ Level [%d]", Acc.m_Level);
 	AddDescription(aBuf);
 
-	int64_t CurXp = Acc.m_XP;
+	int CurXp = Acc.m_XP;
+	int ClampedLevel = std::clamp((int)Acc.m_Level, 0, 4);
+	int NeededXp = GameServer()->m_AccountManager.m_NeededXp[ClampedLevel];
 
-	str_format(aBuf, sizeof(aBuf), "│ XP [%lld/%lld]", CurXp, CurXp);
+	str_format(aBuf, sizeof(aBuf), "│ XP [%d/%d]", CurXp, NeededXp);
 	AddDescription(aBuf);
 
 	float PlayTimeHours = Acc.m_Playtime / 60.0f;
-	str_format(aBuf, sizeof(aBuf), "│ Play Time: %.1f Hour%s", PlayTimeHours, PlayTimeHours == 1 ? "" : "s");
+	str_format(aBuf, sizeof(aBuf), "│ Playtime: %.1f Hour%s", PlayTimeHours, PlayTimeHours == 1 ? "" : "s");
 	if(Acc.m_Playtime < 100)
-		str_format(aBuf, sizeof(aBuf), "│ Play Time: %lld Minute%s", (int)Acc.m_Playtime, Acc.m_Playtime == 1 ? "" : "s");
+		str_format(aBuf, sizeof(aBuf), "│ Playtime: %lld Minute%s", (int)Acc.m_Playtime, Acc.m_Playtime == 1 ? "" : "s");
 	AddDescription(aBuf);
 
 	str_format(aBuf, sizeof(aBuf), "│ %s: %lld", g_Config.m_SvCurrencyName, Acc.m_Money);
@@ -306,19 +321,19 @@ void CVoteMenu::SendPageAccount(int ClientId)
 
 void CVoteMenu::SendPageShop(int ClientId)
 {
-	CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
+	// CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
 	// ToDo
 }
 
 void CVoteMenu::SendPageInventory(int ClientId)
 {
-	CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
+	// CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
 	// ToDo
 }
 
 void CVoteMenu::SendPageAdmin(int ClientId)
 {
-	CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
+	// CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
 	// ToDo
 }
 

@@ -1558,9 +1558,8 @@ void CGameContext::OnClientEnter(int ClientId)
 	}
 	m_pController->OnPlayerConnect(m_apPlayers[ClientId]);
 
-	//<FoxNet
+	// <FoxNet
 	m_AccountManager.AutoLogin(ClientId);
-	m_VoteMenu.OnClientEnter(ClientId);
 	// FoxNet>
 
 	{
@@ -1785,6 +1784,10 @@ void CGameContext::OnClientConnected(int ClientId, void *pData)
 void CGameContext::OnClientDrop(int ClientId, const char *pReason)
 {
 	LogEvent("Disconnect", ClientId);
+
+	// <FoxNet
+	m_VoteMenu.OnClientDrop(ClientId);
+	// FoxNet>
 
 	AbortVoteKickOnDisconnect(ClientId);
 	m_pController->OnPlayerDisconnect(m_apPlayers[ClientId], pReason);
@@ -5294,12 +5297,14 @@ void CGameContext::ClearVotes(int ClientId)
 
 void CGameContext::RegisterFoxNetCommands()
 {
-	Console()->Register("force_login", "r[Username]", CFGFLAG_SERVER, ConForceLogin, this, "Show someones profile");
+	Console()->Register("force_login", "r[username]", CFGFLAG_SERVER, ConAccForceLogin, this, "Force Log into any account");
+	Console()->Register("force_logout", "i[id]", CFGFLAG_SERVER, ConAccForceLogout, this, "Force logout an account thats currently active on the server");
+	Console()->Register("acc_edit", "s[username] s[variable] r[value]", CFGFLAG_SERVER, ConAccEdit, this, "Edit an account");
 
 	Console()->Register("register", "s[username] s[password] s[password2]", CFGFLAG_CHAT, ConAccRegister, this, "Register a account");
 	Console()->Register("password", "s[oldpass] s[password] s[password2]", CFGFLAG_CHAT, ConAccPassword, this, "Change your password");
 	Console()->Register("login", "s[username] r[password]", CFGFLAG_CHAT, ConAccLogin, this, "Login to your account");
 	Console()->Register("logout", "", CFGFLAG_CHAT, ConAccLogout, this, "Logout of your account");
-	Console()->Register("profile", "?s[Name]", CFGFLAG_CHAT, ConAccProfile, this, "Show someones profile");
+	Console()->Register("profile", "?s[name]", CFGFLAG_CHAT, ConAccProfile, this, "Show someones profile");
 }
 // FoxNet>

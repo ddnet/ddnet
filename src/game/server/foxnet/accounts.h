@@ -35,15 +35,17 @@ struct CAccountSession
 	uint64_t m_LastLogin = 0;
 	int m_Port = 0;
 	int ClientId = -1;
-	uint64_t m_Flags = 0;
-	uint64_t m_VoteMenuFlags = 0;
-	uint64_t m_Playtime = 0; // Minutes
-	uint64_t m_Deaths = 0;
-	uint64_t m_Kills = 0;
-	uint64_t m_Level = 0;
-	uint64_t m_XP = 0;
-	uint64_t m_Money = 0;
+	int64_t m_Flags = 0;
+	int m_VoteMenuPage = 0;
+	int64_t m_Playtime = 0; // Minutes
+	int64_t m_Deaths = 0;
+	int64_t m_Kills = 0;
+	int64_t m_Level = 0;
+	int64_t m_XP = 0;
+	int64_t m_Money = 0;
 	char m_Inventory[1028] = "";
+
+	int m_LoginTick = 0;
 };
 
 class CAccounts
@@ -70,7 +72,7 @@ public:
 	bool Login(int ClientId, const char *pUsername, const char *pPassword);
 	bool Logout(int ClientId);
 
-	void OnLogin(int ClientId, const char *pUsername);
+	void OnLogin(int ClientId, const char *pUsername, sqlite3_stmt *pstmt);
 	void OnLogout(int ClientId, const CAccountSession AccInfo);
 
 	void SaveAccountsInfo(int ClientId, const CAccountSession AccInfo);
@@ -86,6 +88,13 @@ public:
 	CAccountSession GetAccount(int ClientId);
 
 	void SetPlayerName(int ClientId, const char *pName);
+
+	void EditAccount(const char *pUsername, const char *pVariable, const char *pValue);
+
+	// Returns 0 if not logged in and the current port if logged in
+	int IsAccountLoggedIn(const char *pUsername); 
+
+	int64_t m_NeededXp[4] = {30, 65, 100, 150};
 
 	// std::optional<CAccountSession> AccountInfoUsername(const char *pUsername);
 };
