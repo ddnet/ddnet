@@ -121,7 +121,7 @@ void CVoteMenu::OnClientDrop(int ClientId)
 
 void CVoteMenu::UpdatePages(int ClientId)
 {
-	CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
+	// CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
 	const int Page = GetPage(ClientId);
 
 	bool Changes = false;
@@ -250,7 +250,7 @@ void CVoteMenu::SetPage(int ClientId, int Page)
 
 void CVoteMenu::SendPageSettings(int ClientId)
 {
-	CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
+	// CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
 	const CAccountSession Acc = GameServer()->m_Account[ClientId];
 
 	if(Acc.m_LoggedIn)
@@ -259,7 +259,7 @@ void CVoteMenu::SendPageSettings(int ClientId)
 
 void CVoteMenu::SendPageAccount(int ClientId)
 {
-	CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
+	// CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
 	const CAccountSession Acc = GameServer()->m_Account[ClientId];
 
 	if(!Acc.m_LoggedIn)
@@ -340,7 +340,6 @@ void CVoteMenu::SendPageAdmin(int ClientId)
 void CVoteMenu::AddHeader(int ClientId)
 {
 	const int NumVotesToSend = Pages::NUM_PAGES + 3;
-	const CAccountSession Acc = GameServer()->m_Account[ClientId];
 
 	std::vector<std::string> Descriptions;
 

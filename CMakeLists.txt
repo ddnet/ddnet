@@ -2777,10 +2777,10 @@ if(SERVER)
     #<FoxNet
     foxnet/accounts.cpp
     foxnet/accounts.h
-    foxnet/gamecontext.cpp
+    foxnet/commands.cpp
     foxnet/fontconvert.cpp
     foxnet/fontconvert.h
-    foxnet/commands.cpp
+    foxnet/gamecontext.cpp
     foxnet/votemenu.cpp
     foxnet/votemenu.h
     # FoxNet>
