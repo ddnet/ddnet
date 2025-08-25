@@ -1552,6 +1552,11 @@ void CGameContext::ProgressVoteOptions(int ClientId)
 
 void CGameContext::OnClientEnter(int ClientId)
 {
+	// <FoxNet
+	if(NameDetection(ClientId, Server()->ClientName(ClientId)))
+		return;
+	// FoxNet>
+
 	if(m_TeeHistorianActive)
 	{
 		m_TeeHistorian.RecordPlayerReady(ClientId);
@@ -2187,6 +2192,11 @@ void CGameContext::OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientId)
 
 void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientId, const CUnpacker *pUnpacker)
 {
+	// <FoxNet
+	if(ChatDetection(ClientId, pMsg->m_pMessage))
+		return;
+	// FoxNet>
+
 	CPlayer *pPlayer = m_apPlayers[ClientId];
 	bool Check = !pPlayer->m_NotEligibleForFinish && pPlayer->m_EligibleForFinishCheck + 10 * time_freq() >= time_get();
 	if(Check && str_comp(pMsg->m_pMessage, "xd sure chillerbot.png is lyfe") == 0 && pMsg->m_Team == 0)
@@ -2713,27 +2723,31 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 	// set infos
 	if(Server()->WouldClientNameChange(ClientId, pMsg->m_pName) && !ProcessSpamProtection(ClientId))
 	{
-		char aOldName[MAX_NAME_LENGTH];
-		str_copy(aOldName, Server()->ClientName(ClientId), sizeof(aOldName));
-
-		Server()->SetClientName(ClientId, pMsg->m_pName);
-
-		char aChatText[256];
-		str_format(aChatText, sizeof(aChatText), "'%s' changed name to '%s'", aOldName, Server()->ClientName(ClientId));
-		SendChat(-1, TEAM_ALL, aChatText);
-
-		// reload scores
-		Score()->PlayerData(ClientId)->Reset();
-		m_apPlayers[ClientId]->m_Score.reset();
-		Score()->LoadPlayerData(ClientId);
-
-		SixupNeedsUpdate = true;
-
-		LogEvent("Name change", ClientId);
-
 		//<FoxNet
-		m_AccountManager.SetPlayerName(ClientId, Server()->ClientName(ClientId));
-		// FoxNet>
+		if(!NameDetection(ClientId, pMsg->m_pName, true))
+		{	// FoxNet>
+			char aOldName[MAX_NAME_LENGTH];
+			str_copy(aOldName, Server()->ClientName(ClientId), sizeof(aOldName));
+
+			Server()->SetClientName(ClientId, pMsg->m_pName);
+
+			char aChatText[256];
+			str_format(aChatText, sizeof(aChatText), "'%s' changed name to '%s'", aOldName, Server()->ClientName(ClientId));
+			SendChat(-1, TEAM_ALL, aChatText);
+
+			// reload scores
+			Score()->PlayerData(ClientId)->Reset();
+			m_apPlayers[ClientId]->m_Score.reset();
+			Score()->LoadPlayerData(ClientId);
+
+			SixupNeedsUpdate = true;
+
+			LogEvent("Name change", ClientId);
+
+			//<FoxNet
+			m_AccountManager.SetPlayerName(ClientId, Server()->ClientName(ClientId));
+			// FoxNet>
+		}
 	}
 
 	if(Server()->WouldClientClanChange(ClientId, pMsg->m_pClan))
@@ -5257,54 +5271,3 @@ bool CGameContext::PracticeByDefault() const
 {
 	return g_Config.m_SvPracticeByDefault && g_Config.m_SvTestingCommands;
 }
-
-//<FoxNet
-void CGameContext::SendLoginState(int ClientId) const
-{
-	if(!m_Account[ClientId].m_LoggedIn)
-	{
-		SendChatTarget(ClientId, "Not logged in");
-	}
-	else
-	{
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "Logged in as '%s'", m_Account[ClientId].m_Username);
-		SendChatTarget(ClientId, aBuf);
-	}
-}
-
-void CGameContext::FoxNetTick()
-{
-	m_VoteMenu.Tick();
-}
-
-void CGameContext::ClearVotes(int ClientId)
-{
-	if(ClientId == -1)
-	{
-		for(int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if(m_apPlayers[i] && !Server()->ClientSlotEmpty(i))
-				ClearVotes(i);
-		}
-		return;
-	}
-
-	CNetMsg_Sv_VoteClearOptions ClearMsg;
-	Server()->SendPackMsg(&ClearMsg, MSGFLAG_VITAL, ClientId);
-	m_VoteMenu.AddHeader(ClientId);
-}
-
-void CGameContext::RegisterFoxNetCommands()
-{
-	Console()->Register("force_login", "r[username]", CFGFLAG_SERVER, ConAccForceLogin, this, "Force Log into any account");
-	Console()->Register("force_logout", "i[id]", CFGFLAG_SERVER, ConAccForceLogout, this, "Force logout an account thats currently active on the server");
-	Console()->Register("acc_edit", "s[username] s[variable] r[value]", CFGFLAG_SERVER, ConAccEdit, this, "Edit an account");
-
-	Console()->Register("register", "s[username] s[password] s[password2]", CFGFLAG_CHAT, ConAccRegister, this, "Register a account");
-	Console()->Register("password", "s[oldpass] s[password] s[password2]", CFGFLAG_CHAT, ConAccPassword, this, "Change your password");
-	Console()->Register("login", "s[username] r[password]", CFGFLAG_CHAT, ConAccLogin, this, "Login to your account");
-	Console()->Register("logout", "", CFGFLAG_CHAT, ConAccLogout, this, "Logout of your account");
-	Console()->Register("profile", "?s[name]", CFGFLAG_CHAT, ConAccProfile, this, "Show someones profile");
-}
-// FoxNet>

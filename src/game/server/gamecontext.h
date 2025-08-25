@@ -59,6 +59,51 @@ class IStorage;
 struct CAntibotRoundData;
 struct CScoreRandomMapResult;
 
+// <FoxNet
+
+class CStringDetection
+{
+	char m_String[32] = "";
+	char m_Reason[64] = "";
+	float m_Addition = 1.0f;
+	bool m_Ban = false;
+	int m_Time = 0; // in Minutes
+
+	bool m_ExactMatch = false;
+
+public:
+	CStringDetection(const char *pStrings, const char *pReason, bool Ban, int Time, bool ExactMatch)
+	{
+		str_copy(m_String, pStrings);
+		str_copy(m_Reason, pReason);
+		m_Time = Time;
+		m_Ban = Ban;
+		m_ExactMatch = ExactMatch;
+	}
+	CStringDetection(const char *pStrings, const char *pReason, float Addition, bool Ban, int Time)
+	{
+		str_copy(m_String, pStrings);
+		str_copy(m_Reason, pReason);
+		m_Addition = Addition;
+		m_Time = Time;
+		m_Ban = Ban;
+	}
+
+	const char *String() const { return m_String; }
+	const char *Reason() const { return m_Reason; }
+	bool IsBan() const { return m_Ban; }
+	float Addition() const { return m_Addition; }
+	int Time() const { return m_Time; }
+	bool ExactMatch() const { return m_ExactMatch; }
+
+	bool operator==(const CStringDetection &Other) const
+	{
+		bool StringMatch = !str_comp(String(), Other.String()) && str_comp(String(), "") != 0;
+		return StringMatch;
+	}
+};
+// FoxNet>
+
 struct CSnapContext
 {
 	CSnapContext(int Version, bool Sixup, int ClientId) :
@@ -643,10 +688,17 @@ public:
 	//<FoxNet
 	void ClearVotes(int ClientId);
 
+	bool ChatDetection(int ClientId, const char *pMsg);
+	bool NameDetection(int ClientId, const char *pName, bool PreventNameChange = false);
+
+private:	
+
+	std::vector<CStringDetection> m_ChatDetection;
+	std::vector<CStringDetection> m_NameDetection;
+
 	void FoxNetTick();
 	void RegisterFoxNetCommands();
 
-	void SendLoginState(int ClientId) const;
 	static void ConAccRegister(IConsole::IResult *pResult, void *pUserData);
 	static void ConAccPassword(IConsole::IResult *pResult, void *pUserData);
 	static void ConAccLogin(IConsole::IResult *pResult, void *pUserData);
@@ -655,6 +707,27 @@ public:
 	static void ConAccEdit(IConsole::IResult *pResult, void *pUserData);
 	static void ConAccForceLogin(IConsole::IResult *pResult, void *pUserData);
 	static void ConAccForceLogout(IConsole::IResult *pResult, void *pUserData);
+
+	// Add
+	static void ConAddChatDetectionString(IConsole::IResult *pResult, void *pUserData);
+	void AddChatDetectionString(const char *pString, const char *pReason, bool pBan, int pBanTime, float pAddition = 1.0f);
+	// Remove
+	static void ConClearChatDetectionString(IConsole::IResult *pResult, void *pUserData);
+	static void ConRemoveChatDetectionString(IConsole::IResult *pResult, void *pUserData);
+	void RemoveChatDetectionString(const char *pString);
+	// List
+	static void ConListChatDetectionStrings(IConsole::IResult *pResult, void *pUserData);
+
+	// Add
+	static void ConAddNameDetectionString(IConsole::IResult *pResult, void *pUserData);
+	void AddNameDetectionString(const char *pString, const char *pReason, int pBanTime, bool ExactName);
+	// Remove
+	static void ConClearNameDetectionStrings(IConsole::IResult *pResult, void *pUserData);
+	static void ConRemoveNameDetectionString(IConsole::IResult *pResult, void *pUserData);
+	void RemoveNameDetectionString(const char *pString);
+	// List
+	static void ConListNameDetectionStrings(IConsole::IResult *pResult, void *pUserData);
+
 	// FoxNet>
 };
 
