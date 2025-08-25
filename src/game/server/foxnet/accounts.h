@@ -44,6 +44,7 @@ struct CAccountSession
 	int64_t m_XP = 0;
 	int64_t m_Money = 0;
 	char m_Inventory[1028] = "";
+	char m_LastActiveItems[1028] = ""; // corelates to m_Inventory, will load this on login
 
 	int m_LoginTick = 0;
 };
