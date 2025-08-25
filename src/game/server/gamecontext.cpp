@@ -182,6 +182,11 @@ void CGameContext::Clear()
 	CMutes Mutes = m_Mutes;
 	CMutes VoteMutes = m_VoteMutes;
 
+	// <FoxNet
+	std::vector<CStringDetection> ChatDection = m_ChatDetection;
+	std::vector<CStringDetection> NameDection = m_NameDetection;
+	// FoxNet>
+
 	m_Resetting = true;
 	this->~CGameContext();
 	new(this) CGameContext(RESET);
@@ -193,6 +198,11 @@ void CGameContext::Clear()
 	m_Tuning = Tuning;
 	m_Mutes = Mutes;
 	m_VoteMutes = VoteMutes;
+
+	// <FoxNet
+	m_ChatDetection = ChatDection;
+	m_NameDetection = NameDection;
+	// FoxNet>
 }
 
 void CGameContext::TeeHistorianWrite(const void *pData, int DataSize, void *pUser)
