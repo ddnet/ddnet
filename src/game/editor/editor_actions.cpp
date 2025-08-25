@@ -977,7 +977,7 @@ void CEditorActionEditLayerTilesProp::Redo()
 	}
 	else if(m_Prop == ETilesProp::PROP_SHIFT)
 	{
-		pLayerTiles->Shift(m_Current);
+		pLayerTiles->Shift((EShiftDirection)m_Current);
 	}
 	else if(m_Prop == ETilesProp::PROP_SHIFT_BY)
 	{

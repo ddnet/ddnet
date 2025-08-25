@@ -52,7 +52,7 @@ void CLayerTune::Resize(int NewW, int NewH)
 		m_pEditor->m_Map.m_pGameLayer->Resize(NewW, NewH);
 }
 
-void CLayerTune::Shift(int Direction)
+void CLayerTune::Shift(EShiftDirection Direction)
 {
 	CLayerTiles::Shift(Direction);
 	ShiftImpl(m_pTuneTile, Direction, m_pEditor->m_ShiftBy);

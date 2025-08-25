@@ -154,25 +154,25 @@ SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pPro
 			Ui()->DoLabel(&Shifter, "Y", 10.0f, TEXTALIGN_MC);
 			if(DoButton_FontIcon(&pIds[i], FONT_ICON_MINUS, 0, &Left, BUTTONFLAG_LEFT, "Shift left.", IGraphics::CORNER_L, 7.0f))
 			{
-				*pNewVal = DIRECTION_LEFT;
+				*pNewVal = (int)EShiftDirection::LEFT;
 				Change = i;
 				State = EEditState::ONE_GO;
 			}
 			if(DoButton_FontIcon(((char *)&pIds[i]) + 3, FONT_ICON_PLUS, 0, &Right, BUTTONFLAG_LEFT, "Shift right.", IGraphics::CORNER_R, 7.0f))
 			{
-				*pNewVal = DIRECTION_RIGHT;
+				*pNewVal = (int)EShiftDirection::RIGHT;
 				Change = i;
 				State = EEditState::ONE_GO;
 			}
 			if(DoButton_FontIcon(((char *)&pIds[i]) + 1, FONT_ICON_MINUS, 0, &Up, BUTTONFLAG_LEFT, "Shift up.", IGraphics::CORNER_L, 7.0f))
 			{
-				*pNewVal = DIRECTION_UP;
+				*pNewVal = (int)EShiftDirection::UP;
 				Change = i;
 				State = EEditState::ONE_GO;
 			}
 			if(DoButton_FontIcon(((char *)&pIds[i]) + 2, FONT_ICON_PLUS, 0, &Down, BUTTONFLAG_LEFT, "Shift down.", IGraphics::CORNER_R, 7.0f))
 			{
-				*pNewVal = DIRECTION_DOWN;
+				*pNewVal = (int)EShiftDirection::DOWN;
 				Change = i;
 				State = EEditState::ONE_GO;
 			}

@@ -51,7 +51,7 @@ void CLayerSwitch::Resize(int NewW, int NewH)
 		m_pEditor->m_Map.m_pGameLayer->Resize(NewW, NewH);
 }
 
-void CLayerSwitch::Shift(int Direction)
+void CLayerSwitch::Shift(EShiftDirection Direction)
 {
 	CLayerTiles::Shift(Direction);
 	ShiftImpl(m_pSwitchTile, Direction, m_pEditor->m_ShiftBy);
