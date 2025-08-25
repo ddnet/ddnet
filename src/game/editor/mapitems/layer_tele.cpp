@@ -52,7 +52,7 @@ void CLayerTele::Resize(int NewW, int NewH)
 		m_pEditor->m_Map.m_pGameLayer->Resize(NewW, NewH);
 }
 
-void CLayerTele::Shift(int Direction)
+void CLayerTele::Shift(EShiftDirection Direction)
 {
 	CLayerTiles::Shift(Direction);
 	ShiftImpl(m_pTeleTile, Direction, m_pEditor->m_ShiftBy);
