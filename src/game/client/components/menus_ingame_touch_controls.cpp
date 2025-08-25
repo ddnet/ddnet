@@ -1140,7 +1140,7 @@ void CMenusIngameTouchControls::SelectedButtonNotVisible()
 
 bool CMenusIngameTouchControls::UnsavedChanges() const
 {
-	return GameClient()->m_TouchControls.UnsavedChanges();
+	return GameClient()->m_TouchControls.HasUnsavedChanges();
 }
 
 void CMenusIngameTouchControls::SetUnsavedChanges(bool UnsavedChanges)

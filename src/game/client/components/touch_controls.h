@@ -596,8 +596,8 @@ private:
 	std::vector<CUnitRect> m_vLastUpdateRects;
 	std::vector<CUnitRect> m_vXSortedRects;
 	std::vector<CUnitRect> m_vYSortedRects;
-	int m_vLastWidth = -10;
-	int m_vLastHeight = -10;
+	int m_LastWidth = -10;
+	int m_LastHeight = -10;
 	void BuildPositionXY(std::vector<CUnitRect> vVisibleButtonRects, CUnitRect MyRect);
 	CUnitRect FindPositionXY(std::vector<CUnitRect> &vVisibleButtonRects, CUnitRect MyRect);
 
@@ -636,7 +636,7 @@ public:
 	CUIRect CalculateScreenFromUnitRect(CUnitRect Unit, EButtonShape Shape = EButtonShape::RECT) const;
 
 	// Getters and setters.
-	bool UnsavedChanges() const { return m_UnsavedChanges; }
+	bool HasUnsavedChanges() const { return m_UnsavedChanges; }
 	void SetUnsavedChanges(bool UnsavedChanges) { m_UnsavedChanges = UnsavedChanges; }
 	std::array<bool, (size_t)EButtonVisibility::NUM_VISIBILITIES> VirtualVisibilities() const { return m_aVirtualVisibilities; }
 	void ReverseVirtualVisibilities(int Number) { m_aVirtualVisibilities[Number] = !m_aVirtualVisibilities[Number]; }

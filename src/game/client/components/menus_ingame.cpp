@@ -460,7 +460,7 @@ void CMenus::PopupCancelChangeSelectedButton()
 		GameClient()->m_Menus.SetActive(false);
 }
 
-void CMenus::PopupConfirm_TurnOffEditor()
+void CMenus::PopupConfirmTurnOffEditor()
 {
 	if(m_MenusIngameTouchControls.CheckCachedSettings())
 	{

@@ -68,7 +68,6 @@ CTouchControls::CTouchButton::CTouchButton(CTouchButton &&Other) noexcept :
 	m_VisibilityCached(false)
 {
 	Other.m_pTouchControls = nullptr;
-	// Bro costs me hours debugging. Screw you.
 	UpdatePointers();
 	UpdateScreenFromUnitRect();
 }
@@ -2076,10 +2075,10 @@ CTouchControls::CUnitRect CTouchControls::FindPositionXY(std::vector<CUnitRect> 
 		if(!IfOverlap)
 			return MyRect;
 	}
-	if(vVisibleButtonRects != m_vLastUpdateRects || MyRect.m_W != m_vLastWidth || MyRect.m_H != m_vLastHeight)
+	if(vVisibleButtonRects != m_vLastUpdateRects || MyRect.m_W != m_LastWidth || MyRect.m_H != m_LastHeight)
 	{
-		m_vLastWidth = MyRect.m_W;
-		m_vLastHeight = MyRect.m_H;
+		m_LastWidth = MyRect.m_W;
+		m_LastHeight = MyRect.m_H;
 		m_vLastUpdateRects = vVisibleButtonRects;
 		BuildPositionXY(m_vLastUpdateRects, MyRect);
 	}

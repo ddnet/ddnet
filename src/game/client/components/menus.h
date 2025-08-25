@@ -505,7 +505,7 @@ protected:
 	void PopupConfirmSelectedNotVisible();
 	void PopupConfirmChangeSelectedButton();
 	void PopupCancelChangeSelectedButton();
-	void PopupConfirm_TurnOffEditor();
+	void PopupConfirmTurnOffEditor();
 	void RenderPlayers(CUIRect MainView);
 	void RenderServerInfo(CUIRect MainView);
 	void RenderServerInfoMotd(CUIRect Motd);
