@@ -242,7 +242,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			{
 				m_MenusIngameTouchControls.m_pOldSelectedButton = GameClient()->m_TouchControls.SelectedButton();
 				m_MenusIngameTouchControls.m_pNewSelectedButton = nullptr;
-				PopupConfirm(Localize("Unsaved changes"), Localize("Save all changes before turning off the editor?"), Localize("Save"), Localize("Cancel"), &CMenus::PopupConfirm_TurnOffEditor);
+				PopupConfirm(Localize("Unsaved changes"), Localize("Save all changes before turning off the editor?"), Localize("Save"), Localize("Cancel"), &CMenus::PopupConfirmTurnOffEditor);
 			}
 			else
 			{
