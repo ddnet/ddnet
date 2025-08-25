@@ -322,19 +322,19 @@ void CVoteMenu::SendPageAccount(int ClientId)
 void CVoteMenu::SendPageShop(int ClientId)
 {
 	// CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
-	// ToDo
+	AddDescription("ToDo");
 }
 
 void CVoteMenu::SendPageInventory(int ClientId)
 {
 	// CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
-	// ToDo
+	AddDescription("ToDo");
 }
 
 void CVoteMenu::SendPageAdmin(int ClientId)
 {
 	// CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
-	// ToDo
+	AddDescription("ToDo");
 }
 
 void CVoteMenu::AddHeader(int ClientId)
@@ -386,9 +386,9 @@ void CVoteMenu::AddHeader(int ClientId)
 
 void CVoteMenu::AddDescriptionPrefix(const char *pDesc, int Prefix)
 {
-	const char *pPrefixes[] = {"•", "─", ">", "⇨", "⁃", "‣"};
+	const char *pPrefixes[] = {"•", "─", ">", "⇨", "⁃", "‣", "◆", "◇"};
 
-	if(Prefix < 0 || Prefix >= std::size(pPrefixes))
+	if(Prefix < 0 || Prefix >= (int)std::size(pPrefixes))
 	{
 		AddDescription(pDesc);
 		return;
