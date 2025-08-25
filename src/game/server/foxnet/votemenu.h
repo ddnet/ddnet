@@ -43,7 +43,7 @@ enum Flags
 	FLAG_INVENTORY = 1 << INVENTORY,
 };
 
-struct CVoteMenu
+class CVoteMenu
 {
 	CGameContext *m_pGameServer;
 	CGameContext *GameServer() const { return m_pGameServer; }
@@ -62,8 +62,6 @@ struct CVoteMenu
 
 	bool IsPageAllowed(int ClientId, int Page) const;
 
-	void PrepareVoteOptions(int ClientId, int Page);
-
 	void AddDescription(const char *pDesc) { m_vDescriptions.emplace_back(pDesc); }
 	void AddDescriptionPrefix(const char *pDesc, int Prefix);
 	void AddDescriptionCheckBox(const char *pDesc, bool Checked);
@@ -77,6 +75,8 @@ struct CVoteMenu
 	void UpdatePages(int ClientId);
 
 public:
+	void PrepareVoteOptions(int ClientId, int Page);
+
 	int GetPage(int ClientId) const;
 	void SetPage(int ClientId, int Page);
 
