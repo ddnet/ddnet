@@ -1,4 +1,5 @@
 #include "../gamecontext.h"
+#include <base/system.h>
 
 void CGameContext::ConAccRegister(IConsole::IResult *pResult, void *pUserData)
 {
@@ -65,9 +66,7 @@ void CGameContext::ConAccLogin(IConsole::IResult *pResult, void *pUserData)
 
 	if(!pSelf->m_AccountManager.Login(ClientId, pUser, pPass))
 	{
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "Login failed");
-		pSelf->SendChatTarget(ClientId, aBuf);
+		pSelf->SendChatTarget(ClientId, "Login failed");
 		return;
 	}
 
