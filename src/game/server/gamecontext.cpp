@@ -4611,7 +4611,7 @@ bool CGameContext::IsClientPlayer(int ClientId) const
 bool CGameContext::IsClientHighBandwidth(int ClientId) const
 {
 	// force high bandwidth is not supported for sixup
-	return m_apPlayers[ClientId] && !Server()->IsSixup(ClientId) && Server()->GetAuthedState(ClientId) &&
+	return m_apPlayers[ClientId] && !Server()->IsSixup(ClientId) && Server()->IsRconAuthed(ClientId) &&
 	       (m_apPlayers[ClientId]->GetTeam() == TEAM_SPECTATORS || m_apPlayers[ClientId]->IsPaused());
 }
 
@@ -5064,7 +5064,7 @@ bool CGameContext::RateLimitPlayerVote(int ClientId)
 	int64_t TickSpeed = Server()->TickSpeed();
 	CPlayer *pPlayer = m_apPlayers[ClientId];
 
-	if(g_Config.m_SvRconVote && !Server()->GetAuthedState(ClientId))
+	if(g_Config.m_SvRconVote && !Server()->IsRconAuthed(ClientId))
 	{
 		SendChatTarget(ClientId, "You can only vote after logging in.");
 		return true;
@@ -5129,7 +5129,7 @@ bool CGameContext::RateLimitPlayerVote(int ClientId)
 
 bool CGameContext::RateLimitPlayerMapVote(int ClientId) const
 {
-	if(!Server()->GetAuthedState(ClientId) && time_get() < m_LastMapVote + (time_freq() * g_Config.m_SvVoteMapTimeDelay))
+	if(!Server()->IsRconAuthed(ClientId) && time_get() < m_LastMapVote + (time_freq() * g_Config.m_SvVoteMapTimeDelay))
 	{
 		char aChatMessage[128];
 		str_format(aChatMessage, sizeof(aChatMessage), "There's a %d second delay between map-votes, please wait %d seconds.",

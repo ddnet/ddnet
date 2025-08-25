@@ -317,6 +317,8 @@ public:
 	void SendLogLine(const CLogMessage *pMessage);
 	void SetRconCid(int ClientId) override;
 	int GetAuthedState(int ClientId) const override;
+	bool IsRconAuthed(int ClientId) const override;
+	bool IsRconAuthedAdmin(int ClientId) const override;
 	const char *GetAuthName(int ClientId) const override;
 	bool HasAuthHidden(int ClientId) const override;
 	void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pMapSha256, int *pMapCrc) override;
