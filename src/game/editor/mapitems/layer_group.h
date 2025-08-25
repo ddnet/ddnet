@@ -6,26 +6,14 @@
 #include <memory>
 #include <vector>
 
-class CLayerGroup
+class CLayerGroup : public CMapItemGroup
 {
 public:
 	class CEditorMap *m_pMap;
 
 	std::vector<std::shared_ptr<CLayer>> m_vpLayers;
 
-	int m_OffsetX;
-	int m_OffsetY;
-
-	int m_ParallaxX;
-	int m_ParallaxY;
-
-	int m_UseClipping;
-	int m_ClipX;
-	int m_ClipY;
-	int m_ClipW;
-	int m_ClipH;
-
-	char m_aName[12];
+	char m_aGroupName[12];
 	bool m_GameGroup;
 	bool m_Visible;
 	bool m_Collapse;

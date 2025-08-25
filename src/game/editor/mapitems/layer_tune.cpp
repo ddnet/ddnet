@@ -5,7 +5,7 @@
 CLayerTune::CLayerTune(CEditor *pEditor, int w, int h) :
 	CLayerTiles(pEditor, w, h)
 {
-	str_copy(m_aName, "Tune");
+	str_copy(m_aLayerName, "Tune");
 	m_HasTune = true;
 
 	m_pTuneTile = new CTuneTile[w * h];
@@ -18,7 +18,7 @@ CLayerTune::CLayerTune(CEditor *pEditor, int w, int h) :
 CLayerTune::CLayerTune(const CLayerTune &Other) :
 	CLayerTiles(Other)
 {
-	str_copy(m_aName, "Tune copy");
+	str_copy(m_aLayerName, "Tune copy");
 	m_HasTune = true;
 
 	m_pTuneTile = new CTuneTile[m_Width * m_Height];

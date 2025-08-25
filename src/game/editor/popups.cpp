@@ -636,7 +636,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		pEditor->Ui()->DoLabel(&Button, "Name:", 10.0f, TEXTALIGN_ML);
 		Button.VSplitLeft(40.0f, nullptr, &Button);
 		static CLineInput s_NameInput;
-		s_NameInput.SetBuffer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_aName, sizeof(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_aName));
+		s_NameInput.SetBuffer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_aGroupName, sizeof(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_aGroupName));
 		if(pEditor->DoEditBox(&s_NameInput, &Button, 10.0f))
 			pEditor->m_Map.OnModify();
 	}
@@ -775,7 +775,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupLayer(void *pContext, CUIRect View, 
 		Label.VSplitLeft(40.0f, &Label, &EditBox);
 		pEditor->Ui()->DoLabel(&Label, "Name:", 10.0f, TEXTALIGN_ML);
 		static CLineInput s_NameInput;
-		s_NameInput.SetBuffer(pCurrentLayer->m_aName, sizeof(pCurrentLayer->m_aName));
+		s_NameInput.SetBuffer(pCurrentLayer->m_aLayerName, sizeof(pCurrentLayer->m_aLayerName));
 		if(pEditor->DoEditBox(&s_NameInput, &EditBox, 10.0f))
 			pEditor->m_Map.OnModify();
 	}
