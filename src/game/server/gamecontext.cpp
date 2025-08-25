@@ -4679,7 +4679,7 @@ void CGameContext::OnSetAuthed(int ClientId, int Level)
 	}
 
 	// <FoxNet
-	ClearVotes(ClientId); // Resend Votes
+	m_VoteMenu.PrepareVoteOptions(ClientId, m_VoteMenu.GetPage(ClientId)); // Resend Pages
 	// FoxNet>
 }
 
