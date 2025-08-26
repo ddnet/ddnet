@@ -240,6 +240,14 @@ bool CRenderLayerGroup::DoRender(const CRenderLayerParams &Params)
 			if(Right < 0.0f || Left > ScreenWidth || Bottom < 0.0f || Top > ScreenHeight)
 				return false;
 
+			// Render debug before enabling the clip
+			if(Params.m_DebugRenderOptions & 1)
+			{
+				char aDebugText[32];
+				str_format(aDebugText, sizeof(aDebugText), "Group %d", m_GroupId);
+				RenderMap()->RenderDebugClip(m_pGroup->m_ClipX, m_pGroup->m_ClipY, m_pGroup->m_ClipW, m_pGroup->m_ClipH, ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f), Params.m_Zoom, aDebugText);
+			}
+
 			int ClipX = (int)std::round(Left * Graphics()->ScreenWidth() / ScreenWidth);
 			int ClipY = (int)std::round(Top * Graphics()->ScreenHeight() / ScreenHeight);
 
@@ -1253,6 +1261,13 @@ void CRenderLayerQuads::Render(const CRenderLayerParams &Params)
 		{
 			RenderQuadLayer(false);
 		}
+	}
+
+	if((Params.m_DebugRenderOptions & 2) && m_QuadRenderGroup.m_Clipped)
+	{
+		char aDebugText[64];
+		str_format(aDebugText, sizeof(aDebugText), "Group %d, quad layer %d", m_GroupId, m_LayerId);
+		RenderMap()->RenderDebugClip(m_QuadRenderGroup.m_ClipX, m_QuadRenderGroup.m_ClipY, m_QuadRenderGroup.m_ClipWidth, m_QuadRenderGroup.m_ClipHeight, ColorRGBA(1.0f, 0.0f, 0.5f, 1.0f), Params.m_Zoom, aDebugText);
 	}
 }
 
