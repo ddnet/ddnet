@@ -710,7 +710,7 @@ void CLayerTiles::Resize(int NewW, int NewH)
 		m_pEditor->m_Map.m_pTuneLayer->Resize(NewW, NewH);
 }
 
-void CLayerTiles::Shift(int Direction)
+void CLayerTiles::Shift(EShiftDirection Direction)
 {
 	ShiftImpl(m_pTiles, Direction, m_pEditor->m_ShiftBy);
 }
@@ -1088,7 +1088,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	}
 	else if(Prop == ETilesProp::PROP_SHIFT)
 	{
-		Shift(NewVal);
+		Shift((EShiftDirection)NewVal);
 	}
 	else if(Prop == ETilesProp::PROP_SHIFT_BY)
 	{
@@ -1322,7 +1322,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 	else if(Prop == ETilesCommonProp::PROP_SHIFT)
 	{
 		for(auto &pLayer : vpLayers)
-			pLayer->Shift(NewVal);
+			pLayer->Shift((EShiftDirection)NewVal);
 	}
 	else if(Prop == ETilesCommonProp::PROP_SHIFT_BY)
 	{

@@ -49,7 +49,7 @@ void CLayerSpeedup::Resize(int NewW, int NewH)
 		m_pEditor->m_Map.m_pGameLayer->Resize(NewW, NewH);
 }
 
-void CLayerSpeedup::Shift(int Direction)
+void CLayerSpeedup::Shift(EShiftDirection Direction)
 {
 	CLayerTiles::Shift(Direction);
 	ShiftImpl(m_pSpeedupTile, Direction, m_pEditor->m_ShiftBy);
