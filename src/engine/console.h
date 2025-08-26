@@ -13,6 +13,7 @@ static constexpr ColorRGBA gs_ConsoleDefaultColor(1, 1, 1, 1);
 
 enum LEVEL : char;
 struct CChecksumData;
+class CAuthManager;
 
 class IConsole : public IInterface
 {
@@ -126,6 +127,8 @@ public:
 	virtual void InitChecksum(CChecksumData *pData) const = 0;
 
 	virtual void SetAccessLevel(int AccessLevel) = 0;
+
+	virtual CAuthManager *AuthManager() = 0;
 
 	static LEVEL ToLogLevel(int ConsoleLevel);
 	static int ToLogLevelFilter(int ConsoleLevel);
