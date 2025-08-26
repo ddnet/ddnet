@@ -34,6 +34,7 @@
 #include <engine/shared/protocol_ex.h>
 #include <engine/shared/rust_version.h>
 #include <engine/shared/snapshot.h>
+#include <game/generated/protocol.h>
 
 #include <game/version.h>
 
@@ -207,6 +208,22 @@ void CRconClientLogger::Log(const CLogMessage *pMessage)
 		return;
 	}
 	m_pServer->SendRconLogLine(m_ClientId, pMessage);
+}
+
+int CServer::CClient::ConsoleAccessLevel() const
+{
+	switch(m_Authed)
+	{
+	case AUTHED_ADMIN:
+		return IConsole::ACCESS_LEVEL_ADMIN;
+	case AUTHED_MOD:
+		return IConsole::ACCESS_LEVEL_MOD;
+	case AUTHED_HELPER:
+		return IConsole::ACCESS_LEVEL_HELPER;
+	};
+
+	dbg_assert(false, "invalid auth level: %d", m_Authed);
+	dbg_break();
 }
 
 void CServer::CClient::Reset()

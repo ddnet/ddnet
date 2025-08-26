@@ -207,10 +207,7 @@ public:
 			return m_State != STATE_EMPTY && !m_DebugDummy;
 		}
 
-		int ConsoleAccessLevel() const
-		{
-			return m_Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : m_Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER;
-		}
+		int ConsoleAccessLevel() const;
 	};
 
 	CClient m_aClients[MAX_CLIENTS];
