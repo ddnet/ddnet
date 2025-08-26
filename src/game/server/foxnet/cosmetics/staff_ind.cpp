@@ -1,0 +1,130 @@
+#include "staff_ind.h"
+#include "game/server/entities/character.h"
+#include <algorithm>
+#include <game/server/entity.h>
+#include <game/server/gamecontext.h>
+#include <game/server/gameworld.h>
+#include <game/server/player.h>
+
+CStaffInd::CStaffInd(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_STAFF_IND, Pos)
+{
+	m_Owner = Owner;
+
+	m_Dist = 0.f;
+	m_BallFirst = true;
+	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+	m_TeamMask = pOwnerChar ? pOwnerChar->TeamMask() : CClientMask();
+
+	for(int i = 0; i < NUM_IDS; i++)
+		m_aIds[i] = Server()->SnapNewId();
+	std::sort(std::begin(m_aIds), std::end(m_aIds));
+	GameWorld()->InsertEntity(this);
+}
+
+void CStaffInd::Reset()
+{
+	for(int i = 0; i < NUM_IDS; i++)
+		Server()->SnapFreeId(m_aIds[i]);
+
+	Server()->SnapFreeId(GetId());
+	GameWorld()->RemoveEntity(this);
+}
+
+void CStaffInd::Tick()
+{
+	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
+
+	if(!pOwner)
+		return;
+
+	if(!pOwner->GetPlayer()->m_Cosmetics.m_StaffInd)
+	{
+		Reset();
+		return;
+	}
+
+	m_TeamMask = pOwner->TeamMask();
+	m_Pos = pOwner->GetPos();
+	m_aPos[ARMOR] = vec2(m_Pos.x, m_Pos.y - 70.f);
+
+	if(m_BallFirst)
+	{
+		m_Dist += 0.9f;
+		if(m_Dist > 25.f)
+			m_BallFirst = false;
+	}
+	else
+	{
+		m_Dist -= 0.9f;
+		if(m_Dist < -25.f)
+			m_BallFirst = true;
+	}
+
+	m_aPos[BALL] = vec2(m_Pos.x + m_Dist, m_aPos[ARMOR].y);
+}
+
+void CStaffInd::Snap(int SnappingClient)
+{
+	if(NetworkClipped(SnappingClient))
+		return;
+
+	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+	CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+
+	if(!pOwnerChar || !pSnapPlayer)
+		return;
+
+	if(pSnapPlayer->m_HideCosmetics)
+		return;
+
+	if(pOwnerChar->IsPaused())
+		return;
+
+	if(pSnapPlayer->GetCharacter() && pOwnerChar)
+		if(!pOwnerChar->CanSnapCharacter(SnappingClient))
+			return;
+
+	if(pOwnerChar->GetPlayer()->m_Vanish && SnappingClient != pOwnerChar->GetPlayer()->GetCid() && SnappingClient != -1)
+		if(!pSnapPlayer->m_Vanish && Server()->GetAuthedState(SnappingClient) < AUTHED_ADMIN)
+			return;
+
+	CNetObj_DDNetPickup *pPickup = Server()->SnapNewItem<CNetObj_DDNetPickup>(m_aIds[ARMOR]);
+	if(pPickup)
+	{
+		vec2 Pos = m_aPos[ARMOR];
+		if(m_Owner == SnappingClient && !pOwnerChar->GetPlayer()->IsPaused())
+		{
+			float Lat = std::clamp((float)(pOwnerChar->GetPlayer()->m_Latency.m_Avg + pOwnerChar->GetPlayer()->m_ExtraPing), 0.0f, 125.0f) / 27.77f;
+			Pos.x = m_aPos[ARMOR].x + std::clamp(pOwnerChar->Core()->m_Vel.x, -100.0f, 100.0f) * std::clamp(Lat, 0.0f, 150.0f);
+			Pos.y = m_aPos[ARMOR].y + std::clamp(pOwnerChar->Core()->m_Vel.y, -15.0f, 15.0f) * std::clamp(Lat, 0.0f, 150.0f);
+			Pos = m_Pos + vec2(0.8f, 0.8f) * (Pos - m_Pos);
+		}
+
+		pPickup->m_X = round_to_int(Pos.x);
+		pPickup->m_Y = round_to_int(Pos.y);
+		pPickup->m_Type = POWERUP_ARMOR;
+		pPickup->m_Flags = PICKUPFLAG_NO_PREDICT;
+	}
+
+	// m_ID is created before m_aID is created, means that id is lower and we can simply use it to make the ball behind
+	CNetObj_DDNetLaser *pLaser = static_cast<CNetObj_DDNetLaser *>(Server()->SnapNewItem(NETOBJTYPE_DDNETLASER, m_BallFirst ? m_aIds[BALL_FRONT] : m_aIds[BALL], sizeof(CNetObj_DDNetLaser)));
+	if(pLaser)
+	{
+		vec2 Pos = m_aPos[BALL];
+		if(m_Owner == SnappingClient && !pOwnerChar->GetPlayer()->IsPaused())
+		{
+			float Lat = std::clamp((float)pOwnerChar->GetPlayer()->m_Latency.m_Avg, 0.0f, 125.0f) / 27.77f;
+			Pos.x = m_aPos[BALL].x + std::clamp(pOwnerChar->Core()->m_Vel.x, -100.0f, 100.0f) * std::clamp(Lat, 0.0f, 150.0f);
+			Pos.y = m_aPos[BALL].y + std::clamp(pOwnerChar->Core()->m_Vel.y, -15.0f, 15.0f) * std::clamp(Lat, 0.0f, 150.0f);
+			Pos = m_Pos + vec2(0.8f, 0.8f) * (Pos - m_Pos);
+		}
+		pLaser->m_ToX = round_to_int(Pos.x);
+		pLaser->m_ToY = round_to_int(Pos.y);
+		pLaser->m_FromX = round_to_int(Pos.x);
+		pLaser->m_FromY = round_to_int(Pos.y);
+		pLaser->m_StartTick = Server()->Tick();
+		pLaser->m_Type = LASERTYPE_PLASMA;
+		pLaser->m_Owner = m_Owner;
+	}
+}

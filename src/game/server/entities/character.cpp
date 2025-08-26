@@ -16,12 +16,12 @@
 #include <game/mapitems.h>
 #include <game/team_state.h>
 
+#include <game/server/foxnet/accounts.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/server/teams.h>
-#include <game/server/foxnet/accounts.h>
 
 MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
 
@@ -127,6 +127,11 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 			GameServer()->m_apSavedTees[m_pPlayer->GetCid()] = nullptr;
 		}
 	}
+	// <FoxNet
+	m_Snake.OnSpawn(this);
+	m_Ufo.OnSpawn(this);
+	m_PowerHookedId = -1;
+	// FoxNet>
 
 	return true;
 }
@@ -260,7 +265,7 @@ void CCharacter::HandleJetpack()
 	{
 		if(m_Core.m_Jetpack)
 		{
-			float Strength = GetTuning(m_TuneZone)->m_JetpackStrength;
+			float Strength = GetTuning(GetOverriddenTuneZone())->m_JetpackStrength;
 			TakeDamage(Direction * -1.0f * (Strength / 100.0f / 6.11f), 0, m_pPlayer->GetCid(), m_Core.m_ActiveWeapon);
 		}
 	}
@@ -305,8 +310,8 @@ void CCharacter::HandleNinja()
 		m_Core.m_Vel = m_Core.m_Ninja.m_ActivationDir * g_pData->m_Weapons.m_Ninja.m_Velocity;
 		vec2 OldPos = m_Pos;
 		vec2 GroundElasticity = vec2(
-			GetTuning(m_TuneZone)->m_GroundElasticityX,
-			GetTuning(m_TuneZone)->m_GroundElasticityY);
+			GetTuning(GetOverriddenTuneZone())->m_GroundElasticityX,
+			GetTuning(GetOverriddenTuneZone())->m_GroundElasticityY);
 
 		Collision()->MoveBox(&m_Core.m_Pos, &m_Core.m_Vel, vec2(GetProximityRadius(), GetProximityRadius()), GroundElasticity);
 
@@ -501,7 +506,7 @@ void CCharacter::FireWeapon()
 		{
 			auto *pTarget = static_cast<CCharacter *>(apEnts[i]);
 
-			//if ((pTarget == this) || Collision()->IntersectLine(ProjStartPos, pTarget->m_Pos, NULL, NULL))
+			// if ((pTarget == this) || Collision()->IntersectLine(ProjStartPos, pTarget->m_Pos, NULL, NULL))
 			if((pTarget == this || (pTarget->IsAlive() && !CanCollide(pTarget->GetPlayer()->GetCid()))))
 				continue;
 
@@ -517,7 +522,7 @@ void CCharacter::FireWeapon()
 			else
 				Dir = vec2(0.f, -1.f);
 
-			float Strength = GetTuning(m_TuneZone)->m_HammerStrength;
+			float Strength = GetTuning(GetOverriddenTuneZone())->m_HammerStrength;
 
 			vec2 Temp = pTarget->m_Core.m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
 			Temp = ClampVel(pTarget->m_MoveRestrictions, Temp);
@@ -534,7 +539,7 @@ void CCharacter::FireWeapon()
 		// if we Hit anything, we have to wait for the reload
 		if(Hits)
 		{
-			float FireDelay = GetTuning(m_TuneZone)->m_HammerHitFireDelay;
+			float FireDelay = GetTuning(GetOverriddenTuneZone())->m_HammerHitFireDelay;
 			m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
 		}
 	}
@@ -544,19 +549,19 @@ void CCharacter::FireWeapon()
 	{
 		if(!m_Core.m_Jetpack || !m_pPlayer->m_NinjaJetpack || m_Core.m_HasTelegunGun)
 		{
-			int Lifetime = (int)(Server()->TickSpeed() * GetTuning(m_TuneZone)->m_GunLifetime);
+			int Lifetime = (int)(Server()->TickSpeed() * GetTuning(GetOverriddenTuneZone())->m_GunLifetime);
 
 			new CProjectile(
 				GameWorld(),
-				WEAPON_GUN, //Type
-				m_pPlayer->GetCid(), //Owner
-				ProjStartPos, //Pos
-				Direction, //Dir
-				Lifetime, //Span
-				false, //Freeze
-				false, //Explosive
-				-1, //SoundImpact
-				MouseTarget //InitDir
+				WEAPON_GUN, // Type
+				m_pPlayer->GetCid(), // Owner
+				ProjStartPos, // Pos
+				Direction, // Dir
+				Lifetime, // Span
+				false, // Freeze
+				false, // Explosive
+				-1, // SoundImpact
+				MouseTarget // InitDir
 			);
 
 			GameServer()->CreateSound(m_Pos, SOUND_GUN_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
@@ -566,7 +571,7 @@ void CCharacter::FireWeapon()
 
 	case WEAPON_SHOTGUN:
 	{
-		float LaserReach = GetTuning(m_TuneZone)->m_LaserReach;
+		float LaserReach = GetTuning(GetOverriddenTuneZone())->m_LaserReach;
 
 		new CLaser(&GameServer()->m_World, m_Pos, Direction, LaserReach, m_pPlayer->GetCid(), WEAPON_SHOTGUN);
 		GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
@@ -575,18 +580,18 @@ void CCharacter::FireWeapon()
 
 	case WEAPON_GRENADE:
 	{
-		int Lifetime = (int)(Server()->TickSpeed() * GetTuning(m_TuneZone)->m_GrenadeLifetime);
+		int Lifetime = (int)(Server()->TickSpeed() * GetTuning(GetOverriddenTuneZone())->m_GrenadeLifetime);
 
 		new CProjectile(
 			GameWorld(),
-			WEAPON_GRENADE, //Type
-			m_pPlayer->GetCid(), //Owner
-			ProjStartPos, //Pos
-			Direction, //Dir
-			Lifetime, //Span
-			false, //Freeze
-			true, //Explosive
-			SOUND_GRENADE_EXPLODE, //SoundImpact
+			WEAPON_GRENADE, // Type
+			m_pPlayer->GetCid(), // Owner
+			ProjStartPos, // Pos
+			Direction, // Dir
+			Lifetime, // Span
+			false, // Freeze
+			true, // Explosive
+			SOUND_GRENADE_EXPLODE, // SoundImpact
 			MouseTarget // MouseTarget
 		);
 
@@ -596,7 +601,7 @@ void CCharacter::FireWeapon()
 
 	case WEAPON_LASER:
 	{
-		float LaserReach = GetTuning(m_TuneZone)->m_LaserReach;
+		float LaserReach = GetTuning(GetOverriddenTuneZone())->m_LaserReach;
 
 		new CLaser(GameWorld(), m_Pos, Direction, LaserReach, m_pPlayer->GetCid(), WEAPON_LASER);
 		GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
@@ -622,14 +627,14 @@ void CCharacter::FireWeapon()
 	if(!m_ReloadTimer)
 	{
 		float FireDelay;
-		GetTuning(m_TuneZone)->Get(offsetof(CTuningParams, m_HammerFireDelay) / sizeof(CTuneParam) + m_Core.m_ActiveWeapon, &FireDelay);
+		GetTuning(GetOverriddenTuneZone())->Get(offsetof(CTuningParams, m_HammerFireDelay) / sizeof(CTuneParam) + m_Core.m_ActiveWeapon, &FireDelay);
 		m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
 	}
 }
 
 void CCharacter::HandleWeapons()
 {
-	//ninja
+	// ninja
 	HandleNinja();
 	HandleJetpack();
 
@@ -790,7 +795,9 @@ void CCharacter::Tick()
 
 	// handle Weapons
 	HandleWeapons();
-
+	// <FoxNet
+	FoxNetTick();
+	// FoxNet>
 	DDRacePostCoreTick();
 
 	if(m_Core.m_TriggeredEvents & COREEVENT_HOOK_ATTACH_PLAYER)
@@ -820,7 +827,7 @@ void CCharacter::TickDeferred()
 		m_ReckoningCore.Quantize();
 	}
 
-	//lastsentcore
+	// lastsentcore
 	vec2 StartPos = m_Core.m_Pos;
 	vec2 StartVel = m_Core.m_Vel;
 	bool StuckBefore = Collision()->TestBox(m_Core.m_Pos, CCharacterCore::PhysicalSizeVec2());
@@ -872,7 +879,12 @@ void CCharacter::TickDeferred()
 			GameServer()->CreateSound(m_Pos, SOUND_PLAYER_JUMP, TeamMaskExceptSelfAndSixup);
 
 		if(Events & COREEVENT_HOOK_ATTACH_PLAYER)
+		{
+			// <FoxNet
+			OnPlayerHook();
+			// FoxNet>
 			GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, TeamMaskExceptSixup);
+		}
 
 		if(Events & COREEVENT_HOOK_ATTACH_GROUND)
 			GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_GROUND, TeamMaskExceptSelfAndSixup);
@@ -914,7 +926,17 @@ void CCharacter::TickDeferred()
 			m_SendCore = m_Core;
 			m_ReckoningCore = m_Core;
 			m_Core.m_Reset = false;
+		}	
+		// <FoxNet
+		bool InstaUpdate = m_InSnake || m_Ufo.Active();
+		if(InstaUpdate)
+		{
+			m_ReckoningTick = Server()->Tick();
+			m_SendCore = m_Core;
+			m_ReckoningCore = m_Core;
+			m_Core.m_Reset = false;
 		}
+		// FoxNet>
 	}
 }
 
@@ -989,14 +1011,50 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 	m_Alive = false;
 	SetSolo(false);
 
+	// <FoxNet
+	switch(GetPlayer()->m_Cosmetics.m_DeathEffect)
+	{
+	case DEATH_HAMMERHIT:
+	{
+		GameServer()->CreateHammerHit(m_Pos, CosmeticMask());
+		GameServer()->CreateSound(m_Pos, SOUND_HAMMER_FIRE, CosmeticMask());
+		break;
+	}
+	case DEATH_EXPLOSION:
+	{
+		GameServer()->Explosion(m_Pos, CosmeticMask());
+		GameServer()->CreateSound(m_Pos, SOUND_GRENADE_EXPLODE, CosmeticMask());
+		break;
+	}
+	case DEATH_LASER:
+	{
+		GameServer()->CreateLaserDeath(1, m_pPlayer->GetCid(), m_Pos, CosmeticMask());
+		break;
+	}
+	case DEATH_DAMAGEIND:
+	{
+		for(int i = 0; i < 8; i++)
+			GameServer()->CreateDamageInd(m_Pos, 0.84f + (i * 0.76f), 1, CosmeticMask());
+		break;
+	}
+	case DEATH_NONE: GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCid(), CosmeticMask()); break;
+	}
+	// This only gets created if a player has cosmetics turned off
+	GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCid(), OppsiteCosmeticMask());
+	// FoxNet>
+
 	GameServer()->m_World.RemoveEntity(this);
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCid()] = nullptr;
-	GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCid(), TeamMask());
 	Teams()->OnCharacterDeath(GetPlayer()->GetCid(), Weapon);
 	CancelSwapRequests();
 
 	// <FoxNet
+	if(Server()->GetAuthedState(m_pPlayer->GetCid()) > AUTHED_NO)
+		GameServer()->UnsetTelekinesis(this);
+
 	OnDie(Killer, Weapon, SendKillMsg);
+	m_Snake.OnPlayerDeath();
+	m_Ufo.OnPlayerDeath();
 	// FoxNet>
 }
 
@@ -1036,7 +1094,7 @@ void CCharacter::CancelSwapRequests()
 	GetPlayer()->m_SwapTargetsClientId = -1;
 }
 
-//TODO: Move the emote stuff to a function
+// TODO: Move the emote stuff to a function
 void CCharacter::SnapCharacter(int SnappingClient, int Id)
 {
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
@@ -1082,6 +1140,12 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 				Faketuning |= FAKETUNE_NOHOOK;
 			if(!m_Core.m_EndlessJump && m_Core.m_Jumps == 0)
 				Faketuning |= FAKETUNE_NOJUMP;
+			// <FoxNet
+			if(m_InSnake || m_Ufo.Active())
+				Faketuning |= FAKETUNE_NOJUMP | FAKETUNE_NOHOOK | FAKETUNE_NOCOLL;
+			if(m_Core.m_Passive)
+				Faketuning |= FAKETUNE_NOJUMP | FAKETUNE_NOHOOK | FAKETUNE_NOCOLL | FAKETUNE_NOHAMMER;
+			// FoxNet>
 		}
 		if(Faketuning != m_NeededFaketuning)
 		{
@@ -1145,6 +1209,13 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 		pCharacter->m_Health = Health;
 		pCharacter->m_Armor = Armor;
 		pCharacter->m_PlayerFlags = GetPlayer()->m_PlayerFlags;
+		// <FoxNet
+		if(m_Ufo.Active() && g_Config.m_SvUfoHideHookColl > 0)
+		{
+			if(g_Config.m_SvUfoHideHookColl == 1 || (g_Config.m_SvUfoHideHookColl == 2 && !m_Ufo.AllowHookColl()))
+				pCharacter->m_PlayerFlags &= ~PLAYERFLAG_AIM;
+		}
+		// FoxNet>
 	}
 	else
 	{
@@ -1261,9 +1332,9 @@ void CCharacter::Snap(int SnappingClient)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_INVINCIBLE;
 	if(m_Core.m_EndlessHook)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_HOOK;
-	if(m_Core.m_CollisionDisabled || !GetTuning(m_TuneZone)->m_PlayerCollision)
+	if(m_Core.m_CollisionDisabled || !GetTuning(GetOverriddenTuneZone())->m_PlayerCollision)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_COLLISION_DISABLED;
-	if(m_Core.m_HookHitDisabled || !GetTuning(m_TuneZone)->m_PlayerHooking)
+	if(m_Core.m_HookHitDisabled || !GetTuning(GetOverriddenTuneZone())->m_PlayerHooking)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_HOOK_HIT_DISABLED;
 	if(m_Core.m_EndlessJump)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_JUMP;
@@ -1326,8 +1397,38 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacter->m_TargetX = m_Core.m_Input.m_TargetX;
 	pDDNetCharacter->m_TargetY = m_Core.m_Input.m_TargetY;
 
-	// -1 is the default value, SnapNewItem zeroes the object, so it would incorrectly become 0
-	pDDNetCharacter->m_TuneZoneOverride = -1;
+	// <FoxNet
+	if(m_InSnake || m_Ufo.Active())
+	{
+		pDDNetCharacter->m_Jumps = 0;
+		pDDNetCharacter->m_JumpedTotal = 0;
+		if(m_InSnake)
+			pDDNetCharacter->m_Flags |= CHARACTERFLAG_COLLISION_DISABLED;
+		if(m_Ufo.Active())
+			pDDNetCharacter->m_Flags |= CHARACTERFLAG_MOVEMENTS_DISABLED;
+	}
+
+	pDDNetCharacter->m_TuneZoneOverride = m_TuneZoneOverride;
+
+	CPlayer *SnapPlayer = (SnappingClient >= 0 && SnappingClient < MAX_CLIENTS) ? GameServer()->m_apPlayers[SnappingClient] : nullptr;
+
+	if(SnapPlayer)
+	{
+		m_Ufo.Snap(SnappingClient);
+
+		if(!SnapPlayer->m_HideCosmetics)
+		{
+			if(GetPlayer()->m_Cosmetics.m_Sparkle)
+				pDDNetCharacter->m_Flags |= CHARACTERFLAG_INVINCIBLE;
+
+			if(GetPlayer()->m_Cosmetics.m_InverseAim && Server()->GetAuthedState(SnappingClient) < AUTHED_ADMIN)
+			{
+				pDDNetCharacter->m_TargetX = -m_Core.m_Input.m_TargetX;
+				pDDNetCharacter->m_TargetY = -m_Core.m_Input.m_TargetY;
+			}
+		}
+	}
+	// FoxNet>
 }
 
 void CCharacter::PostGlobalSnap()
@@ -1529,8 +1630,8 @@ void CCharacter::HandleSkippableTiles(int Index)
 			constexpr float MaxSpeedScale = 5.0f;
 			if(MaxSpeed == 0)
 			{
-				float MaxRampSpeed = GetTuning(m_TuneZone)->m_VelrampRange / (50 * log(maximum((float)GetTuning(m_TuneZone)->m_VelrampCurvature, 1.01f)));
-				MaxSpeed = maximum(MaxRampSpeed, GetTuning(m_TuneZone)->m_VelrampStart / 50) * MaxSpeedScale;
+				float MaxRampSpeed = GetTuning(GetOverriddenTuneZone())->m_VelrampRange / (50 * log(maximum((float)GetTuning(GetOverriddenTuneZone())->m_VelrampCurvature, 1.01f)));
+				MaxSpeed = maximum(MaxRampSpeed, GetTuning(GetOverriddenTuneZone())->m_VelrampStart / 50) * MaxSpeedScale;
 			}
 
 			// (signed) length of projection
@@ -1579,7 +1680,7 @@ void CCharacter::SetTimeCheckpoint(int TimeCheckpoint)
 void CCharacter::HandleTiles(int Index)
 {
 	int MapIndex = Index;
-	//int PureMapIndex = Collision()->GetPureMapIndex(m_Pos);
+	// int PureMapIndex = Collision()->GetPureMapIndex(m_Pos);
 	m_TileIndex = Collision()->GetTileIndex(MapIndex);
 	m_TileFIndex = Collision()->GetFrontTileIndex(MapIndex);
 	m_MoveRestrictions = Collision()->GetMoveRestrictions(IsSwitchActiveCb, this, m_Pos, 18.0f, MapIndex);
@@ -2067,13 +2168,29 @@ void CCharacter::HandleTuneLayer()
 {
 	m_TuneZoneOld = m_TuneZone;
 	int CurrentIndex = Collision()->GetMapIndex(m_Pos);
-	m_TuneZone = Collision()->IsTune(CurrentIndex);
-
-	if(m_TuneZone)
-		m_Core.m_Tuning = TuningList()[m_TuneZone]; // throw tunings from specific zone into gamecore
+	// <FoxNet
+	if(m_TuneZoneOverride == -1)
+	{
+		m_TuneZone = Collision()->IsTune(CurrentIndex);
+	}
 	else
-		m_Core.m_Tuning = *Tuning();
+	{
+		// tune zone will be always 0 with override to not send sv_tuneparams messages
+		m_TuneZone = 0;
+	}
 
+	if(m_TuneZoneOverride != -1)
+	{
+		m_Core.m_Tuning = TuningList()[m_TuneZoneOverride];
+	}
+	else
+	{
+		if(m_TuneZone)
+			m_Core.m_Tuning = TuningList()[m_TuneZone]; // throw tunings from specific zone into gamecore
+		else
+			m_Core.m_Tuning = *Tuning();
+	}
+	// FoxNet>
 	if(m_TuneZone != m_TuneZoneOld) // don't send tunigs all the time
 	{
 		// send zone msgs
@@ -2175,6 +2292,22 @@ void CCharacter::DDRaceTick()
 	GameServer()->m_pController->SetArmorProgress(this, m_FreezeTime);
 	if(m_Input.m_Direction != 0 || m_Input.m_Jump != 0)
 		m_LastMove = Server()->Tick();
+
+	// <FoxNet
+	if(m_Snake.Active())
+	{
+		m_Snake.OnInput(m_Input);
+		m_Input.m_Direction = 0;
+		m_Input.m_Jump = 0;
+		m_Input.m_Hook = 0;
+	}
+	if(m_Ufo.Active())
+	{
+		m_Ufo.OnInput(m_Input);
+		m_Input.m_Direction = 0;
+		m_Input.m_Jump = 0;
+	}
+	// FoxNet>
 
 	if(m_Core.m_LiveFrozen && !m_Core.m_Super && !m_Core.m_Invincible)
 	{
@@ -2569,4 +2702,152 @@ void CCharacter::OnDie(int Killer, int Weapon, bool SendKillMsg)
 {
 	if(Acc()->m_LoggedIn)
 		Acc()->m_Deaths++;
+}
+
+// <FoxNet
+CClientMask CCharacter::CosmeticMask()
+{
+	return Teams()->CosmeticMask(Team(), GetPlayer()->GetCid(), false);
+}
+
+CClientMask CCharacter::OppsiteCosmeticMask()
+{
+	return Teams()->CosmeticMask(Team(), GetPlayer()->GetCid(), true);
+}
+
+void CCharacter::FoxNetTick()
+{
+	if(m_IsRainbowHooked && GetPowerHooked() != HOOK_RAINBOW)
+	{
+		m_IsRainbowHooked = false;
+	}
+
+	if(Team() != TEAM_SPECTATORS && m_Alive)
+	{
+		if(GetPlayer()->m_Cosmetics.m_StrongBloody)
+		{
+			GameServer()->CreateDeath(m_Pos, GetPlayer()->GetCid(), CosmeticMask());
+		}
+		else if(GetPlayer()->m_Cosmetics.m_Bloody || GetPowerHooked() == HOOK_BLOODY)
+		{
+			if(Server()->Tick() % 6 == 0)
+				GameServer()->CreateDeath(m_Pos, GetPlayer()->GetCid(), CosmeticMask());
+		}
+	}
+
+	float Angle = std::atan2(m_Core.m_Vel.x, -m_Core.m_Vel.y);
+
+	if(GetPlayer()->m_Cosmetics.m_Trail == TRAIL_STAR && Server()->Tick() % 20 == 0) // only every second
+		GameServer()->CreateDamageInd(m_Pos, Angle, 1, CosmeticMask());
+
+	if(GetPlayer()->m_SpiderHook)
+	{
+		if(m_Core.m_HookState != HOOK_FLYING && m_Core.m_HookState != HOOK_GRABBED)
+			m_HookBasePos = m_Core.m_Pos;
+
+		vec2 Pos = m_HookBasePos;
+		vec2 CursorPos = GetCursorPos();
+		vec2 HookPos = m_Core.m_HookPos;
+
+		float HookLength = abs(GetTuning(GetOverriddenTuneZone())->m_HookLength - 20.0f);
+		HookLength = std::clamp(distance(CursorPos, Pos), -HookLength, HookLength);
+
+		bool NoHit = m_Core.m_HookState == HOOK_RETRACT_START || (HookLength < distance(HookPos, Pos) && m_Core.m_HookState == HOOK_FLYING);
+		bool AimActive = (GetPlayer()->m_PlayerFlags & PLAYERFLAG_AIM) && m_Core.m_HookState == HOOK_FLYING;
+
+		if((NoHit || AimActive) && m_Core.m_HookState != HOOK_GRABBED)
+		{
+			m_Core.m_HookState = HOOK_GRABBED;
+			m_Core.m_HookPos = Pos + m_Core.m_HookDir * distance(CursorPos, Pos);
+		}
+	}
+
+	if(m_pTelekinesisEntity)
+	{
+		CCharacter *pChr = (CCharacter *)m_pTelekinesisEntity;
+
+		if(!pChr)
+			return;
+
+		if(pChr->GetPlayer() && pChr->GetPlayer()->m_TelekinesisImmunity)
+			m_pTelekinesisEntity = nullptr;
+
+		if(/* GetActiveWeapon() == WEAPON_TELEKINESIS  || */ m_pPlayer->m_Cosmetics.m_Ability == ABILITY_TELEKINESIS)
+		{
+			pChr->m_Core.m_Pos = GetCursorPos();
+			pChr->m_Core.m_Vel = vec2(0.0f, 0.0f);
+		}
+		else
+			m_pTelekinesisEntity = nullptr;
+	}
+
+	if(g_Config.m_SvAutoUfo && !m_Ufo.Active())
+		SetUfo(true);
+
+	m_Snake.Tick();
+	m_Ufo.Tick();
+}
+
+vec2 CCharacter::GetCursorPos()
+{
+	vec2 Target = vec2(Core()->m_Input.m_TargetX, Core()->m_Input.m_TargetY);
+	return GetPlayer()->m_CameraInfo.ConvertTargetToWorld(GetPos(), Target);
+}
+
+void CCharacter::SetTuneOverride(int pZone)
+{
+	int Zone = std::clamp(pZone, -1, 255);
+	if(Zone == 0)
+		Zone = -1;
+	m_TuneZoneOverride = Zone;
+	GameServer()->SendTuningParams(-1, Zone);
+}
+
+void CCharacter::OnPlayerHook()
+{
+	CCharacter *pHookedTee = GameServer()->GetPlayerChar(m_Core.HookedPlayer());
+	if(!pHookedTee)
+		return;
+
+	if(GetPlayer()->m_Cosmetics.m_HookPower != HOOK_NORMAL)
+		pHookedTee->m_PowerHookedId = m_pPlayer->GetCid();
+
+	// set hook extra stuff
+	// if(GetPlayer()->m_HookPower == ATOM && !pHookedTee->GetPlayer()->m_Atom)
+	//	new CAtom(GameWorld(), pHookedTee->m_Pos, m_Core.HookedPlayer());
+	// if(GetPlayer()->m_HookPower == TRAIL && !pHookedTee->GetPlayer()->m_Trail)
+	//	new CTrail(GameWorld(), pHookedTee->m_Pos, m_Core.HookedPlayer());
+}
+
+int CCharacter::GetPowerHooked()
+{
+	if(m_PowerHookedId == -1)
+		return HOOK_NORMAL;
+
+	CCharacter *pHooker = GameServer()->GetPlayerChar(m_PowerHookedId);
+	if(!pHooker || pHooker->Core()->HookedPlayer() != m_pPlayer->GetCid())
+	{
+		m_PowerHookedId = -1;
+		return HOOK_NORMAL;
+	}
+
+	return pHooker->GetPlayer()->m_Cosmetics.m_HookPower;
+}
+
+void CCharacter::SetFakeTuned(bool Active, std::optional<const CTuningParams> Tuning)
+{
+	m_Core.m_FakeTuned = Active;
+
+	if(Tuning.has_value())
+		m_Core.m_FakeTuning = Tuning.value();
+}
+
+void CCharacter::SetUfo(bool Set)
+{
+	m_Ufo.SetActive(Set);
+}
+
+void CCharacter::SetSnake(bool Active)
+{
+	m_Snake.SetActive(Active);
 }

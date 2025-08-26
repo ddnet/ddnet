@@ -1345,3 +1345,66 @@ bool CGameTeams::IsPractice(int Team)
 
 	return m_aPractice[Team];
 }
+
+// <FoxNet
+CClientMask CGameTeams::CosmeticMask(int Team, int Asker, bool Opposite)
+{
+	int VersionFlags = CGameContext::FLAG_SIX | CGameContext::FLAG_SIXUP;
+
+	if(Team == TEAM_SUPER)
+		return CClientMask().set();
+
+	CClientMask Mask;
+	for(int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if(!GetPlayer(i))
+			continue; // Player doesn't exist
+		if(!((Server()->IsSixup(i) && (VersionFlags & CGameContext::FLAG_SIXUP)) ||
+			   (!Server()->IsSixup(i) && (VersionFlags & CGameContext::FLAG_SIX))))
+			continue;
+		if(!(GetPlayer(i)->GetTeam() == TEAM_SPECTATORS || GetPlayer(i)->IsPaused()))
+		{ // Not spectator
+			if(i != Asker)
+			{ // Actions of other players
+				if(!Character(i))
+					continue; // Player is currently dead
+				else if(GetPlayer(i)->m_ShowOthers == SHOW_OTHERS_ON)
+				{
+					// Do Nothing
+				}
+				//else if((GetPlayer(i)->m_ShouldUnsolo || GetPlayer(Asker)->m_ShouldUnsolo) && m_Core.Team(i) == Team)
+				//{
+				//	// Do Nothing
+				//}
+				else if(GetPlayer(i)->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM)
+				{
+					if(m_Core.Team(i) != Team && m_Core.Team(i) != TEAM_SUPER)
+						continue; // In different teams
+				}
+				else if(GetPlayer(i)->m_ShowOthers == SHOW_OTHERS_OFF)
+				{
+					if(m_Core.GetSolo(Asker))
+						continue; // When in solo part don't show others
+					if(m_Core.GetSolo(i))
+						continue; // When in solo part don't show others
+					if(m_Core.Team(i) != Team && m_Core.Team(i) != TEAM_SUPER)
+						continue; // In different teams
+				}
+			} // See everything of yourself
+		}
+
+		if(!Opposite)
+		{
+			if(GetPlayer(i)->m_HideCosmetics)
+				continue;
+		}
+		else
+		{
+			if(!GetPlayer(i)->m_HideCosmetics)
+				continue;
+		}
+
+		Mask.set(i);
+	}
+	return Mask;
+}

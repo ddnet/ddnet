@@ -23,3 +23,24 @@ MACRO_CONFIG_INT(SvLevelUpMoney, fs_levelup_money, 500, 0, 5000, CFGFLAG_SERVER 
 MACRO_CONFIG_INT(SvPlaytimeMoney, fs_playtime_money, 250, 0, 5000, CFGFLAG_SERVER | CFGFLAG_GAME, "How much money a player should everytime their playtime increased by 100 (divisble by 100: 100, 200..)")
 
 MACRO_CONFIG_INT(SvAntiAdBot, fs_anti_ad_bot, 1, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Anti Chat Ad Bot")
+
+MACRO_CONFIG_INT(SvReversePrediction, fs_prediction_test, 14, 1, 200, CFGFLAG_SERVER, "Reverse Prediction Margin")
+
+// snake
+MACRO_CONFIG_INT(SvSnakeAutoMove, fs_snake_auto_move, 0, 0, 1, CFGFLAG_SERVER, "Whether snake keeps last input or can stand still if no inputs applied")
+MACRO_CONFIG_INT(SvSnakeSpeed, fs_snake_speed, 6, 1, 50, CFGFLAG_SERVER, "Snake blocks per second speed")
+MACRO_CONFIG_INT(SvSnakeDiagonal, fs_snake_diagonal, 1, 0, 1, CFGFLAG_SERVER, "Whether snake can move diagonally")
+MACRO_CONFIG_INT(SvSnakeSmooth, fs_snake_smooth, 1, 0, 1, CFGFLAG_SERVER, "Whether snake moves smoothly")
+MACRO_CONFIG_INT(SvSnakeTeePickup, fs_snake_tee_pickup, 1, 0, 1, CFGFLAG_SERVER, "Whether to add Tees to the Snake on touch or not")
+MACRO_CONFIG_INT(SvSnakeCollision, fs_snake_collision, 1, 0, 1, CFGFLAG_SERVER, "Whether to have collision with blocks or not")
+
+// Ufo
+MACRO_CONFIG_INT(SvUfoMaxSpeed, fs_ufo_max_speed, 16, 1, 50, CFGFLAG_SERVER, "Ufos Maximum Speed")
+MACRO_CONFIG_INT(SvUfoFriction, fs_ufo_friction, 90, 0, 100, CFGFLAG_SERVER, "Ufos Friction (how fast it slows down when theres no movement)")
+MACRO_CONFIG_INT(SvUfoAccel, fs_ufo_accel, 12, 1, 200, CFGFLAG_SERVER, "Ufos Acceleration in any direction")
+MACRO_CONFIG_INT(SvUfoTranslateVel, fs_ufo_translate_vel, 1, 0, 1, CFGFLAG_SERVER, "Whether to use normal chararcter Velocity aswell as UFOs")
+MACRO_CONFIG_INT(SvUfoDisableFreeze, fs_ufo_disable_freeze, 1, 0, 1, CFGFLAG_SERVER, "Whether the character gets affected by freeze (cant move)")
+MACRO_CONFIG_INT(SvAutoUfo, fs_auto_ufo, 0, 0, 1, CFGFLAG_SERVER, "Automatically gives every Player an UFO (always)")
+MACRO_CONFIG_INT(SvUfoLaserType, fs_ufo_laser_type, 0, 0, 6, CFGFLAG_SERVER, "Ufos Laser Type")
+MACRO_CONFIG_INT(SvUfoHideHookColl, fs_ufo_hide_hook_coll, 2, 0, 2, CFGFLAG_SERVER, "Whether other people see UFO players hookcoll when flying down")
+MACRO_CONFIG_INT(SvUfoBrakes, fs_ufo_brakes, 0, 0, 1, CFGFLAG_SERVER, "Allows the UFO to instantly stop and stay still if player is flying up, down, and holding Fire")

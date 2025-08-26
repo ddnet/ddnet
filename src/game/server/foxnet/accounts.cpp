@@ -24,7 +24,7 @@ constexpr const char *SQLITE_TABLE = R"(
 			LastLogin INTEGER DEFAULT 0,
             Port INTEGER DEFAULT 0,
             ClientId INTEGER DEFAULT -1,
-            Flags INTEGER DEFAULT 0,
+            Flags INTEGER DEFAULT 1,
             VoteMenuPage INTEGER DEFAULT 0,
 			Playtime INTEGER DEFAULT 0,
 			Deaths INTEGER DEFAULT 0,
@@ -232,6 +232,8 @@ void CAccounts::OnLogin(int ClientId, const char *pUsername, sqlite3_stmt *pstmt
 		GameServer()->m_VoteMenu.SetPage(ClientId, Acc.m_VoteMenuPage);
 	}
 
+	GameServer()->OnLogin(ClientId);
+
 	const char *CurrentIP = Server()->ClientAddrString(ClientId, false);
 	int Port = Server()->Port();
 	const char *PlayerName = Server()->ClientName(ClientId);
@@ -289,6 +291,8 @@ void CAccounts::OnLogout(int ClientId, const CAccountSession AccInfo)
 		sqlite3_close(m_AccDatabase);
 		return;
 	}
+
+	GameServer()->OnLogout(ClientId);
 
 	const char *UpdateQuery = R"(
 		UPDATE Accounts

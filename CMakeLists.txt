@@ -2778,9 +2778,36 @@ if(SERVER)
     foxnet/accounts.cpp
     foxnet/accounts.h
     foxnet/commands.cpp
+    foxnet/cosmetics/dot_trail.cpp
+    foxnet/cosmetics/dot_trail.cpp
+    foxnet/cosmetics/epic_circle.cpp
+    foxnet/cosmetics/epic_circle.cpp
+    foxnet/cosmetics/firework.cpp
+    foxnet/cosmetics/firework.cpp
+    foxnet/cosmetics/flyingpoint.cpp
+    foxnet/cosmetics/flyingpoint.cpp
+    foxnet/cosmetics/head_powerup.cpp
+    foxnet/cosmetics/head_powerup.cpp
+    foxnet/cosmetics/heart_hat.cpp
+    foxnet/cosmetics/heart_hat.cpp
+    foxnet/cosmetics/lovely.cpp
+    foxnet/cosmetics/lovely.cpp
+    foxnet/cosmetics/pickup_pet.cpp
+    foxnet/cosmetics/pickup_pet.cpp
+    foxnet/cosmetics/rotating_ball.cpp
+    foxnet/cosmetics/rotating_ball.cpp
+    foxnet/cosmetics/staff_ind.cpp
+    foxnet/cosmetics/staff_ind.cpp
     foxnet/fontconvert.cpp
     foxnet/fontconvert.h
     foxnet/gamecontext.cpp
+    foxnet/player.cpp
+    foxnet/shop.cpp
+    foxnet/shop.h
+    foxnet/vehicles/snake.cpp
+    foxnet/vehicles/snake.h
+    foxnet/vehicles/ufo.cpp
+    foxnet/vehicles/ufo.h
     foxnet/votemenu.cpp
     foxnet/votemenu.h
     # FoxNet>

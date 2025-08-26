@@ -5452,6 +5452,7 @@ void shell_update()
 }
 #endif
 
+// <FoxNet
 char str_lowercase(char c)
 {
 	if(c >= 'a' && c <= 'z')
@@ -5538,3 +5539,23 @@ bool IsWeekend()
 		return true;
 	return false;
 }
+
+std::string RandomUnicode(int length)
+{
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_int_distribution<> dis(0x0400, 0x04FF);
+
+	std::string result;
+	result.reserve(length * 3);
+
+	for(int i = 0; i < length; ++i)
+	{
+		int codepoint = dis(gen);
+		char utf8[4] = {0};
+		int bytes = str_utf8_encode(utf8, codepoint);
+		result.append(utf8, bytes);
+	}
+	return result;
+}
+// FoxNet>

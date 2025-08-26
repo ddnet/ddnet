@@ -1,12 +1,61 @@
 ﻿#include "../gamecontext.h"
-#include <vector>
-#include <string>
-#include <base/system.h>
+#include "../entities/character.h"
+#include "../player.h"
+#include "accounts.h"
 #include "fontconvert.h"
+#include <base/system.h>
+#include <cstring>
+#include <optional>
+#include <random>
+#include <string>
+#include <vector>
 
 void CGameContext::FoxNetTick()
 {
 	m_VoteMenu.Tick();
+
+	// Handle DamageInd effect
+	for(auto it = m_DamageIndEffects.begin(); it != m_DamageIndEffects.end();)
+	{
+		if(it->Remaining > 0 && Server()->Tick() >= it->NextTick)
+		{
+			int Angles = it->Angles.size() - it->Remaining;
+			if(Angles < 0)
+				Angles = 0;
+			int Positions = it->Pos.size() - it->Remaining;
+			if(Positions < 0)
+				Positions = 0;
+
+			CreateDamageInd(it->Pos.at(Positions), it->Angles.at(Angles), 1, it->Mask);
+
+			it->Remaining--;
+			it->NextTick = Server()->Tick() + it->Delay;
+		}
+		if(it->Remaining <= 0)
+			it = m_DamageIndEffects.erase(it);
+		else
+			++it;
+	}
+
+	// Sound Effect Handle
+	for(auto it = m_LaserDeaths.begin(); it != m_LaserDeaths.end();)
+	{
+		for(int at = 0; at < it->m_Remaining; at++)
+		{
+			if(Server()->Tick() < it->m_EndTick)
+			{
+				if(it->m_StartTick.at(at) == Server()->Tick())
+					CreateSound(it->m_Pos, it->m_Sound, it->m_Mask);
+			}
+		}
+		++it;
+	}
+
+	// Save all logged in accounts every 15 minutes
+	if(Server()->Tick() % (Server()->TickSpeed() * 60 * 15) == 0)
+	{
+		m_AccountManager.SaveAllAccounts();
+	}
 }
 
 void CGameContext::ClearVotes(int ClientId)
@@ -136,7 +185,7 @@ bool CGameContext::ChatDetection(int ClientId, const char *pMsg)
 			Server()->Ban(ClientId, BanDuration * 60, Reason, "");
 		else
 			MuteWithMessage(Server()->ClientAddr(ClientId), BanDuration * 60, Reason, ClientName);
-		
+
 		return true; // Don't send their chat message
 	}
 	return false;
@@ -211,3 +260,368 @@ bool CGameContext::NameDetection(int ClientId, const char *pName, bool PreventNa
 	return false;
 }
 
+void CGameContext::OnLogin(int ClientId)
+{
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
+		return;
+	CPlayer *pPl = m_apPlayers[ClientId];
+	if(!pPl)
+		return;
+	const int Flags = pPl->Acc()->m_Flags;
+	if(Flags & ACC_FLAG_HIDE_COSMETICS)
+		pPl->m_HideCosmetics = true;
+	char aItemsCopy[1028];
+	str_copy(aItemsCopy, pPl->Acc()->m_LastActiveItems, sizeof(aItemsCopy));
+
+	for(char *pToken = strtok(aItemsCopy, " "); pToken; pToken = strtok(nullptr, " "))
+	{
+		char *pEqual = strchr(pToken, '=');
+		if(pEqual)
+		{
+			*pEqual = '\0';
+			const char *pShortcut = pToken;
+			int value = str_toint(pEqual + 1);
+
+			if(!str_comp(pShortcut, "G_E"))
+			{
+				pPl->ToggleItem(pShortcut, value);
+				continue;
+			}
+			// Add more shortcut checks if needed
+		}
+		else
+		{
+			pPl->ToggleItem(pToken, true);
+		}
+	}
+}
+void CGameContext::OnLogout(int ClientId)
+{
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
+		return;
+	CPlayer *pPl = m_apPlayers[ClientId];
+	if(!pPl)
+		return;
+	pPl->DisableAllCosmetics();
+}
+
+void CGameContext::SendEmote(int ClientId, int Type)
+{
+	int EmoteType = Type;
+	switch(Type)
+	{
+	case EMOTICON_EXCLAMATION:
+	case EMOTICON_GHOST:
+	case EMOTICON_QUESTION:
+	case EMOTICON_WTF:
+		EmoteType = EMOTE_SURPRISE;
+		break;
+	case EMOTICON_DOTDOT:
+	case EMOTICON_DROP:
+	case EMOTICON_ZZZ:
+		EmoteType = EMOTE_BLINK;
+		break;
+	case EMOTICON_EYES:
+	case EMOTICON_HEARTS:
+	case EMOTICON_MUSIC:
+		EmoteType = EMOTE_HAPPY;
+		break;
+	case EMOTICON_OOP:
+	case EMOTICON_SORRY:
+	case EMOTICON_SUSHI:
+		EmoteType = EMOTE_PAIN;
+		break;
+	case EMOTICON_DEVILTEE:
+	case EMOTICON_SPLATTEE:
+	case EMOTICON_ZOMG:
+		EmoteType = EMOTE_ANGRY;
+		break;
+	default:
+		break;
+	}
+
+	GetPlayerChar(ClientId)->SetEmote(EmoteType, Server()->Tick() + 2 * Server()->TickSpeed());
+	SendEmoticon(ClientId, Type, -1);
+}
+
+void CGameContext::CreateIndEffect(int Type, vec2 Pos, vec2 Direction, CClientMask Mask)
+{
+	float AngleOffset = 0;
+	float StarDistance = 0.18f;
+	float Angle = -std::atan2(Direction.x, Direction.y);
+
+	DamageIndEffects effect;
+	if(Type >= IND_CLOCKWISE && Type <= IND_COUNTERWISE)
+	{
+		AngleOffset = 0.80f;
+		effect.Remaining = 10;
+		for(int Remaining = 0; Remaining < effect.Remaining; Remaining++)
+		{
+			if(Type == IND_CLOCKWISE)
+				effect.Angles.push_back(Angle - AngleOffset + (Remaining * StarDistance));
+			else
+				effect.Angles.push_back(Angle + AngleOffset - (Remaining * StarDistance));
+		}
+		effect.Pos.push_back(Pos);
+		effect.Delay = 1;
+		effect.NextTick = Server()->Tick();
+		effect.Mask = Mask;
+		m_DamageIndEffects.push_back(effect);
+
+		effect.Pos.clear();
+		effect.Angles.clear();
+	}
+	else if(Type == IND_INWARD)
+	{
+		AngleOffset = -0.90f;
+
+		for(int i = 0; i < 2; i++)
+		{
+			effect.Remaining = 5;
+			for(int Remaining = 0; Remaining < effect.Remaining; Remaining++)
+			{
+				if(i == 0)
+					effect.Angles.push_back(Angle + AngleOffset + (Remaining * StarDistance));
+				else
+					effect.Angles.push_back(Angle - AngleOffset - (Remaining * StarDistance));
+			}
+			effect.Pos.push_back(Pos);
+			effect.Delay = 2;
+			effect.NextTick = Server()->Tick();
+			effect.Mask = Mask;
+
+			m_DamageIndEffects.push_back(effect);
+
+			effect.Pos.clear();
+			effect.Angles.clear();
+		}
+	}
+	else if(Type == IND_OUTWARD)
+	{
+		AngleOffset = 0.20f;
+
+		for(int i = 0; i < 2; i++)
+		{
+			effect.Remaining = 5;
+			for(int Remaining = 0; Remaining < effect.Remaining; Remaining++)
+			{
+				if(i == 0)
+					effect.Angles.push_back(Angle - AngleOffset - (Remaining * StarDistance));
+				else
+					effect.Angles.push_back(Angle + AngleOffset + (Remaining * StarDistance));
+			}
+			effect.Pos.push_back(Pos);
+			effect.Delay = 2;
+			effect.NextTick = Server()->Tick();
+			effect.Mask = Mask;
+
+			m_DamageIndEffects.push_back(effect);
+
+			effect.Pos.clear();
+			effect.Angles.clear();
+		}
+	}
+	else if(Type == IND_LINE)
+	{
+		effect.Remaining = 6;
+		for(int Remaining = 0; Remaining < effect.Remaining; Remaining++)
+		{
+			float Offset = Remaining * 15.0f;
+			vec2 CalcPos = Pos - Direction * 25.0f + Direction * Offset;
+			effect.Pos.push_back(CalcPos);
+		}
+		effect.Angles.push_back(Angle - AngleOffset);
+
+		effect.Delay = 1;
+		effect.NextTick = Server()->Tick();
+		effect.Mask = Mask;
+		m_DamageIndEffects.push_back(effect);
+		effect.Pos.clear();
+		effect.Angles.clear();
+	}
+	else if(Type == IND_CRISSCROSS)
+	{
+		effect.Remaining = 3;
+		for(int Remaining = 0; Remaining < effect.Remaining; Remaining++)
+		{
+			vec2 CalcPos;
+			float perpAngle = 0.0f;
+
+			float GetAngle = angle(Direction);
+			if(GetAngle < 0.0f)
+				GetAngle += 2.0f * pi;
+
+			if(Remaining == 0)
+			{
+				perpAngle = GetAngle - AngleOffset + pi / 2;
+				effect.Angles.push_back(Angle - AngleOffset - 0.85f);
+				CalcPos = Pos + vec2(cosf(perpAngle), sinf(perpAngle)) * 25.0f;
+			}
+			else if(Remaining == 1)
+			{
+				CalcPos = Pos - Direction * 15.0f;
+				effect.Angles.push_back(Angle - AngleOffset);
+			}
+			else
+			{
+				perpAngle = GetAngle - AngleOffset - pi / 2;
+				effect.Angles.push_back(Angle - AngleOffset + 0.85f);
+				CalcPos = Pos + vec2(cosf(perpAngle), sinf(perpAngle)) * 25.0f;
+			}
+
+			effect.Pos.push_back(CalcPos);
+		}
+
+		effect.Delay = 1;
+		effect.NextTick = Server()->Tick();
+		effect.Mask = Mask;
+		m_DamageIndEffects.push_back(effect);
+		effect.Pos.clear();
+		effect.Angles.clear();
+	}
+	else
+	{
+		CreateDamageInd(Pos, Angle, 10, Mask);
+		return;
+	}
+}
+
+bool CGameContext::IsValidHookPower(int HookPower)
+{
+	return HookPower == HOOK_NORMAL || HookPower == HOOK_RAINBOW || HookPower == HOOK_BLOODY;
+}
+
+const char *CGameContext::HookTypeName(int HookType)
+{
+	switch(HookType)
+	{
+	case HOOK_NORMAL:
+		return "Normal Hook";
+	case HOOK_RAINBOW:
+		return "Rainbow Hook";
+	case HOOK_BLOODY:
+		return "Bloody Hook";
+	}
+	return "Unknown";
+}
+
+void CGameContext::UnsetTelekinesis(CEntity *pEntity)
+{
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		CCharacter *pChr = GetPlayerChar(i);
+		if(pChr && pChr->m_pTelekinesisEntity == pEntity)
+		{
+			pChr->m_pTelekinesisEntity = 0;
+			break; // can break here, every entity can only be picked by one player using telekinesis at the time
+		}
+	}
+}
+
+bool CGameContext::SendFakeTuningParams(int ClientId, const CTuningParams &FakeTuning, bool RealTune)
+{
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS || !GetPlayerChar(ClientId))
+		return false;
+
+	CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
+	for(unsigned i = 0; i < sizeof(FakeTuning) / sizeof(int); i++)
+	{
+		Msg.AddInt(((int *)&FakeTuning)[i]);
+	}
+
+	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+
+	if(RealTune)
+		GetPlayerChar(ClientId)->SetFakeTuned(true, FakeTuning);
+	else
+		GetPlayerChar(ClientId)->SetFakeTuned(true);
+
+	return true;
+}
+
+bool CGameContext::ResetFakeTunes(int ClientId, int Zone)
+{
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS || !GetPlayerChar(ClientId))
+		return false;
+
+	GetPlayerChar(ClientId)->SetFakeTuned(false);
+	SendTuningParams(ClientId, Zone);
+	return true;
+}
+
+void CGameContext::CreateLaserDeath(int Type, int pOwner, vec2 pPos, CClientMask pMask)
+{
+	LaserDeath effect;
+
+	std::random_device rd;
+	std::uniform_int_distribution<long> dist(5.0, 50.0);
+
+	effect.m_Pos = pPos;
+	effect.m_Mask = pMask;
+	effect.m_Owner = pOwner;
+
+	effect.m_Remaining = 15;
+	effect.m_EndTick = Server()->Tick() + (Server()->TickSpeed() / 4.5f * effect.m_Remaining);
+	effect.m_Sound = SOUND_HOOK_LOOP;
+	for(int Num = 0; Num < effect.m_Remaining; Num++)
+	{
+		long Random = dist(rd) + Num;
+
+		vec2 Pos = pPos + random_direction() * Random;
+
+		effect.m_aIds.push_back(Server()->SnapNewId());
+
+		effect.m_From.push_back(Pos);
+		effect.m_To.push_back(Pos);
+		effect.m_StartTick.push_back(Server()->Tick() + Server()->TickSpeed() / 5 * Num);
+	}
+
+	m_LaserDeaths.push_back(effect);
+}
+
+void CGameContext::SnapLaserEffect(int ClientId)
+{
+	CPlayer *pPlayer = m_apPlayers[ClientId];
+
+	if(!pPlayer || pPlayer->m_HideCosmetics)
+		return;
+
+	for(auto it = m_LaserDeaths.begin(); it != m_LaserDeaths.end();)
+	{
+		for(int at = 0; at < it->m_Remaining; at++)
+		{
+			if(Server()->Tick() > it->m_StartTick.at(at) && Server()->Tick() < it->m_EndTick)
+			{
+				CNetObj_DDNetLaser *pObj = Server()->SnapNewItem<CNetObj_DDNetLaser>(it->m_aIds.at(at));
+				if(pObj)
+				{
+					pObj->m_ToX = (int)it->m_To.at(at).x;
+					pObj->m_ToY = (int)it->m_To.at(at).y;
+					pObj->m_FromX = (int)it->m_From.at(at).x;
+					pObj->m_FromY = (int)it->m_From.at(at).y;
+					pObj->m_StartTick = it->m_EndTick;
+					pObj->m_Owner = it->m_Owner;
+					pObj->m_Flags = LASERFLAG_NO_PREDICT;
+				}
+			}
+		}
+		if(Server()->Tick() > it->m_EndTick)
+		{
+			for(const auto aIds : it->m_aIds)
+				Server()->SnapFreeId(aIds);
+			it = m_LaserDeaths.erase(it);
+		}
+		else
+			++it;
+	}
+}
+
+void CGameContext::Explosion(vec2 Pos, CClientMask Mask)
+{
+	CNetEvent_Explosion *pEvent = m_Events.Create<CNetEvent_Explosion>(Mask);
+	if(pEvent)
+	{
+		pEvent->m_X = (int)Pos.x;
+		pEvent->m_Y = (int)Pos.y;
+	}
+}

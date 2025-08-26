@@ -190,6 +190,12 @@ void CCharacterCore::Reset()
 
 void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 {
+	// <FoxNet
+	CTuningParams Tuning = m_Tuning;
+	if(m_FakeTuned)
+		Tuning = m_FakeTuning;
+	// FoxNet>
+
 	m_MoveRestrictions = m_pCollision->GetMoveRestrictions(UseInput ? IsSwitchActiveCb : nullptr, this, m_Pos);
 	m_TriggeredEvents = 0;
 
@@ -197,11 +203,11 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 	const bool Grounded = m_pCollision->CheckPoint(m_Pos.x + PhysicalSize() / 2, m_Pos.y + PhysicalSize() / 2 + 5) || m_pCollision->CheckPoint(m_Pos.x - PhysicalSize() / 2, m_Pos.y + PhysicalSize() / 2 + 5);
 	vec2 TargetDirection = normalize(vec2(m_Input.m_TargetX, m_Input.m_TargetY));
 
-	m_Vel.y += m_Tuning.m_Gravity;
+	m_Vel.y += Tuning.m_Gravity;
 
-	float MaxSpeed = Grounded ? m_Tuning.m_GroundControlSpeed : m_Tuning.m_AirControlSpeed;
-	float Accel = Grounded ? m_Tuning.m_GroundControlAccel : m_Tuning.m_AirControlAccel;
-	float Friction = Grounded ? m_Tuning.m_GroundFriction : m_Tuning.m_AirFriction;
+	float MaxSpeed = Grounded ? Tuning.m_GroundControlSpeed : Tuning.m_AirControlSpeed;
+	float Accel = Grounded ? Tuning.m_GroundControlAccel : Tuning.m_AirControlAccel;
+	float Friction = Grounded ? Tuning.m_GroundFriction : Tuning.m_AirFriction;
 
 	// handle input
 	if(UseInput)
@@ -233,7 +239,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 				if(Grounded && (!(m_Jumped & 2) || m_Jumps != 0))
 				{
 					m_TriggeredEvents |= COREEVENT_GROUND_JUMP;
-					m_Vel.y = -m_Tuning.m_GroundJumpImpulse;
+					m_Vel.y = -Tuning.m_GroundJumpImpulse;
 					if(m_Jumps > 1)
 					{
 						m_Jumped |= 1;
@@ -247,7 +253,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 				else if(!(m_Jumped & 2))
 				{
 					m_TriggeredEvents |= COREEVENT_AIR_JUMP;
-					m_Vel.y = -m_Tuning.m_AirJumpImpulse;
+					m_Vel.y = -Tuning.m_AirJumpImpulse;
 					m_Jumped |= 3;
 					m_JumpedTotal++;
 				}
@@ -267,7 +273,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 				m_HookPos = m_Pos + TargetDirection * PhysicalSize() * 1.5f;
 				m_HookDir = TargetDirection;
 				SetHookedPlayer(-1);
-				m_HookTick = (float)SERVER_TICK_SPEED * (1.25f - m_Tuning.m_HookDuration);
+				m_HookTick = (float)SERVER_TICK_SPEED * (1.25f - Tuning.m_HookDuration);
 				m_TriggeredEvents |= COREEVENT_HOOK_LAUNCH;
 			}
 		}
@@ -318,11 +324,11 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		{
 			HookBase = m_HookTeleBase;
 		}
-		vec2 NewPos = m_HookPos + m_HookDir * m_Tuning.m_HookFireSpeed;
-		if(distance(HookBase, NewPos) > m_Tuning.m_HookLength)
+		vec2 NewPos = m_HookPos + m_HookDir * Tuning.m_HookFireSpeed;
+		if(distance(HookBase, NewPos) > Tuning.m_HookLength)
 		{
 			m_HookState = HOOK_RETRACT_START;
-			NewPos = HookBase + normalize(NewPos - HookBase) * m_Tuning.m_HookLength;
+			NewPos = HookBase + normalize(NewPos - HookBase) * Tuning.m_HookLength;
 			m_Reset = true;
 		}
 
@@ -345,7 +351,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		}
 
 		// Check against other players first
-		if(!m_HookHitDisabled && m_pWorld && m_Tuning.m_PlayerHooking && (m_HookState == HOOK_FLYING || !m_NewHook))
+		if(!m_HookHitDisabled && m_pWorld && Tuning.m_PlayerHooking && (m_HookState == HOOK_FLYING || !m_NewHook))
 		{
 			float Distance = 0.0f;
 			for(int i = 0; i < MAX_CLIENTS; i++)
@@ -422,7 +428,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		// don't do this hook routine when we are already hooked to a player
 		if(m_HookedPlayer == -1 && distance(m_HookPos, m_Pos) > 46.0f)
 		{
-			vec2 HookVel = normalize(m_HookPos - m_Pos) * m_Tuning.m_HookDragAccel;
+			vec2 HookVel = normalize(m_HookPos - m_Pos) * Tuning.m_HookDragAccel;
 			// the hook as more power to drag you up then down.
 			// this makes it easier to get on top of an platform
 			if(HookVel.y > 0)
@@ -439,7 +445,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 
 			// check if we are under the legal limit for the hook
 			const float NewVelLength = length(NewVel);
-			if(NewVelLength < m_Tuning.m_HookDragSpeed || NewVelLength < length(m_Vel))
+			if(NewVelLength < Tuning.m_HookDragSpeed || NewVelLength < length(m_Vel))
 				m_Vel = NewVel; // no problem. apply
 		}
 
@@ -460,7 +466,12 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 void CCharacterCore::TickDeferred()
 {
 	if(m_pWorld)
-	{
+	{ 
+		// <FoxNet
+		CTuningParams Tuning = m_Tuning;
+		if(m_FakeTuned)
+			Tuning = m_FakeTuning;
+		// FoxNet>
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			CCharacterCore *pCharCore = m_pWorld->m_apCharacters[i];
@@ -479,7 +490,7 @@ void CCharacterCore::TickDeferred()
 			{
 				vec2 Dir = normalize(m_Pos - pCharCore->m_Pos);
 
-				bool CanCollide = (m_Super || pCharCore->m_Super) || (!m_CollisionDisabled && !pCharCore->m_CollisionDisabled && m_Tuning.m_PlayerCollision);
+				bool CanCollide = (m_Super || pCharCore->m_Super) || (!m_CollisionDisabled && !pCharCore->m_CollisionDisabled && Tuning.m_PlayerCollision);
 
 				if(CanCollide && Distance < PhysicalSize() * 1.25f)
 				{
@@ -496,12 +507,12 @@ void CCharacterCore::TickDeferred()
 				}
 
 				// handle hook influence
-				if(!m_HookHitDisabled && m_HookedPlayer == i && m_Tuning.m_PlayerHooking)
+				if(!m_HookHitDisabled && m_HookedPlayer == i && Tuning.m_PlayerHooking)
 				{
 					if(Distance > PhysicalSize() * 1.50f)
 					{
-						float HookAccel = m_Tuning.m_HookDragAccel * (Distance / m_Tuning.m_HookLength);
-						float DragSpeed = m_Tuning.m_HookDragSpeed;
+						float HookAccel = Tuning.m_HookDragAccel * (Distance / Tuning.m_HookLength);
+						float DragSpeed = Tuning.m_HookDragSpeed;
 
 						vec2 Temp;
 						// add force to the hooked player
@@ -530,7 +541,13 @@ void CCharacterCore::TickDeferred()
 
 void CCharacterCore::Move()
 {
-	float RampValue = VelocityRamp(length(m_Vel) * 50, m_Tuning.m_VelrampStart, m_Tuning.m_VelrampRange, m_Tuning.m_VelrampCurvature);
+	// <FoxNet
+	CTuningParams Tuning = m_Tuning;
+	if(m_FakeTuned)
+		Tuning = m_FakeTuning;
+	// FoxNet>
+
+	float RampValue = VelocityRamp(length(m_Vel) * 50, Tuning.m_VelrampStart, Tuning.m_VelrampRange, Tuning.m_VelrampCurvature);
 
 	m_Vel.x = m_Vel.x * RampValue;
 
@@ -539,8 +556,8 @@ void CCharacterCore::Move()
 	vec2 OldVel = m_Vel;
 	bool Grounded = false;
 	m_pCollision->MoveBox(&NewPos, &m_Vel, PhysicalSizeVec2(),
-		vec2(m_Tuning.m_GroundElasticityX,
-			m_Tuning.m_GroundElasticityY),
+		vec2(Tuning.m_GroundElasticityX,
+			Tuning.m_GroundElasticityY),
 		&Grounded);
 
 	if(Grounded)
@@ -562,7 +579,7 @@ void CCharacterCore::Move()
 
 	m_Vel.x = m_Vel.x * (1.0f / RampValue);
 
-	if(m_pWorld && (m_Super || (m_Tuning.m_PlayerCollision && !m_CollisionDisabled && !m_Solo)))
+	if(m_pWorld && (m_Super || (Tuning.m_PlayerCollision && !m_CollisionDisabled && !m_Solo)))
 	{
 		// check player collision
 		float Distance = distance(m_Pos, NewPos);

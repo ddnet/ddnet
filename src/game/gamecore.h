@@ -269,6 +269,19 @@ public:
 	bool m_DeepFrozen;
 	bool m_LiveFrozen;
 	CTuningParams m_Tuning;
+	// <FoxNet
+
+	CTuningParams m_FakeTuning;
+	bool m_FakeTuned;
+
+	bool m_ExplosionGun;
+
+	bool m_Passive;
+
+	bool m_Collidable;
+	bool m_Hittable;
+	bool m_Hookable;
+	// FoxNet>
 
 private:
 	CTeamsCore *m_pTeams;

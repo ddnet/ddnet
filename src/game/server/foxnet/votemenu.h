@@ -5,42 +5,44 @@
 #include <array>
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
+#include <game/server/player.h>
 
 class CGameContext;
 class IServer;
 
 enum Pages
 {
-	NONE = -1,
+	PAGE_NONE = -1,
 
-	VOTES = 0,
-	SETTINGS,
-	ACCOUNT,
-	SHOP,
-	INVENTORY,
-	ADMIN,
+	PAGE_VOTES = 0,
+	PAGE_SETTINGS,
+	PAGE_ACCOUNT,
+	PAGE_SHOP,
+	PAGE_INVENTORY,
+	PAGE_ADMIN,
 	NUM_PAGES
 };
 
-enum Prefixes
+enum BulletPoints
 {
-	DOT = 0,
-	DASH,
-	GREATER_THAN,
-	ARROW,
-	RECTANGLE_BULLET,
-	TRIANGLE_BULLET,
-	BLACK_DIAMOND,
-	WHITE_DIAMOND
+	BULLET_NONE = 0,
+	BULLET_DOT,
+	BULLET_DASH,
+	BULLET_GREATER_THAN,
+	BULLET_ARROW,
+	BULLET_RECTANGLE,
+	BULLET_TRIANGLE,
+	BULLET_BLACK_DIAMOND,
+	BULLET_WHITE_DIAMOND
 };
 
 enum Flags
 {
-	FLAG_VOTES = 1 << VOTES,
-	FLAG_SETTINGS = 1 << SETTINGS,
-	FLAG_ACCOUNT = 1 << ACCOUNT,
-	FLAG_SHOP = 1 << SHOP,
-	FLAG_INVENTORY = 1 << INVENTORY,
+	FLAG_VOTES = 1 << PAGE_VOTES,
+	FLAG_SETTINGS = 1 << PAGE_SETTINGS,
+	FLAG_ACCOUNT = 1 << PAGE_ACCOUNT,
+	FLAG_SHOP = 1 << PAGE_SHOP,
+	FLAG_INVENTORY = 1 << PAGE_INVENTORY,
 };
 
 class CVoteMenu
@@ -52,25 +54,34 @@ class CVoteMenu
 	std::array<char[64], NUM_PAGES> m_aPages;
 	struct ClientData
 	{
-		int m_Page = VOTES;
+		int m_Page = PAGE_VOTES;
 
 		// Comparison data for auto updates
 		CAccountSession m_Account = CAccountSession();
+		CCosmetics m_Cosmetics = CCosmetics();
 	};
 	ClientData m_aClientData[MAX_CLIENTS];
 	std::vector<std::string> m_vDescriptions;
 
 	bool IsPageAllowed(int ClientId, int Page) const;
 
-	void AddDescription(const char *pDesc) { m_vDescriptions.emplace_back(pDesc); }
-	void AddDescriptionPrefix(const char *pDesc, int Prefix);
-	void AddDescriptionCheckBox(const char *pDesc, bool Checked);
+	bool IsOptionWithPrefix(const char *pDesc, const char *pWantedOption) { return str_startswith(pDesc, pWantedOption) != 0; }
+
+	void AddVoteText(const char *pDesc) { m_vDescriptions.emplace_back(pDesc); }
+	void AddVoteSeperator() { m_vDescriptions.emplace_back(" "); }
+	void AddVoteSubheader(const char *pDesc);
+	void AddVotePrefix(const char *pDesc, int Prefix);
+	void AddVoteCheckBox(const char *pDesc, bool Checked);
+	void AddVoteValueOption(const char *pDescription, int Value, int Max, int BulletPoint);
+
 
 	void SendPageSettings(int ClientId);
 	void SendPageAccount(int ClientId);
 	void SendPageShop(int ClientId);
 	void SendPageInventory(int ClientId);
 	void SendPageAdmin(int ClientId);
+
+	void DoCosmeticVotes(int ClientId, bool Authed);
 
 	void UpdatePages(int ClientId);
 

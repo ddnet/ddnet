@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "projectile.h"
 #include "character.h"
+#include "../player.h"
 
 #include <engine/shared/config.h>
 
@@ -127,9 +128,20 @@ void CProjectile::Tick()
 	if(pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit)
 		pTargetChr = GameServer()->m_World.IntersectCharacter(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pOwnerChar, m_Owner);
 
+	int EmoteGun = 0;
+	bool ConfettiGun = false;
+	bool LaserGun = false;
+
+	if(pOwnerChar)
+	{
+		EmoteGun = pOwnerChar->GetPlayer()->m_Cosmetics.m_EmoticonGun;
+		ConfettiGun = pOwnerChar->GetPlayer()->m_Cosmetics.m_ConfettiGun;
+		LaserGun = pOwnerChar->GetPlayer()->m_Cosmetics.m_PhaseGun;
+	}
+
 	if(m_LifeSpan > -1)
 		m_LifeSpan--;
-
+	
 	CClientMask TeamMask = CClientMask().set();
 	bool IsWeaponCollide = false;
 	if(
@@ -239,8 +251,35 @@ void CProjectile::Tick()
 		}
 		else if(m_Type == WEAPON_GUN)
 		{
-			GameServer()->CreateDamageInd(CurPos, -std::atan2(m_Direction.x, m_Direction.y), 10, (m_Owner != -1) ? TeamMask : CClientMask().set());
-			m_MarkedForDestroy = true;
+			if(ConfettiGun && !LaserGun)
+			{
+				vec2 ActualPos;
+				GetNearestAirPos(NewPos, CurPos, &ActualPos);
+				GameServer()->CreateBirthdayEffect(ActualPos, pOwnerChar->CosmeticMask());
+			}
+			if(EmoteGun && pTargetChr)
+			{
+				GameServer()->SendEmote(pTargetChr->GetPlayer()->GetCid(), EmoteGun - 1);
+			}
+
+			bool CreateDmgInd = true;
+			if(EmoteGun && pTargetChr)
+				CreateDmgInd = false;
+			else if(LaserGun)
+				CreateDmgInd = false;
+			else if(ConfettiGun)
+				CreateDmgInd = false;
+
+			int DamageIndEffect = (pOwnerChar && pOwnerChar->GetPlayer()->m_Cosmetics.m_DamageIndType) ? pOwnerChar->GetPlayer()->m_Cosmetics.m_DamageIndType : 0;
+
+			if(LaserGun && pTargetChr)
+				CreateDmgInd = true;
+
+			if(CreateDmgInd)
+				GameServer()->CreateIndEffect(DamageIndEffect, CurPos, m_Direction, (m_Owner != -1) ? TeamMask : CClientMask().set());
+
+			if(!LaserGun || m_LifeSpan == -1 || pTargetChr)
+				m_MarkedForDestroy = true;
 			return;
 		}
 		else

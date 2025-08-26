@@ -8,6 +8,8 @@
 #include <game/race_state.h>
 #include <game/server/save.h>
 #include <game/server/foxnet/accounts.h>
+#include <game/server/foxnet/vehicles/ufo.h>
+#include <game/server/foxnet/vehicles/snake.h>
 
 class CGameTeams;
 class CGameWorld;
@@ -23,6 +25,22 @@ enum
 	FAKETUNE_NOHOOK = 1 << 4,
 	FAKETUNE_JETPACK = 1 << 5,
 	FAKETUNE_NOHAMMER = 1 << 6,
+};
+
+enum
+{
+	ABILITY_NONE = 0,
+
+	// F3 And F4
+	ABILITY_HEART,
+	ABILITY_SHIELD,
+
+	// Only F4
+	ABILITY_FIREWORK,
+
+	// F3
+	ABILITY_TELEKINESIS,
+	NUM_ABILITY
 };
 
 class CCharacter : public CEntity
@@ -211,6 +229,9 @@ public:
 	bool m_FrozenLastTick;
 	int m_TuneZone;
 	int m_TuneZoneOld;
+	// <FoxNet
+	int m_TuneZoneOverride;
+	// FoxNet>
 	int m_PainSoundTimer;
 	int m_LastMove;
 	int m_StartTime;
@@ -262,7 +283,9 @@ public:
 	bool HasTelegunGun() const { return m_Core.m_HasTelegunGun; }
 	bool HasTelegunGrenade() const { return m_Core.m_HasTelegunGrenade; }
 	bool HasTelegunLaser() const { return m_Core.m_HasTelegunLaser; }
-
+	// <FoxNet
+	int GetOverriddenTuneZone() const { return m_TuneZoneOverride < 0 ? m_TuneZone : m_TuneZoneOverride; }
+	// FoxNet>
 	bool HammerHitDisabled() const { return m_Core.m_HammerHitDisabled; }
 	bool ShotgunHitDisabled() const { return m_Core.m_ShotgunHitDisabled; }
 	bool LaserHitDisabled() const { return m_Core.m_LaserHitDisabled; }
@@ -276,6 +299,35 @@ public:
 	// <FoxNet
 	CAccountSession *Acc();
 	void OnDie(int Killer, int Weapon, bool SendKillMsg);
+	void SetTuneOverride(int pZone);
+
+	CClientMask CosmeticMask();
+	CClientMask OppsiteCosmeticMask();
+
+	// Telekinesis
+	CEntity *m_pTelekinesisEntity;
+	vec2 GetCursorPos();
+
+	int GetPowerHooked();
+	bool m_IsRainbowHooked;
+	int m_PowerHookedId;
+
+	int m_HeadItem;
+
+	CSnake m_Snake;
+	bool m_InSnake;
+	void SetSnake(bool Active);
+
+	CVUfo m_Ufo;
+	void SetUfo(bool Set);
+
+	void SetFakeTuned(bool Active, std::optional<const CTuningParams> Tuning = std::nullopt);
+
+private:
+	vec2 m_HookBasePos = vec2(0, 0);
+	void OnPlayerHook();
+
+	void FoxNetTick();
 	// FoxNet>
 };
 

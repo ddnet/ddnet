@@ -22,6 +22,7 @@
 
 #include "foxnet/accounts.h"
 #include "foxnet/votemenu.h"
+#include "foxnet/shop.h"
 
 /*
 	Tick
@@ -679,19 +680,36 @@ public:
 	void OnSetAuthed(int ClientId, int Level) override;
 
 	void ResetTuning();
+	// <FoxNet
+private:
+	struct LaserDeath
+	{
+		std::vector<int> m_aIds;
 
-	CAccountSession m_Account[MAX_CLIENTS];
-	CAccounts m_AccountManager;
+		int m_Owner;
+		int m_Remaining;
+		vec2 m_Pos;
+		std::vector<vec2> m_From;
+		std::vector<vec2> m_To;
+		std::vector<int64_t> m_StartTick;
+		int64_t m_EndTick;
+		CClientMask m_Mask;
+		int m_Sound;
+	};
 
-	CVoteMenu m_VoteMenu;
-
-	//<FoxNet
-	void ClearVotes(int ClientId);
+	struct DamageIndEffects
+	{
+		int Remaining;
+		std::vector<float> Angles;
+		std::vector<vec2> Pos;
+		int64_t Delay;
+		int64_t NextTick;
+		CClientMask Mask;
+	};
+	std::vector<DamageIndEffects> m_DamageIndEffects;
 
 	bool ChatDetection(int ClientId, const char *pMsg);
 	bool NameDetection(int ClientId, const char *pName, bool PreventNameChange = false);
-
-private:	
 
 	std::vector<CStringDetection> m_ChatDetection;
 	std::vector<CStringDetection> m_NameDetection;
@@ -707,6 +725,37 @@ private:
 	static void ConAccEdit(IConsole::IResult *pResult, void *pUserData);
 	static void ConAccForceLogin(IConsole::IResult *pResult, void *pUserData);
 	static void ConAccForceLogout(IConsole::IResult *pResult, void *pUserData);
+
+	static void ConRainbowBody(IConsole::IResult *pResult, void *pUserData);
+	static void ConRainbowFeet(IConsole::IResult *pResult, void *pUserData);
+	static void ConRainbowSpeed(IConsole::IResult *pResult, void *pUserData);
+	static void ConSparkle(IConsole::IResult *pResult, void *pUserData);
+	static void ConDotTrail(IConsole::IResult *pResult, void *pUserData);
+	static void ConStarTrail(IConsole::IResult *pResult, void *pUserData);
+	static void ConInverseAim(IConsole::IResult *pResult, void *pUserData);
+	static void ConLovely(IConsole::IResult *pResult, void *pUserData);
+	static void ConRotatingBall(IConsole::IResult *pResult, void *pUserData);
+	static void ConEpicCircle(IConsole::IResult *pResult, void *pUserData);
+	static void ConBloody(IConsole::IResult *pResult, void *pUserData);
+	static void ConHeartHat(IConsole::IResult *pResult, void *pUserData);
+
+	static void ConDeathEffect(IConsole::IResult *pResult, void *pUserData);
+	static void ConDamageIndEffect(IConsole::IResult *pResult, void *pUserData);
+
+	static void ConPhaseGun(IConsole::IResult *pResult, void *pUserData);
+
+	static void ConInvisible(IConsole::IResult *pResult, void *pUserData);
+	static void ConStrongBloody(IConsole::IResult *pResult, void *pUserData);
+	static void ConHookPower(IConsole::IResult *pResult, void *pUserData);
+	static void ConStaffInd(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetConfettiGun(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetEmoticonGun(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetPickupPet(IConsole::IResult *pResult, void *pUserData);
+
+	static void ConSnake(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetUfo(IConsole::IResult *pResult, void *pUserData);
+
+	static void ConHideCosmetics(IConsole::IResult *pResult, void *pUserData);
 
 	// Add
 	static void ConAddChatDetectionString(IConsole::IResult *pResult, void *pUserData);
@@ -727,6 +776,38 @@ private:
 	void RemoveNameDetectionString(const char *pString);
 	// List
 	static void ConListNameDetectionStrings(IConsole::IResult *pResult, void *pUserData);
+
+	static void ConShopBuyItem(IConsole::IResult *pResult, void *pUserData);
+	static void ConToggleItem(IConsole::IResult *pResult, void *pUserData);
+
+public:
+	CAccountSession m_Account[MAX_CLIENTS];
+	CAccounts m_AccountManager;
+
+	CVoteMenu m_VoteMenu;
+	CShop m_Shop;
+
+	void ClearVotes(int ClientId);
+	void SendEmote(int ClientId, int Type);
+
+	void CreateIndEffect(int Type, vec2 Pos, vec2 Direction, CClientMask Mask);
+
+	std::vector<LaserDeath> m_LaserDeaths;
+	void CreateLaserDeath(int Type, int pOwner, vec2 pPos, CClientMask pMask);
+	void SnapLaserEffect(int ClientId);
+
+	bool IsValidHookPower(int HookPower);
+	const char *HookTypeName(int HookType);
+
+	void UnsetTelekinesis(CEntity *pEntity);
+
+	bool SendFakeTuningParams(int ClientId, const CTuningParams &FakeTuning, bool RealTune = false);
+	bool ResetFakeTunes(int ClientId, int Zone);
+
+	void OnLogin(int ClientId);
+	void OnLogout(int ClientId);
+
+	void Explosion(vec2 Pos, CClientMask Mask);
 
 	// FoxNet>
 };

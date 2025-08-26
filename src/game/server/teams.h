@@ -118,6 +118,9 @@ public:
 	bool GetSaving(int TeamId) const;
 	void SetPractice(int Team, bool Enabled);
 	bool IsPractice(int Team);
+	// <FoxNet
+	CClientMask CosmeticMask(int Team, int Asker, bool Opposite);
+	// FoxNet>
 };
 
 #endif

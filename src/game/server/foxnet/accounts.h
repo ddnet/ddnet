@@ -21,6 +21,7 @@ enum
 	ACC_MIN_PASSW_LENGTH = 6,
 
 	ACC_FLAG_AUTOLOGIN = 1 << 0,
+	ACC_FLAG_HIDE_COSMETICS = 1 << 1,
 };
 
 struct CAccountSession

@@ -14,11 +14,25 @@
 #include <iterator>
 #include <string>
 #include <vector>
+#include <cstring>
 
 // Font: https://fsymbols.com/generators/smallcaps/
 constexpr const char *EMPTY_DESC = " ";
 constexpr const char *FANCY_LINES_DESC = "═─═─═─═─═─═─═─═─═─═─═";
+
 constexpr const char *SETTINGS_AUTO_LOGIN = "Auto Login";
+constexpr const char *SETTINGS_HIDE_COSMETICS = "Hide Cosmetics";
+
+// Admin Extra Cosmetics
+constexpr const char *ADMIN_COSM_PICKUPPET = "Pickup Pet";
+constexpr const char *ADMIN_COSM_STAFFIND = "Staff Indicator";
+constexpr const char *ADMIN_COSM_HEARTGUN = "Heart Gun";
+
+// Part of Cosmetics ig /shrug
+constexpr const char *ADMIN_ABILITY_HEART = "Heart Ability";
+constexpr const char *ADMIN_ABILITY_SHIELD = "Shield Ability";
+constexpr const char *ADMIN_ABILITY_FIREWORK = "Firework Ability";
+constexpr const char *ADMIN_ABILITY_TELEKINESIS = "Telekinesis Ability";
 
 IServer *CVoteMenu::Server() const { return GameServer()->Server(); }
 
@@ -26,12 +40,12 @@ void CVoteMenu::Init(CGameContext *pGameServer)
 {
 	m_pGameServer = pGameServer;
 
-	str_copy(m_aPages[Pages::VOTES], "Vᴏᴛᴇs");
-	str_copy(m_aPages[Pages::SETTINGS], "Sᴇᴛᴛɪɴɢs");
-	str_copy(m_aPages[Pages::ACCOUNT], "Aᴄᴄᴏᴜɴᴛ");
-	str_copy(m_aPages[Pages::SHOP], "Sʜᴏᴘ");
-	str_copy(m_aPages[Pages::INVENTORY], "Iɴᴠᴇɴᴛᴏʀʏ");
-	str_copy(m_aPages[Pages::ADMIN], "Aᴅᴍɪɴ");
+	str_copy(m_aPages[PAGE_VOTES], "Vᴏᴛᴇs");
+	str_copy(m_aPages[PAGE_SETTINGS], "Sᴇᴛᴛɪɴɢs");
+	str_copy(m_aPages[PAGE_ACCOUNT], "Aᴄᴄᴏᴜɴᴛ");
+	str_copy(m_aPages[PAGE_SHOP], "Sʜᴏᴘ");
+	str_copy(m_aPages[PAGE_INVENTORY], "Iɴᴠᴇɴᴛᴏʀʏ");
+	str_copy(m_aPages[PAGE_ADMIN], "Aᴅᴍɪɴ");
 }
 
 bool CVoteMenu::OnCallVote(const CNetMsg_Cl_CallVote *pMsg, int ClientId)
@@ -41,11 +55,15 @@ bool CVoteMenu::OnCallVote(const CNetMsg_Cl_CallVote *pMsg, int ClientId)
 
 	const int Page = m_aClientData[ClientId].m_Page;
 	const char *Vote = str_skip_voting_menu_prefixes(pMsg->m_pValue);
-	const char *pDescription = pMsg->m_pReason;
+	const char *pReason = pMsg->m_pReason;
+
+	std::optional<int> ReasonInt = std::nullopt;
+	if(pReason[0] && str_isallnum(pReason))
+		ReasonInt = str_toint(pReason);
 
 	CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
 
-	if(!Vote || !pDescription || !pPl)
+	if(!Vote || !pPl)
 		return false;
 
 	if(Page < 0 || Page >= NUM_PAGES)
@@ -53,7 +71,7 @@ bool CVoteMenu::OnCallVote(const CNetMsg_Cl_CallVote *pMsg, int ClientId)
 
 	CAccountSession &Acc = GameServer()->m_Account[ClientId];
 
-	for(int i = 0; i < Pages::NUM_PAGES; i++)
+	for(int i = 0; i < NUM_PAGES; i++)
 	{
 		if(!str_comp(Vote, m_aPages[i]))
 		{
@@ -64,7 +82,7 @@ bool CVoteMenu::OnCallVote(const CNetMsg_Cl_CallVote *pMsg, int ClientId)
 
 	if(IsPageAllowed(ClientId, Page))
 	{
-		if(Page == Pages::SETTINGS)
+		if(Page == PAGE_SETTINGS)
 		{
 			if(Acc.m_LoggedIn && !str_comp(Vote, SETTINGS_AUTO_LOGIN))
 			{
@@ -80,22 +98,83 @@ bool CVoteMenu::OnCallVote(const CNetMsg_Cl_CallVote *pMsg, int ClientId)
 				}
 				return true;
 			}
+			if(!str_comp(Vote, SETTINGS_HIDE_COSMETICS))
+			{
+				pPl->SetHideCosmetics(!pPl->m_HideCosmetics);
+				return true;
+			}
 		}
-		else if(Page == Pages::ACCOUNT)
+		else if(Page == PAGE_ACCOUNT)
 		{
+
 		}
-		else if(Page == Pages::SHOP)
+		else if(Page == PAGE_SHOP)
+		{		
+			for(const auto &Items : GameServer()->m_Shop.m_Items)
+			{
+				if(!str_comp(Items->Name(), ""))
+					continue;
+				if(Items->Price() == -1)
+					continue;
+
+				char aBuf[128];
+				str_format(aBuf, sizeof(aBuf), "%s | %d %s", Items->Name(), Items->Price(), g_Config.m_SvCurrencyName);
+
+				if(!str_comp(Vote, aBuf))
+				{
+					GameServer()->m_Shop.BuyItem(ClientId, Items->Name());
+					return true;
+				}
+			}
+		}
+		else if(Page == PAGE_INVENTORY)
 		{
+			if(pPl->m_HideCosmetics)
+			{
+				GameServer()->SendChatTarget(ClientId, "Turn on Cosmetics to enable them");
+				SetPage(ClientId, PAGE_SETTINGS);
+				return true;
+			}
+
+			// !New Cosmetic
+			if(IsOptionWithPrefix(Vote, "Rainbow Speed"))
+			{
+				if(ReasonInt.has_value())
+					pPl->m_Cosmetics.m_RainbowSpeed = ReasonInt.value();
+				else
+					GameServer()->SendChatTarget(ClientId, "Please specify the rainbow speed using the reason field");
+				return true;
+			}
+			if(IsOptionWithPrefix(Vote, "Emoticon Gun"))
+			{
+				if(ReasonInt.has_value())
+					pPl->ToggleItem("Emoticon Gun", ReasonInt.value());
+				else
+					GameServer()->SendChatTarget(ClientId, "Please specify the emote type using the reason field");
+				return true;
+			}
+
+			// Options that use the reason field go above
+			for(const auto &Items : GameServer()->m_Shop.m_Items)
+			{
+				if(!str_comp(Items->Name(), ""))
+					continue;
+				if(Items->Price() == -1)
+					continue;
+
+				if(!str_comp(Vote, Items->Name()))
+				{
+					pPl->ToggleItem(Items->Name(), 0);
+					return true;
+				}
+			}
 		}
-		else if(Page == Pages::INVENTORY)
-		{
-		}
-		else if(Page == Pages::ADMIN)
+		else if(Page == PAGE_ADMIN)
 		{
 		}
 	}
 
-	if(Page != Pages::VOTES)
+	if(Page != PAGE_VOTES)
 		return true;
 	return false;
 }
@@ -116,7 +195,7 @@ void CVoteMenu::Tick()
 
 void CVoteMenu::OnClientDrop(int ClientId)
 {
-	SetPage(ClientId, Pages::VOTES);
+	SetPage(ClientId, PAGE_VOTES);
 }
 
 void CVoteMenu::UpdatePages(int ClientId)
@@ -128,32 +207,60 @@ void CVoteMenu::UpdatePages(int ClientId)
 
 	if(!IsPageAllowed(ClientId, Page))
 	{
-		if(Page != Pages::VOTES)
-			SetPage(ClientId, Pages::VOTES);
+		if(Page != PAGE_VOTES)
+			SetPage(ClientId, PAGE_VOTES);
 		return;
 	}
+	CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
 	CAccountSession Acc = GameServer()->m_Account[ClientId];
+	CAccountSession &OldAcc = m_aClientData[ClientId].m_Account;
 
 	if(Acc.m_LoggedIn != m_aClientData[ClientId].m_Account.m_LoggedIn) // Check login status change
 		Changes = true;
 
-	if(Page == Pages::VOTES)
+	if(Page == PAGE_VOTES)
 		return;
 
-	if(Page == Pages::SETTINGS)
+	if(Page == PAGE_SETTINGS)
 	{
-		if(Acc.m_Flags != m_aClientData[ClientId].m_Account.m_Flags)
+		if(Acc.m_Flags != OldAcc.m_Flags)
 			Changes = true;
 	}
-	else if(Page == Pages::ACCOUNT)
+	else if(Page == PAGE_ACCOUNT)
 	{
-		if(mem_comp(&Acc, &m_aClientData[ClientId].m_Account, sizeof(Acc)) != 0)
+		if(Acc.m_Level != OldAcc.m_Level)
+			Changes = true;
+		if(Acc.m_XP != OldAcc.m_XP)
+			Changes = true;
+		if(Acc.m_Playtime != OldAcc.m_Playtime)
+			Changes = true;
+		if(Acc.m_Money != OldAcc.m_Money)
+			Changes = true;
+		if(Acc.m_Deaths != OldAcc.m_Deaths)
+			Changes = true;
+	}
+	else if(Page == PAGE_SHOP)
+	{
+		if(Acc.m_Money != OldAcc.m_Money)
+			Changes = true;
+		if(memcmp(Acc.m_Inventory, OldAcc.m_Inventory, sizeof(Acc.m_Inventory)) != 0)
+			Changes = true;
+
+		//if(mem_comp(&Acc, &m_aClientData[ClientId].m_Account, sizeof(Acc)) != 0)
+		//	Changes = true;
+	}
+	else if(Page == PAGE_INVENTORY)
+	{
+		if(memcmp(Acc.m_Inventory, OldAcc.m_Inventory, sizeof(Acc.m_Inventory)) != 0)
+			Changes = true;
+		if(memcmp(&pPl->m_Cosmetics, &m_aClientData[ClientId].m_Cosmetics, sizeof(pPl->m_Cosmetics)) != 0)
 			Changes = true;
 	}
 
 	if(Changes)
 	{
 		m_aClientData[ClientId].m_Account = GameServer()->m_Account[ClientId];
+		m_aClientData[ClientId].m_Cosmetics = pPl->m_Cosmetics;
 		PrepareVoteOptions(ClientId, Page);
 	}
 }
@@ -165,11 +272,11 @@ bool CVoteMenu::IsPageAllowed(int ClientId, int Page) const
 
 	const CAccountSession Acc = GameServer()->m_Account[ClientId];
 
-	if(IsFlagSet(g_Config.m_SvVoteMenuFlags, Page) && Page != Pages::ADMIN)
+	if(IsFlagSet(g_Config.m_SvVoteMenuFlags, Page) && Page != PAGE_ADMIN)
 		return false;
-	if(Page == Pages::ADMIN && Server()->GetAuthedState(ClientId) < AUTHED_ADMIN)
+	if(Page == PAGE_ADMIN && Server()->GetAuthedState(ClientId) < AUTHED_ADMIN)
 		return false;
-	if(!Acc.m_LoggedIn && (Page == Pages::SHOP || Page == Pages::INVENTORY))
+	if(!Acc.m_LoggedIn && (Page == PAGE_SHOP || Page == PAGE_INVENTORY))
 		return false;
 	return true;
 }
@@ -186,12 +293,12 @@ void CVoteMenu::PrepareVoteOptions(int ClientId, int Page)
 
 	switch(Page)
 	{
-	case Pages::VOTES: GameServer()->m_apPlayers[ClientId]->m_SendVoteIndex = 0; return;
-	case Pages::SETTINGS: SendPageSettings(ClientId); break;
-	case Pages::ACCOUNT: SendPageAccount(ClientId); break;
-	case Pages::SHOP: SendPageShop(ClientId); break;
-	case Pages::INVENTORY: SendPageInventory(ClientId); break;
-	case Pages::ADMIN: SendPageAdmin(ClientId); break;
+	case PAGE_VOTES: GameServer()->m_apPlayers[ClientId]->m_SendVoteIndex = 0; return;
+	case PAGE_SETTINGS: SendPageSettings(ClientId); break;
+	case PAGE_ACCOUNT: SendPageAccount(ClientId); break;
+	case PAGE_SHOP: SendPageShop(ClientId); break;
+	case PAGE_INVENTORY: SendPageInventory(ClientId); break;
+	case PAGE_ADMIN: SendPageAdmin(ClientId); break;
 	}
 
 	const int NumVotesToSend = m_vDescriptions.size();
@@ -229,7 +336,7 @@ void CVoteMenu::PrepareVoteOptions(int ClientId, int Page)
 int CVoteMenu::GetPage(int ClientId) const
 {
 	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
-		return Pages::VOTES;
+		return PAGE_VOTES;
 	return m_aClientData[ClientId].m_Page;
 }
 
@@ -237,7 +344,7 @@ void CVoteMenu::SetPage(int ClientId, int Page)
 {
 	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
 		return;
-	if(Page < 0 || Page >= Pages::NUM_PAGES)
+	if(Page < 0 || Page >= NUM_PAGES)
 		return;
 
 	m_aClientData[ClientId].m_Page = Page;
@@ -250,11 +357,12 @@ void CVoteMenu::SetPage(int ClientId, int Page)
 
 void CVoteMenu::SendPageSettings(int ClientId)
 {
-	// CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
+	CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
 	const CAccountSession Acc = GameServer()->m_Account[ClientId];
 
 	if(Acc.m_LoggedIn)
-		AddDescriptionCheckBox(SETTINGS_AUTO_LOGIN, Acc.m_Flags & ACC_FLAG_AUTOLOGIN);
+		AddVoteCheckBox(SETTINGS_AUTO_LOGIN, Acc.m_Flags & ACC_FLAG_AUTOLOGIN);
+	AddVoteCheckBox(SETTINGS_HIDE_COSMETICS, pPl->m_HideCosmetics);
 }
 
 void CVoteMenu::SendPageAccount(int ClientId)
@@ -264,20 +372,20 @@ void CVoteMenu::SendPageAccount(int ClientId)
 
 	if(!Acc.m_LoggedIn)
 	{
-		AddDescription("You are not logged in.");
-		AddDescription(EMPTY_DESC);
-		AddDescription("1 - use /register <Name> <Password> <Password>");
-		AddDescription("2 - login using /login <Name> <Password>");
+		AddVoteText("You are not logged in.");
+		AddVoteSeperator();
+		AddVoteText("1 - use /register <Name> <Password> <Password>");
+		AddVoteText("2 - login using /login <Name> <Password>");
 		return;
 	}
 
 	char aBuf[VOTE_DESC_LENGTH];
 
-	AddDescription("╭─────────       Pʀᴏғɪʟᴇ");
+	AddVoteText("╭─────────       Pʀᴏғɪʟᴇ");
 	str_format(aBuf, sizeof(aBuf), "│ Account Name: %s", Acc.m_Username);
-	AddDescription(aBuf);
+	AddVoteText(aBuf);
 	str_format(aBuf, sizeof(aBuf), "│ Last Player Name: %s", Acc.m_LastName);
-	AddDescription(aBuf);
+	AddVoteText(aBuf);
 
 	char TimeBuf[64];
 
@@ -285,61 +393,289 @@ void CVoteMenu::SendPageAccount(int ClientId)
 	if(FormatUnixTime(Acc.m_RegisterDate, TimeBuf, sizeof(TimeBuf), "%Y-%m-%d %H:%M:%S"))
 	{
 		str_format(aBuf, sizeof(aBuf), "│ Register Date: %s", TimeBuf);
-		AddDescription(aBuf);
+		AddVoteText(aBuf);
 	}
 	else
 	{
-		AddDescription("│ Register Date: n/a");
+		AddVoteText("│ Register Date: n/a");
 	}
 
-	AddDescription("├──────      Sᴛᴀᴛs");
+	AddVoteText("├──────      Sᴛᴀᴛs");
 
 	str_format(aBuf, sizeof(aBuf), "│ Level [%d]", Acc.m_Level);
-	AddDescription(aBuf);
+	AddVoteText(aBuf);
 
 	int CurXp = Acc.m_XP;
 	int ClampedLevel = std::clamp((int)Acc.m_Level, 0, 4);
 	int NeededXp = GameServer()->m_AccountManager.m_NeededXp[ClampedLevel];
 
 	str_format(aBuf, sizeof(aBuf), "│ XP [%d/%d]", CurXp, NeededXp);
-	AddDescription(aBuf);
+	AddVoteText(aBuf);
 
 	float PlayTimeHours = Acc.m_Playtime / 60.0f;
 	str_format(aBuf, sizeof(aBuf), "│ Playtime: %.1f Hour%s", PlayTimeHours, PlayTimeHours == 1 ? "" : "s");
 	if(Acc.m_Playtime < 100)
 		str_format(aBuf, sizeof(aBuf), "│ Playtime: %lld Minute%s", (int)Acc.m_Playtime, Acc.m_Playtime == 1 ? "" : "s");
-	AddDescription(aBuf);
+	AddVoteText(aBuf);
 
 	str_format(aBuf, sizeof(aBuf), "│ %s: %lld", g_Config.m_SvCurrencyName, Acc.m_Money);
-	AddDescription(aBuf);
+	AddVoteText(aBuf);
 
 	str_format(aBuf, sizeof(aBuf), "│ Deaths: %d", Acc.m_Deaths);
-	AddDescription(aBuf);
+	AddVoteText(aBuf);
 
-	AddDescription("╰──────────────────────────");
+	AddVoteText("╰──────────────────────────");
 }
 
 void CVoteMenu::SendPageShop(int ClientId)
 {
-	// CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
-	AddDescription("ToDo");
+	CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
+	const CAccountSession Acc = GameServer()->m_Account[ClientId];
+
+	if(!Acc.m_LoggedIn)
+	{
+		AddVoteText("You are not logged in.");
+		AddVoteSeperator();
+		AddVoteText("1 - use /register <Name> <Password> <Password>");
+		AddVoteText("2 - login using /login <Name> <Password>");
+		return;
+	}
+	std::vector<std::string> RainbowItems;
+	std::vector<std::string> GunItems;
+	std::vector<std::string> IndicatorItems;
+	std::vector<std::string> KillEffectItems;
+	std::vector<std::string> TrailItems;
+	std::vector<std::string> OtherItems;
+
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "%s: %lld", g_Config.m_SvCurrencyName, Acc.m_Money);
+	AddVoteText(aBuf);
+	AddVoteSeperator();
+
+	for(const auto &Items : GameServer()->m_Shop.m_Items)
+	{
+		if(!str_comp(Items->Name(), ""))
+			continue;
+		if(Items->Price() == -1)
+			continue;
+		if(pPl->OwnsItem(Items->Name()))
+			continue;
+		if(Acc.m_Level < Items->MinLevel())
+			continue;
+
+		str_format(aBuf, sizeof(aBuf), "%s | %d %s", Items->Name(), Items->Price(), g_Config.m_SvCurrencyName);
+
+		if(Items->Type() == TYPE_RAINBOW)
+			RainbowItems.push_back(std::string(aBuf));
+		else if(Items->Type() == TYPE_GUN)
+			GunItems.push_back(std::string(aBuf));
+		else if(Items->Type() == TYPE_INDICATOR)
+			IndicatorItems.push_back(std::string(aBuf));
+		else if(Items->Type() == TYPE_DEATHS)
+			KillEffectItems.push_back(std::string(aBuf));
+		else if(Items->Type() == TYPE_TRAIL)
+			TrailItems.push_back(std::string(aBuf));
+		else
+			OtherItems.push_back(std::string(aBuf));
+	}
+	if(!RainbowItems.empty())
+	{
+		AddVoteSubheader("Rᴀɪɴʙᴏᴡ");
+		for(const auto &Item : RainbowItems)
+		{
+			AddVoteText(Item.c_str());
+		}
+		AddVoteSeperator();
+	}
+	if(!GunItems.empty())
+	{
+		AddVoteSubheader("Gᴜɴs");
+		for(const auto &Item : GunItems)
+		{
+			AddVoteText(Item.c_str());
+		}
+		AddVoteSeperator();
+	}
+	if(!IndicatorItems.empty())
+	{
+		AddVoteSubheader("Gᴜɴ Hɪᴛ Eғғᴇᴄᴛs");
+		for(const auto &Item : IndicatorItems)
+		{
+			AddVoteText(Item.c_str());
+		}
+		AddVoteSeperator();
+	}
+	if(!KillEffectItems.empty())
+	{
+		AddVoteSubheader("Dᴇᴀᴛʜ Eғғᴇᴄᴛs");
+		for(const auto &Item : KillEffectItems)
+		{
+			AddVoteText(Item.c_str());
+		}
+		AddVoteSeperator();
+	}
+	if(!TrailItems.empty())
+	{
+		AddVoteSubheader("Tʀᴀɪʟs");
+		for(const auto &Item : TrailItems)
+		{
+			AddVoteText(Item.c_str());
+		}
+		AddVoteSeperator();
+	}
+	if(!OtherItems.empty())
+	{
+		AddVoteSubheader("Oᴛʜᴇʀ");
+		for(const auto &Item : OtherItems)
+		{
+			AddVoteText(Item.c_str());
+		}
+	}
 }
 
 void CVoteMenu::SendPageInventory(int ClientId)
 {
-	// CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
-	AddDescription("ToDo");
+	CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
+	const CAccountSession Acc = GameServer()->m_Account[ClientId];
+	if(!Acc.m_LoggedIn)
+	{
+		AddVoteText("You are not logged in.");
+		AddVoteSeperator();
+		AddVoteText("1 - use /register <Name> <Password> <Password>");
+		AddVoteText("2 - login using /login <Name> <Password>");
+		return;
+	}
+
+	AddVoteSubheader("Cᴏsᴍᴇᴛɪᴄs");
+	AddVoteSeperator();
+
+	DoCosmeticVotes(ClientId, false);
+}
+
+void CVoteMenu::DoCosmeticVotes(int ClientId, bool Authed)
+{
+	CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
+
+	// !New Cosmetic
+	std::vector<std::string> RainbowItems;
+	std::vector<std::string> GunItems;
+	std::vector<std::string> IndicatorItems;
+	std::vector<std::string> KillEffectItems;
+	std::vector<std::string> TrailItems;
+	std::vector<std::string> OtherItems;
+
+	for(const auto &Items : GameServer()->m_Shop.m_Items)
+	{
+		if(!Authed)
+		{
+			if(!str_comp(Items->Name(), ""))
+				continue;
+			if(Items->Price() == -1)
+				continue;
+			if(!(pPl->OwnsItem(Items->Name())))
+				continue;
+		}
+
+		if(Items->Type() == TYPE_RAINBOW)
+			RainbowItems.push_back(std::string(Items->Name()));
+		else if(Items->Type() == TYPE_GUN)
+			GunItems.push_back(std::string(Items->Name()));
+		else if(Items->Type() == TYPE_INDICATOR)
+			IndicatorItems.push_back(std::string(Items->Name()));
+		else if(Items->Type() == TYPE_DEATHS)
+			KillEffectItems.push_back(std::string(Items->Name()));
+		else if(Items->Type() == TYPE_TRAIL)
+			TrailItems.push_back(std::string(Items->Name()));
+		else
+			OtherItems.push_back(std::string(Items->Name()));
+	}
+
+	if(Authed)
+	{
+		AddVoteSubheader("Uɴᴀᴠᴀɪʟᴀʙʟᴇ");
+		AddVoteCheckBox(ADMIN_COSM_PICKUPPET, pPl->m_Cosmetics.m_PickupPet);
+		AddVoteCheckBox(ADMIN_COSM_STAFFIND, pPl->m_Cosmetics.m_StaffInd);
+		//if(pPl->GetCharacter())
+		//	AddVoteCheckBox(CADMIN_COSM_HEARTGUN, pPl->GetCharacter()->GetWeaponGot(WEAPON_HEART_GUN));
+		//AddVoteSeperator();
+		// 
+		//AddVoteSubheader("Aʙɪʟɪᴛɪᴇs");
+		//AddVoteCheckBox(ADMIN_ABILITY_HEART, pPl->m_Cosmetics.m_Ability == ABILITY_HEART);
+		//AddVoteCheckBox(ADMIN_ABILITY_SHIELD, pPl->m_Cosmetics.m_Ability == ABILITY_SHIELD);
+		//AddVoteCheckBox(ADMIN_ABILITY_FIREWORK, pPl->m_Cosmetics.m_Ability == ABILITY_FIREWORK);
+		//AddVoteCheckBox(ADMIN_ABILITY_TELEKINESIS, pPl->m_Cosmetics.m_Ability == ABILITY_TELEKINESIS);
+		AddVoteSeperator();
+
+	}
+
+	if(!RainbowItems.empty())
+	{
+		AddVoteSubheader("Rᴀɪɴʙᴏᴡ");
+		AddVoteValueOption("Rainbow Speed", pPl->m_Cosmetics.m_RainbowSpeed, 20, BULLET_ARROW);
+		for(const auto &Item : RainbowItems)
+		{
+			AddVoteCheckBox(Item.c_str(), pPl->ItemEnabled(Item.c_str()));
+		}
+		AddVoteSeperator();
+	}
+	if(!GunItems.empty())
+	{
+		AddVoteSubheader("Gᴜɴs");
+		for(const auto &Item : GunItems)
+		{
+			if(!str_comp(Item.c_str(), "Emoticon Gun"))
+				AddVoteValueOption(Item.c_str(), pPl->m_Cosmetics.m_EmoticonGun, 16, BULLET_NONE);
+			else
+				AddVoteCheckBox(Item.c_str(), pPl->ItemEnabled(Item.c_str()));
+		}
+		AddVoteSeperator();
+	}
+	if(!IndicatorItems.empty())
+	{
+		AddVoteSubheader("Gᴜɴ Hɪᴛ Eғғᴇᴄᴛs");
+		for(const auto &Item : IndicatorItems)
+		{
+			AddVoteCheckBox(Item.c_str(), pPl->ItemEnabled(Item.c_str()));
+		}
+		AddVoteSeperator();
+	}
+	if(!KillEffectItems.empty())
+	{
+		AddVoteSubheader("Dᴇᴀᴛʜ Eғғᴇᴄᴛs");
+		for(const auto &Item : KillEffectItems)
+		{
+			AddVoteCheckBox(Item.c_str(), pPl->ItemEnabled(Item.c_str()));
+		}
+		AddVoteSeperator();
+	}
+	if(!TrailItems.empty())
+	{
+		AddVoteSubheader("Tʀᴀɪʟs");
+		for(const auto &Item : TrailItems)
+		{
+			AddVoteCheckBox(Item.c_str(), pPl->ItemEnabled(Item.c_str()));
+		}
+		AddVoteSeperator();
+	}
+	if(!OtherItems.empty())
+	{
+		AddVoteSubheader("Oᴛʜᴇʀ");
+		for(const auto &Item : OtherItems)
+		{
+			AddVoteCheckBox(Item.c_str(), pPl->ItemEnabled(Item.c_str()));
+		}
+	}
 }
 
 void CVoteMenu::SendPageAdmin(int ClientId)
 {
 	// CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
-	AddDescription("ToDo");
+	AddVoteText("ToDo");
 }
 
 void CVoteMenu::AddHeader(int ClientId)
 {
-	const int NumVotesToSend = Pages::NUM_PAGES + 3;
+	const int NumVotesToSend = NUM_PAGES + 3;
 
 	std::vector<std::string> Descriptions;
 
@@ -349,11 +685,11 @@ void CVoteMenu::AddHeader(int ClientId)
 		if(!IsPageAllowed(ClientId, i))
 			continue;
 
-		if(i == Pages::NUM_PAGES)
+		if(i == NUM_PAGES)
 			Descriptions.emplace_back(EMPTY_DESC);
-		else if(i == Pages::NUM_PAGES + 1)
+		else if(i == NUM_PAGES + 1)
 			Descriptions.emplace_back(FANCY_LINES_DESC);
-		else if(i == Pages::NUM_PAGES + 2)
+		else if(i == NUM_PAGES + 2)
 			Descriptions.emplace_back(EMPTY_DESC);
 		else
 		{
@@ -383,23 +719,47 @@ void CVoteMenu::AddHeader(int ClientId)
 	GameServer()->m_apPlayers[ClientId]->m_SendVoteIndex = 0;
 }
 
-void CVoteMenu::AddDescriptionPrefix(const char *pDesc, int Prefix)
+void CVoteMenu::AddVotePrefix(const char *pDesc, int Prefix)
 {
-	const char *pPrefixes[] = {"•", "─", ">", "⇨", "⁃", "‣", "◆", "◇"};
+	const char *pPrefixes[] = {"", "•", "─", ">", "⇨", "⁃", "‣", "◆", "◇"};
 
 	if(Prefix < 0 || Prefix >= (int)std::size(pPrefixes))
 	{
-		AddDescription(pDesc);
+		AddVoteText(pDesc);
 		return;
 	}
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "%s %s", pPrefixes[Prefix], pDesc);
-	AddDescription(aBuf);
+	AddVoteText(aBuf);
 }
 
-void CVoteMenu::AddDescriptionCheckBox(const char *pDesc, bool Checked)
+void CVoteMenu::AddVoteValueOption(const char *pDescription, int Value, int Max, int BulletPoint)
+{
+	char aBuf[VOTE_DESC_LENGTH];
+	if(Max == -1)
+	{
+		str_format(aBuf, sizeof(aBuf), "%s: %d", pDescription, Value);
+	}
+	else
+	{
+		str_format(aBuf, sizeof(aBuf), "%s: %d/%d", pDescription, Value, Max);
+	}
+	AddVotePrefix(aBuf, BulletPoint);
+}
+
+void CVoteMenu::AddVoteSubheader(const char *pDesc)
+{
+	const char *pPrefixes[] = {"•", "─", ">", "⇨", "⁃", "‣", "◆", "◇"};
+
+	char aBuf[128];
+	//str_format(aBuf, sizeof(aBuf), "═─═ %s ═─═", pDesc);
+	str_format(aBuf, sizeof(aBuf), "─── %s ───", pDesc);
+	AddVoteText(aBuf);
+}
+
+void CVoteMenu::AddVoteCheckBox(const char *pDesc, bool Checked)
 {
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "%s %s", Checked ? "☒" : "☐", pDesc);
-	AddDescription(aBuf);
+	AddVoteText(aBuf);
 }

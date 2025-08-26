@@ -13,12 +13,86 @@
 #include "foxnet/accounts.h"
 #include <memory>
 #include <optional>
+#include "foxnet/cosmetics/pickup_pet.h"
 
 class CCharacter;
 class CGameContext;
 class IServer;
 struct CNetObj_PlayerInput;
 struct CScorePlayerResult;
+
+// <FoxNet
+enum HookTypes
+{
+	HOOK_NORMAL = 0,
+	HOOK_BLOODY,
+	HOOK_RAINBOW,
+	NUM_HOOKS
+};
+
+enum Indicators
+{
+	IND_NONE = 0,
+	IND_CLOCKWISE,
+	IND_COUNTERWISE,
+	IND_INWARD,
+	IND_OUTWARD,
+	IND_LINE,
+	IND_CRISSCROSS,
+	NUM_DAMAGE_IND
+};
+
+enum KillEffects
+{
+	DEATH_NONE = 0,
+	DEATH_HAMMERHIT,
+	DEATH_EXPLOSION,
+	DEATH_DAMAGEIND,
+	DEATH_LASER,
+	NUM_DEATHS
+};
+
+enum TrailTypes
+{
+	TRAIL_NONE = 0,
+	TRAIL_STAR,
+	TRAIL_DOT,
+	NUM_TRAILS
+};
+
+struct CCosmetics
+{
+	int m_Ability = 0;
+	bool m_EpicCircle = false;
+	bool m_Lovely = false;
+	bool m_RotatingBall = false;
+	bool m_Sparkle = false;
+	int m_HookPower = 0;
+	bool m_Bloody = false;
+	bool m_InverseAim = false;
+	bool m_HeartHat = false;
+	int m_DeathEffect = 0;
+
+	// Guns
+	int m_EmoticonGun = 0;
+	bool m_ConfettiGun = false;
+	bool m_PhaseGun = false;
+	int m_DamageIndType = 0;
+
+	// Trails
+	int m_Trail = 0;
+
+	// Rainbow
+	bool m_RainbowFeet = false;
+	bool m_RainbowBody = false;
+	int m_RainbowSpeed = 2;
+
+	bool m_StrongBloody = false;
+	bool m_StaffInd = false;
+	bool m_PickupPet = false;
+};
+
+// FoxNet>
 
 // player object
 class CPlayer
@@ -241,8 +315,18 @@ public:
 	CSaveTee m_LastTeleTee;
 	std::optional<CSaveTee> m_LastDeath;
 
-	//<FoxNet
-	void FoxNetTick();
+	// <FoxNet
+	bool m_HideCosmetics = false;
+
+	CCosmetics m_Cosmetics;
+
+	bool m_Invisible;
+	bool m_Obfuscated;
+	bool m_Vanish;
+	int m_ExtraPing = 0;
+	bool m_IgnoreGamelayer;
+	bool m_TelekinesisImmunity;
+	bool m_SpiderHook;
 
 	CAccountSession *Acc();
 
@@ -251,6 +335,61 @@ public:
 	bool CheckLevelUp(int64_t Amount, bool Silent = false);
 	void GiveMoney(int64_t Amount, const char *pMessage = "");
 
+	bool OwnsItem(const char *pItemName);
+	bool ToggleItem(const char *pItemName, int Set);
+
+	void UpdateActiveItems();
+
+	int GetItemToggle(const char *pItemName) const;
+	bool ItemEnabled(const char *pItemName) const;
+
+	void HookPower(int Extra);
+	void SetEmoticonGun(int Type);
+	void SetExtraPing(int Type);
+	void SetIgnoreGameLayer(bool Active);
+	void SetObfuscated(bool Active);
+	void SetInvisible(bool Active);
+	void SetTelekinesisImmunity(bool Active);
+	void SetAbility(int Type);
+
+	// Death Effect
+	void SetDeathEffect(int Type);
+	void SetPickupPet(bool Active);
+	void SetHeartHat(bool Active);
+	void SetStaffInd(bool Active);
+	void SetStrongBloody(bool Active);
+
+	void SetHideCosmetics(bool Set);
+
+	// Cosmetics
+	void SetRainbowBody(bool Active);
+	void SetRainbowFeet(bool Active);
+	void SetSparkle(bool Active);
+	void SetInverseAim(bool Active);
+	void SetLovely(bool Active);
+	void SetRotatingBall(bool Active);
+	void SetEpicCircle(bool Active);
+	void SetBloody(bool Active);
+
+	// Trails
+	void SetTrail(int Type);
+
+	// Gun effects
+	void SetConfettiGun(bool Active);
+	void SetPhaseGun(bool Active);
+	void SetDamageIndType(int Type);
+
+	void DisableAllCosmetics();
+
+	CPickupPet *m_pPickupPet;
+
+private:
+	void OverrideName(int SnappingClient, CNetObj_ClientInfo *pClientInfo);
+
+	int m_RainbowColor;
+	void RainbowSnap(int SnappingClient, CNetObj_ClientInfo *pClientInfo);
+	void RainbowTick();
+	void FoxNetTick();
 	// FoxNet>
 };
 
