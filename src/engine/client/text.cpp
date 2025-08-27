@@ -1476,7 +1476,7 @@ public:
 		TextContainer.m_Y = pCursor->m_Y;
 		TextContainer.m_Flags = pCursor->m_Flags;
 
-		if(pCursor->m_LineWidth <= 0)
+		if(pCursor->m_LineWidth <= 0.0f)
 			TextContainer.m_RenderFlags = m_RenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE;
 		else
 			TextContainer.m_RenderFlags = m_RenderFlags;
@@ -1537,7 +1537,7 @@ public:
 		const SGlyph *pEllipsisGlyph = nullptr;
 		if(pCursor->m_Flags & TEXTFLAG_ELLIPSIS_AT_END)
 		{
-			if(pCursor->m_LineWidth != -1 && pCursor->m_LineWidth < TextWidth(pCursor->m_FontSize, pText, -1, -1.0f))
+			if(pCursor->m_LineWidth > 0.0f && pCursor->m_LineWidth < TextWidth(pCursor->m_FontSize, pText))
 			{
 				pEllipsisGlyph = m_pGlyphMap->GetGlyph(0x2026, ActualSize); // …
 				if(pEllipsisGlyph == nullptr)
@@ -1660,7 +1660,7 @@ public:
 		{
 			bool NewLine = false;
 			const char *pBatchEnd = pEnd;
-			if(pCursor->m_LineWidth > 0 && !(pCursor->m_Flags & TEXTFLAG_STOP_AT_END) && !(pCursor->m_Flags & TEXTFLAG_ELLIPSIS_AT_END))
+			if(pCursor->m_LineWidth > 0.0f && !(pCursor->m_Flags & TEXTFLAG_STOP_AT_END) && !(pCursor->m_Flags & TEXTFLAG_ELLIPSIS_AT_END))
 			{
 				int Wlen = minimum(WordLength(pCurrent), (int)(pEnd - pCurrent));
 				CTextCursor Compare = *pCursor;
@@ -1670,7 +1670,7 @@ public:
 				Compare.m_Y = DrawY;
 				Compare.m_Flags &= ~TEXTFLAG_RENDER;
 				Compare.m_Flags |= TEXTFLAG_DISALLOW_NEWLINE;
-				Compare.m_LineWidth = -1;
+				Compare.m_LineWidth = -1.0f;
 				TextEx(&Compare, pCurrent, Wlen);
 
 				if(Compare.m_X - DrawX > pCursor->m_LineWidth)
@@ -1751,7 +1751,8 @@ public:
 						{
 							CharKerningEllipsis = m_pGlyphMap->Kerning(pGlyph, pEllipsisGlyph).x * Scale * pCursor->m_AlignedFontSize;
 						}
-						if(DrawX + CharKerning + Advance + CharKerningEllipsis + AdvanceEllipsis - pCursor->m_StartX > pCursor->m_LineWidth)
+						if(pCursor->m_LineWidth > 0.0f &&
+							DrawX + CharKerning + Advance + CharKerningEllipsis + AdvanceEllipsis - pCursor->m_StartX > pCursor->m_LineWidth)
 						{
 							// we hit the end, only render ellipsis and finish
 							pTmp = pEllipsis;
@@ -1760,7 +1761,9 @@ public:
 						}
 					}
 
-					if(pCursor->m_Flags & TEXTFLAG_STOP_AT_END && (DrawX + CharKerning) + Advance - pCursor->m_StartX > pCursor->m_LineWidth)
+					if(pCursor->m_LineWidth > 0.0f &&
+						(pCursor->m_Flags & TEXTFLAG_STOP_AT_END) != 0 &&
+						(DrawX + CharKerning) + Advance - pCursor->m_StartX > pCursor->m_LineWidth)
 					{
 						// we hit the end of the line, no more to render or count
 						pCurrent = pEnd;
