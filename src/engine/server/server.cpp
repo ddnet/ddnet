@@ -16,6 +16,7 @@
 #include <engine/engine.h>
 #include <engine/map.h>
 #include <engine/server.h>
+#include <engine/server/authmanager.h>
 #include <engine/shared/compression.h>
 #include <engine/shared/config.h>
 #include <engine/shared/console.h>
@@ -1996,11 +1997,11 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 			if(!pName[0])
 			{
-				if(m_AuthManager.CheckKey((KeySlot = m_AuthManager.DefaultKey(AUTHED_ADMIN)), pPw))
+				if(m_AuthManager.CheckKey((KeySlot = m_AuthManager.DefaultKey(RoleName::ADMIN)), pPw))
 					AuthLevel = AUTHED_ADMIN;
-				else if(m_AuthManager.CheckKey((KeySlot = m_AuthManager.DefaultKey(AUTHED_MOD)), pPw))
+				else if(m_AuthManager.CheckKey((KeySlot = m_AuthManager.DefaultKey(RoleName::MODERATOR)), pPw))
 					AuthLevel = AUTHED_MOD;
-				else if(m_AuthManager.CheckKey((KeySlot = m_AuthManager.DefaultKey(AUTHED_HELPER)), pPw))
+				else if(m_AuthManager.CheckKey((KeySlot = m_AuthManager.DefaultKey(RoleName::HELPER)), pPw))
 					AuthLevel = AUTHED_HELPER;
 			}
 			else
@@ -3570,9 +3571,11 @@ void CServer::ConAuthAdd(IConsole::IResult *pResult, void *pUser)
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "level can be one of {\"admin\", \"mod(erator)\", \"helper\"}");
 		return;
 	}
+	// back compat to change "mod", "modder" and so on as parameters to "moderator"
+	pLevel = CAuthManager::AuthLevelToRoleName(Level);
 
 	bool NeedUpdate = !pManager->NumNonDefaultKeys();
-	if(pManager->AddKey(pIdent, pPw, Level) < 0)
+	if(pManager->AddKey(pIdent, pPw, pLevel) < 0)
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident already exists");
 	else
 	{
@@ -3604,6 +3607,8 @@ void CServer::ConAuthAddHashed(IConsole::IResult *pResult, void *pUser)
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "level can be one of {\"admin\", \"mod(erator)\", \"helper\"}");
 		return;
 	}
+	// back compat to change "mod", "modder" and so on as parameters to "moderator"
+	pLevel = CAuthManager::AuthLevelToRoleName(Level);
 
 	MD5_DIGEST Hash;
 	unsigned char aSalt[SALT_BYTES];
@@ -3621,7 +3626,7 @@ void CServer::ConAuthAddHashed(IConsole::IResult *pResult, void *pUser)
 
 	bool NeedUpdate = !pManager->NumNonDefaultKeys();
 
-	if(pManager->AddKeyHash(pIdent, Hash, aSalt, Level) < 0)
+	if(pManager->AddKeyHash(pIdent, Hash, aSalt, pLevel) < 0)
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident already exists");
 	else
 	{
@@ -3653,8 +3658,10 @@ void CServer::ConAuthUpdate(IConsole::IResult *pResult, void *pUser)
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "level can be one of {\"admin\", \"mod(erator)\", \"helper\"}");
 		return;
 	}
+	// back compat to change "mod", "modder" and so on as parameters to "moderator"
+	pLevel = CAuthManager::AuthLevelToRoleName(Level);
 
-	pManager->UpdateKey(KeySlot, pPw, Level);
+	pManager->UpdateKey(KeySlot, pPw, pLevel);
 	pThis->LogoutKey(KeySlot, "key update");
 
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "key updated");
@@ -3683,6 +3690,8 @@ void CServer::ConAuthUpdateHashed(IConsole::IResult *pResult, void *pUser)
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "level can be one of {\"admin\", \"mod(erator)\", \"helper\"}");
 		return;
 	}
+	// back compat to change "mod", "modder" and so on as parameters to "moderator"
+	pLevel = CAuthManager::AuthLevelToRoleName(Level);
 
 	MD5_DIGEST Hash;
 	unsigned char aSalt[SALT_BYTES];
@@ -3698,7 +3707,7 @@ void CServer::ConAuthUpdateHashed(IConsole::IResult *pResult, void *pUser)
 		return;
 	}
 
-	pManager->UpdateKeyHash(KeySlot, Hash, aSalt, Level);
+	pManager->UpdateKeyHash(KeySlot, Hash, aSalt, pLevel);
 	pThis->LogoutKey(KeySlot, "key update");
 
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "key updated");
@@ -3726,13 +3735,9 @@ void CServer::ConAuthRemove(IConsole::IResult *pResult, void *pUser)
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "key removed, all users logged out");
 }
 
-static void ListKeysCallback(const char *pIdent, int Level, void *pUser)
+static void ListKeysCallback(const char *pIdent, const char *pRoleName, void *pUser)
 {
-	static const char LSTRING[][10] = {"helper", "moderator", "admin"};
-
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "%s %s", pIdent, LSTRING[Level - 1]);
-	((CServer *)pUser)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", aBuf);
+	log_info("auth", "%s %s", pIdent, pRoleName);
 }
 
 void CServer::ConAuthList(IConsole::IResult *pResult, void *pUser)
@@ -4149,11 +4154,11 @@ void CServer::LogoutKey(int Key, const char *pReason)
 			LogoutClient(i, pReason);
 }
 
-void CServer::ConchainRconPasswordChangeGeneric(int Level, const char *pCurrent, IConsole::IResult *pResult)
+void CServer::ConchainRconPasswordChangeGeneric(const char *pRoleName, const char *pCurrent, IConsole::IResult *pResult)
 {
 	if(pResult->NumArguments() == 1)
 	{
-		int KeySlot = m_AuthManager.DefaultKey(Level);
+		int KeySlot = m_AuthManager.DefaultKey(pRoleName);
 		const char *pNew = pResult->GetString(0);
 		if(str_comp(pCurrent, pNew) == 0)
 		{
@@ -4161,7 +4166,7 @@ void CServer::ConchainRconPasswordChangeGeneric(int Level, const char *pCurrent,
 		}
 		if(KeySlot == -1 && pNew[0])
 		{
-			m_AuthManager.AddDefaultKey(Level, pNew);
+			m_AuthManager.AddDefaultKey(pRoleName, pNew);
 		}
 		else if(KeySlot >= 0)
 		{
@@ -4172,7 +4177,7 @@ void CServer::ConchainRconPasswordChangeGeneric(int Level, const char *pCurrent,
 			}
 			else
 			{
-				m_AuthManager.UpdateKey(KeySlot, pNew, Level);
+				m_AuthManager.UpdateKey(KeySlot, pNew, pRoleName);
 				LogoutKey(KeySlot, "key update");
 			}
 		}
@@ -4182,21 +4187,21 @@ void CServer::ConchainRconPasswordChangeGeneric(int Level, const char *pCurrent,
 void CServer::ConchainRconPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CServer *pThis = static_cast<CServer *>(pUserData);
-	pThis->ConchainRconPasswordChangeGeneric(AUTHED_ADMIN, pThis->Config()->m_SvRconPassword, pResult);
+	pThis->ConchainRconPasswordChangeGeneric(RoleName::ADMIN, pThis->Config()->m_SvRconPassword, pResult);
 	pfnCallback(pResult, pCallbackUserData);
 }
 
 void CServer::ConchainRconModPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CServer *pThis = static_cast<CServer *>(pUserData);
-	pThis->ConchainRconPasswordChangeGeneric(AUTHED_MOD, pThis->Config()->m_SvRconModPassword, pResult);
+	pThis->ConchainRconPasswordChangeGeneric(RoleName::MODERATOR, pThis->Config()->m_SvRconModPassword, pResult);
 	pfnCallback(pResult, pCallbackUserData);
 }
 
 void CServer::ConchainRconHelperPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CServer *pThis = static_cast<CServer *>(pUserData);
-	pThis->ConchainRconPasswordChangeGeneric(AUTHED_HELPER, pThis->Config()->m_SvRconHelperPassword, pResult);
+	pThis->ConchainRconPasswordChangeGeneric(RoleName::HELPER, pThis->Config()->m_SvRconHelperPassword, pResult);
 	pfnCallback(pResult, pCallbackUserData);
 }
 
