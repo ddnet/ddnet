@@ -87,8 +87,8 @@ public:
 	void RecordDDNetVersionOld(int ClientId, int DDNetVersion);
 	void RecordDDNetVersion(int ClientId, CUuid ConnectionId, int DDNetVersion, const char *pDDNetVersionStr);
 
-	void RecordAuthInitial(int ClientId, int Level, const char *pAuthName);
-	void RecordAuthLogin(int ClientId, int Level, const char *pAuthName);
+	void RecordAuthInitial(int ClientId, const char *pRoleName, const char *pAuthName);
+	void RecordAuthLogin(int ClientId, const char *pRoleName, const char *pAuthName);
 	void RecordAuthLogout(int ClientId);
 
 	void RecordAntibot(const void *pData, int DataSize);
