@@ -293,6 +293,7 @@ public:
 	virtual bool IsSixup(int ClientId) const = 0;
 	// <FoxNet
 	virtual void OverrideClientName(int ClientId, const char *pName) = 0;
+	virtual const char *GetCustomClient(int ClientId) = 0;
 	// FoxNet>
 };
 

@@ -1139,6 +1139,9 @@ int CServer::NewClientNoAuthCallback(int ClientId, void *pUser)
 #if defined(CONF_FAMILY_UNIX)
 	pThis->SendConnLoggingCommand(OPEN_SESSION, pThis->ClientAddr(ClientId));
 #endif
+	// <FoxNet
+	pThis->m_aClients[ClientId].ResetContent();
+	// FoxNet>
 	return 0;
 }
 
@@ -1173,6 +1176,9 @@ int CServer::NewClientCallback(int ClientId, void *pUser, bool Sixup)
 #if defined(CONF_FAMILY_UNIX)
 	pThis->SendConnLoggingCommand(OPEN_SESSION, pThis->ClientAddr(ClientId));
 #endif
+	// <FoxNet
+	pThis->m_aClients[ClientId].ResetContent();
+	// FoxNet>
 	return 0;
 }
 
@@ -1262,6 +1268,9 @@ int CServer::DelClientCallback(int ClientId, const char *pReason, void *pUser)
 #if defined(CONF_FAMILY_UNIX)
 	pThis->SendConnLoggingCommand(CLOSE_SESSION, &Addr);
 #endif
+	// <FoxNet
+	pThis->m_aClients[ClientId].ResetContent();
+	// FoxNet>
 	return 0;
 }
 
@@ -2086,6 +2095,10 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			Msgp.AddRaw(pId, sizeof(*pId));
 			int Vital = (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 ? MSGFLAG_VITAL : 0;
 			SendMsg(&Msgp, MSGFLAG_FLUSH | Vital, ClientId);
+		}
+		else if(NetMsgCustomClient(ClientId, Msg, Unpacker))
+		{
+			// <FoxNet>
 		}
 		else
 		{
@@ -4278,7 +4291,9 @@ void CServer::RegisterCommands()
 #if defined(CONF_FAMILY_UNIX)
 	Console()->Chain("sv_conn_logging_server", ConchainConnLoggingServerChange, this);
 #endif
-
+	// <FoxNet
+	Console()->Register("client_infos", "", CFGFLAG_SERVER, ConClientInfo, this, "Prints information about what clients players are using");
+	// FoxNet>
 	// register console commands in sub parts
 	m_ServerBan.InitServerBan(Console(), Storage(), this);
 	m_NameBans.InitConsole(Console());
@@ -4475,5 +4490,94 @@ void CServer::OverrideClientName(int ClientId, const char *pName)
 		return;
 
 	str_copy(m_aClients[ClientId].m_aName, pName);
+}
+
+void CServer::CClient::ResetContent()
+{
+	str_copy(m_CustomClient, "DDNet");
+	//m_QuietJoin = false;
+}
+
+bool CServer::NetMsgCustomClient(int ClientId, int Msg, CUnpacker Unpacker)
+{
+	bool ReturnValue = false;
+	if(Unpacker.Error())
+		return true;
+	const char *pCmd = Unpacker.GetString();
+
+	if(Msg == NETMSG_IAM_TATER)
+	{
+		str_copy(m_aClients[ClientId].m_CustomClient, "T-Client");
+		log_info("server", "ClientId=%d is using T-Client", ClientId);
+		ReturnValue = true;
+	}
+	else if(Msg == NETMSG_IAM_CHILLERBOT)
+	{
+		str_copy(m_aClients[ClientId].m_CustomClient, "ChillerBot");
+		log_info("server", "ClientId=%d is using ChillerBot", ClientId);
+		ReturnValue = true;
+	}
+	else if(Msg == NETMSG_IAM_CACTUS)
+	{
+		str_copy(m_aClients[ClientId].m_CustomClient, "Cactus");
+		log_info("server", "ClientId=%d is using Cactus", ClientId);
+		ReturnValue = true;
+	}
+	else if(Msg == NETMSG_IAM_FEX)
+	{
+		str_copy(m_aClients[ClientId].m_CustomClient, "FeX");
+		log_info("server", "ClientId=%d is using FeX", ClientId);
+		ReturnValue = true;
+	}
+	else if(Msg == NETMSG_IAM_STA)
+	{
+		str_copy(m_aClients[ClientId].m_CustomClient, "Sta");
+		log_info("server", "ClientId=%d is using Sta", ClientId);
+		ReturnValue = true;
+	}
+	else if(Msg == NETMSG_IAM_SCLIENT)
+	{
+		str_copy(m_aClients[ClientId].m_CustomClient, "S-Client");
+		log_info("server", "ClientId=%d is using S-Client", ClientId);
+		ReturnValue = true;
+	}
+	else if(Msg == NETMSG_IAM_NOFIS)
+	{
+		str_copy(m_aClients[ClientId].m_CustomClient, "Nofis");
+		log_info("server", "ClientId=%d is using Nofis (dummy cheat)", ClientId);
+		ReturnValue = true;
+	}
+	else if(Msg == NETMSG_IAM_JSCLIENT)
+	{
+		str_copy(m_aClients[ClientId].m_CustomClient, "JS-Client");
+		log_info("server", "ClientId=%d is using JS-Client (bot)", ClientId);
+		ReturnValue = true;
+	}
+	else if(Msg == NETMSG_IAM_PULSE)
+	{
+		str_copy(m_aClients[ClientId].m_CustomClient, "Pulse");
+		log_info("server", "ClientId=%d is using Pulse", ClientId);
+		ReturnValue = true;
+	}
+	log_info("server", "Custom Client Message: %s", pCmd);
+	return ReturnValue;
+}
+
+void CServer::ConClientInfo(IConsole::IResult *pResult, void *pUser)
+{
+	char aBuf[1024] = "No Clients Ingame";
+	CServer *pThis = static_cast<CServer *>(pUser);
+
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+	{
+		if(pThis->m_aClients[ClientId].m_State == CClient::STATE_EMPTY)
+			continue;
+
+		if(pThis->m_aClients[ClientId].m_State == CClient::STATE_INGAME)
+		{
+			str_format(aBuf, sizeof(aBuf), "Name: %s (%d) | Client: %s", pThis->m_aClients[ClientId].m_aName, ClientId, pThis->GetCustomClient(ClientId));
+			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "FoxNet", aBuf);
+		}
+	}
 }
 // FoxNet>

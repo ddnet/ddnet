@@ -209,6 +209,10 @@ public:
 		{
 			return m_Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : m_Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER;
 		}
+		// <FoxNet
+		void ResetContent();
+		char m_CustomClient[24];
+		// FoxNet>	
 	};
 
 	CClient m_aClients[MAX_CLIENTS];
@@ -537,6 +541,10 @@ public:
 #endif
 	// <FoxNet
 	void OverrideClientName(int ClientId, const char *pName) override;
+	const char *GetCustomClient(int ClientId) override { return m_aClients[ClientId].m_CustomClient; }
+
+	static void ConClientInfo(IConsole::IResult *pResult, void *pUser);
+	bool NetMsgCustomClient(int ClientId, int Msg, CUnpacker Unpacker);
 	// FoxNet>
 };
 
