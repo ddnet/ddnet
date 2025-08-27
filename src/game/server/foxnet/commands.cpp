@@ -830,8 +830,9 @@ void CGameContext::RegisterFoxNetCommands()
 	Console()->Register("name_strings_list", "", CFGFLAG_SERVER, ConListNameDetectionStrings, this, "List all strings on the list");
 	Console()->Register("name_string_clear", "", CFGFLAG_SERVER, ConClearNameDetectionStrings, this, "List all strings on the list");
 
-	Console()->Register("buyitem", "r[item]", CFGFLAG_CHAT, ConShopBuyItem, this, "Buy an item from the shop");
-	Console()->Register("toggleitem", "s[item] ?i[value]", CFGFLAG_CHAT, ConToggleItem, this, "Toggle an Item, value is only needed for 2 items");
+	Console()->Register("snake", "?v[id]", CFGFLAG_SERVER, ConSnake, this, "Makes a player (id) a Snake");
+	Console()->Register("ufo", "?v[id]", CFGFLAG_SERVER, ConSetUfo, this, "Puts player (id) int an UFO");
+
 
 	Console()->Register("c_lovely", "?v[id]", CFGFLAG_SERVER, ConLovely, this, "Makes a player (id) Lovely");
 	Console()->Register("c_staff_ind", "?v[id]", CFGFLAG_SERVER, ConStaffInd, this, "Gives a player (id) a Staff Indicator");
@@ -859,9 +860,6 @@ void CGameContext::RegisterFoxNetCommands()
 	Console()->Register("c_death_type", "i[type] ?v[id]", CFGFLAG_SERVER, ConDeathEffect, this, "Set a players (id) Damage Ind Type");
 	Console()->Register("c_damageind_type", "i[type] ?v[id]", CFGFLAG_SERVER, ConDamageIndEffect, this, "Set a players (id) Damage Ind Type");
 
-	Console()->Register("c_snake", "?v[id]", CFGFLAG_SERVER, ConSnake, this, "Makes a player (id) a Snake");
-	Console()->Register("c_ufo", "?v[id]", CFGFLAG_SERVER, ConSetUfo, this, "Puts player (id) int an UFO");
-
 	Console()->Register("c_hide_cosmetics", "?v[id]", CFGFLAG_SERVER, ConHideCosmetics, this, "Hides Cosmetics for Player (id)");
 
 	Console()->Register("force_login", "r[username]", CFGFLAG_SERVER, ConAccForceLogin, this, "Force Log into any account");
@@ -873,6 +871,9 @@ void CGameContext::RegisterFoxNetCommands()
 	Console()->Register("login", "s[username] r[password]", CFGFLAG_CHAT, ConAccLogin, this, "Login to your account");
 	Console()->Register("logout", "", CFGFLAG_CHAT, ConAccLogout, this, "Logout of your account");
 	Console()->Register("profile", "?s[name]", CFGFLAG_CHAT, ConAccProfile, this, "Show someones profile");
+
+	Console()->Register("buyitem", "r[item]", CFGFLAG_CHAT, ConShopBuyItem, this, "Buy an item from the shop");
+	Console()->Register("toggleitem", "s[item] ?i[value]", CFGFLAG_CHAT, ConToggleItem, this, "Toggle an Item, value is only needed for 2 items");
 
 	Console()->Chain("sv_debug_quad_pos", ConchainQuadDebugPos, this);
 }
