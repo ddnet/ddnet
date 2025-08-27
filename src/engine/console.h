@@ -40,14 +40,6 @@ public:
 		FILE_RECURSION_LIMIT = 16,
 	};
 
-	enum class EAccessLevel
-	{
-		USER,
-		HELPER,
-		MODERATOR,
-		ADMIN,
-	};
-
 	// TODO: rework this interface to reduce the amount of virtual calls
 	class IResult
 	{
@@ -83,7 +75,6 @@ public:
 		virtual const char *Help() const = 0;
 		virtual const char *Params() const = 0;
 		virtual int Flags() const = 0;
-		virtual EAccessLevel GetAccessLevel() const = 0;
 	};
 
 	typedef void (*FTeeHistorianCommandCallback)(int ClientId, int FlagMask, const char *pCmd, IResult *pResult, void *pUser);
@@ -127,8 +118,6 @@ public:
 	virtual void SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, void *pUser) = 0;
 	virtual void SetCanUseCommandCallback(FCanUseCommandCallback pfnCallback, void *pUser) = 0;
 	virtual void InitChecksum(CChecksumData *pData) const = 0;
-
-	virtual void SetAccessLevel(EAccessLevel AccessLevel) = 0;
 
 	static LEVEL ToLogLevel(int ConsoleLevel);
 	static int ToLogLevelFilter(int ConsoleLevel);
