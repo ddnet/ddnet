@@ -10,6 +10,7 @@
 #include <game/server/foxnet/accounts.h>
 #include <game/server/foxnet/vehicles/ufo.h>
 #include <game/server/foxnet/vehicles/snake.h>
+#include <game/mapitems.h>
 
 class CGameTeams;
 class CGameWorld;
@@ -331,6 +332,8 @@ private:
 	float GetFireDelay(int Weapon);
 
 	void FoxNetTick();
+	void HandleQuads(const CMapItemLayerQuads *pQuadLayer, int QuadIndex);
+	void HandleQuadStopa(const CMapItemLayerQuads *pQuadLayer, int QuadIndex);
 	// FoxNet>
 };
 

@@ -14,6 +14,7 @@
 #include <game/mapitems.h>
 
 #include <engine/shared/config.h>
+#include <game/envelopeaccess.h>
 
 vec2 ClampVel(int MoveRestriction, vec2 Vel)
 {
@@ -146,6 +147,9 @@ void CCollision::Init(class CLayers *pLayers)
 			}
 		}
 	}
+	// <FoxNet
+	m_vQuadLayers = m_pLayers->QuadLayers();
+	// FoxNet>
 }
 
 void CCollision::Unload()
@@ -169,6 +173,9 @@ void CCollision::Unload()
 	m_pTune = nullptr;
 	delete[] m_pDoor;
 	m_pDoor = nullptr;
+	// <FoxNet
+	m_vQuadLayers.clear();
+	// FoxNet>
 }
 
 void CCollision::FillAntibot(CAntibotMapData *pMapData) const
@@ -1294,4 +1301,331 @@ size_t CCollision::TeleAllSize(int Number)
 	if(m_TeleOthers.contains(Number))
 		Total += m_TeleOthers[Number].size();
 	return Total;
+}
+
+static void Rotate(vec2 Center, vec2 *pPoint, float Rotation)
+{
+	float x = pPoint->x - Center.x;
+	float y = pPoint->y - Center.y;
+	pPoint->x = (x * cosf(Rotation) - y * sinf(Rotation) + Center.x);
+	pPoint->y = (x * sinf(Rotation) + y * cosf(Rotation) + Center.y);
+}
+
+int CCollision::GetQuadCorners(int StartNum, const CMapItemLayerQuads *pQuadLayer, float ExtraTime, vec2 *pTopLCorner, vec2 *pTopRCorner, vec2 *pBottomLCorner, vec2 *pBottomRCorner) const
+{
+	if(!pQuadLayer)
+		return -1;
+
+	int Num = StartNum;
+	SAnimationTransformCache AnimationCache;
+
+	CQuad *pQuads = (CQuad *)m_pLayers->Map()->GetDataSwapped(pQuadLayer->m_Data);
+
+	vec2 Position(0.0f, 0.0f);
+	float Angle = 0.0f;
+	if(pQuads[Num].m_PosEnv >= 0)
+	{
+		if(pQuads[Num].m_PosEnv != AnimationCache.PosEnv || AnimationCache.PosEnvOffset != pQuads[Num].m_PosEnvOffset)
+		{
+			AnimationCache.PosEnv = pQuads[Num].m_PosEnv;
+			AnimationCache.PosEnvOffset = pQuads[Num].m_PosEnvOffset;
+			GetAnimationTransform(m_Time + ExtraTime + (AnimationCache.PosEnvOffset / 1000.0), AnimationCache.PosEnv, m_pLayers, AnimationCache.Position, AnimationCache.Angle);
+		}
+		Position = AnimationCache.Position;
+		Angle = AnimationCache.Angle;
+	}
+
+	vec2 p0 = Position + vec2(fx2f(pQuads[Num].m_aPoints[0].x), fx2f(pQuads[Num].m_aPoints[0].y));
+	vec2 p1 = Position + vec2(fx2f(pQuads[Num].m_aPoints[1].x), fx2f(pQuads[Num].m_aPoints[1].y));
+	vec2 p2 = Position + vec2(fx2f(pQuads[Num].m_aPoints[2].x), fx2f(pQuads[Num].m_aPoints[2].y));
+	vec2 p3 = Position + vec2(fx2f(pQuads[Num].m_aPoints[3].x), fx2f(pQuads[Num].m_aPoints[3].y));
+
+	if(Angle != 0)
+	{
+		vec2 center(fx2f(pQuads[Num].m_aPoints[4].x), fx2f(pQuads[Num].m_aPoints[4].y));
+		Rotate(center, &p0, Angle);
+		Rotate(center, &p1, Angle);
+		Rotate(center, &p2, Angle);
+		Rotate(center, &p3, Angle);
+	}
+
+	if(pTopLCorner)
+		*pTopLCorner = p0;
+	if(pTopRCorner)
+		*pTopRCorner = p1;
+	if(pBottomLCorner)
+		*pBottomLCorner = p2;
+	if(pBottomRCorner)
+		*pBottomRCorner = p3;
+
+	return Num;
+}
+
+static float SolveBezier(float x, float p0, float p1, float p2, float p3)
+{
+	const double x3 = -p0 + 3.0 * p1 - 3.0 * p2 + p3;
+	const double x2 = 3.0 * p0 - 6.0 * p1 + 3.0 * p2;
+	const double x1 = -3.0 * p0 + 3.0 * p1;
+	const double x0 = p0 - x;
+
+	if(x3 == 0.0 && x2 == 0.0)
+	{
+		// linear
+		// a * t + b = 0
+		const double a = x1;
+		const double b = x0;
+
+		if(a == 0.0)
+			return 0.0f;
+		return -b / a;
+	}
+	else if(x3 == 0.0)
+	{
+		// quadratic
+		// t * t + b * t + c = 0
+		const double b = x1 / x2;
+		const double c = x0 / x2;
+
+		if(c == 0.0)
+			return 0.0f;
+
+		const double D = b * b - 4.0 * c;
+		const double SqrtD = std::sqrt(D);
+
+		const double t = (-b + SqrtD) / 2.0;
+
+		if(0.0 <= t && t <= 1.0001)
+			return t;
+		return (-b - SqrtD) / 2.0;
+	}
+	else
+	{
+		// cubic
+		// t * t * t + a * t * t + b * t * t + c = 0
+		const double a = x2 / x3;
+		const double b = x1 / x3;
+		const double c = x0 / x3;
+
+		// substitute t = y - a / 3
+		const double sub = a / 3.0;
+
+		// depressed form x^3 + px + q = 0
+		// cardano's method
+		const double p = b / 3.0 - a * a / 9.0;
+		const double q = (2.0 * a * a * a / 27.0 - a * b / 3.0 + c) / 2.0;
+
+		const double D = q * q + p * p * p;
+
+		if(D > 0.0)
+		{
+			// only one 'real' solution
+			const double s = std::sqrt(D);
+			return std::cbrt(s - q) - std::cbrt(s + q) - sub;
+		}
+		else if(D == 0.0)
+		{
+			// one single, one double solution or triple solution
+			const double s = std::cbrt(-q);
+			const double t = 2.0 * s - sub;
+
+			if(0.0 <= t && t <= 1.0001)
+				return t;
+			return (-s - sub);
+		}
+		else
+		{
+			// Casus irreducibilis ... ,_,
+			const double phi = std::acos(-q / std::sqrt(-(p * p * p))) / 3.0;
+			const double s = 2.0 * std::sqrt(-p);
+
+			const double t1 = s * std::cos(phi) - sub;
+
+			if(0.0 <= t1 && t1 <= 1.0001)
+				return t1;
+
+			const double t2 = -s * std::cos(phi + pi / 3.0) - sub;
+
+			if(0.0 <= t2 && t2 <= 1.0001)
+				return t2;
+			return -s * std::cos(phi - pi / 3.0) - sub;
+		}
+	}
+}
+
+void CCollision::GetAnimationTransform(float GlobalTime, int Env, CLayers *pLayers, vec2 &Position, float &Angle) const
+{
+	Position.x = 0.0f;
+	Position.y = 0.0f;
+	Angle = 0.0f;
+
+	int Start, Num;
+	pLayers->Map()->GetType(MAPITEMTYPE_ENVELOPE, &Start, &Num);
+	if(Env >= Num)
+		return;
+	CMapItemEnvelope *pItem = (CMapItemEnvelope *)pLayers->Map()->GetItem(Start + Env, 0, 0);
+
+	if(pItem->m_NumPoints == 0)
+		return;
+
+	IMap *pMap = pLayers->Map();
+	CMapBasedEnvelopePointAccess EnvelopePoints(pMap);
+	EnvelopePoints.SetPointsRange(pItem->m_StartPoint, pItem->m_NumPoints);
+
+	if(EnvelopePoints.NumPoints() == 0)
+		return;
+
+	if(EnvelopePoints.NumPoints() == 1)
+	{
+		Position.x = fx2f(EnvelopePoints.GetPoint(0)->m_aValues[0]);
+		Position.y = fx2f(EnvelopePoints.GetPoint(0)->m_aValues[1]);
+		Angle = fx2f(EnvelopePoints.GetPoint(0)->m_aValues[2]) / 360.0f * pi * 2.0f;
+		return;
+	}
+
+	int NumPoints = EnvelopePoints.NumPoints();
+	const CEnvPoint *pLastPoint = EnvelopePoints.GetPoint(NumPoints - 1);
+	float Time = std::fmod(GlobalTime, pLastPoint->m_Time / 1000.0f) * 1000.0f;
+	for(int i = 0; i < pItem->m_NumPoints - 1; i++)
+	{
+		if(Time >= EnvelopePoints.GetPoint(i)->m_Time && Time <= EnvelopePoints.GetPoint(i + 1)->m_Time)
+		{
+			float Delta = EnvelopePoints.GetPoint(i + 1)->m_Time - EnvelopePoints.GetPoint(i)->m_Time;
+			float a = (Time - EnvelopePoints.GetPoint(i)->m_Time) / Delta;
+			switch(EnvelopePoints.GetPoint(i)->m_Curvetype)
+			{
+			case CURVETYPE_SMOOTH:
+			{
+				a = -2 * a * a * a + 3 * a * a; // second hermite basis
+				break;
+			}
+			case CURVETYPE_SLOW:
+			{
+				a = a * a * a;
+				break;
+			}
+			case CURVETYPE_FAST:
+			{
+				a = 1 - a;
+				a = 1 - a * a * a;
+				break;
+			}
+			case CURVETYPE_STEP:
+			{
+				a = 0;
+				break;
+			}
+			case CURVETYPE_BEZIER:
+			{
+				const CEnvPointBezier *pCurrentPointBezier = EnvelopePoints.GetBezier(i);
+				const CEnvPointBezier *pNextPointBezier = EnvelopePoints.GetBezier(i + 1);
+				if(pCurrentPointBezier == nullptr || pNextPointBezier == nullptr)
+					break; // fallback to linear
+				for(size_t c = 0; c < 3; c++)
+				{
+					// monotonic 2d cubic bezier curve
+					const vec2 p0 = vec2(EnvelopePoints.GetPoint(i)->m_Time, fx2f(EnvelopePoints.GetPoint(i)->m_aValues[c]));
+					const vec2 p3 = vec2(EnvelopePoints.GetPoint(i + 1)->m_Time, fx2f(EnvelopePoints.GetPoint(i + 1)->m_aValues[c]));
+
+					const vec2 OutTang = vec2(pCurrentPointBezier->m_aOutTangentDeltaX[c], fx2f(pCurrentPointBezier->m_aOutTangentDeltaY[c]));
+					const vec2 InTang = vec2(pNextPointBezier->m_aInTangentDeltaX[c], fx2f(pNextPointBezier->m_aInTangentDeltaY[c]));
+
+					vec2 p1 = p0 + OutTang;
+					vec2 p2 = p3 + InTang;
+
+					// validate bezier curve
+					p1.x = std::clamp(p1.x, p0.x, p3.x);
+					p2.x = std::clamp(p2.x, p0.x, p3.x);
+
+					// solve x(a) = time for a
+					a = std::clamp(SolveBezier(Time, p0.x, p1.x, p2.x, p3.x), 0.0f, 1.0f);
+
+					// value = y(t)
+					if(c == 0)
+						Position.x = bezier(p0.y, p1.y, p2.y, p3.y, a);
+					else if(c == 1)
+						Position.y = bezier(p0.y, p1.y, p2.y, p3.y, a);
+					else if(c == 2)
+						Angle = bezier(p0.y, p1.y, p2.y, p3.y, a) / 360.0f * pi * 2.0f;
+				}
+
+				return;
+			}
+			default:
+			{
+
+			}
+			}
+			// X
+			{
+				float v0 = fx2f(EnvelopePoints.GetPoint(i)->m_aValues[0]);
+				float v1 = fx2f(EnvelopePoints.GetPoint(i + 1)->m_aValues[0]);
+				Position.x = v0 + (v1 - v0) * a;
+			}
+			// Y
+			{
+				float v0 = fx2f(EnvelopePoints.GetPoint(i)->m_aValues[1]);
+				float v1 = fx2f(EnvelopePoints.GetPoint(i + 1)->m_aValues[1]);
+				Position.y = v0 + (v1 - v0) * a;
+			}
+			// angle
+			{
+				float v0 = fx2f(EnvelopePoints.GetPoint(i)->m_aValues[2]);
+				float v1 = fx2f(EnvelopePoints.GetPoint(i + 1)->m_aValues[2]);
+				Angle = (v0 + (v1 - v0) * a) / 360.0f * pi * 2.0f;
+			}
+			return;
+		}
+	}
+	Position.x = fx2f(pLastPoint->m_aValues[0]);
+	Position.y = fx2f(pLastPoint->m_aValues[1]);
+	Angle = fx2f(pLastPoint->m_aValues[2]) / 360.0f * pi * 2.0f;
+	return;
+}
+
+bool CCollision::InsideQuad(vec2 Pos, float Radius, vec2 TopLCorner, vec2 TopRCorner, vec2 BottomLCorner, vec2 BottomRCorner) const
+{
+	// Helper: point-in-quad (convex, CCW)
+	auto IsLeft = [](const vec2 &A, const vec2 &B, const vec2 &P) -> bool {
+		return ((B.x - A.x) * (P.y - A.y) - (B.y - A.y) * (P.x - A.x)) >= 0.0f;
+	};
+
+	bool inside =
+		IsLeft(TopLCorner, TopRCorner, Pos) &&
+		IsLeft(TopRCorner, BottomRCorner, Pos) &&
+		IsLeft(BottomRCorner, BottomLCorner, Pos) &&
+		IsLeft(BottomLCorner, TopLCorner, Pos);
+
+	if(inside)
+		return true;
+
+	// Helper: circle-line segment intersection
+	auto CircleIntersectsSegment = [](const vec2 &C, float R, const vec2 &A, const vec2 &B) -> bool {
+		vec2 AB = B - A;
+		vec2 AC = C - A;
+		float t = std::clamp(dot(AC, AB) / dot(AB, AB), 0.0f, 1.0f);
+		vec2 Closest = A + AB * t;
+		return distance(C, Closest) <= R;
+	};
+
+	// Check intersection with each edge
+	if(CircleIntersectsSegment(Pos, Radius, TopLCorner, TopRCorner))
+		return true;
+	if(CircleIntersectsSegment(Pos, Radius, TopRCorner, BottomRCorner))
+		return true;
+	if(CircleIntersectsSegment(Pos, Radius, BottomRCorner, BottomLCorner))
+		return true;
+	if(CircleIntersectsSegment(Pos, Radius, BottomLCorner, TopLCorner))
+		return true;
+
+	// Optionally: check if any corner is inside the circle
+	if(distance(Pos, TopLCorner) <= Radius)
+		return true;
+	if(distance(Pos, TopRCorner) <= Radius)
+		return true;
+	if(distance(Pos, BottomLCorner) <= Radius)
+		return true;
+	if(distance(Pos, BottomRCorner) <= Radius)
+		return true;
+
+	return false;
 }

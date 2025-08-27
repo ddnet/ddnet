@@ -8,10 +8,16 @@
 #include <random>
 #include <string>
 #include <vector>
+#include <game/server/gamecontroller.h>
+#include <game/collision.h>
+#include <game/gamecore.h>
+#include <game/mapitems.h>
 
 void CGameContext::FoxNetTick()
 {
 	m_VoteMenu.Tick();
+	// Set moving tiles time for quads with pos envelopes
+	m_Collision.SetTime(m_pController->GetTime());
 
 	// Handle DamageInd effect
 	for(auto it = m_DamageIndEffects.begin(); it != m_DamageIndEffects.end();)
@@ -647,4 +653,66 @@ int CGameContext::GetWeaponType(int Weapon)
 		return WEAPON_GUN;
 	}
 	return Weapon;
+}
+
+void CGameContext::SnapDebuggedQuad(int ClientId)
+{
+	CPlayer *pPlayer = m_apPlayers[ClientId];
+
+	if(!pPlayer || !g_Config.m_SvDebugQuadPos)
+		return;
+
+	if(!m_QuadDebugIds.empty())
+	{
+		int GetId = 0;
+		for(const auto *pQuadLayer : Collision()->QuadLayers())
+		{
+			if(!pQuadLayer)
+				continue;
+
+			for(int i = 0; i < pQuadLayer->m_NumQuads; i++)
+			{
+				vec2 TopLeft;
+				Collision()->GetQuadCorners(i, pQuadLayer, 0.0f, &TopLeft);
+
+				CNetObj_DDNetLaser *pObj = Server()->SnapNewItem<CNetObj_DDNetLaser>(m_QuadDebugIds.at(GetId));
+				if(pObj)
+				{
+					pObj->m_ToX = (int)TopLeft.x;
+					pObj->m_ToY = (int)TopLeft.y;
+					pObj->m_FromX = (int)TopLeft.x;
+					pObj->m_FromY = (int)TopLeft.y;
+					pObj->m_StartTick = Server()->Tick();
+					pObj->m_Owner = -1;
+					pObj->m_Flags = LASERFLAG_NO_PREDICT;
+				}
+				GetId++;
+			}
+		}
+	}
+}
+
+void CGameContext::QuadDebugIds(bool Clear)
+{
+	if(Clear)
+	{
+		for(const auto *pQuadLayer : Collision()->QuadLayers())
+		{
+			if(!pQuadLayer)
+				continue;
+
+			for(int i = 0; i < pQuadLayer->m_NumQuads; i++)
+			{
+				m_QuadDebugIds.push_back(Server()->SnapNewId());
+			}
+		}
+	}
+	else if(!Clear && !m_QuadDebugIds.empty())
+	{
+		for(int i = 0; i < (int)m_QuadDebugIds.size(); i++)
+		{
+			Server()->SnapFreeId(m_QuadDebugIds[i]);
+		}
+		m_QuadDebugIds.clear();
+	}
 }

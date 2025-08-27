@@ -3025,4 +3025,6 @@ bool IsFlagSet(uint32_t Flags, int n);
 bool FormatUnixTime(uint64_t unixSeconds, char *out, size_t outSize, const char *fmt);
 bool IsWeekend();
 std::string RandomUnicode(int length);
+void StrToInts(int *pInts, size_t NumInts, const char *pStr);
+bool IntsToStr(const int *pInts, size_t NumInts, char *pStr, size_t StrSize);
 // FoxNet>

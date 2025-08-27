@@ -8,6 +8,7 @@
 #include <game/gamecore.h>
 #include <game/generated/protocol.h>
 #include <game/race_state.h>
+#include <game/mapitems.h>
 
 enum
 {
@@ -181,6 +182,11 @@ private:
 
 	int m_LastWeaponSwitchTick;
 	int m_LastTuneZoneTick;
+
+	// <FoxNet
+	void HandleQuads(const CMapItemLayerQuads *pQuadLayer, int QuadIndex);
+	void HandleQuadStopa(const CMapItemLayerQuads *pQuadLayer, int QuadIndex);
+	// FoxNet>
 };
 
 #endif

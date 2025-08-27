@@ -275,6 +275,7 @@ public:
 	bool m_LiveFrozen;
 	CTuningParams m_Tuning;
 	// <FoxNet
+	bool m_IsInFreezeQuad;
 
 	CTuningParams m_FakeTuning;
 	bool m_FakeTuned;

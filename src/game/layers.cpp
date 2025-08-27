@@ -4,7 +4,9 @@
 
 #include "mapitems.h"
 
+#include <base/system.h>
 #include <engine/map.h>
+#include <iterator>
 
 CLayers::CLayers()
 {
@@ -25,6 +27,25 @@ void CLayers::Init(IMap *pMap, bool GameOnly)
 		for(int LayerIndex = 0; LayerIndex < pGroup->m_NumLayers; LayerIndex++)
 		{
 			CMapItemLayer *pLayer = GetLayer(pGroup->m_StartLayer + LayerIndex);
+			// <FoxNet
+			if(pLayer->m_Type == LAYERTYPE_QUADS)
+			{
+				char aBuf[30];
+				CMapItemLayerQuads *pTilemap = reinterpret_cast<CMapItemLayerQuads *>(pLayer);
+				IntsToStr(pTilemap->m_aName, std::size(pTilemap->m_aName), aBuf, std::size(aBuf));
+
+				for(int i = 0; i < (int)std::size(ValidQuadNames); i++)
+				{
+					if(!str_comp(ValidQuadNames[i], aBuf))
+					{
+						// m_MovingQuads = true;
+						m_vQuadLayers.push_back(pTilemap);
+						break;
+					}
+				}
+			}
+			// FoxNet>
+
 			if(pLayer->m_Type != LAYERTYPE_TILES)
 				continue;
 

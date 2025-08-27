@@ -18,6 +18,7 @@ using offset_ptr32 = unsigned int;
 #include <game/map/render_map.h>
 #include <game/mapitems.h>
 #include <game/mapitems_ex.h>
+#include <game/envelopeaccess.h>
 
 class CMapLayers;
 class CMapItemLayerTilemap;

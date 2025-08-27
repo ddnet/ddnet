@@ -716,7 +716,12 @@ private:
 
 	void FoxNetTick();
 	void RegisterFoxNetCommands();
+	void SnapDebuggedQuad(int ClientId);
+	void QuadDebugIds(bool Clear);
+	std::vector<int> m_QuadDebugIds;
 
+	static void ConchainQuadDebugPos(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	
 	static void ConAccRegister(IConsole::IResult *pResult, void *pUserData);
 	static void ConAccPassword(IConsole::IResult *pResult, void *pUserData);
 	static void ConAccLogin(IConsole::IResult *pResult, void *pUserData);

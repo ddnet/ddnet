@@ -4581,6 +4581,7 @@ void CGameContext::OnSnap(int ClientId, bool GlobalSnap)
 	}
 	// <FoxNet
 	SnapLaserEffect(ClientId);
+	SnapDebuggedQuad(ClientId);
 	// FoxNet>
 }
 

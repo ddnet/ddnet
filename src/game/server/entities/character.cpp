@@ -954,11 +954,13 @@ void CCharacter::TickDeferred()
 		// only allow dead reckoning for a top of 3 seconds
 		if(m_Core.m_Reset || m_ReckoningTick + Server()->TickSpeed() * 3 < Server()->Tick() || mem_comp(&Predicted, &Current, sizeof(CNetObj_Character)) != 0)
 		{
+			// <FoxNet
 			m_ReckoningTick = Server()->Tick();
 			m_SendCore = m_Core;
 			m_ReckoningCore = m_Core;
 			m_Core.m_Reset = false;
-		}	
+			// FoxNet>
+		}
 		// <FoxNet
 		bool InstaUpdate = m_InSnake || m_Ufo.Active();
 		if(InstaUpdate)
@@ -1401,7 +1403,8 @@ void CCharacter::Snap(int SnappingClient)
 	if(m_Core.m_LiveFrozen)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_MOVEMENTS_DISABLED;
 
-	pDDNetCharacter->m_FreezeEnd = m_Core.m_DeepFrozen ? -1 : m_FreezeTime == 0 ? 0 : Server()->Tick() + m_FreezeTime;
+	pDDNetCharacter->m_FreezeEnd = m_Core.m_DeepFrozen ? -1 : m_FreezeTime == 0 ? 0 :
+										      Server()->Tick() + m_FreezeTime;
 	pDDNetCharacter->m_Jumps = m_Core.m_Jumps;
 	pDDNetCharacter->m_TeleCheckpoint = m_TeleCheckpoint;
 	pDDNetCharacter->m_StrongWeakId = m_StrongWeakId;
@@ -1430,12 +1433,21 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacter->m_TargetY = m_Core.m_Input.m_TargetY;
 
 	// <FoxNet
+	if(m_Core.m_IsInFreezeQuad && !m_Core.m_IsInFreeze)
+	{
+		pDDNetCharacter->m_FreezeEnd = -1;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_IN_FREEZE;
+	}
+
 	if(m_InSnake || m_Ufo.Active())
 	{
 		pDDNetCharacter->m_Jumps = 0;
 		pDDNetCharacter->m_JumpedTotal = 0;
 		if(m_InSnake)
+		{
 			pDDNetCharacter->m_Flags |= CHARACTERFLAG_COLLISION_DISABLED;
+			pDDNetCharacter->m_Flags &= CHARACTERFLAG_INVINCIBLE;
+		}
 		if(m_Ufo.Active())
 			pDDNetCharacter->m_Flags |= CHARACTERFLAG_MOVEMENTS_DISABLED;
 	}
@@ -2283,7 +2295,7 @@ bool CCharacter::TrySetRescue(int RescueMode)
 	{
 		// check for nearby health pickups (also freeze)
 		bool InHealthPickup = false;
-		if(!m_Core.m_IsInFreeze)
+		if(!m_Core.m_IsInFreeze && /*FoxNet*/ !m_Core.m_IsInFreezeQuad)
 		{
 			CEntity *apEnts[9];
 			int Num = GameWorld()->FindEntities(m_Pos, GetProximityRadius() + CPickup::ms_CollisionExtraSize, apEnts, std::size(apEnts), CGameWorld::ENTTYPE_PICKUP);
@@ -2302,7 +2314,7 @@ bool CCharacter::TrySetRescue(int RescueMode)
 			}
 		}
 
-		if(!m_Core.m_IsInFreeze && IsGrounded() && !m_Core.m_DeepFrozen && !InHealthPickup)
+		if(!m_Core.m_IsInFreeze && /*<FoxNet*/ !m_Core.m_IsInFreezeQuad /*FoxNet>*/ && IsGrounded() && !m_Core.m_DeepFrozen && !InHealthPickup)
 		{
 			ForceSetRescue(RescueMode);
 			Set = true;
@@ -2439,6 +2451,19 @@ void CCharacter::DDRacePostCoreTick()
 	if(!m_Alive)
 		return;
 
+	// <FoxNet
+	m_Core.m_IsInFreezeQuad = false;
+	for(const auto *pQuadLayer : Collision()->QuadLayers())
+	{
+		for(int QuadIndex = 0; QuadIndex < pQuadLayer->m_NumQuads; QuadIndex++)
+		{
+			HandleQuads(pQuadLayer, QuadIndex);
+			if(!m_Alive)
+				return;
+		}
+	}
+	// FoxNet>
+
 	// handle Anti-Skip tiles
 	std::vector<int> vIndices = Collision()->GetMapIndices(m_PrevPos, m_Pos);
 	if(!vIndices.empty())
@@ -2456,6 +2481,10 @@ void CCharacter::DDRacePostCoreTick()
 		if(!m_Alive)
 			return;
 	}
+	// <FoxNet
+	if(m_Core.m_IsInFreezeQuad)
+		Freeze();
+	// FoxNet>
 
 	// teleport gun
 	if(m_TeleGunTeleport)
@@ -2721,7 +2750,8 @@ void CCharacter::ApplyMoveRestrictions()
 void CCharacter::SwapClients(int Client1, int Client2)
 {
 	const int HookedPlayer = m_Core.HookedPlayer();
-	m_Core.SetHookedPlayer(HookedPlayer == Client1 ? Client2 : HookedPlayer == Client2 ? Client1 : HookedPlayer);
+	m_Core.SetHookedPlayer(HookedPlayer == Client1 ? Client2 : HookedPlayer == Client2 ? Client1 :
+											     HookedPlayer);
 }
 
 // <FoxNet
@@ -2818,7 +2848,7 @@ void CCharacter::FoxNetTick()
 			pChr->m_Core.m_Vel = vec2(0.f, 0.0f);
 		}
 		else
-		{ 
+		{
 			m_pTelekinesisEntity = nullptr;
 			return;
 		}
@@ -2908,4 +2938,167 @@ void CCharacter::SetUfo(bool Set)
 void CCharacter::SetSnake(bool Active)
 {
 	m_Snake.SetActive(Active);
+}
+
+void CCharacter::HandleQuads(const CMapItemLayerQuads *pQuadLayer, int QuadIndex)
+{
+	if(!pQuadLayer)
+		return;
+
+	char QuadName[30] = "";
+	IntsToStr(pQuadLayer->m_aName, std::size(pQuadLayer->m_aName), QuadName, std::size(QuadName));
+
+	bool IsFreeze = !str_comp("QFr", QuadName);
+	bool IsUnFreeze = !str_comp("QUnFr", QuadName);
+	bool IsDeath = !str_comp("QDeath", QuadName);
+	bool IsStopa = !str_comp("QStopa", QuadName);
+	bool IsCfrm = !str_comp("QCfrm", QuadName);
+
+	vec2 TopL, TopR, BottomL, BottomR;
+	int FoundNum = Collision()->GetQuadCorners(QuadIndex, pQuadLayer, 0.00f, &TopL, &TopR, &BottomL, &BottomR);
+	if(FoundNum < 0 || FoundNum >= pQuadLayer->m_NumQuads)
+		return;
+
+	float Radius = 0.0f;
+	if(IsDeath)
+		Radius = 8.0f;
+	if(IsStopa)
+		Radius = CCharacterCore::PhysicalSize();
+
+	bool Inside = Collision()->InsideQuad(m_Pos, Radius, TopL, TopR, BottomL, BottomR);
+	if(!Inside)
+		return;
+
+	if(IsFreeze)
+	{
+		m_Core.m_IsInFreezeQuad = true;
+	}
+	else if(IsUnFreeze)
+	{
+		UnFreeze();
+		m_Core.m_IsInFreezeQuad = false;
+	}
+	else if(IsDeath)
+	{
+		Die(m_pPlayer->GetCid(), WEAPON_WORLD);
+	}
+	else if(IsStopa)
+	{
+		HandleQuadStopa(pQuadLayer, QuadIndex);
+	}
+	else if(IsCfrm)
+	{
+		if(m_Core.m_Super || m_Core.m_Invincible)
+			return;
+		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
+		for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
+		{
+			if(!Collision()->TeleCheckOuts(k).empty())
+			{
+				int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleCheckOuts(k).size());
+				m_Core.m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
+				m_Core.m_Vel = vec2(0, 0);
+
+				if(!g_Config.m_SvTeleportHoldHook)
+				{
+					ResetHook();
+					GameWorld()->ReleaseHooked(GetPlayer()->GetCid());
+				}
+
+				return;
+			}
+		}
+		// if no checkpointout have been found (or if there no recorded checkpoint), teleport to start
+		vec2 SpawnPos;
+		if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), &SpawnPos, GameServer()->GetDDRaceTeam(GetPlayer()->GetCid())))
+		{
+			m_Core.m_Pos = SpawnPos;
+			m_Core.m_Vel = vec2(0, 0);
+
+			if(!g_Config.m_SvTeleportHoldHook)
+			{
+				ResetHook();
+				GameWorld()->ReleaseHooked(GetPlayer()->GetCid());
+			}
+		}
+	}
+}
+
+void CCharacter::HandleQuadStopa(const CMapItemLayerQuads *pQuadLayer, int QuadIndex)
+{
+	if(!pQuadLayer)
+		return;
+
+	vec2 TL, TR, BL, BR;
+	int Found = Collision()->GetQuadCorners(QuadIndex, pQuadLayer, 0.0f, &TL, &TR, &BL, &BR);
+	if(Found < 0 || Found >= pQuadLayer->m_NumQuads)
+		return;
+
+	const float R = GetProximityRadius() * 0.5f;
+	const vec2 P = m_Core.m_Pos;
+
+	const vec2 aA[4] = {TL, TR, BR, BL};
+	const vec2 aB[4] = {TR, BR, BL, TL};
+
+	float MinPenetration = std::numeric_limits<float>::infinity();
+	vec2 BestInwardNormal = vec2(0.f, 0.f);
+
+	for(int i = 0; i < 4; ++i)
+	{
+		vec2 E = aB[i] - aA[i];
+		float Elen2 = dot(E, E);
+		if(Elen2 <= 1e-6f)
+			continue;
+
+		vec2 N_in = normalize(vec2(-E.y, E.x));
+		float d = dot(P - aA[i], N_in);
+		float penetration = d + R;
+
+		if(penetration < MinPenetration)
+		{
+			MinPenetration = penetration;
+			BestInwardNormal = N_in;
+		}
+	}
+
+	if(MinPenetration == std::numeric_limits<float>::infinity())
+		return;
+
+	if(MinPenetration > 0.0f)
+	{
+		const float Epsilon = 0.1f;
+		vec2 MTV = -BestInwardNormal * (MinPenetration + Epsilon);
+
+		const vec2 BoxSize = CCharacterCore::PhysicalSizeVec2();
+		vec2 TargetPos = m_Core.m_Pos + MTV;
+
+		auto IsCollidingAt = [&](const vec2 &Pos) -> bool {
+			return Collision()->TestBox(Pos, BoxSize);
+		};
+
+		if(IsCollidingAt(TargetPos))
+		{
+			float lo = 0.0f, hi = 1.0f;
+			for(int iter = 0; iter < 10; ++iter)
+			{
+				float mid = (lo + hi) * 0.5f;
+				vec2 midPos = m_Core.m_Pos + MTV * mid;
+				if(IsCollidingAt(midPos))
+					hi = mid;
+				else
+					lo = mid;
+			}
+
+			if(lo > 0.0f)
+				m_Core.m_Pos += MTV * lo;
+		}
+		else
+		{
+			m_Core.m_Pos = TargetPos;
+		}
+
+		float vIn = dot(m_Core.m_Vel, BestInwardNormal);
+		if(vIn > 0.0f)
+			m_Core.m_Vel -= BestInwardNormal * vIn;
+	}
 }

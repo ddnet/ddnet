@@ -16,6 +16,9 @@ class CSpeedupTile;
 class CSwitchTile;
 class CTuneTile;
 class CDoorTile;
+// <FoxNet
+class CMapItemLayerQuads;
+// FoxNet>
 
 enum
 {
@@ -165,6 +168,27 @@ private:
 	std::map<int, std::vector<vec2>> m_TeleCheckOuts;
 	// TILE_TELEINEVIL, TILE_TELECHECK, TILE_TELECHECKIN, TILE_TELECHECKINEVIL
 	std::map<int, std::vector<vec2>> m_TeleOthers;
+
+	// <FoxNet
+	std::vector<CMapItemLayerQuads *> m_vQuadLayers;
+
+	double m_Time;
+	struct SAnimationTransformCache
+	{
+		vec2 Position = vec2(0.0f, 0.f);
+		float Angle = 0;
+		int PosEnv = -1;
+		int PosEnvOffset = 0;
+	};
+
+public:
+	const std::vector<CMapItemLayerQuads *> &QuadLayers() const { return m_vQuadLayers; }
+
+	void SetTime(double Time) { m_Time = Time; }
+	void GetAnimationTransform(float GlobalTime, int Env, class CLayers *pLayers, vec2 &Position, float &Angle) const;
+	int GetQuadCorners(int StartNum, const CMapItemLayerQuads *pQuadLayer, float ExtraTime = 0.0, vec2 *pTopLCorner = nullptr, vec2 *pTopRCorner = nullptr, vec2 *pBottomLCorner = nullptr, vec2 *pBottomRCorner = nullptr) const;
+	bool InsideQuad(vec2 Pos, float Radius, vec2 TopLCorner, vec2 TopRCorner, vec2 BottomLCorner, vec2 BottomRCorner) const;
+	// FoxNet>
 };
 
 void ThroughOffset(vec2 Pos0, vec2 Pos1, int *pOffsetX, int *pOffsetY);
