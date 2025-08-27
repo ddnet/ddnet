@@ -153,7 +153,7 @@ void CCharacter::SetWeapon(int W)
 	m_Core.m_ActiveWeapon = W;
 	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SWITCH, TeamMask());
 
-	if(m_Core.m_ActiveWeapon < 0 || m_Core.m_ActiveWeapon >= NUM_WEAPONS)
+	if(m_Core.m_ActiveWeapon < 0 || m_Core.m_ActiveWeapon >= NUM_EXTRA_WEAPONS)
 		m_Core.m_ActiveWeapon = 0;
 }
 
@@ -387,7 +387,7 @@ void CCharacter::HandleWeaponSwitch()
 		WantedWeapon = m_QueuedWeapon;
 
 	bool Anything = false;
-	for(int i = 0; i < NUM_WEAPONS - 1; ++i)
+	for(int i = 0; i < NUM_EXTRA_WEAPONS - 1; ++i)
 		if(m_Core.m_aWeapons[i].m_Got)
 			Anything = true;
 	if(!Anything)
@@ -400,7 +400,7 @@ void CCharacter::HandleWeaponSwitch()
 	{
 		while(Next) // Next Weapon selection
 		{
-			WantedWeapon = (WantedWeapon + 1) % NUM_WEAPONS;
+			WantedWeapon = (WantedWeapon + 1) % NUM_EXTRA_WEAPONS;
 			if(m_Core.m_aWeapons[WantedWeapon].m_Got)
 				Next--;
 		}
@@ -410,7 +410,7 @@ void CCharacter::HandleWeaponSwitch()
 	{
 		while(Prev) // Prev Weapon selection
 		{
-			WantedWeapon = (WantedWeapon - 1) < 0 ? NUM_WEAPONS - 1 : WantedWeapon - 1;
+			WantedWeapon = (WantedWeapon - 1) < 0 ? NUM_EXTRA_WEAPONS - 1 : WantedWeapon - 1;
 			if(m_Core.m_aWeapons[WantedWeapon].m_Got)
 				Prev--;
 		}
@@ -421,7 +421,7 @@ void CCharacter::HandleWeaponSwitch()
 		WantedWeapon = m_Input.m_WantedWeapon - 1;
 
 	// check for insane values
-	if(WantedWeapon >= 0 && WantedWeapon < NUM_WEAPONS && WantedWeapon != m_Core.m_ActiveWeapon && m_Core.m_aWeapons[WantedWeapon].m_Got)
+	if(WantedWeapon >= 0 && WantedWeapon < NUM_EXTRA_WEAPONS && WantedWeapon != m_Core.m_ActiveWeapon && m_Core.m_aWeapons[WantedWeapon].m_Got)
 		m_QueuedWeapon = WantedWeapon;
 
 	DoWeaponSwitch();
@@ -620,18 +620,50 @@ void CCharacter::FireWeapon()
 		GameServer()->CreateSound(m_Pos, SOUND_NINJA_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 	}
 	break;
+		// <FoxNet
+	case WEAPON_TELEKINESIS:
+	{
+		DoTelekinesis();
+	}
+	break;
+
+	case WEAPON_HEARTGUN:
+	{
+		GameServer()->CreateSound(m_Pos, SOUND_CHAT_CLIENT, TeamMask());
+	}
+	break;
+		// FoxNet>
 	}
 
 	m_AttackTick = Server()->Tick();
 
 	if(!m_ReloadTimer)
 	{
+		// <FoxNet
 		float FireDelay;
-		GetTuning(GetOverriddenTuneZone())->Get(offsetof(CTuningParams, m_HammerFireDelay) / sizeof(CTuneParam) + m_Core.m_ActiveWeapon, &FireDelay);
+		FireDelay = GetFireDelay(Core()->m_ActiveWeapon);
+		// GetTuning(GetOverriddenTuneZone())->Get(offsetof(CTuningParams, m_HammerFireDelay) / sizeof(CTuneParam) + m_Core.m_ActiveWeapon, &FireDelay);
 		m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
+		// FoxNet>
 	}
 }
-
+// <FoxNet
+float CCharacter::GetFireDelay(int Weapon)
+{
+	switch(Weapon)
+	{
+	case WEAPON_HAMMER: return (float)Tuning()->m_HammerFireDelay;
+	case WEAPON_GUN: return (float)Tuning()->m_GunFireDelay;
+	case WEAPON_SHOTGUN: return (float)Tuning()->m_ShotgunFireDelay;
+	case WEAPON_GRENADE: return (float)Tuning()->m_GrenadeFireDelay;
+	case WEAPON_LASER: return (float)Tuning()->m_LaserFireDelay;
+	case WEAPON_NINJA: return (float)Tuning()->m_NinjaFireDelay;
+	case WEAPON_HEARTGUN: return (float)Tuning()->m_HeartgunFireDelay;
+	case WEAPON_TELEKINESIS: return (float)Tuning()->m_TelekinesisFireDelay;
+	default: dbg_assert(false, "invalid weapon"); return 0.0f; // this value should not be reached
+	}
+}
+// FoxNet>
 void CCharacter::HandleWeapons()
 {
 	// ninja
@@ -1099,7 +1131,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 {
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 	CCharacterCore *pCore;
-	int Tick, Emote = m_EmoteType, Weapon = m_Core.m_ActiveWeapon, AmmoCount = 0,
+	int Tick, Emote = m_EmoteType, Weapon = /*<FoxNet*/ GameServer()->GetWeaponType(m_Core.m_ActiveWeapon) /*FoxNet>*/, AmmoCount = 0,
 		  Health = 0, Armor = 0;
 	if(!m_ReckoningTick || GameServer()->m_World.m_Paused)
 	{
@@ -2515,7 +2547,7 @@ void CCharacter::GiveAllWeapons()
 
 void CCharacter::ResetPickups()
 {
-	for(int i = WEAPON_SHOTGUN; i < NUM_WEAPONS - 1; i++)
+	for(int i = WEAPON_SHOTGUN; i < NUM_EXTRA_WEAPONS - 1; i++)
 	{
 		m_Core.m_aWeapons[i].m_Got = false;
 		if(m_Core.m_ActiveWeapon == i)
@@ -2762,30 +2794,56 @@ void CCharacter::FoxNetTick()
 		}
 	}
 
-	if(m_pTelekinesisEntity)
-	{
-		CCharacter *pChr = (CCharacter *)m_pTelekinesisEntity;
-
-		if(!pChr)
-			return;
-
-		if(pChr->GetPlayer() && pChr->GetPlayer()->m_TelekinesisImmunity)
-			m_pTelekinesisEntity = nullptr;
-
-		if(/* GetActiveWeapon() == WEAPON_TELEKINESIS  || */ m_pPlayer->m_Cosmetics.m_Ability == ABILITY_TELEKINESIS)
-		{
-			pChr->m_Core.m_Pos = GetCursorPos();
-			pChr->m_Core.m_Vel = vec2(0.0f, 0.0f);
-		}
-		else
-			m_pTelekinesisEntity = nullptr;
-	}
-
 	if(g_Config.m_SvAutoUfo && !m_Ufo.Active())
 		SetUfo(true);
 
 	m_Snake.Tick();
 	m_Ufo.Tick();
+
+	// update telekinesis entitiy position
+	if(CCharacter *pChr = m_pTelekinesisEntity)
+	{
+		if(!pChr || !pChr->GetPlayer())
+			return;
+
+		if(pChr->GetPlayer()->m_TelekinesisImmunity)
+		{
+			m_pTelekinesisEntity = nullptr;
+			return;
+		}
+
+		if(GetActiveWeapon() == WEAPON_TELEKINESIS || GetPlayer()->m_Cosmetics.m_Ability == ABILITY_TELEKINESIS)
+		{
+			pChr->m_Core.m_Pos = GetCursorPos();
+			pChr->m_Core.m_Vel = vec2(0.f, 0.0f);
+		}
+		else
+		{ 
+			m_pTelekinesisEntity = nullptr;
+			return;
+		}
+	}
+}
+
+void CCharacter::DoTelekinesis()
+{
+	if(!m_pTelekinesisEntity)
+	{
+		float zoom = std::max(1.0f, GetPlayer()->m_CameraInfo.GetZoom());
+		CCharacter *pClosest = GameServer()->m_World.ClosestCharacter(GetCursorPos(), CCharacterCore::PhysicalSize() * zoom, this);
+		if(!pClosest)
+			return;
+
+		if((pClosest->IsAlive() && !CanCollide(pClosest->GetPlayer()->GetCid())))
+			return;
+		m_pTelekinesisEntity = pClosest;
+	}
+	else
+		m_pTelekinesisEntity = nullptr;
+	if(m_pTelekinesisEntity)
+		GameServer()->CreateSound(m_Pos, SOUND_NINJA_HIT, TeamMask());
+
+	// VoteActionDelay[0] = Server()->Tick() + FireDelay * Server()->TickSpeed() / 1000;
 }
 
 vec2 CCharacter::GetCursorPos()

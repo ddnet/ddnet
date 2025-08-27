@@ -305,7 +305,7 @@ public:
 	CClientMask OppsiteCosmeticMask();
 
 	// Telekinesis
-	CEntity *m_pTelekinesisEntity;
+	CCharacter *m_pTelekinesisEntity;
 	vec2 GetCursorPos();
 
 	int GetPowerHooked();
@@ -323,9 +323,12 @@ public:
 
 	void SetFakeTuned(bool Active, std::optional<const CTuningParams> Tuning = std::nullopt);
 
+	void DoTelekinesis();
+
 private:
 	vec2 m_HookBasePos = vec2(0, 0);
 	void OnPlayerHook();
+	float GetFireDelay(int Weapon);
 
 	void FoxNetTick();
 	// FoxNet>

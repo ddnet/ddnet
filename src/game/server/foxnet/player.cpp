@@ -303,16 +303,16 @@ bool CPlayer::ItemEnabled(const char *pItemName) const
 	return Value;
 }
 
-bool CPlayer::ToggleItem(const char *pItemName, int Set)
+bool CPlayer::ToggleItem(const char *pItemName, int Set, bool IgnoreAccount)
 {
-	if(!Acc()->m_LoggedIn)
+	if(!Acc()->m_LoggedIn && !IgnoreAccount)
 		return false;
 	char pItem[64];
 	str_copy(pItem, pItemName);
 	if(str_comp(GameServer()->m_Shop.NameToShortcut(pItem), "") != 0)
 		str_copy(pItem, GameServer()->m_Shop.NameToShortcut(pItem));
 
-	if(!OwnsItem(pItem))
+	if(!OwnsItem(pItem) && !IgnoreAccount)
 		return false;
 
 	const int pValue = GetItemToggle(pItem);
@@ -322,15 +322,15 @@ bool CPlayer::ToggleItem(const char *pItemName, int Set)
 	if(!str_comp_nocase(pItem, ItemShortcuts[C_OTHER_SPARKLE]))
 		m_Cosmetics.m_Sparkle = pValue;
 	else if(!str_comp_nocase(pItem, ItemShortcuts[C_OTHER_HEARTHAT]))
-		m_Cosmetics.m_HeartHat = pValue;
+		SetHeartHat(pValue);
 	else if(!str_comp_nocase(pItem, ItemShortcuts[C_OTHER_INVERSEAIM]))
 		m_Cosmetics.m_InverseAim = pValue;
 	else if(!str_comp_nocase(pItem, ItemShortcuts[C_OTHER_LOVELY]))
-		m_Cosmetics.m_Lovely = pValue;
+		SetLovely(pValue);
 	else if(!str_comp_nocase(pItem, ItemShortcuts[C_OTHER_ROTATINGBALL]))
-		m_Cosmetics.m_RotatingBall = pValue;
+		SetRotatingBall(pValue);
 	else if(!str_comp_nocase(pItem, ItemShortcuts[C_OTHER_EPICCIRCLE]))
-		m_Cosmetics.m_EpicCircle = pValue;
+		SetEpicCircle(pValue);
 	// else if(!str_comp_nocase(pItem, ItemShortcuts[OTHER_BLOODY]))
 	//	m_Cosmetics.m_Bloody = pValue;
 
@@ -350,9 +350,9 @@ bool CPlayer::ToggleItem(const char *pItemName, int Set)
 		m_Cosmetics.m_PhaseGun = pValue;
 
 	else if(!str_comp_nocase(pItem, ItemShortcuts[C_TRAIL_STAR]))
-		m_Cosmetics.m_Trail = pValue;
+		SetTrail(pValue);
 	else if(!str_comp_nocase(pItem, ItemShortcuts[C_TRAIL_DOT]))
-		m_Cosmetics.m_Trail = pValue;
+		SetTrail(pValue);
 
 	else if(!str_comp_nocase(pItem, ItemShortcuts[C_INDICATOR_CLOCKWISE]))
 		m_Cosmetics.m_DamageIndType = pValue;

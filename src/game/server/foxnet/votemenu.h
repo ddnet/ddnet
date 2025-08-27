@@ -65,7 +65,7 @@ class CVoteMenu
 
 	bool IsPageAllowed(int ClientId, int Page) const;
 
-	bool IsOptionWithPrefix(const char *pDesc, const char *pWantedOption) { return str_startswith(pDesc, pWantedOption) != 0; }
+	bool IsOptionWithSuffix(const char *pDesc, const char *pWantedOption) { return str_startswith(pDesc, pWantedOption) != 0; }
 
 	void AddVoteText(const char *pDesc) { m_vDescriptions.emplace_back(pDesc); }
 	void AddVoteSeperator() { m_vDescriptions.emplace_back(" "); }

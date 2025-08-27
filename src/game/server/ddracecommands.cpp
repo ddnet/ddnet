@@ -9,6 +9,10 @@
 #include <game/server/player.h>
 #include <game/server/save.h>
 #include <game/server/teams.h>
+#include <algorithm>
+// <FoxNet
+#include <game/gamecore.h>
+// FoxNet>
 
 void CGameContext::ConGoLeft(IConsole::IResult *pResult, void *pUserData)
 {
@@ -388,7 +392,7 @@ void CGameContext::ModifyWeapons(IConsole::IResult *pResult, void *pUserData,
 	if(!pChr)
 		return;
 
-	if(std::clamp(Weapon, -1, NUM_WEAPONS - 1) != Weapon)
+	if(std::clamp(Weapon, -1, NUM_EXTRA_WEAPONS - 1) != Weapon)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info",
 			"invalid weapon id");

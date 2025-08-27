@@ -32,7 +32,7 @@ void CSaveTee::Save(CCharacter *pChr, bool AddPenalty)
 	m_TeeFinished = pChr->Teams()->TeeFinished(m_ClientId);
 	m_IsSolo = pChr->m_Core.m_Solo;
 
-	for(int i = 0; i < NUM_WEAPONS; i++)
+	for(int i = 0; i < NUM_EXTRA_WEAPONS; i++)
 	{
 		m_aWeapons[i].m_AmmoRegenStart = pChr->m_Core.m_aWeapons[i].m_AmmoRegenStart;
 		m_aWeapons[i].m_Ammo = pChr->m_Core.m_aWeapons[i].m_Ammo;
@@ -148,7 +148,7 @@ bool CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 		pChr->Teams()->SetFinished(pChr->m_pPlayer->GetCid(), m_TeeFinished);
 	}
 
-	for(int i = 0; i < NUM_WEAPONS; i++)
+	for(int i = 0; i < NUM_EXTRA_WEAPONS; i++)
 	{
 		pChr->m_Core.m_aWeapons[i].m_AmmoRegenStart = m_aWeapons[i].m_AmmoRegenStart;
 		// m_Ammo not used anymore for tracking freeze following https://github.com/ddnet/ddnet/pull/2086

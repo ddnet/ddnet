@@ -5,6 +5,7 @@
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
 #include <game/team_state.h>
+#include <game/gamecore.h>
 
 #include <optional>
 
@@ -79,7 +80,7 @@ private:
 		int m_Ammo;
 		int m_Ammocost;
 		int m_Got;
-	} m_aWeapons[NUM_WEAPONS];
+	} m_aWeapons[NUM_EXTRA_WEAPONS];
 
 	// ninja
 	struct

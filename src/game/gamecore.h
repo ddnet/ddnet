@@ -17,6 +17,15 @@
 class CCollision;
 class CTeamsCore;
 
+// <FoxNet
+enum ExtraWeapons
+{
+	WEAPON_TELEKINESIS = NUM_WEAPONS,
+	WEAPON_HEARTGUN,
+	NUM_EXTRA_WEAPONS
+};
+// FoxNet>
+
 class CTuneParam
 {
 	int m_Value;
@@ -66,10 +75,6 @@ public:
 
 	static const CTuningParams DEFAULT;
 };
-
-// Do not use these function unless for legacy code!
-void StrToInts(int *pInts, size_t NumInts, const char *pStr);
-bool IntsToStr(const int *pInts, size_t NumInts, char *pStr, size_t StrSize);
 
 inline vec2 CalcPos(vec2 Pos, vec2 Velocity, float Curvature, float Speed, float Time)
 {
@@ -202,7 +207,7 @@ public:
 		int m_Ammo;
 		int m_Ammocost;
 		bool m_Got;
-	} m_aWeapons[NUM_WEAPONS];
+	} m_aWeapons[NUM_EXTRA_WEAPONS];
 
 	// ninja
 	struct

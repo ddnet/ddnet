@@ -1,20 +1,21 @@
 ﻿#include "votemenu.h"
-#include "../gamecontext.h"
-#include "../player.h"
 #include "accounts.h"
 #include <algorithm>
 #include <base/system.h>
-#include <ctime>
+#include <cstring>
 #include <engine/message.h>
 #include <engine/server.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
+#include <game/server/entities/character.h>
+#include <game/server/gamecontext.h>
+#include <game/server/player.h>
 #include <game/voting.h>
 #include <iterator>
 #include <string>
 #include <vector>
-#include <cstring>
+#include <game/gamecore.h>
 
 // Font: https://fsymbols.com/generators/smallcaps/
 constexpr const char *EMPTY_DESC = " ";
@@ -78,7 +79,11 @@ bool CVoteMenu::OnCallVote(const CNetMsg_Cl_CallVote *pMsg, int ClientId)
 			SetPage(ClientId, i);
 			return true;
 		}
+
 	}
+
+	if(!str_comp(Vote, FANCY_LINES_DESC) || !str_comp(Vote, EMPTY_DESC))
+		return true;
 
 	if(IsPageAllowed(ClientId, Page))
 	{
@@ -106,10 +111,9 @@ bool CVoteMenu::OnCallVote(const CNetMsg_Cl_CallVote *pMsg, int ClientId)
 		}
 		else if(Page == PAGE_ACCOUNT)
 		{
-
 		}
 		else if(Page == PAGE_SHOP)
-		{		
+		{
 			for(const auto &Items : GameServer()->m_Shop.m_Items)
 			{
 				if(!str_comp(Items->Name(), ""))
@@ -137,7 +141,7 @@ bool CVoteMenu::OnCallVote(const CNetMsg_Cl_CallVote *pMsg, int ClientId)
 			}
 
 			// !New Cosmetic
-			if(IsOptionWithPrefix(Vote, "Rainbow Speed"))
+			if(IsOptionWithSuffix(Vote, "Rainbow Speed"))
 			{
 				if(ReasonInt.has_value())
 					pPl->m_Cosmetics.m_RainbowSpeed = ReasonInt.value();
@@ -145,7 +149,7 @@ bool CVoteMenu::OnCallVote(const CNetMsg_Cl_CallVote *pMsg, int ClientId)
 					GameServer()->SendChatTarget(ClientId, "Please specify the rainbow speed using the reason field");
 				return true;
 			}
-			if(IsOptionWithPrefix(Vote, "Emoticon Gun"))
+			if(IsOptionWithSuffix(Vote, "Emoticon Gun"))
 			{
 				if(ReasonInt.has_value())
 					pPl->ToggleItem("Emoticon Gun", ReasonInt.value());
@@ -171,6 +175,38 @@ bool CVoteMenu::OnCallVote(const CNetMsg_Cl_CallVote *pMsg, int ClientId)
 		}
 		else if(Page == PAGE_ADMIN)
 		{
+			// !New Cosmetic
+			if(IsOptionWithSuffix(Vote, "Rainbow Speed"))
+			{
+				if(ReasonInt.has_value())
+					pPl->m_Cosmetics.m_RainbowSpeed = ReasonInt.value();
+				else
+					GameServer()->SendChatTarget(ClientId, "Please specify the rainbow speed using the reason field");
+				return true;
+			}
+			if(IsOptionWithSuffix(Vote, "Emoticon Gun"))
+			{
+				if(ReasonInt.has_value())
+					pPl->ToggleItem("Emoticon Gun", ReasonInt.value());
+				else
+					GameServer()->SendChatTarget(ClientId, "Please specify the emote type using the reason field");
+				return true;
+			}
+
+			// Options that use the reason field go above
+			for(const auto &Items : GameServer()->m_Shop.m_Items)
+			{
+				if(!str_comp(Items->Name(), ""))
+					continue;
+				if(Items->Price() == -1)
+					continue;
+
+				if(!str_comp(Vote, Items->Name()))
+				{
+					pPl->ToggleItem(Items->Name(), 0, true);
+					return true;
+				}
+			}
 		}
 	}
 
@@ -246,10 +282,17 @@ void CVoteMenu::UpdatePages(int ClientId)
 		if(memcmp(Acc.m_Inventory, OldAcc.m_Inventory, sizeof(Acc.m_Inventory)) != 0)
 			Changes = true;
 
-		//if(mem_comp(&Acc, &m_aClientData[ClientId].m_Account, sizeof(Acc)) != 0)
+		// if(mem_comp(&Acc, &m_aClientData[ClientId].m_Account, sizeof(Acc)) != 0)
 		//	Changes = true;
 	}
 	else if(Page == PAGE_INVENTORY)
+	{
+		if(memcmp(Acc.m_Inventory, OldAcc.m_Inventory, sizeof(Acc.m_Inventory)) != 0)
+			Changes = true;
+		if(memcmp(&pPl->m_Cosmetics, &m_aClientData[ClientId].m_Cosmetics, sizeof(pPl->m_Cosmetics)) != 0)
+			Changes = true;
+	}
+	else if(Page == PAGE_ADMIN)
 	{
 		if(memcmp(Acc.m_Inventory, OldAcc.m_Inventory, sizeof(Acc.m_Inventory)) != 0)
 			Changes = true;
@@ -595,17 +638,16 @@ void CVoteMenu::DoCosmeticVotes(int ClientId, bool Authed)
 		AddVoteSubheader("Uɴᴀᴠᴀɪʟᴀʙʟᴇ");
 		AddVoteCheckBox(ADMIN_COSM_PICKUPPET, pPl->m_Cosmetics.m_PickupPet);
 		AddVoteCheckBox(ADMIN_COSM_STAFFIND, pPl->m_Cosmetics.m_StaffInd);
-		//if(pPl->GetCharacter())
-		//	AddVoteCheckBox(CADMIN_COSM_HEARTGUN, pPl->GetCharacter()->GetWeaponGot(WEAPON_HEART_GUN));
-		//AddVoteSeperator();
-		// 
-		//AddVoteSubheader("Aʙɪʟɪᴛɪᴇs");
-		//AddVoteCheckBox(ADMIN_ABILITY_HEART, pPl->m_Cosmetics.m_Ability == ABILITY_HEART);
-		//AddVoteCheckBox(ADMIN_ABILITY_SHIELD, pPl->m_Cosmetics.m_Ability == ABILITY_SHIELD);
-		//AddVoteCheckBox(ADMIN_ABILITY_FIREWORK, pPl->m_Cosmetics.m_Ability == ABILITY_FIREWORK);
-		//AddVoteCheckBox(ADMIN_ABILITY_TELEKINESIS, pPl->m_Cosmetics.m_Ability == ABILITY_TELEKINESIS);
+		if(pPl->GetCharacter())
+			AddVoteCheckBox(ADMIN_COSM_HEARTGUN, pPl->GetCharacter()->GetWeaponGot(WEAPON_HEARTGUN));
 		AddVoteSeperator();
 
+		AddVoteSubheader("Aʙɪʟɪᴛɪᴇs");
+		AddVoteCheckBox(ADMIN_ABILITY_HEART, pPl->m_Cosmetics.m_Ability == ABILITY_HEART);
+		AddVoteCheckBox(ADMIN_ABILITY_SHIELD, pPl->m_Cosmetics.m_Ability == ABILITY_SHIELD);
+		AddVoteCheckBox(ADMIN_ABILITY_FIREWORK, pPl->m_Cosmetics.m_Ability == ABILITY_FIREWORK);
+		AddVoteCheckBox(ADMIN_ABILITY_TELEKINESIS, pPl->m_Cosmetics.m_Ability == ABILITY_TELEKINESIS);
+		AddVoteSeperator();
 	}
 
 	if(!RainbowItems.empty())
@@ -670,7 +712,7 @@ void CVoteMenu::DoCosmeticVotes(int ClientId, bool Authed)
 void CVoteMenu::SendPageAdmin(int ClientId)
 {
 	// CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
-	AddVoteText("ToDo");
+	DoCosmeticVotes(ClientId, true);
 }
 
 void CVoteMenu::AddHeader(int ClientId)
@@ -752,7 +794,7 @@ void CVoteMenu::AddVoteSubheader(const char *pDesc)
 	const char *pPrefixes[] = {"•", "─", ">", "⇨", "⁃", "‣", "◆", "◇"};
 
 	char aBuf[128];
-	//str_format(aBuf, sizeof(aBuf), "═─═ %s ═─═", pDesc);
+	// str_format(aBuf, sizeof(aBuf), "═─═ %s ═─═", pDesc);
 	str_format(aBuf, sizeof(aBuf), "─── %s ───", pDesc);
 	AddVoteText(aBuf);
 }

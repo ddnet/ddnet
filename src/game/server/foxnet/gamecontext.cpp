@@ -1,11 +1,10 @@
-﻿#include "../gamecontext.h"
-#include "../entities/character.h"
-#include "../player.h"
-#include "accounts.h"
+﻿#include "accounts.h"
 #include "fontconvert.h"
 #include <base/system.h>
 #include <cstring>
-#include <optional>
+#include <game/server/entities/character.h>
+#include <game/server/gamecontext.h>
+#include <game/server/player.h>
 #include <random>
 #include <string>
 #include <vector>
@@ -287,7 +286,7 @@ void CGameContext::OnLogin(int ClientId)
 				pPl->ToggleItem(pShortcut, value);
 				continue;
 			}
-			// Add more shortcut checks if needed
+			// Add more shortcut checks if any other new cosmetic needs it
 		}
 		else
 		{
@@ -512,7 +511,7 @@ void CGameContext::UnsetTelekinesis(CEntity *pEntity)
 		CCharacter *pChr = GetPlayerChar(i);
 		if(pChr && pChr->m_pTelekinesisEntity == pEntity)
 		{
-			pChr->m_pTelekinesisEntity = 0;
+			pChr->m_pTelekinesisEntity = nullptr;
 			break; // can break here, every entity can only be picked by one player using telekinesis at the time
 		}
 	}
@@ -624,4 +623,28 @@ void CGameContext::Explosion(vec2 Pos, CClientMask Mask)
 		pEvent->m_X = (int)Pos.x;
 		pEvent->m_Y = (int)Pos.y;
 	}
+}
+
+int CGameContext::GetWeaponType(int Weapon)
+{
+	switch(Weapon)
+	{
+	case WEAPON_HAMMER:
+		return WEAPON_HAMMER;
+	case WEAPON_GUN:
+		return WEAPON_GUN;
+	case WEAPON_SHOTGUN:
+		return WEAPON_SHOTGUN;
+	case WEAPON_GRENADE:
+		return WEAPON_GRENADE;
+	case WEAPON_LASER:
+		return WEAPON_LASER;
+	case WEAPON_NINJA:
+		return WEAPON_NINJA;
+	case WEAPON_TELEKINESIS:
+		return WEAPON_GUN;
+	case WEAPON_HEARTGUN:
+		return WEAPON_GUN;
+	}
+	return Weapon;
 }

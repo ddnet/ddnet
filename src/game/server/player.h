@@ -272,6 +272,10 @@ public:
 		vec2 ConvertTargetToWorld(vec2 Position, vec2 Target) const;
 		void Write(const CNetMsg_Cl_CameraInfo *pMsg);
 		void Reset();
+		// <FoxNet
+		float GetZoom() const { return m_Zoom; }
+		// FoxNet>
+
 	} m_CameraInfo;
 
 	int m_ChatScore;
@@ -336,7 +340,7 @@ public:
 	void GiveMoney(int64_t Amount, const char *pMessage = "");
 
 	bool OwnsItem(const char *pItemName);
-	bool ToggleItem(const char *pItemName, int Set);
+	bool ToggleItem(const char *pItemName, int Set, bool IgnoreAccount = false);
 
 	void UpdateActiveItems();
 

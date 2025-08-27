@@ -809,6 +809,7 @@ public:
 
 	void Explosion(vec2 Pos, CClientMask Mask);
 
+	int GetWeaponType(int Weapon);
 	// FoxNet>
 };
 
