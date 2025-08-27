@@ -6,6 +6,7 @@
 #include <base/time.h>
 
 #include <engine/antibot.h>
+#include <engine/server/authmanager.h>
 #include <engine/shared/config.h>
 
 #include <game/mapitems.h>
@@ -465,11 +466,11 @@ void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 	const bool HasSource = pResult->NumArguments() == 2;
 	int Tele = HasSource ? pResult->GetVictim(0) : pResult->m_ClientId;
 	int TeleTo = pResult->NumArguments() ? pResult->GetVictim(HasSource ? 1 : 0) : pResult->m_ClientId;
-	int AuthLevel = pSelf->Server()->GetAuthedState(pResult->m_ClientId);
+	CRconRole *pRole = pSelf->Server()->RoleOrNullptr(pResult->m_ClientId);
 
-	if(Tele != pResult->m_ClientId && AuthLevel < g_Config.m_SvTeleOthersAuthLevel)
+	if(!pRole || (Tele != pResult->m_ClientId && !pRole->CanTeleOthers()))
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tele", "you aren't allowed to tele others");
+		log_error("tele", "you aren't allowed to tele others");
 		return;
 	}
 
