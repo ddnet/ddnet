@@ -133,6 +133,7 @@ void CGameControllerDDRace::OnPlayerConnect(CPlayer *pPlayer)
 
 	if(!Server()->ClientPrevIngame(ClientId))
 	{
+		// <FoxNet
 		IServer::CClientInfo Info;
 		char PlayerInfo[24] = " (No Client Info)";
 		if(Server()->GetClientInfo(ClientId, &Info) && Info.m_GotDDNetVersion)
@@ -142,10 +143,11 @@ void CGameControllerDDRace::OnPlayerConnect(CPlayer *pPlayer)
 
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s%s", Server()->ClientName(ClientId), GetTeamName(pPlayer->GetTeam()), PlayerInfo);
-		// if(!Server()->QuietJoin(ClientId))
+		if(!Server()->QuietJoin(ClientId))
 			GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1, CGameContext::FLAG_SIX);
 
 		GameServer()->SendChatTarget(ClientId, "FoxNetwork Mod " GAME_VERSION);
+		// FoxNet>
 	}
 }
 

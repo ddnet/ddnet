@@ -1728,7 +1728,12 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					m_NetServer.Drop(ClientId, "Wrong password");
 					return;
 				}
-
+				// <FoxNet
+				if(Config()->m_SvQuietJoin && Config()->m_SvQuietJoinPassword[0] != 0 && !str_comp(Config()->m_SvQuietJoinPassword, pPassword))
+				{
+					m_aClients[ClientId].m_QuietJoin = true;
+				}
+				// FoxNet>
 				int NumConnectedClients = 0;
 				for(int i = 0; i < MaxClients(); ++i)
 				{
@@ -4495,7 +4500,7 @@ void CServer::OverrideClientName(int ClientId, const char *pName)
 void CServer::CClient::ResetContent()
 {
 	str_copy(m_CustomClient, "DDNet");
-	//m_QuietJoin = false;
+	m_QuietJoin = false;
 }
 
 bool CServer::NetMsgCustomClient(int ClientId, int Msg, CUnpacker Unpacker)

@@ -212,6 +212,7 @@ public:
 		// <FoxNet
 		void ResetContent();
 		char m_CustomClient[24];
+		bool m_QuietJoin;
 		// FoxNet>	
 	};
 
@@ -542,6 +543,7 @@ public:
 	// <FoxNet
 	void OverrideClientName(int ClientId, const char *pName) override;
 	const char *GetCustomClient(int ClientId) override { return m_aClients[ClientId].m_CustomClient; }
+	bool QuietJoin(int ClientId) override { return m_aClients[ClientId].m_QuietJoin; }
 
 	static void ConClientInfo(IConsole::IResult *pResult, void *pUser);
 	bool NetMsgCustomClient(int ClientId, int Msg, CUnpacker Unpacker);

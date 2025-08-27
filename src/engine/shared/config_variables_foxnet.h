@@ -45,4 +45,8 @@ MACRO_CONFIG_INT(SvUfoLaserType, sv_ufo_laser_type, 0, 0, 6, CFGFLAG_SERVER, "Uf
 MACRO_CONFIG_INT(SvUfoHideHookColl, sv_ufo_hide_hook_coll, 2, 0, 2, CFGFLAG_SERVER, "Whether other people see UFO players hookcoll when flying down")
 MACRO_CONFIG_INT(SvUfoBrakes, sv_ufo_brakes, 0, 0, 1, CFGFLAG_SERVER, "Allows the UFO to instantly stop and stay still if player is flying up, down, and holding Fire")
 
+// Quiet Join
+MACRO_CONFIG_INT(SvQuietJoin, fs_quiet_join, 0, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Whether to disable the join message for players with the right password")
+MACRO_CONFIG_STR(SvQuietJoinPassword, fs_quiet_join_password, 128, "", CFGFLAG_SERVER | CFGFLAG_GAME, "Password if QuietJoin is enabled")
+
 MACRO_CONFIG_INT(SvDebugQuadPos, sv_debug_quad_pos, 0, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Shows interactive quad positions using lasers")
