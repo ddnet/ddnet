@@ -7,8 +7,10 @@
 #include "databases/connection_pool.h"
 #include "register.h"
 
+#include <base/log.h>
 #include <base/logger.h>
 #include <base/math.h>
+#include <base/str.h>
 #include <base/system.h>
 
 #include <engine/config.h>
@@ -16,6 +18,7 @@
 #include <engine/engine.h>
 #include <engine/map.h>
 #include <engine/server.h>
+#include <engine/server/authmanager.h>
 #include <engine/shared/compression.h>
 #include <engine/shared/config.h>
 #include <engine/shared/console.h>
@@ -38,6 +41,8 @@
 #include <engine/shared/rust_version.h>
 #include <engine/shared/snapshot.h>
 #include <engine/storage.h>
+
+#include <generated/protocol.h>
 
 #include <game/version.h>
 
@@ -308,23 +313,6 @@ const char *CServer::DnsblStateStr(EDnsblState State)
 	}
 
 	dbg_assert(false, "unreachable");
-	dbg_break();
-}
-
-IConsole::EAccessLevel CServer::ConsoleAccessLevel(int ClientId) const
-{
-	int AuthLevel = GetAuthedState(ClientId);
-	switch(AuthLevel)
-	{
-	case AUTHED_ADMIN:
-		return IConsole::EAccessLevel::ADMIN;
-	case AUTHED_MOD:
-		return IConsole::EAccessLevel::MODERATOR;
-	case AUTHED_HELPER:
-		return IConsole::EAccessLevel::HELPER;
-	};
-
-	dbg_assert(false, "invalid auth level: %d", AuthLevel);
 	dbg_break();
 }
 
@@ -633,6 +621,19 @@ int CServer::GetAuthedState(int ClientId) const
 	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "ClientId %d is not valid", ClientId);
 	dbg_assert(m_aClients[ClientId].m_State != CServer::CClient::STATE_EMPTY, "Client slot is empty");
 	return m_AuthManager.KeyLevel(m_aClients[ClientId].m_AuthKey);
+}
+
+int CServer::GetAuthRank(int ClientId) const
+{
+	if(ClientId == -1)
+		return RoleRank::ADMIN;
+	if(ClientId == IConsole::CLIENT_ID_GAME)
+		return RoleRank::ADMIN;
+	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "ClientId %d is not valid", ClientId);
+	dbg_assert(m_aClients[ClientId].m_State != CServer::CClient::STATE_EMPTY, "Client slot is empty");
+	if(!IsRconAuthed(ClientId))
+		return RoleRank::NONE;
+	return RoleOrNullptr(ClientId)->Rank();
 }
 
 bool CServer::IsRconAuthed(int ClientId) const
@@ -1551,11 +1552,10 @@ void CServer::UpdateClientMaplistEntries(int ClientId)
 	if(Client.m_MaplistEntryToSend == CClient::MAPLIST_UNINITIALIZED)
 	{
 		static const char *const MAP_COMMANDS[] = {"sv_map", "change_map"};
-		const IConsole::EAccessLevel AccessLevel = ConsoleAccessLevel(ClientId);
 		const bool MapCommandAllowed = std::any_of(std::begin(MAP_COMMANDS), std::end(MAP_COMMANDS), [&](const char *pMapCommand) {
 			const IConsole::ICommandInfo *pInfo = Console()->GetCommandInfo(pMapCommand, CFGFLAG_SERVER, false);
 			dbg_assert(pInfo != nullptr, "Map command not found");
-			return AccessLevel <= pInfo->GetAccessLevel();
+			return CanClientUseCommand(ClientId, pInfo);
 		});
 		if(MapCommandAllowed)
 		{
@@ -1965,7 +1965,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					str_format(aBuf, sizeof(aBuf), "ClientId=%d rcon='%s'", ClientId, pCmd);
 					Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 					m_RconClientId = ClientId;
-					m_RconAuthLevel = GetAuthedState(ClientId);
+					m_RconAuthLevel = GetAuthRank(ClientId);
 					{
 						CRconClientLogger Logger(this, ClientId);
 						CLogScope Scope(&Logger);
@@ -1998,11 +1998,11 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 			if(!pName[0])
 			{
-				if(m_AuthManager.CheckKey((KeySlot = m_AuthManager.DefaultKey(AUTHED_ADMIN)), pPw))
+				if(m_AuthManager.CheckKey((KeySlot = m_AuthManager.DefaultKey(RoleName::ADMIN)), pPw))
 					AuthLevel = AUTHED_ADMIN;
-				else if(m_AuthManager.CheckKey((KeySlot = m_AuthManager.DefaultKey(AUTHED_MOD)), pPw))
+				else if(m_AuthManager.CheckKey((KeySlot = m_AuthManager.DefaultKey(RoleName::MODERATOR)), pPw))
 					AuthLevel = AUTHED_MOD;
-				else if(m_AuthManager.CheckKey((KeySlot = m_AuthManager.DefaultKey(AUTHED_HELPER)), pPw))
+				else if(m_AuthManager.CheckKey((KeySlot = m_AuthManager.DefaultKey(RoleName::HELPER)), pPw))
 					AuthLevel = AUTHED_HELPER;
 			}
 			else
@@ -2043,28 +2043,15 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 					char aBuf[256];
 					const char *pIdent = m_AuthManager.KeyIdent(KeySlot);
-					switch(AuthLevel)
-					{
-					case AUTHED_ADMIN:
-					{
-						SendRconLine(ClientId, "Admin authentication successful. Full remote console access granted.");
-						str_format(aBuf, sizeof(aBuf), "ClientId=%d authed with key=%s (admin)", ClientId, pIdent);
-						break;
-					}
-					case AUTHED_MOD:
-					{
-						SendRconLine(ClientId, "Moderator authentication successful. Limited remote console access granted.");
-						str_format(aBuf, sizeof(aBuf), "ClientId=%d authed with key=%s (moderator)", ClientId, pIdent);
-						break;
-					}
-					case AUTHED_HELPER:
-					{
-						SendRconLine(ClientId, "Helper authentication successful. Limited remote console access granted.");
-						str_format(aBuf, sizeof(aBuf), "ClientId=%d authed with key=%s (helper)", ClientId, pIdent);
-						break;
-					}
-					}
-					Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+					const CRconRole *pRole = RoleOrNullptr(ClientId);
+					str_format(
+						aBuf,
+						sizeof(aBuf),
+						"Successfully authenticated as %s. %s remote console access granted.",
+						pRole->Name(),
+						pRole->IsAdmin() ? "Full" : "Limited");
+					SendRconLine(ClientId, aBuf);
+					log_info("server", "ClientId=%d authed with key=%s (%s)", ClientId, pIdent, pRole->Name());
 
 					// DDRace
 					GameServer()->OnSetAuthed(ClientId, AuthLevel);
@@ -3459,11 +3446,9 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 			aAuthStr[0] = '\0';
 			if(pThis->m_aClients[i].m_AuthKey >= 0)
 			{
-				const char *pAuthStr = pThis->GetAuthedState(i) == AUTHED_ADMIN ? "(Admin)" :
-												  pThis->GetAuthedState(i) == AUTHED_MOD ? "(Mod)" :
-																	   pThis->GetAuthedState(i) == AUTHED_HELPER ? "(Helper)" : "";
-
-				str_format(aAuthStr, sizeof(aAuthStr), " key=%s %s", pThis->m_AuthManager.KeyIdent(pThis->m_aClients[i].m_AuthKey), pAuthStr);
+				const CRconRole *pRole = pThis->RoleOrNullptr(i);
+				const char *pAuthStr = pRole ? pRole->Name() : "";
+				str_format(aAuthStr, sizeof(aAuthStr), " key=%s (%s)", pThis->m_AuthManager.KeyIdent(pThis->m_aClients[i].m_AuthKey), pAuthStr);
 			}
 
 			const char *pClientPrefix = "";
@@ -3496,6 +3481,13 @@ static int GetAuthLevel(const char *pLevel)
 	return Level;
 }
 
+CRconRole *CServer::RoleOrNullptr(int ClientId) const
+{
+	const CAuthManager *pManager = &m_AuthManager;
+	CRconRole *pRole = pManager->KeyRole(m_aClients[ClientId].m_AuthKey);
+	return pRole;
+}
+
 bool CServer::CanClientUseCommandCallback(int ClientId, const IConsole::ICommandInfo *pCommand, void *pUser)
 {
 	return ((CServer *)pUser)->CanClientUseCommand(ClientId, pCommand);
@@ -3503,13 +3495,22 @@ bool CServer::CanClientUseCommandCallback(int ClientId, const IConsole::ICommand
 
 bool CServer::CanClientUseCommand(int ClientId, const IConsole::ICommandInfo *pCommand) const
 {
+	// everyone can use all chat commands
 	if(pCommand->Flags() & CFGFLAG_CHAT)
 		return true;
 	if(pCommand->Flags() & CMDFLAG_PRACTICE)
 		return true;
+	// some commands are run with -1 if they are executed
+	// by the server it self and not by a human
+	// those are always allowed
+	if(ClientId == -1)
+		return true;
 	if(!IsRconAuthed(ClientId))
 		return false;
-	return pCommand->GetAccessLevel() >= ConsoleAccessLevel(ClientId);
+	CRconRole *pRole = RoleOrNullptr(ClientId);
+	if(!pRole)
+		return false;
+	return pRole->CanUseRconCommand(pCommand->Name());
 }
 
 void CServer::AuthRemoveKey(int KeySlot)
@@ -3546,15 +3547,23 @@ void CServer::ConAuthAdd(IConsole::IResult *pResult, void *pUser)
 		return;
 	}
 
-	int Level = GetAuthLevel(pLevel);
-	if(Level == -1)
+	if(!pManager->FindRole(pLevel))
 	{
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "level can be one of {\"admin\", \"mod(erator)\", \"helper\"}");
-		return;
+		int Level = GetAuthLevel(pLevel);
+		if(Level == -1)
+		{
+			// TODO: this will cut on too many rcon roles. Which is better than flooding the rcon messages.
+			char aRoles[512];
+			pManager->GetRoleNames(aRoles, sizeof(aRoles));
+			log_warn("auth", "role can be one of: %s", aRoles);
+			return;
+		}
+		// back compat to support "mod", "modder" and so on as values for "moderator"
+		pLevel = CAuthManager::AuthLevelToRoleName(Level);
 	}
 
 	bool NeedUpdate = !pManager->NumNonDefaultKeys();
-	if(pManager->AddKey(pIdent, pPw, Level) < 0)
+	if(pManager->AddKey(pIdent, pPw, pLevel) < 0)
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident already exists");
 	else
 	{
@@ -3580,11 +3589,19 @@ void CServer::ConAuthAddHashed(IConsole::IResult *pResult, void *pUser)
 		return;
 	}
 
-	int Level = GetAuthLevel(pLevel);
-	if(Level == -1)
+	if(!pManager->FindRole(pLevel))
 	{
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "level can be one of {\"admin\", \"mod(erator)\", \"helper\"}");
-		return;
+		int Level = GetAuthLevel(pLevel);
+		if(Level == -1)
+		{
+			// TODO: this will cut on too many rcon roles. Which is better than flooding the rcon messages.
+			char aRoles[512];
+			pManager->GetRoleNames(aRoles, sizeof(aRoles));
+			log_warn("auth", "role can be one of: %s", aRoles);
+			return;
+		}
+		// back compat to support "mod", "modder" and so on as values for "moderator"
+		pLevel = CAuthManager::AuthLevelToRoleName(Level);
 	}
 
 	MD5_DIGEST Hash;
@@ -3603,7 +3620,7 @@ void CServer::ConAuthAddHashed(IConsole::IResult *pResult, void *pUser)
 
 	bool NeedUpdate = !pManager->NumNonDefaultKeys();
 
-	if(pManager->AddKeyHash(pIdent, Hash, aSalt, Level) < 0)
+	if(pManager->AddKeyHash(pIdent, Hash, aSalt, pLevel) < 0)
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident already exists");
 	else
 	{
@@ -3629,14 +3646,22 @@ void CServer::ConAuthUpdate(IConsole::IResult *pResult, void *pUser)
 		return;
 	}
 
-	int Level = GetAuthLevel(pLevel);
-	if(Level == -1)
+	if(!pManager->FindRole(pLevel))
 	{
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "level can be one of {\"admin\", \"mod(erator)\", \"helper\"}");
-		return;
+		int Level = GetAuthLevel(pLevel);
+		if(Level == -1)
+		{
+			// TODO: this will cut on too many rcon roles. Which is better than flooding the rcon messages.
+			char aRoles[512];
+			pManager->GetRoleNames(aRoles, sizeof(aRoles));
+			log_warn("auth", "role can be one of: %s", aRoles);
+			return;
+		}
+		// back compat to support "mod", "modder" and so on as values for "moderator"
+		pLevel = CAuthManager::AuthLevelToRoleName(Level);
 	}
 
-	pManager->UpdateKey(KeySlot, pPw, Level);
+	pManager->UpdateKey(KeySlot, pPw, pLevel);
 	pThis->LogoutKey(KeySlot, "key update");
 
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "key updated");
@@ -3659,11 +3684,19 @@ void CServer::ConAuthUpdateHashed(IConsole::IResult *pResult, void *pUser)
 		return;
 	}
 
-	int Level = GetAuthLevel(pLevel);
-	if(Level == -1)
+	if(!pManager->FindRole(pLevel))
 	{
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "level can be one of {\"admin\", \"mod(erator)\", \"helper\"}");
-		return;
+		int Level = GetAuthLevel(pLevel);
+		if(Level == -1)
+		{
+			// TODO: this will cut on too many rcon roles. Which is better than flooding the rcon messages.
+			char aRoles[512];
+			pManager->GetRoleNames(aRoles, sizeof(aRoles));
+			log_warn("auth", "role can be one of: %s", aRoles);
+			return;
+		}
+		// back compat to support "mod", "modder" and so on as values for "moderator"
+		pLevel = CAuthManager::AuthLevelToRoleName(Level);
 	}
 
 	MD5_DIGEST Hash;
@@ -3680,7 +3713,7 @@ void CServer::ConAuthUpdateHashed(IConsole::IResult *pResult, void *pUser)
 		return;
 	}
 
-	pManager->UpdateKeyHash(KeySlot, Hash, aSalt, Level);
+	pManager->UpdateKeyHash(KeySlot, Hash, aSalt, pLevel);
 	pThis->LogoutKey(KeySlot, "key update");
 
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "key updated");
@@ -3708,13 +3741,9 @@ void CServer::ConAuthRemove(IConsole::IResult *pResult, void *pUser)
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "key removed, all users logged out");
 }
 
-static void ListKeysCallback(const char *pIdent, int Level, void *pUser)
+static void ListKeysCallback(const char *pIdent, const char *pRoleName, void *pUser)
 {
-	static const char LSTRING[][10] = {"helper", "moderator", "admin"};
-
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "%s %s", pIdent, LSTRING[Level - 1]);
-	((CServer *)pUser)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", aBuf);
+	log_info("auth", "%s %s", pIdent, pRoleName);
 }
 
 void CServer::ConAuthList(IConsole::IResult *pResult, void *pUser)
@@ -3723,6 +3752,254 @@ void CServer::ConAuthList(IConsole::IResult *pResult, void *pUser)
 	CAuthManager *pManager = &pThis->m_AuthManager;
 
 	pManager->ListKeys(ListKeysCallback, pThis);
+}
+
+void CServer::ConRoleAllow(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pThis = (CServer *)pUser;
+	CAuthManager *pManager = &pThis->m_AuthManager;
+
+	const char *pCommand = pResult->GetString(0);
+	const char *pRoleName = pResult->GetString(1);
+
+	if(!str_comp(pRoleName, "all"))
+	{
+		log_error("auth", "The meta role 'all' is not supported by this command.");
+		return;
+	}
+
+	CRconRole *pRole = pManager->FindRole(pRoleName);
+
+	if(!pRole)
+	{
+		log_error("auth", "Role '%s' not found.", pRoleName);
+		return;
+	}
+
+	const IConsole::ICommandInfo *pInfo = pThis->Console()->GetCommandInfo(pCommand, CFGFLAG_SERVER, false);
+	if(!pInfo)
+	{
+		log_error("auth", "No such command: '%s'.", pCommand);
+		return;
+	}
+
+	if(pRole->AllowCommand(pCommand))
+	{
+		log_info("auth", "Role '%s' can now use command '%s'.", pRoleName, pCommand);
+	}
+	else
+	{
+		log_warn("auth", "Role '%s' already had access to command '%s'.", pRoleName, pCommand);
+	}
+}
+
+void CServer::ConRoleDisallow(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pThis = (CServer *)pUser;
+	CAuthManager *pManager = &pThis->m_AuthManager;
+
+	const char *pCommand = pResult->GetString(0);
+	const char *pRoleName = pResult->GetString(1);
+
+	if(!str_comp(pRoleName, "all"))
+	{
+		log_error("auth", "The meta role 'all' is not supported by this command.");
+		return;
+	}
+
+	CRconRole *pRole = pManager->FindRole(pRoleName);
+
+	if(!pRole)
+	{
+		log_error("auth", "Role '%s' not found.", pRoleName);
+		return;
+	}
+
+	const IConsole::ICommandInfo *pInfo = pThis->Console()->GetCommandInfo(pCommand, CFGFLAG_SERVER, false);
+	if(!pInfo)
+	{
+		log_error("auth", "No such command: '%s'.", pCommand);
+		return;
+	}
+
+	if(pRole->DisallowCommand(pCommand))
+	{
+		log_info("auth", "Role '%s' can no longer use command '%s'.", pRoleName, pCommand);
+	}
+	else
+	{
+		log_warn("auth", "Role '%s' already had no access to command '%s'.", pRoleName, pCommand);
+	}
+}
+
+void CServer::ConRoleCreate(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pThis = (CServer *)pUser;
+	CAuthManager *pManager = &pThis->m_AuthManager;
+
+	const char *pRoleName = pResult->GetString(0);
+	int Rank = 1; // lowest rank by default
+
+	// Rank 1 happens to be AUTHED_HELPER
+	// meaning new roles will get access to all commands
+	// that helper has access to.
+	//
+	// That is NOT good.
+	// We can also not go down to 0 because thats the special unauthed rank.
+	// Would be nice if we could shift these default roles to higher ranks.
+	// Something like 998, 999 and 1000
+	// But then the problem will be that all the code has to change.
+
+	if(pManager->AddRole(pRoleName, Rank))
+	{
+		log_info("auth", "Role '%s' created.", pRoleName);
+	}
+	else
+	{
+		log_warn("auth", "Role '%s' already exists.", pRoleName);
+	}
+}
+
+void CServer::ConRoleDelete(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pThis = (CServer *)pUser;
+	CAuthManager *pManager = &pThis->m_AuthManager;
+	const char *pRoleName = pResult->GetString(0);
+
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(pThis->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
+			continue;
+		if(!pThis->IsRconAuthed(i))
+			continue;
+
+		CRconRole *pRole = pThis->RoleOrNullptr(i);
+		// TODO: is this sus? shouldn't all authed players have a role???
+		if(!pRole)
+			continue;
+		if(str_comp(pRole->Name(), pRoleName))
+			continue;
+
+		pThis->LogoutClient(i, "role deletion");
+	}
+
+	pManager->DeleteRole(pRoleName);
+}
+
+void CServer::ConRoleInherit(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pThis = (CServer *)pUser;
+	CAuthManager *pManager = &pThis->m_AuthManager;
+	const char *pRole = pResult->GetString(0);
+	const char *pParent = pResult->GetString(1);
+	if(pManager->RoleInherit(pRole, pParent))
+	{
+		log_info("auth", "'%s' now inherits all commands from '%s'", pRole, pParent);
+	}
+}
+
+void CServer::ConRoleDisinherit(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pThis = (CServer *)pUser;
+	CAuthManager *pManager = &pThis->m_AuthManager;
+	const char *pRole = pResult->GetString(0);
+	const char *pParent = pResult->GetString(1);
+	if(pManager->RoleDeleteInherit(pRole, pParent))
+	{
+		log_info("auth", "'%s' no longer inherits all commands from '%s'", pRole, pParent);
+	}
+}
+
+void CServer::ConAccessLevel(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pThis = (CServer *)pUser;
+	CAuthManager *pManager = &pThis->m_AuthManager;
+
+	const char *pCommand = pResult->GetString(0);
+	const char *pRoleName = pResult->GetString(1);
+
+	const IConsole::ICommandInfo *pInfo = pThis->Console()->GetCommandInfo(pCommand, CFGFLAG_SERVER, false);
+	if(!pInfo)
+	{
+		log_error("server", "No such command: '%s'.", pCommand);
+		return;
+	}
+
+	CRconRole *pModerator = pManager->FindRole(RoleName::MODERATOR);
+	CRconRole *pHelper = pManager->FindRole(RoleName::HELPER);
+
+	if(pResult->NumArguments() > 1)
+	{
+		CRconRole *pRole = pManager->FindRole(pRoleName);
+		if(!pRole)
+		{
+			if(str_startswith(pRoleName, "mod"))
+				pRole = pManager->FindRole(RoleName::MODERATOR);
+			else if(!str_comp(pRoleName, "0"))
+				pRole = pManager->FindRole(RoleName::ADMIN);
+			else if(!str_comp(pRoleName, "1"))
+				pRole = pManager->FindRole(RoleName::MODERATOR);
+			else if(!str_comp(pRoleName, "2"))
+				pRole = pManager->FindRole(RoleName::HELPER);
+			// meta role "all" grants helper and upwards access
+			else if(!str_comp(pRoleName, "3") || !str_comp(pRoleName, "all"))
+				pRole = pManager->FindRole(RoleName::HELPER);
+		}
+		if(!pRole)
+		{
+			log_error("auth", "Role '%s' not found.", pRoleName);
+			return;
+		}
+
+		if(!str_comp(pRole->Name(), RoleName::ADMIN))
+		{
+			pModerator->DisallowCommand(pCommand);
+			pHelper->DisallowCommand(pCommand);
+		}
+		else if(!str_comp(pRole->Name(), RoleName::MODERATOR))
+		{
+			pModerator->AllowCommand(pCommand);
+			pHelper->DisallowCommand(pCommand);
+		}
+		else if(!str_comp(pRole->Name(), RoleName::HELPER))
+		{
+			pHelper->AllowCommand(pCommand);
+		}
+		else
+		{
+			// TODO: could also support custom roles here
+			//       but then the output should change because we do not want to list ALL roles in that case
+			//       needs to be planned first how this should behave exactly for custom roles
+			log_error("auth", "This command only works for default roles. Use role_allow, role_disallow instead.");
+			return;
+		}
+	}
+
+	if(pResult->NumArguments() == 2)
+	{
+		log_info("server", "moderator access for '%s' is now %s", pCommand, pModerator->CanUseRconCommand(pCommand) ? "enabled" : "disabled");
+		log_info("server", "helper access for '%s' is now %s", pCommand, pHelper->CanUseRconCommand(pCommand) ? "enabled" : "disabled");
+	}
+	else
+	{
+		log_info("server", "moderator access for '%s' is %s", pCommand, pModerator->CanUseRconCommand(pCommand) ? "enabled" : "disabled");
+		log_info("server", "helper access for '%s' is %s", pCommand, pHelper->CanUseRconCommand(pCommand) ? "enabled" : "disabled");
+	}
+}
+
+void CServer::ConAccessStatus(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pThis = (CServer *)pUser;
+	CAuthManager *pManager = &pThis->m_AuthManager;
+	const char *pRoleName = pResult->GetString(0);
+	CRconRole *pRole = pManager->FindRole(pRoleName);
+	if(!pRole)
+	{
+		log_error("server", "Role '%s' not found", pRoleName);
+		return;
+	}
+	int MaxLineLength = 240;
+	pRole->LogRconCommandAccess(MaxLineLength);
 }
 
 void CServer::ConShutdown(IConsole::IResult *pResult, void *pUser)
@@ -4046,43 +4323,57 @@ void CServer::ConchainMaxclientsperipUpdate(IConsole::IResult *pResult, void *pU
 
 void CServer::ConchainCommandAccessUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
-	if(pResult->NumArguments() == 2)
+	if(pResult->NumArguments() != 2)
 	{
-		CServer *pThis = static_cast<CServer *>(pUserData);
-		const IConsole::ICommandInfo *pInfo = pThis->Console()->GetCommandInfo(pResult->GetString(0), CFGFLAG_SERVER, false);
-		IConsole::EAccessLevel OldAccessLevel = IConsole::EAccessLevel::ADMIN;
-		if(pInfo)
-			OldAccessLevel = pInfo->GetAccessLevel();
 		pfnCallback(pResult, pCallbackUserData);
-		if(pInfo && OldAccessLevel != pInfo->GetAccessLevel())
-		{
-			for(int i = 0; i < MAX_CLIENTS; ++i)
-			{
-				if(pThis->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
-					continue;
-				if(!pThis->IsRconAuthed(i))
-					continue;
-
-				const IConsole::EAccessLevel ClientAccessLevel = pThis->ConsoleAccessLevel(i);
-				bool HadAccess = OldAccessLevel >= ClientAccessLevel;
-				bool HasAccess = pInfo->GetAccessLevel() >= ClientAccessLevel;
-
-				// Nothing changed
-				if(HadAccess == HasAccess)
-					continue;
-				// Command not sent yet. The sending will happen in alphabetical order with correctly updated permissions.
-				if(pThis->m_aClients[i].m_pRconCmdToSend && str_comp(pResult->GetString(0), pThis->m_aClients[i].m_pRconCmdToSend->Name()) >= 0)
-					continue;
-
-				if(HasAccess)
-					pThis->SendRconCmdAdd(pInfo, i);
-				else
-					pThis->SendRconCmdRem(pInfo, i);
-			}
-		}
+		return;
 	}
-	else
-		pfnCallback(pResult, pCallbackUserData);
+
+	CServer *pThis = static_cast<CServer *>(pUserData);
+	const char *pCommand = pResult->GetString(0);
+	const IConsole::ICommandInfo *pInfo = pThis->Console()->GetCommandInfo(pCommand, CFGFLAG_SERVER, false);
+	if(!pInfo)
+	{
+		log_warn("server", "Command '%s' not found!", pCommand);
+		return;
+	}
+
+	bool aHadAcces[MAX_CLIENTS] = {};
+
+	for(int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if(pThis->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
+			continue;
+		if(!pThis->IsRconAuthed(i))
+			continue;
+
+		aHadAcces[i] = pThis->CanClientUseCommand(i, pInfo);
+	}
+
+	pfnCallback(pResult, pCallbackUserData);
+
+	for(int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if(pThis->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
+			continue;
+		if(!pThis->IsRconAuthed(i))
+			continue;
+
+		bool HadAccess = aHadAcces[i];
+		bool HasAccess = pThis->CanClientUseCommand(i, pInfo);
+
+		// Nothing changed
+		if(HadAccess == HasAccess)
+			continue;
+		// Command not sent yet. The sending will happen in alphabetical order with correctly updated permissions.
+		if(pThis->m_aClients[i].m_pRconCmdToSend && str_comp(pCommand, pThis->m_aClients[i].m_pRconCmdToSend->Name()) >= 0)
+			continue;
+
+		if(HasAccess)
+			pThis->SendRconCmdAdd(pInfo, i);
+		else
+			pThis->SendRconCmdRem(pInfo, i);
+	}
 }
 
 void CServer::LogoutClient(int ClientId, const char *pReason)
@@ -4131,11 +4422,11 @@ void CServer::LogoutKey(int Key, const char *pReason)
 			LogoutClient(i, pReason);
 }
 
-void CServer::ConchainRconPasswordChangeGeneric(int Level, const char *pCurrent, IConsole::IResult *pResult)
+void CServer::ConchainRconPasswordChangeGeneric(const char *pRoleName, const char *pCurrent, IConsole::IResult *pResult)
 {
 	if(pResult->NumArguments() == 1)
 	{
-		int KeySlot = m_AuthManager.DefaultKey(Level);
+		int KeySlot = m_AuthManager.DefaultKey(pRoleName);
 		const char *pNew = pResult->GetString(0);
 		if(str_comp(pCurrent, pNew) == 0)
 		{
@@ -4143,7 +4434,7 @@ void CServer::ConchainRconPasswordChangeGeneric(int Level, const char *pCurrent,
 		}
 		if(KeySlot == -1 && pNew[0])
 		{
-			m_AuthManager.AddDefaultKey(Level, pNew);
+			m_AuthManager.AddDefaultKey(pRoleName, pNew);
 		}
 		else if(KeySlot >= 0)
 		{
@@ -4154,7 +4445,7 @@ void CServer::ConchainRconPasswordChangeGeneric(int Level, const char *pCurrent,
 			}
 			else
 			{
-				m_AuthManager.UpdateKey(KeySlot, pNew, Level);
+				m_AuthManager.UpdateKey(KeySlot, pNew, pRoleName);
 				LogoutKey(KeySlot, "key update");
 			}
 		}
@@ -4164,21 +4455,21 @@ void CServer::ConchainRconPasswordChangeGeneric(int Level, const char *pCurrent,
 void CServer::ConchainRconPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CServer *pThis = static_cast<CServer *>(pUserData);
-	pThis->ConchainRconPasswordChangeGeneric(AUTHED_ADMIN, pThis->Config()->m_SvRconPassword, pResult);
+	pThis->ConchainRconPasswordChangeGeneric(RoleName::ADMIN, pThis->Config()->m_SvRconPassword, pResult);
 	pfnCallback(pResult, pCallbackUserData);
 }
 
 void CServer::ConchainRconModPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CServer *pThis = static_cast<CServer *>(pUserData);
-	pThis->ConchainRconPasswordChangeGeneric(AUTHED_MOD, pThis->Config()->m_SvRconModPassword, pResult);
+	pThis->ConchainRconPasswordChangeGeneric(RoleName::MODERATOR, pThis->Config()->m_SvRconModPassword, pResult);
 	pfnCallback(pResult, pCallbackUserData);
 }
 
 void CServer::ConchainRconHelperPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CServer *pThis = static_cast<CServer *>(pUserData);
-	pThis->ConchainRconPasswordChangeGeneric(AUTHED_HELPER, pThis->Config()->m_SvRconHelperPassword, pResult);
+	pThis->ConchainRconPasswordChangeGeneric(RoleName::HELPER, pThis->Config()->m_SvRconHelperPassword, pResult);
 	pfnCallback(pResult, pCallbackUserData);
 }
 
@@ -4304,6 +4595,17 @@ void CServer::RegisterCommands()
 	Console()->Register("auth_remove", "s[ident]", CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, ConAuthRemove, this, "Remove a rcon key");
 	Console()->Register("auth_list", "", CFGFLAG_SERVER, ConAuthList, this, "List all rcon keys");
 
+	// TODO: delete this command? it will do the same as access_level anyways??????
+	Console()->Register("role_allow", "s[command] s[role]", CFGFLAG_SERVER, ConRoleAllow, this, "");
+	Console()->Register("role_disallow", "s[command] s[role]", CFGFLAG_SERVER, ConRoleDisallow, this, "");
+	Console()->Register("role_create", "s[role]", CFGFLAG_SERVER, ConRoleCreate, this, "");
+	Console()->Register("role_delete", "s[role]", CFGFLAG_SERVER, ConRoleDelete, this, "");
+	Console()->Register("role_inherit", "s[role] s[parent]", CFGFLAG_SERVER, ConRoleInherit, this, "");
+	Console()->Register("role_disinherit", "s[role] s[parent]", CFGFLAG_SERVER, ConRoleDisinherit, this, "");
+	// backwards compatible alias for role_allow, role_disallow
+	Console()->Register("access_level", "s[command] ?s[role]", CFGFLAG_SERVER, ConAccessLevel, this, "");
+	Console()->Register("access_status", "s[role]", CFGFLAG_SERVER, ConAccessStatus, this, "List all commands which are accessible for given access level");
+
 	Console()->Register("reload_announcement", "", CFGFLAG_SERVER, ConReloadAnnouncement, this, "Reload the announcements");
 	Console()->Register("reload_maplist", "", CFGFLAG_SERVER, ConReloadMaplist, this, "Reload the maplist");
 
@@ -4314,7 +4616,10 @@ void CServer::RegisterCommands()
 	Console()->Chain("sv_spectator_slots", ConchainSpecialInfoupdate, this);
 
 	Console()->Chain("sv_max_clients_per_ip", ConchainMaxclientsperipUpdate, this);
+	Console()->Chain("access_level_legacy", ConchainCommandAccessUpdate, this);
 	Console()->Chain("access_level", ConchainCommandAccessUpdate, this);
+	Console()->Chain("role_allow", ConchainCommandAccessUpdate, this);
+	Console()->Chain("role_disallow", ConchainCommandAccessUpdate, this);
 
 	Console()->Chain("sv_rcon_password", ConchainRconPasswordChange, this);
 	Console()->Chain("sv_rcon_mod_password", ConchainRconModPasswordChange, this);
