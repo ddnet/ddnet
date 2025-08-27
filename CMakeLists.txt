@@ -2774,30 +2774,30 @@ if(SERVER)
     entity.h
     eventhandler.cpp
     eventhandler.h  
-    #<FoxNet
+    # <FoxNet
     foxnet/accounts.cpp
     foxnet/accounts.h
     foxnet/commands.cpp
     foxnet/cosmetics/dot_trail.cpp
-    foxnet/cosmetics/dot_trail.cpp
+    foxnet/cosmetics/dot_trail.h
     foxnet/cosmetics/epic_circle.cpp
-    foxnet/cosmetics/epic_circle.cpp
+    foxnet/cosmetics/epic_circle.h
     foxnet/cosmetics/firework.cpp
-    foxnet/cosmetics/firework.cpp
+    foxnet/cosmetics/firework.h
     foxnet/cosmetics/flyingpoint.cpp
-    foxnet/cosmetics/flyingpoint.cpp
+    foxnet/cosmetics/flyingpoint.h
     foxnet/cosmetics/head_powerup.cpp
-    foxnet/cosmetics/head_powerup.cpp
+    foxnet/cosmetics/head_powerup.h
     foxnet/cosmetics/heart_hat.cpp
-    foxnet/cosmetics/heart_hat.cpp
+    foxnet/cosmetics/heart_hat.h
     foxnet/cosmetics/lovely.cpp
-    foxnet/cosmetics/lovely.cpp
+    foxnet/cosmetics/lovely.h
     foxnet/cosmetics/pickup_pet.cpp
-    foxnet/cosmetics/pickup_pet.cpp
+    foxnet/cosmetics/pickup_pet.h
     foxnet/cosmetics/rotating_ball.cpp
-    foxnet/cosmetics/rotating_ball.cpp
+    foxnet/cosmetics/rotating_ball.h
     foxnet/cosmetics/staff_ind.cpp
-    foxnet/cosmetics/staff_ind.cpp
+    foxnet/cosmetics/staff_ind.h
     foxnet/fontconvert.cpp
     foxnet/fontconvert.h
     foxnet/gamecontext.cpp
