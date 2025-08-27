@@ -114,19 +114,19 @@ bool CVoteMenu::OnCallVote(const CNetMsg_Cl_CallVote *pMsg, int ClientId)
 		}
 		else if(Page == PAGE_SHOP)
 		{
-			for(const auto &Items : GameServer()->m_Shop.m_Items)
+			for(const auto &pItems : GameServer()->m_Shop.m_Items)
 			{
-				if(!str_comp(Items->Name(), ""))
+				if(!str_comp(pItems->Name(), ""))
 					continue;
-				if(Items->Price() == -1)
+				if(pItems->Price() == -1)
 					continue;
 
 				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "%s | %d %s", Items->Name(), Items->Price(), g_Config.m_SvCurrencyName);
+				str_format(aBuf, sizeof(aBuf), "%s | %d %s", pItems->Name(), pItems->Price(), g_Config.m_SvCurrencyName);
 
 				if(!str_comp(Vote, aBuf))
 				{
-					GameServer()->m_Shop.BuyItem(ClientId, Items->Name());
+					GameServer()->m_Shop.BuyItem(ClientId, pItems->Name());
 					return true;
 				}
 			}
@@ -159,16 +159,16 @@ bool CVoteMenu::OnCallVote(const CNetMsg_Cl_CallVote *pMsg, int ClientId)
 			}
 
 			// Options that use the reason field go above
-			for(const auto &Items : GameServer()->m_Shop.m_Items)
+			for(const auto &pItems : GameServer()->m_Shop.m_Items)
 			{
-				if(!str_comp(Items->Name(), ""))
+				if(!str_comp(pItems->Name(), ""))
 					continue;
-				if(Items->Price() == -1)
+				if(pItems->Price() == -1)
 					continue;
 
-				if(!str_comp(Vote, Items->Name()))
+				if(!str_comp(Vote, pItems->Name()))
 				{
-					pPl->ToggleItem(Items->Name(), 0);
+					pPl->ToggleItem(pItems->Name(), 0);
 					return true;
 				}
 			}
@@ -194,16 +194,16 @@ bool CVoteMenu::OnCallVote(const CNetMsg_Cl_CallVote *pMsg, int ClientId)
 			}
 
 			// Options that use the reason field go above
-			for(const auto &Items : GameServer()->m_Shop.m_Items)
+			for(const auto &pItems : GameServer()->m_Shop.m_Items)
 			{
-				if(!str_comp(Items->Name(), ""))
+				if(!str_comp(pItems->Name(), ""))
 					continue;
-				if(Items->Price() == -1)
+				if(pItems->Price() == -1)
 					continue;
 
-				if(!str_comp(Vote, Items->Name()))
+				if(!str_comp(Vote, pItems->Name()))
 				{
-					pPl->ToggleItem(Items->Name(), 0, true);
+					pPl->ToggleItem(pItems->Name(), 0, true);
 					return true;
 				}
 			}
@@ -236,7 +236,6 @@ void CVoteMenu::OnClientDrop(int ClientId)
 
 void CVoteMenu::UpdatePages(int ClientId)
 {
-	// CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
 	const int Page = GetPage(ClientId);
 
 	bool Changes = false;
@@ -495,28 +494,28 @@ void CVoteMenu::SendPageShop(int ClientId)
 	AddVoteText(aBuf);
 	AddVoteSeperator();
 
-	for(const auto &Items : GameServer()->m_Shop.m_Items)
+	for(const auto &pItems : GameServer()->m_Shop.m_Items)
 	{
-		if(!str_comp(Items->Name(), ""))
+		if(!str_comp(pItems->Name(), ""))
 			continue;
-		if(Items->Price() == -1)
+		if(pItems->Price() == -1)
 			continue;
-		if(pPl->OwnsItem(Items->Name()))
+		if(pPl->OwnsItem(pItems->Name()))
 			continue;
-		if(Acc.m_Level < Items->MinLevel())
+		if(Acc.m_Level < pItems->MinLevel())
 			continue;
 
-		str_format(aBuf, sizeof(aBuf), "%s | %d %s", Items->Name(), Items->Price(), g_Config.m_SvCurrencyName);
+		str_format(aBuf, sizeof(aBuf), "%s | %d %s", pItems->Name(), pItems->Price(), g_Config.m_SvCurrencyName);
 
-		if(Items->Type() == TYPE_RAINBOW)
+		if(pItems->Type() == TYPE_RAINBOW)
 			RainbowItems.push_back(std::string(aBuf));
-		else if(Items->Type() == TYPE_GUN)
+		else if(pItems->Type() == TYPE_GUN)
 			GunItems.push_back(std::string(aBuf));
-		else if(Items->Type() == TYPE_INDICATOR)
+		else if(pItems->Type() == TYPE_INDICATOR)
 			IndicatorItems.push_back(std::string(aBuf));
-		else if(Items->Type() == TYPE_DEATHS)
+		else if(pItems->Type() == TYPE_DEATHS)
 			KillEffectItems.push_back(std::string(aBuf));
-		else if(Items->Type() == TYPE_TRAIL)
+		else if(pItems->Type() == TYPE_TRAIL)
 			TrailItems.push_back(std::string(aBuf));
 		else
 			OtherItems.push_back(std::string(aBuf));
@@ -578,7 +577,7 @@ void CVoteMenu::SendPageShop(int ClientId)
 
 void CVoteMenu::SendPageInventory(int ClientId)
 {
-	CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
+	// CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
 	const CAccountSession Acc = GameServer()->m_Account[ClientId];
 	if(!Acc.m_LoggedIn)
 	{
@@ -607,30 +606,30 @@ void CVoteMenu::DoCosmeticVotes(int ClientId, bool Authed)
 	std::vector<std::string> TrailItems;
 	std::vector<std::string> OtherItems;
 
-	for(const auto &Items : GameServer()->m_Shop.m_Items)
+	for(const auto &pItems : GameServer()->m_Shop.m_Items)
 	{
 		if(!Authed)
 		{
-			if(!str_comp(Items->Name(), ""))
+			if(!str_comp(pItems->Name(), ""))
 				continue;
-			if(Items->Price() == -1)
+			if(pItems->Price() == -1)
 				continue;
-			if(!(pPl->OwnsItem(Items->Name())))
+			if(!(pPl->OwnsItem(pItems->Name())))
 				continue;
 		}
 
-		if(Items->Type() == TYPE_RAINBOW)
-			RainbowItems.push_back(std::string(Items->Name()));
-		else if(Items->Type() == TYPE_GUN)
-			GunItems.push_back(std::string(Items->Name()));
-		else if(Items->Type() == TYPE_INDICATOR)
-			IndicatorItems.push_back(std::string(Items->Name()));
-		else if(Items->Type() == TYPE_DEATHS)
-			KillEffectItems.push_back(std::string(Items->Name()));
-		else if(Items->Type() == TYPE_TRAIL)
-			TrailItems.push_back(std::string(Items->Name()));
+		if(pItems->Type() == TYPE_RAINBOW)
+			RainbowItems.push_back(std::string(pItems->Name()));
+		else if(pItems->Type() == TYPE_GUN)
+			GunItems.push_back(std::string(pItems->Name()));
+		else if(pItems->Type() == TYPE_INDICATOR)
+			IndicatorItems.push_back(std::string(pItems->Name()));
+		else if(pItems->Type() == TYPE_DEATHS)
+			KillEffectItems.push_back(std::string(pItems->Name()));
+		else if(pItems->Type() == TYPE_TRAIL)
+			TrailItems.push_back(std::string(pItems->Name()));
 		else
-			OtherItems.push_back(std::string(Items->Name()));
+			OtherItems.push_back(std::string(pItems->Name()));
 	}
 
 	if(Authed)
@@ -791,8 +790,6 @@ void CVoteMenu::AddVoteValueOption(const char *pDescription, int Value, int Max,
 
 void CVoteMenu::AddVoteSubheader(const char *pDesc)
 {
-	const char *pPrefixes[] = {"•", "─", ">", "⇨", "⁃", "‣", "◆", "◇"};
-
 	char aBuf[128];
 	// str_format(aBuf, sizeof(aBuf), "═─═ %s ═─═", pDesc);
 	str_format(aBuf, sizeof(aBuf), "─── %s ───", pDesc);

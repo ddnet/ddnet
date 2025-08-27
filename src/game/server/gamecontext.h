@@ -766,7 +766,7 @@ private:
 	static void ConAddChatDetectionString(IConsole::IResult *pResult, void *pUserData);
 	void AddChatDetectionString(const char *pString, const char *pReason, bool pBan, int pBanTime, float pAddition = 1.0f);
 	// Remove
-	static void ConClearChatDetectionString(IConsole::IResult *pResult, void *pUserData);
+	static void ConClearChatDetectionStrings(IConsole::IResult *pResult, void *pUserData);
 	static void ConRemoveChatDetectionString(IConsole::IResult *pResult, void *pUserData);
 	void RemoveChatDetectionString(const char *pString);
 	// List
