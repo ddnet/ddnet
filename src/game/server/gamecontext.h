@@ -11,6 +11,7 @@
 
 #include <engine/console.h>
 #include <engine/server.h>
+#include <engine/server/authmanager.h>
 
 #include <generated/protocol.h>
 
@@ -376,7 +377,7 @@ public:
 	void TeehistorianRecordPlayerName(int ClientId, const char *pName) override;
 	void TeehistorianRecordPlayerFinish(int ClientId, int TimeTicks) override;
 	void TeehistorianRecordTeamFinish(int TeamId, int TimeTicks) override;
-	void TeehistorianRecordAuthLogin(int ClientId, int Level, const char *pAuthName) override;
+	void TeehistorianRecordAuthLogin(int ClientId, const char *pRoleName, const char *pAuthName) override;
 
 	bool IsClientReady(int ClientId) const override;
 	bool IsClientPlayer(int ClientId) const override;
@@ -650,7 +651,7 @@ public:
 	void SendRecord(int ClientId);
 	void SendFinish(int ClientId, float Time, std::optional<float> PreviousBestTime);
 	void SendSaveCode(int Team, int TeamSize, int State, const char *pError, const char *pSaveRequester, const char *pServerName, const char *pGeneratedCode, const char *pCode);
-	void OnSetAuthed(int ClientId, int Level) override;
+	void OnSetAuthed(int ClientId, CRconRole *pRole) override;
 
 	void ResetTuning();
 };
