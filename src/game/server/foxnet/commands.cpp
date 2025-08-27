@@ -818,6 +818,129 @@ void CGameContext::ConSetUfo(IConsole::IResult *pResult, void *pUserData)
 	log_info("cosmetics", "Set ufo to %d for player %s", Set, pSelf->Server()->ClientName(Victim));
 }
 
+void CGameContext::ConSetPlayerName(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->m_ClientId;
+	if(pResult->NumArguments() > 1)
+		Victim = pResult->GetVictim();
+	if(pResult->GetInteger(0) == -1)
+		Victim = pResult->m_ClientId;
+
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+
+	if(!pChr)
+		return;
+
+	pChr->Server()->OverrideClientName(Victim, pResult->GetString(1));
+}
+
+void CGameContext::ConSetPlayerClan(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->m_ClientId;
+	if(pResult->NumArguments() > 1)
+		Victim = pResult->GetVictim();
+	if(pResult->GetInteger(0) == -1)
+		Victim = pResult->m_ClientId;
+
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+
+	if(!pChr)
+		return;
+
+	pChr->Server()->SetClientClan(Victim, pResult->GetString(1));
+}
+
+void CGameContext::ConSetPlayerSkin(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->m_ClientId;
+	if(pResult->NumArguments() > 1)
+		Victim = pResult->GetVictim();
+	if(pResult->GetInteger(0) == -1)
+		Victim = pResult->m_ClientId;
+
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+
+	if(!pChr)
+		return;
+
+	str_copy(pChr->GetPlayer()->m_TeeInfos.m_aSkinName, pResult->GetString(1));
+}
+
+void CGameContext::ConSetPlayerCustomColor(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->m_ClientId;
+	if(pResult->NumArguments() > 1)
+		Victim = pResult->GetVictim();
+	if(pResult->GetInteger(0) == -1)
+		Victim = pResult->m_ClientId;
+
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+
+	if(!pChr)
+		return;
+
+	pChr->GetPlayer()->m_TeeInfos.m_UseCustomColor = pResult->GetInteger(1);
+}
+
+void CGameContext::ConSetPlayerColorBody(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->m_ClientId;
+	if(pResult->NumArguments() > 1)
+		Victim = pResult->GetVictim();
+	if(pResult->GetInteger(0) == -1)
+		Victim = pResult->m_ClientId;
+
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+
+	if(!pChr)
+		return;
+
+	pChr->GetPlayer()->m_TeeInfos.m_ColorBody = pResult->GetInteger(1);
+}
+
+void CGameContext::ConSetPlayerColorFeet(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->m_ClientId;
+	if(pResult->NumArguments() > 1)
+		Victim = pResult->GetVictim();
+	if(pResult->GetInteger(0) == -1)
+		Victim = pResult->m_ClientId;
+
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+
+	if(!pChr)
+		return;
+
+	pChr->GetPlayer()->m_TeeInfos.m_ColorFeet = pResult->GetInteger(1);
+}
+
+void CGameContext::ConSetPlayerAfk(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->m_ClientId;
+	if(pResult->NumArguments() > 0)
+		Victim = pResult->GetVictim();
+	if(pResult->GetInteger(0) == -1)
+		Victim = pResult->m_ClientId;
+
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+
+	if(!pChr)
+		return;
+
+	bool Afk = !pChr->GetPlayer()->IsAfk();
+	if(pResult->NumArguments() > 1)
+		Afk = pResult->GetInteger(1);
+
+	pChr->GetPlayer()->SetInitialAfk(Afk);
+}
+
 void CGameContext::RegisterFoxNetCommands()
 {
 	Console()->Register("chat_string_add", "s[string] s[reason] i[should Ban] i[bantime] ?f[addition]", CFGFLAG_SERVER, ConAddChatDetectionString, this, "Add a string to the chat detection list");
@@ -832,6 +955,14 @@ void CGameContext::RegisterFoxNetCommands()
 
 	Console()->Register("snake", "?v[id]", CFGFLAG_SERVER, ConSnake, this, "Makes a player (id) a Snake");
 	Console()->Register("ufo", "?v[id]", CFGFLAG_SERVER, ConSetUfo, this, "Puts player (id) int an UFO");
+
+	Console()->Register("set_name", "v[id] s[name]", CFGFLAG_SERVER, ConSetPlayerName, this, "Set a players (id) Name");
+	Console()->Register("set_clan", "v[id] s[clan]", CFGFLAG_SERVER, ConSetPlayerClan, this, "Set a players (id) Clan");
+	Console()->Register("set_skin", "v[id] s[skin]", CFGFLAG_SERVER, ConSetPlayerSkin, this, "Set a players (id) Skin");
+	Console()->Register("set_custom_color", "v[id] i[int]", CFGFLAG_SERVER, ConSetPlayerCustomColor, this, "Whether a player (id) uses custom color (1 = true | 0 = false)");
+	Console()->Register("set_color_body", "v[id] i[color]", CFGFLAG_SERVER, ConSetPlayerColorBody, this, "Set a players (id) Body Color");
+	Console()->Register("set_color_feet", "v[id] i[color]", CFGFLAG_SERVER, ConSetPlayerColorFeet, this, "Set a players (id) Feet Color");
+	Console()->Register("set_afk", "v[id] ?i[afk]", CFGFLAG_SERVER, ConSetPlayerAfk, this, "Set a players (id) afk status");
 
 
 	Console()->Register("c_lovely", "?v[id]", CFGFLAG_SERVER, ConLovely, this, "Makes a player (id) Lovely");

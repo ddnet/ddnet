@@ -757,6 +757,14 @@ private:
 	static void ConSetEmoticonGun(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetPickupPet(IConsole::IResult *pResult, void *pUserData);
 
+	static void ConSetPlayerName(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetPlayerClan(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetPlayerSkin(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetPlayerCustomColor(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetPlayerColorFeet(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetPlayerColorBody(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetPlayerAfk(IConsole::IResult *pResult, void *pUserData);
+
 	static void ConSnake(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetUfo(IConsole::IResult *pResult, void *pUserData);
 

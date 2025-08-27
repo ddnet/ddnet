@@ -1,3 +1,4 @@
+#include "server.h"
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
@@ -4465,3 +4466,14 @@ void CServer::SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr
 	m_pFileLogger = pFileLogger;
 	m_pStdoutLogger = pStdoutLogger;
 }
+
+// <FoxNet
+void CServer::OverrideClientName(int ClientId, const char *pName)
+{
+	dbg_assert(0 <= ClientId && ClientId < MAX_CLIENTS, "invalid client id");
+	if(m_aClients[ClientId].m_State < CClient::STATE_READY)
+		return;
+
+	str_copy(m_aClients[ClientId].m_aName, pName);
+}
+// FoxNet>

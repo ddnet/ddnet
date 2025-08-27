@@ -50,6 +50,14 @@
 |acc_edit|Edit any logged out account|
 |snake|Toggle Snake|
 |ufo|Toggle UFO|
+|set_name|Set a clients name|
+|set_clan|Set a clients name|
+|set_skin|Set a clients skin|
+|set_color|Set a clients color|
+|set_custom_color|Set whether a client uses custom color|
+|set_color_body|Set players custom body color|
+|set_color_feet|Set players custom feet color|
+|set_afk_|Set players afk sate|
 
 |Chat Commands|Description|
 |-|-|

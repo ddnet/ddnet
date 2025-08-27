@@ -525,6 +525,7 @@ public:
 
 	void SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr<ILogger> &&pStdoutLogger);
 
+
 #ifdef CONF_FAMILY_UNIX
 	enum CONN_LOGGING_CMD
 	{
@@ -534,6 +535,9 @@ public:
 
 	void SendConnLoggingCommand(CONN_LOGGING_CMD Cmd, const NETADDR *pAddr);
 #endif
+	// <FoxNet
+	void OverrideClientName(int ClientId, const char *pName) override;
+	// FoxNet>
 };
 
 bool IsInterrupted();
