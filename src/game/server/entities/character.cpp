@@ -3060,7 +3060,7 @@ void CCharacter::HandleQuadStopa(const CMapItemLayerQuads *pQuadLayer, int QuadI
 	const vec2 aB[4] = {TR, BR, BL, TL};
 
 	float MinPenetration = std::numeric_limits<float>::infinity();
-	vec2 BestInwardNormal = vec2(0.f, 0.f);
+	vec2 BestInwardNormal = vec2(0.0f, 0.0f);
 
 	for(int i = 0; i < 4; ++i)
 	{
@@ -3088,36 +3088,55 @@ void CCharacter::HandleQuadStopa(const CMapItemLayerQuads *pQuadLayer, int QuadI
 		const float Epsilon = 0.0f;
 		vec2 MTV = -BestInwardNormal * (MinPenetration + Epsilon);
 
-		const vec2 BoxSize = CCharacterCore::PhysicalSizeVec2();
-		vec2 TargetPos = m_Core.m_Pos + MTV;
-
-		auto IsCollidingAt = [&](const vec2 &Pos) -> bool {
-			return Collision()->TestBox(Pos, BoxSize);
+		auto CanPlace = [&](const vec2 &Pos) {
+			return !Collision()->TestBox(Pos, CCharacterCore::PhysicalSizeVec2());
 		};
 
-		if(IsCollidingAt(TargetPos))
-		{
-			float lo = 0.0f, hi = 1.0f;
-			for(int iter = 0; iter < 10; ++iter)
+		auto MoveAxis = [&](vec2 &Pos, const vec2 &Delta) {
+			if(Delta.x == 0.0f && Delta.y == 0.0f)
+				return vec2(0.f, 0.f);
+
+			vec2 Target = Pos + Delta;
+			if(CanPlace(Target))
 			{
-				float mid = (lo + hi) * 0.5f;
-				vec2 midPos = m_Core.m_Pos + MTV * mid;
-				if(IsCollidingAt(midPos))
-					hi = mid;
-				else
-					lo = mid;
+				Pos = Target;
+				return Delta;
 			}
 
+			float lo = 0.0f;
+			float hi = 1.0f;
+			for(int i = 0; i < 10; ++i)
+			{
+				float mid = (lo + hi) * 0.5f;
+				vec2 MidPos = Pos + Delta * mid;
+				if(CanPlace(MidPos))
+					lo = mid;
+				else
+					hi = mid;
+			}
 			if(lo > 0.0f)
-				m_Core.m_Pos += MTV * lo;
-		}
-		else
-		{
-			m_Core.m_Pos = TargetPos;
-		}
+			{
+				vec2 Applied = Delta * lo;
+				Pos += Applied;
+				return Applied;
+			}
+			return vec2(0.0f, 0.0f);
+		};
+
+		vec2 NewPos = m_Core.m_Pos;
+
+		vec2 AppliedX = MoveAxis(NewPos, vec2(MTV.x, 0.0f));
+		vec2 AppliedY = MoveAxis(NewPos, vec2(0.0f, MTV.y));
+
+		m_Core.m_Pos = NewPos;
 
 		float vIn = dot(m_Core.m_Vel, BestInwardNormal);
 		if(vIn > 0.0f)
 			m_Core.m_Vel -= BestInwardNormal * vIn;
+
+		if(AppliedX.x == 0.0f && MTV.x != 0.0f)
+			m_Core.m_Vel.x = 0.0f;
+		if(AppliedY.y == 0.0f && MTV.y != 0.0f)
+			m_Core.m_Vel.y = 0.0f;
 	}
 }
