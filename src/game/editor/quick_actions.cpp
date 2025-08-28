@@ -254,6 +254,6 @@ void CEditor::TestMapLocally()
 		pGameClient->m_LocalServer.RunServer({"sv_register 0", aMapChange});
 		OnClose();
 		g_Config.m_ClEditor = 0;
-		Client()->Connect("localhost");
+		Client()->Connect("[::1],127.0.0.1");
 	}
 }
