@@ -812,7 +812,7 @@ public:
 	bool IsValidHookPower(int HookPower);
 	const char *HookTypeName(int HookType);
 
-	void UnsetTelekinesis(CEntity *pEntity);
+	void UnsetTelekinesis(int ClientId);
 
 	bool SendFakeTuningParams(int ClientId, const CTuningParams &FakeTuning, bool RealTune = false);
 	bool ResetFakeTunes(int ClientId, int Zone);

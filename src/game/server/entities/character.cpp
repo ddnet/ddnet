@@ -47,6 +47,13 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 	{
 		CurrentTimeCp = 0.0f;
 	}
+
+	// <FoxNet
+	m_TelekinesisId = -1;
+	m_IsRainbowHooked = false;
+	m_TuneZoneOverride = -1;
+	m_InSnake = false;
+	// FoxNet>
 }
 
 void CCharacter::Reset()
@@ -131,6 +138,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_Snake.OnSpawn(this);
 	m_Ufo.OnSpawn(this);
 	m_PowerHookedId = -1;
+	m_TelekinesisId = -1;
 	// FoxNet>
 
 	return true;
@@ -1037,14 +1045,6 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 
 	// a nice sound
 	GameServer()->CreateSound(m_Pos, SOUND_PLAYER_DIE, TeamMask());
-
-	// this is to rate limit respawning to 3 secs
-	m_pPlayer->m_PreviousDieTick = m_pPlayer->m_DieTick;
-	m_pPlayer->m_DieTick = Server()->Tick();
-
-	m_Alive = false;
-	SetSolo(false);
-
 	// <FoxNet
 	switch(GetPlayer()->m_Cosmetics.m_DeathEffect)
 	{
@@ -1077,18 +1077,23 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 	GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCid(), OppsiteCosmeticMask());
 	// FoxNet>
 
+	// this is to rate limit respawning to 3 secs
+	m_pPlayer->m_PreviousDieTick = m_pPlayer->m_DieTick;
+	m_pPlayer->m_DieTick = Server()->Tick();
+
+	m_Alive = false;
+	SetSolo(false);
+
 	GameServer()->m_World.RemoveEntity(this);
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCid()] = nullptr;
 	Teams()->OnCharacterDeath(GetPlayer()->GetCid(), Weapon);
 	CancelSwapRequests();
 
 	// <FoxNet
-	if(Server()->GetAuthedState(m_pPlayer->GetCid()) > AUTHED_NO)
-		GameServer()->UnsetTelekinesis(this);
+	if(Server()->GetAuthedState(GetPlayer()->GetCid()) > AUTHED_NO)
+		GameServer()->UnsetTelekinesis(GetPlayer()->GetCid());
 
 	OnDie(Killer, Weapon, SendKillMsg);
-	m_Snake.OnPlayerDeath();
-	m_Ufo.OnPlayerDeath();
 	// FoxNet>
 }
 
@@ -2764,6 +2769,8 @@ void CCharacter::OnDie(int Killer, int Weapon, bool SendKillMsg)
 {
 	if(Acc()->m_LoggedIn)
 		Acc()->m_Deaths++;
+	m_Snake.OnPlayerDeath();
+	m_Ufo.OnPlayerDeath();
 }
 
 // <FoxNet
@@ -2829,16 +2836,28 @@ void CCharacter::FoxNetTick()
 
 	m_Snake.Tick();
 	m_Ufo.Tick();
+	HandleTelekinesis();
+}
 
-	// update telekinesis entitiy position
-	if(CCharacter *pChr = m_pTelekinesisEntity)
+void CCharacter::HandleTelekinesis()
+{
+	int tId = m_TelekinesisId;
+	if(!CheckClientId(tId))
+		return;
+
+	if(CCharacter *pChr = GameServer()->GetPlayerChar(tId))
 	{
 		if(!pChr || !pChr->GetPlayer())
+		{
+			tId = -1;
+			return;
+		}
+		if(!pChr->IsAlive())
 			return;
 
 		if(pChr->GetPlayer()->m_TelekinesisImmunity)
 		{
-			m_pTelekinesisEntity = nullptr;
+			tId = -1;
 			return;
 		}
 
@@ -2849,7 +2868,7 @@ void CCharacter::FoxNetTick()
 		}
 		else
 		{
-			m_pTelekinesisEntity = nullptr;
+			tId = -1;
 			return;
 		}
 	}
@@ -2857,7 +2876,7 @@ void CCharacter::FoxNetTick()
 
 void CCharacter::DoTelekinesis()
 {
-	if(!m_pTelekinesisEntity)
+	if(m_TelekinesisId == -1)
 	{
 		float zoom = std::max(1.0f, GetPlayer()->m_CameraInfo.GetZoom());
 		CCharacter *pClosest = GameServer()->m_World.ClosestCharacter(GetCursorPos(), CCharacterCore::PhysicalSize() * zoom, this);
@@ -2866,11 +2885,11 @@ void CCharacter::DoTelekinesis()
 
 		if((pClosest->IsAlive() && !CanCollide(pClosest->GetPlayer()->GetCid())))
 			return;
-		m_pTelekinesisEntity = pClosest;
+		m_TelekinesisId = pClosest->GetPlayer()->GetCid();
 	}
 	else
-		m_pTelekinesisEntity = nullptr;
-	if(m_pTelekinesisEntity)
+		m_TelekinesisId = -1;
+	if(CheckClientId(m_TelekinesisId))
 		GameServer()->CreateSound(m_Pos, SOUND_NINJA_HIT, TeamMask());
 
 	// VoteActionDelay[0] = Server()->Tick() + FireDelay * Server()->TickSpeed() / 1000;
@@ -2963,7 +2982,7 @@ void CCharacter::HandleQuads(const CMapItemLayerQuads *pQuadLayer, int QuadIndex
 	if(IsDeath)
 		Radius = 8.0f;
 	if(IsStopa)
-		Radius = CCharacterCore::PhysicalSize();
+		Radius = CCharacterCore::PhysicalSize() / 2.0f;
 
 	bool Inside = Collision()->InsideQuad(m_Pos, Radius, TopL, TopR, BottomL, BottomR);
 	if(!Inside)
@@ -3066,7 +3085,7 @@ void CCharacter::HandleQuadStopa(const CMapItemLayerQuads *pQuadLayer, int QuadI
 
 	if(MinPenetration > 0.0f)
 	{
-		const float Epsilon = 0.1f;
+		const float Epsilon = 0.0f;
 		vec2 MTV = -BestInwardNormal * (MinPenetration + Epsilon);
 
 		const vec2 BoxSize = CCharacterCore::PhysicalSizeVec2();

@@ -306,7 +306,8 @@ public:
 	CClientMask OppsiteCosmeticMask();
 
 	// Telekinesis
-	CCharacter *m_pTelekinesisEntity;
+	int m_TelekinesisId;
+	void HandleTelekinesis();
 	vec2 GetCursorPos();
 
 	int GetPowerHooked();

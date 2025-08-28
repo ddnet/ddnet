@@ -48,7 +48,7 @@ constexpr const char *ItemShortcuts[NUM_ITEMS] = {
 
 	"G_E", // Emoticon Gun
 	"G_C", // Confetti Gun
-	"G_P", // Laser Gun
+	"G_P", // Phase Gun
 
 	"I_C", // Clockwise Indicator
 	"I_CC", // Counter Clockwise Indicator

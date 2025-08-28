@@ -57,7 +57,7 @@ bool CSnake::SetActive(bool Active)
 		m_pCharacter->GetPlayer()->SetInitialAfk(false);
 		m_pCharacter->GetPlayer()->SetAfk(false);
 
-		GameServer()->UnsetTelekinesis(m_pCharacter);
+		GameServer()->UnsetTelekinesis(m_pCharacter->GetPlayer()->GetCid());
 		if(m_pCharacter->m_Ufo.Active())
 			m_pCharacter->m_Ufo.Reset();
 
@@ -190,7 +190,7 @@ void CSnake::AddNewTees()
 
 			pChr->m_InSnake = true;
 			GameServer()->SendTuningParams(i, pChr->m_TuneZone);
-			GameServer()->UnsetTelekinesis(pChr);
+			GameServer()->UnsetTelekinesis(pChr->GetPlayer()->GetCid());
 
 			int Zone = m_pCharacter->GetOverriddenTuneZone();
 			CTuningParams FakeTuning = Zone > 0 ? GameServer()->TuningList()[Zone] : *GameServer()->Tuning();

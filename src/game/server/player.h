@@ -324,13 +324,13 @@ public:
 
 	CCosmetics m_Cosmetics;
 
-	bool m_Invisible;
-	bool m_Obfuscated;
-	bool m_Vanish;
+	bool m_Invisible = false;
+	bool m_Obfuscated = false;
+	bool m_Vanish = false;
 	int m_ExtraPing = 0;
-	bool m_IgnoreGamelayer;
-	bool m_TelekinesisImmunity;
-	bool m_SpiderHook;
+	bool m_IgnoreGamelayer = false;
+	bool m_TelekinesisImmunity = false;
+	bool m_SpiderHook = false;
 
 	CAccountSession *Acc();
 
@@ -390,7 +390,7 @@ public:
 private:
 	void OverrideName(int SnappingClient, CNetObj_ClientInfo *pClientInfo);
 
-	int m_RainbowColor;
+	int m_RainbowColor = 0;
 	void RainbowSnap(int SnappingClient, CNetObj_ClientInfo *pClientInfo);
 	void RainbowTick();
 	void FoxNetTick();

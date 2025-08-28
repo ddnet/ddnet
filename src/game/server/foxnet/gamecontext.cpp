@@ -45,11 +45,12 @@ void CGameContext::FoxNetTick()
 	// Sound Effect Handle
 	for(auto it = m_LaserDeaths.begin(); it != m_LaserDeaths.end();)
 	{
-		for(int at = 0; at < it->m_Remaining; at++)
+		const size_t count = std::min<size_t>((size_t)it->m_Remaining, it->m_StartTick.size());
+		for(size_t at = 0; at < count; at++)
 		{
 			if(Server()->Tick() < it->m_EndTick)
 			{
-				if(it->m_StartTick.at(at) == Server()->Tick())
+				if(it->m_StartTick[at] == Server()->Tick())
 					CreateSound(it->m_Pos, it->m_Sound, it->m_Mask);
 			}
 		}
@@ -510,14 +511,14 @@ const char *CGameContext::HookTypeName(int HookType)
 	return "Unknown";
 }
 
-void CGameContext::UnsetTelekinesis(CEntity *pEntity)
+void CGameContext::UnsetTelekinesis(int ClientId)
 {
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		CCharacter *pChr = GetPlayerChar(i);
-		if(pChr && pChr->m_pTelekinesisEntity == pEntity)
+		if(pChr && pChr->m_TelekinesisId == ClientId)
 		{
-			pChr->m_pTelekinesisEntity = nullptr;
+			pChr->m_TelekinesisId = -1;
 			break; // can break here, every entity can only be picked by one player using telekinesis at the time
 		}
 	}
@@ -586,6 +587,9 @@ void CGameContext::CreateLaserDeath(int Type, int pOwner, vec2 pPos, CClientMask
 
 void CGameContext::SnapLaserEffect(int ClientId)
 {
+	if(m_LaserDeaths.empty())
+		return;
+
 	CPlayer *pPlayer = m_apPlayers[ClientId];
 
 	if(!pPlayer || pPlayer->m_HideCosmetics)
@@ -593,17 +597,21 @@ void CGameContext::SnapLaserEffect(int ClientId)
 
 	for(auto it = m_LaserDeaths.begin(); it != m_LaserDeaths.end();)
 	{
-		for(int at = 0; at < it->m_Remaining; at++)
+		const size_t count = std::min({ (size_t)it->m_Remaining,
+			it->m_aIds.size(), it->m_From.size(), it->m_To.size(), it->m_StartTick.size() });
+		for(size_t at = 0; at < count; at++)
 		{
-			if(Server()->Tick() > it->m_StartTick.at(at) && Server()->Tick() < it->m_EndTick)
+			if(Server()->Tick() > it->m_StartTick[at] && Server()->Tick() < it->m_EndTick)
 			{
-				CNetObj_DDNetLaser *pObj = Server()->SnapNewItem<CNetObj_DDNetLaser>(it->m_aIds.at(at));
+				CNetObj_DDNetLaser *pObj = Server()->SnapNewItem<CNetObj_DDNetLaser>(it->m_aIds[at]);
 				if(pObj)
 				{
-					pObj->m_ToX = (int)it->m_To.at(at).x;
-					pObj->m_ToY = (int)it->m_To.at(at).y;
-					pObj->m_FromX = (int)it->m_From.at(at).x;
-					pObj->m_FromY = (int)it->m_From.at(at).y;
+					const vec2 &To = it->m_To[at];
+					const vec2 &From = it->m_From[at];
+					pObj->m_ToX = (int)To.x;
+					pObj->m_ToY = (int)To.y;
+					pObj->m_FromX = (int)From.x;
+					pObj->m_FromY = (int)From.y;
 					pObj->m_StartTick = it->m_EndTick;
 					pObj->m_Owner = it->m_Owner;
 					pObj->m_Flags = LASERFLAG_NO_PREDICT;

@@ -1620,7 +1620,7 @@ void CCharacter::HandleQuadStopa(const CMapItemLayerQuads *pQuadLayer, int QuadI
 
 	if(MinPenetration > 0.0f)
 	{
-		const float Epsilon = 0.1f;
+		const float Epsilon = 0.0f;
 		vec2 MTV = -BestInwardNormal * (MinPenetration + Epsilon);
 
 		const vec2 BoxSize = CCharacterCore::PhysicalSizeVec2();
