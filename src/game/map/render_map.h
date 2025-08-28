@@ -63,7 +63,6 @@ public:
 
 	// map render methods (render_map.cpp)
 	static void RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, std::chrono::nanoseconds TimeNanos, ColorRGBA &Result, size_t Channels);
-	void RenderQuads(CQuad *pQuads, int NumQuads, int Flags, IEnvelopeEval *pEnvEval);
 	void ForceRenderQuads(CQuad *pQuads, int NumQuads, int Flags, IEnvelopeEval *pEnvEval, float Alpha = 1.0f);
 	void RenderTile(int x, int y, unsigned char Index, float Scale, ColorRGBA Color);
 	void RenderTilemap(CTile *pTiles, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);

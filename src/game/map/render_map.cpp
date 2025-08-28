@@ -373,14 +373,6 @@ static void Rotate(const CPoint *pCenter, CPoint *pPoint, float Rotation)
 	pPoint->y = (int)(x * std::sin(Rotation) + y * std::cos(Rotation) + pCenter->y);
 }
 
-void CRenderMap::RenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, IEnvelopeEval *pEnvEval)
-{
-	if(!g_Config.m_ClShowQuads || g_Config.m_ClOverlayEntities == 100)
-		return;
-
-	ForceRenderQuads(pQuads, NumQuads, RenderFlags, pEnvEval, (100 - g_Config.m_ClOverlayEntities) / 100.0f);
-}
-
 void CRenderMap::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, IEnvelopeEval *pEnvEval, float Alpha)
 {
 	Graphics()->TrianglesBegin();
