@@ -4,6 +4,7 @@
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/player.h>
+#include <game/gamecore.h>
 
 void CGameContext::ConAccRegister(IConsole::IResult *pResult, void *pUserData)
 {
@@ -834,6 +835,7 @@ void CGameContext::ConSetPlayerName(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	pChr->Server()->OverrideClientName(Victim, pResult->GetString(1));
+	log_info("server", "changed player '%s's changed name to '%s'", pSelf->Server()->ClientName(Victim), pResult->GetString(1));
 }
 
 void CGameContext::ConSetPlayerClan(IConsole::IResult *pResult, void *pUserData)
@@ -851,6 +853,7 @@ void CGameContext::ConSetPlayerClan(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	pChr->Server()->SetClientClan(Victim, pResult->GetString(1));
+	log_info("server", "changed player '%s's changed clan to '%s'", pSelf->Server()->ClientName(Victim), pResult->GetString(1));
 }
 
 void CGameContext::ConSetPlayerSkin(IConsole::IResult *pResult, void *pUserData)
@@ -868,6 +871,7 @@ void CGameContext::ConSetPlayerSkin(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	str_copy(pChr->GetPlayer()->m_TeeInfos.m_aSkinName, pResult->GetString(1));
+	log_info("server", "changed player '%s's changed skin to '%s'", pSelf->Server()->ClientName(Victim), pResult->GetString(1));
 }
 
 void CGameContext::ConSetPlayerCustomColor(IConsole::IResult *pResult, void *pUserData)
@@ -885,6 +889,7 @@ void CGameContext::ConSetPlayerCustomColor(IConsole::IResult *pResult, void *pUs
 		return;
 
 	pChr->GetPlayer()->m_TeeInfos.m_UseCustomColor = pResult->GetInteger(1);
+	log_info("server", "changed player '%s's changed custom color to '%d'", pSelf->Server()->ClientName(Victim), pResult->GetInteger(1));
 }
 
 void CGameContext::ConSetPlayerColorBody(IConsole::IResult *pResult, void *pUserData)
@@ -902,6 +907,7 @@ void CGameContext::ConSetPlayerColorBody(IConsole::IResult *pResult, void *pUser
 		return;
 
 	pChr->GetPlayer()->m_TeeInfos.m_ColorBody = pResult->GetInteger(1);
+	log_info("server", "changed player '%s's changed body color to '%d'", pSelf->Server()->ClientName(Victim), pResult->GetInteger(1));
 }
 
 void CGameContext::ConSetPlayerColorFeet(IConsole::IResult *pResult, void *pUserData)
@@ -919,6 +925,7 @@ void CGameContext::ConSetPlayerColorFeet(IConsole::IResult *pResult, void *pUser
 		return;
 
 	pChr->GetPlayer()->m_TeeInfos.m_ColorFeet = pResult->GetInteger(1);
+	log_info("server", "changed player '%s's changed feet color to '%d'", pSelf->Server()->ClientName(Victim), pResult->GetInteger(1));
 }
 
 void CGameContext::ConSetPlayerAfk(IConsole::IResult *pResult, void *pUserData)
@@ -940,6 +947,7 @@ void CGameContext::ConSetPlayerAfk(IConsole::IResult *pResult, void *pUserData)
 		Afk = pResult->GetInteger(1);
 
 	pChr->GetPlayer()->SetInitialAfk(Afk);
+	log_info("server", "changed player '%s's afk status to '%d'", pSelf->Server()->ClientName(Victim), Afk);
 }
 
 void CGameContext::ConSetAbility(IConsole::IResult *pResult, void *pUserData)
@@ -957,6 +965,7 @@ void CGameContext::ConSetAbility(IConsole::IResult *pResult, void *pUserData)
 
 	int Ability = pResult->GetInteger(1);
 	pPlayer->SetAbility(Ability);
+	log_info("server", "Set ability to %d for player %s", Ability, pSelf->Server()->ClientName(Victim));
 }
 
 void CGameContext::ConIgnoreGameLayer(IConsole::IResult *pResult, void *pUserData)
@@ -974,6 +983,7 @@ void CGameContext::ConIgnoreGameLayer(IConsole::IResult *pResult, void *pUserDat
 		return;
 
 	pPlayer->SetIgnoreGameLayer(!pPlayer->m_IgnoreGamelayer);
+	log_info("server", "Set ignore game layer to %d for player %s", !pPlayer->m_IgnoreGamelayer, pSelf->Server()->ClientName(Victim));
 }
 
 void CGameContext::ConSetVanish(IConsole::IResult *pResult, void *pUserData)
@@ -1024,6 +1034,7 @@ void CGameContext::ConSetObfuscated(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	pPlayer->SetObfuscated(!pPlayer->m_Obfuscated);
+	log_info("server", "Set obfuscated to %d for player %s", pPlayer->m_Obfuscated, pSelf->Server()->ClientName(Victim));
 }
 
 void CGameContext::ConIncludeInServerInfo(IConsole::IResult *pResult, void *pUserData)
@@ -1146,6 +1157,64 @@ void CGameContext::ConSetTuneOverride(IConsole::IResult *pResult, void *pUserDat
 	pChr->SetTuneOverride(pResult->GetInteger(0));
 }
 
+void CGameContext::ConTelekinesisImmunity(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->NumArguments() > 1 ? pResult->m_ClientId : pResult->GetVictim();
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+
+	if(!pPlayer)
+		return;
+
+	pPlayer->SetTelekinesisImmunity(!pPlayer->m_TelekinesisImmunity);
+	log_info("server", "Set telekinesis immunity to %d for player %s", pPlayer->m_TelekinesisImmunity, pSelf->Server()->ClientName(pResult->m_ClientId));
+}
+
+void CGameContext::ConTelekinesis(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->NumArguments() > 1 ? pResult->m_ClientId : pResult->GetVictim();
+
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+
+	if(!pChr)
+		return;
+
+	bool GotWeapon = pChr->GetWeaponGot(WEAPON_TELEKINESIS);
+
+	if(GotWeapon)
+		pChr->GiveWeapon(WEAPON_TELEKINESIS, true);
+	else
+	{
+		pChr->GiveWeapon(WEAPON_TELEKINESIS);
+		pChr->SetActiveWeapon(WEAPON_TELEKINESIS);
+		pChr->UpdateWeaponIndicator();
+	}
+}
+
+void CGameContext::ConHeartGun(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->NumArguments() > 1 ? pResult->m_ClientId : pResult->GetVictim();
+
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+
+	if(!pChr)
+		return;
+
+	bool GotWeapon = pChr->GetWeaponGot(WEAPON_HEARTGUN);
+
+	if(GotWeapon)
+		pChr->GiveWeapon(WEAPON_HEARTGUN, true);
+	else
+	{
+		pChr->GiveWeapon(WEAPON_HEARTGUN);
+		pChr->SetActiveWeapon(WEAPON_HEARTGUN);
+		pChr->UpdateWeaponIndicator();
+	}
+}
+
 void CGameContext::RegisterFoxNetCommands()
 {
 	Console()->Register("chat_string_add", "s[string] s[reason] i[should Ban] i[bantime] ?f[addition]", CFGFLAG_SERVER, ConAddChatDetectionString, this, "Add a string to the chat detection list");
@@ -1184,6 +1253,11 @@ void CGameContext::RegisterFoxNetCommands()
 	Console()->Register("collidable", "?v[id]", CFGFLAG_SERVER, ConSetCollidable, this, "whether player (id) can collide with others");
 
 	Console()->Register("set_tune_override", "i[zone] ?v[id]", CFGFLAG_SERVER, ConSetTuneOverride, this, "Sets the tune override for the player (id)");
+
+	Console()->Register("telekinesis_immunity", "?v[id]", CFGFLAG_SERVER, ConTelekinesisImmunity, this, "Makes player (id) immunte to telekinesis");
+	
+	Console()->Register("telekinesis", "?v[id]", CFGFLAG_SERVER, ConTelekinesis, this, "Gives/Takes telekinses to player (id)");
+	Console()->Register("heartgun", "?v[id]", CFGFLAG_SERVER, ConHeartGun, this, "Gives/Takes telekinses to player (id)");
 
 	Console()->Register("c_lovely", "?v[id]", CFGFLAG_SERVER, ConLovely, this, "Makes a player (id) Lovely");
 	Console()->Register("c_staff_ind", "?v[id]", CFGFLAG_SERVER, ConStaffInd, this, "Gives a player (id) a Staff Indicator");

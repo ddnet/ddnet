@@ -69,6 +69,9 @@
 |hookable|Makes this player unable to be hooked by other players|
 |collidable|Makes this player unable to be moved with other player collisions|
 |set_tune_override|Set a players tune override|
+|telekinesis_immunity|Make a player immune to telekinesis|
+|telekinesis|Toggle telekinesis for a player|
+|heartgun|Toggle heartgun for a player|
 
 |Chat Commands|Description|
 |-|-|
