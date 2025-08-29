@@ -941,6 +941,23 @@ void CGameContext::ConSetPlayerAfk(IConsole::IResult *pResult, void *pUserData)
 	pChr->GetPlayer()->SetInitialAfk(Afk);
 }
 
+void CGameContext::ConIgnoreGameLayer(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientId;
+
+	if(pResult->GetInteger(0) == -1)
+		Victim = pResult->m_ClientId;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[Victim];
+
+	if(!pPlayer)
+		return;
+
+	pPlayer->SetIgnoreGameLayer(!pPlayer->m_IgnoreGamelayer);
+}
+
 void CGameContext::RegisterFoxNetCommands()
 {
 	Console()->Register("chat_string_add", "s[string] s[reason] i[should Ban] i[bantime] ?f[addition]", CFGFLAG_SERVER, ConAddChatDetectionString, this, "Add a string to the chat detection list");

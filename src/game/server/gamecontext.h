@@ -770,6 +770,9 @@ private:
 
 	static void ConHideCosmetics(IConsole::IResult *pResult, void *pUserData);
 
+	static void ConIgnoreGameLayer(IConsole::IResult *pResult, void *pUserData);
+
+
 	// Add
 	static void ConAddChatDetectionString(IConsole::IResult *pResult, void *pUserData);
 	void AddChatDetectionString(const char *pString, const char *pReason, bool pBan, int pBanTime, float pAddition = 1.0f);

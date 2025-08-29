@@ -1604,7 +1604,9 @@ void CCharacter::HandleSkippableTiles(int Index)
 		}
 	}
 
-	if(GameLayerClipped(m_Pos))
+	// <FoxNet
+	if(GetPlayer()->m_IgnoreGamelayer);
+	else if(GameLayerClipped(m_Pos))
 	{
 		Die(m_pPlayer->GetCid(), WEAPON_WORLD);
 		return;

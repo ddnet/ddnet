@@ -131,9 +131,11 @@ void CProjectile::Tick()
 	int EmoteGun = 0;
 	bool ConfettiGun = false;
 	bool LaserGun = false;
+	bool GLClipped = GameLayerClipped(CurPos);
 
 	if(pOwnerChar)
 	{
+		GLClipped = GameLayerClipped(CurPos) && !pOwnerChar->GetPlayer()->m_IgnoreGamelayer;
 		EmoteGun = pOwnerChar->GetPlayer()->m_Cosmetics.m_EmoticonGun;
 		ConfettiGun = pOwnerChar->GetPlayer()->m_Cosmetics.m_ConfettiGun;
 		LaserGun = pOwnerChar->GetPlayer()->m_Cosmetics.m_PhaseGun;
@@ -163,7 +165,7 @@ void CProjectile::Tick()
 		return;
 	}
 
-	if(((pTargetChr && (pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar)) || Collide || GameLayerClipped(CurPos)) && !IsWeaponCollide)
+	if(((pTargetChr && (pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar)) || Collide || GLClipped) && !IsWeaponCollide)
 	{
 		if(m_Explosive /*??*/ && (!pTargetChr || (pTargetChr && (!m_Freeze || (m_Type == WEAPON_SHOTGUN && Collide)))))
 		{
