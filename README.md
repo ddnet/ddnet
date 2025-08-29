@@ -72,6 +72,7 @@
 |telekinesis_immunity|Make a player immune to telekinesis|
 |telekinesis|Toggle telekinesis for a player|
 |heartgun|Toggle heartgun for a player|
+|spider_hook|Toggle spider hook for a player|
 
 |Chat Commands|Description|
 |-|-|
