@@ -1242,6 +1242,33 @@ static int priv_net_extract(const char *hostname, char *host, int max_host, int 
 	return 0;
 }
 
+static int net_host_lookup_fallback(const char *hostname, NETADDR *addr, int types, int port)
+{
+	if(str_comp_nocase(hostname, "localhost") == 0)
+	{
+		if(types == NETTYPE_IPV4)
+		{
+			dbg_assert(net_addr_from_str(addr, "127.0.0.1") == 0, "unreachable");
+			addr->port = port;
+			return 0;
+		}
+		else if(types == NETTYPE_IPV6)
+		{
+			dbg_assert(net_addr_from_str(addr, "[::1]") == 0, "unreachable");
+			addr->port = port;
+			return 0;
+		}
+		else
+		{
+			// TODO: return both IPv4 and IPv6 address
+			dbg_assert(net_addr_from_str(addr, "127.0.0.1") == 0, "unreachable");
+			addr->port = port;
+			return 0;
+		}
+	}
+	return -1;
+}
+
 static int net_host_lookup_impl(const char *hostname, NETADDR *addr, int types)
 {
 	char host[256];
@@ -1264,12 +1291,14 @@ static int net_host_lookup_impl(const char *hostname, NETADDR *addr, int types)
 	struct addrinfo *result = nullptr;
 	int e = getaddrinfo(host, nullptr, &hints, &result);
 	if(!result)
-		return -1;
+	{
+		return net_host_lookup_fallback(hostname, addr, types, port);
+	}
 
 	if(e != 0)
 	{
 		freeaddrinfo(result);
-		return -1;
+		return net_host_lookup_fallback(hostname, addr, types, port);
 	}
 
 	sockaddr_to_netaddr(result->ai_addr, result->ai_addrlen, addr);
