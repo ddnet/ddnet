@@ -213,6 +213,7 @@ public:
 		void ResetContent();
 		char m_CustomClient[24];
 		bool m_QuietJoin;
+		bool m_HighBandwidth;
 		// FoxNet>	
 	};
 
@@ -545,6 +546,7 @@ public:
 	const char *GetCustomClient(int ClientId) override { return m_aClients[ClientId].m_CustomClient; }
 	bool QuietJoin(int ClientId) override { return m_aClients[ClientId].m_QuietJoin; }
 
+	static void ConHighBandwidth(IConsole::IResult *pResult, void *pUser);
 	static void ConClientInfo(IConsole::IResult *pResult, void *pUser);
 	bool NetMsgCustomClient(int ClientId, int Msg, CUnpacker Unpacker);
 	// FoxNet>

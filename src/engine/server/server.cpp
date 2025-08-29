@@ -981,7 +981,14 @@ void CServer::DoSnapshot()
 
 		// only allow clients with forced high bandwidth on spectate to receive snapshots on non-global ticks
 		if(!IsGlobalSnap && !(m_aClients[i].m_ForceHighBandwidthOnSpectate && GameServer()->IsClientHighBandwidth(i)))
-			continue;
+		{
+			// <FoxNet
+			if(IsSixup(i))
+				continue;
+			if(!m_aClients[i].m_HighBandwidth)
+				continue;
+			// FoxNet>
+		}
 
 		{
 			m_SnapshotBuilder.Init(m_aClients[i].m_Sixup);
@@ -4298,6 +4305,7 @@ void CServer::RegisterCommands()
 #endif
 	// <FoxNet
 	Console()->Register("client_infos", "", CFGFLAG_SERVER, ConClientInfo, this, "Prints information about what clients players are using");
+	Console()->Register("high_bandwidth", "?i[enable]", CFGFLAG_SERVER, ConHighBandwidth, this, "Prints information about what clients players are using");
 	// FoxNet>
 	// register console commands in sub parts
 	m_ServerBan.InitServerBan(Console(), Storage(), this);
@@ -4501,6 +4509,7 @@ void CServer::CClient::ResetContent()
 {
 	str_copy(m_CustomClient, "DDNet");
 	m_QuietJoin = false;
+	m_HighBandwidth = true;
 }
 
 bool CServer::NetMsgCustomClient(int ClientId, int Msg, CUnpacker Unpacker)
@@ -4582,6 +4591,26 @@ void CServer::ConClientInfo(IConsole::IResult *pResult, void *pUser)
 		{
 			str_format(aBuf, sizeof(aBuf), "Name: %s (%d) | Client: %s", pThis->m_aClients[ClientId].m_aName, ClientId, pThis->GetCustomClient(ClientId));
 			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "FoxNet", aBuf);
+		}
+	}
+}
+
+void CServer::ConHighBandwidth(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pServer = (CServer *)pUser;
+
+	if(pServer->m_RconClientId >= 0 && pServer->m_RconClientId < MAX_CLIENTS &&
+		pServer->m_aClients[pServer->m_RconClientId].m_State != CServer::CClient::STATE_EMPTY)
+	{
+		if(pResult->NumArguments())
+		{
+			pServer->m_aClients[pServer->m_RconClientId].m_HighBandwidth = pResult->GetInteger(0);
+		}
+		else
+		{
+			char aStr[9];
+			str_format(aStr, sizeof(aStr), "Value: %d", pServer->m_aClients[pServer->m_RconClientId].m_HighBandwidth);
+			pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aStr);
 		}
 	}
 }
