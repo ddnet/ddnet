@@ -3,6 +3,7 @@
 #include <base/hash.h>
 #include <base/hash_ctxt.h>
 #include <base/log.h>
+#include <cstdint>
 #include <ctime>
 #include <engine/server.h>
 #include <engine/shared/config.h>
@@ -24,8 +25,8 @@ constexpr const char *SQLITE_TABLE = R"(
 			LastLogin INTEGER DEFAULT 0,
             Port INTEGER DEFAULT 0,
             ClientId INTEGER DEFAULT -1,
-            Flags INTEGER DEFAULT 1,
-            VoteMenuPage INTEGER DEFAULT 0,
+            Flags INTEGER DEFAULT -1,
+            VoteMenuPage INTEGER DEFAULT -1,
 			Playtime INTEGER DEFAULT 0,
 			Deaths INTEGER DEFAULT 0,
 			Kills INTEGER DEFAULT 0,
@@ -206,6 +207,9 @@ void CAccounts::OnLogin(int ClientId, const char *pUsername, sqlite3_stmt *pstmt
 		time_t Now;
 		time(&Now);
 
+		const int64_t Flags = sqlite3_column_int64(pstmt, 10);
+		const int64_t VoteMenuPage = sqlite3_column_int64(pstmt, 11);
+
 		str_copy(Acc.m_Username, reinterpret_cast<const char *>(sqlite3_column_text(pstmt, 0)));
 		Acc.m_RegisterDate = sqlite3_column_int64(pstmt, 1);
 		str_copy(Acc.m_Name, reinterpret_cast<const char *>(sqlite3_column_text(pstmt, 2)));
@@ -216,8 +220,10 @@ void CAccounts::OnLogin(int ClientId, const char *pUsername, sqlite3_stmt *pstmt
 		Acc.m_LastLogin = Now;
 		Acc.m_Port = Server()->Port();
 		Acc.ClientId = ClientId;
-		Acc.m_Flags = sqlite3_column_int64(pstmt, 10);
-		Acc.m_VoteMenuPage = sqlite3_column_int64(pstmt, 11);
+		if(Flags != -1)
+			Acc.m_Flags = Flags;
+		if(VoteMenuPage != -1)
+			Acc.m_VoteMenuPage = sqlite3_column_int64(pstmt, 11);
 		Acc.m_Playtime = sqlite3_column_int64(pstmt, 12);
 		Acc.m_Deaths = sqlite3_column_int64(pstmt, 13);
 		Acc.m_Kills = sqlite3_column_int64(pstmt, 14);
