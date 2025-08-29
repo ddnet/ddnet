@@ -146,7 +146,7 @@ void CGameControllerDDRace::OnPlayerConnect(CPlayer *pPlayer)
 		if(!Server()->QuietJoin(ClientId))
 			GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1, CGameContext::FLAG_SIX);
 
-		GameServer()->SendChatTarget(ClientId, "FoxNetwork Mod " GAME_VERSION);
+		GameServer()->SendChatTarget(ClientId, "FoxNetwork Mod " FOXNET_VERSION);
 		// FoxNet>
 	}
 }
