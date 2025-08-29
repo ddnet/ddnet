@@ -84,12 +84,12 @@ void CCustomProjectile::Tick()
 		m_CollisionState = COLLIDED_TWICE;
 
 	// weapon teleport
-	int x = GameServer()->Collision()->GetIndex(m_PrevPos, m_Pos);
-	int z;
-	if(Config()->m_SvOldTeleportWeapons)
-		z = GameServer()->Collision()->IsTeleport(x);
-	else
-		z = GameServer()->Collision()->IsTeleportWeapon(x);
+	//int x = GameServer()->Collision()->GetIndex(m_PrevPos, m_Pos);
+	//int z;
+	//if(Config()->m_SvOldTeleportWeapons)
+	//	z = GameServer()->Collision()->IsTeleport(x);
+	//else
+	//	z = GameServer()->Collision()->IsTeleportWeapon(x);
 	// if(z && ((CGameControllerDDRace *)GameServer()->m_pController)->m_TeleOuts[z - 1].size())
 	//{
 	//	int Num = ((CGameControllerDDRace *)GameServer()->m_pController)->m_TeleOuts[z - 1].size();

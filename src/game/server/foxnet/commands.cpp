@@ -1162,13 +1162,13 @@ void CGameContext::ConTelekinesisImmunity(IConsole::IResult *pResult, void *pUse
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Victim = pResult->NumArguments() > 1 ? pResult->m_ClientId : pResult->GetVictim();
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	CPlayer *pPlayer = pSelf->m_apPlayers[Victim];
 
 	if(!pPlayer)
 		return;
 
 	pPlayer->SetTelekinesisImmunity(!pPlayer->m_TelekinesisImmunity);
-	log_info("server", "Set telekinesis immunity to %d for player %s", pPlayer->m_TelekinesisImmunity, pSelf->Server()->ClientName(pResult->m_ClientId));
+	log_info("server", "Set telekinesis immunity to %d for player %s", pPlayer->m_TelekinesisImmunity, pSelf->Server()->ClientName(Victim));
 }
 
 void CGameContext::ConTelekinesis(IConsole::IResult *pResult, void *pUserData)

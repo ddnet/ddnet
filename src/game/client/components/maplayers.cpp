@@ -35,7 +35,7 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, 
 			const auto TickToNanoSeconds = std::chrono::nanoseconds(1s) / (int64_t)pClient->GameTickSpeed();
 			int MinTick = pClient->PrevGameTick(g_Config.m_ClDummy) - pGameClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
 			int CurTick = pClient->GameTick(g_Config.m_ClDummy) - pGameClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;	
-			if(!pGameClient->Collision()->QuadLayers().empty() && !pGameClient->m_aClients[pGameClient->m_Snap.m_LocalClientId].m_Paused || pGameClient->m_aClients[pGameClient->m_Snap.m_LocalClientId].m_Spec)
+			if(!pGameClient->Collision()->QuadLayers().empty() && (!pGameClient->m_aClients[pGameClient->m_Snap.m_LocalClientId].m_Paused || pGameClient->m_aClients[pGameClient->m_Snap.m_LocalClientId].m_Spec))
 			{
 				CServerInfo CurrentServerInfo;
 				pGameClient->Client()->GetServerInfo(&CurrentServerInfo);
