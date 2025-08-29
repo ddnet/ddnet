@@ -349,7 +349,15 @@ void CCharacter::HandleNinja()
 				// Don't hit players in solo parts
 				if(Teams()->m_Core.GetSolo(pChr->m_pPlayer->GetCid()))
 					return;
+				// <FoxNet
+				if(Core()->m_Passive)
+					continue;
+				if(pChr && pChr->Core()->m_Passive)
+					continue;
 
+				if(pChr && !pChr->Core()->m_Hittable)
+					continue;
+				// FoxNet>
 				// make sure we haven't Hit this object before
 				bool AlreadyHit = false;
 				for(int j = 0; j < m_NumObjectsHit; j++)
@@ -501,6 +509,10 @@ void CCharacter::FireWeapon()
 		GameServer()->CreateSound(m_Pos, SOUND_HAMMER_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 
 		Antibot()->OnHammerFire(m_pPlayer->GetCid());
+		// <FoxNet	
+		if(m_Core.m_Passive)
+			break;
+		// FoxNet>
 
 		if(m_Core.m_HammerHitDisabled)
 			break;
@@ -517,6 +529,13 @@ void CCharacter::FireWeapon()
 			// if ((pTarget == this) || Collision()->IntersectLine(ProjStartPos, pTarget->m_Pos, NULL, NULL))
 			if((pTarget == this || (pTarget->IsAlive() && !CanCollide(pTarget->GetPlayer()->GetCid()))))
 				continue;
+			// <FoxNet
+			if(pTarget->Core()->m_Passive)
+				continue;
+
+			if(!pTarget->Core()->m_Hittable)
+				continue;
+			// FoxNet>
 
 			// set his velocity to fast upward (for now)
 			if(length(pTarget->m_Pos - ProjStartPos) > 0.0f)
@@ -1183,7 +1202,9 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 			if(m_InSnake || m_Ufo.Active())
 				Faketuning |= FAKETUNE_NOJUMP | FAKETUNE_NOHOOK | FAKETUNE_NOCOLL;
 			if(m_Core.m_Passive)
-				Faketuning |= FAKETUNE_NOJUMP | FAKETUNE_NOHOOK | FAKETUNE_NOCOLL | FAKETUNE_NOHAMMER;
+				Faketuning |= FAKETUNE_NOHOOK | FAKETUNE_NOCOLL | FAKETUNE_NOHAMMER;
+			if(m_Core.m_Collidable)
+				Faketuning |= FAKETUNE_NOCOLL;
 			// FoxNet>
 		}
 		if(Faketuning != m_NeededFaketuning)
@@ -1477,6 +1498,29 @@ void CCharacter::Snap(int SnappingClient)
 			}
 		}
 	}
+
+	CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
+
+	if(pSnapChar)
+	{
+		if(pSnapChar->Core()->m_Passive)
+			pDDNetCharacter->m_Flags |= CHARACTERFLAG_HOOK_HIT_DISABLED | CHARACTERFLAG_HAMMER_HIT_DISABLED;
+		if(!pSnapChar->Core()->m_Hittable && Id != SnappingClient)
+			pDDNetCharacter->m_Flags |= CHARACTERFLAG_HAMMER_HIT_DISABLED;
+		if(!pSnapChar->Core()->m_Hookable && Id != SnappingClient)
+			pDDNetCharacter->m_Flags |= CHARACTERFLAG_HOOK_HIT_DISABLED;
+	}
+	if(m_Core.m_Passive)
+	{
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_COLLISION_DISABLED;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_HOOK_HIT_DISABLED;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_HAMMER_HIT_DISABLED;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_SHOTGUN_HIT_DISABLED;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_GRENADE_HIT_DISABLED;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_LASER_HIT_DISABLED;
+	}
+	if(!m_Core.m_Collidable && Id == SnappingClient)
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_COLLISION_DISABLED;
 	// FoxNet>
 }
 
@@ -3141,4 +3185,21 @@ void CCharacter::HandleQuadStopa(const CMapItemLayerQuads *pQuadLayer, int QuadI
 		if(AppliedY.y == 0.0f && MTV.y != 0.0f)
 			m_Core.m_Vel.y = 0.0f;
 	}
+}
+
+void CCharacter::SetPassive(bool Active)
+{
+	m_Core.m_Passive = Active;
+}
+void CCharacter::SetHittable(bool Active)
+{
+	m_Core.m_Hittable = Active;
+}
+void CCharacter::SetHookable(bool Active)
+{
+	m_Core.m_Hookable = Active;
+}
+void CCharacter::SetCollidable(bool Active)
+{
+	m_Core.m_Collidable = Active;
 }

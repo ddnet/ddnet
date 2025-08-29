@@ -356,7 +356,19 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 				continue;
 			if(Owner == -1 && ActivatedTeam != -1 && pChr->IsAlive() && pChr->Team() != ActivatedTeam)
 				continue;
+			// <FoxNet
+			CCharacter *pPlayerChar = GetPlayerChar(Owner);
 
+			if(Owner != pChr->GetPlayer()->GetCid() && Owner != -1)
+			{
+				if(pPlayerChar && pPlayerChar->Core()->m_Passive)
+					continue;
+				if(pChr && pChr->Core()->m_Passive)
+					continue;
+				if(pChr && !pChr->Core()->m_Hittable)
+					continue;
+			}
+			// FoxNet>
 			// Explode at most once per team
 			int PlayerTeam = pChr->Team();
 			if((GetPlayerChar(Owner) ? GetPlayerChar(Owner)->GrenadeHitDisabled() : !g_Config.m_SvHit) || NoDamage)

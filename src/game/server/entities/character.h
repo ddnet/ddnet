@@ -327,6 +327,11 @@ public:
 
 	void DoTelekinesis();
 
+	void SetPassive(bool Active);
+	void SetHittable(bool Active);
+	void SetHookable(bool Active);
+	void SetCollidable(bool Active);
+
 private:
 	vec2 m_HookBasePos = vec2(0, 0);
 	void OnPlayerHook();

@@ -772,6 +772,10 @@ private:
 
 	static void ConIgnoreGameLayer(IConsole::IResult *pResult, void *pUserData);
 
+	static void ConSetPassive(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetHittable(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetHookable(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetCollidable(IConsole::IResult *pResult, void *pUserData);
 
 	// Add
 	static void ConAddChatDetectionString(IConsole::IResult *pResult, void *pUserData);

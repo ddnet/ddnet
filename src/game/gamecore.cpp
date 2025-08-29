@@ -140,6 +140,15 @@ void CCharacterCore::Reset()
 	// never initialize both to 0
 	m_Input.m_TargetX = 0;
 	m_Input.m_TargetY = -1;
+
+	// <FoxNet
+	m_IsInFreezeQuad = false;
+	m_Passive = false;
+
+	m_Hittable = true;
+	m_Hookable = true;
+	m_Collidable = true;
+	// FoxNet>
 }
 
 void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
@@ -313,6 +322,13 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 				CCharacterCore *pCharCore = m_pWorld->m_apCharacters[i];
 				if(!pCharCore || pCharCore == this || (!(m_Super || pCharCore->m_Super) && ((m_Id != -1 && !m_pTeams->CanCollide(i, m_Id)) || pCharCore->m_Solo || m_Solo)))
 					continue;
+				// <FoxNet
+				if(m_Passive || pCharCore->m_Passive)
+					continue;
+
+				if(!pCharCore->m_Hookable)
+					continue;
+				// FoxNet>
 
 				vec2 ClosestPoint;
 				if(closest_point_on_line(m_HookPos, NewPos, pCharCore->m_Pos, ClosestPoint))
@@ -437,6 +453,10 @@ void CCharacterCore::TickDeferred()
 
 			if(!(m_Super || pCharCore->m_Super) && (m_Solo || pCharCore->m_Solo))
 				continue;
+			// <FoxNet
+			if(m_Passive || pCharCore->m_Passive)
+				continue;
+			// FoxNet>
 
 			// handle player <-> player collision
 			float Distance = distance(m_Pos, pCharCore->m_Pos);
@@ -445,6 +465,9 @@ void CCharacterCore::TickDeferred()
 				vec2 Dir = normalize(m_Pos - pCharCore->m_Pos);
 
 				bool CanCollide = (m_Super || pCharCore->m_Super) || (!m_CollisionDisabled && !pCharCore->m_CollisionDisabled && Tuning.m_PlayerCollision);
+				// <FoxNet
+				CanCollide &= m_Collidable;
+				// FoxNet>
 
 				if(CanCollide && Distance < PhysicalSize() * 1.25f)
 				{
@@ -552,6 +575,13 @@ void CCharacterCore::Move()
 						continue;
 					if((!(pCharCore->m_Super || m_Super) && (m_Solo || pCharCore->m_Solo || pCharCore->m_CollisionDisabled || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, p)))))
 						continue;
+					// <FoxNet
+					if(m_Passive || pCharCore->m_Passive)
+						continue;
+
+					if(!m_Collidable)
+						continue;
+					// FoxNet>
 					float D = distance(Pos, pCharCore->m_Pos);
 					if(D < PhysicalSize())
 					{

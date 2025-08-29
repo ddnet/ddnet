@@ -280,8 +280,6 @@ public:
 	CTuningParams m_FakeTuning;
 	bool m_FakeTuned;
 
-	bool m_ExplosionGun;
-
 	bool m_Passive;
 
 	bool m_Collidable;
