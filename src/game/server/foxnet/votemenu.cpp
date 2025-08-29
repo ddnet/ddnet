@@ -16,6 +16,7 @@
 #include <string>
 #include <vector>
 #include <game/gamecore.h>
+#include <optional>
 
 // Font: https://fsymbols.com/generators/smallcaps/
 constexpr const char *EMPTY_DESC = " ";
@@ -23,6 +24,32 @@ constexpr const char *FANCY_LINES_DESC = "═─═─═─═─═─═─�
 
 constexpr const char *SETTINGS_AUTO_LOGIN = "Auto Login";
 constexpr const char *SETTINGS_HIDE_COSMETICS = "Hide Cosmetics";
+
+// Admin SubPages
+constexpr const char *ADMIN_UTIL = "Util Page";
+constexpr const char *ADMIN_COSMETICS = "Cosmetics Page";
+constexpr const char *ADMIN_MISC = "Misc Page";
+
+// Admin Util
+constexpr const char *ADMIN_UTIL_VANISH = "Vanish";
+
+constexpr const char *ADMIN_UTIL_INVINCIBLE = "Invincible";
+constexpr const char *ADMIN_UTIL_SPIDERHOOK = "Spider Hook";
+constexpr const char *ADMIN_UTIL_PASSIVE = "Passive";
+
+constexpr const char *ADMIN_UTIL_TELEKINESIS = "Telekinesis";
+constexpr const char *ADMIN_UTIL_TELEK_IMMUNITY = "Telekinesis Immunity";
+
+constexpr const char *ADMIN_UTIL_COLLIDABLE = "Collidable";
+constexpr const char *ADMIN_UTIL_HITTABLE = "Hittable";
+constexpr const char *ADMIN_UTIL_HOOKABLE = "Hookable";
+
+// Admin Misc
+constexpr const char *ADMIN_MISC_SNAKE = "Snake";
+constexpr const char *ADMIN_MISC_UFO = "Ufo";
+
+constexpr const char *ADMIN_MISC_OBFUSCATED = "Obfuscate Name";
+constexpr const char *ADMIN_MISC_IGN_KILL_BORD = "Ignore Kill Border";
 
 // Admin Extra Cosmetics
 constexpr const char *ADMIN_COSM_PICKUPPET = "Pickup Pet";
@@ -54,8 +81,34 @@ bool CVoteMenu::OnCallVote(const CNetMsg_Cl_CallVote *pMsg, int ClientId)
 	if(str_comp_nocase(pMsg->m_pType, "option") != 0)
 		return false;
 
+	const char *pVote = str_skip_voting_menu_prefixes(pMsg->m_pValue);
 	const int Page = m_aClientData[ClientId].m_Page;
-	const char *Vote = str_skip_voting_menu_prefixes(pMsg->m_pValue);
+
+	if(!pVote)
+		return false;
+
+	for(int i = 0; i < NUM_PAGES; i++)
+	{
+		if(IsOption(pVote, m_aPages[i]))
+		{
+			SetPage(ClientId, i);
+			return true;
+		}
+	}
+
+	if(IsOption(pVote, FANCY_LINES_DESC) || IsOption(pVote, EMPTY_DESC))
+		return true;
+
+	if(IsCustomVoteOption(pMsg, ClientId))
+	{
+		PrepareVoteOptions(ClientId, Page);
+	}
+	return true;
+}
+bool CVoteMenu::IsCustomVoteOption(const CNetMsg_Cl_CallVote *pMsg, int ClientId)
+{
+	const int Page = m_aClientData[ClientId].m_Page;
+	const char *pVote = str_skip_voting_menu_prefixes(pMsg->m_pValue);
 	const char *pReason = pMsg->m_pReason;
 
 	std::optional<int> ReasonInt = std::nullopt;
@@ -63,8 +116,9 @@ bool CVoteMenu::OnCallVote(const CNetMsg_Cl_CallVote *pMsg, int ClientId)
 		ReasonInt = str_toint(pReason);
 
 	CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
+	CCharacter *pChr = pPl->GetCharacter();
 
-	if(!Vote || !pPl)
+	if(!pVote || !pPl)
 		return false;
 
 	if(Page < 0 || Page >= NUM_PAGES)
@@ -72,140 +126,235 @@ bool CVoteMenu::OnCallVote(const CNetMsg_Cl_CallVote *pMsg, int ClientId)
 
 	CAccountSession &Acc = GameServer()->m_Account[ClientId];
 
-	for(int i = 0; i < NUM_PAGES; i++)
+	if(!IsPageAllowed(ClientId, Page) && Page != PAGE_VOTES)
 	{
-		if(!str_comp(Vote, m_aPages[i]))
+		return false;
+	}
+
+	if(Page == PAGE_SETTINGS)
+	{
+		if(Acc.m_LoggedIn && IsOption(pVote, SETTINGS_AUTO_LOGIN))
 		{
-			SetPage(ClientId, i);
+			if(Acc.m_Flags & ACC_FLAG_AUTOLOGIN)
+			{
+				Acc.m_Flags &= ~ACC_FLAG_AUTOLOGIN;
+				GameServer()->SendChatTarget(ClientId, "Auto Login has been disabled");
+			}
+			else
+			{
+				Acc.m_Flags |= ACC_FLAG_AUTOLOGIN;
+				GameServer()->SendChatTarget(ClientId, "Auto Login has been enabled");
+			}
+			return true;
+		}
+		if(IsOption(pVote, SETTINGS_HIDE_COSMETICS))
+		{
+			pPl->SetHideCosmetics(!pPl->m_HideCosmetics);
+			return true;
+		}
+	}
+	else if(Page == PAGE_ACCOUNT)
+	{
+	}
+	else if(Page == PAGE_SHOP)
+	{
+		for(const auto &pItems : GameServer()->m_Shop.m_Items)
+		{
+			if(IsOption(pItems->Name(), ""))
+				continue;
+			if(pItems->Price() == -1)
+				continue;
+
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "%s | %d %s", pItems->Name(), pItems->Price(), g_Config.m_SvCurrencyName);
+
+			if(IsOption(pVote, aBuf))
+			{
+				GameServer()->m_Shop.BuyItem(ClientId, pItems->Name());
+				return true;
+			}
+		}
+	}
+	else if(Page == PAGE_INVENTORY || Page == PAGE_ADMIN)
+	{
+		if(pPl->m_HideCosmetics && Page == PAGE_INVENTORY)
+		{
+			GameServer()->SendChatTarget(ClientId, "Turn on Cosmetics to enable them");
+			SetPage(ClientId, PAGE_SETTINGS);
 			return true;
 		}
 
+		// !New Cosmetic
+		if(IsOptionWithSuffix(pVote, "Rainbow Speed"))
+		{
+			if(ReasonInt.has_value())
+				pPl->m_Cosmetics.m_RainbowSpeed = ReasonInt.value();
+			else
+				GameServer()->SendChatTarget(ClientId, "Please specify the rainbow speed using the reason field");
+			return true;
+		}
+		if(IsOptionWithSuffix(pVote, "Emoticon Gun"))
+		{
+			if(ReasonInt.has_value())
+				pPl->ToggleItem("Emoticon Gun", ReasonInt.value(), Page == PAGE_ADMIN);
+			else
+				GameServer()->SendChatTarget(ClientId, "Please specify the emote type using the reason field");
+			return true;
+		}
+
+		// Options that use the reason field go above
+		for(const auto &pItems : GameServer()->m_Shop.m_Items)
+		{
+			if(IsOption(pItems->Name(), ""))
+				continue;
+			if(pItems->Price() == -1)
+				continue;
+
+			if(IsOption(pVote, pItems->Name()))
+			{
+				pPl->ToggleItem(pItems->Name(), 0, Page == PAGE_ADMIN);
+				return true;
+			}
+		}
 	}
-
-	if(!str_comp(Vote, FANCY_LINES_DESC) || !str_comp(Vote, EMPTY_DESC))
-		return true;
-
-	if(IsPageAllowed(ClientId, Page))
+	if(Page == PAGE_ADMIN)
 	{
-		if(Page == PAGE_SETTINGS)
+		if(IsOption(pVote, ADMIN_UTIL))
 		{
-			if(Acc.m_LoggedIn && !str_comp(Vote, SETTINGS_AUTO_LOGIN))
+			SetSubPage(ClientId, SUB_ADMIN_UTIL);
+			return true;
+		}
+		if(IsOption(pVote, ADMIN_MISC))
+		{
+			SetSubPage(ClientId, SUB_ADMIN_MISC);
+			return true;
+		}
+		if(IsOption(pVote, ADMIN_COSMETICS))
+		{
+			SetSubPage(ClientId, SUB_ADMIN_COSMETICS);
+			return true;
+		}
+
+		if(GetSubPage(ClientId) == SUB_ADMIN_UTIL)
+		{
+			if(IsOption(pVote, ADMIN_UTIL_INVINCIBLE))
 			{
-				if(Acc.m_Flags & ACC_FLAG_AUTOLOGIN)
-				{
-					Acc.m_Flags &= ~ACC_FLAG_AUTOLOGIN;
-					GameServer()->SendChatTarget(ClientId, "Auto Login has been disabled");
-				}
-				else
-				{
-					Acc.m_Flags |= ACC_FLAG_AUTOLOGIN;
-					GameServer()->SendChatTarget(ClientId, "Auto Login has been enabled");
-				}
+				if(pChr)
+					pChr->SetInvincible(!pChr->Core()->m_Invincible);
 				return true;
 			}
-			if(!str_comp(Vote, SETTINGS_HIDE_COSMETICS))
+			if(IsOption(pVote, ADMIN_UTIL_VANISH))
 			{
-				pPl->SetHideCosmetics(!pPl->m_HideCosmetics);
+				pPl->m_Vanish = !pPl->m_Vanish;
+				return true;
+			}
+			if(IsOption(pVote, ADMIN_UTIL_SPIDERHOOK))
+			{
+				pPl->m_SpiderHook = !pPl->m_SpiderHook;
+				return true;
+			}
+			if(IsOption(pVote, ADMIN_UTIL_PASSIVE))
+			{
+				if(pChr)
+					pChr->SetPassive(!pChr->Core()->m_Passive);
+				return true;
+			}
+
+			if(IsOption(pVote, ADMIN_UTIL_TELEKINESIS))
+			{
+				if(pChr)
+					pChr->GiveWeapon(WEAPON_TELEKINESIS, pChr->GetWeaponGot(WEAPON_TELEKINESIS));
+				return true;
+			}
+			if(IsOption(pVote, ADMIN_UTIL_TELEK_IMMUNITY))
+			{
+				pPl->SetTelekinesisImmunity(!pPl->m_TelekinesisImmunity);
+				return true;
+			}
+
+			if(IsOption(pVote, ADMIN_UTIL_COLLIDABLE))
+			{
+				if(pChr)
+					pChr->SetCollidable(!pChr->Core()->m_Collidable);
+				return true;
+			}
+			if(IsOption(pVote, ADMIN_UTIL_HITTABLE))
+			{
+				if(pChr)
+					pChr->SetHittable(!pChr->Core()->m_Hittable);
+				return true;
+			}
+			if(IsOption(pVote, ADMIN_UTIL_HOOKABLE))
+			{
+				if(pChr)
+					pChr->SetHookable(!pChr->Core()->m_Hookable);
 				return true;
 			}
 		}
-		else if(Page == PAGE_ACCOUNT)
-		{
-		}
-		else if(Page == PAGE_SHOP)
-		{
-			for(const auto &pItems : GameServer()->m_Shop.m_Items)
-			{
-				if(!str_comp(pItems->Name(), ""))
-					continue;
-				if(pItems->Price() == -1)
-					continue;
 
-				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "%s | %d %s", pItems->Name(), pItems->Price(), g_Config.m_SvCurrencyName);
-
-				if(!str_comp(Vote, aBuf))
-				{
-					GameServer()->m_Shop.BuyItem(ClientId, pItems->Name());
-					return true;
-				}
-			}
-		}
-		else if(Page == PAGE_INVENTORY)
+		if(GetSubPage(ClientId) == SUB_ADMIN_MISC)
 		{
-			if(pPl->m_HideCosmetics)
+			if(IsOption(pVote, ADMIN_MISC_SNAKE) && pChr)
 			{
-				GameServer()->SendChatTarget(ClientId, "Turn on Cosmetics to enable them");
-				SetPage(ClientId, PAGE_SETTINGS);
+				pChr->SetSnake(!pChr->m_Snake.Active());
 				return true;
 			}
 
-			// !New Cosmetic
-			if(IsOptionWithSuffix(Vote, "Rainbow Speed"))
+			if(IsOption(pVote, ADMIN_MISC_UFO) && pChr)
 			{
-				if(ReasonInt.has_value())
-					pPl->m_Cosmetics.m_RainbowSpeed = ReasonInt.value();
-				else
-					GameServer()->SendChatTarget(ClientId, "Please specify the rainbow speed using the reason field");
-				return true;
-			}
-			if(IsOptionWithSuffix(Vote, "Emoticon Gun"))
-			{
-				if(ReasonInt.has_value())
-					pPl->ToggleItem("Emoticon Gun", ReasonInt.value());
-				else
-					GameServer()->SendChatTarget(ClientId, "Please specify the emote type using the reason field");
+				pChr->SetUfo(!pChr->m_Ufo.Active());
 				return true;
 			}
 
-			// Options that use the reason field go above
-			for(const auto &pItems : GameServer()->m_Shop.m_Items)
+			if(IsOption(pVote, ADMIN_MISC_IGN_KILL_BORD))
 			{
-				if(!str_comp(pItems->Name(), ""))
-					continue;
-				if(pItems->Price() == -1)
-					continue;
-
-				if(!str_comp(Vote, pItems->Name()))
-				{
-					pPl->ToggleItem(pItems->Name(), 0);
-					return true;
-				}
+				pPl->m_IgnoreGamelayer = !pPl->m_IgnoreGamelayer;
+				return true;
+			}
+			if(IsOption(pVote, ADMIN_MISC_OBFUSCATED))
+			{
+				pPl->SetObfuscated(!pPl->m_Obfuscated);
+				return true;
 			}
 		}
-		else if(Page == PAGE_ADMIN)
+
+		if(GetSubPage(ClientId) == SUB_ADMIN_COSMETICS)
 		{
-			// !New Cosmetic
-			if(IsOptionWithSuffix(Vote, "Rainbow Speed"))
+			if(IsOption(pVote, ADMIN_COSM_PICKUPPET))
 			{
-				if(ReasonInt.has_value())
-					pPl->m_Cosmetics.m_RainbowSpeed = ReasonInt.value();
-				else
-					GameServer()->SendChatTarget(ClientId, "Please specify the rainbow speed using the reason field");
+				pPl->SetPickupPet(!pPl->m_Cosmetics.m_PickupPet);
 				return true;
 			}
-			if(IsOptionWithSuffix(Vote, "Emoticon Gun"))
+			if(IsOption(pVote, ADMIN_COSM_STAFFIND))
 			{
-				if(ReasonInt.has_value())
-					pPl->ToggleItem("Emoticon Gun", ReasonInt.value());
-				else
-					GameServer()->SendChatTarget(ClientId, "Please specify the emote type using the reason field");
+				pPl->SetStaffInd(!pPl->m_Cosmetics.m_StaffInd);
 				return true;
 			}
-
-			// Options that use the reason field go above
-			for(const auto &pItems : GameServer()->m_Shop.m_Items)
+			if(IsOption(pVote, ADMIN_COSM_HEARTGUN))
 			{
-				if(!str_comp(pItems->Name(), ""))
-					continue;
-				if(pItems->Price() == -1)
-					continue;
-
-				if(!str_comp(Vote, pItems->Name()))
-				{
-					pPl->ToggleItem(pItems->Name(), 0, true);
-					return true;
-				}
+				if(pChr)
+					pChr->GiveWeapon(WEAPON_HEARTGUN, pChr->GetWeaponGot(WEAPON_HEARTGUN));
+				return true;
+			}
+			if(IsOption(pVote, ADMIN_ABILITY_HEART))
+			{
+				pPl->SetAbility(pPl->m_Cosmetics.m_Ability == ABILITY_HEART ? ABILITY_NONE : ABILITY_HEART);
+				return true;
+			}
+			if(IsOption(pVote, ADMIN_ABILITY_SHIELD))
+			{
+				pPl->SetAbility(pPl->m_Cosmetics.m_Ability == ABILITY_SHIELD ? ABILITY_NONE : ABILITY_SHIELD);
+				return true;
+			}
+			if(IsOption(pVote, ADMIN_ABILITY_FIREWORK))
+			{
+				pPl->SetAbility(pPl->m_Cosmetics.m_Ability == ABILITY_FIREWORK ? ABILITY_NONE : ABILITY_FIREWORK);
+				return true;
+			}
+			if(IsOption(pVote, ADMIN_ABILITY_TELEKINESIS))
+			{
+				pPl->SetAbility(pPl->m_Cosmetics.m_Ability == ABILITY_TELEKINESIS ? ABILITY_NONE : ABILITY_TELEKINESIS);
+				return true;
 			}
 		}
 	}
@@ -261,7 +410,7 @@ void CVoteMenu::UpdatePages(int ClientId)
 		if(Acc.m_Flags != OldAcc.m_Flags)
 			Changes = true;
 	}
-	else if(Page == PAGE_ACCOUNT)
+	if(Page == PAGE_ACCOUNT)
 	{
 		if(Acc.m_Level != OldAcc.m_Level)
 			Changes = true;
@@ -274,7 +423,7 @@ void CVoteMenu::UpdatePages(int ClientId)
 		if(Acc.m_Deaths != OldAcc.m_Deaths)
 			Changes = true;
 	}
-	else if(Page == PAGE_SHOP)
+	if(Page == PAGE_SHOP)
 	{
 		if(Acc.m_Money != OldAcc.m_Money)
 			Changes = true;
@@ -284,14 +433,7 @@ void CVoteMenu::UpdatePages(int ClientId)
 		// if(mem_comp(&Acc, &m_aClientData[ClientId].m_Account, sizeof(Acc)) != 0)
 		//	Changes = true;
 	}
-	else if(Page == PAGE_INVENTORY)
-	{
-		if(memcmp(Acc.m_Inventory, OldAcc.m_Inventory, sizeof(Acc.m_Inventory)) != 0)
-			Changes = true;
-		if(memcmp(&pPl->m_Cosmetics, &m_aClientData[ClientId].m_Cosmetics, sizeof(pPl->m_Cosmetics)) != 0)
-			Changes = true;
-	}
-	else if(Page == PAGE_ADMIN)
+	if(Page == PAGE_INVENTORY || Page == PAGE_ADMIN)
 	{
 		if(memcmp(Acc.m_Inventory, OldAcc.m_Inventory, sizeof(Acc.m_Inventory)) != 0)
 			Changes = true;
@@ -708,10 +850,79 @@ void CVoteMenu::DoCosmeticVotes(int ClientId, bool Authed)
 	}
 }
 
+int CVoteMenu::GetSubPage(int ClientId) const
+{
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
+		return 0;
+	const int Page = m_aClientData[ClientId].m_Page;
+	return m_aClientData[ClientId].m_SubPage[Page];
+}
+
+void CVoteMenu::SetSubPage(int ClientId, int SubPage)
+{
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
+		return;
+	const int Page = m_aClientData[ClientId].m_Page;
+	if(Page < 0 || Page >= NUM_PAGES)
+		return;
+
+	m_aClientData[ClientId].m_SubPage[Page] = SubPage;
+	PrepareVoteOptions(ClientId, Page);
+}
+
 void CVoteMenu::SendPageAdmin(int ClientId)
 {
-	// CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
-	DoCosmeticVotes(ClientId, true);
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	CCharacter *pChr = GameServer()->GetPlayerChar(ClientId);
+	
+	AddVoteSubheader("Aᴅᴍɪɴ Pᴀɢᴇs");
+	AddVotePrefix(ADMIN_UTIL, GetSubPage(ClientId) == SUB_ADMIN_UTIL ? BULLET_BLACK_DIAMOND : BULLET_WHITE_DIAMOND);
+	AddVotePrefix(ADMIN_COSMETICS, GetSubPage(ClientId) == SUB_ADMIN_COSMETICS ? BULLET_BLACK_DIAMOND : BULLET_WHITE_DIAMOND);
+	AddVotePrefix(ADMIN_MISC, GetSubPage(ClientId) == SUB_ADMIN_MISC ? BULLET_BLACK_DIAMOND : BULLET_WHITE_DIAMOND);
+	AddVoteSeperator();
+	if(GetSubPage(ClientId) == SUB_ADMIN_UTIL)
+	{
+		if(pChr)
+			AddVoteCheckBox(ADMIN_UTIL_INVINCIBLE, pChr->Core()->m_Invincible);
+		AddVoteCheckBox(ADMIN_UTIL_SPIDERHOOK, pPlayer->m_SpiderHook);
+
+		AddVoteCheckBox(ADMIN_UTIL_VANISH, pPlayer->m_Vanish);
+		if(pChr)
+		{
+			AddVoteCheckBox(ADMIN_UTIL_TELEKINESIS, pChr->GetWeaponGot(WEAPON_TELEKINESIS));
+			if(Server()->GetAuthedState(ClientId) >= AUTHED_ADMIN)
+				AddVoteCheckBox(ADMIN_UTIL_TELEK_IMMUNITY, pPlayer->m_TelekinesisImmunity);
+			AddVoteSeperator();
+
+			AddVoteCheckBox(ADMIN_UTIL_PASSIVE, pChr->Core()->m_Passive);
+			AddVoteSeperator();
+
+			AddVoteText("Should your own character be:");
+			AddVoteCheckBox(ADMIN_UTIL_COLLIDABLE, pChr->Core()->m_Collidable);
+			AddVoteCheckBox(ADMIN_UTIL_HITTABLE, pChr->Core()->m_Hittable);
+			AddVoteCheckBox(ADMIN_UTIL_HOOKABLE, pChr->Core()->m_Hookable);
+		}
+	}
+	if(GetSubPage(ClientId) == SUB_ADMIN_MISC)
+	{
+		AddVoteSubheader("Mɪsᴄᴇʟʟᴀɴᴇᴏᴜs");
+		if(pChr)
+		{
+			AddVoteCheckBox(ADMIN_MISC_SNAKE, pChr->m_Snake.Active());
+			AddVoteCheckBox(ADMIN_MISC_UFO, pChr->m_Ufo.Active());
+		}
+
+		AddVoteSeperator();
+
+		if(Server()->GetAuthedState(ClientId) >= AUTHED_ADMIN && pChr)
+			AddVoteCheckBox(ADMIN_MISC_OBFUSCATED, pPlayer->m_Obfuscated);
+
+		AddVoteCheckBox(ADMIN_MISC_IGN_KILL_BORD, pPlayer->m_IgnoreGamelayer);
+	}
+	if(GetSubPage(ClientId) == SUB_ADMIN_COSMETICS)
+	{
+		DoCosmeticVotes(ClientId, true);
+	}
 }
 
 void CVoteMenu::AddHeader(int ClientId)

@@ -5474,7 +5474,7 @@ const char *str_skip_voting_menu_prefixes(const char *pVote)
 	if(!pVote || !pVote[0])
 		return 0;
 
-	const char *pPrefixes[] = {"•", "☒", "☐", "│", "╭", "─", ">", "⇨", "⁃", "‣"};
+	const char *pPrefixes[] = {"•", "☒", "☐", "│", "╭", "─", ">", "⇨", "⁃", "‣", "◆", "◇"};
 	const char *pTemp = pVote;
 	while(1)
 	{

@@ -20,17 +20,25 @@ enum Pages
 	PAGE_SHOP,
 	PAGE_INVENTORY,
 	PAGE_ADMIN,
-	NUM_PAGES
+	NUM_PAGES,
+};
+
+enum AdminSubPages
+{
+	SUB_ADMIN_UTIL = 0,
+	SUB_ADMIN_MISC,
+	SUB_ADMIN_COSMETICS,
+	NUM_SUB_PAGES,
 };
 
 enum BulletPoints
 {
 	BULLET_NONE = 0,
-	BULLET_DOT,
+	BULLET_POINT,
 	BULLET_DASH,
 	BULLET_GREATER_THAN,
 	BULLET_ARROW,
-	BULLET_RECTANGLE,
+	BULLET_HYPHEN,
 	BULLET_TRIANGLE,
 	BULLET_BLACK_DIAMOND,
 	BULLET_WHITE_DIAMOND
@@ -55,6 +63,7 @@ class CVoteMenu
 	struct ClientData
 	{
 		int m_Page = PAGE_VOTES;
+		int m_SubPage[NUM_PAGES] = {0};
 
 		// Comparison data for auto updates
 		CAccountSession m_Account = CAccountSession();
@@ -66,6 +75,7 @@ class CVoteMenu
 	bool IsPageAllowed(int ClientId, int Page) const;
 
 	bool IsOptionWithSuffix(const char *pDesc, const char *pWantedOption) { return str_startswith(pDesc, pWantedOption) != 0; }
+	bool IsOption(const char *pDesc, const char *pWantedOption) { return !str_comp(pDesc, pWantedOption); }
 
 	void AddVoteText(const char *pDesc) { m_vDescriptions.emplace_back(pDesc); }
 	void AddVoteSeperator() { m_vDescriptions.emplace_back(" "); }
@@ -73,7 +83,6 @@ class CVoteMenu
 	void AddVotePrefix(const char *pDesc, int Prefix);
 	void AddVoteCheckBox(const char *pDesc, bool Checked);
 	void AddVoteValueOption(const char *pDescription, int Value, int Max, int BulletPoint);
-
 
 	void SendPageSettings(int ClientId);
 	void SendPageAccount(int ClientId);
@@ -84,6 +93,9 @@ class CVoteMenu
 	void DoCosmeticVotes(int ClientId, bool Authed);
 
 	void UpdatePages(int ClientId);
+
+	int GetSubPage(int ClientId) const;
+	void SetSubPage(int ClientId, int Page);
 
 public:
 	void PrepareVoteOptions(int ClientId, int Page);
@@ -97,6 +109,7 @@ public:
 	void OnClientDrop(int ClientId);
 	void Init(CGameContext *pGameServer);
 	bool OnCallVote(const CNetMsg_Cl_CallVote *pMsg, int ClientId);
+	bool IsCustomVoteOption(const CNetMsg_Cl_CallVote *pMsg, int ClientId);
 };
 
 #endif // GAME_SERVER_FOXNET_VOTEMENU_H
