@@ -90,27 +90,27 @@ static_assert(
     "type IConsole_FCommandCallback should be trivially move constructible and trivially destructible in C++ to be used as an argument of `Register` in Rust");
 
 extern "C" {
-::std::int32_t cxxbridge1$IConsole_IResult$GetInteger(const ::IConsole_IResult &self, ::std::uint32_t Index) noexcept {
+::std::int32_t cxxbridge1$IConsole_IResult$GetInteger(::IConsole_IResult const &self, ::std::uint32_t Index) noexcept {
   ::std::int32_t (::IConsole_IResult::*GetInteger$)(::std::uint32_t) const = &::IConsole_IResult::GetInteger;
   return (self.*GetInteger$)(Index);
 }
 
-float cxxbridge1$IConsole_IResult$GetFloat(const ::IConsole_IResult &self, ::std::uint32_t Index) noexcept {
+float cxxbridge1$IConsole_IResult$GetFloat(::IConsole_IResult const &self, ::std::uint32_t Index) noexcept {
   float (::IConsole_IResult::*GetFloat$)(::std::uint32_t) const = &::IConsole_IResult::GetFloat;
   return (self.*GetFloat$)(Index);
 }
 
-void cxxbridge1$IConsole_IResult$GetString(const ::IConsole_IResult &self, ::std::uint32_t Index, ::StrRef *return$) noexcept {
+void cxxbridge1$IConsole_IResult$GetString(::IConsole_IResult const &self, ::std::uint32_t Index, ::StrRef *return$) noexcept {
   ::StrRef (::IConsole_IResult::*GetString$)(::std::uint32_t) const = &::IConsole_IResult::GetString;
   new (return$) ::StrRef((self.*GetString$)(Index));
 }
 
-::std::int32_t cxxbridge1$IConsole_IResult$NumArguments(const ::IConsole_IResult &self) noexcept {
+::std::int32_t cxxbridge1$IConsole_IResult$NumArguments(::IConsole_IResult const &self) noexcept {
   ::std::int32_t (::IConsole_IResult::*NumArguments$)() const = &::IConsole_IResult::NumArguments;
   return (self.*NumArguments$)();
 }
 
-::std::int32_t cxxbridge1$IConsole_IResult$GetVictim(const ::IConsole_IResult &self) noexcept {
+::std::int32_t cxxbridge1$IConsole_IResult$GetVictim(::IConsole_IResult const &self) noexcept {
   ::std::int32_t (::IConsole_IResult::*GetVictim$)() const = &::IConsole_IResult::GetVictim;
   return (self.*GetVictim$)();
 }
@@ -120,7 +120,7 @@ void cxxbridge1$IConsole$ExecuteLine(::IConsole &self, ::StrRef *pStr, ::std::in
   (self.*ExecuteLine$)(::std::move(*pStr), ClientId, InterpretSemicolons);
 }
 
-void cxxbridge1$IConsole$Print(const ::IConsole &self, ::std::int32_t Level, ::StrRef *pFrom, ::StrRef *pStr, ::ColorRGBA *PrintColor) noexcept {
+void cxxbridge1$IConsole$Print(::IConsole const &self, ::std::int32_t Level, ::StrRef *pFrom, ::StrRef *pStr, ::ColorRGBA *PrintColor) noexcept {
   void (::IConsole::*Print$)(::std::int32_t, ::StrRef, ::StrRef, ::ColorRGBA) const = &::IConsole::Print;
   (self.*Print$)(Level, ::std::move(*pFrom), ::std::move(*pStr), ::std::move(*PrintColor));
 }
@@ -135,7 +135,7 @@ void cxxbridge1$IConsole$Register(::IConsole &self, ::StrRef *pName, ::StrRef *p
   return CreateConsole$(FlagMask).release();
 }
 
-static_assert(::rust::detail::is_complete<::IConsole>::value, "definition of IConsole is required");
+static_assert(::rust::detail::is_complete<::IConsole>::value, "definition of `::IConsole` is required");
 static_assert(sizeof(::std::unique_ptr<::IConsole>) == sizeof(void *), "");
 static_assert(alignof(::std::unique_ptr<::IConsole>) == alignof(void *), "");
 void cxxbridge1$unique_ptr$IConsole$null(::std::unique_ptr<::IConsole> *ptr) noexcept {
@@ -144,10 +144,10 @@ void cxxbridge1$unique_ptr$IConsole$null(::std::unique_ptr<::IConsole> *ptr) noe
 void cxxbridge1$unique_ptr$IConsole$raw(::std::unique_ptr<::IConsole> *ptr, ::IConsole *raw) noexcept {
   ::new (ptr) ::std::unique_ptr<::IConsole>(raw);
 }
-const ::IConsole *cxxbridge1$unique_ptr$IConsole$get(const ::std::unique_ptr<::IConsole>& ptr) noexcept {
+::IConsole const *cxxbridge1$unique_ptr$IConsole$get(::std::unique_ptr<::IConsole> const &ptr) noexcept {
   return ptr.get();
 }
-::IConsole *cxxbridge1$unique_ptr$IConsole$release(::std::unique_ptr<::IConsole>& ptr) noexcept {
+::IConsole *cxxbridge1$unique_ptr$IConsole$release(::std::unique_ptr<::IConsole> &ptr) noexcept {
   return ptr.release();
 }
 void cxxbridge1$unique_ptr$IConsole$drop(::std::unique_ptr<::IConsole> *ptr) noexcept {
