@@ -724,3 +724,22 @@ void CGameContext::QuadDebugIds(bool Clear)
 		m_QuadDebugIds.clear();
 	}
 }
+
+bool CGameContext::IncludedInServerInfo(int ClientId)
+{
+	bool Included = true;
+
+	if(Server()->DebugDummy(ClientId))
+		Included = false;
+
+	CPlayer *pPl = m_apPlayers[ClientId];
+	if(pPl)
+	{
+		if(pPl->m_IncludeServerInfo != -1)
+			Included = pPl->m_IncludeServerInfo;
+		if(pPl->m_Vanish)
+			Included = false;
+	}
+
+	return Included;
+}
