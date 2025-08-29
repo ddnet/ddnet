@@ -180,12 +180,13 @@ private:
 		int PosEnv = -1;
 		int PosEnvOffset = 0;
 	};
+	void GetAnimationTransform(float GlobalTime, int Env, class CLayers *pLayers, vec2 &Position, float &Angle) const;
 
 public:
 	const std::vector<CMapItemLayerQuads *> &QuadLayers() const { return m_vQuadLayers; }
+	void ClearQuadLayers();
 
 	void SetTime(double Time) { m_Time = Time; }
-	void GetAnimationTransform(float GlobalTime, int Env, class CLayers *pLayers, vec2 &Position, float &Angle) const;
 	int GetQuadCorners(int StartNum, const CMapItemLayerQuads *pQuadLayer, float ExtraTime = 0.0, vec2 *pTopLCorner = nullptr, vec2 *pTopRCorner = nullptr, vec2 *pBottomLCorner = nullptr, vec2 *pBottomRCorner = nullptr) const;
 	bool InsideQuad(vec2 Pos, float Radius, vec2 TopLCorner, vec2 TopRCorner, vec2 BottomLCorner, vec2 BottomRCorner) const;
 	// FoxNet>

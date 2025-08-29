@@ -1302,6 +1302,12 @@ size_t CCollision::TeleAllSize(int Number)
 		Total += m_TeleOthers[Number].size();
 	return Total;
 }
+// <FoxNet
+
+void CCollision::ClearQuadLayers()
+{
+	m_vQuadLayers.clear();
+}
 
 static void Rotate(vec2 Center, vec2 *pPoint, float Rotation)
 {

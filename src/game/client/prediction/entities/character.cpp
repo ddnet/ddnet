@@ -1113,7 +1113,6 @@ void CCharacter::DDRacePostCoreTick()
 	}
 
 	// <FoxNet
-	Collision()->SetTime(static_cast<double>(GameWorld()->GameTick() / GameWorld()->GameTickSpeed()));
 	m_Core.m_IsInFreezeQuad = false;
 	for(const auto *pQuadLayer : Collision()->QuadLayers())
 	{

@@ -33,14 +33,24 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, 
 		{
 			// get the lerp of the current tick and prev
 			const auto TickToNanoSeconds = std::chrono::nanoseconds(1s) / (int64_t)pClient->GameTickSpeed();
-			const int MinTick = pClient->PrevGameTick(g_Config.m_ClDummy) - pGameClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
-			const int CurTick = pClient->GameTick(g_Config.m_ClDummy) - pGameClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
+			int MinTick = pClient->PrevGameTick(g_Config.m_ClDummy) - pGameClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
+			int CurTick = pClient->GameTick(g_Config.m_ClDummy) - pGameClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;	
+			if(!pGameClient->Collision()->QuadLayers().empty() && !pGameClient->m_aClients[pGameClient->m_Snap.m_LocalClientId].m_Paused || pGameClient->m_aClients[pGameClient->m_Snap.m_LocalClientId].m_Spec)
+			{
+				CServerInfo CurrentServerInfo;
+				pGameClient->Client()->GetServerInfo(&CurrentServerInfo);
+				if(str_comp(CurrentServerInfo.m_aGameType, "FoxNetwork") != 0)
+					pGameClient->Collision()->ClearQuadLayers();
+				MinTick = pGameClient->Client()->PrevGameTick(g_Config.m_ClDummy) + pGameClient->Client()->GetPredictionTime() / 21;
+				CurTick = pGameClient->Client()->GameTick(g_Config.m_ClDummy) + pGameClient->Client()->GetPredictionTime() / 21;
+			}
 			s_Time = std::chrono::nanoseconds((int64_t)(mix<double>(
 									    0,
 									    (CurTick - MinTick),
 									    (double)pClient->IntraGameTick(g_Config.m_ClDummy)) *
 								    TickToNanoSeconds.count())) +
 				 MinTick * TickToNanoSeconds;
+
 		}
 	}
 	else
