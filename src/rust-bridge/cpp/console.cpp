@@ -80,9 +80,6 @@ static_assert(
     ::rust::IsRelocatable<::ColorRGBA>::value,
     "type ColorRGBA should be trivially move constructible and trivially destructible in C++ to be used as an argument of `Print` in Rust");
 static_assert(
-    ::rust::IsRelocatable<::ColorHSLA>::value,
-    "type ColorHSLA should be trivially move constructible and trivially destructible in C++ to be used as a return value of `GetColor` in Rust");
-static_assert(
     ::rust::IsRelocatable<::StrRef>::value,
     "type StrRef should be trivially move constructible and trivially destructible in C++ to be used as an argument of `ExecuteLine`, `Print`, `Register` or return value of `GetString` in Rust");
 static_assert(
@@ -106,11 +103,6 @@ float cxxbridge1$IConsole_IResult$GetFloat(const ::IConsole_IResult &self, ::std
 void cxxbridge1$IConsole_IResult$GetString(const ::IConsole_IResult &self, ::std::uint32_t Index, ::StrRef *return$) noexcept {
   ::StrRef (::IConsole_IResult::*GetString$)(::std::uint32_t) const = &::IConsole_IResult::GetString;
   new (return$) ::StrRef((self.*GetString$)(Index));
-}
-
-void cxxbridge1$IConsole_IResult$GetColor(const ::IConsole_IResult &self, ::std::uint32_t Index, float DarkestLighting, ::ColorHSLA *return$) noexcept {
-  std::optional<::ColorHSLA> (::IConsole_IResult::*GetColor$)(::std::uint32_t, float) const = &::IConsole_IResult::GetColor;
-  new(return$)::ColorHSLA((self.*GetColor$)(Index, DarkestLighting).value_or(::ColorHSLA(0, 0, 0)));
 }
 
 ::std::int32_t cxxbridge1$IConsole_IResult$NumArguments(const ::IConsole_IResult &self) noexcept {
