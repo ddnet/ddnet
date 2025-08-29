@@ -50,7 +50,7 @@ Body
 == Gövde
 
 Call vote
-== Oylama
+== Oy kullan
 
 Change settings
 == Ayarları değiştir
@@ -62,7 +62,7 @@ Clan
 == Klan
 
 Client
-== İstemci
+== Uygulama
 
 Connecting to
 == Bağlanılıyor
@@ -89,13 +89,13 @@ Delete
 == Sil
 
 Delete demo
-== Demoyu sil
+== Kaydı sil
 
 Demofile: %s
-== Demo dosyası: %s
+== Kayıt dosyası: %s
 
 Demos
-== Demolar
+== Kayıtlar
 
 Disconnect
 == Bağlantıyı kes
@@ -113,13 +113,13 @@ Dynamic Camera
 == Dinamik Kamera
 
 Emoticon
-== İfade
+== İfadeler
 
 Error
 == Hata
 
 Error loading demo
-== Demo yüklenirken hata oluştu
+== Kayıt yüklenirken hata oluştu
 
 Favorite
 == Favori
@@ -167,7 +167,7 @@ Graphics
 == Grafik
 
 Grenade
-== El bombası
+== Bombaatar
 
 Hammer
 == Çekiç
@@ -182,7 +182,7 @@ Hook
 == Kanca
 
 Invalid Demo
-== Geçersiz Demo
+== Geçersiz Kayıt
 
 Join blue
 == Maviye katıl
@@ -293,10 +293,10 @@ Remove
 == Çıkar
 
 Remove friend
-== Arkadaşı sil
+== Arkadaşı kaldır
 
 Rename demo
-== Demonun adını değiştir
+== Kaydın adını değiştir
 
 Reset filter
 == Filtreleri sıfırla
@@ -392,7 +392,7 @@ Type
 == Tür
 
 Unable to rename the demo
-== Demonun ismi değiştirilemiyor
+== Kaydın ismi değiştirilemiyor
 
 Use sounds
 == Sesleri kullan
@@ -446,7 +446,7 @@ Internet
 == İnternet
 
 Max demos
-== Maksimum Demo Sayısı
+== Maksimum kayıt Sayısı
 
 News
 == Haberler
@@ -470,10 +470,10 @@ Hue
 == Renk
 
 Record demo
-== Demo kaydet
+== Kaydı kaydet
 
 Your skin
-== Sizin görünüşünüz
+== Sizin kostümünüz
 
 Reset to defaults
 == Varsayılanlara getir
@@ -503,16 +503,16 @@ Game paused
 == Oyun durduruldu
 
 Server best:
-== Sunucu en iyi:
+== Sunucu en iyisi:
 
 Personal best:
-== Bireysel en iyi:
+== Bireysel rekorun:
 
 Learn
 == Öğren
 
 Browser
-== Sunucular
+== Sunucu ara
 
 Ghost
 == Hayalet
@@ -524,7 +524,7 @@ Reconnect in %d sec
 == %d saniye içinde yeniden bağlanılacak
 
 Render demo
-== Demo'yu işle
+== Kaydı işle
 
 Replace video
 == Video üzerine yaz
@@ -536,10 +536,10 @@ Are you sure that you want to disconnect?
 == Ayrılmak istediğinizden emin misiniz?
 
 Disconnect Dummy
-== Dummy Ayrıl
+== İkizden Ayrıl
 
 Are you sure that you want to disconnect your dummy?
-== Dummy'nin bağlantısını koparmak istediğinizden emin misiniz?
+== İkizin bağlantısını koparmak istediğinizden emin misiniz?
 
 Welcome to DDNet
 == DDNet'e hoş geldiniz
@@ -569,7 +569,7 @@ Search
 == Ara
 
 Exclude
-== Hariç
+== Hariç tut
 
 Player country:
 == Oyuncu ülkesi:
@@ -617,7 +617,7 @@ Remove chat
 == %.2f KiB
 
 Demo
-== Demo
+== Kayıt
 
 Markers
 == İşaretler
@@ -632,10 +632,10 @@ Fetch Info
 == Bilgileri göster
 
 Connecting dummy
-== Dummy bağlanıyor
+== Yardımcı karakter bağlanıyor
 
 Connect Dummy
-== Dummy Katıl
+== İkiz Katıl
 
 Deactivate
 == Devre dışı bırak
@@ -668,16 +668,16 @@ Automatically create statboard csv
 == Otomatik olarak skor tablosunu csv olarak oluştur
 
 Max CSVs
-== Maksimum CSVs
+== Maksimum CSVler
 
 Vanilla skins only
-== Sadece vanilla skinleri
+== Sadece vanilla kostümler
 
 Fat skins (DDFat)
-== Şişko skinler (DDFat)
+== Şişko kostümler (DDFat)
 
 Skin prefix
-== Skin sıfatı
+== Kostüm sıfatı
 
 Hook collisions
 == Kanca çizgisi
@@ -707,16 +707,16 @@ Toggle dyncam
 == Dinamik kamera
 
 Toggle dummy
-== Dummy kullan
+== İkiz kullan
 
 Toggle ghost
 == Hayaleti göster
 
 Dummy copy
-== Dummy kopyala
+== İkiz kopyala
 
 Hammerfly dummy
-== Çekiç uçuşu dummy
+== Çekiç uçuşu ikiz
 
 Converse
 == Konuşma
@@ -746,7 +746,7 @@ Enable gun sound
 == Silah sesini etkinleştir
 
 Enable long pain sound (used when shooting in freeze)
-== Uzun ağlama sesini etkinleştir (freeze iken ateş edince kullanılır)
+== Uzun ağlama sesini etkinleştir (donmada iken ateş edince kullanılır)
 
 Enable server message sound
 == Sunucu mesaj sesini etkinleştir
@@ -806,10 +806,10 @@ Normal message
 == Normal mesaj
 
 Client message
-== İstemci mesajı
+== Uygulama mesajı
 
 Save the best demo of each race
-== Her yarış için en iyi demoyu kaydet
+== Her yarış için en iyi kaydı kaydet
 
 Default length
 == Varsayılan uzunluk
@@ -851,7 +851,7 @@ AntiPing: predict weapons
 == AntiPing: silahları tahmin et
 
 AntiPing: predict grenade paths
-== AntiPing: el bombası yolunu tahmin et
+== AntiPing: bombaatar yolunu tahmin et
 
 Show other players' hook collision lines
 == Diğer oyuncuların kanca çizgisini göster
@@ -905,16 +905,16 @@ Best
 == En iyi
 
 Grabs
-== Yakalama
+== Yakalamalar
 
 1 new mention
-== 1 yeni bildirim
+== 1 yeni bahsetme
 
 %d new mentions
-== %d yeni bildirim
+== %d yeni bahsetme
 
 9+ new mentions
-== 9+ yeni bildirim
+== 9+ yeni bahsetme
 
 Manual
 == Manual
@@ -964,7 +964,7 @@ Could not initialize the given graphics backend, this is probably because you di
 == Verilen grafik işleyicisi başlatılamadı, muhtemelen dahili ekran kartının sürücülerini yüklemediğinizden kaynaklanıyor.
 
 Could not save downloaded map. Try manually deleting this file: %s
-== İndirilen map kaydedilemedi. Bu dosyayı manuel olarak silmeyi deneyin: %s
+== İndirilen harita kaydedilemedi. Bu dosyayı manuel olarak silmeyi deneyin: %s
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == %s dokusunun genişliği %d'ye veya yüksekliği %d'ye bölünmüyor, bu görsel hatalara neden olabilir.
@@ -973,7 +973,7 @@ The format of texture %s is not RGBA which will cause visual bugs.
 == %s dokusunun formatı RGBA değil, bu görsel hatalara neden olacak.
 
 Preparing demo playback
-== Demo oynatmaya hazırlanıyor
+== Kayıt oynatmaya hazırlanıyor
 
 Connected
 == Bağlanıldı
@@ -1057,7 +1057,7 @@ Checking for existing player with your name
 == Adınıza sahip diğer oyuncular aranıyor
 
 A demo with this name already exists
-== Bu ada sahip bir demo zaten var
+== Bu ada sahip bir kayıt zaten var
 
 A folder with this name already exists
 == Bu ada sahip bir klasör zaten var
@@ -1160,13 +1160,13 @@ Add Clan
 == Klan ekle
 
 Play the current demo
-== Demoyu oynat
+== Kaydı oynat
 
 Pause the current demo
-== Demoyu duraklat
+== Kaydı duraklat
 
 Stop the current demo
-== Demoyu durdur
+== Şu anki kaydı durdur
 
 Go back one tick
 == Bir tık geri git
@@ -1175,10 +1175,10 @@ Go forward one tick
 == Bir tık ileri git
 
 Slow down the demo
-== Demoyu yavaşlat
+== Kaydı yavaşlat
 
 Speed up the demo
-== Demoyu hızlandır
+== Kaydı hızlandır
 
 Mark the beginning of a cut (right click to reset)
 == Bir kesitin başlangıcını işaretleyin (sıfırlamak için sağ tıkla)
@@ -1187,7 +1187,7 @@ Mark the end of a cut (right click to reset)
 == Bir kesitin bitişini işaretleyin (sıfırlamak için sağ tıkla)
 
 Export cut as a separate demo
-== Kesiti ayrı bir demo olarak dışarı aktar
+== Kesiti ayrı bir kayıt olarak dışarı aktar
 
 Go back one marker
 == Bir işaret geri git
@@ -1196,7 +1196,7 @@ Go forward one marker
 == Bir işaret ileri git
 
 Close the demo player
-== Demo oynatıcısını kapat
+== Kayıt oynatıcısını kapat
 
 Toggle keyboard shortcuts
 == Klavye kısayollarını kullan
@@ -1211,7 +1211,7 @@ Cut length
 == Kesit uzunluğu
 
 Loading demo files
-== Demo dosyaları yükleniyor
+== Kayıt dosyaları yükleniyor
 
 All combined
 == Hepsi birlikte
@@ -1220,10 +1220,10 @@ Folder Link
 == Klasör Linki
 
 Demos directory
-== Demo klasörü
+== Kayıt klasörü
 
 Open the directory that contains the demo files
-== Demo dosyalarını içeren klasörü aç
+== kayıt dosyalarını içeren klasörü aç
 
 Are you sure that you want to delete the folder '%s'?
 == '%s' klasörünü silmek istediğine emin misin?
@@ -1235,7 +1235,7 @@ Delete folder
 == Klasörü sil
 
 Unable to delete the demo '%s'
-== '%s' demosu silinemiyor
+== '%s' kaydı silinemiyor
 
 Unable to delete the folder '%s'. Make sure it's empty first.
 == '%s' klasörü silinemiyor. Önce boş olduğundan emin olun.
@@ -1274,25 +1274,25 @@ Open the directory to add custom themes
 == Özel temalar eklemek için klasörü aç
 
 Loading skin files
-== Skin dosyaları yükleniyor
+== Kostüm dosyaları yükleniyor
 
 Download skins
-== Skinleri indir
+== Kostümleri indir
 
 Download community skins
-== Topluluk skinlerini indir
+== Topluluk kostümlerini indir
 
 Choose default eyes when joining a server
 == Bir sunucuya girerken kullanılacak varsayılan gözleri seçin
 
 Create a random skin
-== Rastgele skin oluştur
+== Rastgele kostüm oluştur
 
 Skin Database
-== Skin Veri Tabanı
+== Kostüm Veri Tabanı
 
 Skins directory
-== Skin klasörü
+== Kostüm klasörü
 
 Open the directory to add custom skins
 == Özel skinler eklemek için klasörü açın
@@ -1357,7 +1357,7 @@ Cancel
 == İptal et
 
 Dummy
-== Dummy
+== İkiz
 
 Windowed
 == Pencereli
@@ -1423,7 +1423,7 @@ Show jumps indicator
 == Kaç zıplama kaldığını göster
 
 Show dummy actions
-== Dummy aksiyonlarını göster
+== İkiz aksiyonlarını göster
 
 Show player position
 == Oyuncu pozisyonunu göster
@@ -1435,10 +1435,10 @@ Show player target angle
 == Oyuncu hedef açısını göster
 
 Show freeze bars
-== Freeze barını göster
+== Donma barını göster
 
 Opacity of freeze bars inside freeze
-== Freeze içerisindeyken freeze barının opaklığı
+== Donma içerisindeyken donma barının opaklığı
 
 Use old chat style
 == Eski sohbet stilini kullan
@@ -1498,10 +1498,10 @@ Door Laser Inner Color
 == Kapının Lazer İç Rengi
 
 Freeze Laser Outline Color
-== Freeze Lazeri Dış Rengi
+== Dondurucu Lazeri Dış Rengi
 
 Freeze Laser Inner Color
-== Freeze Lazeri İç Rengi
+== Dondurucu Lazeri İç Rengi
 
 Set all to Rifle
 == Hepsini tüfeğe göre ayarla
@@ -1589,7 +1589,7 @@ Play
 == Oyna
 
 Loading race demo files
-== Yarış demo dosyaları yükleniyor
+== Yarış kayıt dosyaları yükleniyor
 
 Super
 == Süper
@@ -1621,7 +1621,7 @@ Render cut to video
 == Kesiti videoya dönüştür
 
 Error playing demo
-== Demo oynatırken hata oluştu
+== Kayıt oynatırken hata oluştu
 
 Failed saving the replay!
 == Tekrar kaydedilemedi!
@@ -1708,7 +1708,7 @@ Please use a different filename
 == Farklı bir dosya adı kullanın
 
 No demo selected
-== Demo seçilmedi
+== Kayıt seçilmedi
 
 Created
 == Oluşturuldu
@@ -1832,22 +1832,22 @@ Connect address error
 == Bağlantı adresi hatası
 
 Could not connect dummy
-== Dummy bağlanamadı
+== ikiz bağlanamadı
 
 Dummy is not allowed on this server
-== Bu sunucuda dummy izin verilmiyor
+== Bu sunucuda ikiz izin verilmiyor
 
 Please wait…
 == Lütfen bekleyin…
 
 Show client IDs (scoreboard, chat, spectator)
-== İstemci ID'sini göster (skor tablosu, sohbet, izleyici)
+== Uygulama ID'sini göster (skor tablosu, sohbet, izleyici)
 
 Are you sure that you want to delete '%s'?
 == '%s' bunu silmek istediğine emin misin?
 
 Delete skin
-== Skini sil
+== Kostümü sil
 
 Basic
 == Basit
@@ -1856,19 +1856,19 @@ Custom
 == Özel
 
 Unable to delete skin
-== Skin silinemiyor
+== Kostüm silinemiyor
 
 Save skin
-== Skini kaydet
+== Kostümü kaydet
 
 Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== Skini kaydetmek istiyor musun? Bu isimde başka bir skin varsa, bu skin varolan skin yerine kaydedilecek.
+== Kostüm kaydetmek istiyor musun? Bu isimde başka bir kostüm varsa, bu skin varolan kostüm yerine kaydedilecek.
 
 Unable to save the skin
-== Skin kaydedilemiyor
+== Kostüm kaydedilemiyor
 
 Unable to save the skin with a reserved name
-== Skin kaydedilemiyor bu isimde zaten bir skin var
+== Kostüm kaydedilemiyor bu isimde zaten bir skin var
 
 No local servers found (ports %d-%d)
 == Yerel sunucu bulunamadı (bağlantı noktası %d-%d)
@@ -2045,7 +2045,7 @@ Disabled
 
 [Auto camera]
 Enabled
-== Etkin
+== Aktif
 
 [Auto camera]
 Unavailable for this player
@@ -2106,7 +2106,7 @@ Renders your frame rate in the top right
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Türkçe çeviri Learath2, ardadem, h-kaan, eghwand, Gokturk ve WarHammer tarafından yapıldı
+== Türkçe çeviri Learath2, ardadem, h-kaan, eghwand, Gokturk, WarHammer ve janpasak408 tarafından yapıldı
 
 Show spectator cursor
 == İzlenenin imlecini göster
@@ -2116,7 +2116,7 @@ Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom
 == VRAM bitmiş. 'cl_skins_loaded_max' değerini daha düşük bir değere ayarlamayı veya özel varlıkları (kaplamalar, varlıklar vb.), özellikle de yüksek çözünürlüklü olanları kaldırmayı deneyin.
 
 No demo with this filename exists
-== Bu isimle bir demo bulunmuyor
+== Bu isimle bir kayıt bulunmuyor
 
 This name cannot be used for files and folders
 == Bu isim dosya ve klasörler için kullanılamıyor
@@ -2128,13 +2128,13 @@ This skin name cannot be used.
 == Bu skin adı kullanılamıyor.
 
 Skin could not be loaded due to an error. Check the local console for details.
-== Skin bir sebepten dolayı yüklenemiyor. Detay için yerel konsolu kontrol et.
+== Kostüm bir sebepten dolayı yüklenemiyor. Detay için yerel konsolu kontrol et.
 
 Skin could not be found.
-== Skin bulunamadı.
+== Kostüm bulunamadı.
 
 No skins match your filter criteria
-== Kriterlerine uygun skinler bulunamadı
+== Kriterlerine uygun kostüm bulunamadı
 
 Show number of spectators
 == İzleyici sayısını göster
@@ -2162,10 +2162,10 @@ Show friend icon in name plates
 == Arkadaş ikonunu oyuncu isimlerinde göster
 
 Show client IDs on a seperate line
-== İstemci ID'lerini ayrı satırda göster
+== Uygulama ID'lerini ayrı satırda göster
 
 Client IDs size
-== İstemci ID boyutu
+== Uygulama ID boyutu
 
 Show players' key presses
 == Oyuncu tuş basımlarını göster
@@ -2190,13 +2190,13 @@ Preview player's name plate
 == Oyuncu ismini ön izle
 
 Preview dummy's name plate
-== Dummy ismini ön izle
+== İkiz ismini ön izle
 
 Dragger Outline Color
-== Dragger Ana hat Rengi
+== Sürükleyici Ana hat Rengi
 
 Dragger Inner Color
-== Dragger İç Rengi
+== Sürükleyici İç Rengi
 
 AntiPing: prediction margin
 == AntiPing: tahmin marjı
