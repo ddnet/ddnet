@@ -320,6 +320,7 @@ public:
 	std::optional<CSaveTee> m_LastDeath;
 
 	// <FoxNet
+	bool m_WeaponIndicator = true;
 	bool m_HideCosmetics = false;
 
 	CCosmetics m_Cosmetics;

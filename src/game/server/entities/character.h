@@ -333,6 +333,14 @@ public:
 	void SetCollidable(bool Active);
 
 	void VoteAction(const CNetMsg_Cl_Vote *pMsg, int ClientId);
+
+	// weapon indicator
+	void UpdateWeaponIndicator();
+	bool IsWeaponIndicator();
+	int64_t m_LastWeaponIndTick;
+	void SendBroadcastHud(const char *pMessage);
+	int NumDDraceHudRows();
+
 private:
 	vec2 m_HookBasePos = vec2(0, 0);
 	void OnPlayerHook();

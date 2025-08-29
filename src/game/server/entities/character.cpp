@@ -398,6 +398,9 @@ void CCharacter::DoWeaponSwitch()
 
 	// switch Weapon
 	SetWeapon(m_QueuedWeapon);
+	// <FoxNet
+	UpdateWeaponIndicator();
+	// FoxNet>
 }
 
 void CCharacter::HandleWeaponSwitch()
@@ -3324,4 +3327,110 @@ void CCharacter::VoteAction(const CNetMsg_Cl_Vote *pMsg, int ClientId)
 		if(Ability == ABILITY_FIREWORK)
 			new CFirework(GameWorld(), m_pPlayer->GetCid(), m_Pos);
 	}
+}
+
+int CCharacter::NumDDraceHudRows()
+{
+	if(Server()->IsSixup(m_pPlayer->GetCid()) || GameServer()->GetClientVersion(m_pPlayer->GetCid()) < VERSION_DDNET_NEW_HUD)
+		return 0;
+
+	CCharacter *pChr = this;
+	if((m_pPlayer->GetTeam() == TEAM_SPECTATORS || m_pPlayer->IsPaused()) && m_pPlayer->SpectatorId() >= 0 && GameServer()->GetPlayerChar(m_pPlayer->SpectatorId()))
+		pChr = GameServer()->GetPlayerChar(m_pPlayer->SpectatorId());
+
+	int Rows = 0;
+	if(pChr->Core()->m_EndlessJump || pChr->Core()->m_EndlessHook || pChr->Core()->m_Jetpack || pChr->Core()->m_HasTelegunGrenade || pChr->Core()->m_HasTelegunGun || pChr->Core()->m_HasTelegunLaser)
+		Rows++;
+	if(pChr->Core()->m_Solo || pChr->Core()->m_CollisionDisabled || pChr->Core()->m_Passive || pChr->Core()->m_HookHitDisabled || pChr->Core()->m_HammerHitDisabled || pChr->Core()->m_ShotgunHitDisabled || pChr->Core()->m_GrenadeHitDisabled || pChr->Core()->m_LaserHitDisabled)
+		Rows++;
+	if(Teams()->IsPractice(Team()) || Teams()->TeamLocked(Team()) || pChr->Core()->m_DeepFrozen || pChr->Core()->m_LiveFrozen)
+		Rows++;
+
+	return Rows;
+}
+
+void CCharacter::SendBroadcastHud(const char *pMessage)
+{
+	char aBuf[256] = "";
+	for(int i = 0; i < NumDDraceHudRows(); i++)
+		str_append(aBuf, "\n", sizeof(aBuf));
+
+	str_append(aBuf, pMessage, sizeof(aBuf));
+
+	if(!Server()->IsSixup(m_pPlayer->GetCid()))
+		for(int i = 0; i < 128; i++)
+			str_append(aBuf, " ", sizeof(aBuf));
+
+	GameServer()->SendBroadcast(aBuf, m_pPlayer->GetCid(), false);
+}
+
+bool CCharacter::IsWeaponIndicator()
+{
+	// 2 seconds of showing weapon indicator instead
+	return m_LastWeaponIndTick > Server()->Tick() - Server()->TickSpeed() * 2;
+}
+
+const char *GetWeaponName(int Weapon)
+{
+	switch(Weapon)
+	{
+	case -2:
+		return "Heart";
+	case -1:
+		return "Armor";
+	case WEAPON_HAMMER:
+		return "Hammer";
+	case WEAPON_GUN:
+		return "Gun";
+	case WEAPON_SHOTGUN:
+		return "Shotgun";
+	case WEAPON_GRENADE:
+		return "Grenade";
+	case WEAPON_LASER:
+		return "Laser";
+	case WEAPON_NINJA:
+		return "Ninja";
+	case WEAPON_TELEKINESIS:
+		return "Telekinesis";
+	case WEAPON_HEARTGUN:
+		return "Heart Gun";
+	}
+	return "Unknown";
+}
+
+void CCharacter::UpdateWeaponIndicator()
+{
+	if(!m_pPlayer->m_WeaponIndicator)
+		return;
+
+	char aAmmo[32] = "";
+	const char *pName = GetWeaponName(GetActiveWeapon());
+
+	char aBuf[256] = "";
+	if(!Server()->IsSixup(m_pPlayer->GetCid()))
+	{
+		if(GameServer()->GetClientVersion(m_pPlayer->GetCid()) < VERSION_DDNET_NEW_HUD)
+		{
+			str_format(aBuf, sizeof(aBuf), "Weapon: %s%s", pName, aAmmo);
+		}
+		else
+		{
+			if(GetActiveWeapon() >= NUM_WEAPONS)
+				str_format(aBuf, sizeof(aBuf), "> %s%s", pName, aAmmo);
+		}
+	}
+	else
+	{
+		str_format(aBuf, sizeof(aBuf), "> %s%s <", pName, aAmmo);
+	}
+
+	// dont update, when we change between vanilla weapons, so that no "" is being sent to remove another broadcast, for example a money broadcast
+	if(aBuf[0] || IsWeaponIndicator())
+	{
+		SendBroadcastHud(aBuf);
+	}
+
+	// dont update when vanilla weapon got triggered and we have new hud
+	if(aBuf[0])
+		m_LastWeaponIndTick = Server()->Tick();
 }
