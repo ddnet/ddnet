@@ -1,8 +1,9 @@
+#include <base/log.h>
 #include <base/system.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamecontext.h>
+#include <game/server/gamecontroller.h>
 #include <game/server/player.h>
-#include <base/log.h>
 
 void CGameContext::ConAccRegister(IConsole::IResult *pResult, void *pUserData)
 {
@@ -958,6 +959,41 @@ void CGameContext::ConIgnoreGameLayer(IConsole::IResult *pResult, void *pUserDat
 	pPlayer->SetIgnoreGameLayer(!pPlayer->m_IgnoreGamelayer);
 }
 
+void CGameContext::ConSetVanish(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientId;
+
+	if(pResult->GetInteger(0) == -1)
+		Victim = pResult->m_ClientId;
+
+	CPlayer *pPl = pSelf->m_apPlayers[Victim];
+
+	if(!pPl)
+		return;
+
+	pPl->m_Vanish = !pPl->m_Vanish;
+
+	if(pResult->GetInteger(1) == 1 || pSelf->Server()->QuietJoin(Victim)) // silent
+		return;
+
+	char PlayerInfo[512] = " (No Client Info)";
+	char aBuf[128];
+
+	if(!pPl->m_Vanish)
+	{
+		IServer::CClientInfo Info;
+		if(pSelf->Server()->GetClientInfo(Victim, &Info) && Info.m_GotDDNetVersion)
+			str_format(PlayerInfo, sizeof(PlayerInfo), "(%s %d)", pSelf->Server()->GetCustomClient(Victim), Info.m_DDNetVersion);
+
+		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s %s", pSelf->Server()->ClientName(Victim), pSelf->m_pController->GetTeamName(pPl->GetTeam()), PlayerInfo);
+	}
+	else
+		str_format(aBuf, sizeof(aBuf), "'%s' has left the game", pSelf->Server()->ClientName(Victim));
+
+	pSelf->SendChat(-1, 0, aBuf, -1, CGameContext::FLAG_SIX);
+}
+
 void CGameContext::ConSetPassive(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -1046,6 +1082,7 @@ void CGameContext::RegisterFoxNetCommands()
 	Console()->Register("set_afk", "v[id] ?i[afk]", CFGFLAG_SERVER, ConSetPlayerAfk, this, "Set a players (id) afk status");
 
 	Console()->Register("ignore_gamelayer", "?v[id]", CFGFLAG_SERVER, ConIgnoreGameLayer, this, "Turns off the kill-border for (id)");
+	Console()->Register("vanish", "?v[id]", CFGFLAG_SERVER, ConSetVanish, this, "Completely hide from everyone on the server");
 
 	Console()->Register("passive", "?v[id]", CFGFLAG_SERVER, ConSetPassive, this, "Put player (id) into passive");
 	Console()->Register("hittable", "?v[id]", CFGFLAG_SERVER, ConSetHittable, this, "whether player (id) can be hit by other players");
