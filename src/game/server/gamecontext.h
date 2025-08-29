@@ -765,6 +765,8 @@ private:
 	static void ConSetPlayerColorBody(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetPlayerAfk(IConsole::IResult *pResult, void *pUserData);
 
+	static void ConSetAbility(IConsole::IResult *pResult, void *pUserData);
+
 	static void ConSnake(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetUfo(IConsole::IResult *pResult, void *pUserData);
 

@@ -332,14 +332,24 @@ public:
 	void SetHookable(bool Active);
 	void SetCollidable(bool Active);
 
+	void VoteAction(const CNetMsg_Cl_Vote *pMsg, int ClientId);
 private:
 	vec2 m_HookBasePos = vec2(0, 0);
 	void OnPlayerHook();
 	float GetFireDelay(int Weapon);
 
 	void FoxNetTick();
+	enum
+	{
+		VOTE_F3 = 0,
+		VOTE_F4 = 1,
+	};
+	int64_t m_VoteActionDelay[2];
 	void HandleQuads(const CMapItemLayerQuads *pQuadLayer, int QuadIndex);
 	void HandleQuadStopa(const CMapItemLayerQuads *pQuadLayer, int QuadIndex);
+
+	void CreatePowerupExplosion(vec2 Pos, int ClientId, int Type);
+	void CreatePowerupCircle(vec2 Pos, int ClientId, int Type);
 	// FoxNet>
 };
 

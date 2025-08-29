@@ -22,6 +22,10 @@
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/server/teams.h>
+// <FoxNet
+#include <game/server/foxnet/cosmetics/firework.h>
+#include <game/server/foxnet/entities/custom_projectile.h>
+// FoxNet>
 
 MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
 
@@ -656,7 +660,17 @@ void CCharacter::FireWeapon()
 
 	case WEAPON_HEARTGUN:
 	{
-		GameServer()->CreateSound(m_Pos, SOUND_CHAT_CLIENT, TeamMask());
+		new CCustomProjectile(
+			GameWorld(),
+			m_pPlayer->GetCid(), // owner
+			ProjStartPos, // pos
+			Direction, // dir
+			false, // explosive
+			false, // freeze
+			false, // unfreeze
+			POWERUP_HEALTH // type
+		);
+		GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH, TeamMask());
 	}
 	break;
 		// FoxNet>
@@ -2928,17 +2942,17 @@ void CCharacter::DoTelekinesis()
 		CCharacter *pClosest = GameServer()->m_World.ClosestCharacter(GetCursorPos(), CCharacterCore::PhysicalSize() * zoom, this);
 		if(!pClosest)
 			return;
-
-		if((pClosest->IsAlive() && !CanCollide(pClosest->GetPlayer()->GetCid())))
+		if(!pClosest->IsAlive())
+			return;
+		if(pClosest->GetPlayer()->m_TelekinesisImmunity)
 			return;
 		m_TelekinesisId = pClosest->GetPlayer()->GetCid();
 	}
 	else
 		m_TelekinesisId = -1;
-	if(CheckClientId(m_TelekinesisId))
-		GameServer()->CreateSound(m_Pos, SOUND_NINJA_HIT, TeamMask());
+	GameServer()->CreateSound(m_Pos, SOUND_NINJA_HIT, TeamMask());
 
-	// VoteActionDelay[0] = Server()->Tick() + FireDelay * Server()->TickSpeed() / 1000;
+	m_VoteActionDelay[0] = Server()->Tick() + GetFireDelay(Core()->m_ActiveWeapon) * Server()->TickSpeed() / 1000;
 }
 
 vec2 CCharacter::GetCursorPos()
@@ -3202,4 +3216,112 @@ void CCharacter::SetHookable(bool Active)
 void CCharacter::SetCollidable(bool Active)
 {
 	m_Core.m_Collidable = Active;
+}
+
+void CCharacter::CreatePowerupExplosion(vec2 Pos, int ClientId, int Type)
+{
+	vec2 Direction;
+	float Amount = 8;
+
+	for(int Repeat = 1; Repeat < (int)Amount + 1; Repeat++)
+	{
+		Direction = direction(360.0f / Amount * Repeat * (pi / 180.0f));
+
+		new CCustomProjectile(
+			GameWorld(),
+			ClientId, // owner
+			Pos, // pos
+			Direction, // dir
+			false, // explosive
+			false, // freeze
+			false, // unfreeze
+			Type, // type
+			false, // Is Normal Weapon Type
+			6.0f, // Lifetime
+			1.0f, // Accel
+			10.0f // Speed
+		);
+	}
+	int Sound = Type + 24;
+	GameServer()->CreateSound(Pos, Sound, TeamMask());
+}
+
+void CCharacter::CreatePowerupCircle(vec2 Pos, int ClientId, int Type)
+{
+	vec2 Direction;
+	float LifeTime = 3.0f;
+	int Amount = 32;
+
+	float Random = random_float(0.0f, 2.0f);
+
+	for(int Repeat = 1; Repeat < Amount + 1; Repeat++)
+	{
+		float BetweenTime = (Amount / 2.0f) / 10.0f;
+		Direction = direction(360.0f / Amount * Repeat * (pi / 180.0f)) * 50;
+		LifeTime = 3.0f + Repeat / 10.0f;
+
+		if(Random > 1.0f)
+			LifeTime = 3.0f + BetweenTime - Repeat / 10.0f;
+
+		if(Repeat > Amount / 2) // this creates a little effect when its starts to dissapear
+		{
+			LifeTime = 3.0f + BetweenTime - (Amount - Repeat) / 10.0f;
+			if(Random > 1.0f)
+				LifeTime = 3.0f + (Amount - Repeat) / 10.0f;
+		}
+
+		new CCustomProjectile(
+			GameWorld(),
+			ClientId, // owner
+			Pos + Direction, // pos
+			-Direction, // dir
+			false, // explosive
+			false, // freeze
+			false, // unfreeze
+			Type, // type
+			false, // Is Normal Weapon Type
+			LifeTime, // Lifetime
+			0.98f, // Accel
+			4.00f // Speed
+		);
+	}
+	int Sound = Type + 24;
+	GameServer()->CreateSound(Pos, Sound, TeamMask());
+}
+
+void CCharacter::VoteAction(const CNetMsg_Cl_Vote *pMsg, int ClientId)
+{
+	int Ability = GetPlayer()->m_Cosmetics.m_Ability;
+	if(!Ability && GetActiveWeapon() != WEAPON_HEARTGUN)
+		return;
+
+	bool NoCooldown = Server()->GetAuthedState(ClientId) && g_Config.m_SvNoAuthCooldown;
+
+	bool F3 = pMsg->m_Vote == 1;
+	bool F4 = pMsg->m_Vote == -1;
+
+	if(F3 && (m_VoteActionDelay[VOTE_F3] < Server()->Tick() || NoCooldown))
+	{
+		m_VoteActionDelay[VOTE_F3] = Server()->Tick() + Server()->TickSpeed() * g_Config.m_SvAbilityCooldown;
+
+		// Heart "Explosion"
+		if(GetActiveWeapon() == WEAPON_HEARTGUN || Ability == ABILITY_HEART)
+			CreatePowerupExplosion(m_Pos, ClientId, POWERUP_HEALTH);
+		else if(Ability == ABILITY_SHIELD)
+			CreatePowerupExplosion(m_Pos, ClientId, POWERUP_ARMOR);
+		else if(Ability == ABILITY_TELEKINESIS)
+			DoTelekinesis();
+	}
+
+	if(F4 && (m_VoteActionDelay[VOTE_F4] < Server()->Tick() || NoCooldown))
+	{
+		m_VoteActionDelay[VOTE_F4] = Server()->Tick() + Server()->TickSpeed() * (g_Config.m_SvAbilityCooldown + 3.0f);
+
+		if(GetActiveWeapon() == WEAPON_HEARTGUN || Ability == ABILITY_HEART)
+			CreatePowerupCircle(GetCursorPos(), ClientId, POWERUP_HEALTH);
+		if(Ability == ABILITY_SHIELD)
+			CreatePowerupCircle(GetCursorPos(), ClientId, POWERUP_ARMOR);
+		if(Ability == ABILITY_FIREWORK)
+			new CFirework(GameWorld(), m_pPlayer->GetCid(), m_Pos);
+	}
 }

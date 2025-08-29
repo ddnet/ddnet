@@ -131,7 +131,6 @@ void CFirework::Snap(int SnappingClient)
 			pProj->m_VelX = m_aVel[i].x * 32;
 			pProj->m_VelY = m_aVel[i].x * 32;
 			pProj->m_Type = WEAPON_LASER;
-			pProj->m_Owner = m_Owner;
 		}
 	}
 }

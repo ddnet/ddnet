@@ -2800,6 +2800,8 @@ if(SERVER)
     foxnet/cosmetics/rotating_ball.h
     foxnet/cosmetics/staff_ind.cpp
     foxnet/cosmetics/staff_ind.h
+    foxnet/entities/custom_projectile.cpp
+    foxnet/entities/custom_projectile.h
     foxnet/fontconvert.cpp
     foxnet/fontconvert.h
     foxnet/gamecontext.cpp

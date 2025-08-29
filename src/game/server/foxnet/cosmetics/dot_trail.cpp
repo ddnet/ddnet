@@ -7,7 +7,7 @@
 #include <game/server/teams.h>
 
 CDotTrail::CDotTrail(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_CHARACTER, Pos)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_DOT_TRAIL, Pos)
 {
 	m_Owner = Owner;
 

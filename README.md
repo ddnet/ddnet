@@ -58,6 +58,7 @@
 |set_color_body|Set players custom body color|
 |set_color_feet|Set players custom feet color|
 |set_afk|Set players afk sate|
+|set_ability|Set a players ability|
 |ignore_gamelayer|Makes a player able to go beyond the kill border|
 |invisible|Hides a players character from everyone|
 |vanish|Make a player seem offline|

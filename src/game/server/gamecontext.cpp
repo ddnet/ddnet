@@ -2579,7 +2579,12 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 void CGameContext::OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId)
 {
 	if(!m_VoteCloseTime)
+	{	// <FoxNet
+		if(GetPlayerChar(ClientId))
+			GetPlayerChar(ClientId)->VoteAction(pMsg, ClientId);
+		// FoxNet>
 		return;
+	}
 
 	CPlayer *pPlayer = m_apPlayers[ClientId];
 
