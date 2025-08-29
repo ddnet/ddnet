@@ -772,6 +772,7 @@ private:
 
 	static void ConIgnoreGameLayer(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetVanish(IConsole::IResult *pResult, void *pUserData);
+	static void ConIncludeInServerInfo(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConSetPassive(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetHittable(IConsole::IResult *pResult, void *pUserData);
@@ -802,6 +803,8 @@ private:
 	static void ConToggleItem(IConsole::IResult *pResult, void *pUserData);
 
 public:
+	bool IncludedInServerInfo(int ClientId) override;
+
 	CAccountSession m_Account[MAX_CLIENTS];
 	CAccounts m_AccountManager;
 

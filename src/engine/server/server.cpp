@@ -2208,8 +2208,9 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 	int PlayerCount = 0, ClientCount = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(m_aClients[i].IncludedInServerInfo())
-		{
+		// <FoxNet
+		if(IncludedInServerInfo(i))
+		{ // FoxNet>
 			if(GameServer()->IsClientPlayer(i))
 				PlayerCount++;
 
@@ -2340,8 +2341,9 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(m_aClients[i].IncludedInServerInfo())
-		{
+		// <FoxNet
+		if(IncludedInServerInfo(i))
+		{ // FoxNet>
 			if(Remaining == 0)
 			{
 				if(Type == SERVERINFO_VANILLA || Type == SERVERINFO_INGAME)
@@ -2422,8 +2424,9 @@ void CServer::CacheServerInfoSixup(CCache *pCache, bool SendClients, int MaxCons
 	int PlayerCount = 0, ClientCount = 0, ClientCountAll = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(m_aClients[i].IncludedInServerInfo())
-		{
+		// <FoxNet
+		if(IncludedInServerInfo(i))
+		{ // FoxNet>
 			ClientCountAll++;
 			if(i < MaxConsideredClients)
 			{
@@ -2471,8 +2474,9 @@ void CServer::CacheServerInfoSixup(CCache *pCache, bool SendClients, int MaxCons
 	{
 		for(int i = 0; i < MaxConsideredClients; i++)
 		{
-			if(m_aClients[i].IncludedInServerInfo())
-			{
+			// <FoxNet
+			if(IncludedInServerInfo(i))
+			{ // FoxNet>
 				Packer.AddString(ClientName(i), MAX_NAME_LENGTH); // client name
 				Packer.AddString(ClientClan(i), MAX_CLAN_LENGTH); // client clan
 				Packer.AddInt(m_aClients[i].m_Country); // client country (ISO 3166-1 numeric)
@@ -2598,8 +2602,9 @@ void CServer::UpdateRegisterServerInfo()
 	int PlayerCount = 0, ClientCount = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(m_aClients[i].IncludedInServerInfo())
-		{
+		// <FoxNet
+		if(IncludedInServerInfo(i))
+		{ // FoxNet>
 			if(GameServer()->IsClientPlayer(i))
 				PlayerCount++;
 
@@ -2655,8 +2660,9 @@ void CServer::UpdateRegisterServerInfo()
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(m_aClients[i].IncludedInServerInfo())
-		{
+		// <FoxNet
+		if(IncludedInServerInfo(i))
+		{ // FoxNet>
 			JsonWriter.BeginObject();
 
 			JsonWriter.WriteAttribute("name");
@@ -4496,6 +4502,18 @@ void CServer::SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr
 }
 
 // <FoxNet
+bool CServer::IncludedInServerInfo(int ClientId)
+{
+	bool Include = true;
+	if(m_aClients[ClientId].m_State == CClient::STATE_EMPTY)
+		return Include = false;
+
+	if(!GameServer()->IncludedInServerInfo(ClientId))
+		Include = false;
+
+	return Include;
+}
+
 void CServer::OverrideClientName(int ClientId, const char *pName)
 {
 	dbg_assert(0 <= ClientId && ClientId < MAX_CLIENTS, "invalid client id");

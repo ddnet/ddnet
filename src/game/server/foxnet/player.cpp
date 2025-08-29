@@ -1,9 +1,9 @@
-﻿#include "../player.h"
-#include "../entities/character.h"
-#include "../gamecontext.h"
-#include "accounts.h"
-#include "shop.h"
-#include <game/generated/protocol.h>
+﻿#include <game/generated/protocol.h>
+#include <game/server/entities/character.h>
+#include <game/server/gamecontext.h>
+#include <game/server/player.h>
+
+#include <base/system.h>
 #include <string>
 
 #include "cosmetics/dot_trail.h"
@@ -16,6 +16,11 @@
 #include "cosmetics/pickup_pet.h"
 #include "cosmetics/rotating_ball.h"
 #include "cosmetics/staff_ind.h"
+
+#include "accounts.h"
+#include "shop.h"
+
+CAccountSession *CPlayer::Acc() { return &GameServer()->m_Account[m_ClientId]; }
 
 void CPlayer::FoxNetTick()
 {
@@ -32,9 +37,19 @@ void CPlayer::FoxNetTick()
 	}
 }
 
-CAccountSession *CPlayer::Acc()
+void CPlayer::FoxNetReset()
 {
-	return &GameServer()->m_Account[m_ClientId];
+	m_IncludeServerInfo = -1;
+	m_HideCosmetics = false;
+
+	m_ExtraPing = false;
+	m_Obfuscated = false;
+	m_Vanish = false;
+	m_IgnoreGamelayer = false;
+	m_TelekinesisImmunity = false;
+	m_SpiderHook = false;
+
+	m_Cosmetics = CCosmetics();
 }
 
 void CPlayer::GivePlaytime(int Amount)
@@ -65,7 +80,7 @@ void CPlayer::GiveXP(int64_t Amount, const char *pMessage)
 
 	if(pMessage[0])
 	{
-		str_format(aBuf, sizeof(aBuf), "+%lld XP %s%s", Amount, pMessage, ""); // IsDoubleXp ? " (doubled xp)" : "");
+		str_format(aBuf, sizeof(aBuf), "+%lld XP %s%s", Amount, pMessage, "");
 		GameServer()->SendChatTarget(m_ClientId, aBuf);
 	}
 

@@ -994,6 +994,31 @@ void CGameContext::ConSetVanish(IConsole::IResult *pResult, void *pUserData)
 	pSelf->SendChat(-1, 0, aBuf, -1, CGameContext::FLAG_SIX);
 }
 
+void CGameContext::ConIncludeInServerInfo(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientId;
+
+	if(pResult->GetInteger(0) == -1)
+		Victim = pResult->m_ClientId;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[Victim];
+	if(!pPlayer)
+		return;
+
+	int Include = pResult->NumArguments() > 1 ? pResult->GetInteger(1) : -2;
+
+	if(Include == -2)
+	{
+		pPlayer->m_IncludeServerInfo = pPlayer->m_IncludeServerInfo == 0 ? 1 : 0;
+	}
+	else
+	{
+		Include = std::clamp(Include, 0, 1);
+		pPlayer->m_IncludeServerInfo = Include;
+	}
+}
+
 void CGameContext::ConSetPassive(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -1083,6 +1108,7 @@ void CGameContext::RegisterFoxNetCommands()
 
 	Console()->Register("ignore_gamelayer", "?v[id]", CFGFLAG_SERVER, ConIgnoreGameLayer, this, "Turns off the kill-border for (id)");
 	Console()->Register("vanish", "?v[id]", CFGFLAG_SERVER, ConSetVanish, this, "Completely hide from everyone on the server");
+	Console()->Register("include_serverinfo", "v[id] ?i[include]", CFGFLAG_SERVER, ConIncludeInServerInfo, this, "whether a player should be in the serverinfo (true by default for everyone)");
 
 	Console()->Register("passive", "?v[id]", CFGFLAG_SERVER, ConSetPassive, this, "Put player (id) into passive");
 	Console()->Register("hittable", "?v[id]", CFGFLAG_SERVER, ConSetHittable, this, "whether player (id) can be hit by other players");

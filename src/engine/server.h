@@ -292,6 +292,7 @@ public:
 
 	virtual bool IsSixup(int ClientId) const = 0;
 	// <FoxNet
+	virtual bool DebugDummy(int ClientId) const = 0;
 	virtual void OverrideClientName(int ClientId, const char *pName) = 0;
 	virtual const char *GetCustomClient(int ClientId) = 0;
 	virtual bool QuietJoin(int ClientId) = 0;
@@ -393,6 +394,10 @@ public:
 	 * @param i The client id.
 	 */
 	virtual void OnUpdatePlayerServerInfo(CJsonStringWriter *pJSonWriter, int Id) = 0;
+
+	// <FoxNet
+	virtual bool IncludedInServerInfo(int ClientId) = 0;
+	// FoxNet>
 };
 
 extern IGameServer *CreateGameServer();

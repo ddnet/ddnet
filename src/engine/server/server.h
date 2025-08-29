@@ -200,10 +200,12 @@ public:
 
 		bool m_Sixup;
 
-		bool IncludedInServerInfo() const
-		{
-			return m_State != STATE_EMPTY && !m_DebugDummy;
-		}
+		// <FoxNet
+		//bool IncludedInServerInfo() const
+		//{
+		//	return m_State != STATE_EMPTY && !m_DebugDummy;
+		//}
+		// FoxNet>
 
 		int ConsoleAccessLevel() const
 		{
@@ -542,6 +544,9 @@ public:
 	void SendConnLoggingCommand(CONN_LOGGING_CMD Cmd, const NETADDR *pAddr);
 #endif
 	// <FoxNet
+	bool IncludedInServerInfo(int ClientId);
+	bool DebugDummy(int ClientId) const override { return m_aClients[ClientId].m_DebugDummy; }
+
 	void OverrideClientName(int ClientId, const char *pName) override;
 	const char *GetCustomClient(int ClientId) override { return m_aClients[ClientId].m_CustomClient; }
 	bool QuietJoin(int ClientId) override { return m_aClients[ClientId].m_QuietJoin; }

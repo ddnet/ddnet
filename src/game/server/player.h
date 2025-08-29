@@ -331,6 +331,7 @@ public:
 	bool m_IgnoreGamelayer = false;
 	bool m_TelekinesisImmunity = false;
 	bool m_SpiderHook = false;
+	int m_IncludeServerInfo;
 
 	CAccountSession *Acc();
 
@@ -388,6 +389,7 @@ public:
 	CPickupPet *m_pPickupPet;
 
 private:
+	void FoxNetReset();
 	void OverrideName(int SnappingClient, CNetObj_ClientInfo *pClientInfo);
 
 	int m_RainbowColor = 0;

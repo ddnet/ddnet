@@ -149,6 +149,9 @@ void CPlayer::Reset()
 	m_RescueMode = RESCUEMODE_AUTO;
 
 	m_CameraInfo.Reset();
+	// <FoxNet
+	FoxNetReset();
+	// FoxNet>
 }
 
 static int PlayerFlags_SixToSeven(int Flags)
