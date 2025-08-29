@@ -958,6 +958,8 @@ void CGameContext::ConIgnoreGameLayer(IConsole::IResult *pResult, void *pUserDat
 	pPlayer->SetIgnoreGameLayer(!pPlayer->m_IgnoreGamelayer);
 }
 
+
+
 void CGameContext::RegisterFoxNetCommands()
 {
 	Console()->Register("chat_string_add", "s[string] s[reason] i[should Ban] i[bantime] ?f[addition]", CFGFLAG_SERVER, ConAddChatDetectionString, this, "Add a string to the chat detection list");
@@ -981,6 +983,7 @@ void CGameContext::RegisterFoxNetCommands()
 	Console()->Register("set_color_feet", "v[id] i[color]", CFGFLAG_SERVER, ConSetPlayerColorFeet, this, "Set a players (id) Feet Color");
 	Console()->Register("set_afk", "v[id] ?i[afk]", CFGFLAG_SERVER, ConSetPlayerAfk, this, "Set a players (id) afk status");
 
+	Console()->Register("ignore_gamelayer", "?v[id]", CFGFLAG_SERVER, ConIgnoreGameLayer, this, "Turns off the kill-border for (id)");
 
 	Console()->Register("c_lovely", "?v[id]", CFGFLAG_SERVER, ConLovely, this, "Makes a player (id) Lovely");
 	Console()->Register("c_staff_ind", "?v[id]", CFGFLAG_SERVER, ConStaffInd, this, "Gives a player (id) a Staff Indicator");
