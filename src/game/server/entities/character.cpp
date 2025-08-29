@@ -3124,6 +3124,8 @@ void CCharacter::HandleQuadStopa(const CMapItemLayerQuads *pQuadLayer, int QuadI
 
 	float MinPenetration = std::numeric_limits<float>::infinity();
 	vec2 BestInwardNormal = vec2(0.0f, 0.0f);
+	int BestEdgeIdx = -1;
+	vec2 BestEdgeVec = vec2(0.0f, 0.0f);
 
 	for(int i = 0; i < 4; ++i)
 	{
@@ -3140,6 +3142,8 @@ void CCharacter::HandleQuadStopa(const CMapItemLayerQuads *pQuadLayer, int QuadI
 		{
 			MinPenetration = penetration;
 			BestInwardNormal = N_in;
+			BestEdgeIdx = i;
+			BestEdgeVec = E;
 		}
 	}
 
@@ -3201,6 +3205,25 @@ void CCharacter::HandleQuadStopa(const CMapItemLayerQuads *pQuadLayer, int QuadI
 			m_Core.m_Vel.x = 0.0f;
 		if(AppliedY.y == 0.0f && MTV.y != 0.0f)
 			m_Core.m_Vel.y = 0.0f;
+
+		if(g_Config.m_SvQStopaGivesDj && BestEdgeIdx >= 0)
+		{
+			const float NormalThresh = 0.35f;
+			const float SlopeThresh = 0.60f;
+
+			float edgeLen = length(BestEdgeVec);
+			float edgeSlope = edgeLen > 1e-6f ? absolute(BestEdgeVec.y) / edgeLen : 1.0f;
+			bool IsFloorNormal = (BestInwardNormal.y >= NormalThresh);
+			bool IsFlatEnough = (edgeSlope <= SlopeThresh);
+			bool PushedUp = (AppliedY.y < 0.0f);
+			bool WasFallingOrRest = (m_Core.m_Vel.y >= 0.0f);
+
+			if(IsFloorNormal && IsFlatEnough && PushedUp && WasFallingOrRest)
+			{
+				m_Core.m_Jumped = 0;
+				m_Core.m_JumpedTotal = 0;
+			}
+		}
 	}
 }
 
