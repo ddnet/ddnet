@@ -59,6 +59,7 @@
 |set_color_feet|Set players custom feet color|
 |set_afk|Set players afk sate|
 |ignore_gamelayer|Makes a player able to go beyond the kill border|
+|invisible|Hides a players character from everyone|
 |vanish|Make a player seem offline|
 |include_serverinfo|Whether to include a player in the serverinfo|
 |redirect|Redirect a player to another server|
@@ -66,6 +67,7 @@
 |hittable|Makes this player unhittable|
 |hookable|Makes this player unable to be hooked by other players|
 |collidable|Makes this player unable to be moved with other player collisions|
+|set_tune_override|Set a players tune override|
 
 |Chat Commands|Description|
 |-|-|

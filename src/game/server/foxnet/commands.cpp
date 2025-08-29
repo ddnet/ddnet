@@ -1110,6 +1110,25 @@ void CGameContext::ConSetCollidable(IConsole::IResult *pResult, void *pUserData)
 	pChr->SetCollidable(!pChr->Core()->m_Collidable);
 }
 
+void CGameContext::ConSetTuneOverride(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int Victim = pResult->m_ClientId;
+	if(pResult->NumArguments() > 1)
+		Victim = pResult->GetVictim();
+
+	if(pResult->GetInteger(1) == -1)
+		Victim = pResult->m_ClientId;
+
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+
+	if(!pChr)
+		return;
+
+	pChr->SetTuneOverride(pResult->GetInteger(0));
+}
+
 void CGameContext::RegisterFoxNetCommands()
 {
 	Console()->Register("chat_string_add", "s[string] s[reason] i[should Ban] i[bantime] ?f[addition]", CFGFLAG_SERVER, ConAddChatDetectionString, this, "Add a string to the chat detection list");
@@ -1144,6 +1163,8 @@ void CGameContext::RegisterFoxNetCommands()
 	Console()->Register("hittable", "?v[id]", CFGFLAG_SERVER, ConSetHittable, this, "whether player (id) can be hit by other players");
 	Console()->Register("hookable", "?v[id]", CFGFLAG_SERVER, ConSetHookable, this, "whether player (id) can be hooked by other players");
 	Console()->Register("collidable", "?v[id]", CFGFLAG_SERVER, ConSetCollidable, this, "whether player (id) can collide with others");
+
+	Console()->Register("set_tune_override", "i[zone] ?v[id]", CFGFLAG_SERVER, ConSetTuneOverride, this, "Sets the tune override for the player (id)");
 
 	Console()->Register("c_lovely", "?v[id]", CFGFLAG_SERVER, ConLovely, this, "Makes a player (id) Lovely");
 	Console()->Register("c_staff_ind", "?v[id]", CFGFLAG_SERVER, ConStaffInd, this, "Gives a player (id) a Staff Indicator");
