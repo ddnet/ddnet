@@ -1,5 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <base/log.h>
 #include <base/math.h>
 #include <base/system.h>
 
@@ -26,7 +27,9 @@ static const unsigned char gs_OldVersion = 3;
 static const unsigned char gs_Sha256Version = 6;
 static const unsigned char gs_VersionTickCompression = 5; // demo files with this version or higher will use `CHUNKTICKFLAG_TICK_COMPRESSED`
 
+// TODO: rewrite all logs in this file using log_log_color, and remove gs_DemoPrintColor and m_pConsole
 static constexpr ColorRGBA gs_DemoPrintColor{0.75f, 0.7f, 0.7f, 1.0f};
+static constexpr LOG_COLOR DEMO_PRINT_COLOR = {191, 178, 178};
 
 bool CDemoHeader::Valid() const
 {
@@ -61,6 +64,12 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 
 	m_pConsole = pConsole;
 	m_pStorage = pStorage;
+
+	if(!str_valid_filename(fs_filename(pFilename)))
+	{
+		log_error_color(DEMO_PRINT_COLOR, "demo_recorder", "The name '%s' cannot be used for demos because not all platforms support it", pFilename);
+		return -1;
+	}
 
 	IOHANDLE DemoFile = pStorage->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	if(!DemoFile)
