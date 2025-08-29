@@ -61,6 +61,7 @@
 |ignore_gamelayer|Makes a player able to go beyond the kill border|
 |vanish|Make a player seem offline|
 |include_serverinfo|Whether to include a player in the serverinfo|
+|redirect|Redirect a player to another server|
 |passive|Make a player unable to interact with other players|
 |hittable|Makes this player unhittable|
 |hookable|Makes this player unable to be hooked by other players|

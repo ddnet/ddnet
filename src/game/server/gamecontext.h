@@ -773,6 +773,7 @@ private:
 	static void ConIgnoreGameLayer(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetVanish(IConsole::IResult *pResult, void *pUserData);
 	static void ConIncludeInServerInfo(IConsole::IResult *pResult, void *pUserData);
+	static void ConRedirectClient(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConSetPassive(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetHittable(IConsole::IResult *pResult, void *pUserData);
