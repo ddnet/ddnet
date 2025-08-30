@@ -6,6 +6,7 @@
 #include <engine/shared/protocol.h>
 
 #include <game/client/component.h>
+#include <game/generated/protocol.h>
 
 enum class EHookStrongWeakState
 {
@@ -56,7 +57,7 @@ public:
 	void OnWindowResize() override;
 	void OnRender() override;
 	CNamePlates();
-	~CNamePlates();
+	~CNamePlates() override;
 };
 
 #endif
