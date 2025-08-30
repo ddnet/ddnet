@@ -78,11 +78,11 @@ float CConsole::CResult::GetFloat(unsigned Index) const
 	return str_tofloat(m_apArgs[Index], &Out) ? Out : 0.0f;
 }
 
-std::optional<ColorHSLA> CConsole::CResult::GetColor(unsigned Index, float DarkestLighting) const
+ColorHSLA CConsole::CResult::GetColor(unsigned Index, float DarkestLighting) const
 {
 	if(Index >= m_NumArgs)
-		return std::nullopt;
-	return ColorParse(m_apArgs[Index], DarkestLighting);
+		return ColorHSLA(0, 0, 0);
+	return ColorParse(m_apArgs[Index], DarkestLighting).value_or(ColorHSLA(0, 0, 0));
 }
 
 void CConsole::CCommand::SetAccessLevel(EAccessLevel AccessLevel)
@@ -287,7 +287,6 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat, bool IsColor)
 				}
 				if(Command == 'i')
 				{
-					// don't validate colors here
 					if(!IsColor)
 					{
 						int Value;
