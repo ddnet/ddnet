@@ -263,3 +263,48 @@ TEST_F(CTestGameWorld, BasicTick)
 
 	GameServer()->OnTick();
 }
+
+TEST_F(CTestGameWorld, CharacterEmote)
+{
+	int ClientId = 0;
+	bool Afk = true;
+	int LastWhisperTo = -1;
+	GameServer()->CreatePlayer(ClientId, TEAM_RED, Afk, LastWhisperTo);
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	pPlayer->ForceSpawn(vec2(0, 0));
+	CCharacter *pChr = pPlayer->GetCharacter();
+	ASSERT_NE(pChr, nullptr);
+
+	// afk
+	pPlayer->SetAfk(true);
+	ASSERT_EQ(pChr->DetermineEyeEmote(), EMOTE_BLINK);
+
+	// not afk
+	pPlayer->SetAfk(false);
+	ASSERT_EQ(pChr->DetermineEyeEmote(), EMOTE_NORMAL);
+
+	// frozen
+	pChr->Freeze(10);
+	ASSERT_EQ(pChr->DetermineEyeEmote(), EMOTE_BLINK);
+
+	// frozen and paused
+	pPlayer->Pause(CPlayer::PAUSE_PAUSED, true);
+	ASSERT_EQ(pChr->DetermineEyeEmote(), EMOTE_NORMAL);
+
+	// ninja jetpack
+	pPlayer->Pause(CPlayer::PAUSE_NONE, true);
+	pChr->UnFreeze();
+	pPlayer->m_NinjaJetpack = true;
+	pChr->m_NinjaJetpack = true;
+	pChr->SetJetpack(true);
+	pChr->SetActiveWeapon(WEAPON_GUN);
+	ASSERT_EQ(pChr->DetermineEyeEmote(), EMOTE_HAPPY);
+
+	// /emote angry 3 chat command
+	pChr->SetEmote(EMOTE_ANGRY, GameServer()->Server()->Tick() + GameServer()->Server()->TickSpeed() * 3);
+	ASSERT_EQ(pChr->DetermineEyeEmote(), EMOTE_ANGRY);
+
+	// /emote angry 3 chat command and frozen
+	pChr->Freeze(10);
+	ASSERT_EQ(pChr->DetermineEyeEmote(), EMOTE_ANGRY);
+}
