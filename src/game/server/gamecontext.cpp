@@ -3837,7 +3837,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("say", "r[message]", CFGFLAG_SERVER, ConSay, this, "Say in chat");
 	Console()->Register("set_team", "i[id] i[team-id] ?i[delay in minutes]", CFGFLAG_SERVER, ConSetTeam, this, "Set team of player to team");
 	Console()->Register("set_team_all", "i[team-id]", CFGFLAG_SERVER, ConSetTeamAll, this, "Set team of all players to team");
-	Console()->Register("hot_reload", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConHotReload, this, "Reload the map while preserving the state of tees and teams");
+	Console()->Register("hot_reload", "", CFGFLAG_SERVER, ConHotReload, this, "Reload the map while preserving the state of tees and teams");
 	Console()->Register("reload_censorlist", "", CFGFLAG_SERVER, ConReloadCensorlist, this, "Reload the censorlist");
 
 	Console()->Register("add_vote", "s[name] r[command]", CFGFLAG_SERVER, ConAddVote, this, "Add a voting option");
@@ -3906,8 +3906,8 @@ void CGameContext::RegisterDDRaceCommands()
 	Console()->Register("up", "?i[tiles] ?v[id]", CFGFLAG_SERVER, ConGoUp, this, "Makes you move 1 tile up");
 	Console()->Register("down", "?i[tiles] ?v[id]", CFGFLAG_SERVER, ConGoDown, this, "Makes you move 1 tile down");
 
-	Console()->Register("move", "i[x] i[y]", CFGFLAG_SERVER | CMDFLAG_TEST, ConMove, this, "Moves to the tile with x/y-number ii");
-	Console()->Register("move_raw", "i[x] i[y]", CFGFLAG_SERVER | CMDFLAG_TEST, ConMoveRaw, this, "Moves to the point with x/y-coordinates ii");
+	Console()->Register("move", "i[x] i[y] ?v[id]", CFGFLAG_SERVER, ConMove, this, "Moves to the tile with x/y-number ii");
+	Console()->Register("move_raw", "i[x] i[y] ?v[id]", CFGFLAG_SERVER, ConMoveRaw, this, "Moves to the point with x/y-coordinates ii");
 	Console()->Register("force_pause", "v[id] i[seconds]", CFGFLAG_SERVER, ConForcePause, this, "Force i to pause for i seconds");
 	Console()->Register("force_unpause", "v[id]", CFGFLAG_SERVER, ConForcePause, this, "Set force-pause timer of i to 0.");
 

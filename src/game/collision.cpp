@@ -1303,7 +1303,6 @@ size_t CCollision::TeleAllSize(int Number)
 	return Total;
 }
 // <FoxNet
-
 void CCollision::ClearQuadLayers()
 {
 	m_vQuadLayers.clear();
@@ -1590,7 +1589,6 @@ void CCollision::GetAnimationTransform(float GlobalTime, int Env, CLayers *pLaye
 
 bool CCollision::InsideQuad(vec2 Pos, float Radius, vec2 TopLCorner, vec2 TopRCorner, vec2 BottomLCorner, vec2 BottomRCorner) const
 {
-	// Helper: point-in-quad (convex, CCW)
 	auto IsLeft = [](const vec2 &A, const vec2 &B, const vec2 &P) -> bool {
 		return ((B.x - A.x) * (P.y - A.y) - (B.y - A.y) * (P.x - A.x)) >= 0.0f;
 	};
@@ -1604,7 +1602,6 @@ bool CCollision::InsideQuad(vec2 Pos, float Radius, vec2 TopLCorner, vec2 TopRCo
 	if(inside)
 		return true;
 
-	// Helper: circle-line segment intersection
 	auto CircleIntersectsSegment = [](const vec2 &C, float R, const vec2 &A, const vec2 &B) -> bool {
 		vec2 AB = B - A;
 		vec2 AC = C - A;
@@ -1613,7 +1610,6 @@ bool CCollision::InsideQuad(vec2 Pos, float Radius, vec2 TopLCorner, vec2 TopRCo
 		return distance(C, Closest) <= R;
 	};
 
-	// Check intersection with each edge
 	if(CircleIntersectsSegment(Pos, Radius, TopLCorner, TopRCorner))
 		return true;
 	if(CircleIntersectsSegment(Pos, Radius, TopRCorner, BottomRCorner))
@@ -1623,7 +1619,6 @@ bool CCollision::InsideQuad(vec2 Pos, float Radius, vec2 TopLCorner, vec2 TopRCo
 	if(CircleIntersectsSegment(Pos, Radius, BottomLCorner, TopLCorner))
 		return true;
 
-	// Optionally: check if any corner is inside the circle
 	if(distance(Pos, TopLCorner) <= Radius)
 		return true;
 	if(distance(Pos, TopRCorner) <= Radius)
@@ -1635,3 +1630,4 @@ bool CCollision::InsideQuad(vec2 Pos, float Radius, vec2 TopLCorner, vec2 TopRCo
 
 	return false;
 }
+// FoxNet>
