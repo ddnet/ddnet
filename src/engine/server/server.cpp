@@ -2830,6 +2830,11 @@ int CServer::LoadMap(const char *pMapName)
 
 	char aBuf[IO_MAX_PATH_LENGTH];
 	str_format(aBuf, sizeof(aBuf), "maps/%s.map", pMapName);
+	if(!str_valid_filename(fs_filename(aBuf)))
+	{
+		log_error("server", "The name '%s' cannot be used for maps because not all platforms support it", aBuf);
+		return 0;
+	}
 	if(!GameServer()->OnMapChange(aBuf, sizeof(aBuf)))
 	{
 		return 0;
