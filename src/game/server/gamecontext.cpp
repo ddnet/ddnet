@@ -4604,8 +4604,7 @@ void CGameContext::OnSnap(int ClientId, bool GlobalSnap)
 		m_Events.Snap(ClientId);
 	}
 	// <FoxNet
-	SnapLaserEffect(ClientId);
-	SnapDebuggedQuad(ClientId);
+	FoxNetSnap(ClientId, GlobalSnap);
 	// FoxNet>
 }
 

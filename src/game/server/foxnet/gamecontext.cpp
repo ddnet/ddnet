@@ -12,6 +12,7 @@
 #include <game/collision.h>
 #include <game/gamecore.h>
 #include <game/mapitems.h>
+#include <game/generated/protocol.h>
 
 void CGameContext::FoxNetTick()
 {
@@ -61,6 +62,61 @@ void CGameContext::FoxNetTick()
 	if(Server()->Tick() % (Server()->TickSpeed() * 60 * 15) == 0)
 	{
 		m_AccountManager.SaveAllAccounts();
+	}
+
+	for(auto it = m_vFakeSnapPlayers.begin(); it != m_vFakeSnapPlayers.end();)
+	{
+		if(it->m_State == 2)
+		{
+			it = m_vFakeSnapPlayers.erase(it);
+			continue;
+		}
+		if(it->m_State == 1)
+		{
+			const int Id = it->m_Id;
+			CNetMsg_Sv_Chat Msg;
+			Msg.m_Team = 0;
+			Msg.m_ClientId = Id;
+			Msg.m_pMessage = it->m_aMessage;
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
+			it->m_State = 2;
+		}
+		++it;
+	}
+}
+
+void CGameContext::FoxNetSnap(int ClientId, bool GlobalSnap)
+{
+	SnapLaserEffect(ClientId);
+	SnapDebuggedQuad(ClientId);
+
+	// Snap the Fake Player
+	for(auto it = m_vFakeSnapPlayers.begin(); it != m_vFakeSnapPlayers.end();)
+	{
+		const int Id = it->m_Id;
+
+		if(auto *pInfo = Server()->SnapNewItem<CNetObj_ClientInfo>(Id))
+		{
+			StrToInts(pInfo->m_aName, std::size(pInfo->m_aName), it->m_aName);
+			StrToInts(pInfo->m_aClan, std::size(pInfo->m_aClan), it->m_aClan);
+			pInfo->m_Country = it->m_Country;
+			StrToInts(pInfo->m_aSkin, std::size(pInfo->m_aSkin), it->m_aSkinName);
+			pInfo->m_UseCustomColor = it->m_CustomColors;
+			pInfo->m_ColorBody = it->m_ColorBody;
+			pInfo->m_ColorFeet = it->m_ColorFeet;
+		}
+
+		if(auto *pPI = Server()->SnapNewItem<CNetObj_PlayerInfo>(Id))
+		{
+			pPI->m_Latency = 0;
+			pPI->m_Score = 0;
+			pPI->m_Team = TEAM_SPECTATORS;
+			pPI->m_Local = 0;
+			pPI->m_ClientId = Id;
+		}
+		if(!it->m_State)
+			it->m_State = 1;
+		++it;
 	}
 }
 
@@ -742,4 +798,37 @@ bool CGameContext::IncludedInServerInfo(int ClientId)
 	}
 
 	return Included;
+}
+bool CGameContext::AddFakeMessage(const char *pName, const char *pMessage, const char *pSkinName, bool CustomColor, int ColorBody, int ColorFeet)
+{
+	if(!pName[0] || !pMessage[0])
+		return false;
+
+	static int LastUsedId = -1;
+
+	int FreeId = -1;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(!m_apPlayers[i] && Server()->ClientSlotEmpty(i) && LastUsedId != i)
+		{
+			FreeId = i;
+			break;
+		}
+	}
+	if(FreeId == -1)
+		return false; // no free visual slot
+	LastUsedId = FreeId;
+	CFakeSnapPlayer FakeSnap;
+	FakeSnap.m_Id = FreeId;
+	str_copy(FakeSnap.m_aName, pName);
+	FakeSnap.m_aClan[0] = '\0';
+	FakeSnap.m_Country = -1;
+	str_copy(FakeSnap.m_aSkinName, pSkinName ? pSkinName : "default");
+	FakeSnap.m_CustomColors = CustomColor;
+	FakeSnap.m_ColorBody = ColorBody;
+	FakeSnap.m_ColorFeet = ColorFeet;
+	str_copy(FakeSnap.m_aMessage, pMessage);
+
+	m_vFakeSnapPlayers.push_back(FakeSnap);
+	return true;
 }

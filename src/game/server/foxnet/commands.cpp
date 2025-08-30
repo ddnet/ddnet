@@ -1230,6 +1230,14 @@ void CGameContext::ConSetSpiderHook(IConsole::IResult *pResult, void *pUserData)
 	pPlayer->m_SpiderHook = !pPlayer->m_SpiderHook;
 }
 
+void CGameContext::ConSendFakeMessage(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	const char *pName = pResult->GetString(0);
+	const char *pMsg = pResult->GetString(1);
+	pSelf->AddFakeMessage(pName, pMsg, "Robot");
+}
+
 void CGameContext::RegisterFoxNetCommands()
 {
 	Console()->Register("chat_string_add", "s[string] s[reason] i[should Ban] i[bantime] ?f[addition]", CFGFLAG_SERVER, ConAddChatDetectionString, this, "Add a string to the chat detection list");
@@ -1275,6 +1283,8 @@ void CGameContext::RegisterFoxNetCommands()
 	Console()->Register("heartgun", "?v[id]", CFGFLAG_SERVER, ConHeartGun, this, "Gives/Takes telekinses to player (id)");
 
 	Console()->Register("spider_hook", "?v[id]", CFGFLAG_SERVER, ConSetSpiderHook, this, "whether player (id) has spider hook");
+
+	Console()->Register("fake_message", "s[name] r[msg]", CFGFLAG_SERVER, ConSendFakeMessage, this, "Sends a message as a fake player with that name");
 
 	Console()->Register("c_lovely", "?v[id]", CFGFLAG_SERVER, ConLovely, this, "Makes a player (id) Lovely");
 	Console()->Register("c_staff_ind", "?v[id]", CFGFLAG_SERVER, ConStaffInd, this, "Gives a player (id) a Staff Indicator");

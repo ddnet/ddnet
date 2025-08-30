@@ -715,6 +715,7 @@ private:
 	std::vector<CStringDetection> m_NameDetection;
 
 	void FoxNetTick();
+	void FoxNetSnap(int ClientId, bool GlobalSnap);
 	void RegisterFoxNetCommands();
 	void SnapDebuggedQuad(int ClientId);
 	void QuadDebugIds(bool Clear);
@@ -814,6 +815,28 @@ private:
 	static void ConShopBuyItem(IConsole::IResult *pResult, void *pUserData);
 	static void ConToggleItem(IConsole::IResult *pResult, void *pUserData);
 
+	static void ConSendFakeMessage(IConsole::IResult *pResult, void *pUserData);
+
+	struct CFakeSnapPlayer
+	{
+		int m_Id;
+
+		char m_aName[16];
+		char m_aClan[12];
+		int m_Country;
+
+		bool m_CustomColors;
+		char m_aSkinName[24];
+		int m_ColorBody;
+		int m_ColorFeet;
+
+		char m_aMessage[256];
+
+		int m_State = 0;
+	};
+
+	std::vector<CFakeSnapPlayer> m_vFakeSnapPlayers;
+
 public:
 	bool IncludedInServerInfo(int ClientId) override;
 
@@ -844,6 +867,8 @@ public:
 	void OnLogout(int ClientId);
 
 	void Explosion(vec2 Pos, CClientMask Mask);
+
+	bool AddFakeMessage(const char *pName, const char *pMessage, const char *pSkinName, bool CustomColor = false, int ColorBody = 0, int ColorFeet = 0);
 
 	int GetWeaponType(int Weapon);
 	// FoxNet>
