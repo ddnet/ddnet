@@ -9,7 +9,7 @@
 #include <engine/map.h>
 #include <engine/shared/protocol.h>
 
-#include <game/generated/protocol7.h>
+#include <generated/protocol7.h>
 
 #include "kernel.h"
 

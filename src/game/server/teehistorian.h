@@ -4,7 +4,7 @@
 #include <base/hash.h>
 #include <engine/console.h>
 #include <engine/shared/protocol.h>
-#include <game/generated/protocol.h>
+#include <generated/protocol.h>
 
 #include <ctime>
 

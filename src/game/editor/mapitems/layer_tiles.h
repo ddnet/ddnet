@@ -17,12 +17,16 @@ struct STileStateChange
 template<typename T>
 using EditorTileStateChangeHistory = std::map<int, std::map<int, T>>;
 
-enum
+/**
+ * Represents a direction to shift a tile layer with the CLayerTiles::Shift function.
+ * The underlying type is `int` as this is also used with the CEditor::DoPropertiesWithState function.
+ */
+enum class EShiftDirection : int
 {
-	DIRECTION_LEFT = 0,
-	DIRECTION_RIGHT,
-	DIRECTION_UP,
-	DIRECTION_DOWN,
+	LEFT,
+	RIGHT,
+	UP,
+	DOWN,
 };
 
 struct RECTi
@@ -35,11 +39,11 @@ class CLayerTiles : public CLayer
 {
 protected:
 	template<typename T>
-	void ShiftImpl(T *pTiles, int Direction, int ShiftBy)
+	void ShiftImpl(T *pTiles, EShiftDirection Direction, int ShiftBy)
 	{
 		switch(Direction)
 		{
-		case DIRECTION_LEFT:
+		case EShiftDirection::LEFT:
 			ShiftBy = minimum(ShiftBy, m_Width);
 			for(int y = 0; y < m_Height; ++y)
 			{
@@ -48,7 +52,7 @@ protected:
 				mem_zero(&pTiles[y * m_Width + (m_Width - ShiftBy)], ShiftBy * sizeof(T));
 			}
 			break;
-		case DIRECTION_RIGHT:
+		case EShiftDirection::RIGHT:
 			ShiftBy = minimum(ShiftBy, m_Width);
 			for(int y = 0; y < m_Height; ++y)
 			{
@@ -57,7 +61,7 @@ protected:
 				mem_zero(&pTiles[y * m_Width], ShiftBy * sizeof(T));
 			}
 			break;
-		case DIRECTION_UP:
+		case EShiftDirection::UP:
 			ShiftBy = minimum(ShiftBy, m_Height);
 			for(int y = ShiftBy; y < m_Height; ++y)
 			{
@@ -68,7 +72,7 @@ protected:
 				mem_zero(&pTiles[y * m_Width], m_Width * sizeof(T));
 			}
 			break;
-		case DIRECTION_DOWN:
+		case EShiftDirection::DOWN:
 			ShiftBy = minimum(ShiftBy, m_Height);
 			for(int y = m_Height - ShiftBy - 1; y >= 0; --y)
 			{
@@ -78,6 +82,9 @@ protected:
 			{
 				mem_zero(&pTiles[y * m_Width], m_Width * sizeof(T));
 			}
+			break;
+		default:
+			dbg_assert(false, "Direction invalid: %d", (int)Direction);
 			break;
 		}
 	}
@@ -106,7 +113,7 @@ public:
 	void SetTileIgnoreHistory(int x, int y, CTile Tile) const;
 
 	virtual void Resize(int NewW, int NewH);
-	virtual void Shift(int Direction);
+	virtual void Shift(EShiftDirection Direction);
 
 	void MakePalette() const;
 	void Render(bool Tileset = false) override;

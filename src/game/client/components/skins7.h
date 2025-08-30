@@ -9,10 +9,11 @@
 #include <engine/client/enums.h>
 #include <engine/graphics.h>
 
+#include <generated/protocol.h>
+#include <generated/protocol7.h>
+
 #include <game/client/component.h>
 #include <game/client/render.h>
-#include <game/generated/protocol.h>
-#include <game/generated/protocol7.h>
 
 #include <chrono>
 #include <vector>

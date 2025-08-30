@@ -36,7 +36,7 @@ def output_map_source(name, m):
 def main():
 	map_header = "map_header" in sys.argv
 	map_source = "map_source" in sys.argv
-	guard = "GAME_GENERATED_PROTOCOLGLUE"
+	guard = "GENERATED_PROTOCOLGLUE_H"
 	if map_header:
 		print("#ifndef " + guard)
 		print("#define " + guard)

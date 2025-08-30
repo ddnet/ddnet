@@ -14,6 +14,7 @@ using offset_ptr32 = unsigned int;
 #include <base/color.h>
 #include <engine/graphics.h>
 
+#include <game/map/envelope_manager.h>
 #include <game/map/render_component.h>
 #include <game/map/render_map.h>
 #include <game/mapitems.h>
@@ -41,6 +42,7 @@ public:
 	bool m_RenderInvalidTiles;
 	bool m_TileAndQuadBuffering;
 	bool m_RenderTileBorder;
+	int m_DebugRenderOptions;
 };
 
 class CRenderLayer : public CRenderComponent
@@ -48,7 +50,7 @@ class CRenderLayer : public CRenderComponent
 public:
 	CRenderLayer(int GroupId, int LayerId, int Flags);
 	virtual ~CRenderLayer() = default;
-	virtual void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, IEnvelopeEval *pEnvelopeEval, IMap *pMap, IMapImages *pMapImages, std::shared_ptr<CMapBasedEnvelopePointAccess> &pEnvelopePoints, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional);
+	virtual void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional);
 
 	virtual void Init() = 0;
 	virtual void Render(const CRenderLayerParams &Params) = 0;
@@ -70,9 +72,8 @@ protected:
 
 	class IMap *m_pMap = nullptr;
 	IMapImages *m_pMapImages = nullptr;
-	IEnvelopeEval *m_pEnvelopeEval = nullptr;
+	std::shared_ptr<CEnvelopeManager> m_pEnvelopeManager;
 	std::optional<FRenderUploadCallback> m_RenderUploadCallback;
-	std::shared_ptr<CMapBasedEnvelopePointAccess> m_pEnvelopePoints;
 };
 
 class CRenderLayerGroup : public CRenderLayer
@@ -101,7 +102,7 @@ public:
 	void Render(const CRenderLayerParams &Params) override;
 	bool DoRender(const CRenderLayerParams &Params) override;
 	void Init() override;
-	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, IEnvelopeEval *pEnvelopeEval, IMap *pMap, IMapImages *pMapImages, std::shared_ptr<CMapBasedEnvelopePointAccess> &pEnvelopePoints, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional) override;
+	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional) override;
 
 	virtual int GetDataIndex(unsigned int &TileSize) const;
 	bool IsValid() const override { return GetRawData() != nullptr; }
@@ -210,7 +211,7 @@ class CRenderLayerQuads : public CRenderLayer
 {
 public:
 	CRenderLayerQuads(int GroupId, int LayerId, int Flags, CMapItemLayerQuads *pLayerQuads);
-	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, IEnvelopeEval *pEnvelopeEval, IMap *pMap, IMapImages *pMapImages, std::shared_ptr<CMapBasedEnvelopePointAccess> &pEnvelopePoints, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional) override;
+	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional) override;
 	virtual void Init() override;
 	bool IsValid() const override { return m_pLayerQuads->m_NumQuads > 0 && m_pQuads; }
 	virtual void Render(const CRenderLayerParams &Params) override;
@@ -220,8 +221,7 @@ public:
 protected:
 	virtual IGraphics::CTextureHandle GetTexture() const override { return m_TextureHandle; }
 	void CalculateClipping();
-	bool CalculateEnvelopeClipping(int aEnvelopeOffsetMin[2], int aEnvelopeOffsetMax[2]);
-	void CalculateQuadClipping(int aQuadOffsetMin[2], int aQuadOffsetMax[2]);
+	bool CalculateQuadClipping(int aQuadOffsetMin[2], int aQuadOffsetMax[2], bool Grouped);
 
 	class CQuadLayerVisuals : public CRenderComponent
 	{
@@ -234,7 +234,7 @@ protected:
 		int m_BufferContainerIndex;
 		bool m_IsTextured;
 	};
-	void RenderQuadLayer(bool ForceRender = false);
+	void RenderQuadLayer(float Alpha = 1.0f);
 
 	std::optional<CRenderLayerQuads::CQuadLayerVisuals> m_VisualQuad;
 	CMapItemLayerQuads *m_pLayerQuads;

@@ -4,10 +4,10 @@
 
 #include <engine/server.h>
 
-#include <game/generated/protocol.h>
-#include <game/teamscore.h>
+#include <generated/protocol.h>
 
 #include <game/server/gamecontext.h>
+#include <game/teamscore.h>
 
 const float PLASMA_ACCEL = 1.1f;
 

@@ -1,8 +1,10 @@
 #include <engine/shared/protocolglue.h>
 #include <engine/shared/snapshot.h>
 #include <engine/shared/translation_context.h>
+
+#include <generated/protocol7.h>
+
 #include <game/client/gameclient.h>
-#include <game/generated/protocol7.h>
 
 int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven, int Conn, bool Dummy)
 {

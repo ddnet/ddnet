@@ -12,8 +12,8 @@
 #include <engine/friends.h>
 #include <engine/shared/translation_context.h>
 
-#include <game/generated/protocol.h>
-#include <game/generated/protocol7.h>
+#include <generated/protocol.h>
+#include <generated/protocol7.h>
 
 #include <functional>
 #include <optional>

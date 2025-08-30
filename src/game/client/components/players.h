@@ -4,8 +4,9 @@
 #define GAME_CLIENT_COMPONENTS_PLAYERS_H
 #include <game/client/component.h>
 
+#include <generated/protocol.h>
+
 #include <game/client/render.h>
-#include <game/generated/protocol.h>
 
 class CPlayers : public CComponent
 {

@@ -21,9 +21,11 @@
 #include <engine/textrender.h>
 #include <engine/updater.h>
 
-#include <game/generated/client_data.h>
-#include <game/generated/client_data7.h>
-#include <game/generated/protocol.h>
+#include <generated/client_data.h>
+#include <generated/client_data7.h>
+#include <generated/protocol.h>
+#include <generated/protocol7.h>
+#include <generated/protocolglue.h>
 
 #include <base/log.h>
 #include <base/math.h>
@@ -39,9 +41,6 @@
 #include <game/localization.h>
 #include <game/mapitems.h>
 #include <game/version.h>
-
-#include <game/generated/protocol7.h>
-#include <game/generated/protocolglue.h>
 
 #include "components/background.h"
 #include "components/binds.h"

@@ -99,7 +99,7 @@ int CServerBan::BanExt(T *pBanPool, const typename T::CDataType *pData, int Seco
 			if(Server()->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
 				continue;
 
-			if(Server()->m_aClients[i].m_Authed != AUTHED_NO && NetMatch(pData, Server()->ClientAddr(i)))
+			if(Server()->IsRconAuthed(i) && NetMatch(pData, Server()->ClientAddr(i)))
 			{
 				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (command denied)");
 				return -1;
@@ -615,6 +615,16 @@ int CServer::GetAuthedState(int ClientId) const
 	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "ClientId is not valid");
 	dbg_assert(m_aClients[ClientId].m_State != CServer::CClient::STATE_EMPTY, "Client slot is empty");
 	return m_aClients[ClientId].m_Authed;
+}
+
+bool CServer::IsRconAuthed(int ClientId) const
+{
+	return GetAuthedState(ClientId) != AUTHED_NO;
+}
+
+bool CServer::IsRconAuthedAdmin(int ClientId) const
+{
+	return GetAuthedState(ClientId) == AUTHED_ADMIN;
 }
 
 const char *CServer::GetAuthName(int ClientId) const
@@ -1428,7 +1438,7 @@ void CServer::SendRconLogLine(int ClientId, const CLogMessage *pMessage)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if(m_aClients[i].m_State != CClient::STATE_EMPTY && m_aClients[i].m_Authed >= AUTHED_ADMIN)
+			if(m_aClients[i].m_State != CClient::STATE_EMPTY && IsRconAuthedAdmin(i))
 				SendRconLine(i, m_aClients[i].m_ShowIps ? pLine : pLineWithoutIps);
 		}
 	}
@@ -1484,7 +1494,7 @@ void CServer::UpdateClientRconCommands()
 {
 	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
-		if(m_aClients[ClientId].m_State != CClient::STATE_EMPTY && m_aClients[ClientId].m_Authed)
+		if(m_aClients[ClientId].m_State != CClient::STATE_EMPTY && IsRconAuthed(ClientId))
 		{
 			int ConsoleAccessLevel = m_aClients[ClientId].ConsoleAccessLevel();
 			for(int i = 0; i < MAX_RCONCMD_SEND && m_aClients[ClientId].m_pRconCmdToSend; ++i)
@@ -1528,7 +1538,7 @@ void CServer::UpdateClientMaplistEntries(int ClientId)
 {
 	CClient &Client = m_aClients[ClientId];
 	if(Client.m_State != CClient::STATE_INGAME ||
-		!Client.m_Authed ||
+		!IsRconAuthed(ClientId) ||
 		Client.m_Sixup ||
 		Client.m_pRconCmdToSend != nullptr || // wait for command sending
 		Client.m_MaplistEntryToSend == CClient::MAPLIST_DISABLED ||
@@ -1951,7 +1961,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					m_aClients[ClientId].m_DDNetVersion = VERSION_DDNET_OLD;
 				}
 			}
-			else if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && m_aClients[ClientId].m_Authed)
+			else if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && IsRconAuthed(ClientId))
 			{
 				if(GameServer()->PlayerExists(ClientId))
 				{
@@ -2586,7 +2596,7 @@ void CServer::FillAntibot(CAntibotRoundData *pData)
 			pPlayer->m_DnsblNone = m_aClients[ClientId].m_DnsblState == EDnsblState::NONE;
 			pPlayer->m_DnsblPending = m_aClients[ClientId].m_DnsblState == EDnsblState::PENDING;
 			pPlayer->m_DnsblBlacklisted = m_aClients[ClientId].m_DnsblState == EDnsblState::BLACKLISTED;
-			pPlayer->m_Authed = m_aClients[ClientId].m_Authed > AUTHED_NO;
+			pPlayer->m_Authed = IsRconAuthed(ClientId);
 		}
 	}
 }
@@ -2851,6 +2861,11 @@ int CServer::LoadMap(const char *pMapName)
 
 	char aBuf[IO_MAX_PATH_LENGTH];
 	str_format(aBuf, sizeof(aBuf), "maps/%s.map", pMapName);
+	if(!str_valid_filename(fs_filename(aBuf)))
+	{
+		log_error("server", "The name '%s' cannot be used for maps because not all platforms support it", aBuf);
+		return 0;
+	}
 	if(!GameServer()->OnMapChange(aBuf, sizeof(aBuf)))
 	{
 		return 0;
@@ -4477,7 +4492,7 @@ bool CServer::SetTimedOut(int ClientId, int OrigId)
 	}
 	m_aClients[ClientId].m_Sixup = m_aClients[OrigId].m_Sixup;
 
-	if(m_aClients[OrigId].m_Authed != AUTHED_NO)
+	if(IsRconAuthed(OrigId))
 	{
 		LogoutClient(ClientId, "Timeout Protection");
 	}

@@ -6,8 +6,8 @@
 #include <cstddef>
 #include <cstdint>
 
-#include <game/generated/protocol.h>
-#include <game/generated/protocol7.h>
+#include <generated/protocol.h>
+#include <generated/protocol7.h>
 
 // CSnapshot
 

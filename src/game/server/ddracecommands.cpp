@@ -631,7 +631,7 @@ void CGameContext::ConDrySave(IConsole::IResult *pResult, void *pUserData)
 
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
 
-	if(!pPlayer || pSelf->Server()->GetAuthedState(pResult->m_ClientId) != AUTHED_ADMIN)
+	if(!pPlayer || !pSelf->Server()->IsRconAuthedAdmin(pResult->m_ClientId))
 		return;
 
 	CSaveTeam SavedTeam;
@@ -694,7 +694,7 @@ void CGameContext::ConDumpLog(IConsole::IResult *pResult, void *pUserData)
 		if(Seconds > LimitSecs)
 			continue;
 
-		char aBuf[256];
+		char aBuf[sizeof(pEntry->m_aDescription) + 128];
 		if(pEntry->m_FromServer)
 			str_format(aBuf, sizeof(aBuf), "%s, %d seconds ago", pEntry->m_aDescription, Seconds);
 		else

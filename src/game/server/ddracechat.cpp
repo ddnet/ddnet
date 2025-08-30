@@ -125,7 +125,7 @@ void CGameContext::ConSettings(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 			"to check a server setting say /settings and setting's name, setting names are:");
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-			"teams, cheats, collision, hooking, endlesshooking, me, ");
+			"teams, cheats, collision, hooking, endlesshooking,");
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 			"hitting, oldlaser, timeout, votes, pause and scores");
 	}
@@ -189,13 +189,6 @@ void CGameContext::ConSettings(IConsole::IResult *pResult, void *pUserData)
 				g_Config.m_SvOldLaser ?
 					"Lasers can hit you if you shot them and they pull you towards the bounce origin (Like DDRace Beta)" :
 					"Lasers can't hit you if you shot them, and they pull others towards the shooter");
-		}
-		else if(str_comp_nocase(pArg, "me") == 0)
-		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-				g_Config.m_SvSlashMe ?
-					"Players can use /me commands the famous IRC Command" :
-					"Players can't use the /me command");
 		}
 		else if(str_comp_nocase(pArg, "timeout") == 0)
 		{
@@ -1440,26 +1433,6 @@ void CGameContext::ConJoin(IConsole::IResult *pResult, void *pUserData)
 	pSelf->AttemptJoinTeam(pResult->m_ClientId, Team);
 }
 
-void CGameContext::ConMe(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientId(pResult->m_ClientId))
-		return;
-
-	char aBuf[256 + 24];
-
-	str_format(aBuf, 256 + 24, "'%s' %s",
-		pSelf->Server()->ClientName(pResult->m_ClientId),
-		pResult->GetString(0));
-	if(g_Config.m_SvSlashMe)
-		pSelf->SendChat(-2, TEAM_ALL, aBuf, pResult->m_ClientId);
-	else
-		pSelf->Console()->Print(
-			IConsole::OUTPUT_LEVEL_STANDARD,
-			"chatresp",
-			"/me is disabled on this server");
-}
-
 void CGameContext::ConConverse(IConsole::IResult *pResult, void *pUserData)
 {
 	// This will never be called
@@ -2118,7 +2091,7 @@ void CGameContext::ConLastTele(IConsole::IResult *pResult, void *pUserData)
 		pSelf->SendChatTarget(pPlayer->GetCid(), "You haven't previously teleported. Use /tp before using this command.");
 		return;
 	}
-	pPlayer->m_LastTeleTee.Load(pChr, pChr->Team(), true);
+	pPlayer->m_LastTeleTee.Load(pChr);
 	pPlayer->Pause(CPlayer::PAUSE_NONE, true);
 }
 

@@ -1,6 +1,4 @@
-# mastersrv
-
-@page mastersrv
+# @page mastersrv mastersrv
 
 The mastersrv maintains a list of all registered DDNet (and Teeworlds) servers.
 Game servers try to register themselves with the mastersrv via an HTTP POST

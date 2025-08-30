@@ -27,7 +27,7 @@ enum
 //	virtual int NumPoints() const = 0;
 //	virtual const CEnvPoint *GetPoint(int Index) const = 0;
 //	virtual const CEnvPointBezier *GetBezier(int Index) const = 0;
-//	int FindPointIndex(int Time) const;
+//	int FindPointIndex(CFixedTime  Time) const;
 //};
 //
 //class CMapBasedEnvelopePointAccess : public IEnvelopePointAccess
@@ -66,7 +66,6 @@ public:
 
 	// map render methods (render_map.cpp)
 	static void RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, std::chrono::nanoseconds TimeNanos, ColorRGBA &Result, size_t Channels);
-	void RenderQuads(CQuad *pQuads, int NumQuads, int Flags, IEnvelopeEval *pEnvEval);
 	void ForceRenderQuads(CQuad *pQuads, int NumQuads, int Flags, IEnvelopeEval *pEnvEval, float Alpha = 1.0f);
 	void RenderTile(int x, int y, unsigned char Index, float Scale, ColorRGBA Color);
 	void RenderTilemap(CTile *pTiles, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
@@ -83,6 +82,8 @@ public:
 	void RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
 	void RenderSwitchmap(CSwitchTile *pSwitch, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
 	void RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
+
+	void RenderDebugClip(float ClipX, float ClipY, float ClipW, float ClipH, ColorRGBA Color, float Zoom, const char *pLabel);
 };
 
 #endif

@@ -3,7 +3,9 @@
 
 #include <base/vmath.h>
 #include <engine/shared/protocol.h>
-#include <game/generated/protocol.h>
+
+#include <generated/protocol.h>
+
 #include <game/team_state.h>
 #include <game/gamecore.h>
 
@@ -39,7 +41,7 @@ public:
 	CSaveTee();
 	~CSaveTee() = default;
 	void Save(CCharacter *pchr, bool AddPenalty = true);
-	bool Load(CCharacter *pchr, int Team, bool IsSwap = false);
+	bool Load(CCharacter *pchr, std::optional<int> Team = std::nullopt);
 	char *GetString(const CSaveTeam *pTeam);
 	int FromString(const char *pString);
 	void LoadHookedPlayer(const CSaveTeam *pTeam);
@@ -158,7 +160,7 @@ public:
 	CSaveHotReloadTee() = default;
 	~CSaveHotReloadTee() = default;
 	void Save(CCharacter *pChr, bool AddPenalty = true);
-	bool Load(CCharacter *pChr, int Team, bool IsSwap = false);
+	bool Load(CCharacter *pChr, int Team);
 
 private:
 	CSaveTee m_SaveTee;

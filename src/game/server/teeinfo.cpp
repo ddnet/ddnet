@@ -1,6 +1,6 @@
 #include <base/color.h>
 #include <base/system.h>
-#include <game/generated/protocol7.h>
+#include <generated/protocol7.h>
 
 #include "teeinfo.h"
 

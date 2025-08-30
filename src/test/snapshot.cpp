@@ -1,8 +1,10 @@
 #include <gtest/gtest.h>
 
 #include <base/system.h>
+
 #include <engine/shared/snapshot.h>
-#include <game/generated/protocol.h>
+
+#include <generated/protocol.h>
 
 TEST(Snapshot, CrcOneInt)
 {

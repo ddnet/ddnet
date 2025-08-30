@@ -11,7 +11,7 @@
 #include <cstring>
 #include <iomanip> // std::get_time
 #include <iterator> // std::size
-#include <random>
+#include <mutex>
 #include <sstream> // std::istringstream
 #include <string_view>
 
@@ -1242,6 +1242,33 @@ static int priv_net_extract(const char *hostname, char *host, int max_host, int 
 	return 0;
 }
 
+static int net_host_lookup_fallback(const char *hostname, NETADDR *addr, int types, int port)
+{
+	if(str_comp_nocase(hostname, "localhost") == 0)
+	{
+		if(types == NETTYPE_IPV4)
+		{
+			dbg_assert(net_addr_from_str(addr, "127.0.0.1") == 0, "unreachable");
+			addr->port = port;
+			return 0;
+		}
+		else if(types == NETTYPE_IPV6)
+		{
+			dbg_assert(net_addr_from_str(addr, "[::1]") == 0, "unreachable");
+			addr->port = port;
+			return 0;
+		}
+		else
+		{
+			// TODO: return both IPv4 and IPv6 address
+			dbg_assert(net_addr_from_str(addr, "127.0.0.1") == 0, "unreachable");
+			addr->port = port;
+			return 0;
+		}
+	}
+	return -1;
+}
+
 static int net_host_lookup_impl(const char *hostname, NETADDR *addr, int types)
 {
 	char host[256];
@@ -1264,12 +1291,14 @@ static int net_host_lookup_impl(const char *hostname, NETADDR *addr, int types)
 	struct addrinfo *result = nullptr;
 	int e = getaddrinfo(host, nullptr, &hints, &result);
 	if(!result)
-		return -1;
+	{
+		return net_host_lookup_fallback(hostname, addr, types, port);
+	}
 
 	if(e != 0)
 	{
 		freeaddrinfo(result);
-		return -1;
+		return net_host_lookup_fallback(hostname, addr, types, port);
 	}
 
 	sockaddr_to_netaddr(result->ai_addr, result->ai_addrlen, addr);
@@ -2703,9 +2732,7 @@ int fs_remove(const char *filename)
 	}
 	const std::wstring wide_filename = windows_utf8_to_wide(filename);
 
-	thread_local std::mt19937 rand_generator(std::random_device{}());
-	std::uniform_int_distribution<unsigned> rand_distribution(std::numeric_limits<unsigned>::min(), std::numeric_limits<unsigned>::max());
-	unsigned random_num = rand_distribution(rand_generator);
+	unsigned random_num = secure_rand();
 	std::wstring wide_filename_temp;
 	do
 	{
@@ -4741,7 +4768,7 @@ int open_file(const char *path)
 
 struct SECURE_RANDOM_DATA
 {
-	int initialized;
+	std::once_flag initialized_once_flag;
 #if defined(CONF_FAMILY_WINDOWS)
 	HCRYPTPROV provider;
 #else
@@ -4749,65 +4776,23 @@ struct SECURE_RANDOM_DATA
 #endif
 };
 
-static struct SECURE_RANDOM_DATA secure_random_data = {0};
+static struct SECURE_RANDOM_DATA secure_random_data = {};
 
-int secure_random_init()
+static void ensure_secure_random_init()
 {
-	if(secure_random_data.initialized)
-	{
-		return 0;
-	}
+	std::call_once(secure_random_data.initialized_once_flag, []() {
 #if defined(CONF_FAMILY_WINDOWS)
-	if(CryptAcquireContext(&secure_random_data.provider, nullptr, nullptr, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
-	{
-		secure_random_data.initialized = 1;
-		return 0;
-	}
-	else
-	{
-		return 1;
-	}
+		if(!CryptAcquireContext(&secure_random_data.provider, nullptr, nullptr, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
+		{
+			const DWORD LastError = GetLastError();
+			dbg_assert(false, "Failed to initialize secure random: CryptAcquireContext failure (%ld '%s')", LastError, windows_format_system_message(LastError).c_str());
+			dbg_break();
+		}
 #else
-	secure_random_data.urandom = io_open("/dev/urandom", IOFLAG_READ);
-	if(secure_random_data.urandom)
-	{
-		secure_random_data.initialized = 1;
-		return 0;
-	}
-	else
-	{
-		return 1;
-	}
+			secure_random_data.urandom = io_open("/dev/urandom", IOFLAG_READ);
+			dbg_assert(secure_random_data.urandom != nullptr, "Failed to initialize secure random: failed to open /dev/urandom");
 #endif
-}
-
-int secure_random_uninit()
-{
-	if(!secure_random_data.initialized)
-	{
-		return 0;
-	}
-#if defined(CONF_FAMILY_WINDOWS)
-	if(CryptReleaseContext(secure_random_data.provider, 0))
-	{
-		secure_random_data.initialized = 0;
-		return 0;
-	}
-	else
-	{
-		return 1;
-	}
-#else
-	if(!io_close(secure_random_data.urandom))
-	{
-		secure_random_data.initialized = 0;
-		return 0;
-	}
-	else
-	{
-		return 1;
-	}
-#endif
+	});
 }
 
 void generate_password(char *buffer, unsigned length, const unsigned short *random, unsigned random_length)
@@ -4848,25 +4833,16 @@ void secure_random_password(char *buffer, unsigned length, unsigned pw_length)
 
 void secure_random_fill(void *bytes, unsigned length)
 {
-	if(!secure_random_data.initialized)
-	{
-		dbg_msg("secure", "called secure_random_fill before secure_random_init");
-		dbg_break();
-	}
+	ensure_secure_random_init();
 #if defined(CONF_FAMILY_WINDOWS)
 	if(!CryptGenRandom(secure_random_data.provider, length, (unsigned char *)bytes))
 	{
 		const DWORD LastError = GetLastError();
-		const std::string ErrorMsg = windows_format_system_message(LastError);
-		dbg_msg("secure", "CryptGenRandom failed: %ld %s", LastError, ErrorMsg.c_str());
+		dbg_assert(false, "CryptGenRandom failure (%ld '%s')", LastError, windows_format_system_message(LastError).c_str());
 		dbg_break();
 	}
 #else
-	if(length != io_read(secure_random_data.urandom, bytes, length))
-	{
-		dbg_msg("secure", "io_read returned with a short read");
-		dbg_break();
-	}
+	dbg_assert(length == io_read(secure_random_data.urandom, bytes, length), "io_read returned with a short read");
 #endif
 }
 

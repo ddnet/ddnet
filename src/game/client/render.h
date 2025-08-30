@@ -8,9 +8,11 @@
 #include <base/color.h>
 #include <base/vmath.h>
 
+#include <generated/protocol.h>
+#include <generated/protocol7.h>
+
 #include <game/client/skin.h>
 #include <game/client/ui_rect.h>
-#include <game/generated/protocol7.h>
 
 #include <functional>
 #include <memory>
@@ -30,8 +32,6 @@ class CEnvPointBezier;
 class CEnvPointBezier_upstream;
 class CMapItemGroup;
 class CQuad;
-
-#include <game/generated/protocol.h>
 
 class CSkinDescriptor
 {

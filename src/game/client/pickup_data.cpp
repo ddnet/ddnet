@@ -4,8 +4,10 @@
 #include "pickup_data.h"
 
 #include <engine/shared/snapshot.h>
+
+#include <generated/protocol.h>
+
 #include <game/collision.h>
-#include <game/generated/protocol.h>
 
 CPickupData ExtractPickupInfo(int NetObjType, const void *pData, const CNetObj_EntityEx *pEntEx)
 {

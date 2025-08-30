@@ -4,8 +4,10 @@
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
 #include <engine/textrender.h>
-#include <game/generated/client_data.h>
-#include <game/generated/protocol.h>
+
+#include <generated/client_data.h>
+#include <generated/protocol.h>
+
 #include <game/localization.h>
 
 #include "infomessages.h"

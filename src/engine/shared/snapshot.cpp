@@ -10,8 +10,8 @@
 #include <base/math.h>
 #include <base/system.h>
 
-#include <game/generated/protocol7.h>
-#include <game/generated/protocolglue.h>
+#include <generated/protocol7.h>
+#include <generated/protocolglue.h>
 
 // CSnapshot
 

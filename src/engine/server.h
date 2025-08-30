@@ -15,9 +15,9 @@
 #include "message.h"
 #include <engine/shared/jsonwriter.h>
 #include <engine/shared/protocol.h>
-#include <game/generated/protocol.h>
-#include <game/generated/protocol7.h>
-#include <game/generated/protocolglue.h>
+#include <generated/protocol.h>
+#include <generated/protocol7.h>
+#include <generated/protocolglue.h>
 
 struct CAntibotRoundData;
 
@@ -251,6 +251,8 @@ public:
 	};
 	virtual void SetRconCid(int ClientId) = 0;
 	virtual int GetAuthedState(int ClientId) const = 0;
+	virtual bool IsRconAuthed(int ClientId) const = 0;
+	virtual bool IsRconAuthedAdmin(int ClientId) const = 0;
 	virtual const char *GetAuthName(int ClientId) const = 0;
 	virtual bool HasAuthHidden(int ClientId) const = 0;
 	virtual void Kick(int ClientId, const char *pReason) = 0;

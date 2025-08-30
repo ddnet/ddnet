@@ -977,7 +977,7 @@ void CEditorActionEditLayerTilesProp::Redo()
 	}
 	else if(m_Prop == ETilesProp::PROP_SHIFT)
 	{
-		pLayerTiles->Shift(m_Current);
+		pLayerTiles->Shift((EShiftDirection)m_Current);
 	}
 	else if(m_Prop == ETilesProp::PROP_SHIFT_BY)
 	{
@@ -1516,11 +1516,32 @@ void CEditorActionEnvelopeEdit::Redo()
 	m_pEditor->m_SelectedEnvelope = m_EnvelopeIndex;
 }
 
+CEditorActionEnvelopeEditPointTime::CEditorActionEnvelopeEditPointTime(CEditor *pEditor, int EnvelopeIndex, int PointIndex, CFixedTime Previous, CFixedTime Current) :
+	IEditorAction(pEditor), m_EnvelopeIndex(EnvelopeIndex), m_PointIndex(PointIndex), m_Previous(Previous), m_Current(Current), m_pEnv(pEditor->m_Map.m_vpEnvelopes[EnvelopeIndex])
+{
+	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Edit time of point %d of env %d", m_PointIndex, m_EnvelopeIndex);
+}
+
+void CEditorActionEnvelopeEditPointTime::Undo()
+{
+	Apply(m_Previous);
+}
+
+void CEditorActionEnvelopeEditPointTime::Redo()
+{
+	Apply(m_Current);
+}
+
+void CEditorActionEnvelopeEditPointTime::Apply(CFixedTime Value)
+{
+	m_pEnv->m_vPoints[m_PointIndex].m_Time = Value;
+	m_pEditor->m_Map.OnModify();
+}
+
 CEditorActionEnvelopeEditPoint::CEditorActionEnvelopeEditPoint(CEditor *pEditor, int EnvelopeIndex, int PointIndex, int Channel, EEditType EditType, int Previous, int Current) :
 	IEditorAction(pEditor), m_EnvelopeIndex(EnvelopeIndex), m_PointIndex(PointIndex), m_Channel(Channel), m_EditType(EditType), m_Previous(Previous), m_Current(Current), m_pEnv(pEditor->m_Map.m_vpEnvelopes[EnvelopeIndex])
 {
 	static const char *s_apNames[] = {
-		"time",
 		"value",
 		"curve type"};
 	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Edit %s of point %d (channel %d) of env %d", s_apNames[(int)m_EditType], m_PointIndex, m_Channel, m_EnvelopeIndex);
@@ -1538,11 +1559,7 @@ void CEditorActionEnvelopeEditPoint::Redo()
 
 void CEditorActionEnvelopeEditPoint::Apply(int Value)
 {
-	if(m_EditType == EEditType::TIME)
-	{
-		m_pEnv->m_vPoints[m_PointIndex].m_Time = Value;
-	}
-	else if(m_EditType == EEditType::VALUE)
+	if(m_EditType == EEditType::VALUE)
 	{
 		m_pEnv->m_vPoints[m_PointIndex].m_aValues[m_Channel] = Value;
 
@@ -1563,7 +1580,7 @@ void CEditorActionEnvelopeEditPoint::Apply(int Value)
 
 // ----
 
-CEditorActionEditEnvelopePointValue::CEditorActionEditEnvelopePointValue(CEditor *pEditor, int EnvIndex, int PointIndex, int Channel, EType Type, int OldTime, int OldValue, int NewTime, int NewValue) :
+CEditorActionEditEnvelopePointValue::CEditorActionEditEnvelopePointValue(CEditor *pEditor, int EnvIndex, int PointIndex, int Channel, EType Type, CFixedTime OldTime, int OldValue, CFixedTime NewTime, int NewValue) :
 	IEditorAction(pEditor), m_EnvIndex(EnvIndex), m_PtIndex(PointIndex), m_Channel(Channel), m_Type(Type), m_OldTime(OldTime), m_OldValue(OldValue), m_NewTime(NewTime), m_NewValue(NewValue)
 {
 	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Edit point %d%s value (envelope %d, channel %d)", PointIndex, m_Type == EType::TANGENT_IN ? "tangent in" : (m_Type == EType::TANGENT_OUT ? "tangent out" : ""), m_EnvIndex, m_Channel);
@@ -1582,17 +1599,17 @@ void CEditorActionEditEnvelopePointValue::Redo()
 void CEditorActionEditEnvelopePointValue::Apply(bool Undo)
 {
 	float CurrentValue = fx2f(Undo ? m_OldValue : m_NewValue);
-	float CurrentTime = (Undo ? m_OldTime : m_NewTime) / 1000.0f;
+	CFixedTime CurrentTime = (Undo ? m_OldTime : m_NewTime);
 
 	std::shared_ptr<CEnvelope> pEnvelope = m_pEditor->m_Map.m_vpEnvelopes[m_EnvIndex];
 	if(m_Type == EType::TANGENT_IN)
 	{
-		pEnvelope->m_vPoints[m_PtIndex].m_Bezier.m_aInTangentDeltaX[m_Channel] = minimum<int>(CurrentTime * 1000.0f - pEnvelope->m_vPoints[m_PtIndex].m_Time, 0);
+		pEnvelope->m_vPoints[m_PtIndex].m_Bezier.m_aInTangentDeltaX[m_Channel] = std::min(CurrentTime - pEnvelope->m_vPoints[m_PtIndex].m_Time, CFixedTime(0));
 		pEnvelope->m_vPoints[m_PtIndex].m_Bezier.m_aInTangentDeltaY[m_Channel] = f2fx(CurrentValue) - pEnvelope->m_vPoints[m_PtIndex].m_aValues[m_Channel];
 	}
 	else if(m_Type == EType::TANGENT_OUT)
 	{
-		pEnvelope->m_vPoints[m_PtIndex].m_Bezier.m_aOutTangentDeltaX[m_Channel] = maximum<int>(CurrentTime * 1000.0f - pEnvelope->m_vPoints[m_PtIndex].m_Time, 0);
+		pEnvelope->m_vPoints[m_PtIndex].m_Bezier.m_aOutTangentDeltaX[m_Channel] = std::max(CurrentTime - pEnvelope->m_vPoints[m_PtIndex].m_Time, CFixedTime(0));
 		pEnvelope->m_vPoints[m_PtIndex].m_Bezier.m_aOutTangentDeltaY[m_Channel] = f2fx(CurrentValue) - pEnvelope->m_vPoints[m_PtIndex].m_aValues[m_Channel];
 	}
 	else
@@ -1603,16 +1620,16 @@ void CEditorActionEditEnvelopePointValue::Apply(bool Undo)
 
 		if(m_PtIndex != 0)
 		{
-			pEnvelope->m_vPoints[m_PtIndex].m_Time = CurrentTime * 1000.0f;
+			pEnvelope->m_vPoints[m_PtIndex].m_Time = CurrentTime;
 
 			if(pEnvelope->m_vPoints[m_PtIndex].m_Time < pEnvelope->m_vPoints[m_PtIndex - 1].m_Time)
-				pEnvelope->m_vPoints[m_PtIndex].m_Time = pEnvelope->m_vPoints[m_PtIndex - 1].m_Time + 1;
+				pEnvelope->m_vPoints[m_PtIndex].m_Time = pEnvelope->m_vPoints[m_PtIndex - 1].m_Time + CFixedTime(1);
 			if(static_cast<size_t>(m_PtIndex) + 1 != pEnvelope->m_vPoints.size() && pEnvelope->m_vPoints[m_PtIndex].m_Time > pEnvelope->m_vPoints[m_PtIndex + 1].m_Time)
-				pEnvelope->m_vPoints[m_PtIndex].m_Time = pEnvelope->m_vPoints[m_PtIndex + 1].m_Time - 1;
+				pEnvelope->m_vPoints[m_PtIndex].m_Time = pEnvelope->m_vPoints[m_PtIndex + 1].m_Time - CFixedTime(1);
 		}
 		else
 		{
-			pEnvelope->m_vPoints[m_PtIndex].m_Time = 0.0f;
+			pEnvelope->m_vPoints[m_PtIndex].m_Time = CFixedTime(0);
 		}
 	}
 
@@ -1628,13 +1645,13 @@ CEditorActionResetEnvelopePointTangent::CEditorActionResetEnvelopePointTangent(C
 	std::shared_ptr<CEnvelope> pEnvelope = pEditor->m_Map.m_vpEnvelopes[EnvIndex];
 	if(In)
 	{
-		m_Previous[0] = pEnvelope->m_vPoints[PointIndex].m_Bezier.m_aInTangentDeltaX[Channel];
-		m_Previous[1] = pEnvelope->m_vPoints[PointIndex].m_Bezier.m_aInTangentDeltaY[Channel];
+		m_OldTime = pEnvelope->m_vPoints[PointIndex].m_Bezier.m_aInTangentDeltaX[Channel];
+		m_OldValue = pEnvelope->m_vPoints[PointIndex].m_Bezier.m_aInTangentDeltaY[Channel];
 	}
 	else
 	{
-		m_Previous[0] = pEnvelope->m_vPoints[PointIndex].m_Bezier.m_aOutTangentDeltaX[Channel];
-		m_Previous[1] = pEnvelope->m_vPoints[PointIndex].m_Bezier.m_aOutTangentDeltaY[Channel];
+		m_OldTime = pEnvelope->m_vPoints[PointIndex].m_Bezier.m_aOutTangentDeltaX[Channel];
+		m_OldValue = pEnvelope->m_vPoints[PointIndex].m_Bezier.m_aOutTangentDeltaY[Channel];
 	}
 
 	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Reset point %d of env %d tangent %s", m_PointIndex, m_EnvIndex, m_In ? "in" : "out");
@@ -1645,13 +1662,13 @@ void CEditorActionResetEnvelopePointTangent::Undo()
 	std::shared_ptr<CEnvelope> pEnvelope = m_pEditor->m_Map.m_vpEnvelopes[m_EnvIndex];
 	if(m_In)
 	{
-		pEnvelope->m_vPoints[m_PointIndex].m_Bezier.m_aInTangentDeltaX[m_Channel] = m_Previous[0];
-		pEnvelope->m_vPoints[m_PointIndex].m_Bezier.m_aInTangentDeltaY[m_Channel] = m_Previous[1];
+		pEnvelope->m_vPoints[m_PointIndex].m_Bezier.m_aInTangentDeltaX[m_Channel] = m_OldTime;
+		pEnvelope->m_vPoints[m_PointIndex].m_Bezier.m_aInTangentDeltaY[m_Channel] = m_OldValue;
 	}
 	else
 	{
-		pEnvelope->m_vPoints[m_PointIndex].m_Bezier.m_aOutTangentDeltaX[m_Channel] = m_Previous[0];
-		pEnvelope->m_vPoints[m_PointIndex].m_Bezier.m_aOutTangentDeltaY[m_Channel] = m_Previous[1];
+		pEnvelope->m_vPoints[m_PointIndex].m_Bezier.m_aOutTangentDeltaX[m_Channel] = m_OldTime;
+		pEnvelope->m_vPoints[m_PointIndex].m_Bezier.m_aOutTangentDeltaY[m_Channel] = m_OldValue;
 	}
 	m_pEditor->m_Map.OnModify();
 }
@@ -1661,12 +1678,12 @@ void CEditorActionResetEnvelopePointTangent::Redo()
 	std::shared_ptr<CEnvelope> pEnvelope = m_pEditor->m_Map.m_vpEnvelopes[m_EnvIndex];
 	if(m_In)
 	{
-		pEnvelope->m_vPoints[m_PointIndex].m_Bezier.m_aInTangentDeltaX[m_Channel] = 0.0f;
+		pEnvelope->m_vPoints[m_PointIndex].m_Bezier.m_aInTangentDeltaX[m_Channel] = CFixedTime(0);
 		pEnvelope->m_vPoints[m_PointIndex].m_Bezier.m_aInTangentDeltaY[m_Channel] = 0.0f;
 	}
 	else
 	{
-		pEnvelope->m_vPoints[m_PointIndex].m_Bezier.m_aOutTangentDeltaX[m_Channel] = 0.0f;
+		pEnvelope->m_vPoints[m_PointIndex].m_Bezier.m_aOutTangentDeltaX[m_Channel] = CFixedTime(0);
 		pEnvelope->m_vPoints[m_PointIndex].m_Bezier.m_aOutTangentDeltaY[m_Channel] = 0.0f;
 	}
 	m_pEditor->m_Map.OnModify();
@@ -1674,10 +1691,10 @@ void CEditorActionResetEnvelopePointTangent::Redo()
 
 // ------------------
 
-CEditorActionAddEnvelopePoint::CEditorActionAddEnvelopePoint(CEditor *pEditor, int EnvIndex, int Time, ColorRGBA Channels) :
+CEditorActionAddEnvelopePoint::CEditorActionAddEnvelopePoint(CEditor *pEditor, int EnvIndex, CFixedTime Time, ColorRGBA Channels) :
 	IEditorAction(pEditor), m_EnvIndex(EnvIndex), m_Time(Time), m_Channels(Channels)
 {
-	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Add new point in envelope %d at time %f", m_EnvIndex, Time / 1000.0);
+	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Add new point in envelope %d at time %f", m_EnvIndex, Time.AsSeconds());
 }
 
 void CEditorActionAddEnvelopePoint::Undo()

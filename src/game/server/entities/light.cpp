@@ -4,12 +4,12 @@
 
 #include <engine/server.h>
 
-#include <game/generated/protocol.h>
-#include <game/mapitems.h>
-#include <game/teamscore.h>
+#include <generated/protocol.h>
 
+#include <game/mapitems.h>
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
+#include <game/teamscore.h>
 
 CLight::CLight(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
 	int Layer, int Number) :

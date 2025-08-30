@@ -2,7 +2,7 @@
 #include <base/hash_ctxt.h>
 #include <base/system.h>
 #include <engine/shared/config.h>
-#include <game/generated/protocol.h>
+#include <generated/protocol.h>
 
 #define ADMIN_IDENT "default_admin"
 #define MOD_IDENT "default_mod"
