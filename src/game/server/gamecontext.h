@@ -723,14 +723,26 @@ private:
 
 	static void ConchainQuadDebugPos(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	
-	static void ConAccRegister(IConsole::IResult *pResult, void *pUserData);
-	static void ConAccPassword(IConsole::IResult *pResult, void *pUserData);
-	static void ConAccLogin(IConsole::IResult *pResult, void *pUserData);
-	static void ConAccLogout(IConsole::IResult *pResult, void *pUserData);
-	static void ConAccProfile(IConsole::IResult *pResult, void *pUserData);
-	static void ConAccEdit(IConsole::IResult *pResult, void *pUserData);
-	static void ConAccForceLogin(IConsole::IResult *pResult, void *pUserData);
-	static void ConAccForceLogout(IConsole::IResult *pResult, void *pUserData);
+	// Add
+	static void ConAddChatDetectionString(IConsole::IResult *pResult, void *pUserData);
+	void AddChatDetectionString(const char *pString, const char *pReason, bool pBan, int pBanTime, float pAddition = 1.0f);
+	// Remove
+	static void ConClearChatDetectionStrings(IConsole::IResult *pResult, void *pUserData);
+	static void ConRemoveChatDetectionString(IConsole::IResult *pResult, void *pUserData);
+	void RemoveChatDetectionString(const char *pString);
+	// List
+	static void ConListChatDetectionStrings(IConsole::IResult *pResult, void *pUserData);
+
+	// Add
+	static void ConAddNameDetectionString(IConsole::IResult *pResult, void *pUserData);
+	void AddNameDetectionString(const char *pString, const char *pReason, int pBanTime, bool ExactName);
+	// Remove
+	static void ConClearNameDetectionStrings(IConsole::IResult *pResult, void *pUserData);
+	static void ConRemoveNameDetectionString(IConsole::IResult *pResult, void *pUserData);
+	void RemoveNameDetectionString(const char *pString);
+	// List
+	static void ConListNameDetectionStrings(IConsole::IResult *pResult, void *pUserData);
+
 
 	static void ConRainbowBody(IConsole::IResult *pResult, void *pUserData);
 	static void ConRainbowFeet(IConsole::IResult *pResult, void *pUserData);
@@ -792,25 +804,15 @@ private:
 	static void ConHeartGun(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConSetSpiderHook(IConsole::IResult *pResult, void *pUserData);
-	// Add
-	static void ConAddChatDetectionString(IConsole::IResult *pResult, void *pUserData);
-	void AddChatDetectionString(const char *pString, const char *pReason, bool pBan, int pBanTime, float pAddition = 1.0f);
-	// Remove
-	static void ConClearChatDetectionStrings(IConsole::IResult *pResult, void *pUserData);
-	static void ConRemoveChatDetectionString(IConsole::IResult *pResult, void *pUserData);
-	void RemoveChatDetectionString(const char *pString);
-	// List
-	static void ConListChatDetectionStrings(IConsole::IResult *pResult, void *pUserData);
 
-	// Add
-	static void ConAddNameDetectionString(IConsole::IResult *pResult, void *pUserData);
-	void AddNameDetectionString(const char *pString, const char *pReason, int pBanTime, bool ExactName);
-	// Remove
-	static void ConClearNameDetectionStrings(IConsole::IResult *pResult, void *pUserData);
-	static void ConRemoveNameDetectionString(IConsole::IResult *pResult, void *pUserData);
-	void RemoveNameDetectionString(const char *pString);
-	// List
-	static void ConListNameDetectionStrings(IConsole::IResult *pResult, void *pUserData);
+	static void ConAccRegister(IConsole::IResult *pResult, void *pUserData);
+	static void ConAccPassword(IConsole::IResult *pResult, void *pUserData);
+	static void ConAccLogin(IConsole::IResult *pResult, void *pUserData);
+	static void ConAccLogout(IConsole::IResult *pResult, void *pUserData);
+	static void ConAccProfile(IConsole::IResult *pResult, void *pUserData);
+	static void ConAccEdit(IConsole::IResult *pResult, void *pUserData);
+	static void ConAccForceLogin(IConsole::IResult *pResult, void *pUserData);
+	static void ConAccForceLogout(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConShopBuyItem(IConsole::IResult *pResult, void *pUserData);
 	static void ConToggleItem(IConsole::IResult *pResult, void *pUserData);
@@ -819,6 +821,11 @@ private:
 
 	static void ConToggleMapVoteLock(IConsole::IResult *pResult, void *pUserData);
 	bool m_MapVoteLock;
+
+	static void ConInsertRecord(IConsole::IResult *pResult, void *pUserData);
+	static void ConRemoveRecord(IConsole::IResult *pResult, void *pUserData);
+	static void ConRemoveRecordWithTime(IConsole::IResult *pResult, void *pUserData);
+	static void ConRemoveAllRecords(IConsole::IResult *pResult, void *pUserData);
 
 	struct CFakeSnapPlayer
 	{

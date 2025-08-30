@@ -1951,3 +1951,141 @@ bool CScoreWorker::GetSaves(IDbConnection *pSqlServer, const ISqlData *pGameData
 	}
 	return true;
 }
+
+// <FoxNet
+bool CScoreWorker::RemovePlayerMapRecords(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
+{
+	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
+
+	char aBuf[256];
+	// Remove all race records for this player on the map
+	str_format(aBuf, sizeof(aBuf),
+		"DELETE FROM %s_race WHERE Name = ? AND Map = ?",
+		pSqlServer->GetPrefix());
+	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		return false;
+	pSqlServer->BindString(1, pData->m_aName);
+	pSqlServer->BindString(2, pData->m_aMap);
+	int NumDeletedRace = 0;
+	if(!pSqlServer->ExecuteUpdate(&NumDeletedRace, pError, ErrorSize))
+		return false;
+
+	// subtract the map's points from the player's total
+	int NumUpdatedPoints = 0;
+	str_format(aBuf, sizeof(aBuf),
+		"SELECT Points FROM %s_maps WHERE Map = ?",
+		pSqlServer->GetPrefix());
+	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		return false;
+	pSqlServer->BindString(1, pData->m_aMap);
+	bool End2;
+	if(!pSqlServer->Step(&End2, pError, ErrorSize))
+		return false;
+	int MapPoints = End2 ? 0 : pSqlServer->GetInt(1);
+
+	str_format(aBuf, sizeof(aBuf),
+		"UPDATE %s_points SET Points = Points - ? WHERE Name = ?",
+		pSqlServer->GetPrefix());
+	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		return false;
+	pSqlServer->BindInt(1, MapPoints);
+	pSqlServer->BindString(2, pData->m_aName);
+	if(!pSqlServer->ExecuteUpdate(&NumUpdatedPoints, pError, ErrorSize))
+		return false;
+
+	dbg_msg("sql", "Removed %d records and subtracted %d points for player '%s' on map '%s'", NumDeletedRace, NumUpdatedPoints, pData->m_aName, pData->m_aMap);
+	return true;
+}
+
+bool CScoreWorker::RemovePlayerRecordWithTime(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
+{
+	const auto *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
+
+	// Remove race record with specific time
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf),
+		"DELETE FROM %s_race WHERE Name = ? AND Map = ? AND ABS(Time - ?) < 0.001",
+		pSqlServer->GetPrefix());
+	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		return false;
+	pSqlServer->BindString(1, pData->m_aName);
+	pSqlServer->BindString(2, pData->m_aMap);
+	pSqlServer->BindFloat(3, pData->m_Time);
+	int NumDeletedRace = 0;
+	if(!pSqlServer->ExecuteUpdate(&NumDeletedRace, pError, ErrorSize))
+		return false;
+
+	// Check if any other finishes remain for this player on this map
+	str_format(aBuf, sizeof(aBuf),
+		"SELECT COUNT(*) FROM %s_race WHERE Name = ? AND Map = ?",
+		pSqlServer->GetPrefix());
+	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		return false;
+	pSqlServer->BindString(1, pData->m_aName);
+	pSqlServer->BindString(2, pData->m_aMap);
+
+	bool End;
+	if(!pSqlServer->Step(&End, pError, ErrorSize))
+		return false;
+	int NumRemaining = pSqlServer->GetInt(1);
+
+	int NumUpdatedPoints = 0;
+	if(NumRemaining == 0)
+	{
+		// Subtract the map's points from the player's total
+		str_format(aBuf, sizeof(aBuf),
+			"SELECT Points FROM %s_maps WHERE Map = ?",
+			pSqlServer->GetPrefix());
+		if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+			return false;
+		pSqlServer->BindString(1, pData->m_aMap);
+		bool End2;
+		if(!pSqlServer->Step(&End2, pError, ErrorSize))
+			return false;
+		int MapPoints = End2 ? 0 : pSqlServer->GetInt(1);
+
+		str_format(aBuf, sizeof(aBuf),
+			"UPDATE %s_points SET Points = Points - ? WHERE Name = ?",
+			pSqlServer->GetPrefix());
+		if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+			return false;
+		pSqlServer->BindInt(1, MapPoints);
+		pSqlServer->BindString(2, pData->m_aName);
+		if(!pSqlServer->ExecuteUpdate(&NumUpdatedPoints, pError, ErrorSize))
+			return false;
+	}
+
+	dbg_msg("sql", "Removed %d records and subtracted %d points for player '%s' on map '%s' with time %.6f (remaining finishes on map: %d)", NumDeletedRace, NumUpdatedPoints, pData->m_aName, pData->m_aMap, pData->m_Time, NumRemaining);
+	return true;
+}
+
+bool CScoreWorker::RemoveAllPlayerRecords(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
+{
+	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
+
+	// Remove all race records for this player
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf),
+		"DELETE FROM %s_race WHERE Name = ?",
+		pSqlServer->GetPrefix());
+	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		return false;
+	pSqlServer->BindString(1, pData->m_aName);
+	int NumDeletedRace = 0;
+	if(!pSqlServer->ExecuteUpdate(&NumDeletedRace, pError, ErrorSize))
+		return false;
+
+	str_format(aBuf, sizeof(aBuf),
+		"DELETE FROM %s_points WHERE Name = ?",
+		pSqlServer->GetPrefix());
+	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		return false;
+	pSqlServer->BindString(1, pData->m_aName);
+	int NumDeletedPoints = 0;
+	if(!pSqlServer->ExecuteUpdate(&NumDeletedPoints, pError, ErrorSize))
+		return false;
+
+	dbg_msg("sql", "Removed %d records and %d points for player '%s'", NumDeletedRace, NumDeletedPoints, pData->m_aName);
+	return true;
+}
+// FoxNet>

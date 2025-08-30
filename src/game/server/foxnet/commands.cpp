@@ -7,6 +7,7 @@
 #include <game/gamecore.h>
 #include <engine/shared/protocol.h>
 #include "votemenu.h"
+#include <game/server/score.h>
 
 void CGameContext::ConAccRegister(IConsole::IResult *pResult, void *pUserData)
 {
@@ -1255,6 +1256,82 @@ void CGameContext::ConToggleMapVoteLock(IConsole::IResult *pResult, void *pUserD
 	}
 }
 
+void CGameContext::ConInsertRecord(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	const char *pName = pResult->GetString(0);
+	const char *pMap = pResult->GetString(1);
+	float Time = pResult->GetFloat(2);
+	pSelf->Score()->InsertPlayerRecord(pResult->m_ClientId, pName, pMap, Time);
+
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ++ClientId)
+	{
+		if(pSelf->Server()->ClientIngame(ClientId) && !str_comp(pName, pSelf->Server()->ClientName(ClientId)))
+		{
+			pSelf->Score()->PlayerData(ClientId)->Reset();
+			pSelf->m_apPlayers[ClientId]->m_Score.reset();
+			pSelf->Score()->LoadPlayerData(ClientId);
+			return;
+		}
+	}
+}
+
+void CGameContext::ConRemoveRecord(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	const char *pName = pResult->GetString(0);
+	const char *pMap = pResult->GetString(1);
+	pSelf->Score()->RemovePlayerRecords(pName, pMap);
+
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ++ClientId)
+	{
+		if(pSelf->Server()->ClientIngame(ClientId) && !str_comp(pName, pSelf->Server()->ClientName(ClientId)))
+		{
+			pSelf->Score()->PlayerData(ClientId)->Reset();
+			pSelf->m_apPlayers[ClientId]->m_Score.reset();
+			pSelf->Score()->LoadPlayerData(ClientId);
+			return;
+		}
+	}
+}
+void CGameContext::ConRemoveRecordWithTime(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	const char *pName = pResult->GetString(0);
+	const char *pMap = pResult->GetString(1);
+	float Time = pResult->GetFloat(2);
+	pSelf->Score()->RemovePlayerRecordWithTime(pName, pMap, Time);
+
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ++ClientId)
+	{
+		if(pSelf->Server()->ClientIngame(ClientId) && !str_comp(pName, pSelf->Server()->ClientName(ClientId)))
+		{
+			pSelf->Score()->PlayerData(ClientId)->Reset();
+			pSelf->m_apPlayers[ClientId]->m_Score.reset();
+			pSelf->Score()->LoadPlayerData(ClientId);
+			return;
+		}
+	}
+}
+
+void CGameContext::ConRemoveAllRecords(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	const char *pName = pResult->GetString(0);
+	pSelf->Score()->RemoveAllPlayerRecords(pName);
+
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ++ClientId)
+	{
+		if(pSelf->Server()->ClientIngame(ClientId) && !str_comp(pName, pSelf->Server()->ClientName(ClientId)))
+		{
+			pSelf->Score()->PlayerData(ClientId)->Reset();
+			pSelf->m_apPlayers[ClientId]->m_Score.reset();
+			pSelf->Score()->LoadPlayerData(ClientId);
+			return;
+		}
+	}
+}
+
 void CGameContext::RegisterFoxNetCommands()
 {
 	Console()->Register("chat_string_add", "s[string] s[reason] i[should Ban] i[bantime] ?f[addition]", CFGFLAG_SERVER, ConAddChatDetectionString, this, "Add a string to the chat detection list");
@@ -1332,6 +1409,11 @@ void CGameContext::RegisterFoxNetCommands()
 	Console()->Register("c_damageind_type", "i[type] ?v[id]", CFGFLAG_SERVER, ConDamageIndEffect, this, "Set a players (id) Damage Ind Type");
 
 	Console()->Register("c_hide_cosmetics", "?v[id]", CFGFLAG_SERVER, ConHideCosmetics, this, "Hides Cosmetics for Player (id)");
+
+	Console()->Register("record_insert", "s[name] s[map] f[time]", CFGFLAG_SERVER, ConInsertRecord, this, "insert a new record for that name on the given map with given time");
+	Console()->Register("record_remove", "s[name] r[map]", CFGFLAG_SERVER, ConRemoveRecord, this, "remove all records a name has on the given map");
+	Console()->Register("record_remove_time", "s[name] s[map] f[time]", CFGFLAG_SERVER, ConRemoveRecordWithTime, this, "remove records a name has on given map with given time");
+	Console()->Register("record_remove_all", "r[name]", CFGFLAG_SERVER, ConRemoveAllRecords, this, "remove all records a name has");
 
 	Console()->Register("force_login", "r[username]", CFGFLAG_SERVER, ConAccForceLogin, this, "Force Log into any account");
 	Console()->Register("force_logout", "i[id]", CFGFLAG_SERVER, ConAccForceLogout, this, "Force logout an account thats currently active on the server");

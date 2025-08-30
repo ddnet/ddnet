@@ -71,6 +71,12 @@ public:
 	void SaveTeam(int ClientId, const char *pCode, const char *pServer);
 	void LoadTeam(const char *pCode, int ClientId);
 	void GetSaves(int ClientId);
+	// <FoxNet
+	void InsertPlayerRecord(int ClientId, const char *pName, const char *pMap, float Time);
+	void RemovePlayerRecords(const char *pName, const char *pMap);
+	void RemovePlayerRecordWithTime(const char *pName, const char *pMap, float Time);
+	void RemoveAllPlayerRecords(const char *pName);
+	// FoxNet>
 };
 
 #endif // GAME_SERVER_SCORE_H

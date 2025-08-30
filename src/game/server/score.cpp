@@ -395,3 +395,64 @@ void CScore::GetSaves(int ClientId)
 		return;
 	ExecPlayerThread(CScoreWorker::GetSaves, "get saves", ClientId, "", 0);
 }
+// <FoxNet
+void CScore::InsertPlayerRecord(int ClientId, const char *pName, const char *pMap, float Time)
+{
+	CPlayer *pCurPlayer = GameServer()->m_apPlayers[ClientId];
+	if(pCurPlayer->m_ScoreFinishResult != nullptr)
+		dbg_msg("sql", "WARNING: previous save score result didn't complete, overwriting it now");
+	pCurPlayer->m_ScoreFinishResult = std::make_shared<CScorePlayerResult>();
+	auto Tmp = std::make_unique<CSqlScoreData>(pCurPlayer->m_ScoreFinishResult);
+
+	str_copy(Tmp->m_aMap, pMap, sizeof(Tmp->m_aMap));
+	str_copy(Tmp->m_aName, pName, sizeof(Tmp->m_aName));
+	FormatUuid(GameServer()->GameUuid(), Tmp->m_aGameUuid, sizeof(Tmp->m_aGameUuid));
+
+	Tmp->m_ClientId = ClientId;
+	Tmp->m_Time = Time;
+
+	char aTimestamp[TIMESTAMP_STR_LENGTH];
+	str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_SPACE);
+	str_copy(Tmp->m_aTimestamp, aTimestamp, sizeof(Tmp->m_aTimestamp));
+
+	for(int i = 0; i < NUM_CHECKPOINTS; i++)
+		Tmp->m_aCurrentTimeCp[i] = 0.0f;
+
+	m_pPool->ExecuteWrite(CScoreWorker::SaveScore, std::move(Tmp), "save score");
+}
+
+void CScore::RemovePlayerRecords(const char *pName, const char *pMap)
+{
+	auto pResult = std::make_shared<CScorePlayerResult>();
+	auto Tmp = std::make_unique<CSqlPlayerRequest>(pResult);
+
+	str_copy(Tmp->m_aName, pName, sizeof(Tmp->m_aName));
+	str_copy(Tmp->m_aMap, pMap, sizeof(Tmp->m_aMap));
+	str_copy(Tmp->m_aRequestingPlayer, pName, sizeof(Tmp->m_aRequestingPlayer));
+
+	m_pPool->ExecuteWrite(CScoreWorker::RemovePlayerMapRecords, std::move(Tmp), "remove player map records");
+}
+
+void CScore::RemovePlayerRecordWithTime(const char *pName, const char *pMap, float Time)
+{
+	auto pResult = std::make_shared<CScorePlayerResult>();
+	auto Tmp = std::make_unique<CSqlScoreData>(pResult);
+
+	str_copy(Tmp->m_aName, pName, sizeof(Tmp->m_aName));
+	str_copy(Tmp->m_aMap, pMap, sizeof(Tmp->m_aMap));
+	Tmp->m_Time = Time;
+
+	m_pPool->ExecuteWrite(CScoreWorker::RemovePlayerRecordWithTime, std::move(Tmp), "remove player record with time");
+}
+
+void CScore::RemoveAllPlayerRecords(const char *pName)
+{
+	auto pResult = std::make_shared<CScorePlayerResult>();
+	auto Tmp = std::make_unique<CSqlPlayerRequest>(pResult);
+
+	str_copy(Tmp->m_aName, pName, sizeof(Tmp->m_aName));
+	str_copy(Tmp->m_aRequestingPlayer, pName, sizeof(Tmp->m_aRequestingPlayer));
+
+	m_pPool->ExecuteWrite(CScoreWorker::RemoveAllPlayerRecords, std::move(Tmp), "remove all player map records");
+}
+// FoxNet>
