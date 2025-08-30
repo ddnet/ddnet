@@ -88,6 +88,7 @@
 #if defined(CONF_PLATFORM_EMSCRIPTEN)
 #include <emscripten/emscripten.h>
 #endif
+#include <random>
 
 static NETSTATS network_stats = {0};
 

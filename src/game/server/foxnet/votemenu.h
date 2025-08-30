@@ -4,7 +4,7 @@
 #include "accounts.h"
 #include <array>
 #include <engine/shared/protocol.h>
-#include <game/generated/protocol.h>
+#include <generated/protocol.h>
 #include <game/server/player.h>
 
 class CGameContext;

@@ -9,7 +9,7 @@
 #include <game/mapitems.h>
 #include <game/mapitems_ex.h>
 
-int IEnvelopePointAccess::FindPointIndex(int Time) const
+int IEnvelopePointAccess::FindPointIndex(CFixedTime Time) const
 {
 	// binary search for the interval around Time
 	int Low = 0;

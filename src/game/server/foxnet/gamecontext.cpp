@@ -12,7 +12,7 @@
 #include <game/collision.h>
 #include <game/gamecore.h>
 #include <game/mapitems.h>
-#include <game/generated/protocol.h>
+#include <generated/protocol.h>
 #include <game/voting.h>
 
 void CGameContext::FoxNetTick()

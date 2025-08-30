@@ -1345,7 +1345,7 @@ int CCollision::GetQuadCorners(int StartNum, const CMapItemLayerQuads *pQuadLaye
 	vec2 p2 = Position + vec2(fx2f(pQuads[Num].m_aPoints[2].x), fx2f(pQuads[Num].m_aPoints[2].y));
 	vec2 p3 = Position + vec2(fx2f(pQuads[Num].m_aPoints[3].x), fx2f(pQuads[Num].m_aPoints[3].y));
 
-	if(Angle != 0)
+	if(Angle != 0.0f)
 	{
 		vec2 center(fx2f(pQuads[Num].m_aPoints[4].x), fx2f(pQuads[Num].m_aPoints[4].y));
 		Rotate(center, &p0, Angle);
@@ -1468,7 +1468,6 @@ void CCollision::GetAnimationTransform(float GlobalTime, int Env, CLayers *pLaye
 	if(Env >= Num)
 		return;
 	CMapItemEnvelope *pItem = (CMapItemEnvelope *)pLayers->Map()->GetItem(Start + Env, 0, 0);
-
 	if(pItem->m_NumPoints == 0)
 		return;
 
@@ -1487,100 +1486,107 @@ void CCollision::GetAnimationTransform(float GlobalTime, int Env, CLayers *pLaye
 		return;
 	}
 
-	int NumPoints = EnvelopePoints.NumPoints();
+	const int NumPoints = EnvelopePoints.NumPoints();
 	const CEnvPoint *pLastPoint = EnvelopePoints.GetPoint(NumPoints - 1);
-	float Time = std::fmod(GlobalTime, pLastPoint->m_Time / 1000.0f) * 1000.0f;
-	for(int i = 0; i < pItem->m_NumPoints - 1; i++)
+
+	const float LoopDurationSec = pLastPoint->m_Time.AsSeconds();
+	const float TimeSec = LoopDurationSec > 0.0f ? std::fmod(GlobalTime, LoopDurationSec) : 0.0f;
+
+	for(int i = 0; i < NumPoints - 1; i++)
 	{
-		if(Time >= EnvelopePoints.GetPoint(i)->m_Time && Time <= EnvelopePoints.GetPoint(i + 1)->m_Time)
+		const CEnvPoint *pCur = EnvelopePoints.GetPoint(i);
+		const CEnvPoint *pNext = EnvelopePoints.GetPoint(i + 1);
+
+		const float t0 = pCur->m_Time.AsSeconds();
+		const float t1 = pNext->m_Time.AsSeconds();
+		if(!(TimeSec >= t0 && TimeSec < t1))
+			continue;
+
+		const float Delta = t1 - t0;
+		if(Delta <= 0.0f)
 		{
-			float Delta = EnvelopePoints.GetPoint(i + 1)->m_Time - EnvelopePoints.GetPoint(i)->m_Time;
-			float a = (Time - EnvelopePoints.GetPoint(i)->m_Time) / Delta;
-			switch(EnvelopePoints.GetPoint(i)->m_Curvetype)
-			{
-			case CURVETYPE_SMOOTH:
-			{
-				a = -2 * a * a * a + 3 * a * a; // second hermite basis
-				break;
-			}
-			case CURVETYPE_SLOW:
-			{
-				a = a * a * a;
-				break;
-			}
-			case CURVETYPE_FAST:
-			{
-				a = 1 - a;
-				a = 1 - a * a * a;
-				break;
-			}
-			case CURVETYPE_STEP:
-			{
-				a = 0;
-				break;
-			}
-			case CURVETYPE_BEZIER:
-			{
-				const CEnvPointBezier *pCurrentPointBezier = EnvelopePoints.GetBezier(i);
-				const CEnvPointBezier *pNextPointBezier = EnvelopePoints.GetBezier(i + 1);
-				if(pCurrentPointBezier == nullptr || pNextPointBezier == nullptr)
-					break; // fallback to linear
-				for(size_t c = 0; c < 3; c++)
-				{
-					// monotonic 2d cubic bezier curve
-					const vec2 p0 = vec2(EnvelopePoints.GetPoint(i)->m_Time, fx2f(EnvelopePoints.GetPoint(i)->m_aValues[c]));
-					const vec2 p3 = vec2(EnvelopePoints.GetPoint(i + 1)->m_Time, fx2f(EnvelopePoints.GetPoint(i + 1)->m_aValues[c]));
+			Position.x = fx2f(pCur->m_aValues[0]);
+			Position.y = fx2f(pCur->m_aValues[1]);
+			Angle = fx2f(pCur->m_aValues[2]) / 360.0f * pi * 2.0f;
+			return;
+		}
 
-					const vec2 OutTang = vec2(pCurrentPointBezier->m_aOutTangentDeltaX[c], fx2f(pCurrentPointBezier->m_aOutTangentDeltaY[c]));
-					const vec2 InTang = vec2(pNextPointBezier->m_aInTangentDeltaX[c], fx2f(pNextPointBezier->m_aInTangentDeltaY[c]));
+		float a = (TimeSec - t0) / Delta;
 
-					vec2 p1 = p0 + OutTang;
-					vec2 p2 = p3 + InTang;
+		switch(pCur->m_Curvetype)
+		{
+		case CURVETYPE_SMOOTH:
+			a = -2.0f * a * a * a + 3.0f * a * a;
+			break;
+		case CURVETYPE_SLOW:
+			a = a * a * a;
+			break;
+		case CURVETYPE_FAST:
+			a = 1.0f - a;
+			a = 1.0f - a * a * a;
+			break;
+		case CURVETYPE_STEP:
+			a = 0.0f;
+			break;
+		case CURVETYPE_BEZIER:
+		{
+			const CEnvPointBezier *pCurBez = EnvelopePoints.GetBezier(i);
+			const CEnvPointBezier *pNextBez = EnvelopePoints.GetBezier(i + 1);
+			if(pCurBez == nullptr || pNextBez == nullptr)
+				break; // fallback to linear
 
-					// validate bezier curve
-					p1.x = std::clamp(p1.x, p0.x, p3.x);
-					p2.x = std::clamp(p2.x, p0.x, p3.x);
-
-					// solve x(a) = time for a
-					a = std::clamp(SolveBezier(Time, p0.x, p1.x, p2.x, p3.x), 0.0f, 1.0f);
-
-					// value = y(t)
-					if(c == 0)
-						Position.x = bezier(p0.y, p1.y, p2.y, p3.y, a);
-					else if(c == 1)
-						Position.y = bezier(p0.y, p1.y, p2.y, p3.y, a);
-					else if(c == 2)
-						Angle = bezier(p0.y, p1.y, p2.y, p3.y, a) / 360.0f * pi * 2.0f;
-				}
-
-				return;
-			}
-			default:
+			for(size_t c = 0; c < 3; c++)
 			{
+				// 2D cubic bezier in time-value space, all in seconds
+				const vec2 P0 = vec2(pCur->m_Time.AsSeconds(), fx2f(pCur->m_aValues[c]));
+				const vec2 P3 = vec2(pNext->m_Time.AsSeconds(), fx2f(pNext->m_aValues[c]));
+				const vec2 OutTang = vec2(pCurBez->m_aOutTangentDeltaX[c].AsSeconds(), fx2f(pCurBez->m_aOutTangentDeltaY[c]));
+				const vec2 InTang = vec2(pNextBez->m_aInTangentDeltaX[c].AsSeconds(), fx2f(pNextBez->m_aInTangentDeltaY[c]));
 
-			}
-			}
-			// X
-			{
-				float v0 = fx2f(EnvelopePoints.GetPoint(i)->m_aValues[0]);
-				float v1 = fx2f(EnvelopePoints.GetPoint(i + 1)->m_aValues[0]);
-				Position.x = v0 + (v1 - v0) * a;
-			}
-			// Y
-			{
-				float v0 = fx2f(EnvelopePoints.GetPoint(i)->m_aValues[1]);
-				float v1 = fx2f(EnvelopePoints.GetPoint(i + 1)->m_aValues[1]);
-				Position.y = v0 + (v1 - v0) * a;
-			}
-			// angle
-			{
-				float v0 = fx2f(EnvelopePoints.GetPoint(i)->m_aValues[2]);
-				float v1 = fx2f(EnvelopePoints.GetPoint(i + 1)->m_aValues[2]);
-				Angle = (v0 + (v1 - v0) * a) / 360.0f * pi * 2.0f;
+				vec2 P1 = P0 + OutTang;
+				vec2 P2 = P3 + InTang;
+
+				// keep monotonic in time
+				P1.x = std::clamp(P1.x, P0.x, P3.x);
+				P2.x = std::clamp(P2.x, P0.x, P3.x);
+
+				// solve x(t) = time for t
+				const float t = std::clamp(SolveBezier(TimeSec, P0.x, P1.x, P2.x, P3.x), 0.0f, 1.0f);
+
+				const float v = bezier(P0.y, P1.y, P2.y, P3.y, t);
+				if(c == 0)
+					Position.x = v;
+				else if(c == 1)
+					Position.y = v;
+				else
+					Angle = v / 360.0f * pi * 2.0f;
 			}
 			return;
 		}
+		default:
+			break;
+		}
+
+		// Linear interpolation as fallback or after shaping 'a'
+		{
+			const float x0 = fx2f(pCur->m_aValues[0]);
+			const float x1 = fx2f(pNext->m_aValues[0]);
+			Position.x = x0 + (x1 - x0) * a;
+		}
+		{
+			const float y0 = fx2f(pCur->m_aValues[1]);
+			const float y1 = fx2f(pNext->m_aValues[1]);
+			Position.y = y0 + (y1 - y0) * a;
+		}
+		{
+			const float r0 = fx2f(pCur->m_aValues[2]);
+			const float r1 = fx2f(pNext->m_aValues[2]);
+			Angle = (r0 + (r1 - r0) * a) / 360.0f * pi * 2.0f;
+		}
+		return;
 	}
+
+	// If not found (edge cases), use last point
 	Position.x = fx2f(pLastPoint->m_aValues[0]);
 	Position.y = fx2f(pLastPoint->m_aValues[1]);
 	Angle = fx2f(pLastPoint->m_aValues[2]) / 360.0f * pi * 2.0f;

@@ -3,7 +3,7 @@
 #include "game/server/entities/character.h"
 #include <base/vmath.h>
 #include <engine/shared/config.h>
-#include <game/generated/protocol.h>
+#include <generated/protocol.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gameworld.h>
 #include <game/server/player.h>

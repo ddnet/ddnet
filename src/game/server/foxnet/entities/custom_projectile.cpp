@@ -4,15 +4,17 @@
 #include <game/server/entities/character.h>
 #include <game/server/player.h>
 
-#include <game/generated/protocol.h>
-#include <game/generated/server_data.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
 #include <game/server/teams.h>
 
+#include <generated/protocol.h>
+#include <generated/server_data.h>
+
 #include <base/vmath.h>
 #include <game/mapitems.h>
 #include <game/server/entity.h>
+#include <game/server/gameworld.h>
 
 CCustomProjectile::CCustomProjectile(CGameWorld *pGameWorld, int Owner, vec2 Pos, vec2 Dir,
 	bool Explosive, bool Freeze, bool Unfreeze, int Type, bool IsNormalWeapon, float Lifetime, float Accel, float Speed) :
@@ -84,11 +86,11 @@ void CCustomProjectile::Tick()
 		m_CollisionState = COLLIDED_TWICE;
 
 	// weapon teleport
-	//int x = GameServer()->Collision()->GetIndex(m_PrevPos, m_Pos);
-	//int z;
-	//if(Config()->m_SvOldTeleportWeapons)
+	// int x = GameServer()->Collision()->GetIndex(m_PrevPos, m_Pos);
+	// int z;
+	// if(Config()->m_SvOldTeleportWeapons)
 	//	z = GameServer()->Collision()->IsTeleport(x);
-	//else
+	// else
 	//	z = GameServer()->Collision()->IsTeleportWeapon(x);
 	// if(z && ((CGameControllerDDRace *)GameServer()->m_pController)->m_TeleOuts[z - 1].size())
 	//{

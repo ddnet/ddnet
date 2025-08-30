@@ -21,3 +21,4 @@ extern const char *GIT_SHORTREV_HASH;
 #define FOXNET_VERSION "v0.4"
 
 #endif
+	
