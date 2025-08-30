@@ -50,10 +50,28 @@ SHA256_DIGEST CAccounts::HashPassword(const char *pPassword)
 void CAccounts::Init(CGameContext *pGameServer)
 {
 	m_pGameServer = pGameServer;
+
 	if(sqlite3_open("Accounts.sqlite", &m_AccDatabase) != SQLITE_OK)
 	{
 		dbg_msg("accounts", "Failed to open SQLite database: %s", sqlite3_errmsg(m_AccDatabase));
 		return;
+	}
+
+	char *pErr = nullptr;
+	if(sqlite3_exec(m_AccDatabase, "PRAGMA journal_mode=WAL;", nullptr, nullptr, &pErr) != SQLITE_OK)
+	{
+		dbg_msg("accounts", "Failed to set WAL mode: %s", pErr ? pErr : "(unknown)");
+		sqlite3_free(pErr);
+	}
+	if(sqlite3_exec(m_AccDatabase, "PRAGMA busy_timeout=5000;", nullptr, nullptr, &pErr) != SQLITE_OK)
+	{
+		dbg_msg("accounts", "Failed to set busy_timeout: %s", pErr ? pErr : "(unknown)");
+		sqlite3_free(pErr);
+	}
+
+	if(sqlite3_exec(m_AccDatabase, SQLITE_TABLE, nullptr, nullptr, &pErr) != SQLITE_OK)
+	{
+		dbg_msg("accounts", "Failed to create Accounts table: %s", pErr ? pErr : "(unknown)");
 	}
 
 	LogoutAllAccountsPort(Server()->Port());
