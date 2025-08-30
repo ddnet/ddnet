@@ -2,12 +2,13 @@
 #define GAME_CLIENT_COMPONENTS_LOCAL_SERVER_H
 
 #include <base/types.h>
-
+#include <engine/shared/config.h>
 #include <game/client/component.h>
 
 class CLocalServer : public CComponentInterfaces
 {
 public:
+	virtual ~CLocalServer() = default;
 	void RunServer(const std::vector<const char *> &vpArguments);
 	void KillServer();
 	bool IsServerRunning();
