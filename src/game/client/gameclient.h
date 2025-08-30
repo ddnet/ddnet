@@ -29,6 +29,7 @@
 #include "components/binds.h"
 #include "components/broadcast.h"
 #include "components/camera.h"
+#include "components/censor.h"
 #include "components/chat.h"
 #include "components/console.h"
 #include "components/controls.h"
@@ -135,6 +136,7 @@ public:
 	CInfoMessages m_InfoMessages;
 	CCamera m_Camera;
 	CChat m_Chat;
+	CCensor m_Censor;
 	CMotd m_Motd;
 	CBroadcast m_Broadcast;
 	CGameConsole m_GameConsole;
