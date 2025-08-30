@@ -1,4 +1,4 @@
-### FoxNet, a DDNet server modification
+﻿### FoxNet, a DDNet server modification
 
 # Features
 - Accounts
@@ -12,6 +12,7 @@
 |Configs|Description|
 |-|-|
 |sv_vote_menu_flags|Toggle Specific pages in the vote menu using flags|
+|sv_vote_skip_prefix|Whether to skip "│" in vote menu descriptions|
 |sv_accounts|Whether accounts are enabled or not|
 |sv_currency_name|What name the currency should be|
 |sv_levelup_money|How much money a player gets on level up|
@@ -73,6 +74,8 @@
 |telekinesis|Toggle telekinesis for a player|
 |heartgun|Toggle heartgun for a player|
 |spider_hook|Toggle spider hook for a player|
+|fake_message|Send a message as a player that doesn't exist|
+|map_vote_lock|Lock changing maps trough normal votes|
 
 |Chat Commands|Description|
 |-|-|

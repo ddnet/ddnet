@@ -5,6 +5,8 @@
 #include <game/server/gamecontroller.h>
 #include <game/server/player.h>
 #include <game/gamecore.h>
+#include <engine/shared/protocol.h>
+#include "votemenu.h"
 
 void CGameContext::ConAccRegister(IConsole::IResult *pResult, void *pUserData)
 {
@@ -1238,6 +1240,21 @@ void CGameContext::ConSendFakeMessage(IConsole::IResult *pResult, void *pUserDat
 	pSelf->AddFakeMessage(pName, pMsg, "Robot");
 }
 
+void CGameContext::ConToggleMapVoteLock(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->m_MapVoteLock = !pSelf->m_MapVoteLock;
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+	{
+		if (pSelf->m_apPlayers[ClientId])
+		{
+			const int VoteMenuPage = pSelf->m_VoteMenu.GetPage(ClientId);
+			if(VoteMenuPage == PAGE_VOTES)
+				pSelf->ClearVotes(ClientId);
+		}
+	}
+}
+
 void CGameContext::RegisterFoxNetCommands()
 {
 	Console()->Register("chat_string_add", "s[string] s[reason] i[should Ban] i[bantime] ?f[addition]", CFGFLAG_SERVER, ConAddChatDetectionString, this, "Add a string to the chat detection list");
@@ -1285,6 +1302,8 @@ void CGameContext::RegisterFoxNetCommands()
 	Console()->Register("spider_hook", "?v[id]", CFGFLAG_SERVER, ConSetSpiderHook, this, "whether player (id) has spider hook");
 
 	Console()->Register("fake_message", "s[name] r[msg]", CFGFLAG_SERVER, ConSendFakeMessage, this, "Sends a message as a fake player with that name");
+
+	Console()->Register("map_vote_lock", "", CFGFLAG_SERVER, ConToggleMapVoteLock, this, "Toggle Map Vote Locking");
 
 	Console()->Register("c_lovely", "?v[id]", CFGFLAG_SERVER, ConLovely, this, "Makes a player (id) Lovely");
 	Console()->Register("c_staff_ind", "?v[id]", CFGFLAG_SERVER, ConStaffInd, this, "Gives a player (id) a Staff Indicator");

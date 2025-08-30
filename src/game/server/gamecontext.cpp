@@ -37,6 +37,7 @@
 
 #include "foxnet/votemenu.h"
 #include "foxnet/shop.h"
+#include <cstring>
 
 // Not thread-safe!
 class CClientChatLogger : public ILogger
@@ -1496,6 +1497,8 @@ void CGameContext::ProgressVoteOptions(int ClientId)
 
 	int VotesLeft = m_NumVoteOptions - pPl->m_SendVoteIndex;
 	int NumVotesToSend = minimum(g_Config.m_SvSendVotesPerTick, VotesLeft);
+	// Ensure we don't exceed the 15 description slots in the message
+	NumVotesToSend = minimum(NumVotesToSend, 15);
 
 	if(!VotesLeft)
 	{
@@ -1526,26 +1529,39 @@ void CGameContext::ProgressVoteOptions(int ClientId)
 	// get current vote option by index
 	const CVoteOptionServer *pCurrent = GetVoteOption(pPl->m_SendVoteIndex);
 
+	// <FoxNet
+	char aDescBuf[15][VOTE_DESC_LENGTH] = {{0}};
+	// FoxNet>
 	while(CurIndex < NumVotesToSend && pCurrent != nullptr)
 	{
+		// <FoxNet
+		const char *pDesc = pCurrent->m_aDescription;
+
+		if(!str_comp(pCurrent->m_aCommand, "map_vote_lock"))
+		{
+			str_format(aDescBuf[CurIndex], sizeof(aDescBuf[CurIndex]), "%s%s",pCurrent->m_aDescription, m_MapVoteLock ? "ALLOW Map Changing" : "LOCK Map Changing");
+			pDesc = aDescBuf[CurIndex];
+		}
+
 		switch(CurIndex)
 		{
-		case 0: OptionMsg.m_pDescription0 = pCurrent->m_aDescription; break;
-		case 1: OptionMsg.m_pDescription1 = pCurrent->m_aDescription; break;
-		case 2: OptionMsg.m_pDescription2 = pCurrent->m_aDescription; break;
-		case 3: OptionMsg.m_pDescription3 = pCurrent->m_aDescription; break;
-		case 4: OptionMsg.m_pDescription4 = pCurrent->m_aDescription; break;
-		case 5: OptionMsg.m_pDescription5 = pCurrent->m_aDescription; break;
-		case 6: OptionMsg.m_pDescription6 = pCurrent->m_aDescription; break;
-		case 7: OptionMsg.m_pDescription7 = pCurrent->m_aDescription; break;
-		case 8: OptionMsg.m_pDescription8 = pCurrent->m_aDescription; break;
-		case 9: OptionMsg.m_pDescription9 = pCurrent->m_aDescription; break;
-		case 10: OptionMsg.m_pDescription10 = pCurrent->m_aDescription; break;
-		case 11: OptionMsg.m_pDescription11 = pCurrent->m_aDescription; break;
-		case 12: OptionMsg.m_pDescription12 = pCurrent->m_aDescription; break;
-		case 13: OptionMsg.m_pDescription13 = pCurrent->m_aDescription; break;
-		case 14: OptionMsg.m_pDescription14 = pCurrent->m_aDescription; break;
+		case 0: OptionMsg.m_pDescription0 = pDesc; break;
+		case 1: OptionMsg.m_pDescription1 = pDesc; break;
+		case 2: OptionMsg.m_pDescription2 = pDesc; break;
+		case 3: OptionMsg.m_pDescription3 = pDesc; break;
+		case 4: OptionMsg.m_pDescription4 = pDesc; break;
+		case 5: OptionMsg.m_pDescription5 = pDesc; break;
+		case 6: OptionMsg.m_pDescription6 = pDesc; break;
+		case 7: OptionMsg.m_pDescription7 = pDesc; break;
+		case 8: OptionMsg.m_pDescription8 = pDesc; break;
+		case 9: OptionMsg.m_pDescription9 = pDesc; break;
+		case 10: OptionMsg.m_pDescription10 = pDesc; break;
+		case 11: OptionMsg.m_pDescription11 = pDesc; break;
+		case 12: OptionMsg.m_pDescription12 = pDesc; break;
+		case 13: OptionMsg.m_pDescription13 = pDesc; break;
+		case 14: OptionMsg.m_pDescription14 = pDesc; break;
 		}
+		// FoxNet>
 
 		CurIndex++;
 		pCurrent = pCurrent->m_pNext;
@@ -2378,7 +2394,30 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 				{
 					str_copy(aCmd, pOption->m_aCommand);
 				}
+				// <FoxNet
+				if(m_MapVoteLock)
+				{
+					if(str_startswith(aCmd, "sv_map ") || str_startswith(aCmd, "change_map ") || str_startswith(aCmd, "random_map") || str_startswith(aCmd, "random_unfinished_map"))
+					{
+						SendChatTarget(ClientId, "Map votes are currently locked");
+						return;
+					}
+				}
+				if(g_Config.m_SvVoteSkipPrefix)
+				{
+				
+					if(str_startswith(aDesc, "│"))
+					{
+						size_t prefixLen = str_length("│");
+						size_t descLen = str_length(aDesc);
+						memmove(aDesc, aDesc + prefixLen, descLen - prefixLen + 1);
 
+						if(str_startswith(aCmd, " "))
+							memmove(aCmd, aCmd + 1, str_length(aCmd));
+						break;
+					}
+				}
+				// FoxNet>
 				m_LastMapVote = time_get();
 				break;
 			}
@@ -2388,17 +2427,30 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 
 		if(!pOption)
 		{
-			if(Authed != AUTHED_ADMIN) // allow admins to call any vote they want
+			// <FoxNet
+			bool IsValid = false;
+
+			if(str_find(pMsg->m_pValue, m_MapVoteLock ? "ALLOW Map Changing" : "LOCK Map Changing"))
 			{
-				str_format(aChatmsg, sizeof(aChatmsg), "'%s' isn't an option on this server", pMsg->m_pValue);
-				SendChatTarget(ClientId, aChatmsg);
-				return;
-			}
-			else
-			{
-				str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s'", Server()->ClientName(ClientId), pMsg->m_pValue);
+				IsValid = true;
 				str_copy(aDesc, pMsg->m_pValue);
-				str_copy(aCmd, pMsg->m_pValue);
+				str_copy(aCmd, "map_vote_lock");
+			}
+
+			if(!IsValid)
+			{// FoxNet>
+				if(Authed != AUTHED_ADMIN) // allow admins to call any vote they want
+				{
+					str_format(aChatmsg, sizeof(aChatmsg), "'%s' isn't an option on this server", pMsg->m_pValue);
+					SendChatTarget(ClientId, aChatmsg);
+					return;
+				}
+				else
+				{
+					str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s'", Server()->ClientName(ClientId), pMsg->m_pValue);
+					str_copy(aDesc, pMsg->m_pValue);
+					str_copy(aCmd, pMsg->m_pValue);
+				}
 			}
 		}
 

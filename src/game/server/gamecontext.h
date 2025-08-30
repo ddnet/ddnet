@@ -817,6 +817,9 @@ private:
 
 	static void ConSendFakeMessage(IConsole::IResult *pResult, void *pUserData);
 
+	static void ConToggleMapVoteLock(IConsole::IResult *pResult, void *pUserData);
+	bool m_MapVoteLock;
+
 	struct CFakeSnapPlayer
 	{
 		int m_Id;

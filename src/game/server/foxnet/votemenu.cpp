@@ -102,8 +102,9 @@ bool CVoteMenu::OnCallVote(const CNetMsg_Cl_CallVote *pMsg, int ClientId)
 	if(IsCustomVoteOption(pMsg, ClientId))
 	{
 		PrepareVoteOptions(ClientId, Page);
+		return true;
 	}
-	return true;
+	return false;
 }
 bool CVoteMenu::IsCustomVoteOption(const CNetMsg_Cl_CallVote *pMsg, int ClientId)
 {
