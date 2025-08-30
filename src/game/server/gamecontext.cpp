@@ -4235,11 +4235,11 @@ void CGameContext::OnInit(const void *pPersistentData)
 		char aVersion[128];
 		if(GIT_SHORTREV_HASH)
 		{
-			str_format(aVersion, sizeof(aVersion), "%s (%s)", GAME_VERSION, GIT_SHORTREV_HASH);
+			str_format(aVersion, sizeof(aVersion), "%s (%s)", FOXNET_VERSION, GIT_SHORTREV_HASH);
 		}
 		else
 		{
-			str_copy(aVersion, GAME_VERSION);
+			str_copy(aVersion, FOXNET_VERSION);
 		}
 		CTeeHistorian::CGameInfo GameInfo;
 		GameInfo.m_GameUuid = m_GameUuid;
@@ -4763,7 +4763,7 @@ bool CGameContext::IsClientHighBandwidth(int ClientId) const
 
 CUuid CGameContext::GameUuid() const { return m_GameUuid; }
 const char *CGameContext::GameType() const { return m_pController && m_pController->m_pGameType ? m_pController->m_pGameType : ""; }
-const char *CGameContext::Version() const { return GAME_VERSION; }
+const char *CGameContext::Version() const { return FOXNET_VERSION; }
 const char *CGameContext::NetVersion() const { return GAME_NETVERSION; }
 
 IGameServer *CreateGameServer() { return new CGameContext; }
