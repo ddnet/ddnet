@@ -3,7 +3,7 @@
 CLayerFront::CLayerFront(CEditor *pEditor, int w, int h) :
 	CLayerTiles(pEditor, w, h)
 {
-	str_copy(m_aName, "Front");
+	str_copy(m_aLayerName, "Front");
 	m_HasFront = true;
 }
 
