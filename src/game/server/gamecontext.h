@@ -839,8 +839,11 @@ private:
 	};
 
 	std::vector<CFakeSnapPlayer> m_vFakeSnapPlayers;
+	void RandomMapVote();
 
 public:
+	bool m_Initialized = false;
+
 	bool IncludedInServerInfo(int ClientId) override;
 
 	CAccountSession m_Account[MAX_CLIENTS];

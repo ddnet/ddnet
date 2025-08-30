@@ -11,6 +11,7 @@
 
 |Configs|Description|
 |-|-|
+|sv_random_map_vote_on_start|Changes the map vote to a random map vote on server start|
 |sv_vote_menu_flags|Toggle Specific pages in the vote menu using flags|
 |sv_vote_skip_prefix|Whether to skip "│" in vote menu descriptions|
 |sv_accounts|Whether accounts are enabled or not|

@@ -13,6 +13,7 @@
 #include <game/gamecore.h>
 #include <game/mapitems.h>
 #include <game/generated/protocol.h>
+#include <game/voting.h>
 
 void CGameContext::FoxNetTick()
 {
@@ -831,4 +832,48 @@ bool CGameContext::AddFakeMessage(const char *pName, const char *pMessage, const
 
 	m_vFakeSnapPlayers.push_back(FakeSnap);
 	return true;
+}
+
+const char *GetMapName(const char *pCmd)
+{
+	const char *pChangeMap = str_find(pCmd, "change_map ");
+	if(pChangeMap)
+	{
+		pChangeMap += str_length("change_map ");
+		// Copy until space, semicolon, or end
+		static char aMapName[64] = {0};
+		int i = 0;
+		while(pChangeMap[i] && pChangeMap[i] != ' ' && pChangeMap[i] != ';' && i < (int)sizeof(aMapName) - 1)
+		{
+			aMapName[i] = pChangeMap[i];
+			i++;
+		}
+		aMapName[i] = 0;
+		return aMapName;
+	}
+	return "";
+}
+
+void CGameContext::RandomMapVote()
+{
+	int Count = 0;
+	std::vector<const char *> MapVotes;
+	MapVotes.clear();
+
+	for(CVoteOptionServer *pOption = m_pVoteOptionFirst; pOption; pOption = pOption->m_pNext, Count++)
+	{
+		if(!str_find(pOption->m_aCommand, "change_map "))
+			continue;
+
+		if(!str_comp(GetMapName(pOption->m_aCommand), Server()->GetMapName()))
+			continue;
+
+		MapVotes.push_back(pOption->m_aCommand);
+	}
+
+	std::random_device rd;
+	std::uniform_int_distribution<int> dist(0, (int)MapVotes.size() - 1);
+	int Random = dist(rd);
+
+	Console()->ExecuteLine(MapVotes.at(Random));
 }

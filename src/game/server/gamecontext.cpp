@@ -187,7 +187,9 @@ void CGameContext::Clear()
 	// <FoxNet
 	std::vector<CStringDetection> ChatDection = m_ChatDetection;
 	std::vector<CStringDetection> NameDection = m_NameDetection;
+	std::vector<int> QuadDebugIds = m_QuadDebugIds;
 	CShop Shop = m_Shop;
+	bool Initialized = m_Initialized;
 	// FoxNet>
 
 	m_Resetting = true;
@@ -205,7 +207,9 @@ void CGameContext::Clear()
 	// <FoxNet
 	m_ChatDetection = ChatDection;
 	m_NameDetection = NameDection;
+	m_QuadDebugIds = QuadDebugIds;
 	m_Shop = Shop;
+	m_Initialized = Initialized;
 	// FoxNet>
 }
 
@@ -4296,9 +4300,18 @@ void CGameContext::OnInit(const void *pPersistentData)
 
 	m_pAntibot->RoundStart(this);
 
+	// <FoxNet
 	m_AccountManager.Init(this);
 	m_VoteMenu.Init(this);
 	m_Shop.Init(this);
+
+	if(!m_Initialized)
+	{
+		if(g_Config.m_SvRandomMapVoteOnStart)
+			RandomMapVote();
+		m_Initialized = true;
+	}
+	// FoxNet>
 }
 
 void CGameContext::CreateAllEntities(bool Initial)
