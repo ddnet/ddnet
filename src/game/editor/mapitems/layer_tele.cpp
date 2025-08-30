@@ -21,8 +21,8 @@ CLayerTele::CLayerTele(const CLayerTele &Other) :
 	str_copy(m_aName, "Tele copy");
 	m_HasTele = true;
 
-	m_pTeleTile = new CTeleTile[m_Width * m_Height];
-	mem_copy(m_pTeleTile, Other.m_pTeleTile, (size_t)m_Width * m_Height * sizeof(CTeleTile));
+	m_pTeleTile = new CTeleTile[m_LayerTilemap.m_Width * m_LayerTilemap.m_Height];
+	mem_copy(m_pTeleTile, Other.m_pTeleTile, (size_t)m_LayerTilemap.m_Width * m_LayerTilemap.m_Height * sizeof(CTeleTile));
 }
 
 CLayerTele::~CLayerTele()
@@ -37,8 +37,8 @@ void CLayerTele::Resize(int NewW, int NewH)
 	mem_zero(pNewTeleData, (size_t)NewW * NewH * sizeof(CTeleTile));
 
 	// copy old data
-	for(int y = 0; y < minimum(NewH, m_Height); y++)
-		mem_copy(&pNewTeleData[y * NewW], &m_pTeleTile[y * m_Width], minimum(m_Width, NewW) * sizeof(CTeleTile));
+	for(int y = 0; y < minimum(NewH, m_LayerTilemap.m_Height); y++)
+		mem_copy(&pNewTeleData[y * NewW], &m_pTeleTile[y * m_LayerTilemap.m_Width], minimum(m_LayerTilemap.m_Width, NewW) * sizeof(CTeleTile));
 
 	// replace old
 	delete[] m_pTeleTile;
@@ -48,7 +48,7 @@ void CLayerTele::Resize(int NewW, int NewH)
 	CLayerTiles::Resize(NewW, NewH);
 
 	// resize gamelayer too
-	if(m_pEditor->m_Map.m_pGameLayer->m_Width != NewW || m_pEditor->m_Map.m_pGameLayer->m_Height != NewH)
+	if(m_pEditor->m_Map.m_pGameLayer->m_LayerTilemap.m_Width != NewW || m_pEditor->m_Map.m_pGameLayer->m_LayerTilemap.m_Height != NewH)
 		m_pEditor->m_Map.m_pGameLayer->Resize(NewW, NewH);
 }
 
@@ -60,9 +60,9 @@ void CLayerTele::Shift(EShiftDirection Direction)
 
 bool CLayerTele::IsEmpty() const
 {
-	for(int y = 0; y < m_Height; y++)
+	for(int y = 0; y < m_LayerTilemap.m_Height; y++)
 	{
-		for(int x = 0; x < m_Width; x++)
+		for(int x = 0; x < m_LayerTilemap.m_Width; x++)
 		{
 			const int Index = GetTile(x, y).m_Index;
 			if(Index == 0)
@@ -91,20 +91,20 @@ void CLayerTele::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 
 	bool Destructive = m_pEditor->m_BrushDrawDestructive || pTeleLayer->IsEmpty();
 
-	for(int y = 0; y < pTeleLayer->m_Height; y++)
-		for(int x = 0; x < pTeleLayer->m_Width; x++)
+	for(int y = 0; y < pTeleLayer->m_LayerTilemap.m_Height; y++)
+		for(int x = 0; x < pTeleLayer->m_LayerTilemap.m_Width; x++)
 		{
 			int fx = x + sx;
 			int fy = y + sy;
 
-			if(fx < 0 || fx >= m_Width || fy < 0 || fy >= m_Height)
+			if(fx < 0 || fx >= m_LayerTilemap.m_Width || fy < 0 || fy >= m_LayerTilemap.m_Height)
 				continue;
 
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			const int SrcIndex = y * pTeleLayer->m_Width + x;
-			const int TgtIndex = fy * m_Width + fx;
+			const int SrcIndex = y * pTeleLayer->m_LayerTilemap.m_Width + x;
+			const int TgtIndex = fy * m_LayerTilemap.m_Width + fx;
 
 			STeleTileStateChange::SData Previous{
 				m_pTeleTile[TgtIndex].m_Number,
@@ -166,7 +166,7 @@ void CLayerTele::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 
 			RecordStateChange(fx, fy, Previous, Current);
 		}
-	FlagModified(sx, sy, pTeleLayer->m_Width, pTeleLayer->m_Height);
+	FlagModified(sx, sy, pTeleLayer->m_LayerTilemap.m_Width, pTeleLayer->m_LayerTilemap.m_Height);
 }
 
 void CLayerTele::RecordStateChange(int x, int y, STeleTileStateChange::SData Previous, STeleTileStateChange::SData Current)
@@ -200,20 +200,20 @@ void CLayerTele::BrushRotate(float Amount)
 	if(Rotation == 1 || Rotation == 3)
 	{
 		// 90° rotation
-		CTeleTile *pTempData1 = new CTeleTile[m_Width * m_Height];
-		CTile *pTempData2 = new CTile[m_Width * m_Height];
-		mem_copy(pTempData1, m_pTeleTile, (size_t)m_Width * m_Height * sizeof(CTeleTile));
-		mem_copy(pTempData2, m_pTiles, (size_t)m_Width * m_Height * sizeof(CTile));
+		CTeleTile *pTempData1 = new CTeleTile[m_LayerTilemap.m_Width * m_LayerTilemap.m_Height];
+		CTile *pTempData2 = new CTile[m_LayerTilemap.m_Width * m_LayerTilemap.m_Height];
+		mem_copy(pTempData1, m_pTeleTile, (size_t)m_LayerTilemap.m_Width * m_LayerTilemap.m_Height * sizeof(CTeleTile));
+		mem_copy(pTempData2, m_pTiles, (size_t)m_LayerTilemap.m_Width * m_LayerTilemap.m_Height * sizeof(CTile));
 		CTeleTile *pDst1 = m_pTeleTile;
 		CTile *pDst2 = m_pTiles;
-		for(int x = 0; x < m_Width; ++x)
-			for(int y = m_Height - 1; y >= 0; --y, ++pDst1, ++pDst2)
+		for(int x = 0; x < m_LayerTilemap.m_Width; ++x)
+			for(int y = m_LayerTilemap.m_Height - 1; y >= 0; --y, ++pDst1, ++pDst2)
 			{
-				*pDst1 = pTempData1[y * m_Width + x];
-				*pDst2 = pTempData2[y * m_Width + x];
+				*pDst1 = pTempData1[y * m_LayerTilemap.m_Width + x];
+				*pDst2 = pTempData2[y * m_LayerTilemap.m_Width + x];
 			}
 
-		std::swap(m_Width, m_Height);
+		std::swap(m_LayerTilemap.m_Width, m_LayerTilemap.m_Height);
 		delete[] pTempData1;
 		delete[] pTempData2;
 	}
@@ -248,14 +248,14 @@ void CLayerTele::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRe
 			int fx = x + sx;
 			int fy = y + sy;
 
-			if(fx < 0 || fx >= m_Width || fy < 0 || fy >= m_Height)
+			if(fx < 0 || fx >= m_LayerTilemap.m_Width || fy < 0 || fy >= m_LayerTilemap.m_Height)
 				continue;
 
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			const int SrcIndex = Empty ? 0 : (y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height);
-			const int TgtIndex = fy * m_Width + fx;
+			const int SrcIndex = Empty ? 0 : (y * pLt->m_LayerTilemap.m_Width + x % pLt->m_LayerTilemap.m_Width) % (pLt->m_LayerTilemap.m_Width * pLt->m_LayerTilemap.m_Height);
+			const int TgtIndex = fy * m_LayerTilemap.m_Width + fx;
 
 			STeleTileStateChange::SData Previous{
 				m_pTeleTile[TgtIndex].m_Number,
@@ -325,11 +325,11 @@ int CLayerTele::FindNextFreeNumber(bool Checkpoint) const
 
 bool CLayerTele::ContainsElementWithId(int Id, bool Checkpoint) const
 {
-	for(int y = 0; y < m_Height; ++y)
+	for(int y = 0; y < m_LayerTilemap.m_Height; ++y)
 	{
-		for(int x = 0; x < m_Width; ++x)
+		for(int x = 0; x < m_LayerTilemap.m_Width; ++x)
 		{
-			if(IsTeleTileNumberUsed(m_pTeleTile[y * m_Width + x].m_Type, Checkpoint) && m_pTeleTile[y * m_Width + x].m_Number == Id)
+			if(IsTeleTileNumberUsed(m_pTeleTile[y * m_LayerTilemap.m_Width + x].m_Type, Checkpoint) && m_pTeleTile[y * m_LayerTilemap.m_Width + x].m_Number == Id)
 			{
 				return true;
 			}
@@ -347,11 +347,11 @@ void CLayerTele::GetPos(int Number, int Offset, int &TeleX, int &TeleY)
 	TeleY = -1;
 
 	auto FindTile = [this, &Match, &MatchPos, &Number, &Offset]() {
-		for(int x = 0; x < m_Width; x++)
+		for(int x = 0; x < m_LayerTilemap.m_Width; x++)
 		{
-			for(int y = 0; y < m_Height; y++)
+			for(int y = 0; y < m_LayerTilemap.m_Height; y++)
 			{
-				int i = y * m_Width + x;
+				int i = y * m_LayerTilemap.m_Width + x;
 				if(!IsTeleTileNumberUsedAny(m_pTeleTile[i].m_Type))
 					continue;
 				int Tele = m_pTeleTile[i].m_Number;

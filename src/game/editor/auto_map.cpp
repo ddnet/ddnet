@@ -392,22 +392,22 @@ void CAutoMapper::ProceedLocalized(CLayerTiles *pLayer, CLayerTiles *pGameLayer,
 		return;
 
 	if(Width < 0)
-		Width = pLayer->m_Width;
+		Width = pLayer->m_LayerTilemap.m_Width;
 
 	if(Height < 0)
-		Height = pLayer->m_Height;
+		Height = pLayer->m_LayerTilemap.m_Height;
 
 	CConfiguration *pConf = &m_vConfigs[ConfigId];
 
-	int CommitFromX = std::clamp(X + pConf->m_StartX, 0, pLayer->m_Width);
-	int CommitFromY = std::clamp(Y + pConf->m_StartY, 0, pLayer->m_Height);
-	int CommitToX = std::clamp(X + Width + pConf->m_EndX, 0, pLayer->m_Width);
-	int CommitToY = std::clamp(Y + Height + pConf->m_EndY, 0, pLayer->m_Height);
+	int CommitFromX = std::clamp(X + pConf->m_StartX, 0, pLayer->m_LayerTilemap.m_Width);
+	int CommitFromY = std::clamp(Y + pConf->m_StartY, 0, pLayer->m_LayerTilemap.m_Height);
+	int CommitToX = std::clamp(X + Width + pConf->m_EndX, 0, pLayer->m_LayerTilemap.m_Width);
+	int CommitToY = std::clamp(Y + Height + pConf->m_EndY, 0, pLayer->m_LayerTilemap.m_Height);
 
-	int UpdateFromX = std::clamp(X + 3 * pConf->m_StartX, 0, pLayer->m_Width);
-	int UpdateFromY = std::clamp(Y + 3 * pConf->m_StartY, 0, pLayer->m_Height);
-	int UpdateToX = std::clamp(X + Width + 3 * pConf->m_EndX, 0, pLayer->m_Width);
-	int UpdateToY = std::clamp(Y + Height + 3 * pConf->m_EndY, 0, pLayer->m_Height);
+	int UpdateFromX = std::clamp(X + 3 * pConf->m_StartX, 0, pLayer->m_LayerTilemap.m_Width);
+	int UpdateFromY = std::clamp(Y + 3 * pConf->m_StartY, 0, pLayer->m_LayerTilemap.m_Height);
+	int UpdateToX = std::clamp(X + Width + 3 * pConf->m_EndX, 0, pLayer->m_LayerTilemap.m_Width);
+	int UpdateToY = std::clamp(Y + Height + 3 * pConf->m_EndY, 0, pLayer->m_LayerTilemap.m_Height);
 
 	CLayerTiles *pUpdateLayer = new CLayerTiles(Editor(), UpdateToX - UpdateFromX, UpdateToY - UpdateFromY);
 	CLayerTiles *pUpdateGame = new CLayerTiles(Editor(), UpdateToX - UpdateFromX, UpdateToY - UpdateFromY);
@@ -416,13 +416,13 @@ void CAutoMapper::ProceedLocalized(CLayerTiles *pLayer, CLayerTiles *pGameLayer,
 	{
 		for(int x = UpdateFromX; x < UpdateToX; x++)
 		{
-			const CTile *pInLayer = &pLayer->m_pTiles[y * pLayer->m_Width + x];
-			CTile *pOutLayer = &pUpdateLayer->m_pTiles[(y - UpdateFromY) * pUpdateLayer->m_Width + x - UpdateFromX];
+			const CTile *pInLayer = &pLayer->m_pTiles[y * pLayer->m_LayerTilemap.m_Width + x];
+			CTile *pOutLayer = &pUpdateLayer->m_pTiles[(y - UpdateFromY) * pUpdateLayer->m_LayerTilemap.m_Width + x - UpdateFromX];
 			pOutLayer->m_Index = pInLayer->m_Index;
 			pOutLayer->m_Flags = pInLayer->m_Flags;
 
-			const CTile *pInGame = &pGameLayer->m_pTiles[y * pGameLayer->m_Width + x];
-			CTile *pOutGame = &pUpdateGame->m_pTiles[(y - UpdateFromY) * pUpdateGame->m_Width + x - UpdateFromX];
+			const CTile *pInGame = &pGameLayer->m_pTiles[y * pGameLayer->m_LayerTilemap.m_Width + x];
+			CTile *pOutGame = &pUpdateGame->m_pTiles[(y - UpdateFromY) * pUpdateGame->m_LayerTilemap.m_Width + x - UpdateFromX];
 			pOutGame->m_Index = pInGame->m_Index;
 			pOutGame->m_Flags = pInGame->m_Flags;
 		}
@@ -434,15 +434,15 @@ void CAutoMapper::ProceedLocalized(CLayerTiles *pLayer, CLayerTiles *pGameLayer,
 	{
 		for(int x = CommitFromX; x < CommitToX; x++)
 		{
-			const CTile *pInLayer = &pUpdateLayer->m_pTiles[(y - UpdateFromY) * pUpdateLayer->m_Width + x - UpdateFromX];
-			CTile *pOutLayer = &pLayer->m_pTiles[y * pLayer->m_Width + x];
+			const CTile *pInLayer = &pUpdateLayer->m_pTiles[(y - UpdateFromY) * pUpdateLayer->m_LayerTilemap.m_Width + x - UpdateFromX];
+			CTile *pOutLayer = &pLayer->m_pTiles[y * pLayer->m_LayerTilemap.m_Width + x];
 			CTile PreviousLayer = *pOutLayer;
 			pOutLayer->m_Index = pInLayer->m_Index;
 			pOutLayer->m_Flags = pInLayer->m_Flags;
 			pLayer->RecordStateChange(x, y, PreviousLayer, *pOutLayer);
 
-			const CTile *pInGame = &pUpdateGame->m_pTiles[(y - UpdateFromY) * pUpdateGame->m_Width + x - UpdateFromX];
-			CTile *pOutGame = &pGameLayer->m_pTiles[y * pGameLayer->m_Width + x];
+			const CTile *pInGame = &pUpdateGame->m_pTiles[(y - UpdateFromY) * pUpdateGame->m_LayerTilemap.m_Width + x - UpdateFromX];
+			CTile *pOutGame = &pGameLayer->m_pTiles[y * pGameLayer->m_LayerTilemap.m_Width + x];
 			CTile PreviousGame = *pOutGame;
 			pOutGame->m_Index = pInGame->m_Index;
 			pOutGame->m_Flags = pInGame->m_Flags;
@@ -465,8 +465,8 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, CLayerTiles *pGameLayer, int Refe
 	CConfiguration *pConf = &m_vConfigs[ConfigId];
 	pLayer->ClearHistory();
 
-	const int LayerWidth = pLayer->m_Width;
-	const int LayerHeight = pLayer->m_Height;
+	const int LayerWidth = pLayer->m_LayerTilemap.m_Width;
+	const int LayerHeight = pLayer->m_LayerTilemap.m_Height;
 
 	static const int s_aTileIndex[] = {TILE_SOLID, TILE_DEATH, TILE_NOHOOK, TILE_FREEZE, TILE_UNFREEZE, TILE_DFREEZE, TILE_DUNFREEZE, TILE_LFREEZE, TILE_LUNFREEZE};
 
@@ -485,14 +485,14 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, CLayerTiles *pGameLayer, int Refe
 		{
 			pReadLayer = new CLayerTiles(Editor(), LayerWidth, LayerHeight);
 
-			int LoopWidth = IsFilterable ? std::min(pGameLayer->m_Width, LayerWidth) : LayerWidth;
-			int LoopHeight = IsFilterable ? std::min(pGameLayer->m_Height, LayerHeight) : LayerHeight;
+			int LoopWidth = IsFilterable ? std::min(pGameLayer->m_LayerTilemap.m_Width, LayerWidth) : LayerWidth;
+			int LoopHeight = IsFilterable ? std::min(pGameLayer->m_LayerTilemap.m_Height, LayerHeight) : LayerHeight;
 
 			for(int y = 0; y < LoopHeight; y++)
 			{
 				for(int x = 0; x < LoopWidth; x++)
 				{
-					const CTile *pIn = &pBuffer->m_pTiles[y * pBuffer->m_Width + x];
+					const CTile *pIn = &pBuffer->m_pTiles[y * pBuffer->m_LayerTilemap.m_Width + x];
 					CTile *pOut = &pReadLayer->m_pTiles[y * LayerWidth + x];
 					if(h == 0 && ReferenceId >= 1 && pIn->m_Index != s_aTileIndex[ReferenceId - 1])
 						pOut->m_Index = 0;

@@ -62,9 +62,9 @@ void CProofMode::ResetMenuBackgroundPositions()
 
 	if(Editor()->m_Map.m_pGameLayer)
 	{
-		for(int y = 0; y < Editor()->m_Map.m_pGameLayer->m_Height; ++y)
+		for(int y = 0; y < Editor()->m_Map.m_pGameLayer->m_LayerTilemap.m_Height; ++y)
 		{
-			for(int x = 0; x < Editor()->m_Map.m_pGameLayer->m_Width; ++x)
+			for(int x = 0; x < Editor()->m_Map.m_pGameLayer->m_LayerTilemap.m_Width; ++x)
 			{
 				CTile Tile = Editor()->m_Map.m_pGameLayer->GetTile(x, y);
 				if(Tile.m_Index >= TILE_TIME_CHECKPOINT_FIRST && Tile.m_Index <= TILE_TIME_CHECKPOINT_LAST)
