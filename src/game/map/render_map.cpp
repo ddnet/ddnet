@@ -12,7 +12,7 @@
 
 #include "render_map.h"
 
-#include <game/generated/client_data.h>
+#include <generated/client_data.h>
 
 #include <game/mapitems.h>
 #include <game/mapitems_ex.h>

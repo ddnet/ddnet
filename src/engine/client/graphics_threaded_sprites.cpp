@@ -1,8 +1,8 @@
 #include "graphics_threaded.h"
 #include <engine/graphics.h>
 
-#include <game/generated/client_data.h>
-#include <game/generated/client_data7.h>
+#include <generated/client_data.h>
+#include <generated/client_data7.h>
 
 void CGraphics_Threaded::SelectSprite(const CDataSprite *pSprite, int Flags)
 {

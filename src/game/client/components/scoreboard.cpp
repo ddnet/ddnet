@@ -7,7 +7,8 @@
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
 
-#include <game/generated/protocol.h>
+#include <generated/client_data7.h>
+#include <generated/protocol.h>
 
 #include <game/client/animstate.h>
 #include <game/client/components/countryflags.h>
@@ -15,7 +16,6 @@
 #include <game/client/components/statboard.h>
 #include <game/client/gameclient.h>
 #include <game/client/ui.h>
-#include <game/generated/client_data7.h>
 #include <game/localization.h>
 
 CScoreboard::CScoreboard()

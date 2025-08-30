@@ -4,7 +4,7 @@
 #define GAME_CLIENT_COMPONENTS_BROADCAST_H
 
 #include <engine/textrender.h>
-#include <game/generated/protocol.h>
+#include <generated/protocol.h>
 
 #include <game/client/component.h>
 

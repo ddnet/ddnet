@@ -3,10 +3,10 @@
 #ifndef GAME_CLIENT_PREDICTION_ENTITIES_CHARACTER_H
 #define GAME_CLIENT_PREDICTION_ENTITIES_CHARACTER_H
 
-#include <game/client/prediction/entity.h>
+#include <generated/protocol.h>
 
+#include <game/client/prediction/entity.h>
 #include <game/gamecore.h>
-#include <game/generated/protocol.h>
 #include <game/race_state.h>
 
 enum

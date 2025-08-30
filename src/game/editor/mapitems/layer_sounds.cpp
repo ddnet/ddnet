@@ -1,8 +1,9 @@
 #include "layer_sounds.h"
 
+#include <generated/client_data.h>
+
 #include <game/editor/editor.h>
 #include <game/editor/editor_actions.h>
-#include <game/generated/client_data.h>
 
 static const float s_SourceVisualSize = 32.0f;
 

@@ -44,8 +44,8 @@ def EmitFlags(names):
 
 
 def gen_network_header():
-	print("#ifndef GAME_GENERATED_PROTOCOL_H")
-	print("#define GAME_GENERATED_PROTOCOL_H")
+	print("#ifndef GENERATED_PROTOCOL_H")
+	print("#define GENERATED_PROTOCOL_H")
 	print("class CUnpacker;")
 	print("#include <engine/message.h>")
 	print(network.RawHeader)
@@ -130,7 +130,7 @@ public:
 };
 	""")
 
-	print("#endif // GAME_GENERATED_PROTOCOL_H")
+	print("#endif // GENERATED_PROTOCOL_H")
 
 
 def gen_network_source():
@@ -453,15 +453,15 @@ def gen_common_content_source():
 
 
 def gen_content_types_header():
-	print("#ifndef CONTENT_TYPES_HEADER")
-	print("#define CONTENT_TYPES_HEADER")
+	print("#ifndef GENERATED_DATA_TYPES_H")
+	print("#define GENERATED_DATA_TYPES_H")
 	gen_common_content_types_header()
 	print("#endif")
 
 
 def gen_client_content_header():
-	print("#ifndef CLIENT_CONTENT_HEADER")
-	print("#define CLIENT_CONTENT_HEADER")
+	print("#ifndef GENERATED_CLIENT_DATA_H")
+	print("#define GENERATED_CLIENT_DATA_H")
 	gen_common_content_header()
 	print("#endif")
 
@@ -472,8 +472,8 @@ def gen_client_content_source():
 
 
 def gen_server_content_header():
-	print("#ifndef SERVER_CONTENT_HEADER")
-	print("#define SERVER_CONTENT_HEADER")
+	print("#ifndef GENERATED_SERVER_DATA_H")
+	print("#define GENERATED_SERVER_DATA_H")
 	gen_common_content_header()
 	print("#endif")
 

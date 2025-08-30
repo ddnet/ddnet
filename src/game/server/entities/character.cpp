@@ -11,8 +11,9 @@
 #include <engine/antibot.h>
 #include <engine/shared/config.h>
 
-#include <game/generated/protocol.h>
-#include <game/generated/server_data.h>
+#include <generated/protocol.h>
+#include <generated/server_data.h>
+
 #include <game/mapitems.h>
 #include <game/team_state.h>
 

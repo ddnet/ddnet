@@ -7,6 +7,8 @@
 #include <base/math.h>
 #include <base/system.h>
 
+#include <generated/client_data.h>
+
 #include <engine/engine.h>
 #include <engine/gfx/image_manipulation.h>
 #include <engine/graphics.h>
@@ -15,7 +17,6 @@
 #include <engine/storage.h>
 
 #include <game/client/gameclient.h>
-#include <game/generated/client_data.h>
 #include <game/localization.h>
 
 using namespace std::chrono_literals;

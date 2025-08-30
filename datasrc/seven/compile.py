@@ -49,12 +49,12 @@ def main():
 	gen_server_content_source = "server_content_source" in sys.argv
 
 	if gen_client_content_header:
-		print("#ifndef CLIENT_CONTENT7_HEADER")
-		print("#define CLIENT_CONTENT7_HEADER")
+		print("#ifndef GENERATED_CLIENT_DATA7_H")
+		print("#define GENERATED_CLIENT_DATA7_H")
 
 	if gen_server_content_header:
-		print("#ifndef SERVER_CONTENT7_HEADER")
-		print("#define SERVER_CONTENT7_HEADER")
+		print("#ifndef GENERATED_SERVER_DATA7_H")
+		print("#define GENERATED_SERVER_DATA7_H")
 
 
 	if gen_client_content_header or gen_server_content_header:
@@ -84,8 +84,8 @@ def main():
 # NETWORK
 	if gen_network_header:
 
-		print("#ifndef GAME_GENERATED_PROTOCOL7_H")
-		print("#define GAME_GENERATED_PROTOCOL7_H")
+		print("#ifndef GENERATED_PROTOCOL7_H")
+		print("#define GENERATED_PROTOCOL7_H")
 		print("class CUnpacker;")
 		print("class CSnapshot;")
 		print("#include <engine/message.h>")
@@ -166,7 +166,7 @@ def main():
 	""")
 
 		print("}")
-		print("#endif // GAME_GENERATED_PROTOCOL7_H")
+		print("#endif // GENERATED_PROTOCOL7_H")
 
 
 	if gen_network_source:

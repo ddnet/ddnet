@@ -5,12 +5,13 @@
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
 
+#include <generated/client_data.h>
+#include <generated/protocol.h>
+
 #include <game/client/animstate.h>
 #include <game/client/components/scoreboard.h>
 #include <game/client/gameclient.h>
 #include <game/client/prediction/entities/character.h>
-#include <game/generated/client_data.h>
-#include <game/generated/protocol.h>
 
 #include <game/layers.h>
 #include <game/localization.h>

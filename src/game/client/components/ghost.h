@@ -3,10 +3,10 @@
 #ifndef GAME_CLIENT_COMPONENTS_GHOST_H
 #define GAME_CLIENT_COMPONENTS_GHOST_H
 
+#include <generated/protocol.h>
+
 #include <game/client/component.h>
 #include <game/client/components/menus.h>
-#include <game/generated/protocol.h>
-
 #include <game/client/render.h>
 
 struct CNetObj_Character;

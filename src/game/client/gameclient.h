@@ -21,8 +21,8 @@
 #include <game/client/prediction/gameworld.h>
 #include <game/client/race.h>
 
-#include <game/generated/protocol7.h>
-#include <game/generated/protocolglue.h>
+#include <generated/protocol7.h>
+#include <generated/protocolglue.h>
 
 // components
 #include "components/background.h"

@@ -2,7 +2,7 @@
 #define ENGINE_SHARED_TRANSLATION_CONTEXT_H
 
 #include <engine/shared/protocol.h>
-#include <game/generated/protocol7.h>
+#include <generated/protocol7.h>
 
 #include <engine/client/enums.h>
 

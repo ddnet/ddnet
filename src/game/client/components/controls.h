@@ -8,7 +8,7 @@
 #include <engine/client.h>
 
 #include <game/client/component.h>
-#include <game/generated/protocol.h>
+#include <generated/protocol.h>
 
 class CControls : public CComponent
 {
