@@ -6,6 +6,7 @@
 #include "memheap.h"
 
 #include <engine/console.h>
+#include <engine/shared/authmanager.h>
 #include <engine/storage.h>
 
 #include <optional>
@@ -51,6 +52,7 @@ class CConsole : public IConsole
 	CExecFile *m_pFirstExec;
 	IStorage *m_pStorage;
 	int m_AccessLevel;
+	CAuthManager m_AuthManager;
 
 	CCommand *m_pRecycleList;
 	CHeap m_TempCommands;
@@ -178,6 +180,8 @@ public:
 	void InitChecksum(CChecksumData *pData) const override;
 
 	void SetAccessLevel(int AccessLevel) override;
+
+	CAuthManager *AuthManager() override { return &m_AuthManager; };
 
 	/**
 	 * Converts access level string to access level enum (integer).

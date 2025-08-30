@@ -14,6 +14,7 @@
 #include <engine/server/server.h>
 #include <engine/server/server_logger.h>
 #include <engine/shared/assertion_logger.h>
+#include <engine/shared/authmanager.h>
 #include <engine/shared/config.h>
 #include <game/generated/protocol.h>
 #include <game/server/entities/character.h>
@@ -92,7 +93,7 @@ public:
 
 		m_pServer->m_RunServer = CServer::RUNNING;
 
-		m_pServer->m_AuthManager.Init();
+		m_pServer->Console()->AuthManager()->Init();
 
 		{
 			int Size = GameServer()->PersistentClientDataSize();

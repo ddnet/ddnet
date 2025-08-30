@@ -23,7 +23,6 @@
 #include <vector>
 
 #include "antibot.h"
-#include "authmanager.h"
 #include "name_ban.h"
 #include "snap_id_pool.h"
 
@@ -271,7 +270,6 @@ public:
 	char m_aMapDownloadUrl[256];
 
 	CDemoRecorder m_aDemoRecorder[NUM_RECORDERS];
-	CAuthManager m_AuthManager;
 
 	int64_t m_ServerInfoFirstRequest;
 	int m_ServerInfoNumRequests;
@@ -319,7 +317,7 @@ public:
 	int GetAuthedState(int ClientId) const override;
 	bool IsRconAuthed(int ClientId) const override;
 	bool IsRconAuthedAdmin(int ClientId) const override;
-	const char *GetAuthName(int ClientId) const override;
+	const char *GetAuthName(int ClientId) override;
 	bool HasAuthHidden(int ClientId) const override;
 	void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pMapSha256, int *pMapCrc) override;
 	bool GetClientInfo(int ClientId, CClientInfo *pInfo) const override;
