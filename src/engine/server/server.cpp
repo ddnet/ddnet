@@ -3476,11 +3476,11 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 static int GetAuthLevel(const char *pLevel)
 {
 	int Level = -1;
-	if(!str_comp_nocase(pLevel, "admin"))
+	if(!str_comp(pLevel, "admin"))
 		Level = AUTHED_ADMIN;
-	else if(str_startswith(pLevel, "mod"))
+	else if(!str_comp(pLevel, "moderator"))
 		Level = AUTHED_MOD;
-	else if(!str_comp_nocase(pLevel, "helper"))
+	else if(!str_comp(pLevel, "helper"))
 		Level = AUTHED_HELPER;
 
 	return Level;
@@ -3523,7 +3523,7 @@ void CServer::ConAuthAdd(IConsole::IResult *pResult, void *pUser)
 	int Level = GetAuthLevel(pLevel);
 	if(Level == -1)
 	{
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "level can be one of {\"admin\", \"mod(erator)\", \"helper\"}");
+		log_info("auth", "level can be one of {\"admin\", \"moderator\", \"helper\"}");
 		return;
 	}
 
@@ -3557,7 +3557,7 @@ void CServer::ConAuthAddHashed(IConsole::IResult *pResult, void *pUser)
 	int Level = GetAuthLevel(pLevel);
 	if(Level == -1)
 	{
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "level can be one of {\"admin\", \"mod(erator)\", \"helper\"}");
+		log_info("auth", "level can be one of {\"admin\", \"moderator\", \"helper\"}");
 		return;
 	}
 
@@ -3606,7 +3606,7 @@ void CServer::ConAuthUpdate(IConsole::IResult *pResult, void *pUser)
 	int Level = GetAuthLevel(pLevel);
 	if(Level == -1)
 	{
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "level can be one of {\"admin\", \"mod(erator)\", \"helper\"}");
+		log_info("auth", "level can be one of {\"admin\", \"moderator\", \"helper\"}");
 		return;
 	}
 
@@ -3636,7 +3636,7 @@ void CServer::ConAuthUpdateHashed(IConsole::IResult *pResult, void *pUser)
 	int Level = GetAuthLevel(pLevel);
 	if(Level == -1)
 	{
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "level can be one of {\"admin\", \"mod(erator)\", \"helper\"}");
+		log_info("auth", "level can be one of {\"admin\", \"moderator\", \"helper\"}");
 		return;
 	}
 
