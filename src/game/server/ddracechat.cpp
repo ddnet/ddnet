@@ -2118,7 +2118,7 @@ void CGameContext::ConLastTele(IConsole::IResult *pResult, void *pUserData)
 		pSelf->SendChatTarget(pPlayer->GetCid(), "You haven't previously teleported. Use /tp before using this command.");
 		return;
 	}
-	pPlayer->m_LastTeleTee.Load(pChr, pChr->Team(), true);
+	pPlayer->m_LastTeleTee.Load(pChr);
 	pPlayer->Pause(CPlayer::PAUSE_NONE, true);
 }
 
