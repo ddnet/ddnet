@@ -699,26 +699,30 @@ void CPlayer::SetAbility(int Type)
 
 void CPlayer::DisableAllCosmetics()
 {
-	SetInverseAim(false);
-	SetLovely(false);
-	SetBloody(false);
-	HookPower(false);
-	SetSparkle(false);
+	SetAbility(ABILITY_NONE);
 	SetEpicCircle(false);
-
+	SetLovely(false);
 	SetRotatingBall(false);
+	SetSparkle(false);
+	HookPower(HOOK_NORMAL);
+	SetBloody(false);
+	SetInverseAim(false);
 	SetHeartHat(false);
 
-	SetConfettiGun(false);
+	SetDeathEffect(DEATH_NONE);
+	SetDamageIndType(IND_NONE);
+
 	SetEmoticonGun(0);
+	SetConfettiGun(false);
 	SetPhaseGun(false);
+
+	SetTrail(TRAIL_NONE);
 
 	SetRainbowBody(false);
 	SetRainbowFeet(false);
 
-	SetTrail(false);
-
 	// Not Available Normally
+	SetStrongBloody(false);
 	SetStaffInd(false);
 	SetPickupPet(false);
 }

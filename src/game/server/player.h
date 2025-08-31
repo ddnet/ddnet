@@ -71,13 +71,14 @@ struct CCosmetics
 	bool m_Bloody = false;
 	bool m_InverseAim = false;
 	bool m_HeartHat = false;
+
 	int m_DeathEffect = 0;
+	int m_DamageIndType = 0;
 
 	// Guns
 	int m_EmoticonGun = 0;
 	bool m_ConfettiGun = false;
 	bool m_PhaseGun = false;
-	int m_DamageIndType = 0;
 
 	// Trails
 	int m_Trail = 0;
@@ -85,7 +86,7 @@ struct CCosmetics
 	// Rainbow
 	bool m_RainbowFeet = false;
 	bool m_RainbowBody = false;
-	int m_RainbowSpeed = 2;
+	int m_RainbowSpeed = 2; // Default speed
 
 	bool m_StrongBloody = false;
 	bool m_StaffInd = false;
