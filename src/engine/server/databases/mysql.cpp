@@ -295,17 +295,20 @@ bool CMysqlConnection::ConnectImpl()
 		char aCreateMaps[1024];
 		char aCreateSaves[1024];
 		char aCreatePoints[1024];
+		char aCreateAccounts[1024]; // <FoxNet>
 		FormatCreateRace(aCreateRace, sizeof(aCreateRace), /* Backup */ false);
 		FormatCreateTeamrace(aCreateTeamrace, sizeof(aCreateTeamrace), "VARBINARY(16)", /* Backup */ false);
 		FormatCreateMaps(aCreateMaps, sizeof(aCreateMaps));
 		FormatCreateSaves(aCreateSaves, sizeof(aCreateSaves), /* Backup */ false);
 		FormatCreatePoints(aCreatePoints, sizeof(aCreatePoints));
+		FormatCreateAccounts(aCreateAccounts, sizeof(aCreateAccounts)); // <FoxNet>
 
 		if(!PrepareAndExecuteStatement(aCreateRace) ||
 			!PrepareAndExecuteStatement(aCreateTeamrace) ||
 			!PrepareAndExecuteStatement(aCreateMaps) ||
 			!PrepareAndExecuteStatement(aCreateSaves) ||
-			!PrepareAndExecuteStatement(aCreatePoints))
+			!PrepareAndExecuteStatement(aCreatePoints) ||
+			!PrepareAndExecuteStatement(aCreateAccounts)) // <FoxNet>
 		{
 			return false;
 		}

@@ -2782,6 +2782,8 @@ if(SERVER)
     # <FoxNet
     foxnet/accounts.cpp
     foxnet/accounts.h
+    foxnet/accountworker.cpp
+    foxnet/accountworker.h
     foxnet/commands.cpp
     foxnet/cosmetics/dot_trail.cpp
     foxnet/cosmetics/dot_trail.h

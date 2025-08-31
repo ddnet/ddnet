@@ -90,3 +90,44 @@ void IDbConnection::FormatCreatePoints(char *aBuf, unsigned int BufferSize) cons
 		")",
 		GetPrefix(), MAX_NAME_LENGTH_SQL, BinaryCollate());
 }
+// <FoxNet
+void IDbConnection::FormatCreateAccounts(char *aBuf, unsigned int BufferSize) const
+{
+	// ToDO: @qxdFox - move Inventory and LastActiveItems to separate table
+	str_format(aBuf, BufferSize,
+		"CREATE TABLE IF NOT EXISTS foxnet_accounts ("
+		"  Version INTEGER NOT NULL DEFAULT 1, "
+		"  Username VARCHAR(32) COLLATE %s NOT NULL, "
+		"  Password VARCHAR(128) COLLATE %s NOT NULL, "
+		"  RegisterDate INTEGER NOT NULL, "
+		"  PlayerName VARCHAR(%d) COLLATE %s DEFAULT '', "
+		"  LastPlayerName VARCHAR(%d) COLLATE %s DEFAULT '', "
+		"  CurrentIP VARCHAR(45) COLLATE %s DEFAULT '', "
+		"  LastIP VARCHAR(45) COLLATE %s DEFAULT '', "
+		"  LoggedIn INTEGER DEFAULT 0, "
+		"  LastLogin INTEGER DEFAULT 0, "
+		"  Port INTEGER DEFAULT 0, "
+		"  ClientId INTEGER DEFAULT -1, "
+		"  Flags INTEGER DEFAULT -1, "
+		"  VoteMenuPage INTEGER DEFAULT -1, "
+		"  Playtime INTEGER DEFAULT 0, "
+		"  Deaths INTEGER DEFAULT 0, "
+		"  Kills INTEGER DEFAULT 0, "
+		"  Level INTEGER DEFAULT 0, "
+		"  XP INTEGER DEFAULT 0, "
+		"  Money INTEGER DEFAULT 0, "
+		"  Inventory TEXT COLLATE %s DEFAULT '', "
+		"  LastActiveItems TEXT COLLATE %s DEFAULT '', "
+		"  PRIMARY KEY (Username)"
+		")",
+		BinaryCollate(),
+		BinaryCollate(),
+		MAX_NAME_LENGTH_SQL, BinaryCollate(),
+		MAX_NAME_LENGTH_SQL, BinaryCollate(),
+		BinaryCollate(),
+		BinaryCollate(),
+		BinaryCollate(),
+		BinaryCollate()
+	);
+}
+// FoxNet>

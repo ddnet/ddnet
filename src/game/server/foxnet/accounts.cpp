@@ -1,43 +1,40 @@
 ﻿#include "accounts.h"
-#include "../gamecontext.h"
+#include "game/server/gamecontext.h"
+#include "accountworker.h"
+
 #include <base/hash.h>
 #include <base/hash_ctxt.h>
 #include <base/log.h>
+#include <chrono>
 #include <cstdint>
 #include <ctime>
+#include <thread>
+
 #include <engine/server.h>
+#include <engine/server/databases/connection.h>
+#include <engine/server/databases/connection_pool.h>
 #include <engine/shared/config.h>
-#include <sqlite3.h>
+#include <engine/shared/protocol.h>
+
+// Local worker request/handlers for updates and simple selects not covered by accounts_worker
 
 IServer *CAccounts::Server() const { return GameServer()->Server(); }
 
-constexpr const char *SQLITE_TABLE = R"(
-        CREATE TABLE IF NOT EXISTS Accounts (
-			Version INTEGER NOT NULL DEFAULT 1,
-            Username TEXT NOT NULL COLLATE NOCASE,
-            Password TEXT NOT NULL,
-            RegisterDate INTEGER NOT NULL,
-			PlayerName TEXT DEFAULT '',
-            LastPlayerName TEXT DEFAULT '',
-			CurrentIP TEXT DEFAULT '',
-			LastIP TEXT DEFAULT '',
-            LoggedIn INTEGER DEFAULT 0,
-			LastLogin INTEGER DEFAULT 0,
-            Port INTEGER DEFAULT 0,
-            ClientId INTEGER DEFAULT -1,
-            Flags INTEGER DEFAULT -1,
-            VoteMenuPage INTEGER DEFAULT -1,
-			Playtime INTEGER DEFAULT 0,
-			Deaths INTEGER DEFAULT 0,
-			Kills INTEGER DEFAULT 0,
-            Level INTEGER DEFAULT 0,
-            XP INTEGER DEFAULT 0,
-			Money INTEGER DEFAULT 0,
-			Inventory TEXT DEFAULT '',
-			LastActiveItems TEXT DEFAULT '',
-			PRIMARY KEY (Username)
-        );
-    )";
+bool CAccounts::WaitForResult(const std::shared_ptr<ISqlResult> &pRes, const char *pOpName, int TimeoutMs)
+{
+	using namespace std::chrono;
+	const auto Start = steady_clock::now();
+	while(!pRes->m_Completed.load())
+	{
+		std::this_thread::sleep_for(1ms);
+		if(duration_cast<milliseconds>(steady_clock::now() - Start).count() > TimeoutMs)
+		{
+			dbg_msg("accounts", "%s timed out waiting for DB result", pOpName);
+			return false;
+		}
+	}
+	return pRes->m_Success;
+}
 
 SHA256_DIGEST CAccounts::HashPassword(const char *pPassword)
 {
@@ -47,81 +44,42 @@ SHA256_DIGEST CAccounts::HashPassword(const char *pPassword)
 	return sha256_finish(&Sha256Ctx);
 }
 
-void CAccounts::Init(CGameContext *pGameServer)
+void CAccounts::Init(CGameContext *pGameServer, CDbConnectionPool *pPool)
 {
 	m_pGameServer = pGameServer;
+	m_pPool = pPool;
 
-	if(sqlite3_open("Accounts.sqlite", &m_AccDatabase) != SQLITE_OK)
-	{
-		dbg_msg("accounts", "Failed to open SQLite database: %s", sqlite3_errmsg(m_AccDatabase));
-		return;
-	}
-
-	char *pErr = nullptr;
-	if(sqlite3_exec(m_AccDatabase, "PRAGMA journal_mode=WAL;", nullptr, nullptr, &pErr) != SQLITE_OK)
-	{
-		dbg_msg("accounts", "Failed to set WAL mode: %s", pErr ? pErr : "(unknown)");
-		sqlite3_free(pErr);
-	}
-	if(sqlite3_exec(m_AccDatabase, "PRAGMA busy_timeout=5000;", nullptr, nullptr, &pErr) != SQLITE_OK)
-	{
-		dbg_msg("accounts", "Failed to set busy_timeout: %s", pErr ? pErr : "(unknown)");
-		sqlite3_free(pErr);
-	}
-
-	if(sqlite3_exec(m_AccDatabase, SQLITE_TABLE, nullptr, nullptr, &pErr) != SQLITE_OK)
-	{
-		dbg_msg("accounts", "Failed to create Accounts table: %s", pErr ? pErr : "(unknown)");
-	}
-
+	// Optional: mark all leftover sessions for this port as logged out
 	LogoutAllAccountsPort(Server()->Port());
-}
-
-void CAccounts::OnShutdown()
-{
-	if(m_AccDatabase)
-		sqlite3_close(m_AccDatabase);
 }
 
 void CAccounts::AutoLogin(int ClientId)
 {
-	if(!m_AccDatabase)
-		return;
-
-	const char *SelectQuery = R"(
-        SELECT Username, LastIP, LastLogin, LoggedIn, Flags
-        FROM Accounts
-        WHERE LastPlayerName = ?;
-    )";
-	sqlite3_stmt *stmt;
-	if(sqlite3_prepare_v2(m_AccDatabase, SelectQuery, -1, &stmt, nullptr) != SQLITE_OK)
+	if(!m_pPool)
 		return;
 
 	const char *pName = Server()->ClientName(ClientId);
-	sqlite3_bind_text(stmt, 1, pName, -1, SQLITE_STATIC);
 
-	CAccountSession Acc = CAccountSession();
-	if(sqlite3_step(stmt) == SQLITE_ROW)
-	{
-		str_copy(Acc.m_Username, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 0)));
-		str_copy(Acc.LastIp, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 1)));
-		Acc.m_LastLogin = sqlite3_column_int64(stmt, 2);
-		Acc.m_LoggedIn = sqlite3_column_int(stmt, 3);
-		Acc.m_Flags = sqlite3_column_int64(stmt, 4);
-	}
-	sqlite3_finalize(stmt);
+	// Query last user by LastPlayerName
+	auto pRes = std::make_shared<CAccResult>();
+	auto pReq = std::make_unique<CAccSelectByLastName>(pRes);
+	str_copy(pReq->m_LastPlayerName, pName, sizeof(pReq->m_LastPlayerName));
+	m_pPool->Execute(CAccountsWorker::SelectByLastPlayerName, std::move(pReq), "acc select by last name");
 
-	if(Acc.m_LastLogin == 0)
+	if(!WaitForResult(pRes, "autologin.select"))
 		return;
+	if(!pRes->m_Found || pRes->m_LastLogin == 0)
+		return;
+
 	const char *pAddr = Server()->ClientAddrString(ClientId, false);
-	if(str_comp(Acc.LastIp, pAddr) != 0)
+	if(str_comp(pRes->m_LastIP, pAddr) != 0)
 		return;
-	if(str_comp(Acc.m_Username, pName) != 0)
+	if(str_comp(pRes->m_Username, pName) != 0)
 		return;
-	if(Acc.m_LoggedIn || !(Acc.m_Flags & ACC_FLAG_AUTOLOGIN))
+	if(pRes->m_LoggedIn || !(pRes->m_Flags & ACC_FLAG_AUTOLOGIN))
 		return;
 
-	if(ForceLogin(ClientId, Acc.m_Username))
+	if(ForceLogin(ClientId, pRes->m_Username))
 		GameServer()->SendChatTarget(ClientId, "Automatically logged into your account");
 	else
 		GameServer()->SendChatTarget(ClientId, "[Err] Autologin Failed");
@@ -129,127 +87,93 @@ void CAccounts::AutoLogin(int ClientId)
 
 bool CAccounts::ForceLogin(int ClientId, const char *pUsername)
 {
-	if(!m_AccDatabase)
+	if(!m_pPool || !pUsername[0])
 		return false;
 
-	if(!pUsername[0])
+	// Query by Username
+	auto pRes = std::make_shared<CAccResult>();
+	auto pReq = std::make_unique<CAccSelectByUser>(pRes);
+	str_copy(pReq->m_Username, pUsername, sizeof(pReq->m_Username));
+	m_pPool->Execute(CAccountsWorker::SelectByUsername, std::move(pReq), "acc select by username");
+	if(!WaitForResult(pRes, "forcelogin.select"))
 		return false;
 
-	const char *SelectQuery = R"(
-		SELECT Username, RegisterDate, PlayerName, LastPlayerName, CurrentIP, LastIP, LoggedIn, LastLogin, Port, ClientId, Flags, VoteMenuPage, Playtime, Deaths, Kills, Level, XP, Money, Inventory, LastActiveItems
-        FROM Accounts
-        WHERE Username = ?;
-    )";
-
-	sqlite3_stmt *stmt;
-	if(sqlite3_prepare_v2(m_AccDatabase, SelectQuery, -1, &stmt, nullptr) != SQLITE_OK)
+	if(!pRes->m_Found)
 		return false;
-
-	sqlite3_bind_text(stmt, 1, pUsername, -1, SQLITE_STATIC);
-
-	if(sqlite3_step(stmt) == SQLITE_ROW)
+	if(pRes->m_LoggedIn)
 	{
-		if(sqlite3_column_int(stmt, 6))
-		{
-			sqlite3_finalize(stmt);
-			GameServer()->SendChatTarget(ClientId, "Account is already logged in");
-			return false;
-		}
-
-		OnLogin(ClientId, pUsername, stmt);
-		sqlite3_finalize(stmt);
-		return true;
+		GameServer()->SendChatTarget(ClientId, "Account is already logged in");
+		return false;
 	}
-	sqlite3_finalize(stmt);
 
-	return false;
+	OnLogin(ClientId, *pRes);
+	return true;
 }
 
 bool CAccounts::Login(int ClientId, const char *pUsername, const char *pPassword)
 {
-	if(!m_AccDatabase)
+	if(!m_pPool)
 		return false;
 
 	if(!pUsername[0] || !pPassword[0])
 		return false;
 
-	const char *SelectQuery = R"(
-		SELECT Username, RegisterDate, PlayerName, LastPlayerName, CurrentIP, LastIP, LoggedIn, LastLogin, Port, ClientId, Flags, VoteMenuPage, Playtime, Deaths, Kills, Level, XP, Money, Inventory, LastActiveItems
-        FROM Accounts
-        WHERE Username = ? AND Password = ?;
-    )";
-	sqlite3_stmt *stmt;
-
-	if(sqlite3_prepare_v2(m_AccDatabase, SelectQuery, -1, &stmt, nullptr) != SQLITE_OK)
-		return false;
-
 	char HashedPassword[ACC_MAX_PASSW_LENGTH];
 	sha256_str(HashPassword(pPassword), HashedPassword, ACC_MAX_PASSW_LENGTH);
 
-	sqlite3_bind_text(stmt, 1, pUsername, -1, SQLITE_STATIC);
-	sqlite3_bind_text(stmt, 2, HashedPassword, -1, SQLITE_STATIC);
+	// Use accounts_worker Login (SELECT with Username+Password)
+	auto pRes = std::make_shared<CAccResult>();
+	auto pReq = std::make_unique<CAccLoginRequest>(pRes);
+	str_copy(pReq->m_Username, pUsername, sizeof(pReq->m_Username));
+	str_copy(pReq->m_PasswordHash, HashedPassword, sizeof(pReq->m_PasswordHash));
+	m_pPool->Execute(CAccountsWorker::Login, std::move(pReq), "acc login");
 
-	if(sqlite3_step(stmt) == SQLITE_ROW)
+	if(!WaitForResult(pRes, "login.select"))
+		return false;
+
+	if(!pRes->m_Found)
+		return false;
+	if(pRes->m_LoggedIn)
 	{
-		if(sqlite3_column_int(stmt, 6))
-		{
-			sqlite3_finalize(stmt);
-			GameServer()->SendChatTarget(ClientId, "Account is already logged in");
-			return false;
-		}
-		OnLogin(ClientId, pUsername, stmt);
-		sqlite3_finalize(stmt);
-		return true;
+		GameServer()->SendChatTarget(ClientId, "Account is already logged in");
+		return false;
 	}
-	sqlite3_finalize(stmt);
 
-	return false;
+	OnLogin(ClientId, *pRes);
+	return true;
 }
 
-void CAccounts::OnLogin(int ClientId, const char *pUsername, sqlite3_stmt *pstmt)
+void CAccounts::OnLogin(int ClientId, const CAccResult &Res)
 {
-	if(!m_AccDatabase)
-		return;
-
-	if(sqlite3_exec(m_AccDatabase, SQLITE_TABLE, nullptr, nullptr, nullptr) != SQLITE_OK)
-	{
-		dbg_msg("accounts", "Failed to create table: %s", sqlite3_errmsg(m_AccDatabase));
-		sqlite3_close(m_AccDatabase);
-		return;
-	}
-
-	// Set account session
+	// Set account session (in-memory)
 	{
 		CAccountSession &Acc = GameServer()->m_Account[ClientId];
 
 		time_t Now;
 		time(&Now);
 
-		const int64_t Flags = sqlite3_column_int64(pstmt, 10);
-		const int64_t VoteMenuPage = sqlite3_column_int64(pstmt, 11);
-
-		str_copy(Acc.m_Username, reinterpret_cast<const char *>(sqlite3_column_text(pstmt, 0)));
-		Acc.m_RegisterDate = sqlite3_column_int64(pstmt, 1);
-		str_copy(Acc.m_Name, reinterpret_cast<const char *>(sqlite3_column_text(pstmt, 2)));
-		str_copy(Acc.m_LastName, reinterpret_cast<const char *>(sqlite3_column_text(pstmt, 3)));
+		str_copy(Acc.m_Username, Res.m_Username);
+		Acc.m_RegisterDate = Res.m_RegisterDate;
+		str_copy(Acc.m_Name, Res.m_PlayerName);
+		str_copy(Acc.m_LastName, Res.m_LastPlayerName);
 		str_copy(Acc.CurrentIp, Server()->ClientAddrString(ClientId, false));
-		str_copy(Acc.LastIp, reinterpret_cast<const char *>(sqlite3_column_text(pstmt, 5)));
+		str_copy(Acc.LastIp, Res.m_LastIP);
 		Acc.m_LoggedIn = true;
 		Acc.m_LastLogin = Now;
 		Acc.m_Port = Server()->Port();
 		Acc.ClientId = ClientId;
-		if(Flags != -1)
-			Acc.m_Flags = Flags;
-		if(VoteMenuPage != -1)
-			Acc.m_VoteMenuPage = sqlite3_column_int64(pstmt, 11);
-		Acc.m_Playtime = sqlite3_column_int64(pstmt, 12);
-		Acc.m_Deaths = sqlite3_column_int64(pstmt, 13);
-		Acc.m_Kills = sqlite3_column_int64(pstmt, 14);
-		Acc.m_Level = sqlite3_column_int64(pstmt, 15);
-		Acc.m_XP = sqlite3_column_int64(pstmt, 16);
-		Acc.m_Money = sqlite3_column_int64(pstmt, 17);
-		str_copy(Acc.m_Inventory, reinterpret_cast<const char *>(sqlite3_column_text(pstmt, 18)));
-		str_copy(Acc.m_LastActiveItems, reinterpret_cast<const char *>(sqlite3_column_text(pstmt, 19)));
+		if(Res.m_Flags != -1)
+			Acc.m_Flags = Res.m_Flags;
+		if(Res.m_VoteMenuPage != -1)
+			Acc.m_VoteMenuPage = Res.m_VoteMenuPage;
+		Acc.m_Playtime = Res.m_Playtime;
+		Acc.m_Deaths = Res.m_Deaths;
+		Acc.m_Kills = Res.m_Kills;
+		Acc.m_Level = Res.m_Level;
+		Acc.m_XP = Res.m_XP;
+		Acc.m_Money = Res.m_Money;
+		str_copy(Acc.m_Inventory, Res.m_Inventory);
+		str_copy(Acc.m_LastActiveItems, Res.m_LastActiveItems);
 
 		Acc.m_LoginTick = Server()->Tick();
 
@@ -258,39 +182,17 @@ void CAccounts::OnLogin(int ClientId, const char *pUsername, sqlite3_stmt *pstmt
 
 	GameServer()->OnLogin(ClientId);
 
-	const char *CurrentIP = Server()->ClientAddrString(ClientId, false);
-	int Port = Server()->Port();
-	const char *PlayerName = Server()->ClientName(ClientId);
-
-	const char *UpdateQuery = R"(
-		UPDATE Accounts
-		SET
-			LastPlayerName = PlayerName,
-			PlayerName = ?,
-			LastIP = CurrentIP,
-			CurrentIP = ?,
-			LoggedIn = 1,
-			LastLogin = ?,	
-			Port = ?,
-			ClientId = ?
-		WHERE Username = ?;
-	)";
-
-	sqlite3_stmt *stmt = nullptr;
-	if(sqlite3_prepare_v2(m_AccDatabase, UpdateQuery, -1, &stmt, nullptr) != SQLITE_OK)
-		return;
-
+	// Persist login state
+	auto pUpd = std::make_unique<CAccUpdLoginState>();
+	str_copy(pUpd->m_Username, Res.m_Username, sizeof(pUpd->m_Username));
+	str_copy(pUpd->m_PlayerName, Server()->ClientName(ClientId), sizeof(pUpd->m_PlayerName));
+	str_copy(pUpd->m_CurrentIP, Server()->ClientAddrString(ClientId, false), sizeof(pUpd->m_CurrentIP));
 	time_t Now;
 	time(&Now);
-
-	sqlite3_bind_text(stmt, 1, PlayerName, -1, SQLITE_STATIC);
-	sqlite3_bind_text(stmt, 2, CurrentIP, -1, SQLITE_STATIC);
-	sqlite3_bind_int(stmt, 3, Now);
-	sqlite3_bind_int(stmt, 4, Port);
-	sqlite3_bind_int(stmt, 5, ClientId);
-	sqlite3_bind_text(stmt, 6, pUsername, -1, SQLITE_STATIC);
-	sqlite3_step(stmt);
-	sqlite3_finalize(stmt);
+	pUpd->m_LastLogin = Now;
+	pUpd->m_Port = Server()->Port();
+	pUpd->m_ClientId = ClientId;
+	m_pPool->ExecuteWrite(CAccountsWorker::UpdateLoginState, std::move(pUpd), "acc update login");
 }
 
 bool CAccounts::Logout(int ClientId)
@@ -298,6 +200,7 @@ bool CAccounts::Logout(int ClientId)
 	if(GameServer()->m_Account[ClientId].m_LoggedIn)
 	{
 		OnLogout(ClientId, GameServer()->m_Account[ClientId]);
+		GameServer()->OnLogout(ClientId);
 		GameServer()->m_Account[ClientId] = CAccountSession(); // Reset account session
 		return true;
 	}
@@ -306,101 +209,59 @@ bool CAccounts::Logout(int ClientId)
 
 void CAccounts::OnLogout(int ClientId, const CAccountSession AccInfo)
 {
-	if(!m_AccDatabase)
+	if(!m_pPool)
 		return;
 
-	if(sqlite3_exec(m_AccDatabase, SQLITE_TABLE, nullptr, nullptr, nullptr) != SQLITE_OK)
-	{
-		dbg_msg("accounts", "Failed to create table: %s", sqlite3_errmsg(m_AccDatabase));
-		sqlite3_close(m_AccDatabase);
-		return;
-	}
+	auto pReq = std::make_unique<CAccUpdLogoutState>();
+	str_copy(pReq->m_Username, AccInfo.m_Username, sizeof(pReq->m_Username));
+	pReq->m_Flags = AccInfo.m_Flags;
+	pReq->m_VoteMenuPage = AccInfo.m_VoteMenuPage;
+	pReq->m_Playtime = AccInfo.m_Playtime;
+	pReq->m_Deaths = AccInfo.m_Deaths;
+	pReq->m_Kills = AccInfo.m_Kills;
+	pReq->m_Level = AccInfo.m_Level;
+	pReq->m_XP = AccInfo.m_XP;
+	pReq->m_Money = AccInfo.m_Money;
+	str_copy(pReq->m_Inventory, AccInfo.m_Inventory);
+	str_copy(pReq->m_LastActiveItems, AccInfo.m_LastActiveItems);
 
-	GameServer()->OnLogout(ClientId);
-
-	const char *UpdateQuery = R"(
-		UPDATE Accounts
-		SET
-			LoggedIn = 0,
-			Port = 0,
-			ClientId = -1,
-			LastPlayerName = PlayerName,
-			LastIP = CurrentIP,
-			Flags = ?,
-			VoteMenuPage = ?,
-			Playtime = ?,
-			Deaths = ?,
-			Kills = ?,
-			Level = ?,
-			XP = ?,
-			Money = ?,
-			Inventory = ?,
-			LastActiveItems = ?
-		WHERE Username = ?;
-	)";
-
-	sqlite3_stmt *stmt = nullptr;
-	if(sqlite3_prepare_v2(m_AccDatabase, UpdateQuery, -1, &stmt, nullptr) == SQLITE_OK)
-	{
-		time_t Now;
-		time(&Now);
-
-		sqlite3_bind_int64(stmt, 1, AccInfo.m_Flags);
-		sqlite3_bind_int64(stmt, 2, AccInfo.m_VoteMenuPage);
-		sqlite3_bind_int64(stmt, 3, AccInfo.m_Playtime);
-		sqlite3_bind_int64(stmt, 4, AccInfo.m_Deaths);
-		sqlite3_bind_int64(stmt, 5, AccInfo.m_Kills);
-		sqlite3_bind_int64(stmt, 6, AccInfo.m_Level);
-		sqlite3_bind_int64(stmt, 7, AccInfo.m_XP);
-		sqlite3_bind_int64(stmt, 8, AccInfo.m_Money);
-		sqlite3_bind_text(stmt, 9, AccInfo.m_Inventory, -1, SQLITE_STATIC);
-		sqlite3_bind_text(stmt, 10, AccInfo.m_LastActiveItems, -1, SQLITE_STATIC);
-		sqlite3_bind_text(stmt, 11, AccInfo.m_Username, -1, SQLITE_STATIC);
-		sqlite3_step(stmt);
-		sqlite3_finalize(stmt);
-	}
+	m_pPool->ExecuteWrite(CAccountsWorker::UpdateLogoutState, std::move(pReq), "acc update logout");
 }
 
 void CAccounts::LogoutAllAccountsPort(int Port)
 {
-	if(!m_AccDatabase)
+	if(!m_pPool)
 		return;
-	if(sqlite3_exec(m_AccDatabase, SQLITE_TABLE, nullptr, nullptr, nullptr) != SQLITE_OK)
+	// Simple bulk logout by port
+	struct CSqlLogoutByPort : ISqlData
 	{
-		dbg_msg("accounts", "Failed to create table: %s", sqlite3_errmsg(m_AccDatabase));
-		sqlite3_close(m_AccDatabase);
-		return;
-	}
-	const char *UpdateQuery = R"(
-		UPDATE Accounts
-		SET
-			LastPlayerName = PlayerName,
-			LastIP = CurrentIP,
-			LoggedIn = 0,
-			Port = 0,
-			ClientId = -1
-		WHERE Port = ?;
-	)";
-	sqlite3_stmt *stmt = nullptr;
-	if(sqlite3_prepare_v2(m_AccDatabase, UpdateQuery, -1, &stmt, nullptr) != SQLITE_OK)
-		return;
-
-	sqlite3_bind_int(stmt, 1, Port);
-	sqlite3_step(stmt);
-	sqlite3_finalize(stmt);
+		CSqlLogoutByPort() :
+			ISqlData(nullptr) {}
+		int m_Port{};
+	};
+	auto Fn = [](IDbConnection *pSql, const ISqlData *pData, Write, char *pError, int ErrorSize) -> bool {
+		const auto *p = dynamic_cast<const CSqlLogoutByPort *>(pData);
+		char aSql[256];
+		str_copy(aSql,
+			"UPDATE foxnet_accounts "
+			"SET LastPlayerName = PlayerName, LastIP = CurrentIP, LoggedIn = 0, Port = 0, ClientId = -1 "
+			"WHERE Port = ?",
+			sizeof(aSql));
+		if(!pSql->PrepareStatement(aSql, pError, ErrorSize))
+			return false;
+		pSql->BindInt(1, p->m_Port);
+		int NumUpdated = 0;
+		return pSql->ExecuteUpdate(&NumUpdated, pError, ErrorSize);
+	};
+	auto pReq = std::make_unique<CSqlLogoutByPort>();
+	pReq->m_Port = Port;
+	m_pPool->ExecuteWrite(Fn, std::move(pReq), "acc bulk logout by port");
 }
 
 bool CAccounts::Register(int ClientId, const char *pUsername, const char *pPassword, const char *pPassword2)
 {
-	if(!m_AccDatabase)
+	if(!m_pPool)
 		return false;
-
-	if(sqlite3_exec(m_AccDatabase, SQLITE_TABLE, nullptr, nullptr, nullptr) != SQLITE_OK)
-	{
-		dbg_msg("accounts", "Failed to create table: %s", sqlite3_errmsg(m_AccDatabase));
-		sqlite3_close(m_AccDatabase);
-		return false;
-	}
 
 	if(!pUsername[0] || !pPassword[0] || !pPassword2[0])
 	{
@@ -431,51 +292,34 @@ bool CAccounts::Register(int ClientId, const char *pUsername, const char *pPassw
 	char HashedPassword[ACC_MAX_PASSW_LENGTH];
 	sha256_str(HashPassword(pPassword), HashedPassword, ACC_MAX_PASSW_LENGTH);
 
-	// Use plain INSERT so duplicates trigger a constraint error (do not overwrite)
-	const char *InsertQuery = R"(
-        INSERT INTO Accounts (Username, Password, RegisterDate)
-        VALUES (?, ?, ?);
-    )";
+	auto pRes = std::make_shared<CAccResult>();
+	auto pReq = std::make_unique<CAccRegisterRequest>(pRes);
+	str_copy(pReq->m_Username, pUsername, sizeof(pReq->m_Username));
+	str_copy(pReq->m_PasswordHash, HashedPassword, sizeof(pReq->m_PasswordHash));
+	time_t Now;
+	time(&Now);
+	pReq->m_RegisterDate = Now;
+	m_pPool->ExecuteWrite(CAccountsWorker::Register, std::move(pReq), "acc register");
 
-	sqlite3_stmt *stmt = nullptr;
-	if(sqlite3_prepare_v2(m_AccDatabase, InsertQuery, -1, &stmt, nullptr) != SQLITE_OK)
+	if(!WaitForResult(pRes, "register.insert"))
 	{
-		dbg_msg("accounts", "Failed to prepare insert statement: %s", sqlite3_errmsg(m_AccDatabase));
+		GameServer()->SendChatTarget(ClientId, "[Err] Registration failed");
 		return false;
 	}
 
-	time_t Now;
-	time(&Now);
-
-	sqlite3_bind_text(stmt, 1, pUsername, -1, SQLITE_STATIC);
-	sqlite3_bind_text(stmt, 2, HashedPassword, -1, SQLITE_STATIC);
-	sqlite3_bind_int64(stmt, 3, Now);
-
-	int rc = sqlite3_step(stmt);
-	if(rc != SQLITE_DONE)
+	if(!pRes->m_Success)
 	{
-		int err = sqlite3_errcode(m_AccDatabase);
-		if(err == SQLITE_CONSTRAINT)
-		{
-			GameServer()->SendChatTarget(ClientId, "[Err] Username is already taken");
-		}
-		else
-		{
-			dbg_msg("accounts", "Failed to insert account info: (%d) %s", err, sqlite3_errmsg(m_AccDatabase));
-		}
-		sqlite3_finalize(stmt);
+		GameServer()->SendChatTarget(ClientId, "[Err] Username is already taken");
 		return false;
 	}
 
 	GameServer()->SendChatTarget(ClientId, "Registered Successfully, use /login..");
-
-	sqlite3_finalize(stmt);
 	return true;
 }
 
 bool CAccounts::ChangePassword(int ClientId, const char *pOldPassword, const char *pNewPassword, const char *pNewPassword2)
 {
-	if(!m_AccDatabase)
+	if(!m_pPool)
 		return false;
 
 	if(!GameServer()->m_Account[ClientId].m_LoggedIn)
@@ -499,79 +343,60 @@ bool CAccounts::ChangePassword(int ClientId, const char *pOldPassword, const cha
 		GameServer()->SendChatTarget(ClientId, "[Err] New password is too short");
 		return false;
 	}
-	char HashedOldPassword[ACC_MAX_PASSW_LENGTH];
-	sha256_str(HashPassword(pOldPassword), HashedOldPassword, ACC_MAX_PASSW_LENGTH);
-	char HashedNewPassword[ACC_MAX_PASSW_LENGTH];
-	sha256_str(HashPassword(pNewPassword), HashedNewPassword, ACC_MAX_PASSW_LENGTH);
-	const char *UpdateQuery = R"(
-		UPDATE Accounts
-		SET Password = ?
-		WHERE Username = ? AND Password = ?;
-	)";
-	sqlite3_stmt *stmt = nullptr;
-	if(sqlite3_prepare_v2(m_AccDatabase, UpdateQuery, -1, &stmt, nullptr) != SQLITE_OK)
-	{
-		dbg_msg("accounts", "Failed to prepare update statement: %s", sqlite3_errmsg(m_AccDatabase));
-		return false;
-	}
-	sqlite3_bind_text(stmt, 1, HashedNewPassword, -1, SQLITE_STATIC);
-	sqlite3_bind_text(stmt, 2, GameServer()->m_Account[ClientId].m_Username, -1, SQLITE_STATIC);
-	sqlite3_bind_text(stmt, 3, HashedOldPassword, -1, SQLITE_STATIC);
 
-	int rc = sqlite3_step(stmt);
-	if(rc != SQLITE_DONE)
-	{
-		int err = sqlite3_errcode(m_AccDatabase);
-		if(err == SQLITE_CONSTRAINT)
-		{
-			GameServer()->SendChatTarget(ClientId, "[Err] Old password is incorrect");
-		}
-		else
-		{
-			GameServer()->SendChatTarget(ClientId, "[Err] Failed to change password");
-		}
-		sqlite3_finalize(stmt);
-		return false;
-	}
+	char HashedOld[ACC_MAX_PASSW_LENGTH];
+	sha256_str(HashPassword(pOldPassword), HashedOld, ACC_MAX_PASSW_LENGTH);
+	char HashedNew[ACC_MAX_PASSW_LENGTH];
+	sha256_str(HashPassword(pNewPassword), HashedNew, ACC_MAX_PASSW_LENGTH);
 
+	struct CSqlChangePass : ISqlData
+	{
+		CSqlChangePass() :
+			ISqlData(nullptr) {}
+		char m_Username[ACC_MAX_USERNAME_LENGTH]{};
+		char m_OldHash[ACC_MAX_PASSW_LENGTH]{};
+		char m_NewHash[ACC_MAX_PASSW_LENGTH]{};
+	};
+	auto Fn = [](IDbConnection *pSql, const ISqlData *pData, Write, char *pError, int ErrorSize) -> bool {
+		const auto *p = dynamic_cast<const CSqlChangePass *>(pData);
+		const char *aSql =
+			"UPDATE foxnet_accounts SET Password = ? WHERE Username = ? AND Password = ?";
+		if(!pSql->PrepareStatement(aSql, pError, ErrorSize))
+			return false;
+		pSql->BindString(1, p->m_NewHash);
+		pSql->BindString(2, p->m_Username);
+		pSql->BindString(3, p->m_OldHash);
+		int NumUpdated = 0;
+		return pSql->ExecuteUpdate(&NumUpdated, pError, ErrorSize);
+	};
+	auto pReq = std::make_unique<CSqlChangePass>();
+	str_copy(pReq->m_Username, GameServer()->m_Account[ClientId].m_Username, sizeof(pReq->m_Username));
+	str_copy(pReq->m_OldHash, HashedOld, sizeof(pReq->m_OldHash));
+	str_copy(pReq->m_NewHash, HashedNew, sizeof(pReq->m_NewHash));
+
+	m_pPool->ExecuteWrite(Fn, std::move(pReq), "acc change password");
+	GameServer()->SendChatTarget(ClientId, "Password change requested");
 	return true;
 }
 
 int CAccounts::IsAccountLoggedIn(const char *pUsername)
 {
-	if(!m_AccDatabase)
-		return false;
-	if(!pUsername[0])
-		return false;
-	const char *SelectQuery = R"(
-		SELECT Port
-		FROM Accounts
-		WHERE Username = ?;
-	)";
-	sqlite3_stmt *stmt;
-	if(sqlite3_prepare_v2(m_AccDatabase, SelectQuery, -1, &stmt, nullptr) != SQLITE_OK)
-		return false;
-	sqlite3_bind_text(stmt, 1, pUsername, -1, SQLITE_STATIC);
-	int LoggedIn = false;
-	if(sqlite3_step(stmt) == SQLITE_ROW)
-	{
-		LoggedIn = sqlite3_column_int(stmt, 0);
-	}
-	sqlite3_finalize(stmt);
-	return LoggedIn;
+	if(!m_pPool || !pUsername[0])
+		return 0;
+
+	auto pRes = std::make_shared<CAccResult>();
+	auto pReq = std::make_unique<CAccSelectPortByUser>(pRes);
+	str_copy(pReq->m_Username, pUsername, sizeof(pReq->m_Username));
+	m_pPool->Execute(CAccountsWorker::SelectPortByUsername, std::move(pReq), "acc select port");
+	if(!WaitForResult(pRes, "isloggedin.select"))
+		return 0;
+	return pRes->m_Port;
 }
 
 void CAccounts::EditAccount(const char *pUsername, const char *pVariable, const char *pValue)
 {
-	if(!m_AccDatabase)
+	if(!m_pPool)
 		return;
-	if(sqlite3_exec(m_AccDatabase, SQLITE_TABLE, nullptr, nullptr, nullptr) != SQLITE_OK)
-	{
-		dbg_msg("accounts", "Failed to create table: %s", sqlite3_errmsg(m_AccDatabase));
-		sqlite3_close(m_AccDatabase);
-		return;
-	}
-
 	if(!pUsername || !pUsername[0] || !pVariable || !pVariable[0] || !pValue)
 		return;
 
@@ -587,20 +412,16 @@ void CAccounts::EditAccount(const char *pUsername, const char *pVariable, const 
 			"Version", "RegisterDate", "LoggedIn", "LastLogin", "Port", "ClientId",
 			"Flags", "VoteMenuPage", "Playtime", "Deaths", "Kills", "Level", "XP", "Money", nullptr};
 		for(const char **pp = s_aIntCols; *pp; ++pp)
-		{
 			if(!str_comp(*pp, pCol))
 				return true;
-		}
 		return false;
 	};
 	auto IsTextCol = [](const char *pCol) {
 		static const char *s_aTextCols[] = {
 			"PlayerName", "LastPlayerName", "CurrentIP", "LastIP", "Inventory", "LastActiveItems", nullptr};
 		for(const char **pp = s_aTextCols; *pp; ++pp)
-		{
 			if(!str_comp(*pp, pCol))
 				return true;
-		}
 		return false;
 	};
 
@@ -613,29 +434,39 @@ void CAccounts::EditAccount(const char *pUsername, const char *pVariable, const 
 		return;
 	}
 
-	char aSql[256];
-	if(IsInt)
-		str_format(aSql, sizeof(aSql), "UPDATE Accounts SET %s = CAST(? AS INTEGER) WHERE Username = ?;", pVariable);
-	else // text
-		str_format(aSql, sizeof(aSql), "UPDATE Accounts SET %s = ? WHERE Username = ?;", pVariable);
-
-	sqlite3_stmt *pStmt = nullptr;
-	if(sqlite3_prepare_v2(m_AccDatabase, aSql, -1, &pStmt, nullptr) != SQLITE_OK)
+	struct CSqlEditReq : ISqlData
 	{
-		dbg_msg("accounts", "EditAccount: prepare failed: %s", sqlite3_errmsg(m_AccDatabase));
-		return;
-	}
+		CSqlEditReq() :
+			ISqlData(nullptr) {}
+		char m_Username[ACC_MAX_USERNAME_LENGTH]{};
+		char m_Value[1028]{};
+		char m_Column[64]{};
+		bool m_IsInt{};
+	};
+	auto Fn = [](IDbConnection *pSql, const ISqlData *pData, Write, char *pError, int ErrorSize) -> bool {
+		const auto *p = dynamic_cast<const CSqlEditReq *>(pData);
+		char aSql[384];
+		if(p->m_IsInt)
+			str_format(aSql, sizeof(aSql), "UPDATE foxnet_accounts SET %s = CAST(? AS INTEGER) WHERE Username = ?", p->m_Column);
+		else
+			str_format(aSql, sizeof(aSql), "UPDATE foxnet_accounts SET %s = ? WHERE Username = ?", p->m_Column);
+		if(!pSql->PrepareStatement(aSql, pError, ErrorSize))
+			return false;
+		pSql->BindString(1, p->m_Value);
+		pSql->BindString(2, p->m_Username);
+		int NumUpdated = 0;
+		return pSql->ExecuteUpdate(&NumUpdated, pError, ErrorSize);
+	};
+	auto pReq = std::make_unique<CSqlEditReq>();
+	str_copy(pReq->m_Username, pUsername, sizeof(pReq->m_Username));
+	str_copy(pReq->m_Value, pValue, sizeof(pReq->m_Value));
+	str_copy(pReq->m_Column, pVariable, sizeof(pReq->m_Column));
+	pReq->m_IsInt = IsInt;
 
-	sqlite3_bind_text(pStmt, 1, pValue, -1, SQLITE_STATIC);
-	sqlite3_bind_text(pStmt, 2, pUsername, -1, SQLITE_STATIC);
-
-	const int rc = sqlite3_step(pStmt);
-	if(rc != SQLITE_DONE)
-		dbg_msg("accounts", "update failed: (%d) %s", sqlite3_errcode(m_AccDatabase), sqlite3_errmsg(m_AccDatabase));
-	sqlite3_finalize(pStmt);
+	m_pPool->ExecuteWrite(Fn, std::move(pReq), "acc edit");
 }
 
-const char *FormatLastSeen(time_t LastLoginDate)
+static const char *FormatLastSeen(time_t LastLoginDate)
 {
 	static char aBuf[64];
 	if(LastLoginDate <= 0)
@@ -695,7 +526,7 @@ void CAccounts::ShowAccProfile(int ClientId, const char *pName)
 
 	GameServer()->SendChatTarget(ClientId, "├──────      Sᴛᴀᴛs");
 
-	str_format(aBuf, sizeof(aBuf), "│ Level %d", OptAcc->m_Level);
+	str_format(aBuf, sizeof(aBuf), "│ Level %lld", OptAcc->m_Level);
 	GameServer()->SendChatTarget(ClientId, aBuf);
 	str_format(aBuf, sizeof(aBuf), "│ %lld %s", OptAcc->m_Money, g_Config.m_SvCurrencyName);
 	GameServer()->SendChatTarget(ClientId, aBuf);
@@ -706,86 +537,66 @@ void CAccounts::ShowAccProfile(int ClientId, const char *pName)
 		str_format(aBuf, sizeof(aBuf), "│ %d Minutes Playtime", (int)OptAcc->m_Playtime);
 	GameServer()->SendChatTarget(ClientId, aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "│ %d Deaths", OptAcc->m_Deaths);
+	str_format(aBuf, sizeof(aBuf), "│ %lld Deaths", OptAcc->m_Deaths);
 	GameServer()->SendChatTarget(ClientId, aBuf);
-
-	// if(g_Config.m_SvBlockMode)
-	//{
-	//	str_format(aBuf, sizeof(aBuf), "│ %d Kills", pAcc->m_Kills);
-	//	GameServer()->SendChatTarget(ClientId, aBuf);
-	// }
 
 	GameServer()->SendChatTarget(ClientId, "╰───────────────────────");
 }
 
 std::optional<CAccountSession> CAccounts::GetAccount(const char *pUsername)
 {
-	if(!m_AccDatabase)
+	if(!m_pPool || !pUsername[0])
 		return std::nullopt;
-	if(!pUsername[0])
+
+	auto pRes = std::make_shared<CAccResult>();
+	auto pReq = std::make_unique<CAccSelectByUser>(pRes);
+	str_copy(pReq->m_Username, pUsername, sizeof(pReq->m_Username));
+	m_pPool->Execute(CAccountsWorker::SelectByUsername, std::move(pReq), "acc select by username (profile)");
+	if(!WaitForResult(pRes, "getaccount.select"))
 		return std::nullopt;
-	const char *SelectQuery = R"(
-		SELECT Username, PlayerName, LastPlayerName, LoggedIn, LastLogin, Playtime, Deaths, Level, Money
-		FROM Accounts
-		WHERE Username = ?;
-	)";
-	sqlite3_stmt *stmt;
-	if(sqlite3_prepare_v2(m_AccDatabase, SelectQuery, -1, &stmt, nullptr) == SQLITE_OK)
-	{
-		sqlite3_bind_text(stmt, 1, pUsername, -1, SQLITE_STATIC);
-		if(sqlite3_step(stmt) == SQLITE_ROW)
-		{
-			CAccountSession Acc;
-			str_copy(Acc.m_Username, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 0)));
-			str_copy(Acc.m_Name, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 1)));
-			str_copy(Acc.m_LastName, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 2)));
-			Acc.m_LoggedIn = sqlite3_column_int(stmt, 3);
-			Acc.m_LastLogin = sqlite3_column_int64(stmt, 4);
-			Acc.m_Playtime = sqlite3_column_int64(stmt, 5);
-			Acc.m_Deaths = sqlite3_column_int64(stmt, 6);
-			Acc.m_Level = sqlite3_column_int64(stmt, 7);
-			Acc.m_Money = sqlite3_column_int64(stmt, 8);
-			sqlite3_finalize(stmt);
-			return Acc;
-		}
-		sqlite3_finalize(stmt);
-	}
-	return std::nullopt;
+
+	if(!pRes->m_Found)
+		return std::nullopt;
+
+	CAccountSession Acc;
+	str_copy(Acc.m_Username, pRes->m_Username);
+	str_copy(Acc.m_Name, pRes->m_PlayerName);
+	str_copy(Acc.m_LastName, pRes->m_LastPlayerName);
+	Acc.m_LoggedIn = pRes->m_LoggedIn;
+	Acc.m_LastLogin = pRes->m_LastLogin;
+	Acc.m_Playtime = pRes->m_Playtime;
+	Acc.m_Deaths = pRes->m_Deaths;
+	Acc.m_Level = pRes->m_Level;
+	Acc.m_Money = pRes->m_Money;
+	return Acc;
 }
 
 std::optional<CAccountSession> CAccounts::GetAccountCurName(const char *pName)
 {
-	if(!m_AccDatabase)
+	if(!m_pPool || !pName[0])
 		return std::nullopt;
-	if(!pName[0])
+
+	auto pRes = std::make_shared<CAccResult>();
+	auto pReq = std::make_unique<CAccSelectByLastName>(pRes);
+	str_copy(pReq->m_LastPlayerName, pName, sizeof(pReq->m_LastPlayerName));
+	m_pPool->Execute(CAccountsWorker::SelectByLastPlayerName, std::move(pReq), "acc select by last name (profile)");
+	if(!WaitForResult(pRes, "getaccountcurname.select"))
 		return std::nullopt;
-	const char *SelectQuery = R"(
-		SELECT Username, PlayerName, LastPlayerName, LoggedIn, LastLogin, Playtime, Deaths, Level, Money
-		FROM Accounts
-		WHERE LastPlayerName = ?;
-	)";
-	sqlite3_stmt *stmt;
-	if(sqlite3_prepare_v2(m_AccDatabase, SelectQuery, -1, &stmt, nullptr) == SQLITE_OK)
-	{
-		sqlite3_bind_text(stmt, 1, pName, -1, SQLITE_STATIC);
-		if(sqlite3_step(stmt) == SQLITE_ROW)
-		{
-			CAccountSession Acc;
-			str_copy(Acc.m_Username, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 0)));
-			str_copy(Acc.m_Name, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 1)));
-			str_copy(Acc.m_LastName, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 2)));
-			Acc.m_LoggedIn = sqlite3_column_int(stmt, 3);
-			Acc.m_LastLogin = sqlite3_column_int64(stmt, 4);
-			Acc.m_Playtime = sqlite3_column_int64(stmt, 5);
-			Acc.m_Deaths = sqlite3_column_int64(stmt, 6);
-			Acc.m_Level = sqlite3_column_int64(stmt, 7);
-			Acc.m_Money = sqlite3_column_int64(stmt, 8);
-			sqlite3_finalize(stmt);
-			return Acc;
-		}
-		sqlite3_finalize(stmt);
-	}
-	return std::nullopt;
+
+	if(!pRes->m_Found)
+		return std::nullopt;
+
+	CAccountSession Acc;
+	str_copy(Acc.m_Username, pRes->m_Username);
+	str_copy(Acc.m_Name, pRes->m_PlayerName);
+	str_copy(Acc.m_LastName, pRes->m_LastPlayerName);
+	Acc.m_LoggedIn = pRes->m_LoggedIn;
+	Acc.m_LastLogin = pRes->m_LastLogin;
+	Acc.m_Playtime = pRes->m_Playtime;
+	Acc.m_Deaths = pRes->m_Deaths;
+	Acc.m_Level = pRes->m_Level;
+	Acc.m_Money = pRes->m_Money;
+	return Acc;
 }
 
 CAccountSession CAccounts::GetAccount(int ClientId)
@@ -795,59 +606,27 @@ CAccountSession CAccounts::GetAccount(int ClientId)
 
 void CAccounts::SaveAccountsInfo(int ClientId, const CAccountSession AccInfo)
 {
-	if(!m_AccDatabase)
+	if(!m_pPool)
 		return;
 
-	if(sqlite3_exec(m_AccDatabase, SQLITE_TABLE, nullptr, nullptr, nullptr) != SQLITE_OK)
-	{
-		dbg_msg("accounts", "Failed to create table: %s", sqlite3_errmsg(m_AccDatabase));
-		sqlite3_close(m_AccDatabase);
-		return;
-	}
-
-	const char *UpdateQuery = R"(
-		UPDATE Accounts
-		SET
-			LastPlayerName = PlayerName,
-			LastIP = CurrentIP,
-			Flags = ?,
-			VoteMenuPage = ?,
-			Playtime = ?,
-			Deaths = ?,
-			Kills = ?,
-			Level = ?,
-			XP = ?,
-			Money = ?,
-			Inventory = ?,
-			LastActiveItems = ?
-		WHERE Username = ?;
-	)";
-
-	sqlite3_stmt *stmt = nullptr;
-	if(sqlite3_prepare_v2(m_AccDatabase, UpdateQuery, -1, &stmt, nullptr) == SQLITE_OK)
-	{
-		time_t Now;
-		time(&Now);
-
-		sqlite3_bind_int64(stmt, 1, AccInfo.m_Flags);
-		sqlite3_bind_int64(stmt, 2, AccInfo.m_VoteMenuPage);
-		sqlite3_bind_int64(stmt, 3, AccInfo.m_Playtime);
-		sqlite3_bind_int64(stmt, 4, AccInfo.m_Deaths);
-		sqlite3_bind_int64(stmt, 5, AccInfo.m_Kills);
-		sqlite3_bind_int64(stmt, 6, AccInfo.m_Level);
-		sqlite3_bind_int64(stmt, 7, AccInfo.m_XP);
-		sqlite3_bind_int64(stmt, 8, AccInfo.m_Money);
-		sqlite3_bind_text(stmt, 9, AccInfo.m_Inventory, -1, SQLITE_STATIC);
-		sqlite3_bind_text(stmt, 10, AccInfo.m_LastActiveItems, -1, SQLITE_STATIC);
-		sqlite3_bind_text(stmt, 11, AccInfo.m_Username, -1, SQLITE_STATIC);
-		sqlite3_step(stmt);
-		sqlite3_finalize(stmt);
-	}
+	auto pReq = std::make_unique<CAccSaveInfo>();
+	pReq->m_Flags = AccInfo.m_Flags;
+	pReq->m_VoteMenuPage = AccInfo.m_VoteMenuPage;
+	pReq->m_Playtime = AccInfo.m_Playtime;
+	pReq->m_Deaths = AccInfo.m_Deaths;
+	pReq->m_Kills = AccInfo.m_Kills;
+	pReq->m_Level = AccInfo.m_Level;
+	pReq->m_XP = AccInfo.m_XP;
+	pReq->m_Money = AccInfo.m_Money;
+	str_copy(pReq->m_Inventory, AccInfo.m_Inventory);
+	str_copy(pReq->m_LastActiveItems, AccInfo.m_LastActiveItems);
+	str_copy(pReq->m_Username, AccInfo.m_Username);
+	m_pPool->ExecuteWrite(CAccountsWorker::SaveInfo, std::move(pReq), "acc save info");
 }
 
 void CAccounts::SaveAllAccounts()
 {
-	if(!m_AccDatabase)
+	if(!m_pPool)
 		return;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -858,81 +637,11 @@ void CAccounts::SaveAllAccounts()
 
 void CAccounts::SetPlayerName(int ClientId, const char *pName) // When player changes name
 {
-	if(!m_AccDatabase)
+	if(!m_pPool)
 		return;
 
-	if(sqlite3_exec(m_AccDatabase, SQLITE_TABLE, nullptr, nullptr, nullptr) != SQLITE_OK)
-	{
-		dbg_msg("accounts", "Failed to create table: %s", sqlite3_errmsg(m_AccDatabase));
-		sqlite3_close(m_AccDatabase);
-		return;
-	}
-
-	const char *UpdateQuery = R"(
-		UPDATE Accounts
-		SET
-			LastPlayerName = PlayerName,
-			PlayerName = ?
-		WHERE Username = ?;
-	)";
-
-	sqlite3_stmt *stmt = nullptr;
-	if(sqlite3_prepare_v2(m_AccDatabase, UpdateQuery, -1, &stmt, nullptr) != SQLITE_OK)
-		return;
-
-	sqlite3_bind_text(stmt, 1, pName, -1, SQLITE_STATIC);
-	sqlite3_bind_text(stmt, 2, GameServer()->m_Account[ClientId].m_Username, -1, SQLITE_STATIC);
-
-	sqlite3_step(stmt);
-	sqlite3_finalize(stmt);
+	auto pReq = std::make_unique<CAccSetNameReq>();
+	str_copy(pReq->m_NewPlayerName, pName, sizeof(pReq->m_NewPlayerName));
+	str_copy(pReq->m_Username, GameServer()->m_Account[ClientId].m_Username, sizeof(pReq->m_Username));
+	m_pPool->ExecuteWrite(CAccountsWorker::SetPlayerName, std::move(pReq), "acc set player name");
 }
-
-// std::optional<CAccountSession> CAccounts::AccountInfoUsername(const char *pUsername)
-//{
-//	if(!m_AccDatabase)
-//		return std::nullopt;
-//
-//	const char *SelectQuery = R"(
-//		SELECT Username, RegisterDate, PlayerName, LastPlayerName, CurrentIP, LastIP, LoggedIn, LastLogin, Port, ClientId, Flags, VoteMenuPage Playtime, Deaths, Kills, Level, XP, Money, Inventory, LastActiveItems
-//		FROM Accounts
-//		WHERE Username;
-//	)";
-//
-//	sqlite3_stmt *stmt;
-//	if(sqlite3_prepare_v2(m_AccDatabase, SelectQuery, -1, &stmt, nullptr) != SQLITE_OK)
-//		return std::nullopt;
-//
-//	sqlite3_bind_text(stmt, 1, pUsername, -1, SQLITE_STATIC);
-//
-//	if(sqlite3_step(stmt) == SQLITE_ROW)
-//	{
-//		CAccountSession Acc = CAccountSession();
-//
-//		str_copy(Acc.m_Username, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 0)));
-//		Acc.m_RegisterDate = sqlite3_column_int64(stmt, 1);
-//		str_copy(Acc.m_Name, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 2)));
-//		str_copy(Acc.m_LastName, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 3)));
-//		str_copy(Acc.CurrentIp, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 4)));
-//		str_copy(Acc.LastIp, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 5)));
-//		Acc.m_LoggedIn = sqlite3_column_int(stmt, 6);
-//		Acc.m_LastLogin = sqlite3_column_int64(stmt, 7);
-//		Acc.m_Port = sqlite3_column_int(stmt, 8);
-//		Acc.ClientId = sqlite3_column_int(stmt, 9);
-//		Acc.m_Flags = sqlite3_column_int64(stmt, 10);
-//		Acc.m_VoteMenuPage = sqlite3_column_int64(stmt, 11);
-//		Acc.m_Playtime = sqlite3_column_int64(stmt, 12);
-//		Acc.m_Deaths = sqlite3_column_int64(stmt, 13);
-//		Acc.m_Kills = sqlite3_column_int64(stmt, 14);
-//		Acc.m_Level = sqlite3_column_int64(stmt, 15);
-//		Acc.m_XP = sqlite3_column_int64(stmt, 16);
-//		Acc.m_Money = sqlite3_column_int64(stmt, 17);
-//		str_copy(Acc.m_Inventory, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 18)));
-//		str_copy(Acc.m_LastActiveItems, reinterpret_cast<const char *>(sqlite3_column_text(stmt, 19)));
-//
-//		sqlite3_finalize(stmt);
-//		return Acc;
-//	}
-//	sqlite3_finalize(stmt);
-//
-//	return std::nullopt;
-//}

@@ -165,6 +165,11 @@ bool CSqliteConnection::ConnectImpl(char *pError, int ErrorSize)
 		FormatCreatePoints(aBuf, sizeof(aBuf));
 		if(!Execute(aBuf, pError, ErrorSize))
 			return false;
+		// <FoxNet
+		FormatCreateAccounts(aBuf, sizeof(aBuf));
+		if(!Execute(aBuf, pError, ErrorSize))
+			return false;
+		// FoxNet>
 
 		FormatCreateRace(aBuf, sizeof(aBuf), /* Backup */ true);
 		if(!Execute(aBuf, pError, ErrorSize))

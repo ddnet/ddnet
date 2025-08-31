@@ -4299,9 +4299,8 @@ void CGameContext::OnInit(const void *pPersistentData)
 	CreateAllEntities(true);
 
 	m_pAntibot->RoundStart(this);
-
 	// <FoxNet
-	m_AccountManager.Init(this);
+	m_AccountManager.Init(this, ((CServer *)Server())->DbPool());
 	m_VoteMenu.Init(this);
 	m_Shop.Init(this);
 

@@ -7,11 +7,13 @@
 #include <engine/storage.h>
 #include <optional>
 #include <string>
+#include <memory>
 
-#include <sqlite3.h>
-
+class CDbConnectionPool;
 class CGameContext;
+class IDbConnection;
 class IServer;
+struct ISqlData;
 
 enum
 {
@@ -45,7 +47,7 @@ struct CAccountSession
 	int64_t m_XP = 0;
 	int64_t m_Money = 0;
 	char m_Inventory[1028] = "";
-	char m_LastActiveItems[1028] = ""; // corelates to m_Inventory, will load this on login
+	char m_LastActiveItems[1028] = ""; // correlates to m_Inventory, will load this on login
 
 	int m_LoginTick = 0;
 };
@@ -53,19 +55,24 @@ struct CAccountSession
 class CAccounts
 {
 	CGameContext *m_pGameServer;
+	CDbConnectionPool *m_pPool;
+
 	CGameContext *GameServer() const { return m_pGameServer; }
 	IServer *Server() const;
 
-	sqlite3 *m_AccDatabase;
+	// Wait helper for simple synchronous flows (register/login).
+	// Returns true if completed and successful.
+	bool WaitForResult(const std::shared_ptr<struct ISqlResult> &pRes, const char *pOpName, int TimeoutMs = 2000);
 
-public:
-	void Init(CGameContext *pGameServer);
-	void OnShutdown();
-
+	// Password hashing
 	SHA256_DIGEST HashPassword(const char *pPassword);
 
-	bool Register(int ClientId, const char *pUsername, const char *pPassword, const char *pPassword2);
+public:
+	// Pool-aware init. Pass the same pool used by CScore.
+	void Init(CGameContext *pGameServer, CDbConnectionPool *pPool);
 
+	// Account operations
+	bool Register(int ClientId, const char *pUsername, const char *pPassword, const char *pPassword2);
 	bool ChangePassword(int ClientId, const char *pOldPassword, const char *pNewPassword, const char *pNewPassword2);
 
 	void AutoLogin(int ClientId);
@@ -74,7 +81,8 @@ public:
 	bool Login(int ClientId, const char *pUsername, const char *pPassword);
 	bool Logout(int ClientId);
 
-	void OnLogin(int ClientId, const char *pUsername, sqlite3_stmt *pstmt);
+	// In-memory session -> DB persist helpers
+	void OnLogin(int ClientId, const struct CAccResult &Res);
 	void OnLogout(int ClientId, const CAccountSession AccInfo);
 
 	void SaveAccountsInfo(int ClientId, const CAccountSession AccInfo);
@@ -90,15 +98,13 @@ public:
 	CAccountSession GetAccount(int ClientId);
 
 	void SetPlayerName(int ClientId, const char *pName);
-
 	void EditAccount(const char *pUsername, const char *pVariable, const char *pValue);
 
 	// Returns 0 if not logged in and the current port if logged in
-	int IsAccountLoggedIn(const char *pUsername); 
+	int IsAccountLoggedIn(const char *pUsername);
 
+	// XP curve (unchanged)
 	int64_t m_NeededXp[4] = {30, 65, 100, 150};
-
-	// std::optional<CAccountSession> AccountInfoUsername(const char *pUsername);
 };
 
 #endif // GAME_SERVER_FOXNET_ACCOUNTS_H
