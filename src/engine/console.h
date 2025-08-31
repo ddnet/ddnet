@@ -136,6 +136,9 @@ public:
 
 	virtual int FlagMask() const = 0;
 	virtual void SetFlagMask(int FlagMask) = 0;
+	// <FoxNet
+	virtual bool ExecuteBansFile() = 0;
+	// FoxNet>
 };
 
 std::unique_ptr<IConsole> CreateConsole(int FlagMask);

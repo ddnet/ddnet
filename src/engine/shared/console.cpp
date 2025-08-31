@@ -732,6 +732,54 @@ bool CConsole::ExecuteFile(const char *pFilename, int ClientId, bool LogFailure,
 	return Success;
 }
 
+
+bool CConsole::ExecuteBansFile()
+{
+	const char *pFilename = "Bans.cfg";
+	int Count = 0;
+	// make sure that this isn't being executed already and that recursion limit isn't met
+	for(CExecFile *pCur = m_pFirstExec; pCur; pCur = pCur->m_pPrev)
+	{
+		Count++;
+
+		if(str_comp(pFilename, pCur->m_pFilename) == 0 || Count > FILE_RECURSION_LIMIT)
+			return false;
+	}
+	if(!m_pStorage)
+		return false;
+
+	// push this one to the stack
+	CExecFile ThisFile;
+	CExecFile *pPrev = m_pFirstExec;
+	ThisFile.m_pFilename = pFilename;
+	ThisFile.m_pPrev = m_pFirstExec;
+	m_pFirstExec = &ThisFile;
+
+	// exec the file
+	CLineReader LineReader;
+	bool Success = false;
+	int BanCount = 0;
+
+	if(LineReader.OpenFile(m_pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_ALL)))
+	{
+		while(const char *pLine = LineReader.Get())
+		{
+			if(str_find_nocase(pLine, "Banned by vote") || str_find_nocase(pLine, "No Reason Given")) // Don't add Vote Bans to the list
+				continue;
+
+			ExecuteLine(pLine, -1);
+			BanCount++;
+		}
+		Success = true;
+	}
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "Executed %d Bans", BanCount);
+	Print(IConsole::OUTPUT_LEVEL_STANDARD, "ban-sync", aBuf);
+
+	m_pFirstExec = pPrev;
+	return Success;
+}
+
 void CConsole::Con_Echo(IResult *pResult, void *pUserData)
 {
 	((CConsole *)pUserData)->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", pResult->GetString(0));

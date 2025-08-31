@@ -14,13 +14,48 @@
 #include <game/mapitems.h>
 #include <generated/protocol.h>
 #include <game/voting.h>
+#include <engine/shared/config.h>
 
 void CGameContext::FoxNetTick()
 {
 	m_VoteMenu.Tick();
+	HandleEffects();
+
+	if(g_Config.m_SvBanSyncing)
+		BanSync();
+
 	// Set moving tiles time for quads with pos envelopes
 	m_Collision.SetTime(m_pController->GetTime());
 
+	// Save all logged in accounts every 15 minutes
+	if(Server()->Tick() % (Server()->TickSpeed() * 60 * 15) == 0)
+	{
+		m_AccountManager.SaveAllAccounts();
+	}
+
+	for(auto it = m_vFakeSnapPlayers.begin(); it != m_vFakeSnapPlayers.end();)
+	{
+		if(it->m_State == 2)
+		{
+			it = m_vFakeSnapPlayers.erase(it);
+			continue;
+		}
+		if(it->m_State == 1)
+		{
+			const int Id = it->m_Id;
+			CNetMsg_Sv_Chat Msg;
+			Msg.m_Team = 0;
+			Msg.m_ClientId = Id;
+			Msg.m_pMessage = it->m_aMessage;
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
+			it->m_State = 2;
+		}
+		++it;
+	}
+}
+
+void CGameContext::HandleEffects()
+{
 	// Handle DamageInd effect
 	for(auto it = m_DamageIndEffects.begin(); it != m_DamageIndEffects.end();)
 	{
@@ -58,32 +93,46 @@ void CGameContext::FoxNetTick()
 		}
 		++it;
 	}
+}
 
-	// Save all logged in accounts every 15 minutes
-	if(Server()->Tick() % (Server()->TickSpeed() * 60 * 15) == 0)
+void CGameContext::BanSync()
+{
+	static int64_t ExecSaveDelay = Server()->Tick() + Server()->TickSpeed();
+	if(m_BanSaveDelay < Server()->Tick())
 	{
-		m_AccountManager.SaveAllAccounts();
-	}
+		static bool ExecBans = false;
 
-	for(auto it = m_vFakeSnapPlayers.begin(); it != m_vFakeSnapPlayers.end();)
-	{
-		if(it->m_State == 2)
+		if(Storage()->FileExists("Bans.cfg", IStorage::TYPE_ALL))
 		{
-			it = m_vFakeSnapPlayers.erase(it);
-			continue;
+			if(!ExecBans)
+			{
+				Server()->SetQuietBan(true);
+				Console()->ExecuteBansFile();
+				ExecBans = true;
+				ExecSaveDelay = Server()->Tick() + Server()->TickSpeed();
+			}
 		}
-		if(it->m_State == 1)
+		else
 		{
-			const int Id = it->m_Id;
-			CNetMsg_Sv_Chat Msg;
-			Msg.m_Team = 0;
-			Msg.m_ClientId = Id;
-			Msg.m_pMessage = it->m_aMessage;
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
-			it->m_State = 2;
+			// Info Message
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ban-sync", "Couldn't find \"Bans.cfg\", disabling component ");
+			g_Config.m_SvBanSyncing = 0;
+			if(g_Config.m_SvBanSyncing == 0)
+				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ban-sync", "fs_ban_syncing set to 0");
 		}
-		++it;
+
+		if(ExecSaveDelay < Server()->Tick() && ExecBans)
+		{
+			Console()->ExecuteLine("bans_save \"Bans.cfg\"");
+
+			// Info Message
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ban-sync", "Saved Bans");
+
+			ExecBans = false;
+			m_BanSaveDelay = Server()->Tick() + Server()->TickSpeed() * (g_Config.m_SvBanSyncingDelay * 60);
+		}
 	}
+	Server()->SetQuietBan(false);
 }
 
 void CGameContext::FoxNetSnap(int ClientId, bool GlobalSnap)

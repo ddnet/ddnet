@@ -549,6 +549,7 @@ public:
 	bool IncludedInServerInfo(int ClientId);
 	bool DebugDummy(int ClientId) const override { return m_aClients[ClientId].m_DebugDummy; }
 
+	void SetQuietBan(bool Quiet) override;
 	void OverrideClientName(int ClientId, const char *pName) override;
 	const char *GetCustomClient(int ClientId) override { return m_aClients[ClientId].m_CustomClient; }
 	bool QuietJoin(int ClientId) override { return m_aClients[ClientId].m_QuietJoin; }

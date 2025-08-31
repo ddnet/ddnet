@@ -714,6 +714,10 @@ private:
 	std::vector<CStringDetection> m_ChatDetection;
 	std::vector<CStringDetection> m_NameDetection;
 
+	void HandleEffects();
+	int64_t m_BanSaveDelay = 0;
+	void BanSync();
+
 	void FoxNetTick();
 	void FoxNetSnap(int ClientId, bool GlobalSnap);
 	void RegisterFoxNetCommands();

@@ -28,6 +28,10 @@ MACRO_CONFIG_INT(SvAntiAdBot, sv_anti_ad_bot, 1, 0, 1, CFGFLAG_SERVER | CFGFLAG_
 
 MACRO_CONFIG_INT(SvReversePrediction, sv_prediction_test, 14, 1, 200, CFGFLAG_SERVER, "Reverse prediction margin")
 
+// Ban Syncing
+MACRO_CONFIG_INT(SvBanSyncing, fs_ban_syncing, 1, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Whether to Sync bans every fs_ban_syncing_delay mins across servers")
+MACRO_CONFIG_INT(SvBanSyncingDelay, fs_ban_syncing_delay, 15, 1, 500, CFGFLAG_SERVER | CFGFLAG_GAME, "How long the server waits between syncs")
+
 // snake
 MACRO_CONFIG_INT(SvSnakeAutoMove, sv_snake_auto_move, 0, 0, 1, CFGFLAG_SERVER, "Whether snake keeps last input or can stand still if no inputs applied")
 MACRO_CONFIG_INT(SvSnakeSpeed, sv_snake_speed, 6, 1, 50, CFGFLAG_SERVER, "Snake blocks per second speed")

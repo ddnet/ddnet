@@ -4659,4 +4659,9 @@ void CServer::ConHighBandwidth(IConsole::IResult *pResult, void *pUser)
 		}
 	}
 }
+
+void CServer::SetQuietBan(bool Quiet)
+{
+	m_NetServer.NetBan()->m_QuietBan = Quiet;
+}
 // FoxNet>

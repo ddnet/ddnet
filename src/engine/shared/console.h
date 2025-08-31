@@ -205,6 +205,9 @@ public:
 
 	int FlagMask() const override { return m_FlagMask; }
 	void SetFlagMask(int FlagMask) override { m_FlagMask = FlagMask; }
+
+	// <FoxNet
+	bool ExecuteBansFile() override;
 };
 
 #endif

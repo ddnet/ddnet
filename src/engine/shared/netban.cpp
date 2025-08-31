@@ -232,9 +232,13 @@ int CNetBan::Ban(T *pBanPool, const typename T::CDataType *pData, int Seconds, c
 	{
 		// adjust the ban
 		pBanPool->Update(pBan, &Info);
-		char aBuf[256];
-		MakeBanInfo(pBan, aBuf, sizeof(aBuf), MSGTYPE_LIST);
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", aBuf);
+		// <FoxNet
+		if(!m_QuietBan)
+		{ // FoxNet>
+			char aBuf[256];
+			MakeBanInfo(pBan, aBuf, sizeof(aBuf), MSGTYPE_LIST);
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", aBuf);
+		}
 		return 1;
 	}
 
@@ -242,10 +246,14 @@ int CNetBan::Ban(T *pBanPool, const typename T::CDataType *pData, int Seconds, c
 	pBan = pBanPool->Add(pData, &Info, &NetHash);
 	if(pBan)
 	{
-		char aBuf[256];
-		MakeBanInfo(pBan, aBuf, sizeof(aBuf), MSGTYPE_BANADD);
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", aBuf);
-		return 0;
+		// <FoxNet
+		if(!m_QuietBan)
+		{ // FoxNet>
+			char aBuf[256];
+			MakeBanInfo(pBan, aBuf, sizeof(aBuf), MSGTYPE_BANADD);
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", aBuf);
+			return 0;
+		}
 	}
 	else
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban failed (full banlist)");
