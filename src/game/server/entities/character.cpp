@@ -26,6 +26,7 @@
 // <FoxNet
 #include <game/server/foxnet/cosmetics/firework.h>
 #include <game/server/foxnet/entities/custom_projectile.h>
+#include <game/server/foxnet/entities/light_saber.h>
 // FoxNet>
 
 MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
@@ -677,6 +678,15 @@ void CCharacter::FireWeapon()
 		GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH, TeamMask());
 	}
 	break;
+
+	case WEAPON_LIGHTSABER:
+	{
+		if(!m_pLightSaber)
+			m_pLightSaber = new CLightSaber(GameWorld(), m_pPlayer->GetCid(), m_Pos);
+		if(m_pLightSaber)
+			m_pLightSaber->OnFire();
+	}
+	break;
 		// FoxNet>
 	}
 
@@ -705,9 +715,11 @@ float CCharacter::GetFireDelay(int Weapon)
 	case WEAPON_NINJA: return (float)Tuning()->m_NinjaFireDelay;
 	case WEAPON_HEARTGUN: return (float)Tuning()->m_HeartgunFireDelay;
 	case WEAPON_TELEKINESIS: return (float)Tuning()->m_TelekinesisFireDelay;
+	case WEAPON_LIGHTSABER: return LIGHT_SABER_MAX_LENGTH / LIGHT_SABER_SPEED;
 	default: dbg_assert(false, "invalid weapon"); return 0.0f; // this value should not be reached
 	}
 }
+
 // FoxNet>
 void CCharacter::HandleWeapons()
 {
@@ -3418,6 +3430,8 @@ const char *GetWeaponName(int Weapon)
 		return "Telekinesis";
 	case WEAPON_HEARTGUN:
 		return "Heart Gun";
+	case WEAPON_LIGHTSABER:
+		return "Lightsaber";
 	}
 	return "Unknown";
 }

@@ -11,6 +11,7 @@
 #include <game/server/foxnet/vehicles/ufo.h>
 #include <game/server/foxnet/vehicles/snake.h>
 #include <game/mapitems.h>
+#include <game/server/foxnet/entities/light_saber.h>
 
 class CGameTeams;
 class CGameWorld;
@@ -340,6 +341,9 @@ public:
 	int64_t m_LastWeaponIndTick;
 	void SendBroadcastHud(const char *pMessage);
 	int NumDDraceHudRows();
+
+	CLightSaber *m_pLightSaber;
+	CNetObj_PlayerInput *Input() { return &m_Input; };
 
 private:
 	vec2 m_HookBasePos = vec2(0, 0);
