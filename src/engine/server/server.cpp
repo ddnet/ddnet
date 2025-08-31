@@ -4552,61 +4552,73 @@ bool CServer::NetMsgCustomClient(int ClientId, int Msg, CUnpacker Unpacker)
 		return true;
 	const char *pCmd = Unpacker.GetString();
 
-	if(Msg == NETMSG_IAM_TATER)
+	if(Msg == NETMSG_IAM_QXD)
+	{
+		str_copy(m_aClients[ClientId].m_CustomClient, "E-Client");
+		log_info("foxnet", "ClientId=%d is using E-Client", ClientId);
+		ReturnValue = true;
+	}
+	else if(Msg == NETMSG_IAM_AIODOB)
+	{
+		str_copy(m_aClients[ClientId].m_CustomClient, "A-Client");
+		log_info("foxnet", "ClientId=%d is using A-Client", ClientId);
+		ReturnValue = true;
+	}
+	else if(Msg == NETMSG_IAM_TATER)
 	{
 		str_copy(m_aClients[ClientId].m_CustomClient, "T-Client");
-		log_info("server", "ClientId=%d is using T-Client", ClientId);
+		log_info("foxnet", "ClientId=%d is using T-Client", ClientId);
 		ReturnValue = true;
 	}
 	else if(Msg == NETMSG_IAM_CHILLERBOT)
 	{
 		str_copy(m_aClients[ClientId].m_CustomClient, "ChillerBot");
-		log_info("server", "ClientId=%d is using ChillerBot", ClientId);
+		log_info("foxnet", "ClientId=%d is using ChillerBot", ClientId);
 		ReturnValue = true;
 	}
 	else if(Msg == NETMSG_IAM_CACTUS)
 	{
 		str_copy(m_aClients[ClientId].m_CustomClient, "Cactus");
-		log_info("server", "ClientId=%d is using Cactus", ClientId);
+		log_info("foxnet", "ClientId=%d is using Cactus", ClientId);
 		ReturnValue = true;
 	}
 	else if(Msg == NETMSG_IAM_FEX)
 	{
 		str_copy(m_aClients[ClientId].m_CustomClient, "FeX");
-		log_info("server", "ClientId=%d is using FeX", ClientId);
+		log_info("foxnet", "ClientId=%d is using FeX", ClientId);
 		ReturnValue = true;
 	}
 	else if(Msg == NETMSG_IAM_STA)
 	{
 		str_copy(m_aClients[ClientId].m_CustomClient, "Sta");
-		log_info("server", "ClientId=%d is using Sta", ClientId);
+		log_info("foxnet", "ClientId=%d is using Sta", ClientId);
 		ReturnValue = true;
 	}
 	else if(Msg == NETMSG_IAM_SCLIENT)
 	{
 		str_copy(m_aClients[ClientId].m_CustomClient, "S-Client");
-		log_info("server", "ClientId=%d is using S-Client", ClientId);
+		log_info("foxnet", "ClientId=%d is using S-Client", ClientId);
 		ReturnValue = true;
 	}
 	else if(Msg == NETMSG_IAM_NOFIS)
 	{
 		str_copy(m_aClients[ClientId].m_CustomClient, "Nofis");
-		log_info("server", "ClientId=%d is using Nofis (dummy cheat)", ClientId);
+		log_info("foxnet", "ClientId=%d is using Nofis (dummy cheat)", ClientId);
 		ReturnValue = true;
 	}
 	else if(Msg == NETMSG_IAM_JSCLIENT)
 	{
 		str_copy(m_aClients[ClientId].m_CustomClient, "JS-Client");
-		log_info("server", "ClientId=%d is using JS-Client (bot)", ClientId);
+		log_info("foxnet", "ClientId=%d is using JS-Client (bot)", ClientId);
 		ReturnValue = true;
 	}
 	else if(Msg == NETMSG_IAM_PULSE)
 	{
 		str_copy(m_aClients[ClientId].m_CustomClient, "Pulse");
-		log_info("server", "ClientId=%d is using Pulse", ClientId);
+		log_info("foxnet", "ClientId=%d is using Pulse", ClientId);
 		ReturnValue = true;
 	}
-	log_info("server", "Custom Client Message: %s", pCmd);
+	log_info("foxnet", "Custom Client Message: %s", pCmd);
 	return ReturnValue;
 }
 
