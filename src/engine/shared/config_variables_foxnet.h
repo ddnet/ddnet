@@ -51,6 +51,8 @@ MACRO_CONFIG_INT(SvUfoBrakes, sv_ufo_brakes, 0, 0, 1, CFGFLAG_SERVER, "Allows th
 MACRO_CONFIG_INT(SvQuietJoin, fs_quiet_join, 0, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Whether to disable the join message for players with the right password")
 MACRO_CONFIG_STR(SvQuietJoinPassword, fs_quiet_join_password, 128, "", CFGFLAG_SERVER | CFGFLAG_GAME, "Password if QuietJoin is enabled")
 
+// Quads
+MACRO_CONFIG_INT(SvInstantCoreUpdate, sv_instant_core_update, 0, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Sends Info about a player every tick, even if not doing anything")
 MACRO_CONFIG_INT(SvDebugQuadPos, sv_debug_quad_pos, 0, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Shows interactive quad positions using lasers")
 MACRO_CONFIG_INT(SvQStopaGivesDj, sv_qstopa_gives_dj, 0, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Whether the QStopa quad should give dj back")
 
