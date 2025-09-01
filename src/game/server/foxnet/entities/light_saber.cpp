@@ -119,9 +119,6 @@ void CLightSaber::Snap(int SnappingClient)
 	if(!pOwnerChar || !pSnapPlayer)
 		return;
 
-	if(pOwnerChar->IsPaused())
-		return;
-
 	if(pSnapPlayer->GetCharacter() && pOwnerChar)
 		if(!pOwnerChar->CanSnapCharacter(SnappingClient))
 			return;

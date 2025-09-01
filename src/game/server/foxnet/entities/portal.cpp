@@ -1,0 +1,247 @@
+#include <game/gamecore.h>
+#include <game/server/entities/character.h>
+#include <game/server/entity.h>
+#include <game/server/gamecontext.h>
+#include <game/server/gameworld.h>
+#include <game/server/player.h>
+
+#include <generated/protocol.h>
+
+#include <engine/shared/protocol.h>
+
+#include <base/vmath.h>
+#include <iterator>
+
+#include "portal.h"
+
+constexpr float PortalRadius = 52.0f;
+constexpr float MaxDistanceFromPlayer = 1200.0f;
+constexpr int Lifetime = 12.5 * SERVER_TICK_SPEED;
+
+CPortal::CPortal(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_PORTALS, Pos)
+{
+	m_Owner = Owner;
+	m_Pos = Pos;
+	m_State = STATE_NONE;
+
+	for(size_t i = 0; i < std::size(m_aIds); i++)
+		m_aIds[i] = Server()->SnapNewId();
+
+	for(size_t i = 0; i < std::size(m_aParticeIds); i++)
+		m_aParticeIds[i] = Server()->SnapNewId();
+	GameWorld()->InsertEntity(this);
+}
+
+void CPortal::Reset()
+{
+	for(size_t i = 0; i < std::size(m_aIds); i++)
+		Server()->SnapFreeId(m_aIds[i]);
+	for(size_t i = 0; i < std::size(m_aParticeIds); i++)
+		Server()->SnapFreeId(m_aParticeIds[i]);
+	Server()->SnapFreeId(GetId());
+	GameWorld()->RemoveEntity(this);
+
+	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+	if(pOwnerChar)
+		pOwnerChar->m_pPortal = nullptr;
+}
+
+inline bool PointInCircle(vec2 pos, vec2 center, float radius)
+{
+	return length_squared(pos - center) <= radius * radius;
+}
+
+void CPortal::Tick()
+{
+	m_Lifetime--;
+	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+	if(pOwnerChar && !pOwnerChar->GetWeaponGot(WEAPON_PORTALGUN) && m_Lifetime <= 0)
+	{
+		Reset();
+		return;
+	}
+
+	if(m_Lifetime <= 0)
+	{
+		RemovePortals();
+		return;
+	}
+
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+	{
+		CCharacter *pChr = GameServer()->GetPlayerChar(ClientId);
+		if(!pChr || !pChr->IsAlive())
+			continue;
+
+		bool Teleported = false;
+		if(m_PortalData[0].m_Active && m_PortalData[1].m_Active)
+		{
+			if(PointInCircle(pChr->m_Pos, m_PortalData[0].m_Pos, PortalRadius))
+			{
+				if(!m_CanTeleport[ClientId])
+					return;
+
+				pChr->SetPosition(m_PortalData[1].m_Pos);
+				pChr->ReleaseHook();
+				m_CanTeleport[ClientId] = false;
+				Teleported = true;
+			}
+			else if(PointInCircle(pChr->m_Pos, m_PortalData[1].m_Pos, PortalRadius))
+			{
+				if(!m_CanTeleport[ClientId])
+					return;
+
+				pChr->SetPosition(m_PortalData[0].m_Pos);
+				pChr->ReleaseHook();
+				m_CanTeleport[ClientId] = false;
+				Teleported = true;
+			}
+			else
+				m_CanTeleport[ClientId] = true;
+		}
+		if(Teleported)
+		{
+			if(distance(m_PortalData[0].m_Pos,m_PortalData[1].m_Pos) > 450.0f)
+			{
+				GameServer()->CreateSound(m_PortalData[0].m_Pos, SOUND_WEAPON_SPAWN);
+				GameServer()->CreateSound(m_PortalData[1].m_Pos, SOUND_WEAPON_SPAWN);
+			}
+			else
+				GameServer()->CreateSound(pChr->m_Pos, SOUND_WEAPON_SPAWN);
+		}
+	}
+}
+
+void CPortal::OnFire()
+{
+	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+	if(TrySetPortal())
+	{
+		GameServer()->CreateSound(pOwnerChar->m_Pos, SOUND_PICKUP_HEALTH);
+	}
+	else
+	{
+		GameServer()->CreateSound(pOwnerChar->m_Pos, SOUND_WEAPON_NOAMMO);
+		pOwnerChar->SetReloadTimer(250 * Server()->TickSpeed() / 1000);
+	}
+}
+
+bool CPortal::TrySetPortal()
+{
+	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+	vec2 CursorPos = pOwnerChar->GetCursorPos();
+
+	if(Collision()->TestBox(CursorPos, CCharacterCore::PhysicalSizeVec2()))
+		return false;
+	if(!pOwnerChar->HasLineOfSight(CursorPos))
+		return false;
+	if(distance(pOwnerChar->m_Pos, CursorPos) > MaxDistanceFromPlayer)
+		return false;
+
+	if(m_State == STATE_NONE)
+	{
+		m_PortalData[0].m_Active = true;
+		m_PortalData[0].m_Pos = CursorPos;
+		m_Lifetime = Lifetime;
+		m_State = STATE_FIRST_SET;
+	}
+	else if(m_State == STATE_FIRST_SET)
+	{
+		m_PortalData[1].m_Active = true;
+		m_PortalData[1].m_Pos = CursorPos;
+		m_Lifetime = Lifetime;
+		m_State = STATE_BOTH_SET;
+	}
+	else if(m_State == STATE_BOTH_SET)
+		return false;
+	return true;
+}
+
+void CPortal::RemovePortals()
+{
+	for(int i = 0; i < 2; i++)
+	{
+		if(m_PortalData[i].m_Active)
+		{
+			m_PortalData[i].m_Active = false;
+			m_PortalData[i].m_Pos = vec2(0, 0);
+			m_State = STATE_NONE;
+		}
+	}
+}
+
+inline vec2 GetRandomPointInCircle(vec2 center, float radius)
+{
+	float angle = static_cast<float>(rand()) / RAND_MAX * 2.0f * pi;
+	float r = radius * sqrtf(static_cast<float>(rand()) / RAND_MAX);
+	return center + vec2(cosf(angle), sinf(angle)) * r;
+}
+
+void CPortal::Snap(int SnappingClient)
+{
+	if(NetworkClipped(SnappingClient, m_PortalData[0].m_Pos) && NetworkClipped(SnappingClient, m_PortalData[1].m_Pos))
+		return;
+
+	CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+
+	if(!pSnapPlayer)
+		return;
+
+	int Amount = 13;
+	int Segments = 12;
+	for(int p = 0; p < 2; p++)
+	{
+		double Spin = (Server()->Tick() / 30.0) + (p * pi);
+
+		Spin = p ? -Spin : Spin;
+
+		int StartId = p ? 13 : 0;
+		for(int i = 0; i < Amount; i++)
+		{
+			int CirclePart = i;
+			if(CirclePart == Amount - 1)
+				CirclePart = 0;
+			if(m_PortalData[p].m_Active)
+			{
+				vec2 Direction = direction((360.0f / Segments * CirclePart * (pi / 180.0f)) + Spin);
+				vec2 From = m_PortalData[p].m_Pos + Direction * PortalRadius;
+
+				Direction = direction((360.0f / Segments * (CirclePart + 1) * (pi / 180.0f)) + Spin);
+				vec2 To = m_PortalData[p].m_Pos + Direction * PortalRadius;
+
+				// To make the the first circle part not look weird
+				if(CirclePart != i)
+					To = From;
+
+				CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_aIds[StartId + i], sizeof(CNetObj_Laser)));
+				if(!pObj)
+					return;
+				pObj->m_X = (int)From.x;
+				pObj->m_Y = (int)From.y;
+				pObj->m_FromX = (int)To.x;
+				pObj->m_FromY = (int)To.y;
+				pObj->m_StartTick = Server()->Tick() + 2;
+			}
+		}
+	}
+
+	if(m_State == STATE_BOTH_SET)
+	{
+		for(size_t i = 0; i < std::size(m_aParticeIds); i++)
+		{
+			CNetObj_Projectile *pProj = Server()->SnapNewItem<CNetObj_Projectile>(m_aParticeIds[i]);
+			if(!pProj)
+				return;
+
+			vec2 Pos = GetRandomPointInCircle(m_PortalData[i % 2].m_Pos, PortalRadius - 6.0f);
+
+			pProj->m_X = (int)(Pos.x);
+			pProj->m_Y = (int)(Pos.y);
+			pProj->m_VelX = 0;
+			pProj->m_VelY = 0;
+			pProj->m_StartTick = 0;
+			pProj->m_Type = WEAPON_HAMMER;
+		}
+	}
+}

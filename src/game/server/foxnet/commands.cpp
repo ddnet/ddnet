@@ -1185,14 +1185,15 @@ void CGameContext::ConTelekinesis(IConsole::IResult *pResult, void *pUserData)
 	if(!pChr)
 		return;
 
-	bool GotWeapon = pChr->GetWeaponGot(WEAPON_TELEKINESIS);
+	const int Weapon = WEAPON_TELEKINESIS;
+	const bool GotWeapon = pChr->GetWeaponGot(Weapon);
 
 	if(GotWeapon)
-		pChr->GiveWeapon(WEAPON_TELEKINESIS, true);
+		pChr->GiveWeapon(Weapon, true);
 	else
 	{
-		pChr->GiveWeapon(WEAPON_TELEKINESIS);
-		pChr->SetActiveWeapon(WEAPON_TELEKINESIS);
+		pChr->GiveWeapon(Weapon);
+		pChr->SetActiveWeapon(Weapon);
 	}
 }
 
@@ -1206,15 +1207,58 @@ void CGameContext::ConHeartGun(IConsole::IResult *pResult, void *pUserData)
 	if(!pChr)
 		return;
 
-	bool GotWeapon = pChr->GetWeaponGot(WEAPON_HEARTGUN);
+	const int Weapon = WEAPON_HEARTGUN;
+	const bool GotWeapon = pChr->GetWeaponGot(Weapon);
 
 	if(GotWeapon)
-		pChr->GiveWeapon(WEAPON_HEARTGUN, true);
+		pChr->GiveWeapon(Weapon, true);
 	else
 	{
-		pChr->GiveWeapon(WEAPON_HEARTGUN);
-		pChr->SetActiveWeapon(WEAPON_HEARTGUN);
-		pChr->UpdateWeaponIndicator();
+		pChr->GiveWeapon(Weapon);
+		pChr->SetActiveWeapon(Weapon);
+	}
+}
+
+void CGameContext::ConLightsaber(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->NumArguments() > 1 ? pResult->m_ClientId : pResult->GetVictim();
+
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+
+	if(!pChr)
+		return;
+	const int Weapon = WEAPON_LIGHTSABER;
+	const bool GotWeapon = pChr->GetWeaponGot(Weapon);
+
+	if(GotWeapon)
+		pChr->GiveWeapon(Weapon, true);
+	else
+	{
+		pChr->GiveWeapon(Weapon);
+		pChr->SetActiveWeapon(Weapon);
+	}
+}
+
+void CGameContext::ConPortalGun(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->NumArguments() > 1 ? pResult->m_ClientId : pResult->GetVictim();
+
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+
+	if(!pChr)
+		return;
+
+	const int Weapon = WEAPON_PORTALGUN;
+	const bool GotWeapon = pChr->GetWeaponGot(Weapon);
+
+	if(GotWeapon)
+		pChr->GiveWeapon(Weapon, true);
+	else
+	{
+		pChr->GiveWeapon(Weapon);
+		pChr->SetActiveWeapon(Weapon);
 	}
 }
 
@@ -1387,8 +1431,10 @@ void CGameContext::RegisterFoxNetCommands()
 
 	Console()->Register("telekinesis_immunity", "?v[id]", CFGFLAG_SERVER, ConTelekinesisImmunity, this, "Makes player (id) immunte to telekinesis");
 	
-	Console()->Register("telekinesis", "?v[id]", CFGFLAG_SERVER, ConTelekinesis, this, "Gives/Takes telekinses to player (id)");
-	Console()->Register("heartgun", "?v[id]", CFGFLAG_SERVER, ConHeartGun, this, "Gives/Takes telekinses to player (id)");
+	Console()->Register("telekinesis", "?v[id]", CFGFLAG_SERVER, ConTelekinesis, this, "Gives/Takes telekinses to/from player (id)");
+	Console()->Register("heartgun", "?v[id]", CFGFLAG_SERVER, ConHeartGun, this, "Gives/Takes a heartgun to/from player (id)");
+	Console()->Register("lightsaber", "?v[id]", CFGFLAG_SERVER, ConLightsaber, this, "Gives/Takes a lightsaber to/from player (id)");
+	Console()->Register("portalgun", "?v[id]", CFGFLAG_SERVER, ConPortalGun, this, "Gives/Takes the portal gun to/from player (id)");
 
 	Console()->Register("spider_hook", "?v[id]", CFGFLAG_SERVER, ConSetSpiderHook, this, "whether player (id) has spider hook");
 

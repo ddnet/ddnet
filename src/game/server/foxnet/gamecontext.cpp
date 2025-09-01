@@ -784,6 +784,8 @@ int CGameContext::GetWeaponType(int Weapon)
 		return WEAPON_GUN;
 	case WEAPON_LIGHTSABER:
 		return WEAPON_GUN;
+	case WEAPON_PORTALGUN:
+		return WEAPON_LASER;
 	}
 	return Weapon;
 }

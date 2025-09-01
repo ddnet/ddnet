@@ -51,6 +51,10 @@ constexpr const char *ADMIN_MISC_UFO = "Ufo";
 constexpr const char *ADMIN_MISC_OBFUSCATED = "Obfuscate Name";
 constexpr const char *ADMIN_MISC_IGN_KILL_BORD = "Ignore Kill Border";
 
+constexpr const char *ADMIN_MISC_HEARTGUN = "Heart Gun";
+constexpr const char *ADMIN_MISC_LIGHTSABER = "Lightsaber";
+constexpr const char *ADMIN_MISC_PORTALGUN = "Portal gun";
+
 // Admin Extra Cosmetics
 constexpr const char *ADMIN_COSM_PICKUPPET = "Pickup Pet";
 constexpr const char *ADMIN_COSM_STAFFIND = "Staff Indicator";
@@ -315,6 +319,33 @@ bool CVoteMenu::IsCustomVoteOption(const CNetMsg_Cl_CallVote *pMsg, int ClientId
 			if(IsOption(pVote, ADMIN_MISC_OBFUSCATED))
 			{
 				pPl->SetObfuscated(!pPl->m_Obfuscated);
+				return true;
+			}
+			if(IsOption(pVote, ADMIN_MISC_HEARTGUN))
+			{
+				if(pChr)
+				{
+					pChr->GiveWeapon(WEAPON_HEARTGUN, pChr->GetWeaponGot(WEAPON_HEARTGUN));
+					pChr->SetActiveWeapon(WEAPON_HEARTGUN);
+				}
+				return true;
+			}
+			if(IsOption(pVote, ADMIN_MISC_LIGHTSABER))
+			{
+				if(pChr)
+				{
+					pChr->GiveWeapon(WEAPON_LIGHTSABER, pChr->GetWeaponGot(WEAPON_LIGHTSABER));
+					pChr->SetActiveWeapon(WEAPON_LIGHTSABER);
+				}
+				return true;
+			}
+			if(IsOption(pVote, ADMIN_MISC_PORTALGUN))
+			{
+				if(pChr)
+				{
+					pChr->GiveWeapon(WEAPON_PORTALGUN, pChr->GetWeaponGot(WEAPON_PORTALGUN));
+					pChr->SetActiveWeapon(WEAPON_PORTALGUN);
+				}
 				return true;
 			}
 		}
@@ -915,10 +946,19 @@ void CVoteMenu::SendPageAdmin(int ClientId)
 
 		AddVoteSeperator();
 
-		if(Server()->GetAuthedState(ClientId) >= AUTHED_ADMIN && pChr)
+		if(Server()->GetAuthedState(ClientId) >= AUTHED_ADMIN)
 			AddVoteCheckBox(ADMIN_MISC_OBFUSCATED, pPlayer->m_Obfuscated);
 
 		AddVoteCheckBox(ADMIN_MISC_IGN_KILL_BORD, pPlayer->m_IgnoreGamelayer);
+
+		AddVoteSeperator();
+		if(pChr)
+		{
+			AddVoteCheckBox(ADMIN_MISC_HEARTGUN, pChr->GetWeaponGot(WEAPON_HEARTGUN));
+			AddVoteCheckBox(ADMIN_MISC_LIGHTSABER, pChr->GetWeaponGot(WEAPON_LIGHTSABER));
+			AddVoteCheckBox(ADMIN_MISC_PORTALGUN, pChr->GetWeaponGot(WEAPON_PORTALGUN));
+		}
+
 	}
 	if(GetSubPage(ClientId) == SUB_ADMIN_COSMETICS)
 	{

@@ -2811,6 +2811,8 @@ if(SERVER)
     foxnet/entities/light_saber.h
     foxnet/entities/pickupdrop.cpp
     foxnet/entities/pickupdrop.h
+    foxnet/entities/portal.cpp
+    foxnet/entities/portal.h
     foxnet/fontconvert.cpp
     foxnet/fontconvert.h
     foxnet/gamecontext.cpp

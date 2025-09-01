@@ -688,6 +688,15 @@ void CCharacter::FireWeapon()
 			m_pLightSaber->OnFire();
 	}
 	break;
+
+	case WEAPON_PORTALGUN:
+	{
+		if(!m_pPortal)
+			m_pPortal = new CPortal(GameWorld(), m_pPlayer->GetCid(), m_Pos);
+		if(m_pPortal)
+			m_pPortal->OnFire();
+	}
+	break;
 		// FoxNet>
 	}
 
@@ -717,6 +726,7 @@ float CCharacter::GetFireDelay(int Weapon)
 	case WEAPON_HEARTGUN: return (float)Tuning()->m_HeartgunFireDelay;
 	case WEAPON_TELEKINESIS: return (float)Tuning()->m_TelekinesisFireDelay;
 	case WEAPON_LIGHTSABER: return LIGHT_SABER_MAX_LENGTH / LIGHT_SABER_SPEED;
+	case WEAPON_PORTALGUN: return 25.0f;
 	default: dbg_assert(false, "invalid weapon"); return 0.0f; // this value should not be reached
 	}
 }
@@ -3432,6 +3442,8 @@ const char *GetWeaponName(int Weapon)
 		return "Heart Gun";
 	case WEAPON_LIGHTSABER:
 		return "Lightsaber";
+	case WEAPON_PORTALGUN:
+		return "Portal Gun";
 	}
 	return "Unknown";
 }
@@ -3513,4 +3525,16 @@ void CCharacter::DropWeapon(int Type, vec2 Dir)
 		else
 			SetActiveWeapon(-1);
 	}
+}
+
+bool CCharacter::HasLineOfSight(vec2 Pos)
+{
+	vec2 tmp;
+	return GameServer()->Collision()->IntersectLine(m_Pos, Pos, &tmp, &tmp) == 0;
+}
+
+void CCharacter::SetActiveWeapon(int ActiveWeap)
+{
+	m_Core.m_ActiveWeapon = ActiveWeap;
+	UpdateWeaponIndicator();
 }

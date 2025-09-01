@@ -10,11 +10,11 @@
 #include <generated/server_data.h>
 
 #include <base/vmath.h>
+#include <game/collision.h>
+#include <game/gamecore.h>
 #include <game/mapitems.h>
 #include <game/server/entity.h>
 #include <game/server/gameworld.h>
-#include <game/gamecore.h>
-#include <game/collision.h>
 
 CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, int LastOwner, vec2 Pos, int Team, vec2 Dir, int Lifetime, int Type) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUPDROP, Pos)
@@ -30,7 +30,6 @@ CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, int LastOwner, vec2 Pos, int Te
 
 	m_PickupDelay = Server()->TickSpeed() * 1.5f;
 	m_GroundElasticity = vec2(0.5f, 0.5f);
-
 
 	for(int i = 0; i < 2; i++)
 		m_aIds[i] = Server()->SnapNewId();
@@ -170,7 +169,6 @@ void CPickupDrop::Tick()
 			HandleQuadStopa(pQuadLayer, QuadIndex);
 		}
 	}
-
 
 	// tiles
 	std::vector<int> vIndices = Collision()->GetMapIndices(m_PrevPos, m_Pos);
@@ -424,11 +422,10 @@ void CPickupDrop::Snap(int SnappingClient)
 	if(m_Lifetime < Server()->TickSpeed() * 4 && (Server()->Tick() / (Server()->TickSpeed() / 4)) % 2 == 0)
 		return;
 
-
 	int SnappingClientVersion = pSnapPlayer->GetClientVersion();
 	bool SixUp = Server()->IsSixup(SnappingClient);
 	int SubType = GameServer()->GetWeaponType(m_Type);
-	
+
 	GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, SixUp, SnappingClient), GetId(), m_Pos, POWERUP_WEAPON, SubType, -1, PICKUPFLAG_NO_PREDICT);
 
 	if(m_Type == WEAPON_HEARTGUN)
@@ -439,6 +436,23 @@ void CPickupDrop::Snap(int SnappingClient)
 	{
 		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, SixUp, SnappingClient), m_aIds[0], m_Pos + vec2(30.0f, 0.0f), m_Pos + vec2(34.0f, 0.0f), Server()->Tick(), -1, LASERTYPE_GUN);
 	}
+	else if(m_Type == WEAPON_PORTALGUN)
+	{
+		vec2 OffSet = vec2(0.0f, -30.0f);
+		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, SixUp, SnappingClient), m_aIds[0], m_Pos + OffSet, m_Pos + OffSet, Server()->Tick(), -1, LASERTYPE_GUN);
 
+		vec2 Spin = vec2(cos(Server()->Tick() / 5.0f), sin(Server()->Tick() / 5.0f)) * 17.0f;
+		Spin += OffSet;
 
+		CNetObj_Projectile *pProj = Server()->SnapNewItem<CNetObj_Projectile>(m_aIds[1]);
+		if(!pProj)
+			return;
+
+		pProj->m_X = (int)(m_Pos.x + Spin.x);
+		pProj->m_Y = (int)(m_Pos.y + Spin.y);
+		pProj->m_VelX = 0;
+		pProj->m_VelY = 0;
+		pProj->m_StartTick = 0;
+		pProj->m_Type = WEAPON_HAMMER;
+	}
 }

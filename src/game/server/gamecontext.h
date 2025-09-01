@@ -808,6 +808,8 @@ private:
 
 	static void ConTelekinesis(IConsole::IResult *pResult, void *pUserData);
 	static void ConHeartGun(IConsole::IResult *pResult, void *pUserData);
+	static void ConLightsaber(IConsole::IResult *pResult, void *pUserData);
+	static void ConPortalGun(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConSetSpiderHook(IConsole::IResult *pResult, void *pUserData);
 

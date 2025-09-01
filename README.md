@@ -36,6 +36,7 @@
 |sv_ufo_hide_hook_coll|Whether to hide hook coll while flying down|
 |sv_ufo_brakes|Whether pressing every button should stop the ufo completely|
 |sv_debug_quad_pos|Shows a laser on every top left corner of a valid interactable quad|
+|sv_allow_weapon_drops|Whether the /dropweapon command is allowed|
 
 |Commands|Description|
 |-|-|
@@ -74,6 +75,8 @@
 |telekinesis_immunity|Make a player immune to telekinesis|
 |telekinesis|Toggle telekinesis for a player|
 |heartgun|Toggle heartgun for a player|
+|lightsaber|Toggle heartgun for a player|
+|portalgun|Toggle heartgun for a player|
 |spider_hook|Toggle spider hook for a player|
 |fake_message|Send a message as a player that doesn't exist|
 |map_vote_lock|Lock changing maps trough normal votes|

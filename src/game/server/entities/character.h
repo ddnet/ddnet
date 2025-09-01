@@ -12,6 +12,7 @@
 #include <game/server/foxnet/vehicles/snake.h>
 #include <game/mapitems.h>
 #include <game/server/foxnet/entities/light_saber.h>
+#include <game/server/foxnet/entities/portal.h>
 
 class CGameTeams;
 class CGameWorld;
@@ -265,7 +266,7 @@ public:
 	int GetLastWeapon() const { return m_LastWeapon; }
 	void SetLastWeapon(int LastWeap) { m_LastWeapon = LastWeap; }
 	int GetActiveWeapon() const { return m_Core.m_ActiveWeapon; }
-	void SetActiveWeapon(int ActiveWeap) { m_Core.m_ActiveWeapon = ActiveWeap; }
+	// void SetActiveWeapon(int ActiveWeap) { m_Core.m_ActiveWeapon = ActiveWeap; }
 	void SetLastAction(int LastAction) { m_LastAction = LastAction; }
 	int GetArmor() const { return m_Armor; }
 	void SetArmor(int Armor) { m_Armor = Armor; }
@@ -287,6 +288,7 @@ public:
 	bool HasTelegunLaser() const { return m_Core.m_HasTelegunLaser; }
 	// <FoxNet
 	int GetOverriddenTuneZone() const { return m_TuneZoneOverride < 0 ? m_TuneZone : m_TuneZoneOverride; }
+	void SetActiveWeapon(int ActiveWeap);
 	// FoxNet>
 	bool HammerHitDisabled() const { return m_Core.m_HammerHitDisabled; }
 	bool ShotgunHitDisabled() const { return m_Core.m_ShotgunHitDisabled; }
@@ -342,13 +344,18 @@ public:
 	void SendBroadcastHud(const char *pMessage);
 	int NumDDraceHudRows();
 
-	CLightSaber *m_pLightSaber;
 	CNetObj_PlayerInput *Input() { return &m_Input; };
+	CLightSaber *m_pLightSaber;
+	CPortal *m_pPortal;
+	void SetReloadTimer(int Timer) { m_ReloadTimer = Timer; }
 
 	// Dir Is also the Throw force -> m_Vel = Dir on drop creation
 	void DropWeapon(int Type, vec2 Dir);
 
+	bool HasLineOfSight(vec2 Pos);
+
 private:
+
 	bool CanDropWeapon(int Type) const;
 
 	vec2 m_HookBasePos = vec2(0, 0);
