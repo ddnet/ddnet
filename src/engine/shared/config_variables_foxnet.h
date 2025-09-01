@@ -63,3 +63,6 @@ MACRO_CONFIG_INT(SvQStopaGivesDj, sv_qstopa_gives_dj, 0, 0, 1, CFGFLAG_SERVER | 
 // Abilities
 MACRO_CONFIG_INT(SvNoAuthCooldown, sv_no_auth_cooldown, 0, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "whether theres a cooldown for abilities on authed players")
 MACRO_CONFIG_INT(SvAbilityCooldown, sv_ability_cooldown, 1, 1, 100, CFGFLAG_SERVER | CFGFLAG_GAME, "Cooldown for Abilities")
+
+// Weapon Drops
+MACRO_CONFIG_INT(SvAllowWeaponDrops, sv_allow_weapon_drops, 1, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Turns on functionality for /weapondrop")

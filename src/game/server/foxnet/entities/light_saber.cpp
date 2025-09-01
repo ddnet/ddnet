@@ -119,9 +119,6 @@ void CLightSaber::Snap(int SnappingClient)
 	if(!pOwnerChar || !pSnapPlayer)
 		return;
 
-	if(pSnapPlayer->m_HideCosmetics)
-		return;
-
 	if(pOwnerChar->IsPaused())
 		return;
 

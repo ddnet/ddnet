@@ -345,7 +345,12 @@ public:
 	CLightSaber *m_pLightSaber;
 	CNetObj_PlayerInput *Input() { return &m_Input; };
 
+	// Dir Is also the Throw force -> m_Vel = Dir on drop creation
+	void DropWeapon(int Type, vec2 Dir);
+
 private:
+	bool CanDropWeapon(int Type) const;
+
 	vec2 m_HookBasePos = vec2(0, 0);
 	void OnPlayerHook();
 	float GetFireDelay(int Weapon);

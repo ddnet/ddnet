@@ -27,6 +27,7 @@
 #include <game/server/foxnet/cosmetics/firework.h>
 #include <game/server/foxnet/entities/custom_projectile.h>
 #include <game/server/foxnet/entities/light_saber.h>
+#include <game/server/foxnet/entities/pickupdrop.h>
 // FoxNet>
 
 MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
@@ -164,11 +165,11 @@ void CCharacter::SetWeapon(int W)
 
 	m_LastWeapon = m_Core.m_ActiveWeapon;
 	m_QueuedWeapon = -1;
-	m_Core.m_ActiveWeapon = W;
+	SetActiveWeapon(W);
 	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SWITCH, TeamMask());
 
 	if(m_Core.m_ActiveWeapon < 0 || m_Core.m_ActiveWeapon >= NUM_EXTRA_WEAPONS)
-		m_Core.m_ActiveWeapon = 0;
+		SetActiveWeapon(0);
 }
 
 void CCharacter::SetJetpack(bool Active)
@@ -748,7 +749,7 @@ void CCharacter::GiveNinja()
 	m_Core.m_aWeapons[WEAPON_NINJA].m_Ammo = -1;
 	if(m_Core.m_ActiveWeapon != WEAPON_NINJA)
 		m_LastWeapon = m_Core.m_ActiveWeapon;
-	m_Core.m_ActiveWeapon = WEAPON_NINJA;
+	SetActiveWeapon(WEAPON_NINJA);
 
 	if(!m_Core.m_aWeapons[WEAPON_NINJA].m_Got)
 		GameServer()->CreateSound(m_Pos, SOUND_PICKUP_NINJA, TeamMask());
@@ -762,7 +763,7 @@ void CCharacter::RemoveNinja()
 	m_Core.m_Ninja.m_OldVelAmount = 0;
 	m_Core.m_aWeapons[WEAPON_NINJA].m_Got = false;
 	m_Core.m_aWeapons[WEAPON_NINJA].m_Ammo = 0;
-	m_Core.m_ActiveWeapon = m_LastWeapon;
+	SetActiveWeapon(m_Core.m_ActiveWeapon);
 
 	SetWeapon(m_Core.m_ActiveWeapon);
 }
@@ -2608,7 +2609,7 @@ bool CCharacter::UnFreeze()
 	{
 		m_Armor = 10;
 		if(!m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Got)
-			m_Core.m_ActiveWeapon = WEAPON_GUN;
+			SetWeapon(WEAPON_GUN);
 		m_FreezeTime = 0;
 		m_Core.m_FreezeStart = 0;
 		m_FrozenLastTick = true;
@@ -2661,7 +2662,7 @@ void CCharacter::ResetPickups()
 	{
 		m_Core.m_aWeapons[i].m_Got = false;
 		if(m_Core.m_ActiveWeapon == i)
-			m_Core.m_ActiveWeapon = WEAPON_GUN;
+			SetWeapon(WEAPON_GUN);
 	}
 }
 
@@ -2917,7 +2918,7 @@ void CCharacter::FoxNetTick()
 
 void CCharacter::HandleTelekinesis()
 {
-	int tId = m_TelekinesisId;
+	int &tId = m_TelekinesisId;
 	if(!CheckClientId(tId))
 		return;
 
@@ -3402,8 +3403,7 @@ void CCharacter::SendBroadcastHud(const char *pMessage)
 
 bool CCharacter::IsWeaponIndicator()
 {
-	// 2 seconds of showing weapon indicator instead
-	return m_LastWeaponIndTick > Server()->Tick() - Server()->TickSpeed() * 2;
+	return m_LastWeaponIndTick > Server()->Tick() - Server()->TickSpeed() * 10;
 }
 
 const char *GetWeaponName(int Weapon)
@@ -3471,4 +3471,46 @@ void CCharacter::UpdateWeaponIndicator()
 	// dont update when vanilla weapon got triggered and we have new hud
 	if(aBuf[0])
 		m_LastWeaponIndTick = Server()->Tick();
+}
+
+bool CCharacter::CanDropWeapon(int Type) const
+{
+	if(!g_Config.m_SvAllowWeaponDrops)
+		return false;
+
+	if(Type < 0 || Type >= NUM_EXTRA_WEAPONS)
+		return false;
+
+	if(!m_Core.m_aWeapons[Type].m_Got)
+		return false;
+
+	if(Type == WEAPON_TELEKINESIS)
+		return false;
+
+	if(Type == WEAPON_NINJA)
+		return false;
+
+	return true;
+}
+
+void CCharacter::DropWeapon(int Type, vec2 Dir)
+{
+	if(!CanDropWeapon(Type))
+		return;
+
+	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
+	new CPickupDrop(GameWorld(), GetPlayer()->GetCid(), m_Pos, Team(), Dir, 300, m_Core.m_ActiveWeapon);
+	GiveWeapon(Type, true);
+	if(Type >= NUM_WEAPONS)
+		SendBroadcastHud("");
+	for(int i = 0; i < NUM_EXTRA_WEAPONS; i++)
+	{
+		if(m_Core.m_aWeapons[i].m_Got)
+		{
+			SetActiveWeapon(i);
+			return;
+		}
+		else
+			SetActiveWeapon(-1);
+	}
 }

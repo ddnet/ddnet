@@ -2809,6 +2809,8 @@ if(SERVER)
     foxnet/entities/custom_projectile.h
     foxnet/entities/light_saber.cpp
     foxnet/entities/light_saber.h
+    foxnet/entities/pickupdrop.cpp
+    foxnet/entities/pickupdrop.h
     foxnet/fontconvert.cpp
     foxnet/fontconvert.h
     foxnet/gamecontext.cpp

@@ -8,6 +8,7 @@
 #include <engine/shared/protocol.h>
 #include "votemenu.h"
 #include <game/server/score.h>
+#include <base/vmath.h>
 
 void CGameContext::ConAccRegister(IConsole::IResult *pResult, void *pUserData)
 {
@@ -1192,7 +1193,6 @@ void CGameContext::ConTelekinesis(IConsole::IResult *pResult, void *pUserData)
 	{
 		pChr->GiveWeapon(WEAPON_TELEKINESIS);
 		pChr->SetActiveWeapon(WEAPON_TELEKINESIS);
-		pChr->UpdateWeaponIndicator();
 	}
 }
 
@@ -1332,6 +1332,20 @@ void CGameContext::ConRemoveAllRecords(IConsole::IResult *pResult, void *pUserDa
 	}
 }
 
+void CGameContext::ConDropWeapon(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
+	if(!pChr)
+		return;
+
+	vec2 Dir = normalize(vec2(pChr->Input()->m_TargetX, pChr->Input()->m_TargetY));
+	int Type = pChr->Core()->m_ActiveWeapon;
+
+
+	pChr->DropWeapon(Type, Dir * vec2(5.0f,8.0f));
+}
+
 void CGameContext::RegisterFoxNetCommands()
 {
 	Console()->Register("chat_string_add", "s[string] s[reason] i[should Ban] i[bantime] ?f[addition]", CFGFLAG_SERVER, ConAddChatDetectionString, this, "Add a string to the chat detection list");
@@ -1427,6 +1441,7 @@ void CGameContext::RegisterFoxNetCommands()
 
 	Console()->Register("buyitem", "r[item]", CFGFLAG_CHAT, ConShopBuyItem, this, "Buy an item from the shop");
 	Console()->Register("toggleitem", "s[item] ?i[value]", CFGFLAG_CHAT, ConToggleItem, this, "Toggle an Item, value is only needed for 2 items");
+	Console()->Register("dropweapon", "", CFGFLAG_CHAT, ConDropWeapon, this, "Drops the weapon you're currently holding");
 
 	Console()->Chain("sv_debug_quad_pos", ConchainQuadDebugPos, this);
 }

@@ -833,6 +833,8 @@ private:
 	static void ConRemoveRecordWithTime(IConsole::IResult *pResult, void *pUserData);
 	static void ConRemoveAllRecords(IConsole::IResult *pResult, void *pUserData);
 
+	static void ConDropWeapon(IConsole::IResult *pResult, void *pUserData);
+
 	struct CFakeSnapPlayer
 	{
 		int m_Id;
