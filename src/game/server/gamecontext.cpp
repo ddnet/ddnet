@@ -1649,7 +1649,7 @@ void CGameContext::OnClientEnter(int ClientId)
 
 	for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
 	{
-		NewClientInfoMsg.m_apSkinPartNames[p] = pNewPlayer->m_TeeInfos.m_apSkinPartNames[p];
+		NewClientInfoMsg.m_apSkinPartNames[p] = pNewPlayer->m_TeeInfos.m_aaSkinPartNames[p];
 		NewClientInfoMsg.m_aUseCustomColors[p] = pNewPlayer->m_TeeInfos.m_aUseCustomColors[p];
 		NewClientInfoMsg.m_aSkinPartColors[p] = pNewPlayer->m_TeeInfos.m_aSkinPartColors[p];
 	}
@@ -1679,7 +1679,7 @@ void CGameContext::OnClientEnter(int ClientId)
 
 			for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
 			{
-				ClientInfoMsg.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_apSkinPartNames[p];
+				ClientInfoMsg.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_aaSkinPartNames[p];
 				ClientInfoMsg.m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
 				ClientInfoMsg.m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
 			}
@@ -2746,7 +2746,7 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 
 		for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
 		{
-			Info.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_apSkinPartNames[p];
+			Info.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_aaSkinPartNames[p];
 			Info.m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
 			Info.m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
 		}
@@ -2766,7 +2766,7 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 		Msg.m_ClientId = ClientId;
 		for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
 		{
-			Msg.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_apSkinPartNames[p];
+			Msg.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_aaSkinPartNames[p];
 			Msg.m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
 			Msg.m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
 		}
@@ -5176,7 +5176,7 @@ void CGameContext::OnUpdatePlayerServerInfo(CJsonStringWriter *pJSonWriter, int 
 			pJSonWriter->BeginObject();
 
 			pJSonWriter->WriteAttribute("name");
-			pJSonWriter->WriteStrValue(TeeInfo.m_apSkinPartNames[i]);
+			pJSonWriter->WriteStrValue(TeeInfo.m_aaSkinPartNames[i]);
 
 			if(TeeInfo.m_aUseCustomColors[i])
 			{
