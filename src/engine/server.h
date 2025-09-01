@@ -400,6 +400,7 @@ public:
 
 	// <FoxNet
 	virtual bool IncludedInServerInfo(int ClientId) = 0;
+	virtual void OnPreShutdown() = 0;
 	// FoxNet>
 };
 

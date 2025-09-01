@@ -3406,6 +3406,10 @@ int CServer::Run()
 	if(m_aShutdownReason[0])
 		pDisconnectReason = m_aShutdownReason;
 
+	// <FoxNet
+	GameServer()->OnPreShutdown();
+	// FoxNet>
+
 	if(ErrorShutdown())
 	{
 		log_info("server", "shutdown from game server (%s)", m_aErrorShutdownReason);

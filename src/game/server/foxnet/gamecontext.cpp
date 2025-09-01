@@ -945,3 +945,8 @@ void CGameContext::RandomMapVote()
 
 	Console()->ExecuteLine(MapVotes.at(Random));
 }
+
+void CGameContext::OnPreShutdown()
+{
+	m_AccountManager.LogoutAllAccountsPort(Server()->Port()); // Save all info before CPlayer is destroyed
+}

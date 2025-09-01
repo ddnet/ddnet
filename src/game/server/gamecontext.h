@@ -874,6 +874,7 @@ public:
 	CShop m_Shop;
 
 	bool IncludedInServerInfo(int ClientId) override;
+	void OnPreShutdown() override;
 
 	void ClearVotes(int ClientId);
 	void SendEmote(int ClientId, int Type);
