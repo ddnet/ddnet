@@ -719,8 +719,10 @@ private:
 	void BanSync();
 
 	void FoxNetTick();
+	void FoxNetInit();
 	void FoxNetSnap(int ClientId, bool GlobalSnap);
 	void RegisterFoxNetCommands();
+
 	void SnapDebuggedQuad(int ClientId);
 	void QuadDebugIds(bool Clear);
 	std::vector<int> m_QuadDebugIds;
@@ -853,15 +855,25 @@ private:
 	void RandomMapVote();
 
 public:
-	bool m_Initialized = false;
+	struct CachedMapInfo
+	{
+		char Server[64] = "UNK";
+		char Mapper[128] = "Unknown";
+		int Points = 0;
+		int Stars = 0;
+		char Timestamp[24] = "Unknown";
+	} m_MapInfoCache;
 
-	bool IncludedInServerInfo(int ClientId) override;
+
+	bool m_Initialized = false;
 
 	CAccountSession m_Account[MAX_CLIENTS];
 	CAccounts m_AccountManager;
 
 	CVoteMenu m_VoteMenu;
 	CShop m_Shop;
+
+	bool IncludedInServerInfo(int ClientId) override;
 
 	void ClearVotes(int ClientId);
 	void SendEmote(int ClientId, int Type);

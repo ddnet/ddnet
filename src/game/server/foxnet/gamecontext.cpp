@@ -2,19 +2,21 @@
 #include "fontconvert.h"
 #include <base/system.h>
 #include <cstring>
-#include <game/server/entities/character.h>
-#include <game/server/gamecontext.h>
-#include <game/server/player.h>
-#include <random>
-#include <string>
-#include <vector>
-#include <game/server/gamecontroller.h>
+#include <engine/server/server.h>
+#include <engine/shared/config.h>
 #include <game/collision.h>
 #include <game/gamecore.h>
 #include <game/mapitems.h>
-#include <generated/protocol.h>
+#include <game/server/entities/character.h>
+#include <game/server/gamecontext.h>
+#include <game/server/gamecontroller.h>
+#include <game/server/player.h>
+#include <game/server/score.h>
 #include <game/voting.h>
-#include <engine/shared/config.h>
+#include <generated/protocol.h>
+#include <random>
+#include <string>
+#include <vector>
 
 void CGameContext::FoxNetTick()
 {
@@ -52,6 +54,21 @@ void CGameContext::FoxNetTick()
 		}
 		++it;
 	}
+}
+void CGameContext::FoxNetInit()
+{
+	m_AccountManager.Init(this, ((CServer *)Server())->DbPool());
+	m_VoteMenu.Init(this);
+	m_Shop.Init(this);
+
+	if(!m_Initialized)
+	{
+		if(g_Config.m_SvRandomMapVoteOnStart)
+			RandomMapVote();
+		m_Initialized = true;
+	}
+	if(Score())
+		Score()->CacheMapInfo();
 }
 
 void CGameContext::HandleEffects()
@@ -703,8 +720,8 @@ void CGameContext::SnapLaserEffect(int ClientId)
 
 	for(auto it = m_LaserDeaths.begin(); it != m_LaserDeaths.end();)
 	{
-		const size_t count = std::min({ (size_t)it->m_Remaining,
-			it->m_aIds.size(), it->m_From.size(), it->m_To.size(), it->m_StartTick.size() });
+		const size_t count = std::min({(size_t)it->m_Remaining,
+			it->m_aIds.size(), it->m_From.size(), it->m_To.size(), it->m_StartTick.size()});
 		for(size_t at = 0; at < count; at++)
 		{
 			if(Server()->Tick() > it->m_StartTick[at] && Server()->Tick() < it->m_EndTick)

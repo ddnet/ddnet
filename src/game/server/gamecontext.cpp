@@ -4300,16 +4300,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 
 	m_pAntibot->RoundStart(this);
 	// <FoxNet
-	m_AccountManager.Init(this, ((CServer *)Server())->DbPool());
-	m_VoteMenu.Init(this);
-	m_Shop.Init(this);
-
-	if(!m_Initialized)
-	{
-		if(g_Config.m_SvRandomMapVoteOnStart)
-			RandomMapVote();
-		m_Initialized = true;
-	}
+	FoxNetInit();
 	// FoxNet>
 }
 

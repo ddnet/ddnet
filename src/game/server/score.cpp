@@ -457,4 +457,18 @@ void CScore::RemoveAllPlayerRecords(const char *pName)
 
 	m_pPool->ExecuteWrite(CScoreWorker::RemoveAllPlayerRecords, std::move(Tmp), "remove all player map records");
 }
+
+void CScore::CacheMapInfo()
+{
+	GameServer()->m_MapInfoCache = CGameContext::CachedMapInfo();
+
+	auto pResult = std::make_shared<CScorePlayerResult>();
+	auto Tmp = std::make_unique<CSqlMapCacheRequest>(pResult);
+
+	str_copy(Tmp->m_aMap, Server()->GetMapName(), sizeof(Tmp->m_aMap));
+	str_copy(Tmp->Server, g_Config.m_SvSqlServerName, sizeof(Tmp->Server));
+	Tmp->m_pGameServer = GameServer();
+
+	m_pPool->ExecuteWrite(CScoreWorker::CacheMapInfo, std::move(Tmp), "cache map info");
+}
 // FoxNet>

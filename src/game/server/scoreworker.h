@@ -279,6 +279,22 @@ struct CTeamrank
 	static bool GetSqlTop5Team(IDbConnection *pSqlServer, bool *pEnd, char *pError, int ErrorSize, char (*paMessages)[512], int *StartLine, int Count);
 };
 
+struct CSqlMapCacheRequest : ISqlData
+{
+	CSqlMapCacheRequest(std::shared_ptr<CScorePlayerResult> pResult) :
+		ISqlData(std::move(pResult))
+	{
+	}
+
+	char m_aMap[MAX_MAP_LENGTH];
+	char Server[64];
+	char Mapper[128];
+	int Points;
+	int Stars;
+	char Timestamp[24];
+	CGameContext *m_pGameServer;
+};
+
 struct CScoreWorker
 {
 	static bool LoadBestTime(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
@@ -309,6 +325,8 @@ struct CScoreWorker
 	static bool RemovePlayerMapRecords(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize);
 	static bool RemovePlayerRecordWithTime(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize);
 	static bool RemoveAllPlayerRecords(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize);
+
+	static bool CacheMapInfo(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize);
 	// FoxNet>
 };
 

@@ -823,6 +823,21 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 		Player->m_Score = TTime;
 	}
 
+	// <FoxNet
+	if(Player->Acc()->m_LoggedIn)
+	{
+		int64_t XP = 0;
+		if(GameServer()->m_MapInfoCache.Points > 0)
+			XP = GameServer()->m_MapInfoCache.Points;
+
+		if(XP > 0)
+		{
+			Player->GiveXP(XP, "for finishing the map!");
+			GameServer()->m_AccountManager.SaveAccountsInfo(Player->GetCid(), *Player->Acc());
+		}
+	}
+	// FoxNet>
+
 	// Confetti
 	CCharacter *pChar = Player->GetCharacter();
 	m_pGameContext->CreateFinishEffect(pChar->m_Pos, pChar->TeamMask());

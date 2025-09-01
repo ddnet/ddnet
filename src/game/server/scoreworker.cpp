@@ -1,11 +1,14 @@
 #include "scoreworker.h"
 
-#include <base/log.h>
-#include <base/system.h>
+#include <game/server/gamecontext.h>
+
 #include <engine/server/databases/connection.h>
 #include <engine/server/databases/connection_pool.h>
 #include <engine/server/sql_string_helpers.h>
 #include <engine/shared/config.h>
+
+#include <base/log.h>
+#include <base/system.h>
 
 #include <cmath>
 
@@ -2086,6 +2089,48 @@ bool CScoreWorker::RemoveAllPlayerRecords(IDbConnection *pSqlServer, const ISqlD
 		return false;
 
 	dbg_msg("sql", "Removed %d records and %d points for player '%s'", NumDeletedRace, NumDeletedPoints, pData->m_aName);
+	return true;
+}
+
+bool CScoreWorker::CacheMapInfo(IDbConnection *pSqlServer, const ISqlData *pGameData, Write /*w*/, char *pError, int ErrorSize)
+{
+	const auto *pReqConst = static_cast<const CSqlMapCacheRequest *>(pGameData);
+	auto *pReq = const_cast<CSqlMapCacheRequest *>(pReqConst);
+
+	char aSql[512];
+	str_format(aSql, sizeof(aSql),
+		"SELECT Server, Mapper, Points, Stars, Timestamp "
+		"FROM %s_maps WHERE LOWER(Map)=LOWER(?) LIMIT 1",
+		pSqlServer->GetPrefix());
+
+	if(!pSqlServer->PrepareStatement(aSql, pError, ErrorSize))
+		return false;
+
+	pSqlServer->BindString(1, pReq->m_aMap);
+
+	bool End = true;
+	if(!pSqlServer->Step(&End, pError, ErrorSize))
+		return false;
+
+	if(!End)
+	{
+		pSqlServer->GetString(1, pReq->Server, sizeof(pReq->Server));
+		pSqlServer->GetString(2, pReq->Mapper, sizeof(pReq->Mapper));
+		pReq->Points = pSqlServer->GetInt(3);
+		pReq->Stars = pSqlServer->GetInt(4);
+		pSqlServer->GetString(5, pReq->Timestamp, sizeof(pReq->Timestamp));
+
+		if(pReq->m_pGameServer)
+		{
+			auto &Dst = pReq->m_pGameServer->m_MapInfoCache;
+			str_copy(Dst.Server, pReq->Server, sizeof(Dst.Server));
+			str_copy(Dst.Mapper, pReq->Mapper, sizeof(Dst.Mapper));
+			Dst.Points = pReq->Points;
+			Dst.Stars = pReq->Stars;
+			str_copy(Dst.Timestamp, pReq->Timestamp, sizeof(Dst.Timestamp));
+		}
+	}
+
 	return true;
 }
 // FoxNet>
