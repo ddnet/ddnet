@@ -74,7 +74,7 @@ impl Config {
         ParsedConfig::read(filename)?.to_config()
     }
     pub fn is_banned(&self, addr: Addr) -> Option<&str> {
-        for ban in &self.bans {
+        for ban in self.bans.iter() {
             if ban.address.matches(addr) {
                 return Some(ban.reason.as_deref().unwrap_or(&self.default_ban_message));
             }

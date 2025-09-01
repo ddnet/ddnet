@@ -208,6 +208,7 @@ typename CNetBan::CBan<T> *CNetBan::CBanPool<T, HashCount>::Get(int Index) const
 }
 
 template<class T>
+
 int CNetBan::Ban(T *pBanPool, const typename T::CDataType *pData, int Seconds, const char *pReason, bool VerbatimReason)
 {
 	// do not ban localhost
@@ -252,8 +253,8 @@ int CNetBan::Ban(T *pBanPool, const typename T::CDataType *pData, int Seconds, c
 			char aBuf[256];
 			MakeBanInfo(pBan, aBuf, sizeof(aBuf), MSGTYPE_BANADD);
 			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", aBuf);
-			return 0;
 		}
+		return 0;
 	}
 	else
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban failed (full banlist)");
