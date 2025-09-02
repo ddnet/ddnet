@@ -13,10 +13,10 @@
 #include <iterator>
 
 #include "portal.h"
-#include <game/teamscore.h>
-#include <base/math.h>
 #include <algorithm>
+#include <base/math.h>
 #include <base/system.h>
+#include <game/teamscore.h>
 
 constexpr float PortalRadius = 52.0f;
 constexpr float MaxDistanceFromPlayer = 1200.0f;
@@ -40,7 +40,7 @@ CPortal::CPortal(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
 }
 
 void CPortal::Reset()
-{	
+{
 	Server()->SnapFreeId(GetId());
 	for(int i = 0; i < NUM_IDS; i++)
 		Server()->SnapFreeId(m_Snap.m_aIds[i]);
@@ -243,7 +243,8 @@ void CPortal::Snap(int SnappingClient)
 
 	if(CCharacter *pSnapChar = pSnapPlayer->GetCharacter())
 	{
-		if(m_PortalData[0].m_Team == TEAM_SUPER);
+		if(m_PortalData[0].m_Team == TEAM_SUPER)
+			;
 		else if(pSnapPlayer->IsPaused())
 		{
 			if(pSnapChar->Team() != m_PortalData[0].m_Team && pSnapPlayer->m_SpecTeam)

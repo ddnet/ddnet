@@ -2,8 +2,8 @@
 #ifndef GAME_SERVER_FOXNET_ENTITIES_LIGHT_SABER_H
 #define GAME_SERVER_FOXNET_ENTITIES_LIGHT_SABER_H
 
-#include <game/server/entity.h>
 #include <base/vmath.h>
+#include <game/server/entity.h>
 #include <game/server/gameworld.h>
 
 constexpr float LIGHT_SABER_SPEED = 10.0f;

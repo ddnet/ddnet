@@ -12,10 +12,10 @@
 #include <generated/server_data.h>
 
 #include <base/vmath.h>
+#include <game/gamecore.h>
 #include <game/mapitems.h>
 #include <game/server/entity.h>
 #include <game/server/gameworld.h>
-#include <game/gamecore.h>
 #include <game/teamscore.h>
 
 CLightSaber::CLightSaber(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
@@ -70,7 +70,6 @@ void CLightSaber::Tick()
 			m_State = STATE_RETRACTING;
 	}
 
-
 	if(m_State == STATE_EXTENDING)
 	{
 		if(Server()->Tick() % 5 == 0)
@@ -98,9 +97,9 @@ void CLightSaber::Tick()
 	vec2 WantedTo = m_Pos + normalize(vec2(pChar->Input()->m_TargetX, pChar->Input()->m_TargetY)) * m_Length;
 	GameServer()->Collision()->IntersectLine(m_Pos, WantedTo, &m_To, 0);
 
-    std::vector<CCharacter *> HitChars = GameWorld()->IntersectedCharacters(m_From, m_To, 6.0f, GameServer()->GetPlayerChar(m_Owner));
+	std::vector<CCharacter *> HitChars = GameWorld()->IntersectedCharacters(m_From, m_To, 6.0f, GameServer()->GetPlayerChar(m_Owner));
 	if(HitChars.empty())
-	    return;
+		return;
 
 	for(CCharacter *pHit : HitChars)
 	{
@@ -110,7 +109,6 @@ void CLightSaber::Tick()
 		pHit->SetEmote(EMOTE_PAIN, Server()->Tick() + 2);
 	}
 }
-
 
 void CLightSaber::Snap(int SnappingClient)
 {

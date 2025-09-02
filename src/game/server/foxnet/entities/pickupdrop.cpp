@@ -13,9 +13,9 @@
 #include <game/collision.h>
 #include <game/gamecore.h>
 #include <game/mapitems.h>
+#include <game/server/entities/pickup.h>
 #include <game/server/entity.h>
 #include <game/server/gameworld.h>
-#include <game/server/entities/pickup.h>
 #include <vector>
 
 CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, int LastOwner, vec2 Pos, int Team, int TeleCheckpoint, vec2 Dir, int Lifetime, int Type) :
@@ -316,7 +316,6 @@ void CPickupDrop::CollectItem()
 
 	Reset(true);
 }
-
 
 void CPickupDrop::HandleQuads(const CMapItemLayerQuads *pQuadLayer, int QuadIndex)
 {

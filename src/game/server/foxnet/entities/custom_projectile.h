@@ -15,7 +15,6 @@ enum
 class CCustomProjectile : public CEntity
 {
 public:
-
 	CCustomProjectile(CGameWorld *pGameWorld, int Owner, vec2 Pos, vec2 Dir,
 		bool Explosive, bool Freeze, bool Unfreeze, int Type, bool IsNormalWeapon = false, float Lifetime = 6.0f, float Accel = 1.0f, float Speed = 10.0f);
 
@@ -32,7 +31,7 @@ private:
 	int m_LifeTime;
 
 	CClientMask m_TeamMask;
-	CCharacter* m_pOwner;
+	CCharacter *m_pOwner;
 	int m_Owner;
 
 	int m_Freeze;
@@ -54,7 +53,6 @@ private:
 	void FillInfo(CNetObj_Projectile *pProj);
 	bool FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj);
 	void FillExtraInfo(CNetObj_DDNetProjectile *pProj);
-
 };
 
 #endif
