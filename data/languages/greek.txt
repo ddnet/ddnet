@@ -550,6 +550,9 @@ Could not resolve connect address '%s'. See local console for details.
 Connect address error
 == 
 
+Press Ctrl+Shift+G to disable debug graphs.
+== 
+
 Could not save downloaded map. Try manually deleting this file: %s
 == 
 
@@ -724,6 +727,15 @@ Personal best:
 == 
 
 Team %d
+== 
+
+Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
+== 
+
+Server could not be started
+== 
+
+Server executable not found, can't run server
 == 
 
 Some map images could not be loaded. Check the local console for details.
@@ -930,6 +942,9 @@ Getting server list from master server
 No local servers found (ports %d-%d)
 == 
 
+Could not get server list from master server
+== 
+
 Example of usage
 == 
 
@@ -1019,6 +1034,14 @@ Server filter
 == 
 
 Friends
+== 
+
+[Demo playback]
+Live
+== 
+
+[Demo playback]
+Go to Live
 == 
 
 Play the current demo
@@ -1204,66 +1227,16 @@ Pause
 Edit touch controls
 == 
 
-Close
-== 
-
-https://wiki.ddnet.org/wiki/Touch_controls
-== 
-
-Save changes
-== 
-
-Error saving touch controls
-== 
-
-Could not save touch controls to file. See local console for details.
-== 
-
 Unsaved changes
 == 
 
-Discard changes
+Save all changes before turning off the editor?
 == 
 
-Are you sure that you want to discard the current changes to the touch controls?
+Save
 == 
 
-Are you sure that you want to reset the touch controls to default?
-== 
-
-Import from clipboard
-== 
-
-Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
-== 
-
-Export to clipboard
-== 
-
-Direct touch input while ingame
-== 
-
-[Direct touch input]
-Disabled
-== 
-
-[Direct touch input]
-Active action
-== 
-
-[Direct touch input]
-Aim
-== 
-
-[Direct touch input]
-Fire
-== 
-
-[Direct touch input]
-Hook
-== 
-
-Direct touch input while spectating
+Close
 == 
 
 Error loading touch controls
@@ -1335,10 +1308,311 @@ Deactivate
 Activate
 == 
 
-Save
+Menu opened. Press Esc key again to close menu.
 == 
 
-Menu opened. Press Esc key again to close menu.
+Layout
+== 
+
+Visibility
+== 
+
+Behavior
+== 
+
+Save changes
+== 
+
+Discard changes
+== 
+
+Delete button
+== 
+
+Are you sure that you want to delete this button?
+== 
+
+Duplicate
+== 
+
+New button already created
+== 
+
+A new button has already been created, please save or delete it before creating another one.
+== 
+
+Please save your changes before duplicating a button.
+== 
+
+No space for button
+== 
+
+There is not enough space available to place another button.
+== 
+
+There is not enough space available to place another button with this size. The button has been resized.
+== 
+
+Deselect
+== 
+
+You'll lose unsaved changes after deselecting.
+== 
+
+Width
+== 
+
+Height
+== 
+
+Shape
+== 
+
+[Touch button shape]
+Rectangle
+== 
+
+[Touch button shape]
+Circle
+== 
+
+[Touch button label type]
+Plain
+== 
+
+[Touch button label type]
+Localized
+== 
+
+[Touch button label type]
+Icon
+== 
+
+Behavior type
+== 
+
+[Touch button behavior]
+Bind
+== 
+
+[Touch button behavior]
+Bind Toggle
+== 
+
+[Touch button behavior]
+Predefined
+== 
+
+Command
+== 
+
+Label
+== 
+
+Label type
+== 
+
+Add command
+== 
+
+Delete command
+== 
+
+[Touch button visibility preview]
+Included
+== 
+
+[Touch button visibility preview]
+Excluded
+== 
+
+[Touch button visibility preview]
+Ignore
+== 
+
+Long press on a touch button to select it.
+== 
+
+New button
+== 
+
+Select button by touch
+== 
+
+No buttons match your filter criteria
+== 
+
+File
+== 
+
+Buttons
+== 
+
+Preview
+== 
+
+Active color
+== 
+
+Inactive color
+== 
+
+Direct touch input while ingame
+== 
+
+[Direct touch input]
+Disabled
+== 
+
+[Direct touch input]
+Active action
+== 
+
+[Direct touch input]
+Aim
+== 
+
+[Direct touch input]
+Fire
+== 
+
+[Direct touch input]
+Hook
+== 
+
+Direct touch input while spectating
+== 
+
+Preview button visibility while the editor is active.
+== 
+
+Show all buttons
+== 
+
+https://wiki.ddnet.org/wiki/Touch_controls
+== 
+
+Error saving touch controls
+== 
+
+Could not save touch controls to file. See local console for details.
+== 
+
+Are you sure that you want to discard the current changes to the touch controls?
+== 
+
+Are you sure that you want to reset the touch controls to default?
+== 
+
+Import from clipboard
+== 
+
+Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
+== 
+
+Export to clipboard
+== 
+
+Save all changes before switching selected button?
+== 
+
+Discard
+== 
+
+There is not enough space available for the button. Check its visibilities and size.
+== 
+
+Selected button not visible
+== 
+
+The selected button is not visible. Do you want to deselect it or edit its visibility?
+== 
+
+Edit
+== 
+
+Width and height are required to be within the range from %d to %d.
+== 
+
+Button position is outside of the screen.
+== 
+
+The selected button is overlapping with other buttons.
+== 
+
+Wrong button settings
+== 
+
+[Touch button visibilities]
+Ingame
+== 
+
+[Touch button visibilities]
+Zoom Allowed
+== 
+
+[Touch button visibilities]
+Vote Active
+== 
+
+[Touch button visibilities]
+Dummy Allowed
+== 
+
+[Touch button visibilities]
+Dummy Connected
+== 
+
+[Touch button visibilities]
+Rcon Authed
+== 
+
+[Touch button visibilities]
+Demo Player
+== 
+
+[Touch button visibilities]
+Extra Menu
+== 
+
+[Predefined touch button behaviors]
+Ingame Menu
+== 
+
+[Predefined touch button behaviors]
+Extra Menu
+== 
+
+[Predefined touch button behaviors]
+Emoticon
+== 
+
+[Predefined touch button behaviors]
+Spectate
+== 
+
+[Predefined touch button behaviors]
+Swap Action
+== 
+
+[Predefined touch button behaviors]
+Use Action
+== 
+
+[Predefined touch button behaviors]
+Joystick Action
+== 
+
+[Predefined touch button behaviors]
+Joystick Aim
+== 
+
+[Predefined touch button behaviors]
+Joystick Fire
+== 
+
+[Predefined touch button behaviors]
+Joystick Hook
 == 
 
 Smooth Dynamic Camera
@@ -1719,6 +1993,9 @@ Chat font size
 Chat width
 == 
 
+Chat background color
+== 
+
 Messages
 == 
 
@@ -1738,9 +2015,6 @@ Normal message
 == 
 
 Client message
-== 
-
-Preview
 == 
 
 [Show name plates]
@@ -2098,12 +2372,6 @@ Downloading %s:
 == 
 
 Update failed! Check log…
-== 
-
-Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
-== 
-
-Server executable not found, can't run server
 == 
 
 Loading race demo files
