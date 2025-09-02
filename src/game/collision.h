@@ -185,6 +185,7 @@ private:
 public:
 	const std::vector<CMapItemLayerQuads *> &QuadLayers() const { return m_vQuadLayers; }
 	void ClearQuadLayers();
+	void Rotate(vec2 Center, vec2 *pPoint, float Rotation) const;
 
 	void SetTime(double Time) { m_Time = Time; }
 	int GetQuadCorners(int StartNum, const CMapItemLayerQuads *pQuadLayer, float ExtraTime = 0.0, vec2 *pTopLCorner = nullptr, vec2 *pTopRCorner = nullptr, vec2 *pBottomLCorner = nullptr, vec2 *pBottomRCorner = nullptr) const;

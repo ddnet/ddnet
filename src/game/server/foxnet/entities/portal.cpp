@@ -14,7 +14,6 @@
 
 #include "portal.h"
 #include <algorithm>
-#include <base/math.h>
 #include <base/system.h>
 #include <game/teamscore.h>
 
@@ -272,8 +271,8 @@ void CPortal::Snap(int SnappingClient)
 			vec2 From = m_Snap.m_From[i];
 
 			const float Spin = (Server()->Tick() / 30.0) + (p * pi);
-			Rotate(vec2(0, 0), &To, Spin);
-			Rotate(vec2(0, 0), &From, Spin);
+			Collision()->Rotate(vec2(0, 0), &To, Spin);
+			Collision()->Rotate(vec2(0, 0), &From, Spin);
 
 			To += m_PortalData[p].m_Pos;
 			From += m_PortalData[p].m_Pos;

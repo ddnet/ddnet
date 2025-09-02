@@ -1308,6 +1308,14 @@ void CCollision::ClearQuadLayers()
 	m_vQuadLayers.clear();
 }
 
+void CCollision::Rotate(vec2 Center, vec2 *pPoint, float Rotation) const
+{
+	float x = pPoint->x - Center.x;
+	float y = pPoint->y - Center.y;
+	pPoint->x = (x * cosf(Rotation) - y * sinf(Rotation) + Center.x);
+	pPoint->y = (x * sinf(Rotation) + y * cosf(Rotation) + Center.y);
+}
+
 int CCollision::GetQuadCorners(int StartNum, const CMapItemLayerQuads *pQuadLayer, float ExtraTime, vec2 *pTopLCorner, vec2 *pTopRCorner, vec2 *pBottomLCorner, vec2 *pBottomRCorner) const
 {
 	if(!pQuadLayer)

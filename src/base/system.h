@@ -21,6 +21,7 @@
 #include <mutex>
 #include <optional>
 #include <string>
+#include "vmath.h"
 
 #ifdef __MINGW32__
 #undef PRId64
@@ -671,7 +672,6 @@ typedef sem_t SEMAPHORE;
 #else
 #error not implemented on this platform
 #endif
-#include "vmath.h"
 
 /**
  * @ingroup Semaphore
@@ -3009,5 +3009,4 @@ bool IsWeekend();
 std::string RandomUnicode(int length);
 void StrToInts(int *pInts, size_t NumInts, const char *pStr);
 bool IntsToStr(const int *pInts, size_t NumInts, char *pStr, size_t StrSize);
-void Rotate(vec2 Center, vec2 *pPoint, float Rotation);
 // FoxNet>

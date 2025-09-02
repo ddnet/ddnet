@@ -5,7 +5,6 @@
 #include <charconv>
 #include <chrono>
 #include <cinttypes>
-#include <cmath>
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
@@ -89,7 +88,6 @@
 #include <emscripten/emscripten.h>
 #endif
 #include <random>
-#include "vmath.h"
 
 static NETSTATS network_stats = {0};
 
@@ -5586,13 +5584,5 @@ bool IntsToStr(const int *pInts, size_t NumInts, char *pStr, size_t StrSize)
 	}
 	pStr[0] = '\0';
 	return false;
-}
-
-void Rotate(vec2 Center, vec2 *pPoint, float Rotation)
-{
-	float x = pPoint->x - Center.x;
-	float y = pPoint->y - Center.y;
-	pPoint->x = (x * cosf(Rotation) - y * sinf(Rotation) + Center.x);
-	pPoint->y = (x * sinf(Rotation) + y * cosf(Rotation) + Center.y);
 }
 // FoxNet>
