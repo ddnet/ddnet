@@ -61,6 +61,8 @@ void CGameContext::FoxNetInit()
 	m_VoteMenu.Init(this);
 	m_Shop.Init(this);
 
+	m_BanSaveDelay = Server()->Tick() + Server()->TickSpeed() * (g_Config.m_SvBanSyncingDelay * 60);
+
 	if(!m_Initialized)
 	{
 		if(g_Config.m_SvRandomMapVoteOnStart)
