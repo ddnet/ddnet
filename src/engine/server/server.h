@@ -160,7 +160,6 @@ public:
 		char m_aClan[MAX_CLAN_LENGTH];
 		int m_Country;
 		std::optional<int> m_Score;
-		int m_Authed;
 		int m_AuthKey;
 		int m_AuthTries;
 		bool m_AuthHidden;
@@ -206,12 +205,9 @@ public:
 		{
 			return m_State != STATE_EMPTY && !m_DebugDummy;
 		}
-
-		int ConsoleAccessLevel() const
-		{
-			return m_Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : m_Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER;
-		}
 	};
+
+	int ConsoleAccessLevel(int ClientId) const;
 
 	CClient m_aClients[MAX_CLIENTS];
 	int m_aIdMap[MAX_CLIENTS * VANILLA_MAX_CLIENTS];
