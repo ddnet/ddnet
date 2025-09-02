@@ -2219,3 +2219,271 @@ Error checking player name
 
 Could not check for existing player with your name. Check your internet connection.
 == 無法驗證是否已存在相同暱稱的玩家。請檢查你的網路連線。
+
+Press Ctrl+Shift+G to disable debug graphs.
+== 
+
+Server could not be started
+== 
+
+Could not get server list from master server
+== 
+
+[Demo playback]
+Live
+== 
+
+[Demo playback]
+Go to Live
+== 
+
+Save all changes before turning off the editor?
+== 
+
+Layout
+== 
+
+Visibility
+== 
+
+Behavior
+== 
+
+Delete button
+== 
+
+Are you sure that you want to delete this button?
+== 
+
+Duplicate
+== 
+
+New button already created
+== 
+
+A new button has already been created, please save or delete it before creating another one.
+== 
+
+Please save your changes before duplicating a button.
+== 
+
+No space for button
+== 
+
+There is not enough space available to place another button.
+== 
+
+There is not enough space available to place another button with this size. The button has been resized.
+== 
+
+Deselect
+== 
+
+You'll lose unsaved changes after deselecting.
+== 
+
+Width
+== 
+
+Height
+== 
+
+Shape
+== 
+
+[Touch button shape]
+Rectangle
+== 
+
+[Touch button shape]
+Circle
+== 
+
+[Touch button label type]
+Plain
+== 
+
+[Touch button label type]
+Localized
+== 
+
+[Touch button label type]
+Icon
+== 
+
+Behavior type
+== 
+
+[Touch button behavior]
+Bind
+== 
+
+[Touch button behavior]
+Bind Toggle
+== 
+
+[Touch button behavior]
+Predefined
+== 
+
+Command
+== 
+
+Label
+== 
+
+Label type
+== 
+
+Add command
+== 
+
+Delete command
+== 
+
+[Touch button visibility preview]
+Included
+== 
+
+[Touch button visibility preview]
+Excluded
+== 
+
+[Touch button visibility preview]
+Ignore
+== 
+
+Long press on a touch button to select it.
+== 
+
+New button
+== 
+
+Select button by touch
+== 
+
+No buttons match your filter criteria
+== 
+
+File
+== 
+
+Buttons
+== 
+
+Active color
+== 
+
+Inactive color
+== 
+
+Preview button visibility while the editor is active.
+== 
+
+Show all buttons
+== 
+
+Save all changes before switching selected button?
+== 
+
+Discard
+== 
+
+There is not enough space available for the button. Check its visibilities and size.
+== 
+
+Selected button not visible
+== 
+
+The selected button is not visible. Do you want to deselect it or edit its visibility?
+== 
+
+Edit
+== 
+
+Width and height are required to be within the range from %d to %d.
+== 
+
+Button position is outside of the screen.
+== 
+
+The selected button is overlapping with other buttons.
+== 
+
+Wrong button settings
+== 
+
+[Touch button visibilities]
+Ingame
+== 
+
+[Touch button visibilities]
+Zoom Allowed
+== 
+
+[Touch button visibilities]
+Vote Active
+== 
+
+[Touch button visibilities]
+Dummy Allowed
+== 
+
+[Touch button visibilities]
+Dummy Connected
+== 
+
+[Touch button visibilities]
+Rcon Authed
+== 
+
+[Touch button visibilities]
+Demo Player
+== 
+
+[Touch button visibilities]
+Extra Menu
+== 
+
+[Predefined touch button behaviors]
+Ingame Menu
+== 
+
+[Predefined touch button behaviors]
+Extra Menu
+== 
+
+[Predefined touch button behaviors]
+Emoticon
+== 
+
+[Predefined touch button behaviors]
+Spectate
+== 
+
+[Predefined touch button behaviors]
+Swap Action
+== 
+
+[Predefined touch button behaviors]
+Use Action
+== 
+
+[Predefined touch button behaviors]
+Joystick Action
+== 
+
+[Predefined touch button behaviors]
+Joystick Aim
+== 
+
+[Predefined touch button behaviors]
+Joystick Fire
+== 
+
+[Predefined touch button behaviors]
+Joystick Hook
+== 
+
+Chat background color
+== 
