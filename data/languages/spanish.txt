@@ -2237,7 +2237,7 @@ Save all changes before turning off the editor?
 == ¿Guardar todos los cambios antes de salir del editor?
 
 Layout
-== Disposición
+== Órden
 
 Visibility
 == Visibilidad
@@ -2246,7 +2246,7 @@ Behavior
 == Comportamiento
 
 Delete button
-== Borrar botón
+== Eliminar botón
 
 Are you sure that you want to delete this button?
 == ¿Estás seguro de que quieres eliminar este botón?
@@ -2419,7 +2419,7 @@ Zoom Allowed
 
 [Touch button visibilities]
 Vote Active
-== Votación activa
+== Votación en curso
 
 [Touch button visibilities]
 Dummy Allowed
@@ -2431,7 +2431,7 @@ Dummy Connected
 
 [Touch button visibilities]
 Rcon Authed
-== Autenticado en rcon
+== Autenticado en Rcon
 
 [Touch button visibilities]
 Demo Player
