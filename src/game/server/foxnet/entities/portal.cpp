@@ -13,6 +13,7 @@
 #include <iterator>
 
 #include "portal.h"
+#include <game/teamscore.h>
 
 constexpr float PortalRadius = 52.0f;
 constexpr float MaxDistanceFromPlayer = 1200.0f;
@@ -68,10 +69,30 @@ void CPortal::Tick()
 		return;
 	}
 
+	if(m_State == STATE_FIRST_SET)
+	{
+		if(m_PortalData[0].m_Team != pOwnerChar->Team())
+		{
+			RemovePortals();
+			return;
+		}
+	}
+	else if(m_State == STATE_BOTH_SET)
+	{
+		if(m_PortalData[0].m_Team != m_PortalData[1].m_Team)
+		{
+			RemovePortals();
+			return;
+		}
+	}
+
 	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
 		CCharacter *pChr = GameServer()->GetPlayerChar(ClientId);
 		if(!pChr || !pChr->IsAlive())
+			continue;
+
+		if(m_PortalData[0].m_Team != TEAM_SUPER && pChr->Team() != TEAM_SUPER && pChr->Team() != m_PortalData[0].m_Team)
 			continue;
 
 		bool Teleported = false;
@@ -102,7 +123,7 @@ void CPortal::Tick()
 		}
 		if(Teleported)
 		{
-			if(distance(m_PortalData[0].m_Pos,m_PortalData[1].m_Pos) > 450.0f)
+			if(distance(m_PortalData[0].m_Pos, m_PortalData[1].m_Pos) > 450.0f)
 			{
 				GameServer()->CreateSound(m_PortalData[0].m_Pos, SOUND_WEAPON_SPAWN);
 				GameServer()->CreateSound(m_PortalData[1].m_Pos, SOUND_WEAPON_SPAWN);
@@ -150,6 +171,7 @@ bool CPortal::TrySetPortal()
 	{
 		m_PortalData[0].m_Active = true;
 		m_PortalData[0].m_Pos = CursorPos;
+		m_PortalData[0].m_Team = pOwnerChar->Team();
 		m_Lifetime = Lifetime;
 		m_State = STATE_FIRST_SET;
 	}
@@ -157,6 +179,7 @@ bool CPortal::TrySetPortal()
 	{
 		m_PortalData[1].m_Active = true;
 		m_PortalData[1].m_Pos = CursorPos;
+		m_PortalData[1].m_Team = pOwnerChar->Team();
 		m_Lifetime = Lifetime;
 		m_State = STATE_BOTH_SET;
 	}
@@ -195,6 +218,21 @@ void CPortal::Snap(int SnappingClient)
 	if(!pSnapPlayer)
 		return;
 
+	if(CCharacter *pSnapChar = pSnapPlayer->GetCharacter())
+	{
+		if(m_PortalData[0].m_Team == TEAM_SUPER);
+		else if(pSnapPlayer->IsPaused())
+		{
+			if(pSnapChar->Team() != m_PortalData[0].m_Team && pSnapPlayer->m_SpecTeam)
+				return;
+		}
+		else
+		{
+			if(pSnapChar->Team() != TEAM_SUPER && pSnapChar->Team() != m_PortalData[0].m_Team)
+				return;
+		}
+	}
+
 	int Amount = 13;
 	int Segments = 12;
 	for(int p = 0; p < 2; p++)
@@ -212,23 +250,19 @@ void CPortal::Snap(int SnappingClient)
 			if(m_PortalData[p].m_Active)
 			{
 				vec2 Direction = direction((360.0f / Segments * CirclePart * (pi / 180.0f)) + Spin);
-				vec2 From = m_PortalData[p].m_Pos + Direction * PortalRadius;
+				vec2 To = m_PortalData[p].m_Pos + Direction * PortalRadius;
 
 				Direction = direction((360.0f / Segments * (CirclePart + 1) * (pi / 180.0f)) + Spin);
-				vec2 To = m_PortalData[p].m_Pos + Direction * PortalRadius;
+				vec2 From = m_PortalData[p].m_Pos + Direction * PortalRadius;
 
 				// To make the the first circle part not look weird
 				if(CirclePart != i)
-					To = From;
+					From = To;
+				int SnappingClientVersion = pSnapPlayer->GetClientVersion();
+				bool SixUp = Server()->IsSixup(SnappingClient);
+				int SubType = GameServer()->GetWeaponType(LASERTYPE_GUN);
 
-				CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_aIds[StartId + i], sizeof(CNetObj_Laser)));
-				if(!pObj)
-					return;
-				pObj->m_X = (int)From.x;
-				pObj->m_Y = (int)From.y;
-				pObj->m_FromX = (int)To.x;
-				pObj->m_FromY = (int)To.y;
-				pObj->m_StartTick = Server()->Tick() + 2;
+				GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, SixUp, SnappingClient), m_aIds[StartId + i], To, From, Server()->Tick() + 2);
 			}
 		}
 	}

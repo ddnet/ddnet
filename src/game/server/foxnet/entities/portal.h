@@ -10,6 +10,7 @@ struct CPortalData
 {
 	bool m_Active;
 	vec2 m_Pos;
+	int m_Team;
 };
 
 class CPortal : public CEntity

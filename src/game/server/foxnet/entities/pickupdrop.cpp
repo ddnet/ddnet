@@ -217,6 +217,8 @@ void CPickupDrop::CollectItem()
 	CCharacter *pClosest = GameServer()->m_World.ClosestCharacter(m_Pos, Radius, this);
 	if(!pClosest)
 		return;
+	if(m_Team != TEAM_SUPER && pClosest->Team() != TEAM_SUPER && m_Team != pClosest->Team())
+		return;
 	if(pClosest->Core()->m_aWeapons[m_Type].m_Got)
 		return;
 
@@ -416,8 +418,23 @@ void CPickupDrop::Snap(int SnappingClient)
 	if(!pSnapPlayer)
 		return;
 
+	if(CCharacter *pSnapChar = pSnapPlayer->GetCharacter())
+	{
+		if(m_Team == TEAM_SUPER) {}
+		else if(pSnapPlayer->IsPaused())
+		{
+			if(pSnapChar->Team() != m_Team && pSnapPlayer->m_SpecTeam)
+				return;
+		}
+		else
+		{
+			if(pSnapChar->Team() != TEAM_SUPER && pSnapChar->Team() != m_Team)
+				return;
+		}
+	}
+
 	// Make the pickup blink when about to disappear
-	if(m_Lifetime < Server()->TickSpeed() * 4 && (Server()->Tick() / (Server()->TickSpeed() / 4)) % 2 == 0)
+	if(m_Lifetime < Server()->TickSpeed() * 10 && (Server()->Tick() / (Server()->TickSpeed() / 4)) % 2 == 0)
 		return;
 
 	int SnappingClientVersion = pSnapPlayer->GetClientVersion();
@@ -426,19 +443,18 @@ void CPickupDrop::Snap(int SnappingClient)
 
 	GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, SixUp, SnappingClient), GetId(), m_Pos, POWERUP_WEAPON, SubType, -1, PICKUPFLAG_NO_PREDICT);
 
+	vec2 OffSet = vec2(0.0f, -32.0f);
 	if(m_Type == WEAPON_HEARTGUN)
 	{
-		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, SixUp, SnappingClient), m_aIds[0], m_Pos + vec2(0.0f, -30.0f), POWERUP_HEALTH, 0, -1, PICKUPFLAG_NO_PREDICT);
+		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, SixUp, SnappingClient), m_aIds[0], m_Pos + OffSet, POWERUP_HEALTH, 0, -1, PICKUPFLAG_NO_PREDICT);
 	}
 	else if(m_Type == WEAPON_LIGHTSABER)
 	{
-		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, SixUp, SnappingClient), m_aIds[0], m_Pos + vec2(30.0f, 0.0f), m_Pos + vec2(34.0f, 0.0f), Server()->Tick(), -1, LASERTYPE_GUN);
+		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, SixUp, SnappingClient), m_aIds[0], m_Pos + OffSet, m_Pos + OffSet, Server()->Tick(), -1, LASERTYPE_GUN);
 	}
 	else if(m_Type == WEAPON_PORTALGUN)
 	{
-		vec2 OffSet = vec2(0.0f, -30.0f);
 		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, SixUp, SnappingClient), m_aIds[0], m_Pos + OffSet, m_Pos + OffSet, Server()->Tick(), -1, LASERTYPE_GUN);
-
 		vec2 Spin = vec2(cos(Server()->Tick() / 5.0f), sin(Server()->Tick() / 5.0f)) * 17.0f;
 		Spin += OffSet;
 

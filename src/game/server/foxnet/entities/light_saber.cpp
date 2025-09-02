@@ -16,6 +16,7 @@
 #include <game/server/entity.h>
 #include <game/server/gameworld.h>
 #include <game/gamecore.h>
+#include <game/teamscore.h>
 
 CLightSaber::CLightSaber(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LIGHT_SABER, Pos)
@@ -103,6 +104,9 @@ void CLightSaber::Tick()
 
 	for(CCharacter *pHit : HitChars)
 	{
+		if(pChar->Team() != TEAM_SUPER && pChar->Team() != pHit->Team())
+			return;
+
 		pHit->SetEmote(EMOTE_PAIN, Server()->Tick() + 2);
 	}
 }
