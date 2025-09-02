@@ -133,12 +133,19 @@ bool CPortal::TrySetPortal()
 	vec2 CursorPos = pOwnerChar->GetCursorPos();
 
 	if(Collision()->TestBox(CursorPos, CCharacterCore::PhysicalSizeVec2()))
-		return false;
+		return false; // teleport position is inside a block
 	if(!pOwnerChar->HasLineOfSight(CursorPos))
-		return false;
+		return false; // Theres blocks in the way
 	if(distance(pOwnerChar->m_Pos, CursorPos) > MaxDistanceFromPlayer)
-		return false;
-
+		return false; // Too far away
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+	{
+		CCharacter *pChr = GameServer()->GetPlayerChar(ClientId);
+		if(!pChr || !pChr->IsAlive())
+			continue;
+		if(PointInCircle(pChr->m_Pos, CursorPos, PortalRadius + CCharacterCore::PhysicalSize()))
+			return false; // Don't place portal on players
+	}
 	if(m_State == STATE_NONE)
 	{
 		m_PortalData[0].m_Active = true;
