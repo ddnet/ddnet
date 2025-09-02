@@ -29,6 +29,9 @@ class CPickupDrop : public CEntity
 	void HandleTiles(int Index);
 	void HandleQuads(const CMapItemLayerQuads *pQuadLayer, int QuadIndex);
 	void HandleQuadStopa(const CMapItemLayerQuads *pQuadLayer, int QuadIndex);
+
+	bool m_InsideFreeze;
+
 	int m_TeleCheckpoint;
 	int m_TileIndex;
 	int m_TileFIndex;

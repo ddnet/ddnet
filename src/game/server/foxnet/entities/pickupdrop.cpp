@@ -16,6 +16,7 @@
 #include <game/server/entity.h>
 #include <game/server/gameworld.h>
 #include <game/server/entities/pickup.h>
+#include <vector>
 
 CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, int LastOwner, vec2 Pos, int Team, int TeleCheckpoint, vec2 Dir, int Lifetime, int Type) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUPDROP, Pos)
@@ -194,6 +195,16 @@ void CPickupDrop::Tick()
 		m_Vel.x *= 0.88f;
 	m_Vel.x *= 0.98f;
 
+	if(m_InsideFreeze)
+	{
+		m_Vel.y -= 0.05f; // slowly float up
+		if(!m_TuneZone)
+			m_Vel.y -= GameServer()->Tuning()->m_Gravity;
+		else
+			m_Vel.y -= GameServer()->TuningList()[m_TuneZone].m_Gravity;
+		m_InsideFreeze = false; // Reset for the next tick
+	}
+
 	m_PrevPos = m_Pos;
 }
 
@@ -337,6 +348,8 @@ void CPickupDrop::HandleQuads(const CMapItemLayerQuads *pQuadLayer, int QuadInde
 
 	if(IsFreeze)
 	{
+		if(g_Config.m_SvDropsInFreezeFloat)
+			m_InsideFreeze = true;
 	}
 	else if(IsDeath)
 	{
@@ -484,6 +497,12 @@ void CPickupDrop::HandleTiles(int Index)
 		m_TeleCheckpoint = TeleCheckpoint;
 
 	m_Vel = ClampVel(m_MoveRestrictions, m_Vel);
+	if(g_Config.m_SvDropsInFreezeFloat && (m_TileIndex == TILE_FREEZE || m_TileFIndex == TILE_FREEZE))
+	{
+		if(g_Config.m_SvDropsInFreezeFloat)
+			m_InsideFreeze = true;
+	}
+
 	// teleporters
 	int z = Collision()->IsTeleport(MapIndex);
 	if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && z && !Collision()->TeleOuts(z - 1).empty())
