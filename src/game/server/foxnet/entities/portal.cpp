@@ -260,7 +260,6 @@ void CPortal::Snap(int SnappingClient)
 					From = To;
 				int SnappingClientVersion = pSnapPlayer->GetClientVersion();
 				bool SixUp = Server()->IsSixup(SnappingClient);
-				int SubType = GameServer()->GetWeaponType(LASERTYPE_GUN);
 
 				GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, SixUp, SnappingClient), m_aIds[StartId + i], To, From, Server()->Tick() + 2);
 			}

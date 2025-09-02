@@ -223,8 +223,6 @@ void CPickupDrop::CollectItem()
 	if(pClosest->Core()->m_aWeapons[m_Type].m_Got)
 		return;
 
-	int ActiveWeapon = pClosest->GetActiveWeapon();
-
 	pClosest->GiveWeapon(m_Type);
 	pClosest->SetActiveWeapon(m_Type);
 	CClientMask TeamMask = CClientMask().set();
