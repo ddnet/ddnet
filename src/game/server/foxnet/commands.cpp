@@ -99,6 +99,22 @@ void CGameContext::ConAccProfile(IConsole::IResult *pResult, void *pUserData)
 	pSelf->m_AccountManager.ShowAccProfile(pResult->m_ClientId, pName);
 }
 
+void CGameContext::ConAccTop5Money(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->m_AccountManager.Top5(pResult->m_ClientId, "money", pResult->NumArguments() > 0 ? pResult->GetInteger(0) : 1);
+}
+void CGameContext::ConAccTop5Level(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->m_AccountManager.Top5(pResult->m_ClientId, "level", pResult->NumArguments() > 0 ? pResult->GetInteger(0) : 1);
+}
+void CGameContext::ConAccTop5Playtime(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->m_AccountManager.Top5(pResult->m_ClientId, "playtime", pResult->NumArguments() > 0 ? pResult->GetInteger(0) : 1);
+}
+
 void CGameContext::ConAccEdit(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -1484,6 +1500,10 @@ void CGameContext::RegisterFoxNetCommands()
 	Console()->Register("login", "s[username] r[password]", CFGFLAG_CHAT, ConAccLogin, this, "Login to your account");
 	Console()->Register("logout", "", CFGFLAG_CHAT, ConAccLogout, this, "Logout of your account");
 	Console()->Register("profile", "?s[name]", CFGFLAG_CHAT, ConAccProfile, this, "Show someones profile");
+
+	Console()->Register("top5money", "?i[offset]", CFGFLAG_CHAT, ConAccTop5Money, this, "Show someones profile");
+	Console()->Register("top5level", "?i[offset]", CFGFLAG_CHAT, ConAccTop5Level, this, "Show someones profile");
+	Console()->Register("top5playtime", "?i[offset]", CFGFLAG_CHAT, ConAccTop5Playtime, this, "Show someones profile");
 
 	Console()->Register("buyitem", "r[item]", CFGFLAG_CHAT, ConShopBuyItem, this, "Buy an item from the shop");
 	Console()->Register("toggleitem", "s[item] ?i[value]", CFGFLAG_CHAT, ConToggleItem, this, "Toggle an Item, value is only needed for 2 items");

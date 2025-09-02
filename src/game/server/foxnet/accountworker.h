@@ -117,13 +117,22 @@ struct CAccSaveInfo : ISqlData
 	char m_LastActiveItems[1028]{};
 };
 
-
 struct CAccSetNameReq : ISqlData
 {
 	CAccSetNameReq() :
 		ISqlData(nullptr) {}
 	char m_Username[ACC_MAX_USERNAME_LENGTH]{};
 	char m_NewPlayerName[MAX_NAME_LENGTH]{};
+};
+
+struct CAccShowTop5 : ISqlData
+{
+	CAccShowTop5() :
+		ISqlData(nullptr) {}
+	int m_ClientId;
+	char m_Type[16];
+	int m_Offset = 0;
+	CGameContext *m_pGameServer;
 };
 
 struct CAccountsWorker
@@ -137,6 +146,7 @@ struct CAccountsWorker
 	static bool UpdateLogoutState(IDbConnection *pSql, const ISqlData *pData, Write, char *pError, int ErrorSize);
 	static bool SetPlayerName(IDbConnection *pSql, const ISqlData *pData, Write, char *pError, int ErrorSize);
 	static bool SaveInfo(IDbConnection *pSql, const ISqlData *pData, Write, char *pError, int ErrorSize);
+	static bool ShowTop5(IDbConnection *pSql, const ISqlData *pData, char *pError, int ErrorSize);
 };
 
 #endif

@@ -837,6 +837,10 @@ private:
 
 	static void ConDropWeapon(IConsole::IResult *pResult, void *pUserData);
 
+	static void ConAccTop5Money(IConsole::IResult *pResult, void *pUserData);
+	static void ConAccTop5Level(IConsole::IResult *pResult, void *pUserData);
+	static void ConAccTop5Playtime(IConsole::IResult *pResult, void *pUserData);
+
 	struct CFakeSnapPlayer
 	{
 		int m_Id;

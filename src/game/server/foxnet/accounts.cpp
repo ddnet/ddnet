@@ -237,7 +237,7 @@ void CAccounts::LogoutAllAccountsPort(int Port)
 	{
 		CSqlLogoutByPort() :
 			ISqlData(nullptr) {}
-		int m_Port{};
+		int m_Port;
 	};
 	auto Fn = [](IDbConnection *pSql, const ISqlData *pData, Write, char *pError, int ErrorSize) -> bool {
 		const auto *p = dynamic_cast<const CSqlLogoutByPort *>(pData);
@@ -353,9 +353,9 @@ bool CAccounts::ChangePassword(int ClientId, const char *pOldPassword, const cha
 	{
 		CSqlChangePass() :
 			ISqlData(nullptr) {}
-		char m_Username[ACC_MAX_USERNAME_LENGTH]{};
-		char m_OldHash[ACC_MAX_PASSW_LENGTH]{};
-		char m_NewHash[ACC_MAX_PASSW_LENGTH]{};
+		char m_Username[ACC_MAX_USERNAME_LENGTH];
+		char m_OldHash[ACC_MAX_PASSW_LENGTH];
+		char m_NewHash[ACC_MAX_PASSW_LENGTH];
 	};
 	auto Fn = [](IDbConnection *pSql, const ISqlData *pData, Write, char *pError, int ErrorSize) -> bool {
 		const auto *p = dynamic_cast<const CSqlChangePass *>(pData);
@@ -438,10 +438,10 @@ void CAccounts::EditAccount(const char *pUsername, const char *pVariable, const 
 	{
 		CSqlEditReq() :
 			ISqlData(nullptr) {}
-		char m_Username[ACC_MAX_USERNAME_LENGTH]{};
-		char m_Value[1028]{};
-		char m_Column[64]{};
-		bool m_IsInt{};
+		char m_Username[ACC_MAX_USERNAME_LENGTH];
+		char m_Value[1028];
+		char m_Column[64];
+		bool m_IsInt;
 	};
 	auto Fn = [](IDbConnection *pSql, const ISqlData *pData, Write, char *pError, int ErrorSize) -> bool {
 		const auto *p = dynamic_cast<const CSqlEditReq *>(pData);
@@ -633,6 +633,20 @@ void CAccounts::SaveAllAccounts()
 		if(GameServer()->m_Account[i].m_LoggedIn)
 			SaveAccountsInfo(i, GameServer()->m_Account[i]);
 	}
+}
+
+void CAccounts::Top5(int ClientId, const char *pType, int Offset)
+{
+	if(!m_pPool)
+		return;
+
+	auto pReq = std::make_unique<CAccShowTop5>();
+	pReq->m_ClientId = ClientId;
+	str_copy(pReq->m_Type, pType, sizeof(pReq->m_Type));
+	pReq->m_Offset = Offset;
+	pReq->m_pGameServer = GameServer();
+
+	m_pPool->Execute(CAccountsWorker::ShowTop5, std::move(pReq), "acc top5");
 }
 
 void CAccounts::SetPlayerName(int ClientId, const char *pName) // When player changes name

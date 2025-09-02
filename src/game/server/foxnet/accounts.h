@@ -92,6 +92,8 @@ public:
 
 	void SaveAllAccounts();
 
+	void Top5(int ClientId, const char *pType, int Offset = 0);
+
 	std::optional<CAccountSession> GetAccount(const char *pUsername);
 	std::optional<CAccountSession> GetAccountCurName(const char *pLastName);
 

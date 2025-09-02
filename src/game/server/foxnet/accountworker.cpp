@@ -1,6 +1,7 @@
-#include "accountworker.h"
+﻿#include "accountworker.h"
 #include <engine/server/databases/connection.h>
 #include "accounts.h"
+#include <game/server/gamecontext.h>
 
 bool CAccountsWorker::Register(IDbConnection *pSql, const ISqlData *pData, Write w, char *pError, int ErrorSize)
 {
@@ -296,5 +297,93 @@ bool CAccountsWorker::SelectPortByUsername(IDbConnection *pSql, const ISqlData *
 		pRes->m_Success = true;
 	}
 	pRes->m_Completed.store(true);
+	return true;
+}
+bool CAccountsWorker::ShowTop5(IDbConnection *pSql, const ISqlData *pData, char *pError, int ErrorSize)
+{
+	const auto *pReq = dynamic_cast<const CAccShowTop5 *>(pData);
+	if(!pReq || !pReq->m_pGameServer)
+		return false;
+
+	const char *pMetric = "Level";
+	if(!str_comp_nocase(pReq->m_Type, "Level"))
+		pMetric = "Level";
+	else if(!str_comp_nocase(pReq->m_Type, "XP"))
+		pMetric = "XP";
+	else if(!str_comp_nocase(pReq->m_Type, "Money"))
+		pMetric = "Money";
+	else if(!str_comp_nocase(pReq->m_Type, "Playtime"))
+		pMetric = "Playtime";
+	else if(!str_comp_nocase(pReq->m_Type, "Deaths"))
+		pMetric = "Deaths";
+	else if(!str_comp_nocase(pReq->m_Type, "Kills"))
+		pMetric = "Kills";
+	//else if(!str_comp_nocase(pReq->m_Type, "RegisterDate"))
+	//	pMetric = "RegisterDate";
+	//else if(!str_comp_nocase(pReq->m_Type, "LastLogin"))
+	//	pMetric = "LastLogin";
+	else
+		return false;
+
+	const int Page = pReq->m_Offset < 0 ? 0 : pReq->m_Offset;
+	const int LimitStart = Page * 5;
+
+	char aSql[512];
+	str_format(
+		aSql, sizeof(aSql),
+		"SELECT Username, PlayerName, %s AS Metric "
+		"FROM foxnet_accounts "
+		"ORDER BY %s DESC, Username ASC "
+		"LIMIT %d, %d",
+		pMetric, pMetric, LimitStart, 5);
+
+	if(!pSql->PrepareStatement(aSql, pError, ErrorSize))
+		return false;
+
+	// Header
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "------- Top 5 by %s -------", pMetric);
+	pReq->m_pGameServer->SendChatTarget(pReq->m_ClientId, aBuf);
+
+	// Iterate rows
+	bool End = true;
+	if(!pSql->Step(&End, pError, ErrorSize))
+		return false;
+
+	int Rank = LimitStart + 1;
+	while(!End)
+	{
+		char aUsername[ACC_MAX_USERNAME_LENGTH]{};
+		char aPlayerName[MAX_NAME_LENGTH]{};
+		pSql->GetString(1, aUsername, sizeof(aUsername));
+		pSql->GetString(2, aPlayerName, sizeof(aPlayerName));
+		const int64_t Metric = pSql->GetInt64(3);
+
+		const char *pName = aPlayerName[0] ? aPlayerName : aUsername;
+
+		if(!str_comp(pMetric, "Playtime"))
+		{
+			if(Metric < 100)
+				str_format(aBuf, sizeof(aBuf), "%d. %s %s: %lld Minutes", Rank, pName, pMetric, (long long)Metric);
+			else
+			{
+				const float Hours = Metric / 60.0f;
+				str_format(aBuf, sizeof(aBuf), "%d. %s %s: %.1f Hours", Rank, pName, pMetric, Hours);
+			}
+		}
+		else
+		{
+			str_format(aBuf, sizeof(aBuf), "%d. %s %s: %lld", Rank, pName, pMetric, (long long)Metric);
+		}
+
+		pReq->m_pGameServer->SendChatTarget(pReq->m_ClientId, aBuf);
+		Rank++;
+
+		if(!pSql->Step(&End, pError, ErrorSize))
+			return false;
+	}
+
+	// Footer
+	pReq->m_pGameServer->SendChatTarget(pReq->m_ClientId, "---------------------------------");
 	return true;
 }
