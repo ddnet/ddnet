@@ -17,6 +17,7 @@
 #include <vector>
 #include <game/gamecore.h>
 #include <optional>
+#include <engine/console.h>
 
 // Font: https://fsymbols.com/generators/smallcaps/
 constexpr const char *EMPTY_DESC = " ";
@@ -490,7 +491,7 @@ bool CVoteMenu::IsPageAllowed(int ClientId, int Page) const
 
 	if(IsFlagSet(g_Config.m_SvVoteMenuFlags, Page) && Page != PAGE_ADMIN)
 		return false;
-	if(Page == PAGE_ADMIN && Server()->GetAuthedState(ClientId) < AUTHED_ADMIN)
+	if(Page == PAGE_ADMIN && Server()->GetAuthedState(ClientId) < AUTHED_MOD) // Allow Mod Access
 		return false;
 	if(!Acc.m_LoggedIn && (Page == PAGE_SHOP || Page == PAGE_INVENTORY))
 		return false;
@@ -902,11 +903,29 @@ void CVoteMenu::SetSubPage(int ClientId, int SubPage)
 	PrepareVoteOptions(ClientId, Page);
 }
 
+bool CVoteMenu::CanUseCmd(int ClientId, const char *pCmd) const
+{
+	const IConsole::CCommandInfo *pInfo = GameServer()->Console()->GetCommandInfo(pCmd, CFGFLAG_SERVER, false);
+	if(!pInfo)
+		return false;
+
+	int Required = pInfo->GetAccessLevel();
+	int ClientLevel = IConsole::ACCESS_LEVEL_USER;
+	switch(Server()->GetAuthedState(ClientId))
+	{
+	case AUTHED_ADMIN: ClientLevel = IConsole::ACCESS_LEVEL_ADMIN; break;
+	case AUTHED_MOD: ClientLevel = IConsole::ACCESS_LEVEL_MOD; break;
+	case AUTHED_HELPER: ClientLevel = IConsole::ACCESS_LEVEL_HELPER; break;
+	default: ClientLevel = IConsole::ACCESS_LEVEL_USER; break;
+	}
+	return Required >= ClientLevel;
+}
+
 void CVoteMenu::SendPageAdmin(int ClientId)
 {
 	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
 	CCharacter *pChr = GameServer()->GetPlayerChar(ClientId);
-	
+
 	AddVoteSubheader("Aᴅᴍɪɴ Pᴀɢᴇs");
 	AddVotePrefix(ADMIN_UTIL, GetSubPage(ClientId) == SUB_ADMIN_UTIL ? BULLET_BLACK_DIAMOND : BULLET_WHITE_DIAMOND);
 	AddVotePrefix(ADMIN_COSMETICS, GetSubPage(ClientId) == SUB_ADMIN_COSMETICS ? BULLET_BLACK_DIAMOND : BULLET_WHITE_DIAMOND);
@@ -914,25 +933,33 @@ void CVoteMenu::SendPageAdmin(int ClientId)
 	AddVoteSeperator();
 	if(GetSubPage(ClientId) == SUB_ADMIN_UTIL)
 	{
-		if(pChr)
+		if(pChr && CanUseCmd(ClientId, "invincible"))
 			AddVoteCheckBox(ADMIN_UTIL_INVINCIBLE, pChr->Core()->m_Invincible);
-		AddVoteCheckBox(ADMIN_UTIL_SPIDERHOOK, pPlayer->m_SpiderHook);
-
-		AddVoteCheckBox(ADMIN_UTIL_VANISH, pPlayer->m_Vanish);
+		if(CanUseCmd(ClientId, "spider_hook"))
+			AddVoteCheckBox(ADMIN_UTIL_SPIDERHOOK, pPlayer->m_SpiderHook);
+		if(CanUseCmd(ClientId, "vanish"))
+			AddVoteCheckBox(ADMIN_UTIL_VANISH, pPlayer->m_Vanish);
 		if(pChr)
 		{
-			AddVoteCheckBox(ADMIN_UTIL_TELEKINESIS, pChr->GetWeaponGot(WEAPON_TELEKINESIS));
-			if(Server()->GetAuthedState(ClientId) >= AUTHED_ADMIN)
+			if(CanUseCmd(ClientId, "telekinesis"))
+				AddVoteCheckBox(ADMIN_UTIL_TELEKINESIS, pChr->GetWeaponGot(WEAPON_TELEKINESIS));
+			if(CanUseCmd(ClientId, "telekinesis_immunity"))
 				AddVoteCheckBox(ADMIN_UTIL_TELEK_IMMUNITY, pPlayer->m_TelekinesisImmunity);
 			AddVoteSeperator();
 
-			AddVoteCheckBox(ADMIN_UTIL_PASSIVE, pChr->Core()->m_Passive);
-			AddVoteSeperator();
+			if(CanUseCmd(ClientId, "passive"))
+			{
+				AddVoteCheckBox(ADMIN_UTIL_PASSIVE, pChr->Core()->m_Passive);
+				AddVoteSeperator();
+			}
 
-			AddVoteText("Should your own character be:");
-			AddVoteCheckBox(ADMIN_UTIL_COLLIDABLE, pChr->Core()->m_Collidable);
-			AddVoteCheckBox(ADMIN_UTIL_HITTABLE, pChr->Core()->m_Hittable);
-			AddVoteCheckBox(ADMIN_UTIL_HOOKABLE, pChr->Core()->m_Hookable);
+			if(CanUseCmd(ClientId, "collidable") && CanUseCmd(ClientId, "hittable") && CanUseCmd(ClientId, "hookable"))
+			{
+				AddVoteText("Should your own character be:");
+				AddVoteCheckBox(ADMIN_UTIL_COLLIDABLE, pChr->Core()->m_Collidable);
+				AddVoteCheckBox(ADMIN_UTIL_HITTABLE, pChr->Core()->m_Hittable);
+				AddVoteCheckBox(ADMIN_UTIL_HOOKABLE, pChr->Core()->m_Hookable);
+			}
 		}
 	}
 	if(GetSubPage(ClientId) == SUB_ADMIN_MISC)
@@ -940,23 +967,28 @@ void CVoteMenu::SendPageAdmin(int ClientId)
 		AddVoteSubheader("Mɪsᴄᴇʟʟᴀɴᴇᴏᴜs");
 		if(pChr)
 		{
-			AddVoteCheckBox(ADMIN_MISC_SNAKE, pChr->m_Snake.Active());
-			AddVoteCheckBox(ADMIN_MISC_UFO, pChr->m_Ufo.Active());
+			if(CanUseCmd(ClientId, "snake"))
+				AddVoteCheckBox(ADMIN_MISC_SNAKE, pChr->m_Snake.Active());
+			if(CanUseCmd(ClientId, "ufo"))
+				AddVoteCheckBox(ADMIN_MISC_UFO, pChr->m_Ufo.Active());
 		}
 
 		AddVoteSeperator();
-
-		if(Server()->GetAuthedState(ClientId) >= AUTHED_ADMIN)
+		if(CanUseCmd(ClientId, "obfuscate"))
 			AddVoteCheckBox(ADMIN_MISC_OBFUSCATED, pPlayer->m_Obfuscated);
 
-		AddVoteCheckBox(ADMIN_MISC_IGN_KILL_BORD, pPlayer->m_IgnoreGamelayer);
+		if(CanUseCmd(ClientId, "ignore_gamelayer"))
+			AddVoteCheckBox(ADMIN_MISC_IGN_KILL_BORD, pPlayer->m_IgnoreGamelayer);
 
 		AddVoteSeperator();
 		if(pChr)
 		{
-			AddVoteCheckBox(ADMIN_MISC_HEARTGUN, pChr->GetWeaponGot(WEAPON_HEARTGUN));
-			AddVoteCheckBox(ADMIN_MISC_LIGHTSABER, pChr->GetWeaponGot(WEAPON_LIGHTSABER));
-			AddVoteCheckBox(ADMIN_MISC_PORTALGUN, pChr->GetWeaponGot(WEAPON_PORTALGUN));
+			if(CanUseCmd(ClientId, "heartgun"))
+				AddVoteCheckBox(ADMIN_MISC_HEARTGUN, pChr->GetWeaponGot(WEAPON_HEARTGUN));
+			if(CanUseCmd(ClientId, "lightsaber"))
+				AddVoteCheckBox(ADMIN_MISC_LIGHTSABER, pChr->GetWeaponGot(WEAPON_LIGHTSABER));
+			if(CanUseCmd(ClientId, "Portalgun"))
+				AddVoteCheckBox(ADMIN_MISC_PORTALGUN, pChr->GetWeaponGot(WEAPON_PORTALGUN));
 		}
 
 	}

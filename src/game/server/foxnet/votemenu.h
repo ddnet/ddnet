@@ -97,6 +97,8 @@ class CVoteMenu
 	int GetSubPage(int ClientId) const;
 	void SetSubPage(int ClientId, int Page);
 
+	bool CanUseCmd(int ClientId, const char *pCmd) const;
+
 public:
 	void PrepareVoteOptions(int ClientId, int Page);
 
