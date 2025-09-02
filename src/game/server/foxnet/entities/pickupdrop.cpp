@@ -51,40 +51,6 @@ void CPickupDrop::Reset(bool PickedUp)
 		GameServer()->CreateDeath(m_Pos, m_LastOwner, TeamMask);
 }
 
-void CPickupDrop::OnExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, CClientMask Mask)
-{
-	// Match team gating from CreateExplosion for switch-activated explosions
-	if(Owner == -1 && ActivatedTeam != -1 && m_Team != TEAM_SUPER && m_Team != ActivatedTeam)
-		return;
-
-	// Distance-based falloff identical to CreateExplosion
-	const float Radius = 135.0f;
-	const float InnerRadius = 48.0f;
-
-	vec2 Diff = m_Pos - Pos;
-	vec2 ForceDir(0.0f, 1.0f);
-	float Dist = length(Diff);
-	if(Dist > 0.0f)
-		ForceDir = normalize(Diff);
-
-	float Falloff = 1.0f - std::clamp((Dist - InnerRadius) / (Radius - InnerRadius), 0.0f, 1.0f);
-
-	// Use the owner's tune zone for explosion strength (same as CreateExplosion)
-	float Strength;
-	if(Owner == -1 || !GameServer()->m_apPlayers[Owner] || !GameServer()->m_apPlayers[Owner]->m_TuneZone)
-		Strength = GameServer()->Tuning()->m_ExplosionStrength;
-	else
-		Strength = GameServer()->TuningList()[GameServer()->m_apPlayers[Owner]->m_TuneZone].m_ExplosionStrength;
-
-	float Dmg = Strength * Falloff;
-	if(!(int)Dmg)
-		return;
-
-	// Apply impulse; drops are not "damaged", only pushed
-	vec2 Temp = m_Vel + ForceDir * Dmg * 2.0f;
-	m_Vel = ClampVel(m_MoveRestrictions, Temp);
-}
-
 bool CPickupDrop::IsSwitchActiveCb(int Number, void *pUser)
 {
 	CPickupDrop *pThis = (CPickupDrop *)pUser;
@@ -94,7 +60,7 @@ bool CPickupDrop::IsSwitchActiveCb(int Number, void *pUser)
 
 void CPickupDrop::Tick()
 {
-	if(m_LastOwner >= 0 && !GameServer()->m_apPlayers[m_LastOwner])
+	if(m_LastOwner >= 0 && (!GameServer()->m_apPlayers[m_LastOwner] && g_Config.m_SvResetDropsOnLeave))
 	{
 		Reset();
 		return;
