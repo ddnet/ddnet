@@ -2619,7 +2619,18 @@ bool CCharacter::UnFreeze()
 	{
 		m_Armor = 10;
 		if(!m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Got)
-			SetWeapon(WEAPON_GUN);
+		{
+			for(int i = 0; i < NUM_EXTRA_WEAPONS; i++)
+			{
+				if(m_Core.m_aWeapons[i].m_Got)
+				{
+					SetActiveWeapon(i);
+					break;
+				}
+				else
+					SetActiveWeapon(-1);
+			}
+		}
 		m_FreezeTime = 0;
 		m_Core.m_FreezeStart = 0;
 		m_FrozenLastTick = true;
