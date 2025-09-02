@@ -102,17 +102,17 @@ void CGameContext::ConAccProfile(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConAccTop5Money(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->m_AccountManager.Top5(pResult->m_ClientId, "money", pResult->NumArguments() > 0 ? pResult->GetInteger(0) : 1);
+	pSelf->m_AccountManager.Top5(pResult->m_ClientId, "money", pResult->NumArguments() > 0 ? pResult->GetInteger(0) : 0);
 }
 void CGameContext::ConAccTop5Level(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->m_AccountManager.Top5(pResult->m_ClientId, "level", pResult->NumArguments() > 0 ? pResult->GetInteger(0) : 1);
+	pSelf->m_AccountManager.Top5(pResult->m_ClientId, "level", pResult->NumArguments() > 0 ? pResult->GetInteger(0) : 0);
 }
 void CGameContext::ConAccTop5Playtime(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->m_AccountManager.Top5(pResult->m_ClientId, "playtime", pResult->NumArguments() > 0 ? pResult->GetInteger(0) : 1);
+	pSelf->m_AccountManager.Top5(pResult->m_ClientId, "playtime", pResult->NumArguments() > 0 ? pResult->GetInteger(0) : 0);
 }
 
 void CGameContext::ConAccEdit(IConsole::IResult *pResult, void *pUserData)
