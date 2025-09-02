@@ -354,7 +354,7 @@ void CBinds::ConBinds(IConsole::IResult *pResult, void *pUserData)
 			else
 			{
 				char *pBuf = pBinds->GetKeyBindCommand(BindSlot.m_ModifierMask, BindSlot.m_Key);
-				log_info_color(BIND_PRINT_COLOR, "binds", pBuf);
+				log_info_color(BIND_PRINT_COLOR, "binds", "%s", pBuf);
 				free(pBuf);
 			}
 		}
@@ -368,7 +368,7 @@ void CBinds::ConBinds(IConsole::IResult *pResult, void *pUserData)
 				if(!pBinds->m_aapKeyBindings[Modifier][Key])
 					continue;
 				char *pBuf = pBinds->GetKeyBindCommand(Modifier, Key);
-				log_info_color(BIND_PRINT_COLOR, "binds", pBuf);
+				log_info_color(BIND_PRINT_COLOR, "binds", "%s", pBuf);
 				free(pBuf);
 			}
 		}
