@@ -117,6 +117,7 @@ void CPortal::Tick()
 			{
 				if(!m_CanTeleport[ClientId])
 					return;
+
 				pChr->m_PrevPos = m_PortalData[0].m_Pos;
 				pChr->SetPosition(m_PortalData[0].m_Pos);
 				pChr->ReleaseHook();

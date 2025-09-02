@@ -3,6 +3,8 @@
 #define GAME_SERVER_FOXNET_COSMETICS_DOT_TRAIL_H
 
 #include <game/server/entity.h>
+#include <game/server/gameworld.h>
+#include <base/vmath.h>
 
 class CDotTrail : public CEntity
 {

@@ -2,8 +2,8 @@
 #ifndef GAME_SERVER_FOXNET_COSMETICS_HEARTHAT_H
 #define GAME_SERVER_FOXNET_COSMETICS_HEARTHAT_H
 
-#include <game/server/gameworld.h>
 #include <game/server/entity.h>
+#include <game/server/gameworld.h>
 
 #include <base/vmath.h>
 

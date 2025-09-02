@@ -1,11 +1,12 @@
 #include "flyingpoint.h"
 #include "game/server/entities/character.h"
+#include <algorithm>
 #include <base/vmath.h>
 #include <game/server/entity.h>
 #include <game/server/gamecontext.h>
+#include <game/server/gameworld.h>
 #include <game/server/player.h>
 #include <generated/protocol.h>
-#include <game/server/gameworld.h>
 
 CFlyingPoint::CFlyingPoint(CGameWorld *pGameWorld, vec2 Pos, int To, int Owner, vec2 InitialVel, vec2 ToPos) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_FLYINGPOINT, Pos)

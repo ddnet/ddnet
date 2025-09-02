@@ -1,12 +1,17 @@
 // Made by qxdFox
 #include "pickup_pet.h"
 #include "game/server/entities/character.h"
+#include <base/math.h>
 #include <base/vmath.h>
-#include <engine/shared/config.h>
-#include <generated/protocol.h>
+#include <cmath>
+#include <cstdlib>
+#include <engine/shared/protocol.h>
+#include <game/gamecore.h>
+#include <game/server/entity.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gameworld.h>
 #include <game/server/player.h>
+#include <generated/protocol.h>
 
 CPickupPet::CPickupPet(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP, Pos)
@@ -113,11 +118,11 @@ void CPickupPet::Snap(int SnappingClient)
 		pPickup->m_Type = m_CurType;
 	}
 
-	//if(g_Config.m_SvDebugPetPosition)
+	// if(g_Config.m_SvDebugPetPosition)
 	//{
 	//	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 	//	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, false, SnappingClient), m_Id, m_aPos, m_aPos, Server()->Tick(), m_Owner, LASERTYPE_GUN);
-	//}
+	// }
 }
 
 void CPickupPet::PlayerAfkMode(CCharacter *pOwner)

@@ -1,10 +1,12 @@
 // Made by qxdFox
 #include "firework.h"
 #include "game/server/entities/character.h"
-#include <generated/protocol.h>
+#include <base/vmath.h>
 #include <game/server/entity.h>
 #include <game/server/gamecontext.h>
+#include <game/server/gameworld.h>
 #include <game/server/player.h>
+#include <generated/protocol.h>
 #include <random>
 
 constexpr int LaunchSpeed = -25;

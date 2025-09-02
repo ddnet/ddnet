@@ -9,7 +9,6 @@
 
 class CHeadItem : public CEntity
 {
-	CClientMask m_TeamMask;
 	int m_Owner;
 
 	int m_Type;

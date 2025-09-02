@@ -7,6 +7,7 @@
 #include <game/server/gameworld.h>
 #include <game/server/player.h>
 #include <generated/protocol.h>
+#include <algorithm>
 
 CHeartHat::CHeartHat(CGameWorld *pGameWorld, int Owner) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_HEART_HAT, vec2(0,0))

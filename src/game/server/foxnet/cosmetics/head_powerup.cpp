@@ -1,12 +1,13 @@
 // Made by qxdFox
-#include "game/server/entities/character.h"
 #include "head_powerup.h"
+#include "game/server/entities/character.h"
+#include <base/vmath.h>
+#include <engine/shared/protocol.h>
+#include <game/server/entity.h>
 #include <game/server/gamecontext.h>
+#include <game/server/gameworld.h>
 #include <game/server/player.h>
 #include <generated/protocol.h>
-#include <game/server/entity.h>
-#include <game/server/gameworld.h>
-#include <base/vmath.h>
 
 CHeadItem::CHeadItem(CGameWorld *pGameWorld, int Owner, vec2 Pos, int Type, float Offset) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_HEAD_ITEM, Pos)
@@ -16,9 +17,6 @@ CHeadItem::CHeadItem(CGameWorld *pGameWorld, int Owner, vec2 Pos, int Type, floa
 	// Type of Entity
 	m_Type = Type;
 	m_Offset = Offset;
-
-	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	m_TeamMask = pOwnerChar ? pOwnerChar->TeamMask() : CClientMask();
 
 	GameWorld()->InsertEntity(this);
 }
@@ -39,7 +37,6 @@ void CHeadItem::Tick()
 		return;
 	}
 
-	m_TeamMask = pOwner->TeamMask();
 	m_Pos = pOwner->GetPos();
 	m_Pos.y -= m_Offset;
 }
@@ -55,7 +52,7 @@ void CHeadItem::Snap(int SnappingClient)
 	if(!pOwnerChar || !pSnapPlayer)
 		return;
 
-	//if(pSnapPlayer->m_HideCosmetics)
+	// if(pSnapPlayer->m_HideCosmetics)
 	//	return;
 
 	if(pOwnerChar->IsPaused())

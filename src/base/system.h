@@ -21,7 +21,6 @@
 #include <mutex>
 #include <optional>
 #include <string>
-#include "vmath.h"
 
 #ifdef __MINGW32__
 #undef PRId64

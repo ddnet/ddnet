@@ -1,16 +1,22 @@
-#include <game/server/gamecontext.h>
-#include <game/server/player.h>
-#include "game/server/entities/character.h"
 #include "epic_circle.h"
+#include "game/server/entities/character.h"
+#include <algorithm>
+#include <base/vmath.h>
+#include <cmath>
+#include <engine/shared/protocol.h>
+#include <game/server/entity.h>
+#include <game/server/gamecontext.h>
+#include <game/server/gameworld.h>
+#include <game/server/player.h>
 
-CEpicCircle::CEpicCircle(CGameWorld *pGameWorld, int Owner, vec2 Pos)
-	: CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE, Pos)
+CEpicCircle::CEpicCircle(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE, Pos)
 {
 	m_Owner = Owner;
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	m_TeamMask = pOwnerChar ? pOwnerChar->TeamMask() : CClientMask();
 
-	for(int i = 0; i < MAX_PARTICLES; i ++)
+	for(int i = 0; i < MAX_PARTICLES; i++)
 		m_aIds[i] = Server()->SnapNewId();
 	GameWorld()->InsertEntity(this);
 }
@@ -50,7 +56,7 @@ void CEpicCircle::Tick()
 }
 
 void CEpicCircle::Snap(int SnappingClient)
-{   
+{
 	if(NetworkClipped(SnappingClient))
 		return;
 
@@ -75,7 +81,7 @@ void CEpicCircle::Snap(int SnappingClient)
 			return;
 
 	CNetObj_Projectile *pParticle[MAX_PARTICLES];
-	for (int i = 0; i < MAX_PARTICLES; i++)
+	for(int i = 0; i < MAX_PARTICLES; i++)
 	{
 		vec2 Pos = m_Pos + m_RotatePos[i];
 		if(m_Owner == SnappingClient)
@@ -87,7 +93,7 @@ void CEpicCircle::Snap(int SnappingClient)
 		}
 
 		pParticle[i] = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_aIds[i], sizeof(CNetObj_Projectile)));
-		if (pParticle[i])
+		if(pParticle[i])
 		{
 			pParticle[i]->m_X = Pos.x;
 			pParticle[i]->m_Y = Pos.y;

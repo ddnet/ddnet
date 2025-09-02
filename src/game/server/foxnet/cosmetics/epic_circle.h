@@ -1,6 +1,11 @@
 #ifndef GAME_SERVER_FOXNET_COSMETICS_EPIC_CIRCLE_H
 #define GAME_SERVER_FOXNET_COSMETICS_EPIC_CIRCLE_H
 
+#include <base/vmath.h>
+#include <engine/shared/protocol.h>
+#include <game/server/gameworld.h>
+#include <game/server/entity.h>
+
 class CEpicCircle : public CEntity
 {
 	enum
