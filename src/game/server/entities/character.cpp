@@ -169,7 +169,7 @@ void CCharacter::SetWeapon(int W)
 	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SWITCH, TeamMask());
 
 	if(m_Core.m_ActiveWeapon < 0 || m_Core.m_ActiveWeapon >= NUM_EXTRA_WEAPONS)
-		SetActiveWeapon(0);
+		SetActiveWeapon(-1); // <FoxNet>
 }
 
 void CCharacter::SetJetpack(bool Active)
@@ -2648,7 +2648,12 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove)
 	if(Remove)
 	{
 		if(GetActiveWeapon() == Weapon)
+		{
 			SetActiveWeapon(WEAPON_GUN);
+			// <FoxNet
+			if(!GetWeaponGot(WEAPON_GUN))
+				SetActiveWeapon(-1); // FoxNet>
+		}
 	}
 	else
 	{
