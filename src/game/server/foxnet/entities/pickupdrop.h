@@ -6,6 +6,7 @@
 #include <base/vmath.h>
 #include <game/server/gameworld.h>
 #include <game/mapitems.h>
+#include <engine/shared/protocol.h>
 
 class CPickupDrop : public CEntity
 {
@@ -26,6 +27,7 @@ class CPickupDrop : public CEntity
 	static bool IsSwitchActiveCb(int Number, void *pUser);
 	bool IsGrounded();
 	void HandleTiles(int Index);
+	void HandleQuads(const CMapItemLayerQuads *pQuadLayer, int QuadIndex);
 	void HandleQuadStopa(const CMapItemLayerQuads *pQuadLayer, int QuadIndex);
 	int m_TeleCheckpoint;
 	int m_TileIndex;
@@ -36,7 +38,7 @@ class CPickupDrop : public CEntity
 	void CollectItem();
 
 public:
-	CPickupDrop(CGameWorld *pGameWorld, int LastOwner, vec2 Pos, int Team, vec2 Dir, int Lifetime /*Seconds*/, int Type);
+	CPickupDrop(CGameWorld *pGameWorld, int LastOwner, vec2 Pos, int Team, int TeleCheckpoint, vec2 Dir, int Lifetime /*Seconds*/, int Type);
 
 	void Reset(bool PickdUp);
 	virtual void Reset() override { Reset(false); }

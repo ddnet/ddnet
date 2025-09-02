@@ -350,7 +350,7 @@ public:
 	void SetReloadTimer(int Timer) { m_ReloadTimer = Timer; }
 
 	// Dir Is also the Throw force -> m_Vel = Dir on drop creation
-	void DropWeapon(int Type, vec2 Dir);
+	void DropWeapon(int Type, vec2 Dir, bool Death = false);
 
 	bool HasLineOfSight(vec2 Pos);
 

@@ -2861,6 +2861,16 @@ void CCharacter::OnDie(int Killer, int Weapon, bool SendKillMsg)
 {
 	if(Acc()->m_LoggedIn)
 		Acc()->m_Deaths++;
+
+	if(g_Config.m_SvAllowWeaponDrops && g_Config.m_SvDropWeaponOnDeath)
+	{
+		for(int Weapon = NUM_WEAPONS; Weapon < NUM_EXTRA_WEAPONS; Weapon++)
+		{
+			if(GetWeaponGot(Weapon))
+				DropWeapon(Weapon, random_direction() * 3);
+		}
+	}
+
 	m_Snake.OnPlayerDeath();
 	m_Ufo.OnPlayerDeath();
 }
@@ -3510,14 +3520,17 @@ bool CCharacter::CanDropWeapon(int Type) const
 	return true;
 }
 
-void CCharacter::DropWeapon(int Type, vec2 Dir)
+void CCharacter::DropWeapon(int Type, vec2 Dir, bool Death)
 {
 	if(!CanDropWeapon(Type))
 		return;
 
-	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
-	new CPickupDrop(GameWorld(), GetPlayer()->GetCid(), m_Pos, Team(), Dir, 300, m_Core.m_ActiveWeapon);
-	GiveWeapon(Type, true);
+	new CPickupDrop(GameWorld(), GetPlayer()->GetCid(), m_Pos, Team(), m_TeleCheckpoint, Dir, 300, Type);
+	if(!Death)
+	{
+		GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
+		GiveWeapon(Type, true);
+	}
 	if(Type >= NUM_WEAPONS)
 		SendBroadcastHud("");
 	for(int i = 0; i < NUM_EXTRA_WEAPONS; i++)

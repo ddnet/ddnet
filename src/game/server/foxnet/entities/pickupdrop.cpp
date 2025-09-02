@@ -16,7 +16,7 @@
 #include <game/server/entity.h>
 #include <game/server/gameworld.h>
 
-CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, int LastOwner, vec2 Pos, int Team, vec2 Dir, int Lifetime, int Type) :
+CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, int LastOwner, vec2 Pos, int Team, int TeleCheckpoint, vec2 Dir, int Lifetime, int Type) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUPDROP, Pos)
 {
 	m_LastOwner = LastOwner;
@@ -27,6 +27,7 @@ CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, int LastOwner, vec2 Pos, int Te
 	m_Lifetime = Lifetime * Server()->TickSpeed();
 	m_Type = Type;
 	m_TuneZone = -1;
+	m_TeleCheckpoint = TeleCheckpoint;
 
 	m_PickupDelay = Server()->TickSpeed() * 1.5f;
 	m_GroundElasticity = vec2(0.5f, 0.5f);
@@ -37,7 +38,7 @@ CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, int LastOwner, vec2 Pos, int Te
 	GameWorld()->InsertEntity(this);
 }
 
-void CPickupDrop::Reset(bool PickdUp)
+void CPickupDrop::Reset(bool PickedUp)
 {
 	for(int i = 0; i < 2; i++)
 		Server()->SnapFreeId(m_aIds[i]);
@@ -46,8 +47,42 @@ void CPickupDrop::Reset(bool PickdUp)
 	GameWorld()->RemoveEntity(this);
 
 	CClientMask TeamMask = CClientMask().set();
-	if(!PickdUp)
+	if(!PickedUp)
 		GameServer()->CreateDeath(m_Pos, m_LastOwner, TeamMask);
+}
+
+void CPickupDrop::OnExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, CClientMask Mask)
+{
+	// Match team gating from CreateExplosion for switch-activated explosions
+	if(Owner == -1 && ActivatedTeam != -1 && m_Team != TEAM_SUPER && m_Team != ActivatedTeam)
+		return;
+
+	// Distance-based falloff identical to CreateExplosion
+	const float Radius = 135.0f;
+	const float InnerRadius = 48.0f;
+
+	vec2 Diff = m_Pos - Pos;
+	vec2 ForceDir(0.0f, 1.0f);
+	float Dist = length(Diff);
+	if(Dist > 0.0f)
+		ForceDir = normalize(Diff);
+
+	float Falloff = 1.0f - std::clamp((Dist - InnerRadius) / (Radius - InnerRadius), 0.0f, 1.0f);
+
+	// Use the owner's tune zone for explosion strength (same as CreateExplosion)
+	float Strength;
+	if(Owner == -1 || !GameServer()->m_apPlayers[Owner] || !GameServer()->m_apPlayers[Owner]->m_TuneZone)
+		Strength = GameServer()->Tuning()->m_ExplosionStrength;
+	else
+		Strength = GameServer()->TuningList()[GameServer()->m_apPlayers[Owner]->m_TuneZone].m_ExplosionStrength;
+
+	float Dmg = Strength * Falloff;
+	if(!(int)Dmg)
+		return;
+
+	// Apply impulse; drops are not "damaged", only pushed
+	vec2 Temp = m_Vel + ForceDir * Dmg * 2.0f;
+	m_Vel = ClampVel(m_MoveRestrictions, Temp);
 }
 
 bool CPickupDrop::IsSwitchActiveCb(int Number, void *pUser)
@@ -166,7 +201,7 @@ void CPickupDrop::Tick()
 	{
 		for(int QuadIndex = 0; QuadIndex < pQuadLayer->m_NumQuads; QuadIndex++)
 		{
-			HandleQuadStopa(pQuadLayer, QuadIndex);
+			HandleQuads(pQuadLayer, QuadIndex);
 		}
 	}
 
@@ -230,6 +265,68 @@ void CPickupDrop::CollectItem()
 	GameServer()->CreateSound(pClosest->m_Pos, SOUND_PICKUP_HEALTH, TeamMask);
 
 	Reset(true);
+}
+
+
+void CPickupDrop::HandleQuads(const CMapItemLayerQuads *pQuadLayer, int QuadIndex)
+{
+	if(!pQuadLayer)
+		return;
+
+	char QuadName[30] = "";
+	IntsToStr(pQuadLayer->m_aName, std::size(pQuadLayer->m_aName), QuadName, std::size(QuadName));
+
+	bool IsFreeze = !str_comp("QFr", QuadName);
+	bool IsDeath = !str_comp("QDeath", QuadName);
+	bool IsStopa = !str_comp("QStopa", QuadName);
+	bool IsCfrm = !str_comp("QCfrm", QuadName);
+
+	vec2 TopL, TopR, BottomL, BottomR;
+	int FoundNum = Collision()->GetQuadCorners(QuadIndex, pQuadLayer, 0.00f, &TopL, &TopR, &BottomL, &BottomR);
+	if(FoundNum < 0 || FoundNum >= pQuadLayer->m_NumQuads)
+		return;
+
+	float Radius = 0.0f;
+	if(IsDeath)
+		Radius = 8.0f;
+	if(IsStopa)
+		Radius = CCharacterCore::PhysicalSize() / 2.0f;
+
+	bool Inside = Collision()->InsideQuad(m_Pos, Radius, TopL, TopR, BottomL, BottomR);
+	if(!Inside)
+		return;
+
+	if(IsFreeze)
+	{
+	}
+	else if(IsDeath)
+	{
+		Reset();
+	}
+	else if(IsStopa)
+	{
+		HandleQuadStopa(pQuadLayer, QuadIndex);
+	}
+	else if(IsCfrm)
+	{
+		for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
+		{
+			if(!Collision()->TeleCheckOuts(k).empty())
+			{
+				int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleCheckOuts(k).size());
+				m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
+				m_Vel = vec2(0, 0);
+
+				return;
+			}
+		}
+		vec2 SpawnPos;
+		if(GameServer()->m_pController->CanSpawn(0, &SpawnPos, m_Team))
+		{
+			m_Pos = SpawnPos;
+			m_Vel = vec2(0, 0);
+		}
+	}
 }
 
 void CPickupDrop::HandleQuadStopa(const CMapItemLayerQuads *pQuadLayer, int QuadIndex)
@@ -342,6 +439,10 @@ void CPickupDrop::HandleTiles(int Index)
 	// int PureMapIndex = Collision()->GetPureMapIndex(m_Pos);
 	m_TileIndex = Collision()->GetTileIndex(MapIndex);
 	m_TileFIndex = Collision()->GetFrontTileIndex(MapIndex);
+
+	int TeleCheckpoint = Collision()->IsTeleCheckpoint(MapIndex);
+	if(TeleCheckpoint)
+		m_TeleCheckpoint = TeleCheckpoint;
 
 	m_Vel = ClampVel(m_MoveRestrictions, m_Vel);
 	// teleporters

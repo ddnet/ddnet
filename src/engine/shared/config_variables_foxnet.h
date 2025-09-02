@@ -66,3 +66,4 @@ MACRO_CONFIG_INT(SvAbilityCooldown, sv_ability_cooldown, 1, 1, 100, CFGFLAG_SERV
 
 // Weapon Drops
 MACRO_CONFIG_INT(SvAllowWeaponDrops, sv_allow_weapon_drops, 1, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Turns on functionality for /weapondrop")
+MACRO_CONFIG_INT(SvDropWeaponOnDeath, sv_drop_weapon_on_death, 0, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Requires sv_allow_weapon_drops")
