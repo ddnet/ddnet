@@ -105,7 +105,7 @@ void CPortal::Tick()
 			if(PointInCircle(pChr->m_Pos, m_PortalData[0].m_Pos, PortalRadius))
 			{
 				if(!m_CanTeleport[ClientId])
-					return;
+					continue;
 
 				pChr->m_PrevPos = m_PortalData[1].m_Pos;
 				pChr->SetPosition(m_PortalData[1].m_Pos);
@@ -116,7 +116,7 @@ void CPortal::Tick()
 			else if(PointInCircle(pChr->m_Pos, m_PortalData[1].m_Pos, PortalRadius))
 			{
 				if(!m_CanTeleport[ClientId])
-					return;
+					continue;
 
 				pChr->m_PrevPos = m_PortalData[0].m_Pos;
 				pChr->SetPosition(m_PortalData[0].m_Pos);
