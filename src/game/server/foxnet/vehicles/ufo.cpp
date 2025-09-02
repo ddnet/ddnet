@@ -1,11 +1,13 @@
 // Made by qxdFox
+#include "ufo.h"
+#include "game/server/entities/character.h"
+#include <algorithm>
+#include <base/vmath.h>
+#include <engine/server.h>
+#include <engine/shared/config.h>
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
-#include "game/server/entities/character.h"
-#include "ufo.h"
-#include <engine/shared/config.h>
 #include <iterator>
-#include <algorithm>
 
 CGameContext *CVUfo::GameServer() const { return m_pCharacter->GameServer(); }
 IServer *CVUfo::Server() const { return GameServer()->Server(); }
@@ -22,7 +24,7 @@ void CVUfo::OnPlayerDeath()
 }
 
 void CVUfo::SetActive(bool Active)
-{;
+{
 	if(!Active)
 	{
 		Reset();
@@ -66,8 +68,8 @@ void CVUfo::Reset()
 	if(!m_Active)
 		return;
 
-	for(int i = 0; i < NUM_PARTS; i++) 
-   		Server()->SnapFreeId(m_Visual.m_aIds[i]);
+	for(int i = 0; i < NUM_PARTS; i++)
+		Server()->SnapFreeId(m_Visual.m_aIds[i]);
 
 	int Zone = m_pCharacter->GetOverriddenTuneZone();
 
@@ -83,7 +85,7 @@ void CVUfo::SetUfoVisual()
 	m_Visual.m_From[0] = vec2(32.0f, -15.0f);
 	m_Visual.m_From[1] = vec2(20.0f, -30.0f);
 	// middle
-	m_Visual.m_From[2] =  vec2(0, -37.0f);
+	m_Visual.m_From[2] = vec2(0, -37.0f);
 	// left dome
 	m_Visual.m_From[3] = vec2(-20.0f, -30.0f);
 	m_Visual.m_From[4] = vec2(-32.0f, -15.0f);
@@ -199,7 +201,7 @@ bool CVUfo::HandleInput()
 	const bool Up = m_Input.m_Jump;
 	const bool Down = pChr->GetPlayer()->m_PlayerFlags & PLAYERFLAG_AIM;
 	const bool HoldingFire = m_Input.m_Fire % 2 != 0;
-	
+
 	if(!m_Immovable)
 	{
 		m_pPrevPos = pChr->m_Pos;
@@ -213,7 +215,6 @@ bool CVUfo::HandleInput()
 	m_AllowHookColl = false;
 	if(m_CanMove)
 	{
-
 		Dir = vec2(m_Input.m_Direction, 0);
 		if(Up)
 			Dir.y += -1;
@@ -226,7 +227,7 @@ bool CVUfo::HandleInput()
 		if(Up && Down && HoldingFire && g_Config.m_SvUfoBrakes)
 		{
 			pChr->SetPosition(m_pPrevPos);
-			pChr->ResetVelocity(); 
+			pChr->ResetVelocity();
 			m_pVel = vec2(0, 0);
 			m_Immovable = true;
 			return true; // still update visuals
@@ -258,5 +259,3 @@ bool CVUfo::HandleInput()
 
 	return true;
 }
-
-

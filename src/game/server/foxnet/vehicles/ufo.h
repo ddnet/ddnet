@@ -40,7 +40,6 @@ class CVUfo
 	bool m_CanMove;
 
 public:
-
 	bool Active() const { return m_Active; }
 	bool AllowHookColl() const { return m_AllowHookColl; }
 
