@@ -57,7 +57,7 @@ void CPortal::Tick()
 {
 	m_Lifetime--;
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	if(pOwnerChar && !pOwnerChar->GetWeaponGot(WEAPON_PORTALGUN) && m_Lifetime <= 0)
+	if((!GameServer()->m_apPlayers[m_Owner] || (pOwnerChar && !pOwnerChar->GetWeaponGot(WEAPON_PORTALGUN))) && m_Lifetime <= 0)
 	{
 		Reset();
 		return;
