@@ -223,9 +223,7 @@ void CPickupDrop::CollectItem()
 	int ActiveWeapon = pClosest->GetActiveWeapon();
 
 	pClosest->GiveWeapon(m_Type);
-	pClosest->SetActiveWeapon(ActiveWeapon);
-	if(pClosest->GetActiveWeapon() == -1)
-		pClosest->SetActiveWeapon(m_Type);
+	pClosest->SetActiveWeapon(m_Type);
 	CClientMask TeamMask = CClientMask().set();
 	GameServer()->CreateSound(pClosest->m_Pos, SOUND_PICKUP_HEALTH, TeamMask);
 
