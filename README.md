@@ -88,8 +88,12 @@
 |logout|Log out of your account|
 |password|Change your password|
 |profile|View anyones profile|
+|top5money|show top 5 accounts with most money|
+|top5level|show top 5 accounts with highest level|
+|top5playtime|Vshow top 5 accounts with highest playtime|
 |buyitem|Buy an Item from the shop|
 |toggleitem|Toggle any item you own|
+|dropweapon|Drop the weapon youre holding|
 
 |Cosmetic Commands|
 |-|
