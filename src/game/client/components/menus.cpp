@@ -882,6 +882,7 @@ void CMenus::OnInterfacesInit(CGameClient *pClient)
 	CComponentInterfaces::OnInterfacesInit(pClient);
 	m_CommunityIcons.OnInterfacesInit(pClient);
 	m_MenusStart.OnInterfacesInit(pClient);
+	m_MenusIngameTouchControls.OnInterfacesInit(pClient);
 }
 
 void CMenus::OnInit()
