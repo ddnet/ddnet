@@ -2215,7 +2215,7 @@ Could not check for existing player with your name. Check your internet connecti
 == Adınıza sahip mevcut oyuncu olup olmadığı kontrol edilemedi. İnternet bağlantınızı kontrol edin.
 
 Press Ctrl+Shift+G to disable debug graphs.
-== Hata ayıklama grafiğini devre dışı bırakmak için Ctrl+Shhift+G tuşlarına basın.
+== Hata ayıklama grafiğini devre dışı bırakmak için Ctrl+Shift+G tuşlarına basın.
 
 Server could not be started
 == Sunucu başlatılamadı
@@ -2299,7 +2299,7 @@ Plain
 
 [Touch button label type]
 Localized
-== Yerleştirildi
+== Sabit
 
 [Touch button label type]
 Icon
