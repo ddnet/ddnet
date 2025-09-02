@@ -15,6 +15,27 @@ struct CPortalData
 
 class CPortal : public CEntity
 {
+	enum
+	{
+		NUM_PORTALS = 2,
+		SEGMENTS = 12,
+		NUM_IDS = SEGMENTS * NUM_PORTALS + 2,
+		NUM_POS = SEGMENTS + 1,
+		NUM_PRTCL = 6
+	};
+
+	struct SSnapPortal
+	{
+		int m_aIds[NUM_IDS];
+		vec2 m_From[NUM_POS];
+		vec2 m_To[NUM_POS];
+		int m_aParticleIds[NUM_PRTCL];
+	};
+	SSnapPortal m_Snap;
+
+	inline vec2 CirclePos(int Part);
+	void SetPortalVisual();
+
 	int m_Owner;
 
 	CPortalData m_PortalData[2];
@@ -30,9 +51,6 @@ class CPortal : public CEntity
 		STATE_FIRST_SET,
 		STATE_BOTH_SET,
 	};
-
-	int m_aIds[26];
-	int m_aParticeIds[6];
 
 	void RemovePortals();
 	bool TrySetPortal();

@@ -14,6 +14,9 @@
 
 #include "portal.h"
 #include <game/teamscore.h>
+#include <base/math.h>
+#include <algorithm>
+#include <base/system.h>
 
 constexpr float PortalRadius = 52.0f;
 constexpr float MaxDistanceFromPlayer = 1200.0f;
@@ -26,26 +29,28 @@ CPortal::CPortal(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
 	m_Pos = Pos;
 	m_State = STATE_NONE;
 
-	for(size_t i = 0; i < std::size(m_aIds); i++)
-		m_aIds[i] = Server()->SnapNewId();
+	for(int i = 0; i < NUM_IDS; i++)
+		m_Snap.m_aIds[i] = Server()->SnapNewId();
+	std::sort(std::begin(m_Snap.m_aIds), std::end(m_Snap.m_aIds)); // Ensures lasers dont overlap weirdly
 
-	for(size_t i = 0; i < std::size(m_aParticeIds); i++)
-		m_aParticeIds[i] = Server()->SnapNewId();
+	for(int i = 0; i < NUM_PRTCL; i++)
+		m_Snap.m_aParticleIds[i] = Server()->SnapNewId();
+
 	GameWorld()->InsertEntity(this);
 }
 
 void CPortal::Reset()
-{
-	for(size_t i = 0; i < std::size(m_aIds); i++)
-		Server()->SnapFreeId(m_aIds[i]);
-	for(size_t i = 0; i < std::size(m_aParticeIds); i++)
-		Server()->SnapFreeId(m_aParticeIds[i]);
+{	
 	Server()->SnapFreeId(GetId());
-	GameWorld()->RemoveEntity(this);
+	for(int i = 0; i < NUM_IDS; i++)
+		Server()->SnapFreeId(m_Snap.m_aIds[i]);
+	for(int i = 0; i < NUM_PRTCL; i++)
+		Server()->SnapFreeId(m_Snap.m_aParticleIds[i]);
 
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	if(pOwnerChar)
 		pOwnerChar->m_pPortal = nullptr;
+	GameWorld()->RemoveEntity(this);
 }
 
 inline bool PointInCircle(vec2 pos, vec2 center, float radius)
@@ -132,6 +137,25 @@ void CPortal::Tick()
 				GameServer()->CreateSound(pChr->m_Pos, SOUND_WEAPON_SPAWN);
 		}
 	}
+	SetPortalVisual();
+}
+
+inline vec2 CPortal::CirclePos(int Part)
+{
+	vec2 Direction = direction(360.0f / CPortal::SEGMENTS * Part * (pi / 180.0f));
+	Direction *= PortalRadius;
+
+	return Direction;
+}
+
+void CPortal::SetPortalVisual()
+{
+	for(int i = 0; i < SEGMENTS + 1; i++)
+	{
+		m_Snap.m_To[i] = CirclePos(i);
+		m_Snap.m_From[i] = CirclePos(i + 1);
+	}
+	m_Snap.m_From[SEGMENTS] = CirclePos(SEGMENTS);
 }
 
 void CPortal::OnFire()
@@ -190,7 +214,7 @@ bool CPortal::TrySetPortal()
 
 void CPortal::RemovePortals()
 {
-	for(int i = 0; i < 2; i++)
+	for(int i = 0; i < NUM_PORTALS; i++)
 	{
 		if(m_PortalData[i].m_Active)
 		{
@@ -214,7 +238,6 @@ void CPortal::Snap(int SnappingClient)
 		return;
 
 	CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
-
 	if(!pSnapPlayer)
 		return;
 
@@ -233,49 +256,41 @@ void CPortal::Snap(int SnappingClient)
 		}
 	}
 
-	int Amount = 13;
-	int Segments = 12;
-	for(int p = 0; p < 2; p++)
+	const int snapVer = pSnapPlayer->GetClientVersion();
+	const bool sixUp = Server()->IsSixup(SnappingClient);
+	const int StartTick = Server()->Tick() + 2;
+
+	for(int p = 0; p < NUM_PORTALS; ++p)
 	{
-		double Spin = (Server()->Tick() / 30.0) + (p * pi);
-
-		Spin = p ? -Spin : Spin;
-
-		int StartId = p ? 13 : 0;
-		for(int i = 0; i < Amount; i++)
+		if(!m_PortalData[p].m_Active)
+			continue;
+		const int baseId = p ? 13 : 0;
+		for(int i = 0; i < NUM_POS; ++i)
 		{
-			int CirclePart = i;
-			if(CirclePart == Amount - 1)
-				CirclePart = 0;
-			if(m_PortalData[p].m_Active)
-			{
-				vec2 Direction = direction((360.0f / Segments * CirclePart * (pi / 180.0f)) + Spin);
-				vec2 To = m_PortalData[p].m_Pos + Direction * PortalRadius;
+			vec2 To = m_Snap.m_To[i];
+			vec2 From = m_Snap.m_From[i];
 
-				Direction = direction((360.0f / Segments * (CirclePart + 1) * (pi / 180.0f)) + Spin);
-				vec2 From = m_PortalData[p].m_Pos + Direction * PortalRadius;
+			const float Spin = (Server()->Tick() / 30.0) + (p * pi);
+			Rotate(vec2(0, 0), &To, Spin);
+			Rotate(vec2(0, 0), &From, Spin);
 
-				// To make the the first circle part not look weird
-				if(CirclePart != i)
-					From = To;
-				int SnappingClientVersion = pSnapPlayer->GetClientVersion();
-				bool SixUp = Server()->IsSixup(SnappingClient);
+			To += m_PortalData[p].m_Pos;
+			From += m_PortalData[p].m_Pos;
 
-				GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, SixUp, SnappingClient), m_aIds[StartId + i], To, From, Server()->Tick() + 2);
-			}
+			GameServer()->SnapLaserObject(CSnapContext(snapVer, sixUp, SnappingClient),
+				m_Snap.m_aIds[baseId + i], To, From, StartTick);
 		}
 	}
 
 	if(m_State == STATE_BOTH_SET)
 	{
-		for(size_t i = 0; i < std::size(m_aParticeIds); i++)
+		for(size_t i = 0; i < NUM_PRTCL; i++)
 		{
-			CNetObj_Projectile *pProj = Server()->SnapNewItem<CNetObj_Projectile>(m_aParticeIds[i]);
+			CNetObj_Projectile *pProj = Server()->SnapNewItem<CNetObj_Projectile>(m_Snap.m_aParticleIds[i]);
 			if(!pProj)
 				return;
 
 			vec2 Pos = GetRandomPointInCircle(m_PortalData[i % 2].m_Pos, PortalRadius - 6.0f);
-
 			pProj->m_X = (int)(Pos.x);
 			pProj->m_Y = (int)(Pos.y);
 			pProj->m_VelX = 0;
