@@ -217,6 +217,9 @@ public:
 	CTuningParams *m_pTuningList;
 	CTuningParams *TuningList() { return m_pTuningList; }
 	CTuningParams *GetTuning(int i) { return &TuningList()[i]; }
+	// <FoxNet
+	void RemoveEntities(int Type);
+	// FoxNet>
 };
 
 #endif

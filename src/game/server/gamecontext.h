@@ -836,6 +836,7 @@ private:
 	static void ConRemoveAllRecords(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConDropWeapon(IConsole::IResult *pResult, void *pUserData);
+	static void ConCleanDroppedPickups(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConAccTop5Money(IConsole::IResult *pResult, void *pUserData);
 	static void ConAccTop5Level(IConsole::IResult *pResult, void *pUserData);

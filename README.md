@@ -93,6 +93,7 @@
 |spider_hook|Toggle spider hook for a player|
 |fake_message|Send a message as a player that doesn't exist|
 |map_vote_lock|Lock changing maps trough normal votes|
+|cleanup_pickupdrops|Deletes all dropped weapons|
 
 |Chat Commands|Description|
 |-|-|

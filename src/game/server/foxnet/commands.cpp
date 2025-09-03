@@ -9,6 +9,7 @@
 #include "votemenu.h"
 #include <game/server/score.h>
 #include <base/vmath.h>
+#include <game/server/gameworld.h>
 
 void CGameContext::ConAccRegister(IConsole::IResult *pResult, void *pUserData)
 {
@@ -1406,6 +1407,19 @@ void CGameContext::ConDropWeapon(IConsole::IResult *pResult, void *pUserData)
 	pChr->DropWeapon(Type, Dir * vec2(5.0f,8.0f));
 }
 
+void CGameContext::ConCleanDroppedPickups(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+	{
+		CPlayer *pPlayer = pSelf->m_apPlayers[ClientId];
+		if(pPlayer)
+			pPlayer->m_vPickupDrops.clear();
+	}
+	// clean all existing pickupdrops
+	pSelf->m_World.RemoveEntities(CGameWorld::ENTTYPE_PICKUPDROP);
+}
+
 void CGameContext::RegisterFoxNetCommands()
 {
 	Console()->Register("chat_string_add", "s[string] s[reason] i[should Ban] i[bantime] ?f[addition]", CFGFLAG_SERVER, ConAddChatDetectionString, this, "Add a string to the chat detection list");
@@ -1508,6 +1522,8 @@ void CGameContext::RegisterFoxNetCommands()
 	Console()->Register("buyitem", "r[item]", CFGFLAG_CHAT, ConShopBuyItem, this, "Buy an item from the shop");
 	Console()->Register("toggleitem", "s[item] ?i[value]", CFGFLAG_CHAT, ConToggleItem, this, "Toggle an Item, value is only needed for 2 items");
 	Console()->Register("dropweapon", "", CFGFLAG_CHAT, ConDropWeapon, this, "Drops the weapon you're currently holding");
+
+	Console()->Register("cleanup_pickupdrops", "", CFGFLAG_SERVER, ConCleanDroppedPickups, this, "Removes all dropped pickups");
 
 	Console()->Chain("sv_debug_quad_pos", ConchainQuadDebugPos, this);
 }

@@ -387,3 +387,22 @@ CTuningParams *CGameWorld::Tuning()
 {
 	return &m_Core.m_aTuning[0];
 }
+
+// <FoxNet
+void CGameWorld::RemoveEntities(int Type)
+{
+	for(auto *pEnt : m_apFirstEntityTypes)
+	{
+		for(; pEnt;)
+		{
+			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
+			if(pEnt->m_ObjType == Type)
+			{
+				RemoveEntity(pEnt);
+				pEnt->Destroy();
+			}
+			pEnt = m_pNextTraverseEntity;
+		}
+	}
+
+}

@@ -18,6 +18,7 @@
 #include <game/server/gameworld.h>
 #include <vector>
 #include <engine/shared/protocol.h>
+#include <game/teamscore.h>
 
 CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, int LastOwner, vec2 Pos, int Team, int TeleCheckpoint, vec2 Dir, int Lifetime, int Type) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUPDROP, Pos)
@@ -75,6 +76,11 @@ bool CPickupDrop::IsSwitchActiveCb(int Number, void *pUser)
 
 void CPickupDrop::Tick()
 {
+	if(GameLayerClipped(m_Pos))
+	{
+		Reset();
+		return;
+	}
 	if(m_LastOwner >= 0 && (!GameServer()->m_apPlayers[m_LastOwner] && g_Config.m_SvResetDropsOnLeave))
 	{
 		Reset();
