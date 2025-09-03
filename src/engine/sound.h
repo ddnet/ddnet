@@ -15,9 +15,10 @@ public:
 	enum
 	{
 		FLAG_LOOP = 1 << 0,
-		FLAG_POS = 1 << 1,
-		FLAG_NO_PANNING = 1 << 2,
-		FLAG_PREVIEW = 1 << 3,
+		FLAG_LOOPED = 1 << 1,
+		FLAG_POS = 1 << 2,
+		FLAG_NO_PANNING = 1 << 3,
+		FLAG_PREVIEW = 1 << 4,
 	};
 
 	enum
