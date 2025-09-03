@@ -4,6 +4,7 @@
 #include "snap_id_pool.h"
 
 #include <base/system.h>
+#include <engine/shared/config.h>
 
 CSnapIdPool::CSnapIdPool()
 {
@@ -52,6 +53,9 @@ int CSnapIdPool::NewId()
 		RemoveFirstTimeout();
 
 	int Id = m_FirstFree;
+	if(g_Config.m_SvDebugIdPool)
+		dbg_msg("idpool", "alloacted id %d", Id);
+
 	if(Id == -1)
 	{
 		dbg_msg("server", "invalid id");
@@ -77,6 +81,9 @@ void CSnapIdPool::FreeId(int Id)
 		return;
 	dbg_assert((size_t)Id < std::size(m_aIds), "id is out of range");
 	dbg_assert(m_aIds[Id].m_State == ID_ALLOCATED, "id is not allocated");
+
+	if(g_Config.m_SvDebugIdPool)
+		dbg_msg("idpool", "freeing id %d", Id);
 
 	m_InUsage--;
 	m_aIds[Id].m_State = ID_TIMED;

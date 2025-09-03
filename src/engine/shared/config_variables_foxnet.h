@@ -60,6 +60,9 @@ MACRO_CONFIG_INT(SvInstantCoreUpdate, sv_instant_core_update, 0, 0, 1, CFGFLAG_S
 MACRO_CONFIG_INT(SvDebugQuadPos, sv_debug_quad_pos, 0, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Shows interactive quad positions using lasers")
 MACRO_CONFIG_INT(SvQStopaGivesDj, sv_qstopa_gives_dj, 0, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Whether the QStopa quad should give dj back")
 
+MACRO_CONFIG_INT(SvDebugIdPool, sv_debug_id_pool, 0, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Debug Id allocation")
+
+
 // Abilities
 MACRO_CONFIG_INT(SvNoAuthCooldown, sv_no_auth_cooldown, 0, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "whether theres a cooldown for abilities on authed players")
 
