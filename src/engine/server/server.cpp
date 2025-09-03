@@ -4048,13 +4048,19 @@ void CServer::ConchainCommandAccessUpdate(IConsole::IResult *pResult, void *pUse
 					continue;
 				if(!pThis->IsRconAuthed(i))
 					continue;
+
 				const int ClientAccessLevel = pThis->ConsoleAccessLevel(i);
-				if((pInfo->GetAccessLevel() > ClientAccessLevel && ClientAccessLevel < OldAccessLevel) ||
-					(pInfo->GetAccessLevel() < ClientAccessLevel && ClientAccessLevel > OldAccessLevel) ||
-					(pThis->m_aClients[i].m_pRconCmdToSend && str_comp(pResult->GetString(0), pThis->m_aClients[i].m_pRconCmdToSend->m_pName) >= 0))
+				bool HadAccess = OldAccessLevel >= ClientAccessLevel;
+				bool HasAccess = pInfo->GetAccessLevel() >= ClientAccessLevel;
+
+				// Nothing changed
+				if(HadAccess == HasAccess)
+					continue;
+				// Command not sent yet. The sending will happen in alphabetical order with correctly updated permissions.
+				if(pThis->m_aClients[i].m_pRconCmdToSend && str_comp(pResult->GetString(0), pThis->m_aClients[i].m_pRconCmdToSend->m_pName) >= 0)
 					continue;
 
-				if(OldAccessLevel < pInfo->GetAccessLevel())
+				if(HasAccess)
 					pThis->SendRconCmdAdd(pInfo, i);
 				else
 					pThis->SendRconCmdRem(pInfo, i);
