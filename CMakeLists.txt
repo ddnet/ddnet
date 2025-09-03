@@ -1042,6 +1042,7 @@ set(EXPECTED_DATA
   audio/sfx_ctf_grab_en.wv
   audio/sfx_ctf_grab_pl.wv
   audio/sfx_ctf_rtn.wv
+  audio/sfx_falling_woosh.wv
   audio/sfx_hit_strong-01.wv
   audio/sfx_hit_strong-02.wv
   audio/sfx_hit_weak-01.wv
