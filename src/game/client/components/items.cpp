@@ -351,7 +351,7 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 
 void CItems::RenderLaser(vec2 From, vec2 Pos, ColorRGBA OuterColor, ColorRGBA InnerColor, float TicksBody, float TicksHead, int Type) const
 {
-	int TuneZone = (Client()->State() == IClient::STATE_ONLINE && GameClient()->m_GameWorld.m_WorldConfig.m_UseTuneZones) ? Collision()->IsTune(Collision()->GetMapIndex(From)) : 0;
+	int TuneZone = (Client()->State() == IClient::STATE_ONLINE && GameClient()->m_GameWorld.m_WorldConfig.m_UseTuneZones) ? Collision()->IsTuneZoneTile(Collision()->GetMapIndex(From)) : 0;
 	float Len = distance(Pos, From);
 
 	if(Len > 0)

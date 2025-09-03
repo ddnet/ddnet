@@ -37,7 +37,7 @@ CProjectileData ExtractProjectileInfo(int NetObjType, const void *pData, CGameWo
 	Result.m_StartTick = pProj->m_StartTick;
 	Result.m_ExtraInfo = false;
 	Result.m_Owner = -1;
-	Result.m_TuneZone = pGameWorld && pGameWorld->m_WorldConfig.m_UseTuneZones ? pGameWorld->Collision()->IsTune(pGameWorld->Collision()->GetMapIndex(Result.m_StartPos)) : 0;
+	Result.m_TuneZone = pGameWorld && pGameWorld->m_WorldConfig.m_UseTuneZones ? pGameWorld->Collision()->IsTuneZoneTile(pGameWorld->Collision()->GetMapIndex(Result.m_StartPos)) : 0;
 	Result.m_SwitchNumber = pEntEx ? pEntEx->m_SwitchNumber : 0;
 	return Result;
 }
@@ -64,7 +64,7 @@ CProjectileData ExtractProjectileInfoDDRace(const CNetObj_DDRaceProjectile *pPro
 	Result.m_Bouncing = (pProj->m_Data >> 10) & 3;
 	Result.m_Explosive = pProj->m_Data & LEGACYPROJECTILEFLAG_EXPLOSIVE;
 	Result.m_Freeze = pProj->m_Data & LEGACYPROJECTILEFLAG_FREEZE;
-	Result.m_TuneZone = pGameWorld && pGameWorld->m_WorldConfig.m_UseTuneZones ? pGameWorld->Collision()->IsTune(pGameWorld->Collision()->GetMapIndex(Result.m_StartPos)) : 0;
+	Result.m_TuneZone = pGameWorld && pGameWorld->m_WorldConfig.m_UseTuneZones ? pGameWorld->Collision()->IsTuneZoneTile(pGameWorld->Collision()->GetMapIndex(Result.m_StartPos)) : 0;
 	Result.m_SwitchNumber = pEntEx ? pEntEx->m_SwitchNumber : 0;
 	return Result;
 }

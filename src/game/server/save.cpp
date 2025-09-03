@@ -74,6 +74,7 @@ void CSaveTee::Save(CCharacter *pChr, bool AddPenalty)
 
 	m_TuneZone = pChr->m_TuneZone;
 	m_TuneZoneOld = pChr->m_TuneZoneOld;
+	m_TuneZoneOverride = pChr->m_TuneZoneOverride;
 
 	if(pChr->m_StartTime)
 		m_Time = pChr->Server()->Tick() - pChr->m_StartTime;
@@ -186,6 +187,7 @@ bool CSaveTee::Load(CCharacter *pChr, std::optional<int> Team)
 
 	pChr->m_TuneZone = m_TuneZone;
 	pChr->m_TuneZoneOld = m_TuneZoneOld;
+	pChr->m_TuneZoneOverride = m_TuneZoneOverride;
 
 	if(m_Time)
 		pChr->m_StartTime = pChr->Server()->Tick() - m_Time;

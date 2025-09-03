@@ -3217,9 +3217,9 @@ void CGameClient::UpdateLocalTuning()
 	{
 		int TuneZone =
 			m_Snap.m_aCharacters[m_Snap.m_LocalClientId].m_HasExtendedData &&
-					m_Snap.m_aCharacters[m_Snap.m_LocalClientId].m_ExtendedData.m_TuneZoneOverride != -1 ?
+					m_Snap.m_aCharacters[m_Snap.m_LocalClientId].m_ExtendedData.m_TuneZoneOverride != TUNEZONE_OVERRIDE_NONE ?
 				m_Snap.m_aCharacters[m_Snap.m_LocalClientId].m_ExtendedData.m_TuneZoneOverride :
-				Collision()->IsTune(Collision()->GetMapIndex(LocalPos));
+				Collision()->IsTuneZoneTile(Collision()->GetMapIndex(LocalPos));
 
 		if(TuneZone != m_aLocalTuneZone[g_Config.m_ClDummy])
 		{
@@ -3268,7 +3268,7 @@ void CGameClient::UpdateLocalTuning()
 		}
 		else
 		{
-			// if we have processed what we need, and the tuning is still wrong due to out of order messege
+			// if we have processed what we need, and the tuning is still wrong due to out of order message
 			// fix our tuning by using the current one
 			m_GameWorld.TuningList()[TuneZone] = m_aTuning[g_Config.m_ClDummy];
 			m_aExpectingTuningSince[g_Config.m_ClDummy] = 0;
