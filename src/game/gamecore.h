@@ -22,6 +22,7 @@ class CTeamsCore;
 // <FoxNet
 enum ExtraWeapons
 {
+	WEAPON_NONE = -1;
 	WEAPON_TELEKINESIS = NUM_WEAPONS,
 	WEAPON_HEARTGUN,
 	WEAPON_LIGHTSABER,

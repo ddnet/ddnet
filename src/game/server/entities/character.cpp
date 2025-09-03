@@ -169,7 +169,7 @@ void CCharacter::SetWeapon(int W)
 	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SWITCH, TeamMask());
 
 	if(m_Core.m_ActiveWeapon < 0 || m_Core.m_ActiveWeapon >= NUM_EXTRA_WEAPONS)
-		SetActiveWeapon(-1); // <FoxNet>
+		SetActiveWeapon(WEAPON_NONE); // <FoxNet>
 }
 
 void CCharacter::SetJetpack(bool Active)
@@ -717,6 +717,7 @@ float CCharacter::GetFireDelay(int Weapon)
 {
 	switch(Weapon)
 	{
+	case WEAPON_NONE: return 0.0f; // shows no weapon - meaning no delay since it does nothing
 	case WEAPON_HAMMER: return (float)Tuning()->m_HammerFireDelay;
 	case WEAPON_GUN: return (float)Tuning()->m_GunFireDelay;
 	case WEAPON_SHOTGUN: return (float)Tuning()->m_ShotgunFireDelay;
@@ -2628,7 +2629,7 @@ bool CCharacter::UnFreeze()
 					break;
 				}
 				else
-					SetActiveWeapon(-1);
+					SetActiveWeapon(WEAPON_NONE);
 			}
 		}
 		m_FreezeTime = 0;
@@ -2663,7 +2664,7 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove)
 			SetActiveWeapon(WEAPON_GUN);
 			// <FoxNet
 			if(!GetWeaponGot(WEAPON_GUN))
-				SetActiveWeapon(-1); // FoxNet>
+				SetActiveWeapon(WEAPON_NONE); // FoxNet>
 		}
 	}
 	else
@@ -3566,7 +3567,7 @@ void CCharacter::DropWeapon(int Type, vec2 Dir, bool Death)
 			return;
 		}
 		else
-			SetActiveWeapon(-1);
+			SetActiveWeapon(WEAPON_NONE);
 	}
 }
 
