@@ -142,7 +142,6 @@ void CCharacterCore::Reset()
 	m_Input.m_TargetY = -1;
 
 	// <FoxNet
-	m_IsInFreezeQuad = false;
 	m_Passive = false;
 
 	m_Hittable = true;

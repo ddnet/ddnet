@@ -123,8 +123,7 @@ void CPortal::HandleTele()
 				continue;
 
 			const vec2 Target = InP0 ? m_PortalData[1].m_Pos : m_PortalData[0].m_Pos;
-			pChr->m_PrevPos = Target;
-			pChr->SetPosition(Target);
+			pChr->ForceSetPos(Target);
 			pChr->ReleaseHook();
 			Can = false;
 

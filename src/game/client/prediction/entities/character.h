@@ -186,6 +186,7 @@ private:
 	// <FoxNet
 	void HandleQuads(const CMapItemLayerQuads *pQuadLayer, int QuadIndex);
 	void HandleQuadStopa(const CMapItemLayerQuads *pQuadLayer, int QuadIndex);
+	bool m_InQuadFreeze;
 	// FoxNet>
 };
 

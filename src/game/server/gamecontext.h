@@ -863,6 +863,9 @@ private:
 	std::vector<CFakeSnapPlayer> m_vFakeSnapPlayers;
 	void RandomMapVote();
 
+	void HandleQuads(const CMapItemLayerQuads *pQuadLayer, int QuadIndex, int Type);
+	void HandleQuadStopa(CEntity *pEntity, const CMapItemLayerQuads *pQuadLayer, int QuadIndex);
+
 public:
 	struct CachedMapInfo
 	{

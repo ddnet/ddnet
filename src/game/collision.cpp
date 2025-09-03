@@ -15,6 +15,7 @@
 
 #include <engine/shared/config.h>
 #include <game/envelopeaccess.h>
+#include <iterator>
 
 vec2 ClampVel(int MoveRestriction, vec2 Vel)
 {
@@ -1636,4 +1637,29 @@ bool CCollision::InsideQuad(vec2 Pos, float Radius, vec2 TopLCorner, vec2 TopRCo
 
 	return false;
 }
+
+int CCollision::GetQuadType(const CMapItemLayerQuads *pQuadLayer) const
+{
+	char QuadName[30] = "";
+	IntsToStr(pQuadLayer->m_aName, std::size(pQuadLayer->m_aName), QuadName, std::size(QuadName));
+
+	bool IsFreeze = !str_comp("QFr", QuadName);
+	bool IsUnFreeze = !str_comp("QUnFr", QuadName);
+	bool IsDeath = !str_comp("QDeath", QuadName);
+	bool IsStopa = !str_comp("QStopa", QuadName);
+	bool IsCfrm = !str_comp("QCfrm", QuadName);
+
+	if(IsFreeze)
+		return QUADTYPE_FREEZE;
+	else if(IsUnFreeze)
+		return QUADTYPE_UNFREEZE;
+	else if(IsDeath)
+		return QUADTYPE_DEATH;
+	else if(IsStopa)
+		return QUADTYPE_STOPA;
+	else if(IsCfrm)
+		return QUADTYPE_CFRM;
+	return 0;
+}
+
 // FoxNet>

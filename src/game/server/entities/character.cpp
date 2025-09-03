@@ -1501,7 +1501,7 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacter->m_TargetY = m_Core.m_Input.m_TargetY;
 
 	// <FoxNet
-	if(m_Core.m_IsInFreezeQuad && !m_Core.m_IsInFreeze)
+	if(m_InQuadFreeze && !m_Core.m_IsInFreeze)
 	{
 		pDDNetCharacter->m_FreezeEnd = -1;
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_IN_FREEZE;
@@ -2388,7 +2388,7 @@ bool CCharacter::TrySetRescue(int RescueMode)
 	{
 		// check for nearby health pickups (also freeze)
 		bool InHealthPickup = false;
-		if(!m_Core.m_IsInFreeze && /*FoxNet*/ !m_Core.m_IsInFreezeQuad)
+		if(!m_Core.m_IsInFreeze && /*FoxNet*/ !m_InQuadFreeze)
 		{
 			CEntity *apEnts[9];
 			int Num = GameWorld()->FindEntities(m_Pos, GetProximityRadius() + CPickup::ms_CollisionExtraSize, apEnts, std::size(apEnts), CGameWorld::ENTTYPE_PICKUP);
@@ -2407,7 +2407,7 @@ bool CCharacter::TrySetRescue(int RescueMode)
 			}
 		}
 
-		if(!m_Core.m_IsInFreeze && /*<FoxNet*/ !m_Core.m_IsInFreezeQuad /*FoxNet>*/ && IsGrounded() && !m_Core.m_DeepFrozen && !InHealthPickup)
+		if(!m_Core.m_IsInFreeze && /*<FoxNet*/ !m_InQuadFreeze /*FoxNet>*/ && IsGrounded() && !m_Core.m_DeepFrozen && !InHealthPickup)
 		{
 			ForceSetRescue(RescueMode);
 			Set = true;
@@ -2544,19 +2544,6 @@ void CCharacter::DDRacePostCoreTick()
 	if(!m_Alive)
 		return;
 
-	// <FoxNet
-	m_Core.m_IsInFreezeQuad = false;
-	for(const auto *pQuadLayer : Collision()->QuadLayers())
-	{
-		for(int QuadIndex = 0; QuadIndex < pQuadLayer->m_NumQuads; QuadIndex++)
-		{
-			HandleQuads(pQuadLayer, QuadIndex);
-			if(!m_Alive)
-				return;
-		}
-	}
-	// FoxNet>
-
 	// handle Anti-Skip tiles
 	std::vector<int> vIndices = Collision()->GetMapIndices(m_PrevPos, m_Pos);
 	if(!vIndices.empty())
@@ -2575,7 +2562,7 @@ void CCharacter::DDRacePostCoreTick()
 			return;
 	}
 	// <FoxNet
-	if(m_Core.m_IsInFreezeQuad)
+	if(m_InQuadFreeze)
 		Freeze();
 	// FoxNet>
 
@@ -2851,6 +2838,12 @@ void CCharacter::AddVelocity(vec2 Addition)
 	SetVelocity(m_Core.m_Vel + Addition);
 }
 
+void CCharacter::ForceSetPos(vec2 NewPos)
+{
+	m_PrevPos = NewPos;
+	m_Core.m_Pos = NewPos;
+}
+
 void CCharacter::ApplyMoveRestrictions()
 {
 	m_Core.m_Vel = ClampVel(m_MoveRestrictions, m_Core.m_Vel);
@@ -3081,211 +3074,6 @@ void CCharacter::SetUfo(bool Set)
 void CCharacter::SetSnake(bool Active)
 {
 	m_Snake.SetActive(Active);
-}
-
-void CCharacter::HandleQuads(const CMapItemLayerQuads *pQuadLayer, int QuadIndex)
-{
-	if(!pQuadLayer)
-		return;
-
-	char QuadName[30] = "";
-	IntsToStr(pQuadLayer->m_aName, std::size(pQuadLayer->m_aName), QuadName, std::size(QuadName));
-
-	bool IsFreeze = !str_comp("QFr", QuadName);
-	bool IsUnFreeze = !str_comp("QUnFr", QuadName);
-	bool IsDeath = !str_comp("QDeath", QuadName);
-	bool IsStopa = !str_comp("QStopa", QuadName);
-	bool IsCfrm = !str_comp("QCfrm", QuadName);
-
-	vec2 TopL, TopR, BottomL, BottomR;
-	int FoundNum = Collision()->GetQuadCorners(QuadIndex, pQuadLayer, 0.00f, &TopL, &TopR, &BottomL, &BottomR);
-	if(FoundNum < 0 || FoundNum >= pQuadLayer->m_NumQuads)
-		return;
-
-	float Radius = 0.0f;
-	if(IsDeath)
-		Radius = 8.0f;
-	if(IsStopa)
-		Radius = CCharacterCore::PhysicalSize() / 2.0f;
-
-	bool Inside = Collision()->InsideQuad(m_Pos, Radius, TopL, TopR, BottomL, BottomR);
-	if(!Inside)
-		return;
-
-	if(IsFreeze)
-	{
-		m_Core.m_IsInFreezeQuad = true;
-	}
-	else if(IsUnFreeze)
-	{
-		UnFreeze();
-		m_Core.m_IsInFreezeQuad = false;
-	}
-	else if(IsDeath)
-	{
-		Die(m_pPlayer->GetCid(), WEAPON_WORLD);
-	}
-	else if(IsStopa)
-	{
-		HandleQuadStopa(pQuadLayer, QuadIndex);
-	}
-	else if(IsCfrm)
-	{
-		if(m_Core.m_Super || m_Core.m_Invincible)
-			return;
-		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
-		for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
-		{
-			if(!Collision()->TeleCheckOuts(k).empty())
-			{
-				int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleCheckOuts(k).size());
-				m_Core.m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
-				m_Core.m_Vel = vec2(0, 0);
-
-				if(!g_Config.m_SvTeleportHoldHook)
-				{
-					ResetHook();
-					GameWorld()->ReleaseHooked(GetPlayer()->GetCid());
-				}
-
-				return;
-			}
-		}
-		// if no checkpointout have been found (or if there no recorded checkpoint), teleport to start
-		vec2 SpawnPos;
-		if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), &SpawnPos, GameServer()->GetDDRaceTeam(GetPlayer()->GetCid())))
-		{
-			m_Core.m_Pos = SpawnPos;
-			m_Core.m_Vel = vec2(0, 0);
-
-			if(!g_Config.m_SvTeleportHoldHook)
-			{
-				ResetHook();
-				GameWorld()->ReleaseHooked(GetPlayer()->GetCid());
-			}
-		}
-	}
-}
-
-void CCharacter::HandleQuadStopa(const CMapItemLayerQuads *pQuadLayer, int QuadIndex)
-{
-	if(!pQuadLayer)
-		return;
-
-	vec2 TL, TR, BL, BR;
-	int Found = Collision()->GetQuadCorners(QuadIndex, pQuadLayer, 0.0f, &TL, &TR, &BL, &BR);
-	if(Found < 0 || Found >= pQuadLayer->m_NumQuads)
-		return;
-
-	const float R = GetProximityRadius() * 0.5f;
-	const vec2 P = m_Core.m_Pos;
-
-	const vec2 aA[4] = {TL, TR, BR, BL};
-	const vec2 aB[4] = {TR, BR, BL, TL};
-
-	float MinPenetration = std::numeric_limits<float>::infinity();
-	vec2 BestInwardNormal = vec2(0.0f, 0.0f);
-	int BestEdgeIdx = -1;
-	vec2 BestEdgeVec = vec2(0.0f, 0.0f);
-
-	for(int i = 0; i < 4; ++i)
-	{
-		vec2 E = aB[i] - aA[i];
-		float Elen2 = dot(E, E);
-		if(Elen2 <= 1e-6f)
-			continue;
-
-		vec2 N_in = normalize(vec2(-E.y, E.x));
-		float d = dot(P - aA[i], N_in);
-		float penetration = d + R;
-
-		if(penetration < MinPenetration)
-		{
-			MinPenetration = penetration;
-			BestInwardNormal = N_in;
-			BestEdgeIdx = i;
-			BestEdgeVec = E;
-		}
-	}
-
-	if(MinPenetration == std::numeric_limits<float>::infinity())
-		return;
-
-	if(MinPenetration > 0.0f)
-	{
-		const float Epsilon = 0.0f;
-		vec2 MTV = -BestInwardNormal * (MinPenetration + Epsilon);
-
-		auto CanPlace = [&](const vec2 &Pos) {
-			return !Collision()->TestBox(Pos, CCharacterCore::PhysicalSizeVec2());
-		};
-
-		auto MoveAxis = [&](vec2 &Pos, const vec2 &Delta) {
-			if(Delta.x == 0.0f && Delta.y == 0.0f)
-				return vec2(0.f, 0.f);
-
-			vec2 Target = Pos + Delta;
-			if(CanPlace(Target))
-			{
-				Pos = Target;
-				return Delta;
-			}
-
-			float lo = 0.0f;
-			float hi = 1.0f;
-			for(int i = 0; i < 10; ++i)
-			{
-				float mid = (lo + hi) * 0.5f;
-				vec2 MidPos = Pos + Delta * mid;
-				if(CanPlace(MidPos))
-					lo = mid;
-				else
-					hi = mid;
-			}
-			if(lo > 0.0f)
-			{
-				vec2 Applied = Delta * lo;
-				Pos += Applied;
-				return Applied;
-			}
-			return vec2(0.0f, 0.0f);
-		};
-
-		vec2 NewPos = m_Core.m_Pos;
-
-		vec2 AppliedX = MoveAxis(NewPos, vec2(MTV.x, 0.0f));
-		vec2 AppliedY = MoveAxis(NewPos, vec2(0.0f, MTV.y));
-
-		m_Core.m_Pos = NewPos;
-
-		float vIn = dot(m_Core.m_Vel, BestInwardNormal);
-		if(vIn > 0.0f)
-			m_Core.m_Vel -= BestInwardNormal * vIn;
-
-		if(AppliedX.x == 0.0f && MTV.x != 0.0f)
-			m_Core.m_Vel.x = 0.0f;
-		if(AppliedY.y == 0.0f && MTV.y != 0.0f)
-			m_Core.m_Vel.y = 0.0f;
-
-		if(g_Config.m_SvQStopaGivesDj && BestEdgeIdx >= 0)
-		{
-			const float NormalThresh = 0.35f;
-			const float SlopeThresh = 0.60f;
-
-			float edgeLen = length(BestEdgeVec);
-			float edgeSlope = edgeLen > 1e-6f ? absolute(BestEdgeVec.y) / edgeLen : 1.0f;
-			bool IsFloorNormal = (BestInwardNormal.y >= NormalThresh);
-			bool IsFlatEnough = (edgeSlope <= SlopeThresh);
-			bool PushedUp = (AppliedY.y < 0.0f);
-			bool WasFallingOrRest = (m_Core.m_Vel.y >= 0.0f);
-
-			if(IsFloorNormal && IsFlatEnough && PushedUp && WasFallingOrRest)
-			{
-				m_Core.m_Jumped = 0;
-				m_Core.m_JumpedTotal = 0;
-			}
-		}
-	}
 }
 
 void CCharacter::SetPassive(bool Active)

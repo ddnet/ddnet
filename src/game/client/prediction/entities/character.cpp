@@ -1115,7 +1115,7 @@ void CCharacter::DDRacePostCoreTick()
 	}
 
 	// <FoxNet
-	m_Core.m_IsInFreezeQuad = false;
+	m_InQuadFreeze = false;
 	for(const auto *pQuadLayer : Collision()->QuadLayers())
 	{
 		for(int QuadIndex = 0; QuadIndex < pQuadLayer->m_NumQuads; QuadIndex++)
@@ -1139,7 +1139,7 @@ void CCharacter::DDRacePostCoreTick()
 	}
 
 	// <FoxNet
-	if(m_Core.m_IsInFreezeQuad)
+	if(m_InQuadFreeze)
 		Freeze();
 	// FoxNet>
 }
@@ -1566,12 +1566,12 @@ void CCharacter::HandleQuads(const CMapItemLayerQuads *pQuadLayer, int QuadIndex
 
 	if(IsFreeze)
 	{
-		m_Core.m_IsInFreezeQuad = true;
+		m_InQuadFreeze = true;
 	}
 	else if(IsUnFreeze)
 	{
 		UnFreeze();
-		m_Core.m_IsInFreezeQuad = false;
+		m_InQuadFreeze = false;
 	}
 	else if(IsStopa)
 	{

@@ -15,9 +15,6 @@ class CPickupDrop : public CEntity
 	int m_PickupDelay; // In ticks
 	int m_Type;
 
-	vec2 m_PrevPos;
-	vec2 m_Vel;
-
 	int m_aIds[2]; // Extra Ids
 
 	int m_Team;
@@ -27,10 +24,8 @@ class CPickupDrop : public CEntity
 	static bool IsSwitchActiveCb(int Number, void *pUser);
 	bool IsGrounded();
 	void HandleTiles(int Index);
-	void HandleQuads(const CMapItemLayerQuads *pQuadLayer, int QuadIndex);
-	void HandleQuadStopa(const CMapItemLayerQuads *pQuadLayer, int QuadIndex);
-
-	bool m_InsideFreeze;
+	vec2 m_PrevPos;
+	vec2 m_Vel;
 
 	int m_TeleCheckpoint;
 	int m_TileIndex;
@@ -42,9 +37,22 @@ class CPickupDrop : public CEntity
 	bool CheckArmor();
 
 public:
+	int Team() const { return m_Team; }
+	int TeleCheckpoint() const { return m_TeleCheckpoint; }
+
+	bool m_InsideFreeze;
+
+	void SetVelocity(vec2 Vel) override;
+	void SetRawVelocity(vec2 Vel) override { m_Vel = Vel; }
+	vec2 GetVelocity() const override { return m_Vel; }
+	void AddVelocity(vec2 Vel) override { m_Vel += Vel; }
+	void ResetVelocity() override { m_Vel = vec2(0.0f, 0.0f); }
+
+	void ForceSetPos(vec2 NewPos) override;
+
 	CPickupDrop(CGameWorld *pGameWorld, int LastOwner, vec2 Pos, int Team, int TeleCheckpoint, vec2 Dir, int Lifetime /*Seconds*/, int Type);
 
-	void Reset(bool PickdUp);
+	void Reset(bool PickedUp);
 	virtual void Reset() override { Reset(false); }
 	virtual void Tick() override;
 	virtual void Snap(int SnappingClient) override;

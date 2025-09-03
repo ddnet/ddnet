@@ -120,10 +120,16 @@ public:
 	void SetPosition(const vec2 &Position);
 	void Move(vec2 RelPos);
 
-	void ResetVelocity();
-	void SetVelocity(vec2 NewVelocity);
-	void SetRawVelocity(vec2 NewVelocity);
-	void AddVelocity(vec2 Addition);
+	// <FoxNet
+	void ResetVelocity() override;
+	void SetVelocity(vec2 NewVelocity) override;
+	void SetRawVelocity(vec2 NewVelocity) override;
+	void AddVelocity(vec2 Addition) override;
+	vec2 GetVelocity() const override { return m_Core.m_Vel; }
+
+	void ForceSetPos(vec2 NewPos) override;
+	// FoxNet>
+
 	void ApplyMoveRestrictions();
 
 private:
@@ -349,6 +355,8 @@ public:
 
 	bool HasLineOfSight(vec2 Pos);
 
+	bool m_InQuadFreeze;
+
 private:
 
 	bool CanDropWeapon(int Type) const;
@@ -359,8 +367,6 @@ private:
 
 	void FoxNetTick();
 	int m_VoteActionDelay;
-	void HandleQuads(const CMapItemLayerQuads *pQuadLayer, int QuadIndex);
-	void HandleQuadStopa(const CMapItemLayerQuads *pQuadLayer, int QuadIndex);
 
 	void CreatePowerupExplosion(vec2 Pos, int ClientId, int Type);
 	void CreatePowerupCircle(vec2 Pos, int ClientId, int Type);

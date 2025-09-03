@@ -183,6 +183,18 @@ private:
 	void GetAnimationTransform(float GlobalTime, int Env, class CLayers *pLayers, vec2 &Position, float &Angle) const;
 
 public:
+	enum QuadType
+	{
+		QUADTYPE_FREEZE = 0,
+		QUADTYPE_UNFREEZE,
+		QUADTYPE_DEATH,
+		QUADTYPE_STOPA,
+		QUADTYPE_CFRM,
+		NUM_QUADTYPES
+	};
+
+	int GetQuadType(const CMapItemLayerQuads *pQuadLayer) const;
+
 	const std::vector<CMapItemLayerQuads *> &QuadLayers() const { return m_vQuadLayers; }
 	void ClearQuadLayers();
 	void Rotate(vec2 Center, vec2 *pPoint, float Rotation) const;

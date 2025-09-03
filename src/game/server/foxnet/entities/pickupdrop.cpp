@@ -21,7 +21,7 @@
 #include <game/teamscore.h>
 
 CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, int LastOwner, vec2 Pos, int Team, int TeleCheckpoint, vec2 Dir, int Lifetime, int Type) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUPDROP, Pos)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUPDROP, Pos, 24)
 {
 	m_LastOwner = LastOwner;
 	m_PrevPos = m_Pos;
@@ -188,15 +188,6 @@ void CPickupDrop::Tick()
 		}
 	}
 
-	// quads
-	for(const auto *pQuadLayer : Collision()->QuadLayers())
-	{
-		for(int QuadIndex = 0; QuadIndex < pQuadLayer->m_NumQuads; QuadIndex++)
-		{
-			HandleQuads(pQuadLayer, QuadIndex);
-		}
-	}
-
 	// tiles
 	std::vector<int> vIndices = Collision()->GetMapIndices(m_PrevPos, m_Pos);
 	if(!vIndices.empty())
@@ -346,173 +337,6 @@ bool CPickupDrop::CollectItem()
 	return true;
 }
 
-void CPickupDrop::HandleQuads(const CMapItemLayerQuads *pQuadLayer, int QuadIndex)
-{
-	if(!pQuadLayer)
-		return;
-
-	char QuadName[30] = "";
-	IntsToStr(pQuadLayer->m_aName, std::size(pQuadLayer->m_aName), QuadName, std::size(QuadName));
-
-	bool IsFreeze = !str_comp("QFr", QuadName);
-	bool IsDeath = !str_comp("QDeath", QuadName);
-	bool IsStopa = !str_comp("QStopa", QuadName);
-	bool IsCfrm = !str_comp("QCfrm", QuadName);
-
-	vec2 TopL, TopR, BottomL, BottomR;
-	int FoundNum = Collision()->GetQuadCorners(QuadIndex, pQuadLayer, 0.00f, &TopL, &TopR, &BottomL, &BottomR);
-	if(FoundNum < 0 || FoundNum >= pQuadLayer->m_NumQuads)
-		return;
-
-	float Radius = 0.0f;
-	if(IsDeath)
-		Radius = 8.0f;
-	if(IsStopa)
-		Radius = CCharacterCore::PhysicalSize() / 2.0f;
-
-	bool Inside = Collision()->InsideQuad(m_Pos, Radius, TopL, TopR, BottomL, BottomR);
-	if(!Inside)
-		return;
-
-	if(IsFreeze)
-	{
-		if(g_Config.m_SvDropsInFreezeFloat)
-			m_InsideFreeze = true;
-	}
-	else if(IsDeath)
-	{
-		Reset();
-	}
-	else if(IsStopa)
-	{
-		HandleQuadStopa(pQuadLayer, QuadIndex);
-	}
-	else if(IsCfrm)
-	{
-		for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
-		{
-			if(!Collision()->TeleCheckOuts(k).empty())
-			{
-				int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleCheckOuts(k).size());
-				m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
-				m_Vel = vec2(0, 0);
-
-				return;
-			}
-		}
-		vec2 SpawnPos;
-		if(GameServer()->m_pController->CanSpawn(0, &SpawnPos, m_Team))
-		{
-			m_Pos = SpawnPos;
-			m_Vel = vec2(0, 0);
-		}
-	}
-}
-
-void CPickupDrop::HandleQuadStopa(const CMapItemLayerQuads *pQuadLayer, int QuadIndex)
-{
-	if(!pQuadLayer)
-		return;
-
-	vec2 TL, TR, BL, BR;
-	int Found = Collision()->GetQuadCorners(QuadIndex, pQuadLayer, 0.0f, &TL, &TR, &BL, &BR);
-	if(Found < 0 || Found >= pQuadLayer->m_NumQuads)
-		return;
-
-	bool Inside = Collision()->InsideQuad(m_Pos, CCharacterCore::PhysicalSize() / 1.5f, TL, TR, BL, BR);
-	if(!Inside)
-		return;
-
-	constexpr float R = CCharacterCore::PhysicalSize() * 0.5f;
-	const vec2 P = m_Pos;
-
-	const vec2 aA[4] = {TL, TR, BR, BL};
-	const vec2 aB[4] = {TR, BR, BL, TL};
-
-	float MinPenetration = std::numeric_limits<float>::infinity();
-	vec2 BestInwardNormal = vec2(0.0f, 0.0f);
-	vec2 BestEdgeVec = vec2(0.0f, 0.0f);
-
-	for(int i = 0; i < 4; ++i)
-	{
-		vec2 E = aB[i] - aA[i];
-		float Elen2 = dot(E, E);
-		if(Elen2 <= 1e-6f)
-			continue;
-
-		vec2 N_in = normalize(vec2(-E.y, E.x));
-		float d = dot(P - aA[i], N_in);
-		float penetration = d + R;
-
-		if(penetration < MinPenetration)
-		{
-			MinPenetration = penetration;
-			BestInwardNormal = N_in;
-			BestEdgeVec = E;
-		}
-	}
-
-	if(MinPenetration == std::numeric_limits<float>::infinity())
-		return;
-
-	if(MinPenetration > 0.0f)
-	{
-		const float Epsilon = 0.0f;
-		vec2 MTV = -BestInwardNormal * (MinPenetration + Epsilon);
-
-		auto CanPlace = [&](const vec2 &Pos) {
-			return !Collision()->TestBox(Pos, CCharacterCore::PhysicalSizeVec2());
-		};
-
-		auto MoveAxis = [&](vec2 &Pos, const vec2 &Delta) {
-			if(Delta.x == 0.0f && Delta.y == 0.0f)
-				return vec2(0.f, 0.f);
-
-			vec2 Target = Pos + Delta;
-			if(CanPlace(Target))
-			{
-				Pos = Target;
-				return Delta;
-			}
-
-			float lo = 0.0f;
-			float hi = 1.0f;
-			for(int i = 0; i < 10; ++i)
-			{
-				float mid = (lo + hi) * 0.5f;
-				vec2 MidPos = Pos + Delta * mid;
-				if(CanPlace(MidPos))
-					lo = mid;
-				else
-					hi = mid;
-			}
-			if(lo > 0.0f)
-			{
-				vec2 Applied = Delta * lo;
-				Pos += Applied;
-				return Applied;
-			}
-			return vec2(0.0f, 0.0f);
-		};
-
-		vec2 NewPos = m_Pos;
-
-		vec2 AppliedX = MoveAxis(NewPos, vec2(MTV.x, 0.0f));
-		vec2 AppliedY = MoveAxis(NewPos, vec2(0.0f, MTV.y));
-
-		m_Pos = NewPos;
-
-		float vIn = dot(m_Vel, BestInwardNormal);
-		if(vIn > 0.0f)
-			m_Vel -= BestInwardNormal * vIn;
-
-		if(AppliedX.x == 0.0f && MTV.x != 0.0f)
-			m_Vel.x = 0.0f;
-		if(AppliedY.y == 0.0f && MTV.y != 0.0f)
-			m_Vel.y = 0.0f;
-	}
-}
-
 void CPickupDrop::HandleTiles(int Index)
 {
 	int MapIndex = Index;
@@ -656,4 +480,15 @@ void CPickupDrop::Snap(int SnappingClient)
 		pProj->m_StartTick = 0;
 		pProj->m_Type = WEAPON_HAMMER;
 	}
+}
+
+void CPickupDrop::SetVelocity(vec2 Vel)
+{
+	m_Vel = ClampVel(m_MoveRestrictions, Vel);
+}
+
+void CPickupDrop::ForceSetPos(vec2 NewPos)
+{
+	m_Pos = NewPos;
+	m_PrevPos = m_Pos;
 }

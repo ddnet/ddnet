@@ -22,7 +22,7 @@ class CTeamsCore;
 // <FoxNet
 enum ExtraWeapons
 {
-	WEAPON_NONE = -1;
+	WEAPON_NONE = -1,
 	WEAPON_TELEKINESIS = NUM_WEAPONS,
 	WEAPON_HEARTGUN,
 	WEAPON_LIGHTSABER,
@@ -280,8 +280,6 @@ public:
 	bool m_LiveFrozen;
 	CTuningParams m_Tuning;
 	// <FoxNet
-	bool m_IsInFreezeQuad;
-
 	CTuningParams m_FakeTuning;
 	bool m_FakeTuned;
 
