@@ -5,7 +5,11 @@
 - Shop
 - Inventory
 - Custom vote menu
+- UFO
+- Snake
 - Moving tiles using quads (like KoG) - still missing moving hookable/unhookable
+- Custom weapons
+- Dropping weapons
 
 # Commands/Configs
 
@@ -20,6 +24,8 @@
 |sv_playtime_money|How much money a player gets as playtime bonus|
 |sv_anti_ad_bot|whether to ban and hide bot client advertisement mesasges|
 |sv_prediction_test|Used for ufos visuals so the lasers are ontop of the player|
+|sv_ban_syncing|Whether to automatically exec and save bans across multiple servers|
+|sv_ban_syncing_delay|How long to wait before syncing bans|
 |sv_snake_auto_move|Whether the snake can stand still or not|
 |sv_snake_speed|How fast the snake should move|
 |sv_snake_diagonal|Whether the snake can move diagonally|
@@ -35,8 +41,15 @@
 |sv_ufo_laser_type|Ufos laser type|
 |sv_ufo_hide_hook_coll|Whether to hide hook coll while flying down|
 |sv_ufo_brakes|Whether pressing every button should stop the ufo completely|
+|sv_instant_core_update|Sends an update to clients instantly always|
 |sv_debug_quad_pos|Shows a laser on every top left corner of a valid interactable quad|
+|sv_qstopa_gives_dj|Whether standing on a Quad Stopa gives back double jump|
+|sv_no_auth_cooldown|Whether authed players have a cooldown on abilities|
 |sv_allow_weapon_drops|Whether the /dropweapon command is allowed|
+|sv_drop_weapon_vote_no|Whether players can drop weapons using vote no (f4)|
+|sv_reset_drops_on_leave|Whether to reset dropped weapons when a player leaves|
+|sv_drop_weapon_on_death|Whether all custom weapons are dropped on death|
+|sv_drops_in_freeze_float|Whether dropped weapons should float up inside freeze|
 
 |Commands|Description|
 |-|-|
