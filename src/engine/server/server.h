@@ -208,7 +208,7 @@ public:
 		}
 	};
 
-	int ConsoleAccessLevel(int ClientId) const;
+	IConsole::EAccessLevel ConsoleAccessLevel(int ClientId) const;
 
 	CClient m_aClients[MAX_CLIENTS];
 	int m_aIdMap[MAX_CLIENTS * VANILLA_MAX_CLIENTS];
