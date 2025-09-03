@@ -2899,6 +2899,9 @@ CClientMask CCharacter::OppsiteCosmeticMask()
 
 void CCharacter::FoxNetTick()
 {
+	if(m_VoteActionDelay >= 0)
+		m_VoteActionDelay--;
+
 	if(m_IsRainbowHooked && GetPowerHooked() != HOOK_RAINBOW)
 	{
 		m_IsRainbowHooked = false;
@@ -3005,7 +3008,7 @@ void CCharacter::DoTelekinesis()
 		m_TelekinesisId = -1;
 	GameServer()->CreateSound(m_Pos, SOUND_NINJA_HIT, TeamMask());
 
-	m_VoteActionDelay[0] = Server()->Tick() + GetFireDelay(Core()->m_ActiveWeapon) * Server()->TickSpeed() / 1000;
+	m_VoteActionDelay = GetFireDelay(Core()->m_ActiveWeapon) * Server()->TickSpeed() / 1000;
 }
 
 vec2 CCharacter::GetCursorPos()
@@ -3368,37 +3371,39 @@ void CCharacter::CreatePowerupCircle(vec2 Pos, int ClientId, int Type)
 void CCharacter::VoteAction(const CNetMsg_Cl_Vote *pMsg, int ClientId)
 {
 	int Ability = GetPlayer()->m_Cosmetics.m_Ability;
-	if(!Ability && GetActiveWeapon() != WEAPON_HEARTGUN)
-		return;
 
 	bool NoCooldown = Server()->GetAuthedState(ClientId) && g_Config.m_SvNoAuthCooldown;
 
 	bool F3 = pMsg->m_Vote == 1;
 	bool F4 = pMsg->m_Vote == -1;
 
-	if(F3 && (m_VoteActionDelay[VOTE_F3] < Server()->Tick() || NoCooldown))
+	if(F3 && (m_VoteActionDelay <= 0 || NoCooldown))
 	{
-		m_VoteActionDelay[VOTE_F3] = Server()->Tick() + Server()->TickSpeed() * g_Config.m_SvAbilityCooldown;
-
-		// Heart "Explosion"
 		if(GetActiveWeapon() == WEAPON_HEARTGUN || Ability == ABILITY_HEART)
-			CreatePowerupExplosion(m_Pos, ClientId, POWERUP_HEALTH);
-		else if(Ability == ABILITY_SHIELD)
-			CreatePowerupExplosion(m_Pos, ClientId, POWERUP_ARMOR);
+		{
+			CreatePowerupCircle(GetCursorPos(), ClientId, POWERUP_HEALTH);
+			m_VoteActionDelay = Server()->TickSpeed() * 3;
+		}
+		if(Ability == ABILITY_SHIELD)
+		{
+			CreatePowerupCircle(GetCursorPos(), ClientId, POWERUP_ARMOR);
+			m_VoteActionDelay = Server()->TickSpeed() * 3;
+		}
+		if(Ability == ABILITY_FIREWORK)
+		{
+			new CFirework(GameWorld(), m_pPlayer->GetCid(), m_Pos);
+			m_VoteActionDelay = Server()->TickSpeed() * 3;
+		}
 		else if(Ability == ABILITY_TELEKINESIS)
 			DoTelekinesis();
 	}
 
-	if(F4 && (m_VoteActionDelay[VOTE_F4] < Server()->Tick() || NoCooldown))
+	if(F4 && g_Config.m_SvAllowWeaponDrops && g_Config.m_SvDropWeaponVoteNo)
 	{
-		m_VoteActionDelay[VOTE_F4] = Server()->Tick() + Server()->TickSpeed() * (g_Config.m_SvAbilityCooldown + 3.0f);
+		vec2 Dir = normalize(vec2(Input()->m_TargetX, Input()->m_TargetY));
+		int Type = Core()->m_ActiveWeapon;
 
-		if(GetActiveWeapon() == WEAPON_HEARTGUN || Ability == ABILITY_HEART)
-			CreatePowerupCircle(GetCursorPos(), ClientId, POWERUP_HEALTH);
-		if(Ability == ABILITY_SHIELD)
-			CreatePowerupCircle(GetCursorPos(), ClientId, POWERUP_ARMOR);
-		if(Ability == ABILITY_FIREWORK)
-			new CFirework(GameWorld(), m_pPlayer->GetCid(), m_Pos);
+		DropWeapon(Type, Dir * vec2(5.0f, 8.0f));
 	}
 }
 

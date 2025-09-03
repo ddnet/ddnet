@@ -13,6 +13,7 @@
 #include <game/mapitems.h>
 #include <game/server/foxnet/entities/light_saber.h>
 #include <game/server/foxnet/entities/portal.h>
+#include <game/server/foxnet/entities/pickupdrop.h>
 
 class CGameTeams;
 class CGameWorld;
@@ -33,15 +34,9 @@ enum
 enum
 {
 	ABILITY_NONE = 0,
-
-	// F3 And F4
 	ABILITY_HEART,
 	ABILITY_SHIELD,
-
-	// Only F4
 	ABILITY_FIREWORK,
-
-	// F3
 	ABILITY_TELEKINESIS,
 	NUM_ABILITY
 };
@@ -351,6 +346,7 @@ public:
 
 	// Dir Is also the Throw force -> m_Vel = Dir on drop creation
 	void DropWeapon(int Type, vec2 Dir, bool Death = false);
+	std::vector<CPickupDrop *> m_vPickupDrops;
 
 	bool HasLineOfSight(vec2 Pos);
 
@@ -363,12 +359,7 @@ private:
 	float GetFireDelay(int Weapon);
 
 	void FoxNetTick();
-	enum
-	{
-		VOTE_F3 = 0,
-		VOTE_F4 = 1,
-	};
-	int64_t m_VoteActionDelay[2];
+	int m_VoteActionDelay;
 	void HandleQuads(const CMapItemLayerQuads *pQuadLayer, int QuadIndex);
 	void HandleQuadStopa(const CMapItemLayerQuads *pQuadLayer, int QuadIndex);
 

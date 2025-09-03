@@ -1,7 +1,7 @@
-﻿#include <generated/protocol.h>
-#include <game/server/entities/character.h>
+﻿#include <game/server/entities/character.h>
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
+#include <generated/protocol.h>
 
 #include <base/system.h>
 #include <string>
@@ -686,15 +686,7 @@ void CPlayer::SetAbility(int Type)
 	str_format(aBuf, sizeof(aBuf), "Ability set to %s", GetAbilityName(m_Cosmetics.m_Ability));
 	GameServer()->SendChatTarget(ClientId, aBuf);
 
-	if(ABILITY_HEART <= Type && Type <= ABILITY_SHIELD)
-	{
-		GameServer()->SendChatTarget(ClientId, "Use f3 (Vote Yes) to use ability 1");
-		GameServer()->SendChatTarget(ClientId, "If there is one, Use f4 (Vote No) to use ability 2");
-	}
-	if(Type == ABILITY_FIREWORK)
-		GameServer()->SendChatTarget(ClientId, "If there is one, Use f4 (Vote No) to use your Ability");
-	if(Type == ABILITY_TELEKINESIS)
-		GameServer()->SendChatTarget(ClientId, "Use f3 (Vote Yes) to use your Ability");
+	GameServer()->SendChatTarget(ClientId, "Use f4 (Vote No) to use your Ability");
 }
 
 void CPlayer::DisableAllCosmetics()

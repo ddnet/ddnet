@@ -62,10 +62,10 @@ MACRO_CONFIG_INT(SvQStopaGivesDj, sv_qstopa_gives_dj, 0, 0, 1, CFGFLAG_SERVER | 
 
 // Abilities
 MACRO_CONFIG_INT(SvNoAuthCooldown, sv_no_auth_cooldown, 0, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "whether theres a cooldown for abilities on authed players")
-MACRO_CONFIG_INT(SvAbilityCooldown, sv_ability_cooldown, 1, 1, 100, CFGFLAG_SERVER | CFGFLAG_GAME, "Cooldown for Abilities")
 
 // Weapon Drops
 MACRO_CONFIG_INT(SvAllowWeaponDrops, sv_allow_weapon_drops, 1, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Turns on functionality for /weapondrop")
+MACRO_CONFIG_INT(SvDropWeaponVoteNo, sv_drop_weapon_vote_no, 1, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "requires sv_allow_weapon_drops, drop weapons using f4 (vote no)")
 MACRO_CONFIG_INT(SvResetDropsOnLeave, sv_reset_drops_on_leave, 1, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "If a player leaves while he was weapons dropped, they get reset")
 MACRO_CONFIG_INT(SvDropWeaponOnDeath, sv_drop_weapon_on_death, 0, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Requires sv_allow_weapon_drops")
 MACRO_CONFIG_INT(SvDropsInFreezeFloat, sv_drops_in_freeze_float, 0, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Make Weapon Drops in freeze float up")
