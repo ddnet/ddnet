@@ -61,6 +61,7 @@ void CPortal::Tick()
 {
 	m_Lifetime--;
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+
 	if((!GameServer()->m_apPlayers[m_Owner] || (pOwnerChar && !pOwnerChar->GetWeaponGot(WEAPON_PORTALGUN))) && m_Lifetime <= 0)
 	{
 		Reset();
@@ -75,6 +76,12 @@ void CPortal::Tick()
 
 	if(m_State == STATE_FIRST_SET)
 	{
+		if(!pOwnerChar)
+		{
+			RemovePortals();
+			return;
+		}
+
 		if(m_PortalData[0].m_Team != pOwnerChar->Team())
 		{
 			RemovePortals();
@@ -89,7 +96,11 @@ void CPortal::Tick()
 			return;
 		}
 	}
-
+	HandleTele();
+	SetPortalVisual();
+}
+void CPortal::HandleTele()
+{
 	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
 		CCharacter *pChr = GameServer()->GetPlayerChar(ClientId);
@@ -138,9 +149,7 @@ void CPortal::Tick()
 				GameServer()->CreateSound(pChr->m_Pos, SOUND_WEAPON_SPAWN);
 		}
 	}
-	SetPortalVisual();
 }
-
 inline vec2 CPortal::CirclePos(int Part)
 {
 	vec2 Direction = direction(360.0f / CPortal::SEGMENTS * Part * (pi / 180.0f));

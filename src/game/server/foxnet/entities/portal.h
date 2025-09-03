@@ -54,6 +54,7 @@ class CPortal : public CEntity
 
 	void RemovePortals();
 	bool TrySetPortal();
+	void HandleTele();
 
 public:
 	CPortal(CGameWorld *pGameWorld, int Owner, vec2 Pos);
