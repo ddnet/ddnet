@@ -4051,6 +4051,8 @@ void CServer::ConchainCommandAccessUpdate(IConsole::IResult *pResult, void *pUse
 			{
 				if(pThis->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
 					continue;
+				if(!pThis->IsRconAuthed(i))
+					continue;
 				const int ClientAccessLevel = pThis->ConsoleAccessLevel(i);
 				if((pInfo->GetAccessLevel() > ClientAccessLevel && ClientAccessLevel < OldAccessLevel) ||
 					(pInfo->GetAccessLevel() < ClientAccessLevel && ClientAccessLevel > OldAccessLevel) ||
