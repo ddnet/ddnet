@@ -96,8 +96,9 @@ class CSound : public IEngineSound
 	CSample *AllocSample() REQUIRES(!m_SoundLock);
 	void RateConvert(CSample &Sample) const;
 
-	bool DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize) const;
-	bool DecodeWV(CSample &Sample, const void *pData, unsigned DataSize) const;
+	// pFilename used for error
+	bool DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize, const char *pFilename) const;
+	bool DecodeWV(CSample &Sample, const void *pData, unsigned DataSize, const char *pFilename) const;
 
 	void UpdateVolume();
 
