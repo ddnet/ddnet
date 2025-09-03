@@ -38,8 +38,8 @@ class CPickupDrop : public CEntity
 	int m_TuneZone;
 	int m_MoveRestrictions;
 
-	void CollectItem();
-	void CheckArmor();
+	bool CollectItem();
+	bool CheckArmor();
 
 public:
 	CPickupDrop(CGameWorld *pGameWorld, int LastOwner, vec2 Pos, int Team, int TeleCheckpoint, vec2 Dir, int Lifetime /*Seconds*/, int Type);

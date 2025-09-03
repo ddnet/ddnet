@@ -49,6 +49,7 @@ void CPlayer::FoxNetReset()
 	m_SpiderHook = false;
 
 	m_Cosmetics = CCosmetics();
+	m_vPickupDrops.clear();
 }
 
 void CPlayer::GivePlaytime(int Amount)

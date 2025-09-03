@@ -101,6 +101,9 @@ void CPortal::Tick()
 }
 void CPortal::HandleTele()
 {
+	if(!m_PortalData[0].m_Active || !m_PortalData[1].m_Active)
+		return;
+
 	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
 		CCharacter *pChr = GameServer()->GetPlayerChar(ClientId);
@@ -110,43 +113,34 @@ void CPortal::HandleTele()
 		if(m_PortalData[0].m_Team != TEAM_SUPER && pChr->Team() != TEAM_SUPER && pChr->Team() != m_PortalData[0].m_Team)
 			continue;
 
-		bool Teleported = false;
-		if(m_PortalData[0].m_Active && m_PortalData[1].m_Active)
-		{
-			if(PointInCircle(pChr->m_Pos, m_PortalData[0].m_Pos, PortalRadius))
-			{
-				if(!m_CanTeleport[ClientId])
-					continue;
+		const bool InP0 = PointInCircle(pChr->m_Pos, m_PortalData[0].m_Pos, PortalRadius);
+		const bool InP1 = !InP0 && PointInCircle(pChr->m_Pos, m_PortalData[1].m_Pos, PortalRadius);
 
-				pChr->m_PrevPos = m_PortalData[1].m_Pos;
-				pChr->SetPosition(m_PortalData[1].m_Pos);
-				pChr->ReleaseHook();
-				m_CanTeleport[ClientId] = false;
-				Teleported = true;
-			}
-			else if(PointInCircle(pChr->m_Pos, m_PortalData[1].m_Pos, PortalRadius))
-			{
-				if(!m_CanTeleport[ClientId])
-					continue;
-
-				pChr->m_PrevPos = m_PortalData[0].m_Pos;
-				pChr->SetPosition(m_PortalData[0].m_Pos);
-				pChr->ReleaseHook();
-				m_CanTeleport[ClientId] = false;
-				Teleported = true;
-			}
-			else
-				m_CanTeleport[ClientId] = true;
-		}
-		if(Teleported)
+		if(InP0 || InP1)
 		{
+			bool &Can = m_CanTeleport[ClientId];
+			if(!Can)
+				continue;
+
+			const vec2 Target = InP0 ? m_PortalData[1].m_Pos : m_PortalData[0].m_Pos;
+			pChr->m_PrevPos = Target;
+			pChr->SetPosition(Target);
+			pChr->ReleaseHook();
+			Can = false;
+
 			if(distance(m_PortalData[0].m_Pos, m_PortalData[1].m_Pos) > 450.0f)
 			{
 				GameServer()->CreateSound(m_PortalData[0].m_Pos, SOUND_WEAPON_SPAWN);
 				GameServer()->CreateSound(m_PortalData[1].m_Pos, SOUND_WEAPON_SPAWN);
 			}
 			else
-				GameServer()->CreateSound(pChr->m_Pos, SOUND_WEAPON_SPAWN);
+			{
+				GameServer()->CreateSound(Target, SOUND_WEAPON_SPAWN);
+			}
+		}
+		else
+		{
+			m_CanTeleport[ClientId] = true;
 		}
 	}
 }

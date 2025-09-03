@@ -10,10 +10,13 @@
 
 #include "teeinfo.h"
 
-#include "foxnet/accounts.h"
+// <FoxNet
 #include <memory>
 #include <optional>
+#include "foxnet/accounts.h"
 #include "foxnet/cosmetics/pickup_pet.h"
+#include "foxnet/entities/pickupdrop.h"
+// FoxNet>
 
 class CCharacter;
 class CGameContext;
@@ -390,6 +393,7 @@ public:
 
 	CPickupPet *m_pPickupPet;
 
+	std::vector<CPickupDrop *> m_vPickupDrops;
 private:
 	void FoxNetReset();
 	void OverrideName(int SnappingClient, CNetObj_ClientInfo *pClientInfo);

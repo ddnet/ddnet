@@ -17,6 +17,7 @@
 #include <game/server/entity.h>
 #include <game/server/gameworld.h>
 #include <vector>
+#include <engine/shared/protocol.h>
 
 CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, int LastOwner, vec2 Pos, int Team, int TeleCheckpoint, vec2 Dir, int Lifetime, int Type) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUPDROP, Pos)
@@ -44,13 +45,25 @@ void CPickupDrop::Reset(bool PickedUp)
 {
 	for(int i = 0; i < 2; i++)
 		Server()->SnapFreeId(m_aIds[i]);
-
 	Server()->SnapFreeId(GetId());
-	GameWorld()->RemoveEntity(this);
+
+	if(m_LastOwner >= 0)
+	{
+		if(CPlayer *pPl = GameServer()->m_apPlayers[m_LastOwner])
+		{
+			for(size_t i = 0; i < pPl->m_vPickupDrops.size(); i++)
+			{
+				if(pPl->m_vPickupDrops[i] == this)
+					pPl->m_vPickupDrops.erase(pPl->m_vPickupDrops.begin() + i);
+			}
+		}
+	}
 
 	CClientMask TeamMask = CClientMask().set();
 	if(!PickedUp)
 		GameServer()->CreateDeath(m_Pos, m_LastOwner, TeamMask);
+
+	GameWorld()->RemoveEntity(this);
 }
 
 bool CPickupDrop::IsSwitchActiveCb(int Number, void *pUser)
@@ -73,6 +86,11 @@ void CPickupDrop::Tick()
 		Reset();
 		return;
 	}
+	if(CheckArmor())
+		return;
+	if(CollectItem())
+		return;
+
 	int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_Pos);
 	m_TuneZone = GameServer()->Collision()->IsTune(CurrentIndex);
 
@@ -187,8 +205,6 @@ void CPickupDrop::Tick()
 		HandleTiles(CurrentIndex);
 	}
 
-	CheckArmor();
-	CollectItem();
 	bool Grounded = false;
 	Collision()->MoveBox(&m_Pos, &m_Vel, CCharacterCore::PhysicalSizeVec2(), m_GroundElasticity, &Grounded);
 	if(Grounded)
@@ -208,7 +224,7 @@ void CPickupDrop::Tick()
 	m_PrevPos = m_Pos;
 }
 
-void CPickupDrop::CheckArmor()
+bool CPickupDrop::CheckArmor()
 {
 	CPickup *apEnts[9];
 	int Num = GameWorld()->FindEntities(m_Pos, 34, (CEntity **)apEnts, 9, CGameWorld::ENTTYPE_PICKUP);
@@ -219,11 +235,12 @@ void CPickupDrop::CheckArmor()
 		{
 		case POWERUP_ARMOR:
 		{
-			if(m_Type > 0 && m_Type < NUM_WEAPONS && apEnts[i]->GetOwnerId() < 0)
+			if(m_Type > WEAPON_GUN && m_Type < NUM_WEAPONS && apEnts[i]->GetOwnerId() < 0)
 			{
 				CClientMask TeamMask = CClientMask().set();
 				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, TeamMask);
-				Reset();
+				Reset(false);
+				return true;
 			}
 		}
 		break;
@@ -234,7 +251,8 @@ void CPickupDrop::CheckArmor()
 			{
 				CClientMask TeamMask = CClientMask().set();
 				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, TeamMask);
-				Reset();
+				Reset(false);
+				return true;
 			}
 		}
 		break;
@@ -246,6 +264,7 @@ void CPickupDrop::CheckArmor()
 				CClientMask TeamMask = CClientMask().set();
 				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, TeamMask);
 				Reset();
+				return true;
 			}
 		}
 		break;
@@ -257,6 +276,7 @@ void CPickupDrop::CheckArmor()
 				CClientMask TeamMask = CClientMask().set();
 				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, TeamMask);
 				Reset();
+				return true;
 			}
 		}
 		break;
@@ -268,6 +288,7 @@ void CPickupDrop::CheckArmor()
 				CClientMask TeamMask = CClientMask().set();
 				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, TeamMask);
 				Reset();
+				return true;
 			}
 		}
 		break;
@@ -276,6 +297,7 @@ void CPickupDrop::CheckArmor()
 			break;
 		}
 	}
+	return false;
 }
 
 bool CPickupDrop::IsGrounded()
@@ -289,22 +311,22 @@ bool CPickupDrop::IsGrounded()
 	return (MoveRestrictionsBelow & CANTMOVE_DOWN) != 0;
 }
 
-void CPickupDrop::CollectItem()
+bool CPickupDrop::CollectItem()
 {
 	if(m_PickupDelay > 0)
 	{
 		m_PickupDelay--;
-		return;
+		return false;
 	}
 
 	float Radius = 32.0f;
 	CCharacter *pClosest = GameServer()->m_World.ClosestCharacter(m_Pos, Radius, this);
 	if(!pClosest)
-		return;
+		return false;
 	if(m_Team != TEAM_SUPER && pClosest->Team() != TEAM_SUPER && m_Team != pClosest->Team())
-		return;
+		return false;
 	if(pClosest->Core()->m_aWeapons[m_Type].m_Got)
-		return;
+		return false;
 
 	pClosest->GiveWeapon(m_Type);
 	pClosest->SetActiveWeapon(m_Type);
@@ -315,6 +337,7 @@ void CPickupDrop::CollectItem()
 		GameServer()->SendWeaponPickup(pClosest->GetPlayer()->GetCid(), m_Type);
 
 	Reset(true);
+	return true;
 }
 
 void CPickupDrop::HandleQuads(const CMapItemLayerQuads *pQuadLayer, int QuadIndex)

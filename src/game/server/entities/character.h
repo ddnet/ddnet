@@ -346,7 +346,6 @@ public:
 
 	// Dir Is also the Throw force -> m_Vel = Dir on drop creation
 	void DropWeapon(int Type, vec2 Dir, bool Death = false);
-	std::vector<CPickupDrop *> m_vPickupDrops;
 
 	bool HasLineOfSight(vec2 Pos);
 

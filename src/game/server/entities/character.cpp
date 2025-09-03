@@ -2902,6 +2902,13 @@ void CCharacter::FoxNetTick()
 	if(m_VoteActionDelay >= 0)
 		m_VoteActionDelay--;
 
+	if(GetPlayer()->m_vPickupDrops.size() > (size_t)(NUM_EXTRA_WEAPONS + 1))
+	{ 
+		// remove oldest drop
+		auto pPickup = GetPlayer()->m_vPickupDrops.begin();
+		(*pPickup)->Reset(false);
+	}
+
 	if(m_IsRainbowHooked && GetPowerHooked() != HOOK_RAINBOW)
 	{
 		m_IsRainbowHooked = false;
@@ -3541,7 +3548,9 @@ void CCharacter::DropWeapon(int Type, vec2 Dir, bool Death)
 	if(!CanDropWeapon(Type))
 		return;
 
-	new CPickupDrop(GameWorld(), GetPlayer()->GetCid(), m_Pos, Team(), m_TeleCheckpoint, Dir, 300, Type);
+	CPickupDrop *pPickup = new CPickupDrop(GameWorld(), GetPlayer()->GetCid(), m_Pos, Team(), m_TeleCheckpoint, Dir, 300, Type);
+	GetPlayer()->m_vPickupDrops.push_back(pPickup);
+
 	if(!Death)
 	{
 		GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
