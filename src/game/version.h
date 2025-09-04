@@ -18,7 +18,7 @@ extern const char *GIT_SHORTREV_HASH;
 #define GAME_NETVERSION "0.6 626fce9a778df4d4"
 #define GAME_NETVERSION7 "0.7 802f1be60a05665f"
 
-#define FOXNET_VERSION "v0.6"
+#define FOXNET_VERSION "v0.7"
 
 #endif
 	
