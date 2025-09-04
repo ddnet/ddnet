@@ -524,8 +524,10 @@ CClientMask CGameTeams::TeamMask(int Team, int ExceptId, int Asker, int VersionF
 	CClientMask Mask;
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
+		// <FoxNet
 		if(!SetMask(i, Team, ExceptId, Asker, VersionFlags))
 			continue;
+		// FoxNet>
 
 		Mask.set(i);
 	}
