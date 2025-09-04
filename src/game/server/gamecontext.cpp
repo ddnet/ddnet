@@ -1554,8 +1554,8 @@ void CGameContext::OnClientEnter(int ClientId)
 		CNetMsg_Sv_CommandInfoGroupStart Msg;
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 	}
-	for(const IConsole::CCommandInfo *pCmd = Console()->FirstCommandInfo(IConsole::ACCESS_LEVEL_USER, CFGFLAG_CHAT);
-		pCmd; pCmd = pCmd->NextCommandInfo(IConsole::ACCESS_LEVEL_USER, CFGFLAG_CHAT))
+	for(const IConsole::CCommandInfo *pCmd = Console()->FirstCommandInfo(IConsole::EAccessLevel::USER, CFGFLAG_CHAT);
+		pCmd; pCmd = pCmd->NextCommandInfo(IConsole::EAccessLevel::USER, CFGFLAG_CHAT))
 	{
 		const char *pName = pCmd->m_pName;
 
@@ -2043,9 +2043,9 @@ void *CGameContext::PreProcessMsg(int *pMsgId, CUnpacker *pUnpacker, int ClientI
 			if(pMsg7->m_Force)
 			{
 				str_format(s_aRawMsg, sizeof(s_aRawMsg), "force_vote \"%s\" \"%s\" \"%s\"", pMsg7->m_pType, pMsg7->m_pValue, pMsg7->m_pReason);
-				Console()->SetAccessLevel(Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER);
+				Console()->SetAccessLevel(Authed == AUTHED_ADMIN ? IConsole::EAccessLevel::ADMIN : Authed == AUTHED_MOD ? IConsole::EAccessLevel::MODERATOR : IConsole::EAccessLevel::HELPER);
 				Console()->ExecuteLine(s_aRawMsg, ClientId, false);
-				Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
+				Console()->SetAccessLevel(IConsole::EAccessLevel::ADMIN);
 				return nullptr;
 			}
 
@@ -2250,9 +2250,9 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientId, con
 			Console()->SetFlagMask(CFGFLAG_CHAT);
 			int Authed = Server()->GetAuthedState(ClientId);
 			if(Authed)
-				Console()->SetAccessLevel(Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER);
+				Console()->SetAccessLevel(Authed == AUTHED_ADMIN ? IConsole::EAccessLevel::ADMIN : Authed == AUTHED_MOD ? IConsole::EAccessLevel::MODERATOR : IConsole::EAccessLevel::HELPER);
 			else
-				Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_USER);
+				Console()->SetAccessLevel(IConsole::EAccessLevel::USER);
 
 			{
 				CClientChatLogger Logger(this, ClientId, log_get_scope_logger());
@@ -2265,7 +2265,7 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientId, con
 			str_format(aBuf, sizeof(aBuf), "%d used %s", ClientId, pMsg->m_pMessage);
 			Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "chat-command", aBuf);
 
-			Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
+			Console()->SetAccessLevel(IConsole::EAccessLevel::ADMIN);
 			Console()->SetFlagMask(CFGFLAG_SERVER);
 		}
 	}
