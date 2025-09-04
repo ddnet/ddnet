@@ -1973,7 +1973,7 @@ Disabled
 
 [Direct touch input]
 Active action
-== Aktywne działanie
+== Aktywna akcja
 
 [Direct touch input]
 Aim
@@ -2203,15 +2203,283 @@ Dragger Outline Color
 Dragger Inner Color
 == Kolor zewnętrzny draggera
 
+Press Ctrl+Shift+G to disable debug graphs.
+== Naciśnij Ctrl+Shift+G, aby wyłączyć grafy debugowania.
+
 [Spectating]
 Following %d: %s
-== 
+== Obserwowanie %d: %s
+
+Server could not be started
+== Nie udało się uruchomić serwera
 
 Loading map
-== 
+== Ładowanie mapy
 
 Error checking player name
-== 
+== Błąd sprawdzania nicku
 
 Could not check for existing player with your name. Check your internet connection.
-== 
+== Nie udało się sprawdzić, czy istnieje gracz posiadający twój nick. Sprawdź połączenie z internetem.
+
+Could not get server list from master server
+== Nie udało się pobrać listy serwerów z serwera głównego
+
+[Demo playback]
+Live
+== Na żywo
+
+[Demo playback]
+Go to Live
+== Powrót do na żywo
+
+Save all changes before turning off the editor?
+== Czy zapisać wszystkie zmiany przed wyłączeniem edytora?
+
+Layout
+== Rozmieszczenie
+
+Visibility
+== Widoczność
+
+Behavior
+== Zachowanie
+
+Delete button
+== Usuń przycisk
+
+Are you sure that you want to delete this button?
+== Czy na pewno chcesz usunąć ten przycisk?
+
+Duplicate
+== Duplikuj
+
+New button already created
+== Nowy przycisk został już utworzony
+
+A new button has already been created, please save or delete it before creating another one.
+== Nowy przycisk został już utworzony. Zapisz go lub usuń, zanim dodasz następny.
+
+Please save your changes before duplicating a button.
+== Zapisz swoje zmiany przed zduplikowaniem przycisku.
+
+No space for button
+== Brak miejsca dla przycisku
+
+There is not enough space available to place another button.
+== Za mało miejsca, by dodać kolejny przycisk.
+
+There is not enough space available to place another button with this size. The button has been resized.
+== Za mało miejsca, by dodać kolejny przycisk w tym rozmiarze. Rozmiar przycisku został zmieniony.
+
+Deselect
+== Odznacz wybrany przycisk
+
+You'll lose unsaved changes after deselecting.
+== Po odznaczeniu utracisz niezapisane zmiany.
+
+Width
+== Szerokość
+
+Height
+== Wysokość
+
+Shape
+== Kształt
+
+[Touch button shape]
+Rectangle
+== Prostokąt
+
+[Touch button shape]
+Circle
+== Koło
+
+[Touch button label type]
+Plain
+== Zwykła
+
+[Touch button label type]
+Localized
+== Zlokalizowana
+
+[Touch button label type]
+Icon
+== Ikona
+
+Behavior type
+== Typ zachowania
+
+[Touch button behavior]
+Bind
+== Bind
+
+[Touch button behavior]
+Bind Toggle
+== Bind przełączający
+
+[Touch button behavior]
+Predefined
+== Domyślny
+
+Command
+== Komenda
+
+Label
+== Etykieta
+
+Label type
+== Typ etykiety
+
+Add command
+== Dodaj komendę
+
+Delete command
+== Usuń komendę
+
+[Touch button visibility preview]
+Included
+== Zawieraj
+
+[Touch button visibility preview]
+Excluded
+== Wykluczaj
+
+[Touch button visibility preview]
+Ignore
+== Ignoruj
+
+Long press on a touch button to select it.
+== Przytrzymaj przycisk, aby go wybrać.
+
+New button
+== Nowy przycisk
+
+Select button by touch
+== Dotknij, aby wybrać przycisk
+
+No buttons match your filter criteria
+== Żaden przycisk nie pasuje do kryteriów filtra
+
+File
+== Plik
+
+Buttons
+== Przyciski
+
+Active color
+== Kolor, gdy aktywny
+
+Inactive color
+== Kolor, gdy nieaktywny
+
+Preview button visibility while the editor is active.
+== Podgląd przycisku, gdy edytor jest włączony.
+
+Show all buttons
+== Pokaż wszystkie przyciski
+
+Save all changes before switching selected button?
+== Czy zapisać wszystkie zmiany przed zmianą aktywnego przycisku?
+
+Discard
+== Odrzuć
+
+There is not enough space available for the button. Check its visibilities and size.
+== Za mało miejsca na przycisk. Sprawdź jego widoczność i rozmiar.
+
+Selected button not visible
+== Aktywny przycisk nie jest widoczny
+
+The selected button is not visible. Do you want to deselect it or edit its visibility?
+== Wybrany przycisk nie jest widoczny. Czy chcesz go odznaczyć, czy zmienić jego widoczność?
+
+Edit
+== Edytuj
+
+Width and height are required to be within the range from %d to %d.
+== Szerokość i wysokość muszą być w zakresie od %d do %d.
+
+Button position is outside of the screen.
+== Pozycja przycisku jest poza ekranem.
+
+The selected button is overlapping with other buttons.
+== Aktywny przycisk nakłada się na inne przyciski.
+
+Wrong button settings
+== Złe ustawienia przycisku.
+
+[Touch button visibilities]
+Ingame
+== Podczas gry
+
+[Touch button visibilities]
+Zoom Allowed
+== Zoom dozwolony
+
+[Touch button visibilities]
+Vote Active
+== Podczas głosowania
+
+[Touch button visibilities]
+Dummy Allowed
+== Kukła dozwolona
+
+[Touch button visibilities]
+Dummy Connected
+== Kukła połączona
+
+[Touch button visibilities]
+Rcon Authed
+== Autoryzowany rcon
+
+[Touch button visibilities]
+Demo Player
+== Odtwarzacz demo
+
+[Touch button visibilities]
+Extra Menu
+== Dodatkowe menu
+
+[Predefined touch button behaviors]
+Ingame Menu
+== Menu gry
+
+[Predefined touch button behaviors]
+Extra Menu
+== Dodatkowe menu
+
+[Predefined touch button behaviors]
+Emoticon
+== Emotikona
+
+[Predefined touch button behaviors]
+Spectate
+== Obserwowanie
+
+[Predefined touch button behaviors]
+Swap Action
+== Zamień akcje
+
+[Predefined touch button behaviors]
+Use Action
+== Użyj akcji
+
+[Predefined touch button behaviors]
+Joystick Action
+== Joystick: Akcja
+
+[Predefined touch button behaviors]
+Joystick Aim
+== Joystick: Celowanie
+
+[Predefined touch button behaviors]
+Joystick Fire
+== Joystick: Strzał
+
+[Predefined touch button behaviors]
+Joystick Hook
+== Joystick: Hak
+
+Chat background color
+== Kolor tła czatu

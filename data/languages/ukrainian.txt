@@ -2213,3 +2213,271 @@ Error checking player name
 
 Could not check for existing player with your name. Check your internet connection.
 == Не вдалося перевірити, чи існує гравець із таким іменем. Перевірте з'єднання з інтернетом.
+
+Press Ctrl+Shift+G to disable debug graphs.
+== Натисніть Ctrl+Shift+G, щоб вимкнути графіки відладки.
+
+Server could not be started
+== Не вдалося запустити сервер
+
+Could not get server list from master server
+== Не вдалося отримати список серверів від майстер-сервера
+
+[Demo playback]
+Live
+== Наживо
+
+[Demo playback]
+Go to Live
+== Перейти до режиму "Наживо"
+
+Save all changes before turning off the editor?
+== Зберегти всі зміни перед вимкненням редактора?
+
+Layout
+== Макет
+
+Visibility
+== Видимість
+
+Behavior
+== Поведінка
+
+Delete button
+== Видалити кнопку
+
+Are you sure that you want to delete this button?
+== Ви впевнені, що хочете видалити цю кнопку?
+
+Duplicate
+== Дублювати
+
+New button already created
+== Нова кнопка вже створена
+
+A new button has already been created, please save or delete it before creating another one.
+== Нова кнопка вже створена, збережіть або видаліть її перед створенням іншої.
+
+Please save your changes before duplicating a button.
+== Будь ласка, збережіть зміни перед дублюванням кнопки.
+
+No space for button
+== Немає місця для кнопки
+
+There is not enough space available to place another button.
+== Недостатньо місця для розміщення ще однієї кнопки.
+
+There is not enough space available to place another button with this size. The button has been resized.
+== Недостатньо місця для розміщення кнопки такого розміру. Кнопку було змінено.
+
+Deselect
+== Скасувати вибір
+
+You'll lose unsaved changes after deselecting.
+== Ви втратите незбережені зміни після скасування вибору.
+
+Width
+== Ширина
+
+Height
+== Висота
+
+Shape
+== Форма
+
+[Touch button shape]
+Rectangle
+== Прямокутник
+
+[Touch button shape]
+Circle
+== Коло
+
+[Touch button label type]
+Plain
+== Звичайний
+
+[Touch button label type]
+Localized
+== Локалізований
+
+[Touch button label type]
+Icon
+== Іконка
+
+Behavior type
+== Тип поведінки
+
+[Touch button behavior]
+Bind
+== Прив’язка
+
+[Touch button behavior]
+Bind Toggle
+== Перемикач прив’язки
+
+[Touch button behavior]
+Predefined
+== Попередньо визначена
+
+Command
+== Команда
+
+Label
+== Підпис
+
+Label type
+== Тип підпису
+
+Add command
+== Додати команду
+
+Delete command
+== Видалити команду
+
+[Touch button visibility preview]
+Included
+== Увімкнено
+
+[Touch button visibility preview]
+Excluded
+== Вимкнено
+
+[Touch button visibility preview]
+Ignore
+== Ігнорувати
+
+Long press on a touch button to select it.
+== Довге натискання на сенсорну кнопку для вибору.
+
+New button
+== Нова кнопка
+
+Select button by touch
+== Вибір кнопки дотиком
+
+No buttons match your filter criteria
+== Жодна кнопка не відповідає критеріям фільтру
+
+File
+== Файл
+
+Buttons
+== Кнопки
+
+Active color
+== Активний колір
+
+Inactive color
+== Неактивний колір
+
+Preview button visibility while the editor is active.
+== Попередній перегляд видимості кнопок під час активного редактора.
+
+Show all buttons
+== Показати всі кнопки
+
+Save all changes before switching selected button?
+== Зберегти всі зміни перед перемиканням вибраної кнопки?
+
+Discard
+== Відхилити
+
+There is not enough space available for the button. Check its visibilities and size.
+== Недостатньо місця для кнопки. Перевірте її видимість і розмір.
+
+Selected button not visible
+== Вибрана кнопка невидима
+
+The selected button is not visible. Do you want to deselect it or edit its visibility?
+== Вибрана кнопка невидима. Хочете скасувати вибір чи змінити її видимість?
+
+Edit
+== Редагувати
+
+Width and height are required to be within the range from %d to %d.
+== Ширина і висота мають бути в межах від %d до %d.
+
+Button position is outside of the screen.
+== Позиція кнопки за межами екрана.
+
+The selected button is overlapping with other buttons.
+== Вибрана кнопка перекриває інші кнопки.
+
+Wrong button settings
+== Неправильні налаштування кнопки
+
+[Touch button visibilities]
+Ingame
+== У грі
+
+[Touch button visibilities]
+Zoom Allowed
+== Дозволено масштабування
+
+[Touch button visibilities]
+Vote Active
+== Активне голосування
+
+[Touch button visibilities]
+Dummy Allowed
+== Дозволено даммі
+
+[Touch button visibilities]
+Dummy Connected
+== Даммі підключено
+
+[Touch button visibilities]
+Rcon Authed
+== Rcon авторизовано
+
+[Touch button visibilities]
+Demo Player
+== Перегляд демо
+
+[Touch button visibilities]
+Extra Menu
+== Додаткове меню
+
+[Predefined touch button behaviors]
+Ingame Menu
+== Ігрове меню
+
+[Predefined touch button behaviors]
+Extra Menu
+== Додаткове меню
+
+[Predefined touch button behaviors]
+Emoticon
+== Смайлик
+
+[Predefined touch button behaviors]
+Spectate
+== Спостерігати
+
+[Predefined touch button behaviors]
+Swap Action
+== Змінити дію
+
+[Predefined touch button behaviors]
+Use Action
+== Використати дію
+
+[Predefined touch button behaviors]
+Joystick Action
+== Дія джойстика
+
+[Predefined touch button behaviors]
+Joystick Aim
+== Прицілювання джойстиком
+
+[Predefined touch button behaviors]
+Joystick Fire
+== Вогонь джойстиком
+
+[Predefined touch button behaviors]
+Joystick Hook
+== Гак джойстиком
+
+Chat background color
+== Колір фону чату

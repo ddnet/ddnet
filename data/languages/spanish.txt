@@ -209,13 +209,13 @@ Map
 == Mapa
 
 Move left
-== Mover a la izquierda
+== Moverse a la izquierda
 
 Move player to spectators
 == Mover jugador a espectadores
 
 Move right
-== Mover a la derecha
+== Moverse a la derecha
 
 Movement
 == Movimiento
@@ -2203,15 +2203,283 @@ Dragger Outline Color
 Dragger Inner Color
 == Color interno del arrastrador
 
+Press Ctrl+Shift+G to disable debug graphs.
+== Presiona Ctrl+Shift+G para deshabilitar las gráficas de debug.
+
 [Spectating]
 Following %d: %s
-== 
+== Siguiendo a %d: %s
+
+Server could not be started
+== No se pudo iniciar el servidor
 
 Loading map
-== 
+== Cargando mapa
 
 Error checking player name
-== 
+== Error al verificar el nombre del jugador
 
 Could not check for existing player with your name. Check your internet connection.
-== 
+== No se pudo verificar un jugador existente con tu nombre. Revisa tu conexión a internet.
+
+Could not get server list from master server
+== No se pudo obtener la lista de servidores desde el servidor maestro
+
+[Demo playback]
+Live
+== En vivo
+
+[Demo playback]
+Go to Live
+== Ir a En vivo
+
+Save all changes before turning off the editor?
+== ¿Guardar todos los cambios antes de salir del editor?
+
+Layout
+== Órden
+
+Visibility
+== Visibilidad
+
+Behavior
+== Comportamiento
+
+Delete button
+== Eliminar botón
+
+Are you sure that you want to delete this button?
+== ¿Estás seguro de que quieres eliminar este botón?
+
+Duplicate
+== Duplicar
+
+New button already created
+== El nuevo botón ya ha sido creado
+
+A new button has already been created, please save or delete it before creating another one.
+== Un nuevo botón ya ha sido creado, por favor guárdalo o bórralo antes de crear otro.
+
+Please save your changes before duplicating a button.
+== Por favor guarda los cambios antes de duplicar un botón.
+
+No space for button
+== No hay espacio para el botón
+
+There is not enough space available to place another button.
+== No hay espacio suficiente para colocar otro botón.
+
+There is not enough space available to place another button with this size. The button has been resized.
+== No hay espacio suficiente para colocar otro botón de este tamaño. El botón ha sido redimensionado.
+
+Deselect
+== Deseleccionar
+
+You'll lose unsaved changes after deselecting.
+== Perderás los cambios sin guardar despues de deseleccionar.
+
+Width
+== Ancho
+
+Height
+== Altura
+
+Shape
+== Forma
+
+[Touch button shape]
+Rectangle
+== Rectángulo
+
+[Touch button shape]
+Circle
+== Círculo
+
+[Touch button label type]
+Plain
+== Simple
+
+[Touch button label type]
+Localized
+== Localizado
+
+[Touch button label type]
+Icon
+== Icono
+
+Behavior type
+== Tipo de comportamiento
+
+[Touch button behavior]
+Bind
+== Bind
+
+[Touch button behavior]
+Bind Toggle
+== Bind alternado
+
+[Touch button behavior]
+Predefined
+== Predefinido
+
+Command
+== Comando
+
+Label
+== Etiqueta
+
+Label type
+== Tipo de etiqueta
+
+Add command
+== Añadir comando
+
+Delete command
+== Borrar comando
+
+[Touch button visibility preview]
+Included
+== Incluido
+
+[Touch button visibility preview]
+Excluded
+== Excluido
+
+[Touch button visibility preview]
+Ignore
+== Ignorar
+
+Long press on a touch button to select it.
+== Mantén presionado un botón táctil para seleccionarlo.
+
+New button
+== Nuevo botón
+
+Select button by touch
+== Tocar un botón para seleccionarlo
+
+No buttons match your filter criteria
+== No se encontró un botón con estos filtros
+
+File
+== Archivo
+
+Buttons
+== Botones
+
+Active color
+== Color activo
+
+Inactive color
+== Color inactivo
+
+Preview button visibility while the editor is active.
+== Vista previa de los botones mientras el editor está activo.
+
+Show all buttons
+== Mostrar todos los botones
+
+Save all changes before switching selected button?
+== ¿Guardar todos los cambios antes de cambiar de botón?
+
+Discard
+== Descartar
+
+There is not enough space available for the button. Check its visibilities and size.
+== No hay espacio suficiente para este botón. Revisa su tamaño y visibilidad.
+
+Selected button not visible
+== El botón seleccionado no es visible
+
+The selected button is not visible. Do you want to deselect it or edit its visibility?
+== El botón seleccionado no es visible. ¿Quieres deseleccionarlo o editar su visibilidad?
+
+Edit
+== Editar
+
+Width and height are required to be within the range from %d to %d.
+== El ancho y la altura deben estar entre el rango de %d a %d.
+
+Button position is outside of the screen.
+== La posición del botón está fuera de la pantalla.
+
+The selected button is overlapping with other buttons.
+== El botón seleccionado se está superponiendo con otros botones.
+
+Wrong button settings
+== Configuración incorrecta del botón
+
+[Touch button visibilities]
+Ingame
+== Dentro del juego
+
+[Touch button visibilities]
+Zoom Allowed
+== Zoom permitido
+
+[Touch button visibilities]
+Vote Active
+== Votación en curso
+
+[Touch button visibilities]
+Dummy Allowed
+== Dummy permitido
+
+[Touch button visibilities]
+Dummy Connected
+== Dummy conectado
+
+[Touch button visibilities]
+Rcon Authed
+== Autenticado en Rcon
+
+[Touch button visibilities]
+Demo Player
+== Reproductor de demos
+
+[Touch button visibilities]
+Extra Menu
+== Menú Extra
+
+[Predefined touch button behaviors]
+Ingame Menu
+== Menú Dentro del juego
+
+[Predefined touch button behaviors]
+Extra Menu
+== Menú Extra
+
+[Predefined touch button behaviors]
+Emoticon
+== Emoticón
+
+[Predefined touch button behaviors]
+Spectate
+== Asistir
+
+[Predefined touch button behaviors]
+Swap Action
+== Intercambiar Acción
+
+[Predefined touch button behaviors]
+Use Action
+== Usar Acción
+
+[Predefined touch button behaviors]
+Joystick Action
+== Acción de Joystick
+
+[Predefined touch button behaviors]
+Joystick Aim
+== Joystick Apuntar
+
+[Predefined touch button behaviors]
+Joystick Fire
+== Joystick Disparar
+
+[Predefined touch button behaviors]
+Joystick Hook
+== Joystick Gancho
+
+Chat background color
+== Color de fondo del chat

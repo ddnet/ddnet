@@ -2213,3 +2213,271 @@ Error checking player name
 
 Could not check for existing player with your name. Check your internet connection.
 == Não foi possível verificar se há um jogador com o seu nome. Verifique sua conexão de internet. 
+
+Press Ctrl+Shift+G to disable debug graphs.
+== Pressione Ctrl+Shift+G para desabilitar grafos de depuração.
+
+Server could not be started
+== O servidor não pôde ser iniciado
+
+Could not get server list from master server
+== Não foi possível obter a lista de servidores do servidor mestre
+
+[Demo playback]
+Live
+== Ao vivo
+
+[Demo playback]
+Go to Live
+== Ir para ao vivo
+
+Save all changes before turning off the editor?
+== Salvar todas as alterações antes de desligar o editor?
+
+Layout
+== Layout
+
+Visibility
+== Visibilidade
+
+Behavior
+== Comportamento
+
+Delete button
+== Excluir botão
+
+Are you sure that you want to delete this button?
+== Tem certeza de que deseja excluir este botão?
+
+Duplicate
+== Duplicar
+
+New button already created
+== Novo botão já criado
+
+A new button has already been created, please save or delete it before creating another one.
+== Um novo botão já foi criado, por favor salve-o ou exclua-o antes de criar outro.
+
+Please save your changes before duplicating a button.
+== Salve suas alterações antes de duplicar um botão.
+
+No space for button
+== Sem espaço para botão
+
+There is not enough space available to place another button.
+== Não há espaço disponível para colocar outro botão.
+
+There is not enough space available to place another button with this size. The button has been resized.
+== Não há espaço suficiente disponível para colocar outro botão com este tamanho. O botão foi redimensionado.
+
+Deselect
+== Desmarcar
+
+You'll lose unsaved changes after deselecting.
+== Você vai perder as alterações não salvas após desmarcar.
+
+Width
+== Largura
+
+Height
+== Altura
+
+Shape
+== Formato
+
+[Touch button shape]
+Rectangle
+== Retângulo
+
+[Touch button shape]
+Circle
+== Círculo
+
+[Touch button label type]
+Plain
+== Plano
+
+[Touch button label type]
+Localized
+== Localizado
+
+[Touch button label type]
+Icon
+== Ícone
+
+Behavior type
+== Tipo de comportamento
+
+[Touch button behavior]
+Bind
+== Atribuição
+
+[Touch button behavior]
+Bind Toggle
+== Alternar atribuição
+
+[Touch button behavior]
+Predefined
+== Predefinido
+
+Command
+== Comando
+
+Label
+== Rótulo
+
+Label type
+== Tipo de rótulo
+
+Add command
+== Adicionar comando
+
+Delete command
+== Excluir comando
+
+[Touch button visibility preview]
+Included
+== Incluído
+
+[Touch button visibility preview]
+Excluded
+== Excluído
+
+[Touch button visibility preview]
+Ignore
+== Ignorar
+
+Long press on a touch button to select it.
+== Matenha pressionado um botão de toque para selecioná-lo.
+
+New button
+== Novo botão
+
+Select button by touch
+== Selecione o botão por toque
+
+No buttons match your filter criteria
+== Novos botões correspondem ao seu critério de filtro
+
+File
+== Arquivo
+
+Buttons
+== Botões
+
+Active color
+== Cor ativa
+
+Inactive color
+== Cor inativa
+
+Preview button visibility while the editor is active.
+== Confira a visibilidade do botão enquanto o editor está ativo.
+
+Show all buttons
+== Mostrar todos os botões
+
+Save all changes before switching selected button?
+== Salvar todas as alterações antes de trocar o botão selecionado?
+
+Discard
+== Descartar
+
+There is not enough space available for the button. Check its visibilities and size.
+== Não há espaço suficiente disponível para o botão. Confirma suas visibilidades e seu tamanho.
+
+Selected button not visible
+== Botão selecionado não visível
+
+The selected button is not visible. Do you want to deselect it or edit its visibility?
+== O botão selecionado não está visível. Deseja desmarcá-lo ou editar sua visibilidade?
+
+Edit
+== Editar
+
+Width and height are required to be within the range from %d to %d.
+== Largura e altura são exigidas para estar dentro do intervalo de %d e %d.
+
+Button position is outside of the screen.
+== A posição do botão está fora da tela.
+
+The selected button is overlapping with other buttons.
+== O botão selecionado está se sobrepondo a outros botões.
+
+Wrong button settings
+== Configurações de botão incorretas
+
+[Touch button visibilities]
+Ingame
+== No jogo
+
+[Touch button visibilities]
+Zoom Allowed
+== Zoom permitido
+
+[Touch button visibilities]
+Vote Active
+== Voto ativo
+
+[Touch button visibilities]
+Dummy Allowed
+== Dummy permitido
+
+[Touch button visibilities]
+Dummy Connected
+== Dummy conectado
+
+[Touch button visibilities]
+Rcon Authed
+== Rcon autenticado
+
+[Touch button visibilities]
+Demo Player
+== Reprodutor de demo
+
+[Touch button visibilities]
+Extra Menu
+== Menu extra
+
+[Predefined touch button behaviors]
+Ingame Menu
+== Menu no jogo
+
+[Predefined touch button behaviors]
+Extra Menu
+== Menu extra
+
+[Predefined touch button behaviors]
+Emoticon
+== Emoticon
+
+[Predefined touch button behaviors]
+Spectate
+== Observar
+
+[Predefined touch button behaviors]
+Swap Action
+== Trocar ação
+
+[Predefined touch button behaviors]
+Use Action
+== Ação de usar
+
+[Predefined touch button behaviors]
+Joystick Action
+== Ação com joystick
+
+[Predefined touch button behaviors]
+Joystick Aim
+== Mirar com joystick
+
+[Predefined touch button behaviors]
+Joystick Fire
+== Atirar com joystick
+
+[Predefined touch button behaviors]
+Joystick Hook
+== Gancho com joystick
+
+Chat background color
+== Cor de fundo do chat

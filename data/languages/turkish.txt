@@ -2213,3 +2213,271 @@ Error checking player name
 
 Could not check for existing player with your name. Check your internet connection.
 == Adınıza sahip mevcut oyuncu olup olmadığı kontrol edilemedi. İnternet bağlantınızı kontrol edin.
+
+Press Ctrl+Shift+G to disable debug graphs.
+== Hata ayıklama grafiğini devre dışı bırakmak için Ctrl+Shift+G tuşlarına basın.
+
+Server could not be started
+== Sunucu başlatılamadı
+
+Could not get server list from master server
+== Ana sunucudan sunucu listesi alınamadı
+
+[Demo playback]
+Live
+== Canlı
+
+[Demo playback]
+Go to Live
+== Canlıya Geç
+
+Save all changes before turning off the editor?
+== Editör kapatılmadan önce tüm değişiklikler kaydedilsin mi?
+
+Layout
+== Düzen
+
+Visibility
+== Görünürlük
+
+Behavior
+== Davranış
+
+Delete button
+== Buton sil
+
+Are you sure that you want to delete this button?
+== Bu butonu silmek istediğine emin misin?
+
+Duplicate
+== Çoğalt
+
+New button already created
+== Yeni buton zaten oluşturuldu
+
+A new button has already been created, please save or delete it before creating another one.
+== Yeni bir buton zaten oluşturuldu, başka bir buton oluşturmadan önce lütfen kaydedin veya silin.
+
+Please save your changes before duplicating a button.
+== Bir butonu çoğaltmadan önce lütfen değişiklikleri kaydedin.
+
+No space for button
+== Buton için yeterli alan yok
+
+There is not enough space available to place another button.
+== Başka bir buton yerleştirmek için yeterli alan yok.
+
+There is not enough space available to place another button with this size. The button has been resized.
+== Bu büyüklükte bir butonu yerleştirmek için yeterli alan yok. Buton yeniden boyutlandırıldı.
+
+Deselect
+== Seçimi iptal et
+
+You'll lose unsaved changes after deselecting.
+== Seçimi iptal ettikten sonra kaydedilmemiş değişiklikler kaybolacak.
+
+Width
+== Genişlik
+
+Height
+== Yükseklik
+
+Shape
+== Şekil
+
+[Touch button shape]
+Rectangle
+== Dikdörtgen
+
+[Touch button shape]
+Circle
+== Daire
+
+[Touch button label type]
+Plain
+== Düz
+
+[Touch button label type]
+Localized
+== Sabit
+
+[Touch button label type]
+Icon
+== Simge
+
+Behavior type
+== Davranış biçimi
+
+[Touch button behavior]
+Bind
+== Atama
+
+[Touch button behavior]
+Bind Toggle
+== Aç/Kapa
+
+[Touch button behavior]
+Predefined
+== Ön tanımlı
+
+Command
+== Komut
+
+Label
+== Başlık
+
+Label type
+== Başlık türü
+
+Add command
+== Komut ekle
+
+Delete command
+== Komut sil
+
+[Touch button visibility preview]
+Included
+== Dahil
+
+[Touch button visibility preview]
+Excluded
+== Hariç
+
+[Touch button visibility preview]
+Ignore
+== Yok say
+
+Long press on a touch button to select it.
+== Butonu seçmek için uzun bas.
+
+New button
+== Yeni buton
+
+Select button by touch
+== Butonu dokunarak seç
+
+No buttons match your filter criteria
+== Filtre kriterlerine uyan buton yok
+
+File
+== Dosya
+
+Buttons
+== Butonlar
+
+Active color
+== Aktif renk
+
+Inactive color
+== İnaktif renk
+
+Preview button visibility while the editor is active.
+== Editör aktifken önizleme butonunu göster.
+
+Show all buttons
+== Tüm butonları göster
+
+Save all changes before switching selected button?
+== Seçili butonu değiştirmeden önce tüm değişiklikler kaydedilsin mi?
+
+Discard
+== İptal et
+
+There is not enough space available for the button. Check its visibilities and size.
+== Buton için yeterli alan yok. Görünürlüğünü ve büyüklüğünü kontrol edin.
+
+Selected button not visible
+== Seçili buton görünmez
+
+The selected button is not visible. Do you want to deselect it or edit its visibility?
+== Seçili buton görünmez. Seçimi iptal etmek ya da görünürlüğünü değiştirmek ister misin?
+
+Edit
+== Düzenle
+
+Width and height are required to be within the range from %d to %d.
+== Genişlik ve yükseklik, %d ile %d aralığında olmalıdır.
+
+Button position is outside of the screen.
+== Buton pozisyonu ekranın dışında.
+
+The selected button is overlapping with other buttons.
+== Seçili buton diğer butonlarla çakışıyor.
+
+Wrong button settings
+== Hatalı buton ayarları
+
+[Touch button visibilities]
+Ingame
+== Oyun içi
+
+[Touch button visibilities]
+Zoom Allowed
+== Yakınlaştırma İzinli
+
+[Touch button visibilities]
+Vote Active
+== Oylama Aktif
+
+[Touch button visibilities]
+Dummy Allowed
+== Dummy İzinli
+
+[Touch button visibilities]
+Dummy Connected
+== Dummy bağlandı
+
+[Touch button visibilities]
+Rcon Authed
+== Rcon doğrulandı
+
+[Touch button visibilities]
+Demo Player
+== Demo Oynatıcı
+
+[Touch button visibilities]
+Extra Menu
+== Ekstra Menü
+
+[Predefined touch button behaviors]
+Ingame Menu
+== Oyun İçi Menü
+
+[Predefined touch button behaviors]
+Extra Menu
+== Ekstra Menü
+
+[Predefined touch button behaviors]
+Emoticon
+== İfade
+
+[Predefined touch button behaviors]
+Spectate
+== İzle
+
+[Predefined touch button behaviors]
+Swap Action
+== Eylemi Değiştir
+
+[Predefined touch button behaviors]
+Use Action
+== Eylemi Kullan
+
+[Predefined touch button behaviors]
+Joystick Action
+== Joystick Eylemi
+
+[Predefined touch button behaviors]
+Joystick Aim
+== Joystick Aim
+
+[Predefined touch button behaviors]
+Joystick Fire
+== Joystick Ateş
+
+[Predefined touch button behaviors]
+Joystick Hook
+== Joystick Kanca
+
+Chat background color
+== Sohbet arka plan rengi

@@ -1,5 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <base/color.h>
 #include <base/math.h>
 #include <base/system.h>
 
@@ -236,7 +237,25 @@ void CMenus::RenderGame(CUIRect MainView)
 		static char s_TouchControlsEditCheckbox;
 		if(DoButton_CheckBox(&s_TouchControlsEditCheckbox, Localize("Edit touch controls"), GameClient()->m_TouchControls.IsEditingActive(), &Button))
 		{
-			GameClient()->m_TouchControls.SetEditingActive(!GameClient()->m_TouchControls.IsEditingActive());
+			if(GameClient()->m_TouchControls.IsEditingActive() && m_MenusIngameTouchControls.UnsavedChanges())
+			{
+				m_MenusIngameTouchControls.m_pOldSelectedButton = GameClient()->m_TouchControls.SelectedButton();
+				m_MenusIngameTouchControls.m_pNewSelectedButton = nullptr;
+				PopupConfirm(Localize("Unsaved changes"), Localize("Save all changes before turning off the editor?"), Localize("Save"), Localize("Cancel"), &CMenus::PopupConfirmTurnOffEditor);
+			}
+			else
+			{
+				GameClient()->m_TouchControls.SetEditingActive(!GameClient()->m_TouchControls.IsEditingActive());
+				if(GameClient()->m_TouchControls.IsEditingActive())
+				{
+					GameClient()->m_TouchControls.ResetVirtualVisibilities();
+					m_MenusIngameTouchControls.m_EditElement = CMenusIngameTouchControls::EElementType::LAYOUT;
+				}
+				else
+				{
+					m_MenusIngameTouchControls.ResetButtonPointers();
+				}
+			}
 		}
 
 		ButtonBar2.VSplitRight(80.0f, &ButtonBar2, &Button);
@@ -261,149 +280,47 @@ void CMenus::RenderGame(CUIRect MainView)
 		{
 			Console()->ExecuteLine("toggle_local_console");
 		}
-
+		// Only when these are all false, the preview page is rendered. Once the page is not rendered, update is needed upon next rendering.
+		if(!GameClient()->m_TouchControls.IsEditingActive() || m_MenusIngameTouchControls.m_CurrentMenu != CMenusIngameTouchControls::EMenuType::MENU_BUTTONS || GameClient()->m_TouchControls.IsButtonEditing())
+			m_MenusIngameTouchControls.m_NeedUpdatePreview = true;
+		// Quit preview all buttons automatically.
+		if(!GameClient()->m_TouchControls.IsEditingActive() || m_MenusIngameTouchControls.m_CurrentMenu != CMenusIngameTouchControls::EMenuType::MENU_PREVIEW)
+			GameClient()->m_TouchControls.SetPreviewAllButtons(false);
 		if(GameClient()->m_TouchControls.IsEditingActive())
 		{
-			CUIRect TouchControlsEditor;
-			MainView.VMargin((MainView.w - 505.0f) / 2.0f, &TouchControlsEditor);
-			TouchControlsEditor.HMargin((TouchControlsEditor.h - 230.0f) / 2.0f, &TouchControlsEditor);
-			RenderTouchControlsEditor(TouchControlsEditor);
+			// Resolve issues if needed before rendering, so the elements could have a correct value on this frame.
+			// Issues need to be resolved before popup. So CheckCachedSettings could not be bad.
+			m_MenusIngameTouchControls.ResolveIssues();
+			// Do Popups if needed.
+			CTouchControls::CPopupParam PopupParam = GameClient()->m_TouchControls.RequiredPopup();
+			if(PopupParam.m_PopupType != CTouchControls::EPopupType::NUM_POPUPS)
+			{
+				m_MenusIngameTouchControls.DoPopupType(PopupParam);
+				return;
+			}
+			if(m_MenusIngameTouchControls.m_FirstEnter)
+			{
+				m_MenusIngameTouchControls.m_aCachedVisibilities[(int)CTouchControls::EButtonVisibility::DEMO_PLAYER] = CMenusIngameTouchControls::EVisibilityType::EXCLUDE;
+				m_MenusIngameTouchControls.m_ColorActive = color_cast<ColorHSLA>(GameClient()->m_TouchControls.BackgroundColorActive()).Pack(true);
+				m_MenusIngameTouchControls.m_ColorInactive = color_cast<ColorHSLA>(GameClient()->m_TouchControls.BackgroundColorInactive()).Pack(true);
+				m_MenusIngameTouchControls.m_FirstEnter = false;
+			}
+			// Their width is all 505.0f, height is adjustable, you can directly change its h value, so no need for changing where tab is.
+			CUIRect SelectingTab;
+			MainView.HSplitTop(40.0f, nullptr, &MainView);
+			MainView.VMargin((MainView.w - CMenusIngameTouchControls::BUTTON_EDITOR_WIDTH) / 2.0f, &MainView);
+			MainView.HSplitTop(25.0f, &SelectingTab, &MainView);
+
+			m_MenusIngameTouchControls.RenderSelectingTab(SelectingTab);
+			switch(m_MenusIngameTouchControls.m_CurrentMenu)
+			{
+			case CMenusIngameTouchControls::EMenuType::MENU_FILE: m_MenusIngameTouchControls.RenderTouchControlsEditor(MainView); break;
+			case CMenusIngameTouchControls::EMenuType::MENU_BUTTONS: m_MenusIngameTouchControls.RenderTouchButtonEditor(MainView); break;
+			case CMenusIngameTouchControls::EMenuType::MENU_SETTINGS: m_MenusIngameTouchControls.RenderConfigSettings(MainView); break;
+			case CMenusIngameTouchControls::EMenuType::MENU_PREVIEW: m_MenusIngameTouchControls.RenderPreviewSettings(MainView); break;
+			default: dbg_assert(false, "Unknown selected tab value = %d.", (int)m_MenusIngameTouchControls.m_CurrentMenu);
+			}
 		}
-	}
-}
-
-void CMenus::RenderTouchControlsEditor(CUIRect MainView)
-{
-	CUIRect Label, Button, Row;
-	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_ALL, 10.0f);
-	MainView.Margin(10.0f, &MainView);
-
-	MainView.HSplitTop(25.0f, &Row, &MainView);
-	MainView.HSplitTop(5.0f, nullptr, &MainView);
-	Row.VSplitLeft(Row.h, nullptr, &Row);
-	Row.VSplitRight(Row.h, &Row, &Button);
-	Row.VMargin(5.0f, &Label);
-	Ui()->DoLabel(&Label, Localize("Edit touch controls"), 20.0f, TEXTALIGN_MC);
-
-	static CButtonContainer s_OpenHelpButton;
-	if(Ui()->DoButton_FontIcon(&s_OpenHelpButton, FONT_ICON_QUESTION, 0, &Button, BUTTONFLAG_LEFT))
-	{
-		Client()->ViewLink(Localize("https://wiki.ddnet.org/wiki/Touch_controls"));
-	}
-
-	MainView.HSplitTop(25.0f, &Row, &MainView);
-	MainView.HSplitTop(5.0f, nullptr, &MainView);
-
-	Row.VSplitLeft(240.0f, &Button, &Row);
-	static CButtonContainer s_SaveConfigurationButton;
-	if(DoButton_Menu(&s_SaveConfigurationButton, Localize("Save changes"), GameClient()->m_TouchControls.HasEditingChanges() ? 0 : 1, &Button))
-	{
-		if(GameClient()->m_TouchControls.SaveConfigurationToFile())
-		{
-			GameClient()->m_TouchControls.SetEditingChanges(false);
-		}
-		else
-		{
-			SWarning Warning(Localize("Error saving touch controls"), Localize("Could not save touch controls to file. See local console for details."));
-			Warning.m_AutoHide = false;
-			Client()->AddWarning(Warning);
-		}
-	}
-
-	Row.VSplitLeft(5.0f, nullptr, &Row);
-	Row.VSplitLeft(240.0f, &Button, &Row);
-	if(GameClient()->m_TouchControls.HasEditingChanges())
-	{
-		TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f));
-		Ui()->DoLabel(&Button, Localize("Unsaved changes"), 14.0f, TEXTALIGN_MC);
-		TextRender()->TextColor(TextRender()->DefaultTextColor());
-	}
-
-	MainView.HSplitTop(25.0f, &Row, &MainView);
-	MainView.HSplitTop(5.0f, nullptr, &MainView);
-
-	Row.VSplitLeft(240.0f, &Button, &Row);
-	static CButtonContainer s_DiscardChangesButton;
-	if(DoButton_Menu(&s_DiscardChangesButton, Localize("Discard changes"), GameClient()->m_TouchControls.HasEditingChanges() ? 0 : 1, &Button))
-	{
-		PopupConfirm(Localize("Discard changes"),
-			Localize("Are you sure that you want to discard the current changes to the touch controls?"),
-			Localize("Yes"), Localize("No"),
-			&CMenus::PopupConfirmDiscardTouchControlsChanges);
-	}
-
-	Row.VSplitLeft(5.0f, nullptr, &Row);
-	Row.VSplitLeft(240.0f, &Button, &Row);
-	static CButtonContainer s_ResetButton;
-	if(DoButton_Menu(&s_ResetButton, Localize("Reset to defaults"), 0, &Button))
-	{
-		PopupConfirm(Localize("Reset to defaults"),
-			Localize("Are you sure that you want to reset the touch controls to default?"),
-			Localize("Yes"), Localize("No"),
-			&CMenus::PopupConfirmResetTouchControls);
-	}
-
-	MainView.HSplitTop(25.0f, &Row, &MainView);
-	MainView.HSplitTop(10.0f, nullptr, &MainView);
-
-	Row.VSplitLeft(240.0f, &Button, &Row);
-	static CButtonContainer s_ClipboardImportButton;
-	if(DoButton_Menu(&s_ClipboardImportButton, Localize("Import from clipboard"), 0, &Button))
-	{
-		PopupConfirm(Localize("Import from clipboard"),
-			Localize("Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls."),
-			Localize("Yes"), Localize("No"),
-			&CMenus::PopupConfirmImportTouchControlsClipboard);
-	}
-
-	Row.VSplitLeft(5.0f, nullptr, &Row);
-	Row.VSplitLeft(240.0f, &Button, &Row);
-	static CButtonContainer s_ClipboardExportButton;
-	if(DoButton_Menu(&s_ClipboardExportButton, Localize("Export to clipboard"), 0, &Button))
-	{
-		GameClient()->m_TouchControls.SaveConfigurationToClipboard();
-	}
-
-	MainView.HSplitTop(25.0f, &Label, &MainView);
-	MainView.HSplitTop(5.0f, nullptr, &MainView);
-	Ui()->DoLabel(&Label, Localize("Settings"), 20.0f, TEXTALIGN_MC);
-
-	MainView.HSplitTop(25.0f, &Row, &MainView);
-	MainView.HSplitTop(5.0f, nullptr, &MainView);
-
-	Row.VSplitLeft(300.0f, &Label, &Row);
-	Ui()->DoLabel(&Label, Localize("Direct touch input while ingame"), 16.0f, TEXTALIGN_ML);
-
-	Row.VSplitLeft(5.0f, nullptr, &Row);
-	Row.VSplitLeft(180.0f, &Button, &Row);
-	const char *apIngameTouchModes[(int)CTouchControls::EDirectTouchIngameMode::NUM_STATES] = {Localize("Disabled", "Direct touch input"), Localize("Active action", "Direct touch input"), Localize("Aim", "Direct touch input"), Localize("Fire", "Direct touch input"), Localize("Hook", "Direct touch input")};
-	const CTouchControls::EDirectTouchIngameMode OldDirectTouchIngame = GameClient()->m_TouchControls.DirectTouchIngame();
-	static CUi::SDropDownState s_DirectTouchIngameDropDownState;
-	static CScrollRegion s_DirectTouchIngameDropDownScrollRegion;
-	s_DirectTouchIngameDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_DirectTouchIngameDropDownScrollRegion;
-	const CTouchControls::EDirectTouchIngameMode NewDirectTouchIngame = (CTouchControls::EDirectTouchIngameMode)Ui()->DoDropDown(&Button, (int)OldDirectTouchIngame, apIngameTouchModes, std::size(apIngameTouchModes), s_DirectTouchIngameDropDownState);
-	if(OldDirectTouchIngame != NewDirectTouchIngame)
-	{
-		GameClient()->m_TouchControls.SetDirectTouchIngame(NewDirectTouchIngame);
-	}
-
-	MainView.HSplitTop(25.0f, &Row, &MainView);
-	MainView.HSplitTop(5.0f, nullptr, &MainView);
-
-	Row.VSplitLeft(300.0f, &Label, &Row);
-	Ui()->DoLabel(&Label, Localize("Direct touch input while spectating"), 16.0f, TEXTALIGN_ML);
-
-	Row.VSplitLeft(5.0f, nullptr, &Row);
-	Row.VSplitLeft(180.0f, &Button, &Row);
-	const char *apSpectateTouchModes[(int)CTouchControls::EDirectTouchSpectateMode::NUM_STATES] = {Localize("Disabled", "Direct touch input"), Localize("Aim", "Direct touch input")};
-	const CTouchControls::EDirectTouchSpectateMode OldDirectTouchSpectate = GameClient()->m_TouchControls.DirectTouchSpectate();
-	static CUi::SDropDownState s_DirectTouchSpectateDropDownState;
-	static CScrollRegion s_DirectTouchSpectateDropDownScrollRegion;
-	s_DirectTouchSpectateDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_DirectTouchSpectateDropDownScrollRegion;
-	const CTouchControls::EDirectTouchSpectateMode NewDirectTouchSpectate = (CTouchControls::EDirectTouchSpectateMode)Ui()->DoDropDown(&Button, (int)OldDirectTouchSpectate, apSpectateTouchModes, std::size(apSpectateTouchModes), s_DirectTouchSpectateDropDownState);
-	if(OldDirectTouchSpectate != NewDirectTouchSpectate)
-	{
-		GameClient()->m_TouchControls.SetDirectTouchSpectate(NewDirectTouchSpectate);
 	}
 }
 
@@ -422,6 +339,8 @@ void CMenus::PopupConfirmDiscardTouchControlsChanges()
 {
 	if(GameClient()->m_TouchControls.LoadConfigurationFromFile(IStorage::TYPE_ALL))
 	{
+		m_MenusIngameTouchControls.m_ColorActive = color_cast<ColorHSLA>(GameClient()->m_TouchControls.BackgroundColorActive()).Pack(true);
+		m_MenusIngameTouchControls.m_ColorInactive = color_cast<ColorHSLA>(GameClient()->m_TouchControls.BackgroundColorInactive()).Pack(true);
 		GameClient()->m_TouchControls.SetEditingChanges(false);
 	}
 	else
@@ -445,6 +364,8 @@ void CMenus::PopupConfirmResetTouchControls()
 	}
 	if(Success)
 	{
+		m_MenusIngameTouchControls.m_ColorActive = color_cast<ColorHSLA>(GameClient()->m_TouchControls.BackgroundColorActive()).Pack(true);
+		m_MenusIngameTouchControls.m_ColorInactive = color_cast<ColorHSLA>(GameClient()->m_TouchControls.BackgroundColorInactive()).Pack(true);
 		GameClient()->m_TouchControls.SetEditingChanges(true);
 	}
 	else
@@ -459,6 +380,8 @@ void CMenus::PopupConfirmImportTouchControlsClipboard()
 {
 	if(GameClient()->m_TouchControls.LoadConfigurationFromClipboard())
 	{
+		m_MenusIngameTouchControls.m_ColorActive = color_cast<ColorHSLA>(GameClient()->m_TouchControls.BackgroundColorActive()).Pack(true);
+		m_MenusIngameTouchControls.m_ColorInactive = color_cast<ColorHSLA>(GameClient()->m_TouchControls.BackgroundColorInactive()).Pack(true);
 		GameClient()->m_TouchControls.SetEditingChanges(true);
 	}
 	else
@@ -466,6 +389,83 @@ void CMenus::PopupConfirmImportTouchControlsClipboard()
 		SWarning Warning(Localize("Error loading touch controls"), Localize("Could not load touch controls from clipboard. See local console for details."));
 		Warning.m_AutoHide = false;
 		Client()->AddWarning(Warning);
+	}
+}
+
+void CMenus::PopupConfirmDeleteButton()
+{
+	GameClient()->m_TouchControls.DeleteSelectedButton();
+	m_MenusIngameTouchControls.ResetCachedSettings();
+	GameClient()->m_TouchControls.SetEditingChanges(true);
+}
+
+void CMenus::PopupCancelDeselectButton()
+{
+	m_MenusIngameTouchControls.ResetButtonPointers();
+	m_MenusIngameTouchControls.SetUnsavedChanges(false);
+	m_MenusIngameTouchControls.ResetCachedSettings();
+}
+
+void CMenus::PopupConfirmSelectedNotVisible()
+{
+	if(m_MenusIngameTouchControls.UnsavedChanges())
+	{
+		// The m_pSelectedButton can't nullptr, because this function is triggered when selected button not visible.
+		m_MenusIngameTouchControls.m_pOldSelectedButton = GameClient()->m_TouchControls.SelectedButton();
+		m_MenusIngameTouchControls.m_pNewSelectedButton = nullptr;
+		m_MenusIngameTouchControls.m_CloseMenu = true;
+		m_MenusIngameTouchControls.ChangeSelectedButtonWhileHavingUnsavedChanges();
+	}
+	else
+	{
+		m_MenusIngameTouchControls.ResetButtonPointers();
+		GameClient()->m_Menus.SetActive(false);
+	}
+}
+
+void CMenus::PopupConfirmChangeSelectedButton()
+{
+	if(m_MenusIngameTouchControls.CheckCachedSettings())
+	{
+		GameClient()->m_TouchControls.SetSelectedButton(m_MenusIngameTouchControls.m_pNewSelectedButton);
+		if(m_MenusIngameTouchControls.m_pOldSelectedButton == nullptr)
+		{
+			m_MenusIngameTouchControls.m_pOldSelectedButton = GameClient()->m_TouchControls.NewButton();
+		}
+		m_MenusIngameTouchControls.SaveCachedSettingsToTarget(m_MenusIngameTouchControls.m_pOldSelectedButton);
+		// Update wild pointer.
+		if(m_MenusIngameTouchControls.m_pNewSelectedButton != nullptr)
+			m_MenusIngameTouchControls.m_pNewSelectedButton = GameClient()->m_TouchControls.SelectedButton();
+		GameClient()->m_TouchControls.SetEditingChanges(true);
+		m_MenusIngameTouchControls.SetUnsavedChanges(false);
+		PopupCancelChangeSelectedButton();
+	}
+}
+
+void CMenus::PopupCancelChangeSelectedButton()
+{
+	GameClient()->m_TouchControls.SetSelectedButton(m_MenusIngameTouchControls.m_pNewSelectedButton);
+	m_MenusIngameTouchControls.CacheAllSettingsFromTarget(m_MenusIngameTouchControls.m_pNewSelectedButton);
+	m_MenusIngameTouchControls.SetUnsavedChanges(false);
+	if(m_MenusIngameTouchControls.m_pNewSelectedButton != nullptr)
+	{
+		m_MenusIngameTouchControls.UpdateSampleButton();
+	}
+	else
+	{
+		m_MenusIngameTouchControls.ResetButtonPointers();
+	}
+	if(m_MenusIngameTouchControls.m_CloseMenu)
+		GameClient()->m_Menus.SetActive(false);
+}
+
+void CMenus::PopupConfirmTurnOffEditor()
+{
+	if(m_MenusIngameTouchControls.CheckCachedSettings())
+	{
+		m_MenusIngameTouchControls.SaveCachedSettingsToTarget(m_MenusIngameTouchControls.m_pOldSelectedButton);
+		GameClient()->m_TouchControls.SetEditingActive(!GameClient()->m_TouchControls.IsEditingActive());
+		m_MenusIngameTouchControls.ResetButtonPointers();
 	}
 }
 

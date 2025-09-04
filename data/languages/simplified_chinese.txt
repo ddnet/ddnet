@@ -2219,3 +2219,271 @@ Error checking player name
 
 Could not check for existing player with your name. Check your internet connection.
 == 无法验证是否已存在相同名称的玩家。请检查你的网络连接。
+
+Press Ctrl+Shift+G to disable debug graphs.
+== 按下 Ctrl+Shift+G 以关闭调试图表
+
+Server could not be started
+== 无法启动服务器
+
+Could not get server list from master server
+== 无法从主服务器获取服务器列表
+
+[Demo playback]
+Live
+== 实时
+
+[Demo playback]
+Go to Live
+== 跳转到实时
+
+Save all changes before turning off the editor?
+== 是否在关闭编辑器前保存更改？
+
+Layout
+== 布局
+
+Visibility
+== 可见度
+
+Behavior
+== 行为
+
+Delete button
+== 删除按键
+
+Are you sure that you want to delete this button?
+== 你确定要删除这个按键吗？
+
+Duplicate
+== 复制
+
+New button already created
+== 已经创建了新按键
+
+A new button has already been created, please save or delete it before creating another one.
+== 新按键已经被创建，请在创建另一个按键之前先保存或者删除该按键。
+
+Please save your changes before duplicating a button.
+== 请在复制按键之前先保存更改。
+
+No space for button
+== 空间不足
+
+There is not enough space available to place another button.
+== 屏幕上剩余空间不足以增加一个新按键。
+
+There is not enough space available to place another button with this size. The button has been resized.
+== 屏幕上剩余空间不足以增加一个该大小的新按键。新按键已被自动缩小。
+
+Deselect
+== 取消选择
+
+You'll lose unsaved changes after deselecting.
+== 你的更改在取消选择后不会被保存。
+
+Width
+== 宽
+
+Height
+== 高
+
+Shape
+== 形状
+
+[Touch button shape]
+Rectangle
+== 矩形
+
+[Touch button shape]
+Circle
+== 圆形
+
+[Touch button label type]
+Plain
+== 普通
+
+[Touch button label type]
+Localized
+== 自动翻译
+
+[Touch button label type]
+Icon
+== 图标化
+
+Behavior type
+== 行为类型
+
+[Touch button behavior]
+Bind
+== 绑定
+
+[Touch button behavior]
+Bind Toggle
+== 绑定切换
+
+[Touch button behavior]
+Predefined
+== 预设
+
+Command
+== 命令
+
+Label
+== 标签
+
+Label type
+== 标签种类
+
+Add command
+== 添加命令
+
+Delete command
+== 删除命令
+
+[Touch button visibility preview]
+Included
+== 包含
+
+[Touch button visibility preview]
+Excluded
+== 排除
+
+[Touch button visibility preview]
+Ignore
+== 忽略
+
+Long press on a touch button to select it.
+== 长按一个按键即可选择。
+
+New button
+== 新按键
+
+Select button by touch
+== 在屏幕上选择按键
+
+No buttons match your filter criteria
+== 没有按键符合你的筛选条件
+
+File
+== 文件
+
+Buttons
+== 按键
+
+Active color
+== 按键激活时颜色
+
+Inactive color
+== 按键未激活时颜色
+
+Preview button visibility while the editor is active.
+== 按键编辑器打开时用于预览按键的可见度
+
+Show all buttons
+== 显示所有按键
+
+Save all changes before switching selected button?
+== 切换当前选择的按键前保存对当前按键的更改？
+
+Discard
+== 舍弃更改
+
+There is not enough space available for the button. Check its visibilities and size.
+== 屏幕上空闲位置不足。建议检查它的可见度和大小。
+
+Selected button not visible
+== 选中的按键不可见
+
+The selected button is not visible. Do you want to deselect it or edit its visibility?
+== 选中的按键在当前可见度下不可见。你想取消选择该按键还是更改它的可见度？
+
+Edit
+== 更改
+
+Width and height are required to be within the range from %d to %d.
+== 按键的宽和高需要在%d到%d内。
+
+Button position is outside of the screen.
+== 按键的位置在屏幕之外。
+
+The selected button is overlapping with other buttons.
+== 选中的按键和其它按键重合。
+
+Wrong button settings
+== 错误的按键设置
+
+[Touch button visibilities]
+Ingame
+== 在游戏内时
+
+[Touch button visibilities]
+Zoom Allowed
+== 允许缩放时
+
+[Touch button visibilities]
+Vote Active
+== 当前有投票
+
+[Touch button visibilities]
+Dummy Allowed
+== 允许分身时
+
+[Touch button visibilities]
+Dummy Connected
+== 分身已连接
+
+[Touch button visibilities]
+Rcon Authed
+== 登入管理员
+
+[Touch button visibilities]
+Demo Player
+== 播放回放时
+
+[Touch button visibilities]
+Extra Menu
+== 额外菜单
+
+[Predefined touch button behaviors]
+Ingame Menu
+== 游戏内菜单
+
+[Predefined touch button behaviors]
+Extra Menu
+== 额外菜单开关
+
+[Predefined touch button behaviors]
+Emoticon
+== 表情选择器
+
+[Predefined touch button behaviors]
+Spectate
+== 旁观者菜单
+
+[Predefined touch button behaviors]
+Swap Action
+== 切换行为
+
+[Predefined touch button behaviors]
+Use Action
+== 使用行为
+
+[Predefined touch button behaviors]
+Joystick Action
+== 摇杆：使用行为
+
+[Predefined touch button behaviors]
+Joystick Aim
+== 摇杆：瞄准
+
+[Predefined touch button behaviors]
+Joystick Fire
+== 摇杆：开火
+
+[Predefined touch button behaviors]
+Joystick Hook
+== 摇杆：出钩
+
+Chat background color
+== 聊天背景色

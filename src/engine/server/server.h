@@ -205,19 +205,14 @@ public:
 		//{
 		//	return m_State != STATE_EMPTY && !m_DebugDummy;
 		//}
-		// FoxNet>
-
-		int ConsoleAccessLevel() const
-		{
-			return m_Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : m_Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER;
-		}
-		// <FoxNet
 		void ResetContent();
 		char m_CustomClient[24];
 		bool m_QuietJoin;
 		bool m_HighBandwidth;
 		// FoxNet>	
 	};
+
+	int ConsoleAccessLevel(int ClientId) const;
 
 	CClient m_aClients[MAX_CLIENTS];
 	int m_aIdMap[MAX_CLIENTS * VANILLA_MAX_CLIENTS];
