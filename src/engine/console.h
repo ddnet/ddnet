@@ -42,10 +42,10 @@ public:
 
 	enum class EAccessLevel
 	{
-		ADMIN,
-		MODERATOR,
-		HELPER,
 		USER,
+		HELPER,
+		MODERATOR,
+		ADMIN,
 	};
 
 	// TODO: rework this interface to reduce the amount of virtual calls

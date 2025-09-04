@@ -1555,7 +1555,7 @@ void CServer::UpdateClientMaplistEntries(int ClientId)
 		const bool MapCommandAllowed = std::any_of(std::begin(MAP_COMMANDS), std::end(MAP_COMMANDS), [&](const char *pMapCommand) {
 			const IConsole::ICommandInfo *pInfo = Console()->GetCommandInfo(pMapCommand, CFGFLAG_SERVER, false);
 			dbg_assert(pInfo != nullptr, "Map command not found");
-			return AccessLevel <= pInfo->GetAccessLevel();
+			return AccessLevel >= pInfo->GetAccessLevel();
 		});
 		if(MapCommandAllowed)
 		{
@@ -4050,8 +4050,8 @@ void CServer::ConchainCommandAccessUpdate(IConsole::IResult *pResult, void *pUse
 					continue;
 
 				const IConsole::EAccessLevel ClientAccessLevel = pThis->ConsoleAccessLevel(i);
-				bool HadAccess = OldAccessLevel >= ClientAccessLevel;
-				bool HasAccess = pInfo->GetAccessLevel() >= ClientAccessLevel;
+				bool HadAccess = ClientAccessLevel >= OldAccessLevel;
+				bool HasAccess = ClientAccessLevel >= pInfo->GetAccessLevel();
 
 				// Nothing changed
 				if(HadAccess == HasAccess)

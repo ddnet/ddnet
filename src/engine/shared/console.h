@@ -15,7 +15,7 @@ class CConsole : public IConsole
 {
 	class CCommand : public ICommandInfo
 	{
-		EAccessLevel m_AccessLevel;
+		EAccessLevel m_AccessLevel = EAccessLevel::ADMIN;
 		CCommand *m_pNext;
 
 	public:
