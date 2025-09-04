@@ -279,9 +279,6 @@ void CPlayers::RenderHookCollLine(
 		if(Hit && Hit != TILE_TELEINHOOK)
 			break;
 
-		NewPos.x = round_to_int(NewPos.x);
-		NewPos.y = round_to_int(NewPos.y);
-
 		if(OldPos == NewPos)
 			break;
 	} while(!DoBreak);
