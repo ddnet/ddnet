@@ -659,3 +659,17 @@ void CAccounts::SetPlayerName(int ClientId, const char *pName) // When player ch
 	str_copy(pReq->m_Username, GameServer()->m_Account[ClientId].m_Username, sizeof(pReq->m_Username));
 	m_pPool->ExecuteWrite(CAccountsWorker::SetPlayerName, std::move(pReq), "acc set player name");
 }
+
+int CAccounts::NeededXP(int Level)
+{
+	if(Level < 1)
+		return 30;
+	else if(Level < 5)
+		return 65;
+	else if(Level < 10)
+		return 100;
+	else if(Level < 20)
+		return 150;
+	else
+		return 150 + Level * 2;
+}

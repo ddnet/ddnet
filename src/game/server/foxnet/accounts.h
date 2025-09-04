@@ -105,8 +105,7 @@ public:
 	// Returns 0 if not logged in and the current port if logged in
 	int IsAccountLoggedIn(const char *pUsername);
 
-	// XP curve (unchanged)
-	int64_t m_NeededXp[4] = {30, 65, 100, 150};
+	int NeededXP(int Level);
 };
 
 #endif // GAME_SERVER_FOXNET_ACCOUNTS_H

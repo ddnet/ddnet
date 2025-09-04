@@ -623,8 +623,7 @@ void CVoteMenu::SendPageAccount(int ClientId)
 	AddVoteText(aBuf);
 
 	int CurXp = Acc.m_XP;
-	int ClampedLevel = std::clamp((int)Acc.m_Level, 0, 4);
-	int NeededXp = GameServer()->m_AccountManager.m_NeededXp[ClampedLevel];
+	int NeededXp = GameServer()->m_AccountManager.NeededXP(Acc.m_Level);
 
 	str_format(aBuf, sizeof(aBuf), "│ XP [%d/%d]", CurXp, NeededXp);
 	AddVoteText(aBuf);

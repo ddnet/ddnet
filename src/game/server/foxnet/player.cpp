@@ -18,6 +18,7 @@
 
 #include "accounts.h"
 #include "shop.h"
+#include <engine/shared/protocol.h>
 
 CAccountSession *CPlayer::Acc() { return &GameServer()->m_Account[m_ClientId]; }
 
@@ -92,35 +93,38 @@ bool CPlayer::CheckLevelUp(int64_t Amount, bool Silent)
 	bool LeveledUp = false;
 	char aBuf[256];
 
-	// ╔╦╦╦╦═════════════╗
-	// ╚╩╩╩╩═════════════╝
-
-	int ClampedLevel = std::clamp((int)Acc()->m_Level, 0, 4);
-	int NeededXp = GameServer()->m_AccountManager.m_NeededXp[ClampedLevel];
-
-	while(Acc()->m_XP >= NeededXp)
+	// Level up as long as we have enough XP for the current level
+	while(true)
 	{
+		const int NeededXp = GameServer()->m_AccountManager.NeededXP((int)Acc()->m_Level);
+		if(Acc()->m_XP < NeededXp)
+			break;
+
 		Acc()->m_Level++;
 		Acc()->m_XP -= NeededXp;
 
 		GiveMoney(g_Config.m_SvLevelUpMoney);
 		LeveledUp = true;
 	}
+
 	if(LeveledUp && !Silent)
 	{
-		str_format(aBuf, sizeof(aBuf), "You are now level %d!", Acc()->m_Level);
+		str_format(aBuf, sizeof(aBuf), "You are now level %lld!", Acc()->m_Level);
 		GameServer()->SendChatTarget(m_ClientId, aBuf);
+
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if(i != m_ClientId && GameServer()->GetPlayerChar(i) && i < g_Config.m_SvMaxClients)
+			if(GameServer()->m_apPlayers[i] && i != m_ClientId)
 			{
-				// send a level up message to everyone except for the player who leveled up
-				str_format(aBuf, sizeof(aBuf), "%s is not level %d!", Server()->ClientName(m_ClientId), Acc()->m_Level);
+				str_format(aBuf, sizeof(aBuf), "%s is now level %lld!", Server()->ClientName(m_ClientId), Acc()->m_Level);
 				GameServer()->SendChatTarget(i, aBuf);
 			}
 		}
+
 		GameServer()->m_AccountManager.SaveAccountsInfo(m_ClientId, *Acc());
-		GameServer()->CreateBirthdayEffect(GetCharacter()->GetPos(), GetCharacter()->TeamMask());
+
+		if(GetCharacter())
+			GameServer()->CreateBirthdayEffect(GetCharacter()->GetPos(), GetCharacter()->TeamMask());
 	}
 
 	return LeveledUp;
