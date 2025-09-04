@@ -21,7 +21,7 @@
 #include <game/teamscore.h>
 
 CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, int LastOwner, vec2 Pos, int Team, int TeleCheckpoint, vec2 Dir, int Lifetime, int Type) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUPDROP, Pos, 24)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUPDROP, Pos, 28)
 {
 	m_LastOwner = LastOwner;
 	m_PrevPos = m_Pos;

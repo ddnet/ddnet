@@ -2841,6 +2841,7 @@ void CCharacter::AddVelocity(vec2 Addition)
 void CCharacter::ForceSetPos(vec2 NewPos)
 {
 	m_PrevPos = NewPos;
+	m_Pos = NewPos;
 	m_Core.m_Pos = NewPos;
 }
 
@@ -2897,7 +2898,7 @@ void CCharacter::FoxNetTick()
 		m_VoteActionDelay--;
 
 	if(GetPlayer()->m_vPickupDrops.size() > (size_t)(NUM_EXTRA_WEAPONS + 1))
-	{ 
+	{
 		// remove oldest drop
 		auto pPickup = GetPlayer()->m_vPickupDrops.begin();
 		(*pPickup)->Reset(false);
