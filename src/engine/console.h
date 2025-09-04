@@ -25,11 +25,6 @@ public:
 		OUTPUT_LEVEL_ADDINFO,
 		OUTPUT_LEVEL_DEBUG,
 
-		ACCESS_LEVEL_ADMIN = 0,
-		ACCESS_LEVEL_MOD,
-		ACCESS_LEVEL_HELPER,
-		ACCESS_LEVEL_USER,
-
 		TEMPCMD_NAME_LENGTH = 64,
 		TEMPCMD_HELP_LENGTH = 192,
 		TEMPCMD_PARAMS_LENGTH = 96,
@@ -40,6 +35,14 @@ public:
 		CLIENT_ID_NO_GAME = -3,
 
 		FILE_RECURSION_LIMIT = 16,
+	};
+
+	enum class EAccessLevel
+	{
+		USER,
+		HELPER,
+		MODERATOR,
+		ADMIN,
 	};
 
 	// TODO: rework this interface to reduce the amount of virtual calls
@@ -72,18 +75,18 @@ public:
 	class CCommandInfo
 	{
 	protected:
-		int m_AccessLevel;
+		EAccessLevel m_AccessLevel;
 
 	public:
-		CCommandInfo() { m_AccessLevel = ACCESS_LEVEL_ADMIN; }
+		CCommandInfo() { m_AccessLevel = EAccessLevel::ADMIN; }
 		virtual ~CCommandInfo() = default;
 		const char *m_pName;
 		const char *m_pHelp;
 		const char *m_pParams;
 
-		virtual const CCommandInfo *NextCommandInfo(int AccessLevel, int FlagMask) const = 0;
+		virtual const CCommandInfo *NextCommandInfo(EAccessLevel AccessLevel, int FlagMask) const = 0;
 
-		int GetAccessLevel() const { return m_AccessLevel; }
+		EAccessLevel GetAccessLevel() const { return m_AccessLevel; }
 	};
 
 	typedef void (*FTeeHistorianCommandCallback)(int ClientId, int FlagMask, const char *pCmd, IResult *pResult, void *pUser);
@@ -96,7 +99,7 @@ public:
 	static bool EmptyUnknownCommandCallback(const char *pCommand, void *pUser) { return false; }
 
 	virtual void Init() = 0;
-	virtual const CCommandInfo *FirstCommandInfo(int AccessLevel, int Flagmask) const = 0;
+	virtual const CCommandInfo *FirstCommandInfo(EAccessLevel AccessLevel, int Flagmask) const = 0;
 	virtual const CCommandInfo *GetCommandInfo(const char *pName, int FlagMask, bool Temp) = 0;
 	virtual int PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback = EmptyPossibleCommandCallback, void *pUser = nullptr) = 0;
 	virtual void ParseArguments(int NumArgs, const char **ppArguments) = 0;
@@ -125,7 +128,7 @@ public:
 	virtual void SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, void *pUser) = 0;
 	virtual void InitChecksum(CChecksumData *pData) const = 0;
 
-	virtual void SetAccessLevel(int AccessLevel) = 0;
+	virtual void SetAccessLevel(EAccessLevel AccessLevel) = 0;
 
 	static LEVEL ToLogLevel(int ConsoleLevel);
 	static int ToLogLevelFilter(int ConsoleLevel);

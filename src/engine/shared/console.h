@@ -22,9 +22,9 @@ class CConsole : public IConsole
 		FCommandCallback m_pfnCallback;
 		void *m_pUserData;
 
-		const CCommandInfo *NextCommandInfo(int AccessLevel, int FlagMask) const override;
+		const CCommandInfo *NextCommandInfo(EAccessLevel AccessLevel, int FlagMask) const override;
 
-		void SetAccessLevel(int AccessLevel);
+		void SetAccessLevel(EAccessLevel AccessLevel);
 	};
 
 	class CChain
@@ -50,7 +50,7 @@ class CConsole : public IConsole
 
 	CExecFile *m_pFirstExec;
 	IStorage *m_pStorage;
-	int m_AccessLevel;
+	EAccessLevel m_AccessLevel;
 
 	CCommand *m_pRecycleList;
 	CHeap m_TempCommands;
@@ -155,7 +155,7 @@ public:
 	~CConsole();
 
 	void Init() override;
-	const CCommandInfo *FirstCommandInfo(int AccessLevel, int FlagMask) const override;
+	const CCommandInfo *FirstCommandInfo(EAccessLevel AccessLevel, int FlagMask) const override;
 	const CCommandInfo *GetCommandInfo(const char *pName, int FlagMask, bool Temp) override;
 	int PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback, void *pUser) override;
 
@@ -177,23 +177,23 @@ public:
 	void SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, void *pUser) override;
 	void InitChecksum(CChecksumData *pData) const override;
 
-	void SetAccessLevel(int AccessLevel) override;
+	void SetAccessLevel(EAccessLevel AccessLevel) override;
 
 	/**
-	 * Converts access level string to access level enum (integer).
+	 * Converts access level string to access level enum.
 	 *
 	 * @param pAccesssLevel should be either "admin", "mod", "moderator", "helper" or "user".
-	 * @return `std::nullopt` on error otherwise one of the auth enums such as `ACCESS_LEVEL_ADMIN`.
+	 * @return `std::nullopt` on error otherwise one of the auth enums such as `EAccessLevel::ADMIN`.
 	 */
-	static std::optional<int> AccessLevelToInt(const char *pAccessLevel);
+	static std::optional<EAccessLevel> AccessLevelToEnum(const char *pAccessLevel);
 
 	/**
-	 * Converts access level enum (integer) to access level string.
+	 * Converts access level enum to access level string.
 	 *
-	 * @param AccessLevel should be one of these: `ACCESS_LEVEL_ADMIN`, `ACCESS_LEVEL_MOD`, `ACCESS_LEVEL_HELPER` or `ACCESS_LEVEL_USER`.
+	 * @param AccessLevel should be one of these: `EAccessLevel::ADMIN`, `EAccessLevel::MODERATOR`, `EAccessLevel::HELPER` or `EAccessLevel::USER`.
 	 * @return `nullptr` on error or access level string like "admin".
 	 */
-	static const char *AccessLevelToString(int AccessLevel);
+	static const char *AccessLevelToString(EAccessLevel AccessLevel);
 
 	static std::optional<ColorHSLA> ColorParse(const char *pStr, float DarkestLighting);
 
