@@ -119,7 +119,8 @@ public:
 	void SetPractice(int Team, bool Enabled);
 	bool IsPractice(int Team);
 	// <FoxNet
-	CClientMask CosmeticMask(int Team, int Asker, bool Opposite);
+	bool SetMask(int ClientId, int Team, int ExceptId, int Asker, int VersionFlags);
+	CClientMask CosmeticMask(int Team, int ExceptId = -1, int Asker = -1, int VersionFlags = CGameContext::FLAG_SIX | CGameContext::FLAG_SIXUP, bool Opposite = false);
 	// FoxNet>
 };
 

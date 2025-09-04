@@ -2884,12 +2884,12 @@ void CCharacter::OnDie(int Killer, int Weapon, bool SendKillMsg)
 // <FoxNet
 CClientMask CCharacter::CosmeticMask()
 {
-	return Teams()->CosmeticMask(Team(), GetPlayer()->GetCid(), false);
+	return Teams()->CosmeticMask(Team(), -1, GetPlayer()->GetCid(), 3, false);
 }
 
 CClientMask CCharacter::OppsiteCosmeticMask()
 {
-	return Teams()->CosmeticMask(Team(), GetPlayer()->GetCid(), true);
+	return Teams()->CosmeticMask(Team(), -1, GetPlayer()->GetCid(), 3, true);
 }
 
 void CCharacter::FoxNetTick()
