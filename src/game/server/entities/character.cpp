@@ -1533,7 +1533,7 @@ void CCharacter::Snap(int SnappingClient)
 			if(GetPlayer()->m_Cosmetics.m_Sparkle)
 				pDDNetCharacter->m_Flags |= CHARACTERFLAG_INVINCIBLE;
 
-			if(GetPlayer()->m_Cosmetics.m_InverseAim && Server()->GetAuthedState(SnappingClient) < AUTHED_ADMIN)
+			if(GetPlayer()->m_Cosmetics.m_InverseAim && Server()->GetAuthedState(SnappingClient) < AUTHED_MOD)
 			{
 				pDDNetCharacter->m_TargetX = -m_Core.m_Input.m_TargetX;
 				pDDNetCharacter->m_TargetY = -m_Core.m_Input.m_TargetY;
