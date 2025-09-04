@@ -106,10 +106,10 @@ float CPlayers::GetPlayerTargetAngle(
 		return angle(GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy]);
 	}
 
-	float AngleIntraTick = Intra;
 	// using unpredicted angle when rendering other players in-game
 	if(ClientId >= 0)
-		AngleIntraTick = Client()->IntraGameTick(g_Config.m_ClDummy);
+		Intra = Client()->IntraGameTick(g_Config.m_ClDummy);
+
 	if(ClientId >= 0 && GameClient()->m_Snap.m_aCharacters[ClientId].m_HasExtendedDisplayInfo)
 	{
 		CNetObj_DDNetCharacter *pExtendedData = &GameClient()->m_Snap.m_aCharacters[ClientId].m_ExtendedData;
@@ -117,8 +117,8 @@ float CPlayers::GetPlayerTargetAngle(
 		{
 			const CNetObj_DDNetCharacter *PrevExtendedData = GameClient()->m_Snap.m_aCharacters[ClientId].m_PrevExtendedData;
 
-			float MixX = mix((float)PrevExtendedData->m_TargetX, (float)pExtendedData->m_TargetX, AngleIntraTick);
-			float MixY = mix((float)PrevExtendedData->m_TargetY, (float)pExtendedData->m_TargetY, AngleIntraTick);
+			float MixX = mix((float)PrevExtendedData->m_TargetX, (float)pExtendedData->m_TargetX, Intra);
+			float MixY = mix((float)PrevExtendedData->m_TargetY, (float)pExtendedData->m_TargetY, Intra);
 
 			return angle(vec2(MixX, MixY));
 		}
@@ -134,15 +134,15 @@ float CPlayers::GetPlayerTargetAngle(
 		// short path and not the long one.
 		if(pPlayerChar->m_Angle > (256.0f * pi) && pPrevChar->m_Angle < 0)
 		{
-			return mix((float)pPrevChar->m_Angle, (float)(pPlayerChar->m_Angle - 256.0f * 2 * pi), AngleIntraTick) / 256.0f;
+			return mix((float)pPrevChar->m_Angle, (float)(pPlayerChar->m_Angle - 256.0f * 2 * pi), Intra) / 256.0f;
 		}
 		else if(pPlayerChar->m_Angle < 0 && pPrevChar->m_Angle > (256.0f * pi))
 		{
-			return mix((float)pPrevChar->m_Angle, (float)(pPlayerChar->m_Angle + 256.0f * 2 * pi), AngleIntraTick) / 256.0f;
+			return mix((float)pPrevChar->m_Angle, (float)(pPlayerChar->m_Angle + 256.0f * 2 * pi), Intra) / 256.0f;
 		}
 		else
 		{
-			return mix((float)pPrevChar->m_Angle, (float)pPlayerChar->m_Angle, AngleIntraTick) / 256.0f;
+			return mix((float)pPrevChar->m_Angle, (float)pPlayerChar->m_Angle, Intra) / 256.0f;
 		}
 	}
 }
