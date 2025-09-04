@@ -828,7 +828,7 @@ private:
 	static void ConSendFakeMessage(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConToggleMapVoteLock(IConsole::IResult *pResult, void *pUserData);
-	bool m_MapVoteLock;
+	bool m_MapVoteLock = false;
 
 	static void ConInsertRecord(IConsole::IResult *pResult, void *pUserData);
 	static void ConRemoveRecord(IConsole::IResult *pResult, void *pUserData);
