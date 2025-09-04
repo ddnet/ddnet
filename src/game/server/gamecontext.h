@@ -866,7 +866,11 @@ private:
 	void HandleQuads(const CMapItemLayerQuads *pQuadLayer, int QuadIndex, int Type);
 	void HandleQuadStopa(CEntity *pEntity, const CMapItemLayerQuads *pQuadLayer, int QuadIndex);
 
+	bool m_IsWeekend;
+
 public:
+	bool IsWeekend() const { return m_IsWeekend; }
+
 	struct CachedMapInfo
 	{
 		char Server[64] = "UNK";

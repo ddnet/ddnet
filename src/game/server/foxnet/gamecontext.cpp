@@ -1,10 +1,6 @@
-﻿#include "accounts.h"
-#include "entities/pickupdrop.h"
-#include "fontconvert.h"
-#include <base/system.h>
-#include <cstring>
-#include <engine/server/server.h>
+﻿#include <engine/server/server.h>
 #include <engine/shared/config.h>
+
 #include <game/collision.h>
 #include <game/gamecore.h>
 #include <game/mapitems.h>
@@ -16,7 +12,16 @@
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/voting.h>
+
+#include <base/system.h>
+
 #include <generated/protocol.h>
+
+#include "accounts.h"
+#include "entities/pickupdrop.h"
+#include "fontconvert.h"
+
+#include <cstring>
 #include <random>
 #include <string>
 #include <vector>
@@ -25,6 +30,9 @@ void CGameContext::FoxNetTick()
 {
 	m_VoteMenu.Tick();
 	HandleEffects();
+
+	if(Server()->Tick() % (Server()->TickSpeed() * 60 * 60 * 12) == 0) // every 12 hours
+		m_IsWeekend = IsWeekend();
 
 	if(g_Config.m_SvBanSyncing)
 		BanSync();
@@ -78,6 +86,8 @@ void CGameContext::FoxNetInit()
 	m_Shop.Init(this);
 
 	m_BanSaveDelay = Server()->Tick() + Server()->TickSpeed() * (g_Config.m_SvBanSyncingDelay * 60);
+
+	m_IsWeekend = IsWeekend();
 
 	if(!m_Initialized)
 	{

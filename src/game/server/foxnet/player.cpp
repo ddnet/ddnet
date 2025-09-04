@@ -71,7 +71,7 @@ void CPlayer::GiveXP(int64_t Amount, const char *pMessage)
 	if(!Acc()->m_LoggedIn)
 		return;
 
-	if(IsWeekend())
+	if(GameServer()->IsWeekend())
 		Amount *= 2;
 
 	Acc()->m_XP += Amount;
@@ -131,7 +131,7 @@ void CPlayer::GiveMoney(int64_t Amount, const char *pMessage)
 	if(!Acc()->m_LoggedIn)
 		return;
 
-	if(IsWeekend())
+	if(GameServer()->IsWeekend())
 		Amount *= 2.0f;
 
 	Acc()->m_Money += Amount;
