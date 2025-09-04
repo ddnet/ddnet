@@ -2815,6 +2815,8 @@ if(SERVER)
     foxnet/entities/pickupdrop.h
     foxnet/entities/portal.cpp
     foxnet/entities/portal.h
+    foxnet/entities/powerup.cpp
+    foxnet/entities/powerup.h
     foxnet/fontconvert.cpp
     foxnet/fontconvert.h
     foxnet/gamecontext.cpp

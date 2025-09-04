@@ -182,6 +182,8 @@ private:
 	};
 	void GetAnimationTransform(float GlobalTime, int Env, class CLayers *pLayers, vec2 &Position, float &Angle) const;
 
+	std::vector<vec2> m_SpawnCandidates;
+
 public:
 	enum QuadType
 	{
@@ -202,6 +204,16 @@ public:
 	void SetTime(double Time) { m_Time = Time; }
 	int GetQuadCorners(int StartNum, const CMapItemLayerQuads *pQuadLayer, float ExtraTime = 0.0, vec2 *pTopLCorner = nullptr, vec2 *pTopRCorner = nullptr, vec2 *pBottomLCorner = nullptr, vec2 *pBottomRCorner = nullptr) const;
 	bool InsideQuad(vec2 Pos, float Radius, vec2 TopLCorner, vec2 TopRCorner, vec2 BottomLCorner, vec2 BottomRCorner) const;
+
+	void CollectMapSpawnPoints(std::vector<vec2> &OutSeeds) const;
+	int CountSolidTilesInRadius(vec2 Pos, int TileRadius, bool Circle = true) const;
+	bool HasSolidInRadius(vec2 Pos, int TileRadius, int MinCount = 1, bool Circle = true) const;
+
+	void BuildSpawnCandidatesOnLoad();
+	bool TryPickCachedCandidate(vec2 &out) const;
+	size_t SpawnCandidateCount() const { return m_SpawnCandidates.size(); }
+
+
 	// FoxNet>
 };
 

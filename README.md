@@ -50,6 +50,7 @@
 |sv_reset_drops_on_leave|Whether to reset dropped weapons when a player leaves|
 |sv_drop_weapon_on_death|Whether all custom weapons are dropped on death|
 |sv_drops_in_freeze_float|Whether dropped weapons should float up inside freeze|
+|sv_spawn_powerups|Whether to spawn random Powerups (gives xp) on the map|
 
 |Commands|Description|
 |-|-|

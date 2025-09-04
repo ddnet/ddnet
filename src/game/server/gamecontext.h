@@ -24,6 +24,7 @@
 #include "foxnet/accounts.h"
 #include "foxnet/votemenu.h"
 #include "foxnet/shop.h"
+#include "foxnet/entities/powerup.h"
 
 /*
 	Tick
@@ -722,6 +723,7 @@ private:
 	void FoxNetInit();
 	void FoxNetSnap(int ClientId, bool GlobalSnap);
 	void RegisterFoxNetCommands();
+	void PowerUpSpawner();
 
 	void SnapDebuggedQuad(int ClientId);
 	void QuadDebugIds(bool Clear);
@@ -869,6 +871,11 @@ private:
 	bool m_IsWeekend;
 
 public:
+	int64_t m_PowerUpDelay;
+	std::vector<CPowerUp *> m_vPowerups;
+
+	void CollectedPowerup(int ClientId, int XP) const;
+
 	bool IsWeekend() const { return m_IsWeekend; }
 
 	struct CachedMapInfo
@@ -917,6 +924,7 @@ public:
 	bool AddFakeMessage(const char *pName, const char *pMessage, const char *pSkinName, bool CustomColor = false, int ColorBody = 0, int ColorFeet = 0);
 
 	int GetWeaponType(int Weapon);
+	std::optional<vec2> GetRandomAccessablePos();
 	// FoxNet>
 };
 

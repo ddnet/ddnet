@@ -25,11 +25,15 @@
 #include <random>
 #include <string>
 #include <vector>
+#include <game/server/entities/pickup.h>
+#include <optional>
+#include "entities/powerup.h"
 
 void CGameContext::FoxNetTick()
 {
 	m_VoteMenu.Tick();
 	HandleEffects();
+	PowerUpSpawner();
 
 	if(Server()->Tick() % (Server()->TickSpeed() * 60 * 60 * 12) == 0) // every 12 hours
 		m_IsWeekend = IsWeekend();
@@ -79,11 +83,45 @@ void CGameContext::FoxNetTick()
 		++it;
 	}
 }
+int RandGeometricXP(std::mt19937 &rng, int minXP, int maxXP, double p)
+{
+	std::geometric_distribution<int> geo(p);
+	int range = std::max(0, maxXP - minXP);
+	int k = geo(rng);
+	if(k > range)
+		k = range;
+	return minXP + k;
+}
+void CGameContext::PowerUpSpawner()
+{
+	if(!g_Config.m_SvSpawnPowerUps)
+		return;
+	if(m_vPowerups.size() >= 5)
+		return;
+	if(m_PowerUpDelay > Server()->Tick())
+		return;
+
+	const auto RandomPos = GetRandomAccessablePos();
+	if(!RandomPos)
+	{
+		m_PowerUpDelay = Server()->Tick() + Server()->TickSpeed() * 5;
+		return;
+	}
+
+	static std::mt19937 rng{std::random_device{}()};
+	int Xp = RandGeometricXP(rng, 5, 35, 0.35);
+	CPowerUp *NewPowerUp = new CPowerUp(&m_World, *RandomPos, Xp);
+
+	m_vPowerups.push_back(NewPowerUp);
+	m_PowerUpDelay = Server()->Tick() + Server()->TickSpeed() * 25;
+}
 void CGameContext::FoxNetInit()
 {
 	m_AccountManager.Init(this, ((CServer *)Server())->DbPool());
 	m_VoteMenu.Init(this);
 	m_Shop.Init(this);
+	m_vPowerups.clear();
+	m_PowerUpDelay = Server()->Tick() + Server()->TickSpeed() * 5;
 
 	m_BanSaveDelay = Server()->Tick() + Server()->TickSpeed() * (g_Config.m_SvBanSyncingDelay * 60);
 
@@ -1256,4 +1294,88 @@ void CGameContext::HandleQuadStopa(CEntity *pEntity, const CMapItemLayerQuads *p
 			}
 		}
 	}
+}
+
+std::optional<vec2> CGameContext::GetRandomAccessablePos()
+{
+	const auto Dist2 = [](const vec2 &a, const vec2 &b) {
+		const float dx = a.x - b.x;
+		const float dy = a.y - b.y;
+		return dx * dx + dy * dy;
+	};
+
+	constexpr float MinPlayerDist = 640.0f; // 20 tiles
+
+	for(int Tries = 0; Tries < 16; ++Tries)
+	{
+		vec2 Pos;
+		if(!Collision()->TryPickCachedCandidate(Pos))
+			return std::nullopt;
+
+		CEntity *apEnts[64] = {0};
+		const int num = m_World.FindEntities(Pos, MinPlayerDist, apEnts, std::size(apEnts), CGameWorld::ENTTYPE_CHARACTER);
+		bool NearPlayer = false;
+		for(int i = 0; i < num; ++i)
+		{
+			auto *pChr = static_cast<CCharacter *>(apEnts[i]);
+			if(pChr && pChr->IsAlive())
+			{
+				NearPlayer = true;
+				break;
+			}
+		}
+		if(NearPlayer)
+			continue;
+
+		return Pos;
+	}
+
+	float BestScore = -1.0f;
+	vec2 BestPos;
+	for(int k = 0; k < 32; ++k)
+	{
+		vec2 Pos;
+		if(!Collision()->TryPickCachedCandidate(Pos))
+			break;
+
+		float MinDist2 = std::numeric_limits<float>::infinity();
+		CEntity *apEnts[128] = {0};
+		const int Num = m_World.FindEntities(Pos, 1024.0f, apEnts, std::size(apEnts), CGameWorld::ENTTYPE_CHARACTER);
+		for(int i = 0; i < Num; ++i)
+		{
+			auto *pChr = static_cast<CCharacter *>(apEnts[i]);
+			if(!pChr || !pChr->IsAlive())
+				continue;
+			MinDist2 = std::min(MinDist2, Dist2(pChr->m_Pos, Pos));
+			if(MinDist2 == 0.0f)
+				break;
+		}
+		if(MinDist2 > BestScore)
+		{
+			BestScore = MinDist2;
+			BestPos = Pos;
+		}
+	}
+	if(BestScore >= 0.0f)
+		return BestPos;
+
+	return std::nullopt;
+}
+
+void CGameContext::CollectedPowerup(int ClientId, int XP) const
+{
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
+		return;
+	CPlayer *pPlayer = m_apPlayers[ClientId];
+	if(!pPlayer)
+		return;
+
+	if(!pPlayer->Acc()->m_LoggedIn)
+	{
+		SendChatTarget(ClientId, "You need to be logged in to collect Powerups");
+		SendChatTarget(ClientId, "/register <name> <pw> <pw>");
+		return;
+	}
+
+	pPlayer->GiveXP(XP, "for collecting a PowerUp!");
 }

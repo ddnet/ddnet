@@ -1,4 +1,4 @@
-/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
+﻿/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
 #include <base/system.h>
@@ -6,7 +6,6 @@
 
 #include <antibot/antibot_data.h>
 
-#include <cmath>
 #include <engine/map.h>
 
 #include <game/collision.h>
@@ -15,7 +14,11 @@
 
 #include <engine/shared/config.h>
 #include <game/envelopeaccess.h>
+
 #include <iterator>
+#include <random>
+#include <utility>
+#include <deque>
 
 vec2 ClampVel(int MoveRestriction, vec2 Vel)
 {
@@ -150,6 +153,7 @@ void CCollision::Init(class CLayers *pLayers)
 	}
 	// <FoxNet
 	m_vQuadLayers = m_pLayers->QuadLayers();
+	BuildSpawnCandidatesOnLoad();
 	// FoxNet>
 }
 
@@ -176,6 +180,7 @@ void CCollision::Unload()
 	m_pDoor = nullptr;
 	// <FoxNet
 	m_vQuadLayers.clear();
+	m_SpawnCandidates.clear();
 	// FoxNet>
 }
 
@@ -1660,6 +1665,192 @@ int CCollision::GetQuadType(const CMapItemLayerQuads *pQuadLayer) const
 	else if(IsCfrm)
 		return QUADTYPE_CFRM;
 	return 0;
+}
+
+
+void CCollision::CollectMapSpawnPoints(std::vector<vec2> &OutSeeds) const
+{
+	const int W = GetWidth();
+	const int H = GetHeight();
+	OutSeeds.clear();
+	OutSeeds.reserve(16);
+
+	for(int y = 0; y < H; ++y)
+	{
+		for(int x = 0; x < W; ++x)
+		{
+			const int Ent = Entity(x, y, LAYER_GAME);
+			if(Ent >= ENTITY_SPAWN && Ent <= ENTITY_SPAWN_BLUE)
+			{
+				OutSeeds.emplace_back(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
+			}
+		}
+	}
+}
+
+int CCollision::CountSolidTilesInRadius(vec2 pos, int tileRadius, bool circle) const
+{
+	if(tileRadius < 0)
+		return 0;
+
+	const int W = GetWidth();
+	const int H = GetHeight();
+
+	const int cx = std::clamp((int)std::floor(pos.x / 32.0f), 0, W - 1);
+	const int cy = std::clamp((int)std::floor(pos.y / 32.0f), 0, H - 1);
+
+	const int r2 = tileRadius * tileRadius;
+	int Count = 0;
+
+	for(int dy = -tileRadius; dy <= tileRadius; ++dy)
+	{
+		for(int dx = -tileRadius; dx <= tileRadius; ++dx)
+		{
+			if(circle && (dx * dx + dy * dy) > r2)
+				continue;
+
+			const int tx = cx + dx;
+			const int ty = cy + dy;
+			if(tx < 0 || ty < 0 || tx >= W || ty >= H)
+				continue;
+
+			const int px = tx * 32 + 16;
+			const int py = ty * 32 + 16;
+			if(IsSolid(px, py))
+				++Count;
+		}
+	}
+	return Count;
+}
+
+bool CCollision::HasSolidInRadius(vec2 Pos, int TileRadius, int MinCount, bool Circle) const
+{
+	return CountSolidTilesInRadius(Pos, TileRadius, Circle) >= MinCount;
+}
+
+void CCollision::BuildSpawnCandidatesOnLoad()
+{
+	m_SpawnCandidates.clear();
+
+	std::vector<vec2> seeds;
+	CollectMapSpawnPoints(seeds);
+	if(seeds.empty())
+		return;
+
+	const int W = GetWidth();
+	const int H = GetHeight();
+	auto ToIndex = [&](int x, int y) { return y * W + x; };
+	auto InBounds = [&](int x, int y) { return x >= 0 && x < W && y >= 0 && y < H; };
+
+	auto IsAirAt = [&](int tx, int ty) -> bool {
+		if(!InBounds(tx, ty))
+			return false;
+		const int idx = ToIndex(tx, ty);
+		return GetTileIndex(idx) == 0 && GetFrontTileIndex(idx) == 0;
+	};
+	auto SurroundedByAir = [&](int cx, int cy, int radiusTiles = 1) -> bool {
+		for(int oy = -radiusTiles; oy <= radiusTiles; ++oy)
+		{
+			for(int ox = -radiusTiles; ox <= radiusTiles; ++ox)
+			{
+				if(!IsAirAt(cx + ox, cy + oy))
+					return false;
+			}
+		}
+		return true;
+	};
+
+	std::deque<std::pair<int, int>> q;
+	std::vector<uint8_t> visited((size_t)W * H, 0);
+
+	for(const vec2 &s : seeds)
+	{
+		const int sx = std::clamp((int)std::floor(s.x / 32.0f), 0, W - 1);
+		const int sy = std::clamp((int)std::floor(s.y / 32.0f), 0, H - 1);
+		const int si = ToIndex(sx, sy);
+		if(!visited[si])
+		{
+			visited[si] = 1;
+			q.emplace_back(sx, sy);
+		}
+	}
+
+	constexpr int kSolidRadius = 6;
+	const int dx[4] = {1, -1, 0, 0};
+	const int dy[4] = {0, 0, 1, -1};
+
+	while(!q.empty())
+	{
+		auto [x, y] = q.front();
+		q.pop_front();
+
+		if(SurroundedByAir(x, y, 1))
+		{
+			const vec2 pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
+			if(HasSolidInRadius(pos, kSolidRadius, 1, true))
+				m_SpawnCandidates.push_back(pos);
+		}
+
+		for(int k = 0; k < 4; ++k)
+		{
+			const int nx = x + dx[k], ny = y + dy[k];
+			if(!InBounds(nx, ny))
+				continue;
+			const int ni = ToIndex(nx, ny);
+			if(visited[ni])
+				continue;
+
+			const int px = nx * 32 + 16;
+			const int py = ny * 32 + 16;
+			if(!IsSolid(px, py))
+			{
+				visited[ni] = 1;
+				q.emplace_back(nx, ny);
+			}
+		}
+
+		if(m_pTele)
+		{
+			const int idx = ToIndex(x, y);
+			const int tType = m_pTele[idx].m_Type;
+			const int tNum = m_pTele[idx].m_Number;
+
+			if(tNum > 0 && (tType == TILE_TELEIN || tType == TILE_TELEINEVIL))
+			{
+				const int key = tNum - 1;
+				auto it = m_TeleOuts.find(key);
+				if(it != m_TeleOuts.end())
+				{
+					for(const vec2 &outPos : it->second)
+					{
+						const int ox = std::clamp((int)std::floor(outPos.x / 32.0f), 0, W - 1);
+						const int oy = std::clamp((int)std::floor(outPos.y / 32.0f), 0, H - 1);
+						const int oi = ToIndex(ox, oy);
+						if(visited[oi])
+							continue;
+
+						const int opx = ox * 32 + 16;
+						const int opy = oy * 32 + 16;
+						if(!IsSolid(opx, opy))
+						{
+							visited[oi] = 1;
+							q.emplace_back(ox, oy);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+bool CCollision::TryPickCachedCandidate(vec2 &out) const
+{
+	if(m_SpawnCandidates.empty())
+		return false;
+	static thread_local std::mt19937 rng{std::random_device{}()};
+	std::uniform_int_distribution<size_t> pick(0, m_SpawnCandidates.size() - 1);
+	out = m_SpawnCandidates[pick(rng)];
+	return true;
 }
 
 // FoxNet>
