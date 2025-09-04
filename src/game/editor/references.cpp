@@ -4,7 +4,7 @@ void CLayerTilesEnvelopeReference::SetEnvelope(const std::shared_ptr<CEnvelope> 
 {
 	if(pEnvelope->Type() == CEnvelope::EType::COLOR)
 	{
-		m_pLayerTiles->m_ColorEnv = EnvIndex;
+		m_pLayerTiles->m_LayerTilemap.m_ColorEnv = EnvIndex;
 	}
 }
 

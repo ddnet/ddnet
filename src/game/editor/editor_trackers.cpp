@@ -508,12 +508,12 @@ int CLayerTilesPropTracker::PropToValue(ETilesProp Prop)
 	{
 	case ETilesProp::PROP_AUTOMAPPER: return m_pObject->m_AutoMapperConfig;
 	case ETilesProp::PROP_LIVE_GAMETILES: return m_pObject->m_LiveGameTiles;
-	case ETilesProp::PROP_COLOR: return PackColor(m_pObject->m_Color);
-	case ETilesProp::PROP_COLOR_ENV: return m_pObject->m_ColorEnv;
-	case ETilesProp::PROP_COLOR_ENV_OFFSET: return m_pObject->m_ColorEnvOffset;
-	case ETilesProp::PROP_HEIGHT: return m_pObject->m_Height;
-	case ETilesProp::PROP_WIDTH: return m_pObject->m_Width;
-	case ETilesProp::PROP_IMAGE: return m_pObject->m_Image;
+	case ETilesProp::PROP_COLOR: return PackColor(m_pObject->m_LayerTilemap.m_Color);
+	case ETilesProp::PROP_COLOR_ENV: return m_pObject->m_LayerTilemap.m_ColorEnv;
+	case ETilesProp::PROP_COLOR_ENV_OFFSET: return m_pObject->m_LayerTilemap.m_ColorEnvOffset;
+	case ETilesProp::PROP_HEIGHT: return m_pObject->m_LayerTilemap.m_Height;
+	case ETilesProp::PROP_WIDTH: return m_pObject->m_LayerTilemap.m_Width;
+	case ETilesProp::PROP_IMAGE: return m_pObject->m_LayerTilemap.m_Image;
 	case ETilesProp::PROP_SEED: return m_pObject->m_Seed;
 	case ETilesProp::PROP_SHIFT_BY: return m_pEditor->m_ShiftBy;
 	default: return 0;
@@ -588,15 +588,15 @@ int CLayerGroupPropTracker::PropToValue(EGroupProp Prop)
 	switch(Prop)
 	{
 	case EGroupProp::PROP_ORDER: return m_pEditor->m_SelectedGroup;
-	case EGroupProp::PROP_POS_X: return m_pObject->m_OffsetX;
-	case EGroupProp::PROP_POS_Y: return m_pObject->m_OffsetY;
-	case EGroupProp::PROP_PARA_X: return m_pObject->m_ParallaxX;
-	case EGroupProp::PROP_PARA_Y: return m_pObject->m_ParallaxY;
-	case EGroupProp::PROP_USE_CLIPPING: return m_pObject->m_UseClipping;
-	case EGroupProp::PROP_CLIP_X: return m_pObject->m_ClipX;
-	case EGroupProp::PROP_CLIP_Y: return m_pObject->m_ClipY;
-	case EGroupProp::PROP_CLIP_W: return m_pObject->m_ClipW;
-	case EGroupProp::PROP_CLIP_H: return m_pObject->m_ClipH;
+	case EGroupProp::PROP_POS_X: return m_pObject->m_ItemGroup.m_OffsetX;
+	case EGroupProp::PROP_POS_Y: return m_pObject->m_ItemGroup.m_OffsetY;
+	case EGroupProp::PROP_PARA_X: return m_pObject->m_ItemGroup.m_ParallaxX;
+	case EGroupProp::PROP_PARA_Y: return m_pObject->m_ItemGroup.m_ParallaxY;
+	case EGroupProp::PROP_USE_CLIPPING: return m_pObject->m_ItemGroup.m_UseClipping;
+	case EGroupProp::PROP_CLIP_X: return m_pObject->m_ItemGroup.m_ClipX;
+	case EGroupProp::PROP_CLIP_Y: return m_pObject->m_ItemGroup.m_ClipY;
+	case EGroupProp::PROP_CLIP_W: return m_pObject->m_ItemGroup.m_ClipW;
+	case EGroupProp::PROP_CLIP_H: return m_pObject->m_ItemGroup.m_ClipH;
 	default: return 0;
 	}
 }
@@ -612,7 +612,7 @@ void CLayerQuadsPropTracker::OnEnd(ELayerQuadsProp Prop, int Value)
 int CLayerQuadsPropTracker::PropToValue(ELayerQuadsProp Prop)
 {
 	if(Prop == ELayerQuadsProp::PROP_IMAGE)
-		return m_pObject->m_Image;
+		return m_pObject->m_LayerQuads.m_Image;
 	return 0;
 }
 
@@ -627,7 +627,7 @@ void CLayerSoundsPropTracker::OnEnd(ELayerSoundsProp Prop, int Value)
 int CLayerSoundsPropTracker::PropToValue(ELayerSoundsProp Prop)
 {
 	if(Prop == ELayerSoundsProp::PROP_SOUND)
-		return m_pObject->m_Sound;
+		return m_pObject->m_LayerSounds.m_Sound;
 	return 0;
 }
 
