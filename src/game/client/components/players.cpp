@@ -274,14 +274,8 @@ void CPlayers::RenderHookCollLine(
 		if(Hit && Hit != TILE_TELEINHOOK)
 			break;
 
-		NewPos.x = round_to_int(NewPos.x);
-		NewPos.y = round_to_int(NewPos.y);
-
 		if(OldPos == NewPos)
 			break;
-
-		Direction.x = round_to_int(Direction.x * 256.0f) / 256.0f;
-		Direction.y = round_to_int(Direction.y * 256.0f) / 256.0f;
 	} while(!DoBreak);
 
 	std::pair<vec2, vec2> NewPair = std::make_pair(InitPos, FinishPos);
