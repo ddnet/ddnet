@@ -1,18 +1,20 @@
 // Made by qxdFox
 #include "heart_hat.h"
 #include "game/server/entities/character.h"
+#include <algorithm>
 #include <base/vmath.h>
 #include <game/server/entity.h>
 #include <game/server/gamecontext.h>
+#include <game/server/gamecontroller.h>
 #include <game/server/gameworld.h>
 #include <game/server/player.h>
+#include <game/server/teams.h>
 #include <generated/protocol.h>
-#include <algorithm>
 
 CHeartHat::CHeartHat(CGameWorld *pGameWorld, int Owner) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_HEART_HAT, vec2(0,0))
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_HEART_HAT, vec2(0, 0))
 {
-	m_aPos[0] = vec2(0,0);
+	m_aPos[0] = vec2(0, 0);
 
 	m_Owner = Owner;
 	m_Ids[0] = GetId();
@@ -86,7 +88,10 @@ void CHeartHat::Snap(int SnappingClient)
 	if(pSnapPlayer->m_HideCosmetics)
 		return;
 
-	if(pOwnerChar->IsPaused())
+	CGameTeams Teams = GameServer()->m_pController->Teams();
+	int Team = pOwnerChar->Team();
+
+	if(!Teams.SetMask(SnappingClient, Team))
 		return;
 
 	if(pSnapPlayer->GetCharacter() && pOwnerChar)

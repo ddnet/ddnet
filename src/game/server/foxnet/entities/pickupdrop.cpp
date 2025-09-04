@@ -429,20 +429,9 @@ void CPickupDrop::Snap(int SnappingClient)
 	if(!pSnapPlayer)
 		return;
 
-	if(CCharacter *pSnapChar = pSnapPlayer->GetCharacter())
-	{
-		if(m_Team == TEAM_SUPER) {}
-		else if(pSnapPlayer->IsPaused())
-		{
-			if(pSnapChar->Team() != m_Team && pSnapPlayer->m_SpecTeam)
-				return;
-		}
-		else
-		{
-			if(pSnapChar->Team() != TEAM_SUPER && pSnapChar->Team() != m_Team)
-				return;
-		}
-	}
+	CGameTeams Teams = GameServer()->m_pController->Teams();
+	if(!Teams.SetMask(SnappingClient, m_Team))
+		return;
 
 	// Make the pickup blink when about to disappear
 	if(m_Lifetime < Server()->TickSpeed() * 10 && (Server()->Tick() / (Server()->TickSpeed() / 4)) % 2 == 0)

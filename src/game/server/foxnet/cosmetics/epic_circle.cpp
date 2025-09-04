@@ -6,8 +6,10 @@
 #include <engine/shared/protocol.h>
 #include <game/server/entity.h>
 #include <game/server/gamecontext.h>
+#include <game/server/gamecontroller.h>
 #include <game/server/gameworld.h>
 #include <game/server/player.h>
+#include <game/server/teams.h>
 
 CEpicCircle::CEpicCircle(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE, Pos)
@@ -69,7 +71,10 @@ void CEpicCircle::Snap(int SnappingClient)
 	if(pSnapPlayer->m_HideCosmetics)
 		return;
 
-	if(pOwnerChar->IsPaused())
+	CGameTeams Teams = GameServer()->m_pController->Teams();
+	int Team = pOwnerChar->Team();
+
+	if(!Teams.SetMask(SnappingClient, Team))
 		return;
 
 	if(pSnapPlayer->GetCharacter() && pOwnerChar)
@@ -80,10 +85,13 @@ void CEpicCircle::Snap(int SnappingClient)
 		if(!pSnapPlayer->m_Vanish && Server()->GetAuthedState(SnappingClient) < AUTHED_ADMIN)
 			return;
 
-	CNetObj_Projectile *pParticle[MAX_PARTICLES];
 	for(int i = 0; i < MAX_PARTICLES; i++)
 	{
+		CNetObj_DDNetProjectile *pProj = Server()->SnapNewItem<CNetObj_DDNetProjectile>(m_aIds[i]);
+		if(!pProj)
+			return;
 		vec2 Pos = m_Pos + m_RotatePos[i];
+
 		if(m_Owner == SnappingClient)
 		{
 			float Lat = std::clamp((float)pOwnerChar->GetPlayer()->m_Latency.m_Avg, 0.0f, 125.0f) / 27.77f;
@@ -92,15 +100,12 @@ void CEpicCircle::Snap(int SnappingClient)
 			Pos = m_Pos + vec2(0.8f, 0.8f) * (Pos - m_Pos);
 		}
 
-		pParticle[i] = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_aIds[i], sizeof(CNetObj_Projectile)));
-		if(pParticle[i])
-		{
-			pParticle[i]->m_X = Pos.x;
-			pParticle[i]->m_Y = Pos.y;
-			pParticle[i]->m_VelX = 0;
-			pParticle[i]->m_VelY = 0;
-			pParticle[i]->m_StartTick = 0;
-			pParticle[i]->m_Type = WEAPON_HAMMER;
-		}
+		pProj->m_X = round_to_int(Pos.x * 100.0f);
+		pProj->m_Y = round_to_int(Pos.y * 100.0f);
+		pProj->m_Type = WEAPON_HAMMER;
+		pProj->m_Owner = m_Owner;
+		pProj->m_StartTick = 0;
+		pProj->m_VelX = 0;
+		pProj->m_VelY = 0;
 	}
 }

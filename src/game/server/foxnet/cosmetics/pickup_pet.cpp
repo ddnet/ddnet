@@ -9,8 +9,10 @@
 #include <game/gamecore.h>
 #include <game/server/entity.h>
 #include <game/server/gamecontext.h>
+#include <game/server/gamecontroller.h>
 #include <game/server/gameworld.h>
 #include <game/server/player.h>
+#include <game/server/teams.h>
 #include <generated/protocol.h>
 
 CPickupPet::CPickupPet(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
@@ -75,7 +77,10 @@ void CPickupPet::Snap(int SnappingClient)
 	if(pSnapPlayer->m_HideCosmetics)
 		return;
 
-	if(pOwnerChar->IsPaused())
+	CGameTeams Teams = GameServer()->m_pController->Teams();
+	int Team = pOwnerChar->Team();
+
+	if(!Teams.SetMask(SnappingClient, Team))
 		return;
 
 	if(pSnapPlayer->GetCharacter() && pOwnerChar)

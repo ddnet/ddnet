@@ -3,8 +3,10 @@
 #include <base/vmath.h>
 #include <game/server/entity.h>
 #include <game/server/gamecontext.h>
+#include <game/server/gamecontroller.h>
 #include <game/server/gameworld.h>
 #include <game/server/player.h>
+#include <game/server/teams.h>
 
 CRotatingBall::CRotatingBall(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_ROTATING_BALL, Pos)
@@ -82,7 +84,10 @@ void CRotatingBall::Snap(int SnappingClient)
 	if(pSnapPlayer->m_HideCosmetics)
 		return;
 
-	if(pOwnerChar->IsPaused())
+	CGameTeams Teams = GameServer()->m_pController->Teams();
+	int Team = pOwnerChar->Team();
+
+	if(!Teams.SetMask(SnappingClient, Team))
 		return;
 
 	if(pSnapPlayer->GetCharacter() && pOwnerChar)
@@ -111,11 +116,11 @@ void CRotatingBall::Snap(int SnappingClient)
 		pLaser->m_FromX = round_to_int(Pos.x);
 		pLaser->m_FromY = round_to_int(Pos.y);
 		pLaser->m_StartTick = Server()->Tick();
-		pLaser->m_Owner = m_Owner;
 		pLaser->m_Flags = LASERFLAG_NO_PREDICT;
+		pLaser->m_Owner = m_Owner;
 	}
 
-	CNetObj_Projectile *pProj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_Id1, sizeof(CNetObj_Projectile)));
+	CNetObj_DDNetProjectile *pProj = Server()->SnapNewItem<CNetObj_DDNetProjectile>(m_Id1);
 	if(!pProj)
 		return;
 
@@ -128,11 +133,12 @@ void CRotatingBall::Snap(int SnappingClient)
 			Pos.y = m_ProjPos.y + std::clamp(pOwnerChar->Core()->m_Vel.y, -15.0f, 15.0f) * std::clamp(Lat, 0.0f, 150.0f);
 		}
 
-		pProj->m_X = round_to_int(Pos.x);
-		pProj->m_Y = round_to_int(Pos.y);
+		pProj->m_X = round_to_int(Pos.x * 100.0f);
+		pProj->m_Y = round_to_int(Pos.y * 100.0f);
+		pProj->m_Type = WEAPON_HAMMER;
+		pProj->m_Owner = m_Owner;
+		pProj->m_StartTick = 0;
 		pProj->m_VelX = 0;
 		pProj->m_VelY = 0;
-		pProj->m_StartTick = 0;
-		pProj->m_Type = WEAPON_HAMMER;
 	}
 }

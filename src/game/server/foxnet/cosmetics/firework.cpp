@@ -4,6 +4,7 @@
 #include <base/vmath.h>
 #include <game/server/entity.h>
 #include <game/server/gamecontext.h>
+#include <game/server/gamecontroller.h>
 #include <game/server/gameworld.h>
 #include <game/server/player.h>
 #include <generated/protocol.h>
@@ -94,7 +95,10 @@ void CFirework::Snap(int SnappingClient)
 	if(pSnapPlayer->m_HideCosmetics)
 		return;
 
-	if(pOwnerChar->IsPaused())
+	CGameTeams Teams = GameServer()->m_pController->Teams();
+	int Team = pOwnerChar->Team();
+
+	if(!Teams.SetMask(SnappingClient, Team))
 		return;
 
 	if(pSnapPlayer->GetCharacter() && pOwnerChar)

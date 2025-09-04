@@ -1,9 +1,14 @@
-#include <game/gamecore.h>
+
 #include <game/server/entities/character.h>
 #include <game/server/entity.h>
 #include <game/server/gamecontext.h>
+#include <game/server/gamecontroller.h>
 #include <game/server/gameworld.h>
 #include <game/server/player.h>
+#include <game/server/teams.h>
+
+#include <game/gamecore.h>
+#include <game/teamscore.h>
 
 #include <generated/protocol.h>
 
@@ -14,8 +19,6 @@
 
 #include "portal.h"
 #include <algorithm>
-#include <base/system.h>
-#include <game/teamscore.h>
 
 constexpr float PortalRadius = 52.0f;
 constexpr float MaxDistanceFromPlayer = 1200.0f;
@@ -244,21 +247,13 @@ void CPortal::Snap(int SnappingClient)
 	if(!pSnapPlayer)
 		return;
 
-	if(CCharacter *pSnapChar = pSnapPlayer->GetCharacter())
-	{
-		if(m_PortalData[0].m_Team == TEAM_SUPER)
-			;
-		else if(pSnapPlayer->IsPaused())
-		{
-			if(pSnapChar->Team() != m_PortalData[0].m_Team && pSnapPlayer->m_SpecTeam)
-				return;
-		}
-		else
-		{
-			if(pSnapChar->Team() != TEAM_SUPER && pSnapChar->Team() != m_PortalData[0].m_Team)
-				return;
-		}
-	}
+	CGameTeams Teams = GameServer()->m_pController->Teams();
+	if(!Teams.SetMask(SnappingClient, m_PortalData[0].m_Team))
+		return;
+
+	int Team = Teams.m_Core.Team(SnappingClient);
+	if(Team != m_PortalData[0].m_Team && Team != TEAM_SUPER)
+		Team = MAX_CLIENTS;
 
 	const int snapVer = pSnapPlayer->GetClientVersion();
 	const bool sixUp = Server()->IsSixup(SnappingClient);
@@ -282,7 +277,7 @@ void CPortal::Snap(int SnappingClient)
 			From += m_PortalData[p].m_Pos;
 
 			GameServer()->SnapLaserObject(CSnapContext(snapVer, sixUp, SnappingClient),
-				m_Snap.m_aIds[baseId + i], To, From, StartTick);
+				m_Snap.m_aIds[baseId + i], To, From, StartTick, Team);
 		}
 	}
 
@@ -290,17 +285,18 @@ void CPortal::Snap(int SnappingClient)
 	{
 		for(size_t i = 0; i < NUM_PRTCL; i++)
 		{
-			CNetObj_Projectile *pProj = Server()->SnapNewItem<CNetObj_Projectile>(m_Snap.m_aParticleIds[i]);
+			CNetObj_DDNetProjectile *pProj = Server()->SnapNewItem<CNetObj_DDNetProjectile>(m_Snap.m_aParticleIds[i]);
 			if(!pProj)
-				return;
+				continue;
 
 			vec2 Pos = GetRandomPointInCircle(m_PortalData[i % 2].m_Pos, PortalRadius - 6.0f);
-			pProj->m_X = (int)(Pos.x);
-			pProj->m_Y = (int)(Pos.y);
+			pProj->m_X = round_to_int(Pos.x * 100.0f);
+			pProj->m_Y = round_to_int(Pos.y * 100.0f);
+			pProj->m_StartTick = 0;
 			pProj->m_VelX = 0;
 			pProj->m_VelY = 0;
-			pProj->m_StartTick = 0;
 			pProj->m_Type = WEAPON_HAMMER;
+			pProj->m_Owner = Team;
 		}
 	}
 }

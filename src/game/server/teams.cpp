@@ -1306,6 +1306,13 @@ bool CGameTeams::IsPractice(int Team)
 // <FoxNet
 bool CGameTeams::SetMask(int ClientId, int Team, int ExceptId, int Asker, int VersionFlags)
 {
+	if(Team == TEAM_SUPER)
+	{
+		if(ExceptId == -1)
+			return true;
+		return false;
+	}
+
 	if(ClientId == ExceptId)
 		return false; // Explicitly excluded
 	if(!GetPlayer(ClientId))

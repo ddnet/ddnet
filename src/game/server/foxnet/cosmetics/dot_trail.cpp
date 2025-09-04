@@ -5,6 +5,7 @@
 #include <base/vmath.h>
 #include <game/server/entity.h>
 #include <game/server/gamecontext.h>
+#include <game/server/gamecontroller.h>
 #include <game/server/gameworld.h>
 #include <game/server/player.h>
 #include <game/server/teams.h>
@@ -50,7 +51,10 @@ void CDotTrail::Snap(int SnappingClient)
 	if(pSnapPlayer->m_HideCosmetics)
 		return;
 
-	if(pOwnerChar->IsPaused())
+	CGameTeams Teams = GameServer()->m_pController->Teams();
+	int Team = pOwnerChar->Team();
+
+	if(!Teams.SetMask(SnappingClient, Team))
 		return;
 
 	if(pSnapPlayer->GetCharacter() && pOwnerChar)
@@ -61,7 +65,7 @@ void CDotTrail::Snap(int SnappingClient)
 		if(!pSnapPlayer->m_Vanish && Server()->GetAuthedState(SnappingClient) < AUTHED_ADMIN)
 			return;
 
-	CNetObj_Projectile *pProj = Server()->SnapNewItem<CNetObj_Projectile>(GetId());
+	CNetObj_DDNetProjectile *pProj = Server()->SnapNewItem<CNetObj_DDNetProjectile>(GetId());
 	if(!pProj)
 		return;
 
@@ -74,10 +78,11 @@ void CDotTrail::Snap(int SnappingClient)
 		Pos = m_Pos + vec2(0.8f, 0.8f) * (Pos - m_Pos);
 	}
 
-	pProj->m_X = (int)(Pos.x);
-	pProj->m_Y = (int)(Pos.y);
+	pProj->m_X = round_to_int(Pos.x * 100.0f);
+	pProj->m_Y = round_to_int(Pos.y * 100.0f);
+	pProj->m_Type = WEAPON_HAMMER;
+	pProj->m_Owner = m_Owner;
+	pProj->m_StartTick = 0;
 	pProj->m_VelX = 0;
 	pProj->m_VelY = 0;
-	pProj->m_StartTick = 0;
-	pProj->m_Type = WEAPON_HAMMER;
 }

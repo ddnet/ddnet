@@ -4,6 +4,7 @@
 #include <base/vmath.h>
 #include <game/server/entity.h>
 #include <game/server/gamecontext.h>
+#include <game/server/gamecontroller.h>
 #include <game/server/gameworld.h>
 #include <game/server/player.h>
 #include <generated/protocol.h>
@@ -79,6 +80,12 @@ void CFlyingPoint::Snap(int SnappingClient)
 	// if(pSnapPlayer->m_HideCosmetics)
 	//	return;
 
+	CGameTeams Teams = GameServer()->m_pController->Teams();
+	int Team = pOwnerChar->Team();
+
+	if(!Teams.SetMask(SnappingClient, Team))
+		return;
+
 	if(pOwnerChar->IsPaused())
 		return;
 
@@ -89,14 +96,15 @@ void CFlyingPoint::Snap(int SnappingClient)
 	if(pOwnerChar->GetPlayer()->m_Vanish && SnappingClient != pOwnerChar->GetPlayer()->GetCid() && SnappingClient != -1)
 		if(!pSnapPlayer->m_Vanish && Server()->GetAuthedState(SnappingClient) < AUTHED_ADMIN)
 			return;
-	CNetObj_Projectile *pProj = Server()->SnapNewItem<CNetObj_Projectile>(GetId());
+
+	CNetObj_DDNetProjectile *pProj = Server()->SnapNewItem<CNetObj_DDNetProjectile>(GetId());
 	if(!pProj)
 		return;
 
-	pProj->m_X = (int)(m_Pos.x);
-	pProj->m_Y = (int)(m_Pos.y);
+	pProj->m_X = round_to_int(m_Pos.x * 100.0f);
+	pProj->m_Y = round_to_int(m_Pos.y * 100.0f);
+	pProj->m_Type = WEAPON_HAMMER;
+	pProj->m_StartTick = 0;
 	pProj->m_VelX = 0;
 	pProj->m_VelY = 0;
-	pProj->m_StartTick = 0;
-	pProj->m_Type = WEAPON_HAMMER;
 }
