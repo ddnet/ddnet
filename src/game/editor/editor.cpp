@@ -2534,7 +2534,7 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 
 			s_Operation = OP_SELECT;
 		}
-		else if(Ui()->MouseButton(1))
+		else if(Ui()->MouseButtonClicked(1))
 		{
 			s_Operation = OP_CONTEXT_MENU;
 
