@@ -106,18 +106,18 @@ float CPlayers::GetPlayerTargetAngle(
 		return angle(GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy]);
 	}
 
-	float AngleIntraTick = Intra;
 	// using unpredicted angle when rendering other players in-game
 	if(ClientId >= 0)
-		AngleIntraTick = Client()->IntraGameTick(g_Config.m_ClDummy);
+		Intra = Client()->IntraGameTick(g_Config.m_ClDummy);
+
 	if(ClientId >= 0 && GameClient()->m_Snap.m_aCharacters[ClientId].m_HasExtendedDisplayInfo)
 	{
 		const CNetObj_DDNetCharacter *pExtendedData = &GameClient()->m_Snap.m_aCharacters[ClientId].m_ExtendedData;
 		const CNetObj_DDNetCharacter *pPrevExtendedData = GameClient()->m_Snap.m_aCharacters[ClientId].m_pPrevExtendedData;
 		if(pPrevExtendedData)
 		{
-			float MixX = mix((float)pPrevExtendedData->m_TargetX, (float)pExtendedData->m_TargetX, AngleIntraTick);
-			float MixY = mix((float)pPrevExtendedData->m_TargetY, (float)pExtendedData->m_TargetY, AngleIntraTick);
+			float MixX = mix((float)pPrevExtendedData->m_TargetX, (float)pExtendedData->m_TargetX, Intra);
+			float MixY = mix((float)pPrevExtendedData->m_TargetY, (float)pExtendedData->m_TargetY, Intra);
 			return angle(vec2(MixX, MixY));
 		}
 		else
@@ -132,15 +132,15 @@ float CPlayers::GetPlayerTargetAngle(
 		// short path and not the long one.
 		if(pPlayerChar->m_Angle > (256.0f * pi) && pPrevChar->m_Angle < 0)
 		{
-			return mix((float)pPrevChar->m_Angle, (float)(pPlayerChar->m_Angle - 256.0f * 2 * pi), AngleIntraTick) / 256.0f;
+			return mix((float)pPrevChar->m_Angle, (float)(pPlayerChar->m_Angle - 256.0f * 2 * pi), Intra) / 256.0f;
 		}
 		else if(pPlayerChar->m_Angle < 0 && pPrevChar->m_Angle > (256.0f * pi))
 		{
-			return mix((float)pPrevChar->m_Angle, (float)(pPlayerChar->m_Angle + 256.0f * 2 * pi), AngleIntraTick) / 256.0f;
+			return mix((float)pPrevChar->m_Angle, (float)(pPlayerChar->m_Angle + 256.0f * 2 * pi), Intra) / 256.0f;
 		}
 		else
 		{
-			return mix((float)pPrevChar->m_Angle, (float)pPlayerChar->m_Angle, AngleIntraTick) / 256.0f;
+			return mix((float)pPrevChar->m_Angle, (float)pPlayerChar->m_Angle, Intra) / 256.0f;
 		}
 	}
 }
@@ -161,18 +161,17 @@ void CPlayers::RenderHookCollLine(
 	float Alpha = (OtherTeam || ClientId < 0) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
 	Alpha *= (float)g_Config.m_ClHookCollAlpha / 100;
 
-	float IntraTick = Intra;
 	if(ClientId >= 0)
-		IntraTick = GameClient()->m_aClients[ClientId].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
+		Intra = GameClient()->m_aClients[ClientId].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
 
-	float Angle = GetPlayerTargetAngle(&Prev, &Player, ClientId, IntraTick);
+	float Angle = GetPlayerTargetAngle(&Prev, &Player, ClientId, Intra);
 
 	vec2 Direction = direction(Angle);
 	vec2 Position;
 	if(in_range(ClientId, MAX_CLIENTS - 1))
 		Position = GameClient()->m_aClients[ClientId].m_RenderPos;
 	else
-		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
+		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), Intra);
 
 	// draw hook collision line
 	bool Aim = (Player.m_PlayerFlags & PLAYERFLAG_AIM);
@@ -342,9 +341,8 @@ void CPlayers::RenderHook(
 	if(pPlayerChar->m_HookedPlayer != -1 && !GameClient()->m_Snap.m_aCharacters[pPlayerChar->m_HookedPlayer].m_Active)
 		return;
 
-	float IntraTick = Intra;
 	if(ClientId >= 0)
-		IntraTick = (GameClient()->m_aClients[ClientId].m_IsPredicted) ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
+		Intra = GameClient()->m_aClients[ClientId].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
 
 	bool OtherTeam = GameClient()->IsOtherTeam(ClientId);
 	float Alpha = (OtherTeam || ClientId < 0) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
@@ -357,7 +355,7 @@ void CPlayers::RenderHook(
 	if(in_range(ClientId, MAX_CLIENTS - 1))
 		Position = GameClient()->m_aClients[ClientId].m_RenderPos;
 	else
-		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
+		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), Intra);
 
 	// draw hook
 	if(Prev.m_HookState > 0 && Player.m_HookState > 0)
@@ -372,7 +370,7 @@ void CPlayers::RenderHook(
 		if(in_range(pPlayerChar->m_HookedPlayer, MAX_CLIENTS - 1))
 			HookPos = GameClient()->m_aClients[pPlayerChar->m_HookedPlayer].m_RenderPos;
 		else
-			HookPos = mix(vec2(Prev.m_HookX, Prev.m_HookY), vec2(Player.m_HookX, Player.m_HookY), IntraTick);
+			HookPos = mix(vec2(Prev.m_HookX, Prev.m_HookY), vec2(Player.m_HookX, Player.m_HookY), Intra);
 
 		float d = distance(Pos, HookPos);
 		vec2 Dir = normalize(Pos - HookPos);
@@ -429,9 +427,8 @@ void CPlayers::RenderPlayer(
 	// set size
 	RenderInfo.m_Size = 64.0f;
 
-	float IntraTick = Intra;
 	if(ClientId >= 0)
-		IntraTick = GameClient()->m_aClients[ClientId].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
+		Intra = GameClient()->m_aClients[ClientId].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
 
 	static float s_LastGameTickTime = Client()->GameTickTime(g_Config.m_ClDummy);
 	static float s_LastPredIntraTick = Client()->PredIntraGameTick(g_Config.m_ClDummy);
@@ -452,15 +449,15 @@ void CPlayers::RenderPlayer(
 	}
 	float AttackTicksPassed = AttackTime * (float)Client()->GameTickSpeed();
 
-	float Angle = GetPlayerTargetAngle(&Prev, &Player, ClientId, IntraTick);
+	float Angle = GetPlayerTargetAngle(&Prev, &Player, ClientId, Intra);
 
 	vec2 Direction = direction(Angle);
 	vec2 Position;
 	if(in_range(ClientId, MAX_CLIENTS - 1))
 		Position = GameClient()->m_aClients[ClientId].m_RenderPos;
 	else
-		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
-	vec2 Vel = mix(vec2(Prev.m_VelX / 256.0f, Prev.m_VelY / 256.0f), vec2(Player.m_VelX / 256.0f, Player.m_VelY / 256.0f), IntraTick);
+		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), Intra);
+	vec2 Vel = mix(vec2(Prev.m_VelX / 256.0f, Prev.m_VelY / 256.0f), vec2(Player.m_VelX / 256.0f, Player.m_VelY / 256.0f), Intra);
 
 	GameClient()->m_Flow.Add(Position, Vel * 100.0f, 10.0f);
 
