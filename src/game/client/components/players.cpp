@@ -199,19 +199,18 @@ void CPlayers::RenderHookCollLine(
 	if(!AlwaysRenderHookColl && !RenderHookCollPlayer)
 		return;
 
-	vec2 ExDirection = Direction;
-
 	if(Local && !GameClient()->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
-		ExDirection = normalize(vec2((int)GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].x, (int)GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].y));
+		Direction = normalize(vec2((int)GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].x, (int)GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].y));
 
 		// fix direction if mouse is exactly in the center
 		if(!(int)GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].x && !(int)GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].y)
-			ExDirection = vec2(1, 0);
+			Direction = vec2(1.0f, 0.0f);
 	}
+
 	Graphics()->TextureClear();
 	vec2 InitPos = Position;
-	vec2 FinishPos = InitPos + ExDirection * (GameClient()->m_aClients[ClientId].m_Predicted.m_Tuning.m_HookLength - 42.0f);
+	vec2 FinishPos = InitPos + Direction * (GameClient()->m_aClients[ClientId].m_Predicted.m_Tuning.m_HookLength - 42.0f);
 
 	const int HookCollSize = Local ? g_Config.m_ClHookCollSize : g_Config.m_ClHookCollSizeOther;
 	if(HookCollSize > 0)
@@ -221,7 +220,7 @@ void CPlayers::RenderHookCollLine(
 
 	ColorRGBA HookCollColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorNoColl));
 
-	vec2 OldPos = InitPos + ExDirection * CCharacterCore::PhysicalSize() * 1.5f;
+	vec2 OldPos = InitPos + Direction * CCharacterCore::PhysicalSize() * 1.5f;
 	vec2 NewPos = OldPos;
 
 	bool DoBreak = false;
@@ -231,7 +230,7 @@ void CPlayers::RenderHookCollLine(
 	do
 	{
 		OldPos = NewPos;
-		NewPos = OldPos + ExDirection * GameClient()->m_aClients[ClientId].m_Predicted.m_Tuning.m_HookFireSpeed;
+		NewPos = OldPos + Direction * GameClient()->m_aClients[ClientId].m_Predicted.m_Tuning.m_HookFireSpeed;
 
 		if(distance(InitPos, NewPos) > GameClient()->m_aClients[ClientId].m_Predicted.m_Tuning.m_HookLength)
 		{
@@ -281,8 +280,8 @@ void CPlayers::RenderHookCollLine(
 		if(OldPos == NewPos)
 			break;
 
-		ExDirection.x = round_to_int(ExDirection.x * 256.0f) / 256.0f;
-		ExDirection.y = round_to_int(ExDirection.y * 256.0f) / 256.0f;
+		Direction.x = round_to_int(Direction.x * 256.0f) / 256.0f;
+		Direction.y = round_to_int(Direction.y * 256.0f) / 256.0f;
 	} while(!DoBreak);
 
 	std::pair<vec2, vec2> NewPair = std::make_pair(InitPos, FinishPos);
@@ -300,7 +299,7 @@ void CPlayers::RenderHookCollLine(
 		if(HookCollSize > 0)
 		{
 			float LineWidth = 0.5f + (float)(HookCollSize - 1) * 0.25f;
-			vec2 PerpToAngle = normalize(vec2(ExDirection.y, -ExDirection.x)) * GameClient()->m_Camera.m_Zoom;
+			vec2 PerpToAngle = normalize(vec2(Direction.y, -Direction.x)) * GameClient()->m_Camera.m_Zoom;
 			vec2 Pos0 = DrawFinishPos + PerpToAngle * -LineWidth;
 			vec2 Pos1 = DrawFinishPos + PerpToAngle * LineWidth;
 			vec2 Pos2 = DrawInitPos + PerpToAngle * -LineWidth;
