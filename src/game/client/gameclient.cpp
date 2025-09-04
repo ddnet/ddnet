@@ -127,6 +127,7 @@ void CGameClient::OnConsoleInit()
 					      &m_Particles, // doesn't render anything, just updates all the particles
 					      &m_RaceDemo,
 					      &m_MapSounds,
+					      &m_Censor,
 					      &m_Background, // render instead of m_MapLayersBackground when g_Config.m_ClOverlayEntities == 100
 					      &m_MapLayersBackground, // first to render
 					      &m_Particles.m_RenderTrail,
