@@ -792,6 +792,7 @@ private:
 	static void ConSetUfo(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConHideCosmetics(IConsole::IResult *pResult, void *pUserData);
+	static void ConHidePowerUps(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConIgnoreGameLayer(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetVanish(IConsole::IResult *pResult, void *pUserData);

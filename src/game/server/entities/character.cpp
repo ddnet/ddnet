@@ -2886,7 +2886,6 @@ CClientMask CCharacter::CosmeticMask()
 {
 	return Teams()->CosmeticMask(Team(), -1, GetPlayer()->GetCid(), 3, false);
 }
-
 CClientMask CCharacter::OppsiteCosmeticMask()
 {
 	return Teams()->CosmeticMask(Team(), -1, GetPlayer()->GetCid(), 3, true);

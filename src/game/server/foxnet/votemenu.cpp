@@ -25,6 +25,7 @@ constexpr const char *FANCY_LINES_DESC = "═─═─═─═─═─═─�
 
 constexpr const char *SETTINGS_AUTO_LOGIN = "Auto Login";
 constexpr const char *SETTINGS_HIDE_COSMETICS = "Hide Cosmetics";
+constexpr const char *SETTINGS_HIDE_POWERUPS = "Hide PowerUps";
 
 // Admin SubPages
 constexpr const char *ADMIN_UTIL = "Util Page";
@@ -156,6 +157,11 @@ bool CVoteMenu::IsCustomVoteOption(const CNetMsg_Cl_CallVote *pMsg, int ClientId
 		if(IsOption(pVote, SETTINGS_HIDE_COSMETICS))
 		{
 			pPl->SetHideCosmetics(!pPl->m_HideCosmetics);
+			return true;
+		}
+		if(IsOption(pVote, SETTINGS_HIDE_POWERUPS))
+		{
+			pPl->SetHidePowerUps(!pPl->m_HidePowerUps);
 			return true;
 		}
 	}
@@ -580,6 +586,7 @@ void CVoteMenu::SendPageSettings(int ClientId)
 	if(Acc.m_LoggedIn)
 		AddVoteCheckBox(SETTINGS_AUTO_LOGIN, Acc.m_Flags & ACC_FLAG_AUTOLOGIN);
 	AddVoteCheckBox(SETTINGS_HIDE_COSMETICS, pPl->m_HideCosmetics);
+	AddVoteCheckBox(SETTINGS_HIDE_POWERUPS, pPl->m_HidePowerUps);
 }
 
 void CVoteMenu::SendPageAccount(int ClientId)

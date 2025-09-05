@@ -326,6 +326,7 @@ public:
 	// <FoxNet
 	bool m_WeaponIndicator = true;
 	bool m_HideCosmetics = false;
+	bool m_HidePowerUps = false;
 
 	CCosmetics m_Cosmetics;
 
@@ -370,6 +371,7 @@ public:
 	void SetStrongBloody(bool Active);
 
 	void SetHideCosmetics(bool Set);
+	void SetHidePowerUps(bool Set);
 
 	// Cosmetics
 	void SetRainbowBody(bool Active);

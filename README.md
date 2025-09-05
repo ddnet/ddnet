@@ -95,6 +95,8 @@
 |fake_message|Send a message as a player that doesn't exist|
 |map_vote_lock|Lock changing maps trough normal votes|
 |cleanup_pickupdrops|Deletes all dropped weapons|
+|hide_cosmetics|Hides all cosmetics for a player|
+|hide_powerups|Hides all powerups for a player|
 
 |Chat Commands|Description|
 |-|-|
@@ -133,4 +135,3 @@
 |c_confetti_gun|
 |c_death_type|
 |c_damageind_type|
-|c_hide_cosmetics|

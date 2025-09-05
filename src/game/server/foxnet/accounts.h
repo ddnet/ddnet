@@ -24,6 +24,7 @@ enum
 
 	ACC_FLAG_AUTOLOGIN = 1 << 0,
 	ACC_FLAG_HIDE_COSMETICS = 1 << 1,
+	ACC_FLAG_HIDE_POWERUPS = 1 << 2,
 };
 
 struct CAccountSession

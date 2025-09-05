@@ -659,6 +659,23 @@ void CPlayer::SetHideCosmetics(bool Set)
 	}
 }
 
+void CPlayer::SetHidePowerUps(bool Set)
+{
+	m_HidePowerUps = Set;
+	if(!Acc()->m_LoggedIn)
+		return;
+	if(Set)
+	{
+		Acc()->m_Flags |= ACC_FLAG_HIDE_POWERUPS;
+		GameServer()->SendChatTarget(m_ClientId, "PowerUps will be hidden");
+	}
+	else
+	{
+		Acc()->m_Flags &= ~ACC_FLAG_HIDE_POWERUPS;
+		GameServer()->SendChatTarget(m_ClientId, "PowerUps will show");
+	}
+}
+
 static const char *GetAbilityName(int Type)
 {
 	switch(Type)

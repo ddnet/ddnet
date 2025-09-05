@@ -465,6 +465,9 @@ void CGameContext::OnLogin(int ClientId)
 	const int Flags = pPl->Acc()->m_Flags;
 	if(Flags & ACC_FLAG_HIDE_COSMETICS)
 		pPl->m_HideCosmetics = true;
+	if(Flags & ACC_FLAG_HIDE_POWERUPS)
+		pPl->m_HidePowerUps = true;
+
 	char aItemsCopy[1028];
 	str_copy(aItemsCopy, pPl->Acc()->m_LastActiveItems, sizeof(aItemsCopy));
 
@@ -1369,6 +1372,12 @@ void CGameContext::CollectedPowerup(int ClientId, int XP) const
 	CPlayer *pPlayer = m_apPlayers[ClientId];
 	if(!pPlayer)
 		return;
+
+	if(pPlayer->m_HidePowerUps)
+	{
+		pPlayer->GiveXP(XP); // GiveXP has a logged in check
+		return;
+	}
 
 	if(!pPlayer->Acc()->m_LoggedIn)
 	{

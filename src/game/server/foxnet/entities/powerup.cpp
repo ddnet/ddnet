@@ -110,6 +110,9 @@ void CPowerUp::Snap(int SnappingClient)
 	if(!pSnapPlayer)
 		return;
 
+	if(pSnapPlayer->m_HidePowerUps)
+		return;
+
 	CGameTeams Teams = GameServer()->m_pController->Teams();
 	if(!Teams.SetMask(SnappingClient, TEAM_FLOCK))
 		return;
