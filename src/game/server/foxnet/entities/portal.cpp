@@ -248,7 +248,7 @@ void CPortal::Snap(int SnappingClient)
 		return;
 
 	CGameTeams Teams = GameServer()->m_pController->Teams();
-	if(!Teams.SetMask(SnappingClient, m_PortalData[0].m_Team))
+	if(!Teams.SetMaskWithFlags(SnappingClient, m_PortalData[0].m_Team, CGameTeams::EXTRAFLAG_IGNORE_SOLO))
 		return;
 
 	int Team = Teams.m_Core.Team(SnappingClient);

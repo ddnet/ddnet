@@ -428,7 +428,7 @@ void CPickupDrop::Snap(int SnappingClient)
 		return;
 
 	CGameTeams Teams = GameServer()->m_pController->Teams();
-	if(!Teams.SetMask(SnappingClient, m_Team))
+	if(!Teams.SetMaskWithFlags(SnappingClient, m_Team, CGameTeams::EXTRAFLAG_IGNORE_SOLO))
 		return;
 
 	// Make the pickup blink when about to disappear
