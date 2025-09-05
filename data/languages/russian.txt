@@ -1908,7 +1908,7 @@ Online friends (%d)
 == Друзья в сети (%d)
 
 Add friends by entering their name below or by clicking their name in the player list.
-== Чтобы добавить друзей, впишите их имена ниже или нажимите по их имени в списке игроков.
+== Чтобы добавить друзей, впишите их имена ниже или нажмите по их имени в списке игроков.
 
 Add clanmates by entering their clan below and leaving the name blank.
 == Чтобы добавить соклановцев, впишите их клан и оставьте имя пустым.
@@ -2215,269 +2215,269 @@ Could not check for existing player with your name. Check your internet connecti
 == Не удалось проверить, существует ли игрок с вашим именем. Проверьте подключение к Интернету.
 
 Press Ctrl+Shift+G to disable debug graphs.
-== 
+== Нажмите Ctrl+Shift+G, чтобы отключить графики отладки.
 
 Server could not be started
-== 
+== Не удалось запустить сервер
 
 Could not get server list from master server
-== 
+== Не удалось получить список серверов от мастер-сервера
 
 [Demo playback]
 Live
-== 
+== В реальном времени
 
 [Demo playback]
 Go to Live
-== 
+== Перейти к реальному времени
 
 Save all changes before turning off the editor?
-== 
+== Сохранить все изменения перед выходом из редактора?
 
 Layout
-== 
+== Макет
 
 Visibility
-== 
+== Видимость
 
 Behavior
-== 
+== Поведение
 
 Delete button
-== 
+== Удалить кнопку
 
 Are you sure that you want to delete this button?
-== 
+== Вы уверены, что хотите удалить эту кнопку?
 
 Duplicate
-== 
+== Дублировать
 
 New button already created
-== 
+== Новая кнопка уже создана
 
 A new button has already been created, please save or delete it before creating another one.
-== 
+== Новая кнопка уже создана, пожалуйста, сохраните или удалите её перед созданием другой.
 
 Please save your changes before duplicating a button.
-== 
+== Пожалуйста, сохраните изменения перед дублированием кнопки.
 
 No space for button
-== 
+== Нет места для кнопки
 
 There is not enough space available to place another button.
-== 
+== Недостаточно места для размещения другой кнопки.
 
 There is not enough space available to place another button with this size. The button has been resized.
-== 
+== Недостаточно места для размещения кнопки такого размера. Кнопка была изменена.
 
 Deselect
-== 
+== Снять выделение
 
 You'll lose unsaved changes after deselecting.
-== 
+== Несохранённые изменения будут потеряны после снятия выделения.
 
 Width
-== 
+== Ширина
 
 Height
-== 
+== Высота
 
 Shape
-== 
+== Форма
 
 [Touch button shape]
 Rectangle
-== 
+== Прямоугольник
 
 [Touch button shape]
 Circle
-== 
+== Круг
 
 [Touch button label type]
 Plain
-== 
+== Обычный
 
 [Touch button label type]
 Localized
-== 
+== Локализованный
 
 [Touch button label type]
 Icon
-== 
+== Иконка
 
 Behavior type
-== 
+== Тип поведения
 
 [Touch button behavior]
 Bind
-== 
+== Привязка
 
 [Touch button behavior]
 Bind Toggle
-== 
+== Переключение привязки
 
 [Touch button behavior]
 Predefined
-== 
+== Предустановленное
 
 Command
-== 
+== Команда
 
 Label
-== 
+== Метка
 
 Label type
-== 
+== Тип метки
 
 Add command
-== 
+== Добавить команду
 
 Delete command
-== 
+== Удалить команду
 
 [Touch button visibility preview]
 Included
-== 
+== Включено
 
 [Touch button visibility preview]
 Excluded
-== 
+== Исключено
 
 [Touch button visibility preview]
 Ignore
-== 
+== Игнорировать
 
 Long press on a touch button to select it.
-== 
+== Длительное нажатие на сенсорную кнопку для выбора.
 
 New button
-== 
+== Новая кнопка
 
 Select button by touch
-== 
+== Выбрать кнопку касанием
 
 No buttons match your filter criteria
-== 
+== Нет кнопок, подходящих под ваш фильтр
 
 File
-== 
+== Файл
 
 Buttons
-== 
+== Кнопки
 
 Active color
-== 
+== Активный цвет
 
 Inactive color
-== 
+== Неактивный цвет
 
 Preview button visibility while the editor is active.
-== 
+== Предпросмотр видимости кнопки во время работы редактора.
 
 Show all buttons
-== 
+== Показать все кнопки
 
 Save all changes before switching selected button?
-== 
+== Сохранить все изменения перед переключением выбранной кнопки?
 
 Discard
-== 
+== Отменить
 
 There is not enough space available for the button. Check its visibilities and size.
-== 
+== Недостаточно места для кнопки. Проверьте её видимость и размер.
 
 Selected button not visible
-== 
+== Выбранная кнопка не видна
 
 The selected button is not visible. Do you want to deselect it or edit its visibility?
-== 
+== Выбранная кнопка не видна. Хотите снять выделение или изменить её видимость?
 
 Edit
-== 
+== Редактировать
 
 Width and height are required to be within the range from %d to %d.
-== 
+== Ширина и высота должны быть в диапазоне от %d до %d.
 
 Button position is outside of the screen.
-== 
+== Положение кнопки вне экрана.
 
 The selected button is overlapping with other buttons.
-== 
+== Выбранная кнопка перекрывает другие кнопки.
 
 Wrong button settings
-== 
+== Неправильные настройки кнопки
 
 [Touch button visibilities]
 Ingame
-== 
+== В игре
 
 [Touch button visibilities]
 Zoom Allowed
-== 
+== Разрешён зум
 
 [Touch button visibilities]
 Vote Active
-== 
+== Голосование активно
 
 [Touch button visibilities]
 Dummy Allowed
-== 
+== Дамми разрешён
 
 [Touch button visibilities]
 Dummy Connected
-== 
+== Дамми подключён
 
 [Touch button visibilities]
 Rcon Authed
-== 
+== Rcon авторизован
 
 [Touch button visibilities]
 Demo Player
-== 
+== Проигрыватель демо
 
 [Touch button visibilities]
 Extra Menu
-== 
+== Дополнительное меню
 
 [Predefined touch button behaviors]
 Ingame Menu
-== 
+== Меню в игре
 
 [Predefined touch button behaviors]
 Extra Menu
-== 
+== Дополнительное меню
 
 [Predefined touch button behaviors]
 Emoticon
-== 
+== Эмоция
 
 [Predefined touch button behaviors]
 Spectate
-== 
+== Наблюдать
 
 [Predefined touch button behaviors]
 Swap Action
-== 
+== Сменить действие
 
 [Predefined touch button behaviors]
 Use Action
-== 
+== Использовать действие
 
 [Predefined touch button behaviors]
 Joystick Action
-== 
+== Действие джойстика
 
 [Predefined touch button behaviors]
 Joystick Aim
-== 
+== Прицеливание джойстиком
 
 [Predefined touch button behaviors]
 Joystick Fire
-== 
+== Стрельба джойстиком
 
 [Predefined touch button behaviors]
 Joystick Hook
-== 
+== Крюк джойстиком
 
 Chat background color
-== 
+== Цвет фона
