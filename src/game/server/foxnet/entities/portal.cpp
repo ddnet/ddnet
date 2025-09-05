@@ -19,6 +19,7 @@
 
 #include "portal.h"
 #include <algorithm>
+#include <engine/server.h>
 
 constexpr float PortalRadius = 52.0f;
 constexpr float MaxDistanceFromPlayer = 1200.0f;
@@ -243,9 +244,12 @@ void CPortal::Snap(int SnappingClient)
 	if(NetworkClipped(SnappingClient, m_PortalData[0].m_Pos) && NetworkClipped(SnappingClient, m_PortalData[1].m_Pos))
 		return;
 
-	CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
-	if(!pSnapPlayer)
-		return;
+	if(SnappingClient != SERVER_DEMO_CLIENT)
+	{
+		CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+		if(!pSnapPlayer)
+			return;
+	}
 
 	CGameTeams Teams = GameServer()->m_pController->Teams();
 	if(!Teams.SetMaskWithFlags(SnappingClient, m_PortalData[0].m_Team, CGameTeams::EXTRAFLAG_IGNORE_SOLO))
@@ -255,8 +259,8 @@ void CPortal::Snap(int SnappingClient)
 	if(Team != m_PortalData[0].m_Team && Team != TEAM_SUPER)
 		Team = MAX_CLIENTS;
 
-	const int snapVer = pSnapPlayer->GetClientVersion();
-	const bool sixUp = Server()->IsSixup(SnappingClient);
+	const int SnapVer = Server()->GetClientVersion(SnappingClient);
+	const bool SixUp = Server()->IsSixup(SnappingClient);
 	const int StartTick = Server()->Tick() + 2;
 
 	for(int p = 0; p < NUM_PORTALS; ++p)
@@ -276,7 +280,7 @@ void CPortal::Snap(int SnappingClient)
 			To += m_PortalData[p].m_Pos;
 			From += m_PortalData[p].m_Pos;
 
-			GameServer()->SnapLaserObject(CSnapContext(snapVer, sixUp, SnappingClient),
+			GameServer()->SnapLaserObject(CSnapContext(SnapVer, SixUp, SnappingClient),
 				m_Snap.m_aIds[baseId + i], To, From, StartTick, Team);
 		}
 	}

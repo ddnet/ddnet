@@ -13,6 +13,7 @@
 #include <generated/protocol.h>
 
 #include <engine/shared/protocol.h>
+#include <engine/server.h>
 
 #include <base/vmath.h>
 #include <iterator>
@@ -110,18 +111,20 @@ void CPowerUp::SetPowerupVisual()
 	m_Snap.m_aFrom[4] = m_Pos + vec2(-Len, -Len);
 }
 
-
 void CPowerUp::Snap(int SnappingClient)
 {
 	if(NetworkClipped(SnappingClient))
 		return;
 
-	CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
-	if(!pSnapPlayer)
-		return;
+	if(SnappingClient != SERVER_DEMO_CLIENT)
+	{
+		CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+		if(!pSnapPlayer)
+			return;
 
-	if(pSnapPlayer->m_HidePowerUps)
-		return;
+		if(pSnapPlayer->m_HidePowerUps)
+			return;
+	}
 
 	// Make the powerup blink when about to disappear
 	if(m_Lifetime < Server()->TickSpeed() * 10 && (Server()->Tick() / (Server()->TickSpeed() / 4)) % 2 == 0)
@@ -131,7 +134,7 @@ void CPowerUp::Snap(int SnappingClient)
 	if(!Teams.SetMaskWithFlags(SnappingClient, TEAM_FLOCK, CGameTeams::EXTRAFLAG_IGNORE_SOLO))
 		return;
 
-	int SnappingClientVersion = pSnapPlayer->GetClientVersion();
+	int SnappingClientVersion = Server()->GetClientVersion(SnappingClient);
 	bool SixUp = Server()->IsSixup(SnappingClient);
 
 	if(m_Delay == 0)
@@ -143,6 +146,6 @@ void CPowerUp::Snap(int SnappingClient)
 	{
 		vec2 To = m_Snap.m_aTo[i];
 		vec2 From = m_Snap.m_aFrom[i];
-		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, SixUp, SnappingClient), m_Snap.m_aLaserIds[i], To, From, Server()->Tick(),-1, 0);
+		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, SixUp, SnappingClient), m_Snap.m_aLaserIds[i], To, From, Server()->Tick(), -1, 0);
 	}
 }

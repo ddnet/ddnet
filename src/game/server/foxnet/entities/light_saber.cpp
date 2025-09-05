@@ -116,24 +116,29 @@ void CLightSaber::Snap(int SnappingClient)
 		return;
 
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
-
-	if(!pOwnerChar || !pSnapPlayer)
+	if(!pOwnerChar)
 		return;
 
-	CGameTeams Teams = GameServer()->m_pController->Teams();
-	int Team = pOwnerChar->Team();
-
-	if(!Teams.SetMask(SnappingClient, Team))
-		return;
-
-	if(pSnapPlayer->GetCharacter() && pOwnerChar)
-		if(!pOwnerChar->CanSnapCharacter(SnappingClient))
+	if(SnappingClient != SERVER_DEMO_CLIENT)
+	{
+		CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+		if(!pSnapPlayer)
 			return;
 
-	if(pOwnerChar->GetPlayer()->m_Vanish && SnappingClient != pOwnerChar->GetPlayer()->GetCid() && SnappingClient != -1)
-		if(!pSnapPlayer->m_Vanish && Server()->GetAuthedState(SnappingClient) < AUTHED_ADMIN)
+		CGameTeams Teams = GameServer()->m_pController->Teams();
+		int Team = pOwnerChar->Team();
+
+		if(!Teams.SetMask(SnappingClient, Team))
 			return;
+
+		if(pSnapPlayer->GetCharacter() && pOwnerChar)
+			if(!pOwnerChar->CanSnapCharacter(SnappingClient))
+				return;
+
+		if(pOwnerChar->GetPlayer()->m_Vanish && SnappingClient != pOwnerChar->GetPlayer()->GetCid() && SnappingClient != -1)
+			if(!pSnapPlayer->m_Vanish && Server()->GetAuthedState(SnappingClient) < AUTHED_ADMIN)
+				return;
+	}
 
 	if(m_Length <= 0)
 		return;
@@ -150,11 +155,8 @@ void CLightSaber::Snap(int SnappingClient)
 		To = m_From + pOwnerChar->Core()->m_Vel;
 	}
 
-	pLaser->m_ToX = round_to_int(To.x);
-	pLaser->m_ToY = round_to_int(To.y);
-	pLaser->m_FromX = round_to_int(From.x);
-	pLaser->m_FromY = round_to_int(From.y);
-	pLaser->m_StartTick = Server()->Tick() - 3; // Makes the Laser thinner
-	pLaser->m_Owner = m_Owner;
-	pLaser->m_Flags = LASERFLAG_NO_PREDICT;
+	const int SnapVer = Server()->GetClientVersion(SnappingClient);
+	bool SixUp = Server()->IsSixup(SnappingClient);
+
+	GameServer()->SnapLaserObject(CSnapContext(SnapVer, SixUp, SnappingClient), GetId(), To, From, Server()->Tick() - 3, m_Owner, LASERTYPE_GUN);
 }
