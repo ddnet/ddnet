@@ -69,7 +69,7 @@ void CPowerUp::Tick()
 	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
 		CCharacter *pChr = GameServer()->GetPlayerChar(ClientId);
-		if(!pChr || !pChr->IsAlive())
+		if(!pChr || !pChr->IsAlive() || pChr->Team() != TEAM_FLOCK)
 			continue;
 
 		if(PointInSquare(m_Pos, pChr->GetPos(), 54.0f))
