@@ -51,6 +51,13 @@ static bool MatchesExactly(const char *a, const char *b)
 	return str_comp(a, &b[1]) == 0;
 }
 
+static NETADDR CommunityAddressKey(const NETADDR &Addr)
+{
+	NETADDR AddressKey = Addr;
+	AddressKey.type &= ~NETTYPE_TW7;
+	return AddressKey;
+}
+
 CServerBrowser::CServerBrowser() :
 	m_CommunityCache(this),
 	m_CountriesFilter(&m_CommunityCache),
@@ -1170,7 +1177,7 @@ void CServerBrowser::UpdateFromHttp()
 		Want = [this, pWantedCommunity, IsNoneCommunity](const NETADDR *pAddrs, int NumAddrs) -> bool {
 			for(int AddressIndex = 0; AddressIndex < NumAddrs; AddressIndex++)
 			{
-				const auto CommunityServer = m_CommunityServersByAddr.find(pAddrs[AddressIndex]);
+				const auto CommunityServer = m_CommunityServersByAddr.find(CommunityAddressKey(pAddrs[AddressIndex]));
 				if(CommunityServer != m_CommunityServersByAddr.end())
 				{
 					if(IsNoneCommunity)
@@ -1594,7 +1601,7 @@ void CServerBrowser::LoadDDNetServers()
 		{
 			for(const auto &Server : Country.Servers())
 			{
-				m_CommunityServersByAddr.emplace(Server.Address(), CCommunityServer(NewCommunity.Id(), Country.Name(), Server.TypeName()));
+				m_CommunityServersByAddr.emplace(CommunityAddressKey(Server.Address()), CCommunityServer(NewCommunity.Id(), Country.Name(), Server.TypeName()));
 			}
 		}
 		m_vCommunities.push_back(std::move(NewCommunity));
@@ -1642,7 +1649,7 @@ void CServerBrowser::UpdateServerCommunity(CServerInfo *pInfo) const
 {
 	for(int AddressIndex = 0; AddressIndex < pInfo->m_NumAddresses; AddressIndex++)
 	{
-		const auto Community = m_CommunityServersByAddr.find(pInfo->m_aAddresses[AddressIndex]);
+		const auto Community = m_CommunityServersByAddr.find(CommunityAddressKey(pInfo->m_aAddresses[AddressIndex]));
 		if(Community != m_CommunityServersByAddr.end())
 		{
 			str_copy(pInfo->m_aCommunityId, Community->second.CommunityId());
