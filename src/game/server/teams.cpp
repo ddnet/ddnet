@@ -1306,7 +1306,7 @@ bool CGameTeams::IsPractice(int Team)
 }
 
 // <FoxNet
-bool CGameTeams::SetMask(int ClientId, int Team, int ExceptId, int Asker, int VersionFlags, int ExtraFlags)
+bool CGameTeams::SetMask(int ClientId, int Team, int ExceptId, int Asker, int VersionFlags, int Flags)
 {
 	if(Team == TEAM_SUPER)
 	{
@@ -1336,7 +1336,7 @@ bool CGameTeams::SetMask(int ClientId, int Team, int ExceptId, int Asker, int Ve
 			}
 			else if(GetPlayer(ClientId)->m_ShowOthers == SHOW_OTHERS_OFF)
 			{
-				if(!(ExtraFlags & EXTRAFLAG_IGNORE_SOLO))
+				if(!(Flags & EXTRAFLAG_IGNORE_SOLO))
 				{
 					if(m_Core.GetSolo(Asker))
 						return false; // When in solo part don't show others
@@ -1361,7 +1361,7 @@ bool CGameTeams::SetMask(int ClientId, int Team, int ExceptId, int Asker, int Ve
 			}
 			else if(GetPlayer(ClientId)->m_ShowOthers == SHOW_OTHERS_OFF)
 			{
-				if(!(ExtraFlags & EXTRAFLAG_IGNORE_SOLO))
+				if(!(Flags & EXTRAFLAG_IGNORE_SOLO))
 				{
 					if(m_Core.GetSolo(Asker))
 						return false; // When in solo part don't show others

@@ -125,7 +125,7 @@ public:
 	};
 
 	bool SetMask(int ClientId, int Team, int ExceptId = -1, int Asker = -1, int VersionFlags = CGameContext::FLAG_SIX | CGameContext::FLAG_SIXUP, int ExtraFlags = 0);
-	bool SetMaskWithFlags(int ClientId, int Team, int ExtraFlags = 0) { return SetMask(ClientId, Team, -1, -1, CGameContext::FLAG_SIX | CGameContext::FLAG_SIXUP, ExtraFlags); }
+	bool SetMaskWithFlags(int ClientId, int Team, int Flags = 0) { return SetMask(ClientId, Team, -1, -1, CGameContext::FLAG_SIX | CGameContext::FLAG_SIXUP, Flags); }
 	CClientMask CosmeticMask(int Team, int ExceptId = -1, int Asker = -1, int VersionFlags = CGameContext::FLAG_SIX | CGameContext::FLAG_SIXUP, bool Opposite = false);
 	// FoxNet>
 };
