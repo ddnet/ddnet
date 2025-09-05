@@ -11,8 +11,8 @@
 class CBroadcast : public CComponent
 {
 	// broadcasts
-	char m_aBroadcastText[NUM_DUMMIES][1024];
-	int m_BroadcastTick[NUM_DUMMIES];
+	char m_aaBroadcastText[NUM_DUMMIES][1024];
+	int m_aBroadcastTick[NUM_DUMMIES];
 	float m_BroadcastRenderOffset;
 	STextContainerIndex m_TextContainerIndex;
 

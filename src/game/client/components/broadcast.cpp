@@ -15,7 +15,7 @@
 
 void CBroadcast::OnReset()
 {
-	std::fill(std::begin(m_BroadcastTick), std::end(m_BroadcastTick), 0);
+	std::fill(std::begin(m_aBroadcastTick), std::end(m_aBroadcastTick), 0);
 	DeleteBroadcastContainer();
 }
 
@@ -37,9 +37,9 @@ void CBroadcast::RenderServerBroadcast()
 	if(GameClient()->m_Scoreboard.IsActive() || GameClient()->m_Motd.IsActive() || !g_Config.m_ClShowBroadcasts)
 		return;
 
-	char aCurrentBroadcast[sizeof(m_aBroadcastText[0])];
+	char aCurrentBroadcast[sizeof(m_aaBroadcastText[0])];
 
-	float SecondsRemaining = (m_BroadcastTick[g_Config.m_ClDummy] - Client()->GameTick(g_Config.m_ClDummy)) / (float)Client()->GameTickSpeed();
+	float SecondsRemaining = (m_aBroadcastTick[g_Config.m_ClDummy] - Client()->GameTick(g_Config.m_ClDummy)) / (float)Client()->GameTickSpeed();
 	if(SecondsRemaining <= 0.0f)
 	{
 		if(SecondsRemaining == 0.0f)
@@ -47,7 +47,7 @@ void CBroadcast::RenderServerBroadcast()
 			DeleteBroadcastContainer();
 		}
 
-		SecondsRemaining = (m_BroadcastTick[!g_Config.m_ClDummy] - Client()->GameTick(g_Config.m_ClDummy)) / (float)Client()->GameTickSpeed();
+		SecondsRemaining = (m_aBroadcastTick[!g_Config.m_ClDummy] - Client()->GameTick(g_Config.m_ClDummy)) / (float)Client()->GameTickSpeed();
 		if(SecondsRemaining <= 0.0f)
 		{
 			DeleteBroadcastContainer();
@@ -55,12 +55,12 @@ void CBroadcast::RenderServerBroadcast()
 		}
 		else
 		{
-			str_copy(aCurrentBroadcast, m_aBroadcastText[!g_Config.m_ClDummy]);
+			str_copy(aCurrentBroadcast, m_aaBroadcastText[!g_Config.m_ClDummy]);
 		}
 	}
 	else
 	{
-		str_copy(aCurrentBroadcast, m_aBroadcastText[g_Config.m_ClDummy]);
+		str_copy(aCurrentBroadcast, m_aaBroadcastText[g_Config.m_ClDummy]);
 	}
 
 	const float Height = 300.0f;
@@ -112,12 +112,12 @@ void CBroadcast::DoDummyBroadcast(const char *pText)
 void CBroadcast::DoBroadcast(const char *pText, bool Dummy)
 {
 	int Conn = (Dummy != (bool)g_Config.m_ClDummy);
-	m_BroadcastTick[Conn] = Client()->GameTick(g_Config.m_ClDummy) + Client()->GameTickSpeed() * 10;
-	str_copy(m_aBroadcastText[Conn], pText);
+	m_aBroadcastTick[Conn] = Client()->GameTick(g_Config.m_ClDummy) + Client()->GameTickSpeed() * 10;
+	str_copy(m_aaBroadcastText[Conn], pText);
 
 	if(Dummy)
 	{
-		const float SecondsRemaining = (m_BroadcastTick[Conn] - Client()->GameTick(g_Config.m_ClDummy)) / (float)Client()->GameTickSpeed();
+		const float SecondsRemaining = (m_aBroadcastTick[Conn] - Client()->GameTick(g_Config.m_ClDummy)) / (float)Client()->GameTickSpeed();
 		if(SecondsRemaining <= 0.0f)
 			DeleteBroadcastContainer();
 	}
@@ -126,7 +126,7 @@ void CBroadcast::DoBroadcast(const char *pText, bool Dummy)
 
 	if(g_Config.m_ClPrintBroadcasts)
 	{
-		char aLine[sizeof(m_aBroadcastText[0])];
+		char aLine[sizeof(m_aaBroadcastText[0])];
 		while((pText = str_next_token(pText, "\n", aLine, sizeof(aLine))))
 		{
 			if(aLine[0] != '\0')
