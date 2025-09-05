@@ -111,7 +111,7 @@ void CCountryFlags::OnInit()
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "countryflags", "failed to load country flags. folder='countryflags/'");
 		CCountryFlag DummyEntry;
 		DummyEntry.m_CountryCode = -1;
-		mem_zero(DummyEntry.m_aCountryCodeString, sizeof(DummyEntry.m_aCountryCodeString));
+		DummyEntry.m_aCountryCodeString[0] = '\0';
 		m_vCountryFlags.push_back(DummyEntry);
 	}
 

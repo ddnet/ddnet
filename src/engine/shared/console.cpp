@@ -782,8 +782,7 @@ void CConsole::ConCommandAccess(IResult *pResult, void *pUser)
 void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 {
 	CConsole *pConsole = static_cast<CConsole *>(pUser);
-	char aBuf[240];
-	mem_zero(aBuf, sizeof(aBuf));
+	char aBuf[240] = "";
 	int Used = 0;
 	std::optional<int> AccessLevel = AccessLevelToInt(pResult->GetString(0));
 	if(!AccessLevel.has_value())
@@ -810,7 +809,6 @@ void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 			else
 			{
 				pConsole->Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
-				mem_zero(aBuf, sizeof(aBuf));
 				str_copy(aBuf, pCommand->m_pName);
 				Used = Length;
 			}

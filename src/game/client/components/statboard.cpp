@@ -436,9 +436,7 @@ std::string CStatboard::ReplaceCommata(char *pStr)
 	if(!str_find(pStr, ","))
 		return pStr;
 
-	char aOutbuf[256];
-	mem_zero(aOutbuf, sizeof(aOutbuf));
-
+	char aOutbuf[256] = "";
 	for(int i = 0, skip = 0; i < 64; i++)
 	{
 		if(pStr[i] == ',')
@@ -450,7 +448,6 @@ std::string CStatboard::ReplaceCommata(char *pStr)
 		else
 			aOutbuf[i + skip] = pStr[i];
 	}
-
 	return aOutbuf;
 }
 
