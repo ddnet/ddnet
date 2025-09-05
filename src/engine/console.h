@@ -75,6 +75,12 @@ public:
 		virtual int GetVictim() const = 0;
 	};
 
+	typedef void (*FTeeHistorianCommandCallback)(int ClientId, int FlagMask, const char *pCmd, IResult *pResult, void *pUser);
+	typedef void (*FPossibleCallback)(int Index, const char *pCmd, void *pUser);
+	typedef void (*FCommandCallback)(IResult *pResult, void *pUserData);
+	typedef void (*FChainCommandCallback)(IResult *pResult, void *pUserData, FCommandCallback pfnCallback, void *pCallbackUserData);
+	typedef bool (*FUnknownCommandCallback)(const char *pCommand, void *pUser); // returns true if the callback has handled the argument
+
 	class ICommandInfo
 	{
 	public:
@@ -82,21 +88,30 @@ public:
 		virtual const char *Name() const = 0;
 		virtual const char *Help() const = 0;
 		virtual const char *Params() const = 0;
-		virtual const ICommandInfo *NextCommandInfo(EAccessLevel AccessLevel, int FlagMask) const = 0;
 		virtual EAccessLevel GetAccessLevel() const = 0;
+		virtual void SetAccessLevel(EAccessLevel AccessLevel) = 0;
+		virtual void SetName(const char *pName) = 0;
+		virtual void SetHelp(const char *pHelp) = 0;
+		virtual void SetParams(const char *pParams) = 0;
+		virtual const ICommandInfo *Next() const = 0;
+		virtual ICommandInfo *Next() = 0;
+		virtual void SetNext(ICommandInfo *pNext) = 0;
+		virtual int Flags() const = 0;
+		virtual void SetFlags(int Flags) = 0;
+		virtual bool IsTemp() const = 0;
+		virtual void SetTemp(bool Temp) = 0;
+		virtual void *CallbackUserData() const = 0;
+		virtual FCommandCallback Callback() const = 0;
+		virtual void SetCallback(FCommandCallback pfnCallback, void *pUserData) = 0;
+		virtual void ExecCallback(IResult *pResult) = 0;
 	};
-
-	typedef void (*FTeeHistorianCommandCallback)(int ClientId, int FlagMask, const char *pCmd, IResult *pResult, void *pUser);
-	typedef void (*FPossibleCallback)(int Index, const char *pCmd, void *pUser);
-	typedef void (*FCommandCallback)(IResult *pResult, void *pUserData);
-	typedef void (*FChainCommandCallback)(IResult *pResult, void *pUserData, FCommandCallback pfnCallback, void *pCallbackUserData);
-	typedef bool (*FUnknownCommandCallback)(const char *pCommand, void *pUser); // returns true if the callback has handled the argument
 
 	static void EmptyPossibleCommandCallback(int Index, const char *pCmd, void *pUser) {}
 	static bool EmptyUnknownCommandCallback(const char *pCommand, void *pUser) { return false; }
 
 	virtual void Init() = 0;
 	virtual const ICommandInfo *FirstCommandInfo(EAccessLevel AccessLevel, int FlagMask) const = 0;
+	virtual const ICommandInfo *NextCommandInfo(const IConsole::ICommandInfo *pInfo, EAccessLevel AccessLevel, int FlagMask) const = 0;
 	virtual const ICommandInfo *GetCommandInfo(const char *pName, int FlagMask, bool Temp) = 0;
 	virtual int PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback = EmptyPossibleCommandCallback, void *pUser = nullptr) = 0;
 	virtual void ParseArguments(int NumArgs, const char **ppArguments) = 0;
