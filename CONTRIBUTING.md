@@ -336,7 +336,7 @@ For sound effects and small sound bites, [`.wv`](https://en.wikipedia.org/wiki/W
 
 Music can be [`.opus`](https://en.wikipedia.org/wiki/Opus_(audio_format)).
 
-Here are some [`ffmpeg`](https://ffmpeg.org/) command to convert to these formats:
+Here are some [`ffmpeg`](https://ffmpeg.org/) commands to convert to these formats:
 
 ```sh
 ffmpeg -i "input.mp3" -ar 48000 -ac 1 -c:a wavpack -sample_fmt s16 "output.wv"
