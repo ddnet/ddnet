@@ -12,6 +12,7 @@
 static constexpr ColorRGBA gs_ConsoleDefaultColor(1, 1, 1, 1);
 
 enum LEVEL : char;
+struct LOG_COLOR;
 struct CChecksumData;
 
 class IConsole : public IInterface
@@ -127,6 +128,7 @@ public:
 
 	virtual void SetAccessLevel(int AccessLevel) = 0;
 
+	static LOG_COLOR ColorToLogColor(ColorRGBA Color);
 	static LEVEL ToLogLevel(int ConsoleLevel);
 	static int ToLogLevelFilter(int ConsoleLevel);
 
