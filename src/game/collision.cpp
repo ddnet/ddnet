@@ -1747,7 +1747,6 @@ void CCollision::BuildSpawnCandidatesOnLoad()
 		if(!InBounds(tx, ty))
 			return false;
 		const int Idx = ToIndex(tx, ty);
-		// Air on game+front layers only.
 		return GetTileIndex(Idx) == TILE_AIR && GetFrontTileIndex(Idx) == TILE_AIR;
 	};
 
@@ -1778,7 +1777,9 @@ void CCollision::BuildSpawnCandidatesOnLoad()
 		const int Front = GetFrontTileIndex(Idx);
 		const bool Solid = Game == TILE_SOLID || Game == TILE_NOHOOK;
 		const bool Finish = Game == TILE_FINISH || Front == TILE_FINISH;
-		return Solid || Finish;
+		const bool Kill = Game == TILE_DEATH || Front == TILE_DEATH;
+		const bool StopA = Game == TILE_STOPA || Front == TILE_STOPA;
+		return Solid || Finish || Kill || StopA;
 	};
 
 	const auto IsTeleInType = [](unsigned char t) {
