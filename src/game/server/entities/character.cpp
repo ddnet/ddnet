@@ -3203,41 +3203,6 @@ void CCharacter::VoteAction(const CNetMsg_Cl_Vote *pMsg, int ClientId)
 	}
 }
 
-int CCharacter::NumDDraceHudRows()
-{
-	if(Server()->IsSixup(m_pPlayer->GetCid()) || GameServer()->GetClientVersion(m_pPlayer->GetCid()) < VERSION_DDNET_NEW_HUD)
-		return 0;
-
-	CCharacter *pChr = this;
-	if((m_pPlayer->GetTeam() == TEAM_SPECTATORS || m_pPlayer->IsPaused()) && m_pPlayer->SpectatorId() >= 0 && GameServer()->GetPlayerChar(m_pPlayer->SpectatorId()))
-		pChr = GameServer()->GetPlayerChar(m_pPlayer->SpectatorId());
-
-	int Rows = 0;
-	if(pChr->Core()->m_EndlessJump || pChr->Core()->m_EndlessHook || pChr->Core()->m_Jetpack || pChr->Core()->m_HasTelegunGrenade || pChr->Core()->m_HasTelegunGun || pChr->Core()->m_HasTelegunLaser)
-		Rows++;
-	if(pChr->Core()->m_Solo || pChr->Core()->m_CollisionDisabled || pChr->Core()->m_Passive || pChr->Core()->m_HookHitDisabled || pChr->Core()->m_HammerHitDisabled || pChr->Core()->m_ShotgunHitDisabled || pChr->Core()->m_GrenadeHitDisabled || pChr->Core()->m_LaserHitDisabled)
-		Rows++;
-	if(Teams()->IsPractice(Team()) || Teams()->TeamLocked(Team()) || pChr->Core()->m_DeepFrozen || pChr->Core()->m_LiveFrozen)
-		Rows++;
-
-	return Rows;
-}
-
-void CCharacter::SendBroadcastHud(const char *pMessage)
-{
-	char aBuf[256] = "";
-	for(int i = 0; i < NumDDraceHudRows(); i++)
-		str_append(aBuf, "\n", sizeof(aBuf));
-
-	str_append(aBuf, pMessage, sizeof(aBuf));
-
-	if(!Server()->IsSixup(m_pPlayer->GetCid()))
-		for(int i = 0; i < 128; i++)
-			str_append(aBuf, " ", sizeof(aBuf));
-
-	GameServer()->SendBroadcast(aBuf, m_pPlayer->GetCid(), false);
-}
-
 bool CCharacter::IsWeaponIndicator()
 {
 	return m_LastWeaponIndTick > Server()->Tick() - Server()->TickSpeed() * 10;
@@ -3304,12 +3269,22 @@ void CCharacter::UpdateWeaponIndicator()
 	// dont update, when we change between vanilla weapons, so that no "" is being sent to remove another broadcast, for example a money broadcast
 	if(aBuf[0] || IsWeaponIndicator())
 	{
-		SendBroadcastHud(aBuf);
+		GetPlayer()->SendBroadcastHud(aBuf);
 	}
 
 	// dont update when vanilla weapon got triggered and we have new hud
 	if(aBuf[0])
 		m_LastWeaponIndTick = Server()->Tick();
+
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+	{
+		CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
+		if(!pPl)
+			return;
+		if(pPl->SpectatorId() == GetPlayer()->GetCid())
+			pPl->SendBroadcastHud(aBuf);
+	}
+
 }
 
 bool CCharacter::CanDropWeapon(int Type) const
@@ -3350,7 +3325,7 @@ void CCharacter::DropWeapon(int Type, vec2 Dir, bool Death)
 		GiveWeapon(Type, true);
 	}
 	if(Type >= NUM_WEAPONS)
-		SendBroadcastHud("");
+		GetPlayer()->SendBroadcastHud("");
 	for(int i = 0; i < NUM_EXTRA_WEAPONS; i++)
 	{
 		if(m_Core.m_aWeapons[i].m_Got)

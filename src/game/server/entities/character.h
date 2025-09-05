@@ -342,8 +342,6 @@ public:
 	void UpdateWeaponIndicator();
 	bool IsWeaponIndicator();
 	int64_t m_LastWeaponIndTick;
-	void SendBroadcastHud(const char *pMessage);
-	int NumDDraceHudRows();
 
 	CNetObj_PlayerInput *Input() { return &m_Input; };
 	CLightSaber *m_pLightSaber;

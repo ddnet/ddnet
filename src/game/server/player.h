@@ -396,6 +396,9 @@ public:
 	CPickupPet *m_pPickupPet;
 
 	std::vector<CPickupDrop *> m_vPickupDrops;
+
+	int NumDDraceHudRows();
+	void SendBroadcastHud(const char *pMessage);
 private:
 	void FoxNetReset();
 	void OverrideName(int SnappingClient, CNetObj_ClientInfo *pClientInfo);

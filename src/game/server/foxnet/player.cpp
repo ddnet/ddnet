@@ -1,6 +1,7 @@
 ﻿#include <game/server/entities/character.h>
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
+#include <game/server/teams.h>
 #include <generated/protocol.h>
 
 #include <base/system.h>
@@ -739,4 +740,41 @@ void CPlayer::DisableAllCosmetics()
 	SetStrongBloody(false);
 	SetStaffInd(false);
 	SetPickupPet(false);
+}
+int CPlayer::NumDDraceHudRows()
+{
+	if(Server()->IsSixup(GetCid()) || GameServer()->GetClientVersion(GetCid()) < VERSION_DDNET_NEW_HUD)
+		return 0;
+
+	CCharacter *pChr = GetCharacter();
+	if((GetTeam() == TEAM_SPECTATORS || IsPaused()) && SpectatorId() >= 0 && GameServer()->GetPlayerChar(SpectatorId()))
+		pChr = GameServer()->GetPlayerChar(SpectatorId());
+
+	if(!pChr)
+		return 0;
+
+	int Rows = 0;
+	if(pChr->Core()->m_EndlessJump || pChr->Core()->m_EndlessHook || pChr->Core()->m_Jetpack || pChr->Core()->m_HasTelegunGrenade || pChr->Core()->m_HasTelegunGun || pChr->Core()->m_HasTelegunLaser)
+		Rows++;
+	if(pChr->Core()->m_Solo || pChr->Core()->m_CollisionDisabled || pChr->Core()->m_Passive || pChr->Core()->m_HookHitDisabled || pChr->Core()->m_HammerHitDisabled || pChr->Core()->m_ShotgunHitDisabled || pChr->Core()->m_GrenadeHitDisabled || pChr->Core()->m_LaserHitDisabled)
+		Rows++;
+	if(pChr->Teams()->IsPractice(pChr->Team()) || pChr->Teams()->TeamLocked(pChr->Team()) || pChr->Core()->m_DeepFrozen || pChr->Core()->m_LiveFrozen)
+		Rows++;
+
+	return Rows;
+}
+
+void CPlayer::SendBroadcastHud(const char *pMessage)
+{
+	char aBuf[256] = "";
+	for(int i = 0; i < NumDDraceHudRows(); i++)
+		str_append(aBuf, "\n", sizeof(aBuf));
+
+	str_append(aBuf, pMessage, sizeof(aBuf));
+
+	if(!Server()->IsSixup(GetCid()))
+		for(int i = 0; i < 128; i++)
+			str_append(aBuf, " ", sizeof(aBuf));
+
+	GameServer()->SendBroadcast(aBuf, GetCid(), false);
 }
