@@ -32,23 +32,23 @@ void CShop::AddItems()
 	m_Items.push_back(new CItems("Counter Clockwise Indicator", TYPE_INDICATOR, 1500, 0));
 	m_Items.push_back(new CItems("Inward Turning Indicator", TYPE_INDICATOR, 3000, 0));
 	m_Items.push_back(new CItems("Outward Turning Indicator", TYPE_INDICATOR, 3000, 0));
-	m_Items.push_back(new CItems("Line Indicator", TYPE_INDICATOR, 2250, 0));
-	m_Items.push_back(new CItems("Criss Cross Indicator", TYPE_INDICATOR, 2000, 0));
+	m_Items.push_back(new CItems("Line Indicator", TYPE_INDICATOR, 3250, 0));
+	m_Items.push_back(new CItems("Criss Cross Indicator", TYPE_INDICATOR, 2500, 0));
 
 	m_Items.push_back(new CItems("Explosive Death", TYPE_DEATHS, 1250, 0));
-	m_Items.push_back(new CItems("Hammer Hit Death", TYPE_DEATHS, 1000, 0));
-	m_Items.push_back(new CItems("Indicator Death", TYPE_DEATHS, 1500, 0));
-	m_Items.push_back(new CItems("Laser Death", TYPE_DEATHS, 1500, 0));
+	m_Items.push_back(new CItems("Hammer Hit Death", TYPE_DEATHS, 1250, 0));
+	m_Items.push_back(new CItems("Indicator Death", TYPE_DEATHS, 1750, 0));
+	m_Items.push_back(new CItems("Laser Death", TYPE_DEATHS, 2250, 0));
 
 	m_Items.push_back(new CItems("Star Trail", TYPE_TRAIL, 2500, 0));
-	m_Items.push_back(new CItems("Dot Trail", TYPE_TRAIL, 1750, 0));
+	m_Items.push_back(new CItems("Dot Trail", TYPE_TRAIL, 2500, 0));
 
-	m_Items.push_back(new CItems("Sparkle", TYPE_OTHER, 500, 0));
+	m_Items.push_back(new CItems("Sparkle", TYPE_OTHER, 1000, 0));
 	m_Items.push_back(new CItems("Heart Hat", TYPE_OTHER, 2250, 0));
-	m_Items.push_back(new CItems("Inverse Aim", TYPE_OTHER, 1500, 0));
-	m_Items.push_back(new CItems("Lovely", TYPE_OTHER, 1750, 0));
-	m_Items.push_back(new CItems("Rotating Ball", TYPE_OTHER, 2500, 0));
-	m_Items.push_back(new CItems("Epic Circle", TYPE_OTHER, 2500, 0));
+	m_Items.push_back(new CItems("Inverse Aim", TYPE_OTHER, 3500, 0));
+	m_Items.push_back(new CItems("Lovely", TYPE_OTHER, 2750, 0));
+	m_Items.push_back(new CItems("Rotating Ball", TYPE_OTHER, 3500, 0));
+	m_Items.push_back(new CItems("Epic Circle", TYPE_OTHER, 3500, 0));
 	//m_Items.push_back(new CItems("Bloody", TYPE_OTHER, 1500, 0));
 }
 
