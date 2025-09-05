@@ -33,7 +33,7 @@ class CPortal : public CEntity
 	};
 	SSnapPortal m_Snap;
 
-	inline vec2 CirclePos(int Part);
+	vec2 CirclePos(int Part);
 	void SetPortalVisual();
 
 	int m_Owner;
@@ -44,6 +44,9 @@ class CPortal : public CEntity
 	int m_Lifetime; // In ticks
 
 	bool m_CanTeleport[MAX_CLIENTS];
+	float m_PortalRadius;
+
+	CClientMask m_TeamMask;
 
 	enum States
 	{

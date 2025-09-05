@@ -21,7 +21,10 @@
 #include <algorithm>
 #include <engine/server.h>
 
-constexpr float PortalRadius = 52.0f;
+constexpr float MaxPortalRad = 56.0f;
+constexpr float MinPortalRad = 15.0f;
+constexpr int FadeOutTicks = SERVER_TICK_SPEED;
+constexpr int GrowTicks = SERVER_TICK_SPEED / 4;
 constexpr float MaxDistanceFromPlayer = 1200.0f;
 constexpr int Lifetime = 12.5 * SERVER_TICK_SPEED;
 
@@ -31,6 +34,11 @@ CPortal::CPortal(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
 	m_Owner = Owner;
 	m_Pos = Pos;
 	m_State = STATE_NONE;
+	m_PortalRadius = MinPortalRad;
+	if(CCharacter *pChr = GameServer()->GetPlayerChar(m_Owner))
+		m_TeamMask = pChr->TeamMask();
+	else
+		m_TeamMask = CClientMask().set();
 
 	for(int i = 0; i < NUM_IDS; i++)
 		m_Snap.m_aIds[i] = Server()->SnapNewId();
@@ -64,29 +72,57 @@ inline bool PointInCircle(vec2 pos, vec2 center, float radius)
 void CPortal::Tick()
 {
 	m_Lifetime--;
-	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+	CCharacter *pOwnerChr = GameServer()->GetPlayerChar(m_Owner);
 
-	if((!GameServer()->m_apPlayers[m_Owner] || (pOwnerChar && !pOwnerChar->GetWeaponGot(WEAPON_PORTALGUN))) && m_Lifetime <= 0)
+	if((!GameServer()->m_apPlayers[m_Owner] || (pOwnerChr && !pOwnerChr->GetWeaponGot(WEAPON_PORTALGUN))) && m_Lifetime <= 0)
 	{
 		Reset();
 		return;
 	}
 
-	if(m_Lifetime <= 0)
+	if(m_Lifetime > 0 && (m_State == STATE_FIRST_SET || m_State == STATE_BOTH_SET))
 	{
+		if(m_Lifetime <= FadeOutTicks)
+		{
+			// Shrink phase (last FadeOutTicks)
+			float a = static_cast<float>(m_Lifetime) / static_cast<float>(FadeOutTicks);
+			m_PortalRadius = MinPortalRad + (MaxPortalRad - MinPortalRad) * a;
+			if(m_PortalRadius < MinPortalRad)
+				m_PortalRadius = MinPortalRad;
+		}
+		else
+		{
+			if(m_PortalRadius < MaxPortalRad)
+			{
+				float growPerTick = (MaxPortalRad - MinPortalRad) / static_cast<float>(GrowTicks);
+				if(growPerTick < 0.001f)
+					growPerTick = MaxPortalRad - MinPortalRad; // safety
+				m_PortalRadius += growPerTick;
+				if(m_PortalRadius > MaxPortalRad)
+					m_PortalRadius = MaxPortalRad;
+			}
+			else
+			{
+				m_PortalRadius = MaxPortalRad;
+			}
+		}
+	}
+	else if(m_Lifetime <= 0)
+	{
+		m_PortalRadius = MinPortalRad;
 		RemovePortals();
 		return;
 	}
 
 	if(m_State == STATE_FIRST_SET)
 	{
-		if(!pOwnerChar)
+		if(!pOwnerChr)
 		{
 			RemovePortals();
 			return;
 		}
 
-		if(m_PortalData[0].m_Team != pOwnerChar->Team())
+		if(m_PortalData[0].m_Team != pOwnerChr->Team())
 		{
 			RemovePortals();
 			return;
@@ -100,9 +136,11 @@ void CPortal::Tick()
 			return;
 		}
 	}
+
 	HandleTele();
 	SetPortalVisual();
 }
+
 void CPortal::HandleTele()
 {
 	if(!m_PortalData[0].m_Active || !m_PortalData[1].m_Active)
@@ -117,8 +155,8 @@ void CPortal::HandleTele()
 		if(m_PortalData[0].m_Team != TEAM_SUPER && pChr->Team() != TEAM_SUPER && pChr->Team() != m_PortalData[0].m_Team)
 			continue;
 
-		const bool InP0 = PointInCircle(pChr->m_Pos, m_PortalData[0].m_Pos, PortalRadius);
-		const bool InP1 = !InP0 && PointInCircle(pChr->m_Pos, m_PortalData[1].m_Pos, PortalRadius);
+		const bool InP0 = PointInCircle(pChr->m_Pos, m_PortalData[0].m_Pos, m_PortalRadius);
+		const bool InP1 = !InP0 && PointInCircle(pChr->m_Pos, m_PortalData[1].m_Pos, m_PortalRadius);
 
 		if(InP0 || InP1)
 		{
@@ -150,7 +188,7 @@ void CPortal::HandleTele()
 inline vec2 CPortal::CirclePos(int Part)
 {
 	vec2 Direction = direction(360.0f / CPortal::SEGMENTS * Part * (pi / 180.0f));
-	Direction *= PortalRadius;
+	Direction *= m_PortalRadius;
 
 	return Direction;
 }
@@ -170,11 +208,11 @@ void CPortal::OnFire()
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	if(TrySetPortal())
 	{
-		GameServer()->CreateSound(pOwnerChar->m_Pos, SOUND_PICKUP_HEALTH, pOwnerChar->TeamMask());
+		GameServer()->CreateSound(pOwnerChar->m_Pos, SOUND_PICKUP_HEALTH, m_TeamMask);
 	}
 	else
 	{
-		GameServer()->CreateSound(pOwnerChar->m_Pos, SOUND_WEAPON_NOAMMO, pOwnerChar->TeamMask());
+		GameServer()->CreateSound(pOwnerChar->m_Pos, SOUND_WEAPON_NOAMMO, m_TeamMask);
 		pOwnerChar->SetReloadTimer(250 * Server()->TickSpeed() / 1000);
 	}
 }
@@ -195,7 +233,7 @@ bool CPortal::TrySetPortal()
 		CCharacter *pChr = GameServer()->GetPlayerChar(ClientId);
 		if(!pChr || !pChr->IsAlive())
 			continue;
-		if(PointInCircle(pChr->m_Pos, CursorPos, PortalRadius + CCharacterCore::PhysicalSize()))
+		if(PointInCircle(pChr->m_Pos, CursorPos, m_PortalRadius + CCharacterCore::PhysicalSize()))
 			return false; // Don't place portal on players
 	}
 	if(m_State == STATE_NONE)
@@ -225,6 +263,7 @@ void CPortal::RemovePortals()
 	{
 		if(m_PortalData[i].m_Active)
 		{
+			GameServer()->CreateDeath(m_PortalData[i].m_Pos, m_Owner, m_TeamMask);
 			m_PortalData[i].m_Active = false;
 			m_PortalData[i].m_Pos = vec2(0, 0);
 			m_State = STATE_NONE;
@@ -293,7 +332,7 @@ void CPortal::Snap(int SnappingClient)
 			if(!pProj)
 				continue;
 
-			vec2 Pos = GetRandomPointInCircle(m_PortalData[i % 2].m_Pos, PortalRadius - 6.0f);
+			vec2 Pos = GetRandomPointInCircle(m_PortalData[i % 2].m_Pos, m_PortalRadius - 6.0f);
 			pProj->m_X = round_to_int(Pos.x * 100.0f);
 			pProj->m_Y = round_to_int(Pos.y * 100.0f);
 			pProj->m_StartTick = 0;
