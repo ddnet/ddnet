@@ -15,14 +15,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [ubuntu-latest, macOS-latest, windows-latest, ubuntu-22.04, windows-latest-mingw]
+        name: [ubuntu-latest-fancy, macOS-latest, windows-latest, ubuntu-22.04, windows-latest-mingw]
         include:
-        - name: ubuntu-latest
+        - name: ubuntu-latest-fancy
           os: ubuntu-latest
           cmake-args: -G Ninja
           cmake-init-env: CXXFLAGS=-Werror
           package-file: "*-linux_x86_64.tar.xz"
-          fancy: true
         - name: ubuntu-22.04
           os: ubuntu-22.04
           cmake-path: /usr/bin/
@@ -30,25 +29,21 @@ jobs:
           cmake-init-env: CXXFLAGS=-Werror
           gtest-env: GTEST_FILTER=-*SQLite*
           package-file: "*-linux_x86_64.tar.xz"
-          fancy: false
         - name: macOS-latest
           os: macOS-latest
           cmake-args: -G Ninja
           cmake-init-env: CXXFLAGS=-Werror
           package-file: "*-macos.dmg"
-          fancy: false
         - name: windows-latest
           os: windows-latest
           cmake-args: -A x64 -DEXCEPTION_HANDLING=ON
           cmake-init-env: CXXFLAGS=/WX LDFLAGS=/WX
           package-file: "*-win64.zip"
-          fancy: false
         - name: windows-latest-mingw
           os: windows-latest
           cmake-args: -G Ninja -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DEXCEPTION_HANDLING=ON -DCMAKE_RC_COMPILER=windres -DCMAKE_AR=ar
           cmake-init-env: CXXFLAGS=-Werror LDFLAGS=-Werror
           package-file: "*-win64.zip"
-          fancy: false
 
     steps:
     - uses: actions/checkout@v4
@@ -64,7 +59,7 @@ jobs:
         sudo apt-get install pkg-config ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libvulkan-dev glslang-tools spirv-tools libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev libpng-dev valgrind gcovr libglew-dev -y
 
     - name: Prepare Linux (non-fancy)
-      if: contains(matrix.os, 'ubuntu') && !matrix.fancy
+      if: contains(matrix.os, 'ubuntu') && !contains(matrix.name, 'fancy')
       run: |
         curl -LO https://github.com/Kitware/CMake/releases/download/v3.13.4/cmake-3.13.4-Linux-x86_64.tar.gz
         sudo tar --strip-components 1 -C /usr -xf cmake-3.13.4-Linux-x86_64.tar.gz
@@ -84,7 +79,7 @@ jobs:
         EOF
 
     - name: Prepare Linux (fancy)
-      if: contains(matrix.os, 'ubuntu') && matrix.fancy
+      if: contains(matrix.os, 'ubuntu') && contains(matrix.name, 'fancy')
       run: |
         sudo apt-get install cmake libmariadb-dev libwebsockets-dev mariadb-server -y
         sudo systemctl stop mysql
@@ -193,7 +188,7 @@ jobs:
         flags: unittests
 
     - name: Build in release mode with debug info and all features on
-      if: matrix.fancy
+      if: contains(matrix.name, 'fancy')
       run: |
         mkdir fancy
         cd fancy
@@ -201,13 +196,13 @@ jobs:
         ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo --target everything
 
     - name: Test fancy
-      if: matrix.fancy
+      if: contains(matrix.name, 'fancy')
       run: |
         cd fancy
         ${{ matrix.cmake-path }}cmake -E env ${{ matrix.gtest-env }} ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo --target run_tests
 
     - name: Run fancy server
-      if: matrix.fancy
+      if: contains(matrix.name, 'fancy')
       run: |
         cd fancy
         ./DDNet-Server shutdown
