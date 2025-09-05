@@ -21,6 +21,7 @@ class CPowerUp : public CEntity
 	SSnap m_Snap;
 
 	int m_XP;
+	int m_Lifetime;
 
 	bool m_Switch;
 	int m_Delay; // In ticks
@@ -28,7 +29,7 @@ class CPowerUp : public CEntity
 	void SetPowerupVisual();
 
 public:
-	CPowerUp(CGameWorld *pGameWorld, vec2 Pos, int XP);
+	CPowerUp(CGameWorld *pGameWorld, vec2 Pos, int Lifetime, int XP);
 
 	void OnFire();
 

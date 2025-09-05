@@ -20,11 +20,14 @@
 #include "powerup.h"
 #include <algorithm>
 
-CPowerUp::CPowerUp(CGameWorld *pGameWorld, vec2 Pos, int XP) :
+// Its called powerup because i want to add more functionality later to it like giving custom weapons or abilities
+// For now it just acts like the 0xf one
+CPowerUp::CPowerUp(CGameWorld *pGameWorld, vec2 Pos, int Lifetime, int XP) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PORTALS, Pos, 54)
 {
 	m_Pos = Pos;
 	m_XP = XP;
+	m_Lifetime = Lifetime * Server()->TickSpeed();
 
 	for(int i = 0; i < NUM_LASERS; i++)
 		m_Snap.m_aLaserIds[i] = Server()->SnapNewId();
@@ -56,6 +59,13 @@ inline static bool PointInSquare(vec2 Point, vec2 Center, float Size)
 
 void CPowerUp::Tick()
 {
+	m_Lifetime--;
+	if(m_Lifetime <= 0)
+	{
+		Reset();
+		return;
+	}
+
 	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
 		CCharacter *pChr = GameServer()->GetPlayerChar(ClientId);
@@ -111,6 +121,10 @@ void CPowerUp::Snap(int SnappingClient)
 		return;
 
 	if(pSnapPlayer->m_HidePowerUps)
+		return;
+
+	// Make the powerup blink when about to disappear
+	if(m_Lifetime < Server()->TickSpeed() * 10 && (Server()->Tick() / (Server()->TickSpeed() / 4)) % 2 == 0)
 		return;
 
 	CGameTeams Teams = GameServer()->m_pController->Teams();
