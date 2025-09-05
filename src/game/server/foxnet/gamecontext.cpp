@@ -1065,9 +1065,10 @@ void CGameContext::HandleQuads(const CMapItemLayerQuads *pQuadLayer, int QuadInd
 
 			if(IsFreeze)
 			{
+				pChar->Freeze();
 				pChar->m_InQuadFreeze = true;
 			}
-			else if(IsUnFreeze)
+			else if(IsUnFreeze && !pChar->Core()->m_IsInFreeze)
 			{
 				pChar->UnFreeze();
 				pChar->m_InQuadFreeze = false;
