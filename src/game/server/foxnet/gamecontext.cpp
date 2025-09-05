@@ -109,8 +109,9 @@ void CGameContext::PowerUpSpawner()
 	}
 
 	static std::mt19937 rng{std::random_device{}()};
-	int Xp = RandGeometricXP(rng, 5, 35, 0.35);
-	CPowerUp *NewPowerUp = new CPowerUp(&m_World, *RandomPos, Xp);
+	int Xp = RandGeometricXP(rng, 5, 35, 0.35); 
+	int Lifetime = 120 + Xp * 15; // Lifetime in seconds
+	CPowerUp *NewPowerUp = new CPowerUp(&m_World, *RandomPos, Lifetime, Xp);
 
 	m_vPowerups.push_back(NewPowerUp);
 	m_PowerUpDelay = Server()->Tick() + Server()->TickSpeed() * 25;

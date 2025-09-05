@@ -1739,16 +1739,19 @@ void CCollision::BuildSpawnCandidatesOnLoad()
 
 	const int W = GetWidth();
 	const int H = GetHeight();
-	auto ToIndex = [&](int x, int y) { return y * W + x; };
-	auto InBounds = [&](int x, int y) { return x >= 0 && x < W && y >= 0 && y < H; };
 
-	auto IsAirAt = [&](int tx, int ty) -> bool {
+	const auto ToIndex = [&](int x, int y) { return y * W + x; };
+	const auto InBounds = [&](int x, int y) { return x >= 0 && x < W && y >= 0 && y < H; };
+
+	const auto IsAirAt = [&](int tx, int ty) -> bool {
 		if(!InBounds(tx, ty))
 			return false;
-		const int idx = ToIndex(tx, ty);
-		return GetTileIndex(idx) == 0 && GetFrontTileIndex(idx) == 0;
+		const int Idx = ToIndex(tx, ty);
+		// Air on game+front layers only.
+		return GetTileIndex(Idx) == TILE_AIR && GetFrontTileIndex(Idx) == TILE_AIR;
 	};
-	auto SurroundedByAir = [&](int cx, int cy, int radiusTiles = 1) -> bool {
+
+	const auto SurroundedByAir = [&](int cx, int cy, int radiusTiles = 1) -> bool {
 		for(int oy = -radiusTiles; oy <= radiusTiles; ++oy)
 		{
 			for(int ox = -radiusTiles; ox <= radiusTiles; ++ox)
@@ -1760,17 +1763,39 @@ void CCollision::BuildSpawnCandidatesOnLoad()
 		return true;
 	};
 
+	const auto IsTeleTileAt = [&](int tx, int ty) -> bool {
+		if(!m_pTele || !InBounds(tx, ty))
+			return false;
+		const int Idx = ToIndex(tx, ty);
+		return m_pTele[Idx].m_Type != 0;
+	};
+
+	const auto IsBlockedForSpawnNav = [&](int tx, int ty) -> bool {
+		if(!InBounds(tx, ty))
+			return true;
+		const int Idx = ToIndex(tx, ty);
+		const int Game = GetTileIndex(Idx);
+		const int Front = GetFrontTileIndex(Idx);
+		const bool Solid = Game == TILE_SOLID || Game == TILE_NOHOOK;
+		const bool Finish = Game == TILE_FINISH || Front == TILE_FINISH;
+		return Solid || Finish;
+	};
+
+	const auto IsTeleInType = [](unsigned char t) {
+		return t == TILE_TELEIN || t == TILE_TELEINEVIL || t == TILE_TELECHECKIN || t == TILE_TELECHECKINEVIL;
+	};
+
 	std::deque<std::pair<int, int>> q;
-	std::vector<uint8_t> visited((size_t)W * H, 0);
+	std::vector<uint8_t> Visited((size_t)W * H, 0);
 
 	for(const vec2 &s : seeds)
 	{
 		const int sx = std::clamp((int)std::floor(s.x / 32.0f), 0, W - 1);
 		const int sy = std::clamp((int)std::floor(s.y / 32.0f), 0, H - 1);
 		const int si = ToIndex(sx, sy);
-		if(!visited[si])
+		if(!Visited[si])
 		{
-			visited[si] = 1;
+			Visited[si] = 1;
 			q.emplace_back(sx, sy);
 		}
 	}
@@ -1783,8 +1808,8 @@ void CCollision::BuildSpawnCandidatesOnLoad()
 	{
 		auto [x, y] = q.front();
 		q.pop_front();
-
-		if(SurroundedByAir(x, y, 1))
+		
+		if(SurroundedByAir(x, y, 1) && !IsTeleTileAt(x, y))
 		{
 			const vec2 pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
 			if(HasSolidInRadius(pos, kSolidRadius, 1, true))
@@ -1796,44 +1821,67 @@ void CCollision::BuildSpawnCandidatesOnLoad()
 			const int nx = x + dx[k], ny = y + dy[k];
 			if(!InBounds(nx, ny))
 				continue;
-			const int ni = ToIndex(nx, ny);
-			if(visited[ni])
+
+			const int nIdx = ToIndex(nx, ny);
+			if(Visited[nIdx])
 				continue;
 
-			const int px = nx * 32 + 16;
-			const int py = ny * 32 + 16;
-			if(!IsSolid(px, py))
+			if(m_pTele)
 			{
-				visited[ni] = 1;
+				const unsigned char nType = m_pTele[nIdx].m_Type;
+				const unsigned char nNum = m_pTele[nIdx].m_Number;
+				if(nNum > 0 && IsTeleInType(nType))
+				{
+					const int key = nNum - 1;
+					auto it = m_TeleOuts.find(key);
+					if(it != m_TeleOuts.end())
+					{
+						for(const vec2 &outPos : it->second)
+						{
+							const int ox = std::clamp((int)std::floor(outPos.x / 32.0f), 0, W - 1);
+							const int oy = std::clamp((int)std::floor(outPos.y / 32.0f), 0, H - 1);
+							const int oIdx = ToIndex(ox, oy);
+							if(Visited[oIdx])
+								continue;
+							if(!IsBlockedForSpawnNav(ox, oy))
+							{
+								Visited[oIdx] = 1;
+								q.emplace_back(ox, oy);
+							}
+						}
+					}
+					continue;
+				}
+			}
+
+			if(!IsBlockedForSpawnNav(nx, ny))
+			{
+				Visited[nIdx] = 1;
 				q.emplace_back(nx, ny);
 			}
 		}
 
 		if(m_pTele)
 		{
-			const int idx = ToIndex(x, y);
-			const int tType = m_pTele[idx].m_Type;
-			const int tNum = m_pTele[idx].m_Number;
-
-			if(tNum > 0 && (tType == TILE_TELEIN || tType == TILE_TELEINEVIL))
+			const int Idx = ToIndex(x, y);
+			const unsigned char tType = m_pTele[Idx].m_Type;
+			const unsigned char tNum = m_pTele[Idx].m_Number;
+			if(tNum > 0 && IsTeleInType(tType))
 			{
 				const int key = tNum - 1;
 				auto it = m_TeleOuts.find(key);
 				if(it != m_TeleOuts.end())
 				{
-					for(const vec2 &outPos : it->second)
+					for(const vec2 &OutPos : it->second)
 					{
-						const int ox = std::clamp((int)std::floor(outPos.x / 32.0f), 0, W - 1);
-						const int oy = std::clamp((int)std::floor(outPos.y / 32.0f), 0, H - 1);
-						const int oi = ToIndex(ox, oy);
-						if(visited[oi])
+						const int ox = std::clamp((int)std::floor(OutPos.x / 32.0f), 0, W - 1);
+						const int oy = std::clamp((int)std::floor(OutPos.y / 32.0f), 0, H - 1);
+						const int oIdx = ToIndex(ox, oy);
+						if(Visited[oIdx])
 							continue;
-
-						const int opx = ox * 32 + 16;
-						const int opy = oy * 32 + 16;
-						if(!IsSolid(opx, opy))
+						if(!IsBlockedForSpawnNav(ox, oy))
 						{
-							visited[oi] = 1;
+							Visited[oIdx] = 1;
 							q.emplace_back(ox, oy);
 						}
 					}
