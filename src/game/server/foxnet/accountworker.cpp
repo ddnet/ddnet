@@ -36,7 +36,7 @@ bool CAccountsWorker::Login(IDbConnection *pSql, const ISqlData *pData, char *pE
 	str_copy(aSql,
 		"SELECT Username, RegisterDate, PlayerName, LastPlayerName, CurrentIP, LastIP, "
 		"LoggedIn, LastLogin, Port, ClientId, Flags, VoteMenuPage, Playtime, Deaths, Kills, "
-		"Level, XP, Money, Inventory, LastActiveItems "
+		"Level, XP, Money, Inventory, LastActiveItems, Disabled "
 		"FROM foxnet_accounts WHERE Username = ? AND Password = ?",
 		sizeof(aSql));
 	if(!pSql->PrepareStatement(aSql, pError, ErrorSize))
@@ -71,7 +71,8 @@ bool CAccountsWorker::Login(IDbConnection *pSql, const ISqlData *pData, char *pE
 		pRes->m_Money = pSql->GetInt64(18);
 		pSql->GetString(19, pRes->m_Inventory, sizeof(pRes->m_Inventory));
 		pSql->GetString(20, pRes->m_LastActiveItems, sizeof(pRes->m_LastActiveItems));
-		pRes->m_Found = true; 
+		pRes->m_Disabled = pSql->GetInt(21);
+		pRes->m_Found = true;
 		pRes->m_Success = true;
 	}
 	pRes->m_Completed.store(true);
@@ -108,7 +109,7 @@ bool CAccountsWorker::UpdateLoginState(IDbConnection *pSql, const ISqlData *pDat
 
 bool CAccountsWorker::UpdateLogoutState(IDbConnection *pSql, const ISqlData *pData, Write, char *pError, int ErrorSize)
 {
-	const auto *p = dynamic_cast<const CAccUpdLogoutState *>(pData);
+	const auto *pReq = dynamic_cast<const CAccUpdLogoutState *>(pData);
 	char aSql[768];
 	str_copy(aSql,
 		"UPDATE foxnet_accounts "
@@ -120,17 +121,17 @@ bool CAccountsWorker::UpdateLogoutState(IDbConnection *pSql, const ISqlData *pDa
 		sizeof(aSql));
 	if(!pSql->PrepareStatement(aSql, pError, ErrorSize))
 		return false;
-	pSql->BindInt64(1, p->m_Flags);
-	pSql->BindInt(2, p->m_VoteMenuPage);
-	pSql->BindInt64(3, p->m_Playtime);
-	pSql->BindInt64(4, p->m_Deaths);
-	pSql->BindInt64(5, p->m_Kills);
-	pSql->BindInt64(6, p->m_Level);
-	pSql->BindInt64(7, p->m_XP);
-	pSql->BindInt64(8, p->m_Money);
-	pSql->BindString(9, p->m_Inventory);
-	pSql->BindString(10, p->m_LastActiveItems);
-	pSql->BindString(11, p->m_Username);
+	pSql->BindInt64(1, pReq->m_Flags);
+	pSql->BindInt(2, pReq->m_VoteMenuPage);
+	pSql->BindInt64(3, pReq->m_Playtime);
+	pSql->BindInt64(4, pReq->m_Deaths);
+	pSql->BindInt64(5, pReq->m_Kills);
+	pSql->BindInt64(6, pReq->m_Level);
+	pSql->BindInt64(7, pReq->m_XP);
+	pSql->BindInt64(8, pReq->m_Money);
+	pSql->BindString(9, pReq->m_Inventory);
+	pSql->BindString(10, pReq->m_LastActiveItems);
+	pSql->BindString(11, pReq->m_Username);
 	int NumUpdated = 0;
 	return pSql->ExecuteUpdate(&NumUpdated, pError, ErrorSize);
 }
@@ -144,7 +145,7 @@ bool CAccountsWorker::SelectByLastPlayerName(IDbConnection *pSql, const ISqlData
 	str_copy(aSql,
 		"SELECT Username, RegisterDate, PlayerName, LastPlayerName, CurrentIP, LastIP, "
 		"LoggedIn, LastLogin, Port, ClientId, Flags, VoteMenuPage, Playtime, Deaths, Kills, "
-		"Level, XP, Money, Inventory, LastActiveItems "
+		"Level, XP, Money, Inventory, LastActiveItems, Disabled "
 		"FROM foxnet_accounts WHERE LastPlayerName = ?",
 		sizeof(aSql));
 	if(!pSql->PrepareStatement(aSql, pError, ErrorSize))
@@ -177,6 +178,7 @@ bool CAccountsWorker::SelectByLastPlayerName(IDbConnection *pSql, const ISqlData
 		pRes->m_Money = pSql->GetInt64(18);
 		pSql->GetString(19, pRes->m_Inventory, sizeof(pRes->m_Inventory));
 		pSql->GetString(20, pRes->m_LastActiveItems, sizeof(pRes->m_LastActiveItems));
+		pRes->m_Disabled = pSql->GetInt(21);
 		pRes->m_Found = true;
 		pRes->m_Success = true;
 	}
@@ -236,7 +238,7 @@ bool CAccountsWorker::SelectByUsername(IDbConnection *pSql, const ISqlData *pDat
 	str_copy(aSql,
 		"SELECT Username, RegisterDate, PlayerName, LastPlayerName, CurrentIP, LastIP, "
 		"LoggedIn, LastLogin, Port, ClientId, Flags, VoteMenuPage, Playtime, Deaths, Kills, "
-		"Level, XP, Money, Inventory, LastActiveItems "
+		"Level, XP, Money, Inventory, LastActiveItems, Disabled "
 		"FROM foxnet_accounts WHERE Username = ?",
 		sizeof(aSql));
 	if(!pSql->PrepareStatement(aSql, pError, ErrorSize))
@@ -269,6 +271,7 @@ bool CAccountsWorker::SelectByUsername(IDbConnection *pSql, const ISqlData *pDat
 		pRes->m_Money = pSql->GetInt64(18);
 		pSql->GetString(19, pRes->m_Inventory, sizeof(pRes->m_Inventory));
 		pSql->GetString(20, pRes->m_LastActiveItems, sizeof(pRes->m_LastActiveItems));
+		pRes->m_Disabled = pSql->GetInt(21);
 		pRes->m_Found = true;
 		pRes->m_Success = true;
 	}
@@ -318,10 +321,6 @@ bool CAccountsWorker::ShowTop5(IDbConnection *pSql, const ISqlData *pData, char 
 		pMetric = "Deaths";
 	else if(!str_comp_nocase(pReq->m_Type, "Kills"))
 		pMetric = "Kills";
-	//else if(!str_comp_nocase(pReq->m_Type, "RegisterDate"))
-	//	pMetric = "RegisterDate";
-	//else if(!str_comp_nocase(pReq->m_Type, "LastLogin"))
-	//	pMetric = "LastLogin";
 	else
 		return false;
 
@@ -333,9 +332,10 @@ bool CAccountsWorker::ShowTop5(IDbConnection *pSql, const ISqlData *pData, char 
 		aSql, sizeof(aSql),
 		"SELECT Username, PlayerName, %s AS Metric "
 		"FROM foxnet_accounts "
+		"WHERE Disabled = %s "
 		"ORDER BY %s DESC, Username ASC "
 		"LIMIT %d, %d",
-		pMetric, pMetric, LimitStart, 5);
+		pMetric, pSql->False(), pMetric, LimitStart, 5);
 
 	if(!pSql->PrepareStatement(aSql, pError, ErrorSize))
 		return false;
@@ -386,4 +386,22 @@ bool CAccountsWorker::ShowTop5(IDbConnection *pSql, const ISqlData *pData, char 
 	// Footer
 	pReq->m_pGameServer->SendChatTarget(pReq->m_ClientId, "---------------------------------");
 	return true;
+}
+
+bool CAccountsWorker::DisableAccount(IDbConnection *pSql, const ISqlData *pData, Write, char *pError, int ErrorSize)
+{
+	const auto *p = dynamic_cast<const CAccDisable *>(pData);
+	char aSql[768];
+	str_copy(aSql,
+		"UPDATE foxnet_accounts "
+		"SET LastPlayerName = PlayerName, LastIP = CurrentIP, "
+		"    Disabled = ? "
+		"WHERE Username = ?",
+		sizeof(aSql));
+	if(!pSql->PrepareStatement(aSql, pError, ErrorSize))
+		return false;
+	pSql->BindInt(1, p->m_Disable);
+	pSql->BindString(2, p->m_Username);
+	int NumUpdated = 0;
+	return pSql->ExecuteUpdate(&NumUpdated, pError, ErrorSize);
 }

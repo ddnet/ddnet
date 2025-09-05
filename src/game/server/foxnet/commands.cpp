@@ -126,6 +126,15 @@ void CGameContext::ConAccEdit(IConsole::IResult *pResult, void *pUserData)
 	pSelf->m_AccountManager.EditAccount(pUser, pVariable, pValue);
 }
 
+void CGameContext::ConAccDisable(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	const char *pUser = pResult->GetString(0);
+	const int pValue = pResult->GetInteger(1);
+
+	pSelf->m_AccountManager.DisableAccount(pUser, pValue);
+}
+
 void CGameContext::ConAccForceLogin(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -1523,6 +1532,7 @@ void CGameContext::RegisterFoxNetCommands()
 	Console()->Register("force_login", "r[username]", CFGFLAG_SERVER, ConAccForceLogin, this, "Force Log into any account");
 	Console()->Register("force_logout", "i[id]", CFGFLAG_SERVER, ConAccForceLogout, this, "Force logout an account thats currently active on the server");
 	Console()->Register("acc_edit", "s[username] s[variable] r[value]", CFGFLAG_SERVER, ConAccEdit, this, "Edit an account");
+	Console()->Register("acc_disable", "s[username] i[1 | 0]", CFGFLAG_SERVER, ConAccDisable, this, "Disable an account");
 
 	Console()->Register("register", "s[username] s[password] s[password2]", CFGFLAG_CHAT, ConAccRegister, this, "Register a account");
 	Console()->Register("password", "s[oldpass] s[password] s[password2]", CFGFLAG_CHAT, ConAccPassword, this, "Change your password");

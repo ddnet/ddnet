@@ -96,7 +96,7 @@ void IDbConnection::FormatCreateAccounts(char *aBuf, unsigned int BufferSize) co
 	// ToDO: @qxdFox - move Inventory and LastActiveItems to separate table
 	str_format(aBuf, BufferSize,
 		"CREATE TABLE IF NOT EXISTS foxnet_accounts ("
-		"  Version INTEGER NOT NULL DEFAULT 1, "
+		"  Version INTEGER NOT NULL DEFAULT 2, "
 		"  Username VARCHAR(32) COLLATE %s NOT NULL, "
 		"  Password VARCHAR(128) COLLATE %s NOT NULL, "
 		"  RegisterDate INTEGER NOT NULL, "
@@ -118,6 +118,7 @@ void IDbConnection::FormatCreateAccounts(char *aBuf, unsigned int BufferSize) co
 		"  Money INTEGER DEFAULT 0, "
 		"  Inventory TEXT COLLATE %s DEFAULT '', "
 		"  LastActiveItems TEXT COLLATE %s DEFAULT '', "
+		"  Disabled BOOL DEFAULT FALSE, "
 		"  PRIMARY KEY (Username)"
 		")",
 		BinaryCollate(),

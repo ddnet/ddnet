@@ -49,7 +49,6 @@ void CAccounts::Init(CGameContext *pGameServer, CDbConnectionPool *pPool)
 	m_pGameServer = pGameServer;
 	m_pPool = pPool;
 
-	// Optional: mark all leftover sessions for this port as logged out
 	LogoutAllAccountsPort(Server()->Port());
 }
 
@@ -131,6 +130,11 @@ bool CAccounts::Login(int ClientId, const char *pUsername, const char *pPassword
 	if(!WaitForResult(pRes, "login.select"))
 		return false;
 
+	if(pRes->m_Disabled)
+	{
+		GameServer()->SendChatTarget(ClientId, "Your account is disabled");
+		return false;
+	}
 	if(!pRes->m_Found)
 		return false;
 	if(pRes->m_LoggedIn)
@@ -145,7 +149,6 @@ bool CAccounts::Login(int ClientId, const char *pUsername, const char *pPassword
 
 void CAccounts::OnLogin(int ClientId, const CAccResult &Res)
 {
-	// Set account session (in-memory)
 	{
 		CAccountSession &Acc = GameServer()->m_Account[ClientId];
 
@@ -514,8 +517,16 @@ void CAccounts::ShowAccProfile(int ClientId, const char *pName)
 
 	str_format(aBuf, sizeof(aBuf), "│ Name: %s", OptAcc->m_LoggedIn ? pName : OptAcc->m_Name);
 	GameServer()->SendChatTarget(ClientId, aBuf);
+	if(Server()->GetAuthedState(ClientId) >= AUTHED_MOD)
+	{
+		str_format(aBuf, sizeof(aBuf), "│ Username: %s", OptAcc->m_Username);
+		GameServer()->SendChatTarget(ClientId, aBuf);
+	}
 
 	str_format(aBuf, sizeof(aBuf), "│ Status: %s", OptAcc->m_LoggedIn ? "Online" : "Offline");
+	if(OptAcc->m_Disabled)
+		str_format(aBuf, sizeof(aBuf), "│ Status: %s", "Account disabled");
+
 	GameServer()->SendChatTarget(ClientId, aBuf);
 
 	if(!OptAcc->m_LoggedIn)
@@ -568,6 +579,7 @@ std::optional<CAccountSession> CAccounts::GetAccount(const char *pUsername)
 	Acc.m_Deaths = pRes->m_Deaths;
 	Acc.m_Level = pRes->m_Level;
 	Acc.m_Money = pRes->m_Money;
+	Acc.m_Disabled = pRes->m_Disabled;
 	return Acc;
 }
 
@@ -596,6 +608,7 @@ std::optional<CAccountSession> CAccounts::GetAccountCurName(const char *pName)
 	Acc.m_Deaths = pRes->m_Deaths;
 	Acc.m_Level = pRes->m_Level;
 	Acc.m_Money = pRes->m_Money;
+	Acc.m_Disabled = pRes->m_Disabled;
 	return Acc;
 }
 
@@ -658,6 +671,17 @@ void CAccounts::SetPlayerName(int ClientId, const char *pName) // When player ch
 	str_copy(pReq->m_NewPlayerName, pName, sizeof(pReq->m_NewPlayerName));
 	str_copy(pReq->m_Username, GameServer()->m_Account[ClientId].m_Username, sizeof(pReq->m_Username));
 	m_pPool->ExecuteWrite(CAccountsWorker::SetPlayerName, std::move(pReq), "acc set player name");
+}
+
+void CAccounts::DisableAccount(const char *pUsername, bool Disable)
+{
+	if(!m_pPool)
+		return;
+
+	auto pReq = std::make_unique<CAccDisable>();
+	pReq->m_Disable = Disable;
+	str_copy(pReq->m_Username, pUsername, sizeof(pReq->m_Username));
+	m_pPool->ExecuteWrite(CAccountsWorker::DisableAccount, std::move(pReq), "acc (un)disable");
 }
 
 int CAccounts::NeededXP(int Level)

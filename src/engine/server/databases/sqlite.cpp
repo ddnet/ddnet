@@ -74,6 +74,9 @@ private:
 	void AssertNoError(int Result);
 
 	std::atomic_bool m_InUse;
+	// <FoxNet
+	bool ApplyMigrations();
+	// FoxNet>
 };
 
 CSqliteConnection::CSqliteConnection(const char *pFilename, bool Setup) :
@@ -182,6 +185,9 @@ bool CSqliteConnection::ConnectImpl(char *pError, int ErrorSize)
 			return false;
 		m_Setup = false;
 	}
+	// <FoxNet
+	ApplyMigrations();
+	// FoxNet>
 	return true;
 }
 
@@ -421,3 +427,24 @@ std::unique_ptr<IDbConnection> CreateSqliteConnection(const char *pFilename, boo
 {
 	return std::make_unique<CSqliteConnection>(pFilename, Setup);
 }
+// <FoxNet
+bool CSqliteConnection::ApplyMigrations()
+{
+	char aErr[256];
+	if(!Execute("ALTER TABLE foxnet_accounts ADD COLUMN IF NOT EXISTS Disabled INTEGER NOT NULL DEFAULT 0", aErr, sizeof(aErr)))
+	{
+		if(!Execute("ALTER TABLE foxnet_accounts ADD COLUMN Disabled INTEGER NOT NULL DEFAULT 0", aErr, sizeof(aErr)))
+		{
+			if(!strstr(aErr, "duplicate column"))
+			{
+				dbg_msg("sqlite", "foxnet migration failed: %s", aErr);
+				return false;
+			}
+		}
+	}
+
+	Execute("UPDATE foxnet_accounts SET Version = 2 WHERE Version < 2", aErr, sizeof(aErr));
+
+	return true;
+}
+// FoxNet>

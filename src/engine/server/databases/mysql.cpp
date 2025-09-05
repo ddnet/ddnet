@@ -137,6 +137,10 @@ private:
 	CMysqlConfig m_Config;
 
 	std::atomic_bool m_InUse;
+
+	// <FoxNet
+	bool ApplyMigrations();
+	// FoxNet>
 };
 
 void CMysqlConnection::CStmtDeleter::operator()(MYSQL_STMT *pStmt) const
@@ -311,6 +315,10 @@ bool CMysqlConnection::ConnectImpl()
 		}
 		m_Config.m_Setup = false;
 	}
+	// <FoxNet
+	ApplyMigrations();
+	// FoxNet>
+
 	dbg_msg("mysql", "connection established");
 	return true;
 }
@@ -683,6 +691,29 @@ std::unique_ptr<IDbConnection> CreateMysqlConnection(CMysqlConfig Config)
 {
 	return std::make_unique<CMysqlConnection>(Config);
 }
+// <FoxNet
+bool CMysqlConnection::ApplyMigrations()
+{
+	if(!PrepareAndExecuteStatement("ALTER TABLE foxnet_accounts ADD COLUMN IF NOT EXISTS Disabled BOOL NOT NULL DEFAULT FALSE"))
+	{
+		const char *pAlter = "ALTER TABLE foxnet_accounts ADD COLUMN Disabled BOOL NOT NULL DEFAULT FALSE";
+		if(mysql_stmt_prepare(m_pStmt.get(), pAlter, str_length(pAlter)) || mysql_stmt_execute(m_pStmt.get()))
+		{
+			unsigned Err = mysql_stmt_errno(m_pStmt.get());
+			if(Err != 1060) // 1060 = Duplicate column name
+			{
+				StoreErrorStmt("alter:add_disabled");
+				dbg_msg("mysql", "foxnet migration failed: %s", m_aErrorDetail);
+				return false;
+			}
+		}
+	}
+
+	PrepareAndExecuteStatement("UPDATE foxnet_accounts SET Version = 2 WHERE Version < 2");
+
+	return true;
+}
+// FoxNet>
 #else
 bool MysqlAvailable()
 {

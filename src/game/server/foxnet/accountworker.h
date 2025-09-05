@@ -11,11 +11,11 @@ class IGameController;
 struct CAccResult : ISqlResult
 {
 	bool m_Found = false;
-	char m_Username[ACC_MAX_USERNAME_LENGTH]{};
-	char m_PlayerName[MAX_NAME_LENGTH]{};
-	char m_LastPlayerName[MAX_NAME_LENGTH]{};
-	char m_CurrentIP[46]{};
-	char m_LastIP[46]{};
+	char m_Username[ACC_MAX_USERNAME_LENGTH] = "";
+	char m_PlayerName[MAX_NAME_LENGTH] = "";
+	char m_LastPlayerName[MAX_NAME_LENGTH] = "";
+	char m_CurrentIP[46] = "";
+	char m_LastIP[46] = "";
 	int64_t m_RegisterDate = 0;
 	int m_LoggedIn = 0;
 	int64_t m_LastLogin = 0;
@@ -29,16 +29,17 @@ struct CAccResult : ISqlResult
 	int64_t m_Level = 0;
 	int64_t m_XP = 0;
 	int64_t m_Money = 0;
-	char m_Inventory[1028]{};
-	char m_LastActiveItems[1028]{};
+	char m_Inventory[1028] = "";
+	char m_LastActiveItems[1028] = "";
+	bool m_Disabled;
 };
 
 struct CAccRegisterRequest : ISqlData
 {
 	CAccRegisterRequest(std::shared_ptr<CAccResult> pRes) :
 		ISqlData(std::move(pRes)) {}
-	char m_Username[ACC_MAX_USERNAME_LENGTH]{};
-	char m_PasswordHash[ACC_MAX_PASSW_LENGTH]{};
+	char m_Username[ACC_MAX_USERNAME_LENGTH] = "";
+	char m_PasswordHash[ACC_MAX_PASSW_LENGTH] = "";
 	int64_t m_RegisterDate = 0;
 };
 
@@ -46,38 +47,38 @@ struct CAccLoginRequest : ISqlData
 {
 	CAccLoginRequest(std::shared_ptr<CAccResult> pRes) :
 		ISqlData(std::move(pRes)) {}
-	char m_Username[ACC_MAX_USERNAME_LENGTH]{};
-	char m_PasswordHash[256]{};
+	char m_Username[ACC_MAX_USERNAME_LENGTH] = "";
+	char m_PasswordHash[256] = "";
 };
 
 struct CAccSelectByUser : ISqlData
 {
 	CAccSelectByUser(std::shared_ptr<ISqlResult> pRes) :
 		ISqlData(std::move(pRes)) {}
-	char m_Username[ACC_MAX_USERNAME_LENGTH]{};
+	char m_Username[ACC_MAX_USERNAME_LENGTH] = "";
 };
 
 struct CAccSelectByLastName : ISqlData
 {
 	CAccSelectByLastName(std::shared_ptr<ISqlResult> pRes) :
 		ISqlData(std::move(pRes)) {}
-	char m_LastPlayerName[MAX_NAME_LENGTH]{};
+	char m_LastPlayerName[MAX_NAME_LENGTH] = "";
 };
 
 struct CAccSelectPortByUser : ISqlData
 {
 	CAccSelectPortByUser(std::shared_ptr<ISqlResult> pRes) :
 		ISqlData(std::move(pRes)) {}
-	char m_Username[ACC_MAX_USERNAME_LENGTH]{};
+	char m_Username[ACC_MAX_USERNAME_LENGTH] = "";
 };
 
 struct CAccUpdLoginState : ISqlData
 {
 	CAccUpdLoginState() :
 		ISqlData(nullptr) {}
-	char m_Username[ACC_MAX_USERNAME_LENGTH]{};
-	char m_PlayerName[MAX_NAME_LENGTH]{};
-	char m_CurrentIP[46]{};
+	char m_Username[ACC_MAX_USERNAME_LENGTH] = "";
+	char m_PlayerName[MAX_NAME_LENGTH] = "";
+	char m_CurrentIP[46] = "";
 	int64_t m_LastLogin = 0;
 	int m_Port = 0;
 	int m_ClientId = -1;
@@ -96,15 +97,15 @@ struct CAccUpdLogoutState : ISqlData
 	int64_t m_Level = 0;
 	int64_t m_XP = 0;
 	int64_t m_Money = 0;
-	char m_Inventory[1028]{};
-	char m_LastActiveItems[1028]{};
+	char m_Inventory[1028] = "";
+	char m_LastActiveItems[1028] = "";
 };
 
 struct CAccSaveInfo : ISqlData
 {
 	CAccSaveInfo() :
 		ISqlData(nullptr) {}
-	char m_Username[ACC_MAX_USERNAME_LENGTH]{};
+	char m_Username[ACC_MAX_USERNAME_LENGTH] = "";
 	int64_t m_Flags = 0;
 	int m_VoteMenuPage = 0;
 	int64_t m_Playtime = 0;
@@ -113,16 +114,16 @@ struct CAccSaveInfo : ISqlData
 	int64_t m_Level = 0;
 	int64_t m_XP = 0;
 	int64_t m_Money = 0;
-	char m_Inventory[1028]{};
-	char m_LastActiveItems[1028]{};
+	char m_Inventory[1028] = "";
+	char m_LastActiveItems[1028] = "";
 };
 
 struct CAccSetNameReq : ISqlData
 {
 	CAccSetNameReq() :
 		ISqlData(nullptr) {}
-	char m_Username[ACC_MAX_USERNAME_LENGTH]{};
-	char m_NewPlayerName[MAX_NAME_LENGTH]{};
+	char m_Username[ACC_MAX_USERNAME_LENGTH] = "";
+	char m_NewPlayerName[MAX_NAME_LENGTH] = "";
 };
 
 struct CAccShowTop5 : ISqlData
@@ -133,6 +134,14 @@ struct CAccShowTop5 : ISqlData
 	char m_Type[16];
 	int m_Offset = 0;
 	CGameContext *m_pGameServer;
+};
+
+struct CAccDisable : ISqlData
+{
+	CAccDisable() :
+		ISqlData(nullptr) {}
+	bool m_Disable;
+	char m_Username[ACC_MAX_USERNAME_LENGTH] = "";
 };
 
 struct CAccountsWorker
@@ -147,6 +156,7 @@ struct CAccountsWorker
 	static bool SetPlayerName(IDbConnection *pSql, const ISqlData *pData, Write, char *pError, int ErrorSize);
 	static bool SaveInfo(IDbConnection *pSql, const ISqlData *pData, Write, char *pError, int ErrorSize);
 	static bool ShowTop5(IDbConnection *pSql, const ISqlData *pData, char *pError, int ErrorSize);
+	static bool DisableAccount(IDbConnection *pSql, const ISqlData *pData, Write, char *pError, int ErrorSize);
 };
 
 #endif

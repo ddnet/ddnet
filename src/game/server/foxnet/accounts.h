@@ -51,6 +51,7 @@ struct CAccountSession
 	char m_LastActiveItems[1028] = ""; // correlates to m_Inventory, will load this on login
 
 	int m_LoginTick = 0;
+	bool m_Disabled = false;
 };
 
 class CAccounts
@@ -87,6 +88,7 @@ public:
 	void OnLogout(int ClientId, const CAccountSession AccInfo);
 
 	void SaveAccountsInfo(int ClientId, const CAccountSession AccInfo);
+	void DisableAccount(const char *pUsername, bool Disable);
 
 	void LogoutAllAccountsPort(int Port);
 	void ShowAccProfile(int ClientId, const char *pName);
