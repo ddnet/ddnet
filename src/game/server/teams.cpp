@@ -1329,7 +1329,11 @@ bool CGameTeams::SetMask(int ClientId, int Team, int ExceptId, int Asker, int Ve
 		{ // Actions of other players
 			if(!Character(ClientId))
 				return false; // Player is currently dead
-			if(GetPlayer(ClientId)->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM)
+			if(Character(ClientId)->m_SpawnSolo || (Character(GetPlayer(ClientId)->SpectatorId()) && Character(GetPlayer(ClientId)->SpectatorId())->m_SpawnSolo))
+			{
+				// Do nothing
+			}
+			else if(GetPlayer(ClientId)->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM)
 			{
 				if(m_Core.Team(ClientId) != Team && m_Core.Team(ClientId) != TEAM_SUPER)
 					return false; // In different teams
@@ -1354,7 +1358,11 @@ bool CGameTeams::SetMask(int ClientId, int Team, int ExceptId, int Asker, int Ve
 		{ // Actions of other players
 			if(!Character(GetPlayer(ClientId)->SpectatorId()))
 				return false; // Player is currently dead
-			if(GetPlayer(ClientId)->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM)
+			if(Character(ClientId)->m_SpawnSolo || (Character(GetPlayer(ClientId)->SpectatorId()) && Character(GetPlayer(ClientId)->SpectatorId())->m_SpawnSolo))
+			{
+				// Do nothing
+			}
+			else if(GetPlayer(ClientId)->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM)
 			{
 				if(m_Core.Team(GetPlayer(ClientId)->SpectatorId()) != Team && m_Core.Team(GetPlayer(ClientId)->SpectatorId()) != TEAM_SUPER)
 					return false; // In different teams

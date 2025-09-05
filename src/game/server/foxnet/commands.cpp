@@ -1551,6 +1551,7 @@ void CGameContext::RegisterFoxNetCommands()
 	Console()->Register("cleanup_pickupdrops", "", CFGFLAG_SERVER, ConCleanDroppedPickups, this, "Removes all dropped pickups");
 
 	Console()->Chain("sv_debug_quad_pos", ConchainQuadDebugPos, this);
+	Console()->Chain("sv_solo_on_spawn", ConchainSoloOnSpawn, this);
 }
 
 void CGameContext::ConchainQuadDebugPos(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -1561,4 +1562,20 @@ void CGameContext::ConchainQuadDebugPos(IConsole::IResult *pResult, void *pUserD
 		CGameContext *pSelf = (CGameContext *)pUserData;
 		pSelf->QuadDebugIds(g_Config.m_SvDebugQuadPos);
 	}
+}
+
+void CGameContext::ConchainSoloOnSpawn(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	if(!pResult->NumArguments() || !pResult->GetInteger(0))
+		return;
+
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+	{
+		CCharacter *pChr = pSelf->GetPlayerChar(ClientId);
+		if(pChr && pChr->m_SpawnSolo)
+			pChr->UnSpawnSolo();
+	}
+
 }

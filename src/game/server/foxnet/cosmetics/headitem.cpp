@@ -1,15 +1,20 @@
 // Made by qxdFox
-#include "head_powerup.h"
 #include "game/server/entities/character.h"
-#include <base/vmath.h>
-#include <engine/shared/protocol.h>
 #include <game/server/entity.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/gameworld.h>
 #include <game/server/player.h>
 #include <game/server/teams.h>
+
+#include <engine/shared/protocol.h>
+
 #include <generated/protocol.h>
+
+#include <base/vmath.h>
+
+#include "headitem.h"
+#include <engine/server.h>
 
 CHeadItem::CHeadItem(CGameWorld *pGameWorld, int Owner, vec2 Pos, int Type, float Offset) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_HEAD_ITEM, Pos)
@@ -33,7 +38,9 @@ void CHeadItem::Tick()
 {
 	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
 
-	if(!pOwner || !pOwner->m_HeadItem)
+	if(!pOwner)
+		return;
+	if(!pOwner->m_HeadItem)
 	{
 		Reset();
 		return;
@@ -49,27 +56,30 @@ void CHeadItem::Snap(int SnappingClient)
 		return;
 
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
 
-	if(!pOwnerChar || !pSnapPlayer)
+	if(!pOwnerChar)
 		return;
 
-	// if(pSnapPlayer->m_HideCosmetics)
-	//	return;
-
-	CGameTeams Teams = GameServer()->m_pController->Teams();
-	int Team = pOwnerChar->Team();
-
-	if(!Teams.SetMask(SnappingClient, Team))
-		return;
-
-	if(pSnapPlayer->GetCharacter() && pOwnerChar)
-		if(!pOwnerChar->CanSnapCharacter(SnappingClient))
+	if(SnappingClient != SERVER_DEMO_CLIENT)
+	{
+		CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+		if(!pSnapPlayer)
 			return;
 
-	if(pOwnerChar->GetPlayer()->m_Vanish && SnappingClient != pOwnerChar->GetPlayer()->GetCid() && SnappingClient != -1)
-		if(!pSnapPlayer->m_Vanish && Server()->GetAuthedState(SnappingClient) < AUTHED_ADMIN)
+		CGameTeams Teams = GameServer()->m_pController->Teams();
+		int Team = pOwnerChar->Team();
+
+		if(!Teams.SetMaskWithFlags(SnappingClient, Team))
 			return;
+
+		if(pSnapPlayer->GetCharacter() && pOwnerChar)
+			if(!pOwnerChar->CanSnapCharacter(SnappingClient))
+				return;
+
+		if(pOwnerChar->GetPlayer()->m_Vanish && SnappingClient != pOwnerChar->GetPlayer()->GetCid() && SnappingClient != -1)
+			if(!pSnapPlayer->m_Vanish && Server()->GetAuthedState(SnappingClient) < AUTHED_ADMIN)
+				return;
+	}
 
 	int Type = m_Type;
 	int SubType = Type - 7;

@@ -9,8 +9,7 @@
 
 #include "cosmetics/dot_trail.h"
 #include "cosmetics/epic_circle.h"
-#include "cosmetics/flyingpoint.h"
-#include "cosmetics/head_powerup.h"
+#include "cosmetics/headitem.h"
 #include "cosmetics/heart_hat.h"
 #include "cosmetics/lovely.h"
 #include "cosmetics/pickup_pet.h"

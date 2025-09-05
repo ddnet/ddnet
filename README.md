@@ -51,6 +51,7 @@
 |sv_drop_weapon_on_death|Whether all custom weapons are dropped on death|
 |sv_drops_in_freeze_float|Whether dropped weapons should float up inside freeze|
 |sv_spawn_powerups|Whether to spawn random Powerups (gives xp) on the map|
+|sv_solo_on_spawn|Whether to spawn players in solo for a set seconds (value is used as delay in seconds)|
 
 |Commands|Description|
 |-|-|

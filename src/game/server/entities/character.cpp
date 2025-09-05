@@ -25,6 +25,7 @@
 #include <game/server/teams.h>
 // <FoxNet
 #include <game/server/foxnet/cosmetics/firework.h>
+#include <game/server/foxnet/cosmetics/headitem.h>
 #include <game/server/foxnet/entities/custom_projectile.h>
 #include <game/server/foxnet/entities/light_saber.h>
 #include <game/server/foxnet/entities/pickupdrop.h>
@@ -60,6 +61,7 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 	m_IsRainbowHooked = false;
 	m_TuneZoneOverride = -1;
 	m_InSnake = false;
+	m_HeadItem = nullptr;
 	// FoxNet>
 }
 
@@ -142,10 +144,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 		}
 	}
 	// <FoxNet
-	m_Snake.OnSpawn(this);
-	m_Ufo.OnSpawn(this);
-	m_PowerHookedId = -1;
-	m_TelekinesisId = -1;
+	FoxNetSpawn();
 	// FoxNet>
 
 	return true;
@@ -519,7 +518,7 @@ void CCharacter::FireWeapon()
 		GameServer()->CreateSound(m_Pos, SOUND_HAMMER_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 
 		Antibot()->OnHammerFire(m_pPlayer->GetCid());
-		// <FoxNet	
+		// <FoxNet
 		if(m_Core.m_Passive)
 			break;
 		// FoxNet>
@@ -1360,6 +1359,10 @@ bool CCharacter::CanSnapCharacter(int SnappingClient)
 
 	CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
 	CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+	CCharacter *pSpecChar = GameServer()->GetPlayerChar(GetPlayer()->SpectatorId());
+
+	if(((pSnapChar && pSnapChar->m_SpawnSolo) || (pSpecChar && pSpecChar->m_SpawnSolo) || m_SpawnSolo) && SameTeam(SnappingClient))
+		return true;
 
 	if(pSnapPlayer->GetTeam() == TEAM_SPECTATORS || pSnapPlayer->IsPaused())
 	{
@@ -1691,7 +1694,8 @@ void CCharacter::HandleSkippableTiles(int Index)
 	}
 
 	// <FoxNet
-	if(GetPlayer()->m_IgnoreGamelayer);
+	if(GetPlayer()->m_IgnoreGamelayer)
+		;
 	else if(GameLayerClipped(m_Pos))
 	{
 		Die(m_pPlayer->GetCid(), WEAPON_WORLD);
@@ -1837,6 +1841,8 @@ void CCharacter::HandleTiles(int Index)
 	GameServer()->m_pController->HandleCharacterTiles(this, Index);
 	if(!m_Alive)
 		return;
+
+	ExtraTileHandle();
 
 	// freeze
 	if(((m_TileIndex == TILE_FREEZE) || (m_TileFIndex == TILE_FREEZE)) && !m_Core.m_Super && !m_Core.m_Invincible && !m_Core.m_DeepFrozen)
@@ -2893,6 +2899,11 @@ CClientMask CCharacter::OppsiteCosmeticMask()
 
 void CCharacter::FoxNetTick()
 {
+	m_Snake.Tick();
+	m_Ufo.Tick();
+	HandleTelekinesis();
+	HandleSpawnSolo();
+
 	if(m_VoteActionDelay >= 0)
 		m_VoteActionDelay--;
 
@@ -2950,10 +2961,49 @@ void CCharacter::FoxNetTick()
 
 	if(g_Config.m_SvAutoUfo && !m_Ufo.Active())
 		SetUfo(true);
+}
 
-	m_Snake.Tick();
-	m_Ufo.Tick();
-	HandleTelekinesis();
+void CCharacter::FoxNetSpawn()
+{
+	m_Snake.OnSpawn(this);
+	m_Ufo.OnSpawn(this);
+	m_PowerHookedId = -1;
+	m_TelekinesisId = -1;
+
+	if(g_Config.m_SvSoloOnSpawn > 0)
+	{
+		m_SpawnSolo = true;
+		SetSolo(true);
+		if(!m_HeadItem)
+			m_HeadItem = new CHeadItem(GameWorld(), GetPlayer()->GetCid(), m_Pos, POWERUP_ARMOR, 56.0f);
+	}
+}
+
+
+void CCharacter::ExtraTileHandle()
+{
+	if(m_SpawnSolo && (m_TileIndex == TILE_SOLO_DISABLE || m_TileFIndex == TILE_SOLO_DISABLE))
+		UnSpawnSolo();
+}
+
+void CCharacter::HandleSpawnSolo()
+{
+	if(!IsAlive())
+		return;
+	if(Team() == TEAM_SPECTATORS)
+		return;
+	if(!m_SpawnSolo)
+		return;
+	if(m_SpawnTick > Server()->Tick() - Server()->TickSpeed() * g_Config.m_SvSoloOnSpawn)
+		return;
+
+	UnSpawnSolo();
+}
+void CCharacter::UnSpawnSolo()
+{
+	SetSolo(false);
+	m_SpawnSolo = false;
+	m_HeadItem = nullptr;
 }
 
 void CCharacter::HandleTelekinesis()
@@ -3284,7 +3334,6 @@ void CCharacter::UpdateWeaponIndicator()
 		if(pPl->SpectatorId() == GetPlayer()->GetCid())
 			pPl->SendBroadcastHud(aBuf);
 	}
-
 }
 
 bool CCharacter::CanDropWeapon(int Type) const

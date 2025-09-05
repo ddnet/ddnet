@@ -14,6 +14,7 @@
 #include <game/server/foxnet/entities/light_saber.h>
 #include <game/server/foxnet/entities/portal.h>
 #include <game/server/foxnet/entities/pickupdrop.h>
+#include <game/server/foxnet/cosmetics/headitem.h>
 
 class CGameTeams;
 class CGameWorld;
@@ -311,14 +312,11 @@ public:
 
 	// Telekinesis
 	int m_TelekinesisId;
-	void HandleTelekinesis();
 	vec2 GetCursorPos();
 
 	int GetPowerHooked();
 	bool m_IsRainbowHooked;
 	int m_PowerHookedId;
-
-	int m_HeadItem;
 
 	CSnake m_Snake;
 	bool m_InSnake;
@@ -355,6 +353,9 @@ public:
 
 	bool m_InQuadFreeze;
 
+	CHeadItem *m_HeadItem;
+	bool m_SpawnSolo = false;
+	void UnSpawnSolo();
 private:
 
 	bool CanDropWeapon(int Type) const;
@@ -363,11 +364,18 @@ private:
 	void OnPlayerHook();
 	float GetFireDelay(int Weapon);
 
-	void FoxNetTick();
 	int m_VoteActionDelay;
 
 	void CreatePowerupExplosion(vec2 Pos, int ClientId, int Type);
 	void CreatePowerupCircle(vec2 Pos, int ClientId, int Type);
+
+	void ExtraTileHandle();
+
+	void FoxNetTick();
+	void HandleTelekinesis();
+	void HandleSpawnSolo();
+	void FoxNetSpawn();
+
 	// FoxNet>
 };
 

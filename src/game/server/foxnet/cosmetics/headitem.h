@@ -1,6 +1,6 @@
 // Made by qxdFox
-#ifndef GAME_SERVER_FOXNET_COSMETICS_HEAD_POWERUP_H
-#define GAME_SERVER_FOXNET_COSMETICS_HEAD_POWERUP_H
+#ifndef GAME_SERVER_FOXNET_COSMETICS_HEADITEM_H
+#define GAME_SERVER_FOXNET_COSMETICS_HEADITEM_H
 
 #include <base/vmath.h>
 #include <engine/shared/protocol.h>
@@ -10,7 +10,6 @@
 class CHeadItem : public CEntity
 {
 	int m_Owner;
-
 	int m_Type;
 	float m_Offset;
 
@@ -22,4 +21,4 @@ public:
 	virtual void Snap(int SnappingClient) override;
 };
 
-#endif // GAME_SERVER_FOXNET_COSMETICS_HEAD_POWERUP_H
+#endif // GAME_SERVER_FOXNET_COSMETICS_HEADITEM_H
