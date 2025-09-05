@@ -31,8 +31,8 @@ CLightSaber::CLightSaber(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
 
 void CLightSaber::Reset()
 {
-	if(CCharacter *pChar = GameServer()->GetPlayerChar(m_Owner))
-		pChar->m_pLightSaber = nullptr;
+	if(CCharacter *pChr = GameServer()->GetPlayerChar(m_Owner))
+		pChr->m_pLightSaber = nullptr;
 	Server()->SnapFreeId(GetId());
 	GameWorld()->RemoveEntity(this);
 }
@@ -47,14 +47,14 @@ void CLightSaber::OnFire()
 
 void CLightSaber::Tick()
 {
-	CCharacter *pChar = GameServer()->GetPlayerChar(m_Owner);
+	CCharacter *pChr = GameServer()->GetPlayerChar(m_Owner);
 
-	if(!pChar)
+	if(!pChr)
 	{
 		Reset();
 		return;
 	}
-	if(pChar->GetActiveWeapon() != WEAPON_LIGHTSABER)
+	if(pChr->GetActiveWeapon() != WEAPON_LIGHTSABER)
 	{
 		if(m_Length > 0)
 			m_State = STATE_RETRACTING;
@@ -64,7 +64,7 @@ void CLightSaber::Tick()
 			return;
 		}
 	}
-	if(pChar->m_FreezeTime > 0 || pChar->IsPaused())
+	if(pChr->m_FreezeTime > 0 || pChr->IsPaused())
 	{
 		if(m_Length > 0)
 			m_State = STATE_RETRACTING;
@@ -73,7 +73,7 @@ void CLightSaber::Tick()
 	if(m_State == STATE_EXTENDING)
 	{
 		if(Server()->Tick() % 5 == 0)
-			GameServer()->CreateSound(m_Pos, SOUND_LASER_BOUNCE, pChar->TeamMask());
+			GameServer()->CreateSound(m_Pos, SOUND_LASER_BOUNCE, pChr->TeamMask());
 		m_Length += LIGHT_SABER_SPEED;
 		if(m_Length > LIGHT_SABER_MAX_LENGTH)
 		{
@@ -84,7 +84,7 @@ void CLightSaber::Tick()
 	else if(m_State == STATE_RETRACTING)
 	{
 		if(Server()->Tick() % 5 == 0)
-			GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, pChar->TeamMask());
+			GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, pChr->TeamMask());
 		m_Length -= LIGHT_SABER_SPEED;
 		if(m_Length < 0)
 		{
@@ -92,9 +92,9 @@ void CLightSaber::Tick()
 			m_State = STATE_RETRACTED;
 		}
 	}
-	m_Pos = pChar->m_Pos;
-	m_From = pChar->m_Pos;
-	vec2 WantedTo = m_Pos + normalize(vec2(pChar->Input()->m_TargetX, pChar->Input()->m_TargetY)) * m_Length;
+	m_Pos = pChr->m_Pos;
+	m_From = pChr->m_Pos;
+	vec2 WantedTo = m_Pos + normalize(vec2(pChr->Input()->m_TargetX, pChr->Input()->m_TargetY)) * m_Length;
 	GameServer()->Collision()->IntersectLine(m_Pos, WantedTo, &m_To, 0);
 
 	std::vector<CCharacter *> HitChars = GameWorld()->IntersectedCharacters(m_From, m_To, 6.0f, GameServer()->GetPlayerChar(m_Owner));
@@ -103,7 +103,7 @@ void CLightSaber::Tick()
 
 	for(CCharacter *pHit : HitChars)
 	{
-		if(pChar->Team() != TEAM_SUPER && pChar->Team() != pHit->Team())
+		if(pChr->Team() != TEAM_SUPER && pChr->Team() != pHit->Team())
 			return;
 
 		pHit->SetEmote(EMOTE_PAIN, Server()->Tick() + 2);

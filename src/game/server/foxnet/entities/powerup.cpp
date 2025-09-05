@@ -58,14 +58,14 @@ void CPowerUp::Tick()
 {
 	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
-		CCharacter *pChar = GameServer()->GetPlayerChar(ClientId);
-		if(!pChar || !pChar->IsAlive())
+		CCharacter *pChr = GameServer()->GetPlayerChar(ClientId);
+		if(!pChr || !pChr->IsAlive())
 			continue;
 
-		if(PointInSquare(m_Pos, pChar->GetPos(), 54.0f))
+		if(PointInSquare(m_Pos, pChr->GetPos(), 54.0f))
 		{
 			GameServer()->CollectedPowerup(ClientId, m_XP);
-			GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, CClientMask().set(ClientId));
+			GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->TeamMask());
 			Reset();
 			return;
 		}

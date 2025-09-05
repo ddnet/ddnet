@@ -36,6 +36,8 @@ class CPickupDrop : public CEntity
 	bool CollectItem();
 	bool CheckArmor();
 
+	CClientMask m_TeamMask;
+
 public:
 	int Team() const { return m_Team; }
 	int TeleCheckpoint() const { return m_TeleCheckpoint; }

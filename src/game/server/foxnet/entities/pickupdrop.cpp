@@ -328,7 +328,7 @@ bool CPickupDrop::CollectItem()
 	pClosest->GiveWeapon(m_Type);
 	pClosest->SetActiveWeapon(m_Type);
 	CClientMask TeamMask = CClientMask().set();
-	GameServer()->CreateSound(pClosest->m_Pos, SOUND_PICKUP_HEALTH, TeamMask);
+	GameServer()->CreateSound(pClosest->m_Pos, SOUND_PICKUP_HEALTH, pClosest->TeamMask());
 
 	if(pClosest->GetPlayer())
 		GameServer()->SendWeaponPickup(pClosest->GetPlayer()->GetCid(), m_Type);

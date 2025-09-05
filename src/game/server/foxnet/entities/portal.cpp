@@ -132,12 +132,12 @@ void CPortal::HandleTele()
 
 			if(distance(m_PortalData[0].m_Pos, m_PortalData[1].m_Pos) > 450.0f)
 			{
-				GameServer()->CreateSound(m_PortalData[0].m_Pos, SOUND_WEAPON_SPAWN);
-				GameServer()->CreateSound(m_PortalData[1].m_Pos, SOUND_WEAPON_SPAWN);
+				GameServer()->CreateSound(m_PortalData[0].m_Pos, SOUND_WEAPON_SPAWN, pChr->TeamMask());
+				GameServer()->CreateSound(m_PortalData[1].m_Pos, SOUND_WEAPON_SPAWN, pChr->TeamMask());
 			}
 			else
 			{
-				GameServer()->CreateSound(Target, SOUND_WEAPON_SPAWN);
+				GameServer()->CreateSound(Target, SOUND_WEAPON_SPAWN, pChr->TeamMask());
 			}
 		}
 		else
@@ -169,11 +169,11 @@ void CPortal::OnFire()
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	if(TrySetPortal())
 	{
-		GameServer()->CreateSound(pOwnerChar->m_Pos, SOUND_PICKUP_HEALTH);
+		GameServer()->CreateSound(pOwnerChar->m_Pos, SOUND_PICKUP_HEALTH, pOwnerChar->TeamMask());
 	}
 	else
 	{
-		GameServer()->CreateSound(pOwnerChar->m_Pos, SOUND_WEAPON_NOAMMO);
+		GameServer()->CreateSound(pOwnerChar->m_Pos, SOUND_WEAPON_NOAMMO, pOwnerChar->TeamMask());
 		pOwnerChar->SetReloadTimer(250 * Server()->TickSpeed() / 1000);
 	}
 }
