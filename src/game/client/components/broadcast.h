@@ -11,13 +11,12 @@
 class CBroadcast : public CComponent
 {
 	// broadcasts
-	char m_aBroadcastText[1024];
-	int m_BroadcastTick;
+	char m_aaBroadcastText[NUM_DUMMIES][1024];
+	int m_aBroadcastTick[NUM_DUMMIES];
 	float m_BroadcastRenderOffset;
 	STextContainerIndex m_TextContainerIndex;
 
 	void RenderServerBroadcast();
-	void OnBroadcastMessage(const CNetMsg_Sv_Broadcast *pMsg);
 
 public:
 	int Sizeof() const override { return sizeof(*this); }
@@ -26,7 +25,10 @@ public:
 	void OnRender() override;
 	void OnMessage(int MsgType, void *pRawMsg) override;
 
-	void DoBroadcast(const char *pText);
+	void DeleteBroadcastContainer();
+
+	void DoDummyBroadcast(const char *pText);
+	void DoBroadcast(const char *pText, bool Dummy = false);
 };
 
 #endif

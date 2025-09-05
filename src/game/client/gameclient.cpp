@@ -511,6 +511,8 @@ void CGameClient::OnDummySwap()
 	m_DummyInput = m_Controls.m_aInputData[!g_Config.m_ClDummy];
 	m_Controls.m_aInputData[g_Config.m_ClDummy].m_Fire = tmp;
 	m_IsDummySwapping = 1;
+
+	m_Broadcast.DeleteBroadcastContainer();
 }
 
 int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
@@ -1054,6 +1056,11 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 			{
 				m_Chat.OnMessage(MsgId, pRawMsg);
 			}
+		}
+		if(MsgId == NETMSGTYPE_SV_BROADCAST)
+		{
+			const CNetMsg_Sv_Broadcast *pMsg = (CNetMsg_Sv_Broadcast *)pRawMsg;
+			m_Broadcast.DoDummyBroadcast(pMsg->m_pMessage);
 		}
 		return; // no need of all that stuff for the dummy
 	}

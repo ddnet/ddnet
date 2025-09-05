@@ -337,6 +337,14 @@ char CConsole::NextParam(const char *&pFormat)
 	return *pFormat;
 }
 
+LOG_COLOR IConsole::ColorToLogColor(ColorRGBA Color)
+{
+	return LOG_COLOR{
+		(uint8_t)(Color.r * 255.0),
+		(uint8_t)(Color.g * 255.0),
+		(uint8_t)(Color.b * 255.0)};
+}
+
 LEVEL IConsole::ToLogLevel(int Level)
 {
 	switch(Level)
@@ -359,14 +367,6 @@ int IConsole::ToLogLevelFilter(int Level)
 		dbg_assert(0, "invalid log level filter");
 	}
 	return Level + 2;
-}
-
-static LOG_COLOR ColorToLogColor(ColorRGBA Color)
-{
-	return LOG_COLOR{
-		(uint8_t)(Color.r * 255.0),
-		(uint8_t)(Color.g * 255.0),
-		(uint8_t)(Color.b * 255.0)};
 }
 
 void CConsole::Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor) const
