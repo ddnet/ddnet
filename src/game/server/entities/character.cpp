@@ -2873,7 +2873,7 @@ void CCharacter::OnDie(int Killer, int Weapon, bool SendKillMsg)
 		for(int iWeapon = NUM_WEAPONS; iWeapon < NUM_EXTRA_WEAPONS; iWeapon++)
 		{
 			if(GetWeaponGot(iWeapon))
-				DropWeapon(iWeapon, random_direction() * 3);
+				DropWeapon(iWeapon, m_Core.m_Vel + random_direction() * 3);
 		}
 	}
 
@@ -3199,7 +3199,7 @@ void CCharacter::VoteAction(const CNetMsg_Cl_Vote *pMsg, int ClientId)
 		vec2 Dir = normalize(vec2(Input()->m_TargetX, Input()->m_TargetY));
 		int Type = Core()->m_ActiveWeapon;
 
-		DropWeapon(Type, Dir * vec2(5.0f, 8.0f));
+		DropWeapon(Type, m_Core.m_Vel + Dir * vec2(5.0f, 8.0f));
 	}
 }
 
