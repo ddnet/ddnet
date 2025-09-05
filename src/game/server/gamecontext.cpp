@@ -2036,7 +2036,14 @@ void *CGameContext::PreProcessMsg(int *pMsgId, CUnpacker *pUnpacker, int ClientI
 			CTeeInfo Info(pMsg7->m_apSkinPartNames, pMsg7->m_aUseCustomColors, pMsg7->m_aSkinPartColors);
 			Info.FromSixup();
 			pPlayer->m_TeeInfos = Info;
+			// <FoxNet
+			char SkinBuf[MAX_SKIN_LENGTH];
+			str_copy(SkinBuf, Info.m_aSkinName);
+			if((!str_comp_nocase(SkinBuf, "x_spec") || !str_comp_nocase(SkinBuf, "x_ninja")) && Server()->GetAuthedState(ClientId) < AUTHED_MOD)
+				str_copy(SkinBuf, "default");
 
+			str_copy(pPlayer->m_TeeInfos.m_aSkinName, SkinBuf, sizeof(pPlayer->m_TeeInfos.m_aSkinName));
+			// FoxNet>
 			str_copy(s_aRawMsg + sizeof(*pMsg), Info.m_aSkinName, sizeof(s_aRawMsg) - sizeof(*pMsg));
 
 			pMsg->m_pSkin = s_aRawMsg + sizeof(*pMsg);
@@ -2852,7 +2859,14 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 		SixupNeedsUpdate = true;
 	Server()->SetClientCountry(ClientId, pMsg->m_Country);
 
-	str_copy(pPlayer->m_TeeInfos.m_aSkinName, pMsg->m_pSkin, sizeof(pPlayer->m_TeeInfos.m_aSkinName));
+	// <FoxNet
+	char SkinBuf[MAX_SKIN_LENGTH];
+	str_copy(SkinBuf, pMsg->m_pSkin);
+	if((!str_comp_nocase(SkinBuf, "x_spec") || !str_comp_nocase(SkinBuf, "x_ninja")) && Server()->GetAuthedState(ClientId) < AUTHED_MOD)
+		str_copy(SkinBuf, "default");
+
+	str_copy(pPlayer->m_TeeInfos.m_aSkinName, SkinBuf, sizeof(pPlayer->m_TeeInfos.m_aSkinName));
+	// FoxNet>
 	pPlayer->m_TeeInfos.m_UseCustomColor = pMsg->m_UseCustomColor;
 	pPlayer->m_TeeInfos.m_ColorBody = pMsg->m_ColorBody;
 	pPlayer->m_TeeInfos.m_ColorFeet = pMsg->m_ColorFeet;
@@ -3043,7 +3057,14 @@ void CGameContext::OnStartInfoNetMessage(const CNetMsg_Cl_StartInfo *pMsg, int C
 		return;
 	}
 	Server()->SetClientCountry(ClientId, pMsg->m_Country);
-	str_copy(pPlayer->m_TeeInfos.m_aSkinName, pMsg->m_pSkin, sizeof(pPlayer->m_TeeInfos.m_aSkinName));
+	// <FoxNet
+	char SkinBuf[MAX_SKIN_LENGTH];
+	str_copy(SkinBuf, pMsg->m_pSkin);
+	if((!str_comp_nocase(SkinBuf, "x_spec") || !str_comp_nocase(SkinBuf, "x_ninja")) && Server()->GetAuthedState(ClientId) < AUTHED_MOD)
+		str_copy(SkinBuf, "default");
+
+	str_copy(pPlayer->m_TeeInfos.m_aSkinName, SkinBuf, sizeof(pPlayer->m_TeeInfos.m_aSkinName));
+	// FoxNet>
 	pPlayer->m_TeeInfos.m_UseCustomColor = pMsg->m_UseCustomColor;
 	pPlayer->m_TeeInfos.m_ColorBody = pMsg->m_ColorBody;
 	pPlayer->m_TeeInfos.m_ColorFeet = pMsg->m_ColorFeet;

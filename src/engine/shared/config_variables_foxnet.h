@@ -77,3 +77,8 @@ MACRO_CONFIG_INT(SvSpawnPowerUps, sv_spawn_powerups, 1, 0, 1, CFGFLAG_SERVER | C
 
 // Solo on Spawn
 MACRO_CONFIG_INT(SvSoloOnSpawn, sv_solo_on_spawn, 5, 0, 15, CFGFLAG_SERVER | CFGFLAG_GAME, "Whether Players Should be solod on spawn + how long in seconds")
+
+// Flags
+MACRO_CONFIG_INT(SvAllowZoom, sv_allow_zoom, 1, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Whether to allow zoom or not")
+MACRO_CONFIG_INT(SvAllowHookColl, sv_allow_hook_coll, 1, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Whether to allow hook coll or not")
+MACRO_CONFIG_INT(SvAllowEyeWheel, sv_allow_eye_wheel, 1, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Whether to allow eye wheel or not")

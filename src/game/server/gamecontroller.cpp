@@ -618,9 +618,9 @@ void IGameController::Snap(int SnappingClient)
 		GAMEINFOFLAG_GAMETYPE_DDNET |
 		GAMEINFOFLAG_UNLIMITED_AMMO |
 		GAMEINFOFLAG_RACE_RECORD_MESSAGE |
-		GAMEINFOFLAG_ALLOW_EYE_WHEEL |
-		GAMEINFOFLAG_ALLOW_HOOK_COLL |
-		GAMEINFOFLAG_ALLOW_ZOOM |
+		// GAMEINFOFLAG_ALLOW_EYE_WHEEL |
+		// GAMEINFOFLAG_ALLOW_HOOK_COLL |
+		// GAMEINFOFLAG_ALLOW_ZOOM |
 		GAMEINFOFLAG_BUG_DDRACE_GHOST |
 		GAMEINFOFLAG_BUG_DDRACE_INPUT |
 		GAMEINFOFLAG_PREDICT_DDRACE |
@@ -633,6 +633,16 @@ void IGameController::Snap(int SnappingClient)
 	if(g_Config.m_SvNoWeakHook)
 		pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_NO_WEAK_HOOK;
 	pGameInfoEx->m_Version = GAMEINFO_CURVERSION;
+
+	// <FoxNet
+	if(g_Config.m_SvAllowZoom)
+		pGameInfoEx->m_Flags |= GAMEINFOFLAG_ALLOW_ZOOM;
+	if(g_Config.m_SvAllowHookColl)
+		pGameInfoEx->m_Flags |= GAMEINFOFLAG_ALLOW_HOOK_COLL;
+	if(g_Config.m_SvAllowEyeWheel)
+		pGameInfoEx->m_Flags |= GAMEINFOFLAG_ALLOW_EYE_WHEEL;
+	pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_ALLOW_X_SKINS;
+	// FoxNet>
 
 	if(Server()->IsSixup(SnappingClient))
 	{
