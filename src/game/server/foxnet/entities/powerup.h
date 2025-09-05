@@ -26,6 +26,8 @@ class CPowerUp : public CEntity
 	bool m_Switch;
 	int m_Delay; // In ticks
 
+	CClientMask m_TeamMask;
+
 	void SetPowerupVisual();
 
 public:

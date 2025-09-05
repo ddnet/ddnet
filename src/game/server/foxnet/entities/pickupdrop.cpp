@@ -33,6 +33,11 @@ CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, int LastOwner, vec2 Pos, int Te
 	m_TuneZone = -1;
 	m_TeleCheckpoint = TeleCheckpoint;
 
+	if(CCharacter *pChr = GameServer()->GetPlayerChar(LastOwner))
+		m_TeamMask = pChr->TeamMask();
+	else
+		m_TeamMask = CClientMask().set();
+
 	m_PickupDelay = Server()->TickSpeed() * 1.5f;
 	m_GroundElasticity = vec2(0.5f, 0.5f);
 
@@ -60,9 +65,8 @@ void CPickupDrop::Reset(bool PickedUp)
 		}
 	}
 
-	CClientMask TeamMask = CClientMask().set();
 	if(!PickedUp)
-		GameServer()->CreateDeath(m_Pos, m_LastOwner, TeamMask);
+		GameServer()->CreateDeath(m_Pos, m_LastOwner, m_TeamMask);
 
 	GameWorld()->RemoveEntity(this);
 }
@@ -234,8 +238,7 @@ bool CPickupDrop::CheckArmor()
 		{
 			if(m_Type > WEAPON_GUN && m_Type < NUM_WEAPONS && apEnts[i]->GetOwnerId() < 0)
 			{
-				CClientMask TeamMask = CClientMask().set();
-				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, TeamMask);
+				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, m_TeamMask);
 				Reset(false);
 				return true;
 			}
@@ -246,8 +249,7 @@ bool CPickupDrop::CheckArmor()
 		{
 			if(m_Type == WEAPON_SHOTGUN && apEnts[i]->GetOwnerId() < 0)
 			{
-				CClientMask TeamMask = CClientMask().set();
-				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, TeamMask);
+				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, m_TeamMask);
 				Reset(false);
 				return true;
 			}
@@ -258,8 +260,7 @@ bool CPickupDrop::CheckArmor()
 		{
 			if(m_Type == WEAPON_GRENADE && apEnts[i]->GetOwnerId() < 0)
 			{
-				CClientMask TeamMask = CClientMask().set();
-				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, TeamMask);
+				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, m_TeamMask);
 				Reset();
 				return true;
 			}
@@ -270,8 +271,7 @@ bool CPickupDrop::CheckArmor()
 		{
 			if(m_Type == WEAPON_NINJA && apEnts[i]->GetOwnerId() < 0)
 			{
-				CClientMask TeamMask = CClientMask().set();
-				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, TeamMask);
+				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, m_TeamMask);
 				Reset();
 				return true;
 			}
@@ -282,8 +282,7 @@ bool CPickupDrop::CheckArmor()
 		{
 			if(m_Type == WEAPON_LASER && apEnts[i]->GetOwnerId() < 0)
 			{
-				CClientMask TeamMask = CClientMask().set();
-				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, TeamMask);
+				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, m_TeamMask);
 				Reset();
 				return true;
 			}
@@ -327,7 +326,6 @@ bool CPickupDrop::CollectItem()
 
 	pClosest->GiveWeapon(m_Type);
 	pClosest->SetActiveWeapon(m_Type);
-	CClientMask TeamMask = CClientMask().set();
 	GameServer()->CreateSound(pClosest->m_Pos, SOUND_PICKUP_HEALTH, pClosest->TeamMask());
 
 	if(pClosest->GetPlayer())
