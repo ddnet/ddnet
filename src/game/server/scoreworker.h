@@ -124,6 +124,7 @@ struct CSqlRandomMapRequest : ISqlData
 	char m_aCurrentMap[MAX_MAP_LENGTH];
 	char m_aRequestingPlayer[MAX_NAME_LENGTH];
 	int m_Stars;
+	int m_MaxStars = -1;
 };
 
 struct CSqlScoreData : ISqlData
