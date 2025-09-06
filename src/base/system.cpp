@@ -3070,11 +3070,6 @@ void str_truncate(char *dst, int dst_size, const char *src, int truncation_len)
 	str_copy(dst, src, size);
 }
 
-int str_length(const char *str)
-{
-	return (int)strlen(str);
-}
-
 int str_format_v(char *buffer, int buffer_size, const char *format, va_list args)
 {
 #if defined(CONF_FAMILY_WINDOWS)
