@@ -35,7 +35,6 @@ class CSounds : public CComponent
 	bool m_WaitForSoundJob;
 
 	void UpdateChannels();
-	int GetSampleId(int SetId);
 
 	float m_GuiSoundVolume = -1.0f;
 	float m_GameSoundVolume = -1.0f;
@@ -58,6 +57,8 @@ public:
 	void OnReset() override;
 	void OnStateChange(int NewState, int OldState) override;
 	void OnRender() override;
+
+	int GetSampleId(int SetId);
 
 	void ClearQueue();
 	void Enqueue(int Channel, int SetId);
