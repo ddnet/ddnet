@@ -1487,7 +1487,7 @@ int CServer::NumRconCommands(int ClientId)
 	int Num = 0;
 	const int AccessLevel = ConsoleAccessLevel(ClientId);
 	for(const IConsole::CCommandInfo *pCmd = Console()->FirstCommandInfo(AccessLevel, CFGFLAG_SERVER);
-		pCmd; pCmd = pCmd->NextCommandInfo(AccessLevel, CFGFLAG_SERVER))
+		pCmd; pCmd = Console()->NextCommandInfo(pCmd, AccessLevel, CFGFLAG_SERVER))
 	{
 		Num++;
 	}
@@ -1508,7 +1508,7 @@ void CServer::UpdateClientRconCommands(int ClientId)
 	for(int i = 0; i < MAX_RCONCMD_SEND && Client.m_pRconCmdToSend; ++i)
 	{
 		SendRconCmdAdd(Client.m_pRconCmdToSend, ClientId);
-		Client.m_pRconCmdToSend = Client.m_pRconCmdToSend->NextCommandInfo(AccessLevel, CFGFLAG_SERVER);
+		Client.m_pRconCmdToSend = Console()->NextCommandInfo(Client.m_pRconCmdToSend, AccessLevel, CFGFLAG_SERVER);
 		if(Client.m_pRconCmdToSend == nullptr)
 		{
 			SendRconCmdGroupEnd(ClientId);

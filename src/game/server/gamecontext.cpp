@@ -1555,7 +1555,7 @@ void CGameContext::OnClientEnter(int ClientId)
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 	}
 	for(const IConsole::CCommandInfo *pCmd = Console()->FirstCommandInfo(IConsole::ACCESS_LEVEL_USER, CFGFLAG_CHAT);
-		pCmd; pCmd = pCmd->NextCommandInfo(IConsole::ACCESS_LEVEL_USER, CFGFLAG_CHAT))
+		pCmd; pCmd = Console()->NextCommandInfo(pCmd, IConsole::ACCESS_LEVEL_USER, CFGFLAG_CHAT))
 	{
 		const char *pName = pCmd->m_pName;
 
