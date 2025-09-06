@@ -3249,7 +3249,7 @@ void CCharacter::VoteAction(const CNetMsg_Cl_Vote *pMsg, int ClientId)
 		vec2 Dir = normalize(vec2(Input()->m_TargetX, Input()->m_TargetY));
 		int Type = Core()->m_ActiveWeapon;
 
-		DropWeapon(Type, m_Core.m_Vel + Dir * vec2(5.0f, 8.0f));
+		DropWeapon(Type, m_Core.m_Vel * 0.7f + Dir * vec2(5.0f, 6.0f));
 	}
 }
 

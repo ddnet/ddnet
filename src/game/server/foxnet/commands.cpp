@@ -1427,7 +1427,7 @@ void CGameContext::ConDropWeapon(IConsole::IResult *pResult, void *pUserData)
 	int Type = pChr->Core()->m_ActiveWeapon;
 
 
-	pChr->DropWeapon(Type, Dir * vec2(5.0f,8.0f));
+	pChr->DropWeapon(Type, pChr->Core()->m_Vel * 0.7f + Dir * vec2(5.0f, 6.0f));
 }
 
 void CGameContext::ConCleanDroppedPickups(IConsole::IResult *pResult, void *pUserData)
