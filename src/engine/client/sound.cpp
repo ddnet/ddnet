@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <SDL.h>
 
+#include <base/log.h>
 #include <base/math.h>
 #include <base/system.h>
 
@@ -141,12 +142,30 @@ void CSound::Mix(short *pFinalOut, unsigned Frames)
 			Voice.m_Tick++;
 		}
 
-		// free voice if not used any more
-		if(Voice.m_Tick == Voice.m_pSample->m_NumFrames)
+		if(Voice.m_Flags & ISound::FLAG_LOOP)
 		{
-			if(Voice.m_Flags & ISound::FLAG_LOOP)
-				Voice.m_Tick = 0;
+			// on first loop play everything before looping
+			// on subsequent loops, only play until a point
+			if(Voice.m_Flags & ISound::FLAG_LOOPED)
+			{
+				if(Voice.m_Tick == Voice.m_pSample->m_NumFrames)
+				{
+					Voice.m_Tick = Voice.m_pSample->m_LoopStart;
+				}
+			}
 			else
+			{
+				if(Voice.m_Tick == Voice.m_pSample->m_LoopEnd)
+				{
+					Voice.m_Tick = Voice.m_pSample->m_LoopStart;
+					Voice.m_Flags |= ISound::FLAG_LOOPED;
+				}
+			}
+		}
+		else
+		{
+			// free voice if not used any more
+			if(Voice.m_Tick == Voice.m_pSample->m_NumFrames)
 			{
 				Voice.m_pSample = nullptr;
 				Voice.m_Age++;
@@ -323,6 +342,11 @@ void CSound::RateConvert(CSample &Sample) const
 		}
 	}
 
+	// adjust looping positions, note that this is not precise
+	const float Factor = m_MixingRate / Sample.m_Rate;
+	Sample.m_LoopStart = Sample.m_LoopStart * Factor;
+	Sample.m_LoopEnd = Sample.m_LoopEnd * Factor;
+
 	// free old data and apply new
 	free(Sample.m_pData);
 	Sample.m_pData = pNewData;
@@ -330,7 +354,7 @@ void CSound::RateConvert(CSample &Sample) const
 	Sample.m_Rate = m_MixingRate;
 }
 
-bool CSound::DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize) const
+bool CSound::DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize, const char *pFilename) const
 {
 	int OpusError = 0;
 	OggOpusFile *pOpusFile = op_open_memory((const unsigned char *)pData, DataSize, &OpusError);
@@ -340,7 +364,7 @@ bool CSound::DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize) c
 		if(NumChannels > 2)
 		{
 			op_free(pOpusFile);
-			dbg_msg("sound/opus", "file is not mono or stereo.");
+			log_error("sound/opus", "File is not mono or stereo. Filename='%s'", pFilename);
 			return false;
 		}
 
@@ -348,7 +372,7 @@ bool CSound::DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize) c
 		if(NumSamples < 0)
 		{
 			op_free(pOpusFile);
-			dbg_msg("sound/opus", "failed to get number of samples, error %d", NumSamples);
+			log_error("sound/opus", "Failed to get number of samples, error %d. Filename='%s'", NumSamples, pFilename);
 			return false;
 		}
 
@@ -362,7 +386,7 @@ bool CSound::DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize) c
 			{
 				free(pSampleData);
 				op_free(pOpusFile);
-				dbg_msg("sound/opus", "op_read error %d at %d", Read, Pos);
+				log_error("sound/opus", "op_read error %d at %d. Filename='%s'", Read, Pos, pFilename);
 				return false;
 			}
 			else if(Read == 0) // EOF
@@ -370,19 +394,35 @@ bool CSound::DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize) c
 			Pos += Read;
 		}
 
-		op_free(pOpusFile);
-
 		Sample.m_pData = pSampleData;
 		Sample.m_NumFrames = Pos;
 		Sample.m_Rate = 48000;
 		Sample.m_Channels = NumChannels;
-		Sample.m_LoopStart = -1;
-		Sample.m_LoopEnd = -1;
+		Sample.m_LoopStart = 0;
+		Sample.m_LoopEnd = Sample.m_NumFrames;
 		Sample.m_PausedAt = 0;
+
+		const OpusTags *pTags = op_tags(pOpusFile, -1);
+		if(pTags)
+		{
+			for(int i = 0; i < pTags->comments; ++i)
+			{
+				const char *pComment = pTags->user_comments[i];
+				if(!pComment)
+					continue;
+				// verification done for safety not feedback
+				if(str_startswith(pComment, "loop_start="))
+					Sample.m_LoopStart = std::clamp(str_toint(pComment + str_length("loop_start=")), 0, Sample.m_NumFrames);
+				else if(str_startswith(pComment, "loop_end="))
+					Sample.m_LoopEnd = std::clamp(str_toint(pComment + str_length("loop_end=")), 0, Sample.m_NumFrames);
+			}
+		}
+
+		op_free(pOpusFile);
 	}
 	else
 	{
-		dbg_msg("sound/opus", "failed to decode sample, error %d", OpusError);
+		log_error("sound/opus", "Failed to decode sample, error %d. Filename='%s'", OpusError, pFilename);
 		return false;
 	}
 
@@ -403,54 +443,78 @@ static int ReadDataOld(void *pBuffer, int Size)
 }
 
 #if defined(CONF_WAVPACK_OPEN_FILE_INPUT_EX)
-static int ReadData(void *pId, void *pBuffer, int Size)
+static int ReadData([[maybe_unused]] void *pId, void *pBuffer, int Size)
 {
-	(void)pId;
 	return ReadDataOld(pBuffer, Size);
 }
 
-static int ReturnFalse(void *pId)
+static unsigned int GetPos([[maybe_unused]] void *pId)
 {
-	(void)pId;
-	return 0;
-}
-
-static unsigned int GetPos(void *pId)
-{
-	(void)pId;
 	return s_WVBufferPosition;
 }
 
-static unsigned int GetLength(void *pId)
+static unsigned int GetLength([[maybe_unused]] void *pId)
 {
-	(void)pId;
 	return s_WVBufferSize;
 }
 
-static int PushBackByte(void *pId, int Char)
+static int PushBackByte([[maybe_unused]] void *pId, int Char)
 {
+	if(s_WVBufferPosition == 0)
+		return -1;
 	s_WVBufferPosition -= 1;
+	return Char;
+}
+
+static int SetPosAbs([[maybe_unused]] void *pId, unsigned Pos)
+{
+	s_WVBufferPosition = Pos;
+	return 0;
+}
+
+static int SetPosRel([[maybe_unused]] void *pId, int Pos, int Mode)
+{
+	switch(Mode)
+	{
+	case SEEK_SET: // Pos is absolute
+		s_WVBufferPosition = Pos;
+		break;
+	case SEEK_CUR: // Pos relative to current
+		s_WVBufferPosition = (long)s_WVBufferPosition + (long)Pos;
+		break;
+	case SEEK_END: // Pos relative to end
+		s_WVBufferPosition = (long)s_WVBufferSize + (long)Pos;
+		break;
+	default:
+		return -1; // invalid mode
+	}
 	return 0;
 }
 #endif
 
-bool CSound::DecodeWV(CSample &Sample, const void *pData, unsigned DataSize) const
+bool CSound::DecodeWV(CSample &Sample, const void *pData, unsigned DataSize, const char *pFilename) const
 {
-	char aError[100];
+	// no need to load sound when we are running with no sound
+	if(!m_SoundEnabled)
+		return false;
 
 	dbg_assert(s_pWVBuffer == nullptr, "DecodeWV already in use");
 	s_pWVBuffer = pData;
 	s_WVBufferSize = DataSize;
 	s_WVBufferPosition = 0;
 
+	char aError[100];
+
 #if defined(CONF_WAVPACK_OPEN_FILE_INPUT_EX)
 	WavpackStreamReader Callback = {0};
-	Callback.can_seek = ReturnFalse;
-	Callback.get_length = GetLength;
-	Callback.get_pos = GetPos;
-	Callback.push_back_byte = PushBackByte;
 	Callback.read_bytes = ReadData;
-	WavpackContext *pContext = WavpackOpenFileInputEx(&Callback, (void *)1, 0, aError, 0, 0);
+	Callback.get_pos = GetPos;
+	Callback.set_pos_abs = SetPosAbs;
+	Callback.set_pos_rel = SetPosRel;
+	Callback.push_back_byte = PushBackByte;
+	Callback.get_length = GetLength;
+	Callback.can_seek = []([[maybe_unused]] void *pId) { return 1; };
+	WavpackContext *pContext = WavpackOpenFileInputEx(&Callback, (void *)1, 0, aError, OPEN_TAGS, 0);
 #else
 	WavpackContext *pContext = WavpackOpenFileInput(ReadDataOld, aError);
 #endif
@@ -463,14 +527,14 @@ bool CSound::DecodeWV(CSample &Sample, const void *pData, unsigned DataSize) con
 
 		if(NumChannels > 2)
 		{
-			dbg_msg("sound/wv", "file is not mono or stereo.");
+			log_error("sound/wv", "File is not mono or stereo. Filename='%s'", pFilename);
 			s_pWVBuffer = nullptr;
 			return false;
 		}
 
 		if(BitsPerSample != 16)
 		{
-			dbg_msg("sound/wv", "bps is %d, not 16", BitsPerSample);
+			log_error("sound/wv", "Bits per sample is %d, not 16. Filename='%s'", BitsPerSample, pFilename);
 			s_pWVBuffer = nullptr;
 			return false;
 		}
@@ -479,7 +543,7 @@ bool CSound::DecodeWV(CSample &Sample, const void *pData, unsigned DataSize) con
 		if(!WavpackUnpackSamples(pContext, pBuffer, NumSamples))
 		{
 			free(pBuffer);
-			dbg_msg("sound/wv", "WavpackUnpackSamples failed. NumSamples=%d, NumChannels=%d", NumSamples, NumChannels);
+			log_error("sound/wv", "WavpackUnpackSamples failed. NumSamples=%d NumChannels=%d Filename='%s'", NumSamples, NumChannels, pFilename);
 			s_pWVBuffer = nullptr;
 			return false;
 		}
@@ -491,23 +555,31 @@ bool CSound::DecodeWV(CSample &Sample, const void *pData, unsigned DataSize) con
 		for(int i = 0; i < NumSamples * NumChannels; i++)
 			*pDst++ = (short)*pSrc++;
 
-		free(pBuffer);
-#ifdef CONF_WAVPACK_CLOSE_FILE
-		WavpackCloseFile(pContext);
-#endif
-
 		Sample.m_NumFrames = NumSamples;
 		Sample.m_Rate = SampleRate;
 		Sample.m_Channels = NumChannels;
-		Sample.m_LoopStart = -1;
-		Sample.m_LoopEnd = -1;
+		Sample.m_LoopStart = 0;
+		Sample.m_LoopEnd = Sample.m_NumFrames;
 		Sample.m_PausedAt = 0;
 
+		// verification done for safety not feedback
+		char aBuf[256];
+		if(WavpackGetTagItem(pContext, "loop_start", aBuf, sizeof(aBuf)) > 0)
+			Sample.m_LoopStart = std::clamp(str_toint(aBuf), 0, Sample.m_NumFrames);
+		if(WavpackGetTagItem(pContext, "loop_end", aBuf, sizeof(aBuf)) > 0)
+			Sample.m_LoopEnd = std::clamp(str_toint(aBuf), 0, Sample.m_NumFrames);
+
+		log_info("sound/wv", "%d %d", Sample.m_LoopStart, Sample.m_LoopEnd);
+
+#ifdef CONF_WAVPACK_CLOSE_FILE
+		WavpackCloseFile(pContext);
+#endif
+		free(pBuffer);
 		s_pWVBuffer = nullptr;
 	}
 	else
 	{
-		dbg_msg("sound/wv", "failed to decode sample (%s)", aError);
+		log_error("sound/wv", "Failed to decode sample (%s). Filename='%s'", aError, pFilename);
 		s_pWVBuffer = nullptr;
 		return false;
 	}
@@ -524,7 +596,7 @@ int CSound::LoadOpus(const char *pFilename, int StorageType)
 	CSample *pSample = AllocSample();
 	if(!pSample)
 	{
-		dbg_msg("sound/opus", "failed to allocate sample ID. filename='%s'", pFilename);
+		log_error("sound/opus", "failed to allocate sample ID. Filename='%s'", pFilename);
 		return -1;
 	}
 
@@ -533,11 +605,11 @@ int CSound::LoadOpus(const char *pFilename, int StorageType)
 	if(!m_pStorage->ReadFile(pFilename, StorageType, &pData, &DataSize))
 	{
 		UnloadSample(pSample->m_Index);
-		dbg_msg("sound/opus", "failed to open file. filename='%s'", pFilename);
+		log_error("sound/opus", "failed to open file. Filename='%s'", pFilename);
 		return -1;
 	}
 
-	const bool DecodeSuccess = DecodeOpus(*pSample, pData, DataSize);
+	const bool DecodeSuccess = DecodeOpus(*pSample, pData, DataSize, pFilename);
 	free(pData);
 	if(!DecodeSuccess)
 	{
@@ -546,7 +618,7 @@ int CSound::LoadOpus(const char *pFilename, int StorageType)
 	}
 
 	if(g_Config.m_Debug)
-		dbg_msg("sound/opus", "loaded %s", pFilename);
+		dbg_msg("sound/opus", "loaded %s (%d)", pFilename, pSample->m_Index);
 
 	RateConvert(*pSample);
 	return pSample->m_Index;
@@ -561,7 +633,7 @@ int CSound::LoadWV(const char *pFilename, int StorageType)
 	CSample *pSample = AllocSample();
 	if(!pSample)
 	{
-		dbg_msg("sound/wv", "failed to allocate sample ID. filename='%s'", pFilename);
+		log_error("sound/wv", "failed to allocate sample ID. Filename='%s'", pFilename);
 		return -1;
 	}
 
@@ -570,11 +642,11 @@ int CSound::LoadWV(const char *pFilename, int StorageType)
 	if(!m_pStorage->ReadFile(pFilename, StorageType, &pData, &DataSize))
 	{
 		UnloadSample(pSample->m_Index);
-		dbg_msg("sound/wv", "failed to open file. filename='%s'", pFilename);
+		log_error("sound/wv", "failed to open file. Filename='%s'", pFilename);
 		return -1;
 	}
 
-	const bool DecodeSuccess = DecodeWV(*pSample, pData, DataSize);
+	const bool DecodeSuccess = DecodeWV(*pSample, pData, DataSize, pFilename);
 	free(pData);
 	if(!DecodeSuccess)
 	{
@@ -583,7 +655,7 @@ int CSound::LoadWV(const char *pFilename, int StorageType)
 	}
 
 	if(g_Config.m_Debug)
-		dbg_msg("sound/wv", "loaded %s", pFilename);
+		dbg_msg("sound/wv", "loaded %s (%d)", pFilename, pSample->m_Index);
 
 	RateConvert(*pSample);
 	return pSample->m_Index;
@@ -599,7 +671,7 @@ int CSound::LoadOpusFromMem(const void *pData, unsigned DataSize, bool ForceLoad
 	if(!pSample)
 		return -1;
 
-	if(!DecodeOpus(*pSample, pData, DataSize))
+	if(!DecodeOpus(*pSample, pData, DataSize, "mem"))
 	{
 		UnloadSample(pSample->m_Index);
 		return -1;
@@ -619,7 +691,7 @@ int CSound::LoadWVFromMem(const void *pData, unsigned DataSize, bool ForceLoad =
 	if(!pSample)
 		return -1;
 
-	if(!DecodeWV(*pSample, pData, DataSize))
+	if(!DecodeWV(*pSample, pData, DataSize, "mem"))
 	{
 		UnloadSample(pSample->m_Index);
 		return -1;
