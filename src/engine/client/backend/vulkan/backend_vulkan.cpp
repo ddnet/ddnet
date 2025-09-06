@@ -3225,8 +3225,15 @@ protected:
 
 	void ExecBufferFillDynamicStates(const CCommandBuffer::SState &State, SRenderCommandExecuteBuffer &ExecBuffer)
 	{
+		// Workaround for a bug in molten-vk: https://github.com/KhronosGroup/MoltenVK/issues/2304
+#ifdef CONF_PLATFORM_MACOS
+		auto HasDynamicState = true;
+#else
 		size_t DynamicStateIndex = GetDynamicModeIndexFromState(State);
-		if(DynamicStateIndex == VULKAN_BACKEND_CLIP_MODE_DYNAMIC_SCISSOR_AND_VIEWPORT)
+		auto HasDynamicState = DynamicStateIndex == VULKAN_BACKEND_CLIP_MODE_DYNAMIC_SCISSOR_AND_VIEWPORT;
+#endif
+
+		if(HasDynamicState)
 		{
 			VkViewport Viewport;
 			if(m_HasDynamicViewport)
