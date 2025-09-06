@@ -81,10 +81,6 @@ void CPowerUp::Tick()
 			return;
 		}
 	}
-	if(m_Delay > 0)
-		m_Delay--;
-	else
-		m_Delay = Server()->TickSpeed();
 	SetPowerupVisual();
 }
 
@@ -137,7 +133,7 @@ void CPowerUp::Snap(int SnappingClient)
 	int SnappingClientVersion = Server()->GetClientVersion(SnappingClient);
 	bool SixUp = Server()->IsSixup(SnappingClient);
 
-	if(m_Delay == 0)
+	if(Server()->Tick() % Server()->TickSpeed() == 0)
 		m_Switch = !m_Switch;
 
 	GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, SixUp, SnappingClient), GetId(), m_Pos, m_Switch, 0, -1, PICKUPFLAG_NO_PREDICT);

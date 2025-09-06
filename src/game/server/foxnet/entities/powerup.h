@@ -24,7 +24,6 @@ class CPowerUp : public CEntity
 	int m_Lifetime;
 
 	bool m_Switch;
-	int m_Delay; // In ticks
 
 	CClientMask m_TeamMask;
 
