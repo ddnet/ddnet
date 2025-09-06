@@ -8,6 +8,7 @@
 
 struct CPortalData
 {
+	float m_PortalRadius;
 	bool m_Active;
 	vec2 m_Pos;
 	int m_Team;
@@ -19,32 +20,31 @@ class CPortal : public CEntity
 	{
 		NUM_PORTALS = 2,
 		SEGMENTS = 12,
-		NUM_IDS = SEGMENTS * NUM_PORTALS + 2,
+		NUM_IDS = SEGMENTS + 1,
 		NUM_POS = SEGMENTS + 1,
-		NUM_PRTCL = 6
+		NUM_PRTCL = 3
 	};
 
 	struct SSnapPortal
 	{
 		int m_aIds[NUM_IDS];
-		vec2 m_From[NUM_POS];
-		vec2 m_To[NUM_POS];
+		vec2 m_aFrom[NUM_POS];
+		vec2 m_aTo[NUM_POS];
 		int m_aParticleIds[NUM_PRTCL];
 	};
-	SSnapPortal m_Snap;
+	SSnapPortal m_Snap[NUM_PORTALS];
 
-	vec2 CirclePos(int Part);
+	vec2 CirclePos(int Portal, int Part) const;
 	void SetPortalVisual();
 
 	int m_Owner;
 
-	CPortalData m_PortalData[2];
+	CPortalData m_apData[NUM_PORTALS];
 
 	int m_State;
 	int m_Lifetime; // In ticks
 
-	bool m_CanTeleport[MAX_CLIENTS];
-	float m_PortalRadius;
+	bool m_aCanTeleport[MAX_CLIENTS];
 
 	CClientMask m_TeamMask;
 

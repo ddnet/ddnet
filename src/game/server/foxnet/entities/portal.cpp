@@ -34,18 +34,22 @@ CPortal::CPortal(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
 	m_Owner = Owner;
 	m_Pos = Pos;
 	m_State = STATE_NONE;
-	m_PortalRadius = MinPortalRad;
+
 	if(CCharacter *pChr = GameServer()->GetPlayerChar(m_Owner))
 		m_TeamMask = pChr->TeamMask();
 	else
 		m_TeamMask = CClientMask().set();
 
-	for(int i = 0; i < NUM_IDS; i++)
-		m_Snap.m_aIds[i] = Server()->SnapNewId();
-	std::sort(std::begin(m_Snap.m_aIds), std::end(m_Snap.m_aIds)); // Ensures lasers dont overlap weirdly
+	for(int p = 0; p < NUM_PORTALS; p++)
+	{
+		m_apData[p].m_PortalRadius = MinPortalRad;
 
-	for(int i = 0; i < NUM_PRTCL; i++)
-		m_Snap.m_aParticleIds[i] = Server()->SnapNewId();
+		for(int i = 0; i < NUM_IDS; i++)
+			m_Snap[p].m_aIds[i] = Server()->SnapNewId();
+		std::sort(std::begin(m_Snap[p].m_aIds), std::end(m_Snap[p].m_aIds)); // Ensures lasers dont overlap weirdly
+		for(int i = 0; i < NUM_PRTCL; i++)
+			m_Snap[p].m_aParticleIds[i] = Server()->SnapNewId();
+	}
 
 	GameWorld()->InsertEntity(this);
 }
@@ -53,10 +57,14 @@ CPortal::CPortal(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
 void CPortal::Reset()
 {
 	Server()->SnapFreeId(GetId());
-	for(int i = 0; i < NUM_IDS; i++)
-		Server()->SnapFreeId(m_Snap.m_aIds[i]);
-	for(int i = 0; i < NUM_PRTCL; i++)
-		Server()->SnapFreeId(m_Snap.m_aParticleIds[i]);
+
+	for(int p = 0; p < NUM_PORTALS; p++)
+	{
+		for(int i = 0; i < NUM_IDS; i++)
+			Server()->SnapFreeId(m_Snap[p].m_aIds[i]);
+		for(int i = 0; i < NUM_PRTCL; i++)
+			Server()->SnapFreeId(m_Snap[p].m_aParticleIds[i]);
+	}
 
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	if(pOwnerChar)
@@ -82,34 +90,41 @@ void CPortal::Tick()
 
 	if(m_Lifetime > 0 && (m_State == STATE_FIRST_SET || m_State == STATE_BOTH_SET))
 	{
-		if(m_Lifetime <= FadeOutTicks)
+		for(int p = 0; p < NUM_PORTALS; p++)
 		{
-			// Shrink phase (last FadeOutTicks)
-			float a = static_cast<float>(m_Lifetime) / static_cast<float>(FadeOutTicks);
-			m_PortalRadius = MinPortalRad + (MaxPortalRad - MinPortalRad) * a;
-			if(m_PortalRadius < MinPortalRad)
-				m_PortalRadius = MinPortalRad;
-		}
-		else
-		{
-			if(m_PortalRadius < MaxPortalRad)
+			if(!m_apData[p].m_Active)
+				continue;
+
+			if(m_Lifetime <= FadeOutTicks)
 			{
-				float growPerTick = (MaxPortalRad - MinPortalRad) / static_cast<float>(GrowTicks);
-				if(growPerTick < 0.001f)
-					growPerTick = MaxPortalRad - MinPortalRad; // safety
-				m_PortalRadius += growPerTick;
-				if(m_PortalRadius > MaxPortalRad)
-					m_PortalRadius = MaxPortalRad;
+				// Shrink phase (last FadeOutTicks)
+				float a = static_cast<float>(m_Lifetime) / static_cast<float>(FadeOutTicks);
+				m_apData[p].m_PortalRadius = MinPortalRad + (MaxPortalRad - MinPortalRad) * a;
+				if(m_apData[p].m_PortalRadius < MinPortalRad)
+					m_apData[p].m_PortalRadius = MinPortalRad;
 			}
 			else
 			{
-				m_PortalRadius = MaxPortalRad;
+				if(m_apData[p].m_PortalRadius < MaxPortalRad)
+				{
+					float growPerTick = (MaxPortalRad - MinPortalRad) / static_cast<float>(GrowTicks);
+					if(growPerTick < 0.001f)
+						growPerTick = MaxPortalRad - MinPortalRad;
+					m_apData[p].m_PortalRadius += growPerTick;
+					if(m_apData[p].m_PortalRadius > MaxPortalRad)
+						m_apData[p].m_PortalRadius = MaxPortalRad;
+				}
+				else
+				{
+					m_apData[p].m_PortalRadius = MaxPortalRad;
+				}
 			}
 		}
 	}
 	else if(m_Lifetime <= 0)
 	{
-		m_PortalRadius = MinPortalRad;
+		for(int p = 0; p < NUM_PORTALS; p++)
+			m_apData[p].m_PortalRadius = MinPortalRad;
 		RemovePortals();
 		return;
 	}
@@ -122,7 +137,7 @@ void CPortal::Tick()
 			return;
 		}
 
-		if(m_PortalData[0].m_Team != pOwnerChr->Team())
+		if(m_apData[0].m_Team != pOwnerChr->Team())
 		{
 			RemovePortals();
 			return;
@@ -130,7 +145,7 @@ void CPortal::Tick()
 	}
 	else if(m_State == STATE_BOTH_SET)
 	{
-		if(m_PortalData[0].m_Team != m_PortalData[1].m_Team)
+		if(m_apData[0].m_Team != m_apData[1].m_Team)
 		{
 			RemovePortals();
 			return;
@@ -143,7 +158,7 @@ void CPortal::Tick()
 
 void CPortal::HandleTele()
 {
-	if(!m_PortalData[0].m_Active || !m_PortalData[1].m_Active)
+	if(!m_apData[0].m_Active || !m_apData[1].m_Active)
 		return;
 
 	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
@@ -152,27 +167,27 @@ void CPortal::HandleTele()
 		if(!pChr || !pChr->IsAlive())
 			continue;
 
-		if(m_PortalData[0].m_Team != TEAM_SUPER && pChr->Team() != TEAM_SUPER && pChr->Team() != m_PortalData[0].m_Team)
+		if(m_apData[0].m_Team != TEAM_SUPER && pChr->Team() != TEAM_SUPER && pChr->Team() != m_apData[0].m_Team)
 			continue;
 
-		const bool InP0 = PointInCircle(pChr->m_Pos, m_PortalData[0].m_Pos, m_PortalRadius);
-		const bool InP1 = !InP0 && PointInCircle(pChr->m_Pos, m_PortalData[1].m_Pos, m_PortalRadius);
+		const bool InP0 = PointInCircle(pChr->m_Pos, m_apData[0].m_Pos, m_apData[0].m_PortalRadius);
+		const bool InP1 = !InP0 && PointInCircle(pChr->m_Pos, m_apData[1].m_Pos, m_apData[1].m_PortalRadius);
 
 		if(InP0 || InP1)
 		{
-			bool &Can = m_CanTeleport[ClientId];
+			bool &Can = m_aCanTeleport[ClientId];
 			if(!Can)
 				continue;
 
-			const vec2 Target = InP0 ? m_PortalData[1].m_Pos : m_PortalData[0].m_Pos;
+			const vec2 Target = InP0 ? m_apData[1].m_Pos : m_apData[0].m_Pos;
 			pChr->ForceSetPos(Target);
 			pChr->ReleaseHook();
 			Can = false;
 
-			if(distance(m_PortalData[0].m_Pos, m_PortalData[1].m_Pos) > 450.0f)
+			if(distance(m_apData[0].m_Pos, m_apData[1].m_Pos) > 550.0f)
 			{
-				GameServer()->CreateSound(m_PortalData[0].m_Pos, SOUND_WEAPON_SPAWN, pChr->TeamMask());
-				GameServer()->CreateSound(m_PortalData[1].m_Pos, SOUND_WEAPON_SPAWN, pChr->TeamMask());
+				GameServer()->CreateSound(m_apData[0].m_Pos, SOUND_WEAPON_SPAWN, pChr->TeamMask());
+				GameServer()->CreateSound(m_apData[1].m_Pos, SOUND_WEAPON_SPAWN, pChr->TeamMask());
 			}
 			else
 			{
@@ -181,26 +196,28 @@ void CPortal::HandleTele()
 		}
 		else
 		{
-			m_CanTeleport[ClientId] = true;
+			m_aCanTeleport[ClientId] = true;
 		}
 	}
 }
-inline vec2 CPortal::CirclePos(int Part)
+inline vec2 CPortal::CirclePos(int Portal, int Part) const
 {
 	vec2 Direction = direction(360.0f / CPortal::SEGMENTS * Part * (pi / 180.0f));
-	Direction *= m_PortalRadius;
-
+	Direction *= m_apData[Portal].m_PortalRadius;
 	return Direction;
 }
 
 void CPortal::SetPortalVisual()
 {
-	for(int i = 0; i < SEGMENTS + 1; i++)
+	for(int p = 0; p < NUM_PORTALS; p++)
 	{
-		m_Snap.m_To[i] = CirclePos(i);
-		m_Snap.m_From[i] = CirclePos(i + 1);
+		for(int i = 0; i < SEGMENTS + 1; i++)
+		{
+			m_Snap[p].m_aTo[i] = CirclePos(p, i);
+			m_Snap[p].m_aFrom[i] = CirclePos(p, i + 1);
+		}
+		m_Snap[p].m_aFrom[SEGMENTS] = CirclePos(p, SEGMENTS);
 	}
-	m_Snap.m_From[SEGMENTS] = CirclePos(SEGMENTS);
 }
 
 void CPortal::OnFire()
@@ -219,36 +236,38 @@ void CPortal::OnFire()
 
 bool CPortal::TrySetPortal()
 {
-	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	vec2 CursorPos = pOwnerChar->GetCursorPos();
+	CCharacter *pOwnerChr = GameServer()->GetPlayerChar(m_Owner);
+	vec2 CursorPos = pOwnerChr->GetCursorPos();
 
 	if(Collision()->TestBox(CursorPos, CCharacterCore::PhysicalSizeVec2()))
 		return false; // teleport position is inside a block
-	if(!pOwnerChar->HasLineOfSight(CursorPos))
+	if(!pOwnerChr->HasLineOfSight(CursorPos))
 		return false; // Theres blocks in the way
-	if(distance(pOwnerChar->m_Pos, CursorPos) > MaxDistanceFromPlayer)
+	if(distance(pOwnerChr->m_Pos, CursorPos) > MaxDistanceFromPlayer)
 		return false; // Too far away
 	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
 		CCharacter *pChr = GameServer()->GetPlayerChar(ClientId);
 		if(!pChr || !pChr->IsAlive())
 			continue;
-		if(PointInCircle(pChr->m_Pos, CursorPos, m_PortalRadius + CCharacterCore::PhysicalSize()))
+		if(ClientId == m_Owner)
+			continue;
+		if(PointInCircle(pChr->m_Pos, CursorPos, MaxPortalRad + CCharacterCore::PhysicalSize() - 6))
 			return false; // Don't place portal on players
 	}
 	if(m_State == STATE_NONE)
 	{
-		m_PortalData[0].m_Active = true;
-		m_PortalData[0].m_Pos = CursorPos;
-		m_PortalData[0].m_Team = pOwnerChar->Team();
+		m_apData[0].m_Active = true;
+		m_apData[0].m_Pos = CursorPos;
+		m_apData[0].m_Team = pOwnerChr->Team();
 		m_Lifetime = Lifetime;
 		m_State = STATE_FIRST_SET;
 	}
 	else if(m_State == STATE_FIRST_SET)
 	{
-		m_PortalData[1].m_Active = true;
-		m_PortalData[1].m_Pos = CursorPos;
-		m_PortalData[1].m_Team = pOwnerChar->Team();
+		m_apData[1].m_Active = true;
+		m_apData[1].m_Pos = CursorPos;
+		m_apData[1].m_Team = pOwnerChr->Team();
 		m_Lifetime = Lifetime;
 		m_State = STATE_BOTH_SET;
 	}
@@ -261,11 +280,11 @@ void CPortal::RemovePortals()
 {
 	for(int i = 0; i < NUM_PORTALS; i++)
 	{
-		if(m_PortalData[i].m_Active)
+		if(m_apData[i].m_Active)
 		{
-			GameServer()->CreateDeath(m_PortalData[i].m_Pos, m_Owner, m_TeamMask);
-			m_PortalData[i].m_Active = false;
-			m_PortalData[i].m_Pos = vec2(0, 0);
+			GameServer()->CreateDeath(m_apData[i].m_Pos, m_Owner, m_TeamMask);
+			m_apData[i].m_Active = false;
+			m_apData[i].m_Pos = vec2(0, 0);
 			m_State = STATE_NONE;
 		}
 	}
@@ -280,7 +299,7 @@ inline vec2 GetRandomPointInCircle(vec2 center, float radius)
 
 void CPortal::Snap(int SnappingClient)
 {
-	if(NetworkClipped(SnappingClient, m_PortalData[0].m_Pos) && NetworkClipped(SnappingClient, m_PortalData[1].m_Pos))
+	if(NetworkClipped(SnappingClient, m_apData[0].m_Pos) && NetworkClipped(SnappingClient, m_apData[1].m_Pos))
 		return;
 
 	if(SnappingClient != SERVER_DEMO_CLIENT)
@@ -291,11 +310,11 @@ void CPortal::Snap(int SnappingClient)
 	}
 
 	CGameTeams Teams = GameServer()->m_pController->Teams();
-	if(!Teams.SetMaskWithFlags(SnappingClient, m_PortalData[0].m_Team, CGameTeams::EXTRAFLAG_IGNORE_SOLO))
+	if(!Teams.SetMaskWithFlags(SnappingClient, m_apData[0].m_Team, CGameTeams::EXTRAFLAG_IGNORE_SOLO))
 		return;
 
 	int Team = Teams.m_Core.Team(SnappingClient);
-	if(Team != m_PortalData[0].m_Team && Team != TEAM_SUPER)
+	if(Team != m_apData[0].m_Team && Team != TEAM_SUPER)
 		Team = MAX_CLIENTS;
 
 	const int SnapVer = Server()->GetClientVersion(SnappingClient);
@@ -304,42 +323,41 @@ void CPortal::Snap(int SnappingClient)
 
 	for(int p = 0; p < NUM_PORTALS; ++p)
 	{
-		if(!m_PortalData[p].m_Active)
+		if(!m_apData[p].m_Active)
 			continue;
-		const int baseId = p ? 13 : 0;
 		for(int i = 0; i < NUM_POS; ++i)
 		{
-			vec2 To = m_Snap.m_To[i];
-			vec2 From = m_Snap.m_From[i];
+			vec2 To = m_Snap[p].m_aTo[i];
+			vec2 From = m_Snap[p].m_aFrom[i];
 
 			const float Spin = (Server()->Tick() / 30.0) + (p * pi);
 			Collision()->Rotate(vec2(0, 0), &To, Spin);
 			Collision()->Rotate(vec2(0, 0), &From, Spin);
 
-			To += m_PortalData[p].m_Pos;
-			From += m_PortalData[p].m_Pos;
+			To += m_apData[p].m_Pos;
+			From += m_apData[p].m_Pos;
 
 			GameServer()->SnapLaserObject(CSnapContext(SnapVer, SixUp, SnappingClient),
-				m_Snap.m_aIds[baseId + i], To, From, StartTick, Team);
+				m_Snap[p].m_aIds[i], To, From, StartTick, Team);
 		}
-	}
 
-	if(m_State == STATE_BOTH_SET)
-	{
-		for(size_t i = 0; i < NUM_PRTCL; i++)
+		if(m_State == STATE_BOTH_SET)
 		{
-			CNetObj_DDNetProjectile *pProj = Server()->SnapNewItem<CNetObj_DDNetProjectile>(m_Snap.m_aParticleIds[i]);
-			if(!pProj)
-				continue;
+			for(size_t i = 0; i < NUM_PRTCL; i++)
+			{
+				CNetObj_DDNetProjectile *pProj = Server()->SnapNewItem<CNetObj_DDNetProjectile>(m_Snap[p].m_aParticleIds[i]);
+				if(!pProj)
+					continue;
 
-			vec2 Pos = GetRandomPointInCircle(m_PortalData[i % 2].m_Pos, m_PortalRadius - 6.0f);
-			pProj->m_X = round_to_int(Pos.x * 100.0f);
-			pProj->m_Y = round_to_int(Pos.y * 100.0f);
-			pProj->m_StartTick = 0;
-			pProj->m_VelX = 0;
-			pProj->m_VelY = 0;
-			pProj->m_Type = WEAPON_HAMMER;
-			pProj->m_Owner = Team;
+				vec2 Pos = GetRandomPointInCircle(m_apData[i % 2].m_Pos, m_apData[p].m_PortalRadius - 6.0f);
+				pProj->m_X = round_to_int(Pos.x * 100.0f);
+				pProj->m_Y = round_to_int(Pos.y * 100.0f);
+				pProj->m_StartTick = 0;
+				pProj->m_VelX = 0;
+				pProj->m_VelY = 0;
+				pProj->m_Type = WEAPON_HAMMER;
+				pProj->m_Owner = Team;
+			}
 		}
 	}
 }
