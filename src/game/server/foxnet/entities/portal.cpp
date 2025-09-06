@@ -25,7 +25,7 @@ constexpr float MaxPortalRad = 56.0f;
 constexpr float MinPortalRad = 15.0f;
 constexpr int FadeOutTicks = SERVER_TICK_SPEED;
 constexpr int GrowTicks = SERVER_TICK_SPEED / 4;
-constexpr float MaxDistanceFromPlayer = 1200.0f;
+constexpr float MaxDistanceFromPlayer = 1500.0f;
 constexpr int Lifetime = 12.5 * SERVER_TICK_SPEED;
 
 CPortal::CPortal(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
@@ -249,6 +249,8 @@ bool CPortal::TrySetPortal()
 	{
 		CCharacter *pChr = GameServer()->GetPlayerChar(ClientId);
 		if(!pChr || !pChr->IsAlive())
+			continue;
+		if(pChr->Team() != pOwnerChr->Team())
 			continue;
 		if(ClientId == m_Owner)
 			continue;
