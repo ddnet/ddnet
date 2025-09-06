@@ -239,7 +239,7 @@ private:
 	unsigned short m_Sequence;
 	unsigned short m_Ack;
 	unsigned short m_PeerAck;
-	EState m_State;
+	EState m_State = EState::OFFLINE;
 	int m_RemoteClosed;
 	bool m_BlockCloseMsg;
 	bool m_UnknownSeq;
@@ -412,7 +412,7 @@ class CNetServer
 	NETSOCKET m_Socket;
 	CNetBan *m_pNetBan;
 	CSlot m_aSlots[NET_MAX_CLIENTS];
-	int m_MaxClients;
+	int m_MaxClients = NET_MAX_CLIENTS;
 	int m_MaxClientsPerIp;
 
 	NETFUNC_NEWCLIENT m_pfnNewClient;
