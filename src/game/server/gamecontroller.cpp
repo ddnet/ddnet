@@ -104,7 +104,7 @@ float IGameController::EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos, int DDTeam)
 	return Score;
 }
 
-void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type, int DDTeam)
+void IGameController::EvaluateSpawnType(CSpawnEval *pEval, ESpawnType SpawnType, int DDTeam)
 {
 	const bool PlayerCollision = GameServer()->m_World.m_Core.m_aTuning[0].m_PlayerCollision;
 
@@ -117,7 +117,7 @@ void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type, int DDTeam)
 	for(int j = 0; j < 2; j++)
 	{
 		// get spawn point
-		for(const vec2 &SpawnPoint : m_avSpawnPoints[Type])
+		for(const vec2 &SpawnPoint : m_avSpawnPoints[SpawnType])
 		{
 			vec2 P = SpawnPoint;
 			if(j == 0)
@@ -167,9 +167,9 @@ bool IGameController::CanSpawn(int Team, vec2 *pOutPos, int DDTeam)
 		return false;
 
 	CSpawnEval Eval;
-	EvaluateSpawnType(&Eval, 0, DDTeam);
-	EvaluateSpawnType(&Eval, 1, DDTeam);
-	EvaluateSpawnType(&Eval, 2, DDTeam);
+	EvaluateSpawnType(&Eval, SPAWNTYPE_DEFAULT, DDTeam);
+	EvaluateSpawnType(&Eval, SPAWNTYPE_RED, DDTeam);
+	EvaluateSpawnType(&Eval, SPAWNTYPE_BLUE, DDTeam);
 
 	*pOutPos = Eval.m_Pos;
 	return Eval.m_Got;
@@ -193,8 +193,8 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 
 	if(Index >= ENTITY_SPAWN && Index <= ENTITY_SPAWN_BLUE && Initial)
 	{
-		const int Type = Index - ENTITY_SPAWN;
-		m_avSpawnPoints[Type].push_back(Pos);
+		const int SpawnType = Index - ENTITY_SPAWN;
+		m_avSpawnPoints[SpawnType].push_back(Pos);
 	}
 	else if(Index == ENTITY_DOOR)
 	{
