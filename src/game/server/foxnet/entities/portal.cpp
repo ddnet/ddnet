@@ -313,10 +313,6 @@ void CPortal::Snap(int SnappingClient)
 	if(!Teams.SetMaskWithFlags(SnappingClient, m_apData[0].m_Team, CGameTeams::EXTRAFLAG_IGNORE_SOLO))
 		return;
 
-	int Team = Teams.m_Core.Team(SnappingClient);
-	if(Team != m_apData[0].m_Team && Team != TEAM_SUPER)
-		Team = MAX_CLIENTS;
-
 	const int SnapVer = Server()->GetClientVersion(SnappingClient);
 	const bool SixUp = Server()->IsSixup(SnappingClient);
 	const int StartTick = Server()->Tick() + 2;
@@ -338,7 +334,7 @@ void CPortal::Snap(int SnappingClient)
 			From += m_apData[p].m_Pos;
 
 			GameServer()->SnapLaserObject(CSnapContext(SnapVer, SixUp, SnappingClient),
-				m_Snap[p].m_aIds[i], To, From, StartTick, Team);
+				m_Snap[p].m_aIds[i], To, From, StartTick, m_Owner);
 		}
 
 		if(m_State == STATE_BOTH_SET)
@@ -356,7 +352,7 @@ void CPortal::Snap(int SnappingClient)
 				pProj->m_VelX = 0;
 				pProj->m_VelY = 0;
 				pProj->m_Type = WEAPON_HAMMER;
-				pProj->m_Owner = Team;
+				pProj->m_Owner = m_Owner;
 			}
 		}
 	}
