@@ -35,9 +35,9 @@ public:
 
 class CImageLoader
 {
+public:
 	CImageLoader() = delete;
 
-public:
 	enum
 	{
 		PNGLITE_COLOR_TYPE = 1 << 0,
