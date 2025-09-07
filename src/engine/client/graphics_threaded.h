@@ -684,11 +684,11 @@ public:
 
 	virtual const TTwGraphicsGpuList &GetGpus() const = 0;
 
-	virtual void GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen) = 0;
-	virtual void GetCurrentVideoMode(CVideoMode &CurMode, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen) = 0;
+	virtual void GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Index) = 0;
+	virtual void GetCurrentVideoMode(CVideoMode &CurMode, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Index) = 0;
 
 	virtual int GetNumScreens() const = 0;
-	virtual const char *GetScreenName(int Screen) const = 0;
+	virtual const char *GetScreenName(int Index) const = 0;
 
 	virtual void Minimize() = 0;
 	virtual void Maximize() = 0;
@@ -1206,7 +1206,7 @@ public:
 	void IndicesNumRequiredNotify(unsigned int RequiredIndicesCount) override;
 
 	int GetNumScreens() const override;
-	const char *GetScreenName(int Screen) const override;
+	const char *GetScreenName(int Index) const override;
 
 	void Minimize() override;
 	void Maximize() override;
@@ -1244,8 +1244,8 @@ public:
 	bool SetVSync(bool State) override;
 	bool SetMultiSampling(uint32_t ReqMultiSamplingCount, uint32_t &MultiSamplingCountBackend) override;
 
-	int GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen) override;
-	void GetCurrentVideoMode(CVideoMode &CurMode, int Screen) override;
+	int GetVideoModes(CVideoMode *pModes, int MaxModes, int Index) override;
+	void GetCurrentVideoMode(CVideoMode &CurMode, int Index) override;
 
 	virtual int GetDesktopScreenWidth() const { return g_Config.m_GfxDesktopWidth; }
 	virtual int GetDesktopScreenHeight() const { return g_Config.m_GfxDesktopHeight; }
