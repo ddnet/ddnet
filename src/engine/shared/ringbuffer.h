@@ -45,7 +45,7 @@ protected:
 
 	void Init(void *pMemory, int Size, int Flags);
 	int PopFirst();
-	void SetPopCallback(const std::function<void(void *pCurrent)> PopCallback);
+	void SetPopCallback(std::function<void(void *pCurrent)> PopCallback);
 
 public:
 	enum
