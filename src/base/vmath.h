@@ -144,7 +144,7 @@ inline vector2_base<float> normalize(const vector2_base<float> &v)
 	float divisor = length(v);
 	if(divisor == 0.0f)
 		return vector2_base<float>(0.0f, 0.0f);
-	float l = (float)(1.0f / divisor);
+	float l = 1.0f / divisor;
 	return vector2_base<float>(v.x * l, v.y * l);
 }
 
@@ -290,7 +290,7 @@ inline vector3_base<float> normalize(const vector3_base<float> &v)
 	float divisor = length(v);
 	if(divisor == 0.0f)
 		return vector3_base<float>(0.0f, 0.0f, 0.0f);
-	float l = (float)(1.0f / divisor);
+	float l = 1.0f / divisor;
 	return vector3_base<float>(v.x * l, v.y * l, v.z * l);
 }
 
