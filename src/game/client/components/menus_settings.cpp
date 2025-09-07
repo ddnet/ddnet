@@ -570,7 +570,13 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		vec2 OffsetToMid;
 		CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState::GetIdle(), &OwnSkinInfo, OffsetToMid);
 		const vec2 TeeRenderPos = vec2(YourSkin.x + YourSkin.w / 2.0f, YourSkin.y + YourSkin.h / 2.0f + OffsetToMid.y);
-		RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, *pEmote, vec2(1.0f, 0.0f), TeeRenderPos);
+		// tee looking towards cursor, and it is happy when you touch it
+		const vec2 DeltaPosition = Ui()->MousePos() - TeeRenderPos;
+		const float Distance = length(DeltaPosition);
+		const float InteractionDistance = 20.0f;
+		const vec2 TeeDirection = Distance < InteractionDistance ? normalize(vec2(DeltaPosition.x, maximum(DeltaPosition.y, 0.5f))) : normalize(DeltaPosition);
+		const int TeeEmote = Distance < InteractionDistance ? EMOTE_HAPPY : *pEmote;
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, TeeEmote, TeeDirection, TeeRenderPos);
 	}
 
 	// Skin loading status
