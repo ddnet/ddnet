@@ -321,79 +321,136 @@ bool CPlayer::ItemEnabled(const char *pItemName) const
 
 	return Value;
 }
+bool CPlayer::ReachedItemLimit(const char *pItem, int Set, int Value)
+{
+	if(Server()->GetAuthedState(GetCid()) >= AUTHED_MOD)
+		return false;
+
+	if(Set == 0 || Value == 0)
+		return false;
+
+	int Amount = 0;
+
+	if(m_Cosmetics.m_EpicCircle)
+		Amount++;
+	if(m_Cosmetics.m_Lovely)
+		Amount++;
+	if(m_Cosmetics.m_RotatingBall)
+		Amount++;
+	if(m_Cosmetics.m_Sparkle)
+		Amount++;
+	if(m_Cosmetics.m_HookPower > 0)
+		Amount++;
+	if(m_Cosmetics.m_Bloody || m_Cosmetics.m_StrongBloody)
+		Amount++;
+	if(m_Cosmetics.m_InverseAim)
+		Amount++;
+	if(m_Cosmetics.m_HeartHat)
+		Amount++;
+
+	if(m_Cosmetics.m_DeathEffect > 0)
+		Amount++;
+	if(m_Cosmetics.m_DamageIndType > 0)
+		Amount++;
+
+	if(m_Cosmetics.m_EmoticonGun > 0)
+		Amount++;
+	if(m_Cosmetics.m_ConfettiGun)
+		Amount++;
+	if(m_Cosmetics.m_PhaseGun)
+		Amount++;
+
+	if(m_Cosmetics.m_Trail > 0)
+		Amount++;
+	if(m_Cosmetics.m_RainbowBody || m_Cosmetics.m_RainbowFeet)
+		Amount++;
+
+	if(m_Cosmetics.m_StaffInd)
+		Amount++;
+	if(m_Cosmetics.m_PickupPet)
+		Amount++;
+
+	return Amount >= g_Config.m_SvCosmeticLimit;
+}
+
 
 bool CPlayer::ToggleItem(const char *pItemName, int Set, bool IgnoreAccount)
 {
 	if(!Acc()->m_LoggedIn && !IgnoreAccount)
 		return false;
-	char pItem[64];
-	str_copy(pItem, pItemName);
-	if(str_comp(GameServer()->m_Shop.NameToShortcut(pItem), "") != 0)
-		str_copy(pItem, GameServer()->m_Shop.NameToShortcut(pItem));
+	char Item[64];
+	str_copy(Item, pItemName);
+	if(str_comp(GameServer()->m_Shop.NameToShortcut(Item), "") != 0)
+		str_copy(Item, GameServer()->m_Shop.NameToShortcut(Item));
 
-	if(!OwnsItem(pItem) && !IgnoreAccount)
+	if(!OwnsItem(Item) && !IgnoreAccount)
 		return false;
 
-	const int pValue = GetItemToggle(pItem);
-	if(pValue == -1 && Set == -1)
+	const int Value = GetItemToggle(Item);
+	if(Value == -1 && Set == -1)
 		return false;
+	if(ReachedItemLimit(pItemName, Set, Value) && Value != 0)
+	{
+		GameServer()->SendChatTarget(m_ClientId, "You have reached the item limit! Disable another item first.");
+		return false;
+	}
 
-	if(!str_comp_nocase(pItem, ItemShortcuts[C_OTHER_SPARKLE]))
-		m_Cosmetics.m_Sparkle = pValue;
-	else if(!str_comp_nocase(pItem, ItemShortcuts[C_OTHER_HEARTHAT]))
-		SetHeartHat(pValue);
-	else if(!str_comp_nocase(pItem, ItemShortcuts[C_OTHER_INVERSEAIM]))
-		m_Cosmetics.m_InverseAim = pValue;
-	else if(!str_comp_nocase(pItem, ItemShortcuts[C_OTHER_LOVELY]))
-		SetLovely(pValue);
-	else if(!str_comp_nocase(pItem, ItemShortcuts[C_OTHER_ROTATINGBALL]))
-		SetRotatingBall(pValue);
-	else if(!str_comp_nocase(pItem, ItemShortcuts[C_OTHER_EPICCIRCLE]))
-		SetEpicCircle(pValue);
-	// else if(!str_comp_nocase(pItem, ItemShortcuts[OTHER_BLOODY]))
-	//	m_Cosmetics.m_Bloody = pValue;
+	if(!str_comp_nocase(Item, ItemShortcuts[C_OTHER_SPARKLE]))
+		SetSparkle(Value);
+	else if(!str_comp_nocase(Item, ItemShortcuts[C_OTHER_HEARTHAT]))
+		SetHeartHat(Value);
+	else if(!str_comp_nocase(Item, ItemShortcuts[C_OTHER_INVERSEAIM]))
+		SetInverseAim(Value);
+	else if(!str_comp_nocase(Item, ItemShortcuts[C_OTHER_LOVELY]))
+		SetLovely(Value);
+	else if(!str_comp_nocase(Item, ItemShortcuts[C_OTHER_ROTATINGBALL]))
+		SetRotatingBall(Value);
+	else if(!str_comp_nocase(Item, ItemShortcuts[C_OTHER_EPICCIRCLE]))
+		SetEpicCircle(Value);
+	// else if(!str_comp_nocase(Item, ItemShortcuts[OTHER_BLOODY]))
+	//	m_Cosmetics.m_Bloody = Value;
 
-	else if(!str_comp_nocase(pItem, ItemShortcuts[C_RAINBOW_FEET]))
-		m_Cosmetics.m_RainbowFeet = pValue;
-	else if(!str_comp_nocase(pItem, ItemShortcuts[C_RAINBOW_BODY]))
-		m_Cosmetics.m_RainbowBody = pValue;
-	else if(!str_comp_nocase(pItem, ItemShortcuts[C_RAINBOW_HOOK]))
-		m_Cosmetics.m_HookPower = pValue;
+	else if(!str_comp_nocase(Item, ItemShortcuts[C_RAINBOW_FEET]))
+		SetRainbowFeet(Value);
+	else if(!str_comp_nocase(Item, ItemShortcuts[C_RAINBOW_BODY]))
+		SetRainbowBody(Value);
+	else if(!str_comp_nocase(Item, ItemShortcuts[C_RAINBOW_HOOK]))
+		HookPower(Value);
 
-	else if(!str_comp_nocase(pItem, ItemShortcuts[C_GUN_EMOTICON]))
-		m_Cosmetics.m_EmoticonGun = Set; // Special
+	else if(!str_comp_nocase(Item, ItemShortcuts[C_GUN_EMOTICON]))
+		SetEmoticonGun(Set);
 
-	else if(!str_comp_nocase(pItem, ItemShortcuts[C_GUN_CONFETTI]))
-		m_Cosmetics.m_ConfettiGun = pValue;
-	else if(!str_comp_nocase(pItem, ItemShortcuts[C_GUN_LASER]))
-		m_Cosmetics.m_PhaseGun = pValue;
+	else if(!str_comp_nocase(Item, ItemShortcuts[C_GUN_CONFETTI]))
+		SetConfettiGun(Value);
+	else if(!str_comp_nocase(Item, ItemShortcuts[C_GUN_LASER]))
+		SetPhaseGun(Value);
 
-	else if(!str_comp_nocase(pItem, ItemShortcuts[C_TRAIL_STAR]))
-		SetTrail(pValue);
-	else if(!str_comp_nocase(pItem, ItemShortcuts[C_TRAIL_DOT]))
-		SetTrail(pValue);
+	else if(!str_comp_nocase(Item, ItemShortcuts[C_TRAIL_STAR]))
+		SetTrail(Value);
+	else if(!str_comp_nocase(Item, ItemShortcuts[C_TRAIL_DOT]))
+		SetTrail(Value);
 
-	else if(!str_comp_nocase(pItem, ItemShortcuts[C_INDICATOR_CLOCKWISE]))
-		m_Cosmetics.m_DamageIndType = pValue;
-	else if(!str_comp_nocase(pItem, ItemShortcuts[C_INDICATOR_COUNTERCLOCKWISE]))
-		m_Cosmetics.m_DamageIndType = pValue;
-	else if(!str_comp_nocase(pItem, ItemShortcuts[C_INDICATOR_INWARD_TURNING]))
-		m_Cosmetics.m_DamageIndType = pValue;
-	else if(!str_comp_nocase(pItem, ItemShortcuts[C_INDICATOR_OUTWARD_TURNING]))
-		m_Cosmetics.m_DamageIndType = pValue;
-	else if(!str_comp_nocase(pItem, ItemShortcuts[C_INDICATOR_LINE]))
-		m_Cosmetics.m_DamageIndType = pValue;
-	else if(!str_comp_nocase(pItem, ItemShortcuts[C_INDICATOR_CRISSCROSS]))
-		m_Cosmetics.m_DamageIndType = pValue;
+	else if(!str_comp_nocase(Item, ItemShortcuts[C_INDICATOR_CLOCKWISE]))
+		SetDamageIndType(Value);
+	else if(!str_comp_nocase(Item, ItemShortcuts[C_INDICATOR_COUNTERCLOCKWISE]))
+		SetDamageIndType(Value);
+	else if(!str_comp_nocase(Item, ItemShortcuts[C_INDICATOR_INWARD_TURNING]))
+		SetDamageIndType(Value);
+	else if(!str_comp_nocase(Item, ItemShortcuts[C_INDICATOR_OUTWARD_TURNING]))
+		SetDamageIndType(Value);
+	else if(!str_comp_nocase(Item, ItemShortcuts[C_INDICATOR_LINE]))
+		SetDamageIndType(Value);
+	else if(!str_comp_nocase(Item, ItemShortcuts[C_INDICATOR_CRISSCROSS]))
+		SetDamageIndType(Value);
 
-	else if(!str_comp_nocase(pItem, ItemShortcuts[C_DEATH_EXPLOSIVE]))
-		m_Cosmetics.m_DeathEffect = pValue;
-	else if(!str_comp_nocase(pItem, ItemShortcuts[C_DEATH_HAMMERHIT]))
-		m_Cosmetics.m_DeathEffect = pValue;
-	else if(!str_comp_nocase(pItem, ItemShortcuts[C_DEATH_INDICATOR]))
-		m_Cosmetics.m_DeathEffect = pValue;
-	else if(!str_comp_nocase(pItem, ItemShortcuts[C_DEATH_LASER]))
-		m_Cosmetics.m_DeathEffect = pValue;
+	else if(!str_comp_nocase(Item, ItemShortcuts[C_DEATH_EXPLOSIVE]))
+		SetDeathEffect(Value);
+	else if(!str_comp_nocase(Item, ItemShortcuts[C_DEATH_HAMMERHIT]))
+		SetDeathEffect(Value);
+	else if(!str_comp_nocase(Item, ItemShortcuts[C_DEATH_INDICATOR]))
+		SetDeathEffect(Value);
+	else if(!str_comp_nocase(Item, ItemShortcuts[C_DEATH_LASER]))
+		SetDeathEffect(Value);
 
 	UpdateActiveItems();
 

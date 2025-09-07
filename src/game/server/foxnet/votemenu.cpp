@@ -224,7 +224,7 @@ bool CVoteMenu::IsCustomVoteOption(const CNetMsg_Cl_CallVote *pMsg, int ClientId
 
 			if(IsOption(pVote, pItems->Name()))
 			{
-				pPl->ToggleItem(pItems->Name(), 0, Page == PAGE_ADMIN);
+				pPl->ToggleItem(pItems->Name(), -1, Page == PAGE_ADMIN);
 				return true;
 			}
 		}

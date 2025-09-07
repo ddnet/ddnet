@@ -348,6 +348,7 @@ public:
 
 	bool OwnsItem(const char *pItemName);
 	bool ToggleItem(const char *pItemName, int Set, bool IgnoreAccount = false);
+	bool ReachedItemLimit(const char *pItem, int Set, int Value);
 
 	void UpdateActiveItems();
 
