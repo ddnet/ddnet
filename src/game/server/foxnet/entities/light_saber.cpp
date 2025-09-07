@@ -143,9 +143,6 @@ void CLightSaber::Snap(int SnappingClient)
 	if(m_Length <= 0)
 		return;
 
-	CNetObj_DDNetLaser *pLaser = static_cast<CNetObj_DDNetLaser *>(Server()->SnapNewItem(NETOBJTYPE_DDNETLASER, GetId(), sizeof(CNetObj_DDNetLaser)));
-	if(!pLaser)
-		return;
 
 	vec2 From = m_To + pOwnerChar->Core()->m_Vel / 2;
 	vec2 To = m_From + pOwnerChar->Core()->m_Vel / 2;
