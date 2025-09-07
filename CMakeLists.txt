@@ -2006,6 +2006,8 @@ set_src(BASE GLOB_RECURSE src/base
   logger.h
   math.h
   rust.h
+  str.cpp
+  str.h
   system.cpp
   system.h
   tl/threading.h
