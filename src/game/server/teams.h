@@ -104,7 +104,7 @@ public:
 	void SwapTeamCharacters(CPlayer *pPrimaryPlayer, CPlayer *pTargetPlayer, int Team);
 	void CancelTeamSwap(CPlayer *pPlayer, int Team);
 	void ProcessSaveTeam();
-	int GetFirstEmptyTeam() const;
+	std::optional<int> GetFirstEmptyTeam() const;
 	bool TeeStarted(int ClientId) const;
 	bool TeeFinished(int ClientId) const;
 	ETeamState GetTeamState(int Team) const;
