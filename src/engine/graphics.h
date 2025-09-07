@@ -593,7 +593,7 @@ public:
 	virtual bool IsBackendInitialized() = 0;
 
 protected:
-	inline CTextureHandle CreateTextureHandle(int Index)
+	CTextureHandle CreateTextureHandle(int Index)
 	{
 		CTextureHandle Tex;
 		Tex.m_Id = Index;
