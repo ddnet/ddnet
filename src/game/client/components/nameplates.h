@@ -1,11 +1,12 @@
 #ifndef GAME_CLIENT_COMPONENTS_NAMEPLATES_H
 #define GAME_CLIENT_COMPONENTS_NAMEPLATES_H
+
 #include <base/color.h>
 #include <base/vmath.h>
 
-#include <engine/shared/protocol.h>
-
 #include <game/client/component.h>
+
+struct CNetObj_PlayerInfo;
 
 enum class EHookStrongWeakState
 {
@@ -56,7 +57,7 @@ public:
 	void OnWindowResize() override;
 	void OnRender() override;
 	CNamePlates();
-	~CNamePlates();
+	~CNamePlates() override;
 };
 
 #endif
