@@ -6,7 +6,7 @@
 class CMsgPacker;
 class CUnpacker;
 
-enum
+enum // NOLINT(readability-enum-initial-value)
 {
 	NETMSG_EX_INVALID = UUID_INVALID,
 	NETMSG_EX_UNKNOWN = UUID_UNKNOWN,
@@ -18,11 +18,17 @@ enum
 #include "protocol_ex_msgs.h"
 #undef UUID
 	OFFSET_TEEHISTORIAN_UUID,
+};
 
+enum
+{
 	UNPACKMESSAGE_ERROR = 0,
 	UNPACKMESSAGE_OK,
 	UNPACKMESSAGE_ANSWER,
+};
 
+enum
+{
 	SERVERCAP_CURVERSION = 5,
 	SERVERCAPFLAG_DDNET = 1 << 0,
 	SERVERCAPFLAG_CHATTIMEOUTCODE = 1 << 1,

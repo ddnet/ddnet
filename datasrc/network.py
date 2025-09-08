@@ -69,7 +69,10 @@ enum
 	FLAG_MISSING=-3,
 	FLAG_ATSTAND,
 	FLAG_TAKEN,
+};
 
+enum
+{
 	SPEC_FREEVIEW=-1,
 	SPEC_FOLLOW=-2,
 };
