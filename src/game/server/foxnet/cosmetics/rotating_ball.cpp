@@ -81,6 +81,9 @@ void CRotatingBall::Snap(int SnappingClient)
 	if(!pOwnerChar || !pSnapPlayer)
 		return;
 
+	if(pOwnerChar->IsPaused())
+		return;
+
 	if(pSnapPlayer->m_HideCosmetics)
 		return;
 

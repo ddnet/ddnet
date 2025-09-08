@@ -60,6 +60,9 @@ void CHeadItem::Snap(int SnappingClient)
 	if(!pOwnerChar)
 		return;
 
+	if(pOwnerChar->IsPaused())
+		return;
+
 	if(SnappingClient != SERVER_DEMO_CLIENT)
 	{
 		CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];

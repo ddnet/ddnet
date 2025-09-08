@@ -71,6 +71,9 @@ void CEpicCircle::Snap(int SnappingClient)
 	if(pSnapPlayer->m_HideCosmetics)
 		return;
 
+	if(pOwnerChar->IsPaused())
+		return;
+
 	CGameTeams Teams = GameServer()->m_pController->Teams();
 	int Team = pOwnerChar->Team();
 
