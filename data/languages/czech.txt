@@ -538,13 +538,13 @@ File already exists, do you want to overwrite it?
 == Soubor již existuje, chcete jej přepsat?
 
 Are you sure that you want to disconnect?
-== Jste si jisti, že se chcete odpojit?
+== Opravdu se chcete odpojit?
 
 Disconnect Dummy
 == Odpojit Dummyho
 
 Are you sure that you want to disconnect your dummy?
-== Jste si jisti, že chcete odpojit svého dummyho?
+== Opravdu chcete odpojit svého dummyho?
 
 Welcome to DDNet
 == Vítejte na DDNetu
@@ -919,7 +919,7 @@ Warning
 == Varování
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== Režim ladění povolen. Stisknutím kláves Ctrl + Shift + D deaktivujte režim ladění.
+== Režim ladění povolen. Stisknutím kláves Ctrl+Shift+D deaktivujte režim ladění.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == Pomocí klávesy k se zabijete (restartujte), pomocí q pauznete a můžete sledovat ostatní hráče. Otevřte nastavení pro další klávesové zkratky.
@@ -1310,7 +1310,7 @@ Are you sure that you want to remove the player '%s' from your friends list?
 == Opravdu chcete odstranit hráče '%s' ze seznamu přátel?
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== Jste si jisti, že chcete odstranit klan '%s' ze svého seznamu přátel?
+== Opravdu chcete odstranit klan '%s' ze svého seznamu přátel?
 
 Add Clan
 == Přidat Klan
@@ -1421,10 +1421,10 @@ Open the directory that contains the demo files
 == Otevřete adresář, který obsahuje soubory se záznamy
 
 Are you sure that you want to delete the folder '%s'?
-== Jste si jisti, že chcete smazat složku '%s'?
+== Opravdu chcete smazat složku '%s'?
 
 Are you sure that you want to delete the demo '%s'?
-== Jste si jisti, že chcete smazat záznam '%s'?
+== Opravdu chcete smazat záznam '%s'?
 
 Delete folder
 == Smazat složku
@@ -1829,7 +1829,7 @@ Show client IDs (scoreboard, chat, spectator)
 == Zobrazit ID klientů (výsledková tabulka, chat, divák)
 
 Are you sure that you want to delete '%s'?
-== Jste si jisti, že chcete smazat '%s'?
+== Opravdu chcete smazat '%s'?
 
 Delete skin
 == Odstranit skin
@@ -2217,269 +2217,269 @@ Active: Hook
 == Aktivní: Hák
 
 Press Ctrl+Shift+G to disable debug graphs.
-== 
+== Stisknutím Ctrl+Shift+G deaktivujete grafy ladění.
 
 Server could not be started
-== 
+== Server se nepodařilo spustit
 
 Could not get server list from master server
-== 
+== Nepodařilo se získat seznam serverů z hlavního serveru
 
 [Demo playback]
 Live
-== 
+== Živě
 
 [Demo playback]
 Go to Live
-== 
+== Přejít na živý přenos
 
 Save all changes before turning off the editor?
-== 
+== Uložit všechny změny před vypnutím editoru?
 
 Layout
-== 
+== Rozložení
 
 Visibility
-== 
+== Viditelnost
 
 Behavior
-== 
+== Chování
 
 Delete button
-== 
+== Smazat tlačítko
 
 Are you sure that you want to delete this button?
-== 
+== Opravdu chcete toto tlačítko smazat?
 
 Duplicate
-== 
+== Duplikát
 
 New button already created
-== 
+== Nové tlačítko již bylo vytvořeno
 
 A new button has already been created, please save or delete it before creating another one.
-== 
+== Nové tlačítko již bylo vytvořeno, před vytvořením dalšího jej prosím uložte nebo smažte.
 
 Please save your changes before duplicating a button.
-== 
+== Před duplikováním tlačítka prosím uložte změny.
 
 No space for button
-== 
+== Není místo pro tlačítko
 
 There is not enough space available to place another button.
-== 
+== Není dostatek místa pro umístění dalšího tlačítka.
 
 There is not enough space available to place another button with this size. The button has been resized.
-== 
+== Není dostatek místa pro umístění dalšího tlačítka této velikosti. Velikost tlačítka byla změněna.
 
 Deselect
-== 
+== Zrušit výběr
 
 You'll lose unsaved changes after deselecting.
-== 
+== Po zrušení výběru ztratíte neuložené změny.
 
 Width
-== 
+== Šířka
 
 Height
-== 
+== Výška
 
 Shape
-== 
+== Tvar
 
 [Touch button shape]
 Rectangle
-== 
+== Obdélník
 
 [Touch button shape]
 Circle
-== 
+== Kruh
 
 [Touch button label type]
 Plain
-== 
+== Prostý
 
 [Touch button label type]
 Localized
-== 
+== Lokalizované
 
 [Touch button label type]
 Icon
-== 
+== Ikona
 
 Behavior type
-== 
+== Typ chování
 
 [Touch button behavior]
 Bind
-== 
+== Bind
 
 [Touch button behavior]
 Bind Toggle
-== 
+== Bind přepínač
 
 [Touch button behavior]
 Predefined
-== 
+== Předdefinované
 
 Command
-== 
+== Příkaz
 
 Label
-== 
+== Štítek
 
 Label type
-== 
+== Typ štítku
 
 Add command
-== 
+== Přidat příkaz
 
 Delete command
-== 
+== Smazat příkaz
 
 [Touch button visibility preview]
 Included
-== 
+== Zahrnuto
 
 [Touch button visibility preview]
 Excluded
-== 
+== Vyloučeno
 
 [Touch button visibility preview]
 Ignore
-== 
+== Ignorovat
 
 Long press on a touch button to select it.
-== 
+== Dlouhým stisknutím dotykového tlačítka jej vyberete.
 
 New button
-== 
+== Nové tlačítko
 
 Select button by touch
-== 
+== Vyberte tlačítko dotykem
 
 No buttons match your filter criteria
-== 
+== Žádná tlačítka neodpovídají vašim kritériím filtru
 
 File
-== 
+== Soubor
 
 Buttons
-== 
+== Tlačítka
 
 Active color
-== 
+== Aktivní barva
 
 Inactive color
-== 
+== Neaktivní barva
 
 Preview button visibility while the editor is active.
-== 
+== Náhled viditelnosti tlačítka, když je editor aktivní.
 
 Show all buttons
-== 
+== Zobrazit všechna tlačítka
 
 Save all changes before switching selected button?
-== 
+== Uložit všechny změny před přepnutím vybraného tlačítka?
 
 Discard
-== 
+== Zahodit
 
 There is not enough space available for the button. Check its visibilities and size.
-== 
+== Pro tlačítko není dostatek místa. Zkontrolujte jeho viditelnost a velikost.
 
 Selected button not visible
-== 
+== Vybrané tlačítko není viditelné
 
 The selected button is not visible. Do you want to deselect it or edit its visibility?
-== 
+== Vybrané tlačítko není viditelné. Chcete jeho výběr zrušit nebo upravit jeho viditelnost?
 
 Edit
-== 
+== Upravit
 
 Width and height are required to be within the range from %d to %d.
-== 
+== Šířka a výška musí být v rozsahu od %d do %d.
 
 Button position is outside of the screen.
-== 
+== Poloha tlačítka je mimo obrazovku.
 
 The selected button is overlapping with other buttons.
-== 
+== Vybrané tlačítko se překrývá s jinými tlačítky.
 
 Wrong button settings
-== 
+== Špatné nastavení tlačítek
 
 [Touch button visibilities]
 Ingame
-== 
+== Ve hře
 
 [Touch button visibilities]
 Zoom Allowed
-== 
+== Přiblížení povoleno
 
 [Touch button visibilities]
 Vote Active
-== 
+== Hlasování aktivní
 
 [Touch button visibilities]
 Dummy Allowed
-== 
+== Dummy povolen
 
 [Touch button visibilities]
 Dummy Connected
-== 
+== Dummy připojen
 
 [Touch button visibilities]
 Rcon Authed
-== 
+== Rcon autorizován
 
 [Touch button visibilities]
 Demo Player
-== 
+== Přehrávač záznamů
 
 [Touch button visibilities]
 Extra Menu
-== 
+== Další menu
 
 [Predefined touch button behaviors]
 Ingame Menu
-== 
+== Menu ve hře
 
 [Predefined touch button behaviors]
 Extra Menu
-== 
+== Další menu
 
 [Predefined touch button behaviors]
 Emoticon
-== 
+== Emotikon
 
 [Predefined touch button behaviors]
 Spectate
-== 
+== Pozorovat
 
 [Predefined touch button behaviors]
 Swap Action
-== 
+== Zaměnit akci
 
 [Predefined touch button behaviors]
 Use Action
-== 
+== Použít akci
 
 [Predefined touch button behaviors]
 Joystick Action
-== 
+== Joystick: Akce
 
 [Predefined touch button behaviors]
 Joystick Aim
-== 
+== Joystick: Míření
 
 [Predefined touch button behaviors]
 Joystick Fire
-== 
+== Joystick: Střelba
 
 [Predefined touch button behaviors]
 Joystick Hook
-== 
+== Joystick: Hák
 
 Chat background color
-== 
+== Barva pozadí chatu
