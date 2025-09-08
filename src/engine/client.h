@@ -137,28 +137,28 @@ public:
 	};
 
 	//
-	inline EClientState State() const { return m_State; }
-	inline ELoadingStateDetail LoadingStateDetail() const { return m_LoadingStateDetail; }
-	inline int64_t StateStartTime() const { return m_StateStartTime; }
+	EClientState State() const { return m_State; }
+	ELoadingStateDetail LoadingStateDetail() const { return m_LoadingStateDetail; }
+	int64_t StateStartTime() const { return m_StateStartTime; }
 	void SetLoadingStateDetail(ELoadingStateDetail LoadingStateDetail) { m_LoadingStateDetail = LoadingStateDetail; }
 
 	void SetLoadingCallback(TLoadingCallback &&Func) { m_LoadingCallback = std::move(Func); }
 
 	// tick time access
-	inline int PrevGameTick(int Conn) const { return m_aPrevGameTick[Conn]; }
-	inline int GameTick(int Conn) const { return m_aCurGameTick[Conn]; }
-	inline int PredGameTick(int Conn) const { return m_aPredTick[Conn]; }
-	inline float IntraGameTick(int Conn) const { return m_aGameIntraTick[Conn]; }
-	inline float PredIntraGameTick(int Conn) const { return m_aPredIntraTick[Conn]; }
-	inline float IntraGameTickSincePrev(int Conn) const { return m_aGameIntraTickSincePrev[Conn]; }
-	inline float GameTickTime(int Conn) const { return m_aGameTickTime[Conn]; }
-	inline int GameTickSpeed() const { return SERVER_TICK_SPEED; }
+	int PrevGameTick(int Conn) const { return m_aPrevGameTick[Conn]; }
+	int GameTick(int Conn) const { return m_aCurGameTick[Conn]; }
+	int PredGameTick(int Conn) const { return m_aPredTick[Conn]; }
+	float IntraGameTick(int Conn) const { return m_aGameIntraTick[Conn]; }
+	float PredIntraGameTick(int Conn) const { return m_aPredIntraTick[Conn]; }
+	float IntraGameTickSincePrev(int Conn) const { return m_aGameIntraTickSincePrev[Conn]; }
+	float GameTickTime(int Conn) const { return m_aGameTickTime[Conn]; }
+	int GameTickSpeed() const { return SERVER_TICK_SPEED; }
 
 	// other time access
-	inline float RenderFrameTime() const { return m_RenderFrameTime; }
-	inline float LocalTime() const { return m_LocalTime; }
-	inline float GlobalTime() const { return m_GlobalTime; }
-	inline float FrameTimeAverage() const { return m_FrameTimeAverage; }
+	float RenderFrameTime() const { return m_RenderFrameTime; }
+	float LocalTime() const { return m_LocalTime; }
+	float GlobalTime() const { return m_GlobalTime; }
+	float FrameTimeAverage() const { return m_FrameTimeAverage; }
 
 	// actions
 	virtual void Connect(const char *pAddress, const char *pPassword = nullptr) = 0;
