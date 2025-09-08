@@ -849,7 +849,9 @@ private:
 };
 
 // make sure to inline this function
-inline class IGraphics *CLayer::Graphics() { return m_pEditor->Graphics(); }
-inline class ITextRender *CLayer::TextRender() { return m_pEditor->TextRender(); }
+inline const class IGraphics *CLayer::Graphics() const { return m_pEditor->Graphics(); }
+inline class IGraphics *CLayer::Graphics() { return const_cast<IGraphics *>(const_cast<const CLayer *>(this)->Graphics()); }
+inline const class ITextRender *CLayer::TextRender() const { return m_pEditor->TextRender(); }
+inline class ITextRender *CLayer::TextRender() { return const_cast<ITextRender *>(const_cast<const CLayer *>(this)->TextRender()); }
 
 #endif

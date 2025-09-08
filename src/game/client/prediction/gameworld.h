@@ -56,9 +56,10 @@ public:
 	CCollision *m_pCollision;
 
 	// getter for server variables
-	int GameTick() { return m_GameTick; }
-	int GameTickSpeed() { return SERVER_TICK_SPEED; }
-	CCollision *Collision() { return m_pCollision; }
+	int GameTick() const { return m_GameTick; }
+	int GameTickSpeed() const { return SERVER_TICK_SPEED; }
+	const CCollision *Collision() const { return m_pCollision; }
+	CCollision *Collision() { return const_cast<CCollision *>(const_cast<const CGameWorld *>(this)->Collision()); }
 	CTeamsCore *Teams() { return &m_Teams; }
 	std::vector<SSwitchers> &Switchers() { return m_Core.m_vSwitchers; }
 	CTuningParams *Tuning();
@@ -102,8 +103,10 @@ public:
 	void Clear();
 
 	CTuningParams *m_pTuningList;
-	CTuningParams *TuningList() { return m_pTuningList; }
-	CTuningParams *GetTuning(int i) { return &TuningList()[i]; }
+	const CTuningParams *TuningList() const { return m_pTuningList; }
+	CTuningParams *TuningList() { return const_cast<CTuningParams *>(const_cast<const CGameWorld *>(this)->TuningList()); }
+	const CTuningParams *GetTuning(int i) const { return &TuningList()[i]; }
+	CTuningParams *GetTuning(int i) { return const_cast<CTuningParams *>(const_cast<const CGameWorld *>(this)->GetTuning(i)); }
 
 	const CMapBugs *m_pMapBugs;
 	bool EmulateBug(int Bug) const;

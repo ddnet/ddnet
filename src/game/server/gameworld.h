@@ -196,8 +196,10 @@ public:
 	CTuningParams *Tuning();
 
 	CTuningParams *m_pTuningList;
-	CTuningParams *TuningList() { return m_pTuningList; }
-	CTuningParams *GetTuning(int i) { return &TuningList()[i]; }
+	const CTuningParams *TuningList() const { return m_pTuningList; }
+	CTuningParams *TuningList() { return const_cast<CTuningParams *>(const_cast<const CGameWorld *>(this)->TuningList()); }
+	const CTuningParams *GetTuning(int i) const { return &TuningList()[i]; }
+	CTuningParams *GetTuning(int i) { return const_cast<CTuningParams *>(const_cast<const CGameWorld *>(this)->GetTuning(i)); }
 };
 
 #endif
