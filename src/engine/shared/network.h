@@ -325,7 +325,7 @@ public:
 	int SecurityToken() const { return m_SecurityToken; }
 	CStaticRingBuffer<CNetChunkResend, NET_CONN_BUFFERSIZE> *ResendBuffer() { return &m_Buffer; }
 
-	void SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack, SECURITY_TOKEN SecurityToken, CStaticRingBuffer<CNetChunkResend, NET_CONN_BUFFERSIZE> *pResendBuffer, bool Sixup);
+	void ResumeConnection(const NETADDR *pAddr, int Sequence, int Ack, SECURITY_TOKEN SecurityToken, CStaticRingBuffer<CNetChunkResend, NET_CONN_BUFFERSIZE> *pResendBuffer, bool Sixup);
 
 	// anti spoof
 	void DirectInit(const NETADDR &Addr, SECURITY_TOKEN SecurityToken, SECURITY_TOKEN Token, bool Sixup);
@@ -474,9 +474,9 @@ public:
 
 	//
 	void SetMaxClientsPerIp(int Max);
-	bool CanSetTimedOut(int ClientId, int OrigId);
-	void SetTimedOut(int ClientId, int OrigId);
-	void SetTimeoutProtected(int ClientId);
+	bool HasErrored(int ClientId);
+	void ResumeOldConnection(int ClientId, int OrigId);
+	void IgnoreTimeouts(int ClientId);
 
 	void ResetErrorString(int ClientId);
 	const char *ErrorString(int ClientId);
