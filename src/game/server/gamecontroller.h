@@ -19,6 +19,7 @@ class IGameController
 {
 	friend class CSaveTeam; // need access to GameServer() and Server()
 
+protected:
 	enum ESpawnType
 	{
 		SPAWNTYPE_DEFAULT = 0,
@@ -27,6 +28,8 @@ class IGameController
 
 		NUM_SPAWNTYPES
 	};
+
+private:
 	std::vector<vec2> m_avSpawnPoints[NUM_SPAWNTYPES];
 
 	class CGameContext *m_pGameServer;
