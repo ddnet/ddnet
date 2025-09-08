@@ -3924,7 +3924,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 				}
 			}
 
-			str_format(aBuf, sizeof(aBuf), "#%d %s", g, m_Map.m_vpGroups[g]->m_aName);
+			str_format(aBuf, sizeof(aBuf), "#%d %s", g, m_Map.m_vpGroups[g]->m_aGroupName);
 
 			bool Clicked;
 			bool Abrupted;
@@ -4083,8 +4083,8 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 				}
 			}
 
-			if(m_Map.m_vpGroups[g]->m_vpLayers[i]->m_aName[0])
-				str_copy(aBuf, m_Map.m_vpGroups[g]->m_vpLayers[i]->m_aName);
+			if(m_Map.m_vpGroups[g]->m_vpLayers[i]->m_aLayerName[0])
+				str_copy(aBuf, m_Map.m_vpGroups[g]->m_vpLayers[i]->m_aLayerName);
 			else
 			{
 				if(m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Type == LAYERTYPE_TILES)
