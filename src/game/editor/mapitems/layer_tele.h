@@ -41,7 +41,7 @@ public:
 	ivec2 m_GotoTeleLastPos;
 
 	EditorTileStateChangeHistory<STeleTileStateChange> m_History;
-	inline void ClearHistory() override
+	void ClearHistory() override
 	{
 		CLayerTiles::ClearHistory();
 		m_History.clear();

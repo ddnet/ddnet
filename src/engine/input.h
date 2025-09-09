@@ -88,6 +88,7 @@ public:
 	class IJoystick
 	{
 	public:
+		virtual ~IJoystick() = default;
 		virtual int GetIndex() const = 0;
 		virtual const char *GetName() const = 0;
 		virtual int GetNumAxes() const = 0;

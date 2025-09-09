@@ -40,7 +40,7 @@ public:
 	ivec2 m_GotoTuneLastPos;
 
 	EditorTileStateChangeHistory<STuneTileStateChange> m_History;
-	inline void ClearHistory() override
+	void ClearHistory() override
 	{
 		CLayerTiles::ClearHistory();
 		m_History.clear();

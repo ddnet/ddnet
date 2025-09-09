@@ -244,6 +244,7 @@ public:
 class IFilterList
 {
 public:
+	virtual ~IFilterList() = default;
 	virtual void Add(const char *pElement) = 0;
 	virtual void Remove(const char *pElement) = 0;
 	virtual void Clear() = 0;
@@ -254,6 +255,7 @@ public:
 class ICommunityCache
 {
 public:
+	virtual ~ICommunityCache() = default;
 	virtual void Update(bool Force) = 0;
 	virtual const std::vector<const CCommunity *> &SelectedCommunities() const = 0;
 	virtual const std::vector<const CCommunityCountry *> &SelectableCountries() const = 0;
