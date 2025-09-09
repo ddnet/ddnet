@@ -374,9 +374,6 @@ public:
 			const CNetObj_DDNetCharacter *m_pPrevExtendedData;
 			bool m_HasExtendedData;
 			bool m_HasExtendedDisplayInfo;
-
-			// interpolated position
-			vec2 m_Position;
 		};
 		CCharacterInfo m_aCharacters[MAX_CLIENTS];
 	};
