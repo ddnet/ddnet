@@ -295,7 +295,7 @@ static void InitGrabbedLayer(std::shared_ptr<T> &pLayer, CLayerTiles *pThisLayer
 	}
 };
 
-int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
+int CLayerTiles::BrushGrab(const std::shared_ptr<CLayerGroup> &pBrush, CUIRect Rect)
 {
 	RECTi r;
 	Convert(Rect, &r);
@@ -503,7 +503,7 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 	return 1;
 }
 
-void CLayerTiles::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect)
+void CLayerTiles::FillSelection(bool Empty, const std::shared_ptr<CLayer> &pBrush, CUIRect Rect)
 {
 	if(m_Readonly || (!Empty && pBrush->m_Type != LAYERTYPE_TILES))
 		return;
@@ -551,7 +551,7 @@ void CLayerTiles::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIR
 	FlagModified(sx, sy, w, h);
 }
 
-void CLayerTiles::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
+void CLayerTiles::BrushDraw(const std::shared_ptr<CLayer> &pBrush, vec2 WorldPos)
 {
 	if(m_Readonly)
 		return;
