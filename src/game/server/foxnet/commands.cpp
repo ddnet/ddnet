@@ -1045,9 +1045,6 @@ void CGameContext::ConSetVanish(IConsole::IResult *pResult, void *pUserData)
 
 	pPl->m_Vanish = !pPl->m_Vanish;
 
-	if(pResult->GetInteger(1) == 1 || pSelf->Server()->QuietJoin(Victim)) // silent
-		return;
-
 	char PlayerInfo[512] = " (No Client Info)";
 	char aBuf[128];
 
@@ -1063,6 +1060,22 @@ void CGameContext::ConSetVanish(IConsole::IResult *pResult, void *pUserData)
 		str_format(aBuf, sizeof(aBuf), "'%s' has left the game", pSelf->Server()->ClientName(Victim));
 
 	pSelf->SendChat(-1, 0, aBuf, -1, CGameContext::FLAG_SIX);
+}
+
+void CGameContext::ConSetVanishQuiet(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientId;
+
+	if(pResult->GetInteger(0) == -1)
+		Victim = pResult->m_ClientId;
+
+	CPlayer *pPl = pSelf->m_apPlayers[Victim];
+
+	if(!pPl)
+		return;
+
+	pPl->m_Vanish = !pPl->m_Vanish;
 }
 
 void CGameContext::ConSetObfuscated(IConsole::IResult *pResult, void *pUserData)
@@ -1471,6 +1484,7 @@ void CGameContext::RegisterFoxNetCommands()
 	Console()->Register("ignore_gamelayer", "?v[id]", CFGFLAG_SERVER, ConIgnoreGameLayer, this, "Turns off the kill-border for (id)");
 	Console()->Register("invisible", "?v[id]", CFGFLAG_SERVER, ConInvisible, this, "Makes a players (id) Invisible");
 	Console()->Register("vanish", "?v[id]", CFGFLAG_SERVER, ConSetVanish, this, "Completely hide player (id) from everyone on the server");
+	Console()->Register("vanish_quiet", "?v[id]", CFGFLAG_SERVER, ConSetVanishQuiet, this, "Completely hide player (id) from everyone on the server without the chat join/leave message");
 	Console()->Register("obfuscate", "?v[id]", CFGFLAG_SERVER, ConSetObfuscated, this, "Makes players (id) name obfuscated");
 	Console()->Register("include_serverinfo", "v[id] ?i[include]", CFGFLAG_SERVER, ConIncludeInServerInfo, this, "whether a player should be in the serverinfo (true by default for everyone)");
 	Console()->Register("redirect", "v[id] i[port]", CFGFLAG_SERVER, ConRedirectClient, this, "Redirect player (id) to a different Server (port)");

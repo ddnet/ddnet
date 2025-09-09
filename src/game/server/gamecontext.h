@@ -797,6 +797,7 @@ private:
 
 	static void ConIgnoreGameLayer(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetVanish(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetVanishQuiet(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetObfuscated(IConsole::IResult *pResult, void *pUserData);
 	static void ConIncludeInServerInfo(IConsole::IResult *pResult, void *pUserData);
 	static void ConRedirectClient(IConsole::IResult *pResult, void *pUserData);
