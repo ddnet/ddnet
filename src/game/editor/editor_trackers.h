@@ -78,7 +78,7 @@ public:
 
 	void Begin(EEnvelopeEditorOp Operation);
 	void Stop(bool Switch = true);
-	inline void Reset() { m_TrackedOp = EEnvelopeEditorOp::OP_NONE; }
+	void Reset() { m_TrackedOp = EEnvelopeEditorOp::OP_NONE; }
 
 	CEditor *m_pEditor;
 
@@ -137,6 +137,7 @@ template<typename T, typename E>
 class CPropTracker
 {
 public:
+	virtual ~CPropTracker() = default;
 	CPropTracker(CEditor *pEditor) :
 		m_pEditor(pEditor), m_OriginalValue(0), m_pObject(nullptr), m_OriginalLayerIndex(-1), m_OriginalGroupIndex(-1), m_CurrentLayerIndex(-1), m_CurrentGroupIndex(-1), m_Tracking(false) {}
 	CEditor *m_pEditor;

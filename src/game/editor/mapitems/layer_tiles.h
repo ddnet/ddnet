@@ -197,7 +197,7 @@ public:
 	bool m_KnownTextModeLayer = false;
 
 	EditorTileStateChangeHistory<STileStateChange> m_TilesHistory;
-	inline virtual void ClearHistory() { m_TilesHistory.clear(); }
+	virtual void ClearHistory() { m_TilesHistory.clear(); }
 
 	static bool HasAutomapEffect(ETilesProp Prop);
 

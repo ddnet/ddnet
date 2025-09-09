@@ -102,7 +102,7 @@ public:
 	virtual void UnpauseAudioDevice() = 0;
 
 protected:
-	inline CVoiceHandle CreateVoiceHandle(int Index, int Age)
+	CVoiceHandle CreateVoiceHandle(int Index, int Age)
 	{
 		CVoiceHandle Voice;
 		Voice.m_Id = Index;
