@@ -4628,6 +4628,13 @@ bool CServer::NetMsgCustomClient(int ClientId, int Msg, CUnpacker Unpacker)
 		ReturnValue = true;
 	}
 	break;
+	case NETMSG_IAM_PULSE:
+	{
+		str_copy(m_aClients[ClientId].m_CustomClient, "Pulse");
+		log_info("foxnet", "ClientId=%d is using Pulse", ClientId);
+		ReturnValue = true;
+	}
+	break;
 	case NETMSG_IAM_SCLIENT:
 	{
 		str_copy(m_aClients[ClientId].m_CustomClient, "S-Client");
@@ -4635,6 +4642,7 @@ bool CServer::NetMsgCustomClient(int ClientId, int Msg, CUnpacker Unpacker)
 		ReturnValue = true;
 	}
 	break;
+
 	case NETMSG_IAM_NOFIS:
 	{
 		str_copy(m_aClients[ClientId].m_CustomClient, "Nofis");
@@ -4650,13 +4658,6 @@ bool CServer::NetMsgCustomClient(int ClientId, int Msg, CUnpacker Unpacker)
 		}
 		str_copy(m_aClients[ClientId].m_CustomClient, "JS-Client");
 		log_info("foxnet", "ClientId=%d is using JS-Client (bot)", ClientId);
-		ReturnValue = true;
-	}
-	break;
-	case NETMSG_IAM_PULSE:
-	{
-		str_copy(m_aClients[ClientId].m_CustomClient, "Pulse");
-		log_info("foxnet", "ClientId=%d is using Pulse", ClientId);
 		ReturnValue = true;
 	}
 	break;
