@@ -4487,12 +4487,13 @@ bool CServer::SetTimedOut(int ClientId, int OrigId)
 	{
 		LogoutClient(ClientId, "Timeout Protection");
 	}
-	DelClientCallback(OrigId, "Timeout Protection used", this);
 	m_aClients[ClientId].m_Authed = AUTHED_NO;
 	m_aClients[ClientId].m_Flags = m_aClients[OrigId].m_Flags;
 	m_aClients[ClientId].m_DDNetVersion = m_aClients[OrigId].m_DDNetVersion;
 	m_aClients[ClientId].m_GotDDNetVersionPacket = m_aClients[OrigId].m_GotDDNetVersionPacket;
 	m_aClients[ClientId].m_DDNetVersionSettled = m_aClients[OrigId].m_DDNetVersionSettled;
+	GameServer()->OnSetTimedOut(ClientId);
+	DelClientCallback(OrigId, "Timeout Protection used", this);
 	return true;
 }
 
