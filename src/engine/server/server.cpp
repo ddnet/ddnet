@@ -4574,7 +4574,6 @@ bool CServer::NetMsgCustomClient(int ClientId, int Msg, CUnpacker Unpacker)
 	bool ReturnValue = false;
 	if(Unpacker.Error())
 		return true;
-	const char *pCmd = Unpacker.GetString();
 
 	switch(Msg)
 	{
