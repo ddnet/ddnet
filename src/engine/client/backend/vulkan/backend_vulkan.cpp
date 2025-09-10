@@ -6849,11 +6849,10 @@ public:
 		{
 			if(IsVerbose())
 			{
-				dbg_msg("vulkan", "queueing swap chain recreation because the viewport changed");
+				dbg_msg("vulkan", "got resize event.");
 			}
 			m_CanvasWidth = (uint32_t)pCommand->m_Width;
 			m_CanvasHeight = (uint32_t)pCommand->m_Height;
-			m_RecreateSwapChain = true;
 		}
 		else
 		{
