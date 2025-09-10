@@ -159,6 +159,46 @@ enum class EStatus
 };
 ```
 
+Also do **not** use `enum` or `enum class` for flags. See the next section instead.
+`enum class` should only be used for enumerations. Constants with a typed value should use `constexpr` instead.
+
+### Bitwise flags
+
+The current code uses a lot of `enum` for that. But new code should use `static constexpr` for bitwise flags!
+
+❌ Avoid:
+
+```cpp
+enum
+{
+	CFGFLAG_SAVE = 0,
+	CFGFLAG_CLIENT = 2,
+	CFGFLAG_SERVER = 4,
+	CFGFLAG_STORE = 8,
+	CFGFLAG_MASTER = 16,
+	CFGFLAG_ECON = 32,
+};
+```
+
+✅ Instead do:
+
+```cpp
+namespace ConfigFlag {
+inline constexpr uint32_t SAVE = 1 << 0;
+inline constexpr uint32_t CLIENT = 1 << 1;
+inline constexpr uint32_t SERVER = 1 << 2;
+inline constexpr uint32_t STORE = 1 << 3;
+inline constexpr uint32_t MASTER = 1 << 4;
+inline constexpr uint32_t ECON = 1 << 5;
+} // end namespace ConfigFlag
+```
+
+### Using the C preprocessor should be avoided
+
+- Avoid `#define` for constants. Use `enum class` or `static constexpr` instead.
+  Only use `#define` if there is no other option.
+- Avoid macros
+
 ### The usage of `goto` is not encouraged
 
 Do not use the `goto` keyword in new code, there are better control flow constructs in C++.
