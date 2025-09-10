@@ -321,8 +321,9 @@ public:
 	CCharacterCore m_PredictedChar;
 
 	// snap pointers
-	struct CSnapState
+	class CSnapState
 	{
+	public:
 		const CNetObj_Character *m_pLocalCharacter;
 		const CNetObj_Character *m_pLocalPrevCharacter;
 		const CNetObj_PlayerInfo *m_pLocalInfo;
@@ -344,7 +345,6 @@ public:
 		int m_aTeamSize[2];
 		int m_HighestClientId;
 
-		// spectate data
 		class CSpectateInfo
 		{
 		public:
@@ -358,11 +358,12 @@ public:
 			int m_Deadzone;
 			int m_FollowFactor;
 			int m_SpectatorCount;
-		} m_SpecInfo;
+		};
+		CSpectateInfo m_SpecInfo;
 
-		//
-		struct CCharacterInfo
+		class CCharacterInfo
 		{
+		public:
 			bool m_Active;
 
 			// snapshots
@@ -370,14 +371,10 @@ public:
 			CNetObj_Character m_Cur;
 
 			CNetObj_DDNetCharacter m_ExtendedData;
-			const CNetObj_DDNetCharacter *m_PrevExtendedData;
+			const CNetObj_DDNetCharacter *m_pPrevExtendedData;
 			bool m_HasExtendedData;
 			bool m_HasExtendedDisplayInfo;
-
-			// interpolated position
-			vec2 m_Position;
 		};
-
 		CCharacterInfo m_aCharacters[MAX_CLIENTS];
 	};
 
