@@ -4643,6 +4643,11 @@ bool CServer::NetMsgCustomClient(int ClientId, int Msg, CUnpacker Unpacker)
 	break;
 	case NETMSG_IAM_JSCLIENT:
 	{
+		if(g_Config.m_SvAutoBanJSClient)
+		{
+			m_ServerBan.BanAddr(m_NetServer.ClientAddr(ClientId), 0, "Using JS-Client", "Using JS-Client");
+			return true;
+		}
 		str_copy(m_aClients[ClientId].m_CustomClient, "JS-Client");
 		log_info("foxnet", "ClientId=%d is using JS-Client (bot)", ClientId);
 		ReturnValue = true;
