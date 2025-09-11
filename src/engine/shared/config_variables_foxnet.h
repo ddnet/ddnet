@@ -26,7 +26,7 @@ MACRO_CONFIG_INT(SvPlaytimeMoney, sv_playtime_money, 250, 0, 5000, CFGFLAG_SERVE
 
 // Bot Detection
 MACRO_CONFIG_INT(SvAntiAdBot, sv_anti_ad_bot, 1, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Anti chat ad bot")
-MACRO_CONFIG_INT(SvAutoBanJSClient, sv_auto_ba_jsclient, 1, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "JS Client is a bot client commonly used for chat spamming")
+MACRO_CONFIG_INT(SvAutoBanJSClient, sv_auto_ban_jsclient, 1, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "JS Client is a bot client commonly used for chat spamming")
 
 MACRO_CONFIG_INT(SvReversePrediction, sv_prediction_test, 14, 1, 200, CFGFLAG_SERVER, "Reverse prediction margin")
 

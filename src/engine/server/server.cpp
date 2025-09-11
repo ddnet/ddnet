@@ -4653,7 +4653,8 @@ bool CServer::NetMsgCustomClient(int ClientId, int Msg, CUnpacker Unpacker)
 	{
 		if(g_Config.m_SvAutoBanJSClient)
 		{
-			m_ServerBan.BanAddr(m_NetServer.ClientAddr(ClientId), 0, "Using JS-Client", "Using JS-Client");
+			const int BanTime = 60 * 60 * 24; // 24 hours
+			m_ServerBan.BanAddr(m_NetServer.ClientAddr(ClientId), BanTime, "Using JS-Client", "Using JS-Client");
 			return true;
 		}
 		str_copy(m_aClients[ClientId].m_CustomClient, "JS-Client");
