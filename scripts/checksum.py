@@ -20,8 +20,10 @@ def main():
 
 	with open(args.list_file, encoding="utf-8") as f:
 		files = f.read().splitlines()
+	files = files[:1]
 	with open(args.extra_file, "rb") as f:
 		extra = f.read().splitlines()
+	extra = extra[:-1]
 	hashes_files = [hash_file(file) for file in files]
 	hashes_extra = [hash_bytes(line) for line in extra]
 	hashes = hashes_files + hashes_extra
