@@ -114,6 +114,10 @@ CheckOptions:
   - key:             readability-identifier-naming.LocalConstantCase
     value:           CamelCase
   - key:             readability-identifier-naming.ClassMemberCase
+    value:           CamelCase
+  - key:             readability-identifier-naming.ClassMemberPrefix
+    value:           ms_
+  - key:             readability-identifier-naming.ConstexprVariableCase
     value:           UPPER_CASE
   - key:             readability-identifier-naming.MemberCase
     value:           CamelCase
@@ -141,6 +145,8 @@ CheckOptions:
     value:           '^(p|a|v|[a-z]$|[xy][0123]$).*'
   - key:             readability-identifier-naming.ClassMethodIgnoredRegexp
     value:           '^(Con_).*'
+  - key:             readability-identifier-naming.ConstexprVariableIgnoredRegexp
+    value:           '^(s_1024x1024ImgSize|s_ImageBufferCacheId|s_VertexBufferCacheId|s_StagingBufferImageCacheId|s_StagingBufferCacheId|s_BenchmarkRenderThreads|ms_aStandardScreen|LayerHeight|LayerWidth|MaxAllocSize|gs_DemoPrintColor)$'
   - key:             readability-identifier-naming.ClassMemberIgnoredRegexp
     value:           '^(m_a|m_v|m_p|ms_p|ms_a|ms_v|s_1024x1024ImgSize$|s_ImageBufferCacheId$|s_VertexBufferCacheId$|s_StagingBufferImageCacheId$|REPLACEMENT_CHARACTER$|(MAX|MIN)_FONT_SIZE$|MAXIMUM_ATLAS_DIMENSION$|INITIAL_ATLAS_DIMENSION$|MAX_SECTION_DIMENSION_MAPPED$|MIN_SECTION_DIMENSION$|s_StagingBufferCacheId$).*'
   - key:             readability-identifier-naming.LocalConstantIgnoredRegexp
