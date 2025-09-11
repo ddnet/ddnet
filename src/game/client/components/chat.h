@@ -35,6 +35,7 @@ class CChat : public CComponent
 		CLine();
 		void Reset(CChat &This);
 
+		bool m_Initialized;
 		int64_t m_Time;
 		float m_aYOffset[2];
 		int m_ClientId;
