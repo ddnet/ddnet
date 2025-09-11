@@ -10,9 +10,6 @@ class CEditorActionLayerBase : public IEditorAction
 public:
 	CEditorActionLayerBase(CEditor *pEditor, int GroupIndex, int LayerIndex);
 
-	void Undo() override {}
-	void Redo() override {}
-
 protected:
 	int m_GroupIndex;
 	int m_LayerIndex;
@@ -231,9 +228,6 @@ class CEditorActionEditLayerPropBase : public CEditorActionLayerBase
 {
 public:
 	CEditorActionEditLayerPropBase(CEditor *pEditor, int GroupIndex, int LayerIndex, E Prop, int Previous, int Current);
-
-	void Undo() override {}
-	void Redo() override {}
 
 protected:
 	E m_Prop;

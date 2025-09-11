@@ -96,7 +96,7 @@ class CDynamicRingBuffer : public CTypedRingBuffer<T>
 public:
 	CDynamicRingBuffer(int Size, int Flags = 0) { Init(Size, Flags); }
 
-	virtual ~CDynamicRingBuffer()
+	~CDynamicRingBuffer()
 	{
 		free(m_pBuffer);
 	}
