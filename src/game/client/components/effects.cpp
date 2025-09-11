@@ -22,7 +22,7 @@ CEffects::CEffects()
 	m_Add100hz = false;
 }
 
-void CEffects::AirJump(vec2 Pos, float Alpha)
+void CEffects::AirJump(vec2 Pos, float Alpha, float Volume)
 {
 	CParticle p;
 	p.SetDefault();
@@ -45,7 +45,7 @@ void CEffects::AirJump(vec2 Pos, float Alpha)
 	GameClient()->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
 
 	if(g_Config.m_SndGame)
-		GameClient()->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_AIRJUMP, 1.0f, Pos);
+		GameClient()->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_AIRJUMP, Volume, Pos);
 }
 
 void CEffects::DamageIndicator(vec2 Pos, vec2 Dir, float Alpha)
@@ -143,7 +143,7 @@ void CEffects::SmokeTrail(vec2 Pos, vec2 Vel, float Alpha, float TimePassed)
 	GameClient()->m_Particles.Add(CParticles::GROUP_PROJECTILE_TRAIL, &p, TimePassed);
 }
 
-void CEffects::SkidTrail(vec2 Pos, vec2 Vel, int Direction, float Alpha)
+void CEffects::SkidTrail(vec2 Pos, vec2 Vel, int Direction, float Alpha, float Volume)
 {
 	if(m_Add100hz)
 	{
@@ -167,7 +167,7 @@ void CEffects::SkidTrail(vec2 Pos, vec2 Vel, int Direction, float Alpha)
 		if(Now - m_SkidSoundTimer > time_freq() / 10)
 		{
 			m_SkidSoundTimer = Now;
-			GameClient()->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_SKID, 1.0f, Pos);
+			GameClient()->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_SKID, Volume, Pos);
 		}
 	}
 }
@@ -190,7 +190,7 @@ void CEffects::BulletTrail(vec2 Pos, float Alpha, float TimePassed)
 	GameClient()->m_Particles.Add(CParticles::GROUP_PROJECTILE_TRAIL, &p, TimePassed);
 }
 
-void CEffects::PlayerSpawn(vec2 Pos, float Alpha)
+void CEffects::PlayerSpawn(vec2 Pos, float Alpha, float Volume)
 {
 	for(int i = 0; i < 32; i++)
 	{
@@ -211,7 +211,7 @@ void CEffects::PlayerSpawn(vec2 Pos, float Alpha)
 		GameClient()->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
 	}
 	if(g_Config.m_SndGame)
-		GameClient()->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_SPAWN, 1.0f, Pos);
+		GameClient()->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_SPAWN, Volume, Pos);
 }
 
 void CEffects::PlayerDeath(vec2 Pos, int ClientId, float Alpha)
@@ -392,7 +392,7 @@ void CEffects::Explosion(vec2 Pos, float Alpha)
 	}
 }
 
-void CEffects::HammerHit(vec2 Pos, float Alpha)
+void CEffects::HammerHit(vec2 Pos, float Alpha, float Volume)
 {
 	// add the explosion
 	CParticle p;
@@ -407,7 +407,7 @@ void CEffects::HammerHit(vec2 Pos, float Alpha)
 	p.m_StartAlpha = Alpha;
 	GameClient()->m_Particles.Add(CParticles::GROUP_EXPLOSIONS, &p);
 	if(g_Config.m_SndGame)
-		GameClient()->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_HAMMER_HIT, 1.0f, Pos);
+		GameClient()->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_HAMMER_HIT, Volume, Pos);
 }
 
 void CEffects::OnRender()
