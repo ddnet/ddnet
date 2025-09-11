@@ -393,10 +393,7 @@ private: // Map settings validation on load
 		std::vector<CEditorMapSetting> m_vSettingsValid;
 		std::map<int, std::vector<int>> m_SettingsDuplicate;
 
-		SLoadedMapSettings() :
-			m_vSettingsInvalid(), m_vSettingsValid(), m_SettingsDuplicate()
-		{
-		}
+		SLoadedMapSettings() = default;
 
 		void Reset()
 		{

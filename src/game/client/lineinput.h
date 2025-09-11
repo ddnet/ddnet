@@ -214,19 +214,14 @@ public:
 class CLineInputNumber : public CLineInputBuffered<32>
 {
 public:
-	CLineInputNumber() :
-		CLineInputBuffered()
-	{
-	}
+	CLineInputNumber() = default;
 
-	CLineInputNumber(int Number) :
-		CLineInputBuffered()
+	CLineInputNumber(int Number)
 	{
 		SetInteger(Number);
 	}
 
-	CLineInputNumber(float Number) :
-		CLineInputBuffered()
+	CLineInputNumber(float Number)
 	{
 		SetFloat(Number);
 	}

@@ -245,7 +245,7 @@ public:
 	vec2 m_CursorRenderedPosition = vec2(-1.0f, -1.0f);
 
 	// Color splits of the cursor to allow multicolored text
-	std::vector<STextColorSplit> m_vColorSplits = {};
+	std::vector<STextColorSplit> m_vColorSplits;
 
 	float Height() const;
 	STextBoundingBox BoundingBox() const;
