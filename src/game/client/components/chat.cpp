@@ -585,6 +585,8 @@ static constexpr const char *SAVES_HEADER[] = {
 	"Code",
 };
 
+// TODO: remove this in a few releases (in 2026 or later)
+//       it got deprecated by CGameClient::StoreSave
 void CChat::StoreSave(const char *pText)
 {
 	const char *pStart = str_find(pText, "Team successfully saved by ");
