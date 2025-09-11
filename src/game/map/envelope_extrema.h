@@ -15,6 +15,7 @@ public:
 	{
 	public:
 		bool m_Available;
+		bool m_Rotating;
 		ivec2 m_Minima;
 		ivec2 m_Maxima;
 	};

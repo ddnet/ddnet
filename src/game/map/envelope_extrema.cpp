@@ -6,10 +6,12 @@ CEnvelopeExtrema::CEnvelopeExtrema(IMap *pMap) :
 	m_pMap = pMap;
 
 	m_EnvelopeExtremaItemNone.m_Available = true;
+	m_EnvelopeExtremaItemNone.m_Rotating = false;
 	m_EnvelopeExtremaItemNone.m_Minima = ivec2(0, 0);
 	m_EnvelopeExtremaItemNone.m_Maxima = ivec2(0, 0);
 
 	m_EnvelopeExtremaItemInvalid.m_Available = false;
+	m_EnvelopeExtremaItemInvalid.m_Rotating = false;
 	m_EnvelopeExtremaItemInvalid.m_Minima = ivec2(0, 0);
 	m_EnvelopeExtremaItemInvalid.m_Maxima = ivec2(0, 0);
 
@@ -27,6 +29,7 @@ void CEnvelopeExtrema::CalculateEnvelope(const CMapItemEnvelope *pEnvelopeItem, 
 		EnvExt.m_Maxima[Channel] = std::numeric_limits<int>::min(); // maximum of channel
 	}
 	EnvExt.m_Available = false;
+	EnvExt.m_Rotating = false;
 
 	// check if the envelope is a position envelope
 	if(pEnvelopeItem->m_Channels != 3)
@@ -36,9 +39,9 @@ void CEnvelopeExtrema::CalculateEnvelope(const CMapItemEnvelope *pEnvelopeItem, 
 	{
 		const CEnvPoint *pEnvPoint = m_EnvelopePoints.GetPoint(PointId);
 
-		// rotation is not implemented for clipping
+		// check if quad is rotating
 		if(pEnvPoint->m_aValues[2] != 0)
-			return;
+			EnvExt.m_Rotating = true;
 
 		for(int Channel = 0; Channel < 2; ++Channel)
 		{
