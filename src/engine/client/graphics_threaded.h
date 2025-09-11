@@ -76,7 +76,7 @@ public:
 		MAX_VERTICES = 32 * 1024,
 	};
 
-	enum ECommandBufferCMD
+	enum
 	{
 		// command groups
 		CMDGROUP_CORE = 0, // commands that everyone has to implement
@@ -84,7 +84,10 @@ public:
 		CMDGROUP_PLATFORM_SDL = 20000,
 
 		CMD_FIRST = CMDGROUP_CORE,
+	};
 
+	enum ECommandBufferCMD
+	{
 		// synchronization
 		CMD_SIGNAL = CMD_FIRST,
 
@@ -143,7 +146,10 @@ public:
 	{
 		TEXFORMAT_INVALID = 0,
 		TEXFORMAT_RGBA,
+	};
 
+	enum
+	{
 		TEXFLAG_NOMIPMAPS = 1,
 		TEXFLAG_TO_3D_TEXTURE = (1 << 3),
 		TEXFLAG_TO_2D_ARRAY_TEXTURE = (1 << 4),

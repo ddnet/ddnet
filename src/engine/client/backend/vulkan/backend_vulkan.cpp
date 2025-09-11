@@ -1098,7 +1098,7 @@ private:
 		// command should be considered handled after it executed
 		bool m_CMDIsHandled = true;
 	};
-	std::array<SCommandCallback, CCommandBuffer::CMD_COUNT - CCommandBuffer::CMD_FIRST> m_aCommandCallbacks;
+	std::array<SCommandCallback, static_cast<int>(CCommandBuffer::CMD_COUNT) - static_cast<int>(CCommandBuffer::CMD_FIRST)> m_aCommandCallbacks;
 
 protected:
 	/************************
@@ -1239,7 +1239,7 @@ protected:
 
 	size_t CommandBufferCMDOff(CCommandBuffer::ECommandBufferCMD CommandBufferCMD)
 	{
-		return (size_t)CommandBufferCMD - CCommandBuffer::ECommandBufferCMD::CMD_FIRST;
+		return (size_t)CommandBufferCMD - CCommandBuffer::CMD_FIRST;
 	}
 
 	void RegisterCommands()
