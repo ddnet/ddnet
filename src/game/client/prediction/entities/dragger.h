@@ -21,7 +21,7 @@ public:
 	CDragger(CGameWorld *pGameWorld, int Id, const CLaserData *pData);
 	bool Match(CDragger *pDragger);
 	void Read(const CLaserData *pData);
-	float GetStrength() { return m_Strength; }
+	float GetStrength() const { return m_Strength; }
 
 	void Tick() override;
 };

@@ -367,7 +367,7 @@ void CCommandProcessor_SDL_GL::RunBuffer(CCommandBuffer *pBuffer)
 {
 	m_pGLBackend->StartCommands(pBuffer->m_CommandCount, pBuffer->m_RenderCallCount);
 
-	for(CCommandBuffer::SCommand *pCommand = pBuffer->Head(); pCommand; pCommand = pCommand->m_pNext)
+	for(const CCommandBuffer::SCommand *pCommand = pBuffer->Head(); pCommand; pCommand = pCommand->m_pNext)
 	{
 		auto Res = m_pGLBackend->RunCommand(pCommand);
 		if(Res == ERunCommandReturnTypes::RUN_COMMAND_COMMAND_HANDLED)

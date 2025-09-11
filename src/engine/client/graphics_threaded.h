@@ -624,10 +624,8 @@ public:
 		return true;
 	}
 
-	SCommand *Head()
-	{
-		return m_pCmdBufferHead;
-	}
+	const SCommand *Head() const { return m_pCmdBufferHead; }
+	SCommand *Head() { return const_cast<SCommand *>(const_cast<const CCommandBuffer *>(this)->Head()); }
 
 	void Reset()
 	{
@@ -873,7 +871,7 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	template<typename TName>
 	void AddCmd(
-		TName &Cmd, std::function<bool()> FailFunc = [] { return true; })
+		TName &Cmd, const std::function<bool()> &FailFunc = [] { return true; })
 	{
 		if(m_pCommandBuffer->AddCommandUnsafe(Cmd))
 			return;

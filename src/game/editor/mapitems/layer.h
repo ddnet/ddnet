@@ -16,7 +16,9 @@ class CLayer
 {
 public:
 	class CEditor *m_pEditor;
+	const class IGraphics *Graphics() const;
 	class IGraphics *Graphics();
+	const class ITextRender *TextRender() const;
 	class ITextRender *TextRender();
 
 	explicit CLayer(CEditor *pEditor)

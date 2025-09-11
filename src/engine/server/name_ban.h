@@ -36,7 +36,7 @@ class CNameBans
 
 public:
 	void InitConsole(IConsole *pConsole);
-	void Ban(const char *pName, const char *pReason, const int Distance, const bool IsSubstring);
+	void Ban(const char *pName, const char *pReason, int Distance, bool IsSubstring);
 	void Unban(const char *pName);
 	void Dump() const;
 	const CNameBan *IsBanned(const char *pName) const;

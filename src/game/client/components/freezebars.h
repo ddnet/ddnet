@@ -4,8 +4,8 @@
 
 class CFreezeBars : public CComponent
 {
-	void RenderFreezeBar(const int ClientId);
-	void RenderFreezeBarPos(float x, const float y, const float Width, const float Height, float Progress, float Alpha = 1.0f);
+	void RenderFreezeBar(int ClientId);
+	void RenderFreezeBarPos(float x, float y, float Width, float Height, float Progress, float Alpha = 1.0f);
 	bool IsPlayerInfoAvailable(int ClientId) const;
 
 public:
