@@ -123,7 +123,7 @@ static std::shared_ptr<CLayerTiles> AddLayerWithImage(CEditor *pEditor, const st
 
 	std::shared_ptr<CLayerTiles> pLayer = std::make_shared<CLayerTiles>(pEditor, Width, Height);
 	str_copy(pLayer->m_aName, pName);
-	pLayer->m_Image = pEditor->m_Map.m_vpImages.size() - 1;
+	pLayer->m_LayerTilemap.m_Image = pEditor->m_Map.m_vpImages.size() - 1;
 	pGroup->AddLayer(pLayer);
 
 	return pLayer;
@@ -131,10 +131,10 @@ static std::shared_ptr<CLayerTiles> AddLayerWithImage(CEditor *pEditor, const st
 
 static void SetTilelayerIndices(const std::shared_ptr<CLayerTiles> &pLayer, const std::array<ColorRGBA, NumTiles> &aColorGroup, const CImageInfo &Image)
 {
-	for(int x = 0; x < pLayer->m_Width; x++)
+	for(int x = 0; x < pLayer->m_LayerTilemap.m_Width; x++)
 	{
-		for(int y = 0; y < pLayer->m_Height; y++)
-			pLayer->m_pTiles[x + y * pLayer->m_Width].m_Index = GetColorIndex(aColorGroup, Image.PixelColor(x, y));
+		for(int y = 0; y < pLayer->m_LayerTilemap.m_Height; y++)
+			pLayer->m_pTiles[x + y * pLayer->m_LayerTilemap.m_Width].m_Index = GetColorIndex(aColorGroup, Image.PixelColor(x, y));
 	}
 }
 

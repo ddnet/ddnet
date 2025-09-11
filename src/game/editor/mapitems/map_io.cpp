@@ -156,15 +156,15 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 		CMapItemGroup GItem;
 		GItem.m_Version = 3;
 
-		GItem.m_ParallaxX = pGroup->m_ParallaxX;
-		GItem.m_ParallaxY = pGroup->m_ParallaxY;
-		GItem.m_OffsetX = pGroup->m_OffsetX;
-		GItem.m_OffsetY = pGroup->m_OffsetY;
-		GItem.m_UseClipping = pGroup->m_UseClipping;
-		GItem.m_ClipX = pGroup->m_ClipX;
-		GItem.m_ClipY = pGroup->m_ClipY;
-		GItem.m_ClipW = pGroup->m_ClipW;
-		GItem.m_ClipH = pGroup->m_ClipH;
+		GItem.m_ParallaxX = pGroup->m_ItemGroup.m_ParallaxX;
+		GItem.m_ParallaxY = pGroup->m_ItemGroup.m_ParallaxY;
+		GItem.m_OffsetX = pGroup->m_ItemGroup.m_OffsetX;
+		GItem.m_OffsetY = pGroup->m_ItemGroup.m_OffsetY;
+		GItem.m_UseClipping = pGroup->m_ItemGroup.m_UseClipping;
+		GItem.m_ClipX = pGroup->m_ItemGroup.m_ClipX;
+		GItem.m_ClipY = pGroup->m_ItemGroup.m_ClipY;
+		GItem.m_ClipW = pGroup->m_ItemGroup.m_ClipW;
+		GItem.m_ClipH = pGroup->m_ItemGroup.m_ClipH;
 		GItem.m_StartLayer = LayerCount;
 		GItem.m_NumLayers = 0;
 
@@ -183,15 +183,15 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 				Item.m_Version = 3;
 
 				Item.m_Layer.m_Version = 0; // was previously uninitialized, do not rely on it being 0
-				Item.m_Layer.m_Flags = pLayerTiles->m_Flags;
+				Item.m_Layer.m_Flags = pLayerTiles->CLayer::m_Flags;
 				Item.m_Layer.m_Type = pLayerTiles->m_Type;
 
-				Item.m_Color = pLayerTiles->m_Color;
-				Item.m_ColorEnv = pLayerTiles->m_ColorEnv;
-				Item.m_ColorEnvOffset = pLayerTiles->m_ColorEnvOffset;
+				Item.m_Color = pLayerTiles->m_LayerTilemap.m_Color;
+				Item.m_ColorEnv = pLayerTiles->m_LayerTilemap.m_ColorEnv;
+				Item.m_ColorEnvOffset = pLayerTiles->m_LayerTilemap.m_ColorEnvOffset;
 
-				Item.m_Width = pLayerTiles->m_Width;
-				Item.m_Height = pLayerTiles->m_Height;
+				Item.m_Width = pLayerTiles->m_LayerTilemap.m_Width;
+				Item.m_Height = pLayerTiles->m_LayerTilemap.m_Height;
 				// Item.m_Flags = pLayerTiles->m_Game ? TILESLAYERFLAG_GAME : 0;
 
 				if(pLayerTiles->m_HasTele)
@@ -207,7 +207,7 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 				else
 					Item.m_Flags = pLayerTiles->m_HasGame ? TILESLAYERFLAG_GAME : 0;
 
-				Item.m_Image = pLayerTiles->m_Image;
+				Item.m_Image = pLayerTiles->m_LayerTilemap.m_Image;
 
 				// the following values were previously uninitialized, do not rely on them being -1 when unused
 				Item.m_Tele = -1;
@@ -218,24 +218,24 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 
 				if(Item.m_Flags && !(pLayerTiles->m_HasGame))
 				{
-					CTile *pEmptyTiles = (CTile *)calloc((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height, sizeof(CTile));
-					mem_zero(pEmptyTiles, (size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile));
-					Item.m_Data = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile), pEmptyTiles);
+					CTile *pEmptyTiles = (CTile *)calloc((size_t)pLayerTiles->m_LayerTilemap.m_Width * pLayerTiles->m_LayerTilemap.m_Height, sizeof(CTile));
+					mem_zero(pEmptyTiles, (size_t)pLayerTiles->m_LayerTilemap.m_Width * pLayerTiles->m_LayerTilemap.m_Height * sizeof(CTile));
+					Item.m_Data = Writer.AddData((size_t)pLayerTiles->m_LayerTilemap.m_Width * pLayerTiles->m_LayerTilemap.m_Height * sizeof(CTile), pEmptyTiles);
 					free(pEmptyTiles);
 
 					if(pLayerTiles->m_HasTele)
-						Item.m_Tele = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTeleTile), std::static_pointer_cast<CLayerTele>(pLayerTiles)->m_pTeleTile);
+						Item.m_Tele = Writer.AddData((size_t)pLayerTiles->m_LayerTilemap.m_Width * pLayerTiles->m_LayerTilemap.m_Height * sizeof(CTeleTile), std::static_pointer_cast<CLayerTele>(pLayerTiles)->m_pTeleTile);
 					else if(pLayerTiles->m_HasSpeedup)
-						Item.m_Speedup = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CSpeedupTile), std::static_pointer_cast<CLayerSpeedup>(pLayerTiles)->m_pSpeedupTile);
+						Item.m_Speedup = Writer.AddData((size_t)pLayerTiles->m_LayerTilemap.m_Width * pLayerTiles->m_LayerTilemap.m_Height * sizeof(CSpeedupTile), std::static_pointer_cast<CLayerSpeedup>(pLayerTiles)->m_pSpeedupTile);
 					else if(pLayerTiles->m_HasFront)
-						Item.m_Front = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile), pLayerTiles->m_pTiles);
+						Item.m_Front = Writer.AddData((size_t)pLayerTiles->m_LayerTilemap.m_Width * pLayerTiles->m_LayerTilemap.m_Height * sizeof(CTile), pLayerTiles->m_pTiles);
 					else if(pLayerTiles->m_HasSwitch)
-						Item.m_Switch = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CSwitchTile), std::static_pointer_cast<CLayerSwitch>(pLayerTiles)->m_pSwitchTile);
+						Item.m_Switch = Writer.AddData((size_t)pLayerTiles->m_LayerTilemap.m_Width * pLayerTiles->m_LayerTilemap.m_Height * sizeof(CSwitchTile), std::static_pointer_cast<CLayerSwitch>(pLayerTiles)->m_pSwitchTile);
 					else if(pLayerTiles->m_HasTune)
-						Item.m_Tune = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTuneTile), std::static_pointer_cast<CLayerTune>(pLayerTiles)->m_pTuneTile);
+						Item.m_Tune = Writer.AddData((size_t)pLayerTiles->m_LayerTilemap.m_Width * pLayerTiles->m_LayerTilemap.m_Height * sizeof(CTuneTile), std::static_pointer_cast<CLayerTune>(pLayerTiles)->m_pTuneTile);
 				}
 				else
-					Item.m_Data = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile), pLayerTiles->m_pTiles);
+					Item.m_Data = Writer.AddData((size_t)pLayerTiles->m_LayerTilemap.m_Width * pLayerTiles->m_LayerTilemap.m_Height * sizeof(CTile), pLayerTiles->m_pTiles);
 
 				// save layer name
 				StrToInts(Item.m_aName, std::size(Item.m_aName), pLayerTiles->m_aName);
@@ -269,7 +269,7 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 				Item.m_Layer.m_Version = 0; // was previously uninitialized, do not rely on it being 0
 				Item.m_Layer.m_Flags = pLayerQuads->m_Flags;
 				Item.m_Layer.m_Type = pLayerQuads->m_Type;
-				Item.m_Image = pLayerQuads->m_Image;
+				Item.m_Image = pLayerQuads->m_LayerQuads.m_Image;
 
 				Item.m_NumQuads = 0;
 				Item.m_Data = -1;
@@ -302,7 +302,7 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 				Item.m_Layer.m_Version = 0; // was previously uninitialized, do not rely on it being 0
 				Item.m_Layer.m_Flags = pLayerSounds->m_Flags;
 				Item.m_Layer.m_Type = pLayerSounds->m_Type;
-				Item.m_Sound = pLayerSounds->m_Sound;
+				Item.m_Sound = pLayerSounds->m_LayerSounds.m_Sound;
 
 				Item.m_NumSources = 0;
 				if(!pLayerSounds->m_vSources.empty())
@@ -666,18 +666,18 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 				continue;
 
 			std::shared_ptr<CLayerGroup> pGroup = NewGroup();
-			pGroup->m_ParallaxX = pGItem->m_ParallaxX;
-			pGroup->m_ParallaxY = pGItem->m_ParallaxY;
-			pGroup->m_OffsetX = pGItem->m_OffsetX;
-			pGroup->m_OffsetY = pGItem->m_OffsetY;
+			pGroup->m_ItemGroup.m_ParallaxX = pGItem->m_ParallaxX;
+			pGroup->m_ItemGroup.m_ParallaxY = pGItem->m_ParallaxY;
+			pGroup->m_ItemGroup.m_OffsetX = pGItem->m_OffsetX;
+			pGroup->m_ItemGroup.m_OffsetY = pGItem->m_OffsetY;
 
 			if(pGItem->m_Version >= 2)
 			{
-				pGroup->m_UseClipping = pGItem->m_UseClipping;
-				pGroup->m_ClipX = pGItem->m_ClipX;
-				pGroup->m_ClipY = pGItem->m_ClipY;
-				pGroup->m_ClipW = pGItem->m_ClipW;
-				pGroup->m_ClipH = pGItem->m_ClipH;
+				pGroup->m_ItemGroup.m_UseClipping = pGItem->m_UseClipping;
+				pGroup->m_ItemGroup.m_ClipX = pGItem->m_ClipX;
+				pGroup->m_ItemGroup.m_ClipY = pGItem->m_ClipY;
+				pGroup->m_ItemGroup.m_ClipW = pGItem->m_ClipW;
+				pGroup->m_ItemGroup.m_ClipH = pGItem->m_ClipH;
 			}
 
 			// load group name
@@ -745,21 +745,21 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 					{
 						pTiles = std::make_shared<CLayerTiles>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
 						pTiles->m_pEditor = m_pEditor;
-						pTiles->m_Color = pTilemapItem->m_Color;
-						pTiles->m_ColorEnv = pTilemapItem->m_ColorEnv;
-						pTiles->m_ColorEnvOffset = pTilemapItem->m_ColorEnvOffset;
+						pTiles->m_LayerTilemap.m_Color = pTilemapItem->m_Color;
+						pTiles->m_LayerTilemap.m_ColorEnv = pTilemapItem->m_ColorEnv;
+						pTiles->m_LayerTilemap.m_ColorEnvOffset = pTilemapItem->m_ColorEnvOffset;
 					}
 
-					pTiles->m_Flags = pLayerItem->m_Flags;
+					pTiles->CLayer::m_Flags = pLayerItem->m_Flags;
 
 					pGroup->AddLayer(pTiles);
-					pTiles->m_Image = pTilemapItem->m_Image;
+					pTiles->m_LayerTilemap.m_Image = pTilemapItem->m_Image;
 					pTiles->m_HasGame = pTilemapItem->m_Flags & TILESLAYERFLAG_GAME;
 
 					// validate image index
-					if(pTiles->m_Image < -1 || pTiles->m_Image >= (int)m_vpImages.size())
+					if(pTiles->m_LayerTilemap.m_Image < -1 || pTiles->m_LayerTilemap.m_Image >= (int)m_vpImages.size())
 					{
-						pTiles->m_Image = -1;
+						pTiles->m_LayerTilemap.m_Image = -1;
 					}
 
 					// load layer name
@@ -770,12 +770,12 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 					{
 						void *pTeleData = DataFile.GetData(pTilemapItem->m_Tele);
 						unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Tele);
-						if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTeleTile))
+						if(Size >= (size_t)pTiles->m_LayerTilemap.m_Width * pTiles->m_LayerTilemap.m_Height * sizeof(CTeleTile))
 						{
 							CTeleTile *pLayerTeleTiles = std::static_pointer_cast<CLayerTele>(pTiles)->m_pTeleTile;
-							mem_copy(pLayerTeleTiles, pTeleData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTeleTile));
+							mem_copy(pLayerTeleTiles, pTeleData, (size_t)pTiles->m_LayerTilemap.m_Width * pTiles->m_LayerTilemap.m_Height * sizeof(CTeleTile));
 
-							for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
+							for(int i = 0; i < pTiles->m_LayerTilemap.m_Width * pTiles->m_LayerTilemap.m_Height; i++)
 							{
 								if(IsValidTeleTile(pLayerTeleTiles[i].m_Type))
 									pTiles->m_pTiles[i].m_Index = pLayerTeleTiles[i].m_Type;
@@ -790,12 +790,12 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 						void *pSpeedupData = DataFile.GetData(pTilemapItem->m_Speedup);
 						unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Speedup);
 
-						if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CSpeedupTile))
+						if(Size >= (size_t)pTiles->m_LayerTilemap.m_Width * pTiles->m_LayerTilemap.m_Height * sizeof(CSpeedupTile))
 						{
 							CSpeedupTile *pLayerSpeedupTiles = std::static_pointer_cast<CLayerSpeedup>(pTiles)->m_pSpeedupTile;
-							mem_copy(pLayerSpeedupTiles, pSpeedupData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CSpeedupTile));
+							mem_copy(pLayerSpeedupTiles, pSpeedupData, (size_t)pTiles->m_LayerTilemap.m_Width * pTiles->m_LayerTilemap.m_Height * sizeof(CSpeedupTile));
 
-							for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
+							for(int i = 0; i < pTiles->m_LayerTilemap.m_Width * pTiles->m_LayerTilemap.m_Height; i++)
 							{
 								if(IsValidSpeedupTile(pLayerSpeedupTiles[i].m_Type) && pLayerSpeedupTiles[i].m_Force > 0)
 									pTiles->m_pTiles[i].m_Index = pLayerSpeedupTiles[i].m_Type;
@@ -817,12 +817,12 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 					{
 						void *pSwitchData = DataFile.GetData(pTilemapItem->m_Switch);
 						unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Switch);
-						if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CSwitchTile))
+						if(Size >= (size_t)pTiles->m_LayerTilemap.m_Width * pTiles->m_LayerTilemap.m_Height * sizeof(CSwitchTile))
 						{
 							CSwitchTile *pLayerSwitchTiles = std::static_pointer_cast<CLayerSwitch>(pTiles)->m_pSwitchTile;
-							mem_copy(pLayerSwitchTiles, pSwitchData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CSwitchTile));
+							mem_copy(pLayerSwitchTiles, pSwitchData, (size_t)pTiles->m_LayerTilemap.m_Width * pTiles->m_LayerTilemap.m_Height * sizeof(CSwitchTile));
 
-							for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
+							for(int i = 0; i < pTiles->m_LayerTilemap.m_Width * pTiles->m_LayerTilemap.m_Height; i++)
 							{
 								if(((pLayerSwitchTiles[i].m_Type > (ENTITY_CRAZY_SHOTGUN + ENTITY_OFFSET) && pLayerSwitchTiles[i].m_Type < (ENTITY_DRAGGER_WEAK + ENTITY_OFFSET)) || pLayerSwitchTiles[i].m_Type == (ENTITY_LASER_O_FAST + 1 + ENTITY_OFFSET)))
 									continue;
@@ -846,12 +846,12 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 					{
 						void *pTuneData = DataFile.GetData(pTilemapItem->m_Tune);
 						unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Tune);
-						if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTuneTile))
+						if(Size >= (size_t)pTiles->m_LayerTilemap.m_Width * pTiles->m_LayerTilemap.m_Height * sizeof(CTuneTile))
 						{
 							CTuneTile *pLayerTuneTiles = std::static_pointer_cast<CLayerTune>(pTiles)->m_pTuneTile;
-							mem_copy(pLayerTuneTiles, pTuneData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTuneTile));
+							mem_copy(pLayerTuneTiles, pTuneData, (size_t)pTiles->m_LayerTilemap.m_Width * pTiles->m_LayerTilemap.m_Height * sizeof(CTuneTile));
 
-							for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
+							for(int i = 0; i < pTiles->m_LayerTilemap.m_Width * pTiles->m_LayerTilemap.m_Height; i++)
 							{
 								if(IsValidTuneTile(pLayerTuneTiles[i].m_Type))
 									pTiles->m_pTiles[i].m_Index = pLayerTuneTiles[i].m_Type;
@@ -875,12 +875,12 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 
 					std::shared_ptr<CLayerQuads> pQuads = std::make_shared<CLayerQuads>(m_pEditor);
 					pQuads->m_Flags = pLayerItem->m_Flags;
-					pQuads->m_Image = pQuadsItem->m_Image;
+					pQuads->m_LayerQuads.m_Image = pQuadsItem->m_Image;
 
 					// validate image index
-					if(pQuads->m_Image < -1 || pQuads->m_Image >= (int)m_vpImages.size())
+					if(pQuads->m_LayerQuads.m_Image < -1 || pQuads->m_LayerQuads.m_Image >= (int)m_vpImages.size())
 					{
-						pQuads->m_Image = -1;
+						pQuads->m_LayerQuads.m_Image = -1;
 					}
 
 					// load layer name
@@ -905,12 +905,12 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 
 					std::shared_ptr<CLayerSounds> pSounds = std::make_shared<CLayerSounds>(m_pEditor);
 					pSounds->m_Flags = pLayerItem->m_Flags;
-					pSounds->m_Sound = pSoundsItem->m_Sound;
+					pSounds->m_LayerSounds.m_Sound = pSoundsItem->m_Sound;
 
 					// validate sound index
-					if(pSounds->m_Sound < -1 || pSounds->m_Sound >= (int)m_vpSounds.size())
+					if(pSounds->m_LayerSounds.m_Sound < -1 || pSounds->m_LayerSounds.m_Sound >= (int)m_vpSounds.size())
 					{
-						pSounds->m_Sound = -1;
+						pSounds->m_LayerSounds.m_Sound = -1;
 					}
 
 					// load layer name
@@ -936,12 +936,12 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 
 					std::shared_ptr<CLayerSounds> pSounds = std::make_shared<CLayerSounds>(m_pEditor);
 					pSounds->m_Flags = pLayerItem->m_Flags;
-					pSounds->m_Sound = pSoundsItem->m_Sound;
+					pSounds->m_LayerSounds.m_Sound = pSoundsItem->m_Sound;
 
 					// validate sound index
-					if(pSounds->m_Sound < -1 || pSounds->m_Sound >= (int)m_vpSounds.size())
+					if(pSounds->m_LayerSounds.m_Sound < -1 || pSounds->m_LayerSounds.m_Sound >= (int)m_vpSounds.size())
 					{
-						pSounds->m_Sound = -1;
+						pSounds->m_LayerSounds.m_Sound = -1;
 					}
 
 					// load layer name
@@ -1076,9 +1076,9 @@ void CEditorMap::PerformSanityChecks(const std::function<void(const char *pError
 					if(pLayer->m_Type == LAYERTYPE_TILES)
 					{
 						std::shared_ptr<CLayerTiles> pLayerTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
-						if(pLayerTiles->m_Image >= 0 && (size_t)pLayerTiles->m_Image == ImageIndex)
+						if(pLayerTiles->m_LayerTilemap.m_Image >= 0 && (size_t)pLayerTiles->m_LayerTilemap.m_Image == ImageIndex)
 						{
-							pLayerTiles->m_Image = -1;
+							pLayerTiles->m_LayerTilemap.m_Image = -1;
 							char aBuf[IO_MAX_PATH_LENGTH + 128];
 							str_format(aBuf, sizeof(aBuf), "Error: The image '%s' (size %" PRIzu "x%" PRIzu ") has a width or height that is not divisible by 16 and therefore cannot be used for tile layers. The image of layer #%" PRIzu " '%s' in group #%" PRIzu " '%s' has been unset.", pImage->m_aName, pImage->m_Width, pImage->m_Height, LayerIndex, pLayer->m_aName, GroupIndex, pGroup->m_aName);
 							ErrorHandler(aBuf);

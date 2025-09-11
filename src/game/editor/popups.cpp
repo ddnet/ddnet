@@ -496,17 +496,17 @@ CUi::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 
 			// search for unneeded game tiles
 			std::shared_ptr<CLayerTiles> pGameLayer = pEditor->m_Map.m_pGameLayer;
-			for(int y = 0; y < pGameLayer->m_Height; ++y)
+			for(int y = 0; y < pGameLayer->m_LayerTilemap.m_Height; ++y)
 			{
-				for(int x = 0; x < pGameLayer->m_Width; ++x)
+				for(int x = 0; x < pGameLayer->m_LayerTilemap.m_Width; ++x)
 				{
-					if(pGameLayer->m_pTiles[y * pGameLayer->m_Width + x].m_Index > static_cast<unsigned char>(TILE_NOHOOK))
+					if(pGameLayer->m_pTiles[y * pGameLayer->m_LayerTilemap.m_Width + x].m_Index > static_cast<unsigned char>(TILE_NOHOOK))
 						continue;
 
 					bool Found = false;
 					for(const auto &pLayer : vpLayers)
 					{
-						if(x < pLayer->m_Width && y < pLayer->m_Height && pLayer->m_pTiles[y * pLayer->m_Width + x].m_Index)
+						if(x < pLayer->m_LayerTilemap.m_Width && y < pLayer->m_LayerTilemap.m_Height && pLayer->m_pTiles[y * pLayer->m_LayerTilemap.m_Width + x].m_Index)
 						{
 							Found = true;
 							break;
@@ -643,15 +643,15 @@ CUi::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 
 	CProperty aProps[] = {
 		{"Order", pEditor->m_SelectedGroup, PROPTYPE_INT, 0, (int)pEditor->m_Map.m_vpGroups.size() - 1},
-		{"Pos X", -pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_OffsetX, PROPTYPE_INT, -1000000, 1000000},
-		{"Pos Y", -pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_OffsetY, PROPTYPE_INT, -1000000, 1000000},
-		{"Para X", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxX, PROPTYPE_INT, -1000000, 1000000},
-		{"Para Y", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxY, PROPTYPE_INT, -1000000, 1000000},
-		{"Use Clipping", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_UseClipping, PROPTYPE_BOOL, 0, 1},
-		{"Clip X", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipX, PROPTYPE_INT, -1000000, 1000000},
-		{"Clip Y", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipY, PROPTYPE_INT, -1000000, 1000000},
-		{"Clip W", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipW, PROPTYPE_INT, 0, 1000000},
-		{"Clip H", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipH, PROPTYPE_INT, 0, 1000000},
+		{"Pos X", -pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ItemGroup.m_OffsetX, PROPTYPE_INT, -1000000, 1000000},
+		{"Pos Y", -pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ItemGroup.m_OffsetY, PROPTYPE_INT, -1000000, 1000000},
+		{"Para X", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ItemGroup.m_ParallaxX, PROPTYPE_INT, -1000000, 1000000},
+		{"Para Y", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ItemGroup.m_ParallaxY, PROPTYPE_INT, -1000000, 1000000},
+		{"Use Clipping", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ItemGroup.m_UseClipping, PROPTYPE_BOOL, 0, 1},
+		{"Clip X", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ItemGroup.m_ClipX, PROPTYPE_INT, -1000000, 1000000},
+		{"Clip Y", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ItemGroup.m_ClipY, PROPTYPE_INT, -1000000, 1000000},
+		{"Clip W", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ItemGroup.m_ClipW, PROPTYPE_INT, 0, 1000000},
+		{"Clip H", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ItemGroup.m_ClipH, PROPTYPE_INT, 0, 1000000},
 		{nullptr},
 	};
 
@@ -680,39 +680,39 @@ CUi::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 	{
 		if(Prop == EGroupProp::PROP_PARA_X)
 		{
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxX = NewVal;
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ItemGroup.m_ParallaxX = NewVal;
 		}
 		else if(Prop == EGroupProp::PROP_PARA_Y)
 		{
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxY = NewVal;
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ItemGroup.m_ParallaxY = NewVal;
 		}
 		else if(Prop == EGroupProp::PROP_POS_X)
 		{
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_OffsetX = -NewVal;
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ItemGroup.m_OffsetX = -NewVal;
 		}
 		else if(Prop == EGroupProp::PROP_POS_Y)
 		{
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_OffsetY = -NewVal;
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ItemGroup.m_OffsetY = -NewVal;
 		}
 		else if(Prop == EGroupProp::PROP_USE_CLIPPING)
 		{
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_UseClipping = NewVal;
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ItemGroup.m_UseClipping = NewVal;
 		}
 		else if(Prop == EGroupProp::PROP_CLIP_X)
 		{
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipX = NewVal;
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ItemGroup.m_ClipX = NewVal;
 		}
 		else if(Prop == EGroupProp::PROP_CLIP_Y)
 		{
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipY = NewVal;
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ItemGroup.m_ClipY = NewVal;
 		}
 		else if(Prop == EGroupProp::PROP_CLIP_W)
 		{
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipW = NewVal;
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ItemGroup.m_ClipW = NewVal;
 		}
 		else if(Prop == EGroupProp::PROP_CLIP_H)
 		{
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipH = NewVal;
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ItemGroup.m_ClipH = NewVal;
 		}
 	}
 
@@ -864,7 +864,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 	// aspect ratio button
 	View.HSplitBottom(10.0f, &View, nullptr);
 	View.HSplitBottom(12.0f, &View, &Button);
-	if(pLayer && pLayer->m_Image >= 0 && (size_t)pLayer->m_Image < pEditor->m_Map.m_vpImages.size())
+	if(pLayer && pLayer->m_LayerQuads.m_Image >= 0 && (size_t)pLayer->m_LayerQuads.m_Image < pEditor->m_Map.m_vpImages.size())
 	{
 		static int s_AspectRatioButton = 0;
 		if(pEditor->DoButton_Editor(&s_AspectRatioButton, "Aspect ratio", 0, &Button, BUTTONFLAG_LEFT, "Resize the current quad based on the aspect ratio of its image."))
@@ -886,7 +886,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 						Right = pQuad->m_aPoints[k].x;
 				}
 
-				const int Height = (Right - Left) * pEditor->m_Map.m_vpImages[pLayer->m_Image]->m_Height / pEditor->m_Map.m_vpImages[pLayer->m_Image]->m_Width;
+				const int Height = (Right - Left) * pEditor->m_Map.m_vpImages[pLayer->m_LayerQuads.m_Image]->m_Height / pEditor->m_Map.m_vpImages[pLayer->m_LayerQuads.m_Image]->m_Width;
 
 				pQuad->m_aPoints[0].x = Left;
 				pQuad->m_aPoints[0].y = Top;
@@ -2398,7 +2398,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSelectConfigAutoMap(void *pContext, 
 {
 	CEditor *pEditor = static_cast<CEditor *>(pContext);
 	std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(pEditor->GetSelectedLayer(0));
-	CAutoMapper *pAutoMapper = &pEditor->m_Map.m_vpImages[pLayer->m_Image]->m_AutoMapper;
+	CAutoMapper *pAutoMapper = &pEditor->m_Map.m_vpImages[pLayer->m_LayerTilemap.m_Image]->m_AutoMapper;
 
 	const float ButtonHeight = 12.0f;
 	const float ButtonMargin = 2.0f;
@@ -2437,7 +2437,7 @@ void CEditor::PopupSelectConfigAutoMapInvoke(int Current, float x, float y)
 	s_AutoMapConfigSelected = -100;
 	s_AutoMapConfigCurrent = Current;
 	std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(GetSelectedLayer(0));
-	const int ItemCount = minimum(m_Map.m_vpImages[pLayer->m_Image]->m_AutoMapper.ConfigNamesNum() + 1, 10); // +1 for None-entry
+	const int ItemCount = minimum(m_Map.m_vpImages[pLayer->m_LayerTilemap.m_Image]->m_AutoMapper.ConfigNamesNum() + 1, 10); // +1 for None-entry
 	// Width for buttons is 120, 15 is the scrollbar width, 2 is the margin between both.
 	Ui()->DoPopupMenu(&s_PopupSelectConfigAutoMapId, x, y, 120.0f + 15.0f + 2.0f, 10.0f + 12.0f * ItemCount + 2.0f * (ItemCount - 1) + CScrollRegion::HEIGHT_MAGIC_FIX, this, PopupSelectConfigAutoMap);
 }

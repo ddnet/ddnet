@@ -21,8 +21,8 @@ CLayerTune::CLayerTune(const CLayerTune &Other) :
 	str_copy(m_aName, "Tune copy");
 	m_HasTune = true;
 
-	m_pTuneTile = new CTuneTile[m_Width * m_Height];
-	mem_copy(m_pTuneTile, Other.m_pTuneTile, (size_t)m_Width * m_Height * sizeof(CTuneTile));
+	m_pTuneTile = new CTuneTile[m_LayerTilemap.m_Width * m_LayerTilemap.m_Height];
+	mem_copy(m_pTuneTile, Other.m_pTuneTile, (size_t)m_LayerTilemap.m_Width * m_LayerTilemap.m_Height * sizeof(CTuneTile));
 }
 
 CLayerTune::~CLayerTune()
@@ -37,8 +37,8 @@ void CLayerTune::Resize(int NewW, int NewH)
 	mem_zero(pNewTuneData, (size_t)NewW * NewH * sizeof(CTuneTile));
 
 	// copy old data
-	for(int y = 0; y < minimum(NewH, m_Height); y++)
-		mem_copy(&pNewTuneData[y * NewW], &m_pTuneTile[y * m_Width], minimum(m_Width, NewW) * sizeof(CTuneTile));
+	for(int y = 0; y < minimum(NewH, m_LayerTilemap.m_Height); y++)
+		mem_copy(&pNewTuneData[y * NewW], &m_pTuneTile[y * m_LayerTilemap.m_Width], minimum(m_LayerTilemap.m_Width, NewW) * sizeof(CTuneTile));
 
 	// replace old
 	delete[] m_pTuneTile;
@@ -48,7 +48,7 @@ void CLayerTune::Resize(int NewW, int NewH)
 	CLayerTiles::Resize(NewW, NewH);
 
 	// resize gamelayer too
-	if(m_pEditor->m_Map.m_pGameLayer->m_Width != NewW || m_pEditor->m_Map.m_pGameLayer->m_Height != NewH)
+	if(m_pEditor->m_Map.m_pGameLayer->m_LayerTilemap.m_Width != NewW || m_pEditor->m_Map.m_pGameLayer->m_LayerTilemap.m_Height != NewH)
 		m_pEditor->m_Map.m_pGameLayer->Resize(NewW, NewH);
 }
 
@@ -60,9 +60,9 @@ void CLayerTune::Shift(EShiftDirection Direction)
 
 bool CLayerTune::IsEmpty() const
 {
-	for(int y = 0; y < m_Height; y++)
+	for(int y = 0; y < m_LayerTilemap.m_Height; y++)
 	{
-		for(int x = 0; x < m_Width; x++)
+		for(int x = 0; x < m_LayerTilemap.m_Width; x++)
 		{
 			const int Index = GetTile(x, y).m_Index;
 			if(Index == 0)
@@ -93,20 +93,20 @@ void CLayerTune::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 
 	bool Destructive = m_pEditor->m_BrushDrawDestructive || pTuneLayer->IsEmpty();
 
-	for(int y = 0; y < pTuneLayer->m_Height; y++)
-		for(int x = 0; x < pTuneLayer->m_Width; x++)
+	for(int y = 0; y < pTuneLayer->m_LayerTilemap.m_Height; y++)
+		for(int x = 0; x < pTuneLayer->m_LayerTilemap.m_Width; x++)
 		{
 			int fx = x + sx;
 			int fy = y + sy;
 
-			if(fx < 0 || fx >= m_Width || fy < 0 || fy >= m_Height)
+			if(fx < 0 || fx >= m_LayerTilemap.m_Width || fy < 0 || fy >= m_LayerTilemap.m_Height)
 				continue;
 
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			const int SrcIndex = y * pTuneLayer->m_Width + x;
-			const int TgtIndex = fy * m_Width + fx;
+			const int SrcIndex = y * pTuneLayer->m_LayerTilemap.m_Width + x;
+			const int TgtIndex = fy * m_LayerTilemap.m_Width + fx;
 
 			STuneTileStateChange::SData Previous{
 				m_pTuneTile[TgtIndex].m_Number,
@@ -154,7 +154,7 @@ void CLayerTune::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 
 			RecordStateChange(fx, fy, Previous, Current);
 		}
-	FlagModified(sx, sy, pTuneLayer->m_Width, pTuneLayer->m_Height);
+	FlagModified(sx, sy, pTuneLayer->m_LayerTilemap.m_Width, pTuneLayer->m_LayerTilemap.m_Height);
 }
 
 void CLayerTune::RecordStateChange(int x, int y, STuneTileStateChange::SData Previous, STuneTileStateChange::SData Current)
@@ -186,20 +186,20 @@ void CLayerTune::BrushRotate(float Amount)
 	if(Rotation == 1 || Rotation == 3)
 	{
 		// 90° rotation
-		CTuneTile *pTempData1 = new CTuneTile[m_Width * m_Height];
-		CTile *pTempData2 = new CTile[m_Width * m_Height];
-		mem_copy(pTempData1, m_pTuneTile, (size_t)m_Width * m_Height * sizeof(CTuneTile));
-		mem_copy(pTempData2, m_pTiles, (size_t)m_Width * m_Height * sizeof(CTile));
+		CTuneTile *pTempData1 = new CTuneTile[m_LayerTilemap.m_Width * m_LayerTilemap.m_Height];
+		CTile *pTempData2 = new CTile[m_LayerTilemap.m_Width * m_LayerTilemap.m_Height];
+		mem_copy(pTempData1, m_pTuneTile, (size_t)m_LayerTilemap.m_Width * m_LayerTilemap.m_Height * sizeof(CTuneTile));
+		mem_copy(pTempData2, m_pTiles, (size_t)m_LayerTilemap.m_Width * m_LayerTilemap.m_Height * sizeof(CTile));
 		CTuneTile *pDst1 = m_pTuneTile;
 		CTile *pDst2 = m_pTiles;
-		for(int x = 0; x < m_Width; ++x)
-			for(int y = m_Height - 1; y >= 0; --y, ++pDst1, ++pDst2)
+		for(int x = 0; x < m_LayerTilemap.m_Width; ++x)
+			for(int y = m_LayerTilemap.m_Height - 1; y >= 0; --y, ++pDst1, ++pDst2)
 			{
-				*pDst1 = pTempData1[y * m_Width + x];
-				*pDst2 = pTempData2[y * m_Width + x];
+				*pDst1 = pTempData1[y * m_LayerTilemap.m_Width + x];
+				*pDst2 = pTempData2[y * m_LayerTilemap.m_Width + x];
 			}
 
-		std::swap(m_Width, m_Height);
+		std::swap(m_LayerTilemap.m_Width, m_LayerTilemap.m_Height);
 		delete[] pTempData1;
 		delete[] pTempData2;
 	}
@@ -234,14 +234,14 @@ void CLayerTune::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRe
 			int fx = x + sx;
 			int fy = y + sy;
 
-			if(fx < 0 || fx >= m_Width || fy < 0 || fy >= m_Height)
+			if(fx < 0 || fx >= m_LayerTilemap.m_Width || fy < 0 || fy >= m_LayerTilemap.m_Height)
 				continue;
 
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			const int SrcIndex = Empty ? 0 : (y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height);
-			const int TgtIndex = fy * m_Width + fx;
+			const int SrcIndex = Empty ? 0 : (y * pLt->m_LayerTilemap.m_Width + x % pLt->m_LayerTilemap.m_Width) % (pLt->m_LayerTilemap.m_Width * pLt->m_LayerTilemap.m_Height);
+			const int TgtIndex = fy * m_LayerTilemap.m_Width + fx;
 
 			STuneTileStateChange::SData Previous{
 				m_pTuneTile[TgtIndex].m_Number,
@@ -262,7 +262,7 @@ void CLayerTune::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRe
 				m_pTiles[TgtIndex] = pLt->m_pTiles[SrcIndex];
 				if(pLt->m_HasTune && m_pTiles[TgtIndex].m_Index > 0)
 				{
-					m_pTuneTile[TgtIndex].m_Type = m_pTiles[fy * m_Width + fx].m_Index;
+					m_pTuneTile[TgtIndex].m_Type = m_pTiles[fy * m_LayerTilemap.m_Width + fx].m_Index;
 
 					if((pLt->m_pTuneTile[SrcIndex].m_Number == 0 && m_pEditor->m_TuningNum) || m_pEditor->m_TuningNum != pLt->m_TuningNumber)
 						m_pTuneTile[TgtIndex].m_Number = m_pEditor->m_TuningNum;
@@ -303,11 +303,11 @@ int CLayerTune::FindNextFreeNumber() const
 
 bool CLayerTune::ContainsElementWithId(int Id) const
 {
-	for(int y = 0; y < m_Height; ++y)
+	for(int y = 0; y < m_LayerTilemap.m_Height; ++y)
 	{
-		for(int x = 0; x < m_Width; ++x)
+		for(int x = 0; x < m_LayerTilemap.m_Width; ++x)
 		{
-			if(IsValidTuneTile(m_pTuneTile[y * m_Width + x].m_Type) && m_pTuneTile[y * m_Width + x].m_Number == Id)
+			if(IsValidTuneTile(m_pTuneTile[y * m_LayerTilemap.m_Width + x].m_Type) && m_pTuneTile[y * m_LayerTilemap.m_Width + x].m_Number == Id)
 			{
 				return true;
 			}
@@ -324,11 +324,11 @@ void CLayerTune::GetPos(int Number, int Offset, ivec2 &Pos)
 	Pos = ivec2(-1, -1);
 
 	auto FindTile = [this, &Match, &MatchPos, &Number, &Offset]() {
-		for(int x = 0; x < m_Width; x++)
+		for(int x = 0; x < m_LayerTilemap.m_Width; x++)
 		{
-			for(int y = 0; y < m_Height; y++)
+			for(int y = 0; y < m_LayerTilemap.m_Height; y++)
 			{
-				int i = y * m_Width + x;
+				int i = y * m_LayerTilemap.m_Width + x;
 				int Tune = m_pTuneTile[i].m_Number;
 				if(Number == Tune)
 				{
