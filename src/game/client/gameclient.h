@@ -853,6 +853,7 @@ public:
 	bool m_ExtrasSkinLoaded = false;
 
 	const std::vector<CSnapEntities> &SnapEntities() { return m_vSnapEntities; }
+	const std::vector<CClient::CSnapItem> &SnapFlags() { return m_vSnapFlags; }
 
 	int m_MultiViewTeam;
 	float m_MultiViewPersonalZoom;
@@ -866,6 +867,7 @@ public:
 
 private:
 	std::vector<CSnapEntities> m_vSnapEntities;
+	std::vector<CClient::CSnapItem> m_vSnapFlags;
 	void SnapCollectEntities();
 
 	bool m_aDDRaceMsgSent[NUM_DUMMIES];

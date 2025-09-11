@@ -623,22 +623,15 @@ void CItems::OnRender()
 		}
 	}
 
-	int Num = Client()->SnapNumItems(IClient::SNAP_CURRENT);
-
 	// render flag
-	for(int i = 0; i < Num; i++)
+	for(const auto &FlagItem : GameClient()->SnapFlags())
 	{
-		const IClient::CSnapItem Item = Client()->SnapGetItem(IClient::SNAP_CURRENT, i);
-
-		if(Item.m_Type == NETOBJTYPE_FLAG)
+		const void *pPrev = Client()->SnapFindItem(IClient::SNAP_PREV, FlagItem.m_Type, FlagItem.m_Id);
+		if(pPrev)
 		{
-			const void *pPrev = Client()->SnapFindItem(IClient::SNAP_PREV, Item.m_Type, Item.m_Id);
-			if(pPrev)
-			{
-				const void *pPrevGameData = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_GAMEDATA, GameClient()->m_Snap.m_GameDataSnapId);
-				RenderFlag(static_cast<const CNetObj_Flag *>(pPrev), static_cast<const CNetObj_Flag *>(Item.m_pData),
-					static_cast<const CNetObj_GameData *>(pPrevGameData), GameClient()->m_Snap.m_pGameDataObj);
-			}
+			const void *pPrevGameData = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_GAMEDATA, GameClient()->m_Snap.m_GameDataSnapId);
+			RenderFlag(static_cast<const CNetObj_Flag *>(pPrev), static_cast<const CNetObj_Flag *>(FlagItem.m_pData),
+				static_cast<const CNetObj_GameData *>(pPrevGameData), GameClient()->m_Snap.m_pGameDataObj);
 		}
 	}
 

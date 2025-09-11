@@ -677,6 +677,7 @@ void CGameClient::OnReset()
 	m_PrevPredictedWorld.CopyWorld(&m_PredictedWorld);
 
 	m_vSnapEntities.clear();
+	m_vSnapFlags.clear();
 
 	std::fill(std::begin(m_aDDRaceMsgSent), std::end(m_aDDRaceMsgSent), false);
 	std::fill(std::begin(m_aShowOthers), std::end(m_aShowOthers), SHOW_OTHERS_NOT_SET);
@@ -4586,6 +4587,8 @@ void CGameClient::SnapCollectEntities()
 	std::vector<CSnapEntities> vItemData;
 	std::vector<CSnapEntities> vItemEx;
 
+	m_vSnapFlags.clear();
+
 	for(int Index = 0; Index < NumSnapItems; Index++)
 	{
 		const IClient::CSnapItem Item = Client()->SnapGetItem(IClient::SNAP_CURRENT, Index);
@@ -4593,6 +4596,8 @@ void CGameClient::SnapCollectEntities()
 			vItemEx.push_back({Item, nullptr});
 		else if(Item.m_Type == NETOBJTYPE_PICKUP || Item.m_Type == NETOBJTYPE_DDNETPICKUP || Item.m_Type == NETOBJTYPE_LASER || Item.m_Type == NETOBJTYPE_DDNETLASER || Item.m_Type == NETOBJTYPE_PROJECTILE || Item.m_Type == NETOBJTYPE_DDRACEPROJECTILE || Item.m_Type == NETOBJTYPE_DDNETPROJECTILE)
 			vItemData.push_back({Item, nullptr});
+		else if(Item.m_Type == NETOBJTYPE_FLAG)
+			m_vSnapFlags.push_back(Item);
 	}
 
 	// sort by id
