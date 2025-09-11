@@ -92,6 +92,7 @@ public:
 		int GetAccessLevel() const { return m_AccessLevel; }
 	};
 
+	typedef std::vector<int> (*FGetVictimsCommandCallback)(int ClientId, int Victim, void *pUser);
 	typedef void (*FTeeHistorianCommandCallback)(int ClientId, int FlagMask, const char *pCmd, IResult *pResult, void *pUser);
 	typedef void (*FPossibleCallback)(int Index, const char *pCmd, void *pUser);
 	typedef void (*FCommandCallback)(IResult *pResult, void *pUserData);
@@ -127,6 +128,7 @@ public:
 	 * - They do not require a pointer to `IConsole` to be used.
 	 */
 	virtual void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = gs_ConsoleDefaultColor) const = 0;
+	virtual void SetGetVictimsCommandCallback(FGetVictimsCommandCallback pfnCallback, void *pUser) = 0;
 	virtual void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser) = 0;
 	virtual void SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, void *pUser) = 0;
 	virtual void InitChecksum(CChecksumData *pData) const = 0;
