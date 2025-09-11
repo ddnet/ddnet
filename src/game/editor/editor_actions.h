@@ -303,7 +303,6 @@ public:
 		int m_Envelopes;
 	};
 
-public:
 	CEditorActionAppendMap(CEditor *pEditor, const char *pMapName, const SPrevInfo &PrevInfo, std::vector<int> &vImageIndexMap);
 
 	void Undo() override;
@@ -600,7 +599,6 @@ public:
 private:
 	int m_SourceIndex;
 
-private:
 	void Apply(int Value);
 };
 
@@ -615,7 +613,6 @@ public:
 private:
 	int m_SourceIndex;
 
-private:
 	void Apply(int Value);
 };
 
@@ -630,7 +627,6 @@ public:
 private:
 	int m_SourceIndex;
 
-private:
 	void Apply(int Value);
 };
 
