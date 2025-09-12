@@ -76,7 +76,7 @@ public:
 		MAX_VERTICES = 32 * 1024,
 	};
 
-	enum ECommandBufferCMD
+	enum
 	{
 		// command groups
 		CMDGROUP_CORE = 0, // commands that everyone has to implement
@@ -84,7 +84,10 @@ public:
 		CMDGROUP_PLATFORM_SDL = 20000,
 
 		CMD_FIRST = CMDGROUP_CORE,
+	};
 
+	enum ECommandBufferCMD
+	{
 		// synchronization
 		CMD_SIGNAL = CMD_FIRST,
 
@@ -143,7 +146,10 @@ public:
 	{
 		TEXFORMAT_INVALID = 0,
 		TEXFORMAT_RGBA,
+	};
 
+	enum
+	{
 		TEXFLAG_NOMIPMAPS = 1,
 		TEXFLAG_TO_3D_TEXTURE = (1 << 3),
 		TEXFLAG_TO_2D_ARRAY_TEXTURE = (1 << 4),
@@ -624,10 +630,8 @@ public:
 		return true;
 	}
 
-	SCommand *Head()
-	{
-		return m_pCmdBufferHead;
-	}
+	const SCommand *Head() const { return m_pCmdBufferHead; }
+	SCommand *Head() { return const_cast<SCommand *>(const_cast<const CCommandBuffer *>(this)->Head()); }
 
 	void Reset()
 	{
@@ -873,7 +877,7 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	template<typename TName>
 	void AddCmd(
-		TName &Cmd, std::function<bool()> FailFunc = [] { return true; })
+		TName &Cmd, const std::function<bool()> &FailFunc = [] { return true; })
 	{
 		if(m_pCommandBuffer->AddCommandUnsafe(Cmd))
 			return;

@@ -17,7 +17,6 @@ enum ERenderType
 	RENDERTYPE_BACKGROUND_FORCE,
 	RENDERTYPE_FOREGROUND,
 	RENDERTYPE_FULL_DESIGN,
-	RENDERTYPE_ALL = -1,
 };
 
 class IEnvelopeEval
@@ -30,6 +29,7 @@ public:
 class IMapImages
 {
 public:
+	virtual ~IMapImages() = default;
 	virtual IGraphics::CTextureHandle Get(int Index) const = 0;
 	virtual int Num() const = 0;
 	// DDRace

@@ -63,8 +63,12 @@ enum
 	MODE_LAYERS = 0,
 	MODE_IMAGES,
 	MODE_SOUNDS,
-	NUM_MODES,
 
+	NUM_MODES,
+};
+
+enum
+{
 	DIALOG_NONE = 0,
 	DIALOG_FILE,
 	DIALOG_MAPSETTINGS_ERROR,
@@ -149,7 +153,7 @@ class CEditor : public IEditor, public IEnvelopeEval
 	};
 
 	std::shared_ptr<CLayerGroup> m_apSavedBrushes[10];
-	static inline constexpr ColorRGBA ms_DefaultPropColor = ColorRGBA(1, 1, 1, 0.5f);
+	static constexpr ColorRGBA ms_DefaultPropColor = ColorRGBA(1, 1, 1, 0.5f);
 
 public:
 	class IInput *Input() const { return m_pInput; }
@@ -849,7 +853,9 @@ private:
 };
 
 // make sure to inline this function
-inline class IGraphics *CLayer::Graphics() { return m_pEditor->Graphics(); }
-inline class ITextRender *CLayer::TextRender() { return m_pEditor->TextRender(); }
+inline const class IGraphics *CLayer::Graphics() const { return m_pEditor->Graphics(); }
+inline class IGraphics *CLayer::Graphics() { return const_cast<IGraphics *>(const_cast<const CLayer *>(this)->Graphics()); }
+inline const class ITextRender *CLayer::TextRender() const { return m_pEditor->TextRender(); }
+inline class ITextRender *CLayer::TextRender() { return const_cast<ITextRender *>(const_cast<const CLayer *>(this)->TextRender()); }
 
 #endif

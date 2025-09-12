@@ -3,6 +3,8 @@
 
 #include <base/types.h>
 
+#include <engine/shared/config.h>
+
 #include <game/client/component.h>
 
 class CLocalServer : public CComponentInterfaces

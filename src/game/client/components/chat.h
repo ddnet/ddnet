@@ -69,11 +69,17 @@ class CChat : public CComponent
 		// client IDs for special messages
 		CLIENT_MSG = -2,
 		SERVER_MSG = -1,
+	};
 
+	enum
+	{
 		MODE_NONE = 0,
 		MODE_ALL,
 		MODE_TEAM,
+	};
 
+	enum
+	{
 		CHAT_SERVER = 0,
 		CHAT_HIGHLIGHT,
 		CHAT_CLIENT,

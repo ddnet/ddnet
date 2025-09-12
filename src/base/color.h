@@ -14,7 +14,7 @@
 	Function: RgbToHue
 		Determines the hue from RGB values
 */
-constexpr inline float RgbToHue(float r, float g, float b)
+constexpr float RgbToHue(float r, float g, float b)
 {
 	float h_min = minimum(r, g, b);
 	float h_max = maximum(r, g, b);
@@ -161,7 +161,7 @@ class ColorHSLA : public color4_base<ColorHSLA>
 {
 public:
 	using color4_base::color4_base;
-	constexpr ColorHSLA(){};
+	constexpr ColorHSLA() = default;
 
 	constexpr static const float DARKEST_LGT = 0.5f;
 	constexpr static const float DARKEST_LGT7 = 61.0f / 255.0f;
@@ -191,21 +191,21 @@ class ColorHSVA : public color4_base<ColorHSVA>
 {
 public:
 	using color4_base::color4_base;
-	constexpr ColorHSVA(){};
+	constexpr ColorHSVA() = default;
 };
 
 class ColorRGBA : public color4_base<ColorRGBA>
 {
 public:
 	using color4_base::color4_base;
-	constexpr ColorRGBA(){};
+	constexpr ColorRGBA() = default;
 };
 
 template<typename T, typename F>
 constexpr T color_cast(const F &) = delete;
 
 template<>
-constexpr inline ColorHSLA color_cast(const ColorRGBA &rgb)
+constexpr ColorHSLA color_cast(const ColorRGBA &rgb)
 {
 	float Min = minimum(rgb.r, rgb.g, rgb.b);
 	float Max = maximum(rgb.r, rgb.g, rgb.b);
@@ -219,7 +219,7 @@ constexpr inline ColorHSLA color_cast(const ColorRGBA &rgb)
 }
 
 template<>
-constexpr inline ColorRGBA color_cast(const ColorHSLA &hsl)
+constexpr ColorRGBA color_cast(const ColorHSLA &hsl)
 {
 	vec3 rgb = vec3(0, 0, 0);
 
@@ -261,27 +261,27 @@ constexpr inline ColorRGBA color_cast(const ColorHSLA &hsl)
 }
 
 template<>
-constexpr inline ColorHSLA color_cast(const ColorHSVA &hsv)
+constexpr ColorHSLA color_cast(const ColorHSVA &hsv)
 {
 	float l = hsv.v * (1 - hsv.s * 0.5f);
 	return ColorHSLA(hsv.h, (l == 0.0f || l == 1.0f) ? 0 : (hsv.v - l) / minimum(l, 1 - l), l, hsv.a);
 }
 
 template<>
-constexpr inline ColorHSVA color_cast(const ColorHSLA &hsl)
+constexpr ColorHSVA color_cast(const ColorHSLA &hsl)
 {
 	float v = hsl.l + hsl.s * minimum(hsl.l, 1 - hsl.l);
 	return ColorHSVA(hsl.h, v == 0.0f ? 0 : 2 - (2 * hsl.l / v), v, hsl.a);
 }
 
 template<>
-constexpr inline ColorRGBA color_cast(const ColorHSVA &hsv)
+constexpr ColorRGBA color_cast(const ColorHSVA &hsv)
 {
 	return color_cast<ColorRGBA>(color_cast<ColorHSLA>(hsv));
 }
 
 template<>
-constexpr inline ColorHSVA color_cast(const ColorRGBA &rgb)
+constexpr ColorHSVA color_cast(const ColorRGBA &rgb)
 {
 	return color_cast<ColorHSVA>(color_cast<ColorHSLA>(rgb));
 }

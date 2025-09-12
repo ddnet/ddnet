@@ -24,9 +24,8 @@ public:
 		FRIEND_NO = 0,
 		FRIEND_CLAN,
 		FRIEND_PLAYER,
-
-		MAX_FRIENDS = 4096,
 	};
+	static constexpr auto MAX_FRIENDS = 4096;
 
 	virtual void Init(bool Foes = false) = 0;
 

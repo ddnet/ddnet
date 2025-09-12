@@ -13,7 +13,7 @@ enum
 
 	// the first thing sent by the client
 	// contains the version info for the client
-	NETMSG_INFO = 1,
+	NETMSG_INFO,
 
 	// sent by server
 	NETMSG_MAP_CHANGE, // sent when client should switch map
@@ -52,12 +52,16 @@ enum
 
 	NETMSG_MAPLIST_ENTRY_ADD, // todo 0.8: move up
 	NETMSG_MAPLIST_ENTRY_REM,
+};
 
+enum
+{
 	NET_CTRLMSG_KEEPALIVE = 0,
-	NET_CTRLMSG_CONNECT = 1,
-	NET_CTRLMSG_ACCEPT = 2,
-	NET_CTRLMSG_CLOSE = 4,
-	NET_CTRLMSG_TOKEN = 5,
+	NET_CTRLMSG_CONNECT,
+	NET_CTRLMSG_ACCEPT,
+	NET_CTRLMSG_UNUSED,
+	NET_CTRLMSG_CLOSE,
+	NET_CTRLMSG_TOKEN,
 };
 
 enum

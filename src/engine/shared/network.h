@@ -49,11 +49,14 @@ CURRENT:
 
 enum
 {
-	NETSENDFLAG_VITAL = 1,
-	NETSENDFLAG_CONNLESS = 2,
-	NETSENDFLAG_FLUSH = 4,
-	NETSENDFLAG_EXTENDED = 8,
+	NETSENDFLAG_VITAL = 1 << 0,
+	NETSENDFLAG_CONNLESS = 1 << 1,
+	NETSENDFLAG_FLUSH = 1 << 2,
+	NETSENDFLAG_EXTENDED = 1 << 3,
+};
 
+enum
+{
 	NETSTATE_OFFLINE = 0,
 	NETSTATE_CONNECTING,
 	NETSTATE_ONLINE,
@@ -239,7 +242,7 @@ private:
 	unsigned short m_Sequence;
 	unsigned short m_Ack;
 	unsigned short m_PeerAck;
-	EState m_State;
+	EState m_State = EState::OFFLINE;
 	int m_RemoteClosed;
 	bool m_BlockCloseMsg;
 	bool m_UnknownSeq;
@@ -412,7 +415,7 @@ class CNetServer
 	NETSOCKET m_Socket;
 	CNetBan *m_pNetBan;
 	CSlot m_aSlots[NET_MAX_CLIENTS];
-	int m_MaxClients;
+	int m_MaxClients = NET_MAX_CLIENTS;
 	int m_MaxClientsPerIp;
 
 	NETFUNC_NEWCLIENT m_pfnNewClient;

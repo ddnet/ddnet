@@ -47,7 +47,7 @@ CCamera::CCamera()
 	m_CanUseCameraInfo = false;
 	m_UsingAutoSpecCamera = false;
 
-	mem_zero(m_aAutoSpecCameraTooltip, sizeof(m_aAutoSpecCameraTooltip));
+	m_aAutoSpecCameraTooltip[0] = '\0';
 }
 
 float CCamera::CameraSmoothingProgress(float CurrentTime) const

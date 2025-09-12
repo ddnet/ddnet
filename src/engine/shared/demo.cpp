@@ -188,7 +188,6 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 		while(true)
 		{
 			unsigned char aChunk[1024 * 64];
-			mem_zero(aChunk, sizeof(aChunk));
 			int Bytes = io_read(MapFile, &aChunk, sizeof(aChunk));
 			if(Bytes <= 0)
 				break;

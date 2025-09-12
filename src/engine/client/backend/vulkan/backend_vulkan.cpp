@@ -1098,7 +1098,7 @@ private:
 		// command should be considered handled after it executed
 		bool m_CMDIsHandled = true;
 	};
-	std::array<SCommandCallback, CCommandBuffer::CMD_COUNT - CCommandBuffer::CMD_FIRST> m_aCommandCallbacks;
+	std::array<SCommandCallback, static_cast<int>(CCommandBuffer::CMD_COUNT) - static_cast<int>(CCommandBuffer::CMD_FIRST)> m_aCommandCallbacks;
 
 protected:
 	/************************
@@ -1239,7 +1239,7 @@ protected:
 
 	size_t CommandBufferCMDOff(CCommandBuffer::ECommandBufferCMD CommandBufferCMD)
 	{
-		return (size_t)CommandBufferCMD - CCommandBuffer::ECommandBufferCMD::CMD_FIRST;
+		return (size_t)CommandBufferCMD - CCommandBuffer::CMD_FIRST;
 	}
 
 	void RegisterCommands()
@@ -3208,8 +3208,15 @@ protected:
 
 	void ExecBufferFillDynamicStates(const CCommandBuffer::SState &State, SRenderCommandExecuteBuffer &ExecBuffer)
 	{
+		// Workaround for a bug in molten-vk: https://github.com/KhronosGroup/MoltenVK/issues/2304
+#ifdef CONF_PLATFORM_MACOS
+		auto HasDynamicState = true;
+#else
 		size_t DynamicStateIndex = GetDynamicModeIndexFromState(State);
-		if(DynamicStateIndex == VULKAN_BACKEND_CLIP_MODE_DYNAMIC_SCISSOR_AND_VIEWPORT)
+		auto HasDynamicState = DynamicStateIndex == VULKAN_BACKEND_CLIP_MODE_DYNAMIC_SCISSOR_AND_VIEWPORT;
+#endif
+
+		if(HasDynamicState)
 		{
 			VkViewport Viewport;
 			if(m_HasDynamicViewport)
@@ -6842,11 +6849,10 @@ public:
 		{
 			if(IsVerbose())
 			{
-				dbg_msg("vulkan", "queueing swap chain recreation because the viewport changed");
+				dbg_msg("vulkan", "got resize event.");
 			}
 			m_CanvasWidth = (uint32_t)pCommand->m_Width;
 			m_CanvasHeight = (uint32_t)pCommand->m_Height;
-			m_RecreateSwapChain = true;
 		}
 		else
 		{

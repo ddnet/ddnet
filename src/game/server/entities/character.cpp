@@ -784,6 +784,24 @@ void CCharacter::SetEmote(int Emote, int Tick)
 	m_EmoteStop = Tick;
 }
 
+int CCharacter::DetermineEyeEmote()
+{
+	const bool IsFrozen = m_Core.m_DeepFrozen || m_FreezeTime > 0 || m_Core.m_LiveFrozen;
+	const bool HasNinjajetpack = m_pPlayer->m_NinjaJetpack && m_Core.m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN;
+
+	if(GetPlayer()->IsAfk() || GetPlayer()->IsPaused())
+		return IsFrozen ? EMOTE_NORMAL : EMOTE_BLINK;
+	if(m_EmoteType != EMOTE_NORMAL) // user manually set an eye emote using /emote
+		return m_EmoteType;
+	if(IsFrozen)
+		return (m_Core.m_DeepFrozen || m_Core.m_LiveFrozen) ? EMOTE_PAIN : EMOTE_BLINK;
+	if(HasNinjajetpack && !m_Core.m_DeepFrozen && m_FreezeTime == 0 && !m_Core.m_HasTelegunGun)
+		return EMOTE_HAPPY;
+	if(5 * Server()->TickSpeed() - ((Server()->Tick() - m_LastAction) % (5 * Server()->TickSpeed())) < 5)
+		return EMOTE_BLINK;
+	return EMOTE_NORMAL;
+}
+
 void CCharacter::OnPredictedInput(const CNetObj_PlayerInput *pNewInput)
 {
 	// check for changes
@@ -1193,13 +1211,16 @@ void CCharacter::CancelSwapRequests()
 	GetPlayer()->m_SwapTargetsClientId = -1;
 }
 
-// TODO: Move the emote stuff to a function
 void CCharacter::SnapCharacter(int SnappingClient, int Id)
 {
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 	CCharacterCore *pCore;
-	int Tick, Emote = m_EmoteType, Weapon = /*<FoxNet*/ GameServer()->GetWeaponType(m_Core.m_ActiveWeapon) /*FoxNet>*/, AmmoCount = 0,
-		  Health = 0, Armor = 0;
+	int Weapon = /*<FoxNet*/ GameServer()->GetWeaponType(m_Core.m_ActiveWeapon) /*FoxNet>*/,
+	 AmmoCount = 0,
+	    Health = 0,
+		 Armor = 0;
+	int Emote = DetermineEyeEmote();
+	int Tick;
 	if(!m_ReckoningTick || GameServer()->m_World.m_Paused)
 	{
 		Tick = 0;
@@ -1211,12 +1232,9 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 		pCore = &m_SendCore;
 	}
 
-	// change eyes and use ninja graphic if player is frozen
+	// use ninja graphic for old clients if player is frozen
 	if(m_Core.m_DeepFrozen || m_FreezeTime > 0 || m_Core.m_LiveFrozen)
 	{
-		if(Emote == EMOTE_NORMAL)
-			Emote = (m_Core.m_DeepFrozen || m_Core.m_LiveFrozen) ? EMOTE_PAIN : EMOTE_BLINK;
-
 		if((m_Core.m_DeepFrozen || m_FreezeTime > 0) && SnappingClientVersion < VERSION_DDNET_NEW_HUD)
 			Weapon = WEAPON_NINJA;
 	}
@@ -1255,11 +1273,9 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 		}
 	}
 
-	// change eyes, use ninja graphic and set ammo count if player has ninjajetpack
+	// use ninja graphic and set ammo count if player has ninjajetpack
 	if(m_pPlayer->m_NinjaJetpack && m_Core.m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN && !m_Core.m_DeepFrozen && m_FreezeTime == 0 && !m_Core.m_HasTelegunGun)
 	{
-		if(Emote == EMOTE_NORMAL)
-			Emote = EMOTE_HAPPY;
 		Weapon = WEAPON_NINJA;
 		AmmoCount = 10;
 	}
@@ -1270,20 +1286,6 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 		Health = m_Health;
 		Armor = m_Armor;
 		AmmoCount = (m_FreezeTime == 0) ? m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo : 0;
-	}
-
-	if(GetPlayer()->IsAfk() || GetPlayer()->IsPaused())
-	{
-		if(m_FreezeTime > 0 || m_Core.m_DeepFrozen || m_Core.m_LiveFrozen)
-			Emote = EMOTE_NORMAL;
-		else
-			Emote = EMOTE_BLINK;
-	}
-
-	if(Emote == EMOTE_NORMAL)
-	{
-		if(5 * Server()->TickSpeed() - ((Server()->Tick() - m_LastAction) % (5 * Server()->TickSpeed())) < 5)
-			Emote = EMOTE_BLINK;
 	}
 
 	if(!Server()->IsSixup(SnappingClient))

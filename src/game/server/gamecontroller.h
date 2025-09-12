@@ -19,7 +19,18 @@ class IGameController
 {
 	friend class CSaveTeam; // need access to GameServer() and Server()
 
-	std::vector<vec2> m_avSpawnPoints[3];
+protected:
+	enum ESpawnType
+	{
+		SPAWNTYPE_DEFAULT = 0,
+		SPAWNTYPE_RED,
+		SPAWNTYPE_BLUE,
+
+		NUM_SPAWNTYPES
+	};
+
+private:
+	std::vector<vec2> m_avSpawnPoints[NUM_SPAWNTYPES];
 
 	class CGameContext *m_pGameServer;
 	class CConfig *m_pConfig;
@@ -50,7 +61,7 @@ protected:
 	};
 
 	float EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos, int DDTeam);
-	void EvaluateSpawnType(CSpawnEval *pEval, int Type, int DDTeam);
+	void EvaluateSpawnType(CSpawnEval *pEval, ESpawnType SpawnType, int DDTeam);
 
 	void ResetGame();
 

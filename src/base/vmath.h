@@ -82,7 +82,7 @@ public:
 };
 
 template<Numeric T>
-constexpr inline vector2_base<T> rotate(const vector2_base<T> &a, float angle)
+constexpr vector2_base<T> rotate(const vector2_base<T> &a, float angle)
 {
 	angle = angle * pi / 180.0f;
 	float s = std::sin(angle);
@@ -97,7 +97,7 @@ inline T distance(const vector2_base<T> a, const vector2_base<T> &b)
 }
 
 template<Numeric T>
-constexpr inline T dot(const vector2_base<T> a, const vector2_base<T> &b)
+constexpr T dot(const vector2_base<T> a, const vector2_base<T> &b)
 {
 	return a.x * b.x + a.y * b.y;
 }
@@ -114,12 +114,12 @@ inline float length(const vector2_base<T> &a)
 	return std::sqrt(static_cast<float>(dot(a, a)));
 }
 
-constexpr inline float length_squared(const vector2_base<float> &a)
+constexpr float length_squared(const vector2_base<float> &a)
 {
 	return dot(a, a);
 }
 
-constexpr inline float angle(const vector2_base<float> &a)
+constexpr float angle(const vector2_base<float> &a)
 {
 	if(a.x == 0 && a.y == 0)
 		return 0.0f;
@@ -132,7 +132,7 @@ constexpr inline float angle(const vector2_base<float> &a)
 }
 
 template<Numeric T>
-constexpr inline vector2_base<T> normalize_pre_length(const vector2_base<T> &v, T len)
+constexpr vector2_base<T> normalize_pre_length(const vector2_base<T> &v, T len)
 {
 	if(len == 0)
 		return vector2_base<T>();
@@ -144,7 +144,7 @@ inline vector2_base<float> normalize(const vector2_base<float> &v)
 	float divisor = length(v);
 	if(divisor == 0.0f)
 		return vector2_base<float>(0.0f, 0.0f);
-	float l = (float)(1.0f / divisor);
+	float l = 1.0f / divisor;
 	return vector2_base<float>(v.x * l, v.y * l);
 }
 
@@ -163,7 +163,7 @@ typedef vector2_base<bool> bvec2;
 typedef vector2_base<int> ivec2;
 
 template<Numeric T>
-constexpr inline bool closest_point_on_line(vector2_base<T> line_pointA, vector2_base<T> line_pointB, vector2_base<T> target_point, vector2_base<T> &out_pos)
+constexpr bool closest_point_on_line(vector2_base<T> line_pointA, vector2_base<T> line_pointB, vector2_base<T> target_point, vector2_base<T> &out_pos)
 {
 	vector2_base<T> AB = line_pointB - line_pointA;
 	T SquaredMagnitudeAB = dot(AB, AB);
@@ -265,13 +265,13 @@ inline T distance(const vector3_base<T> &a, const vector3_base<T> &b)
 }
 
 template<Numeric T>
-constexpr inline T dot(const vector3_base<T> &a, const vector3_base<T> &b)
+constexpr T dot(const vector3_base<T> &a, const vector3_base<T> &b)
 {
 	return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
 template<Numeric T>
-constexpr inline vector3_base<T> cross(const vector3_base<T> &a, const vector3_base<T> &b)
+constexpr vector3_base<T> cross(const vector3_base<T> &a, const vector3_base<T> &b)
 {
 	return vector3_base<T>(
 		a.y * b.z - a.z * b.y,
@@ -290,7 +290,7 @@ inline vector3_base<float> normalize(const vector3_base<float> &v)
 	float divisor = length(v);
 	if(divisor == 0.0f)
 		return vector3_base<float>(0.0f, 0.0f, 0.0f);
-	float l = (float)(1.0f / divisor);
+	float l = 1.0f / divisor;
 	return vector3_base<float>(v.x * l, v.y * l, v.z * l);
 }
 

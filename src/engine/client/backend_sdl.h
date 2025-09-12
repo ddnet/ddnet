@@ -77,7 +77,7 @@ protected:
 	void StartProcessor(ICommandProcessor *pProcessor);
 	void StopProcessor();
 
-	bool HasWarning()
+	bool HasWarning() const
 	{
 		return m_Warning.m_WarningType != GFX_WARNING_TYPE_NONE;
 	}
