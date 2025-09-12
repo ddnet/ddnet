@@ -351,7 +351,6 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 
 void CItems::RenderLaser(vec2 From, vec2 Pos, ColorRGBA OuterColor, ColorRGBA InnerColor, float TicksBody, float TicksHead, int Type) const
 {
-	int TuneZone = (Client()->State() == IClient::STATE_ONLINE && GameClient()->m_GameWorld.m_WorldConfig.m_UseTuneZones) ? Collision()->IsTune(Collision()->GetMapIndex(From)) : 0;
 	float Len = distance(Pos, From);
 
 	if(Len > 0)
@@ -365,7 +364,16 @@ void CItems::RenderLaser(vec2 From, vec2 Pos, ColorRGBA OuterColor, ColorRGBA In
 		vec2 Dir = normalize_pre_length(Pos - From, Len);
 
 		float Ms = TicksBody * 1000.0f / Client()->GameTickSpeed();
-		float a = Ms / (Type == LASERTYPE_RIFLE || Type == LASERTYPE_SHOTGUN ? GameClient()->GetTuning(TuneZone)->m_LaserBounceDelay : CTuningParams::DEFAULT.m_LaserBounceDelay);
+		float a;
+		if(Type == LASERTYPE_RIFLE || Type == LASERTYPE_SHOTGUN)
+		{
+			int TuneZone = (Client()->State() == IClient::STATE_ONLINE && GameClient()->m_GameWorld.m_WorldConfig.m_UseTuneZones) ? Collision()->IsTune(Collision()->GetMapIndex(From)) : 0;
+			a = Ms / GameClient()->GetTuning(TuneZone)->m_LaserBounceDelay;
+		}
+		else
+		{
+			a = Ms / CTuningParams::DEFAULT.m_LaserBounceDelay;
+		}
 		a = std::clamp(a, 0.0f, 1.0f);
 		float Ia = 1 - a;
 
