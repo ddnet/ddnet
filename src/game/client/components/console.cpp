@@ -650,14 +650,14 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 			char aBuf[IConsole::CMDLINE_LENGTH];
 			StrCopyUntilSpace(aBuf, sizeof(aBuf), aCmd);
 
-			const IConsole::CCommandInfo *pCommand = m_pGameConsole->m_pConsole->GetCommandInfo(aBuf, m_CompletionFlagmask,
+			const IConsole::ICommandInfo *pCommand = m_pGameConsole->m_pConsole->GetCommandInfo(aBuf, m_CompletionFlagmask,
 				m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands());
 			if(pCommand)
 			{
 				m_IsCommand = true;
-				m_pCommandName = pCommand->m_pName;
-				m_pCommandHelp = pCommand->m_pHelp;
-				m_pCommandParams = pCommand->m_pParams;
+				m_pCommandName = pCommand->Name();
+				m_pCommandHelp = pCommand->Help();
+				m_pCommandParams = pCommand->Params();
 			}
 			else
 				m_IsCommand = false;
