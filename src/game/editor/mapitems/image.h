@@ -10,7 +10,7 @@ class CEditorImage : public CImageInfo, public CEditorComponent
 {
 public:
 	explicit CEditorImage(CEditor *pEditor);
-	~CEditorImage();
+	~CEditorImage() override;
 
 	void OnInit(CEditor *pEditor) override;
 	void AnalyseTileFlags();

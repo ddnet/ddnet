@@ -25,7 +25,7 @@ class CCharacter : public CEntity
 	friend class CGameWorld;
 
 public:
-	~CCharacter();
+	~CCharacter() override;
 
 	void PreTick() override;
 	void Tick() override;

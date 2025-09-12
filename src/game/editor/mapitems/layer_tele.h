@@ -19,7 +19,7 @@ class CLayerTele : public CLayerTiles
 public:
 	CLayerTele(CEditor *pEditor, int w, int h);
 	CLayerTele(const CLayerTele &Other);
-	~CLayerTele();
+	~CLayerTele() override;
 
 	CTeleTile *m_pTeleTile;
 	unsigned char m_TeleNum;

@@ -61,7 +61,7 @@ private:
 
 	public:
 		CCommunityIconLoadJob(CCommunityIcons *pCommunityIcons, const char *pCommunityId, int StorageType);
-		~CCommunityIconLoadJob();
+		~CCommunityIconLoadJob() override;
 
 		CImageInfo &ImageInfo() { return m_ImageInfo; }
 		CImageInfo &ImageInfoGrayscale() { return m_ImageInfoGrayscale; }

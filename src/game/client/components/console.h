@@ -185,7 +185,7 @@ public:
 	};
 
 	CGameConsole();
-	~CGameConsole();
+	~CGameConsole() override;
 	int Sizeof() const override { return sizeof(*this); }
 
 	void PrintLine(int Type, const char *pLine);
