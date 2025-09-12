@@ -81,7 +81,7 @@ std::optional<ColorHSLA> CConsole::CResult::GetColor(unsigned Index, float Darke
 	return ColorParse(m_apArgs[Index], DarkestLighting);
 }
 
-const IConsole::CCommandInfo *CConsole::CCommand::NextCommandInfo(int AccessLevel, int FlagMask) const
+const IConsole::ICommandInfo *CConsole::CCommand::NextCommandInfo(int AccessLevel, int FlagMask) const
 {
 	const CCommand *pInfo = m_pNext;
 	while(pInfo)
@@ -98,7 +98,7 @@ void CConsole::CCommand::SetAccessLevel(int AccessLevel)
 	m_AccessLevel = std::clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_USER));
 }
 
-const IConsole::CCommandInfo *CConsole::FirstCommandInfo(int AccessLevel, int FlagMask) const
+const IConsole::ICommandInfo *CConsole::FirstCommandInfo(int AccessLevel, int FlagMask) const
 {
 	for(const CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
 	{
@@ -1022,7 +1022,7 @@ void CConsole::DeregisterTemp(const char *pName)
 	else
 	{
 		for(CCommand *pCommand = m_pFirstCommand; pCommand->m_pNext; pCommand = pCommand->m_pNext)
-			if(pCommand->m_pNext->m_Temp && str_comp(pCommand->m_pNext->m_pName, pName) == 0)
+			if(pCommand->m_pNext->m_Temp && str_comp(pCommand->m_pNext->Name(), pName) == 0)
 			{
 				pRemoved = pCommand->m_pNext;
 				pCommand->m_pNext = pCommand->m_pNext->m_pNext;
@@ -1104,13 +1104,13 @@ void CConsole::StoreCommands(bool Store)
 	m_StoreCommands = Store;
 }
 
-const IConsole::CCommandInfo *CConsole::GetCommandInfo(const char *pName, int FlagMask, bool Temp)
+const IConsole::ICommandInfo *CConsole::GetCommandInfo(const char *pName, int FlagMask, bool Temp)
 {
 	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
 	{
 		if(pCommand->m_Flags & FlagMask && pCommand->m_Temp == Temp)
 		{
-			if(str_comp_nocase(pCommand->m_pName, pName) == 0)
+			if(str_comp_nocase(pCommand->Name(), pName) == 0)
 				return pCommand;
 		}
 	}

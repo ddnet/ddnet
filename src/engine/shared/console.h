@@ -13,17 +13,26 @@
 
 class CConsole : public IConsole
 {
-	class CCommand : public CCommandInfo
+	class CCommand : public ICommandInfo
 	{
+		int m_AccessLevel;
+
 	public:
+		const char *m_pName;
+		const char *m_pHelp;
+		const char *m_pParams;
+
 		CCommand *m_pNext;
 		int m_Flags;
 		bool m_Temp;
 		FCommandCallback m_pfnCallback;
 		void *m_pUserData;
 
-		const CCommandInfo *NextCommandInfo(int AccessLevel, int FlagMask) const override;
-
+		const ICommandInfo *NextCommandInfo(int AccessLevel, int FlagMask) const override;
+		const char *Name() const override { return m_pName; }
+		const char *Help() const override { return m_pHelp; }
+		const char *Params() const override { return m_pParams; }
+		int GetAccessLevel() const override { return m_AccessLevel; }
 		void SetAccessLevel(int AccessLevel);
 	};
 
@@ -155,8 +164,8 @@ public:
 	~CConsole();
 
 	void Init() override;
-	const CCommandInfo *FirstCommandInfo(int AccessLevel, int FlagMask) const override;
-	const CCommandInfo *GetCommandInfo(const char *pName, int FlagMask, bool Temp) override;
+	const ICommandInfo *FirstCommandInfo(int AccessLevel, int FlagMask) const override;
+	const ICommandInfo *GetCommandInfo(const char *pName, int FlagMask, bool Temp) override;
 	int PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback, void *pUser) override;
 
 	void ParseArguments(int NumArgs, const char **ppArguments) override;
