@@ -1,4 +1,4 @@
-
+// Made by qxdFox
 #include <game/server/entities/character.h>
 #include <game/server/entity.h>
 #include <game/server/gamecontext.h>
@@ -42,7 +42,7 @@ CPortal::CPortal(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
 
 	for(int p = 0; p < NUM_PORTALS; p++)
 	{
-		m_apData[p].m_PortalRadius = MinPortalRad;
+		m_aData[p].m_PortalRadius = MinPortalRad;
 
 		for(int i = 0; i < NUM_IDS; i++)
 			m_Snap[p].m_aIds[i] = Server()->SnapNewId();
@@ -92,31 +92,31 @@ void CPortal::Tick()
 	{
 		for(int p = 0; p < NUM_PORTALS; p++)
 		{
-			if(!m_apData[p].m_Active)
+			if(!m_aData[p].m_Active)
 				continue;
 
 			if(m_Lifetime <= FadeOutTicks)
 			{
 				// Shrink phase (last FadeOutTicks)
 				float a = static_cast<float>(m_Lifetime) / static_cast<float>(FadeOutTicks);
-				m_apData[p].m_PortalRadius = MinPortalRad + (MaxPortalRad - MinPortalRad) * a;
-				if(m_apData[p].m_PortalRadius < MinPortalRad)
-					m_apData[p].m_PortalRadius = MinPortalRad;
+				m_aData[p].m_PortalRadius = MinPortalRad + (MaxPortalRad - MinPortalRad) * a;
+				if(m_aData[p].m_PortalRadius < MinPortalRad)
+					m_aData[p].m_PortalRadius = MinPortalRad;
 			}
 			else
 			{
-				if(m_apData[p].m_PortalRadius < MaxPortalRad)
+				if(m_aData[p].m_PortalRadius < MaxPortalRad)
 				{
 					float growPerTick = (MaxPortalRad - MinPortalRad) / static_cast<float>(GrowTicks);
 					if(growPerTick < 0.001f)
 						growPerTick = MaxPortalRad - MinPortalRad;
-					m_apData[p].m_PortalRadius += growPerTick;
-					if(m_apData[p].m_PortalRadius > MaxPortalRad)
-						m_apData[p].m_PortalRadius = MaxPortalRad;
+					m_aData[p].m_PortalRadius += growPerTick;
+					if(m_aData[p].m_PortalRadius > MaxPortalRad)
+						m_aData[p].m_PortalRadius = MaxPortalRad;
 				}
 				else
 				{
-					m_apData[p].m_PortalRadius = MaxPortalRad;
+					m_aData[p].m_PortalRadius = MaxPortalRad;
 				}
 			}
 		}
@@ -124,7 +124,7 @@ void CPortal::Tick()
 	else if(m_Lifetime <= 0)
 	{
 		for(int p = 0; p < NUM_PORTALS; p++)
-			m_apData[p].m_PortalRadius = MinPortalRad;
+			m_aData[p].m_PortalRadius = MinPortalRad;
 		RemovePortals();
 		return;
 	}
@@ -137,7 +137,7 @@ void CPortal::Tick()
 			return;
 		}
 
-		if(m_apData[0].m_Team != pOwnerChr->Team())
+		if(m_aData[0].m_Team != pOwnerChr->Team())
 		{
 			RemovePortals();
 			return;
@@ -145,7 +145,7 @@ void CPortal::Tick()
 	}
 	else if(m_State == STATE_BOTH_SET)
 	{
-		if(m_apData[0].m_Team != m_apData[1].m_Team)
+		if(m_aData[0].m_Team != m_aData[1].m_Team)
 		{
 			RemovePortals();
 			return;
@@ -158,7 +158,7 @@ void CPortal::Tick()
 
 void CPortal::HandleTele()
 {
-	if(!m_apData[0].m_Active || !m_apData[1].m_Active)
+	if(!m_aData[0].m_Active || !m_aData[1].m_Active)
 		return;
 
 	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
@@ -167,11 +167,11 @@ void CPortal::HandleTele()
 		if(!pChr || !pChr->IsAlive())
 			continue;
 
-		if(m_apData[0].m_Team != TEAM_SUPER && pChr->Team() != TEAM_SUPER && pChr->Team() != m_apData[0].m_Team)
+		if(m_aData[0].m_Team != TEAM_SUPER && pChr->Team() != TEAM_SUPER && pChr->Team() != m_aData[0].m_Team)
 			continue;
 
-		const bool InP0 = PointInCircle(pChr->m_Pos, m_apData[0].m_Pos, m_apData[0].m_PortalRadius);
-		const bool InP1 = !InP0 && PointInCircle(pChr->m_Pos, m_apData[1].m_Pos, m_apData[1].m_PortalRadius);
+		const bool InP0 = PointInCircle(pChr->m_Pos, m_aData[0].m_Pos, m_aData[0].m_PortalRadius);
+		const bool InP1 = !InP0 && PointInCircle(pChr->m_Pos, m_aData[1].m_Pos, m_aData[1].m_PortalRadius);
 
 		if(InP0 || InP1)
 		{
@@ -179,15 +179,15 @@ void CPortal::HandleTele()
 			if(!Can)
 				continue;
 
-			const vec2 Target = InP0 ? m_apData[1].m_Pos : m_apData[0].m_Pos;
+			const vec2 Target = InP0 ? m_aData[1].m_Pos : m_aData[0].m_Pos;
 			pChr->ForceSetPos(Target);
 			pChr->ReleaseHook();
 			Can = false;
 
-			if(distance(m_apData[0].m_Pos, m_apData[1].m_Pos) > 550.0f)
+			if(distance(m_aData[0].m_Pos, m_aData[1].m_Pos) > 550.0f)
 			{
-				GameServer()->CreateSound(m_apData[0].m_Pos, SOUND_WEAPON_SPAWN, pChr->TeamMask());
-				GameServer()->CreateSound(m_apData[1].m_Pos, SOUND_WEAPON_SPAWN, pChr->TeamMask());
+				GameServer()->CreateSound(m_aData[0].m_Pos, SOUND_WEAPON_SPAWN, pChr->TeamMask());
+				GameServer()->CreateSound(m_aData[1].m_Pos, SOUND_WEAPON_SPAWN, pChr->TeamMask());
 			}
 			else
 			{
@@ -203,7 +203,7 @@ void CPortal::HandleTele()
 inline vec2 CPortal::CirclePos(int Portal, int Part) const
 {
 	vec2 Direction = direction(360.0f / CPortal::SEGMENTS * Part * (pi / 180.0f));
-	Direction *= m_apData[Portal].m_PortalRadius;
+	Direction *= m_aData[Portal].m_PortalRadius;
 	return Direction;
 }
 
@@ -259,17 +259,17 @@ bool CPortal::TrySetPortal()
 	}
 	if(m_State == STATE_NONE)
 	{
-		m_apData[0].m_Active = true;
-		m_apData[0].m_Pos = CursorPos;
-		m_apData[0].m_Team = pOwnerChr->Team();
+		m_aData[0].m_Active = true;
+		m_aData[0].m_Pos = CursorPos;
+		m_aData[0].m_Team = pOwnerChr->Team();
 		m_Lifetime = Lifetime;
 		m_State = STATE_FIRST_SET;
 	}
 	else if(m_State == STATE_FIRST_SET)
 	{
-		m_apData[1].m_Active = true;
-		m_apData[1].m_Pos = CursorPos;
-		m_apData[1].m_Team = pOwnerChr->Team();
+		m_aData[1].m_Active = true;
+		m_aData[1].m_Pos = CursorPos;
+		m_aData[1].m_Team = pOwnerChr->Team();
 		m_Lifetime = Lifetime;
 		m_State = STATE_BOTH_SET;
 	}
@@ -282,11 +282,11 @@ void CPortal::RemovePortals()
 {
 	for(int i = 0; i < NUM_PORTALS; i++)
 	{
-		if(m_apData[i].m_Active)
+		if(m_aData[i].m_Active)
 		{
-			GameServer()->CreateDeath(m_apData[i].m_Pos, m_Owner, m_TeamMask);
-			m_apData[i].m_Active = false;
-			m_apData[i].m_Pos = vec2(0, 0);
+			GameServer()->CreateDeath(m_aData[i].m_Pos, m_Owner, m_TeamMask);
+			m_aData[i].m_Active = false;
+			m_aData[i].m_Pos = vec2(0, 0);
 			m_State = STATE_NONE;
 		}
 	}
@@ -301,7 +301,7 @@ inline vec2 GetRandomPointInCircle(vec2 center, float radius)
 
 void CPortal::Snap(int SnappingClient)
 {
-	if(NetworkClipped(SnappingClient, m_apData[0].m_Pos) && NetworkClipped(SnappingClient, m_apData[1].m_Pos))
+	if(NetworkClipped(SnappingClient, m_aData[0].m_Pos) && NetworkClipped(SnappingClient, m_aData[1].m_Pos))
 		return;
 
 	if(SnappingClient != SERVER_DEMO_CLIENT)
@@ -312,7 +312,7 @@ void CPortal::Snap(int SnappingClient)
 	}
 
 	CGameTeams Teams = GameServer()->m_pController->Teams();
-	if(!Teams.SetMaskWithFlags(SnappingClient, m_apData[0].m_Team, CGameTeams::EXTRAFLAG_IGNORE_SOLO))
+	if(!Teams.SetMaskWithFlags(SnappingClient, m_aData[0].m_Team, CGameTeams::EXTRAFLAG_IGNORE_SOLO))
 		return;
 
 	const int SnapVer = Server()->GetClientVersion(SnappingClient);
@@ -321,7 +321,7 @@ void CPortal::Snap(int SnappingClient)
 
 	for(int p = 0; p < NUM_PORTALS; ++p)
 	{
-		if(!m_apData[p].m_Active)
+		if(!m_aData[p].m_Active)
 			continue;
 		for(int i = 0; i < NUM_POS; ++i)
 		{
@@ -332,8 +332,8 @@ void CPortal::Snap(int SnappingClient)
 			Collision()->Rotate(vec2(0, 0), &To, Spin);
 			Collision()->Rotate(vec2(0, 0), &From, Spin);
 
-			To += m_apData[p].m_Pos;
-			From += m_apData[p].m_Pos;
+			To += m_aData[p].m_Pos;
+			From += m_aData[p].m_Pos;
 
 			GameServer()->SnapLaserObject(CSnapContext(SnapVer, SixUp, SnappingClient),
 				m_Snap[p].m_aIds[i], To, From, StartTick, m_Owner);
@@ -347,7 +347,7 @@ void CPortal::Snap(int SnappingClient)
 				if(!pProj)
 					continue;
 
-				vec2 Pos = GetRandomPointInCircle(m_apData[i % 2].m_Pos, m_apData[p].m_PortalRadius - 6.0f);
+				vec2 Pos = GetRandomPointInCircle(m_aData[i % 2].m_Pos, m_aData[p].m_PortalRadius - 6.0f);
 				pProj->m_X = round_to_int(Pos.x * 100.0f);
 				pProj->m_Y = round_to_int(Pos.y * 100.0f);
 				pProj->m_StartTick = 0;

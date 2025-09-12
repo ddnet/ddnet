@@ -685,14 +685,14 @@ public:
 private:
 	struct LaserDeath
 	{
-		std::vector<int> m_aIds;
+		std::vector<int> m_vIds;
 
 		int m_Owner;
 		int m_Remaining;
 		vec2 m_Pos;
-		std::vector<vec2> m_From;
-		std::vector<vec2> m_To;
-		std::vector<int64_t> m_StartTick;
+		std::vector<vec2> m_vFrom;
+		std::vector<vec2> m_vTo;
+		std::vector<int64_t> m_vStartTick;
 		int64_t m_EndTick;
 		CClientMask m_Mask;
 		int m_Sound;
@@ -700,20 +700,20 @@ private:
 
 	struct DamageIndEffects
 	{
-		int Remaining;
-		std::vector<float> Angles;
-		std::vector<vec2> Pos;
-		int64_t Delay;
-		int64_t NextTick;
-		CClientMask Mask;
+		int m_Remaining;
+		std::vector<float> m_vAngles;
+		std::vector<vec2> m_vPos;
+		int64_t m_Delay;
+		int64_t m_NextTick;
+		CClientMask m_Mask;
 	};
-	std::vector<DamageIndEffects> m_DamageIndEffects;
+	std::vector<DamageIndEffects> m_vDamageIndEffects;
 
 	bool ChatDetection(int ClientId, const char *pMsg);
 	bool NameDetection(int ClientId, const char *pName, bool PreventNameChange = false);
 
-	std::vector<CStringDetection> m_ChatDetection;
-	std::vector<CStringDetection> m_NameDetection;
+	std::vector<CStringDetection> m_vChatDetection;
+	std::vector<CStringDetection> m_vNameDetection;
 
 	void HandleEffects();
 	int64_t m_BanSaveDelay = 0;
@@ -727,7 +727,7 @@ private:
 
 	void SnapDebuggedQuad(int ClientId);
 	void QuadDebugIds(bool Clear);
-	std::vector<int> m_QuadDebugIds;
+	std::vector<int> m_vQuadDebugIds;
 
 	static void ConchainQuadDebugPos(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainSoloOnSpawn(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -751,7 +751,6 @@ private:
 	void RemoveNameDetectionString(const char *pString);
 	// List
 	static void ConListNameDetectionStrings(IConsole::IResult *pResult, void *pUserData);
-
 
 	static void ConRainbowBody(IConsole::IResult *pResult, void *pUserData);
 	static void ConRainbowFeet(IConsole::IResult *pResult, void *pUserData);
@@ -884,17 +883,17 @@ public:
 
 	struct CachedMapInfo
 	{
-		char Server[64] = "UNK";
-		char Mapper[128] = "Unknown";
-		int Points = 0;
-		int Stars = 0;
-		char Timestamp[24] = "Unknown";
+		char m_aServer[64] = "UNK";
+		char m_aMapper[128] = "Unknown";
+		int m_Points = 0;
+		int m_Stars = 0;
+		char m_aTimestamp[24] = "Unknown";
 	} m_MapInfoCache;
 
 
 	bool m_Initialized = false;
 
-	CAccountSession m_Account[MAX_CLIENTS];
+	CAccountSession m_aAccounts[MAX_CLIENTS];
 	CAccounts m_AccountManager;
 
 	CVoteMenu m_VoteMenu;
@@ -908,7 +907,7 @@ public:
 
 	void CreateIndEffect(int Type, vec2 Pos, vec2 Direction, CClientMask Mask);
 
-	std::vector<LaserDeath> m_LaserDeaths;
+	std::vector<LaserDeath> m_vLaserDeaths;
 	void CreateLaserDeath(int Type, int pOwner, vec2 pPos, CClientMask pMask);
 	void SnapLaserEffect(int ClientId);
 

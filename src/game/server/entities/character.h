@@ -312,7 +312,7 @@ public:
 	CClientMask OppsiteCosmeticMask();
 
 	// Telekinesis
-	int m_TelekinesisId;
+	int m_TelekinesisId; // Should be a CEntity so PickupDrops can be telekinesised
 	vec2 GetCursorPos();
 
 	int GetPowerHooked();
@@ -354,7 +354,7 @@ public:
 
 	bool m_InQuadFreeze;
 
-	CHeadItem *m_HeadItem;
+	CHeadItem *m_pHeadItem;
 	bool m_SpawnSolo = false;
 	void UnSpawnSolo();
 private:

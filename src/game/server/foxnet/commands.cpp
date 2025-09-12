@@ -1,15 +1,19 @@
-#include <base/log.h>
-#include <base/system.h>
+#include <game/gamecore.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
-#include <game/server/player.h>
-#include <game/gamecore.h>
-#include <engine/shared/protocol.h>
-#include "votemenu.h"
-#include <game/server/score.h>
-#include <base/vmath.h>
 #include <game/server/gameworld.h>
+#include <game/server/player.h>
+#include <game/server/score.h>
+
+#include <engine/shared/config.h>
+#include <engine/shared/protocol.h>
+
+#include <base/log.h>
+#include <base/system.h>
+#include <base/vmath.h>
+
+#include "votemenu.h"
 
 void CGameContext::ConAccRegister(IConsole::IResult *pResult, void *pUserData)
 {
@@ -21,7 +25,7 @@ void CGameContext::ConAccRegister(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	if(pSelf->m_Account[ClientId].m_LoggedIn)
+	if(pSelf->m_aAccounts[ClientId].m_LoggedIn)
 	{
 		pSelf->SendChatTarget(ClientId, "You are already logged in");
 		return;
@@ -43,7 +47,7 @@ void CGameContext::ConAccPassword(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	if(!pSelf->m_Account[ClientId].m_LoggedIn)
+	if(!pSelf->m_aAccounts[ClientId].m_LoggedIn)
 	{
 		pSelf->SendChatTarget(ClientId, "You aren't logged in");
 		return;
@@ -65,7 +69,7 @@ void CGameContext::ConAccLogin(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	if(pSelf->m_Account[ClientId].m_LoggedIn)
+	if(pSelf->m_aAccounts[ClientId].m_LoggedIn)
 	{
 		pSelf->SendChatTarget(ClientId, "You are already logged in");
 		return;
@@ -174,7 +178,7 @@ void CGameContext::AddChatDetectionString(const char *pString, const char *pReas
 {
 	char aBuf[512];
 
-	for(const auto &Words : m_ChatDetection)
+	for(const auto &Words : m_vChatDetection)
 	{
 		if(Words.String()[0] == '\0')
 			continue;
@@ -188,7 +192,7 @@ void CGameContext::AddChatDetectionString(const char *pString, const char *pReas
 
 	if(str_comp_nocase(pString, "") != 0)
 	{
-		m_ChatDetection.push_back(CStringDetection(pString, pReason, pAddition, pBan, pBanTime));
+		m_vChatDetection.push_back(CStringDetection(pString, pReason, pAddition, pBan, pBanTime));
 		str_format(aBuf, sizeof(aBuf), "Added \"%s\" to the Chat Detection List", pString);
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chat-detection", aBuf);
 	}
@@ -197,7 +201,7 @@ void CGameContext::AddChatDetectionString(const char *pString, const char *pReas
 void CGameContext::ConClearChatDetectionStrings(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->m_ChatDetection.clear();
+	pSelf->m_vChatDetection.clear();
 }
 
 void CGameContext::ConRemoveChatDetectionString(IConsole::IResult *pResult, void *pUserData)
@@ -212,18 +216,18 @@ void CGameContext::RemoveChatDetectionString(const char *pString)
 	if(pString[0] == '\0')
 		return;
 
-	if(m_ChatDetection.empty())
+	if(m_vChatDetection.empty())
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chat-detection", "List is Empty");
 		return;
 	}
 
 	char aBuf[512];
-	for(auto it = m_ChatDetection.begin(); it != m_ChatDetection.end(); ++it)
+	for(auto it = m_vChatDetection.begin(); it != m_vChatDetection.end(); ++it)
 	{
 		if(!str_comp_nocase(it->String(), pString))
 		{
-			m_ChatDetection.erase(it);
+			m_vChatDetection.erase(it);
 			str_format(aBuf, sizeof(aBuf), "Removed \"%s\" from the Chat Detection List", pString);
 			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chat-detection", aBuf);
 			return;
@@ -235,14 +239,14 @@ void CGameContext::ConListChatDetectionStrings(IConsole::IResult *pResult, void 
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	if(pSelf->m_ChatDetection.empty())
+	if(pSelf->m_vChatDetection.empty())
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chat-detection", "List is Empty");
 		return;
 	}
 
 	char aBuf[512];
-	for(const auto &Words : pSelf->m_ChatDetection)
+	for(const auto &Words : pSelf->m_vChatDetection)
 	{
 		if(Words.String()[0] == '\0')
 			continue;
@@ -273,7 +277,7 @@ void CGameContext::AddNameDetectionString(const char *pString, const char *pReas
 {
 	char aBuf[512];
 
-	for(const auto &Words : m_NameDetection)
+	for(const auto &Words : m_vNameDetection)
 	{
 		if(Words.String()[0] == '\0')
 			continue;
@@ -287,7 +291,7 @@ void CGameContext::AddNameDetectionString(const char *pString, const char *pReas
 
 	if(str_comp_nocase(pString, "") != 0)
 	{
-		m_NameDetection.push_back(CStringDetection(pString, pReason, 1, pBanTime, ExactName));
+		m_vNameDetection.push_back(CStringDetection(pString, pReason, 1, pBanTime, ExactName));
 		str_format(aBuf, sizeof(aBuf), "Added \"%s\" to the Name Detection List", pString);
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "name-detection", aBuf);
 	}
@@ -296,7 +300,7 @@ void CGameContext::AddNameDetectionString(const char *pString, const char *pReas
 void CGameContext::ConClearNameDetectionStrings(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->m_NameDetection.clear();
+	pSelf->m_vNameDetection.clear();
 }
 
 void CGameContext::ConRemoveNameDetectionString(IConsole::IResult *pResult, void *pUserData)
@@ -310,18 +314,18 @@ void CGameContext::RemoveNameDetectionString(const char *pString)
 {
 	if(pString[0] == '\0')
 		return;
-	if(m_NameDetection.empty())
+	if(m_vNameDetection.empty())
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "name-detection", "List is Empty");
 		return;
 	}
 
 	char aBuf[512];
-	for(auto it = m_NameDetection.begin(); it != m_NameDetection.end(); ++it)
+	for(auto it = m_vNameDetection.begin(); it != m_vNameDetection.end(); ++it)
 	{
 		if(!str_comp(it->String(), pString))
 		{
-			m_NameDetection.erase(it);
+			m_vNameDetection.erase(it);
 			str_format(aBuf, sizeof(aBuf), "Removed \"%s\" from the Name Detection List", pString);
 			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "name-detection", aBuf);
 			return;
@@ -333,14 +337,14 @@ void CGameContext::ConListNameDetectionStrings(IConsole::IResult *pResult, void 
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	if(pSelf->m_NameDetection.empty())
+	if(pSelf->m_vNameDetection.empty())
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "name-detection", "List is Empty");
 		return;
 	}
 
 	char aBuf[512];
-	for(const auto &Words : pSelf->m_NameDetection)
+	for(const auto &Words : pSelf->m_vNameDetection)
 	{
 		if(Words.String()[0] == '\0')
 			continue;
@@ -1130,7 +1134,6 @@ void CGameContext::ConRedirectClient(IConsole::IResult *pResult, void *pUserData
 	pSelf->Server()->RedirectClient(Victim, pResult->GetInteger(1));
 }
 
-
 void CGameContext::ConSetPassive(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -1344,7 +1347,7 @@ void CGameContext::ConToggleMapVoteLock(IConsole::IResult *pResult, void *pUserD
 	pSelf->m_MapVoteLock = !pSelf->m_MapVoteLock;
 	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
-		if (pSelf->m_apPlayers[ClientId])
+		if(pSelf->m_apPlayers[ClientId])
 		{
 			const int VoteMenuPage = pSelf->m_VoteMenu.GetPage(ClientId);
 			if(VoteMenuPage == PAGE_VOTES)
@@ -1439,7 +1442,6 @@ void CGameContext::ConDropWeapon(IConsole::IResult *pResult, void *pUserData)
 	vec2 Dir = normalize(vec2(pChr->Input()->m_TargetX, pChr->Input()->m_TargetY));
 	int Type = pChr->Core()->m_ActiveWeapon;
 
-
 	pChr->DropWeapon(Type, pChr->Core()->m_Vel * 0.7f + Dir * vec2(5.0f, 6.0f));
 }
 
@@ -1497,7 +1499,7 @@ void CGameContext::RegisterFoxNetCommands()
 	Console()->Register("set_tune_override", "i[zone] ?v[id]", CFGFLAG_SERVER, ConSetTuneOverride, this, "Sets the tune override for the player (id)");
 
 	Console()->Register("telekinesis_immunity", "?v[id]", CFGFLAG_SERVER, ConTelekinesisImmunity, this, "Makes player (id) immunte to telekinesis");
-	
+
 	Console()->Register("telekinesis", "?v[id]", CFGFLAG_SERVER, ConTelekinesis, this, "Gives/Takes telekinses to/from player (id)");
 	Console()->Register("heartgun", "?v[id]", CFGFLAG_SERVER, ConHeartGun, this, "Gives/Takes a heartgun to/from player (id)");
 	Console()->Register("lightsaber", "?v[id]", CFGFLAG_SERVER, ConLightsaber, this, "Gives/Takes a lightsaber to/from player (id)");
@@ -1591,5 +1593,4 @@ void CGameContext::ConchainSoloOnSpawn(IConsole::IResult *pResult, void *pUserDa
 		if(pChr && pChr->m_SpawnSolo)
 			pChr->UnSpawnSolo();
 	}
-
 }

@@ -39,7 +39,7 @@ class CPortal : public CEntity
 
 	int m_Owner;
 
-	CPortalData m_apData[NUM_PORTALS];
+	CPortalData m_aData[NUM_PORTALS];
 
 	int m_State;
 	int m_Lifetime; // In ticks

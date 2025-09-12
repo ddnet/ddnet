@@ -141,37 +141,37 @@ void CGameContext::FoxNetInit()
 void CGameContext::HandleEffects()
 {
 	// Handle DamageInd effect
-	for(auto it = m_DamageIndEffects.begin(); it != m_DamageIndEffects.end();)
+	for(auto it = m_vDamageIndEffects.begin(); it != m_vDamageIndEffects.end();)
 	{
-		if(it->Remaining > 0 && Server()->Tick() >= it->NextTick)
+		if(it->m_Remaining > 0 && Server()->Tick() >= it->m_NextTick)
 		{
-			int Angles = it->Angles.size() - it->Remaining;
+			int Angles = it->m_vAngles.size() - it->m_Remaining;
 			if(Angles < 0)
 				Angles = 0;
-			int Positions = it->Pos.size() - it->Remaining;
+			int Positions = it->m_vPos.size() - it->m_Remaining;
 			if(Positions < 0)
 				Positions = 0;
 
-			CreateDamageInd(it->Pos.at(Positions), it->Angles.at(Angles), 1, it->Mask);
+			CreateDamageInd(it->m_vPos.at(Positions), it->m_vAngles.at(Angles), 1, it->m_Mask);
 
-			it->Remaining--;
-			it->NextTick = Server()->Tick() + it->Delay;
+			it->m_Remaining--;
+			it->m_NextTick = Server()->Tick() + it->m_Delay;
 		}
-		if(it->Remaining <= 0)
-			it = m_DamageIndEffects.erase(it);
+		if(it->m_Remaining <= 0)
+			it = m_vDamageIndEffects.erase(it);
 		else
 			++it;
 	}
 
 	// Sound Effect Handle
-	for(auto it = m_LaserDeaths.begin(); it != m_LaserDeaths.end();)
+	for(auto it = m_vLaserDeaths.begin(); it != m_vLaserDeaths.end();)
 	{
-		const size_t count = std::min<size_t>((size_t)it->m_Remaining, it->m_StartTick.size());
+		const size_t count = std::min<size_t>((size_t)it->m_Remaining, it->m_vStartTick.size());
 		for(size_t at = 0; at < count; at++)
 		{
 			if(Server()->Tick() < it->m_EndTick)
 			{
-				if(it->m_StartTick[at] == Server()->Tick())
+				if(it->m_vStartTick[at] == Server()->Tick())
 					CreateSound(it->m_Pos, it->m_Sound, it->m_Mask);
 			}
 		}
@@ -277,7 +277,7 @@ bool CGameContext::ChatDetection(int ClientId, const char *pMsg)
 	if(ClientId < 0)
 		return false;
 
-	if(m_ChatDetection.empty())
+	if(m_vChatDetection.empty())
 		return false;
 
 	float count = 0; // amount of flagged strings (some strings may count more than others)
@@ -298,7 +298,7 @@ bool CGameContext::ChatDetection(int ClientId, const char *pMsg)
 	FoundStrings.clear();
 	Times.clear();
 
-	for(const auto &Entry : m_ChatDetection)
+	for(const auto &Entry : m_vChatDetection)
 	{
 		if(Entry.String()[0] == '\0')
 			continue;
@@ -392,7 +392,7 @@ bool CGameContext::NameDetection(int ClientId, const char *pName, bool PreventNa
 	if(ClientId < 0)
 		return false;
 
-	if(m_NameDetection.empty())
+	if(m_vNameDetection.empty())
 		return false;
 
 	const char *ClientName = pName;
@@ -405,7 +405,7 @@ bool CGameContext::NameDetection(int ClientId, const char *pName, bool PreventNa
 	FoundStrings.clear();
 	Times.clear();
 
-	for(const auto &Entry : m_NameDetection)
+	for(const auto &Entry : m_vNameDetection)
 	{
 		if(Entry.String()[0] == '\0')
 			continue;
@@ -553,22 +553,22 @@ void CGameContext::CreateIndEffect(int Type, vec2 Pos, vec2 Direction, CClientMa
 	if(Type >= IND_CLOCKWISE && Type <= IND_COUNTERWISE)
 	{
 		AngleOffset = 0.80f;
-		effect.Remaining = 10;
-		for(int Remaining = 0; Remaining < effect.Remaining; Remaining++)
+		effect.m_Remaining = 10;
+		for(int Remaining = 0; Remaining < effect.m_Remaining; Remaining++)
 		{
 			if(Type == IND_CLOCKWISE)
-				effect.Angles.push_back(Angle - AngleOffset + (Remaining * StarDistance));
+				effect.m_vAngles.push_back(Angle - AngleOffset + (Remaining * StarDistance));
 			else
-				effect.Angles.push_back(Angle + AngleOffset - (Remaining * StarDistance));
+				effect.m_vAngles.push_back(Angle + AngleOffset - (Remaining * StarDistance));
 		}
-		effect.Pos.push_back(Pos);
-		effect.Delay = 1;
-		effect.NextTick = Server()->Tick();
-		effect.Mask = Mask;
-		m_DamageIndEffects.push_back(effect);
+		effect.m_vPos.push_back(Pos);
+		effect.m_Delay = 1;
+		effect.m_NextTick = Server()->Tick();
+		effect.m_Mask = Mask;
+		m_vDamageIndEffects.push_back(effect);
 
-		effect.Pos.clear();
-		effect.Angles.clear();
+		effect.m_vPos.clear();
+		effect.m_vAngles.clear();
 	}
 	else if(Type == IND_INWARD)
 	{
@@ -576,23 +576,23 @@ void CGameContext::CreateIndEffect(int Type, vec2 Pos, vec2 Direction, CClientMa
 
 		for(int i = 0; i < 2; i++)
 		{
-			effect.Remaining = 5;
-			for(int Remaining = 0; Remaining < effect.Remaining; Remaining++)
+			effect.m_Remaining = 5;
+			for(int Remaining = 0; Remaining < effect.m_Remaining; Remaining++)
 			{
 				if(i == 0)
-					effect.Angles.push_back(Angle + AngleOffset + (Remaining * StarDistance));
+					effect.m_vAngles.push_back(Angle + AngleOffset + (Remaining * StarDistance));
 				else
-					effect.Angles.push_back(Angle - AngleOffset - (Remaining * StarDistance));
+					effect.m_vAngles.push_back(Angle - AngleOffset - (Remaining * StarDistance));
 			}
-			effect.Pos.push_back(Pos);
-			effect.Delay = 2;
-			effect.NextTick = Server()->Tick();
-			effect.Mask = Mask;
+			effect.m_vPos.push_back(Pos);
+			effect.m_Delay = 2;
+			effect.m_NextTick = Server()->Tick();
+			effect.m_Mask = Mask;
 
-			m_DamageIndEffects.push_back(effect);
+			m_vDamageIndEffects.push_back(effect);
 
-			effect.Pos.clear();
-			effect.Angles.clear();
+			effect.m_vPos.clear();
+			effect.m_vAngles.clear();
 		}
 	}
 	else if(Type == IND_OUTWARD)
@@ -601,47 +601,47 @@ void CGameContext::CreateIndEffect(int Type, vec2 Pos, vec2 Direction, CClientMa
 
 		for(int i = 0; i < 2; i++)
 		{
-			effect.Remaining = 5;
-			for(int Remaining = 0; Remaining < effect.Remaining; Remaining++)
+			effect.m_Remaining = 5;
+			for(int Remaining = 0; Remaining < effect.m_Remaining; Remaining++)
 			{
 				if(i == 0)
-					effect.Angles.push_back(Angle - AngleOffset - (Remaining * StarDistance));
+					effect.m_vAngles.push_back(Angle - AngleOffset - (Remaining * StarDistance));
 				else
-					effect.Angles.push_back(Angle + AngleOffset + (Remaining * StarDistance));
+					effect.m_vAngles.push_back(Angle + AngleOffset + (Remaining * StarDistance));
 			}
-			effect.Pos.push_back(Pos);
-			effect.Delay = 2;
-			effect.NextTick = Server()->Tick();
-			effect.Mask = Mask;
+			effect.m_vPos.push_back(Pos);
+			effect.m_Delay = 2;
+			effect.m_NextTick = Server()->Tick();
+			effect.m_Mask = Mask;
 
-			m_DamageIndEffects.push_back(effect);
+			m_vDamageIndEffects.push_back(effect);
 
-			effect.Pos.clear();
-			effect.Angles.clear();
+			effect.m_vPos.clear();
+			effect.m_vAngles.clear();
 		}
 	}
 	else if(Type == IND_LINE)
 	{
-		effect.Remaining = 6;
-		for(int Remaining = 0; Remaining < effect.Remaining; Remaining++)
+		effect.m_Remaining = 6;
+		for(int Remaining = 0; Remaining < effect.m_Remaining; Remaining++)
 		{
 			float Offset = Remaining * 15.0f;
 			vec2 CalcPos = Pos - Direction * 25.0f + Direction * Offset;
-			effect.Pos.push_back(CalcPos);
+			effect.m_vPos.push_back(CalcPos);
 		}
-		effect.Angles.push_back(Angle - AngleOffset);
+		effect.m_vAngles.push_back(Angle - AngleOffset);
 
-		effect.Delay = 1;
-		effect.NextTick = Server()->Tick();
-		effect.Mask = Mask;
-		m_DamageIndEffects.push_back(effect);
-		effect.Pos.clear();
-		effect.Angles.clear();
+		effect.m_Delay = 1;
+		effect.m_NextTick = Server()->Tick();
+		effect.m_Mask = Mask;
+		m_vDamageIndEffects.push_back(effect);
+		effect.m_vPos.clear();
+		effect.m_vAngles.clear();
 	}
 	else if(Type == IND_CRISSCROSS)
 	{
-		effect.Remaining = 3;
-		for(int Remaining = 0; Remaining < effect.Remaining; Remaining++)
+		effect.m_Remaining = 3;
+		for(int Remaining = 0; Remaining < effect.m_Remaining; Remaining++)
 		{
 			vec2 CalcPos;
 			float perpAngle = 0.0f;
@@ -653,30 +653,30 @@ void CGameContext::CreateIndEffect(int Type, vec2 Pos, vec2 Direction, CClientMa
 			if(Remaining == 0)
 			{
 				perpAngle = GetAngle - AngleOffset + pi / 2;
-				effect.Angles.push_back(Angle - AngleOffset - 0.85f);
+				effect.m_vAngles.push_back(Angle - AngleOffset - 0.85f);
 				CalcPos = Pos + vec2(cosf(perpAngle), sinf(perpAngle)) * 25.0f;
 			}
 			else if(Remaining == 1)
 			{
 				CalcPos = Pos - Direction * 15.0f;
-				effect.Angles.push_back(Angle - AngleOffset);
+				effect.m_vAngles.push_back(Angle - AngleOffset);
 			}
 			else
 			{
 				perpAngle = GetAngle - AngleOffset - pi / 2;
-				effect.Angles.push_back(Angle - AngleOffset + 0.85f);
+				effect.m_vAngles.push_back(Angle - AngleOffset + 0.85f);
 				CalcPos = Pos + vec2(cosf(perpAngle), sinf(perpAngle)) * 25.0f;
 			}
 
-			effect.Pos.push_back(CalcPos);
+			effect.m_vPos.push_back(CalcPos);
 		}
 
-		effect.Delay = 1;
-		effect.NextTick = Server()->Tick();
-		effect.Mask = Mask;
-		m_DamageIndEffects.push_back(effect);
-		effect.Pos.clear();
-		effect.Angles.clear();
+		effect.m_Delay = 1;
+		effect.m_NextTick = Server()->Tick();
+		effect.m_Mask = Mask;
+		m_vDamageIndEffects.push_back(effect);
+		effect.m_vPos.clear();
+		effect.m_vAngles.clear();
 	}
 	else
 	{
@@ -768,19 +768,19 @@ void CGameContext::CreateLaserDeath(int Type, int pOwner, vec2 pPos, CClientMask
 
 		vec2 Pos = pPos + random_direction() * Random;
 
-		effect.m_aIds.push_back(Server()->SnapNewId());
+		effect.m_vIds.push_back(Server()->SnapNewId());
 
-		effect.m_From.push_back(Pos);
-		effect.m_To.push_back(Pos);
-		effect.m_StartTick.push_back(Server()->Tick() + Server()->TickSpeed() / 5 * Num);
+		effect.m_vFrom.push_back(Pos);
+		effect.m_vTo.push_back(Pos);
+		effect.m_vStartTick.push_back(Server()->Tick() + Server()->TickSpeed() / 5 * Num);
 	}
 
-	m_LaserDeaths.push_back(effect);
+	m_vLaserDeaths.push_back(effect);
 }
 
 void CGameContext::SnapLaserEffect(int ClientId)
 {
-	if(m_LaserDeaths.empty())
+	if(m_vLaserDeaths.empty())
 		return;
 
 	CPlayer *pPlayer = m_apPlayers[ClientId];
@@ -788,19 +788,19 @@ void CGameContext::SnapLaserEffect(int ClientId)
 	if(!pPlayer || pPlayer->m_HideCosmetics)
 		return;
 
-	for(auto it = m_LaserDeaths.begin(); it != m_LaserDeaths.end();)
+	for(auto it = m_vLaserDeaths.begin(); it != m_vLaserDeaths.end();)
 	{
 		const size_t count = std::min({(size_t)it->m_Remaining,
-			it->m_aIds.size(), it->m_From.size(), it->m_To.size(), it->m_StartTick.size()});
+			it->m_vIds.size(), it->m_vFrom.size(), it->m_vTo.size(), it->m_vStartTick.size()});
 		for(size_t at = 0; at < count; at++)
 		{
-			if(Server()->Tick() > it->m_StartTick[at] && Server()->Tick() < it->m_EndTick)
+			if(Server()->Tick() > it->m_vStartTick[at] && Server()->Tick() < it->m_EndTick)
 			{
-				CNetObj_DDNetLaser *pObj = Server()->SnapNewItem<CNetObj_DDNetLaser>(it->m_aIds[at]);
+				CNetObj_DDNetLaser *pObj = Server()->SnapNewItem<CNetObj_DDNetLaser>(it->m_vIds[at]);
 				if(pObj)
 				{
-					const vec2 &To = it->m_To[at];
-					const vec2 &From = it->m_From[at];
+					const vec2 &To = it->m_vTo[at];
+					const vec2 &From = it->m_vFrom[at];
 					pObj->m_ToX = (int)To.x;
 					pObj->m_ToY = (int)To.y;
 					pObj->m_FromX = (int)From.x;
@@ -813,9 +813,9 @@ void CGameContext::SnapLaserEffect(int ClientId)
 		}
 		if(Server()->Tick() > it->m_EndTick)
 		{
-			for(const auto aIds : it->m_aIds)
+			for(const auto aIds : it->m_vIds)
 				Server()->SnapFreeId(aIds);
-			it = m_LaserDeaths.erase(it);
+			it = m_vLaserDeaths.erase(it);
 		}
 		else
 			++it;
@@ -867,7 +867,7 @@ void CGameContext::SnapDebuggedQuad(int ClientId)
 	if(!pPlayer || !g_Config.m_SvDebugQuadPos)
 		return;
 
-	if(!m_QuadDebugIds.empty())
+	if(!m_vQuadDebugIds.empty())
 	{
 		int GetId = 0;
 		for(const auto *pQuadLayer : Collision()->QuadLayers())
@@ -880,7 +880,7 @@ void CGameContext::SnapDebuggedQuad(int ClientId)
 				vec2 TopLeft;
 				Collision()->GetQuadCorners(i, pQuadLayer, 0.0f, &TopLeft);
 
-				CNetObj_DDNetLaser *pObj = Server()->SnapNewItem<CNetObj_DDNetLaser>(m_QuadDebugIds.at(GetId));
+				CNetObj_DDNetLaser *pObj = Server()->SnapNewItem<CNetObj_DDNetLaser>(m_vQuadDebugIds.at(GetId));
 				if(pObj)
 				{
 					pObj->m_ToX = (int)TopLeft.x;
@@ -908,17 +908,17 @@ void CGameContext::QuadDebugIds(bool Clear)
 
 			for(int i = 0; i < pQuadLayer->m_NumQuads; i++)
 			{
-				m_QuadDebugIds.push_back(Server()->SnapNewId());
+				m_vQuadDebugIds.push_back(Server()->SnapNewId());
 			}
 		}
 	}
-	else if(!Clear && !m_QuadDebugIds.empty())
+	else if(!Clear && !m_vQuadDebugIds.empty())
 	{
-		for(int i = 0; i < (int)m_QuadDebugIds.size(); i++)
+		for(int i = 0; i < (int)m_vQuadDebugIds.size(); i++)
 		{
-			Server()->SnapFreeId(m_QuadDebugIds[i]);
+			Server()->SnapFreeId(m_vQuadDebugIds[i]);
 		}
-		m_QuadDebugIds.clear();
+		m_vQuadDebugIds.clear();
 	}
 }
 

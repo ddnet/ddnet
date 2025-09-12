@@ -20,7 +20,7 @@
 #include "shop.h"
 #include <engine/shared/protocol.h>
 
-CAccountSession *CPlayer::Acc() { return &GameServer()->m_Account[m_ClientId]; }
+CAccountSession *CPlayer::Acc() { return &GameServer()->m_aAccounts[m_ClientId]; }
 
 void CPlayer::FoxNetTick()
 {

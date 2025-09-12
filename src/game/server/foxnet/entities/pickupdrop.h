@@ -2,11 +2,13 @@
 #ifndef GAME_SERVER_FOXNET_ENTITIES_PICKUPDROP_H
 #define GAME_SERVER_FOXNET_ENTITIES_PICKUPDROP_H
 
-#include <base/vmath.h>
-#include <engine/shared/protocol.h>
 #include <game/mapitems.h>
 #include <game/server/entity.h>
 #include <game/server/gameworld.h>
+
+#include <engine/shared/protocol.h>
+
+#include <base/vmath.h>
 
 class CPickupDrop : public CEntity
 {

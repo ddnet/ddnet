@@ -1,4 +1,4 @@
-#include "pickupdrop.h"
+// Made by qxdFox
 #include <game/server/entities/character.h>
 #include <game/server/player.h>
 
@@ -7,18 +7,21 @@
 #include <game/server/teams.h>
 
 #include <generated/protocol.h>
-#include <generated/server_data.h>
 
-#include <base/vmath.h>
 #include <game/collision.h>
 #include <game/gamecore.h>
 #include <game/mapitems.h>
 #include <game/server/entities/pickup.h>
 #include <game/server/entity.h>
 #include <game/server/gameworld.h>
-#include <vector>
-#include <engine/shared/protocol.h>
 #include <game/teamscore.h>
+
+#include <engine/shared/protocol.h>
+
+#include <base/vmath.h>
+#include <vector>
+
+#include "pickupdrop.h"
 
 CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, int LastOwner, vec2 Pos, int Team, int TeleCheckpoint, vec2 Dir, int Lifetime, int Type) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUPDROP, Pos, 28)

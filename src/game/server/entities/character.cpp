@@ -61,7 +61,7 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 	m_IsRainbowHooked = false;
 	m_TuneZoneOverride = -1;
 	m_InSnake = false;
-	m_HeadItem = nullptr;
+	m_pHeadItem = nullptr;
 	// FoxNet>
 }
 
@@ -2868,7 +2868,7 @@ void CCharacter::SwapClients(int Client1, int Client2)
 // <FoxNet
 CAccountSession *CCharacter::Acc()
 {
-	return &GameServer()->m_Account[GetPlayer()->GetCid()];
+	return &GameServer()->m_aAccounts[GetPlayer()->GetCid()];
 }
 
 void CCharacter::OnDie(int Killer, int Weapon, bool SendKillMsg)
@@ -2976,8 +2976,8 @@ void CCharacter::FoxNetSpawn()
 	{
 		m_SpawnSolo = true;
 		SetSolo(true);
-		if(!m_HeadItem)
-			m_HeadItem = new CHeadItem(GameWorld(), GetPlayer()->GetCid(), m_Pos, POWERUP_ARMOR, 56.0f);
+		if(!m_pHeadItem)
+			m_pHeadItem = new CHeadItem(GameWorld(), GetPlayer()->GetCid(), m_Pos, POWERUP_ARMOR, 56.0f);
 	}
 }
 
@@ -3005,7 +3005,7 @@ void CCharacter::UnSpawnSolo()
 {
 	SetSolo(false);
 	m_SpawnSolo = false;
-	m_HeadItem = nullptr;
+	m_pHeadItem = nullptr;
 }
 
 void CCharacter::HandleTelekinesis()
@@ -3328,6 +3328,7 @@ void CCharacter::UpdateWeaponIndicator()
 	if(aBuf[0])
 		m_LastWeaponIndTick = Server()->Tick();
 
+	// Send the broadcast to spectators too
 	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
 		CPlayer *pPl = GameServer()->m_apPlayers[ClientId];

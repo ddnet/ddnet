@@ -1,20 +1,17 @@
 // made by fokkonaut
-
-#include "custom_projectile.h"
+#include <game/mapitems.h>
 #include <game/server/entities/character.h>
-#include <game/server/player.h>
-
+#include <game/server/entity.h>
 #include <game/server/gamecontext.h>
-#include <game/server/gamemodes/DDRace.h>
-#include <game/server/teams.h>
+#include <game/server/gameworld.h>
+#include <game/server/player.h>
 
 #include <generated/protocol.h>
 #include <generated/server_data.h>
 
 #include <base/vmath.h>
-#include <game/mapitems.h>
-#include <game/server/entity.h>
-#include <game/server/gameworld.h>
+
+#include "custom_projectile.h"
 
 CCustomProjectile::CCustomProjectile(CGameWorld *pGameWorld, int Owner, vec2 Pos, vec2 Dir,
 	bool Explosive, bool Freeze, bool Unfreeze, int Type, bool IsNormalWeapon, float Lifetime, float Accel, float Speed) :

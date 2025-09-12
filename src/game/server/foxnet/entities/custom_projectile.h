@@ -1,9 +1,11 @@
 // made by fokkonaut
-
 #ifndef GAME_SERVER_FOXNET_ENTITIES_CUSTOM_PROJECTILE_H
 #define GAME_SERVER_FOXNET_ENTITIES_CUSTOM_PROJECTILE_H
 
 #include <game/server/entity.h>
+#include <game/server/entities/character.h>
+
+#include <engine/shared/protocol.h>
 
 enum
 {

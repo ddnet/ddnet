@@ -40,7 +40,7 @@ void CHeadItem::Tick()
 
 	if(!pOwner)
 		return;
-	if(!pOwner->m_HeadItem)
+	if(!pOwner->m_pHeadItem)
 	{
 		Reset();
 		return;

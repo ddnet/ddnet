@@ -150,7 +150,7 @@ bool CAccounts::Login(int ClientId, const char *pUsername, const char *pPassword
 void CAccounts::OnLogin(int ClientId, const CAccResult &Res)
 {
 	{
-		CAccountSession &Acc = GameServer()->m_Account[ClientId];
+		CAccountSession &Acc = GameServer()->m_aAccounts[ClientId];
 
 		time_t Now;
 		time(&Now);
@@ -200,11 +200,11 @@ void CAccounts::OnLogin(int ClientId, const CAccResult &Res)
 
 bool CAccounts::Logout(int ClientId)
 {
-	if(GameServer()->m_Account[ClientId].m_LoggedIn)
+	if(GameServer()->m_aAccounts[ClientId].m_LoggedIn)
 	{
-		OnLogout(ClientId, GameServer()->m_Account[ClientId]);
+		OnLogout(ClientId, GameServer()->m_aAccounts[ClientId]);
 		GameServer()->OnLogout(ClientId);
-		GameServer()->m_Account[ClientId] = CAccountSession(); // Reset account session
+		GameServer()->m_aAccounts[ClientId] = CAccountSession(); // Reset account session
 		return true;
 	}
 	return false;
@@ -325,7 +325,7 @@ bool CAccounts::ChangePassword(int ClientId, const char *pOldPassword, const cha
 	if(!m_pPool)
 		return false;
 
-	if(!GameServer()->m_Account[ClientId].m_LoggedIn)
+	if(!GameServer()->m_aAccounts[ClientId].m_LoggedIn)
 	{
 		GameServer()->SendChatTarget(ClientId, "[Err] You are not logged in");
 		return false;
@@ -373,7 +373,7 @@ bool CAccounts::ChangePassword(int ClientId, const char *pOldPassword, const cha
 		return pSql->ExecuteUpdate(&NumUpdated, pError, ErrorSize);
 	};
 	auto pReq = std::make_unique<CSqlChangePass>();
-	str_copy(pReq->m_Username, GameServer()->m_Account[ClientId].m_Username, sizeof(pReq->m_Username));
+	str_copy(pReq->m_Username, GameServer()->m_aAccounts[ClientId].m_Username, sizeof(pReq->m_Username));
 	str_copy(pReq->m_OldHash, HashedOld, sizeof(pReq->m_OldHash));
 	str_copy(pReq->m_NewHash, HashedNew, sizeof(pReq->m_NewHash));
 
@@ -614,7 +614,7 @@ std::optional<CAccountSession> CAccounts::GetAccountCurName(const char *pName)
 
 CAccountSession CAccounts::GetAccount(int ClientId)
 {
-	return GameServer()->m_Account[ClientId];
+	return GameServer()->m_aAccounts[ClientId];
 }
 
 void CAccounts::SaveAccountsInfo(int ClientId, const CAccountSession AccInfo)
@@ -643,8 +643,8 @@ void CAccounts::SaveAllAccounts()
 		return;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(GameServer()->m_Account[i].m_LoggedIn)
-			SaveAccountsInfo(i, GameServer()->m_Account[i]);
+		if(GameServer()->m_aAccounts[i].m_LoggedIn)
+			SaveAccountsInfo(i, GameServer()->m_aAccounts[i]);
 	}
 }
 
@@ -669,7 +669,7 @@ void CAccounts::SetPlayerName(int ClientId, const char *pName) // When player ch
 
 	auto pReq = std::make_unique<CAccSetNameReq>();
 	str_copy(pReq->m_NewPlayerName, pName, sizeof(pReq->m_NewPlayerName));
-	str_copy(pReq->m_Username, GameServer()->m_Account[ClientId].m_Username, sizeof(pReq->m_Username));
+	str_copy(pReq->m_Username, GameServer()->m_aAccounts[ClientId].m_Username, sizeof(pReq->m_Username));
 	m_pPool->ExecuteWrite(CAccountsWorker::SetPlayerName, std::move(pReq), "acc set player name");
 }
 

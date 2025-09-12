@@ -771,8 +771,8 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 	if(Player->Acc()->m_LoggedIn)
 	{
 		int64_t XP = 0;
-		if(GameServer()->m_MapInfoCache.Points > 0)
-			XP = GameServer()->m_MapInfoCache.Points;
+		if(GameServer()->m_MapInfoCache.m_Points > 0)
+			XP = GameServer()->m_MapInfoCache.m_Points;
 
 		if(XP > 0)
 		{

@@ -116,7 +116,7 @@ const char *CShop::ShortcutToName(const char *pShortcut)
 
 void CShop::BuyItem(int ClientId, const char *pName)
 {
-	CAccountSession *pAcc = &GameServer()->m_Account[ClientId];
+	CAccountSession *pAcc = &GameServer()->m_aAccounts[ClientId];
 	const int Price = GetItemPrice(pName);
 	const int MinLevel = GetItemMinLevel(pName);
 
@@ -212,5 +212,5 @@ void CShop::BuyItem(int ClientId, const char *pName)
 	str_format(aBuf, sizeof(aBuf), "│ You now have: %lld %s", pAcc->m_Money, g_Config.m_SvCurrencyName);
 	GameServer()->SendChatTarget(ClientId, aBuf);
 	GameServer()->SendChatTarget(ClientId, "╰───────────────────────");
-	GameServer()->m_AccountManager.SaveAccountsInfo(ClientId, GameServer()->m_Account[ClientId]);
+	GameServer()->m_AccountManager.SaveAccountsInfo(ClientId, GameServer()->m_aAccounts[ClientId]);
 }

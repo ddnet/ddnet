@@ -2123,11 +2123,11 @@ bool CScoreWorker::CacheMapInfo(IDbConnection *pSqlServer, const ISqlData *pGame
 		if(pReq->m_pGameServer)
 		{
 			auto &Dst = pReq->m_pGameServer->m_MapInfoCache;
-			str_copy(Dst.Server, pReq->Server, sizeof(Dst.Server));
-			str_copy(Dst.Mapper, pReq->Mapper, sizeof(Dst.Mapper));
-			Dst.Points = pReq->Points;
-			Dst.Stars = pReq->Stars;
-			str_copy(Dst.Timestamp, pReq->Timestamp, sizeof(Dst.Timestamp));
+			str_copy(Dst.m_aServer, pReq->Server, sizeof(Dst.m_aServer));
+			str_copy(Dst.m_aMapper, pReq->Mapper, sizeof(Dst.m_aMapper));
+			Dst.m_Points = pReq->Points;
+			Dst.m_Stars = pReq->Stars;
+			str_copy(Dst.m_aTimestamp, pReq->Timestamp, sizeof(Dst.m_aTimestamp));
 		}
 	}
 

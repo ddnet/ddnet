@@ -1,6 +1,4 @@
-// made by fokkonaut
-
-#include "light_saber.h"
+// Made by qxdFox
 #include <game/server/entities/character.h>
 #include <game/server/player.h>
 
@@ -9,17 +7,17 @@
 #include <game/server/teams.h>
 
 #include <generated/protocol.h>
-#include <generated/server_data.h>
 
 #include <base/vmath.h>
 #include <game/gamecore.h>
-#include <game/mapitems.h>
 #include <game/server/entity.h>
 #include <game/server/gameworld.h>
 #include <game/teamscore.h>
 
+#include "light_saber.h"
+
 CLightSaber::CLightSaber(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_LIGHT_SABER, Pos)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_LIGHTSABER, Pos)
 {
 	m_Owner = Owner;
 	m_Pos = Pos;

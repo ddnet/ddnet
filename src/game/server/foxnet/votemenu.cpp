@@ -131,7 +131,7 @@ bool CVoteMenu::IsCustomVoteOption(const CNetMsg_Cl_CallVote *pMsg, int ClientId
 	if(Page < 0 || Page >= NUM_PAGES)
 		return false;
 
-	CAccountSession &Acc = GameServer()->m_Account[ClientId];
+	CAccountSession &Acc = GameServer()->m_aAccounts[ClientId];
 
 	if(!IsPageAllowed(ClientId, Page) && Page != PAGE_VOTES)
 	{
@@ -435,10 +435,10 @@ void CVoteMenu::UpdatePages(int ClientId)
 		return;
 	}
 	CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
-	CAccountSession Acc = GameServer()->m_Account[ClientId];
+	const CAccountSession *pAcc = &GameServer()->m_aAccounts[ClientId];
 	CAccountSession &OldAcc = m_aClientData[ClientId].m_Account;
 
-	if(Acc.m_LoggedIn != m_aClientData[ClientId].m_Account.m_LoggedIn) // Check login status change
+	if(pAcc->m_LoggedIn != m_aClientData[ClientId].m_Account.m_LoggedIn) // Check login status change
 		Changes = true;
 
 	if(Page == PAGE_VOTES)
@@ -446,27 +446,27 @@ void CVoteMenu::UpdatePages(int ClientId)
 
 	if(Page == PAGE_SETTINGS)
 	{
-		if(Acc.m_Flags != OldAcc.m_Flags)
+		if(pAcc->m_Flags != OldAcc.m_Flags)
 			Changes = true;
 	}
 	if(Page == PAGE_ACCOUNT)
 	{
-		if(Acc.m_Level != OldAcc.m_Level)
+		if(pAcc->m_Level != OldAcc.m_Level)
 			Changes = true;
-		if(Acc.m_XP != OldAcc.m_XP)
+		if(pAcc->m_XP != OldAcc.m_XP)
 			Changes = true;
-		if(Acc.m_Playtime != OldAcc.m_Playtime)
+		if(pAcc->m_Playtime != OldAcc.m_Playtime)
 			Changes = true;
-		if(Acc.m_Money != OldAcc.m_Money)
+		if(pAcc->m_Money != OldAcc.m_Money)
 			Changes = true;
-		if(Acc.m_Deaths != OldAcc.m_Deaths)
+		if(pAcc->m_Deaths != OldAcc.m_Deaths)
 			Changes = true;
 	}
 	if(Page == PAGE_SHOP)
 	{
-		if(Acc.m_Money != OldAcc.m_Money)
+		if(pAcc->m_Money != OldAcc.m_Money)
 			Changes = true;
-		if(memcmp(Acc.m_Inventory, OldAcc.m_Inventory, sizeof(Acc.m_Inventory)) != 0)
+		if(memcmp(pAcc->m_Inventory, OldAcc.m_Inventory, sizeof(pAcc->m_Inventory)) != 0)
 			Changes = true;
 
 		// if(mem_comp(&Acc, &m_aClientData[ClientId].m_Account, sizeof(Acc)) != 0)
@@ -474,7 +474,7 @@ void CVoteMenu::UpdatePages(int ClientId)
 	}
 	if(Page == PAGE_INVENTORY || Page == PAGE_ADMIN)
 	{
-		if(memcmp(Acc.m_Inventory, OldAcc.m_Inventory, sizeof(Acc.m_Inventory)) != 0)
+		if(memcmp(pAcc->m_Inventory, OldAcc.m_Inventory, sizeof(pAcc->m_Inventory)) != 0)
 			Changes = true;
 		if(memcmp(&pPl->m_Cosmetics, &m_aClientData[ClientId].m_Cosmetics, sizeof(pPl->m_Cosmetics)) != 0)
 			Changes = true;
@@ -482,7 +482,7 @@ void CVoteMenu::UpdatePages(int ClientId)
 
 	if(Changes)
 	{
-		m_aClientData[ClientId].m_Account = GameServer()->m_Account[ClientId];
+		m_aClientData[ClientId].m_Account = GameServer()->m_aAccounts[ClientId];
 		m_aClientData[ClientId].m_Cosmetics = pPl->m_Cosmetics;
 		PrepareVoteOptions(ClientId, Page);
 	}
@@ -493,13 +493,13 @@ bool CVoteMenu::IsPageAllowed(int ClientId, int Page) const
 	if(Page < 0 || Page >= NUM_PAGES)
 		return true;
 
-	const CAccountSession Acc = GameServer()->m_Account[ClientId];
+	const CAccountSession *pAcc = &GameServer()->m_aAccounts[ClientId];
 
 	if(IsFlagSet(g_Config.m_SvVoteMenuFlags, Page) && Page != PAGE_ADMIN)
 		return false;
 	if(Page == PAGE_ADMIN && Server()->GetAuthedState(ClientId) < AUTHED_MOD) // Allow Mod Access
 		return false;
-	if(!Acc.m_LoggedIn && (Page == PAGE_SHOP || Page == PAGE_INVENTORY))
+	if(!pAcc->m_LoggedIn && (Page == PAGE_SHOP || Page == PAGE_INVENTORY))
 		return false;
 	return true;
 }
@@ -571,7 +571,7 @@ void CVoteMenu::SetPage(int ClientId, int Page)
 		return;
 
 	m_aClientData[ClientId].m_Page = Page;
-	CAccountSession &Acc = GameServer()->m_Account[ClientId];
+	CAccountSession &Acc = GameServer()->m_aAccounts[ClientId];
 	if(Acc.m_LoggedIn)
 		Acc.m_VoteMenuPage = Page;
 
@@ -581,10 +581,10 @@ void CVoteMenu::SetPage(int ClientId, int Page)
 void CVoteMenu::SendPageSettings(int ClientId)
 {
 	CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
-	const CAccountSession Acc = GameServer()->m_Account[ClientId];
+	const CAccountSession *pAcc = &GameServer()->m_aAccounts[ClientId];
 
-	if(Acc.m_LoggedIn)
-		AddVoteCheckBox(SETTINGS_AUTO_LOGIN, Acc.m_Flags & ACC_FLAG_AUTOLOGIN);
+	if(pAcc->m_LoggedIn)
+		AddVoteCheckBox(SETTINGS_AUTO_LOGIN, pAcc->m_Flags & ACC_FLAG_AUTOLOGIN);
 	AddVoteCheckBox(SETTINGS_HIDE_COSMETICS, pPl->m_HideCosmetics);
 	AddVoteCheckBox(SETTINGS_HIDE_POWERUPS, pPl->m_HidePowerUps);
 }
@@ -592,9 +592,9 @@ void CVoteMenu::SendPageSettings(int ClientId)
 void CVoteMenu::SendPageAccount(int ClientId)
 {
 	// CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
-	const CAccountSession Acc = GameServer()->m_Account[ClientId];
+	const CAccountSession *pAcc = &GameServer()->m_aAccounts[ClientId];
 
-	if(!Acc.m_LoggedIn)
+	if(!pAcc->m_LoggedIn)
 	{
 		AddVoteText("You are not logged in.");
 		AddVoteSeperator();
@@ -606,15 +606,15 @@ void CVoteMenu::SendPageAccount(int ClientId)
 	char aBuf[VOTE_DESC_LENGTH];
 
 	AddVoteText("╭─────────       Pʀᴏғɪʟᴇ");
-	str_format(aBuf, sizeof(aBuf), "│ Account Name: %s", Acc.m_Username);
+	str_format(aBuf, sizeof(aBuf), "│ Account Name: %s", pAcc->m_Username);
 	AddVoteText(aBuf);
-	str_format(aBuf, sizeof(aBuf), "│ Last Player Name: %s", Acc.m_LastName);
+	str_format(aBuf, sizeof(aBuf), "│ Last Player Name: %s", pAcc->m_LastName);
 	AddVoteText(aBuf);
 
 	char TimeBuf[64];
 
 	// Register Date
-	if(FormatUnixTime(Acc.m_RegisterDate, TimeBuf, sizeof(TimeBuf), "%Y-%m-%d %H:%M:%S"))
+	if(FormatUnixTime(pAcc->m_RegisterDate, TimeBuf, sizeof(TimeBuf), "%Y-%m-%d %H:%M:%S"))
 	{
 		str_format(aBuf, sizeof(aBuf), "│ Register Date: %s", TimeBuf);
 		AddVoteText(aBuf);
@@ -626,25 +626,25 @@ void CVoteMenu::SendPageAccount(int ClientId)
 
 	AddVoteText("├──────      Sᴛᴀᴛs");
 
-	str_format(aBuf, sizeof(aBuf), "│ Level [%d]", Acc.m_Level);
+	str_format(aBuf, sizeof(aBuf), "│ Level [%d]", pAcc->m_Level);
 	AddVoteText(aBuf);
 
-	int CurXp = Acc.m_XP;
-	int NeededXp = GameServer()->m_AccountManager.NeededXP(Acc.m_Level);
+	int CurXp = pAcc->m_XP;
+	int NeededXp = GameServer()->m_AccountManager.NeededXP(pAcc->m_Level);
 
 	str_format(aBuf, sizeof(aBuf), "│ XP [%d/%d]", CurXp, NeededXp);
 	AddVoteText(aBuf);
 
-	float PlayTimeHours = Acc.m_Playtime / 60.0f;
+	float PlayTimeHours = pAcc->m_Playtime / 60.0f;
 	str_format(aBuf, sizeof(aBuf), "│ Playtime: %.1f Hour%s", PlayTimeHours, PlayTimeHours == 1 ? "" : "s");
-	if(Acc.m_Playtime < 100)
-		str_format(aBuf, sizeof(aBuf), "│ Playtime: %lld Minute%s", (int)Acc.m_Playtime, Acc.m_Playtime == 1 ? "" : "s");
+	if(pAcc->m_Playtime < 100)
+		str_format(aBuf, sizeof(aBuf), "│ Playtime: %lld Minute%s", pAcc->m_Playtime, pAcc->m_Playtime == 1 ? "" : "s");
 	AddVoteText(aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "│ %s: %lld", g_Config.m_SvCurrencyName, Acc.m_Money);
+	str_format(aBuf, sizeof(aBuf), "│ %s: %lld", g_Config.m_SvCurrencyName, pAcc->m_Money);
 	AddVoteText(aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "│ Deaths: %d", Acc.m_Deaths);
+	str_format(aBuf, sizeof(aBuf), "│ Deaths: %d", pAcc->m_Deaths);
 	AddVoteText(aBuf);
 
 	AddVoteText("╰──────────────────────────");
@@ -653,9 +653,9 @@ void CVoteMenu::SendPageAccount(int ClientId)
 void CVoteMenu::SendPageShop(int ClientId)
 {
 	CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
-	const CAccountSession Acc = GameServer()->m_Account[ClientId];
+	const CAccountSession *pAcc = &GameServer()->m_aAccounts[ClientId];
 
-	if(!Acc.m_LoggedIn)
+	if(!pAcc->m_LoggedIn)
 	{
 		AddVoteText("You are not logged in.");
 		AddVoteSeperator();
@@ -671,7 +671,7 @@ void CVoteMenu::SendPageShop(int ClientId)
 	std::vector<std::string> OtherItems;
 
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "%s: %lld", g_Config.m_SvCurrencyName, Acc.m_Money);
+	str_format(aBuf, sizeof(aBuf), "%s: %lld", g_Config.m_SvCurrencyName, pAcc->m_Money);
 	AddVoteText(aBuf);
 	AddVoteSeperator();
 
@@ -683,7 +683,7 @@ void CVoteMenu::SendPageShop(int ClientId)
 			continue;
 		if(pPl->OwnsItem(pItems->Name()))
 			continue;
-		if(Acc.m_Level < pItems->MinLevel())
+		if(pAcc->m_Level < pItems->MinLevel())
 			continue;
 
 		str_format(aBuf, sizeof(aBuf), "%s | %d %s", pItems->Name(), pItems->Price(), g_Config.m_SvCurrencyName);
@@ -759,8 +759,8 @@ void CVoteMenu::SendPageShop(int ClientId)
 void CVoteMenu::SendPageInventory(int ClientId)
 {
 	// CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
-	const CAccountSession Acc = GameServer()->m_Account[ClientId];
-	if(!Acc.m_LoggedIn)
+	const CAccountSession *pAcc = &GameServer()->m_aAccounts[ClientId];
+	if(!pAcc->m_LoggedIn)
 	{
 		AddVoteText("You are not logged in.");
 		AddVoteSeperator();
