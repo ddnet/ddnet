@@ -312,7 +312,7 @@ void CPortal::Snap(int SnappingClient)
 	}
 
 	CGameTeams Teams = GameServer()->m_pController->Teams();
-	if(!Teams.SetMaskWithFlags(SnappingClient, m_aData[0].m_Team, CGameTeams::EXTRAFLAG_IGNORE_SOLO))
+	if(!Teams.SetMaskWithFlags(SnappingClient, m_aData[0].m_Team, CGameTeams::IGNORE_SOLO))
 		return;
 
 	const int SnapVer = Server()->GetClientVersion(SnappingClient);

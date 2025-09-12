@@ -127,7 +127,7 @@ void CPowerUp::Snap(int SnappingClient)
 		return;
 
 	CGameTeams Teams = GameServer()->m_pController->Teams();
-	if(!Teams.SetMaskWithFlags(SnappingClient, TEAM_FLOCK, CGameTeams::EXTRAFLAG_IGNORE_SOLO))
+	if(!Teams.SetMaskWithFlags(SnappingClient, TEAM_FLOCK, CGameTeams::IGNORE_SOLO))
 		return;
 
 	int SnappingClientVersion = Server()->GetClientVersion(SnappingClient);

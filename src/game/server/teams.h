@@ -119,9 +119,9 @@ public:
 	void SetPractice(int Team, bool Enabled);
 	bool IsPractice(int Team);
 	// <FoxNet
-	enum ExtraFlags
+	enum MaskFlags
 	{
-		EXTRAFLAG_IGNORE_SOLO = 1 << 0,
+		IGNORE_SOLO = 1 << 0,
 	};
 
 	bool SetMask(int ClientId, int Team, int ExceptId = -1, int Asker = -1, int VersionFlags = CGameContext::FLAG_SIX | CGameContext::FLAG_SIXUP, int Flags = 0);

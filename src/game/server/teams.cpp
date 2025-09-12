@@ -1331,7 +1331,7 @@ bool CGameTeams::SetMask(int ClientId, int Team, int ExceptId, int Asker, int Ve
 		{ // Actions of other players
 			if(!Character(ClientId))
 				return false; // Player is currently dead
-			const bool SpawnSolo = Character(ClientId)->m_SpawnSolo || (pAskerChr && pAskerChr->m_SpawnSolo);
+			const bool SpawnSolo = Character(ClientId)->m_SpawnSolo || (pAskerChr && pAskerChr->m_SpawnSolo); // Spawn solo mimics SHOW_OTHERS_ONLY_TEAM
 			if(GetPlayer(ClientId)->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM || SpawnSolo)
 			{
 				if(m_Core.Team(ClientId) != Team && m_Core.Team(ClientId) != TEAM_SUPER)
@@ -1339,7 +1339,7 @@ bool CGameTeams::SetMask(int ClientId, int Team, int ExceptId, int Asker, int Ve
 			}
 			else if(GetPlayer(ClientId)->m_ShowOthers == SHOW_OTHERS_OFF)
 			{
-				if(!(Flags & EXTRAFLAG_IGNORE_SOLO))
+				if(!(Flags & IGNORE_SOLO))
 				{
 					if(m_Core.GetSolo(Asker))
 						return false; // When in solo part don't show others
@@ -1357,7 +1357,7 @@ bool CGameTeams::SetMask(int ClientId, int Team, int ExceptId, int Asker, int Ve
 		{ // Actions of other players
 			if(!Character(GetPlayer(ClientId)->SpectatorId()))
 				return false; // Player is currently dead
-			const bool SpawnSolo = Character(GetPlayer(ClientId)->SpectatorId())->m_SpawnSolo || (pAskerChr && pAskerChr->m_SpawnSolo);
+			const bool SpawnSolo = Character(GetPlayer(ClientId)->SpectatorId())->m_SpawnSolo || (pAskerChr && pAskerChr->m_SpawnSolo); // Spawn solo mimics SHOW_OTHERS_ONLY_TEAM
 			if(GetPlayer(ClientId)->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM || SpawnSolo)
 			{
 				if(m_Core.Team(GetPlayer(ClientId)->SpectatorId()) != Team && m_Core.Team(GetPlayer(ClientId)->SpectatorId()) != TEAM_SUPER)
@@ -1365,7 +1365,7 @@ bool CGameTeams::SetMask(int ClientId, int Team, int ExceptId, int Asker, int Ve
 			}
 			else if(GetPlayer(ClientId)->m_ShowOthers == SHOW_OTHERS_OFF)
 			{
-				if(!(Flags & EXTRAFLAG_IGNORE_SOLO))
+				if(!(Flags & IGNORE_SOLO))
 				{
 					if(m_Core.GetSolo(Asker))
 						return false; // When in solo part don't show others
@@ -1398,23 +1398,27 @@ CClientMask CGameTeams::CosmeticMask(int Team, int ExceptId, int Asker, int Vers
 	}
 
 	CClientMask Mask;
-	for(int i = 0; i < MAX_CLIENTS; ++i)
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ++ClientId)
 	{
-		if(!SetMask(i, Team, ExceptId, Asker, VersionFlags))
+		if(!SetMask(ClientId, Team, ExceptId, Asker, VersionFlags))
 			continue;
 
 		if(!Opposite)
 		{
-			if(GetPlayer(i)->m_HideCosmetics)
+			if(GetPlayer(ClientId)->m_HideCosmetics)
 				continue;
 		}
 		else
 		{
-			if(!GetPlayer(i)->m_HideCosmetics)
+			if(!GetPlayer(ClientId)->m_HideCosmetics)
 				continue;
 		}
 
-		Mask.set(i);
+		if(Server()->GetAuthedState(ClientId) < AUTHED_MOD)
+			if(ClientId != Asker && Asker >= 0 && GetPlayer(Asker) && (GetPlayer(Asker)->m_Vanish || GetPlayer(Asker)->m_Invisible))
+				continue; // Player is invisible
+
+		Mask.set(ClientId);
 	}
 	return Mask;
 }
