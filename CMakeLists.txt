@@ -2338,6 +2338,8 @@ if(CLIENT)
     components/broadcast.h
     components/camera.cpp
     components/camera.h
+    components/censor.cpp
+    components/censor.h
     components/chat.cpp
     components/chat.h
     components/community_icons.cpp
