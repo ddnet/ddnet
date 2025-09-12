@@ -94,19 +94,19 @@ void CGameContext::ConHelp(IConsole::IResult *pResult, void *pUserData)
 	else
 	{
 		const char *pArg = pResult->GetString(0);
-		const IConsole::CCommandInfo *pCmdInfo =
+		const IConsole::ICommandInfo *pCmdInfo =
 			pSelf->Console()->GetCommandInfo(pArg, CFGFLAG_SERVER | CFGFLAG_CHAT, false);
 		if(pCmdInfo)
 		{
-			if(pCmdInfo->m_pParams)
+			if(pCmdInfo->Params())
 			{
 				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "Usage: %s %s", pCmdInfo->m_pName, pCmdInfo->m_pParams);
+				str_format(aBuf, sizeof(aBuf), "Usage: %s %s", pCmdInfo->Name(), pCmdInfo->Params());
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 			}
 
-			if(pCmdInfo->m_pHelp)
-				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", pCmdInfo->m_pHelp);
+			if(pCmdInfo->Help())
+				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", pCmdInfo->Help());
 		}
 		else
 		{
@@ -771,12 +771,12 @@ void CGameContext::ConPracticeCmdList(IConsole::IResult *pResult, void *pUserDat
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
 	char aPracticeCommands[256] = "Available practice commands: ";
-	for(const IConsole::CCommandInfo *pCmd = pSelf->Console()->FirstCommandInfo(IConsole::EAccessLevel::USER, CMDFLAG_PRACTICE);
+	for(const IConsole::ICommandInfo *pCmd = pSelf->Console()->FirstCommandInfo(IConsole::EAccessLevel::USER, CMDFLAG_PRACTICE);
 		pCmd; pCmd = pCmd->NextCommandInfo(IConsole::EAccessLevel::USER, CMDFLAG_PRACTICE))
 	{
 		char aCommand[64];
 
-		str_format(aCommand, sizeof(aCommand), "/%s%s", pCmd->m_pName, pCmd->NextCommandInfo(IConsole::EAccessLevel::USER, CMDFLAG_PRACTICE) ? ", " : "");
+		str_format(aCommand, sizeof(aCommand), "/%s%s", pCmd->Name(), pCmd->NextCommandInfo(IConsole::EAccessLevel::USER, CMDFLAG_PRACTICE) ? ", " : "");
 
 		if(str_length(aCommand) + str_length(aPracticeCommands) > 255)
 		{

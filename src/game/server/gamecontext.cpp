@@ -1554,10 +1554,10 @@ void CGameContext::OnClientEnter(int ClientId)
 		CNetMsg_Sv_CommandInfoGroupStart Msg;
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 	}
-	for(const IConsole::CCommandInfo *pCmd = Console()->FirstCommandInfo(IConsole::EAccessLevel::USER, CFGFLAG_CHAT);
+	for(const IConsole::ICommandInfo *pCmd = Console()->FirstCommandInfo(IConsole::EAccessLevel::USER, CFGFLAG_CHAT);
 		pCmd; pCmd = pCmd->NextCommandInfo(IConsole::EAccessLevel::USER, CFGFLAG_CHAT))
 	{
-		const char *pName = pCmd->m_pName;
+		const char *pName = pCmd->Name();
 
 		if(Server()->IsSixup(ClientId))
 		{
@@ -1569,16 +1569,16 @@ void CGameContext::OnClientEnter(int ClientId)
 
 			protocol7::CNetMsg_Sv_CommandInfo Msg;
 			Msg.m_pName = pName;
-			Msg.m_pArgsFormat = pCmd->m_pParams;
-			Msg.m_pHelpText = pCmd->m_pHelp;
+			Msg.m_pArgsFormat = pCmd->Params();
+			Msg.m_pHelpText = pCmd->Help();
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 		}
 		else
 		{
 			CNetMsg_Sv_CommandInfo Msg;
 			Msg.m_pName = pName;
-			Msg.m_pArgsFormat = pCmd->m_pParams;
-			Msg.m_pHelpText = pCmd->m_pHelp;
+			Msg.m_pArgsFormat = pCmd->Params();
+			Msg.m_pHelpText = pCmd->Help();
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 		}
 	}
