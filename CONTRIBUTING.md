@@ -288,6 +288,7 @@ Still be aware that in game loop code you should avoid allocations, so static bu
 
 Examples:
 - Use `nullptr` instead of `0` or `NULL`.
+- Use `std::fill` to initialize arrays instead of using `mem_zero` or loops.
 
 ### Use `true` for success
 
