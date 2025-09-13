@@ -334,10 +334,8 @@ void CPlayers::RenderHook(
 	if(pPrevChar->m_HookState <= 0 || pPlayerChar->m_HookState <= 0)
 		return;
 
-	CNetObj_Character Prev;
-	CNetObj_Character Player;
-	Prev = *pPrevChar;
-	Player = *pPlayerChar;
+	const CNetObj_Character Prev = *pPrevChar;
+	const CNetObj_Character Player = *pPlayerChar;
 
 	CTeeRenderInfo RenderInfo = *pRenderInfo;
 
@@ -413,10 +411,8 @@ void CPlayers::RenderPlayer(
 	int ClientId,
 	float Intra)
 {
-	CNetObj_Character Prev;
-	CNetObj_Character Player;
-	Prev = *pPrevChar;
-	Player = *pPlayerChar;
+	const CNetObj_Character Prev = *pPrevChar;
+	const CNetObj_Character Player = *pPlayerChar;
 
 	CTeeRenderInfo RenderInfo = *pRenderInfo;
 
