@@ -375,7 +375,9 @@ Objects = [
 
 	NetEventEx("Finish:Common", "finish@netevent.ddnet.org", []),
     
-	NetEventEx("TargetHit:Common", "targethit@netevent.ddnet.org", []),
+	NetEventEx("TargetHit:Common", "targethit@netevent.ddnet.org", [
+		NetBool("m_Weakly"),
+	]),
 
 	NetObjectEx("MyOwnEvent", "my-own-event@heinrich5991.de", [
 		NetIntAny("m_Test"),

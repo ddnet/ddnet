@@ -1426,7 +1426,8 @@ void CGameClient::ProcessEvents()
 		else if(Item.m_Type == NETEVENTTYPE_TARGETHIT)
 		{
 			const CNetEvent_TargetHit *pEvent = (const CNetEvent_TargetHit *)Item.m_pData;
-			m_Effects.TargetHit(vec2(pEvent->m_X, pEvent->m_Y), Alpha);
+			if(!pEvent->m_Weakly)
+				m_Effects.TargetHit(vec2(pEvent->m_X, pEvent->m_Y), Alpha);
 		}
 	}
 }

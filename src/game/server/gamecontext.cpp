@@ -416,13 +416,14 @@ void CGameContext::CreateFinishEffect(vec2 Pos, CClientMask Mask)
 	}
 }
 
-void CGameContext::CreateTargetHit(vec2 Pos, CClientMask Mask)
+void CGameContext::CreateTargetHit(vec2 Pos, bool Weakly, CClientMask Mask)
 {
 	CNetEvent_TargetHit *pEvent = m_Events.Create<CNetEvent_TargetHit>(Mask);
 	if(pEvent)
 	{
 		pEvent->m_X = (int)Pos.x;
 		pEvent->m_Y = (int)Pos.y;
+		pEvent->m_Weakly = Weakly;
 	}
 }
 
