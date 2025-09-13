@@ -4,16 +4,16 @@
 #include <GL/glew.h>
 #endif
 
-#include <SDL.h>
-#include <SDL_messagebox.h>
-#include <SDL_vulkan.h>
-
 #include <base/log.h>
 #include <base/math.h>
 #include <base/tl/threading.h>
 
 #include <engine/shared/config.h>
 #include <engine/shared/localization.h>
+
+#include <SDL.h>
+#include <SDL_messagebox.h>
+#include <SDL_vulkan.h>
 
 #if defined(CONF_VIDEORECORDER)
 #include <engine/shared/video.h>

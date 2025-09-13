@@ -3,10 +3,10 @@
 #ifndef ENGINE_SOUND_H
 #define ENGINE_SOUND_H
 
+#include <base/vmath.h>
+
 #include <engine/kernel.h>
 #include <engine/storage.h>
-
-#include <base/vmath.h>
 
 class ISound : public IInterface
 {

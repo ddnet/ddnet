@@ -1,10 +1,10 @@
-#include <gtest/gtest.h>
-
 #include <base/system.h>
 
 #include <engine/shared/snapshot.h>
 
 #include <generated/protocol.h>
+
+#include <gtest/gtest.h>
 
 TEST(Snapshot, CrcOneInt)
 {

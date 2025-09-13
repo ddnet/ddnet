@@ -1,9 +1,8 @@
-#include <gtest/gtest.h>
-
 #include <base/system.h>
 
 #include <game/gamecore.h>
 
+#include <gtest/gtest.h>
 #include <limits>
 
 typedef void (*TStringArgumentFunction)(char *pStr);

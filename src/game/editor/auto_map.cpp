@@ -1,5 +1,6 @@
-#include <cinttypes>
-#include <cstdio> // sscanf
+#include "auto_map.h"
+
+#include "editor_actions.h"
 
 #include <engine/console.h>
 #include <engine/shared/linereader.h>
@@ -8,8 +9,8 @@
 #include <game/editor/mapitems/layer_tiles.h>
 #include <game/mapitems.h>
 
-#include "auto_map.h"
-#include "editor_actions.h"
+#include <cinttypes>
+#include <cstdio> // sscanf
 
 // Based on triple32inc from https://github.com/skeeto/hash-prospector/tree/79a6074062a84907df6e45b756134b74e2956760
 static uint32_t HashUInt32(uint32_t Num)

@@ -1,9 +1,9 @@
 #ifndef ENGINE_IMAGE_H
 #define ENGINE_IMAGE_H
 
-#include <cstdint>
-
 #include <base/color.h>
+
+#include <cstdint>
 
 /**
  * Represents an image that has been loaded into main memory.

@@ -4,7 +4,9 @@
 #define GAME_CLIENT_COMPONENTS_COUNTRYFLAGS_H
 
 #include <engine/graphics.h>
+
 #include <game/client/component.h>
+
 #include <vector>
 
 class CCountryFlags : public CComponent

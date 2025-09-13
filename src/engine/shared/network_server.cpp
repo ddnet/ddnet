@@ -1,12 +1,13 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "config.h"
+#include "netban.h"
+#include "network.h"
+
 #include <base/hash_ctxt.h>
 #include <base/math.h>
 #include <base/system.h>
 
-#include "config.h"
-#include "netban.h"
-#include "network.h"
 #include <engine/shared/compression.h>
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>

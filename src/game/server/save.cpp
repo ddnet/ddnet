@@ -1,14 +1,16 @@
+#include "save.h"
+
+#include "player.h"
+#include "teams.h"
+
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
+
 #include <game/server/entities/character.h>
 #include <game/server/gamemodes/DDRace.h>
 #include <game/team_state.h>
 
 #include <cstdio> // sscanf
-
-#include "player.h"
-#include "save.h"
-#include "teams.h"
 
 CSaveTee::CSaveTee() = default;
 

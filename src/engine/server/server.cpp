@@ -12,8 +12,6 @@
 #include <engine/engine.h>
 #include <engine/map.h>
 #include <engine/server.h>
-#include <engine/storage.h>
-
 #include <engine/shared/compression.h>
 #include <engine/shared/config.h>
 #include <engine/shared/console.h>
@@ -34,19 +32,20 @@
 #include <engine/shared/protocol_ex.h>
 #include <engine/shared/rust_version.h>
 #include <engine/shared/snapshot.h>
+#include <engine/storage.h>
 
 #include <game/version.h>
 
 // DDRace
-#include <engine/shared/linereader.h>
-#include <vector>
-#include <zlib.h>
-
 #include "databases/connection.h"
 #include "databases/connection_pool.h"
 #include "register.h"
 
+#include <engine/shared/linereader.h>
+
 #include <chrono>
+#include <vector>
+#include <zlib.h>
 
 using namespace std::chrono_literals;
 

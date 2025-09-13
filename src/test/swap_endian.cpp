@@ -1,9 +1,9 @@
 #include "test.h"
-#include <gtest/gtest.h>
 
 #include <base/system.h>
 
 #include <array>
+#include <gtest/gtest.h>
 
 TEST(SwapEndian, Generic)
 {

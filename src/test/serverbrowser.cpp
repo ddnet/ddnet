@@ -1,6 +1,3 @@
-#include <gtest/gtest.h>
-#include <memory>
-
 #include <base/system.h>
 
 #include <engine/client/serverbrowser_ping_cache.h>
@@ -8,6 +5,9 @@
 #include <engine/engine.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
+
+#include <gtest/gtest.h>
+#include <memory>
 #include <test/test.h>
 
 TEST(ServerBrowser, PingCache)

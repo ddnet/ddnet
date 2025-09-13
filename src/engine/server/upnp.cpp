@@ -1,14 +1,17 @@
 #ifdef CONF_UPNP
 
 #include "upnp.h"
+
 #include <base/system.h>
+
 #include <engine/shared/config.h>
+
 #include <game/version.h>
+
+#include <cstdlib>
 #include <miniupnpc/miniupnpc.h>
 #include <miniupnpc/upnpcommands.h>
 #include <miniupnpc/upnperrors.h>
-
-#include <cstdlib>
 
 void CUPnP::Open(NETADDR Address)
 {

@@ -1,11 +1,11 @@
 #include "connection.h"
 
-#include <sqlite3.h>
-
 #include <base/math.h>
+
 #include <engine/console.h>
 
 #include <atomic>
+#include <sqlite3.h>
 
 class CSqliteConnection : public IDbConnection
 {

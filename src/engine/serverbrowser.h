@@ -3,6 +3,8 @@
 #ifndef ENGINE_SERVERBROWSER_H
 #define ENGINE_SERVERBROWSER_H
 
+#include "kernel.h"
+
 #include <base/hash.h>
 #include <base/system.h>
 
@@ -10,8 +12,6 @@
 #include <engine/shared/protocol.h>
 
 #include <generated/protocol7.h>
-
-#include "kernel.h"
 
 #include <unordered_set>
 #include <vector>

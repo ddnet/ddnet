@@ -1,7 +1,8 @@
-#include <gtest/gtest.h>
-
 #include <base/system.h>
+
 #include <game/mapbugs.h>
+
+#include <gtest/gtest.h>
 
 static const char *BINARY_SHA256 = "65b410e197fd2298ec270e89a84b762f6739d1d18089529f8ef6cf2104d3d600";
 static const char *DM1_SHA256 = "0b0c481d77519c32fbe85624ef16ec0fa9991aec7367ad538bd280f28d8c26cf";

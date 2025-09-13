@@ -1,11 +1,12 @@
 #include "test.h"
-#include <gtest/gtest.h>
 
 #include <base/logger.h>
 #include <base/system.h>
+
 #include <engine/storage.h>
 
 #include <algorithm>
+#include <gtest/gtest.h>
 
 CTestInfo::CTestInfo()
 {

@@ -1,6 +1,6 @@
-#include <gtest/gtest.h>
-
 #include <engine/server/name_ban.h>
+
+#include <gtest/gtest.h>
 
 TEST(NameBan, Empty)
 {

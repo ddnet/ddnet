@@ -3,13 +3,13 @@
 #include <engine/server/databases/connection_pool.h>
 
 #if defined(CONF_MYSQL)
-#include <mysql.h>
-
 #include <base/tl/threading.h>
+
 #include <engine/console.h>
 
 #include <atomic>
 #include <memory>
+#include <mysql.h>
 #include <vector>
 
 // MySQL >= 8.0.1 removed my_bool, 8.0.2 accidentally reintroduced it: https://bugs.mysql.com/bug.php?id=87337

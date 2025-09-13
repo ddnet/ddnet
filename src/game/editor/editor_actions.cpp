@@ -1,4 +1,5 @@
 #include "editor_actions.h"
+
 #include <game/editor/mapitems/image.h>
 
 CEditorBrushDrawAction::CEditorBrushDrawAction(CEditor *pEditor, int Group) :

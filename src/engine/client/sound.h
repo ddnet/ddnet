@@ -8,7 +8,6 @@
 #include <engine/sound.h>
 
 #include <SDL_audio.h>
-
 #include <atomic>
 
 struct CSample

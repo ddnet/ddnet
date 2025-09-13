@@ -1,8 +1,7 @@
 #define STEAMAPI DYNAMIC_EXPORT
 
-#include <steam/steam_api_flat.h>
-
 #include <cstdlib>
+#include <steam/steam_api_flat.h>
 
 extern "C" {
 
