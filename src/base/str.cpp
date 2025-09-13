@@ -1,5 +1,7 @@
 #include "str.h"
 
+#include <charconv>
+#include <cstdio>
 #include <cstring>
 
 int str_copy(char *dst, const char *src, int dst_size)
@@ -36,6 +38,40 @@ void str_truncate(char *dst, int dst_size, const char *src, int truncation_len)
 	str_copy(dst, src, size);
 }
 
+int str_format_v(char *buffer, int buffer_size, const char *format, va_list args)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	_vsprintf_p(buffer, buffer_size, format, args);
+	buffer[buffer_size - 1] = 0; /* assure null termination */
+#else
+	vsnprintf(buffer, buffer_size, format, args);
+	/* null termination is assured by definition of vsnprintf */
+#endif
+	return str_utf8_fix_truncation(buffer);
+}
+
+#if !defined(CONF_DEBUG)
+int str_format_int(char *buffer, size_t buffer_size, int value)
+{
+	buffer[0] = '\0'; // Fix false positive clang-analyzer-core.UndefinedBinaryOperatorResult when using result
+	auto result = std::to_chars(buffer, buffer + buffer_size - 1, value);
+	result.ptr[0] = '\0';
+	return result.ptr - buffer;
+}
+#endif
+
+#undef str_format
+int str_format(char *buffer, int buffer_size, const char *format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	int length = str_format_v(buffer, buffer_size, format, args);
+	va_end(args);
+	return length;
+}
+#if !defined(CONF_DEBUG)
+#define str_format str_format_opt
+#endif
 
 int str_length(const char *str)
 {

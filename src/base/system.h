@@ -1210,68 +1210,6 @@ std::string windows_format_system_message(unsigned long error);
  */
 
 /**
- * Performs printf formatting into a buffer.
- *
- * @ingroup Strings
- *
- * @param buffer Pointer to the buffer to receive the formatted string.
- * @param buffer_size Size of the buffer.
- * @param format printf formatting string.
- * @param args The variable argument list.
- *
- * @return Length of written string, even if it has been truncated.
- *
- * @remark See the C manual for syntax for the printf formatting string.
- * @remark The strings are treated as null-terminated strings.
- * @remark Guarantees that buffer string will contain null-termination.
- */
-[[gnu::format(printf, 3, 0)]] int str_format_v(char *buffer, int buffer_size, const char *format, va_list args);
-
-/**
- * Performs printf formatting into a buffer.
- *
- * @ingroup Strings
- *
- * @param buffer Pointer to the buffer to receive the formatted string.
- * @param buffer_size Size of the buffer.
- * @param format printf formatting string.
- * @param ... Parameters for the formatting.
- *
- * @return Length of written string, even if it has been truncated.
- *
- * @remark See the C manual for syntax for the printf formatting string.
- * @remark The strings are treated as null-terminated strings.
- * @remark Guarantees that buffer string will contain null-termination.
- */
-[[gnu::format(printf, 3, 4)]] int str_format(char *buffer, int buffer_size, const char *format, ...);
-
-#if !defined(CONF_DEBUG)
-int str_format_int(char *buffer, size_t buffer_size, int value);
-
-template<typename... Args>
-int str_format_opt(char *buffer, int buffer_size, const char *format, Args... args)
-{
-	static_assert(sizeof...(args) > 0, "Use str_copy instead of str_format without format arguments");
-	return str_format(buffer, buffer_size, format, args...);
-}
-
-template<>
-inline int str_format_opt(char *buffer, int buffer_size, const char *format, int val)
-{
-	if(strcmp(format, "%d") == 0)
-	{
-		return str_format_int(buffer, buffer_size, val);
-	}
-	else
-	{
-		return str_format(buffer, buffer_size, format, val);
-	}
-}
-
-#define str_format str_format_opt
-#endif
-
-/**
  * Trims specific number of words at the start of a string.
  *
  * @ingroup Strings
