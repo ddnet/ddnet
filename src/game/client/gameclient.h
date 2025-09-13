@@ -10,6 +10,7 @@
 #include <engine/client/enums.h>
 #include <engine/console.h>
 #include <engine/shared/config.h>
+#include <engine/shared/snapshot.h>
 
 #include <game/collision.h>
 #include <game/gamecore.h>
@@ -331,10 +332,12 @@ public:
 		const CNetObj_PlayerInfo *m_pLocalInfo;
 		const CNetObj_SpectatorInfo *m_pSpectatorInfo;
 		const CNetObj_SpectatorInfo *m_pPrevSpectatorInfo;
-		const CNetObj_Flag *m_apFlags[2];
+		int m_NumFlags;
+		const CNetObj_Flag *m_apFlags[CSnapshot::MAX_ITEMS];
+		const CNetObj_Flag *m_apPrevFlags[CSnapshot::MAX_ITEMS];
 		const CNetObj_GameInfo *m_pGameInfoObj;
 		const CNetObj_GameData *m_pGameDataObj;
-		int m_GameDataSnapId;
+		const CNetObj_GameData *m_pPrevGameDataObj;
 
 		const CNetObj_PlayerInfo *m_apPlayerInfos[MAX_CLIENTS];
 		const CNetObj_PlayerInfo *m_apInfoByScore[MAX_CLIENTS];
