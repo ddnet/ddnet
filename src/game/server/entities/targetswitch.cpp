@@ -1,9 +1,9 @@
 #include "targetswitch.h"
 #include "character.h"
 
-#include <game/generated/protocol.h>
 #include <game/mapitems.h>
 #include <game/teamscore.h>
+#include <generated/protocol.h>
 
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
@@ -57,7 +57,8 @@ void CTargetSwitch::GetHit(int TeamHitFrom, bool Weakly)
 
 	if(Weakly)
 	{
-		GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamHitBitset);
+		GameServer()->CreateTargetHit(m_Pos, true, TeamHitBitset);
+		GameServer()->CreateTargetHit(m_Pos, true, TeamHitBitset);
 		return;
 	}
 
@@ -79,21 +80,19 @@ void CTargetSwitch::GetHit(int TeamHitFrom, bool Weakly)
 	else if(m_Type == TARGETSWITCHTYPE_ALTERNATE)
 	{
 		Switchers()[m_Number].m_aStatus[TeamHitFrom] = !Switchers()[m_Number].m_aStatus[TeamHitFrom];
-		Switchers()[m_Number].m_aEndTick[TeamHitFrom] = 0; // no delay on alternating targets
+		// delay not supported on alternating switches due to confusing behavior
+		Switchers()[m_Number].m_aEndTick[TeamHitFrom] = 0;
 		Switchers()[m_Number].m_aType[TeamHitFrom] = (Switchers()[m_Number].m_aType[TeamHitFrom] == TILE_SWITCHCLOSE) ? TILE_SWITCHCLOSE : TILE_SWITCHOPEN;
 	}
 
 	// Hitting this switch changed something, provide feedback
 	if(PreviousSwitchStatus != Switchers()[m_Number].m_aStatus[TeamHitFrom])
 	{
-		GameServer()->CreateTargetHit(m_Pos, TeamHitBitset);
+		GameServer()->CreateTargetHit(m_Pos, false, TeamHitBitset);
 		GameServer()->CreateSound(m_Pos, SOUND_HIT, TeamHitBitset);
 	}
-	else
-	{
-		GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamHitBitset);
-	}
 }
+
 void CTargetSwitch::Move()
 {
 	if(Server()->Tick() % (int)(Server()->TickSpeed() * 0.04f) == 0)

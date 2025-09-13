@@ -1,6 +1,6 @@
 #include "targetswitch_data.h"
 
-#include <game/generated/protocol.h>
+#include <generated/protocol.h>
 
 CTargetSwitchData ExtractTargetSwitchInfo(const void *pData)
 {
