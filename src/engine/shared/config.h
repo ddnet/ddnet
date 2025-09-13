@@ -231,6 +231,7 @@ public:
 	void Reset(const char *pScriptName) override;
 	void ResetGameSettings() override;
 	void SetReadOnly(const char *pScriptName, bool ReadOnly) override;
+	void SetGameSettingsReadOnly(bool ReadOnly) override;
 	bool Save() override;
 	CConfig *Values() override { return &g_Config; }
 
