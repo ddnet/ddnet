@@ -3019,33 +3019,6 @@ ETimeSeason time_season()
 	}
 }
 
-void str_append(char *dst, const char *src, int dst_size)
-{
-	int s = str_length(dst);
-	int i = 0;
-	while(s < dst_size)
-	{
-		dst[s] = src[i];
-		if(!src[i]) /* check for null termination */
-			break;
-		s++;
-		i++;
-	}
-
-	dst[dst_size - 1] = 0; /* assure null termination */
-	str_utf8_fix_truncation(dst);
-}
-
-void str_truncate(char *dst, int dst_size, const char *src, int truncation_len)
-{
-	int size = dst_size;
-	if(truncation_len < size)
-	{
-		size = truncation_len + 1;
-	}
-	str_copy(dst, src, size);
-}
-
 int str_format_v(char *buffer, int buffer_size, const char *format, va_list args)
 {
 #if defined(CONF_FAMILY_WINDOWS)
@@ -3080,57 +3053,6 @@ int str_format(char *buffer, int buffer_size, const char *format, ...)
 #if !defined(CONF_DEBUG)
 #define str_format str_format_opt
 #endif
-
-const char *str_trim_words(const char *str, int words)
-{
-	while(*str && str_isspace(*str))
-		str++;
-	while(words && *str)
-	{
-		if(str_isspace(*str) && !str_isspace(*(str + 1)))
-			words--;
-		str++;
-	}
-	return str;
-}
-
-bool str_has_cc(const char *str)
-{
-	unsigned char *s = (unsigned char *)str;
-	while(*s)
-	{
-		if(*s < 32)
-		{
-			return true;
-		}
-		s++;
-	}
-	return false;
-}
-
-/* makes sure that the string only contains the characters between 32 and 255 */
-void str_sanitize_cc(char *str_in)
-{
-	unsigned char *str = (unsigned char *)str_in;
-	while(*str)
-	{
-		if(*str < 32)
-			*str = ' ';
-		str++;
-	}
-}
-
-/* makes sure that the string only contains the characters between 32 and 255 + \r\n\t */
-void str_sanitize(char *str_in)
-{
-	unsigned char *str = (unsigned char *)str_in;
-	while(*str)
-	{
-		if(*str < 32 && !(*str == '\r') && !(*str == '\n') && !(*str == '\t'))
-			*str = ' ';
-		str++;
-	}
-}
 
 void str_sanitize_filename(char *str_in)
 {
