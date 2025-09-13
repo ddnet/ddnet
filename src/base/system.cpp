@@ -3019,33 +3019,6 @@ ETimeSeason time_season()
 	}
 }
 
-void str_append(char *dst, const char *src, int dst_size)
-{
-	int s = str_length(dst);
-	int i = 0;
-	while(s < dst_size)
-	{
-		dst[s] = src[i];
-		if(!src[i]) /* check for null termination */
-			break;
-		s++;
-		i++;
-	}
-
-	dst[dst_size - 1] = 0; /* assure null termination */
-	str_utf8_fix_truncation(dst);
-}
-
-void str_truncate(char *dst, int dst_size, const char *src, int truncation_len)
-{
-	int size = dst_size;
-	if(truncation_len < size)
-	{
-		size = truncation_len + 1;
-	}
-	str_copy(dst, src, size);
-}
-
 int str_format_v(char *buffer, int buffer_size, const char *format, va_list args)
 {
 #if defined(CONF_FAMILY_WINDOWS)

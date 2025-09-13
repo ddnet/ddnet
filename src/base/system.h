@@ -1210,53 +1210,6 @@ std::string windows_format_system_message(unsigned long error);
  */
 
 /**
- * Appends a string to another.
- *
- * @ingroup Strings
- *
- * @param dst Pointer to a buffer that contains a string.
- * @param src String to append.
- * @param dst_size Size of the buffer of the dst string.
- *
- * @remark The strings are treated as null-terminated strings.
- * @remark Guarantees that dst string will contain null-termination.
- */
-void str_append(char *dst, const char *src, int dst_size);
-
-/**
- * Appends a string to a fixed-size array of chars.
- *
- * @ingroup Strings
- *
- * @param dst Array that shall receive the string.
- * @param src String to append.
- *
- * @remark The strings are treated as null-terminated strings.
- * @remark Guarantees that dst string will contain null-termination.
- */
-template<int N>
-void str_append(char (&dst)[N], const char *src)
-{
-	str_append(dst, src, N);
-}
-
-/**
- * Truncates a string to a given length.
- *
- * @ingroup Strings
- *
- * @param dst Pointer to a buffer that shall receive the string.
- * @param dst_size Size of the buffer dst.
- * @param src String to be truncated.
- * @param truncation_len Maximum length of the returned string (not
- *                       counting the null-termination).
- *
- * @remark The strings are treated as null-terminated strings.
- * @remark Guarantees that dst string will contain null-termination.
- */
-void str_truncate(char *dst, int dst_size, const char *src, int truncation_len);
-
-/**
  * Performs printf formatting into a buffer.
  *
  * @ingroup Strings
