@@ -1,5 +1,4 @@
 #include "test.h"
-#include <gtest/gtest.h>
 
 #include <base/system.h>
 
@@ -7,6 +6,7 @@
 #include <engine/shared/jobs.h>
 
 #include <functional>
+#include <gtest/gtest.h>
 
 static const int TEST_NUM_THREADS = 4;
 

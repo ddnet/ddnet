@@ -1,15 +1,19 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <algorithm>
-
 #include <base/color.h>
 #include <base/log.h>
 #include <base/system.h>
 
+#include <algorithm>
+
 #if defined(CONF_FAMILY_UNIX)
 #include <pthread.h>
 #endif
+
+#include "auto_map.h"
+#include "editor.h"
+#include "editor_actions.h"
 
 #include <engine/client.h>
 #include <engine/console.h>
@@ -31,16 +35,11 @@
 #include <game/client/ui.h>
 #include <game/client/ui_listbox.h>
 #include <game/client/ui_scrollregion.h>
-#include <game/editor/explanations.h>
-#include <game/localization.h>
-
 #include <game/editor/editor_history.h>
+#include <game/editor/explanations.h>
 #include <game/editor/mapitems/image.h>
 #include <game/editor/mapitems/sound.h>
-
-#include "auto_map.h"
-#include "editor.h"
-#include "editor_actions.h"
+#include <game/localization.h>
 
 #include <chrono>
 #include <iterator>

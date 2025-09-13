@@ -2,6 +2,7 @@
 #define GAME_MAP_MAP_RENDERER_H
 
 #include <engine/map.h>
+
 #include <game/layers.h>
 #include <game/map/render_component.h>
 #include <game/map/render_layer.h>

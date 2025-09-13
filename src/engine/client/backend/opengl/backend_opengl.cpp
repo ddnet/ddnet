@@ -1,20 +1,17 @@
 #include "backend_opengl.h"
 
-#include <engine/graphics.h>
-
-#include <engine/client/backend_sdl.h>
-
 #include <base/detect.h>
 #include <base/system.h>
 
+#include <engine/client/backend_sdl.h>
+#include <engine/graphics.h>
+
 #if defined(BACKEND_AS_OPENGL_ES) || !defined(CONF_BACKEND_OPENGL_ES)
 
+#include <engine/client/backend/glsl_shader_compiler.h>
 #include <engine/client/backend/opengl/opengl_sl.h>
 #include <engine/client/backend/opengl/opengl_sl_program.h>
 #include <engine/client/blocklist_driver.h>
-
-#include <engine/client/backend/glsl_shader_compiler.h>
-
 #include <engine/gfx/image_manipulation.h>
 
 #ifndef BACKEND_AS_OPENGL_ES

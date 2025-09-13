@@ -1,11 +1,11 @@
 #ifndef GAME_EDITOR_PROMPT_H
 #define GAME_EDITOR_PROMPT_H
 
+#include "component.h"
+
 #include <game/client/lineinput.h>
 #include <game/client/ui_rect.h>
 #include <game/editor/quick_action.h>
-
-#include "component.h"
 
 class CPrompt : public CEditorComponent
 {

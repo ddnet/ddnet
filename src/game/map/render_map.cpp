@@ -1,16 +1,15 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "render_map.h"
+
 #include <base/math.h>
 
 #include <engine/graphics.h>
 #include <engine/map.h>
-#include <engine/textrender.h>
-
 #include <engine/shared/config.h>
 #include <engine/shared/datafile.h>
 #include <engine/shared/map.h>
-
-#include "render_map.h"
+#include <engine/textrender.h>
 
 #include <generated/client_data.h>
 

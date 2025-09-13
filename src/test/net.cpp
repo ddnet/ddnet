@@ -1,8 +1,7 @@
-#include <gtest/gtest.h>
-
 #include <base/system.h>
 
 #include <chrono>
+#include <gtest/gtest.h>
 
 using namespace std::chrono_literals;
 

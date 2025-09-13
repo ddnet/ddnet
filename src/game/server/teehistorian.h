@@ -2,8 +2,10 @@
 #define GAME_SERVER_TEEHISTORIAN_H
 
 #include <base/hash.h>
+
 #include <engine/console.h>
 #include <engine/shared/protocol.h>
+
 #include <generated/protocol.h>
 
 #include <ctime>

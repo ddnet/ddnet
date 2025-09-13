@@ -1,9 +1,10 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <base/system.h>
+#include "packer.h"
 
 #include "compression.h"
-#include "packer.h"
+
+#include <base/system.h>
 
 CAbstractPacker::CAbstractPacker(unsigned char *pBuffer, size_t Size) :
 	m_pBuffer(pBuffer),

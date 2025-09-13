@@ -1,8 +1,9 @@
 #include "opengl_sl_program.h"
+
 #include "opengl_sl.h"
-#include <base/system.h>
 
 #include <base/detect.h>
+#include <base/system.h>
 
 #if defined(BACKEND_AS_OPENGL_ES) || !defined(CONF_BACKEND_OPENGL_ES)
 

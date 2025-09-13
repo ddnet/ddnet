@@ -3,21 +3,23 @@
 #ifndef ENGINE_SERVER_H
 #define ENGINE_SERVER_H
 
-#include <array>
-#include <optional>
-#include <type_traits>
+#include "kernel.h"
+#include "message.h"
 
 #include <base/hash.h>
 #include <base/math.h>
 #include <base/system.h>
 
-#include "kernel.h"
-#include "message.h"
 #include <engine/shared/jsonwriter.h>
 #include <engine/shared/protocol.h>
+
 #include <generated/protocol.h>
 #include <generated/protocol7.h>
 #include <generated/protocolglue.h>
+
+#include <array>
+#include <optional>
+#include <type_traits>
 
 struct CAntibotRoundData;
 

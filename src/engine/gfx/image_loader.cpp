@@ -5,7 +5,6 @@
 
 #include <csetjmp>
 #include <cstdlib>
-
 #include <png.h>
 
 bool CByteBufferReader::Read(void *pData, size_t Size)

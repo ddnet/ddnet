@@ -4,26 +4,27 @@
 #define GAME_CLIENT_GAMECLIENT_H
 
 #include "render.h"
+
 #include <base/color.h>
 #include <base/vmath.h>
+
 #include <engine/client.h>
 #include <engine/client/enums.h>
 #include <engine/console.h>
 #include <engine/shared/config.h>
 #include <engine/shared/snapshot.h>
 
+#include <generated/protocol7.h>
+#include <generated/protocolglue.h>
+
+#include <game/client/prediction/gameworld.h>
+#include <game/client/race.h>
 #include <game/collision.h>
 #include <game/gamecore.h>
 #include <game/layers.h>
 #include <game/map/render_map.h>
 #include <game/mapbugs.h>
 #include <game/teamscore.h>
-
-#include <game/client/prediction/gameworld.h>
-#include <game/client/race.h>
-
-#include <generated/protocol7.h>
-#include <generated/protocolglue.h>
 
 // components
 #include "components/background.h"

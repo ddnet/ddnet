@@ -1,4 +1,5 @@
 #include "graphics_threaded.h"
+
 #include <engine/graphics.h>
 
 #include <generated/client_data.h>

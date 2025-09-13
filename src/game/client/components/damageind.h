@@ -4,6 +4,7 @@
 #define GAME_CLIENT_COMPONENTS_DAMAGEIND_H
 #include <base/color.h>
 #include <base/vmath.h>
+
 #include <game/client/component.h>
 
 class CDamageInd : public CComponent

@@ -1,9 +1,8 @@
-#include <gtest/gtest.h>
-
+#include <engine/external/json-parser/json.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/serverinfo.h>
 
-#include <engine/external/json-parser/json.h>
+#include <gtest/gtest.h>
 
 TEST(ServerInfo, ParseLocation)
 {

@@ -5,9 +5,8 @@
 #include <base/system.h>
 
 #include <engine/console.h>
-#include <engine/storage.h>
-
 #include <engine/shared/config.h>
+#include <engine/storage.h>
 
 #if defined(CONF_VIDEORECORDER)
 #include <engine/shared/video.h>

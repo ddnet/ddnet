@@ -1,7 +1,8 @@
 #include "test.h"
-#include <gtest/gtest.h>
 
 #include <game/prng.h>
+
+#include <gtest/gtest.h>
 
 // https://www.pcg-random.org/using-pcg-c-basic.html, retrieved 2020-05-25
 // suggests to use `pcg-32-global.demo.c`:

@@ -6,11 +6,6 @@
 #include <base/types.h>
 #include <base/vmath.h>
 
-#include <chrono>
-#include <deque>
-#include <optional>
-#include <vector>
-
 #include <engine/console.h>
 #include <engine/demo.h>
 #include <engine/friends.h>
@@ -19,15 +14,19 @@
 #include <engine/textrender.h>
 
 #include <game/client/component.h>
+#include <game/client/components/community_icons.h>
 #include <game/client/components/mapimages.h>
 #include <game/client/components/menus_ingame_touch_controls.h>
+#include <game/client/components/menus_start.h>
+#include <game/client/components/skins7.h>
 #include <game/client/lineinput.h>
 #include <game/client/ui.h>
 #include <game/voting.h>
 
-#include <game/client/components/community_icons.h>
-#include <game/client/components/menus_start.h>
-#include <game/client/components/skins7.h>
+#include <chrono>
+#include <deque>
+#include <optional>
+#include <vector>
 
 // component to fetch keypresses, override all other input
 class CMenusKeyBinder : public CComponent

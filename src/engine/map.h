@@ -4,6 +4,7 @@
 #define ENGINE_MAP_H
 
 #include "kernel.h"
+
 #include <base/hash.h>
 #include <base/types.h>
 

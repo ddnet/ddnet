@@ -3,6 +3,7 @@
 
 #include <game/map/render_map.h>
 #include <game/mapitems.h>
+
 #include <vector>
 
 class CEnvelope

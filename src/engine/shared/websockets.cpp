@@ -14,9 +14,8 @@
 #elif defined(CONF_FAMILY_WINDOWS)
 #include <ws2tcpip.h>
 #endif
-#include <libwebsockets.h>
-
 #include <cstdlib>
+#include <libwebsockets.h>
 #include <map>
 #include <string>
 

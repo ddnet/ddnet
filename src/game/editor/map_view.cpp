@@ -1,11 +1,11 @@
 #include "map_view.h"
 
+#include "editor.h"
+
 #include <engine/keys.h>
 #include <engine/shared/config.h>
 
 #include <game/client/ui.h>
-
-#include "editor.h"
 
 void CMapView::OnInit(CEditor *pEditor)
 {

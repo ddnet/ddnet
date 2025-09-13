@@ -3,9 +3,9 @@
 #ifndef ENGINE_FRIENDS_H
 #define ENGINE_FRIENDS_H
 
-#include <engine/shared/protocol.h>
-
 #include "kernel.h"
+
+#include <engine/shared/protocol.h>
 
 struct CFriendInfo
 {

@@ -3,10 +3,10 @@
 #ifndef GAME_CLIENT_RENDER_H
 #define GAME_CLIENT_RENDER_H
 
-#include <engine/client/enums.h>
-
 #include <base/color.h>
 #include <base/vmath.h>
+
+#include <engine/client/enums.h>
 
 #include <generated/protocol.h>
 #include <generated/protocol7.h>

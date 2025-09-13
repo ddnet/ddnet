@@ -1,6 +1,7 @@
 #include "sql_string_helpers.h"
 
 #include <base/system.h>
+
 #include <cmath>
 
 void sqlstr::FuzzyString(char *pString, int Size)
