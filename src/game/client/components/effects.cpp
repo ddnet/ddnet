@@ -418,14 +418,14 @@ void CEffects::TargetHit(vec2 Pos, float Alpha)
 		p.SetDefault();
 		p.m_Spr = SPRITE_PART_BALL;
 		p.m_Pos = Pos;
-		p.m_Vel = direction(2.0f * pi * i / 8) * 500.0f;
+		p.m_Vel = direction(2.0f * pi * i / 8) * 600.0f;
 		p.m_LifeSpan = 0.5f;
 		p.m_StartSize = 12.0f;
 		p.m_EndSize = 0.f;
 		p.m_Rot = 0.f;
 		p.m_Rotspeed = 0.f;
 		p.m_Gravity = 0.f;
-		p.m_Friction = 0.5f;
+		p.m_Friction = 0.45f;
 		p.m_StartAlpha = Alpha;
 		p.m_Collides = false;
 		p.m_FlowAffected = false;
