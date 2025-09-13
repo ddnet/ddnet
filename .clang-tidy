@@ -17,6 +17,8 @@
 # performance-noexcept-*
 #   Exceptions may be disabled later, adding noexcept is just noise
 
+HeaderFilterRegex: '.*'
+
 Checks: >
   -*,
   bugprone-*,
