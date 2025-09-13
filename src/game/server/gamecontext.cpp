@@ -4052,9 +4052,19 @@ void CGameContext::OnInit(const void *pPersistentData)
 			Switcher.m_Initial = true;
 	}
 
+	m_pConfigManager->PossibleConfigVariables("", CFGFLAG_GAME, [](const SConfigVariable *pVariable, void *pUserData) {
+		CGameContext *pGameContext = (CGameContext *)pUserData;
+		pGameContext->ConfigManager()->SetReadOnly(pVariable->m_pScriptName, false);
+	}, this);
+
 	Console()->ExecuteFile(g_Config.m_SvResetFile, -1);
 
 	LoadMapSettings();
+
+	m_pConfigManager->PossibleConfigVariables("", CFGFLAG_GAME, [](const SConfigVariable *pVariable, void *pUserData) {
+		CGameContext *pGameContext = (CGameContext *)pUserData;
+		pGameContext->ConfigManager()->SetReadOnly(pVariable->m_pScriptName, true);
+	}, this);
 
 	m_MapBugs.Dump();
 
