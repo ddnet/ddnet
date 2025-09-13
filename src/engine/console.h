@@ -86,8 +86,8 @@ public:
 		const char *m_pName;
 		const char *m_pHelp;
 		const char *m_pParams;
-
-		virtual const CCommandInfo *NextCommandInfo(int AccessLevel, int FlagMask) const = 0;
+		CCommandInfo *m_pNext;
+		int m_Flags;
 
 		int GetAccessLevel() const { return m_AccessLevel; }
 	};
@@ -103,6 +103,7 @@ public:
 
 	virtual void Init() = 0;
 	virtual const CCommandInfo *FirstCommandInfo(int AccessLevel, int Flagmask) const = 0;
+	virtual const CCommandInfo *NextCommandInfo(const IConsole::CCommandInfo *pInfo, int AccessLevel, int FlagMask) const = 0;
 	virtual const CCommandInfo *GetCommandInfo(const char *pName, int FlagMask, bool Temp) = 0;
 	virtual int PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback = EmptyPossibleCommandCallback, void *pUser = nullptr) = 0;
 	virtual void ParseArguments(int NumArgs, const char **ppArguments) = 0;
