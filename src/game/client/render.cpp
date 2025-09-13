@@ -1,11 +1,10 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <cmath>
-
-#include <base/math.h>
+#include "render.h"
 
 #include "animstate.h"
-#include "render.h"
+
+#include <base/math.h>
 
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
@@ -16,6 +15,8 @@
 #include <generated/protocol7.h>
 
 #include <game/mapitems.h>
+
+#include <cmath>
 
 CSkinDescriptor::CSkinDescriptor()
 {

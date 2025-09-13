@@ -2,10 +2,10 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "layer_quads.h"
 
+#include "image.h"
+
 #include <game/editor/editor.h>
 #include <game/editor/editor_actions.h>
-
-#include "image.h"
 
 CLayerQuads::CLayerQuads(CEditor *pEditor) :
 	CLayer(pEditor)

@@ -1,7 +1,10 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <algorithm>
+#include "editor.h"
+
+#include "auto_map.h"
+#include "editor_actions.h"
 
 #include <base/color.h>
 #include <base/log.h>
@@ -27,17 +30,13 @@
 #include <game/client/ui.h>
 #include <game/client/ui_listbox.h>
 #include <game/client/ui_scrollregion.h>
-#include <game/editor/explanations.h>
-#include <game/localization.h>
-
 #include <game/editor/editor_history.h>
+#include <game/editor/explanations.h>
 #include <game/editor/mapitems/image.h>
 #include <game/editor/mapitems/sound.h>
+#include <game/localization.h>
 
-#include "auto_map.h"
-#include "editor.h"
-#include "editor_actions.h"
-
+#include <algorithm>
 #include <chrono>
 #include <iterator>
 #include <limits>

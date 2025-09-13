@@ -1,9 +1,9 @@
 #ifndef ENGINE_SERVER_AUTHMANAGER_H
 #define ENGINE_SERVER_AUTHMANAGER_H
 
-#include <vector>
-
 #include <base/hash.h>
+
+#include <vector>
 
 #define SALT_BYTES 8
 

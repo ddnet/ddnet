@@ -3,10 +3,10 @@
 #include <base/log.h>
 #include <base/system.h>
 
+#include <png.h>
+
 #include <csetjmp>
 #include <cstdlib>
-
-#include <png.h>
 
 bool CByteBufferReader::Read(void *pData, size_t Size)
 {

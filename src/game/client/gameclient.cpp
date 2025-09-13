@@ -1,46 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <chrono>
-#include <limits>
-
-#include <engine/client/checksum.h>
-#include <engine/client/enums.h>
-#include <engine/demo.h>
-#include <engine/discord.h>
-#include <engine/editor.h>
-#include <engine/engine.h>
-#include <engine/favorites.h>
-#include <engine/friends.h>
-#include <engine/graphics.h>
-#include <engine/map.h>
-#include <engine/serverbrowser.h>
-#include <engine/shared/config.h>
-#include <engine/sound.h>
-#include <engine/storage.h>
-#include <engine/textrender.h>
-#include <engine/updater.h>
-
-#include <generated/client_data.h>
-#include <generated/client_data7.h>
-#include <generated/protocol.h>
-#include <generated/protocol7.h>
-#include <generated/protocolglue.h>
-
-#include <base/log.h>
-#include <base/math.h>
-#include <base/system.h>
-#include <base/vmath.h>
-
 #include "gameclient.h"
-#include "lineinput.h"
-#include "race.h"
-#include "render.h"
-
-#include <game/client/projectile_data.h>
-#include <game/localization.h>
-#include <game/mapitems.h>
-#include <game/version.h>
 
 #include "components/background.h"
 #include "components/binds.h"
@@ -76,8 +37,47 @@
 #include "components/spectator.h"
 #include "components/statboard.h"
 #include "components/voting.h"
+#include "lineinput.h"
 #include "prediction/entities/character.h"
 #include "prediction/entities/projectile.h"
+#include "race.h"
+#include "render.h"
+
+#include <base/log.h>
+#include <base/math.h>
+#include <base/system.h>
+#include <base/vmath.h>
+
+#include <engine/client/checksum.h>
+#include <engine/client/enums.h>
+#include <engine/demo.h>
+#include <engine/discord.h>
+#include <engine/editor.h>
+#include <engine/engine.h>
+#include <engine/favorites.h>
+#include <engine/friends.h>
+#include <engine/graphics.h>
+#include <engine/map.h>
+#include <engine/serverbrowser.h>
+#include <engine/shared/config.h>
+#include <engine/sound.h>
+#include <engine/storage.h>
+#include <engine/textrender.h>
+#include <engine/updater.h>
+
+#include <generated/client_data.h>
+#include <generated/client_data7.h>
+#include <generated/protocol.h>
+#include <generated/protocol7.h>
+#include <generated/protocolglue.h>
+
+#include <game/client/projectile_data.h>
+#include <game/localization.h>
+#include <game/mapitems.h>
+#include <game/version.h>
+
+#include <chrono>
+#include <limits>
 
 using namespace std::chrono_literals;
 

@@ -1,11 +1,9 @@
 #include "test.h"
-#include <game/server/gamecontroller.h>
-#include <game/server/player.h>
-#include <gtest/gtest.h>
 
 #include <base/logger.h>
 #include <base/system.h>
 #include <base/types.h>
+
 #include <engine/engine.h>
 #include <engine/kernel.h>
 #include <engine/server/databases/connection.h>
@@ -20,8 +18,12 @@
 
 #include <game/server/entities/character.h>
 #include <game/server/gamecontext.h>
+#include <game/server/gamecontroller.h>
 #include <game/server/gameworld.h>
+#include <game/server/player.h>
 #include <game/version.h>
+
+#include <gtest/gtest.h>
 
 #include <memory>
 #include <thread>

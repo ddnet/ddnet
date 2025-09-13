@@ -3,6 +3,7 @@
 #include <game/client/component.h>
 #include <game/client/components/touch_controls.h>
 #include <game/client/ui.h>
+
 #include <memory>
 
 class CMenusIngameTouchControls : public CComponentInterfaces

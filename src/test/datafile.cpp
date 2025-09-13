@@ -1,10 +1,13 @@
 #include "test.h"
-#include <gtest/gtest.h>
-#include <memory>
 
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
+
 #include <game/mapitems_ex.h>
+
+#include <gtest/gtest.h>
+
+#include <memory>
 
 TEST(Datafile, ExtendedType)
 {

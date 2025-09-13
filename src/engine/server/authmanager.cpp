@@ -1,7 +1,10 @@
 #include "authmanager.h"
+
 #include <base/hash_ctxt.h>
 #include <base/system.h>
+
 #include <engine/shared/config.h>
+
 #include <generated/protocol.h>
 
 #define ADMIN_IDENT "default_admin"

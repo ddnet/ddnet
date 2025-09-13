@@ -1,7 +1,8 @@
 #include "test.h"
-#include <gtest/gtest.h>
 
 #include <base/system.h>
+
+#include <gtest/gtest.h>
 
 static const int BUF_SIZE = 64 * 1024;
 

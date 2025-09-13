@@ -1,6 +1,7 @@
+#include "updater.h"
+
 #include <base/system.h>
 
-#include "updater.h"
 #include <engine/client.h>
 #include <engine/engine.h>
 #include <engine/external/json-parser/json.h>

@@ -1,9 +1,9 @@
 #ifndef GAME_EDITOR_SMOOTH_VALUE_H
 #define GAME_EDITOR_SMOOTH_VALUE_H
 
-#include <base/bezier.h>
-
 #include "component.h"
+
+#include <base/bezier.h>
 
 /**
  * A value that is changed smoothly over time.

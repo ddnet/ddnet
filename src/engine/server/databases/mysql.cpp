@@ -3,10 +3,11 @@
 #include <engine/server/databases/connection_pool.h>
 
 #if defined(CONF_MYSQL)
-#include <mysql.h>
-
 #include <base/tl/threading.h>
+
 #include <engine/console.h>
+
+#include <mysql.h>
 
 #include <atomic>
 #include <memory>

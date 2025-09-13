@@ -1,9 +1,10 @@
 #include "connection.h"
 
-#include <sqlite3.h>
-
 #include <base/math.h>
+
 #include <engine/console.h>
+
+#include <sqlite3.h>
 
 #include <atomic>
 

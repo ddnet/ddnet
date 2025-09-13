@@ -1,6 +1,6 @@
 #include "hash.h"
-#include "hash_ctxt.h"
 
+#include "hash_ctxt.h"
 #include "system.h"
 
 const SHA256_DIGEST SHA256_ZEROED = {{0}};

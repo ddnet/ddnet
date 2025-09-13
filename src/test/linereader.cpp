@@ -1,8 +1,10 @@
 #include "test.h"
-#include <gtest/gtest.h>
 
 #include <base/system.h>
+
 #include <engine/shared/linereader.h>
+
+#include <gtest/gtest.h>
 
 void TestFileLineReaderRaw(const char *pWritten, unsigned WrittenLength, std::initializer_list<const char *> pReads, bool ExpectSuccess, bool WriteBom)
 {

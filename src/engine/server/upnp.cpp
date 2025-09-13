@@ -1,9 +1,13 @@
 #ifdef CONF_UPNP
 
 #include "upnp.h"
+
 #include <base/system.h>
+
 #include <engine/shared/config.h>
+
 #include <game/version.h>
+
 #include <miniupnpc/miniupnpc.h>
 #include <miniupnpc/upnpcommands.h>
 #include <miniupnpc/upnperrors.h>

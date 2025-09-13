@@ -6,12 +6,11 @@
 
 #include <engine/shared/linereader.h>
 
-#include <string>
-#include <vector>
-
+#include <SDL.h>
 #include <jni.h>
 
-#include <SDL.h>
+#include <string>
+#include <vector>
 
 static bool UnpackAsset(const char *pFilename)
 {

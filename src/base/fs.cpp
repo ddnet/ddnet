@@ -12,8 +12,9 @@
 
 #elif defined(CONF_FAMILY_WINDOWS)
 #include <io.h>
-#include <string>
 #include <windows.h>
+
+#include <string>
 #else
 #error NOT IMPLEMENTED
 #endif

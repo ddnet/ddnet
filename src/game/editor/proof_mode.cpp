@@ -1,8 +1,8 @@
 #include "proof_mode.h"
 
-#include <game/client/components/menu_background.h>
-
 #include "editor.h"
+
+#include <game/client/components/menu_background.h>
 
 void CProofMode::OnInit(CEditor *pEditor)
 {

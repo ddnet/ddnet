@@ -1,11 +1,11 @@
 #ifndef BASE_TYPES_H
 #define BASE_TYPES_H
 
+#include <base/detect.h>
+
 #include <cstdint>
 #include <ctime>
 #include <functional>
-
-#include <base/detect.h>
 
 #if defined(CONF_FAMILY_UNIX)
 #include <sys/types.h> // pid_t

@@ -1,7 +1,9 @@
 #include "layer_group.h"
 
 #include <base/math.h>
+
 #include <engine/shared/config.h>
+
 #include <game/editor/editor.h>
 
 CLayerGroup::CLayerGroup()

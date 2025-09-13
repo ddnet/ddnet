@@ -1,8 +1,8 @@
-#include <gtest/gtest.h>
-
 #include <base/detect.h>
 
 #include <engine/client/blocklist_driver.h>
+
+#include <gtest/gtest.h>
 
 TEST(BlocklistDriver, Valid1)
 {

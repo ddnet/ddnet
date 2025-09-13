@@ -3,11 +3,11 @@
 #ifndef GAME_CLIENT_PREDICTION_ENTITY_H
 #define GAME_CLIENT_PREDICTION_ENTITY_H
 
+#include "gameworld.h"
+
 #include <base/vmath.h>
 
 #include <game/alloc.h>
-
-#include "gameworld.h"
 
 class CEntity
 {

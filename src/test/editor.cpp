@@ -1,6 +1,6 @@
-#include <gtest/gtest.h>
-
 #include <base/system.h>
+
+#include <gtest/gtest.h>
 
 bool is_letter(char c) { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }
 

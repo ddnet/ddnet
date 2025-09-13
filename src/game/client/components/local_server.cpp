@@ -1,8 +1,7 @@
-#include <game/client/gameclient.h>
-
-#include <game/localization.h>
-
 #include "local_server.h"
+
+#include <game/client/gameclient.h>
+#include <game/localization.h>
 
 #if defined(CONF_PLATFORM_ANDROID)
 #include <android/android_main.h>

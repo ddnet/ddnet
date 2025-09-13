@@ -1,12 +1,13 @@
 #ifndef ENGINE_FAVORITES_H
 #define ENGINE_FAVORITES_H
 
-#include <memory>
+#include "kernel.h"
 
 #include <base/types.h>
+
 #include <engine/shared/protocol.h>
 
-#include "kernel.h"
+#include <memory>
 
 class IConfigManager;
 

@@ -1,8 +1,9 @@
+#include "econ.h"
+
+#include "netban.h"
+
 #include <engine/console.h>
 #include <engine/shared/config.h>
-
-#include "econ.h"
-#include "netban.h"
 
 CEcon::CEcon() :
 	m_Ready(false)

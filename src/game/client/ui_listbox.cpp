@@ -1,5 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "ui_listbox.h"
+
 #include <base/system.h>
 #include <base/vmath.h>
 
@@ -7,8 +9,6 @@
 #include <engine/shared/config.h>
 
 #include <game/localization.h>
-
-#include "ui_listbox.h"
 
 CListBox::CListBox()
 {
