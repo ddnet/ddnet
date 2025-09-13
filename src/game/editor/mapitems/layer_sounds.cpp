@@ -116,7 +116,7 @@ void CLayerSounds::BrushSelecting(CUIRect Rect)
 	Rect.DrawOutline(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
 }
 
-int CLayerSounds::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
+int CLayerSounds::BrushGrab(const std::shared_ptr<CLayerGroup> &pBrush, CUIRect Rect)
 {
 	// create new layer
 	std::shared_ptr<CLayerSounds> pGrabbed = std::make_shared<CLayerSounds>(m_pEditor);
@@ -141,7 +141,7 @@ int CLayerSounds::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 	return pGrabbed->m_vSources.empty() ? 0 : 1;
 }
 
-void CLayerSounds::BrushPlace(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
+void CLayerSounds::BrushPlace(const std::shared_ptr<CLayer> &pBrush, vec2 WorldPos)
 {
 	std::shared_ptr<CLayerSounds> pSoundLayer = std::static_pointer_cast<CLayerSounds>(pBrush);
 	std::vector<CSoundSource> vAddedSources;

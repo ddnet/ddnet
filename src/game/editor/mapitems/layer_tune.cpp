@@ -78,7 +78,7 @@ bool CLayerTune::IsEmpty() const
 	return true;
 }
 
-void CLayerTune::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
+void CLayerTune::BrushDraw(const std::shared_ptr<CLayer> &pBrush, vec2 WorldPos)
 {
 	if(m_Readonly)
 		return;
@@ -211,7 +211,7 @@ void CLayerTune::BrushRotate(float Amount)
 	}
 }
 
-void CLayerTune::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect)
+void CLayerTune::FillSelection(bool Empty, const std::shared_ptr<CLayer> &pBrush, CUIRect Rect)
 {
 	if(m_Readonly || (!Empty && pBrush->m_Type != LAYERTYPE_TILES))
 		return;

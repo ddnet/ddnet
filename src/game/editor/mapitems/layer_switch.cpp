@@ -77,7 +77,7 @@ bool CLayerSwitch::IsEmpty() const
 	return true;
 }
 
-void CLayerSwitch::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
+void CLayerSwitch::BrushDraw(const std::shared_ptr<CLayer> &pBrush, vec2 WorldPos)
 {
 	if(m_Readonly)
 		return;
@@ -235,7 +235,7 @@ void CLayerSwitch::BrushRotate(float Amount)
 	}
 }
 
-void CLayerSwitch::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect)
+void CLayerSwitch::FillSelection(bool Empty, const std::shared_ptr<CLayer> &pBrush, CUIRect Rect)
 {
 	if(m_Readonly || (!Empty && pBrush->m_Type != LAYERTYPE_TILES))
 		return;
