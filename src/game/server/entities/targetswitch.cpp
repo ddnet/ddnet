@@ -1,9 +1,9 @@
 #include "targetswitch.h"
 #include "character.h"
 
-#include <game/generated/protocol.h>
 #include <game/mapitems.h>
 #include <game/teamscore.h>
+#include <generated/protocol.h>
 
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
@@ -58,6 +58,7 @@ void CTargetSwitch::GetHit(int TeamHitFrom, bool Weakly)
 	if(Weakly)
 	{
 		GameServer()->CreateTargetHit(m_Pos, true, TeamHitBitset);
+		GameServer()->CreateTargetHit(m_Pos, true, TeamHitBitset);
 		return;
 	}
 
@@ -80,7 +81,7 @@ void CTargetSwitch::GetHit(int TeamHitFrom, bool Weakly)
 	{
 		Switchers()[m_Number].m_aStatus[TeamHitFrom] = !Switchers()[m_Number].m_aStatus[TeamHitFrom];
 		// delay not supported on alternating switches due to confusing behavior
-		Switchers()[m_Number].m_aEndTick[TeamHitFrom] = 0; 
+		Switchers()[m_Number].m_aEndTick[TeamHitFrom] = 0;
 		Switchers()[m_Number].m_aType[TeamHitFrom] = (Switchers()[m_Number].m_aType[TeamHitFrom] == TILE_SWITCHCLOSE) ? TILE_SWITCHCLOSE : TILE_SWITCHOPEN;
 	}
 
