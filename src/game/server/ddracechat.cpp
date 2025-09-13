@@ -37,7 +37,7 @@ void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 		"Steinchen, ewancg, gerdoe-jr, BlaiZephyr, KebsCS, bencie,",
 		"DynamoFox, MilkeeyCat, iMilchshake, SchrodingerZhu,",
 		"catseyenebulous, Rei-Tw, Matodor, Emilcha, art0007i, SollyBunny,",
-		"0xfaulty & others",
+		"0xfaulty, pilonpl & others",
 		"Based on DDRace by the DDRace developers,",
 		"which is a mod of Teeworlds by the Teeworlds developers.",
 	};
