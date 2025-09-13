@@ -9,6 +9,7 @@
 #define BASE_SYSTEM_H
 
 #include "detect.h"
+#include "fs.h"
 #include "str.h"
 #include "types.h"
 
@@ -1909,37 +1910,6 @@ void fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user);
  * @remark The strings are treated as null-terminated strings.
  */
 void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int type, void *user);
-
-/**
- * Creates a directory.
- *
- * @ingroup Filesystem
- *
- * @param path Directory to create.
- *
- * @return `0` on success. Negative value on failure.
- *
- * @remark Does not create several directories if needed. "a/b/c" will
- *         result in a failure if b or a does not exist.
- *
- * @remark The strings are treated as null-terminated strings.
- */
-int fs_makedir(const char *path);
-
-/**
- * Removes a directory.
- *
- * @ingroup Filesystem
- *
- * @param path Directory to remove.
- *
- * @return `0` on success. Negative value on failure.
- *
- * @remark Cannot remove a non-empty directory.
- *
- * @remark The strings are treated as null-terminated strings.
- */
-int fs_removedir(const char *path);
 
 /**
  * Recursively creates parent directories for a file or directory.
