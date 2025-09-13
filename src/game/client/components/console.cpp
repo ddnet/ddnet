@@ -1196,8 +1196,10 @@ void CGameConsole::OnRender()
 			}
 		}
 
+		const bool Hidden = m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !m_RemoteConsole.m_Searching && !Client()->RconAuthed() && (pConsole->m_UserGot || !pConsole->m_UsernameReq);
+		pConsole->m_Input.SetHidden(Hidden);
+
 		// render console input (wrap line)
-		pConsole->m_Input.SetHidden(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed() && (pConsole->m_UserGot || !pConsole->m_UsernameReq));
 		if(m_ConsoleState == CONSOLE_OPEN)
 		{
 			pConsole->m_Input.Activate(EInputPriority::CONSOLE); // Ensure that the input is active
