@@ -287,7 +287,7 @@ public:
 	std::shared_ptr<ILogger> m_pStdoutLogger = nullptr;
 
 	CServer();
-	~CServer();
+	~CServer() override;
 
 	bool IsClientNameAvailable(int ClientId, const char *pNameRequest);
 	bool SetClientNameImpl(int ClientId, const char *pNameRequest, bool Set);

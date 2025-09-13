@@ -106,7 +106,7 @@ protected:
 public:
 	CLayerTiles(CEditor *pEditor, int w, int h);
 	CLayerTiles(const CLayerTiles &Other);
-	~CLayerTiles();
+	~CLayerTiles() override;
 
 	[[nodiscard]] virtual CTile GetTile(int x, int y) const;
 	virtual void SetTile(int x, int y, CTile Tile);

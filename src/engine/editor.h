@@ -8,7 +8,6 @@ class IEditor : public IInterface
 {
 	MACRO_INTERFACE("editor")
 public:
-	virtual ~IEditor() = default;
 	virtual void Init() = 0;
 	virtual void OnUpdate() = 0;
 	virtual void OnRender() = 0;

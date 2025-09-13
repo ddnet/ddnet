@@ -16,8 +16,6 @@ class IEngine : public IInterface
 	MACRO_INTERFACE("engine")
 
 public:
-	virtual ~IEngine() = default;
-
 	virtual void Init() = 0;
 	virtual void AddJob(std::shared_ptr<IJob> pJob) = 0;
 	virtual void ShutdownJobs() = 0;

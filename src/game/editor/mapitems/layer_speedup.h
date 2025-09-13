@@ -21,7 +21,7 @@ class CLayerSpeedup : public CLayerTiles
 public:
 	CLayerSpeedup(CEditor *pEditor, int w, int h);
 	CLayerSpeedup(const CLayerSpeedup &Other);
-	~CLayerSpeedup();
+	~CLayerSpeedup() override;
 
 	CSpeedupTile *m_pSpeedupTile;
 	int m_SpeedupForce;

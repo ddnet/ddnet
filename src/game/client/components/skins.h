@@ -48,7 +48,7 @@ private:
 	{
 	public:
 		CAbstractSkinLoadJob(CSkins *pSkins, const char *pName);
-		virtual ~CAbstractSkinLoadJob();
+		~CAbstractSkinLoadJob() override;
 
 		CSkinLoadData m_Data;
 		bool m_NotFound = false;

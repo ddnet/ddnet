@@ -250,7 +250,7 @@ class CServerBrowser : public IServerBrowser
 {
 public:
 	CServerBrowser();
-	virtual ~CServerBrowser();
+	~CServerBrowser() override;
 
 	// interface functions
 	void Refresh(int Type, bool Force = false) override;

@@ -123,7 +123,6 @@ protected:
 
 public:
 	CCommandProcessorFragment_OpenGL();
-	virtual ~CCommandProcessorFragment_OpenGL() = default;
 
 	ERunCommandReturnTypes RunCommand(const CCommandBuffer::SCommand *pBaseCommand) override;
 };

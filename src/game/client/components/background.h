@@ -34,7 +34,7 @@ protected:
 
 public:
 	CBackground(ERenderType MapType = ERenderType::RENDERTYPE_BACKGROUND_FORCE, bool OnlineOnly = true);
-	virtual ~CBackground();
+	~CBackground() override;
 	int Sizeof() const override { return sizeof(*this); }
 
 	void OnInit() override;

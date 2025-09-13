@@ -8,7 +8,7 @@ class CLayerSounds : public CLayer
 public:
 	explicit CLayerSounds(CEditor *pEditor);
 	CLayerSounds(const CLayerSounds &Other);
-	~CLayerSounds();
+	~CLayerSounds() override;
 
 	void Render(bool Tileset = false) override;
 	CSoundSource *NewSource(int x, int y);
