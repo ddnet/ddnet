@@ -1,17 +1,18 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "snapshot.h"
+
 #include "compression.h"
 #include "uuid_manager.h"
-
-#include <cstdlib>
-#include <limits>
 
 #include <base/math.h>
 #include <base/system.h>
 
 #include <generated/protocol7.h>
 #include <generated/protocolglue.h>
+
+#include <cstdlib>
+#include <limits>
 
 // CSnapshot
 

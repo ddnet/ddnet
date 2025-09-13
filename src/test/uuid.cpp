@@ -1,6 +1,6 @@
-#include <gtest/gtest.h>
-
 #include <engine/shared/uuid_manager.h>
+
+#include <gtest/gtest.h>
 
 TEST(Uuid, FromToString)
 {

@@ -1,8 +1,9 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <engine/demo.h>
+#include "effects.h"
 
+#include <engine/demo.h>
 #include <engine/shared/config.h>
 
 #include <generated/client_data.h>
@@ -12,8 +13,6 @@
 #include <game/client/components/particles.h>
 #include <game/client/components/sounds.h>
 #include <game/client/gameclient.h>
-
-#include "effects.h"
 
 CEffects::CEffects()
 {

@@ -4,7 +4,9 @@
 #define ENGINE_DEMO_H
 
 #include "kernel.h"
+
 #include <base/hash.h>
+
 #include <engine/map.h>
 #include <engine/shared/uuid_manager.h>
 

@@ -1,14 +1,16 @@
 #ifndef GAME_EDITOR_FONT_TYPER_H
 #define GAME_EDITOR_FONT_TYPER_H
 
+#include "component.h"
+
 #include <base/vmath.h>
+
 #include <engine/graphics.h>
+
 #include <game/editor/mapitems/layer_tiles.h>
 
 #include <chrono>
 #include <memory>
-
-#include "component.h"
 
 class CFontTyper : public CEditorComponent
 {

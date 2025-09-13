@@ -1,8 +1,10 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "network.h"
+
 #include <base/system.h>
 #include <base/types.h>
+
 #include <engine/shared/protocol7.h>
 
 bool CNetClient::Open(NETADDR BindAddr)

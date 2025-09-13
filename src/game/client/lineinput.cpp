@@ -1,10 +1,11 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "lineinput.h"
+
+#include "ui.h"
+
 #include <engine/keys.h>
 #include <engine/shared/config.h>
-
-#include "lineinput.h"
-#include "ui.h"
 
 IInput *CLineInput::ms_pInput = nullptr;
 ITextRender *CLineInput::ms_pTextRender = nullptr;

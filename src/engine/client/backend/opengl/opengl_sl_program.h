@@ -12,6 +12,7 @@
 
 #include <base/color.h>
 #include <base/vmath.h>
+
 #include <engine/client/graphics_defines.h>
 
 class CGLSL;

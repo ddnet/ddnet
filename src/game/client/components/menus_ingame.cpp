@@ -1,5 +1,10 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "ghost.h"
+#include "menus.h"
+#include "motd.h"
+#include "voting.h"
+
 #include <base/color.h>
 #include <base/math.h>
 #include <base/system.h>
@@ -9,9 +14,11 @@
 #include <engine/friends.h>
 #include <engine/ghost.h>
 #include <engine/graphics.h>
+#include <engine/keys.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
 #include <engine/shared/localization.h>
+#include <engine/storage.h>
 #include <engine/textrender.h>
 
 #include <generated/client_data.h>
@@ -25,14 +32,6 @@
 #include <game/client/ui_listbox.h>
 #include <game/client/ui_scrollregion.h>
 #include <game/localization.h>
-
-#include "menus.h"
-#include "motd.h"
-#include "voting.h"
-
-#include "ghost.h"
-#include <engine/keys.h>
-#include <engine/storage.h>
 
 #include <chrono>
 

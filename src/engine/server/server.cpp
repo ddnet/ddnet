@@ -3,6 +3,10 @@
 
 #include "server.h"
 
+#include "databases/connection.h"
+#include "databases/connection_pool.h"
+#include "register.h"
+
 #include <base/logger.h>
 #include <base/math.h>
 #include <base/system.h>
@@ -12,8 +16,6 @@
 #include <engine/engine.h>
 #include <engine/map.h>
 #include <engine/server.h>
-#include <engine/storage.h>
-
 #include <engine/shared/compression.h>
 #include <engine/shared/config.h>
 #include <engine/shared/console.h>
@@ -25,6 +27,7 @@
 #include <engine/shared/http.h>
 #include <engine/shared/json.h>
 #include <engine/shared/jsonwriter.h>
+#include <engine/shared/linereader.h>
 #include <engine/shared/masterserver.h>
 #include <engine/shared/netban.h>
 #include <engine/shared/network.h>
@@ -34,18 +37,14 @@
 #include <engine/shared/protocol_ex.h>
 #include <engine/shared/rust_version.h>
 #include <engine/shared/snapshot.h>
+#include <engine/storage.h>
 
 #include <game/version.h>
 
-#include <engine/shared/linereader.h>
-#include <vector>
 #include <zlib.h>
 
-#include "databases/connection.h"
-#include "databases/connection_pool.h"
-#include "register.h"
-
 #include <chrono>
+#include <vector>
 
 using namespace std::chrono_literals;
 

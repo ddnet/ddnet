@@ -3,8 +3,9 @@
 #ifndef GAME_CLIENT_COMPONENTS_RACE_DEMO_H
 #define GAME_CLIENT_COMPONENTS_RACE_DEMO_H
 
-#include <chrono>
 #include <game/client/component.h>
+
+#include <chrono>
 
 class CRaceDemo : public CComponent
 {

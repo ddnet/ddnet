@@ -2,6 +2,7 @@
 #define GAME_EDITOR_MAPITEMS_SOUND_H
 
 #include <base/types.h>
+
 #include <game/editor/component.h>
 
 class CEditorSound : public CEditorComponent

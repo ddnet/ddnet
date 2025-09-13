@@ -2,13 +2,19 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "gamecontext.h"
 
-#include <vector>
-
+#include "entities/character.h"
+#include "gamemodes/DDRace.h"
+#include "gamemodes/mod.h"
+#include "player.h"
+#include "score.h"
 #include "teeinfo.h"
+
 #include <antibot/antibot_data.h>
+
 #include <base/logger.h>
 #include <base/math.h>
 #include <base/system.h>
+
 #include <engine/console.h>
 #include <engine/engine.h>
 #include <engine/map.h>
@@ -21,19 +27,15 @@
 #include <engine/shared/protocolglue.h>
 #include <engine/storage.h>
 
+#include <generated/protocol7.h>
+#include <generated/protocolglue.h>
+
 #include <game/collision.h>
 #include <game/gamecore.h>
 #include <game/mapitems.h>
 #include <game/version.h>
 
-#include <generated/protocol7.h>
-#include <generated/protocolglue.h>
-
-#include "entities/character.h"
-#include "gamemodes/DDRace.h"
-#include "gamemodes/mod.h"
-#include "player.h"
-#include "score.h"
+#include <vector>
 
 // Not thread-safe!
 class CClientChatLogger : public ILogger

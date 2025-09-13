@@ -2,14 +2,15 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "laser.h"
 
+#include "character.h"
+
+#include <engine/shared/config.h>
+
 #include <generated/protocol.h>
 
-#include "character.h"
 #include <game/client/laser_data.h>
 #include <game/collision.h>
 #include <game/mapitems.h>
-
-#include <engine/shared/config.h>
 
 CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)

@@ -2,6 +2,7 @@
 #define GAME_MAP_ENVELOPE_EXTREMA_H
 
 #include <engine/map.h>
+
 #include <game/map/render_map.h>
 
 #include <vector>

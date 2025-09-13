@@ -1,8 +1,8 @@
 #include "test.h"
 
-#include <gtest/gtest.h>
-
 #include <base/color.h>
+
+#include <gtest/gtest.h>
 
 TEST(Color, HslToRgbToHslConv)
 {

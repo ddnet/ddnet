@@ -2,6 +2,7 @@
 #define BASE_TL_THREADING_H
 
 #include "../system.h"
+
 #include <atomic>
 
 class CSemaphore

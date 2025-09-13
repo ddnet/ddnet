@@ -5,7 +5,6 @@
 
 #include <cstdlib>
 #include <iterator> // std::size
-
 #include <thread>
 
 struct SPacket

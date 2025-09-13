@@ -1,3 +1,5 @@
+#include "menus.h"
+
 #include <base/system.h>
 
 #include <engine/shared/config.h>
@@ -7,8 +9,6 @@
 #include <game/client/gameclient.h>
 #include <game/client/ui_listbox.h>
 #include <game/localization.h>
-
-#include "menus.h"
 
 #include <chrono>
 

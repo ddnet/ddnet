@@ -3,9 +3,9 @@
 #ifndef GAME_ALLOC_H
 #define GAME_ALLOC_H
 
-#include <new>
-
 #include <base/system.h>
+
+#include <new>
 
 #ifndef __has_feature
 #define __has_feature(x) 0

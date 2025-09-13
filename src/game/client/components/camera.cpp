@@ -1,18 +1,20 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <engine/shared/config.h>
+#include "camera.h"
+
+#include "controls.h"
 
 #include <base/log.h>
 #include <base/math.h>
 #include <base/vmath.h>
+
+#include <engine/shared/config.h>
+
 #include <game/client/gameclient.h>
 #include <game/collision.h>
 #include <game/localization.h>
 #include <game/mapitems.h>
-
-#include "camera.h"
-#include "controls.h"
 
 #include <limits>
 

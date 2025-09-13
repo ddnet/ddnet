@@ -1,10 +1,10 @@
+#include "community_icons.h"
+
 #include <base/log.h>
 
 #include <engine/engine.h>
 #include <engine/gfx/image_manipulation.h>
 #include <engine/storage.h>
-
-#include "community_icons.h"
 
 CCommunityIcons::CAbstractCommunityIconJob::CAbstractCommunityIconJob(CCommunityIcons *pCommunityIcons, const char *pCommunityId, int StorageType) :
 	m_pCommunityIcons(pCommunityIcons),

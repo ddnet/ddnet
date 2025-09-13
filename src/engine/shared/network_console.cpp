@@ -1,9 +1,9 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <base/system.h>
-
 #include "netban.h"
 #include "network.h"
+
+#include <base/system.h>
 
 bool CNetConsole::Open(NETADDR BindAddr, CNetBan *pNetBan)
 {

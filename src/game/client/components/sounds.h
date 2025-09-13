@@ -4,8 +4,10 @@
 #define GAME_CLIENT_COMPONENTS_SOUNDS_H
 
 #include <base/vmath.h>
+
 #include <engine/shared/jobs.h>
 #include <engine/sound.h>
+
 #include <game/client/component.h>
 
 class CSoundLoading : public IJob

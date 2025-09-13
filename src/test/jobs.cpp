@@ -1,10 +1,11 @@
 #include "test.h"
-#include <gtest/gtest.h>
 
 #include <base/system.h>
 
 #include <engine/shared/host_lookup.h>
 #include <engine/shared/jobs.h>
+
+#include <gtest/gtest.h>
 
 #include <functional>
 

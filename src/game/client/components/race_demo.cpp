@@ -1,18 +1,17 @@
 /* (c) Redix and Sushi */
 
-#include <cctype>
+#include "race_demo.h"
 
 #include <base/system.h>
+
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 
+#include <game/client/gameclient.h>
 #include <game/client/race.h>
 #include <game/localization.h>
 
-#include "race_demo.h"
-
-#include <game/client/gameclient.h>
-
+#include <cctype>
 #include <chrono>
 
 using namespace std::chrono_literals;

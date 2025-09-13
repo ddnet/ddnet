@@ -1,9 +1,9 @@
 #ifndef GAME_SERVER_SCORE_H
 #define GAME_SERVER_SCORE_H
 
-#include <game/prng.h>
-
 #include "scoreworker.h"
+
+#include <game/prng.h>
 
 class CDbConnectionPool;
 class CGameContext;

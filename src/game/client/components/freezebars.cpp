@@ -1,6 +1,6 @@
-#include <game/client/gameclient.h>
-
 #include "freezebars.h"
+
+#include <game/client/gameclient.h>
 
 void CFreezeBars::RenderFreezeBar(const int ClientId)
 {

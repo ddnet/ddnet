@@ -3,9 +3,10 @@
 #ifndef ENGINE_SHARED_MAP_H
 #define ENGINE_SHARED_MAP_H
 
+#include "datafile.h"
+
 #include <base/types.h>
 
-#include "datafile.h"
 #include <engine/map.h>
 
 class CMap : public IEngineMap

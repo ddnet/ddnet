@@ -3,11 +3,12 @@
 #include <base/system.h>
 #if defined(CONF_FAMILY_UNIX)
 
-#include <cstdlib>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+#include <cstdlib>
 
 void CFifo::Init(IConsole *pConsole, const char *pFifoFile, int Flag)
 {

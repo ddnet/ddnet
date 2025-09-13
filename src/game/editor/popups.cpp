@@ -1,6 +1,9 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include "editor.h"
+#include "editor_actions.h"
+
 #include <base/color.h>
 
 #include <engine/console.h>
@@ -10,15 +13,13 @@
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
-#include <limits>
 
 #include <game/client/gameclient.h>
 #include <game/client/ui_scrollregion.h>
 #include <game/editor/mapitems/image.h>
 #include <game/editor/mapitems/sound.h>
 
-#include "editor.h"
-#include "editor_actions.h"
+#include <limits>
 
 using namespace FontIcons;
 

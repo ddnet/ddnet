@@ -2,9 +2,12 @@
 #define GAME_EDITOR_QUADART_H
 
 #include <base/types.h>
+
 #include <engine/image.h>
+
 #include <game/editor/mapitems/layer_quads.h>
 #include <game/mapitems.h>
+
 #include <memory>
 #include <optional>
 
