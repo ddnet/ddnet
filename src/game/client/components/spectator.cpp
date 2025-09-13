@@ -601,6 +601,7 @@ void CSpectator::Spectate(int SpectatorId)
 	{
 		GameClient()->m_DemoSpecId = std::clamp(SpectatorId, (int)SPEC_FOLLOW, MAX_CLIENTS - 1);
 		// The tick must be rendered for the spectator mode to be updated, so we do it manually when demo playback is paused
+		// TODO: Update spectator info some other way
 		if(DemoPlayer()->BaseInfo()->m_Paused)
 			GameClient()->m_Menus.DemoSeekTick(IDemoPlayer::TICK_CURRENT);
 		return;

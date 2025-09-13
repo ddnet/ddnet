@@ -1007,6 +1007,7 @@ bool CDemoPlayer::SeekTick(ETickOffset TickOffset)
 	switch(TickOffset)
 	{
 	case TICK_CURRENT:
+		// TODO: WantedTick == m_Info.m_NextTick is used to update spectator info when paused so seeking must be done
 		WantedTick = m_Info.m_Info.m_CurrentTick;
 		break;
 	case TICK_PREVIOUS:
@@ -1029,6 +1030,8 @@ bool CDemoPlayer::SetPos(int WantedTick)
 	if(!m_File)
 		return false;
 
+	// TODO: WantedTick == m_Info.m_NextTick is used to update spectator info when paused so seeking must be done
+
 	int LastSeekableTick = m_Info.m_Info.m_LastTick;
 	if(m_Info.m_Info.m_LiveDemo)
 	{
@@ -1043,6 +1046,16 @@ bool CDemoPlayer::SetPos(int WantedTick)
 	{
 		WantedTick = std::clamp(WantedTick, m_Info.m_Info.m_FirstTick, LastSeekableTick);
 	}
+
+	// Just the next tick
+	if(WantedTick == m_Info.m_NextTick + 1)
+	{
+		// This does handle looping correctly
+		DoTick();
+		Play();
+		return true;
+	}
+
 	const int KeyFrameWantedTick = WantedTick - 5; // -5 because we have to have a current tick and previous tick when we do the playback
 	const float Percent = (KeyFrameWantedTick - m_Info.m_Info.m_FirstTick) / (float)(m_Info.m_Info.m_LastTick - m_Info.m_Info.m_FirstTick);
 
@@ -1053,16 +1066,19 @@ bool CDemoPlayer::SetPos(int WantedTick)
 	while(KeyFrame > 0 && m_vKeyFrames[KeyFrame].m_Tick > KeyFrameWantedTick)
 		KeyFrame--;
 
-	// seek to the correct key frame
-	if(io_seek(m_File, m_vKeyFrames[KeyFrame].m_Filepos, IOSEEK_START) != 0)
+	if(WantedTick <= m_Info.m_Info.m_CurrentTick || // if we are seeking backwards (must be <= for high bandwidth demos) OR
+		m_Info.m_Info.m_CurrentTick < m_vKeyFrames[KeyFrame].m_Tick || // we are before the wanted KeyFrame OR
+		(KeyFrame != m_vKeyFrames.size() - 1 && m_Info.m_Info.m_CurrentTick >= m_vKeyFrames[KeyFrame + 1].m_Tick)) // we are after the wanted KeyFrame
 	{
-		Stop("Error seeking keyframe position");
-		return false;
+		if(io_seek(m_File, m_vKeyFrames[KeyFrame].m_Filepos, IOSEEK_START) != 0)
+		{
+			Stop("Error seeking keyframe position");
+			return false;
+		}
+		m_Info.m_NextTick = -1;
+		m_Info.m_Info.m_CurrentTick = -1;
+		m_Info.m_PreviousTick = -1;
 	}
-
-	m_Info.m_NextTick = -1;
-	m_Info.m_Info.m_CurrentTick = -1;
-	m_Info.m_PreviousTick = -1;
 
 	// playback everything until we hit our tick
 	while(m_Info.m_NextTick < WantedTick)
