@@ -24,6 +24,7 @@ with open("src/engine/keys.h", "w", encoding="utf-8") as f:
 	print("#undef KEY_EXECUTE", file=f)
 	print("#endif", file=f)
 	print("", file=f)
+	print("// NOLINTBEGIN(misc-confusable-identifiers)", file=f)
 	print("enum EKey", file=f)
 	print("{", file=f)
 
@@ -86,6 +87,7 @@ with open("src/engine/keys.h", "w", encoding="utf-8") as f:
 	print(f"\tNUM_JOYSTICK_HATS = {num_joystick_hats},", file=f)
 
 	print("};", file=f)
+	print("// NOLINTEND(misc-confusable-identifiers)", file=f)
 	print("", file=f)
 	print("#endif", file=f)
 

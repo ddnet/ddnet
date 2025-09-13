@@ -85,7 +85,7 @@ public:
 	bool IsLoaded() const { return m_FileLoaded; }
 
 private:
-	std::vector<CConfiguration> m_vConfigs = {};
+	std::vector<CConfiguration> m_vConfigs;
 	bool m_FileLoaded = false;
 };
 

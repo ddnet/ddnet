@@ -10,9 +10,6 @@ class CEditorActionLayerBase : public IEditorAction
 public:
 	CEditorActionLayerBase(CEditor *pEditor, int GroupIndex, int LayerIndex);
 
-	void Undo() override {}
-	void Redo() override {}
-
 protected:
 	int m_GroupIndex;
 	int m_LayerIndex;
@@ -232,9 +229,6 @@ class CEditorActionEditLayerPropBase : public CEditorActionLayerBase
 public:
 	CEditorActionEditLayerPropBase(CEditor *pEditor, int GroupIndex, int LayerIndex, E Prop, int Previous, int Current);
 
-	void Undo() override {}
-	void Redo() override {}
-
 protected:
 	E m_Prop;
 	int m_Previous;
@@ -309,7 +303,6 @@ public:
 		int m_Envelopes;
 	};
 
-public:
 	CEditorActionAppendMap(CEditor *pEditor, const char *pMapName, const SPrevInfo &PrevInfo, std::vector<int> &vImageIndexMap);
 
 	void Undo() override;
@@ -606,7 +599,6 @@ public:
 private:
 	int m_SourceIndex;
 
-private:
 	void Apply(int Value);
 };
 
@@ -621,7 +613,6 @@ public:
 private:
 	int m_SourceIndex;
 
-private:
 	void Apply(int Value);
 };
 
@@ -636,7 +627,6 @@ public:
 private:
 	int m_SourceIndex;
 
-private:
 	void Apply(int Value);
 };
 

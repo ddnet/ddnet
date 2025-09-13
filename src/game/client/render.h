@@ -23,10 +23,6 @@ class CSwitchTile;
 class CTeleTile;
 class CTile;
 class CTuneTile;
-namespace client_data7 {
-struct CDataSprite;
-}
-struct CDataSprite;
 class CEnvPoint;
 class CEnvPointBezier;
 class CEnvPointBezier_upstream;
