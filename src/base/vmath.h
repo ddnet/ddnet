@@ -96,6 +96,14 @@ inline T distance(const vector2_base<T> a, const vector2_base<T> &b)
 	return length(a - b);
 }
 
+template<>
+inline int distance(const vector2_base<int> a, const vector2_base<int> &b)
+{
+	vector2_base<float> Pos1(a.x, a.y);
+	vector2_base<float> Pos2(b.x, b.y);
+	return (int)std::round(distance(Pos1, Pos2));
+}
+
 template<Numeric T>
 constexpr T dot(const vector2_base<T> a, const vector2_base<T> &b)
 {
@@ -262,6 +270,14 @@ template<Numeric T>
 inline T distance(const vector3_base<T> &a, const vector3_base<T> &b)
 {
 	return length(a - b);
+}
+
+template<>
+inline int distance(const vector3_base<int> &a, const vector3_base<int> &b)
+{
+	vector3_base<float> Pos1(a.x, a.y, a.z);
+	vector3_base<float> Pos2(b.x, b.y, b.z);
+	return (int)std::round(distance(Pos1, Pos2));
 }
 
 template<Numeric T>
