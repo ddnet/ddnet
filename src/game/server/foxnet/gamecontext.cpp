@@ -1,7 +1,4 @@
-﻿#include <engine/server/server.h>
-#include <engine/shared/config.h>
-
-#include <game/collision.h>
+﻿#include <game/collision.h>
 #include <game/gamecore.h>
 #include <game/mapitems.h>
 #include <game/server/entities/character.h>
@@ -13,21 +10,25 @@
 #include <game/server/score.h>
 #include <game/voting.h>
 
+#include <engine/server/server.h>
+#include <engine/shared/config.h>
+#include <engine/shared/protocol.h>
+
+#include <base/log.h>
 #include <base/system.h>
 
 #include <generated/protocol.h>
 
-#include "accounts.h"
-#include "entities/pickupdrop.h"
-#include "fontconvert.h"
-
 #include <cstring>
+#include <optional>
 #include <random>
 #include <string>
 #include <vector>
-#include <game/server/entities/pickup.h>
-#include <optional>
+
+#include "accounts.h"
+#include "entities/pickupdrop.h"
 #include "entities/powerup.h"
+#include "fontconvert.h"
 
 void CGameContext::FoxNetTick()
 {
@@ -62,26 +63,6 @@ void CGameContext::FoxNetTick()
 	{
 		m_AccountManager.SaveAllAccounts();
 	}
-
-	for(auto it = m_vFakeSnapPlayers.begin(); it != m_vFakeSnapPlayers.end();)
-	{
-		if(it->m_State == 2)
-		{
-			it = m_vFakeSnapPlayers.erase(it);
-			continue;
-		}
-		if(it->m_State == 1)
-		{
-			const int Id = it->m_Id;
-			CNetMsg_Sv_Chat Msg;
-			Msg.m_Team = 0;
-			Msg.m_ClientId = Id;
-			Msg.m_pMessage = it->m_aMessage;
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
-			it->m_State = 2;
-		}
-		++it;
-	}
 }
 int RandGeometricXP(std::mt19937 &rng, int minXP, int maxXP, double p)
 {
@@ -109,7 +90,7 @@ void CGameContext::PowerUpSpawner()
 	}
 
 	static std::mt19937 rng{std::random_device{}()};
-	int Xp = RandGeometricXP(rng, 5, 35, 0.35); 
+	int Xp = RandGeometricXP(rng, 5, 35, 0.35);
 	int Lifetime = 120 + Xp * 15; // Lifetime in seconds
 	CPowerUp *NewPowerUp = new CPowerUp(&m_World, *RandomPos, Lifetime, Xp);
 
@@ -225,32 +206,53 @@ void CGameContext::FoxNetSnap(int ClientId, bool GlobalSnap)
 	SnapDebuggedQuad(ClientId);
 
 	// Snap the Fake Player
-	for(auto it = m_vFakeSnapPlayers.begin(); it != m_vFakeSnapPlayers.end();)
+	for(auto it = m_vFakeSnapPlayers.begin(); it < m_vFakeSnapPlayers.end();)
 	{
-		const int Id = it->m_Id;
+		const int ClientId = it->m_ClientId;
 
-		if(auto *pInfo = Server()->SnapNewItem<CNetObj_ClientInfo>(Id))
+		if(auto *pClientInfo = Server()->SnapNewItem<CNetObj_ClientInfo>(ClientId))
 		{
-			StrToInts(pInfo->m_aName, std::size(pInfo->m_aName), it->m_aName);
-			StrToInts(pInfo->m_aClan, std::size(pInfo->m_aClan), it->m_aClan);
-			pInfo->m_Country = it->m_Country;
-			StrToInts(pInfo->m_aSkin, std::size(pInfo->m_aSkin), it->m_aSkinName);
-			pInfo->m_UseCustomColor = it->m_CustomColors;
-			pInfo->m_ColorBody = it->m_ColorBody;
-			pInfo->m_ColorFeet = it->m_ColorFeet;
+			StrToInts(pClientInfo->m_aName, std::size(pClientInfo->m_aName), it->m_aName);
+			StrToInts(pClientInfo->m_aClan, std::size(pClientInfo->m_aClan), it->m_aClan);
+			pClientInfo->m_Country = it->m_Country;
+			StrToInts(pClientInfo->m_aSkin, std::size(pClientInfo->m_aSkin), it->m_aSkinName);
+			pClientInfo->m_UseCustomColor = it->m_CustomColors;
+			pClientInfo->m_ColorBody = it->m_ColorBody;
+			pClientInfo->m_ColorFeet = it->m_ColorFeet;
 		}
 
-		if(auto *pPI = Server()->SnapNewItem<CNetObj_PlayerInfo>(Id))
+		if(auto *pPlayerInfo = Server()->SnapNewItem<CNetObj_PlayerInfo>(ClientId))
 		{
-			pPI->m_Latency = 0;
-			pPI->m_Score = 0;
-			pPI->m_Team = TEAM_SPECTATORS;
-			pPI->m_Local = 0;
-			pPI->m_ClientId = Id;
+			pPlayerInfo->m_Latency = 0;
+			pPlayerInfo->m_Score = 0;
+			pPlayerInfo->m_Team = TEAM_SPECTATORS;
+			pPlayerInfo->m_Local = 0;
+			pPlayerInfo->m_ClientId = ClientId;
 		}
-		if(!it->m_State)
-			it->m_State = 1;
-		++it;
+		if(ClientId == -1)
+			it = m_vFakeSnapPlayers.erase(it);
+		else
+			it++;
+	}
+}
+
+void CGameContext::FoxNetPostGlobalSnap()
+{
+	for(auto it = m_vFakeSnapPlayers.begin(); it < m_vFakeSnapPlayers.end(); it++)
+	{
+		const int ClientId = it->m_ClientId;
+		if(ClientId < 0 || ClientId >= MAX_CLIENTS)
+			continue;
+
+		CNetMsg_Sv_Chat Msg;
+		Msg.m_Team = 0;
+		Msg.m_ClientId = ClientId;
+		Msg.m_pMessage = it->m_aMessage;
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
+
+		log_info(it->m_Context, "%d:%d:%s: %s", ClientId, Msg.m_Team, it->m_aName, it->m_aMessage);
+
+		it->m_ClientId = -1;
 	}
 }
 
@@ -960,7 +962,7 @@ bool CGameContext::AddFakeMessage(const char *pName, const char *pMessage, const
 		return false; // no free visual slot
 	LastUsedId = FreeId;
 	CFakeSnapPlayer FakeSnap;
-	FakeSnap.m_Id = FreeId;
+	FakeSnap.m_ClientId = FreeId;
 	str_copy(FakeSnap.m_aName, pName);
 	FakeSnap.m_aClan[0] = '\0';
 	FakeSnap.m_Country = -1;

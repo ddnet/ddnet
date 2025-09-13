@@ -722,6 +722,7 @@ private:
 	void FoxNetTick();
 	void FoxNetInit();
 	void FoxNetSnap(int ClientId, bool GlobalSnap);
+	void FoxNetPostGlobalSnap();
 	void RegisterFoxNetCommands();
 	void PowerUpSpawner();
 
@@ -849,7 +850,7 @@ private:
 
 	struct CFakeSnapPlayer
 	{
-		int m_Id;
+		int m_ClientId;
 
 		char m_aName[16];
 		char m_aClan[12];
@@ -862,7 +863,7 @@ private:
 
 		char m_aMessage[256];
 
-		int m_State = 0;
+		char m_Context[24] = "fake-message";
 	};
 
 	std::vector<CFakeSnapPlayer> m_vFakeSnapPlayers;

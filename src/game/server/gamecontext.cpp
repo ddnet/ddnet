@@ -4694,6 +4694,9 @@ void CGameContext::OnPostGlobalSnap()
 		if(pPlayer && pPlayer->GetCharacter())
 			pPlayer->GetCharacter()->PostGlobalSnap();
 	}
+	// <FoxNet
+	FoxNetPostGlobalSnap();
+	// FoxNet>
 	m_Events.Clear();
 }
 
