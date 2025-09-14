@@ -2575,9 +2575,9 @@ protected:
 			pData = pTmpData;
 		}
 
-		bool Requires2DTexture = (Flags & CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0;
-		bool Requires2DTextureArray = (Flags & (CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE)) != 0;
-		bool RequiresMipMaps = (Flags & CCommandBuffer::TEXFLAG_NOMIPMAPS) == 0;
+		bool Requires2DTexture = (Flags & TextureFlag::NO_2D_TEXTURE) == 0;
+		bool Requires2DTextureArray = (Flags & TextureFlag::TO_2D_ARRAY_TEXTURE) != 0;
+		bool RequiresMipMaps = (Flags & TextureFlag::NO_MIPMAPS) == 0;
 		size_t MipMapLevelCount = 1;
 		if(RequiresMipMaps)
 		{
@@ -6669,9 +6669,9 @@ public:
 		uint8_t *pTmpData = pCommand->m_pTextData;
 		uint8_t *pTmpData2 = pCommand->m_pTextOutlineData;
 
-		if(!CreateTextureCMD(Slot, Width, Height, VK_FORMAT_R8_UNORM, VK_FORMAT_R8_UNORM, CCommandBuffer::TEXFLAG_NOMIPMAPS, pTmpData))
+		if(!CreateTextureCMD(Slot, Width, Height, VK_FORMAT_R8_UNORM, VK_FORMAT_R8_UNORM, TextureFlag::NO_MIPMAPS, pTmpData))
 			return false;
-		if(!CreateTextureCMD(SlotOutline, Width, Height, VK_FORMAT_R8_UNORM, VK_FORMAT_R8_UNORM, CCommandBuffer::TEXFLAG_NOMIPMAPS, pTmpData2))
+		if(!CreateTextureCMD(SlotOutline, Width, Height, VK_FORMAT_R8_UNORM, VK_FORMAT_R8_UNORM, TextureFlag::NO_MIPMAPS, pTmpData2))
 			return false;
 
 		if(!CreateNewTextDescriptorSets(Slot, SlotOutline))

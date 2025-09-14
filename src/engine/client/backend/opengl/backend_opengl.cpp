@@ -757,15 +757,15 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 
 	const size_t PixelSize = GLFormatToPixelSize(GLFormat);
 
-	if((Flags & CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0)
+	if((Flags & TextureFlag::NO_2D_TEXTURE) == 0)
 	{
 		glGenTextures(1, &m_vTextures[Slot].m_Tex);
 		glBindTexture(GL_TEXTURE_2D, m_vTextures[Slot].m_Tex);
 	}
 
-	if(Flags & CCommandBuffer::TEXFLAG_NOMIPMAPS || !m_HasMipMaps)
+	if(Flags & TextureFlag::NO_MIPMAPS || !m_HasMipMaps)
 	{
-		if((Flags & CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0)
+		if((Flags & TextureFlag::NO_2D_TEXTURE) == 0)
 		{
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -774,7 +774,7 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 	}
 	else
 	{
-		if((Flags & CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0)
+		if((Flags & TextureFlag::NO_2D_TEXTURE) == 0)
 		{
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -788,8 +788,8 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 			glTexImage2D(GL_TEXTURE_2D, 0, GLStoreFormat, Width, Height, 0, GLFormat, GL_UNSIGNED_BYTE, pTexData);
 		}
 
-		int Flag2DArrayTexture = CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE;
-		int Flag3DTexture = CCommandBuffer::TEXFLAG_TO_3D_TEXTURE;
+		int Flag2DArrayTexture = TextureFlag::TO_2D_ARRAY_TEXTURE;
+		int Flag3DTexture = TextureFlag::TO_3D_TEXTURE;
 		if((Flags & (Flag2DArrayTexture | Flag3DTexture)) != 0)
 		{
 			bool Is3DTexture = (Flags & Flag3DTexture) != 0;
@@ -917,8 +917,8 @@ void CCommandProcessorFragment_OpenGL::Cmd_TextTextures_Destroy(const CCommandBu
 
 void CCommandProcessorFragment_OpenGL::Cmd_TextTextures_Create(const CCommandBuffer::SCommand_TextTextures_Create *pCommand)
 {
-	TextureCreate(pCommand->m_Slot, pCommand->m_Width, pCommand->m_Height, GL_ALPHA, GL_ALPHA, CCommandBuffer::TEXFLAG_NOMIPMAPS, pCommand->m_pTextData);
-	TextureCreate(pCommand->m_SlotOutline, pCommand->m_Width, pCommand->m_Height, GL_ALPHA, GL_ALPHA, CCommandBuffer::TEXFLAG_NOMIPMAPS, pCommand->m_pTextOutlineData);
+	TextureCreate(pCommand->m_Slot, pCommand->m_Width, pCommand->m_Height, GL_ALPHA, GL_ALPHA, TextureFlag::NO_MIPMAPS, pCommand->m_pTextData);
+	TextureCreate(pCommand->m_SlotOutline, pCommand->m_Width, pCommand->m_Height, GL_ALPHA, GL_ALPHA, TextureFlag::NO_MIPMAPS, pCommand->m_pTextOutlineData);
 }
 
 void CCommandProcessorFragment_OpenGL::Cmd_Clear(const CCommandBuffer::SCommand_Clear *pCommand)
