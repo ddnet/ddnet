@@ -4888,6 +4888,9 @@ bool CGameContext::ProcessSpamProtection(int ClientId, bool RespectChatInitialDe
 {
 	if(!m_apPlayers[ClientId])
 		return false;
+	if(Server()->GetAuthedState(ClientId) >= AUTHED_MOD)
+		return false;
+
 	if(g_Config.m_SvSpamprotection && m_apPlayers[ClientId]->m_LastChat && m_apPlayers[ClientId]->m_LastChat + Server()->TickSpeed() * g_Config.m_SvChatDelay > Server()->Tick())
 		return true;
 	else if(g_Config.m_SvDnsblChat && Server()->DnsblBlack(ClientId))
