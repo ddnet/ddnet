@@ -828,6 +828,10 @@ private:
 	static void ConAccForceLogin(IConsole::IResult *pResult, void *pUserData);
 	static void ConAccForceLogout(IConsole::IResult *pResult, void *pUserData);
 
+	static void ConShopListItems(IConsole::IResult *pResult, void *pUserData);
+	static void ConShopEditItem(IConsole::IResult *pResult, void *pUserData);
+	static void ConShopReset(IConsole::IResult *pResult, void *pUserData);
+
 	static void ConShopBuyItem(IConsole::IResult *pResult, void *pUserData);
 	static void ConToggleItem(IConsole::IResult *pResult, void *pUserData);
 

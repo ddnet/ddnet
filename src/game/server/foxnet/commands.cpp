@@ -355,6 +355,24 @@ void CGameContext::ConListNameDetectionStrings(IConsole::IResult *pResult, void 
 	}
 }
 
+void CGameContext::ConShopListItems(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->m_Shop.ListItems();
+}
+
+void CGameContext::ConShopEditItem(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->m_Shop.EditItem(pResult->GetString(0), pResult->GetInteger(1), pResult->GetInteger(2));
+}
+
+void CGameContext::ConShopReset(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->m_Shop.ResetItems();
+}
+
 void CGameContext::ConShopBuyItem(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -1511,6 +1529,7 @@ void CGameContext::RegisterFoxNetCommands()
 
 	Console()->Register("map_vote_lock", "", CFGFLAG_SERVER, ConToggleMapVoteLock, this, "Toggle Map Vote Locking");
 
+	// Cosmetics
 	Console()->Register("c_lovely", "?v[id]", CFGFLAG_SERVER, ConLovely, this, "Makes a player (id) Lovely");
 	Console()->Register("c_staff_ind", "?v[id]", CFGFLAG_SERVER, ConStaffInd, this, "Gives a player (id) a Staff Indicator");
 	Console()->Register("c_epic_circle", "?v[id]", CFGFLAG_SERVER, ConEpicCircle, this, "Gives a player (id) an Epic Circle");
@@ -1537,14 +1556,17 @@ void CGameContext::RegisterFoxNetCommands()
 	Console()->Register("c_death_type", "i[type] ?v[id]", CFGFLAG_SERVER, ConDeathEffect, this, "Set a players (id) Damage Ind Type");
 	Console()->Register("c_damageind_type", "i[type] ?v[id]", CFGFLAG_SERVER, ConDamageIndEffect, this, "Set a players (id) Damage Ind Type");
 
+	// Player configs
 	Console()->Register("hide_cosmetics", "?v[id]", CFGFLAG_SERVER, ConHideCosmetics, this, "Hides Cosmetics for Player (id)");
 	Console()->Register("hide_powerups", "?v[id]", CFGFLAG_SERVER, ConHideCosmetics, this, "Hides Cosmetics for Player (id)");
 
+	// Records
 	Console()->Register("record_insert", "s[name] s[map] f[time]", CFGFLAG_SERVER, ConInsertRecord, this, "insert a new record for that name on the given map with given time");
 	Console()->Register("record_remove", "s[name] r[map]", CFGFLAG_SERVER, ConRemoveRecord, this, "remove all records a name has on the given map");
 	Console()->Register("record_remove_time", "s[name] s[map] f[time]", CFGFLAG_SERVER, ConRemoveRecordWithTime, this, "remove records a name has on given map with given time");
 	Console()->Register("record_remove_all", "r[name]", CFGFLAG_SERVER, ConRemoveAllRecords, this, "remove all records a name has");
 
+	// Account
 	Console()->Register("force_login", "r[username]", CFGFLAG_SERVER, ConAccForceLogin, this, "Force Log into any account");
 	Console()->Register("force_logout", "i[id]", CFGFLAG_SERVER, ConAccForceLogout, this, "Force logout an account thats currently active on the server");
 	Console()->Register("acc_edit", "s[username] s[variable] r[value]", CFGFLAG_SERVER, ConAccEdit, this, "Edit an account");
@@ -1559,6 +1581,11 @@ void CGameContext::RegisterFoxNetCommands()
 	Console()->Register("top5money", "?i[offset]", CFGFLAG_CHAT, ConAccTop5Money, this, "Show someones profile");
 	Console()->Register("top5level", "?i[offset]", CFGFLAG_CHAT, ConAccTop5Level, this, "Show someones profile");
 	Console()->Register("top5playtime", "?i[offset]", CFGFLAG_CHAT, ConAccTop5Playtime, this, "Show someones profile");
+	
+	// Shop
+	Console()->Register("shop_edit_item", "s[Name] i[Price] ?i[Minimum Level]", CFGFLAG_SERVER, ConShopEditItem, this, "Edit a shop item");
+	Console()->Register("shop_list_items", "", CFGFLAG_SERVER, ConShopListItems, this, "Lists all shop items");
+	Console()->Register("shop_reset", "", CFGFLAG_SERVER, ConShopReset, this, "Resets all prices in the shop");
 
 	Console()->Register("buyitem", "r[item]", CFGFLAG_CHAT, ConShopBuyItem, this, "Buy an item from the shop");
 	Console()->Register("toggleitem", "s[item] ?i[value]", CFGFLAG_CHAT, ConToggleItem, this, "Toggle an Item, value is only needed for 2 items");

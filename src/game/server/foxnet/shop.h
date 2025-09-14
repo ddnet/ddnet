@@ -159,6 +159,11 @@ class CShop
 	int GetItemMinLevel(const char *pName);
 
 public:
+	void ResetItems();
+
+	void ListItems();
+
+	void EditItem(const char *pName, int Price, int MinLevel = -1);
 
 	const char *NameToShortcut(const char *pName);
 	const char *ShortcutToName(const char *pShortcut);

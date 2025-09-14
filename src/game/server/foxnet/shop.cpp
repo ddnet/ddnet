@@ -7,6 +7,8 @@
 #include <engine/server.h>
 #include <engine/shared/config.h>
 #include <vector>
+#include <base/str.h>
+#include <base/log.h>
 
 IServer *CShop::Server() const { return GameServer()->Server(); }
 
@@ -49,7 +51,62 @@ void CShop::AddItems()
 	m_Items.push_back(new CItems("Lovely", TYPE_OTHER, 2750, 0));
 	m_Items.push_back(new CItems("Rotating Ball", TYPE_OTHER, 3500, 0));
 	m_Items.push_back(new CItems("Epic Circle", TYPE_OTHER, 3500, 0));
-	//m_Items.push_back(new CItems("Bloody", TYPE_OTHER, 1500, 0));
+}
+
+void CShop::ResetItems()
+{
+	m_Items.clear();
+	AddItems();
+	ListItems();
+}
+
+void CShop::ListItems()
+{
+	char aBuf[5012] = "";
+	char Seperator[128] = "";
+	for(int Length = 0; Length < 56; Length++)
+		str_append(Seperator, "-");
+
+	log_info("shop", Seperator);
+	for(CItems *pItem : m_Items)
+	{
+		if(!str_comp(pItem->Name(), ""))
+			continue;
+
+		char Name[64];
+		str_format(aBuf, sizeof(aBuf), "%s | Price: %d | MinLevel: %d", pItem->Name(), pItem->Price(), pItem->MinLevel());
+		log_info("shop", aBuf);
+	}
+	log_info("shop", Seperator);
+}
+
+void CShop::EditItem(const char *pName, int Price, int MinLevel)
+{
+	char aBuf[128];
+	bool Found = false;
+
+	for(CItems *pItem : m_Items)
+	{
+		if(str_comp_nocase(pItem->Name(), pName) == 0)
+		{
+			pItem->SetPrice(Price);
+			if(MinLevel >= 0)
+				pItem->SetMinLevel(MinLevel);
+
+			if(MinLevel >= 0)
+				str_format(aBuf, sizeof(aBuf), "Set price of \"%s\" to %d", pName, Price);
+			else
+				str_format(aBuf, sizeof(aBuf), "Set price of \"%s\" to %d and Min Level to %d", pName, Price, MinLevel);
+
+			Found = true;
+			break;
+		}
+	}
+
+	if(!Found)
+		str_format(aBuf, sizeof(aBuf), "Couldn't find \"%s\"", pName);
+
+	log_info("Shop", aBuf);
 }
 
 int CShop::GetItemPrice(const char *pName)
