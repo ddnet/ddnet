@@ -738,11 +738,12 @@ public:
 
 class CGraphics_Threaded : public IEngineGraphics
 {
-	enum
+	enum class EDrawing
 	{
-		DRAWING_QUADS = 1,
-		DRAWING_LINES = 2,
-		DRAWING_TRIANGLES = 3
+		NONE,
+		QUADS,
+		LINES,
+		TRIANGLES,
 	};
 
 	CCommandBuffer::SState m_State;
@@ -776,7 +777,7 @@ class CGraphics_Threaded : public IEngineGraphics
 	bool m_RenderEnable;
 
 	float m_Rotation;
-	int m_Drawing;
+	EDrawing m_Drawing;
 	bool m_DoScreenshot;
 	char m_aScreenshotName[IO_MAX_PATH_LENGTH];
 
@@ -990,7 +991,7 @@ public:
 	{
 		CCommandBuffer::SPoint Center;
 
-		dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsDrawTL without begin");
+		dbg_assert(m_Drawing == EDrawing::QUADS, "called Graphics()->QuadsDrawTL without begin");
 
 		if(g_Config.m_GfxQuadAsTriangle && !m_GLUseTrianglesAsQuad)
 		{
@@ -1138,7 +1139,7 @@ public:
 		if(!KeepVertices)
 			m_NumVertices = 0;
 
-		if(m_Drawing == DRAWING_QUADS)
+		if(m_Drawing == EDrawing::QUADS)
 		{
 			if(g_Config.m_GfxQuadAsTriangle && !m_GLUseTrianglesAsQuad)
 			{
@@ -1151,12 +1152,12 @@ public:
 				PrimCount = NumVerts / 4;
 			}
 		}
-		else if(m_Drawing == DRAWING_LINES)
+		else if(m_Drawing == EDrawing::LINES)
 		{
 			PrimType = CCommandBuffer::PRIMTYPE_LINES;
 			PrimCount = NumVerts / 2;
 		}
-		else if(m_Drawing == DRAWING_TRIANGLES)
+		else if(m_Drawing == EDrawing::TRIANGLES)
 		{
 			PrimType = CCommandBuffer::PRIMTYPE_TRIANGLES;
 			PrimCount = NumVerts / 3;
