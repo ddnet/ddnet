@@ -8,13 +8,14 @@
 #include <game/server/teams.h>
 
 #include <engine/shared/protocol.h>
+#include <engine/server.h>
+#include <engine/shared/config.h>
 
 #include <generated/protocol.h>
 
 #include <base/vmath.h>
 
 #include "headitem.h"
-#include <engine/server.h>
 
 CHeadItem::CHeadItem(CGameWorld *pGameWorld, int Owner, vec2 Pos, int Type, float Offset) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_HEAD_ITEM, Pos)
@@ -55,12 +56,12 @@ void CHeadItem::Snap(int SnappingClient)
 	if(NetworkClipped(SnappingClient))
 		return;
 
-	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+	CCharacter *pOwnerChr = GameServer()->GetPlayerChar(m_Owner);
 
-	if(!pOwnerChar)
+	if(!pOwnerChr)
 		return;
 
-	if(pOwnerChar->IsPaused())
+	if(pOwnerChr->IsPaused())
 		return;
 
 	if(SnappingClient != SERVER_DEMO_CLIENT)
@@ -70,16 +71,16 @@ void CHeadItem::Snap(int SnappingClient)
 			return;
 
 		CGameTeams Teams = GameServer()->m_pController->Teams();
-		int Team = pOwnerChar->Team();
+		int Team = pOwnerChr->Team();
 
 		if(!Teams.SetMaskWithFlags(SnappingClient, Team))
 			return;
 
-		if(pSnapPlayer->GetCharacter() && pOwnerChar)
-			if(!pOwnerChar->CanSnapCharacter(SnappingClient))
+		if(pSnapPlayer->GetCharacter() && pOwnerChr)
+			if(!pOwnerChr->CanSnapCharacter(SnappingClient))
 				return;
 
-		if(pOwnerChar->GetPlayer()->m_Vanish && SnappingClient != pOwnerChar->GetPlayer()->GetCid() && SnappingClient != -1)
+		if(pOwnerChr->GetPlayer()->m_Vanish && SnappingClient != pOwnerChr->GetPlayer()->GetCid() && SnappingClient != -1)
 			if(!pSnapPlayer->m_Vanish && Server()->GetAuthedState(SnappingClient) < AUTHED_ADMIN)
 				return;
 	}
@@ -96,12 +97,12 @@ void CHeadItem::Snap(int SnappingClient)
 		Type = POWERUP_WEAPON;
 
 	vec2 Pos = m_Pos;
-	if(m_Owner == SnappingClient)
+	if(g_Config.m_SvExperimentalPrediction && m_Owner == SnappingClient)
 	{
-		float Lat = std::clamp((float)pOwnerChar->GetPlayer()->m_Latency.m_Avg, 0.0f, 125.0f) / 27.77f;
-		Pos.x = m_Pos.x + std::clamp(pOwnerChar->Core()->m_Vel.x, -100.0f, 100.0f) * std::clamp(Lat, 0.0f, 150.0f);
-		Pos.y = m_Pos.y + std::clamp(pOwnerChar->Core()->m_Vel.y, -15.0f, 15.0f) * std::clamp(Lat, 0.0f, 150.0f);
-		Pos = m_Pos + vec2(0.8f, 0.8f) * (Pos - m_Pos);
+		const double Pred = pOwnerChr->GetPlayer()->m_PredLatency;
+		const float dist = distance(pOwnerChr->m_Pos, pOwnerChr->m_PrevPos);
+		vec2 nVel = normalize(pOwnerChr->GetVelocity()) * Pred * dist / 2.0f;
+		Pos += nVel;
 	}
 
 	if(GameServer()->GetClientVersion(SnappingClient) >= VERSION_DDNET_ENTITY_NETOBJS)

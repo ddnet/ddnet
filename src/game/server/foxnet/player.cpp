@@ -26,6 +26,9 @@ void CPlayer::FoxNetTick()
 {
 	RainbowTick();
 
+	if(m_JoinTick + Server()->TickSpeed() * 5 > Server()->Tick())
+		Repredict();
+
 	if(Acc()->m_LoggedIn)
 	{
 		if(!IsAfk() && (Server()->Tick() - Acc()->m_LoginTick) % (Server()->TickSpeed() * 60) == 0 && Acc()->m_LoginTick != Server()->Tick())
@@ -833,4 +836,62 @@ void CPlayer::SendBroadcastHud(const char *pMessage)
 			str_append(aBuf, " ", sizeof(aBuf));
 
 	GameServer()->SendBroadcast(aBuf, GetCid(), false);
+}
+void CPlayer::Repredict(int PredMargin)
+{
+	int PingMs = m_Latency.m_Min + PredMargin;
+
+	static const std::unordered_map<int, double> s_BucketByPing = {
+		{0, 2.0},
+		{10, 3.0},
+		{20, 4.1},
+		{30, 5.0},
+		{40, 5.8},
+		{50, 6.8},
+		{60, 7.8},
+		{70, 8.5},
+		{80, 9.7},
+		{90, 10.7},
+		{100, 11.4},
+		{110, 12.5},
+		{120, 13.6},
+		{130, 14.5},
+		{140, 15.6},
+		{150, 16.5},
+		{160, 17.5},
+	};
+
+	static std::vector<int> s_Thresholds = [] {
+		std::vector<int> v;
+		v.reserve(s_BucketByPing.size());
+		for(const auto &kv : s_BucketByPing)
+			v.push_back(kv.first);
+		std::sort(v.begin(), v.end());
+		return v;
+	}();
+
+	double PredIndex = 0.0;
+
+	if(PingMs <= s_Thresholds.front())
+	{
+		PredIndex = s_BucketByPing.at(s_Thresholds.front());
+	}
+	else if(PingMs >= s_Thresholds.back())
+	{
+		PredIndex = s_BucketByPing.at(s_Thresholds.back());
+	}
+	else
+	{
+		const auto it = std::lower_bound(s_Thresholds.begin(), s_Thresholds.end(), PingMs);
+		const int hiKey = *it;
+		const int loKey = *(it - 1);
+
+		const double loIdx = s_BucketByPing.at(loKey);
+		const double hiIdx = s_BucketByPing.at(hiKey);
+
+		const double t = (double)(PingMs - loKey) / (double)(hiKey - loKey);
+		PredIndex = loIdx + t * (hiIdx - loIdx);
+	}
+
+	m_PredLatency = PredIndex;
 }

@@ -91,7 +91,7 @@ void CGameContext::FoxNetInit()
 void CGameContext::OnExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, CClientMask Mask)
 {
 	// deal damage
-	CEntity *apDrops[MAX_CLIENTS * NUM_MAX_DROPS];
+	CEntity *apDrops[(int)MAX_CLIENTS * (int)NUM_MAX_DROPS];
 	float Radius = 135.0f;
 	float InnerRadius = 48.0f;
 	int NumDrops = m_World.FindEntities(Pos, Radius, apDrops, std::size(apDrops), CGameWorld::ENTTYPE_PICKUPDROP);

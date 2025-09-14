@@ -1,9 +1,4 @@
-#include "staff_ind.h"
 #include "game/server/entities/character.h"
-#include <algorithm>
-#include <base/math.h>
-#include <base/vmath.h>
-#include <engine/shared/protocol.h>
 #include <game/server/entity.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
@@ -11,7 +6,17 @@
 #include <game/server/player.h>
 #include <game/server/teams.h>
 #include <generated/protocol.h>
+
+#include <engine/shared/config.h>
+#include <engine/shared/protocol.h>
+
+#include <base/math.h>
+#include <base/vmath.h>
+
+#include <algorithm>
 #include <iterator>
+
+#include "staff_ind.h"
 
 CStaffInd::CStaffInd(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_STAFF_IND, Pos)
@@ -76,39 +81,40 @@ void CStaffInd::Snap(int SnappingClient)
 	if(NetworkClipped(SnappingClient))
 		return;
 
-	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+	CCharacter *pOwnerChr = GameServer()->GetPlayerChar(m_Owner);
 	CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
 
-	if(!pOwnerChar || !pSnapPlayer)
+	if(!pOwnerChr || !pSnapPlayer)
 		return;
 
 	if(pSnapPlayer->m_HideCosmetics)
 		return;
 
 	CGameTeams Teams = GameServer()->m_pController->Teams();
-	int Team = pOwnerChar->Team();
+	int Team = pOwnerChr->Team();
 
 	if(!Teams.SetMask(SnappingClient, Team))
 		return;
 
-	if(pSnapPlayer->GetCharacter() && pOwnerChar)
-		if(!pOwnerChar->CanSnapCharacter(SnappingClient))
+	if(pSnapPlayer->GetCharacter() && pOwnerChr)
+		if(!pOwnerChr->CanSnapCharacter(SnappingClient))
 			return;
 
-	if(pOwnerChar->GetPlayer()->m_Vanish && SnappingClient != pOwnerChar->GetPlayer()->GetCid() && SnappingClient != -1)
+	if(pOwnerChr->GetPlayer()->m_Vanish && SnappingClient != pOwnerChr->GetPlayer()->GetCid() && SnappingClient != -1)
 		if(!pSnapPlayer->m_Vanish && Server()->GetAuthedState(SnappingClient) < AUTHED_ADMIN)
 			return;
+
+	const double Pred = pOwnerChr->GetPlayer()->m_PredLatency;
+	const float dist = distance(pOwnerChr->m_Pos, pOwnerChr->m_PrevPos);
 
 	CNetObj_DDNetPickup *pPickup = Server()->SnapNewItem<CNetObj_DDNetPickup>(m_aIds[ARMOR]);
 	if(pPickup)
 	{
 		vec2 Pos = m_aPos[ARMOR];
-		if(m_Owner == SnappingClient && !pOwnerChar->GetPlayer()->IsPaused())
+		if(g_Config.m_SvExperimentalPrediction && m_Owner == SnappingClient)
 		{
-			float Lat = std::clamp((float)(pOwnerChar->GetPlayer()->m_Latency.m_Avg + pOwnerChar->GetPlayer()->m_ExtraPing), 0.0f, 125.0f) / 27.77f;
-			Pos.x = m_aPos[ARMOR].x + std::clamp(pOwnerChar->Core()->m_Vel.x, -100.0f, 100.0f) * std::clamp(Lat, 0.0f, 150.0f);
-			Pos.y = m_aPos[ARMOR].y + std::clamp(pOwnerChar->Core()->m_Vel.y, -15.0f, 15.0f) * std::clamp(Lat, 0.0f, 150.0f);
-			Pos = m_Pos + vec2(0.8f, 0.8f) * (Pos - m_Pos);
+			vec2 nVel = normalize(pOwnerChr->GetVelocity()) * Pred * dist / 2.0f;
+			Pos += nVel;
 		}
 
 		pPickup->m_X = round_to_int(Pos.x);
@@ -122,12 +128,10 @@ void CStaffInd::Snap(int SnappingClient)
 	if(pLaser)
 	{
 		vec2 Pos = m_aPos[BALL];
-		if(m_Owner == SnappingClient && !pOwnerChar->GetPlayer()->IsPaused())
+		if(g_Config.m_SvExperimentalPrediction && m_Owner == SnappingClient)
 		{
-			float Lat = std::clamp((float)pOwnerChar->GetPlayer()->m_Latency.m_Avg, 0.0f, 125.0f) / 27.77f;
-			Pos.x = m_aPos[BALL].x + std::clamp(pOwnerChar->Core()->m_Vel.x, -100.0f, 100.0f) * std::clamp(Lat, 0.0f, 150.0f);
-			Pos.y = m_aPos[BALL].y + std::clamp(pOwnerChar->Core()->m_Vel.y, -15.0f, 15.0f) * std::clamp(Lat, 0.0f, 150.0f);
-			Pos = m_Pos + vec2(0.8f, 0.8f) * (Pos - m_Pos);
+			vec2 nVel = normalize(pOwnerChr->GetVelocity()) * Pred * dist / 2.0f;
+			Pos += nVel;
 		}
 		pLaser->m_ToX = round_to_int(Pos.x);
 		pLaser->m_ToY = round_to_int(Pos.y);

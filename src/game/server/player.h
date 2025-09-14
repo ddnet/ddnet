@@ -400,6 +400,10 @@ public:
 
 	int NumDDraceHudRows();
 	void SendBroadcastHud(const char *pMessage);
+
+	double m_PredLatency = 0.0;
+	void Repredict(int PredMargin = 0);
+
 private:
 	void FoxNetReset();
 	void OverrideName(int SnappingClient, CNetObj_ClientInfo *pClientInfo);

@@ -15,6 +15,7 @@
 #include <game/teamscore.h>
 
 #include "light_saber.h"
+#include <engine/shared/config.h>
 
 CLightSaber::CLightSaber(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LIGHTSABER, Pos)
@@ -91,9 +92,9 @@ void CLightSaber::Tick()
 		}
 	}
 	m_Pos = pChr->m_Pos;
-	m_From = pChr->m_Pos;
-	vec2 WantedTo = m_Pos + normalize(vec2(pChr->Input()->m_TargetX, pChr->Input()->m_TargetY)) * m_Length;
-	GameServer()->Collision()->IntersectLine(m_Pos, WantedTo, &m_To, 0);
+	m_To = pChr->m_Pos;
+	vec2 WantedFrom = m_Pos + normalize(vec2(pChr->Input()->m_TargetX, pChr->Input()->m_TargetY)) * m_Length;
+	GameServer()->Collision()->IntersectLine(m_Pos, WantedFrom, &m_From, 0);
 
 	std::vector<CCharacter *> HitChars = GameWorld()->IntersectedCharacters(m_From, m_To, 6.0f, GameServer()->GetPlayerChar(m_Owner));
 	if(HitChars.empty())
@@ -113,8 +114,8 @@ void CLightSaber::Snap(int SnappingClient)
 	if(NetworkClipped(SnappingClient))
 		return;
 
-	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	if(!pOwnerChar)
+	CCharacter *pOwnerChr = GameServer()->GetPlayerChar(m_Owner);
+	if(!pOwnerChr)
 		return;
 
 	if(SnappingClient != SERVER_DEMO_CLIENT)
@@ -124,16 +125,16 @@ void CLightSaber::Snap(int SnappingClient)
 			return;
 
 		CGameTeams Teams = GameServer()->m_pController->Teams();
-		int Team = pOwnerChar->Team();
+		int Team = pOwnerChr->Team();
 
 		if(!Teams.SetMask(SnappingClient, Team))
 			return;
 
-		if(pSnapPlayer->GetCharacter() && pOwnerChar)
-			if(!pOwnerChar->CanSnapCharacter(SnappingClient))
+		if(pSnapPlayer->GetCharacter() && pOwnerChr)
+			if(!pOwnerChr->CanSnapCharacter(SnappingClient))
 				return;
 
-		if(pOwnerChar->GetPlayer()->m_Vanish && SnappingClient != pOwnerChar->GetPlayer()->GetCid() && SnappingClient != -1)
+		if(pOwnerChr->GetPlayer()->m_Vanish && SnappingClient != pOwnerChr->GetPlayer()->GetCid() && SnappingClient != -1)
 			if(!pSnapPlayer->m_Vanish && Server()->GetAuthedState(SnappingClient) < AUTHED_ADMIN)
 				return;
 	}
@@ -141,13 +142,17 @@ void CLightSaber::Snap(int SnappingClient)
 	if(m_Length <= 0)
 		return;
 
-
-	vec2 From = m_To + pOwnerChar->Core()->m_Vel / 2;
-	vec2 To = m_From + pOwnerChar->Core()->m_Vel / 2;
-	if(SnappingClient == m_Owner)
+	vec2 From = m_From;
+	vec2 To = m_To;
+	if(g_Config.m_SvExperimentalPrediction && m_Owner == SnappingClient)
 	{
-		From = m_To + pOwnerChar->Core()->m_Vel;
-		To = m_From + pOwnerChar->Core()->m_Vel;
+		const double Pred = pOwnerChr->GetPlayer()->m_PredLatency;
+		const float dist = distance(pOwnerChr->m_Pos, pOwnerChr->m_PrevPos);
+		vec2 nVel = normalize(pOwnerChr->GetVelocity()) * Pred * dist / 2.0f;
+
+		To = m_Pos + nVel;
+		vec2 WantedFrom = To + normalize(vec2(pOwnerChr->Input()->m_TargetX, pOwnerChr->Input()->m_TargetY)) * m_Length;
+		GameServer()->Collision()->IntersectLine(To, WantedFrom, &From, 0);
 	}
 
 	const int SnapVer = Server()->GetClientVersion(SnappingClient);
