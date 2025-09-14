@@ -144,12 +144,6 @@ public:
 
 	enum
 	{
-		TEXFORMAT_INVALID = 0,
-		TEXFORMAT_RGBA,
-	};
-
-	enum
-	{
 		TEXFLAG_NOMIPMAPS = 1,
 		TEXFLAG_TO_3D_TEXTURE = (1 << 3),
 		TEXFLAG_TO_2D_ARRAY_TEXTURE = (1 << 4),
@@ -158,8 +152,6 @@ public:
 
 	enum
 	{
-		//
-		PRIMTYPE_INVALID = 0,
 		PRIMTYPE_LINES,
 		PRIMTYPE_QUADS,
 		PRIMTYPE_TRIANGLES,
