@@ -330,6 +330,8 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 	// create the event
 	Explosion(Pos, Mask);
 
+	OnExplosion(Pos, Owner, Weapon, NoDamage, ActivatedTeam, Mask);
+
 	// deal damage
 	CEntity *apEnts[MAX_CLIENTS];
 	float Radius = 135.0f;

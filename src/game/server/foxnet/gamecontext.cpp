@@ -16,6 +16,7 @@
 
 #include <base/log.h>
 #include <base/system.h>
+#include <base/vmath.h>
 
 #include <generated/protocol.h>
 
@@ -64,6 +65,81 @@ void CGameContext::FoxNetTick()
 		m_AccountManager.SaveAllAccounts();
 	}
 }
+
+void CGameContext::FoxNetInit()
+{
+	m_AccountManager.Init(this, ((CServer *)Server())->DbPool());
+	m_VoteMenu.Init(this);
+	m_Shop.Init(this);
+	m_vPowerups.clear();
+	m_PowerUpDelay = Server()->Tick() + Server()->TickSpeed() * 5;
+
+	m_BanSaveDelay = Server()->Tick() + Server()->TickSpeed() * (g_Config.m_SvBanSyncingDelay * 60);
+
+	m_IsWeekend = IsWeekend();
+
+	if(!m_Initialized)
+	{
+		if(g_Config.m_SvRandomMapVoteOnStart)
+			RandomMapVote();
+		m_Initialized = true;
+	}
+	if(Score())
+		Score()->CacheMapInfo();
+}
+
+void CGameContext::OnExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, CClientMask Mask)
+{
+	// deal damage
+	CEntity *apDrops[MAX_CLIENTS * NUM_MAX_DROPS];
+	float Radius = 135.0f;
+	float InnerRadius = 48.0f;
+	int NumDrops = m_World.FindEntities(Pos, Radius, apDrops, std::size(apDrops), CGameWorld::ENTTYPE_PICKUPDROP);
+	CClientMask TeamMask = Mask;
+	for(int i = 0; i < NumDrops; i++)
+	{
+		auto *pPickup = static_cast<CPickupDrop *>(apDrops[i]);
+		if(!pPickup)
+			continue;
+
+		vec2 Diff = pPickup->m_Pos - Pos;
+		vec2 ForceDir(0, 1);
+		float l = length(Diff);
+		if(l)
+			ForceDir = normalize(Diff);
+		l = 1 - std::clamp((l - InnerRadius) / (Radius - InnerRadius), 0.0f, 1.0f);
+		float Strength;
+		if(Owner == -1 || !m_apPlayers[Owner] || !m_apPlayers[Owner]->m_TuneZone)
+			Strength = Tuning()->m_ExplosionStrength;
+		else
+			Strength = TuningList()[m_apPlayers[Owner]->m_TuneZone].m_ExplosionStrength;
+
+		float Dmg = Strength * l;
+		if(!(int)Dmg)
+			continue;
+
+		if((GetPlayerChar(Owner) ? !GetPlayerChar(Owner)->GrenadeHitDisabled() : g_Config.m_SvHit) || NoDamage)
+		{
+
+			if(Owner == -1 && ActivatedTeam != -1 && pPickup->Team() != ActivatedTeam)
+				continue;
+			// Explode at most once per team
+			int PickupTeam = pPickup->Team();
+
+			if((GetPlayerChar(Owner) ? GetPlayerChar(Owner)->GrenadeHitDisabled() : !g_Config.m_SvHit) || NoDamage)
+			{
+				if(PickupTeam == TEAM_SUPER)
+					continue;
+				if(!TeamMask.test(PickupTeam))
+					continue;
+				TeamMask.reset(PickupTeam);
+			}
+
+			pPickup->TakeDamage(ForceDir * Dmg * 2);
+		}
+	}
+}
+
 int RandGeometricXP(std::mt19937 &rng, int minXP, int maxXP, double p)
 {
 	std::geometric_distribution<int> geo(p);
@@ -96,27 +172,6 @@ void CGameContext::PowerUpSpawner()
 
 	m_vPowerups.push_back(NewPowerUp);
 	m_PowerUpDelay = Server()->Tick() + Server()->TickSpeed() * 25;
-}
-void CGameContext::FoxNetInit()
-{
-	m_AccountManager.Init(this, ((CServer *)Server())->DbPool());
-	m_VoteMenu.Init(this);
-	m_Shop.Init(this);
-	m_vPowerups.clear();
-	m_PowerUpDelay = Server()->Tick() + Server()->TickSpeed() * 5;
-
-	m_BanSaveDelay = Server()->Tick() + Server()->TickSpeed() * (g_Config.m_SvBanSyncingDelay * 60);
-
-	m_IsWeekend = IsWeekend();
-
-	if(!m_Initialized)
-	{
-		if(g_Config.m_SvRandomMapVoteOnStart)
-			RandomMapVote();
-		m_Initialized = true;
-	}
-	if(Score())
-		Score()->CacheMapInfo();
 }
 
 void CGameContext::HandleEffects()

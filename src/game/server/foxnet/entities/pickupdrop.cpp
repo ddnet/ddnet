@@ -474,6 +474,17 @@ void CPickupDrop::Snap(int SnappingClient)
 	}
 }
 
+void CPickupDrop::TakeDamage(vec2 Force)
+{
+	//if(Dmg)
+	//{
+	//	SetEmote(EMOTE_PAIN, Server()->Tick() + 500 * Server()->TickSpeed() / 1000);
+	//}
+
+	vec2 Temp = m_Vel + Force;
+	m_Vel = ClampVel(m_MoveRestrictions, Temp);
+}
+
 void CPickupDrop::SetVelocity(vec2 Vel)
 {
 	m_Vel = ClampVel(m_MoveRestrictions, Vel);

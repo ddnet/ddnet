@@ -46,6 +46,8 @@ public:
 
 	bool m_InsideFreeze;
 
+	void TakeDamage(vec2 Force);
+
 	void SetVelocity(vec2 Vel) override;
 	void SetRawVelocity(vec2 Vel) override { m_Vel = Vel; }
 	vec2 GetVelocity() const override { return m_Vel; }
