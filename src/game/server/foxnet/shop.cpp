@@ -72,8 +72,6 @@ void CShop::ListItems()
 	{
 		if(!str_comp(pItem->Name(), ""))
 			continue;
-
-		char Name[64];
 		str_format(aBuf, sizeof(aBuf), "%s | Price: %d | MinLevel: %d", pItem->Name(), pItem->Price(), pItem->MinLevel());
 		log_info("shop", aBuf);
 	}

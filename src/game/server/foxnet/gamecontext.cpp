@@ -1106,7 +1106,7 @@ void CGameContext::HandleQuads(const CMapItemLayerQuads *pQuadLayer, int QuadInd
 		TestRadius = CCharacterCore::PhysicalSize() * 0.5f;
 
 	{
-		CEntity *apEnts[MAX_CLIENTS] = {0};
+		CEntity *apEnts[MAX_CLIENTS];
 		const int Num = m_World.FindEntities(Center, R + CCharacterCore::PhysicalSize(), apEnts, std::size(apEnts), CGameWorld::ENTTYPE_CHARACTER);
 		for(int i = 0; i < Num; ++i)
 		{
@@ -1185,7 +1185,7 @@ void CGameContext::HandleQuads(const CMapItemLayerQuads *pQuadLayer, int QuadInd
 
 	if(!IsUnFreeze)
 	{
-		CEntity *apDrops[MAX_CLIENTS * NUM_MAX_DROPS] = {0};
+		CEntity *apDrops[(int)MAX_CLIENTS * (int)NUM_MAX_DROPS];
 		const int NumDrops = m_World.FindEntities(Center, R + CCharacterCore::PhysicalSize(), apDrops, std::size(apDrops), CGameWorld::ENTTYPE_PICKUPDROP);
 		for(int i = 0; i < NumDrops; ++i)
 		{
