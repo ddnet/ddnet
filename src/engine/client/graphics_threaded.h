@@ -15,6 +15,14 @@
 constexpr int CMD_BUFFER_DATA_BUFFER_SIZE = 1024 * 1024 * 2;
 constexpr int CMD_BUFFER_CMD_BUFFER_SIZE = 1024 * 256;
 
+namespace TextureFlag
+{
+	inline constexpr uint32_t NO_MIPMAPS = 1 << 0;
+	inline constexpr uint32_t TO_3D_TEXTURE = 1 << 1;
+	inline constexpr uint32_t TO_2D_ARRAY_TEXTURE = 1 << 2;
+	inline constexpr uint32_t NO_2D_TEXTURE = 1 << 3;
+};
+
 class CCommandBuffer
 {
 	class CBuffer
@@ -140,14 +148,6 @@ public:
 		CMD_WINDOW_DESTROY_NTF,
 
 		CMD_COUNT,
-	};
-
-	enum
-	{
-		TEXFLAG_NOMIPMAPS = 1,
-		TEXFLAG_TO_3D_TEXTURE = (1 << 3),
-		TEXFLAG_TO_2D_ARRAY_TEXTURE = (1 << 4),
-		TEXFLAG_NO_2D_TEXTURE = (1 << 5),
 	};
 
 	enum
