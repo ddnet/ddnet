@@ -83,12 +83,12 @@ std::optional<ColorHSLA> CConsole::CResult::GetColor(unsigned Index, float Darke
 
 const IConsole::CCommandInfo *CConsole::CCommand::NextCommandInfo(int AccessLevel, int FlagMask) const
 {
-	const CCommand *pInfo = m_pNext;
+	const CCommand *pInfo = Next();
 	while(pInfo)
 	{
 		if(pInfo->m_Flags & FlagMask && pInfo->m_AccessLevel >= AccessLevel)
 			break;
-		pInfo = pInfo->m_pNext;
+		pInfo = pInfo->Next();
 	}
 	return pInfo;
 }
@@ -100,7 +100,7 @@ void CConsole::CCommand::SetAccessLevel(int AccessLevel)
 
 const IConsole::CCommandInfo *CConsole::FirstCommandInfo(int AccessLevel, int FlagMask) const
 {
-	for(const CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
+	for(const CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->Next())
 	{
 		if(pCommand->m_Flags & FlagMask && pCommand->GetAccessLevel() >= AccessLevel)
 			return pCommand;
@@ -398,7 +398,7 @@ void CConsole::SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, vo
 void CConsole::InitChecksum(CChecksumData *pData) const
 {
 	pData->m_NumCommands = 0;
-	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
+	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->Next())
 	{
 		if(pData->m_NumCommands < (int)(std::size(pData->m_aCommandsChecksum)))
 		{
@@ -643,7 +643,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 int CConsole::PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback, void *pUser)
 {
 	int Index = 0;
-	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
+	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->Next())
 	{
 		if(pCommand->m_Flags & FlagMask && pCommand->m_Temp == Temp)
 		{
@@ -659,7 +659,7 @@ int CConsole::PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossi
 
 CConsole::CCommand *CConsole::FindCommand(const char *pName, int FlagMask)
 {
-	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
+	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->Next())
 	{
 		if(pCommand->m_Flags & FlagMask)
 		{
@@ -791,7 +791,7 @@ void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 		return;
 	}
 
-	for(CCommand *pCommand = pConsole->m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
+	for(CCommand *pCommand = pConsole->m_pFirstCommand; pCommand; pCommand = pCommand->Next())
 	{
 		if(pCommand->m_Flags & pConsole->m_FlagMask && pCommand->GetAccessLevel() >= AccessLevel.value())
 		{
@@ -872,7 +872,7 @@ CConsole::~CConsole()
 	CCommand *pCommand = m_pFirstCommand;
 	while(pCommand)
 	{
-		CCommand *pNext = pCommand->m_pNext;
+		CCommand *pNext = pCommand->Next();
 		{
 			FCommandCallback pfnCallback = pCommand->m_pfnCallback;
 			void *pUserData = pCommand->m_pUserData;
@@ -925,20 +925,20 @@ void CConsole::AddCommandSorted(CCommand *pCommand)
 {
 	if(!m_pFirstCommand || str_comp(pCommand->m_pName, m_pFirstCommand->m_pName) <= 0)
 	{
-		if(m_pFirstCommand && m_pFirstCommand->m_pNext)
-			pCommand->m_pNext = m_pFirstCommand;
+		if(m_pFirstCommand && m_pFirstCommand->Next())
+			pCommand->SetNext(m_pFirstCommand);
 		else
-			pCommand->m_pNext = nullptr;
+			pCommand->SetNext(nullptr);
 		m_pFirstCommand = pCommand;
 	}
 	else
 	{
-		for(CCommand *p = m_pFirstCommand; p; p = p->m_pNext)
+		for(CCommand *p = m_pFirstCommand; p; p = p->Next())
 		{
-			if(!p->m_pNext || str_comp(pCommand->m_pName, p->m_pNext->m_pName) <= 0)
+			if(!p->Next() || str_comp(pCommand->m_pName, p->Next()->m_pName) <= 0)
 			{
-				pCommand->m_pNext = p->m_pNext;
-				p->m_pNext = pCommand;
+				pCommand->SetNext(p->Next());
+				p->SetNext(pCommand);
 				break;
 			}
 		}
@@ -982,7 +982,7 @@ void CConsole::RegisterTemp(const char *pName, const char *pParams, int Flags, c
 		str_copy(const_cast<char *>(pCommand->m_pHelp), pHelp, TEMPCMD_HELP_LENGTH);
 		str_copy(const_cast<char *>(pCommand->m_pParams), pParams, TEMPCMD_PARAMS_LENGTH);
 
-		m_pRecycleList = m_pRecycleList->m_pNext;
+		m_pRecycleList = m_pRecycleList->Next();
 	}
 	else
 	{
@@ -1017,15 +1017,15 @@ void CConsole::DeregisterTemp(const char *pName)
 	if(m_pFirstCommand->m_Temp && str_comp(m_pFirstCommand->m_pName, pName) == 0)
 	{
 		pRemoved = m_pFirstCommand;
-		m_pFirstCommand = m_pFirstCommand->m_pNext;
+		m_pFirstCommand = m_pFirstCommand->Next();
 	}
 	else
 	{
-		for(CCommand *pCommand = m_pFirstCommand; pCommand->m_pNext; pCommand = pCommand->m_pNext)
-			if(pCommand->m_pNext->m_Temp && str_comp(pCommand->m_pNext->m_pName, pName) == 0)
+		for(CCommand *pCommand = m_pFirstCommand; pCommand->Next(); pCommand = pCommand->Next())
+			if(pCommand->Next()->m_Temp && str_comp(pCommand->Next()->m_pName, pName) == 0)
 			{
-				pRemoved = pCommand->m_pNext;
-				pCommand->m_pNext = pCommand->m_pNext->m_pNext;
+				pRemoved = pCommand->Next();
+				pCommand->SetNext(pCommand->Next()->Next());
 				break;
 			}
 	}
@@ -1033,7 +1033,7 @@ void CConsole::DeregisterTemp(const char *pName)
 	// add to recycle list
 	if(pRemoved)
 	{
-		pRemoved->m_pNext = m_pRecycleList;
+		pRemoved->SetNext(m_pRecycleList);
 		m_pRecycleList = pRemoved;
 	}
 }
@@ -1041,18 +1041,18 @@ void CConsole::DeregisterTemp(const char *pName)
 void CConsole::DeregisterTempAll()
 {
 	// set non temp as first one
-	for(; m_pFirstCommand && m_pFirstCommand->m_Temp; m_pFirstCommand = m_pFirstCommand->m_pNext)
+	for(; m_pFirstCommand && m_pFirstCommand->m_Temp; m_pFirstCommand = m_pFirstCommand->Next())
 		;
 
 	// remove temp entries from command list
-	for(CCommand *pCommand = m_pFirstCommand; pCommand && pCommand->m_pNext; pCommand = pCommand->m_pNext)
+	for(CCommand *pCommand = m_pFirstCommand; pCommand && pCommand->Next(); pCommand = pCommand->Next())
 	{
-		CCommand *pNext = pCommand->m_pNext;
+		CCommand *pNext = pCommand->Next();
 		if(pNext->m_Temp)
 		{
-			for(; pNext && pNext->m_Temp; pNext = pNext->m_pNext)
+			for(; pNext && pNext->m_Temp; pNext = pNext->Next())
 				;
-			pCommand->m_pNext = pNext;
+			pCommand->SetNext(pNext);
 		}
 	}
 
@@ -1106,7 +1106,7 @@ void CConsole::StoreCommands(bool Store)
 
 const IConsole::CCommandInfo *CConsole::GetCommandInfo(const char *pName, int FlagMask, bool Temp)
 {
-	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
+	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->Next())
 	{
 		if(pCommand->m_Flags & FlagMask && pCommand->m_Temp == Temp)
 		{
