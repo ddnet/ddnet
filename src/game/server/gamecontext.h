@@ -15,6 +15,7 @@
 
 #include "eventhandler.h"
 #include "gameworld.h"
+#include "playermapping.h"
 #include "teehistorian.h"
 
 #include <map>
@@ -223,6 +224,7 @@ public:
 
 	IGameController *m_pController;
 	CGameWorld m_World;
+	CPlayerMapping m_PlayerMapping;
 
 	// helper functions
 	class CCharacter *GetPlayerChar(int ClientId);
@@ -326,8 +328,6 @@ public:
 	void OnTick() override;
 	void OnSnap(int ClientId, bool GlobalSnap) override;
 	void OnPostGlobalSnap() override;
-
-	void UpdatePlayerMaps();
 
 	void *PreProcessMsg(int *pMsgId, CUnpacker *pUnpacker, int ClientId);
 	void CensorMessage(char *pCensoredMessage, const char *pMessage, int Size);
@@ -629,6 +629,7 @@ public:
 	void SendRecord(int ClientId);
 	void SendFinish(int ClientId, float Time, float PreviousBestTime);
 	void OnSetAuthed(int ClientId, int Level) override;
+	void OnSetTimedOut(int ClientId) override;
 
 	void ResetTuning();
 };
