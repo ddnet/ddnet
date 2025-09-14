@@ -2909,7 +2909,7 @@ void CCharacter::FoxNetTick()
 	if(m_VoteActionDelay >= 0)
 		m_VoteActionDelay--;
 
-	if(GetPlayer()->m_vPickupDrops.size() > (size_t)(NUM_EXTRA_WEAPONS + 1))
+	if(GetPlayer()->m_vPickupDrops.size() > (size_t)(NUM_MAX_DROPS))
 	{
 		// remove oldest drop
 		auto pPickup = GetPlayer()->m_vPickupDrops.begin();

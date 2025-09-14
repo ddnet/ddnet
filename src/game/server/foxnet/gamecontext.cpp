@@ -1130,7 +1130,7 @@ void CGameContext::HandleQuads(const CMapItemLayerQuads *pQuadLayer, int QuadInd
 
 	if(!IsUnFreeze)
 	{
-		CEntity *apDrops[64 * (NUM_EXTRA_WEAPONS + 1)] = {0};
+		CEntity *apDrops[MAX_CLIENTS * NUM_MAX_DROPS] = {0};
 		const int NumDrops = m_World.FindEntities(Center, R + CCharacterCore::PhysicalSize(), apDrops, std::size(apDrops), CGameWorld::ENTTYPE_PICKUPDROP);
 		for(int i = 0; i < NumDrops; ++i)
 		{
