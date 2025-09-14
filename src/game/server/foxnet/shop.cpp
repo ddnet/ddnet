@@ -22,35 +22,35 @@ void CShop::Init(CGameContext *pGameServer)
 
 void CShop::AddItems()
 {
-	m_Items.push_back(new CItems("Rainbow Feet", TYPE_RAINBOW, 750, 0));
-	m_Items.push_back(new CItems("Rainbow Body", TYPE_RAINBOW, 1250, 0));
-	m_Items.push_back(new CItems("Rainbow Hook", TYPE_RAINBOW, 1500, 0));
+	m_Items.push_back(new CItems("Rainbow Feet", TYPE_RAINBOW, 750, 2));
+	m_Items.push_back(new CItems("Rainbow Body", TYPE_RAINBOW, 1250, 4));
+	m_Items.push_back(new CItems("Rainbow Hook", TYPE_RAINBOW, 1500, 5));
 
-	m_Items.push_back(new CItems("Emoticon Gun", TYPE_GUN, 1550, 0));
-	m_Items.push_back(new CItems("Confetti Gun", TYPE_GUN, 2000, 0));
-	m_Items.push_back(new CItems("Phase Gun", TYPE_GUN, 1000, 0));
+	m_Items.push_back(new CItems("Emoticon Gun", TYPE_GUN, 1550, 10));
+	m_Items.push_back(new CItems("Confetti Gun", TYPE_GUN, 2000, 10));
+	m_Items.push_back(new CItems("Phase Gun", TYPE_GUN, 1000, 5));
 
-	m_Items.push_back(new CItems("Clockwise Indicator", TYPE_INDICATOR, 1500, 0));
-	m_Items.push_back(new CItems("Counter Clockwise Indicator", TYPE_INDICATOR, 1500, 0));
-	m_Items.push_back(new CItems("Inward Turning Indicator", TYPE_INDICATOR, 3000, 0));
-	m_Items.push_back(new CItems("Outward Turning Indicator", TYPE_INDICATOR, 3000, 0));
-	m_Items.push_back(new CItems("Line Indicator", TYPE_INDICATOR, 3250, 0));
-	m_Items.push_back(new CItems("Criss Cross Indicator", TYPE_INDICATOR, 2500, 0));
+	m_Items.push_back(new CItems("Clockwise Indicator", TYPE_INDICATOR, 1500, 5));
+	m_Items.push_back(new CItems("Counter Clockwise Indicator", TYPE_INDICATOR, 1500, 5));
+	m_Items.push_back(new CItems("Inward Turning Indicator", TYPE_INDICATOR, 3000, 15));
+	m_Items.push_back(new CItems("Outward Turning Indicator", TYPE_INDICATOR, 3000, 15));
+	m_Items.push_back(new CItems("Line Indicator", TYPE_INDICATOR, 2500, 10));
+	m_Items.push_back(new CItems("Criss Cross Indicator", TYPE_INDICATOR, 2500, 10));
 
-	m_Items.push_back(new CItems("Explosive Death", TYPE_DEATHS, 1250, 0));
-	m_Items.push_back(new CItems("Hammer Hit Death", TYPE_DEATHS, 1250, 0));
-	m_Items.push_back(new CItems("Indicator Death", TYPE_DEATHS, 1750, 0));
-	m_Items.push_back(new CItems("Laser Death", TYPE_DEATHS, 2250, 0));
+	m_Items.push_back(new CItems("Explosive Death", TYPE_DEATHS, 1250, 5));
+	m_Items.push_back(new CItems("Hammer Hit Death", TYPE_DEATHS, 1250, 5));
+	m_Items.push_back(new CItems("Indicator Death", TYPE_DEATHS, 1750, 10));
+	m_Items.push_back(new CItems("Laser Death", TYPE_DEATHS, 2250, 10));
 
-	m_Items.push_back(new CItems("Star Trail", TYPE_TRAIL, 2500, 0));
-	m_Items.push_back(new CItems("Dot Trail", TYPE_TRAIL, 2500, 0));
+	m_Items.push_back(new CItems("Star Trail", TYPE_TRAIL, 2500, 5));
+	m_Items.push_back(new CItems("Dot Trail", TYPE_TRAIL, 2500, 5));
 
-	m_Items.push_back(new CItems("Sparkle", TYPE_OTHER, 1000, 0));
-	m_Items.push_back(new CItems("Heart Hat", TYPE_OTHER, 2250, 0));
-	m_Items.push_back(new CItems("Inverse Aim", TYPE_OTHER, 3500, 0));
-	m_Items.push_back(new CItems("Lovely", TYPE_OTHER, 2750, 0));
-	m_Items.push_back(new CItems("Rotating Ball", TYPE_OTHER, 3500, 0));
-	m_Items.push_back(new CItems("Epic Circle", TYPE_OTHER, 3500, 0));
+	m_Items.push_back(new CItems("Sparkle", TYPE_OTHER, 1000, 5));
+	m_Items.push_back(new CItems("Heart Hat", TYPE_OTHER, 2250, 10));
+	m_Items.push_back(new CItems("Inverse Aim", TYPE_OTHER, 3500, 20));
+	m_Items.push_back(new CItems("Lovely", TYPE_OTHER, 2750, 15));
+	m_Items.push_back(new CItems("Rotating Ball", TYPE_OTHER, 3500, 10));
+	m_Items.push_back(new CItems("Epic Circle", TYPE_OTHER, 3500, 20));
 }
 
 void CShop::ResetItems()
