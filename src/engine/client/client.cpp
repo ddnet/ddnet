@@ -5188,6 +5188,11 @@ int CClient::UdpConnectivity(int NetType)
 
 bool CClient::ViewLink(const char *pLink)
 {
+	if(!str_startswith(pLink, "https://"))
+	{
+		log_error("client", "Failed to open link '%s': only https-links are allowed", pLink);
+		return false;
+	}
 #if defined(CONF_PLATFORM_ANDROID)
 	if(SDL_OpenURL(pLink) == 0)
 	{
