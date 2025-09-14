@@ -1,10 +1,8 @@
-# Overview
-
 @mainpage Overview
 
 This is the main page of the documentation of the [DDNet source code](https://github.com/ddnet/ddnet).
 
-## Structure
+# Structure
 
 The `src` folder is structured into several folders as follows:
 
@@ -21,7 +19,7 @@ The `src` folder is structured into several folders as follows:
 - test: Unit tests.
 - tools: Additional tools for utility and testing.
 
-## Documentation
+# Documentation
 
 We use [doxygen](https://www.doxygen.nl/) to generate this code documentation.
 The documentation is updated regularly and available at https://codedoc.ddnet.org/
@@ -29,7 +27,7 @@ The documentation is updated regularly and available at https://codedoc.ddnet.or
 To generate the documentation locally, install doxygen, then run `doxygen` within the project folder.
 The documentation will be written to the `docs` folder.
 
-## Resources
+# Resources
 
 - [Development page on the DDNet Wiki](https://wiki.ddnet.org/wiki/Development)
 - [Extra tools pages on the DDNet Wiki](https://wiki.ddnet.org/wiki/Extra_tools)
