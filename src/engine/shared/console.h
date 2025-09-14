@@ -15,8 +15,12 @@ class CConsole : public IConsole
 {
 	class CCommand : public CCommandInfo
 	{
-	public:
 		CCommand *m_pNext;
+
+	public:
+		const CCommand *Next() const { return m_pNext; }
+		CCommand *Next() { return m_pNext; }
+		void SetNext(CCommand *pNext) { m_pNext = pNext; }
 		int m_Flags;
 		bool m_Temp;
 		FCommandCallback m_pfnCallback;
