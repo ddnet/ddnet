@@ -738,6 +738,17 @@ void CGameConsole::CInstance::UpdateEntryTextAttributes(CBacklogEntry *pEntry) c
 	pEntry->m_LineCount = Cursor.m_LineCount;
 }
 
+bool CGameConsole::CInstance::IsInputHidden() const
+{
+	if(m_Type != CONSOLETYPE_REMOTE)
+		return false;
+	if(m_pGameConsole->Client()->State() != IClient::STATE_ONLINE || m_Searching)
+		return false;
+	if(m_pGameConsole->Client()->RconAuthed())
+		return false;
+	return m_UserGot || !m_UsernameReq;
+}
+
 void CGameConsole::CInstance::SetSearching(bool Searching)
 {
 	m_Searching = Searching;
@@ -1197,7 +1208,7 @@ void CGameConsole::OnRender()
 		}
 
 		// render console input (wrap line)
-		pConsole->m_Input.SetHidden(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed() && (pConsole->m_UserGot || !pConsole->m_UsernameReq));
+		pConsole->m_Input.SetHidden(pConsole->IsInputHidden());
 		if(m_ConsoleState == CONSOLE_OPEN)
 		{
 			pConsole->m_Input.Activate(EInputPriority::CONSOLE); // Ensure that the input is active

@@ -133,6 +133,8 @@ class CGameConsole : public CComponent
 
 		void UpdateEntryTextAttributes(CBacklogEntry *pEntry) const;
 
+		bool IsInputHidden() const;
+
 	private:
 		void SetSearching(bool Searching);
 		void ClearSearch();
