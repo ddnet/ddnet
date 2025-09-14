@@ -740,8 +740,6 @@ class CGraphics_Threaded : public IEngineGraphics
 {
 	enum
 	{
-		NUM_CMDBUFFERS = 2,
-
 		DRAWING_QUADS = 1,
 		DRAWING_LINES = 2,
 		DRAWING_TRIANGLES = 3
@@ -757,7 +755,7 @@ class CGraphics_Threaded : public IEngineGraphics
 	bool m_GLHasTextureArraysSupport;
 	bool m_GLUseTrianglesAsQuad;
 
-	CCommandBuffer *m_apCommandBuffers[NUM_CMDBUFFERS];
+	CCommandBuffer *m_apCommandBuffers[2];
 	CCommandBuffer *m_pCommandBuffer;
 	unsigned m_CurrentCommandBuffer;
 
