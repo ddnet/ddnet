@@ -3334,7 +3334,7 @@ void CCharacter::UpdateWeaponIndicator()
 		CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
 		if(!pPl)
 			return;
-		if(pPl->SpectatorId() == GetPlayer()->GetCid())
+		if(pPl->IsPaused() && pPl->SpectatorId() == GetPlayer()->GetCid())
 			pPl->SendBroadcastHud(aBuf);
 	}
 }

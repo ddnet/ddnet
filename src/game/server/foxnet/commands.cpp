@@ -1051,7 +1051,7 @@ void CGameContext::ConIgnoreGameLayer(IConsole::IResult *pResult, void *pUserDat
 		return;
 
 	pPlayer->SetIgnoreGameLayer(!pPlayer->m_IgnoreGamelayer);
-	log_info("server", "Set ignore game layer to %d for player %s", !pPlayer->m_IgnoreGamelayer, pSelf->Server()->ClientName(Victim));
+	log_info("server", "Set ignore game layer to %d for player %s", pPlayer->m_IgnoreGamelayer, pSelf->Server()->ClientName(Victim));
 }
 
 void CGameContext::ConSetVanish(IConsole::IResult *pResult, void *pUserData)
