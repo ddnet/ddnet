@@ -84,7 +84,7 @@ const CEnvelopeExtrema::CEnvelopeExtremaItem &CEnvelopeExtrema::GetExtrema(int E
 {
 	if(Env == -1)
 		return m_EnvelopeExtremaItemNone; // No envelope just means no movement
-	else if(Env < -1 || Env > (int)m_vEnvelopeExtrema.size())
+	else if(Env < -1 || Env >= (int)m_vEnvelopeExtrema.size())
 		return m_EnvelopeExtremaItemInvalid;
 	return m_vEnvelopeExtrema[Env];
 }

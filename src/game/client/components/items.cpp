@@ -230,6 +230,15 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 	Graphics()->QuadsSetRotation(0);
 }
 
+void CItems::RenderFlags()
+{
+	for(int Flag = 0; Flag < GameClient()->m_Snap.m_NumFlags; ++Flag)
+	{
+		RenderFlag(GameClient()->m_Snap.m_apPrevFlags[Flag], GameClient()->m_Snap.m_apFlags[Flag],
+			GameClient()->m_Snap.m_pPrevGameDataObj, GameClient()->m_Snap.m_pGameDataObj);
+	}
+}
+
 void CItems::RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent, const CNetObj_GameData *pPrevGameData, const CNetObj_GameData *pCurGameData)
 {
 	float Angle = 0.0f;
@@ -351,7 +360,6 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 
 void CItems::RenderLaser(vec2 From, vec2 Pos, ColorRGBA OuterColor, ColorRGBA InnerColor, float TicksBody, float TicksHead, int Type) const
 {
-	int TuneZone = (Client()->State() == IClient::STATE_ONLINE && GameClient()->m_GameWorld.m_WorldConfig.m_UseTuneZones) ? Collision()->IsTune(Collision()->GetMapIndex(From)) : 0;
 	float Len = distance(Pos, From);
 
 	if(Len > 0)
@@ -365,7 +373,16 @@ void CItems::RenderLaser(vec2 From, vec2 Pos, ColorRGBA OuterColor, ColorRGBA In
 		vec2 Dir = normalize_pre_length(Pos - From, Len);
 
 		float Ms = TicksBody * 1000.0f / Client()->GameTickSpeed();
-		float a = Ms / (Type == LASERTYPE_RIFLE || Type == LASERTYPE_SHOTGUN ? GameClient()->GetTuning(TuneZone)->m_LaserBounceDelay : CTuningParams::DEFAULT.m_LaserBounceDelay);
+		float a;
+		if(Type == LASERTYPE_RIFLE || Type == LASERTYPE_SHOTGUN)
+		{
+			int TuneZone = (Client()->State() == IClient::STATE_ONLINE && GameClient()->m_GameWorld.m_WorldConfig.m_UseTuneZones) ? Collision()->IsTune(Collision()->GetMapIndex(From)) : 0;
+			a = Ms / GameClient()->GetTuning(TuneZone)->m_LaserBounceDelay;
+		}
+		else
+		{
+			a = Ms / CTuningParams::DEFAULT.m_LaserBounceDelay;
+		}
 		a = std::clamp(a, 0.0f, 1.0f);
 		float Ia = 1 - a;
 
@@ -623,24 +640,7 @@ void CItems::OnRender()
 		}
 	}
 
-	int Num = Client()->SnapNumItems(IClient::SNAP_CURRENT);
-
-	// render flag
-	for(int i = 0; i < Num; i++)
-	{
-		const IClient::CSnapItem Item = Client()->SnapGetItem(IClient::SNAP_CURRENT, i);
-
-		if(Item.m_Type == NETOBJTYPE_FLAG)
-		{
-			const void *pPrev = Client()->SnapFindItem(IClient::SNAP_PREV, Item.m_Type, Item.m_Id);
-			if(pPrev)
-			{
-				const void *pPrevGameData = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_GAMEDATA, GameClient()->m_Snap.m_GameDataSnapId);
-				RenderFlag(static_cast<const CNetObj_Flag *>(pPrev), static_cast<const CNetObj_Flag *>(Item.m_pData),
-					static_cast<const CNetObj_GameData *>(pPrevGameData), GameClient()->m_Snap.m_pGameDataObj);
-			}
-		}
-	}
+	RenderFlags();
 
 	Graphics()->QuadsSetRotation(0);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);

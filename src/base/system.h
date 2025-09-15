@@ -9,6 +9,7 @@
 #define BASE_SYSTEM_H
 
 #include "detect.h"
+#include "fs.h"
 #include "str.h"
 #include "types.h"
 
@@ -1210,53 +1211,6 @@ std::string windows_format_system_message(unsigned long error);
  */
 
 /**
- * Appends a string to another.
- *
- * @ingroup Strings
- *
- * @param dst Pointer to a buffer that contains a string.
- * @param src String to append.
- * @param dst_size Size of the buffer of the dst string.
- *
- * @remark The strings are treated as null-terminated strings.
- * @remark Guarantees that dst string will contain null-termination.
- */
-void str_append(char *dst, const char *src, int dst_size);
-
-/**
- * Appends a string to a fixed-size array of chars.
- *
- * @ingroup Strings
- *
- * @param dst Array that shall receive the string.
- * @param src String to append.
- *
- * @remark The strings are treated as null-terminated strings.
- * @remark Guarantees that dst string will contain null-termination.
- */
-template<int N>
-void str_append(char (&dst)[N], const char *src)
-{
-	str_append(dst, src, N);
-}
-
-/**
- * Truncates a string to a given length.
- *
- * @ingroup Strings
- *
- * @param dst Pointer to a buffer that shall receive the string.
- * @param dst_size Size of the buffer dst.
- * @param src String to be truncated.
- * @param truncation_len Maximum length of the returned string (not
- *                       counting the null-termination).
- *
- * @remark The strings are treated as null-terminated strings.
- * @remark Guarantees that dst string will contain null-termination.
- */
-void str_truncate(char *dst, int dst_size, const char *src, int truncation_len);
-
-/**
  * Performs printf formatting into a buffer.
  *
  * @ingroup Strings
@@ -1317,57 +1271,6 @@ inline int str_format_opt(char *buffer, int buffer_size, const char *format, int
 
 #define str_format str_format_opt
 #endif
-
-/**
- * Trims specific number of words at the start of a string.
- *
- * @ingroup Strings
- *
- * @param str String to trim the words from.
- * @param words Count of words to trim.
- *
- * @return Trimmed string
- *
- * @remark The strings are treated as null-terminated strings.
- * @remark Leading whitespace is always trimmed.
- */
-const char *str_trim_words(const char *str, int words);
-
-/**
- * Check whether string has ASCII control characters.
- *
- * @ingroup Strings
- *
- * @param str String to check.
- *
- * @return Whether the string has ASCII control characters.
- *
- * @remark The strings are treated as null-terminated strings.
- */
-bool str_has_cc(const char *str);
-
-/**
- * Replaces all characters below 32 with whitespace.
- *
- * @ingroup Strings
- *
- * @param str String to sanitize.
- *
- * @remark The strings are treated as null-terminated strings.
- */
-void str_sanitize_cc(char *str);
-
-/**
- * Replaces all characters below 32 with whitespace with
- * exception to \t, \n and \r.
- *
- * @ingroup Strings
- *
- * @param str String to sanitize.
- *
- * @remark The strings are treated as null-terminated strings.
- */
-void str_sanitize(char *str);
 
 /**
  * Replaces all invalid filename characters with whitespace.
@@ -1909,37 +1812,6 @@ void fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user);
  * @remark The strings are treated as null-terminated strings.
  */
 void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int type, void *user);
-
-/**
- * Creates a directory.
- *
- * @ingroup Filesystem
- *
- * @param path Directory to create.
- *
- * @return `0` on success. Negative value on failure.
- *
- * @remark Does not create several directories if needed. "a/b/c" will
- *         result in a failure if b or a does not exist.
- *
- * @remark The strings are treated as null-terminated strings.
- */
-int fs_makedir(const char *path);
-
-/**
- * Removes a directory.
- *
- * @ingroup Filesystem
- *
- * @param path Directory to remove.
- *
- * @return `0` on success. Negative value on failure.
- *
- * @remark Cannot remove a non-empty directory.
- *
- * @remark The strings are treated as null-terminated strings.
- */
-int fs_removedir(const char *path);
 
 /**
  * Recursively creates parent directories for a file or directory.

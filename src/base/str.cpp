@@ -9,6 +9,33 @@ int str_copy(char *dst, const char *src, int dst_size)
 	return str_utf8_fix_truncation(dst);
 }
 
+void str_append(char *dst, const char *src, int dst_size)
+{
+	int s = str_length(dst);
+	int i = 0;
+	while(s < dst_size)
+	{
+		dst[s] = src[i];
+		if(!src[i]) /* check for null termination */
+			break;
+		s++;
+		i++;
+	}
+
+	dst[dst_size - 1] = 0; /* assure null termination */
+	str_utf8_fix_truncation(dst);
+}
+
+void str_truncate(char *dst, int dst_size, const char *src, int truncation_len)
+{
+	int size = dst_size;
+	if(truncation_len < size)
+	{
+		size = truncation_len + 1;
+	}
+	str_copy(dst, src, size);
+}
+
 int str_length(const char *str)
 {
 	return (int)strlen(str);
@@ -51,6 +78,57 @@ int str_isallnum_hex(const char *str)
 int str_isspace(char c)
 {
 	return c == ' ' || c == '\n' || c == '\r' || c == '\t';
+}
+
+const char *str_trim_words(const char *str, int words)
+{
+	while(*str && str_isspace(*str))
+		str++;
+	while(words && *str)
+	{
+		if(str_isspace(*str) && !str_isspace(*(str + 1)))
+			words--;
+		str++;
+	}
+	return str;
+}
+
+bool str_has_cc(const char *str)
+{
+	unsigned char *s = (unsigned char *)str;
+	while(*s)
+	{
+		if(*s < 32)
+		{
+			return true;
+		}
+		s++;
+	}
+	return false;
+}
+
+/* makes sure that the string only contains the characters between 32 and 255 */
+void str_sanitize_cc(char *str_in)
+{
+	unsigned char *str = (unsigned char *)str_in;
+	while(*str)
+	{
+		if(*str < 32)
+			*str = ' ';
+		str++;
+	}
+}
+
+/* makes sure that the string only contains the characters between 32 and 255 + \r\n\t */
+void str_sanitize(char *str_in)
+{
+	unsigned char *str = (unsigned char *)str_in;
+	while(*str)
+	{
+		if(*str < 32 && !(*str == '\r') && !(*str == '\n') && !(*str == '\t'))
+			*str = ' ';
+		str++;
+	}
 }
 
 static unsigned char str_byte_next(const char **ptr)

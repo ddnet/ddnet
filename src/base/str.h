@@ -35,6 +35,53 @@ void str_copy(char (&dst)[N], const char *src)
 }
 
 /**
+ * Appends a string to another.
+ *
+ * @ingroup Strings
+ *
+ * @param dst Pointer to a buffer that contains a string.
+ * @param src String to append.
+ * @param dst_size Size of the buffer of the dst string.
+ *
+ * @remark The strings are treated as null-terminated strings.
+ * @remark Guarantees that dst string will contain null-termination.
+ */
+void str_append(char *dst, const char *src, int dst_size);
+
+/**
+ * Appends a string to a fixed-size array of chars.
+ *
+ * @ingroup Strings
+ *
+ * @param dst Array that shall receive the string.
+ * @param src String to append.
+ *
+ * @remark The strings are treated as null-terminated strings.
+ * @remark Guarantees that dst string will contain null-termination.
+ */
+template<int N>
+void str_append(char (&dst)[N], const char *src)
+{
+	str_append(dst, src, N);
+}
+
+/**
+ * Truncates a string to a given length.
+ *
+ * @ingroup Strings
+ *
+ * @param dst Pointer to a buffer that shall receive the string.
+ * @param dst_size Size of the buffer dst.
+ * @param src String to be truncated.
+ * @param truncation_len Maximum length of the returned string (not
+ *                       counting the null-termination).
+ *
+ * @remark The strings are treated as null-terminated strings.
+ * @remark Guarantees that dst string will contain null-termination.
+ */
+void str_truncate(char *dst, int dst_size, const char *src, int truncation_len);
+
+/**
  * Returns the length of a null-terminated string.
  *
  * @ingroup Strings
@@ -65,6 +112,57 @@ int str_isallnum_hex(const char *str);
  * @remark The following characters are considered whitespace: ' ', '\n', '\r', '\t'.
  */
 int str_isspace(char c);
+
+/**
+ * Trims specific number of words at the start of a string.
+ *
+ * @ingroup Strings
+ *
+ * @param str String to trim the words from.
+ * @param words Count of words to trim.
+ *
+ * @return Trimmed string
+ *
+ * @remark The strings are treated as null-terminated strings.
+ * @remark Leading whitespace is always trimmed.
+ */
+const char *str_trim_words(const char *str, int words);
+
+/**
+ * Check whether string has ASCII control characters.
+ *
+ * @ingroup Strings
+ *
+ * @param str String to check.
+ *
+ * @return Whether the string has ASCII control characters.
+ *
+ * @remark The strings are treated as null-terminated strings.
+ */
+bool str_has_cc(const char *str);
+
+/**
+ * Replaces all characters below 32 with whitespace.
+ *
+ * @ingroup Strings
+ *
+ * @param str String to sanitize.
+ *
+ * @remark The strings are treated as null-terminated strings.
+ */
+void str_sanitize_cc(char *str);
+
+/**
+ * Replaces all characters below 32 with whitespace with
+ * exception to \t, \n and \r.
+ *
+ * @ingroup Strings
+ *
+ * @param str String to sanitize.
+ *
+ * @remark The strings are treated as null-terminated strings.
+ */
+void str_sanitize(char *str);
 
 /**
  * Decodes a UTF-8 codepoint.

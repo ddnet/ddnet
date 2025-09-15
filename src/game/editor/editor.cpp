@@ -1046,14 +1046,12 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 			m_ShowTileInfo = SHOW_TILE_OFF;
 		else
 			m_ShowTileInfo = SHOW_TILE_DECIMAL;
-		m_ShowEnvelopePreview = SHOWENV_NONE;
 	}
 
 	// handle shortcut for hex button
 	if(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_I) && ModPressed && ShiftPressed)
 	{
 		m_ShowTileInfo = m_ShowTileInfo == SHOW_TILE_HEXADECIMAL ? SHOW_TILE_OFF : SHOW_TILE_HEXADECIMAL;
-		m_ShowEnvelopePreview = SHOWENV_NONE;
 	}
 
 	// handle shortcut for unused button
@@ -2809,7 +2807,7 @@ void CEditor::DoQuadEnvelopes(const std::vector<CQuad> &vQuads, IGraphics::CText
 
 	for(size_t i = 0; i < Num; i++)
 	{
-		if((m_ShowEnvelopePreview == SHOWENV_SELECTED && vQuads[i].m_PosEnv == m_SelectedEnvelope) || m_ShowEnvelopePreview == SHOWENV_ALL)
+		if((m_ActiveEnvelopePreview == EEnvelopePreview::SELECTED && vQuads[i].m_PosEnv == m_SelectedEnvelope) || m_ActiveEnvelopePreview == EEnvelopePreview::ALL)
 			if(vQuads[i].m_PosEnv >= 0 && vQuads[i].m_PosEnv < (int)m_Map.m_vpEnvelopes.size())
 				apEnvelope[i] = m_Map.m_vpEnvelopes[vQuads[i].m_PosEnv];
 	}
@@ -3457,8 +3455,8 @@ void CEditor::DoMapEditor(CUIRect View)
 					{
 						std::shared_ptr<CLayerQuads> pLayer = std::static_pointer_cast<CLayerQuads>(pEditLayer);
 
-						if(m_ShowEnvelopePreview == SHOWENV_NONE)
-							m_ShowEnvelopePreview = SHOWENV_ALL;
+						if(m_ActiveEnvelopePreview == EEnvelopePreview::NONE)
+							m_ActiveEnvelopePreview = EEnvelopePreview::ALL;
 
 						if(m_QuadKnifeActive)
 							DoQuadKnife(m_vSelectedQuads[m_SelectedQuadIndex]);
@@ -3614,7 +3612,7 @@ void CEditor::DoMapEditor(CUIRect View)
 	if(!m_ShowPicker)
 		MapView()->ProofMode()->RenderScreenSizes();
 
-	if(!m_ShowPicker && m_ShowTileInfo != SHOW_TILE_OFF && m_ShowEnvelopePreview != SHOWENV_NONE && GetSelectedLayer(0) && GetSelectedLayer(0)->m_Type == LAYERTYPE_QUADS)
+	if(!m_ShowPicker && m_ShowEnvelopePreview && m_ActiveEnvelopePreview != EEnvelopePreview::NONE && GetSelectedLayer(0) && GetSelectedLayer(0)->m_Type == LAYERTYPE_QUADS)
 	{
 		GetSelectedGroup()->MapScreen();
 
@@ -3624,7 +3622,7 @@ void CEditor::DoMapEditor(CUIRect View)
 			Texture = m_Map.m_vpImages[pLayer->m_Image]->m_Texture;
 
 		DoQuadEnvelopes(pLayer->m_vQuads, Texture);
-		m_ShowEnvelopePreview = SHOWENV_NONE;
+		m_ActiveEnvelopePreview = EEnvelopePreview::NONE;
 	}
 
 	Ui()->MapScreen();
@@ -3656,8 +3654,8 @@ void CEditor::SetHotQuadPoint(const std::shared_ptr<CLayerQuads> &pLayer)
 	{
 		CQuad &Quad = pLayer->m_vQuads.at(i);
 
-		if(m_ShowTileInfo != SHOW_TILE_OFF &&
-			m_ShowEnvelopePreview != SHOWENV_NONE &&
+		if(m_ShowEnvelopePreview &&
+			m_ActiveEnvelopePreview != EEnvelopePreview::NONE &&
 			Quad.m_PosEnv >= 0 &&
 			Quad.m_PosEnv < (int)m_Map.m_vpEnvelopes.size())
 		{
@@ -5883,7 +5881,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				s_EnvelopeEditorButtonUsed = -1;
 			}
 
-			m_ShowEnvelopePreview = SHOWENV_SELECTED;
+			m_ActiveEnvelopePreview = EEnvelopePreview::SELECTED;
 			str_copy(m_aTooltip, "Double click to create a new point. Use shift to change the zoom axis. Press S to scale selected envelope points.");
 		}
 
@@ -6190,7 +6188,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 						if(Ui()->CheckActiveItem(pId))
 						{
-							m_ShowEnvelopePreview = SHOWENV_SELECTED;
+							m_ActiveEnvelopePreview = EEnvelopePreview::SELECTED;
 
 							if(s_Operation == EEnvelopeEditorOp::OP_SELECT)
 							{
@@ -6350,7 +6348,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 								}
 							}
 
-							m_ShowEnvelopePreview = SHOWENV_SELECTED;
+							m_ActiveEnvelopePreview = EEnvelopePreview::SELECTED;
 							Graphics()->SetColor(1, 1, 1, 1);
 							str_copy(m_aTooltip, "Envelope point. Left mouse to drag. Hold ctrl to be more precise. Hold shift to alter time. Shift+right click to delete.");
 							m_pUiGotContext = pId;
@@ -6396,7 +6394,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 							if(Ui()->CheckActiveItem(pId))
 							{
-								m_ShowEnvelopePreview = SHOWENV_SELECTED;
+								m_ActiveEnvelopePreview = EEnvelopePreview::SELECTED;
 
 								if(s_Operation == EEnvelopeEditorOp::OP_SELECT)
 								{
@@ -6485,7 +6483,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 									}
 								}
 
-								m_ShowEnvelopePreview = SHOWENV_SELECTED;
+								m_ActiveEnvelopePreview = EEnvelopePreview::SELECTED;
 								Graphics()->SetColor(1, 1, 1, 1);
 								str_copy(m_aTooltip, "Bezier out-tangent. Left mouse to drag. Hold ctrl to be more precise. Shift+right click to reset.");
 								m_pUiGotContext = pId;
@@ -6529,7 +6527,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 							if(Ui()->CheckActiveItem(pId))
 							{
-								m_ShowEnvelopePreview = SHOWENV_SELECTED;
+								m_ActiveEnvelopePreview = EEnvelopePreview::SELECTED;
 
 								if(s_Operation == EEnvelopeEditorOp::OP_SELECT)
 								{
@@ -6618,7 +6616,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 									}
 								}
 
-								m_ShowEnvelopePreview = SHOWENV_SELECTED;
+								m_ActiveEnvelopePreview = EEnvelopePreview::SELECTED;
 								Graphics()->SetColor(1, 1, 1, 1);
 								str_copy(m_aTooltip, "Bezier in-tangent. Left mouse to drag. Hold ctrl to be more precise. Shift+right click to reset.");
 								m_pUiGotContext = pId;
@@ -7155,8 +7153,8 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	MenuBar.VSplitLeft(60.0f, &SettingsButton, &MenuBar);
 	if(DoButton_Ex(&s_SettingsButton, "Settings", 0, &SettingsButton, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_T, EditorFontSizes::MENU, TEXTALIGN_ML))
 	{
-		static SPopupMenuId s_PopupMenuEntitiesId;
-		Ui()->DoPopupMenu(&s_PopupMenuEntitiesId, SettingsButton.x, SettingsButton.y + SettingsButton.h - 1.0f, 220.0f, 134.0f, this, PopupMenuSettings, PopupProperties);
+		static SPopupMenuId s_PopupMenuSettingsId;
+		Ui()->DoPopupMenu(&s_PopupMenuSettingsId, SettingsButton.x, SettingsButton.y + SettingsButton.h - 1.0f, 280.0f, 148.0f, this, PopupMenuSettings, PopupProperties);
 	}
 
 	CUIRect ChangedIndicator, Info, Help, Close;
@@ -7946,7 +7944,7 @@ void CEditor::Reset(bool CreateDefault)
 	m_Map.m_LastSaveTime = Client()->GlobalTime();
 	m_Map.m_LastAutosaveUpdateTime = -1.0f;
 
-	m_ShowEnvelopePreview = SHOWENV_NONE;
+	m_ActiveEnvelopePreview = EEnvelopePreview::NONE;
 	m_ShiftBy = 1;
 
 	m_ResetZoomEnvelope = true;

@@ -1994,6 +1994,8 @@ set_src(BASE GLOB_RECURSE src/base
   crashdump.cpp
   detect.h
   dynamic.h
+  fs.cpp
+  fs.h
   hash.cpp
   hash.h
   hash_bundled.cpp
@@ -2343,6 +2345,8 @@ if(CLIENT)
     components/broadcast.h
     components/camera.cpp
     components/camera.h
+    components/censor.cpp
+    components/censor.h
     components/chat.cpp
     components/chat.h
     components/community_icons.cpp

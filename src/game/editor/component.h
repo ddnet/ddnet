@@ -43,7 +43,7 @@ public:
 	void RegisterSubComponent(CEditorComponent &Component);
 
 private:
-	std::vector<std::reference_wrapper<CEditorComponent>> m_vSubComponents = {};
+	std::vector<std::reference_wrapper<CEditorComponent>> m_vSubComponents;
 };
 
 #endif

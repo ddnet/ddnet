@@ -292,7 +292,6 @@ REGISTER_QUICK_ACTION(
 	"Show info: Off",
 	[&]() {
 		m_ShowTileInfo = SHOW_TILE_OFF;
-		m_ShowEnvelopePreview = SHOWENV_NONE;
 	},
 	ALWAYS_FALSE,
 	[&]() -> bool { return m_ShowTileInfo == SHOW_TILE_OFF; },
@@ -303,7 +302,6 @@ REGISTER_QUICK_ACTION(
 	"Show info: Dec",
 	[&]() {
 		m_ShowTileInfo = SHOW_TILE_DECIMAL;
-		m_ShowEnvelopePreview = SHOWENV_NONE;
 	},
 	ALWAYS_FALSE,
 	[&]() -> bool { return m_ShowTileInfo == SHOW_TILE_DECIMAL; },
@@ -314,12 +312,22 @@ REGISTER_QUICK_ACTION(
 	"Show info: Hex",
 	[&]() {
 		m_ShowTileInfo = SHOW_TILE_HEXADECIMAL;
-		m_ShowEnvelopePreview = SHOWENV_NONE;
 	},
 	ALWAYS_FALSE,
 	[&]() -> bool { return m_ShowTileInfo == SHOW_TILE_HEXADECIMAL; },
 	DEFAULT_BTN,
 	"[Ctrl+Shift+I] Show tile information in hexadecimal.")
+REGISTER_QUICK_ACTION(
+	PreviewQuadEnvelopes,
+	"Preview quad envelopes",
+	[&]() {
+		m_ShowEnvelopePreview = !m_ShowEnvelopePreview;
+		m_ActiveEnvelopePreview = EEnvelopePreview::NONE;
+	},
+	ALWAYS_FALSE,
+	[&]() -> bool { return m_ShowEnvelopePreview; },
+	DEFAULT_BTN,
+	"Toggle previewing the paths of quads with a position envelope when a quad layer is selected.")
 REGISTER_QUICK_ACTION(
 	DeleteLayer,
 	"Delete layer",

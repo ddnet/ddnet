@@ -4208,9 +4208,13 @@ void CGameContext::OnInit(const void *pPersistentData)
 			Switcher.m_Initial = true;
 	}
 
+	m_pConfigManager->SetGameSettingsReadOnly(false);
+
 	Console()->ExecuteFile(g_Config.m_SvResetFile, -1);
 
 	LoadMapSettings();
+
+	m_pConfigManager->SetGameSettingsReadOnly(true);
 
 	m_MapBugs.Dump();
 
