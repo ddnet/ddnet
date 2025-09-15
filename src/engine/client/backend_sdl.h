@@ -1,7 +1,7 @@
 #ifndef ENGINE_CLIENT_BACKEND_SDL_H
 #define ENGINE_CLIENT_BACKEND_SDL_H
 
-#include <SDL_video.h>
+#include <SDL3/SDL_video.h>
 
 #include <base/detect.h>
 
@@ -215,8 +215,6 @@ class CGraphicsBackend_SDL_GL : public CGraphicsBackend_Threaded
 
 	TGLBackendReadPresentedImageData m_ReadPresentedImageDataFunc;
 
-	int m_NumScreens;
-
 	SBackendCapabilites m_Capabilites;
 
 	char m_aVendorString[gs_GpuInfoStringSize] = {};
@@ -229,6 +227,8 @@ class CGraphicsBackend_SDL_GL : public CGraphicsBackend_Threaded
 
 	static EBackendType DetectBackend();
 	static void ClampDriverVersion(EBackendType BackendType);
+	
+	SDL_DisplayID DisplayIdFromIndex(int &Index) const;
 
 public:
 	CGraphicsBackend_SDL_GL(TTranslateFunc &&TranslateFunc);
@@ -242,11 +242,11 @@ public:
 
 	const TTwGraphicsGpuList &GetGpus() const override;
 
-	int GetNumScreens() const override { return m_NumScreens; }
-	const char *GetScreenName(int Screen) const override;
+	int GetNumScreens() const override;
+	const char *GetScreenName(int Index) const override;
 
-	void GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenId) override;
-	void GetCurrentVideoMode(CVideoMode &CurMode, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenId) override;
+	void GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Index) override;
+	void GetCurrentVideoMode(CVideoMode &CurMode, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Index) override;
 
 	void Minimize() override;
 	void Maximize() override;

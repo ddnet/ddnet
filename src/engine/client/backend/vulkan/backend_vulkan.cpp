@@ -33,8 +33,8 @@
 #include <utility>
 #include <vector>
 
-#include <SDL_video.h>
-#include <SDL_vulkan.h>
+#include <SDL3/SDL_video.h>
+#include <SDL3/SDL_vulkan.h>
 
 #include <vulkan/vk_platform.h>
 #include <vulkan/vulkan_core.h>
@@ -3467,15 +3467,10 @@ public:
 
 	[[nodiscard]] bool GetVulkanExtensions(SDL_Window *pWindow, std::vector<std::string> &vVKExtensions)
 	{
-		unsigned int ExtCount = 0;
-		if(!SDL_Vulkan_GetInstanceExtensions(pWindow, &ExtCount, nullptr))
-		{
-			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "Could not get instance extensions from SDL.");
-			return false;
-		}
-
-		std::vector<const char *> vExtensionList(ExtCount);
-		if(!SDL_Vulkan_GetInstanceExtensions(pWindow, &ExtCount, vExtensionList.data()))
+		// TODOSDL: just return ppExtentionList?
+		uint32_t ExtCount;
+		const char *const *ppExtentionList = SDL_Vulkan_GetInstanceExtensions(&ExtCount);
+		if(!ppExtentionList)
 		{
 			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "Could not get instance extensions from SDL.");
 			return false;
@@ -3484,7 +3479,7 @@ public:
 		vVKExtensions.reserve(ExtCount);
 		for(uint32_t i = 0; i < ExtCount; i++)
 		{
-			vVKExtensions.emplace_back(vExtensionList[i]);
+			vVKExtensions.emplace_back(ppExtentionList[i]);
 		}
 
 		return true;
@@ -3943,7 +3938,7 @@ public:
 
 	[[nodiscard]] bool CreateSurface(SDL_Window *pWindow)
 	{
-		if(!SDL_Vulkan_CreateSurface(pWindow, m_VKInstance, &m_VKPresentSurface))
+		if(!SDL_Vulkan_CreateSurface(pWindow, m_VKInstance, nullptr, &m_VKPresentSurface))
 		{
 			dbg_msg("vulkan", "error from sdl: %s", SDL_GetError());
 			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "Creating a vulkan surface for the SDL window failed.");

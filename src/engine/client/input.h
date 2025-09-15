@@ -3,8 +3,8 @@
 #ifndef ENGINE_CLIENT_INPUT_H
 #define ENGINE_CLIENT_INPUT_H
 
-#include <SDL_events.h>
-#include <SDL_joystick.h>
+#include <SDL3/SDL_events.h>
+#include <SDL3/SDL_joystick.h>
 #include <engine/console.h>
 
 #include <engine/input.h>
@@ -64,11 +64,13 @@ private:
 	IEngineGraphics *Graphics() const { return m_pGraphics; }
 	IConsole *Console() const { return m_pConsole; }
 
+	SDL_Window *m_pWindow = nullptr;
+
 	// joystick
 	std::vector<CJoystick> m_vJoysticks;
 	CJoystick *m_pActiveJoystick = nullptr;
 	void InitJoysticks();
-	bool OpenJoystick(int JoystickIndex);
+	bool OpenJoystick(int JoystickId);
 	void CloseJoysticks();
 	void UpdateActiveJoystick();
 	static void ConchainJoystickGuidChanged(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -109,8 +111,6 @@ private:
 
 	char m_aDropFile[IO_MAX_PATH_LENGTH];
 
-	void ProcessSystemMessage(SDL_SysWMmsg *pMsg);
-
 public:
 	CInput();
 
@@ -150,6 +150,7 @@ public:
 	void StartTextInput() override;
 	void StopTextInput() override;
 	void EnsureScreenKeyboardShown() override;
+	void ClearComposition() const override;
 	const char *GetComposition() const override { return m_CompositionString.c_str(); }
 	bool HasComposition() const override { return !m_CompositionString.empty(); }
 	int GetCompositionCursor() const override { return m_CompositionCursor; }

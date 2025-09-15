@@ -83,7 +83,7 @@ build_cmake_lib zlib https://github.com/madler/zlib
 build_cmake_lib png https://github.com/glennrp/libpng
 build_cmake_lib curl https://github.com/curl/curl "curl-8_8_0"
 build_cmake_lib freetype2 https://gitlab.freedesktop.org/freetype/freetype
-build_cmake_lib sdl https://github.com/libsdl-org/SDL SDL2
+build_cmake_lib sdl https://github.com/libsdl-org/SDL SDL3
 build_cmake_lib ogg https://github.com/xiph/ogg
 build_cmake_lib opus https://github.com/xiph/opus
 
@@ -148,14 +148,14 @@ copy_arches_for_lib _copy_freetype2
 
 function _copy_sdl() {
 	mkdir -p ddnet-libs/sdl/"$OS_NAME"/lib"$2"
-	cp compile_libs/sdl/build_"$OS_NAME"_"$1"/libSDL2.a ddnet-libs/sdl/"$OS_NAME"/lib"$2"/libSDL2.a
-	cp compile_libs/sdl/build_"$OS_NAME"_"$1"/libSDL2main.a ddnet-libs/sdl/"$OS_NAME"/lib"$2"/libSDL2main.a
+	cp compile_libs/sdl/build_"$OS_NAME"_"$1"/libSDL3.a ddnet-libs/sdl/"$OS_NAME"/lib"$2"/libSDL3.a
+	cp compile_libs/sdl/build_"$OS_NAME"_"$1"/libSDL3main.a ddnet-libs/sdl/"$OS_NAME"/lib"$2"/libSDL3main.a
 	mkdir -p ddnet-libs/sdl/include/"$OS_NAME"
 	cp -R compile_libs/sdl/include/* ddnet-libs/sdl/include/"$OS_NAME"
 }
 copy_arches_for_lib _copy_sdl
 
-# copy java code from SDL2
+# copy java code from SDL3
 if [[ "$OS_NAME" == "android" ]]; then
 	rm -R ddnet-libs/sdl/java
 	mkdir -p ddnet-libs/sdl/java

@@ -919,12 +919,9 @@ bool CUi::DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize
 	{
 		if(MouseButton(0))
 		{
+			// Clear IME composition/candidates on mouse press
 			if(pLineInput->IsActive() && (Input()->HasComposition() || Input()->GetCandidateCount()))
-			{
-				// Clear IME composition/candidates on mouse press
-				Input()->StopTextInput();
-				Input()->StartTextInput();
-			}
+				Input()->ClearComposition();
 		}
 		else
 		{

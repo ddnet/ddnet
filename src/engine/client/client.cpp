@@ -67,7 +67,7 @@
 #include <emscripten/emscripten.h>
 #endif
 
-#include "SDL.h"
+#include <SDL3/SDL.h>
 #ifdef main
 #undef main
 #endif
@@ -3211,7 +3211,7 @@ void CClient::Run()
 			if(State() == IClient::STATE_QUITTING)
 				break;
 			else
-				SetState(IClient::STATE_QUITTING); // SDL_QUIT
+				SetState(IClient::STATE_QUITTING); // SDL_EVENT_QUIT
 		}
 
 		char aFile[IO_MAX_PATH_LENGTH];
@@ -4909,37 +4909,30 @@ int main(int argc, const char **argv)
 	pClient->ShellRegister();
 #endif
 
-	// Do not automatically translate touch events to mouse events and vice versa.
-	SDL_SetHint("SDL_TOUCH_MOUSE_EVENTS", "0");
-	SDL_SetHint("SDL_MOUSE_TOUCH_EVENTS", "0");
+	// Set meta data
+	SDL_SetAppMetadata(GAME_NAME, GAME_RELEASE_VERSION, nullptr);
 
-	// Support longer IME composition strings (enables SDL_TEXTEDITING_EXT).
-#if SDL_VERSION_ATLEAST(2, 0, 22)
-	SDL_SetHint(SDL_HINT_IME_SUPPORT_EXTENDED_TEXT, "1");
-#endif
+	// Do not automatically translate touch events to mouse events and vice versa.
+	SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
+	SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
 
 #if defined(CONF_PLATFORM_MACOS)
 	// Hints will not be set if there is an existing override hint or environment variable that takes precedence.
 	// So this respects cli environment overrides.
-	SDL_SetHint("SDL_MAC_OPENGL_ASYNC_DISPATCH", "1");
+	SDL_SetHint(SDL_HINT_MAC_OPENGL_ASYNC_DISPATCH, "1");
 #endif
 
-#if defined(CONF_FAMILY_WINDOWS)
-	SDL_SetHint("SDL_IME_SHOW_UI", g_Config.m_InpImeNativeUi ? "1" : "0");
-#else
-	SDL_SetHint("SDL_IME_SHOW_UI", "1");
-#endif
+	SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, g_Config.m_InpImeNativeUi ? "none" : "composition,candidates");
 
-#if defined(CONF_PLATFORM_ANDROID)
 	// Trap the Android back button so it can be handled in our code reliably
 	// instead of letting the system handle it.
-	SDL_SetHint("SDL_ANDROID_TRAP_BACK_BUTTON", "1");
+	SDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, "1");
+
 	// Force landscape screen orientation.
-	SDL_SetHint("SDL_IOS_ORIENTATIONS", "LandscapeLeft LandscapeRight");
-#endif
+	SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
 
 	// init SDL
-	if(SDL_Init(0) < 0)
+	if(!SDL_Init(0))
 	{
 		char aError[256];
 		str_format(aError, sizeof(aError), "Unable to initialize SDL base: %s", SDL_GetError());
