@@ -6,6 +6,7 @@
 #include <base/vmath.h>
 
 #include <engine/client.h>
+#include <engine/console.h>
 
 #include <game/client/component.h>
 #include <generated/protocol.h>
