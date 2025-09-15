@@ -99,33 +99,33 @@ bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char 
 		ShaderCode[i] = vLines[i].c_str();
 	}
 
-	TWGLuint shader = glCreateShader(Type);
+	const TWGLuint ShaderId = glCreateShader(Type);
 
-	glShaderSource(shader, vLines.size(), ShaderCode, NULL);
-	glCompileShader(shader);
+	glShaderSource(ShaderId, vLines.size(), ShaderCode, NULL);
+	glCompileShader(ShaderId);
 
 	delete[] ShaderCode;
 
 	int CompilationStatus;
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &CompilationStatus);
+	glGetShaderiv(ShaderId, GL_COMPILE_STATUS, &CompilationStatus);
 
 	if(CompilationStatus == GL_FALSE)
 	{
 		char aBuf[3000];
 
 		TWGLint maxLength = 0;
-		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+		glGetShaderiv(ShaderId, GL_INFO_LOG_LENGTH, &maxLength);
 
-		glGetShaderInfoLog(shader, maxLength, &maxLength, aBuf);
+		glGetShaderInfoLog(ShaderId, maxLength, &maxLength, aBuf);
 
 		dbg_msg("glsl", "%s: %s", pFile, aBuf);
-		glDeleteShader(shader);
+		glDeleteShader(ShaderId);
 		return false;
 	}
 	m_Type = Type;
 	m_IsLoaded = true;
 
-	m_ShaderId = shader;
+	m_ShaderId = ShaderId;
 
 	return true;
 }
