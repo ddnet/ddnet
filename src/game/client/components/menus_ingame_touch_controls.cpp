@@ -877,7 +877,7 @@ void CMenusIngameTouchControls::RenderSelectingTab(CUIRect SelectingTab)
 void CMenusIngameTouchControls::RenderConfigSettings(CUIRect MainView)
 {
 	CUIRect EditBox, Row, Label, Button;
-	MainView.h = 2 * MAINMARGIN + 4 * ROWSIZE + 3 * ROWGAP;
+	MainView.h = 600.0f - 40.0f - MainView.y;
 	MainView.Draw(CMenus::ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 	MainView.VMargin(MAINMARGIN, &MainView);
 	MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
@@ -926,6 +926,46 @@ void CMenusIngameTouchControls::RenderConfigSettings(CUIRect MainView)
 	if(OldDirectTouchSpectate != NewDirectTouchSpectate)
 	{
 		GameClient()->m_TouchControls.SetDirectTouchSpectate(NewDirectTouchSpectate);
+	}
+
+	MainView.HSplitTop(ROWGAP, nullptr, &MainView);
+	MainView.HSplitTop(ROWSIZE, &Row, &MainView);
+	const bool OldZoomGestureGame = GameClient()->m_TouchControls.HasEnabledZoomGestureGame();
+	static CButtonContainer s_IngameZoomGestureCheckbox;
+	if(GameClient()->m_Menus.DoButton_CheckBox(&s_IngameZoomGestureCheckbox, Localize("Two-finger zoom gesture while ingame"), OldZoomGestureGame, &Row))
+	{
+		GameClient()->m_TouchControls.SetEditingChanges(true);
+		GameClient()->m_TouchControls.SetZoomGestureGame(!OldZoomGestureGame);
+	}
+
+	MainView.HSplitTop(ROWGAP, nullptr, &MainView);
+	MainView.HSplitTop(ROWSIZE, &Row, &MainView);
+	const bool OldZoomGestureSpec = GameClient()->m_TouchControls.HasEnabledZoomGestureSpec();
+	static CButtonContainer s_SpecZoomGestureCheckbox;
+	if(GameClient()->m_Menus.DoButton_CheckBox(&s_SpecZoomGestureCheckbox, Localize("Two-finger zoom & pan gesture while spectating"), OldZoomGestureSpec, &Row))
+	{
+		GameClient()->m_TouchControls.SetEditingChanges(true);
+		GameClient()->m_TouchControls.SetZoomGestureSpec(!OldZoomGestureSpec);
+	}
+
+	MainView.HSplitTop(ROWGAP, nullptr, &MainView);
+	MainView.HSplitTop(ROWSIZE, &Row, &MainView);
+	const bool OldToggleGestureGame = GameClient()->m_TouchControls.HasEnabledToggleGestureGame();
+	static CButtonContainer s_ToggleGestureCheckboxGame;
+	if(GameClient()->m_Menus.DoButton_CheckBox(&s_ToggleGestureCheckboxGame, Localize("Three fingers pressed simultaneously to hide all buttons while ingame"), OldToggleGestureGame, &Row))
+	{
+		GameClient()->m_TouchControls.SetEditingChanges(true);
+		GameClient()->m_TouchControls.SetToggleGestureGame(!OldToggleGestureGame);
+	}
+
+	MainView.HSplitTop(ROWGAP, nullptr, &MainView);
+	MainView.HSplitTop(ROWSIZE, &Row, &MainView);
+	const bool OldToggleGestureSpec = GameClient()->m_TouchControls.HasEnabledToggleGestureSpec();
+	static CButtonContainer s_ToggleGestureCheckboxSpec;
+	if(GameClient()->m_Menus.DoButton_CheckBox(&s_ToggleGestureCheckboxSpec, Localize("Three fingers pressed simultaneously to hide all buttons while spectating"), OldToggleGestureSpec, &Row))
+	{
+		GameClient()->m_TouchControls.SetEditingChanges(true);
+		GameClient()->m_TouchControls.SetToggleGestureSpec(!OldToggleGestureSpec);
 	}
 }
 
