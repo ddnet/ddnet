@@ -20,7 +20,7 @@ MACRO_CONFIG_INT(SvVoteSkipPrefix, sv_vote_skip_prefix, 1, 0, 1, CFGFLAG_SERVER 
 
 MACRO_CONFIG_INT(SvAccounts, sv_accounts, 1, 0, 1, CFGFLAG_SERVER | CFGFLAG_SAVE, "Enable optional player accounts")
 
-MACRO_CONFIG_STR(SvCurrencyName, sv_currency_name, 16, "FoxCoins", CFGFLAG_SERVER, "Whatever you want your currency name to be")
+MACRO_CONFIG_STR(SvCurrencyName, sv_currency_name, 12, "FoxCoins", CFGFLAG_SERVER, "Whatever you want your currency name to be")
 MACRO_CONFIG_INT(SvLevelUpMoney, sv_levelup_money, 500, 0, 5000, CFGFLAG_SERVER | CFGFLAG_GAME, "How much money a player should get if they level up")
 MACRO_CONFIG_INT(SvPlaytimeMoney, sv_playtime_money, 250, 0, 5000, CFGFLAG_SERVER | CFGFLAG_GAME, "How much money a player should everytime their playtime increased by 100 (divisble by 100: 100, 200..)")
 

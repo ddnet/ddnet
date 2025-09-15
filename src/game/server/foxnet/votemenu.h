@@ -1,11 +1,15 @@
 #ifndef GAME_SERVER_FOXNET_VOTEMENU_H
 #define GAME_SERVER_FOXNET_VOTEMENU_H
+#include <game/server/player.h>
+
+#include <engine/shared/protocol.h>
+
+#include <generated/protocol.h>
 
 #include "accounts.h"
+#include "shop.h"
+
 #include <array>
-#include <engine/shared/protocol.h>
-#include <generated/protocol.h>
-#include <game/server/player.h>
 
 class CGameContext;
 class IServer;
@@ -87,6 +91,7 @@ class CVoteMenu
 	void SendPageSettings(int ClientId);
 	void SendPageAccount(int ClientId);
 	void SendPageShop(int ClientId);
+	const char *FormatItemVote(CItems *pItem, const CAccountSession *pAcc);
 	void SendPageInventory(int ClientId);
 	void SendPageAdmin(int ClientId);
 

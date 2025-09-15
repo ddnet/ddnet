@@ -18,6 +18,7 @@
 #include <game/gamecore.h>
 #include <optional>
 #include <engine/console.h>
+#include "shop.h"
 
 // Font: https://fsymbols.com/generators/smallcaps/
 constexpr const char *EMPTY_DESC = " ";
@@ -112,6 +113,19 @@ bool CVoteMenu::OnCallVote(const CNetMsg_Cl_CallVote *pMsg, int ClientId)
 	}
 	return false;
 }
+
+const char *CVoteMenu::FormatItemVote(CItems *pItem, const CAccountSession *pAcc)
+{
+	static char aBuf[128];
+	char levelBuf[32] = "";
+
+	if(pItem->MinLevel() > 0)
+		str_format(levelBuf, sizeof(levelBuf), "Min lvl %d |", pItem->MinLevel());
+	str_format(aBuf, sizeof(aBuf), "%s  %s  | %d %s", levelBuf, pItem->Name(), pItem->Price(), g_Config.m_SvCurrencyName);
+
+	return aBuf;
+}
+
 bool CVoteMenu::IsCustomVoteOption(const CNetMsg_Cl_CallVote *pMsg, int ClientId)
 {
 	const int Page = m_aClientData[ClientId].m_Page;
@@ -176,11 +190,9 @@ bool CVoteMenu::IsCustomVoteOption(const CNetMsg_Cl_CallVote *pMsg, int ClientId
 				continue;
 			if(pItems->Price() == -1)
 				continue;
+			const char *pVoteName = FormatItemVote(pItems, &Acc);
 
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "%s | %d %s", pItems->Name(), pItems->Price(), g_Config.m_SvCurrencyName);
-
-			if(IsOption(pVote, aBuf))
+			if(IsOption(pVote, pVoteName))
 			{
 				GameServer()->m_Shop.BuyItem(ClientId, pItems->Name());
 				return true;
@@ -683,23 +695,21 @@ void CVoteMenu::SendPageShop(int ClientId)
 			continue;
 		if(pPl->OwnsItem(pItems->Name()))
 			continue;
-		if(pAcc->m_Level < pItems->MinLevel())
-			continue;
 
-		str_format(aBuf, sizeof(aBuf), "%s | %d %s", pItems->Name(), pItems->Price(), g_Config.m_SvCurrencyName);
+		const char *pVoteName = FormatItemVote(pItems, pAcc);
 
 		if(pItems->Type() == TYPE_RAINBOW)
-			RainbowItems.push_back(std::string(aBuf));
+			RainbowItems.push_back(std::string(pVoteName));
 		else if(pItems->Type() == TYPE_GUN)
-			GunItems.push_back(std::string(aBuf));
+			GunItems.push_back(std::string(pVoteName));
 		else if(pItems->Type() == TYPE_INDICATOR)
-			IndicatorItems.push_back(std::string(aBuf));
+			IndicatorItems.push_back(std::string(pVoteName));
 		else if(pItems->Type() == TYPE_DEATHS)
-			KillEffectItems.push_back(std::string(aBuf));
+			KillEffectItems.push_back(std::string(pVoteName));
 		else if(pItems->Type() == TYPE_TRAIL)
-			TrailItems.push_back(std::string(aBuf));
+			TrailItems.push_back(std::string(pVoteName));
 		else
-			OtherItems.push_back(std::string(aBuf));
+			OtherItems.push_back(std::string(pVoteName));
 	}
 	if(!RainbowItems.empty())
 	{

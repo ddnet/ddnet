@@ -837,6 +837,7 @@ void CPlayer::SendBroadcastHud(const char *pMessage)
 
 	GameServer()->SendBroadcast(aBuf, GetCid(), false);
 }
+
 void CPlayer::Repredict(int PredMargin)
 {
 	int PingMs = m_Latency.m_Min + PredMargin;
