@@ -107,10 +107,12 @@ void CStaffInd::Snap(int SnappingClient)
 	const int BallId = m_BallFirst ? m_aIds[BALL_FRONT] : m_aIds[BALL];
 	const vec2 nVel = normalize(pOwnerChr->GetVelocity()) * Pred * dist / 2.0f;
 
-	vec2 Pos = m_aPos[ARMOR];
-	vec2 LaserPos = m_aPos[BALL];
-	if(g_Config.m_SvExperimentalPrediction && m_Owner == SnappingClient)
+	vec2 Pos = m_aPos[ARMOR] + pOwnerChr->GetVelocity();
+	vec2 LaserPos = m_aPos[BALL] + pOwnerChr->GetVelocity();
+	if(g_Config.m_SvExperimentalPrediction && m_Owner == SnappingClient && !pOwnerChr->GetPlayer()->IsPaused())
 	{
+		vec2 Pos = m_aPos[ARMOR];
+		vec2 LaserPos = m_aPos[BALL];
 		Pos += nVel;
 		LaserPos += nVel;
 	}

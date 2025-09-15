@@ -72,9 +72,10 @@ void CDotTrail::Snap(int SnappingClient)
 	if(!pProj)
 		return;
 
-	vec2 Pos = m_Pos;
-	if(g_Config.m_SvExperimentalPrediction && m_Owner == SnappingClient)
+	vec2 Pos = m_Pos + pOwnerChr->GetVelocity();
+	if(g_Config.m_SvExperimentalPrediction && m_Owner == SnappingClient && !pOwnerChr->GetPlayer()->IsPaused())
 	{
+		Pos = m_Pos;
 		const double Pred = pOwnerChr->GetPlayer()->m_PredLatency;
 		const float dist = distance(pOwnerChr->m_Pos, pOwnerChr->m_PrevPos);
 		const vec2 nVel = normalize(pOwnerChr->GetVelocity()) * Pred * dist / 2.0f;

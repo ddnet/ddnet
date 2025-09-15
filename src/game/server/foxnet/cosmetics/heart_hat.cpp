@@ -110,10 +110,11 @@ void CHeartHat::Snap(int SnappingClient)
 		if(m_switch && i == HEART_FRONT)
 			continue;
 
-		vec2 Pos = m_aPos[i] + vec2(0, -42);
+		vec2 Pos = m_aPos[i] + pOwnerChr->GetVelocity() + vec2(0, -42);
 
-		if(g_Config.m_SvExperimentalPrediction && m_Owner == SnappingClient)
+		if(g_Config.m_SvExperimentalPrediction && m_Owner == SnappingClient && !pOwnerChr->GetPlayer()->IsPaused())
 		{
+			Pos = m_aPos[i] + vec2(0, -42);
 			const double Pred = pOwnerChr->GetPlayer()->m_PredLatency;
 			const float dist = distance(pOwnerChr->m_Pos, pOwnerChr->m_PrevPos);
 			const vec2 nVel = normalize(pOwnerChr->GetVelocity()) * Pred * dist / 2.0f;

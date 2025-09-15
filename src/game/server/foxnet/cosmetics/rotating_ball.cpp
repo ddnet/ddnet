@@ -107,10 +107,12 @@ void CRotatingBall::Snap(int SnappingClient)
 	const float dist = distance(pOwnerChr->m_Pos, pOwnerChr->m_PrevPos);
 	const vec2 nVel = normalize(pOwnerChr->GetVelocity()) * Pred * dist / 2.0f;
 
-	vec2 Pos = m_ProjPos;
-	vec2 LaserPos = m_LaserPos;
-	if(g_Config.m_SvExperimentalPrediction && m_Owner == SnappingClient)
+	vec2 Pos = m_ProjPos + pOwnerChr->GetVelocity();
+	vec2 LaserPos = m_LaserPos + pOwnerChr->GetVelocity();
+	if(g_Config.m_SvExperimentalPrediction && m_Owner == SnappingClient && !pOwnerChr->GetPlayer()->IsPaused())
 	{
+		Pos = m_ProjPos;
+		LaserPos = m_LaserPos;
 		Pos += nVel;
 		LaserPos += nVel;
 	}
