@@ -237,7 +237,7 @@ void CPortal::OnFire()
 bool CPortal::TrySetPortal()
 {
 	CCharacter *pOwnerChr = GameServer()->GetPlayerChar(m_Owner);
-	vec2 CursorPos = pOwnerChr->GetCursorPos();
+	const vec2 CursorPos = pOwnerChr->GetCursorPos();
 
 	if(Collision()->TestBox(CursorPos, CCharacterCore::PhysicalSizeVec2()))
 		return false; // teleport position is inside a block
@@ -294,8 +294,8 @@ void CPortal::RemovePortals()
 
 inline vec2 GetRandomPointInCircle(vec2 center, float radius)
 {
-	float angle = static_cast<float>(rand()) / RAND_MAX * 2.0f * pi;
-	float r = radius * sqrtf(static_cast<float>(rand()) / RAND_MAX);
+	const float angle = static_cast<float>(rand()) / RAND_MAX * 2.0f * pi;
+	const float r = radius * sqrtf(static_cast<float>(rand()) / RAND_MAX);
 	return center + vec2(cosf(angle), sinf(angle)) * r;
 }
 
@@ -306,7 +306,7 @@ void CPortal::Snap(int SnappingClient)
 
 	if(SnappingClient != SERVER_DEMO_CLIENT)
 	{
-		CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+		const CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
 		if(!pSnapPlayer)
 			return;
 	}
@@ -347,7 +347,7 @@ void CPortal::Snap(int SnappingClient)
 				if(!pProj)
 					continue;
 
-				vec2 Pos = GetRandomPointInCircle(m_aData[i % 2].m_Pos, m_aData[p].m_PortalRadius - 6.0f);
+				const vec2 Pos = GetRandomPointInCircle(m_aData[i % 2].m_Pos, m_aData[p].m_PortalRadius - 6.0f);
 				pProj->m_X = round_to_int(Pos.x * 100.0f);
 				pProj->m_Y = round_to_int(Pos.y * 100.0f);
 				pProj->m_StartTick = 0;

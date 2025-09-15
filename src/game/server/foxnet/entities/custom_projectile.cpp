@@ -246,7 +246,7 @@ bool CCustomProjectile::FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj)
 		return false;
 	}
 	// Send additional/modified info, by modifying the fields of the netobj
-	float Angle = -std::atan2(m_Direction.x, m_Direction.y);
+	const float Angle = -std::atan2(m_Direction.x, m_Direction.y);
 
 	int Data = 0;
 	Data |= (absolute(m_Owner) & 255) << 0;

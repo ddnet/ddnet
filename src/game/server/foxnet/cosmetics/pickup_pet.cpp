@@ -20,7 +20,6 @@ CPickupPet::CPickupPet(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
 {
 	m_Pos = Pos;
 	m_Owner = Owner;
-	m_Id = Server()->SnapNewId();
 	m_PetMode = 1;
 	m_CurType = POWERUP_ARMOR;
 	m_SwitchDelay = Server()->Tick() + Server()->TickSpeed();
@@ -30,7 +29,6 @@ CPickupPet::CPickupPet(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
 void CPickupPet::Reset()
 {
 	Server()->SnapFreeId(GetId());
-	Server()->SnapFreeId(m_Id);
 	GameWorld()->RemoveEntity(this);
 
 	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
@@ -69,7 +67,7 @@ void CPickupPet::Snap(int SnappingClient)
 		return;
 
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+	const CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
 
 	if(!pOwnerChar || !pSnapPlayer)
 		return;
@@ -78,17 +76,13 @@ void CPickupPet::Snap(int SnappingClient)
 		return;
 
 	CGameTeams Teams = GameServer()->m_pController->Teams();
-	int Team = pOwnerChar->Team();
+	const int Team = pOwnerChar->Team();
 
 	if(!Teams.SetMask(SnappingClient, Team))
 		return;
 
 	if(pSnapPlayer->GetCharacter() && pOwnerChar)
 		if(!pOwnerChar->CanSnapCharacter(SnappingClient))
-			return;
-
-	if(pOwnerChar->GetPlayer()->m_Vanish && SnappingClient != pOwnerChar->GetPlayer()->GetCid() && SnappingClient != -1)
-		if(!pSnapPlayer->m_Vanish && Server()->GetAuthedState(SnappingClient) < AUTHED_ADMIN)
 			return;
 
 	if(Server()->Tick() > m_SwitchDelay)
@@ -101,33 +95,9 @@ void CPickupPet::Snap(int SnappingClient)
 		m_SwitchDelay = Server()->Tick() + Server()->TickSpeed();
 	}
 
-	if(GameServer()->GetClientVersion(SnappingClient) >= VERSION_DDNET_ENTITY_NETOBJS)
-	{
-		CNetObj_DDNetPickup *pPickup = Server()->SnapNewItem<CNetObj_DDNetPickup>(GetId());
-		if(!pPickup)
-			return;
-
-		pPickup->m_X = (int)(m_Pos.x);
-		pPickup->m_Y = (int)(m_Pos.y);
-		pPickup->m_Type = m_CurType;
-		pPickup->m_Flags = PICKUPFLAG_NO_PREDICT;
-	}
-	else
-	{
-		CNetObj_Pickup *pPickup = Server()->SnapNewItem<CNetObj_Pickup>(GetId());
-		if(!pPickup)
-			return;
-
-		pPickup->m_X = (int)(m_Pos.x);
-		pPickup->m_Y = (int)(m_Pos.y);
-		pPickup->m_Type = m_CurType;
-	}
-
-	// if(g_Config.m_SvDebugPetPosition)
-	//{
-	//	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
-	//	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, false, SnappingClient), m_Id, m_aPos, m_aPos, Server()->Tick(), m_Owner, LASERTYPE_GUN);
-	// }
+	const int SnapVer = Server()->GetClientVersion(SnappingClient);
+	const bool SixUp = Server()->IsSixup(SnappingClient);
+	GameServer()->SnapPickup(CSnapContext(SnapVer, SixUp, SnappingClient), GetId(), m_Pos, m_CurType, -1, -1, PICKUPFLAG_NO_PREDICT);
 }
 
 void CPickupPet::PlayerAfkMode(CCharacter *pOwner)

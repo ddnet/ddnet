@@ -82,7 +82,7 @@ void CStaffInd::Snap(int SnappingClient)
 		return;
 
 	CCharacter *pOwnerChr = GameServer()->GetPlayerChar(m_Owner);
-	CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+	const CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
 
 	if(!pOwnerChr || !pSnapPlayer)
 		return;
@@ -91,7 +91,7 @@ void CStaffInd::Snap(int SnappingClient)
 		return;
 
 	CGameTeams Teams = GameServer()->m_pController->Teams();
-	int Team = pOwnerChr->Team();
+	const int Team = pOwnerChr->Team();
 
 	if(!Teams.SetMask(SnappingClient, Team))
 		return;
@@ -100,45 +100,20 @@ void CStaffInd::Snap(int SnappingClient)
 		if(!pOwnerChr->CanSnapCharacter(SnappingClient))
 			return;
 
-	if(pOwnerChr->GetPlayer()->m_Vanish && SnappingClient != pOwnerChr->GetPlayer()->GetCid() && SnappingClient != -1)
-		if(!pSnapPlayer->m_Vanish && Server()->GetAuthedState(SnappingClient) < AUTHED_ADMIN)
-			return;
-
+	const int SnapVer = Server()->GetClientVersion(SnappingClient);
+	const bool SixUp = Server()->IsSixup(SnappingClient);
 	const double Pred = pOwnerChr->GetPlayer()->m_PredLatency;
 	const float dist = distance(pOwnerChr->m_Pos, pOwnerChr->m_PrevPos);
+	const int BallId = m_BallFirst ? m_aIds[BALL_FRONT] : m_aIds[BALL];
+	const vec2 nVel = normalize(pOwnerChr->GetVelocity()) * Pred * dist / 2.0f;
 
-	CNetObj_DDNetPickup *pPickup = Server()->SnapNewItem<CNetObj_DDNetPickup>(m_aIds[ARMOR]);
-	if(pPickup)
+	vec2 Pos = m_aPos[ARMOR];
+	vec2 LaserPos = m_aPos[BALL];
+	if(g_Config.m_SvExperimentalPrediction && m_Owner == SnappingClient)
 	{
-		vec2 Pos = m_aPos[ARMOR];
-		if(g_Config.m_SvExperimentalPrediction && m_Owner == SnappingClient)
-		{
-			vec2 nVel = normalize(pOwnerChr->GetVelocity()) * Pred * dist / 2.0f;
-			Pos += nVel;
-		}
-
-		pPickup->m_X = round_to_int(Pos.x);
-		pPickup->m_Y = round_to_int(Pos.y);
-		pPickup->m_Type = POWERUP_ARMOR;
-		pPickup->m_Flags = PICKUPFLAG_NO_PREDICT;
+		Pos += nVel;
+		LaserPos += nVel;
 	}
-
-	// m_ID is created before m_aID is created, means that id is lower and we can simply use it to make the ball behind
-	CNetObj_DDNetLaser *pLaser = static_cast<CNetObj_DDNetLaser *>(Server()->SnapNewItem(NETOBJTYPE_DDNETLASER, m_BallFirst ? m_aIds[BALL_FRONT] : m_aIds[BALL], sizeof(CNetObj_DDNetLaser)));
-	if(pLaser)
-	{
-		vec2 Pos = m_aPos[BALL];
-		if(g_Config.m_SvExperimentalPrediction && m_Owner == SnappingClient)
-		{
-			vec2 nVel = normalize(pOwnerChr->GetVelocity()) * Pred * dist / 2.0f;
-			Pos += nVel;
-		}
-		pLaser->m_ToX = round_to_int(Pos.x);
-		pLaser->m_ToY = round_to_int(Pos.y);
-		pLaser->m_FromX = round_to_int(Pos.x);
-		pLaser->m_FromY = round_to_int(Pos.y);
-		pLaser->m_StartTick = Server()->Tick();
-		pLaser->m_Type = LASERTYPE_PLASMA;
-		pLaser->m_Owner = m_Owner;
-	}
+	GameServer()->SnapPickup(CSnapContext(SnapVer, SixUp, SnappingClient), m_aIds[ARMOR], Pos, POWERUP_ARMOR, -1, -1, PICKUPFLAG_NO_PREDICT);
+	GameServer()->SnapLaserObject(CSnapContext(SnapVer, SixUp, SnappingClient), BallId, LaserPos, LaserPos, Server()->Tick(), m_Owner, LASERTYPE_GUN, -1, -1, LASERFLAG_NO_PREDICT);
 }

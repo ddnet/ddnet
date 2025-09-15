@@ -19,11 +19,11 @@ class CLovely : public CEntity
 
 	struct SLovelyData
 	{
-		int m_ID;
+		int m_Id;
 		vec2 m_Pos;
 		float m_Lifespan;
 	};
-	SLovelyData m_aLovelyData[MAX_HEARTS];
+	SLovelyData m_aData[MAX_HEARTS];
 	void SpawnNewHeart();
 
 public:

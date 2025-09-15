@@ -120,7 +120,7 @@ void CLightSaber::Snap(int SnappingClient)
 
 	if(SnappingClient != SERVER_DEMO_CLIENT)
 	{
-		CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+		const CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
 		if(!pSnapPlayer)
 			return;
 
@@ -148,15 +148,14 @@ void CLightSaber::Snap(int SnappingClient)
 	{
 		const double Pred = pOwnerChr->GetPlayer()->m_PredLatency;
 		const float dist = distance(pOwnerChr->m_Pos, pOwnerChr->m_PrevPos);
-		vec2 nVel = normalize(pOwnerChr->GetVelocity()) * Pred * dist / 2.0f;
+		const vec2 nVel = normalize(pOwnerChr->GetVelocity()) * Pred * dist / 2.0f;
 
 		To = m_Pos + nVel;
-		vec2 WantedFrom = To + normalize(vec2(pOwnerChr->Input()->m_TargetX, pOwnerChr->Input()->m_TargetY)) * m_Length;
+		const vec2 WantedFrom = To + normalize(vec2(pOwnerChr->Input()->m_TargetX, pOwnerChr->Input()->m_TargetY)) * m_Length;
 		GameServer()->Collision()->IntersectLine(To, WantedFrom, &From, 0);
 	}
 
 	const int SnapVer = Server()->GetClientVersion(SnappingClient);
-	bool SixUp = Server()->IsSixup(SnappingClient);
-
-	GameServer()->SnapLaserObject(CSnapContext(SnapVer, SixUp, SnappingClient), GetId(), To, From, Server()->Tick() - 3, m_Owner, LASERTYPE_GUN);
+	const bool SixUp = Server()->IsSixup(SnappingClient);
+	GameServer()->SnapLaserObject(CSnapContext(SnapVer, SixUp, SnappingClient), GetId(), To, From, Server()->Tick() - 3, m_Owner, LASERTYPE_GUN, -1, -1, LASERFLAG_NO_PREDICT);
 }

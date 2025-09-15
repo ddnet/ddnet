@@ -20,7 +20,6 @@ class CPickupPet : public CEntity
 	
 	float m_aSpeed;
 	int m_Owner;
-	int m_Id;
 
 	int m_CurType;
 	int64_t m_SwitchDelay;

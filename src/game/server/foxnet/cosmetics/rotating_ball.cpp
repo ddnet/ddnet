@@ -80,7 +80,7 @@ void CRotatingBall::Snap(int SnappingClient)
 		return;
 
 	CCharacter *pOwnerChr = GameServer()->GetPlayerChar(m_Owner);
-	CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+	const CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
 
 	if(!pOwnerChr || !pSnapPlayer)
 		return;
@@ -92,7 +92,7 @@ void CRotatingBall::Snap(int SnappingClient)
 		return;
 
 	CGameTeams Teams = GameServer()->m_pController->Teams();
-	int Team = pOwnerChr->Team();
+	const int Team = pOwnerChr->Team();
 
 	if(!Teams.SetMask(SnappingClient, Team))
 		return;
@@ -101,52 +101,30 @@ void CRotatingBall::Snap(int SnappingClient)
 		if(!pOwnerChr->CanSnapCharacter(SnappingClient))
 			return;
 
-	if(pOwnerChr->GetPlayer()->m_Vanish && SnappingClient != pOwnerChr->GetPlayer()->GetCid() && SnappingClient != -1)
-		if(!pSnapPlayer->m_Vanish && Server()->GetAuthedState(SnappingClient) < AUTHED_ADMIN)
-			return;
-
-	CNetObj_DDNetLaser *pLaser = static_cast<CNetObj_DDNetLaser *>(Server()->SnapNewItem(NETOBJTYPE_DDNETLASER, GetId(), sizeof(CNetObj_DDNetLaser)));
-	if(!pLaser)
-		return;
-
+	const int SnapVer = Server()->GetClientVersion(SnappingClient);
+	const bool SixUp = Server()->IsSixup(SnappingClient);
 	const double Pred = pOwnerChr->GetPlayer()->m_PredLatency;
 	const float dist = distance(pOwnerChr->m_Pos, pOwnerChr->m_PrevPos);
+	const vec2 nVel = normalize(pOwnerChr->GetVelocity()) * Pred * dist / 2.0f;
 
+	vec2 Pos = m_ProjPos;
+	vec2 LaserPos = m_LaserPos;
+	if(g_Config.m_SvExperimentalPrediction && m_Owner == SnappingClient)
 	{
-		vec2 Pos = m_LaserPos;
-		if(g_Config.m_SvExperimentalPrediction && m_Owner == SnappingClient)
-		{
-			vec2 nVel = normalize(pOwnerChr->GetVelocity()) * Pred * dist / 2.0f;
-			Pos += nVel;
-		}
-
-		pLaser->m_ToX = round_to_int(Pos.x);
-		pLaser->m_ToY = round_to_int(Pos.y);
-		pLaser->m_FromX = round_to_int(Pos.x);
-		pLaser->m_FromY = round_to_int(Pos.y);
-		pLaser->m_StartTick = Server()->Tick();
-		pLaser->m_Flags = LASERFLAG_NO_PREDICT;
-		pLaser->m_Owner = m_Owner;
+		Pos += nVel;
+		LaserPos += nVel;
 	}
+	GameServer()->SnapLaserObject(CSnapContext(SnapVer, SixUp, SnappingClient), GetId(), LaserPos, LaserPos, Server()->Tick(), m_Owner, LASERTYPE_GUN, -1, -1, LASERFLAG_NO_PREDICT);
 
 	CNetObj_DDNetProjectile *pProj = Server()->SnapNewItem<CNetObj_DDNetProjectile>(m_Id1);
 	if(!pProj)
 		return;
 
-	{
-		vec2 Pos = m_ProjPos;
-		if(g_Config.m_SvExperimentalPrediction && m_Owner == SnappingClient)
-		{
-			vec2 nVel = normalize(pOwnerChr->GetVelocity()) * Pred * dist / 2.0f;
-			Pos += nVel;
-		}
-
-		pProj->m_X = round_to_int(Pos.x * 100.0f);
-		pProj->m_Y = round_to_int(Pos.y * 100.0f);
-		pProj->m_Type = WEAPON_HAMMER;
-		pProj->m_Owner = m_Owner;
-		pProj->m_StartTick = 0;
-		pProj->m_VelX = 0;
-		pProj->m_VelY = 0;
-	}
+	pProj->m_X = round_to_int(Pos.x * 100.0f);
+	pProj->m_Y = round_to_int(Pos.y * 100.0f);
+	pProj->m_Type = WEAPON_HAMMER;
+	pProj->m_Owner = m_Owner;
+	pProj->m_StartTick = 0;
+	pProj->m_VelX = 0;
+	pProj->m_VelY = 0;
 }

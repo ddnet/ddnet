@@ -1,13 +1,19 @@
-#include "flyingpoint.h"
 #include "game/server/entities/character.h"
-#include <algorithm>
-#include <base/vmath.h>
 #include <game/server/entity.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/gameworld.h>
 #include <game/server/player.h>
+#include <game/server/teams.h>
+
 #include <generated/protocol.h>
+
+#include <base/math.h>
+#include <base/vmath.h>
+
+#include <algorithm>
+
+#include "flyingpoint.h"
 
 CFlyingPoint::CFlyingPoint(CGameWorld *pGameWorld, vec2 Pos, int To, int Owner, vec2 InitialVel, vec2 ToPos) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_FLYINGPOINT, Pos)
@@ -52,14 +58,14 @@ void CFlyingPoint::Tick()
 		ToPos = pChr->GetPos();
 	}
 
-	float Dist = distance(m_Pos, ToPos);
+	const float Dist = distance(m_Pos, ToPos);
 	if(Dist < 24.0f)
 	{
 		Reset();
 		return;
 	}
 
-	vec2 Dir = normalize(ToPos - m_Pos);
+	const vec2 Dir = normalize(ToPos - m_Pos);
 	m_Pos += Dir * std::clamp(Dist, 1.0f, 24.0f) * (1.0f - m_InitialAmount) + m_InitialVel * m_InitialAmount;
 
 	m_InitialAmount *= 0.98f;
@@ -72,7 +78,7 @@ void CFlyingPoint::Snap(int SnappingClient)
 		return;
 
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+	const CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
 
 	if(!pOwnerChar || !pSnapPlayer)
 		return;
@@ -81,7 +87,7 @@ void CFlyingPoint::Snap(int SnappingClient)
 	//	return;
 
 	CGameTeams Teams = GameServer()->m_pController->Teams();
-	int Team = pOwnerChar->Team();
+	const int Team = pOwnerChar->Team();
 
 	if(!Teams.SetMask(SnappingClient, Team))
 		return;
@@ -91,10 +97,6 @@ void CFlyingPoint::Snap(int SnappingClient)
 
 	if(pSnapPlayer->GetCharacter() && pOwnerChar)
 		if(!pOwnerChar->CanSnapCharacter(SnappingClient))
-			return;
-
-	if(pOwnerChar->GetPlayer()->m_Vanish && SnappingClient != pOwnerChar->GetPlayer()->GetCid() && SnappingClient != -1)
-		if(!pSnapPlayer->m_Vanish && Server()->GetAuthedState(SnappingClient) < AUTHED_ADMIN)
 			return;
 
 	CNetObj_DDNetProjectile *pProj = Server()->SnapNewItem<CNetObj_DDNetProjectile>(GetId());

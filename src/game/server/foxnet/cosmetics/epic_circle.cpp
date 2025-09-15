@@ -68,7 +68,7 @@ void CEpicCircle::Snap(int SnappingClient)
 		return;
 
 	CCharacter *pOwnerChr = GameServer()->GetPlayerChar(m_Owner);
-	CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+	const CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
 
 	if(!pOwnerChr || !pSnapPlayer)
 		return;
@@ -80,7 +80,7 @@ void CEpicCircle::Snap(int SnappingClient)
 		return;
 
 	CGameTeams Teams = GameServer()->m_pController->Teams();
-	int Team = pOwnerChr->Team();
+	const int Team = pOwnerChr->Team();
 
 	if(!Teams.SetMask(SnappingClient, Team))
 		return;

@@ -114,7 +114,7 @@ void CPowerUp::Snap(int SnappingClient)
 
 	if(SnappingClient != SERVER_DEMO_CLIENT)
 	{
-		CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+		const CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
 		if(!pSnapPlayer)
 			return;
 
@@ -130,8 +130,8 @@ void CPowerUp::Snap(int SnappingClient)
 	if(!Teams.SetMaskWithFlags(SnappingClient, TEAM_FLOCK, CGameTeams::IGNORE_SOLO))
 		return;
 
-	int SnappingClientVersion = Server()->GetClientVersion(SnappingClient);
-	bool SixUp = Server()->IsSixup(SnappingClient);
+	const int SnappingClientVersion = Server()->GetClientVersion(SnappingClient);
+	const bool SixUp = Server()->IsSixup(SnappingClient);
 
 	if(Server()->Tick() % Server()->TickSpeed() == 0)
 		m_Switch = !m_Switch;
@@ -140,8 +140,8 @@ void CPowerUp::Snap(int SnappingClient)
 
 	for(int i = 0; i < NUM_LASERS; i++)
 	{
-		vec2 To = m_Snap.m_aTo[i];
-		vec2 From = m_Snap.m_aFrom[i];
+		const vec2 To = m_Snap.m_aTo[i];
+		const vec2 From = m_Snap.m_aFrom[i];
 		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, SixUp, SnappingClient), m_Snap.m_aLaserIds[i], To, From, Server()->Tick(), -1, 0);
 	}
 }

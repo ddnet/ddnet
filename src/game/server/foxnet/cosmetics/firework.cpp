@@ -1,14 +1,20 @@
 // Made by qxdFox
-#include "firework.h"
 #include "game/server/entities/character.h"
-#include <base/vmath.h>
 #include <game/server/entity.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/gameworld.h>
 #include <game/server/player.h>
+#include <game/server/teams.h>
+
 #include <generated/protocol.h>
+
+#include <base/math.h>
+#include <base/vmath.h>
+
 #include <random>
+
+#include "firework.h"
 
 constexpr int LaunchSpeed = -25;
 constexpr float LaunchTime = 1.5f;
@@ -87,7 +93,7 @@ void CFirework::Tick()
 void CFirework::Snap(int SnappingClient)
 {
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+	const CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
 
 	if(!pOwnerChar || !pSnapPlayer)
 		return;
@@ -96,17 +102,13 @@ void CFirework::Snap(int SnappingClient)
 		return;
 
 	CGameTeams Teams = GameServer()->m_pController->Teams();
-	int Team = pOwnerChar->Team();
+	const int Team = pOwnerChar->Team();
 
 	if(!Teams.SetMask(SnappingClient, Team))
 		return;
 
 	if(pSnapPlayer->GetCharacter() && pOwnerChar)
 		if(!pOwnerChar->CanSnapCharacter(SnappingClient))
-			return;
-
-	if(pOwnerChar->GetPlayer()->m_Vanish && SnappingClient != pOwnerChar->GetPlayer()->GetCid() && SnappingClient != -1)
-		if(!pSnapPlayer->m_Vanish && Server()->GetAuthedState(SnappingClient) < AUTHED_ADMIN)
 			return;
 
 	if(m_State == STATE_START)

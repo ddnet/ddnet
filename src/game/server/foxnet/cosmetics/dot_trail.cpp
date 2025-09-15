@@ -47,7 +47,7 @@ void CDotTrail::Tick()
 void CDotTrail::Snap(int SnappingClient)
 {
 	CCharacter *pOwnerChr = GameServer()->GetPlayerChar(m_Owner);
-	CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+	const CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
 
 	if(!pOwnerChr || !pSnapPlayer)
 		return;
@@ -59,7 +59,7 @@ void CDotTrail::Snap(int SnappingClient)
 		return;
 
 	CGameTeams Teams = GameServer()->m_pController->Teams();
-	int Team = pOwnerChr->Team();
+	const int Team = pOwnerChr->Team();
 
 	if(!Teams.SetMask(SnappingClient, Team))
 		return;
@@ -77,7 +77,7 @@ void CDotTrail::Snap(int SnappingClient)
 	{
 		const double Pred = pOwnerChr->GetPlayer()->m_PredLatency;
 		const float dist = distance(pOwnerChr->m_Pos, pOwnerChr->m_PrevPos);
-		vec2 nVel = normalize(pOwnerChr->GetVelocity()) * Pred * dist / 2.0f;
+		const vec2 nVel = normalize(pOwnerChr->GetVelocity()) * Pred * dist / 2.0f;
 		Pos += nVel;
 	}
 

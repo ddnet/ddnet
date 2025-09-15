@@ -427,7 +427,7 @@ void CPickupDrop::Snap(int SnappingClient)
 
 	if(SnappingClient != SERVER_DEMO_CLIENT)
 	{
-		CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+		const CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
 		if(!pSnapPlayer)
 			return;
 	}
@@ -441,8 +441,8 @@ void CPickupDrop::Snap(int SnappingClient)
 		return;
 
 	const int SnapVer = Server()->GetClientVersion(SnappingClient);
-	bool SixUp = Server()->IsSixup(SnappingClient);
-	int SubType = GameServer()->GetWeaponType(m_Type);
+	const bool SixUp = Server()->IsSixup(SnappingClient);
+	const int SubType = GameServer()->GetWeaponType(m_Type);
 
 	GameServer()->SnapPickup(CSnapContext(SnapVer, SixUp, SnappingClient), GetId(), m_Pos, POWERUP_WEAPON, SubType, -1, PICKUPFLAG_NO_PREDICT);
 
@@ -458,9 +458,8 @@ void CPickupDrop::Snap(int SnappingClient)
 	else if(m_Type == WEAPON_PORTALGUN)
 	{
 		GameServer()->SnapLaserObject(CSnapContext(SnapVer, SixUp, SnappingClient), m_aIds[0], m_Pos + OffSet, m_Pos + OffSet, Server()->Tick(), -1, LASERTYPE_GUN);
-		vec2 Spin = vec2(cos(Server()->Tick() / 5.0f), sin(Server()->Tick() / 5.0f)) * 17.0f;
-		Spin += OffSet;
-
+		const vec2 Spin = vec2(cos(Server()->Tick() / 5.0f), sin(Server()->Tick() / 5.0f)) * 17.0f + OffSet;
+	
 		CNetObj_Projectile *pProj = Server()->SnapNewItem<CNetObj_Projectile>(m_aIds[1]);
 		if(!pProj)
 			return;
@@ -476,11 +475,6 @@ void CPickupDrop::Snap(int SnappingClient)
 
 void CPickupDrop::TakeDamage(vec2 Force)
 {
-	//if(Dmg)
-	//{
-	//	SetEmote(EMOTE_PAIN, Server()->Tick() + 500 * Server()->TickSpeed() / 1000);
-	//}
-
 	vec2 Temp = m_Vel + Force;
 	m_Vel = ClampVel(m_MoveRestrictions, Temp);
 }

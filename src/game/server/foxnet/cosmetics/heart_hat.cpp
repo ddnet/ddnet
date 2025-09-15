@@ -83,7 +83,7 @@ void CHeartHat::Snap(int SnappingClient)
 		return;
 
 	CCharacter *pOwnerChr = GameServer()->GetPlayerChar(m_Owner);
-	CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+	const CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
 
 	if(!pOwnerChr || !pSnapPlayer)
 		return;
@@ -95,7 +95,7 @@ void CHeartHat::Snap(int SnappingClient)
 		return;
 
 	CGameTeams Teams = GameServer()->m_pController->Teams();
-	int Team = pOwnerChr->Team();
+	const int Team = pOwnerChr->Team();
 
 	if(!Teams.SetMask(SnappingClient, Team))
 		return;
@@ -106,7 +106,7 @@ void CHeartHat::Snap(int SnappingClient)
 
 	for(int i = 0; i < NUM_HEARTS; i++)
 	{
-		int Id = m_Ids[i];
+		const int Id = m_Ids[i];
 		if(m_switch && i == HEART_FRONT)
 			continue;
 
@@ -116,30 +116,12 @@ void CHeartHat::Snap(int SnappingClient)
 		{
 			const double Pred = pOwnerChr->GetPlayer()->m_PredLatency;
 			const float dist = distance(pOwnerChr->m_Pos, pOwnerChr->m_PrevPos);
-			vec2 nVel = normalize(pOwnerChr->GetVelocity()) * Pred * dist / 2.0f;
+			const vec2 nVel = normalize(pOwnerChr->GetVelocity()) * Pred * dist / 2.0f;
 			Pos += nVel;
 		}
 
-		if(GameServer()->GetClientVersion(SnappingClient) >= VERSION_DDNET_ENTITY_NETOBJS)
-		{
-			CNetObj_DDNetPickup *pPickup = Server()->SnapNewItem<CNetObj_DDNetPickup>(Id);
-			if(!pPickup)
-				return;
-
-			pPickup->m_X = (int)(Pos.x);
-			pPickup->m_Y = (int)(Pos.y);
-			pPickup->m_Type = POWERUP_HEALTH;
-			pPickup->m_Flags = PICKUPFLAG_NO_PREDICT;
-		}
-		else
-		{
-			CNetObj_Pickup *pPickup = Server()->SnapNewItem<CNetObj_Pickup>(Id);
-			if(!pPickup)
-				return;
-
-			pPickup->m_X = (int)(Pos.x);
-			pPickup->m_Y = (int)(Pos.y);
-			pPickup->m_Type = POWERUP_HEALTH;
-		}
+		const int SnapVer = Server()->GetClientVersion(SnappingClient);
+		const bool SixUp = Server()->IsSixup(SnappingClient);
+		GameServer()->SnapPickup(CSnapContext(SnapVer, SixUp, SnappingClient), Id, Pos, POWERUP_HEALTH, -1, -1, PICKUPFLAG_NO_PREDICT);
 	}
 }

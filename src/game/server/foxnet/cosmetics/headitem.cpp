@@ -7,7 +7,6 @@
 #include <game/server/player.h>
 #include <game/server/teams.h>
 
-#include <engine/shared/protocol.h>
 #include <engine/server.h>
 #include <engine/shared/config.h>
 
@@ -66,12 +65,12 @@ void CHeadItem::Snap(int SnappingClient)
 
 	if(SnappingClient != SERVER_DEMO_CLIENT)
 	{
-		CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+		const CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
 		if(!pSnapPlayer)
 			return;
 
 		CGameTeams Teams = GameServer()->m_pController->Teams();
-		int Team = pOwnerChr->Team();
+		const int Team = pOwnerChr->Team();
 
 		if(!Teams.SetMaskWithFlags(SnappingClient, Team))
 			return;
@@ -86,7 +85,7 @@ void CHeadItem::Snap(int SnappingClient)
 	}
 
 	int Type = m_Type;
-	int SubType = Type - 7;
+	const int SubType = Type - 7;
 	if(m_Type == 8)
 		Type = POWERUP_WEAPON;
 	else if(m_Type == 9)
@@ -101,40 +100,11 @@ void CHeadItem::Snap(int SnappingClient)
 	{
 		const double Pred = pOwnerChr->GetPlayer()->m_PredLatency;
 		const float dist = distance(pOwnerChr->m_Pos, pOwnerChr->m_PrevPos);
-		vec2 nVel = normalize(pOwnerChr->GetVelocity()) * Pred * dist / 2.0f;
+		const vec2 nVel = normalize(pOwnerChr->GetVelocity()) * Pred * dist / 2.0f;
 		Pos += nVel;
 	}
 
-	if(GameServer()->GetClientVersion(SnappingClient) >= VERSION_DDNET_ENTITY_NETOBJS)
-	{
-		CNetObj_DDNetPickup *pPickup = Server()->SnapNewItem<CNetObj_DDNetPickup>(GetId());
-		if(!pPickup)
-			return;
-
-		pPickup->m_X = (int)(Pos.x);
-		pPickup->m_Y = (int)(Pos.y);
-
-		pPickup->m_Type = Type;
-		pPickup->m_Subtype = SubType;
-		pPickup->m_Flags = PICKUPFLAG_NO_PREDICT;
-	}
-	else
-	{
-		CNetObj_Pickup *pPickup = Server()->SnapNewItem<CNetObj_Pickup>(GetId());
-		if(!pPickup)
-			return;
-
-		pPickup->m_X = (int)(Pos.x);
-		pPickup->m_Y = (int)(Pos.y);
-
-		pPickup->m_Type = Type;
-		if(GameServer()->GetClientVersion(SnappingClient) < VERSION_DDNET_WEAPON_SHIELDS)
-		{
-			if(Type >= POWERUP_ARMOR_SHOTGUN && Type <= POWERUP_ARMOR_LASER)
-			{
-				pPickup->m_Type = POWERUP_ARMOR;
-			}
-		}
-		pPickup->m_Subtype = SubType;
-	}
+	const int SnapVer = Server()->GetClientVersion(SnappingClient);
+	const bool SixUp = Server()->IsSixup(SnappingClient);
+	GameServer()->SnapPickup(CSnapContext(SnapVer, SixUp, SnappingClient), GetId(), Pos, Type, SubType, -1, PICKUPFLAG_NO_PREDICT);
 }
