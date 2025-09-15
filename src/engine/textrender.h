@@ -85,6 +85,7 @@ namespace FontIcons {
 [[maybe_unused]] static const char *FONT_ICON_TRIANGLE_EXCLAMATION = "\xEF\x81\xB1";
 
 [[maybe_unused]] static const char *FONT_ICON_HOUSE = "\xEF\x80\x95";
+[[maybe_unused]] static const char *FONT_ICON_BOOKMARK = "\xEF\x80\xAE";
 [[maybe_unused]] static const char *FONT_ICON_NEWSPAPER = "\xEF\x87\xAA";
 [[maybe_unused]] static const char *FONT_ICON_POWER_OFF = "\xEF\x80\x91";
 [[maybe_unused]] static const char *FONT_ICON_GEAR = "\xEF\x80\x93";

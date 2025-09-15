@@ -74,7 +74,7 @@ private:
 	ColorHSLA DoButton_ColorPicker(const CUIRect *pRect, unsigned int *pHslaColor, bool Alpha);
 
 	void DoLaserPreview(const CUIRect *pRect, ColorHSLA OutlineColor, ColorHSLA InnerColor, int LaserType);
-	int DoButton_GridHeader(const void *pId, const char *pText, int Checked, const CUIRect *pRect);
+	int DoButton_GridHeader(const void *pId, const char *pText, int Checked, const CUIRect *pRect, int Align = TEXTALIGN_ML);
 	int DoButton_Favorite(const void *pButtonId, const void *pParentId, bool Checked, const CUIRect *pRect);
 
 	int DoKeyReader(const void *pId, const CUIRect *pRect, int Key, int ModifierCombination, int *pNewModifierCombination);
@@ -270,12 +270,14 @@ protected:
 	enum
 	{
 		SORT_DEMONAME = 0,
+		SORT_MARKERS,
 		SORT_LENGTH,
 		SORT_DATE,
 	};
 
-	struct CDemoItem
+	class CDemoItem
 	{
+	public:
 		char m_aFilename[IO_MAX_PATH_LENGTH];
 		char m_aName[IO_MAX_PATH_LENGTH];
 		bool m_IsDir;
@@ -329,6 +331,8 @@ protected:
 			if(!m_InfosLoaded)
 				return !Other.m_InfosLoaded;
 
+			if(g_Config.m_BrDemoSort == SORT_MARKERS)
+				return Left.NumMarkers() < Right.NumMarkers();
 			if(g_Config.m_BrDemoSort == SORT_LENGTH)
 				return Left.Length() < Right.Length();
 
