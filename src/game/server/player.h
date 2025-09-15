@@ -402,7 +402,7 @@ public:
 	void SendBroadcastHud(const char *pMessage);
 
 	double m_PredLatency = 0.0;
-	void Repredict(int PredMargin = 0);
+	void Repredict(int PredMargin = 8);
 
 private:
 	void FoxNetReset();

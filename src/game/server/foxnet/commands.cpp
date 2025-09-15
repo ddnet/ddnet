@@ -1486,7 +1486,7 @@ void CGameContext::ConRepredict(IConsole::IResult *pResult, void *pUserData)
 	if(!pPlayer)
 		return;
 
-	int PredMargin = pResult->NumArguments() ? pResult->GetInteger(0) : 0;
+	int PredMargin = pResult->NumArguments() ? pResult->GetInteger(0) : 8;
 
 	pPlayer->Repredict(PredMargin);
 }
