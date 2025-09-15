@@ -161,6 +161,7 @@ void CMenusIngameTouchControls::RenderTouchButtonEditor(CUIRect MainView)
 			m_pNewSelectedButton = GameClient()->m_TouchControls.SelectedButton();
 			SaveCachedSettingsToTarget(m_pNewSelectedButton);
 			UpdateSampleButton();
+			GameClient()->m_TouchControls.SetEditingChanges(true);
 		}
 	}
 
@@ -622,6 +623,7 @@ void CMenusIngameTouchControls::RenderTouchButtonBrowser(CUIRect MainView)
 			SaveCachedSettingsToTarget(GameClient()->m_TouchControls.SelectedButton());
 			UpdateSampleButton();
 			m_NeedUpdatePreview = true;
+			GameClient()->m_TouchControls.SetEditingChanges(true);
 		}
 	}
 	EditBox.VSplitLeft(SUBMARGIN, nullptr, &MiddleButton);
@@ -1355,7 +1357,8 @@ void CMenusIngameTouchControls::ResolveIssues()
 			case(int)CTouchControls::EIssueType::CACHE_SETTINGS: CacheAllSettingsFromTarget(aIssues[Current].m_pTargetButton); break;
 			case(int)CTouchControls::EIssueType::SAVE_SETTINGS:
 			{
-				SaveCachedSettingsToTarget(aIssues[Current].m_pTargetButton);
+				if(CheckCachedSettings())
+					SaveCachedSettingsToTarget(aIssues[Current].m_pTargetButton);
 				break;
 			}
 			case(int)CTouchControls::EIssueType::CACHE_POSITION: SetPosInputs(aIssues[Current].m_pTargetButton->m_UnitRect); break;
@@ -1400,7 +1403,7 @@ std::string CMenusIngameTouchControls::DetermineTouchButtonCommandLabel(CTouchCo
 		{
 			const auto *pExtraMenuBehavior = static_cast<CTouchControls::CExtraMenuTouchButtonBehavior *>(pTargetBehavior);
 			Command.append(" ");
-			Command.append(std::to_string(pExtraMenuBehavior->GetNumber()));
+			Command.append(std::to_string(pExtraMenuBehavior->GetNumber() + 1));
 		}
 		return Command;
 	}
