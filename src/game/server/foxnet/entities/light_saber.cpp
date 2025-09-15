@@ -96,6 +96,9 @@ void CLightSaber::Tick()
 	vec2 WantedFrom = m_Pos + normalize(vec2(pChr->Input()->m_TargetX, pChr->Input()->m_TargetY)) * m_Length;
 	GameServer()->Collision()->IntersectLine(m_Pos, WantedFrom, &m_From, 0);
 
+	if(pChr->Core()->m_Solo)
+		return;
+
 	std::vector<CCharacter *> HitChars = GameWorld()->IntersectedCharacters(m_From, m_To, 6.0f, GameServer()->GetPlayerChar(m_Owner));
 	if(HitChars.empty())
 		return;
@@ -103,7 +106,9 @@ void CLightSaber::Tick()
 	for(CCharacter *pHit : HitChars)
 	{
 		if(pChr->Team() != TEAM_SUPER && pChr->Team() != pHit->Team())
-			return;
+			continue;
+		if(pChr->Core()->m_Solo)
+			continue;
 
 		pHit->SetEmote(EMOTE_PAIN, Server()->Tick() + 2);
 	}
