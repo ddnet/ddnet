@@ -449,6 +449,19 @@ void CCharacter::HandleWeaponSwitch()
 	if(WantedWeapon >= 0 && WantedWeapon < NUM_EXTRA_WEAPONS && WantedWeapon != m_Core.m_ActiveWeapon && m_Core.m_aWeapons[WantedWeapon].m_Got)
 		m_QueuedWeapon = WantedWeapon;
 
+	if(!m_Core.m_aWeapons[WantedWeapon].m_Got)
+	{
+		// Find another weapon with same weapon type
+		for(int i = 0; i < NUM_EXTRA_WEAPONS; i++)
+		{
+			const int WantedWeaponType = GameServer()->GetWeaponType(WantedWeapon);
+			if(m_Core.m_aWeapons[i].m_Got && GameServer()->GetWeaponType(i) == WantedWeaponType)
+			{
+				m_QueuedWeapon = i;
+				break;
+			}
+		}
+	}
 	DoWeaponSwitch();
 }
 
@@ -1461,18 +1474,18 @@ void CCharacter::Snap(int SnappingClient)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_TELEGUN_GRENADE;
 	if(m_Core.m_HasTelegunLaser)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_TELEGUN_LASER;
-	if(m_Core.m_aWeapons[WEAPON_HAMMER].m_Got)
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_HAMMER;
-	if(m_Core.m_aWeapons[WEAPON_GUN].m_Got)
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_GUN;
-	if(m_Core.m_aWeapons[WEAPON_SHOTGUN].m_Got)
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_SHOTGUN;
-	if(m_Core.m_aWeapons[WEAPON_GRENADE].m_Got)
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_GRENADE;
-	if(m_Core.m_aWeapons[WEAPON_LASER].m_Got)
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_LASER;
-	if(m_Core.m_ActiveWeapon == WEAPON_NINJA)
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_NINJA;
+	//if(m_Core.m_aWeapons[WEAPON_HAMMER].m_Got)
+	//	pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_HAMMER;
+	//if(m_Core.m_aWeapons[WEAPON_GUN].m_Got)
+	//	pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_GUN;
+	//if(m_Core.m_aWeapons[WEAPON_SHOTGUN].m_Got)
+	//	pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_SHOTGUN;
+	//if(m_Core.m_aWeapons[WEAPON_GRENADE].m_Got)
+	//	pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_GRENADE;
+	//if(m_Core.m_aWeapons[WEAPON_LASER].m_Got)
+	//	pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_LASER;
+	//if(m_Core.m_ActiveWeapon == WEAPON_NINJA)
+	//	pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_NINJA;
 	if(m_Core.m_LiveFrozen)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_MOVEMENTS_DISABLED;
 
@@ -1540,6 +1553,23 @@ void CCharacter::Snap(int SnappingClient)
 	}
 
 	CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
+
+	const auto WeaponFlag = [](int Weapon)
+	{
+		switch(Weapon)
+		{
+		case WEAPON_HAMMER: return CHARACTERFLAG_WEAPON_HAMMER;
+		case WEAPON_GUN: return CHARACTERFLAG_WEAPON_GUN;
+		case WEAPON_SHOTGUN: return CHARACTERFLAG_WEAPON_SHOTGUN;
+		case WEAPON_GRENADE: return CHARACTERFLAG_WEAPON_GRENADE;
+		case WEAPON_LASER: return CHARACTERFLAG_WEAPON_LASER;
+		case WEAPON_NINJA: return CHARACTERFLAG_WEAPON_NINJA;
+		}
+	};
+
+	for(int Weapon = WEAPON_HAMMER; Weapon < NUM_EXTRA_WEAPONS; Weapon++)
+		if(GetWeaponGot(Weapon))
+			pDDNetCharacter->m_Flags |= WeaponFlag(GameServer()->GetWeaponType(Weapon));
 
 	if(pSnapChar)
 	{
