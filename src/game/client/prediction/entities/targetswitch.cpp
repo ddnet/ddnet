@@ -43,13 +43,14 @@ void CTargetSwitch::Tick()
 	Move();
 }
 
-void CTargetSwitch::GetHit(int TeamHitFrom, bool Weakly)
+void CTargetSwitch::GetHit(int ClientId, bool Weakly)
 {
 	if(Weakly)
 	{
 		return;
 	}
 
+	int TeamHitFrom = GameWorld()->GetCharacterById(ClientId)->Team();
 	const int EndTick = m_Delay ? GameWorld()->GameTick() + 1 + m_Delay * GameWorld()->GameTickSpeed() : 0;
 	Switchers()[m_Number].m_aLastUpdateTick[TeamHitFrom] = GameWorld()->GameTick();
 	if(m_Type == TARGETSWITCHTYPE_CLOSE)
