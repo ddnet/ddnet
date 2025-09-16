@@ -170,12 +170,12 @@ void CMenusIngameTouchControls::RenderTouchButtonEditor(CUIRect MainView)
 		}
 		else
 		{
-			CTouchControls::CUnitRect FreeRect = GameClient()->m_TouchControls.UpdatePosition(GameClient()->m_TouchControls.ShownRect().value(), true);
+			CTouchControls::CUnitRect FreeRect = GameClient()->m_TouchControls.UpdatePosition(GameClient()->m_TouchControls.ShownRect().value(), m_CachedShape, true);
 			if(FreeRect.m_X == -1)
 			{
 				FreeRect.m_W = CTouchControls::BUTTON_SIZE_MINIMUM;
 				FreeRect.m_H = CTouchControls::BUTTON_SIZE_MINIMUM;
-				FreeRect = GameClient()->m_TouchControls.UpdatePosition(FreeRect, true);
+				FreeRect = GameClient()->m_TouchControls.UpdatePosition(FreeRect, m_CachedShape, true);
 				if(FreeRect.m_X == -1)
 				{
 					GameClient()->m_Menus.PopupMessage(Localize("No space for button"), Localize("There is not enough space available to place another button."), Localize("Ok"));
@@ -1154,7 +1154,7 @@ bool CMenusIngameTouchControls::CheckCachedSettings() const
 	{
 		vpErrors.emplace_back(Localize("Button position is outside of the screen."));
 	}
-	if(GameClient()->m_TouchControls.IsRectOverlapping({X, Y, W, H}))
+	if(GameClient()->m_TouchControls.IsRectOverlapping({X, Y, W, H}, m_CachedShape))
 	{
 		vpErrors.emplace_back(Localize("The selected button is overlapping with other buttons."));
 	}
@@ -1343,7 +1343,7 @@ void CMenusIngameTouchControls::ResetButtonPointers()
 // New button doesn't create a real button, instead it reset the Samplebutton to cache every setting. When saving a the Samplebutton then a real button will be created.
 void CMenusIngameTouchControls::NewVirtualButton()
 {
-	CTouchControls::CUnitRect FreeRect = GameClient()->m_TouchControls.UpdatePosition({0, 0, CTouchControls::BUTTON_SIZE_MINIMUM, CTouchControls::BUTTON_SIZE_MINIMUM}, true);
+	CTouchControls::CUnitRect FreeRect = GameClient()->m_TouchControls.UpdatePosition({0, 0, CTouchControls::BUTTON_SIZE_MINIMUM, CTouchControls::BUTTON_SIZE_MINIMUM}, CTouchControls::EButtonShape::RECT, true);
 	ResetButtonPointers();
 	ResetCachedSettings();
 	SetPosInputs(FreeRect);
