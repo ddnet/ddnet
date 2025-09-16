@@ -3050,11 +3050,19 @@ void CCharacter::DoTelekinesis()
 		float zoom = std::max(1.0f, GetPlayer()->m_CameraInfo.GetZoom());
 		CCharacter *pClosest = GameServer()->m_World.ClosestCharacter(GetCursorPos(), CCharacterCore::PhysicalSize() * zoom, this);
 		if(!pClosest)
-			return;
+			return; // no one close
 		if(!pClosest->IsAlive())
-			return;
+			return; // dead
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			CCharacter *pChr = GameServer()->GetPlayerChar(i);
+			if(pChr && pChr->m_TelekinesisId == pClosest->GetPlayer()->GetCid())
+				return; // already telekinesis
+		}
+		if(pClosest->m_TelekinesisId == GetPlayer()->GetCid())
+			return; // dont telekinesis back
 		if(pClosest->GetPlayer()->m_TelekinesisImmunity)
-			return;
+			return; // immunity
 		m_TelekinesisId = pClosest->GetPlayer()->GetCid();
 	}
 	else
