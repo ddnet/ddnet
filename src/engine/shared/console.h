@@ -156,7 +156,7 @@ class CConsole : public IConsole
 
 public:
 	CConsole(int FlagMask);
-	~CConsole();
+	~CConsole() override;
 
 	void Init() override;
 	const CCommandInfo *FirstCommandInfo(int AccessLevel, int FlagMask) const override;

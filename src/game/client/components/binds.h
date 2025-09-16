@@ -41,7 +41,7 @@ class CBinds : public CComponent
 
 public:
 	CBinds();
-	~CBinds();
+	~CBinds() override;
 	int Sizeof() const override { return sizeof(*this); }
 
 	class CBindsSpecial : public CComponent

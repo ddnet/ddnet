@@ -23,7 +23,6 @@ public:
 
 	// Commands
 	virtual void ConsoleCommand(const char *pCommand) = 0;
-	virtual ~IAntibot() = default;
 };
 
 class IEngineAntibot : public IAntibot
@@ -39,8 +38,6 @@ public:
 	virtual bool OnEngineClientMessage(int ClientId, const void *pData, int Size, int Flags) = 0;
 	virtual bool OnEngineServerMessage(int ClientId, const void *pData, int Size, int Flags) = 0;
 	virtual bool OnEngineSimulateClientMessage(int *pClientId, void *pBuffer, int BufferSize, int *pOutSize, int *pFlags) = 0;
-
-	virtual ~IEngineAntibot() = default;
 };
 
 #endif //ENGINE_ANTIBOT_H

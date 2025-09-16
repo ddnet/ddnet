@@ -165,11 +165,6 @@ class CComponent : public CComponentInterfaces
 {
 public:
 	/**
-	 * The component virtual destructor.
-	 */
-	virtual ~CComponent() = default;
-
-	/**
 	 * Gets the size of the non-abstract component.
 	 */
 	virtual int Sizeof() const = 0;
