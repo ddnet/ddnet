@@ -1591,7 +1591,7 @@ void CGameContext::RegisterFoxNetCommands()
 	Console()->Register("password", "s[oldpass] s[password] s[password2]", CFGFLAG_CHAT, ConAccPassword, this, "Change your password");
 	Console()->Register("login", "s[username] r[password]", CFGFLAG_CHAT, ConAccLogin, this, "Login to your account");
 	Console()->Register("logout", "", CFGFLAG_CHAT, ConAccLogout, this, "Logout of your account");
-	Console()->Register("profile", "?s[name]", CFGFLAG_CHAT, ConAccProfile, this, "Show someones profile");
+	Console()->Register("profile", "?r[name]", CFGFLAG_CHAT, ConAccProfile, this, "Show someones profile");
 
 	Console()->Register("top5money", "?i[offset]", CFGFLAG_CHAT, ConAccTop5Money, this, "Show someones profile");
 	Console()->Register("top5level", "?i[offset]", CFGFLAG_CHAT, ConAccTop5Level, this, "Show someones profile");
