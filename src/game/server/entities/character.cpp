@@ -1505,13 +1505,6 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacter->m_TargetX = m_Core.m_Input.m_TargetX;
 	pDDNetCharacter->m_TargetY = m_Core.m_Input.m_TargetY;
 
-	// <FoxNet
-	if(m_InQuadFreeze && !m_Core.m_IsInFreeze)
-	{
-		pDDNetCharacter->m_FreezeEnd = -1;
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_IN_FREEZE;
-	}
-
 	if(m_InSnake || m_Ufo.Active())
 	{
 		pDDNetCharacter->m_Jumps = 0;
