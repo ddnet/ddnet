@@ -168,7 +168,7 @@ void CProjectile::Tick()
 			pTargetChr->TakeDamage(vec2(0, 0), 0, m_Owner, m_Type);
 		else if(pTargetTargetSwitch && pOwnerChar)
 		{
-			pTargetTargetSwitch->GetHit(pOwnerChar->Team(), m_Type == WEAPON_GUN);
+			pTargetTargetSwitch->GetHit(pOwnerChar->GetCore().m_Id, m_Type == WEAPON_GUN);
 		}
 
 		if(pOwnerChar && !GameLayerClipped(ColPos) &&

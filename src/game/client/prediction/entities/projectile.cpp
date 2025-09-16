@@ -126,7 +126,7 @@ void CProjectile::Tick()
 		}
 		else if(pTargetTargetSwitch && pOwnerChar)
 		{
-			pTargetTargetSwitch->GetHit(pOwnerChar->Team(), m_Type == WEAPON_GUN);
+			pTargetTargetSwitch->GetHit(pOwnerChar->GetCid(), m_Type == WEAPON_GUN);
 		}
 		if(Collide && m_Bouncing != 0)
 		{

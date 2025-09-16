@@ -50,15 +50,14 @@ void CTargetSwitch::Snap(int SnappingClient)
 	GameServer()->SnapTargetSwitch(CSnapContext(SnappingClientVersion, Sixup, SnappingClient), GetId(), m_Pos, m_Type, m_Number, m_Delay, 0);
 }
 
-void CTargetSwitch::GetHit(int TeamHitFrom, bool Weakly)
+void CTargetSwitch::GetHit(int ClientId, bool Weakly)
 {
-	std::bitset<MAX_CLIENTS> TeamHitBitset;
-	TeamHitBitset.set(TeamHitFrom);
+	CClientMask Mask = GameServer()->GetPlayerChar(ClientId)->TeamMask();
+	int TeamHitFrom = GameServer()->GetPlayerChar(ClientId)->Team();
 
 	if(Weakly)
 	{
-		GameServer()->CreateTargetHit(m_Pos, true, TeamHitBitset);
-		GameServer()->CreateTargetHit(m_Pos, true, TeamHitBitset);
+		GameServer()->CreateTargetHit(m_Pos, true, Mask);
 		return;
 	}
 
@@ -88,8 +87,7 @@ void CTargetSwitch::GetHit(int TeamHitFrom, bool Weakly)
 	// Hitting this switch changed something, provide feedback
 	if(PreviousSwitchStatus != Switchers()[m_Number].m_aStatus[TeamHitFrom])
 	{
-		GameServer()->CreateTargetHit(m_Pos, false, TeamHitBitset);
-		GameServer()->CreateSound(m_Pos, SOUND_HIT, TeamHitBitset);
+		GameServer()->CreateTargetHit(m_Pos, false, Mask);
 	}
 }
 

@@ -404,7 +404,7 @@ void CCharacter::HandleNinja()
 				if(m_NumObjectsHit < 10)
 					m_apHitObjects[m_NumObjectsHit++] = pTarget;
 
-				pTarget->GetHit(m_pPlayer->GetTeam());
+				pTarget->GetHit(m_pPlayer->GetCid());
 			}
 		}
 
@@ -582,8 +582,7 @@ void CCharacter::FireWeapon()
 		for(int i = 0; i < Num; ++i)
 		{
 			auto *pTarget = static_cast<CTargetSwitch *>(apTargetEnts[i]);
-			int Team = Teams()->m_Core.Team(m_Core.m_Id);
-			pTarget->GetHit(Team);
+			pTarget->GetHit(m_pPlayer->GetCid());
 			GameServer()->CreateHammerHit(pTarget->m_Pos, TeamMask());
 			Hits++;
 		}

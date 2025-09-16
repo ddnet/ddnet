@@ -427,6 +427,8 @@ void CEffects::TargetHit(vec2 Pos, float Alpha)
 		p.m_Collides = false;
 		p.m_FlowAffected = false;
 		GameClient()->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
+		if(g_Config.m_SndGame)
+			GameClient()->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_HIT, 1.0f, Pos);
 	}
 }
 

@@ -207,7 +207,7 @@ void CCharacter::HandleNinja()
 				if(m_NumObjectsHit < 10)
 					m_aHitObjects[m_NumObjectsHit++] = pTarget->GetId();
 
-				pTarget->GetHit(Team());
+				pTarget->GetHit(m_Core.m_Id);
 			}
 		}
 
@@ -385,7 +385,7 @@ void CCharacter::FireWeapon()
 		for(int i = 0; i < Num; ++i)
 		{
 			auto *pTarget = static_cast<CTargetSwitch *>(apTargetEnts[i]);
-			pTarget->GetHit(Team());
+			pTarget->GetHit(m_Core.m_Id);
 			Hits++;
 		}
 

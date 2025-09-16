@@ -13,7 +13,7 @@ public:
 	void TickPaused() override;
 	void Snap(int SnappingClient) override;
 
-	void GetHit(int TeamHitFrom, bool Weakly = false);
+	void GetHit(int ClientId, bool Weakly = false);
 
 private:
 	int m_Type;

@@ -364,13 +364,12 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 		auto *pTarget = static_cast<CTargetSwitch *>(apTargetEnts[i]);
 		if((GetPlayerChar(Owner) ? !GetPlayerChar(Owner)->GrenadeHitDisabled() : g_Config.m_SvHit) || NoDamage)
 		{
-			int PlayerTeam = GetDDRaceTeam(Owner);
 			if((GetPlayerChar(Owner) ? GetPlayerChar(Owner)->GrenadeHitDisabled() : !g_Config.m_SvHit) || NoDamage)
 			{
 				continue;
 			}
 
-			pTarget->GetHit(PlayerTeam);
+			pTarget->GetHit(Owner);
 		}
 	}
 }
