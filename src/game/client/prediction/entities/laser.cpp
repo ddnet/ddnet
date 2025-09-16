@@ -101,7 +101,7 @@ bool CLaser::HitTargetSwitch(vec2 From, vec2 To)
 	if(!pHit)
 		return false;
 
-	pHit->GetHit(GameWorld()->Teams()->Team(m_Owner));
+	pHit->GetHit(m_Owner);
 	m_From = From;
 	m_Pos = At;
 	m_Energy = -1;

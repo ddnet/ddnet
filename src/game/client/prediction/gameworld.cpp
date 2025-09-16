@@ -396,13 +396,12 @@ void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage,
 		auto *pTarget = static_cast<CTargetSwitch *>(apTargetEnts[i]);
 		if((GetCharacterById(Owner) ? !GetCharacterById(Owner)->GrenadeHitDisabled() : g_Config.m_SvHit) || NoDamage)
 		{
-			int PlayerTeam = Teams()->Team(Owner);
 			if((GetCharacterById(Owner) ? GetCharacterById(Owner)->GrenadeHitDisabled() : !g_Config.m_SvHit) || NoDamage)
 			{
 				continue;
 			}
 
-			pTarget->GetHit(PlayerTeam);
+			pTarget->GetHit(Owner);
 		}
 	}
 }
