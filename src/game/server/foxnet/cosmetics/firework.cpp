@@ -123,6 +123,7 @@ void CFirework::Snap(int SnappingClient)
 		pProj->m_VelY = round_to_int(LaunchSpeed * 10000.0f);
 		pProj->m_Type = WEAPON_SHOTGUN;
 		pProj->m_StartTick = m_StartTick;
+		pProj->m_Owner = m_Owner;
 	}
 	else if(m_State == STATE_EXPLOSION)
 	{
@@ -139,6 +140,7 @@ void CFirework::Snap(int SnappingClient)
 			pProj->m_VelX = m_aVel[i].x * 32;
 			pProj->m_VelY = m_aVel[i].x * 32;
 			pProj->m_Type = WEAPON_LASER;
+			pProj->m_Owner = m_Owner;
 		}
 	}
 }
