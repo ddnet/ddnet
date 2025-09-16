@@ -7,7 +7,7 @@
 CLayerGroup::CLayerGroup()
 {
 	m_vpLayers.clear();
-	m_aName[0] = 0;
+	m_aGroupName[0] = 0;
 	m_Visible = true;
 	m_Collapse = false;
 	m_GameGroup = false;
