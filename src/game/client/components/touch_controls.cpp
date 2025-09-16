@@ -1826,8 +1826,8 @@ void CTouchControls::UpdateButtonsEditor(const std::vector<IInput::CTouchFingerS
 		// If Zooming started, update it's x,y value so it's width and height could be calculated correctly.
 		if(m_pSampleButton != nullptr && m_ShownRect.has_value())
 		{
-			m_pSampleButton->m_UnitRect.m_X = (*m_ShownRect).m_X;
-			m_pSampleButton->m_UnitRect.m_Y = (*m_ShownRect).m_Y;
+			m_pSampleButton->m_UnitRect.m_X = m_ShownRect->m_X;
+			m_pSampleButton->m_UnitRect.m_Y = m_ShownRect->m_Y;
 		}
 	}
 	else
@@ -1836,8 +1836,8 @@ void CTouchControls::UpdateButtonsEditor(const std::vector<IInput::CTouchFingerS
 		m_ZoomStartPos = vec2(0.0f, 0.0f);
 		if(m_pSampleButton != nullptr && m_ShownRect.has_value())
 		{
-			m_pSampleButton->m_UnitRect.m_W = (*m_ShownRect).m_W;
-			m_pSampleButton->m_UnitRect.m_H = (*m_ShownRect).m_H;
+			m_pSampleButton->m_UnitRect.m_W = m_ShownRect->m_W;
+			m_pSampleButton->m_UnitRect.m_H = m_ShownRect->m_H;
 		}
 	}
 	for(auto &TouchButton : m_vTouchButtons)
@@ -1873,6 +1873,7 @@ void CTouchControls::UpdateButtonsEditor(const std::vector<IInput::CTouchFingerS
 				if(IsRectOverlapping(TouchButton.m_UnitRect))
 				{
 					TouchButton.m_UnitRect = UpdatePosition(TouchButton.m_UnitRect);
+					m_UnsavedChanges = true;
 					if(TouchButton.m_UnitRect.m_X == -1)
 					{
 						m_PopupParam.m_PopupType = EPopupType::NO_SPACE;
@@ -1957,14 +1958,14 @@ void CTouchControls::UpdateButtonsEditor(const std::vector<IInput::CTouchFingerS
 			vec2 UnitWHDelta;
 			UnitWHDelta.x = (std::abs(m_ActiveFingerState.value().m_Position.x - m_ZoomFingerState.value().m_Position.x) - std::abs(m_ZoomStartPos.x)) * BUTTON_SIZE_SCALE;
 			UnitWHDelta.y = (std::abs(m_ActiveFingerState.value().m_Position.y - m_ZoomFingerState.value().m_Position.y) - std::abs(m_ZoomStartPos.y)) * BUTTON_SIZE_SCALE;
-			(*m_ShownRect).m_W = m_pSampleButton->m_UnitRect.m_W + UnitWHDelta.x;
-			(*m_ShownRect).m_H = m_pSampleButton->m_UnitRect.m_H + UnitWHDelta.y;
-			(*m_ShownRect).m_W = std::clamp((*m_ShownRect).m_W, BUTTON_SIZE_MINIMUM, BUTTON_SIZE_MAXIMUM);
-			(*m_ShownRect).m_H = std::clamp((*m_ShownRect).m_H, BUTTON_SIZE_MINIMUM, BUTTON_SIZE_MAXIMUM);
-			if((*m_ShownRect).m_W + (*m_ShownRect).m_X > BUTTON_SIZE_SCALE)
-				(*m_ShownRect).m_W = BUTTON_SIZE_SCALE - (*m_ShownRect).m_X;
-			if((*m_ShownRect).m_H + (*m_ShownRect).m_Y > BUTTON_SIZE_SCALE)
-				(*m_ShownRect).m_H = BUTTON_SIZE_SCALE - (*m_ShownRect).m_Y;
+			m_ShownRect->m_W = m_pSampleButton->m_UnitRect.m_W + UnitWHDelta.x;
+			m_ShownRect->m_H = m_pSampleButton->m_UnitRect.m_H + UnitWHDelta.y;
+			m_ShownRect->m_W = std::clamp(m_ShownRect->m_W, BUTTON_SIZE_MINIMUM, BUTTON_SIZE_MAXIMUM);
+			m_ShownRect->m_H = std::clamp(m_ShownRect->m_H, BUTTON_SIZE_MINIMUM, BUTTON_SIZE_MAXIMUM);
+			if(m_ShownRect->m_W + m_ShownRect->m_X > BUTTON_SIZE_SCALE)
+				m_ShownRect->m_W = BUTTON_SIZE_SCALE - m_ShownRect->m_X;
+			if(m_ShownRect->m_H + m_ShownRect->m_Y > BUTTON_SIZE_SCALE)
+				m_ShownRect->m_H = BUTTON_SIZE_SCALE - m_ShownRect->m_Y;
 			// Clamp the biggest W and H so they won't overlap with other buttons. Known as "FindPositionWH".
 			std::optional<int> BiggestW;
 			std::optional<int> BiggestH;
@@ -1972,18 +1973,18 @@ void CTouchControls::UpdateButtonsEditor(const std::vector<IInput::CTouchFingerS
 			for(const auto &Rect : vVisibleButtonRects)
 			{
 				// If Overlap
-				if(!(Rect.m_X + Rect.m_W <= (*m_ShownRect).m_X || (*m_ShownRect).m_X + (*m_ShownRect).m_W <= Rect.m_X || Rect.m_Y + Rect.m_H <= (*m_ShownRect).m_Y || (*m_ShownRect).m_Y + (*m_ShownRect).m_H <= Rect.m_Y))
+				if(!(Rect.m_X + Rect.m_W <= m_ShownRect->m_X || m_ShownRect->m_X + m_ShownRect->m_W <= Rect.m_X || Rect.m_Y + Rect.m_H <= m_ShownRect->m_Y || m_ShownRect->m_Y + m_ShownRect->m_H <= Rect.m_Y))
 				{
 					// Calculate the biggest Height and Width it could have.
-					LimitH = Rect.m_Y - (*m_ShownRect).m_Y;
-					LimitW = Rect.m_X - (*m_ShownRect).m_X;
+					LimitH = Rect.m_Y - m_ShownRect->m_Y;
+					LimitW = Rect.m_X - m_ShownRect->m_X;
 					if(LimitH < BUTTON_SIZE_MINIMUM)
 						LimitH = std::nullopt;
 					if(LimitW < BUTTON_SIZE_MINIMUM)
 						LimitW = std::nullopt;
 					if(LimitH.has_value() && LimitW.has_value())
 					{
-						if(std::abs(*LimitH - (*m_ShownRect).m_H) < std::abs(*LimitW - (*m_ShownRect).m_W))
+						if(std::abs(*LimitH - m_ShownRect->m_H) < std::abs(*LimitW - m_ShownRect->m_W))
 						{
 							BiggestH = std::min(*LimitH, BiggestH.value_or(BUTTON_SIZE_SCALE));
 						}
@@ -2013,8 +2014,8 @@ void CTouchControls::UpdateButtonsEditor(const std::vector<IInput::CTouchFingerS
 					}
 				}
 			}
-			(*m_ShownRect).m_W = BiggestW.value_or((*m_ShownRect).m_W);
-			(*m_ShownRect).m_H = BiggestH.value_or((*m_ShownRect).m_H);
+			m_ShownRect->m_W = BiggestW.value_or(m_ShownRect->m_W);
+			m_ShownRect->m_H = BiggestH.value_or(m_ShownRect->m_H);
 			m_UnsavedChanges = true;
 		}
 		// No finger on screen, then show it as is.
@@ -2026,7 +2027,9 @@ void CTouchControls::UpdateButtonsEditor(const std::vector<IInput::CTouchFingerS
 		if(vTouchFingerStates.empty())
 		{
 			m_AccumulatedDelta = vec2(0.0f, 0.0f);
+			std::optional<CUnitRect> OldRect = m_ShownRect;
 			m_ShownRect = FindPositionXY(vVisibleButtonRects, m_pSampleButton->m_UnitRect);
+			m_UnsavedChanges |= OldRect != m_ShownRect;
 			m_pSampleButton->m_UnitRect = (*m_ShownRect);
 			m_aIssueParam[(int)EIssueType::CACHE_POSITION].m_pTargetButton = m_pSampleButton.get();
 			m_aIssueParam[(int)EIssueType::CACHE_POSITION].m_Resolved = false;
@@ -2034,6 +2037,7 @@ void CTouchControls::UpdateButtonsEditor(const std::vector<IInput::CTouchFingerS
 		}
 		if(m_ShownRect->m_X == -1)
 		{
+			m_UnsavedChanges = true;
 			m_PopupParam.m_PopupType = EPopupType::NO_SPACE;
 			m_PopupParam.m_KeepMenuOpen = true;
 			GameClient()->m_Menus.SetActive(true);
