@@ -240,21 +240,6 @@ void CItems::RenderFlags()
 	}
 }
 
-void CItems::RenderTargetSwitch(const CTargetSwitchData *pData)
-{
-	const vec2 Pos = pData->m_Pos;
-	const int SwitchState = GameClient()->Switchers()[pData->m_SwitchNumber].m_aStatus[GameClient()->SwitchStateTeam()];
-	const bool Open = pData->m_Type == TARGETSWITCHTYPE_OPEN || (pData->m_Type == TARGETSWITCHTYPE_ALTERNATE && SwitchState);
-	const int QuadOffset = Open ? m_TargetSwitchOpenOffset : m_TargetSwitchCloseOffset;
-	Graphics()->TextureSet(Open ? GameClient()->m_ExtrasSkin.m_TargetSwitchOpen : GameClient()->m_ExtrasSkin.m_TargetSwitchClose);
-
-	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
-	Graphics()->QuadsSetRotation(0);
-	vec2 Scale = vec2(1.2, 1.2);
-	Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, QuadOffset, Pos.x, Pos.y, Scale.x, Scale.y);
-	Graphics()->QuadsSetRotation(0);
-}
-
 void CItems::RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent, const CNetObj_GameData *pPrevGameData, const CNetObj_GameData *pCurGameData)
 {
 	float Angle = 0.0f;
@@ -295,6 +280,21 @@ void CItems::RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent,
 	}
 
 	Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, QuadOffset, Pos.x, Pos.y - Size * 0.75f);
+}
+
+void CItems::RenderTargetSwitch(const CTargetSwitchData *pData)
+{
+	const vec2 Pos = pData->m_Pos;
+	const int SwitchState = GameClient()->Switchers()[pData->m_SwitchNumber].m_aStatus[GameClient()->SwitchStateTeam()];
+	const bool Open = pData->m_Type == TARGETSWITCHTYPE_OPEN || (pData->m_Type == TARGETSWITCHTYPE_ALTERNATE && SwitchState);
+	const int QuadOffset = Open ? m_TargetSwitchOpenOffset : m_TargetSwitchCloseOffset;
+	Graphics()->TextureSet(Open ? GameClient()->m_ExtrasSkin.m_TargetSwitchOpen : GameClient()->m_ExtrasSkin.m_TargetSwitchClose);
+
+	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+	Graphics()->QuadsSetRotation(0);
+	vec2 Scale = vec2(1.2, 1.2);
+	Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, QuadOffset, Pos.x, Pos.y, Scale.x, Scale.y);
+	Graphics()->QuadsSetRotation(0);
 }
 
 void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
