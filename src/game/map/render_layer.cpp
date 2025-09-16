@@ -240,7 +240,7 @@ bool CRenderLayerGroup::DoRender(const CRenderLayerParams &Params)
 				return false;
 
 			// Render debug before enabling the clip
-			if(Params.m_DebugRenderOptions & 1)
+			if(Params.m_DebugRenderGroupClips)
 			{
 				char aDebugText[32];
 				str_format(aDebugText, sizeof(aDebugText), "Group %d", m_GroupId);
@@ -1202,7 +1202,7 @@ void CRenderLayerQuads::Render(const CRenderLayerParams &Params)
 		RenderQuadLayer(Alpha);
 	}
 
-	if((Params.m_DebugRenderOptions & 2) && m_QuadRenderGroup.m_Clipped)
+	if(Params.m_DebugRenderQuadClips && m_QuadRenderGroup.m_Clipped)
 	{
 		char aDebugText[64];
 		str_format(aDebugText, sizeof(aDebugText), "Group %d, quad layer %d", m_GroupId, m_LayerId);

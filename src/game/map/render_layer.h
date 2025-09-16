@@ -41,7 +41,8 @@ public:
 	bool m_RenderInvalidTiles;
 	bool m_TileAndQuadBuffering;
 	bool m_RenderTileBorder;
-	int m_DebugRenderOptions;
+	bool m_DebugRenderGroupClips;
+	bool m_DebugRenderQuadClips;
 };
 
 class CRenderLayer : public CRenderComponent
