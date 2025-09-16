@@ -2869,14 +2869,12 @@ void CEditor::DoQuadEnvelopes(const std::vector<CQuad> &vQuads, IGraphics::CText
 			continue;
 
 		// QuadParams
-		const CPoint *pPoints = vQuads[j].m_aPoints;
-
 		for(size_t i = 0; i < apEnvelope[j]->m_vPoints.size(); i++)
 		{
 			// Calc Env Position
 			float OffsetX = fx2f(apEnvelope[j]->m_vPoints[i].m_aValues[0]);
 			float OffsetY = fx2f(apEnvelope[j]->m_vPoints[i].m_aValues[1]);
-			float Rot = fx2f(apEnvelope[j]->m_vPoints[i].m_aValues[2]) / 360.0f * pi * 2;
+			const float Rotation = fx2f(apEnvelope[j]->m_vPoints[i].m_aValues[2]) / 360.0f * pi * 2;
 
 			// Set Colours
 			float Alpha = (m_SelectedQuadEnvelope == vQuads[j].m_PosEnv && IsEnvPointSelected(i)) ? 0.65f : 0.35f;
@@ -2888,19 +2886,20 @@ void CEditor::DoQuadEnvelopes(const std::vector<CQuad> &vQuads, IGraphics::CText
 			Graphics()->SetColorVertex(aArray, std::size(aArray));
 
 			// Rotation
+			const CPoint *pPoints;
 			CPoint aRotated[4];
-			if(Rot != 0)
+			if(Rotation != 0.0f)
 			{
-				aRotated[0] = vQuads[j].m_aPoints[0];
-				aRotated[1] = vQuads[j].m_aPoints[1];
-				aRotated[2] = vQuads[j].m_aPoints[2];
-				aRotated[3] = vQuads[j].m_aPoints[3];
+				std::copy_n(vQuads[j].m_aPoints, std::size(aRotated), aRotated);
+				for(auto &Point : aRotated)
+				{
+					Rotate(&vQuads[j].m_aPoints[4], &Point, Rotation);
+				}
 				pPoints = aRotated;
-
-				Rotate(&vQuads[j].m_aPoints[4], &aRotated[0], Rot);
-				Rotate(&vQuads[j].m_aPoints[4], &aRotated[1], Rot);
-				Rotate(&vQuads[j].m_aPoints[4], &aRotated[2], Rot);
-				Rotate(&vQuads[j].m_aPoints[4], &aRotated[3], Rot);
+			}
+			else
+			{
+				pPoints = vQuads[j].m_aPoints;
 			}
 
 			// Set Texture Coords
