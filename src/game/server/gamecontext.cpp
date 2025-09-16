@@ -4275,7 +4275,10 @@ void CGameContext::OnInit(const void *pPersistentData)
 
 		GameInfo.m_pServerName = g_Config.m_SvName;
 		GameInfo.m_ServerPort = Server()->Port();
-		GameInfo.m_pGameType = m_pController->m_pGameType;
+		// <FoxNet
+		// GameInfo.m_pGameType = m_pController->m_pGameType;
+		GameInfo.m_pGameType = "FoxNetwork";
+		// FoxNet>
 
 		GameInfo.m_pConfig = &g_Config;
 		GameInfo.m_pTuning = Tuning();
