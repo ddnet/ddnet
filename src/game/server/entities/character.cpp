@@ -1554,16 +1554,16 @@ void CCharacter::Snap(int SnappingClient)
 
 	CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
 
-	const auto WeaponFlag = [](int Weapon)
-	{
+	const auto WeaponFlag = [](int Weapon) {
 		switch(Weapon)
 		{
-		case WEAPON_HAMMER: return CHARACTERFLAG_WEAPON_HAMMER;
-		case WEAPON_GUN: return CHARACTERFLAG_WEAPON_GUN;
-		case WEAPON_SHOTGUN: return CHARACTERFLAG_WEAPON_SHOTGUN;
-		case WEAPON_GRENADE: return CHARACTERFLAG_WEAPON_GRENADE;
-		case WEAPON_LASER: return CHARACTERFLAG_WEAPON_LASER;
-		case WEAPON_NINJA: return CHARACTERFLAG_WEAPON_NINJA;
+		case WEAPON_HAMMER: return (int)CHARACTERFLAG_WEAPON_HAMMER;
+		case WEAPON_GUN: return (int)CHARACTERFLAG_WEAPON_GUN;
+		case WEAPON_SHOTGUN: return (int)CHARACTERFLAG_WEAPON_SHOTGUN;
+		case WEAPON_GRENADE: return (int)CHARACTERFLAG_WEAPON_GRENADE;
+		case WEAPON_LASER: return (int)CHARACTERFLAG_WEAPON_LASER;
+		case WEAPON_NINJA: return (int)CHARACTERFLAG_WEAPON_NINJA;
+		default: return 0;
 		}
 	};
 
