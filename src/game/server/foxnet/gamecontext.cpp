@@ -78,14 +78,19 @@ void CGameContext::FoxNetInit()
 
 	m_IsWeekend = IsWeekend();
 
-	if(!m_Initialized)
-	{
-		if(g_Config.m_SvRandomMapVoteOnStart)
-			RandomMapVote();
-		m_Initialized = true;
-	}
 	if(Score())
 		Score()->CacheMapInfo();
+
+	if(!m_InitRandomMap)
+	{
+		if(g_Config.m_SvRandomMapVoteOnStart)
+		{
+			if(RandomMapVote())
+				m_InitRandomMap = true;
+		}
+		else
+			m_InitRandomMap = true;
+	}
 }
 
 void CGameContext::OnExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, CClientMask Mask)
@@ -1049,11 +1054,10 @@ const char *GetMapName(const char *pCmd)
 	return "";
 }
 
-void CGameContext::RandomMapVote()
+bool CGameContext::RandomMapVote()
 {
 	int Count = 0;
 	std::vector<const char *> MapVotes;
-	MapVotes.clear();
 
 	for(CVoteOptionServer *pOption = m_pVoteOptionFirst; pOption; pOption = pOption->m_pNext, Count++)
 	{
@@ -1066,11 +1070,15 @@ void CGameContext::RandomMapVote()
 		MapVotes.push_back(pOption->m_aCommand);
 	}
 
+	if(MapVotes.empty())
+		return false;
+
 	std::random_device rd;
 	std::uniform_int_distribution<int> dist(0, (int)MapVotes.size() - 1);
 	int Random = dist(rd);
 
-	Console()->ExecuteLine(MapVotes.at(Random));
+	Console()->ExecuteLine(MapVotes[Random]);
+	return true;
 }
 
 void CGameContext::OnPreShutdown()

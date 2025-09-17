@@ -189,7 +189,7 @@ void CGameContext::Clear()
 	std::vector<CStringDetection> vNameDection = m_vNameDetection;
 	std::vector<int> vQuadDebugIds = m_vQuadDebugIds;
 	CShop Shop = m_Shop;
-	bool Initialized = m_Initialized;
+	bool InitedRandMap = m_InitRandomMap;
 	// FoxNet>
 
 	m_Resetting = true;
@@ -209,7 +209,7 @@ void CGameContext::Clear()
 	m_vNameDetection = vNameDection;
 	m_vQuadDebugIds = vQuadDebugIds;
 	m_Shop = Shop;
-	m_Initialized = Initialized;
+	m_InitRandomMap = InitedRandMap;
 	// FoxNet>
 }
 

@@ -875,7 +875,7 @@ private:
 	};
 
 	std::vector<CFakeSnapPlayer> m_vFakeSnapPlayers;
-	void RandomMapVote();
+	bool RandomMapVote();
 
 	void HandleQuads(const CMapItemLayerQuads *pQuadLayer, int QuadIndex, int Type);
 	void HandleQuadStopa(CEntity *pEntity, const CMapItemLayerQuads *pQuadLayer, int QuadIndex);
@@ -900,7 +900,7 @@ public:
 	} m_MapInfoCache;
 
 
-	bool m_Initialized = false;
+	bool m_InitRandomMap = false;
 
 	CAccountSession m_aAccounts[MAX_CLIENTS];
 	CAccounts m_AccountManager;
