@@ -312,3 +312,49 @@ void CEditorMap::MakeTuneLayer(const std::shared_ptr<CLayer> &pLayer)
 	m_pTuneLayer = std::static_pointer_cast<CLayerTune>(pLayer);
 	m_pTuneLayer->m_pEditor = m_pEditor;
 }
+
+bool CEditorMap::IsImageUsed(int ImageIndex) const
+{
+	for(const auto &pGroup : m_vpGroups)
+	{
+		for(const auto &pLayer : pGroup->m_vpLayers)
+		{
+			if(pLayer->m_Type == LAYERTYPE_TILES)
+			{
+				const std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
+				if(pTiles->m_Image == ImageIndex)
+				{
+					return true;
+				}
+			}
+			else if(pLayer->m_Type == LAYERTYPE_QUADS)
+			{
+				const std::shared_ptr<CLayerQuads> pQuads = std::static_pointer_cast<CLayerQuads>(pLayer);
+				if(pQuads->m_Image == ImageIndex)
+				{
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool CEditorMap::IsSoundUsed(int SoundIndex) const
+{
+	for(const auto &pGroup : m_vpGroups)
+	{
+		for(const auto &pLayer : pGroup->m_vpLayers)
+		{
+			if(pLayer->m_Type == LAYERTYPE_SOUNDS)
+			{
+				std::shared_ptr<CLayerSounds> pSounds = std::static_pointer_cast<CLayerSounds>(pLayer);
+				if(pSounds->m_Sound == SoundIndex)
+				{
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}

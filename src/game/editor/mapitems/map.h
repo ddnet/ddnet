@@ -129,6 +129,10 @@ public:
 	void MakeSwitchLayer(const std::shared_ptr<CLayer> &pLayer);
 	void MakeTuneLayer(const std::shared_ptr<CLayer> &pLayer);
 
+	bool IsImageUsed(int ImageIndex) const;
+
+	bool IsSoundUsed(int SoundIndex) const;
+
 private:
 	CEditor *m_pEditor;
 };
