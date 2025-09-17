@@ -332,6 +332,9 @@ void CPlayers::RenderHook(
 	int ClientId,
 	float Intra)
 {
+	if(pPrevChar->m_HookState <= 0 || pPlayerChar->m_HookState <= 0)
+		return;
+
 	CNetObj_Character Prev;
 	CNetObj_Character Player;
 	Prev = *pPrevChar;
@@ -360,50 +363,47 @@ void CPlayers::RenderHook(
 		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), Intra);
 
 	// draw hook
-	if(Prev.m_HookState > 0 && Player.m_HookState > 0)
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+	if(ClientId < 0)
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.5f);
+
+	vec2 Pos = Position;
+	vec2 HookPos;
+
+	if(in_range(pPlayerChar->m_HookedPlayer, MAX_CLIENTS - 1))
+		HookPos = GameClient()->m_aClients[pPlayerChar->m_HookedPlayer].m_RenderPos;
+	else
+		HookPos = mix(vec2(Prev.m_HookX, Prev.m_HookY), vec2(Player.m_HookX, Player.m_HookY), Intra);
+
+	float d = distance(Pos, HookPos);
+	vec2 Dir = normalize(Pos - HookPos);
+
+	Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteHookHead);
+	Graphics()->QuadsSetRotation(angle(Dir) + pi);
+	// render head
+	int QuadOffset = NUM_WEAPONS * 2 + 2;
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
+	Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, HookPos.x, HookPos.y);
+
+	// render chain
+	++QuadOffset;
+	static IGraphics::SRenderSpriteInfo s_aHookChainRenderInfo[1024];
+	int HookChainCount = 0;
+	for(float f = 24; f < d && HookChainCount < 1024; f += 24, ++HookChainCount)
 	{
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		if(ClientId < 0)
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.5f);
-
-		vec2 Pos = Position;
-		vec2 HookPos;
-
-		if(in_range(pPlayerChar->m_HookedPlayer, MAX_CLIENTS - 1))
-			HookPos = GameClient()->m_aClients[pPlayerChar->m_HookedPlayer].m_RenderPos;
-		else
-			HookPos = mix(vec2(Prev.m_HookX, Prev.m_HookY), vec2(Player.m_HookX, Player.m_HookY), Intra);
-
-		float d = distance(Pos, HookPos);
-		vec2 Dir = normalize(Pos - HookPos);
-
-		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteHookHead);
-		Graphics()->QuadsSetRotation(angle(Dir) + pi);
-		// render head
-		int QuadOffset = NUM_WEAPONS * 2 + 2;
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
-		Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, HookPos.x, HookPos.y);
-
-		// render chain
-		++QuadOffset;
-		static IGraphics::SRenderSpriteInfo s_aHookChainRenderInfo[1024];
-		int HookChainCount = 0;
-		for(float f = 24; f < d && HookChainCount < 1024; f += 24, ++HookChainCount)
-		{
-			vec2 p = HookPos + Dir * f;
-			s_aHookChainRenderInfo[HookChainCount].m_Pos[0] = p.x;
-			s_aHookChainRenderInfo[HookChainCount].m_Pos[1] = p.y;
-			s_aHookChainRenderInfo[HookChainCount].m_Scale = 1;
-			s_aHookChainRenderInfo[HookChainCount].m_Rotation = angle(Dir) + pi;
-		}
-		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteHookChain);
-		Graphics()->RenderQuadContainerAsSpriteMultiple(m_WeaponEmoteQuadContainerIndex, QuadOffset, HookChainCount, s_aHookChainRenderInfo);
-
-		Graphics()->QuadsSetRotation(0);
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-
-		RenderHand(&RenderInfo, Position, normalize(HookPos - Pos), -pi / 2, vec2(20, 0), Alpha);
+		vec2 p = HookPos + Dir * f;
+		s_aHookChainRenderInfo[HookChainCount].m_Pos[0] = p.x;
+		s_aHookChainRenderInfo[HookChainCount].m_Pos[1] = p.y;
+		s_aHookChainRenderInfo[HookChainCount].m_Scale = 1;
+		s_aHookChainRenderInfo[HookChainCount].m_Rotation = angle(Dir) + pi;
 	}
+	Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteHookChain);
+	Graphics()->RenderQuadContainerAsSpriteMultiple(m_WeaponEmoteQuadContainerIndex, QuadOffset, HookChainCount, s_aHookChainRenderInfo);
+
+	Graphics()->QuadsSetRotation(0);
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+	RenderHand(&RenderInfo, Position, normalize(HookPos - Pos), -pi / 2, vec2(20, 0), Alpha);
 }
 
 void CPlayers::RenderPlayer(
