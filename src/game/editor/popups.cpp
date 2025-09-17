@@ -1901,7 +1901,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSound(void *pContext, CUIRect View, 
 	View.HSplitTop(RowHeight, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_RemoveButton, "Remove", 0, &Slot, BUTTONFLAG_LEFT, "Remove the sound from the map."))
 	{
-		if(IsAssetUsed(CFileBrowser::EFileType::SOUND, pEditor->m_SelectedImage, pEditor))
+		if(IsAssetUsed(CFileBrowser::EFileType::SOUND, pEditor->m_SelectedSound, pEditor))
 		{
 			pEditor->m_PopupEventType = POPEVENT_REMOVE_USED_SOUND;
 			pEditor->m_PopupEventActivated = true;
