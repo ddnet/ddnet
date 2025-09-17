@@ -4,11 +4,6 @@
 #include <base/detect.h>
 #include <base/log.h>
 #include <base/math.h>
-
-#if defined(CONF_FAMILY_UNIX)
-#include <pthread.h>
-#endif
-
 #include <base/system.h>
 
 #include <engine/console.h>

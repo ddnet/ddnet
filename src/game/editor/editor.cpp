@@ -7,10 +7,6 @@
 #include <base/log.h>
 #include <base/system.h>
 
-#if defined(CONF_FAMILY_UNIX)
-#include <pthread.h>
-#endif
-
 #include <engine/client.h>
 #include <engine/console.h>
 #include <engine/gfx/image_loader.h>
