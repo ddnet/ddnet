@@ -2487,6 +2487,7 @@ if(CLIENT)
     editor_server_settings.h
     editor_trackers.cpp
     editor_trackers.h
+    editor_ui.cpp
     editor_ui.h
     enums.h
     explanations.cpp
