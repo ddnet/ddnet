@@ -631,7 +631,7 @@ public:
 	}
 
 	const SCommand *Head() const { return m_pCmdBufferHead; }
-	SCommand *Head() { return const_cast<SCommand *>(const_cast<const CCommandBuffer *>(this)->Head()); }
+	SCommand *Head() { return m_pCmdBufferHead; }
 
 	void Reset()
 	{

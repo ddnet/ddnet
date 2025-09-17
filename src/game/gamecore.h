@@ -156,7 +156,7 @@ public:
 		m_pPrng = nullptr;
 	}
 
-	int RandomOr0(int BelowThis) const
+	int RandomOr0(int BelowThis)
 	{
 		if(BelowThis <= 1 || !m_pPrng)
 		{

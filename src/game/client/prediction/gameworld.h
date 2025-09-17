@@ -59,7 +59,7 @@ public:
 	int GameTick() const { return m_GameTick; }
 	int GameTickSpeed() const { return SERVER_TICK_SPEED; }
 	const CCollision *Collision() const { return m_pCollision; }
-	CCollision *Collision() { return const_cast<CCollision *>(const_cast<const CGameWorld *>(this)->Collision()); }
+	CCollision *Collision() { return m_pCollision; }
 	CTeamsCore *Teams() { return &m_Teams; }
 	std::vector<SSwitchers> &Switchers() { return m_Core.m_vSwitchers; }
 	CTuningParams *Tuning();
@@ -104,9 +104,9 @@ public:
 
 	CTuningParams *m_pTuningList;
 	const CTuningParams *TuningList() const { return m_pTuningList; }
-	CTuningParams *TuningList() { return const_cast<CTuningParams *>(const_cast<const CGameWorld *>(this)->TuningList()); }
+	CTuningParams *TuningList() { return m_pTuningList; }
 	const CTuningParams *GetTuning(int i) const { return &TuningList()[i]; }
-	CTuningParams *GetTuning(int i) { return const_cast<CTuningParams *>(const_cast<const CGameWorld *>(this)->GetTuning(i)); }
+	CTuningParams *GetTuning(int i) { return &TuningList()[i]; }
 
 	const CMapBugs *m_pMapBugs;
 	bool EmulateBug(int Bug) const;
