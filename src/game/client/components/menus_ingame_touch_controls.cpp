@@ -88,7 +88,7 @@ void CMenusIngameTouchControls::RenderTouchButtonEditor(CUIRect MainView)
 	case EElementType::LAYOUT: Changed |= RenderLayoutSettingBlock(Block); break;
 	case EElementType::VISIBILITY: Changed |= RenderVisibilitySettingBlock(Block); break;
 	case EElementType::BEHAVIOR: Changed |= RenderBehaviorSettingBlock(Block); break;
-	default: dbg_assert(false, "Unknown m_EditElement = %d.", m_EditElement);
+	default: dbg_assert(false, "Unknown m_EditElement = %d.", (int)m_EditElement);
 	}
 
 	// Save & Cancel & Hint.

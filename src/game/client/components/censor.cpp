@@ -165,7 +165,7 @@ std::optional<std::vector<std::string>> CCensor::LoadCensorList(const void *pLis
 
 	json_value_free(pData);
 
-	log_info("censor", "Loaded %d words from censor list", vWordList.size());
+	log_info("censor", "Loaded %" PRIzu " words from censor list", vWordList.size());
 	return vWordList;
 }
 
