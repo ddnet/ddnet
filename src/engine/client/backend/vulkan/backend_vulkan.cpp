@@ -6875,6 +6875,9 @@ public:
 			}
 			m_CanvasWidth = (uint32_t)pCommand->m_Width;
 			m_CanvasHeight = (uint32_t)pCommand->m_Height;
+#ifndef CONF_PLATFORM_MACOS
+			m_RecreateSwapChain = true;
+#endif
 		}
 		else
 		{
