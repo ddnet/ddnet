@@ -111,10 +111,8 @@ void CRotatingBall::Snap(int SnappingClient)
 	vec2 LaserPos = m_LaserPos + pOwnerChr->GetVelocity();
 	if(g_Config.m_SvExperimentalPrediction && m_Owner == SnappingClient && !pOwnerChr->GetPlayer()->IsPaused())
 	{
-		Pos = m_ProjPos;
-		LaserPos = m_LaserPos;
-		Pos += nVel;
-		LaserPos += nVel;
+		Pos = m_ProjPos + nVel;
+		LaserPos = m_LaserPos + nVel;
 	}
 	GameServer()->SnapLaserObject(CSnapContext(SnapVer, SixUp, SnappingClient), GetId(), LaserPos, LaserPos, Server()->Tick(), m_Owner, LASERTYPE_GUN, -1, -1, LASERFLAG_NO_PREDICT);
 

@@ -97,11 +97,10 @@ void CEpicCircle::Snap(int SnappingClient)
 		vec2 Pos = m_Pos + m_RotatePos[i] + pOwnerChr->GetVelocity();
 		if(g_Config.m_SvExperimentalPrediction && m_Owner == SnappingClient && !pOwnerChr->GetPlayer()->IsPaused())
 		{
-			Pos = m_Pos + m_RotatePos[i];
 			const double Pred = pOwnerChr->GetPlayer()->m_PredLatency;
 			const float dist = distance(pOwnerChr->m_Pos, pOwnerChr->m_PrevPos);
 			const vec2 nVel = normalize(pOwnerChr->GetVelocity()) * Pred * dist / 2.0f;
-			Pos += nVel;
+			Pos = m_Pos + m_RotatePos[i] + nVel;
 		}
 
 		pProj->m_X = round_to_int(Pos.x * 100.0f);

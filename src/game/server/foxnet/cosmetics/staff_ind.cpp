@@ -111,10 +111,8 @@ void CStaffInd::Snap(int SnappingClient)
 	vec2 LaserPos = m_aPos[BALL] + pOwnerChr->GetVelocity();
 	if(g_Config.m_SvExperimentalPrediction && m_Owner == SnappingClient && !pOwnerChr->GetPlayer()->IsPaused())
 	{
-		vec2 Pos = m_aPos[ARMOR];
-		vec2 LaserPos = m_aPos[BALL];
-		Pos += nVel;
-		LaserPos += nVel;
+		Pos = m_aPos[ARMOR] + nVel;
+		LaserPos = m_aPos[BALL] + nVel;
 	}
 	GameServer()->SnapPickup(CSnapContext(SnapVer, SixUp, SnappingClient), m_aIds[ARMOR], Pos, POWERUP_ARMOR, -1, -1, PICKUPFLAG_NO_PREDICT);
 	GameServer()->SnapLaserObject(CSnapContext(SnapVer, SixUp, SnappingClient), BallId, LaserPos, LaserPos, Server()->Tick(), m_Owner, LASERTYPE_GUN, -1, -1, LASERFLAG_NO_PREDICT);
