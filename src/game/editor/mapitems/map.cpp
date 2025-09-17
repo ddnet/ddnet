@@ -3,6 +3,7 @@
 #include <base/system.h>
 
 #include <game/editor/editor.h>
+#include <game/editor/mapitems/image.h>
 #include <game/editor/mapitems/layer_front.h>
 #include <game/editor/mapitems/layer_game.h>
 #include <game/editor/mapitems/layer_group.h>
@@ -244,6 +245,8 @@ void CEditorMap::Clean()
 
 	m_MapInfo.Reset();
 	m_MapInfoTmp.Reset();
+
+	m_SelectedImage = 0;
 }
 
 void CEditorMap::CreateDefault()
@@ -311,6 +314,77 @@ void CEditorMap::MakeTuneLayer(const std::shared_ptr<CLayer> &pLayer)
 {
 	m_pTuneLayer = std::static_pointer_cast<CLayerTune>(pLayer);
 	m_pTuneLayer->m_pEditor = m_pEditor;
+}
+
+std::shared_ptr<CEditorImage> CEditorMap::SelectedImage() const
+{
+	if(m_SelectedImage < 0 || (size_t)m_SelectedImage >= m_vpImages.size())
+	{
+		return nullptr;
+	}
+	return m_vpImages[m_SelectedImage];
+}
+
+void CEditorMap::SelectImage(const std::shared_ptr<CEditorImage> &pImage)
+{
+	for(size_t i = 0; i < m_vpImages.size(); ++i)
+	{
+		if(m_vpImages[i] == pImage)
+		{
+			m_SelectedImage = i;
+			break;
+		}
+	}
+}
+
+void CEditorMap::SelectNextImage()
+{
+	const int OldImage = m_SelectedImage;
+	m_SelectedImage = std::clamp(m_SelectedImage, 0, (int)m_vpImages.size() - 1);
+	for(size_t i = m_SelectedImage + 1; i < m_vpImages.size(); i++)
+	{
+		if(m_vpImages[i]->m_External == m_vpImages[m_SelectedImage]->m_External)
+		{
+			m_SelectedImage = i;
+			break;
+		}
+	}
+	if(m_SelectedImage == OldImage && !m_vpImages[m_SelectedImage]->m_External)
+	{
+		for(size_t i = 0; i < m_vpImages.size(); i++)
+		{
+			if(m_vpImages[i]->m_External)
+			{
+				m_SelectedImage = i;
+				break;
+			}
+		}
+	}
+}
+
+void CEditorMap::SelectPreviousImage()
+{
+	const int OldImage = m_SelectedImage;
+	m_SelectedImage = std::clamp(m_SelectedImage, 0, (int)m_vpImages.size() - 1);
+	for(int i = m_SelectedImage - 1; i >= 0; i--)
+	{
+		if(m_vpImages[i]->m_External == m_vpImages[m_SelectedImage]->m_External)
+		{
+			m_SelectedImage = i;
+			break;
+		}
+	}
+	if(m_SelectedImage == OldImage && m_vpImages[m_SelectedImage]->m_External)
+	{
+		for(int i = (int)m_vpImages.size() - 1; i >= 0; i--)
+		{
+			if(!m_vpImages[i]->m_External)
+			{
+				m_SelectedImage = i;
+				break;
+			}
+		}
+	}
 }
 
 bool CEditorMap::IsImageUsed(int ImageIndex) const

@@ -1699,7 +1699,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupImage(void *pContext, CUIRect View, 
 
 	CUIRect Slot;
 	View.HSplitTop(RowHeight, &Slot, &View);
-	std::shared_ptr<CEditorImage> pImg = pEditor->m_Map.m_vpImages[pEditor->m_SelectedImage];
+	std::shared_ptr<CEditorImage> pImg = pEditor->m_Map.SelectedImage();
 
 	if(!pImg->m_External)
 	{
@@ -1793,15 +1793,15 @@ CUi::EPopupMenuFunctionResult CEditor::PopupImage(void *pContext, CUIRect View, 
 	View.HSplitTop(RowHeight, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_RemoveButton, "Remove", 0, &Slot, BUTTONFLAG_LEFT, "Remove the image from the map."))
 	{
-		if(pEditor->m_Map.IsImageUsed(pEditor->m_SelectedImage))
+		if(pEditor->m_Map.IsImageUsed(pEditor->m_Map.m_SelectedImage))
 		{
 			pEditor->m_PopupEventType = POPEVENT_REMOVE_USED_IMAGE;
 			pEditor->m_PopupEventActivated = true;
 		}
 		else
 		{
-			pEditor->m_Map.m_vpImages.erase(pEditor->m_Map.m_vpImages.begin() + pEditor->m_SelectedImage);
-			pEditor->m_Map.ModifyImageIndex(gs_ModifyIndexDeleted(pEditor->m_SelectedImage));
+			pEditor->m_Map.m_vpImages.erase(pEditor->m_Map.m_vpImages.begin() + pEditor->m_Map.m_SelectedImage);
+			pEditor->m_Map.ModifyImageIndex(gs_ModifyIndexDeleted(pEditor->m_Map.m_SelectedImage));
 		}
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
@@ -2204,8 +2204,8 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_REMOVE_USED_IMAGE)
 		{
-			pEditor->m_Map.m_vpImages.erase(pEditor->m_Map.m_vpImages.begin() + pEditor->m_SelectedImage);
-			pEditor->m_Map.ModifyImageIndex(gs_ModifyIndexDeleted(pEditor->m_SelectedImage));
+			pEditor->m_Map.m_vpImages.erase(pEditor->m_Map.m_vpImages.begin() + pEditor->m_Map.m_SelectedImage);
+			pEditor->m_Map.ModifyImageIndex(gs_ModifyIndexDeleted(pEditor->m_Map.m_SelectedImage));
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_REMOVE_USED_SOUND)
 		{

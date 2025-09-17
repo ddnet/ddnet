@@ -97,6 +97,8 @@ public:
 	CMapInfo m_MapInfo;
 	CMapInfo m_MapInfoTmp;
 
+	int m_SelectedImage;
+
 	std::shared_ptr<CEnvelope> NewEnvelope(CEnvelope::EType Type);
 	void InsertEnvelope(int Index, std::shared_ptr<CEnvelope> &pEnvelope);
 	void UpdateEnvelopeReferences(int Index, std::shared_ptr<CEnvelope> &pEnvelope, std::vector<std::shared_ptr<IEditorEnvelopeReference>> &vpEditorObjectReferences);
@@ -129,6 +131,10 @@ public:
 	void MakeSwitchLayer(const std::shared_ptr<CLayer> &pLayer);
 	void MakeTuneLayer(const std::shared_ptr<CLayer> &pLayer);
 
+	std::shared_ptr<CEditorImage> SelectedImage() const;
+	void SelectImage(const std::shared_ptr<CEditorImage> &pImage);
+	void SelectNextImage();
+	void SelectPreviousImage();
 	bool IsImageUsed(int ImageIndex) const;
 
 	bool IsSoundUsed(int SoundIndex) const;
