@@ -7,6 +7,7 @@
 #include <base/system.h>
 
 #include <engine/client/checksum.h>
+#include <engine/console.h>
 #include <engine/shared/protocol.h>
 #include <engine/storage.h>
 
@@ -81,7 +82,7 @@ std::optional<ColorHSLA> CConsole::CResult::GetColor(unsigned Index, float Darke
 	return ColorParse(m_apArgs[Index], DarkestLighting);
 }
 
-const IConsole::CCommandInfo *CConsole::CCommand::NextCommandInfo(int AccessLevel, int FlagMask) const
+const IConsole::CCommandInfo *CConsole::CCommand::NextCommandInfo(EAccessLevel AccessLevel, int FlagMask) const
 {
 	const CCommand *pInfo = Next();
 	while(pInfo)
@@ -93,12 +94,12 @@ const IConsole::CCommandInfo *CConsole::CCommand::NextCommandInfo(int AccessLeve
 	return pInfo;
 }
 
-void CConsole::CCommand::SetAccessLevel(int AccessLevel)
+void CConsole::CCommand::SetAccessLevel(EAccessLevel AccessLevel)
 {
-	m_AccessLevel = std::clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_USER));
+	m_AccessLevel = AccessLevel;
 }
 
-const IConsole::CCommandInfo *CConsole::FirstCommandInfo(int AccessLevel, int FlagMask) const
+const IConsole::CCommandInfo *CConsole::FirstCommandInfo(EAccessLevel AccessLevel, int FlagMask) const
 {
 	for(const CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->Next())
 	{
@@ -109,44 +110,44 @@ const IConsole::CCommandInfo *CConsole::FirstCommandInfo(int AccessLevel, int Fl
 	return nullptr;
 }
 
-std::optional<int> CConsole::AccessLevelToInt(const char *pAccessLevel)
+std::optional<CConsole::EAccessLevel> CConsole::AccessLevelToEnum(const char *pAccessLevel)
 {
 	// alias for legacy integer access levels
 	if(!str_comp(pAccessLevel, "0"))
-		return ACCESS_LEVEL_ADMIN;
+		return EAccessLevel::ADMIN;
 	if(!str_comp(pAccessLevel, "1"))
-		return ACCESS_LEVEL_MOD;
+		return EAccessLevel::MODERATOR;
 	if(!str_comp(pAccessLevel, "2"))
-		return ACCESS_LEVEL_HELPER;
+		return EAccessLevel::HELPER;
 	if(!str_comp(pAccessLevel, "3"))
-		return ACCESS_LEVEL_USER;
+		return EAccessLevel::USER;
 
 	// string access levels
 	if(!str_comp(pAccessLevel, "admin"))
-		return ACCESS_LEVEL_ADMIN;
+		return EAccessLevel::ADMIN;
 	if(!str_comp(pAccessLevel, "moderator"))
-		return ACCESS_LEVEL_MOD;
+		return EAccessLevel::MODERATOR;
 	if(!str_comp(pAccessLevel, "helper"))
-		return ACCESS_LEVEL_HELPER;
+		return EAccessLevel::HELPER;
 	if(!str_comp(pAccessLevel, "all"))
-		return ACCESS_LEVEL_USER;
+		return EAccessLevel::USER;
 	return std::nullopt;
 }
 
-const char *CConsole::AccessLevelToString(int AccessLevel)
+const char *CConsole::AccessLevelToString(EAccessLevel AccessLevel)
 {
 	switch(AccessLevel)
 	{
-	case ACCESS_LEVEL_ADMIN:
+	case EAccessLevel::ADMIN:
 		return "admin";
-	case ACCESS_LEVEL_MOD:
+	case EAccessLevel::MODERATOR:
 		return "moderator";
-	case ACCESS_LEVEL_HELPER:
+	case EAccessLevel::HELPER:
 		return "helper";
-	case ACCESS_LEVEL_USER:
+	case EAccessLevel::USER:
 		return "all";
 	}
-	dbg_assert(false, "invalid access level: %d", AccessLevel);
+	dbg_assert(false, "invalid access level: %d", (int)AccessLevel);
 	dbg_break();
 }
 
@@ -413,9 +414,9 @@ void CConsole::InitChecksum(CChecksumData *pData) const
 	}
 }
 
-void CConsole::SetAccessLevel(int AccessLevel)
+void CConsole::SetAccessLevel(EAccessLevel AccessLevel)
 {
-	m_AccessLevel = std::clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_USER));
+	m_AccessLevel = AccessLevel;
 }
 
 bool CConsole::LineIsValid(const char *pStr)
@@ -751,26 +752,26 @@ void CConsole::ConCommandAccess(IResult *pResult, void *pUser)
 	{
 		if(pResult->NumArguments() == 2)
 		{
-			std::optional<int> AccessLevel = AccessLevelToInt(pResult->GetString(1));
+			std::optional<EAccessLevel> AccessLevel = AccessLevelToEnum(pResult->GetString(1));
 			if(!AccessLevel.has_value())
 			{
 				log_error("console", "Invalid access level '%s'. Allowed values are admin, moderator, helper and all.", pResult->GetString(1));
 				return;
 			}
 			pCommand->SetAccessLevel(AccessLevel.value());
-			str_format(aBuf, sizeof(aBuf), "moderator access for '%s' is now %s", pResult->GetString(0), pCommand->GetAccessLevel() ? "enabled" : "disabled");
+			str_format(aBuf, sizeof(aBuf), "moderator access for '%s' is now %s", pResult->GetString(0), pCommand->GetAccessLevel() >= EAccessLevel::MODERATOR ? "enabled" : "disabled");
 			pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
-			str_format(aBuf, sizeof(aBuf), "helper access for '%s' is now %s", pResult->GetString(0), pCommand->GetAccessLevel() >= ACCESS_LEVEL_HELPER ? "enabled" : "disabled");
+			str_format(aBuf, sizeof(aBuf), "helper access for '%s' is now %s", pResult->GetString(0), pCommand->GetAccessLevel() >= EAccessLevel::HELPER ? "enabled" : "disabled");
 			pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
-			str_format(aBuf, sizeof(aBuf), "user access for '%s' is now %s", pResult->GetString(0), pCommand->GetAccessLevel() >= ACCESS_LEVEL_USER ? "enabled" : "disabled");
+			str_format(aBuf, sizeof(aBuf), "user access for '%s' is now %s", pResult->GetString(0), pCommand->GetAccessLevel() >= EAccessLevel::USER ? "enabled" : "disabled");
 		}
 		else
 		{
-			str_format(aBuf, sizeof(aBuf), "moderator access for '%s' is %s", pResult->GetString(0), pCommand->GetAccessLevel() ? "enabled" : "disabled");
+			str_format(aBuf, sizeof(aBuf), "moderator access for '%s' is %s", pResult->GetString(0), pCommand->GetAccessLevel() >= EAccessLevel::MODERATOR ? "enabled" : "disabled");
 			pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
-			str_format(aBuf, sizeof(aBuf), "helper access for '%s' is %s", pResult->GetString(0), pCommand->GetAccessLevel() >= ACCESS_LEVEL_HELPER ? "enabled" : "disabled");
+			str_format(aBuf, sizeof(aBuf), "helper access for '%s' is %s", pResult->GetString(0), pCommand->GetAccessLevel() >= EAccessLevel::HELPER ? "enabled" : "disabled");
 			pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
-			str_format(aBuf, sizeof(aBuf), "user access for '%s' is %s", pResult->GetString(0), pCommand->GetAccessLevel() >= ACCESS_LEVEL_USER ? "enabled" : "disabled");
+			str_format(aBuf, sizeof(aBuf), "user access for '%s' is %s", pResult->GetString(0), pCommand->GetAccessLevel() >= EAccessLevel::USER ? "enabled" : "disabled");
 		}
 	}
 	else
@@ -784,7 +785,7 @@ void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 	CConsole *pConsole = static_cast<CConsole *>(pUser);
 	char aBuf[240] = "";
 	int Used = 0;
-	std::optional<int> AccessLevel = AccessLevelToInt(pResult->GetString(0));
+	std::optional<EAccessLevel> AccessLevel = AccessLevelToEnum(pResult->GetString(0));
 	if(!AccessLevel.has_value())
 	{
 		log_error("console", "Invalid access level '%s'. Allowed values are admin, moderator, helper and all.", pResult->GetString(0));
@@ -823,7 +824,7 @@ void CConsole::ConUserCommandStatus(IResult *pResult, void *pUser)
 	CConsole *pConsole = static_cast<CConsole *>(pUser);
 	CResult Result(pResult->m_ClientId);
 	Result.m_pCommand = "access_status";
-	Result.AddArgument(AccessLevelToString((int)IConsole::ACCESS_LEVEL_USER));
+	Result.AddArgument(AccessLevelToString(EAccessLevel::USER));
 
 	CConsole::ConCommandStatus(&Result, pConsole);
 }
@@ -841,7 +842,7 @@ void CConsole::TraverseChain(FCommandCallback *ppfnCallback, void **ppUserData)
 CConsole::CConsole(int FlagMask)
 {
 	m_FlagMask = FlagMask;
-	m_AccessLevel = ACCESS_LEVEL_ADMIN;
+	m_AccessLevel = EAccessLevel::ADMIN;
 	m_pRecycleList = nullptr;
 	m_TempCommands.Reset();
 	m_StoreCommands = true;
@@ -969,7 +970,7 @@ void CConsole::Register(const char *pName, const char *pParams,
 		AddCommandSorted(pCommand);
 
 	if(pCommand->m_Flags & CFGFLAG_CHAT)
-		pCommand->SetAccessLevel(ACCESS_LEVEL_USER);
+		pCommand->SetAccessLevel(EAccessLevel::USER);
 }
 
 void CConsole::RegisterTemp(const char *pName, const char *pParams, int Flags, const char *pHelp)

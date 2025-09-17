@@ -313,17 +313,17 @@ const char *CServer::DnsblStateStr(EDnsblState State)
 	dbg_break();
 }
 
-int CServer::ConsoleAccessLevel(int ClientId) const
+IConsole::EAccessLevel CServer::ConsoleAccessLevel(int ClientId) const
 {
 	int AuthLevel = GetAuthedState(ClientId);
 	switch(AuthLevel)
 	{
 	case AUTHED_ADMIN:
-		return IConsole::ACCESS_LEVEL_ADMIN;
+		return IConsole::EAccessLevel::ADMIN;
 	case AUTHED_MOD:
-		return IConsole::ACCESS_LEVEL_MOD;
+		return IConsole::EAccessLevel::MODERATOR;
 	case AUTHED_HELPER:
-		return IConsole::ACCESS_LEVEL_HELPER;
+		return IConsole::EAccessLevel::HELPER;
 	};
 
 	dbg_assert(false, "invalid auth level: %d", AuthLevel);
@@ -1481,7 +1481,7 @@ void CServer::SendRconCmdGroupEnd(int ClientId)
 int CServer::NumRconCommands(int ClientId)
 {
 	int Num = 0;
-	const int AccessLevel = ConsoleAccessLevel(ClientId);
+	const IConsole::EAccessLevel AccessLevel = ConsoleAccessLevel(ClientId);
 	for(const IConsole::CCommandInfo *pCmd = Console()->FirstCommandInfo(AccessLevel, CFGFLAG_SERVER);
 		pCmd; pCmd = pCmd->NextCommandInfo(AccessLevel, CFGFLAG_SERVER))
 	{
@@ -1500,7 +1500,7 @@ void CServer::UpdateClientRconCommands(int ClientId)
 		return;
 	}
 
-	const int AccessLevel = ConsoleAccessLevel(ClientId);
+	const IConsole::EAccessLevel AccessLevel = ConsoleAccessLevel(ClientId);
 	for(int i = 0; i < MAX_RCONCMD_SEND && Client.m_pRconCmdToSend; ++i)
 	{
 		SendRconCmdAdd(Client.m_pRconCmdToSend, ClientId);
@@ -1551,7 +1551,7 @@ void CServer::UpdateClientMaplistEntries(int ClientId)
 	if(Client.m_MaplistEntryToSend == CClient::MAPLIST_UNINITIALIZED)
 	{
 		static const char *const MAP_COMMANDS[] = {"sv_map", "change_map"};
-		const int AccessLevel = ConsoleAccessLevel(ClientId);
+		const IConsole::EAccessLevel AccessLevel = ConsoleAccessLevel(ClientId);
 		const bool MapCommandAllowed = std::any_of(std::begin(MAP_COMMANDS), std::end(MAP_COMMANDS), [&](const char *pMapCommand) {
 			const IConsole::CCommandInfo *pInfo = Console()->GetCommandInfo(pMapCommand, CFGFLAG_SERVER, false);
 			dbg_assert(pInfo != nullptr, "Map command not found");
@@ -1972,7 +1972,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 						CLogScope Scope(&Logger);
 						Console()->ExecuteLineFlag(pCmd, CFGFLAG_SERVER, ClientId);
 					}
-					Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
+					Console()->SetAccessLevel(IConsole::EAccessLevel::ADMIN);
 					m_RconClientId = IServer::RCON_CID_SERV;
 					m_RconAuthLevel = AUTHED_ADMIN;
 				}
@@ -4036,7 +4036,7 @@ void CServer::ConchainCommandAccessUpdate(IConsole::IResult *pResult, void *pUse
 	{
 		CServer *pThis = static_cast<CServer *>(pUserData);
 		const IConsole::CCommandInfo *pInfo = pThis->Console()->GetCommandInfo(pResult->GetString(0), CFGFLAG_SERVER, false);
-		int OldAccessLevel = 0;
+		IConsole::EAccessLevel OldAccessLevel = IConsole::EAccessLevel::ADMIN;
 		if(pInfo)
 			OldAccessLevel = pInfo->GetAccessLevel();
 		pfnCallback(pResult, pCallbackUserData);
@@ -4049,7 +4049,7 @@ void CServer::ConchainCommandAccessUpdate(IConsole::IResult *pResult, void *pUse
 				if(!pThis->IsRconAuthed(i))
 					continue;
 
-				const int ClientAccessLevel = pThis->ConsoleAccessLevel(i);
+				const IConsole::EAccessLevel ClientAccessLevel = pThis->ConsoleAccessLevel(i);
 				bool HadAccess = OldAccessLevel >= ClientAccessLevel;
 				bool HasAccess = pInfo->GetAccessLevel() >= ClientAccessLevel;
 
