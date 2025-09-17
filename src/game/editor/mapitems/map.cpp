@@ -10,6 +10,7 @@
 #include <game/editor/mapitems/layer_quads.h>
 #include <game/editor/mapitems/layer_sounds.h>
 #include <game/editor/mapitems/layer_tiles.h>
+#include <game/editor/mapitems/sound.h>
 
 void CEditorMap::CMapInfo::Reset()
 {
@@ -247,6 +248,7 @@ void CEditorMap::Clean()
 	m_MapInfoTmp.Reset();
 
 	m_SelectedImage = 0;
+	m_SelectedSound = 0;
 }
 
 void CEditorMap::CreateDefault()
@@ -412,6 +414,37 @@ bool CEditorMap::IsImageUsed(int ImageIndex) const
 		}
 	}
 	return false;
+}
+
+std::shared_ptr<CEditorSound> CEditorMap::SelectedSound() const
+{
+	if(m_SelectedSound < 0 || (size_t)m_SelectedSound >= m_vpSounds.size())
+	{
+		return nullptr;
+	}
+	return m_vpSounds[m_SelectedSound];
+}
+
+void CEditorMap::SelectSound(const std::shared_ptr<CEditorSound> &pSound)
+{
+	for(size_t i = 0; i < m_vpSounds.size(); ++i)
+	{
+		if(m_vpSounds[i] == pSound)
+		{
+			m_SelectedSound = i;
+			break;
+		}
+	}
+}
+
+void CEditorMap::SelectNextSound()
+{
+	m_SelectedSound = (m_SelectedSound + 1) % m_vpSounds.size();
+}
+
+void CEditorMap::SelectPreviousSound()
+{
+	m_SelectedSound = (m_SelectedSound + m_vpSounds.size() - 1) % m_vpSounds.size();
 }
 
 bool CEditorMap::IsSoundUsed(int SoundIndex) const

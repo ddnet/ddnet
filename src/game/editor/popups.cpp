@@ -1838,7 +1838,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSound(void *pContext, CUIRect View, 
 
 	CUIRect Slot;
 	View.HSplitTop(RowHeight, &Slot, &View);
-	std::shared_ptr<CEditorSound> pSound = pEditor->m_Map.m_vpSounds[pEditor->m_SelectedSound];
+	std::shared_ptr<CEditorSound> pSound = pEditor->m_Map.SelectedSound();
 
 	static CUi::SSelectionPopupContext s_SelectionPopupContext;
 	static CScrollRegion s_SelectionPopupScrollRegion;
@@ -1902,15 +1902,15 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSound(void *pContext, CUIRect View, 
 	View.HSplitTop(RowHeight, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_RemoveButton, "Remove", 0, &Slot, BUTTONFLAG_LEFT, "Remove the sound from the map."))
 	{
-		if(pEditor->m_Map.IsSoundUsed(pEditor->m_SelectedSound))
+		if(pEditor->m_Map.IsSoundUsed(pEditor->m_Map.m_SelectedSound))
 		{
 			pEditor->m_PopupEventType = POPEVENT_REMOVE_USED_SOUND;
 			pEditor->m_PopupEventActivated = true;
 		}
 		else
 		{
-			pEditor->m_Map.m_vpSounds.erase(pEditor->m_Map.m_vpSounds.begin() + pEditor->m_SelectedSound);
-			pEditor->m_Map.ModifySoundIndex(gs_ModifyIndexDeleted(pEditor->m_SelectedSound));
+			pEditor->m_Map.m_vpSounds.erase(pEditor->m_Map.m_vpSounds.begin() + pEditor->m_Map.m_SelectedSound);
+			pEditor->m_Map.ModifySoundIndex(gs_ModifyIndexDeleted(pEditor->m_Map.m_SelectedSound));
 			pEditor->m_ToolbarPreviewSound = -1;
 		}
 		return CUi::POPUP_CLOSE_CURRENT;
@@ -2209,8 +2209,8 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_REMOVE_USED_SOUND)
 		{
-			pEditor->m_Map.m_vpSounds.erase(pEditor->m_Map.m_vpSounds.begin() + pEditor->m_SelectedSound);
-			pEditor->m_Map.ModifySoundIndex(gs_ModifyIndexDeleted(pEditor->m_SelectedSound));
+			pEditor->m_Map.m_vpSounds.erase(pEditor->m_Map.m_vpSounds.begin() + pEditor->m_Map.m_SelectedSound);
+			pEditor->m_Map.ModifySoundIndex(gs_ModifyIndexDeleted(pEditor->m_Map.m_SelectedSound));
 			pEditor->m_ToolbarPreviewSound = -1;
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_RESTART_SERVER)

@@ -563,7 +563,7 @@ bool CEditor::CallbackSaveSound(const char *pFileName, int StorageType, void *pU
 
 	CEditor *pEditor = static_cast<CEditor *>(pUser);
 
-	std::shared_ptr<CEditorSound> pSound = pEditor->m_Map.m_vpSounds[pEditor->m_SelectedSound];
+	std::shared_ptr<CEditorSound> pSound = pEditor->m_Map.SelectedSound();
 
 	IOHANDLE File = pEditor->Storage()->OpenFile(pFileName, IOFLAG_WRITE, StorageType);
 	if(File)
@@ -1072,9 +1072,9 @@ void CEditor::DoToolbarSounds(CUIRect ToolBar)
 	CUIRect ToolBarTop, ToolBarBottom;
 	ToolBar.HSplitMid(&ToolBarTop, &ToolBarBottom, 5.0f);
 
-	if(m_SelectedSound >= 0 && (size_t)m_SelectedSound < m_Map.m_vpSounds.size())
+	std::shared_ptr<CEditorSound> pSelectedSound = m_Map.SelectedSound();
+	if(pSelectedSound != nullptr)
 	{
-		const std::shared_ptr<CEditorSound> pSelectedSound = m_Map.m_vpSounds[m_SelectedSound];
 		if(pSelectedSound->m_SoundId != m_ToolbarPreviewSound && m_ToolbarPreviewSound >= 0 && Sound()->IsPlaying(m_ToolbarPreviewSound))
 			Sound()->Stop(m_ToolbarPreviewSound);
 		m_ToolbarPreviewSound = pSelectedSound->m_SoundId;
@@ -4254,15 +4254,7 @@ bool CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 	str_copy(pSound->m_aName, aBuf);
 	pEditor->m_Map.m_vpSounds.push_back(pSound);
 
-	for(size_t i = 0; i < pEditor->m_Map.m_vpSounds.size(); ++i)
-	{
-		if(pEditor->m_Map.m_vpSounds[i] == pSound)
-		{
-			pEditor->m_SelectedSound = i;
-			break;
-		}
-	}
-
+	pEditor->m_Map.SelectSound(pSound);
 	pEditor->OnDialogClose();
 	return true;
 }
@@ -4302,7 +4294,7 @@ bool CEditor::ReplaceSound(const char *pFileName, int StorageType, bool CheckDup
 		return false;
 	}
 
-	std::shared_ptr<CEditorSound> pSound = m_Map.m_vpSounds[m_SelectedSound];
+	std::shared_ptr<CEditorSound> pSound = m_Map.SelectedSound();
 
 	if(m_ToolbarPreviewSound == pSound->m_SoundId)
 	{
@@ -4319,15 +4311,7 @@ bool CEditor::ReplaceSound(const char *pFileName, int StorageType, bool CheckDup
 	pSound->m_pData = pData;
 	pSound->m_DataSize = DataSize;
 
-	for(size_t i = 0; i < m_Map.m_vpSounds.size(); ++i)
-	{
-		if(m_Map.m_vpSounds[i] == pSound)
-		{
-			m_SelectedSound = i;
-			break;
-		}
-	}
-
+	m_Map.SelectSound(pSound);
 	OnDialogClose();
 	return true;
 }
@@ -4540,12 +4524,12 @@ void CEditor::RenderSounds(CUIRect ToolBox)
 	{
 		if(Input()->KeyPress(KEY_DOWN))
 		{
-			m_SelectedSound = (m_SelectedSound + 1) % m_Map.m_vpSounds.size();
+			m_Map.SelectNextSound();
 			ScrollToSelection = true;
 		}
 		else if(Input()->KeyPress(KEY_UP))
 		{
-			m_SelectedSound = (m_SelectedSound + m_Map.m_vpSounds.size() - 1) % m_Map.m_vpSounds.size();
+			m_Map.SelectPreviousSound();
 			ScrollToSelection = true;
 		}
 	}
@@ -4558,7 +4542,7 @@ void CEditor::RenderSounds(CUIRect ToolBox)
 	for(int i = 0; i < (int)m_Map.m_vpSounds.size(); i++)
 	{
 		ToolBox.HSplitTop(RowHeight + 2.0f, &Slot, &ToolBox);
-		int Selected = m_SelectedSound == i;
+		int Selected = m_Map.m_SelectedSound == i;
 		if(!s_ScrollRegion.AddRect(Slot, Selected && ScrollToSelection))
 			continue;
 		Slot.HSplitTop(RowHeight, &Slot, nullptr);
@@ -4577,7 +4561,7 @@ void CEditor::RenderSounds(CUIRect ToolBox)
 		if(int Result = DoButton_Ex(&m_Map.m_vpSounds[i], m_Map.m_vpSounds[i]->m_aName, Selected, &Slot,
 			   BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT, "Select sound.", IGraphics::CORNER_ALL))
 		{
-			m_SelectedSound = i;
+			m_Map.m_SelectedSound = i;
 
 			if(Result == 2)
 			{
@@ -7509,7 +7493,6 @@ void CEditor::Reset(bool CreateDefault)
 	DeselectQuads();
 	DeselectQuadPoints();
 	m_SelectedEnvelope = 0;
-	m_SelectedSound = 0;
 	m_SelectedSource = -1;
 
 	m_pContainerPanned = nullptr;

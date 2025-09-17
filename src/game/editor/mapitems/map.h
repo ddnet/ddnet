@@ -98,6 +98,7 @@ public:
 	CMapInfo m_MapInfoTmp;
 
 	int m_SelectedImage;
+	int m_SelectedSound;
 
 	std::shared_ptr<CEnvelope> NewEnvelope(CEnvelope::EType Type);
 	void InsertEnvelope(int Index, std::shared_ptr<CEnvelope> &pEnvelope);
@@ -137,6 +138,10 @@ public:
 	void SelectPreviousImage();
 	bool IsImageUsed(int ImageIndex) const;
 
+	std::shared_ptr<CEditorSound> SelectedSound() const;
+	void SelectSound(const std::shared_ptr<CEditorSound> &pSound);
+	void SelectNextSound();
+	void SelectPreviousSound();
 	bool IsSoundUsed(int SoundIndex) const;
 
 private:
