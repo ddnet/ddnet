@@ -157,9 +157,6 @@ void CPlayers::RenderHookCollLine(
 	Player = *pPlayerChar;
 
 	bool Local = GameClient()->m_Snap.m_LocalClientId == ClientId;
-	bool OtherTeam = GameClient()->IsOtherTeam(ClientId);
-	float Alpha = (OtherTeam || ClientId < 0) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
-	Alpha *= (float)g_Config.m_ClHookCollAlpha / 100;
 
 	if(ClientId >= 0)
 		Intra = GameClient()->m_aClients[ClientId].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
@@ -173,7 +170,6 @@ void CPlayers::RenderHookCollLine(
 	else
 		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), Intra);
 
-	// draw hook collision line
 	bool Aim = (Player.m_PlayerFlags & PLAYERFLAG_AIM);
 	if(!Client()->ServerCapAnyPlayerFlag())
 	{
@@ -208,15 +204,8 @@ void CPlayers::RenderHookCollLine(
 			Direction = vec2(1.0f, 0.0f);
 	}
 
-	Graphics()->TextureClear();
 	vec2 InitPos = Position;
 	vec2 FinishPos = InitPos + Direction * (GameClient()->m_aClients[ClientId].m_Predicted.m_Tuning.m_HookLength - 42.0f);
-
-	const int HookCollSize = Local ? g_Config.m_ClHookCollSize : g_Config.m_ClHookCollSizeOther;
-	if(HookCollSize > 0)
-		Graphics()->QuadsBegin();
-	else
-		Graphics()->LinesBegin();
 
 	ColorRGBA HookCollColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorNoColl));
 
@@ -227,6 +216,7 @@ void CPlayers::RenderHookCollLine(
 
 	std::vector<std::pair<vec2, vec2>> vLineSegments;
 
+	// Calculate hook coll line position
 	do
 	{
 		OldPos = NewPos;
@@ -293,7 +283,20 @@ void CPlayers::RenderHookCollLine(
 		// invert the hook coll colors when using cl_show_hook_coll_always and +showhookcoll is pressed
 		HookCollColor = color_invert(HookCollColor);
 	}
+
+	// Render hook coll line
+	Graphics()->TextureClear();
+	const int HookCollSize = Local ? g_Config.m_ClHookCollSize : g_Config.m_ClHookCollSizeOther;
+	if(HookCollSize > 0)
+		Graphics()->QuadsBegin();
+	else
+		Graphics()->LinesBegin();
+
+	bool OtherTeam = GameClient()->IsOtherTeam(ClientId);
+	float Alpha = (OtherTeam || ClientId < 0) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
+	Alpha *= (float)g_Config.m_ClHookCollAlpha / 100;
 	Graphics()->SetColor(HookCollColor.WithAlpha(Alpha));
+
 	for(const auto &[DrawInitPos, DrawFinishPos] : vLineSegments)
 	{
 		if(HookCollSize > 0)
@@ -517,18 +520,12 @@ void CPlayers::RenderPlayer(
 	{
 		if(!(RenderInfo.m_TeeRenderFlags & TEE_NO_WEAPON))
 		{
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-			Graphics()->QuadsSetRotation(State.GetAttach()->m_Angle * pi * 2.0f + Angle);
-
-			if(ClientId < 0)
-				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.5f);
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
 
 			// normal weapons
 			int CurrentWeapon = std::clamp(Player.m_Weapon, 0, NUM_WEAPONS - 1);
 			Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteWeapons[CurrentWeapon]);
 			int QuadOffset = CurrentWeapon * 2 + (Direction.x < 0.0f ? 1 : 0);
-
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
 
 			float Recoil = 0.0f;
 			vec2 WeaponPosition;
@@ -637,6 +634,7 @@ void CPlayers::RenderPlayer(
 					WeaponPosition.y += 3.0f;
 				if(Player.m_Weapon == WEAPON_GUN && g_Config.m_ClOldGunPosition)
 					WeaponPosition.y -= 8.0f;
+				Graphics()->QuadsSetRotation(State.GetAttach()->m_Angle * pi * 2.0f + Angle);
 				Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, WeaponPosition.x, WeaponPosition.y);
 			}
 
