@@ -51,7 +51,6 @@ public:
 	explicit CEditorMap(CEditor *pEditor) :
 		m_pEditor(pEditor)
 	{
-		Clean();
 	}
 
 	const CEditor *Editor() const { return m_pEditor; }
