@@ -40,6 +40,8 @@ jobs:
         mkdir clang-tidy
         cd clang-tidy
         cmake -G Ninja \
+          -DCMAKE_CXX_COMPILER=clang++-20 \
+          -DCMAKE_C_COMPILER=clang-20 \
           -DCMAKE_CXX_CLANG_TIDY="clang-tidy-20;-warnings-as-errors=*" \
           -DCMAKE_C_CLANG_TIDY="clang-tidy-20;-warnings-as-errors=*" \
           -DCMAKE_BUILD_TYPE=Debug \

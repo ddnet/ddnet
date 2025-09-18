@@ -53,9 +53,16 @@ static LEVEL AvLevelToLogLevel(int Level)
 	const LEVEL LogLevel = AvLevelToLogLevel(Level);
 	if(LogLevel <= LEVEL_INFO)
 	{
-		char aFormat[4096]; // Longest log line length
-		str_truncate(aFormat, sizeof(aFormat), pFormat, str_length(pFormat) - 1); // Truncate duplicate newline
-		log_log_v(LogLevel, "videorecorder/libav", aFormat, VarArgs);
+		char aLog[4096]; // Longest log line length
+		int Length = str_format_v(aLog, sizeof(aLog), pFormat, VarArgs);
+		if(Length > 0)
+		{
+			if(aLog[Length - 1] == '\n')
+			{
+				aLog[Length - 1] = '\0';
+			}
+			log_log(LogLevel, "videorecorder/libav", "%s", aLog);
+		}
 	}
 }
 
