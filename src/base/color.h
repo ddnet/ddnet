@@ -6,6 +6,7 @@
 #include <base/vmath.h>
 
 #include <optional>
+#include <type_traits>
 
 /*
 	Title: Color handling
@@ -88,6 +89,12 @@ public:
 		y = ((col >> 8) & 0xFF) / 255.0f;
 		z = ((col >> 0) & 0xFF) / 255.0f;
 	}
+
+	// Disallow casting between different instantiations of the color4_base template.
+	// The color_cast functions below should be used to convert between colors.
+	template<typename OtherDerivedT>
+	requires(!std::is_same_v<DerivedT, OtherDerivedT>)
+		color4_base(const color4_base<OtherDerivedT> &Other) = delete;
 
 	constexpr vec4 v4() const { return vec4(x, y, z, a); }
 	constexpr operator vec4() const { return vec4(x, y, z, a); }
