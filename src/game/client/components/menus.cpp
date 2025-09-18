@@ -597,17 +597,14 @@ void CMenus::RenderMenubar(CUIRect Box, IClient::EClientState ClientState)
 	}
 	GameClient()->m_Tooltips.DoToolTip(&s_EditorButton, &Button, Localize("Editor"));
 
-	if(ClientState == IClient::STATE_OFFLINE)
+	Box.VSplitRight(10.0f, &Box, nullptr);
+	Box.VSplitRight(33.0f, &Box, &Button);
+	static CButtonContainer s_DemoButton;
+	if(DoButton_MenuTab(&s_DemoButton, FONT_ICON_CLAPPERBOARD, ActivePage == PAGE_DEMOS, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_DEMOBUTTON]))
 	{
-		Box.VSplitRight(10.0f, &Box, nullptr);
-		Box.VSplitRight(33.0f, &Box, &Button);
-		static CButtonContainer s_DemoButton;
-		if(DoButton_MenuTab(&s_DemoButton, FONT_ICON_CLAPPERBOARD, ActivePage == PAGE_DEMOS, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_DEMOBUTTON]))
-		{
-			NewPage = PAGE_DEMOS;
-		}
-		GameClient()->m_Tooltips.DoToolTip(&s_DemoButton, &Button, Localize("Demos"));
+		NewPage = PAGE_DEMOS;
 	}
+	GameClient()->m_Tooltips.DoToolTip(&s_DemoButton, &Button, Localize("Demos"));
 
 	Box.VSplitRight(10.0f, &Box, nullptr);
 
@@ -1206,6 +1203,10 @@ void CMenus::Render()
 			else if(m_GamePage == PAGE_CALLVOTE)
 			{
 				RenderServerControl(MainView);
+			}
+			else if(m_GamePage == PAGE_DEMOS)
+			{
+				RenderDemoBrowser(MainView);
 			}
 			else if(m_GamePage == PAGE_SETTINGS)
 			{
