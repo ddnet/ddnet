@@ -463,6 +463,10 @@ void CMenus::PopupConfirmTurnOffEditor()
 {
 	if(m_MenusIngameTouchControls.CheckCachedSettings())
 	{
+		if(m_MenusIngameTouchControls.m_pOldSelectedButton == nullptr)
+		{
+			m_MenusIngameTouchControls.m_pOldSelectedButton = GameClient()->m_TouchControls.NewButton();
+		}
 		m_MenusIngameTouchControls.SaveCachedSettingsToTarget(m_MenusIngameTouchControls.m_pOldSelectedButton);
 		GameClient()->m_TouchControls.SetEditingActive(!GameClient()->m_TouchControls.IsEditingActive());
 		m_MenusIngameTouchControls.ResetButtonPointers();
