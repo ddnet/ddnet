@@ -7605,7 +7605,6 @@ void CEditor::Reset(bool CreateDefault)
 	m_Map.m_ModifiedAuto = false;
 	m_Map.m_LastModifiedTime = -1.0f;
 	m_Map.m_LastSaveTime = Client()->GlobalTime();
-	m_Map.m_LastAutosaveUpdateTime = -1.0f;
 
 	m_ActiveEnvelopePreview = EEnvelopePreview::NONE;
 	m_ShiftBy = 1;
@@ -7881,8 +7880,8 @@ void CEditor::MouseAxisLock(vec2 &CursorRel)
 void CEditor::HandleAutosave()
 {
 	const float Time = Client()->GlobalTime();
-	const float LastAutosaveUpdateTime = m_Map.m_LastAutosaveUpdateTime;
-	m_Map.m_LastAutosaveUpdateTime = Time;
+	const float LastAutosaveUpdateTime = m_LastAutosaveUpdateTime;
+	m_LastAutosaveUpdateTime = Time;
 
 	if(g_Config.m_EdAutosaveInterval == 0)
 		return; // autosave disabled

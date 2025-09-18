@@ -61,7 +61,6 @@ public:
 	bool m_ModifiedAuto; // unsaved changes in autosave
 	float m_LastModifiedTime;
 	float m_LastSaveTime;
-	float m_LastAutosaveUpdateTime;
 	void OnModify();
 
 	std::vector<std::shared_ptr<CLayerGroup>> m_vpGroups;
