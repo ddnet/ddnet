@@ -199,6 +199,17 @@ class ColorRGBA : public color4_base<ColorRGBA>
 public:
 	using color4_base::color4_base;
 	constexpr ColorRGBA() = default;
+
+	template<Numeric T>
+	constexpr ColorRGBA Multiply(const T &Factor) const
+	{
+		ColorRGBA Color = *this;
+		Color.r *= Factor;
+		Color.g *= Factor;
+		Color.b *= Factor;
+		Color.a *= Factor;
+		return Color;
+	}
 };
 
 template<typename T, typename F>
