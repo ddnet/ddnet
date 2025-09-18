@@ -427,10 +427,6 @@ void CMenus::PopupConfirmChangeSelectedButton()
 	if(m_MenusIngameTouchControls.CheckCachedSettings())
 	{
 		GameClient()->m_TouchControls.SetSelectedButton(m_MenusIngameTouchControls.m_pNewSelectedButton);
-		if(m_MenusIngameTouchControls.m_pOldSelectedButton == nullptr)
-		{
-			m_MenusIngameTouchControls.m_pOldSelectedButton = GameClient()->m_TouchControls.NewButton();
-		}
 		m_MenusIngameTouchControls.SaveCachedSettingsToTarget(m_MenusIngameTouchControls.m_pOldSelectedButton);
 		// Update wild pointer.
 		if(m_MenusIngameTouchControls.m_pNewSelectedButton != nullptr)
