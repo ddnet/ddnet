@@ -1397,7 +1397,7 @@ void CCharacter::HandleBroadcast()
 {
 	CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCid());
 
-	if(m_DDRaceState == ERaceState::STARTED && m_pPlayer->GetClientVersion() == VERSION_VANILLA &&
+	if(m_DDRaceState == ERaceState::STARTED && m_pPlayer->GetClientVersion() == VERSION_VANILLA && !Server()->IsSixup(m_pPlayer->GetCid()) &&
 		m_LastTimeCpBroadcasted != m_LastTimeCp && m_LastTimeCp > -1 &&
 		m_TimeCpBroadcastEndTick > Server()->Tick() && pData->m_BestTime && pData->m_aBestTimeCp[m_LastTimeCp] != 0)
 	{
@@ -1556,17 +1556,27 @@ void CCharacter::SetTimeCheckpoint(int TimeCheckpoint)
 		m_LastTimeCp = TimeCheckpoint;
 		m_aCurrentTimeCp[m_LastTimeCp] = m_Time;
 		m_TimeCpBroadcastEndTick = Server()->Tick() + Server()->TickSpeed() * 2;
-		if(m_pPlayer->GetClientVersion() >= VERSION_DDRACE)
+		if(m_pPlayer->GetClientVersion() >= VERSION_DDRACE || Server()->IsSixup(m_pPlayer->GetCid()))
 		{
 			CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCid());
 			if(pData->m_aBestTimeCp[m_LastTimeCp] != 0.0f)
 			{
-				CNetMsg_Sv_DDRaceTime Msg;
-				Msg.m_Time = (int)(m_Time * 100.0f);
-				Msg.m_Finish = 0;
-				float Diff = (m_aCurrentTimeCp[m_LastTimeCp] - pData->m_aBestTimeCp[m_LastTimeCp]) * 100;
-				Msg.m_Check = (int)Diff;
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, m_pPlayer->GetCid());
+				if(Server()->IsSixup(m_pPlayer->GetCid()))
+				{
+					protocol7::CNetMsg_Sv_Checkpoint Msg;
+					float Diff = (m_aCurrentTimeCp[m_LastTimeCp] - pData->m_aBestTimeCp[m_LastTimeCp]) * 1000;
+					Msg.m_Diff = (int)Diff;
+					Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, m_pPlayer->GetCid());
+				}
+				else
+				{
+					CNetMsg_Sv_DDRaceTime Msg;
+					Msg.m_Time = (int)(m_Time * 100.0f);
+					Msg.m_Finish = 0;
+					float Diff = (m_aCurrentTimeCp[m_LastTimeCp] - pData->m_aBestTimeCp[m_LastTimeCp]) * 100;
+					Msg.m_Check = (int)Diff;
+					Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, m_pPlayer->GetCid());
+				}
 			}
 		}
 	}
