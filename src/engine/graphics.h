@@ -353,6 +353,13 @@ public:
 		CLineItem() = default;
 		CLineItem(float x0, float y0, float x1, float y1) :
 			m_X0(x0), m_Y0(y0), m_X1(x1), m_Y1(y1) {}
+		CLineItem(vec2 From, vec2 To)
+		{
+			m_X0 = From.x;
+			m_Y0 = From.y;
+			m_X1 = To.x;
+			m_Y1 = To.y;
+		}
 	};
 	virtual void LinesBegin() = 0;
 	virtual void LinesEnd() = 0;

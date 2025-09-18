@@ -2754,7 +2754,7 @@ void CEditor::DoQuadKnife(int QuadIndex)
 	int LineCount = maximum(m_QuadKnifeCount - 1, 0);
 
 	for(int i = 0; i < LineCount; i++)
-		aLines[i] = IGraphics::CLineItem(m_aQuadKnifePoints[i].x, m_aQuadKnifePoints[i].y, m_aQuadKnifePoints[i + 1].x, m_aQuadKnifePoints[i + 1].y);
+		aLines[i] = IGraphics::CLineItem(m_aQuadKnifePoints[i], m_aQuadKnifePoints[i + 1]);
 
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 	Graphics()->LinesDraw(aLines, LineCount);
@@ -2763,13 +2763,13 @@ void CEditor::DoQuadKnife(int QuadIndex)
 	{
 		if(m_QuadKnifeCount > 0)
 		{
-			IGraphics::CLineItem LineCurrent(Point.x, Point.y, m_aQuadKnifePoints[m_QuadKnifeCount - 1].x, m_aQuadKnifePoints[m_QuadKnifeCount - 1].y);
+			IGraphics::CLineItem LineCurrent(Point, m_aQuadKnifePoints[m_QuadKnifeCount - 1]);
 			Graphics()->LinesDraw(&LineCurrent, 1);
 		}
 
 		if(m_QuadKnifeCount == 3)
 		{
-			IGraphics::CLineItem LineClose(Point.x, Point.y, m_aQuadKnifePoints[0].x, m_aQuadKnifePoints[0].y);
+			IGraphics::CLineItem LineClose(Point, m_aQuadKnifePoints[0]);
 			Graphics()->LinesDraw(&LineClose, 1);
 		}
 	}
