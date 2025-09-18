@@ -67,6 +67,7 @@ public:
 	float m_LastModifiedTime;
 	float m_LastSaveTime;
 	void OnModify();
+	void ResetModifiedState();
 
 	std::vector<std::shared_ptr<CLayerGroup>> m_vpGroups;
 	std::vector<std::shared_ptr<CEditorImage>> m_vpImages;

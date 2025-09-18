@@ -7601,11 +7601,6 @@ void CEditor::Reset(bool CreateDefault)
 	m_pContainerPanned = nullptr;
 	m_pContainerPannedLast = nullptr;
 
-	m_Map.m_Modified = false;
-	m_Map.m_ModifiedAuto = false;
-	m_Map.m_LastModifiedTime = -1.0f;
-	m_Map.m_LastSaveTime = Client()->GlobalTime();
-
 	m_ActiveEnvelopePreview = EEnvelopePreview::NONE;
 	m_ShiftBy = 1;
 
