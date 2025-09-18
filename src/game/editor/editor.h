@@ -596,7 +596,7 @@ public:
 	// editor_ui.cpp
 	void UpdateTooltip(const void *pId, const CUIRect *pRect, const char *pToolTip);
 	ColorRGBA GetButtonColor(const void *pId, int Checked);
-	int DoButton_Editor_Common(const void *pId, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
+	int DoButtonLogic(const void *pId, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
 	int DoButton_Editor(const void *pId, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
 	int DoButton_Env(const void *pId, const char *pText, int Checked, const CUIRect *pRect, const char *pToolTip, ColorRGBA Color, int Corners);
 	int DoButton_Ex(const void *pId, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize = EditorFontSizes::MENU, int Align = TEXTALIGN_MC);

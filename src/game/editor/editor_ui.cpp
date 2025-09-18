@@ -68,7 +68,7 @@ ColorRGBA CEditor::GetButtonColor(const void *pId, int Checked)
 	}
 }
 
-int CEditor::DoButton_Editor_Common(const void *pId, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
+int CEditor::DoButtonLogic(const void *pId, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
 {
 	if(Ui()->MouseInside(pRect))
 	{
@@ -86,7 +86,7 @@ int CEditor::DoButton_Editor(const void *pId, const char *pText, int Checked, co
 	CUIRect NewRect = *pRect;
 	Ui()->DoLabel(&NewRect, pText, 10.0f, TEXTALIGN_MC);
 	Checked %= 2;
-	return DoButton_Editor_Common(pId, pText, Checked, pRect, Flags, pToolTip);
+	return DoButtonLogic(pId, Checked, pRect, Flags, pToolTip);
 }
 
 int CEditor::DoButton_Env(const void *pId, const char *pText, int Checked, const CUIRect *pRect, const char *pToolTip, ColorRGBA BaseColor, int Corners)
@@ -98,7 +98,7 @@ int CEditor::DoButton_Env(const void *pId, const char *pText, int Checked, const
 	pRect->Draw(Color, Corners, 3.0f);
 	Ui()->DoLabel(pRect, pText, 10.0f, TEXTALIGN_MC);
 	Checked %= 2;
-	return DoButton_Editor_Common(pId, pText, Checked, pRect, BUTTONFLAG_LEFT, pToolTip);
+	return DoButtonLogic(pId, Checked, pRect, BUTTONFLAG_LEFT, pToolTip);
 }
 
 int CEditor::DoButton_Ex(const void *pId, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize, int Align)
@@ -113,7 +113,7 @@ int CEditor::DoButton_Ex(const void *pId, const char *pText, int Checked, const 
 	Props.m_EllipsisAtEnd = true;
 	Ui()->DoLabel(&Rect, pText, FontSize, Align, Props);
 
-	return DoButton_Editor_Common(pId, pText, Checked, pRect, Flags, pToolTip);
+	return DoButtonLogic(pId, Checked, pRect, Flags, pToolTip);
 }
 
 int CEditor::DoButton_FontIcon(const void *pId, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize)
@@ -126,7 +126,7 @@ int CEditor::DoButton_FontIcon(const void *pId, const char *pText, int Checked, 
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 
-	return DoButton_Editor_Common(pId, pText, Checked, pRect, Flags, pToolTip);
+	return DoButtonLogic(pId, Checked, pRect, Flags, pToolTip);
 }
 
 int CEditor::DoButton_MenuItem(const void *pId, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
@@ -146,7 +146,7 @@ int CEditor::DoButton_MenuItem(const void *pId, const char *pText, int Checked, 
 	}
 	Ui()->DoLabel(&Rect, pText, 10.0f, TEXTALIGN_ML, Props);
 
-	return DoButton_Editor_Common(pId, pText, Checked, pRect, Flags, pToolTip);
+	return DoButtonLogic(pId, Checked, pRect, Flags, pToolTip);
 }
 
 int CEditor::DoButton_DraggableEx(const void *pId, const char *pText, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted, int Flags, const char *pToolTip, int Corners, float FontSize)
