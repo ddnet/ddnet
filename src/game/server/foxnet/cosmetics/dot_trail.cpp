@@ -9,8 +9,6 @@
 
 #include <generated/protocol.h>
 
-#include <engine/shared/config.h>
-
 #include <base/vmath.h>
 
 #include "dot_trail.h"
@@ -18,6 +16,7 @@
 CDotTrail::CDotTrail(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_DOT_TRAIL, Pos)
 {
+	m_Pos = Pos;
 	m_Owner = Owner;
 
 	GameWorld()->InsertEntity(this);

@@ -16,8 +16,6 @@ CLovely::CLovely(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
 {
 	m_Owner = Owner;
 	m_SpawnDelay = 0;
-	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	m_TeamMask = pOwnerChar ? pOwnerChar->TeamMask() : CClientMask();
 	for(int i = 0; i < MAX_HEARTS; i++)
 		m_aData[i].m_Id = Server()->SnapNewId();
 	GameWorld()->InsertEntity(this);

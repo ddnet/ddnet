@@ -15,8 +15,8 @@
 CRotatingBall::CRotatingBall(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_ROTATING_BALL, Pos)
 {
-	m_Owner = Owner;
 	m_Pos = Pos;
+	m_Owner = Owner;
 
 	m_IsRotating = true;
 

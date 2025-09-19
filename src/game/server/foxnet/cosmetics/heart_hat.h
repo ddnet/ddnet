@@ -24,7 +24,7 @@ class CHeartHat : public CEntity
 	vec2 m_aPos[NUM_HEARTS];
 
 public:
-	CHeartHat(CGameWorld *pGameWorld, int Owner);
+	CHeartHat(CGameWorld *pGameWorld, int Owner, vec2 Pos);
 
 	virtual void Reset() override;
 	virtual void Tick() override;

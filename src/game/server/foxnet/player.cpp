@@ -19,6 +19,7 @@
 #include "accounts.h"
 #include "shop.h"
 #include <engine/shared/protocol.h>
+#include <base/vmath.h>
 
 CAccountSession *CPlayer::Acc() { return &GameServer()->m_aAccounts[m_ClientId]; }
 
@@ -574,41 +575,40 @@ void CPlayer::SetRotatingBall(bool Active)
 {
 	if(m_Cosmetics.m_RotatingBall == Active)
 		return;
-
 	m_Cosmetics.m_RotatingBall = Active;
-	if(GetCharacter() && m_Cosmetics.m_RotatingBall)
-		new CRotatingBall(&GameServer()->m_World, GetCid(), vec2(0, 0));
+	const vec2 Pos = GetCharacter() ? GetCharacter()->GetPos() : vec2(0, 0);
+	if(m_Cosmetics.m_RotatingBall)
+		new CRotatingBall(&GameServer()->m_World, GetCid(), Pos);
 }
 
 void CPlayer::SetEpicCircle(bool Active)
 {
 	if(m_Cosmetics.m_EpicCircle == Active)
 		return;
-
 	m_Cosmetics.m_EpicCircle = Active;
-
-	if(GetCharacter() && Active)
-		new CEpicCircle(&GameServer()->m_World, GetCid(), vec2(0, 0));
+	const vec2 Pos = GetCharacter() ? GetCharacter()->GetPos() : vec2(0, 0);
+	if(Active)
+		new CEpicCircle(&GameServer()->m_World, GetCid(), Pos);
 }
 
 void CPlayer::SetLovely(bool Active)
 {
 	if(m_Cosmetics.m_Lovely == Active)
 		return;
-
 	m_Cosmetics.m_Lovely = Active;
+	const vec2 Pos = GetCharacter() ? GetCharacter()->GetPos() : vec2(0, 0);
 	if(Active)
-		new CLovely(&GameServer()->m_World, GetCid(), vec2(0, 0));
+		new CLovely(&GameServer()->m_World, GetCid(), Pos);
 }
 
 void CPlayer::SetTrail(int Type)
 {
 	if(m_Cosmetics.m_Trail == Type)
 		return;
-
 	m_Cosmetics.m_Trail = Type;
+	const vec2 Pos = GetCharacter() ? GetCharacter()->GetPos() : vec2(0, 0);
 	if(Type == TRAIL_DOT)
-		new CDotTrail(&GameServer()->m_World, GetCid(), vec2(0, 0));
+		new CDotTrail(&GameServer()->m_World, GetCid(), Pos);
 }
 
 void CPlayer::SetPickupPet(bool Active)
@@ -616,8 +616,9 @@ void CPlayer::SetPickupPet(bool Active)
 	if(m_Cosmetics.m_PickupPet == Active)
 		return;
 	m_Cosmetics.m_PickupPet = Active;
+	const vec2 Pos = GetCharacter() ? GetCharacter()->GetPos() : vec2(0, 0);
 	if(Active)
-		m_pPickupPet = new CPickupPet(&GameServer()->m_World, GetCid(), vec2(0, 0));
+		m_pPickupPet = new CPickupPet(&GameServer()->m_World, GetCid(), Pos);
 }
 
 void CPlayer::SetStaffInd(bool Active)
@@ -625,8 +626,9 @@ void CPlayer::SetStaffInd(bool Active)
 	if(m_Cosmetics.m_StaffInd == Active)
 		return;
 	m_Cosmetics.m_StaffInd = Active;
+	const vec2 Pos = GetCharacter() ? GetCharacter()->GetPos() : vec2(0, 0);
 	if(Active)
-		new CStaffInd(&GameServer()->m_World, GetCid(), vec2(0, 0));
+		new CStaffInd(&GameServer()->m_World, GetCid(), Pos);
 }
 
 void CPlayer::SetHeartHat(bool Active)
@@ -634,8 +636,9 @@ void CPlayer::SetHeartHat(bool Active)
 	if(m_Cosmetics.m_HeartHat == Active)
 		return;
 	m_Cosmetics.m_HeartHat = Active;
+	const vec2 Pos = GetCharacter() ? GetCharacter()->GetPos() : vec2(0, 0);
 	if(Active)
-		new CHeartHat(&GameServer()->m_World, GetCid());
+		new CHeartHat(&GameServer()->m_World, GetCid(), Pos);
 }
 
 void CPlayer::SetDamageIndType(int Type)
@@ -843,8 +846,8 @@ void CPlayer::Repredict(int PredMargin)
 	int PingMs = m_Latency.m_Min + PredMargin;
 
 	static const std::unordered_map<int, double> s_BucketByPing = {
-		{0, 2.0},
-		{10, 3.0},
+		{0, 2.8},
+		{10, 3.4},
 		{20, 4.1},
 		{30, 5.0},
 		{40, 5.8},

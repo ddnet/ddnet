@@ -21,6 +21,7 @@
 CStaffInd::CStaffInd(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_STAFF_IND, Pos)
 {
+	m_Pos = Pos;
 	m_Owner = Owner;
 
 	m_Dist = 0.f;

@@ -14,15 +14,18 @@
 #include <base/vmath.h>
 
 #include "heart_hat.h"
-CHeartHat::CHeartHat(CGameWorld *pGameWorld, int Owner) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_HEART_HAT, vec2(0, 0))
+CHeartHat::CHeartHat(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_HEART_HAT, Pos)
 {
-	m_aPos[0] = vec2(0, 0);
+	m_Pos = Pos;
 
 	m_Owner = Owner;
 	m_Ids[0] = GetId();
 	for(int i = 0; i < NUM_HEARTS - 1; i++)
+	{
 		m_Ids[i + 1] = Server()->SnapNewId();
+		m_aPos[i] = Pos;
+	}
 
 	GameWorld()->InsertEntity(this);
 }
@@ -33,7 +36,6 @@ void CHeartHat::Reset()
 		Server()->SnapFreeId(m_Ids[i + 1]);
 
 	Server()->SnapFreeId(GetId());
-
 	GameWorld()->RemoveEntity(this);
 }
 

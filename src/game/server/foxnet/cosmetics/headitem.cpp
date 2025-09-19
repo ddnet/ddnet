@@ -19,6 +19,7 @@
 CHeadItem::CHeadItem(CGameWorld *pGameWorld, int Owner, vec2 Pos, int Type, float Offset) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_HEAD_ITEM, Pos)
 {
+	m_Pos = Pos;
 	m_Owner = Owner;
 
 	// Type of Entity
