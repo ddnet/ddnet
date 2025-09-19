@@ -63,96 +63,97 @@ enum class EFontPreset
 	ICON_FONT,
 };
 
-namespace FontIcons {
-// Each font icon is named according to its official name in Font Awesome
-[[maybe_unused]] static const char *FONT_ICON_PLUS = "+";
-[[maybe_unused]] static const char *FONT_ICON_MINUS = "-";
-[[maybe_unused]] static const char *FONT_ICON_LOCK = "\xEF\x80\xA3";
-[[maybe_unused]] static const char *FONT_ICON_MAGNIFYING_GLASS = "\xEF\x80\x82";
-[[maybe_unused]] static const char *FONT_ICON_HEART = "\xEF\x80\x84";
-[[maybe_unused]] static const char *FONT_ICON_STAR = "\xEF\x80\x85";
-[[maybe_unused]] static const char *FONT_ICON_XMARK = "\xEF\x80\x8D";
-[[maybe_unused]] static const char *FONT_ICON_CIRCLE = "\xEF\x84\x91";
-[[maybe_unused]] static const char *FONT_ICON_ARROW_ROTATE_LEFT = "\xEF\x83\xA2";
-[[maybe_unused]] static const char *FONT_ICON_ARROW_ROTATE_RIGHT = "\xEF\x80\x9E";
-[[maybe_unused]] static const char *FONT_ICON_FLAG_CHECKERED = "\xEF\x84\x9E";
-[[maybe_unused]] static const char *FONT_ICON_BAN = "\xEF\x81\x9E";
-[[maybe_unused]] static const char *FONT_ICON_CIRCLE_CHEVRON_DOWN = "\xEF\x84\xBA";
-[[maybe_unused]] static const char *FONT_ICON_SQUARE_MINUS = "\xEF\x85\x86";
-[[maybe_unused]] static const char *FONT_ICON_SQUARE_PLUS = "\xEF\x83\xBE";
-[[maybe_unused]] static const char *FONT_ICON_SORT_UP = "\xEF\x83\x9E";
-[[maybe_unused]] static const char *FONT_ICON_SORT_DOWN = "\xEF\x83\x9D";
-[[maybe_unused]] static const char *FONT_ICON_TRIANGLE_EXCLAMATION = "\xEF\x81\xB1";
+namespace FontIcons
+{
+	// Each font icon is named according to its official name in Font Awesome
+	[[maybe_unused]] static const char *FONT_ICON_PLUS = "+";
+	[[maybe_unused]] static const char *FONT_ICON_MINUS = "-";
+	[[maybe_unused]] static const char *FONT_ICON_LOCK = "\xEF\x80\xA3";
+	[[maybe_unused]] static const char *FONT_ICON_MAGNIFYING_GLASS = "\xEF\x80\x82";
+	[[maybe_unused]] static const char *FONT_ICON_HEART = "\xEF\x80\x84";
+	[[maybe_unused]] static const char *FONT_ICON_STAR = "\xEF\x80\x85";
+	[[maybe_unused]] static const char *FONT_ICON_XMARK = "\xEF\x80\x8D";
+	[[maybe_unused]] static const char *FONT_ICON_CIRCLE = "\xEF\x84\x91";
+	[[maybe_unused]] static const char *FONT_ICON_ARROW_ROTATE_LEFT = "\xEF\x83\xA2";
+	[[maybe_unused]] static const char *FONT_ICON_ARROW_ROTATE_RIGHT = "\xEF\x80\x9E";
+	[[maybe_unused]] static const char *FONT_ICON_FLAG_CHECKERED = "\xEF\x84\x9E";
+	[[maybe_unused]] static const char *FONT_ICON_BAN = "\xEF\x81\x9E";
+	[[maybe_unused]] static const char *FONT_ICON_CIRCLE_CHEVRON_DOWN = "\xEF\x84\xBA";
+	[[maybe_unused]] static const char *FONT_ICON_SQUARE_MINUS = "\xEF\x85\x86";
+	[[maybe_unused]] static const char *FONT_ICON_SQUARE_PLUS = "\xEF\x83\xBE";
+	[[maybe_unused]] static const char *FONT_ICON_SORT_UP = "\xEF\x83\x9E";
+	[[maybe_unused]] static const char *FONT_ICON_SORT_DOWN = "\xEF\x83\x9D";
+	[[maybe_unused]] static const char *FONT_ICON_TRIANGLE_EXCLAMATION = "\xEF\x81\xB1";
 
-[[maybe_unused]] static const char *FONT_ICON_HOUSE = "\xEF\x80\x95";
-[[maybe_unused]] static const char *FONT_ICON_BOOKMARK = "\xEF\x80\xAE";
-[[maybe_unused]] static const char *FONT_ICON_NEWSPAPER = "\xEF\x87\xAA";
-[[maybe_unused]] static const char *FONT_ICON_POWER_OFF = "\xEF\x80\x91";
-[[maybe_unused]] static const char *FONT_ICON_GEAR = "\xEF\x80\x93";
-[[maybe_unused]] static const char *FONT_ICON_PEN_TO_SQUARE = "\xEF\x81\x84";
-[[maybe_unused]] static const char *FONT_ICON_CLAPPERBOARD = "\xEE\x84\xB1";
-[[maybe_unused]] static const char *FONT_ICON_EARTH_AMERICAS = "\xEF\x95\xBD";
-[[maybe_unused]] static const char *FONT_ICON_NETWORK_WIRED = "\xEF\x9B\xBF";
-[[maybe_unused]] static const char *FONT_ICON_LIST_UL = "\xEF\x83\x8A";
-[[maybe_unused]] static const char *FONT_ICON_INFO = "\xEF\x84\xA9";
-[[maybe_unused]] static const char *FONT_ICON_TERMINAL = "\xEF\x84\xA0";
+	[[maybe_unused]] static const char *FONT_ICON_HOUSE = "\xEF\x80\x95";
+	[[maybe_unused]] static const char *FONT_ICON_BOOKMARK = "\xEF\x80\xAE";
+	[[maybe_unused]] static const char *FONT_ICON_NEWSPAPER = "\xEF\x87\xAA";
+	[[maybe_unused]] static const char *FONT_ICON_POWER_OFF = "\xEF\x80\x91";
+	[[maybe_unused]] static const char *FONT_ICON_GEAR = "\xEF\x80\x93";
+	[[maybe_unused]] static const char *FONT_ICON_PEN_TO_SQUARE = "\xEF\x81\x84";
+	[[maybe_unused]] static const char *FONT_ICON_CLAPPERBOARD = "\xEE\x84\xB1";
+	[[maybe_unused]] static const char *FONT_ICON_EARTH_AMERICAS = "\xEF\x95\xBD";
+	[[maybe_unused]] static const char *FONT_ICON_NETWORK_WIRED = "\xEF\x9B\xBF";
+	[[maybe_unused]] static const char *FONT_ICON_LIST_UL = "\xEF\x83\x8A";
+	[[maybe_unused]] static const char *FONT_ICON_INFO = "\xEF\x84\xA9";
+	[[maybe_unused]] static const char *FONT_ICON_TERMINAL = "\xEF\x84\xA0";
 
-[[maybe_unused]] static const char *FONT_ICON_SLASH = "\xEF\x9C\x95";
-[[maybe_unused]] static const char *FONT_ICON_PLAY = "\xEF\x81\x8B";
-[[maybe_unused]] static const char *FONT_ICON_PAUSE = "\xEF\x81\x8C";
-[[maybe_unused]] static const char *FONT_ICON_STOP = "\xEF\x81\x8D";
-[[maybe_unused]] static const char *FONT_ICON_CHEVRON_LEFT = "\xEF\x81\x93";
-[[maybe_unused]] static const char *FONT_ICON_CHEVRON_RIGHT = "\xEF\x81\x94";
-[[maybe_unused]] static const char *FONT_ICON_CHEVRON_UP = "\xEF\x81\xB7";
-[[maybe_unused]] static const char *FONT_ICON_CHEVRON_DOWN = "\xEF\x81\xB8";
-[[maybe_unused]] static const char *FONT_ICON_BACKWARD = "\xEF\x81\x8A";
-[[maybe_unused]] static const char *FONT_ICON_FORWARD = "\xEF\x81\x8E";
-[[maybe_unused]] static const char *FONT_ICON_RIGHT_FROM_BRACKET = "\xEF\x8B\xB5";
-[[maybe_unused]] static const char *FONT_ICON_RIGHT_TO_BRACKET = "\xEF\x8B\xB6";
-[[maybe_unused]] static const char *FONT_ICON_ARROW_UP_RIGHT_FROM_SQUARE = "\xEF\x82\x8E";
-[[maybe_unused]] static const char *FONT_ICON_BACKWARD_STEP = "\xEF\x81\x88";
-[[maybe_unused]] static const char *FONT_ICON_FORWARD_STEP = "\xEF\x81\x91";
-[[maybe_unused]] static const char *FONT_ICON_BACKWARD_FAST = "\xEF\x81\x89";
-[[maybe_unused]] static const char *FONT_ICON_FORWARD_FAST = "\xEF\x81\x90";
-[[maybe_unused]] static const char *FONT_ICON_KEYBOARD = "\xE2\x8C\xA8";
-[[maybe_unused]] static const char *FONT_ICON_ELLIPSIS = "\xEF\x85\x81";
+	[[maybe_unused]] static const char *FONT_ICON_SLASH = "\xEF\x9C\x95";
+	[[maybe_unused]] static const char *FONT_ICON_PLAY = "\xEF\x81\x8B";
+	[[maybe_unused]] static const char *FONT_ICON_PAUSE = "\xEF\x81\x8C";
+	[[maybe_unused]] static const char *FONT_ICON_STOP = "\xEF\x81\x8D";
+	[[maybe_unused]] static const char *FONT_ICON_CHEVRON_LEFT = "\xEF\x81\x93";
+	[[maybe_unused]] static const char *FONT_ICON_CHEVRON_RIGHT = "\xEF\x81\x94";
+	[[maybe_unused]] static const char *FONT_ICON_CHEVRON_UP = "\xEF\x81\xB7";
+	[[maybe_unused]] static const char *FONT_ICON_CHEVRON_DOWN = "\xEF\x81\xB8";
+	[[maybe_unused]] static const char *FONT_ICON_BACKWARD = "\xEF\x81\x8A";
+	[[maybe_unused]] static const char *FONT_ICON_FORWARD = "\xEF\x81\x8E";
+	[[maybe_unused]] static const char *FONT_ICON_RIGHT_FROM_BRACKET = "\xEF\x8B\xB5";
+	[[maybe_unused]] static const char *FONT_ICON_RIGHT_TO_BRACKET = "\xEF\x8B\xB6";
+	[[maybe_unused]] static const char *FONT_ICON_ARROW_UP_RIGHT_FROM_SQUARE = "\xEF\x82\x8E";
+	[[maybe_unused]] static const char *FONT_ICON_BACKWARD_STEP = "\xEF\x81\x88";
+	[[maybe_unused]] static const char *FONT_ICON_FORWARD_STEP = "\xEF\x81\x91";
+	[[maybe_unused]] static const char *FONT_ICON_BACKWARD_FAST = "\xEF\x81\x89";
+	[[maybe_unused]] static const char *FONT_ICON_FORWARD_FAST = "\xEF\x81\x90";
+	[[maybe_unused]] static const char *FONT_ICON_KEYBOARD = "\xE2\x8C\xA8";
+	[[maybe_unused]] static const char *FONT_ICON_ELLIPSIS = "\xEF\x85\x81";
 
-[[maybe_unused]] static const char *FONT_ICON_FOLDER = "\xEF\x81\xBB";
-[[maybe_unused]] static const char *FONT_ICON_FOLDER_OPEN = "\xEF\x81\xBC";
-[[maybe_unused]] static const char *FONT_ICON_FOLDER_TREE = "\xEF\xA0\x82";
-[[maybe_unused]] static const char *FONT_ICON_FILM = "\xEF\x80\x88";
-[[maybe_unused]] static const char *FONT_ICON_VIDEO = "\xEF\x80\xBD";
-[[maybe_unused]] static const char *FONT_ICON_MAP = "\xEF\x89\xB9";
-[[maybe_unused]] static const char *FONT_ICON_IMAGE = "\xEF\x80\xBE";
-[[maybe_unused]] static const char *FONT_ICON_MUSIC = "\xEF\x80\x81";
-[[maybe_unused]] static const char *FONT_ICON_FILE = "\xEF\x85\x9B";
+	[[maybe_unused]] static const char *FONT_ICON_FOLDER = "\xEF\x81\xBB";
+	[[maybe_unused]] static const char *FONT_ICON_FOLDER_OPEN = "\xEF\x81\xBC";
+	[[maybe_unused]] static const char *FONT_ICON_FOLDER_TREE = "\xEF\xA0\x82";
+	[[maybe_unused]] static const char *FONT_ICON_FILM = "\xEF\x80\x88";
+	[[maybe_unused]] static const char *FONT_ICON_VIDEO = "\xEF\x80\xBD";
+	[[maybe_unused]] static const char *FONT_ICON_MAP = "\xEF\x89\xB9";
+	[[maybe_unused]] static const char *FONT_ICON_IMAGE = "\xEF\x80\xBE";
+	[[maybe_unused]] static const char *FONT_ICON_MUSIC = "\xEF\x80\x81";
+	[[maybe_unused]] static const char *FONT_ICON_FILE = "\xEF\x85\x9B";
 
-[[maybe_unused]] static const char *FONT_ICON_PENCIL = "\xEF\x8C\x83";
-[[maybe_unused]] static const char *FONT_ICON_TRASH = "\xEF\x87\xB8";
+	[[maybe_unused]] static const char *FONT_ICON_PENCIL = "\xEF\x8C\x83";
+	[[maybe_unused]] static const char *FONT_ICON_TRASH = "\xEF\x87\xB8";
 
-[[maybe_unused]] static const char *FONT_ICON_ARROWS_LEFT_RIGHT = "\xEF\x8C\xB7";
-[[maybe_unused]] static const char *FONT_ICON_ARROWS_UP_DOWN = "\xEF\x81\xBD";
-[[maybe_unused]] static const char *FONT_ICON_CIRCLE_PLAY = "\xEF\x85\x84";
-[[maybe_unused]] static const char *FONT_ICON_BORDER_ALL = "\xEF\xA1\x8C";
-[[maybe_unused]] static const char *FONT_ICON_EYE = "\xEF\x81\xAE";
-[[maybe_unused]] static const char *FONT_ICON_EYE_SLASH = "\xEF\x81\xB0";
-[[maybe_unused]] static const char *FONT_ICON_EYE_DROPPER = "\xEF\x87\xBB";
+	[[maybe_unused]] static const char *FONT_ICON_ARROWS_LEFT_RIGHT = "\xEF\x8C\xB7";
+	[[maybe_unused]] static const char *FONT_ICON_ARROWS_UP_DOWN = "\xEF\x81\xBD";
+	[[maybe_unused]] static const char *FONT_ICON_CIRCLE_PLAY = "\xEF\x85\x84";
+	[[maybe_unused]] static const char *FONT_ICON_BORDER_ALL = "\xEF\xA1\x8C";
+	[[maybe_unused]] static const char *FONT_ICON_EYE = "\xEF\x81\xAE";
+	[[maybe_unused]] static const char *FONT_ICON_EYE_SLASH = "\xEF\x81\xB0";
+	[[maybe_unused]] static const char *FONT_ICON_EYE_DROPPER = "\xEF\x87\xBB";
 
-[[maybe_unused]] static const char *FONT_ICON_DICE_ONE = "\xEF\x94\xA5";
-[[maybe_unused]] static const char *FONT_ICON_DICE_TWO = "\xEF\x94\xA8";
-[[maybe_unused]] static const char *FONT_ICON_DICE_THREE = "\xEF\x94\xA7";
-[[maybe_unused]] static const char *FONT_ICON_DICE_FOUR = "\xEF\x94\xA4";
-[[maybe_unused]] static const char *FONT_ICON_DICE_FIVE = "\xEF\x94\xA3";
-[[maybe_unused]] static const char *FONT_ICON_DICE_SIX = "\xEF\x94\xA6";
+	[[maybe_unused]] static const char *FONT_ICON_DICE_ONE = "\xEF\x94\xA5";
+	[[maybe_unused]] static const char *FONT_ICON_DICE_TWO = "\xEF\x94\xA8";
+	[[maybe_unused]] static const char *FONT_ICON_DICE_THREE = "\xEF\x94\xA7";
+	[[maybe_unused]] static const char *FONT_ICON_DICE_FOUR = "\xEF\x94\xA4";
+	[[maybe_unused]] static const char *FONT_ICON_DICE_FIVE = "\xEF\x94\xA3";
+	[[maybe_unused]] static const char *FONT_ICON_DICE_SIX = "\xEF\x94\xA6";
 
-[[maybe_unused]] static const char *FONT_ICON_LAYER_GROUP = "\xEF\x97\xBD";
-[[maybe_unused]] static const char *FONT_ICON_UNDO = "\xEF\x8B\xAA";
-[[maybe_unused]] static const char *FONT_ICON_REDO = "\xEF\x8B\xB9";
+	[[maybe_unused]] static const char *FONT_ICON_LAYER_GROUP = "\xEF\x97\xBD";
+	[[maybe_unused]] static const char *FONT_ICON_UNDO = "\xEF\x8B\xAA";
+	[[maybe_unused]] static const char *FONT_ICON_REDO = "\xEF\x8B\xB9";
 
-[[maybe_unused]] static const char *FONT_ICON_ARROWS_ROTATE = "\xEF\x80\xA1";
-[[maybe_unused]] static const char *FONT_ICON_QUESTION = "?";
+	[[maybe_unused]] static const char *FONT_ICON_ARROWS_ROTATE = "\xEF\x80\xA1";
+	[[maybe_unused]] static const char *FONT_ICON_QUESTION = "?";
 
-[[maybe_unused]] static const char *FONT_ICON_CAMERA = "\xEF\x80\xB0";
+	[[maybe_unused]] static const char *FONT_ICON_CAMERA = "\xEF\x80\xB0";
 } // end namespace FontIcons
 
 enum ETextCursorSelectionMode
