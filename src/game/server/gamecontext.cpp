@@ -3247,27 +3247,31 @@ void CGameContext::ConRestart(IConsole::IResult *pResult, void *pUserData)
 		pSelf->m_pController->StartRound();
 }
 
+static void UnescapeNewlines(char *pBuf)
+{
+	int i, j;
+	for(i = 0, j = 0; pBuf[i]; i++, j++)
+	{
+		if(pBuf[i] == '\\' && pBuf[i + 1] == 'n')
+		{
+			pBuf[j] = '\n';
+			i++;
+		}
+		else if(i != j)
+		{
+			pBuf[j] = pBuf[i];
+		}
+	}
+	pBuf[j] = '\0';
+}
+
 void CGameContext::ConBroadcast(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
 	char aBuf[1024];
 	str_copy(aBuf, pResult->GetString(0), sizeof(aBuf));
-
-	int i, j;
-	for(i = 0, j = 0; aBuf[i]; i++, j++)
-	{
-		if(aBuf[i] == '\\' && aBuf[i + 1] == 'n')
-		{
-			aBuf[j] = '\n';
-			i++;
-		}
-		else if(i != j)
-		{
-			aBuf[j] = aBuf[i];
-		}
-	}
-	aBuf[j] = '\0';
+	UnescapeNewlines(aBuf);
 
 	pSelf->SendBroadcast(aBuf, -1);
 }
