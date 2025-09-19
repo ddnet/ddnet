@@ -75,21 +75,15 @@ public:
 		virtual int GetVictim() const = 0;
 	};
 
-	class CCommandInfo
+	class ICommandInfo
 	{
-	protected:
-		EAccessLevel m_AccessLevel;
-
 	public:
-		CCommandInfo() { m_AccessLevel = EAccessLevel::ADMIN; }
-		virtual ~CCommandInfo() = default;
-		const char *m_pName;
-		const char *m_pHelp;
-		const char *m_pParams;
-
-		virtual const CCommandInfo *NextCommandInfo(EAccessLevel AccessLevel, int FlagMask) const = 0;
-
-		EAccessLevel GetAccessLevel() const { return m_AccessLevel; }
+		virtual ~ICommandInfo() = default;
+		virtual const char *Name() const = 0;
+		virtual const char *Help() const = 0;
+		virtual const char *Params() const = 0;
+		virtual const ICommandInfo *NextCommandInfo(EAccessLevel AccessLevel, int FlagMask) const = 0;
+		virtual EAccessLevel GetAccessLevel() const = 0;
 	};
 
 	typedef void (*FTeeHistorianCommandCallback)(int ClientId, int FlagMask, const char *pCmd, IResult *pResult, void *pUser);
@@ -102,8 +96,8 @@ public:
 	static bool EmptyUnknownCommandCallback(const char *pCommand, void *pUser) { return false; }
 
 	virtual void Init() = 0;
-	virtual const CCommandInfo *FirstCommandInfo(EAccessLevel AccessLevel, int Flagmask) const = 0;
-	virtual const CCommandInfo *GetCommandInfo(const char *pName, int FlagMask, bool Temp) = 0;
+	virtual const ICommandInfo *FirstCommandInfo(EAccessLevel AccessLevel, int FlagMask) const = 0;
+	virtual const ICommandInfo *GetCommandInfo(const char *pName, int FlagMask, bool Temp) = 0;
 	virtual int PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback = EmptyPossibleCommandCallback, void *pUser = nullptr) = 0;
 	virtual void ParseArguments(int NumArgs, const char **ppArguments) = 0;
 
