@@ -57,6 +57,8 @@ Authed = ["NO", "HELPER", "MOD", "ADMIN"]
 EntityClasses = ["PROJECTILE", "DOOR", "DRAGGER_WEAK", "DRAGGER_NORMAL", "DRAGGER_STRONG", "GUN_NORMAL", "GUN_EXPLOSIVE", "GUN_FREEZE", "GUN_UNFREEZE", "LIGHT", "PICKUP"]
 Teams = ["ALL", "SPECTATORS", "RED", "BLUE", "WHISPER_SEND", "WHISPER_RECV"]
 
+ImportantAlertTypes = ["SERVER", "MODERATOR"]
+
 RawHeader = '''
 #include <engine/shared/teehistorian_ex.h>
 
@@ -95,6 +97,7 @@ Enums = [
 	Enum("LASERGUNTYPE", GunTypes),
 	Enum("TEAM", Teams, -2),
 	Enum("SAVESTATE", SaveStates),
+	Enum("IMPORTANTALERTTYPE", ImportantAlertTypes),
 ]
 
 Flags = [
@@ -637,5 +640,10 @@ Messages = [
 		NetStringStrict("m_pGeneratedCode"),
 		NetStringStrict("m_pCode"),
 		NetStringStrict("m_pTeamMembers"),
+    ]),
+
+	NetMessageEx("Sv_ImportantAlert", "important-alert@netmsg.ddnet.org", [
+		NetIntRange("m_Type", 0, 'NUM_IMPORTANTALERTTYPES-1'),
+		NetString("m_pMessage"),
 	]),
 ]

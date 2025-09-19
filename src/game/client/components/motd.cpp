@@ -9,6 +9,7 @@
 
 #include <generated/protocol.h>
 
+#include <game/client/components/important_alert.h>
 #include <game/client/gameclient.h>
 
 CMotd::CMotd()
@@ -49,6 +50,12 @@ void CMotd::OnRender()
 
 	if(!IsActive())
 		return;
+
+	if(GameClient()->m_ImportantAlert.IsActive())
+	{
+		Clear();
+		return;
+	}
 
 	const float FontSize = 32.0f; // also the size of the margin and rect rounding
 	const float ScreenHeight = 40.0f * FontSize; // multiple of the font size to get perfect alignment
