@@ -949,6 +949,7 @@ bool CVideo::AddStream(COutputStream *pStream, AVFormatContext *pFormatContext, 
 
 		pContext->gop_size = 12; /* emit one intra frame every twelve frames at most */
 		pContext->pix_fmt = AV_PIX_FMT_YUV420P;
+		pContext->colorspace = AVCOL_SPC_SMPTE170M;
 		if(pContext->codec_id == AV_CODEC_ID_MPEG2VIDEO)
 		{
 			/* just for testing, we also add B-frames */
