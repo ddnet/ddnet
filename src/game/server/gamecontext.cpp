@@ -765,6 +765,59 @@ void CGameContext::SendSettings(int ClientId) const
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 }
 
+void CGameContext::SendServerAlert(const char *pMessage)
+{
+	for(int ClientId = 0; ClientId < Server()->MaxClients(); ClientId++)
+	{
+		if(!m_apPlayers[ClientId])
+		{
+			continue;
+		}
+
+		if(m_apPlayers[ClientId]->GetClientVersion() >= VERSION_DDNET_IMPORTANT_ALERT)
+		{
+			CNetMsg_Sv_ServerAlert Msg;
+			Msg.m_pMessage = pMessage;
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
+		}
+		else
+		{
+			char aBroadcastText[1024 + 32];
+			str_copy(aBroadcastText, "SERVER ALERT\n\n");
+			str_append(aBroadcastText, pMessage);
+			SendBroadcast(aBroadcastText, ClientId, true);
+		}
+	}
+
+	// Record server alert to demos exactly once
+	// TODO: Workaround https://github.com/ddnet/ddnet/issues/11144 by using client ID 0,
+	//       otherwise the message is recorded multiple times.
+	CNetMsg_Sv_ServerAlert Msg;
+	Msg.m_pMessage = pMessage;
+	Server()->SendPackMsg(&Msg, MSGFLAG_NOSEND, 0);
+}
+
+void CGameContext::SendModeratorAlert(const char *pMessage, int ToClientId)
+{
+	dbg_assert(in_range(ToClientId, 0, MAX_CLIENTS - 1), "SendImportantAlert ToClientId invalid: %d", ToClientId);
+	dbg_assert(m_apPlayers[ToClientId] != nullptr, "Client not online: %d", ToClientId);
+
+	if(m_apPlayers[ToClientId]->GetClientVersion() >= VERSION_DDNET_IMPORTANT_ALERT)
+	{
+		CNetMsg_Sv_ModeratorAlert Msg;
+		Msg.m_pMessage = pMessage;
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ToClientId);
+	}
+	else
+	{
+		char aBroadcastText[1024 + 32];
+		str_copy(aBroadcastText, "MODERATOR ALERT\n\n");
+		str_append(aBroadcastText, pMessage);
+		SendBroadcast(aBroadcastText, ToClientId, true);
+		log_info("moderator_alert", "Notice: player uses an old client version and may not see moderator alerts: %s (ID %d)", Server()->ClientName(ToClientId), ToClientId);
+	}
+}
+
 void CGameContext::SendBroadcast(const char *pText, int ClientId, bool IsImportant)
 {
 	CNetMsg_Sv_Broadcast Msg;
@@ -3266,6 +3319,35 @@ static void UnescapeNewlines(char *pBuf)
 	pBuf[j] = '\0';
 }
 
+void CGameContext::ConServerAlert(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	char aBuf[1024];
+	str_copy(aBuf, pResult->GetString(0), sizeof(aBuf));
+	UnescapeNewlines(aBuf);
+
+	pSelf->SendServerAlert(aBuf);
+}
+
+void CGameContext::ConModAlert(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	const int Victim = pResult->GetVictim();
+	if(!CheckClientId(Victim) || !pSelf->m_apPlayers[Victim])
+	{
+		log_info("moderator_alert", "Client ID not found: %d", Victim);
+		return;
+	}
+
+	char aBuf[1024];
+	str_copy(aBuf, pResult->GetString(1), sizeof(aBuf));
+	UnescapeNewlines(aBuf);
+
+	pSelf->SendModeratorAlert(aBuf, Victim);
+}
+
 void CGameContext::ConBroadcast(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -3774,6 +3856,8 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("random_map", "?i[stars] ?i[max stars]", CFGFLAG_SERVER | CFGFLAG_STORE, ConRandomMap, this, "Random map");
 	Console()->Register("random_unfinished_map", "?i[stars] ?i[max stars]", CFGFLAG_SERVER | CFGFLAG_STORE, ConRandomUnfinishedMap, this, "Random unfinished map");
 	Console()->Register("restart", "?i[seconds]", CFGFLAG_SERVER | CFGFLAG_STORE, ConRestart, this, "Restart in x seconds (0 = abort)");
+	Console()->Register("server_alert", "r[message]", CFGFLAG_SERVER, ConServerAlert, this, "Send a server alert message to all players");
+	Console()->Register("mod_alert", "v[id] r[message]", CFGFLAG_SERVER, ConModAlert, this, "Send a moderator alert message to player");
 	Console()->Register("broadcast", "r[message]", CFGFLAG_SERVER, ConBroadcast, this, "Broadcast message");
 	Console()->Register("say", "r[message]", CFGFLAG_SERVER, ConSay, this, "Say in chat");
 	Console()->Register("set_team", "i[id] i[team-id] ?i[delay in minutes]", CFGFLAG_SERVER, ConSetTeam, this, "Set team of player to team");

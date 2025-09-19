@@ -147,6 +147,8 @@ class CGameContext : public IGameServer
 	static void ConRandomMap(IConsole::IResult *pResult, void *pUserData);
 	static void ConRandomUnfinishedMap(IConsole::IResult *pResult, void *pUserData);
 	static void ConRestart(IConsole::IResult *pResult, void *pUserData);
+	static void ConServerAlert(IConsole::IResult *pResult, void *pUserData);
+	static void ConModAlert(IConsole::IResult *pResult, void *pUserData);
 	static void ConBroadcast(IConsole::IResult *pResult, void *pUserData);
 	static void ConSay(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetTeam(IConsole::IResult *pResult, void *pUserData);
@@ -300,6 +302,8 @@ public:
 	void SendWeaponPickup(int ClientId, int Weapon) const;
 	void SendMotd(int ClientId) const;
 	void SendSettings(int ClientId) const;
+	void SendServerAlert(const char *pMessage);
+	void SendModeratorAlert(const char *pMessage, int ToClientId);
 	void SendBroadcast(const char *pText, int ClientId, bool IsImportant = true);
 
 	void List(int ClientId, const char *pFilter);
