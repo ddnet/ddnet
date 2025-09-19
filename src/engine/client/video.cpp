@@ -25,6 +25,12 @@ using namespace std::chrono_literals;
 
 // This code is mostly stolen from https://github.com/FFmpeg/FFmpeg/blob/master/doc/examples/muxing.c
 
+static const enum AVColorSpace COLOR_SPACE = AVCOL_SPC_BT709;
+// AVCodecContext->colorspace is an enum AVColorSpace but sws_getCoefficients
+// wants an SWS_CS_* macro. Both sets of constants follow H.273 numbering
+// and hence agree, but we assert that they're equal here to be sure.
+static_assert(COLOR_SPACE == SWS_CS_ITU709);
+
 static LEVEL AvLevelToLogLevel(int Level)
 {
 	switch(Level)
@@ -249,6 +255,9 @@ bool CVideo::Start()
 				m_VideoStream.m_pCodecContext->width, m_VideoStream.m_pCodecContext->height, AV_PIX_FMT_RGBA,
 				m_VideoStream.m_pCodecContext->width, m_VideoStream.m_pCodecContext->height, AV_PIX_FMT_YUV420P,
 				0, nullptr, nullptr, nullptr);
+
+			const int *pMatrixCoefficients = sws_getCoefficients(COLOR_SPACE);
+			sws_setColorspaceDetails(m_VideoStream.m_vpSwsContexts[i], pMatrixCoefficients, 0, pMatrixCoefficients, 0, 0, 1 << 16, 1 << 16);
 		}
 	}
 
@@ -949,7 +958,7 @@ bool CVideo::AddStream(COutputStream *pStream, AVFormatContext *pFormatContext, 
 
 		pContext->gop_size = 12; /* emit one intra frame every twelve frames at most */
 		pContext->pix_fmt = AV_PIX_FMT_YUV420P;
-		pContext->colorspace = AVCOL_SPC_SMPTE170M;
+		pContext->colorspace = COLOR_SPACE;
 		if(pContext->codec_id == AV_CODEC_ID_MPEG2VIDEO)
 		{
 			/* just for testing, we also add B-frames */
