@@ -1579,13 +1579,11 @@ void CUi::RenderProgressSpinner(vec2 Center, float OuterRadius, const SProgressS
 	Graphics()->SetColor(Props.m_Color.WithMultipliedAlpha(0.5f));
 	for(int i = 0; i < Props.m_Segments; ++i)
 	{
-		const float Angle1 = AngleOffset + i * SegmentsAngle;
-		const float Angle2 = AngleOffset + (i + 1) * SegmentsAngle;
+		const vec2 Dir1 = direction(AngleOffset + i * SegmentsAngle);
+		const vec2 Dir2 = direction(AngleOffset + (i + 1) * SegmentsAngle);
 		IGraphics::CFreeformItem Item = IGraphics::CFreeformItem(
-			Center.x + std::cos(Angle1) * InnerRadius, Center.y + std::sin(Angle1) * InnerRadius,
-			Center.x + std::cos(Angle2) * InnerRadius, Center.y + std::sin(Angle2) * InnerRadius,
-			Center.x + std::cos(Angle1) * OuterRadius, Center.y + std::sin(Angle1) * OuterRadius,
-			Center.x + std::cos(Angle2) * OuterRadius, Center.y + std::sin(Angle2) * OuterRadius);
+			Center + Dir1 * InnerRadius, Center + Dir2 * InnerRadius,
+			Center + Dir1 * OuterRadius, Center + Dir2 * OuterRadius);
 		Graphics()->QuadsDrawFreeform(&Item, 1);
 	}
 
