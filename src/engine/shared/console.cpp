@@ -87,23 +87,29 @@ void CConsole::CCommand::SetAccessLevel(EAccessLevel AccessLevel)
 	m_AccessLevel = AccessLevel;
 }
 
-const IConsole::ICommandInfo *CConsole::FirstCommandInfo(EAccessLevel AccessLevel, int FlagMask) const
+const IConsole::ICommandInfo *CConsole::FirstCommandInfo(int ClientId, int FlagMask) const
 {
 	for(const CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->Next())
 	{
-		if(pCommand->m_Flags & FlagMask && pCommand->GetAccessLevel() <= AccessLevel)
+		bool CanUseCommand = false;
+		if(m_pfnCanUseCommandCallback(ClientId, pCommand, m_pCanUseCommandUserData))
+			CanUseCommand = true;
+		if(pCommand->m_Flags & FlagMask && CanUseCommand)
 			return pCommand;
 	}
 
 	return nullptr;
 }
 
-const IConsole::ICommandInfo *CConsole::NextCommandInfo(const IConsole::ICommandInfo *pInfo, EAccessLevel AccessLevel, int FlagMask) const
+const IConsole::ICommandInfo *CConsole::NextCommandInfo(const IConsole::ICommandInfo *pInfo, int ClientId, int FlagMask) const
 {
 	const CCommand *pNext = ((CCommand *)pInfo)->Next();
 	while(pNext)
 	{
-		if(pNext->m_Flags & FlagMask && pNext->GetAccessLevel() >= AccessLevel)
+		bool CanUseCommand = false;
+		if(m_pfnCanUseCommandCallback(ClientId, pNext, m_pCanUseCommandUserData))
+			CanUseCommand = true;
+		if(pNext->m_Flags & FlagMask && CanUseCommand)
 			break;
 		pNext = pNext->Next();
 	}
@@ -396,6 +402,12 @@ void CConsole::SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, vo
 	m_pUnknownCommandUserdata = pUser;
 }
 
+void CConsole::SetCanUseCommandCallback(FCanUseCommandCallback pfnCallback, void *pUser)
+{
+	m_pfnCanUseCommandCallback = pfnCallback;
+	m_pCanUseCommandUserData = pUser;
+}
+
 void CConsole::InitChecksum(CChecksumData *pData) const
 {
 	pData->m_NumCommands = 0;
@@ -546,7 +558,8 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 					Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 				}
 			}
-			else if(pCommand->GetAccessLevel() <= m_AccessLevel)
+			// the fallback is needed for the rust tests
+			else if(!m_pfnCanUseCommandCallback || m_pfnCanUseCommandCallback(Result.m_ClientId, pCommand, m_pCanUseCommandUserData))
 			{
 				int IsStrokeCommand = 0;
 				if(Result.m_pCommand[0] == '+')
