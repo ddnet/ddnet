@@ -5208,6 +5208,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		{
 			m_Map.OnModify();
 			m_Map.m_vpEnvelopes.push_back(std::make_shared<CEnvelope>(*m_Map.m_vpEnvelopes[m_SelectedEnvelope]));
+
+			m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeDuplicate>(this, m_SelectedEnvelope, m_Map.m_vpEnvelopes.back()));
 		}
 
 		ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);

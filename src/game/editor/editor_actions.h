@@ -385,6 +385,17 @@ private:
 	std::shared_ptr<CEnvelope> m_pEnv;
 };
 
+class CEditorActionEnvelopeDuplicate : public IEditorAction
+{
+public:
+	CEditorActionEnvelopeDuplicate(CEditor *pEditor, int EnvelopeIndex, const std::shared_ptr<CEnvelope> &pEnv);
+
+	void Undo() override;
+	void Redo() override;
+
+private:
+	std::shared_ptr<CEnvelope> m_pEnv;
+};
 class CEditorActionEnvelopeDelete : public IEditorAction
 {
 public:
