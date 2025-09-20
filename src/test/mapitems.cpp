@@ -3,17 +3,17 @@
 
 #include <game/mapitems.h>
 
-namespace testing::internal {
-
-template<>
-class UniversalPrinter<CFixedTime>
+namespace testing::internal
 {
-public:
-	static void Print(const CFixedTime &FixedTime, std::ostream *pOutputStream)
+	template<>
+	class UniversalPrinter<CFixedTime>
 	{
-		*pOutputStream << "CFixedTime with internal value " << FixedTime.GetInternal();
-	}
-};
+	public:
+		static void Print(const CFixedTime &FixedTime, std::ostream *pOutputStream)
+		{
+			*pOutputStream << "CFixedTime with internal value " << FixedTime.GetInternal();
+		}
+	};
 
 } // namespace testing::internal
 
