@@ -1181,9 +1181,6 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 	CancelSwapRequests();
 
 	// <FoxNet
-	if(Server()->GetAuthedState(GetPlayer()->GetCid()) > AUTHED_NO)
-		GameServer()->UnsetTelekinesis(GetPlayer()->GetCid());
-
 	OnDie(Killer, Weapon, SendKillMsg);
 	// FoxNet>
 }
@@ -2896,6 +2893,9 @@ CAccountSession *CCharacter::Acc()
 
 void CCharacter::OnDie(int Killer, int Weapon, bool SendKillMsg)
 {
+	if(Server()->GetAuthedState(GetPlayer()->GetCid()) > AUTHED_NO)
+		GameServer()->UnsetTelekinesis(GetPlayer()->GetCid());
+
 	if(Acc()->m_LoggedIn)
 		Acc()->m_Deaths++;
 
@@ -2908,11 +2908,13 @@ void CCharacter::OnDie(int Killer, int Weapon, bool SendKillMsg)
 		}
 	}
 
+	if(m_Core.m_ActiveWeapon >= NUM_WEAPONS)
+		GameServer()->SendBroadcast("", GetPlayer()->GetCid());
+
 	m_Snake.OnPlayerDeath();
 	m_Ufo.OnPlayerDeath();
 }
 
-// <FoxNet
 CClientMask CCharacter::CosmeticMask()
 {
 	return Teams()->CosmeticMask(Team(), -1, GetPlayer()->GetCid(), 3, false);
