@@ -790,12 +790,12 @@ void CGameContext::ConPracticeCmdList(IConsole::IResult *pResult, void *pUserDat
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
 	char aPracticeCommands[256] = "Available practice commands: ";
-	for(const IConsole::ICommandInfo *pCmd = pSelf->Console()->FirstCommandInfo(IConsole::EAccessLevel::USER, CMDFLAG_PRACTICE);
-		pCmd; pCmd = pSelf->Console()->NextCommandInfo(pCmd, IConsole::EAccessLevel::USER, CMDFLAG_PRACTICE))
+	for(const IConsole::ICommandInfo *pCmd = pSelf->Console()->FirstCommandInfo(pResult->m_ClientId, CMDFLAG_PRACTICE);
+		pCmd; pCmd = pSelf->Console()->NextCommandInfo(pCmd, pResult->m_ClientId, CMDFLAG_PRACTICE))
 	{
 		char aCommand[64];
 
-		str_format(aCommand, sizeof(aCommand), "/%s%s", pCmd->Name(), pSelf->Console()->NextCommandInfo(pCmd, IConsole::EAccessLevel::USER, CMDFLAG_PRACTICE) ? ", " : "");
+		str_format(aCommand, sizeof(aCommand), "/%s%s", pCmd->Name(), pSelf->Console()->NextCommandInfo(pCmd, pResult->m_ClientId, CMDFLAG_PRACTICE) ? ", " : "");
 
 		if(str_length(aCommand) + str_length(aPracticeCommands) > 255)
 		{
