@@ -380,6 +380,12 @@ bool CPlayer::ReachedItemLimit(const char *pItem, int Set, int Value)
 
 bool CPlayer::ToggleItem(const char *pItemName, int Set, bool IgnoreAccount)
 {
+	if(!g_Config.m_SvCosmetics)
+	{
+		GameServer()->SendChatTarget(m_ClientId, "Cosmetics are currently disabled");
+		return false;
+	}
+
 	if(!Acc()->m_LoggedIn && !IgnoreAccount)
 		return false;
 	char Item[64];

@@ -1612,6 +1612,7 @@ void CGameContext::RegisterFoxNetCommands()
 
 	Console()->Chain("sv_debug_quad_pos", ConchainQuadDebugPos, this);
 	Console()->Chain("sv_solo_on_spawn", ConchainSoloOnSpawn, this);
+	Console()->Chain("sv_cosmetics", ConchainCosmetics, this);
 }
 
 void CGameContext::ConchainQuadDebugPos(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -1636,5 +1637,29 @@ void CGameContext::ConchainSoloOnSpawn(IConsole::IResult *pResult, void *pUserDa
 		CCharacter *pChr = pSelf->GetPlayerChar(ClientId);
 		if(pChr && pChr->m_SpawnSolo)
 			pChr->UnSpawnSolo();
+	}
+}
+
+void CGameContext::ConchainCosmetics(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	if(!pResult->NumArguments())
+		return;
+
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	const bool Value = pResult->GetInteger(0) != 0;
+	if(!Value)
+	{
+		for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+		{
+			CPlayer *pPlayer = pSelf->m_apPlayers[ClientId];
+			if(pPlayer)
+			{
+				pPlayer->DisableAllCosmetics();
+				const int Page = pSelf->m_VoteMenu.GetPage(ClientId);
+				if(Page == PAGE_INVENTORY)
+					pSelf->m_VoteMenu.PrepareVoteOptions(ClientId, Page); // Resend Pages
+			}
+		}
 	}
 }

@@ -778,6 +778,11 @@ void CVoteMenu::SendPageInventory(int ClientId)
 		AddVoteText("2 - login using /login <Name> <Password>");
 		return;
 	}
+	else if(!g_Config.m_SvCosmetics)
+	{
+		AddVoteText("Cosmetics are currently disabled");
+		return;
+	}
 
 	AddVoteSubheader("Cᴏsᴍᴇᴛɪᴄs");
 	AddVoteSeperator();

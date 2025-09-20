@@ -87,6 +87,7 @@ MACRO_CONFIG_INT(SvAllowHookColl, sv_allow_hook_coll, 1, 0, 1, CFGFLAG_SERVER | 
 MACRO_CONFIG_INT(SvAllowEyeWheel, sv_allow_eye_wheel, 1, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Whether to allow eye wheel or not")
 
 // Cosmetics
+MACRO_CONFIG_INT(SvCosmetics, sv_cosmetics, 1, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Whether to allow cosmetics")
 MACRO_CONFIG_INT(SvCosmeticLimit, sv_cosmetic_limit, 5, 0, 25, CFGFLAG_SERVER | CFGFLAG_GAME, "How many cosmetics a player can have at a time")
 
 // Dummies
