@@ -3071,7 +3071,7 @@ int CServer::Run()
 	int Port = Config()->m_SvPort;
 	for(BindAddr.port = Port != 0 ? Port : 8303; !m_NetServer.Open(BindAddr, &m_ServerBan, Config()->m_SvMaxClients, Config()->m_SvMaxClientsPerIp); BindAddr.port++)
 	{
-		if(Port != 0 || BindAddr.port >= 8310)
+		if(Port != 0 || BindAddr.port >= 8360)
 		{
 			log_error("server", "couldn't open socket. port %d might already be in use", BindAddr.port);
 			return -1;
