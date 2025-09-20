@@ -5202,6 +5202,15 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			m_EnvelopeEditorHistory.Undo();
 		}
 
+		ToolBar.VSplitRight(30.0f, &ToolBar, &Button);
+		static int s_DuplicateEnvelopeButton = 0;
+		if(DoButton_Editor(&s_DuplicateEnvelopeButton, "Dup", m_SelectedEnvelope >= 0 ? 0 : -1, &Button, BUTTONFLAG_LEFT, "Duplicate current envelope."))
+		{
+			m_Map.OnModify();
+			m_Map.m_vpEnvelopes.push_back(std::make_shared<CEnvelope>(*m_Map.m_vpEnvelopes[m_SelectedEnvelope]));
+		}
+
+		ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
 		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 		static int s_NewSoundButton = 0;
 		if(DoButton_Editor(&s_NewSoundButton, "Sound+", 0, &Button, BUTTONFLAG_LEFT, "Create a new sound envelope."))
