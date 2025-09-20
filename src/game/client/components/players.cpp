@@ -785,9 +785,9 @@ void CPlayers::RenderPlayer(
 
 inline bool CPlayers::IsPlayerInfoAvailable(int ClientId) const
 {
-	const void *pPrevInfo = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_PLAYERINFO, ClientId);
-	const void *pInfo = Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_PLAYERINFO, ClientId);
-	return pPrevInfo && pInfo;
+	return GameClient()->m_Snap.m_aCharacters[ClientId].m_Active &&
+	       GameClient()->m_Snap.m_apPrevPlayerInfos[ClientId] != nullptr &&
+	       GameClient()->m_Snap.m_apPlayerInfos[ClientId] != nullptr;
 }
 
 void CPlayers::OnRender()
@@ -859,13 +859,13 @@ void CPlayers::OnRender()
 	const int LocalClientId = GameClient()->m_Snap.m_LocalClientId;
 	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
-		if(ClientId == LocalClientId || !GameClient()->m_Snap.m_aCharacters[ClientId].m_Active || !IsPlayerInfoAvailable(ClientId))
+		if(ClientId == LocalClientId || !IsPlayerInfoAvailable(ClientId))
 		{
 			continue;
 		}
 		RenderHook(&GameClient()->m_aClients[ClientId].m_RenderPrev, &GameClient()->m_aClients[ClientId].m_RenderCur, &aRenderInfo[ClientId], ClientId);
 	}
-	if(LocalClientId != -1 && GameClient()->m_Snap.m_aCharacters[LocalClientId].m_Active && IsPlayerInfoAvailable(LocalClientId))
+	if(LocalClientId != -1 && IsPlayerInfoAvailable(LocalClientId))
 	{
 		const CGameClient::CClientData *pLocalClientData = &GameClient()->m_aClients[LocalClientId];
 		RenderHook(&pLocalClientData->m_RenderPrev, &pLocalClientData->m_RenderCur, &aRenderInfo[LocalClientId], LocalClientId);
@@ -893,7 +893,7 @@ void CPlayers::OnRender()
 
 	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
-		if(ClientId == RenderLastId || !GameClient()->m_Snap.m_aCharacters[ClientId].m_Active || !IsPlayerInfoAvailable(ClientId))
+		if(ClientId == RenderLastId || !IsPlayerInfoAvailable(ClientId))
 		{
 			continue;
 		}
@@ -906,7 +906,7 @@ void CPlayers::OnRender()
 		}
 		RenderPlayer(&GameClient()->m_aClients[ClientId].m_RenderPrev, &GameClient()->m_aClients[ClientId].m_RenderCur, &aRenderInfo[ClientId], ClientId);
 	}
-	if(RenderLastId != -1 && GameClient()->m_Snap.m_aCharacters[RenderLastId].m_Active && IsPlayerInfoAvailable(RenderLastId))
+	if(RenderLastId != -1 && IsPlayerInfoAvailable(RenderLastId))
 	{
 		const CGameClient::CClientData *pClientData = &GameClient()->m_aClients[RenderLastId];
 		RenderHookCollLine(&pClientData->m_RenderPrev, &pClientData->m_RenderCur, RenderLastId);
