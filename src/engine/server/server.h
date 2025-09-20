@@ -509,6 +509,8 @@ public:
 		return m_aClients[ClientId].m_DnsblState == EDnsblState::BLACKLISTED;
 	}
 
+	static bool CanClientUseCommandCallback(int ClientId, const IConsole::ICommandInfo *pCommand, void *pUser);
+	bool CanClientUseCommand(int ClientId, const IConsole::ICommandInfo *pCommand) const;
 	void AuthRemoveKey(int KeySlot);
 	bool ClientPrevIngame(int ClientId) override { return m_aPrevStates[ClientId] == CClient::STATE_INGAME; }
 	const char *GetNetErrorString(int ClientId) override { return m_NetServer.ErrorString(ClientId); }
