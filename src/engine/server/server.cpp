@@ -3173,6 +3173,26 @@ int CServer::Run()
 					m_ServerInfoFirstRequest = 0;
 					Kernel()->ReregisterInterface(GameServer());
 					Console()->StoreCommands(true);
+
+					for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+					{
+						CClient &Client = m_aClients[ClientId];
+						if(Client.m_State < CClient::STATE_PREAUTH)
+							continue;
+
+						// When doing a map change, a new Teehistorian file is created. For players that are already
+						// on the server, no PlayerJoin event is produced in Teehistorian from the network engine.
+						// Record PlayerJoin events here to record the Sixup version and player join event.
+						GameServer()->TeehistorianRecordPlayerJoin(ClientId, Client.m_Sixup);
+
+						// Record the players auth state aswell if needed.
+						// This was recorded in AuthInit in the past.
+						if(IsRconAuthed(ClientId))
+						{
+							GameServer()->TeehistorianRecordAuthLogin(ClientId, Client.m_Authed, GetAuthName(ClientId));
+						}
+					}
+
 					GameServer()->OnInit(m_pPersistentData);
 					Console()->StoreCommands(false);
 					if(ErrorShutdown())
@@ -3180,16 +3200,6 @@ int CServer::Run()
 						break;
 					}
 					UpdateServerInfo(true);
-					for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
-					{
-						if(m_aClients[ClientId].m_State != CClient::STATE_CONNECTING)
-							continue;
-
-						// When doing a map change, a new Teehistorian file is created. For players that are already
-						// on the server, no PlayerJoin event is produced in Teehistorian from the network engine.
-						// Record PlayerJoin events here to record the Sixup version and player join event.
-						GameServer()->TeehistorianRecordPlayerJoin(ClientId, m_aClients[ClientId].m_Sixup);
-					}
 				}
 				else
 				{
