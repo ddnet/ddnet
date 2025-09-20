@@ -67,6 +67,10 @@ void CDotTrail::Snap(int SnappingClient)
 		if(!pOwnerChr->CanSnapCharacter(SnappingClient))
 			return;
 
+	if(pOwnerChr->GetPlayer()->m_Vanish && SnappingClient != pOwnerChr->GetPlayer()->GetCid() && SnappingClient != -1)
+		if(!pSnapPlayer->m_Vanish && Server()->GetAuthedState(SnappingClient) < AUTHED_ADMIN)
+			return;
+
 	CNetObj_DDNetProjectile *pProj = Server()->SnapNewItem<CNetObj_DDNetProjectile>(GetId());
 	if(!pProj)
 		return;

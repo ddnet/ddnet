@@ -106,6 +106,10 @@ void CHeartHat::Snap(int SnappingClient)
 		if(!pOwnerChr->CanSnapCharacter(SnappingClient))
 			return;
 
+	if(pOwnerChr->GetPlayer()->m_Vanish && SnappingClient != pOwnerChr->GetPlayer()->GetCid() && SnappingClient != -1)
+		if(!pSnapPlayer->m_Vanish && Server()->GetAuthedState(SnappingClient) < AUTHED_ADMIN)
+			return;
+
 	for(int i = 0; i < NUM_HEARTS; i++)
 	{
 		const int Id = m_Ids[i];

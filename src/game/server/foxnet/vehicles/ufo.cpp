@@ -1,13 +1,18 @@
 // Made by qxdFox
-#include "ufo.h"
 #include "game/server/entities/character.h"
-#include <algorithm>
-#include <base/vmath.h>
-#include <engine/server.h>
-#include <engine/shared/config.h>
+#include <game/server/entity.h>
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
+
+#include <engine/server.h>
+#include <engine/shared/config.h>
+
+#include <base/vmath.h>
+
+#include <algorithm>
 #include <iterator>
+
+#include "ufo.h"
 
 CGameContext *CVUfo::GameServer() const { return m_pCharacter->GameServer(); }
 IServer *CVUfo::Server() const { return GameServer()->Server(); }

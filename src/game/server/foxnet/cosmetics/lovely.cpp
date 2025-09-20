@@ -86,26 +86,30 @@ void CLovely::Snap(int SnappingClient)
 	if(NetworkClipped(SnappingClient))
 		return;
 
-	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+	CCharacter *pOwnerChr = GameServer()->GetPlayerChar(m_Owner);
 	const CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
 
-	if(!pOwnerChar || !pSnapPlayer)
+	if(!pOwnerChr || !pSnapPlayer)
 		return;
 
-	if(pOwnerChar->IsPaused())
+	if(pOwnerChr->IsPaused())
 		return;
 
 	if(pSnapPlayer->m_HideCosmetics)
 		return;
 
 	CGameTeams Teams = GameServer()->m_pController->Teams();
-	const int Team = pOwnerChar->Team();
+	const int Team = pOwnerChr->Team();
 
 	if(!Teams.SetMask(SnappingClient, Team))
 		return;
 
-	if(pSnapPlayer->GetCharacter() && pOwnerChar)
-		if(!pOwnerChar->CanSnapCharacter(SnappingClient))
+	if(pSnapPlayer->GetCharacter() && pOwnerChr)
+		if(!pOwnerChr->CanSnapCharacter(SnappingClient))
+			return;
+
+	if(pOwnerChr->GetPlayer()->m_Vanish && SnappingClient != pOwnerChr->GetPlayer()->GetCid() && SnappingClient != -1)
+		if(!pSnapPlayer->m_Vanish && Server()->GetAuthedState(SnappingClient) < AUTHED_ADMIN)
 			return;
 
 	const int SnapVer = Server()->GetClientVersion(SnappingClient);

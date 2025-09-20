@@ -101,6 +101,10 @@ void CRotatingBall::Snap(int SnappingClient)
 		if(!pOwnerChr->CanSnapCharacter(SnappingClient))
 			return;
 
+	if(pOwnerChr->GetPlayer()->m_Vanish && SnappingClient != pOwnerChr->GetPlayer()->GetCid() && SnappingClient != -1)
+		if(!pSnapPlayer->m_Vanish && Server()->GetAuthedState(SnappingClient) < AUTHED_ADMIN)
+			return;
+
 	const int SnapVer = Server()->GetClientVersion(SnappingClient);
 	const bool SixUp = Server()->IsSixup(SnappingClient);
 	const double Pred = pOwnerChr->GetPlayer()->m_PredLatency;
