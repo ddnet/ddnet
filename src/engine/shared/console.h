@@ -34,6 +34,7 @@ class CConsole : public IConsole
 		const char *Name() const override { return m_pName; }
 		const char *Help() const override { return m_pHelp; }
 		const char *Params() const override { return m_pParams; }
+		int Flags() const override { return m_Flags; }
 		EAccessLevel GetAccessLevel() const override { return m_AccessLevel; }
 		void SetAccessLevel(EAccessLevel AccessLevel);
 	};
@@ -81,6 +82,9 @@ class CConsole : public IConsole
 
 	FUnknownCommandCallback m_pfnUnknownCommandCallback = EmptyUnknownCommandCallback;
 	void *m_pUnknownCommandUserdata = nullptr;
+
+	FCanUseCommandCallback m_pfnCanUseCommandCallback = nullptr;
+	void *m_pCanUseCommandUserData;
 
 	enum
 	{
@@ -166,8 +170,8 @@ public:
 	~CConsole() override;
 
 	void Init() override;
-	const ICommandInfo *FirstCommandInfo(EAccessLevel AccessLevel, int FlagMask) const override;
-	const ICommandInfo *NextCommandInfo(const IConsole::ICommandInfo *pInfo, EAccessLevel AccessLevel, int FlagMask) const override;
+	const ICommandInfo *FirstCommandInfo(int ClientId, int FlagMask) const override;
+	const ICommandInfo *NextCommandInfo(const IConsole::ICommandInfo *pInfo, int ClientId, int FlagMask) const override;
 	const ICommandInfo *GetCommandInfo(const char *pName, int FlagMask, bool Temp) override;
 	int PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback, void *pUser) override;
 
@@ -187,6 +191,7 @@ public:
 	void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = gs_ConsoleDefaultColor) const override;
 	void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser) override;
 	void SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, void *pUser) override;
+	void SetCanUseCommandCallback(FCanUseCommandCallback pfnCallback, void *pUser) override;
 	void InitChecksum(CChecksumData *pData) const override;
 
 	void SetAccessLevel(EAccessLevel AccessLevel) override;
