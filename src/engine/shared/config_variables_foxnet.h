@@ -88,3 +88,6 @@ MACRO_CONFIG_INT(SvAllowEyeWheel, sv_allow_eye_wheel, 1, 0, 1, CFGFLAG_SERVER | 
 
 // Cosmetics
 MACRO_CONFIG_INT(SvCosmeticLimit, sv_cosmetic_limit, 5, 0, 25, CFGFLAG_SERVER | CFGFLAG_GAME, "How many cosmetics a player can have at a time")
+
+// Dummies
+MACRO_CONFIG_INT(SvAddDummies, add_dummies, 0, 0, SERVER_MAX_CLIENTS, CFGFLAG_SERVER, "Add debug dummies to server (Debug build only)")

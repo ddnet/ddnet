@@ -2963,13 +2963,13 @@ int CServer::LoadMap(const char *pMapName)
 
 void CServer::UpdateDebugDummies(bool ForceDisconnect)
 {
-	if(m_PreviousDebugDummies == g_Config.m_DbgDummies && !ForceDisconnect)
+	if(m_PreviousDebugDummies == g_Config.m_SvAddDummies && !ForceDisconnect)
 		return;
 
-	g_Config.m_DbgDummies = std::clamp(g_Config.m_DbgDummies, 0, MaxClients());
-	for(int DummyIndex = 0; DummyIndex < maximum(m_PreviousDebugDummies, g_Config.m_DbgDummies); ++DummyIndex)
+	g_Config.m_SvAddDummies = std::clamp(g_Config.m_SvAddDummies, 0, MaxClients());
+	for(int DummyIndex = 0; DummyIndex < maximum(m_PreviousDebugDummies, g_Config.m_SvAddDummies); ++DummyIndex)
 	{
-		const bool AddDummy = !ForceDisconnect && DummyIndex < g_Config.m_DbgDummies;
+		const bool AddDummy = !ForceDisconnect && DummyIndex < g_Config.m_SvAddDummies;
 		const int ClientId = MaxClients() - DummyIndex - 1;
 		CClient &Client = m_aClients[ClientId];
 		if(AddDummy && m_aClients[ClientId].m_State == CClient::STATE_EMPTY)
@@ -3005,19 +3005,9 @@ void CServer::UpdateDebugDummies(bool ForceDisconnect)
 		{
 			DelClientCallback(ClientId, "Dropping debug dummy", this);
 		}
-
-		if(AddDummy && Client.m_DebugDummy)
-		{
-			CNetObj_PlayerInput Input = {0};
-			Input.m_Direction = (ClientId & 1) ? -1 : 1;
-			Client.m_aInputs[0].m_GameTick = Tick() + 1;
-			mem_copy(Client.m_aInputs[0].m_aData, &Input, minimum(sizeof(Input), sizeof(Client.m_aInputs[0].m_aData)));
-			Client.m_LatestInput = Client.m_aInputs[0];
-			Client.m_CurrentInput = 0;
-		}
 	}
 
-	m_PreviousDebugDummies = ForceDisconnect ? 0 : g_Config.m_DbgDummies;
+	m_PreviousDebugDummies = ForceDisconnect ? 0 : g_Config.m_SvAddDummies;
 }
 
 int CServer::Run()
