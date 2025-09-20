@@ -610,6 +610,7 @@ void CGameContext::CreateIndEffect(int Type, vec2 Pos, vec2 Direction, CClientMa
 	float Angle = -std::atan2(Direction.x, Direction.y);
 
 	DamageIndEffects effect;
+	effect.m_Mask = Mask;
 	if(Type >= IND_CLOCKWISE && Type <= IND_COUNTERWISE)
 	{
 		AngleOffset = 0.80f;
@@ -624,11 +625,7 @@ void CGameContext::CreateIndEffect(int Type, vec2 Pos, vec2 Direction, CClientMa
 		effect.m_vPos.push_back(Pos);
 		effect.m_Delay = 1;
 		effect.m_NextTick = Server()->Tick();
-		effect.m_Mask = Mask;
 		m_vDamageIndEffects.push_back(effect);
-
-		effect.m_vPos.clear();
-		effect.m_vAngles.clear();
 	}
 	else if(Type == IND_INWARD)
 	{
@@ -647,12 +644,7 @@ void CGameContext::CreateIndEffect(int Type, vec2 Pos, vec2 Direction, CClientMa
 			effect.m_vPos.push_back(Pos);
 			effect.m_Delay = 2;
 			effect.m_NextTick = Server()->Tick();
-			effect.m_Mask = Mask;
-
 			m_vDamageIndEffects.push_back(effect);
-
-			effect.m_vPos.clear();
-			effect.m_vAngles.clear();
 		}
 	}
 	else if(Type == IND_OUTWARD)
@@ -672,12 +664,7 @@ void CGameContext::CreateIndEffect(int Type, vec2 Pos, vec2 Direction, CClientMa
 			effect.m_vPos.push_back(Pos);
 			effect.m_Delay = 2;
 			effect.m_NextTick = Server()->Tick();
-			effect.m_Mask = Mask;
-
 			m_vDamageIndEffects.push_back(effect);
-
-			effect.m_vPos.clear();
-			effect.m_vAngles.clear();
 		}
 	}
 	else if(Type == IND_LINE)
@@ -693,10 +680,7 @@ void CGameContext::CreateIndEffect(int Type, vec2 Pos, vec2 Direction, CClientMa
 
 		effect.m_Delay = 1;
 		effect.m_NextTick = Server()->Tick();
-		effect.m_Mask = Mask;
 		m_vDamageIndEffects.push_back(effect);
-		effect.m_vPos.clear();
-		effect.m_vAngles.clear();
 	}
 	else if(Type == IND_CRISSCROSS)
 	{
@@ -733,10 +717,7 @@ void CGameContext::CreateIndEffect(int Type, vec2 Pos, vec2 Direction, CClientMa
 
 		effect.m_Delay = 1;
 		effect.m_NextTick = Server()->Tick();
-		effect.m_Mask = Mask;
 		m_vDamageIndEffects.push_back(effect);
-		effect.m_vPos.clear();
-		effect.m_vAngles.clear();
 	}
 	else
 	{
