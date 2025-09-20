@@ -356,6 +356,7 @@ public:
 
 	CHeadItem *m_pHeadItem;
 	bool m_SpawnSolo = false;
+	bool m_ShouldSolo = true;
 	void UnSpawnSolo();
 private:
 

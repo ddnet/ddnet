@@ -2995,13 +2995,18 @@ void CCharacter::FoxNetSpawn()
 	m_PowerHookedId = -1;
 	m_TelekinesisId = -1;
 
-	if(g_Config.m_SvSoloOnSpawn > 0)
+	if(g_Config.m_SvSoloServer || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
+		m_ShouldSolo = false;
+
+	if(g_Config.m_SvSoloOnSpawn > 0 && m_ShouldSolo)
 	{
 		m_SpawnSolo = true;
 		SetSolo(true);
 		if(!m_pHeadItem)
 			m_pHeadItem = new CHeadItem(GameWorld(), GetPlayer()->GetCid(), m_Pos, POWERUP_ARMOR, 56.0f);
 	}
+	if(!m_ShouldSolo)
+		m_ShouldSolo = true; // Next spawn will be solo
 }
 
 
