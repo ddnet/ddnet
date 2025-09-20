@@ -3014,8 +3014,16 @@ void CCharacter::FoxNetSpawn()
 
 void CCharacter::ExtraTileHandle()
 {
-	if(m_SpawnSolo && (m_TileIndex == TILE_SOLO_DISABLE || m_TileFIndex == TILE_SOLO_DISABLE))
-		UnSpawnSolo();
+	const auto &&IsTile = [this](int Tile) {
+		return m_TileIndex == Tile || m_TileFIndex == Tile;
+	};
+
+
+	if(m_SpawnSolo)
+	{
+		if(IsTile(TILE_SOLO_DISABLE) || IsTile(TILE_SOLO_ENABLE))
+			UnSpawnSolo();
+	}
 }
 
 void CCharacter::HandleSpawnSolo()
