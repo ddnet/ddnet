@@ -75,11 +75,11 @@ float CConsole::CResult::GetFloat(unsigned Index) const
 	return str_tofloat(m_apArgs[Index]);
 }
 
-std::optional<ColorHSLA> CConsole::CResult::GetColor(unsigned Index, float DarkestLighting) const
+ColorHSLA CConsole::CResult::GetColor(unsigned Index, float DarkestLighting) const
 {
 	if(Index >= m_NumArgs)
-		return std::nullopt;
-	return ColorParse(m_apArgs[Index], DarkestLighting);
+		return ColorHSLA(0, 0, 0);
+	return ColorParse(m_apArgs[Index], DarkestLighting).value_or(ColorHSLA(0, 0, 0));
 }
 
 const IConsole::ICommandInfo *CConsole::CCommand::NextCommandInfo(EAccessLevel AccessLevel, int FlagMask) const
@@ -276,7 +276,6 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat, bool IsColor)
 				// validate args
 				if(Command == 'i')
 				{
-					// don't validate colors here
 					if(!IsColor)
 					{
 						int Value;
@@ -284,6 +283,15 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat, bool IsColor)
 							Value == std::numeric_limits<int>::max() || Value == std::numeric_limits<int>::min())
 						{
 							Error = PARSEARGS_INVALID_INTEGER;
+							break;
+						}
+					}
+					else
+					{
+						float DarkestLighting = 0.0f; // TODO: where to get this value from?
+						if(!ColorParse(pResult->GetString(pResult->NumArguments() - 1), DarkestLighting).has_value())
+						{
+							Error = PARSEARGS_INVALID_COLOR;
 							break;
 						}
 					}
@@ -573,6 +581,8 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 							str_format(aBuf, sizeof(aBuf), "%s is not a valid integer.", Result.GetString(Result.NumArguments() - 1));
 						else if(Error == PARSEARGS_INVALID_FLOAT)
 							str_format(aBuf, sizeof(aBuf), "%s is not a valid decimal number.", Result.GetString(Result.NumArguments() - 1));
+						else if(Error == PARSEARGS_INVALID_COLOR)
+							str_format(aBuf, sizeof(aBuf), "%s is not a valid color.", Result.GetString(Result.NumArguments() - 1));
 						else
 							str_format(aBuf, sizeof(aBuf), "Invalid arguments. Usage: %s %s", pCommand->m_pName, pCommand->m_pParams);
 						Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
