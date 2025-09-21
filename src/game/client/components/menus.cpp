@@ -76,24 +76,24 @@ CMenus::CMenus()
 	m_DemoPlayerState = DEMOPLAYER_NONE;
 	m_Dummy = false;
 
-	for(SUIAnimator &animator : m_aAnimatorsSettingsTab)
+	for(SUIAnimator &Animator : m_aAnimatorsSettingsTab)
 	{
-		animator.m_YOffset = -2.5f;
-		animator.m_HOffset = 5.0f;
-		animator.m_WOffset = 5.0f;
-		animator.m_RepositionLabel = true;
+		Animator.m_YOffset = -2.5f;
+		Animator.m_HOffset = 5.0f;
+		Animator.m_WOffset = 5.0f;
+		Animator.m_RepositionLabel = true;
 	}
 
-	for(SUIAnimator &animator : m_aAnimatorsBigPage)
+	for(SUIAnimator &Animator : m_aAnimatorsBigPage)
 	{
-		animator.m_YOffset = -5.0f;
-		animator.m_HOffset = 5.0f;
+		Animator.m_YOffset = -5.0f;
+		Animator.m_HOffset = 5.0f;
 	}
 
-	for(SUIAnimator &animator : m_aAnimatorsSmallPage)
+	for(SUIAnimator &Animator : m_aAnimatorsSmallPage)
 	{
-		animator.m_YOffset = -2.5f;
-		animator.m_HOffset = 2.5f;
+		Animator.m_YOffset = -2.5f;
+		Animator.m_HOffset = 2.5f;
 	}
 
 	m_PasswordInput.SetBuffer(g_Config.m_Password, sizeof(g_Config.m_Password));

@@ -380,9 +380,9 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 
 		void Destroy(VkDevice &Device)
 		{
-			for(auto it = m_MemoryCaches.m_vpMemoryHeaps.begin(); it != m_MemoryCaches.m_vpMemoryHeaps.end();)
+			for(auto HeapIterator = m_MemoryCaches.m_vpMemoryHeaps.begin(); HeapIterator != m_MemoryCaches.m_vpMemoryHeaps.end();)
 			{
-				auto *pHeap = *it;
+				auto *pHeap = *HeapIterator;
 				if(pHeap->m_pMappedBuffer != nullptr)
 					vkUnmapMemory(Device, pHeap->m_BufferMem.m_Mem);
 				if(pHeap->m_Buffer != VK_NULL_HANDLE)
@@ -390,7 +390,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 				vkFreeMemory(Device, pHeap->m_BufferMem.m_Mem, nullptr);
 
 				delete pHeap;
-				it = m_MemoryCaches.m_vpMemoryHeaps.erase(it);
+				HeapIterator = m_MemoryCaches.m_vpMemoryHeaps.erase(HeapIterator);
 			}
 
 			m_MemoryCaches.m_vpMemoryHeaps.clear();
@@ -423,9 +423,9 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 				m_CanShrink = false;
 				if(m_MemoryCaches.m_vpMemoryHeaps.size() > 1)
 				{
-					for(auto it = m_MemoryCaches.m_vpMemoryHeaps.begin(); it != m_MemoryCaches.m_vpMemoryHeaps.end();)
+					for(auto HeapIterator = m_MemoryCaches.m_vpMemoryHeaps.begin(); HeapIterator != m_MemoryCaches.m_vpMemoryHeaps.end();)
 					{
-						auto *pHeap = *it;
+						auto *pHeap = *HeapIterator;
 						if(pHeap->m_Heap.IsUnused())
 						{
 							if(pHeap->m_pMappedBuffer != nullptr)
@@ -436,12 +436,12 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 							FreeedMemory += pHeap->m_BufferMem.m_Size;
 
 							delete pHeap;
-							it = m_MemoryCaches.m_vpMemoryHeaps.erase(it);
+							HeapIterator = m_MemoryCaches.m_vpMemoryHeaps.erase(HeapIterator);
 							if(m_MemoryCaches.m_vpMemoryHeaps.size() == 1)
 								break;
 						}
 						else
-							++it;
+							++HeapIterator;
 					}
 				}
 			}
@@ -1889,14 +1889,14 @@ protected:
 
 	[[nodiscard]] bool GetImageMemory(SMemoryImageBlock<IMAGE_BUFFER_CACHE_ID> &RetBlock, VkDeviceSize RequiredSize, VkDeviceSize RequiredAlignment, uint32_t RequiredMemoryTypeBits)
 	{
-		auto it = m_ImageBufferCaches.find(RequiredMemoryTypeBits);
-		if(it == m_ImageBufferCaches.end())
+		auto BufferCacheIterator = m_ImageBufferCaches.find(RequiredMemoryTypeBits);
+		if(BufferCacheIterator == m_ImageBufferCaches.end())
 		{
-			it = m_ImageBufferCaches.insert({RequiredMemoryTypeBits, {}}).first;
+			BufferCacheIterator = m_ImageBufferCaches.insert({RequiredMemoryTypeBits, {}}).first;
 
-			it->second.Init(m_SwapChainImageCount);
+			BufferCacheIterator->second.Init(m_SwapChainImageCount);
 		}
-		return GetImageMemoryBlockImpl<IMAGE_BUFFER_CACHE_ID, IMAGE_SIZE_1024X1024_APPROXIMATION, 2>(RetBlock, it->second, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, RequiredSize, RequiredAlignment, RequiredMemoryTypeBits);
+		return GetImageMemoryBlockImpl<IMAGE_BUFFER_CACHE_ID, IMAGE_SIZE_1024X1024_APPROXIMATION, 2>(RetBlock, BufferCacheIterator->second, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, RequiredSize, RequiredAlignment, RequiredMemoryTypeBits);
 	}
 
 	void FreeImageMemBlock(SMemoryImageBlock<IMAGE_BUFFER_CACHE_ID> &Block)
@@ -2635,15 +2635,15 @@ protected:
 			}
 
 			bool Needs3DTexDel = false;
-			uint8_t *p3DTexData = static_cast<uint8_t *>(malloc((size_t)PixelSize * ConvertWidth * ConvertHeight));
-			if(!Texture2DTo3D(pData, ConvertWidth, ConvertHeight, PixelSize, 16, 16, p3DTexData, Image3DWidth, Image3DHeight))
+			uint8_t *pTexData3D = static_cast<uint8_t *>(malloc((size_t)PixelSize * ConvertWidth * ConvertHeight));
+			if(!Texture2DTo3D(pData, ConvertWidth, ConvertHeight, PixelSize, 16, 16, pTexData3D, Image3DWidth, Image3DHeight))
 			{
-				free(p3DTexData);
-				p3DTexData = nullptr;
+				free(pTexData3D);
+				pTexData3D = nullptr;
 			}
 			Needs3DTexDel = true;
 
-			if(p3DTexData != nullptr)
+			if(pTexData3D != nullptr)
 			{
 				const size_t ImageDepth2DArray = (size_t)16 * 16;
 				VkExtent3D ImgSize{(uint32_t)Image3DWidth, (uint32_t)Image3DHeight, 1};
@@ -2654,7 +2654,7 @@ protected:
 						MipMapLevelCount = 1;
 				}
 
-				if(!CreateTextureImage(ImageIndex, Texture.m_Img3D, Texture.m_Img3DMem, p3DTexData, Format, Image3DWidth, Image3DHeight, ImageDepth2DArray, PixelSize, MipMapLevelCount))
+				if(!CreateTextureImage(ImageIndex, Texture.m_Img3D, Texture.m_Img3DMem, pTexData3D, Format, Image3DWidth, Image3DHeight, ImageDepth2DArray, PixelSize, MipMapLevelCount))
 					return false;
 				VkFormat ImgFormat = Format;
 				VkImageView ImgView = CreateTextureImageView(Texture.m_Img3D, ImgFormat, VK_IMAGE_VIEW_TYPE_2D_ARRAY, ImageDepth2DArray, MipMapLevelCount);
@@ -2666,7 +2666,7 @@ protected:
 					return false;
 
 				if(Needs3DTexDel)
-					free(p3DTexData);
+					free(pTexData3D);
 			}
 		}
 		return true;
@@ -3949,8 +3949,7 @@ public:
 		VKCreateInfo.pEnabledFeatures = NULL;
 		VKCreateInfo.flags = 0;
 
-		VkResult res = vkCreateDevice(m_VKGPU, &VKCreateInfo, nullptr, &m_VKDevice);
-		if(res != VK_SUCCESS)
+		if(vkCreateDevice(m_VKGPU, &VKCreateInfo, nullptr, &m_VKDevice) != VK_SUCCESS)
 		{
 			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "Logical device could not be created.");
 			return false;
@@ -4227,8 +4226,7 @@ public:
 	[[nodiscard]] bool GetSwapChainImageHandles()
 	{
 		uint32_t ImgCount = 0;
-		VkResult res = vkGetSwapchainImagesKHR(m_VKDevice, m_VKSwapChain, &ImgCount, nullptr);
-		if(res != VK_SUCCESS)
+		if(vkGetSwapchainImagesKHR(m_VKDevice, m_VKSwapChain, &ImgCount, nullptr) != VK_SUCCESS)
 		{
 			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "Could not get swap chain images.");
 			return false;
@@ -4274,10 +4272,10 @@ public:
 
 	VkResult CreateDebugUtilsMessengerEXT(const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo, const VkAllocationCallbacks *pAllocator, VkDebugUtilsMessengerEXT *pDebugMessenger)
 	{
-		auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_VKInstance, "vkCreateDebugUtilsMessengerEXT");
-		if(func != nullptr)
+		auto pfnVulkanCreateDebugUtilsFunction = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_VKInstance, "vkCreateDebugUtilsMessengerEXT");
+		if(pfnVulkanCreateDebugUtilsFunction != nullptr)
 		{
-			return func(m_VKInstance, pCreateInfo, pAllocator, pDebugMessenger);
+			return pfnVulkanCreateDebugUtilsFunction(m_VKInstance, pCreateInfo, pAllocator, pDebugMessenger);
 		}
 		else
 		{
@@ -4287,10 +4285,10 @@ public:
 
 	void DestroyDebugUtilsMessengerEXT(VkDebugUtilsMessengerEXT &DebugMessenger)
 	{
-		auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_VKInstance, "vkDestroyDebugUtilsMessengerEXT");
-		if(func != nullptr)
+		auto pfnVulkanDestroyDebugUtilsFunction = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_VKInstance, "vkDestroyDebugUtilsMessengerEXT");
+		if(pfnVulkanDestroyDebugUtilsFunction != nullptr)
 		{
-			func(m_VKInstance, DebugMessenger, nullptr);
+			pfnVulkanDestroyDebugUtilsFunction(m_VKInstance, DebugMessenger, nullptr);
 		}
 	}
 #endif
@@ -4562,8 +4560,8 @@ public:
 
 	[[nodiscard]] bool LoadShader(const char *pFilename, std::vector<uint8_t> *&pvShaderData)
 	{
-		auto it = m_ShaderFiles.find(pFilename);
-		if(it == m_ShaderFiles.end())
+		auto ShaderFileIterator = m_ShaderFiles.find(pFilename);
+		if(ShaderFileIterator == m_ShaderFiles.end())
 		{
 			void *pShaderBuff;
 			unsigned FileSize;
@@ -4575,10 +4573,10 @@ public:
 			mem_copy(vShaderBuff.data(), pShaderBuff, FileSize);
 			free(pShaderBuff);
 
-			it = m_ShaderFiles.insert({pFilename, {std::move(vShaderBuff)}}).first;
+			ShaderFileIterator = m_ShaderFiles.insert({pFilename, {std::move(vShaderBuff)}}).first;
 		}
 
-		pvShaderData = &it->second.m_vBinary;
+		pvShaderData = &ShaderFileIterator->second.m_vBinary;
 
 		return true;
 	}
@@ -6301,12 +6299,12 @@ public:
 
 		uint8_t *pMem = nullptr;
 
-		size_t it = 0;
+		size_t BufferCountOffset = 0;
 		if(UsesCurrentCountOffset)
-			it = StreamUniformBuffer.GetUsedCount(m_CurImageIndex);
-		for(; it < StreamUniformBuffer.GetBuffers(m_CurImageIndex).size(); ++it)
+			BufferCountOffset = StreamUniformBuffer.GetUsedCount(m_CurImageIndex);
+		for(; BufferCountOffset < StreamUniformBuffer.GetBuffers(m_CurImageIndex).size(); ++BufferCountOffset)
 		{
-			auto &BufferOfFrame = StreamUniformBuffer.GetBuffers(m_CurImageIndex)[it];
+			auto &BufferOfFrame = StreamUniformBuffer.GetBuffers(m_CurImageIndex)[BufferCountOffset];
 			if(BufferOfFrame.m_Size >= DataSize + BufferOfFrame.m_UsedSize)
 			{
 				if(BufferOfFrame.m_UsedSize == 0)

@@ -28,15 +28,15 @@ inline void CTooltips::ClearActiveTooltip()
 void CTooltips::DoToolTip(const void *pId, const CUIRect *pNearRect, const char *pText, float WidthHint)
 {
 	uintptr_t Id = reinterpret_cast<uintptr_t>(pId);
-	const auto result = m_Tooltips.emplace(Id, CTooltip{
-							   pId,
-							   *pNearRect,
-							   pText,
-							   WidthHint,
-							   false});
-	CTooltip &Tooltip = result.first->second;
+	const auto &[Entry, WasInserted] = m_Tooltips.emplace(Id, CTooltip{
+									  pId,
+									  *pNearRect,
+									  pText,
+									  WidthHint,
+									  false});
+	CTooltip &Tooltip = Entry->second;
 
-	if(!result.second)
+	if(!WasInserted)
 	{
 		Tooltip.m_Rect = *pNearRect; // update in case of window resize
 		Tooltip.m_pText = pText; // update in case of language change
