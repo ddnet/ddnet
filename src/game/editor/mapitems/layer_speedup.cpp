@@ -18,8 +18,8 @@ CLayerSpeedup::CLayerSpeedup(const CLayerSpeedup &Other) :
 	str_copy(m_aName, "Speedup copy");
 	m_HasSpeedup = true;
 
-	m_pSpeedupTile = new CSpeedupTile[m_Width * m_Height];
-	mem_copy(m_pSpeedupTile, Other.m_pSpeedupTile, (size_t)m_Width * m_Height * sizeof(CSpeedupTile));
+	m_pSpeedupTile = new CSpeedupTile[m_LayerTilemap.m_Width * m_LayerTilemap.m_Height];
+	mem_copy(m_pSpeedupTile, Other.m_pSpeedupTile, (size_t)m_LayerTilemap.m_Width * m_LayerTilemap.m_Height * sizeof(CSpeedupTile));
 }
 
 CLayerSpeedup::~CLayerSpeedup()
@@ -34,8 +34,8 @@ void CLayerSpeedup::Resize(int NewW, int NewH)
 	mem_zero(pNewSpeedupData, (size_t)NewW * NewH * sizeof(CSpeedupTile));
 
 	// copy old data
-	for(int y = 0; y < minimum(NewH, m_Height); y++)
-		mem_copy(&pNewSpeedupData[y * NewW], &m_pSpeedupTile[y * m_Width], minimum(m_Width, NewW) * sizeof(CSpeedupTile));
+	for(int y = 0; y < minimum(NewH, m_LayerTilemap.m_Height); y++)
+		mem_copy(&pNewSpeedupData[y * NewW], &m_pSpeedupTile[y * m_LayerTilemap.m_Width], minimum(m_LayerTilemap.m_Width, NewW) * sizeof(CSpeedupTile));
 
 	// replace old
 	delete[] m_pSpeedupTile;
@@ -45,7 +45,7 @@ void CLayerSpeedup::Resize(int NewW, int NewH)
 	CLayerTiles::Resize(NewW, NewH);
 
 	// resize gamelayer too
-	if(m_pEditor->m_Map.m_pGameLayer->m_Width != NewW || m_pEditor->m_Map.m_pGameLayer->m_Height != NewH)
+	if(m_pEditor->m_Map.m_pGameLayer->m_LayerTilemap.m_Width != NewW || m_pEditor->m_Map.m_pGameLayer->m_LayerTilemap.m_Height != NewH)
 		m_pEditor->m_Map.m_pGameLayer->Resize(NewW, NewH);
 }
 
@@ -57,9 +57,9 @@ void CLayerSpeedup::Shift(EShiftDirection Direction)
 
 bool CLayerSpeedup::IsEmpty() const
 {
-	for(int y = 0; y < m_Height; y++)
+	for(int y = 0; y < m_LayerTilemap.m_Height; y++)
 	{
-		for(int x = 0; x < m_Width; x++)
+		for(int x = 0; x < m_LayerTilemap.m_Width; x++)
 		{
 			const int Index = GetTile(x, y).m_Index;
 			if(Index == 0)
@@ -92,20 +92,20 @@ void CLayerSpeedup::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 
 	bool Destructive = m_pEditor->m_BrushDrawDestructive || pSpeedupLayer->IsEmpty();
 
-	for(int y = 0; y < pSpeedupLayer->m_Height; y++)
-		for(int x = 0; x < pSpeedupLayer->m_Width; x++)
+	for(int y = 0; y < pSpeedupLayer->m_LayerTilemap.m_Height; y++)
+		for(int x = 0; x < pSpeedupLayer->m_LayerTilemap.m_Width; x++)
 		{
 			int fx = x + sx;
 			int fy = y + sy;
 
-			if(fx < 0 || fx >= m_Width || fy < 0 || fy >= m_Height)
+			if(fx < 0 || fx >= m_LayerTilemap.m_Width || fy < 0 || fy >= m_LayerTilemap.m_Height)
 				continue;
 
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			const int SrcIndex = y * pSpeedupLayer->m_Width + x;
-			const int TgtIndex = fy * m_Width + fx;
+			const int SrcIndex = y * pSpeedupLayer->m_LayerTilemap.m_Width + x;
+			const int TgtIndex = fy * m_LayerTilemap.m_Width + fx;
 
 			SSpeedupTileStateChange::SData Previous{
 				m_pSpeedupTile[TgtIndex].m_Force,
@@ -170,7 +170,7 @@ void CLayerSpeedup::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 
 			RecordStateChange(fx, fy, Previous, Current);
 		}
-	FlagModified(sx, sy, pSpeedupLayer->m_Width, pSpeedupLayer->m_Height);
+	FlagModified(sx, sy, pSpeedupLayer->m_LayerTilemap.m_Width, pSpeedupLayer->m_LayerTilemap.m_Height);
 }
 
 void CLayerSpeedup::RecordStateChange(int x, int y, SSpeedupTileStateChange::SData Previous, SSpeedupTileStateChange::SData Current)
@@ -190,9 +190,9 @@ void CLayerSpeedup::BrushFlipX()
 		Number = (180 - Number % 360 + 360) % 360;
 	};
 
-	for(int y = 0; y < m_Height; y++)
-		for(int x = 0; x < m_Width; x++)
-			AngleFlipX(m_pSpeedupTile[y * m_Width + x].m_Angle);
+	for(int y = 0; y < m_LayerTilemap.m_Height; y++)
+		for(int x = 0; x < m_LayerTilemap.m_Width; x++)
+			AngleFlipX(m_pSpeedupTile[y * m_LayerTilemap.m_Width + x].m_Angle);
 }
 
 void CLayerSpeedup::BrushFlipY()
@@ -204,9 +204,9 @@ void CLayerSpeedup::BrushFlipY()
 		Number = (360 - Number % 360 + 360) % 360;
 	};
 
-	for(int y = 0; y < m_Height; y++)
-		for(int x = 0; x < m_Width; x++)
-			AngleFlipY(m_pSpeedupTile[y * m_Width + x].m_Angle);
+	for(int y = 0; y < m_LayerTilemap.m_Height; y++)
+		for(int x = 0; x < m_LayerTilemap.m_Width; x++)
+			AngleFlipY(m_pSpeedupTile[y * m_LayerTilemap.m_Width + x].m_Angle);
 }
 
 void CLayerSpeedup::BrushRotate(float Amount)
@@ -224,21 +224,21 @@ void CLayerSpeedup::BrushRotate(float Amount)
 	if(Rotation == 1 || Rotation == 3)
 	{
 		// 90° rotation
-		CSpeedupTile *pTempData1 = new CSpeedupTile[m_Width * m_Height];
-		CTile *pTempData2 = new CTile[m_Width * m_Height];
-		mem_copy(pTempData1, m_pSpeedupTile, (size_t)m_Width * m_Height * sizeof(CSpeedupTile));
-		mem_copy(pTempData2, m_pTiles, (size_t)m_Width * m_Height * sizeof(CTile));
+		CSpeedupTile *pTempData1 = new CSpeedupTile[m_LayerTilemap.m_Width * m_LayerTilemap.m_Height];
+		CTile *pTempData2 = new CTile[m_LayerTilemap.m_Width * m_LayerTilemap.m_Height];
+		mem_copy(pTempData1, m_pSpeedupTile, (size_t)m_LayerTilemap.m_Width * m_LayerTilemap.m_Height * sizeof(CSpeedupTile));
+		mem_copy(pTempData2, m_pTiles, (size_t)m_LayerTilemap.m_Width * m_LayerTilemap.m_Height * sizeof(CTile));
 		CSpeedupTile *pDst1 = m_pSpeedupTile;
 		CTile *pDst2 = m_pTiles;
-		for(int x = 0; x < m_Width; ++x)
-			for(int y = m_Height - 1; y >= 0; --y, ++pDst1, ++pDst2)
+		for(int x = 0; x < m_LayerTilemap.m_Width; ++x)
+			for(int y = m_LayerTilemap.m_Height - 1; y >= 0; --y, ++pDst1, ++pDst2)
 			{
-				AdjustAngle(pTempData1[y * m_Width + x].m_Angle);
-				*pDst1 = pTempData1[y * m_Width + x];
-				*pDst2 = pTempData2[y * m_Width + x];
+				AdjustAngle(pTempData1[y * m_LayerTilemap.m_Width + x].m_Angle);
+				*pDst1 = pTempData1[y * m_LayerTilemap.m_Width + x];
+				*pDst2 = pTempData2[y * m_LayerTilemap.m_Width + x];
 			}
 
-		std::swap(m_Width, m_Height);
+		std::swap(m_LayerTilemap.m_Width, m_LayerTilemap.m_Height);
 		delete[] pTempData1;
 		delete[] pTempData2;
 	}
@@ -273,14 +273,14 @@ void CLayerSpeedup::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CU
 			int fx = x + sx;
 			int fy = y + sy;
 
-			if(fx < 0 || fx >= m_Width || fy < 0 || fy >= m_Height)
+			if(fx < 0 || fx >= m_LayerTilemap.m_Width || fy < 0 || fy >= m_LayerTilemap.m_Height)
 				continue;
 
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			const int SrcIndex = Empty ? 0 : (y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height);
-			const int TgtIndex = fy * m_Width + fx;
+			const int SrcIndex = Empty ? 0 : (y * pLt->m_LayerTilemap.m_Width + x % pLt->m_LayerTilemap.m_Width) % (pLt->m_LayerTilemap.m_Width * pLt->m_LayerTilemap.m_Height);
+			const int TgtIndex = fy * m_LayerTilemap.m_Width + fx;
 
 			SSpeedupTileStateChange::SData Previous{
 				m_pSpeedupTile[TgtIndex].m_Force,

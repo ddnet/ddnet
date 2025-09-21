@@ -44,43 +44,43 @@ protected:
 		switch(Direction)
 		{
 		case EShiftDirection::LEFT:
-			ShiftBy = minimum(ShiftBy, m_Width);
-			for(int y = 0; y < m_Height; ++y)
+			ShiftBy = minimum(ShiftBy, m_LayerTilemap.m_Width);
+			for(int y = 0; y < m_LayerTilemap.m_Height; ++y)
 			{
-				if(ShiftBy < m_Width)
-					mem_move(&pTiles[y * m_Width], &pTiles[y * m_Width + ShiftBy], (m_Width - ShiftBy) * sizeof(T));
-				mem_zero(&pTiles[y * m_Width + (m_Width - ShiftBy)], ShiftBy * sizeof(T));
+				if(ShiftBy < m_LayerTilemap.m_Width)
+					mem_move(&pTiles[y * m_LayerTilemap.m_Width], &pTiles[y * m_LayerTilemap.m_Width + ShiftBy], (m_LayerTilemap.m_Width - ShiftBy) * sizeof(T));
+				mem_zero(&pTiles[y * m_LayerTilemap.m_Width + (m_LayerTilemap.m_Width - ShiftBy)], ShiftBy * sizeof(T));
 			}
 			break;
 		case EShiftDirection::RIGHT:
-			ShiftBy = minimum(ShiftBy, m_Width);
-			for(int y = 0; y < m_Height; ++y)
+			ShiftBy = minimum(ShiftBy, m_LayerTilemap.m_Width);
+			for(int y = 0; y < m_LayerTilemap.m_Height; ++y)
 			{
-				if(ShiftBy < m_Width)
-					mem_move(&pTiles[y * m_Width + ShiftBy], &pTiles[y * m_Width], (m_Width - ShiftBy) * sizeof(T));
-				mem_zero(&pTiles[y * m_Width], ShiftBy * sizeof(T));
+				if(ShiftBy < m_LayerTilemap.m_Width)
+					mem_move(&pTiles[y * m_LayerTilemap.m_Width + ShiftBy], &pTiles[y * m_LayerTilemap.m_Width], (m_LayerTilemap.m_Width - ShiftBy) * sizeof(T));
+				mem_zero(&pTiles[y * m_LayerTilemap.m_Width], ShiftBy * sizeof(T));
 			}
 			break;
 		case EShiftDirection::UP:
-			ShiftBy = minimum(ShiftBy, m_Height);
-			for(int y = ShiftBy; y < m_Height; ++y)
+			ShiftBy = minimum(ShiftBy, m_LayerTilemap.m_Height);
+			for(int y = ShiftBy; y < m_LayerTilemap.m_Height; ++y)
 			{
-				mem_copy(&pTiles[(y - ShiftBy) * m_Width], &pTiles[y * m_Width], m_Width * sizeof(T));
+				mem_copy(&pTiles[(y - ShiftBy) * m_LayerTilemap.m_Width], &pTiles[y * m_LayerTilemap.m_Width], m_LayerTilemap.m_Width * sizeof(T));
 			}
-			for(int y = m_Height - ShiftBy; y < m_Height; ++y)
+			for(int y = m_LayerTilemap.m_Height - ShiftBy; y < m_LayerTilemap.m_Height; ++y)
 			{
-				mem_zero(&pTiles[y * m_Width], m_Width * sizeof(T));
+				mem_zero(&pTiles[y * m_LayerTilemap.m_Width], m_LayerTilemap.m_Width * sizeof(T));
 			}
 			break;
 		case EShiftDirection::DOWN:
-			ShiftBy = minimum(ShiftBy, m_Height);
-			for(int y = m_Height - ShiftBy - 1; y >= 0; --y)
+			ShiftBy = minimum(ShiftBy, m_LayerTilemap.m_Height);
+			for(int y = m_LayerTilemap.m_Height - ShiftBy - 1; y >= 0; --y)
 			{
-				mem_copy(&pTiles[(y + ShiftBy) * m_Width], &pTiles[y * m_Width], m_Width * sizeof(T));
+				mem_copy(&pTiles[(y + ShiftBy) * m_LayerTilemap.m_Width], &pTiles[y * m_LayerTilemap.m_Width], m_LayerTilemap.m_Width * sizeof(T));
 			}
 			for(int y = 0; y < ShiftBy; ++y)
 			{
-				mem_zero(&pTiles[y * m_Width], m_Width * sizeof(T));
+				mem_zero(&pTiles[y * m_LayerTilemap.m_Width], m_LayerTilemap.m_Width * sizeof(T));
 			}
 			break;
 		default:
@@ -91,16 +91,16 @@ protected:
 	template<typename T>
 	void BrushFlipXImpl(T *pTiles)
 	{
-		for(int y = 0; y < m_Height; y++)
-			for(int x = 0; x < m_Width / 2; x++)
-				std::swap(pTiles[y * m_Width + x], pTiles[(y + 1) * m_Width - 1 - x]);
+		for(int y = 0; y < m_LayerTilemap.m_Height; y++)
+			for(int x = 0; x < m_LayerTilemap.m_Width / 2; x++)
+				std::swap(pTiles[y * m_LayerTilemap.m_Width + x], pTiles[(y + 1) * m_LayerTilemap.m_Width - 1 - x]);
 	}
 	template<typename T>
 	void BrushFlipYImpl(T *pTiles)
 	{
-		for(int y = 0; y < m_Height / 2; y++)
-			for(int x = 0; x < m_Width; x++)
-				std::swap(pTiles[y * m_Width + x], pTiles[(m_Height - 1 - y) * m_Width + x]);
+		for(int y = 0; y < m_LayerTilemap.m_Height / 2; y++)
+			for(int x = 0; x < m_LayerTilemap.m_Width; x++)
+				std::swap(pTiles[y * m_LayerTilemap.m_Width + x], pTiles[(m_LayerTilemap.m_Height - 1 - y) * m_LayerTilemap.m_Width + x]);
 	}
 
 public:
@@ -165,19 +165,14 @@ public:
 
 	void GetSize(float *pWidth, float *pHeight) override
 	{
-		*pWidth = m_Width * 32.0f;
-		*pHeight = m_Height * 32.0f;
+		*pWidth = m_LayerTilemap.m_Width * 32.0f;
+		*pHeight = m_LayerTilemap.m_Height * 32.0f;
 	}
 
 	void FlagModified(int x, int y, int w, int h);
 
+	CMapItemLayerTilemap m_LayerTilemap;
 	bool m_HasGame;
-	int m_Image;
-	int m_Width;
-	int m_Height;
-	CColor m_Color;
-	int m_ColorEnv;
-	int m_ColorEnvOffset;
 	CTile *m_pTiles;
 
 	// DDRace
