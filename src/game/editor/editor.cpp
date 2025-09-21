@@ -3346,7 +3346,7 @@ void CEditor::DoColorPickerButton(const void *pId, const CUIRect *pRect, ColorRG
 	pRect->Margin(1.0f, &ColorRect);
 	ColorRect.Draw(Color, IGraphics::CORNER_ALL, 3.0f);
 
-	const int ButtonResult = DoButton_Editor_Common(pId, nullptr, 0, pRect, BUTTONFLAG_ALL, "Click to show the color picker. Shift+right click to copy color to clipboard. Shift+left click to paste color from clipboard.");
+	const int ButtonResult = DoButtonLogic(pId, 0, pRect, BUTTONFLAG_ALL, "Click to show the color picker. Shift+right click to copy color to clipboard. Shift+left click to paste color from clipboard.");
 	if(Input()->ShiftIsPressed())
 	{
 		if(ButtonResult == 1)
@@ -6838,7 +6838,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 		static int s_ChangedIndicator;
-		DoButton_Editor_Common(&s_ChangedIndicator, "", 0, &ChangedIndicator, BUTTONFLAG_NONE, "This map has unsaved changes."); // just for the tooltip, result unused
+		DoButtonLogic(&s_ChangedIndicator, 0, &ChangedIndicator, BUTTONFLAG_NONE, "This map has unsaved changes."); // just for the tooltip, result unused
 	}
 
 	char aBuf[IO_MAX_PATH_LENGTH + 32];
@@ -7276,7 +7276,7 @@ void CEditor::UpdateColorPipette()
 	}
 
 	// Simulate button overlaying the entire screen to intercept all clicks for color pipette.
-	const int ButtonResult = DoButton_Editor_Common(&s_PipetteScreenButton, "", 0, Ui()->Screen(), BUTTONFLAG_ALL, "Left click to pick a color from the screen. Right click to cancel pipette mode.");
+	const int ButtonResult = DoButtonLogic(&s_PipetteScreenButton, 0, Ui()->Screen(), BUTTONFLAG_ALL, "Left click to pick a color from the screen. Right click to cancel pipette mode.");
 	// Don't handle clicks if we are panning, so the pipette stays active while panning.
 	// Checking m_pContainerPanned alone is not enough, as this variable is reset when
 	// panning ends before this function is called.
