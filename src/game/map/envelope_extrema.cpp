@@ -31,13 +31,15 @@ void CEnvelopeExtrema::CalculateEnvelope(const CMapItemEnvelope *pEnvelopeItem, 
 	EnvExt.m_Available = false;
 	EnvExt.m_Rotating = false;
 
-	// check if the envelope is a position envelope
-	if(pEnvelopeItem->m_Channels != 3)
+	// check if the envelope is a valid position envelope
+	if(!pEnvelopeItem || pEnvelopeItem->m_Channels != 3)
 		return;
 
 	for(int PointId = pEnvelopeItem->m_StartPoint; PointId < pEnvelopeItem->m_StartPoint + pEnvelopeItem->m_NumPoints; ++PointId)
 	{
 		const CEnvPoint *pEnvPoint = m_EnvelopePoints.GetPoint(PointId);
+		if(!pEnvPoint)
+			return;
 
 		// check if quad is rotating
 		if(pEnvPoint->m_aValues[2] != 0)
@@ -53,6 +55,9 @@ void CEnvelopeExtrema::CalculateEnvelope(const CMapItemEnvelope *pEnvelopeItem, 
 			if(PointId < pEnvelopeItem->m_StartPoint + pEnvelopeItem->m_NumPoints - 1 && pEnvPoint->m_Curvetype == CURVETYPE_BEZIER)
 			{
 				const CEnvPointBezier *pEnvPointBezier = m_EnvelopePoints.GetBezier(PointId);
+				if(!pEnvPointBezier)
+					return;
+
 				// we are only interested in the height not in the time, meaning we only need delta Y
 				EnvExt.m_Minima[Channel] = std::min(pEnvPoint->m_aValues[Channel] + pEnvPointBezier->m_aOutTangentDeltaY[Channel], EnvExt.m_Minima[Channel]);
 				EnvExt.m_Maxima[Channel] = std::max(pEnvPoint->m_aValues[Channel] + pEnvPointBezier->m_aOutTangentDeltaY[Channel], EnvExt.m_Maxima[Channel]);
@@ -61,6 +66,9 @@ void CEnvelopeExtrema::CalculateEnvelope(const CMapItemEnvelope *pEnvelopeItem, 
 			if(PointId > 0 && m_EnvelopePoints.GetPoint(PointId - 1)->m_Curvetype == CURVETYPE_BEZIER)
 			{
 				const CEnvPointBezier *pEnvPointBezier = m_EnvelopePoints.GetBezier(PointId);
+				if(!pEnvPointBezier)
+					return;
+
 				// we are only interested in the height not in the time, meaning we only need delta Y
 				EnvExt.m_Minima[Channel] = std::min(pEnvPoint->m_aValues[Channel] + pEnvPointBezier->m_aInTangentDeltaY[Channel], EnvExt.m_Minima[Channel]);
 				EnvExt.m_Maxima[Channel] = std::max(pEnvPoint->m_aValues[Channel] + pEnvPointBezier->m_aInTangentDeltaY[Channel], EnvExt.m_Maxima[Channel]);
