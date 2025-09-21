@@ -73,11 +73,10 @@ void CGameContext::ConList(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientId(ClientId))
 		return;
 
-	char zerochar = 0;
 	if(pResult->NumArguments() > 0)
 		pSelf->List(ClientId, pResult->GetString(0));
 	else
-		pSelf->List(ClientId, &zerochar);
+		pSelf->List(ClientId, "");
 }
 
 void CGameContext::ConHelp(IConsole::IResult *pResult, void *pUserData)

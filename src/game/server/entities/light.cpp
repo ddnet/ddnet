@@ -73,9 +73,9 @@ void CLight::Move()
 void CLight::Step()
 {
 	Move();
-	vec2 dir(std::sin(m_Rotation), std::cos(m_Rotation));
-	vec2 to2 = m_Pos + normalize(dir) * m_CurveLength;
-	GameServer()->Collision()->IntersectNoLaser(m_Pos, to2, &m_To, nullptr);
+	const vec2 Direction = vec2(std::sin(m_Rotation), std::cos(m_Rotation));
+	const vec2 NextPosition = m_Pos + normalize(Direction) * m_CurveLength;
+	GameServer()->Collision()->IntersectNoLaser(m_Pos, NextPosition, &m_To, nullptr);
 }
 
 void CLight::Reset()

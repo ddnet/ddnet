@@ -146,13 +146,13 @@ CheckOptions:
   - key:             readability-identifier-naming.ParameterCase
     value:           CamelCase
   - key:             readability-identifier-naming.ParameterIgnoredRegexp
-    value:           '^(p|a|v|[a-z]$|[xy][0123]$).*'
+    value:           '^((a|v|p|pfn)+[A-Z][a-zA-Z0-9]*|[a-z]|[pxy][0-3]|p[xy])$'
   - key:             readability-identifier-naming.ClassMethodIgnoredRegexp
     value:           '^(Con_).*'
   - key:             readability-identifier-naming.ClassMemberIgnoredRegexp
     value:           '^(ms?_(a|v|p|pfn)*[A-Z][a-zA-Z0-9]*|[abfghlrsuvwxyz])$'
   - key:             readability-identifier-naming.LocalConstantIgnoredRegexp
-    value:           '^(p|a|v|MAX_ANIM_SPEED$|DATA_OFFSET$|HEADER_LEN$|MIN_ANIM_SPEED$|[hwdcbqstf]$|[xt][0123]$|result$|sub$|it$|len$|d[xy]$).*'
+    value:           '^((a|v|p|pfn)+[A-Z][a-zA-Z0-9]*|[abcdfhpqstvw]|[aptvx][0-3]|d[xy])$'
   - key:             readability-identifier-naming.LocalVariableIgnoredRegexp
-    value:           '^(p|a|FT_|TB_|ul_|v|[xy]i$|[zijklxyhmrgbacwestnduvqf]$|[dmpwsitcf][xy]$|(ch|skel)[0-2]?$|it$|tw$|dt$|th$|ls$|func$|res$|shader$|len$|maxLength$|length$|offset$|offpos$|result$|bg$|sp$|url$|index$|ctxt$|key$|null$|logger$|LAST_MODIFIED$|teleNr$|target$|id$|hit$|hsl[0-2]?$|rgb[0-2]?$|dir$|tmp$|sub$|ret$|rendered$|size$|isWeaponCollide$|zerochar$|dist$|sound$|matches$|nohook$|btn$|savedLayers$|l[hw]$|evilz$|sec$|min$|to2$|delay$|[xy]Fract$|[xy]Int$|imgg[xy]$|skip$|localPlayer$|fdratio$|[rgbat][0-2]$|[xy][0-3]$|x[rl]$).*'
+    value:           '^((a|v|p|pfn)+[A-Z][a-zA-Z0-9]*|[abcdefghijklmnpqrstuvwxyz]|[aptvxy][0-3]|[cdfimpstw][xy])$'
 
