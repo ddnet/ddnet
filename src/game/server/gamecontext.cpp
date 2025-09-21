@@ -1838,6 +1838,7 @@ void CGameContext::OnClientDrop(int ClientId, const char *pReason)
 
 	// <FoxNet
 	m_VoteMenu.OnClientDrop(ClientId);
+	m_AccountManager.Logout(ClientId);
 	// FoxNet>
 
 	AbortVoteKickOnDisconnect(ClientId);
@@ -1883,8 +1884,6 @@ void CGameContext::OnClientDrop(int ClientId, const char *pReason)
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);
 
 	Server()->ExpireServerInfo();
-
-	m_AccountManager.Logout(ClientId);
 }
 
 void CGameContext::TeehistorianRecordAntibot(const void *pData, int DataSize)

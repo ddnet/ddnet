@@ -30,15 +30,15 @@ void CDotTrail::Reset()
 
 void CDotTrail::Tick()
 {
-	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
-	if(!pOwner)
-		return;
-
-	if(pOwner->GetPlayer()->m_Cosmetics.m_Trail != TRAIL_DOT)
+	const CPlayer *pOwnerPl = GameServer()->m_apPlayers[m_Owner];
+	if(!pOwnerPl || pOwnerPl->m_Cosmetics.m_Trail != TRAIL_DOT)
 	{
 		Reset();
 		return;
 	}
+	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
+	if(!pOwner)
+		return;
 
 	m_Pos = pOwner->GetPos();
 }

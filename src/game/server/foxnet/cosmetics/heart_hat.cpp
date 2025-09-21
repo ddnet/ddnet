@@ -41,15 +41,15 @@ void CHeartHat::Reset()
 
 void CHeartHat::Tick()
 {
-	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
-	if(!pOwner)
-		return;
-
-	if(!pOwner->GetPlayer()->m_Cosmetics.m_HeartHat)
+	const CPlayer *pOwnerPl = GameServer()->m_apPlayers[m_Owner];
+	if(!pOwnerPl || !pOwnerPl->m_Cosmetics.m_HeartHat)
 	{
 		Reset();
 		return;
 	}
+	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
+	if(!pOwner)
+		return;
 
 	m_Pos = pOwner->GetPos();
 

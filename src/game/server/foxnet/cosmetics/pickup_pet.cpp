@@ -43,15 +43,15 @@ void CPickupPet::Reset()
 
 void CPickupPet::Tick()
 {
-	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
-	if(!pOwner)
-		return;
-
-	if(!pOwner->GetPlayer()->m_Cosmetics.m_PickupPet)
+	const CPlayer *pOwnerPl = GameServer()->m_apPlayers[m_Owner];
+	if(!pOwnerPl || !pOwnerPl->m_Cosmetics.m_PickupPet)
 	{
 		Reset();
 		return;
 	}
+	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
+	if(!pOwner)
+		return;
 
 	if(m_PetMode == PET_MODE_AFK)
 		PlayerAfkMode(pOwner);

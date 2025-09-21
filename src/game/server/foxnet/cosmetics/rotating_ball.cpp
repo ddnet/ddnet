@@ -43,14 +43,15 @@ void CRotatingBall::Reset()
 
 void CRotatingBall::Tick()
 {
-	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
-	if(!pOwner)
-		return;
-	if(!pOwner->GetPlayer()->m_Cosmetics.m_RotatingBall)
+	const CPlayer *pOwnerPl = GameServer()->m_apPlayers[m_Owner];
+	if(!pOwnerPl || !pOwnerPl->m_Cosmetics.m_RotatingBall)
 	{
 		Reset();
 		return;
 	}
+	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
+	if(!pOwner)
+		return;
 
 	m_Pos = pOwner->GetPos();
 

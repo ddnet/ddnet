@@ -46,16 +46,15 @@ void CStaffInd::Reset()
 
 void CStaffInd::Tick()
 {
-	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
-
-	if(!pOwner)
-		return;
-
-	if(!pOwner->GetPlayer()->m_Cosmetics.m_StaffInd)
+	const CPlayer *pOwnerPl = GameServer()->m_apPlayers[m_Owner];
+	if(!pOwnerPl || !pOwnerPl->m_Cosmetics.m_StaffInd)
 	{
 		Reset();
 		return;
 	}
+	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
+	if(!pOwner)
+		return;
 
 	m_TeamMask = pOwner->TeamMask();
 	m_Pos = pOwner->GetPos();

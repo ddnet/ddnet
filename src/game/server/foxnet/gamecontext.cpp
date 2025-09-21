@@ -543,14 +543,15 @@ void CGameContext::OnLogin(int ClientId)
 
 			if(!str_comp(pShortcut, "G_E"))
 			{
-				pPl->ToggleItem(pShortcut, value);
+				if(!pPl->ToggleItem(pShortcut, value))
+					break;
 				continue;
 			}
-			// Add more shortcut checks if any other new cosmetic needs it
 		}
 		else
 		{
-			pPl->ToggleItem(pToken, true);
+			if(!pPl->ToggleItem(pToken, true))
+				break;
 		}
 	}
 }

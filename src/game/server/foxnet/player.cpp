@@ -385,9 +385,11 @@ bool CPlayer::ToggleItem(const char *pItemName, int Set, bool IgnoreAccount)
 		GameServer()->SendChatTarget(m_ClientId, "Cosmetics are currently disabled");
 		return false;
 	}
-
 	if(!Acc()->m_LoggedIn && !IgnoreAccount)
 		return false;
+	if(m_HideCosmetics)
+		return false;
+
 	char Item[64];
 	str_copy(Item, pItemName);
 	if(str_comp(GameServer()->m_Shop.NameToShortcut(Item), "") != 0)
@@ -593,7 +595,7 @@ void CPlayer::SetEpicCircle(bool Active)
 		return;
 	m_Cosmetics.m_EpicCircle = Active;
 	const vec2 Pos = GetCharacter() ? GetCharacter()->GetPos() : vec2(0, 0);
-	if(Active)
+	if(m_Cosmetics.m_EpicCircle)
 		new CEpicCircle(&GameServer()->m_World, GetCid(), Pos);
 }
 
@@ -603,7 +605,7 @@ void CPlayer::SetLovely(bool Active)
 		return;
 	m_Cosmetics.m_Lovely = Active;
 	const vec2 Pos = GetCharacter() ? GetCharacter()->GetPos() : vec2(0, 0);
-	if(Active)
+	if(m_Cosmetics.m_Lovely)
 		new CLovely(&GameServer()->m_World, GetCid(), Pos);
 }
 
@@ -613,7 +615,7 @@ void CPlayer::SetTrail(int Type)
 		return;
 	m_Cosmetics.m_Trail = Type;
 	const vec2 Pos = GetCharacter() ? GetCharacter()->GetPos() : vec2(0, 0);
-	if(Type == TRAIL_DOT)
+	if(m_Cosmetics.m_Trail == TRAIL_DOT)
 		new CDotTrail(&GameServer()->m_World, GetCid(), Pos);
 }
 
@@ -623,7 +625,7 @@ void CPlayer::SetPickupPet(bool Active)
 		return;
 	m_Cosmetics.m_PickupPet = Active;
 	const vec2 Pos = GetCharacter() ? GetCharacter()->GetPos() : vec2(0, 0);
-	if(Active)
+	if(m_Cosmetics.m_PickupPet)
 		m_pPickupPet = new CPickupPet(&GameServer()->m_World, GetCid(), Pos);
 }
 
@@ -633,7 +635,7 @@ void CPlayer::SetStaffInd(bool Active)
 		return;
 	m_Cosmetics.m_StaffInd = Active;
 	const vec2 Pos = GetCharacter() ? GetCharacter()->GetPos() : vec2(0, 0);
-	if(Active)
+	if(m_Cosmetics.m_StaffInd)
 		new CStaffInd(&GameServer()->m_World, GetCid(), Pos);
 }
 
@@ -643,7 +645,7 @@ void CPlayer::SetHeartHat(bool Active)
 		return;
 	m_Cosmetics.m_HeartHat = Active;
 	const vec2 Pos = GetCharacter() ? GetCharacter()->GetPos() : vec2(0, 0);
-	if(Active)
+	if(m_Cosmetics.m_HeartHat)
 		new CHeartHat(&GameServer()->m_World, GetCid(), Pos);
 }
 
