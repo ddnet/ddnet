@@ -1,7 +1,7 @@
 #include "graphics.h"
 
 // helper functions
-void IGraphics::CalcScreenParams(float Aspect, float Zoom, float *pWidth, float *pHeight)
+void IGraphics::CalcScreenParams(float Aspect, float Zoom, float *pWidth, float *pHeight) const
 {
 	const float Amount = 1150 * 1000;
 	const float WMax = 1500;
@@ -29,7 +29,7 @@ void IGraphics::CalcScreenParams(float Aspect, float Zoom, float *pWidth, float 
 }
 
 void IGraphics::MapScreenToWorld(float CenterX, float CenterY, float ParallaxX, float ParallaxY,
-	float ParallaxZoom, float OffsetX, float OffsetY, float Aspect, float Zoom, float *pPoints)
+	float ParallaxZoom, float OffsetX, float OffsetY, float Aspect, float Zoom, float *pPoints) const
 {
 	float Width, Height;
 	CalcScreenParams(Aspect, Zoom, &Width, &Height);
