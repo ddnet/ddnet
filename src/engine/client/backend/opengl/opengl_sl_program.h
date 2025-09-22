@@ -24,7 +24,7 @@ public:
 
 	bool AddShader(CGLSL *pShader) const;
 
-	void LinkProgram();
+	bool LinkProgram();
 	void UseProgram() const;
 	TWGLuint GetProgramId() const;
 
