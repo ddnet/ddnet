@@ -527,15 +527,10 @@ void CPickupDrop::ForceSetPos(vec2 NewPos)
 
 void CPickupDrop::HandleQuads(const vec2 TL, const vec2 TR, const vec2 BL, const vec2 BR, int Type)
 {
-	const vec2 Center = (TL + TR + BL + BR) * 0.25f;
-	const float R =
-		maximum(maximum(distance(Center, TL), distance(Center, TR)),
-			maximum(distance(Center, BL), distance(Center, BR)));
-
 	float TestRadius = 0.0f;
 	if(Type == CCollision::QUADTYPE_DEATH)
 		TestRadius = 8.0f;
-	else if(CCollision::QUADTYPE_STOPA)
+	else if(Type == CCollision::QUADTYPE_STOPA)
 		TestRadius = CCharacterCore::PhysicalSize() * 0.5f;
 
 	if(!Collision()->InsideQuad(m_Pos, TestRadius, TL, TR, BL, BR))
@@ -587,7 +582,6 @@ void CPickupDrop::HandleQuadStopa(const vec2 TL, const vec2 TR, const vec2 BL, c
 
 	float MinPenetration = std::numeric_limits<float>::infinity();
 	vec2 BestInwardNormal = vec2(0.0f, 0.0f);
-	int BestEdgeIdx = -1;
 	vec2 BestEdgeVec = vec2(0.0f, 0.0f);
 
 	for(int i = 0; i < 4; ++i)
@@ -605,7 +599,6 @@ void CPickupDrop::HandleQuadStopa(const vec2 TL, const vec2 TR, const vec2 BL, c
 		{
 			MinPenetration = penetration;
 			BestInwardNormal = N_in;
-			BestEdgeIdx = i;
 			BestEdgeVec = E;
 		}
 	}

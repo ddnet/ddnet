@@ -213,15 +213,16 @@ void CGameWorld::Tick()
 					pEnt = m_pNextTraverseEntity;
 				}
 			}
-
-			auto *pEnt = m_apFirstEntityTypes[i];
-			for(; pEnt;)
 			{
-				m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
-				pEnt->Tick();
-				pEnt = m_pNextTraverseEntity;
+				auto *pEnt = m_apFirstEntityTypes[i];
+				for(; pEnt;)
+				{
+					m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
+					pEnt->Tick();
+					pEnt = m_pNextTraverseEntity;
+				}
 			}
-
+			// <FoxNet
 			for(const auto *pQuadLayer : GameServer()->Collision()->QuadLayers())
 			{
 				if(!pQuadLayer)
@@ -243,27 +244,30 @@ void CGameWorld::Tick()
 					}
 				}
 			}
-
+			// FoxNet>
 		}
-
 		for(auto *pEnt : m_apFirstEntityTypes)
+		{
 			for(; pEnt;)
 			{
 				m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 				pEnt->TickDeferred();
 				pEnt = m_pNextTraverseEntity;
 			}
+		}
 	}
 	else
 	{
 		// update all objects
 		for(auto *pEnt : m_apFirstEntityTypes)
+		{
 			for(; pEnt;)
 			{
 				m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 				pEnt->TickPaused();
 				pEnt = m_pNextTraverseEntity;
 			}
+		}
 	}
 
 	RemoveEntities();

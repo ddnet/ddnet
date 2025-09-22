@@ -3451,11 +3451,6 @@ void CCharacter::SetActiveWeapon(int ActiveWeap)
 
 void CCharacter::HandleQuads(const vec2 TL, const vec2 TR, const vec2 BL, const vec2 BR, int Type)
 {
-	const vec2 Center = (TL + TR + BL + BR) * 0.25f;
-	const float R =
-		maximum(maximum(distance(Center, TL), distance(Center, TR)),
-			maximum(distance(Center, BL), distance(Center, BR)));
-
 	float TestRadius = 0.0f;
 	if(Type == CCollision::QUADTYPE_DEATH)
 		TestRadius = 8.0f;
