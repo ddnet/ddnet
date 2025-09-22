@@ -84,7 +84,7 @@ void CLayerQuads::BrushSelecting(CUIRect Rect)
 	Rect.DrawOutline(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
 }
 
-int CLayerQuads::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
+int CLayerQuads::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 {
 	// create new layers
 	std::shared_ptr<CLayerQuads> pGrabbed = std::make_shared<CLayerQuads>(m_pEditor);
@@ -112,12 +112,12 @@ int CLayerQuads::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 	return pGrabbed->m_vQuads.empty() ? 0 : 1;
 }
 
-void CLayerQuads::BrushPlace(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
+void CLayerQuads::BrushPlace(CLayer *pBrush, vec2 WorldPos)
 {
 	if(m_Readonly)
 		return;
 
-	std::shared_ptr<CLayerQuads> pQuadLayer = std::static_pointer_cast<CLayerQuads>(pBrush);
+	CLayerQuads *pQuadLayer = static_cast<CLayerQuads *>(pBrush);
 	std::vector<CQuad> vAddedQuads;
 	for(const auto &Quad : pQuadLayer->m_vQuads)
 	{

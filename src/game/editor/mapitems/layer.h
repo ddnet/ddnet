@@ -42,10 +42,10 @@ public:
 	virtual ~CLayer() = default;
 
 	virtual void BrushSelecting(CUIRect Rect) {}
-	virtual int BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect) { return 0; }
-	virtual void FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect) {}
-	virtual void BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos) {}
-	virtual void BrushPlace(std::shared_ptr<CLayer> pBrush, vec2 WorldPos) {}
+	virtual int BrushGrab(CLayerGroup *pBrush, CUIRect Rect) { return 0; }
+	virtual void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect) {}
+	virtual void BrushDraw(CLayer *pBrush, vec2 WorldPos) {}
+	virtual void BrushPlace(CLayer *pBrush, vec2 WorldPos) {}
 	virtual void BrushFlipX() {}
 	virtual void BrushFlipY() {}
 	virtual void BrushRotate(float Amount) {}
