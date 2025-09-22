@@ -3448,3 +3448,194 @@ void CCharacter::SetActiveWeapon(int ActiveWeap)
 	m_Core.m_ActiveWeapon = ActiveWeap;
 	UpdateWeaponIndicator();
 }
+
+void CCharacter::HandleQuads(const vec2 TL, const vec2 TR, const vec2 BL, const vec2 BR, int Type)
+{
+	const vec2 Center = (TL + TR + BL + BR) * 0.25f;
+	const float R =
+		maximum(maximum(distance(Center, TL), distance(Center, TR)),
+			maximum(distance(Center, BL), distance(Center, BR)));
+
+	float TestRadius = 0.0f;
+	if(Type == CCollision::QUADTYPE_DEATH)
+		TestRadius = 8.0f;
+	else if(Type == CCollision::QUADTYPE_STOPA)
+		TestRadius = CCharacterCore::PhysicalSize() * 0.5f;
+
+	m_InQuadFreeze = false;
+
+	if(!Collision()->InsideQuad(m_Pos, TestRadius, TL, TR, BL, BR))
+		return;
+
+	switch(Type)
+	{
+	case CCollision::QUADTYPE_FREEZE:
+		Freeze();
+		m_InQuadFreeze = true;
+		break;
+	case CCollision::QUADTYPE_UNFREEZE:
+		if(!Core()->m_IsInFreeze)
+		{
+			UnFreeze();
+			m_InQuadFreeze = false;
+		}
+		break;
+	case CCollision::QUADTYPE_DEATH:
+		Die(GetPlayer()->GetCid(), WEAPON_WORLD);
+		break;
+	case CCollision::QUADTYPE_STOPA:
+		HandleQuadStopa(TL, TR, BL, BR);
+		break;
+	case CCollision::QUADTYPE_CFRM:
+		// Teleport to last tele checkpoint out, or spawn if none
+		if(Core()->m_Super || Core()->m_Invincible)
+			return;
+		// First try TeleCheckOuts from current to older checkpoints
+		bool Teleported = false;
+		for(int k = m_TeleCheckpoint - 1; k >= 0; --k)
+		{
+			const auto &outs = Collision()->TeleCheckOuts(k);
+			if(!outs.empty())
+			{
+				const int idx = GameWorld()->m_Core.RandomOr0(outs.size());
+				SetPosition(outs[idx]);
+				ResetVelocity();
+				if(!g_Config.m_SvTeleportHoldHook)
+				{
+					ResetHook();
+					GameWorld()->ReleaseHooked(GetPlayer()->GetCid());
+				}
+				Teleported = true;
+				break;
+			}
+		}
+		// If none found, teleport to spawn
+		if(!Teleported)
+		{
+			vec2 SpawnPos;
+			if(GameServer()->m_pController->CanSpawn(GetPlayer()->GetTeam(), &SpawnPos, GameServer()->GetDDRaceTeam(GetPlayer()->GetCid())))
+			{
+				SetPosition(SpawnPos);
+				ResetVelocity();
+				if(!g_Config.m_SvTeleportHoldHook)
+				{
+					ResetHook();
+					GameWorld()->ReleaseHooked(GetPlayer()->GetCid());
+				}
+			}
+		}
+		break;
+	}
+}
+
+// Should probably not be duplicated in CPickupDrop
+void CCharacter::HandleQuadStopa(const vec2 TL, const vec2 TR, const vec2 BL, const vec2 BR)
+{
+	const float R = GetProximityRadius() * 0.4f;
+	const vec2 P = m_Pos;
+
+	const vec2 aA[4] = {TL, TR, BR, BL};
+	const vec2 aB[4] = {TR, BR, BL, TL};
+
+	float MinPenetration = std::numeric_limits<float>::infinity();
+	vec2 BestInwardNormal = vec2(0.0f, 0.0f);
+	int BestEdgeIdx = -1;
+	vec2 BestEdgeVec = vec2(0.0f, 0.0f);
+
+	for(int i = 0; i < 4; ++i)
+	{
+		vec2 E = aB[i] - aA[i];
+		const float Elen2 = dot(E, E);
+		if(Elen2 <= 1e-6f)
+			continue;
+
+		const vec2 N_in = normalize(vec2(-E.y, E.x));
+		const float d = dot(P - aA[i], N_in);
+		float Penetration = d + R;
+
+		if(Penetration < MinPenetration)
+		{
+			MinPenetration = Penetration;
+			BestInwardNormal = N_in;
+			BestEdgeIdx = i;
+			BestEdgeVec = E;
+		}
+	}
+
+	if(MinPenetration == std::numeric_limits<float>::infinity())
+		return;
+
+	if(MinPenetration > 0.0f)
+	{
+		const float Epsilon = 0.0f;
+		vec2 MTV = -BestInwardNormal * (MinPenetration + Epsilon);
+
+		auto CanPlace = [&](const vec2 &Pos) {
+			return !Collision()->TestBox(Pos, vec2(GetProximityRadius(), GetProximityRadius()));
+		};
+
+		auto MoveAxis = [&](vec2 &Pos, const vec2 &Delta) {
+			if(Delta.x == 0.0f && Delta.y == 0.0f)
+				return vec2(0.f, 0.f);
+
+			vec2 Target = Pos + Delta;
+			if(CanPlace(Target))
+			{
+				Pos = Target;
+				return Delta;
+			}
+
+			float lo = 0.0f;
+			float hi = 1.0f;
+			for(int i = 0; i < 10; ++i)
+			{
+				float Mid = (lo + hi) * 0.5f;
+				vec2 MidPos = Pos + Delta * Mid;
+				if(CanPlace(MidPos))
+					lo = Mid;
+				else
+					hi = Mid;
+			}
+			if(lo > 0.0f)
+			{
+				vec2 Applied = Delta * lo;
+				Pos += Applied;
+				return Applied;
+			}
+			return vec2(0.0f, 0.0f);
+		};
+
+		vec2 NewPos = m_Pos;
+
+		vec2 AppliedX = MoveAxis(NewPos, vec2(MTV.x, 0.0f));
+		vec2 AppliedY = MoveAxis(NewPos, vec2(0.0f, MTV.y));
+
+		const vec2 Vel = GetVelocity();
+		ForceSetPos(NewPos);
+
+		const float vIn = dot(Vel, BestInwardNormal);
+		if(vIn > 0.0f)
+			SetRawVelocity(Vel - BestInwardNormal * vIn);
+
+		if(AppliedX.x == 0.0f && MTV.x != 0.0f)
+			SetRawVelocity(vec2(0.0f, Vel.y));
+		if(AppliedY.y == 0.0f && MTV.y != 0.0f)
+			SetRawVelocity(vec2(Vel.x, 0.0f));
+
+		if(g_Config.m_SvQStopaGivesDj && BestEdgeIdx >= 0)
+		{
+			const float NormalThresh = 0.35f;
+			const float SlopeThresh = 0.60f;
+
+			float edgeLen = length(BestEdgeVec);
+			float edgeSlope = edgeLen > 1e-6f ? absolute(BestEdgeVec.y) / edgeLen : 1.0f;
+			bool IsFloorNormal = (BestInwardNormal.y >= NormalThresh);
+			bool IsFlatEnough = (edgeSlope <= SlopeThresh);
+			bool PushedUp = (AppliedY.y < 0.0f);
+			bool WasFallingOrRest = (Vel.y >= 0.0f);
+
+			if(IsFloorNormal && IsFlatEnough && PushedUp && WasFallingOrRest)
+				ResetJumps();
+		}
+	}
+}

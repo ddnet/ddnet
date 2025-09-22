@@ -221,6 +221,29 @@ void CGameWorld::Tick()
 				pEnt->Tick();
 				pEnt = m_pNextTraverseEntity;
 			}
+
+			for(const auto *pQuadLayer : GameServer()->Collision()->QuadLayers())
+			{
+				if(!pQuadLayer)
+					continue;
+				const int QuadType = GameServer()->Collision()->GetQuadType(pQuadLayer);
+				for(int QuadIndex = 0; QuadIndex < pQuadLayer->m_NumQuads; ++QuadIndex)
+				{
+					vec2 TL, TR, BL, BR;
+					const int Found = GameServer()->Collision()->GetQuadCorners(QuadIndex, pQuadLayer, 0.0f, &TL, &TR, &BL, &BR);
+					if(Found < 0 || Found >= pQuadLayer->m_NumQuads)
+						continue;
+
+					auto *pEnt = m_apFirstEntityTypes[i];
+					for(; pEnt;)
+					{
+						m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
+						pEnt->HandleQuads(TL, TR, BL, BR, QuadType);
+						pEnt = m_pNextTraverseEntity;
+					}
+				}
+			}
+
 		}
 
 		for(auto *pEnt : m_apFirstEntityTypes)

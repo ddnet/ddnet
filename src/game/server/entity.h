@@ -75,16 +75,9 @@ public: // TODO: Maybe make protected
 	CEntity *TypePrev() { return m_pPrevTypeEntity; }
 	const vec2 &GetPos() const { return m_Pos; }
 	float GetProximityRadius() const { return m_ProximityRadius; }
+
 	// <FoxNet
-	int GetObjType() const { return m_ObjType; }
-
-	virtual void SetVelocity(vec2 /*NewVelocity*/) {}
-	virtual void SetRawVelocity(vec2 /*NewVelocity*/) {} // For CCharacter
-	virtual vec2 GetVelocity() const { return vec2(0.f, 0.f); }
-	virtual void AddVelocity(vec2 /*Delta*/) {}
-	virtual void ResetVelocity() {}
-
-	virtual void ForceSetPos(vec2 NewPos) { m_Pos = NewPos; }
+	virtual void HandleQuads(const vec2 TL, const vec2 TR, const vec2 BL, const vec2 BR, int Type) {}
 	// FoxNet>
 
 	/* Other functions */

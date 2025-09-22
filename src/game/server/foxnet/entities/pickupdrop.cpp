@@ -459,7 +459,7 @@ void CPickupDrop::Snap(int SnappingClient)
 	{
 		GameServer()->SnapLaserObject(CSnapContext(SnapVer, SixUp, SnappingClient), m_aIds[0], m_Pos + OffSet, m_Pos + OffSet, Server()->Tick(), -1, LASERTYPE_GUN);
 		const vec2 Spin = vec2(cos(Server()->Tick() / 5.0f), sin(Server()->Tick() / 5.0f)) * 17.0f + OffSet;
-	
+
 		CNetObj_Projectile *pProj = Server()->SnapNewItem<CNetObj_Projectile>(m_aIds[1]);
 		if(!pProj)
 			return;
@@ -479,13 +479,155 @@ void CPickupDrop::TakeDamage(vec2 Force)
 	m_Vel = ClampVel(m_MoveRestrictions, Temp);
 }
 
-void CPickupDrop::SetVelocity(vec2 Vel)
-{
-	m_Vel = ClampVel(m_MoveRestrictions, Vel);
-}
-
 void CPickupDrop::ForceSetPos(vec2 NewPos)
 {
 	m_Pos = NewPos;
 	m_PrevPos = m_Pos;
+}
+
+void CPickupDrop::HandleQuads(const vec2 TL, const vec2 TR, const vec2 BL, const vec2 BR, int Type)
+{
+	const vec2 Center = (TL + TR + BL + BR) * 0.25f;
+	const float R =
+		maximum(maximum(distance(Center, TL), distance(Center, TR)),
+			maximum(distance(Center, BL), distance(Center, BR)));
+
+	float TestRadius = 0.0f;
+	if(Type == CCollision::QUADTYPE_DEATH)
+		TestRadius = 8.0f;
+	else if(CCollision::QUADTYPE_STOPA)
+		TestRadius = CCharacterCore::PhysicalSize() * 0.5f;
+
+	if(!Collision()->InsideQuad(m_Pos, TestRadius, TL, TR, BL, BR))
+		return;
+
+	switch(Type)
+	{
+	case CCollision::QUADTYPE_FREEZE:
+		if(g_Config.m_SvDropsInFreezeFloat)
+			m_InsideFreeze = true;
+		break;
+
+	case CCollision::QUADTYPE_DEATH:
+		Reset();
+		break;
+
+	case CCollision::QUADTYPE_STOPA:
+		HandleQuadStopa(TL, TR, BL, BR);
+		break;
+
+	case CCollision::QUADTYPE_CFRM:
+		for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
+		{
+			if(!Collision()->TeleCheckOuts(k).empty())
+			{
+				int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleCheckOuts(k).size());
+				m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
+				m_Vel = vec2(0, 0);
+				return;
+			}
+		}
+		vec2 SpawnPos;
+		if(GameServer()->m_pController->CanSpawn(0, &SpawnPos, m_Team))
+		{
+			m_Pos = SpawnPos;
+			m_Vel = vec2(0, 0);
+		}
+		break;
+	}
+}
+
+void CPickupDrop::HandleQuadStopa(const vec2 TL, const vec2 TR, const vec2 BL, const vec2 BR)
+{
+	const float R = GetProximityRadius() * 0.4f;
+	const vec2 P = m_Pos;
+
+	const vec2 aA[4] = {TL, TR, BR, BL};
+	const vec2 aB[4] = {TR, BR, BL, TL};
+
+	float MinPenetration = std::numeric_limits<float>::infinity();
+	vec2 BestInwardNormal = vec2(0.0f, 0.0f);
+	int BestEdgeIdx = -1;
+	vec2 BestEdgeVec = vec2(0.0f, 0.0f);
+
+	for(int i = 0; i < 4; ++i)
+	{
+		vec2 E = aB[i] - aA[i];
+		float Elen2 = dot(E, E);
+		if(Elen2 <= 1e-6f)
+			continue;
+
+		vec2 N_in = normalize(vec2(-E.y, E.x));
+		float d = dot(P - aA[i], N_in);
+		float penetration = d + R;
+
+		if(penetration < MinPenetration)
+		{
+			MinPenetration = penetration;
+			BestInwardNormal = N_in;
+			BestEdgeIdx = i;
+			BestEdgeVec = E;
+		}
+	}
+
+	if(MinPenetration == std::numeric_limits<float>::infinity())
+		return;
+
+	if(MinPenetration > 0.0f)
+	{
+		const float Epsilon = 0.0f;
+		vec2 MTV = -BestInwardNormal * (MinPenetration + Epsilon);
+
+		auto CanPlace = [&](const vec2 &Pos) {
+			return !Collision()->TestBox(Pos, vec2(GetProximityRadius(), GetProximityRadius()));
+		};
+
+		auto MoveAxis = [&](vec2 &Pos, const vec2 &Delta) {
+			if(Delta.x == 0.0f && Delta.y == 0.0f)
+				return vec2(0.f, 0.f);
+
+			vec2 Target = Pos + Delta;
+			if(CanPlace(Target))
+			{
+				Pos = Target;
+				return Delta;
+			}
+
+			float lo = 0.0f;
+			float hi = 1.0f;
+			for(int i = 0; i < 10; ++i)
+			{
+				float Mid = (lo + hi) * 0.5f;
+				vec2 MidPos = Pos + Delta * Mid;
+				if(CanPlace(MidPos))
+					lo = Mid;
+				else
+					hi = Mid;
+			}
+			if(lo > 0.0f)
+			{
+				vec2 Applied = Delta * lo;
+				Pos += Applied;
+				return Applied;
+			}
+			return vec2(0.0f, 0.0f);
+		};
+
+		vec2 NewPos = m_Pos;
+
+		vec2 AppliedX = MoveAxis(NewPos, vec2(MTV.x, 0.0f));
+		vec2 AppliedY = MoveAxis(NewPos, vec2(0.0f, MTV.y));
+
+		vec2 Vel = GetVelocity();
+		ForceSetPos(NewPos);
+
+		float vIn = dot(Vel, BestInwardNormal);
+		if(vIn > 0.0f)
+			SetRawVelocity(Vel - BestInwardNormal * vIn);
+
+		if(AppliedX.x == 0.0f && MTV.x != 0.0f)
+			SetRawVelocity(vec2(0.0f, Vel.y));
+		if(AppliedY.y == 0.0f && MTV.y != 0.0f)
+			SetRawVelocity(vec2(Vel.x, 0.0f));
+	}
 }

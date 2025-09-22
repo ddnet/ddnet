@@ -63,7 +63,6 @@ struct CAntibotRoundData;
 struct CScoreRandomMapResult;
 
 // <FoxNet
-
 class CStringDetection
 {
 	char m_String[32] = "";
@@ -877,9 +876,6 @@ private:
 
 	std::vector<CFakeSnapPlayer> m_vFakeSnapPlayers;
 	bool RandomMapVote();
-
-	void HandleQuads(const CMapItemLayerQuads *pQuadLayer, int QuadIndex, int Type);
-	void HandleQuadStopa(CEntity *pEntity, const CMapItemLayerQuads *pQuadLayer, int QuadIndex);
 
 	bool m_IsWeekend;
 

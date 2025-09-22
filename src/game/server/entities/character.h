@@ -122,14 +122,14 @@ public:
 	void SetPosition(const vec2 &Position);
 	void Move(vec2 RelPos);
 
-	// <FoxNet
-	void ResetVelocity() override;
-	void SetVelocity(vec2 NewVelocity) override;
-	void SetRawVelocity(vec2 NewVelocity) override;
-	void AddVelocity(vec2 Addition) override;
-	vec2 GetVelocity() const override { return m_Core.m_Vel; }
+	void ResetVelocity();
+	void SetVelocity(vec2 NewVelocity);
+	void SetRawVelocity(vec2 NewVelocity);
+	void AddVelocity(vec2 Addition);
+	vec2 GetVelocity() const { return m_Core.m_Vel; }
 
-	void ForceSetPos(vec2 NewPos) override;
+	// <FoxNet
+	void ForceSetPos(vec2 NewPos);
 	// FoxNet>
 
 	void ApplyMoveRestrictions();
@@ -378,6 +378,8 @@ private:
 	void HandleSpawnSolo();
 	void FoxNetSpawn();
 
+	void HandleQuads(const vec2 TL, const vec2 TR, const vec2 BL, const vec2 BR, int Type) override;
+	void HandleQuadStopa(const vec2 TL, const vec2 TR, const vec2 BL, const vec2 BR);
 	// FoxNet>
 };
 
