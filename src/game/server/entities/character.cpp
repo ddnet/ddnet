@@ -3022,7 +3022,7 @@ void CCharacter::ExtraTileHandle()
 	if(m_SpawnSolo)
 	{
 		if(IsTile(TILE_SOLO_DISABLE) || IsTile(TILE_SOLO_ENABLE))
-			UnSpawnSolo();
+			UnSpawnSolo(false);
 	}
 }
 
@@ -3039,9 +3039,10 @@ void CCharacter::HandleSpawnSolo()
 
 	UnSpawnSolo();
 }
-void CCharacter::UnSpawnSolo()
+void CCharacter::UnSpawnSolo(bool Unsolo)
 {
-	SetSolo(false);
+	if(Unsolo)
+		SetSolo(false);
 	m_SpawnSolo = false;
 	m_pHeadItem = nullptr;
 }

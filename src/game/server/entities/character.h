@@ -357,7 +357,7 @@ public:
 	CHeadItem *m_pHeadItem;
 	bool m_SpawnSolo = false;
 	bool m_ShouldSolo = true;
-	void UnSpawnSolo();
+	void UnSpawnSolo(bool Unsolo = true);
 private:
 
 	bool CanDropWeapon(int Type) const;
