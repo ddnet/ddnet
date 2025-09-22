@@ -1,6 +1,9 @@
 #ifndef BASE_STR_H
 #define BASE_STR_H
 
+#include <cstddef>
+#include <cstdint>
+
 /**
  * Copies a string to another.
  *
@@ -414,6 +417,36 @@ const char *str_find_nocase(const char *haystack, const char *needle);
 const char *str_find(const char *haystack, const char *needle);
 
 /**
+ * Writes the next token after str into buf, returns the rest of the string.
+ *
+ * @ingroup Strings
+ *
+ * @param str Pointer to string.
+ * @param delim Delimiter for tokenization.
+ * @param buffer Buffer to store token in.
+ * @param buffer_size Size of the buffer.
+ *
+ * @return Pointer to rest of the string.
+ *
+ * @remark The token is always null-terminated.
+ */
+const char *str_next_token(const char *str, const char *delim, char *buffer, int buffer_size);
+
+/**
+ * Checks if needle is in list delimited by delim.
+ *
+ * @param list List.
+ * @param delim List delimiter.
+ * @param needle Item that is being looked for.
+ *
+ * @return `1` - Item is in list.
+ * @return `0` - Item isn't in list.
+ *
+* @remark The strings are treated as null-terminated strings.
+ */
+int str_in_list(const char *list, const char *delim, const char *needle);
+
+/**
  * @ingroup Strings
  *
  * @param haystack String to search in.
@@ -542,6 +575,38 @@ void str_base64(char *dst, int dst_size, const void *data, int data_size);
 int str_base64_decode(void *dst, int dst_size, const char *data);
 
 /**
+ * Escapes \ and " characters in a string.
+ *
+ * @param dst Destination array pointer, gets increased, will point to the terminating null.
+ * @param src Source array.
+ * @param end End of destination array.
+ */
+void str_escape(char **dst, const char *src, const char *end);
+
+int str_toint(const char *str);
+bool str_toint(const char *str, int *out);
+int str_toint_base(const char *str, int base);
+unsigned long str_toulong_base(const char *str, int base);
+int64_t str_toint64_base(const char *str, int base = 10);
+float str_tofloat(const char *str);
+bool str_tofloat(const char *str, float *out);
+
+unsigned str_quickhash(const char *str);
+
+/**
+ * Encode a UTF-8 character.
+ *
+ * @ingroup Strings
+ *
+ * @param ptr Pointer to a buffer that should receive the data. Should be able to hold at least 4 bytes.
+ *
+ * @return Number of bytes put into the buffer.
+ *
+ * @remark Does not do null-termination of the string.
+ */
+int str_utf8_encode(char *ptr, int chr);
+
+/**
  * Decodes a UTF-8 codepoint.
  *
  * @ingroup Strings
@@ -583,6 +648,33 @@ void str_utf8_truncate(char *dst, int dst_size, const char *src, int truncation_
  * @remark The strings are treated as null-terminated.
  */
 int str_utf8_fix_truncation(char *str);
+
+/**
+ * Removes trailing characters that render as spaces by modifying the string in-place.
+ *
+ * @ingroup Strings
+ *
+ * @param param Input string.
+ *
+ * @remark The string is modified in-place.
+ * @remark The strings are treated as null-terminated.
+ */
+void str_utf8_trim_right(char *param);
+
+/**
+ * Converts the given UTF-8 string to lowercase (locale insensitive).
+ *
+ * @ingroup Strings
+ *
+ * @param str String to convert to lowercase.
+ * @param output Buffer that will receive the lowercase string.
+ * @param size Size of the output buffer.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ * @remark This function does not work in-place as converting a UTF-8 string to
+ *         lowercase may increase its length.
+ */
+void str_utf8_tolower(const char *input, char *output, size_t size);
 
 /**
  * Checks whether the given Unicode codepoint renders as space.

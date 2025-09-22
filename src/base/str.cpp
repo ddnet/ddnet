@@ -438,6 +438,51 @@ const char *str_find(const char *haystack, const char *needle)
 	return nullptr;
 }
 
+static const char *str_token_get(const char *str, const char *delim, int *length)
+{
+	size_t len = strspn(str, delim);
+	if(len > 1)
+		str++;
+	else
+		str += len;
+	if(!*str)
+		return nullptr;
+
+	*length = strcspn(str, delim);
+	return str;
+}
+
+const char *str_next_token(const char *str, const char *delim, char *buffer, int buffer_size)
+{
+	int len = 0;
+	const char *tok = str_token_get(str, delim, &len);
+	if(len < 0 || tok == nullptr)
+	{
+		buffer[0] = '\0';
+		return nullptr;
+	}
+
+	len = buffer_size > len ? len : buffer_size - 1;
+	mem_copy(buffer, tok, len);
+	buffer[len] = '\0';
+
+	return tok + len;
+}
+
+int str_in_list(const char *list, const char *delim, const char *needle)
+{
+	const char *tok = list;
+	int len = 0, notfound = 1, needlelen = str_length(needle);
+
+	while(notfound && (tok = str_token_get(tok, delim, &len)))
+	{
+		notfound = needlelen != len || str_comp_num(tok, needle, len);
+		tok = tok + len;
+	}
+
+	return !notfound;
+}
+
 bool str_delimiters_around_offset(const char *haystack, const char *delim, int offset, int *start, int *end)
 {
 	bool found = true;
@@ -740,6 +785,112 @@ int str_base64_decode(void *dst_raw, int dst_size, const char *data)
 	return o;
 }
 
+void str_escape(char **dst, const char *src, const char *end)
+{
+	while(*src && *dst + 1 < end)
+	{
+		if(*src == '"' || *src == '\\') // escape \ and "
+		{
+			if(*dst + 2 < end)
+				*(*dst)++ = '\\';
+			else
+				break;
+		}
+		*(*dst)++ = *src++;
+	}
+	**dst = 0;
+}
+
+int str_toint(const char *str)
+{
+	return str_toint_base(str, 10);
+}
+
+bool str_toint(const char *str, int *out)
+{
+	// returns true if conversion was successful
+	char *end;
+	int value = strtol(str, &end, 10);
+	if(*end != '\0')
+		return false;
+	if(out != nullptr)
+		*out = value;
+	return true;
+}
+
+int str_toint_base(const char *str, int base)
+{
+	return strtol(str, nullptr, base);
+}
+
+unsigned long str_toulong_base(const char *str, int base)
+{
+	return strtoul(str, nullptr, base);
+}
+
+int64_t str_toint64_base(const char *str, int base)
+{
+	return strtoll(str, nullptr, base);
+}
+
+float str_tofloat(const char *str)
+{
+	return strtod(str, nullptr);
+}
+
+bool str_tofloat(const char *str, float *out)
+{
+	// returns true if conversion was successful
+	char *end;
+	float value = strtod(str, &end);
+	if(*end != '\0')
+		return false;
+	if(out != nullptr)
+		*out = value;
+	return true;
+}
+
+unsigned str_quickhash(const char *str)
+{
+	unsigned hash = 5381;
+	for(; *str; str++)
+		hash = ((hash << 5) + hash) + (*str); /* hash * 33 + c */
+	return hash;
+}
+
+int str_utf8_encode(char *ptr, int chr)
+{
+	/* encode */
+	if(chr <= 0x7F)
+	{
+		ptr[0] = (char)chr;
+		return 1;
+	}
+	else if(chr <= 0x7FF)
+	{
+		ptr[0] = 0xC0 | ((chr >> 6) & 0x1F);
+		ptr[1] = 0x80 | (chr & 0x3F);
+		return 2;
+	}
+	else if(chr <= 0xFFFF)
+	{
+		ptr[0] = 0xE0 | ((chr >> 12) & 0x0F);
+		ptr[1] = 0x80 | ((chr >> 6) & 0x3F);
+		ptr[2] = 0x80 | (chr & 0x3F);
+		return 3;
+	}
+	else if(chr <= 0x10FFFF)
+	{
+		ptr[0] = 0xF0 | ((chr >> 18) & 0x07);
+		ptr[1] = 0x80 | ((chr >> 12) & 0x3F);
+		ptr[2] = 0x80 | ((chr >> 6) & 0x3F);
+		ptr[3] = 0x80 | (chr & 0x3F);
+		return 4;
+	}
+
+	return 0;
+}
+
 static unsigned char str_byte_next(const char **ptr)
 {
 	unsigned char byte_value = **ptr;
@@ -851,6 +1002,49 @@ int str_utf8_fix_truncation(char *str)
 		}
 	}
 	return len;
+}
+
+void str_utf8_trim_right(char *param)
+{
+	const char *str = param;
+	char *end = nullptr;
+	while(*str)
+	{
+		char *str_old = (char *)str;
+		int code = str_utf8_decode(&str);
+
+		// check if unicode is not empty
+		if(!str_utf8_isspace(code))
+		{
+			end = nullptr;
+		}
+		else if(!end)
+		{
+			end = str_old;
+		}
+	}
+	if(end)
+	{
+		*end = 0;
+	}
+}
+
+void str_utf8_tolower(const char *input, char *output, size_t size)
+{
+	size_t out_pos = 0;
+	while(*input)
+	{
+		const int code = str_utf8_tolower_codepoint(str_utf8_decode(&input));
+		char encoded_code[4];
+		const int code_size = str_utf8_encode(encoded_code, code);
+		if(out_pos + code_size + 1 > size) // +1 for null termination
+		{
+			break;
+		}
+		mem_copy(&output[out_pos], encoded_code, code_size);
+		out_pos += code_size;
+	}
+	output[out_pos] = '\0';
 }
 
 int str_utf8_isspace(int code)
