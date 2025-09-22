@@ -83,11 +83,6 @@ bool CPickupDrop::IsSwitchActiveCb(int Number, void *pUser)
 
 void CPickupDrop::Tick()
 {
-	if(GameLayerClipped(m_Pos))
-	{
-		Reset();
-		return;
-	}
 	if(m_LastOwner >= 0 && (!GameServer()->m_apPlayers[m_LastOwner] && g_Config.m_SvResetDropsOnLeave))
 	{
 		Reset();
@@ -114,11 +109,88 @@ void CPickupDrop::Tick()
 	else
 		m_Vel.y += GameServer()->TuningList()[m_TuneZone].m_Gravity;
 
-	if(Collision()->IsSpeedup(CurrentIndex))
+	HandleSkippableTiles(CurrentIndex);
+
+	// tiles
+	std::vector<int> vIndices = Collision()->GetMapIndices(m_PrevPos, m_Pos);
+	if(!vIndices.empty())
+	{
+		for(int &Index : vIndices)
+		{
+			HandleTiles(Index);
+		}
+	}
+	else
+	{
+		HandleTiles(CurrentIndex);
+	}
+
+	bool Grounded = false;
+	Collision()->MoveBox(&m_Pos, &m_Vel, CCharacterCore::PhysicalSizeVec2(), m_GroundElasticity, &Grounded);
+	if(Grounded)
+		m_Vel.x *= 0.88f;
+	m_Vel.x *= 0.98f;
+
+	if(m_InsideFreeze)
+	{
+		m_Vel.y -= 0.05f; // slowly float up
+		if(!m_TuneZone)
+			m_Vel.y -= GameServer()->Tuning()->m_Gravity;
+		else
+			m_Vel.y -= GameServer()->TuningList()[m_TuneZone].m_Gravity;
+		m_InsideFreeze = false; // Reset for the next tick
+	}
+
+	m_PrevPos = m_Pos;
+}
+
+
+void CPickupDrop::HandleSkippableTiles(int Index)
+{
+	const CPlayer *pPlayer = GameServer()->m_apPlayers[m_LastOwner];
+	const CCharacter *pChr = GameServer()->GetPlayerChar(m_LastOwner);
+
+	// handle death-tiles and leaving gamelayer
+	if((Collision()->GetCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH ||
+		   Collision()->GetCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH ||
+		   Collision()->GetCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH ||
+		   Collision()->GetCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH ||
+		   Collision()->GetFrontCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH ||
+		   Collision()->GetFrontCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH ||
+		   Collision()->GetFrontCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH ||
+		   Collision()->GetFrontCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH) &&
+		pChr && !pChr->Core()->m_Super && !pChr->Core()->m_Invincible)
+	{
+		if(GameServer()->m_pController->Teams().IsPractice(Team()))
+		{
+			if(g_Config.m_SvDropsInFreezeFloat)
+				m_InsideFreeze = true;
+		}
+		else
+		{
+			Reset();
+			return;
+		}
+	}
+
+	// <FoxNet
+	if(pPlayer && pPlayer->m_IgnoreGamelayer)
+		;
+	else if(GameLayerClipped(m_Pos))
+	{
+		Reset();
+		return;
+	}
+
+	if(Index < 0)
+		return;
+
+	// handle speedup tiles
+	if(Collision()->IsSpeedup(Index))
 	{
 		vec2 Direction, TempVel = m_Vel;
 		int Force, Type, MaxSpeed = 0;
-		Collision()->GetSpeedup(CurrentIndex, &Direction, &Force, &MaxSpeed, &Type);
+		Collision()->GetSpeedup(Index, &Direction, &Force, &MaxSpeed, &Type);
 
 		if(Type == TILE_SPEED_BOOST_OLD)
 		{
@@ -194,38 +266,6 @@ void CPickupDrop::Tick()
 			m_Vel = ClampVel(m_MoveRestrictions, TempVel);
 		}
 	}
-
-	// tiles
-	std::vector<int> vIndices = Collision()->GetMapIndices(m_PrevPos, m_Pos);
-	if(!vIndices.empty())
-	{
-		for(int &Index : vIndices)
-		{
-			HandleTiles(Index);
-		}
-	}
-	else
-	{
-		HandleTiles(CurrentIndex);
-	}
-
-	bool Grounded = false;
-	Collision()->MoveBox(&m_Pos, &m_Vel, CCharacterCore::PhysicalSizeVec2(), m_GroundElasticity, &Grounded);
-	if(Grounded)
-		m_Vel.x *= 0.88f;
-	m_Vel.x *= 0.98f;
-
-	if(m_InsideFreeze)
-	{
-		m_Vel.y -= 0.05f; // slowly float up
-		if(!m_TuneZone)
-			m_Vel.y -= GameServer()->Tuning()->m_Gravity;
-		else
-			m_Vel.y -= GameServer()->TuningList()[m_TuneZone].m_Gravity;
-		m_InsideFreeze = false; // Reset for the next tick
-	}
-
-	m_PrevPos = m_Pos;
 }
 
 bool CPickupDrop::CheckArmor()
@@ -350,7 +390,7 @@ void CPickupDrop::HandleTiles(int Index)
 		m_TeleCheckpoint = TeleCheckpoint;
 
 	m_Vel = ClampVel(m_MoveRestrictions, m_Vel);
-	if(g_Config.m_SvDropsInFreezeFloat && (m_TileIndex == TILE_FREEZE || m_TileFIndex == TILE_FREEZE))
+	if(m_TileIndex == TILE_FREEZE || m_TileFIndex == TILE_FREEZE)
 	{
 		if(g_Config.m_SvDropsInFreezeFloat)
 			m_InsideFreeze = true;

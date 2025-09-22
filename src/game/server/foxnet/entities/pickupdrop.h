@@ -25,6 +25,7 @@ class CPickupDrop : public CEntity
 
 	static bool IsSwitchActiveCb(int Number, void *pUser);
 	bool IsGrounded();
+	void HandleSkippableTiles(int Index);
 	void HandleTiles(int Index);
 	vec2 m_PrevPos;
 	vec2 m_Vel;
