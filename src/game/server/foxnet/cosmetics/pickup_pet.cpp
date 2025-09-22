@@ -14,6 +14,7 @@
 #include <game/server/player.h>
 #include <game/server/teams.h>
 #include <generated/protocol.h>
+#include <engine/shared/config.h>
 
 CPickupPet::CPickupPet(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP, Pos)
@@ -101,7 +102,11 @@ void CPickupPet::Snap(int SnappingClient)
 
 	const int SnapVer = Server()->GetClientVersion(SnappingClient);
 	const bool SixUp = Server()->IsSixup(SnappingClient);
-	GameServer()->SnapPickup(CSnapContext(SnapVer, SixUp, SnappingClient), GetId(), m_Pos, m_CurType, -1, -1, PICKUPFLAG_NO_PREDICT);
+
+	if(g_Config.m_SvCorruptPickupPet)
+		m_CurType = NUM_POWERUPS;
+	
+	GameServer()->SnapPickup(CSnapContext(SnapVer, SixUp, SnappingClient), GetId(), m_Pos, m_CurType, 0, -1, PICKUPFLAG_NO_PREDICT);
 }
 
 void CPickupPet::PlayerAfkMode(CCharacter *pOwner)

@@ -119,7 +119,14 @@ void CRotatingBall::Snap(int SnappingClient)
 		Pos = m_ProjPos + nVel;
 		LaserPos = m_LaserPos + nVel;
 	}
-	GameServer()->SnapLaserObject(CSnapContext(SnapVer, SixUp, SnappingClient), GetId(), LaserPos, LaserPos, Server()->Tick(), m_Owner, LASERTYPE_GUN, -1, -1, LASERFLAG_NO_PREDICT);
+
+	int Owner = m_Owner;
+	if(g_Config.m_SvCorruptPickupPet && pSnapPlayer->m_Cosmetics.m_PickupPet)
+		Owner = -1; // Sets the pickuppet to the laser sprite for some reason
+
+
+
+	GameServer()->SnapLaserObject(CSnapContext(SnapVer, SixUp, SnappingClient), GetId(), LaserPos, LaserPos, Server()->Tick(), Owner, LASERTYPE_GUN, -1, -1, LASERFLAG_NO_PREDICT);
 
 	CNetObj_DDNetProjectile *pProj = Server()->SnapNewItem<CNetObj_DDNetProjectile>(m_Id1);
 	if(!pProj)
