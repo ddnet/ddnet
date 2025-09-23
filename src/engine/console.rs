@@ -25,7 +25,6 @@ mod ffi {
         include!("engine/rust.h");
 
         type ColorRGBA = ddnet_base::ColorRGBA;
-        type ColorHSLA = ddnet_base::ColorHSLA;
         type StrRef<'a> = ddnet_base::StrRef<'a>;
         type UserPtr = ddnet_base::UserPtr;
         type IConsole_FCommandCallback = super::IConsole_FCommandCallback;
@@ -136,70 +135,6 @@ mod ffi {
         /// # assert!(executed);
         /// ```
         pub fn GetString(self: &IConsole_IResult, Index: u32) -> StrRef<'_>;
-
-        /// Get the n-th parameter of the command as a color.
-        ///
-        /// If the index is out of range, this returns black. If the parameter
-        /// cannot be parsed as a color, this also returns black.
-        ///
-        /// It supports the following formats:
-        /// - `$XXX` (RGB, e.g. `$f00` for red)
-        /// - `$XXXX` (RGBA, e.g. `$f00f` for red with maximum opacity)
-        /// - `$XXXXXX` (RGB, e.g. `$ffa500` for DDNet's logo color)
-        /// - `$XXXXXXXX` (RGBA, e.g. `$ffa500ff` for DDNet's logo color with maximum opacity)
-        /// - base 10 integers (24/32 bit HSL in base 10, e.g. `0` for black)
-        /// - the following color names: `red`, `yellow`, `green`, `cyan`,
-        /// `blue`, `magenta`, `white`, `gray`, `black`.
-        ///
-        /// The `Light` parameter influences the interpretation of base 10
-        /// integers, if it is set, the lightness channel is divided by 2 and
-        /// 0.5 is added, making 0.5 the darkest and 1.0 the lightest possible
-        /// value.
-        ///
-        /// # Examples
-        ///
-        /// ```
-        /// # extern crate ddnet_test;
-        /// # use ddnet_base::ColorHSLA;
-        /// # use ddnet_base::UserPtr;
-        /// # use ddnet_base::s;
-        /// # use ddnet_engine::CreateConsole;
-        /// # use ddnet_engine::IConsole;
-        /// # use ddnet_engine::IConsole_FCommandCallback;
-        /// # use ddnet_engine::IConsole_IResult;
-        /// # use ddnet_engine_shared::CFGFLAG_SERVER;
-        /// #
-        /// # let mut console = CreateConsole(CFGFLAG_SERVER);
-        /// # let mut executed = false;
-        /// # console.pin_mut().Register(s!("command"), s!("ssssssss"), CFGFLAG_SERVER, IConsole_FCommandCallback(callback), UserPtr::from(&mut executed), s!(""));
-        /// # console.pin_mut().ExecuteLine(s!(r#"command "$f00" $ffa500 $12345 shiny cyan -16777216 $f008 $00ffff80"#), -1, true);
-        /// # extern "C" fn callback(result_param: &IConsole_IResult, mut user: UserPtr) {
-        /// # unsafe { *user.cast_mut::<bool>() = true; }
-        /// let result: &IConsole_IResult /* = `command "$f00" $ffa500 $12345 shiny cyan -16777216 $f008 $00ffff80` */;
-        /// # result = result_param;
-        /// assert_eq!(result.GetColor(0, 0.0), ColorHSLA { h: 0.0, s: 1.0, l: 0.5, a: 1.0 }); // red
-        /// assert_eq!(result.GetColor(1, 0.0), ColorHSLA { h: 0.10784314, s: 1.0, l: 0.5, a: 1.0 }); // DDNet logo color
-        /// assert_eq!(result.GetColor(2, 0.0), ColorHSLA { h: 0.0, s: 0.0, l: 0.0, a: 1.0 }); // cannot be parsed => black
-        /// assert_eq!(result.GetColor(3, 0.0), ColorHSLA { h: 0.0, s: 0.0, l: 0.0, a: 1.0 }); // unknown color name => black
-        /// assert_eq!(result.GetColor(4, 0.0), ColorHSLA { h: 0.5, s: 1.0, l: 0.5, a: 1.0 }); // cyan
-        /// assert_eq!(result.GetColor(5, 0.0), ColorHSLA { h: 0.0, s: 0.0, l: 0.0, a: 1.0 }); // black
-        /// assert_eq!(result.GetColor(6, 0.0), ColorHSLA { h: 0.0, s: 1.0, l: 0.5, a: 0.53333336 }); // red with alpha specified
-        /// assert_eq!(result.GetColor(7, 0.0), ColorHSLA { h: 0.5, s: 1.0, l: 0.5, a: 0.5019608 }); // cyan with alpha specified
-        /// assert_eq!(result.GetColor(8, 0.0), ColorHSLA { h: 0.0, s: 0.0, l: 0.0, a: 1.0 }); // out of range => black
-        ///
-        /// assert_eq!(result.GetColor(0, 0.5), result.GetColor(0, 0.0));
-        /// assert_eq!(result.GetColor(1, 0.5), result.GetColor(1, 0.0));
-        /// assert_eq!(result.GetColor(2, 0.5), result.GetColor(2, 0.0));
-        /// assert_eq!(result.GetColor(3, 0.5), result.GetColor(3, 0.0));
-        /// assert_eq!(result.GetColor(4, 0.5), result.GetColor(4, 0.0));
-        /// assert_eq!(result.GetColor(5, 0.5), ColorHSLA { h: 0.0, s: 0.0, l: 0.5, a: 1.0 }); // black, but has the `Light` parameter set
-        /// assert_eq!(result.GetColor(6, 0.5), result.GetColor(6, 0.0));
-        /// assert_eq!(result.GetColor(7, 0.5), result.GetColor(7, 0.0));
-        /// assert_eq!(result.GetColor(8, 0.5), result.GetColor(8, 0.0));
-        /// # }
-        /// # assert!(executed);
-        /// ```
-        pub fn GetColor(self: &IConsole_IResult, Index: u32, DarkestLighting: f32) -> ColorHSLA;
 
         /// Get the number of parameters passed.
         ///
