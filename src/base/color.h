@@ -132,16 +132,6 @@ public:
 		return col;
 	}
 
-	constexpr DerivedT Multiply(const DerivedT &Other) const
-	{
-		DerivedT Color(static_cast<const DerivedT &>(*this));
-		Color.x *= Other.x;
-		Color.y *= Other.y;
-		Color.z *= Other.z;
-		Color.a *= Other.a;
-		return Color;
-	}
-
 	template<typename UnpackT>
 	constexpr static UnpackT UnpackAlphaLast(unsigned Color, bool Alpha = true)
 	{
@@ -206,6 +196,27 @@ class ColorRGBA : public color4_base<ColorRGBA>
 public:
 	using color4_base::color4_base;
 	constexpr ColorRGBA() = default;
+
+	constexpr ColorRGBA Multiply(const ColorRGBA &Other) const
+	{
+		ColorRGBA Color = *this;
+		Color.r *= Other.r;
+		Color.g *= Other.g;
+		Color.b *= Other.b;
+		Color.a *= Other.a;
+		return Color;
+	}
+
+	template<Numeric T>
+	constexpr ColorRGBA Multiply(const T &Factor) const
+	{
+		ColorRGBA Color = *this;
+		Color.r *= Factor;
+		Color.g *= Factor;
+		Color.b *= Factor;
+		Color.a *= Factor;
+		return Color;
+	}
 };
 
 template<typename T, typename F>
