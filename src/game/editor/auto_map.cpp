@@ -1,15 +1,16 @@
-#include <cinttypes>
-#include <cstdio> // sscanf
+#include "auto_map.h"
 
-#include <engine/console.h>
+#include <base/log.h>
+
 #include <engine/shared/linereader.h>
 #include <engine/storage.h>
 
+#include <game/editor/editor_actions.h>
 #include <game/editor/mapitems/layer_tiles.h>
 #include <game/mapitems.h>
 
-#include "auto_map.h"
-#include "editor_actions.h"
+#include <cinttypes>
+#include <cstdio> // sscanf
 
 // Based on triple32inc from https://github.com/skeeto/hash-prospector/tree/79a6074062a84907df6e45b756134b74e2956760
 static uint32_t HashUInt32(uint32_t Num)
@@ -49,12 +50,15 @@ void CAutoMapper::Load(const char *pTileName)
 {
 	char aPath[IO_MAX_PATH_LENGTH];
 	str_format(aPath, sizeof(aPath), "editor/automap/%s.rules", pTileName);
+	if(!Storage()->FileExists(aPath, IStorage::TYPE_ALL))
+	{
+		return; // Avoid error message if no rules exist
+	}
+
 	CLineReader LineReader;
 	if(!LineReader.OpenFile(Storage()->OpenFile(aPath, IOFLAG_READ, IStorage::TYPE_ALL)))
 	{
-		char aBuf[IO_MAX_PATH_LENGTH + 32];
-		str_format(aBuf, sizeof(aBuf), "failed to load %s", aPath);
-		Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor/automap", aBuf);
+		log_error("editor/automap", "Failed to load rules from '%s'", aPath);
 		return;
 	}
 
@@ -350,10 +354,7 @@ void CAutoMapper::Load(const char *pTileName)
 		}
 	}
 
-	char aBuf[IO_MAX_PATH_LENGTH + 16];
-	str_format(aBuf, sizeof(aBuf), "loaded %s", aPath);
-	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor/automap", aBuf);
-
+	log_trace("editor/automap", "Loaded '%s'", aPath);
 	m_FileLoaded = true;
 }
 
