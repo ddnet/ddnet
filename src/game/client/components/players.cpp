@@ -222,7 +222,6 @@ void CPlayers::RenderHookCollLine(
 
 	bool DoBreak = false;
 	std::vector<IGraphics::CLineItem> vLineSegments;
-	vLineSegments.reserve(HookLength / HookSpeed + 1);
 	do
 	{
 		OldPos = NewPos;
