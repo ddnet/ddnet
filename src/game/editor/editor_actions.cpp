@@ -1450,6 +1450,26 @@ void CEditorActionEnvelopeAdd::Redo()
 	m_pEditor->m_SelectedEnvelope = m_pEditor->m_Map.m_vpEnvelopes.size() - 1;
 }
 
+CEditorActionEnvelopeDuplicate::CEditorActionEnvelopeDuplicate(CEditor *pEditor, int EnvelopeIndex, const std::shared_ptr<CEnvelope> &pEnv) :
+	IEditorAction(pEditor), m_pEnv(pEnv)
+{
+	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Duplicate envelope %d", EnvelopeIndex);
+}
+
+void CEditorActionEnvelopeDuplicate::Undo()
+{
+	// Undo is removing the envelope, which was added at the back of the list
+	m_pEditor->m_Map.m_vpEnvelopes.pop_back();
+	m_pEditor->m_SelectedEnvelope = m_pEditor->m_Map.m_vpEnvelopes.size() - 1;
+}
+
+void CEditorActionEnvelopeDuplicate::Redo()
+{
+	// Redo is adding back at the back the saved envelope
+	m_pEditor->m_Map.m_vpEnvelopes.push_back(m_pEnv);
+	m_pEditor->m_SelectedEnvelope = m_pEditor->m_Map.m_vpEnvelopes.size() - 1;
+}
+
 CEditorActionEnvelopeDelete::CEditorActionEnvelopeDelete(CEditor *pEditor, int EnvelopeIndex, std::vector<std::shared_ptr<IEditorEnvelopeReference>> &vpObjectReferences, std::shared_ptr<CEnvelope> &pEnvelope) :
 	IEditorAction(pEditor), m_EnvelopeIndex(EnvelopeIndex), m_pEnv(pEnvelope), m_vpObjectReferences(vpObjectReferences)
 {
