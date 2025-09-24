@@ -14,8 +14,8 @@ public:
 	CSoundSource *NewSource(int x, int y);
 
 	void BrushSelecting(CUIRect Rect) override;
-	int BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect) override;
-	void BrushPlace(std::shared_ptr<CLayer> pBrush, vec2 WorldPos) override;
+	int BrushGrab(CLayerGroup *pBrush, CUIRect Rect) override;
+	void BrushPlace(CLayer *pBrush, vec2 WorldPos) override;
 
 	CUi::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
 

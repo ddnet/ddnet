@@ -75,12 +75,12 @@ bool CLayerSpeedup::IsEmpty() const
 	return true;
 }
 
-void CLayerSpeedup::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
+void CLayerSpeedup::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 {
 	if(m_Readonly)
 		return;
 
-	std::shared_ptr<CLayerSpeedup> pSpeedupLayer = std::static_pointer_cast<CLayerSpeedup>(pBrush);
+	CLayerSpeedup *pSpeedupLayer = static_cast<CLayerSpeedup *>(pBrush);
 	int sx = ConvertX(WorldPos.x);
 	int sy = ConvertY(WorldPos.y);
 	if(str_comp(pSpeedupLayer->m_aFileName, m_pEditor->m_aFileName))
@@ -250,7 +250,7 @@ void CLayerSpeedup::BrushRotate(float Amount)
 	}
 }
 
-void CLayerSpeedup::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect)
+void CLayerSpeedup::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 {
 	if(m_Readonly || (!Empty && pBrush->m_Type != LAYERTYPE_TILES))
 		return;
@@ -262,7 +262,7 @@ void CLayerSpeedup::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CU
 	int w = ConvertX(Rect.w);
 	int h = ConvertY(Rect.h);
 
-	std::shared_ptr<CLayerSpeedup> pLt = std::static_pointer_cast<CLayerSpeedup>(pBrush);
+	CLayerSpeedup *pLt = static_cast<CLayerSpeedup *>(pBrush);
 
 	bool Destructive = m_pEditor->m_BrushDrawDestructive || Empty || pLt->IsEmpty();
 

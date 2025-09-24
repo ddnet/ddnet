@@ -78,12 +78,12 @@ bool CLayerTune::IsEmpty() const
 	return true;
 }
 
-void CLayerTune::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
+void CLayerTune::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 {
 	if(m_Readonly)
 		return;
 
-	std::shared_ptr<CLayerTune> pTuneLayer = std::static_pointer_cast<CLayerTune>(pBrush);
+	CLayerTune *pTuneLayer = static_cast<CLayerTune *>(pBrush);
 	int sx = ConvertX(WorldPos.x);
 	int sy = ConvertY(WorldPos.y);
 	if(str_comp(pTuneLayer->m_aFileName, m_pEditor->m_aFileName))
@@ -211,7 +211,7 @@ void CLayerTune::BrushRotate(float Amount)
 	}
 }
 
-void CLayerTune::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect)
+void CLayerTune::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 {
 	if(m_Readonly || (!Empty && pBrush->m_Type != LAYERTYPE_TILES))
 		return;
@@ -223,7 +223,7 @@ void CLayerTune::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRe
 	int w = ConvertX(Rect.w);
 	int h = ConvertY(Rect.h);
 
-	std::shared_ptr<CLayerTune> pLt = std::static_pointer_cast<CLayerTune>(pBrush);
+	CLayerTune *pLt = static_cast<CLayerTune *>(pBrush);
 
 	bool Destructive = m_pEditor->m_BrushDrawDestructive || Empty || pLt->IsEmpty();
 

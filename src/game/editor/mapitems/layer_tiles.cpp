@@ -295,7 +295,7 @@ static void InitGrabbedLayer(std::shared_ptr<T> &pLayer, CLayerTiles *pThisLayer
 	}
 };
 
-int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
+int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 {
 	RECTi r;
 	Convert(Rect, &r);
@@ -503,7 +503,7 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 	return 1;
 }
 
-void CLayerTiles::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect)
+void CLayerTiles::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 {
 	if(m_Readonly || (!Empty && pBrush->m_Type != LAYERTYPE_TILES))
 		return;
@@ -515,7 +515,7 @@ void CLayerTiles::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIR
 	int w = ConvertX(Rect.w);
 	int h = ConvertY(Rect.h);
 
-	std::shared_ptr<CLayerTiles> pLt = std::static_pointer_cast<CLayerTiles>(pBrush);
+	CLayerTiles *pLt = static_cast<CLayerTiles *>(pBrush);
 
 	bool Destructive = m_pEditor->m_BrushDrawDestructive || Empty || pLt->IsEmpty();
 
@@ -551,13 +551,12 @@ void CLayerTiles::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIR
 	FlagModified(sx, sy, w, h);
 }
 
-void CLayerTiles::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
+void CLayerTiles::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 {
 	if(m_Readonly)
 		return;
 
-	//
-	std::shared_ptr<CLayerTiles> pTileLayer = std::static_pointer_cast<CLayerTiles>(pBrush);
+	CLayerTiles *pTileLayer = static_cast<CLayerTiles *>(pBrush);
 	int sx = ConvertX(WorldPos.x);
 	int sy = ConvertY(WorldPos.y);
 

@@ -17,7 +17,7 @@ class CLayerTilesEnvelopeReference : public IEditorEnvelopeReference
 {
 public:
 	CLayerTilesEnvelopeReference(std::shared_ptr<CLayerTiles> pLayerTiles) :
-		m_pLayerTiles(pLayerTiles) {}
+		m_pLayerTiles(std::move(pLayerTiles)) {}
 	void SetEnvelope(const std::shared_ptr<CEnvelope> &pEnvelope, int EnvIndex) override;
 
 private:
@@ -28,7 +28,7 @@ class CLayerQuadsEnvelopeReference : public IEditorEnvelopeReference
 {
 public:
 	CLayerQuadsEnvelopeReference(std::shared_ptr<CLayerQuads> pLayerQuads) :
-		m_pLayerQuads(pLayerQuads) {}
+		m_pLayerQuads(std::move(pLayerQuads)) {}
 	void SetEnvelope(const std::shared_ptr<CEnvelope> &pEnvelope, int EnvIndex) override;
 	void AddQuadIndex(int QuadIndex) { m_vQuadIndices.push_back(QuadIndex); }
 	bool Empty() const { return m_vQuadIndices.empty(); }
@@ -42,7 +42,7 @@ class CLayerSoundEnvelopeReference : public IEditorEnvelopeReference
 {
 public:
 	CLayerSoundEnvelopeReference(std::shared_ptr<CLayerSounds> pLayerSounds) :
-		m_pLayerSounds(pLayerSounds) {}
+		m_pLayerSounds(std::move(pLayerSounds)) {}
 	void SetEnvelope(const std::shared_ptr<CEnvelope> &pEnvelope, int EnvIndex) override;
 	void AddSoundSourceIndex(int SoundSourceIndex) { m_vSoundSourceIndices.push_back(SoundSourceIndex); }
 	bool Empty() const { return m_vSoundSourceIndices.empty(); }
