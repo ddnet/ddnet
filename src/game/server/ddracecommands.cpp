@@ -532,6 +532,7 @@ void CGameContext::ConSetDDRTeam(IConsole::IResult *pResult, void *pUserData)
 		pSelf->m_apPlayers[Target]->KillCharacter(WEAPON_GAME);
 
 	pController->Teams().SetForceCharacterTeam(Target, Team);
+	pController->Teams().SetTeamLock(Team, true);
 }
 
 void CGameContext::ConUninvite(IConsole::IResult *pResult, void *pUserData)
