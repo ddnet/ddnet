@@ -107,7 +107,7 @@ public:
 	void ModifySoundIndex(const FIndexModifyFunction &IndexModifyFunction);
 
 	void Clean();
-	void CreateDefault(IGraphics::CTextureHandle EntitiesTexture);
+	void CreateDefault();
 
 	// io
 	bool Save(const char *pFilename, const std::function<void(const char *pErrorMessage)> &ErrorHandler);

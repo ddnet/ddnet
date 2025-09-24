@@ -239,7 +239,7 @@ void CEditorMap::Clean()
 	m_ModifiedAuto = false;
 }
 
-void CEditorMap::CreateDefault(IGraphics::CTextureHandle EntitiesTexture)
+void CEditorMap::CreateDefault()
 {
 	// add background
 	std::shared_ptr<CLayerGroup> pGroup = NewGroup();
