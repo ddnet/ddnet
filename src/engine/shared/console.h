@@ -86,6 +86,8 @@ class CConsole : public IConsole
 	FCanUseCommandCallback m_pfnCanUseCommandCallback = nullptr;
 	void *m_pCanUseCommandUserData;
 
+	bool CanUseCommand(int ClientId, const IConsole::ICommandInfo *pCommand) const;
+
 	enum
 	{
 		CONSOLE_MAX_STR_LENGTH = 8192,

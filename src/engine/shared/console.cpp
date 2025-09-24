@@ -91,10 +91,7 @@ const IConsole::ICommandInfo *CConsole::FirstCommandInfo(int ClientId, int FlagM
 {
 	for(const CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->Next())
 	{
-		bool CanUseCommand = false;
-		if(m_pfnCanUseCommandCallback(ClientId, pCommand, m_pCanUseCommandUserData))
-			CanUseCommand = true;
-		if(pCommand->m_Flags & FlagMask && CanUseCommand)
+		if(pCommand->m_Flags & FlagMask && CanUseCommand(ClientId, pCommand))
 			return pCommand;
 	}
 
@@ -106,10 +103,7 @@ const IConsole::ICommandInfo *CConsole::NextCommandInfo(const IConsole::ICommand
 	const CCommand *pNext = ((CCommand *)pInfo)->Next();
 	while(pNext)
 	{
-		bool CanUseCommand = false;
-		if(m_pfnCanUseCommandCallback(ClientId, pNext, m_pCanUseCommandUserData))
-			CanUseCommand = true;
-		if(pNext->m_Flags & FlagMask && CanUseCommand)
+		if(pNext->m_Flags & FlagMask && CanUseCommand(ClientId, pNext))
 			break;
 		pNext = pNext->Next();
 	}
@@ -559,7 +553,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 				}
 			}
 			// the fallback is needed for the rust tests
-			else if(!m_pfnCanUseCommandCallback || m_pfnCanUseCommandCallback(Result.m_ClientId, pCommand, m_pCanUseCommandUserData))
+			else if(!m_pfnCanUseCommandCallback || CanUseCommand(Result.m_ClientId, pCommand))
 			{
 				int IsStrokeCommand = 0;
 				if(Result.m_pCommand[0] == '+')
@@ -652,6 +646,11 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 
 		pStr = pNextPart;
 	}
+}
+
+bool CConsole::CanUseCommand(int ClientId, const IConsole::ICommandInfo *pCommand) const
+{
+	return m_pfnCanUseCommandCallback(ClientId, pCommand, m_pCanUseCommandUserData);
 }
 
 int CConsole::PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback, void *pUser)
