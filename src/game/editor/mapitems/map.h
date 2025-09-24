@@ -115,8 +115,10 @@ public:
 	void ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction);
 	void ModifySoundIndex(const FIndexModifyFunction &IndexModifyFunction);
 
+	// Housekeeping
 	void Clean();
 	void CreateDefault();
+	void CheckIntegrity();
 
 	// io
 	bool Save(const char *pFilename, const std::function<void(const char *pErrorMessage)> &ErrorHandler);

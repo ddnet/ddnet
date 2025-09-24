@@ -282,6 +282,110 @@ void CEditorMap::CreateDefault()
 	m_pGameGroup->AddLayer(m_pGameLayer);
 
 	ResetModifiedState();
+	CheckIntegrity();
+}
+
+void CEditorMap::CheckIntegrity()
+{
+	const auto &&CheckObjectInMap = [&](const CMapObject *pMapObject, const char *pName) {
+		dbg_assert(pMapObject != nullptr, "%s missing in map", pName);
+		dbg_assert(pMapObject->Map() == this, "%s does not belong to map (object_map=%p, this_map=%p)", pName, pMapObject->Map(), this);
+	};
+	bool GameGroupMissing = true;
+	CheckObjectInMap(m_pGameGroup.get(), "Game group");
+	dbg_assert(m_pGameGroup->m_GameGroup, "Game group not marked as such");
+	bool GameLayerMissing = true;
+	CheckObjectInMap(m_pGameLayer.get(), "Game layer");
+	dbg_assert(m_pGameLayer->m_HasGame, "Game layer not marked as such");
+	bool FrontLayerMissing = false;
+	if(m_pFrontLayer != nullptr)
+	{
+		FrontLayerMissing = true;
+		CheckObjectInMap(m_pFrontLayer.get(), "Front layer");
+		dbg_assert(m_pFrontLayer->m_HasFront, "Front layer not marked as such");
+	}
+	bool TeleLayerMissing = false;
+	if(m_pTeleLayer != nullptr)
+	{
+		TeleLayerMissing = true;
+		CheckObjectInMap(m_pTeleLayer.get(), "Tele layer");
+		dbg_assert(m_pTeleLayer->m_HasTele, "Tele layer not marked as such");
+	}
+	bool SpeedupLayerMissing = false;
+	if(m_pSpeedupLayer != nullptr)
+	{
+		SpeedupLayerMissing = true;
+		CheckObjectInMap(m_pSpeedupLayer.get(), "Speedup layer");
+		dbg_assert(m_pSpeedupLayer->m_HasSpeedup, "Speedup layer not marked as such");
+	}
+	bool SwitchLayerMissing = false;
+	if(m_pSwitchLayer != nullptr)
+	{
+		SwitchLayerMissing = true;
+		CheckObjectInMap(m_pSwitchLayer.get(), "Switch layer");
+		dbg_assert(m_pSwitchLayer->m_HasSwitch, "Switch layer not marked as such");
+	}
+	bool TuneLayerMissing = false;
+	if(m_pTuneLayer != nullptr)
+	{
+		TuneLayerMissing = true;
+		CheckObjectInMap(m_pTuneLayer.get(), "Tune layer");
+		dbg_assert(m_pTuneLayer->m_HasTune, "Tune layer not marked as such");
+	}
+	for(const auto &pGroup : m_vpGroups)
+	{
+		CheckObjectInMap(pGroup.get(), "Group");
+		for(const auto &pLayer : pGroup->m_vpLayers)
+		{
+			CheckObjectInMap(pLayer.get(), "Layer");
+		}
+		if(pGroup == m_pGameGroup)
+		{
+			GameGroupMissing = false;
+			for(const auto &pLayer : pGroup->m_vpLayers)
+			{
+				if(pLayer == m_pGameLayer)
+				{
+					GameLayerMissing = false;
+				}
+				if(pLayer == m_pFrontLayer)
+				{
+					FrontLayerMissing = false;
+				}
+				if(pLayer == m_pTeleLayer)
+				{
+					TeleLayerMissing = false;
+				}
+				if(pLayer == m_pSpeedupLayer)
+				{
+					SpeedupLayerMissing = false;
+				}
+				if(pLayer == m_pSwitchLayer)
+				{
+					SwitchLayerMissing = false;
+				}
+				if(pLayer == m_pTuneLayer)
+				{
+					TuneLayerMissing = false;
+				}
+			}
+			dbg_assert(!GameLayerMissing, "Game layer missing in game group");
+			dbg_assert(!FrontLayerMissing, "Front layer missing in game group");
+			dbg_assert(!TeleLayerMissing, "Tele layer missing in game group");
+			dbg_assert(!SpeedupLayerMissing, "Speedup layer missing in game group");
+			dbg_assert(!SwitchLayerMissing, "Switch layer missing in game group");
+			dbg_assert(!TuneLayerMissing, "Tune layer missing in game group");
+		}
+	}
+	dbg_assert(!GameGroupMissing, "Game group missing in list of groups");
+	for(const auto &pImage : m_vpImages)
+	{
+		CheckObjectInMap(pImage.get(), "Image");
+	}
+	for(const auto &pSound : m_vpSounds)
+	{
+		CheckObjectInMap(pSound.get(), "Sound");
+	}
 }
 
 void CEditorMap::MakeGameLayer(const std::shared_ptr<CLayer> &pLayer)

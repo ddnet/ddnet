@@ -1047,6 +1047,7 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const std::functio
 		}
 	}
 
+	CheckIntegrity();
 	PerformSanityChecks(ErrorHandler);
 
 	ResetModifiedState();

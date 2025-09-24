@@ -7912,6 +7912,10 @@ void CEditor::OnRender()
 	Input()->Clear();
 
 	CLineInput::RenderCandidates();
+
+#if defined(CONF_DEBUG)
+	m_Map.CheckIntegrity();
+#endif
 }
 
 void CEditor::OnActivate()
@@ -8154,6 +8158,8 @@ bool CEditor::Append(const char *pFilename, int StorageType, bool IgnoreHistory)
 
 	if(!IgnoreHistory)
 		m_EditorHistory.RecordAction(std::make_shared<CEditorActionAppendMap>(this, pFilename, Info, IndexMap));
+
+	m_Map.CheckIntegrity();
 
 	// all done \o/
 	return true;
