@@ -239,9 +239,9 @@ void CEditorMap::Clean()
 	m_ModifiedAuto = false;
 }
 
-void CEditorMap::CreateDefault(IGraphics::CTextureHandle EntitiesTexture)
+void CEditorMap::CreateDefault()
 {
-	// add background
+	// Add default background group, quad layer and quad
 	std::shared_ptr<CLayerGroup> pGroup = NewGroup();
 	pGroup->m_ParallaxX = 0;
 	pGroup->m_ParallaxY = 0;
@@ -255,7 +255,7 @@ void CEditorMap::CreateDefault(IGraphics::CTextureHandle EntitiesTexture)
 	pQuad->m_aColors[2].b = pQuad->m_aColors[3].b = 255;
 	pGroup->AddLayer(pLayer);
 
-	// add game layer and reset front, tele, speedup, tune and switch layer pointers
+	// Add game group and layer
 	MakeGameGroup(NewGroup());
 	MakeGameLayer(std::make_shared<CLayerGame>(m_pEditor, 50, 50));
 	m_pGameGroup->AddLayer(m_pGameLayer);
