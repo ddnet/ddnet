@@ -737,20 +737,20 @@ int64_t time_get();
 int64_t time_freq();
 
 /**
- * Retrieves the current time as a UNIX timestamp
+ * Retrieves the current time as a UNIX timestamp.
  *
  * @ingroup Time
  *
- * @return The time as a UNIX timestamp
+ * @return The time as a UNIX timestamp.
  */
 int64_t time_timestamp();
 
 /**
- * Retrieves the hours since midnight (0..23)
+ * Retrieves the hours since midnight (0..23).
  *
  * @ingroup Time
  *
- * @return The current hour of the day
+ * @return The current hour of the day.
  */
 int time_houroftheday();
 
@@ -774,7 +774,7 @@ enum ETimeSeason
  *
  * @ingroup Time
  *
- * @return One of the SEASON_* enum literals
+ * @return One of the SEASON_* enum literals.
  *
  * @see SEASON_SPRING
  */
@@ -1120,7 +1120,7 @@ int net_tcp_connect_non_blocking(NETSOCKET sock, NETADDR bindaddr);
 int net_tcp_send(NETSOCKET sock, const void *data, int size);
 
 /**
- * Recvives data from a TCP stream.
+ * Receives data from a TCP stream.
  *
  * @ingroup Network-TCP
  *
