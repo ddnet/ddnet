@@ -5111,29 +5111,29 @@ bool CGameContext::RateLimitPlayerMapVote(int ClientId) const
 	return false;
 }
 
-void CGameContext::OnUpdatePlayerServerInfo(CJsonStringWriter *pJSonWriter, int Id)
+void CGameContext::OnUpdatePlayerServerInfo(CJsonWriter *pJsonWriter, int ClientId)
 {
-	if(!m_apPlayers[Id])
+	if(!m_apPlayers[ClientId])
 		return;
 
-	CTeeInfo &TeeInfo = m_apPlayers[Id]->m_TeeInfos;
+	CTeeInfo &TeeInfo = m_apPlayers[ClientId]->m_TeeInfos;
 
-	pJSonWriter->WriteAttribute("skin");
-	pJSonWriter->BeginObject();
+	pJsonWriter->WriteAttribute("skin");
+	pJsonWriter->BeginObject();
 
 	// 0.6
-	if(!Server()->IsSixup(Id))
+	if(!Server()->IsSixup(ClientId))
 	{
-		pJSonWriter->WriteAttribute("name");
-		pJSonWriter->WriteStrValue(TeeInfo.m_aSkinName);
+		pJsonWriter->WriteAttribute("name");
+		pJsonWriter->WriteStrValue(TeeInfo.m_aSkinName);
 
 		if(TeeInfo.m_UseCustomColor)
 		{
-			pJSonWriter->WriteAttribute("color_body");
-			pJSonWriter->WriteIntValue(TeeInfo.m_ColorBody);
+			pJsonWriter->WriteAttribute("color_body");
+			pJsonWriter->WriteIntValue(TeeInfo.m_ColorBody);
 
-			pJSonWriter->WriteAttribute("color_feet");
-			pJSonWriter->WriteIntValue(TeeInfo.m_ColorFeet);
+			pJsonWriter->WriteAttribute("color_feet");
+			pJsonWriter->WriteIntValue(TeeInfo.m_ColorFeet);
 		}
 	}
 	// 0.7
@@ -5143,31 +5143,31 @@ void CGameContext::OnUpdatePlayerServerInfo(CJsonStringWriter *pJSonWriter, int 
 
 		for(int i = 0; i < protocol7::NUM_SKINPARTS; ++i)
 		{
-			pJSonWriter->WriteAttribute(apPartNames[i]);
-			pJSonWriter->BeginObject();
+			pJsonWriter->WriteAttribute(apPartNames[i]);
+			pJsonWriter->BeginObject();
 
-			pJSonWriter->WriteAttribute("name");
-			pJSonWriter->WriteStrValue(TeeInfo.m_aaSkinPartNames[i]);
+			pJsonWriter->WriteAttribute("name");
+			pJsonWriter->WriteStrValue(TeeInfo.m_aaSkinPartNames[i]);
 
 			if(TeeInfo.m_aUseCustomColors[i])
 			{
-				pJSonWriter->WriteAttribute("color");
-				pJSonWriter->WriteIntValue(TeeInfo.m_aSkinPartColors[i]);
+				pJsonWriter->WriteAttribute("color");
+				pJsonWriter->WriteIntValue(TeeInfo.m_aSkinPartColors[i]);
 			}
 
-			pJSonWriter->EndObject();
+			pJsonWriter->EndObject();
 		}
 	}
 
-	pJSonWriter->EndObject();
+	pJsonWriter->EndObject();
 
-	pJSonWriter->WriteAttribute("afk");
-	pJSonWriter->WriteBoolValue(m_apPlayers[Id]->IsAfk());
+	pJsonWriter->WriteAttribute("afk");
+	pJsonWriter->WriteBoolValue(m_apPlayers[ClientId]->IsAfk());
 
-	const int Team = m_pController->IsTeamPlay() ? m_apPlayers[Id]->GetTeam() : m_apPlayers[Id]->GetTeam() == TEAM_SPECTATORS ? -1 : GetDDRaceTeam(Id);
+	const int Team = m_pController->IsTeamPlay() ? m_apPlayers[ClientId]->GetTeam() : m_apPlayers[ClientId]->GetTeam() == TEAM_SPECTATORS ? -1 : GetDDRaceTeam(ClientId);
 
-	pJSonWriter->WriteAttribute("team");
-	pJSonWriter->WriteIntValue(Team);
+	pJsonWriter->WriteAttribute("team");
+	pJsonWriter->WriteIntValue(Team);
 }
 
 void CGameContext::ReadCensorList()
