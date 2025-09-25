@@ -74,7 +74,7 @@
 	THREAD_ANNOTATION_ATTRIBUTE__(no_thread_safety_analysis)
 
 /**
- * @defgroup Locks
+ * @defgroup Locks Locks
  * @see Threads
  */
 

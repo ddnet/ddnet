@@ -48,7 +48,7 @@
 /**
  * Utilities for debugging.
  *
- * @defgroup Debug
+ * @defgroup Debug Debugging
  */
 
 /**
@@ -123,7 +123,7 @@ void dbg_assert_set_handler(DBG_ASSERT_HANDLER handler);
 /**
  * Memory management utilities.
  *
- * @defgroup Memory
+ * @defgroup Memory Memory
  */
 
 /**
@@ -199,9 +199,9 @@ int mem_comp(const void *a, const void *b, size_t size);
 bool mem_has_null(const void *block, size_t size);
 
 /**
- * I/O related operations.
+ * File I/O related operations.
  *
- * @defgroup File-IO
+ * @defgroup File-IO File I/O
  */
 
 /**
@@ -599,7 +599,7 @@ void aio_free(ASYNCIO *aio);
 /**
  * Threading related functions.
  *
- * @defgroup Threads
+ * @defgroup Threads Threading
  *
  * @see Locks
  * @see Semaphore
@@ -657,7 +657,7 @@ void thread_detach(void *thread);
 void thread_init_and_detach(void (*threadfunc)(void *), void *user, const char *name);
 
 /**
- * @defgroup Semaphore
+ * @defgroup Semaphore Semaphores
  *
  * @see Threads
  */
@@ -694,7 +694,13 @@ void sphore_destroy(SEMAPHORE *sem);
 /**
  * Time utilities.
  *
- * @defgroup Time
+ * @defgroup Time Time
+ */
+
+/**
+ * Timestamp related functions.
+ *
+ * @defgroup Timestamp Timestamps
  */
 
 /**
@@ -739,7 +745,7 @@ int64_t time_freq();
 /**
  * Retrieves the current time as a UNIX timestamp.
  *
- * @ingroup Time
+ * @ingroup Timestamp
  *
  * @return The time as a UNIX timestamp.
  */
@@ -781,14 +787,19 @@ enum ETimeSeason
 ETimeSeason time_season();
 
 /**
- * @defgroup Network-General
+ * @defgroup Network Networking
  */
 
-extern const NETADDR NETADDR_ZEROED;
+/**
+ * @defgroup Network-General General networking
+ *
+ * @ingroup Network
+ */
 
 /**
  * @ingroup Network-General
  */
+extern const NETADDR NETADDR_ZEROED;
 
 #ifdef CONF_FAMILY_UNIX
 /**
@@ -975,9 +986,9 @@ int net_would_block();
 int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds);
 
 /**
- * @defgroup Network-UDP
+ * @defgroup Network-UDP UDP Networking
  *
- * @ingroup Network-General
+ * @ingroup Network
  */
 
 /**
@@ -1040,9 +1051,9 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data);
 void net_udp_close(NETSOCKET sock);
 
 /**
- * @defgroup Network-TCP
+ * @defgroup Network-TCP TCP Networking
  *
- * @ingroup Network-General
+ * @ingroup Network
  */
 
 /**
@@ -1144,9 +1155,9 @@ void net_tcp_close(NETSOCKET sock);
 
 #if defined(CONF_FAMILY_UNIX)
 /**
- * @defgroup Network-Unix-Sockets
+ * @defgroup Network-Unix-Sockets UNIX Socket Networking
  *
- * @ingroup Network-General
+ * @ingroup Network
  */
 
 /**
@@ -1207,7 +1218,7 @@ std::string windows_format_system_message(unsigned long error);
 /**
  * String related functions.
  *
- * @defgroup Strings
+ * @defgroup Strings Strings
  */
 
 /**
@@ -1325,7 +1336,7 @@ int str_utf32_dist_buffer(const int *a, int a_len, const int *b, int b_len, int 
 /**
  * Copies a timestamp in the format year-month-day_hour-minute-second to the string.
  *
- * @ingroup Strings
+ * @ingroup Timestamp
  *
  * @param buffer Pointer to a buffer that shall receive the timestamp string.
  * @param buffer_size Size of the buffer.
@@ -1396,7 +1407,7 @@ int str_time_float(float secs, int format, char *buffer, int buffer_size);
 /**
  * Utilities for accessing the file system.
  *
- * @defgroup Filesystem
+ * @defgroup Filesystem Filesystem
  */
 
 /**
@@ -1845,7 +1856,7 @@ void uint_to_bytes_be(unsigned char *bytes, unsigned value);
 /**
  * Shell, process management, OS specific functionality.
  *
- * @defgroup Shell
+ * @defgroup Shell Shell
  */
 
 /**
@@ -1984,7 +1995,7 @@ int open_file(const char *path);
 /**
  * Secure random number generation.
  *
- * @defgroup Secure-Random
+ * @defgroup Secure-Random Secure Random
  */
 
 /**
@@ -2075,14 +2086,14 @@ bool os_version_str(char *version, size_t length);
 void os_locale_str(char *locale, size_t length);
 
 /**
- * @defgroup Crash-dumping
+ * @defgroup Crash-Dumping Crash Dumping
  */
 
 /**
  * Initializes the crash dumper and sets the filename to write the crash dump
  * to, if support for crash logging was compiled in. Otherwise does nothing.
  *
- * @ingroup Crash-dumping
+ * @ingroup Crash-Dumping
  *
  * @param log_file_path Absolute path to which crash log file should be written.
  */
