@@ -11,6 +11,7 @@
 
 #include <engine/antibot.h>
 #include <engine/server.h>
+#include <engine/server/authmanager.h>
 #include <engine/shared/config.h>
 
 #include <game/gamecore.h>
@@ -465,9 +466,9 @@ void CPlayer::Snap(int SnappingClient)
 		return;
 
 	if((SnappingClient >= 0 && Server()->IsRconAuthed(SnappingClient)) || !Server()->HasAuthHidden(m_ClientId))
-		pDDNetPlayer->m_AuthLevel = Server()->GetAuthedState(m_ClientId);
+		pDDNetPlayer->m_AuthLevel = Server()->GetAuthRank(m_ClientId);
 	else
-		pDDNetPlayer->m_AuthLevel = AUTHED_NO;
+		pDDNetPlayer->m_AuthLevel = RoleRank::NONE;
 
 	pDDNetPlayer->m_Flags = 0;
 	if(m_Afk)

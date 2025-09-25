@@ -87,7 +87,7 @@ int CServerBan::BanExt(T *pBanPool, const typename T::CDataType *pData, int Seco
 			if(i == Server()->m_RconClientId || Server()->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
 				continue;
 
-			if(Server()->GetAuthedState(i) >= Server()->m_RconAuthLevel && NetMatch(pData, Server()->ClientAddr(i)))
+			if(Server()->GetAuthRank(i) >= Server()->m_RconAuthLevel && NetMatch(pData, Server()->ClientAddr(i)))
 			{
 				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (command denied)");
 				return -1;
@@ -496,7 +496,7 @@ void CServer::Kick(int ClientId, const char *pReason)
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "you can't kick yourself");
 		return;
 	}
-	else if(GetAuthedState(ClientId) > m_RconAuthLevel)
+	else if(GetAuthRank(ClientId) > m_RconAuthLevel)
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "kick command denied");
 		return;
@@ -612,18 +612,7 @@ void CServer::SetRconCid(int ClientId)
 	m_RconClientId = ClientId;
 }
 
-int CServer::GetAuthedState(int ClientId) const
-{
-	if(ClientId == -1)
-		return AUTHED_ADMIN;
-	if(ClientId == IConsole::CLIENT_ID_GAME)
-		return AUTHED_ADMIN;
-	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "ClientId %d is not valid", ClientId);
-	dbg_assert(m_aClients[ClientId].m_State != CServer::CClient::STATE_EMPTY, "Client slot is empty");
-	return m_AuthManager.KeyLevel(m_aClients[ClientId].m_AuthKey);
-}
-
-int CServer::GetAuthRank(int ClientId) const
+int CServer::GetAuthRank(int ClientId)
 {
 	if(ClientId == -1)
 		return RoleRank::ADMIN;
@@ -636,14 +625,20 @@ int CServer::GetAuthRank(int ClientId) const
 	return RoleOrNullptr(ClientId)->Rank();
 }
 
-bool CServer::IsRconAuthed(int ClientId) const
+bool CServer::IsRconAuthed(int ClientId)
 {
-	return GetAuthedState(ClientId) != AUTHED_NO;
+	if(ClientId == -1)
+		return true;
+	if(ClientId == IConsole::CLIENT_ID_GAME)
+		return true;
+	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "ClientId %d is not valid", ClientId);
+	dbg_assert(m_aClients[ClientId].m_State != CServer::CClient::STATE_EMPTY, "Client slot is empty");
+	return m_aClients[ClientId].m_AuthKey != -1;
 }
 
-bool CServer::IsRconAuthedAdmin(int ClientId) const
+bool CServer::IsRconAuthedAdmin(int ClientId)
 {
-	return GetAuthedState(ClientId) == AUTHED_ADMIN;
+	return GetAuthRank(ClientId) == RoleRank::ADMIN;
 }
 
 const char *CServer::GetAuthName(int ClientId) const
@@ -2014,7 +2009,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 			if(AuthLevel != -1)
 			{
-				if(GetAuthedState(ClientId) != AuthLevel)
+				if(GetAuthRank(ClientId) != AuthLevel)
 				{
 					if(!IsSixup(ClientId))
 					{
@@ -3481,11 +3476,12 @@ static int GetAuthLevel(const char *pLevel)
 	return Level;
 }
 
-CRconRole *CServer::RoleOrNullptr(int ClientId) const
+CRconRole *CServer::RoleOrNullptr(int ClientId)
 {
-	const CAuthManager *pManager = &m_AuthManager;
-	CRconRole *pRole = pManager->KeyRole(m_aClients[ClientId].m_AuthKey);
-	return pRole;
+	CAuthManager *pManager = &m_AuthManager;
+	if(ClientId == IConsole::CLIENT_ID_GAME || ClientId == -1)
+		return pManager->FindRole(RoleName::ADMIN);
+	return pManager->KeyRole(m_aClients[ClientId].m_AuthKey);
 }
 
 bool CServer::CanClientUseCommandCallback(int ClientId, const IConsole::ICommandInfo *pCommand, void *pUser)
@@ -3493,7 +3489,7 @@ bool CServer::CanClientUseCommandCallback(int ClientId, const IConsole::ICommand
 	return ((CServer *)pUser)->CanClientUseCommand(ClientId, pCommand);
 }
 
-bool CServer::CanClientUseCommand(int ClientId, const IConsole::ICommandInfo *pCommand) const
+bool CServer::CanClientUseCommand(int ClientId, const IConsole::ICommandInfo *pCommand)
 {
 	// everyone can use all chat commands
 	if(pCommand->Flags() & CFGFLAG_CHAT)

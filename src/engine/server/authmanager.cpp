@@ -43,6 +43,9 @@ bool CRconRole::IsAncestor(const CRconRole *pAncestor) const
 
 bool CRconRole::CanUseRconCommand(const char *pCommand)
 {
+	if(IsAdmin())
+		return true;
+
 	bool CanDirect = std::ranges::any_of(
 		m_vRconCommands,
 		[pCommand](const std::string &Command) {
@@ -343,7 +346,7 @@ int CAuthManager::NumNonDefaultKeys() const
 
 CRconRole *CAuthManager::FindRole(const char *pName)
 {
-	auto It = m_Roles.find(pName);
+	const auto It = m_Roles.find(pName);
 	if(It == m_Roles.end())
 		return nullptr;
 	return &It->second;
