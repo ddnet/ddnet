@@ -241,29 +241,7 @@ void CItems::RenderFlags()
 
 void CItems::RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent, const CNetObj_GameData *pPrevGameData, const CNetObj_GameData *pCurGameData)
 {
-	float Angle = 0.0f;
-	float Size = 42.0f;
-
-	if(pCurrent->m_Team == TEAM_RED)
-		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteFlagRed);
-	else
-		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteFlagBlue);
-	Graphics()->QuadsSetRotation(0);
-	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
-	int QuadOffset;
-	if(pCurrent->m_Team == TEAM_RED)
-	{
-		QuadOffset = m_RedFlagOffset;
-	}
-	else
-	{
-		QuadOffset = m_BlueFlagOffset;
-	}
-
-	Graphics()->QuadsSetRotation(Angle);
-
 	vec2 Pos = mix(vec2(pPrev->m_X, pPrev->m_Y), vec2(pCurrent->m_X, pCurrent->m_Y), Client()->IntraGameTick(g_Config.m_ClDummy));
-
 	if(pCurGameData)
 	{
 		int FlagCarrier = (pCurrent->m_Team == TEAM_RED) ? pCurGameData->m_FlagCarrierRed : pCurGameData->m_FlagCarrierBlue;
@@ -278,6 +256,20 @@ void CItems::RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent,
 			Pos = vec2(pCurrent->m_X, pCurrent->m_Y);
 	}
 
+	float Size = 42.0f;
+	int QuadOffset;
+	if(pCurrent->m_Team == TEAM_RED)
+	{
+		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteFlagRed);
+		QuadOffset = m_RedFlagOffset;
+	}
+	else
+	{
+		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteFlagBlue);
+		QuadOffset = m_BlueFlagOffset;
+	}
+	Graphics()->QuadsSetRotation(0.0f);
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 	Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, QuadOffset, Pos.x, Pos.y - Size * 0.75f);
 }
 
