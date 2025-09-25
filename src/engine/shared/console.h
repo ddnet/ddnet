@@ -62,7 +62,6 @@ class CConsole : public IConsole
 
 	CExecFile *m_pFirstExec;
 	IStorage *m_pStorage;
-	EAccessLevel m_AccessLevel;
 
 	CCommand *m_pRecycleList;
 	CHeap m_TempCommands;
@@ -195,8 +194,6 @@ public:
 	void SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, void *pUser) override;
 	void SetCanUseCommandCallback(FCanUseCommandCallback pfnCallback, void *pUser) override;
 	void InitChecksum(CChecksumData *pData) const override;
-
-	void SetAccessLevel(EAccessLevel AccessLevel) override;
 
 	/**
 	 * Converts access level string to access level enum.

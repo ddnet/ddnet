@@ -1969,13 +1969,11 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 					m_RconClientId = ClientId;
 					m_RconAuthLevel = GetAuthedState(ClientId);
-					Console()->SetAccessLevel(ConsoleAccessLevel(ClientId));
 					{
 						CRconClientLogger Logger(this, ClientId);
 						CLogScope Scope(&Logger);
 						Console()->ExecuteLineFlag(pCmd, CFGFLAG_SERVER, ClientId);
 					}
-					Console()->SetAccessLevel(IConsole::EAccessLevel::ADMIN);
 					m_RconClientId = IServer::RCON_CID_SERV;
 					m_RconAuthLevel = AUTHED_ADMIN;
 				}

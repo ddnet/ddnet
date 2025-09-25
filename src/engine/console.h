@@ -128,8 +128,6 @@ public:
 	virtual void SetCanUseCommandCallback(FCanUseCommandCallback pfnCallback, void *pUser) = 0;
 	virtual void InitChecksum(CChecksumData *pData) const = 0;
 
-	virtual void SetAccessLevel(EAccessLevel AccessLevel) = 0;
-
 	static LEVEL ToLogLevel(int ConsoleLevel);
 	static int ToLogLevelFilter(int ConsoleLevel);
 

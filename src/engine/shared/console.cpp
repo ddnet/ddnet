@@ -420,11 +420,6 @@ void CConsole::InitChecksum(CChecksumData *pData) const
 	}
 }
 
-void CConsole::SetAccessLevel(EAccessLevel AccessLevel)
-{
-	m_AccessLevel = AccessLevel;
-}
-
 bool CConsole::LineIsValid(const char *pStr)
 {
 	if(!pStr || *pStr == 0)
@@ -854,7 +849,6 @@ void CConsole::TraverseChain(FCommandCallback *ppfnCallback, void **ppUserData)
 CConsole::CConsole(int FlagMask)
 {
 	m_FlagMask = FlagMask;
-	m_AccessLevel = EAccessLevel::ADMIN;
 	m_pRecycleList = nullptr;
 	m_TempCommands.Reset();
 	m_StoreCommands = true;
