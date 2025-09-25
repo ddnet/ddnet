@@ -1505,23 +1505,23 @@ int CServer::NumRconCommands(int ClientId)
 
 void CServer::UpdateClientRconCommands()
 {
-	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ++ClientId)
 	{
-		return;
-	}
+		CClient &Client = m_aClients[ClientId];
 
-	if(!IsRconAuthed(ClientId) || m_aClients[ClientId].m_State == CClient::STATE_EMPTY)
-		return;
+		if(Client.m_State != CClient::STATE_INGAME || !IsRconAuthed(ClientId))
+			return;
 
-	const IConsole::EAccessLevel AccessLevel = ConsoleAccessLevel(ClientId);
-	for(int i = 0; i < MAX_RCONCMD_SEND && Client.m_pRconCmdToSend; ++i)
-	{
-		SendRconCmdAdd(Client.m_pRconCmdToSend, ClientId);
-		Client.m_pRconCmdToSend = Client.m_pRconCmdToSend->NextCommandInfo(AccessLevel, CFGFLAG_SERVER);
-		if(Client.m_pRconCmdToSend == nullptr)
+		const IConsole::EAccessLevel AccessLevel = ConsoleAccessLevel(ClientId);
+		for(int i = 0; i < MAX_RCONCMD_SEND && Client.m_pRconCmdToSend; ++i)
 		{
-			CMsgPacker Msg(NETMSG_RCON_CMD_GROUP_END, true);
-			SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+			SendRconCmdAdd(Client.m_pRconCmdToSend, ClientId);
+			Client.m_pRconCmdToSend = Client.m_pRconCmdToSend->NextCommandInfo(AccessLevel, CFGFLAG_SERVER);
+			if(Client.m_pRconCmdToSend == nullptr)
+			{
+				CMsgPacker Msg(NETMSG_RCON_CMD_GROUP_END, true);
+				SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+			}
 		}
 	}
 }

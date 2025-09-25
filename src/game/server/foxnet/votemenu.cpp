@@ -926,18 +926,18 @@ void CVoteMenu::SetSubPage(int ClientId, int SubPage)
 
 bool CVoteMenu::CanUseCmd(int ClientId, const char *pCmd) const
 {
-	const IConsole::CCommandInfo *pInfo = GameServer()->Console()->GetCommandInfo(pCmd, CFGFLAG_SERVER, false);
+	const IConsole::ICommandInfo *pInfo = GameServer()->Console()->GetCommandInfo(pCmd, CFGFLAG_SERVER, false);
 	if(!pInfo)
 		return false;
 
-	int Required = pInfo->GetAccessLevel();
-	int ClientLevel = IConsole::ACCESS_LEVEL_USER;
+	const IConsole::EAccessLevel Required = pInfo->GetAccessLevel();
+	IConsole::EAccessLevel ClientLevel = IConsole::EAccessLevel::USER;
 	switch(Server()->GetAuthedState(ClientId))
 	{
-	case AUTHED_ADMIN: ClientLevel = IConsole::ACCESS_LEVEL_ADMIN; break;
-	case AUTHED_MOD: ClientLevel = IConsole::ACCESS_LEVEL_MOD; break;
-	case AUTHED_HELPER: ClientLevel = IConsole::ACCESS_LEVEL_HELPER; break;
-	default: ClientLevel = IConsole::ACCESS_LEVEL_USER; break;
+	case AUTHED_ADMIN: ClientLevel = IConsole::EAccessLevel::ADMIN; break;
+	case AUTHED_MOD: ClientLevel = IConsole::EAccessLevel::MODERATOR; break;
+	case AUTHED_HELPER: ClientLevel = IConsole::EAccessLevel::HELPER; break;
+	default: ClientLevel = IConsole::EAccessLevel::USER; break;
 	}
 	return Required >= ClientLevel;
 }
