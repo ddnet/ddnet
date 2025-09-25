@@ -320,6 +320,8 @@ public:
 	void SendLogLine(const CLogMessage *pMessage);
 	void SetRconCid(int ClientId) override;
 
+	// WHAT THE FLIPFLOP
+
 	// deprecated! Use GetAuthRank instead
 	int GetAuthedState(int ClientId) const override;
 	// returns the rcon rank if logged in and 0 if not logged in
