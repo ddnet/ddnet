@@ -26,8 +26,6 @@ public:
 		bool m_AllowPing;
 	};
 
-	virtual ~IFavorites() = default;
-
 	virtual TRISTATE IsFavorite(const NETADDR *pAddrs, int NumAddrs) const = 0;
 	// Only considers the addresses that are actually favorites.
 	virtual TRISTATE IsPingAllowed(const NETADDR *pAddrs, int NumAddrs) const = 0;

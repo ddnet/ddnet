@@ -25,6 +25,12 @@ using namespace std::chrono_literals;
 
 // This code is mostly stolen from https://github.com/FFmpeg/FFmpeg/blob/master/doc/examples/muxing.c
 
+static const enum AVColorSpace COLOR_SPACE = AVCOL_SPC_BT709;
+// AVCodecContext->colorspace is an enum AVColorSpace but sws_getCoefficients
+// wants an SWS_CS_* macro. Both sets of constants follow H.273 numbering
+// and hence agree, but we assert that they're equal here to be sure.
+static_assert(COLOR_SPACE == SWS_CS_ITU709);
+
 static LEVEL AvLevelToLogLevel(int Level)
 {
 	switch(Level)
@@ -53,9 +59,16 @@ static LEVEL AvLevelToLogLevel(int Level)
 	const LEVEL LogLevel = AvLevelToLogLevel(Level);
 	if(LogLevel <= LEVEL_INFO)
 	{
-		char aFormat[4096]; // Longest log line length
-		str_truncate(aFormat, sizeof(aFormat), pFormat, str_length(pFormat) - 1); // Truncate duplicate newline
-		log_log_v(LogLevel, "videorecorder/libav", aFormat, VarArgs);
+		char aLog[4096]; // Longest log line length
+		int Length = str_format_v(aLog, sizeof(aLog), pFormat, VarArgs);
+		if(Length > 0)
+		{
+			if(aLog[Length - 1] == '\n')
+			{
+				aLog[Length - 1] = '\0';
+			}
+			log_log(LogLevel, "videorecorder/libav", "%s", aLog);
+		}
 	}
 }
 
@@ -241,7 +254,10 @@ bool CVideo::Start()
 				m_VideoStream.m_vpSwsContexts[i],
 				m_VideoStream.m_pCodecContext->width, m_VideoStream.m_pCodecContext->height, AV_PIX_FMT_RGBA,
 				m_VideoStream.m_pCodecContext->width, m_VideoStream.m_pCodecContext->height, AV_PIX_FMT_YUV420P,
-				0, nullptr, nullptr, nullptr);
+				SWS_FULL_CHR_H_INT | SWS_FULL_CHR_H_INP | SWS_ACCURATE_RND | SWS_BITEXACT, nullptr, nullptr, nullptr);
+
+			const int *pMatrixCoefficients = sws_getCoefficients(COLOR_SPACE);
+			sws_setColorspaceDetails(m_VideoStream.m_vpSwsContexts[i], pMatrixCoefficients, 0, pMatrixCoefficients, 0, 0, 1 << 16, 1 << 16);
 		}
 	}
 
@@ -942,6 +958,7 @@ bool CVideo::AddStream(COutputStream *pStream, AVFormatContext *pFormatContext, 
 
 		pContext->gop_size = 12; /* emit one intra frame every twelve frames at most */
 		pContext->pix_fmt = AV_PIX_FMT_YUV420P;
+		pContext->colorspace = COLOR_SPACE;
 		if(pContext->codec_id == AV_CODEC_ID_MPEG2VIDEO)
 		{
 			/* just for testing, we also add B-frames */

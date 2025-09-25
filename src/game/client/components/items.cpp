@@ -394,10 +394,8 @@ void CItems::RenderLaser(vec2 From, vec2 Pos, ColorRGBA OuterColor, ColorRGBA In
 		vec2 Out = vec2(Dir.y, -Dir.x) * (7.0f * Ia);
 
 		IGraphics::CFreeformItem Freeform(
-			From.x - Out.x, From.y - Out.y,
-			From.x + Out.x, From.y + Out.y,
-			Pos.x - Out.x, Pos.y - Out.y,
-			Pos.x + Out.x, Pos.y + Out.y);
+			From - Out, From + Out,
+			Pos - Out, Pos + Out);
 		Graphics()->QuadsDrawFreeform(&Freeform, 1);
 
 		// do inner
@@ -407,10 +405,8 @@ void CItems::RenderLaser(vec2 From, vec2 Pos, ColorRGBA OuterColor, ColorRGBA In
 		Graphics()->SetColor(InnerColor); // center
 
 		Freeform = IGraphics::CFreeformItem(
-			From.x - Out.x + ExtraOutlineFrom.x, From.y - Out.y + ExtraOutlineFrom.y,
-			From.x + Out.x + ExtraOutlineFrom.x, From.y + Out.y + ExtraOutlineFrom.y,
-			Pos.x - Out.x - ExtraOutlinePos.x, Pos.y - Out.y - ExtraOutlinePos.y,
-			Pos.x + Out.x - ExtraOutlinePos.x, Pos.y + Out.y - ExtraOutlinePos.y);
+			From - Out + ExtraOutlineFrom, From + Out + ExtraOutlineFrom,
+			Pos - Out - ExtraOutlinePos, Pos + Out - ExtraOutlinePos);
 		Graphics()->QuadsDrawFreeform(&Freeform, 1);
 
 		Graphics()->QuadsEnd();

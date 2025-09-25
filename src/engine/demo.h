@@ -84,7 +84,6 @@ public:
 		TICK_NEXT, // go to the next tick
 	};
 
-	virtual ~IDemoPlayer() = default;
 	virtual void SetSpeed(float Speed) = 0;
 	virtual void SetSpeedIndex(int SpeedIndex) = 0;
 	virtual void AdjustSpeedIndex(int Offset) = 0;
@@ -111,7 +110,6 @@ public:
 		REMOVE_FILE,
 	};
 
-	virtual ~IDemoRecorder() = default;
 	virtual bool IsRecording() const = 0;
 	virtual int Stop(IDemoRecorder::EStopMode Mode, const char *pTargetFilename = "") = 0;
 	virtual int Length() const = 0;

@@ -240,7 +240,7 @@ bool CRenderLayerGroup::DoRender(const CRenderLayerParams &Params)
 				return false;
 
 			// Render debug before enabling the clip
-			if(Params.m_DebugRenderOptions & 1)
+			if(Params.m_DebugRenderGroupClips)
 			{
 				char aDebugText[32];
 				str_format(aDebugText, sizeof(aDebugText), "Group %d", m_GroupId);
@@ -1128,20 +1128,48 @@ bool CRenderLayerQuads::CalculateQuadClipping(int aQuadOffsetMin[2], int aQuadOf
 	{
 		const CQuad *pQuad = &m_pQuads[i];
 
+		const CEnvelopeExtrema::CEnvelopeExtremaItem &Extrema = m_pEnvelopeManager->EnvelopeExtrema()->GetExtrema(pQuad->m_PosEnv);
+		if(!Extrema.m_Available)
+			return false;
+
 		// calculate clip region
-		for(int QuadIdPoint = 0; QuadIdPoint < 4; ++QuadIdPoint)
+		if(!Extrema.m_Rotating)
 		{
+			for(int QuadIdPoint = 0; QuadIdPoint < 4; ++QuadIdPoint)
+			{
+				for(int Channel = 0; Channel < 2; ++Channel)
+				{
+					int OffsetMinimum = pQuad->m_aPoints[QuadIdPoint][Channel];
+					int OffsetMaximum = pQuad->m_aPoints[QuadIdPoint][Channel];
+
+					// calculate env offsets for every ungrouped quad
+					if(!Grouped && pQuad->m_PosEnv >= 0)
+					{
+						OffsetMinimum += Extrema.m_Minima[Channel];
+						OffsetMaximum += Extrema.m_Maxima[Channel];
+					}
+					aQuadOffsetMin[Channel] = std::min(aQuadOffsetMin[Channel], OffsetMinimum);
+					aQuadOffsetMax[Channel] = std::max(aQuadOffsetMax[Channel], OffsetMaximum);
+				}
+			}
+		}
+		else
+		{
+			const CPoint &Center = pQuad->m_aPoints[4];
+			int MaxDistance = 0;
+			for(int QuadIdPoint = 0; QuadIdPoint < 4; ++QuadIdPoint)
+			{
+				const CPoint &QuadPoint = pQuad->m_aPoints[QuadIdPoint];
+				int Distance = (int)std::ceil(std::sqrt(1.0 * (Center.x - QuadPoint.x) * (Center.x - QuadPoint.x) + (Center.y - QuadPoint.y) * (Center.y - QuadPoint.y)));
+				MaxDistance = std::max(Distance, MaxDistance);
+			}
+
 			for(int Channel = 0; Channel < 2; ++Channel)
 			{
-				int OffsetMinimum = pQuad->m_aPoints[QuadIdPoint][Channel];
-				int OffsetMaximum = pQuad->m_aPoints[QuadIdPoint][Channel];
-
-				// calculate env offsets for every ungrouped quad
+				int OffsetMinimum = Center[Channel] - MaxDistance;
+				int OffsetMaximum = Center[Channel] + MaxDistance;
 				if(!Grouped && pQuad->m_PosEnv >= 0)
 				{
-					const CEnvelopeExtrema::CEnvelopeExtremaItem &Extrema = m_pEnvelopeManager->EnvelopeExtrema()->GetExtrema(m_QuadRenderGroup.m_PosEnv);
-					if(!Extrema.m_Available)
-						return false;
 					OffsetMinimum += Extrema.m_Minima[Channel];
 					OffsetMaximum += Extrema.m_Maxima[Channel];
 				}
@@ -1154,9 +1182,10 @@ bool CRenderLayerQuads::CalculateQuadClipping(int aQuadOffsetMin[2], int aQuadOf
 	// add env offsets for the quad group
 	if(Grouped && m_QuadRenderGroup.m_PosEnv >= 0)
 	{
+		const CEnvelopeExtrema::CEnvelopeExtremaItem &Extrema = m_pEnvelopeManager->EnvelopeExtrema()->GetExtrema(m_QuadRenderGroup.m_PosEnv);
+
 		for(int Channel = 0; Channel < 2; ++Channel)
 		{
-			const CEnvelopeExtrema::CEnvelopeExtremaItem &Extrema = m_pEnvelopeManager->EnvelopeExtrema()->GetExtrema(m_QuadRenderGroup.m_PosEnv);
 			aQuadOffsetMin[Channel] += Extrema.m_Minima[Channel];
 			aQuadOffsetMax[Channel] += Extrema.m_Maxima[Channel];
 		}
@@ -1202,7 +1231,7 @@ void CRenderLayerQuads::Render(const CRenderLayerParams &Params)
 		RenderQuadLayer(Alpha);
 	}
 
-	if((Params.m_DebugRenderOptions & 2) && m_QuadRenderGroup.m_Clipped)
+	if(Params.m_DebugRenderQuadClips && m_QuadRenderGroup.m_Clipped)
 	{
 		char aDebugText[64];
 		str_format(aDebugText, sizeof(aDebugText), "Group %d, quad layer %d", m_GroupId, m_LayerId);

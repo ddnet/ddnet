@@ -261,12 +261,12 @@ public:
 	virtual void MapScreen(float TopLeftX, float TopLeftY, float BottomRightX, float BottomRightY) = 0;
 
 	// helper functions
-	void CalcScreenParams(float Aspect, float Zoom, float *pWidth, float *pHeight);
+	void CalcScreenParams(float Aspect, float Zoom, float *pWidth, float *pHeight) const;
 	void MapScreenToWorld(float CenterX, float CenterY, float ParallaxX, float ParallaxY,
-		float ParallaxZoom, float OffsetX, float OffsetY, float Aspect, float Zoom, float *pPoints);
+		float ParallaxZoom, float OffsetX, float OffsetY, float Aspect, float Zoom, float *pPoints) const;
 	void MapScreenToInterface(float CenterX, float CenterY, float Zoom = 1.0f);
 
-	virtual void GetScreen(float *pTopLeftX, float *pTopLeftY, float *pBottomRightX, float *pBottomRightY) = 0;
+	virtual void GetScreen(float *pTopLeftX, float *pTopLeftY, float *pBottomRightX, float *pBottomRightY) const = 0;
 
 	// TODO: These should perhaps not be virtuals
 	virtual void BlendNone() = 0;
@@ -353,6 +353,13 @@ public:
 		CLineItem() = default;
 		CLineItem(float x0, float y0, float x1, float y1) :
 			m_X0(x0), m_Y0(y0), m_X1(x1), m_Y1(y1) {}
+		CLineItem(vec2 From, vec2 To)
+		{
+			m_X0 = From.x;
+			m_Y0 = From.y;
+			m_X1 = To.x;
+			m_Y1 = To.y;
+		}
 	};
 	virtual void LinesBegin() = 0;
 	virtual void LinesEnd() = 0;
@@ -386,6 +393,8 @@ public:
 		CFreeformItem() = default;
 		CFreeformItem(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3) :
 			m_X0(x0), m_Y0(y0), m_X1(x1), m_Y1(y1), m_X2(x2), m_Y2(y2), m_X3(x3), m_Y3(y3) {}
+		CFreeformItem(vec2 Point1, vec2 Point2, vec2 Point3, vec2 Point4) :
+			m_X0(Point1.x), m_Y0(Point1.y), m_X1(Point2.x), m_Y1(Point2.y), m_X2(Point3.x), m_Y2(Point3.y), m_X3(Point4.x), m_Y3(Point4.y) {}
 	};
 
 	struct CQuadItem
@@ -394,6 +403,8 @@ public:
 		CQuadItem() = default;
 		CQuadItem(float x, float y, float w, float h) :
 			m_X(x), m_Y(y), m_Width(w), m_Height(h) {}
+		CQuadItem(vec2 Position, vec2 Size) :
+			m_X(Position.x), m_Y(Position.y), m_Width(Size.x), m_Height(Size.y) {}
 	};
 	virtual void QuadsDraw(CQuadItem *pArray, int Num) = 0;
 	virtual void QuadsDrawTL(const CQuadItem *pArray, int Num) = 0;

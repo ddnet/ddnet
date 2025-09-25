@@ -629,11 +629,12 @@ private:
 public:
 	CTouchButton *NewButton();
 	void DeleteSelectedButton();
-	bool IsRectOverlapping(CUnitRect MyRect = {0, 0, BUTTON_SIZE_MINIMUM, BUTTON_SIZE_MINIMUM}) const;
-	CUnitRect UpdatePosition(CUnitRect MyRect, bool Ignore = false); // If Ignore == true, then the function will also try to avoid m_pSelectedButton.
+	bool IsRectOverlapping(CUnitRect MyRect, EButtonShape Shape) const;
+	CUnitRect UpdatePosition(CUnitRect MyRect, EButtonShape Shape, bool Ignore = false); // If Ignore == true, then the function will also try to avoid m_pSelectedButton.
 	void ResetButtonPointers();
 	void ResetVirtualVisibilities();
 	CUIRect CalculateScreenFromUnitRect(CUnitRect Unit, EButtonShape Shape = EButtonShape::RECT) const;
+	CUnitRect CalculateHitbox(const CUnitRect &Rect, EButtonShape Shape) const;
 
 	// Getters and setters.
 	bool HasUnsavedChanges() const { return m_UnsavedChanges; }

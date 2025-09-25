@@ -106,18 +106,18 @@ float CPlayers::GetPlayerTargetAngle(
 		return angle(GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy]);
 	}
 
-	float AngleIntraTick = Intra;
 	// using unpredicted angle when rendering other players in-game
 	if(ClientId >= 0)
-		AngleIntraTick = Client()->IntraGameTick(g_Config.m_ClDummy);
+		Intra = Client()->IntraGameTick(g_Config.m_ClDummy);
+
 	if(ClientId >= 0 && GameClient()->m_Snap.m_aCharacters[ClientId].m_HasExtendedDisplayInfo)
 	{
 		const CNetObj_DDNetCharacter *pExtendedData = &GameClient()->m_Snap.m_aCharacters[ClientId].m_ExtendedData;
 		const CNetObj_DDNetCharacter *pPrevExtendedData = GameClient()->m_Snap.m_aCharacters[ClientId].m_pPrevExtendedData;
 		if(pPrevExtendedData)
 		{
-			float MixX = mix((float)pPrevExtendedData->m_TargetX, (float)pExtendedData->m_TargetX, AngleIntraTick);
-			float MixY = mix((float)pPrevExtendedData->m_TargetY, (float)pExtendedData->m_TargetY, AngleIntraTick);
+			float MixX = mix((float)pPrevExtendedData->m_TargetX, (float)pExtendedData->m_TargetX, Intra);
+			float MixY = mix((float)pPrevExtendedData->m_TargetY, (float)pExtendedData->m_TargetY, Intra);
 			return angle(vec2(MixX, MixY));
 		}
 		else
@@ -132,15 +132,15 @@ float CPlayers::GetPlayerTargetAngle(
 		// short path and not the long one.
 		if(pPlayerChar->m_Angle > (256.0f * pi) && pPrevChar->m_Angle < 0)
 		{
-			return mix((float)pPrevChar->m_Angle, (float)(pPlayerChar->m_Angle - 256.0f * 2 * pi), AngleIntraTick) / 256.0f;
+			return mix((float)pPrevChar->m_Angle, (float)(pPlayerChar->m_Angle - 256.0f * 2 * pi), Intra) / 256.0f;
 		}
 		else if(pPlayerChar->m_Angle < 0 && pPrevChar->m_Angle > (256.0f * pi))
 		{
-			return mix((float)pPrevChar->m_Angle, (float)(pPlayerChar->m_Angle + 256.0f * 2 * pi), AngleIntraTick) / 256.0f;
+			return mix((float)pPrevChar->m_Angle, (float)(pPlayerChar->m_Angle + 256.0f * 2 * pi), Intra) / 256.0f;
 		}
 		else
 		{
-			return mix((float)pPrevChar->m_Angle, (float)pPlayerChar->m_Angle, AngleIntraTick) / 256.0f;
+			return mix((float)pPrevChar->m_Angle, (float)pPlayerChar->m_Angle, Intra) / 256.0f;
 		}
 	}
 }
@@ -157,24 +157,19 @@ void CPlayers::RenderHookCollLine(
 	Player = *pPlayerChar;
 
 	bool Local = GameClient()->m_Snap.m_LocalClientId == ClientId;
-	bool OtherTeam = GameClient()->IsOtherTeam(ClientId);
-	float Alpha = (OtherTeam || ClientId < 0) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
-	Alpha *= (float)g_Config.m_ClHookCollAlpha / 100;
 
-	float IntraTick = Intra;
 	if(ClientId >= 0)
-		IntraTick = GameClient()->m_aClients[ClientId].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
+		Intra = GameClient()->m_aClients[ClientId].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
 
-	float Angle = GetPlayerTargetAngle(&Prev, &Player, ClientId, IntraTick);
+	float Angle = GetPlayerTargetAngle(&Prev, &Player, ClientId, Intra);
 
 	vec2 Direction = direction(Angle);
 	vec2 Position;
 	if(in_range(ClientId, MAX_CLIENTS - 1))
 		Position = GameClient()->m_aClients[ClientId].m_RenderPos;
 	else
-		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
+		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), Intra);
 
-	// draw hook collision line
 	bool Aim = (Player.m_PlayerFlags & PLAYERFLAG_AIM);
 	if(!Client()->ServerCapAnyPlayerFlag())
 	{
@@ -200,43 +195,42 @@ void CPlayers::RenderHookCollLine(
 	if(!AlwaysRenderHookColl && !RenderHookCollPlayer)
 		return;
 
-	vec2 ExDirection = Direction;
-
 	if(Local && !GameClient()->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
-		ExDirection = normalize(vec2((int)GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].x, (int)GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].y));
+		Direction = normalize(vec2((int)GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].x, (int)GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].y));
 
 		// fix direction if mouse is exactly in the center
 		if(!(int)GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].x && !(int)GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].y)
-			ExDirection = vec2(1, 0);
+			Direction = vec2(1.0f, 0.0f);
 	}
-	Graphics()->TextureClear();
-	vec2 InitPos = Position;
-	vec2 FinishPos = InitPos + ExDirection * (GameClient()->m_aClients[ClientId].m_Predicted.m_Tuning.m_HookLength - 42.0f);
 
-	const int HookCollSize = Local ? g_Config.m_ClHookCollSize : g_Config.m_ClHookCollSizeOther;
-	if(HookCollSize > 0)
-		Graphics()->QuadsBegin();
-	else
-		Graphics()->LinesBegin();
+	// Calculate hook coll line position
+	int HookSpeed = GameClient()->m_aClients[ClientId].m_Predicted.m_Tuning.m_HookFireSpeed;
+	if(HookSpeed <= 0)
+		return;
+
+	int HookLength = GameClient()->m_aClients[ClientId].m_Predicted.m_Tuning.m_HookLength;
+
+	const float LineOffset = CCharacterCore::PhysicalSize() * 1.5f;
+	vec2 InitPos = Position;
+	vec2 FinishPos = InitPos + Direction * (HookLength - LineOffset);
 
 	ColorRGBA HookCollColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorNoColl));
 
-	vec2 OldPos = InitPos + ExDirection * CCharacterCore::PhysicalSize() * 1.5f;
+	vec2 OldPos = InitPos + Direction * LineOffset;
 	vec2 NewPos = OldPos;
 
 	bool DoBreak = false;
-
-	std::vector<std::pair<vec2, vec2>> vLineSegments;
-
+	std::vector<IGraphics::CLineItem> vLineSegments;
+	vLineSegments.reserve(HookLength / HookSpeed + 1);
 	do
 	{
 		OldPos = NewPos;
-		NewPos = OldPos + ExDirection * GameClient()->m_aClients[ClientId].m_Predicted.m_Tuning.m_HookFireSpeed;
+		NewPos = OldPos + Direction * HookSpeed;
 
-		if(distance(InitPos, NewPos) > GameClient()->m_aClients[ClientId].m_Predicted.m_Tuning.m_HookLength)
+		if(distance(InitPos, NewPos) > HookLength)
 		{
-			NewPos = InitPos + normalize(NewPos - InitPos) * GameClient()->m_aClients[ClientId].m_Predicted.m_Tuning.m_HookLength;
+			NewPos = InitPos + normalize(NewPos - InitPos) * HookLength;
 			DoBreak = true;
 		}
 
@@ -257,10 +251,7 @@ void CPlayers::RenderHookCollLine(
 			}
 			else
 			{
-				std::pair<vec2, vec2> NewPair = std::make_pair(InitPos, FinishPos);
-				if(std::find(vLineSegments.begin(), vLineSegments.end(), NewPair) != vLineSegments.end())
-					break;
-				vLineSegments.push_back(NewPair);
+				vLineSegments.emplace_back(InitPos, FinishPos);
 				InitPos = NewPos = Collision()->TeleOuts(Tele - 1)[0];
 			}
 		}
@@ -282,45 +273,54 @@ void CPlayers::RenderHookCollLine(
 		if(OldPos == NewPos)
 			break;
 
-		ExDirection.x = round_to_int(ExDirection.x * 256.0f) / 256.0f;
-		ExDirection.y = round_to_int(ExDirection.y * 256.0f) / 256.0f;
+		Direction.x = round_to_int(Direction.x * 256.0f) / 256.0f;
+		Direction.y = round_to_int(Direction.y * 256.0f) / 256.0f;
 	} while(!DoBreak);
 
-	std::pair<vec2, vec2> NewPair = std::make_pair(InitPos, FinishPos);
-	if(std::find(vLineSegments.begin(), vLineSegments.end(), NewPair) == vLineSegments.end())
-		vLineSegments.push_back(NewPair);
+	vLineSegments.emplace_back(InitPos, FinishPos);
 
 	if(AlwaysRenderHookColl && RenderHookCollPlayer)
 	{
 		// invert the hook coll colors when using cl_show_hook_coll_always and +showhookcoll is pressed
 		HookCollColor = color_invert(HookCollColor);
 	}
-	Graphics()->SetColor(HookCollColor.WithAlpha(Alpha));
-	for(const auto &[DrawInitPos, DrawFinishPos] : vLineSegments)
+
+	// Render hook coll line
+	const int HookCollSize = Local ? g_Config.m_ClHookCollSize : g_Config.m_ClHookCollSizeOther;
+
+	bool OtherTeam = GameClient()->IsOtherTeam(ClientId);
+	float Alpha = (OtherTeam || ClientId < 0) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
+	Alpha *= (float)g_Config.m_ClHookCollAlpha / 100;
+
+	Graphics()->TextureClear();
+	if(HookCollSize > 0)
 	{
-		if(HookCollSize > 0)
+		std::vector<IGraphics::CFreeformItem> vLineQuadSegments;
+		vLineQuadSegments.reserve(vLineSegments.size());
+
+		float LineWidth = 0.5f + (float)(HookCollSize - 1) * 0.25f;
+		const vec2 PerpToAngle = normalize(vec2(Direction.y, -Direction.x)) * GameClient()->m_Camera.m_Zoom;
+
+		for(const auto &LineSegment : vLineSegments)
 		{
-			float LineWidth = 0.5f + (float)(HookCollSize - 1) * 0.25f;
-			vec2 PerpToAngle = normalize(vec2(ExDirection.y, -ExDirection.x)) * GameClient()->m_Camera.m_Zoom;
+			vec2 DrawInitPos(LineSegment.m_X0, LineSegment.m_Y0);
+			vec2 DrawFinishPos(LineSegment.m_X1, LineSegment.m_Y1);
 			vec2 Pos0 = DrawFinishPos + PerpToAngle * -LineWidth;
 			vec2 Pos1 = DrawFinishPos + PerpToAngle * LineWidth;
 			vec2 Pos2 = DrawInitPos + PerpToAngle * -LineWidth;
 			vec2 Pos3 = DrawInitPos + PerpToAngle * LineWidth;
-			IGraphics::CFreeformItem FreeformItem(Pos0.x, Pos0.y, Pos1.x, Pos1.y, Pos2.x, Pos2.y, Pos3.x, Pos3.y);
-			Graphics()->QuadsDrawFreeform(&FreeformItem, 1);
+			vLineQuadSegments.emplace_back(Pos0.x, Pos0.y, Pos1.x, Pos1.y, Pos2.x, Pos2.y, Pos3.x, Pos3.y);
 		}
-		else
-		{
-			IGraphics::CLineItem LineItem(DrawInitPos.x, DrawInitPos.y, DrawFinishPos.x, DrawFinishPos.y);
-			Graphics()->LinesDraw(&LineItem, 1);
-		}
-	}
-	if(HookCollSize > 0)
-	{
+		Graphics()->QuadsBegin();
+		Graphics()->SetColor(HookCollColor.WithAlpha(Alpha));
+		Graphics()->QuadsDrawFreeform(vLineQuadSegments.data(), vLineQuadSegments.size());
 		Graphics()->QuadsEnd();
 	}
 	else
 	{
+		Graphics()->LinesBegin();
+		Graphics()->SetColor(HookCollColor.WithAlpha(Alpha));
+		Graphics()->LinesDraw(vLineSegments.data(), vLineSegments.size());
 		Graphics()->LinesEnd();
 	}
 }
@@ -331,6 +331,9 @@ void CPlayers::RenderHook(
 	int ClientId,
 	float Intra)
 {
+	if(pPrevChar->m_HookState <= 0 || pPlayerChar->m_HookState <= 0)
+		return;
+
 	CNetObj_Character Prev;
 	CNetObj_Character Player;
 	Prev = *pPrevChar;
@@ -342,9 +345,8 @@ void CPlayers::RenderHook(
 	if(pPlayerChar->m_HookedPlayer != -1 && !GameClient()->m_Snap.m_aCharacters[pPlayerChar->m_HookedPlayer].m_Active)
 		return;
 
-	float IntraTick = Intra;
 	if(ClientId >= 0)
-		IntraTick = (GameClient()->m_aClients[ClientId].m_IsPredicted) ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
+		Intra = GameClient()->m_aClients[ClientId].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
 
 	bool OtherTeam = GameClient()->IsOtherTeam(ClientId);
 	float Alpha = (OtherTeam || ClientId < 0) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
@@ -357,53 +359,50 @@ void CPlayers::RenderHook(
 	if(in_range(ClientId, MAX_CLIENTS - 1))
 		Position = GameClient()->m_aClients[ClientId].m_RenderPos;
 	else
-		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
+		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), Intra);
 
 	// draw hook
-	if(Prev.m_HookState > 0 && Player.m_HookState > 0)
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+	if(ClientId < 0)
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.5f);
+
+	vec2 Pos = Position;
+	vec2 HookPos;
+
+	if(in_range(pPlayerChar->m_HookedPlayer, MAX_CLIENTS - 1))
+		HookPos = GameClient()->m_aClients[pPlayerChar->m_HookedPlayer].m_RenderPos;
+	else
+		HookPos = mix(vec2(Prev.m_HookX, Prev.m_HookY), vec2(Player.m_HookX, Player.m_HookY), Intra);
+
+	float d = distance(Pos, HookPos);
+	vec2 Dir = normalize(Pos - HookPos);
+
+	Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteHookHead);
+	Graphics()->QuadsSetRotation(angle(Dir) + pi);
+	// render head
+	int QuadOffset = NUM_WEAPONS * 2 + 2;
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
+	Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, HookPos.x, HookPos.y);
+
+	// render chain
+	++QuadOffset;
+	static IGraphics::SRenderSpriteInfo s_aHookChainRenderInfo[1024];
+	int HookChainCount = 0;
+	for(float f = 24; f < d && HookChainCount < 1024; f += 24, ++HookChainCount)
 	{
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		if(ClientId < 0)
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.5f);
-
-		vec2 Pos = Position;
-		vec2 HookPos;
-
-		if(in_range(pPlayerChar->m_HookedPlayer, MAX_CLIENTS - 1))
-			HookPos = GameClient()->m_aClients[pPlayerChar->m_HookedPlayer].m_RenderPos;
-		else
-			HookPos = mix(vec2(Prev.m_HookX, Prev.m_HookY), vec2(Player.m_HookX, Player.m_HookY), IntraTick);
-
-		float d = distance(Pos, HookPos);
-		vec2 Dir = normalize(Pos - HookPos);
-
-		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteHookHead);
-		Graphics()->QuadsSetRotation(angle(Dir) + pi);
-		// render head
-		int QuadOffset = NUM_WEAPONS * 2 + 2;
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
-		Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, HookPos.x, HookPos.y);
-
-		// render chain
-		++QuadOffset;
-		static IGraphics::SRenderSpriteInfo s_aHookChainRenderInfo[1024];
-		int HookChainCount = 0;
-		for(float f = 24; f < d && HookChainCount < 1024; f += 24, ++HookChainCount)
-		{
-			vec2 p = HookPos + Dir * f;
-			s_aHookChainRenderInfo[HookChainCount].m_Pos[0] = p.x;
-			s_aHookChainRenderInfo[HookChainCount].m_Pos[1] = p.y;
-			s_aHookChainRenderInfo[HookChainCount].m_Scale = 1;
-			s_aHookChainRenderInfo[HookChainCount].m_Rotation = angle(Dir) + pi;
-		}
-		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteHookChain);
-		Graphics()->RenderQuadContainerAsSpriteMultiple(m_WeaponEmoteQuadContainerIndex, QuadOffset, HookChainCount, s_aHookChainRenderInfo);
-
-		Graphics()->QuadsSetRotation(0);
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-
-		RenderHand(&RenderInfo, Position, normalize(HookPos - Pos), -pi / 2, vec2(20, 0), Alpha);
+		vec2 p = HookPos + Dir * f;
+		s_aHookChainRenderInfo[HookChainCount].m_Pos[0] = p.x;
+		s_aHookChainRenderInfo[HookChainCount].m_Pos[1] = p.y;
+		s_aHookChainRenderInfo[HookChainCount].m_Scale = 1;
+		s_aHookChainRenderInfo[HookChainCount].m_Rotation = angle(Dir) + pi;
 	}
+	Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteHookChain);
+	Graphics()->RenderQuadContainerAsSpriteMultiple(m_WeaponEmoteQuadContainerIndex, QuadOffset, HookChainCount, s_aHookChainRenderInfo);
+
+	Graphics()->QuadsSetRotation(0);
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+	RenderHand(&RenderInfo, Position, normalize(HookPos - Pos), -pi / 2, vec2(20, 0), Alpha);
 }
 
 void CPlayers::RenderPlayer(
@@ -429,9 +428,8 @@ void CPlayers::RenderPlayer(
 	// set size
 	RenderInfo.m_Size = 64.0f;
 
-	float IntraTick = Intra;
 	if(ClientId >= 0)
-		IntraTick = GameClient()->m_aClients[ClientId].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
+		Intra = GameClient()->m_aClients[ClientId].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
 
 	static float s_LastGameTickTime = Client()->GameTickTime(g_Config.m_ClDummy);
 	static float s_LastPredIntraTick = Client()->PredIntraGameTick(g_Config.m_ClDummy);
@@ -452,15 +450,15 @@ void CPlayers::RenderPlayer(
 	}
 	float AttackTicksPassed = AttackTime * (float)Client()->GameTickSpeed();
 
-	float Angle = GetPlayerTargetAngle(&Prev, &Player, ClientId, IntraTick);
+	float Angle = GetPlayerTargetAngle(&Prev, &Player, ClientId, Intra);
 
 	vec2 Direction = direction(Angle);
 	vec2 Position;
 	if(in_range(ClientId, MAX_CLIENTS - 1))
 		Position = GameClient()->m_aClients[ClientId].m_RenderPos;
 	else
-		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
-	vec2 Vel = mix(vec2(Prev.m_VelX / 256.0f, Prev.m_VelY / 256.0f), vec2(Player.m_VelX / 256.0f, Player.m_VelY / 256.0f), IntraTick);
+		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), Intra);
+	vec2 Vel = mix(vec2(Prev.m_VelX / 256.0f, Prev.m_VelY / 256.0f), vec2(Player.m_VelX / 256.0f, Player.m_VelY / 256.0f), Intra);
 
 	GameClient()->m_Flow.Add(Position, Vel * 100.0f, 10.0f);
 
@@ -521,18 +519,12 @@ void CPlayers::RenderPlayer(
 	{
 		if(!(RenderInfo.m_TeeRenderFlags & TEE_NO_WEAPON))
 		{
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-			Graphics()->QuadsSetRotation(State.GetAttach()->m_Angle * pi * 2.0f + Angle);
-
-			if(ClientId < 0)
-				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.5f);
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
 
 			// normal weapons
 			int CurrentWeapon = std::clamp(Player.m_Weapon, 0, NUM_WEAPONS - 1);
 			Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteWeapons[CurrentWeapon]);
 			int QuadOffset = CurrentWeapon * 2 + (Direction.x < 0.0f ? 1 : 0);
-
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
 
 			float Recoil = 0.0f;
 			vec2 WeaponPosition;
@@ -641,6 +633,7 @@ void CPlayers::RenderPlayer(
 					WeaponPosition.y += 3.0f;
 				if(Player.m_Weapon == WEAPON_GUN && g_Config.m_ClOldGunPosition)
 					WeaponPosition.y -= 8.0f;
+				Graphics()->QuadsSetRotation(State.GetAttach()->m_Angle * pi * 2.0f + Angle);
 				Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, WeaponPosition.x, WeaponPosition.y);
 			}
 

@@ -325,21 +325,22 @@ void CMenus::RenderSkinSelection7(CUIRect MainView)
 	}
 
 	m_pSelectedSkin = nullptr;
-	int s_OldSelected = -1;
-	s_ListBox.DoStart(50.0f, s_vpSkinList.size(), 4, 1, s_OldSelected, &MainView);
-
+	int OldSelected = -1;
 	for(int i = 0; i < (int)s_vpSkinList.size(); ++i)
 	{
 		const CSkins7::CSkin *pSkin = s_vpSkinList[i];
-		if(pSkin == nullptr)
-			continue;
 		if(!str_comp(pSkin->m_aName, CSkins7::ms_apSkinNameVariables[m_Dummy]))
 		{
 			m_pSelectedSkin = pSkin;
-			s_OldSelected = i;
+			OldSelected = i;
+			break;
 		}
+	}
+	s_ListBox.DoStart(50.0f, s_vpSkinList.size(), 4, 1, OldSelected, &MainView);
 
-		const CListboxItem Item = s_ListBox.DoNextItem(&s_vpSkinList[i], s_OldSelected == i);
+	for(const CSkins7::CSkin *pSkin : s_vpSkinList)
+	{
+		const CListboxItem Item = s_ListBox.DoNextItem(pSkin);
 		if(!Item.m_Visible)
 			continue;
 
@@ -368,7 +369,7 @@ void CMenus::RenderSkinSelection7(CUIRect MainView)
 	}
 
 	const int NewSelected = s_ListBox.DoEnd();
-	if(NewSelected != -1 && NewSelected != s_OldSelected)
+	if(NewSelected != -1 && NewSelected != OldSelected)
 	{
 		s_LastSelectionTime = Client()->GlobalTime();
 		m_pSelectedSkin = s_vpSkinList[NewSelected];
@@ -385,13 +386,13 @@ void CMenus::RenderSkinSelection7(CUIRect MainView)
 
 void CMenus::RenderSkinPartSelection7(CUIRect MainView)
 {
-	static std::vector<const CSkins7::CSkinPart *> s_paList[protocol7::NUM_SKINPARTS];
+	static std::vector<const CSkins7::CSkinPart *> s_avpList[protocol7::NUM_SKINPARTS];
 	static CListBox s_ListBox;
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
 		if(!m_SkinList7LastRefreshTime.has_value() || m_SkinList7LastRefreshTime.value() != GameClient()->m_Skins7.LastRefreshTime())
 		{
-			s_paList[Part].clear();
+			s_avpList[Part].clear();
 			for(const CSkins7::CSkinPart &SkinPart : GameClient()->m_Skins7.GetSkinParts(Part))
 			{
 				if((SkinPart.m_Flags & CSkins7::SKINFLAG_SPECIAL) != 0)
@@ -400,23 +401,26 @@ void CMenus::RenderSkinPartSelection7(CUIRect MainView)
 				if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_utf8_find_nocase(SkinPart.m_aName, g_Config.m_ClSkinFilterString))
 					continue;
 
-				s_paList[Part].emplace_back(&SkinPart);
+				s_avpList[Part].emplace_back(&SkinPart);
 			}
 		}
 	}
 
-	static int s_OldSelected = -1;
-	s_ListBox.DoStart(72.0f, s_paList[m_TeePartSelected].size(), 4, 1, s_OldSelected, &MainView, false, IGraphics::CORNER_NONE, true);
-
-	for(int i = 0; i < (int)s_paList[m_TeePartSelected].size(); ++i)
+	int OldSelected = -1;
+	for(int i = 0; i < (int)s_avpList[m_TeePartSelected].size(); ++i)
 	{
-		const CSkins7::CSkinPart *pPart = s_paList[m_TeePartSelected][i];
-		if(pPart == nullptr)
-			continue;
+		const CSkins7::CSkinPart *pPart = s_avpList[m_TeePartSelected][i];
 		if(!str_comp(pPart->m_aName, CSkins7::ms_apSkinVariables[(int)m_Dummy][m_TeePartSelected]))
-			s_OldSelected = i;
+		{
+			OldSelected = i;
+			break;
+		}
+	}
+	s_ListBox.DoStart(72.0f, s_avpList[m_TeePartSelected].size(), 4, 1, OldSelected, &MainView, false, IGraphics::CORNER_NONE, true);
 
-		CListboxItem Item = s_ListBox.DoNextItem(&s_paList[m_TeePartSelected][i], s_OldSelected == i);
+	for(const CSkins7::CSkinPart *pPart : s_avpList[m_TeePartSelected])
+	{
+		CListboxItem Item = s_ListBox.DoNextItem(pPart);
 		if(!Item.m_Visible)
 			continue;
 
@@ -451,11 +455,10 @@ void CMenus::RenderSkinPartSelection7(CUIRect MainView)
 	}
 
 	const int NewSelected = s_ListBox.DoEnd();
-	if(NewSelected != -1 && NewSelected != s_OldSelected)
+	if(NewSelected != -1 && NewSelected != OldSelected)
 	{
-		str_copy(CSkins7::ms_apSkinVariables[(int)m_Dummy][m_TeePartSelected], s_paList[m_TeePartSelected][NewSelected]->m_aName, protocol7::MAX_SKIN_ARRAY_SIZE);
+		str_copy(CSkins7::ms_apSkinVariables[(int)m_Dummy][m_TeePartSelected], s_avpList[m_TeePartSelected][NewSelected]->m_aName, protocol7::MAX_SKIN_ARRAY_SIZE);
 		CSkins7::ms_apSkinNameVariables[m_Dummy][0] = '\0';
 		SetNeedSendInfo();
 	}
-	s_OldSelected = NewSelected;
 }

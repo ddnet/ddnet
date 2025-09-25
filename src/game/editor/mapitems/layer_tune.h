@@ -19,7 +19,7 @@ class CLayerTune : public CLayerTiles
 public:
 	CLayerTune(CEditor *pEditor, int w, int h);
 	CLayerTune(const CLayerTune &Other);
-	~CLayerTune();
+	~CLayerTune() override;
 
 	CTuneTile *m_pTuneTile;
 	unsigned char m_TuningNumber;

@@ -27,7 +27,7 @@ class CAntibot : public IEngineAntibot
 
 public:
 	CAntibot();
-	virtual ~CAntibot();
+	~CAntibot() override;
 
 	// Engine
 	void Init() override;

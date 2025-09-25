@@ -8,7 +8,7 @@ class CLayerQuads : public CLayer
 public:
 	explicit CLayerQuads(CEditor *pEditor);
 	CLayerQuads(const CLayerQuads &Other);
-	~CLayerQuads();
+	~CLayerQuads() override;
 
 	void Render(bool QuadPicker = false) override;
 	CQuad *NewQuad(int x, int y, int Width, int Height);

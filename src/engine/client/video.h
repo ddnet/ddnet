@@ -42,7 +42,7 @@ class CVideo : public IVideo
 {
 public:
 	CVideo(IGraphics *pGraphics, ISound *pSound, IStorage *pStorage, int Width, int Height, const char *pName);
-	~CVideo();
+	~CVideo() override;
 
 	bool Start() override REQUIRES(!m_WriteLock);
 	void Stop() override;

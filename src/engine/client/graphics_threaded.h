@@ -631,7 +631,7 @@ public:
 	}
 
 	const SCommand *Head() const { return m_pCmdBufferHead; }
-	SCommand *Head() { return const_cast<SCommand *>(const_cast<const CCommandBuffer *>(this)->Head()); }
+	SCommand *Head() { return m_pCmdBufferHead; }
 
 	void Reset()
 	{
@@ -924,7 +924,7 @@ public:
 	const TTwGraphicsGpuList &GetGpus() const override;
 
 	void MapScreen(float TopLeftX, float TopLeftY, float BottomRightX, float BottomRightY) override;
-	void GetScreen(float *pTopLeftX, float *pTopLeftY, float *pBottomRightX, float *pBottomRightY) override;
+	void GetScreen(float *pTopLeftX, float *pTopLeftY, float *pBottomRightX, float *pBottomRightY) const override;
 
 	void LinesBegin() override;
 	void LinesEnd() override;
