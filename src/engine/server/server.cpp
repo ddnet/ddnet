@@ -37,7 +37,6 @@
 
 #include <game/version.h>
 
-// DDRace
 #include <engine/shared/linereader.h>
 #include <vector>
 #include <zlib.h>
