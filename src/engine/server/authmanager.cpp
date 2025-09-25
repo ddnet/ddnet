@@ -42,6 +42,9 @@ bool CRconRole::IsAncestor(const CRconRole *pAncestor) const
 
 bool CRconRole::CanUseRconCommand(const char *pCommand)
 {
+	if(IsAdmin())
+		return true;
+
 	bool CanDirect = std::ranges::any_of(
 		m_vRconCommands,
 		[pCommand](const std::string &Command) {
