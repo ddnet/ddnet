@@ -342,7 +342,7 @@ int CAuthManager::NumNonDefaultKeys() const
 
 CRconRole *CAuthManager::FindRole(const char *pName)
 {
-	auto It = m_Roles.find(pName);
+	const auto It = m_Roles.find(pName);
 	if(It == m_Roles.end())
 		return nullptr;
 	return &It->second;

@@ -319,10 +319,11 @@ public:
 
 	void SendLogLine(const CLogMessage *pMessage);
 	void SetRconCid(int ClientId) override;
+
 	// deprecated! Use GetAuthRank instead
 	int GetAuthedState(int ClientId) const override;
 	// returns the rcon rank if logged in and 0 if not logged in
-	int GetAuthRank(int ClientId) const override;
+	int GetAuthRank(int ClientId) override;
 	bool IsRconAuthed(int ClientId) const override;
 	bool IsRconAuthedAdmin(int ClientId) const override;
 	const char *GetAuthName(int ClientId) const override;
@@ -528,9 +529,9 @@ public:
 		return m_aClients[ClientId].m_DnsblState == EDnsblState::BLACKLISTED;
 	}
 
-	CRconRole *RoleOrNullptr(int ClientId) const;
+	CRconRole *RoleOrNullptr(int ClientId);
 	static bool CanClientUseCommandCallback(int ClientId, const IConsole::ICommandInfo *pCommand, void *pUser);
-	bool CanClientUseCommand(int ClientId, const IConsole::ICommandInfo *pCommand) const;
+	bool CanClientUseCommand(int ClientId, const IConsole::ICommandInfo *pCommand);
 	void AuthRemoveKey(int KeySlot);
 	bool ClientPrevIngame(int ClientId) override { return m_aPrevStates[ClientId] == CClient::STATE_INGAME; }
 	const char *GetNetErrorString(int ClientId) override { return m_NetServer.ErrorString(ClientId); }

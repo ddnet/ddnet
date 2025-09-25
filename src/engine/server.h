@@ -251,7 +251,7 @@ public:
 	};
 	virtual void SetRconCid(int ClientId) = 0;
 	virtual int GetAuthedState(int ClientId) const = 0;
-	virtual int GetAuthRank(int ClientId) const = 0;
+	virtual int GetAuthRank(int ClientId) = 0;
 	virtual bool IsRconAuthed(int ClientId) const = 0;
 	virtual bool IsRconAuthedAdmin(int ClientId) const = 0;
 	virtual const char *GetAuthName(int ClientId) const = 0;

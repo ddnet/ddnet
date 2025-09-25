@@ -625,7 +625,7 @@ int CServer::GetAuthedState(int ClientId) const
 	return m_AuthManager.KeyLevel(m_aClients[ClientId].m_AuthKey);
 }
 
-int CServer::GetAuthRank(int ClientId) const
+int CServer::GetAuthRank(int ClientId)
 {
 	if(ClientId == -1)
 		return RoleRank::ADMIN;
@@ -3483,11 +3483,12 @@ static int GetAuthLevel(const char *pLevel)
 	return Level;
 }
 
-CRconRole *CServer::RoleOrNullptr(int ClientId) const
+CRconRole *CServer::RoleOrNullptr(int ClientId)
 {
-	const CAuthManager *pManager = &m_AuthManager;
-	CRconRole *pRole = pManager->KeyRole(m_aClients[ClientId].m_AuthKey);
-	return pRole;
+	CAuthManager *pManager = &m_AuthManager;
+	if(ClientId == IConsole::CLIENT_ID_GAME || ClientId == -1)
+		return pManager->FindRole(RoleName::ADMIN);
+	return pManager->KeyRole(m_aClients[ClientId].m_AuthKey);
 }
 
 bool CServer::CanClientUseCommandCallback(int ClientId, const IConsole::ICommandInfo *pCommand, void *pUser)
@@ -3495,7 +3496,7 @@ bool CServer::CanClientUseCommandCallback(int ClientId, const IConsole::ICommand
 	return ((CServer *)pUser)->CanClientUseCommand(ClientId, pCommand);
 }
 
-bool CServer::CanClientUseCommand(int ClientId, const IConsole::ICommandInfo *pCommand) const
+bool CServer::CanClientUseCommand(int ClientId, const IConsole::ICommandInfo *pCommand)
 {
 	// everyone can use all chat commands
 	if(pCommand->Flags() & CFGFLAG_CHAT)
