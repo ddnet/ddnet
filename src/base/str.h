@@ -112,7 +112,7 @@ int str_isallnum_hex(const char *str);
  *
  * @return `1` if the character is whitespace, `0` otherwise.
  *
- * @remark The following characters are considered whitespace: ' ', '\n', '\r', '\t'.
+ * @remark The following characters are considered whitespace: ` `, `\n`, `\r`, `\t`.
  */
 int str_isspace(char c);
 
@@ -157,7 +157,7 @@ void str_sanitize_cc(char *str);
 
 /**
  * Replaces all characters below 32 with whitespace with
- * exception to \t, \n and \r.
+ * exception to `\t`, `\n` and `\n`.
  *
  * @ingroup Strings
  *
