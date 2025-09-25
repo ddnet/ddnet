@@ -57,7 +57,7 @@
  * @ingroup Debug
  *
  * @param test Result of the test.
- * @param msg Message that should be printed if the test fails.
+ * @param fmt A printf styled format message that should be printed if the test fails.
  *
  * @remark Also works in release mode.
  *
@@ -1126,7 +1126,7 @@ int net_tcp_send(NETSOCKET sock, const void *data, int size);
  *
  * @param sock Socket to recvive data from.
  * @param data Pointer to a buffer to write the data to.
- * @param max_size Maximum of data to write to the buffer.
+ * @param maxsize Maximum of data to write to the buffer.
  *
  * @return Number of bytes recvived. Negative value on failure. When in
  * non-blocking mode, it returns 0 when there is no more data to be fetched.
@@ -1790,7 +1790,7 @@ void str_utf8_stats(const char *str, size_t max_size, size_t max_count, size_t *
  *
  * @ingroup Strings
  *
- * @param text Pointer to the string.
+ * @param str Pointer to the string.
  * @param byte_offset Offset in bytes.
  *
  * @return Offset in UTF-8 characters. Clamped to the maximum length of the string in UTF-8 characters.
@@ -1805,7 +1805,7 @@ size_t str_utf8_offset_bytes_to_chars(const char *str, size_t byte_offset);
  *
  * @ingroup Strings
  *
- * @param text Pointer to the string.
+ * @param str Pointer to the string.
  * @param char_offset Offset in UTF-8 characters.
  *
  * @return Offset in bytes. Clamped to the maximum length of the string in bytes.
@@ -2018,7 +2018,7 @@ void secure_random_password(char *buffer, unsigned length, unsigned pw_length);
  *
  * @ingroup Secure-Random
  *
- * @param buffer Pointer to the start of the buffer.
+ * @param bytes Pointer to the start of the buffer.
  * @param length Length of the buffer.
  */
 void secure_random_fill(void *bytes, unsigned length);
