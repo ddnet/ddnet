@@ -48,6 +48,7 @@ PickupFlags = [
 LaserTypes = ["RIFLE", "SHOTGUN", "DOOR", "FREEZE", "DRAGGER", "GUN", "PLASMA"]
 DraggerTypes = ["WEAK", "WEAK_NW", "NORMAL", "NORMAL_NW", "STRONG", "STRONG_NW"]
 GunTypes = ["UNFREEZE", "EXPLOSIVE", "FREEZE", "EXPFREEZE"]
+TargetSwitchTypes = ["OPEN", "CLOSE", "ALTERNATE"]
 
 Emoticons = ["OOP", "EXCLAMATION", "HEARTS", "DROP", "DOTDOT", "MUSIC", "SORRY", "GHOST", "SUSHI", "SPLATTEE", "DEVILTEE", "ZOMG", "ZZZ", "WTF", "EYES", "QUESTION"]
 
@@ -92,6 +93,7 @@ Enums = [
 	Enum("LASERTYPE", LaserTypes),
 	Enum("LASERDRAGGERTYPE", DraggerTypes),
 	Enum("LASERGUNTYPE", GunTypes),
+	Enum("TARGETSWITCHTYPE", TargetSwitchTypes),
 	Enum("TEAM", Teams, -2),
 ]
 
@@ -318,6 +320,15 @@ Objects = [
 		NetIntAny("m_Flags", default=0),
 	]),
 
+	NetObjectEx("DDNetTargetSwitch", "targetswitch@netobj.ddnet.tw", [
+		NetIntAny("m_X"),
+		NetIntAny("m_Y"),
+		NetIntRange("m_Type", 0, 'max_int'),
+		NetIntAny("m_SwitchNumber"),
+		NetIntAny("m_SwitchDelay"),
+		NetIntAny("m_Flags", default=0),
+	]),
+
 	NetObjectEx("DDNetSpectatorInfo", "spectator-info@netobj.ddnet.org", [
 		NetBool("m_HasCameraInfo"),
 		NetIntRange("m_Zoom", 0, 'max_int'),
@@ -358,6 +369,10 @@ Objects = [
 	NetEventEx("Birthday:Common", "birthday@netevent.ddnet.org", []),
 
 	NetEventEx("Finish:Common", "finish@netevent.ddnet.org", []),
+    
+	NetEventEx("TargetHit:Common", "targethit@netevent.ddnet.org", [
+		NetBool("m_Weakly"),
+	]),
 
 	NetObjectEx("MyOwnEvent", "my-own-event@heinrich5991.de", [
 		NetIntAny("m_Test"),

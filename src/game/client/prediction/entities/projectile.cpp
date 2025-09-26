@@ -10,6 +10,7 @@
 
 #include "character.h"
 #include "projectile.h"
+#include "targetswitch.h"
 
 CProjectile::CProjectile(
 	CGameWorld *pGameWorld,
@@ -86,19 +87,24 @@ void CProjectile::Tick()
 	if(GameWorld()->m_WorldConfig.m_IsSolo && !(m_Type == WEAPON_SHOTGUN && GameWorld()->m_WorldConfig.m_IsDDRace))
 		pTargetChr = nullptr;
 
+	CTargetSwitch *pTargetTargetSwitch = GameWorld()->IntersectTargetSwitch(PrevPos, ColPos, 0.f, ColPos);
+
 	if(m_LifeSpan > -1)
 		m_LifeSpan--;
 
-	bool isWeaponCollide = false;
+	bool IsWeaponCollide = false;
 	if(
 		pOwnerChar &&
 		pTargetChr &&
 		!pTargetChr->CanCollide(m_Owner))
 	{
-		isWeaponCollide = true;
+		IsWeaponCollide = true;
 	}
 
-	if(((pTargetChr && (pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar)) || Collide || GameLayerClipped(CurPos)) && !isWeaponCollide)
+	if((((pTargetChr || pTargetTargetSwitch) &&
+		    (pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar || pTargetTargetSwitch)) ||
+		   Collide || GameLayerClipped(CurPos)) &&
+		!IsWeaponCollide)
 	{
 		if(m_Explosive && (!pTargetChr || (!m_Freeze || (m_Type == WEAPON_SHOTGUN && Collide))))
 		{
@@ -114,6 +120,10 @@ void CProjectile::Tick()
 				if(pChr && (m_Layer != LAYER_SWITCH || (m_Layer == LAYER_SWITCH && m_Number > 0 && m_Number < (int)Switchers().size() && Switchers()[m_Number].m_aStatus[pChr->Team()])))
 					pChr->Freeze();
 			}
+		}
+		else if(pTargetTargetSwitch && pOwnerChar)
+		{
+			pTargetTargetSwitch->GetHit(pOwnerChar->GetCid(), m_Type == WEAPON_GUN);
 		}
 		if(Collide && m_Bouncing != 0)
 		{

@@ -2444,6 +2444,8 @@ if(CLIENT)
     prediction/entities/plasma.h
     prediction/entities/projectile.cpp
     prediction/entities/projectile.h
+    prediction/entities/targetswitch.cpp
+    prediction/entities/targetswitch.h
     prediction/entity.cpp
     prediction/entity.h
     prediction/gameworld.cpp
@@ -2459,6 +2461,8 @@ if(CLIENT)
     sixup_translate_snapshot.cpp
     skin.cpp
     skin.h
+    targetswitch_data.cpp
+    targetswitch_data.h
     ui.cpp
     ui.h
     ui_listbox.cpp
@@ -2779,6 +2783,8 @@ if(SERVER)
     entities/plasma.h
     entities/projectile.cpp
     entities/projectile.h
+    entities/targetswitch.cpp
+    entities/targetswitch.h
     entity.cpp
     entity.h
     eventhandler.cpp
