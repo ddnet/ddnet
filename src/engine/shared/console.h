@@ -194,7 +194,7 @@ public:
 	/**
 	 * Converts access level string to access level enum.
 	 *
-	 * @param pAccesssLevel should be either "admin", "mod", "moderator", "helper" or "user".
+	 * @param pAccessLevel should be either "admin", "mod", "moderator", "helper" or "user".
 	 * @return `std::nullopt` on error otherwise one of the auth enums such as `EAccessLevel::ADMIN`.
 	 */
 	static std::optional<EAccessLevel> AccessLevelToEnum(const char *pAccessLevel);

@@ -33,7 +33,7 @@ struct LOG_COLOR
 #define log_trace_color(color, sys, ...) log_log_color(LEVEL_TRACE, color, sys, __VA_ARGS__)
 
 /**
- * @defgroup Log
+ * @defgroup Log Logging
  *
  * Methods for outputting log messages and way of handling them.
  */
