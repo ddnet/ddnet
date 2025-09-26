@@ -1471,18 +1471,6 @@ void CCharacter::Snap(int SnappingClient)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_TELEGUN_GRENADE;
 	if(m_Core.m_HasTelegunLaser)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_TELEGUN_LASER;
-	//if(m_Core.m_aWeapons[WEAPON_HAMMER].m_Got)
-	//	pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_HAMMER;
-	//if(m_Core.m_aWeapons[WEAPON_GUN].m_Got)
-	//	pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_GUN;
-	//if(m_Core.m_aWeapons[WEAPON_SHOTGUN].m_Got)
-	//	pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_SHOTGUN;
-	//if(m_Core.m_aWeapons[WEAPON_GRENADE].m_Got)
-	//	pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_GRENADE;
-	//if(m_Core.m_aWeapons[WEAPON_LASER].m_Got)
-	//	pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_LASER;
-	//if(m_Core.m_ActiveWeapon == WEAPON_NINJA)
-	//	pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_NINJA;
 	if(m_Core.m_LiveFrozen)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_MOVEMENTS_DISABLED;
 
@@ -1522,7 +1510,7 @@ void CCharacter::Snap(int SnappingClient)
 		if(m_InSnake)
 		{
 			pDDNetCharacter->m_Flags |= CHARACTERFLAG_COLLISION_DISABLED;
-			pDDNetCharacter->m_Flags &= CHARACTERFLAG_INVINCIBLE;
+			pDDNetCharacter->m_Flags &= ~CHARACTERFLAG_INVINCIBLE;
 		}
 		if(m_Ufo.Active())
 			pDDNetCharacter->m_Flags |= CHARACTERFLAG_MOVEMENTS_DISABLED;
