@@ -384,12 +384,12 @@ public:
 	virtual void FillAntibot(CAntibotRoundData *pData) = 0;
 
 	/**
-	 * Used to report custom player info to master servers.
+	 * Used to report custom player info to the master server.
 	 *
-	 * @param pJsonWriter A pointer to a CJsonStringWriter which the custom data will be added to.
-	 * @param i The client id.
+	 * @param pJsonWriter A pointer to a @link CJsonWriter @endlink to which the custom data will written.
+	 * @param ClientId The client ID.
 	 */
-	virtual void OnUpdatePlayerServerInfo(CJsonStringWriter *pJSonWriter, int Id) = 0;
+	virtual void OnUpdatePlayerServerInfo(CJsonWriter *pJsonWriter, int ClientId) = 0;
 };
 
 extern IGameServer *CreateGameServer();
