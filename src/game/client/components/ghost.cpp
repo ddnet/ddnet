@@ -363,7 +363,6 @@ void CGhost::OnRender()
 		}
 
 		GameClient()->m_Players.RenderHook(&Prev, &Player, pRenderInfo, -2, IntraTick);
-		GameClient()->m_Players.RenderHookCollLine(&Prev, &Player, -2, IntraTick);
 		GameClient()->m_Players.RenderPlayer(&Prev, &Player, pRenderInfo, -2, IntraTick);
 	}
 }
