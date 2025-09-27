@@ -946,6 +946,15 @@ struct AssertUnwindSafe<T>(pub T);
 impl<T> panic::UnwindSafe for AssertUnwindSafe<T> {}
 impl<T> panic::RefUnwindSafe for AssertUnwindSafe<T> {}
 
+macro_rules! fatal {
+    ($($arg:tt)*) => {
+        {
+            eprintln!($($arg)*);
+            process::exit(1);
+        }
+    }
+}
+
 // TODO: put active part masterservers on a different domain?
 #[tokio::main]
 async fn main() {
@@ -1041,7 +1050,11 @@ async fn main() {
         (Some(f), None) => ConfigLocation::File(f.into()),
         (Some(_), Some(_)) => unreachable!(),
     };
-    let config = Arc::new(ArcSwap::from_pointee(config_location.read().unwrap()));
+    let config = Arc::new(ArcSwap::from_pointee(
+        config_location.read().unwrap_or_else(|err| {
+            fatal!("couldn't read config: {}", err);
+        }),
+    ));
     let timekeeper = Timekeeper::new();
     let challenger = Arc::new(Mutex::new(Challenger::new()));
     let mut servers = Servers::new();
