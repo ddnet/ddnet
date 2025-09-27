@@ -89,7 +89,7 @@ int CServerBan::BanExt(T *pBanPool, const typename T::CDataType *pData, int Seco
 			if(i == Server()->m_RconClientId || Server()->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
 				continue;
 
-			if(Server()->GetAuthedState(i) >= Server()->m_RconAuthLevel && NetMatch(pData, Server()->ClientAddr(i)))
+			if(Server()->GetAuthRank(i) >= Server()->m_RconAuthLevel && NetMatch(pData, Server()->ClientAddr(i)))
 			{
 				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (command denied)");
 				return -1;
@@ -498,7 +498,7 @@ void CServer::Kick(int ClientId, const char *pReason)
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "you can't kick yourself");
 		return;
 	}
-	else if(GetAuthedState(ClientId) > m_RconAuthLevel)
+	else if(GetAuthRank(ClientId) > m_RconAuthLevel)
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "kick command denied");
 		return;
@@ -2016,7 +2016,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 			if(AuthLevel != -1)
 			{
-				if(GetAuthedState(ClientId) != AuthLevel)
+				if(GetAuthRank(ClientId) != AuthLevel)
 				{
 					if(!IsSixup(ClientId))
 					{

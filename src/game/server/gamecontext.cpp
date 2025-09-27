@@ -2286,6 +2286,7 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 		str_copy(aReason, pMsg->m_pReason, sizeof(aReason));
 	}
 	int Authed = Server()->GetAuthedState(ClientId);
+	int RconRank = Server()->GetAuthRank(ClientId);
 
 	if(str_comp_nocase(pMsg->m_pType, "option") == 0)
 	{
@@ -2327,7 +2328,7 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 
 		if(!pOption)
 		{
-			if(Authed != AUTHED_ADMIN) // allow admins to call any vote they want
+			if(!Server()->IsRconAuthedAdmin(ClientId)) // allow admins to call any vote they want
 			{
 				str_format(aChatmsg, sizeof(aChatmsg), "'%s' isn't an option on this server", pMsg->m_pValue);
 				SendChatTarget(ClientId, aChatmsg);
