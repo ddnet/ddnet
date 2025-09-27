@@ -429,7 +429,7 @@ void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Tele = pResult->NumArguments() == 2 ? pResult->GetInteger(0) : pResult->m_ClientId;
 	int TeleTo = pResult->NumArguments() ? pResult->GetInteger(pResult->NumArguments() - 1) : pResult->m_ClientId;
-	int AuthLevel = pSelf->Server()->GetAuthedState(pResult->m_ClientId);
+	int AuthLevel = pSelf->Server()->GetAuthRank(pResult->m_ClientId);
 
 	if(Tele != pResult->m_ClientId && AuthLevel < g_Config.m_SvTeleOthersAuthLevel)
 	{
