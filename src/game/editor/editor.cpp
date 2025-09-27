@@ -7957,14 +7957,6 @@ void CEditor::HandleWriterFinishJobs()
 	m_WriterFinishJobs.pop_front();
 
 	char aBuf[2 * IO_MAX_PATH_LENGTH + 128];
-	if(!Storage()->RemoveFile(pJob->GetRealFileName(), IStorage::TYPE_SAVE))
-	{
-		str_format(aBuf, sizeof(aBuf), "Saving failed: Could not remove old map file '%s'.", pJob->GetRealFileName());
-		ShowFileDialogError("%s", aBuf);
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor/save", aBuf);
-		return;
-	}
-
 	if(!Storage()->RenameFile(pJob->GetTempFileName(), pJob->GetRealFileName(), IStorage::TYPE_SAVE))
 	{
 		str_format(aBuf, sizeof(aBuf), "Saving failed: Could not move temporary map file '%s' to '%s'.", pJob->GetTempFileName(), pJob->GetRealFileName());
