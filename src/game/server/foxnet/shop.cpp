@@ -62,20 +62,18 @@ void CShop::ResetItems()
 
 void CShop::ListItems()
 {
-	char aBuf[5012] = "";
 	char Seperator[128] = "";
 	for(int Length = 0; Length < 56; Length++)
 		str_append(Seperator, "-");
 
-	log_info("shop", Seperator);
+	log_info("shop", "%s", Seperator);
 	for(CItems *pItem : m_Items)
 	{
 		if(!str_comp(pItem->Name(), ""))
 			continue;
-		str_format(aBuf, sizeof(aBuf), "%s | Price: %d | MinLevel: %d", pItem->Name(), pItem->Price(), pItem->MinLevel());
-		log_info("shop", aBuf);
+		log_info("shop", "%s | Price: %d | MinLevel: %d", pItem->Name(), pItem->Price(), pItem->MinLevel());
 	}
-	log_info("shop", Seperator);
+	log_info("shop", "%s", Seperator);
 }
 
 void CShop::EditItem(const char *pName, int Price, int MinLevel)
@@ -104,7 +102,7 @@ void CShop::EditItem(const char *pName, int Price, int MinLevel)
 	if(!Found)
 		str_format(aBuf, sizeof(aBuf), "Couldn't find \"%s\"", pName);
 
-	log_info("Shop", aBuf);
+	log_info("Shop", "%s", aBuf);
 }
 
 int CShop::GetItemPrice(const char *pName)
@@ -246,7 +244,7 @@ void CShop::BuyItem(int ClientId, const char *pName)
 		GameServer()->SendChatTarget(ClientId, "╭──────     Sʜᴏᴘ");
 		str_format(aBuf, sizeof(aBuf), "│ You need atleast Level %d to buy %s", MinLevel, ItemName);
 		GameServer()->SendChatTarget(ClientId, aBuf);
-		str_format(aBuf, sizeof(aBuf), "│ You are currently Level %d", pAcc->m_Level);
+		str_format(aBuf, sizeof(aBuf), "│ You are currently Level %ld", (long)pAcc->m_Level);
 		GameServer()->SendChatTarget(ClientId, aBuf);
 		GameServer()->SendChatTarget(ClientId, "│");
 		GameServer()->SendChatTarget(ClientId, "│ Level up by playing");
@@ -264,7 +262,7 @@ void CShop::BuyItem(int ClientId, const char *pName)
 	GameServer()->SendChatTarget(ClientId, "╭──────     Sʜᴏᴘ");
 	str_format(aBuf, sizeof(aBuf), "│ You bought \"%s\" for %d %s", ItemName, Price, g_Config.m_SvCurrencyName);
 	GameServer()->SendChatTarget(ClientId, aBuf);
-	str_format(aBuf, sizeof(aBuf), "│ You now have: %lld %s", pAcc->m_Money, g_Config.m_SvCurrencyName);
+	str_format(aBuf, sizeof(aBuf), "│ You now have: %ld %s", (long)pAcc->m_Money, g_Config.m_SvCurrencyName);
 	GameServer()->SendChatTarget(ClientId, aBuf);
 	GameServer()->SendChatTarget(ClientId, "╰───────────────────────");
 	GameServer()->m_AccountManager.SaveAccountsInfo(ClientId, GameServer()->m_aAccounts[ClientId]);

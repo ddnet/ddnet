@@ -163,7 +163,7 @@ void CGameContext::PowerUpSpawner()
 	CPowerUp *NewPowerUp = new CPowerUp(&m_World, *RandomPos, Lifetime, Xp);
 
 	m_vPowerups.push_back(NewPowerUp);
-	m_PowerUpDelay = Server()->Tick() + Server()->TickSpeed() * 25;
+	m_PowerUpDelay = Server()->Tick() + Server()->TickSpeed() * 15;
 }
 
 void CGameContext::HandleEffects()
@@ -490,8 +490,7 @@ bool CGameContext::NameDetection(int ClientId, const char *pName, bool PreventNa
 			str_append(aBuf, str.c_str());
 			str_append(aBuf, ", ");
 		}
-		log_info("chat-detection", aBuf);
-		dbg_msg("name-detection", aBuf);
+		log_info("chat-detection", "%s", aBuf);
 
 		if(!PreventNameChange && BanDuration > 0)
 			Server()->Ban(ClientId, BanDuration * 60, Reason, "");
@@ -1061,7 +1060,8 @@ std::optional<vec2> CGameContext::GetRandomAccessablePos()
 		return dx * dx + dy * dy;
 	};
 
-	constexpr float MinPlayerDist = 640.0f; // 20 tiles
+	constexpr float TileSize = 32.0f;
+	constexpr float MinPlayerDist = TileSize * 25.0f; 
 
 	for(int Tries = 0; Tries < 16; ++Tries)
 	{
