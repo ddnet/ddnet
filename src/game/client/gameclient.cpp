@@ -1692,6 +1692,7 @@ void CGameClient::OnNewSnapshot()
 					m_aClients[pInfo->m_ClientId].m_Team = pInfo->m_Team;
 					m_aClients[pInfo->m_ClientId].m_Active = true;
 					m_Snap.m_apPlayerInfos[pInfo->m_ClientId] = pInfo;
+					m_Snap.m_apPrevPlayerInfos[pInfo->m_ClientId] = static_cast<const CNetObj_PlayerInfo *>(Client()->SnapFindItem(IClient::SNAP_PREV, Item.m_Type, pInfo->m_ClientId));
 					m_Snap.m_NumPlayers++;
 
 					if(pInfo->m_Local)
