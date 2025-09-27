@@ -4359,7 +4359,7 @@ bool IsFlagSet(uint32_t Flags, int n)
 	return (Flags & (1 << n)) != 0;
 }
 
-bool FormatUnixTime(uint64_t unixSeconds, char *out, size_t outSize, const char *fmt)
+bool FormatUnixTime(uint64_t unixSeconds, char *out, size_t outSize)
 {
 	time_t tt;
 	if(unixSeconds > static_cast<uint64_t>(std::numeric_limits<time_t>::max()))
@@ -4375,7 +4375,7 @@ bool FormatUnixTime(uint64_t unixSeconds, char *out, size_t outSize, const char 
 	if(localtime_r(&tt, &tmLocal) == nullptr)
 		return false;
 #endif
-	return std::strftime(out, outSize, fmt, &tmLocal) != 0;
+	return std::strftime(out, outSize, FORMAT_TIME, &tmLocal) != 0;
 }
 
 bool IsWeekend()

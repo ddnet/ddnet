@@ -379,10 +379,7 @@ bool CGameContext::ChatDetection(int ClientId, const char *pMsg)
 			if(&str != &FoundStrings.back())
 				str_append(InfoMsg, ", ");
 		}
-
-		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf), "Name: %s | Strings Found: %s", ClientName, InfoMsg);
-		dbg_msg("chat-detection", aBuf);
+		log_info("chat-detection", "Name: %s | Strings Found: %s", ClientName, InfoMsg);
 	}
 
 	if(g_Config.m_SvAntiAdBot)
@@ -493,6 +490,7 @@ bool CGameContext::NameDetection(int ClientId, const char *pName, bool PreventNa
 			str_append(aBuf, str.c_str());
 			str_append(aBuf, ", ");
 		}
+		log_info("chat-detection", aBuf);
 		dbg_msg("name-detection", aBuf);
 
 		if(!PreventNameChange && BanDuration > 0)

@@ -66,7 +66,7 @@ void CPlayer::GivePlaytime(int Amount)
 	if(Acc()->m_Playtime % 100 == 0)
 	{
 		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "for reaching %d Minutes of Playtime!", Acc()->m_Playtime);
+		str_format(aBuf, sizeof(aBuf), "for reaching %ld Minutes of Playtime!", (long)Acc()->m_Playtime);
 		GiveMoney(g_Config.m_SvPlaytimeMoney, aBuf);
 	}
 }
@@ -85,7 +85,7 @@ void CPlayer::GiveXP(int64_t Amount, const char *pMessage)
 
 	if(pMessage[0])
 	{
-		str_format(aBuf, sizeof(aBuf), "+%lld XP %s", Amount, pMessage);
+		str_format(aBuf, sizeof(aBuf), "+%ld XP %s", (long)Amount, pMessage);
 		GameServer()->SendChatTarget(m_ClientId, aBuf);
 	}
 
@@ -113,14 +113,14 @@ bool CPlayer::CheckLevelUp(int64_t Amount, bool Silent)
 
 	if(LeveledUp && !Silent)
 	{
-		str_format(aBuf, sizeof(aBuf), "You are now level %lld!", Acc()->m_Level);
+		str_format(aBuf, sizeof(aBuf), "You are now level %ld!", (long)Acc()->m_Level);
 		GameServer()->SendChatTarget(m_ClientId, aBuf);
 
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if(GameServer()->m_apPlayers[i] && i != m_ClientId)
 			{
-				str_format(aBuf, sizeof(aBuf), "%s is now level %lld!", Server()->ClientName(m_ClientId), Acc()->m_Level);
+				str_format(aBuf, sizeof(aBuf), "%s is now level %ld!", Server()->ClientName(m_ClientId), (long)Acc()->m_Level);
 				GameServer()->SendChatTarget(i, aBuf);
 			}
 		}
@@ -148,7 +148,7 @@ void CPlayer::GiveMoney(int64_t Amount, const char *pMessage)
 
 	if(pMessage[0])
 	{
-		str_format(aBuf, sizeof(aBuf), "+%lld %s %s", Amount, g_Config.m_SvCurrencyName, pMessage);
+		str_format(aBuf, sizeof(aBuf), "+%ld %s %s", (long)Amount, g_Config.m_SvCurrencyName, pMessage);
 		GameServer()->SendChatTarget(m_ClientId, aBuf);
 	}
 

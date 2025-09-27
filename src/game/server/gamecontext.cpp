@@ -2249,18 +2249,6 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientId, con
 	// FoxNet>
 
 	CPlayer *pPlayer = m_apPlayers[ClientId];
-	bool Check = !pPlayer->m_NotEligibleForFinish && pPlayer->m_EligibleForFinishCheck + 10 * time_freq() >= time_get();
-	if(Check && str_comp(pMsg->m_pMessage, "xd sure chillerbot.png is lyfe") == 0 && pMsg->m_Team == 0)
-	{
-		if(m_TeeHistorianActive)
-		{
-			m_TeeHistorian.RecordPlayerMessage(ClientId, pUnpacker->CompleteData(), pUnpacker->CompleteSize());
-		}
-
-		pPlayer->m_NotEligibleForFinish = true;
-		dbg_msg("hack", "bot detected, cid=%d", ClientId);
-		return;
-	}
 	int Team = pMsg->m_Team;
 
 	// trim right and set maximum length to 256 utf8-characters

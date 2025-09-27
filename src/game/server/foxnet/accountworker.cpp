@@ -364,7 +364,7 @@ bool CAccountsWorker::ShowTop5(IDbConnection *pSql, const ISqlData *pData, char 
 		if(!str_comp(pMetric, "Playtime"))
 		{
 			if(Metric < 100)
-				str_format(aBuf, sizeof(aBuf), "%d. %s %s: %lld Minutes", Rank, pName, pMetric, (long long)Metric);
+				str_format(aBuf, sizeof(aBuf), "%d. %s %s: %ld Minutes", Rank, pName, pMetric, (long)Metric);
 			else
 			{
 				const float Hours = Metric / 60.0f;
@@ -373,7 +373,7 @@ bool CAccountsWorker::ShowTop5(IDbConnection *pSql, const ISqlData *pData, char 
 		}
 		else
 		{
-			str_format(aBuf, sizeof(aBuf), "%d. %s %s: %lld", Rank, pName, pMetric, (long long)Metric);
+			str_format(aBuf, sizeof(aBuf), "%d. %s %s: %ld", Rank, pName, pMetric, (long)Metric);
 		}
 
 		pReq->m_pGameServer->SendChatTarget(pReq->m_ClientId, aBuf);

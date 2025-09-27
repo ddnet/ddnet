@@ -2265,7 +2265,7 @@ const char *str_skip_voting_menu_prefixes(const char *pVote);
 
 void SetFlag(uint32_t &Flags, int n, bool Value);
 bool IsFlagSet(uint32_t Flags, int n);
-bool FormatUnixTime(uint64_t unixSeconds, char *out, size_t outSize, const char *fmt);
+bool FormatUnixTime(uint64_t unixSeconds, char *out, size_t outSize);
 bool IsWeekend();
 std::string RandomUnicode(int length);
 void StrToInts(int *pInts, size_t NumInts, const char *pStr);

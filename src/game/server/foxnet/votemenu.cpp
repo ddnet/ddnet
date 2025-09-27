@@ -626,7 +626,7 @@ void CVoteMenu::SendPageAccount(int ClientId)
 	char TimeBuf[64];
 
 	// Register Date
-	if(FormatUnixTime(pAcc->m_RegisterDate, TimeBuf, sizeof(TimeBuf), "%Y-%m-%d %H:%M:%S"))
+	if(FormatUnixTime(pAcc->m_RegisterDate, TimeBuf, sizeof(TimeBuf)))
 	{
 		str_format(aBuf, sizeof(aBuf), "│ Register Date: %s", TimeBuf);
 		AddVoteText(aBuf);
@@ -638,7 +638,7 @@ void CVoteMenu::SendPageAccount(int ClientId)
 
 	AddVoteText("├──────      Sᴛᴀᴛs");
 
-	str_format(aBuf, sizeof(aBuf), "│ Level [%d]", pAcc->m_Level);
+	str_format(aBuf, sizeof(aBuf), "│ Level [%ld]", (long)pAcc->m_Level);
 	AddVoteText(aBuf);
 
 	int CurXp = pAcc->m_XP;
@@ -650,13 +650,13 @@ void CVoteMenu::SendPageAccount(int ClientId)
 	float PlayTimeHours = pAcc->m_Playtime / 60.0f;
 	str_format(aBuf, sizeof(aBuf), "│ Playtime: %.1f Hour%s", PlayTimeHours, PlayTimeHours == 1 ? "" : "s");
 	if(pAcc->m_Playtime < 100)
-		str_format(aBuf, sizeof(aBuf), "│ Playtime: %lld Minute%s", pAcc->m_Playtime, pAcc->m_Playtime == 1 ? "" : "s");
+		str_format(aBuf, sizeof(aBuf), "│ Playtime: %ld Minute%s", (long)pAcc->m_Playtime, pAcc->m_Playtime == 1 ? "" : "s");
 	AddVoteText(aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "│ %s: %lld", g_Config.m_SvCurrencyName, pAcc->m_Money);
+	str_format(aBuf, sizeof(aBuf), "│ %s: %ld", g_Config.m_SvCurrencyName, (long)pAcc->m_Money);
 	AddVoteText(aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "│ Deaths: %d", pAcc->m_Deaths);
+	str_format(aBuf, sizeof(aBuf), "│ Deaths: %ld", (long)pAcc->m_Deaths);
 	AddVoteText(aBuf);
 
 	AddVoteText("╰──────────────────────────");
@@ -683,7 +683,7 @@ void CVoteMenu::SendPageShop(int ClientId)
 	std::vector<std::string> OtherItems;
 
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "%s: %lld", g_Config.m_SvCurrencyName, pAcc->m_Money);
+	str_format(aBuf, sizeof(aBuf), "%s: %ld", g_Config.m_SvCurrencyName, (long)pAcc->m_Money);
 	AddVoteText(aBuf);
 	AddVoteSeperator();
 

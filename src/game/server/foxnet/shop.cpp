@@ -3,12 +3,12 @@
 #include "../player.h"
 #include "accounts.h"
 #include <algorithm>
+#include <base/log.h>
+#include <base/str.h>
 #include <base/system.h>
 #include <engine/server.h>
 #include <engine/shared/config.h>
 #include <vector>
-#include <base/str.h>
-#include <base/log.h>
 
 IServer *CShop::Server() const { return GameServer()->Server(); }
 

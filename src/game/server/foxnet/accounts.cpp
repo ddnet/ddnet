@@ -29,7 +29,7 @@ bool CAccounts::WaitForResult(const std::shared_ptr<ISqlResult> &pRes, const cha
 		std::this_thread::sleep_for(1ms);
 		if(duration_cast<milliseconds>(steady_clock::now() - Start).count() > TimeoutMs)
 		{
-			dbg_msg("accounts", "%s timed out waiting for DB result", pOpName);
+			log_info("accounts", "%s timed out waiting for DB result", pOpName);
 			return false;
 		}
 	}
@@ -508,7 +508,6 @@ void CAccounts::ShowAccProfile(int ClientId, const char *pName)
 		GameServer()->SendChatTarget(ClientId, "╭─────────       Pʀᴏғɪʟᴇ");
 		str_format(aBuf, sizeof(aBuf), "│ Account \"%s\" doesn't exist", pName);
 		GameServer()->SendChatTarget(ClientId, aBuf);
-
 		GameServer()->SendChatTarget(ClientId, "╰──────────────────────────");
 		return;
 	}
@@ -537,18 +536,18 @@ void CAccounts::ShowAccProfile(int ClientId, const char *pName)
 
 	GameServer()->SendChatTarget(ClientId, "├──────      Sᴛᴀᴛs");
 
-	str_format(aBuf, sizeof(aBuf), "│ Level %lld", OptAcc->m_Level);
+	str_format(aBuf, sizeof(aBuf), "│ Level %ld", (long)OptAcc->m_Level);
 	GameServer()->SendChatTarget(ClientId, aBuf);
-	str_format(aBuf, sizeof(aBuf), "│ %lld %s", OptAcc->m_Money, g_Config.m_SvCurrencyName);
+	str_format(aBuf, sizeof(aBuf), "│ %ld %s", (long)OptAcc->m_Money, g_Config.m_SvCurrencyName);
 	GameServer()->SendChatTarget(ClientId, aBuf);
 
 	float PlayTimeHours = OptAcc->m_Playtime / 60.0f;
 	str_format(aBuf, sizeof(aBuf), "│ %.1f Hours Playtime", PlayTimeHours);
 	if(OptAcc->m_Playtime < 100)
-		str_format(aBuf, sizeof(aBuf), "│ %d Minutes Playtime", (int)OptAcc->m_Playtime);
+		str_format(aBuf, sizeof(aBuf), "│ %ld Minutes Playtime", (long)OptAcc->m_Playtime);
 	GameServer()->SendChatTarget(ClientId, aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "│ %lld Deaths", OptAcc->m_Deaths);
+	str_format(aBuf, sizeof(aBuf), "│ %ld Deaths", (long)OptAcc->m_Deaths);
 	GameServer()->SendChatTarget(ClientId, aBuf);
 
 	GameServer()->SendChatTarget(ClientId, "╰───────────────────────");
