@@ -505,7 +505,7 @@ void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Tele = pResult->NumArguments() == 2 ? pResult->GetVictim() : pResult->m_ClientId;
 	int TeleTo = pResult->NumArguments() ? pResult->GetInteger(pResult->NumArguments() - 1) : pResult->m_ClientId;
-	int AuthLevel = pSelf->Server()->GetAuthedState(pResult->m_ClientId);
+	const int AuthLevel = pSelf->Server()->GetAuthedState(pResult->m_ClientId);
 
 	if(pResult->GetInteger(0) == -1)
 		Tele = pResult->m_ClientId;
@@ -519,13 +519,13 @@ void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	CCharacter *pChr = pSelf->GetPlayerChar(Tele);
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	CPlayer *pPlayer = pSelf->m_apPlayers[TeleTo];
 
 	if(pChr && pPlayer && pSelf->GetPlayerChar(TeleTo))
 	{
 		// default to view pos when character is not available
 		vec2 Pos = pPlayer->m_ViewPos;
-		if(pResult->NumArguments() == 0 && !pPlayer->IsPaused() && pChr->IsAlive())
+		if(!pResult->NumArguments() && !pPlayer->IsPaused() && pChr->IsAlive())
 		{
 			vec2 Target = vec2(pChr->Core()->m_Input.m_TargetX, pChr->Core()->m_Input.m_TargetY);
 			Pos = pPlayer->m_CameraInfo.ConvertTargetToWorld(pChr->GetPos(), Target);
