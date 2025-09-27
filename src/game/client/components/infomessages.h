@@ -3,8 +3,8 @@
 #ifndef GAME_CLIENT_COMPONENTS_INFOMESSAGES_H
 #define GAME_CLIENT_COMPONENTS_INFOMESSAGES_H
 #include <engine/textrender.h>
-#include <game/client/component.h>
 
+#include <game/client/component.h>
 #include <game/client/render.h>
 class CInfoMessages : public CComponent
 {

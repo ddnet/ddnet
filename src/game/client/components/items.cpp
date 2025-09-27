@@ -1,5 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "items.h"
+
 #include <engine/demo.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
@@ -7,20 +9,15 @@
 #include <generated/client_data.h>
 #include <generated/protocol.h>
 
-#include <game/mapitems.h>
-
+#include <game/client/components/effects.h>
 #include <game/client/gameclient.h>
 #include <game/client/laser_data.h>
 #include <game/client/pickup_data.h>
-#include <game/client/projectile_data.h>
-
 #include <game/client/prediction/entities/laser.h>
 #include <game/client/prediction/entities/pickup.h>
 #include <game/client/prediction/entities/projectile.h>
-
-#include <game/client/components/effects.h>
-
-#include "items.h"
+#include <game/client/projectile_data.h>
+#include <game/mapitems.h>
 
 void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemId)
 {

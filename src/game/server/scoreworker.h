@@ -1,18 +1,19 @@
 #ifndef GAME_SERVER_SCOREWORKER_H
 #define GAME_SERVER_SCOREWORKER_H
 
+#include <engine/map.h>
+#include <engine/server/databases/connection_pool.h>
+#include <engine/shared/protocol.h>
+#include <engine/shared/uuid_manager.h>
+
+#include <game/server/save.h>
+#include <game/voting.h>
+
 #include <memory>
 #include <optional>
 #include <string>
 #include <utility>
 #include <vector>
-
-#include <engine/map.h>
-#include <engine/server/databases/connection_pool.h>
-#include <engine/shared/protocol.h>
-#include <engine/shared/uuid_manager.h>
-#include <game/server/save.h>
-#include <game/voting.h>
 
 class IDbConnection;
 class IGameController;

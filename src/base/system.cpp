@@ -1,5 +1,12 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "system.h"
+
+#include "lock.h"
+#include "logger.h"
+
+#include <sys/types.h>
+
 #include <atomic>
 #include <cctype>
 #include <charconv>
@@ -15,35 +22,30 @@
 #include <sstream> // std::istringstream
 #include <string_view>
 
-#include "lock.h"
-#include "logger.h"
-#include "system.h"
-
-#include <sys/types.h>
-
 #if defined(CONF_WEBSOCKETS)
 #include <engine/shared/websockets.h>
 #endif
 
 #if defined(CONF_FAMILY_UNIX)
-#include <csignal>
-#include <locale>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/utsname.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include <csignal>
+#include <locale>
+
 /* unix net includes */
 #include <arpa/inet.h>
-#include <cerrno>
+#include <dirent.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <pthread.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 
-#include <dirent.h>
+#include <cerrno>
 
 #if defined(CONF_PLATFORM_MACOS)
 // some lock and pthread functions are already defined in headers
@@ -63,12 +65,6 @@
 #endif
 
 #elif defined(CONF_FAMILY_WINDOWS)
-#include <windows.h>
-#include <winsock2.h>
-#include <ws2tcpip.h>
-
-#include <cerrno>
-#include <cfenv>
 #include <io.h>
 #include <objbase.h>
 #include <process.h>
@@ -77,6 +73,12 @@
 #include <shlobj.h> // SHChangeNotify, SHGetKnownFolderPath
 #include <shlwapi.h>
 #include <wincrypt.h>
+#include <windows.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+
+#include <cerrno>
+#include <cfenv>
 #else
 #error NOT IMPLEMENTED
 #endif

@@ -4,6 +4,7 @@
 #include <base/hash_ctxt.h>
 #include <base/system.h>
 
+#include <engine/http.h>
 #include <engine/shared/jobs.h>
 
 #include <algorithm>
@@ -13,8 +14,6 @@
 #include <mutex>
 #include <optional>
 #include <unordered_map>
-
-#include <engine/http.h>
 
 typedef struct _json_value json_value;
 class IStorage;

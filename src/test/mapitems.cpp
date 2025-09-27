@@ -1,7 +1,7 @@
+#include <game/mapitems.h>
+
 #include <gtest/gtest-printers.h>
 #include <gtest/gtest.h>
-
-#include <game/mapitems.h>
 
 namespace testing::internal
 {

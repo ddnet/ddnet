@@ -1,8 +1,9 @@
+#include "nameplates.h"
+
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
-#include <engine/textrender.h>
-
 #include <engine/shared/protocol7.h>
+#include <engine/textrender.h>
 
 #include <generated/client_data.h>
 
@@ -12,8 +13,6 @@
 
 #include <memory>
 #include <vector>
-
-#include "nameplates.h"
 
 static constexpr float DEFAULT_PADDING = 5.0f;
 

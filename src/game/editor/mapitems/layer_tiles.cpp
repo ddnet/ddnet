@@ -2,17 +2,18 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "layer_tiles.h"
 
+#include "image.h"
+
 #include <engine/keys.h>
 #include <engine/shared/config.h>
 #include <engine/shared/map.h>
+
 #include <game/editor/editor.h>
 #include <game/editor/editor_actions.h>
 #include <game/editor/enums.h>
 
 #include <iterator>
 #include <numeric>
-
-#include "image.h"
 
 CLayerTiles::CLayerTiles(CEditor *pEditor, int w, int h) :
 	CLayer(pEditor)

@@ -1,4 +1,5 @@
 #include "quadart.h"
+
 #include "editor.h"
 #include "editor_actions.h"
 

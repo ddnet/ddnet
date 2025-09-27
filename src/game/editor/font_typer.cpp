@@ -1,12 +1,15 @@
+#include "font_typer.h"
+
+#include "editor.h"
+
 #include <base/log.h>
 #include <base/system.h>
+
 #include <engine/keys.h>
+
 #include <game/editor/editor_actions.h>
 
 #include <algorithm>
-
-#include "editor.h"
-#include "font_typer.h"
 
 using namespace std::chrono_literals;
 

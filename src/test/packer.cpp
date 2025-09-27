@@ -1,8 +1,10 @@
 #include "test.h"
-#include <gtest/gtest.h>
 
 #include <base/system.h>
+
 #include <engine/shared/packer.h>
+
+#include <gtest/gtest.h>
 
 // pExpected is NULL if an error is expected
 static void ExpectAddString5(const char *pString, int Limit, bool AllowTruncation, const char *pExpected)

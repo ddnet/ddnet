@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include "entity.h"
+
 #include "gamecontext.h"
 #include "player.h"
 

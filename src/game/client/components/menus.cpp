@@ -1,10 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <algorithm>
-#include <chrono>
-#include <cmath>
-#include <vector>
+#include "menus.h"
 
 #include <base/log.h>
 #include <base/math.h>
@@ -36,7 +33,10 @@
 #include <game/client/ui_listbox.h>
 #include <game/localization.h>
 
-#include "menus.h"
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <vector>
 
 using namespace FontIcons;
 using namespace std::chrono_literals;

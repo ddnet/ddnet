@@ -1,11 +1,12 @@
 #ifndef GAME_EDITOR_MAPITEMS_LAYER_TILES_H
 #define GAME_EDITOR_MAPITEMS_LAYER_TILES_H
 
+#include "layer.h"
+
 #include <game/editor/editor_trackers.h>
 #include <game/editor/enums.h>
-#include <map>
 
-#include "layer.h"
+#include <map>
 
 struct STileStateChange
 {

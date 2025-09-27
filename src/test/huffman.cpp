@@ -1,7 +1,8 @@
-#include <gtest/gtest.h>
-
 #include <base/system.h>
+
 #include <engine/shared/huffman.h>
+
+#include <gtest/gtest.h>
 
 TEST(Huffman, CompressionShouldNotChangeData)
 {

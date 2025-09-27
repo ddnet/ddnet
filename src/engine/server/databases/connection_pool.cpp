@@ -1,12 +1,14 @@
 #include "connection_pool.h"
+
 #include "connection.h"
-#include <engine/shared/config.h>
 
 #include <base/system.h>
-#include <cstring>
+
 #include <engine/console.h>
+#include <engine/shared/config.h>
 
 #include <chrono>
+#include <cstring>
 #include <iterator>
 #include <memory>
 #include <thread>

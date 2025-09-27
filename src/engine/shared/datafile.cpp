@@ -3,6 +3,8 @@
 
 #include "datafile.h"
 
+#include "uuid_manager.h"
+
 #include <base/hash_ctxt.h>
 #include <base/log.h>
 #include <base/math.h>
@@ -10,13 +12,11 @@
 
 #include <engine/storage.h>
 
-#include "uuid_manager.h"
+#include <zlib.h>
 
 #include <cstdlib>
 #include <limits>
 #include <unordered_set>
-
-#include <zlib.h>
 
 static constexpr int MAX_ITEM_TYPE = 0xFFFF;
 static constexpr int MAX_ITEM_ID = 0xFFFF;

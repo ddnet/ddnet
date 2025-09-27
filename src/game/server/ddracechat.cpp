@@ -1,7 +1,13 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
+#include "gamecontext.h"
+#include "player.h"
+#include "score.h"
+
 #include <base/log.h>
+
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
+
 #include <game/mapitems.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamemodes/DDRace.h>
@@ -9,10 +15,6 @@
 #include <game/team_state.h>
 #include <game/teamscore.h>
 #include <game/version.h>
-
-#include "gamecontext.h"
-#include "player.h"
-#include "score.h"
 
 void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 {

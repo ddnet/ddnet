@@ -1,8 +1,8 @@
+#include "map_renderer.h"
+
 #include <base/log.h>
 
 #include <game/map/envelope_manager.h>
-
-#include "map_renderer.h"
 
 const int LAYER_DEFAULT_TILESET = -1;
 

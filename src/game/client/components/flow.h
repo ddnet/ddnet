@@ -3,6 +3,7 @@
 #ifndef GAME_CLIENT_COMPONENTS_FLOW_H
 #define GAME_CLIENT_COMPONENTS_FLOW_H
 #include <base/vmath.h>
+
 #include <game/client/component.h>
 
 class CFlow : public CComponent

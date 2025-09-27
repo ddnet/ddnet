@@ -4,6 +4,7 @@
 #include <engine/console.h>
 
 #include <game/client/component.h>
+
 #include <string>
 
 class CStatboard : public CComponent

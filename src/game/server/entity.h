@@ -3,12 +3,12 @@
 #ifndef GAME_SERVER_ENTITY_H
 #define GAME_SERVER_ENTITY_H
 
+#include "gameworld.h"
+#include "save.h"
+
 #include <base/vmath.h>
 
 #include <game/alloc.h>
-
-#include "gameworld.h"
-#include "save.h"
 
 class CCollision;
 class CGameContext;

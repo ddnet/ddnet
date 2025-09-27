@@ -1,6 +1,6 @@
-#include <base/system.h>
+#include "menu_background.h"
 
-#include <algorithm>
+#include <base/system.h>
 
 #include <engine/graphics.h>
 #include <engine/map.h>
@@ -10,13 +10,11 @@
 #include <game/client/components/mapimages.h>
 #include <game/client/components/maplayers.h>
 #include <game/client/gameclient.h>
-
 #include <game/layers.h>
 #include <game/localization.h>
 #include <game/mapitems.h>
 
-#include "menu_background.h"
-
+#include <algorithm>
 #include <chrono>
 
 using namespace std::chrono_literals;

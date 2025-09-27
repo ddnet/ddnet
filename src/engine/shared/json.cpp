@@ -1,4 +1,5 @@
 #include <base/system.h>
+
 #include <engine/shared/json.h>
 
 const struct _json_value *json_object_get(const json_value *pObject, const char *pIndex)

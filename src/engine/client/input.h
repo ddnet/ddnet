@@ -3,12 +3,12 @@
 #ifndef ENGINE_CLIENT_INPUT_H
 #define ENGINE_CLIENT_INPUT_H
 
-#include <SDL_events.h>
-#include <SDL_joystick.h>
 #include <engine/console.h>
-
 #include <engine/input.h>
 #include <engine/keys.h>
+
+#include <SDL_events.h>
+#include <SDL_joystick.h>
 
 #include <string>
 #include <vector>

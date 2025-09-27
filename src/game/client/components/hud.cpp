@@ -1,6 +1,14 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "hud.h"
+
+#include "binds.h"
+#include "camera.h"
+#include "controls.h"
+#include "voting.h"
+
 #include <base/color.h>
+
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
@@ -12,17 +20,10 @@
 #include <game/client/components/scoreboard.h>
 #include <game/client/gameclient.h>
 #include <game/client/prediction/entities/character.h>
-
 #include <game/layers.h>
 #include <game/localization.h>
 
 #include <cmath>
-
-#include "binds.h"
-#include "camera.h"
-#include "controls.h"
-#include "hud.h"
-#include "voting.h"
 
 CHud::CHud()
 {

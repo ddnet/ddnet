@@ -1,10 +1,11 @@
 #ifndef ENGINE_GHOST_H
 #define ENGINE_GHOST_H
 
-#include <base/hash.h>
-#include <engine/shared/protocol.h>
-
 #include "kernel.h"
+
+#include <base/hash.h>
+
+#include <engine/shared/protocol.h>
 
 class CGhostInfo
 {

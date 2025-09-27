@@ -1,6 +1,6 @@
-#include <engine/warning.h>
-
 #include <base/system.h>
+
+#include <engine/warning.h>
 
 SWarning::SWarning(const SWarning &Other)
 {

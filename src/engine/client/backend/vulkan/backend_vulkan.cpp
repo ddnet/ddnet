@@ -1,8 +1,11 @@
 #if defined(CONF_BACKEND_VULKAN)
 
-#include <engine/client/backend/vulkan/backend_vulkan.h>
+#include <base/log.h>
+#include <base/math.h>
+#include <base/system.h>
 
 #include <engine/client/backend/backend_base.h>
+#include <engine/client/backend/vulkan/backend_vulkan.h>
 #include <engine/client/backend_sdl.h>
 #include <engine/client/graphics_threaded.h>
 #include <engine/gfx/image_manipulation.h>
@@ -11,9 +14,10 @@
 #include <engine/shared/localization.h>
 #include <engine/storage.h>
 
-#include <base/log.h>
-#include <base/math.h>
-#include <base/system.h>
+#include <SDL_video.h>
+#include <SDL_vulkan.h>
+#include <vulkan/vk_platform.h>
+#include <vulkan/vulkan_core.h>
 
 #include <algorithm>
 #include <array>
@@ -32,12 +36,6 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
-
-#include <SDL_video.h>
-#include <SDL_vulkan.h>
-
-#include <vulkan/vk_platform.h>
-#include <vulkan/vulkan_core.h>
 
 #ifndef VK_API_VERSION_MAJOR
 #define VK_API_VERSION_MAJOR VK_VERSION_MAJOR
