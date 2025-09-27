@@ -5318,13 +5318,13 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		{
 			if(pNewEnv->GetChannels() == 4)
 			{
-				pNewEnv->AddPoint(CFixedTime::FromSeconds(0.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f));
-				pNewEnv->AddPoint(CFixedTime::FromSeconds(1.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f));
+				pNewEnv->AddPoint(CFixedTime::FromSeconds(0.0f), {f2fx(1.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f)});
+				pNewEnv->AddPoint(CFixedTime::FromSeconds(1.0f), {f2fx(1.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f)});
 			}
 			else
 			{
-				pNewEnv->AddPoint(CFixedTime::FromSeconds(0.0f), 0);
-				pNewEnv->AddPoint(CFixedTime::FromSeconds(1.0f), 0);
+				pNewEnv->AddPoint(CFixedTime::FromSeconds(0.0f), {0, 0, 0, 0});
+				pNewEnv->AddPoint(CFixedTime::FromSeconds(1.0f), {0, 0, 0, 0});
 			}
 
 			m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeAdd>(this, pNewEnv));
