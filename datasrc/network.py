@@ -56,6 +56,8 @@ Authed = ["NO", "HELPER", "MOD", "ADMIN"]
 EntityClasses = ["PROJECTILE", "DOOR", "DRAGGER_WEAK", "DRAGGER_NORMAL", "DRAGGER_STRONG", "GUN_NORMAL", "GUN_EXPLOSIVE", "GUN_FREEZE", "GUN_UNFREEZE", "LIGHT", "PICKUP"]
 Teams = ["ALL", "SPECTATORS", "RED", "BLUE", "WHISPER_SEND", "WHISPER_RECV"]
 
+AlertMessageTypes = ["SERVER", "MODERATOR"]
+
 RawHeader = '''
 #include <engine/shared/teehistorian_ex.h>
 
@@ -93,6 +95,7 @@ Enums = [
 	Enum("LASERDRAGGERTYPE", DraggerTypes),
 	Enum("LASERGUNTYPE", GunTypes),
 	Enum("TEAM", Teams, -2),
+	Enum("ALERTMESSAGETYPE", AlertMessageTypes),
 ]
 
 Flags = [
@@ -587,13 +590,13 @@ Messages = [
 	]),
 
 	NetMessageEx("Sv_CommandInfo", "commandinfo@netmsg.ddnet.org", [
-			NetStringStrict("m_pName"),
-			NetStringStrict("m_pArgsFormat"),
-			NetStringStrict("m_pHelpText")
+		NetStringStrict("m_pName"),
+		NetStringStrict("m_pArgsFormat"),
+		NetStringStrict("m_pHelpText")
 	]),
 
 	NetMessageEx("Sv_CommandInfoRemove", "commandinfo-remove@netmsg.ddnet.org", [
-			NetStringStrict("m_pName")
+		NetStringStrict("m_pName")
 	]),
 
 	NetMessageEx("Sv_VoteOptionGroupStart", "sv-vote-option-group-start@netmsg.ddnet.org", []),
@@ -609,7 +612,7 @@ Messages = [
 	NetMessageEx("Sv_MapSoundGlobal", "map-sound-global@netmsg.ddnet.org", [
 		NetIntAny("m_SoundId"),
 	]),
-    
+
 	NetMessageEx("Sv_PreInput", "preinput@netmsg.ddnet.org", [
 		NetIntAny("m_Direction"),
 		NetIntAny("m_TargetX"),
@@ -622,8 +625,13 @@ Messages = [
 		NetIntAny("m_WantedWeapon"),
 		NetIntAny("m_NextWeapon"),
 		NetIntAny("m_PrevWeapon"),
-        
+
 		NetIntRange("m_Owner", 0, 'MAX_CLIENTS-1'),
 		NetTick("m_IntendedTick"),
+	]),
+
+	NetMessageEx("Sv_ImportantAlert", "importantalert@netmsg.ddnet.org", [
+		NetIntRange("m_Type", 0, 'NUM_ALERTMESSAGETYPES-1'),
+		NetString("m_pMessage"),
 	]),
 ]

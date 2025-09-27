@@ -762,6 +762,55 @@ void CGameContext::SendSettings(int ClientId) const
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 }
 
+void CGameContext::SendImportantAlert(int Type, const char *pMessage, int ToClientId)
+{
+	dbg_assert(in_range(Type, 0, NUM_ALERTMESSAGETYPES - 1), "SendImportantAlert Type invalid: %d", Type);
+	dbg_assert(in_range(ToClientId, -1, MAX_CLIENTS - 1), "SendImportantAlert ToClientId invalid: %d", ToClientId);
+
+	const auto &&SendImportantAlertToClient = [&](int ClientId) {
+		if(m_apPlayers[ClientId]->GetClientVersion() >= VERSION_DDNET_IMPORTANTALERT)
+		{
+			CNetMsg_Sv_ImportantAlert Msg;
+			Msg.m_Type = Type;
+			Msg.m_pMessage = pMessage;
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientId);
+		}
+		else
+		{
+			char aBroadcastText[1024 + 32] = "";
+			switch(Type)
+			{
+			case ALERTMESSAGETYPE_SERVER:
+				str_append(aBroadcastText, "SERVER ALERT\n\n");
+				break;
+			case ALERTMESSAGETYPE_MODERATOR:
+				str_append(aBroadcastText, "MODERATOR ALERT\n\n");
+				log_info("moderator_alert", "Notice: player uses old client version and may not see important alerts: %s (ID %d)", Server()->ClientName(ClientId), ClientId);
+				break;
+			}
+			str_append(aBroadcastText, pMessage);
+			SendBroadcast(aBroadcastText, ClientId, true);
+		}
+	};
+
+	if(ToClientId == -1)
+	{
+		for(int ClientId = 0; ClientId < Server()->MaxClients(); ClientId++)
+		{
+			if(!m_apPlayers[ClientId])
+			{
+				continue;
+			}
+			SendImportantAlertToClient(ClientId);
+		}
+	}
+	else
+	{
+		dbg_assert(m_apPlayers[ToClientId] != nullptr, "Client not online");
+		SendImportantAlertToClient(ToClientId);
+	}
+}
+
 void CGameContext::SendBroadcast(const char *pText, int ClientId, bool IsImportant)
 {
 	CNetMsg_Sv_Broadcast Msg;
@@ -3207,27 +3256,60 @@ void CGameContext::ConRestart(IConsole::IResult *pResult, void *pUserData)
 		pSelf->m_pController->StartRound();
 }
 
+static void UnescapeNewlines(char *pBuf)
+{
+	int i, j;
+	for(i = 0, j = 0; pBuf[i]; i++, j++)
+	{
+		if(pBuf[i] == '\\' && pBuf[i + 1] == 'n')
+		{
+			pBuf[j] = '\n';
+			i++;
+		}
+		else if(i != j)
+		{
+			pBuf[j] = pBuf[i];
+		}
+	}
+	pBuf[j] = '\0';
+}
+
+void CGameContext::ConServerAlert(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	char aBuf[1024];
+	str_copy(aBuf, pResult->GetString(0), sizeof(aBuf));
+	UnescapeNewlines(aBuf);
+
+	pSelf->SendImportantAlert(ALERTMESSAGETYPE_SERVER, aBuf, -1);
+}
+
+void CGameContext::ConModeratorAlert(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	const int Victim = pResult->GetVictim();
+	if(!CheckClientId(Victim) || !pSelf->m_apPlayers[Victim])
+	{
+		log_info("moderator_alert", "Client ID not found: %d", Victim);
+		return;
+	}
+
+	char aBuf[1024];
+	str_copy(aBuf, pResult->GetString(1), sizeof(aBuf));
+	UnescapeNewlines(aBuf);
+
+	pSelf->SendImportantAlert(ALERTMESSAGETYPE_MODERATOR, aBuf, Victim);
+}
+
 void CGameContext::ConBroadcast(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
 	char aBuf[1024];
 	str_copy(aBuf, pResult->GetString(0), sizeof(aBuf));
-
-	int i, j;
-	for(i = 0, j = 0; aBuf[i]; i++, j++)
-	{
-		if(aBuf[i] == '\\' && aBuf[i + 1] == 'n')
-		{
-			aBuf[j] = '\n';
-			i++;
-		}
-		else if(i != j)
-		{
-			aBuf[j] = aBuf[i];
-		}
-	}
-	aBuf[j] = '\0';
+	UnescapeNewlines(aBuf);
 
 	pSelf->SendBroadcast(aBuf, -1);
 }
@@ -3729,6 +3811,8 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("random_map", "?i[stars]", CFGFLAG_SERVER | CFGFLAG_STORE, ConRandomMap, this, "Random map");
 	Console()->Register("random_unfinished_map", "?i[stars]", CFGFLAG_SERVER | CFGFLAG_STORE, ConRandomUnfinishedMap, this, "Random unfinished map");
 	Console()->Register("restart", "?i[seconds]", CFGFLAG_SERVER | CFGFLAG_STORE, ConRestart, this, "Restart in x seconds (0 = abort)");
+	Console()->Register("server_alert", "r[message]", CFGFLAG_SERVER, ConServerAlert, this, "Send server alert message to players");
+	Console()->Register("moderator_alert", "v[id] r[message]", CFGFLAG_SERVER, ConModeratorAlert, this, "Send moderator alert message to player with client ID");
 	Console()->Register("broadcast", "r[message]", CFGFLAG_SERVER, ConBroadcast, this, "Broadcast message");
 	Console()->Register("say", "r[message]", CFGFLAG_SERVER, ConSay, this, "Say in chat");
 	Console()->Register("set_team", "i[id] i[team-id] ?i[delay in minutes]", CFGFLAG_SERVER, ConSetTeam, this, "Set team of player to team");
