@@ -2625,6 +2625,15 @@ void CServer::UpdateRegisterServerInfo()
 	JsonWriter.WriteAttribute("game_type");
 	JsonWriter.WriteStrValue(GameServer()->GameType());
 
+	if(g_Config.m_SvRegisterCommunityToken[0])
+	{
+		if(g_Config.m_SvFlag != -1)
+		{
+			JsonWriter.WriteAttribute("flag");
+			JsonWriter.WriteIntValue(g_Config.m_SvFlag);
+		}
+	}
+
 	JsonWriter.WriteAttribute("name");
 	JsonWriter.WriteStrValue(g_Config.m_SvName);
 
@@ -2636,6 +2645,11 @@ void CServer::UpdateRegisterServerInfo()
 	JsonWriter.WriteStrValue(aMapSha256);
 	JsonWriter.WriteAttribute("size");
 	JsonWriter.WriteIntValue(m_aCurrentMapSize[MAP_TYPE_SIX]);
+	if(m_aMapDownloadUrl[0])
+	{
+		JsonWriter.WriteAttribute("url");
+		JsonWriter.WriteStrValue(m_aMapDownloadUrl);
+	}
 	JsonWriter.EndObject();
 
 	JsonWriter.WriteAttribute("version");

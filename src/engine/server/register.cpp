@@ -128,6 +128,9 @@ class CRegister : public IRegister
 	bool m_aProtocolEnabled[NUM_PROTOCOLS] = {true, true, true, true};
 	CProtocol m_aProtocols[NUM_PROTOCOLS];
 
+	bool m_GotCommunityToken = false;
+	char m_aCommunityToken[128];
+
 	int m_NumExtraHeaders = 0;
 	char m_aaExtraHeaders[8][128];
 
@@ -304,6 +307,10 @@ void CRegister::CProtocol::SendRegister()
 		pRegister->HeaderString("Challenge-Token", m_aChallengeToken);
 	}
 	pRegister->HeaderInt("Info-Serial", InfoSerial);
+	if(m_pParent->m_GotCommunityToken)
+	{
+		pRegister->HeaderString("Community-Token", m_pParent->m_aCommunityToken);
+	}
 	for(int i = 0; i < m_pParent->m_NumExtraHeaders; i++)
 	{
 		pRegister->Header(m_pParent->m_aaExtraHeaders[i]);
@@ -536,6 +543,7 @@ CRegister::CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHt
 	m_pConsole->Chain("sv_register_url", ConchainOnConfigChange, this);
 	m_pConsole->Chain("sv_sixup", ConchainOnConfigChange, this);
 	m_pConsole->Chain("sv_ipv4only", ConchainOnConfigChange, this);
+	m_pConsole->Chain("sv_community_token", ConchainOnConfigChange, this);
 }
 
 void CRegister::Update()
@@ -636,6 +644,11 @@ void CRegister::OnConfigChange()
 	{
 		m_aProtocolEnabled[PROTOCOL_TW6_IPV6] = false;
 		m_aProtocolEnabled[PROTOCOL_TW7_IPV6] = false;
+	}
+	m_GotCommunityToken = (bool)m_pConfig->m_SvRegisterCommunityToken[0];
+	if(m_GotCommunityToken)
+	{
+		str_copy(m_aCommunityToken, m_pConfig->m_SvRegisterCommunityToken);
 	}
 	m_NumExtraHeaders = 0;
 	const char *pRegisterExtra = m_pConfig->m_SvRegisterExtra;
