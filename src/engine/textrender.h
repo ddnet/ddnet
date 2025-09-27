@@ -154,7 +154,7 @@ namespace FontIcons
 	[[maybe_unused]] static const char *FONT_ICON_QUESTION = "?";
 
 	[[maybe_unused]] static const char *FONT_ICON_CAMERA = "\xEF\x80\xB0";
-} // end namespace FontIcons
+}
 
 enum ETextCursorSelectionMode
 {
