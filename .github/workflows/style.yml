@@ -42,7 +42,8 @@ jobs:
 
     - name: Check documentation style (Doxygen)
       run: |
-        doxygen
+        doxygen --version
+        doxygen -q
         # TODO: Files included for macro-based lists like config variables and editor actions cannot be found by Doxygen version 1.9.8 used in the CI.
         #       Remove this ignored warning when the version is upgraded to one where this is fixed.
         sed -i -E '/warning: include file .* not found, perhaps you forgot to add its directory to INCLUDE_PATH/d' docs/warn.log
