@@ -82,32 +82,32 @@ std::optional<ColorHSLA> CConsole::CResult::GetColor(unsigned Index, float Darke
 	return ColorParse(m_apArgs[Index], DarkestLighting);
 }
 
-const IConsole::ICommandInfo *CConsole::CCommand::NextCommandInfo(EAccessLevel AccessLevel, int FlagMask) const
-{
-	const CCommand *pInfo = Next();
-	while(pInfo)
-	{
-		if(pInfo->m_Flags & FlagMask && pInfo->m_AccessLevel >= AccessLevel)
-			break;
-		pInfo = pInfo->Next();
-	}
-	return pInfo;
-}
-
 void CConsole::CCommand::SetAccessLevel(EAccessLevel AccessLevel)
 {
 	m_AccessLevel = AccessLevel;
 }
 
-const IConsole::ICommandInfo *CConsole::FirstCommandInfo(EAccessLevel AccessLevel, int FlagMask) const
+const IConsole::ICommandInfo *CConsole::FirstCommandInfo(int ClientId, int FlagMask) const
 {
 	for(const CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->Next())
 	{
-		if(pCommand->m_Flags & FlagMask && pCommand->GetAccessLevel() >= AccessLevel)
+		if(pCommand->m_Flags & FlagMask && CanUseCommand(ClientId, pCommand))
 			return pCommand;
 	}
 
 	return nullptr;
+}
+
+const IConsole::ICommandInfo *CConsole::NextCommandInfo(const IConsole::ICommandInfo *pInfo, int ClientId, int FlagMask) const
+{
+	const CCommand *pNext = ((CCommand *)pInfo)->Next();
+	while(pNext)
+	{
+		if(pNext->m_Flags & FlagMask && CanUseCommand(ClientId, pNext))
+			break;
+		pNext = pNext->Next();
+	}
+	return pNext;
 }
 
 std::optional<CConsole::EAccessLevel> CConsole::AccessLevelToEnum(const char *pAccessLevel)
@@ -396,6 +396,12 @@ void CConsole::SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, vo
 	m_pUnknownCommandUserdata = pUser;
 }
 
+void CConsole::SetCanUseCommandCallback(FCanUseCommandCallback pfnCallback, void *pUser)
+{
+	m_pfnCanUseCommandCallback = pfnCallback;
+	m_pCanUseCommandUserData = pUser;
+}
+
 void CConsole::InitChecksum(CChecksumData *pData) const
 {
 	pData->m_NumCommands = 0;
@@ -412,11 +418,6 @@ void CConsole::InitChecksum(CChecksumData *pData) const
 		}
 		pData->m_NumCommands += 1;
 	}
-}
-
-void CConsole::SetAccessLevel(EAccessLevel AccessLevel)
-{
-	m_AccessLevel = AccessLevel;
 }
 
 bool CConsole::LineIsValid(const char *pStr)
@@ -546,7 +547,8 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 					Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 				}
 			}
-			else if(pCommand->GetAccessLevel() >= m_AccessLevel)
+			// the fallback is needed for the rust tests
+			else if(!m_pfnCanUseCommandCallback || CanUseCommand(Result.m_ClientId, pCommand))
 			{
 				int IsStrokeCommand = 0;
 				if(Result.m_pCommand[0] == '+')
@@ -639,6 +641,11 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 
 		pStr = pNextPart;
 	}
+}
+
+bool CConsole::CanUseCommand(int ClientId, const IConsole::ICommandInfo *pCommand) const
+{
+	return m_pfnCanUseCommandCallback(ClientId, pCommand, m_pCanUseCommandUserData);
 }
 
 int CConsole::PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback, void *pUser)
@@ -759,19 +766,19 @@ void CConsole::ConCommandAccess(IResult *pResult, void *pUser)
 				return;
 			}
 			pCommand->SetAccessLevel(AccessLevel.value());
-			str_format(aBuf, sizeof(aBuf), "moderator access for '%s' is now %s", pResult->GetString(0), pCommand->GetAccessLevel() >= EAccessLevel::MODERATOR ? "enabled" : "disabled");
+			str_format(aBuf, sizeof(aBuf), "moderator access for '%s' is now %s", pResult->GetString(0), pCommand->GetAccessLevel() <= EAccessLevel::MODERATOR ? "enabled" : "disabled");
 			pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
-			str_format(aBuf, sizeof(aBuf), "helper access for '%s' is now %s", pResult->GetString(0), pCommand->GetAccessLevel() >= EAccessLevel::HELPER ? "enabled" : "disabled");
+			str_format(aBuf, sizeof(aBuf), "helper access for '%s' is now %s", pResult->GetString(0), pCommand->GetAccessLevel() <= EAccessLevel::HELPER ? "enabled" : "disabled");
 			pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
-			str_format(aBuf, sizeof(aBuf), "user access for '%s' is now %s", pResult->GetString(0), pCommand->GetAccessLevel() >= EAccessLevel::USER ? "enabled" : "disabled");
+			str_format(aBuf, sizeof(aBuf), "user access for '%s' is now %s", pResult->GetString(0), pCommand->GetAccessLevel() <= EAccessLevel::USER ? "enabled" : "disabled");
 		}
 		else
 		{
-			str_format(aBuf, sizeof(aBuf), "moderator access for '%s' is %s", pResult->GetString(0), pCommand->GetAccessLevel() >= EAccessLevel::MODERATOR ? "enabled" : "disabled");
+			str_format(aBuf, sizeof(aBuf), "moderator access for '%s' is %s", pResult->GetString(0), pCommand->GetAccessLevel() <= EAccessLevel::MODERATOR ? "enabled" : "disabled");
 			pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
-			str_format(aBuf, sizeof(aBuf), "helper access for '%s' is %s", pResult->GetString(0), pCommand->GetAccessLevel() >= EAccessLevel::HELPER ? "enabled" : "disabled");
+			str_format(aBuf, sizeof(aBuf), "helper access for '%s' is %s", pResult->GetString(0), pCommand->GetAccessLevel() <= EAccessLevel::HELPER ? "enabled" : "disabled");
 			pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
-			str_format(aBuf, sizeof(aBuf), "user access for '%s' is %s", pResult->GetString(0), pCommand->GetAccessLevel() >= EAccessLevel::USER ? "enabled" : "disabled");
+			str_format(aBuf, sizeof(aBuf), "user access for '%s' is %s", pResult->GetString(0), pCommand->GetAccessLevel() <= EAccessLevel::USER ? "enabled" : "disabled");
 		}
 	}
 	else
@@ -794,7 +801,7 @@ void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 
 	for(CCommand *pCommand = pConsole->m_pFirstCommand; pCommand; pCommand = pCommand->Next())
 	{
-		if(pCommand->m_Flags & pConsole->m_FlagMask && pCommand->GetAccessLevel() >= AccessLevel.value())
+		if(pCommand->m_Flags & pConsole->m_FlagMask && pCommand->GetAccessLevel() <= AccessLevel.value())
 		{
 			int Length = str_length(pCommand->m_pName);
 			if(Used + Length + 2 < (int)(sizeof(aBuf)))
@@ -842,7 +849,6 @@ void CConsole::TraverseChain(FCommandCallback *ppfnCallback, void **ppUserData)
 CConsole::CConsole(int FlagMask)
 {
 	m_FlagMask = FlagMask;
-	m_AccessLevel = EAccessLevel::ADMIN;
 	m_pRecycleList = nullptr;
 	m_TempCommands.Reset();
 	m_StoreCommands = true;
