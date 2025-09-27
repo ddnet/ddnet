@@ -629,7 +629,13 @@ int CServer::GetAuthRank(int ClientId)
 
 bool CServer::IsRconAuthed(int ClientId)
 {
-	return GetAuthRank(ClientId) != RoleRank::NONE;
+	if(ClientId == -1)
+		return AUTHED_ADMIN;
+	if(ClientId == IConsole::CLIENT_ID_GAME)
+		return AUTHED_ADMIN;
+	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "ClientId %d is not valid", ClientId);
+	dbg_assert(m_aClients[ClientId].m_State != CServer::CClient::STATE_EMPTY, "Client slot is empty");
+	return m_aClients[ClientId].m_AuthKey != -1;
 }
 
 bool CServer::IsRconAuthedAdmin(int ClientId)
