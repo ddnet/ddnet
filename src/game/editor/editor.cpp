@@ -4145,8 +4145,11 @@ bool CEditor::ReplaceImage(const char *pFileName, int StorageType, bool CheckDup
 	SortImages();
 	for(size_t i = 0; i < m_Map.m_vpImages.size(); ++i)
 	{
-		if(!str_comp(m_Map.m_vpImages[i]->m_aName, pImg->m_aName))
+		if(m_Map.m_vpImages[i] == pImg)
+		{
 			m_SelectedImage = i;
+			break;
+		}
 	}
 	OnDialogClose();
 	return true;
@@ -4205,14 +4208,13 @@ bool CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 	pImg->m_AutoMapper.Load(pImg->m_aName);
 	pEditor->m_Map.m_vpImages.push_back(pImg);
 	pEditor->SortImages();
-	if(pEditor->m_SelectedImage >= 0 && (size_t)pEditor->m_SelectedImage < pEditor->m_Map.m_vpImages.size())
+	for(size_t i = 0; i < pEditor->m_Map.m_vpImages.size(); ++i)
 	{
-		for(int i = 0; i <= pEditor->m_SelectedImage; ++i)
-			if(!str_comp(pEditor->m_Map.m_vpImages[i]->m_aName, aBuf))
-			{
-				pEditor->m_SelectedImage++;
-				break;
-			}
+		if(pEditor->m_Map.m_vpImages[i] == pImg)
+		{
+			pEditor->m_SelectedImage = i;
+			break;
+		}
 	}
 	pEditor->OnDialogClose();
 	return true;
@@ -4267,14 +4269,13 @@ bool CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 	str_copy(pSound->m_aName, aBuf);
 	pEditor->m_Map.m_vpSounds.push_back(pSound);
 
-	if(pEditor->m_SelectedSound >= 0 && (size_t)pEditor->m_SelectedSound < pEditor->m_Map.m_vpSounds.size())
+	for(size_t i = 0; i < pEditor->m_Map.m_vpSounds.size(); ++i)
 	{
-		for(int i = 0; i <= pEditor->m_SelectedSound; ++i)
-			if(!str_comp(pEditor->m_Map.m_vpSounds[i]->m_aName, aBuf))
-			{
-				pEditor->m_SelectedSound++;
-				break;
-			}
+		if(pEditor->m_Map.m_vpSounds[i] == pSound)
+		{
+			pEditor->m_SelectedSound = i;
+			break;
+		}
 	}
 
 	pEditor->OnDialogClose();
@@ -4332,6 +4333,15 @@ bool CEditor::ReplaceSound(const char *pFileName, int StorageType, bool CheckDup
 	pSound->m_SoundId = SoundId;
 	pSound->m_pData = pData;
 	pSound->m_DataSize = DataSize;
+
+	for(size_t i = 0; i < m_Map.m_vpSounds.size(); ++i)
+	{
+		if(m_Map.m_vpSounds[i] == pSound)
+		{
+			m_SelectedSound = i;
+			break;
+		}
+	}
 
 	OnDialogClose();
 	return true;
