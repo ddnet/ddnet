@@ -30,7 +30,15 @@ void CEditorMap::OnModify()
 {
 	m_Modified = true;
 	m_ModifiedAuto = true;
-	m_LastModifiedTime = m_pEditor->Client()->GlobalTime();
+	m_LastModifiedTime = Editor()->Client()->GlobalTime();
+}
+
+void CEditorMap::ResetModifiedState()
+{
+	m_Modified = false;
+	m_ModifiedAuto = false;
+	m_LastModifiedTime = -1.0f;
+	m_LastSaveTime = Editor()->Client()->GlobalTime();
 }
 
 std::shared_ptr<CEnvelope> CEditorMap::NewEnvelope(CEnvelope::EType Type)
@@ -218,6 +226,8 @@ void CEditorMap::ModifySoundIndex(const FIndexModifyFunction &IndexModifyFunctio
 
 void CEditorMap::Clean()
 {
+	ResetModifiedState();
+
 	m_vpGroups.clear();
 	m_vpEnvelopes.clear();
 	m_vpImages.clear();
@@ -234,9 +244,6 @@ void CEditorMap::Clean()
 
 	m_MapInfo.Reset();
 	m_MapInfoTmp.Reset();
-
-	m_Modified = false;
-	m_ModifiedAuto = false;
 }
 
 void CEditorMap::CreateDefault()
@@ -259,6 +266,8 @@ void CEditorMap::CreateDefault()
 	MakeGameGroup(NewGroup());
 	MakeGameLayer(std::make_shared<CLayerGame>(m_pEditor, 50, 50));
 	m_pGameGroup->AddLayer(m_pGameLayer);
+
+	ResetModifiedState();
 }
 
 void CEditorMap::MakeGameLayer(const std::shared_ptr<CLayer> &pLayer)

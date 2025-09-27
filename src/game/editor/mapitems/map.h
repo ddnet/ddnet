@@ -51,17 +51,23 @@ public:
 	explicit CEditorMap(CEditor *pEditor) :
 		m_pEditor(pEditor)
 	{
-		Clean();
 	}
 
-	CEditor *Editor() const { return m_pEditor; }
+	const CEditor *Editor() const { return m_pEditor; }
+	CEditor *Editor() { return m_pEditor; }
 
-	bool m_Modified; // unsaved changes in manual save
-	bool m_ModifiedAuto; // unsaved changes in autosave
+	/**
+	 * Map has unsaved changes for manual save.
+	 */
+	bool m_Modified;
+	/**
+	 * Map has unsaved changes for autosave.
+	 */
+	bool m_ModifiedAuto;
 	float m_LastModifiedTime;
 	float m_LastSaveTime;
-	float m_LastAutosaveUpdateTime;
 	void OnModify();
+	void ResetModifiedState();
 
 	std::vector<std::shared_ptr<CLayerGroup>> m_vpGroups;
 	std::vector<std::shared_ptr<CEditorImage>> m_vpImages;

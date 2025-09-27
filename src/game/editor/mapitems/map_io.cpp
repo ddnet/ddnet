@@ -1051,10 +1051,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 
 	PerformSanityChecks(ErrorHandler);
 
-	m_Modified = false;
-	m_ModifiedAuto = false;
-	m_LastModifiedTime = -1.0f;
-	m_LastSaveTime = m_pEditor->Client()->GlobalTime();
+	ResetModifiedState();
 	return true;
 }
 

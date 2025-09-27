@@ -334,6 +334,13 @@ public:
 		Horizontal,
 		Vertical
 	} m_MouseAxisLockState = EAxisLock::Start;
+
+	/**
+	 * Global time when the autosave was last updated in the @link HandleAutosave @endlink function.
+	 * This is used so that the autosave does not immediately activate when reopening the editor after
+	 * a longer time of inactivity, as autosaves are only updated while the editor is open.
+	 */
+	float m_LastAutosaveUpdateTime = -1.0f;
 	void HandleAutosave();
 	bool PerformAutosave();
 	void HandleWriterFinishJobs();
