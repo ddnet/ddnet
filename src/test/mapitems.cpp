@@ -15,7 +15,7 @@ namespace testing::internal
 		}
 	};
 
-} // namespace testing::internal
+}
 
 TEST(Mapitems, FixedTimeRoundtrip)
 {

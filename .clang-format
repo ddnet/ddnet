@@ -45,6 +45,7 @@ IncludeIsMainRegex: '$'
 IndentWidth: 8
 KeepEmptyLinesAtTheStartOfBlocks: false
 NamespaceIndentation: All
+FixNamespaceComments: false
 PointerAlignment: Right
 ReflowComments: true
 SpaceBeforeParens: Never
