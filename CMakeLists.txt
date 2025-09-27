@@ -865,6 +865,7 @@ set_src(RUST_BRIDGE_SHARED GLOB_RECURSE src/rust-bridge
 
 set_glob(RUST_MASTERSRV GLOB "rs;toml" src/mastersrv/src
   addr.rs
+  community_token.rs
   config.rs
   locations.rs
   main.rs
