@@ -25,8 +25,7 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, 
 	if(pEnvelopePoints->NumPoints() == 0)
 		return;
 
-	static std::chrono::nanoseconds s_Time{0};
-	static auto s_LastLocalTime = time_get_nanoseconds();
+	std::chrono::nanoseconds Time{0};
 	if(OnlineOnly && (pItem->m_Version < 2 || pItem->m_Synchronized))
 	{
 		if(pGameClient->m_Snap.m_pGameInfoObj)
@@ -35,21 +34,19 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, 
 			const auto TickToNanoSeconds = std::chrono::nanoseconds(1s) / (int64_t)pClient->GameTickSpeed();
 			const int MinTick = pClient->PrevGameTick(g_Config.m_ClDummy) - pGameClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
 			const int CurTick = pClient->GameTick(g_Config.m_ClDummy) - pGameClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
-			s_Time = std::chrono::nanoseconds((int64_t)(mix<double>(
-									    0,
-									    (CurTick - MinTick),
-									    (double)pClient->IntraGameTick(g_Config.m_ClDummy)) *
-								    TickToNanoSeconds.count())) +
-				 MinTick * TickToNanoSeconds;
+			Time = std::chrono::nanoseconds((int64_t)(mix<double>(
+									  0,
+									  (CurTick - MinTick),
+									  (double)pClient->IntraGameTick(g_Config.m_ClDummy)) *
+								  TickToNanoSeconds.count())) +
+			       MinTick * TickToNanoSeconds;
 		}
 	}
 	else
 	{
-		const auto CurTime = time_get_nanoseconds();
-		s_Time += CurTime - s_LastLocalTime;
-		s_LastLocalTime = CurTime;
+		Time = time_get_nanoseconds();
 	}
-	CRenderMap::RenderEvalEnvelope(pEnvelopePoints, s_Time + std::chrono::nanoseconds(std::chrono::milliseconds(TimeOffsetMillis)), Result, Channels);
+	CRenderMap::RenderEvalEnvelope(pEnvelopePoints, Time + std::chrono::nanoseconds(std::chrono::milliseconds(TimeOffsetMillis)), Result, Channels);
 }
 
 void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels)
