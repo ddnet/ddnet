@@ -2285,8 +2285,6 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 	{
 		str_copy(aReason, pMsg->m_pReason, sizeof(aReason));
 	}
-	int Authed = Server()->GetAuthedState(ClientId);
-	int RconRank = Server()->GetAuthRank(ClientId);
 
 	if(str_comp_nocase(pMsg->m_pType, "option") == 0)
 	{
@@ -2346,12 +2344,12 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 	}
 	else if(str_comp_nocase(pMsg->m_pType, "kick") == 0)
 	{
-		if(!g_Config.m_SvVoteKick && !Authed) // allow admins to call kick votes even if they are forbidden
+		if(!g_Config.m_SvVoteKick && !Server()->IsRconAuthed(ClientId)) // allow admins to call kick votes even if they are forbidden
 		{
 			SendChatTarget(ClientId, "Server does not allow voting to kick players");
 			return;
 		}
-		if(!Authed && time_get() < m_apPlayers[ClientId]->m_Last_KickVote + (time_freq() * g_Config.m_SvVoteKickDelay))
+		if(!Server()->IsRconAuthed(ClientId) && time_get() < m_apPlayers[ClientId]->m_Last_KickVote + (time_freq() * g_Config.m_SvVoteKickDelay))
 		{
 			str_format(aChatmsg, sizeof(aChatmsg), "There's a %d second wait time between kick votes for each player please wait %d second(s)",
 				g_Config.m_SvVoteKickDelay,
@@ -2414,8 +2412,7 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 		{
 			return;
 		}
-		int KickedAuthed = Server()->GetAuthedState(KickId);
-		if(KickedAuthed > Authed)
+		if(Server()->GetAuthRank(KickId) > Server()->GetAuthRank(ClientId))
 		{
 			SendChatTarget(ClientId, "You can't kick authorized players");
 			char aBufKick[128];
@@ -2475,8 +2472,7 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 			SendChatTarget(ClientId, "You can't move yourself to spectators");
 			return;
 		}
-		int SpectateAuthed = Server()->GetAuthedState(SpectateId);
-		if(SpectateAuthed > Authed)
+		if(Server()->GetAuthRank(SpectateId) > Server()->GetAuthRank(ClientId))
 		{
 			SendChatTarget(ClientId, "You can't move authorized players to spectators");
 			char aBufSpectate[128];
@@ -4111,7 +4107,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 			{
 				continue;
 			}
-			const int Level = Server()->GetAuthedState(i);
+			const int Level = Server()->GetAuthRank(i);
 			if(Level == AUTHED_NO)
 			{
 				continue;
@@ -4590,7 +4586,7 @@ void CGameContext::OnSetAuthed(int ClientId, int Level)
 	{
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "ban %s %d Banned by vote", Server()->ClientAddrString(ClientId, false), g_Config.m_SvVoteKickBantime);
-		if(!str_comp_nocase(m_aVoteCommand, aBuf) && (m_VoteCreator == -1 || Level > Server()->GetAuthedState(m_VoteCreator)))
+		if(!str_comp_nocase(m_aVoteCommand, aBuf) && (m_VoteCreator == -1 || Level > Server()->GetAuthRank(m_VoteCreator)))
 		{
 			m_VoteEnforce = CGameContext::VOTE_ENFORCE_NO_ADMIN;
 			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", "Vote aborted by authorized login.");

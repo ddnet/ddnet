@@ -614,17 +614,6 @@ void CServer::SetRconCid(int ClientId)
 	m_RconClientId = ClientId;
 }
 
-int CServer::GetAuthedState(int ClientId) const
-{
-	if(ClientId == -1)
-		return AUTHED_ADMIN;
-	if(ClientId == IConsole::CLIENT_ID_GAME)
-		return AUTHED_ADMIN;
-	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "ClientId %d is not valid", ClientId);
-	dbg_assert(m_aClients[ClientId].m_State != CServer::CClient::STATE_EMPTY, "Client slot is empty");
-	return m_AuthManager.KeyLevel(m_aClients[ClientId].m_AuthKey);
-}
-
 int CServer::GetAuthRank(int ClientId)
 {
 	if(ClientId == -1)
@@ -638,14 +627,14 @@ int CServer::GetAuthRank(int ClientId)
 	return RoleOrNullptr(ClientId)->Rank();
 }
 
-bool CServer::IsRconAuthed(int ClientId) const
+bool CServer::IsRconAuthed(int ClientId)
 {
-	return GetAuthedState(ClientId) != AUTHED_NO;
+	return GetAuthRank(ClientId) != RoleRank::NONE;
 }
 
-bool CServer::IsRconAuthedAdmin(int ClientId) const
+bool CServer::IsRconAuthedAdmin(int ClientId)
 {
-	return GetAuthedState(ClientId) == AUTHED_ADMIN;
+	return GetAuthRank(ClientId) == RoleRank::ADMIN;
 }
 
 const char *CServer::GetAuthName(int ClientId) const

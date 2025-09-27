@@ -322,12 +322,10 @@ public:
 
 	// WHAT THE FLIPFLOP
 
-	// deprecated! Use GetAuthRank instead
-	int GetAuthedState(int ClientId) const override;
 	// returns the rcon rank if logged in and 0 if not logged in
 	int GetAuthRank(int ClientId) override;
-	bool IsRconAuthed(int ClientId) const override;
-	bool IsRconAuthedAdmin(int ClientId) const override;
+	bool IsRconAuthed(int ClientId) override;
+	bool IsRconAuthedAdmin(int ClientId) override;
 	const char *GetAuthName(int ClientId) const override;
 	bool HasAuthHidden(int ClientId) const override;
 	void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pMapSha256, int *pMapCrc) override;
