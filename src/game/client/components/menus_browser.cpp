@@ -149,6 +149,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 		UI_ELEM_PLAYERS,
 		UI_ELEM_FRIEND_ICON,
 		UI_ELEM_PING,
+		UI_ELEM_KEY_ICON,
 		NUM_UI_ELEMS,
 	};
 
@@ -338,6 +339,10 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 				if(pItem->m_Flags & SERVER_FLAG_PASSWORD)
 				{
 					RenderBrowserIcons(*pUiElement->Rect(UI_ELEM_LOCK_ICON), &Button, ColorRGBA(0.75f, 0.75f, 0.75f, 1.0f), TextRender()->DefaultTextOutlineColor(), FONT_ICON_LOCK, TEXTALIGN_MC);
+				}
+				else if(pItem->m_RequiresLogin)
+				{
+					RenderBrowserIcons(*pUiElement->Rect(UI_ELEM_KEY_ICON), &Button, ColorRGBA(0.75f, 0.75f, 0.75f, 1.0f), TextRender()->DefaultTextOutlineColor(), FONT_ICON_KEY, TEXTALIGN_MC);
 				}
 			}
 			else if(Id == COL_FLAG_FAV)
