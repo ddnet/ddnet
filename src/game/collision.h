@@ -181,7 +181,6 @@ private:
 		int PosEnvOffset = 0;
 	};
 	void GetAnimationTransform(float GlobalTime, int Env, class CLayers *pLayers, vec2 &Position, float &Angle) const;
-
 	std::vector<vec2> m_SpawnCandidates;
 
 public:
@@ -212,8 +211,6 @@ public:
 	void BuildSpawnCandidatesOnLoad();
 	bool TryPickCachedCandidate(vec2 &out) const;
 	size_t SpawnCandidateCount() const { return m_SpawnCandidates.size(); }
-
-
 	// FoxNet>
 };
 

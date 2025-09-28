@@ -19,6 +19,7 @@
 #include <random>
 #include <utility>
 #include <deque>
+#include <base/log.h>
 
 vec2 ClampVel(int MoveRestriction, vec2 Vel)
 {
@@ -153,6 +154,10 @@ void CCollision::Init(class CLayers *pLayers)
 	}
 	// <FoxNet
 	m_vQuadLayers = m_pLayers->QuadLayers();
+	int Quads = 0;
+	for(const auto pQuadLayers : m_vQuadLayers)
+		Quads += pQuadLayers->m_NumQuads;
+	log_info("moving-tiles", "%d valid quadlayer with %d quads", (int)m_vQuadLayers.size(), Quads);
 	BuildSpawnCandidatesOnLoad();
 	// FoxNet>
 }
@@ -1480,123 +1485,112 @@ void CCollision::GetAnimationTransform(float GlobalTime, int Env, CLayers *pLaye
 	IMap *pMap = pLayers->Map();
 	CMapBasedEnvelopePointAccess EnvelopePoints(pMap);
 	EnvelopePoints.SetPointsRange(pItem->m_StartPoint, pItem->m_NumPoints);
-
 	if(EnvelopePoints.NumPoints() == 0)
 		return;
 
+	// Single point shortcut
 	if(EnvelopePoints.NumPoints() == 1)
 	{
-		Position.x = fx2f(EnvelopePoints.GetPoint(0)->m_aValues[0]);
-		Position.y = fx2f(EnvelopePoints.GetPoint(0)->m_aValues[1]);
-		Angle = fx2f(EnvelopePoints.GetPoint(0)->m_aValues[2]) / 360.0f * pi * 2.0f;
+		const CEnvPoint *pOnly = EnvelopePoints.GetPoint(0);
+		Position.x = fx2f(pOnly->m_aValues[0]);
+		Position.y = fx2f(pOnly->m_aValues[1]);
+		Angle = fx2f(pOnly->m_aValues[2]) / 360.0f * pi * 2.0f;
 		return;
 	}
 
 	const int NumPoints = EnvelopePoints.NumPoints();
 	const CEnvPoint *pLastPoint = EnvelopePoints.GetPoint(NumPoints - 1);
 
-	const float LoopDurationSec = pLastPoint->m_Time.AsSeconds();
-	const float TimeSec = LoopDurationSec > 0.0f ? std::fmod(GlobalTime, LoopDurationSec) : 0.0f;
+	// Convert GlobalTime (seconds) to milliseconds like RenderEvalEnvelope logic
+	double GlobalMillis = (double)GlobalTime * 1000.0;
+	const int64_t LoopMillis = (int64_t)pLastPoint->m_Time.GetInternal();
+	if(LoopMillis > 0)
+		GlobalMillis = std::fmod(GlobalMillis, (double)LoopMillis);
+	else
+		GlobalMillis = 0.0; // degenerate envelope
 
-	for(int i = 0; i < NumPoints - 1; i++)
+	// Locate current segment
+	int FoundIndex = EnvelopePoints.FindPointIndex(CFixedTime(GlobalMillis));
+	if(FoundIndex == -1)
 	{
-		const CEnvPoint *pCur = EnvelopePoints.GetPoint(i);
-		const CEnvPoint *pNext = EnvelopePoints.GetPoint(i + 1);
-
-		const float t0 = pCur->m_Time.AsSeconds();
-		const float t1 = pNext->m_Time.AsSeconds();
-		if(!(TimeSec >= t0 && TimeSec < t1))
-			continue;
-
-		const float Delta = t1 - t0;
-		if(Delta <= 0.0f)
-		{
-			Position.x = fx2f(pCur->m_aValues[0]);
-			Position.y = fx2f(pCur->m_aValues[1]);
-			Angle = fx2f(pCur->m_aValues[2]) / 360.0f * pi * 2.0f;
-			return;
-		}
-
-		float a = (TimeSec - t0) / Delta;
-
-		switch(pCur->m_Curvetype)
-		{
-		case CURVETYPE_SMOOTH:
-			a = -2.0f * a * a * a + 3.0f * a * a;
-			break;
-		case CURVETYPE_SLOW:
-			a = a * a * a;
-			break;
-		case CURVETYPE_FAST:
-			a = 1.0f - a;
-			a = 1.0f - a * a * a;
-			break;
-		case CURVETYPE_STEP:
-			a = 0.0f;
-			break;
-		case CURVETYPE_BEZIER:
-		{
-			const CEnvPointBezier *pCurBez = EnvelopePoints.GetBezier(i);
-			const CEnvPointBezier *pNextBez = EnvelopePoints.GetBezier(i + 1);
-			if(pCurBez == nullptr || pNextBez == nullptr)
-				break; // fallback to linear
-
-			for(size_t c = 0; c < 3; c++)
-			{
-				// 2D cubic bezier in time-value space, all in seconds
-				const vec2 P0 = vec2(pCur->m_Time.AsSeconds(), fx2f(pCur->m_aValues[c]));
-				const vec2 P3 = vec2(pNext->m_Time.AsSeconds(), fx2f(pNext->m_aValues[c]));
-				const vec2 OutTang = vec2(pCurBez->m_aOutTangentDeltaX[c].AsSeconds(), fx2f(pCurBez->m_aOutTangentDeltaY[c]));
-				const vec2 InTang = vec2(pNextBez->m_aInTangentDeltaX[c].AsSeconds(), fx2f(pNextBez->m_aInTangentDeltaY[c]));
-
-				vec2 P1 = P0 + OutTang;
-				vec2 P2 = P3 + InTang;
-
-				// keep monotonic in time
-				P1.x = std::clamp(P1.x, P0.x, P3.x);
-				P2.x = std::clamp(P2.x, P0.x, P3.x);
-
-				// solve x(t) = time for t
-				const float t = std::clamp(SolveBezier(TimeSec, P0.x, P1.x, P2.x, P3.x), 0.0f, 1.0f);
-
-				const float v = bezier(P0.y, P1.y, P2.y, P3.y, t);
-				if(c == 0)
-					Position.x = v;
-				else if(c == 1)
-					Position.y = v;
-				else
-					Angle = v / 360.0f * pi * 2.0f;
-			}
-			return;
-		}
-		default:
-			break;
-		}
-
-		// Linear interpolation as fallback or after shaping 'a'
-		{
-			const float x0 = fx2f(pCur->m_aValues[0]);
-			const float x1 = fx2f(pNext->m_aValues[0]);
-			Position.x = x0 + (x1 - x0) * a;
-		}
-		{
-			const float y0 = fx2f(pCur->m_aValues[1]);
-			const float y1 = fx2f(pNext->m_aValues[1]);
-			Position.y = y0 + (y1 - y0) * a;
-		}
-		{
-			const float r0 = fx2f(pCur->m_aValues[2]);
-			const float r1 = fx2f(pNext->m_aValues[2]);
-			Angle = (r0 + (r1 - r0) * a) / 360.0f * pi * 2.0f;
-		}
+		// After last point
+		Position.x = fx2f(pLastPoint->m_aValues[0]);
+		Position.y = fx2f(pLastPoint->m_aValues[1]);
+		Angle = fx2f(pLastPoint->m_aValues[2]) / 360.0f * pi * 2.0f;
 		return;
 	}
 
-	// If not found (edge cases), use last point
-	Position.x = fx2f(pLastPoint->m_aValues[0]);
-	Position.y = fx2f(pLastPoint->m_aValues[1]);
-	Angle = fx2f(pLastPoint->m_aValues[2]) / 360.0f * pi * 2.0f;
-	return;
+	const CEnvPoint *pCur = EnvelopePoints.GetPoint(FoundIndex);
+	const CEnvPoint *pNext = EnvelopePoints.GetPoint(FoundIndex + 1);
+	CFixedTime Delta = pNext->m_Time - pCur->m_Time;
+	if(Delta <= CFixedTime(0))
+	{
+		Position.x = fx2f(pCur->m_aValues[0]);
+		Position.y = fx2f(pCur->m_aValues[1]);
+		Angle = fx2f(pCur->m_aValues[2]) / 360.0f * pi * 2.0f;
+		return;
+	}
+
+	float a = (float)(GlobalMillis - pCur->m_Time.GetInternal()) / (float)Delta.GetInternal();
+	switch(pCur->m_Curvetype)
+	{
+	case CURVETYPE_STEP:
+		a = 0.0f;
+		break;
+	case CURVETYPE_SLOW:
+		a = a * a * a;
+		break;
+	case CURVETYPE_FAST:
+		a = 1.0f - a;
+		a = 1.0f - a * a * a;
+		break;
+	case CURVETYPE_SMOOTH:
+		a = -2.0f * a * a * a + 3.0f * a * a; // Hermite smoothstep
+		break;
+	case CURVETYPE_BEZIER:
+	{
+		const CEnvPointBezier *pCurBez = EnvelopePoints.GetBezier(FoundIndex);
+		const CEnvPointBezier *pNextBez = EnvelopePoints.GetBezier(FoundIndex + 1);
+		if(pCurBez && pNextBez)
+		{
+			float Channels[3] = {0.f, 0.f, 0.f};
+			for(size_t c = 0; c < 3; ++c)
+			{
+				// 2D cubic bezier in (time,value) space (time in ms)
+				vec2 P0 = vec2(pCur->m_Time.GetInternal(), fx2f(pCur->m_aValues[c]));
+				vec2 P3 = vec2(pNext->m_Time.GetInternal(), fx2f(pNext->m_aValues[c]));
+				vec2 OutTang = vec2(pCurBez->m_aOutTangentDeltaX[c].GetInternal(), fx2f(pCurBez->m_aOutTangentDeltaY[c]));
+				vec2 InTang = vec2(pNextBez->m_aInTangentDeltaX[c].GetInternal(), fx2f(pNextBez->m_aInTangentDeltaY[c]));
+				vec2 P1 = P0 + OutTang;
+				vec2 P2 = P3 + InTang;
+				P1.x = std::clamp(P1.x, P0.x, P3.x);
+				P2.x = std::clamp(P2.x, P0.x, P3.x);
+				float t = std::clamp(SolveBezier((float)GlobalMillis, P0.x, P1.x, P2.x, P3.x), 0.0f, 1.0f);
+				Channels[c] = bezier(P0.y, P1.y, P2.y, P3.y, t);
+			}
+			Position.x = Channels[0];
+			Position.y = Channels[1];
+			Angle = Channels[2] / 360.0f * pi * 2.0f;
+			return; // Bezier done
+		}
+		// fallthrough to linear if bezier data missing
+		break;
+	}
+	case CURVETYPE_LINEAR:
+	default:
+		break; // linear handled below
+	}
+
+	// Linear interpolation (or shaped 'a')
+	const float x0 = fx2f(pCur->m_aValues[0]);
+	const float x1 = fx2f(pNext->m_aValues[0]);
+	const float y0 = fx2f(pCur->m_aValues[1]);
+	const float y1 = fx2f(pNext->m_aValues[1]);
+	const float r0 = fx2f(pCur->m_aValues[2]);
+	const float r1 = fx2f(pNext->m_aValues[2]);
+	Position.x = x0 + (x1 - x0) * a;
+	Position.y = y0 + (y1 - y0) * a;
+	Angle = (r0 + (r1 - r0) * a) / 360.0f * pi * 2.0f;
 }
 
 bool CCollision::InsideQuad(vec2 Pos, float Radius, vec2 TopLCorner, vec2 TopRCorner, vec2 BottomLCorner, vec2 BottomRCorner) const
