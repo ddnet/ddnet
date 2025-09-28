@@ -2,24 +2,35 @@
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
 #include <game/server/teams.h>
-#include <generated/protocol.h>
 
-#include <base/system.h>
-#include <string>
+#include <engine/shared/config.h>
+#include <engine/shared/protocol.h>
+
+#include <generated/protocol.h>
 
 #include "cosmetics/dot_trail.h"
 #include "cosmetics/epic_circle.h"
-#include "cosmetics/headitem.h"
 #include "cosmetics/heart_hat.h"
 #include "cosmetics/lovely.h"
 #include "cosmetics/pickup_pet.h"
 #include "cosmetics/rotating_ball.h"
 #include "cosmetics/staff_ind.h"
 
+#include <base/vmath.h>
+#include <base/system.h>
+#include <base/str.h>
+
+#include <string>
+#include <algorithm>
+#include <cstdint>
+#include <iterator>
+#include <unordered_map>
+#include <vector>
+
 #include "accounts.h"
 #include "shop.h"
-#include <engine/shared/protocol.h>
-#include <base/vmath.h>
+
+
 
 CAccountSession *CPlayer::Acc() { return &GameServer()->m_aAccounts[m_ClientId]; }
 
@@ -30,6 +41,9 @@ void CPlayer::FoxNetTick()
 	if(m_JoinTick + Server()->TickSpeed() * 5 > Server()->Tick())
 		Repredict();
 
+	if(m_LastBet + Server()->TickSpeed() * 30 < Server()->Tick())
+		m_BetAmount = -1; // Reset bet amount every 30 seconds
+
 	if(Acc()->m_LoggedIn)
 	{
 		if(!IsAfk() && (Server()->Tick() - Acc()->m_LoginTick) % (Server()->TickSpeed() * 60) == 0 && Acc()->m_LoginTick != Server()->Tick())
@@ -37,6 +51,20 @@ void CPlayer::FoxNetTick()
 			GivePlaytime(1);
 			int XP = 1;
 			GiveXP(XP, "");
+		}
+		if(GetArea() == AREA_ROULETTE && GameServer()->m_pRoulette->CanBet(GetCid()))
+		{
+			std::vector<std::string> Messages;
+
+			char Msg[32] = "";
+			str_format(Msg, sizeof(Msg), "%s: %ld", g_Config.m_SvCurrencyName, (long)Acc()->m_Money);
+			Messages.push_back(Msg);
+			if(m_BetAmount <= 0)
+				str_copy(Msg, "wager: Nothing");
+			else
+				str_format(Msg, sizeof(Msg), "wager: %d", m_BetAmount);
+			Messages.push_back(Msg);
+			SendBroadcastHud(Messages, 2);
 		}
 	}
 }
@@ -149,6 +177,24 @@ void CPlayer::GiveMoney(int64_t Amount, const char *pMessage)
 	if(pMessage[0])
 	{
 		str_format(aBuf, sizeof(aBuf), "+%ld %s %s", (long)Amount, g_Config.m_SvCurrencyName, pMessage);
+		GameServer()->SendChatTarget(m_ClientId, aBuf);
+	}
+
+	GameServer()->m_AccountManager.SaveAccountsInfo(m_ClientId, *Acc());
+}
+
+void CPlayer::TakeMoney(int64_t Amount, const char *pMessage)
+{
+	if(!Acc()->m_LoggedIn)
+		return;
+
+	Acc()->m_Money -= Amount;
+
+	char aBuf[256];
+
+	if(pMessage[0])
+	{
+		str_format(aBuf, sizeof(aBuf), "-%ld %s %s", (long)Amount, g_Config.m_SvCurrencyName, pMessage);
 		GameServer()->SendChatTarget(m_ClientId, aBuf);
 	}
 
@@ -837,6 +883,7 @@ int CPlayer::NumDDraceHudRows()
 void CPlayer::SendBroadcastHud(const char *pMessage)
 {
 	char aBuf[256] = "";
+
 	for(int i = 0; i < NumDDraceHudRows(); i++)
 		str_append(aBuf, "\n", sizeof(aBuf));
 
@@ -845,6 +892,53 @@ void CPlayer::SendBroadcastHud(const char *pMessage)
 	if(!Server()->IsSixup(GetCid()))
 		for(int i = 0; i < 128; i++)
 			str_append(aBuf, " ", sizeof(aBuf));
+
+	GameServer()->SendBroadcast(aBuf, GetCid(), false);
+}
+
+void CPlayer::SendBroadcastHud(std::vector<std::string> pMessages)
+{
+	char aBuf[256] = "";
+
+	for(int i = 0; i < NumDDraceHudRows(); i++)
+		str_append(aBuf, "\n", sizeof(aBuf));
+
+	int StartingOffset = str_length(aBuf);
+
+	for(std::string pMessage : pMessages)
+	{
+		str_append(aBuf, pMessage.c_str(), sizeof(aBuf));
+
+		int strlen = str_length(aBuf) - StartingOffset;
+		StartingOffset = 0;
+		if(!Server()->IsSixup(GetCid()))
+			for(int i = 0; i < 128 - strlen - 2; i++)
+				str_append(aBuf, " ", sizeof(aBuf));
+
+		str_append(aBuf, "\n", sizeof(aBuf));
+	}
+	GameServer()->SendBroadcast(aBuf, GetCid(), false);
+}
+
+void CPlayer::SendBroadcastHud(std::vector<std::string> pMessages, size_t Offset)
+{
+	char aBuf[256] = "";
+
+	if(!Server()->IsSixup(GetCid()))
+		for(size_t i = 0; i < 128 + Offset * 2 + 4; i++)
+			str_append(aBuf, " ", sizeof(aBuf));
+
+	for(size_t i = 0; i < Offset; i++)
+		str_append(aBuf, "\n", sizeof(aBuf));
+
+	for(std::string pMessage : pMessages)
+	{
+		str_append(aBuf, pMessage.c_str(), sizeof(aBuf));
+		str_append(aBuf, "\n", sizeof(aBuf));
+	}
+
+
+
 
 	GameServer()->SendBroadcast(aBuf, GetCid(), false);
 }
@@ -906,4 +1000,50 @@ void CPlayer::Repredict(int PredMargin)
 	}
 
 	m_PredLatency = PredIndex;
+}
+
+void CPlayer::SendAreaMotd(int Area)
+{
+	if(m_Area == Area)
+		return;
+
+	if(Area == 0)
+	{
+		SendBroadcastHud("");
+		return;
+	}
+
+	CNetMsg_Sv_Motd Msg;
+	Msg.m_pMessage = "\0";
+	switch(Area)
+	{
+	case 1:
+		Msg.m_pMessage =
+			"\n"
+			"[Settings ➞ Server info]\n"
+			"\n"
+			"\n"
+			"--  Rᴏᴜʟᴇᴛᴛᴇ  --\n"
+			"\n"
+			"To start, write '/bet <amount>', after that you can select your bet type by hovering your mouse over any of the options below and hammering\n"
+			"\n"
+			"Pᴀʏᴏᴜᴛs:\n"
+			"Black | Red: 2x\n"
+			"3x dozens: 3x\n"
+			"Green [Zero]: 10x\n"
+			"\n"
+			"[Press Tab to hide]";
+		break;
+	default:
+		break;
+	}
+	if(Msg.m_pMessage[0] == '\0')
+		return;
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, GetCid());
+}
+
+void CPlayer::SetArea(int Area)
+{
+	SendAreaMotd(Area);
+	m_Area = Area;
 }

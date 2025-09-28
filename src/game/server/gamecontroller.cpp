@@ -22,6 +22,9 @@
 #include "entities/pickup.h"
 #include "entities/projectile.h"
 
+// <FoxNet
+#include <game/server/foxnet/entities/roulette.h>
+
 IGameController::IGameController(class CGameContext *pGameServer) :
 	m_Teams(pGameServer), m_pLoadBestTimeResult(nullptr)
 {
@@ -383,6 +386,10 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 	else if(Index == ENTITY_PLASMAU)
 	{
 		new CGun(&GameServer()->m_World, Pos, false, false, Layer, Number);
+	}
+	else if(Index == ENTITY_ROULETTE)
+	{
+		new CRoulette(&GameServer()->m_World, Pos);
 	}
 
 	if(Type != -1) // NOLINT(clang-analyzer-unix.Malloc)

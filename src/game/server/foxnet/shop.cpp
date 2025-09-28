@@ -253,7 +253,7 @@ void CShop::BuyItem(int ClientId, const char *pName)
 		return;
 	}
 
-	pAcc->m_Money -= Price;
+	pPl->TakeMoney(Price);
 
 	char AddItem[256];
 	str_format(AddItem, sizeof(AddItem), "%s ", NameToShortcut(ItemName));

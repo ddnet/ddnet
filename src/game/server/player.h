@@ -25,6 +25,13 @@ struct CNetObj_PlayerInput;
 struct CScorePlayerResult;
 
 // <FoxNet
+enum Areas
+{
+	AREA_GAME = 0,
+	AREA_ROULETTE = 1,
+	NUM_AREAS
+};
+
 enum HookTypes
 {
 	HOOK_NORMAL = 0,
@@ -324,6 +331,24 @@ public:
 	std::optional<CSaveTee> m_LastDeath;
 
 	// <FoxNet
+private:
+	void FoxNetReset();
+	void OverrideName(int SnappingClient, CNetObj_ClientInfo *pClientInfo);
+
+	int m_RainbowColor = 0;
+	void RainbowSnap(int SnappingClient, CNetObj_ClientInfo *pClientInfo);
+	void RainbowTick();
+	void FoxNetTick();
+
+	int m_Area = 0;
+	void SendAreaMotd(int Area);
+public:
+	int m_BetAmount = -1;
+	int64_t m_LastBet = 0;
+
+	void SetArea(int Area);
+	int GetArea() const { return m_Area; }
+
 	bool m_WeaponIndicator = true;
 	bool m_HideCosmetics = false;
 	bool m_HidePowerUps = false;
@@ -345,6 +370,7 @@ public:
 	void GiveXP(int64_t Amount, const char *pMessage = "");
 	bool CheckLevelUp(int64_t Amount, bool Silent = false);
 	void GiveMoney(int64_t Amount, const char *pMessage = "");
+	void TakeMoney(int64_t Amount, const char *pMessage = "");
 
 	bool OwnsItem(const char *pItemName);
 	bool ToggleItem(const char *pItemName, int Set, bool IgnoreAccount = false);
@@ -399,19 +425,12 @@ public:
 	std::vector<CPickupDrop *> m_vPickupDrops;
 
 	int NumDDraceHudRows();
-	void SendBroadcastHud(const char *pMessage);
+	void SendBroadcastHud(const char *pMessages);
+	void SendBroadcastHud(std::vector<std::string> pMessages);
+	void SendBroadcastHud(std::vector<std::string> pMessages, size_t Offset);
 
 	double m_PredLatency = 0.0;
 	void Repredict(int PredMargin = 6);
-
-private:
-	void FoxNetReset();
-	void OverrideName(int SnappingClient, CNetObj_ClientInfo *pClientInfo);
-
-	int m_RainbowColor = 0;
-	void RainbowSnap(int SnappingClient, CNetObj_ClientInfo *pClientInfo);
-	void RainbowTick();
-	void FoxNetTick();
 	// FoxNet>
 };
 

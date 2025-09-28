@@ -1,4 +1,4 @@
-#include <game/gamecore.h>
+﻿#include <game/gamecore.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
@@ -155,6 +155,43 @@ void CGameContext::ConAccForceLogout(IConsole::IResult *pResult, void *pUserData
 	if(!CheckClientId(ClientId))
 		return;
 	pSelf->m_AccountManager.Logout(ClientId);
+}
+
+void CGameContext::ConGiveMoney(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	const int ClientId = pResult->GetInteger(0);
+	if(!CheckClientId(ClientId))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[ClientId];
+	if(!pPlayer)
+		return;
+	if(!pPlayer->Acc()->m_LoggedIn)
+		return;
+
+	const int Amount = pResult->GetInteger(1);
+	if(Amount > 0)
+		pPlayer->GiveMoney(Amount);
+	else
+		pPlayer->TakeMoney(-Amount);
+}
+
+void CGameContext::ConGiveXp(IConsole::IResult *pResult, void *pUserData)
+{ // Logs out Current Acc Session, does not work across servers
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	const int ClientId = pResult->GetInteger(0);
+	if(!CheckClientId(ClientId))
+		return;
+	CPlayer *pPlayer = pSelf->m_apPlayers[ClientId];
+	if(!pPlayer)
+		return;
+	if(!pPlayer->Acc()->m_LoggedIn)
+		return;
+
+	const int Amount = pResult->GetInteger(1);
+	if(Amount > 0)
+		pPlayer->GiveXP(Amount);
 }
 
 void CGameContext::ConAddChatDetectionString(IConsole::IResult *pResult, void *pUserData)
@@ -1491,6 +1528,62 @@ void CGameContext::ConRepredict(IConsole::IResult *pResult, void *pUserData)
 	pPlayer->Repredict(PredMargin);
 }
 
+void CGameContext::ConSetBet(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	const int ClientId = pResult->m_ClientId;
+	if(!CheckClientId(ClientId))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return;
+
+	if(!pPlayer->Acc()->m_LoggedIn)
+	{
+		pSelf->SendChatTarget(ClientId, "You need to be logged in for this");
+		return;
+	}
+
+	if(pPlayer->GetArea() != AREA_ROULETTE)
+	{
+		pSelf->SendChatTarget(ClientId, "You need to be in an area where you can place a bet");
+		return;
+	}
+
+	if(!pSelf->m_pRoulette->CanBet(ClientId))
+	{
+		pSelf->SendChatTarget(ClientId, "You can't place a bet right now");
+		return;
+	}
+
+
+	const int Amount = pResult->GetInteger(0);
+	const int Money = pPlayer->Acc()->m_Money;
+	if(Amount > Money)
+	{
+		pSelf->SendChatTarget(ClientId, "You don't have enough money to place that bet");
+		return;
+	}
+
+	if(Amount <= 0)
+		return;
+	if(pPlayer->m_BetAmount == Amount)
+		return;
+
+	char aBuf[64];
+	if(pPlayer->m_BetAmount <= 0)
+		str_format(aBuf, sizeof(aBuf), "You wagered %d %s", Amount, g_Config.m_SvCurrencyName);
+	else
+		str_format(aBuf, sizeof(aBuf), "You changed your wager to %d %s", Amount, g_Config.m_SvCurrencyName);
+
+	pSelf->SendChatTarget(ClientId, aBuf);
+
+	pPlayer->m_BetAmount = Amount;
+	pPlayer->m_LastBet = pSelf->Server()->Tick();
+}
+
+
 void CGameContext::RegisterFoxNetCommands()
 {
 	Console()->Register("chat_string_add", "s[string] s[reason] i[should Ban] i[bantime] ?f[addition]", CFGFLAG_SERVER, ConAddChatDetectionString, this, "Add a string to the chat detection list");
@@ -1586,6 +1679,8 @@ void CGameContext::RegisterFoxNetCommands()
 	Console()->Register("force_logout", "i[id]", CFGFLAG_SERVER, ConAccForceLogout, this, "Force logout an account thats currently active on the server");
 	Console()->Register("acc_edit", "s[username] s[variable] r[value]", CFGFLAG_SERVER, ConAccEdit, this, "Edit an account");
 	Console()->Register("acc_disable", "s[username] i[1 | 0]", CFGFLAG_SERVER, ConAccDisable, this, "Disable an account");
+	Console()->Register("give_money", "v[id] i[amount]", CFGFLAG_SERVER, ConGiveMoney, this, "Give player (id) money");
+	Console()->Register("give_xp", "v[id] i[amount]", CFGFLAG_SERVER, ConGiveXp, this, "Give player (id) xp");
 
 	Console()->Register("register", "s[username] s[password] s[password2]", CFGFLAG_CHAT, ConAccRegister, this, "Register a account");
 	Console()->Register("password", "s[oldpass] s[password] s[password2]", CFGFLAG_CHAT, ConAccPassword, this, "Change your password");
@@ -1596,6 +1691,8 @@ void CGameContext::RegisterFoxNetCommands()
 	Console()->Register("top5money", "?i[offset]", CFGFLAG_CHAT, ConAccTop5Money, this, "Show someones profile");
 	Console()->Register("top5level", "?i[offset]", CFGFLAG_CHAT, ConAccTop5Level, this, "Show someones profile");
 	Console()->Register("top5playtime", "?i[offset]", CFGFLAG_CHAT, ConAccTop5Playtime, this, "Show someones profile");
+	
+	Console()->Register("bet", "i[amount]", CFGFLAG_SERVER | CFGFLAG_CHAT, ConSetBet, this, "place a bet on the roulette");
 
 	// Shop
 	Console()->Register("shop_edit_item", "s[Name] i[Price] ?i[Minimum Level]", CFGFLAG_SERVER, ConShopEditItem, this, "Edit a shop item");

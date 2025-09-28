@@ -360,6 +360,8 @@ public:
 	void UnSpawnSolo(bool Unsolo = true);
 private:
 
+	void RouletteTileHandle();
+
 	bool CanDropWeapon(int Type) const;
 
 	vec2 m_HookBasePos = vec2(0, 0);

@@ -29,6 +29,7 @@
 #include <game/server/foxnet/entities/custom_projectile.h>
 #include <game/server/foxnet/entities/light_saber.h>
 #include <game/server/foxnet/entities/pickupdrop.h>
+#include <game/server/foxnet/entities/roulette.h>
 // FoxNet>
 
 MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
@@ -531,6 +532,7 @@ void CCharacter::FireWeapon()
 		GameServer()->CreateSound(m_Pos, SOUND_HAMMER_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 
 		Antibot()->OnHammerFire(m_pPlayer->GetCid());
+		RouletteTileHandle();
 		// <FoxNet
 		if(m_Core.m_Passive)
 			break;
@@ -2894,6 +2896,8 @@ void CCharacter::OnDie(int Killer, int Weapon, bool SendKillMsg)
 	if(Acc()->m_LoggedIn)
 		Acc()->m_Deaths++;
 
+	GetPlayer()->SetArea(AREA_GAME); // Reset area on spawn
+
 	if(g_Config.m_SvAllowWeaponDrops && g_Config.m_SvDropWeaponOnDeath)
 	{
 		for(int iWeapon = NUM_WEAPONS; iWeapon < NUM_EXTRA_WEAPONS; iWeapon++)
@@ -2991,6 +2995,7 @@ void CCharacter::FoxNetSpawn()
 	m_Ufo.OnSpawn(this);
 	m_PowerHookedId = -1;
 	m_TelekinesisId = -1;
+	GetPlayer()->SetArea(AREA_GAME); // Reset area on spawn
 
 	if(g_Config.m_SvSoloServer || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
 		m_ShouldSolo = false;
@@ -3006,18 +3011,82 @@ void CCharacter::FoxNetSpawn()
 		m_ShouldSolo = true; // Next spawn will be solo
 }
 
+void CCharacter::RouletteTileHandle()
+{
+	if(!GameServer()->m_pRoulette)
+		return;
+
+	const int ClientId = GetPlayer()->GetCid();
+	const int Bet = GetPlayer()->m_BetAmount;
+	if(!GameServer()->m_pRoulette->CanBet(ClientId))
+		return;
+
+	vec2 CursorPos = GetCursorPos();
+
+	const int CurrentIndex = Collision()->GetMapIndex(CursorPos);
+	if(Collision()->IsSpeedup(CurrentIndex))
+	{
+		vec2 Direction = vec2(0,0);
+		int Force = 0, Type = 0, MaxSpeed = 0, Angle = 0;
+		Collision()->GetSpeedup(CurrentIndex, &Direction, &Force, &MaxSpeed, &Type);
+
+		if(Type != TILE_EXTRA)
+			return;
+
+		Angle = GameServer()->DirectionToEditorDeg(Direction);
+
+
+		for(int i = 0; i < (int)std::size(RouletteOptions); i++)
+		{
+			if(Force == FORCE_ROULETTE && Angle == 0 && MaxSpeed == i + 2)
+			{
+				if(GameServer()->m_pRoulette->AddClient(ClientId, Bet, RouletteOptions[i]))
+				{
+					GameServer()->CreateDeath(CursorPos, ClientId, TeamMask());
+					char aBuf[256];
+					str_format(aBuf, sizeof(aBuf), "You placed a bet of %d on %s", Bet, RouletteOptions[i]);
+					GameServer()->SendChatTarget(ClientId, aBuf);
+					return;
+				}
+			}
+		}
+	}
+}
+
 
 void CCharacter::ExtraTileHandle()
 {
+	const int CurrentIndex = Collision()->GetMapIndex(m_Pos);
 	const auto &&IsTile = [this](int Tile) {
 		return m_TileIndex == Tile || m_TileFIndex == Tile;
 	};
-
 
 	if(m_SpawnSolo)
 	{
 		if(IsTile(TILE_SOLO_DISABLE) || IsTile(TILE_SOLO_ENABLE))
 			UnSpawnSolo(false);
+	}
+
+
+	if(Collision()->IsSpeedup(CurrentIndex))
+	{
+		vec2 Direction = vec2(0, 0);
+		int Force = 0, Type = 0, MaxSpeed = 0, Angle = 0;
+		Collision()->GetSpeedup(CurrentIndex, &Direction, &Force, &MaxSpeed, &Type);
+
+		if(Type != TILE_EXTRA)
+			return;
+
+		Angle = GameServer()->DirectionToEditorDeg(Direction);
+
+		if(Force == FORCE_NORMAL && Angle == 0 && MaxSpeed == 0)
+		{
+			GetPlayer()->SetArea(AREA_GAME);
+		}
+		else if(Force == FORCE_ROULETTE && Angle == 0 && MaxSpeed == 0)
+		{
+			GetPlayer()->SetArea(AREA_ROULETTE);
+		}
 	}
 }
 
@@ -3369,16 +3438,6 @@ void CCharacter::UpdateWeaponIndicator()
 	// dont update when vanilla weapon got triggered and we have new hud
 	if(aBuf[0])
 		m_LastWeaponIndTick = Server()->Tick();
-
-	// Send the broadcast to spectators too
-	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
-	{
-		CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
-		if(!pPl)
-			return;
-		if(pPl->IsPaused() && pPl->SpectatorId() == GetPlayer()->GetCid())
-			pPl->SendBroadcastHud(aBuf);
-	}
 }
 
 bool CCharacter::CanDropWeapon(int Type) const

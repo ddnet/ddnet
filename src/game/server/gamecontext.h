@@ -25,6 +25,7 @@
 #include "foxnet/votemenu.h"
 #include "foxnet/shop.h"
 #include "foxnet/entities/powerup.h"
+#include "foxnet/entities/roulette.h"
 
 /*
 	Tick
@@ -829,6 +830,9 @@ private:
 	static void ConAccForceLogin(IConsole::IResult *pResult, void *pUserData);
 	static void ConAccForceLogout(IConsole::IResult *pResult, void *pUserData);
 
+	static void ConGiveMoney(IConsole::IResult *pResult, void *pUserData);
+	static void ConGiveXp(IConsole::IResult *pResult, void *pUserData);
+
 	static void ConShopListItems(IConsole::IResult *pResult, void *pUserData);
 	static void ConShopEditItem(IConsole::IResult *pResult, void *pUserData);
 	static void ConShopReset(IConsole::IResult *pResult, void *pUserData);
@@ -855,6 +859,8 @@ private:
 
 	static void ConRepredict(IConsole::IResult *pResult, void *pUserData);
 
+	static void ConSetBet(IConsole::IResult *pResult, void *pUserData);
+
 	struct CFakeSnapPlayer
 	{
 		int m_ClientId;
@@ -879,6 +885,9 @@ private:
 	bool m_IsWeekend;
 
 public:
+	CRoulette *m_pRoulette;
+	int DirectionToEditorDeg(const vec2 &Dir);
+
 	int64_t m_PowerUpDelay;
 	std::vector<CPowerUp *> m_vPowerups;
 

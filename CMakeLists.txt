@@ -2824,6 +2824,8 @@ if(SERVER)
     foxnet/entities/portal.h
     foxnet/entities/powerup.cpp
     foxnet/entities/powerup.h
+    foxnet/entities/roulette.cpp
+    foxnet/entities/roulette.h
     foxnet/fontconvert.cpp
     foxnet/fontconvert.h
     foxnet/gamecontext.cpp
