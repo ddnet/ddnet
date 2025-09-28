@@ -2071,6 +2071,14 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						return;
 					}
 
+					if(g_Config.m_DbgSnap)
+					{
+						if(IsSixup())
+							GameClient()->GetNetObjHandler7()->DebugDumpSnapshot(pTmpBuffer3);
+						else
+							GameClient()->GetNetObjHandler()->DebugDumpSnapshot(pTmpBuffer3);
+					}
+
 					// add new
 					m_aSnapshotStorage[Conn].Add(GameTick, time_get(), SnapSize, pTmpBuffer3, AltSnapSize, pAltSnapBuffer);
 

@@ -1030,6 +1030,14 @@ void CServer::DoSnapshot()
 				m_aDemoRecorder[i].RecordSnapshot(Tick(), aData, SnapshotSize);
 			}
 
+			if(g_Config.m_DbgSnap)
+			{
+				if(m_aClients[i].m_Sixup)
+					GameServer()->GetNetObjHandler7()->DebugDumpSnapshot(pData);
+				else
+					GameServer()->GetNetObjHandler()->DebugDumpSnapshot(pData);
+			}
+
 			int Crc = pData->Crc();
 
 			// remove old snapshots
