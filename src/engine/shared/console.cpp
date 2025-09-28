@@ -82,18 +82,6 @@ std::optional<ColorHSLA> CConsole::CResult::GetColor(unsigned Index, float Darke
 	return ColorParse(m_apArgs[Index], DarkestLighting);
 }
 
-const IConsole::ICommandInfo *CConsole::CCommand::NextCommandInfo(EAccessLevel AccessLevel, int FlagMask) const
-{
-	const CCommand *pInfo = Next();
-	while(pInfo)
-	{
-		if(pInfo->m_Flags & FlagMask && pInfo->m_AccessLevel >= AccessLevel)
-			break;
-		pInfo = pInfo->Next();
-	}
-	return pInfo;
-}
-
 void CConsole::CCommand::SetAccessLevel(EAccessLevel AccessLevel)
 {
 	m_AccessLevel = AccessLevel;
@@ -108,6 +96,18 @@ const IConsole::ICommandInfo *CConsole::FirstCommandInfo(EAccessLevel AccessLeve
 	}
 
 	return nullptr;
+}
+
+const IConsole::ICommandInfo *CConsole::NextCommandInfo(const IConsole::ICommandInfo *pInfo, EAccessLevel AccessLevel, int FlagMask) const
+{
+	const CCommand *pNext = ((CCommand *)pInfo)->Next();
+	while(pNext)
+	{
+		if(pNext->m_Flags & FlagMask && pNext->GetAccessLevel() >= AccessLevel)
+			break;
+		pNext = pNext->Next();
+	}
+	return pNext;
 }
 
 std::optional<CConsole::EAccessLevel> CConsole::AccessLevelToEnum(const char *pAccessLevel)
