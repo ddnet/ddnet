@@ -38,6 +38,7 @@ use tokio::fs::File;
 use tokio::io::AsyncReadExt;
 use tokio::time;
 use warp::Filter;
+use warp::http::StatusCode;
 
 #[macro_use]
 extern crate log;
@@ -91,37 +92,42 @@ enum RegisterResponse {
 #[derive(Debug, Serialize)]
 struct RegisterError {
     #[serde(skip)]
-    is_unsupported_media_type: bool,
+    status: StatusCode,
     message: Cow<'static, str>,
 }
 
 impl RegisterError {
     fn new(s: String) -> RegisterError {
         RegisterError {
-            is_unsupported_media_type: false,
+            status: StatusCode::BAD_REQUEST,
             message: Cow::Owned(s),
+        }
+    }
+    fn banned(reason: Option<&str>) -> RegisterError {
+        RegisterError {
+            status: StatusCode::FORBIDDEN,
+            message: if let Some(reason) = reason {
+                Cow::Owned(format!("banned: {reason}"))
+            } else {
+                Cow::Borrowed("banned")
+            },
         }
     }
     fn unsupported_media_type() -> RegisterError {
         RegisterError {
-            is_unsupported_media_type: true,
+            status: StatusCode::UNSUPPORTED_MEDIA_TYPE,
             message: Cow::Borrowed("The request's Content-Type is not supported"),
         }
     }
-    fn status(&self) -> warp::http::StatusCode {
-        use warp::http::StatusCode;
-        if !self.is_unsupported_media_type {
-            StatusCode::BAD_REQUEST
-        } else {
-            StatusCode::UNSUPPORTED_MEDIA_TYPE
-        }
+    fn status(&self) -> StatusCode {
+        self.status
     }
 }
 
 impl From<&'static str> for RegisterError {
     fn from(s: &'static str) -> RegisterError {
         RegisterError {
-            is_unsupported_media_type: false,
+            status: StatusCode::BAD_REQUEST,
             message: Cow::Borrowed(s),
         }
     }
@@ -779,7 +785,7 @@ fn handle_register(
     let addr = register.address.with_ip(remote_addr);
 
     if let Some(reason) = shared.config.is_banned(addr) {
-        return Err(RegisterError::new(reason.into()));
+        return Err(RegisterError::banned(reason));
     }
 
     let is_exempt = shared.config.is_exempt_from_port_forward_check(addr);
