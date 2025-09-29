@@ -18,7 +18,6 @@ public:
 		FLAG_POS = 1 << 1,
 		FLAG_NO_PANNING = 1 << 2,
 		FLAG_PREVIEW = 1 << 3,
-		FLAG_ALL = FLAG_LOOP | FLAG_POS | FLAG_NO_PANNING | FLAG_PREVIEW,
 	};
 
 	enum
