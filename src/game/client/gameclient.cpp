@@ -148,6 +148,7 @@ void CGameClient::OnConsoleInit()
 					      &m_InfoMessages,
 					      &m_Chat,
 					      &m_Broadcast,
+					      &m_ImportantAlert,
 					      &m_DebugHud,
 					      &m_TouchControls,
 					      &m_Scoreboard,
