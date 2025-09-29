@@ -15,6 +15,7 @@
 #include "cosmetics/pickup_pet.h"
 #include "cosmetics/rotating_ball.h"
 #include "cosmetics/staff_ind.h"
+#include "entities/text/text.h"
 
 #include <base/vmath.h>
 #include <base/system.h>
@@ -166,6 +167,8 @@ void CPlayer::GiveMoney(int64_t Amount, const char *pMessage)
 {
 	if(!Acc()->m_LoggedIn)
 		return;
+	if(Amount <= 0)
+		return;
 
 	if(GameServer()->IsWeekend())
 		Amount *= 2.0f;
@@ -178,6 +181,15 @@ void CPlayer::GiveMoney(int64_t Amount, const char *pMessage)
 	{
 		str_format(aBuf, sizeof(aBuf), "+%ld %s %s", (long)Amount, g_Config.m_SvCurrencyName, pMessage);
 		GameServer()->SendChatTarget(m_ClientId, aBuf);
+	}	
+
+	CCharacter *pChr = GetCharacter();
+	if(pChr)
+	{
+		const vec2 Pos = pChr->m_Pos + vec2(0, -74);
+		char aText[66];
+		str_format(aText, sizeof(aText), "+%ld", (long)Amount);
+		new CProjectileText(pChr->GameWorld(), Pos, GetCid(), 200, aText, WEAPON_HAMMER);
 	}
 
 	GameServer()->m_AccountManager.SaveAccountsInfo(m_ClientId, *Acc());
@@ -186,6 +198,8 @@ void CPlayer::GiveMoney(int64_t Amount, const char *pMessage)
 void CPlayer::TakeMoney(int64_t Amount, const char *pMessage)
 {
 	if(!Acc()->m_LoggedIn)
+		return;
+	if(Amount <= 0)
 		return;
 
 	Acc()->m_Money -= Amount;
@@ -196,6 +210,16 @@ void CPlayer::TakeMoney(int64_t Amount, const char *pMessage)
 	{
 		str_format(aBuf, sizeof(aBuf), "-%ld %s %s", (long)Amount, g_Config.m_SvCurrencyName, pMessage);
 		GameServer()->SendChatTarget(m_ClientId, aBuf);
+	}
+
+	CCharacter *pChr = GetCharacter();
+	if(pChr)
+	{
+		const vec2 Pos = pChr->m_Pos + vec2(0, -74);
+		char aText[66];
+		str_format(aText, sizeof(aText), "-%ld", (long)Amount);
+		new CProjectileText(pChr->GameWorld(), Pos, GetCid(), 175, aText, WEAPON_HAMMER);
+		pChr->SetEmote(EMOTE_HAPPY, Server()->Tick() + Server()->TickSpeed());
 	}
 
 	GameServer()->m_AccountManager.SaveAccountsInfo(m_ClientId, *Acc());
@@ -1020,7 +1044,7 @@ void CPlayer::SendAreaMotd(int Area)
 	case 1:
 		Msg.m_pMessage =
 			"\n"
-			"[Settings ➞ Server info]\n"
+			"[Veiwable in Server info Tab]\n"
 			"\n"
 			"\n"
 			"--  Rᴏᴜʟᴇᴛᴛᴇ  --\n"

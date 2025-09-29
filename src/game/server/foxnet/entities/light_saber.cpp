@@ -1,21 +1,21 @@
 // Made by qxdFox
 #include <game/server/entities/character.h>
 #include <game/server/player.h>
-
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
 #include <game/server/teams.h>
+#include <game/server/gameworld.h>
 
-#include <generated/protocol.h>
+#include <engine/shared/config.h>
 
-#include <base/vmath.h>
 #include <game/gamecore.h>
 #include <game/server/entity.h>
-#include <game/server/gameworld.h>
 #include <game/teamscore.h>
 
+#include <generated/protocol.h>
+#include <base/vmath.h>
+
 #include "light_saber.h"
-#include <engine/shared/config.h>
 
 CLightSaber::CLightSaber(CGameWorld *pGameWorld, int Owner, vec2 Pos) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LIGHTSABER, Pos)

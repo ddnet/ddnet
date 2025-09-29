@@ -1,21 +1,27 @@
 ﻿#include <game/gamecore.h>
 #include <game/server/entities/character.h>
+#include <game/server/foxnet/entities/text/text.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/gameworld.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
 
+#include <engine/console.h>
+#include <engine/server.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
 
+#include <generated/protocol.h>
+
 #include <base/log.h>
+#include <base/str.h>
 #include <base/system.h>
 #include <base/vmath.h>
 
-#include "votemenu.h"
+#include <algorithm>
 
-#include <unordered_map>
+#include "votemenu.h"
 
 void CGameContext::ConAccRegister(IConsole::IResult *pResult, void *pUserData)
 {
@@ -1557,7 +1563,6 @@ void CGameContext::ConSetBet(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-
 	const int Amount = pResult->GetInteger(0);
 	const int Money = pPlayer->Acc()->m_Money;
 	if(Amount > Money)
@@ -1583,9 +1588,47 @@ void CGameContext::ConSetBet(IConsole::IResult *pResult, void *pUserData)
 	pPlayer->m_LastBet = pSelf->Server()->Tick();
 }
 
+void CGameContext::ConLaserText(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	const int ClientId = pResult->m_ClientId;
+
+	if(!CheckClientId(ClientId))
+		return;
+
+	CCharacter *pChr = pSelf->GetPlayerChar(ClientId);
+	if(!pChr)
+		return;
+
+	const vec2 Pos = pChr->m_Pos + vec2(0, -100);
+
+	const char *pText = pResult->NumArguments() ? pResult->GetString(0) : "noob";
+
+	new CLaserText(&pSelf->m_World, Pos, ClientId, 250, pText);
+}
+
+void CGameContext::ConProjectileText(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	const int ClientId = pResult->m_ClientId;
+
+	if(!CheckClientId(ClientId))
+		return;
+
+	CCharacter *pChr = pSelf->GetPlayerChar(ClientId);
+	if(!pChr)
+		return;
+
+	const vec2 Pos = pChr->m_Pos + vec2(0, -60);
+	const char *pText = pResult->GetString(0);
+	new CProjectileText(&pSelf->m_World, Pos, ClientId, 250, pText, WEAPON_HAMMER);
+}
 
 void CGameContext::RegisterFoxNetCommands()
 {
+	Console()->Register("lasertext", "s[string]", CFGFLAG_SERVER, ConLaserText, this, "laser text");
+	Console()->Register("projectiletext", "s[string]", CFGFLAG_SERVER, ConProjectileText, this, "projectile text");
+
 	Console()->Register("chat_string_add", "s[string] s[reason] i[should Ban] i[bantime] ?f[addition]", CFGFLAG_SERVER, ConAddChatDetectionString, this, "Add a string to the chat detection list");
 	Console()->Register("chat_string_remove", "s[name]", CFGFLAG_SERVER, ConRemoveChatDetectionString, this, "Remove a string from the chat detection list");
 	Console()->Register("chat_strings_list", "", CFGFLAG_SERVER, ConListChatDetectionStrings, this, "List all strings on the list");
@@ -1691,7 +1734,7 @@ void CGameContext::RegisterFoxNetCommands()
 	Console()->Register("top5money", "?i[offset]", CFGFLAG_CHAT, ConAccTop5Money, this, "Show someones profile");
 	Console()->Register("top5level", "?i[offset]", CFGFLAG_CHAT, ConAccTop5Level, this, "Show someones profile");
 	Console()->Register("top5playtime", "?i[offset]", CFGFLAG_CHAT, ConAccTop5Playtime, this, "Show someones profile");
-	
+
 	Console()->Register("bet", "i[amount]", CFGFLAG_SERVER | CFGFLAG_CHAT, ConSetBet, this, "place a bet on the roulette");
 
 	// Shop

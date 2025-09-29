@@ -137,8 +137,6 @@ bool CRoulette::AddClient(int ClientId, int BetAmount, const char *pBetOption)
 	m_Betters++;
 	m_TotalWager += BetAmount;
 
-	pPl->TakeMoney(BetAmount);
-
 	if(AmountOfCloseClients() > 1)
 		m_StartDelay = Server()->TickSpeed() * 5; // 5 seconds
 	else
@@ -207,11 +205,17 @@ void CRoulette::EvaluateBets()
 		else if(str_comp(m_aClients[i].m_aBetOption, "25-36") == 0 && Number >= 25 && Number <= 36)
 			PayoutMultiplier = 3;
 
-		CPlayer *pPl = GameServer()->m_apPlayers[i];
-		pPl->GiveMoney(m_aClients[i].m_BetAmount * PayoutMultiplier);
+		bool Win = PayoutMultiplier > 0;
 
-		if(PayoutMultiplier > 0 && pPl->GetCharacter())
-			pPl->GetCharacter()->SetEmote(EMOTE_HAPPY, 150);
+		CPlayer *pPl = GameServer()->m_apPlayers[i];
+		int Amount = m_aClients[i].m_BetAmount;
+		if(Win)
+		{
+			Amount = m_aClients[i].m_BetAmount * PayoutMultiplier - m_aClients[i].m_BetAmount;
+			pPl->GiveMoney(Amount);
+		}
+		else
+			pPl->TakeMoney(Amount);
 	}
 	m_Betters = 0;
 	m_TotalWager = 0;
