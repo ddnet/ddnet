@@ -18,7 +18,7 @@ pub enum ConfigLocation {
 
 #[derive(Default)]
 pub struct Config {
-    default_ban_message: Box<str>,
+    default_ban_message: Option<Box<str>>,
     bans: Box<[Ban]>,
     port_forward_check_exceptions: Box<[ConfigAddr]>,
     pub locations: Locations,
@@ -73,10 +73,10 @@ impl Config {
     pub fn read(filename: &Path) -> Result<Config, Error> {
         ParsedConfig::read(filename)?.to_config()
     }
-    pub fn is_banned(&self, addr: Addr) -> Option<&str> {
+    pub fn is_banned(&self, addr: Addr) -> Option<Option<&str>> {
         for ban in &self.bans {
             if ban.address.matches(addr) {
-                return Some(ban.reason.as_deref().unwrap_or(&self.default_ban_message));
+                return Some(ban.reason.as_deref().or(self.default_ban_message.as_deref()));
             }
         }
         None
@@ -108,7 +108,7 @@ impl ParsedConfig {
             locations,
         } = self;
         Ok(Config {
-            default_ban_message: default_ban_message.unwrap_or_else(|| "banned".into()),
+            default_ban_message: default_ban_message.map(Into::into),
             bans,
             port_forward_check_exceptions,
             locations: locations
