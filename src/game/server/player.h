@@ -3,12 +3,14 @@
 #ifndef GAME_SERVER_PLAYER_H
 #define GAME_SERVER_PLAYER_H
 
+#include "teeinfo.h"
+
 #include <base/vmath.h>
+
 #include <engine/shared/protocol.h>
+
 #include <game/alloc.h>
 #include <game/server/save.h>
-
-#include "teeinfo.h"
 
 #include <memory>
 #include <optional>

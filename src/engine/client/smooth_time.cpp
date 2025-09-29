@@ -1,11 +1,12 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <base/math.h>
-#include <base/system.h>
+#include "smooth_time.h"
 
 #include "graph.h"
-#include "smooth_time.h"
+
+#include <base/math.h>
+#include <base/system.h>
 
 void CSmoothTime::Init(int64_t Target)
 {

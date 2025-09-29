@@ -3,6 +3,7 @@
 
 #include "editor.h"
 #include "editor_action.h"
+
 #include <game/editor/references.h>
 
 class CEditorActionLayerBase : public IEditorAction

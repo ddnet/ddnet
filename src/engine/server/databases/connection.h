@@ -4,6 +4,7 @@
 #include "connection_pool.h"
 
 #include <engine/shared/protocol.h>
+
 #include <memory>
 
 enum

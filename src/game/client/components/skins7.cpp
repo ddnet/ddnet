@@ -1,5 +1,9 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "skins7.h"
+
+#include "menus.h"
+
 #include <base/color.h>
 #include <base/log.h>
 #include <base/math.h>
@@ -16,9 +20,6 @@
 
 #include <game/client/gameclient.h>
 #include <game/localization.h>
-
-#include "menus.h"
-#include "skins7.h"
 
 const char *const CSkins7::ms_apSkinPartNames[protocol7::NUM_SKINPARTS] = {"body", "marking", "decoration", "hands", "feet", "eyes"};
 const char *const CSkins7::ms_apSkinPartNamesLocalized[protocol7::NUM_SKINPARTS] = {Localizable("Body", "skins"), Localizable("Marking", "skins"), Localizable("Decoration", "skins"), Localizable("Hands", "skins"), Localizable("Feet", "skins"), Localizable("Eyes", "skins")};

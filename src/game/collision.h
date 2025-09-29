@@ -4,6 +4,7 @@
 #define GAME_COLLISION_H
 
 #include <base/vmath.h>
+
 #include <engine/shared/protocol.h>
 
 #include <map>

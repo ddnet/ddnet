@@ -1,7 +1,7 @@
+#include "render_component.h"
+
 #include <engine/graphics.h>
 #include <engine/textrender.h>
-
-#include "render_component.h"
 
 void CRenderComponent::OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap)
 {

@@ -1,5 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "menus.h"
+#include "skins7.h"
+
 #include <base/math.h>
 #include <base/system.h>
 
@@ -24,9 +27,6 @@
 #include <game/client/ui_listbox.h>
 #include <game/client/ui_scrollregion.h>
 #include <game/localization.h>
-
-#include "menus.h"
-#include "skins7.h"
 
 #include <vector>
 

@@ -5,15 +5,15 @@
 #include "serverbrowser_http.h"
 #include "serverbrowser_ping_cache.h"
 
-#include <algorithm>
-#include <map>
-#include <set>
-#include <vector>
-
 #include <base/hash_ctxt.h>
 #include <base/log.h>
 #include <base/system.h>
 
+#include <engine/console.h>
+#include <engine/engine.h>
+#include <engine/favorites.h>
+#include <engine/friends.h>
+#include <engine/http.h>
 #include <engine/shared/config.h>
 #include <engine/shared/json.h>
 #include <engine/shared/masterserver.h>
@@ -21,13 +21,12 @@
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
 #include <engine/shared/serverinfo.h>
-
-#include <engine/console.h>
-#include <engine/engine.h>
-#include <engine/favorites.h>
-#include <engine/friends.h>
-#include <engine/http.h>
 #include <engine/storage.h>
+
+#include <algorithm>
+#include <map>
+#include <set>
+#include <vector>
 
 class CSortWrap
 {

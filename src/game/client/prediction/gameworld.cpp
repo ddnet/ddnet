@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include "gameworld.h"
+
 #include "entities/character.h"
 #include "entities/door.h"
 #include "entities/dragger.h"
@@ -10,7 +11,9 @@
 #include "entities/plasma.h"
 #include "entities/projectile.h"
 #include "entity.h"
+
 #include <engine/shared/config.h>
+
 #include <game/client/laser_data.h>
 #include <game/client/pickup_data.h>
 #include <game/client/projectile_data.h>

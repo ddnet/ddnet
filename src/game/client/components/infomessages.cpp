@@ -1,5 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "infomessages.h"
+
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
@@ -8,13 +10,11 @@
 #include <generated/client_data.h>
 #include <generated/protocol.h>
 
-#include <game/localization.h>
-
-#include "infomessages.h"
 #include <game/client/animstate.h>
 #include <game/client/gameclient.h>
 #include <game/client/prediction/entities/character.h>
 #include <game/client/prediction/gameworld.h>
+#include <game/localization.h>
 
 static constexpr float ROW_HEIGHT = 46.0f;
 static constexpr float FONT_SIZE = 36.0f;

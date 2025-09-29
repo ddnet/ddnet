@@ -1,3 +1,5 @@
+#include "background.h"
+
 #include <base/system.h>
 
 #include <engine/map.h>
@@ -5,12 +7,9 @@
 
 #include <game/client/components/mapimages.h>
 #include <game/client/components/maplayers.h>
-
 #include <game/client/gameclient.h>
 #include <game/layers.h>
 #include <game/localization.h>
-
-#include "background.h"
 
 CBackground::CBackground(ERenderType MapType, bool OnlineOnly) :
 	CMapLayers(MapType, OnlineOnly)

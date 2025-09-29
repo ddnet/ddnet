@@ -2,7 +2,9 @@
 #define ENGINE_DISCORD_H
 
 #include "kernel.h"
+
 #include <base/types.h>
+
 #include <engine/serverbrowser.h>
 
 class IDiscord : public IInterface

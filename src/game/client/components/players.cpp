@@ -1,31 +1,29 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include "players.h"
+
+#include <base/color.h>
+#include <base/math.h>
+
 #include <engine/client/enums.h>
 #include <engine/demo.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
-#include <game/gamecore.h>
 
 #include <generated/client_data.h>
 #include <generated/client_data7.h>
 #include <generated/protocol.h>
 
-#include <game/mapitems.h>
-
 #include <game/client/animstate.h>
-#include <game/client/gameclient.h>
-
 #include <game/client/components/controls.h>
 #include <game/client/components/effects.h>
 #include <game/client/components/flow.h>
 #include <game/client/components/skins.h>
 #include <game/client/components/sounds.h>
-
-#include "players.h"
-
-#include <base/color.h>
-#include <base/math.h>
+#include <game/client/gameclient.h>
+#include <game/gamecore.h>
+#include <game/mapitems.h>
 
 static float CalculateHandAngle(vec2 Dir, float AngleOffset)
 {

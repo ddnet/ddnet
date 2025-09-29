@@ -4,8 +4,10 @@
 #define GAME_SERVER_GAMECONTROLLER_H
 
 #include <base/vmath.h>
+
 #include <engine/map.h>
 #include <engine/shared/protocol.h>
+
 #include <game/server/teams.h>
 
 struct CScoreLoadBestTimeResult;

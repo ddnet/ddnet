@@ -1,10 +1,10 @@
+#include "protocolglue.h"
+
 #include <engine/shared/network.h>
 
 #include <generated/protocol.h>
 #include <generated/protocol7.h>
 #include <generated/protocolglue.h>
-
-#include "protocolglue.h"
 
 namespace protocol7
 {

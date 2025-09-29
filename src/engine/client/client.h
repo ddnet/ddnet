@@ -3,6 +3,9 @@
 #ifndef ENGINE_CLIENT_CLIENT_H
 #define ENGINE_CLIENT_CLIENT_H
 
+#include "graph.h"
+#include "smooth_time.h"
+
 #include <base/hash.h>
 #include <base/types.h>
 
@@ -21,9 +24,6 @@
 #include <engine/shared/network.h>
 #include <engine/textrender.h>
 #include <engine/warning.h>
-
-#include "graph.h"
-#include "smooth_time.h"
 
 #include <chrono>
 #include <deque>

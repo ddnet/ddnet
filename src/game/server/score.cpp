@@ -1,4 +1,11 @@
+#include "score.h"
+
+#include "player.h"
+#include "save.h"
+#include "scoreworker.h"
+
 #include <base/system.h>
+
 #include <engine/server/databases/connection_pool.h>
 #include <engine/shared/config.h>
 #include <engine/shared/console.h>
@@ -11,11 +18,6 @@
 #include <game/team_state.h>
 
 #include <memory>
-
-#include "player.h"
-#include "save.h"
-#include "score.h"
-#include "scoreworker.h"
 
 class IDbConnection;
 

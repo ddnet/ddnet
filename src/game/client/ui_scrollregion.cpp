@@ -1,13 +1,13 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "ui_scrollregion.h"
+
 #include <base/system.h>
 #include <base/vmath.h>
 
 #include <engine/client.h>
 #include <engine/keys.h>
 #include <engine/shared/config.h>
-
-#include "ui_scrollregion.h"
 
 CScrollRegion::CScrollRegion()
 {

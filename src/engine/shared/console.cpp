@@ -1,6 +1,11 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include "console.h"
+
+#include "config.h"
+#include "linereader.h"
+
 #include <base/color.h>
 #include <base/log.h>
 #include <base/math.h>
@@ -10,10 +15,6 @@
 #include <engine/console.h>
 #include <engine/shared/protocol.h>
 #include <engine/storage.h>
-
-#include "config.h"
-#include "console.h"
-#include "linereader.h"
 
 #include <algorithm>
 #include <iterator> // std::size

@@ -3,6 +3,7 @@
 #ifndef GAME_CLIENT_COMPONENTS_SPECTATOR_H
 #define GAME_CLIENT_COMPONENTS_SPECTATOR_H
 #include <base/vmath.h>
+
 #include <engine/console.h>
 
 #include <game/client/component.h>

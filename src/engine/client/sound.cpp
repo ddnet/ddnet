@@ -1,6 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <SDL.h>
+#include "sound.h"
 
 #include <base/math.h>
 #include <base/system.h>
@@ -9,7 +9,7 @@
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 
-#include "sound.h"
+#include <SDL.h>
 
 #if defined(CONF_VIDEORECORDER)
 #include <engine/shared/video.h>

@@ -7,11 +7,8 @@ using offset_ptr_size = char *;
 using offset_ptr = uintptr_t;
 using offset_ptr32 = unsigned int;
 
-#include <memory>
-#include <optional>
-#include <vector>
-
 #include <base/color.h>
+
 #include <engine/graphics.h>
 
 #include <game/map/envelope_manager.h>
@@ -19,6 +16,10 @@ using offset_ptr32 = unsigned int;
 #include <game/map/render_map.h>
 #include <game/mapitems.h>
 #include <game/mapitems_ex.h>
+
+#include <memory>
+#include <optional>
+#include <vector>
 
 class CMapLayers;
 class CMapItemLayerTilemap;

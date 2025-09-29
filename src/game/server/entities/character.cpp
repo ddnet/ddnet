@@ -1,11 +1,13 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "character.h"
+
 #include "laser.h"
 #include "pickup.h"
 #include "projectile.h"
 
 #include <antibot/antibot_data.h>
+
 #include <base/log.h>
 
 #include <engine/antibot.h>
@@ -15,13 +17,12 @@
 #include <generated/server_data.h>
 
 #include <game/mapitems.h>
-#include <game/team_state.h>
-
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/server/teams.h>
+#include <game/team_state.h>
 
 MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
 

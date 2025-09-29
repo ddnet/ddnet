@@ -1,5 +1,4 @@
-#include <gtest/gtest.h>
-#include <memory>
+#include "test.h"
 
 #include <base/system.h>
 
@@ -8,7 +7,10 @@
 #include <engine/engine.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
-#include <test/test.h>
+
+#include <gtest/gtest.h>
+
+#include <memory>
 
 TEST(ServerBrowser, PingCache)
 {

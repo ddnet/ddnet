@@ -1,10 +1,10 @@
+#include "editor.h"
+#include "editor_actions.h"
+
 #include <engine/keys.h>
+
 #include <game/client/gameclient.h>
 #include <game/mapitems.h>
-
-#include "editor.h"
-
-#include "editor_actions.h"
 
 void CEditor::FillGameTiles(EGameTileOp FillTile) const
 {

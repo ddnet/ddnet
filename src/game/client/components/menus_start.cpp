@@ -1,12 +1,13 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "menus_start.h"
+
+#include <engine/client/updater.h>
 #include <engine/graphics.h>
 #include <engine/keys.h>
 #include <engine/serverbrowser.h>
-#include <engine/textrender.h>
-
-#include <engine/client/updater.h>
 #include <engine/shared/config.h>
+#include <engine/textrender.h>
 
 #include <generated/client_data.h>
 
@@ -14,8 +15,6 @@
 #include <game/client/ui.h>
 #include <game/localization.h>
 #include <game/version.h>
-
-#include "menus_start.h"
 
 #if defined(CONF_PLATFORM_ANDROID)
 #include <android/android_main.h>

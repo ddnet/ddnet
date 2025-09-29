@@ -3,6 +3,8 @@
 #ifndef ENGINE_SHARED_DEMO_H
 #define ENGINE_SHARED_DEMO_H
 
+#include "snapshot.h"
+
 #include <base/hash.h>
 
 #include <engine/demo.h>
@@ -10,8 +12,6 @@
 
 #include <functional>
 #include <vector>
-
-#include "snapshot.h"
 
 typedef std::function<void()> TUpdateIntraTimesFunc;
 

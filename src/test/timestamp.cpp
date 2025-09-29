@@ -1,6 +1,7 @@
+#include <base/system.h>
+
 #include <gtest/gtest.h>
 
-#include <base/system.h>
 #include <cstdlib>
 
 class TimestampTest : public testing::Test

@@ -1,9 +1,8 @@
 #ifndef ENGINE_CLIENT_BACKEND_BACKEND_BASE_H
 #define ENGINE_CLIENT_BACKEND_BACKEND_BASE_H
 
-#include <engine/graphics.h>
-
 #include <engine/client/graphics_threaded.h>
+#include <engine/graphics.h>
 
 #include <SDL_video.h>
 

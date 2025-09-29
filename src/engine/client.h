@@ -2,10 +2,10 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef ENGINE_CLIENT_H
 #define ENGINE_CLIENT_H
-#include "kernel.h"
-
 #include "graphics.h"
+#include "kernel.h"
 #include "message.h"
+
 #include <base/hash.h>
 
 #include <engine/client/enums.h>

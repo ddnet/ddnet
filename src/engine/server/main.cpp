@@ -5,15 +5,13 @@
 #include <engine/engine.h>
 #include <engine/map.h>
 #include <engine/server.h>
-#include <engine/storage.h>
-
 #include <engine/server/antibot.h>
 #include <engine/server/databases/connection.h>
 #include <engine/server/server.h>
 #include <engine/server/server_logger.h>
-
 #include <engine/shared/assertion_logger.h>
 #include <engine/shared/config.h>
+#include <engine/storage.h>
 
 #include <game/version.h>
 

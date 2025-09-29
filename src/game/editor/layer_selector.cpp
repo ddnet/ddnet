@@ -1,8 +1,8 @@
-#include <engine/shared/config.h>
+#include "layer_selector.h"
 
 #include "editor.h"
 
-#include "layer_selector.h"
+#include <engine/shared/config.h>
 
 void CLayerSelector::OnInit(CEditor *pEditor)
 {

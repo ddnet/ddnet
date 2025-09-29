@@ -4,7 +4,9 @@
 #define ENGINE_CONSOLE_H
 
 #include "kernel.h"
+
 #include <base/color.h>
+
 #include <engine/storage.h>
 
 #include <memory>

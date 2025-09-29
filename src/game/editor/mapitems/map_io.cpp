@@ -1,4 +1,5 @@
-#include <game/editor/editor.h>
+#include "image.h"
+#include "sound.h"
 
 #include <engine/client.h>
 #include <engine/console.h>
@@ -9,11 +10,9 @@
 #include <engine/sound.h>
 #include <engine/storage.h>
 
+#include <game/editor/editor.h>
 #include <game/gamecore.h>
 #include <game/mapitems_ex.h>
-
-#include "image.h"
-#include "sound.h"
 
 // compatibility with old sound layers
 class CSoundSourceDeprecated

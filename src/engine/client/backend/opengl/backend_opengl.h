@@ -12,9 +12,8 @@
 
 #include <base/system.h>
 
-#include <engine/client/graphics_defines.h>
-
 #include <engine/client/backend/backend_base.h>
+#include <engine/client/graphics_defines.h>
 
 class CGLSLTWProgram;
 class CGLSLPrimitiveProgram;

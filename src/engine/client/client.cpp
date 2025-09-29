@@ -1,6 +1,12 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include "client.h"
+
+#include "demoedit.h"
+#include "friends.h"
+#include "serverbrowser.h"
+
 #include <base/hash.h>
 #include <base/hash_ctxt.h>
 #include <base/log.h>
@@ -8,13 +14,12 @@
 #include <base/math.h>
 #include <base/system.h>
 
-#include <engine/external/json-parser/json.h>
-
 #include <engine/config.h>
 #include <engine/console.h>
 #include <engine/discord.h>
 #include <engine/editor.h>
 #include <engine/engine.h>
+#include <engine/external/json-parser/json.h>
 #include <engine/favorites.h>
 #include <engine/graphics.h>
 #include <engine/input.h>
@@ -22,11 +27,6 @@
 #include <engine/map.h>
 #include <engine/notifications.h>
 #include <engine/serverbrowser.h>
-#include <engine/sound.h>
-#include <engine/steam.h>
-#include <engine/storage.h>
-#include <engine/textrender.h>
-
 #include <engine/shared/assertion_logger.h>
 #include <engine/shared/compression.h>
 #include <engine/shared/config.h>
@@ -44,6 +44,10 @@
 #include <engine/shared/rust_version.h>
 #include <engine/shared/snapshot.h>
 #include <engine/shared/uuid_manager.h>
+#include <engine/sound.h>
+#include <engine/steam.h>
+#include <engine/storage.h>
+#include <engine/textrender.h>
 
 #include <generated/protocol.h>
 #include <generated/protocol7.h>
@@ -51,11 +55,6 @@
 
 #include <game/localization.h>
 #include <game/version.h>
-
-#include "client.h"
-#include "demoedit.h"
-#include "friends.h"
-#include "serverbrowser.h"
 
 #if defined(CONF_VIDEORECORDER)
 #include "video.h"
