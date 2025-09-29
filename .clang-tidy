@@ -132,9 +132,9 @@ CheckOptions:
   - key:             readability-identifier-naming.StructPrefix
     value:           S
   - key:             readability-identifier-naming.StructIgnoredRegexp
-    value:           '^C.*'
+    value:           '^((GL_S|[CI])[A-Z](_?[a-zA-Z0-9])*|_json_value|NETADDR)$'
   - key:             readability-identifier-naming.ClassIgnoredRegexp
-    value:           '^(I|CCommandProcessorFragment_Vulkan$).*'
+    value:           '^([CI][A-Z](_?[a-zA-Z0-9])*)$'
   - key:             readability-identifier-naming.ParameterCase
     value:           CamelCase
   - key:             readability-identifier-naming.ParameterIgnoredRegexp
