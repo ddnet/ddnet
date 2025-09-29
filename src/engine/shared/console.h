@@ -106,7 +106,7 @@ class CConsole : public IConsole
 		const char *GetString(unsigned Index) const override;
 		int GetInteger(unsigned Index) const override;
 		float GetFloat(unsigned Index) const override;
-		std::optional<ColorHSLA> GetColor(unsigned Index, float DarkestLighting) const override;
+		ColorHSLA GetColor(unsigned Index, float DarkestLighting) const override;
 
 		// DDRace
 
@@ -133,6 +133,7 @@ class CConsole : public IConsole
 		PARSEARGS_MISSING_VALUE,
 		PARSEARGS_INVALID_INTEGER,
 		PARSEARGS_INVALID_FLOAT,
+		PARSEARGS_INVALID_COLOR,
 	};
 
 	int ParseArgs(CResult *pResult, const char *pFormat, bool IsColor = false);
