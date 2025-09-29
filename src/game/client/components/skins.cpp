@@ -774,13 +774,15 @@ CSkins::CSkinList &CSkins::SkinList()
 
 		const bool SelectedMain = str_comp(pSkinContainer->NormalizedName(), aPlayerSkin) == 0;
 		const bool SelectedDummy = str_comp(pSkinContainer->NormalizedName(), aDummySkin) == 0;
+		const bool Favorite = m_Favorites.contains(pSkinContainer->NormalizedName());
 
 		// Don't include skins in the list that couldn't be found in the database except the current player
 		// and dummy skins to avoid showing a lot of not-found entries while the user is typing a skin name.
 		if(pSkinContainer->m_State == CSkinContainer::EState::NOT_FOUND &&
 			!pSkinContainer->IsSpecial() &&
 			!SelectedMain &&
-			!SelectedDummy)
+			!SelectedDummy &&
+			!Favorite)
 		{
 			continue;
 		}
@@ -797,7 +799,7 @@ CSkins::CSkinList &CSkins::SkinList()
 			}
 			NameMatch = std::make_pair<int, int>(pNameMatchStart - pSkinContainer->Name(), pNameMatchEnd - pNameMatchStart);
 		}
-		m_SkinList.m_vSkins.emplace_back(pSkinContainer.get(), m_Favorites.contains(pSkinContainer->NormalizedName()), SelectedMain, SelectedDummy, NameMatch);
+		m_SkinList.m_vSkins.emplace_back(pSkinContainer.get(), Favorite, SelectedMain, SelectedDummy, NameMatch);
 	}
 
 	std::sort(m_SkinList.m_vSkins.begin(), m_SkinList.m_vSkins.end());
