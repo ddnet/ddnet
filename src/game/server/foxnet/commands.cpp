@@ -86,13 +86,7 @@ void CGameContext::ConAccLogin(IConsole::IResult *pResult, void *pUserData)
 	const char *pUser = pResult->GetString(0);
 	const char *pPass = pResult->GetString(1);
 
-	if(!pSelf->m_AccountManager.Login(ClientId, pUser, pPass))
-	{
-		pSelf->SendChatTarget(ClientId, "Login failed");
-		return;
-	}
-
-	pSelf->SendChatTarget(ClientId, "Login successful");
+	pSelf->m_AccountManager.Login(ClientId, pUser, pPass);
 }
 
 void CGameContext::ConAccLogout(IConsole::IResult *pResult, void *pUserData)

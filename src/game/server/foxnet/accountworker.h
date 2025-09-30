@@ -3,8 +3,8 @@
 
 #include <engine/server/databases/connection_pool.h>
 #include <engine/shared/protocol.h>
-#include "accounts.h"
 
+class CGameContext;
 class IDbConnection;
 class IGameController;
 
@@ -31,7 +31,7 @@ struct CAccResult : ISqlResult
 	int64_t m_Money = 0;
 	char m_Inventory[1028] = "";
 	char m_LastActiveItems[1028] = "";
-	bool m_Disabled;
+	bool m_Disabled = false;
 };
 
 struct CAccRegisterRequest : ISqlData
@@ -42,7 +42,6 @@ struct CAccRegisterRequest : ISqlData
 	char m_PasswordHash[ACC_MAX_PASSW_LENGTH] = "";
 	int64_t m_RegisterDate = 0;
 };
-
 struct CAccLoginRequest : ISqlData
 {
 	CAccLoginRequest(std::shared_ptr<CAccResult> pRes) :
@@ -50,28 +49,24 @@ struct CAccLoginRequest : ISqlData
 	char m_Username[ACC_MAX_USERNAME_LENGTH] = "";
 	char m_PasswordHash[256] = "";
 };
-
 struct CAccSelectByUser : ISqlData
 {
 	CAccSelectByUser(std::shared_ptr<ISqlResult> pRes) :
 		ISqlData(std::move(pRes)) {}
 	char m_Username[ACC_MAX_USERNAME_LENGTH] = "";
 };
-
 struct CAccSelectByLastName : ISqlData
 {
 	CAccSelectByLastName(std::shared_ptr<ISqlResult> pRes) :
 		ISqlData(std::move(pRes)) {}
 	char m_LastPlayerName[MAX_NAME_LENGTH] = "";
 };
-
 struct CAccSelectPortByUser : ISqlData
 {
 	CAccSelectPortByUser(std::shared_ptr<ISqlResult> pRes) :
 		ISqlData(std::move(pRes)) {}
 	char m_Username[ACC_MAX_USERNAME_LENGTH] = "";
 };
-
 struct CAccUpdLoginState : ISqlData
 {
 	CAccUpdLoginState() :
@@ -83,7 +78,6 @@ struct CAccUpdLoginState : ISqlData
 	int m_Port = 0;
 	int m_ClientId = -1;
 };
-
 struct CAccUpdLogoutState : ISqlData
 {
 	CAccUpdLogoutState() :
@@ -100,7 +94,6 @@ struct CAccUpdLogoutState : ISqlData
 	char m_Inventory[1028] = "";
 	char m_LastActiveItems[1028] = "";
 };
-
 struct CAccSaveInfo : ISqlData
 {
 	CAccSaveInfo() :
@@ -117,7 +110,6 @@ struct CAccSaveInfo : ISqlData
 	char m_Inventory[1028] = "";
 	char m_LastActiveItems[1028] = "";
 };
-
 struct CAccSetNameReq : ISqlData
 {
 	CAccSetNameReq() :
@@ -125,7 +117,6 @@ struct CAccSetNameReq : ISqlData
 	char m_Username[ACC_MAX_USERNAME_LENGTH] = "";
 	char m_NewPlayerName[MAX_NAME_LENGTH] = "";
 };
-
 struct CAccShowTop5 : ISqlData
 {
 	CAccShowTop5() :
@@ -135,7 +126,6 @@ struct CAccShowTop5 : ISqlData
 	int m_Offset = 0;
 	CGameContext *m_pGameServer;
 };
-
 struct CAccDisable : ISqlData
 {
 	CAccDisable() :

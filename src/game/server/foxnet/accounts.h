@@ -8,7 +8,10 @@
 #include <optional>
 #include <string>
 #include <memory>
+#include <vector>
+#include <functional>
 
+struct CAccResult;
 class CDbConnectionPool;
 class CGameContext;
 class IDbConnection;
@@ -17,10 +20,10 @@ struct ISqlData;
 
 enum
 {
-	ACC_MAX_USERNAME_LENGTH = 32,
 	ACC_MIN_USERNAME_LENGTH = 4,
-	ACC_MAX_PASSW_LENGTH = 128,
+	ACC_MAX_USERNAME_LENGTH = 32,
 	ACC_MIN_PASSW_LENGTH = 6,
+	ACC_MAX_PASSW_LENGTH = 128,
 
 	ACC_FLAG_AUTOLOGIN = 1 << 0,
 	ACC_FLAG_HIDE_COSMETICS = 1 << 1,
@@ -54,6 +57,12 @@ struct CAccountSession
 	bool m_Disabled = false;
 };
 
+struct CPendingAccResult
+{
+	std::shared_ptr<CAccResult> m_pRes; // shared with sql worker
+	std::function<void(CAccResult &)> m_Callback; // executed on main thread
+};
+
 class CAccounts
 {
 	CGameContext *m_pGameServer;
@@ -62,28 +71,27 @@ class CAccounts
 	CGameContext *GameServer() const { return m_pGameServer; }
 	IServer *Server() const;
 
-	// Wait helper for simple synchronous flows (register/login).
-	// Returns true if completed and successful.
-	bool WaitForResult(const std::shared_ptr<struct ISqlResult> &pRes, const char *pOpName, int TimeoutMs = 2000);
-
 	// Password hashing
 	SHA256_DIGEST HashPassword(const char *pPassword);
+
+	std::vector<CPendingAccResult> m_vPending; 
+	void AddPending(const std::shared_ptr<CAccResult> &pRes, std::function<void(CAccResult &)> &&Cb);
 
 public:
 	// Pool-aware init. Pass the same pool used by CScore.
 	void Init(CGameContext *pGameServer, CDbConnectionPool *pPool);
 
-	// Account operations
+	void Tick();
+
 	bool Register(int ClientId, const char *pUsername, const char *pPassword, const char *pPassword2);
-	bool ChangePassword(int ClientId, const char *pOldPassword, const char *pNewPassword, const char *pNewPassword2);
+	bool ChangePassword(int ClientId, const char *pOldPassword, const char *pNewPassword, const char *pNewPassword2); // unchanged (fire-and-forget write)
 
-	void AutoLogin(int ClientId);
-	bool ForceLogin(int ClientId, const char *pUsername);
+	void AutoLogin(int ClientId); // async
+	bool ForceLogin(int ClientId, const char *pUsername, bool Silent = false, bool Auto = false); // async
 
-	bool Login(int ClientId, const char *pUsername, const char *pPassword);
-	bool Logout(int ClientId);
+	void Login(int ClientId, const char *pUsername, const char *pPassword); // async
+	bool Logout(int ClientId); // immediate
 
-	// In-memory session -> DB persist helpers
 	void OnLogin(int ClientId, const struct CAccResult &Res);
 	void OnLogout(int ClientId, const CAccountSession AccInfo);
 
@@ -91,23 +99,16 @@ public:
 	void DisableAccount(const char *pUsername, bool Disable);
 
 	void LogoutAllAccountsPort(int Port);
-	void ShowAccProfile(int ClientId, const char *pName);
+	void ShowAccProfile(int ClientId, const char *pName); // async
 
 	void SaveAllAccounts();
 
-	void Top5(int ClientId, const char *pType, int Offset = 0);
-
-	std::optional<CAccountSession> GetAccount(const char *pUsername);
-	std::optional<CAccountSession> GetAccountCurName(const char *pLastName);
-
-	CAccountSession GetAccount(int ClientId);
+	void Top5(int ClientId, const char *pType, int Offset = 0); // async
 
 	void SetPlayerName(int ClientId, const char *pName);
-	void EditAccount(const char *pUsername, const char *pVariable, const char *pValue);
+	void EditAccount(const char *pUsername, const char *pVariable, const char *pValue); // async
 
-	// Returns 0 if not logged in and the current port if logged in
-	int IsAccountLoggedIn(const char *pUsername);
-
+	// Returns XP needed for next level
 	int NeededXP(int Level);
 };
 

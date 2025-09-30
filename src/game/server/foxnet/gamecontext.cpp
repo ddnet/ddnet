@@ -37,6 +37,9 @@ void CGameContext::FoxNetTick()
 	HandleEffects();
 	PowerUpSpawner();
 
+	// process async db account results
+	m_AccountManager.Tick();
+
 	if(Server()->Tick() % (Server()->TickSpeed() * 60 * 60 * 12) == 0) // every 12 hours
 		m_IsWeekend = IsWeekend();
 
