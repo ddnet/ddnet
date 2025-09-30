@@ -55,8 +55,8 @@ static const bool asciiTable[256][GlyphH][GlyphW] = {
 	{{true, false, true}, {true, false, false}, {false, true, false}, {false, false, true}, {true, false, true}}, // ascii 37 %
 	{{false, false, false}, {false, false, false}, {false, false, false}, {false, false, false}, {false, false, false}}, // ascii 38
 	{{false, false, false}, {false, false, false}, {false, false, false}, {false, false, false}, {false, false, false}}, // ascii 39
-	{{false, true, false}, {true, false, false}, {true, false, false}, {true, false, false}, {false, true, false}}, // ascii 4false (
-	{{false, true, false}, {false, false, true}, {false, false, true}, {false, false, true}, {false, true, false}}, // ascii 4true )
+	{{false, true, false}, {true, false, false}, {true, false, false}, {true, false, false}, {false, true, false}}, // ascii 40 (
+	{{false, true, false}, {false, false, true}, {false, false, true}, {false, false, true}, {false, true, false}}, // ascii 41 )
 	{{false, false, false}, {false, false, false}, {false, false, false}, {false, false, false}, {false, false, false}}, // ascii 42
 	{{false, false, false}, {false, true, false}, {true, true, true}, {false, true, false}, {false, false, false}}, // ascii 43 +
 	{{false, false, false}, {false, false, false}, {false, false, false}, {false, true, false}, {true, false, false}}, // ascii 44 ,
@@ -75,7 +75,7 @@ static const bool asciiTable[256][GlyphH][GlyphW] = {
 	{{true, true, true}, {true, false, true}, {true, true, true}, {false, false, true}, {true, true, true}}, // 9
 	{{false, false, false}, {false, true, false}, {false, false, false}, {false, true, false}, {false, false, false}}, // :
 	{{false, false, false}, {false, false, false}, {false, false, false}, {false, false, false}, {false, false, false}}, // ascii 59
-	{{false, false, false}, {false, false, false}, {false, false, false}, {false, false, false}, {false, false, false}}, // ascii 6false
+	{{false, false, false}, {false, false, false}, {false, false, false}, {false, false, false}, {false, false, false}}, // ascii 60
 	{{false, false, false}, {true, true, true}, {false, false, false}, {true, true, true}, {false, false, false}}, // ascii 6true =
 	{{false, false, false}, {false, false, false}, {false, false, false}, {false, false, false}, {false, false, false}}, // ascii 62
 	{{false, false, false}, {false, false, false}, {false, false, false}, {false, false, false}, {false, false, false}}, // ascii 63
@@ -102,7 +102,7 @@ static const bool asciiTable[256][GlyphH][GlyphW] = {
 	{{true, true, true}, {false, true, false}, {false, true, false}, {false, true, false}, {false, true, false}}, // T
 	{{false, false, false}, {false, false, false}, {true, false, true}, {true, false, true}, {true, true, true}}, // U
 	{{false, false, false}, {false, false, false}, {true, false, true}, {true, true, true}, {false, true, false}}, // V
-	{{true, false, true}, {true, false, true}, {true, true, true}, {true, true, true}, {true, true, true}}, // W
+	{{true, false, true}, {true, false, true}, {true, true, true}, {true, false, true}, {true, true, true}}, // W
 	{{false, false, false}, {false, false, false}, {true, false, true}, {false, true, false}, {true, false, true}}, // X
 	{{true, false, true}, {true, false, true}, {true, true, true}, {false, true, false}, {false, true, false}}, // Y
 	{{true, true, true}, {false, false, true}, {false, true, false}, {true, false, false}, {true, true, true}}, // Z
@@ -358,9 +358,13 @@ inline void CText::SetData(float Cell)
 }
 
 inline CText::CText(CGameWorld *pGameWorld, vec2 Pos, int Owner, int AliveTicks, const char *pText, int EntType) :
-	CEntity(pGameWorld, EntType), m_Owner(Owner), m_AliveTicks(AliveTicks), m_CurTicks(0), m_StartTick(Server()->Tick())
+	CEntity(pGameWorld, EntType, Pos)
 {
-
+	m_AliveTicks = AliveTicks;
+	m_CurTicks = 0;
+	m_Owner = Owner;
+	m_StartTick = Server()->Tick();
+	str_copy(m_aText, pText ? pText : "", sizeof(m_aText));
 }
 
 class CProjectileText : public CText

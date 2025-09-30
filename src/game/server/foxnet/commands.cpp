@@ -1626,8 +1626,8 @@ void CGameContext::ConProjectileText(IConsole::IResult *pResult, void *pUserData
 
 void CGameContext::RegisterFoxNetCommands()
 {
-	Console()->Register("lasertext", "s[string]", CFGFLAG_SERVER, ConLaserText, this, "laser text");
-	Console()->Register("projectiletext", "s[string]", CFGFLAG_SERVER, ConProjectileText, this, "projectile text");
+	Console()->Register("lasertext", "r[string]", CFGFLAG_SERVER, ConLaserText, this, "laser text");
+	Console()->Register("projectiletext", "r[string]", CFGFLAG_SERVER, ConProjectileText, this, "projectile text");
 
 	Console()->Register("chat_string_add", "s[string] s[reason] i[should Ban] i[bantime] ?f[addition]", CFGFLAG_SERVER, ConAddChatDetectionString, this, "Add a string to the chat detection list");
 	Console()->Register("chat_string_remove", "s[name]", CFGFLAG_SERVER, ConRemoveChatDetectionString, this, "Remove a string from the chat detection list");

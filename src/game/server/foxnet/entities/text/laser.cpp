@@ -10,7 +10,7 @@
 
 #include "text.h"
 
-constexpr float CellSize = 8.0f;
+constexpr float CellSize = 16.0f;
 
 CLaserText::CLaserText(CGameWorld *pGameWorld, vec2 Pos, int Owner, int AliveTicks, const char *pText) :
 	CText(pGameWorld, Pos, Owner, AliveTicks, pText, CGameWorld::ENTTYPE_LASER)
