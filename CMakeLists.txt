@@ -2816,9 +2816,6 @@ if(SERVER)
     foxnet/cosmetics/staff_ind.h
     foxnet/entities/custom_projectile.cpp
     foxnet/entities/custom_projectile.h
-    foxnet/entities/text/projectile.cpp
-    foxnet/entities/text/laser.cpp
-    foxnet/entities/text/text.h
     foxnet/entities/light_saber.cpp
     foxnet/entities/light_saber.h
     foxnet/entities/pickupdrop.cpp
@@ -2829,6 +2826,9 @@ if(SERVER)
     foxnet/entities/powerup.h
     foxnet/entities/roulette.cpp
     foxnet/entities/roulette.h
+    foxnet/entities/text/laser.cpp
+    foxnet/entities/text/projectile.cpp
+    foxnet/entities/text/text.h
     foxnet/fontconvert.cpp
     foxnet/fontconvert.h
     foxnet/gamecontext.cpp
