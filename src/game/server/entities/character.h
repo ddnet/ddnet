@@ -380,7 +380,7 @@ private:
 	void HandleSpawnSolo();
 	void FoxNetSpawn();
 
-	void HandleQuads(const vec2 TL, const vec2 TR, const vec2 BL, const vec2 BR, int Type) override;
+	void HandleQuads();
 	void HandleQuadStopa(const vec2 TL, const vec2 TR, const vec2 BL, const vec2 BR);
 	// FoxNet>
 };

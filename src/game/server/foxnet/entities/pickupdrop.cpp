@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "pickupdrop.h"
+#include <game/layers.h>
 
 CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, int LastOwner, vec2 Pos, int Team, int TeleCheckpoint, vec2 Dir, int Lifetime, int Type) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUPDROP, Pos, 28)
@@ -110,6 +111,8 @@ void CPickupDrop::Tick()
 		m_Vel.y += GameServer()->TuningList()[m_TuneZone].m_Gravity;
 
 	HandleSkippableTiles(CurrentIndex);
+
+	HandleQuads();
 
 	// tiles
 	std::vector<int> vIndices = Collision()->GetMapIndices(m_PrevPos, m_Pos);
@@ -525,50 +528,48 @@ void CPickupDrop::ForceSetPos(vec2 NewPos)
 	m_PrevPos = m_Pos;
 }
 
-void CPickupDrop::HandleQuads(const vec2 TL, const vec2 TR, const vec2 BL, const vec2 BR, int Type)
+void CPickupDrop::HandleQuads()
 {
-	float TestRadius = 0.0f;
-	if(Type == CCollision::QUADTYPE_DEATH)
-		TestRadius = 8.0f;
-	else if(Type == CCollision::QUADTYPE_STOPA)
-		TestRadius = CCharacterCore::PhysicalSize() * 0.5f;
-
-	if(!Collision()->InsideQuad(m_Pos, TestRadius, TL, TR, BL, BR))
-		return;
-
-	switch(Type)
+	std::vector<SQuadData *> pQuads = Collision()->GetQuadsAt(m_Pos);
+	for(const SQuadData *pQuad : pQuads)
 	{
-	case CCollision::QUADTYPE_FREEZE:
-		if(g_Config.m_SvDropsInFreezeFloat)
-			m_InsideFreeze = true;
-		break;
+		if(pQuad->m_Type < QUADTYPE_FREEZE || pQuad->m_Type >= NUM_QUADTYPES)
+			continue;
 
-	case CCollision::QUADTYPE_DEATH:
-		Reset();
-		break;
-
-	case CCollision::QUADTYPE_STOPA:
-		HandleQuadStopa(TL, TR, BL, BR);
-		break;
-
-	case CCollision::QUADTYPE_CFRM:
-		for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
+		switch(pQuad->m_Type)
 		{
-			if(!Collision()->TeleCheckOuts(k).empty())
+		case QUADTYPE_FREEZE:
+			if(g_Config.m_SvDropsInFreezeFloat)
+				m_InsideFreeze = true;
+			break;
+
+		case QUADTYPE_DEATH:
+			Reset();
+			break;
+
+		case QUADTYPE_STOPA:
+			HandleQuadStopa(pQuad->m_Pos[0], pQuad->m_Pos[1], pQuad->m_Pos[2], pQuad->m_Pos[3]);
+			break;
+
+		case QUADTYPE_CFRM:
+			for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
 			{
-				int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleCheckOuts(k).size());
-				m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
-				m_Vel = vec2(0, 0);
-				return;
+				if(!Collision()->TeleCheckOuts(k).empty())
+				{
+					int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleCheckOuts(k).size());
+					m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
+					m_Vel = vec2(0, 0);
+					return;
+				}
 			}
+			vec2 SpawnPos;
+			if(GameServer()->m_pController->CanSpawn(0, &SpawnPos, m_Team))
+			{
+				m_Pos = SpawnPos;
+				m_Vel = vec2(0, 0);
+			}
+			break;
 		}
-		vec2 SpawnPos;
-		if(GameServer()->m_pController->CanSpawn(0, &SpawnPos, m_Team))
-		{
-			m_Pos = SpawnPos;
-			m_Vel = vec2(0, 0);
-		}
-		break;
 	}
 }
 

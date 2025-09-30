@@ -17,7 +17,17 @@ class CSwitchTile;
 class CTuneTile;
 class CDoorTile;
 // <FoxNet
+class CQuad;
 class CMapItemLayerQuads;
+
+struct SQuadData
+{
+	CQuad *m_pQuad = nullptr;
+	CMapItemLayerQuads *m_pLayer = nullptr;
+	size_t m_Type = 0;
+	vec2 m_Pos[5];
+	float m_Angle;
+};
 // FoxNet>
 
 enum
@@ -170,8 +180,6 @@ private:
 	std::map<int, std::vector<vec2>> m_TeleOthers;
 
 	// <FoxNet
-	std::vector<CMapItemLayerQuads *> m_vQuadLayers;
-
 	double m_Time;
 	struct SAnimationTransformCache
 	{
@@ -180,28 +188,20 @@ private:
 		int PosEnv = -1;
 		int PosEnvOffset = 0;
 	};
-	void GetAnimationTransform(float GlobalTime, int Env, class CLayers *pLayers, vec2 &Position, float &Angle) const;
+	void GetAnimationTransform(float GlobalTime, int Env, vec2 &Position, float &Angle) const;
 	std::vector<vec2> m_SpawnCandidates;
+	std::vector<SQuadData> m_vQuads;
 
 public:
-	enum QuadType
-	{
-		QUADTYPE_FREEZE = 0,
-		QUADTYPE_UNFREEZE,
-		QUADTYPE_DEATH,
-		QUADTYPE_STOPA,
-		QUADTYPE_CFRM,
-		NUM_QUADTYPES
-	};
+	const std::vector<SQuadData> QuadLayers() const { return m_vQuads; }
+	void UpdateQuadCache();
 
-	int GetQuadType(const CMapItemLayerQuads *pQuadLayer) const;
+	std::vector<SQuadData *> GetQuadsAt(vec2 Pos);
 
-	const std::vector<CMapItemLayerQuads *> &QuadLayers() const { return m_vQuadLayers; }
 	void ClearQuadLayers();
 	void Rotate(vec2 Center, vec2 *pPoint, float Rotation) const;
 
 	void SetTime(double Time) { m_Time = Time; }
-	int GetQuadCorners(int StartNum, const CMapItemLayerQuads *pQuadLayer, float ExtraTime = 0.0, vec2 *pTopLCorner = nullptr, vec2 *pTopRCorner = nullptr, vec2 *pBottomLCorner = nullptr, vec2 *pBottomRCorner = nullptr) const;
 	bool InsideQuad(vec2 Pos, float Radius, vec2 TopLCorner, vec2 TopRCorner, vec2 BottomLCorner, vec2 BottomRCorner) const;
 
 	void CollectMapSpawnPoints(std::vector<vec2> &OutSeeds) const;

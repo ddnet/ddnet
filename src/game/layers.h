@@ -12,6 +12,26 @@ class CMapItemLayerTilemap;
 
 // <FoxNet
 class CMapItemLayerQuads;
+constexpr char ValidQuadNames[5][30] = {
+	"QFr",
+	"QUnFr",
+	"QDeath",
+	"QStopa",
+	"QCfrm"
+};
+
+enum QuadTypes
+{
+	// Follows order of ValidQuadNames
+	QUADTYPE_NONE = -1,
+	QUADTYPE_FREEZE,
+	QUADTYPE_UNFREEZE,
+	QUADTYPE_DEATH,
+	QUADTYPE_STOPA,
+	QUADTYPE_CFRM,
+	NUM_QUADTYPES
+};
+// FoxNet>
 // FoxNet>
 
 class CLayers
@@ -38,12 +58,6 @@ public:
 	CMapItemLayerTilemap *TuneLayer() const { return m_pTuneLayer; }
 	// <FoxNet
 	const std::vector<CMapItemLayerQuads *> &QuadLayers() const { return m_vQuadLayers; }
-	char ValidQuadNames[5][30] = {
-		"QFr",
-		"QUnFr",
-		"QDeath",
-		"QStopa",
-		"QCfrm"};
 	// FoxNet>
 
 private:

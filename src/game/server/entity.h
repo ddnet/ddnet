@@ -76,10 +76,6 @@ public: // TODO: Maybe make protected
 	const vec2 &GetPos() const { return m_Pos; }
 	float GetProximityRadius() const { return m_ProximityRadius; }
 
-	// <FoxNet
-	virtual void HandleQuads(const vec2 TL, const vec2 TR, const vec2 BL, const vec2 BR, int Type) {}
-	// FoxNet>
-
 	/* Other functions */
 
 	/*

@@ -45,6 +45,7 @@ void CGameContext::FoxNetTick()
 
 	// Set moving tiles time for quads with pos envelopes
 	m_Collision.SetTime(m_pController->GetTime());
+	m_Collision.UpdateQuadCache();
 
 	// Save all logged in accounts every 15 minutes
 	if(Server()->Tick() % (Server()->TickSpeed() * 60 * 15) == 0)
@@ -889,36 +890,29 @@ int CGameContext::GetWeaponType(int Weapon)
 void CGameContext::SnapDebuggedQuad(int ClientId)
 {
 	CPlayer *pPlayer = m_apPlayers[ClientId];
-
 	if(!pPlayer || !g_Config.m_SvDebugQuadPos)
 		return;
 
-	if(!m_vQuadDebugIds.empty())
+	const auto &Quads = Collision()->QuadLayers();
+	if(Quads.empty() || m_vQuadDebugIds.empty())
+		return;
+
+	const size_t Count = std::min(Quads.size(), m_vQuadDebugIds.size());
+
+	for(size_t i = 0; i < Count; ++i)
 	{
-		int GetId = 0;
-		for(const auto *pQuadLayer : Collision()->QuadLayers())
+		const SQuadData &Quad = Quads[i];
+		const vec2 TopLeft = Quad.m_Pos[0];
+
+		if(CNetObj_DDNetLaser *pObj = Server()->SnapNewItem<CNetObj_DDNetLaser>(m_vQuadDebugIds[i]))
 		{
-			if(!pQuadLayer)
-				continue;
-
-			for(int i = 0; i < pQuadLayer->m_NumQuads; i++)
-			{
-				vec2 TopLeft;
-				Collision()->GetQuadCorners(i, pQuadLayer, 0.0f, &TopLeft);
-
-				CNetObj_DDNetLaser *pObj = Server()->SnapNewItem<CNetObj_DDNetLaser>(m_vQuadDebugIds.at(GetId));
-				if(pObj)
-				{
-					pObj->m_ToX = (int)TopLeft.x;
-					pObj->m_ToY = (int)TopLeft.y;
-					pObj->m_FromX = (int)TopLeft.x;
-					pObj->m_FromY = (int)TopLeft.y;
-					pObj->m_StartTick = Server()->Tick();
-					pObj->m_Owner = -1;
-					pObj->m_Flags = LASERFLAG_NO_PREDICT;
-				}
-				GetId++;
-			}
+			pObj->m_ToX = (int)TopLeft.x;
+			pObj->m_ToY = (int)TopLeft.y;
+			pObj->m_FromX = (int)TopLeft.x;
+			pObj->m_FromY = (int)TopLeft.y;
+			pObj->m_StartTick = Server()->Tick();
+			pObj->m_Owner = -1;
+			pObj->m_Flags = LASERFLAG_NO_PREDICT;
 		}
 	}
 }
@@ -927,23 +921,13 @@ void CGameContext::QuadDebugIds(bool Clear)
 {
 	if(Clear)
 	{
-		for(const auto *pQuadLayer : Collision()->QuadLayers())
-		{
-			if(!pQuadLayer)
-				continue;
-
-			for(int i = 0; i < pQuadLayer->m_NumQuads; i++)
-			{
-				m_vQuadDebugIds.push_back(Server()->SnapNewId());
-			}
-		}
+		for(const SQuadData &QuadData : Collision()->QuadLayers())
+			m_vQuadDebugIds.push_back(Server()->SnapNewId());
 	}
 	else if(!Clear && !m_vQuadDebugIds.empty())
 	{
 		for(int i = 0; i < (int)m_vQuadDebugIds.size(); i++)
-		{
 			Server()->SnapFreeId(m_vQuadDebugIds[i]);
-		}
 		m_vQuadDebugIds.clear();
 	}
 }

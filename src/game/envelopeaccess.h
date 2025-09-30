@@ -38,4 +38,5 @@ public:
 	const CEnvPointBezier *GetBezier(int Index) const override;
 };
 
+float SolveBezier(float x, float p0, float p1, float p2, float p3);
 #endif // GAME_SERVER_FOXNET_ENVELOPEACCESS_H

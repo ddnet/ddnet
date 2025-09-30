@@ -1116,13 +1116,6 @@ void CCharacter::DDRacePostCoreTick()
 
 	// <FoxNet
 	m_InQuadFreeze = false;
-	for(const auto *pQuadLayer : Collision()->QuadLayers())
-	{
-		for(int QuadIndex = 0; QuadIndex < pQuadLayer->m_NumQuads; QuadIndex++)
-		{
-			HandleQuads(pQuadLayer, QuadIndex);
-		}
-	}
 	// FoxNet>
 
 	int CurrentIndex = Collision()->GetMapIndex(m_Pos);
@@ -1541,120 +1534,11 @@ CCharacter::~CCharacter()
 // <FoxNet
 void CCharacter::HandleQuads(const CMapItemLayerQuads *pQuadLayer, int QuadIndex)
 {
-	if(!pQuadLayer)
-		return;
-
-	char QuadName[30] = "";
-	IntsToStr(pQuadLayer->m_aName, std::size(pQuadLayer->m_aName), QuadName, std::size(QuadName));
-
-	bool IsFreeze = !str_comp("QFr", QuadName);
-	bool IsUnFreeze = !str_comp("QUnFr", QuadName);
-	bool IsStopa = !str_comp("QStopa", QuadName);
-
-	vec2 TopL, TopR, BottomL, BottomR;
-	int FoundNum = Collision()->GetQuadCorners(QuadIndex, pQuadLayer, 0.00f, &TopL, &TopR, &BottomL, &BottomR);
-	if(FoundNum < 0 || FoundNum >= pQuadLayer->m_NumQuads)
-		return;
-
-	float Radius = 0.0f;
-	if(IsStopa)
-		Radius = CCharacterCore::PhysicalSize();
-
-	bool Inside = Collision()->InsideQuad(m_Pos, Radius, TopL, TopR, BottomL, BottomR);
-	if(!Inside)
-		return;
-
-	if(IsFreeze)
-	{
-		m_InQuadFreeze = true;
-	}
-	else if(IsUnFreeze)
-	{
-		UnFreeze();
-		m_InQuadFreeze = false;
-	}
-	else if(IsStopa)
-	{
-		HandleQuadStopa(pQuadLayer, QuadIndex);
-	}
+	
 }
 
 void CCharacter::HandleQuadStopa(const CMapItemLayerQuads *pQuadLayer, int QuadIndex)
 {
-	if(!pQuadLayer)
-		return;
-
-	vec2 TL, TR, BL, BR;
-	int Found = Collision()->GetQuadCorners(QuadIndex, pQuadLayer, 0.0f, &TL, &TR, &BL, &BR);
-	if(Found < 0 || Found >= pQuadLayer->m_NumQuads)
-		return;
-
-	const float R = GetProximityRadius() * 0.5f;
-	const vec2 P = m_Core.m_Pos;
-
-	const vec2 aA[4] = {TL, TR, BR, BL};
-	const vec2 aB[4] = {TR, BR, BL, TL};
-
-	float MinPenetration = std::numeric_limits<float>::infinity();
-	vec2 BestInwardNormal = vec2(0.f, 0.f);
-
-	for(int i = 0; i < 4; ++i)
-	{
-		vec2 E = aB[i] - aA[i];
-		float Elen2 = dot(E, E);
-		if(Elen2 <= 1e-6f)
-			continue;
-
-		vec2 N_in = normalize(vec2(-E.y, E.x));
-		float d = dot(P - aA[i], N_in);
-		float penetration = d + R;
-
-		if(penetration < MinPenetration)
-		{
-			MinPenetration = penetration;
-			BestInwardNormal = N_in;
-		}
-	}
-
-	if(MinPenetration == std::numeric_limits<float>::infinity())
-		return;
-
-	if(MinPenetration > 0.0f)
-	{
-		const float Epsilon = 0.0f;
-		vec2 MTV = -BestInwardNormal * (MinPenetration + Epsilon);
-
-		const vec2 BoxSize = CCharacterCore::PhysicalSizeVec2();
-		vec2 TargetPos = m_Core.m_Pos + MTV;
-
-		auto IsCollidingAt = [&](const vec2 &Pos) -> bool {
-			return Collision()->TestBox(Pos, BoxSize);
-		};
-
-		if(IsCollidingAt(TargetPos))
-		{
-			float lo = 0.0f, hi = 1.0f;
-			for(int iter = 0; iter < 10; ++iter)
-			{
-				float mid = (lo + hi) * 0.5f;
-				vec2 midPos = m_Core.m_Pos + MTV * mid;
-				if(IsCollidingAt(midPos))
-					hi = mid;
-				else
-					lo = mid;
-			}
-
-			if(lo > 0.0f)
-				m_Core.m_Pos += MTV * lo;
-		}
-		else
-		{
-			m_Core.m_Pos = TargetPos;
-		}
-
-		float vIn = dot(m_Core.m_Vel, BestInwardNormal);
-		if(vIn > 0.0f)
-			m_Core.m_Vel -= BestInwardNormal * vIn;
-	}
+	
 }
 // FoxNet>

@@ -2569,6 +2569,10 @@ void CCharacter::DDRacePostCoreTick()
 	if(!m_Alive)
 		return;
 
+	// <FoxNet
+	HandleQuads();
+	// FoxNet>
+
 	// handle Anti-Skip tiles
 	std::vector<int> vIndices = Collision()->GetMapIndices(m_PrevPos, m_Pos);
 	if(!vIndices.empty())
@@ -3503,77 +3507,78 @@ void CCharacter::SetActiveWeapon(int ActiveWeap)
 	UpdateWeaponIndicator();
 }
 
-void CCharacter::HandleQuads(const vec2 TL, const vec2 TR, const vec2 BL, const vec2 BR, int Type)
+void CCharacter::HandleQuads()
 {
-	float TestRadius = 0.0f;
-	if(Type == CCollision::QUADTYPE_DEATH)
-		TestRadius = 8.0f;
-	else if(Type == CCollision::QUADTYPE_STOPA)
-		TestRadius = CCharacterCore::PhysicalSize() * 0.5f;
-
 	m_InQuadFreeze = false;
 
-	if(!Collision()->InsideQuad(m_Pos, TestRadius, TL, TR, BL, BR))
-		return;
-
-	switch(Type)
+	vec2 TL, TR, BL, BR;
+	std::vector<SQuadData *> pQuads = Collision()->GetQuadsAt(m_Pos);
+	for(const SQuadData *pQuad : pQuads)
 	{
-	case CCollision::QUADTYPE_FREEZE:
-		Freeze();
-		m_InQuadFreeze = true;
-		break;
-	case CCollision::QUADTYPE_UNFREEZE:
-		if(!Core()->m_IsInFreeze)
-		{
-			UnFreeze();
-			m_InQuadFreeze = false;
-		}
-		break;
-	case CCollision::QUADTYPE_DEATH:
-		Die(GetPlayer()->GetCid(), WEAPON_WORLD);
-		break;
-	case CCollision::QUADTYPE_STOPA:
-		HandleQuadStopa(TL, TR, BL, BR);
-		break;
-	case CCollision::QUADTYPE_CFRM:
-		// Teleport to last tele checkpoint out, or spawn if none
-		if(Core()->m_Super || Core()->m_Invincible)
+		if(pQuad->m_Type < QUADTYPE_FREEZE || pQuad->m_Type >= NUM_QUADTYPES)
+			continue;
+		if(!m_Alive)
 			return;
-		// First try TeleCheckOuts from current to older checkpoints
-		bool Teleported = false;
-		for(int k = m_TeleCheckpoint - 1; k >= 0; --k)
+
+		switch(pQuad->m_Type)
 		{
-			const auto &outs = Collision()->TeleCheckOuts(k);
-			if(!outs.empty())
+		case QUADTYPE_FREEZE:
+			Freeze();
+			m_InQuadFreeze = true;
+			break;
+		case QUADTYPE_UNFREEZE:
+			if(!Core()->m_IsInFreeze)
 			{
-				const int idx = GameWorld()->m_Core.RandomOr0(outs.size());
-				SetPosition(outs[idx]);
-				ResetVelocity();
-				if(!g_Config.m_SvTeleportHoldHook)
-				{
-					ResetHook();
-					GameWorld()->ReleaseHooked(GetPlayer()->GetCid());
-				}
-				Teleported = true;
-				break;
+				UnFreeze();
+				m_InQuadFreeze = false;
 			}
-		}
-		// If none found, teleport to spawn
-		if(!Teleported)
-		{
-			vec2 SpawnPos;
-			if(GameServer()->m_pController->CanSpawn(GetPlayer()->GetTeam(), &SpawnPos, GameServer()->GetDDRaceTeam(GetPlayer()->GetCid())))
+			break;
+		case QUADTYPE_DEATH:
+			Die(GetPlayer()->GetCid(), WEAPON_WORLD);
+			break;
+		case QUADTYPE_STOPA:
+			HandleQuadStopa(pQuad->m_Pos[0], pQuad->m_Pos[1], pQuad->m_Pos[2], pQuad->m_Pos[3]);
+			break;
+		case QUADTYPE_CFRM:
+			// Teleport to last tele checkpoint out, or spawn if none
+			if(Core()->m_Super || Core()->m_Invincible)
+				return;
+			// First try TeleCheckOuts from current to older checkpoints
+			bool Teleported = false;
+			for(int k = m_TeleCheckpoint - 1; k >= 0; --k)
 			{
-				SetPosition(SpawnPos);
-				ResetVelocity();
-				if(!g_Config.m_SvTeleportHoldHook)
+				const auto &outs = Collision()->TeleCheckOuts(k);
+				if(!outs.empty())
 				{
-					ResetHook();
-					GameWorld()->ReleaseHooked(GetPlayer()->GetCid());
+					const int idx = GameWorld()->m_Core.RandomOr0(outs.size());
+					SetPosition(outs[idx]);
+					ResetVelocity();
+					if(!g_Config.m_SvTeleportHoldHook)
+					{
+						ResetHook();
+						GameWorld()->ReleaseHooked(GetPlayer()->GetCid());
+					}
+					Teleported = true;
+					break;
 				}
 			}
+			// If none found, teleport to spawn
+			if(!Teleported)
+			{
+				vec2 SpawnPos;
+				if(GameServer()->m_pController->CanSpawn(GetPlayer()->GetTeam(), &SpawnPos, GameServer()->GetDDRaceTeam(GetPlayer()->GetCid())))
+				{
+					SetPosition(SpawnPos);
+					ResetVelocity();
+					if(!g_Config.m_SvTeleportHoldHook)
+					{
+						ResetHook();
+						GameWorld()->ReleaseHooked(GetPlayer()->GetCid());
+					}
+				}
+			}
+			break;
 		}
-		break;
 	}
 }
 

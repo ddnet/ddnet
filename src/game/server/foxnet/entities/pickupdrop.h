@@ -22,14 +22,16 @@ class CPickupDrop : public CEntity
 	int m_Team;
 
 	vec2 m_GroundElasticity;
+	vec2 m_PrevPos;
+	vec2 m_Vel;
+	CClientMask m_TeamMask;
 
 	static bool IsSwitchActiveCb(int Number, void *pUser);
 	bool IsGrounded();
 	void HandleSkippableTiles(int Index);
 	void HandleTiles(int Index);
-	vec2 m_PrevPos;
-	vec2 m_Vel;
-
+	void HandleQuads();
+	void HandleQuadStopa(const vec2 TL, const vec2 TR, const vec2 BL, const vec2 BR);
 	int m_TeleCheckpoint;
 	int m_TileIndex;
 	int m_TileFIndex;
@@ -38,8 +40,6 @@ class CPickupDrop : public CEntity
 
 	bool CollectItem();
 	bool CheckArmor();
-
-	CClientMask m_TeamMask;
 
 public:
 	int Team() const { return m_Team; }
@@ -60,8 +60,6 @@ public:
 	void Reset() override { Reset(false); }
 	void Tick() override;
 	void Snap(int SnappingClient) override;
-	void HandleQuads(const vec2 TL, const vec2 TR, const vec2 BL, const vec2 BR, int Type) override;
-	void HandleQuadStopa(const vec2 TL, const vec2 TR, const vec2 BL, const vec2 BR);
 };
 
 #endif // GAME_SERVER_FOXNET_ENTITIES_PICKUPDROP_H

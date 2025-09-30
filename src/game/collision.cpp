@@ -20,6 +20,7 @@
 #include <utility>
 #include <deque>
 #include <base/log.h>
+#include "gamecore.h"
 
 vec2 ClampVel(int MoveRestriction, vec2 Vel)
 {
@@ -153,11 +154,37 @@ void CCollision::Init(class CLayers *pLayers)
 		}
 	}
 	// <FoxNet
-	m_vQuadLayers = m_pLayers->QuadLayers();
-	int Quads = 0;
-	for(const auto pQuadLayers : m_vQuadLayers)
-		Quads += pQuadLayers->m_NumQuads;
-	log_info("moving-tiles", "%d valid quadlayer with %d quads", (int)m_vQuadLayers.size(), Quads);
+	int Index = 0;
+	for(const auto pQuadLayers : m_pLayers->QuadLayers())
+	{
+		CQuad *pQuads = (CQuad *)m_pLayers->Map()->GetDataSwapped(pQuadLayers->m_Data);
+		for(int i = 0; i < pQuadLayers->m_NumQuads; i++)
+		{
+			char QuadName[30] = "";
+
+			IntsToStr(pQuadLayers->m_aName, std::size(pQuadLayers->m_aName), QuadName, std::size(QuadName));
+
+			SQuadData QuadData;
+			QuadData.m_pQuad = &pQuads[i];
+			QuadData.m_pLayer = pQuadLayers;
+			QuadData.m_Type = QUADTYPE_NONE;
+			for(size_t n = 0; n < std::size(ValidQuadNames); n++)
+			{
+				if(!str_comp(QuadName, ValidQuadNames[n]))
+				{
+					QuadData.m_Type = n;
+					break;
+				}
+			}
+			if(QuadData.m_Type == QUADTYPE_NONE)
+				continue;
+			m_vQuads.push_back(QuadData);
+		}
+		Index++;
+	}
+
+	int QuadLayers = (int)m_pLayers->QuadLayers().size();
+	log_info("moving-tiles", "%d valid quadlayer%s with %d quads", QuadLayers, QuadLayers > 1 ? "s" : "", m_vQuads.size());
 	BuildSpawnCandidatesOnLoad();
 	// FoxNet>
 }
@@ -184,7 +211,7 @@ void CCollision::Unload()
 	delete[] m_pDoor;
 	m_pDoor = nullptr;
 	// <FoxNet
-	m_vQuadLayers.clear();
+	ClearQuadLayers();
 	m_SpawnCandidates.clear();
 	// FoxNet>
 }
@@ -1316,7 +1343,7 @@ size_t CCollision::TeleAllSize(int Number)
 // <FoxNet
 void CCollision::ClearQuadLayers()
 {
-	m_vQuadLayers.clear();
+	m_vQuads.clear();
 }
 
 void CCollision::Rotate(vec2 Center, vec2 *pPoint, float Rotation) const
@@ -1327,162 +1354,41 @@ void CCollision::Rotate(vec2 Center, vec2 *pPoint, float Rotation) const
 	pPoint->y = (x * sinf(Rotation) + y * cosf(Rotation) + Center.y);
 }
 
-int CCollision::GetQuadCorners(int StartNum, const CMapItemLayerQuads *pQuadLayer, float ExtraTime, vec2 *pTopLCorner, vec2 *pTopRCorner, vec2 *pBottomLCorner, vec2 *pBottomRCorner) const
+std::vector<SQuadData *> CCollision::GetQuadsAt(vec2 Pos)
 {
-	if(!pQuadLayer)
-		return -1;
+	std::vector<SQuadData *> vpQuads;
 
-	int Num = StartNum;
-	SAnimationTransformCache AnimationCache;
-
-	CQuad *pQuads = (CQuad *)m_pLayers->Map()->GetDataSwapped(pQuadLayer->m_Data);
-
-	vec2 Position(0.0f, 0.0f);
-	float Angle = 0.0f;
-	if(pQuads[Num].m_PosEnv >= 0)
+	for(auto &QuadData : m_vQuads)
 	{
-		if(pQuads[Num].m_PosEnv != AnimationCache.PosEnv || AnimationCache.PosEnvOffset != pQuads[Num].m_PosEnvOffset)
+		float TestRadius = 0.f;
+		if(QuadData.m_Type == QUADTYPE_DEATH)
+			TestRadius = 8.f;
+		else if(QuadData.m_Type == QUADTYPE_STOPA)
+			TestRadius = CCharacterCore::PhysicalSize() * 0.5f;
+
+		if(InsideQuad(Pos, TestRadius, QuadData.m_Pos[0], QuadData.m_Pos[1], QuadData.m_Pos[2], QuadData.m_Pos[3]))
 		{
-			AnimationCache.PosEnv = pQuads[Num].m_PosEnv;
-			AnimationCache.PosEnvOffset = pQuads[Num].m_PosEnvOffset;
-			GetAnimationTransform(m_Time + ExtraTime + (AnimationCache.PosEnvOffset / 1000.0), AnimationCache.PosEnv, m_pLayers, AnimationCache.Position, AnimationCache.Angle);
+			vpQuads.push_back(&QuadData);
 		}
-		Position = AnimationCache.Position;
-		Angle = AnimationCache.Angle;
 	}
-
-	vec2 p0 = Position + vec2(fx2f(pQuads[Num].m_aPoints[0].x), fx2f(pQuads[Num].m_aPoints[0].y));
-	vec2 p1 = Position + vec2(fx2f(pQuads[Num].m_aPoints[1].x), fx2f(pQuads[Num].m_aPoints[1].y));
-	vec2 p2 = Position + vec2(fx2f(pQuads[Num].m_aPoints[2].x), fx2f(pQuads[Num].m_aPoints[2].y));
-	vec2 p3 = Position + vec2(fx2f(pQuads[Num].m_aPoints[3].x), fx2f(pQuads[Num].m_aPoints[3].y));
-
-	if(Angle != 0.0f)
-	{
-		vec2 center(fx2f(pQuads[Num].m_aPoints[4].x), fx2f(pQuads[Num].m_aPoints[4].y));
-		Rotate(center, &p0, Angle);
-		Rotate(center, &p1, Angle);
-		Rotate(center, &p2, Angle);
-		Rotate(center, &p3, Angle);
-	}
-
-	if(pTopLCorner)
-		*pTopLCorner = p0;
-	if(pTopRCorner)
-		*pTopRCorner = p1;
-	if(pBottomLCorner)
-		*pBottomLCorner = p2;
-	if(pBottomRCorner)
-		*pBottomRCorner = p3;
-
-	return Num;
+	return vpQuads;
 }
 
-static float SolveBezier(float x, float p0, float p1, float p2, float p3)
-{
-	const double x3 = -p0 + 3.0 * p1 - 3.0 * p2 + p3;
-	const double x2 = 3.0 * p0 - 6.0 * p1 + 3.0 * p2;
-	const double x1 = -3.0 * p0 + 3.0 * p1;
-	const double x0 = p0 - x;
-
-	if(x3 == 0.0 && x2 == 0.0)
-	{
-		// linear
-		// a * t + b = 0
-		const double a = x1;
-		const double b = x0;
-
-		if(a == 0.0)
-			return 0.0f;
-		return -b / a;
-	}
-	else if(x3 == 0.0)
-	{
-		// quadratic
-		// t * t + b * t + c = 0
-		const double b = x1 / x2;
-		const double c = x0 / x2;
-
-		if(c == 0.0)
-			return 0.0f;
-
-		const double D = b * b - 4.0 * c;
-		const double SqrtD = std::sqrt(D);
-
-		const double t = (-b + SqrtD) / 2.0;
-
-		if(0.0 <= t && t <= 1.0001)
-			return t;
-		return (-b - SqrtD) / 2.0;
-	}
-	else
-	{
-		// cubic
-		// t * t * t + a * t * t + b * t * t + c = 0
-		const double a = x2 / x3;
-		const double b = x1 / x3;
-		const double c = x0 / x3;
-
-		// substitute t = y - a / 3
-		const double sub = a / 3.0;
-
-		// depressed form x^3 + px + q = 0
-		// cardano's method
-		const double p = b / 3.0 - a * a / 9.0;
-		const double q = (2.0 * a * a * a / 27.0 - a * b / 3.0 + c) / 2.0;
-
-		const double D = q * q + p * p * p;
-
-		if(D > 0.0)
-		{
-			// only one 'real' solution
-			const double s = std::sqrt(D);
-			return std::cbrt(s - q) - std::cbrt(s + q) - sub;
-		}
-		else if(D == 0.0)
-		{
-			// one single, one double solution or triple solution
-			const double s = std::cbrt(-q);
-			const double t = 2.0 * s - sub;
-
-			if(0.0 <= t && t <= 1.0001)
-				return t;
-			return (-s - sub);
-		}
-		else
-		{
-			// Casus irreducibilis ... ,_,
-			const double phi = std::acos(-q / std::sqrt(-(p * p * p))) / 3.0;
-			const double s = 2.0 * std::sqrt(-p);
-
-			const double t1 = s * std::cos(phi) - sub;
-
-			if(0.0 <= t1 && t1 <= 1.0001)
-				return t1;
-
-			const double t2 = -s * std::cos(phi + pi / 3.0) - sub;
-
-			if(0.0 <= t2 && t2 <= 1.0001)
-				return t2;
-			return -s * std::cos(phi - pi / 3.0) - sub;
-		}
-	}
-}
-
-void CCollision::GetAnimationTransform(float GlobalTime, int Env, CLayers *pLayers, vec2 &Position, float &Angle) const
+void CCollision::GetAnimationTransform(float GlobalTime, int Env, vec2 &Position, float &Angle) const
 {
 	Position.x = 0.0f;
 	Position.y = 0.0f;
 	Angle = 0.0f;
 
 	int Start, Num;
-	pLayers->Map()->GetType(MAPITEMTYPE_ENVELOPE, &Start, &Num);
+	m_pLayers->Map()->GetType(MAPITEMTYPE_ENVELOPE, &Start, &Num);
 	if(Env >= Num)
 		return;
-	CMapItemEnvelope *pItem = (CMapItemEnvelope *)pLayers->Map()->GetItem(Start + Env, 0, 0);
+	CMapItemEnvelope *pItem = (CMapItemEnvelope *)m_pLayers->Map()->GetItem(Start + Env, 0, 0);
 	if(pItem->m_NumPoints == 0)
 		return;
 
-	IMap *pMap = pLayers->Map();
+	IMap *pMap = m_pLayers->Map();
 	CMapBasedEnvelopePointAccess EnvelopePoints(pMap);
 	EnvelopePoints.SetPointsRange(pItem->m_StartPoint, pItem->m_NumPoints);
 	if(EnvelopePoints.NumPoints() == 0)
@@ -1593,20 +1499,41 @@ void CCollision::GetAnimationTransform(float GlobalTime, int Env, CLayers *pLaye
 	Angle = (r0 + (r1 - r0) * a) / 360.0f * pi * 2.0f;
 }
 
+void CCollision::UpdateQuadCache()
+{
+	for(auto &QuadData : m_vQuads)
+	{
+		vec2 Position = vec2(0, 0);
+		GetAnimationTransform(m_Time + (QuadData.m_pQuad->m_PosEnvOffset / 1000.0), QuadData.m_pQuad->m_PosEnv, Position, QuadData.m_Angle);
+		for(int i = 0; i < 5; i++)
+			QuadData.m_Pos[i] = (Position + vec2(fx2f(QuadData.m_pQuad->m_aPoints[i].x), fx2f(QuadData.m_pQuad->m_aPoints[i].y)));
+
+		if(QuadData.m_Angle == 0)
+			continue;
+
+		for(int i = 0; i < 4; i++)
+			Rotate(QuadData.m_Pos[4], &QuadData.m_Pos[i], QuadData.m_Angle);
+	}
+
+}
+
 bool CCollision::InsideQuad(vec2 Pos, float Radius, vec2 TopLCorner, vec2 TopRCorner, vec2 BottomLCorner, vec2 BottomRCorner) const
 {
 	auto IsLeft = [](const vec2 &A, const vec2 &B, const vec2 &P) -> bool {
 		return ((B.x - A.x) * (P.y - A.y) - (B.y - A.y) * (P.x - A.x)) >= 0.0f;
 	};
 
-	bool inside =
+	bool Inside =
 		IsLeft(TopLCorner, TopRCorner, Pos) &&
 		IsLeft(TopRCorner, BottomRCorner, Pos) &&
 		IsLeft(BottomRCorner, BottomLCorner, Pos) &&
 		IsLeft(BottomLCorner, TopLCorner, Pos);
 
-	if(inside)
+	if(Inside)
 		return true;
+
+	if(Radius <= 0.0f)
+		return false;
 
 	auto CircleIntersectsSegment = [](const vec2 &C, float R, const vec2 &A, const vec2 &B) -> bool {
 		vec2 AB = B - A;
@@ -1636,31 +1563,6 @@ bool CCollision::InsideQuad(vec2 Pos, float Radius, vec2 TopLCorner, vec2 TopRCo
 
 	return false;
 }
-
-int CCollision::GetQuadType(const CMapItemLayerQuads *pQuadLayer) const
-{
-	char QuadName[30] = "";
-	IntsToStr(pQuadLayer->m_aName, std::size(pQuadLayer->m_aName), QuadName, std::size(QuadName));
-
-	bool IsFreeze = !str_comp("QFr", QuadName);
-	bool IsUnFreeze = !str_comp("QUnFr", QuadName);
-	bool IsDeath = !str_comp("QDeath", QuadName);
-	bool IsStopa = !str_comp("QStopa", QuadName);
-	bool IsCfrm = !str_comp("QCfrm", QuadName);
-
-	if(IsFreeze)
-		return QUADTYPE_FREEZE;
-	else if(IsUnFreeze)
-		return QUADTYPE_UNFREEZE;
-	else if(IsDeath)
-		return QUADTYPE_DEATH;
-	else if(IsStopa)
-		return QUADTYPE_STOPA;
-	else if(IsCfrm)
-		return QUADTYPE_CFRM;
-	return 0;
-}
-
 
 void CCollision::CollectMapSpawnPoints(std::vector<vec2> &OutSeeds) const
 {
