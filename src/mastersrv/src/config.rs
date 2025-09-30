@@ -1,7 +1,11 @@
+use crate::community_token;
 use crate::Addr;
 use crate::Locations;
+use arrayvec::ArrayString;
 use ipnet::IpNet;
 use serde::Deserialize;
+use serde_json as json;
+use std::collections::HashMap;
 use std::error;
 use std::fmt;
 use std::fs;
@@ -18,15 +22,24 @@ pub enum ConfigLocation {
 
 #[derive(Default)]
 pub struct Config {
+    pub communities: Option<Box<json::value::RawValue>>,
+    community_tokens: HashMap<community_token::PlainPrefix, CommunityToken>,
     default_ban_message: Box<str>,
     bans: Box<[Ban]>,
     port_forward_check_exceptions: Box<[ConfigAddr]>,
     pub locations: Locations,
 }
 
+struct CommunityToken {
+    hash: community_token::Hash,
+    community: ArrayString<[u8; 32]>,
+}
+
 #[derive(Default, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct ParsedConfig {
+    #[serde(default)]
+    communities: Option<Communities>,
     #[serde(default)]
     default_ban_message: Option<Box<str>>,
     #[serde(default)]
@@ -35,6 +48,13 @@ struct ParsedConfig {
     port_forward_check_exceptions: Box<[ConfigAddr]>,
     #[serde(default)]
     locations: Option<Box<str>>,
+}
+
+#[derive(Deserialize)]
+struct Communities {
+    json: Box<str>,
+    #[serde(default)]
+    tokens: HashMap<Box<str>, Box<str>>,
 }
 
 #[derive(Deserialize)]
@@ -86,6 +106,76 @@ impl Config {
             .iter()
             .any(|e| e.matches(addr))
     }
+    pub fn community_for_token(&self, token: &str) -> Result<Option<&str>, String> {
+        let plain = community_token::get_plain_prefix_from_token(token).ok_or_else(|| {
+            if community_token::Verification::from_str(token).is_ok() {
+                format!(
+                    "need real token, not verification token: {token} (should start with ddtc_)"
+                )
+            } else {
+                format!("invalid community token format: {token}")
+            }
+        })?;
+        Ok(self.community_for_token_impl(plain, token))
+    }
+    fn community_for_token_impl(&self, plain: &str, token: &str) -> Option<&str> {
+        let community_token = self.community_tokens.get(plain)?;
+        community_token
+            .hash
+            .verify(token)
+            .ok()
+            .map(|()| &community_token.community[..])
+    }
+}
+
+impl CommunityToken {
+    fn from_config(
+        verification: &str,
+        community: &str,
+    ) -> Result<(community_token::PlainPrefix, CommunityToken), Error> {
+        let verification: community_token::Verification = verification.parse()
+            .map_err(|_| {
+                Error(if community_token::get_plain_prefix_from_token(verification).is_some() {
+                    format!("community token, not community _verification_ token: {verification} (should start with ddvc_)")
+                } else {
+                    format!("invalid community verification token {verification}")
+                })
+            })?;
+        Ok((
+            verification.plain_prefix,
+            CommunityToken {
+                hash: verification.hash,
+                community: ArrayString::from(community)
+                    .map_err(|_| Error(format!("community name {:?} too long", community)))?,
+            },
+        ))
+    }
+}
+
+fn read_communities_json(filename: &Path) -> Result<Box<json::value::RawValue>, Error> {
+    let contents = fs::read_to_string(filename).map_err(|e| {
+        Error(format!(
+            "error opening communities JSON {:?}: {}",
+            filename, e
+        ))
+    })?;
+    let result: json::Value = json::from_str(&contents)
+        .map_err(|e| Error(format!("JSON error in {:?}: {}", filename, e)))?;
+    // Normalize the JSON to strip any spaces etc.
+    Ok(json::value::to_raw_value(&result).unwrap())
+}
+
+fn from_community_tokens_map(
+    tokens: &HashMap<Box<str>, Box<str>>,
+) -> Result<HashMap<community_token::PlainPrefix, CommunityToken>, Error> {
+    let mut result = HashMap::new();
+    for (hashed_token, community) in tokens {
+        let (prefix, token) = CommunityToken::from_config(hashed_token, community)?;
+        if result.insert(prefix, token).is_some() {
+            return Err(Error(format!("two tokens with prefix {:?}", prefix)));
+        }
+    }
+    Ok(result)
 }
 
 impl ParsedConfig {
@@ -102,12 +192,22 @@ impl ParsedConfig {
     }
     fn to_config(self) -> Result<Config, Error> {
         let ParsedConfig {
+            communities,
             default_ban_message,
             bans,
             port_forward_check_exceptions,
             locations,
         } = self;
         Ok(Config {
+            communities: communities
+                .as_ref()
+                .map(|c| read_communities_json(Path::new(&*c.json)))
+                .transpose()?,
+            community_tokens: communities
+                .as_ref()
+                .map(|c| from_community_tokens_map(&c.tokens))
+                .transpose()?
+                .unwrap_or_default(),
             default_ban_message: default_ban_message.unwrap_or_else(|| "banned".into()),
             bans,
             port_forward_check_exceptions,
