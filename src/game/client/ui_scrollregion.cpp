@@ -140,6 +140,10 @@ void CScrollRegion::End()
 	if(m_AnimTime > 0.0f)
 	{
 		m_AnimTime -= Client()->RenderFrameTime();
+		if(m_AnimTime < 0.0f)
+		{
+			m_AnimTime = 0.0f;
+		}
 		float AnimProgress = (1.0f - std::pow(m_AnimTime / m_AnimTimeMax, 3.0f)); // cubic ease out
 		m_ScrollY = m_AnimInitScrollY + (m_AnimTargetScrollY - m_AnimInitScrollY) * AnimProgress;
 	}
