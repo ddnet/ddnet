@@ -100,8 +100,14 @@ float CPlayers::GetPlayerTargetAngle(
 {
 	if(GameClient()->m_Snap.m_LocalClientId == ClientId && !GameClient()->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
-		// just use the direct input if it's the local player we are rendering
-		return angle(GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy]);
+		// calculate what would be sent to the server from our current input
+		vec2 Direction = normalize(vec2((int)GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].x, (int)GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].y));
+
+		// fix direction if mouse is exactly in the center
+		if(Direction == vec2(0.0f, 0.0f))
+			Direction = vec2(1.0f, 0.0f);
+
+		return angle(Direction);
 	}
 
 	// using unpredicted angle when rendering other players in-game
@@ -187,15 +193,6 @@ void CPlayers::RenderHookCollLine(
 		RenderHookCollPlayer = GameClient()->m_Controls.m_aShowHookColl[g_Config.m_ClDummy] && g_Config.m_ClShowHookCollOwn > 0;
 	if(!AlwaysRenderHookColl && !RenderHookCollPlayer)
 		return;
-
-	if(Local && !GameClient()->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK)
-	{
-		Direction = normalize(vec2((int)GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].x, (int)GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].y));
-
-		// fix direction if mouse is exactly in the center
-		if(!(int)GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].x && !(int)GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].y)
-			Direction = vec2(1.0f, 0.0f);
-	}
 
 	static constexpr float HOOK_START_DISTANCE = CCharacterCore::PhysicalSize() * 1.5f;
 	float HookLength = (float)GameClient()->m_aClients[ClientId].m_Predicted.m_Tuning.m_HookLength;
