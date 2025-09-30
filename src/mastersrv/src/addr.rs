@@ -132,6 +132,9 @@ impl FromStr for Addr {
         )
         .unwrap();
         let sock_addr: SocketAddr = ip_port.parse().map_err(|_| InvalidAddr)?;
+        if sock_addr.port() == 0 {
+            return Err(InvalidAddr);
+        }
         Ok(Addr {
             ip: sock_addr.ip(),
             port: sock_addr.port(),
