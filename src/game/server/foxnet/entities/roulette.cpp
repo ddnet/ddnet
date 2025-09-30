@@ -302,7 +302,7 @@ void CRoulette::Tick()
 
 			if(pPl->Acc()->m_LoggedIn)
 			{
-				str_format(aBuf, sizeof(aBuf), "%s: %ld", g_Config.m_SvCurrencyName, (long)pPl->Acc()->m_Money);
+				str_format(aBuf, sizeof(aBuf), "%ld %s", (long)pPl->Acc()->m_Money, g_Config.m_SvCurrencyName);
 				Messages.push_back(aBuf);
 			}
 
@@ -312,13 +312,13 @@ void CRoulette::Tick()
 				Messages.push_back(aBuf);
 			}
 
-			str_format(aBuf, sizeof(aBuf), "Betters: %d", m_Betters);
+			str_format(aBuf, sizeof(aBuf), "Players: %d", m_Betters);
 			Messages.push_back(aBuf);
-			str_format(aBuf, sizeof(aBuf), "Total Wager: %d\n", m_TotalWager);
+			str_format(aBuf, sizeof(aBuf), "Total Bets: %d\n", m_TotalWager);
 			Messages.push_back(aBuf);
 			if(m_StartDelay > 0)
 			{
-				str_format(aBuf, sizeof(aBuf), "Time left: %.1fs", TimeLeft);
+				str_format(aBuf, sizeof(aBuf), "Starting in: %.1fs", TimeLeft);
 				Messages.push_back(aBuf);
 			}
 

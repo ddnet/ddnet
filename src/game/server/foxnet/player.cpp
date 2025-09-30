@@ -58,12 +58,12 @@ void CPlayer::FoxNetTick()
 			std::vector<std::string> Messages;
 
 			char Msg[32] = "";
-			str_format(Msg, sizeof(Msg), "%s: %ld", g_Config.m_SvCurrencyName, (long)Acc()->m_Money);
+			str_format(Msg, sizeof(Msg), "%ld %s", (long)Acc()->m_Money, g_Config.m_SvCurrencyName);
 			Messages.push_back(Msg);
 			if(m_BetAmount <= 0)
-				str_copy(Msg, "wager: Nothing");
+				str_copy(Msg, "Wager: Nothing");
 			else
-				str_format(Msg, sizeof(Msg), "wager: %d", m_BetAmount);
+				str_format(Msg, sizeof(Msg), "Wager: %d", m_BetAmount);
 			Messages.push_back(Msg);
 			SendBroadcastHud(Messages, 2);
 		}
@@ -189,7 +189,7 @@ void CPlayer::GiveMoney(int64_t Amount, const char *pMessage)
 		const vec2 Pos = pChr->m_Pos + vec2(0, -74);
 		char aText[66];
 		str_format(aText, sizeof(aText), "+%ld", (long)Amount);
-		new CProjectileText(pChr->GameWorld(), Pos, GetCid(), 200, aText, WEAPON_HAMMER);
+		new CProjectileText(pChr->GameWorld(), Pos, GetCid(), 175, aText, WEAPON_HAMMER);
 	}
 
 	GameServer()->m_AccountManager.SaveAccountsInfo(m_ClientId, *Acc());
@@ -218,8 +218,8 @@ void CPlayer::TakeMoney(int64_t Amount, const char *pMessage)
 		const vec2 Pos = pChr->m_Pos + vec2(0, -74);
 		char aText[66];
 		str_format(aText, sizeof(aText), "-%ld", (long)Amount);
-		new CProjectileText(pChr->GameWorld(), Pos, GetCid(), 175, aText, WEAPON_HAMMER);
-		pChr->SetEmote(EMOTE_HAPPY, Server()->Tick() + Server()->TickSpeed());
+		new CProjectileText(pChr->GameWorld(), Pos, GetCid(), 125, aText, WEAPON_HAMMER);
+		pChr->SetEmote(EMOTE_PAIN, Server()->Tick() + Server()->TickSpeed());
 	}
 
 	GameServer()->m_AccountManager.SaveAccountsInfo(m_ClientId, *Acc());
