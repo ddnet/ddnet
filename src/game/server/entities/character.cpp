@@ -3511,7 +3511,6 @@ void CCharacter::HandleQuads()
 {
 	m_InQuadFreeze = false;
 
-	vec2 TL, TR, BL, BR;
 	std::vector<SQuadData *> pQuads = Collision()->GetQuadsAt(m_Pos);
 	for(const SQuadData *pQuad : pQuads)
 	{

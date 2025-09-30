@@ -924,7 +924,9 @@ void CGameContext::QuadDebugIds(bool Clear)
 {
 	if(Clear)
 	{
-		for(const SQuadData &QuadData : Collision()->QuadLayers())
+		m_vQuadDebugIds.clear();
+		const size_t size = Collision()->QuadLayers().size();
+		for(size_t i = 0; i < size; i++)
 			m_vQuadDebugIds.push_back(Server()->SnapNewId());
 	}
 	else if(!Clear && !m_vQuadDebugIds.empty())

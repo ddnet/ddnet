@@ -21,9 +21,9 @@
 #include <string>
 #include <utility>
 
-#include <vector>
 #include "accounts.h"
 #include "accountworker.h"
+#include <vector>
 
 IServer *CAccounts::Server() const { return GameServer()->Server(); }
 
@@ -409,7 +409,12 @@ void CAccounts::ShowAccProfile(int ClientId, const char *pName)
 	auto pRes = std::make_shared<CAccResult>();
 	auto pReq = std::make_unique<CAccSelectByLastName>(pRes);
 	str_copy(pReq->m_LastPlayerName, pName, sizeof(pReq->m_LastPlayerName));
-	AddPending(pRes, [this, QueryByUsername, SendProfile](CAccResult &Res) { if(!Res.m_Success || !Res.m_Found) QueryByUsername(); else SendProfile(Res); });
+	AddPending(pRes, [QueryByUsername, SendProfile](CAccResult &Res) {
+		if(!Res.m_Success || !Res.m_Found)
+			QueryByUsername();
+		else SendProfile(Res);
+		}
+	);
 	m_pPool->Execute(CAccountsWorker::SelectByLastPlayerName, std::move(pReq), "acc select by last name (profile)");
 }
 

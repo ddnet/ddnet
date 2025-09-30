@@ -154,7 +154,6 @@ void CCollision::Init(class CLayers *pLayers)
 		}
 	}
 	// <FoxNet
-	int Index = 0;
 	for(const auto pQuadLayers : m_pLayers->QuadLayers())
 	{
 		CQuad *pQuads = (CQuad *)m_pLayers->Map()->GetDataSwapped(pQuadLayers->m_Data);
@@ -180,11 +179,10 @@ void CCollision::Init(class CLayers *pLayers)
 				continue;
 			m_vQuads.push_back(QuadData);
 		}
-		Index++;
 	}
 
 	int QuadLayers = (int)m_pLayers->QuadLayers().size();
-	log_info("moving-tiles", "%d valid quadlayer%s with %d quads", QuadLayers, QuadLayers > 1 ? "s" : "", m_vQuads.size());
+	log_info("moving-tiles", "%d valid quadlayer%s with %d quads", QuadLayers, QuadLayers == 1 ? "" : "s", (int)m_vQuads.size());
 	BuildSpawnCandidatesOnLoad();
 	// FoxNet>
 }

@@ -24,7 +24,7 @@ struct SQuadData
 {
 	CQuad *m_pQuad = nullptr;
 	CMapItemLayerQuads *m_pLayer = nullptr;
-	size_t m_Type = 0;
+	int m_Type = 0;
 	vec2 m_Pos[5];
 	float m_Angle;
 };
