@@ -4252,7 +4252,7 @@ bool CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 	}
 
 	// load sound
-	const int SoundId = pEditor->Sound()->LoadOpusFromMem(pData, DataSize, true);
+	const int SoundId = pEditor->Sound()->LoadOpusFromMem(pData, DataSize, true, pFileName);
 	if(SoundId == -1)
 	{
 		free(pData);
@@ -4308,7 +4308,7 @@ bool CEditor::ReplaceSound(const char *pFileName, int StorageType, bool CheckDup
 	}
 
 	// load sound
-	const int SoundId = Sound()->LoadOpusFromMem(pData, DataSize, true);
+	const int SoundId = Sound()->LoadOpusFromMem(pData, DataSize, true, pFileName);
 	if(SoundId == -1)
 	{
 		free(pData);

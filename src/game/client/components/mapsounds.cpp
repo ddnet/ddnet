@@ -53,16 +53,20 @@ void CMapSounds::OnMapLoad()
 	for(int i = 0; i < m_Count; i++)
 	{
 		CMapItemSound *pSound = (CMapItemSound *)pMap->GetItem(Start + i);
-		if(pSound->m_External)
+		const char *pName = pMap->GetDataString(pSound->m_SoundName);
+		if(pName == nullptr || pName[0] == '\0')
 		{
-			const char *pName = pMap->GetDataString(pSound->m_SoundName);
-			if(pName == nullptr || pName[0] == '\0')
+			if(pSound->m_External)
 			{
 				log_error("mapsounds", "Failed to load map sound %d: failed to load name.", i);
 				ShowWarning = true;
 				continue;
 			}
+			pName = "(error)";
+		}
 
+		if(pSound->m_External)
+		{
 			char aBuf[IO_MAX_PATH_LENGTH];
 			str_format(aBuf, sizeof(aBuf), "mapres/%s.opus", pName);
 			m_aSounds[i] = Sound()->LoadOpus(aBuf);
@@ -78,7 +82,7 @@ void CMapSounds::OnMapLoad()
 				continue;
 			}
 			const int SoundDataSize = pMap->GetDataSize(pSound->m_SoundData);
-			m_aSounds[i] = Sound()->LoadOpusFromMem(pData, SoundDataSize);
+			m_aSounds[i] = Sound()->LoadOpusFromMem(pData, SoundDataSize, false, pName);
 			pMap->UnloadData(pSound->m_SoundData);
 		}
 		ShowWarning = ShowWarning || m_aSounds[i] == -1;
