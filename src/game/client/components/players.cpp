@@ -205,12 +205,7 @@ void CPlayers::RenderHookCollLine(
 	if(HookLength < HOOK_START_DISTANCE || HookFireSpeed <= 0.0f)
 		return;
 
-	// pre calculate quantization
-	vec2 QuantizedPos = Position + Direction * HookFireSpeed;
-	QuantizedPos.x = round_to_int(QuantizedPos.x);
-	QuantizedPos.y = round_to_int(QuantizedPos.y);
-	vec2 QuantizedDirection = normalize(QuantizedPos - Position);
-
+	vec2 QuantizedDirection = Direction;
 	vec2 StartOffset = Direction * HOOK_START_DISTANCE;
 	vec2 BasePos = Position;
 	vec2 LineStartPos = BasePos + StartOffset;
@@ -254,6 +249,13 @@ void CPlayers::RenderHookCollLine(
 			SegmentStartPos = SegmentEndPos;
 			SegmentStartPos.x = round_to_int(SegmentStartPos.x);
 			SegmentStartPos.y = round_to_int(SegmentStartPos.y);
+
+			// direction is always the same after the first tick quantization
+			if(HookTick == 0)
+			{
+				QuantizedDirection.x = round_to_int(QuantizedDirection.x * 256.0f) / 256.0f;
+				QuantizedDirection.y = round_to_int(QuantizedDirection.y * 256.0f) / 256.0f;
+			}
 			continue;
 		}
 
@@ -287,7 +289,16 @@ void CPlayers::RenderHookCollLine(
 		// go through one teleout, update positions and continue
 		BasePos = vTeleOuts[0];
 		LineStartPos = BasePos; // make the line start in the teleporter to prevent a gap
-		SegmentStartPos = BasePos + QuantizedDirection * HOOK_START_DISTANCE;
+		SegmentStartPos = BasePos + Direction * HOOK_START_DISTANCE;
+		SegmentStartPos.x = round_to_int(SegmentStartPos.x);
+		SegmentStartPos.y = round_to_int(SegmentStartPos.y);
+
+		// direction is always the same after the first tick quantization
+		if(HookTick == 0)
+		{
+			QuantizedDirection.x = round_to_int(QuantizedDirection.x * 256.0f) / 256.0f;
+			QuantizedDirection.y = round_to_int(QuantizedDirection.y * 256.0f) / 256.0f;
+		}
 	}
 
 	// The hook line is too expensive to calculate and didn't hit anything before, just set a straight line
