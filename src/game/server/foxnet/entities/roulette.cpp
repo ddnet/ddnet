@@ -133,6 +133,8 @@ bool CRoulette::AddClient(int ClientId, int BetAmount, const char *pBetOption)
 		return false;
 	}
 
+	SetState(RStates::PREPARING);
+
 	pPl->m_BetAmount = -1;
 	m_aClients[ClientId].m_BetAmount = BetAmount;
 	str_copy(m_aClients[ClientId].m_aBetOption, pBetOption);
@@ -141,17 +143,29 @@ bool CRoulette::AddClient(int ClientId, int BetAmount, const char *pBetOption)
 	m_Betters++;
 	m_TotalWager += BetAmount;
 
-	if(AmountOfCloseClients() > 3)
-		m_StartDelay = Server()->TickSpeed() * 7; // 5 seconds
-	else if(AmountOfCloseClients() > 1)
-		m_StartDelay = Server()->TickSpeed() * 5; // 5 seconds
-	else
-		m_StartDelay = Server()->TickSpeed() * 1.5; // 1.5 seconds
-
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "You placed a bet of %d on %s", BetAmount, pBetOption);
 	GameServer()->SendChatTarget(ClientId, aBuf);
 	return true;
+}
+
+void CRoulette::SetState(RStates State)
+{
+	if(m_State == State)
+		return;
+
+	m_State = State;
+	
+	if(State == RStates::PREPARING)
+	{
+		if(AmountOfCloseClients() > 3)
+			m_StartDelay = Server()->TickSpeed() * 7; // 5 seconds
+		else if(AmountOfCloseClients() > 1)
+			m_StartDelay = Server()->TickSpeed() * 5; // 5 seconds
+		else
+			m_StartDelay = Server()->TickSpeed() * 1.5; // 1.5 seconds
+	}
+
 }
 
 int CRoulette::GetField() const
@@ -263,10 +277,7 @@ void CRoulette::Tick()
 	if(m_State == RStates::SPINNING || m_State == RStates::STOPPING)
 		m_SpinDuration--;
 	if(m_StartDelay > 0)
-	{
-		SetState(RStates::PREPARING);
 		m_StartDelay--;
-	}
 	else if(m_State == RStates::PREPARING && m_StartDelay == 0)
 		StartSpin();
 

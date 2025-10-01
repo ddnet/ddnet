@@ -80,7 +80,7 @@ class CRoulette : public CEntity
 		{18, COLOR_RED}, {29, COLOR_BLACK}, {7, COLOR_RED}, {28, COLOR_BLACK},
 		{12, COLOR_RED}, {35, COLOR_BLACK}, {3, COLOR_RED}, {26, COLOR_BLACK}};
 
-	void SetState(RStates State) { m_State = State; }
+	void SetState(RStates State);
 	void EvaluateBets();
 
 	int GetField() const;
