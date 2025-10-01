@@ -7,21 +7,20 @@
 #include <game/server/player.h>
 #include <game/server/teams.h>
 
-#include <game/gamecore.h>
 #include <game/teamscore.h>
 
 #include <generated/protocol.h>
 
-#include <engine/shared/protocol.h>
 #include <engine/server.h>
+#include <engine/shared/protocol.h>
 
 #include <base/vmath.h>
-#include <base/math.h>
 
-#include <iterator>
-#include "powerup.h"
 #include <algorithm>
+#include <iterator>
 #include <random>
+
+#include "powerup.h"
 
 // Its called powerup because i want to add more functionality later to it like giving custom weapons or abilities
 // For now it just acts like the 0xf one
@@ -41,7 +40,7 @@ CPowerUp::CPowerUp(CGameWorld *pGameWorld, vec2 Pos, EPowerUp Type) :
 
 void CPowerUp::SetData()
 {
-		std::mt19937 rng{std::random_device{}()};
+	std::mt19937 rng{std::random_device{}()};
 	switch(m_Data.m_Type)
 	{
 	case EPowerUp::XP:
@@ -52,10 +51,12 @@ void CPowerUp::SetData()
 		m_Data.m_Value = GameServer()->RandGeometric(rng, 3, 20, 0.1) * 25;
 		m_Lifetime = 120 + m_Data.m_Value / 2;
 		break;
+	default:
+		m_Data.m_Value = 0;
+		m_Lifetime = 0;
 	}
 	m_Lifetime *= Server()->TickSpeed();
 }
-
 
 void CPowerUp::Reset()
 {

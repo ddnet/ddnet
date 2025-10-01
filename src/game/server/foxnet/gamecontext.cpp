@@ -1146,13 +1146,13 @@ void CGameContext::CollectedPowerup(int ClientId, const SPowerupData *pData) con
 
 	switch(pData->m_Type)
 	{
-	case EPowerUp::INVALID:
-		break;
 	case EPowerUp::XP:
 		pPlayer->GiveXP(pData->m_Value, pMessage);
 		break;
 	case EPowerUp::MONEY:
 		pPlayer->GiveMoney(pData->m_Value, pMessage);
+		break;
+	default:
 		break;
 	}
 }

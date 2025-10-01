@@ -32,7 +32,6 @@ enum QuadTypes
 	NUM_QUADTYPES
 };
 // FoxNet>
-// FoxNet>
 
 class CLayers
 {
