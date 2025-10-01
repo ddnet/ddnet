@@ -19,14 +19,14 @@ class CDoorTile;
 // <FoxNet
 class CQuad;
 class CMapItemLayerQuads;
-
-struct SQuadData
+class CQuadData
 {
+public:
 	CQuad *m_pQuad = nullptr;
 	CMapItemLayerQuads *m_pLayer = nullptr;
 	int m_Type = 0;
-	vec2 m_Pos[5];
-	float m_Angle;
+	vec2 m_Pos[5] = {vec2(0, 0)};
+	float m_Angle = 0.0f;
 };
 // FoxNet>
 
@@ -190,13 +190,13 @@ private:
 	};
 	void GetAnimationTransform(float GlobalTime, int Env, vec2 &Position, float &Angle) const;
 	std::vector<vec2> m_SpawnCandidates;
-	std::vector<SQuadData> m_vQuads;
+	std::vector<CQuadData> m_vQuads;
 
 public:
-	const std::vector<SQuadData> &QuadLayers() const { return m_vQuads; }
+	const std::vector<CQuadData> &QuadLayers() const { return m_vQuads; }
 	void UpdateQuadCache();
 
-	std::vector<SQuadData *> GetQuadsAt(vec2 Pos);
+	std::vector<CQuadData *> GetQuadsAt(vec2 Pos);
 
 	void ClearQuadLayers();
 	void Rotate(vec2 Center, vec2 *pPoint, float Rotation) const;

@@ -3505,8 +3505,8 @@ void CCharacter::HandleQuads()
 {
 	m_InQuadFreeze = false;
 
-	std::vector<SQuadData *> pQuads = Collision()->GetQuadsAt(m_Pos);
-	for(const SQuadData *pQuad : pQuads)
+	std::vector<CQuadData *> pQuads = Collision()->GetQuadsAt(m_Pos);
+	for(const CQuadData *pQuad : pQuads)
 	{
 		if(pQuad->m_Type < QUADTYPE_FREEZE || pQuad->m_Type >= NUM_QUADTYPES)
 			continue;

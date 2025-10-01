@@ -922,7 +922,7 @@ void CGameContext::SnapDebuggedQuad(int ClientId)
 
 	for(size_t i = 0; i < Count; ++i)
 	{
-		const SQuadData &Quad = Quads[i];
+		const CQuadData &Quad = Quads[i];
 		const vec2 TopLeft = Quad.m_Pos[0];
 
 		if(CNetObj_DDNetLaser *pObj = Server()->SnapNewItem<CNetObj_DDNetLaser>(m_vQuadDebugIds[i]))

@@ -155,15 +155,14 @@ void CCollision::Init(class CLayers *pLayers)
 	}
 	// <FoxNet
 	for(const auto pQuadLayers : m_pLayers->QuadLayers())
-	{
+	{//https://github.com/M0REKZ/kaizo-network/blob/ebe1f88f356d396da6f48ce62e830faa93f9eb8a/src/game/collision.cpp#L79
 		CQuad *pQuads = (CQuad *)m_pLayers->Map()->GetDataSwapped(pQuadLayers->m_Data);
 		for(int i = 0; i < pQuadLayers->m_NumQuads; i++)
 		{
 			char QuadName[30] = "";
-
 			IntsToStr(pQuadLayers->m_aName, std::size(pQuadLayers->m_aName), QuadName, std::size(QuadName));
 
-			SQuadData QuadData;
+			CQuadData QuadData;
 			QuadData.m_pQuad = &pQuads[i];
 			QuadData.m_pLayer = pQuadLayers;
 			QuadData.m_Type = QUADTYPE_NONE;
@@ -1352,22 +1351,20 @@ void CCollision::Rotate(vec2 Center, vec2 *pPoint, float Rotation) const
 	pPoint->y = (x * sinf(Rotation) + y * cosf(Rotation) + Center.y);
 }
 
-std::vector<SQuadData *> CCollision::GetQuadsAt(vec2 Pos)
-{
-	std::vector<SQuadData *> vpQuads;
+std::vector<CQuadData *> CCollision::GetQuadsAt(vec2 Pos)
+{//https://github.com/M0REKZ/kaizo-network/blob/ebe1f88f356d396da6f48ce62e830faa93f9eb8a/src/game/collision_kz.cpp#L1104
+	std::vector<CQuadData *> vpQuads;
 
 	for(auto &QuadData : m_vQuads)
 	{
 		float TestRadius = 0.f;
 		if(QuadData.m_Type == QUADTYPE_DEATH)
-			TestRadius = 8.f;
+			TestRadius = 8.0f;
 		else if(QuadData.m_Type == QUADTYPE_STOPA)
 			TestRadius = CCharacterCore::PhysicalSize() * 0.5f;
 
 		if(InsideQuad(Pos, TestRadius, QuadData.m_Pos[0], QuadData.m_Pos[1], QuadData.m_Pos[2], QuadData.m_Pos[3]))
-		{
 			vpQuads.push_back(&QuadData);
-		}
 	}
 	return vpQuads;
 }
@@ -1498,7 +1495,7 @@ void CCollision::GetAnimationTransform(float GlobalTime, int Env, vec2 &Position
 }
 
 void CCollision::UpdateQuadCache()
-{
+{//https://github.com/M0REKZ/kaizo-network/blob/ebe1f88f356d396da6f48ce62e830faa93f9eb8a/src/game/collision_kz.cpp#L1073
 	for(auto &QuadData : m_vQuads)
 	{
 		vec2 Position = vec2(0, 0);
