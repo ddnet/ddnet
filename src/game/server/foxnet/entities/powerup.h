@@ -6,6 +6,20 @@
 #include <game/server/entity.h>
 #include <game/server/gameworld.h>
 
+enum class EPowerUp
+{
+	INVALID = 0,
+	XP,
+	MONEY,
+	NUM_TYPES
+};
+
+struct SPowerupData
+{
+	EPowerUp m_Type = EPowerUp::INVALID;
+	int m_Value = 0;
+};
+
 class CPowerUp : public CEntity
 {
 	enum
@@ -21,7 +35,6 @@ class CPowerUp : public CEntity
 	};
 	SSnap m_Snap;
 
-	int m_XP;
 	int m_Lifetime;
 
 	bool m_Switch;
@@ -30,8 +43,12 @@ class CPowerUp : public CEntity
 
 	void SetPowerupVisual();
 
+	SPowerupData m_Data;
+
+	void SetData();
+
 public:
-	CPowerUp(CGameWorld *pGameWorld, vec2 Pos, int Lifetime, int XP);
+	CPowerUp(CGameWorld *pGameWorld, vec2 Pos, EPowerUp Type);
 
 	void OnFire();
 

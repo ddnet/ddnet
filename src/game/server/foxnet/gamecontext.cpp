@@ -40,8 +40,8 @@ void CGameContext::FoxNetTick()
 	// process async db account results
 	m_AccountManager.Tick();
 
-	if(Server()->Tick() % (Server()->TickSpeed() * 60 * 60 * 12) == 0) // every 12 hours
-		m_IsWeekend = IsWeekend();
+	if(Server()->Tick() % (Server()->TickSpeed() * 60 * 60 * 6) == 0) // every 6 hours
+		RefreshWeekendFlag();
 
 	if(g_Config.m_SvBanSyncing)
 		BanSync();
@@ -66,8 +66,8 @@ void CGameContext::FoxNetInit()
 	m_PowerUpDelay = Server()->Tick() + Server()->TickSpeed() * 5;
 
 	m_BanSaveDelay = Server()->Tick() + Server()->TickSpeed() * (g_Config.m_SvBanSyncingDelay * 60);
-
-	m_IsWeekend = IsWeekend();
+	
+	RefreshWeekendFlag();
 
 	if(Score())
 		Score()->CacheMapInfo();
@@ -82,6 +82,20 @@ void CGameContext::FoxNetInit()
 		else
 			m_InitRandomMap = true;
 	}
+}
+
+void CGameContext::RefreshWeekendFlag()
+{
+	using namespace std::chrono;
+	auto now = system_clock::now();
+	std::time_t t = system_clock::to_time_t(now);
+	std::tm lt{};
+#if defined(_WIN32)
+	localtime_s(&lt, &t);
+#else
+	localtime_r(&t, &lt);
+#endif
+	m_IsWeekend = (lt.tm_wday == 0 || lt.tm_wday == 6);
 }
 
 void CGameContext::OnExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, CClientMask Mask)
@@ -136,15 +150,19 @@ void CGameContext::OnExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, i
 	}
 }
 
-int RandGeometricXP(std::mt19937 &rng, int minXP, int maxXP, double p)
+int CGameContext::RandGeometric(std::mt19937 &rng, int Min, int Max, double p)
 {
-	std::geometric_distribution<int> geo(p);
-	int range = std::max(0, maxXP - minXP);
+	if(Max < Min)
+		std::swap(Min, Max);
+	p = std::clamp(p, 1e-9, 1.0 - 1e-9);
+	std::geometric_distribution<int> geo(p); 
+	int range = Max - Min;
 	int k = geo(rng);
 	if(k > range)
-		k = range;
-	return minXP + k;
+		k = range; 
+	return Min + k;
 }
+
 void CGameContext::PowerUpSpawner()
 {
 	if(!g_Config.m_SvSpawnPowerUps)
@@ -161,10 +179,10 @@ void CGameContext::PowerUpSpawner()
 		return;
 	}
 
-	static std::mt19937 rng{std::random_device{}()};
-	int Xp = RandGeometricXP(rng, 5, 35, 0.35);
-	int Lifetime = 120 + Xp * 15; // Lifetime in seconds
-	CPowerUp *NewPowerUp = new CPowerUp(&m_World, *RandomPos, Lifetime, Xp);
+	std::mt19937 rng{std::random_device{}()};
+	std::uniform_int_distribution<int> dist((int)EPowerUp::INVALID + 1, (int)EPowerUp::NUM_TYPES - 1);
+	EPowerUp Type = (EPowerUp)dist(rng);
+	CPowerUp *NewPowerUp = new CPowerUp(&m_World, *RandomPos, Type);
 
 	m_vPowerups.push_back(NewPowerUp);
 	m_PowerUpDelay = Server()->Tick() + Server()->TickSpeed() * 15;
@@ -1108,7 +1126,7 @@ std::optional<vec2> CGameContext::GetRandomAccessablePos()
 	return std::nullopt;
 }
 
-void CGameContext::CollectedPowerup(int ClientId, int XP) const
+void CGameContext::CollectedPowerup(int ClientId, const SPowerupData *pData) const
 {
 	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
 		return;
@@ -1116,11 +1134,6 @@ void CGameContext::CollectedPowerup(int ClientId, int XP) const
 	if(!pPlayer)
 		return;
 
-	if(pPlayer->m_HidePowerUps)
-	{
-		pPlayer->GiveXP(XP); // GiveXP has a logged in check
-		return;
-	}
 
 	if(!pPlayer->Acc()->m_LoggedIn)
 	{
@@ -1129,7 +1142,17 @@ void CGameContext::CollectedPowerup(int ClientId, int XP) const
 		return;
 	}
 
-	pPlayer->GiveXP(XP, "for collecting a PowerUp!");
+	const char *pMessage = pPlayer->m_HidePowerUps ? "" : "for collecting a PowerUp!";
+
+	switch(pData->m_Type)
+	{
+	case EPowerUp::XP:
+		pPlayer->GiveXP(pData->m_Value, pMessage);
+		break;
+	case EPowerUp::MONEY:
+		pPlayer->GiveMoney(pData->m_Value, pMessage);
+		break;
+	}
 }
 
 int CGameContext::DirectionToEditorDeg(const vec2 &Dir)

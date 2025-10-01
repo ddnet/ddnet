@@ -20,6 +20,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <random>
 
 #include "foxnet/accounts.h"
 #include "foxnet/votemenu.h"
@@ -731,6 +732,8 @@ private:
 	void QuadDebugIds(bool Clear);
 	std::vector<int> m_vQuadDebugIds;
 
+	void RefreshWeekendFlag();
+
 	static void ConchainQuadDebugPos(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainSoloOnSpawn(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainCosmetics(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -894,7 +897,7 @@ public:
 	int64_t m_PowerUpDelay;
 	std::vector<CPowerUp *> m_vPowerups;
 
-	void CollectedPowerup(int ClientId, int XP) const;
+	void CollectedPowerup(int ClientId, const SPowerupData *pData) const;
 
 	bool IsWeekend() const { return m_IsWeekend; }
 
@@ -945,6 +948,8 @@ public:
 
 	int GetWeaponType(int Weapon);
 	std::optional<vec2> GetRandomAccessablePos();
+
+	int RandGeometric(std::mt19937 &rng, int Min, int Max, double p);
 	// FoxNet>
 };
 

@@ -16,26 +16,46 @@
 #include <engine/server.h>
 
 #include <base/vmath.h>
-#include <iterator>
+#include <base/math.h>
 
+#include <iterator>
 #include "powerup.h"
 #include <algorithm>
+#include <random>
 
 // Its called powerup because i want to add more functionality later to it like giving custom weapons or abilities
 // For now it just acts like the 0xf one
-CPowerUp::CPowerUp(CGameWorld *pGameWorld, vec2 Pos, int Lifetime, int XP) :
+CPowerUp::CPowerUp(CGameWorld *pGameWorld, vec2 Pos, EPowerUp Type) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PORTALS, Pos, 54)
 {
 	m_Pos = Pos;
-	m_XP = XP;
-	m_Lifetime = Lifetime * Server()->TickSpeed();
+	m_Data.m_Type = Type;
 
 	for(int i = 0; i < NUM_LASERS; i++)
 		m_Snap.m_aLaserIds[i] = Server()->SnapNewId();
 	std::sort(std::begin(m_Snap.m_aLaserIds), std::end(m_Snap.m_aLaserIds));
 
 	GameWorld()->InsertEntity(this);
+	SetData();
 }
+
+void CPowerUp::SetData()
+{
+		std::mt19937 rng{std::random_device{}()};
+	switch(m_Data.m_Type)
+	{
+	case EPowerUp::XP:
+		m_Data.m_Value = GameServer()->RandGeometric(rng, 5, 35, 0.15);
+		m_Lifetime = 120 + m_Data.m_Value * 15;
+		break;
+	case EPowerUp::MONEY:
+		m_Data.m_Value = GameServer()->RandGeometric(rng, 3, 20, 0.1) * 25;
+		m_Lifetime = 120 + m_Data.m_Value / 2;
+		break;
+	}
+	m_Lifetime *= Server()->TickSpeed();
+}
+
 
 void CPowerUp::Reset()
 {
@@ -75,7 +95,7 @@ void CPowerUp::Tick()
 
 		if(PointInSquare(m_Pos, pChr->GetPos(), 54.0f))
 		{
-			GameServer()->CollectedPowerup(ClientId, m_XP);
+			GameServer()->CollectedPowerup(ClientId, &m_Data);
 			GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->TeamMask());
 			Reset();
 			return;
@@ -138,10 +158,12 @@ void CPowerUp::Snap(int SnappingClient)
 
 	GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, SixUp, SnappingClient), GetId(), m_Pos, m_Switch, 0, -1, PICKUPFLAG_NO_PREDICT);
 
+	int Type = m_Data.m_Type == EPowerUp::XP ? LASERTYPE_GUN : LASERTYPE_SHOTGUN;
+
 	for(int i = 0; i < NUM_LASERS; i++)
 	{
-		const vec2 To = m_Snap.m_aTo[i];
-		const vec2 From = m_Snap.m_aFrom[i];
-		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, SixUp, SnappingClient), m_Snap.m_aLaserIds[i], To, From, Server()->Tick(), -1, 0);
+		vec2 To = m_Snap.m_aTo[i];
+		vec2 From = m_Snap.m_aFrom[i];
+		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, SixUp, SnappingClient), m_Snap.m_aLaserIds[i], To, From, Server()->Tick(), -1, Type);
 	}
 }

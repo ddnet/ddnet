@@ -4378,15 +4378,6 @@ bool FormatUnixTime(uint64_t unixSeconds, char *out, size_t outSize)
 	return std::strftime(out, outSize, FORMAT_TIME, &tmLocal) != 0;
 }
 
-bool IsWeekend()
-{
-	time_t CurrentTime = time(nullptr);
-	tm *LocalTime = localtime(&CurrentTime);
-	if(LocalTime->tm_wday == 0 || LocalTime->tm_wday == 6)
-		return true;
-	return false;
-}
-
 std::string RandomUnicode(int length)
 {
 	std::random_device rd;
