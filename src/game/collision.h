@@ -193,7 +193,7 @@ private:
 	std::vector<SQuadData> m_vQuads;
 
 public:
-	const std::vector<SQuadData> QuadLayers() const { return m_vQuads; }
+	const std::vector<SQuadData> &QuadLayers() const { return m_vQuads; }
 	void UpdateQuadCache();
 
 	std::vector<SQuadData *> GetQuadsAt(vec2 Pos);
