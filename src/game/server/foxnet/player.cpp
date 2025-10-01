@@ -905,55 +905,13 @@ int CPlayer::NumDDraceHudRows()
 	return Rows;
 }
 
-void CPlayer::SendBroadcastHud(const char *pMessage)
+
+void CPlayer::SendBroadcastHud(std::vector<std::string> pMessages, int Offset)
 {
 	char aBuf[256] = "";
+	int NextLines = Offset == -1 ? NumDDraceHudRows() : Offset;
 
-	for(int i = 0; i < NumDDraceHudRows(); i++)
-		str_append(aBuf, "\n", sizeof(aBuf));
-
-	str_append(aBuf, pMessage, sizeof(aBuf));
-
-	if(!Server()->IsSixup(GetCid()))
-		for(int i = 0; i < 128; i++)
-			str_append(aBuf, " ", sizeof(aBuf));
-
-	GameServer()->SendBroadcast(aBuf, GetCid(), false);
-}
-
-void CPlayer::SendBroadcastHud(std::vector<std::string> pMessages)
-{
-	char aBuf[256] = "";
-
-	for(int i = 0; i < NumDDraceHudRows(); i++)
-		str_append(aBuf, "\n", sizeof(aBuf));
-
-	int StartingOffset = str_length(aBuf);
-
-	for(std::string pMessage : pMessages)
-	{
-		str_append(aBuf, pMessage.c_str(), sizeof(aBuf));
-
-		int strlen = str_length(aBuf) - StartingOffset;
-		StartingOffset = 0;
-		if(!Server()->IsSixup(GetCid()))
-			for(int i = 0; i < 128 - strlen - 2; i++)
-				str_append(aBuf, " ", sizeof(aBuf));
-
-		str_append(aBuf, "\n", sizeof(aBuf));
-	}
-	GameServer()->SendBroadcast(aBuf, GetCid(), false);
-}
-
-void CPlayer::SendBroadcastHud(std::vector<std::string> pMessages, size_t Offset)
-{
-	char aBuf[256] = "";
-
-	if(!Server()->IsSixup(GetCid()))
-		for(size_t i = 0; i < 128 + Offset * 2 + 4; i++)
-			str_append(aBuf, " ", sizeof(aBuf));
-
-	for(size_t i = 0; i < Offset; i++)
+	for(int i = 0; i < NextLines; i++)
 		str_append(aBuf, "\n", sizeof(aBuf));
 
 	for(std::string pMessage : pMessages)
@@ -962,10 +920,22 @@ void CPlayer::SendBroadcastHud(std::vector<std::string> pMessages, size_t Offset
 		str_append(aBuf, "\n", sizeof(aBuf));
 	}
 
+	if(!Server()->IsSixup(GetCid()))
+		for(int i = 0; i < 137; i++) // 16:9 ratio default font
+			str_append(aBuf, " ", sizeof(aBuf));
 
+	if(!str_comp(m_BroadcastData.m_aMessage, aBuf) && m_BroadcastData.m_Time + Server()->TickSpeed() * 9 > Server()->Tick())
+		return;
 
+	SendBroadcast(aBuf);
+}
 
-	GameServer()->SendBroadcast(aBuf, GetCid(), false);
+void CPlayer::SendBroadcast(const char *pText)
+{
+	str_copy(m_BroadcastData.m_aMessage, pText);
+	m_BroadcastData.m_Time = Server()->Tick();
+
+	GameServer()->SendBroadcast(pText, GetCid());
 }
 
 void CPlayer::Repredict(int PredMargin)
@@ -1034,7 +1004,7 @@ void CPlayer::SendAreaMotd(int Area)
 
 	if(Area == 0)
 	{
-		SendBroadcastHud("");
+		ClearBroadcast();
 		return;
 	}
 

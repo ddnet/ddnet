@@ -30,6 +30,7 @@
 #include <game/server/foxnet/entities/light_saber.h>
 #include <game/server/foxnet/entities/pickupdrop.h>
 #include <game/server/foxnet/entities/roulette.h>
+#include <string>
 // FoxNet>
 
 MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
@@ -2912,7 +2913,7 @@ void CCharacter::OnDie(int Killer, int Weapon, bool SendKillMsg)
 	}
 
 	if(m_Core.m_ActiveWeapon >= NUM_WEAPONS)
-		GameServer()->SendBroadcast("", GetPlayer()->GetCid());
+		GetPlayer()->ClearBroadcast();
 
 	m_Snake.OnPlayerDeath();
 	m_Ufo.OnPlayerDeath();
@@ -3430,7 +3431,7 @@ void CCharacter::UpdateWeaponIndicator()
 	// dont update, when we change between vanilla weapons, so that no "" is being sent to remove another broadcast, for example a money broadcast
 	if(aBuf[0] || IsWeaponIndicator())
 	{
-		GetPlayer()->SendBroadcastHud(aBuf);
+		GetPlayer()->SendBroadcastHud(std::vector<std::string>{aBuf});
 	}
 
 	// dont update when vanilla weapon got triggered and we have new hud
@@ -3476,7 +3477,8 @@ void CCharacter::DropWeapon(int Type, vec2 Dir, bool Death)
 		GiveWeapon(Type, true);
 	}
 	if(Type >= NUM_WEAPONS)
-		GetPlayer()->SendBroadcastHud("");
+		GetPlayer()->ClearBroadcast();
+
 	for(int i = 0; i < NUM_EXTRA_WEAPONS; i++)
 	{
 		if(m_Core.m_aWeapons[i].m_Got)

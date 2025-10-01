@@ -342,6 +342,8 @@ private:
 
 	int m_Area = 0;
 	void SendAreaMotd(int Area);
+
+	void SendBroadcast(const char *pText);
 public:
 	int m_BetAmount = -1;
 	int64_t m_LastBet = 0;
@@ -424,10 +426,16 @@ public:
 
 	std::vector<CPickupDrop *> m_vPickupDrops;
 
+	class CBroadcastData
+	{
+	public:
+		char m_aMessage[1024];
+		int64_t m_Time;
+	} m_BroadcastData;
+
 	int NumDDraceHudRows();
-	void SendBroadcastHud(const char *pMessages);
-	void SendBroadcastHud(std::vector<std::string> pMessages);
-	void SendBroadcastHud(std::vector<std::string> pMessages, size_t Offset);
+	void SendBroadcastHud(std::vector<std::string> pMessages, int Offset = -1);
+	void ClearBroadcast() { return SendBroadcast(""); };
 
 	double m_PredLatency = 0.0;
 	void Repredict(int PredMargin = 6);
