@@ -53,7 +53,7 @@ void CPlayer::FoxNetTick()
 			int XP = 1;
 			GiveXP(XP, "");
 		}
-		if(GetArea() == AREA_ROULETTE && GameServer()->m_pRoulette->CanBet(GetCid()))
+		if(GetArea() == AREA_ROULETTE && GameServer()->m_pRoulette->State() < RStates::PREPARING)
 		{
 			std::vector<std::string> Messages;
 
@@ -190,6 +190,7 @@ void CPlayer::GiveMoney(int64_t Amount, const char *pMessage)
 		char aText[66];
 		str_format(aText, sizeof(aText), "+%ld", (long)Amount);
 		new CProjectileText(pChr->GameWorld(), Pos, GetCid(), 175, aText, WEAPON_HAMMER);
+		pChr->SetEmote(EMOTE_HAPPY, Server()->Tick() + 175);
 	}
 
 	GameServer()->m_AccountManager.SaveAccountsInfo(m_ClientId, *Acc());
@@ -219,7 +220,7 @@ void CPlayer::TakeMoney(int64_t Amount, const char *pMessage)
 		char aText[66];
 		str_format(aText, sizeof(aText), "-%ld", (long)Amount);
 		new CProjectileText(pChr->GameWorld(), Pos, GetCid(), 125, aText, WEAPON_HAMMER);
-		pChr->SetEmote(EMOTE_PAIN, Server()->Tick() + Server()->TickSpeed());
+		pChr->SetEmote(EMOTE_PAIN, Server()->Tick() + 125);
 	}
 
 	GameServer()->m_AccountManager.SaveAccountsInfo(m_ClientId, *Acc());

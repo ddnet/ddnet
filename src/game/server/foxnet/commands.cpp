@@ -1551,12 +1551,6 @@ void CGameContext::ConSetBet(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	if(!pSelf->m_pRoulette->CanBet(ClientId))
-	{
-		pSelf->SendChatTarget(ClientId, "You can't place a bet right now");
-		return;
-	}
-
 	const int Amount = pResult->GetInteger(0);
 	const int Money = pPlayer->Acc()->m_Money;
 	if(Amount > Money)

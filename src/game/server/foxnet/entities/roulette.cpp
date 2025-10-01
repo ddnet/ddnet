@@ -7,17 +7,17 @@
 
 #include <generated/protocol.h>
 
-#include <engine/shared/protocol.h>
-#include <engine/shared/config.h>
 #include <engine/server.h>
+#include <engine/shared/config.h>
+#include <engine/shared/protocol.h>
 
-#include <base/vmath.h>
 #include <base/math.h>
 #include <base/str.h>
 #include <base/system.h>
+#include <base/vmath.h>
 
-#include <random>
 #include <cmath>
+#include <random>
 #include <string>
 #include <vector>
 
@@ -30,7 +30,7 @@ CRoulette::CRoulette(CGameWorld *pGameWorld, vec2 Pos) :
 {
 	m_Pos = Pos;
 	m_StartDelay = -1;
-	SetState(STATE_IDLE);
+	SetState(RStates::IDLE);
 	GameWorld()->InsertEntity(this);
 
 	GameServer()->m_pRoulette = this;
@@ -38,7 +38,7 @@ CRoulette::CRoulette(CGameWorld *pGameWorld, vec2 Pos) :
 
 bool CRoulette::CanBet(int ClientId) const
 {
-	if(m_State != STATE_IDLE)
+	if(m_State != RStates::IDLE && m_State != RStates::PREPARING)
 		return false;
 	if(m_aClients[ClientId].m_Active)
 		return false;
@@ -77,17 +77,29 @@ int CRoulette::AmountOfCloseClients()
 	int Count = 0;
 	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
-		if(GameServer()->m_apPlayers[ClientId] && ClientCloseEnough(ClientId))
-			Count++;
+		if(!GameServer()->m_apPlayers[ClientId])
+			continue;
+		if(!ClientCloseEnough(ClientId))
+			continue;
+		if(!GameServer()->m_apPlayers[ClientId]->Acc()->m_LoggedIn)
+			continue;
+		Count++;
 	}
 	return Count;
 }
 
 bool CRoulette::AddClient(int ClientId, int BetAmount, const char *pBetOption)
-{	
-	if(!ClientCloseEnough(ClientId))
-		return false;
+{
 	CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
+
+	if(pPl->GetArea() != AREA_ROULETTE)
+		return false;
+
+	if(!CanBet(ClientId))
+	{
+		GameServer()->SendChatTarget(ClientId, "Wait until the current round is over!");
+		return false;
+	}
 
 	if(!pPl->Acc()->m_LoggedIn)
 	{
@@ -100,15 +112,9 @@ bool CRoulette::AddClient(int ClientId, int BetAmount, const char *pBetOption)
 		return false;
 	}
 
-	if(pPl->GetArea() != AREA_ROULETTE)
-		return false;
-
 	if(BetAmount <= 0)
 	{
-		GameServer()->SendChatTarget(ClientId, "╭─────────       Rᴏᴜʟᴇᴛᴛᴇ");
-		GameServer()->SendChatTarget(ClientId, "│ You need to set a wager first");
-		GameServer()->SendChatTarget(ClientId, "│ Use /bet <Amount>");
-		GameServer()->SendChatTarget(ClientId, "╰──────────────────────────");
+		GameServer()->SendChatTarget(ClientId, "You need to set a wager first, use /bet <Amount>");
 		return false;
 	}
 
@@ -123,9 +129,7 @@ bool CRoulette::AddClient(int ClientId, int BetAmount, const char *pBetOption)
 	}
 	if(!ValidOption)
 	{
-		GameServer()->SendChatTarget(ClientId, "╭─────────       Rᴏᴜʟᴇᴛᴛᴇ");
-		GameServer()->SendChatTarget(ClientId, "│ Something went wrong, please try again!");
-		GameServer()->SendChatTarget(ClientId, "╰──────────────────────────");
+		GameServer()->SendChatTarget(ClientId, "Something went wrong, please try again!");
 		return false;
 	}
 
@@ -137,10 +141,16 @@ bool CRoulette::AddClient(int ClientId, int BetAmount, const char *pBetOption)
 	m_Betters++;
 	m_TotalWager += BetAmount;
 
-	if(AmountOfCloseClients() > 1)
+	if(AmountOfCloseClients() > 3)
+		m_StartDelay = Server()->TickSpeed() * 7; // 5 seconds
+	else if(AmountOfCloseClients() > 1)
 		m_StartDelay = Server()->TickSpeed() * 5; // 5 seconds
 	else
-		m_StartDelay = Server()->TickSpeed() * 1.5; // 1.5 seconds 
+		m_StartDelay = Server()->TickSpeed() * 1.5; // 1.5 seconds
+
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "You placed a bet of %d on %s", BetAmount, pBetOption);
+	GameServer()->SendChatTarget(ClientId, aBuf);
 	return true;
 }
 
@@ -224,21 +234,21 @@ void CRoulette::EvaluateBets()
 
 void CRoulette::StartSpin()
 {
-	if(m_State != STATE_PREPARING)
+	if(m_State != RStates::PREPARING)
 		return;
 
 	// random number for spin duration
 	static std::random_device rd;
 	std::mt19937 rng(rd());
 	std::uniform_int_distribution<> distr(MIN_SPIN_DURATION, MAX_SPIN_DURATION);
-	std::uniform_real_distribution<> distrSlow(0.4f, 0.8f);
+	std::uniform_real_distribution<> distrSlow(0.35f, 0.7f);
 
-	if(m_State == STATE_PREPARING)
-	{ 
+	if(m_State == RStates::PREPARING)
+	{
 		m_SpinDuration = distr(rng);
 		m_SlowDownFactor = distrSlow(rng);
 		m_StartDelay = -1;
-		SetState(STATE_SPINNING);
+		SetState(RStates::SPINNING);
 	}
 }
 
@@ -250,29 +260,29 @@ void CRoulette::Reset()
 
 void CRoulette::Tick()
 {
-	if(m_State == STATE_SPINNING || m_State == STATE_STOPPING)
+	if(m_State == RStates::SPINNING || m_State == RStates::STOPPING)
 		m_SpinDuration--;
 	if(m_StartDelay > 0)
 	{
-		SetState(STATE_PREPARING);
+		SetState(RStates::PREPARING);
 		m_StartDelay--;
 	}
-	else if(m_State == STATE_PREPARING && m_StartDelay == 0)
+	else if(m_State == RStates::PREPARING && m_StartDelay == 0)
 		StartSpin();
 
-	if(m_State == STATE_SPINNING)
+	if(m_State == RStates::SPINNING)
 	{
 		m_RotationSpeed += 0.005f;
 		if(m_RotationSpeed > 0.5f)
 			m_RotationSpeed = 0.5f;
 	}
-	else if(m_State == STATE_STOPPING)
+	else if(m_State == RStates::STOPPING)
 	{
 		m_RotationSpeed -= 0.005f * m_SlowDownFactor;
 		if(m_RotationSpeed < 0.0f)
 		{
 			m_RotationSpeed = 0.0f;
-			SetState(STATE_IDLE);
+			SetState(RStates::IDLE);
 			EvaluateBets();
 		}
 	}
@@ -280,11 +290,11 @@ void CRoulette::Tick()
 
 	if(m_SpinDuration <= 0)
 	{
-		if(m_State == STATE_SPINNING)
-			SetState(STATE_STOPPING);
+		if(m_State == RStates::SPINNING)
+			SetState(RStates::STOPPING);
 	}
 
-	if(m_State != STATE_IDLE)
+	if(m_State != RStates::IDLE)
 	{
 		for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 		{
@@ -292,9 +302,9 @@ void CRoulette::Tick()
 			if(!pPl)
 				continue;
 
-			if(!ClientCloseEnough(ClientId) && !m_aClients[ClientId].m_Active)
-				continue;	
-			
+			if(pPl->GetArea() != AREA_ROULETTE)
+				continue;
+
 			float TimeLeft = (float)m_StartDelay / (float)Server()->TickSpeed();
 			char aBuf[32];
 
@@ -308,11 +318,11 @@ void CRoulette::Tick()
 
 			if(m_aClients[ClientId].m_Active)
 			{
-				str_format(aBuf, sizeof(aBuf), "You bet on: %s\n", m_aClients[ClientId].m_aBetOption);
+				str_format(aBuf, sizeof(aBuf), "You bet on: %s", m_aClients[ClientId].m_aBetOption);
 				Messages.push_back(aBuf);
 			}
 
-			str_format(aBuf, sizeof(aBuf), "Players: %d", m_Betters);
+			str_format(aBuf, sizeof(aBuf), "\nPlayers: %d", m_Betters);
 			Messages.push_back(aBuf);
 			str_format(aBuf, sizeof(aBuf), "Total Bets: %d\n", m_TotalWager);
 			Messages.push_back(aBuf);
@@ -327,13 +337,6 @@ void CRoulette::Tick()
 	}
 }
 
-inline vec2 CirclePos(int Part)
-{
-	vec2 Direction = direction(360.0f / MAX_FIELDS * Part * (pi / 180.0f));
-	Direction *= 140;
-	return Direction;
-}
-
 void CRoulette::Snap(int SnappingClient)
 {
 	if(NetworkClipped(SnappingClient))
@@ -342,7 +345,7 @@ void CRoulette::Snap(int SnappingClient)
 	const int SnappingClientVersion = Server()->GetClientVersion(SnappingClient);
 	const bool SixUp = Server()->IsSixup(SnappingClient);
 
-	vec2 From = m_Pos + direction(m_Rotation) * 123.5f;;
+	vec2 From = m_Pos + direction(m_Rotation) * 123.5f;
 
 	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, SixUp, SnappingClient), GetId(), From, m_Pos, 0, -1, LASERTYPE_DRAGGER, LASERDRAGGERTYPE_WEAK, -1, LASERFLAG_NO_PREDICT);
 }

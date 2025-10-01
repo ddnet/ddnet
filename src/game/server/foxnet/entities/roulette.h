@@ -43,16 +43,16 @@ constexpr const char *RouletteOptions[] = {
 	"25-36"
 };
 
+enum class RStates
+{
+	IDLE = 0,
+	PREPARING,
+	SPINNING,
+	STOPPING
+};
 
 class CRoulette : public CEntity
 {
-	enum States
-	{
-		STATE_IDLE = 0,
-		STATE_PREPARING = 1,
-		STATE_SPINNING = 2,
-		STATE_STOPPING = 3
-	};
 
 	int m_SpinDuration = 0;
 
@@ -60,7 +60,7 @@ class CRoulette : public CEntity
 
 	float m_RotationSpeed = 0.0f;
 	float m_Rotation = 0.0f;
-	int m_State = STATE_IDLE;
+	RStates m_State = RStates::IDLE;
 
 	int m_StartDelay = 0;
 
@@ -80,7 +80,7 @@ class CRoulette : public CEntity
 		{18, COLOR_RED}, {29, COLOR_BLACK}, {7, COLOR_RED}, {28, COLOR_BLACK},
 		{12, COLOR_RED}, {35, COLOR_BLACK}, {3, COLOR_RED}, {26, COLOR_BLACK}};
 
-	void SetState(int State) { m_State = State; }
+	void SetState(RStates State) { m_State = State; }
 	void EvaluateBets();
 
 	int GetField() const;
@@ -91,14 +91,14 @@ class CRoulette : public CEntity
 
 	int AmountOfCloseClients();
 
+	bool CanBet(int ClientId) const;
+	void StartSpin();
+
 public:
 	CRoulette(CGameWorld *pGameWorld, vec2 Pos);
 
-	bool CanBet(int ClientId) const;
-
 	bool AddClient(int ClientId, int BetAmount, const char *pBetOption);
-
-	void StartSpin();
+	RStates State() const { return m_State; }
 
 	virtual void Reset() override;
 	virtual void Tick() override;

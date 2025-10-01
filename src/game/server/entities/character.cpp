@@ -3022,36 +3022,30 @@ void CCharacter::RouletteTileHandle()
 
 	const int ClientId = GetPlayer()->GetCid();
 	const int Bet = GetPlayer()->m_BetAmount;
-	if(!GameServer()->m_pRoulette->CanBet(ClientId))
-		return;
 
 	vec2 CursorPos = GetCursorPos();
 
 	const int CurrentIndex = Collision()->GetMapIndex(CursorPos);
-	if(Collision()->IsSpeedup(CurrentIndex))
+	if(!Collision()->IsSpeedup(CurrentIndex))
+		return;
+
+	vec2 Direction = vec2(0, 0);
+	int Force = 0, Type = 0, MaxSpeed = 0, Angle = 0;
+	Collision()->GetSpeedup(CurrentIndex, &Direction, &Force, &MaxSpeed, &Type);
+
+	if(Type != TILE_EXTRA)
+		return;
+
+	Angle = GameServer()->DirectionToEditorDeg(Direction);
+
+	for(int i = 0; i < (int)std::size(RouletteOptions); i++)
 	{
-		vec2 Direction = vec2(0,0);
-		int Force = 0, Type = 0, MaxSpeed = 0, Angle = 0;
-		Collision()->GetSpeedup(CurrentIndex, &Direction, &Force, &MaxSpeed, &Type);
-
-		if(Type != TILE_EXTRA)
-			return;
-
-		Angle = GameServer()->DirectionToEditorDeg(Direction);
-
-
-		for(int i = 0; i < (int)std::size(RouletteOptions); i++)
+		if(Force == FORCE_ROULETTE && Angle == 0 && MaxSpeed == i + 2)
 		{
-			if(Force == FORCE_ROULETTE && Angle == 0 && MaxSpeed == i + 2)
+			if(GameServer()->m_pRoulette->AddClient(ClientId, Bet, RouletteOptions[i]))
 			{
-				if(GameServer()->m_pRoulette->AddClient(ClientId, Bet, RouletteOptions[i]))
-				{
-					GameServer()->CreateDeath(CursorPos, ClientId, TeamMask());
-					char aBuf[256];
-					str_format(aBuf, sizeof(aBuf), "You placed a bet of %d on %s", Bet, RouletteOptions[i]);
-					GameServer()->SendChatTarget(ClientId, aBuf);
-					return;
-				}
+				GameServer()->CreateDeath(CursorPos, ClientId, TeamMask());
+				return;
 			}
 		}
 	}
