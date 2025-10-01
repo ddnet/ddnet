@@ -893,7 +893,7 @@ void CMenusIngameTouchControls::RenderSelectingTab(CUIRect SelectingTab)
 void CMenusIngameTouchControls::RenderConfigSettings(CUIRect MainView)
 {
 	CUIRect EditBox, Row, Label, Button;
-	MainView.h = 2 * MAINMARGIN + 4 * ROWSIZE + 3 * ROWGAP;
+	MainView.h = 600.0f - 40.0f - MainView.y;
 	MainView.Draw(CMenus::ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 	MainView.VMargin(MAINMARGIN, &MainView);
 	MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
@@ -942,6 +942,55 @@ void CMenusIngameTouchControls::RenderConfigSettings(CUIRect MainView)
 	if(OldDirectTouchSpectate != NewDirectTouchSpectate)
 	{
 		GameClient()->m_TouchControls.SetDirectTouchSpectate(NewDirectTouchSpectate);
+	}
+
+	MainView.HSplitTop(ROWGAP, nullptr, &MainView);
+	MainView.HSplitTop(ROWSIZE, &Row, &MainView);
+	Row.VSplitMid(&Label, &Button);
+	Ui()->DoLabel(&Label, Localize("Two-finger zoom gesture while ingame"), FONTSIZE, TEXTALIGN_ML);
+
+	const char *apZoomGestureModes[2] = {Localize("Disabled"), Localize("Enabled")};
+	const bool OldZoomGestureGame = GameClient()->m_TouchControls.HasEnabledZoomGestureGame();
+	static CUi::SDropDownState s_ZoomGestureGameDropDownState;
+	static CScrollRegion s_ZoomGestureGameDropDownScrollRegion;
+	s_ZoomGestureGameDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_ZoomGestureGameDropDownScrollRegion;
+	const bool NewZoomGestureGame = Ui()->DoDropDown(&Button, OldZoomGestureGame ? 1 : 0, apZoomGestureModes, std::size(apZoomGestureModes), s_ZoomGestureGameDropDownState) == 1 ? true : false;
+	if(OldZoomGestureGame != NewZoomGestureGame)
+	{
+		GameClient()->m_TouchControls.SetEditingChanges(true);
+		GameClient()->m_TouchControls.SetZoomGestureGame(NewZoomGestureGame);
+	}
+
+	MainView.HSplitTop(ROWGAP, nullptr, &MainView);
+	MainView.HSplitTop(ROWSIZE, &Row, &MainView);
+	Row.VSplitMid(&Label, &Button);
+	Ui()->DoLabel(&Label, Localize("Two-finger zoom gesture while spectating"), FONTSIZE, TEXTALIGN_ML);
+
+	const bool OldZoomGestureSpec = GameClient()->m_TouchControls.HasEnabledZoomGestureSpec();
+	static CUi::SDropDownState s_ZoomGestureSpecDropDownState;
+	static CScrollRegion s_ZoomGestureSpecDropDownScrollRegion;
+	s_ZoomGestureSpecDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_ZoomGestureSpecDropDownScrollRegion;
+	const bool NewZoomGestureSpec = Ui()->DoDropDown(&Button, OldZoomGestureSpec ? 1 : 0, apZoomGestureModes, std::size(apZoomGestureModes), s_ZoomGestureSpecDropDownState) == 1 ? true : false;
+	if(OldZoomGestureSpec != NewZoomGestureSpec)
+	{
+		GameClient()->m_TouchControls.SetEditingChanges(true);
+		GameClient()->m_TouchControls.SetZoomGestureSpec(NewZoomGestureSpec);
+	}
+
+	MainView.HSplitTop(ROWGAP, nullptr, &MainView);
+	MainView.HSplitTop(ROWSIZE, &Row, &MainView);
+	Row.VSplitMid(&Label, &Button);
+	Ui()->DoLabel(&Label, Localize("Three fingers pressed simultaneously to hide all buttons"), FONTSIZE, TEXTALIGN_ML);
+
+	const bool OldToggleVisibilityGesture = GameClient()->m_TouchControls.HasEnabledToggleVisibilityGesture();
+	static CUi::SDropDownState s_ToggleVisibilityGestureDropDownState;
+	static CScrollRegion s_ToggleVisibilityGestureScrollRegion;
+	s_ToggleVisibilityGestureDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_ToggleVisibilityGestureScrollRegion;
+	const bool NewToggleVisibilityGesture = Ui()->DoDropDown(&Button, OldToggleVisibilityGesture ? 1 : 0, apZoomGestureModes, std::size(apZoomGestureModes), s_ToggleVisibilityGestureDropDownState) == 1 ? true : false;
+	if(OldToggleVisibilityGesture != NewToggleVisibilityGesture)
+	{
+		GameClient()->m_TouchControls.SetEditingChanges(true);
+		GameClient()->m_TouchControls.SetToggleVisibilityGesture(NewToggleVisibilityGesture);
 	}
 }
 
