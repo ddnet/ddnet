@@ -44,11 +44,11 @@ void CPowerUp::SetData()
 	switch(m_Data.m_Type)
 	{
 	case EPowerUp::XP:
-		m_Data.m_Value = GameServer()->RandGeometric(rng, 5, 35, 0.15);
+		m_Data.m_Value = GameServer()->RandGeometric(rng, 5, 35, 0.2);
 		m_Lifetime = 120 + m_Data.m_Value * 15;
 		break;
 	case EPowerUp::MONEY:
-		m_Data.m_Value = GameServer()->RandGeometric(rng, 3, 20, 0.1) * 25;
+		m_Data.m_Value = GameServer()->RandGeometric(rng, 3, 20, 0.2) * 25;
 		m_Lifetime = 120 + m_Data.m_Value / 2;
 		break;
 	default:
