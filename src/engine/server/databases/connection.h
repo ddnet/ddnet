@@ -27,6 +27,7 @@ public:
 	// returns the database prefix
 	const char *GetPrefix() const { return m_aPrefix; }
 	virtual const char *BinaryCollate() const = 0;
+	virtual const char *Decimal() const = 0;
 	// can be inserted into queries to convert a timestamp variable to the unix timestamp
 	virtual void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize) = 0;
 	// since MySQL automatically converts timestamps to utc, meanwhile sqlite code has to
