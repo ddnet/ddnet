@@ -10,7 +10,7 @@ bool CAccountsWorker::Register(IDbConnection *pSql, const ISqlData *pData, Write
 	const auto *pReq = dynamic_cast<const CAccRegisterRequest *>(pData);
 	auto *pRes = dynamic_cast<CAccResult *>(pData->m_pResult.get());
 
-	char aSql[512];
+	char aSql[256];
 	str_copy(aSql, "INSERT INTO foxnet_accounts (Username, Password, RegisterDate, Flags) VALUES (?, ?, ?, ?)", sizeof(aSql));
 	if(!pSql->PrepareStatement(aSql, pError, ErrorSize))
 		return false;
@@ -34,7 +34,7 @@ bool CAccountsWorker::Login(IDbConnection *pSql, const ISqlData *pData, char *pE
 	const auto *pReq = dynamic_cast<const CAccLoginRequest *>(pData);
 	auto *pRes = dynamic_cast<CAccResult *>(pData->m_pResult.get());
 
-	char aSql[1024];
+	char aSql[512];
 	str_copy(aSql,
 		"SELECT Username, RegisterDate, PlayerName, LastPlayerName, CurrentIP, LastIP, "
 		"LoggedIn, LastLogin, Port, ClientId, Flags, VoteMenuPage, Playtime, Deaths, Kills, "
@@ -112,7 +112,7 @@ bool CAccountsWorker::UpdateLoginState(IDbConnection *pSql, const ISqlData *pDat
 bool CAccountsWorker::UpdateLogoutState(IDbConnection *pSql, const ISqlData *pData, Write, char *pError, int ErrorSize)
 {
 	const auto *pReq = dynamic_cast<const CAccUpdLogoutState *>(pData);
-	char aSql[768];
+	char aSql[512];
 	str_copy(aSql,
 		"UPDATE foxnet_accounts "
 		"SET LoggedIn = 0, Port = 0, ClientId = -1, "
@@ -143,12 +143,14 @@ bool CAccountsWorker::SelectByLastPlayerName(IDbConnection *pSql, const ISqlData
 	const auto *p = dynamic_cast<const CAccSelectByLastName *>(pData);
 	auto *pRes = dynamic_cast<CAccResult *>(pData->m_pResult.get());
 
-	char aSql[1024];
+	char aSql[512];
 	str_copy(aSql,
 		"SELECT Username, RegisterDate, PlayerName, LastPlayerName, CurrentIP, LastIP, "
 		"LoggedIn, LastLogin, Port, ClientId, Flags, VoteMenuPage, Playtime, Deaths, Kills, "
 		"Level, XP, Money, Inventory, LastActiveItems, Disabled "
-		"FROM foxnet_accounts WHERE LastPlayerName = ?",
+		"FROM foxnet_accounts WHERE LastPlayerName = ? "
+		"ORDER BY LastLogin DESC "
+		"LIMIT 1",
 		sizeof(aSql));
 	if(!pSql->PrepareStatement(aSql, pError, ErrorSize))
 		return false;
@@ -191,7 +193,7 @@ bool CAccountsWorker::SelectByLastPlayerName(IDbConnection *pSql, const ISqlData
 bool CAccountsWorker::SaveInfo(IDbConnection *pSql, const ISqlData *pData, Write, char *pError, int ErrorSize)
 {
 	const auto *p = dynamic_cast<const CAccSaveInfo *>(pData);
-	char aSql[768];
+	char aSql[512];
 	str_copy(aSql,
 		"UPDATE foxnet_accounts "
 		"SET LastPlayerName = PlayerName, LastIP = CurrentIP, "
@@ -236,7 +238,7 @@ bool CAccountsWorker::SelectByUsername(IDbConnection *pSql, const ISqlData *pDat
 	const auto *p = dynamic_cast<const CAccSelectByUser *>(pData);
 	auto *pRes = dynamic_cast<CAccResult *>(pData->m_pResult.get());
 
-	char aSql[1024];
+	char aSql[512];
 	str_copy(aSql,
 		"SELECT Username, RegisterDate, PlayerName, LastPlayerName, CurrentIP, LastIP, "
 		"LoggedIn, LastLogin, Port, ClientId, Flags, VoteMenuPage, Playtime, Deaths, Kills, "
@@ -393,7 +395,7 @@ bool CAccountsWorker::ShowTop5(IDbConnection *pSql, const ISqlData *pData, char 
 bool CAccountsWorker::DisableAccount(IDbConnection *pSql, const ISqlData *pData, Write, char *pError, int ErrorSize)
 {
 	const auto *p = dynamic_cast<const CAccDisable *>(pData);
-	char aSql[768];
+	char aSql[256];
 	str_copy(aSql,
 		"UPDATE foxnet_accounts "
 		"SET LastPlayerName = PlayerName, LastIP = CurrentIP, "

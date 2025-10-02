@@ -373,8 +373,22 @@ void CAccounts::EditAccount(const char *pUsername, const char *pVariable, const 
 		return;
 	if(!pUsername || !pUsername[0] || !pVariable || !pVariable[0] || !pValue)
 		return;
-	auto IsIntCol = [](const char *pCol) { static const char *s_aIntCols[] = {"Version","RegisterDate","LoggedIn","LastLogin","Port","ClientId","Flags","VoteMenuPage","Playtime","Deaths","Kills","Level","XP","Money",nullptr}; for(const char **pp=s_aIntCols;*pp;++pp) if(!str_comp(*pp,pCol)) return true; return false; };
-	auto IsTextCol = [](const char *pCol) { static const char *s_aTextCols[] = {"PlayerName","LastPlayerName","CurrentIP","LastIP","Inventory","LastActiveItems",nullptr}; for(const char **pp=s_aTextCols;*pp;++pp) if(!str_comp(*pp,pCol)) return true; return false; };
+	auto IsIntCol = [](const char *pCol) {
+		static const char *s_aIntCols[] = {
+			"Version", "RegisterDate", "LoggedIn", "LastLogin", "Port", "ClientId", "Flags", "VoteMenuPage", "Playtime", "Deaths", "Kills", "Level", "XP", "Money", nullptr};
+		for(const char **pp = s_aIntCols; *pp; ++pp)
+			if(!str_comp(*pp, pCol))
+				return true;
+		return false;
+	};
+	auto IsTextCol = [](const char *pCol) {
+		static const char *s_aTextCols[] = {
+			"PlayerName", "LastPlayerName", "CurrentIP", "LastIP", "Inventory", "LastActiveItems", nullptr};
+		for(const char **pp = s_aTextCols; *pp; ++pp)
+			if(!str_comp(*pp, pCol))
+				return true;
+		return false;
+	};
 	bool IsInt = IsIntCol(pVariable);
 	bool IsText = IsTextCol(pVariable);
 	if(!(IsInt || IsText))
@@ -404,17 +418,81 @@ void CAccounts::ShowAccProfile(int ClientId, const char *pName)
 {
 	if(!m_pPool || !pName[0])
 		return;
-	auto SendProfile = [this, ClientId, NameCopy = std::string(pName)](const CAccResult &Data) { char aBuf[128]; GameServer()->SendChatTarget(ClientId,"╭──────     Pʀᴏғɪʟᴇ"); const char *UseName = Data.m_LoggedIn ? NameCopy.c_str() : (Data.m_PlayerName[0]?Data.m_PlayerName:Data.m_Username); str_format(aBuf,sizeof(aBuf),"│ Name: %s",UseName); GameServer()->SendChatTarget(ClientId,aBuf); if(Server()->GetAuthedState(ClientId) >= AUTHED_MOD){ str_format(aBuf,sizeof(aBuf),"│ Username: %s",Data.m_Username); GameServer()->SendChatTarget(ClientId,aBuf);} if(Data.m_Disabled) str_copy(aBuf,"│ Status: Account disabled",sizeof(aBuf)); else str_format(aBuf,sizeof(aBuf),"│ Status: %s",Data.m_LoggedIn?"Online":"Offline"); GameServer()->SendChatTarget(ClientId,aBuf); if(!Data.m_LoggedIn){ time_t Now; time(&Now); double Seconds=difftime(Now,Data.m_LastLogin); int Days=(int)(Seconds/(60*60*24)); int Hours=(int)(Seconds/(60*60)); if(Data.m_LastLogin<=0) str_copy(aBuf,"│ Never",sizeof(aBuf)); else if(Days>0) str_format(aBuf,sizeof(aBuf),"│ Last seen %d day%s ago",Days,Days==1?"":"s"); else if(Hours>0) str_format(aBuf,sizeof(aBuf),"│ Last seen %d hour%s ago",Hours,Hours==1?"":"s"); else str_copy(aBuf,"│ Last seen less than an hour ago",sizeof(aBuf)); GameServer()->SendChatTarget(ClientId,aBuf);} GameServer()->SendChatTarget(ClientId,"├──────      Sᴛᴀᴛs"); str_format(aBuf,sizeof(aBuf),"│ Level %ld",(long)Data.m_Level); GameServer()->SendChatTarget(ClientId,aBuf); str_format(aBuf,sizeof(aBuf),"│ %ld %s",(long)Data.m_Money,g_Config.m_SvCurrencyName); GameServer()->SendChatTarget(ClientId,aBuf); float PlayTimeHours=Data.m_Playtime/60.0f; if(Data.m_Playtime<100) str_format(aBuf,sizeof(aBuf),"│ %ld Minutes Playtime",(long)Data.m_Playtime); else str_format(aBuf,sizeof(aBuf),"│ %.1f Hours Playtime",PlayTimeHours); GameServer()->SendChatTarget(ClientId,aBuf); str_format(aBuf,sizeof(aBuf),"│ %ld Deaths",(long)Data.m_Deaths); GameServer()->SendChatTarget(ClientId,aBuf); GameServer()->SendChatTarget(ClientId,"╰───────────────────────"); };
-	auto QueryByUsername = [this, ClientId, pNameStr = std::string(pName), SendProfile]() { auto pRes2=std::make_shared<CAccResult>(); auto pReq2=std::make_unique<CAccSelectByUser>(pRes2); str_copy(pReq2->m_Username,pNameStr.c_str(),sizeof(pReq2->m_Username)); AddPending(pRes2,[this,ClientId,pNameStr,SendProfile](CAccResult &Res2){ if(!Res2.m_Success || !Res2.m_Found){ GameServer()->SendChatTarget(ClientId,"╭─────────       Pʀᴏғɪʟᴇ"); char aBuf[128]; str_format(aBuf,sizeof(aBuf),"│ Account \"%s\" doesn't exist",pNameStr.c_str()); GameServer()->SendChatTarget(ClientId,aBuf); GameServer()->SendChatTarget(ClientId,"╰──────────────────────────"); return;} SendProfile(Res2);}); m_pPool->Execute(CAccountsWorker::SelectByUsername,std::move(pReq2),"acc select by username (profile)"); };
+	auto SendProfile = [this, ClientId, NameCopy = std::string(pName)](const CAccResult &Data) {
+		char aBuf[128];
+		GameServer()->SendChatTarget(ClientId, "╭──────     Pʀᴏғɪʟᴇ");
+		const char *UseName = Data.m_LoggedIn ? NameCopy.c_str() : (Data.m_PlayerName[0] ? Data.m_PlayerName : Data.m_Username);
+		str_format(aBuf, sizeof(aBuf), "│ Name: %s", UseName);
+		GameServer()->SendChatTarget(ClientId, aBuf);
+		if(Server()->GetAuthedState(ClientId) >= AUTHED_MOD)
+		{
+			str_format(aBuf, sizeof(aBuf), "│ Username: %s", Data.m_Username);
+			GameServer()->SendChatTarget(ClientId, aBuf);
+		}
+		if(Data.m_Disabled)
+			str_copy(aBuf, "│ Status: Account disabled", sizeof(aBuf));
+		else
+			str_format(aBuf, sizeof(aBuf), "│ Status: %s", Data.m_LoggedIn ? "Online" : "Offline");
+		GameServer()->SendChatTarget(ClientId, aBuf);
+		if(!Data.m_LoggedIn)
+		{
+			time_t Now;
+			time(&Now);
+			double Seconds = difftime(Now, Data.m_LastLogin);
+			int Days = (int)(Seconds / (60 * 60 * 24));
+			int Hours = (int)(Seconds / (60 * 60));
+			if(Data.m_LastLogin <= 0)
+				str_copy(aBuf, "│ Never", sizeof(aBuf));
+			else if(Days > 0)
+				str_format(aBuf, sizeof(aBuf), "│ Last seen %d day%s ago", Days, Days == 1 ? "" : "s");
+			else if(Hours > 0)
+				str_format(aBuf, sizeof(aBuf), "│ Last seen %d hour%s ago", Hours, Hours == 1 ? "" : "s");
+			else
+				str_copy(aBuf, "│ Last seen less than an hour ago", sizeof(aBuf));
+			GameServer()->SendChatTarget(ClientId, aBuf);
+		}
+		GameServer()->SendChatTarget(ClientId, "├──────      Sᴛᴀᴛs");
+		str_format(aBuf, sizeof(aBuf), "│ Level %ld", (long)Data.m_Level);
+		GameServer()->SendChatTarget(ClientId, aBuf);
+		str_format(aBuf, sizeof(aBuf), "│ %ld %s", (long)Data.m_Money, g_Config.m_SvCurrencyName);
+		GameServer()->SendChatTarget(ClientId, aBuf);
+		float PlayTimeHours = Data.m_Playtime / 60.0f;
+		if(Data.m_Playtime < 100)
+			str_format(aBuf, sizeof(aBuf), "│ %ld Minutes Playtime", (long)Data.m_Playtime);
+		else
+			str_format(aBuf, sizeof(aBuf), "│ %.1f Hours Playtime", PlayTimeHours);
+		GameServer()->SendChatTarget(ClientId, aBuf);
+		str_format(aBuf, sizeof(aBuf), "│ %ld Deaths", (long)Data.m_Deaths);
+		GameServer()->SendChatTarget(ClientId, aBuf);
+		GameServer()->SendChatTarget(ClientId, "╰───────────────────────");
+	};
+	auto QueryByUsername = [this, ClientId, pNameStr = std::string(pName), SendProfile]() {
+		auto pRes2 = std::make_shared<CAccResult>();
+		auto pReq2 = std::make_unique<CAccSelectByUser>(pRes2);
+		str_copy(pReq2->m_Username, pNameStr.c_str(), sizeof(pReq2->m_Username));
+		AddPending(pRes2, [this, ClientId, pNameStr, SendProfile](CAccResult &Res2) {
+			if(!Res2.m_Success || !Res2.m_Found)
+			{
+				GameServer()->SendChatTarget(ClientId, "╭─────────       Pʀᴏғɪʟᴇ");
+				char aBuf[128];
+				str_format(aBuf, sizeof(aBuf), "│ Account \"%s\" doesn't exist", pNameStr.c_str());
+				GameServer()->SendChatTarget(ClientId, aBuf);
+				GameServer()->SendChatTarget(ClientId, "╰──────────────────────────");
+				return;
+			}
+			SendProfile(Res2);
+		});
+		m_pPool->Execute(CAccountsWorker::SelectByUsername, std::move(pReq2), "acc select by username (profile)");
+	};
 	auto pRes = std::make_shared<CAccResult>();
 	auto pReq = std::make_unique<CAccSelectByLastName>(pRes);
 	str_copy(pReq->m_LastPlayerName, pName, sizeof(pReq->m_LastPlayerName));
 	AddPending(pRes, [QueryByUsername, SendProfile](CAccResult &Res) {
 		if(!Res.m_Success || !Res.m_Found)
 			QueryByUsername();
-		else SendProfile(Res);
-		}
-	);
+		else
+			SendProfile(Res);
+	});
 	m_pPool->Execute(CAccountsWorker::SelectByLastPlayerName, std::move(pReq), "acc select by last name (profile)");
 }
 
