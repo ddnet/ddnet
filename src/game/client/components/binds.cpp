@@ -457,11 +457,11 @@ void CBinds::GetKeyBindName(int Key, int ModifierMask, char *pBuf, size_t BufSiz
 
 char *CBinds::GetKeyBindCommand(int ModifierCombination, int Key) const
 {
-	// worst case the str_escape can double the string length
-	int Size = str_length(m_aapKeyBindings[ModifierCombination][Key]) * 2 + 30;
-	auto *pBuf = static_cast<char *>(malloc(Size));
 	char aBindName[128];
 	GetKeyBindName(Key, ModifierCombination, aBindName, sizeof(aBindName));
+	// worst case the str_escape can double the string length
+	int Size = str_length(m_aapKeyBindings[ModifierCombination][Key]) * 2 + str_length(aBindName) + 16;
+	auto *pBuf = static_cast<char *>(malloc(Size));
 	str_format(pBuf, Size, "bind %s \"", aBindName);
 	char *pDst = pBuf + str_length(pBuf);
 	// process the string. we need to escape some characters
