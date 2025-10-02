@@ -83,6 +83,8 @@ int CRoulette::AmountOfCloseClients()
 			continue;
 		if(!GameServer()->m_apPlayers[ClientId]->Acc()->m_LoggedIn)
 			continue;
+		if(GameServer()->m_apPlayers[ClientId]->Acc()->m_Money <= 0)
+			continue;
 		Count++;
 	}
 	return Count;
