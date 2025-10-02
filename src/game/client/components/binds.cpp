@@ -437,9 +437,9 @@ const char *CBinds::GetModifierName(int Modifier)
 		return "alt";
 	case MODIFIER_GUI:
 		return "gui";
-	case MODIFIER_NONE:
 	default:
-		return "";
+		dbg_assert(false, "Modifier invalid: %d", Modifier);
+		dbg_break();
 	}
 }
 
