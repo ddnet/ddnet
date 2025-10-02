@@ -53,20 +53,6 @@ void CPlayer::FoxNetTick()
 			int XP = 1;
 			GiveXP(XP, "");
 		}
-		if(GetArea() == AREA_ROULETTE && GameServer()->m_pRoulette->State() < RStates::PREPARING)
-		{
-			std::vector<std::string> Messages;
-
-			char Msg[32] = "";
-			str_format(Msg, sizeof(Msg), "%ld %s", (long)Acc()->m_Money, g_Config.m_SvCurrencyName);
-			Messages.push_back(Msg);
-			if(m_BetAmount <= 0)
-				str_copy(Msg, "Wager: Nothing");
-			else
-				str_format(Msg, sizeof(Msg), "Wager: %d", m_BetAmount);
-			Messages.push_back(Msg);
-			SendBroadcastHud(Messages, 2);
-		}
 	}
 }
 
@@ -908,6 +894,9 @@ int CPlayer::NumDDraceHudRows()
 
 void CPlayer::SendBroadcastHud(std::vector<std::string> pMessages, int Offset)
 {
+	if(pMessages.empty())
+		return;
+
 	char aBuf[256] = "";
 	int NextLines = Offset == -1 ? NumDDraceHudRows() : Offset;
 

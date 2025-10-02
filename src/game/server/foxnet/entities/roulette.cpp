@@ -158,14 +158,15 @@ void CRoulette::SetState(RStates State)
 	
 	if(State == RStates::PREPARING)
 	{
-		if(AmountOfCloseClients() > 3)
+		int Close = AmountOfCloseClients();
+
+		if(Close > 3)
 			m_StartDelay = Server()->TickSpeed() * 7; // 5 seconds
-		else if(AmountOfCloseClients() > 1)
+		else if(Close > 1)
 			m_StartDelay = Server()->TickSpeed() * 5; // 5 seconds
 		else
 			m_StartDelay = Server()->TickSpeed() * 1.5; // 1.5 seconds
 	}
-
 }
 
 int CRoulette::GetField() const
@@ -305,47 +306,61 @@ void CRoulette::Tick()
 			SetState(RStates::STOPPING);
 	}
 
-	if(m_State != RStates::IDLE)
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
-		for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+		SendBroadcast(ClientId);
+	}
+}
+
+void CRoulette::SendBroadcast(int ClientId)
+{
+	CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
+	if(!pPl)
+		return;
+
+	if(pPl->GetArea() != AREA_ROULETTE)
+		return;
+
+	float TimeLeft = (float)m_StartDelay / (float)Server()->TickSpeed();
+	char aBuf[32];
+
+	std::vector<std::string> Messages;
+
+	if(pPl->Acc()->m_LoggedIn)
+	{
+		str_format(aBuf, sizeof(aBuf), "%ld %s", (long)pPl->Acc()->m_Money, g_Config.m_SvCurrencyName);
+		Messages.push_back(aBuf);
+
+		if(m_State == RStates::IDLE)
 		{
-			CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
-			if(!pPl)
-				continue;
-
-			if(pPl->GetArea() != AREA_ROULETTE)
-				continue;
-
-			float TimeLeft = (float)m_StartDelay / (float)Server()->TickSpeed();
-			char aBuf[32];
-
-			std::vector<std::string> Messages;
-
-			if(pPl->Acc()->m_LoggedIn)
-			{
-				str_format(aBuf, sizeof(aBuf), "%ld %s", (long)pPl->Acc()->m_Money, g_Config.m_SvCurrencyName);
-				Messages.push_back(aBuf);
-			}
-
-			if(m_aClients[ClientId].m_Active)
-			{
-				str_format(aBuf, sizeof(aBuf), "You bet on: %s", m_aClients[ClientId].m_aBetOption);
-				Messages.push_back(aBuf);
-			}
-
-			str_format(aBuf, sizeof(aBuf), "\nPlayers: %d", m_Betters);
+			if(pPl->m_BetAmount <= 0)
+				str_copy(aBuf, "Wager: Nothing");
+			else
+				str_format(aBuf, sizeof(aBuf), "Wager: %d", pPl->m_BetAmount);
 			Messages.push_back(aBuf);
-			str_format(aBuf, sizeof(aBuf), "Total Bets: %d\n", m_TotalWager);
-			Messages.push_back(aBuf);
-			if(m_StartDelay > 0)
-			{
-				str_format(aBuf, sizeof(aBuf), "Starting in: %.1fs", TimeLeft);
-				Messages.push_back(aBuf);
-			}
-
-			pPl->SendBroadcastHud(Messages, 2);
 		}
 	}
+
+	if(m_State != RStates::IDLE)
+	{
+		if(m_aClients[ClientId].m_Active)
+		{
+			str_format(aBuf, sizeof(aBuf), "You bet on: %s", m_aClients[ClientId].m_aBetOption);
+			Messages.push_back(aBuf);
+		}
+
+		str_format(aBuf, sizeof(aBuf), "\nPlayers: %d", m_Betters);
+		Messages.push_back(aBuf);
+		str_format(aBuf, sizeof(aBuf), "Total Bets: %d\n", m_TotalWager);
+		Messages.push_back(aBuf);
+		if(m_StartDelay > 0)
+		{
+			str_format(aBuf, sizeof(aBuf), "Starting in: %.1fs", TimeLeft);
+			Messages.push_back(aBuf);
+		}
+	}
+
+	pPl->SendBroadcastHud(Messages, 2);
 }
 
 void CRoulette::Snap(int SnappingClient)

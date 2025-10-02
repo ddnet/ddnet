@@ -85,10 +85,9 @@ class CRoulette : public CEntity
 
 	int GetField() const;
 
+	void SendBroadcast(int ClientId);
 	void ResetClients();
-
 	bool ClientCloseEnough(int ClientId);
-
 	int AmountOfCloseClients();
 
 	bool CanBet(int ClientId) const;
