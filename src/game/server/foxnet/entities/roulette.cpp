@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "roulette.h"
+#include <game/teamscore.h>
 
 // Its called powerup because i want to add more functionality later to it like giving custom weapons or abilities
 // For now it just acts like the 0xf one
@@ -60,31 +61,24 @@ void CRoulette::ResetClients()
 	}
 }
 
-bool CRoulette::ClientCloseEnough(int ClientId)
-{
-	const CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
-	if(!pPl)
-		return false;
-	const CCharacter *pCharacter = pPl->GetCharacter();
-	if(!pCharacter)
-		return false;
-	if(distance(pCharacter->m_Pos, m_Pos) < 32.0f * 12.0f)
-		return true;
-	return false;
-}
-
 int CRoulette::AmountOfCloseClients()
 {
 	int Count = 0;
 	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
-		if(!GameServer()->m_apPlayers[ClientId])
+		CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
+		if(!pPl)
 			continue;
-		if(!ClientCloseEnough(ClientId))
+		CCharacter *pCharacter = pPl->GetCharacter();
+		if(!pCharacter)
 			continue;
-		if(!GameServer()->m_apPlayers[ClientId]->Acc()->m_LoggedIn)
+		if(distance(pCharacter->m_Pos, m_Pos) < 32.0f * 12.0f)
 			continue;
-		if(GameServer()->m_apPlayers[ClientId]->Acc()->m_Money <= 0)
+		if(pCharacter->Team() != TEAM_FLOCK)
+			continue;
+		if(!pPl->Acc()->m_LoggedIn)
+			continue;
+		if(pPl->Acc()->m_Money <= 0)
 			continue;
 		Count++;
 	}
@@ -96,6 +90,10 @@ bool CRoulette::AddClient(int ClientId, int BetAmount, const char *pBetOption)
 	CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
 
 	if(pPl->GetArea() != AREA_ROULETTE)
+		return false;
+
+	CCharacter *pChr = pPl->GetCharacter();
+	if(pChr->Team() != TEAM_FLOCK)
 		return false;
 
 	if(!CanBet(ClientId))
@@ -310,9 +308,7 @@ void CRoulette::Tick()
 	}
 
 	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
-	{
 		SendBroadcast(ClientId);
-	}
 }
 
 void CRoulette::SendBroadcast(int ClientId)
@@ -322,6 +318,10 @@ void CRoulette::SendBroadcast(int ClientId)
 		return;
 
 	if(pPl->GetArea() != AREA_ROULETTE)
+		return;
+
+	CCharacter *pChr = pPl->GetCharacter();
+	if(pChr->Team() != TEAM_FLOCK)
 		return;
 
 	float TimeLeft = (float)m_StartDelay / (float)Server()->TickSpeed();
