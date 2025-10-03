@@ -50,12 +50,13 @@ void CRoulette::ResetClients()
 {
 	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
-		m_aClients[ClientId].m_Active = false;
+		CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
+		if(pPl && m_aClients[ClientId].m_Active)
+			pPl->m_BetAmount = -1;
+			
 		m_aClients[ClientId].m_BetAmount = -1;
 		m_aClients[ClientId].m_aBetOption[0] = '\0';
-		CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
-		if(pPl)
-			pPl->m_BetAmount = -1;
+		m_aClients[ClientId].m_Active = false;
 	}
 }
 
