@@ -3391,12 +3391,12 @@ protected:
 	}
 
 	template<typename TName, bool Is3DTextured>
-	[[nodiscard]] bool RenderStandard(SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SState &State, int PrimType, const TName *pVertices, int PrimitiveCount)
+	[[nodiscard]] bool RenderStandard(SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SState &State, EPrimitiveType PrimType, const TName *pVertices, int PrimitiveCount)
 	{
 		std::array<float, (size_t)4 * 2> m;
 		GetStateMatrix(State, m);
 
-		bool IsLineGeometry = PrimType == CCommandBuffer::PRIMTYPE_LINES;
+		bool IsLineGeometry = PrimType == EPrimitiveType::LINES;
 
 		bool IsTextured;
 		size_t BlendModeIndex;
@@ -3415,12 +3415,12 @@ protected:
 
 		size_t VertPerPrim = 2;
 		bool IsIndexed = false;
-		if(PrimType == CCommandBuffer::PRIMTYPE_QUADS)
+		if(PrimType == EPrimitiveType::QUADS)
 		{
 			VertPerPrim = 4;
 			IsIndexed = true;
 		}
-		else if(PrimType == CCommandBuffer::PRIMTYPE_TRIANGLES)
+		else if(PrimType == EPrimitiveType::TRIANGLES)
 		{
 			VertPerPrim = 3;
 		}
