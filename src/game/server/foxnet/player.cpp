@@ -991,6 +991,12 @@ void CPlayer::SendAreaMotd(int Area)
 	if(m_Area == Area)
 		return;
 
+	CCharacter *pChr = GetCharacter();
+	if(!pChr)
+		return;
+	if(pChr->Team() != TEAM_FLOCK)
+		return;
+
 	if(Area == 0)
 	{
 		ClearBroadcast();
