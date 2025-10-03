@@ -3136,7 +3136,16 @@ protected:
 
 	size_t GetAddressModeIndex(const CCommandBuffer::SState &State)
 	{
-		return State.m_WrapMode == CCommandBuffer::WRAP_REPEAT ? VULKAN_BACKEND_ADDRESS_MODE_REPEAT : VULKAN_BACKEND_ADDRESS_MODE_CLAMP_EDGES;
+		switch(State.m_WrapMode)
+		{
+		case EWrapMode::REPEAT:
+			return VULKAN_BACKEND_ADDRESS_MODE_REPEAT;
+		case EWrapMode::CLAMP:
+			return VULKAN_BACKEND_ADDRESS_MODE_CLAMP_EDGES;
+		default:
+			dbg_assert(false, "Invalid wrap mode: %d", (int)State.m_WrapMode);
+			dbg_break();
+		};
 	}
 
 	size_t GetBlendModeIndex(const CCommandBuffer::SState &State)
