@@ -63,19 +63,20 @@ void CCommandProcessorFragment_OpenGL::SetState(const CCommandBuffer::SState &St
 	// blend
 	switch(State.m_BlendMode)
 	{
-	case CCommandBuffer::BLEND_NONE:
+	case EBlendMode::NONE:
 		glDisable(GL_BLEND);
 		break;
-	case CCommandBuffer::BLEND_ALPHA:
+	case EBlendMode::ALPHA:
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		break;
-	case CCommandBuffer::BLEND_ADDITIVE:
+	case EBlendMode::ADDITIVE:
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 		break;
 	default:
-		dbg_msg("render", "unknown blendmode %d\n", State.m_BlendMode);
+		dbg_assert(false, "Invalid blend mode: %d", (int)State.m_BlendMode);
+		dbg_break();
 	};
 	m_LastBlendMode = State.m_BlendMode;
 
@@ -603,7 +604,7 @@ bool CCommandProcessorFragment_OpenGL::Cmd_Init(const SCommand_Init *pCommand)
 	m_HasMipMaps = pCommand->m_pCapabilities->m_MipMapping;
 	m_HasNPOTTextures = pCommand->m_pCapabilities->m_NPOTTextures;
 
-	m_LastBlendMode = CCommandBuffer::BLEND_ALPHA;
+	m_LastBlendMode = EBlendMode::ALPHA;
 	m_LastClipEnable = false;
 
 	return true;
@@ -1112,31 +1113,32 @@ void CCommandProcessorFragment_OpenGL2::UseProgram(CGLSLTWProgram *pProgram)
 
 void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &State, CGLSLTWProgram *pProgram, bool Use2DArrayTextures)
 {
-	if(m_LastBlendMode == CCommandBuffer::BLEND_NONE)
+	if(m_LastBlendMode == EBlendMode::NONE)
 	{
-		m_LastBlendMode = CCommandBuffer::BLEND_ALPHA;
+		m_LastBlendMode = EBlendMode::ALPHA;
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
-	if(State.m_BlendMode != m_LastBlendMode && State.m_BlendMode != CCommandBuffer::BLEND_NONE)
+	if(State.m_BlendMode != m_LastBlendMode && State.m_BlendMode != EBlendMode::NONE)
 	{
 		// blend
 		switch(State.m_BlendMode)
 		{
-		case CCommandBuffer::BLEND_NONE:
+		case EBlendMode::NONE:
 			// We don't really need this anymore
 			// glDisable(GL_BLEND);
 			break;
-		case CCommandBuffer::BLEND_ALPHA:
+		case EBlendMode::ALPHA:
 			// glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			break;
-		case CCommandBuffer::BLEND_ADDITIVE:
+		case EBlendMode::ADDITIVE:
 			// glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 			break;
 		default:
-			dbg_msg("render", "unknown blendmode %d\n", State.m_BlendMode);
+			dbg_assert(false, "Invalid blend mode: %d", (int)State.m_BlendMode);
+			dbg_break();
 		};
 
 		m_LastBlendMode = State.m_BlendMode;

@@ -3141,7 +3141,18 @@ protected:
 
 	size_t GetBlendModeIndex(const CCommandBuffer::SState &State)
 	{
-		return State.m_BlendMode == CCommandBuffer::BLEND_ADDITIVE ? VULKAN_BACKEND_BLEND_MODE_ADDITATIVE : (State.m_BlendMode == CCommandBuffer::BLEND_NONE ? VULKAN_BACKEND_BLEND_MODE_NONE : VULKAN_BACKEND_BLEND_MODE_ALPHA);
+		switch(State.m_BlendMode)
+		{
+		case EBlendMode::NONE:
+			return VULKAN_BACKEND_BLEND_MODE_NONE;
+		case EBlendMode::ALPHA:
+			return VULKAN_BACKEND_BLEND_MODE_ALPHA;
+		case EBlendMode::ADDITIVE:
+			return VULKAN_BACKEND_BLEND_MODE_ADDITATIVE;
+		default:
+			dbg_assert(false, "Invalid blend mode: %d", (int)State.m_BlendMode);
+			dbg_break();
+		};
 	}
 
 	size_t GetDynamicModeIndexFromState(const CCommandBuffer::SState &State) const

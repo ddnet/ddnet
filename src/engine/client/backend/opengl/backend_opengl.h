@@ -64,7 +64,7 @@ protected:
 	bool m_HasNPOTTextures;
 
 	bool m_HasShaders;
-	int m_LastBlendMode; // avoid all possible opengl state changes
+	EBlendMode m_LastBlendMode; // avoid all possible opengl state changes
 	bool m_LastClipEnable;
 
 	int m_OpenGLTextureLodBIAS;
