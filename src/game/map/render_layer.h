@@ -44,6 +44,7 @@ public:
 	bool m_RenderTileBorder;
 	bool m_DebugRenderGroupClips;
 	bool m_DebugRenderQuadClips;
+	bool m_DebugRenderClusterClips;
 };
 
 class CRenderLayer : public CRenderComponent
@@ -220,8 +221,6 @@ public:
 
 protected:
 	IGraphics::CTextureHandle GetTexture() const override { return m_TextureHandle; }
-	void CalculateClipping();
-	bool CalculateQuadClipping(int aQuadOffsetMin[2], int aQuadOffsetMax[2], bool Grouped);
 
 	class CQuadLayerVisuals : public CRenderComponent
 	{
@@ -234,29 +233,42 @@ protected:
 		int m_BufferContainerIndex;
 		bool m_IsTextured;
 	};
-	void RenderQuadLayer(float Alpha = 1.0f);
+	void RenderQuadLayer(float Alpha, const CRenderLayerParams &Params);
 
 	std::optional<CRenderLayerQuads::CQuadLayerVisuals> m_VisualQuad;
 	CMapItemLayerQuads *m_pLayerQuads;
 
-	std::vector<SQuadRenderInfo> m_vQuadRenderInfo;
-
-	bool m_Grouped;
-	class CQuadRenderGroup
+	class CClipRegion
 	{
 	public:
+		float m_X;
+		float m_Y;
+		float m_Width;
+		float m_Height;
+	};
+
+	class CQuadCluster
+	{
+	public:
+		bool m_Grouped;
+		int m_StartIndex;
+		int m_NumQuads;
+
 		int m_PosEnv;
 		float m_PosEnvOffset;
 		int m_ColorEnv;
 		float m_ColorEnvOffset;
 
-		// quad clipping
-		bool m_Clipped;
-		float m_ClipX;
-		float m_ClipY;
-		float m_ClipWidth;
-		float m_ClipHeight;
-	} m_QuadRenderGroup;
+		std::vector<SQuadRenderInfo> m_vQuadRenderInfo;
+		std::optional<CClipRegion> m_ClipRegion;
+	};
+
+	bool IsVisibleInClipRegion(const std::optional<CClipRegion> &ClipRegion) const;
+	void CalculateClipping(CQuadCluster &QuadCluster);
+	bool CalculateQuadClipping(const CQuadCluster &QuadCluster, int aQuadOffsetMin[2], int aQuadOffsetMax[2]) const;
+
+	std::optional<CClipRegion> m_LayerClip;
+	std::vector<CQuadCluster> m_vQuadClusters;
 
 	CQuad *m_pQuads;
 
