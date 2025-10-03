@@ -143,6 +143,7 @@ void CCountryFlags::Render(const CCountryFlag *pFlag, ColorRGBA Color, float x, 
 	{
 		Graphics()->TextureSet(pFlag->m_Texture);
 		Graphics()->SetColor(Color);
+		Graphics()->QuadsSetRotation(0.0f);
 		Graphics()->RenderQuadContainerEx(m_FlagsQuadContainerIndex, 0, -1, x, y, w, h);
 	}
 }
