@@ -561,8 +561,6 @@ void CCharacterCore::Move()
 	else
 		m_LeftWall = true;
 
-	m_Vel.x = m_Vel.x * (1.0f / RampValue);
-
 	if(m_pWorld && (m_Super || (m_Tuning.m_PlayerCollision && !m_CollisionDisabled && !m_Solo)))
 	{
 		// check player collision
@@ -586,10 +584,47 @@ void CCharacterCore::Move()
 					if(D < PhysicalSize())
 					{
 						if(a > 0.0f)
-							m_Pos = LastPos;
-						else if(distance(NewPos, pCharCore->m_Pos) > D)
-							m_Pos = NewPos;
-						return;
+						{
+							// set to pos before collision with other tee
+							NewPos = LastPos;
+						}
+						else if(!(distance(NewPos, pCharCore->m_Pos) > D))
+						{
+							// NaN-safty in move
+							// Is safe, if the distance is zero and the NaN is created by 0 / 0.0
+							// all values multiplied or checked stay NaN, so no new position is set
+							break;
+						}
+
+						if(NewPos != m_Pos && m_pCollision->TestBox(NewPos, PhysicalSizeVec2()))
+						{
+							// Handle Tee getting Stuck by redoing collision check with walls alongside with player
+							// reset velocity / position
+							m_Vel = OldVel;
+							NewPos = m_Pos;
+							// check player collision
+							auto Collide = [this](vec2 CurPos) {
+								for(int p = 0; p < MAX_CLIENTS; p++)
+								{
+									CCharacterCore *pCharCore = m_pWorld->m_apCharacters[p];
+									if(!pCharCore || pCharCore == this)
+										continue;
+									if((!(pCharCore->m_Super || m_Super) && (m_Solo || pCharCore->m_Solo || pCharCore->m_CollisionDisabled || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, p)))))
+										continue;
+									float D = distance(CurPos, pCharCore->m_Pos);
+									if(D < PhysicalSize())
+									{
+										return true;
+									}
+								}
+								return false;
+							};
+							m_pCollision->MoveBox(&NewPos, &m_Vel, PhysicalSizeVec2(),
+								vec2(m_Tuning.m_GroundElasticityX,
+									m_Tuning.m_GroundElasticityY),
+								&Grounded, Collide);
+						}
+						break;
 					}
 				}
 				LastPos = Pos;
@@ -597,6 +632,7 @@ void CCharacterCore::Move()
 		}
 	}
 
+	m_Vel.x = m_Vel.x * (1.0f / RampValue);
 	m_Pos = NewPos;
 }
 
