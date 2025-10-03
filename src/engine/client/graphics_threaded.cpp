@@ -112,7 +112,7 @@ CGraphics_Threaded::CGraphics_Threaded()
 	m_State.m_ClipH = 0;
 	m_State.m_Texture = -1;
 	m_State.m_BlendMode = EBlendMode::NONE;
-	m_State.m_WrapMode = CCommandBuffer::WRAP_REPEAT;
+	m_State.m_WrapMode = EWrapMode::REPEAT;
 
 	m_CurrentCommandBuffer = 0;
 	m_pCommandBuffer = nullptr;
@@ -175,12 +175,12 @@ void CGraphics_Threaded::BlendAdditive()
 
 void CGraphics_Threaded::WrapNormal()
 {
-	m_State.m_WrapMode = CCommandBuffer::WRAP_REPEAT;
+	m_State.m_WrapMode = EWrapMode::REPEAT;
 }
 
 void CGraphics_Threaded::WrapClamp()
 {
-	m_State.m_WrapMode = CCommandBuffer::WRAP_CLAMP;
+	m_State.m_WrapMode = EWrapMode::CLAMP;
 }
 
 uint64_t CGraphics_Threaded::TextureMemoryUsage() const

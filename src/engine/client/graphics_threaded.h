@@ -37,6 +37,12 @@ enum class EBlendMode
 	ADDITIVE,
 };
 
+enum class EWrapMode
+{
+	REPEAT,
+	CLAMP,
+};
+
 class CCommandBuffer
 {
 	class CBuffer
@@ -164,12 +170,6 @@ public:
 		CMD_COUNT,
 	};
 
-	enum
-	{
-		WRAP_REPEAT = 0,
-		WRAP_CLAMP,
-	};
-
 	typedef vec2 SPoint;
 	typedef vec2 STexCoord;
 	typedef GL_SColorf SColorf;
@@ -192,7 +192,7 @@ public:
 	struct SState
 	{
 		EBlendMode m_BlendMode;
-		int m_WrapMode;
+		EWrapMode m_WrapMode;
 		int m_Texture;
 		SPoint m_ScreenTL;
 		SPoint m_ScreenBR;

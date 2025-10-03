@@ -685,7 +685,7 @@ void CCommandProcessorFragment_OpenGL3_3::TextureCreate(int Slot, int Width, int
 	}
 
 	// This is the initial value for the wrap modes
-	m_vTextures[Slot].m_LastWrapMode = CCommandBuffer::WRAP_REPEAT;
+	m_vTextures[Slot].m_LastWrapMode = EWrapMode::REPEAT;
 
 	// calculate memory usage
 	m_vTextures[Slot].m_MemSize = (size_t)Width * Height * PixelSize;

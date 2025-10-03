@@ -122,16 +122,17 @@ void CCommandProcessorFragment_OpenGL::SetState(const CCommandBuffer::SState &St
 			{
 				switch(State.m_WrapMode)
 				{
-				case CCommandBuffer::WRAP_REPEAT:
+				case EWrapMode::REPEAT:
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 					break;
-				case CCommandBuffer::WRAP_CLAMP:
+				case EWrapMode::CLAMP:
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 					break;
 				default:
-					dbg_msg("render", "unknown wrapmode %d\n", State.m_WrapMode);
+					dbg_assert(false, "Invalid wrap mode: %d", (int)State.m_WrapMode);
+					dbg_break();
 				};
 				m_vTextures[State.m_Texture].m_LastWrapMode = State.m_WrapMode;
 			}
@@ -684,7 +685,7 @@ void CCommandProcessorFragment_OpenGL::DestroyTexture(int Slot)
 	m_vTextures[Slot].m_Sampler = 0;
 	m_vTextures[Slot].m_Tex2DArray = 0;
 	m_vTextures[Slot].m_Sampler2DArray = 0;
-	m_vTextures[Slot].m_LastWrapMode = CCommandBuffer::WRAP_REPEAT;
+	m_vTextures[Slot].m_LastWrapMode = EWrapMode::REPEAT;
 }
 
 void CCommandProcessorFragment_OpenGL::Cmd_Texture_Destroy(const CCommandBuffer::SCommand_Texture_Destroy *pCommand)
@@ -884,7 +885,7 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 	}
 
 	// This is the initial value for the wrap modes
-	m_vTextures[Slot].m_LastWrapMode = CCommandBuffer::WRAP_REPEAT;
+	m_vTextures[Slot].m_LastWrapMode = EWrapMode::REPEAT;
 
 	// calculate memory usage
 	m_vTextures[Slot].m_MemSize = (size_t)Width * Height * PixelSize;
@@ -1214,14 +1215,14 @@ void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &S
 		{
 			switch(State.m_WrapMode)
 			{
-			case CCommandBuffer::WRAP_REPEAT:
+			case EWrapMode::REPEAT:
 				if(IsNewApi())
 				{
 					glSamplerParameteri(m_vTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_S, GL_REPEAT);
 					glSamplerParameteri(m_vTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_T, GL_REPEAT);
 				}
 				break;
-			case CCommandBuffer::WRAP_CLAMP:
+			case EWrapMode::CLAMP:
 				if(IsNewApi())
 				{
 					glSamplerParameteri(m_vTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -1229,7 +1230,8 @@ void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &S
 				}
 				break;
 			default:
-				dbg_msg("render", "unknown wrapmode %d\n", State.m_WrapMode);
+				dbg_assert(false, "Invalid wrap mode: %d", (int)State.m_WrapMode);
+				dbg_break();
 			};
 			m_vTextures[State.m_Texture].m_LastWrapMode = State.m_WrapMode;
 		}
