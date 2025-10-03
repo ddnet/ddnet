@@ -604,15 +604,15 @@ void CCharacterCore::Move()
 							NewPos = m_Pos;
 							// check player collision
 							auto Collide = [this](vec2 CurPos) {
-								for(int p = 0; p < MAX_CLIENTS; p++)
+								for(int pId = 0; pId < MAX_CLIENTS; pId++)
 								{
-									CCharacterCore *pCharCore = m_pWorld->m_apCharacters[p];
-									if(!pCharCore || pCharCore == this)
+									CCharacterCore *pCore = m_pWorld->m_apCharacters[pId];
+									if(!pCore || pCore == this)
 										continue;
-									if((!(pCharCore->m_Super || m_Super) && (m_Solo || pCharCore->m_Solo || pCharCore->m_CollisionDisabled || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, p)))))
+									if((!(pCore->m_Super || m_Super) && (m_Solo || pCore->m_Solo || pCore->m_CollisionDisabled || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, pId)))))
 										continue;
-									float D = distance(CurPos, pCharCore->m_Pos);
-									if(D < PhysicalSize())
+									float Dist = distance(CurPos, pCore->m_Pos);
+									if(Dist < PhysicalSize())
 									{
 										return true;
 									}
