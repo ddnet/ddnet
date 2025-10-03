@@ -742,18 +742,18 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Clear(const CCommandBuffer::SComma
 	}
 }
 
-void CCommandProcessorFragment_OpenGL3_3::UploadStreamBufferData(unsigned int PrimitiveType, const void *pVertices, size_t VertSize, unsigned int PrimitiveCount, bool AsTex3D)
+void CCommandProcessorFragment_OpenGL3_3::UploadStreamBufferData(EPrimitiveType PrimitiveType, const void *pVertices, size_t VertSize, unsigned int PrimitiveCount, bool AsTex3D)
 {
 	int Count = 0;
 	switch(PrimitiveType)
 	{
-	case CCommandBuffer::PRIMTYPE_LINES:
+	case EPrimitiveType::LINES:
 		Count = PrimitiveCount * 2;
 		break;
-	case CCommandBuffer::PRIMTYPE_TRIANGLES:
+	case EPrimitiveType::TRIANGLES:
 		Count = PrimitiveCount * 3;
 		break;
-	case CCommandBuffer::PRIMTYPE_QUADS:
+	case EPrimitiveType::QUADS:
 		Count = PrimitiveCount * 4;
 		break;
 	default:
@@ -783,13 +783,13 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Render(const CCommandBuffer::SComm
 	switch(pCommand->m_PrimType)
 	{
 	// We don't support GL_QUADS due to core profile
-	case CCommandBuffer::PRIMTYPE_LINES:
+	case EPrimitiveType::LINES:
 		glDrawArrays(GL_LINES, 0, pCommand->m_PrimCount * 2);
 		break;
-	case CCommandBuffer::PRIMTYPE_TRIANGLES:
+	case EPrimitiveType::TRIANGLES:
 		glDrawArrays(GL_TRIANGLES, 0, pCommand->m_PrimCount * 3);
 		break;
-	case CCommandBuffer::PRIMTYPE_QUADS:
+	case EPrimitiveType::QUADS:
 		if(m_aLastIndexBufferBound[m_LastStreamBuffer] != m_QuadDrawIndexBufferId)
 		{
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferId);
@@ -798,7 +798,8 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Render(const CCommandBuffer::SComm
 		glDrawElements(GL_TRIANGLES, pCommand->m_PrimCount * 6, GL_UNSIGNED_INT, 0);
 		break;
 	default:
-		dbg_msg("render", "unknown primtype %d\n", pCommand->m_PrimType);
+		dbg_assert(false, "Invalid primitive type: %d", (int)pCommand->m_PrimType);
+		dbg_break();
 	};
 
 	m_LastStreamBuffer = (m_LastStreamBuffer + 1 >= MAX_STREAM_BUFFER_COUNT ? 0 : m_LastStreamBuffer + 1);
@@ -819,15 +820,16 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderTex3D(const CCommandBuffer::
 	switch(pCommand->m_PrimType)
 	{
 	// We don't support GL_QUADS due to core profile
-	case CCommandBuffer::PRIMTYPE_LINES:
+	case EPrimitiveType::LINES:
 		glDrawArrays(GL_LINES, 0, pCommand->m_PrimCount * 2);
 		break;
-	case CCommandBuffer::PRIMTYPE_QUADS:
+	case EPrimitiveType::QUADS:
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferId);
 		glDrawElements(GL_TRIANGLES, pCommand->m_PrimCount * 6, GL_UNSIGNED_INT, 0);
 		break;
 	default:
-		dbg_msg("render", "unknown primtype %d\n", pCommand->m_PrimType);
+		dbg_assert(false, "Invalid primitive type: %d", (int)pCommand->m_PrimType);
+		dbg_break();
 	};
 }
 

@@ -951,19 +951,20 @@ void CCommandProcessorFragment_OpenGL::Cmd_Render(const CCommandBuffer::SCommand
 
 	switch(pCommand->m_PrimType)
 	{
-	case CCommandBuffer::PRIMTYPE_QUADS:
+	case EPrimitiveType::QUADS:
 #ifndef BACKEND_AS_OPENGL_ES
 		glDrawArrays(GL_QUADS, 0, pCommand->m_PrimCount * 4);
 #endif
 		break;
-	case CCommandBuffer::PRIMTYPE_LINES:
+	case EPrimitiveType::LINES:
 		glDrawArrays(GL_LINES, 0, pCommand->m_PrimCount * 2);
 		break;
-	case CCommandBuffer::PRIMTYPE_TRIANGLES:
+	case EPrimitiveType::TRIANGLES:
 		glDrawArrays(GL_TRIANGLES, 0, pCommand->m_PrimCount * 3);
 		break;
 	default:
-		dbg_msg("render", "unknown primtype %d\n", pCommand->m_PrimType);
+		dbg_assert(false, "Invalid primitive type: %d", (int)pCommand->m_PrimType);
+		dbg_break();
 	};
 #endif
 }
@@ -1813,14 +1814,15 @@ void CCommandProcessorFragment_OpenGL2::Cmd_RenderTex3D(const CCommandBuffer::SC
 
 	switch(pCommand->m_PrimType)
 	{
-	case CCommandBuffer::PRIMTYPE_QUADS:
+	case EPrimitiveType::QUADS:
 		glDrawArrays(GL_QUADS, 0, pCommand->m_PrimCount * 4);
 		break;
-	case CCommandBuffer::PRIMTYPE_TRIANGLES:
+	case EPrimitiveType::TRIANGLES:
 		glDrawArrays(GL_TRIANGLES, 0, pCommand->m_PrimCount * 3);
 		break;
 	default:
-		dbg_msg("render", "unknown primtype %d\n", pCommand->m_PrimType);
+		dbg_assert(false, "Invalid primitive type: %d", (int)pCommand->m_PrimType);
+		dbg_break();
 	};
 
 	glDisableClientState(GL_VERTEX_ARRAY);

@@ -23,6 +23,13 @@ namespace TextureFlag
 	inline constexpr uint32_t NO_2D_TEXTURE = 1 << 3;
 };
 
+enum class EPrimitiveType
+{
+	LINES,
+	QUADS,
+	TRIANGLES,
+};
+
 class CCommandBuffer
 {
 	class CBuffer
@@ -152,13 +159,6 @@ public:
 
 	enum
 	{
-		PRIMTYPE_LINES,
-		PRIMTYPE_QUADS,
-		PRIMTYPE_TRIANGLES,
-	};
-
-	enum
-	{
 		BLEND_NONE = 0,
 		BLEND_ALPHA,
 		BLEND_ADDITIVE,
@@ -225,7 +225,7 @@ public:
 		SCommand_Render() :
 			SCommand(CMD_RENDER) {}
 		SState m_State;
-		unsigned m_PrimType;
+		EPrimitiveType m_PrimType;
 		unsigned m_PrimCount;
 		SVertex *m_pVertices; // you should use the command buffer data to allocate vertices for this command
 	};
@@ -235,7 +235,7 @@ public:
 		SCommand_RenderTex3D() :
 			SCommand(CMD_RENDER_TEX3D) {}
 		SState m_State;
-		unsigned m_PrimType;
+		EPrimitiveType m_PrimType;
 		unsigned m_PrimCount;
 		SVertexTex3DStream *m_pVertices; // you should use the command buffer data to allocate vertices for this command
 	};
@@ -1128,7 +1128,7 @@ public:
 	int QuadContainerAddSprite(int QuadContainerIndex, float X, float Y, float Width, float Height) override;
 
 	template<typename TName>
-	void FlushVerticesImpl(bool KeepVertices, int &PrimType, size_t &PrimCount, size_t &NumVerts, TName &Command, size_t VertSize)
+	void FlushVerticesImpl(bool KeepVertices, EPrimitiveType &PrimType, size_t &PrimCount, size_t &NumVerts, TName &Command, size_t VertSize)
 	{
 		Command.m_pVertices = nullptr;
 		if(m_NumVertices == 0)
@@ -1143,23 +1143,23 @@ public:
 		{
 			if(g_Config.m_GfxQuadAsTriangle && !m_GLUseTrianglesAsQuad)
 			{
-				PrimType = CCommandBuffer::PRIMTYPE_TRIANGLES;
+				PrimType = EPrimitiveType::TRIANGLES;
 				PrimCount = NumVerts / 3;
 			}
 			else
 			{
-				PrimType = CCommandBuffer::PRIMTYPE_QUADS;
+				PrimType = EPrimitiveType::QUADS;
 				PrimCount = NumVerts / 4;
 			}
 		}
 		else if(m_Drawing == EDrawing::LINES)
 		{
-			PrimType = CCommandBuffer::PRIMTYPE_LINES;
+			PrimType = EPrimitiveType::LINES;
 			PrimCount = NumVerts / 2;
 		}
 		else if(m_Drawing == EDrawing::TRIANGLES)
 		{
-			PrimType = CCommandBuffer::PRIMTYPE_TRIANGLES;
+			PrimType = EPrimitiveType::TRIANGLES;
 			PrimCount = NumVerts / 3;
 		}
 		else

@@ -57,7 +57,7 @@ static CVideoMode g_aFakeModes[] = {
 void CGraphics_Threaded::FlushVertices(bool KeepVertices)
 {
 	CCommandBuffer::SCommand_Render Cmd;
-	int PrimType;
+	EPrimitiveType PrimType;
 	size_t PrimCount, NumVerts;
 	FlushVerticesImpl(KeepVertices, PrimType, PrimCount, NumVerts, Cmd, sizeof(CCommandBuffer::SVertex));
 
@@ -70,7 +70,7 @@ void CGraphics_Threaded::FlushVertices(bool KeepVertices)
 void CGraphics_Threaded::FlushVerticesTex3D()
 {
 	CCommandBuffer::SCommand_RenderTex3D Cmd;
-	int PrimType;
+	EPrimitiveType PrimType;
 	size_t PrimCount, NumVerts;
 	FlushVerticesImpl(false, PrimType, PrimCount, NumVerts, Cmd, sizeof(CCommandBuffer::SVertexTex3DStream));
 
