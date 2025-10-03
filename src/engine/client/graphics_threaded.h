@@ -30,6 +30,13 @@ enum class EPrimitiveType
 	TRIANGLES,
 };
 
+enum class EBlendMode
+{
+	NONE,
+	ALPHA,
+	ADDITIVE,
+};
+
 class CCommandBuffer
 {
 	class CBuffer
@@ -159,13 +166,6 @@ public:
 
 	enum
 	{
-		BLEND_NONE = 0,
-		BLEND_ALPHA,
-		BLEND_ADDITIVE,
-	};
-
-	enum
-	{
 		WRAP_REPEAT = 0,
 		WRAP_CLAMP,
 	};
@@ -191,7 +191,7 @@ public:
 
 	struct SState
 	{
-		int m_BlendMode;
+		EBlendMode m_BlendMode;
 		int m_WrapMode;
 		int m_Texture;
 		SPoint m_ScreenTL;

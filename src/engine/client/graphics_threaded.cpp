@@ -111,7 +111,7 @@ CGraphics_Threaded::CGraphics_Threaded()
 	m_State.m_ClipW = 0;
 	m_State.m_ClipH = 0;
 	m_State.m_Texture = -1;
-	m_State.m_BlendMode = CCommandBuffer::BLEND_NONE;
+	m_State.m_BlendMode = EBlendMode::NONE;
 	m_State.m_WrapMode = CCommandBuffer::WRAP_REPEAT;
 
 	m_CurrentCommandBuffer = 0;
@@ -160,17 +160,17 @@ void CGraphics_Threaded::ClipDisable()
 
 void CGraphics_Threaded::BlendNone()
 {
-	m_State.m_BlendMode = CCommandBuffer::BLEND_NONE;
+	m_State.m_BlendMode = EBlendMode::NONE;
 }
 
 void CGraphics_Threaded::BlendNormal()
 {
-	m_State.m_BlendMode = CCommandBuffer::BLEND_ALPHA;
+	m_State.m_BlendMode = EBlendMode::ALPHA;
 }
 
 void CGraphics_Threaded::BlendAdditive()
 {
-	m_State.m_BlendMode = CCommandBuffer::BLEND_ADDITIVE;
+	m_State.m_BlendMode = EBlendMode::ADDITIVE;
 }
 
 void CGraphics_Threaded::WrapNormal()
