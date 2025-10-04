@@ -463,9 +463,9 @@ void IGameController::ResetGame()
 
 const char *IGameController::GetTeamName(int Team)
 {
-	if(Team == 0)
-		return "game";
-	return "spectators";
+	if(Team < 0)
+		return "spectators";
+	return "game";
 }
 
 void IGameController::StartRound()
