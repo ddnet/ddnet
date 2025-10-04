@@ -209,8 +209,6 @@ public:
 		}
 	};
 
-	IConsole::EAccessLevel ConsoleAccessLevel(int ClientId) const;
-
 	CClient m_aClients[MAX_CLIENTS];
 	int m_aIdMap[MAX_CLIENTS * VANILLA_MAX_CLIENTS];
 
@@ -240,8 +238,14 @@ public:
 	bool m_MapReload;
 	bool m_SameMapReload;
 	bool m_ReloadedWhenEmpty;
+
+	// client id of the user currently executing a rcon command
+	// can be -1 or -2 for server or map triggered commands
 	int m_RconClientId;
+
+	// the rcon rank used to execute the current rcon command
 	int m_RconAuthLevel;
+
 	int m_PrintCBIndex;
 	char m_aShutdownReason[128];
 	void *m_pPersistentData;
@@ -314,9 +318,11 @@ public:
 
 	void SendLogLine(const CLogMessage *pMessage);
 	void SetRconCid(int ClientId) override;
-	int GetAuthedState(int ClientId) const override;
-	bool IsRconAuthed(int ClientId) const override;
-	bool IsRconAuthedAdmin(int ClientId) const override;
+
+	// returns the rcon rank if logged in and 0 if not logged in
+	int GetAuthRank(int ClientId) override;
+	bool IsRconAuthed(int ClientId) override;
+	bool IsRconAuthedAdmin(int ClientId) override;
 	const char *GetAuthName(int ClientId) const override;
 	bool HasAuthHidden(int ClientId) const override;
 	void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pMapSha256, int *pMapCrc) override;
@@ -449,6 +455,15 @@ public:
 	static void ConAuthRemove(IConsole::IResult *pResult, void *pUser);
 	static void ConAuthList(IConsole::IResult *pResult, void *pUser);
 
+	static void ConRoleAllow(IConsole::IResult *pResult, void *pUser);
+	static void ConRoleDisallow(IConsole::IResult *pResult, void *pUser);
+	static void ConRoleCreate(IConsole::IResult *pResult, void *pUser);
+	static void ConRoleDelete(IConsole::IResult *pResult, void *pUser);
+	static void ConRoleInherit(IConsole::IResult *pResult, void *pUser);
+	static void ConRoleDisinherit(IConsole::IResult *pResult, void *pUser);
+	static void ConAccessLevel(IConsole::IResult *pResult, void *pUser);
+	static void ConAccessStatus(IConsole::IResult *pResult, void *pUser);
+
 	// console commands for sqlmasters
 	static void ConAddSqlServer(IConsole::IResult *pResult, void *pUserData);
 	static void ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData);
@@ -463,7 +478,7 @@ public:
 	void LogoutClient(int ClientId, const char *pReason);
 	void LogoutKey(int Key, const char *pReason);
 
-	void ConchainRconPasswordChangeGeneric(int Level, const char *pCurrent, IConsole::IResult *pResult);
+	void ConchainRconPasswordChangeGeneric(const char *pRoleName, const char *pCurrent, IConsole::IResult *pResult);
 	static void ConchainRconPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainRconModPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainRconHelperPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -511,6 +526,9 @@ public:
 		return m_aClients[ClientId].m_DnsblState == EDnsblState::BLACKLISTED;
 	}
 
+	CRconRole *RoleOrNullptr(int ClientId);
+	static bool CanClientUseCommandCallback(int ClientId, const IConsole::ICommandInfo *pCommand, void *pUser);
+	bool CanClientUseCommand(int ClientId, const IConsole::ICommandInfo *pCommand);
 	void AuthRemoveKey(int KeySlot);
 	bool ClientPrevIngame(int ClientId) override { return m_aPrevStates[ClientId] == CClient::STATE_INGAME; }
 	const char *GetNetErrorString(int ClientId) override { return m_NetServer.ErrorString(ClientId); }
