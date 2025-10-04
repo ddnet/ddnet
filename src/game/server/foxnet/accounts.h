@@ -33,23 +33,23 @@ enum
 struct CAccountSession
 {
 	char m_Username[ACC_MAX_USERNAME_LENGTH] = "";
-	uint64_t m_RegisterDate = 0;
+	long m_RegisterDate = 0;
 	char m_Name[MAX_NAME_LENGTH] = "";
 	char m_LastName[MAX_NAME_LENGTH] = "";
 	char CurrentIp[128] = "";
 	char LastIp[128] = "";
 	bool m_LoggedIn = false;
-	uint64_t m_LastLogin = 0;
+	long m_LastLogin = 0;
 	int m_Port = 0;
 	int ClientId = -1;
-	int64_t m_Flags = 0;
+	long m_Flags = 0;
 	int m_VoteMenuPage = 0;
-	int64_t m_Playtime = 0; // Minutes
-	int64_t m_Deaths = 0;
-	int64_t m_Kills = 0;
-	int64_t m_Level = 0;
-	int64_t m_XP = 0;
-	int64_t m_Money = 0;
+	long m_Playtime = 0; // Minutes
+	long m_Deaths = 0;
+	long m_Kills = 0;
+	long m_Level = 0;
+	long m_XP = 0;
+	long m_Money = 0;
 	char m_Inventory[1028] = "";
 	char m_LastActiveItems[1028] = ""; // correlates to m_Inventory, will load this on login
 

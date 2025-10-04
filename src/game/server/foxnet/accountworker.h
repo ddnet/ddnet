@@ -16,19 +16,19 @@ struct CAccResult : ISqlResult
 	char m_LastPlayerName[MAX_NAME_LENGTH] = "";
 	char m_CurrentIP[46] = "";
 	char m_LastIP[46] = "";
-	int64_t m_RegisterDate = 0;
+	long m_RegisterDate = 0;
 	int m_LoggedIn = 0;
-	int64_t m_LastLogin = 0;
+	long m_LastLogin = 0;
 	int m_Port = 0;
 	int m_ClientId = -1;
-	int64_t m_Flags = 0;
+	long m_Flags = 0;
 	int m_VoteMenuPage = 0;
-	int64_t m_Playtime = 0;
-	int64_t m_Deaths = 0;
-	int64_t m_Kills = 0;
-	int64_t m_Level = 0;
-	int64_t m_XP = 0;
-	int64_t m_Money = 0;
+	long m_Playtime = 0;
+	long m_Deaths = 0;
+	long m_Kills = 0;
+	long m_Level = 0;
+	long m_XP = 0;
+	long m_Money = 0;
 	char m_Inventory[1028] = "";
 	char m_LastActiveItems[1028] = "";
 	bool m_Disabled = false;
@@ -40,7 +40,7 @@ struct CAccRegisterRequest : ISqlData
 		ISqlData(std::move(pRes)) {}
 	char m_Username[ACC_MAX_USERNAME_LENGTH] = "";
 	char m_PasswordHash[ACC_MAX_PASSW_LENGTH] = "";
-	int64_t m_RegisterDate = 0;
+	long m_RegisterDate = 0;
 };
 struct CAccLoginRequest : ISqlData
 {
@@ -74,7 +74,7 @@ struct CAccUpdLoginState : ISqlData
 	char m_Username[ACC_MAX_USERNAME_LENGTH] = "";
 	char m_PlayerName[MAX_NAME_LENGTH] = "";
 	char m_CurrentIP[46] = "";
-	int64_t m_LastLogin = 0;
+	long m_LastLogin = 0;
 	int m_Port = 0;
 	int m_ClientId = -1;
 };
@@ -83,14 +83,14 @@ struct CAccUpdLogoutState : ISqlData
 	CAccUpdLogoutState() :
 		ISqlData(nullptr) {}
 	char m_Username[ACC_MAX_USERNAME_LENGTH]{};
-	int64_t m_Flags = 0;
+	long m_Flags = 0;
 	int m_VoteMenuPage = 0;
-	int64_t m_Playtime = 0;
-	int64_t m_Deaths = 0;
-	int64_t m_Kills = 0;
-	int64_t m_Level = 0;
-	int64_t m_XP = 0;
-	int64_t m_Money = 0;
+	long m_Playtime = 0;
+	long m_Deaths = 0;
+	long m_Kills = 0;
+	long m_Level = 0;
+	long m_XP = 0;
+	long m_Money = 0;
 	char m_Inventory[1028] = "";
 	char m_LastActiveItems[1028] = "";
 };
@@ -99,14 +99,14 @@ struct CAccSaveInfo : ISqlData
 	CAccSaveInfo() :
 		ISqlData(nullptr) {}
 	char m_Username[ACC_MAX_USERNAME_LENGTH] = "";
-	int64_t m_Flags = 0;
+	long m_Flags = 0;
 	int m_VoteMenuPage = 0;
-	int64_t m_Playtime = 0;
-	int64_t m_Deaths = 0;
-	int64_t m_Kills = 0;
-	int64_t m_Level = 0;
-	int64_t m_XP = 0;
-	int64_t m_Money = 0;
+	long m_Playtime = 0;
+	long m_Deaths = 0;
+	long m_Kills = 0;
+	long m_Level = 0;
+	long m_XP = 0;
+	long m_Money = 0;
 	char m_Inventory[1028] = "";
 	char m_LastActiveItems[1028] = "";
 };
