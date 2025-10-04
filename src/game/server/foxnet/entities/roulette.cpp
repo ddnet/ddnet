@@ -73,12 +73,12 @@ int CRoulette::AmountOfCloseClients()
 			continue;
 		if(!pPl->Acc()->m_LoggedIn)
 			continue;
-		if(pPl->Acc()->m_Money <= 0)
+		if(!pPl->Acc()->m_Money)
 			continue;
 		CCharacter *pCharacter = pPl->GetCharacter();
 		if(!pCharacter)
 			continue;
-		if(distance(pCharacter->m_Pos, m_Pos) < 32.0f * 12.0f)
+		if(distance(pCharacter->m_Pos, m_Pos) > 32.0f * 13.0f)
 			continue;
 		if(pCharacter->Team() != TEAM_FLOCK)
 			continue;
@@ -165,7 +165,7 @@ void CRoulette::SetState(RStates State)
 		int Close = AmountOfCloseClients();
 
 		if(Close > 3)
-			m_StartDelay = Server()->TickSpeed() * 7; // 5 seconds
+			m_StartDelay = Server()->TickSpeed() * 7.5; // 7.5 seconds
 		else if(Close > 1)
 			m_StartDelay = Server()->TickSpeed() * 5; // 5 seconds
 		else
