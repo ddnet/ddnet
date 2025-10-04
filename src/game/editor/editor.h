@@ -540,8 +540,6 @@ public:
 	std::vector<std::pair<int, int>> m_vSelectedEnvelopePoints;
 	int m_SelectedQuadEnvelope;
 	int m_CurrentQuadIndex;
-	int m_SelectedImage;
-	int m_SelectedSound;
 	int m_SelectedSource;
 	std::pair<int, int> m_SelectedTangentInPoint;
 	std::pair<int, int> m_SelectedTangentOutPoint;
@@ -757,7 +755,6 @@ public:
 	static bool ReplaceSoundCallback(const char *pFileName, int StorageType, void *pUser);
 	static bool AddImage(const char *pFilename, int StorageType, void *pUser);
 	static bool AddSound(const char *pFileName, int StorageType, void *pUser);
-	static bool IsAssetUsed(CFileBrowser::EFileType FileType, int Index, void *pUser);
 
 	bool IsEnvelopeUsed(int EnvelopeIndex) const;
 	void RemoveUnusedEnvelopes();
@@ -766,7 +763,7 @@ public:
 
 	void RenderLayers(CUIRect LayersBox);
 	void RenderImagesList(CUIRect Toolbox);
-	void RenderSelectedImage(CUIRect View);
+	void RenderSelectedImage(CUIRect View) const;
 	void RenderSounds(CUIRect Toolbox);
 	void RenderModebar(CUIRect View);
 	void RenderStatusbar(CUIRect View, CUIRect *pTooltipRect);
