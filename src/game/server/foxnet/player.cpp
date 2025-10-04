@@ -149,14 +149,14 @@ bool CPlayer::CheckLevelUp(int64_t Amount, bool Silent)
 	return LeveledUp;
 }
 
-void CPlayer::GiveMoney(int64_t Amount, const char *pMessage)
+void CPlayer::GiveMoney(int64_t Amount, const char *pMessage, bool Multiplier)
 {
 	if(!Acc()->m_LoggedIn)
 		return;
 	if(Amount <= 0)
 		return;
 
-	if(GameServer()->IsWeekend())
+	if(GameServer()->IsWeekend() && Multiplier)
 		Amount *= 2.0f;
 
 	Acc()->m_Money += Amount;

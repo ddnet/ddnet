@@ -371,7 +371,7 @@ public:
 	void GivePlaytime(int Amount);
 	void GiveXP(int64_t Amount, const char *pMessage = "");
 	bool CheckLevelUp(int64_t Amount, bool Silent = false);
-	void GiveMoney(int64_t Amount, const char *pMessage = "");
+	void GiveMoney(int64_t Amount, const char *pMessage = "", bool Multiplier = true);
 	void TakeMoney(int64_t Amount, const char *pMessage = "");
 
 	bool OwnsItem(const char *pItemName);

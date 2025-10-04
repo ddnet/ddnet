@@ -213,7 +213,7 @@ void CRoulette::EvaluateBets()
 	{
 		if(!m_aClients[i].m_Active)
 			continue;
-		int PayoutMultiplier = 0;
+		float PayoutMultiplier = 0;
 		if(str_comp(m_aClients[i].m_aBetOption, "Black") == 0 && Color == COLOR_BLACK)
 			PayoutMultiplier = 2;
 		else if(str_comp(m_aClients[i].m_aBetOption, "Red") == 0 && Color == COLOR_RED)
@@ -234,14 +234,10 @@ void CRoulette::EvaluateBets()
 		bool Win = PayoutMultiplier > 0;
 
 		CPlayer *pPl = GameServer()->m_apPlayers[i];
-		int Amount = m_aClients[i].m_BetAmount;
 		if(Win)
-		{
-			Amount = m_aClients[i].m_BetAmount * PayoutMultiplier - m_aClients[i].m_BetAmount;
-			pPl->GiveMoney(Amount);
-		}
+			pPl->GiveMoney(m_aClients[i].m_BetAmount * (PayoutMultiplier / 2.0f), "", false);
 		else
-			pPl->TakeMoney(Amount);
+			pPl->TakeMoney(m_aClients[i].m_BetAmount);
 	}
 	m_Betters = 0;
 	m_TotalWager = 0;
