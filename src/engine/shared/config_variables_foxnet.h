@@ -95,4 +95,4 @@ MACRO_CONFIG_INT(SvCorruptPickupPet, sv_corrupt_pickup_pet, 0, 0, 1, CFGFLAG_SER
 MACRO_CONFIG_INT(SvAddDummies, add_dummies, 0, 0, SERVER_MAX_CLIENTS, CFGFLAG_SERVER, "Add debug dummies to server (Debug build only)")
 
 // Roulette
-MACRO_CONFIG_INT(SvRouletteLength, sv_roulette_length, 1400, 0, 100000, CFGFLAG_SERVER | CFGFLAG_GAME, "Length of the roulette spinner")
+MACRO_CONFIG_INT(SvRouletteLength, sv_roulette_length, 140, 0, 500, CFGFLAG_SERVER | CFGFLAG_GAME, "Length of the roulette spinner")

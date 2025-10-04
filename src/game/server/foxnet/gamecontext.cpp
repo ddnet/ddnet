@@ -1134,7 +1134,6 @@ void CGameContext::CollectedPowerup(int ClientId, const SPowerupData *pData) con
 	if(!pPlayer)
 		return;
 
-
 	if(!pPlayer->Acc()->m_LoggedIn)
 	{
 		SendChatTarget(ClientId, "You need to be logged in to collect Powerups");

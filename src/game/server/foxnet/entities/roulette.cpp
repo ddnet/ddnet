@@ -373,7 +373,7 @@ void CRoulette::Snap(int SnappingClient)
 	const int SnappingClientVersion = Server()->GetClientVersion(SnappingClient);
 	const bool SixUp = Server()->IsSixup(SnappingClient);
 
-	float RouletteLength = g_Config.m_SvRouletteLength / 10.0f;
+	float RouletteLength = g_Config.m_SvRouletteLength;
 
 	vec2 From = m_Pos + direction(m_Rotation) * RouletteLength;
 
