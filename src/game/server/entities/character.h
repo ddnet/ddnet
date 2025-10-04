@@ -119,7 +119,7 @@ private:
 	int m_NeededFaketuning;
 
 	// weapon info
-	CEntity *m_apHitObjects[10];
+	int m_aHitObjects[MAX_CLIENTS];
 	int m_NumObjectsHit;
 
 	int m_LastWeapon;
