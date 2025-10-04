@@ -236,11 +236,13 @@ void CRoulette::EvaluateBets()
 
 		bool Win = PayoutMultiplier > 0;
 
+		int Amount = m_aClients[i].m_BetAmount;
+
 		CPlayer *pPl = GameServer()->m_apPlayers[i];
 		if(Win)
-			pPl->GiveMoney(m_aClients[i].m_BetAmount * (PayoutMultiplier / 2.0f), "", false);
+			pPl->GiveMoney((Amount * PayoutMultiplier) - Amount, "", false);
 		else
-			pPl->TakeMoney(m_aClients[i].m_BetAmount);
+			pPl->TakeMoney(Amount);
 	}
 	m_Betters = 0;
 	m_TotalWager = 0;
