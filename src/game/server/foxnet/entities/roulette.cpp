@@ -332,7 +332,7 @@ void CRoulette::SendBroadcast(int ClientId)
 
 	if(pPl->Acc()->m_LoggedIn)
 	{
-		str_format(aBuf, sizeof(aBuf), "%ld %s", (long)pPl->Acc()->m_Money, g_Config.m_SvCurrencyName);
+		str_format(aBuf, sizeof(aBuf), "%ld %s", pPl->Acc()->m_Money, g_Config.m_SvCurrencyName);
 		Messages.push_back(aBuf);
 
 		if(m_State == RStates::IDLE)

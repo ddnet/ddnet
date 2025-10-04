@@ -371,10 +371,10 @@ public:
 	CAccountSession *Acc();
 
 	void GivePlaytime(int Amount);
-	void GiveXP(int64_t Amount, const char *pMessage = "");
-	bool CheckLevelUp(int64_t Amount, bool Silent = false);
-	void GiveMoney(int64_t Amount, const char *pMessage = "", bool Multiplier = true);
-	void TakeMoney(int64_t Amount, bool Silent = true, const char *pMessage = "");
+	void GiveXP(long Amount, const char *pMessage = "");
+	bool CheckLevelUp(long Amount, bool Silent = false);
+	void GiveMoney(long Amount, const char *pMessage = "", bool Multiplier = true);
+	void TakeMoney(long Amount, bool Silent = true, const char *pMessage = "");
 
 	bool OwnsItem(const char *pItemName);
 	bool ToggleItem(const char *pItemName, int Set, bool IgnoreAccount = false);

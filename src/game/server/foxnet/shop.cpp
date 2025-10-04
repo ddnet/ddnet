@@ -243,7 +243,7 @@ void CShop::BuyItem(int ClientId, const char *pName)
 		GameServer()->SendChatTarget(ClientId, "╭──────     Sʜᴏᴘ");
 		str_format(aBuf, sizeof(aBuf), "│ You need atleast Level %d to buy %s", MinLevel, ItemName);
 		GameServer()->SendChatTarget(ClientId, aBuf);
-		str_format(aBuf, sizeof(aBuf), "│ You are currently Level %ld", (long)pAcc->m_Level);
+		str_format(aBuf, sizeof(aBuf), "│ You are currently Level %ld", pAcc->m_Level);
 		GameServer()->SendChatTarget(ClientId, aBuf);
 		GameServer()->SendChatTarget(ClientId, "│");
 		GameServer()->SendChatTarget(ClientId, "│ Level up by playing");
@@ -261,7 +261,7 @@ void CShop::BuyItem(int ClientId, const char *pName)
 	GameServer()->SendChatTarget(ClientId, "╭──────     Sʜᴏᴘ");
 	str_format(aBuf, sizeof(aBuf), "│ You bought \"%s\" for %d %s", ItemName, Price, g_Config.m_SvCurrencyName);
 	GameServer()->SendChatTarget(ClientId, aBuf);
-	str_format(aBuf, sizeof(aBuf), "│ You now have: %ld %s", (long)pAcc->m_Money, g_Config.m_SvCurrencyName);
+	str_format(aBuf, sizeof(aBuf), "│ You now have: %ld %s", pAcc->m_Money, g_Config.m_SvCurrencyName);
 	GameServer()->SendChatTarget(ClientId, aBuf);
 	GameServer()->SendChatTarget(ClientId, "╰───────────────────────");
 	GameServer()->m_AccountManager.SaveAccountsInfo(ClientId, GameServer()->m_aAccounts[ClientId]);

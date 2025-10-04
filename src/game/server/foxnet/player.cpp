@@ -81,12 +81,12 @@ void CPlayer::GivePlaytime(int Amount)
 	if(Acc()->m_Playtime % 100 == 0)
 	{
 		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "for reaching %ld Minutes of Playtime!", (long)Acc()->m_Playtime);
+		str_format(aBuf, sizeof(aBuf), "for reaching %ld Minutes of Playtime!", Acc()->m_Playtime);
 		GiveMoney(g_Config.m_SvPlaytimeMoney, aBuf);
 	}
 }
 
-void CPlayer::GiveXP(int64_t Amount, const char *pMessage)
+void CPlayer::GiveXP(long Amount, const char *pMessage)
 {
 	if(!Acc()->m_LoggedIn)
 		return;
@@ -100,14 +100,14 @@ void CPlayer::GiveXP(int64_t Amount, const char *pMessage)
 
 	if(pMessage[0])
 	{
-		str_format(aBuf, sizeof(aBuf), "+%ld XP %s", (long)Amount, pMessage);
+		str_format(aBuf, sizeof(aBuf), "+%ld XP %s", Amount, pMessage);
 		GameServer()->SendChatTarget(m_ClientId, aBuf);
 	}
 
 	CheckLevelUp(Amount);
 }
 
-bool CPlayer::CheckLevelUp(int64_t Amount, bool Silent)
+bool CPlayer::CheckLevelUp(long Amount, bool Silent)
 {
 	bool LeveledUp = false;
 	char aBuf[256];
@@ -128,14 +128,14 @@ bool CPlayer::CheckLevelUp(int64_t Amount, bool Silent)
 
 	if(LeveledUp && !Silent)
 	{
-		str_format(aBuf, sizeof(aBuf), "You are now level %ld!", (long)Acc()->m_Level);
+		str_format(aBuf, sizeof(aBuf), "You are now level %ld!", Acc()->m_Level);
 		GameServer()->SendChatTarget(m_ClientId, aBuf);
 
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if(GameServer()->m_apPlayers[i] && i != m_ClientId)
 			{
-				str_format(aBuf, sizeof(aBuf), "%s is now level %ld!", Server()->ClientName(m_ClientId), (long)Acc()->m_Level);
+				str_format(aBuf, sizeof(aBuf), "%s is now level %ld!", Server()->ClientName(m_ClientId), Acc()->m_Level);
 				GameServer()->SendChatTarget(i, aBuf);
 			}
 		}
@@ -149,7 +149,7 @@ bool CPlayer::CheckLevelUp(int64_t Amount, bool Silent)
 	return LeveledUp;
 }
 
-void CPlayer::GiveMoney(int64_t Amount, const char *pMessage, bool Multiplier)
+void CPlayer::GiveMoney(long Amount, const char *pMessage, bool Multiplier)
 {
 	if(!Acc()->m_LoggedIn)
 		return;
@@ -165,7 +165,7 @@ void CPlayer::GiveMoney(int64_t Amount, const char *pMessage, bool Multiplier)
 
 	if(pMessage[0])
 	{
-		str_format(aBuf, sizeof(aBuf), "+%ld %s %s", (long)Amount, g_Config.m_SvCurrencyName, pMessage);
+		str_format(aBuf, sizeof(aBuf), "+%ld %s %s", Amount, g_Config.m_SvCurrencyName, pMessage);
 		GameServer()->SendChatTarget(m_ClientId, aBuf);
 	}	
 
@@ -174,7 +174,7 @@ void CPlayer::GiveMoney(int64_t Amount, const char *pMessage, bool Multiplier)
 	{
 		const vec2 Pos = pChr->m_Pos + vec2(0, -74);
 		char aText[66];
-		str_format(aText, sizeof(aText), "+%ld", (long)Amount);
+		str_format(aText, sizeof(aText), "+%ld", Amount);
 		new CProjectileText(pChr->GameWorld(), Pos, GetCid(), 175, aText, WEAPON_HAMMER);
 		pChr->SetEmote(EMOTE_HAPPY, Server()->Tick() + 175);
 	}
@@ -182,7 +182,7 @@ void CPlayer::GiveMoney(int64_t Amount, const char *pMessage, bool Multiplier)
 	GameServer()->m_AccountManager.SaveAccountsInfo(m_ClientId, *Acc());
 }
 
-void CPlayer::TakeMoney(int64_t Amount, bool Silent, const char *pMessage)
+void CPlayer::TakeMoney(long Amount, bool Silent, const char *pMessage)
 {
 	if(!Acc()->m_LoggedIn)
 		return;
@@ -195,7 +195,7 @@ void CPlayer::TakeMoney(int64_t Amount, bool Silent, const char *pMessage)
 
 	if(pMessage[0])
 	{
-		str_format(aBuf, sizeof(aBuf), "-%ld %s %s", (long)Amount, g_Config.m_SvCurrencyName, pMessage);
+		str_format(aBuf, sizeof(aBuf), "-%ld %s %s", Amount, g_Config.m_SvCurrencyName, pMessage);
 		GameServer()->SendChatTarget(m_ClientId, aBuf);
 	}
 
@@ -204,7 +204,7 @@ void CPlayer::TakeMoney(int64_t Amount, bool Silent, const char *pMessage)
 	{
 		const vec2 Pos = pChr->m_Pos + vec2(0, -74);
 		char aText[66];
-		str_format(aText, sizeof(aText), "-%ld", (long)Amount);
+		str_format(aText, sizeof(aText), "-%ld", Amount);
 		new CProjectileText(pChr->GameWorld(), Pos, GetCid(), 125, aText, WEAPON_HAMMER);
 		pChr->SetEmote(EMOTE_PAIN, Server()->Tick() + 125);
 	}

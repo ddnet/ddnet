@@ -452,17 +452,17 @@ void CAccounts::ShowAccProfile(int ClientId, const char *pName)
 			GameServer()->SendChatTarget(ClientId, aBuf);
 		}
 		GameServer()->SendChatTarget(ClientId, "├──────      Sᴛᴀᴛs");
-		str_format(aBuf, sizeof(aBuf), "│ Level %ld", (long)Data.m_Level);
+		str_format(aBuf, sizeof(aBuf), "│ Level %ld", Data.m_Level);
 		GameServer()->SendChatTarget(ClientId, aBuf);
-		str_format(aBuf, sizeof(aBuf), "│ %ld %s", (long)Data.m_Money, g_Config.m_SvCurrencyName);
+		str_format(aBuf, sizeof(aBuf), "│ %ld %s", Data.m_Money, g_Config.m_SvCurrencyName);
 		GameServer()->SendChatTarget(ClientId, aBuf);
 		float PlayTimeHours = Data.m_Playtime / 60.0f;
 		if(Data.m_Playtime < 100)
-			str_format(aBuf, sizeof(aBuf), "│ %ld Minutes Playtime", (long)Data.m_Playtime);
+			str_format(aBuf, sizeof(aBuf), "│ %ld Minutes Playtime", Data.m_Playtime);
 		else
 			str_format(aBuf, sizeof(aBuf), "│ %.1f Hours Playtime", PlayTimeHours);
 		GameServer()->SendChatTarget(ClientId, aBuf);
-		str_format(aBuf, sizeof(aBuf), "│ %ld Deaths", (long)Data.m_Deaths);
+		str_format(aBuf, sizeof(aBuf), "│ %ld Deaths", Data.m_Deaths);
 		GameServer()->SendChatTarget(ClientId, aBuf);
 		GameServer()->SendChatTarget(ClientId, "╰───────────────────────");
 	};

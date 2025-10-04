@@ -120,7 +120,7 @@ bool CVoteMenu::OnCallVote(const CNetMsg_Cl_CallVote *pMsg, int ClientId)
 const char *CVoteMenu::FormatItemVote(CItems *pItem, const CAccountSession *pAcc)
 {
 	static char aBuf[64];
-	str_format(aBuf, sizeof(aBuf), "Buy Item [%ld]", (long)pItem->Price());
+	str_format(aBuf, sizeof(aBuf), "Buy Item [%d]", pItem->Price());
 	return aBuf;
 }
 
@@ -687,7 +687,7 @@ void CVoteMenu::SendPageAccount(int ClientId)
 
 	AddVoteText("├──────      Sᴛᴀᴛs");
 
-	str_format(aBuf, sizeof(aBuf), "│ Level [%ld]", (long)pAcc->m_Level);
+	str_format(aBuf, sizeof(aBuf), "│ Level [%ld]", pAcc->m_Level);
 	AddVoteText(aBuf);
 
 	int CurXp = pAcc->m_XP;
@@ -699,13 +699,13 @@ void CVoteMenu::SendPageAccount(int ClientId)
 	float PlayTimeHours = pAcc->m_Playtime / 60.0f;
 	str_format(aBuf, sizeof(aBuf), "│ Playtime: %.1f Hour%s", PlayTimeHours, PlayTimeHours == 1 ? "" : "s");
 	if(pAcc->m_Playtime < 100)
-		str_format(aBuf, sizeof(aBuf), "│ Playtime: %ld Minute%s", (long)pAcc->m_Playtime, pAcc->m_Playtime == 1 ? "" : "s");
+		str_format(aBuf, sizeof(aBuf), "│ Playtime: %ld Minute%s", pAcc->m_Playtime, pAcc->m_Playtime == 1 ? "" : "s");
 	AddVoteText(aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "│ %s: %ld", g_Config.m_SvCurrencyName, (long)pAcc->m_Money);
+	str_format(aBuf, sizeof(aBuf), "│ %s: %ld", g_Config.m_SvCurrencyName, pAcc->m_Money);
 	AddVoteText(aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "│ Deaths: %ld", (long)pAcc->m_Deaths);
+	str_format(aBuf, sizeof(aBuf), "│ Deaths: %ld", pAcc->m_Deaths);
 	AddVoteText(aBuf);
 
 	AddVoteText("╰──────────────────────────");
@@ -735,7 +735,7 @@ void CVoteMenu::SendPageShop(int ClientId)
 		std::vector<std::string> OtherItems;
 
 		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "%ld %s", (long)pAcc->m_Money, g_Config.m_SvCurrencyName);
+		str_format(aBuf, sizeof(aBuf), "%ld %s", pAcc->m_Money, g_Config.m_SvCurrencyName);
 		AddVoteText(aBuf);
 		AddVoteSeperator();
 
@@ -846,7 +846,7 @@ void CVoteMenu::SendPageShop(int ClientId)
 		str_copy(aBuf, FormatItemVote(m_pLastItemInfo, pAcc));
 		AddVoteText(aBuf);
 
-		str_format(aBuf, sizeof(aBuf), "↳ Requires level %d", (long)pItem->MinLevel());
+		str_format(aBuf, sizeof(aBuf), "↳ Requires level %d", pItem->MinLevel());
 		AddVoteText(aBuf);
 
 		AddVoteSeperator();
