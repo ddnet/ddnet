@@ -69,6 +69,12 @@ int CRoulette::AmountOfCloseClients()
 		CPlayer *pPl = GameServer()->m_apPlayers[ClientId];
 		if(!pPl)
 			continue;
+		if(pPl->IsAfk())
+			continue;
+		if(!pPl->Acc()->m_LoggedIn)
+			continue;
+		if(pPl->Acc()->m_Money <= 0)
+			continue;
 		CCharacter *pCharacter = pPl->GetCharacter();
 		if(!pCharacter)
 			continue;
@@ -76,10 +82,7 @@ int CRoulette::AmountOfCloseClients()
 			continue;
 		if(pCharacter->Team() != TEAM_FLOCK)
 			continue;
-		if(!pPl->Acc()->m_LoggedIn)
-			continue;
-		if(pPl->Acc()->m_Money <= 0)
-			continue;
+
 		Count++;
 	}
 	return Count;
@@ -370,7 +373,9 @@ void CRoulette::Snap(int SnappingClient)
 	const int SnappingClientVersion = Server()->GetClientVersion(SnappingClient);
 	const bool SixUp = Server()->IsSixup(SnappingClient);
 
-	vec2 From = m_Pos + direction(m_Rotation) * 123.5f;
+	float RouletteLength = g_Config.m_SvRouletteLength / 10.0f;
+
+	vec2 From = m_Pos + direction(m_Rotation) * RouletteLength;
 
 	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, SixUp, SnappingClient), GetId(), From, m_Pos, 0, -1, LASERTYPE_DRAGGER, LASERDRAGGERTYPE_WEAK, -1, LASERFLAG_NO_PREDICT);
 }
