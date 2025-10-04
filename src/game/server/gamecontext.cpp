@@ -2369,7 +2369,6 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 	char aReason[VOTE_REASON_LENGTH] = "No reason given";
 	if(pMsg->m_pReason[0])
 		str_copy(aReason, pMsg->m_pReason, sizeof(aReason));
-	}
 
 	if(str_comp_nocase(pMsg->m_pType, "option") == 0)
 	{
