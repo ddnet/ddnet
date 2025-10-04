@@ -48,7 +48,7 @@
 /**
  * Utilities for debugging.
  *
- * @defgroup Debug
+ * @defgroup Debug Debugging
  */
 
 /**
@@ -57,7 +57,7 @@
  * @ingroup Debug
  *
  * @param test Result of the test.
- * @param msg Message that should be printed if the test fails.
+ * @param fmt A printf styled format message that should be printed if the test fails.
  *
  * @remark Also works in release mode.
  *
@@ -123,7 +123,7 @@ void dbg_assert_set_handler(DBG_ASSERT_HANDLER handler);
 /**
  * Memory management utilities.
  *
- * @defgroup Memory
+ * @defgroup Memory Memory
  */
 
 /**
@@ -199,9 +199,9 @@ int mem_comp(const void *a, const void *b, size_t size);
 bool mem_has_null(const void *block, size_t size);
 
 /**
- * I/O related operations.
+ * File I/O related operations.
  *
- * @defgroup File-IO
+ * @defgroup File-IO File I/O
  */
 
 /**
@@ -599,7 +599,7 @@ void aio_free(ASYNCIO *aio);
 /**
  * Threading related functions.
  *
- * @defgroup Threads
+ * @defgroup Threads Threading
  *
  * @see Locks
  * @see Semaphore
@@ -657,7 +657,7 @@ void thread_detach(void *thread);
 void thread_init_and_detach(void (*threadfunc)(void *), void *user, const char *name);
 
 /**
- * @defgroup Semaphore
+ * @defgroup Semaphore Semaphores
  *
  * @see Threads
  */
@@ -694,7 +694,13 @@ void sphore_destroy(SEMAPHORE *sem);
 /**
  * Time utilities.
  *
- * @defgroup Time
+ * @defgroup Time Time
+ */
+
+/**
+ * Timestamp related functions.
+ *
+ * @defgroup Timestamp Timestamps
  */
 
 /**
@@ -737,20 +743,20 @@ int64_t time_get();
 int64_t time_freq();
 
 /**
- * Retrieves the current time as a UNIX timestamp
+ * Retrieves the current time as a UNIX timestamp.
  *
- * @ingroup Time
+ * @ingroup Timestamp
  *
- * @return The time as a UNIX timestamp
+ * @return The time as a UNIX timestamp.
  */
 int64_t time_timestamp();
 
 /**
- * Retrieves the hours since midnight (0..23)
+ * Retrieves the hours since midnight (0..23).
  *
  * @ingroup Time
  *
- * @return The current hour of the day
+ * @return The current hour of the day.
  */
 int time_houroftheday();
 
@@ -774,21 +780,26 @@ enum ETimeSeason
  *
  * @ingroup Time
  *
- * @return One of the SEASON_* enum literals
+ * @return One of the SEASON_* enum literals.
  *
  * @see SEASON_SPRING
  */
 ETimeSeason time_season();
 
 /**
- * @defgroup Network-General
+ * @defgroup Network Networking
  */
 
-extern const NETADDR NETADDR_ZEROED;
+/**
+ * @defgroup Network-General General networking
+ *
+ * @ingroup Network
+ */
 
 /**
  * @ingroup Network-General
  */
+extern const NETADDR NETADDR_ZEROED;
 
 #ifdef CONF_FAMILY_UNIX
 /**
@@ -975,9 +986,9 @@ int net_would_block();
 int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds);
 
 /**
- * @defgroup Network-UDP
+ * @defgroup Network-UDP UDP Networking
  *
- * @ingroup Network-General
+ * @ingroup Network
  */
 
 /**
@@ -1040,9 +1051,9 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data);
 void net_udp_close(NETSOCKET sock);
 
 /**
- * @defgroup Network-TCP
+ * @defgroup Network-TCP TCP Networking
  *
- * @ingroup Network-General
+ * @ingroup Network
  */
 
 /**
@@ -1120,13 +1131,13 @@ int net_tcp_connect_non_blocking(NETSOCKET sock, NETADDR bindaddr);
 int net_tcp_send(NETSOCKET sock, const void *data, int size);
 
 /**
- * Recvives data from a TCP stream.
+ * Receives data from a TCP stream.
  *
  * @ingroup Network-TCP
  *
  * @param sock Socket to recvive data from.
  * @param data Pointer to a buffer to write the data to.
- * @param max_size Maximum of data to write to the buffer.
+ * @param maxsize Maximum of data to write to the buffer.
  *
  * @return Number of bytes recvived. Negative value on failure. When in
  * non-blocking mode, it returns 0 when there is no more data to be fetched.
@@ -1144,9 +1155,9 @@ void net_tcp_close(NETSOCKET sock);
 
 #if defined(CONF_FAMILY_UNIX)
 /**
- * @defgroup Network-Unix-Sockets
+ * @defgroup Network-Unix-Sockets UNIX Socket Networking
  *
- * @ingroup Network-General
+ * @ingroup Network
  */
 
 /**
@@ -1207,7 +1218,7 @@ std::string windows_format_system_message(unsigned long error);
 /**
  * String related functions.
  *
- * @defgroup Strings
+ * @defgroup Strings Strings
  */
 
 /**
@@ -1325,7 +1336,7 @@ int str_utf32_dist_buffer(const int *a, int a_len, const int *b, int b_len, int 
 /**
  * Copies a timestamp in the format year-month-day_hour-minute-second to the string.
  *
- * @ingroup Strings
+ * @ingroup Timestamp
  *
  * @param buffer Pointer to a buffer that shall receive the timestamp string.
  * @param buffer_size Size of the buffer.
@@ -1396,7 +1407,7 @@ int str_time_float(float secs, int format, char *buffer, int buffer_size);
 /**
  * Utilities for accessing the file system.
  *
- * @defgroup Filesystem
+ * @defgroup Filesystem Filesystem
  */
 
 /**
@@ -1790,7 +1801,7 @@ void str_utf8_stats(const char *str, size_t max_size, size_t max_count, size_t *
  *
  * @ingroup Strings
  *
- * @param text Pointer to the string.
+ * @param str Pointer to the string.
  * @param byte_offset Offset in bytes.
  *
  * @return Offset in UTF-8 characters. Clamped to the maximum length of the string in UTF-8 characters.
@@ -1805,7 +1816,7 @@ size_t str_utf8_offset_bytes_to_chars(const char *str, size_t byte_offset);
  *
  * @ingroup Strings
  *
- * @param text Pointer to the string.
+ * @param str Pointer to the string.
  * @param char_offset Offset in UTF-8 characters.
  *
  * @return Offset in bytes. Clamped to the maximum length of the string in bytes.
@@ -1845,7 +1856,7 @@ void uint_to_bytes_be(unsigned char *bytes, unsigned value);
 /**
  * Shell, process management, OS specific functionality.
  *
- * @defgroup Shell
+ * @defgroup Shell Shell
  */
 
 /**
@@ -1984,7 +1995,7 @@ int open_file(const char *path);
 /**
  * Secure random number generation.
  *
- * @defgroup Secure-Random
+ * @defgroup Secure-Random Secure Random
  */
 
 /**
@@ -2018,7 +2029,7 @@ void secure_random_password(char *buffer, unsigned length, unsigned pw_length);
  *
  * @ingroup Secure-Random
  *
- * @param buffer Pointer to the start of the buffer.
+ * @param bytes Pointer to the start of the buffer.
  * @param length Length of the buffer.
  */
 void secure_random_fill(void *bytes, unsigned length);
@@ -2075,14 +2086,14 @@ bool os_version_str(char *version, size_t length);
 void os_locale_str(char *locale, size_t length);
 
 /**
- * @defgroup Crash-dumping
+ * @defgroup Crash-Dumping Crash Dumping
  */
 
 /**
  * Initializes the crash dumper and sets the filename to write the crash dump
  * to, if support for crash logging was compiled in. Otherwise does nothing.
  *
- * @ingroup Crash-dumping
+ * @ingroup Crash-Dumping
  *
  * @param log_file_path Absolute path to which crash log file should be written.
  */

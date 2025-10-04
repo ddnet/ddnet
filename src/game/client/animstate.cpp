@@ -1,10 +1,11 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <base/math.h>
-#include <generated/client_data.h>
-
 #include "animstate.h"
+
+#include <base/math.h>
+
+#include <generated/client_data.h>
 
 static void AnimSeqEval(const CAnimSequence *pSeq, float Time, CAnimKeyframe *pFrame)
 {

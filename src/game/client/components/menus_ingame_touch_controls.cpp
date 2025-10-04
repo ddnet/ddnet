@@ -4,12 +4,11 @@
 #include <base/math.h>
 #include <base/system.h>
 
+#include <engine/external/json-parser/json.h>
 #include <engine/graphics.h>
+#include <engine/shared/jsonwriter.h>
 #include <engine/shared/localization.h>
 #include <engine/textrender.h>
-
-#include <engine/external/json-parser/json.h>
-#include <engine/shared/jsonwriter.h>
 
 #include <game/client/components/touch_controls.h>
 #include <game/client/gameclient.h>

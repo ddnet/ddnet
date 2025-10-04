@@ -1,4 +1,5 @@
-#include <game/editor/editor.h>
+#include "image.h"
+#include "sound.h"
 
 #include <engine/client.h>
 #include <engine/console.h>
@@ -9,11 +10,9 @@
 #include <engine/sound.h>
 #include <engine/storage.h>
 
+#include <game/editor/editor.h>
 #include <game/gamecore.h>
 #include <game/mapitems_ex.h>
-
-#include "image.h"
-#include "sound.h"
 
 // compatibility with old sound layers
 class CSoundSourceDeprecated
@@ -625,7 +624,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 				// load external
 				if(m_pEditor->Storage()->ReadFile(aBuf, IStorage::TYPE_ALL, &pSound->m_pData, &pSound->m_DataSize))
 				{
-					pSound->m_SoundId = m_pEditor->Sound()->LoadOpusFromMem(pSound->m_pData, pSound->m_DataSize, true);
+					pSound->m_SoundId = m_pEditor->Sound()->LoadOpusFromMem(pSound->m_pData, pSound->m_DataSize, true, pSound->m_aName);
 				}
 				else
 				{
@@ -639,7 +638,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 				void *pData = DataFile.GetData(pItem->m_SoundData);
 				pSound->m_pData = malloc(pSound->m_DataSize);
 				mem_copy(pSound->m_pData, pData, pSound->m_DataSize);
-				pSound->m_SoundId = m_pEditor->Sound()->LoadOpusFromMem(pSound->m_pData, pSound->m_DataSize, true);
+				pSound->m_SoundId = m_pEditor->Sound()->LoadOpusFromMem(pSound->m_pData, pSound->m_DataSize, true, pSound->m_aName);
 			}
 
 			m_vpSounds.push_back(pSound);
@@ -1051,10 +1050,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 
 	PerformSanityChecks(ErrorHandler);
 
-	m_Modified = false;
-	m_ModifiedAuto = false;
-	m_LastModifiedTime = -1.0f;
-	m_LastSaveTime = m_pEditor->Client()->GlobalTime();
+	ResetModifiedState();
 	return true;
 }
 

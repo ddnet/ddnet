@@ -1,8 +1,10 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "binds.h"
+
 #include <base/log.h>
 #include <base/system.h>
+
 #include <engine/config.h>
 #include <engine/shared/config.h>
 
@@ -50,18 +52,18 @@ void CBinds::Bind(int KeyId, const char *pStr, bool FreeOnly, int ModifierCombin
 	free(m_aapKeyBindings[ModifierCombination][KeyId]);
 	m_aapKeyBindings[ModifierCombination][KeyId] = nullptr;
 
-	char aModifiers[128];
-	GetKeyBindModifiersName(ModifierCombination, aModifiers, sizeof(aModifiers));
+	char aBindName[128];
+	GetKeyBindName(KeyId, ModifierCombination, aBindName, sizeof(aBindName));
 	if(!pStr[0])
 	{
-		log_info_color(BIND_PRINT_COLOR, "binds", "unbound %s%s", aModifiers, Input()->KeyName(KeyId));
+		log_info_color(BIND_PRINT_COLOR, "binds", "unbound %s", aBindName);
 	}
 	else
 	{
 		int Size = str_length(pStr) + 1;
 		m_aapKeyBindings[ModifierCombination][KeyId] = (char *)malloc(Size);
 		str_copy(m_aapKeyBindings[ModifierCombination][KeyId], pStr, Size);
-		log_info_color(BIND_PRINT_COLOR, "binds", "bound %s%s = %s", aModifiers, Input()->KeyName(KeyId), m_aapKeyBindings[ModifierCombination][KeyId]);
+		log_info_color(BIND_PRINT_COLOR, "binds", "bound %s = %s", aBindName, m_aapKeyBindings[ModifierCombination][KeyId]);
 	}
 }
 
@@ -239,8 +241,6 @@ void CBinds::GetKey(const char *pBindStr, char *pBuf, size_t BufSize)
 	pBuf[0] = '\0';
 	for(int Modifier = MODIFIER_NONE; Modifier < MODIFIER_COMBINATION_COUNT; Modifier++)
 	{
-		char aModifiers[128];
-		GetKeyBindModifiersName(Modifier, aModifiers, sizeof(aModifiers));
 		for(int KeyId = KEY_FIRST; KeyId < KEY_LAST; KeyId++)
 		{
 			const char *pBind = Get(KeyId, Modifier);
@@ -249,7 +249,7 @@ void CBinds::GetKey(const char *pBindStr, char *pBuf, size_t BufSize)
 
 			if(str_comp(pBind, pBindStr) == 0)
 			{
-				str_format(pBuf, BufSize, "%s%s", aModifiers, Input()->KeyName(KeyId));
+				GetKeyBindName(KeyId, Modifier, pBuf, BufSize);
 				return;
 			}
 		}
@@ -435,33 +435,34 @@ const char *CBinds::GetModifierName(int Modifier)
 		return "alt";
 	case MODIFIER_GUI:
 		return "gui";
-	case MODIFIER_NONE:
 	default:
-		return "";
+		dbg_assert(false, "Modifier invalid: %d", Modifier);
+		dbg_break();
 	}
 }
 
-void CBinds::GetKeyBindModifiersName(int ModifierCombination, char *pBuf, size_t BufSize)
+void CBinds::GetKeyBindName(int Key, int ModifierMask, char *pBuf, size_t BufSize) const
 {
 	pBuf[0] = '\0';
 	for(int k = 1; k < MODIFIER_COUNT; k++)
 	{
-		if(ModifierCombination & (1 << k))
+		if(ModifierMask & (1 << k))
 		{
 			str_append(pBuf, GetModifierName(k), BufSize);
 			str_append(pBuf, "+", BufSize);
 		}
 	}
+	str_append(pBuf, Input()->KeyName(Key), BufSize);
 }
 
 char *CBinds::GetKeyBindCommand(int ModifierCombination, int Key) const
 {
+	char aBindName[128];
+	GetKeyBindName(Key, ModifierCombination, aBindName, sizeof(aBindName));
 	// worst case the str_escape can double the string length
-	int Size = str_length(m_aapKeyBindings[ModifierCombination][Key]) * 2 + 30;
+	int Size = str_length(m_aapKeyBindings[ModifierCombination][Key]) * 2 + str_length(aBindName) + 16;
 	auto *pBuf = static_cast<char *>(malloc(Size));
-	char aModifiers[128];
-	GetKeyBindModifiersName(ModifierCombination, aModifiers, sizeof(aModifiers));
-	str_format(pBuf, Size, "bind %s%s \"", aModifiers, Input()->KeyName(Key));
+	str_format(pBuf, Size, "bind %s \"", aBindName);
 	char *pDst = pBuf + str_length(pBuf);
 	// process the string. we need to escape some characters
 	str_escape(&pDst, m_aapKeyBindings[ModifierCombination][Key], pBuf + Size);

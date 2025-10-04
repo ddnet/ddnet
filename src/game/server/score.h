@@ -1,9 +1,9 @@
 #ifndef GAME_SERVER_SCORE_H
 #define GAME_SERVER_SCORE_H
 
-#include <game/prng.h>
-
 #include "scoreworker.h"
+
+#include <game/prng.h>
 
 class CDbConnectionPool;
 class CGameContext;
@@ -65,8 +65,8 @@ public:
 	void ShowTimes(int ClientId, const char *pName, int Offset = 1);
 	void ShowTimes(int ClientId, int Offset = 1);
 
-	void RandomMap(int ClientId, int Stars);
-	void RandomUnfinishedMap(int ClientId, int Stars);
+	void RandomMap(int ClientId, int MinStars, int MaxStars);
+	void RandomUnfinishedMap(int ClientId, int MinStars, int MaxStars);
 
 	void SaveTeam(int ClientId, const char *pCode, const char *pServer);
 	void LoadTeam(const char *pCode, int ClientId);

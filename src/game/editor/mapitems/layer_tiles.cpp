@@ -2,17 +2,18 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "layer_tiles.h"
 
+#include "image.h"
+
 #include <engine/keys.h>
 #include <engine/shared/config.h>
 #include <engine/shared/map.h>
+
 #include <game/editor/editor.h>
 #include <game/editor/editor_actions.h>
 #include <game/editor/enums.h>
 
 #include <iterator>
 #include <numeric>
-
-#include "image.h"
 
 CLayerTiles::CLayerTiles(CEditor *pEditor, int w, int h) :
 	CLayer(pEditor)
@@ -295,7 +296,7 @@ static void InitGrabbedLayer(std::shared_ptr<T> &pLayer, CLayerTiles *pThisLayer
 	}
 };
 
-int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
+int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 {
 	RECTi r;
 	Convert(Rect, &r);
@@ -305,7 +306,7 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 		return 0;
 
 	// create new layers
-	if(this->m_HasTele)
+	if(m_HasTele)
 	{
 		std::shared_ptr<CLayerTele> pGrabbed = std::make_shared<CLayerTele>(m_pEditor, r.w, r.h);
 		InitGrabbedLayer(pGrabbed, this);
@@ -349,7 +350,7 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 
 		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
 	}
-	else if(this->m_HasSpeedup)
+	else if(m_HasSpeedup)
 	{
 		std::shared_ptr<CLayerSpeedup> pGrabbed = std::make_shared<CLayerSpeedup>(m_pEditor, r.w, r.h);
 		InitGrabbedLayer(pGrabbed, this);
@@ -393,7 +394,7 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 		pGrabbed->m_SpeedupAngle = m_pEditor->m_SpeedupAngle;
 		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
 	}
-	else if(this->m_HasSwitch)
+	else if(m_HasSwitch)
 	{
 		std::shared_ptr<CLayerSwitch> pGrabbed = std::make_shared<CLayerSwitch>(m_pEditor, r.w, r.h);
 		InitGrabbedLayer(pGrabbed, this);
@@ -436,7 +437,7 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
 	}
 
-	else if(this->m_HasTune)
+	else if(m_HasTune)
 	{
 		std::shared_ptr<CLayerTune> pGrabbed = std::make_shared<CLayerTune>(m_pEditor, r.w, r.h);
 		InitGrabbedLayer(pGrabbed, this);
@@ -473,22 +474,21 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 		pGrabbed->m_TuningNumber = m_pEditor->m_TuningNum;
 		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
 	}
-	else if(this->m_HasFront)
+	else // game, front and tiles layers
 	{
-		std::shared_ptr<CLayerFront> pGrabbed = std::make_shared<CLayerFront>(m_pEditor, r.w, r.h);
-		InitGrabbedLayer(pGrabbed, this);
-
-		pBrush->AddLayer(pGrabbed);
-
-		// copy the tiles
-		for(int y = 0; y < r.h; y++)
-			for(int x = 0; x < r.w; x++)
-				pGrabbed->m_pTiles[y * pGrabbed->m_Width + x] = GetTile(r.x + x, r.y + y);
-		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
-	}
-	else
-	{
-		std::shared_ptr<CLayerTiles> pGrabbed = std::make_shared<CLayerFront>(m_pEditor, r.w, r.h);
+		std::shared_ptr<CLayerTiles> pGrabbed;
+		if(m_HasGame)
+		{
+			pGrabbed = std::make_shared<CLayerGame>(m_pEditor, r.w, r.h);
+		}
+		else if(m_HasFront)
+		{
+			pGrabbed = std::make_shared<CLayerFront>(m_pEditor, r.w, r.h);
+		}
+		else
+		{
+			pGrabbed = std::make_shared<CLayerTiles>(m_pEditor, r.w, r.h);
+		}
 		InitGrabbedLayer(pGrabbed, this);
 
 		pBrush->AddLayer(pGrabbed);
@@ -503,7 +503,7 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 	return 1;
 }
 
-void CLayerTiles::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect)
+void CLayerTiles::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 {
 	if(m_Readonly || (!Empty && pBrush->m_Type != LAYERTYPE_TILES))
 		return;
@@ -515,7 +515,7 @@ void CLayerTiles::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIR
 	int w = ConvertX(Rect.w);
 	int h = ConvertY(Rect.h);
 
-	std::shared_ptr<CLayerTiles> pLt = std::static_pointer_cast<CLayerTiles>(pBrush);
+	CLayerTiles *pLt = static_cast<CLayerTiles *>(pBrush);
 
 	bool Destructive = m_pEditor->m_BrushDrawDestructive || Empty || pLt->IsEmpty();
 
@@ -551,13 +551,12 @@ void CLayerTiles::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIR
 	FlagModified(sx, sy, w, h);
 }
 
-void CLayerTiles::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
+void CLayerTiles::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 {
 	if(m_Readonly)
 		return;
 
-	//
-	std::shared_ptr<CLayerTiles> pTileLayer = std::static_pointer_cast<CLayerTiles>(pBrush);
+	CLayerTiles *pTileLayer = static_cast<CLayerTiles *>(pBrush);
 	int sx = ConvertX(WorldPos.x);
 	int sy = ConvertY(WorldPos.y);
 

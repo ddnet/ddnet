@@ -1445,6 +1445,7 @@ void CGraphics_Threaded::RenderQuadLayer(int BufferContainerIndex, SQuadRenderIn
 		});
 
 		mem_copy(Cmd.m_pQuadInfo, pQuadInfo, sizeof(SQuadRenderInfo) * QuadNum);
+		m_pCommandBuffer->AddRenderCalls(((QuadNum - 1) / gs_GraphicsMaxQuadsRenderCount) + 1);
 	}
 	else
 	{
@@ -1455,9 +1456,8 @@ void CGraphics_Threaded::RenderQuadLayer(int BufferContainerIndex, SQuadRenderIn
 		});
 
 		*Cmd.m_pQuadInfo = *pQuadInfo;
+		m_pCommandBuffer->AddRenderCalls(1);
 	}
-
-	m_pCommandBuffer->AddRenderCalls(((QuadNum - 1) / gs_GraphicsMaxQuadsRenderCount) + 1);
 }
 
 void CGraphics_Threaded::RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor)

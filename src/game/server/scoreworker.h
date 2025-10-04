@@ -1,18 +1,19 @@
 #ifndef GAME_SERVER_SCOREWORKER_H
 #define GAME_SERVER_SCOREWORKER_H
 
+#include <engine/map.h>
+#include <engine/server/databases/connection_pool.h>
+#include <engine/shared/protocol.h>
+#include <engine/shared/uuid_manager.h>
+
+#include <game/server/save.h>
+#include <game/voting.h>
+
 #include <memory>
 #include <optional>
 #include <string>
 #include <utility>
 #include <vector>
-
-#include <engine/map.h>
-#include <engine/server/databases/connection_pool.h>
-#include <engine/shared/protocol.h>
-#include <engine/shared/uuid_manager.h>
-#include <game/server/save.h>
-#include <game/voting.h>
 
 class IDbConnection;
 class IGameController;
@@ -123,7 +124,8 @@ struct CSqlRandomMapRequest : ISqlData
 	char m_aServerType[32];
 	char m_aCurrentMap[MAX_MAP_LENGTH];
 	char m_aRequestingPlayer[MAX_NAME_LENGTH];
-	int m_Stars;
+	int m_MinStars;
+	int m_MaxStars;
 };
 
 struct CSqlScoreData : ISqlData

@@ -1,5 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "motd.h"
+
 #include <engine/graphics.h>
 #include <engine/keys.h>
 #include <engine/shared/config.h>
@@ -8,8 +10,6 @@
 #include <generated/protocol.h>
 
 #include <game/client/gameclient.h>
-
-#include "motd.h"
 
 CMotd::CMotd()
 {

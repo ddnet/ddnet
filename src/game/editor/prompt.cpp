@@ -1,10 +1,11 @@
-#include <engine/keys.h>
-#include <game/client/ui_listbox.h>
-#include <game/editor/quick_action.h>
+#include "prompt.h"
 
 #include "editor.h"
 
-#include "prompt.h"
+#include <engine/keys.h>
+
+#include <game/client/ui_listbox.h>
+#include <game/editor/quick_action.h>
 
 static bool FuzzyMatch(const char *pHaystack, const char *pNeedle)
 {

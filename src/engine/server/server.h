@@ -3,11 +3,15 @@
 #ifndef ENGINE_SERVER_SERVER_H
 #define ENGINE_SERVER_SERVER_H
 
+#include "antibot.h"
+#include "authmanager.h"
+#include "name_ban.h"
+#include "snap_id_pool.h"
+
 #include <base/hash.h>
 
 #include <engine/console.h>
 #include <engine/server.h>
-
 #include <engine/shared/demo.h>
 #include <engine/shared/econ.h>
 #include <engine/shared/fifo.h>
@@ -21,11 +25,6 @@
 #include <memory>
 #include <optional>
 #include <vector>
-
-#include "antibot.h"
-#include "authmanager.h"
-#include "name_ban.h"
-#include "snap_id_pool.h"
 
 #if defined(CONF_UPNP)
 #include "upnp.h"

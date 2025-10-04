@@ -1,11 +1,13 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "character.h"
+
 #include "laser.h"
 #include "pickup.h"
 #include "projectile.h"
 
 #include <antibot/antibot_data.h>
+
 #include <base/log.h>
 
 #include <engine/antibot.h>
@@ -15,15 +17,15 @@
 #include <generated/server_data.h>
 
 #include <game/mapitems.h>
-#include <game/team_state.h>
-
-#include <game/server/foxnet/accounts.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/server/teams.h>
+#include <game/team_state.h>
+
 // <FoxNet
+#include <game/server/foxnet/accounts.h>
 #include <game/server/foxnet/cosmetics/firework.h>
 #include <game/server/foxnet/cosmetics/headitem.h>
 #include <game/server/foxnet/entities/custom_projectile.h>
@@ -32,7 +34,6 @@
 #include <game/server/foxnet/entities/roulette.h>
 #include <string>
 // FoxNet>
-
 MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
 
 // Character, "physical" player's part

@@ -1,6 +1,9 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "controls.h"
+
 #include <base/math.h>
+#include <base/vmath.h>
 
 #include <engine/client.h>
 #include <engine/shared/config.h>
@@ -11,10 +14,6 @@
 #include <game/client/components/scoreboard.h>
 #include <game/client/gameclient.h>
 #include <game/collision.h>
-
-#include <base/vmath.h>
-
-#include "controls.h"
 
 CControls::CControls()
 {

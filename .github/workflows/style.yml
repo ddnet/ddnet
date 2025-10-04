@@ -22,7 +22,7 @@ jobs:
     - name: Prepare Linux
       run: |
         sudo apt-get update -y
-        sudo apt-get install ddnet-tools shellcheck tidy pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev python3-clang libvulkan-dev glslang-tools spirv-tools libglew-dev -y
+        sudo apt-get install ddnet-tools shellcheck tidy pkg-config cmake doxygen graphviz ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev python3-clang libvulkan-dev glslang-tools spirv-tools libglew-dev -y
         rustup default stable
         pip3 install pylint
         wget https://github.com/muttleyxd/clang-tools-static-binaries/releases/download/master-46b8640/clang-format-10_linux-amd64
@@ -39,6 +39,20 @@ jobs:
       run: |
         clang-format -version
         scripts/fix_style.py --dry-run
+
+    - name: Check documentation style (Doxygen)
+      run: |
+        doxygen --version
+        doxygen -q
+        # TODO: Files included for macro-based lists like config variables and editor actions cannot be found by Doxygen version 1.9.8 used in the CI.
+        #       Remove this ignored warning when the version is upgraded to one where this is fixed.
+        sed -i -E '/warning: include file .* not found, perhaps you forgot to add its directory to INCLUDE_PATH/d' docs/warn.log
+        if [ -s docs/warn.log ]; then
+          echo "--------------------------------------------------"
+          echo "Doxygen warnings:"
+          cat docs/warn.log
+          exit 1
+        fi
 
     - name: Shellcheck
       run: find . -type f -name '*.sh' -print0 | xargs -0 shellcheck

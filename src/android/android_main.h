@@ -7,7 +7,7 @@
 #endif
 
 /**
- * @defgroup Android
+ * @defgroup Android Android
  *
  * Android-specific functions to interact with the ClientActivity.
  *

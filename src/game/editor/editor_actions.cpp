@@ -1,4 +1,5 @@
 #include "editor_actions.h"
+
 #include <game/editor/mapitems/image.h>
 
 CEditorBrushDrawAction::CEditorBrushDrawAction(CEditor *pEditor, int Group) :
@@ -1715,9 +1716,7 @@ void CEditorActionAddEnvelopePoint::Undo()
 void CEditorActionAddEnvelopePoint::Redo()
 {
 	auto pEnvelope = m_pEditor->m_Map.m_vpEnvelopes[m_EnvIndex];
-	pEnvelope->AddPoint(m_Time,
-		f2fx(m_Channels.r), f2fx(m_Channels.g),
-		f2fx(m_Channels.b), f2fx(m_Channels.a));
+	pEnvelope->AddPoint(m_Time, {f2fx(m_Channels.r), f2fx(m_Channels.g), f2fx(m_Channels.b), f2fx(m_Channels.a)});
 
 	m_pEditor->m_Map.OnModify();
 }

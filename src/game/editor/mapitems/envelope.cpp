@@ -104,23 +104,17 @@ void CEnvelope::Eval(float Time, ColorRGBA &Result, size_t Channels)
 	CRenderMap::RenderEvalEnvelope(&m_PointsAccess, std::chrono::nanoseconds((int64_t)((double)Time * (double)std::chrono::nanoseconds(1s).count())), Result, Channels);
 }
 
-void CEnvelope::AddPoint(CFixedTime Time, int v0, int v1, int v2, int v3)
+void CEnvelope::AddPoint(CFixedTime Time, std::array<int, CEnvPoint::MAX_CHANNELS> aValues)
 {
-	CEnvPoint_runtime p;
-	p.m_Time = Time;
-	p.m_aValues[0] = v0;
-	p.m_aValues[1] = v1;
-	p.m_aValues[2] = v2;
-	p.m_aValues[3] = v3;
-	p.m_Curvetype = CURVETYPE_LINEAR;
-	for(int c = 0; c < CEnvPoint::MAX_CHANNELS; c++)
-	{
-		p.m_Bezier.m_aInTangentDeltaX[c] = CFixedTime(0);
-		p.m_Bezier.m_aInTangentDeltaY[c] = 0;
-		p.m_Bezier.m_aOutTangentDeltaX[c] = CFixedTime(0);
-		p.m_Bezier.m_aOutTangentDeltaY[c] = 0;
-	}
-	m_vPoints.push_back(p);
+	CEnvPoint_runtime Point;
+	Point.m_Time = Time;
+	Point.m_Curvetype = CURVETYPE_LINEAR;
+	std::copy_n(aValues.begin(), std::size(Point.m_aValues), Point.m_aValues);
+	std::fill(std::begin(Point.m_Bezier.m_aInTangentDeltaX), std::end(Point.m_Bezier.m_aInTangentDeltaX), CFixedTime(0));
+	std::fill(std::begin(Point.m_Bezier.m_aInTangentDeltaY), std::end(Point.m_Bezier.m_aInTangentDeltaY), 0);
+	std::fill(std::begin(Point.m_Bezier.m_aOutTangentDeltaX), std::end(Point.m_Bezier.m_aOutTangentDeltaX), CFixedTime(0));
+	std::fill(std::begin(Point.m_Bezier.m_aOutTangentDeltaY), std::end(Point.m_Bezier.m_aOutTangentDeltaY), 0);
+	m_vPoints.emplace_back(Point);
 	Resort();
 }
 

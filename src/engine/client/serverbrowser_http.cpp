@@ -1,5 +1,9 @@
 #include "serverbrowser_http.h"
 
+#include <base/lock.h>
+#include <base/log.h>
+#include <base/system.h>
+
 #include <engine/console.h>
 #include <engine/engine.h>
 #include <engine/external/json-parser/json.h>
@@ -10,14 +14,9 @@
 #include <engine/shared/serverinfo.h>
 #include <engine/storage.h>
 
-#include <base/lock.h>
-#include <base/log.h>
-#include <base/system.h>
-
+#include <chrono>
 #include <memory>
 #include <vector>
-
-#include <chrono>
 
 using namespace std::chrono_literals;
 

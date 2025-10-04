@@ -1,8 +1,8 @@
-#include <gtest/gtest.h>
-
 #include <base/lock.h>
 #include <base/system.h>
 #include <base/tl/threading.h>
+
+#include <gtest/gtest.h>
 
 static void Nothing(void *pUser)
 {

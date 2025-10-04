@@ -1,6 +1,6 @@
-#include <game/client/gameclient.h>
-
 #include "freezebars.h"
+
+#include <game/client/gameclient.h>
 
 void CFreezeBars::RenderFreezeBar(const int ClientId)
 {
@@ -189,9 +189,9 @@ void CFreezeBars::RenderFreezeBarPos(float x, const float y, const float Width, 
 
 inline bool CFreezeBars::IsPlayerInfoAvailable(int ClientId) const
 {
-	const void *pPrevInfo = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_PLAYERINFO, ClientId);
-	const void *pInfo = Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_PLAYERINFO, ClientId);
-	return pPrevInfo && pInfo;
+	return GameClient()->m_Snap.m_aCharacters[ClientId].m_Active &&
+	       GameClient()->m_Snap.m_apPrevPlayerInfos[ClientId] != nullptr &&
+	       GameClient()->m_Snap.m_apPlayerInfos[ClientId] != nullptr;
 }
 
 void CFreezeBars::OnRender()
@@ -221,7 +221,7 @@ void CFreezeBars::OnRender()
 	// render everyone else's freeze bar, then our own
 	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
-		if(ClientId == LocalClientId || !GameClient()->m_Snap.m_aCharacters[ClientId].m_Active || !IsPlayerInfoAvailable(ClientId))
+		if(ClientId == LocalClientId || !IsPlayerInfoAvailable(ClientId))
 		{
 			continue;
 		}
@@ -235,7 +235,7 @@ void CFreezeBars::OnRender()
 
 		RenderFreezeBar(ClientId);
 	}
-	if(LocalClientId != -1 && GameClient()->m_Snap.m_aCharacters[LocalClientId].m_Active && IsPlayerInfoAvailable(LocalClientId))
+	if(LocalClientId != -1 && IsPlayerInfoAvailable(LocalClientId))
 	{
 		RenderFreezeBar(LocalClientId);
 	}

@@ -1,7 +1,8 @@
 #include "test.h"
-#include <gtest/gtest.h>
 
 #include <base/math.h>
+
+#include <gtest/gtest.h>
 
 TEST(Math, FixedPointRoundtrip)
 {

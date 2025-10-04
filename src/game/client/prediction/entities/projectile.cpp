@@ -1,5 +1,9 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "projectile.h"
+
+#include "character.h"
+
 #include <engine/shared/config.h>
 
 #include <generated/protocol.h>
@@ -7,9 +11,6 @@
 #include <game/client/projectile_data.h>
 #include <game/collision.h>
 #include <game/mapitems.h>
-
-#include "character.h"
-#include "projectile.h"
 
 CProjectile::CProjectile(
 	CGameWorld *pGameWorld,

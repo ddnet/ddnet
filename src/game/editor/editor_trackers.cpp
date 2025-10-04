@@ -1,10 +1,10 @@
 #include "editor_trackers.h"
 
-#include <game/editor/mapitems/layer_group.h>
-#include <game/editor/mapitems/layer_tiles.h>
-
 #include "editor.h"
 #include "editor_actions.h"
+
+#include <game/editor/mapitems/layer_group.h>
+#include <game/editor/mapitems/layer_tiles.h>
 
 CQuadEditTracker::CQuadEditTracker() :
 	m_pEditor(nullptr), m_TrackedProp(EQuadProp::PROP_NONE) {}

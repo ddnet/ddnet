@@ -1,5 +1,8 @@
 #include "scoreworker.h"
 
+#include <base/log.h>
+#include <base/system.h>
+
 #include <game/server/gamecontext.h>
 
 #include <engine/server/databases/connection.h>
@@ -1513,18 +1516,19 @@ bool CScoreWorker::RandomMap(IDbConnection *pSqlServer, const ISqlData *pGameDat
 	auto *pResult = dynamic_cast<CScoreRandomMapResult *>(pGameData->m_pResult.get());
 
 	char aBuf[512];
-	if(0 <= pData->m_Stars && pData->m_Stars <= 5)
+	if(in_range(pData->m_MinStars, 0, 5) && in_range(pData->m_MaxStars, 0, 5))
 	{
 		str_format(aBuf, sizeof(aBuf),
 			"SELECT Map FROM %s_maps "
-			"WHERE Server = ? AND Map != ? AND Stars = ? "
+			"WHERE Server = ? AND Map != ? AND Stars BETWEEN ? AND ? "
 			"ORDER BY %s LIMIT 1",
 			pSqlServer->GetPrefix(), pSqlServer->Random());
 		if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 		{
 			return false;
 		}
-		pSqlServer->BindInt(3, pData->m_Stars);
+		pSqlServer->BindInt(3, pData->m_MinStars);
+		pSqlServer->BindInt(4, pData->m_MaxStars);
 	}
 	else
 	{
@@ -1563,12 +1567,12 @@ bool CScoreWorker::RandomUnfinishedMap(IDbConnection *pSqlServer, const ISqlData
 	auto *pResult = dynamic_cast<CScoreRandomMapResult *>(pGameData->m_pResult.get());
 
 	char aBuf[512];
-	if(pData->m_Stars >= 0)
+	if(in_range(pData->m_MinStars, 0, 5) && in_range(pData->m_MaxStars, 0, 5))
 	{
 		str_format(aBuf, sizeof(aBuf),
 			"SELECT Map "
 			"FROM %s_maps "
-			"WHERE Server = ? AND Map != ? AND Stars = ? AND Map NOT IN ("
+			"WHERE Server = ? AND Map != ? AND Stars BETWEEN ? AND ? AND Map NOT IN ("
 			"  SELECT Map "
 			"  FROM %s_race "
 			"  WHERE Name = ?"
@@ -1581,8 +1585,9 @@ bool CScoreWorker::RandomUnfinishedMap(IDbConnection *pSqlServer, const ISqlData
 		}
 		pSqlServer->BindString(1, pData->m_aServerType);
 		pSqlServer->BindString(2, pData->m_aCurrentMap);
-		pSqlServer->BindInt(3, pData->m_Stars);
-		pSqlServer->BindString(4, pData->m_aRequestingPlayer);
+		pSqlServer->BindInt(3, pData->m_MinStars);
+		pSqlServer->BindInt(4, pData->m_MaxStars);
+		pSqlServer->BindString(5, pData->m_aRequestingPlayer);
 	}
 	else
 	{

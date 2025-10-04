@@ -1,12 +1,13 @@
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-
 #include <base/detect.h>
+
 #include <engine/server/databases/connection.h>
 #include <engine/server/databases/connection_pool.h>
 #include <engine/shared/config.h>
+
 #include <game/server/scoreworker.h>
 
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <sqlite3.h>
 
 #if defined(CONF_TEST_MYSQL)
@@ -566,7 +567,8 @@ struct RandomMap : public Score
 
 TEST_P(RandomMap, NoStars)
 {
-	m_RandomMapRequest.m_Stars = -1;
+	m_RandomMapRequest.m_MinStars = -1;
+	m_RandomMapRequest.m_MaxStars = -1;
 	ASSERT_TRUE(CScoreWorker::RandomMap(m_pConn, &m_RandomMapRequest, m_aError, sizeof(m_aError))) << m_aError;
 	EXPECT_EQ(m_pRandomMapResult->m_ClientId, 0);
 	EXPECT_STREQ(m_pRandomMapResult->m_aMap, "Kobra 3");
@@ -575,16 +577,28 @@ TEST_P(RandomMap, NoStars)
 
 TEST_P(RandomMap, StarsExists)
 {
-	m_RandomMapRequest.m_Stars = 5;
+	m_RandomMapRequest.m_MinStars = 5;
+	m_RandomMapRequest.m_MaxStars = 5;
 	ASSERT_TRUE(CScoreWorker::RandomMap(m_pConn, &m_RandomMapRequest, m_aError, sizeof(m_aError))) << m_aError;
 	EXPECT_EQ(m_pRandomMapResult->m_ClientId, 0);
 	EXPECT_STREQ(m_pRandomMapResult->m_aMap, "Kobra 3");
 	EXPECT_STREQ(m_pRandomMapResult->m_aMessage, "");
 }
 
+TEST_P(RandomMap, StarsRangeExists)
+{
+	m_RandomMapRequest.m_MinStars = 1;
+	m_RandomMapRequest.m_MaxStars = 5;
+	ASSERT_TRUE(CScoreWorker::RandomMap(m_pConn, &m_RandomMapRequest, m_aError, sizeof(m_aError))) << m_aError;
+	EXPECT_EQ(m_pRandomMapResult->m_ClientId, 0);
+	EXPECT_STRNE(m_pRandomMapResult->m_aMap, "");
+	EXPECT_STREQ(m_pRandomMapResult->m_aMessage, "");
+}
+
 TEST_P(RandomMap, StarsDoesntExist)
 {
-	m_RandomMapRequest.m_Stars = 3;
+	m_RandomMapRequest.m_MinStars = 3;
+	m_RandomMapRequest.m_MaxStars = 3;
 	ASSERT_TRUE(CScoreWorker::RandomMap(m_pConn, &m_RandomMapRequest, m_aError, sizeof(m_aError))) << m_aError;
 	EXPECT_EQ(m_pRandomMapResult->m_ClientId, 0);
 	EXPECT_STREQ(m_pRandomMapResult->m_aMap, "");
@@ -593,7 +607,8 @@ TEST_P(RandomMap, StarsDoesntExist)
 
 TEST_P(RandomMap, UnfinishedExists)
 {
-	m_RandomMapRequest.m_Stars = -1;
+	m_RandomMapRequest.m_MinStars = -1;
+	m_RandomMapRequest.m_MaxStars = -1;
 	ASSERT_TRUE(CScoreWorker::RandomUnfinishedMap(m_pConn, &m_RandomMapRequest, m_aError, sizeof(m_aError))) << m_aError;
 	EXPECT_EQ(m_pRandomMapResult->m_ClientId, 0);
 	EXPECT_STREQ(m_pRandomMapResult->m_aMap, "Kobra 3");

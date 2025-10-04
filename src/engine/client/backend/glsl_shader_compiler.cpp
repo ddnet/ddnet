@@ -1,6 +1,7 @@
 #include "glsl_shader_compiler.h"
 
 #include <base/system.h>
+
 #include <engine/graphics.h>
 
 CGLSLCompiler::CGLSLCompiler(int OpenGLVersionMajor, int OpenGLVersionMinor, int OpenGLVersionPatch, bool IsOpenGLES, float TextureLODBias)

@@ -53,6 +53,7 @@ use crate::locations::Locations;
 // Naming convention: Always use the abbreviation `addr` except in user-facing
 // (e.g. serialized) identifiers.
 mod addr;
+mod community_token;
 mod config;
 mod locations;
 
@@ -67,6 +68,7 @@ struct Register {
     connless_request_token: Option<ShortString>,
     challenge_secret: ShortString,
     challenge_token: Option<ShortString>,
+    community_token: Option<ShortString>,
     info_serial: i64,
     info: Option<json::Value>,
 }
@@ -166,12 +168,15 @@ impl Timekeeper {
 
 #[derive(Debug, Serialize)]
 struct SerializedServers<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub communities: Option<&'a json::value::RawValue>,
     pub servers: Vec<SerializedServer<'a>>,
 }
 
 impl<'a> SerializedServers<'a> {
-    fn new() -> SerializedServers<'a> {
+    fn new(communities: Option<&'a json::value::RawValue>) -> SerializedServers<'a> {
         SerializedServers {
+            communities,
             servers: Vec::new(),
         }
     }
@@ -181,6 +186,8 @@ impl<'a> SerializedServers<'a> {
 struct SerializedServer<'a> {
     pub addresses: &'a [Addr],
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub community: Option<ShortString>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<Location>,
     pub info: &'a json::value::RawValue,
 }
@@ -189,6 +196,7 @@ impl<'a> SerializedServer<'a> {
     fn new(server: &'a Server, location: Option<Location>) -> SerializedServer<'a> {
         SerializedServer {
             addresses: &server.addresses,
+            community: server.community,
             location,
             info: &server.info,
         }
@@ -199,6 +207,8 @@ impl<'a> SerializedServer<'a> {
 struct DumpServer<'a> {
     pub info_serial: i64,
     pub info: Cow<'a, json::value::RawValue>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub community: Option<ShortString>,
 }
 
 impl<'a> From<&'a Server> for DumpServer<'a> {
@@ -206,6 +216,7 @@ impl<'a> From<&'a Server> for DumpServer<'a> {
         DumpServer {
             info_serial: server.info_serial,
             info: Cow::Borrowed(&server.info),
+            community: server.community,
         }
     }
 }
@@ -333,7 +344,7 @@ impl<'a> Shared<'a> {
 /// Maintains a mapping from server addresses to server info.
 ///
 /// Also maintains a mapping from addresses to corresponding server addresses.
-#[derive(Clone, Deserialize, Serialize)]
+#[derive(Clone)]
 struct Servers {
     pub addresses: HashMap<Addr, AddrInfo>,
     pub servers: HashMap<ShortString, Server>,
@@ -366,6 +377,7 @@ impl Servers {
         a_info: AddrInfo,
         info_serial: i64,
         info: Option<Cow<'_, json::value::RawValue>>,
+        community: Option<&ShortString>,
     ) -> AddResult {
         let need_info = self
             .servers
@@ -409,6 +421,7 @@ impl Servers {
                     addresses: vec![addr],
                     info_serial,
                     info: info.unwrap().into_owned(),
+                    community: community.cloned(),
                 });
             }
             hash_map::Entry::Occupied(mut o) => {
@@ -420,6 +433,7 @@ impl Servers {
                 if info_serial > server.info_serial {
                     server.info_serial = info_serial;
                     server.info = info.unwrap().into_owned();
+                    server.community = community.cloned();
                 }
             }
         }
@@ -469,6 +483,7 @@ impl Servers {
                 a_info.clone(),
                 server.info_serial,
                 Some(Cow::Borrowed(&server.info)),
+                server.community.as_ref(),
             );
         }
     }
@@ -485,6 +500,7 @@ impl Servers {
                             addresses: vec![],
                             info_serial: server.info_serial,
                             info: server.info.into_owned(),
+                            community: server.community,
                         },
                     )
                 })
@@ -510,11 +526,12 @@ impl Servers {
     }
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug)]
 struct Server {
     pub addresses: Vec<Addr>,
     pub info_serial: i64,
     pub info: Box<json::value::RawValue>,
+    pub community: Option<ShortString>,
 }
 
 async fn handle_periodic_reseed(challenger: Arc<Mutex<Challenger>>) {
@@ -562,8 +579,8 @@ async fn overwrite_atomically(
     Ok(())
 }
 
-fn servers_json(now: Timestamp, mut servers: Servers) -> String {
-    let mut serialized = SerializedServers::new();
+fn servers_json(config: &Config, now: Timestamp, mut servers: Servers) -> String {
+    let mut serialized = SerializedServers::new(config.communities.as_deref());
     servers.prune_before(now.minus_seconds(SERVER_TIMEOUT_SECONDS), false);
     serialized.servers.extend(servers.servers.values().map(|s| {
         // Get the location of the first registered address. Since
@@ -580,6 +597,7 @@ fn servers_json(now: Timestamp, mut servers: Servers) -> String {
 }
 
 async fn handle_test_servers_json(
+    config: Arc<Config>,
     servers: Arc<Mutex<Servers>>,
     dumps_dir: Option<String>,
     timekeeper: Timekeeper,
@@ -596,10 +614,11 @@ async fn handle_test_servers_json(
     for other_dump in &other_dumps {
         servers.merge(other_dump);
     }
-    servers_json(now, servers)
+    servers_json(&config, now, servers)
 }
 
 async fn handle_periodic_writeout(
+    config: Arc<ArcSwap<Config>>,
     servers: Arc<Mutex<Servers>>,
     dumps_dir: Option<String>,
     dump_filename: Option<String>,
@@ -622,6 +641,7 @@ async fn handle_periodic_writeout(
 
     loop {
         let now = timekeeper.now();
+        let config = config.load();
         let mut servers = {
             let mut servers = servers.lock().unwrap_or_else(|poison| poison.into_inner());
             servers.prune_before(now.minus_seconds(SERVER_TIMEOUT_SECONDS), true);
@@ -664,7 +684,7 @@ async fn handle_periodic_writeout(
                 servers.merge(other_dump);
             }
             drop(other_dumps);
-            let json = servers_json(now, servers);
+            let json = servers_json(&config, now, servers);
             overwrite_atomically(&servers_filename, servers_filename_temp, json.as_bytes())
                 .await
                 .unwrap();
@@ -754,7 +774,6 @@ fn handle_register(
             })?;
             Some(token)
         }
-        Protocol::Ddper6 => None,
     };
 
     let addr = register.address.with_ip(remote_addr);
@@ -778,6 +797,15 @@ fn handle_register(
             .map(|ct| ct != challenge.current())
             .unwrap_or(true);
 
+    let community = register
+        .community_token
+        .and_then(|t| shared.config.community_for_token(&t).transpose())
+        .transpose()
+        .map_err(RegisterError::new)?
+        .map(|c| ArrayString::from(c))
+        .transpose()
+        .map_err(|_| "invalid community name length")?;
+
     let result = if correct_challenge {
         let raw_info = register
             .info
@@ -799,6 +827,7 @@ fn handle_register(
             },
             register.info_serial,
             raw_info.map(Cow::Owned),
+            community.as_ref(),
         );
         match add_result {
             AddResult::Added => debug!("successfully registered {}", addr),
@@ -888,6 +917,7 @@ fn register_from_headers(
         connless_request_token: parse_opt(headers, "Connless-Token")?,
         challenge_secret: parse(headers, "Challenge-Secret")?,
         challenge_token: parse_opt(headers, "Challenge-Token")?,
+        community_token: parse_opt(headers, "Community-Token")?,
         info_serial: parse(headers, "Info-Serial")?,
         info: if !info.is_empty() {
             match headers
@@ -946,6 +976,15 @@ async fn recover(err: warp::Rejection) -> Result<impl warp::Reply, warp::Rejecti
 struct AssertUnwindSafe<T>(pub T);
 impl<T> panic::UnwindSafe for AssertUnwindSafe<T> {}
 impl<T> panic::RefUnwindSafe for AssertUnwindSafe<T> {}
+
+macro_rules! fatal {
+    ($($arg:tt)*) => {
+        {
+            eprintln!($($arg)*);
+            process::exit(1);
+        }
+    }
+}
 
 // TODO: put active part masterservers on a different domain?
 #[tokio::main]
@@ -1042,7 +1081,11 @@ async fn main() {
         (Some(f), None) => ConfigLocation::File(f.into()),
         (Some(_), Some(_)) => unreachable!(),
     };
-    let config = Arc::new(ArcSwap::from_pointee(config_location.read().unwrap()));
+    let config = Arc::new(ArcSwap::from_pointee(
+        config_location.read().unwrap_or_else(|err| {
+            fatal!("couldn't read config: {}", err);
+        }),
+    ));
     let timekeeper = Timekeeper::new();
     let challenger = Arc::new(Mutex::new(Challenger::new()));
     let mut servers = Servers::new();
@@ -1065,6 +1108,7 @@ async fn main() {
 
     let task_reseed = tokio::spawn(handle_periodic_reseed(challenger.clone()));
     let task_writeout = tokio::spawn(handle_periodic_writeout(
+        config.clone(),
         servers.clone(),
         read_dump_dir.clone(),
         matches
@@ -1124,6 +1168,7 @@ async fn main() {
         .and(warp::body::content_length_limit(32 * 1024)) // limit body size to 32 KiB
         .and(warp::body::bytes())
         .map({
+            let config = config.clone();
             let servers = servers.clone();
             move |headers: warp::http::HeaderMap, addr: Option<SocketAddr>, info: bytes::Bytes| {
                 build_response(|| {
@@ -1154,14 +1199,20 @@ async fn main() {
         });
     let test_servers = warp::path!("ddnet" / "15" / "test-servers.json")
         .and(warp::get())
-        .and_then(move || {
+        .and_then({
+            let config = config.clone();
             let servers = servers.clone();
             let read_dump_dir = read_dump_dir.clone();
-            async move {
-                if test_servers_route {
-                    Ok(handle_test_servers_json(servers, read_dump_dir, timekeeper).await)
-                } else {
-                    Err(warp::reject())
+            move || {
+                let config = config.clone();
+                let servers = servers.clone();
+                let read_dump_dir = read_dump_dir.clone();
+                async move {
+                    if test_servers_route {
+                        Ok(handle_test_servers_json(config.load_full(), servers, read_dump_dir, timekeeper).await)
+                    } else {
+                        Err(warp::reject())
+                    }
                 }
             }
         });

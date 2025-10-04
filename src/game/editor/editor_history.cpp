@@ -1,8 +1,9 @@
-#include <engine/shared/config.h>
+#include "editor_history.h"
 
 #include "editor.h"
 #include "editor_actions.h"
-#include "editor_history.h"
+
+#include <engine/shared/config.h>
 
 void CEditorHistory::RecordAction(const std::shared_ptr<IEditorAction> &pAction)
 {

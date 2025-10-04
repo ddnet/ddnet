@@ -1,9 +1,9 @@
 #ifndef GAME_EDITOR_AUTO_MAP_H
 #define GAME_EDITOR_AUTO_MAP_H
 
-#include <vector>
-
 #include "component.h"
+
+#include <vector>
 
 class CAutoMapper : public CEditorComponent
 {

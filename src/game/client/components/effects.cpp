@@ -1,8 +1,9 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <engine/demo.h>
+#include "effects.h"
 
+#include <engine/demo.h>
 #include <engine/shared/config.h>
 
 #include <generated/client_data.h>
@@ -12,8 +13,6 @@
 #include <game/client/components/particles.h>
 #include <game/client/components/sounds.h>
 #include <game/client/gameclient.h>
-
-#include "effects.h"
 
 CEffects::CEffects()
 {
@@ -264,8 +263,7 @@ void CEffects::PlayerDeath(vec2 Pos, int ClientId, float Alpha)
 		p.m_Rotspeed = random_float(-0.5f, 0.5f) * pi;
 		p.m_Gravity = 800.0f;
 		p.m_Friction = 0.8f;
-		ColorRGBA c = BloodColor.v4() * random_float(0.75f, 1.0f);
-		p.m_Color = ColorRGBA(c.r, c.g, c.b, 0.75f * Alpha);
+		p.m_Color = BloodColor.Multiply(random_float(0.75f, 1.0f)).WithAlpha(0.75f * Alpha);
 		p.m_StartAlpha = Alpha;
 		GameClient()->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
 	}
@@ -385,8 +383,7 @@ void CEffects::Explosion(vec2 Pos, float Alpha)
 		p.m_EndSize = 0.0f;
 		p.m_Gravity = random_float(-800.0f);
 		p.m_Friction = 0.4f;
-		p.m_Color = mix(vec4(0.75f, 0.75f, 0.75f, 1.0f), vec4(0.5f, 0.5f, 0.5f, 1.0f), random_float());
-		p.m_Color.a *= Alpha;
+		p.m_Color = ColorRGBA(1.0f, 1.0f, 1.0f).Multiply(random_float(0.5f, 0.75f)).WithAlpha(Alpha);
 		p.m_StartAlpha = p.m_Color.a;
 		GameClient()->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
 	}

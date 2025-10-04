@@ -1,6 +1,9 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include "editor.h"
+#include "editor_actions.h"
+
 #include <base/color.h>
 
 #include <engine/console.h>
@@ -10,15 +13,13 @@
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
-#include <limits>
 
 #include <game/client/gameclient.h>
 #include <game/client/ui_scrollregion.h>
 #include <game/editor/mapitems/image.h>
 #include <game/editor/mapitems/sound.h>
 
-#include "editor.h"
-#include "editor_actions.h"
+#include <limits>
 
 using namespace FontIcons;
 
@@ -1641,8 +1642,8 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEnvPointCurveType(void *pContext, CU
 				CEnvPoint LastPoint = pEnvelope->m_vPoints[LastSelectedIndex];
 
 				CEnvelope HelperEnvelope(1);
-				HelperEnvelope.AddPoint(FirstPoint.m_Time, FirstPoint.m_aValues[c]);
-				HelperEnvelope.AddPoint(LastPoint.m_Time, LastPoint.m_aValues[c]);
+				HelperEnvelope.AddPoint(FirstPoint.m_Time, {FirstPoint.m_aValues[c], 0, 0, 0});
+				HelperEnvelope.AddPoint(LastPoint.m_Time, {LastPoint.m_aValues[c], 0, 0, 0});
 				HelperEnvelope.m_vPoints[0].m_Curvetype = CurveType;
 
 				for(auto [SelectedIndex, SelectedChannel] : pEditor->m_vSelectedEnvelopePoints)

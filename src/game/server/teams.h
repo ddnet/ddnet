@@ -3,6 +3,7 @@
 #define GAME_SERVER_TEAMS_H
 
 #include <engine/shared/protocol.h>
+
 #include <game/race_state.h>
 #include <game/server/gamecontext.h>
 #include <game/team_state.h>

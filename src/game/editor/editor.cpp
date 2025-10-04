@@ -1,7 +1,10 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <algorithm>
+#include "editor.h"
+
+#include "auto_map.h"
+#include "editor_actions.h"
 
 #include <base/color.h>
 #include <base/log.h>
@@ -27,17 +30,13 @@
 #include <game/client/ui.h>
 #include <game/client/ui_listbox.h>
 #include <game/client/ui_scrollregion.h>
-#include <game/editor/explanations.h>
-#include <game/localization.h>
-
 #include <game/editor/editor_history.h>
+#include <game/editor/explanations.h>
 #include <game/editor/mapitems/image.h>
 #include <game/editor/mapitems/sound.h>
+#include <game/localization.h>
 
-#include "auto_map.h"
-#include "editor.h"
-#include "editor_actions.h"
-
+#include <algorithm>
 #include <chrono>
 #include <iterator>
 #include <limits>
@@ -2967,11 +2966,11 @@ void CEditor::DoMapEditor(CUIRect View)
 									std::shared_ptr<CLayerTiles> pBrushLayer = std::static_pointer_cast<CLayerTiles>(m_pBrush->m_vpLayers[BrushIndex]);
 
 									if((!pLayer->m_HasTele || pBrushLayer->m_HasTele) && (!pLayer->m_HasSpeedup || pBrushLayer->m_HasSpeedup) && (!pLayer->m_HasFront || pBrushLayer->m_HasFront) && (!pLayer->m_HasGame || pBrushLayer->m_HasGame) && (!pLayer->m_HasSwitch || pBrushLayer->m_HasSwitch) && (!pLayer->m_HasTune || pBrushLayer->m_HasTune))
-										pLayer->BrushDraw(pBrushLayer, vec2(wx, wy));
+										pLayer->BrushDraw(pBrushLayer.get(), vec2(wx, wy));
 								}
 								else
 								{
-									apEditLayers[k].second->BrushDraw(m_pBrush->m_vpLayers[BrushIndex], vec2(wx, wy));
+									apEditLayers[k].second->BrushDraw(m_pBrush->m_vpLayers[BrushIndex].get(), vec2(wx, wy));
 								}
 							}
 						}
@@ -2998,7 +2997,7 @@ void CEditor::DoMapEditor(CUIRect View)
 							// TODO: do all layers
 							int Grabs = 0;
 							for(size_t k = 0; k < NumEditLayers; k++)
-								Grabs += apEditLayers[k].second->BrushGrab(m_pBrush, r);
+								Grabs += apEditLayers[k].second->BrushGrab(m_pBrush.get(), r);
 							if(Grabs == 0)
 								m_pBrush->Clear();
 
@@ -3023,7 +3022,7 @@ void CEditor::DoMapEditor(CUIRect View)
 							if(m_pBrush->m_vpLayers.size() != NumEditLayers)
 								BrushIndex = 0;
 							std::shared_ptr<CLayer> pBrush = m_pBrush->IsEmpty() ? nullptr : m_pBrush->m_vpLayers[BrushIndex];
-							apEditLayers[k].second->FillSelection(m_pBrush->IsEmpty(), pBrush, r);
+							apEditLayers[k].second->FillSelection(m_pBrush->IsEmpty(), pBrush.get(), r);
 						}
 						std::shared_ptr<IEditorAction> Action = std::make_shared<CEditorBrushDrawAction>(this, m_SelectedGroup);
 						m_EditorHistory.RecordAction(Action);
@@ -3059,7 +3058,7 @@ void CEditor::DoMapEditor(CUIRect View)
 								BrushIndex = 0;
 
 							if(apEditLayers[k].second->m_Type == m_pBrush->m_vpLayers[BrushIndex]->m_Type)
-								apEditLayers[k].second->BrushPlace(m_pBrush->m_vpLayers[BrushIndex], vec2(wx, wy));
+								apEditLayers[k].second->BrushPlace(m_pBrush->m_vpLayers[BrushIndex].get(), vec2(wx, wy));
 						}
 					}
 
@@ -4145,8 +4144,11 @@ bool CEditor::ReplaceImage(const char *pFileName, int StorageType, bool CheckDup
 	SortImages();
 	for(size_t i = 0; i < m_Map.m_vpImages.size(); ++i)
 	{
-		if(!str_comp(m_Map.m_vpImages[i]->m_aName, pImg->m_aName))
+		if(m_Map.m_vpImages[i] == pImg)
+		{
 			m_SelectedImage = i;
+			break;
+		}
 	}
 	OnDialogClose();
 	return true;
@@ -4205,14 +4207,13 @@ bool CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 	pImg->m_AutoMapper.Load(pImg->m_aName);
 	pEditor->m_Map.m_vpImages.push_back(pImg);
 	pEditor->SortImages();
-	if(pEditor->m_SelectedImage >= 0 && (size_t)pEditor->m_SelectedImage < pEditor->m_Map.m_vpImages.size())
+	for(size_t i = 0; i < pEditor->m_Map.m_vpImages.size(); ++i)
 	{
-		for(int i = 0; i <= pEditor->m_SelectedImage; ++i)
-			if(!str_comp(pEditor->m_Map.m_vpImages[i]->m_aName, aBuf))
-			{
-				pEditor->m_SelectedImage++;
-				break;
-			}
+		if(pEditor->m_Map.m_vpImages[i] == pImg)
+		{
+			pEditor->m_SelectedImage = i;
+			break;
+		}
 	}
 	pEditor->OnDialogClose();
 	return true;
@@ -4251,7 +4252,7 @@ bool CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 	}
 
 	// load sound
-	const int SoundId = pEditor->Sound()->LoadOpusFromMem(pData, DataSize, true);
+	const int SoundId = pEditor->Sound()->LoadOpusFromMem(pData, DataSize, true, pFileName);
 	if(SoundId == -1)
 	{
 		free(pData);
@@ -4267,14 +4268,13 @@ bool CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 	str_copy(pSound->m_aName, aBuf);
 	pEditor->m_Map.m_vpSounds.push_back(pSound);
 
-	if(pEditor->m_SelectedSound >= 0 && (size_t)pEditor->m_SelectedSound < pEditor->m_Map.m_vpSounds.size())
+	for(size_t i = 0; i < pEditor->m_Map.m_vpSounds.size(); ++i)
 	{
-		for(int i = 0; i <= pEditor->m_SelectedSound; ++i)
-			if(!str_comp(pEditor->m_Map.m_vpSounds[i]->m_aName, aBuf))
-			{
-				pEditor->m_SelectedSound++;
-				break;
-			}
+		if(pEditor->m_Map.m_vpSounds[i] == pSound)
+		{
+			pEditor->m_SelectedSound = i;
+			break;
+		}
 	}
 
 	pEditor->OnDialogClose();
@@ -4308,7 +4308,7 @@ bool CEditor::ReplaceSound(const char *pFileName, int StorageType, bool CheckDup
 	}
 
 	// load sound
-	const int SoundId = Sound()->LoadOpusFromMem(pData, DataSize, true);
+	const int SoundId = Sound()->LoadOpusFromMem(pData, DataSize, true, pFileName);
 	if(SoundId == -1)
 	{
 		free(pData);
@@ -4332,6 +4332,15 @@ bool CEditor::ReplaceSound(const char *pFileName, int StorageType, bool CheckDup
 	pSound->m_SoundId = SoundId;
 	pSound->m_pData = pData;
 	pSound->m_DataSize = DataSize;
+
+	for(size_t i = 0; i < m_Map.m_vpSounds.size(); ++i)
+	{
+		if(m_Map.m_vpSounds[i] == pSound)
+		{
+			m_SelectedSound = i;
+			break;
+		}
+	}
 
 	OnDialogClose();
 	return true;
@@ -5318,13 +5327,13 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		{
 			if(pNewEnv->GetChannels() == 4)
 			{
-				pNewEnv->AddPoint(CFixedTime::FromSeconds(0.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f));
-				pNewEnv->AddPoint(CFixedTime::FromSeconds(1.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f));
+				pNewEnv->AddPoint(CFixedTime::FromSeconds(0.0f), {f2fx(1.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f)});
+				pNewEnv->AddPoint(CFixedTime::FromSeconds(1.0f), {f2fx(1.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f)});
 			}
 			else
 			{
-				pNewEnv->AddPoint(CFixedTime::FromSeconds(0.0f), 0);
-				pNewEnv->AddPoint(CFixedTime::FromSeconds(1.0f), 0);
+				pNewEnv->AddPoint(CFixedTime::FromSeconds(0.0f), {0, 0, 0, 0});
+				pNewEnv->AddPoint(CFixedTime::FromSeconds(1.0f), {0, 0, 0, 0});
 			}
 
 			m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeAdd>(this, pNewEnv));
@@ -7587,7 +7596,7 @@ void CEditor::Reset(bool CreateDefault)
 	if(CreateDefault)
 	{
 		m_EditorWasUsedBefore = true;
-		m_Map.CreateDefault(GetEntitiesTexture());
+		m_Map.CreateDefault();
 	}
 
 	SelectGameLayer();
@@ -7600,12 +7609,6 @@ void CEditor::Reset(bool CreateDefault)
 
 	m_pContainerPanned = nullptr;
 	m_pContainerPannedLast = nullptr;
-
-	m_Map.m_Modified = false;
-	m_Map.m_ModifiedAuto = false;
-	m_Map.m_LastModifiedTime = -1.0f;
-	m_Map.m_LastSaveTime = Client()->GlobalTime();
-	m_Map.m_LastAutosaveUpdateTime = -1.0f;
 
 	m_ActiveEnvelopePreview = EEnvelopePreview::NONE;
 	m_ShiftBy = 1;
@@ -7881,8 +7884,8 @@ void CEditor::MouseAxisLock(vec2 &CursorRel)
 void CEditor::HandleAutosave()
 {
 	const float Time = Client()->GlobalTime();
-	const float LastAutosaveUpdateTime = m_Map.m_LastAutosaveUpdateTime;
-	m_Map.m_LastAutosaveUpdateTime = Time;
+	const float LastAutosaveUpdateTime = m_LastAutosaveUpdateTime;
+	m_LastAutosaveUpdateTime = Time;
 
 	if(g_Config.m_EdAutosaveInterval == 0)
 		return; // autosave disabled

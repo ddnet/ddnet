@@ -10,6 +10,6 @@ namespace sqlstr
 
 	void AgoTimeToString(int AgoTime, char *pAgoString, int Size);
 
-} // namespace sqlstr
+}
 
 #endif

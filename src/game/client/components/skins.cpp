@@ -7,14 +7,14 @@
 #include <base/math.h>
 #include <base/system.h>
 
-#include <generated/client_data.h>
-
 #include <engine/engine.h>
 #include <engine/gfx/image_manipulation.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/shared/http.h>
 #include <engine/storage.h>
+
+#include <generated/client_data.h>
 
 #include <game/client/gameclient.h>
 #include <game/localization.h>
@@ -541,7 +541,7 @@ void CSkins::OnUpdate()
 {
 	// Only update skins periodically to reduce FPS impact
 	const std::chrono::nanoseconds StartTime = time_get_nanoseconds();
-	const std::chrono::nanoseconds MaxTime = std::chrono::microseconds(maximum(round_to_int(Client()->RenderFrameTime() / 8.0f), 25));
+	const std::chrono::nanoseconds MaxTime = std::chrono::milliseconds(std::clamp(round_to_int(Client()->RenderFrameTime() * 50000.0f), 25, 500));
 	if(m_ContainerUpdateTime.has_value() && StartTime - m_ContainerUpdateTime.value() < MaxTime)
 	{
 		return;
@@ -774,13 +774,15 @@ CSkins::CSkinList &CSkins::SkinList()
 
 		const bool SelectedMain = str_comp(pSkinContainer->NormalizedName(), aPlayerSkin) == 0;
 		const bool SelectedDummy = str_comp(pSkinContainer->NormalizedName(), aDummySkin) == 0;
+		const bool Favorite = m_Favorites.contains(pSkinContainer->NormalizedName());
 
 		// Don't include skins in the list that couldn't be found in the database except the current player
 		// and dummy skins to avoid showing a lot of not-found entries while the user is typing a skin name.
 		if(pSkinContainer->m_State == CSkinContainer::EState::NOT_FOUND &&
 			!pSkinContainer->IsSpecial() &&
 			!SelectedMain &&
-			!SelectedDummy)
+			!SelectedDummy &&
+			!Favorite)
 		{
 			continue;
 		}
@@ -797,7 +799,7 @@ CSkins::CSkinList &CSkins::SkinList()
 			}
 			NameMatch = std::make_pair<int, int>(pNameMatchStart - pSkinContainer->Name(), pNameMatchEnd - pNameMatchStart);
 		}
-		m_SkinList.m_vSkins.emplace_back(pSkinContainer.get(), m_Favorites.contains(pSkinContainer->NormalizedName()), SelectedMain, SelectedDummy, NameMatch);
+		m_SkinList.m_vSkins.emplace_back(pSkinContainer.get(), Favorite, SelectedMain, SelectedDummy, NameMatch);
 	}
 
 	std::sort(m_SkinList.m_vSkins.begin(), m_SkinList.m_vSkins.end());

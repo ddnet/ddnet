@@ -1,12 +1,13 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <algorithm>
+#include "filecollection.h"
+
 #include <base/math.h>
 
 #include <engine/storage.h>
 
-#include "filecollection.h"
+#include <algorithm>
 
 void CFileCollection::Init(IStorage *pStorage, const char *pPath, const char *pFileDesc, const char *pFileExt, int MaxEntries)
 {

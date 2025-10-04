@@ -1,10 +1,10 @@
 #ifndef ENGINE_SHARED_TRANSLATION_CONTEXT_H
 #define ENGINE_SHARED_TRANSLATION_CONTEXT_H
 
-#include <engine/shared/protocol.h>
-#include <generated/protocol7.h>
-
 #include <engine/client/enums.h>
+#include <engine/shared/protocol.h>
+
+#include <generated/protocol7.h>
 
 class CTranslationContext
 {

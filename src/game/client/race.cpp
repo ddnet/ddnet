@@ -1,11 +1,11 @@
-#include <cctype>
-#include <vector>
+#include "race.h"
 
 #include <game/client/gameclient.h>
 #include <game/collision.h>
 #include <game/mapitems.h>
 
-#include "race.h"
+#include <cctype>
+#include <vector>
 
 void CRaceHelper::Init(const CGameClient *pGameClient)
 {

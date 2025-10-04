@@ -1,13 +1,13 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "ui_scrollregion.h"
+
 #include <base/system.h>
 #include <base/vmath.h>
 
 #include <engine/client.h>
 #include <engine/keys.h>
 #include <engine/shared/config.h>
-
-#include "ui_scrollregion.h"
 
 CScrollRegion::CScrollRegion()
 {
@@ -140,6 +140,10 @@ void CScrollRegion::End()
 	if(m_AnimTime > 0.0f)
 	{
 		m_AnimTime -= Client()->RenderFrameTime();
+		if(m_AnimTime < 0.0f)
+		{
+			m_AnimTime = 0.0f;
+		}
 		float AnimProgress = (1.0f - std::pow(m_AnimTime / m_AnimTimeMax, 3.0f)); // cubic ease out
 		m_ScrollY = m_AnimInitScrollY + (m_AnimTargetScrollY - m_AnimInitScrollY) * AnimProgress;
 	}

@@ -2,6 +2,7 @@
 #define GAME_SERVER_SAVE_H
 
 #include <base/vmath.h>
+
 #include <engine/shared/protocol.h>
 
 #include <generated/protocol.h>

@@ -147,7 +147,7 @@ public:
 	/**
 	 * Initializes the job pool with the given number of worker threads.
 	 *
-	 * @param NumTheads The number of worker threads.
+	 * @param NumThreads The number of worker threads.
 	 *
 	 * @remark Must be called on the main thread.
 	 */

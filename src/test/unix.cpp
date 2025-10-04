@@ -1,6 +1,6 @@
-#include <gtest/gtest.h>
-
 #include <base/system.h>
+
+#include <gtest/gtest.h>
 
 #if defined(CONF_FAMILY_UNIX)
 TEST(Unix, Create)

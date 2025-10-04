@@ -2,6 +2,7 @@
 #define GAME_MAP_ENVELOPE_MANAGER_H
 
 #include <engine/map.h>
+
 #include <game/map/envelope_extrema.h>
 #include <game/map/render_interfaces.h>
 

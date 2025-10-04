@@ -1,11 +1,13 @@
-#include <gtest/gtest.h>
-
 #include <base/detect.h>
+
 #include <engine/external/json-parser/json.h>
 #include <engine/server.h>
 #include <engine/shared/config.h>
+
 #include <game/gamecore.h>
 #include <game/server/teehistorian.h>
+
+#include <gtest/gtest.h>
 
 #include <vector>
 

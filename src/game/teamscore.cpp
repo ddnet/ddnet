@@ -1,6 +1,8 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #include "teamscore.h"
+
 #include <base/system.h>
+
 #include <engine/shared/config.h>
 
 CTeamsCore::CTeamsCore()

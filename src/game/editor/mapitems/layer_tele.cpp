@@ -78,12 +78,12 @@ bool CLayerTele::IsEmpty() const
 	return true;
 }
 
-void CLayerTele::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
+void CLayerTele::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 {
 	if(m_Readonly)
 		return;
 
-	std::shared_ptr<CLayerTele> pTeleLayer = std::static_pointer_cast<CLayerTele>(pBrush);
+	CLayerTele *pTeleLayer = static_cast<CLayerTele *>(pBrush);
 	int sx = ConvertX(WorldPos.x);
 	int sy = ConvertY(WorldPos.y);
 	if(str_comp(pTeleLayer->m_aFileName, m_pEditor->m_aFileName))
@@ -225,7 +225,7 @@ void CLayerTele::BrushRotate(float Amount)
 	}
 }
 
-void CLayerTele::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect)
+void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 {
 	if(m_Readonly || (!Empty && pBrush->m_Type != LAYERTYPE_TILES))
 		return;
@@ -237,7 +237,7 @@ void CLayerTele::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRe
 	int w = ConvertX(Rect.w);
 	int h = ConvertY(Rect.h);
 
-	std::shared_ptr<CLayerTele> pLt = std::static_pointer_cast<CLayerTele>(pBrush);
+	CLayerTele *pLt = static_cast<CLayerTele *>(pBrush);
 
 	bool Destructive = m_pEditor->m_BrushDrawDestructive || Empty || pLt->IsEmpty();
 

@@ -1,16 +1,17 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "emoticon.h"
+
+#include "chat.h"
+
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 
 #include <generated/protocol.h>
 
-#include "chat.h"
-#include "emoticon.h"
 #include <game/client/animstate.h>
-#include <game/client/ui.h>
-
 #include <game/client/gameclient.h>
+#include <game/client/ui.h>
 
 CEmoticon::CEmoticon()
 {

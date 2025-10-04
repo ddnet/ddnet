@@ -4,6 +4,10 @@
 
 #include "server.h"
 
+#include "databases/connection.h"
+#include "databases/connection_pool.h"
+#include "register.h"
+
 #include <base/logger.h>
 #include <base/math.h>
 #include <base/system.h>
@@ -13,8 +17,6 @@
 #include <engine/engine.h>
 #include <engine/map.h>
 #include <engine/server.h>
-#include <engine/storage.h>
-
 #include <engine/shared/compression.h>
 #include <engine/shared/config.h>
 #include <engine/shared/console.h>
@@ -26,6 +28,7 @@
 #include <engine/shared/http.h>
 #include <engine/shared/json.h>
 #include <engine/shared/jsonwriter.h>
+#include <engine/shared/linereader.h>
 #include <engine/shared/masterserver.h>
 #include <engine/shared/netban.h>
 #include <engine/shared/network.h>
@@ -35,19 +38,14 @@
 #include <engine/shared/protocol_ex.h>
 #include <engine/shared/rust_version.h>
 #include <engine/shared/snapshot.h>
+#include <engine/storage.h>
 
 #include <game/version.h>
 
-// DDRace
-#include <engine/shared/linereader.h>
-#include <vector>
 #include <zlib.h>
 
-#include "databases/connection.h"
-#include "databases/connection_pool.h"
-#include "register.h"
-
 #include <chrono>
+#include <vector>
 
 using namespace std::chrono_literals;
 
@@ -1496,7 +1494,7 @@ int CServer::NumRconCommands(int ClientId)
 	int Num = 0;
 	const IConsole::EAccessLevel AccessLevel = ConsoleAccessLevel(ClientId);
 	for(const IConsole::ICommandInfo *pCmd = Console()->FirstCommandInfo(AccessLevel, CFGFLAG_SERVER);
-		pCmd; pCmd = pCmd->NextCommandInfo(AccessLevel, CFGFLAG_SERVER))
+		pCmd; pCmd = Console()->NextCommandInfo(pCmd, AccessLevel, CFGFLAG_SERVER))
 	{
 		Num++;
 	}
@@ -1514,7 +1512,7 @@ void CServer::UpdateClientRconCommands()
 			for(int i = 0; i < MAX_RCONCMD_SEND && Client.m_pRconCmdToSend; ++i)
 			{
 				SendRconCmdAdd(Client.m_pRconCmdToSend, ClientId);
-				Client.m_pRconCmdToSend = Client.m_pRconCmdToSend->NextCommandInfo(AccessLevel, CFGFLAG_SERVER);
+				Client.m_pRconCmdToSend = Console()->NextCommandInfo(Client.m_pRconCmdToSend, AccessLevel, CFGFLAG_SERVER);
 				if(Client.m_pRconCmdToSend == nullptr)
 				{
 					CMsgPacker Msg(NETMSG_RCON_CMD_GROUP_END, true);
@@ -2656,6 +2654,15 @@ void CServer::UpdateRegisterServerInfo()
 	JsonWriter.WriteAttribute("game_type");
 	JsonWriter.WriteStrValue(GameServer()->GameType());
 
+	if(g_Config.m_SvRegisterCommunityToken[0])
+	{
+		if(g_Config.m_SvFlag != -1)
+		{
+			JsonWriter.WriteAttribute("flag");
+			JsonWriter.WriteIntValue(g_Config.m_SvFlag);
+		}
+	}
+
 	JsonWriter.WriteAttribute("name");
 	JsonWriter.WriteStrValue(g_Config.m_SvName);
 
@@ -2667,6 +2674,11 @@ void CServer::UpdateRegisterServerInfo()
 	JsonWriter.WriteStrValue(aMapSha256);
 	JsonWriter.WriteAttribute("size");
 	JsonWriter.WriteIntValue(m_aCurrentMapSize[MAP_TYPE_SIX]);
+	if(m_aMapDownloadUrl[0])
+	{
+		JsonWriter.WriteAttribute("url");
+		JsonWriter.WriteStrValue(m_aMapDownloadUrl);
+	}
 	JsonWriter.EndObject();
 
 	JsonWriter.WriteAttribute("version");

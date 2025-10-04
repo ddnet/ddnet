@@ -1,13 +1,13 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "friends.h"
+
 #include <base/math.h>
 #include <base/system.h>
 
 #include <engine/config.h>
 #include <engine/console.h>
 #include <engine/shared/config.h>
-
-#include "friends.h"
 
 CFriends::CFriends()
 {

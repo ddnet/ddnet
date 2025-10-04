@@ -1,15 +1,18 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
-#include <base/system.h>
-#include <engine/shared/config.h>
-#include <game/mapitems.h>
-#include <game/server/entities/character.h>
-#include <game/team_state.h>
+#include "teams.h"
 
 #include "gamecontroller.h"
 #include "player.h"
 #include "score.h"
-#include "teams.h"
 #include "teehistorian.h"
+
+#include <base/system.h>
+
+#include <engine/shared/config.h>
+
+#include <game/mapitems.h>
+#include <game/server/entities/character.h>
+#include <game/team_state.h>
 
 CGameTeams::CGameTeams(CGameContext *pGameContext) :
 	m_pGameContext(pGameContext)

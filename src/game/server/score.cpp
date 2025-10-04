@@ -1,4 +1,11 @@
+#include "score.h"
+
+#include "player.h"
+#include "save.h"
+#include "scoreworker.h"
+
 #include <base/system.h>
+
 #include <engine/server/databases/connection_pool.h>
 #include <engine/shared/config.h>
 #include <engine/shared/console.h>
@@ -11,11 +18,6 @@
 #include <game/team_state.h>
 
 #include <memory>
-
-#include "player.h"
-#include "save.h"
-#include "score.h"
-#include "scoreworker.h"
 
 class IDbConnection;
 
@@ -258,13 +260,14 @@ void CScore::ShowTopPoints(int ClientId, int Offset)
 	ExecPlayerThread(CScoreWorker::ShowTopPoints, "show top points", ClientId, "", Offset);
 }
 
-void CScore::RandomMap(int ClientId, int Stars)
+void CScore::RandomMap(int ClientId, int MinStars, int MaxStars)
 {
 	auto pResult = std::make_shared<CScoreRandomMapResult>(ClientId);
 	GameServer()->m_SqlRandomMapResult = pResult;
 
 	auto Tmp = std::make_unique<CSqlRandomMapRequest>(pResult);
-	Tmp->m_Stars = Stars;
+	Tmp->m_MinStars = MinStars;
+	Tmp->m_MaxStars = MaxStars;
 	str_copy(Tmp->m_aCurrentMap, Server()->GetMapName(), sizeof(Tmp->m_aCurrentMap));
 	str_copy(Tmp->m_aServerType, g_Config.m_SvServerType, sizeof(Tmp->m_aServerType));
 	str_copy(Tmp->m_aRequestingPlayer, ClientId == -1 ? "nameless tee" : GameServer()->Server()->ClientName(ClientId), sizeof(Tmp->m_aRequestingPlayer));
@@ -272,13 +275,14 @@ void CScore::RandomMap(int ClientId, int Stars)
 	m_pPool->Execute(CScoreWorker::RandomMap, std::move(Tmp), "random map");
 }
 
-void CScore::RandomUnfinishedMap(int ClientId, int Stars)
+void CScore::RandomUnfinishedMap(int ClientId, int MinStars, int MaxStars)
 {
 	auto pResult = std::make_shared<CScoreRandomMapResult>(ClientId);
 	GameServer()->m_SqlRandomMapResult = pResult;
 
 	auto Tmp = std::make_unique<CSqlRandomMapRequest>(pResult);
-	Tmp->m_Stars = Stars;
+	Tmp->m_MinStars = MinStars;
+	Tmp->m_MaxStars = MaxStars;
 	str_copy(Tmp->m_aCurrentMap, Server()->GetMapName(), sizeof(Tmp->m_aCurrentMap));
 	str_copy(Tmp->m_aServerType, g_Config.m_SvServerType, sizeof(Tmp->m_aServerType));
 	str_copy(Tmp->m_aRequestingPlayer, ClientId == -1 ? "nameless tee" : GameServer()->Server()->ClientName(ClientId), sizeof(Tmp->m_aRequestingPlayer));

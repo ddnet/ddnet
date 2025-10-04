@@ -3,13 +3,28 @@
 #ifndef GAME_EDITOR_EDITOR_H
 #define GAME_EDITOR_EDITOR_H
 
+#include "editor_history.h"
+#include "editor_server_settings.h"
+#include "editor_trackers.h"
+#include "editor_ui.h"
+#include "font_typer.h"
+#include "layer_selector.h"
+#include "map_view.h"
+#include "quadart.h"
+#include "smooth_value.h"
+
 #include <base/bezier.h>
 #include <base/system.h>
 
+#include <engine/console.h>
+#include <engine/editor.h>
+#include <engine/engine.h>
+#include <engine/graphics.h>
+#include <engine/shared/datafile.h>
+#include <engine/shared/jobs.h>
+
 #include <game/client/ui.h>
 #include <game/client/ui_listbox.h>
-#include <game/mapitems.h>
-
 #include <game/editor/enums.h>
 #include <game/editor/file_browser.h>
 #include <game/editor/mapitems/envelope.h>
@@ -25,27 +40,10 @@
 #include <game/editor/mapitems/layer_tiles.h>
 #include <game/editor/mapitems/layer_tune.h>
 #include <game/editor/mapitems/map.h>
-
-#include <game/map/render_interfaces.h>
-
-#include <engine/console.h>
-#include <engine/editor.h>
-#include <engine/engine.h>
-#include <engine/graphics.h>
-#include <engine/shared/datafile.h>
-#include <engine/shared/jobs.h>
-
-#include "editor_history.h"
-#include "editor_server_settings.h"
-#include "editor_trackers.h"
-#include "editor_ui.h"
-#include "font_typer.h"
-#include "layer_selector.h"
-#include "map_view.h"
-#include "quadart.h"
-#include "smooth_value.h"
 #include <game/editor/prompt.h>
 #include <game/editor/quick_action.h>
+#include <game/map/render_interfaces.h>
+#include <game/mapitems.h>
 
 #include <deque>
 #include <functional>
@@ -334,6 +332,13 @@ public:
 		Horizontal,
 		Vertical
 	} m_MouseAxisLockState = EAxisLock::Start;
+
+	/**
+	 * Global time when the autosave was last updated in the @link HandleAutosave @endlink function.
+	 * This is used so that the autosave does not immediately activate when reopening the editor after
+	 * a longer time of inactivity, as autosaves are only updated while the editor is open.
+	 */
+	float m_LastAutosaveUpdateTime = -1.0f;
 	void HandleAutosave();
 	bool PerformAutosave();
 	void HandleWriterFinishJobs();

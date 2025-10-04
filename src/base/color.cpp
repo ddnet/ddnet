@@ -1,4 +1,5 @@
 #include "color.h"
+
 #include "system.h"
 
 template<typename T>

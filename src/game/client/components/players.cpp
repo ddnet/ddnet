@@ -1,31 +1,29 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include "players.h"
+
+#include <base/color.h>
+#include <base/math.h>
+
 #include <engine/client/enums.h>
 #include <engine/demo.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
-#include <game/gamecore.h>
 
 #include <generated/client_data.h>
 #include <generated/client_data7.h>
 #include <generated/protocol.h>
 
-#include <game/mapitems.h>
-
 #include <game/client/animstate.h>
-#include <game/client/gameclient.h>
-
 #include <game/client/components/controls.h>
 #include <game/client/components/effects.h>
 #include <game/client/components/flow.h>
 #include <game/client/components/skins.h>
 #include <game/client/components/sounds.h>
-
-#include "players.h"
-
-#include <base/color.h>
-#include <base/math.h>
+#include <game/client/gameclient.h>
+#include <game/gamecore.h>
+#include <game/mapitems.h>
 
 static float CalculateHandAngle(vec2 Dir, float AngleOffset)
 {
@@ -148,27 +146,22 @@ float CPlayers::GetPlayerTargetAngle(
 void CPlayers::RenderHookCollLine(
 	const CNetObj_Character *pPrevChar,
 	const CNetObj_Character *pPlayerChar,
-	int ClientId,
-	float Intra)
+	int ClientId)
 {
 	CNetObj_Character Prev;
 	CNetObj_Character Player;
 	Prev = *pPrevChar;
 	Player = *pPlayerChar;
 
+	dbg_assert(in_range(ClientId, MAX_CLIENTS - 1), "invalid client id (%d)", ClientId);
+
 	bool Local = GameClient()->m_Snap.m_LocalClientId == ClientId;
 
-	if(ClientId >= 0)
-		Intra = GameClient()->m_aClients[ClientId].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
-
+	float Intra = GameClient()->m_aClients[ClientId].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
 	float Angle = GetPlayerTargetAngle(&Prev, &Player, ClientId, Intra);
 
 	vec2 Direction = direction(Angle);
-	vec2 Position;
-	if(in_range(ClientId, MAX_CLIENTS - 1))
-		Position = GameClient()->m_aClients[ClientId].m_RenderPos;
-	else
-		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), Intra);
+	vec2 Position = GameClient()->m_aClients[ClientId].m_RenderPos;
 
 	bool Aim = (Player.m_PlayerFlags & PLAYERFLAG_AIM);
 	if(!Client()->ServerCapAnyPlayerFlag())
@@ -189,7 +182,7 @@ void CPlayers::RenderHookCollLine(
 #endif
 
 	bool AlwaysRenderHookColl = GameClient()->m_GameInfo.m_AllowHookColl && (Local ? g_Config.m_ClShowHookCollOwn : g_Config.m_ClShowHookCollOther) == 2;
-	bool RenderHookCollPlayer = ClientId >= 0 && Aim && (Local ? g_Config.m_ClShowHookCollOwn : g_Config.m_ClShowHookCollOther) > 0;
+	bool RenderHookCollPlayer = Aim && (Local ? g_Config.m_ClShowHookCollOwn : g_Config.m_ClShowHookCollOther) > 0;
 	if(Local && GameClient()->m_GameInfo.m_AllowHookColl && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		RenderHookCollPlayer = GameClient()->m_Controls.m_aShowHookColl[g_Config.m_ClDummy] && g_Config.m_ClShowHookCollOwn > 0;
 	if(!AlwaysRenderHookColl && !RenderHookCollPlayer)
@@ -204,80 +197,120 @@ void CPlayers::RenderHookCollLine(
 			Direction = vec2(1.0f, 0.0f);
 	}
 
-	// Calculate hook coll line position
-	int HookSpeed = GameClient()->m_aClients[ClientId].m_Predicted.m_Tuning.m_HookFireSpeed;
-	if(HookSpeed <= 0)
+	static constexpr float HOOK_START_DISTANCE = CCharacterCore::PhysicalSize() * 1.5f;
+	float HookLength = (float)GameClient()->m_aClients[ClientId].m_Predicted.m_Tuning.m_HookLength;
+	float HookFireSpeed = (float)GameClient()->m_aClients[ClientId].m_Predicted.m_Tuning.m_HookFireSpeed;
+
+	// janky physics
+	if(HookLength < HOOK_START_DISTANCE || HookFireSpeed <= 0.0f)
 		return;
 
-	int HookLength = GameClient()->m_aClients[ClientId].m_Predicted.m_Tuning.m_HookLength;
-
-	const float LineOffset = CCharacterCore::PhysicalSize() * 1.5f;
-	vec2 InitPos = Position;
-	vec2 FinishPos = InitPos + Direction * (HookLength - LineOffset);
+	vec2 QuantizedDirection = Direction;
+	vec2 StartOffset = Direction * HOOK_START_DISTANCE;
+	vec2 BasePos = Position;
+	vec2 LineStartPos = BasePos + StartOffset;
+	vec2 SegmentStartPos = LineStartPos;
 
 	ColorRGBA HookCollColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorNoColl));
-
-	vec2 OldPos = InitPos + Direction * LineOffset;
-	vec2 NewPos = OldPos;
-
-	bool DoBreak = false;
 	std::vector<IGraphics::CLineItem> vLineSegments;
-	vLineSegments.reserve(HookLength / HookSpeed + 1);
-	do
-	{
-		OldPos = NewPos;
-		NewPos = OldPos + Direction * HookSpeed;
 
-		if(distance(InitPos, NewPos) > HookLength)
+	const int MaxHookTicks = 5 * Client()->GameTickSpeed(); // calculating above 5 seconds is very expensive and unlikely to happen
+
+	// simulate the hook into the future
+	int HookTick;
+	for(HookTick = 0; HookTick < MaxHookTicks; ++HookTick)
+	{
+		int Tele;
+		vec2 HitPos;
+		vec2 SegmentEndPos = SegmentStartPos + QuantizedDirection * HookFireSpeed;
+
+		// check if a hook would enter retracting state in this tick
+		if(distance(BasePos, SegmentEndPos) > HookLength)
 		{
-			NewPos = InitPos + normalize(NewPos - InitPos) * HookLength;
-			DoBreak = true;
+			// the line is too long here, and the hook starts to retract, use old position
+			vLineSegments.emplace_back(LineStartPos, SegmentStartPos);
+			break;
 		}
 
-		int Tele;
-		int Hit = Collision()->IntersectLineTeleHook(OldPos, NewPos, &FinishPos, nullptr, &Tele);
+		// check for map collisions
+		int Hit = Collision()->IntersectLineTeleHook(SegmentStartPos, SegmentEndPos, &HitPos, nullptr, &Tele);
 
-		if(ClientId >= 0 && GameClient()->IntersectCharacter(OldPos, FinishPos, FinishPos, ClientId) != -1)
+		// check if we intersect a player
+		if(GameClient()->IntersectCharacter(SegmentStartPos, HitPos, SegmentEndPos, ClientId) != -1)
 		{
 			HookCollColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorTeeColl));
+			vLineSegments.emplace_back(LineStartPos, SegmentEndPos);
 			break;
 		}
 
-		if(!DoBreak && Hit == TILE_TELEINHOOK)
+		// we hit nothing, continue calculating segments
+		if(!Hit)
 		{
-			if(Collision()->TeleOuts(Tele - 1).size() != 1)
+			SegmentStartPos = SegmentEndPos;
+			SegmentStartPos.x = round_to_int(SegmentStartPos.x);
+			SegmentStartPos.y = round_to_int(SegmentStartPos.y);
+
+			// direction is always the same after the first tick quantization
+			if(HookTick == 0)
 			{
-				Hit = Collision()->IntersectLineTeleHook(OldPos, NewPos, &FinishPos, nullptr);
+				QuantizedDirection.x = round_to_int(QuantizedDirection.x * 256.0f) / 256.0f;
+				QuantizedDirection.y = round_to_int(QuantizedDirection.y * 256.0f) / 256.0f;
 			}
-			else
-			{
-				vLineSegments.emplace_back(InitPos, FinishPos);
-				InitPos = NewPos = Collision()->TeleOuts(Tele - 1)[0];
-			}
+			continue;
 		}
 
-		if(!DoBreak && Hit && Hit != TILE_TELEINHOOK)
+		// we hit a solid / hook stopper
+		if(Hit != TILE_TELEINHOOK)
 		{
 			if(Hit != TILE_NOHOOK)
-			{
 				HookCollColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorHookableColl));
-			}
+			vLineSegments.emplace_back(LineStartPos, HitPos);
+			break;
 		}
 
-		if(Hit && Hit != TILE_TELEINHOOK)
+		// we are hitting TILE_TELEINHOOK
+		vLineSegments.emplace_back(LineStartPos, HitPos);
+
+		// check tele outs
+		const std::vector<vec2> &vTeleOuts = Collision()->TeleOuts(Tele - 1);
+		if(vTeleOuts.empty())
+		{
+			// the hook gets stuck, this is a feature or a bug
+			HookCollColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorHookableColl));
 			break;
-
-		NewPos.x = round_to_int(NewPos.x);
-		NewPos.y = round_to_int(NewPos.y);
-
-		if(OldPos == NewPos)
+		}
+		else if(vTeleOuts.size() > 1)
+		{
+			// we don't know which teleout the hook takes, just invert the color
+			HookCollColor = color_invert(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorTeeColl)));
 			break;
+		}
 
-		Direction.x = round_to_int(Direction.x * 256.0f) / 256.0f;
-		Direction.y = round_to_int(Direction.y * 256.0f) / 256.0f;
-	} while(!DoBreak);
+		// go through one teleout, update positions and continue
+		BasePos = vTeleOuts[0];
+		LineStartPos = BasePos; // make the line start in the teleporter to prevent a gap
+		SegmentStartPos = BasePos + Direction * HOOK_START_DISTANCE;
+		SegmentStartPos.x = round_to_int(SegmentStartPos.x);
+		SegmentStartPos.y = round_to_int(SegmentStartPos.y);
 
-	vLineSegments.emplace_back(InitPos, FinishPos);
+		// direction is always the same after the first tick quantization
+		if(HookTick == 0)
+		{
+			QuantizedDirection.x = round_to_int(QuantizedDirection.x * 256.0f) / 256.0f;
+			QuantizedDirection.y = round_to_int(QuantizedDirection.y * 256.0f) / 256.0f;
+		}
+	}
+
+	// The hook line is too expensive to calculate and didn't hit anything before, just set a straight line
+	if(HookTick >= MaxHookTicks && vLineSegments.empty())
+	{
+		// we simply don't know if we hit anything or not
+		HookCollColor = color_invert(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorTeeColl)));
+		vLineSegments.emplace_back(LineStartPos, BasePos + QuantizedDirection * HookLength);
+	}
+
+	// add a line from the player to the start position to prevent a visual gap
+	vLineSegments.emplace_back(Position, Position + StartOffset);
 
 	if(AlwaysRenderHookColl && RenderHookCollPlayer)
 	{
@@ -288,9 +321,10 @@ void CPlayers::RenderHookCollLine(
 	// Render hook coll line
 	const int HookCollSize = Local ? g_Config.m_ClHookCollSize : g_Config.m_ClHookCollSizeOther;
 
-	bool OtherTeam = GameClient()->IsOtherTeam(ClientId);
-	float Alpha = (OtherTeam || ClientId < 0) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
+	float Alpha = GameClient()->IsOtherTeam(ClientId) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
 	Alpha *= (float)g_Config.m_ClHookCollAlpha / 100;
+	if(Alpha <= 0.0f)
+		return;
 
 	Graphics()->TextureClear();
 	if(HookCollSize > 0)
@@ -324,6 +358,7 @@ void CPlayers::RenderHookCollLine(
 		Graphics()->LinesEnd();
 	}
 }
+
 void CPlayers::RenderHook(
 	const CNetObj_Character *pPrevChar,
 	const CNetObj_Character *pPlayerChar,
@@ -785,9 +820,9 @@ void CPlayers::RenderPlayer(
 
 inline bool CPlayers::IsPlayerInfoAvailable(int ClientId) const
 {
-	const void *pPrevInfo = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_PLAYERINFO, ClientId);
-	const void *pInfo = Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_PLAYERINFO, ClientId);
-	return pPrevInfo && pInfo;
+	return GameClient()->m_Snap.m_aCharacters[ClientId].m_Active &&
+	       GameClient()->m_Snap.m_apPrevPlayerInfos[ClientId] != nullptr &&
+	       GameClient()->m_Snap.m_apPlayerInfos[ClientId] != nullptr;
 }
 
 void CPlayers::OnRender()
@@ -859,13 +894,13 @@ void CPlayers::OnRender()
 	const int LocalClientId = GameClient()->m_Snap.m_LocalClientId;
 	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
-		if(ClientId == LocalClientId || !GameClient()->m_Snap.m_aCharacters[ClientId].m_Active || !IsPlayerInfoAvailable(ClientId))
+		if(ClientId == LocalClientId || !IsPlayerInfoAvailable(ClientId))
 		{
 			continue;
 		}
 		RenderHook(&GameClient()->m_aClients[ClientId].m_RenderPrev, &GameClient()->m_aClients[ClientId].m_RenderCur, &aRenderInfo[ClientId], ClientId);
 	}
-	if(LocalClientId != -1 && GameClient()->m_Snap.m_aCharacters[LocalClientId].m_Active && IsPlayerInfoAvailable(LocalClientId))
+	if(LocalClientId != -1 && IsPlayerInfoAvailable(LocalClientId))
 	{
 		const CGameClient::CClientData *pLocalClientData = &GameClient()->m_aClients[LocalClientId];
 		RenderHook(&pLocalClientData->m_RenderPrev, &pLocalClientData->m_RenderCur, &aRenderInfo[LocalClientId], LocalClientId);
@@ -893,7 +928,7 @@ void CPlayers::OnRender()
 
 	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
-		if(ClientId == RenderLastId || !GameClient()->m_Snap.m_aCharacters[ClientId].m_Active || !IsPlayerInfoAvailable(ClientId))
+		if(ClientId == RenderLastId || !IsPlayerInfoAvailable(ClientId))
 		{
 			continue;
 		}
@@ -906,7 +941,7 @@ void CPlayers::OnRender()
 		}
 		RenderPlayer(&GameClient()->m_aClients[ClientId].m_RenderPrev, &GameClient()->m_aClients[ClientId].m_RenderCur, &aRenderInfo[ClientId], ClientId);
 	}
-	if(RenderLastId != -1 && GameClient()->m_Snap.m_aCharacters[RenderLastId].m_Active && IsPlayerInfoAvailable(RenderLastId))
+	if(RenderLastId != -1 && IsPlayerInfoAvailable(RenderLastId))
 	{
 		const CGameClient::CClientData *pClientData = &GameClient()->m_aClients[RenderLastId];
 		RenderHookCollLine(&pClientData->m_RenderPrev, &pClientData->m_RenderCur, RenderLastId);

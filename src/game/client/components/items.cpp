@@ -1,5 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "items.h"
+
 #include <engine/demo.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
@@ -7,20 +9,15 @@
 #include <generated/client_data.h>
 #include <generated/protocol.h>
 
-#include <game/mapitems.h>
-
+#include <game/client/components/effects.h>
 #include <game/client/gameclient.h>
 #include <game/client/laser_data.h>
 #include <game/client/pickup_data.h>
-#include <game/client/projectile_data.h>
-
 #include <game/client/prediction/entities/laser.h>
 #include <game/client/prediction/entities/pickup.h>
 #include <game/client/prediction/entities/projectile.h>
-
-#include <game/client/components/effects.h>
-
-#include "items.h"
+#include <game/client/projectile_data.h>
+#include <game/mapitems.h>
 
 void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemId)
 {
@@ -241,29 +238,7 @@ void CItems::RenderFlags()
 
 void CItems::RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent, const CNetObj_GameData *pPrevGameData, const CNetObj_GameData *pCurGameData)
 {
-	float Angle = 0.0f;
-	float Size = 42.0f;
-
-	if(pCurrent->m_Team == TEAM_RED)
-		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteFlagRed);
-	else
-		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteFlagBlue);
-	Graphics()->QuadsSetRotation(0);
-	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
-	int QuadOffset;
-	if(pCurrent->m_Team == TEAM_RED)
-	{
-		QuadOffset = m_RedFlagOffset;
-	}
-	else
-	{
-		QuadOffset = m_BlueFlagOffset;
-	}
-
-	Graphics()->QuadsSetRotation(Angle);
-
 	vec2 Pos = mix(vec2(pPrev->m_X, pPrev->m_Y), vec2(pCurrent->m_X, pCurrent->m_Y), Client()->IntraGameTick(g_Config.m_ClDummy));
-
 	if(pCurGameData)
 	{
 		int FlagCarrier = (pCurrent->m_Team == TEAM_RED) ? pCurGameData->m_FlagCarrierRed : pCurGameData->m_FlagCarrierBlue;
@@ -278,6 +253,20 @@ void CItems::RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent,
 			Pos = vec2(pCurrent->m_X, pCurrent->m_Y);
 	}
 
+	float Size = 42.0f;
+	int QuadOffset;
+	if(pCurrent->m_Team == TEAM_RED)
+	{
+		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteFlagRed);
+		QuadOffset = m_RedFlagOffset;
+	}
+	else
+	{
+		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteFlagBlue);
+		QuadOffset = m_BlueFlagOffset;
+	}
+	Graphics()->QuadsSetRotation(0.0f);
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 	Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, QuadOffset, Pos.x, Pos.y - Size * 0.75f);
 }
 

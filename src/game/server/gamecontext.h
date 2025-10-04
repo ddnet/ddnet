@@ -3,6 +3,10 @@
 #ifndef GAME_SERVER_GAMECONTEXT_H
 #define GAME_SERVER_GAMECONTEXT_H
 
+#include "eventhandler.h"
+#include "gameworld.h"
+#include "teehistorian.h"
+
 #include <engine/console.h>
 #include <engine/server.h>
 
@@ -12,10 +16,6 @@
 #include <game/layers.h>
 #include <game/mapbugs.h>
 #include <game/voting.h>
-
-#include "eventhandler.h"
-#include "gameworld.h"
-#include "teehistorian.h"
 
 #include <map>
 #include <memory>
@@ -448,7 +448,7 @@ public:
 	bool RateLimitPlayerVote(int ClientId);
 	bool RateLimitPlayerMapVote(int ClientId) const;
 
-	void OnUpdatePlayerServerInfo(CJsonStringWriter *pJSonWriter, int Id) override;
+	void OnUpdatePlayerServerInfo(CJsonWriter *pJsonWriter, int ClientId) override;
 	void ReadCensorList();
 
 	bool PracticeByDefault() const;

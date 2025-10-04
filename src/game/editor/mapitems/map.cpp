@@ -30,7 +30,15 @@ void CEditorMap::OnModify()
 {
 	m_Modified = true;
 	m_ModifiedAuto = true;
-	m_LastModifiedTime = m_pEditor->Client()->GlobalTime();
+	m_LastModifiedTime = Editor()->Client()->GlobalTime();
+}
+
+void CEditorMap::ResetModifiedState()
+{
+	m_Modified = false;
+	m_ModifiedAuto = false;
+	m_LastModifiedTime = -1.0f;
+	m_LastSaveTime = Editor()->Client()->GlobalTime();
 }
 
 std::shared_ptr<CEnvelope> CEditorMap::NewEnvelope(CEnvelope::EType Type)
@@ -218,6 +226,8 @@ void CEditorMap::ModifySoundIndex(const FIndexModifyFunction &IndexModifyFunctio
 
 void CEditorMap::Clean()
 {
+	ResetModifiedState();
+
 	m_vpGroups.clear();
 	m_vpEnvelopes.clear();
 	m_vpImages.clear();
@@ -234,14 +244,11 @@ void CEditorMap::Clean()
 
 	m_MapInfo.Reset();
 	m_MapInfoTmp.Reset();
-
-	m_Modified = false;
-	m_ModifiedAuto = false;
 }
 
-void CEditorMap::CreateDefault(IGraphics::CTextureHandle EntitiesTexture)
+void CEditorMap::CreateDefault()
 {
-	// add background
+	// Add default background group, quad layer and quad
 	std::shared_ptr<CLayerGroup> pGroup = NewGroup();
 	pGroup->m_ParallaxX = 0;
 	pGroup->m_ParallaxY = 0;
@@ -255,10 +262,12 @@ void CEditorMap::CreateDefault(IGraphics::CTextureHandle EntitiesTexture)
 	pQuad->m_aColors[2].b = pQuad->m_aColors[3].b = 255;
 	pGroup->AddLayer(pLayer);
 
-	// add game layer and reset front, tele, speedup, tune and switch layer pointers
+	// Add game group and layer
 	MakeGameGroup(NewGroup());
 	MakeGameLayer(std::make_shared<CLayerGame>(m_pEditor, 50, 50));
 	m_pGameGroup->AddLayer(m_pGameLayer);
+
+	ResetModifiedState();
 }
 
 void CEditorMap::MakeGameLayer(const std::shared_ptr<CLayer> &pLayer)

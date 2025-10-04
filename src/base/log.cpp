@@ -1,6 +1,5 @@
-#include "logger.h"
-
 #include "color.h"
+#include "logger.h"
 #include "system.h"
 
 #include <atomic>

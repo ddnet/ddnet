@@ -31,7 +31,6 @@ class CConsole : public IConsole
 		FCommandCallback m_pfnCallback;
 		void *m_pUserData;
 
-		const ICommandInfo *NextCommandInfo(EAccessLevel AccessLevel, int FlagMask) const override;
 		const char *Name() const override { return m_pName; }
 		const char *Help() const override { return m_pHelp; }
 		const char *Params() const override { return m_pParams; }
@@ -168,6 +167,7 @@ public:
 
 	void Init() override;
 	const ICommandInfo *FirstCommandInfo(EAccessLevel AccessLevel, int FlagMask) const override;
+	const ICommandInfo *NextCommandInfo(const IConsole::ICommandInfo *pInfo, EAccessLevel AccessLevel, int FlagMask) const override;
 	const ICommandInfo *GetCommandInfo(const char *pName, int FlagMask, bool Temp) override;
 	int PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback, void *pUser) override;
 
@@ -194,7 +194,7 @@ public:
 	/**
 	 * Converts access level string to access level enum.
 	 *
-	 * @param pAccesssLevel should be either "admin", "mod", "moderator", "helper" or "user".
+	 * @param pAccessLevel should be either "admin", "mod", "moderator", "helper" or "user".
 	 * @return `std::nullopt` on error otherwise one of the auth enums such as `EAccessLevel::ADMIN`.
 	 */
 	static std::optional<EAccessLevel> AccessLevelToEnum(const char *pAccessLevel);

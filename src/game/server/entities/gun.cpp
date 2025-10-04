@@ -1,5 +1,6 @@
 /* copyright (c) 2007 magnus auvinen, see licence.txt for more info */
 #include "gun.h"
+
 #include "character.h"
 #include "plasma.h"
 

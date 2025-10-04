@@ -1,6 +1,6 @@
-#include <gtest/gtest.h>
-
 #include <base/system.h>
+
+#include <gtest/gtest.h>
 
 static bool mem_is_null(const void *block, size_t size)
 {

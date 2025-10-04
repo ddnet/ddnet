@@ -3,10 +3,10 @@
 #ifndef ENGINE_STORAGE_H
 #define ENGINE_STORAGE_H
 
+#include "kernel.h"
+
 #include <base/hash.h>
 #include <base/types.h>
-
-#include "kernel.h"
 
 #include <memory>
 #include <set>

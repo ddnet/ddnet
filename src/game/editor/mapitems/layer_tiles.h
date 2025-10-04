@@ -1,11 +1,12 @@
 #ifndef GAME_EDITOR_MAPITEMS_LAYER_TILES_H
 #define GAME_EDITOR_MAPITEMS_LAYER_TILES_H
 
+#include "layer.h"
+
 #include <game/editor/editor_trackers.h>
 #include <game/editor/enums.h>
-#include <map>
 
-#include "layer.h"
+#include <map>
 
 struct STileStateChange
 {
@@ -128,11 +129,11 @@ public:
 
 	[[nodiscard]] virtual bool IsEmpty() const;
 	void BrushSelecting(CUIRect Rect) override;
-	int BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect) override;
-	void FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect) override;
+	int BrushGrab(CLayerGroup *pBrush, CUIRect Rect) override;
+	void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect) override;
 	void FillGameTiles(EGameTileOp Fill);
 	bool CanFillGameTiles() const;
-	void BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos) override;
+	void BrushDraw(CLayer *pBrush, vec2 WorldPos) override;
 	void BrushFlipX() override;
 	void BrushFlipY() override;
 	void BrushRotate(float Amount) override;

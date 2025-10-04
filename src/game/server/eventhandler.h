@@ -3,9 +3,9 @@
 #ifndef GAME_SERVER_EVENTHANDLER_H
 #define GAME_SERVER_EVENTHANDLER_H
 
-#include <cstdint>
-
 #include <engine/shared/protocol.h>
+
+#include <cstdint>
 
 class CEventHandler
 {

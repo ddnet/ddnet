@@ -1160,7 +1160,7 @@ bool CRenderLayerQuads::CalculateQuadClipping(int aQuadOffsetMin[2], int aQuadOf
 			for(int QuadIdPoint = 0; QuadIdPoint < 4; ++QuadIdPoint)
 			{
 				const CPoint &QuadPoint = pQuad->m_aPoints[QuadIdPoint];
-				int Distance = (int)std::ceil(std::sqrt(1.0 * (Center.x - QuadPoint.x) * (Center.x - QuadPoint.x) + (Center.y - QuadPoint.y) * (Center.y - QuadPoint.y)));
+				int Distance = (int)std::ceil(length(vec2(Center.x - QuadPoint.x, Center.y - QuadPoint.y)));
 				MaxDistance = std::max(Distance, MaxDistance);
 			}
 

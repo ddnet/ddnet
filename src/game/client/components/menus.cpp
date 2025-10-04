@@ -1,10 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <algorithm>
-#include <chrono>
-#include <cmath>
-#include <vector>
+#include "menus.h"
 
 #include <base/log.h>
 #include <base/math.h>
@@ -36,7 +33,10 @@
 #include <game/client/ui_listbox.h>
 #include <game/localization.h>
 
-#include "menus.h"
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <vector>
 
 using namespace FontIcons;
 using namespace std::chrono_literals;
@@ -525,9 +525,7 @@ int CMenus::DoKeyReader(const void *pId, const CUIRect *pRect, int Key, int Modi
 		aBuf[0] = '\0';
 	else
 	{
-		char aModifiers[128];
-		CBinds::GetKeyBindModifiersName(*pNewModifierCombination, aModifiers, sizeof(aModifiers));
-		str_format(aBuf, sizeof(aBuf), "%s%s", aModifiers, Input()->KeyName(NewKey));
+		GameClient()->m_Binds.GetKeyBindName(NewKey, *pNewModifierCombination, aBuf, sizeof(aBuf));
 	}
 
 	const ColorRGBA Color = m_Binder.m_pKeyReaderId == pId && m_Binder.m_TakeKey ? ColorRGBA(0.0f, 1.0f, 0.0f, 0.4f) : ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f * Ui()->ButtonColorMul(pId));

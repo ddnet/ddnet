@@ -2,10 +2,9 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_PLAYERS_H
 #define GAME_CLIENT_COMPONENTS_PLAYERS_H
-#include <game/client/component.h>
-
 #include <generated/protocol.h>
 
+#include <game/client/component.h>
 #include <game/client/render.h>
 
 class CPlayers : public CComponent
@@ -31,8 +30,7 @@ class CPlayers : public CComponent
 	void RenderHookCollLine(
 		const CNetObj_Character *pPrevChar,
 		const CNetObj_Character *pPlayerChar,
-		int ClientId,
-		float Intra = 0.f);
+		int ClientId);
 	bool IsPlayerInfoAvailable(int ClientId) const;
 
 	int m_WeaponEmoteQuadContainerIndex;

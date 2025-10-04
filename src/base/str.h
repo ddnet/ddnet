@@ -112,7 +112,7 @@ int str_isallnum_hex(const char *str);
  *
  * @return `1` if the character is whitespace, `0` otherwise.
  *
- * @remark The following characters are considered whitespace: ' ', '\n', '\r', '\t'.
+ * @remark The following characters are considered whitespace: ` `, `\n`, `\r`, `\t`.
  */
 int str_isspace(char c);
 
@@ -157,7 +157,7 @@ void str_sanitize_cc(char *str);
 
 /**
  * Replaces all characters below 32 with whitespace with
- * exception to \t, \n and \r.
+ * exception to `\t`, `\n` and `\n`.
  *
  * @ingroup Strings
  *
@@ -460,7 +460,7 @@ int str_in_list(const char *list, const char *delim, const char *needle);
  *
  * @remark The strings are treated as null-terminated strings.
  */
-bool str_delimiters_around_offset(const char *haystay, const char *delim, int offset, int *start, int *end);
+bool str_delimiters_around_offset(const char *haystack, const char *delim, int offset, int *start, int *end);
 
 /**
  * Finds the last occurrence of a character
@@ -533,7 +533,7 @@ void str_hex_cstyle(char *dst, int dst_size, const void *data, int data_size, in
  *
  * @param dst Buffer for the byte array.
  * @param dst_size size of the buffer.
- * @param data String to decode.
+ * @param src String to decode.
  *
  * @return `2` if string doesn't exactly fit the buffer.
  * @return `1` if invalid character in string.
@@ -551,7 +551,7 @@ int str_hex_decode(void *dst, int dst_size, const char *src);
  * @param dst Buffer to fill with base64 data.
  * @param dst_size Size of the buffer.
  * @param data Data to turn into base64.
- * @param data Size of the data.
+ * @param data_size Size of the data.
  *
  * @remark The destination buffer will be null-terminated
  */
@@ -599,6 +599,7 @@ unsigned str_quickhash(const char *str);
  * @ingroup Strings
  *
  * @param ptr Pointer to a buffer that should receive the data. Should be able to hold at least 4 bytes.
+ * @param chr Unicode codepoint to encode.
  *
  * @return Number of bytes put into the buffer.
  *
@@ -628,7 +629,7 @@ int str_utf8_decode(const char **ptr);
  *
  * @param dst Pointer to a buffer that shall receive the string.
  * @param dst_size Size of the buffer dst.
- * @param str String to be truncated.
+ * @param src String to be truncated.
  * @param truncation_len Maximum codepoints in the returned string.
  *
  * @remark The strings are treated as utf8-encoded null-terminated strings.
@@ -666,7 +667,7 @@ void str_utf8_trim_right(char *param);
  *
  * @ingroup Strings
  *
- * @param str String to convert to lowercase.
+ * @param input String to convert to lowercase.
  * @param output Buffer that will receive the lowercase string.
  * @param size Size of the output buffer.
  *
