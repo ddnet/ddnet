@@ -588,15 +588,21 @@ void CCharacterCore::Move()
 							// set to pos before collision with other tee
 							NewPos = LastPos;
 						}
-						else if(!(distance(NewPos, pCharCore->m_Pos) > D))
+						else if(distance(NewPos, pCharCore->m_Pos) > D)
+						{
+							// We are currently stuck in another tee. Just set our pos to NewPos
+							goto endmove;
+						}
+						else
 						{
 							// NaN-safty in move
 							// Is safe, if the distance is zero and the NaN is created by 0 / 0.0
 							// all values multiplied or checked stay NaN, so no new position is set
-							break;
+							NewPos = m_Pos;
+							goto endmove;
 						}
 
-						if(NewPos != m_Pos && m_pCollision->TestBox(NewPos, PhysicalSizeVec2()))
+						if(m_pCollision->TestBox(NewPos, PhysicalSizeVec2()))
 						{
 							// Handle Tee getting Stuck by redoing collision check with walls alongside with player
 							// reset velocity / position
@@ -624,7 +630,8 @@ void CCharacterCore::Move()
 									m_Tuning.m_GroundElasticityY),
 								&Grounded, Collide);
 						}
-						break;
+
+						goto endmove;
 					}
 				}
 				LastPos = Pos;
@@ -632,6 +639,7 @@ void CCharacterCore::Move()
 		}
 	}
 
+endmove:
 	m_Vel.x = m_Vel.x * (1.0f / RampValue);
 	m_Pos = NewPos;
 }
