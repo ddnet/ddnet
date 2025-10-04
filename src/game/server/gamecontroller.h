@@ -62,8 +62,8 @@ protected:
 		float m_Score;
 	};
 
-	float EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos, int DDTeam);
-	void EvaluateSpawnType(CSpawnEval *pEval, ESpawnType SpawnType, int DDTeam);
+	float EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos, int ClientId);
+	void EvaluateSpawnType(CSpawnEval *pEval, ESpawnType SpawnType, int ClientId);
 
 	void ResetGame();
 
@@ -142,7 +142,7 @@ public:
 	virtual void Snap(int SnappingClient);
 
 	//spawn
-	virtual bool CanSpawn(int Team, vec2 *pOutPos, int DDTeam);
+	virtual bool CanSpawn(int Team, vec2 *pOutPos, int ClientId);
 
 	virtual void DoTeamChange(class CPlayer *pPlayer, int Team, bool DoChatMsg = true);
 
