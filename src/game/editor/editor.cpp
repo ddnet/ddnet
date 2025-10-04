@@ -5192,7 +5192,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 	static int s_ActiveChannels = 0xf;
 	{
 		CUIRect Button;
-		std::shared_ptr<CEnvelope> pNewEnv = nullptr;
 
 		// redo button
 		ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
@@ -5215,8 +5214,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		static int s_NewSoundButton = 0;
 		if(DoButton_Editor(&s_NewSoundButton, "Sound+", 0, &Button, BUTTONFLAG_LEFT, "Create a new sound envelope."))
 		{
-			m_Map.OnModify();
-			pNewEnv = m_Map.NewEnvelope(CEnvelope::EType::SOUND);
+			m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionEnvelopeAdd>(this, CEnvelope::EType::SOUND));
+			pEnvelope = m_Map.m_vpEnvelopes[m_SelectedEnvelope];
 		}
 
 		ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
@@ -5224,8 +5223,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		static int s_New4dButton = 0;
 		if(DoButton_Editor(&s_New4dButton, "Color+", 0, &Button, BUTTONFLAG_LEFT, "Create a new color envelope."))
 		{
-			m_Map.OnModify();
-			pNewEnv = m_Map.NewEnvelope(CEnvelope::EType::COLOR);
+			m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionEnvelopeAdd>(this, CEnvelope::EType::COLOR));
+			pEnvelope = m_Map.m_vpEnvelopes[m_SelectedEnvelope];
 		}
 
 		ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
@@ -5233,8 +5232,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		static int s_New2dButton = 0;
 		if(DoButton_Editor(&s_New2dButton, "Pos.+", 0, &Button, BUTTONFLAG_LEFT, "Create a new position envelope."))
 		{
-			m_Map.OnModify();
-			pNewEnv = m_Map.NewEnvelope(CEnvelope::EType::POSITION);
+			m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionEnvelopeAdd>(this, CEnvelope::EType::POSITION));
+			pEnvelope = m_Map.m_vpEnvelopes[m_SelectedEnvelope];
 		}
 
 		if(m_SelectedEnvelope >= 0)
@@ -5321,22 +5320,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 			// Margin on the right side
 			ToolBar.VSplitRight(7.0f, &ToolBar, nullptr);
-		}
-
-		if(pNewEnv) // add the default points
-		{
-			if(pNewEnv->GetChannels() == 4)
-			{
-				pNewEnv->AddPoint(CFixedTime::FromSeconds(0.0f), {f2fx(1.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f)});
-				pNewEnv->AddPoint(CFixedTime::FromSeconds(1.0f), {f2fx(1.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f)});
-			}
-			else
-			{
-				pNewEnv->AddPoint(CFixedTime::FromSeconds(0.0f), {0, 0, 0, 0});
-				pNewEnv->AddPoint(CFixedTime::FromSeconds(1.0f), {0, 0, 0, 0});
-			}
-
-			m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeAdd>(this, pNewEnv));
 		}
 
 		CUIRect Shifter, Inc, Dec;

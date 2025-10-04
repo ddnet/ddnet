@@ -44,9 +44,19 @@ void CEditorMap::ResetModifiedState()
 std::shared_ptr<CEnvelope> CEditorMap::NewEnvelope(CEnvelope::EType Type)
 {
 	OnModify();
-	std::shared_ptr<CEnvelope> pEnv = std::make_shared<CEnvelope>(Type);
-	m_vpEnvelopes.push_back(pEnv);
-	return pEnv;
+	std::shared_ptr<CEnvelope> pEnvelope = std::make_shared<CEnvelope>(Type);
+	if(Type == CEnvelope::EType::COLOR)
+	{
+		pEnvelope->AddPoint(CFixedTime::FromSeconds(0.0f), {f2fx(1.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f)});
+		pEnvelope->AddPoint(CFixedTime::FromSeconds(1.0f), {f2fx(1.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f)});
+	}
+	else
+	{
+		pEnvelope->AddPoint(CFixedTime::FromSeconds(0.0f), {0, 0, 0, 0});
+		pEnvelope->AddPoint(CFixedTime::FromSeconds(1.0f), {0, 0, 0, 0});
+	}
+	m_vpEnvelopes.push_back(pEnvelope);
+	return pEnvelope;
 }
 
 void CEditorMap::InsertEnvelope(int Index, std::shared_ptr<CEnvelope> &pEnvelope)
