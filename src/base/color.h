@@ -3,7 +3,6 @@
 #define BASE_COLOR_H
 
 #include <base/math.h>
-#include <base/vmath.h>
 
 #include <optional>
 #include <type_traits>
@@ -62,16 +61,6 @@ public:
 	{
 	}
 
-	constexpr color4_base(const vec4 &v4) :
-		x(v4.x), y(v4.y), z(v4.z), a(v4.w)
-	{
-	}
-
-	constexpr color4_base(const vec3 &v3) :
-		x(v3.x), y(v3.y), z(v3.z), a(1.0f)
-	{
-	}
-
 	constexpr color4_base(float nx, float ny, float nz, float na) :
 		x(nx), y(ny), z(nz), a(na)
 	{
@@ -96,8 +85,6 @@ public:
 	requires(!std::is_same_v<DerivedT, OtherDerivedT>)
 		color4_base(const color4_base<OtherDerivedT> &Other) = delete;
 
-	constexpr vec4 v4() const { return vec4(x, y, z, a); }
-	constexpr operator vec4() const { return vec4(x, y, z, a); }
 	constexpr float &operator[](int index)
 	{
 		return ((float *)this)[index];
@@ -239,43 +226,44 @@ constexpr ColorHSLA color_cast(const ColorRGBA &rgb)
 template<>
 constexpr ColorRGBA color_cast(const ColorHSLA &hsl)
 {
-	vec3 rgb = vec3(0, 0, 0);
-
 	float h1 = hsl.h * 6;
 	float c = (1.f - absolute(2 * hsl.l - 1)) * hsl.s;
 	float x = c * (1.f - absolute(std::fmod(h1, 2) - 1.f));
 
+	float r = 0.0f;
+	float g = 0.0f;
+	float b = 0.0f;
 	switch(round_truncate(h1))
 	{
 	case 0:
-		rgb.r = c;
-		rgb.g = x;
+		r = c;
+		g = x;
 		break;
 	case 1:
-		rgb.r = x;
-		rgb.g = c;
+		r = x;
+		g = c;
 		break;
 	case 2:
-		rgb.g = c;
-		rgb.b = x;
+		g = c;
+		b = x;
 		break;
 	case 3:
-		rgb.g = x;
-		rgb.b = c;
+		g = x;
+		b = c;
 		break;
 	case 4:
-		rgb.r = x;
-		rgb.b = c;
+		r = x;
+		b = c;
 		break;
 	case 5:
 	case 6:
-		rgb.r = c;
-		rgb.b = x;
+		r = c;
+		b = x;
 		break;
 	}
 
 	float m = hsl.l - (c / 2);
-	return ColorRGBA(rgb.r + m, rgb.g + m, rgb.b + m, hsl.a);
+	return ColorRGBA(r + m, g + m, b + m, hsl.a);
 }
 
 template<>

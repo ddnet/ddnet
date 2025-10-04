@@ -114,7 +114,8 @@ static ColorRGBA DetermineBloodColor(int PartType, const CImageInfo &Info)
 		}
 	}
 
-	return ColorRGBA(normalize(vec3(aColors[0], aColors[1], aColors[2])));
+	const vec3 NormalizedColor = normalize(vec3(aColors[0], aColors[1], aColors[2]));
+	return ColorRGBA(NormalizedColor.x, NormalizedColor.y, NormalizedColor.z);
 }
 
 bool CSkins7::LoadSkinPart(int PartType, const char *pName, int DirType)
