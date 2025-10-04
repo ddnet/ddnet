@@ -53,7 +53,7 @@ Call vote
 == 發起投票
 
 Change settings
-== 變更設定
+== 更改設定
 
 Chat
 == 聊天
@@ -263,7 +263,7 @@ No servers found
 == 未檢測到任何伺服器
 
 No servers match your filter criteria
-== 沒有伺服器滿足設定的過濾條件
+== 沒有伺服器符合設定的篩選條件
 
 Ok
 == 確定
@@ -329,7 +329,7 @@ Rename demo
 == 重新命名回放
 
 Reset filter
-== 重置過濾器
+== 重置篩選
 
 Score
 == 分數
@@ -395,7 +395,7 @@ Stop record
 == 停止錄製
 
 Strict gametype filter
-== 嚴格過濾遊戲模式
+== 嚴格篩選遊戲模式
 
 Sudden Death
 == 決勝
@@ -926,7 +926,7 @@ Show others (own team only)
 == 顯示其他玩家 (僅同隊伍)
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 使用 k鍵 自殺以重新開始，使用 q鍵 可以暫停以旁觀他人或檢視地圖。 請在設定中檢視其他按鍵。
+== 使用 K鍵 自殺以重新開始，使用 Q鍵 可以暫停以旁觀他人或檢視地圖。 請在設定中檢視其他按鍵。
 
 https://wiki.ddnet.org/
 == https://wiki.ddnet.org/wiki/Main_Page/zh
@@ -975,7 +975,7 @@ Replay
 == 回放
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== 偵錯模式已啟用。按 Ctrl+Shift+D 禁用偵錯模式。
+== 偵錯模式已啟用。按下 Ctrl+Shift+D 關閉偵錯模式。
 
 Existing Player
 == 玩家已存在
@@ -1155,7 +1155,7 @@ Allows maps to render with more detail
 == 允許地圖渲染更多細節
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== 當越過起跑綫時，游戲裏將有影子回放你的最佳成績
+== 當越過起跑線時，游戲裏將有影子回放你的最佳成績
 
 Opacity
 == 不透明度
@@ -1304,7 +1304,7 @@ Requesting to join the game
 == 正在請求加入游戲
 
 Loading menu images
-== 正在載入主菜單圖片
+== 正在載入主選單圖片
 
 Loading demo files
 == 正在載入回放檔案
@@ -1418,7 +1418,7 @@ Freeze Laser Inner Color
 == 凍結鐳射實心顔色
 
 Menu opened. Press Esc key again to close menu.
-== 菜單已打開，再次點擊 Esc 以關閉
+== 選單已打開，再次按下 Esc 以關閉
 
 Set all to Rifle
 == 統一為鐳射槍顔色
@@ -1430,16 +1430,16 @@ File '%s' already exists, do you want to overwrite it?
 == 檔案名 "%s" 已經存在，是否要取代該檔案？
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== 你確定要將好友 "%s" 從你的好友列表中移除？
+== 確定要將好友 "%s" 從你的好友列表中移除？
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== 你確定要將戰隊 "%s" 從你的好友列表中移除？
+== 確定要將戰隊 "%s" 從你的好友列表中移除？
 
 Go back one tick
-== 上一個 tick
+== 上一刻點
 
 Go forward one tick
-== 下一個 tick
+== 下一刻點
 
 Go back one marker
 == 返回上一個標記
@@ -1528,11 +1528,11 @@ Create a random skin
 == 隨機創造外觀
 
 Online clanmates (%d)
-== 在綫戰隊隊友 (%d)
+== 在線戰隊隊友 (%d)
 
 [friends (server browser)]
 Offline (%d)
-== 離綫（%d）
+== 離線（%d）
 
 Click to select server. Double click to join your friend.
 == 點擊以選擇伺服器，雙擊以直接加入好友所在伺服器
@@ -1619,10 +1619,10 @@ Error playing demo
 == 回放播放錯誤
 
 Some map images could not be loaded. Check the local console for details.
-== 未能載入某些地圖圖片。檢查本機控制台以取得詳情。
+== 未能載入部分地圖圖片。檢查本機控制台以取得詳情。
 
 Some map sounds could not be loaded. Check the local console for details.
-== 未能載入某些地圖音效。檢查本機控制台以取得詳情。
+== 未能載入部分地圖音效。檢查本機控制台以取得詳情。
 
 Loading menu themes
 == 正在載入主選單主題
@@ -1648,7 +1648,7 @@ Go back the specified duration
 == %s 秒
 
 Change the skip duration
-== 變更指定時長
+== 更改指定時長
 
 Go forward the specified duration
 == 快轉指定時長
@@ -1772,7 +1772,7 @@ Main menu
 == 主選單
 
 Server filter
-== 伺服器過濾器
+== 伺服器篩選器
 
 Friends
 == 好友
@@ -1841,7 +1841,7 @@ https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/index.php?title=Mapping/zh&variant=zh-hant
 
 Could not resolve connect address '%s'. See local console for details.
-== 無法解析連線地址 '%s'。檢查本機控制台以取得詳情。
+== 無法解析連線地址 "%s" 。檢查本機控制台以取得詳情。
 
 Connect address error
 == 連線地址錯誤
@@ -1859,7 +1859,7 @@ Show client IDs (scoreboard, chat, spectator)
 == 顯示客戶端 ID（計分板、聊天、旁觀者）
 
 Are you sure that you want to delete '%s'?
-== 你確定要刪除'%s'嗎？
+== 確定要刪除 "%s" 嗎？
 
 Delete skin
 == 刪除外觀
@@ -1874,16 +1874,16 @@ Unable to delete skin
 == 無法刪除外觀
 
 Save skin
-== 保存外觀
+== 儲存外觀
 
 Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== 你確定要保存外觀嗎？如果已存在同名外觀，將會被替換。
+== 確定要儲存外觀嗎？如果已存在同名外觀，將會被替換。
 
 Unable to save the skin
-== 無法保存外觀
+== 無法儲存外觀
 
 Unable to save the skin with a reserved name
-== 無法保存使用保留名稱的外觀
+== 無法儲存使用保留名稱的外觀
 
 No local servers found (ports %d-%d)
 == 未找到本地伺服器（端口 %d-%d）
@@ -1917,7 +1917,7 @@ Eyes
 == 眼睛
 
 Some fonts could not be loaded. Check the local console for details.
-== 未能載入某些字體。檢查本機控制台以取得詳情。
+== 未能載入部分字體。檢查本機控制台以取得詳情。
 
 Online friends (%d)
 == 在線好友（%d人）
@@ -1929,43 +1929,43 @@ Add clanmates by entering their clan below and leaving the name blank.
 == 在下方輸入戰隊名並留空名稱即可添加戰隊
 
 Edit touch controls
-== 編輯觸控設置
+== 編輯觸控設定
 
 Close
 == 關閉
 
 Save changes
-== 保存更改
+== 儲存更改
 
 Error saving touch controls
-== 保存觸控設置錯誤
+== 儲存觸控設定錯誤
 
 Could not save touch controls to file. See local console for details.
-== 無法將觸控設置保存到文件。檢查本機控制台以取得詳情。
+== 無法將觸控設定儲存到文件。檢查本機控制台以取得詳情。
 
 Unsaved changes
-== 更改未保存
+== 未儲存更改
 
 Discard changes
 == 放棄更改
 
 Are you sure that you want to discard the current changes to the touch controls?
-== 確定要放棄當前對觸控設置的更改嗎？
+== 確定要放棄當前對觸控設定的更改嗎？
 
 Are you sure that you want to reset the touch controls to default?
-== 確定要將觸控設置重置為默認設置嗎？
+== 確定要將觸控設定重置為默認設定嗎？
 
 Import from clipboard
 == 從剪貼簿導入
 
 Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
-== 確定要從剪貼簿導入觸控設置嗎？這將覆蓋當前的觸控設置。
+== 確定要從剪貼簿導入觸控設定嗎？這將覆蓋當前的觸控設定。
 
 Export to clipboard
-== 導出到剪貼簿
+== 另存到剪貼簿
 
 Direct touch input while ingame
-== 遊戲時直接觸摸操作
+== 遊戲時直接觸控操作
 
 [Direct touch input]
 Disabled
@@ -1988,19 +1988,19 @@ Hook
 == 鉤索
 
 Direct touch input while spectating
-== 旁觀時直接觸摸操作
+== 旁觀時直接觸控操作
 
 Error loading touch controls
-== 加載觸控設置錯誤
+== 加載觸控設定錯誤
 
 Could not load touch controls from file. See local console for details.
-== 無法從文件加載觸控設置。檢查本機控制台以取得詳情。
+== 無法從文件加載觸控設定。檢查本機控制台以取得詳情。
 
 Could not load default touch controls from file. See local console for details.
-== 無法從文件加載默認觸控設置。檢查本機控制台以取得詳情。
+== 無法從文件加載默認觸控設定。檢查本機控制台以取得詳情。
 
 Could not load touch controls from clipboard. See local console for details.
-== 無法從剪貼板加載觸控設置。檢查本機控制台以取得詳情。
+== 無法從剪貼簿加載觸控設定。檢查本機控制台以取得詳情。
 
 Width of your own hook collision line
 == 自己的鉤索輔助線寬度
@@ -2018,10 +2018,10 @@ Active: Fire
 == 當前：開火
 
 Active: Hook
-== 當前：鉤鎖
+== 當前：鉤索
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
-== "%s" 與 pnglite 不兼容，無法被舊版本 DDNet 加載
+== "%s" 與pnglite不兼容，無法被舊版本DDNet加載
 
 [Spectating Camera Mode Icon]
 AUTO
@@ -2061,7 +2061,7 @@ Preview dummy's name plate
 == 預覽分身暱稱
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
-== 伺服器無法啟動。請確保在應用程式設置中授予通知權限，以便伺服器可以在後台運行。
+== 伺服器無法啟動。請確保在應用程式設定中授予通知權限，以便伺服器可以在後台運行。
 
 Auto-sync player camera
 == 自動同步玩家視角
@@ -2181,7 +2181,7 @@ AntiPing: prediction margin
 
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
-== 顯示記憶體不足。請嘗試將 'cl_skins_loaded_max' 設定為較低的值，或移除自定義資源（如外觀、實體等），尤其是高解析度的資源。
+== 顯示記憶體不足。請嘗試將 'cl_skins_loaded_max' 調低，或移除自定義材質（如外觀、實體等），尤其是高解析度的資源。
 
 This name cannot be used for files and folders
 == 此名稱不能用於檔案和資料夾
@@ -2221,269 +2221,269 @@ Could not check for existing player with your name. Check your internet connecti
 == 無法驗證是否已存在相同暱稱的玩家。請檢查你的網路連線。
 
 Press Ctrl+Shift+G to disable debug graphs.
-== 
+== 按下 Ctrl+Shift+G 關閉偵錯圖表。
 
 Server could not be started
-== 
+== 伺服器無法啟動
 
 Could not get server list from master server
-== 
+== 無法從主伺服器獲取伺服器列表
 
 [Demo playback]
 Live
-== 
+== 實時
 
 [Demo playback]
 Go to Live
-== 
+== 跳至實時
 
 Save all changes before turning off the editor?
-== 
+== 是否在關閉編輯器前儲存所有更改？
 
 Layout
-== 
+== 按鍵佈局
 
 Visibility
-== 
+== 顯示狀態
 
 Behavior
-== 
+== 按鍵功能
 
 Delete button
-== 
+== 刪除按鍵
 
 Are you sure that you want to delete this button?
-== 
+== 確定要刪除該按鍵嗎？
 
 Duplicate
-== 
+== 複製
 
 New button already created
-== 
+== 已經創建新按鍵
 
 A new button has already been created, please save or delete it before creating another one.
-== 
+== 已經創建一個新按鍵，請在創建其它新按鍵前儲存或刪除。
 
 Please save your changes before duplicating a button.
-== 
+== 請在複製按鍵前儲存或刪除。
 
 No space for button
-== 
+== 按鍵空間不足
 
 There is not enough space available to place another button.
-== 
+== 螢幕空間不足，無法放置新按鍵。
 
 There is not enough space available to place another button with this size. The button has been resized.
-== 
+== 螢幕空間不足，無法放置此尺寸新按鍵。新按鍵尺寸已調整。
 
 Deselect
-== 
+== 離開更改
 
 You'll lose unsaved changes after deselecting.
-== 
+== 未儲存更改在離開後將會丟失。
 
 Width
-== 
+== 寬度
 
 Height
-== 
+== 高度
 
 Shape
-== 
+== 形狀
 
 [Touch button shape]
 Rectangle
-== 
+== 矩形
 
 [Touch button shape]
 Circle
-== 
+== 圓形
 
 [Touch button label type]
 Plain
-== 
+== 純文字
 
 [Touch button label type]
 Localized
-== 
+== 本地化文字
 
 [Touch button label type]
 Icon
-== 
+== 圖示
 
 Behavior type
-== 
+== 功能類型
 
 [Touch button behavior]
 Bind
-== 
+== 綁定
 
 [Touch button behavior]
 Bind Toggle
-== 
+== 綁定切換
 
 [Touch button behavior]
 Predefined
-== 
+== 預設功能
 
 Command
-== 
+== 指令
 
 Label
-== 
+== 標籤
 
 Label type
-== 
+== 標籤類型
 
 Add command
-== 
+== 新增指令
 
 Delete command
-== 
+== 刪除指令
 
 [Touch button visibility preview]
 Included
-== 
+== 顯示
 
 [Touch button visibility preview]
 Excluded
-== 
+== 隱藏
 
 [Touch button visibility preview]
 Ignore
-== 
+== 忽略
 
 Long press on a touch button to select it.
-== 
+== 長按觸控按鍵以選擇
 
 New button
-== 
+== 新增按鍵
 
 Select button by touch
-== 
+== 在螢幕上選擇按键
 
 No buttons match your filter criteria
-== 
+== 沒有按键符合設定的篩選條件
 
 File
-== 
+== 檔案
 
 Buttons
-== 
+== 按鍵
 
 Active color
-== 
+== 按鍵啟用時顏色
 
 Inactive color
-== 
+== 按鍵未啟用時顏色
 
 Preview button visibility while the editor is active.
-== 
+== 在編輯器打開時預覽按鍵顯示狀態
 
 Show all buttons
-== 
+== 顯示所有按鍵
 
 Save all changes before switching selected button?
-== 
+== 是否在切換所選按鍵前儲存目前更改？
 
 Discard
-== 
+== 放棄更改
 
 There is not enough space available for the button. Check its visibilities and size.
-== 
+== 按鍵可用空間不足。請檢查其顯示狀態與尺寸。
 
 Selected button not visible
-== 
+== 所選按鍵不可見
 
 The selected button is not visible. Do you want to deselect it or edit its visibility?
-== 
+== 所選按鍵不可見。你要離開更改它，或編輯其顯示狀態？
 
 Edit
-== 
+== 編輯
 
 Width and height are required to be within the range from %d to %d.
-== 
+== 寬度與高度必須介於%d到%d的範圍內。
 
 Button position is outside of the screen.
-== 
+== 按鍵位置超出螢幕範圍。
 
 The selected button is overlapping with other buttons.
-== 
+== 所選按鍵與其它按鍵重疊。
 
 Wrong button settings
-== 
+== 按鍵設定錯誤
 
 [Touch button visibilities]
 Ingame
-== 
+== 在遊戲内時
 
 [Touch button visibilities]
 Zoom Allowed
-== 
+== 允許縮放時
 
 [Touch button visibilities]
 Vote Active
-== 
+== 投票進行時
 
 [Touch button visibilities]
 Dummy Allowed
-== 
+== 允許分身時
 
 [Touch button visibilities]
 Dummy Connected
-== 
+== 分身已連線
 
 [Touch button visibilities]
 Rcon Authed
-== 
+== 登入遠控檯
 
 [Touch button visibilities]
 Demo Player
-== 
+== 播放回放時
 
 [Touch button visibilities]
 Extra Menu
-== 
+== 額外選單
 
 [Predefined touch button behaviors]
 Ingame Menu
-== 
+== 遊戲内選單
 
 [Predefined touch button behaviors]
 Extra Menu
-== 
+== 額外選單
 
 [Predefined touch button behaviors]
 Emoticon
-== 
+== 表情選單
 
 [Predefined touch button behaviors]
 Spectate
-== 
+== 旁觀選單
 
 [Predefined touch button behaviors]
 Swap Action
-== 
+== 切換動作
 
 [Predefined touch button behaviors]
 Use Action
-== 
+== 執行動作
 
 [Predefined touch button behaviors]
 Joystick Action
-== 
+== 搖桿動作
 
 [Predefined touch button behaviors]
 Joystick Aim
-== 
+== 搖桿瞄準
 
 [Predefined touch button behaviors]
 Joystick Fire
-== 
+== 搖桿開火
 
 [Predefined touch button behaviors]
 Joystick Hook
-== 
+== 搖桿鉤索
 
 Chat background color
-== 
+== 聊天框背景顏色
