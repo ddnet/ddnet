@@ -374,7 +374,7 @@ public:
 	void GiveXP(int64_t Amount, const char *pMessage = "");
 	bool CheckLevelUp(int64_t Amount, bool Silent = false);
 	void GiveMoney(int64_t Amount, const char *pMessage = "", bool Multiplier = true);
-	void TakeMoney(int64_t Amount, const char *pMessage = "");
+	void TakeMoney(int64_t Amount, bool Silent = true, const char *pMessage = "");
 
 	bool OwnsItem(const char *pItemName);
 	bool ToggleItem(const char *pItemName, int Set, bool IgnoreAccount = false);

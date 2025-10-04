@@ -922,7 +922,7 @@ public:
 	bool IncludedInServerInfo(int ClientId) override;
 	void OnPreShutdown() override;
 
-	void ClearVotes(int ClientId);
+	void ClearVotes(int ClientId, bool Header = true);
 	void SendEmote(int ClientId, int Type);
 
 	void CreateIndEffect(int Type, vec2 Pos, vec2 Direction, CClientMask Mask);

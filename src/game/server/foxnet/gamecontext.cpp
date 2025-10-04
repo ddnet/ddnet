@@ -323,21 +323,22 @@ void CGameContext::FoxNetPostGlobalSnap()
 	}
 }
 
-void CGameContext::ClearVotes(int ClientId)
+void CGameContext::ClearVotes(int ClientId, bool Header)
 {
 	if(ClientId == -1)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if(m_apPlayers[i] && !Server()->ClientSlotEmpty(i))
-				ClearVotes(i);
+				ClearVotes(i, Header);
 		}
 		return;
 	}
 
 	CNetMsg_Sv_VoteClearOptions ClearMsg;
 	Server()->SendPackMsg(&ClearMsg, MSGFLAG_VITAL, ClientId);
-	m_VoteMenu.AddHeader(ClientId);
+	if(Header)
+		m_VoteMenu.AddHeader(ClientId);
 }
 
 bool CGameContext::ChatDetection(int ClientId, const char *pMsg)

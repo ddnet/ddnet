@@ -242,7 +242,7 @@ void CRoulette::EvaluateBets()
 		if(Win)
 			pPl->GiveMoney((Amount * PayoutMultiplier) - Amount, "", false);
 		else
-			pPl->TakeMoney(Amount);
+			pPl->TakeMoney(Amount, false);
 	}
 	m_Betters = 0;
 	m_TotalWager = 0;

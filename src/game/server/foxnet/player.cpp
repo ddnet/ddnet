@@ -182,7 +182,7 @@ void CPlayer::GiveMoney(int64_t Amount, const char *pMessage, bool Multiplier)
 	GameServer()->m_AccountManager.SaveAccountsInfo(m_ClientId, *Acc());
 }
 
-void CPlayer::TakeMoney(int64_t Amount, const char *pMessage)
+void CPlayer::TakeMoney(int64_t Amount, bool Silent, const char *pMessage)
 {
 	if(!Acc()->m_LoggedIn)
 		return;
@@ -200,7 +200,7 @@ void CPlayer::TakeMoney(int64_t Amount, const char *pMessage)
 	}
 
 	CCharacter *pChr = GetCharacter();
-	if(pChr)
+	if(!Silent && pChr)
 	{
 		const vec2 Pos = pChr->m_Pos + vec2(0, -74);
 		char aText[66];

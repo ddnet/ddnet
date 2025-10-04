@@ -32,7 +32,11 @@ enum AdminSubPages
 	SUB_ADMIN_UTIL = 0,
 	SUB_ADMIN_MISC,
 	SUB_ADMIN_COSMETICS,
-	NUM_SUB_PAGES,
+};
+enum ShopSubPages
+{
+	SUB_SHOP_MAIN = 0,
+	SUB_SHOP_ITEMINFO,
 };
 
 enum BulletPoints
@@ -75,6 +79,7 @@ class CVoteMenu
 	};
 	ClientData m_aClientData[MAX_CLIENTS];
 	std::vector<std::string> m_vDescriptions;
+	CItems *m_pLastItemInfo = nullptr;
 
 	bool IsPageAllowed(int ClientId, int Page) const;
 
@@ -100,7 +105,7 @@ class CVoteMenu
 	void UpdatePages(int ClientId);
 
 	int GetSubPage(int ClientId) const;
-	void SetSubPage(int ClientId, int Page);
+	void SetSubPage(int ClientId, int Page, bool SendVotes = false);
 
 	bool CanUseCmd(int ClientId, const char *pCmd) const;
 
@@ -116,6 +121,9 @@ public:
 	void OnClientDrop(int ClientId);
 	void Init(CGameContext *pGameServer);
 	bool OnCallVote(const CNetMsg_Cl_CallVote *pMsg, int ClientId);
+
+	bool SendHeader(int ClientId);
+
 	bool IsCustomVoteOption(const CNetMsg_Cl_CallVote *pMsg, int ClientId);
 };
 

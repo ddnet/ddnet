@@ -117,21 +117,24 @@ enum ItemTypes
 
 class CItems
 {
-	char m_Item[32] = "";
+	char m_aItem[32] = "";
+	char m_aDescription[64] = "";
 	int m_Type = 0;
 	int m_Price = 0;
 	int m_MinLevel = 0;
 
 public:
-	CItems(const char *pShopItem, int pItemType, int pPrice, int pMinLevel)
+	CItems(const char *pShopItem, int pItemType, int pPrice, const char *pDesc, int pMinLevel = 0)
 	{
-		str_copy(m_Item, pShopItem);
+		str_copy(m_aItem, pShopItem);
+		str_copy(m_aDescription, pDesc);
 		m_Type = pItemType;
 		m_Price = pPrice;
 		m_MinLevel = pMinLevel;
 	}
 
-	const char *Name() const { return m_Item; }
+	const char *Name() const { return m_aItem; }
+	const char *Description() const { return m_aDescription; }
 	int Type() const { return m_Type; }
 
 	int Price() const { return m_Price; }

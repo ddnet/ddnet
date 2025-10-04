@@ -15,42 +15,41 @@ IServer *CShop::Server() const { return GameServer()->Server(); }
 void CShop::Init(CGameContext *pGameServer)
 {
 	m_pGameServer = pGameServer;
-
 	if(m_Items.empty())
 		AddItems();
 }
 
 void CShop::AddItems()
 {
-	m_Items.push_back(new CItems("Rainbow Feet", TYPE_RAINBOW, 750, 2));
-	m_Items.push_back(new CItems("Rainbow Body", TYPE_RAINBOW, 1250, 4));
-	m_Items.push_back(new CItems("Rainbow Hook", TYPE_RAINBOW, 1500, 5));
+	m_Items.push_back(new CItems("Rainbow Feet", TYPE_RAINBOW, 750, "Makes your body Rainbow", 2));
+	m_Items.push_back(new CItems("Rainbow Body", TYPE_RAINBOW, 1250, "Makes your feet Rainbow", 4));
+	m_Items.push_back(new CItems("Rainbow Hook", TYPE_RAINBOW, 1500, "Anyone you hook is Rainbow", 5));
 
-	m_Items.push_back(new CItems("Emoticon Gun", TYPE_GUN, 1550, 10));
-	m_Items.push_back(new CItems("Confetti Gun", TYPE_GUN, 2000, 10));
-	m_Items.push_back(new CItems("Phase Gun", TYPE_GUN, 1000, 5));
+	m_Items.push_back(new CItems("Emoticon Gun", TYPE_GUN, 1550, "Shoot emotions at people", 10));
+	m_Items.push_back(new CItems("Confetti Gun", TYPE_GUN,  2000,"Party gun!", 10));
+	m_Items.push_back(new CItems("Phase Gun", TYPE_GUN, 1000, "Your bullets defy physics", 5));
 
-	m_Items.push_back(new CItems("Clockwise Indicator", TYPE_INDICATOR, 1500, 5));
-	m_Items.push_back(new CItems("Counter Clockwise Indicator", TYPE_INDICATOR, 1500, 5));
-	m_Items.push_back(new CItems("Inward Turning Indicator", TYPE_INDICATOR, 3000, 15));
-	m_Items.push_back(new CItems("Outward Turning Indicator", TYPE_INDICATOR, 3000, 15));
-	m_Items.push_back(new CItems("Line Indicator", TYPE_INDICATOR, 2500, 10));
-	m_Items.push_back(new CItems("Criss Cross Indicator", TYPE_INDICATOR, 2500, 10));
+	m_Items.push_back(new CItems("Clockwise Indicator", TYPE_INDICATOR, 1500, "Clockwise bullet hit effect", 5));
+	m_Items.push_back(new CItems("Counter Clockwise Indicator", TYPE_INDICATOR,  1500, "Bullet hit effect goes Counter-Clockwise",5));
+	m_Items.push_back(new CItems("Inward Turning Indicator", TYPE_INDICATOR, 3000, "Bullet hit effect goes Inward", 15));
+	m_Items.push_back(new CItems("Outward Turning Indicator", TYPE_INDICATOR,  3000, "Bullet hit effect goes Outward",15));
+	m_Items.push_back(new CItems("Line Indicator", TYPE_INDICATOR, 2500, "Bullet hit effect goes in a Line", 10));
+	m_Items.push_back(new CItems("Criss Cross Indicator", TYPE_INDICATOR,  2500, "Criss Cross bullet hit effect",10));
 
-	m_Items.push_back(new CItems("Explosive Death", TYPE_DEATHS, 1250, 5));
-	m_Items.push_back(new CItems("Hammer Hit Death", TYPE_DEATHS, 1250, 5));
-	m_Items.push_back(new CItems("Indicator Death", TYPE_DEATHS, 1750, 10));
-	m_Items.push_back(new CItems("Laser Death", TYPE_DEATHS, 2250, 10));
+	m_Items.push_back(new CItems("Explosive Death", TYPE_DEATHS, 1250, "Go out with a Boom!", 5));
+	m_Items.push_back(new CItems("Hammer Hit Death", TYPE_DEATHS, 1250, "Hammer death", 5));
+	m_Items.push_back(new CItems("Indicator Death", TYPE_DEATHS, 1750, "Creates an 8 sided circle of damage indicators", 10));
+	m_Items.push_back(new CItems("Laser Death", TYPE_DEATHS, 2250, "Become wizard and summon lasers on death", 10));
 
-	m_Items.push_back(new CItems("Star Trail", TYPE_TRAIL, 2500, 5));
-	m_Items.push_back(new CItems("Dot Trail", TYPE_TRAIL, 2500, 5));
+	m_Items.push_back(new CItems("Star Trail", TYPE_TRAIL, 2500, "A trail of stars", 7));
+	m_Items.push_back(new CItems("Dot Trail", TYPE_TRAIL, 2500, "A dot trail", 7));
 
-	m_Items.push_back(new CItems("Sparkle", TYPE_OTHER, 1000, 5));
-	m_Items.push_back(new CItems("Heart Hat", TYPE_OTHER, 2250, 10));
-	m_Items.push_back(new CItems("Inverse Aim", TYPE_OTHER, 3500, 20));
-	m_Items.push_back(new CItems("Lovely", TYPE_OTHER, 2750, 15));
-	m_Items.push_back(new CItems("Rotating Ball", TYPE_OTHER, 3500, 10));
-	m_Items.push_back(new CItems("Epic Circle", TYPE_OTHER, 3500, 20));
+	m_Items.push_back(new CItems("Sparkle", TYPE_OTHER, 1000, "Makes you sparkle", 5));
+	m_Items.push_back(new CItems("Heart Hat", TYPE_OTHER, 2250, "A hat of hearts?", 10));
+	m_Items.push_back(new CItems("Inverse Aim", TYPE_OTHER, 3500, "Shows your aim backwards to others!", 20));
+	m_Items.push_back(new CItems("Lovely", TYPE_OTHER, 2750, "Spreading love huh?", 15));
+	m_Items.push_back(new CItems("Rotating Ball", TYPE_OTHER, 3500, "Ball rotate - life good", 15));
+	m_Items.push_back(new CItems("Epic Circle", TYPE_OTHER, 3500, "Really epic circle", 20));
 }
 
 void CShop::ResetItems()
@@ -170,8 +169,8 @@ const char *CShop::ShortcutToName(const char *pShortcut)
 void CShop::BuyItem(int ClientId, const char *pName)
 {
 	CAccountSession *pAcc = &GameServer()->m_aAccounts[ClientId];
-	const int Price = GetItemPrice(pName);
-	const int MinLevel = GetItemMinLevel(pName);
+	int Price = GetItemPrice(pName);
+	int MinLevel = GetItemMinLevel(pName);
 
 	if(!pAcc->m_LoggedIn)
 	{
@@ -255,7 +254,7 @@ void CShop::BuyItem(int ClientId, const char *pName)
 
 	pPl->TakeMoney(Price);
 
-	char AddItem[256];
+	char AddItem[64];
 	str_format(AddItem, sizeof(AddItem), "%s ", NameToShortcut(ItemName));
 	str_append(pAcc->m_Inventory, AddItem);
 

@@ -69,6 +69,9 @@ constexpr const char *ADMIN_ABILITY_SHIELD = "Shield Ability";
 constexpr const char *ADMIN_ABILITY_FIREWORK = "Firework Ability";
 constexpr const char *ADMIN_ABILITY_TELEKINESIS = "Telekinesis Ability";
 
+// Shop
+constexpr const char *SHOP_BACKPAGE = "↩ Back ↩";
+
 IServer *CVoteMenu::Server() const { return GameServer()->Server(); }
 
 void CVoteMenu::Init(CGameContext *pGameServer)
@@ -116,13 +119,8 @@ bool CVoteMenu::OnCallVote(const CNetMsg_Cl_CallVote *pMsg, int ClientId)
 
 const char *CVoteMenu::FormatItemVote(CItems *pItem, const CAccountSession *pAcc)
 {
-	static char aBuf[128];
-	char levelBuf[32] = "";
-
-	if(pItem->MinLevel() > 0)
-		str_format(levelBuf, sizeof(levelBuf), "Min lvl %d |", pItem->MinLevel());
-	str_format(aBuf, sizeof(aBuf), "%s  %s  | %d %s", levelBuf, pItem->Name(), pItem->Price(), g_Config.m_SvCurrencyName);
-
+	static char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "Buy Item [%ld]", (long)pItem->Price());
 	return aBuf;
 }
 
@@ -184,17 +182,35 @@ bool CVoteMenu::IsCustomVoteOption(const CNetMsg_Cl_CallVote *pMsg, int ClientId
 	}
 	else if(Page == PAGE_SHOP)
 	{
-		for(const auto &pItems : GameServer()->m_Shop.m_Items)
+		if(GetSubPage(ClientId) == SUB_SHOP_MAIN)
 		{
-			if(IsOption(pItems->Name(), ""))
-				continue;
-			if(pItems->Price() == -1)
-				continue;
-			const char *pVoteName = FormatItemVote(pItems, &Acc);
-
-			if(IsOption(pVote, pVoteName))
+			for(const auto &pItem : GameServer()->m_Shop.m_Items)
 			{
-				GameServer()->m_Shop.BuyItem(ClientId, pItems->Name());
+				if(IsOption(pItem->Name(), ""))
+					continue;
+				if(pItem->Price() == -1)
+					continue;
+				const char *pVoteName = pItem->Name();
+
+				if(IsOption(pVote, pVoteName))
+				{
+					m_pLastItemInfo = pItem;
+					SetSubPage(ClientId, SUB_SHOP_ITEMINFO);
+					return true;
+				}
+			}
+		}
+		else if(GetSubPage(ClientId) == SUB_SHOP_ITEMINFO)
+		{
+			if(IsOption(pVote, SHOP_BACKPAGE))
+			{
+				SetSubPage(ClientId, SUB_SHOP_MAIN);
+				return true;
+			}
+			if(IsOption(pVote, FormatItemVote(m_pLastItemInfo, &Acc)))
+			{
+				GameServer()->m_Shop.BuyItem(ClientId, m_pLastItemInfo->Name());
+				SetSubPage(ClientId, SUB_SHOP_MAIN);
 				return true;
 			}
 		}
@@ -516,6 +532,18 @@ bool CVoteMenu::IsPageAllowed(int ClientId, int Page) const
 	return true;
 }
 
+bool CVoteMenu::SendHeader(int ClientId)
+{
+	int Page = GetPage(ClientId);
+	int SubPage = GetSubPage(ClientId);
+
+	if(Page == PAGE_SHOP && SubPage == SUB_SHOP_ITEMINFO)
+		return false;
+
+
+	return true;
+}
+
 void CVoteMenu::PrepareVoteOptions(int ClientId, int Page)
 {
 	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
@@ -523,7 +551,7 @@ void CVoteMenu::PrepareVoteOptions(int ClientId, int Page)
 	if(Page < 0 || Page >= NUM_PAGES)
 		return;
 
-	GameServer()->ClearVotes(ClientId);
+	GameServer()->ClearVotes(ClientId, SendHeader(ClientId));
 	m_vDescriptions.clear();
 
 	switch(Page)
@@ -588,6 +616,27 @@ void CVoteMenu::SetPage(int ClientId, int Page)
 		Acc.m_VoteMenuPage = Page;
 
 	PrepareVoteOptions(ClientId, Page);
+}
+
+int CVoteMenu::GetSubPage(int ClientId) const
+{
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
+		return 0;
+	const int Page = m_aClientData[ClientId].m_Page;
+	return m_aClientData[ClientId].m_SubPage[Page];
+}
+
+void CVoteMenu::SetSubPage(int ClientId, int SubPage, bool SendVotes)
+{
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
+		return;
+	const int Page = m_aClientData[ClientId].m_Page;
+	if(Page < 0 || Page >= NUM_PAGES)
+		return;
+
+	m_aClientData[ClientId].m_SubPage[Page] = SubPage;
+	if(SendVotes)
+		PrepareVoteOptions(ClientId, Page);
 }
 
 void CVoteMenu::SendPageSettings(int ClientId)
@@ -675,94 +724,133 @@ void CVoteMenu::SendPageShop(int ClientId)
 		AddVoteText("2 - login using /login <Name> <Password>");
 		return;
 	}
-	std::vector<std::string> RainbowItems;
-	std::vector<std::string> GunItems;
-	std::vector<std::string> IndicatorItems;
-	std::vector<std::string> KillEffectItems;
-	std::vector<std::string> TrailItems;
-	std::vector<std::string> OtherItems;
 
-	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "%s: %ld", g_Config.m_SvCurrencyName, (long)pAcc->m_Money);
-	AddVoteText(aBuf);
-	AddVoteSeperator();
+	if(GetSubPage(ClientId) == SUB_SHOP_MAIN)
+	{
+		std::vector<std::string> RainbowItems;
+		std::vector<std::string> GunItems;
+		std::vector<std::string> IndicatorItems;
+		std::vector<std::string> KillEffectItems;
+		std::vector<std::string> TrailItems;
+		std::vector<std::string> OtherItems;
 
-	for(const auto &pItems : GameServer()->m_Shop.m_Items)
-	{
-		if(!str_comp(pItems->Name(), ""))
-			continue;
-		if(pItems->Price() == -1)
-			continue;
-		if(pPl->OwnsItem(pItems->Name()))
-			continue;
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "%ld %s", (long)pAcc->m_Money, g_Config.m_SvCurrencyName);
+		AddVoteText(aBuf);
+		AddVoteSeperator();
 
-		const char *pVoteName = FormatItemVote(pItems, pAcc);
+		for(const auto &pItems : GameServer()->m_Shop.m_Items)
+		{
+			if(!str_comp(pItems->Name(), ""))
+				continue;
+			if(pItems->Price() == -1)
+				continue;
+			if(pPl->OwnsItem(pItems->Name()))
+				continue;
 
-		if(pItems->Type() == TYPE_RAINBOW)
-			RainbowItems.push_back(std::string(pVoteName));
-		else if(pItems->Type() == TYPE_GUN)
-			GunItems.push_back(std::string(pVoteName));
-		else if(pItems->Type() == TYPE_INDICATOR)
-			IndicatorItems.push_back(std::string(pVoteName));
-		else if(pItems->Type() == TYPE_DEATHS)
-			KillEffectItems.push_back(std::string(pVoteName));
-		else if(pItems->Type() == TYPE_TRAIL)
-			TrailItems.push_back(std::string(pVoteName));
-		else
-			OtherItems.push_back(std::string(pVoteName));
-	}
-	if(!RainbowItems.empty())
-	{
-		AddVoteSubheader("Rᴀɪɴʙᴏᴡ");
-		for(const auto &Item : RainbowItems)
-		{
-			AddVoteText(Item.c_str());
+			const char *pVoteName = pItems->Name();
+
+			if(pItems->Type() == TYPE_RAINBOW)
+				RainbowItems.push_back(std::string(pVoteName));
+			else if(pItems->Type() == TYPE_GUN)
+				GunItems.push_back(std::string(pVoteName));
+			else if(pItems->Type() == TYPE_INDICATOR)
+				IndicatorItems.push_back(std::string(pVoteName));
+			else if(pItems->Type() == TYPE_DEATHS)
+				KillEffectItems.push_back(std::string(pVoteName));
+			else if(pItems->Type() == TYPE_TRAIL)
+				TrailItems.push_back(std::string(pVoteName));
+			else
+				OtherItems.push_back(std::string(pVoteName));
 		}
+
+		const int Bulletpoint = BULLET_TRIANGLE;
+
+		if(!RainbowItems.empty())
+		{
+			AddVoteSubheader("Rᴀɪɴʙᴏᴡ");
+			for(const auto &Item : RainbowItems)
+			{
+				AddVotePrefix(Item.c_str(), Bulletpoint);
+			}
+			AddVoteSeperator();
+		}
+		if(!GunItems.empty())
+		{
+			AddVoteSubheader("Gᴜɴs");
+			for(const auto &Item : GunItems)
+			{
+				AddVotePrefix(Item.c_str(), Bulletpoint);
+			}
+			AddVoteSeperator();
+		}
+		if(!IndicatorItems.empty())
+		{
+			AddVoteSubheader("Gᴜɴ Hɪᴛ Eғғᴇᴄᴛs");
+			for(const auto &Item : IndicatorItems)
+			{
+				AddVotePrefix(Item.c_str(), Bulletpoint);
+			}
+			AddVoteSeperator();
+		}
+		if(!KillEffectItems.empty())
+		{
+			AddVoteSubheader("Dᴇᴀᴛʜ Eғғᴇᴄᴛs");
+			for(const auto &Item : KillEffectItems)
+			{
+				AddVotePrefix(Item.c_str(), Bulletpoint);
+			}
+			AddVoteSeperator();
+		}
+		if(!TrailItems.empty())
+		{
+			AddVoteSubheader("Tʀᴀɪʟs");
+			for(const auto &Item : TrailItems)
+			{
+				AddVotePrefix(Item.c_str(), Bulletpoint);
+			}
+			AddVoteSeperator();
+		}
+		if(!OtherItems.empty())
+		{
+			AddVoteSubheader("Oᴛʜᴇʀ");
+			for(const auto &Item : OtherItems)
+			{
+				AddVotePrefix(Item.c_str(), Bulletpoint);
+			}
+		}
+	}
+	else if(GetSubPage(ClientId) == SUB_SHOP_ITEMINFO)
+	{
+		if(!m_pLastItemInfo)
+		{
+			SetSubPage(ClientId, SUB_SHOP_MAIN, true);
+			return;
+		}
+
+		AddVoteText(SHOP_BACKPAGE);
 		AddVoteSeperator();
-	}
-	if(!GunItems.empty())
-	{
-		AddVoteSubheader("Gᴜɴs");
-		for(const auto &Item : GunItems)
-		{
-			AddVoteText(Item.c_str());
-		}
+
+		const CItems *pItem = m_pLastItemInfo;
+
+		char aBuf[VOTE_DESC_LENGTH];
+
+		AddVoteText("╭─────── Iᴛᴇᴍ Iɴғᴏ");
+		str_format(aBuf, sizeof(aBuf), "│ %s ⌬", pItem->Name());
+		AddVoteText(aBuf);
+		str_format(aBuf, sizeof(aBuf), "│ %s", pItem->Description());
+		AddVoteText(aBuf);
+		AddVoteText("╰──────────────────────────");
 		AddVoteSeperator();
-	}
-	if(!IndicatorItems.empty())
-	{
-		AddVoteSubheader("Gᴜɴ Hɪᴛ Eғғᴇᴄᴛs");
-		for(const auto &Item : IndicatorItems)
-		{
-			AddVoteText(Item.c_str());
-		}
+
+		str_copy(aBuf, FormatItemVote(m_pLastItemInfo, pAcc));
+		AddVoteText(aBuf);
+
+		str_format(aBuf, sizeof(aBuf), "↳ Requires level %d", (long)pItem->MinLevel());
+		AddVoteText(aBuf);
+
 		AddVoteSeperator();
-	}
-	if(!KillEffectItems.empty())
-	{
-		AddVoteSubheader("Dᴇᴀᴛʜ Eғғᴇᴄᴛs");
-		for(const auto &Item : KillEffectItems)
-		{
-			AddVoteText(Item.c_str());
-		}
-		AddVoteSeperator();
-	}
-	if(!TrailItems.empty())
-	{
-		AddVoteSubheader("Tʀᴀɪʟs");
-		for(const auto &Item : TrailItems)
-		{
-			AddVoteText(Item.c_str());
-		}
-		AddVoteSeperator();
-	}
-	if(!OtherItems.empty())
-	{
-		AddVoteSubheader("Oᴛʜᴇʀ");
-		for(const auto &Item : OtherItems)
-		{
-			AddVoteText(Item.c_str());
-		}
+		AddVoteText(SHOP_BACKPAGE);
 	}
 }
 
@@ -902,26 +990,6 @@ void CVoteMenu::DoCosmeticVotes(int ClientId, bool Authed)
 			AddVoteCheckBox(Item.c_str(), pPl->ItemEnabled(Item.c_str()));
 		}
 	}
-}
-
-int CVoteMenu::GetSubPage(int ClientId) const
-{
-	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
-		return 0;
-	const int Page = m_aClientData[ClientId].m_Page;
-	return m_aClientData[ClientId].m_SubPage[Page];
-}
-
-void CVoteMenu::SetSubPage(int ClientId, int SubPage)
-{
-	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
-		return;
-	const int Page = m_aClientData[ClientId].m_Page;
-	if(Page < 0 || Page >= NUM_PAGES)
-		return;
-
-	m_aClientData[ClientId].m_SubPage[Page] = SubPage;
-	PrepareVoteOptions(ClientId, Page);
 }
 
 bool CVoteMenu::CanUseCmd(int ClientId, const char *pCmd) const
