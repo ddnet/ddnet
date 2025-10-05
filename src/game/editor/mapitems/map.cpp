@@ -426,6 +426,42 @@ bool CEditorMap::IsImageUsed(int ImageIndex) const
 	return false;
 }
 
+std::vector<int> CEditorMap::SortImages()
+{
+	static const auto &&s_ImageNameComparator = [](const std::shared_ptr<CEditorImage> &pLhs, const std::shared_ptr<CEditorImage> &pRhs) {
+		return str_comp(pLhs->m_aName, pRhs->m_aName) < 0;
+	};
+	if(std::is_sorted(m_vpImages.begin(), m_vpImages.end(), s_ImageNameComparator))
+	{
+		return std::vector<int>();
+	}
+
+	const std::vector<std::shared_ptr<CEditorImage>> vpTemp = m_vpImages;
+	std::vector<int> vSortedIndex;
+	vSortedIndex.resize(vpTemp.size());
+
+	std::sort(m_vpImages.begin(), m_vpImages.end(), s_ImageNameComparator);
+	for(size_t OldIndex = 0; OldIndex < vpTemp.size(); OldIndex++)
+	{
+		for(size_t NewIndex = 0; NewIndex < m_vpImages.size(); NewIndex++)
+		{
+			if(vpTemp[OldIndex] == m_vpImages[NewIndex])
+			{
+				vSortedIndex[OldIndex] = NewIndex;
+				break;
+			}
+		}
+	}
+	ModifyImageIndex([vSortedIndex](int *pIndex) {
+		if(*pIndex >= 0)
+		{
+			*pIndex = vSortedIndex[*pIndex];
+		}
+	});
+
+	return vSortedIndex;
+}
+
 std::shared_ptr<CEditorSound> CEditorMap::SelectedSound() const
 {
 	if(m_SelectedSound < 0 || (size_t)m_SelectedSound >= m_vpSounds.size())

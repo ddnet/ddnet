@@ -158,7 +158,7 @@ void CEditor::AddTileart(bool IgnoreHistory)
 		std::shared_ptr<CLayerTiles> pLayer = AddLayerWithImage(this, pGroup, m_TileartImageInfo.m_Width, m_TileartImageInfo.m_Height, vColorImages[i], aImageName);
 		SetTilelayerIndices(pLayer, vaColorGroups[i], m_TileartImageInfo);
 	}
-	auto IndexMap = SortImages();
+	auto IndexMap = m_Map.SortImages();
 
 	if(!IgnoreHistory)
 	{

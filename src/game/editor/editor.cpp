@@ -4141,7 +4141,7 @@ bool CEditor::ReplaceImage(const char *pFileName, int StorageType, bool CheckDup
 		TextureLoadFlag = 0;
 	pImg->m_Texture = Graphics()->LoadTextureRaw(*pImg, TextureLoadFlag, pFileName);
 
-	SortImages();
+	m_Map.SortImages();
 	m_Map.SelectImage(pImg);
 	OnDialogClose();
 	return true;
@@ -4199,7 +4199,7 @@ bool CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 	str_copy(pImg->m_aName, aBuf);
 	pImg->m_AutoMapper.Load(pImg->m_aName);
 	pEditor->m_Map.m_vpImages.push_back(pImg);
-	pEditor->SortImages();
+	pEditor->m_Map.SortImages();
 	pEditor->m_Map.SelectImage(pImg);
 	pEditor->OnDialogClose();
 	return true;
@@ -4334,40 +4334,6 @@ void CEditor::SelectGameLayer()
 			}
 		}
 	}
-}
-
-std::vector<int> CEditor::SortImages()
-{
-	static const auto &&s_ImageNameComparator = [](const std::shared_ptr<CEditorImage> &pLhs, const std::shared_ptr<CEditorImage> &pRhs) {
-		return str_comp(pLhs->m_aName, pRhs->m_aName) < 0;
-	};
-	if(!std::is_sorted(m_Map.m_vpImages.begin(), m_Map.m_vpImages.end(), s_ImageNameComparator))
-	{
-		const std::vector<std::shared_ptr<CEditorImage>> vpTemp = m_Map.m_vpImages;
-		std::vector<int> vSortedIndex;
-		vSortedIndex.resize(vpTemp.size());
-
-		std::sort(m_Map.m_vpImages.begin(), m_Map.m_vpImages.end(), s_ImageNameComparator);
-		for(size_t OldIndex = 0; OldIndex < vpTemp.size(); OldIndex++)
-		{
-			for(size_t NewIndex = 0; NewIndex < m_Map.m_vpImages.size(); NewIndex++)
-			{
-				if(vpTemp[OldIndex] == m_Map.m_vpImages[NewIndex])
-				{
-					vSortedIndex[OldIndex] = NewIndex;
-					break;
-				}
-			}
-		}
-		m_Map.ModifyImageIndex([vSortedIndex](int *pIndex) {
-			if(*pIndex >= 0)
-				*pIndex = vSortedIndex[*pIndex];
-		});
-
-		return vSortedIndex;
-	}
-
-	return std::vector<int>();
 }
 
 void CEditor::RenderImagesList(CUIRect ToolBox)
@@ -8034,7 +8000,7 @@ bool CEditor::Load(const char *pFileName, int StorageType)
 	if(Result)
 	{
 		str_copy(m_aFileName, pFileName);
-		SortImages();
+		m_Map.SortImages();
 		SelectGameLayer();
 
 		for(CEditorComponent &Component : m_vComponents)
@@ -8180,7 +8146,7 @@ bool CEditor::Append(const char *pFileName, int StorageType, bool IgnoreHistory)
 
 	NewMap.m_vSettings.clear();
 
-	auto IndexMap = SortImages();
+	auto IndexMap = m_Map.SortImages();
 
 	if(!IgnoreHistory)
 		m_EditorHistory.RecordAction(std::make_shared<CEditorActionAppendMap>(this, pFileName, Info, IndexMap));

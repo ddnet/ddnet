@@ -137,6 +137,7 @@ public:
 	void SelectNextImage();
 	void SelectPreviousImage();
 	bool IsImageUsed(int ImageIndex) const;
+	std::vector<int> SortImages();
 
 	std::shared_ptr<CEditorSound> SelectedSound() const;
 	void SelectSound(const std::shared_ptr<CEditorSound> &pSound);
