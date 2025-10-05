@@ -251,10 +251,21 @@ void CMenusStart::RenderStartMenu(CUIRect MainView)
 #elif defined(CONF_INFORM_UPDATE)
 	if(str_comp(Client()->LatestVersion(), "0") != 0)
 	{
+		CUIRect DownloadButton;
+		VersionUpdate.VSplitRight(100.0f, &VersionUpdate, &DownloadButton);
+		VersionUpdate.VSplitRight(10.0f, &VersionUpdate, nullptr);
+
+		static CButtonContainer s_DownloadButton;
+		if(GameClient()->m_Menus.DoButton_Menu(&s_DownloadButton, Localize("Download"), 0, &DownloadButton, BUTTONFLAG_LEFT, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
+		{
+			Client()->ViewLink("https://ddnet.org/downloads/");
+		}
+
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), Localize("DDNet %s is out!"), Client()->LatestVersion());
-		TextRender()->TextColor(TextRender()->DefaultTextColor());
-		Ui()->DoLabel(&VersionUpdate, aBuf, 14.0f, TEXTALIGN_MC);
+		SLabelProperties UpdateLabelProps;
+		UpdateLabelProps.SetColor(ColorRGBA(1.0f, 0.4f, 0.4f, 1.0f));
+		Ui()->DoLabel(&VersionUpdate, aBuf, 14.0f, TEXTALIGN_ML, UpdateLabelProps);
 	}
 #endif
 
