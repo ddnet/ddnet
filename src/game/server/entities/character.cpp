@@ -734,16 +734,16 @@ float CCharacter::GetFireDelay(int Weapon)
 	switch(Weapon)
 	{
 	case WEAPON_NONE: return 0.0f; // shows no weapon - meaning no delay since it does nothing
-	case WEAPON_HAMMER: return (float)Tuning()->m_HammerFireDelay;
-	case WEAPON_GUN: return (float)Tuning()->m_GunFireDelay;
-	case WEAPON_SHOTGUN: return (float)Tuning()->m_ShotgunFireDelay;
-	case WEAPON_GRENADE: return (float)Tuning()->m_GrenadeFireDelay;
-	case WEAPON_LASER: return (float)Tuning()->m_LaserFireDelay;
-	case WEAPON_NINJA: return (float)Tuning()->m_NinjaFireDelay;
-	case WEAPON_HEARTGUN: return (float)Tuning()->m_HeartgunFireDelay;
-	case WEAPON_TELEKINESIS: return (float)Tuning()->m_TelekinesisFireDelay;
-	case WEAPON_LIGHTSABER: return LIGHT_SABER_MAX_LENGTH / LIGHT_SABER_SPEED;
-	case WEAPON_PORTALGUN: return 25.0f;
+	case WEAPON_HAMMER: return (float)GetTuning(GetOverriddenTuneZone())->m_HammerFireDelay;
+	case WEAPON_GUN: return (float)GetTuning(GetOverriddenTuneZone())->m_GunFireDelay;
+	case WEAPON_SHOTGUN: return (float)GetTuning(GetOverriddenTuneZone())->m_ShotgunFireDelay;
+	case WEAPON_GRENADE: return (float)GetTuning(GetOverriddenTuneZone())->m_GrenadeFireDelay;
+	case WEAPON_LASER: return (float)GetTuning(GetOverriddenTuneZone())->m_LaserFireDelay;
+	case WEAPON_NINJA: return (float)GetTuning(GetOverriddenTuneZone())->m_NinjaFireDelay;
+	case WEAPON_HEARTGUN: return (float)GetTuning(GetOverriddenTuneZone())->m_HeartgunFireDelay;
+	case WEAPON_TELEKINESIS: return (float)GetTuning(GetOverriddenTuneZone())->m_TelekinesisFireDelay;
+	case WEAPON_LIGHTSABER: return (float)GetTuning(GetOverriddenTuneZone())->m_LightsaberFireDelay;
+	case WEAPON_PORTALGUN: return (float)GetTuning(GetOverriddenTuneZone())->m_PortalgunFireDelay;
 	default: dbg_assert(false, "invalid weapon"); return 0.0f; // this value should not be reached
 	}
 }

@@ -70,5 +70,7 @@ MACRO_TUNING_PARAM(GroundElasticityY, ground_elasticity_y, 0, "Ground/ceiling el
 
 // <FoxNet
 MACRO_TUNING_PARAM(HeartgunFireDelay, heartgun_fire_delay, 90, "Delay of using Heart Gun")
-MACRO_TUNING_PARAM(TelekinesisFireDelay, telekinesis_fire_delay, 125, "Delay of using telekinesis")
+MACRO_TUNING_PARAM(TelekinesisFireDelay, telekinesis_fire_delay, 125, "Delay of using Telekinesis")
+MACRO_TUNING_PARAM(LightsaberFireDelay, lightsaber_fire_delay, 125, "Delay of using Lightsaber")
+MACRO_TUNING_PARAM(PortalgunFireDelay, portalgun_fire_delay, 100, "Delay of using Portalgun")
 // FoxNet>
