@@ -659,7 +659,7 @@ void CVoteMenu::SendPageAccount(int ClientId)
 	{
 		AddVoteText("You are not logged in.");
 		AddVoteSeperator();
-		AddVoteText("1 - use /register <Name> <Password> <Password>");
+		AddVoteText("1 - use /register <Name> <Password>");
 		AddVoteText("2 - login using /login <Name> <Password>");
 		return;
 	}
@@ -720,7 +720,7 @@ void CVoteMenu::SendPageShop(int ClientId)
 	{
 		AddVoteText("You are not logged in.");
 		AddVoteSeperator();
-		AddVoteText("1 - use /register <Name> <Password> <Password>");
+		AddVoteText("1 - use /register <Name> <Password>");
 		AddVoteText("2 - login using /login <Name> <Password>");
 		return;
 	}
@@ -862,7 +862,7 @@ void CVoteMenu::SendPageInventory(int ClientId)
 	{
 		AddVoteText("You are not logged in.");
 		AddVoteSeperator();
-		AddVoteText("1 - use /register <Name> <Password> <Password>");
+		AddVoteText("1 - use /register <Name> <Password>");
 		AddVoteText("2 - login using /login <Name> <Password>");
 		return;
 	}

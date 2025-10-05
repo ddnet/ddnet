@@ -111,7 +111,7 @@ bool CRoulette::AddClient(int ClientId, int BetAmount, const char *pBetOption)
 		GameServer()->SendChatTarget(ClientId, "│ You need to be logged in to gamble");
 		GameServer()->SendChatTarget(ClientId, "│ Use: /login <name> <pw>");
 		GameServer()->SendChatTarget(ClientId, "│ Or create an account using:");
-		GameServer()->SendChatTarget(ClientId, "│ /register <name> <pw> <pw>");
+		GameServer()->SendChatTarget(ClientId, "│ /register <name> <pw>");
 		GameServer()->SendChatTarget(ClientId, "╰──────────────────────────");
 		return false;
 	}
