@@ -1376,8 +1376,16 @@ bool CCharacter::CanSnapCharacter(int SnappingClient)
 	CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
 	CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
 
-	if(((pSnapChar && pSnapChar->m_SpawnSolo) || m_SpawnSolo) && SameTeam(SnappingClient))
-		return true;
+	if(GetPlayer()->SpectatorId() >= 0)
+	{
+		if(((pSnapChar && pSnapChar->m_SpawnSolo) || m_SpawnSolo) && SameTeam(SnappingClient))
+			return true;
+	}
+	else if(CCharacter *pSpecChar = GameServer()->GetPlayerChar(GetPlayer()->SpectatorId()))
+	{
+		if(((pSpecChar && pSpecChar->m_SpawnSolo) || (pSnapChar && pSnapChar->m_SpawnSolo)) && Teams()->m_Core.Team(SnappingClient) == Teams()->m_Core.Team(GetPlayer()->SpectatorId()))
+			return true;
+	}
 
 	if(pSnapPlayer->GetTeam() == TEAM_SPECTATORS || pSnapPlayer->IsPaused())
 	{
