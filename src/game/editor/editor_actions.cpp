@@ -1431,23 +1431,26 @@ void CEditorCommandAction::Redo()
 
 // ------------------------------------------------
 
-CEditorActionEnvelopeAdd::CEditorActionEnvelopeAdd(CEditor *pEditor, const std::shared_ptr<CEnvelope> &pEnv) :
-	IEditorAction(pEditor), m_pEnv(pEnv)
+CEditorActionEnvelopeAdd::CEditorActionEnvelopeAdd(CEditor *pEditor, CEnvelope::EType EnvelopeType) :
+	IEditorAction(pEditor),
+	m_EnvelopeType(EnvelopeType)
 {
-	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Add new %s envelope", pEnv->Type() == CEnvelope::EType::COLOR ? "color" : (pEnv->Type() == CEnvelope::EType::POSITION ? "position" : "sound"));
+	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Add new %s envelope", EnvelopeType == CEnvelope::EType::COLOR ? "color" : (EnvelopeType == CEnvelope::EType::POSITION ? "position" : "sound"));
+	m_PreviousSelectedEnvelope = m_pEditor->m_SelectedEnvelope;
 }
 
 void CEditorActionEnvelopeAdd::Undo()
 {
 	// Undo is removing the envelope, which was added at the back of the list
 	m_pEditor->m_Map.m_vpEnvelopes.pop_back();
-	m_pEditor->m_SelectedEnvelope = m_pEditor->m_Map.m_vpEnvelopes.size() - 1;
+	m_pEditor->m_Map.OnModify();
+	m_pEditor->m_SelectedEnvelope = m_PreviousSelectedEnvelope;
 }
 
 void CEditorActionEnvelopeAdd::Redo()
 {
-	// Redo is adding back at the back the saved envelope
-	m_pEditor->m_Map.m_vpEnvelopes.push_back(m_pEnv);
+	// Redo is adding a new envelope at the back of the list
+	m_pEditor->m_Map.NewEnvelope(m_EnvelopeType);
 	m_pEditor->m_SelectedEnvelope = m_pEditor->m_Map.m_vpEnvelopes.size() - 1;
 }
 

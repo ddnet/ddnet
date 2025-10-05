@@ -377,13 +377,14 @@ private:
 class CEditorActionEnvelopeAdd : public IEditorAction
 {
 public:
-	CEditorActionEnvelopeAdd(CEditor *pEditor, const std::shared_ptr<CEnvelope> &pEnv);
+	CEditorActionEnvelopeAdd(CEditor *pEditor, CEnvelope::EType EnvelopeType);
 
 	void Undo() override;
 	void Redo() override;
 
 private:
-	std::shared_ptr<CEnvelope> m_pEnv;
+	CEnvelope::EType m_EnvelopeType;
+	int m_PreviousSelectedEnvelope;
 };
 
 class CEditorActionEnvelopeDelete : public IEditorAction
