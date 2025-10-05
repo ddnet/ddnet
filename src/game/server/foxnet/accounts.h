@@ -83,7 +83,7 @@ public:
 
 	void Tick();
 
-	bool Register(int ClientId, const char *pUsername, const char *pPassword, const char *pPassword2);
+	bool Register(int ClientId, const char *pUsername, const char *pPassword);
 	bool ChangePassword(int ClientId, const char *pOldPassword, const char *pNewPassword, const char *pNewPassword2); // unchanged (fire-and-forget write)
 
 	void AutoLogin(int ClientId); // async

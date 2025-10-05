@@ -40,9 +40,8 @@ void CGameContext::ConAccRegister(IConsole::IResult *pResult, void *pUserData)
 	}
 	const char *pUser = pResult->GetString(0);
 	const char *pPass = pResult->GetString(1);
-	const char *pPass2 = pResult->GetString(2);
 
-	pSelf->m_AccountManager.Register(ClientId, pUser, pPass, pPass2);
+	pSelf->m_AccountManager.Register(ClientId, pUser, pPass);
 }
 
 void CGameContext::ConAccPassword(IConsole::IResult *pResult, void *pUserData)
@@ -1713,7 +1712,7 @@ void CGameContext::RegisterFoxNetCommands()
 	Console()->Register("give_money", "v[id] i[amount]", CFGFLAG_SERVER, ConGiveMoney, this, "Give player (id) money");
 	Console()->Register("give_xp", "v[id] i[amount]", CFGFLAG_SERVER, ConGiveXp, this, "Give player (id) xp");
 
-	Console()->Register("register", "s[username] s[password] s[password2]", CFGFLAG_CHAT, ConAccRegister, this, "Register a account");
+	Console()->Register("register", "s[username] s[password]", CFGFLAG_CHAT, ConAccRegister, this, "Register a account");
 	Console()->Register("password", "s[oldpass] s[password] s[password2]", CFGFLAG_CHAT, ConAccPassword, this, "Change your password");
 	Console()->Register("login", "s[username] r[password]", CFGFLAG_CHAT, ConAccLogin, this, "Login to your account");
 	Console()->Register("logout", "", CFGFLAG_CHAT, ConAccLogout, this, "Logout of your account");

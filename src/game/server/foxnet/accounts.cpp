@@ -111,7 +111,9 @@ bool CAccounts::ForceLogin(int ClientId, const char *pUsername, bool Silent, boo
 		}
 		OnLogin(ClientId, Res);
 		if(!Silent)
-			GameServer()->SendChatTarget(ClientId, "Login successful");
+		{
+			GameServer()->SendChatTarget(ClientId, "Logged in successfully");
+		}
 		else if(Auto)
 			GameServer()->SendChatTarget(ClientId, "Automatically logged into your account");
 	});
@@ -153,18 +155,13 @@ void CAccounts::Login(int ClientId, const char *pUsername, const char *pPassword
 	m_pPool->Execute(CAccountsWorker::Login, std::move(pReq), "acc login");
 }
 
-bool CAccounts::Register(int ClientId, const char *pUsername, const char *pPassword, const char *pPassword2)
+bool CAccounts::Register(int ClientId, const char *pUsername, const char *pPassword)
 {
 	if(!m_pPool)
 		return false;
-	if(!pUsername[0] || !pPassword[0] || !pPassword2[0])
+	if(!pUsername[0] || !pPassword[0])
 	{
 		GameServer()->SendChatTarget(ClientId, "[Err] Username or password is empty");
-		return false;
-	}
-	if(str_comp(pPassword, pPassword2) != 0)
-	{
-		GameServer()->SendChatTarget(ClientId, "[Err] Passwords do not match");
 		return false;
 	}
 	if(str_length(pUsername) > ACC_MAX_USERNAME_LENGTH - 1)
