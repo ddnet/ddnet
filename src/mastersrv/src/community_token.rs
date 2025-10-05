@@ -115,8 +115,8 @@ mod tests {
 
     #[test]
     fn verification() {
-        let token = "ddtc_6DnZq5Ix0J2kvDHbkPNtb6bsZxOVQg4ly2jw";
-        let verification = "ddvc_6DnZq51fypqX9ldrEFCF9aJdpi6wjgh6YA";
+        let token = "ddtc_6DnZq5Ix0J2kvDHbkPNtb6bsZxOVQg4ly2jw"; // ggignore
+        let verification = "ddvc_6DnZq51fypqX9ldrEFCF9aJdpi6wjgh6YA"; // ggignore
 
         let verification: Verification = verification.parse().unwrap();
         assert_eq!(
