@@ -3,12 +3,14 @@
 #include <base/system.h>
 
 #include <game/editor/editor.h>
+#include <game/editor/mapitems/image.h>
 #include <game/editor/mapitems/layer_front.h>
 #include <game/editor/mapitems/layer_game.h>
 #include <game/editor/mapitems/layer_group.h>
 #include <game/editor/mapitems/layer_quads.h>
 #include <game/editor/mapitems/layer_sounds.h>
 #include <game/editor/mapitems/layer_tiles.h>
+#include <game/editor/mapitems/sound.h>
 
 void CEditorMap::CMapInfo::Reset()
 {
@@ -244,6 +246,9 @@ void CEditorMap::Clean()
 
 	m_MapInfo.Reset();
 	m_MapInfoTmp.Reset();
+
+	m_SelectedImage = 0;
+	m_SelectedSound = 0;
 }
 
 void CEditorMap::CreateDefault()
@@ -311,4 +316,152 @@ void CEditorMap::MakeTuneLayer(const std::shared_ptr<CLayer> &pLayer)
 {
 	m_pTuneLayer = std::static_pointer_cast<CLayerTune>(pLayer);
 	m_pTuneLayer->m_pEditor = m_pEditor;
+}
+
+std::shared_ptr<CEditorImage> CEditorMap::SelectedImage() const
+{
+	if(m_SelectedImage < 0 || (size_t)m_SelectedImage >= m_vpImages.size())
+	{
+		return nullptr;
+	}
+	return m_vpImages[m_SelectedImage];
+}
+
+void CEditorMap::SelectImage(const std::shared_ptr<CEditorImage> &pImage)
+{
+	for(size_t i = 0; i < m_vpImages.size(); ++i)
+	{
+		if(m_vpImages[i] == pImage)
+		{
+			m_SelectedImage = i;
+			break;
+		}
+	}
+}
+
+void CEditorMap::SelectNextImage()
+{
+	const int OldImage = m_SelectedImage;
+	m_SelectedImage = std::clamp(m_SelectedImage, 0, (int)m_vpImages.size() - 1);
+	for(size_t i = m_SelectedImage + 1; i < m_vpImages.size(); i++)
+	{
+		if(m_vpImages[i]->m_External == m_vpImages[m_SelectedImage]->m_External)
+		{
+			m_SelectedImage = i;
+			break;
+		}
+	}
+	if(m_SelectedImage == OldImage && !m_vpImages[m_SelectedImage]->m_External)
+	{
+		for(size_t i = 0; i < m_vpImages.size(); i++)
+		{
+			if(m_vpImages[i]->m_External)
+			{
+				m_SelectedImage = i;
+				break;
+			}
+		}
+	}
+}
+
+void CEditorMap::SelectPreviousImage()
+{
+	const int OldImage = m_SelectedImage;
+	m_SelectedImage = std::clamp(m_SelectedImage, 0, (int)m_vpImages.size() - 1);
+	for(int i = m_SelectedImage - 1; i >= 0; i--)
+	{
+		if(m_vpImages[i]->m_External == m_vpImages[m_SelectedImage]->m_External)
+		{
+			m_SelectedImage = i;
+			break;
+		}
+	}
+	if(m_SelectedImage == OldImage && m_vpImages[m_SelectedImage]->m_External)
+	{
+		for(int i = (int)m_vpImages.size() - 1; i >= 0; i--)
+		{
+			if(!m_vpImages[i]->m_External)
+			{
+				m_SelectedImage = i;
+				break;
+			}
+		}
+	}
+}
+
+bool CEditorMap::IsImageUsed(int ImageIndex) const
+{
+	for(const auto &pGroup : m_vpGroups)
+	{
+		for(const auto &pLayer : pGroup->m_vpLayers)
+		{
+			if(pLayer->m_Type == LAYERTYPE_TILES)
+			{
+				const std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
+				if(pTiles->m_Image == ImageIndex)
+				{
+					return true;
+				}
+			}
+			else if(pLayer->m_Type == LAYERTYPE_QUADS)
+			{
+				const std::shared_ptr<CLayerQuads> pQuads = std::static_pointer_cast<CLayerQuads>(pLayer);
+				if(pQuads->m_Image == ImageIndex)
+				{
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+std::shared_ptr<CEditorSound> CEditorMap::SelectedSound() const
+{
+	if(m_SelectedSound < 0 || (size_t)m_SelectedSound >= m_vpSounds.size())
+	{
+		return nullptr;
+	}
+	return m_vpSounds[m_SelectedSound];
+}
+
+void CEditorMap::SelectSound(const std::shared_ptr<CEditorSound> &pSound)
+{
+	for(size_t i = 0; i < m_vpSounds.size(); ++i)
+	{
+		if(m_vpSounds[i] == pSound)
+		{
+			m_SelectedSound = i;
+			break;
+		}
+	}
+}
+
+void CEditorMap::SelectNextSound()
+{
+	m_SelectedSound = (m_SelectedSound + 1) % m_vpSounds.size();
+}
+
+void CEditorMap::SelectPreviousSound()
+{
+	m_SelectedSound = (m_SelectedSound + m_vpSounds.size() - 1) % m_vpSounds.size();
+}
+
+bool CEditorMap::IsSoundUsed(int SoundIndex) const
+{
+	for(const auto &pGroup : m_vpGroups)
+	{
+		for(const auto &pLayer : pGroup->m_vpLayers)
+		{
+			if(pLayer->m_Type == LAYERTYPE_SOUNDS)
+			{
+				std::shared_ptr<CLayerSounds> pSounds = std::static_pointer_cast<CLayerSounds>(pLayer);
+				if(pSounds->m_Sound == SoundIndex)
+				{
+					return true;
+				}
+			}
+		}
+	}
+	return false;
 }

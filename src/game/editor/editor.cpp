@@ -543,7 +543,7 @@ bool CEditor::CallbackSaveImage(const char *pFileName, int StorageType, void *pU
 
 	CEditor *pEditor = static_cast<CEditor *>(pUser);
 
-	std::shared_ptr<CEditorImage> pImg = pEditor->m_Map.m_vpImages[pEditor->m_SelectedImage];
+	std::shared_ptr<CEditorImage> pImg = pEditor->m_Map.SelectedImage();
 
 	if(CImageLoader::SavePng(pEditor->Storage()->OpenFile(pFileName, IOFLAG_WRITE, StorageType), pFileName, *pImg))
 	{
@@ -563,7 +563,7 @@ bool CEditor::CallbackSaveSound(const char *pFileName, int StorageType, void *pU
 
 	CEditor *pEditor = static_cast<CEditor *>(pUser);
 
-	std::shared_ptr<CEditorSound> pSound = pEditor->m_Map.m_vpSounds[pEditor->m_SelectedSound];
+	std::shared_ptr<CEditorSound> pSound = pEditor->m_Map.SelectedSound();
 
 	IOHANDLE File = pEditor->Storage()->OpenFile(pFileName, IOFLAG_WRITE, StorageType);
 	if(File)
@@ -1058,9 +1058,9 @@ void CEditor::DoToolbarImages(CUIRect ToolBar)
 	CUIRect ToolBarTop, ToolBarBottom;
 	ToolBar.HSplitMid(&ToolBarTop, &ToolBarBottom, 5.0f);
 
-	if(m_SelectedImage >= 0 && (size_t)m_SelectedImage < m_Map.m_vpImages.size())
+	std::shared_ptr<CEditorImage> pSelectedImage = m_Map.SelectedImage();
+	if(pSelectedImage != nullptr)
 	{
-		const std::shared_ptr<CEditorImage> pSelectedImage = m_Map.m_vpImages[m_SelectedImage];
 		char aLabel[64];
 		str_format(aLabel, sizeof(aLabel), "Size: %" PRIzu " × %" PRIzu, pSelectedImage->m_Width, pSelectedImage->m_Height);
 		Ui()->DoLabel(&ToolBarBottom, aLabel, 12.0f, TEXTALIGN_ML);
@@ -1072,9 +1072,9 @@ void CEditor::DoToolbarSounds(CUIRect ToolBar)
 	CUIRect ToolBarTop, ToolBarBottom;
 	ToolBar.HSplitMid(&ToolBarTop, &ToolBarBottom, 5.0f);
 
-	if(m_SelectedSound >= 0 && (size_t)m_SelectedSound < m_Map.m_vpSounds.size())
+	std::shared_ptr<CEditorSound> pSelectedSound = m_Map.SelectedSound();
+	if(pSelectedSound != nullptr)
 	{
-		const std::shared_ptr<CEditorSound> pSelectedSound = m_Map.m_vpSounds[m_SelectedSound];
 		if(pSelectedSound->m_SoundId != m_ToolbarPreviewSound && m_ToolbarPreviewSound >= 0 && Sound()->IsPlaying(m_ToolbarPreviewSound))
 			Sound()->Stop(m_ToolbarPreviewSound);
 		m_ToolbarPreviewSound = pSelectedSound->m_SoundId;
@@ -4123,7 +4123,7 @@ bool CEditor::ReplaceImage(const char *pFileName, int StorageType, bool CheckDup
 		return false;
 	}
 
-	std::shared_ptr<CEditorImage> pImg = m_Map.m_vpImages[m_SelectedImage];
+	std::shared_ptr<CEditorImage> pImg = m_Map.SelectedImage();
 	pImg->CEditorImage::Free();
 	pImg->m_Width = ImgInfo.m_Width;
 	pImg->m_Height = ImgInfo.m_Height;
@@ -4142,14 +4142,7 @@ bool CEditor::ReplaceImage(const char *pFileName, int StorageType, bool CheckDup
 	pImg->m_Texture = Graphics()->LoadTextureRaw(*pImg, TextureLoadFlag, pFileName);
 
 	SortImages();
-	for(size_t i = 0; i < m_Map.m_vpImages.size(); ++i)
-	{
-		if(m_Map.m_vpImages[i] == pImg)
-		{
-			m_SelectedImage = i;
-			break;
-		}
-	}
+	m_Map.SelectImage(pImg);
 	OnDialogClose();
 	return true;
 }
@@ -4207,14 +4200,7 @@ bool CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 	pImg->m_AutoMapper.Load(pImg->m_aName);
 	pEditor->m_Map.m_vpImages.push_back(pImg);
 	pEditor->SortImages();
-	for(size_t i = 0; i < pEditor->m_Map.m_vpImages.size(); ++i)
-	{
-		if(pEditor->m_Map.m_vpImages[i] == pImg)
-		{
-			pEditor->m_SelectedImage = i;
-			break;
-		}
-	}
+	pEditor->m_Map.SelectImage(pImg);
 	pEditor->OnDialogClose();
 	return true;
 }
@@ -4268,15 +4254,7 @@ bool CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 	str_copy(pSound->m_aName, aBuf);
 	pEditor->m_Map.m_vpSounds.push_back(pSound);
 
-	for(size_t i = 0; i < pEditor->m_Map.m_vpSounds.size(); ++i)
-	{
-		if(pEditor->m_Map.m_vpSounds[i] == pSound)
-		{
-			pEditor->m_SelectedSound = i;
-			break;
-		}
-	}
-
+	pEditor->m_Map.SelectSound(pSound);
 	pEditor->OnDialogClose();
 	return true;
 }
@@ -4316,7 +4294,7 @@ bool CEditor::ReplaceSound(const char *pFileName, int StorageType, bool CheckDup
 		return false;
 	}
 
-	std::shared_ptr<CEditorSound> pSound = m_Map.m_vpSounds[m_SelectedSound];
+	std::shared_ptr<CEditorSound> pSound = m_Map.SelectedSound();
 
 	if(m_ToolbarPreviewSound == pSound->m_SoundId)
 	{
@@ -4333,15 +4311,7 @@ bool CEditor::ReplaceSound(const char *pFileName, int StorageType, bool CheckDup
 	pSound->m_pData = pData;
 	pSound->m_DataSize = DataSize;
 
-	for(size_t i = 0; i < m_Map.m_vpSounds.size(); ++i)
-	{
-		if(m_Map.m_vpSounds[i] == pSound)
-		{
-			m_SelectedSound = i;
-			break;
-		}
-	}
-
+	m_Map.SelectSound(pSound);
 	OnDialogClose();
 	return true;
 }
@@ -4349,48 +4319,6 @@ bool CEditor::ReplaceSound(const char *pFileName, int StorageType, bool CheckDup
 bool CEditor::ReplaceSoundCallback(const char *pFileName, int StorageType, void *pUser)
 {
 	return static_cast<CEditor *>(pUser)->ReplaceSound(pFileName, StorageType, true);
-}
-
-bool CEditor::IsAssetUsed(CFileBrowser::EFileType FileType, int Index, void *pUser)
-{
-	CEditor *pEditor = (CEditor *)pUser;
-	for(const auto &pGroup : pEditor->m_Map.m_vpGroups)
-	{
-		for(const auto &pLayer : pGroup->m_vpLayers)
-		{
-			if(FileType == CFileBrowser::EFileType::IMAGE)
-			{
-				if(pLayer->m_Type == LAYERTYPE_TILES)
-				{
-					std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
-					if(pTiles->m_Image == Index)
-					{
-						return true;
-					}
-				}
-				else if(pLayer->m_Type == LAYERTYPE_QUADS)
-				{
-					std::shared_ptr<CLayerQuads> pQuads = std::static_pointer_cast<CLayerQuads>(pLayer);
-					if(pQuads->m_Image == Index)
-					{
-						return true;
-					}
-				}
-			}
-			else if(FileType == CFileBrowser::EFileType::SOUND)
-			{
-				if(pLayer->m_Type == LAYERTYPE_SOUNDS)
-				{
-					std::shared_ptr<CLayerSounds> pSounds = std::static_pointer_cast<CLayerSounds>(pLayer);
-					if(pSounds->m_Sound == Index)
-					{
-						return true;
-					}
-				}
-			}
-		}
-	}
-	return false;
 }
 
 void CEditor::SelectGameLayer()
@@ -4460,53 +4388,15 @@ void CEditor::RenderImagesList(CUIRect ToolBox)
 	{
 		if(Input()->KeyPress(KEY_DOWN))
 		{
-			int OldImage = m_SelectedImage;
-			m_SelectedImage = std::clamp(m_SelectedImage, 0, (int)m_Map.m_vpImages.size() - 1);
-			for(size_t i = m_SelectedImage + 1; i < m_Map.m_vpImages.size(); i++)
-			{
-				if(m_Map.m_vpImages[i]->m_External == m_Map.m_vpImages[m_SelectedImage]->m_External)
-				{
-					m_SelectedImage = i;
-					break;
-				}
-			}
-			if(m_SelectedImage == OldImage && !m_Map.m_vpImages[m_SelectedImage]->m_External)
-			{
-				for(size_t i = 0; i < m_Map.m_vpImages.size(); i++)
-				{
-					if(m_Map.m_vpImages[i]->m_External)
-					{
-						m_SelectedImage = i;
-						break;
-					}
-				}
-			}
-			ScrollToSelection = OldImage != m_SelectedImage;
+			const int OldImage = m_Map.m_SelectedImage;
+			m_Map.SelectNextImage();
+			ScrollToSelection = OldImage != m_Map.m_SelectedImage;
 		}
 		else if(Input()->KeyPress(KEY_UP))
 		{
-			int OldImage = m_SelectedImage;
-			m_SelectedImage = std::clamp(m_SelectedImage, 0, (int)m_Map.m_vpImages.size() - 1);
-			for(int i = m_SelectedImage - 1; i >= 0; i--)
-			{
-				if(m_Map.m_vpImages[i]->m_External == m_Map.m_vpImages[m_SelectedImage]->m_External)
-				{
-					m_SelectedImage = i;
-					break;
-				}
-			}
-			if(m_SelectedImage == OldImage && m_Map.m_vpImages[m_SelectedImage]->m_External)
-			{
-				for(int i = (int)m_Map.m_vpImages.size() - 1; i >= 0; i--)
-				{
-					if(!m_Map.m_vpImages[i]->m_External)
-					{
-						m_SelectedImage = i;
-						break;
-					}
-				}
-			}
-			ScrollToSelection = OldImage != m_SelectedImage;
+			const int OldImage = m_Map.m_SelectedImage;
+			m_Map.SelectPreviousImage();
+			ScrollToSelection = OldImage != m_Map.m_SelectedImage;
 		}
 	}
 
@@ -4526,7 +4416,7 @@ void CEditor::RenderImagesList(CUIRect ToolBox)
 			}
 
 			ToolBox.HSplitTop(RowHeight + 2.0f, &Slot, &ToolBox);
-			int Selected = m_SelectedImage == i;
+			int Selected = m_Map.m_SelectedImage == i;
 			if(!s_ScrollRegion.AddRect(Slot, Selected && ScrollToSelection))
 				continue;
 			Slot.HSplitTop(RowHeight, &Slot, nullptr);
@@ -4555,12 +4445,11 @@ void CEditor::RenderImagesList(CUIRect ToolBox)
 			if(int Result = DoButton_Ex(&m_Map.m_vpImages[i], m_Map.m_vpImages[i]->m_aName, Selected, &Slot,
 				   BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT, "Select image.", IGraphics::CORNER_ALL))
 			{
-				m_SelectedImage = i;
+				m_Map.m_SelectedImage = i;
 
 				if(Result == 2)
 				{
-					const std::shared_ptr<CEditorImage> pImg = m_Map.m_vpImages[m_SelectedImage];
-					const int Height = pImg->m_External ? 73 : 107;
+					const int Height = m_Map.SelectedImage()->m_External ? 73 : 107;
 					static SPopupMenuId s_PopupImageId;
 					Ui()->DoPopupMenu(&s_PopupImageId, Ui()->MouseX(), Ui()->MouseY(), 140, Height, this, PopupImage);
 				}
@@ -4593,9 +4482,10 @@ void CEditor::RenderImagesList(CUIRect ToolBox)
 	s_ScrollRegion.End();
 }
 
-void CEditor::RenderSelectedImage(CUIRect View)
+void CEditor::RenderSelectedImage(CUIRect View) const
 {
-	if(m_SelectedImage < 0 || (size_t)m_SelectedImage >= m_Map.m_vpImages.size())
+	std::shared_ptr<CEditorImage> pSelectedImage = m_Map.SelectedImage();
+	if(pSelectedImage == nullptr)
 		return;
 
 	View.Margin(10.0f, &View);
@@ -4603,10 +4493,10 @@ void CEditor::RenderSelectedImage(CUIRect View)
 		View.w = View.h;
 	else
 		View.h = View.w;
-	float Max = maximum<float>(m_Map.m_vpImages[m_SelectedImage]->m_Width, m_Map.m_vpImages[m_SelectedImage]->m_Height);
-	View.w *= m_Map.m_vpImages[m_SelectedImage]->m_Width / Max;
-	View.h *= m_Map.m_vpImages[m_SelectedImage]->m_Height / Max;
-	Graphics()->TextureSet(m_Map.m_vpImages[m_SelectedImage]->m_Texture);
+	float Max = maximum<float>(pSelectedImage->m_Width, pSelectedImage->m_Height);
+	View.w *= pSelectedImage->m_Width / Max;
+	View.h *= pSelectedImage->m_Height / Max;
+	Graphics()->TextureSet(pSelectedImage->m_Texture);
 	Graphics()->BlendNormal();
 	Graphics()->WrapClamp();
 	Graphics()->QuadsBegin();
@@ -4634,12 +4524,12 @@ void CEditor::RenderSounds(CUIRect ToolBox)
 	{
 		if(Input()->KeyPress(KEY_DOWN))
 		{
-			m_SelectedSound = (m_SelectedSound + 1) % m_Map.m_vpSounds.size();
+			m_Map.SelectNextSound();
 			ScrollToSelection = true;
 		}
 		else if(Input()->KeyPress(KEY_UP))
 		{
-			m_SelectedSound = (m_SelectedSound + m_Map.m_vpSounds.size() - 1) % m_Map.m_vpSounds.size();
+			m_Map.SelectPreviousSound();
 			ScrollToSelection = true;
 		}
 	}
@@ -4652,7 +4542,7 @@ void CEditor::RenderSounds(CUIRect ToolBox)
 	for(int i = 0; i < (int)m_Map.m_vpSounds.size(); i++)
 	{
 		ToolBox.HSplitTop(RowHeight + 2.0f, &Slot, &ToolBox);
-		int Selected = m_SelectedSound == i;
+		int Selected = m_Map.m_SelectedSound == i;
 		if(!s_ScrollRegion.AddRect(Slot, Selected && ScrollToSelection))
 			continue;
 		Slot.HSplitTop(RowHeight, &Slot, nullptr);
@@ -4671,7 +4561,7 @@ void CEditor::RenderSounds(CUIRect ToolBox)
 		if(int Result = DoButton_Ex(&m_Map.m_vpSounds[i], m_Map.m_vpSounds[i]->m_aName, Selected, &Slot,
 			   BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT, "Select sound.", IGraphics::CORNER_ALL))
 		{
-			m_SelectedSound = i;
+			m_Map.m_SelectedSound = i;
 
 			if(Result == 2)
 			{
@@ -7603,8 +7493,6 @@ void CEditor::Reset(bool CreateDefault)
 	DeselectQuads();
 	DeselectQuadPoints();
 	m_SelectedEnvelope = 0;
-	m_SelectedImage = 0;
-	m_SelectedSound = 0;
 	m_SelectedSource = -1;
 
 	m_pContainerPanned = nullptr;
