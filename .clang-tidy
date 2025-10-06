@@ -14,6 +14,10 @@
 #   We don't want to use anonymous namespaces instead of static functions.
 # bugprone-suspicious-realloc-usage
 #   We generally don't handle memory allocation failures.
+# bugprone-crtp-constructor-accessibility
+#   We don't use many classes with Curiously Recurring Template Patterns
+#   and it's unlikely that they'd be used incorrectly. This check does not
+#   improve the readability of the code.
 # performance-noexcept-*
 #   Exceptions may be disabled later, adding noexcept is just noise
 
@@ -23,6 +27,7 @@ Checks: >
   -bugprone-assignment-in-if-condition,
   -bugprone-branch-clone,
   -bugprone-casting-through-void,
+  -bugprone-crtp-constructor-accessibility,
   -bugprone-easily-swappable-parameters,
   -bugprone-implicit-widening-of-multiplication-result,
   -bugprone-incorrect-roundings,
