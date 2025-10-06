@@ -631,7 +631,7 @@ public:
 	}
 
 	const SCommand *Head() const { return m_pCmdBufferHead; }
-	SCommand *Head() { return m_pCmdBufferHead; }
+	SCommand *Head() { return m_pCmdBufferHead; } // NOLINT(readability-make-member-function-const)
 
 	void Reset()
 	{

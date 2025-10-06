@@ -156,7 +156,7 @@ public:
 		m_pPrng = nullptr;
 	}
 
-	int RandomOr0(int BelowThis)
+	int RandomOr0(int BelowThis) // NOLINT(readability-make-member-function-const)
 	{
 		if(BelowThis <= 1 || !m_pPrng)
 		{
