@@ -1354,19 +1354,19 @@ Loading sound files
 == 소리 파일 로딩 중
 
 Play the current demo
-== 데모 재생
+== 재생
 
 Pause the current demo
-== 데모 일시정지
+== 일시정지
 
 Stop the current demo
-== 데모 정지
+== 정지
 
 Slow down the demo
-== 데모 속도 낮추기
+== 속도 낮추기
 
 Speed up the demo
-== 데모 속도 높이기
+== 속도 높이기
 
 Export cut as a separate demo
 == 자른 부분을 다른 이름으로 저장
@@ -2091,7 +2091,7 @@ Renders your frame rate in the top right
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== 한국어 번역: ksgcln72, Pathos and CHaBek
+== 한국어 번역: ksgcln72, Pathos, CHaBek, 언더
 
 Show spectator cursor
 == 관전자 커서 표시
@@ -2121,32 +2121,32 @@ Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom
 == 
 
 Press Ctrl+Shift+G to disable debug graphs.
-== 
+== Ctrl+Shift+G를 눌러 디버그 그래프를 비활성화합니다.
 
 No demo with this filename exists
 == 
 
 [Spectating]
 Following %d: %s
-== 
+== %d: %s 관전 중
 
 Server could not be started
-== 
+== 서버를 시작할 수 없습니다
 
 Loading map
-== 
+== 맵 로딩
 
 This name cannot be used for files and folders
-== 
+== 이 이름은 파일 및 폴더에 사용할 수 없습니다
 
 Error checking player name
-== 
+== 플레이어 이름 확인 오류
 
 Could not check for existing player with your name. Check your internet connection.
 == 
 
 Could not get server list from master server
-== 
+== 마스터 서버에서 서버 목록을 불러올 수 없습니다.
 
 [Demo playback]
 Live
@@ -2157,7 +2157,7 @@ Go to Live
 == 
 
 Map size
-== 
+== 맵 용량량
 
 Save all changes before turning off the editor?
 == 
@@ -2420,60 +2420,60 @@ No skins match your filter criteria
 == 
 
 Chat background color
-== 
+== 채팅창 배경 색상
 
 [Show name plates]
 None
-== 
+== 끔
 
 [Show name plates]
 Own
-== 
+== 나만
 
 [Show name plates]
 Others
-== 
+== 다른 유저만
 
 [Show name plates]
 All
-== 
+== 모두
 
 Name plates offset
-== 
+== 이름표 간격
 
 Show friend icon in name plates
-== 
+== 이름에 친구 아이콘 표시
 
 Show client IDs on a seperate line
-== 
+== 클라이언트 ID를 별도의 줄에 표시
 
 Client IDs size
-== 
+== 클라이언트 ID 크기
 
 Show players' key presses
-== 
+== 플레이어 키 입력 표시
 
 [Show players' key presses]
 None
-== 
+== 끔
 
 [Show players' key presses]
 Own
-== 
+== 나만
 
 [Show players' key presses]
 Others
-== 
+== 다른 유저만
 
 [Show players' key presses]
 All
-== 
+== 모두
 
 Preview player's name plate
-== 
+== 플레이어 이름표 미리보기
 
 Preview dummy's name plate
-== 
+== 더미 이름표 미리보기
 
 Dragger Outline Color
 == 
