@@ -45,6 +45,5 @@ jobs:
           -DCMAKE_CXX_CLANG_TIDY="clang-tidy-20;-warnings-as-errors=*" \
           -DCMAKE_C_CLANG_TIDY="clang-tidy-20;-warnings-as-errors=*" \
           -DCMAKE_BUILD_TYPE=Debug \
-          -Werror=dev \
-          -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. ..
+          -Werror=dev ..
         cmake --build . --config Debug --target everything -- -k 0
