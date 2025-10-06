@@ -1923,7 +1923,7 @@ enum class EShellExecuteWindowState
  *
  * @return Wide string of arguments with escaped quotes.
  */
-std::wstring windows_args_to_wide(const char **arguments, const size_t num_arguments);
+std::wstring windows_args_to_wide(const char **arguments, size_t num_arguments);
 #endif
 
 /**

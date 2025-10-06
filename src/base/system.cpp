@@ -3433,7 +3433,7 @@ void cmdline_free(int argc, const char **argv)
 }
 
 #if defined(CONF_FAMILY_WINDOWS)
-std::wstring windows_args_to_wide(const char **arguments, const size_t num_arguments)
+std::wstring windows_args_to_wide(const char **arguments, size_t num_arguments)
 {
 	std::wstring wide_arguments;
 
