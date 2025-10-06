@@ -2,8 +2,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include "server.h"
-
 #include "databases/connection.h"
 #include "databases/connection_pool.h"
 #include "register.h"
@@ -55,12 +53,18 @@ extern std::vector<std::string> FetchAndroidServerCommandQueue();
 
 void CServerBan::InitServerBan(IConsole *pConsole, IStorage *pStorage, CServer *pServer)
 {
-	CNetBan::Init(pConsole, pStorage);
+	m_FoxNetBans = &pServer->m_FoxNetBans;
+
+	CNetBan::Init(pConsole, pStorage, &pServer->m_FoxNetBans);
 
 	m_pServer = pServer;
 
 	// overwrites base command, todo: improve this
+#if defined(CONF_SERVER)
+	Console()->Register("ban", "s[ip|id] ?i[minutes] r[reason]", CFGFLAG_SERVER | CFGFLAG_STORE, ConBan, this, "Ban player with ip/client id for x minutes for any reason");
+#else
 	Console()->Register("ban", "s[ip|id] ?i[minutes] r[reason]", CFGFLAG_SERVER | CFGFLAG_STORE, ConBanExt, this, "Ban player with ip/client id for x minutes for any reason");
+#endif
 	Console()->Register("ban_region", "s[region] s[ip|id] ?i[minutes] r[reason]", CFGFLAG_SERVER | CFGFLAG_STORE, ConBanRegion, this, "Ban player in a region");
 	Console()->Register("ban_region_range", "s[region] s[first ip] s[last ip] ?i[minutes] r[reason]", CFGFLAG_SERVER | CFGFLAG_STORE, ConBanRegionRange, this, "Ban range in a region");
 }
@@ -141,6 +145,48 @@ int CServerBan::BanRange(const CNetRange *pRange, int Seconds, const char *pReas
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban failed (invalid range)");
 	return -1;
 }
+
+// <FoxNet
+void CServerBan::ConFoxNetBan(IConsole::IResult *pResult, void *pUser)
+{
+	CServerBan *pThis = static_cast<CServerBan *>(pUser);
+
+	const char *pStr = pResult->GetString(0);
+	int64_t Minutes = pResult->NumArguments() > 1 ? std::clamp(pResult->GetInteger(1), 0, 525600) : 10;
+	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "Follow the server rules. Type /rules into the chat.";
+
+	const char *pIssuer = pResult->m_ClientId >= 0 ? pThis->Server()->ClientName(pResult->m_ClientId) : "Server";
+	char pPlayerName[MAX_NAME_LENGTH] = "";
+	NETADDR Addr;
+	if(str_isallnum(pStr))
+	{
+		int ClientId = str_toint(pStr);
+		if(ClientId < 0 || ClientId >= MAX_CLIENTS || pThis->Server()->m_aClients[ClientId].m_State == CServer::CClient::STATE_EMPTY)
+		{
+			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "foxnet-ban", "ban error (invalid client id)");
+			return;
+		}
+		str_copy(pPlayerName, pThis->Server()->ClientName(ClientId), sizeof(pPlayerName));
+
+		Addr = *pThis->Server()->ClientAddr(ClientId);
+	}
+	else
+	{
+		net_addr_from_str(&Addr, pStr);
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(pThis->Server()->m_aClients[i].m_State != CServer::CClient::STATE_EMPTY &&
+				!net_addr_comp(&Addr, pThis->Server()->ClientAddr(i)))
+			{
+				str_copy(pPlayerName, pThis->Server()->ClientName(i), sizeof(pPlayerName));
+				break;
+			}
+		}
+	}
+
+	pThis->m_FoxNetBans->Ban(&Addr, Minutes * 60, pIssuer, pPlayerName, pReason);
+}
+// FoxNet>
 
 void CServerBan::ConBanExt(IConsole::IResult *pResult, void *pUser)
 {
@@ -3287,7 +3333,9 @@ int CServer::Run()
 			{
 				DoSnapshot();
 
+				// <FoxNet
 				UpdateClientRconCommands();
+				// FoxNet>
 				const int CommandSendingClientId = Tick() % MAX_CLIENTS;
 				UpdateClientMaplistEntries(CommandSendingClientId);
 
@@ -4353,6 +4401,7 @@ void CServer::RegisterCommands()
 	// <FoxNet
 	Console()->Register("client_infos", "", CFGFLAG_SERVER, ConClientInfo, this, "Prints information about what clients players are using");
 	Console()->Register("high_bandwidth", "?i[enable]", CFGFLAG_SERVER, ConHighBandwidth, this, "Prints information about what clients players are using");
+	m_FoxNetBans.Init(Console(), Storage(), this);
 	// FoxNet>
 	// register console commands in sub parts
 	m_ServerBan.InitServerBan(Console(), Storage(), this);

@@ -30,6 +30,10 @@
 #include "upnp.h"
 #endif
 
+// <FoxNet
+#include <engine/server/foxnet/bans.h>
+// FoxNet>
+
 class CConfig;
 class CHostLookup;
 class CLogMessage;
@@ -57,6 +61,10 @@ public:
 	static void ConBanExt(class IConsole::IResult *pResult, void *pUser);
 	static void ConBanRegion(class IConsole::IResult *pResult, void *pUser);
 	static void ConBanRegionRange(class IConsole::IResult *pResult, void *pUser);
+
+	// <FoxNet
+
+	static void ConFoxNetBan(class IConsole::IResult *pResult, void *pUser);
 };
 
 class CServer : public IServer
@@ -226,6 +234,9 @@ public:
 	CFifo m_Fifo;
 	CServerBan m_ServerBan;
 	CHttp m_Http;
+	// <FoxNet 
+	CFoxNetBans m_FoxNetBans;
+	// FoxNet>
 
 	IEngineMap *m_pMap;
 

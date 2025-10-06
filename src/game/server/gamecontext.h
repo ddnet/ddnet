@@ -716,8 +716,6 @@ private:
 	std::vector<CStringDetection> m_vNameDetection;
 
 	void HandleEffects();
-	int64_t m_BanSaveDelay = 0;
-	void BanSync();
 
 	void OnExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, CClientMask Mask);
 

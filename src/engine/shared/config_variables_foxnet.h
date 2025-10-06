@@ -31,10 +31,6 @@ MACRO_CONFIG_INT(SvAutoBanJSClient, sv_auto_ban_jsclient, 1, 0, 1, CFGFLAG_SERVE
 MACRO_CONFIG_INT(SvReversePrediction, sv_prediction_test, 14, 1, 200, CFGFLAG_SERVER, "Reverse prediction margin")
 MACRO_CONFIG_INT(SvExperimentalPrediction, sv_experimental_prediction, 1, 0, 1, CFGFLAG_SERVER, "Experimental Prediction for cosmetics, tries to use clients ping to nudge cosmetics to the correct position")
 
-// Ban Syncing
-MACRO_CONFIG_INT(SvBanSyncing, sv_ban_syncing, 0, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Whether to Sync bans every fs_ban_syncing_delay mins across servers")
-MACRO_CONFIG_INT(SvBanSyncingDelay, sv_ban_syncing_delay, 15, 1, 500, CFGFLAG_SERVER | CFGFLAG_GAME, "How long the server waits between syncs")
-
 // snake
 MACRO_CONFIG_INT(SvSnakeAutoMove, sv_snake_auto_move, 0, 0, 1, CFGFLAG_SERVER, "Whether snake keeps last input or can stand still if no inputs applied")
 MACRO_CONFIG_INT(SvSnakeSpeed, sv_snake_speed, 6, 1, 50, CFGFLAG_SERVER, "Snake blocks per second speed")

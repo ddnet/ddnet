@@ -1,10 +1,16 @@
-#include "netban.h"
+﻿#include "netban.h"
 
 #include <base/math.h>
 
 #include <engine/console.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
+
+// <FoxNet
+#if defined(CONF_SERVER)
+#include <engine/server/foxnet/bans.h>
+#endif
+// FoxNet>
 
 CNetBan::CNetHash::CNetHash(const NETADDR *pAddr)
 {
@@ -279,10 +285,13 @@ int CNetBan::Unban(T *pBanPool, const typename T::CDataType *pData)
 	return -1;
 }
 
-void CNetBan::Init(IConsole *pConsole, IStorage *pStorage)
+void CNetBan::Init(IConsole *pConsole, IStorage *pStorage, CFoxNetBans *pFoxNetBans)
 {
 	m_pConsole = pConsole;
 	m_pStorage = pStorage;
+	// <FoxNet
+	m_FoxNetBans = pFoxNetBans;
+	// FoxNet>
 	m_BanAddrPool.Reset();
 	m_BanRangePool.Reset();
 
@@ -397,13 +406,19 @@ bool CNetBan::IsBanned(const NETADDR *pOrigAddr, char *pBuf, unsigned BufferSize
 	CNetHash aHash[17];
 	int Length = CNetHash::MakeHashArray(pAddr, aHash);
 
-	// check ban addresses
+	// <FoxNet>
+#if defined(CONF_SERVER)
+	if(m_FoxNetBans)
+		m_FoxNetBans->CheckBanned(pAddr);
+#else
 	CBanAddr *pBan = m_BanAddrPool.Find(pAddr, &aHash[Length]);
 	if(pBan)
 	{
 		MakeBanInfo(pBan, pBuf, BufferSize, MSGTYPE_PLAYER);
 		return true;
 	}
+#endif
+	// FoxNet>
 
 	// check ban ranges
 	for(int i = Length - 1; i >= 0; --i)
@@ -463,7 +478,14 @@ void CNetBan::ConUnban(IConsole::IResult *pResult, void *pUser)
 	{
 		NETADDR Addr;
 		if(net_addr_from_str(&Addr, pStr) == 0)
+		{
+#if defined(CONF_SERVER)
+			if(pThis->m_FoxNetBans)
+				pThis->m_FoxNetBans->Unban(&Addr);
+#else
 			pThis->UnbanByAddr(&Addr);
+#endif
+		}
 		else
 			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "unban error (invalid network address)");
 	}

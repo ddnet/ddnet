@@ -5,6 +5,8 @@
 
 #include <engine/console.h>
 
+class CFoxNetBans;
+
 inline int NetComp(const NETADDR *pAddr1, const NETADDR *pAddr2)
 {
 	return mem_comp(pAddr1, pAddr2, pAddr1->type == NETTYPE_IPV4 ? 8 : 20);
@@ -161,6 +163,9 @@ protected:
 	CBanAddrPool m_BanAddrPool;
 	CBanRangePool m_BanRangePool;
 	NETADDR m_LocalhostIpV4, m_LocalhostIpV6;
+	// <FoxNet
+	class CFoxNetBans *m_FoxNetBans;
+	// FoxNet>
 
 public:
 	enum
@@ -175,7 +180,7 @@ public:
 	class IStorage *Storage() const { return m_pStorage; }
 
 	virtual ~CNetBan() = default;
-	void Init(class IConsole *pConsole, class IStorage *pStorage);
+	void Init(class IConsole *pConsole, class IStorage *pStorage, class CFoxNetBans *pFoxNetBans);
 	void Update();
 
 	virtual int BanAddr(const NETADDR *pAddr, int Seconds, const char *pReason, bool VerbatimReason);

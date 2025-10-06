@@ -43,9 +43,6 @@ void CGameContext::FoxNetTick()
 	if(Server()->Tick() % (Server()->TickSpeed() * 60 * 60 * 6) == 0) // every 6 hours
 		RefreshWeekendFlag();
 
-	if(g_Config.m_SvBanSyncing)
-		BanSync();
-
 	// Set moving tiles time for quads with pos envelopes
 	m_Collision.SetTime(m_pController->GetTime());
 	m_Collision.UpdateQuadCache();
@@ -64,8 +61,6 @@ void CGameContext::FoxNetInit()
 	m_Shop.Init(this);
 	m_vPowerups.clear();
 	m_PowerUpDelay = Server()->Tick() + Server()->TickSpeed() * 5;
-
-	m_BanSaveDelay = Server()->Tick() + Server()->TickSpeed() * (g_Config.m_SvBanSyncingDelay * 60);
 	
 	RefreshWeekendFlag();
 
@@ -227,46 +222,6 @@ void CGameContext::HandleEffects()
 		}
 		++it;
 	}
-}
-
-void CGameContext::BanSync()
-{
-	static int64_t ExecSaveDelay = Server()->Tick() + Server()->TickSpeed();
-	if(m_BanSaveDelay < Server()->Tick())
-	{
-		static bool ExecBans = false;
-
-		if(Storage()->FileExists("Bans.cfg", IStorage::TYPE_ALL))
-		{
-			if(!ExecBans)
-			{
-				Server()->SetQuietBan(true);
-				Console()->ExecuteBansFile();
-				ExecBans = true;
-				ExecSaveDelay = Server()->Tick() + Server()->TickSpeed();
-			}
-		}
-		else
-		{
-			// Info Message
-			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ban-sync", "Couldn't find \"Bans.cfg\", disabling component ");
-			g_Config.m_SvBanSyncing = 0;
-			if(g_Config.m_SvBanSyncing == 0)
-				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ban-sync", "fs_ban_syncing set to 0");
-		}
-
-		if(ExecSaveDelay < Server()->Tick() && ExecBans)
-		{
-			Console()->ExecuteLine("bans_save \"Bans.cfg\"");
-
-			// Info Message
-			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ban-sync", "Saved Bans");
-
-			ExecBans = false;
-			m_BanSaveDelay = Server()->Tick() + Server()->TickSpeed() * (g_Config.m_SvBanSyncingDelay * 60);
-		}
-	}
-	Server()->SetQuietBan(false);
 }
 
 void CGameContext::FoxNetSnap(int ClientId, bool GlobalSnap)

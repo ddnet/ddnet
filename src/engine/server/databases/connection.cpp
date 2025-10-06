@@ -118,7 +118,7 @@ void IDbConnection::FormatCreateAccounts(char *aBuf, unsigned int BufferSize) co
 		"  Money INTEGER DEFAULT 0, "
 		"  Inventory TEXT COLLATE %s DEFAULT '', "
 		"  LastActiveItems TEXT COLLATE %s DEFAULT '', "
-		"  Disabled BOOL DEFAULT FALSE, "
+		"  Disabled BOOL DEFAULT %s, "
 		"  PRIMARY KEY (Username)"
 		")",
 		BinaryCollate(),
@@ -128,7 +128,25 @@ void IDbConnection::FormatCreateAccounts(char *aBuf, unsigned int BufferSize) co
 		BinaryCollate(),
 		BinaryCollate(),
 		BinaryCollate(),
-		BinaryCollate()
+		BinaryCollate(),
+		False()
 	);
+}
+
+void IDbConnection::FormatCreateBans(char *aBuf, unsigned int BufferSize) const
+{
+	str_format(aBuf, BufferSize,
+		"CREATE TABLE IF NOT EXISTS foxnet_bans ("
+		"  IP VARCHAR(45) COLLATE %s NOT NULL, "
+		"  EndTimestamp INTEGER NOT NULL, "
+		"  Issuer VARCHAR(%d) COLLATE %s NOT NULL, "
+		"  PlayerName VARCHAR(%d) COLLATE %s NOT NULL, "
+		"  Reason VARCHAR(128) COLLATE %s NOT NULL, "
+		"  PRIMARY KEY (IP)"
+		")",
+		BinaryCollate(),
+		MAX_NAME_LENGTH_SQL, BinaryCollate(),
+		MAX_NAME_LENGTH_SQL, BinaryCollate(),
+		BinaryCollate());
 }
 // FoxNet>

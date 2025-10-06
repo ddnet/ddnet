@@ -2743,6 +2743,8 @@ if(SERVER)
     databases/connection_pool.h
     databases/mysql.cpp
     databases/sqlite.cpp
+    foxnet/bans.cpp
+    foxnet/bans.h
     main.cpp
     name_ban.cpp
     name_ban.h
