@@ -99,15 +99,11 @@ jobs:
         FLUSH PRIVILEGES;
         EOF
 
-    - name: Set up Rust toolchain
-      if: contains(matrix.os, 'macOS')
-      uses: dtolnay/rust-toolchain@1.79.0
-
     - name: Prepare macOS
       if: contains(matrix.os, 'macOS')
       run: |
         brew update || true
-        brew install pkg-config sdl2 ffmpeg ninja molten-vk vulkan-headers glslang spirv-tools || true
+        brew install pkg-config sdl2 ffmpeg ninja molten-vk vulkan-headers glslang spirv-tools rust || true
         brew upgrade freetype
         pip3 install --break-system-packages dmgbuild
         echo /Library/Frameworks/Python.framework/Versions/3.12/bin >> $GITHUB_PATH
