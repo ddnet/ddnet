@@ -1164,7 +1164,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadLayer(const CCommandBuff
 
 	if(!Grouped)
 	{
-		vec4 aColors[ms_MaxQuadsPossible];
+		ColorRGBA aColors[ms_MaxQuadsPossible];
 		vec2 aOffsets[ms_MaxQuadsPossible];
 		float aRotations[ms_MaxQuadsPossible];
 
@@ -1190,7 +1190,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadLayer(const CCommandBuff
 	}
 	else
 	{
-		vec4 Colors = pCommand->m_pQuadInfo[0].m_Color;
+		ColorRGBA Colors = pCommand->m_pQuadInfo[0].m_Color;
 		vec2 Offsets = pCommand->m_pQuadInfo[0].m_Offsets;
 		float Rotations = pCommand->m_pQuadInfo[0].m_Rotation;
 

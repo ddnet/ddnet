@@ -4,6 +4,7 @@
 #define GAME_CLIENT_UI_RECT_H
 
 #include <base/color.h>
+#include <base/vmath.h>
 
 class IGraphics;
 

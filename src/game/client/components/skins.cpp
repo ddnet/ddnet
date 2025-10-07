@@ -363,7 +363,8 @@ bool CSkins::LoadSkinData(const char *pName, CSkinLoadData &Data) const
 				}
 			}
 		}
-		Data.m_BloodColor = ColorRGBA(normalize(vec3(aColors[0], aColors[1], aColors[2])));
+		const vec3 NormalizedColor = normalize(vec3(aColors[0], aColors[1], aColors[2]));
+		Data.m_BloodColor = ColorRGBA(NormalizedColor.x, NormalizedColor.y, NormalizedColor.z);
 	}
 
 	CheckMetrics(Data.m_Metrics.m_Body, Data.m_Info.m_pData, Pitch, 0, 0, BodyWidth, BodyHeight);

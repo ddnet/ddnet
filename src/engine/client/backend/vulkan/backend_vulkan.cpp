@@ -804,7 +804,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 
 	struct SUniformQuadPushGBufferObject
 	{
-		vec4 m_VertColor;
+		ColorRGBA m_VertColor;
 		vec2 m_Offset;
 		float m_Rotation;
 		float m_Padding;

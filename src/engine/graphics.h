@@ -9,6 +9,7 @@
 
 #include <base/color.h>
 #include <base/system.h>
+#include <base/vmath.h>
 
 #include <cstddef>
 #include <cstdint>
