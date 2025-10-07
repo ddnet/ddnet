@@ -792,7 +792,6 @@ public:
 	void RenderMenubar(CUIRect Menubar);
 
 	void SelectGameLayer();
-	std::vector<int> SortImages();
 
 	void DoAudioPreview(CUIRect View, const void *pPlayPauseButtonId, const void *pStopButtonId, const void *pSeekBarId, int SampleId);
 
