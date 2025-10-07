@@ -2325,6 +2325,9 @@ Show number of spectators
 Show only chat messages from team members
 == 
 
+Censor profanity
+== 
+
 Chat background color
 == 
 
@@ -2427,6 +2430,9 @@ Delete skin
 == 
 
 Unable to delete skin
+== 
+
+Download
 == 
 
 [Spectators]

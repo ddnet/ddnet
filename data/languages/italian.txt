@@ -2268,6 +2268,9 @@ Always show chat
 Show only chat messages from team members
 == 
 
+Censor profanity
+== 
+
 Chat font size
 == 
 
@@ -2457,6 +2460,9 @@ https://ddnet.org/discord
 == 
 
 Tutorial
+== 
+
+Download
 == 
 
 [Spectators]

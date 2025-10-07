@@ -2479,5 +2479,11 @@ Joystick Fire
 Joystick Hook
 == 
 
+Censor profanity
+== 
+
 Chat background color
+== 
+
+Download
 == 
