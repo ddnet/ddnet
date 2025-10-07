@@ -151,10 +151,10 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 		StrToInts(Info6.m_aName, std::size(Info6.m_aName), Client.m_aName);
 		StrToInts(Info6.m_aClan, std::size(Info6.m_aClan), Client.m_aClan);
 		Info6.m_Country = Client.m_Country;
-		StrToInts(Info6.m_aSkin, std::size(Info6.m_aSkin), Client.m_aSkinName);
-		Info6.m_UseCustomColor = Client.m_UseCustomColor;
-		Info6.m_ColorBody = Client.m_ColorBody;
-		Info6.m_ColorFeet = Client.m_ColorFeet;
+		StrToInts(Info6.m_aSkin, std::size(Info6.m_aSkin), "default");
+		Info6.m_UseCustomColor = 0;
+		Info6.m_ColorBody = 0;
+		Info6.m_ColorFeet = 0;
 		mem_copy(pObj, &Info6, sizeof(CNetObj_ClientInfo));
 	}
 
