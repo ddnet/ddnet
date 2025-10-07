@@ -2481,3 +2481,9 @@ Joystick Hook
 
 Chat background color
 == Sohbet arka plan rengi
+
+Censor profanity
+== Küfür Sansürü
+
+Download
+== İndir
