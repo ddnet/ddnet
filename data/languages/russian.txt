@@ -2481,3 +2481,9 @@ Joystick Hook
 
 Chat background color
 == Цвет фона
+
+Censor profanity
+== 
+
+Download
+== 

@@ -2189,6 +2189,9 @@ Always show chat
 Show only chat messages from team members
 == 
 
+Censor profanity
+== 
+
 Chat font size
 == 
 
@@ -2423,6 +2426,9 @@ Tutorial
 == 
 
 Can't find a Tutorial server
+== 
+
+Download
 == 
 
 Loading race demo files

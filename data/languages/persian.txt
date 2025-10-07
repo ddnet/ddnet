@@ -2413,6 +2413,9 @@ Show spectator cursor
 Show number of spectators
 == 
 
+Censor profanity
+== 
+
 Chat background color
 == 
 
@@ -2476,6 +2479,9 @@ Dragger Inner Color
 == 
 
 AntiPing: prediction margin
+== 
+
+Download
 == 
 
 https://wiki.ddnet.org/wiki/Mapping
