@@ -3,6 +3,7 @@
 
 #include "menus.h"
 
+#include <base/color.h>
 #include <base/log.h>
 #include <base/math.h>
 #include <base/system.h>
@@ -605,19 +606,9 @@ void CMenus::RenderMenubar(CUIRect Box, IClient::EClientState ClientState)
 			NewPage = PAGE_DEMOS;
 		}
 		GameClient()->m_Tooltips.DoToolTip(&s_DemoButton, &Button, Localize("Demos"));
-	}
+		Box.VSplitRight(10.0f, &Box, nullptr);
 
-	Box.VSplitRight(10.0f, &Box, nullptr);
-
-	TextRender()->SetRenderFlags(0);
-	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
-
-	if(ClientState == IClient::STATE_OFFLINE)
-	{
 		Box.VSplitLeft(33.0f, &Button, &Box);
-
-		TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
-		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGNMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 
 		bool GotNewsOrUpdate = false;
 
@@ -726,6 +717,9 @@ void CMenus::RenderMenubar(CUIRect Box, IClient::EClientState ClientState)
 	}
 	else
 	{
+		TextRender()->SetRenderFlags(0);
+		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
+
 		// online menus
 		Box.VSplitLeft(90.0f, &Button, &Box);
 		static CButtonContainer s_GameButton;
@@ -762,6 +756,25 @@ void CMenus::RenderMenubar(CUIRect Box, IClient::EClientState ClientState)
 		{
 			NewPage = PAGE_CALLVOTE;
 			m_ControlPageOpening = true;
+		}
+
+		if(Box.w >= 10.0f + 33.0f + 10.0f)
+		{
+			TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
+			TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGNMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+
+			Box.VSplitRight(10.0f, &Box, nullptr);
+			Box.VSplitRight(33.0f, &Box, &Button);
+			static CButtonContainer s_DemoButton;
+			if(DoButton_MenuTab(&s_DemoButton, FONT_ICON_CLAPPERBOARD, ActivePage == PAGE_DEMOS, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_DEMOBUTTON]))
+			{
+				NewPage = PAGE_DEMOS;
+			}
+			GameClient()->m_Tooltips.DoToolTip(&s_DemoButton, &Button, Localize("Demos"));
+			Box.VSplitRight(10.0f, &Box, nullptr);
+
+			TextRender()->SetRenderFlags(0);
+			TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 		}
 	}
 
@@ -1204,6 +1217,10 @@ void CMenus::Render()
 			else if(m_GamePage == PAGE_CALLVOTE)
 			{
 				RenderServerControl(MainView);
+			}
+			else if(m_GamePage == PAGE_DEMOS)
+			{
+				RenderDemoBrowser(MainView);
 			}
 			else if(m_GamePage == PAGE_SETTINGS)
 			{
@@ -1712,6 +1729,16 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		TextBox.VSplitLeft(10.0f, nullptr, &TextBox);
 		Ui()->DoLabel(&Label, Localize("Video name:"), 12.8f, TEXTALIGN_ML);
 		Ui()->DoEditBox(&m_DemoRenderInput, &TextBox, 12.8f);
+
+		// Warn about disconnect if online
+		if(Client()->State() == IClient::STATE_ONLINE)
+		{
+			Box.HSplitBottom(10.0f, &Box, nullptr);
+			Box.HSplitBottom(20.0f, &Box, &Row);
+			SLabelProperties LabelProperties;
+			LabelProperties.SetColor(ColorRGBA(1.0f, 0.0f, 0.0f));
+			Ui()->DoLabel(&Row, Localize("You will be disconnected from the server."), 12.8f, TEXTALIGN_MC, LabelProperties);
+		}
 	}
 	else if(m_Popup == POPUP_RENDER_DONE)
 	{

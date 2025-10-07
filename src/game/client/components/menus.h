@@ -488,6 +488,7 @@ protected:
 	void RenderDemoBrowserList(CUIRect ListView, bool &WasListboxItemActivated);
 	void RenderDemoBrowserDetails(CUIRect DetailsView);
 	void RenderDemoBrowserButtons(CUIRect ButtonsView, bool WasListboxItemActivated);
+	void PopupConfirmPlayDemo();
 	void PopupConfirmDeleteDemo();
 	void PopupConfirmDeleteFolder();
 	static void ConchainDemoPlay(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
