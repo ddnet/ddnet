@@ -1,3 +1,4 @@
+/*
 #include "censor.h"
 
 #include <base/log.h>
@@ -255,3 +256,4 @@ void CCensor::CCensorListDownloadJob::Run()
 		m_vLoadedWords = std::move(vLoadedWords);
 	}
 }
+*/
