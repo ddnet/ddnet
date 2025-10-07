@@ -2470,6 +2470,9 @@ Skin could not be found.
 No skins match your filter criteria
 == 
 
+Censor profanity
+== 
+
 Chat background color
 == 
 
@@ -2480,4 +2483,7 @@ Dragger Outline Color
 == 
 
 Dragger Inner Color
+== 
+
+Download
 == 
