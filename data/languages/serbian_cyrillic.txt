@@ -2258,6 +2258,9 @@ Always show chat
 Show only chat messages from team members
 == 
 
+Censor profanity
+== 
+
 Chat font size
 == 
 
@@ -2432,6 +2435,9 @@ Unable to delete skin
 == 
 
 Open the directory to add custom assets
+== 
+
+Download
 == 
 
 [Spectators]

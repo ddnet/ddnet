@@ -1134,6 +1134,9 @@ All combined
 Demo
 == 
 
+Markers
+== 
+
 Length
 == 
 
@@ -1156,9 +1159,6 @@ Size
 == 
 
 %.2f KiB
-== 
-
-Markers
 == 
 
 Netversion
@@ -1985,6 +1985,9 @@ Show only chat messages from team members
 Use old chat style
 == 
 
+Censor profanity
+== 
+
 Chat font size
 == 
 
@@ -2370,6 +2373,9 @@ Downloading %s:
 == 
 
 Update failed! Check log…
+== 
+
+Download
 == 
 
 Loading race demo files

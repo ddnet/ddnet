@@ -2116,15 +2116,8 @@ Marking
 Show number of spectators
 == 관전자 수 표시
 
-[Graphics error]
-Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
-== 
-
 Press Ctrl+Shift+G to disable debug graphs.
 == Ctrl+Shift+G를 눌러 디버그 그래프를 비활성화합니다.
-
-No demo with this filename exists
-== 
 
 [Spectating]
 Following %d: %s
@@ -2142,11 +2135,77 @@ This name cannot be used for files and folders
 Error checking player name
 == 플레이어 이름 확인 오류
 
-Could not check for existing player with your name. Check your internet connection.
-== 
-
 Could not get server list from master server
 == 마스터 서버에서 서버 목록을 불러올 수 없습니다.
+
+Map size
+== 맵 용량량
+
+Chat background color
+== 채팅창 배경 색상
+
+[Show name plates]
+None
+== 끔
+
+[Show name plates]
+Own
+== 나만
+
+[Show name plates]
+Others
+== 다른 유저만
+
+[Show name plates]
+All
+== 모두
+
+Name plates offset
+== 이름표 간격
+
+Show friend icon in name plates
+== 이름에 친구 아이콘 표시
+
+Show client IDs on a seperate line
+== 클라이언트 ID를 별도의 줄에 표시
+
+Client IDs size
+== 클라이언트 ID 크기
+
+Show players' key presses
+== 플레이어 키 입력 표시
+
+[Show players' key presses]
+None
+== 끔
+
+[Show players' key presses]
+Own
+== 나만
+
+[Show players' key presses]
+Others
+== 다른 유저만
+
+[Show players' key presses]
+All
+== 모두
+
+Preview player's name plate
+== 플레이어 이름표 미리보기
+
+Preview dummy's name plate
+== 더미 이름표 미리보기
+
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+No demo with this filename exists
+== 
+
+Could not check for existing player with your name. Check your internet connection.
+== 
 
 [Demo playback]
 Live
@@ -2155,9 +2214,6 @@ Live
 [Demo playback]
 Go to Live
 == 
-
-Map size
-== 맵 용량량
 
 Save all changes before turning off the editor?
 == 
@@ -2419,61 +2475,8 @@ Skin could not be found.
 No skins match your filter criteria
 == 
 
-Chat background color
-== 채팅창 배경 색상
-
-[Show name plates]
-None
-== 끔
-
-[Show name plates]
-Own
-== 나만
-
-[Show name plates]
-Others
-== 다른 유저만
-
-[Show name plates]
-All
-== 모두
-
-Name plates offset
-== 이름표 간격
-
-Show friend icon in name plates
-== 이름에 친구 아이콘 표시
-
-Show client IDs on a seperate line
-== 클라이언트 ID를 별도의 줄에 표시
-
-Client IDs size
-== 클라이언트 ID 크기
-
-Show players' key presses
-== 플레이어 키 입력 표시
-
-[Show players' key presses]
-None
-== 끔
-
-[Show players' key presses]
-Own
-== 나만
-
-[Show players' key presses]
-Others
-== 다른 유저만
-
-[Show players' key presses]
-All
-== 모두
-
-Preview player's name plate
-== 플레이어 이름표 미리보기
-
-Preview dummy's name plate
-== 더미 이름표 미리보기
+Censor profanity
+== 
 
 Dragger Outline Color
 == 
@@ -2482,4 +2485,7 @@ Dragger Inner Color
 == 
 
 AntiPing: prediction margin
+== 
+
+Download
 == 

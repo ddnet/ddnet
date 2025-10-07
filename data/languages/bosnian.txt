@@ -2122,6 +2122,9 @@ Show only chat messages from team members
 Use old chat style
 == 
 
+Censor profanity
+== 
+
 Chat font size
 == 
 
@@ -2402,6 +2405,9 @@ Run server
 
 [Start menu]
 Play
+== 
+
+Download
 == 
 
 Loading race demo files

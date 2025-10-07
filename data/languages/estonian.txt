@@ -2342,6 +2342,9 @@ Show client IDs (scoreboard, chat, spectator)
 Show number of spectators
 == 
 
+Censor profanity
+== 
+
 Chat background color
 == 
 
@@ -2444,6 +2447,9 @@ Delete skin
 == 
 
 Unable to delete skin
+== 
+
+Download
 == 
 
 [skins]
