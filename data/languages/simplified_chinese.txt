@@ -2489,7 +2489,7 @@ Chat background color
 == 聊天背景色
 
 Censor profanity
-== 
+== 屏蔽不文明用语
 
 Download
-== 
+== 下载
