@@ -8,6 +8,7 @@
 #include <base/math.h>
 #include <base/system.h>
 
+#include <engine/client.h>
 #include <engine/demo.h>
 #include <engine/graphics.h>
 #include <engine/keys.h>
@@ -1564,20 +1565,11 @@ void CMenus::RenderDemoBrowserButtons(CUIRect ButtonsView, bool WasListboxItemAc
 			}
 			else // file
 			{
-				char aBuf[IO_MAX_PATH_LENGTH];
-				str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_vpFilteredDemos[m_DemolistSelectedIndex]->m_aFilename);
-				const char *pError = Client()->DemoPlayer_Play(aBuf, m_vpFilteredDemos[m_DemolistSelectedIndex]->m_StorageType);
-				m_LastPauseChange = -1.0f;
-				m_LastSpeedChange = -1.0f;
-				if(pError)
-				{
-					PopupMessage(Localize("Error loading demo"), pError, Localize("Ok"));
-				}
+				if(GameClient()->CurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
+					PopupConfirm(Localize("Disconnect"), Localize("Are you sure that you want to disconnect and play this demo?"), Localize("Yes"), Localize("No"), &CMenus::PopupConfirmPlayDemo);
 				else
-				{
-					Ui()->SetActiveItem(nullptr);
-					return;
-				}
+					CMenus::PopupConfirmPlayDemo();
+				return;
 			}
 		}
 		SetIconMode(false);
@@ -1650,6 +1642,24 @@ void CMenus::RenderDemoBrowserButtons(CUIRect ButtonsView, bool WasListboxItemAc
 			}
 #endif
 		}
+	}
+}
+
+void CMenus::PopupConfirmPlayDemo()
+{
+	char aBuf[IO_MAX_PATH_LENGTH];
+	str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_vpFilteredDemos[m_DemolistSelectedIndex]->m_aFilename);
+	const char *pError = Client()->DemoPlayer_Play(aBuf, m_vpFilteredDemos[m_DemolistSelectedIndex]->m_StorageType);
+	m_LastPauseChange = -1.0f;
+	m_LastSpeedChange = -1.0f;
+	if(pError)
+	{
+		PopupMessage(Localize("Error loading demo"), pError, Localize("Ok"));
+	}
+	else
+	{
+		Ui()->SetActiveItem(nullptr);
+		return;
 	}
 }
 
