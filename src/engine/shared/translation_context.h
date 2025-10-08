@@ -61,28 +61,18 @@ public:
 		{
 			m_Active = false;
 
-			m_UseCustomColor = 0;
-			m_ColorBody = 0;
-			m_ColorFeet = 0;
-
 			m_aName[0] = '\0';
 			m_aClan[0] = '\0';
 			m_Country = 0;
-			m_aSkinName[0] = '\0';
 			m_Team = 0;
 			m_PlayerFlags7 = 0;
 		}
 
 		bool m_Active;
 
-		int m_UseCustomColor;
-		int m_ColorBody;
-		int m_ColorFeet;
-
 		char m_aName[MAX_NAME_LENGTH];
 		char m_aClan[MAX_CLAN_LENGTH];
 		int m_Country;
-		char m_aSkinName[protocol7::MAX_SKIN_LENGTH];
 		int m_Team;
 		int m_PlayerFlags7;
 	};
