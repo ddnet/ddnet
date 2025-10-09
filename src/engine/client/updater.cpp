@@ -290,8 +290,8 @@ void CUpdater::ParseUpdate()
 		return;
 	}
 
-	std::unordered_set<std::string> RemovedInFuture;
-	std::unordered_set<std::string> QueuedDownload;
+	// if we're already downloading a file, or it's been deleted in the latest version, we skip it if it comes up again
+	std::unordered_set<std::string> SkipSet;
 
 	for(int i = 0; i < json_array_length(pVersions); i++)
 	{
@@ -320,8 +320,7 @@ void CUpdater::ParseUpdate()
 				if(!pName)
 					continue;
 
-				// if the file hasn't been removed in the most recent version, and we haven't downloaded it yet
-				if(RemovedInFuture.contains(pName) && QueuedDownload.insert(pName).second)
+				if(SkipSet.insert(pName).second)
 				{
 					AddFileJob(pName, true);
 				}
@@ -337,8 +336,10 @@ void CUpdater::ParseUpdate()
 				if(!pName)
 					continue;
 
-				AddFileJob(pName, false);
-				RemovedInFuture.insert(std::string(pName));
+				if(SkipSet.insert(pName).second)
+				{
+					AddFileJob(pName, false);
+				}
 			}
 		}
 	}
