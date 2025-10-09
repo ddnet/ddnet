@@ -31,9 +31,46 @@ public:
 	CUpdaterFetchTask(CUpdater *pUpdater, const char *pFile, const char *pDestPath);
 };
 
+// addition of '/' to keep paths intact, because EscapeUrl() (using curl_easy_escape) doesn't do this
+static inline bool IsUnreserved(unsigned char c)
+{
+	return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
+	       (c >= '0' && c <= '9') || c == '-' || c == '_' ||
+	       c == '.' || c == '~' || c == '/';
+}
+
+void UrlEncodePath(const char *pIn, char *pOut, size_t OutSize)
+{
+	if(!pIn || !pOut || OutSize == 0)
+		return;
+	static const char HEX[] = "0123456789ABCDEF";
+	size_t WriteIndex = 0;
+	for(size_t i = 0; pIn[i] != '\0'; ++i)
+	{
+		unsigned char c = static_cast<unsigned char>(pIn[i]);
+		if(IsUnreserved(c))
+		{
+			if(OutSize - WriteIndex < 2) // require 1 byte + NUL
+				break;
+			pOut[WriteIndex++] = static_cast<char>(c);
+		}
+		else
+		{
+			if(OutSize - WriteIndex < 4) // require 3 bytes + NUL
+				break;
+			pOut[WriteIndex++] = '%';
+			pOut[WriteIndex++] = HEX[c >> 4]; // upper 4 bits of c
+			pOut[WriteIndex++] = HEX[c & 0x0F]; // lower 4 bits of c
+		}
+	}
+	pOut[(WriteIndex < OutSize) ? WriteIndex : (OutSize - 1)] = '\0';
+}
+
 static const char *GetUpdaterUrl(char *pBuf, int BufSize, const char *pFile)
 {
-	str_format(pBuf, BufSize, "https://update.ddnet.org/%s", pFile);
+	char aBuf[1024];
+	UrlEncodePath(pFile, aBuf, sizeof(aBuf));
+	str_format(pBuf, BufSize, "https://update.ddnet.org/%s", aBuf);
 	return pBuf;
 }
 
@@ -217,7 +254,7 @@ bool CUpdater::ReplaceServer()
 	bool Success = true;
 	char aPath[IO_MAX_PATH_LENGTH];
 
-	//Replace running executable by renaming twice...
+	// Replace running executable by renaming twice...
 	m_pStorage->RemoveBinaryFile(SERVER_EXEC ".old");
 	Success &= m_pStorage->RenameBinaryFile(PLAT_SERVER_EXEC, SERVER_EXEC ".old");
 	str_format(aPath, sizeof(aPath), "update/%s", m_aServerExecTmp);
