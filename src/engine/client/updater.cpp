@@ -12,6 +12,7 @@
 #include <game/version.h>
 
 #include <cstdlib> // system
+#include <unordered_set>
 
 using std::string;
 
@@ -237,39 +238,71 @@ bool CUpdater::ReplaceServer()
 void CUpdater::ParseUpdate()
 {
 	char aPath[IO_MAX_PATH_LENGTH];
-	void *pBuf;
-	unsigned Length;
+	void *pBuf = nullptr;
+	unsigned Length = 0;
 	if(!m_pStorage->ReadFile(m_pStorage->GetBinaryPath("update/update.json", aPath, sizeof(aPath)), IStorage::TYPE_ABSOLUTE, &pBuf, &Length))
 		return;
 
 	json_value *pVersions = json_parse((json_char *)pBuf, Length);
 	free(pBuf);
 
-	if(pVersions && pVersions->type == json_array)
+	if(!pVersions || pVersions->type != json_array)
 	{
-		for(int i = 0; i < json_array_length(pVersions); i++)
+		if(pVersions)
+			json_value_free(pVersions);
+		return;
+	}
+
+	std::unordered_set<std::string> RemovedInFuture;
+	std::unordered_set<std::string> QueuedDownload;
+
+	for(int i = 0; i < json_array_length(pVersions); i++)
+	{
+		const json_value *pCurrent = json_array_get(pVersions, i);
+		if(!pCurrent || pCurrent->type != json_object)
+			continue;
+
+		const char *pVersion = json_string_get(json_object_get(pCurrent, "version"));
+		if(!pVersion)
+			continue;
+
+		if(str_comp(pVersion, GAME_RELEASE_VERSION) == 0)
+			break;
+
+		if(json_boolean_get(json_object_get(pCurrent, "client")))
+			m_ClientUpdate = true;
+		if(json_boolean_get(json_object_get(pCurrent, "server")))
+			m_ServerUpdate = true;
+
+		const json_value *pDownload = json_object_get(pCurrent, "download");
+		if(pDownload && pDownload->type == json_array)
 		{
-			const json_value *pTemp;
-			const json_value *pCurrent = json_array_get(pVersions, i);
-			if(str_comp(json_string_get(json_object_get(pCurrent, "version")), GAME_RELEASE_VERSION))
+			for(int j = 0; j < json_array_length(pDownload); j++)
 			{
-				if(json_boolean_get(json_object_get(pCurrent, "client")))
-					m_ClientUpdate = true;
-				if(json_boolean_get(json_object_get(pCurrent, "server")))
-					m_ServerUpdate = true;
-				if((pTemp = json_object_get(pCurrent, "download"))->type == json_array)
+				const char *pName = json_string_get(json_array_get(pDownload, j));
+				if(!pName)
+					continue;
+
+				// if the file hasn't been removed in the most recent version, and we haven't downloaded it yet
+				if(RemovedInFuture.find(pName) == RemovedInFuture.end() && QueuedDownload.insert(pName).second)
 				{
-					for(int j = 0; j < json_array_length(pTemp); j++)
-						AddFileJob(json_string_get(json_array_get(pTemp, j)), true);
-				}
-				if((pTemp = json_object_get(pCurrent, "remove"))->type == json_array)
-				{
-					for(int j = 0; j < json_array_length(pTemp); j++)
-						AddFileJob(json_string_get(json_array_get(pTemp, j)), false);
+					AddFileJob(pName, true);
 				}
 			}
-			else
-				break;
+		}
+
+		const json_value *pRemove = json_object_get(pCurrent, "remove");
+		if(pRemove && pRemove->type == json_array)
+		{
+			for(int j = 0; j < json_array_length(pRemove); j++)
+			{
+				const char *pName = json_string_get(json_array_get(pRemove, j));
+				if(!pName)
+					continue;
+
+				AddFileJob(pName, false);
+				RemovedInFuture.insert(std::string(pName));
+			}
 		}
 	}
 	json_value_free(pVersions);
