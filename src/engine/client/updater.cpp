@@ -39,7 +39,7 @@ static inline bool IsUnreserved(unsigned char c)
 	       c == '.' || c == '~' || c == '/';
 }
 
-void UrlEncodePath(const char *pIn, char *pOut, size_t OutSize)
+static void UrlEncodePath(const char *pIn, char *pOut, size_t OutSize)
 {
 	if(!pIn || !pOut || OutSize == 0)
 		return;
@@ -321,7 +321,7 @@ void CUpdater::ParseUpdate()
 					continue;
 
 				// if the file hasn't been removed in the most recent version, and we haven't downloaded it yet
-				if(RemovedInFuture.find(pName) == RemovedInFuture.end() && QueuedDownload.insert(pName).second)
+				if(RemovedInFuture.contains(pName) && QueuedDownload.insert(pName).second)
 				{
 					AddFileJob(pName, true);
 				}
