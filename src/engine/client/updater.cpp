@@ -371,11 +371,6 @@ void CUpdater::RunningUpdate()
 				FetchFile(pFile);
 			}
 		}
-		else
-		{
-			m_pStorage->RemoveBinaryFile(Job.first.c_str());
-		}
-
 		m_CurrentJob++;
 	}
 	else
@@ -410,6 +405,14 @@ void CUpdater::CommitUpdate()
 		Success &= ReplaceClient();
 	if(m_ServerUpdate)
 		Success &= ReplaceServer();
+
+	if(Success)
+	{
+		for(auto &FileJob : m_FileJobs)
+			if(!FileJob.second)
+				m_pStorage->RemoveBinaryFile(FileJob.first.c_str());
+	}
+
 	if(!Success)
 		SetCurrentState(IUpdater::FAIL);
 	else if(m_pClient->State() == IClient::STATE_ONLINE || m_pClient->EditorHasUnsavedData())
