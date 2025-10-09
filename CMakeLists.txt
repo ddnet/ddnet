@@ -2080,6 +2080,8 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   fifo.h
   filecollection.cpp
   filecollection.h
+  fixed_point_number.cpp
+  fixed_point_number.h
   global_uuid_manager.cpp
   host_lookup.cpp
   host_lookup.h
