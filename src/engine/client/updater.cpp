@@ -63,7 +63,7 @@ static void UrlEncodePath(const char *pIn, char *pOut, size_t OutSize)
 			pOut[WriteIndex++] = HEX[c & 0x0F]; // lower 4 bits of c
 		}
 	}
-	pOut[(WriteIndex < OutSize) ? WriteIndex : (OutSize - 1)] = '\0';
+	pOut[WriteIndex] = '\0';
 }
 
 static const char *GetUpdaterUrl(char *pBuf, int BufSize, const char *pFile)
@@ -275,8 +275,8 @@ bool CUpdater::ReplaceServer()
 void CUpdater::ParseUpdate()
 {
 	char aPath[IO_MAX_PATH_LENGTH];
-	void *pBuf = nullptr;
-	unsigned Length = 0;
+	void *pBuf;
+	unsigned Length;
 	if(!m_pStorage->ReadFile(m_pStorage->GetBinaryPath("update/update.json", aPath, sizeof(aPath)), IStorage::TYPE_ABSOLUTE, &pBuf, &Length))
 		return;
 
@@ -290,8 +290,8 @@ void CUpdater::ParseUpdate()
 		return;
 	}
 
-	std::unordered_set<std::string> RemovedInFuture;
-	std::unordered_set<std::string> QueuedDownload;
+	// if we're already downloading a file, or it's been deleted in the latest version, we skip it if it comes up again
+	std::unordered_set<std::string> SkipSet;
 
 	for(int i = 0; i < json_array_length(pVersions); i++)
 	{
@@ -320,8 +320,7 @@ void CUpdater::ParseUpdate()
 				if(!pName)
 					continue;
 
-				// if the file hasn't been removed in the most recent version, and we haven't downloaded it yet
-				if(RemovedInFuture.contains(pName) && QueuedDownload.insert(pName).second)
+				if(SkipSet.insert(pName).second)
 				{
 					AddFileJob(pName, true);
 				}
@@ -337,8 +336,10 @@ void CUpdater::ParseUpdate()
 				if(!pName)
 					continue;
 
-				AddFileJob(pName, false);
-				RemovedInFuture.insert(std::string(pName));
+				if(SkipSet.insert(pName).second)
+				{
+					AddFileJob(pName, false);
+				}
 			}
 		}
 	}
@@ -445,9 +446,9 @@ void CUpdater::CommitUpdate()
 
 	if(Success)
 	{
-		for(auto &FileJob : m_FileJobs)
-			if(!FileJob.second)
-				m_pStorage->RemoveBinaryFile(FileJob.first.c_str());
+		for(const auto &[Filename, JobSuccess] : m_FileJobs)
+			if(!JobSuccess)
+				m_pStorage->RemoveBinaryFile(Filename.c_str());
 	}
 
 	if(!Success)
