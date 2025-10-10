@@ -19,7 +19,7 @@
 CMapImages::CMapImages()
 {
 	m_Count = 0;
-	mem_zero(m_aEntitiesIsLoaded, sizeof(m_aEntitiesIsLoaded));
+	std::fill(std::begin(m_aEntitiesIsLoaded), std::end(m_aEntitiesIsLoaded), false);
 	m_SpeedupArrowIsLoaded = false;
 
 	str_copy(m_aEntitiesPath, "editor/entities_clear");
