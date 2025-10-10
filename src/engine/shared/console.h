@@ -15,7 +15,6 @@ class CConsole : public IConsole
 {
 	class CCommand : public ICommandInfo
 	{
-		EAccessLevel m_AccessLevel;
 		CCommand *m_pNext;
 
 	public:
@@ -34,8 +33,7 @@ class CConsole : public IConsole
 		const char *Name() const override { return m_pName; }
 		const char *Help() const override { return m_pHelp; }
 		const char *Params() const override { return m_pParams; }
-		EAccessLevel GetAccessLevel() const override { return m_AccessLevel; }
-		void SetAccessLevel(EAccessLevel AccessLevel);
+		int Flags() const override { return m_Flags; }
 	};
 
 	class CChain
@@ -61,7 +59,6 @@ class CConsole : public IConsole
 
 	CExecFile *m_pFirstExec;
 	IStorage *m_pStorage;
-	EAccessLevel m_AccessLevel;
 
 	CCommand *m_pRecycleList;
 	CHeap m_TempCommands;
@@ -71,8 +68,6 @@ class CConsole : public IConsole
 	static void Con_Chain(IResult *pResult, void *pUserData);
 	static void Con_Echo(IResult *pResult, void *pUserData);
 	static void Con_Exec(IResult *pResult, void *pUserData);
-	static void ConCommandAccess(IResult *pResult, void *pUser);
-	static void ConCommandStatus(IConsole::IResult *pResult, void *pUser);
 
 	void ExecuteLineStroked(int Stroke, const char *pStr, int ClientId = -1, bool InterpretSemicolons = true) override;
 
@@ -81,6 +76,11 @@ class CConsole : public IConsole
 
 	FUnknownCommandCallback m_pfnUnknownCommandCallback = EmptyUnknownCommandCallback;
 	void *m_pUnknownCommandUserdata = nullptr;
+
+	FCanUseCommandCallback m_pfnCanUseCommandCallback = nullptr;
+	void *m_pCanUseCommandUserData;
+
+	bool CanUseCommand(int ClientId, const IConsole::ICommandInfo *pCommand) const;
 
 	enum
 	{
@@ -166,8 +166,8 @@ public:
 	~CConsole() override;
 
 	void Init() override;
-	const ICommandInfo *FirstCommandInfo(EAccessLevel AccessLevel, int FlagMask) const override;
-	const ICommandInfo *NextCommandInfo(const IConsole::ICommandInfo *pInfo, EAccessLevel AccessLevel, int FlagMask) const override;
+	const ICommandInfo *FirstCommandInfo(int ClientId, int FlagMask) const override;
+	const ICommandInfo *NextCommandInfo(const IConsole::ICommandInfo *pInfo, int ClientId, int FlagMask) const override;
 	const ICommandInfo *GetCommandInfo(const char *pName, int FlagMask, bool Temp) override;
 	int PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback, void *pUser) override;
 
@@ -187,31 +187,14 @@ public:
 	void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = gs_ConsoleDefaultColor) const override;
 	void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser) override;
 	void SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, void *pUser) override;
+	void SetCanUseCommandCallback(FCanUseCommandCallback pfnCallback, void *pUser) override;
 	void InitChecksum(CChecksumData *pData) const override;
-
-	void SetAccessLevel(EAccessLevel AccessLevel) override;
-
-	/**
-	 * Converts access level string to access level enum.
-	 *
-	 * @param pAccessLevel should be either "admin", "mod", "moderator", "helper" or "user".
-	 * @return `std::nullopt` on error otherwise one of the auth enums such as `EAccessLevel::ADMIN`.
-	 */
-	static std::optional<EAccessLevel> AccessLevelToEnum(const char *pAccessLevel);
-
-	/**
-	 * Converts access level enum to access level string.
-	 *
-	 * @param AccessLevel should be one of these: `EAccessLevel::ADMIN`, `EAccessLevel::MODERATOR`, `EAccessLevel::HELPER` or `EAccessLevel::USER`.
-	 * @return `nullptr` on error or access level string like "admin".
-	 */
-	static const char *AccessLevelToString(EAccessLevel AccessLevel);
 
 	static std::optional<ColorHSLA> ColorParse(const char *pStr, float DarkestLighting);
 
 	// DDRace
 
-	static void ConUserCommandStatus(IConsole::IResult *pResult, void *pUser);
+	static void ConCmdlistChat(IConsole::IResult *pResult, void *pUser);
 
 	bool Cheated() const override { return m_Cheated; }
 
