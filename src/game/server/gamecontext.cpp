@@ -4712,6 +4712,72 @@ void CGameContext::SendFinish(int ClientId, float Time, float PreviousBestTime)
 	Server()->SendPackMsg(&RaceFinishMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);
 }
 
+void CGameContext::SendSaveCode(int Team, int TeamSize, int State, const char *pError, const char *pSaveRequester, const char *pServerName, const char *pGeneratedCode, const char *pCode)
+{
+	char aBuf[512];
+
+	CMsgPacker Msg(NETMSGTYPE_SV_SAVECODE);
+	Msg.AddInt(State);
+	Msg.AddString(pError);
+	Msg.AddString(pSaveRequester);
+	Msg.AddString(pServerName);
+	Msg.AddString(pGeneratedCode);
+	Msg.AddString(pCode);
+	char aTeamMembers[1024];
+	aTeamMembers[0] = '\0';
+	int NumMembersSent = 0;
+	for(int MemberId = 0; MemberId < MAX_CLIENTS; MemberId++)
+	{
+		if(!m_apPlayers[MemberId])
+			continue;
+		if(GetDDRaceTeam(MemberId) != Team)
+			continue;
+		if(NumMembersSent++ > 10)
+		{
+			str_format(aBuf, sizeof(aBuf), " and %d others", (TeamSize - NumMembersSent) + 1);
+			str_append(aTeamMembers, aBuf);
+			break;
+		}
+
+		if(NumMembersSent > 1)
+			str_append(aTeamMembers, ", ");
+		str_append(aTeamMembers, Server()->ClientName(MemberId));
+	}
+	Msg.AddString(aTeamMembers);
+
+	for(int MemberId = 0; MemberId < MAX_CLIENTS; MemberId++)
+	{
+		if(!m_apPlayers[MemberId])
+			continue;
+		if(GetDDRaceTeam(MemberId) != Team)
+			continue;
+
+		if(GetClientVersion(MemberId) >= VERSION_DDNET_SAVE_CODE)
+		{
+			Server()->SendMsg(&Msg, MSGFLAG_VITAL, MemberId);
+		}
+		else
+		{
+			if(pCode[0] == '\0')
+			{
+				str_format(aBuf,
+					sizeof(aBuf),
+					"Team save in progress. You'll be able to load with '/load %s'",
+					pGeneratedCode);
+			}
+			else
+			{
+				str_format(aBuf,
+					sizeof(aBuf),
+					"Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails",
+					pCode,
+					pGeneratedCode);
+			}
+			SendChatTarget(MemberId, aBuf);
+		}
+	}
+}
+
 bool CGameContext::ProcessSpamProtection(int ClientId, bool RespectChatInitialDelay)
 {
 	if(!m_apPlayers[ClientId])
