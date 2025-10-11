@@ -25,7 +25,7 @@ public:
 	explicit CLayer(CEditor *pEditor)
 	{
 		m_Type = LAYERTYPE_INVALID;
-		str_copy(m_aName, "(invalid)");
+		str_copy(m_aLayerName, "(invalid)");
 		m_Visible = true;
 		m_Readonly = false;
 		m_Flags = 0;
@@ -34,7 +34,7 @@ public:
 
 	CLayer(const CLayer &Other)
 	{
-		str_copy(m_aName, Other.m_aName);
+		str_copy(m_aLayerName, Other.m_aLayerName);
 		m_Flags = Other.m_Flags;
 		m_pEditor = Other.m_pEditor;
 		m_Type = Other.m_Type;
@@ -71,7 +71,7 @@ public:
 		*pHeight = 0;
 	}
 
-	char m_aName[12];
+	char m_aLayerName[12];
 	int m_Type;
 	int m_Flags;
 

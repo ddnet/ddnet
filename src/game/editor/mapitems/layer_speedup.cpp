@@ -5,7 +5,7 @@
 CLayerSpeedup::CLayerSpeedup(CEditor *pEditor, int w, int h) :
 	CLayerTiles(pEditor, w, h)
 {
-	str_copy(m_aName, "Speedup");
+	str_copy(m_aLayerName, "Speedup");
 	m_HasSpeedup = true;
 
 	m_pSpeedupTile = new CSpeedupTile[w * h];
@@ -15,7 +15,7 @@ CLayerSpeedup::CLayerSpeedup(CEditor *pEditor, int w, int h) :
 CLayerSpeedup::CLayerSpeedup(const CLayerSpeedup &Other) :
 	CLayerTiles(Other)
 {
-	str_copy(m_aName, "Speedup copy");
+	str_copy(m_aLayerName, "Speedup copy");
 	m_HasSpeedup = true;
 
 	m_pSpeedupTile = new CSpeedupTile[m_Width * m_Height];

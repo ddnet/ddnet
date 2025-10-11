@@ -19,7 +19,7 @@ CLayerTiles::CLayerTiles(CEditor *pEditor, int w, int h) :
 	CLayer(pEditor)
 {
 	m_Type = LAYERTYPE_TILES;
-	m_aName[0] = '\0';
+	m_aLayerName[0] = '\0';
 	m_Width = w;
 	m_Height = h;
 	m_Image = -1;
@@ -46,7 +46,7 @@ CLayerTiles::CLayerTiles(CEditor *pEditor, int w, int h) :
 }
 
 CLayerTiles::CLayerTiles(const CLayerTiles &Other) :
-	CLayer(Other)
+	CLayer(Other), CMapItemLayerTilemap(Other)
 {
 	m_Width = Other.m_Width;
 	m_Height = Other.m_Height;
