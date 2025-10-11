@@ -505,7 +505,7 @@ Successfully saved the replay!
 == 리플레이 저장에 성공했습니다!
 
 Replay feature is disabled!
-== 리플레이 기능을 비활성화했습니다!
+== 리플레이 기능이 비활성화됐습니다!
 
 Warning
 == 주의
@@ -556,7 +556,7 @@ Welcome to DDNet
 == DDNet에 오신 것을 환영합니다.
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDraceNetwork는 온라인 협동 게임으로, 당신과 당신의 Tee 동료들이 맵의 결승선에 도달하는 것이 목표입니다. 당신이 초보자라면 가장 난이도가 낮은 맵들로 구성된 Novice 서버에서 시작할 것을 권장합니다. 핑을 고려해 자신의 근처에 있는 서버를 선택하십시오.
+== DDraceNetwork는 온라인 협동 게임으로, 당신과 당신의 Tee 동료들이 맵의 결승선에 도달하는 것이 목표입니다. 당신이 초보자라면 가장 난이도가 낮은 맵들로 구성된 Novice 서버에서 시작할 것을 권장합니다. 핑을 고려해 당신의 근처에 있는 서버를 선택하십시오.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == 죽기(재시작) 위해서는 K 키를 눌러야 합니다. Q 키를 눌러 일시정지하면 다른 플레이어를 관전할 수 있습니다. 다른 키 바인드는 설정 창을 참고하십시오.
@@ -595,7 +595,7 @@ Theme
 == 테마
 
 Getting server list from master server
-== 마스터 서버에서 서버 목록을 받는 중
+== 마스터 서버에서 서버 목록을 불러오는 중
 
 Search
 == 검색
@@ -1127,7 +1127,7 @@ default
 == 기본
 
 custom
-== 커스텀
+== 사용자 정의
 
 auto
 == 자동
@@ -1611,7 +1611,7 @@ Save changes
 == 변경사항 저장
 
 Unsaved changes
-== 변경사항 저장되지 않음
+== 변경사항이 저장되지 않음
 
 Discard changes
 == 변경사항 버리기
@@ -1666,19 +1666,19 @@ Hook Strength
 == 갈고리 세기
 
 Show hook strength icon indicator
-== 갈고리 세기 기호 표시
+== 갈고리 세기 아이콘 표시
 
 Show hook strength number indicator
 == 갈고리 세기 정도 표시
 
 Size of hook strength icon and number indicator
-== 갈고리 세기 기호 및 수치 크기
+== 갈고리 세기 아이콘 및 정도 크기
 
 Key Presses
 == 키 입력
 
 Size of key press icons
-== 키 입력 기호 크기
+== 키 입력 아이콘 크기
 
 Show own player's hook collision line
 == 내 갈고리 보조선 표시
@@ -1824,7 +1824,7 @@ Active
 == 활성화
 
 Match %d of %d
-== 경기 %d of %d
+== 경기 %d / %d
 
 No results
 == 결과 없음
@@ -1880,10 +1880,10 @@ Are you sure you want to save your skin? If a skin with this name already exists
 == 당신의 스킨을 저장하시겠습니까? 만약 같은 이름의 스킨이 있을 경우, 덮어쓰기됩니다.
 
 There's an unsaved map in the editor, you might want to save it.
-== 맵 편집기에 저장되지 않은 맵이 있습니다. 돌아가 해당 맵을 저장하실 수 있습니다.
+== 편집기에 저장되지 않은 맵이 있습니다. 돌아가 해당 맵을 저장하실 수 있습니다.
 
 Continue anyway?
-== 계속하시겠습니까?
+== 그래도 계속하시겠습니까?
 
 A demo with this name already exists
 == 같은 이름의 데모가 이미 있습니다.
@@ -1983,7 +1983,7 @@ Could not save touch controls to file. See local console for details.
 == 터치 조작 설정을 파일에 저장할 수 없습니다. 세부사항은 로컬 콘솔을 확인하십시오.
 
 Are you sure that you want to discard the current changes to the touch controls?
-== 터치 조작 설정 변경사항을 버리시겠습니까?
+== 터치 조작 설정의 변경사항을 버리시겠습니까?
 
 Are you sure that you want to reset the touch controls to default?
 == 터치 조작 설정을 초기화하시겠습니까?
@@ -1992,7 +1992,7 @@ Import from clipboard
 == 클립보드에서 가져오기
 
 Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
-== 클립보드에서 터치 조작 설정을 가져오시겠습니까? 그럴 경우, 현재 터치 조작 설정은 덮어쓰기됩니다.
+== 클립보드에서 터치 조작 설정을 가져오시겠습니까? 현재 터치 조작 설정은 덮어쓰기됩니다.
 
 Export to clipboard
 == 클립보드로 내보내기
@@ -2002,11 +2002,11 @@ Direct touch input while ingame
 
 [Direct touch input]
 Disabled
-== 비활성화됨
+== 비활성화
 
 [Direct touch input]
 Active action
-== 활성화
+== 동작 활성화
 
 [Direct touch input]
 Aim
@@ -2100,7 +2100,7 @@ Basic
 == 기본
 
 Custom
-== 사용자 지정
+== 사용자 정의
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
 == 서버를 열 수 없습니다. 백그라운드에서 서버를 구동하기 위해 앱 설정에서 알림 권한을 허용하십시오.
@@ -2117,32 +2117,32 @@ Show number of spectators
 == 관전자 수 표시
 
 Press Ctrl+Shift+G to disable debug graphs.
-== Ctrl+Shift+G를 눌러 디버그 그래프를 비활성화합니다.
+== Ctrl+Shift+G를 눌러 디버그 그래프를 비활성화할 수 있습니다.
 
 [Spectating]
 Following %d: %s
 == %d: %s 관전 중
 
 Server could not be started
-== 서버를 시작할 수 없습니다
+== 서버를 열 수 없습니다.
 
 Loading map
-== 맵 로딩
+== 맵 로딩 중
 
 This name cannot be used for files and folders
-== 이 이름은 파일 및 폴더에 사용할 수 없습니다
+== 이 이름은 파일 및 폴더에 사용할 수 없습니다.
 
 Error checking player name
-== 플레이어 이름 확인 오류
+== 플레이어 이름 검색 오류
 
 Could not get server list from master server
 == 마스터 서버에서 서버 목록을 불러올 수 없습니다.
 
 Map size
-== 맵 용량량
+== 맵 크기
 
 Chat background color
-== 채팅창 배경 색상
+== 채팅 배경 색상
 
 [Show name plates]
 None
@@ -2154,14 +2154,14 @@ Own
 
 [Show name plates]
 Others
-== 다른 유저만
+== 타인만
 
 [Show name plates]
 All
 == 모두
 
 Name plates offset
-== 이름표 간격
+== 이름 표시 간격
 
 Show friend icon in name plates
 == 이름에 친구 아이콘 표시
@@ -2185,133 +2185,133 @@ Own
 
 [Show players' key presses]
 Others
-== 다른 유저만
+== 타인만
 
 [Show players' key presses]
 All
 == 모두
 
 Preview player's name plate
-== 플레이어 이름표 미리보기
+== 플레이어 이름 표시 미리보기
 
 Preview dummy's name plate
-== 더미 이름표 미리보기
+== 더미 이름 표시 미리보기
 
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== VRAM 용량이 부족합니다. 'cl_skins_loaded_max'를 더 낮은 값으로 설정하거나 고해상도의 사용자 정의 에셋(스킨 및 엔티티 등)을 삭제해 보십시오.
 
 No demo with this filename exists
-== 
+== 해당 이름의 데모가 존재하지 않음
 
 Could not check for existing player with your name. Check your internet connection.
-== 
+== 당신의 이름을 기존 플레이어 목록에서 검색할 수 없습니다. 인터넷 연결 상태를 확인하십시오.
 
 [Demo playback]
 Live
-== 
+== 실시간
 
 [Demo playback]
 Go to Live
-== 
+== 실시간으로 재생
 
 Save all changes before turning off the editor?
-== 편집기를 종료하기 전에 모든 변경 사항을 저장할까요?
+== 편집기를 종료하기 전에 모든 변경사항을 저장하시겠습니까?
 
 Layout
-== 
+== 레이아웃
 
 Visibility
-== 
+== 표시
 
 Behavior
-== 
+== 행위
 
 Delete button
 == 버튼 삭제
 
 Are you sure that you want to delete this button?
-== 이 버튼을 삭제할까요?
+== 이 버튼을 삭제하시겠습니까?
 
 Duplicate
-== 
+== 복제
 
 New button already created
-== 
+== 이미 생성된 새 버튼
 
 A new button has already been created, please save or delete it before creating another one.
-== 
+== 새 버튼이 이미 생성됐습니다. 다른 버튼을 생성하기 전에 저장하거나 삭제하십시오.
 
 Please save your changes before duplicating a button.
-== 
+== 버튼을 복제하기 전에 변경사항을 저장하십시오.
 
 No space for button
-== 
+== 버튼 공간 없음
 
 There is not enough space available to place another button.
-== 
+== 다른 버튼을 배치할 공간이 부족합니다.
 
 There is not enough space available to place another button with this size. The button has been resized.
-== 
+== 이 크기의 다른 버튼을 배치할 공간이 부족합니다. 버튼의 크기가 재조절됐습니다.
 
 Deselect
-== 
+== 선택 해제
 
 You'll lose unsaved changes after deselecting.
-== 
+== 선택 해제 시 저장되지 않은 변경사항은 버려집니다.
 
 Width
-== 
+== 너비
 
 Height
-== 
+== 높이
 
 Shape
-== 
+== 형태
 
 [Touch button shape]
 Rectangle
-== 
+== 직사각형
 
 [Touch button shape]
 Circle
-== 
+== 원형
 
 [Touch button label type]
 Plain
-== 
+== 그대로
 
 [Touch button label type]
 Localized
-== 
+== 번역하기
 
 [Touch button label type]
 Icon
-== 
+== 아이콘
 
 Behavior type
-== 
+== 행위 종류
 
 [Touch button behavior]
 Bind
-== 
+== 바인드
 
 [Touch button behavior]
 Bind Toggle
-== 
+== 토글 바인드
 
 [Touch button behavior]
 Predefined
-== 
+== 지정 행위
 
 Command
 == 명령어
 
 Label
-== 
+== 문구
 
 Label type
-== 
+== 문구 종류
 
 Add command
 == 명령어 추가
@@ -2321,72 +2321,72 @@ Delete command
 
 [Touch button visibility preview]
 Included
-== 
+== 포함
 
 [Touch button visibility preview]
 Excluded
-== 
+== 제외
 
 [Touch button visibility preview]
 Ignore
-== 
+== 무시
 
 Long press on a touch button to select it.
-== 
+== 버튼을 길게 눌러 선택하십시오.
 
 New button
 == 새 버튼
 
 Select button by touch
-== 
+== 터치해 버튼 선택
 
 No buttons match your filter criteria
-== 
+== 필터에 일치하는 버튼이 없음
 
 File
 == 파일
 
 Buttons
-== 버튼들
+== 버튼
 
 Active color
-== 
+== 활성화 시 색상
 
 Inactive color
-== 
+== 비활성화 시 색상
 
 Preview button visibility while the editor is active.
-== 
+== 편집기가 활성화 상태일 때 버튼 표시 상태를 미리보기합니다.
 
 Show all buttons
-== 모든 버튼 보이기
+== 모든 버튼 표시
 
 Save all changes before switching selected button?
-== 선택된 버튼을 변경하기 전에 모든 변경 사항을 저장할까요?
+== 다른 버튼을 선택하기 전에 모든 변경사항을 저장하시겠습니까?
 
 Discard
-== 
+== 버리기
 
 There is not enough space available for the button. Check its visibilities and size.
-== 
+== 버튼에 사용 가능한 공간이 부족합니다. 표시 조건과 크기를 확인하십시오.
 
 Selected button not visible
-== 선택된 버튼이 보이지 않음
+== 선택한 버튼이 보이지 않음
 
 The selected button is not visible. Do you want to deselect it or edit its visibility?
-== 
+== 선택한 버튼이 보이지 않습니다. 선택을 해제하거나 표시 조건을 수정하시겠습니까? 
 
 Edit
 == 수정
 
 Width and height are required to be within the range from %d to %d.
-== 
+== 너비와 높이의 허용 범위는 %d 에서 %d 까지입니다.
 
 Button position is outside of the screen.
 == 버튼 위치가 화면 밖에 있습니다.
 
 The selected button is overlapping with other buttons.
-== 선택된 버튼이 다른 버튼과 겹쳐 있습니다.
+== 선택한 버튼이 다른 버튼과 겹쳐 있습니다.
 
 Wrong button settings
 == 잘못된 버튼 설정
@@ -2397,31 +2397,31 @@ Ingame
 
 [Touch button visibilities]
 Zoom Allowed
-== 
+== 시야 조절 허용됨
 
 [Touch button visibilities]
 Vote Active
-== 
+== 투표 활성화
 
 [Touch button visibilities]
 Dummy Allowed
-== 
+== 더미 허용됨
 
 [Touch button visibilities]
 Dummy Connected
-== 
+== 더미 연결됨
 
 [Touch button visibilities]
 Rcon Authed
-== 
+== 원격 콘솔 인증됨
 
 [Touch button visibilities]
 Demo Player
-== 
+== 데모 재생기
 
 [Touch button visibilities]
 Extra Menu
-== 
+== 기타 메뉴
 
 [Predefined touch button behaviors]
 Ingame Menu
@@ -2429,11 +2429,11 @@ Ingame Menu
 
 [Predefined touch button behaviors]
 Extra Menu
-== 
+== 기타 메뉴
 
 [Predefined touch button behaviors]
 Emoticon
-== 
+== 이모티콘
 
 [Predefined touch button behaviors]
 Spectate
@@ -2441,39 +2441,39 @@ Spectate
 
 [Predefined touch button behaviors]
 Swap Action
-== 
+== 동작 전환
 
 [Predefined touch button behaviors]
 Use Action
-== 
+== 동작 실행
 
 [Predefined touch button behaviors]
 Joystick Action
-== 
+== 조이스틱 동작
 
 [Predefined touch button behaviors]
 Joystick Aim
-== 에임
+== 조이스틱 조준
 
 [Predefined touch button behaviors]
 Joystick Fire
-== 발사
+== 조이스틱 발사
 
 [Predefined touch button behaviors]
 Joystick Hook
-== 갈고리
+== 조이스틱 갈고리
 
 This skin name cannot be used.
 == 이 스킨 이름은 사용할 수 없습니다.
 
 Skin could not be loaded due to an error. Check the local console for details.
-== 오류로 인해 스킨을 불러올 수 없습니다. 자세한 내용은 콘솔을 확인하세요. 
+== 오류로 인해 스킨을 불러올 수 없습니다. 세부사항은 로컬 콘솔을 확인하십시오.
 
 Skin could not be found.
 == 스킨을 찾지 못했습니다.
 
 No skins match your filter criteria
-== 필터 조건에 맞는 스킨이 없습니다.
+== 필터에 일치하는 스킨이 없음
 
 Censor profanity
 == 비속어 검열
@@ -2485,7 +2485,7 @@ Dragger Inner Color
 == 드래거 광선 색상
 
 AntiPing: prediction margin
-== 안티 핑: 예측 여유
+== 안티 핑: 예측 허용 범위
 
 Download
 == 다운로드
