@@ -631,7 +631,7 @@ public:
 	}
 
 	const SCommand *Head() const { return m_pCmdBufferHead; }
-	SCommand *Head() { return m_pCmdBufferHead; }
+	SCommand *Head() { return m_pCmdBufferHead; } // NOLINT(readability-make-member-function-const)
 
 	void Reset()
 	{
@@ -858,7 +858,7 @@ class CGraphics_Threaded : public IEngineGraphics
 	void AddVertices(int Count, CCommandBuffer::SVertexTex3DStream *pVertices);
 
 	template<typename TName>
-	void Rotate(const CCommandBuffer::SPoint &rCenter, TName *pPoints, int NumPoints)
+	void Rotate(const CCommandBuffer::SPoint &Center, TName *pPoints, int NumPoints)
 	{
 		float c = std::cos(m_Rotation);
 		float s = std::sin(m_Rotation);
@@ -868,10 +868,10 @@ class CGraphics_Threaded : public IEngineGraphics
 		TName *pVertices = pPoints;
 		for(i = 0; i < NumPoints; i++)
 		{
-			x = pVertices[i].m_Pos.x - rCenter.x;
-			y = pVertices[i].m_Pos.y - rCenter.y;
-			pVertices[i].m_Pos.x = x * c - y * s + rCenter.x;
-			pVertices[i].m_Pos.y = x * s + y * c + rCenter.y;
+			x = pVertices[i].m_Pos.x - Center.x;
+			y = pVertices[i].m_Pos.y - Center.y;
+			pVertices[i].m_Pos.x = x * c - y * s + Center.x;
+			pVertices[i].m_Pos.y = x * s + y * c + Center.y;
 		}
 	}
 

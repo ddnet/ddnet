@@ -30,8 +30,9 @@ enum class EShiftDirection : int
 	DOWN,
 };
 
-struct RECTi
+class CIntRect
 {
+public:
 	int x, y;
 	int w, h;
 };
@@ -121,9 +122,9 @@ public:
 
 	int ConvertX(float x) const;
 	int ConvertY(float y) const;
-	void Convert(CUIRect Rect, RECTi *pOut) const;
+	void Convert(CUIRect Rect, CIntRect *pOut) const;
 	void Snap(CUIRect *pRect) const;
-	void Clamp(RECTi *pRect) const;
+	void Clamp(CIntRect *pRect) const;
 
 	bool IsEntitiesLayer() const override;
 

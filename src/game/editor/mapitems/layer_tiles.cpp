@@ -200,7 +200,7 @@ void CLayerTiles::Render(bool Tileset)
 int CLayerTiles::ConvertX(float x) const { return (int)(x / 32.0f); }
 int CLayerTiles::ConvertY(float y) const { return (int)(y / 32.0f); }
 
-void CLayerTiles::Convert(CUIRect Rect, RECTi *pOut) const
+void CLayerTiles::Convert(CUIRect Rect, CIntRect *pOut) const
 {
 	pOut->x = ConvertX(Rect.x);
 	pOut->y = ConvertY(Rect.y);
@@ -210,7 +210,7 @@ void CLayerTiles::Convert(CUIRect Rect, RECTi *pOut) const
 
 void CLayerTiles::Snap(CUIRect *pRect) const
 {
-	RECTi Out;
+	CIntRect Out;
 	Convert(*pRect, &Out);
 	pRect->x = Out.x * 32.0f;
 	pRect->y = Out.y * 32.0f;
@@ -218,7 +218,7 @@ void CLayerTiles::Snap(CUIRect *pRect) const
 	pRect->h = Out.h * 32.0f;
 }
 
-void CLayerTiles::Clamp(RECTi *pRect) const
+void CLayerTiles::Clamp(CIntRect *pRect) const
 {
 	if(pRect->x < 0)
 	{
@@ -298,7 +298,7 @@ static void InitGrabbedLayer(std::shared_ptr<T> &pLayer, CLayerTiles *pThisLayer
 
 int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 {
-	RECTi r;
+	CIntRect r;
 	Convert(Rect, &r);
 	Clamp(&r);
 

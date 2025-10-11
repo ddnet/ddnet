@@ -178,7 +178,7 @@ public:
 	bool CanSpec() const;
 
 	bool IsPlaying() const;
-	int64_t m_Last_KickVote;
+	int64_t m_LastKickVote;
 	int64_t m_LastDDRaceTeamChange;
 	int m_ShowOthers;
 	bool m_ShowAll;

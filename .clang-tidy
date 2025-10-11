@@ -14,8 +14,15 @@
 #   We don't want to use anonymous namespaces instead of static functions.
 # bugprone-suspicious-realloc-usage
 #   We generally don't handle memory allocation failures.
+# bugprone-crtp-constructor-accessibility
+#   We don't use many classes with Curiously Recurring Template Patterns
+#   and it's unlikely that they'd be used incorrectly. This check does not
+#   improve the readability of the code.
 # performance-noexcept-*
 #   Exceptions may be disabled later, adding noexcept is just noise
+
+HeaderFilterRegex: '.*'
+ExcludeHeaderFilterRegex: '(external/|generated/|include/|steam/steam_api_flat\.h)'
 
 Checks: >
   -*,
@@ -23,6 +30,7 @@ Checks: >
   -bugprone-assignment-in-if-condition,
   -bugprone-branch-clone,
   -bugprone-casting-through-void,
+  -bugprone-crtp-constructor-accessibility,
   -bugprone-easily-swappable-parameters,
   -bugprone-implicit-widening-of-multiplication-result,
   -bugprone-incorrect-roundings,
@@ -120,7 +128,7 @@ CheckOptions:
   - key:             readability-identifier-naming.MemberPrefix
     value:           m_
   - key:             readability-identifier-naming.MemberIgnoredRegexp
-    value:           '^(m_ap|m_v|m_p|m_a|ms_p|[a-z]$).*'
+    value:           '^(ms?_(a|v|p|pfn)*[A-Z][a-zA-Z0-9]*|[abfghlrsuvwxyz])$'
   - key:             readability-identifier-naming.StaticVariablePrefix
     value:           s_
   - key:             readability-identifier-naming.ClassMethodCase
@@ -132,9 +140,9 @@ CheckOptions:
   - key:             readability-identifier-naming.StructPrefix
     value:           S
   - key:             readability-identifier-naming.StructIgnoredRegexp
-    value:           '^C.*'
+    value:           '^((GL_S|[CI])[A-Z](_?[a-zA-Z0-9])*|_json_value|NETADDR)$'
   - key:             readability-identifier-naming.ClassIgnoredRegexp
-    value:           '^(I|CCommandProcessorFragment_Vulkan$).*'
+    value:           '^([CI][A-Z](_?[a-zA-Z0-9])*)$'
   - key:             readability-identifier-naming.ParameterCase
     value:           CamelCase
   - key:             readability-identifier-naming.ParameterIgnoredRegexp
@@ -142,7 +150,7 @@ CheckOptions:
   - key:             readability-identifier-naming.ClassMethodIgnoredRegexp
     value:           '^(Con_).*'
   - key:             readability-identifier-naming.ClassMemberIgnoredRegexp
-    value:           '^(m(s?)_[avp]).*'
+    value:           '^(ms?_(a|v|p|pfn)*[A-Z][a-zA-Z0-9]*|[abfghlrsuvwxyz])$'
   - key:             readability-identifier-naming.LocalConstantIgnoredRegexp
     value:           '^(p|a|v|MAX_ANIM_SPEED$|DATA_OFFSET$|HEADER_LEN$|MIN_ANIM_SPEED$|[hwdcbqstf]$|[xt][0123]$|result$|sub$|it$|len$|d[xy]$).*'
   - key:             readability-identifier-naming.LocalVariableIgnoredRegexp

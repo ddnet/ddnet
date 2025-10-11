@@ -108,7 +108,7 @@ typedef void *PROCESS;
  *
  * @ingroup Shell
  */
-constexpr PROCESS INVALID_PROCESS = nullptr;
+constexpr PROCESS INVALID_PROCESS = nullptr; // NOLINT(misc-misplaced-const)
 #else
 /**
  * A handle for a process.
