@@ -28,6 +28,7 @@
 #include <game/client/animstate.h>
 #include <game/client/components/binds.h>
 #include <game/client/components/console.h>
+#include <game/client/components/key_binder.h>
 #include <game/client/components/menu_background.h>
 #include <game/client/components/sounds.h>
 #include <game/client/gameclient.h>
@@ -488,56 +489,6 @@ int CMenus::DoButton_CheckBox_Number(const void *pId, const char *pText, int Che
 	return DoButton_CheckBox_Common(pId, pText, aBuf, pRect, BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT);
 }
 
-int CMenus::DoKeyReader(const void *pId, const CUIRect *pRect, int Key, int ModifierCombination, int *pNewModifierCombination)
-{
-	int NewKey = Key;
-	*pNewModifierCombination = ModifierCombination;
-
-	const int ButtonResult = Ui()->DoButtonLogic(pId, 0, pRect, BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT);
-	if(ButtonResult == 1)
-	{
-		m_Binder.m_pKeyReaderId = pId;
-		m_Binder.m_TakeKey = true;
-		m_Binder.m_GotKey = false;
-	}
-	else if(ButtonResult == 2)
-	{
-		NewKey = 0;
-		*pNewModifierCombination = CBinds::MODIFIER_NONE;
-	}
-
-	if(m_Binder.m_pKeyReaderId == pId && m_Binder.m_GotKey)
-	{
-		// abort with escape key
-		if(m_Binder.m_Key.m_Key != KEY_ESCAPE)
-		{
-			NewKey = m_Binder.m_Key.m_Key;
-			*pNewModifierCombination = m_Binder.m_ModifierCombination;
-		}
-		m_Binder.m_pKeyReaderId = nullptr;
-		m_Binder.m_GotKey = false;
-		Ui()->SetActiveItem(nullptr);
-	}
-
-	char aBuf[64];
-	if(m_Binder.m_pKeyReaderId == pId && m_Binder.m_TakeKey)
-		str_copy(aBuf, Localize("Press a key…"));
-	else if(NewKey == 0)
-		aBuf[0] = '\0';
-	else
-	{
-		GameClient()->m_Binds.GetKeyBindName(NewKey, *pNewModifierCombination, aBuf, sizeof(aBuf));
-	}
-
-	const ColorRGBA Color = m_Binder.m_pKeyReaderId == pId && m_Binder.m_TakeKey ? ColorRGBA(0.0f, 1.0f, 0.0f, 0.4f) : ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f * Ui()->ButtonColorMul(pId));
-	pRect->Draw(Color, IGraphics::CORNER_ALL, 5.0f);
-	CUIRect Temp;
-	pRect->HMargin(1.0f, &Temp);
-	Ui()->DoLabel(&Temp, aBuf, Temp.h * CUi::ms_FontmodHeight, TEXTALIGN_MC);
-
-	return NewKey;
-}
-
 void CMenus::RenderMenubar(CUIRect Box, IClient::EClientState ClientState)
 {
 	CUIRect Button;
@@ -891,9 +842,10 @@ void CMenus::RenderNews(CUIRect MainView)
 void CMenus::OnInterfacesInit(CGameClient *pClient)
 {
 	CComponentInterfaces::OnInterfacesInit(pClient);
-	m_CommunityIcons.OnInterfacesInit(pClient);
-	m_MenusStart.OnInterfacesInit(pClient);
 	m_MenusIngameTouchControls.OnInterfacesInit(pClient);
+	m_MenusSettingsControls.OnInterfacesInit(pClient);
+	m_MenusStart.OnInterfacesInit(pClient);
+	m_CommunityIcons.OnInterfacesInit(pClient);
 }
 
 void CMenus::OnInit()
@@ -1250,7 +1202,7 @@ void CMenus::Render()
 	Ui()->RenderPopupMenus();
 
 	// Prevent UI elements from being hovered while a key reader is active
-	if(m_Binder.m_TakeKey)
+	if(GameClient()->m_KeyBinder.IsActive())
 	{
 		Ui()->SetHotItem(nullptr);
 	}
