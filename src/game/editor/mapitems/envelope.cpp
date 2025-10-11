@@ -54,6 +54,12 @@ CEnvelope::CEnvelope(int NumChannels) :
 	}
 }
 
+CEnvelope::CEnvelope(const CEnvelope &Other) :
+	m_vPoints(Other.m_vPoints), m_Synchronized(Other.m_Synchronized), m_Type(Other.m_Type), m_PointsAccess(&m_vPoints)
+{
+	str_copy(m_aName, Other.m_aName);
+}
+
 void CEnvelope::Resort()
 {
 	std::sort(m_vPoints.begin(), m_vPoints.end());
