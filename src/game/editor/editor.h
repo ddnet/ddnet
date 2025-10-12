@@ -254,7 +254,7 @@ public:
 
 		m_QuadKnifeActive = false;
 		m_QuadKnifeCount = 0;
-		mem_zero(m_aQuadKnifePoints, sizeof(m_aQuadKnifePoints));
+		std::fill(std::begin(m_aQuadKnifePoints), std::end(m_aQuadKnifePoints), vec2(0.0f, 0.0f));
 
 		for(size_t i = 0; i < std::size(m_aSavedColors); ++i)
 		{
