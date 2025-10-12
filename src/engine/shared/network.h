@@ -173,6 +173,15 @@ public:
 	int m_DataSize;
 	unsigned char m_aChunkData[NET_MAX_PAYLOAD];
 	unsigned char m_aExtraData[NET_CONNLESS_EXTRA_SIZE];
+
+	class CSixup
+	{
+	public:
+		SECURITY_TOKEN m_SecurityToken = NET_SECURITY_TOKEN_UNSUPPORTED;
+		SECURITY_TOKEN m_ResponseToken = NET_SECURITY_TOKEN_UNSUPPORTED;
+	};
+	// Only used for connless 0.7 packets.
+	CSixup m_Sixup;
 };
 
 enum class CONNECTIVITY
@@ -299,7 +308,7 @@ public:
 	int Update();
 	int Flush();
 
-	int Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_TOKEN SecurityToken = NET_SECURITY_TOKEN_UNSUPPORTED, SECURITY_TOKEN ResponseToken = NET_SECURITY_TOKEN_UNSUPPORTED);
+	int Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr);
 	int QueueChunk(int Flags, int DataSize, const void *pData);
 
 	const char *ErrorString();
@@ -435,7 +444,7 @@ class CNetServer
 	CNetRecvUnpacker m_RecvUnpacker;
 
 	void OnTokenCtrlMsg(NETADDR &Addr, int ControlMsg, const CNetPacketConstruct &Packet);
-	int OnSixupCtrlMsg(NETADDR &Addr, CNetChunk *pChunk, int ControlMsg, const CNetPacketConstruct &Packet, SECURITY_TOKEN &ResponseToken, SECURITY_TOKEN Token);
+	int OnSixupCtrlMsg(NETADDR &Addr, CNetChunk *pChunk, int ControlMsg, CNetPacketConstruct *pPacket);
 	void OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet);
 	void OnConnCtrlMsg(NETADDR &Addr, int ClientId, int ControlMsg, const CNetPacketConstruct &Packet);
 	bool ClientExists(const NETADDR &Addr) { return GetClientSlot(Addr) != -1; }
@@ -628,7 +637,7 @@ public:
 	static void SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken, bool Sixup = false);
 
 	static std::optional<int> UnpackPacketFlags(unsigned char *pBuffer, int Size);
-	static int UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool &Sixup, SECURITY_TOKEN *pSecurityToken = nullptr, SECURITY_TOKEN *pResponseToken = nullptr);
+	static int UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool &Sixup);
 
 	// The backroom is ack-NET_MAX_SEQUENCE/2. Used for knowing if we acked a packet or not
 	static bool IsSeqInBackroom(int Seq, int Ack);
