@@ -513,8 +513,6 @@ void CClient::OnPostConnect(int Conn, bool Dummy)
 	{
 		int Emote = ((g_Config.m_ClDummy) ? !Dummy : Dummy) ? g_Config.m_ClDummyDefaultEyes : g_Config.m_ClPlayerDefaultEyes;
 
-		if(Emote != EMOTE_NORMAL) {
-		
 		static const char *s_EMOTE_NAMES[] = {
 			"pain",
 			"happy",
@@ -529,30 +527,14 @@ void CClient::OnPostConnect(int Conn, bool Dummy)
 		str_append(aBufMsg, " ");
 		str_format(aBuf, sizeof(aBuf), "%d", g_Config.m_ClEyeDuration);
 		str_append(aBufMsg, aBuf);
-		}
 	}
 	if(g_Config.m_ClRunOnJoin[0])
 	{
 		str_append(aBufMsg, ";");
 		str_append(aBufMsg, g_Config.m_ClRunOnJoin);
 	}
-	if(IsSixup())
-	{
-		protocol7::CNetMsg_Cl_Say Msg7;
-		Msg7.m_Mode = protocol7::CHAT_ALL;
-		Msg7.m_Target = -1;
-		Msg7.m_pMessage = aBufMsg;
-		SendPackMsg(Conn, &Msg7, MSGFLAG_VITAL, true);
-	}
-	else
-	{
-		CNetMsg_Cl_Say MsgP;
-		MsgP.m_Team = 0;
-		MsgP.m_pMessage = aBufMsg;
-		CMsgPacker PackerTimeout(&MsgP);
-		MsgP.Pack(&PackerTimeout);
-		SendMsg(Conn, &PackerTimeout, MSGFLAG_VITAL);
-	}
+
+	m_pGameClient->SendChatMsg(aBufMsg);
 }
 
 static void GenerateTimeoutCode(char *pBuffer, unsigned Size, char *pSeed, const NETADDR *pAddrs, int NumAddrs, bool Dummy)
