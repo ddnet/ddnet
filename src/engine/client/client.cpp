@@ -486,7 +486,7 @@ void CClient::EnterGame(int Conn)
 	if(State() == IClient::STATE_DEMOPLAYBACK)
 		return;
 
-	m_aCodeRunAfterJoin[Conn] = false;
+	m_aDidPostConnect[Conn] = false;
 
 	// now we will wait for two snapshots
 	// to finish the connection
@@ -495,6 +495,73 @@ void CClient::EnterGame(int Conn)
 
 	ServerInfoRequest(); // fresh one for timeout protection
 	m_CurrentServerNextPingTime = time_get() + time_freq() / 2;
+}
+
+void CClient::OnPostConnect(int Conn, bool Dummy)
+{
+	if(!m_ServerCapabilities.m_ChatTimeoutCode)
+		return;
+
+	char aBuf[128];
+	char aBufMsg[256];
+	if(!g_Config.m_ClRunOnJoin[0] && !g_Config.m_ClDummyDefaultEyes && !g_Config.m_ClPlayerDefaultEyes)
+		str_format(aBufMsg, sizeof(aBufMsg), "/timeout %s", m_aTimeoutCodes[Conn]);
+	else
+		str_format(aBufMsg, sizeof(aBufMsg), "/mc;timeout %s", m_aTimeoutCodes[Conn]);
+
+	if(g_Config.m_ClDummyDefaultEyes || g_Config.m_ClPlayerDefaultEyes)
+	{
+		int Emote = ((g_Config.m_ClDummy) ? !Dummy : Dummy) ? g_Config.m_ClDummyDefaultEyes : g_Config.m_ClPlayerDefaultEyes;
+		char aBufEmote[128];
+		aBufEmote[0] = '\0';
+		switch(Emote)
+		{
+		case EMOTE_NORMAL:
+			break;
+		case EMOTE_PAIN:
+			str_format(aBufEmote, sizeof(aBufEmote), "emote pain %d", g_Config.m_ClEyeDuration);
+			break;
+		case EMOTE_HAPPY:
+			str_format(aBufEmote, sizeof(aBufEmote), "emote happy %d", g_Config.m_ClEyeDuration);
+			break;
+		case EMOTE_SURPRISE:
+			str_format(aBufEmote, sizeof(aBufEmote), "emote surprise %d", g_Config.m_ClEyeDuration);
+			break;
+		case EMOTE_ANGRY:
+			str_format(aBufEmote, sizeof(aBufEmote), "emote angry %d", g_Config.m_ClEyeDuration);
+			break;
+		case EMOTE_BLINK:
+			str_format(aBufEmote, sizeof(aBufEmote), "emote blink %d", g_Config.m_ClEyeDuration);
+			break;
+		}
+		if(aBufEmote[0])
+		{
+			str_format(aBuf, sizeof(aBuf), ";%s", aBufEmote);
+			str_append(aBufMsg, aBuf);
+		}
+	}
+	if(g_Config.m_ClRunOnJoin[0])
+	{
+		str_format(aBuf, sizeof(aBuf), ";%s", g_Config.m_ClRunOnJoin);
+		str_append(aBufMsg, aBuf);
+	}
+	if(IsSixup())
+	{
+		protocol7::CNetMsg_Cl_Say Msg7;
+		Msg7.m_Mode = protocol7::CHAT_ALL;
+		Msg7.m_Target = -1;
+		Msg7.m_pMessage = aBufMsg;
+		SendPackMsg(Conn, &Msg7, MSGFLAG_VITAL, true);
+	}
+	else
+	{
+		CNetMsg_Cl_Say MsgP;
+		MsgP.m_Team = 0;
+		MsgP.m_pMessage = aBufMsg;
+		CMsgPacker PackerTimeout(&MsgP);
+		MsgP.Pack(&PackerTimeout);
+		SendMsg(Conn, &PackerTimeout, MSGFLAG_VITAL);
+	}
 }
 
 static void GenerateTimeoutCode(char *pBuffer, unsigned Size, char *pSeed, const NETADDR *pAddrs, int NumAddrs, bool Dummy)
@@ -2148,72 +2215,10 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						m_aGameTime[Conn].Update(&m_aGametimeMarginGraphs[Conn], (GameTick - 1) * time_freq() / GameTickSpeed(), TimeLeft, CSmoothTime::ADJUSTDIRECTION_DOWN);
 					}
 
-					if(m_aReceivedSnapshots[Conn] > GameTickSpeed() && !m_aCodeRunAfterJoin[Conn])
+					if(m_aReceivedSnapshots[Conn] > GameTickSpeed() && !m_aDidPostConnect[Conn])
 					{
-						if(m_ServerCapabilities.m_ChatTimeoutCode)
-						{
-							char aBuf[128];
-							char aBufMsg[256];
-							if(!g_Config.m_ClRunOnJoin[0] && !g_Config.m_ClDummyDefaultEyes && !g_Config.m_ClPlayerDefaultEyes)
-								str_format(aBufMsg, sizeof(aBufMsg), "/timeout %s", m_aTimeoutCodes[Conn]);
-							else
-								str_format(aBufMsg, sizeof(aBufMsg), "/mc;timeout %s", m_aTimeoutCodes[Conn]);
-
-							if(g_Config.m_ClDummyDefaultEyes || g_Config.m_ClPlayerDefaultEyes)
-							{
-								int Emote = ((g_Config.m_ClDummy) ? !Dummy : Dummy) ? g_Config.m_ClDummyDefaultEyes : g_Config.m_ClPlayerDefaultEyes;
-								char aBufEmote[128];
-								aBufEmote[0] = '\0';
-								switch(Emote)
-								{
-								case EMOTE_NORMAL:
-									break;
-								case EMOTE_PAIN:
-									str_format(aBufEmote, sizeof(aBufEmote), "emote pain %d", g_Config.m_ClEyeDuration);
-									break;
-								case EMOTE_HAPPY:
-									str_format(aBufEmote, sizeof(aBufEmote), "emote happy %d", g_Config.m_ClEyeDuration);
-									break;
-								case EMOTE_SURPRISE:
-									str_format(aBufEmote, sizeof(aBufEmote), "emote surprise %d", g_Config.m_ClEyeDuration);
-									break;
-								case EMOTE_ANGRY:
-									str_format(aBufEmote, sizeof(aBufEmote), "emote angry %d", g_Config.m_ClEyeDuration);
-									break;
-								case EMOTE_BLINK:
-									str_format(aBufEmote, sizeof(aBufEmote), "emote blink %d", g_Config.m_ClEyeDuration);
-									break;
-								}
-								if(aBufEmote[0])
-								{
-									str_format(aBuf, sizeof(aBuf), ";%s", aBufEmote);
-									str_append(aBufMsg, aBuf);
-								}
-							}
-							if(g_Config.m_ClRunOnJoin[0])
-							{
-								str_format(aBuf, sizeof(aBuf), ";%s", g_Config.m_ClRunOnJoin);
-								str_append(aBufMsg, aBuf);
-							}
-							if(IsSixup())
-							{
-								protocol7::CNetMsg_Cl_Say Msg7;
-								Msg7.m_Mode = protocol7::CHAT_ALL;
-								Msg7.m_Target = -1;
-								Msg7.m_pMessage = aBufMsg;
-								SendPackMsg(Conn, &Msg7, MSGFLAG_VITAL, true);
-							}
-							else
-							{
-								CNetMsg_Cl_Say MsgP;
-								MsgP.m_Team = 0;
-								MsgP.m_pMessage = aBufMsg;
-								CMsgPacker PackerTimeout(&MsgP);
-								MsgP.Pack(&PackerTimeout);
-								SendMsg(Conn, &PackerTimeout, MSGFLAG_VITAL);
-							}
-						}
-						m_aCodeRunAfterJoin[Conn] = true;
+						OnPostConnect(Conn, Dummy);
+						m_aDidPostConnect[Conn] = true;
 					}
 
 					// ack snapshot
