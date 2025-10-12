@@ -502,7 +502,6 @@ void CClient::OnPostConnect(int Conn, bool Dummy)
 	if(!m_ServerCapabilities.m_ChatTimeoutCode)
 		return;
 
-	char aBuf[16];
 	char aBufMsg[256];
 	if(!g_Config.m_ClRunOnJoin[0] && !g_Config.m_ClDummyDefaultEyes && !g_Config.m_ClPlayerDefaultEyes)
 		str_format(aBufMsg, sizeof(aBufMsg), "/timeout %s", m_aTimeoutCodes[Conn]);
@@ -515,6 +514,7 @@ void CClient::OnPostConnect(int Conn, bool Dummy)
 
 		if(Emote != EMOTE_NORMAL)
 		{
+			char aBuf[16];
 			static const char *s_EMOTE_NAMES[] = {
 				"pain",
 				"happy",
@@ -531,8 +531,8 @@ void CClient::OnPostConnect(int Conn, bool Dummy)
 	}
 	if(g_Config.m_ClRunOnJoin[0])
 	{
-		str_format(aBuf, sizeof(aBuf), ";%s", g_Config.m_ClRunOnJoin);
-		str_append(aBufMsg, aBuf);
+		str_append(aBufMsg, ";");
+		str_append(aBufMsg, g_Config.m_ClRunOnJoin);
 	}
 	if(IsSixup())
 	{
