@@ -533,8 +533,8 @@ void CClient::OnPostConnect(int Conn, bool Dummy)
 	}
 	if(g_Config.m_ClRunOnJoin[0])
 	{
-		str_format(aBuf, sizeof(aBuf), ";%s", g_Config.m_ClRunOnJoin);
-		str_append(aBufMsg, aBuf);
+		str_append(aBufMsg, ";");
+		str_append(aBufMsg, g_Config.m_ClRunOnJoin);
 	}
 	if(IsSixup())
 	{
