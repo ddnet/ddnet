@@ -253,7 +253,7 @@ std::optional<int> CNetBase::UnpackPacketFlags(unsigned char *pBuffer, int Size)
 }
 
 // TODO: rename this function
-int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool &Sixup, SECURITY_TOKEN *pSecurityToken, SECURITY_TOKEN *pResponseToken)
+int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool &Sixup)
 {
 	std::optional<int> Flags = UnpackPacketFlags(pBuffer, Size);
 	if(!Flags)
@@ -277,16 +277,14 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 	if(pPacket->m_Flags & NET_PACKETFLAG_CONNLESS)
 	{
 		Sixup = (pBuffer[0] & 0x3) == 1;
-		if(Sixup && (pSecurityToken == nullptr || pResponseToken == nullptr))
-			return -1;
 		int Offset = Sixup ? 9 : 6;
 		if(Size < Offset)
 			return -1;
 
 		if(Sixup)
 		{
-			*pSecurityToken = ToSecurityToken(pBuffer + 1);
-			*pResponseToken = ToSecurityToken(pBuffer + 5);
+			pPacket->m_Sixup.m_SecurityToken = ToSecurityToken(pBuffer + 1);
+			pPacket->m_Sixup.m_ResponseToken = ToSecurityToken(pBuffer + 5);
 		}
 
 		pPacket->m_Flags = NET_PACKETFLAG_CONNLESS;
@@ -305,8 +303,6 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 	{
 		if(pPacket->m_Flags & NET_PACKETFLAG_UNUSED)
 			Sixup = true;
-		if(Sixup && pSecurityToken == nullptr)
-			return -1;
 		int DataStart = Sixup ? 7 : NET_PACKETHEADERSIZE;
 		if(Size < DataStart)
 			return -1;
@@ -318,7 +314,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 		if(Sixup)
 		{
 			pPacket->m_Flags = PacketFlags_SevenToSix(pPacket->m_Flags);
-			*pSecurityToken = ToSecurityToken(pBuffer + 3);
+			pPacket->m_Sixup.m_SecurityToken = ToSecurityToken(pBuffer + 3);
 		}
 
 		if(!IsValidConnectionOrientedPacket(pPacket))
@@ -347,7 +343,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 		{
 			if(pPacket->m_aChunkData[0] == NET_CTRLMSG_CONNECT || (Sixup && pPacket->m_aChunkData[0] == protocol7::NET_CTRLMSG_TOKEN))
 			{
-				*pResponseToken = ToSecurityToken(&pPacket->m_aChunkData[1]);
+				pPacket->m_Sixup.m_ResponseToken = ToSecurityToken(&pPacket->m_aChunkData[1]);
 			}
 		}
 	}
