@@ -2175,315 +2175,315 @@ AntiPing: prediction margin
 
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== Slut på VRAM. Testa att sätta 'cl_skins_loaded_max' till ett lägre värde eller ta bort egna assets (skins, entities, etc.), speciellt dem med hög upplösning
 
 Press Ctrl+Shift+G to disable debug graphs.
-== 
+== Tryck ner CTRL+Shift+G för att stänga av felsökningsgrafer
 
 [Spectating]
 Following %d: %s
-== 
+== Följer %d: %s
 
 Server could not be started
-== 
+== Servern kunde inte startas
 
 Loading map
-== 
+== Laddar bana
 
 This name cannot be used for files and folders
-== 
+== Detta namn kan inte användas för filer och mappar
 
 Error checking player name
-== 
+== Misslyckades med att kontrollera spelarnamn
 
 Could not check for existing player with your name. Check your internet connection.
-== 
+== Kunde inte kontrollera om det finns en existerande spelare med detta namn. Kontrollera att din internet anslutning fungerar.
 
 Could not get server list from master server
-== 
+== Kunde inte hämta server listan från master servern
 
 [Demo playback]
 Live
-== 
+== Live
 
 [Demo playback]
 Go to Live
-== 
+== Gå till Live
 
 Save all changes before turning off the editor?
-== 
+== Spara all ändringar innan du stänger av redigeraren?
 
 Layout
-== 
+== Layout
 
 Visibility
-== 
+== Synlighet
 
 Behavior
-== 
+== Beteende
 
 Delete button
-== 
+== Ta bort knapp
 
 Are you sure that you want to delete this button?
-== 
+== Är du säker du vill ta bort knappen?
 
 Duplicate
-== 
+== Kopiera
 
 New button already created
-== 
+== Ny knapp redan skapad
 
 A new button has already been created, please save or delete it before creating another one.
-== 
+== En ny knapp har redan skapats, spara eller ta bort den innan du gör en ny.
 
 Please save your changes before duplicating a button.
-== 
+== Spara dina ändringar innan du kopierar en knapp.
 
 No space for button
-== 
+== Ingen plats för knappen
 
 There is not enough space available to place another button.
-== 
+== Det finns inte tillräckligt med utrymme för att placera en till knapp.
 
 There is not enough space available to place another button with this size. The button has been resized.
-== 
+== Det finns inte tillräckligt med utrymme för att placera en till knapp med denna storlek. Knappens storlek har blivit ändrad.
 
 Deselect
-== 
+== Avmarkera
 
 You'll lose unsaved changes after deselecting.
-== 
+== Du kommer att förlöra alla osparad ändringar efter avmarkering.
 
 Width
-== 
+== Bredd
 
 Height
-== 
+== Höjd
 
 Shape
-== 
+== Form
 
 [Touch button shape]
 Rectangle
-== 
+== Rektangel
 
 [Touch button shape]
 Circle
-== 
+== Cirkel
 
 [Touch button label type]
 Plain
-== 
+== Enkel
 
 [Touch button label type]
 Localized
-== 
+== Översättbar
 
 [Touch button label type]
 Icon
-== 
+== Ikon
 
 Behavior type
-== 
+== Beteende typ
 
 [Touch button behavior]
 Bind
-== 
+== Bind
 
 [Touch button behavior]
 Bind Toggle
-== 
+== Bind växel
 
 [Touch button behavior]
 Predefined
-== 
+== Fördefinerad
 
 Command
-== 
+== Kommando
 
 Label
-== 
+== Text
 
 Label type
-== 
+== Texttyp
 
 Add command
-== 
+== Lägg till kommando
 
 Delete command
-== 
+== Ta bort kommando
 
 [Touch button visibility preview]
 Included
-== 
+== Inkluderad
 
 [Touch button visibility preview]
 Excluded
-== 
+== Excluderad
 
 [Touch button visibility preview]
 Ignore
-== 
+== Ignorera
 
 Long press on a touch button to select it.
-== 
+== Lång tryck på en knapp för att markera den.
 
 New button
-== 
+== Ny knapp
 
 Select button by touch
-== 
+== Markera knapp med touch
 
 No buttons match your filter criteria
-== 
+== Ingen knappar matchade ditt sökfilter
 
 File
-== 
+== Fil
 
 Buttons
-== 
+== Knappar
 
 Active color
-== 
+== Aktiv färg
 
 Inactive color
-== 
+== Inaktiv färg
 
 Preview button visibility while the editor is active.
-== 
+== Förhandsgranska knappens synlighet medans redigeraren är aktiv.
 
 Show all buttons
-== 
+== Visa all knappar
 
 Save all changes before switching selected button?
-== 
+== Spara alla ändringar innan du byter ifrån den aktiva knappen?
 
 Discard
-== 
+== Kasta bort
 
 There is not enough space available for the button. Check its visibilities and size.
-== 
+== Det finns inte tillräckligt med utrymme för denna knapp. Kontrollera dess synlighet och storlek.
 
 Selected button not visible
-== 
+== Den markerade knappen är inte synlig
 
 The selected button is not visible. Do you want to deselect it or edit its visibility?
-== 
+== Den markerade knappen är inte synlig. Vill du avmarkera den och ändra dess synlighet?
 
 Edit
-== 
+== Redigera
 
 Width and height are required to be within the range from %d to %d.
-== 
+== Bredd och höjd måste vara inom %d till %d.
 
 Button position is outside of the screen.
-== 
+== Knappens position är utanför skärmen.
 
 The selected button is overlapping with other buttons.
-== 
+== Den markerade knappen överlappar med andra knappar.
 
 Wrong button settings
-== 
+== Fel knapp inställningar
 
 [Touch button visibilities]
 Ingame
-== 
+== I spelet
 
 [Touch button visibilities]
 Zoom Allowed
-== 
+== Zoom tillåtet
 
 [Touch button visibilities]
 Vote Active
-== 
+== Röstning pågår
 
 [Touch button visibilities]
 Dummy Allowed
-== 
+== Dummy tillåtet
 
 [Touch button visibilities]
 Dummy Connected
-== 
+== Dummy ansluten
 
 [Touch button visibilities]
 Rcon Authed
-== 
+== Rcon inloggad
 
 [Touch button visibilities]
 Demo Player
-== 
+== Demo spelaren
 
 [Touch button visibilities]
 Extra Menu
-== 
+== Extra meny
 
 [Predefined touch button behaviors]
 Ingame Menu
-== 
+== Meny i spelet
 
 [Predefined touch button behaviors]
 Extra Menu
-== 
+== Extra meny
 
 [Predefined touch button behaviors]
 Emoticon
-== 
+== Emoticon
 
 [Predefined touch button behaviors]
 Spectate
-== 
+== Åskada
 
 [Predefined touch button behaviors]
 Swap Action
-== 
+== Växla läge
 
 [Predefined touch button behaviors]
 Use Action
-== 
+== Använd läge
 
 [Predefined touch button behaviors]
 Joystick Action
-== 
+== Joystick läge
 
 [Predefined touch button behaviors]
 Joystick Aim
-== 
+== Joystick aim
 
 [Predefined touch button behaviors]
 Joystick Fire
-== 
+== Joystick skjut
 
 [Predefined touch button behaviors]
 Joystick Hook
-== 
+== Joystick hook
 
 This skin name cannot be used.
-== 
+== Detta skin namn kan inte användas
 
 Skin could not be loaded due to an error. Check the local console for details.
-== 
+== Detta skin kunde inte laddas in på grund av ett fel. Se den lokala konsolen för detaljer.
 
 Skin could not be found.
-== 
+== Skin kunde inte hittas.
 
 No skins match your filter criteria
-== 
+== Inga skins matchar dina sökfilter
 
 Censor profanity
-== 
+== Censurera svordomar
 
 Chat background color
-== 
+== Chatt bakgrundsfärg
 
 Preview player's name plate
-== 
+== Förhandsgranska spelarens namnskylt
 
 Dragger Outline Color
-== 
+== Dragger kontursfärg
 
 Dragger Inner Color
-== 
+== Dragger inre färg
 
 Download
-== 
+== Ladda ner
