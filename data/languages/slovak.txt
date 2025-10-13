@@ -2485,7 +2485,7 @@ Chat background color
 == Farba pozadia chatu
 
 Censor profanity
-== 
+== Cenzurovať nevhodné slová
 
 Download
-== 
+== Stiahnuť
