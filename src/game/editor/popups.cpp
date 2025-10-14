@@ -2763,7 +2763,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSwitch(void *pContext, CUIRect View,
 		{
 			int Number = pEditor->m_Map.m_pSwitchLayer->FindNextFreeNumber();
 			if(Number != -1)
-				pEditor->m_SwitchNum = Number;
+				pEditor->m_SwitchNumber = Number;
 		}
 
 		static int s_NextViewPid = 0;
@@ -2779,7 +2779,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSwitch(void *pContext, CUIRect View,
 	static int s_PreviousView = -1;
 	{
 		CProperty aProps[] = {
-			{"Number", pEditor->m_SwitchNum, PROPTYPE_INT, 0, 255},
+			{"Number", pEditor->m_SwitchNumber, PROPTYPE_INT, 0, 255},
 			{"Delay", pEditor->m_SwitchDelay, PROPTYPE_INT, 0, 255},
 			{"View", pEditor->m_ViewSwitch, PROPTYPE_INT, 0, 255},
 			{nullptr},
@@ -2791,7 +2791,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSwitch(void *pContext, CUIRect View,
 
 		if(Prop == PROP_SWITCH_NUMBER)
 		{
-			pEditor->m_SwitchNum = (NewVal + 256) % 256;
+			pEditor->m_SwitchNumber = (NewVal + 256) % 256;
 		}
 		else if(Prop == PROP_SWITCH_DELAY)
 		{
@@ -2802,13 +2802,13 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSwitch(void *pContext, CUIRect View,
 			pEditor->m_ViewSwitch = (NewVal + 256) % 256;
 		}
 
-		if(s_PreviousNumber == 1 || s_PreviousNumber != pEditor->m_SwitchNum)
-			s_vColors[PROP_SWITCH_NUMBER] = pEditor->m_Map.m_pSwitchLayer->ContainsElementWithId(pEditor->m_SwitchNum) ? ColorRGBA(1, 0.5f, 0.5f, 0.5f) : ColorRGBA(0.5f, 1, 0.5f, 0.5f);
+		if(s_PreviousNumber == 1 || s_PreviousNumber != pEditor->m_SwitchNumber)
+			s_vColors[PROP_SWITCH_NUMBER] = pEditor->m_Map.m_pSwitchLayer->ContainsElementWithId(pEditor->m_SwitchNumber) ? ColorRGBA(1, 0.5f, 0.5f, 0.5f) : ColorRGBA(0.5f, 1, 0.5f, 0.5f);
 		if(s_PreviousView != pEditor->m_ViewSwitch)
 			s_vColors[PROP_SWITCH_VIEW] = ViewSwitch() ? ColorRGBA(0.5f, 1, 0.5f, 0.5f) : ColorRGBA(1, 0.5f, 0.5f, 0.5f);
 	}
 
-	s_PreviousNumber = pEditor->m_SwitchNum;
+	s_PreviousNumber = pEditor->m_SwitchNumber;
 	s_PreviousView = pEditor->m_ViewSwitch;
 	return CUi::POPUP_KEEP_OPEN;
 }
@@ -2863,7 +2863,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupTune(void *pContext, CUIRect View, b
 		{
 			int Number = pEditor->m_Map.m_pTuneLayer->FindNextFreeNumber();
 			if(Number != -1)
-				pEditor->m_TuningNum = Number;
+				pEditor->m_TuningNumber = Number;
 		}
 
 		static int s_NextViewPid = 0;
@@ -2879,7 +2879,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupTune(void *pContext, CUIRect View, b
 	static int s_PreviousView = -1;
 	{
 		CProperty aProps[] = {
-			{"Zone", pEditor->m_TuningNum, PROPTYPE_INT, 1, 255},
+			{"Zone", pEditor->m_TuningNumber, PROPTYPE_INT, 1, 255},
 			{"View", pEditor->m_ViewTuning, PROPTYPE_INT, 1, 255},
 			{nullptr},
 		};
@@ -2890,20 +2890,20 @@ CUi::EPopupMenuFunctionResult CEditor::PopupTune(void *pContext, CUIRect View, b
 
 		if(Prop == PROP_TUNE_NUMBER)
 		{
-			pEditor->m_TuningNum = (NewVal - 1 + 255) % 255 + 1;
+			pEditor->m_TuningNumber = (NewVal - 1 + 255) % 255 + 1;
 		}
 		else if(Prop == PROP_TUNE_VIEW)
 		{
 			pEditor->m_ViewTuning = (NewVal - 1 + 255) % 255 + 1;
 		}
 
-		if(s_PreviousNumber == 1 || s_PreviousNumber != pEditor->m_TuningNum)
-			s_vColors[PROP_TUNE_NUMBER] = pEditor->m_Map.m_pTuneLayer->ContainsElementWithId(pEditor->m_TuningNum) ? ColorRGBA(1, 0.5f, 0.5f, 0.5f) : ColorRGBA(0.5f, 1, 0.5f, 0.5f);
+		if(s_PreviousNumber == 1 || s_PreviousNumber != pEditor->m_TuningNumber)
+			s_vColors[PROP_TUNE_NUMBER] = pEditor->m_Map.m_pTuneLayer->ContainsElementWithId(pEditor->m_TuningNumber) ? ColorRGBA(1, 0.5f, 0.5f, 0.5f) : ColorRGBA(0.5f, 1, 0.5f, 0.5f);
 		if(s_PreviousView != pEditor->m_ViewTuning)
 			s_vColors[PROP_TUNE_VIEW] = ViewTune() ? ColorRGBA(0.5f, 1, 0.5f, 0.5f) : ColorRGBA(1, 0.5f, 0.5f, 0.5f);
 	}
 
-	s_PreviousNumber = pEditor->m_TuningNum;
+	s_PreviousNumber = pEditor->m_TuningNumber;
 	s_PreviousView = pEditor->m_ViewTuning;
 
 	return CUi::POPUP_KEEP_OPEN;

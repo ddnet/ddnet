@@ -345,8 +345,8 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 			}
 		}
 
-		pGrabbed->m_TeleNum = m_pEditor->m_TeleNumber;
-		pGrabbed->m_TeleCheckpointNum = m_pEditor->m_TeleCheckpointNumber;
+		pGrabbed->m_TeleNumber = m_pEditor->m_TeleNumber;
+		pGrabbed->m_TeleCheckpointNumber = m_pEditor->m_TeleCheckpointNumber;
 
 		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
 	}
@@ -414,7 +414,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 					pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x] = static_cast<CLayerSwitch *>(this)->m_pSwitchTile[(r.y + y) * m_Width + (r.x + x)];
 					if(IsValidSwitchTile(pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type))
 					{
-						m_pEditor->m_SwitchNum = pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Number;
+						m_pEditor->m_SwitchNumber = pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Number;
 						m_pEditor->m_SwitchDelay = pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Delay;
 					}
 				}
@@ -424,7 +424,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 					if(IsValidSwitchTile(Tile.m_Index))
 					{
 						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type = Tile.m_Index;
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Number = m_pEditor->m_SwitchNum;
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Number = m_pEditor->m_SwitchNumber;
 						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Delay = m_pEditor->m_SwitchDelay;
 						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Flags = Tile.m_Flags;
 					}
@@ -432,7 +432,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 			}
 		}
 
-		pGrabbed->m_SwitchNumber = m_pEditor->m_SwitchNum;
+		pGrabbed->m_SwitchNumber = m_pEditor->m_SwitchNumber;
 		pGrabbed->m_SwitchDelay = m_pEditor->m_SwitchDelay;
 		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
 	}
@@ -456,7 +456,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 					pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x] = static_cast<CLayerTune *>(this)->m_pTuneTile[(r.y + y) * m_Width + (r.x + x)];
 					if(IsValidTuneTile(pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Type))
 					{
-						m_pEditor->m_TuningNum = pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Number;
+						m_pEditor->m_TuningNumber = pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Number;
 					}
 				}
 				else
@@ -465,13 +465,13 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 					if(IsValidTuneTile(Tile.m_Index))
 					{
 						pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Type = Tile.m_Index;
-						pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Number = m_pEditor->m_TuningNum;
+						pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Number = m_pEditor->m_TuningNumber;
 					}
 				}
 			}
 		}
 
-		pGrabbed->m_TuningNumber = m_pEditor->m_TuningNum;
+		pGrabbed->m_TuningNumber = m_pEditor->m_TuningNumber;
 		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
 	}
 	else // game, front and tiles layers

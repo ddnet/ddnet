@@ -22,8 +22,8 @@ public:
 	~CLayerTele() override;
 
 	CTeleTile *m_pTeleTile;
-	unsigned char m_TeleNum;
-	unsigned char m_TeleCheckpointNum;
+	unsigned char m_TeleNumber;
+	unsigned char m_TeleCheckpointNumber;
 
 	void Resize(int NewW, int NewH) override;
 	void Shift(EShiftDirection Direction) override;
