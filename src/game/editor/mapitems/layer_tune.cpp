@@ -88,7 +88,7 @@ void CLayerTune::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 	int sy = ConvertY(WorldPos.y);
 	if(str_comp(pTuneLayer->m_aFileName, m_pEditor->m_aFileName))
 	{
-		m_pEditor->m_TuningNum = pTuneLayer->m_TuningNumber;
+		m_pEditor->m_TuningNumber = pTuneLayer->m_TuningNumber;
 	}
 
 	bool Destructive = m_pEditor->m_BrushDrawDestructive || pTuneLayer->IsEmpty();
@@ -115,15 +115,15 @@ void CLayerTune::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 
 			if((m_pEditor->IsAllowPlaceUnusedTiles() || IsValidTuneTile(pTuneLayer->m_pTiles[SrcIndex].m_Index)) && pTuneLayer->m_pTiles[SrcIndex].m_Index != TILE_AIR)
 			{
-				if(m_pEditor->m_TuningNum != pTuneLayer->m_TuningNumber)
+				if(m_pEditor->m_TuningNumber != pTuneLayer->m_TuningNumber)
 				{
-					m_pTuneTile[TgtIndex].m_Number = m_pEditor->m_TuningNum;
+					m_pTuneTile[TgtIndex].m_Number = m_pEditor->m_TuningNumber;
 				}
 				else if(pTuneLayer->m_pTuneTile[SrcIndex].m_Number)
 					m_pTuneTile[TgtIndex].m_Number = pTuneLayer->m_pTuneTile[SrcIndex].m_Number;
 				else
 				{
-					if(!m_pEditor->m_TuningNum)
+					if(!m_pEditor->m_TuningNumber)
 					{
 						m_pTuneTile[TgtIndex].m_Number = 0;
 						m_pTuneTile[TgtIndex].m_Type = 0;
@@ -131,7 +131,7 @@ void CLayerTune::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 						continue;
 					}
 					else
-						m_pTuneTile[TgtIndex].m_Number = m_pEditor->m_TuningNum;
+						m_pTuneTile[TgtIndex].m_Number = m_pEditor->m_TuningNumber;
 				}
 
 				m_pTuneTile[TgtIndex].m_Type = pTuneLayer->m_pTiles[SrcIndex].m_Index;
@@ -264,8 +264,8 @@ void CLayerTune::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 				{
 					m_pTuneTile[TgtIndex].m_Type = m_pTiles[fy * m_Width + fx].m_Index;
 
-					if((pLt->m_pTuneTile[SrcIndex].m_Number == 0 && m_pEditor->m_TuningNum) || m_pEditor->m_TuningNum != pLt->m_TuningNumber)
-						m_pTuneTile[TgtIndex].m_Number = m_pEditor->m_TuningNum;
+					if((pLt->m_pTuneTile[SrcIndex].m_Number == 0 && m_pEditor->m_TuningNumber) || m_pEditor->m_TuningNumber != pLt->m_TuningNumber)
+						m_pTuneTile[TgtIndex].m_Number = m_pEditor->m_TuningNumber;
 					else
 						m_pTuneTile[TgtIndex].m_Number = pLt->m_pTuneTile[SrcIndex].m_Number;
 				}

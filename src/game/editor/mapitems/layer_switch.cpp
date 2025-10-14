@@ -87,7 +87,7 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 	int sy = ConvertY(WorldPos.y);
 	if(str_comp(pSwitchLayer->m_aFileName, m_pEditor->m_aFileName))
 	{
-		m_pEditor->m_SwitchNum = pSwitchLayer->m_SwitchNumber;
+		m_pEditor->m_SwitchNumber = pSwitchLayer->m_SwitchNumber;
 		m_pEditor->m_SwitchDelay = pSwitchLayer->m_SwitchDelay;
 	}
 
@@ -117,9 +117,9 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 
 			if((m_pEditor->IsAllowPlaceUnusedTiles() || IsValidSwitchTile(pSwitchLayer->m_pTiles[SrcIndex].m_Index)) && pSwitchLayer->m_pTiles[SrcIndex].m_Index != TILE_AIR)
 			{
-				if(m_pEditor->m_SwitchNum != pSwitchLayer->m_SwitchNumber || m_pEditor->m_SwitchDelay != pSwitchLayer->m_SwitchDelay)
+				if(m_pEditor->m_SwitchNumber != pSwitchLayer->m_SwitchNumber || m_pEditor->m_SwitchDelay != pSwitchLayer->m_SwitchDelay)
 				{
-					m_pSwitchTile[TgtIndex].m_Number = m_pEditor->m_SwitchNum;
+					m_pSwitchTile[TgtIndex].m_Number = m_pEditor->m_SwitchNumber;
 					m_pSwitchTile[TgtIndex].m_Delay = m_pEditor->m_SwitchDelay;
 				}
 				else if(pSwitchLayer->m_pSwitchTile[SrcIndex].m_Number)
@@ -129,7 +129,7 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 				}
 				else
 				{
-					m_pSwitchTile[TgtIndex].m_Number = m_pEditor->m_SwitchNum;
+					m_pSwitchTile[TgtIndex].m_Number = m_pEditor->m_SwitchNumber;
 					m_pSwitchTile[TgtIndex].m_Delay = m_pEditor->m_SwitchDelay;
 				}
 
@@ -292,8 +292,8 @@ void CLayerSwitch::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 				{
 					if(!IsSwitchTileNumberUsed(m_pSwitchTile[TgtIndex].m_Type))
 						m_pSwitchTile[TgtIndex].m_Number = 0;
-					else if(pLt->m_pSwitchTile[SrcIndex].m_Number == 0 || m_pEditor->m_SwitchNum != pLt->m_SwitchNumber)
-						m_pSwitchTile[TgtIndex].m_Number = m_pEditor->m_SwitchNum;
+					else if(pLt->m_pSwitchTile[SrcIndex].m_Number == 0 || m_pEditor->m_SwitchNumber != pLt->m_SwitchNumber)
+						m_pSwitchTile[TgtIndex].m_Number = m_pEditor->m_SwitchNumber;
 					else
 						m_pSwitchTile[TgtIndex].m_Number = pLt->m_pSwitchTile[SrcIndex].m_Number;
 
