@@ -50,6 +50,13 @@ CGameWorld::~CGameWorld()
 		m_pParent->m_pChild = nullptr;
 }
 
+void CGameWorld::Init(CCollision *pCollision, CTuningParams *pTuningList, const CMapBugs *pMapBugs)
+{
+	m_pCollision = pCollision;
+	m_pTuningList = pTuningList;
+	m_pMapBugs = pMapBugs;
+}
+
 CEntity *CGameWorld::FindFirst(int Type)
 {
 	return Type < 0 || Type >= NUM_ENTTYPES ? nullptr : m_apFirstEntityTypes[Type];

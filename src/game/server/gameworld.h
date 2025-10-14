@@ -9,6 +9,7 @@
 
 #include <vector>
 
+class CCollision;
 class CEntity;
 class CCharacter;
 
@@ -40,6 +41,7 @@ private:
 	class CGameContext *m_pGameServer;
 	class CConfig *m_pConfig;
 	class IServer *m_pServer;
+	CTuningParams *m_pTuningList;
 
 public:
 	class CGameContext *GameServer() { return m_pGameServer; }
@@ -54,6 +56,7 @@ public:
 	~CGameWorld();
 
 	void SetGameServer(CGameContext *pGameServer);
+	void Init(CCollision *pCollision, CTuningParams *pTuningList);
 
 	CEntity *FindFirst(int Type);
 
@@ -194,10 +197,8 @@ public:
 	std::vector<CCharacter *> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, const CEntity *pNotThis = nullptr);
 
 	CTuningParams *Tuning();
-
-	CTuningParams *m_pTuningList;
 	const CTuningParams *TuningList() const { return m_pTuningList; }
-	CTuningParams *TuningList() { return m_pTuningList; } // NOLINT(readability-make-member-function-const)
+	CTuningParams *TuningList() { return m_pTuningList; }
 	const CTuningParams *GetTuning(int i) const { return &TuningList()[i]; }
 	CTuningParams *GetTuning(int i) { return &TuningList()[i]; }
 };
