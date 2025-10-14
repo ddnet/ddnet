@@ -63,19 +63,20 @@ void CCommandProcessorFragment_OpenGL::SetState(const CCommandBuffer::SState &St
 	// blend
 	switch(State.m_BlendMode)
 	{
-	case CCommandBuffer::BLEND_NONE:
+	case EBlendMode::NONE:
 		glDisable(GL_BLEND);
 		break;
-	case CCommandBuffer::BLEND_ALPHA:
+	case EBlendMode::ALPHA:
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		break;
-	case CCommandBuffer::BLEND_ADDITIVE:
+	case EBlendMode::ADDITIVE:
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 		break;
 	default:
-		dbg_msg("render", "unknown blendmode %d\n", State.m_BlendMode);
+		dbg_assert(false, "Invalid blend mode: %d", (int)State.m_BlendMode);
+		dbg_break();
 	};
 	m_LastBlendMode = State.m_BlendMode;
 
@@ -121,16 +122,17 @@ void CCommandProcessorFragment_OpenGL::SetState(const CCommandBuffer::SState &St
 			{
 				switch(State.m_WrapMode)
 				{
-				case CCommandBuffer::WRAP_REPEAT:
+				case EWrapMode::REPEAT:
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 					break;
-				case CCommandBuffer::WRAP_CLAMP:
+				case EWrapMode::CLAMP:
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 					break;
 				default:
-					dbg_msg("render", "unknown wrapmode %d\n", State.m_WrapMode);
+					dbg_assert(false, "Invalid wrap mode: %d", (int)State.m_WrapMode);
+					dbg_break();
 				};
 				m_vTextures[State.m_Texture].m_LastWrapMode = State.m_WrapMode;
 			}
@@ -603,7 +605,7 @@ bool CCommandProcessorFragment_OpenGL::Cmd_Init(const SCommand_Init *pCommand)
 	m_HasMipMaps = pCommand->m_pCapabilities->m_MipMapping;
 	m_HasNPOTTextures = pCommand->m_pCapabilities->m_NPOTTextures;
 
-	m_LastBlendMode = CCommandBuffer::BLEND_ALPHA;
+	m_LastBlendMode = EBlendMode::ALPHA;
 	m_LastClipEnable = false;
 
 	return true;
@@ -683,7 +685,7 @@ void CCommandProcessorFragment_OpenGL::DestroyTexture(int Slot)
 	m_vTextures[Slot].m_Sampler = 0;
 	m_vTextures[Slot].m_Tex2DArray = 0;
 	m_vTextures[Slot].m_Sampler2DArray = 0;
-	m_vTextures[Slot].m_LastWrapMode = CCommandBuffer::WRAP_REPEAT;
+	m_vTextures[Slot].m_LastWrapMode = EWrapMode::REPEAT;
 }
 
 void CCommandProcessorFragment_OpenGL::Cmd_Texture_Destroy(const CCommandBuffer::SCommand_Texture_Destroy *pCommand)
@@ -757,15 +759,15 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 
 	const size_t PixelSize = GLFormatToPixelSize(GLFormat);
 
-	if((Flags & CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0)
+	if((Flags & TextureFlag::NO_2D_TEXTURE) == 0)
 	{
 		glGenTextures(1, &m_vTextures[Slot].m_Tex);
 		glBindTexture(GL_TEXTURE_2D, m_vTextures[Slot].m_Tex);
 	}
 
-	if(Flags & CCommandBuffer::TEXFLAG_NOMIPMAPS || !m_HasMipMaps)
+	if(Flags & TextureFlag::NO_MIPMAPS || !m_HasMipMaps)
 	{
-		if((Flags & CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0)
+		if((Flags & TextureFlag::NO_2D_TEXTURE) == 0)
 		{
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -774,7 +776,7 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 	}
 	else
 	{
-		if((Flags & CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0)
+		if((Flags & TextureFlag::NO_2D_TEXTURE) == 0)
 		{
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -788,8 +790,8 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 			glTexImage2D(GL_TEXTURE_2D, 0, GLStoreFormat, Width, Height, 0, GLFormat, GL_UNSIGNED_BYTE, pTexData);
 		}
 
-		int Flag2DArrayTexture = CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE;
-		int Flag3DTexture = CCommandBuffer::TEXFLAG_TO_3D_TEXTURE;
+		int Flag2DArrayTexture = TextureFlag::TO_2D_ARRAY_TEXTURE;
+		int Flag3DTexture = TextureFlag::TO_3D_TEXTURE;
 		if((Flags & (Flag2DArrayTexture | Flag3DTexture)) != 0)
 		{
 			bool Is3DTexture = (Flags & Flag3DTexture) != 0;
@@ -883,7 +885,7 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 	}
 
 	// This is the initial value for the wrap modes
-	m_vTextures[Slot].m_LastWrapMode = CCommandBuffer::WRAP_REPEAT;
+	m_vTextures[Slot].m_LastWrapMode = EWrapMode::REPEAT;
 
 	// calculate memory usage
 	m_vTextures[Slot].m_MemSize = (size_t)Width * Height * PixelSize;
@@ -917,8 +919,8 @@ void CCommandProcessorFragment_OpenGL::Cmd_TextTextures_Destroy(const CCommandBu
 
 void CCommandProcessorFragment_OpenGL::Cmd_TextTextures_Create(const CCommandBuffer::SCommand_TextTextures_Create *pCommand)
 {
-	TextureCreate(pCommand->m_Slot, pCommand->m_Width, pCommand->m_Height, GL_ALPHA, GL_ALPHA, CCommandBuffer::TEXFLAG_NOMIPMAPS, pCommand->m_pTextData);
-	TextureCreate(pCommand->m_SlotOutline, pCommand->m_Width, pCommand->m_Height, GL_ALPHA, GL_ALPHA, CCommandBuffer::TEXFLAG_NOMIPMAPS, pCommand->m_pTextOutlineData);
+	TextureCreate(pCommand->m_Slot, pCommand->m_Width, pCommand->m_Height, GL_ALPHA, GL_ALPHA, TextureFlag::NO_MIPMAPS, pCommand->m_pTextData);
+	TextureCreate(pCommand->m_SlotOutline, pCommand->m_Width, pCommand->m_Height, GL_ALPHA, GL_ALPHA, TextureFlag::NO_MIPMAPS, pCommand->m_pTextOutlineData);
 }
 
 void CCommandProcessorFragment_OpenGL::Cmd_Clear(const CCommandBuffer::SCommand_Clear *pCommand)
@@ -951,19 +953,20 @@ void CCommandProcessorFragment_OpenGL::Cmd_Render(const CCommandBuffer::SCommand
 
 	switch(pCommand->m_PrimType)
 	{
-	case CCommandBuffer::PRIMTYPE_QUADS:
+	case EPrimitiveType::QUADS:
 #ifndef BACKEND_AS_OPENGL_ES
 		glDrawArrays(GL_QUADS, 0, pCommand->m_PrimCount * 4);
 #endif
 		break;
-	case CCommandBuffer::PRIMTYPE_LINES:
+	case EPrimitiveType::LINES:
 		glDrawArrays(GL_LINES, 0, pCommand->m_PrimCount * 2);
 		break;
-	case CCommandBuffer::PRIMTYPE_TRIANGLES:
+	case EPrimitiveType::TRIANGLES:
 		glDrawArrays(GL_TRIANGLES, 0, pCommand->m_PrimCount * 3);
 		break;
 	default:
-		dbg_msg("render", "unknown primtype %d\n", pCommand->m_PrimType);
+		dbg_assert(false, "Invalid primitive type: %d", (int)pCommand->m_PrimType);
+		dbg_break();
 	};
 #endif
 }
@@ -1111,31 +1114,32 @@ void CCommandProcessorFragment_OpenGL2::UseProgram(CGLSLTWProgram *pProgram)
 
 void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &State, CGLSLTWProgram *pProgram, bool Use2DArrayTextures)
 {
-	if(m_LastBlendMode == CCommandBuffer::BLEND_NONE)
+	if(m_LastBlendMode == EBlendMode::NONE)
 	{
-		m_LastBlendMode = CCommandBuffer::BLEND_ALPHA;
+		m_LastBlendMode = EBlendMode::ALPHA;
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
-	if(State.m_BlendMode != m_LastBlendMode && State.m_BlendMode != CCommandBuffer::BLEND_NONE)
+	if(State.m_BlendMode != m_LastBlendMode && State.m_BlendMode != EBlendMode::NONE)
 	{
 		// blend
 		switch(State.m_BlendMode)
 		{
-		case CCommandBuffer::BLEND_NONE:
+		case EBlendMode::NONE:
 			// We don't really need this anymore
 			// glDisable(GL_BLEND);
 			break;
-		case CCommandBuffer::BLEND_ALPHA:
+		case EBlendMode::ALPHA:
 			// glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			break;
-		case CCommandBuffer::BLEND_ADDITIVE:
+		case EBlendMode::ADDITIVE:
 			// glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 			break;
 		default:
-			dbg_msg("render", "unknown blendmode %d\n", State.m_BlendMode);
+			dbg_assert(false, "Invalid blend mode: %d", (int)State.m_BlendMode);
+			dbg_break();
 		};
 
 		m_LastBlendMode = State.m_BlendMode;
@@ -1211,14 +1215,14 @@ void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &S
 		{
 			switch(State.m_WrapMode)
 			{
-			case CCommandBuffer::WRAP_REPEAT:
+			case EWrapMode::REPEAT:
 				if(IsNewApi())
 				{
 					glSamplerParameteri(m_vTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_S, GL_REPEAT);
 					glSamplerParameteri(m_vTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_T, GL_REPEAT);
 				}
 				break;
-			case CCommandBuffer::WRAP_CLAMP:
+			case EWrapMode::CLAMP:
 				if(IsNewApi())
 				{
 					glSamplerParameteri(m_vTextures[State.m_Texture].m_Sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -1226,7 +1230,8 @@ void CCommandProcessorFragment_OpenGL2::SetState(const CCommandBuffer::SState &S
 				}
 				break;
 			default:
-				dbg_msg("render", "unknown wrapmode %d\n", State.m_WrapMode);
+				dbg_assert(false, "Invalid wrap mode: %d", (int)State.m_WrapMode);
+				dbg_break();
 			};
 			m_vTextures[State.m_Texture].m_LastWrapMode = State.m_WrapMode;
 		}
@@ -1813,14 +1818,15 @@ void CCommandProcessorFragment_OpenGL2::Cmd_RenderTex3D(const CCommandBuffer::SC
 
 	switch(pCommand->m_PrimType)
 	{
-	case CCommandBuffer::PRIMTYPE_QUADS:
+	case EPrimitiveType::QUADS:
 		glDrawArrays(GL_QUADS, 0, pCommand->m_PrimCount * 4);
 		break;
-	case CCommandBuffer::PRIMTYPE_TRIANGLES:
+	case EPrimitiveType::TRIANGLES:
 		glDrawArrays(GL_TRIANGLES, 0, pCommand->m_PrimCount * 3);
 		break;
 	default:
-		dbg_msg("render", "unknown primtype %d\n", pCommand->m_PrimType);
+		dbg_assert(false, "Invalid primitive type: %d", (int)pCommand->m_PrimType);
+		dbg_break();
 	};
 
 	glDisableClientState(GL_VERTEX_ARRAY);

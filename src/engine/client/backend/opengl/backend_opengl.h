@@ -30,7 +30,7 @@ protected:
 	struct CTexture
 	{
 		CTexture() :
-			m_Tex(0), m_Tex2DArray(0), m_Sampler(0), m_Sampler2DArray(0), m_LastWrapMode(CCommandBuffer::WRAP_REPEAT), m_MemSize(0), m_Width(0), m_Height(0), m_RescaleCount(0), m_ResizeWidth(0), m_ResizeHeight(0)
+			m_Tex(0), m_Tex2DArray(0), m_Sampler(0), m_Sampler2DArray(0), m_LastWrapMode(EWrapMode::REPEAT), m_MemSize(0), m_Width(0), m_Height(0), m_RescaleCount(0), m_ResizeWidth(0), m_ResizeHeight(0)
 		{
 		}
 
@@ -38,7 +38,7 @@ protected:
 		TWGLuint m_Tex2DArray; // or 3D texture as fallback
 		TWGLuint m_Sampler;
 		TWGLuint m_Sampler2DArray; // or 3D texture as fallback
-		int m_LastWrapMode;
+		EWrapMode m_LastWrapMode;
 
 		int m_MemSize;
 
@@ -64,7 +64,7 @@ protected:
 	bool m_HasNPOTTextures;
 
 	bool m_HasShaders;
-	int m_LastBlendMode; // avoid all possible opengl state changes
+	EBlendMode m_LastBlendMode; // avoid all possible opengl state changes
 	bool m_LastClipEnable;
 
 	int m_OpenGLTextureLodBIAS;

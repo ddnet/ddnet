@@ -2575,9 +2575,9 @@ protected:
 			pData = pTmpData;
 		}
 
-		bool Requires2DTexture = (Flags & CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0;
-		bool Requires2DTextureArray = (Flags & (CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE)) != 0;
-		bool RequiresMipMaps = (Flags & CCommandBuffer::TEXFLAG_NOMIPMAPS) == 0;
+		bool Requires2DTexture = (Flags & TextureFlag::NO_2D_TEXTURE) == 0;
+		bool Requires2DTextureArray = (Flags & TextureFlag::TO_2D_ARRAY_TEXTURE) != 0;
+		bool RequiresMipMaps = (Flags & TextureFlag::NO_MIPMAPS) == 0;
 		size_t MipMapLevelCount = 1;
 		if(RequiresMipMaps)
 		{
@@ -3136,12 +3136,32 @@ protected:
 
 	size_t GetAddressModeIndex(const CCommandBuffer::SState &State)
 	{
-		return State.m_WrapMode == CCommandBuffer::WRAP_REPEAT ? VULKAN_BACKEND_ADDRESS_MODE_REPEAT : VULKAN_BACKEND_ADDRESS_MODE_CLAMP_EDGES;
+		switch(State.m_WrapMode)
+		{
+		case EWrapMode::REPEAT:
+			return VULKAN_BACKEND_ADDRESS_MODE_REPEAT;
+		case EWrapMode::CLAMP:
+			return VULKAN_BACKEND_ADDRESS_MODE_CLAMP_EDGES;
+		default:
+			dbg_assert(false, "Invalid wrap mode: %d", (int)State.m_WrapMode);
+			dbg_break();
+		};
 	}
 
 	size_t GetBlendModeIndex(const CCommandBuffer::SState &State)
 	{
-		return State.m_BlendMode == CCommandBuffer::BLEND_ADDITIVE ? VULKAN_BACKEND_BLEND_MODE_ADDITATIVE : (State.m_BlendMode == CCommandBuffer::BLEND_NONE ? VULKAN_BACKEND_BLEND_MODE_NONE : VULKAN_BACKEND_BLEND_MODE_ALPHA);
+		switch(State.m_BlendMode)
+		{
+		case EBlendMode::NONE:
+			return VULKAN_BACKEND_BLEND_MODE_NONE;
+		case EBlendMode::ALPHA:
+			return VULKAN_BACKEND_BLEND_MODE_ALPHA;
+		case EBlendMode::ADDITIVE:
+			return VULKAN_BACKEND_BLEND_MODE_ADDITATIVE;
+		default:
+			dbg_assert(false, "Invalid blend mode: %d", (int)State.m_BlendMode);
+			dbg_break();
+		};
 	}
 
 	size_t GetDynamicModeIndexFromState(const CCommandBuffer::SState &State) const
@@ -3391,12 +3411,12 @@ protected:
 	}
 
 	template<typename TName, bool Is3DTextured>
-	[[nodiscard]] bool RenderStandard(SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SState &State, int PrimType, const TName *pVertices, int PrimitiveCount)
+	[[nodiscard]] bool RenderStandard(SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SState &State, EPrimitiveType PrimType, const TName *pVertices, int PrimitiveCount)
 	{
 		std::array<float, (size_t)4 * 2> m;
 		GetStateMatrix(State, m);
 
-		bool IsLineGeometry = PrimType == CCommandBuffer::PRIMTYPE_LINES;
+		bool IsLineGeometry = PrimType == EPrimitiveType::LINES;
 
 		bool IsTextured;
 		size_t BlendModeIndex;
@@ -3415,12 +3435,12 @@ protected:
 
 		size_t VertPerPrim = 2;
 		bool IsIndexed = false;
-		if(PrimType == CCommandBuffer::PRIMTYPE_QUADS)
+		if(PrimType == EPrimitiveType::QUADS)
 		{
 			VertPerPrim = 4;
 			IsIndexed = true;
 		}
-		else if(PrimType == CCommandBuffer::PRIMTYPE_TRIANGLES)
+		else if(PrimType == EPrimitiveType::TRIANGLES)
 		{
 			VertPerPrim = 3;
 		}
@@ -6669,9 +6689,9 @@ public:
 		uint8_t *pTmpData = pCommand->m_pTextData;
 		uint8_t *pTmpData2 = pCommand->m_pTextOutlineData;
 
-		if(!CreateTextureCMD(Slot, Width, Height, VK_FORMAT_R8_UNORM, VK_FORMAT_R8_UNORM, CCommandBuffer::TEXFLAG_NOMIPMAPS, pTmpData))
+		if(!CreateTextureCMD(Slot, Width, Height, VK_FORMAT_R8_UNORM, VK_FORMAT_R8_UNORM, TextureFlag::NO_MIPMAPS, pTmpData))
 			return false;
-		if(!CreateTextureCMD(SlotOutline, Width, Height, VK_FORMAT_R8_UNORM, VK_FORMAT_R8_UNORM, CCommandBuffer::TEXFLAG_NOMIPMAPS, pTmpData2))
+		if(!CreateTextureCMD(SlotOutline, Width, Height, VK_FORMAT_R8_UNORM, VK_FORMAT_R8_UNORM, TextureFlag::NO_MIPMAPS, pTmpData2))
 			return false;
 
 		if(!CreateNewTextDescriptorSets(Slot, SlotOutline))

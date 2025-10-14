@@ -57,7 +57,7 @@ static CVideoMode g_aFakeModes[] = {
 void CGraphics_Threaded::FlushVertices(bool KeepVertices)
 {
 	CCommandBuffer::SCommand_Render Cmd;
-	int PrimType;
+	EPrimitiveType PrimType;
 	size_t PrimCount, NumVerts;
 	FlushVerticesImpl(KeepVertices, PrimType, PrimCount, NumVerts, Cmd, sizeof(CCommandBuffer::SVertex));
 
@@ -70,7 +70,7 @@ void CGraphics_Threaded::FlushVertices(bool KeepVertices)
 void CGraphics_Threaded::FlushVerticesTex3D()
 {
 	CCommandBuffer::SCommand_RenderTex3D Cmd;
-	int PrimType;
+	EPrimitiveType PrimType;
 	size_t PrimCount, NumVerts;
 	FlushVerticesImpl(false, PrimType, PrimCount, NumVerts, Cmd, sizeof(CCommandBuffer::SVertexTex3DStream));
 
@@ -111,8 +111,8 @@ CGraphics_Threaded::CGraphics_Threaded()
 	m_State.m_ClipW = 0;
 	m_State.m_ClipH = 0;
 	m_State.m_Texture = -1;
-	m_State.m_BlendMode = CCommandBuffer::BLEND_NONE;
-	m_State.m_WrapMode = CCommandBuffer::WRAP_REPEAT;
+	m_State.m_BlendMode = EBlendMode::NONE;
+	m_State.m_WrapMode = EWrapMode::REPEAT;
 
 	m_CurrentCommandBuffer = 0;
 	m_pCommandBuffer = nullptr;
@@ -126,7 +126,7 @@ CGraphics_Threaded::CGraphics_Threaded()
 	m_ScreenRefreshRate = -1;
 
 	m_Rotation = 0;
-	m_Drawing = 0;
+	m_Drawing = EDrawing::NONE;
 
 	m_TextureMemoryUsage = 0;
 
@@ -160,27 +160,27 @@ void CGraphics_Threaded::ClipDisable()
 
 void CGraphics_Threaded::BlendNone()
 {
-	m_State.m_BlendMode = CCommandBuffer::BLEND_NONE;
+	m_State.m_BlendMode = EBlendMode::NONE;
 }
 
 void CGraphics_Threaded::BlendNormal()
 {
-	m_State.m_BlendMode = CCommandBuffer::BLEND_ALPHA;
+	m_State.m_BlendMode = EBlendMode::ALPHA;
 }
 
 void CGraphics_Threaded::BlendAdditive()
 {
-	m_State.m_BlendMode = CCommandBuffer::BLEND_ADDITIVE;
+	m_State.m_BlendMode = EBlendMode::ADDITIVE;
 }
 
 void CGraphics_Threaded::WrapNormal()
 {
-	m_State.m_WrapMode = CCommandBuffer::WRAP_REPEAT;
+	m_State.m_WrapMode = EWrapMode::REPEAT;
 }
 
 void CGraphics_Threaded::WrapClamp()
 {
-	m_State.m_WrapMode = CCommandBuffer::WRAP_CLAMP;
+	m_State.m_WrapMode = EWrapMode::CLAMP;
 }
 
 uint64_t CGraphics_Threaded::TextureMemoryUsage() const
@@ -226,21 +226,21 @@ void CGraphics_Threaded::GetScreen(float *pTopLeftX, float *pTopLeftY, float *pB
 
 void CGraphics_Threaded::LinesBegin()
 {
-	dbg_assert(m_Drawing == 0, "called Graphics()->LinesBegin twice");
-	m_Drawing = DRAWING_LINES;
+	dbg_assert(m_Drawing == EDrawing::NONE, "called Graphics()->LinesBegin twice");
+	m_Drawing = EDrawing::LINES;
 	SetColor(1, 1, 1, 1);
 }
 
 void CGraphics_Threaded::LinesEnd()
 {
-	dbg_assert(m_Drawing == DRAWING_LINES, "called Graphics()->LinesEnd without begin");
+	dbg_assert(m_Drawing == EDrawing::LINES, "called Graphics()->LinesEnd without begin");
 	FlushVertices();
-	m_Drawing = 0;
+	m_Drawing = EDrawing::NONE;
 }
 
 void CGraphics_Threaded::LinesDraw(const CLineItem *pArray, size_t Num)
 {
-	dbg_assert(m_Drawing == DRAWING_LINES, "called Graphics()->LinesDraw without begin");
+	dbg_assert(m_Drawing == EDrawing::LINES, "called Graphics()->LinesDraw without begin");
 
 	size_t VertexIndex = m_NumVertices;
 	for(size_t i = 0; i < Num; ++i)
@@ -404,11 +404,11 @@ static CCommandBuffer::SCommand_Texture_Create LoadTextureCreateCommand(int Text
 
 	Cmd.m_Flags = 0;
 	if((Flags & IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE) != 0)
-		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE;
+		Cmd.m_Flags |= TextureFlag::TO_2D_ARRAY_TEXTURE;
 	if((Flags & IGraphics::TEXLOAD_TO_3D_TEXTURE) != 0)
-		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_3D_TEXTURE;
+		Cmd.m_Flags |= TextureFlag::TO_3D_TEXTURE;
 	if((Flags & IGraphics::TEXLOAD_NO_2D_TEXTURE) != 0)
-		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_NO_2D_TEXTURE;
+		Cmd.m_Flags |= TextureFlag::NO_2D_TEXTURE;
 
 	return Cmd;
 }
@@ -732,7 +732,7 @@ void CGraphics_Threaded::ScreenshotDirect(bool *pSwapped)
 
 void CGraphics_Threaded::TextureSet(CTextureHandle TextureId)
 {
-	dbg_assert(m_Drawing == 0, "called Graphics()->TextureSet within begin");
+	dbg_assert(m_Drawing == EDrawing::NONE, "called Graphics()->TextureSet within begin");
 	dbg_assert(!TextureId.IsValid() || m_vTextureIndices[TextureId.Id()] == -1, "Texture handle was not invalid, but also did not correlate to an existing texture.");
 	m_State.m_Texture = TextureId.Id();
 }
@@ -750,8 +750,8 @@ void CGraphics_Threaded::Clear(float r, float g, float b, bool ForceClearNow)
 
 void CGraphics_Threaded::QuadsBegin()
 {
-	dbg_assert(m_Drawing == 0, "called Graphics()->QuadsBegin twice");
-	m_Drawing = DRAWING_QUADS;
+	dbg_assert(m_Drawing == EDrawing::NONE, "called Graphics()->QuadsBegin twice");
+	m_Drawing = EDrawing::QUADS;
 
 	QuadsSetSubset(0, 0, 1, 1);
 	QuadsSetRotation(0);
@@ -760,9 +760,9 @@ void CGraphics_Threaded::QuadsBegin()
 
 void CGraphics_Threaded::QuadsEnd()
 {
-	dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsEnd without begin");
+	dbg_assert(m_Drawing == EDrawing::QUADS, "called Graphics()->QuadsEnd without begin");
 	FlushVertices();
-	m_Drawing = 0;
+	m_Drawing = EDrawing::NONE;
 }
 
 void CGraphics_Threaded::QuadsTex3DBegin()
@@ -772,15 +772,15 @@ void CGraphics_Threaded::QuadsTex3DBegin()
 
 void CGraphics_Threaded::QuadsTex3DEnd()
 {
-	dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsEnd without begin");
+	dbg_assert(m_Drawing == EDrawing::QUADS, "called Graphics()->QuadsEnd without begin");
 	FlushVerticesTex3D();
-	m_Drawing = 0;
+	m_Drawing = EDrawing::NONE;
 }
 
 void CGraphics_Threaded::TrianglesBegin()
 {
-	dbg_assert(m_Drawing == 0, "called Graphics()->TrianglesBegin twice");
-	m_Drawing = DRAWING_TRIANGLES;
+	dbg_assert(m_Drawing == EDrawing::NONE, "called Graphics()->TrianglesBegin twice");
+	m_Drawing = EDrawing::TRIANGLES;
 
 	QuadsSetSubset(0, 0, 1, 1);
 	QuadsSetRotation(0);
@@ -789,23 +789,23 @@ void CGraphics_Threaded::TrianglesBegin()
 
 void CGraphics_Threaded::TrianglesEnd()
 {
-	dbg_assert(m_Drawing == DRAWING_TRIANGLES, "called Graphics()->TrianglesEnd without begin");
+	dbg_assert(m_Drawing == EDrawing::TRIANGLES, "called Graphics()->TrianglesEnd without begin");
 	FlushVertices();
-	m_Drawing = 0;
+	m_Drawing = EDrawing::NONE;
 }
 
 void CGraphics_Threaded::QuadsEndKeepVertices()
 {
-	dbg_assert(m_Drawing == DRAWING_QUADS, "called Graphics()->QuadsEndKeepVertices without begin");
+	dbg_assert(m_Drawing == EDrawing::QUADS, "called Graphics()->QuadsEndKeepVertices without begin");
 	FlushVertices(true);
-	m_Drawing = 0;
+	m_Drawing = EDrawing::NONE;
 }
 
 void CGraphics_Threaded::QuadsDrawCurrentVertices(bool KeepVertices)
 {
-	m_Drawing = DRAWING_QUADS;
+	m_Drawing = EDrawing::QUADS;
 	FlushVertices(KeepVertices);
-	m_Drawing = 0;
+	m_Drawing = EDrawing::NONE;
 }
 
 void CGraphics_Threaded::QuadsSetRotation(float Angle)
@@ -820,7 +820,7 @@ static unsigned char NormalizeColorComponent(float ColorComponent)
 
 void CGraphics_Threaded::SetColorVertex(const CColorVertex *pArray, size_t Num)
 {
-	dbg_assert(m_Drawing != 0, "called Graphics()->SetColorVertex without begin");
+	dbg_assert(m_Drawing != EDrawing::NONE, "called Graphics()->SetColorVertex without begin");
 
 	for(size_t i = 0; i < Num; ++i)
 	{
@@ -946,9 +946,9 @@ void CGraphics_Threaded::QuadsTex3DDrawTL(const CQuadItem *pArray, int Num)
 
 void CGraphics_Threaded::QuadsDrawFreeform(const CFreeformItem *pArray, int Num)
 {
-	dbg_assert(m_Drawing == DRAWING_QUADS || m_Drawing == DRAWING_TRIANGLES, "called Graphics()->QuadsDrawFreeform without begin");
+	dbg_assert(m_Drawing == EDrawing::QUADS || m_Drawing == EDrawing::TRIANGLES, "called Graphics()->QuadsDrawFreeform without begin");
 
-	if((g_Config.m_GfxQuadAsTriangle && !m_GLUseTrianglesAsQuad) || m_Drawing == DRAWING_TRIANGLES)
+	if((g_Config.m_GfxQuadAsTriangle && !m_GLUseTrianglesAsQuad) || m_Drawing == EDrawing::TRIANGLES)
 	{
 		for(int i = 0; i < Num; ++i)
 		{
@@ -1725,11 +1725,11 @@ void CGraphics_Threaded::RenderQuadContainer(int ContainerIndex, int QuadOffset,
 			mem_copy(m_aVertices, &Container.m_vQuads[QuadOffset], sizeof(CCommandBuffer::SVertex) * 4 * QuadDrawNum);
 			m_NumVertices += 4 * QuadDrawNum;
 		}
-		m_Drawing = DRAWING_QUADS;
+		m_Drawing = EDrawing::QUADS;
 		if(ChangeWrapMode)
 			WrapClamp();
 		FlushVertices(false);
-		m_Drawing = 0;
+		m_Drawing = EDrawing::NONE;
 	}
 	WrapNormal();
 }
@@ -1846,10 +1846,10 @@ void CGraphics_Threaded::RenderQuadContainerEx(int ContainerIndex, int QuadOffse
 				m_NumVertices += 4;
 			}
 		}
-		m_Drawing = DRAWING_QUADS;
+		m_Drawing = EDrawing::QUADS;
 		WrapClamp();
 		FlushVertices(false);
-		m_Drawing = 0;
+		m_Drawing = EDrawing::NONE;
 	}
 	WrapNormal();
 }
