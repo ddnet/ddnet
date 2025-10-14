@@ -121,18 +121,18 @@ int main(int argc, const char **argv)
 		return -1;
 	}
 
-	const char *pSourceFileName = argv[1];
-	char aDestFileName[IO_MAX_PATH_LENGTH];
+	const char *pSourceFilename = argv[1];
+	char aDestFilename[IO_MAX_PATH_LENGTH];
 
 	if(argc == 3)
 	{
-		str_copy(aDestFileName, argv[2], sizeof(aDestFileName));
+		str_copy(aDestFilename, argv[2], sizeof(aDestFilename));
 	}
 	else
 	{
 		char aBuf[IO_MAX_PATH_LENGTH];
-		IStorage::StripPathAndExtension(pSourceFileName, aBuf, sizeof(aBuf));
-		str_format(aDestFileName, sizeof(aDestFileName), "data/maps7/%s.map", aBuf);
+		IStorage::StripPathAndExtension(pSourceFilename, aBuf, sizeof(aBuf));
+		str_format(aDestFilename, sizeof(aDestFilename), "data/maps7/%s.map", aBuf);
 		if(fs_makedir("data") != 0)
 		{
 			dbg_msg("map_convert_07", "failed to create data directory");
@@ -146,15 +146,15 @@ int main(int argc, const char **argv)
 		}
 	}
 
-	if(!g_DataReader.Open(pStorage.get(), pSourceFileName, IStorage::TYPE_ABSOLUTE))
+	if(!g_DataReader.Open(pStorage.get(), pSourceFilename, IStorage::TYPE_ABSOLUTE))
 	{
-		dbg_msg("map_convert_07", "failed to open source map. filename='%s'", pSourceFileName);
+		dbg_msg("map_convert_07", "failed to open source map. filename='%s'", pSourceFilename);
 		return -1;
 	}
 
-	if(!g_DataWriter.Open(pStorage.get(), aDestFileName, IStorage::TYPE_ABSOLUTE))
+	if(!g_DataWriter.Open(pStorage.get(), aDestFilename, IStorage::TYPE_ABSOLUTE))
 	{
-		dbg_msg("map_convert_07", "failed to open destination map. filename='%s'", aDestFileName);
+		dbg_msg("map_convert_07", "failed to open destination map. filename='%s'", aDestFilename);
 		return -1;
 	}
 
@@ -169,7 +169,7 @@ int main(int argc, const char **argv)
 		{
 			if(i >= MAX_MAPIMAGES)
 			{
-				dbg_msg("map_convert_07", "map uses more images than the client maximum of %" PRIzu ". filename='%s'", MAX_MAPIMAGES, pSourceFileName);
+				dbg_msg("map_convert_07", "map uses more images than the client maximum of %" PRIzu ". filename='%s'", MAX_MAPIMAGES, pSourceFilename);
 				break;
 			}
 			g_aImageIds[i] = Index;
@@ -193,7 +193,7 @@ int main(int argc, const char **argv)
 		}
 
 		int Size = g_DataReader.GetItemSize(Index);
-		Success &= CheckImageDimensions(pItem, Type, pSourceFileName);
+		Success &= CheckImageDimensions(pItem, Type, pSourceFilename);
 
 		CMapItemImage NewImageItem;
 		if(Type == MAPITEMTYPE_IMAGE)

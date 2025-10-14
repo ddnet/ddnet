@@ -79,7 +79,7 @@ public:
 
 	void Print(IConsole *pConsole, Mode DatabaseMode);
 
-	void RegisterSqliteDatabase(Mode DatabaseMode, const char FileName[64]);
+	void RegisterSqliteDatabase(Mode DatabaseMode, const char aFilename[64]);
 	void RegisterMysqlDatabase(Mode DatabaseMode, const CMysqlConfig *pMysqlConfig);
 
 	void Execute(

@@ -33,16 +33,16 @@ class CQuad;
 
 class CDataFileWriterFinishJob : public IJob
 {
-	char m_aRealFileName[IO_MAX_PATH_LENGTH];
-	char m_aTempFileName[IO_MAX_PATH_LENGTH];
+	char m_aRealFilename[IO_MAX_PATH_LENGTH];
+	char m_aTempFilename[IO_MAX_PATH_LENGTH];
 	CDataFileWriter m_Writer;
 
 	void Run() override;
 
 public:
-	CDataFileWriterFinishJob(const char *pRealFileName, const char *pTempFileName, CDataFileWriter &&Writer);
-	const char *GetRealFileName() const { return m_aRealFileName; }
-	const char *GetTempFileName() const { return m_aTempFileName; }
+	CDataFileWriterFinishJob(const char *pRealFilename, const char *pTempFilename, CDataFileWriter &&Writer);
+	const char *GetRealFilename() const { return m_aRealFilename; }
+	const char *GetTempFilename() const { return m_aTempFilename; }
 };
 
 class CEditorMap

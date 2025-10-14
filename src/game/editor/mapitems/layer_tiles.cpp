@@ -69,7 +69,7 @@ CLayerTiles::CLayerTiles(const CLayerTiles &Other) :
 	m_HasSwitch = Other.m_HasSwitch;
 	m_HasTune = Other.m_HasTune;
 
-	str_copy(m_aFileName, Other.m_aFileName);
+	str_copy(m_aFilename, Other.m_aFilename);
 }
 
 CLayerTiles::~CLayerTiles()
@@ -348,7 +348,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		pGrabbed->m_TeleNumber = m_pEditor->m_TeleNumber;
 		pGrabbed->m_TeleCheckpointNumber = m_pEditor->m_TeleCheckpointNumber;
 
-		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
+		str_copy(pGrabbed->m_aFilename, m_pEditor->m_aFilename);
 	}
 	else if(m_HasSpeedup)
 	{
@@ -392,7 +392,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		pGrabbed->m_SpeedupForce = m_pEditor->m_SpeedupForce;
 		pGrabbed->m_SpeedupMaxSpeed = m_pEditor->m_SpeedupMaxSpeed;
 		pGrabbed->m_SpeedupAngle = m_pEditor->m_SpeedupAngle;
-		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
+		str_copy(pGrabbed->m_aFilename, m_pEditor->m_aFilename);
 	}
 	else if(m_HasSwitch)
 	{
@@ -434,7 +434,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 
 		pGrabbed->m_SwitchNumber = m_pEditor->m_SwitchNumber;
 		pGrabbed->m_SwitchDelay = m_pEditor->m_SwitchDelay;
-		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
+		str_copy(pGrabbed->m_aFilename, m_pEditor->m_aFilename);
 	}
 
 	else if(m_HasTune)
@@ -472,7 +472,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		}
 
 		pGrabbed->m_TuningNumber = m_pEditor->m_TuningNumber;
-		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
+		str_copy(pGrabbed->m_aFilename, m_pEditor->m_aFilename);
 	}
 	else // game, front and tiles layers
 	{
@@ -497,7 +497,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		for(int y = 0; y < r.h; y++)
 			for(int x = 0; x < r.w; x++)
 				pGrabbed->m_pTiles[y * pGrabbed->m_Width + x] = GetTile(r.x + x, r.y + y);
-		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
+		str_copy(pGrabbed->m_aFilename, m_pEditor->m_aFilename);
 	}
 
 	return 1;

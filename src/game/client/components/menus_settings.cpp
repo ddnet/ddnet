@@ -1373,7 +1373,7 @@ bool CMenus::RenderLanguageSelection(CUIRect MainView)
 		s_SelectedLanguage = -1;
 		for(size_t i = 0; i < g_Localization.Languages().size(); i++)
 		{
-			if(str_comp(g_Localization.Languages()[i].m_FileName.c_str(), g_Config.m_ClLanguagefile) == 0)
+			if(str_comp(g_Localization.Languages()[i].m_Filename.c_str(), g_Config.m_ClLanguagefile) == 0)
 			{
 				s_SelectedLanguage = i;
 				s_ListBox.ScrollToSelected();
@@ -1405,7 +1405,7 @@ bool CMenus::RenderLanguageSelection(CUIRect MainView)
 
 	if(OldSelected != s_SelectedLanguage)
 	{
-		str_copy(g_Config.m_ClLanguagefile, g_Localization.Languages()[s_SelectedLanguage].m_FileName.c_str());
+		str_copy(g_Config.m_ClLanguagefile, g_Localization.Languages()[s_SelectedLanguage].m_Filename.c_str());
 		GameClient()->OnLanguageChange();
 	}
 

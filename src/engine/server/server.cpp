@@ -4235,10 +4235,10 @@ void CServer::ConchainStdoutOutputLevel(IConsole::IResult *pResult, void *pUserD
 	}
 }
 
-void CServer::ConchainAnnouncementFileName(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+void CServer::ConchainAnnouncementFilename(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CServer *pSelf = (CServer *)pUserData;
-	bool Changed = pResult->NumArguments() && str_comp(pResult->GetString(0), g_Config.m_SvAnnouncementFileName);
+	bool Changed = pResult->NumArguments() && str_comp(pResult->GetString(0), g_Config.m_SvAnnouncementFilename);
 	pfnCallback(pResult, pCallbackUserData);
 	if(Changed)
 	{
@@ -4341,7 +4341,7 @@ void CServer::RegisterCommands()
 	Console()->Chain("loglevel", ConchainLoglevel, this);
 	Console()->Chain("stdout_output_level", ConchainStdoutOutputLevel, this);
 
-	Console()->Chain("sv_announcement_filename", ConchainAnnouncementFileName, this);
+	Console()->Chain("sv_announcement_filename", ConchainAnnouncementFilename, this);
 
 	Console()->Chain("sv_input_fifo", ConchainInputFifo, this);
 
@@ -4384,13 +4384,13 @@ void CServer::ReadAnnouncementsFile()
 {
 	m_vAnnouncements.clear();
 
-	if(g_Config.m_SvAnnouncementFileName[0] == '\0')
+	if(g_Config.m_SvAnnouncementFilename[0] == '\0')
 		return;
 
 	CLineReader LineReader;
-	if(!LineReader.OpenFile(m_pStorage->OpenFile(g_Config.m_SvAnnouncementFileName, IOFLAG_READ, IStorage::TYPE_ALL)))
+	if(!LineReader.OpenFile(m_pStorage->OpenFile(g_Config.m_SvAnnouncementFilename, IOFLAG_READ, IStorage::TYPE_ALL)))
 	{
-		log_error("server", "Failed load announcements from '%s'", g_Config.m_SvAnnouncementFileName);
+		log_error("server", "Failed load announcements from '%s'", g_Config.m_SvAnnouncementFilename);
 		return;
 	}
 	while(const char *pLine = LineReader.Get())
