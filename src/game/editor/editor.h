@@ -685,13 +685,14 @@ public:
 	void DoQuadEnvelopes(const std::vector<CQuad> &vQuads, IGraphics::CTextureHandle Texture = IGraphics::CTextureHandle());
 	void DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int pIndex);
 	void DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int v);
-	void SetHotQuadPoint(const std::shared_ptr<CLayerQuads> &pLayer);
+	void UpdateHotQuadPoint(const CLayerQuads *pLayer);
 
 	float TriangleArea(vec2 A, vec2 B, vec2 C);
 	bool IsInTriangle(vec2 Point, vec2 A, vec2 B, vec2 C);
 	void DoQuadKnife(int QuadIndex);
 
 	void DoSoundSource(int LayerIndex, CSoundSource *pSource, int Index);
+	void UpdateHotSoundSource(const CLayerSounds *pLayer);
 
 	enum class EAxis
 	{
@@ -787,7 +788,7 @@ public:
 	};
 	void DoEditorDragBar(CUIRect View, CUIRect *pDragBar, EDragSide Side, float *pValue, float MinValue = 100.0f, float MaxValue = 400.0f);
 
-	void SetHotEnvelopePoint(const CUIRect &View, const std::shared_ptr<CEnvelope> &pEnvelope, int ActiveChannels);
+	void UpdateHotEnvelopePoint(const CUIRect &View, const CEnvelope *pEnvelope, int ActiveChannels);
 
 	void RenderMenubar(CUIRect Menubar);
 
