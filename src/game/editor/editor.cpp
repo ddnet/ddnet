@@ -5297,14 +5297,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		ToolBar.VSplitLeft(15.0f, nullptr, &ToolBar);
 		ToolBar.VSplitLeft(40.0f, &Button, &ToolBar);
 
-		static int s_SyncButton;
-		if(DoButton_Editor(&s_SyncButton, "Sync", pEnvelope->m_Synchronized, &Button, BUTTONFLAG_LEFT, "Synchronize envelope animation to game time (restarts when you touch the start line)."))
-		{
-			m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeEdit>(this, m_SelectedEnvelope, CEditorActionEnvelopeEdit::EEditType::SYNC, pEnvelope->m_Synchronized, !pEnvelope->m_Synchronized));
-			pEnvelope->m_Synchronized = !pEnvelope->m_Synchronized;
-			m_Map.OnModify();
-		}
-
 		static int s_EnvelopeEditorId = 0;
 		static int s_EnvelopeEditorButtonUsed = -1;
 		const bool ShouldPan = s_Operation == EEnvelopeEditorOp::OP_NONE && (Ui()->MouseButton(2) || (Ui()->MouseButton(0) && Input()->ModifierIsPressed()));
