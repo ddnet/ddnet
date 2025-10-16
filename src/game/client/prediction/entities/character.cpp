@@ -450,7 +450,9 @@ void CCharacter::FireWeapon()
 
 		m_Core.m_Ninja.m_ActivationDir = Direction;
 		m_Core.m_Ninja.m_CurrentMoveTime = g_pData->m_Weapons.m_Ninja.m_Movetime * GameWorld()->GameTickSpeed() / 1000;
-		m_Core.m_Ninja.m_OldVelAmount = length(m_Core.m_Vel);
+
+		// clamp to prevent massive MoveBox calculation lag with SG bug
+		m_Core.m_Ninja.m_OldVelAmount = std::clamp(length(m_Core.m_Vel), 0.0f, 6000.0f);
 	}
 	break;
 	}

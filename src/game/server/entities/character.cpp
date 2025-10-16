@@ -611,7 +611,9 @@ void CCharacter::FireWeapon()
 
 		m_Core.m_Ninja.m_ActivationDir = Direction;
 		m_Core.m_Ninja.m_CurrentMoveTime = g_pData->m_Weapons.m_Ninja.m_Movetime * Server()->TickSpeed() / 1000;
-		m_Core.m_Ninja.m_OldVelAmount = length(m_Core.m_Vel);
+
+		// clamp to prevent massive MoveBox calculation lag with SG bug
+		m_Core.m_Ninja.m_OldVelAmount = std::clamp(length(m_Core.m_Vel), 0.0f, 6000.0f);
 
 		GameServer()->CreateSound(m_Pos, SOUND_NINJA_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 	}
