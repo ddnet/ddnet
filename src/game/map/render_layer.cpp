@@ -997,10 +997,10 @@ void CRenderLayerQuads::Init()
 			if(!Textured)
 			{
 				// ignore the conversion for the position coordinates
-				vTmpQuads[QuadId].m_aVertices[j].m_X = (pQuad->m_aPoints[QuadIdX].x);
-				vTmpQuads[QuadId].m_aVertices[j].m_Y = (pQuad->m_aPoints[QuadIdX].y);
-				vTmpQuads[QuadId].m_aVertices[j].m_CenterX = (pQuad->m_aPoints[4].x);
-				vTmpQuads[QuadId].m_aVertices[j].m_CenterY = (pQuad->m_aPoints[4].y);
+				vTmpQuads[QuadId].m_aVertices[j].m_X = fx2f(pQuad->m_aPoints[QuadIdX].x);
+				vTmpQuads[QuadId].m_aVertices[j].m_Y = fx2f(pQuad->m_aPoints[QuadIdX].y);
+				vTmpQuads[QuadId].m_aVertices[j].m_CenterX = fx2f(pQuad->m_aPoints[4].x);
+				vTmpQuads[QuadId].m_aVertices[j].m_CenterY = fx2f(pQuad->m_aPoints[4].y);
 				vTmpQuads[QuadId].m_aVertices[j].m_R = (unsigned char)pQuad->m_aColors[QuadIdX].r;
 				vTmpQuads[QuadId].m_aVertices[j].m_G = (unsigned char)pQuad->m_aColors[QuadIdX].g;
 				vTmpQuads[QuadId].m_aVertices[j].m_B = (unsigned char)pQuad->m_aColors[QuadIdX].b;
@@ -1009,10 +1009,10 @@ void CRenderLayerQuads::Init()
 			else
 			{
 				// ignore the conversion for the position coordinates
-				vTmpQuadsTextured[QuadId].m_aVertices[j].m_X = (pQuad->m_aPoints[QuadIdX].x);
-				vTmpQuadsTextured[QuadId].m_aVertices[j].m_Y = (pQuad->m_aPoints[QuadIdX].y);
-				vTmpQuadsTextured[QuadId].m_aVertices[j].m_CenterX = (pQuad->m_aPoints[4].x);
-				vTmpQuadsTextured[QuadId].m_aVertices[j].m_CenterY = (pQuad->m_aPoints[4].y);
+				vTmpQuadsTextured[QuadId].m_aVertices[j].m_X = fx2f(pQuad->m_aPoints[QuadIdX].x);
+				vTmpQuadsTextured[QuadId].m_aVertices[j].m_Y = fx2f(pQuad->m_aPoints[QuadIdX].y);
+				vTmpQuadsTextured[QuadId].m_aVertices[j].m_CenterX = fx2f(pQuad->m_aPoints[4].x);
+				vTmpQuadsTextured[QuadId].m_aVertices[j].m_CenterY = fx2f(pQuad->m_aPoints[4].y);
 				vTmpQuadsTextured[QuadId].m_aVertices[j].m_U = fx2f(pQuad->m_aTexcoords[QuadIdX].x);
 				vTmpQuadsTextured[QuadId].m_aVertices[j].m_V = fx2f(pQuad->m_aTexcoords[QuadIdX].y);
 				vTmpQuadsTextured[QuadId].m_aVertices[j].m_R = (unsigned char)pQuad->m_aColors[QuadIdX].r;

@@ -39,8 +39,7 @@ void main()
 		FinalPos.x = X * cos(gRotations[TmpQuadIndex]) - Y * sin(gRotations[TmpQuadIndex]) + inVertex.z;
 		FinalPos.y = X * sin(gRotations[TmpQuadIndex]) + Y * cos(gRotations[TmpQuadIndex]) + inVertex.w;
 	}
-	FinalPos.x = FinalPos.x / 1024.0 + gOffsets[TmpQuadIndex].x;
-	FinalPos.y = FinalPos.y / 1024.0 + gOffsets[TmpQuadIndex].y;
+	FinalPos += gOffsets[TmpQuadIndex];
 
 #ifndef TW_QUAD_GROUPED
 	QuadIndex = TmpQuadIndex;
