@@ -334,29 +334,31 @@ void CCharacter::HandleNinja()
 				if(Team() != pChr->Team())
 					continue;
 
+				const int ClientId = pChr->m_pPlayer->GetCid();
+
 				// Don't hit players in solo parts
-				if(Teams()->m_Core.GetSolo(pChr->m_pPlayer->GetCid()))
+				if(Teams()->m_Core.GetSolo(ClientId))
 					return;
 
 				// make sure we haven't Hit this object before
 				bool AlreadyHit = false;
 				for(int j = 0; j < m_NumObjectsHit; j++)
 				{
-					if(m_apHitObjects[j] == pChr)
+					if(m_aHitObjects[j] == ClientId)
 						AlreadyHit = true;
 				}
 				if(AlreadyHit)
 					continue;
 
 				// check so we are sufficiently close
-				if(distance(pChr->m_Pos, m_Pos) > (GetProximityRadius() * 2.0f))
+				if(distance(pChr->m_Pos, m_Pos) > Radius)
 					continue;
 
 				// Hit a player, give them damage and stuffs...
 				GameServer()->CreateSound(pChr->m_Pos, SOUND_NINJA_HIT, TeamMask());
 				// set his velocity to fast upward (for now)
-				if(m_NumObjectsHit < 10)
-					m_apHitObjects[m_NumObjectsHit++] = pChr;
+				dbg_assert(m_NumObjectsHit < MAX_CLIENTS, "m_aHitObjects overflow");
+				m_aHitObjects[m_NumObjectsHit++] = ClientId;
 
 				pChr->TakeDamage(vec2(0, -10.0f), g_pData->m_Weapons.m_Ninja.m_pBase->m_Damage, m_pPlayer->GetCid(), WEAPON_NINJA);
 			}
@@ -484,8 +486,6 @@ void CCharacter::FireWeapon()
 	{
 	case WEAPON_HAMMER:
 	{
-		// reset objects Hit
-		m_NumObjectsHit = 0;
 		GameServer()->CreateSound(m_Pos, SOUND_HAMMER_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 
 		Antibot()->OnHammerFire(m_pPlayer->GetCid());
