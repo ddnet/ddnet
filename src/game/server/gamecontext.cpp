@@ -27,6 +27,7 @@
 #include <engine/shared/protocolglue.h>
 #include <engine/storage.h>
 
+#include <generated/protocol.h>
 #include <generated/protocol7.h>
 #include <generated/protocolglue.h>
 
@@ -75,6 +76,21 @@ enum
 	RESET,
 	NO_RESET
 };
+
+static const char *AuthLevelToString(int AuthLevel)
+{
+	switch(AuthLevel)
+	{
+	case AUTHED_ADMIN:
+		return "admin";
+	case AUTHED_MOD:
+		return "moderator";
+	case AUTHED_HELPER:
+		return "helper";
+	}
+	dbg_assert(false, "Invalid auth level %d", AuthLevel);
+	dbg_break();
+}
 
 void CGameContext::Construct(int Resetting)
 {
@@ -4151,7 +4167,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 			{
 				continue;
 			}
-			m_TeeHistorian.RecordAuthInitial(i, Level, Server()->GetAuthName(i));
+			m_TeeHistorian.RecordAuthInitial(i, AuthLevelToString(Level), Server()->GetAuthName(i));
 		}
 	}
 
@@ -4636,7 +4652,7 @@ void CGameContext::OnSetAuthed(int ClientId, int Level)
 	{
 		if(Level != AUTHED_NO)
 		{
-			m_TeeHistorian.RecordAuthLogin(ClientId, Level, Server()->GetAuthName(ClientId));
+			m_TeeHistorian.RecordAuthLogin(ClientId, AuthLevelToString(Level), Server()->GetAuthName(ClientId));
 		}
 		else
 		{
