@@ -23,6 +23,7 @@ jobs:
           cmake-init-env: CXXFLAGS=-Werror
           package-file: "*-linux_x86_64.tar.xz"
           fancy: true
+          workaround-issue10203-run-after-configure:
         - name: ubuntu-22.04
           os: ubuntu-22.04
           cmake-path: /usr/bin/
@@ -31,24 +32,30 @@ jobs:
           gtest-env: GTEST_FILTER=-*SQLite*
           package-file: "*-linux_x86_64.tar.xz"
           fancy: false
+          workaround-issue10203-run-after-configure:
         - name: macOS-latest
           os: macOS-latest
           cmake-args: -G Ninja
           cmake-init-env: CXXFLAGS=-Werror
           package-file: "*-macos.dmg"
           fancy: false
+          workaround-issue10203-run-after-configure:
         - name: windows-latest
           os: windows-latest
           cmake-args: -A x64 -DEXCEPTION_HANDLING=ON
           cmake-init-env: CXXFLAGS=/WX LDFLAGS=/WX
           package-file: "*-win64.zip"
           fancy: false
+          workaround-issue10203-run-after-configure:
         - name: windows-latest-mingw
           os: windows-latest
           cmake-args: -G Ninja -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DEXCEPTION_HANDLING=ON -DCMAKE_RC_COMPILER=windres -DCMAKE_AR=ar
           cmake-init-env: CXXFLAGS=-Werror LDFLAGS=-Werror
           package-file: "*-win64.zip"
           fancy: false
+          # Delete outdated libwinpthread-1.dll after configuring to workaround https://github.com/ddnet/ddnet/issues/10203 when using MinGW.
+          # Adding this condition into the individual steps is not possible without using bash shell consistently, which does not work for windows-latest.
+          workaround-issue10203-run-after-configure: rm libwinpthread-1.dll
 
     steps:
     - uses: actions/checkout@v4
@@ -143,6 +150,7 @@ jobs:
         cd debug
         ${{ matrix.cmake-path }}cmake --version
         ${{ matrix.cmake-path }}cmake -E env ${{ matrix.cmake-init-env }} ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=Debug -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=. ..
+        ${{ matrix.workaround-issue10203-run-after-configure }}
         ${{ matrix.cmake-path }}cmake --build . --config Debug --target everything
 
     - name: Test debug
@@ -160,6 +168,7 @@ jobs:
         mkdir release
         cd release
         ${{ matrix.cmake-path }}cmake -E env ${{ matrix.cmake-init-env }} ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=Release -Werror=dev -DDOWNLOAD_GTEST=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. ..
+        ${{ matrix.workaround-issue10203-run-after-configure }}
         ${{ matrix.cmake-path }}cmake --build . --config Release --target everything
 
     - name: Test release
@@ -178,6 +187,7 @@ jobs:
         mkdir headless
         cd headless
         ${{ matrix.cmake-path }}cmake -E env CXXFLAGS="--coverage -Werror" ${{ matrix.cmake-path }}cmake -E env LDFLAGS="--coverage -Werror" ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DHEADLESS_CLIENT=ON -DCMAKE_BUILD_TYPE=Debug -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=. ..
+        ${{ matrix.workaround-issue10203-run-after-configure }}
         ${{ matrix.cmake-path }}cmake -E env RUSTFLAGS="-Clink-arg=--coverage" ${{ matrix.cmake-path }}cmake --build . --config Debug
 
     - name: Test headless client (unit tests)
@@ -198,6 +208,7 @@ jobs:
         mkdir fancy
         cd fancy
         ${{ matrix.cmake-path }}cmake -E env ${{ matrix.cmake-init-env }} ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=RelWithDebInfo -DDOWNLOAD_GTEST=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. -DANTIBOT=ON -DWEBSOCKETS=ON ..
+        ${{ matrix.workaround-issue10203-run-after-configure }}
         ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo --target everything
 
     - name: Test fancy
