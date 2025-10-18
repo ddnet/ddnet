@@ -69,8 +69,7 @@ void main()
 		FinalPos.y = X * sin(gQuadBO.gUniEls[TmpQuadIndex].gRotation) + Y * cos(gQuadBO.gUniEls[TmpQuadIndex].gRotation) + inVertex.w;
 	}
 
-	FinalPos.x = FinalPos.x / 1024.0 + gQuadBO.gUniEls[TmpQuadIndex].gOffset.x;
-	FinalPos.y = FinalPos.y / 1024.0 + gQuadBO.gUniEls[TmpQuadIndex].gOffset.y;
+	FinalPos += gQuadBO.gUniEls[TmpQuadIndex].gOffset;
 
 	gl_Position = vec4(gPosBO.gPos * vec4(FinalPos, 0.0, 1.0), 0.0, 1.0);
 	QuadColor = inColor;
