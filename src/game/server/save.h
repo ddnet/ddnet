@@ -40,8 +40,8 @@ class CSaveTee
 public:
 	CSaveTee();
 	~CSaveTee() = default;
-	void Save(CCharacter *pchr, bool AddPenalty = true);
-	bool Load(CCharacter *pchr, std::optional<int> Team = std::nullopt);
+	void Save(CCharacter *pChr, bool AddPenalty = true);
+	bool Load(CCharacter *pChr, std::optional<int> Team = std::nullopt);
 	char *GetString(const CSaveTeam *pTeam);
 	int FromString(const char *pString);
 	void LoadHookedPlayer(const CSaveTeam *pTeam);

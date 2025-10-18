@@ -745,16 +745,16 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info) cons
 		{
 		}
 
-		bool operator()(const CServerInfo::CClient &p0, const CServerInfo::CClient &p1) const
+		bool operator()(const CServerInfo::CClient &Client0, const CServerInfo::CClient &Client1) const
 		{
 			// Sort players before non players
-			if(p0.m_Player && !p1.m_Player)
+			if(Client0.m_Player && !Client1.m_Player)
 				return true;
-			if(!p0.m_Player && p1.m_Player)
+			if(!Client0.m_Player && Client1.m_Player)
 				return false;
 
-			int Score0 = p0.m_Score;
-			int Score1 = p1.m_Score;
+			int Score0 = Client0.m_Score;
+			int Score1 = Client1.m_Score;
 
 			if(m_ScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME || m_ScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME_BACKCOMPAT)
 			{
@@ -774,7 +774,7 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info) cons
 					return Score0 > Score1;
 			}
 
-			return str_comp_nocase(p0.m_aName, p1.m_aName) < 0;
+			return str_comp_nocase(Client0.m_aName, Client1.m_aName) < 0;
 		}
 	};
 

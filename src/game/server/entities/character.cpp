@@ -1903,11 +1903,11 @@ void CCharacter::HandleTiles(int Index)
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_ADD_TIME && !m_LastPenalty)
 	{
-		int min = Collision()->GetSwitchDelay(MapIndex);
-		int sec = Collision()->GetSwitchNumber(MapIndex);
+		const int Minutes = Collision()->GetSwitchDelay(MapIndex);
+		const int Seconds = Collision()->GetSwitchNumber(MapIndex);
 		int Team = Teams()->m_Core.Team(m_Core.m_Id);
 
-		m_StartTime -= (min * 60 + sec) * Server()->TickSpeed();
+		m_StartTime -= (Minutes * 60 + Seconds) * Server()->TickSpeed();
 
 		if((g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO || (Team != TEAM_FLOCK && !Teams()->TeamFlock(Team))) && Team != TEAM_SUPER)
 		{
@@ -1927,11 +1927,11 @@ void CCharacter::HandleTiles(int Index)
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_SUBTRACT_TIME && !m_LastBonus)
 	{
-		int min = Collision()->GetSwitchDelay(MapIndex);
-		int sec = Collision()->GetSwitchNumber(MapIndex);
+		const int Minutes = Collision()->GetSwitchDelay(MapIndex);
+		const int Seconds = Collision()->GetSwitchNumber(MapIndex);
 		int Team = Teams()->m_Core.Team(m_Core.m_Id);
 
-		m_StartTime += (min * 60 + sec) * Server()->TickSpeed();
+		m_StartTime += (Minutes * 60 + Seconds) * Server()->TickSpeed();
 		if(m_StartTime > Server()->Tick())
 			m_StartTime = Server()->Tick();
 
@@ -1977,13 +1977,13 @@ void CCharacter::HandleTiles(int Index)
 			ResetPickups();
 		return;
 	}
-	int evilz = Collision()->IsEvilTeleport(MapIndex);
-	if(evilz && !Collision()->TeleOuts(evilz - 1).empty())
+	const int EvilTeleport = Collision()->IsEvilTeleport(MapIndex);
+	if(EvilTeleport && !Collision()->TeleOuts(EvilTeleport - 1).empty())
 	{
 		if(m_Core.m_Super || m_Core.m_Invincible)
 			return;
-		int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleOuts(evilz - 1).size());
-		m_Core.m_Pos = Collision()->TeleOuts(evilz - 1)[TeleOut];
+		int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleOuts(EvilTeleport - 1).size());
+		m_Core.m_Pos = Collision()->TeleOuts(EvilTeleport - 1)[TeleOut];
 		if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons)
 		{
 			m_Core.m_Vel = vec2(0, 0);

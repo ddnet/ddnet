@@ -133,7 +133,7 @@ static const unsigned char NET_HEADER_EXTENDED[] = {'x', 'e'};
 void CNetBase::SendPacketConnless(NETSOCKET Socket, NETADDR *pAddr, const void *pData, int DataSize, bool Extended, unsigned char aExtra[NET_CONNLESS_EXTRA_SIZE])
 {
 	unsigned char aBuffer[NET_MAX_PACKETSIZE];
-	const int DATA_OFFSET = sizeof(NET_HEADER_EXTENDED) + NET_CONNLESS_EXTRA_SIZE;
+	static constexpr int DATA_OFFSET = sizeof(NET_HEADER_EXTENDED) + NET_CONNLESS_EXTRA_SIZE;
 	dbg_assert(DataSize <= (int)sizeof(aBuffer) - DATA_OFFSET,
 		"Invalid DataSize for CNetBase::SendPacketConnless: %d > %d", DataSize, (int)sizeof(aBuffer) - DATA_OFFSET);
 
@@ -153,7 +153,7 @@ void CNetBase::SendPacketConnless(NETSOCKET Socket, NETADDR *pAddr, const void *
 void CNetBase::SendPacketConnlessWithToken7(NETSOCKET Socket, NETADDR *pAddr, const void *pData, int DataSize, SECURITY_TOKEN Token, SECURITY_TOKEN ResponseToken)
 {
 	unsigned char aBuffer[NET_MAX_PACKETSIZE];
-	const int DATA_OFFSET = 1 + 2 * sizeof(SECURITY_TOKEN);
+	static constexpr int DATA_OFFSET = 1 + 2 * sizeof(SECURITY_TOKEN);
 	dbg_assert(DataSize <= (int)sizeof(aBuffer) - DATA_OFFSET,
 		"Invalid DataSize for CNetBase::SendPacketConnlessWithToken7: %d > %d", DataSize, (int)sizeof(aBuffer) - DATA_OFFSET);
 

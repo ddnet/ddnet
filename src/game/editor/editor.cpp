@@ -320,7 +320,7 @@ bool CEditor::IsEnvPointSelected(int Index) const
 	auto Iter = std::find_if(
 		m_vSelectedEnvelopePoints.begin(),
 		m_vSelectedEnvelopePoints.end(),
-		[&](auto pair) { return pair.first == Index; });
+		[&](const auto &Pair) { return Pair.first == Index; });
 
 	return Iter != m_vSelectedEnvelopePoints.end();
 }
@@ -730,15 +730,15 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		}
 	}
 
-	CUIRect TB_Top, TB_Bottom;
+	CUIRect ToolbarTop, ToolbarBottom;
 	CUIRect Button;
 
-	ToolBar.HSplitMid(&TB_Top, &TB_Bottom, 5.0f);
+	ToolBar.HSplitMid(&ToolbarTop, &ToolbarBottom, 5.0f);
 
 	// top line buttons
 	{
 		// detail button
-		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
+		ToolbarTop.VSplitLeft(40.0f, &Button, &ToolbarTop);
 		static int s_HqButton = 0;
 		if(DoButton_Editor(&s_HqButton, "HD", m_ShowDetail, &Button, BUTTONFLAG_LEFT, "[Ctrl+H] Toggle high detail.") ||
 			(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_H) && ModPressed))
@@ -746,10 +746,10 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 			m_ShowDetail = !m_ShowDetail;
 		}
 
-		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
+		ToolbarTop.VSplitLeft(5.0f, nullptr, &ToolbarTop);
 
 		// animation button
-		TB_Top.VSplitLeft(25.0f, &Button, &TB_Top);
+		ToolbarTop.VSplitLeft(25.0f, &Button, &ToolbarTop);
 		static char s_AnimateButton;
 		if(DoButton_FontIcon(&s_AnimateButton, FONT_ICON_CIRCLE_PLAY, m_Animate, &Button, BUTTONFLAG_LEFT, "[Ctrl+M] Toggle animation.", IGraphics::CORNER_L) ||
 			(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_M) && ModPressed))
@@ -759,7 +759,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		}
 
 		// animation settings button
-		TB_Top.VSplitLeft(14.0f, &Button, &TB_Top);
+		ToolbarTop.VSplitLeft(14.0f, &Button, &ToolbarTop);
 		static char s_AnimateSettingsButton;
 		if(DoButton_FontIcon(&s_AnimateSettingsButton, FONT_ICON_CIRCLE_CHEVRON_DOWN, 0, &Button, BUTTONFLAG_LEFT, "Change the animation settings.", IGraphics::CORNER_R, 8.0f))
 		{
@@ -768,16 +768,16 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 			Ui()->DoPopupMenu(&s_PopupAnimateSettingsId, Button.x, Button.y + Button.h, 150.0f, 37.0f, this, PopupAnimateSettings);
 		}
 
-		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
+		ToolbarTop.VSplitLeft(5.0f, nullptr, &ToolbarTop);
 
 		// proof button
-		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
+		ToolbarTop.VSplitLeft(40.0f, &Button, &ToolbarTop);
 		if(DoButton_Ex(&m_QuickActionProof, m_QuickActionProof.Label(), m_QuickActionProof.Active(), &Button, BUTTONFLAG_LEFT, m_QuickActionProof.Description(), IGraphics::CORNER_L))
 		{
 			m_QuickActionProof.Call();
 		}
 
-		TB_Top.VSplitLeft(14.0f, &Button, &TB_Top);
+		ToolbarTop.VSplitLeft(14.0f, &Button, &ToolbarTop);
 		static int s_ProofModeButton = 0;
 		if(DoButton_FontIcon(&s_ProofModeButton, FONT_ICON_CIRCLE_CHEVRON_DOWN, 0, &Button, BUTTONFLAG_LEFT, "Select proof mode.", IGraphics::CORNER_R, 8.0f))
 		{
@@ -785,20 +785,20 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 			Ui()->DoPopupMenu(&s_PopupProofModeId, Button.x, Button.y + Button.h, 60.0f, 36.0f, this, PopupProofMode);
 		}
 
-		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
+		ToolbarTop.VSplitLeft(5.0f, nullptr, &ToolbarTop);
 
 		// zoom button
-		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
+		ToolbarTop.VSplitLeft(40.0f, &Button, &ToolbarTop);
 		static int s_ZoomButton = 0;
 		if(DoButton_Editor(&s_ZoomButton, "Zoom", m_PreviewZoom, &Button, BUTTONFLAG_LEFT, "Toggle preview of how layers will be zoomed ingame."))
 		{
 			m_PreviewZoom = !m_PreviewZoom;
 		}
 
-		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
+		ToolbarTop.VSplitLeft(5.0f, nullptr, &ToolbarTop);
 
 		// grid button
-		TB_Top.VSplitLeft(25.0f, &Button, &TB_Top);
+		ToolbarTop.VSplitLeft(25.0f, &Button, &ToolbarTop);
 		static int s_GridButton = 0;
 		if(DoButton_FontIcon(&s_GridButton, FONT_ICON_BORDER_ALL, m_QuickActionToggleGrid.Active(), &Button, BUTTONFLAG_LEFT, m_QuickActionToggleGrid.Description(), IGraphics::CORNER_L) ||
 			(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_G) && ModPressed && !ShiftPressed))
@@ -807,62 +807,62 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		}
 
 		// grid settings button
-		TB_Top.VSplitLeft(14.0f, &Button, &TB_Top);
+		ToolbarTop.VSplitLeft(14.0f, &Button, &ToolbarTop);
 		static char s_GridSettingsButton;
 		if(DoButton_FontIcon(&s_GridSettingsButton, FONT_ICON_CIRCLE_CHEVRON_DOWN, 0, &Button, BUTTONFLAG_LEFT, "Change the grid settings.", IGraphics::CORNER_R, 8.0f))
 		{
 			MapView()->MapGrid()->DoSettingsPopup(vec2(Button.x, Button.y + Button.h));
 		}
 
-		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
+		ToolbarTop.VSplitLeft(5.0f, nullptr, &ToolbarTop);
 
 		// zoom group
-		TB_Top.VSplitLeft(20.0f, &Button, &TB_Top);
+		ToolbarTop.VSplitLeft(20.0f, &Button, &ToolbarTop);
 		static int s_ZoomOutButton = 0;
 		if(DoButton_FontIcon(&s_ZoomOutButton, FONT_ICON_MINUS, 0, &Button, BUTTONFLAG_LEFT, m_QuickActionZoomOut.Description(), IGraphics::CORNER_L))
 		{
 			m_QuickActionZoomOut.Call();
 		}
 
-		TB_Top.VSplitLeft(25.0f, &Button, &TB_Top);
+		ToolbarTop.VSplitLeft(25.0f, &Button, &ToolbarTop);
 		static int s_ZoomNormalButton = 0;
 		if(DoButton_FontIcon(&s_ZoomNormalButton, FONT_ICON_MAGNIFYING_GLASS, 0, &Button, BUTTONFLAG_LEFT, m_QuickActionResetZoom.Description(), IGraphics::CORNER_NONE))
 		{
 			m_QuickActionResetZoom.Call();
 		}
 
-		TB_Top.VSplitLeft(20.0f, &Button, &TB_Top);
+		ToolbarTop.VSplitLeft(20.0f, &Button, &ToolbarTop);
 		static int s_ZoomInButton = 0;
 		if(DoButton_FontIcon(&s_ZoomInButton, FONT_ICON_PLUS, 0, &Button, BUTTONFLAG_LEFT, m_QuickActionZoomIn.Description(), IGraphics::CORNER_R))
 		{
 			m_QuickActionZoomIn.Call();
 		}
 
-		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
+		ToolbarTop.VSplitLeft(5.0f, nullptr, &ToolbarTop);
 
 		// undo/redo group
-		TB_Top.VSplitLeft(25.0f, &Button, &TB_Top);
+		ToolbarTop.VSplitLeft(25.0f, &Button, &ToolbarTop);
 		static int s_UndoButton = 0;
 		if(DoButton_FontIcon(&s_UndoButton, FONT_ICON_UNDO, m_EditorHistory.CanUndo() - 1, &Button, BUTTONFLAG_LEFT, "[Ctrl+Z] Undo the last action.", IGraphics::CORNER_L))
 		{
 			m_EditorHistory.Undo();
 		}
 
-		TB_Top.VSplitLeft(25.0f, &Button, &TB_Top);
+		ToolbarTop.VSplitLeft(25.0f, &Button, &ToolbarTop);
 		static int s_RedoButton = 0;
 		if(DoButton_FontIcon(&s_RedoButton, FONT_ICON_REDO, m_EditorHistory.CanRedo() - 1, &Button, BUTTONFLAG_LEFT, "[Ctrl+Y] Redo the last action.", IGraphics::CORNER_R))
 		{
 			m_EditorHistory.Redo();
 		}
 
-		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
+		ToolbarTop.VSplitLeft(5.0f, nullptr, &ToolbarTop);
 
 		// brush manipulation
 		{
 			int Enabled = m_pBrush->IsEmpty() ? -1 : 0;
 
 			// flip buttons
-			TB_Top.VSplitLeft(25.0f, &Button, &TB_Top);
+			ToolbarTop.VSplitLeft(25.0f, &Button, &ToolbarTop);
 			static int s_FlipXButton = 0;
 			if(DoButton_FontIcon(&s_FlipXButton, FONT_ICON_ARROWS_LEFT_RIGHT, Enabled, &Button, BUTTONFLAG_LEFT, "[N] Flip the brush horizontally.", IGraphics::CORNER_L) || (Input()->KeyPress(KEY_N) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && !Ui()->IsPopupOpen()))
 			{
@@ -870,17 +870,17 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 					pLayer->BrushFlipX();
 			}
 
-			TB_Top.VSplitLeft(25.0f, &Button, &TB_Top);
+			ToolbarTop.VSplitLeft(25.0f, &Button, &ToolbarTop);
 			static int s_FlipyButton = 0;
 			if(DoButton_FontIcon(&s_FlipyButton, FONT_ICON_ARROWS_UP_DOWN, Enabled, &Button, BUTTONFLAG_LEFT, "[M] Flip the brush vertically.", IGraphics::CORNER_R) || (Input()->KeyPress(KEY_M) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && !Ui()->IsPopupOpen()))
 			{
 				for(auto &pLayer : m_pBrush->m_vpLayers)
 					pLayer->BrushFlipY();
 			}
-			TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
+			ToolbarTop.VSplitLeft(5.0f, nullptr, &ToolbarTop);
 
 			// rotate buttons
-			TB_Top.VSplitLeft(25.0f, &Button, &TB_Top);
+			ToolbarTop.VSplitLeft(25.0f, &Button, &ToolbarTop);
 			static int s_RotationAmount = 90;
 			bool TileLayer = false;
 			// check for tile layers in brush selection
@@ -899,11 +899,11 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 					pLayer->BrushRotate(-s_RotationAmount / 360.0f * pi * 2);
 			}
 
-			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
+			ToolbarTop.VSplitLeft(30.0f, &Button, &ToolbarTop);
 			auto RotationAmountRes = UiDoValueSelector(&s_RotationAmount, &Button, "", s_RotationAmount, TileLayer ? 90 : 1, 359, TileLayer ? 90 : 1, TileLayer ? 10.0f : 2.0f, "Rotation of the brush in degrees. Use left mouse button to drag and change the value. Hold shift to be more precise.", true, false, IGraphics::CORNER_NONE);
 			s_RotationAmount = RotationAmountRes.m_Value;
 
-			TB_Top.VSplitLeft(25.0f, &Button, &TB_Top);
+			ToolbarTop.VSplitLeft(25.0f, &Button, &ToolbarTop);
 			static int s_CwButton = 0;
 			if(DoButton_FontIcon(&s_CwButton, FONT_ICON_ARROW_ROTATE_RIGHT, Enabled, &Button, BUTTONFLAG_LEFT, "[T] Rotate the brush clockwise.", IGraphics::CORNER_R) || (Input()->KeyPress(KEY_T) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && !Ui()->IsPopupOpen()))
 			{
@@ -917,10 +917,10 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 			const float PipetteButtonWidth = 30.0f;
 			const float ColorPickerButtonWidth = 20.0f;
 			const float Spacing = 2.0f;
-			const size_t NumColorsShown = std::clamp<int>(round_to_int((TB_Top.w - PipetteButtonWidth - 40.0f) / (ColorPickerButtonWidth + Spacing)), 1, std::size(m_aSavedColors));
+			const size_t NumColorsShown = std::clamp<int>(round_to_int((ToolbarTop.w - PipetteButtonWidth - 40.0f) / (ColorPickerButtonWidth + Spacing)), 1, std::size(m_aSavedColors));
 
 			CUIRect ColorPalette;
-			TB_Top.VSplitRight(NumColorsShown * (ColorPickerButtonWidth + Spacing) + PipetteButtonWidth, &TB_Top, &ColorPalette);
+			ToolbarTop.VSplitRight(NumColorsShown * (ColorPickerButtonWidth + Spacing) + PipetteButtonWidth, &ToolbarTop, &ColorPalette);
 
 			// Pipette button
 			static char s_PipetteButton;
@@ -949,11 +949,11 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 	{
 		// refocus button
 		{
-			TB_Bottom.VSplitLeft(50.0f, &Button, &TB_Bottom);
+			ToolbarBottom.VSplitLeft(50.0f, &Button, &ToolbarBottom);
 			int FocusButtonChecked = MapView()->IsFocused() ? -1 : 1;
 			if(DoButton_Editor(&m_QuickActionRefocus, m_QuickActionRefocus.Label(), FocusButtonChecked, &Button, BUTTONFLAG_LEFT, m_QuickActionRefocus.Description()) || (m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_HOME)))
 				m_QuickActionRefocus.Call();
-			TB_Bottom.VSplitLeft(5.0f, nullptr, &TB_Bottom);
+			ToolbarBottom.VSplitLeft(5.0f, nullptr, &ToolbarBottom);
 		}
 
 		// tile manipulation
@@ -998,7 +998,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 						static char s_aButtonTooltip[64];
 						str_format(s_aButtonTooltip, sizeof(s_aButtonTooltip), "[Ctrl+T] %s", pButtonName);
 
-						TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
+						ToolbarBottom.VSplitLeft(60.0f, &Button, &ToolbarBottom);
 						static int s_ModifierButton = 0;
 						if(DoButton_Ex(&s_ModifierButton, pButtonName, 0, &Button, BUTTONFLAG_LEFT, s_aButtonTooltip, IGraphics::CORNER_ALL) || (m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && ModPressed && Input()->KeyPress(KEY_T)))
 						{
@@ -1008,7 +1008,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 								Ui()->DoPopupMenu(&s_PopupModifierId, Button.x, Button.y + Button.h, 120 + ExtraWidth, 10.0f + Rows * 13.0f, this, pfnPopupFunc);
 							}
 						}
-						TB_Bottom.VSplitLeft(5.0f, nullptr, &TB_Bottom);
+						ToolbarBottom.VSplitLeft(5.0f, nullptr, &ToolbarBottom);
 					}
 				}
 			}
@@ -1019,7 +1019,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		if(pLayer && (pLayer->m_Type == LAYERTYPE_QUADS || pLayer->m_Type == LAYERTYPE_SOUNDS))
 		{
 			// "Add sound source" button needs more space or the font size will be scaled down
-			TB_Bottom.VSplitLeft((pLayer->m_Type == LAYERTYPE_QUADS) ? 60.0f : 100.0f, &Button, &TB_Bottom);
+			ToolbarBottom.VSplitLeft((pLayer->m_Type == LAYERTYPE_QUADS) ? 60.0f : 100.0f, &Button, &ToolbarBottom);
 
 			if(pLayer->m_Type == LAYERTYPE_QUADS)
 			{
@@ -1038,17 +1038,17 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 				}
 			}
 
-			TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
+			ToolbarBottom.VSplitLeft(5.0f, &Button, &ToolbarBottom);
 		}
 
 		// Brush draw mode button
 		{
-			TB_Bottom.VSplitLeft(65.0f, &Button, &TB_Bottom);
+			ToolbarBottom.VSplitLeft(65.0f, &Button, &ToolbarBottom);
 			static int s_BrushDrawModeButton = 0;
 			if(DoButton_Editor(&s_BrushDrawModeButton, "Destructive", m_BrushDrawDestructive, &Button, BUTTONFLAG_LEFT, "[Ctrl+D] Toggle brush draw mode: preserve or override existing tiles.") ||
 				(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_D) && ModPressed && !ShiftPressed))
 				m_BrushDrawDestructive = !m_BrushDrawDestructive;
-			TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
+			ToolbarBottom.VSplitLeft(5.0f, &Button, &ToolbarBottom);
 		}
 	}
 }

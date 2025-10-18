@@ -47,12 +47,12 @@ static void ClearPixelsTile(uint8_t *pImg, int Width, int Height, int TileIndex)
 {
 	int WTile = Width / 16;
 	int HTile = Height / 16;
-	int xi = (TileIndex % 16) * WTile;
-	int yi = (TileIndex / 16) * HTile;
+	int StartX = (TileIndex % 16) * WTile;
+	int StartY = (TileIndex / 16) * HTile;
 
-	for(int y = yi; y < yi + HTile; ++y)
+	for(int y = StartY; y < StartY + HTile; ++y)
 	{
-		for(int x = xi; x < xi + WTile; ++x)
+		for(int x = StartX; x < StartX + WTile; ++x)
 		{
 			int Index = y * Width * 4 + x * 4;
 			pImg[Index + 0] = 0;
@@ -221,14 +221,14 @@ int main(int argc, const char **argv)
 		bool DeletePtr = false;
 		void *pPtr = Reader.GetData(Index);
 		int Size = Reader.GetDataSize(Index);
-		auto it = std::find_if(vDataFindHelper.begin(), vDataFindHelper.end(), [Index](const SMapOptimizeItem &Other) -> bool { return Other.m_Data == Index || Other.m_Text == Index; });
-		if(it != vDataFindHelper.end())
+		auto MapDataItemIterator = std::find_if(vDataFindHelper.begin(), vDataFindHelper.end(), [Index](const SMapOptimizeItem &Other) -> bool { return Other.m_Data == Index || Other.m_Text == Index; });
+		if(MapDataItemIterator != vDataFindHelper.end())
 		{
-			int Width = it->m_pImage->m_Width;
-			int Height = it->m_pImage->m_Height;
+			int Width = MapDataItemIterator->m_pImage->m_Width;
+			int Height = MapDataItemIterator->m_pImage->m_Height;
 
-			int ImageIndex = it->m_Index;
-			if(it->m_Data == Index)
+			int ImageIndex = MapDataItemIterator->m_Index;
+			if(MapDataItemIterator->m_Data == Index)
 			{
 				DeletePtr = true;
 				// optimize embedded images
@@ -292,11 +292,11 @@ int main(int argc, const char **argv)
 					}
 				}
 			}
-			else if(it->m_Text == Index)
+			else if(MapDataItemIterator->m_Text == Index)
 			{
 				char *pImgName = (char *)pPtr;
-				uint8_t *pImgBuff = (uint8_t *)Reader.GetData(it->m_Data);
-				int ImgSize = Reader.GetDataSize(it->m_Data);
+				uint8_t *pImgBuff = (uint8_t *)Reader.GetData(MapDataItemIterator->m_Data);
+				int ImgSize = Reader.GetDataSize(MapDataItemIterator->m_Data);
 
 				char aSHA256Str[SHA256_MAXSTRSIZE];
 				// This is the important function, that calculates the SHA256 in a special way

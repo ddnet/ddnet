@@ -55,7 +55,7 @@ CUpdaterFetchTask::CUpdaterFetchTask(CUpdater *pUpdater, const char *pFile, cons
 
 void CUpdaterFetchTask::OnProgress()
 {
-	CLockScope ls(m_pUpdater->m_Lock);
+	const CLockScope LockScope(m_pUpdater->m_Lock);
 	m_pUpdater->m_Percent = Progress();
 }
 
@@ -101,31 +101,31 @@ void CUpdater::Init(CHttp *pHttp)
 
 void CUpdater::SetCurrentState(EUpdaterState NewState)
 {
-	CLockScope ls(m_Lock);
+	const CLockScope LockScope(m_Lock);
 	m_State = NewState;
 }
 
 IUpdater::EUpdaterState CUpdater::GetCurrentState()
 {
-	CLockScope ls(m_Lock);
+	const CLockScope LockScope(m_Lock);
 	return m_State;
 }
 
 void CUpdater::GetCurrentFile(char *pBuf, int BufSize)
 {
-	CLockScope ls(m_Lock);
+	const CLockScope LockScope(m_Lock);
 	str_copy(pBuf, m_aStatus, BufSize);
 }
 
 int CUpdater::GetCurrentPercent()
 {
-	CLockScope ls(m_Lock);
+	const CLockScope LockScope(m_Lock);
 	return m_Percent;
 }
 
 void CUpdater::FetchFile(const char *pFile, const char *pDestPath)
 {
-	CLockScope ls(m_Lock);
+	const CLockScope LockScope(m_Lock);
 	m_pCurrentTask = std::make_shared<CUpdaterFetchTask>(this, pFile, pDestPath);
 	str_copy(m_aStatus, m_pCurrentTask->Dest());
 	m_pHttp->Run(m_pCurrentTask);
@@ -134,20 +134,20 @@ void CUpdater::FetchFile(const char *pFile, const char *pDestPath)
 bool CUpdater::MoveFile(const char *pFile)
 {
 	char aBuf[256];
-	size_t len = str_length(pFile);
+	const size_t Length = str_length(pFile);
 	bool Success = true;
 
 #if !defined(CONF_FAMILY_WINDOWS)
-	if(!str_comp_nocase(pFile + len - 4, ".dll"))
+	if(!str_comp_nocase(pFile + Length - 4, ".dll"))
 		return Success;
 #endif
 
 #if !defined(CONF_PLATFORM_LINUX)
-	if(!str_comp_nocase(pFile + len - 3, ".so"))
+	if(!str_comp_nocase(pFile + Length - 3, ".so"))
 		return Success;
 #endif
 
-	if(!str_comp_nocase(pFile + len - 4, ".dll") || !str_comp_nocase(pFile + len - 4, ".ttf") || !str_comp_nocase(pFile + len - 3, ".so"))
+	if(!str_comp_nocase(pFile + Length - 4, ".dll") || !str_comp_nocase(pFile + Length - 4, ".ttf") || !str_comp_nocase(pFile + Length - 3, ".so"))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s.old", pFile);
 		m_pStorage->RenameBinaryFile(pFile, aBuf);
@@ -310,25 +310,25 @@ void CUpdater::RunningUpdate()
 		if(Job.second)
 		{
 			const char *pFile = Job.first.c_str();
-			size_t len = str_length(pFile);
-			if(!str_comp_nocase(pFile + len - 4, ".dll"))
+			const size_t Length = str_length(pFile);
+			if(!str_comp_nocase(pFile + Length - 4, ".dll"))
 			{
 #if defined(CONF_FAMILY_WINDOWS)
 				char aBuf[512];
 				str_copy(aBuf, pFile, sizeof(aBuf)); // SDL
-				str_copy(aBuf + len - 4, "-" PLAT_NAME, sizeof(aBuf) - len + 4); // -win32
-				str_append(aBuf, pFile + len - 4); // .dll
+				str_copy(aBuf + Length - 4, "-" PLAT_NAME, sizeof(aBuf) - Length + 4); // -win32
+				str_append(aBuf, pFile + Length - 4); // .dll
 				FetchFile(aBuf, pFile);
 #endif
 				// Ignore DLL downloads on other platforms
 			}
-			else if(!str_comp_nocase(pFile + len - 3, ".so"))
+			else if(!str_comp_nocase(pFile + Length - 3, ".so"))
 			{
 #if defined(CONF_PLATFORM_LINUX)
 				char aBuf[512];
 				str_copy(aBuf, pFile, sizeof(aBuf)); // libsteam_api
-				str_copy(aBuf + len - 3, "-" PLAT_NAME, sizeof(aBuf) - len + 3); // -linux-x86_64
-				str_append(aBuf, pFile + len - 3); // .so
+				str_copy(aBuf + Length - 3, "-" PLAT_NAME, sizeof(aBuf) - Length + 3); // -linux-x86_64
+				str_append(aBuf, pFile + Length - 3); // .so
 				FetchFile(aBuf, pFile);
 #endif
 				// Ignore DLL downloads on other platforms, on Linux we statically link anyway

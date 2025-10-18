@@ -1416,14 +1416,14 @@ void CMenus::RenderGhost(CUIRect MainView)
 		if(!Item.m_Visible)
 			continue;
 
-		ColorRGBA rgb = ColorRGBA(1.0f, 1.0f, 1.0f);
+		ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f);
 		if(pGhost->m_Own)
-			rgb = color_cast<ColorRGBA>(ColorHSLA(0.33f, 1.0f, 0.75f));
+			Color = color_cast<ColorRGBA>(ColorHSLA(0.33f, 1.0f, 0.75f));
 
 		if(pGhost->m_Failed)
-			rgb = ColorRGBA(0.6f, 0.6f, 0.6f, 1.0f);
+			Color = ColorRGBA(0.6f, 0.6f, 0.6f, 1.0f);
 
-		TextRender()->TextColor(rgb.WithAlpha(pGhost->HasFile() ? 1.0f : 0.5f));
+		TextRender()->TextColor(Color.WithAlpha(pGhost->HasFile() ? 1.0f : 0.5f));
 
 		for(int c = 0; c < NumCols; c++)
 		{

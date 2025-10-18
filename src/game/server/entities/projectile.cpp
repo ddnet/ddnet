@@ -195,13 +195,13 @@ void CProjectile::Tick()
 			{
 				// Delay specifies which weapon the tile should work for.
 				// Delay = 0 means all.
-				int delay = GameServer()->Collision()->GetSwitchDelay(MapIndex);
+				int Delay = GameServer()->Collision()->GetSwitchDelay(MapIndex);
 
-				if(delay == 1 && m_Type != WEAPON_GUN)
+				if(Delay == 1 && m_Type != WEAPON_GUN)
 					IsSwitchTeleGun = IsBlueSwitchTeleGun = false;
-				if(delay == 2 && m_Type != WEAPON_GRENADE)
+				if(Delay == 2 && m_Type != WEAPON_GRENADE)
 					IsSwitchTeleGun = IsBlueSwitchTeleGun = false;
-				if(delay == 3 && m_Type != WEAPON_LASER)
+				if(Delay == 3 && m_Type != WEAPON_LASER)
 					IsSwitchTeleGun = IsBlueSwitchTeleGun = false;
 			}
 

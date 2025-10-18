@@ -409,12 +409,12 @@ void CTeeHistorian::WriteTick()
 	CTeehistorianPacker TickPacker;
 	TickPacker.Reset();
 
-	int dt = m_Tick - m_LastWrittenTick - 1;
+	const int TickDelta = m_Tick - m_LastWrittenTick - 1;
 	TickPacker.AddInt(-TEEHISTORIAN_TICK_SKIP);
-	TickPacker.AddInt(dt);
+	TickPacker.AddInt(TickDelta);
 	if(m_Debug)
 	{
-		dbg_msg("teehistorian", "skip_ticks dt=%d", dt);
+		dbg_msg("teehistorian", "skip_ticks tick_delta=%d", TickDelta);
 	}
 	Write(TickPacker.Data(), TickPacker.Size());
 

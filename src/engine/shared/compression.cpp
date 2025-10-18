@@ -65,41 +65,41 @@ const unsigned char *CVariableInt::Unpack(const unsigned char *pSrc, int *pInOut
 	return pSrc;
 }
 
-long CVariableInt::Decompress(const void *pSrc_, int SrcSize, void *pDst_, int DstSize)
+long CVariableInt::Decompress(const void *pSrc, int SrcSize, void *pDst, int DstSize)
 {
 	dbg_assert(DstSize % sizeof(int) == 0, "invalid bounds");
 
-	const unsigned char *pSrc = (unsigned char *)pSrc_;
-	const unsigned char *pSrcEnd = pSrc + SrcSize;
-	int *pDst = (int *)pDst_;
-	const int *pDstEnd = pDst + DstSize / sizeof(int); // NOLINT(bugprone-sizeof-expression)
-	while(pSrc < pSrcEnd)
+	const unsigned char *pCharSrc = (unsigned char *)pSrc;
+	const unsigned char *pCharSrcEnd = pCharSrc + SrcSize;
+	int *pIntDst = (int *)pDst;
+	const int *pIntDstEnd = pIntDst + DstSize / sizeof(int); // NOLINT(bugprone-sizeof-expression)
+	while(pCharSrc < pCharSrcEnd)
 	{
-		if(pDst >= pDstEnd)
+		if(pIntDst >= pIntDstEnd)
 			return -1;
-		pSrc = CVariableInt::Unpack(pSrc, pDst, pSrcEnd - pSrc);
-		if(!pSrc)
+		pCharSrc = CVariableInt::Unpack(pCharSrc, pIntDst, pCharSrcEnd - pCharSrc);
+		if(!pCharSrc)
 			return -1;
-		pDst++;
+		pIntDst++;
 	}
-	return (long)((unsigned char *)pDst - (unsigned char *)pDst_);
+	return (long)((unsigned char *)pIntDst - (unsigned char *)pDst);
 }
 
-long CVariableInt::Compress(const void *pSrc_, int SrcSize, void *pDst_, int DstSize)
+long CVariableInt::Compress(const void *pSrc, int SrcSize, void *pDst, int DstSize)
 {
 	dbg_assert(SrcSize % sizeof(int) == 0, "invalid bounds");
 
-	const int *pSrc = (int *)pSrc_;
-	unsigned char *pDst = (unsigned char *)pDst_;
-	const unsigned char *pDstEnd = pDst + DstSize;
+	const int *pIntSrc = (int *)pSrc;
+	unsigned char *pCharDst = (unsigned char *)pDst;
+	const unsigned char *pCharDstEnd = pCharDst + DstSize;
 	SrcSize /= sizeof(int);
 	while(SrcSize)
 	{
-		pDst = CVariableInt::Pack(pDst, *pSrc, pDstEnd - pDst);
-		if(!pDst)
+		pCharDst = CVariableInt::Pack(pCharDst, *pIntSrc, pCharDstEnd - pCharDst);
+		if(!pCharDst)
 			return -1;
 		SrcSize--;
-		pSrc++;
+		pIntSrc++;
 	}
-	return (long)(pDst - (unsigned char *)pDst_);
+	return (long)(pCharDst - (unsigned char *)pDst);
 }

@@ -170,7 +170,7 @@ bool CChooseMaster::CJob::Abort()
 		return false;
 	}
 
-	CLockScope ls(m_Lock);
+	const CLockScope LockScope(m_Lock);
 	if(m_pHead != nullptr)
 	{
 		m_pHead->Abort();
@@ -216,7 +216,7 @@ void CChooseMaster::CJob::Run()
 		pHead->Timeout(Timeout);
 		pHead->LogProgress(HTTPLOG::FAILURE);
 		{
-			CLockScope ls(m_Lock);
+			const CLockScope LockScope(m_Lock);
 			m_pHead = pHead;
 		}
 
@@ -237,7 +237,7 @@ void CChooseMaster::CJob::Run()
 		pGet->Timeout(Timeout);
 		pGet->LogProgress(HTTPLOG::FAILURE);
 		{
-			CLockScope ls(m_Lock);
+			const CLockScope LockScope(m_Lock);
 			m_pGet = pGet;
 		}
 
