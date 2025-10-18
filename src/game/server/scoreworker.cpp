@@ -1720,39 +1720,11 @@ bool CScoreWorker::SaveTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 		if(NumInserted == 1)
 		{
 			pResult->m_Status = CScoreSaveResult::SAVE_SUCCESS;
-			if(w == Write::NORMAL)
+			if(w != Write::NORMAL)
 			{
-				pResult->m_aBroadcast[0] = '\0';
 				if(str_comp(pData->m_aServer, g_Config.m_SvSqlServerName) == 0)
 				{
-					str_format(pResult->m_aMessage, sizeof(pResult->m_aMessage),
-						"Team successfully saved by %s. Use '/load %s' to continue",
-						pData->m_aClientName, aCode);
-				}
-				else
-				{
-					str_format(pResult->m_aMessage, sizeof(pResult->m_aMessage),
-						"Team successfully saved by %s. Use '/load %s' on %s to continue",
-						pData->m_aClientName, aCode, pData->m_aServer);
-				}
-			}
-			else
-			{
-				str_copy(pResult->m_aBroadcast,
-					"Database connection failed, teamsave written to a file instead. On official DDNet servers this will automatically be inserted into the database every full hour.",
-					sizeof(pResult->m_aBroadcast));
-				if(str_comp(pData->m_aServer, g_Config.m_SvSqlServerName) == 0)
-				{
-					str_format(pResult->m_aMessage, sizeof(pResult->m_aMessage),
-						"Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue",
-						pData->m_aClientName, aCode);
 					pResult->m_aServer[0] = '\0';
-				}
-				else
-				{
-					str_format(pResult->m_aMessage, sizeof(pResult->m_aMessage),
-						"Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue",
-						pData->m_aClientName, aCode, pData->m_aServer);
 				}
 				pResult->m_Status = CScoreSaveResult::SAVE_FALLBACKFILE;
 			}
