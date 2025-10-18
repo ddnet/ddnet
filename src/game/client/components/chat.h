@@ -58,6 +58,9 @@ class CChat : public CComponent
 		float m_TextYOffset;
 
 		int m_TimesRepeated;
+
+		// TODO: Remove m_HandleSaveCodes when removing StoreSave backwards compatiblity function
+		bool m_HandleSaveCodes;
 	};
 
 	bool m_PrevScoreBoardShowed;
@@ -164,7 +167,8 @@ public:
 	static constexpr float MESSAGE_TEE_PADDING_RIGHT = 0.5f;
 
 	bool IsActive() const { return m_Mode != MODE_NONE; }
-	void AddLine(int ClientId, int Team, const char *pLine);
+	// TODO: Remove HandleSaveCodes argument when removing StoreSave backwards compatiblity function
+	void AddLine(int ClientId, int Team, const char *pLine, bool HandleSaveCodes = true);
 	void EnableMode(int Team);
 	void DisableMode();
 	void RegisterCommand(const char *pName, const char *pParams, const char *pHelpText);
