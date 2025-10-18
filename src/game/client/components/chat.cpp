@@ -624,18 +624,6 @@ void CChat::StoreSave(const char *pText)
 	char aTimestamp[20];
 	str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_SPACE);
 
-	// TODO: Find a simple way to get the names of team members. This doesn't
-	// work since team is killed first, then save message gets sent:
-	/*
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		const CNetObj_PlayerInfo *pInfo = GameClient()->m_Snap.m_paInfoByDDTeam[i];
-		if(!pInfo)
-			continue;
-		pInfo->m_Team // All 0
-	}
-	*/
-
 	const bool SavesFileExists = Storage()->FileExists(SAVES_FILE, IStorage::TYPE_SAVE);
 	IOHANDLE File = Storage()->OpenFile(SAVES_FILE, IOFLAG_APPEND, IStorage::TYPE_SAVE);
 	if(!File)
@@ -656,7 +644,7 @@ void CChat::StoreSave(const char *pText)
 	io_close(File);
 }
 
-void CChat::AddLine(int ClientId, int Team, const char *pLine)
+void CChat::AddLine(int ClientId, int Team, const char *pLine, bool HandleSaveCodes)
 {
 	if(*pLine == 0 ||
 		(ClientId == SERVER_MSG && !g_Config.m_ClShowChatSystem) ||
@@ -699,10 +687,9 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	bool Highlighted = false;
 
 	auto &&FChatMsgCheckAndPrint = [this](const CLine &Line) {
-		if(Line.m_ClientId < 0) // server or client message
+		if(Client()->State() != IClient::STATE_DEMOPLAYBACK && Line.m_ClientId == SERVER_MSG && Line.m_HandleSaveCodes)
 		{
-			if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
-				StoreSave(Line.m_aText);
+			StoreSave(Line.m_aText);
 		}
 
 		char aBuf[1024];
@@ -784,6 +771,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	CurrentLine.m_Whisper = Team >= 2;
 	CurrentLine.m_NameColor = -2;
 	CurrentLine.m_CustomColor = CustomColor;
+	CurrentLine.m_HandleSaveCodes = HandleSaveCodes;
 
 	// check for highlighted name
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
@@ -988,15 +976,15 @@ void CChat::OnPrepareLines(float y)
 		{
 			if(str_startswith(Line.m_aText, "Team save in progress. You'll be able to load with '/load ") && str_endswith(Line.m_aText, "'"))
 			{
-				pText = "Team save in progress. You'll be able to load with '/load ***'";
+				pText = "Team save in progress. You'll be able to load with '/load *** *** ***'";
 			}
 			else if(str_startswith(Line.m_aText, "Team save in progress. You'll be able to load with '/load") && str_endswith(Line.m_aText, "if it fails"))
 			{
-				pText = "Team save in progress. You'll be able to load with '/load ***' if save is successful or with '/load *** *** ***' if it fails";
+				pText = "Team save in progress. You'll be able to load with '/load *** *** ***' if save is successful or with '/load *** *** ***' if it fails";
 			}
 			else if(str_startswith(Line.m_aText, "Team successfully saved by ") && str_endswith(Line.m_aText, " to continue"))
 			{
-				pText = "Team successfully saved by ***. Use '/load ***' to continue";
+				pText = "Team successfully saved by ***. Use '/load *** *** ***' to continue";
 			}
 		}
 
