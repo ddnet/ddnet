@@ -85,7 +85,7 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 	CLayerSwitch *pSwitchLayer = static_cast<CLayerSwitch *>(pBrush);
 	int sx = ConvertX(WorldPos.x);
 	int sy = ConvertY(WorldPos.y);
-	if(str_comp(pSwitchLayer->m_aFileName, m_pEditor->m_aFileName))
+	if(str_comp(pSwitchLayer->m_aFilename, m_pEditor->m_aFilename))
 	{
 		m_pEditor->m_SwitchNumber = pSwitchLayer->m_SwitchNumber;
 		m_pEditor->m_SwitchDelay = pSwitchLayer->m_SwitchDelay;

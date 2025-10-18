@@ -219,7 +219,7 @@ REGISTER_QUICK_ACTION(
 	"Save as",
 	[&]() {
 		char aDefaultName[IO_MAX_PATH_LENGTH];
-		fs_split_file_extension(fs_filename(m_aFileName), aDefaultName, sizeof(aDefaultName));
+		fs_split_file_extension(fs_filename(m_aFilename), aDefaultName, sizeof(aDefaultName));
 		m_FileBrowser.ShowFileDialog(IStorage::TYPE_SAVE, CFileBrowser::EFileType::MAP, "Save map", "Save as", "maps", aDefaultName, CallbackSaveMap, this);
 	},
 	ALWAYS_FALSE,

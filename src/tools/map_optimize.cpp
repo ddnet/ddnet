@@ -93,19 +93,19 @@ int main(int argc, const char **argv)
 		return -1;
 	}
 
-	char aFileName[IO_MAX_PATH_LENGTH];
+	char aFilename[IO_MAX_PATH_LENGTH];
 	if(argc == 3)
 	{
-		str_format(aFileName, sizeof(aFileName), "out/%s", argv[2]);
+		str_format(aFilename, sizeof(aFilename), "out/%s", argv[2]);
 
-		fs_makedir_rec_for(aFileName);
+		fs_makedir_rec_for(aFilename);
 	}
 	else
 	{
 		fs_makedir("out");
 		char aBuff[IO_MAX_PATH_LENGTH];
 		IStorage::StripPathAndExtension(argv[1], aBuff, sizeof(aBuff));
-		str_format(aFileName, sizeof(aFileName), "out/%s.map", aBuff);
+		str_format(aFilename, sizeof(aFilename), "out/%s.map", aBuff);
 	}
 
 	CDataFileReader Reader;
@@ -116,7 +116,7 @@ int main(int argc, const char **argv)
 	}
 
 	CDataFileWriter Writer;
-	if(!Writer.Open(pStorage.get(), aFileName, IStorage::TYPE_ABSOLUTE))
+	if(!Writer.Open(pStorage.get(), aFilename, IStorage::TYPE_ABSOLUTE))
 	{
 		dbg_msg("map_optimize", "Failed to open target file.");
 		return -1;

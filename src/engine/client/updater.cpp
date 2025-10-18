@@ -61,12 +61,12 @@ void CUpdaterFetchTask::OnProgress()
 
 void CUpdaterFetchTask::OnCompletion(EHttpState State)
 {
-	const char *pFileName = nullptr;
+	const char *pFilename = nullptr;
 	for(const char *pPath = Dest(); *pPath; pPath++)
 		if(*pPath == '/')
-			pFileName = pPath + 1;
-	pFileName = pFileName ? pFileName : Dest();
-	if(!str_comp(pFileName, "update.json"))
+			pFilename = pPath + 1;
+	pFilename = pFilename ? pFilename : Dest();
+	if(!str_comp(pFilename, "update.json"))
 	{
 		if(State == EHttpState::DONE)
 			m_pUpdater->SetCurrentState(IUpdater::GOT_MANIFEST);

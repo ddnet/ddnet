@@ -86,21 +86,21 @@ int main(int argc, const char **argv)
 		return -1;
 	}
 
-	const char *pSourceFileName = argv[1];
-	const char *pDestFileName = argv[2];
+	const char *pSourceFilename = argv[1];
+	const char *pDestFilename = argv[2];
 	const char *pImageName = argv[3];
 	const char *pImageFile = argv[4];
 
-	if(!g_DataReader.Open(pStorage.get(), pSourceFileName, IStorage::TYPE_ALL))
+	if(!g_DataReader.Open(pStorage.get(), pSourceFilename, IStorage::TYPE_ALL))
 	{
-		dbg_msg("map_replace_image", "failed to open source map. filename='%s'", pSourceFileName);
+		dbg_msg("map_replace_image", "failed to open source map. filename='%s'", pSourceFilename);
 		return -1;
 	}
 
 	CDataFileWriter Writer;
-	if(!Writer.Open(pStorage.get(), pDestFileName))
+	if(!Writer.Open(pStorage.get(), pDestFilename))
 	{
-		dbg_msg("map_replace_image", "failed to open destination map. filename='%s'", pDestFileName);
+		dbg_msg("map_replace_image", "failed to open destination map. filename='%s'", pDestFilename);
 		return -1;
 	}
 
@@ -134,7 +134,7 @@ int main(int argc, const char **argv)
 
 	if(g_NewDataId == -1)
 	{
-		dbg_msg("map_replace_image", "image '%s' not found on source map '%s'.", pImageName, pSourceFileName);
+		dbg_msg("map_replace_image", "image '%s' not found on source map '%s'.", pImageName, pSourceFilename);
 		return -1;
 	}
 
