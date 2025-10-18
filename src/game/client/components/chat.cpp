@@ -687,10 +687,9 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	bool Highlighted = false;
 
 	auto &&FChatMsgCheckAndPrint = [this](const CLine &Line) {
-		if(Line.m_ClientId < 0) // server or client message
+		if(Client()->State() != IClient::STATE_DEMOPLAYBACK && Line.m_ClientId == SERVER_MSG)
 		{
-			if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
-				StoreSave(Line.m_aText);
+			StoreSave(Line.m_aText);
 		}
 
 		char aBuf[1024];
