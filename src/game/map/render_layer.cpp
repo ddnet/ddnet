@@ -1142,7 +1142,7 @@ void CRenderLayerQuads::CQuadLayerVisuals::Unload()
 	Graphics()->DeleteBufferContainer(m_BufferContainerIndex);
 }
 
-bool CRenderLayerQuads::CalculateQuadClipping(const CQuadCluster &QuadCluster, int aQuadOffsetMin[2], int aQuadOffsetMax[2]) const
+bool CRenderLayerQuads::CalculateQuadClipping(const CQuadCluster &QuadCluster, float aQuadOffsetMin[2], float aQuadOffsetMax[2]) const
 {
 	// check if the grouped clipping is available for early exit
 	if(QuadCluster.m_Grouped)
@@ -1155,8 +1155,8 @@ bool CRenderLayerQuads::CalculateQuadClipping(const CQuadCluster &QuadCluster, i
 	// calculate quad position offsets
 	for(int Channel = 0; Channel < 2; ++Channel)
 	{
-		aQuadOffsetMin[Channel] = std::numeric_limits<int>::max(); // minimum of channel
-		aQuadOffsetMax[Channel] = std::numeric_limits<int>::min(); // maximum of channel
+		aQuadOffsetMin[Channel] = std::numeric_limits<float>::max(); // minimum of channel
+		aQuadOffsetMax[Channel] = std::numeric_limits<float>::min(); // maximum of channel
 	}
 
 	for(int QuadId = QuadCluster.m_StartIndex; QuadId < QuadCluster.m_StartIndex + QuadCluster.m_NumQuads; ++QuadId)
@@ -1174,14 +1174,14 @@ bool CRenderLayerQuads::CalculateQuadClipping(const CQuadCluster &QuadCluster, i
 			{
 				for(int Channel = 0; Channel < 2; ++Channel)
 				{
-					int OffsetMinimum = pQuad->m_aPoints[QuadIdPoint][Channel];
-					int OffsetMaximum = pQuad->m_aPoints[QuadIdPoint][Channel];
+					float OffsetMinimum = fx2f(pQuad->m_aPoints[QuadIdPoint][Channel]);
+					float OffsetMaximum = fx2f(pQuad->m_aPoints[QuadIdPoint][Channel]);
 
 					// calculate env offsets for every ungrouped quad
 					if(!QuadCluster.m_Grouped && pQuad->m_PosEnv >= 0)
 					{
-						OffsetMinimum += Extrema.m_Minima[Channel];
-						OffsetMaximum += Extrema.m_Maxima[Channel];
+						OffsetMinimum += fx2f(Extrema.m_Minima[Channel]);
+						OffsetMaximum += fx2f(Extrema.m_Maxima[Channel]);
 					}
 					aQuadOffsetMin[Channel] = std::min(aQuadOffsetMin[Channel], OffsetMinimum);
 					aQuadOffsetMax[Channel] = std::max(aQuadOffsetMax[Channel], OffsetMaximum);
@@ -1190,23 +1190,25 @@ bool CRenderLayerQuads::CalculateQuadClipping(const CQuadCluster &QuadCluster, i
 		}
 		else
 		{
-			const CPoint &Center = pQuad->m_aPoints[4];
-			int MaxDistance = 0;
+			const CPoint &CenterFX = pQuad->m_aPoints[4];
+			vec2 Center(fx2f(CenterFX.x), fx2f(CenterFX.y));
+			float MaxDistance = 0;
 			for(int QuadIdPoint = 0; QuadIdPoint < 4; ++QuadIdPoint)
 			{
-				const CPoint &QuadPoint = pQuad->m_aPoints[QuadIdPoint];
-				int Distance = (int)std::ceil(length(vec2(Center.x - QuadPoint.x, Center.y - QuadPoint.y)));
+				const CPoint &QuadPointFX = pQuad->m_aPoints[QuadIdPoint];
+				vec2 QuadPoint(fx2f(QuadPointFX.x), fx2f(QuadPointFX.y));
+				float Distance = length(Center - QuadPoint);
 				MaxDistance = std::max(Distance, MaxDistance);
 			}
 
 			for(int Channel = 0; Channel < 2; ++Channel)
 			{
-				int OffsetMinimum = Center[Channel] - MaxDistance;
-				int OffsetMaximum = Center[Channel] + MaxDistance;
+				float OffsetMinimum = Center[Channel] - MaxDistance;
+				float OffsetMaximum = Center[Channel] + MaxDistance;
 				if(!QuadCluster.m_Grouped && pQuad->m_PosEnv >= 0)
 				{
-					OffsetMinimum += Extrema.m_Minima[Channel];
-					OffsetMaximum += Extrema.m_Maxima[Channel];
+					OffsetMinimum += fx2f(Extrema.m_Minima[Channel]);
+					OffsetMaximum += fx2f(Extrema.m_Maxima[Channel]);
 				}
 				aQuadOffsetMin[Channel] = std::min(aQuadOffsetMin[Channel], OffsetMinimum);
 				aQuadOffsetMax[Channel] = std::max(aQuadOffsetMax[Channel], OffsetMaximum);
@@ -1221,8 +1223,8 @@ bool CRenderLayerQuads::CalculateQuadClipping(const CQuadCluster &QuadCluster, i
 
 		for(int Channel = 0; Channel < 2; ++Channel)
 		{
-			aQuadOffsetMin[Channel] += Extrema.m_Minima[Channel];
-			aQuadOffsetMax[Channel] += Extrema.m_Maxima[Channel];
+			aQuadOffsetMin[Channel] += fx2f(Extrema.m_Minima[Channel]);
+			aQuadOffsetMax[Channel] += fx2f(Extrema.m_Maxima[Channel]);
 		}
 	}
 	return true;
@@ -1230,8 +1232,8 @@ bool CRenderLayerQuads::CalculateQuadClipping(const CQuadCluster &QuadCluster, i
 
 void CRenderLayerQuads::CalculateClipping(CQuadCluster &QuadCluster)
 {
-	int aQuadOffsetMin[2];
-	int aQuadOffsetMax[2];
+	float aQuadOffsetMin[2];
+	float aQuadOffsetMax[2];
 
 	bool CreateClip = CalculateQuadClipping(QuadCluster, aQuadOffsetMin, aQuadOffsetMax);
 
@@ -1242,12 +1244,12 @@ void CRenderLayerQuads::CalculateClipping(CQuadCluster &QuadCluster)
 	std::optional<CClipRegion> &ClipRegion = QuadCluster.m_ClipRegion;
 
 	// X channel
-	ClipRegion->m_X = fx2f(aQuadOffsetMin[0]);
-	ClipRegion->m_Width = fx2f(aQuadOffsetMax[0]) - fx2f(aQuadOffsetMin[0]);
+	ClipRegion->m_X = aQuadOffsetMin[0];
+	ClipRegion->m_Width = aQuadOffsetMax[0] - aQuadOffsetMin[0];
 
 	// Y channel
-	ClipRegion->m_Y = fx2f(aQuadOffsetMin[1]);
-	ClipRegion->m_Height = fx2f(aQuadOffsetMax[1]) - fx2f(aQuadOffsetMin[1]);
+	ClipRegion->m_Y = aQuadOffsetMin[1];
+	ClipRegion->m_Height = aQuadOffsetMax[1] - aQuadOffsetMin[1];
 
 	// update layer clip
 	if(!m_LayerClip.has_value())
