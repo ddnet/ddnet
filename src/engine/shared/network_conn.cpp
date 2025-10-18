@@ -54,7 +54,7 @@ void CNetConnection::Reset(bool Rejoin)
 
 	m_Buffer.Init();
 
-	mem_zero(&m_Construct, sizeof(m_Construct));
+	m_Construct = {};
 }
 
 const char *CNetConnection::ErrorString()
@@ -115,7 +115,7 @@ int CNetConnection::Flush()
 	m_LastSendTime = time_get();
 
 	// clear construct so we can start building a new package
-	mem_zero(&m_Construct, sizeof(m_Construct));
+	m_Construct = {};
 	return NumChunks;
 }
 
@@ -318,7 +318,7 @@ void CNetConnection::DirectInit(const NETADDR &Addr, SECURITY_TOKEN SecurityToke
 	m_Sixup = Sixup;
 }
 
-int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_TOKEN SecurityToken, SECURITY_TOKEN ResponseToken)
+int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr)
 {
 	// Disregard packets from the wrong address, unless we don't know our peer yet.
 	if(State() != EState::OFFLINE && State() != EState::CONNECT && *pAddr != m_PeerAddr)
@@ -340,7 +340,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 		}
 	}
 
-	if(m_Sixup && SecurityToken != m_Token)
+	if(m_Sixup && pPacket->m_Sixup.m_SecurityToken != m_Token)
 		return 0;
 
 	// check if actual ack value is valid(own sequence..latest peer ack)
@@ -418,7 +418,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 				{
 					m_LastRecvTime = Now;
 					m_State = EState::CONNECT;
-					m_SecurityToken = ResponseToken;
+					m_SecurityToken = pPacket->m_Sixup.m_ResponseToken;
 					SendControlWithToken7(NET_CTRLMSG_CONNECT, m_SecurityToken);
 					if(g_Config.m_Debug)
 					{
@@ -427,7 +427,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 				}
 				else if(g_Config.m_Debug)
 				{
-					log_debug("connection", "got token, token=%x", ResponseToken);
+					log_debug("connection", "got token, token=%x", pPacket->m_Sixup.m_ResponseToken);
 				}
 			}
 			else
