@@ -643,6 +643,7 @@ public:
 	void SendDummyInfo(bool Start) override;
 	void SendKill() const;
 	void SendReadyChange7();
+	void SendChatMsg(const char *pMsg) override;
 
 	int m_NextChangeInfo;
 
