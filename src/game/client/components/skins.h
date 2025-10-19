@@ -25,11 +25,6 @@ class CSkins : public CComponent
 {
 private:
 	/**
-	 * Maximum length of normalized skin names. Normalization may increase the length.
-	 */
-	static constexpr size_t NORMALIZED_SKIN_NAME_LENGTH = 2 * MAX_SKIN_LENGTH;
-
-	/**
 	 * The data of a skin that can be loaded in a separate thread.
 	 */
 	class CSkinLoadData
@@ -109,14 +104,13 @@ public:
 		};
 
 		CSkinContainer(CSkinContainer &&Other) = default;
-		CSkinContainer(CSkins *pSkins, const char *pName, const char *pNormalizedName, EType Type, int StorageType);
+		CSkinContainer(CSkins *pSkins, const char *pName, EType Type, int StorageType);
 		~CSkinContainer();
 
 		bool operator<(const CSkinContainer &Other) const;
 		CSkinContainer &operator=(CSkinContainer &&Other) = default;
 
 		const char *Name() const { return m_aName; }
-		const char *NormalizedName() const { return m_aNormalizedName; }
 		EType Type() const { return m_Type; }
 		int StorageType() const { return m_StorageType; }
 		bool IsVanilla() const { return m_Vanilla; }
@@ -133,7 +127,6 @@ public:
 	private:
 		CSkins *m_pSkins;
 		char m_aName[MAX_SKIN_LENGTH];
-		char m_aNormalizedName[NORMALIZED_SKIN_NAME_LENGTH];
 		EType m_Type;
 		int m_StorageType;
 		bool m_Vanilla;
@@ -260,8 +253,7 @@ public:
 	static bool IsSpecialSkin(const char *pName);
 
 private:
-	static bool IsVanillaSkinNormalized(const char *pNormalizedName);
-	static bool IsSpecialSkinNormalized(const char *pNormalizedName);
+	static bool IsVanillaSkin(const char *pName);
 
 	/**
 	 * Names of all vanilla and special skins.

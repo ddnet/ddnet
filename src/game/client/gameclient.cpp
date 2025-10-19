@@ -4372,7 +4372,7 @@ void CGameClient::OnSkinUpdate(const char *pSkinName)
 	const int SkinPrefixLength = str_length(pSkinPrefix);
 	char aSkinNameWithoutPrefix[MAX_SKIN_LENGTH];
 	if(SkinPrefixLength > 0 &&
-		str_utf8_comp_nocase_num(pSkinName, pSkinPrefix, SkinPrefixLength) == 0 &&
+		str_comp_num(pSkinName, pSkinPrefix, SkinPrefixLength) == 0 &&
 		pSkinName[SkinPrefixLength] == '_' &&
 		pSkinName[SkinPrefixLength + 1] != '\0')
 	{
@@ -4383,12 +4383,12 @@ void CGameClient::OnSkinUpdate(const char *pSkinName)
 		aSkinNameWithoutPrefix[0] = '\0';
 	}
 	const auto &&NameMatches = [&](const char *pCheckName) {
-		if(str_utf8_comp_nocase(pCheckName, pSkinName) == 0)
+		if(str_comp(pCheckName, pSkinName) == 0)
 		{
 			return true;
 		}
 		if(aSkinNameWithoutPrefix[0] != '\0' &&
-			str_utf8_comp_nocase(pCheckName, aSkinNameWithoutPrefix) == 0)
+			str_comp(pCheckName, aSkinNameWithoutPrefix) == 0)
 		{
 			return true;
 		}
