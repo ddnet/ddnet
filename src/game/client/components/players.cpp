@@ -149,6 +149,42 @@ float CPlayers::GetPlayerTargetAngle(
 	}
 }
 
+std::vector<vec2> CPlayers::IntersectLineCircle(vec2 LineStart, vec2 LineEnd, vec2 CircleCenter, float Radius) const
+{
+	vec2 Delta = LineEnd - LineStart;
+	vec2 Offset = LineStart - CircleCenter;
+
+	// A * Time^2 + B * Time + c == 0
+	float A = dot(Delta, Delta);
+	float B = 2.0f * dot(Offset, Delta);
+	float C = dot(Offset, Offset) - Radius * Radius;
+
+	float Discriminant = B * B - 4.0f * A * C;
+	if(Discriminant < 0.0f || A == 0.0f)
+	{
+		// no intersection
+		return std::vector<vec2>();
+	}
+	else if(Discriminant == 0.0f)
+	{
+		// tangent
+		float Time = -B / (2.0f * A);
+		vec2 Intersection = LineStart + Delta * Time;
+		return std::vector<vec2>({Intersection});
+	}
+	else
+	{
+		Discriminant = std::sqrt(Discriminant);
+		float Time1 = (-B - Discriminant) / (2.0f * A);
+		float Time2 = (-B + Discriminant) / (2.0f * A);
+
+		vec2 Intersection1 = LineStart + Delta * Time1;
+		vec2 Intersection2 = LineStart + Delta * Time2;
+
+		return std::vector<vec2>({Intersection1, Intersection2}); // two points
+	}
+}
+
 void CPlayers::RenderHookCollLine(
 	const CNetObj_Character *pPrevChar,
 	const CNetObj_Character *pPlayerChar,
@@ -213,13 +249,31 @@ void CPlayers::RenderHookCollLine(
 
 	const int MaxHookTicks = 5 * Client()->GameTickSpeed(); // calculating above 5 seconds is very expensive and unlikely to happen
 
+	auto AddHookPlayerSegment = [&](const vec2 &StartPos, const vec2 &EndPos, const vec2 &HookablePlayerPosition, const vec2 &HitPos) {
+		HookCollColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorTeeColl));
+
+		// stop hookline at player circle so it looks better
+		std::vector<vec2> vIntersections = IntersectLineCircle(StartPos, EndPos, HookablePlayerPosition, CCharacterCore::PhysicalSize() * 1.45f / 2.0f);
+		if(vIntersections.empty())
+			vLineSegments.emplace_back(StartPos, HitPos);
+		else if(vIntersections.size() == 1)
+			vLineSegments.emplace_back(StartPos, vIntersections[0]);
+		else
+		{
+			if(distance(Position, vIntersections[0]) < distance(Position, vIntersections[1]))
+				vLineSegments.emplace_back(StartPos, vIntersections[0]);
+			else
+				vLineSegments.emplace_back(StartPos, vIntersections[1]);
+		}
+	};
+
 	// simulate the hook into the future
 	int HookTick;
 	bool HookEnteredTelehook = false;
 	for(HookTick = 0; HookTick < MaxHookTicks; ++HookTick)
 	{
 		int Tele;
-		vec2 HitPos;
+		vec2 HitPos, IntersectedPlayerPosition;
 		vec2 SegmentEndPos = SegmentStartPos + QuantizedDirection * HookFireSpeed;
 
 		// check if a hook would enter retracting state in this tick
@@ -229,10 +283,9 @@ void CPlayers::RenderHookCollLine(
 			if(!HookEnteredTelehook)
 			{
 				vec2 RetractingHookEndPos = BasePos + normalize(SegmentEndPos - BasePos) * HookLength;
-				if(GameClient()->IntersectCharacter(SegmentStartPos, RetractingHookEndPos, HitPos, ClientId) != -1)
+				if(GameClient()->IntersectCharacter(SegmentStartPos, RetractingHookEndPos, HitPos, ClientId, &IntersectedPlayerPosition) != -1)
 				{
-					HookCollColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorTeeColl));
-					vLineSegments.emplace_back(LineStartPos, HitPos);
+					AddHookPlayerSegment(LineStartPos, SegmentEndPos, IntersectedPlayerPosition, HitPos);
 					break;
 				}
 			}
@@ -246,10 +299,9 @@ void CPlayers::RenderHookCollLine(
 		int Hit = Collision()->IntersectLineTeleHook(SegmentStartPos, SegmentEndPos, &HitPos, nullptr, &Tele);
 
 		// check if we intersect a player
-		if(GameClient()->IntersectCharacter(SegmentStartPos, HitPos, SegmentEndPos, ClientId) != -1)
+		if(GameClient()->IntersectCharacter(SegmentStartPos, HitPos, SegmentEndPos, ClientId, &IntersectedPlayerPosition) != -1)
 		{
-			HookCollColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorTeeColl));
-			vLineSegments.emplace_back(LineStartPos, SegmentEndPos);
+			AddHookPlayerSegment(LineStartPos, HitPos, IntersectedPlayerPosition, SegmentEndPos);
 			break;
 		}
 
