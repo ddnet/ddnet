@@ -41,7 +41,7 @@ bool ConvertToRgba(uint8_t *pDest, const CImageInfo &SourceImage)
 				}
 				else
 				{
-					dbg_assert(false, "SourceImage.m_Format invalid");
+					dbg_assert_failed("SourceImage.m_Format invalid");
 				}
 			}
 		}

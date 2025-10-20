@@ -235,8 +235,7 @@ IOHANDLE io_open(const char *filename, int flags)
 	}
 	else
 	{
-		dbg_assert(false, "logic error");
-		return nullptr;
+		dbg_assert_failed("logic error");
 	}
 	HANDLE handle = CreateFileW(wide_filename.c_str(), desired_access, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, creation_disposition, FILE_ATTRIBUTE_NORMAL, nullptr);
 	if(handle == INVALID_HANDLE_VALUE)
@@ -262,8 +261,7 @@ IOHANDLE io_open(const char *filename, int flags)
 	}
 	else
 	{
-		dbg_assert(false, "logic error");
-		return nullptr;
+		dbg_assert_failed("logic error");
 	}
 	return fopen(filename, open_mode);
 #endif
@@ -367,8 +365,7 @@ int io_seek(IOHANDLE io, int64_t offset, ESeekOrigin origin)
 		real_origin = SEEK_END;
 		break;
 	default:
-		dbg_assert(false, "origin invalid");
-		return -1;
+		dbg_assert_failed("origin invalid");
 	}
 #if defined(CONF_FAMILY_WINDOWS)
 	return _fseeki64((FILE *)io, offset, real_origin);
@@ -1206,7 +1203,7 @@ void net_addr_str(const NETADDR *addr, char *string, int max_length, bool add_po
 	}
 	else
 	{
-		dbg_assert(false, "unknown NETADDR type %d", addr->type);
+		dbg_assert_failed("unknown NETADDR type %d", addr->type);
 	}
 }
 
@@ -1653,7 +1650,7 @@ static int priv_net_create_socket(int domain, int type, const NETADDR *bindaddr)
 	}
 	else
 	{
-		dbg_assert(false, "socket type invalid: %d", type);
+		dbg_assert_failed("socket type invalid: %d", type);
 	}
 
 	if(bind(sock, (sockaddr *)&addr, addr_len) != 0)

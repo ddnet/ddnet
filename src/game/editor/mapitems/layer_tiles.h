@@ -86,8 +86,7 @@ protected:
 			}
 			break;
 		default:
-			dbg_assert(false, "Direction invalid: %d", (int)Direction);
-			break;
+			dbg_assert_failed("Direction invalid: %d", (int)Direction);
 		}
 	}
 	template<typename T>

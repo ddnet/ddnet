@@ -87,7 +87,7 @@ void CMenusIngameTouchControls::RenderTouchButtonEditor(CUIRect MainView)
 	case EElementType::LAYOUT: Changed |= RenderLayoutSettingBlock(Block); break;
 	case EElementType::VISIBILITY: Changed |= RenderVisibilitySettingBlock(Block); break;
 	case EElementType::BEHAVIOR: Changed |= RenderBehaviorSettingBlock(Block); break;
-	default: dbg_assert(false, "Unknown m_EditElement = %d.", (int)m_EditElement);
+	default: dbg_assert_failed("Unknown m_EditElement = %d.", (int)m_EditElement);
 	}
 
 	// Save & Cancel & Hint.
@@ -1101,7 +1101,7 @@ void CMenusIngameTouchControls::DoPopupType(CTouchControls::CPopupParam PopupPar
 	case CTouchControls::EPopupType::NO_SPACE: NoSpaceForOverlappingButton(); break;
 	case CTouchControls::EPopupType::BUTTON_INVISIBLE: SelectedButtonNotVisible(); break;
 	// The NUM_POPUPS will not call the function.
-	default: dbg_assert(false, "Unknown popup type = %d.", (int)PopupParam.m_PopupType);
+	default: dbg_assert_failed("Unknown popup type = %d.", (int)PopupParam.m_PopupType);
 	}
 }
 
@@ -1255,7 +1255,7 @@ void CMenusIngameTouchControls::CacheAllSettingsFromTarget(CTouchControls::CTouc
 			}
 		}
 		else // Empty
-			dbg_assert(false, "Detected out of bound value in m_EditBehaviorType");
+			dbg_assert_failed("Detected out of bound value in m_EditBehaviorType");
 	}
 }
 
@@ -1301,7 +1301,7 @@ void CMenusIngameTouchControls::SaveCachedSettingsToTarget(CTouchControls::CTouc
 	}
 	else
 	{
-		dbg_assert(false, "Unknown m_EditBehaviorType = %d", (int)m_EditBehaviorType);
+		dbg_assert_failed("Unknown m_EditBehaviorType = %d", (int)m_EditBehaviorType);
 	}
 	pTargetButton->UpdatePointers();
 }
@@ -1371,7 +1371,7 @@ void CMenusIngameTouchControls::ResolveIssues()
 				break;
 			}
 			case(int)CTouchControls::EIssueType::CACHE_POSITION: SetPosInputs(aIssues[Current].m_pTargetButton->m_UnitRect); break;
-			default: dbg_assert(false, "Unknown Issue type: %d", Current);
+			default: dbg_assert_failed("Unknown Issue type: %d", Current);
 			}
 		}
 	}
@@ -1386,7 +1386,7 @@ int CMenusIngameTouchControls::CalculatePredefinedType(const char *pType) const
 		if(str_comp(pType, BEHAVIOR_FACTORIES_EDITOR[IntegerType].m_pId) == 0)
 			return IntegerType;
 	}
-	dbg_assert(false, "Unknown predefined type %s.", pType == nullptr ? "nullptr" : pType);
+	dbg_assert_failed("Unknown predefined type %s.", pType == nullptr ? "nullptr" : pType);
 }
 
 std::string CMenusIngameTouchControls::DetermineTouchButtonCommandLabel(CTouchControls::CTouchButton *pButton) const
@@ -1417,7 +1417,7 @@ std::string CMenusIngameTouchControls::DetermineTouchButtonCommandLabel(CTouchCo
 	}
 	else
 	{
-		dbg_assert(false, "Detected unknown behavior type in CMenusIngameTouchControls::GetCommand()");
+		dbg_assert_failed("Detected unknown behavior type in CMenusIngameTouchControls::GetCommand()");
 	}
 }
 

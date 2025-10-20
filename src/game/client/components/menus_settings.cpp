@@ -1506,7 +1506,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 	}
 	else
 	{
-		dbg_assert(false, "ui_settings_page invalid");
+		dbg_assert_failed("ui_settings_page invalid");
 	}
 
 	if(NeedRestart)

@@ -50,7 +50,7 @@ CEnvelope::CEnvelope(int NumChannels) :
 		m_Type = EType::COLOR;
 		break;
 	default:
-		dbg_assert(false, "invalid number of channels for envelope");
+		dbg_assert_failed("invalid number of channels for envelope");
 	}
 }
 

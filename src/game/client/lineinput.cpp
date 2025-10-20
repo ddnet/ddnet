@@ -684,8 +684,7 @@ void CLineInputNumber::SetInteger(int Number, int Base, int HexPrefix)
 		str_format(aBuf, sizeof(aBuf), "%0*X", HexPrefix, Number);
 		break;
 	default:
-		dbg_assert(false, "Base unsupported");
-		return;
+		dbg_assert_failed("Base unsupported");
 	}
 	if(str_comp(aBuf, GetString()) != 0)
 		Set(aBuf);
@@ -708,8 +707,7 @@ void CLineInputNumber::SetInteger64(int64_t Number, int Base, int HexPrefix)
 		str_format(aBuf, sizeof(aBuf), "%0*" PRIX64, HexPrefix, Number);
 		break;
 	default:
-		dbg_assert(false, "Base unsupported");
-		return;
+		dbg_assert_failed("Base unsupported");
 	}
 	if(str_comp(aBuf, GetString()) != 0)
 		Set(aBuf);
