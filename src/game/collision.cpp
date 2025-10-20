@@ -245,9 +245,8 @@ static int GetMoveRestrictionsMask(int Direction)
 	case MR_DIR_DOWN: return CANTMOVE_DOWN;
 	case MR_DIR_LEFT: return CANTMOVE_LEFT;
 	case MR_DIR_UP: return CANTMOVE_UP;
-	default: dbg_assert(false, "invalid dir");
+	default: dbg_assert_failed("invalid dir");
 	}
-	return 0;
 }
 
 static int GetMoveRestrictions(int Direction, int Tile, int Flags)

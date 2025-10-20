@@ -114,7 +114,7 @@ void CJobPool::RunLoop()
 			{
 				if(OldStateRunning != IJob::STATE_ABORTED)
 				{
-					dbg_assert(false, "Job state invalid, must be either running or aborted");
+					dbg_assert_failed("Job state invalid, must be either running or aborted");
 				}
 			}
 		}

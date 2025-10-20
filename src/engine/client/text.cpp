@@ -2311,7 +2311,7 @@ public:
 			if(pTextContainer->m_ContainerIndex.Valid() && pTextContainer->m_ContainerIndex.m_UseCount.use_count() <= 1)
 			{
 				log_error("textrender", "Found non empty text container with index %d with %" PRIzu " quads '%s'", pTextContainer->m_StringInfo.m_QuadBufferContainerIndex, pTextContainer->m_StringInfo.m_vCharacterQuads.size(), pTextContainer->m_aDebugText);
-				dbg_assert(false, "Text container was forgotten by the implementation (the index was overwritten).");
+				dbg_assert_failed("Text container was forgotten by the implementation (the index was overwritten).");
 			}
 		}
 	}

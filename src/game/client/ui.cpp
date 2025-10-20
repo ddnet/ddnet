@@ -2138,7 +2138,7 @@ CUi::EPopupMenuFunctionResult CUi::PopupColorPicker(void *pContext, CUIRect View
 	}
 	else
 	{
-		dbg_assert(false, "Color picker mode invalid: %d", (int)pColorPicker->m_ColorMode);
+		dbg_assert_failed("Color picker mode invalid: %d", (int)pColorPicker->m_ColorMode);
 	}
 
 	SValueSelectorProperties Props;

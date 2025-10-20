@@ -1016,9 +1016,7 @@ int CDemoPlayer::SeekTick(ETickOffset TickOffset)
 		WantedTick = m_Info.m_NextTick;
 		break;
 	default:
-		dbg_assert(false, "Invalid TickOffset");
-		WantedTick = -1;
-		break;
+		dbg_assert_failed("Invalid TickOffset");
 	}
 
 	// +1 because SetPos will seek until the given tick is the next tick that

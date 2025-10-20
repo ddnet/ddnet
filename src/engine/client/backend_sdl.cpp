@@ -188,7 +188,7 @@ void CGraphicsBackend_Threaded::ProcessError(const SGfxErrorContainer &Error)
 		else
 			VerboseStr.append(ErrStr.m_Err);
 	}
-	dbg_assert(false, "%s", VerboseStr.c_str());
+	dbg_assert_failed("%s", VerboseStr.c_str());
 }
 
 bool CGraphicsBackend_Threaded::GetWarning(std::vector<std::string> &WarningStrings)
@@ -638,7 +638,7 @@ static bool BackendInitGlew(EBackendType BackendType, int &GlewMajor, int &GlewM
 	}
 	else
 	{
-		dbg_assert(false, "Invalid backend type for glew: %d", (int)BackendType);
+		dbg_assert_failed("Invalid backend type for glew: %d", (int)BackendType);
 	}
 
 	return false;
@@ -837,9 +837,9 @@ static Uint32 MessageBoxTypeToSdlFlags(IGraphics::EMessageBoxType Type)
 		return SDL_MESSAGEBOX_WARNING;
 	case IGraphics::EMessageBoxType::INFO:
 		return SDL_MESSAGEBOX_INFORMATION;
+	default:
+		dbg_assert_failed("Type invalid");
 	}
-	dbg_assert(false, "Type invalid");
-	return 0;
 }
 
 static std::optional<int> ShowMessageBoxImpl(const IGraphics::CMessageBox &MessageBox, SDL_Window *pWindow)

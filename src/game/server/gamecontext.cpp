@@ -3230,7 +3230,7 @@ void CGameContext::ConMapbug(IConsole::IResult *pResult, void *pUserData)
 		log_info("mapbugs", "unknown map bug '%s', ignoring", pMapBugName);
 		break;
 	default:
-		dbg_assert(false, "unreachable");
+		dbg_assert_failed("unreachable");
 	}
 }
 
@@ -4896,8 +4896,7 @@ void CGameContext::SendSaveCode(int Team, int TeamSize, int State, const char *p
 				str_copy(aBuf, pError);
 				break;
 			default:
-				dbg_assert(false, "Unexpected save state %d", State);
-				break;
+				dbg_assert_failed("Unexpected save state %d", State);
 			}
 			SendChatTarget(MemberId, aBuf);
 		}

@@ -1846,7 +1846,7 @@ protected:
 				Heaps.back()->m_Heap.Init(MemoryBlockSize * BlockCount, 0);
 				if(!Heaps.back()->m_Heap.Allocate(RequiredSize, RequiredAlignment, AllocatedMem))
 				{
-					dbg_assert(false, "Heap allocation failed directly after creating fresh heap for image");
+					dbg_assert_failed("Heap allocation failed directly after creating fresh heap for image");
 				}
 			}
 
