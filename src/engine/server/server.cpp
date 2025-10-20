@@ -4517,16 +4517,21 @@ int *CServer::GetIdMap(int ClientId)
 
 bool CServer::SetTimedOut(int ClientId, int OrigId)
 {
-	if(!m_NetServer.SetTimedOut(ClientId, OrigId))
+	if(!m_NetServer.HasErrored(ClientId))
 	{
 		return false;
 	}
-	m_aClients[ClientId].m_Sixup = m_aClients[OrigId].m_Sixup;
 
+	// The login was on the current conn, logout should also be on the current conn
 	if(IsRconAuthed(OrigId))
 	{
-		LogoutClient(ClientId, "Timeout Protection");
+		LogoutClient(OrigId, "Timeout Protection");
 	}
+
+	m_NetServer.ResumeOldConnection(ClientId, OrigId);
+
+	m_aClients[ClientId].m_Sixup = m_aClients[OrigId].m_Sixup;
+
 	DelClientCallback(OrigId, "Timeout Protection used", this);
 	m_aClients[ClientId].m_AuthKey = -1;
 	m_aClients[ClientId].m_Flags = m_aClients[OrigId].m_Flags;
