@@ -12,11 +12,11 @@ class CLanguage
 {
 public:
 	CLanguage() = default;
-	CLanguage(const char *pName, const char *pFileName, int Code, const std::vector<std::string> &vLanguageCodes) :
-		m_Name(pName), m_FileName(pFileName), m_CountryCode(Code), m_vLanguageCodes(vLanguageCodes) {}
+	CLanguage(const char *pName, const char *pFilename, int Code, const std::vector<std::string> &vLanguageCodes) :
+		m_Name(pName), m_Filename(pFilename), m_CountryCode(Code), m_vLanguageCodes(vLanguageCodes) {}
 
 	std::string m_Name;
-	std::string m_FileName;
+	std::string m_Filename;
 	int m_CountryCode;
 	std::vector<std::string> m_vLanguageCodes;
 

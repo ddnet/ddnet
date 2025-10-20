@@ -592,7 +592,7 @@ MACRO_CONFIG_INT(SvMinTeamSize, sv_min_team_size, 2, 1, SERVER_MAX_CLIENTS, CFGF
 MACRO_CONFIG_INT(SvMaxTeamSize, sv_max_team_size, SERVER_MAX_CLIENTS, 1, SERVER_MAX_CLIENTS, CFGFLAG_SERVER | CFGFLAG_GAME, "Maximum team size")
 MACRO_CONFIG_INT(SvMapVote, sv_map_vote, 1, 0, 1, CFGFLAG_SERVER, "Whether to allow /map")
 
-MACRO_CONFIG_STR(SvAnnouncementFileName, sv_announcement_filename, IO_MAX_PATH_LENGTH, "announcement.txt", CFGFLAG_SERVER, "File which contains the announcements, one on each line")
+MACRO_CONFIG_STR(SvAnnouncementFilename, sv_announcement_filename, IO_MAX_PATH_LENGTH, "announcement.txt", CFGFLAG_SERVER, "File which contains the announcements, one on each line")
 MACRO_CONFIG_INT(SvAnnouncementInterval, sv_announcement_interval, 120, 1, 9999, CFGFLAG_SERVER, "The time (minutes) for how often an announcement will be displayed from the announcement file")
 MACRO_CONFIG_INT(SvAnnouncementRandom, sv_announcement_random, 1, 0, 1, CFGFLAG_SERVER, "Whether announcements are sequential or random")
 

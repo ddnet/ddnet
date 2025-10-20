@@ -218,15 +218,15 @@ void CEditor::DeleteSelectedLayer()
 
 void CEditor::TestMapLocally()
 {
-	const char *pFileNameNoMaps = str_startswith(m_aFileName, "maps/");
-	if(!pFileNameNoMaps)
+	const char *pFilenameNoMaps = str_startswith(m_aFilename, "maps/");
+	if(!pFilenameNoMaps)
 	{
 		ShowFileDialogError("The map isn't saved in the maps/ folder. It must be saved there to load on the server.");
 		return;
 	}
 
-	char aFileNameNoExt[IO_MAX_PATH_LENGTH];
-	fs_split_file_extension(pFileNameNoMaps, aFileNameNoExt, sizeof(aFileNameNoExt));
+	char aFilenameNoExt[IO_MAX_PATH_LENGTH];
+	fs_split_file_extension(pFilenameNoMaps, aFilenameNoExt, sizeof(aFilenameNoExt));
 
 	if(Client()->RconAuthed())
 	{
@@ -235,7 +235,7 @@ void CEditor::TestMapLocally()
 			OnClose();
 			g_Config.m_ClEditor = 0;
 			char aMapChange[IO_MAX_PATH_LENGTH + 64];
-			str_format(aMapChange, sizeof(aMapChange), "change_map %s", aFileNameNoExt);
+			str_format(aMapChange, sizeof(aMapChange), "change_map %s", aFilenameNoExt);
 			Client()->Rcon(aMapChange);
 			return;
 		}
@@ -250,7 +250,7 @@ void CEditor::TestMapLocally()
 	else
 	{
 		char aMapChange[IO_MAX_PATH_LENGTH + 64];
-		str_format(aMapChange, sizeof(aMapChange), "change_map %s", aFileNameNoExt);
+		str_format(aMapChange, sizeof(aMapChange), "change_map %s", aFilenameNoExt);
 		pGameClient->m_LocalServer.RunServer({"sv_register 0", aMapChange});
 		OnClose();
 		g_Config.m_ClEditor = 0;

@@ -4560,14 +4560,14 @@ public:
 		vkDestroyDescriptorSetLayout(m_VKDevice, m_Standard3DTexturedDescriptorSetLayout, nullptr);
 	}
 
-	[[nodiscard]] bool LoadShader(const char *pFileName, std::vector<uint8_t> *&pvShaderData)
+	[[nodiscard]] bool LoadShader(const char *pFilename, std::vector<uint8_t> *&pvShaderData)
 	{
-		auto it = m_ShaderFiles.find(pFileName);
+		auto it = m_ShaderFiles.find(pFilename);
 		if(it == m_ShaderFiles.end())
 		{
 			void *pShaderBuff;
 			unsigned FileSize;
-			if(!m_pStorage->ReadFile(pFileName, IStorage::TYPE_ALL, &pShaderBuff, &FileSize))
+			if(!m_pStorage->ReadFile(pFilename, IStorage::TYPE_ALL, &pShaderBuff, &FileSize))
 				return false;
 
 			std::vector<uint8_t> vShaderBuff;
@@ -4575,7 +4575,7 @@ public:
 			mem_copy(vShaderBuff.data(), pShaderBuff, FileSize);
 			free(pShaderBuff);
 
-			it = m_ShaderFiles.insert({pFileName, {std::move(vShaderBuff)}}).first;
+			it = m_ShaderFiles.insert({pFilename, {std::move(vShaderBuff)}}).first;
 		}
 
 		pvShaderData = &it->second.m_vBinary;

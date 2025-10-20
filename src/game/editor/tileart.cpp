@@ -140,11 +140,11 @@ static void SetTilelayerIndices(const std::shared_ptr<CLayerTiles> &pLayer, cons
 
 void CEditor::AddTileart(bool IgnoreHistory)
 {
-	char aTileArtFileName[IO_MAX_PATH_LENGTH];
-	IStorage::StripPathAndExtension(m_aTileartFilename, aTileArtFileName, sizeof(aTileArtFileName));
+	char aTileArtFilename[IO_MAX_PATH_LENGTH];
+	IStorage::StripPathAndExtension(m_aTileartFilename, aTileArtFilename, sizeof(aTileArtFilename));
 
 	std::shared_ptr<CLayerGroup> pGroup = m_Map.NewGroup();
-	str_copy(pGroup->m_aName, aTileArtFileName);
+	str_copy(pGroup->m_aName, aTileArtFilename);
 
 	int ImageCount = m_Map.m_vpImages.size();
 
@@ -154,7 +154,7 @@ void CEditor::AddTileart(bool IgnoreHistory)
 	char aImageName[IO_MAX_PATH_LENGTH];
 	for(size_t i = 0; i < vColorImages.size(); i++)
 	{
-		str_format(aImageName, sizeof(aImageName), "%s %" PRIzu, aTileArtFileName, i + 1);
+		str_format(aImageName, sizeof(aImageName), "%s %" PRIzu, aTileArtFilename, i + 1);
 		std::shared_ptr<CLayerTiles> pLayer = AddLayerWithImage(this, pGroup, m_TileartImageInfo.m_Width, m_TileartImageInfo.m_Height, vColorImages[i], aImageName);
 		SetTilelayerIndices(pLayer, vaColorGroups[i], m_TileartImageInfo);
 	}

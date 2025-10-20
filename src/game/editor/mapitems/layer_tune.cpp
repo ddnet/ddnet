@@ -86,7 +86,7 @@ void CLayerTune::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 	CLayerTune *pTuneLayer = static_cast<CLayerTune *>(pBrush);
 	int sx = ConvertX(WorldPos.x);
 	int sy = ConvertY(WorldPos.y);
-	if(str_comp(pTuneLayer->m_aFileName, m_pEditor->m_aFileName))
+	if(str_comp(pTuneLayer->m_aFilename, m_pEditor->m_aFilename))
 	{
 		m_pEditor->m_TuningNumber = pTuneLayer->m_TuningNumber;
 	}
