@@ -537,7 +537,7 @@ Messages = [
 	NetMessage("Cl_ShowOthersLegacy", [
 		NetBool("m_Show"),
 	]),
-# Can't add any NetMessages here!
+	# Can't add any NetMessages here!
 
 	NetMessageEx("Sv_MyOwnMessage", "my-own-message@heinrich5991.de", [
 		NetIntAny("m_Test"),
@@ -589,13 +589,13 @@ Messages = [
 	]),
 
 	NetMessageEx("Sv_CommandInfo", "commandinfo@netmsg.ddnet.org", [
-			NetStringStrict("m_pName"),
-			NetStringStrict("m_pArgsFormat"),
-			NetStringStrict("m_pHelpText")
+		NetStringStrict("m_pName"),
+		NetStringStrict("m_pArgsFormat"),
+		NetStringStrict("m_pHelpText")
 	]),
 
 	NetMessageEx("Sv_CommandInfoRemove", "commandinfo-remove@netmsg.ddnet.org", [
-			NetStringStrict("m_pName")
+		NetStringStrict("m_pName")
 	]),
 
 	NetMessageEx("Sv_VoteOptionGroupStart", "sv-vote-option-group-start@netmsg.ddnet.org", []),
@@ -611,7 +611,7 @@ Messages = [
 	NetMessageEx("Sv_MapSoundGlobal", "map-sound-global@netmsg.ddnet.org", [
 		NetIntAny("m_SoundId"),
 	]),
-    
+
 	NetMessageEx("Sv_PreInput", "preinput@netmsg.ddnet.org", [
 		NetIntAny("m_Direction"),
 		NetIntAny("m_TargetX"),
@@ -624,7 +624,7 @@ Messages = [
 		NetIntAny("m_WantedWeapon"),
 		NetIntAny("m_NextWeapon"),
 		NetIntAny("m_PrevWeapon"),
-        
+
 		NetIntRange("m_Owner", 0, 'MAX_CLIENTS-1'),
 		NetTick("m_IntendedTick"),
 	]),
