@@ -184,8 +184,7 @@ const char *CRegister::ProtocolToScheme(int Protocol)
 	case PROTOCOL_TW7_IPV6: return "tw-0.7+udp://";
 	case PROTOCOL_TW7_IPV4: return "tw-0.7+udp://";
 	}
-	dbg_assert(false, "invalid protocol");
-	dbg_break();
+	dbg_assert_failed("invalid protocol");
 }
 
 const char *CRegister::ProtocolToString(int Protocol)
@@ -197,8 +196,7 @@ const char *CRegister::ProtocolToString(int Protocol)
 	case PROTOCOL_TW7_IPV6: return "tw0.7/ipv6";
 	case PROTOCOL_TW7_IPV4: return "tw0.7/ipv4";
 	}
-	dbg_assert(false, "invalid protocol");
-	dbg_break();
+	dbg_assert_failed("invalid protocol");
 }
 
 bool CRegister::ProtocolFromString(int *pResult, const char *pString)
@@ -236,8 +234,7 @@ const char *CRegister::ProtocolToSystem(int Protocol)
 	case PROTOCOL_TW7_IPV6: return "register/7/ipv6";
 	case PROTOCOL_TW7_IPV4: return "register/7/ipv4";
 	}
-	dbg_assert(false, "invalid protocol");
-	dbg_break();
+	dbg_assert_failed("invalid protocol");
 }
 
 IPRESOLVE CRegister::ProtocolToIpresolve(int Protocol)
@@ -249,8 +246,7 @@ IPRESOLVE CRegister::ProtocolToIpresolve(int Protocol)
 	case PROTOCOL_TW7_IPV6: return IPRESOLVE::V6;
 	case PROTOCOL_TW7_IPV4: return IPRESOLVE::V4;
 	}
-	dbg_assert(false, "invalid protocol");
-	dbg_break();
+	dbg_assert_failed("invalid protocol");
 }
 
 void CRegister::ConchainOnConfigChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)

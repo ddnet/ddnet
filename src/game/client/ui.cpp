@@ -291,9 +291,7 @@ void CUi::ConvertMouseMove(float *pX, float *pY, IInput::ECursorType CursorType)
 		Factor = g_Config.m_UiControllerSens / 100.0f;
 		break;
 	default:
-		dbg_msg("assert", "CUi::ConvertMouseMove CursorType %d", (int)CursorType);
-		dbg_break();
-		break;
+		dbg_assert_failed("CUi::ConvertMouseMove CursorType %d", (int)CursorType);
 	}
 
 	if(m_MouseSlow)

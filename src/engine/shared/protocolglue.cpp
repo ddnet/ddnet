@@ -125,13 +125,11 @@ int PickupType_SixToSeven(int Type6, int SubType6)
 		case WEAPON_GUN: return protocol7::PICKUP_GUN;
 		case WEAPON_HAMMER: return protocol7::PICKUP_HAMMER;
 		default:
-			dbg_assert(false, "invalid subtype %d", SubType6);
-			dbg_break();
+			dbg_assert_failed("invalid subtype %d", SubType6);
 		}
 	case POWERUP_NINJA: return protocol7::PICKUP_NINJA;
 	case POWERUP_ARMOR: return protocol7::PICKUP_ARMOR;
 	default:
-		dbg_assert(false, "invalid type %d", Type6);
-		dbg_break();
+		dbg_assert_failed("invalid type %d", Type6);
 	}
 }

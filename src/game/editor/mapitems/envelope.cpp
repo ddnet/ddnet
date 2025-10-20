@@ -141,7 +141,6 @@ int CEnvelope::GetChannels() const
 	case EType::SOUND:
 		return 1;
 	default:
-		dbg_assert(false, "unknown envelope type");
-		dbg_break();
+		dbg_assert_failed("unknown envelope type");
 	}
 }

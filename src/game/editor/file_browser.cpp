@@ -594,8 +594,7 @@ const char *CFileBrowser::DetermineFileFontIcon(const CFilelistItem *pItem) cons
 		case EFileType::SOUND:
 			return FONT_ICON_MUSIC;
 		default:
-			dbg_assert(false, "m_FileType invalid: %d", (int)m_FileType);
-			dbg_break();
+			dbg_assert_failed("m_FileType invalid: %d", (int)m_FileType);
 		}
 	}
 	else if(pItem->m_IsLink || str_comp(pItem->m_aFilename, "..") == 0)

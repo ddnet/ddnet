@@ -148,8 +148,7 @@ const char *CConsole::AccessLevelToString(EAccessLevel AccessLevel)
 	case EAccessLevel::USER:
 		return "all";
 	}
-	dbg_assert(false, "invalid access level: %d", (int)AccessLevel);
-	dbg_break();
+	dbg_assert_failed("invalid access level: %d", (int)AccessLevel);
 }
 
 // the maximum number of tokens occurs in a string of length CONSOLE_MAX_STR_LENGTH with tokens size 1 separated by single spaces

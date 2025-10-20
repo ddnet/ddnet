@@ -209,8 +209,7 @@ static LEVEL websocket_level_to_loglevel(int level)
 	case LLL_INFO:
 		return LEVEL_DEBUG;
 	default:
-		dbg_assert(false, "invalid log level: %d", level);
-		dbg_break();
+		dbg_assert_failed("invalid log level: %d", level);
 	}
 }
 

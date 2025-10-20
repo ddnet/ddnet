@@ -798,8 +798,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Render(const CCommandBuffer::SComm
 		glDrawElements(GL_TRIANGLES, pCommand->m_PrimCount * 6, GL_UNSIGNED_INT, 0);
 		break;
 	default:
-		dbg_assert(false, "Invalid primitive type: %d", (int)pCommand->m_PrimType);
-		dbg_break();
+		dbg_assert_failed("Invalid primitive type: %d", (int)pCommand->m_PrimType);
 	};
 
 	m_LastStreamBuffer = (m_LastStreamBuffer + 1 >= MAX_STREAM_BUFFER_COUNT ? 0 : m_LastStreamBuffer + 1);
@@ -828,8 +827,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderTex3D(const CCommandBuffer::
 		glDrawElements(GL_TRIANGLES, pCommand->m_PrimCount * 6, GL_UNSIGNED_INT, 0);
 		break;
 	default:
-		dbg_assert(false, "Invalid primitive type: %d", (int)pCommand->m_PrimType);
-		dbg_break();
+		dbg_assert_failed("Invalid primitive type: %d", (int)pCommand->m_PrimType);
 	};
 }
 
