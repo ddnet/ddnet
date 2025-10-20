@@ -1070,8 +1070,7 @@ int CCollision::Entity(int x, int y, int Layer) const
 	case LAYER_TUNE:
 		return m_pTune[Index].m_Type - ENTITY_OFFSET;
 	default:
-		dbg_assert(false, "Layer invalid");
-		dbg_break();
+		dbg_assert_failed("Layer invalid");
 	}
 }
 

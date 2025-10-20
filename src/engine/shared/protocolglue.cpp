@@ -126,8 +126,7 @@ int PickupType_SixToSeven(int Type6, int SubType6)
 		case WEAPON_LASER: return protocol7::PICKUP_LASER;
 		case WEAPON_NINJA: return protocol7::PICKUP_NINJA;
 		default:
-			dbg_assert(false, "invalid subtype %d", SubType6);
-			dbg_break();
+			dbg_assert_failed("invalid subtype %d", SubType6);
 		}
 	case POWERUP_NINJA: return protocol7::PICKUP_NINJA;
 	case POWERUP_HEALTH: return protocol7::PICKUP_HEALTH;
@@ -138,7 +137,6 @@ int PickupType_SixToSeven(int Type6, int SubType6)
 	case POWERUP_ARMOR_LASER:
 		return protocol7::PICKUP_ARMOR;
 	default:
-		dbg_assert(false, "invalid type %d", Type6);
-		dbg_break();
+		dbg_assert_failed("invalid type %d", Type6);
 	}
 }

@@ -408,9 +408,7 @@ bool CControls::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 			Factor = g_Config.m_InpControllerSens / 100.0f;
 			break;
 		default:
-			dbg_msg("assert", "CControls::OnCursorMove CursorType %d", (int)CursorType);
-			dbg_break();
-			break;
+			dbg_assert_failed("CControls::OnCursorMove CursorType %d", (int)CursorType);
 		}
 	}
 

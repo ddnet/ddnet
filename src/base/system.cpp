@@ -2960,8 +2960,7 @@ ETimeSeason time_season()
 	case 10:
 		return SEASON_AUTUMN;
 	default:
-		dbg_assert(false, "Invalid month");
-		dbg_break();
+		dbg_assert_failed("Invalid month");
 	}
 }
 
@@ -3331,8 +3330,7 @@ PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state, c
 		info.nShow = SW_SHOWMINNOACTIVE;
 		break;
 	default:
-		dbg_assert(false, "window_state invalid");
-		dbg_break();
+		dbg_assert_failed("window_state invalid");
 	}
 	info.fMask = SEE_MASK_NOCLOSEPROCESS;
 	// Save and restore the FPU control word because ShellExecute might change it
@@ -3482,8 +3480,7 @@ static void ensure_secure_random_init()
 		if(!CryptAcquireContext(&secure_random_data.provider, nullptr, nullptr, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
 		{
 			const DWORD LastError = GetLastError();
-			dbg_assert(false, "Failed to initialize secure random: CryptAcquireContext failure (%ld '%s')", LastError, windows_format_system_message(LastError).c_str());
-			dbg_break();
+			dbg_assert_failed("Failed to initialize secure random: CryptAcquireContext failure (%ld '%s')", LastError, windows_format_system_message(LastError).c_str());
 		}
 #else
 		secure_random_data.urandom = io_open("/dev/urandom", IOFLAG_READ);
@@ -3535,8 +3532,7 @@ void secure_random_fill(void *bytes, unsigned length)
 	if(!CryptGenRandom(secure_random_data.provider, length, (unsigned char *)bytes))
 	{
 		const DWORD LastError = GetLastError();
-		dbg_assert(false, "CryptGenRandom failure (%ld '%s')", LastError, windows_format_system_message(LastError).c_str());
-		dbg_break();
+		dbg_assert_failed("CryptGenRandom failure (%ld '%s')", LastError, windows_format_system_message(LastError).c_str());
 	}
 #else
 	dbg_assert(length == io_read(secure_random_data.urandom, bytes, length), "io_read returned with a short read");

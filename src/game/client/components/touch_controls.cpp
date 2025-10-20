@@ -937,8 +937,7 @@ int CTouchControls::NextActiveAction(int Action) const
 	case ACTION_HOOK:
 		return ACTION_FIRE;
 	default:
-		dbg_assert(false, "Action invalid for NextActiveAction");
-		dbg_break();
+		dbg_assert_failed("Action invalid for NextActiveAction");
 	}
 }
 
@@ -953,8 +952,7 @@ int CTouchControls::NextDirectTouchAction() const
 		case EDirectTouchSpectateMode::AIM:
 			return ACTION_AIM;
 		default:
-			dbg_assert(false, "m_DirectTouchSpectate invalid");
-			return NUM_ACTIONS;
+			dbg_assert_failed("m_DirectTouchSpectate invalid");
 		}
 	}
 	else

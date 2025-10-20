@@ -75,8 +75,7 @@ class CHttpRequest : public IHttpRequest
 			return "POST";
 		}
 
-		dbg_assert(false, "unreachable");
-		dbg_break();
+		dbg_assert_failed("unreachable");
 	}
 
 	char m_aUrl[256] = {0};

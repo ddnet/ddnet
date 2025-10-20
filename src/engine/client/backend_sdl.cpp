@@ -358,8 +358,7 @@ void CCommandProcessor_SDL_GL::HandleWarning()
 		return;
 	}
 	default:
-		dbg_assert(false, "Unhandled graphics warning type %d", (int)m_Warning.m_WarningType);
-		dbg_break();
+		dbg_assert_failed("Unhandled graphics warning type %d", (int)m_Warning.m_WarningType);
 	}
 }
 
@@ -393,8 +392,7 @@ void CCommandProcessor_SDL_GL::RunBuffer(CCommandBuffer *pBuffer)
 		if(m_General.RunCommand(pCommand))
 			continue;
 
-		dbg_assert(false, "Unknown graphics command %d", pCommand->m_Cmd);
-		dbg_break();
+		dbg_assert_failed("Unknown graphics command %d", pCommand->m_Cmd);
 	}
 
 	m_pGLBackend->EndCommands();
@@ -1196,8 +1194,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		pBackendName = "Vulkan";
 		break;
 	default:
-		dbg_assert(false, "Invalid m_BackendType: %d", m_BackendType);
-		dbg_break();
+		dbg_assert_failed("Invalid m_BackendType: %d", m_BackendType);
 	}
 	log_info("gfx", "Created %s %d.%d context", pBackendName, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor);
 

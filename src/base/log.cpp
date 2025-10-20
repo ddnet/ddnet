@@ -445,8 +445,7 @@ std::unique_ptr<ILogger> log_logger_stdout()
 	}
 	else
 	{
-		dbg_assert(false, "GetFileType failure");
-		dbg_break();
+		dbg_assert_failed("GetFileType failure");
 	}
 #endif
 }

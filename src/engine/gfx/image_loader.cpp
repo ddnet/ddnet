@@ -79,8 +79,7 @@ static CImageInfo::EImageFormat ImageFormatFromChannelCount(int ColorChannelCoun
 	case 4:
 		return CImageInfo::FORMAT_RGBA;
 	default:
-		dbg_assert(false, "ColorChannelCount invalid");
-		dbg_break();
+		dbg_assert_failed("ColorChannelCount invalid");
 	}
 }
 
@@ -334,8 +333,7 @@ static int PngColorTypeFromFormat(CImageInfo::EImageFormat Format)
 	case CImageInfo::FORMAT_RGBA:
 		return PNG_COLOR_TYPE_RGBA;
 	default:
-		dbg_assert(false, "Format invalid");
-		dbg_break();
+		dbg_assert_failed("Format invalid");
 	}
 }
 

@@ -321,7 +321,6 @@ void CGameClient::OnInit()
 			break;
 		default:
 			dbg_assert(false, "Invalid callback loading detail");
-			dbg_break();
 		}
 		m_Menus.RenderLoading(pTitle, pMessage, 0);
 	});

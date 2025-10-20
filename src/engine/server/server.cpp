@@ -307,8 +307,7 @@ const char *CServer::DnsblStateStr(EDnsblState State)
 		return "white";
 	}
 
-	dbg_assert(false, "unreachable");
-	dbg_break();
+	dbg_assert_failed("unreachable");
 }
 
 IConsole::EAccessLevel CServer::ConsoleAccessLevel(int ClientId) const
@@ -324,8 +323,7 @@ IConsole::EAccessLevel CServer::ConsoleAccessLevel(int ClientId) const
 		return IConsole::EAccessLevel::HELPER;
 	};
 
-	dbg_assert(false, "invalid auth level: %d", AuthLevel);
-	dbg_break();
+	dbg_assert_failed("invalid auth level: %d", AuthLevel);
 }
 
 bool CServer::IsClientNameAvailable(int ClientId, const char *pNameRequest)
