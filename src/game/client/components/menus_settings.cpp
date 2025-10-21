@@ -2295,11 +2295,11 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNamePlatesIds, Localize("Show client IDs in name plates"), &g_Config.m_ClNamePlatesIds, &LeftView, LineSize);
 		if(g_Config.m_ClNamePlatesIds > 0)
-			DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNamePlatesIdsSeperateLine, Localize("Show client IDs on a seperate line"), &g_Config.m_ClNamePlatesIdsSeperateLine, &LeftView, LineSize);
+			DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNamePlatesIdsSeparateLine, Localize("Show client IDs on a separate line"), &g_Config.m_ClNamePlatesIdsSeparateLine, &LeftView, LineSize);
 		else
 			LeftView.HSplitTop(LineSize, nullptr, &LeftView);
 		LeftView.HSplitTop(LineSize, &Button, &LeftView);
-		if(g_Config.m_ClNamePlatesIds > 0 && g_Config.m_ClNamePlatesIdsSeperateLine > 0)
+		if(g_Config.m_ClNamePlatesIds > 0 && g_Config.m_ClNamePlatesIdsSeparateLine > 0)
 			Ui()->DoScrollbarOption(&g_Config.m_ClNamePlatesIdsSize, &g_Config.m_ClNamePlatesIdsSize, &Button, Localize("Client IDs size"), -50, 100);
 
 		// ***** Hook Strength ***** //

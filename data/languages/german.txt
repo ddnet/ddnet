@@ -2142,7 +2142,7 @@ Name plates offset
 Show friend icon in name plates
 == Freund-Icon in Spielername zeigen
 
-Show client IDs on a seperate line
+Show client IDs on a separate line
 == Client-IDs in eigener Linie zeigen
 
 Client IDs size

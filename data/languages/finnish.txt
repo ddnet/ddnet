@@ -2356,7 +2356,7 @@ Show friend icon in name plates
 Show client IDs in name plates
 == 
 
-Show client IDs on a seperate line
+Show client IDs on a separate line
 == 
 
 Client IDs size
