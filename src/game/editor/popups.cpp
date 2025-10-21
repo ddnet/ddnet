@@ -3019,8 +3019,8 @@ CUi::EPopupMenuFunctionResult CEditor::PopupAnimateSettings(void *pContext, CUIR
 {
 	CEditor *pEditor = static_cast<CEditor *>(pContext);
 
-	constexpr float MIN_ANIM_SPEED = 0.001f;
-	constexpr float MAX_ANIM_SPEED = 1000000.0f;
+	static constexpr float MIN_ANIM_SPEED = 0.001f;
+	static constexpr float MAX_ANIM_SPEED = 1000000.0f;
 
 	CUIRect Row, Label, ButtonDecrease, EditBox, ButtonIncrease, ButtonReset;
 	View.HSplitTop(13.0f, &Row, &View);

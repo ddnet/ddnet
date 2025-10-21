@@ -634,9 +634,9 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	{
 		NETADDR NextAddr;
 		char aHost[128];
-		int url = net_addr_from_url(&NextAddr, aBuffer, aHost, sizeof(aHost));
+		const int UrlParseResult = net_addr_from_url(&NextAddr, aBuffer, aHost, sizeof(aHost));
 		bool Sixup = NextAddr.type & NETTYPE_TW7;
-		if(url > 0)
+		if(UrlParseResult > 0)
 			str_copy(aHost, aBuffer);
 
 		if(net_host_lookup(aHost, &NextAddr, m_aNetClient[CONN_MAIN].NetType()) != 0)
@@ -4504,9 +4504,9 @@ void CClient::HandleConnectLink(const char *pLink)
 	else
 		str_copy(m_aCmdConnect, pLink);
 	// Edge appends / to the URL
-	const int len = str_length(m_aCmdConnect);
-	if(m_aCmdConnect[len - 1] == '/')
-		m_aCmdConnect[len - 1] = '\0';
+	const int Length = str_length(m_aCmdConnect);
+	if(m_aCmdConnect[Length - 1] == '/')
+		m_aCmdConnect[Length - 1] = '\0';
 }
 
 void CClient::HandleDemoPath(const char *pPath)

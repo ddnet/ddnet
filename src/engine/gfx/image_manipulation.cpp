@@ -227,19 +227,19 @@ static void GetPixelClamped(const uint8_t *pSourceImage, int x, int y, uint32_t 
 static void SampleBicubic(const uint8_t *pSourceImage, float u, float v, uint32_t W, uint32_t H, size_t BPP, uint8_t aSample[4])
 {
 	float X = (u * W) - 0.5f;
-	int xInt = (int)X;
-	float xFract = X - std::floor(X);
+	const int RoundedX = (int)X;
+	const float FractionX = X - std::floor(X);
 
 	float Y = (v * H) - 0.5f;
-	int yInt = (int)Y;
-	float yFract = Y - std::floor(Y);
+	const int RoundedY = (int)Y;
+	const float FractionY = Y - std::floor(Y);
 
 	uint8_t aaaSamples[4][4][4];
 	for(int y = 0; y < 4; ++y)
 	{
 		for(int x = 0; x < 4; ++x)
 		{
-			GetPixelClamped(pSourceImage, xInt + x - 1, yInt + y - 1, W, H, BPP, aaaSamples[x][y]);
+			GetPixelClamped(pSourceImage, RoundedX + x - 1, RoundedY + y - 1, W, H, BPP, aaaSamples[x][y]);
 		}
 	}
 
@@ -248,9 +248,9 @@ static void SampleBicubic(const uint8_t *pSourceImage, float u, float v, uint32_
 		float aRows[4];
 		for(int y = 0; y < 4; ++y)
 		{
-			aRows[y] = CubicHermite(aaaSamples[0][y][i], aaaSamples[1][y][i], aaaSamples[2][y][i], aaaSamples[3][y][i], xFract);
+			aRows[y] = CubicHermite(aaaSamples[0][y][i], aaaSamples[1][y][i], aaaSamples[2][y][i], aaaSamples[3][y][i], FractionX);
 		}
-		aSample[i] = (uint8_t)std::clamp<float>(CubicHermite(aRows[0], aRows[1], aRows[2], aRows[3], yFract), 0.0f, 255.0f);
+		aSample[i] = (uint8_t)std::clamp<float>(CubicHermite(aRows[0], aRows[1], aRows[2], aRows[3], FractionY), 0.0f, 255.0f);
 	}
 }
 
