@@ -427,7 +427,7 @@ bool CConsole::LineIsValid(const char *pStr)
 
 	do
 	{
-		CResult Result(-1);
+		CResult Result(IConsole::CLIENT_ID_UNSPECIFIED);
 		const char *pEnd = pStr;
 		const char *pNextPart = nullptr;
 		int InString = 0;
@@ -741,7 +741,7 @@ void CConsole::Con_Echo(IResult *pResult, void *pUserData)
 
 void CConsole::Con_Exec(IResult *pResult, void *pUserData)
 {
-	((CConsole *)pUserData)->ExecuteFile(pResult->GetString(0), -1, true, IStorage::TYPE_ALL);
+	((CConsole *)pUserData)->ExecuteFile(pResult->GetString(0), IConsole::CLIENT_ID_UNSPECIFIED, true, IStorage::TYPE_ALL);
 }
 
 void CConsole::ConCommandAccess(IResult *pResult, void *pUser)
@@ -907,7 +907,7 @@ void CConsole::ParseArguments(int NumArgs, const char **ppArguments)
 		if(ppArguments[i][0] == '-' && ppArguments[i][1] == 'f' && ppArguments[i][2] == 0)
 		{
 			if(NumArgs - i > 1)
-				ExecuteFile(ppArguments[i + 1], -1, true, IStorage::TYPE_ABSOLUTE);
+				ExecuteFile(ppArguments[i + 1], IConsole::CLIENT_ID_UNSPECIFIED, true, IStorage::TYPE_ABSOLUTE);
 			i++;
 		}
 		else if(!str_comp("-s", ppArguments[i]) || !str_comp("--silent", ppArguments[i]))

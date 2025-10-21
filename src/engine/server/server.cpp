@@ -3291,7 +3291,7 @@ int CServer::Run()
 				std::vector<std::string> vAndroidCommandQueue = FetchAndroidServerCommandQueue();
 				for(const std::string &Command : vAndroidCommandQueue)
 				{
-					Console()->ExecuteLineFlag(Command.c_str(), CFGFLAG_SERVER, -1);
+					Console()->ExecuteLineFlag(Command.c_str(), CFGFLAG_SERVER, IConsole::CLIENT_ID_UNSPECIFIED);
 				}
 #endif
 
