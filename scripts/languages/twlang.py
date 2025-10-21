@@ -14,10 +14,7 @@ def decode(fileobj, elements_per_key):
 	current_key = None
 	index = -1
 	for index, line in enumerate(fileobj):
-		line = line.encode("utf-8").decode("utf-8-sig")
-		line = line[:-1]
-		if line and line[-1] == "\r":
-			line = line[:-1]
+		line = line.encode("utf-8").decode("utf-8-sig").rstrip("\r\n")
 		if not line or line[:1] == "#":
 			current_context = ""
 			continue
