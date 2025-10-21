@@ -707,6 +707,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	if(Ui()->DoButton_FontIcon(&s_ExitButton, FONT_ICON_XMARK, 0, &Button, BUTTONFLAG_LEFT) || (Input()->KeyPress(KEY_C) && !GameClient()->m_GameConsole.IsActive() && m_DemoPlayerState == DEMOPLAYER_NONE))
 	{
 		Client()->Disconnect();
+		SetMenuPage(PAGE_DEMOS);
 		DemolistOnUpdate(false);
 	}
 	GameClient()->m_Tooltips.DoToolTip(&s_ExitButton, &Button, Localize("Close the demo player"));
