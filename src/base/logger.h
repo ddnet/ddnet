@@ -81,7 +81,10 @@ public:
 		m_Filter.m_MaxLevel.store(Filter.m_MaxLevel.load(std::memory_order_relaxed), std::memory_order_relaxed);
 		OnFilterChange();
 	}
-
+	/**
+	 * Name of the logger class. Only used for debugging.
+	 */
+	virtual const char *Name() = 0;
 	/**
 	 * Send the specified message to the logging backend.
 	 *
@@ -238,6 +241,7 @@ private:
 	CLock m_PendingLock;
 
 public:
+	const char *Name() override { return typeid(this).name(); }
 	/**
 	 * Replace the `CFutureLogger` instance with the given logger. It'll
 	 * receive all log messages sent to the `CFutureLogger` so far.
@@ -266,6 +270,7 @@ class CMemoryLogger : public ILogger
 	CLock m_MessagesMutex;
 
 public:
+	const char *Name() override { return typeid(this).name(); }
 	void SetParent(ILogger *pParentLogger) { m_pParentLogger = pParentLogger; }
 	void Log(const CLogMessage *pMessage) override REQUIRES(!m_MessagesMutex);
 	std::vector<CLogMessage> Lines() REQUIRES(!m_MessagesMutex);

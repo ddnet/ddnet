@@ -195,6 +195,7 @@ public:
 		m_ClientId(ClientId)
 	{
 	}
+	const char *Name() override { return typeid(this).name(); }
 	void Log(const CLogMessage *pMessage) override;
 };
 

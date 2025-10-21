@@ -41,6 +41,7 @@ public:
 		dbg_assert(pConsole != nullptr, "console pointer must not be null");
 	}
 
+	const char *Name() override { return typeid(this).name(); }
 	void Log(const CLogMessage *pMessage) override REQUIRES(!m_ConsoleMutex);
 	void OnConsoleDeletion() REQUIRES(!m_ConsoleMutex);
 };

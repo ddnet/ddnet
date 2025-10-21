@@ -52,6 +52,7 @@ public:
 		m_pOuterLogger(pOuterLogger)
 	{
 	}
+	const char *Name() override { return typeid(this).name(); }
 	void Log(const CLogMessage *pMessage) override;
 };
 

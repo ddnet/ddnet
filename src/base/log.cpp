@@ -185,6 +185,7 @@ public:
 	{
 		m_Filter.m_MaxLevel.store(LEVEL_TRACE, std::memory_order_relaxed);
 	}
+	const char *Name() override { return typeid(this).name(); }
 	void Log(const CLogMessage *pMessage) override
 	{
 		if(m_Filter.Filters(pMessage))
@@ -223,6 +224,7 @@ public:
 		m_Close(Close)
 	{
 	}
+	const char *Name() override { return typeid(this).name(); }
 	void Log(const CLogMessage *pMessage) override
 	{
 		if(m_Filter.Filters(pMessage))
@@ -481,6 +483,7 @@ std::unique_ptr<ILogger> log_logger_windows_debugger()
 class CLoggerNoOp : public ILogger
 {
 public:
+	const char *Name() override { return typeid(this).name(); }
 	void Log(const CLogMessage *pMessage) override
 	{
 		// no-op

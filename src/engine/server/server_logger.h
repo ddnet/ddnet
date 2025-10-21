@@ -15,6 +15,7 @@ class CServerLogger : public ILogger
 
 public:
 	CServerLogger(CServer *pServer);
+	const char *Name() override { return typeid(this).name(); }
 	void Log(const CLogMessage *pMessage) override REQUIRES(!m_PendingLock);
 	// Must be called from the main thread!
 	void OnServerDeletion();

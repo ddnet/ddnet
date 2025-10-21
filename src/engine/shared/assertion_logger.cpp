@@ -24,6 +24,7 @@ class CAssertionLogger : public ILogger
 
 public:
 	CAssertionLogger(const char *pAssertLogPath, const char *pGameName);
+	const char *Name() override { return typeid(this).name(); }
 	void Log(const CLogMessage *pMessage) override REQUIRES(!m_DbgMessageMutex);
 	void GlobalFinish() override REQUIRES(!m_DbgMessageMutex);
 };
