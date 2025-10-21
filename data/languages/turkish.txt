@@ -2161,7 +2161,7 @@ Name plates offset
 Show friend icon in name plates
 == Arkadaş ikonunu oyuncu isimlerinde göster
 
-Show client IDs on a seperate line
+Show client IDs on a separate line
 == İstemci ID'lerini ayrı satırda göster
 
 Client IDs size

@@ -2142,7 +2142,7 @@ Name plates offset
 Show friend icon in name plates
 == Mostrar ícone de amigo em placas de nome
 
-Show client IDs on a seperate line
+Show client IDs on a separate line
 == Mostrar IDs de clientes em uma linha separada
 
 Client IDs size

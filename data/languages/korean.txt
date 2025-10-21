@@ -2166,7 +2166,7 @@ Name plates offset
 Show friend icon in name plates
 == 이름에 친구 아이콘 표시
 
-Show client IDs on a seperate line
+Show client IDs on a separate line
 == 클라이언트 ID를 별도의 줄에 표시
 
 Client IDs size

@@ -2070,7 +2070,7 @@ Show friend icon in name plates
 Show client IDs in name plates
 == Паказваць ID кліента ў таблічках імёнаў
 
-Show client IDs on a seperate line
+Show client IDs on a separate line
 == Паказваць ID кліента ў асобным радку
 
 Client IDs size

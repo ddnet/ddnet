@@ -2036,7 +2036,7 @@ https://wiki.ddnet.org/wiki/Touch_controls
 Show client IDs in name plates
 == 顯示客戶端 ID
 
-Show client IDs on a seperate line
+Show client IDs on a separate line
 == 客户端 ID 換行顯示
 
 Client IDs size

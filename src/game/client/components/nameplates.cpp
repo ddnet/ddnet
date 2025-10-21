@@ -239,12 +239,12 @@ private:
 	static_assert(MAX_CLIENTS <= 999, "Make this buffer bigger");
 	char m_aText[5] = "";
 	float m_FontSize = -INFINITY;
-	bool m_ClientIdSeperateLine = false;
+	bool m_ClientIdSeparateLine = false;
 
 protected:
 	bool UpdateNeeded(CGameClient &This, const CNamePlateData &Data) override
 	{
-		m_Visible = Data.m_ShowClientId && (Data.m_ClientIdSeperateLine == m_ClientIdSeperateLine);
+		m_Visible = Data.m_ShowClientId && (Data.m_ClientIdSeparateLine == m_ClientIdSeparateLine);
 		if(!m_Visible)
 			return false;
 		m_Color = Data.m_Color;
@@ -254,7 +254,7 @@ protected:
 	{
 		m_FontSize = Data.m_FontSizeClientId;
 		m_ClientId = Data.m_ClientId;
-		if(m_ClientIdSeperateLine)
+		if(m_ClientIdSeparateLine)
 			str_format(m_aText, sizeof(m_aText), "%d", m_ClientId);
 		else
 			str_format(m_aText, sizeof(m_aText), "%d:", m_ClientId);
@@ -264,10 +264,10 @@ protected:
 	}
 
 public:
-	CNamePlatePartClientId(CGameClient &This, bool ClientIdSeperateLine) :
+	CNamePlatePartClientId(CGameClient &This, bool ClientIdSeparateLine) :
 		CNamePlatePartText(This)
 	{
-		m_ClientIdSeperateLine = ClientIdSeperateLine;
+		m_ClientIdSeparateLine = ClientIdSeparateLine;
 	}
 };
 
@@ -616,8 +616,8 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 	Data.m_FontSize = 18.0f + 20.0f * g_Config.m_ClNamePlatesSize / 100.0f;
 
 	Data.m_ClientId = pPlayerInfo->m_ClientId;
-	Data.m_ClientIdSeperateLine = g_Config.m_ClNamePlatesIdsSeperateLine;
-	Data.m_FontSizeClientId = Data.m_ClientIdSeperateLine ? (18.0f + 20.0f * g_Config.m_ClNamePlatesIdsSize / 100.0f) : Data.m_FontSize;
+	Data.m_ClientIdSeparateLine = g_Config.m_ClNamePlatesIdsSeparateLine;
+	Data.m_FontSizeClientId = Data.m_ClientIdSeparateLine ? (18.0f + 20.0f * g_Config.m_ClNamePlatesIdsSize / 100.0f) : Data.m_FontSize;
 
 	Data.m_ShowClan = Data.m_ShowName && g_Config.m_ClNamePlatesClan;
 	Data.m_pClan = GameClient()->m_aClients[pPlayerInfo->m_ClientId].m_aClan;
@@ -755,8 +755,8 @@ void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
 
 	Data.m_ShowClientId = Data.m_ShowName && (g_Config.m_Debug || g_Config.m_ClNamePlatesIds);
 	Data.m_ClientId = Dummy + 1;
-	Data.m_ClientIdSeperateLine = g_Config.m_ClNamePlatesIdsSeperateLine;
-	Data.m_FontSizeClientId = Data.m_ClientIdSeperateLine ? (18.0f + 20.0f * g_Config.m_ClNamePlatesIdsSize / 100.0f) : Data.m_FontSize;
+	Data.m_ClientIdSeparateLine = g_Config.m_ClNamePlatesIdsSeparateLine;
+	Data.m_FontSizeClientId = Data.m_ClientIdSeparateLine ? (18.0f + 20.0f * g_Config.m_ClNamePlatesIdsSize / 100.0f) : Data.m_FontSize;
 
 	Data.m_ShowClan = Data.m_ShowName && g_Config.m_ClNamePlatesClan;
 	Data.m_pClan = Dummy == 0 ? g_Config.m_PlayerClan : g_Config.m_ClDummyClan;
