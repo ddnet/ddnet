@@ -26,7 +26,7 @@ public:
 	bool m_ShowClientId;
 	int m_ClientId;
 	float m_FontSizeClientId;
-	bool m_ClientIdSeperateLine;
+	bool m_ClientIdSeparateLine;
 	float m_FontSize;
 	bool m_ShowClan;
 	const char *m_pClan;

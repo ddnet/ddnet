@@ -2143,7 +2143,7 @@ Show friend icon in name plates
 Show client IDs in name plates
 == Zobrazit ID klientů na jmenovkách
 
-Show client IDs on a seperate line
+Show client IDs on a separate line
 == Zobrazit ID klientů na samostatném řádku
 
 Client IDs size

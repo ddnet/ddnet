@@ -2142,7 +2142,7 @@ Name plates offset
 Show friend icon in name plates
 == Visa kompis ikon i namnskyltar
 
-Show client IDs on a seperate line
+Show client IDs on a separate line
 == Visa klient IDs på en seperat rad
 
 Client IDs size

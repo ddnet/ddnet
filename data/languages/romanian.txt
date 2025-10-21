@@ -2144,7 +2144,7 @@ Name plates offset
 Show friend icon in name plates
 == Afișați indicatorul de prieten în plăcuțele de nume
 
-Show client IDs on a seperate line
+Show client IDs on a separate line
 == Arată ID-urile de client pe o linie separată
 
 Client IDs size
