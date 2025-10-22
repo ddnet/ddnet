@@ -2,10 +2,10 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "countryflags.h"
 
+#include <base/log.h>
 #include <base/math.h>
 #include <base/system.h>
 
-#include <engine/console.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
@@ -17,9 +17,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 	CLineReader LineReader;
 	if(!LineReader.OpenFile(Storage()->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_ALL)))
 	{
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "couldn't open index file '%s'", pFilename);
-		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", aBuf);
+		log_error("countryflags", "couldn't open index file '%s'", pFilename);
 		return;
 	}
 
@@ -33,24 +31,20 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 		const char *pReplacement = LineReader.Get();
 		if(!pReplacement)
 		{
-			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", "unexpected end of index file");
+			log_error("countryflags", "unexpected end of index file");
 			break;
 		}
 
 		if(pReplacement[0] != '=' || pReplacement[1] != '=' || pReplacement[2] != ' ')
 		{
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "malform replacement for index '%s'", aOrigin);
-			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", aBuf);
+			log_error("countryflags", "malform replacement for index '%s'", aOrigin);
 			continue;
 		}
 
 		int CountryCode = str_toint(pReplacement + 3);
 		if(CountryCode < CODE_LB || CountryCode > CODE_UB)
 		{
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "country code '%i' not within valid code range [%i..%i]", CountryCode, CODE_LB, CODE_UB);
-			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", aBuf);
+			log_error("countryflags", "country code '%i' not within valid code range [%i..%i]", CountryCode, CODE_LB, CODE_UB);
 			continue;
 		}
 
@@ -60,9 +54,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 		str_format(aBuf, sizeof(aBuf), "countryflags/%s.png", aOrigin);
 		if(!Graphics()->LoadPng(Info, aBuf, IStorage::TYPE_ALL))
 		{
-			char aMsg[128];
-			str_format(aMsg, sizeof(aMsg), "failed to load '%s'", aBuf);
-			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", aMsg);
+			log_error("countryflags", "failed to load '%s'", aBuf);
 			continue;
 		}
 
@@ -74,8 +66,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 
 		if(g_Config.m_Debug)
 		{
-			str_format(aBuf, sizeof(aBuf), "loaded country flag '%s'", aOrigin);
-			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", aBuf);
+			log_debug("countryflags", "loaded country flag '%s'", aOrigin);
 		}
 		m_vCountryFlags.push_back(CountryFlag);
 	}
@@ -108,7 +99,7 @@ void CCountryFlags::OnInit()
 	LoadCountryflagsIndexfile();
 	if(m_vCountryFlags.empty())
 	{
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "countryflags", "failed to load country flags. folder='countryflags/'");
+		log_error("countryflags", "failed to load country flags. folder='countryflags/'");
 		CCountryFlag DummyEntry;
 		DummyEntry.m_CountryCode = -1;
 		DummyEntry.m_aCountryCodeString[0] = '\0';
