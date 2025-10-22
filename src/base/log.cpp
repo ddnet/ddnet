@@ -98,7 +98,6 @@ void log_set_scope_logger(ILogger *logger)
 	str_copy(Msg.m_aSystem, sys);
 	Msg.m_SystemLength = str_length(Msg.m_aSystem);
 
-	// TODO: Add level?
 	str_format(Msg.m_aLine, sizeof(Msg.m_aLine), "%s %c %s: ", Msg.m_aTimestamp, "EWIDT"[level], Msg.m_aSystem);
 	Msg.m_LineMessageOffset = str_length(Msg.m_aLine);
 
