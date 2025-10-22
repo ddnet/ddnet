@@ -3,6 +3,7 @@
 #include "gamecontext.h"
 
 #include "entities/character.h"
+#include "entities/targetswitch.h"
 #include "gamemodes/DDRace.h"
 #include "gamemodes/mod.h"
 #include "player.h"
@@ -35,17 +36,8 @@
 #include <game/gamecore.h>
 #include <game/mapitems.h>
 #include <game/version.h>
+
 #include <vector>
-
-#include <generated/protocol7.h>
-#include <generated/protocolglue.h>
-
-#include "entities/character.h"
-#include "entities/targetswitch.h"
-#include "gamemodes/DDRace.h"
-#include "gamemodes/mod.h"
-#include "player.h"
-#include "score.h"
 
 // Not thread-safe!
 class CClientChatLogger : public ILogger

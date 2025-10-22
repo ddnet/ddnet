@@ -3,12 +3,12 @@
 #include "laser.h"
 
 #include "character.h"
+#include "targetswitch.h"
 
 #include <engine/shared/config.h>
 
 #include <generated/protocol.h>
 
-#include "targetswitch.h"
 #include <game/client/laser_data.h>
 #include <game/collision.h>
 #include <game/mapitems.h>

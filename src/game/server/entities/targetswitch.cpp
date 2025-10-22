@@ -1,12 +1,13 @@
 #include "targetswitch.h"
+
 #include "character.h"
 
-#include <game/mapitems.h>
-#include <game/teamscore.h>
 #include <generated/protocol.h>
 
+#include <game/mapitems.h>
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
+#include <game/teamscore.h>
 
 // fills up an entire block to allow hammering thru a wall from any side
 static constexpr int gs_TargetSwitchSize = 30;
@@ -54,7 +55,7 @@ void CTargetSwitch::GetHit(int ClientId, bool Weakly, int ForcedTeam)
 {
 	CClientMask Mask;
 	int TeamHitFrom;
-	if (ForcedTeam == -1 && ClientId != -1)
+	if(ForcedTeam == -1 && ClientId != -1)
 	{
 		Mask = GameServer()->GetPlayerChar(ClientId)->TeamMask();
 		TeamHitFrom = GameServer()->GetPlayerChar(ClientId)->Team();
