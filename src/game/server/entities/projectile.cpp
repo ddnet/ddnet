@@ -12,6 +12,7 @@
 #include <game/mapitems.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
+#include <game/server/player.h>
 
 CProjectile::CProjectile(
 	CGameWorld *pGameWorld,
@@ -43,6 +44,7 @@ CProjectile::CProjectile(
 
 	m_InitDir = InitDir;
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
+	m_TargetSwitchCollisionCooldown = 0;
 
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	m_BelongsToPracticeTeam = pOwnerChar && pOwnerChar->Teams()->IsPractice(pOwnerChar->Team());
@@ -163,12 +165,38 @@ void CProjectile::Tick()
 				if(pChr && (m_Layer != LAYER_SWITCH || (m_Layer == LAYER_SWITCH && m_Number > 0 && Switchers()[m_Number].m_aStatus[pChr->Team()])))
 					pChr->Freeze();
 			}
+
+			constexpr int TargetSwitchCooldown = 4;
+			if(m_TargetSwitchCollisionCooldown <= 0)
+			{
+				CEntity *apTargetEnts[MAX_CLIENTS];
+				Num = GameWorld()->FindEntities(CurPos, 1.0f, apTargetEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_TARGETSWITCH);
+				if(Num > 0)
+				{
+					Collide = true;
+					m_TargetSwitchCollisionCooldown = TargetSwitchCooldown;
+				}
+				for(int i = 0; i < Num; ++i)
+				{
+					auto *pTargetSwitch = static_cast<CTargetSwitch *>(apTargetEnts[i]);
+					if(pTargetSwitch && (m_Layer != LAYER_SWITCH))
+						for(int TargetSwitchTeam = 0; TargetSwitchTeam < TEAM_SUPER; ++TargetSwitchTeam)
+						{
+							pTargetSwitch->GetHit(-1, m_Type == WEAPON_WORLD, TargetSwitchTeam);
+						}
+				}
+			}
+			else
+			{
+				m_TargetSwitchCollisionCooldown--;
+			}
 		}
 		else if(pTargetChr)
 			pTargetChr->TakeDamage(vec2(0, 0), 0, m_Owner, m_Type);
-		else if(pTargetTargetSwitch && pOwnerChar)
+		else if(pTargetTargetSwitch)
 		{
-			pTargetTargetSwitch->GetHit(pOwnerChar->GetCore().m_Id, m_Type == WEAPON_GUN);
+			if(pOwnerChar)
+				pTargetTargetSwitch->GetHit(pOwnerChar->GetPlayer()->GetCid(), m_Type == WEAPON_GUN);
 		}
 
 		if(pOwnerChar && !GameLayerClipped(ColPos) &&

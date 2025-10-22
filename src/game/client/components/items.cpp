@@ -13,13 +13,11 @@
 #include <game/client/gameclient.h>
 #include <game/client/laser_data.h>
 #include <game/client/pickup_data.h>
-#include <game/client/projectile_data.h>
-#include <game/client/targetswitch_data.h>
-
 #include <game/client/prediction/entities/laser.h>
 #include <game/client/prediction/entities/pickup.h>
 #include <game/client/prediction/entities/projectile.h>
 #include <game/client/projectile_data.h>
+#include <game/client/targetswitch_data.h>
 #include <game/mapitems.h>
 
 void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemId)

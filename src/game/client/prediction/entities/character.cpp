@@ -4,6 +4,7 @@
 
 #include "laser.h"
 #include "projectile.h"
+#include "targetswitch.h"
 
 #include <engine/shared/config.h>
 
@@ -11,7 +12,6 @@
 
 #include <game/collision.h>
 #include <game/mapitems.h>
-#include "targetswitch.h"
 
 // Character, "physical" player's part
 

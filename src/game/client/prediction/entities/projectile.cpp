@@ -3,6 +3,7 @@
 #include "projectile.h"
 
 #include "character.h"
+#include "targetswitch.h"
 
 #include <engine/shared/config.h>
 
@@ -11,7 +12,6 @@
 #include <game/client/projectile_data.h>
 #include <game/collision.h>
 #include <game/mapitems.h>
-#include "targetswitch.h"
 
 CProjectile::CProjectile(
 	CGameWorld *pGameWorld,
@@ -39,6 +39,8 @@ CProjectile::CProjectile(
 	m_Layer = Layer;
 	m_Number = Number;
 	m_Freeze = Freeze;
+
+	m_TargetSwitchCollisionCooldown = 0;
 
 	m_TuneZone = GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
 
@@ -94,13 +96,11 @@ void CProjectile::Tick()
 		m_LifeSpan--;
 
 	bool IsWeaponCollide = false;
-	bool IsWeaponCollide = false;
 	if(
 		pOwnerChar &&
 		pTargetChr &&
 		!pTargetChr->CanCollide(m_Owner))
 	{
-		IsWeaponCollide = true;
 		IsWeaponCollide = true;
 	}
 
@@ -122,6 +122,27 @@ void CProjectile::Tick()
 				auto *pChr = static_cast<CCharacter *>(apEnts[i]);
 				if(pChr && (m_Layer != LAYER_SWITCH || (m_Layer == LAYER_SWITCH && m_Number > 0 && m_Number < (int)Switchers().size() && Switchers()[m_Number].m_aStatus[pChr->Team()])))
 					pChr->Freeze();
+			}
+
+			constexpr int TargetSwitchCooldown = 4;
+			if(m_TargetSwitchCollisionCooldown <= 0)
+			{
+				CEntity *apTargetEnts[MAX_CLIENTS];
+				Num = GameWorld()->FindEntities(CurPos, 1.0f, apTargetEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_TARGETSWITCH);
+				if(Num > 0)
+				{
+					Collide = true;
+					m_TargetSwitchCollisionCooldown = TargetSwitchCooldown;
+				}
+				for(int i = 0; i < Num; ++i)
+				{
+					auto *pTargetSwitch = static_cast<CTargetSwitch *>(apTargetEnts[i]);
+					if(pTargetSwitch && (m_Layer != LAYER_SWITCH))
+						for(int TargetSwitchTeam = 0; TargetSwitchTeam < TEAM_SUPER; ++TargetSwitchTeam)
+						{
+							pTargetSwitch->GetHit(-1, m_Type == WEAPON_WORLD, TargetSwitchTeam);
+						}
+				}
 			}
 		}
 		else if(pTargetTargetSwitch && pOwnerChar)
