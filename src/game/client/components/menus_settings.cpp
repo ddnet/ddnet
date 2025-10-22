@@ -2741,7 +2741,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 	if(g_Config.m_ClTextEntities)
 	{
-		if(Ui()->DoScrollbarOption(&g_Config.m_ClTextEntitiesSize, &g_Config.m_ClTextEntitiesSize, &Button, Localize("Size"), 0, 100))
+		if(Ui()->DoScrollbarOption(&g_Config.m_ClTextEntitiesSize, &g_Config.m_ClTextEntitiesSize, &Button, Localize("Size"), 20, 100, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_DELAYUPDATE))
 			GameClient()->m_MapImages.SetTextureScale(g_Config.m_ClTextEntitiesSize);
 	}
 
