@@ -1,4 +1,5 @@
 #include "targetswitch.h"
+
 #include "character.h"
 
 #include <game/client/targetswitch_data.h>
@@ -43,14 +44,23 @@ void CTargetSwitch::Tick()
 	Move();
 }
 
-void CTargetSwitch::GetHit(int ClientId, bool Weakly)
+void CTargetSwitch::GetHit(int ClientId, bool Weakly, int ForcedTeam)
 {
+	int TeamHitFrom;
+	if(ForcedTeam == -1 && ClientId != -1)
+	{
+		TeamHitFrom = GameWorld()->GetCharacterById(ClientId)->Team();
+	}
+	else
+	{
+		TeamHitFrom = ForcedTeam;
+	}
+
 	if(Weakly)
 	{
 		return;
 	}
 
-	int TeamHitFrom = GameWorld()->GetCharacterById(ClientId)->Team();
 	const int EndTick = m_Delay ? GameWorld()->GameTick() + 1 + m_Delay * GameWorld()->GameTickSpeed() : 0;
 	Switchers()[m_Number].m_aLastUpdateTick[TeamHitFrom] = GameWorld()->GameTick();
 	if(m_Type == TARGETSWITCHTYPE_CLOSE)
