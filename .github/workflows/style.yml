@@ -107,7 +107,7 @@ jobs:
       run: |
         mkdir release
         cd release
-        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DDOWNLOAD_GTEST=OFF -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. ..
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DDOWNLOAD_GTEST=OFF ..
         cmake --build . --config Release --target dilate
 
     - name: Check dilated images
