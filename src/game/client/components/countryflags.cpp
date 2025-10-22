@@ -37,7 +37,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 
 		if(pReplacement[0] != '=' || pReplacement[1] != '=' || pReplacement[2] != ' ')
 		{
-			log_error("countryflags", "malform replacement for index '%s'", aOrigin);
+			log_error("countryflags", "malformed replacement for index '%s'", aOrigin);
 			continue;
 		}
 
