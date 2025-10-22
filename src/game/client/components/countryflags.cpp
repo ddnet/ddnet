@@ -127,21 +127,21 @@ size_t CCountryFlags::Num() const
 	return m_vCountryFlags.size();
 }
 
-const CCountryFlags::CCountryFlag *CCountryFlags::GetByCountryCode(int CountryCode) const
+const CCountryFlags::CCountryFlag &CCountryFlags::GetByCountryCode(int CountryCode) const
 {
 	return GetByIndex(m_aCodeIndexLUT[maximum(0, (CountryCode - CODE_LB) % CODE_RANGE)]);
 }
 
-const CCountryFlags::CCountryFlag *CCountryFlags::GetByIndex(size_t Index) const
+const CCountryFlags::CCountryFlag &CCountryFlags::GetByIndex(size_t Index) const
 {
-	return &m_vCountryFlags[Index % m_vCountryFlags.size()];
+	return m_vCountryFlags[Index % m_vCountryFlags.size()];
 }
 
-void CCountryFlags::Render(const CCountryFlag *pFlag, ColorRGBA Color, float x, float y, float w, float h)
+void CCountryFlags::Render(const CCountryFlag &Flag, ColorRGBA Color, float x, float y, float w, float h)
 {
-	if(pFlag->m_Texture.IsValid())
+	if(Flag.m_Texture.IsValid())
 	{
-		Graphics()->TextureSet(pFlag->m_Texture);
+		Graphics()->TextureSet(Flag.m_Texture);
 		Graphics()->SetColor(Color);
 		Graphics()->QuadsSetRotation(0.0f);
 		Graphics()->RenderQuadContainerEx(m_FlagsQuadContainerIndex, 0, -1, x, y, w, h);
