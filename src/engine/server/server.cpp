@@ -2627,8 +2627,8 @@ void CServer::UpdateRegisterServerInfo()
 	{
 		if(g_Config.m_SvFlag != -1)
 		{
-			JsonWriter.WriteAttribute("flag");
-			JsonWriter.WriteIntValue(g_Config.m_SvFlag);
+			JsonWriter.WriteAttribute("country");
+			JsonWriter.WriteIntValue(g_Config.m_SvFlag); // ISO 3166-1 numeric
 		}
 	}
 
