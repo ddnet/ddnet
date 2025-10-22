@@ -1222,7 +1222,25 @@ void CServer::InitDnsbl(int ClientId)
 		str_format(aBuf, sizeof(aBuf), "%s.%d.%d.%d.%d.%s", Config()->m_SvDnsblKey, Addr.ip[3], Addr.ip[2], Addr.ip[1], Addr.ip[0], Config()->m_SvDnsblHost);
 	}
 
-	m_aClients[ClientId].m_pDnsblLookup = std::make_shared<CHostLookup>(aBuf, NETTYPE_IPV4);
+	// Check if a custom DNS server is configured
+	if(Config()->m_SvDnsblServer[0] != '\0')
+	{
+		NETADDR DnsServer;
+		if(net_addr_from_str(&DnsServer, Config()->m_SvDnsblServer) == 0)
+		{
+			m_aClients[ClientId].m_pDnsblLookup = std::make_shared<CHostLookup>(aBuf, NETTYPE_IPV4, DnsServer);
+		}
+		else
+		{
+			log_warn("dnsbl", "invalid DNS server address '%s', using system resolver", Config()->m_SvDnsblServer);
+			m_aClients[ClientId].m_pDnsblLookup = std::make_shared<CHostLookup>(aBuf, NETTYPE_IPV4);
+		}
+	}
+	else
+	{
+		m_aClients[ClientId].m_pDnsblLookup = std::make_shared<CHostLookup>(aBuf, NETTYPE_IPV4);
+	}
+
 	Engine()->AddJob(m_aClients[ClientId].m_pDnsblLookup);
 	m_aClients[ClientId].m_DnsblState = EDnsblState::PENDING;
 }

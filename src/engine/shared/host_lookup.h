@@ -14,12 +14,14 @@ private:
 	char m_aHostname[128];
 	int m_Nettype;
 	NETADDR m_Addr;
+	NETADDR m_DnsServer;
 
 	void Run() override;
 
 public:
 	CHostLookup();
 	CHostLookup(const char *pHostname, int Nettype);
+	CHostLookup(const char *pHostname, int Nettype, const NETADDR &DnsServer);
 
 	int Result() const { return m_Result; }
 	const char *Hostname() const { return m_aHostname; }
