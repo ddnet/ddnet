@@ -57,6 +57,9 @@ public:
 	void SetSolo(bool Solo);
 	void SetSuper(bool Super);
 	void SetInvincible(bool Invincible);
+	void SetCollision(bool Collision);
+	void SetHookCollision(bool Collision);
+	void SetHitOthers(bool Active);
 	void SetLiveFrozen(bool Active);
 	void SetDeepFrozen(bool Active);
 	void HandleWeaponSwitch();
