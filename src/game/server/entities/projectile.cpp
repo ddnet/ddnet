@@ -11,8 +11,8 @@
 
 #include <game/mapitems.h>
 #include <game/server/gamecontext.h>
-#include <game/server/player.h>
 #include <game/server/gamemodes/DDRace.h>
+#include <game/server/player.h>
 
 CProjectile::CProjectile(
 	CGameWorld *pGameWorld,
@@ -165,12 +165,12 @@ void CProjectile::Tick()
 				if(pChr && (m_Layer != LAYER_SWITCH || (m_Layer == LAYER_SWITCH && m_Number > 0 && Switchers()[m_Number].m_aStatus[pChr->Team()])))
 					pChr->Freeze();
 			}
-			
+
 			constexpr int TargetSwitchCooldown = 4;
 			if(m_TargetSwitchCollisionCooldown <= 0)
 			{
 				CEntity *apTargetEnts[MAX_CLIENTS];
-				Num = GameWorld()->FindEntities(CurPos, 3.0f, apTargetEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_TARGETSWITCH);
+				Num = GameWorld()->FindEntities(CurPos, 1.0f, apTargetEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_TARGETSWITCH);
 				if(Num > 0)
 				{
 					Collide = true;
@@ -190,13 +190,12 @@ void CProjectile::Tick()
 			{
 				m_TargetSwitchCollisionCooldown--;
 			}
-
 		}
 		else if(pTargetChr)
 			pTargetChr->TakeDamage(vec2(0, 0), 0, m_Owner, m_Type);
 		else if(pTargetTargetSwitch)
 		{
-			if (pOwnerChar)
+			if(pOwnerChar)
 				pTargetTargetSwitch->GetHit(pOwnerChar->GetPlayer()->GetCid(), m_Type == WEAPON_GUN);
 		}
 

@@ -3,6 +3,7 @@
 #include "projectile.h"
 
 #include "character.h"
+#include "targetswitch.h"
 
 #include <engine/shared/config.h>
 
@@ -11,7 +12,6 @@
 #include <game/client/projectile_data.h>
 #include <game/collision.h>
 #include <game/mapitems.h>
-#include "targetswitch.h"
 
 CProjectile::CProjectile(
 	CGameWorld *pGameWorld,
@@ -128,7 +128,7 @@ void CProjectile::Tick()
 			if(m_TargetSwitchCollisionCooldown <= 0)
 			{
 				CEntity *apTargetEnts[MAX_CLIENTS];
-				Num = GameWorld()->FindEntities(CurPos, 3.0f, apTargetEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_TARGETSWITCH);
+				Num = GameWorld()->FindEntities(CurPos, 1.0f, apTargetEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_TARGETSWITCH);
 				if(Num > 0)
 				{
 					Collide = true;

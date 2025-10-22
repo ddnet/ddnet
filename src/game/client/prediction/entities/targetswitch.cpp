@@ -1,4 +1,5 @@
 #include "targetswitch.h"
+
 #include "character.h"
 
 #include <game/client/targetswitch_data.h>
@@ -46,7 +47,7 @@ void CTargetSwitch::Tick()
 void CTargetSwitch::GetHit(int ClientId, bool Weakly, int ForcedTeam)
 {
 	int TeamHitFrom;
-	if (ForcedTeam == -1 && ClientId != -1)
+	if(ForcedTeam == -1 && ClientId != -1)
 	{
 		TeamHitFrom = GameWorld()->GetCharacterById(ClientId)->Team();
 	}
