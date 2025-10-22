@@ -51,6 +51,9 @@ private:
 	bool m_IsSolo;
 	vec2 m_InitDir;
 
+	// for moving shotgun pellets
+	int m_TargetSwitchCollisionCooldown;
+
 public:
 	void SetBouncing(int Value);
 	bool FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj);
