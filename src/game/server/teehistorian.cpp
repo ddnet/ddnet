@@ -172,6 +172,20 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 		First = false; \
 	}
 
+#define MACRO_CONFIG_FLOAT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
+	{ \
+		const CFixedPointNumber DefaultValue = CFixedPointNumber::FromLiteral(#Def); \
+		if((Flags)&CFGFLAG_SERVER && !((Flags)&CFGFLAG_NONTEEHISTORIC) && pGameInfo->m_pConfig->m_##Name != DefaultValue) \
+		{ \
+			str_format(aJson, sizeof(aJson), "%s\"%s\":\"%s\"", \
+				First ? "" : ",", \
+				E(aBuffer1, #ScriptName), \
+				pGameInfo->m_pConfig->m_##Name.AsStr()); \
+			Write(aJson, str_length(aJson)); \
+			First = false; \
+		} \
+	}
+
 #define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) MACRO_CONFIG_INT(Name, ScriptName, Def, 0, 0, Flags, Desc)
 
 #define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Flags, Desc) \
