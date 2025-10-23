@@ -8,16 +8,13 @@ class LanguageDecodeError(Exception):
 		error = f"File \"{filename}\", line {line+1}: {message}"
 		super().__init__(error)
 
-def decode(fileobj, elements_per_key):
+def decode(fileobj, elements_per_key, allow_context=True):
 	data = {}
 	current_context = ""
 	current_key = None
 	index = -1
 	for index, line in enumerate(fileobj):
-		line = line.encode("utf-8").decode("utf-8-sig")
-		line = line[:-1]
-		if line and line[-1] == "\r":
-			line = line[:-1]
+		line = line.encode("utf-8").decode("utf-8-sig").rstrip("\r\n")
 		if not line or line[:1] == "#":
 			current_context = ""
 			continue
@@ -25,6 +22,8 @@ def decode(fileobj, elements_per_key):
 		if line[0] == "[":
 			if line[-1] != "]":
 				raise LanguageDecodeError("Invalid context string", fileobj.name, index)
+			if not allow_context:
+				raise LanguageDecodeError("Context not allowed in this file", fileobj.name, index)
 			current_context = line[1:-1]
 		elif line[:3] == "== ":
 			if len(data[current_key]) >= 1+elements_per_key:
@@ -73,10 +72,14 @@ def check_folder(path):
 	return englishlist
 
 
-def languages():
+def language_index():
 	with open("data/languages/index.txt", encoding="utf-8") as f:
-		index = decode(f, 3)
-	langs = {"data/languages/"+key[0]+".txt" : [key[0]]+elements for key, elements in index.items()}
+		return {key: value for (key, _), value in decode(f, 3, allow_context=False).items()}
+
+
+def languages():
+	index = language_index()
+	langs = {"data/languages/"+key+".txt": [key]+elements for key, elements in index.items()}
 	return langs
 
 
