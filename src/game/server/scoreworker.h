@@ -66,11 +66,7 @@ struct CScorePlayerResult : ISqlResult
 
 struct CScoreLoadBestTimeResult : ISqlResult
 {
-	CScoreLoadBestTimeResult() :
-		m_CurrentRecord(0)
-	{
-	}
-	float m_CurrentRecord;
+	std::optional<float> m_CurrentRecord = std::nullopt;
 };
 
 struct CSqlLoadBestTimeRequest : ISqlData

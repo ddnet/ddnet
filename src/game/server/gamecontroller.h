@@ -161,7 +161,7 @@ public:
 	bool IsTeamPlay() const { return m_GameFlags & GAMEFLAG_TEAMS; }
 	// DDRace
 
-	float m_CurrentRecord;
+	std::optional<float> m_CurrentRecord;
 	CGameTeams &Teams() { return m_Teams; }
 	std::shared_ptr<CScoreLoadBestTimeResult> m_pLoadBestTimeResult;
 };
