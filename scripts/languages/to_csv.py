@@ -14,7 +14,7 @@ def main():
 	for key, (_, _, _, rfc3066, _) in sorted(twlang.language_index().items()):
 		rfc3066 = rfc3066.split(";")[0]
 		filename = f"{prefix}/data/languages/{key}.txt"
-		with open(f"{args.out_dir}/{rfc3066}.csv", "w", encoding="utf-8") as f:
+		with open(f"{args.out_dir}/{rfc3066}.csv", "w", encoding="utf-8", newline="\r\n") as f:
 			# Needs to use the "unix" dialect, otherwise Weblate misdetects
 			# space as field separator in some of the translation files.
 			writer = csv.DictWriter(f, "source context target".split(), dialect="unix")
