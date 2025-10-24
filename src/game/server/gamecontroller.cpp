@@ -38,7 +38,7 @@ IGameController::IGameController(class CGameContext *pGameServer) :
 	m_GameFlags = 0;
 	m_aMapWish[0] = 0;
 
-	m_CurrentRecord = 0;
+	m_CurrentRecord.reset();
 }
 
 IGameController::~IGameController() = default;
@@ -654,7 +654,7 @@ void IGameController::Snap(int SnappingClient)
 		if(!pRaceData)
 			return;
 
-		pRaceData->m_BestTime = round_to_int(m_CurrentRecord * 1000);
+		pRaceData->m_BestTime = m_CurrentRecord.has_value() ? round_to_int(m_CurrentRecord.value() * 1000) : -1;
 		pRaceData->m_Precision = 2;
 		pRaceData->m_RaceFlags = protocol7::RACEFLAG_KEEP_WANTED_WEAPON;
 	}
