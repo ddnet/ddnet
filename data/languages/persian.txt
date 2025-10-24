@@ -1,4 +1,4 @@
-﻿%ds left
+%ds left
 == %ds ﻩﺪﻧﺎﻣ ﯽﻗﺎﺑ
 
 %i minute left
@@ -354,6 +354,7 @@ Quit
 
 Are you sure that you want to disconnect?
 == ؟ﯽﻨﮐ ﻝﺎﺼﺗﺍ ﻊﻄﻗ ﯼﺍﻮﺨﯿﻣ ﯽﻨﺌﻌﻤﻄﻣ
+
 Disconnect Dummy
 == ﯽﻣﺍﺩ ﻥﺩﺮﮐ ﻊﻄﻗ
 

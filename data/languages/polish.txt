@@ -436,8 +436,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Uruchom ponownie grę, aby użyć nowych ustawień.
 
-#####
-
 Demo
 == Demo
 

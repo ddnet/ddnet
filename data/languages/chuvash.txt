@@ -436,8 +436,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Режим улăштарма валли вăйă сӳнтер тата каллер яр
 
-##### needs translation #####
-
 New name:
 == Çĕн ят
 

@@ -436,8 +436,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Les changements prendront effet au prochain redémarrage.
 
-##### needs translation #####
-
 New name:
 == Nouveau nom :
 

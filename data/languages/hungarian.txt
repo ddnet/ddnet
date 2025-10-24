@@ -1,4 +1,4 @@
-﻿%ds left
+%ds left
 == %ds van hátra
 
 %i minute left
