@@ -101,11 +101,26 @@ enum
 	MAX_SKIN_LENGTH = 24,
 
 	// message packing
-	MSGFLAG_VITAL = 1 << 0, // guaranteed to be delivered, resent on packet loss
-	MSGFLAG_FLUSH = 1 << 1, // makes the msg be sent immediately, without it it's delayed until the next flush
-	MSGFLAG_NORECORD = 1 << 2, // don't write msg to demo recorders
-	MSGFLAG_RECORD = 1 << 3, // write msg to demo recorders
-	MSGFLAG_NOSEND = 1 << 4 // don't send the msg to client/server, useful combined with MSGFLAG_RECORD to record a msg without sending it
+	/**
+	 * Guaranteed to be delivered, resent on packet loss.
+	 */
+	MSGFLAG_VITAL = 1 << 0,
+	/**
+	 * Makes the message be sent immediately. Without this flag the message will be delayed until the next flush.
+	 */
+	MSGFLAG_FLUSH = 1 << 1,
+	/**
+	 * Don't write message to demo recorders. This flag is server-side only, where sent messages are recorded by default.
+	 */
+	MSGFLAG_NORECORD = 1 << 2,
+	/**
+	 * Write message to demo recorders. This flag is client-side only, where sent messages are not recorded by default.
+	 */
+	MSGFLAG_RECORD = 1 << 3,
+	/**
+	 * Don't send the message to client/server. Useful combined with @link MSGFLAG_RECORD @endlink to record a message without sending it.
+	 */
+	MSGFLAG_NOSEND = 1 << 4,
 };
 
 enum
