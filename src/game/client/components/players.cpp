@@ -215,6 +215,7 @@ void CPlayers::RenderHookCollLine(
 
 	// simulate the hook into the future
 	int HookTick;
+	bool HookEnteredTelehook = false;
 	for(HookTick = 0; HookTick < MaxHookTicks; ++HookTick)
 	{
 		int Tele;
@@ -224,7 +225,19 @@ void CPlayers::RenderHookCollLine(
 		// check if a hook would enter retracting state in this tick
 		if(distance(BasePos, SegmentEndPos) > HookLength)
 		{
-			// the line is too long here, and the hook starts to retract, use old position
+			// check if the retracting hook hits a player
+			if(!HookEnteredTelehook)
+			{
+				vec2 RetractingHookEndPos = BasePos + normalize(SegmentEndPos - BasePos) * HookLength;
+				if(GameClient()->IntersectCharacter(SegmentStartPos, RetractingHookEndPos, HitPos, ClientId) != -1)
+				{
+					HookCollColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorTeeColl));
+					vLineSegments.emplace_back(LineStartPos, HitPos);
+					break;
+				}
+			}
+
+			// the line is too long here, and the hook retracts, use old position
 			vLineSegments.emplace_back(LineStartPos, SegmentStartPos);
 			break;
 		}
@@ -233,10 +246,10 @@ void CPlayers::RenderHookCollLine(
 		int Hit = Collision()->IntersectLineTeleHook(SegmentStartPos, SegmentEndPos, &HitPos, nullptr, &Tele);
 
 		// check if we intersect a player
-		if(GameClient()->IntersectCharacter(SegmentStartPos, HitPos, SegmentEndPos, ClientId) != -1)
+		if(GameClient()->IntersectCharacter(SegmentStartPos, SegmentEndPos, HitPos, ClientId) != -1)
 		{
 			HookCollColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorTeeColl));
-			vLineSegments.emplace_back(LineStartPos, SegmentEndPos);
+			vLineSegments.emplace_back(LineStartPos, HitPos);
 			break;
 		}
 
@@ -267,6 +280,7 @@ void CPlayers::RenderHookCollLine(
 
 		// we are hitting TILE_TELEINHOOK
 		vLineSegments.emplace_back(LineStartPos, HitPos);
+		HookEnteredTelehook = true;
 
 		// check tele outs
 		const std::vector<vec2> &vTeleOuts = Collision()->TeleOuts(Tele - 1);
