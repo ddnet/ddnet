@@ -496,13 +496,10 @@ Name plates size
 == Dimensione nomi
 
 DDNet %s is out!
-== DDNet %s è uscito!
-
-%d new mentions
-== %d nuove menzioni
+== È uscito DDNet %s!
 
 Disconnect Dummy
-== Disconnetti Dummy
+== Disconnetti il dummy
 
 Are you sure that you want to disconnect your dummy?
 == Sei sicuro di voler disconnettere il tuo dummy?
@@ -510,14 +507,8 @@ Are you sure that you want to disconnect your dummy?
 Filter connecting players
 == Filtra i giocatori in conness.
 
-9+ new mentions
-== 9+ nuove menzioni
-
 Markers
 == Marcatrici
-
-Disconnect Dummy
-== Disconnetti il dummy
 
 Length
 == Lunghezza
@@ -525,29 +516,14 @@ Length
 Fetch Info
 == Recuperare informazioni
 
-Length
-== Lunghezza
-
 Downloading %s:
 == Scaricando %s:
 
 Update failed! Check log…
 == Aggiornamento non riuscito! Controlla registro…
 
-Filter connecting players
-== Filtra i giocatori in conness.
-
 Time
 == Tempo
-
-Downloading %s:
-== Scarica %s
-
-Are you sure that you want to disconnect your dummy?
-== Sei sicuro di voler scollegare il tuo dummy?
-
-1 new mention
-== 1 nuova menzione
 
 Successfully saved the replay!
 == Hai salvato il replay con successo!
@@ -998,9 +974,6 @@ Editor
 Play
 == Gioca
 
-DDNet %s is out!
-== È uscito DDNet %s!
-
 Restart
 == Ricomincia
 
@@ -1050,7 +1023,7 @@ Grabs
 == %d nuove menzioni
 
 9+ new mentions
-== +9 nuove menzioni
+== 9+ nuove menzioni
 
 Preparing demo playback
 == Preparando la riproduzione della demo
