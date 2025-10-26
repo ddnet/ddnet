@@ -439,8 +439,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Morate ponovo pokrenuti igru da bi sva podešavanja bila primenjena
 
-##### needs translation #####
-
 Demo
 == Snimak
 

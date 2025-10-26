@@ -433,8 +433,6 @@ Yes
 You must restart the game for all settings to take effect.
 == 設定を反映するためにはゲームの再起動が必要です。
 
-##### needs translation #####
-
 New name:
 == 新しいファイル名:
 

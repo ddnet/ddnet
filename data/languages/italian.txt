@@ -436,8 +436,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Devi riavviare il gioco per rendere effettive le modifiche.
 
-##### needs translation #####
-
 New name:
 == Nuovo nome:
 
@@ -950,7 +948,6 @@ Learn
 
 https://wiki.ddnet.org/
 == https://wiki.ddnet.org/
-
 
 Website
 == Sito web

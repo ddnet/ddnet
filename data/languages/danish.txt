@@ -436,8 +436,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Du skal genstarte spillet før alle indstillingerne virker.
 
-##### needs translation #####
-
 New name:
 == Nyt navn:
 

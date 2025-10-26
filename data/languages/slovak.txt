@@ -436,8 +436,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Zmeny sa prejavia po reštartovaní hry.
 
-##### needs translation #####
-
 New name:
 == Nové meno:
 

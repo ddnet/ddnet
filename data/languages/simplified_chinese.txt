@@ -667,8 +667,6 @@ Fat skins (DDFat)
 Ratio
 == K/D
 
-##### Ratio的算法是击杀除以死亡次数 #####
-
 AntiPing
 == 延迟补偿（AntiPing）
 
@@ -726,12 +724,8 @@ Suicides
 Net
 == 净击杀
 
-##### Net的算法是杀人+1被杀-1 #####
-
 FPM
 == 击杀/分
-
-##### 得分速度就是效率FPM #####
 
 Spree
 == 连杀

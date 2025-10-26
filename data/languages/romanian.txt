@@ -442,8 +442,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Trebuie să repornești jocul pentru aplicarea setărilor.
 
-##### needs translation #####
-
 New name:
 == Nume nou:
 

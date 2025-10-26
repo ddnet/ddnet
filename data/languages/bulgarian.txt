@@ -433,8 +433,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Трябва да рестартираш играта за да поемат ефект новите настройки.
 
-##### needs translation #####
-
 New name:
 == Ново име:
 
