@@ -380,19 +380,19 @@ public:
 class CNetRecvUnpacker
 {
 public:
-	bool m_Valid;
-
-	NETADDR m_Addr;
-	CNetConnection *m_pConnection;
-	int m_CurrentChunk;
-	int m_ClientId;
 	CNetPacketConstruct m_Data;
-	unsigned char m_aBuffer[NET_MAX_PACKETSIZE];
 
 	CNetRecvUnpacker() { Clear(); }
 	void Clear();
 	void Start(const NETADDR *pAddr, CNetConnection *pConnection, int ClientId);
 	int FetchChunk(CNetChunk *pChunk);
+
+private:
+	bool m_Valid;
+	NETADDR m_Addr;
+	CNetConnection *m_pConnection;
+	int m_CurrentChunk;
+	int m_ClientId;
 };
 
 // server side
