@@ -39,13 +39,10 @@ void CNetRecvUnpacker::Start(const NETADDR *pAddr, CNetConnection *pConnection, 
 // TODO: rename this function
 int CNetRecvUnpacker::FetchChunk(CNetChunk *pChunk)
 {
-	CNetChunkHeader Header;
-	unsigned char *pEnd = m_Data.m_aChunkData + m_Data.m_DataSize;
+	const unsigned char *const pEnd = m_Data.m_aChunkData + m_Data.m_DataSize;
 
 	while(true)
 	{
-		unsigned char *pData = m_Data.m_aChunkData;
-
 		// check for old data to unpack
 		if(!m_Valid || m_CurrentChunk >= m_Data.m_NumChunks)
 		{
@@ -53,15 +50,19 @@ int CNetRecvUnpacker::FetchChunk(CNetChunk *pChunk)
 			return 0;
 		}
 
+		unsigned char *pData = m_Data.m_aChunkData;
+
 		// TODO: add checking here so we don't read too far
 		const int HeaderSplit = m_pConnection && m_pConnection->m_Sixup ? 6 : 4;
 		for(int i = 0; i < m_CurrentChunk; i++)
 		{
-			pData = Header.Unpack(pData, HeaderSplit);
-			pData += Header.m_Size;
+			CNetChunkHeader SkippedHeader;
+			pData = SkippedHeader.Unpack(pData, HeaderSplit);
+			pData += SkippedHeader.m_Size;
 		}
 
 		// unpack the header
+		CNetChunkHeader Header;
 		pData = Header.Unpack(pData, HeaderSplit);
 		m_CurrentChunk++;
 
