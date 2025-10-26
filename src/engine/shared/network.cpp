@@ -54,14 +54,15 @@ int CNetRecvUnpacker::FetchChunk(CNetChunk *pChunk)
 		}
 
 		// TODO: add checking here so we don't read too far
+		const int HeaderSplit = m_pConnection && m_pConnection->m_Sixup ? 6 : 4;
 		for(int i = 0; i < m_CurrentChunk; i++)
 		{
-			pData = Header.Unpack(pData, (m_pConnection && m_pConnection->m_Sixup) ? 6 : 4);
+			pData = Header.Unpack(pData, HeaderSplit);
 			pData += Header.m_Size;
 		}
 
 		// unpack the header
-		pData = Header.Unpack(pData, (m_pConnection && m_pConnection->m_Sixup) ? 6 : 4);
+		pData = Header.Unpack(pData, HeaderSplit);
 		m_CurrentChunk++;
 
 		if(pData + Header.m_Size > pEnd)
