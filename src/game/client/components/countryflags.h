@@ -25,9 +25,9 @@ public:
 	void OnInit() override;
 
 	size_t Num() const;
-	const CCountryFlag *GetByCountryCode(int CountryCode) const;
-	const CCountryFlag *GetByIndex(size_t Index) const;
-	void Render(const CCountryFlag *pFlag, ColorRGBA Color, float x, float y, float w, float h);
+	const CCountryFlag &GetByCountryCode(int CountryCode) const;
+	const CCountryFlag &GetByIndex(size_t Index) const;
+	void Render(const CCountryFlag &Flag, ColorRGBA Color, float x, float y, float w, float h);
 	void Render(int CountryCode, ColorRGBA Color, float x, float y, float w, float h);
 
 private:

@@ -310,10 +310,10 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	std::vector<const CCountryFlags::CCountryFlag *> vpFilteredFlags;
 	for(size_t i = 0; i < GameClient()->m_CountryFlags.Num(); ++i)
 	{
-		const CCountryFlags::CCountryFlag *pEntry = GameClient()->m_CountryFlags.GetByIndex(i);
-		if(!str_find_nocase(pEntry->m_aCountryCodeString, s_FlagFilterInput.GetString()))
+		const CCountryFlags::CCountryFlag &Entry = GameClient()->m_CountryFlags.GetByIndex(i);
+		if(!str_find_nocase(Entry.m_aCountryCodeString, s_FlagFilterInput.GetString()))
 			continue;
-		vpFilteredFlags.push_back(pEntry);
+		vpFilteredFlags.push_back(&Entry);
 	}
 
 	MainView.HSplitTop(10.0f, nullptr, &MainView);
