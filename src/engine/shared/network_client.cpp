@@ -75,8 +75,8 @@ int CNetClient::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken, bool Six
 {
 	while(true)
 	{
-		// check for a chunk
-		if(m_RecvUnpacker.FetchChunk(pChunk))
+		// Unpack next chunk from stored packet if available
+		if(m_PacketChunkUnpacker.UnpackNextChunk(pChunk))
 			return 1;
 
 		// TODO: empty the recvinfo
@@ -95,40 +95,46 @@ int CNetClient::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken, bool Six
 
 		SECURITY_TOKEN Token;
 		*pResponseToken = NET_SECURITY_TOKEN_UNKNOWN;
-		if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvUnpacker.m_Data, Sixup, &Token, pResponseToken) == 0)
+		if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvBuffer, Sixup, &Token, pResponseToken) == 0)
 		{
 			if(Sixup)
 			{
 				Addr.type |= NETTYPE_TW7;
 			}
-			if(m_RecvUnpacker.m_Data.m_Flags & NET_PACKETFLAG_CONNLESS)
+			if(m_RecvBuffer.m_Flags & NET_PACKETFLAG_CONNLESS)
 			{
 				pChunk->m_Flags = NETSENDFLAG_CONNLESS;
 				pChunk->m_ClientId = -1;
 				pChunk->m_Address = Addr;
-				pChunk->m_DataSize = m_RecvUnpacker.m_Data.m_DataSize;
-				pChunk->m_pData = m_RecvUnpacker.m_Data.m_aChunkData;
-				if(m_RecvUnpacker.m_Data.m_Flags & NET_PACKETFLAG_EXTENDED)
+				pChunk->m_DataSize = m_RecvBuffer.m_DataSize;
+				pChunk->m_pData = m_RecvBuffer.m_aChunkData;
+				if(m_RecvBuffer.m_Flags & NET_PACKETFLAG_EXTENDED)
 				{
 					pChunk->m_Flags |= NETSENDFLAG_EXTENDED;
-					mem_copy(pChunk->m_aExtraData, m_RecvUnpacker.m_Data.m_aExtraData, sizeof(pChunk->m_aExtraData));
+					mem_copy(pChunk->m_aExtraData, m_RecvBuffer.m_aExtraData, sizeof(pChunk->m_aExtraData));
 				}
 				return 1;
 			}
 			else
 			{
+				const bool Control = (m_RecvBuffer.m_Flags & NET_PACKETFLAG_CONTROL) != 0;
 				if(Sixup &&
-					(m_RecvUnpacker.m_Data.m_Flags & NET_PACKETFLAG_CONTROL) != 0 &&
-					m_RecvUnpacker.m_Data.m_DataSize >= 1 + (int)sizeof(SECURITY_TOKEN) &&
-					m_RecvUnpacker.m_Data.m_aChunkData[0] == protocol7::NET_CTRLMSG_TOKEN)
+					Control &&
+					m_RecvBuffer.m_DataSize >= 1 + (int)sizeof(SECURITY_TOKEN) &&
+					m_RecvBuffer.m_aChunkData[0] == protocol7::NET_CTRLMSG_TOKEN)
 				{
 					m_TokenCache.AddToken(&Addr, *pResponseToken);
 				}
 				if(m_Connection.State() != CNetConnection::EState::OFFLINE &&
 					m_Connection.State() != CNetConnection::EState::ERROR &&
-					m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr, Token, *pResponseToken))
+					m_Connection.Feed(&m_RecvBuffer, &Addr, Token, *pResponseToken))
 				{
-					m_RecvUnpacker.Start(&Addr, &m_Connection, 0);
+					if(!Control &&
+						m_RecvBuffer.m_DataSize > 0 &&
+						m_RecvBuffer.m_NumChunks > 0)
+					{
+						m_PacketChunkUnpacker.FeedPacket(Addr, m_RecvBuffer, &m_Connection, 0);
+					}
 				}
 			}
 		}
