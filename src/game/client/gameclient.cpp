@@ -3464,7 +3464,7 @@ void CGameClient::UpdateSpectatorCursor()
 
 	const vec2 Target = vec2(CharInfo.m_ExtendedData.m_TargetX, CharInfo.m_ExtendedData.m_TargetY);
 
-	// interpolate cursor positions when not in debug mode
+	// interpolate cursor positions
 	const double Tick = Client()->GameTick(g_Config.m_ClDummy);
 
 	const bool HasSample = m_CursorInfo.m_NumSamples > 0;
