@@ -4496,7 +4496,7 @@ void CGameContext::OnSnap(int ClientId, bool GlobalSnap)
 		int *pParams = (int *)&m_Tuning;
 		for(unsigned i = 0; i < sizeof(m_Tuning) / sizeof(int); i++)
 			Msg.AddInt(pParams[i]);
-		Server()->SendMsg(&Msg, MSGFLAG_RECORD | MSGFLAG_NOSEND, ClientId);
+		Server()->SendMsg(&Msg, MSGFLAG_NOSEND, ClientId);
 	}
 
 	m_pController->Snap(ClientId);
