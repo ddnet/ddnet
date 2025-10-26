@@ -587,13 +587,12 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 {
 	while(true)
 	{
-		NETADDR Addr;
-
 		// check for a chunk
 		if(m_RecvUnpacker.FetchChunk(pChunk))
 			return 1;
 
 		// TODO: empty the recvinfo
+		NETADDR Addr;
 		unsigned char *pData;
 		int Bytes = net_udp_recv(m_Socket, &Addr, &pData);
 
