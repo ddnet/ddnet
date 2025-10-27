@@ -246,10 +246,10 @@ void CPlayers::RenderHookCollLine(
 		int Hit = Collision()->IntersectLineTeleHook(SegmentStartPos, SegmentEndPos, &HitPos, nullptr, &Tele);
 
 		// check if we intersect a player
-		if(GameClient()->IntersectCharacter(SegmentStartPos, SegmentEndPos, HitPos, ClientId) != -1)
+		if(GameClient()->IntersectCharacter(SegmentStartPos, HitPos, SegmentEndPos, ClientId) != -1)
 		{
 			HookCollColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorTeeColl));
-			vLineSegments.emplace_back(LineStartPos, HitPos);
+			vLineSegments.emplace_back(LineStartPos, SegmentEndPos);
 			break;
 		}
 
