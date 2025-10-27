@@ -119,17 +119,24 @@ int PickupType_SixToSeven(int Type6, int SubType6)
 	case POWERUP_WEAPON:
 		switch(SubType6)
 		{
+		case WEAPON_HAMMER: return protocol7::PICKUP_HAMMER;
+		case WEAPON_GUN: return protocol7::PICKUP_GUN;
 		case WEAPON_SHOTGUN: return protocol7::PICKUP_SHOTGUN;
 		case WEAPON_GRENADE: return protocol7::PICKUP_GRENADE;
 		case WEAPON_LASER: return protocol7::PICKUP_LASER;
-		case WEAPON_GUN: return protocol7::PICKUP_GUN;
-		case WEAPON_HAMMER: return protocol7::PICKUP_HAMMER;
+		case WEAPON_NINJA: return protocol7::PICKUP_NINJA;
 		default:
 			dbg_assert(false, "invalid subtype %d", SubType6);
 			dbg_break();
 		}
 	case POWERUP_NINJA: return protocol7::PICKUP_NINJA;
-	case POWERUP_ARMOR: return protocol7::PICKUP_ARMOR;
+	case POWERUP_HEALTH: return protocol7::PICKUP_HEALTH;
+	case POWERUP_ARMOR:
+	case POWERUP_ARMOR_SHOTGUN:
+	case POWERUP_ARMOR_GRENADE:
+	case POWERUP_ARMOR_NINJA:
+	case POWERUP_ARMOR_LASER:
+		return protocol7::PICKUP_ARMOR;
 	default:
 		dbg_assert(false, "invalid type %d", Type6);
 		dbg_break();
