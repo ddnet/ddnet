@@ -15,10 +15,17 @@
 #define GAME_TYPE_NAME "DDraceNetwork"
 #define TEST_TYPE_NAME "TestDDraceNetwork"
 
-CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer) :
+CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer, bool Block) :
 	IGameController(pGameServer)
 {
-	m_pGameType = g_Config.m_SvTestingCommands ? TEST_TYPE_NAME : GAME_TYPE_NAME;
+	if(!Block)
+	{
+		m_pGameType = g_Config.m_SvTestingCommands ? TEST_TYPE_NAME : GAME_TYPE_NAME;
+	}
+	else
+	{
+		m_pGameType = g_Config.m_SvTestingCommands ? "TestBlock" : "Block";
+	}
 	m_GameFlags = protocol7::GAMEFLAG_RACE;
 }
 

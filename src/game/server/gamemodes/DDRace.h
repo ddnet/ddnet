@@ -7,7 +7,7 @@
 class CGameControllerDDRace : public IGameController
 {
 public:
-	CGameControllerDDRace(class CGameContext *pGameServer);
+	CGameControllerDDRace(class CGameContext *pGameServer, bool Block);
 	~CGameControllerDDRace() override;
 
 	CScore *Score();
