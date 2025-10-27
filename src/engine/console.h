@@ -43,14 +43,6 @@ public:
 		FILE_RECURSION_LIMIT = 16,
 	};
 
-	enum class EAccessLevel
-	{
-		ADMIN,
-		MODERATOR,
-		HELPER,
-		USER,
-	};
-
 	// TODO: rework this interface to reduce the amount of virtual calls
 	class IResult
 	{
@@ -85,7 +77,7 @@ public:
 		virtual const char *Name() const = 0;
 		virtual const char *Help() const = 0;
 		virtual const char *Params() const = 0;
-		virtual EAccessLevel GetAccessLevel() const = 0;
+		virtual int Flags() const = 0;
 	};
 
 	typedef void (*FTeeHistorianCommandCallback)(int ClientId, int FlagMask, const char *pCmd, IResult *pResult, void *pUser);
@@ -93,13 +85,14 @@ public:
 	typedef void (*FCommandCallback)(IResult *pResult, void *pUserData);
 	typedef void (*FChainCommandCallback)(IResult *pResult, void *pUserData, FCommandCallback pfnCallback, void *pCallbackUserData);
 	typedef bool (*FUnknownCommandCallback)(const char *pCommand, void *pUser); // returns true if the callback has handled the argument
+	typedef bool (*FCanUseCommandCallback)(int ClientId, const ICommandInfo *pCommand, void *pUser);
 
 	static void EmptyPossibleCommandCallback(int Index, const char *pCmd, void *pUser) {}
 	static bool EmptyUnknownCommandCallback(const char *pCommand, void *pUser) { return false; }
 
 	virtual void Init() = 0;
-	virtual const ICommandInfo *FirstCommandInfo(EAccessLevel AccessLevel, int FlagMask) const = 0;
-	virtual const ICommandInfo *NextCommandInfo(const IConsole::ICommandInfo *pInfo, EAccessLevel AccessLevel, int FlagMask) const = 0;
+	virtual const ICommandInfo *FirstCommandInfo(int ClientId, int FlagMask) const = 0;
+	virtual const ICommandInfo *NextCommandInfo(const IConsole::ICommandInfo *pInfo, int ClientId, int FlagMask) const = 0;
 	virtual const ICommandInfo *GetCommandInfo(const char *pName, int FlagMask, bool Temp) = 0;
 	virtual int PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback = EmptyPossibleCommandCallback, void *pUser = nullptr) = 0;
 	virtual void ParseArguments(int NumArgs, const char **ppArguments) = 0;
@@ -126,9 +119,8 @@ public:
 	virtual void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = gs_ConsoleDefaultColor) const = 0;
 	virtual void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser) = 0;
 	virtual void SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, void *pUser) = 0;
+	virtual void SetCanUseCommandCallback(FCanUseCommandCallback pfnCallback, void *pUser) = 0;
 	virtual void InitChecksum(CChecksumData *pData) const = 0;
-
-	virtual void SetAccessLevel(EAccessLevel AccessLevel) = 0;
 
 	static LEVEL ToLogLevel(int ConsoleLevel);
 	static int ToLogLevelFilter(int ConsoleLevel);
