@@ -69,10 +69,13 @@ void CScoreboard::RenderTitle(CUIRect TitleBar, int Team, const char *pTitle)
 	dbg_assert(Team == TEAM_RED || Team == TEAM_BLUE, "Team invalid");
 
 	char aScore[128] = "";
+	char aCentiSeconds[3] = "";
 	if(GameClient()->m_GameInfo.m_TimeScore)
 	{
-		if(m_ServerRecord > 0)
+		if(m_ServerRecord > 0.0f)
 		{
+			if(m_ServerRecord < 60 * 60)
+				str_format(aCentiSeconds, sizeof(aCentiSeconds), "%02d", (int)std::round((m_ServerRecord - std::floor(m_ServerRecord)) * 100.0f));
 			str_time_float(m_ServerRecord, TIME_HOURS, aScore, sizeof(aScore));
 		}
 	}
@@ -99,7 +102,8 @@ void CScoreboard::RenderTitle(CUIRect TitleBar, int Team, const char *pTitle)
 	}
 
 	const float TitleFontSize = 40.0f;
-	const float ScoreTextWidth = TextRender()->TextWidth(TitleFontSize, aScore);
+	const float ScoreTextWidthCentiseconds = TextRender()->TextWidth(TitleFontSize, aCentiSeconds);
+	const float ScoreTextWidth = TextRender()->TextWidth(TitleFontSize, aScore) + ScoreTextWidthCentiseconds;
 
 	TitleBar.VMargin(20.0f, &TitleBar);
 	CUIRect TitleLabel, ScoreLabel;
@@ -123,7 +127,16 @@ void CScoreboard::RenderTitle(CUIRect TitleBar, int Team, const char *pTitle)
 
 	if(aScore[0] != '\0')
 	{
-		Ui()->DoLabel(&ScoreLabel, aScore, TitleFontSize, Team == TEAM_RED ? TEXTALIGN_MR : TEXTALIGN_ML);
+		if(ScoreTextWidthCentiseconds > 0.0f)
+		{
+			CUIRect CentisecondLabel;
+			ScoreLabel.VSplitRight(ScoreTextWidthCentiseconds, &ScoreLabel, &CentisecondLabel);
+			CentisecondLabel.HSplitTop(CentisecondLabel.h * 0.85f, &CentisecondLabel, nullptr);
+			Ui()->DoLabel(&ScoreLabel, aScore, TitleFontSize, TEXTALIGN_MR);
+			Ui()->DoLabel(&CentisecondLabel, aCentiSeconds, TitleFontSize * 0.7f, TEXTALIGN_ML);
+		}
+		else
+			Ui()->DoLabel(&ScoreLabel, aScore, TitleFontSize, Team == TEAM_RED ? TEXTALIGN_MR : TEXTALIGN_ML);
 	}
 }
 
@@ -458,6 +471,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 			}
 
 			// score
+			float CentisecondOffset = 0.0f;
 			if(Race7)
 			{
 				if(pInfo->m_Score == -1)
@@ -474,20 +488,43 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 			}
 			else if(TimeScore)
 			{
+				// add centiseconds if time is under an hour
+				if(GameClient()->m_GameInfo.m_TimeType == ETimeType::TIME_TYPE_MILLISECONDS && pInfo->m_Score != -9999 && pInfo->m_Score < 1000 * 60 * 60)
+				{
+					str_format(aBuf, sizeof(aBuf), "%02d", (int)std::round((pInfo->m_Score % 1000) / 10.0f));
+					CentisecondOffset = TextRender()->TextWidth(FontSize * 0.7f, aBuf);
+					TextRender()->Text(ScoreOffset + ScoreLength - CentisecondOffset, Row.y + (Row.h - FontSize * 0.85f) / 2.0f, FontSize * 0.7f, aBuf);
+				}
+
 				if(pInfo->m_Score == -9999)
 				{
 					aBuf[0] = '\0';
 				}
 				else
 				{
-					str_time((int64_t)absolute(pInfo->m_Score) * 100, TIME_HOURS, aBuf, sizeof(aBuf));
+					// server sends time in seconds
+					if(GameClient()->m_GameInfo.m_TimeType == ETimeType::TIME_TYPE_NEGATIVE_SECONDS)
+					{
+						str_time((int64_t)absolute(pInfo->m_Score) * 100, TIME_HOURS, aBuf, sizeof(aBuf));
+					}
+					// server sends time in milliseconds
+					else if(GameClient()->m_GameInfo.m_TimeType == ETimeType::TIME_TYPE_MILLISECONDS)
+					{
+						str_time((int64_t)std::round(pInfo->m_Score / 10.0f), TIME_HOURS, aBuf, sizeof(aBuf));
+					}
+					else
+					{
+						dbg_assert(false, "Unknown time type");
+						dbg_break();
+					}
 				}
 			}
 			else
 			{
 				str_format(aBuf, sizeof(aBuf), "%d", std::clamp(pInfo->m_Score, -999, 99999));
 			}
-			TextRender()->Text(ScoreOffset + ScoreLength - TextRender()->TextWidth(FontSize, aBuf), Row.y + (Row.h - FontSize) / 2.0f, FontSize, aBuf);
+			
+			TextRender()->Text(ScoreOffset + ScoreLength - TextRender()->TextWidth(FontSize, aBuf) - CentisecondOffset, Row.y + (Row.h - FontSize) / 2.0f, FontSize, aBuf);
 
 			// CTF flag
 			if(pGameInfoObj && (pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS) &&

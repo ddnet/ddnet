@@ -347,7 +347,16 @@ void CHud::RenderScoreHud()
 					else if(GameClient()->m_GameInfo.m_TimeScore)
 					{
 						if(apPlayerInfo[t]->m_Score != -9999)
-							str_time((int64_t)absolute(apPlayerInfo[t]->m_Score) * 100, TIME_HOURS, aScore[t], sizeof(aScore[t]));
+						{
+							if(GameClient()->m_GameInfo.m_TimeType == ETimeType::TIME_TYPE_MILLISECONDS)
+							{
+								// milliseconds * seconds * minutes, check if we're under an hour
+								int TimeType = apPlayerInfo[t]->m_Score < 1000 * 60 * 60 ? TIME_MINS_CENTISECS : TIME_HOURS;
+								str_time((int64_t)std::round(apPlayerInfo[t]->m_Score / 10.0f), TimeType, aScore[t], sizeof(aScore[t]));
+							}
+							else
+								str_time((int64_t)absolute(apPlayerInfo[t]->m_Score) * 100, TIME_HOURS, aScore[t], sizeof(aScore[t]));
+						}
 						else
 							aScore[t][0] = 0;
 					}
