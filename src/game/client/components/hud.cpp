@@ -345,8 +345,19 @@ void CHud::RenderScoreHud()
 						str_time((int64_t)absolute(apPlayerInfo[t]->m_Score) / 10, TIME_MINS_CENTISECS, aScore[t], sizeof(aScore[t]));
 					else if(GameClient()->m_GameInfo.m_TimeScore)
 					{
-						if(apPlayerInfo[t]->m_Score != FinishTime::NOT_FINISHED_TIMESCORE)
+						CGameClient::CClientData &ClientData = GameClient()->m_aClients[apPlayerInfo[t]->m_ClientId];
+						if(GameClient()->m_ReceivedDDNetPlayerFinishTimes && ClientData.m_FinishTimeSeconds != FinishTime::NOT_FINISHED_MILLIS)
+						{
+							int64_t TimeSeconds = static_cast<int64_t>(absolute(ClientData.m_FinishTimeSeconds));
+							int64_t TimeMillis = TimeSeconds * 1000 + (absolute(ClientData.m_FinishTimeMillis) % 1000);
+
+							// show centiseconds if we are under an hour
+							str_time(TimeMillis / 10, TimeSeconds < 60 * 60 ? TIME_MINS_CENTISECS : TIME_HOURS, aScore[t], sizeof(aScore[t]));
+						}
+						else if(apPlayerInfo[t]->m_Score != FinishTime::NOT_FINISHED_TIMESCORE)
+						{
 							str_time((int64_t)absolute(apPlayerInfo[t]->m_Score) * 100, TIME_HOURS, aScore[t], sizeof(aScore[t]));
+						}
 						else
 							aScore[t][0] = 0;
 					}
