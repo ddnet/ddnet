@@ -621,7 +621,6 @@ public:
 	void Shutdown() override = 0;
 
 	virtual void Minimize() = 0;
-	virtual void Maximize() = 0;
 
 	virtual int WindowActive() = 0;
 	virtual int WindowOpen() = 0;
