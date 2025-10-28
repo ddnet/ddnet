@@ -70,6 +70,12 @@
 
 #include <vector>
 
+enum class ETimeType
+{
+	TIME_TYPE_NEGATIVE_SECONDS = 0,
+	TIME_TYPE_MILLISECONDS,
+};
+
 class CGameInfo
 {
 public:
@@ -116,6 +122,7 @@ public:
 	bool m_NoSkinChangeForFrozen;
 
 	bool m_DDRaceTeam;
+	ETimeType m_TimeType;
 };
 
 class CSnapEntities
