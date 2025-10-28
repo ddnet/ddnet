@@ -505,8 +505,6 @@ class CNetConsole
 	NETFUNC_DELCLIENT m_pfnDelClient;
 	void *m_pUser;
 
-	CNetRecvUnpacker m_RecvUnpacker;
-
 public:
 	void SetCallbacks(NETFUNC_NEWCLIENT_CON pfnNewClient, NETFUNC_DELCLIENT pfnDelClient, void *pUser);
 
