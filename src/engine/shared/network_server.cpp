@@ -298,7 +298,7 @@ void CNetServer::SendMsgs(NETADDR &Addr, const CPacker **ppMsgs, int Num)
 void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 {
 	bool IsCtrl = Packet.m_Flags & NET_PACKETFLAG_CONTROL;
-	int CtrlMsg = m_RecvUnpacker.m_Data.m_aChunkData[0];
+	int CtrlMsg = Packet.m_aChunkData[0];
 
 	if(IsCtrl && CtrlMsg == NET_CTRLMSG_CONNECT)
 	{
@@ -513,14 +513,14 @@ void CNetServer::OnTokenCtrlMsg(NETADDR &Addr, int ControlMsg, const CNetPacketC
 
 int CNetServer::OnSixupCtrlMsg(NETADDR &Addr, CNetChunk *pChunk, int ControlMsg, const CNetPacketConstruct &Packet, SECURITY_TOKEN &ResponseToken, SECURITY_TOKEN Token)
 {
-	if(m_RecvUnpacker.m_Data.m_DataSize < 1 + (int)sizeof(SECURITY_TOKEN) || ClientExists(Addr))
+	if(Packet.m_DataSize < 1 + (int)sizeof(SECURITY_TOKEN) || ClientExists(Addr))
 		return 0; // silently ignore
 
 	ResponseToken = ToSecurityToken(Packet.m_aChunkData + 1);
 
 	if(ControlMsg == protocol7::NET_CTRLMSG_TOKEN)
 	{
-		if(m_RecvUnpacker.m_Data.m_DataSize >= (int)NET_TOKENREQUEST_DATASIZE)
+		if(Packet.m_DataSize >= (int)NET_TOKENREQUEST_DATASIZE)
 		{
 			SendTokenSixup(Addr, ResponseToken);
 			return 0;
