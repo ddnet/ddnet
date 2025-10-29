@@ -73,7 +73,11 @@ void CScoreboard::RenderTitle(CUIRect TitleBar, int Team, const char *pTitle)
 	{
 		if(m_ServerRecord > 0)
 		{
-			str_time_float(m_ServerRecord, TIME_HOURS, aScore, sizeof(aScore));
+			// seconds * minutes
+			if(m_ServerRecord < 60 * 60)
+				str_time_float(m_ServerRecord, TIME_MINS_CENTISECS, aScore, sizeof(aScore));
+			else
+				str_time_float(m_ServerRecord, TIME_HOURS, aScore, sizeof(aScore));
 		}
 	}
 	else if(GameClient()->IsTeamPlay())
@@ -480,7 +484,23 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 				}
 				else
 				{
-					str_time((int64_t)absolute(pInfo->m_Score) * 100, TIME_HOURS, aBuf, sizeof(aBuf));
+					// server sends time in seconds
+					if(GameClient()->m_GameInfo.m_TimeType == ETimeType::TIME_TYPE_NEGATIVE_SECONDS)
+					{
+						str_time((int64_t)absolute(pInfo->m_Score) * 100, TIME_HOURS, aBuf, sizeof(aBuf));
+					}
+					// server sends time in milliseconds
+					else if(GameClient()->m_GameInfo.m_TimeType == ETimeType::TIME_TYPE_MILLISECONDS)
+					{
+						// milliseconds * seconds * minutes, check if the time is under one hour
+						int TimeType = pInfo->m_Score < 1000 * 60 * 60 ? TIME_MINS_CENTISECS : TIME_HOURS;
+						str_time((int64_t)std::round(pInfo->m_Score / 10.0f), TimeType, aBuf, sizeof(aBuf));
+					}
+					else
+					{
+						dbg_assert(false, "Unknown time type");
+						dbg_break();
+					}
 				}
 			}
 			else
