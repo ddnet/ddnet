@@ -7,7 +7,7 @@
 		<intent
 			android:action="android.intent.action.VIEW"
 			android:targetPackage="org.ddnet.client"
-			android:targetClass="org.ddnet.client.NativeMain">
+			android:targetClass="org.ddnet.client.ClientActivity">
 			<extra
 				android:name="gfx-backend"
 				android:value="Vulkan" />
@@ -21,7 +21,7 @@
 		<intent
 			android:action="android.intent.action.VIEW"
 			android:targetPackage="org.ddnet.client"
-			android:targetClass="org.ddnet.client.NativeMain">
+			android:targetClass="org.ddnet.client.ClientActivity">
 			<extra
 				android:name="gfx-backend"
 				android:value="GLES" />
