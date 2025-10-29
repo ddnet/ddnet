@@ -126,7 +126,7 @@ public:
 	 * as one consecutive list.
 	 *
 	 * @param Number is the teleporter number (one less than what is shown in game)
-	 * @param Offset picks the n'th occurence of that teleporter in the map
+	 * @param Offset picks the n'th occurrence of that teleporter in the map
 	 *
 	 * @return The coordinates of the teleporter in the map
 	 *         or (-1, -1) if not found
@@ -135,7 +135,7 @@ public:
 
 	/**
 	 * @param Number is the teleporter number (one less than what is shown in game)
-	 * @return The amount of occurences of that teleporter across all types (in, out, checkpoint)
+	 * @return The amount of occurrences of that teleporter across all types (in, out, checkpoint)
 	 */
 	size_t TeleAllSize(int Number);
 

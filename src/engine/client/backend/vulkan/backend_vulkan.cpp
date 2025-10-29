@@ -113,7 +113,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 
 	static constexpr size_t STAGING_BUFFER_CACHE_ID = 0;
 	static constexpr size_t STAGING_BUFFER_IMAGE_CACHE_ID = 1;
-	static constexpr size_t VERTEXT_BUFFER_CACHE_ID = 2;
+	static constexpr size_t VERTEX_BUFFER_CACHE_ID = 2;
 	static constexpr size_t IMAGE_BUFFER_CACHE_ID = 3;
 
 	struct SDeviceMemoryBlock
@@ -417,7 +417,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		// returns the total free'd memory
 		size_t Shrink(VkDevice &Device)
 		{
-			size_t FreeedMemory = 0;
+			size_t FreedMemory = 0;
 			if(m_CanShrink)
 			{
 				m_CanShrink = false;
@@ -433,7 +433,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 							if(pHeap->m_Buffer != VK_NULL_HANDLE)
 								vkDestroyBuffer(Device, pHeap->m_Buffer, nullptr);
 							vkFreeMemory(Device, pHeap->m_BufferMem.m_Mem, nullptr);
-							FreeedMemory += pHeap->m_BufferMem.m_Size;
+							FreedMemory += pHeap->m_BufferMem.m_Size;
 
 							delete pHeap;
 							HeapIterator = m_MemoryCaches.m_vpMemoryHeaps.erase(HeapIterator);
@@ -446,7 +446,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 				}
 			}
 
-			return FreeedMemory;
+			return FreedMemory;
 		}
 	};
 
@@ -475,7 +475,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 
 	struct SBufferObject
 	{
-		SMemoryBlock<VERTEXT_BUFFER_CACHE_ID> m_Mem;
+		SMemoryBlock<VERTEX_BUFFER_CACHE_ID> m_Mem;
 	};
 
 	struct SBufferObjectFrame
@@ -874,7 +874,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 
 	SMemoryBlockCache<STAGING_BUFFER_CACHE_ID> m_StagingBufferCache;
 	SMemoryBlockCache<STAGING_BUFFER_IMAGE_CACHE_ID> m_StagingBufferCacheImage;
-	SMemoryBlockCache<VERTEXT_BUFFER_CACHE_ID> m_VertexBufferCache;
+	SMemoryBlockCache<VERTEX_BUFFER_CACHE_ID> m_VertexBufferCache;
 	std::map<uint32_t, SMemoryBlockCache<IMAGE_BUFFER_CACHE_ID>> m_ImageBufferCaches;
 
 	std::vector<VkMappedMemoryRange> m_vNonFlushedStagingBufferRange;
@@ -1559,7 +1559,7 @@ protected:
 			dbg_msg("vulkan", "vulkan memory allocation failed, trying to recover.");
 			if(Res == VK_ERROR_OUT_OF_HOST_MEMORY || Res == VK_ERROR_OUT_OF_DEVICE_MEMORY)
 			{
-				// aggressivly try to get more memory
+				// aggressively try to get more memory
 				vkDeviceWaitIdle(m_VKDevice);
 				for(size_t i = 0; i < m_SwapChainImageCount + 1; ++i)
 				{
@@ -1749,12 +1749,12 @@ protected:
 		}
 	}
 
-	[[nodiscard]] bool GetVertexBuffer(SMemoryBlock<VERTEXT_BUFFER_CACHE_ID> &ResBlock, VkDeviceSize RequiredSize)
+	[[nodiscard]] bool GetVertexBuffer(SMemoryBlock<VERTEX_BUFFER_CACHE_ID> &ResBlock, VkDeviceSize RequiredSize)
 	{
-		return GetBufferBlockImpl<VERTEXT_BUFFER_CACHE_ID, 8 * 1024 * 1024, 3, false>(ResBlock, m_VertexBufferCache, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, RequiredSize, 16);
+		return GetBufferBlockImpl<VERTEX_BUFFER_CACHE_ID, 8 * 1024 * 1024, 3, false>(ResBlock, m_VertexBufferCache, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, RequiredSize, 16);
 	}
 
-	void FreeVertexMemBlock(SMemoryBlock<VERTEXT_BUFFER_CACHE_ID> &Block)
+	void FreeVertexMemBlock(SMemoryBlock<VERTEX_BUFFER_CACHE_ID> &Block)
 	{
 		if(!Block.m_IsCached)
 		{
@@ -2055,36 +2055,36 @@ protected:
 
 	void ShrinkUnusedCaches()
 	{
-		size_t FreeedMemory = 0;
-		FreeedMemory += m_StagingBufferCache.Shrink(m_VKDevice);
-		FreeedMemory += m_StagingBufferCacheImage.Shrink(m_VKDevice);
-		if(FreeedMemory > 0)
+		size_t FreedMemory = 0;
+		FreedMemory += m_StagingBufferCache.Shrink(m_VKDevice);
+		FreedMemory += m_StagingBufferCacheImage.Shrink(m_VKDevice);
+		if(FreedMemory > 0)
 		{
-			m_pStagingMemoryUsage->store(m_pStagingMemoryUsage->load(std::memory_order_relaxed) - FreeedMemory, std::memory_order_relaxed);
+			m_pStagingMemoryUsage->store(m_pStagingMemoryUsage->load(std::memory_order_relaxed) - FreedMemory, std::memory_order_relaxed);
 			if(IsVerbose())
 			{
-				dbg_msg("vulkan", "deallocated chunks of memory with size: %" PRIzu " from all frames (staging buffer)", FreeedMemory);
+				dbg_msg("vulkan", "deallocated chunks of memory with size: %" PRIzu " from all frames (staging buffer)", FreedMemory);
 			}
 		}
-		FreeedMemory = 0;
-		FreeedMemory += m_VertexBufferCache.Shrink(m_VKDevice);
-		if(FreeedMemory > 0)
+		FreedMemory = 0;
+		FreedMemory += m_VertexBufferCache.Shrink(m_VKDevice);
+		if(FreedMemory > 0)
 		{
-			m_pBufferMemoryUsage->store(m_pBufferMemoryUsage->load(std::memory_order_relaxed) - FreeedMemory, std::memory_order_relaxed);
+			m_pBufferMemoryUsage->store(m_pBufferMemoryUsage->load(std::memory_order_relaxed) - FreedMemory, std::memory_order_relaxed);
 			if(IsVerbose())
 			{
-				dbg_msg("vulkan", "deallocated chunks of memory with size: %" PRIzu " from all frames (buffer)", FreeedMemory);
+				dbg_msg("vulkan", "deallocated chunks of memory with size: %" PRIzu " from all frames (buffer)", FreedMemory);
 			}
 		}
-		FreeedMemory = 0;
+		FreedMemory = 0;
 		for(auto &ImageBufferCache : m_ImageBufferCaches)
-			FreeedMemory += ImageBufferCache.second.Shrink(m_VKDevice);
-		if(FreeedMemory > 0)
+			FreedMemory += ImageBufferCache.second.Shrink(m_VKDevice);
+		if(FreedMemory > 0)
 		{
-			m_pTextureMemoryUsage->store(m_pTextureMemoryUsage->load(std::memory_order_relaxed) - FreeedMemory, std::memory_order_relaxed);
+			m_pTextureMemoryUsage->store(m_pTextureMemoryUsage->load(std::memory_order_relaxed) - FreedMemory, std::memory_order_relaxed);
 			if(IsVerbose())
 			{
-				dbg_msg("vulkan", "deallocated chunks of memory with size: %" PRIzu " from all frames (texture)", FreeedMemory);
+				dbg_msg("vulkan", "deallocated chunks of memory with size: %" PRIzu " from all frames (texture)", FreedMemory);
 			}
 		}
 	}
@@ -3053,7 +3053,7 @@ protected:
 			if(!GetStagingBuffer(StagingBuffer, pUploadData, BufferDataSize))
 				return false;
 
-			SMemoryBlock<VERTEXT_BUFFER_CACHE_ID> Mem;
+			SMemoryBlock<VERTEX_BUFFER_CACHE_ID> Mem;
 			if(!GetVertexBuffer(Mem, BufferDataSize))
 				return false;
 
@@ -3672,7 +3672,7 @@ public:
 	}
 
 	// from: https://github.com/SaschaWillems/vulkan.gpuinfo.org/blob/5c3986798afc39d736b825bf8a5fbf92b8d9ed49/includes/functions.php#L364
-	const char *GetDriverVerson(char (&aBuff)[256], uint32_t DriverVersion, uint32_t VendorId)
+	const char *GetDriverVersion(char (&aBuff)[256], uint32_t DriverVersion, uint32_t VendorId)
 	{
 		// NVIDIA
 		if(VendorId == 4318)
@@ -3841,7 +3841,7 @@ public:
 
 			char aBuff[256];
 			str_copy(pVendorName, pVendorNameStr, gs_GpuInfoStringSize);
-			str_format(pVersionName, gs_GpuInfoStringSize, "Vulkan %d.%d.%d (driver: %s)", DevApiMajor, DevApiMinor, DevApiPatch, GetDriverVerson(aBuff, DeviceProp.driverVersion, DeviceProp.vendorID));
+			str_format(pVersionName, gs_GpuInfoStringSize, "Vulkan %d.%d.%d (driver: %s)", DevApiMajor, DevApiMinor, DevApiPatch, GetDriverVersion(aBuff, DeviceProp.driverVersion, DeviceProp.vendorID));
 
 			// get important device limits
 			m_NonCoherentMemAlignment = DeviceProp.limits.nonCoherentAtomSize;
@@ -4394,13 +4394,13 @@ public:
 		m_vSwapChainMultiSamplingImages.clear();
 	}
 
-	[[nodiscard]] bool CreateRenderPass(bool ClearAttachs)
+	[[nodiscard]] bool CreateRenderPass(bool ClearAttachments)
 	{
 		bool HasMultiSamplingTargets = HasMultiSampling();
 		VkAttachmentDescription MultiSamplingColorAttachment{};
 		MultiSamplingColorAttachment.format = m_VKSurfFormat.format;
 		MultiSamplingColorAttachment.samples = GetSampleCount();
-		MultiSamplingColorAttachment.loadOp = ClearAttachs ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		MultiSamplingColorAttachment.loadOp = ClearAttachments ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		MultiSamplingColorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		MultiSamplingColorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		MultiSamplingColorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -4410,7 +4410,7 @@ public:
 		VkAttachmentDescription ColorAttachment{};
 		ColorAttachment.format = m_VKSurfFormat.format;
 		ColorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-		ColorAttachment.loadOp = ClearAttachs && !HasMultiSamplingTargets ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		ColorAttachment.loadOp = ClearAttachments && !HasMultiSamplingTargets ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		ColorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 		ColorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		ColorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -6258,14 +6258,14 @@ public:
 				BeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 				BeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT | VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
 
-				VkCommandBufferInheritanceInfo InheretInfo{};
-				InheretInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
-				InheretInfo.framebuffer = m_vFramebufferList[m_CurImageIndex];
-				InheretInfo.occlusionQueryEnable = VK_FALSE;
-				InheretInfo.renderPass = m_VKRenderPass;
-				InheretInfo.subpass = 0;
+				VkCommandBufferInheritanceInfo InheritanceInfo{};
+				InheritanceInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
+				InheritanceInfo.framebuffer = m_vFramebufferList[m_CurImageIndex];
+				InheritanceInfo.occlusionQueryEnable = VK_FALSE;
+				InheritanceInfo.renderPass = m_VKRenderPass;
+				InheritanceInfo.subpass = 0;
 
-				BeginInfo.pInheritanceInfo = &InheretInfo;
+				BeginInfo.pInheritanceInfo = &InheritanceInfo;
 
 				if(vkBeginCommandBuffer(DrawCommandBuffer, &BeginInfo) != VK_SUCCESS)
 				{

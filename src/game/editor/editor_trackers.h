@@ -39,7 +39,7 @@ public:
 private:
 	std::vector<int> m_vSelectedQuads;
 	int m_SelectedQuadPoints;
-	std::map<int, std::vector<CPoint>> m_InitalPoints;
+	std::map<int, std::vector<CPoint>> m_InitialPoints;
 
 	bool m_Tracking = false;
 	std::shared_ptr<CLayerQuads> m_pLayer;

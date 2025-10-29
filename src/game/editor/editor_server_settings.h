@@ -330,7 +330,7 @@ private:
 	//   CCommandArgumentConstraintBuilder Command(&m_Container);
 	//   Command("tune", 2).Unique(0); // Defines argument 0 of command "tune" having 2 args as UNIQUE
 	//   Command("tune_zone", 3).Multiple(0).Unique(1);
-	//   // ^ Multiple() currently is only for readable purposes. It can be omited:
+	//   // ^ Multiple() currently is only for readable purposes. It can be omitted:
 	//   // Command("tune_zone", 3).Unique(1);
 	//
 

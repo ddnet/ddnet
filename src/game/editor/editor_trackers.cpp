@@ -11,7 +11,7 @@ CQuadEditTracker::CQuadEditTracker() :
 
 CQuadEditTracker::~CQuadEditTracker()
 {
-	m_InitalPoints.clear();
+	m_InitialPoints.clear();
 	m_vSelectedQuads.clear();
 }
 
@@ -19,7 +19,7 @@ bool CQuadEditTracker::QuadPointChanged(const std::vector<CPoint> &vCurrentPoint
 {
 	for(size_t i = 0; i < vCurrentPoints.size(); i++)
 	{
-		if(vCurrentPoints[i] != m_InitalPoints[QuadIndex][i])
+		if(vCurrentPoints[i] != m_InitialPoints[QuadIndex][i])
 			return true;
 	}
 	return false;
@@ -38,7 +38,7 @@ void CQuadEditTracker::BeginQuadTrack(const std::shared_ptr<CLayerQuads> &pLayer
 	for(auto QuadIndex : vSelectedQuads)
 	{
 		auto &pQuad = pLayer->m_vQuads[QuadIndex];
-		m_InitalPoints[QuadIndex] = std::vector<CPoint>(pQuad.m_aPoints, pQuad.m_aPoints + 5);
+		m_InitialPoints[QuadIndex] = std::vector<CPoint>(pQuad.m_aPoints, pQuad.m_aPoints + 5);
 		m_vSelectedQuads.push_back(QuadIndex);
 	}
 }
@@ -56,7 +56,7 @@ void CQuadEditTracker::EndQuadTrack()
 		auto &pQuad = m_pLayer->m_vQuads[QuadIndex];
 		auto vCurrentPoints = std::vector<CPoint>(pQuad.m_aPoints, pQuad.m_aPoints + 5);
 		if(QuadPointChanged(vCurrentPoints, QuadIndex))
-			vpActions.push_back(std::make_shared<CEditorActionEditQuadPoint>(m_pEditor, m_GroupIndex, m_LayerIndex, QuadIndex, m_InitalPoints[QuadIndex], vCurrentPoints));
+			vpActions.push_back(std::make_shared<CEditorActionEditQuadPoint>(m_pEditor, m_GroupIndex, m_LayerIndex, QuadIndex, m_InitialPoints[QuadIndex], vCurrentPoints));
 	}
 
 	if(!vpActions.empty())
@@ -78,7 +78,7 @@ void CQuadEditTracker::BeginQuadPropTrack(const std::shared_ptr<CLayerQuads> &pL
 	{
 		auto &Quad = pLayer->m_vQuads[QuadIndex];
 		if(Prop == EQuadProp::PROP_POS_X || Prop == EQuadProp::PROP_POS_Y)
-			m_InitalPoints[QuadIndex] = std::vector<CPoint>(Quad.m_aPoints, Quad.m_aPoints + 5);
+			m_InitialPoints[QuadIndex] = std::vector<CPoint>(Quad.m_aPoints, Quad.m_aPoints + 5);
 		else if(Prop == EQuadProp::PROP_POS_ENV)
 			m_PreviousValues[QuadIndex] = Quad.m_PosEnv;
 		else if(Prop == EQuadProp::PROP_POS_ENV_OFFSET)
@@ -104,7 +104,7 @@ void CQuadEditTracker::EndQuadPropTrack(EQuadProp Prop)
 		{
 			auto vCurrentPoints = std::vector<CPoint>(Quad.m_aPoints, Quad.m_aPoints + 5);
 			if(QuadPointChanged(vCurrentPoints, QuadIndex))
-				vpActions.push_back(std::make_shared<CEditorActionEditQuadPoint>(m_pEditor, m_GroupIndex, m_LayerIndex, QuadIndex, m_InitalPoints[QuadIndex], vCurrentPoints));
+				vpActions.push_back(std::make_shared<CEditorActionEditQuadPoint>(m_pEditor, m_GroupIndex, m_LayerIndex, QuadIndex, m_InitialPoints[QuadIndex], vCurrentPoints));
 		}
 		else
 		{
@@ -156,7 +156,7 @@ void CQuadEditTracker::AddQuadPointPropTrack(EQuadPointProp Prop)
 	{
 		auto &Quad = m_pLayer->m_vQuads[QuadIndex];
 		if(Prop == EQuadPointProp::PROP_POS_X || Prop == EQuadPointProp::PROP_POS_Y)
-			m_InitalPoints[QuadIndex] = std::vector<CPoint>(Quad.m_aPoints, Quad.m_aPoints + 5);
+			m_InitialPoints[QuadIndex] = std::vector<CPoint>(Quad.m_aPoints, Quad.m_aPoints + 5);
 		else if(Prop == EQuadPointProp::PROP_COLOR)
 		{
 			for(int v = 0; v < 4; v++)
@@ -207,7 +207,7 @@ void CQuadEditTracker::EndQuadPointPropTrack(EQuadPointProp Prop)
 		{
 			auto vCurrentPoints = std::vector<CPoint>(Quad.m_aPoints, Quad.m_aPoints + 5);
 			if(QuadPointChanged(vCurrentPoints, QuadIndex))
-				vpActions.push_back(std::make_shared<CEditorActionEditQuadPoint>(m_pEditor, m_GroupIndex, m_LayerIndex, QuadIndex, m_InitalPoints[QuadIndex], vCurrentPoints));
+				vpActions.push_back(std::make_shared<CEditorActionEditQuadPoint>(m_pEditor, m_GroupIndex, m_LayerIndex, QuadIndex, m_InitialPoints[QuadIndex], vCurrentPoints));
 		}
 		else
 		{
@@ -252,7 +252,7 @@ void CQuadEditTracker::EndQuadPointPropTrackAll()
 			{
 				auto vCurrentPoints = std::vector<CPoint>(Quad.m_aPoints, Quad.m_aPoints + 5);
 				if(QuadPointChanged(vCurrentPoints, QuadIndex))
-					vpActions.push_back(std::make_shared<CEditorActionEditQuadPoint>(m_pEditor, m_GroupIndex, m_LayerIndex, QuadIndex, m_InitalPoints[QuadIndex], vCurrentPoints));
+					vpActions.push_back(std::make_shared<CEditorActionEditQuadPoint>(m_pEditor, m_GroupIndex, m_LayerIndex, QuadIndex, m_InitialPoints[QuadIndex], vCurrentPoints));
 			}
 			else
 			{

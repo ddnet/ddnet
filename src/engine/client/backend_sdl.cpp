@@ -1018,8 +1018,8 @@ void CGraphicsBackend_SDL_GL::GetVideoModes(CVideoMode *pModes, int MaxModes, in
 
 	// Only collect fullscreen modes when requested, that makes sure in windowed mode no refresh rates are shown that aren't supported without
 	// fullscreen anyway(except fullscreen desktop)
-	bool IsFullscreenDestkop = m_pWindow != nullptr && (((SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN_DESKTOP) || g_Config.m_GfxFullscreen == 3);
-	bool CollectFullscreenModes = m_pWindow == nullptr || ((SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN) != 0 && !IsFullscreenDestkop);
+	bool IsFullscreenDesktop = m_pWindow != nullptr && (((SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN_DESKTOP) || g_Config.m_GfxFullscreen == 3);
+	bool CollectFullscreenModes = m_pWindow == nullptr || ((SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN) != 0 && !IsFullscreenDesktop);
 
 	if(SDL_GetDesktopDisplayMode(ScreenId, &DesktopMode) < 0)
 	{
@@ -1048,7 +1048,7 @@ void CGraphicsBackend_SDL_GL::GetVideoModes(CVideoMode *pModes, int MaxModes, in
 		{
 			// if last mode was equal, ignore this one --- in fullscreen this can really only happen if the screen
 			// supports different color modes
-			// in non fullscren these are the modes that show different refresh rate, but are basically the same
+			// in non fullscreen these are the modes that show different refresh rate, but are basically the same
 			if(NumModesInserted > 0 && pModes[NumModesInserted - 1].m_WindowWidth == Mode.w && pModes[NumModesInserted - 1].m_WindowHeight == Mode.h && (pModes[NumModesInserted - 1].m_RefreshRate == Mode.refresh_rate || (Mode.refresh_rate != DesktopMode.refresh_rate && !CollectFullscreenModes)))
 				return;
 
@@ -1066,7 +1066,7 @@ void CGraphicsBackend_SDL_GL::GetVideoModes(CVideoMode *pModes, int MaxModes, in
 
 		ModeInsert(Mode);
 
-		if(IsFullscreenDestkop)
+		if(IsFullscreenDesktop)
 			break;
 
 		if(NumModesInserted >= MaxModes)
@@ -1445,7 +1445,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		CmdGL.m_pGpuList = &m_GpuList;
 		CmdGL.m_pReadPresentedImageDataFunc = &m_ReadPresentedImageDataFunc;
 		CmdGL.m_pStorage = pStorage;
-		CmdGL.m_pCapabilities = &m_Capabilites;
+		CmdGL.m_pCapabilities = &m_Capabilities;
 		CmdGL.m_pInitError = &InitError;
 		CmdGL.m_RequestedMajor = g_Config.m_GfxGLMajor;
 		CmdGL.m_RequestedMinor = g_Config.m_GfxGLMinor;
@@ -1501,9 +1501,9 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		// try setting to version string's supported version
 		if(InitError == -2)
 		{
-			g_Config.m_GfxGLMajor = m_Capabilites.m_ContextMajor;
-			g_Config.m_GfxGLMinor = m_Capabilites.m_ContextMinor;
-			g_Config.m_GfxGLPatch = m_Capabilites.m_ContextPatch;
+			g_Config.m_GfxGLMajor = m_Capabilities.m_ContextMajor;
+			g_Config.m_GfxGLMinor = m_Capabilities.m_ContextMinor;
+			g_Config.m_GfxGLPatch = m_Capabilities.m_ContextPatch;
 		}
 
 		if(pErrorStr != nullptr)

@@ -9,7 +9,7 @@ The `src` folder is structured into several folders as follows:
 - android: Platform-specific code for Android systems.
 - antibot: Antibot API integration.
 - base: Cross-platform abstraction layer. Contains many utility functions and abstracts most platform-specific code. Contains functions for string manipulation, filesystem, time, networking, threading, debugging, secure random etc.
-- engine: Game engine. Mostly implements non-gameplay related funtionality like graphics, sound, input, higher-level networking etc.
+- engine: Game engine. Mostly implements non-gameplay related functionality like graphics, sound, input, higher-level networking etc.
 - game: Gameplay related code. Separated into client, server and editor.
 - macos: Platform-specific code for macOS systems.
 - masterping: Tool that collects game server info via an HTTP endpoint and aggregates them.

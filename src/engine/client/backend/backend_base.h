@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-struct SBackendCapabilites;
+struct SBackendCapabilities;
 
 enum EDebugGfxModes
 {
@@ -143,7 +143,7 @@ public:
 
 		TGLBackendReadPresentedImageData *m_pReadPresentedImageDataFunc;
 
-		SBackendCapabilites *m_pCapabilities;
+		SBackendCapabilities *m_pCapabilities;
 		int *m_pInitError;
 
 		const char **m_pErrStringPtr;

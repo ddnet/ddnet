@@ -15,7 +15,7 @@ public:
 	/**
 	 * Initialize the component and interface pointers.
 	 * Needs to be the first function that is called.
-	 * The default implentation also resets the component.
+	 * The default implementation also resets the component.
 	 */
 	void OnInit(CEditor *pEditor) override;
 
