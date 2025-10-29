@@ -1013,7 +1013,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		{
 			// 31 is the magic number index of laser_damage
 			// which was removed in 0.7
-			// also in 0.6 it is unsed so we just set it to 0
+			// also in 0.6 it is unused so we just set it to 0
 			const int Value = (Client()->IsSixup() && i == 30) ? 0 : pUnpacker->GetInt();
 
 			// check for unpacking errors
@@ -2191,7 +2191,7 @@ void CGameClient::OnNewSnapshot()
 
 	if(m_Snap.m_SpecInfo.m_Active)
 	{
-		// don't send camera infomation when spectating
+		// don't send camera information when spectating
 		Zoom = m_LastZoom;
 		Deadzone = m_LastDeadzone;
 		FollowFactor = m_LastFollowFactor;
@@ -3285,7 +3285,7 @@ void CGameClient::UpdateLocalTuning()
 		}
 		else
 		{
-			// if we have processed what we need, and the tuning is still wrong due to out of order messege
+			// if we have processed what we need, and the tuning is still wrong due to out of order message
 			// fix our tuning by using the current one
 			m_GameWorld.TuningList()[TuneZone] = m_aTuning[g_Config.m_ClDummy];
 			m_aExpectingTuningSince[g_Config.m_ClDummy] = 0;

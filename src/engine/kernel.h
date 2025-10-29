@@ -28,7 +28,7 @@ public: \
 \
 private:
 
-// This kernel thingie makes the structure very flat and basically singletons.
+// This kernel class makes the structure very flat and basically singletons.
 // I'm not sure if this is a good idea but it works for now.
 class IKernel
 {

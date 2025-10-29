@@ -1451,7 +1451,7 @@ void CEditor::ComputeAABBAlignments(const std::shared_ptr<CLayerQuads> &pLayer, 
 	if(!g_Config.m_EdAlignQuads)
 		return;
 
-	// This method is a bit different than the point alignment in the way where instead of trying to aling 1 point to all quads,
+	// This method is a bit different than the point alignment in the way where instead of trying to align 1 point to all quads,
 	// we try to align 5 points to all quads, these 5 points being 5 points of an AABB.
 	// Otherwise, the concept is the same, we use the original position of the AABB to make the computations.
 	int Threshold = f2fx(maximum(5.0f, 10.0f * m_MouseWorldScale));
@@ -8004,7 +8004,7 @@ bool CEditor::Append(const char *pFilename, int StorageType, bool IgnoreHistory)
 		(int)m_Map.m_vpEnvelopes.size()};
 
 	// Keep a map to check if specific indices have already been replaced to prevent
-	// replacing those indices again when transfering images
+	// replacing those indices again when transferring images
 	static std::map<int *, bool> s_ReplacedMap;
 	static const auto &&s_ReplaceIndex = [](int ToReplace, int ReplaceWith) {
 		return [ToReplace, ReplaceWith](int *pIndex) {

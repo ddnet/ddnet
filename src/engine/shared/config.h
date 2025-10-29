@@ -76,7 +76,7 @@ struct SConfigVariable
 	int m_Flags;
 	const char *m_pHelp;
 	// Note that this only applies to the console command and the SetValue function,
-	// but the underlying config variable can still be modified programatically.
+	// but the underlying config variable can still be modified programmatically.
 	bool m_ReadOnly = false;
 
 	SConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp) :

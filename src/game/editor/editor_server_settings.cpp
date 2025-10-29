@@ -916,9 +916,9 @@ void CEditor::RenderMapSettingsErrorDialog()
 
 	// Confirm button
 	static int s_ConfirmButton = 0, s_CancelButton = 0, s_FixAllButton = 0;
-	CUIRect ConfimButton, CancelButton, FixAllUnknownButton;
+	CUIRect ConfirmButton, CancelButton, FixAllUnknownButton;
 	ButtonBar.VSplitLeft(110.0f, &CancelButton, &ButtonBar);
-	ButtonBar.VSplitRight(110.0f, &ButtonBar, &ConfimButton);
+	ButtonBar.VSplitRight(110.0f, &ButtonBar, &ConfirmButton);
 	ButtonBar.VSplitRight(5.0f, &ButtonBar, nullptr);
 	ButtonBar.VSplitRight(150.0f, &ButtonBar, &FixAllUnknownButton);
 
@@ -1002,7 +1002,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 	}
 
 	// Confirm - execute the fixes
-	if(DoButton_Editor(&s_ConfirmButton, "Confirm", CanConfirm ? 0 : -1, &ConfimButton, BUTTONFLAG_LEFT, nullptr) || (CanConfirm && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
+	if(DoButton_Editor(&s_ConfirmButton, "Confirm", CanConfirm ? 0 : -1, &ConfirmButton, BUTTONFLAG_LEFT, nullptr) || (CanConfirm && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
 	{
 		Execute();
 		OnDialogClose();
@@ -1470,7 +1470,7 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pLineInputStr, const c
 			}
 		}
 
-		// Fill argument informations
+		// Fill argument information
 		NewArg.m_X = PosX;
 		NewArg.m_Start = Offset;
 		NewArg.m_End = Offset + Length;
@@ -1630,7 +1630,7 @@ EValidationResult CMapSettingsBackend::CContext::ValidateArg(int Index, const ch
 				if(ValuesIt != It->second.end())
 				{
 					// This means that we have possible values for this argument for this setting
-					// In order to validate such arg, we have to check if it maches any of the possible values
+					// In order to validate such arg, we have to check if it matches any of the possible values
 					const bool EqualsAny = std::any_of(ValuesIt->second.begin(), ValuesIt->second.end(), [pArg](auto *pValue) { return str_comp_nocase(pArg, pValue) == 0; });
 
 					// If equals, then argument is valid
@@ -1647,7 +1647,7 @@ EValidationResult CMapSettingsBackend::CContext::ValidateArg(int Index, const ch
 			}
 		}
 
-		// If we get here, it means there are no posssible values for that specific argument.
+		// If we get here, it means there are no possible values for that specific argument.
 		// The validation for specific types such as int and floats were done earlier so if we get here
 		// we know the argument is valid.
 		// String and "rest of string" types are valid by default.
