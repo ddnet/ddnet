@@ -792,7 +792,8 @@ void CGameContext::SendBroadcast(const char *pText, int ClientId, bool IsImporta
 	if(!IsImportant && m_apPlayers[ClientId]->m_LastBroadcastImportance && m_apPlayers[ClientId]->m_LastBroadcast > Server()->Tick() - Server()->TickSpeed() * 10)
 		return;
 
-	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientId);
+	// Broadcasts to individual players are not recorded in demos
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 	m_apPlayers[ClientId]->m_LastBroadcast = Server()->Tick();
 	m_apPlayers[ClientId]->m_LastBroadcastImportance = IsImportant;
 }
