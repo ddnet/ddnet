@@ -86,7 +86,7 @@ void CLayerTele::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 	CLayerTele *pTeleLayer = static_cast<CLayerTele *>(pBrush);
 	int sx = ConvertX(WorldPos.x);
 	int sy = ConvertY(WorldPos.y);
-	if(str_comp(pTeleLayer->m_aFilename, Editor()->m_aFilename))
+	if(str_comp(pTeleLayer->m_aFilename, pTeleLayer->Map()->m_aFilename))
 		Editor()->m_TeleNumber = pTeleLayer->m_TeleNumber;
 
 	bool Destructive = Editor()->m_BrushDrawDestructive || pTeleLayer->IsEmpty();
