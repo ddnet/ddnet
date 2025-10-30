@@ -247,7 +247,6 @@ public:
 	void GetCurrentVideoMode(CVideoMode &CurMode, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenId) override;
 
 	void Minimize() override;
-	void Maximize() override;
 	void SetWindowParams(int FullscreenMode, bool IsBorderless) override;
 	bool SetWindowScreen(int Index) override;
 	bool UpdateDisplayMode(int Index) override;

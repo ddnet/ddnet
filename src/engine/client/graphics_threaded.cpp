@@ -2516,15 +2516,6 @@ void CGraphics_Threaded::Minimize()
 		PropChangedListener();
 }
 
-void CGraphics_Threaded::Maximize()
-{
-	// TODO: SDL
-	m_pBackend->Maximize();
-
-	for(auto &PropChangedListener : m_vPropChangeListeners)
-		PropChangedListener();
-}
-
 void CGraphics_Threaded::WarnPngliteIncompatibleImages(bool Warn)
 {
 	m_WarnPngliteIncompatibleImages = Warn;

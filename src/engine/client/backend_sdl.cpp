@@ -1598,11 +1598,6 @@ void CGraphicsBackend_SDL_GL::Minimize()
 	SDL_MinimizeWindow(m_pWindow);
 }
 
-void CGraphicsBackend_SDL_GL::Maximize()
-{
-	// TODO: SDL
-}
-
 void CGraphicsBackend_SDL_GL::SetWindowParams(int FullscreenMode, bool IsBorderless)
 {
 	if(FullscreenMode > 0)
