@@ -1702,11 +1702,8 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 	void *pId = &pQuad->m_aPoints[4]; // use pivot addr as id
 	static std::vector<std::vector<CPoint>> s_vvRotatePoints;
 	static int s_Operation = OP_NONE;
-	static float s_MouseXStart = 0.0f;
-	static float s_MouseYStart = 0.0f;
+	static vec2 s_MouseStart = vec2(0.0f, 0.0f);
 	static float s_RotateAngle = 0;
-	float wx = Ui()->MouseWorldX();
-	float wy = Ui()->MouseWorldY();
 	static CPoint s_OriginalPosition;
 	static std::vector<SAlignmentInfo> s_PivotAlignments; // Alignments per pivot per quad
 	static std::vector<SAlignmentInfo> s_vAABBAlignments; // Alignments for one AABB (single quad or selection of multiple quads)
@@ -1720,7 +1717,7 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 	const bool IgnoreGrid = Input()->AltIsPressed();
 
 	auto &&GetDragOffset = [&]() -> ivec2 {
-		vec2 Pos = vec2(wx, wy);
+		vec2 Pos = Ui()->MouseWorldPos();
 		if(MapView()->MapGrid()->IsEnabled() && !IgnoreGrid)
 		{
 			MapView()->MapGrid()->SnapToGrid(Pos);
@@ -1744,10 +1741,7 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 		{
 			if(s_Operation == OP_SELECT)
 			{
-				float x = s_MouseXStart - Ui()->MouseX();
-				float y = s_MouseYStart - Ui()->MouseY();
-
-				if(x * x + y * y > 20.0f)
+				if(length_squared(s_MouseStart - Ui()->MousePos()) > 20.0f)
 				{
 					if(!IsQuadSelected(Index))
 						SelectQuad(Index);
@@ -1970,9 +1964,7 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 		{
 			Ui()->SetActiveItem(pId);
 
-			s_MouseXStart = Ui()->MouseX();
-			s_MouseYStart = Ui()->MouseY();
-
+			s_MouseStart = Ui()->MousePos();
 			s_Operation = OP_SELECT;
 		}
 		else if(Ui()->MouseButtonClicked(1))
@@ -2006,19 +1998,15 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 
 void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int V)
 {
-	void *pId = &pQuad->m_aPoints[V];
-
-	float wx = Ui()->MouseWorldX();
-	float wy = Ui()->MouseWorldY();
-
-	float px = fx2f(pQuad->m_aPoints[V].x);
-	float py = fx2f(pQuad->m_aPoints[V].y);
+	const void *pId = &pQuad->m_aPoints[V];
+	const vec2 Center = vec2(fx2f(pQuad->m_aPoints[V].x), fx2f(pQuad->m_aPoints[V].y));
+	const bool IgnoreGrid = Input()->AltIsPressed();
 
 	// draw selection background
 	if(IsQuadPointSelected(QuadIndex, V))
 	{
 		Graphics()->SetColor(0, 0, 0, 1);
-		IGraphics::CQuadItem QuadItem(px, py, 7.0f * m_MouseWorldScale, 7.0f * m_MouseWorldScale);
+		IGraphics::CQuadItem QuadItem(Center.x, Center.y, 7.0f * m_MouseWorldScale, 7.0f * m_MouseWorldScale);
 		Graphics()->QuadsDraw(&QuadItem, 1);
 	}
 
@@ -2032,16 +2020,13 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 	};
 
 	static int s_Operation = OP_NONE;
-	static float s_MouseXStart = 0.0f;
-	static float s_MouseYStart = 0.0f;
+	static vec2 s_MouseStart = vec2(0.0f, 0.0f);
 	static CPoint s_OriginalPoint;
 	static std::vector<SAlignmentInfo> s_Alignments; // Alignments
 	static ivec2 s_LastOffset;
 
-	const bool IgnoreGrid = Input()->AltIsPressed();
-
 	auto &&GetDragOffset = [&]() -> ivec2 {
-		vec2 Pos = vec2(wx, wy);
+		vec2 Pos = Ui()->MouseWorldPos();
 		if(MapView()->MapGrid()->IsEnabled() && !IgnoreGrid)
 		{
 			MapView()->MapGrid()->SnapToGrid(Pos);
@@ -2057,10 +2042,7 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 		{
 			if(s_Operation == OP_SELECT)
 			{
-				float x = s_MouseXStart - Ui()->MouseX();
-				float y = s_MouseYStart - Ui()->MouseY();
-
-				if(x * x + y * y > 20.0f)
+				if(length_squared(s_MouseStart - Ui()->MousePos()) > 20.0f)
 				{
 					if(!IsQuadPointSelected(QuadIndex, V))
 						SelectQuadPoint(QuadIndex, V);
@@ -2207,9 +2189,7 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 		{
 			Ui()->SetActiveItem(pId);
 
-			s_MouseXStart = Ui()->MouseX();
-			s_MouseYStart = Ui()->MouseY();
-
+			s_MouseStart = Ui()->MousePos();
 			s_Operation = OP_SELECT;
 		}
 		else if(Ui()->MouseButtonClicked(1))
@@ -2225,7 +2205,7 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 	else
 		Graphics()->SetColor(1, 0, 0, 1);
 
-	IGraphics::CQuadItem QuadItem(px, py, 5.0f * m_MouseWorldScale, 5.0f * m_MouseWorldScale);
+	IGraphics::CQuadItem QuadItem(Center.x, Center.y, 5.0f * m_MouseWorldScale, 5.0f * m_MouseWorldScale);
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
@@ -2615,7 +2595,7 @@ void CEditor::DoQuadEnvelopes(const std::vector<CQuad> &vQuads, IGraphics::CText
 	delete[] apEnvelope;
 }
 
-void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
+void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QuadIndex, int PointIndex)
 {
 	enum
 	{
@@ -2624,43 +2604,32 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 		OP_ROTATE,
 	};
 
-	// some basic values
-	static float s_LastWx = 0;
-	static float s_LastWy = 0;
 	static int s_Operation = OP_NONE;
-	float wx = Ui()->MouseWorldX();
-	float wy = Ui()->MouseWorldY();
+
 	std::shared_ptr<CEnvelope> pEnvelope = m_Map.m_vpEnvelopes[pQuad->m_PosEnv];
-	void *pId = &pEnvelope->m_vPoints[PIndex];
-
-	// get pivot
-	float CenterX = fx2f(pQuad->m_aPoints[4].x) + fx2f(pEnvelope->m_vPoints[PIndex].m_aValues[0]);
-	float CenterY = fx2f(pQuad->m_aPoints[4].y) + fx2f(pEnvelope->m_vPoints[PIndex].m_aValues[1]);
-
+	CEnvPoint_runtime *pPoint = &pEnvelope->m_vPoints[PointIndex];
+	const vec2 Center = vec2(fx2f(pQuad->m_aPoints[4].x) + fx2f(pPoint->m_aValues[0]), fx2f(pQuad->m_aPoints[4].y) + fx2f(pPoint->m_aValues[1]));
 	const bool IgnoreGrid = Input()->AltIsPressed();
 
-	if(Ui()->CheckActiveItem(pId) && m_CurrentQuadIndex == QIndex)
+	if(Ui()->CheckActiveItem(pPoint) && m_CurrentQuadIndex == QuadIndex)
 	{
-		if(s_Operation == OP_MOVE)
+		if(m_MouseDeltaWorld != vec2(0.0f, 0.0f))
 		{
-			if(MapView()->MapGrid()->IsEnabled() && !IgnoreGrid)
+			if(s_Operation == OP_MOVE)
 			{
-				vec2 Pos = vec2(wx, wy);
-				MapView()->MapGrid()->SnapToGrid(Pos);
-				pEnvelope->m_vPoints[PIndex].m_aValues[0] = f2fx(Pos.x) - pQuad->m_aPoints[4].x;
-				pEnvelope->m_vPoints[PIndex].m_aValues[1] = f2fx(Pos.y) - pQuad->m_aPoints[4].y;
+				vec2 Pos = Ui()->MouseWorldPos();
+				if(MapView()->MapGrid()->IsEnabled() && !IgnoreGrid)
+				{
+					MapView()->MapGrid()->SnapToGrid(Pos);
+				}
+				pPoint->m_aValues[0] = f2fx(Pos.x) - pQuad->m_aPoints[4].x;
+				pPoint->m_aValues[1] = f2fx(Pos.y) - pQuad->m_aPoints[4].y;
 			}
-			else
+			else if(s_Operation == OP_ROTATE)
 			{
-				pEnvelope->m_vPoints[PIndex].m_aValues[0] += f2fx(wx - s_LastWx);
-				pEnvelope->m_vPoints[PIndex].m_aValues[1] += f2fx(wy - s_LastWy);
+				pPoint->m_aValues[2] += 10 * Ui()->MouseDeltaX();
 			}
 		}
-		else if(s_Operation == OP_ROTATE)
-			pEnvelope->m_vPoints[PIndex].m_aValues[2] += 10 * Ui()->MouseDeltaX();
-
-		s_LastWx = wx;
-		s_LastWy = wy;
 
 		if(!Ui()->MouseButton(0))
 		{
@@ -2671,9 +2640,9 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
-	else if(Ui()->HotItem() == pId && m_CurrentQuadIndex == QIndex)
+	else if(Ui()->HotItem() == pPoint && m_CurrentQuadIndex == QuadIndex)
 	{
-		m_pUiGotContext = pId;
+		m_pUiGotContext = pPoint;
 
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		str_copy(m_aTooltip, "Left mouse button to move. Hold ctrl to rotate. Hold alt to ignore grid.");
@@ -2682,25 +2651,22 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 		{
 			if(Input()->ModifierIsPressed())
 			{
-				Ui()->EnableMouseLock(pId);
+				Ui()->EnableMouseLock(pPoint);
 				s_Operation = OP_ROTATE;
 
-				SelectQuad(QIndex);
+				SelectQuad(QuadIndex);
 			}
 			else
 			{
 				s_Operation = OP_MOVE;
 
-				SelectQuad(QIndex);
+				SelectQuad(QuadIndex);
 			}
 
-			SelectEnvPoint(PIndex);
+			SelectEnvPoint(PointIndex);
 			m_SelectedQuadEnvelope = pQuad->m_PosEnv;
 
-			Ui()->SetActiveItem(pId);
-
-			s_LastWx = wx;
-			s_LastWy = wy;
+			Ui()->SetActiveItem(pPoint);
 		}
 		else
 		{
@@ -2711,7 +2677,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 	else
 		Graphics()->SetColor(0.0f, 1.0f, 0.0f, 1.0f);
 
-	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * m_MouseWorldScale, 5.0f * m_MouseWorldScale);
+	IGraphics::CQuadItem QuadItem(Center.x, Center.y, 5.0f * m_MouseWorldScale, 5.0f * m_MouseWorldScale);
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
@@ -3155,8 +3121,7 @@ void CEditor::DoMapEditor(CUIRect View)
 							Graphics()->QuadsEnd();
 						}
 					}
-
-					if(pEditLayer->m_Type == LAYERTYPE_SOUNDS)
+					else if(pEditLayer->m_Type == LAYERTYPE_SOUNDS)
 					{
 						std::shared_ptr<CLayerSounds> pLayer = std::static_pointer_cast<CLayerSounds>(pEditLayer);
 

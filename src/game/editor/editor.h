@@ -683,7 +683,7 @@ public:
 	int PopupSelectAutoMapReferenceResult();
 
 	void DoQuadEnvelopes(const std::vector<CQuad> &vQuads, IGraphics::CTextureHandle Texture = IGraphics::CTextureHandle());
-	void DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int pIndex);
+	void DoQuadEnvPoint(const CQuad *pQuad, int QuadIndex, int PointIndex);
 	void DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int v);
 	void UpdateHotQuadPoint(const CLayerQuads *pLayer);
 
