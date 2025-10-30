@@ -2275,19 +2275,19 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		{
 			m_ExpectedMaplistEntries = -1;
 		}
-	}
-	else if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0)
-	{
-		// game message
-		if(!Dummy)
-		{
-			for(auto &DemoRecorder : m_aDemoRecorder)
-				if(DemoRecorder.IsRecording())
-					DemoRecorder.RecordMessage(pPacket->m_pData, pPacket->m_DataSize);
-		}
 
-		GameClient()->OnMessage(Msg, &Unpacker, Conn, Dummy);
+		return;
 	}
+
+	// game message
+	if(!Dummy)
+	{
+		for(auto &DemoRecorder : m_aDemoRecorder)
+			if(DemoRecorder.IsRecording())
+				DemoRecorder.RecordMessage(pPacket->m_pData, pPacket->m_DataSize);
+	}
+
+	GameClient()->OnMessage(Msg, &Unpacker, Conn, Dummy);
 }
 
 int CClient::UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshot *pTo)
