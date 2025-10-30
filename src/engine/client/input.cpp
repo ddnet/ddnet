@@ -37,7 +37,8 @@
 void CInput::AddKeyEvent(int Key, int Flags)
 {
 	dbg_assert(Key >= KEY_FIRST && Key < KEY_LAST, "Key invalid: %d", Key);
-	dbg_assert((Flags & (FLAG_PRESS | FLAG_RELEASE)) != 0 && (Flags & ~(FLAG_PRESS | FLAG_RELEASE)) == 0, "Flags invalid");
+	dbg_assert((Flags & (FLAG_PRESS | FLAG_RELEASE)) != 0 && (Flags & ~(FLAG_PRESS | FLAG_RELEASE | FLAG_REPEAT)) == 0, "Flags invalid (unknown flag): %d", Flags);
+	dbg_assert((Flags & FLAG_REPEAT) == 0 || (Flags & FLAG_PRESS) != 0, "Flags invalid (key repeat implies key press): %d", Flags);
 
 	CEvent Event;
 	Event.m_Key = Key;
@@ -734,7 +735,7 @@ int CInput::Update()
 
 		// handle keys
 		case SDL_KEYDOWN:
-			AddKeyEventChecked(TranslateKeyEventKey(Event.key), IInput::FLAG_PRESS);
+			AddKeyEventChecked(TranslateKeyEventKey(Event.key), IInput::FLAG_PRESS | (Event.key.repeat != 0 ? FLAG_REPEAT : 0));
 			break;
 
 		case SDL_KEYUP:
