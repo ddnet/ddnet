@@ -2039,6 +2039,11 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		pTitle = "Unused tiles disabled";
 		pMessage = "Unused tiles can't be placed by default because they could get a use later and then destroy your map.\n\nActivate the 'Allow unused' setting to be able to place every tile.";
 	}
+	else if(pEditor->m_PopupEventType == POPEVENT_RELOAD_WITH_UNUSED)
+	{
+		pTitle = "Map contains unused tiles";
+		pMessage = "This map contains unused tiles that may not work on your client.\n\nDo you want to reload the map and include them?";
+	}
 	else if(pEditor->m_PopupEventType == POPEVENT_IMAGEDIV16)
 	{
 		pTitle = "Image width/height";
@@ -2185,6 +2190,11 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		{
 			pEditor->Reset();
 			pEditor->m_aFilename[0] = 0;
+		}
+		else if(pEditor->m_PopupEventType == POPEVENT_RELOAD_WITH_UNUSED)
+		{
+			pEditor->m_ReloadMapWithUnused = true;
+			pEditor->Load(pEditor->m_aFileSaveName, IStorage::TYPE_ALL_OR_ABSOLUTE);
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
 		{
