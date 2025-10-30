@@ -102,6 +102,7 @@ Checks: >
   -readability-simplify-boolean-expr,
   -readability-suspicious-call-argument,
   -readability-uppercase-literal-suffix,
+  -readability-use-concise-preprocessor-directives,
   -readability-use-std-min-max,
   performance-*,
   -performance-enum-size,
