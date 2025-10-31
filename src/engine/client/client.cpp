@@ -4200,6 +4200,11 @@ int CClient::HandleChecksum(int Conn, CUuid Uuid, CUnpacker *pUnpacker)
 	{ \
 		m_Checksum.m_Data.m_Config.m_##Name = g_Config.m_##Name; \
 	}
+#define MACRO_CONFIG_FLOAT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
+	if(CHECKSUM_RECORD(Flags)) \
+	{ \
+		m_Checksum.m_Data.m_Config.m_##Name = g_Config.m_##Name; \
+	}
 #define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) \
 	if(CHECKSUM_RECORD(Flags)) \
 	{ \
@@ -4213,6 +4218,7 @@ int CClient::HandleChecksum(int Conn, CUuid Uuid, CUnpacker *pUnpacker)
 #include <engine/shared/config_variables.h>
 #undef CHECKSUM_RECORD
 #undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_FLOAT
 #undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR
 	}

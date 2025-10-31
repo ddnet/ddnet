@@ -7,6 +7,7 @@
 
 #include <engine/config.h>
 #include <engine/console.h>
+#include <engine/shared/fixed_point_number.h>
 #include <engine/shared/memheap.h>
 
 #include <vector>
@@ -27,6 +28,9 @@ public:
 #define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
 	static constexpr int ms_##Name = Def; \
 	int m_##Name;
+#define MACRO_CONFIG_FLOAT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
+	static constexpr CFixedPointNumber ms_##Name = CFixedPointNumber::FromLiteral(#Def); \
+	CFixedPointNumber m_##Name;
 #define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) \
 	static constexpr unsigned ms_##Name = Def; \
 	unsigned m_##Name;
@@ -35,6 +39,7 @@ public:
 	char m_##Name[Len]; // Flawfinder: ignore
 #include "config_variables.h"
 #undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_FLOAT
 #undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR
 };
@@ -67,6 +72,7 @@ struct SConfigVariable
 	enum EVariableType
 	{
 		VAR_INT,
+		VAR_FLOAT,
 		VAR_COLOR,
 		VAR_STRING,
 	};
@@ -128,6 +134,37 @@ struct SIntConfigVariable : public SConfigVariable
 	void Serialize(char *pOut, size_t Size, int Value) const;
 	void Serialize(char *pOut, size_t Size) const override;
 	void SetValue(int Value);
+	void ResetToDefault() override;
+	void ResetToOld() override;
+};
+
+struct SFloatConfigVariable : public SConfigVariable
+{
+	CFixedPointNumber *m_pVariable;
+	CFixedPointNumber m_Default;
+	CFixedPointNumber m_Min;
+	CFixedPointNumber m_Max;
+	CFixedPointNumber m_OldValue;
+
+	SFloatConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, CFixedPointNumber *pVariable, CFixedPointNumber Default, CFixedPointNumber Min, CFixedPointNumber Max) :
+		SConfigVariable(pConsole, pScriptName, Type, Flags, pHelp),
+		m_pVariable(pVariable),
+		m_Default(Default),
+		m_Min(Min),
+		m_Max(Max),
+		m_OldValue(Default)
+	{
+		*m_pVariable = m_Default;
+	}
+
+	~SFloatConfigVariable() override = default;
+
+	static void CommandCallback(IConsole::IResult *pResult, void *pUserData);
+	void Register() override;
+	bool IsDefault() const override;
+	void Serialize(char *pOut, size_t Size, const CFixedPointNumber &Value) const;
+	void Serialize(char *pOut, size_t Size) const override;
+	void SetValue(const CFixedPointNumber &Value);
 	void ResetToDefault() override;
 	void ResetToOld() override;
 };
