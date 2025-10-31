@@ -2442,155 +2442,167 @@ void CEditor::DoQuadKnife(int QuadIndex)
 	Graphics()->QuadsEnd();
 }
 
-void CEditor::DoQuadEnvelopes(const std::vector<CQuad> &vQuads, IGraphics::CTextureHandle Texture)
+void CEditor::DoQuadEnvelopes(const CLayerQuads *pLayerQuads)
 {
-	size_t Num = vQuads.size();
-	std::shared_ptr<CEnvelope> *apEnvelope = new std::shared_ptr<CEnvelope>[Num];
-	for(size_t i = 0; i < Num; i++)
-		apEnvelope[i] = nullptr;
-
-	for(size_t i = 0; i < Num; i++)
+	const std::vector<CQuad> &vQuads = pLayerQuads->m_vQuads;
+	if(vQuads.empty())
 	{
-		if((m_ActiveEnvelopePreview == EEnvelopePreview::SELECTED && vQuads[i].m_PosEnv == m_SelectedEnvelope) || m_ActiveEnvelopePreview == EEnvelopePreview::ALL)
-			if(vQuads[i].m_PosEnv >= 0 && vQuads[i].m_PosEnv < (int)m_Map.m_vpEnvelopes.size())
-				apEnvelope[i] = m_Map.m_vpEnvelopes[vQuads[i].m_PosEnv];
+		return;
 	}
 
-	// Draw Lines
+	std::vector<std::pair<const CQuad *, CEnvelope *>> vQuadsWithEnvelopes;
+	vQuadsWithEnvelopes.reserve(vQuads.size());
+	for(const auto &Quad : vQuads)
+	{
+		if(m_ActiveEnvelopePreview != EEnvelopePreview::ALL &&
+			!(m_ActiveEnvelopePreview == EEnvelopePreview::SELECTED && Quad.m_PosEnv == m_SelectedEnvelope))
+		{
+			continue;
+		}
+		if(Quad.m_PosEnv < 0 ||
+			Quad.m_PosEnv >= (int)m_Map.m_vpEnvelopes.size() ||
+			m_Map.m_vpEnvelopes[Quad.m_PosEnv]->m_vPoints.empty())
+		{
+			continue;
+		}
+		vQuadsWithEnvelopes.emplace_back(&Quad, m_Map.m_vpEnvelopes[Quad.m_PosEnv].get());
+	}
+	if(vQuadsWithEnvelopes.empty())
+	{
+		return;
+	}
+
+	GetSelectedGroup()->MapScreen();
+
+	// Draw lines between points
 	Graphics()->TextureClear();
 	IGraphics::CLineItemBatch LineItemBatch;
 	Graphics()->LinesBatchBegin(&LineItemBatch);
-	Graphics()->SetColor(80.0f / 255, 150.0f / 255, 230.f / 255, 0.5f);
-	for(size_t j = 0; j < Num; j++)
+	Graphics()->SetColor(ColorRGBA(0.0f, 1.0f, 1.0f, 0.75f));
+	for(const auto &[pQuad, pEnvelope] : vQuadsWithEnvelopes)
 	{
-		if(!apEnvelope[j] || apEnvelope[j]->m_vPoints.empty())
+		if(pEnvelope->m_vPoints.size() < 2)
+		{
 			continue;
+		}
 
-		// QuadParams
-		const CPoint *pPivotPoint = &vQuads[j].m_aPoints[4];
+		const CPoint *pPivotPoint = &pQuad->m_aPoints[4];
 		const vec2 PivotPoint = vec2(fx2f(pPivotPoint->x), fx2f(pPivotPoint->y));
 
-		const float StartTime = apEnvelope[j]->m_vPoints[0].m_Time.AsSeconds();
-		const float EndTime = apEnvelope[j]->m_vPoints[apEnvelope[j]->m_vPoints.size() - 1].m_Time.AsSeconds();
-		const float TimeRange = EndTime - StartTime;
-		const int Steps = std::clamp(round_to_int(TimeRange * 10.0f), 250, 2500);
-		const float StepTime = TimeRange / static_cast<float>(Steps);
-
-		ColorRGBA Result = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
-		apEnvelope[j]->Eval(StartTime, Result, 2);
-		vec2 Pos0 = PivotPoint + vec2(Result.r, Result.g);
-		float PrevTime = StartTime;
-		for(int Step = 1; Step <= Steps; Step++)
+		for(int PointIndex = 0; PointIndex <= (int)pEnvelope->m_vPoints.size() - 2; PointIndex++)
 		{
-			float CurrentTime = StartTime + Step * StepTime;
-			if(CurrentTime >= EndTime)
+			const auto &PointStart = pEnvelope->m_vPoints[PointIndex];
+			const auto &PointEnd = pEnvelope->m_vPoints[PointIndex + 1];
+			const float PointStartTime = PointStart.m_Time.AsSeconds();
+			const float PointEndTime = PointEnd.m_Time.AsSeconds();
+			const float TimeRange = PointEndTime - PointStartTime;
+
+			int Steps;
+			if(PointStart.m_Curvetype == CURVETYPE_BEZIER)
 			{
-				CurrentTime = EndTime - 0.001f;
-				if(CurrentTime <= PrevTime)
-					break;
+				Steps = std::clamp(round_to_int(TimeRange * 10.0f), 50, 150);
 			}
-			Result = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
-			apEnvelope[j]->Eval(CurrentTime, Result, 2);
+			else
+			{
+				Steps = 1;
+			}
+			ColorRGBA StartPosition = PointStart.ColorValue();
+			for(int Step = 1; Step <= Steps; Step++)
+			{
+				ColorRGBA EndPosition;
+				if(Step == Steps)
+				{
+					EndPosition = PointEnd.ColorValue();
+				}
+				else
+				{
+					const float SectionEndTime = PointStartTime + TimeRange * (Step / (float)Steps);
+					EndPosition = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+					pEnvelope->Eval(SectionEndTime, EndPosition, 2);
+				}
 
-			const vec2 Pos1 = PivotPoint + vec2(Result.r, Result.g);
+				const vec2 Pos0 = PivotPoint + vec2(StartPosition.r, StartPosition.g);
+				const vec2 Pos1 = PivotPoint + vec2(EndPosition.r, EndPosition.g);
+				const IGraphics::CLineItem Item = IGraphics::CLineItem(Pos0, Pos1);
+				Graphics()->LinesBatchDraw(&LineItemBatch, &Item, 1);
 
-			const IGraphics::CLineItem Item = IGraphics::CLineItem(Pos0.x, Pos0.y, Pos1.x, Pos1.y);
-			Graphics()->LinesBatchDraw(&LineItemBatch, &Item, 1);
-
-			Pos0 = Pos1;
-			PrevTime = CurrentTime;
+				StartPosition = EndPosition;
+			}
 		}
 	}
 	Graphics()->LinesBatchEnd(&LineItemBatch);
 
-	// Draw Quads
-	Graphics()->TextureSet(Texture);
-	Graphics()->QuadsBegin();
-
-	for(size_t j = 0; j < Num; j++)
+	// Draw quads at points
+	if(pLayerQuads->m_Image >= 0 && pLayerQuads->m_Image < (int)m_Map.m_vpImages.size())
 	{
-		if(!apEnvelope[j])
-			continue;
-
-		// QuadParams
-		for(size_t i = 0; i < apEnvelope[j]->m_vPoints.size(); i++)
+		Graphics()->TextureSet(m_Map.m_vpImages[pLayerQuads->m_Image]->m_Texture);
+	}
+	else
+	{
+		Graphics()->TextureClear();
+	}
+	Graphics()->QuadsBegin();
+	for(const auto &[pQuad, pEnvelope] : vQuadsWithEnvelopes)
+	{
+		for(size_t PointIndex = 0; PointIndex < pEnvelope->m_vPoints.size(); PointIndex++)
 		{
-			// Calc Env Position
-			float OffsetX = fx2f(apEnvelope[j]->m_vPoints[i].m_aValues[0]);
-			float OffsetY = fx2f(apEnvelope[j]->m_vPoints[i].m_aValues[1]);
-			const float Rotation = fx2f(apEnvelope[j]->m_vPoints[i].m_aValues[2]) / 360.0f * pi * 2;
+			const CEnvPoint_runtime &EnvPoint = pEnvelope->m_vPoints[PointIndex];
+			const vec2 Offset = vec2(fx2f(EnvPoint.m_aValues[0]), fx2f(EnvPoint.m_aValues[1]));
+			const float Rotation = fx2f(EnvPoint.m_aValues[2]) / 180.0f * pi;
 
-			// Set Colours
-			float Alpha = (m_SelectedQuadEnvelope == vQuads[j].m_PosEnv && IsEnvPointSelected(i)) ? 0.65f : 0.35f;
-			IGraphics::CColorVertex aArray[] = {
-				IGraphics::CColorVertex(0, vQuads[j].m_aColors[0].r, vQuads[j].m_aColors[0].g, vQuads[j].m_aColors[0].b, Alpha),
-				IGraphics::CColorVertex(1, vQuads[j].m_aColors[1].r, vQuads[j].m_aColors[1].g, vQuads[j].m_aColors[1].b, Alpha),
-				IGraphics::CColorVertex(2, vQuads[j].m_aColors[2].r, vQuads[j].m_aColors[2].g, vQuads[j].m_aColors[2].b, Alpha),
-				IGraphics::CColorVertex(3, vQuads[j].m_aColors[3].r, vQuads[j].m_aColors[3].g, vQuads[j].m_aColors[3].b, Alpha)};
-			Graphics()->SetColorVertex(aArray, std::size(aArray));
+			const float Alpha = (m_SelectedQuadEnvelope == pQuad->m_PosEnv && IsEnvPointSelected(PointIndex)) ? 0.65f : 0.35f;
+			Graphics()->SetColor4(
+				ColorRGBA(pQuad->m_aColors[0].r, pQuad->m_aColors[0].g, pQuad->m_aColors[0].b, pQuad->m_aColors[0].a).Multiply(1.0f / 255.0f).WithMultipliedAlpha(Alpha),
+				ColorRGBA(pQuad->m_aColors[1].r, pQuad->m_aColors[1].g, pQuad->m_aColors[1].b, pQuad->m_aColors[1].a).Multiply(1.0f / 255.0f).WithMultipliedAlpha(Alpha),
+				ColorRGBA(pQuad->m_aColors[3].r, pQuad->m_aColors[3].g, pQuad->m_aColors[3].b, pQuad->m_aColors[3].a).Multiply(1.0f / 255.0f).WithMultipliedAlpha(Alpha),
+				ColorRGBA(pQuad->m_aColors[2].r, pQuad->m_aColors[2].g, pQuad->m_aColors[2].b, pQuad->m_aColors[2].a).Multiply(1.0f / 255.0f).WithMultipliedAlpha(Alpha));
 
-			// Rotation
 			const CPoint *pPoints;
 			CPoint aRotated[4];
 			if(Rotation != 0.0f)
 			{
-				std::copy_n(vQuads[j].m_aPoints, std::size(aRotated), aRotated);
+				std::copy_n(pQuad->m_aPoints, std::size(aRotated), aRotated);
 				for(auto &Point : aRotated)
 				{
-					Rotate(&vQuads[j].m_aPoints[4], &Point, Rotation);
+					Rotate(&pQuad->m_aPoints[4], &Point, Rotation);
 				}
 				pPoints = aRotated;
 			}
 			else
 			{
-				pPoints = vQuads[j].m_aPoints;
+				pPoints = pQuad->m_aPoints;
 			}
-
-			// Set Texture Coords
 			Graphics()->QuadsSetSubsetFree(
-				fx2f(vQuads[j].m_aTexcoords[0].x), fx2f(vQuads[j].m_aTexcoords[0].y),
-				fx2f(vQuads[j].m_aTexcoords[1].x), fx2f(vQuads[j].m_aTexcoords[1].y),
-				fx2f(vQuads[j].m_aTexcoords[2].x), fx2f(vQuads[j].m_aTexcoords[2].y),
-				fx2f(vQuads[j].m_aTexcoords[3].x), fx2f(vQuads[j].m_aTexcoords[3].y));
+				fx2f(pQuad->m_aTexcoords[0].x), fx2f(pQuad->m_aTexcoords[0].y),
+				fx2f(pQuad->m_aTexcoords[1].x), fx2f(pQuad->m_aTexcoords[1].y),
+				fx2f(pQuad->m_aTexcoords[2].x), fx2f(pQuad->m_aTexcoords[2].y),
+				fx2f(pQuad->m_aTexcoords[3].x), fx2f(pQuad->m_aTexcoords[3].y));
 
-			// Set Quad Coords & Draw
-			IGraphics::CFreeformItem Freeform(
-				fx2f(pPoints[0].x) + OffsetX, fx2f(pPoints[0].y) + OffsetY,
-				fx2f(pPoints[1].x) + OffsetX, fx2f(pPoints[1].y) + OffsetY,
-				fx2f(pPoints[2].x) + OffsetX, fx2f(pPoints[2].y) + OffsetY,
-				fx2f(pPoints[3].x) + OffsetX, fx2f(pPoints[3].y) + OffsetY);
+			const IGraphics::CFreeformItem Freeform(
+				fx2f(pPoints[0].x) + Offset.x, fx2f(pPoints[0].y) + Offset.y,
+				fx2f(pPoints[1].x) + Offset.x, fx2f(pPoints[1].y) + Offset.y,
+				fx2f(pPoints[2].x) + Offset.x, fx2f(pPoints[2].y) + Offset.y,
+				fx2f(pPoints[3].x) + Offset.x, fx2f(pPoints[3].y) + Offset.y);
 			Graphics()->QuadsDrawFreeform(&Freeform, 1);
 		}
 	}
 	Graphics()->QuadsEnd();
 
-	// Draw QuadPoints
+	// Draw quad envelope point handles
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
-	for(size_t j = 0; j < Num; j++)
+	for(const auto &[pQuad, pEnvelope] : vQuadsWithEnvelopes)
 	{
-		if(!apEnvelope[j])
-			continue;
-
-		for(size_t i = 0; i < apEnvelope[j]->m_vPoints.size(); i++)
-			DoQuadEnvPoint(&vQuads[j], j, i);
+		for(size_t PointIndex = 0; PointIndex < pEnvelope->m_vPoints.size(); PointIndex++)
+		{
+			DoQuadEnvPoint(pQuad, pEnvelope, pQuad - vQuads.data(), PointIndex);
+		}
 	}
 	Graphics()->QuadsEnd();
-	delete[] apEnvelope;
 }
 
-void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QuadIndex, int PointIndex)
+void CEditor::DoQuadEnvPoint(const CQuad *pQuad, CEnvelope *pEnvelope, int QuadIndex, int PointIndex)
 {
-	enum
-	{
-		OP_NONE = 0,
-		OP_MOVE,
-		OP_ROTATE,
-	};
-
-	static int s_Operation = OP_NONE;
-
-	std::shared_ptr<CEnvelope> pEnvelope = m_Map.m_vpEnvelopes[pQuad->m_PosEnv];
 	CEnvPoint_runtime *pPoint = &pEnvelope->m_vPoints[PointIndex];
 	const vec2 Center = vec2(fx2f(pQuad->m_aPoints[4].x) + fx2f(pPoint->m_aValues[0]), fx2f(pQuad->m_aPoints[4].y) + fx2f(pPoint->m_aValues[1]));
 	const bool IgnoreGrid = Input()->AltIsPressed();
@@ -2599,7 +2611,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QuadIndex, int PointIndex)
 	{
 		if(m_MouseDeltaWorld != vec2(0.0f, 0.0f))
 		{
-			if(s_Operation == OP_MOVE)
+			if(m_QuadEnvelopePointOperation == EQuadEnvelopePointOperation::MOVE)
 			{
 				vec2 Pos = Ui()->MouseWorldPos();
 				if(MapView()->MapGrid()->IsEnabled() && !IgnoreGrid)
@@ -2609,7 +2621,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QuadIndex, int PointIndex)
 				pPoint->m_aValues[0] = f2fx(Pos.x) - pQuad->m_aPoints[4].x;
 				pPoint->m_aValues[1] = f2fx(Pos.y) - pQuad->m_aPoints[4].y;
 			}
-			else if(s_Operation == OP_ROTATE)
+			else if(m_QuadEnvelopePointOperation == EQuadEnvelopePointOperation::ROTATE)
 			{
 				pPoint->m_aValues[2] += 10 * Ui()->MouseDeltaX();
 			}
@@ -2618,17 +2630,15 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QuadIndex, int PointIndex)
 		if(!Ui()->MouseButton(0))
 		{
 			Ui()->DisableMouseLock();
-			s_Operation = OP_NONE;
+			m_QuadEnvelopePointOperation = EQuadEnvelopePointOperation::NONE;
 			Ui()->SetActiveItem(nullptr);
 		}
 
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		Graphics()->SetColor(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
 	}
 	else if(Ui()->HotItem() == pPoint && m_CurrentQuadIndex == QuadIndex)
 	{
-		m_pUiGotContext = pPoint;
-
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		Graphics()->SetColor(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
 		str_copy(m_aTooltip, "Left mouse button to move. Hold ctrl to rotate. Hold alt to ignore grid.");
 
 		if(Ui()->MouseButton(0))
@@ -2636,20 +2646,15 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QuadIndex, int PointIndex)
 			if(Input()->ModifierIsPressed())
 			{
 				Ui()->EnableMouseLock(pPoint);
-				s_Operation = OP_ROTATE;
-
-				SelectQuad(QuadIndex);
+				m_QuadEnvelopePointOperation = EQuadEnvelopePointOperation::ROTATE;
 			}
 			else
 			{
-				s_Operation = OP_MOVE;
-
-				SelectQuad(QuadIndex);
+				m_QuadEnvelopePointOperation = EQuadEnvelopePointOperation::MOVE;
 			}
-
+			SelectQuad(QuadIndex);
 			SelectEnvPoint(PointIndex);
 			m_SelectedQuadEnvelope = pQuad->m_PosEnv;
-
 			Ui()->SetActiveItem(pPoint);
 		}
 		else
@@ -2659,7 +2664,9 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QuadIndex, int PointIndex)
 		}
 	}
 	else
-		Graphics()->SetColor(0.0f, 1.0f, 0.0f, 1.0f);
+	{
+		Graphics()->SetColor(ColorRGBA(0.0f, 1.0f, 1.0f, 1.0f));
+	}
 
 	IGraphics::CQuadItem QuadItem(Center.x, Center.y, 5.0f * m_MouseWorldScale, 5.0f * m_MouseWorldScale);
 	Graphics()->QuadsDraw(&QuadItem, 1);
@@ -3242,16 +3249,13 @@ void CEditor::DoMapEditor(CUIRect View)
 	if(!m_ShowPicker)
 		MapView()->ProofMode()->RenderScreenSizes();
 
-	if(!m_ShowPicker && m_ShowEnvelopePreview && m_ActiveEnvelopePreview != EEnvelopePreview::NONE && GetSelectedLayer(0) && GetSelectedLayer(0)->m_Type == LAYERTYPE_QUADS)
+	if(!m_ShowPicker && m_ShowEnvelopePreview && m_ActiveEnvelopePreview != EEnvelopePreview::NONE)
 	{
-		GetSelectedGroup()->MapScreen();
-
-		std::shared_ptr<CLayerQuads> pLayer = std::static_pointer_cast<CLayerQuads>(GetSelectedLayer(0));
-		IGraphics::CTextureHandle Texture;
-		if(pLayer->m_Image >= 0 && pLayer->m_Image < (int)m_Map.m_vpImages.size())
-			Texture = m_Map.m_vpImages[pLayer->m_Image]->m_Texture;
-
-		DoQuadEnvelopes(pLayer->m_vQuads, Texture);
+		const std::shared_ptr<CLayer> pSelectedLayer = GetSelectedLayer(0);
+		if(pSelectedLayer != nullptr && pSelectedLayer->m_Type == LAYERTYPE_QUADS)
+		{
+			DoQuadEnvelopes(static_cast<const CLayerQuads *>(pSelectedLayer.get()));
+		}
 		m_ActiveEnvelopePreview = EEnvelopePreview::NONE;
 	}
 
@@ -7416,6 +7420,7 @@ void CEditor::Reset(bool CreateDefault)
 	m_pContainerPannedLast = nullptr;
 
 	m_ActiveEnvelopePreview = EEnvelopePreview::NONE;
+	m_QuadEnvelopePointOperation = EQuadEnvelopePointOperation::NONE;
 	m_ShiftBy = 1;
 
 	m_ResetZoomEnvelope = true;
