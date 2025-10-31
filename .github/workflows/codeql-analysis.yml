@@ -38,7 +38,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        submodules: true
+        submodules: recursive
 
     - name: Prepare Linux
       if: matrix.language == 'cpp'

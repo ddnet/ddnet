@@ -60,7 +60,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        submodules: true
+        submodules: recursive
 
     - name: Prepare Linux
       if: contains(matrix.os, 'ubuntu')
@@ -257,7 +257,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        submodules: true
+        submodules: recursive
 
     - name: Validate Gradle Wrapper
       uses: gradle/actions/wrapper-validation@v4
