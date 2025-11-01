@@ -1846,7 +1846,7 @@ protected:
 				Heaps.back()->m_Heap.Init(MemoryBlockSize * BlockCount, 0);
 				if(!Heaps.back()->m_Heap.Allocate(RequiredSize, RequiredAlignment, AllocatedMem))
 				{
-					dbg_assert(false, "Heap allocation failed directly after creating fresh heap for image");
+					dbg_assert_failed("Heap allocation failed directly after creating fresh heap for image");
 				}
 			}
 
@@ -3143,8 +3143,7 @@ protected:
 		case EWrapMode::CLAMP:
 			return VULKAN_BACKEND_ADDRESS_MODE_CLAMP_EDGES;
 		default:
-			dbg_assert(false, "Invalid wrap mode: %d", (int)State.m_WrapMode);
-			dbg_break();
+			dbg_assert_failed("Invalid wrap mode: %d", (int)State.m_WrapMode);
 		};
 	}
 
@@ -3159,8 +3158,7 @@ protected:
 		case EBlendMode::ADDITIVE:
 			return VULKAN_BACKEND_BLEND_MODE_ADDITATIVE;
 		default:
-			dbg_assert(false, "Invalid blend mode: %d", (int)State.m_BlendMode);
-			dbg_break();
+			dbg_assert_failed("Invalid blend mode: %d", (int)State.m_BlendMode);
 		};
 	}
 

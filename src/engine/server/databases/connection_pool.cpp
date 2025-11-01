@@ -465,7 +465,7 @@ bool CDbConnectionPool::ExecSqlFunc(IDbConnection *pConnection, CSqlExecData *pD
 		Success = pData->m_Ptr.m_pWriteFunc(pConnection, pData->m_pThreadData.get(), w, aError, sizeof(aError));
 		break;
 	default:
-		dbg_assert(false, "unreachable");
+		dbg_assert_failed("unreachable");
 	}
 	pConnection->Disconnect();
 	if(!Success)

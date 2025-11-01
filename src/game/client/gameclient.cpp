@@ -320,8 +320,7 @@ void CGameClient::OnInit()
 			pMessage = Localize("Loading demo file from storage");
 			break;
 		default:
-			dbg_assert(false, "Invalid callback loading detail");
-			dbg_break();
+			dbg_assert_failed("Invalid callback loading detail");
 		}
 		m_Menus.RenderLoading(pTitle, pMessage, 0);
 	});
@@ -1302,7 +1301,7 @@ void CGameClient::RenderShutdownMessage()
 	else if(Client()->State() == IClient::STATE_RESTARTING)
 		pMessage = Localize("Restarting. Please wait…");
 	else
-		dbg_assert(false, "Invalid client state for quitting message");
+		dbg_assert_failed("Invalid client state for quitting message");
 
 	// This function only gets called after the render loop has already terminated, so we have to call Swap manually.
 	Graphics()->Clear(0.0f, 0.0f, 0.0f);
@@ -4567,7 +4566,7 @@ void CGameClient::ConMapbug(IConsole::IResult *pResult, void *pUserData)
 		log_debug("mapbugs", "unknown map bug '%s', ignoring", pMapBugName);
 		break;
 	default:
-		dbg_assert(false, "unreachable");
+		dbg_assert_failed("unreachable");
 	}
 }
 

@@ -1373,7 +1373,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 				return;
 			break;
 		default:
-			dbg_assert(false, "unknown serverinfo type");
+			dbg_assert_failed("unknown serverinfo type");
 		}
 
 		if(SavedType == SERVERINFO_EXTENDED)

@@ -505,7 +505,7 @@ void CMenus::RenderMenubar(CUIRect Box, IClient::EClientState ClientState)
 	}
 	else
 	{
-		dbg_assert(false, "Client state invalid for RenderMenubar");
+		dbg_assert_failed("Client state invalid for RenderMenubar");
 	}
 
 	// First render buttons aligned from right side so remaining
@@ -1128,7 +1128,7 @@ void CMenus::Render()
 			}
 			else
 			{
-				dbg_assert(false, "m_MenuPage invalid");
+				dbg_assert_failed("m_MenuPage invalid");
 			}
 
 			RenderMenubar(TabBar, ClientState);
@@ -1180,7 +1180,7 @@ void CMenus::Render()
 			}
 			else
 			{
-				dbg_assert(false, "m_GamePage invalid");
+				dbg_assert_failed("m_GamePage invalid");
 			}
 
 			RenderMenubar(TabBar, ClientState);
@@ -2031,8 +2031,7 @@ void CMenus::RenderPopupLoading(CUIRect Screen)
 			str_copy(aLabel1, Localize("Sending initial client info"));
 			break;
 		default:
-			dbg_assert(false, "Invalid loading state for RenderPopupLoading");
-			break;
+			dbg_assert_failed("Invalid loading state for RenderPopupLoading");
 		}
 		aLabel2[0] = '\0';
 	}
@@ -2429,9 +2428,8 @@ int CMenus::DoButton_CheckBox_Tristate(const void *pId, const char *pText, TRIST
 	case TRISTATE::ALL:
 		return DoButton_CheckBox_Common(pId, pText, "X", pRect, BUTTONFLAG_LEFT);
 	default:
-		dbg_assert(false, "invalid tristate");
+		dbg_assert_failed("invalid tristate");
 	}
-	dbg_break();
 }
 
 int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser)

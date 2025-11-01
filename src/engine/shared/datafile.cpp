@@ -1100,8 +1100,7 @@ static int CompressionLevelToZlib(CDataFileWriter::ECompressionLevel Compression
 	case CDataFileWriter::COMPRESSION_BEST:
 		return Z_BEST_COMPRESSION;
 	default:
-		dbg_assert(false, "CompressionLevel invalid");
-		dbg_break();
+		dbg_assert_failed("CompressionLevel invalid");
 	}
 }
 

@@ -317,7 +317,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			case CMenusIngameTouchControls::EMenuType::MENU_BUTTONS: m_MenusIngameTouchControls.RenderTouchButtonEditor(MainView); break;
 			case CMenusIngameTouchControls::EMenuType::MENU_SETTINGS: m_MenusIngameTouchControls.RenderConfigSettings(MainView); break;
 			case CMenusIngameTouchControls::EMenuType::MENU_PREVIEW: m_MenusIngameTouchControls.RenderPreviewSettings(MainView); break;
-			default: dbg_assert(false, "Unknown selected tab value = %d.", (int)m_MenusIngameTouchControls.m_CurrentMenu);
+			default: dbg_assert_failed("Unknown selected tab value = %d.", (int)m_MenusIngameTouchControls.m_CurrentMenu);
 			}
 		}
 	}
@@ -765,7 +765,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 			pTeamMode = Localize("solo", "Team status");
 			break;
 		default:
-			dbg_assert(false, "unknown team mode");
+			dbg_assert_failed("unknown team mode");
 		}
 		if((Config()->m_SvTeam == SV_TEAM_ALLOWED || Config()->m_SvTeam == SV_TEAM_MANDATORY) && (Config()->m_SvMinTeamSize != CConfig::ms_SvMinTeamSize || Config()->m_SvMaxTeamSize != CConfig::ms_SvMaxTeamSize))
 		{

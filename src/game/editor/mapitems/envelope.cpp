@@ -50,7 +50,7 @@ CEnvelope::CEnvelope(int NumChannels) :
 		m_Type = EType::COLOR;
 		break;
 	default:
-		dbg_assert(false, "invalid number of channels for envelope");
+		dbg_assert_failed("invalid number of channels for envelope");
 	}
 }
 
@@ -141,7 +141,6 @@ int CEnvelope::GetChannels() const
 	case EType::SOUND:
 		return 1;
 	default:
-		dbg_assert(false, "unknown envelope type");
-		dbg_break();
+		dbg_assert_failed("unknown envelope type");
 	}
 }

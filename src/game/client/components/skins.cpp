@@ -616,8 +616,7 @@ void CSkins::UpdateStartLoading(CSkinLoadingStats &Stats)
 			pSkinContainer->m_pLoadJob = std::make_shared<CSkinDownloadJob>(this, pSkinContainer->Name());
 			break;
 		default:
-			dbg_assert(false, "pSkinContainer->Type() invalid");
-			dbg_break();
+			dbg_assert_failed("pSkinContainer->Type() invalid");
 		}
 		Engine()->AddJob(pSkinContainer->m_pLoadJob);
 		pSkinContainer->SetState(CSkinContainer::EState::LOADING);
