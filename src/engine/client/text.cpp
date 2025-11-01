@@ -1757,6 +1757,7 @@ public:
 							// we hit the end, only render ellipsis and finish
 							pTmp = pEllipsis;
 							NextCharacter = 0x2026;
+							pCursor->m_Truncated = true;
 							continue;
 						}
 					}
@@ -1767,6 +1768,7 @@ public:
 					{
 						// we hit the end of the line, no more to render or count
 						pCurrent = pEnd;
+						pCursor->m_Truncated = true;
 						break;
 					}
 

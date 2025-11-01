@@ -247,6 +247,11 @@ public:
 	int m_CursorCharacter = -1;
 	vec2 m_CursorRenderedPosition = vec2(-1.0f, -1.0f);
 
+	/**
+	 * Whether the text was truncated with @link TEXTFLAG_STOP_AT_END @endlink or @link TEXTFLAG_ELLIPSIS_AT_END @endlink being set.
+	 */
+	bool m_Truncated = false;
+
 	// Color splits of the cursor to allow multicolored text
 	std::vector<STextColorSplit> m_vColorSplits;
 

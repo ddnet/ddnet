@@ -797,7 +797,7 @@ vec2 CUi::CalcAlignedCursorPos(const CUIRect *pRect, vec2 TextSize, int Align, c
 	return Cursor;
 }
 
-void CUi::DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps) const
+CLabelResult CUi::DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps) const
 {
 	const int Flags = GetFlagsForLabelProperties(LabelProps, nullptr);
 	const SCursorAndBoundingBox TextBounds = CalcFontSizeCursorHeightAndBoundingBox(TextRender(), pText, Flags, Size, pRect->w, LabelProps);
@@ -810,6 +810,7 @@ void CUi::DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align
 	Cursor.m_vColorSplits = LabelProps.m_vColorSplits;
 	Cursor.m_LineWidth = (float)LabelProps.m_MaxWidth;
 	TextRender()->TextEx(&Cursor, pText, -1);
+	return CLabelResult{.m_Truncated = Cursor.m_Truncated};
 }
 
 void CUi::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen, const CTextCursor *pReadCursor) const
@@ -896,12 +897,12 @@ void CUi::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRe
 	}
 }
 
-void CUi::DoLabel_AutoLineSize(const char *pText, float FontSize, int Align, CUIRect *pRect, float LineSize, const SLabelProperties &LabelProps) const
+CLabelResult CUi::DoLabel_AutoLineSize(const char *pText, float FontSize, int Align, CUIRect *pRect, float LineSize, const SLabelProperties &LabelProps) const
 {
 	CUIRect LabelRect;
 	pRect->HSplitTop(LineSize, &LabelRect, pRect);
 
-	this->DoLabel(&LabelRect, pText, FontSize, Align);
+	return DoLabel(&LabelRect, pText, FontSize, Align);
 }
 
 bool CUi::DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners, const std::vector<STextColorSplit> &vColorSplits)
