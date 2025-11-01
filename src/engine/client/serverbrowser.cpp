@@ -1365,6 +1365,7 @@ const json_value *CServerBrowser::LoadDDNetInfo()
 		UpdateServerCommunity(&m_ppServerlist[i]->m_Info);
 		UpdateServerRank(&m_ppServerlist[i]->m_Info);
 	}
+	ValidateServerlistType();
 	return m_pDDNetInfo;
 }
 
@@ -1666,6 +1667,21 @@ void CServerBrowser::UpdateServerRank(CServerInfo *pInfo) const
 {
 	const CCommunity *pCommunity = Community(pInfo->m_aCommunityId);
 	pInfo->m_HasRank = pCommunity == nullptr ? CServerInfo::RANK_UNAVAILABLE : pCommunity->HasRank(pInfo->m_aMap);
+}
+
+void CServerBrowser::ValidateServerlistType()
+{
+	if(m_ServerlistType >= IServerBrowser::TYPE_FAVORITE_COMMUNITY_1 &&
+		m_ServerlistType <= IServerBrowser::TYPE_FAVORITE_COMMUNITY_5)
+	{
+		const size_t CommunityIndex = m_ServerlistType - IServerBrowser::TYPE_FAVORITE_COMMUNITY_1;
+		if(CommunityIndex >= FavoriteCommunities().size())
+		{
+			// Reset to internet type if there is no favorite community for the current browser type,
+			// in case communities have been removed.
+			m_ServerlistType = IServerBrowser::TYPE_INTERNET;
+		}
+	}
 }
 
 const char *CServerBrowser::GetTutorialServer()
