@@ -4275,7 +4275,7 @@ void CClient::ConchainWindowScreen(IConsole::IResult *pResult, void *pUserData, 
 	if(pSelf->Graphics() && pResult->NumArguments())
 	{
 		if(g_Config.m_GfxScreen != pResult->GetInteger(0))
-			pSelf->Graphics()->SwitchWindowScreen(pResult->GetInteger(0));
+			pSelf->Graphics()->SwitchWindowScreen(pResult->GetInteger(0), true);
 	}
 	else
 		pfnCallback(pResult, pCallbackUserData);

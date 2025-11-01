@@ -228,8 +228,8 @@ public:
 
 	virtual void WarnPngliteIncompatibleImages(bool Warn) = 0;
 	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless) = 0;
-	virtual bool SetWindowScreen(int Index) = 0;
-	virtual bool SwitchWindowScreen(int Index) = 0;
+	virtual bool SetWindowScreen(int Index, bool MoveToCenter) = 0;
+	virtual bool SwitchWindowScreen(int Index, bool MoveToCenter) = 0;
 	virtual bool SetVSync(bool State) = 0;
 	virtual bool SetMultiSampling(uint32_t ReqMultiSamplingCount, uint32_t &MultiSamplingCountBackend) = 0;
 	virtual int GetWindowScreen() = 0;
