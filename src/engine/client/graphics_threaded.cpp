@@ -840,10 +840,7 @@ void CGraphics_Threaded::SetColor(float r, float g, float b, float a)
 	NewColor.g = NormalizeColorComponent(g);
 	NewColor.b = NormalizeColorComponent(b);
 	NewColor.a = NormalizeColorComponent(a);
-	for(CCommandBuffer::SColor &Color : m_aColor)
-	{
-		Color = NewColor;
-	}
+	std::fill(std::begin(m_aColor), std::end(m_aColor), NewColor);
 }
 
 void CGraphics_Threaded::SetColor(ColorRGBA Color)

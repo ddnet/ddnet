@@ -28,7 +28,7 @@ void CDragger::LookForPlayersToDrag()
 {
 	// Create a list of players who are in the range of the dragger
 	CEntity *apPlayersInRange[MAX_CLIENTS];
-	mem_zero(apPlayersInRange, sizeof(apPlayersInRange));
+	std::fill(std::begin(apPlayersInRange), std::end(apPlayersInRange), nullptr);
 
 	int NumPlayersInRange = GameWorld()->FindEntities(m_Pos,
 		g_Config.m_SvDraggerRange - CCharacterCore::PhysicalSize(),

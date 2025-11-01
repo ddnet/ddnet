@@ -28,7 +28,7 @@ CConsole::CResult::CResult(int ClientId) :
 	mem_zero(m_aStringStorage, sizeof(m_aStringStorage));
 	m_pArgsStart = nullptr;
 	m_pCommand = nullptr;
-	mem_zero(m_apArgs, sizeof(m_apArgs));
+	std::fill(std::begin(m_apArgs), std::end(m_apArgs), nullptr);
 }
 
 CConsole::CResult::CResult(const CResult &Other) :
