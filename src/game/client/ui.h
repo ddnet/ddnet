@@ -214,6 +214,7 @@ struct SLabelProperties
 	bool m_StopAtEnd = false;
 	bool m_EllipsisAtEnd = false;
 	bool m_EnableWidthCheck = true;
+	float m_MinimumFontSize = 5.0f;
 	std::vector<STextColorSplit> m_vColorSplits;
 
 	void SetColor(const ColorRGBA &Color);

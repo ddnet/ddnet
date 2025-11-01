@@ -725,7 +725,6 @@ struct SCursorAndBoundingBox
 
 static SCursorAndBoundingBox CalcFontSizeCursorHeightAndBoundingBox(ITextRender *pTextRender, const char *pText, int Flags, float &Size, float MaxWidth, const SLabelProperties &LabelProps)
 {
-	const float MinFontSize = 5.0f;
 	const float MaxTextWidth = LabelProps.m_MaxWidth != -1.0f ? LabelProps.m_MaxWidth : MaxWidth;
 	const int FlagsWithoutStop = Flags & ~(TEXTFLAG_STOP_AT_END | TEXTFLAG_ELLIPSIS_AT_END);
 	const float MaxTextWidthWithoutStop = Flags == FlagsWithoutStop ? LabelProps.m_MaxWidth : -1.0f;
@@ -741,13 +740,13 @@ static SCursorAndBoundingBox CalcFontSizeCursorHeightAndBoundingBox(ITextRender 
 	float TextWidth;
 	do
 	{
-		Size = maximum(Size, MinFontSize);
+		Size = maximum(Size, LabelProps.m_MinimumFontSize);
 		// Only consider stop-at-end and ellipsis-at-end when minimum font size reached or font scaling disabled
-		if((Size == MinFontSize || !LabelProps.m_EnableWidthCheck) && Flags != FlagsWithoutStop)
+		if((Size == LabelProps.m_MinimumFontSize || !LabelProps.m_EnableWidthCheck) && Flags != FlagsWithoutStop)
 			TextWidth = pTextRender->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, Flags, TextSizeProps);
 		else
 			TextWidth = pTextRender->TextWidth(Size, pText, -1, MaxTextWidthWithoutStop, FlagsWithoutStop, TextSizeProps);
-		if(TextWidth <= MaxTextWidth + 0.001f || !LabelProps.m_EnableWidthCheck || Size == MinFontSize)
+		if(TextWidth <= MaxTextWidth + 0.001f || !LabelProps.m_EnableWidthCheck || Size == LabelProps.m_MinimumFontSize)
 			break;
 		Size--;
 	} while(true);
