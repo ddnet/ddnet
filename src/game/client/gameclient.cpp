@@ -5001,18 +5001,35 @@ void CGameClient::OnSaveCodeNetMessage(const CNetMsg_Sv_SaveCode *pMsg)
 	{
 		if(pMsg->m_pCode[0] == '\0')
 		{
-			str_format(aBuf,
-				sizeof(aBuf),
+			str_format(aBuf, sizeof(aBuf),
 				Localize("Team save in progress. You'll be able to load with '/load %s'"),
-				Config()->m_ClStreamerMode == 1 ? "*** *** ***" : pMsg->m_pGeneratedCode);
+				pMsg->m_pGeneratedCode);
 		}
 		else
 		{
-			str_format(aBuf,
-				sizeof(aBuf),
+			str_format(aBuf, sizeof(aBuf),
 				Localize("Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails"),
-				Config()->m_ClStreamerMode == 1 ? "***" : pMsg->m_pCode,
-				Config()->m_ClStreamerMode == 1 ? "*** *** ***" : pMsg->m_pGeneratedCode);
+				pMsg->m_pCode,
+				pMsg->m_pGeneratedCode);
+		}
+		m_Chat.AddLine(-1, TEAM_ALL, aBuf);
+	}
+	else if(State == SAVESTATE_DONE)
+	{
+		if(pMsg->m_pServerName[0] == '\0')
+		{
+			str_format(aBuf, sizeof(aBuf),
+				"Team successfully saved by %s. Use '/load %s' to continue",
+				pMsg->m_pSaveRequester,
+				pMsg->m_pCode[0] ? pMsg->m_pCode : pMsg->m_pGeneratedCode);
+		}
+		else
+		{
+			str_format(aBuf, sizeof(aBuf),
+				"Team successfully saved by %s. Use '/load %s' on %s to continue",
+				pMsg->m_pSaveRequester,
+				pMsg->m_pCode[0] ? pMsg->m_pCode : pMsg->m_pGeneratedCode,
+				pMsg->m_pServerName);
 		}
 		m_Chat.AddLine(-1, TEAM_ALL, aBuf);
 	}
@@ -5020,21 +5037,17 @@ void CGameClient::OnSaveCodeNetMessage(const CNetMsg_Sv_SaveCode *pMsg)
 	{
 		if(pMsg->m_pServerName[0] == '\0')
 		{
-			str_format(
-				aBuf,
-				sizeof(aBuf),
+			str_format(aBuf, sizeof(aBuf),
 				Localize("Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue"),
 				pMsg->m_pSaveRequester,
-				Config()->m_ClStreamerMode == 1 ? "*** *** ***" : pMsg->m_pGeneratedCode);
+				pMsg->m_pGeneratedCode);
 		}
 		else
 		{
-			str_format(
-				aBuf,
-				sizeof(aBuf),
+			str_format(aBuf, sizeof(aBuf),
 				Localize("Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue"),
 				pMsg->m_pSaveRequester,
-				Config()->m_ClStreamerMode == 1 ? "*** *** ***" : pMsg->m_pGeneratedCode,
+				pMsg->m_pGeneratedCode,
 				pMsg->m_pServerName);
 		}
 		m_Chat.AddLine(-1, TEAM_ALL, aBuf);
