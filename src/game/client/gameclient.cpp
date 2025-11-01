@@ -3108,6 +3108,11 @@ void CGameClient::SendReadyChange7()
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL, true);
 }
 
+void CGameClient::SendChatMsg(const char *pMsg)
+{
+	m_Chat.SendChat(0, pMsg);
+}
+
 void CGameClient::ConTeam(IConsole::IResult *pResult, void *pUserData)
 {
 	((CGameClient *)pUserData)->SendSwitchTeam(pResult->GetInteger(0));
