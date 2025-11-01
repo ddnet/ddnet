@@ -93,9 +93,10 @@ int CNetClient::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken, bool Six
 			continue;
 		}
 
-		SECURITY_TOKEN Token;
-		*pResponseToken = NET_SECURITY_TOKEN_UNKNOWN;
-		if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvUnpacker.m_Data, Sixup, &Token, pResponseToken) == 0)
+		bool UnpackSuccess = CNetBase::UnpackPacket(pData, Bytes, &m_RecvUnpacker.m_Data, Sixup) == 0;
+		*pResponseToken = m_RecvUnpacker.m_Data.m_Sixup.m_ResponseToken;
+
+		if(UnpackSuccess)
 		{
 			if(Sixup)
 			{
@@ -122,11 +123,11 @@ int CNetClient::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken, bool Six
 					m_RecvUnpacker.m_Data.m_DataSize >= 1 + (int)sizeof(SECURITY_TOKEN) &&
 					m_RecvUnpacker.m_Data.m_aChunkData[0] == protocol7::NET_CTRLMSG_TOKEN)
 				{
-					m_TokenCache.AddToken(&Addr, *pResponseToken);
+					m_TokenCache.AddToken(&Addr, m_RecvUnpacker.m_Data.m_Sixup.m_ResponseToken);
 				}
 				if(m_Connection.State() != CNetConnection::EState::OFFLINE &&
 					m_Connection.State() != CNetConnection::EState::ERROR &&
-					m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr, Token, *pResponseToken))
+					m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr))
 				{
 					m_RecvUnpacker.Start(&Addr, &m_Connection, 0);
 				}
