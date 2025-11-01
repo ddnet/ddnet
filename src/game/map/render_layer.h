@@ -265,7 +265,7 @@ protected:
 
 	bool IsVisibleInClipRegion(const std::optional<CClipRegion> &ClipRegion) const;
 	void CalculateClipping(CQuadCluster &QuadCluster);
-	bool CalculateQuadClipping(const CQuadCluster &QuadCluster, int aQuadOffsetMin[2], int aQuadOffsetMax[2]) const;
+	bool CalculateQuadClipping(const CQuadCluster &QuadCluster, float aQuadOffsetMin[2], float aQuadOffsetMax[2]) const;
 
 	std::optional<CClipRegion> m_LayerClip;
 	std::vector<CQuadCluster> m_vQuadClusters;
