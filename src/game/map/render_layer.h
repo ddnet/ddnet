@@ -31,6 +31,19 @@ typedef std::function<void(const char *pCaption, const char *pContent, int Incre
 
 constexpr int BorderRenderDistance = 201;
 
+class CClipRegion
+{
+public:
+	CClipRegion() = default;
+	CClipRegion(float X, float Y, float Width, float Height) :
+		m_X(X), m_Y(Y), m_Width(Width), m_Height(Height) {}
+
+	float m_X;
+	float m_Y;
+	float m_Width;
+	float m_Height;
+};
+
 class CRenderLayerParams
 {
 public:
@@ -45,6 +58,7 @@ public:
 	bool m_DebugRenderGroupClips;
 	bool m_DebugRenderQuadClips;
 	bool m_DebugRenderClusterClips;
+	bool m_DebugRenderTileClips;
 };
 
 class CRenderLayer : public CRenderComponent
@@ -60,6 +74,7 @@ public:
 	virtual bool IsGroup() const { return false; }
 	virtual void Unload() = 0;
 
+	bool IsVisibleInClipRegion(const std::optional<CClipRegion> &ClipRegion) const;
 	int GetGroup() const { return m_GroupId; }
 
 protected:
@@ -75,6 +90,7 @@ protected:
 	IMapImages *m_pMapImages = nullptr;
 	std::shared_ptr<CEnvelopeManager> m_pEnvelopeManager;
 	std::optional<FRenderUploadCallback> m_RenderUploadCallback;
+	std::optional<CClipRegion> m_LayerClip;
 };
 
 class CRenderLayerGroup : public CRenderLayer
@@ -238,15 +254,6 @@ protected:
 	std::optional<CRenderLayerQuads::CQuadLayerVisuals> m_VisualQuad;
 	CMapItemLayerQuads *m_pLayerQuads;
 
-	class CClipRegion
-	{
-	public:
-		float m_X;
-		float m_Y;
-		float m_Width;
-		float m_Height;
-	};
-
 	class CQuadCluster
 	{
 	public:
@@ -262,14 +269,10 @@ protected:
 		std::vector<SQuadRenderInfo> m_vQuadRenderInfo;
 		std::optional<CClipRegion> m_ClipRegion;
 	};
-
-	bool IsVisibleInClipRegion(const std::optional<CClipRegion> &ClipRegion) const;
 	void CalculateClipping(CQuadCluster &QuadCluster);
 	bool CalculateQuadClipping(const CQuadCluster &QuadCluster, float aQuadOffsetMin[2], float aQuadOffsetMax[2]) const;
 
-	std::optional<CClipRegion> m_LayerClip;
 	std::vector<CQuadCluster> m_vQuadClusters;
-
 	CQuad *m_pQuads;
 
 private:
