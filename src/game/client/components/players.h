@@ -42,6 +42,8 @@ class CPlayers : public CComponent
 	std::shared_ptr<CManagedTeeRenderInfo> m_pNinjaTeeRenderInfo;
 	std::shared_ptr<CManagedTeeRenderInfo> m_pSpectatorTeeRenderInfo;
 
+	std::vector<vec2> IntersectLineCircle(vec2 LineStart, vec2 LineEnd, vec2 CircleCenter, float Radius) const;
+
 public:
 	float GetPlayerTargetAngle(
 		const CNetObj_Character *pPrevChar,
