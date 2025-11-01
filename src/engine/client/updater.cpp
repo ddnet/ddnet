@@ -12,6 +12,7 @@
 #include <game/version.h>
 
 #include <cstdlib> // system
+#include <unordered_set>
 
 using std::string;
 
@@ -30,9 +31,46 @@ public:
 	CUpdaterFetchTask(CUpdater *pUpdater, const char *pFile, const char *pDestPath);
 };
 
+// addition of '/' to keep paths intact, because EscapeUrl() (using curl_easy_escape) doesn't do this
+static inline bool IsUnreserved(unsigned char c)
+{
+	return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
+	       (c >= '0' && c <= '9') || c == '-' || c == '_' ||
+	       c == '.' || c == '~' || c == '/';
+}
+
+static void UrlEncodePath(const char *pIn, char *pOut, size_t OutSize)
+{
+	if(!pIn || !pOut || OutSize == 0)
+		return;
+	static const char HEX[] = "0123456789ABCDEF";
+	size_t WriteIndex = 0;
+	for(size_t i = 0; pIn[i] != '\0'; ++i)
+	{
+		unsigned char c = static_cast<unsigned char>(pIn[i]);
+		if(IsUnreserved(c))
+		{
+			if(OutSize - WriteIndex < 2) // require 1 byte + NUL
+				break;
+			pOut[WriteIndex++] = static_cast<char>(c);
+		}
+		else
+		{
+			if(OutSize - WriteIndex < 4) // require 3 bytes + NUL
+				break;
+			pOut[WriteIndex++] = '%';
+			pOut[WriteIndex++] = HEX[c >> 4]; // upper 4 bits of c
+			pOut[WriteIndex++] = HEX[c & 0x0F]; // lower 4 bits of c
+		}
+	}
+	pOut[WriteIndex] = '\0';
+}
+
 static const char *GetUpdaterUrl(char *pBuf, int BufSize, const char *pFile)
 {
-	str_format(pBuf, BufSize, "https://update.ddnet.org/%s", pFile);
+	char aBuf[1024];
+	UrlEncodePath(pFile, aBuf, sizeof(aBuf));
+	str_format(pBuf, BufSize, "https://update.ddnet.org/%s", aBuf);
 	return pBuf;
 }
 
@@ -216,7 +254,7 @@ bool CUpdater::ReplaceServer()
 	bool Success = true;
 	char aPath[IO_MAX_PATH_LENGTH];
 
-	//Replace running executable by renaming twice...
+	// Replace running executable by renaming twice...
 	m_pStorage->RemoveBinaryFile(SERVER_EXEC ".old");
 	Success &= m_pStorage->RenameBinaryFile(PLAT_SERVER_EXEC, SERVER_EXEC ".old");
 	str_format(aPath, sizeof(aPath), "update/%s", m_aServerExecTmp);
@@ -245,31 +283,64 @@ void CUpdater::ParseUpdate()
 	json_value *pVersions = json_parse((json_char *)pBuf, Length);
 	free(pBuf);
 
-	if(pVersions && pVersions->type == json_array)
+	if(!pVersions || pVersions->type != json_array)
 	{
-		for(int i = 0; i < json_array_length(pVersions); i++)
+		if(pVersions)
+			json_value_free(pVersions);
+		return;
+	}
+
+	// if we're already downloading a file, or it's been deleted in the latest version, we skip it if it comes up again
+	std::unordered_set<std::string> SkipSet;
+
+	for(int i = 0; i < json_array_length(pVersions); i++)
+	{
+		const json_value *pCurrent = json_array_get(pVersions, i);
+		if(!pCurrent || pCurrent->type != json_object)
+			continue;
+
+		const char *pVersion = json_string_get(json_object_get(pCurrent, "version"));
+		if(!pVersion)
+			continue;
+
+		if(str_comp(pVersion, GAME_RELEASE_VERSION) == 0)
+			break;
+
+		if(json_boolean_get(json_object_get(pCurrent, "client")))
+			m_ClientUpdate = true;
+		if(json_boolean_get(json_object_get(pCurrent, "server")))
+			m_ServerUpdate = true;
+
+		const json_value *pDownload = json_object_get(pCurrent, "download");
+		if(pDownload && pDownload->type == json_array)
 		{
-			const json_value *pTemp;
-			const json_value *pCurrent = json_array_get(pVersions, i);
-			if(str_comp(json_string_get(json_object_get(pCurrent, "version")), GAME_RELEASE_VERSION))
+			for(int j = 0; j < json_array_length(pDownload); j++)
 			{
-				if(json_boolean_get(json_object_get(pCurrent, "client")))
-					m_ClientUpdate = true;
-				if(json_boolean_get(json_object_get(pCurrent, "server")))
-					m_ServerUpdate = true;
-				if((pTemp = json_object_get(pCurrent, "download"))->type == json_array)
+				const char *pName = json_string_get(json_array_get(pDownload, j));
+				if(!pName)
+					continue;
+
+				if(SkipSet.insert(pName).second)
 				{
-					for(int j = 0; j < json_array_length(pTemp); j++)
-						AddFileJob(json_string_get(json_array_get(pTemp, j)), true);
-				}
-				if((pTemp = json_object_get(pCurrent, "remove"))->type == json_array)
-				{
-					for(int j = 0; j < json_array_length(pTemp); j++)
-						AddFileJob(json_string_get(json_array_get(pTemp, j)), false);
+					AddFileJob(pName, true);
 				}
 			}
-			else
-				break;
+		}
+
+		const json_value *pRemove = json_object_get(pCurrent, "remove");
+		if(pRemove && pRemove->type == json_array)
+		{
+			for(int j = 0; j < json_array_length(pRemove); j++)
+			{
+				const char *pName = json_string_get(json_array_get(pRemove, j));
+				if(!pName)
+					continue;
+
+				if(SkipSet.insert(pName).second)
+				{
+					AddFileJob(pName, false);
+				}
+			}
 		}
 	}
 	json_value_free(pVersions);
@@ -338,11 +409,6 @@ void CUpdater::RunningUpdate()
 				FetchFile(pFile);
 			}
 		}
-		else
-		{
-			m_pStorage->RemoveBinaryFile(Job.first.c_str());
-		}
-
 		m_CurrentJob++;
 	}
 	else
@@ -377,6 +443,14 @@ void CUpdater::CommitUpdate()
 		Success &= ReplaceClient();
 	if(m_ServerUpdate)
 		Success &= ReplaceServer();
+
+	if(Success)
+	{
+		for(const auto &[Filename, JobSuccess] : m_FileJobs)
+			if(!JobSuccess)
+				m_pStorage->RemoveBinaryFile(Filename.c_str());
+	}
+
 	if(!Success)
 		SetCurrentState(IUpdater::FAIL);
 	else if(m_pClient->State() == IClient::STATE_ONLINE || m_pClient->EditorHasUnsavedData())
