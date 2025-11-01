@@ -119,19 +119,11 @@ void SColorConfigVariable::CommandCallback(IConsole::IResult *pResult, void *pUs
 			return;
 
 		const auto Color = pResult->GetColor(0, pData->m_DarkestLighting);
-		if(Color)
-		{
-			const unsigned Value = Color->Pack(pData->m_DarkestLighting, pData->m_Alpha);
+		const unsigned Value = Color.Pack(pData->m_DarkestLighting, pData->m_Alpha);
 
-			*pData->m_pVariable = Value;
-			if(pResult->m_ClientId != IConsole::CLIENT_ID_GAME)
-				pData->m_OldValue = Value;
-		}
-		else
-		{
-			str_format(aBuf, sizeof(aBuf), "%s is not a valid color.", pResult->GetString(0));
-			pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "config", aBuf);
-		}
+		*pData->m_pVariable = Value;
+		if(pResult->m_ClientId != IConsole::CLIENT_ID_GAME)
+			pData->m_OldValue = Value;
 	}
 	else
 	{
@@ -505,7 +497,7 @@ void CConfigManager::Con_Toggle(IConsole::IResult *pResult, void *pUserData)
 		else if(pVariable->m_Type == SConfigVariable::VAR_COLOR)
 		{
 			SColorConfigVariable *pColorVariable = static_cast<SColorConfigVariable *>(pVariable);
-			const bool EqualToFirst = *pColorVariable->m_pVariable == pResult->GetColor(1, pColorVariable->m_DarkestLighting).value_or(ColorHSLA(0, 0, 0)).Pack(pColorVariable->m_DarkestLighting, pColorVariable->m_Alpha);
+			const bool EqualToFirst = *pColorVariable->m_pVariable == pResult->GetColor(1, pColorVariable->m_DarkestLighting).Pack(pColorVariable->m_DarkestLighting, pColorVariable->m_Alpha);
 			const std::optional<ColorHSLA> Value = pResult->GetColor(EqualToFirst ? 2 : 1, pColorVariable->m_DarkestLighting);
 			pColorVariable->SetValue(Value.value_or(ColorHSLA(0, 0, 0)).Pack(pColorVariable->m_DarkestLighting, pColorVariable->m_Alpha));
 		}
