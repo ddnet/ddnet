@@ -761,9 +761,9 @@ void CTeeHistorian::RecordDDNetVersion(int ClientId, CUuid ConnectionId, int DDN
 
 	if(m_Debug)
 	{
-		char aConnnectionId[UUID_MAXSTRSIZE];
-		FormatUuid(ConnectionId, aConnnectionId, sizeof(aConnnectionId));
-		dbg_msg("teehistorian", "ddnetver cid=%d connection_id=%s ddnet_version=%d ddnet_version_str=%s", ClientId, aConnnectionId, DDNetVersion, pDDNetVersionStr);
+		char aConnectionId[UUID_MAXSTRSIZE];
+		FormatUuid(ConnectionId, aConnectionId, sizeof(aConnectionId));
+		dbg_msg("teehistorian", "ddnetver cid=%d connection_id=%s ddnet_version=%d ddnet_version_str=%s", ClientId, aConnectionId, DDNetVersion, pDDNetVersionStr);
 	}
 
 	WriteExtra(UUID_TEEHISTORIAN_DDNETVER, Buffer.Data(), Buffer.Size());

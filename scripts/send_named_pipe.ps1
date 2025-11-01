@@ -30,7 +30,7 @@ try {
 	$Wrapper.Pipe.WaitForPipeDrain()
 	# Dispose the pipe, which also calls Flush and Close.
 	$Wrapper.Pipe.Dispose()
-	# Explicity set error level 0 for success, as otherwise the current error level is kept.
+	# Explicitly set error level 0 for success, as otherwise the current error level is kept.
 	exit 0
 } catch [TimeoutException] {
 	Write-Output "Timeout connecting to pipe"

@@ -106,7 +106,7 @@ public:
 	bool RunCommand(const CCommandBuffer::SCommand *pBaseCommand);
 };
 
-struct SBackendCapabilites
+struct SBackendCapabilities
 {
 	bool m_TileBuffering;
 	bool m_QuadBuffering;
@@ -215,7 +215,7 @@ class CGraphicsBackend_SDL_GL : public CGraphicsBackend_Threaded
 
 	int m_NumScreens;
 
-	SBackendCapabilites m_Capabilites;
+	SBackendCapabilities m_Capabilities;
 
 	char m_aVendorString[gs_GpuInfoStringSize] = {};
 	char m_aVersionString[gs_GpuInfoStringSize] = {};
@@ -264,13 +264,13 @@ public:
 
 	bool GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch, const char *&pName, EBackendType BackendType) override;
 	bool IsConfigModernAPI() override { return IsModernAPI(m_BackendType); }
-	bool UseTrianglesAsQuad() override { return m_Capabilites.m_TrianglesAsQuads; }
-	bool HasTileBuffering() override { return m_Capabilites.m_TileBuffering; }
-	bool HasQuadBuffering() override { return m_Capabilites.m_QuadBuffering; }
-	bool HasTextBuffering() override { return m_Capabilites.m_TextBuffering; }
-	bool HasQuadContainerBuffering() override { return m_Capabilites.m_QuadContainerBuffering; }
-	bool Uses2DTextureArrays() override { return m_Capabilites.m_2DArrayTextures; }
-	bool HasTextureArraysSupport() override { return m_Capabilites.m_2DArrayTextures || m_Capabilites.m_3DTextures; }
+	bool UseTrianglesAsQuad() override { return m_Capabilities.m_TrianglesAsQuads; }
+	bool HasTileBuffering() override { return m_Capabilities.m_TileBuffering; }
+	bool HasQuadBuffering() override { return m_Capabilities.m_QuadBuffering; }
+	bool HasTextBuffering() override { return m_Capabilities.m_TextBuffering; }
+	bool HasQuadContainerBuffering() override { return m_Capabilities.m_QuadContainerBuffering; }
+	bool Uses2DTextureArrays() override { return m_Capabilities.m_2DArrayTextures; }
+	bool HasTextureArraysSupport() override { return m_Capabilities.m_2DArrayTextures || m_Capabilities.m_3DTextures; }
 
 	const char *GetErrorString() override
 	{

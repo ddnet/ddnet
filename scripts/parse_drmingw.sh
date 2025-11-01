@@ -62,7 +62,7 @@ while read -r line; do
 			continue
 		fi
 
-		# Compatibilty with old crash logs: use the raw address and assume it belongs to the main executable
+		# Compatibility with old crash logs: use the raw address and assume it belongs to the main executable
 		RAW_ADDR=$(echo "$line" | grep -E -o -m 1 "[0-9A-Fa-f]+ " | head -1)
 		prine_line_for_address "$(printf '0x%X\n' "$(((0x$RAW_ADDR - 0x$MODULE_OFFSET) + ADDR_BASE))")"
 	fi
