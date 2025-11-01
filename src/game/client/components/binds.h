@@ -23,6 +23,22 @@ namespace KeyModifier
 	inline constexpr int32_t COMBINATION_COUNT = 1 << COUNT;
 };
 
+class CBindSlot
+{
+public:
+	int m_Key;
+	int m_ModifierMask;
+
+	constexpr CBindSlot(int Key, int ModifierMask) :
+		m_Key(Key),
+		m_ModifierMask(ModifierMask)
+	{
+	}
+
+	constexpr bool operator==(const CBindSlot &Other) const { return m_Key == Other.m_Key && m_ModifierMask == Other.m_ModifierMask; }
+	constexpr bool operator!=(const CBindSlot &Other) const { return !(*this == Other); }
+};
+
 class CBinds : public CComponent
 {
 	static void ConBind(IConsole::IResult *pResult, void *pUserData);
@@ -32,18 +48,6 @@ class CBinds : public CComponent
 
 	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
 
-	class CBindSlot
-	{
-	public:
-		int m_Key;
-		int m_ModifierMask;
-
-		CBindSlot(int Key, int ModifierMask) :
-			m_Key(Key),
-			m_ModifierMask(ModifierMask)
-		{
-		}
-	};
 	CBindSlot GetBindSlot(const char *pBindString) const;
 
 	// free buffer after use

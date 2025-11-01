@@ -396,7 +396,7 @@ void CBinds::ConUnbindAll(IConsole::IResult *pResult, void *pUserData)
 	pBinds->UnbindAll();
 }
 
-CBinds::CBindSlot CBinds::GetBindSlot(const char *pBindString) const
+CBindSlot CBinds::GetBindSlot(const char *pBindString) const
 {
 	int ModifierMask = KeyModifier::NONE;
 	char aMod[32];
