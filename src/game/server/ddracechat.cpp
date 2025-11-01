@@ -458,36 +458,54 @@ void CGameContext::ConTimes(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientId(pResult->m_ClientId))
 		return;
 
-	if(pResult->NumArguments() == 0)
-	{
-		pSelf->Score()->ShowTimes(pResult->m_ClientId, 1);
-	}
-	else if(pResult->NumArguments() == 1)
+	int Offset = 1;
+	const char *pRequestedName = nullptr;
+
+	// input validation
+	if(pResult->NumArguments() == 1)
 	{
 		if(pResult->GetInteger(0) != 0)
 		{
-			pSelf->Score()->ShowTimes(pResult->m_ClientId, pResult->GetInteger(0));
+			Offset = pResult->GetInteger(0);
 		}
 		else
 		{
-			const char *pRequestedName = (str_comp_nocase(pResult->GetString(0), "me") == 0) ?
-							     pSelf->Server()->ClientName(pResult->m_ClientId) :
-							     pResult->GetString(0);
-			pSelf->Score()->ShowTimes(pResult->m_ClientId, pRequestedName, pResult->GetInteger(1));
+			pRequestedName = pResult->GetString(0);
 		}
 	}
-	else if(pResult->NumArguments() == 2 && pResult->GetInteger(1) != 0)
+	else if(pResult->NumArguments() == 2)
 	{
-		const char *pRequestedName = (str_comp_nocase(pResult->GetString(0), "me") == 0) ?
-						     pSelf->Server()->ClientName(pResult->m_ClientId) :
-						     pResult->GetString(0);
-		pSelf->Score()->ShowTimes(pResult->m_ClientId, pRequestedName, pResult->GetInteger(1));
+		pRequestedName = pResult->GetString(0);
+		Offset = pResult->GetInteger(1);
 	}
-	else
+	else if(pResult->NumArguments() > 2)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "/times needs 0, 1 or 2 parameter. 1. = name, 2. = start number");
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Example: /times, /times me, /times Hans, /times \"Papa Smurf\" 5");
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Bad: /times Papa Smurf 5 # Good: /times \"Papa Smurf\" 5 ");
+		return;
+	}
+
+	// execution
+	if(g_Config.m_SvHideScore)
+	{
+		if(pRequestedName && str_comp_nocase(pRequestedName, "me") != 0 && str_comp_nocase(pRequestedName, pSelf->Server()->ClientName(pResult->m_ClientId)) != 0)
+		{
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Showing the times of others is not allowed on this server.");
+			return;
+		}
+		pRequestedName = pSelf->Server()->ClientName(pResult->m_ClientId);
+		pSelf->Score()->ShowTimes(pResult->m_ClientId, pRequestedName, Offset);
+	}
+	else if(!pRequestedName)
+	{
+		pSelf->Score()->ShowTimes(pResult->m_ClientId, Offset);
+	}
+	else
+	{
+		if(str_comp_nocase(pRequestedName, "me") == 0)
+			pRequestedName = pSelf->Server()->ClientName(pResult->m_ClientId);
+		pSelf->Score()->ShowTimes(pResult->m_ClientId, pRequestedName, Offset);
 	}
 }
 
