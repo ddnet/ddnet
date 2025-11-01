@@ -82,8 +82,8 @@ public:
 	// Disallow casting between different instantiations of the color4_base template.
 	// The color_cast functions below should be used to convert between colors.
 	template<typename OtherDerivedT>
-	requires(!std::is_same_v<DerivedT, OtherDerivedT>)
-		color4_base(const color4_base<OtherDerivedT> &Other) = delete;
+		requires(!std::is_same_v<DerivedT, OtherDerivedT>)
+	color4_base(const color4_base<OtherDerivedT> &Other) = delete;
 
 	constexpr float &operator[](int index)
 	{

@@ -112,7 +112,7 @@ private:
  * RAII-style wrapper for owning a `CLock`.
  *
  * @ingroup Locks
- * 
+ *
  * @remark This wrapper is only necessary because the clang thread-safety attributes
  * are not available for `std::lock_guard` except when explicitly using libc++.
  */

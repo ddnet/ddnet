@@ -85,13 +85,13 @@ struct CAntibotVersion
 #define ANTIBOT_VERSION \
 	{ \
 		ANTIBOT_ABI_VERSION, \
-			sizeof(CAntibotVersion), \
-			sizeof(CAntibotData), \
-			sizeof(CAntibotPlayerData), \
-			sizeof(CAntibotCharacterData), \
-			sizeof(CAntibotInputData), \
-			sizeof(CAntibotMapData), \
-			sizeof(CAntibotRoundData), \
+		sizeof(CAntibotVersion), \
+		sizeof(CAntibotData), \
+		sizeof(CAntibotPlayerData), \
+		sizeof(CAntibotCharacterData), \
+		sizeof(CAntibotInputData), \
+		sizeof(CAntibotMapData), \
+		sizeof(CAntibotRoundData), \
 	}
 
 struct CAntibotData

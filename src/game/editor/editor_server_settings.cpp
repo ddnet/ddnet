@@ -1,4 +1,5 @@
 ﻿#include "editor_server_settings.h"
+
 #include "editor.h"
 
 #include <base/color.h>

@@ -134,6 +134,7 @@ TEST(NetAddr, FromStrInvalid)
 	EXPECT_TRUE(net_addr_from_str(&Addr, "[::]:c"));
 }
 
+// clang-format off
 TEST(NetAddrDeathTest, StrInvalid1)
 {
 	ASSERT_DEATH({
@@ -153,6 +154,7 @@ TEST(NetAddrDeathTest, StrInvalid2)
 	},
 		"");
 }
+// clang-format on
 
 TEST(NetAddr, IsLocal)
 {

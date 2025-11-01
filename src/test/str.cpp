@@ -257,7 +257,7 @@ TEST(Str, Utf8CompNocase)
 	EXPECT_TRUE(str_utf8_comp_nocase("ÖlÜ", "ölüa") < 0); // NULL < a
 	EXPECT_TRUE(str_utf8_comp_nocase("ölüa", "ÖlÜ") > 0); // a < NULL
 
-#if(CHAR_MIN < 0)
+#if (CHAR_MIN < 0)
 	const char a[2] = {CHAR_MIN, 0};
 	const char b[2] = {0, 0};
 	EXPECT_TRUE(str_utf8_comp_nocase(a, b) > 0);

@@ -77,8 +77,7 @@
  *
  * @ingroup Debug
  */
-[[gnu::format(printf, 3, 4)]]
-[[noreturn]] void
+[[gnu::format(printf, 3, 4)]] [[noreturn]] void
 dbg_assert_imp(const char *filename, int line, const char *fmt, ...);
 
 /**

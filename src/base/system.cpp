@@ -3045,7 +3045,7 @@ int str_utf32_dist_buffer(const int *a, int a_len, const int *b, int b_len, int 
 		b_len = tmp1;
 		b = tmp2;
 	}
-#define B(i, j) buf[((j)&1) * (a_len + 1) + (i)]
+#define B(i, j) buf[((j) & 1) * (a_len + 1) + (i)]
 	for(i = 0; i <= a_len; i++)
 	{
 		B(i, 0) = i;
@@ -3662,8 +3662,8 @@ static void ensure_secure_random_init()
 			dbg_break();
 		}
 #else
-			secure_random_data.urandom = io_open("/dev/urandom", IOFLAG_READ);
-			dbg_assert(secure_random_data.urandom != nullptr, "Failed to initialize secure random: failed to open /dev/urandom");
+		secure_random_data.urandom = io_open("/dev/urandom", IOFLAG_READ);
+		dbg_assert(secure_random_data.urandom != nullptr, "Failed to initialize secure random: failed to open /dev/urandom");
 #endif
 	});
 }

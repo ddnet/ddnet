@@ -3483,9 +3483,10 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 			aAuthStr[0] = '\0';
 			if(pThis->m_aClients[i].m_AuthKey >= 0)
 			{
-				const char *pAuthStr = pThis->GetAuthedState(i) == AUTHED_ADMIN ? "(Admin)" :
-												  pThis->GetAuthedState(i) == AUTHED_MOD ? "(Mod)" :
-																	   pThis->GetAuthedState(i) == AUTHED_HELPER ? "(Helper)" : "";
+				const char *pAuthStr = pThis->GetAuthedState(i) == AUTHED_ADMIN  ? "(Admin)" :
+						       pThis->GetAuthedState(i) == AUTHED_MOD    ? "(Mod)" :
+						       pThis->GetAuthedState(i) == AUTHED_HELPER ? "(Helper)" :
+												   "";
 
 				str_format(aAuthStr, sizeof(aAuthStr), " key=%s %s", pThis->m_AuthManager.KeyIdent(pThis->m_aClients[i].m_AuthKey), pAuthStr);
 			}
