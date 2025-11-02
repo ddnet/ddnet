@@ -24,6 +24,27 @@ CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer) :
 
 CGameControllerDDRace::~CGameControllerDDRace() = default;
 
+int CGameControllerDDRace::SnapGameInfoExFlags(int SnappingClient)
+{
+	return GAMEINFOFLAG_TIMESCORE |
+	       GAMEINFOFLAG_GAMETYPE_RACE |
+	       GAMEINFOFLAG_GAMETYPE_DDRACE |
+	       GAMEINFOFLAG_GAMETYPE_DDNET |
+	       GAMEINFOFLAG_UNLIMITED_AMMO |
+	       GAMEINFOFLAG_RACE_RECORD_MESSAGE |
+	       GAMEINFOFLAG_ALLOW_EYE_WHEEL |
+	       GAMEINFOFLAG_ALLOW_HOOK_COLL |
+	       GAMEINFOFLAG_ALLOW_ZOOM |
+	       GAMEINFOFLAG_BUG_DDRACE_GHOST |
+	       GAMEINFOFLAG_BUG_DDRACE_INPUT |
+	       GAMEINFOFLAG_PREDICT_DDRACE |
+	       GAMEINFOFLAG_PREDICT_DDRACE_TILES |
+	       GAMEINFOFLAG_ENTITIES_DDNET |
+	       GAMEINFOFLAG_ENTITIES_DDRACE |
+	       GAMEINFOFLAG_ENTITIES_RACE |
+	       GAMEINFOFLAG_RACE;
+}
+
 CScore *CGameControllerDDRace::Score()
 {
 	return GameServer()->Score();

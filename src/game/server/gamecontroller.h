@@ -92,10 +92,11 @@ public:
 		Arguments:
 			victim - The CCharacter that died.
 			killer - The player that killed it.
+			KillerId - Client Id of the killer, can be altered to affect the kill message.
 			weapon - What weapon that killed it. Can be -1 for undefined
 				weapon when switching team or player suicides.
 	*/
-	virtual int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon);
+	virtual int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int &KillerId, int &Weapon);
 	/*
 		Function: OnCharacterSpawn
 			Called when a CCharacter spawns into the game world.
@@ -140,6 +141,8 @@ public:
 	virtual void Tick();
 
 	virtual void Snap(int SnappingClient);
+	virtual int SnapGameInfoExFlags(int SnappingClient) { return 0; }
+	virtual bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) { return false; };
 
 	//spawn
 	virtual bool CanSpawn(int Team, vec2 *pOutPos, int DDTeam);

@@ -10,6 +10,8 @@ public:
 	CGameControllerDDRace(class CGameContext *pGameServer);
 	~CGameControllerDDRace() override;
 
+	int SnapGameInfoExFlags(int SnappingClient) override;
+
 	CScore *Score();
 
 	void HandleCharacterTiles(class CCharacter *pChr, int MapIndex) override;

@@ -4,6 +4,7 @@
 
 #include "entities/character.h"
 #include "gamemodes/DDRace.h"
+#include "gamemodes/block.h"
 #include "gamemodes/mod.h"
 #include "player.h"
 #include "score.h"
@@ -4175,6 +4176,8 @@ void CGameContext::OnInit(const void *pPersistentData)
 
 	if(!str_comp(Config()->m_SvGametype, "mod"))
 		m_pController = new CGameControllerMod(this);
+	else if(!str_comp_nocase(Config()->m_SvGametype, "block"))
+		m_pController = new CGameControllerBlock(this);
 	else
 		m_pController = new CGameControllerDDRace(this);
 
