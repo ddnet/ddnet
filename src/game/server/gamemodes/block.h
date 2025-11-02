@@ -54,6 +54,7 @@ public:
 	void OnPlayerDisconnect(CPlayer *pPlayer, const char *pReason) override;
 	bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override;
 	int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int &KillerId, int &Weapon) override;
+	int SnapPlayerScore(int SnappingClient, class CPlayer *pPlayer) override;
 	void Tick() override;
 
 private:

@@ -104,6 +104,7 @@ public:
 
 	int m_DieTick;
 	int m_PreviousDieTick;
+	int m_BlockPoints = 0;
 	std::optional<int> m_Score;
 	int m_JoinTick;
 	int m_LastActionTick;

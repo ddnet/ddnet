@@ -62,6 +62,8 @@ int CGameControllerBlock::OnCharacterDeath(class CCharacter *pVictim, class CPla
 	if(!pToucher || pToucher->GetUniqueCid() != LastToucher.value().m_UniqueClientId)
 		return 0;
 
+	pToucher->m_BlockPoints++;
+
 	KillerId = LastToucher.value().m_ClientId;
 	Weapon = LastToucher.value().m_Weapon;
 
@@ -69,6 +71,11 @@ int CGameControllerBlock::OnCharacterDeath(class CCharacter *pVictim, class CPla
 	if(Weapon == WEAPON_HOOK)
 		Weapon = WEAPON_NINJA;
 	return 0;
+}
+
+int CGameControllerBlock::SnapPlayerScore(int SnappingClient, class CPlayer *pPlayer)
+{
+	return pPlayer->m_BlockPoints;
 }
 
 void CGameControllerBlock::Tick()

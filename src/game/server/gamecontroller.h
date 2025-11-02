@@ -143,6 +143,7 @@ public:
 	virtual void Snap(int SnappingClient);
 	virtual int SnapGameInfoExFlags(int SnappingClient) { return 0; }
 	virtual bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) { return false; };
+	virtual int SnapPlayerScore(int SnappingClient, class CPlayer *pPlayer) { return 0; }
 
 	//spawn
 	virtual bool CanSpawn(int Team, vec2 *pOutPos, int DDTeam);
