@@ -153,7 +153,7 @@ void CLayerSounds::BrushPlace(CLayer *pBrush, vec2 WorldPos)
 		m_vSources.push_back(NewSource);
 		vAddedSources.push_back(NewSource);
 	}
-	Editor()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionSoundPlace>(Editor(), Editor()->m_SelectedGroup, Editor()->m_vSelectedLayers[0], vAddedSources));
+	Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionSoundPlace>(Map(), Editor()->m_SelectedGroup, Editor()->m_vSelectedLayers[0], vAddedSources));
 	Map()->OnModify();
 }
 
@@ -172,8 +172,7 @@ CUi::EPopupMenuFunctionResult CLayerSounds::RenderProperties(CUIRect *pToolBox)
 		Map()->OnModify();
 	}
 
-	static CLayerSoundsPropTracker s_Tracker(Editor());
-	s_Tracker.Begin(this, Prop, State);
+	Map()->m_LayerSoundsPropTracker.Begin(this, Prop, State);
 
 	if(Prop == ELayerSoundsProp::PROP_SOUND)
 	{
@@ -183,7 +182,7 @@ CUi::EPopupMenuFunctionResult CLayerSounds::RenderProperties(CUIRect *pToolBox)
 			m_Sound = -1;
 	}
 
-	s_Tracker.End(Prop, State);
+	Map()->m_LayerSoundsPropTracker.End(Prop, State);
 
 	return CUi::POPUP_KEEP_OPEN;
 }

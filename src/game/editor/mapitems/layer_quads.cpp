@@ -130,7 +130,7 @@ void CLayerQuads::BrushPlace(CLayer *pBrush, vec2 WorldPos)
 		m_vQuads.push_back(NewQuad);
 		vAddedQuads.push_back(NewQuad);
 	}
-	Editor()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionQuadPlace>(Editor(), Editor()->m_SelectedGroup, Editor()->m_vSelectedLayers[0], vAddedQuads));
+	Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionQuadPlace>(Map(), Editor()->m_SelectedGroup, Editor()->m_vSelectedLayers[0], vAddedQuads));
 	Map()->OnModify();
 }
 
@@ -211,8 +211,7 @@ CUi::EPopupMenuFunctionResult CLayerQuads::RenderProperties(CUIRect *pToolBox)
 		Map()->OnModify();
 	}
 
-	static CLayerQuadsPropTracker s_Tracker(Editor());
-	s_Tracker.Begin(this, Prop, State);
+	Map()->m_LayerQuadPropTracker.Begin(this, Prop, State);
 
 	if(Prop == ELayerQuadsProp::PROP_IMAGE)
 	{
@@ -222,7 +221,7 @@ CUi::EPopupMenuFunctionResult CLayerQuads::RenderProperties(CUIRect *pToolBox)
 			m_Image = -1;
 	}
 
-	s_Tracker.End(Prop, State);
+	Map()->m_LayerQuadPropTracker.End(Prop, State);
 
 	return CUi::POPUP_KEEP_OPEN;
 }

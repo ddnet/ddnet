@@ -8,7 +8,9 @@
 #include <engine/shared/datafile.h>
 #include <engine/shared/jobs.h>
 
+#include <game/editor/editor_history.h>
 #include <game/editor/editor_server_settings.h>
+#include <game/editor/editor_trackers.h>
 #include <game/editor/mapitems/envelope.h>
 #include <game/editor/mapitems/layer.h>
 #include <game/editor/references.h>
@@ -49,6 +51,21 @@ class CEditorMap
 {
 public:
 	explicit CEditorMap(CEditor *pEditor) :
+		m_EditorHistory(this),
+		m_ServerSettingsHistory(this),
+		m_EnvelopeEditorHistory(this),
+		m_QuadTracker(this),
+		m_EnvOpTracker(this),
+		m_LayerGroupPropTracker(this),
+		m_LayerPropTracker(this),
+		m_LayerTilesCommonPropTracker(this),
+		m_LayerTilesPropTracker(this),
+		m_LayerQuadPropTracker(this),
+		m_LayerSoundsPropTracker(this),
+		m_SoundSourceOperationTracker(this),
+		m_SoundSourcePropTracker(this),
+		m_SoundSourceRectShapePropTracker(this),
+		m_SoundSourceCircleShapePropTracker(this),
 		m_pEditor(pEditor)
 	{
 	}
@@ -96,6 +113,23 @@ public:
 	};
 	CMapInfo m_MapInfo;
 	CMapInfo m_MapInfoTmp;
+
+	// Undo/Redo
+	CEditorHistory m_EditorHistory;
+	CEditorHistory m_ServerSettingsHistory;
+	CEditorHistory m_EnvelopeEditorHistory;
+	CQuadEditTracker m_QuadTracker;
+	CEnvelopeEditorOperationTracker m_EnvOpTracker;
+	CLayerGroupPropTracker m_LayerGroupPropTracker;
+	CLayerPropTracker m_LayerPropTracker;
+	CLayerTilesCommonPropTracker m_LayerTilesCommonPropTracker;
+	CLayerTilesPropTracker m_LayerTilesPropTracker;
+	CLayerQuadsPropTracker m_LayerQuadPropTracker;
+	CLayerSoundsPropTracker m_LayerSoundsPropTracker;
+	CSoundSourceOperationTracker m_SoundSourceOperationTracker;
+	CSoundSourcePropTracker m_SoundSourcePropTracker;
+	CSoundSourceRectShapePropTracker m_SoundSourceRectShapePropTracker;
+	CSoundSourceCircleShapePropTracker m_SoundSourceCircleShapePropTracker;
 
 	int m_SelectedImage;
 	int m_SelectedSound;

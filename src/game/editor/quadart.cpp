@@ -190,7 +190,7 @@ void CEditor::AddQuadArt(bool IgnoreHistory)
 	QuadArt.Create(pLayer);
 
 	if(!IgnoreHistory)
-		m_EditorHistory.RecordAction(std::make_shared<CEditorActionQuadArt>(this, m_QuadArtParameters));
+		m_Map.m_EditorHistory.RecordAction(std::make_shared<CEditorActionQuadArt>(&m_Map, m_QuadArtParameters));
 
 	m_Map.OnModify();
 	OnDialogClose();

@@ -37,7 +37,7 @@ void CLayerGame::SetTile(int x, int y, CTile Tile)
 			Map()->m_pGameGroup->AddLayer(pLayerFront);
 			int GameGroupIndex = std::find(Map()->m_vpGroups.begin(), Map()->m_vpGroups.end(), Map()->m_pGameGroup) - Map()->m_vpGroups.begin();
 			int LayerIndex = Map()->m_vpGroups[GameGroupIndex]->m_vpLayers.size() - 1;
-			Editor()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(Editor(), GameGroupIndex, LayerIndex));
+			Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(Map(), GameGroupIndex, LayerIndex));
 		}
 		CLayerTiles::SetTile(x, y, CTile{TILE_NOHOOK});
 		Map()->m_pFrontLayer->CLayerTiles::SetTile(x, y, CTile{TILE_THROUGH_CUT}); // NOLINT(bugprone-parent-virtual-call)

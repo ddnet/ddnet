@@ -3,20 +3,21 @@
 
 #include "editor_action.h"
 
+#include <game/editor/map_object.h>
+
 #include <deque>
 #include <memory>
 #include <vector>
 
-class CEditorHistory
+class CEditorHistory : public CMapObject
 {
 public:
-	CEditorHistory()
+	explicit CEditorHistory(CEditorMap *pMap) :
+		CMapObject(pMap)
 	{
-		m_pEditor = nullptr;
-		m_IsBulk = false;
 	}
 
-	~CEditorHistory()
+	~CEditorHistory() override
 	{
 		Clear();
 	}
@@ -36,13 +37,12 @@ public:
 	void EndBulk(const char *pDisplay = nullptr);
 	void EndBulk(int DisplayToUse);
 
-	CEditor *m_pEditor;
 	std::deque<std::shared_ptr<IEditorAction>> m_vpUndoActions;
 	std::deque<std::shared_ptr<IEditorAction>> m_vpRedoActions;
 
 private:
 	std::vector<std::shared_ptr<IEditorAction>> m_vpBulkActions;
-	bool m_IsBulk;
+	bool m_IsBulk = false;
 };
 
 #endif

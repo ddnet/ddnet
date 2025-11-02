@@ -256,6 +256,11 @@ void CEditorMap::Clean()
 	m_MapInfo.Reset();
 	m_MapInfoTmp.Reset();
 
+	m_EditorHistory.Clear();
+	m_EnvelopeEditorHistory.Clear();
+	m_ServerSettingsHistory.Clear();
+	m_EnvOpTracker.Reset();
+
 	m_SelectedImage = 0;
 	m_SelectedSound = 0;
 }
