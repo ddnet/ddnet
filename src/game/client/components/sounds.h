@@ -39,7 +39,6 @@ class CSounds : public CComponent
 	bool m_WaitForSoundJob;
 
 	void UpdateChannels();
-	int GetSampleId(int SetId);
 
 	float m_GuiSoundVolume = -1.0f;
 	float m_GameSoundVolume = -1.0f;
@@ -47,6 +46,8 @@ class CSounds : public CComponent
 	float m_BackgroundMusicVolume = -1.0f;
 
 public:
+	int GetSampleId(int SetId); // TODO: Make sets compile time to avoid this
+
 	// sound channels
 	enum
 	{

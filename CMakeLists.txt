@@ -1043,6 +1043,7 @@ set(EXPECTED_DATA
   audio/sfx_ctf_grab_en.wv
   audio/sfx_ctf_grab_pl.wv
   audio/sfx_ctf_rtn.wv
+  audio/sfx_falling_woosh.opus
   audio/sfx_hit_strong-01.wv
   audio/sfx_hit_strong-02.wv
   audio/sfx_hit_weak-01.wv
@@ -1857,7 +1858,7 @@ set(EXPECTED_DATA
   wordlist.txt
 )
 
-set_glob(DATA GLOB_RECURSE "cfg;frag;json;map;otf;png;rules;ttc;ttf;txt;vert;wv" data ${EXPECTED_DATA})
+set_glob(DATA GLOB_RECURSE "cfg;frag;json;map;opus;otf;png;rules;ttc;ttf;txt;vert;wv" data ${EXPECTED_DATA})
 
 ########################################################################
 # COPY DATA AND SHARED LIBS
