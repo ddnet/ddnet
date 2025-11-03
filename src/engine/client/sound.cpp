@@ -390,69 +390,57 @@ bool CSound::DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize, c
 	return true;
 }
 
-// TODO: Update WavPack to get rid of these global variables
-static const void *s_pWVBuffer = nullptr;
-static int s_WVBufferPosition = 0;
-static int s_WVBufferSize = 0;
-
-static int ReadDataOld(void *pBuffer, int Size)
-{
-	int ChunkSize = minimum(Size, s_WVBufferSize - s_WVBufferPosition);
-	mem_copy(pBuffer, (const char *)s_pWVBuffer + s_WVBufferPosition, ChunkSize);
-	s_WVBufferPosition += ChunkSize;
-	return ChunkSize;
-}
-
-static int ReadData(void *pId, void *pBuffer, int Size)
-{
-	(void)pId;
-	return ReadDataOld(pBuffer, Size);
-}
-
-static int ReturnFalse(void *pId)
-{
-	(void)pId;
-	return 0;
-}
-
-static unsigned int GetPos(void *pId)
-{
-	(void)pId;
-	return s_WVBufferPosition;
-}
-
-static unsigned int GetLength(void *pId)
-{
-	(void)pId;
-	return s_WVBufferSize;
-}
-
-static int PushBackByte(void *pId, int Char)
-{
-	s_WVBufferPosition -= 1;
-	return 0;
-}
-
 bool CSound::DecodeWV(CSample &Sample, const void *pData, unsigned DataSize, const char *pContextName) const
 {
-	// no need to load sound when we are running with no sound
-	if(!m_SoundEnabled)
-		return false;
+	struct
+	{
+		const char *m_pContextName;
+		const void *m_pData;
+		uint32_t m_Position;
+		uint32_t m_Length;
+	} BufferData = {pContextName, pData, 0, DataSize};
 
-	dbg_assert(s_pWVBuffer == nullptr, "DecodeWV already in use");
-	s_pWVBuffer = pData;
-	s_WVBufferSize = DataSize;
-	s_WVBufferPosition = 0;
+	WavpackStreamReader Callback = {
+		.read_bytes = [](void *pId, void *pBuffer, int32_t Size) {
+			auto& CallbackData1 = *(decltype(BufferData) *)pId;
+			int ChunkSize = std::min<int>(Size, CallbackData1.m_Length - CallbackData1.m_Position);
+			mem_copy(pBuffer, (const char *)CallbackData1.m_pData + CallbackData1.m_Position, ChunkSize);
+			CallbackData1.m_Position += ChunkSize;
+			return ChunkSize; },
+		.get_pos = [](void *pId) { return ((decltype(BufferData) *)pId)->m_Position; },
+		.set_pos_abs = [](void *pId, uint32_t Pos) -> int32_t {
+			return ((decltype(BufferData) *)pId)->m_Position = Pos;
+		},
+		.set_pos_rel = [](void *pId, int32_t Offset, int Whence) -> int32_t {
+			auto &CallbackData1 = *(decltype(BufferData) *)pId;
+			if(Whence == SEEK_SET)
+				CallbackData1.m_Position = Offset;
+			else if(Whence == SEEK_CUR)
+				CallbackData1.m_Position += Offset;
+			else if(Whence == SEEK_END)
+				CallbackData1.m_Position = CallbackData1.m_Length + Offset;
+			else
+			{
+				log_error("sound/wv", "Wavpack tried to seek with an unknown type. Offset=%d, Whence=%d, Filename='%s'", Offset, Whence, CallbackData1.m_pContextName);
+				return -1;
+			}
+			CallbackData1.m_Position = std::clamp<uint32_t>(CallbackData1.m_Position, 0, CallbackData1.m_Length);
+			return CallbackData1.m_Position;
+		},
+		.push_back_byte = [](void *pId, int Char) {
+			((decltype(BufferData) *)pId)->m_Position -= 1;
+			(void)Char; // no-op
+			return 0; },
+		.get_length = [](void *pId) { return ((decltype(BufferData) *)pId)->m_Length; },
+		.can_seek = [](void *) { return (int)true; },
+		.write_bytes = [](void *pId, void *pBuffer, int Length) {
+			((decltype(BufferData) *)pId)->m_Position += Length;
+			(void)pBuffer; // no-op
+			return 0; },
+	};
 
-	char aError[100];
-
-	WavpackStreamReader Callback = {0};
-	Callback.can_seek = ReturnFalse;
-	Callback.get_length = GetLength;
-	Callback.get_pos = GetPos;
-	Callback.push_back_byte = PushBackByte;
-	Callback.read_bytes = ReadData;
-	WavpackContext *pContext = WavpackOpenFileInputEx(&Callback, (void *)1, 0, aError, 0, 0);
+	char aError[128];
+	WavpackContext *pContext = WavpackOpenFileInputEx(&Callback, (void *)&BufferData, 0, aError, 0, 0);
 	if(pContext)
 	{
 		const int NumSamples = WavpackGetNumSamples(pContext);
@@ -463,14 +451,12 @@ bool CSound::DecodeWV(CSample &Sample, const void *pData, unsigned DataSize, con
 		if(NumChannels > 2)
 		{
 			log_error("sound/wv", "File is not mono or stereo. Filename='%s'", pContextName);
-			s_pWVBuffer = nullptr;
 			return false;
 		}
 
 		if(BitsPerSample != 16)
 		{
 			log_error("sound/wv", "Bits per sample is %d, not 16. Filename='%s'", BitsPerSample, pContextName);
-			s_pWVBuffer = nullptr;
 			return false;
 		}
 
@@ -479,7 +465,6 @@ bool CSound::DecodeWV(CSample &Sample, const void *pData, unsigned DataSize, con
 		{
 			free(pBuffer);
 			log_error("sound/wv", "WavpackUnpackSamples failed. NumSamples=%d NumChannels=%d Filename='%s'", NumSamples, NumChannels, pContextName);
-			s_pWVBuffer = nullptr;
 			return false;
 		}
 
@@ -491,21 +476,18 @@ bool CSound::DecodeWV(CSample &Sample, const void *pData, unsigned DataSize, con
 			*pDst++ = (short)*pSrc++;
 
 		free(pBuffer);
-		WavpackCloseFile(pContext);
 
 		Sample.m_NumFrames = NumSamples;
 		Sample.m_Rate = SampleRate;
 		Sample.m_Channels = NumChannels;
-		Sample.m_LoopStart = -1;
-		Sample.m_LoopEnd = -1;
+		Sample.m_LoopStart = 0;
 		Sample.m_PausedAt = 0;
 
-		s_pWVBuffer = nullptr;
+		WavpackCloseFile(pContext);
 	}
 	else
 	{
 		log_error("sound/wv", "Failed to decode sample (%s). Filename='%s'", aError, pContextName);
-		s_pWVBuffer = nullptr;
 		return false;
 	}
 
