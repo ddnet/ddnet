@@ -876,7 +876,7 @@ void CRenderLayerQuads::RenderQuadLayer(float Alpha, const CRenderLayerParams &P
 				CQuad *pQuad = &m_pQuads[QuadCluster.m_StartIndex + QuadClusterId];
 
 				ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-				if(pQuad->m_ColorEnvOffset >= 0)
+				if(pQuad->m_ColorEnv >= 0)
 				{
 					m_pEnvelopeManager->EnvelopeEval()->EnvelopeEval(pQuad->m_ColorEnvOffset, pQuad->m_ColorEnv, Color, 4);
 				}
