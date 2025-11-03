@@ -31,13 +31,22 @@ endif()
 if(NOT WAVPACK_FOUND)
   set(WAVPACK_SRC_DIR src/engine/external/wavpack)
   set_src(WAVPACK_SRC GLOB ${WAVPACK_SRC_DIR}
-    bits.c
-    float.c
-    metadata.c
+    common_utils.c
+    decorr_utils.c
+    entropy_utils.c
+    open_legacy.c
+    open_utils.c
+    read_words.c
+    tag_utils.c
+    tags.c
     unpack.c
+    unpack_dsd.c
+    unpack_floats.c
+    unpack_seek.c
+    unpack_utils.c
     wavpack.h
-    words.c
-    wputils.c
+    wavpack_local.h
+    wavpack_version.h
   )
   add_library(wavpack EXCLUDE_FROM_ALL OBJECT ${WAVPACK_SRC})
   set(WAVPACK_DEP $<TARGET_OBJECTS:wavpack>)

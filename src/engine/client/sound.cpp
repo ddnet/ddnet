@@ -403,7 +403,6 @@ static int ReadDataOld(void *pBuffer, int Size)
 	return ChunkSize;
 }
 
-#if defined(CONF_WAVPACK_OPEN_FILE_INPUT_EX)
 static int ReadData(void *pId, void *pBuffer, int Size)
 {
 	(void)pId;
@@ -433,7 +432,6 @@ static int PushBackByte(void *pId, int Char)
 	s_WVBufferPosition -= 1;
 	return 0;
 }
-#endif
 
 bool CSound::DecodeWV(CSample &Sample, const void *pData, unsigned DataSize, const char *pContextName) const
 {
@@ -448,7 +446,6 @@ bool CSound::DecodeWV(CSample &Sample, const void *pData, unsigned DataSize, con
 
 	char aError[100];
 
-#if defined(CONF_WAVPACK_OPEN_FILE_INPUT_EX)
 	WavpackStreamReader Callback = {0};
 	Callback.can_seek = ReturnFalse;
 	Callback.get_length = GetLength;
@@ -456,9 +453,6 @@ bool CSound::DecodeWV(CSample &Sample, const void *pData, unsigned DataSize, con
 	Callback.push_back_byte = PushBackByte;
 	Callback.read_bytes = ReadData;
 	WavpackContext *pContext = WavpackOpenFileInputEx(&Callback, (void *)1, 0, aError, 0, 0);
-#else
-	WavpackContext *pContext = WavpackOpenFileInput(ReadDataOld, aError);
-#endif
 	if(pContext)
 	{
 		const int NumSamples = WavpackGetNumSamples(pContext);
@@ -497,9 +491,7 @@ bool CSound::DecodeWV(CSample &Sample, const void *pData, unsigned DataSize, con
 			*pDst++ = (short)*pSrc++;
 
 		free(pBuffer);
-#ifdef CONF_WAVPACK_CLOSE_FILE
 		WavpackCloseFile(pContext);
-#endif
 
 		Sample.m_NumFrames = NumSamples;
 		Sample.m_Rate = SampleRate;
