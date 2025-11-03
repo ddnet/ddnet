@@ -228,7 +228,7 @@ bool CSaveTee::Load(CCharacter *pChr, std::optional<int> Team)
 	pChr->m_Core.m_HookTick = m_HookTick;
 
 	pChr->m_Core.m_HookState = m_HookState;
-	if(m_HookedPlayer != -1 && pChr->Teams()->m_Core.Team(m_HookedPlayer) != Team)
+	if(m_HookedPlayer != -1 && Team.has_value() && pChr->Teams()->m_Core.Team(m_HookedPlayer) != Team.value())
 	{
 		pChr->m_Core.SetHookedPlayer(-1);
 		pChr->m_Core.m_HookState = HOOK_FLYING;
