@@ -170,6 +170,11 @@ spanish
 == 724
 == es
 
+spanish_latam
+== Español (Latinoamérica)
+== -1
+== es-419;es-AR;es-CL;es-CO;es-CR;es-CU;es-DO;es-EC;es-SV;es-GT;es-HN;es-MX;es-NI;es-PA;es-PY;es-PE;es-PR;es-UY;es-VE
+
 swedish
 == Svenska
 == 752

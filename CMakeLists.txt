@@ -1487,6 +1487,7 @@ set(EXPECTED_DATA
   languages/simplified_chinese.txt
   languages/slovak.txt
   languages/spanish.txt
+  languages/spanish_latam.txt
   languages/swedish.txt
   languages/traditional_chinese.txt
   languages/turkish.txt
