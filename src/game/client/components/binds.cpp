@@ -213,7 +213,7 @@ bool CBinds::OnInput(const IInput::CEvent &Event)
 			}
 		}
 
-		for (auto it = m_vDelayedBinds.begin(); it != m_vDelayedBinds.end(); )
+		for(auto it = m_vDelayedBinds.begin(); it != m_vDelayedBinds.end();)
 		{
 			if(it->m_Key == Event.m_Key)
 			{
@@ -345,7 +345,6 @@ void CBinds::ConBind(IConsole::IResult *pResult, void *pUserData)
 		ConBinds(pResult, pUserData);
 		return;
 	}
-
 
 	const char *pCommand = pResult->GetString(1);
 
