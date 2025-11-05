@@ -212,6 +212,19 @@ bool CBinds::OnInput(const IInput::CEvent &Event)
 				Handled = true;
 			}
 		}
+
+		for (auto it = m_vDelayedBinds.begin(); it != m_vDelayedBinds.end(); )
+		{
+			if(it->m_Key == Event.m_Key)
+			{
+				Bind(it->m_Key, it->m_Command.c_str(), false, it->m_ModifierMask);
+				it = m_vDelayedBinds.erase(it);
+			}
+			else
+			{
+				++it;
+			}
+		}
 	}
 
 	return Handled;
@@ -330,6 +343,22 @@ void CBinds::ConBind(IConsole::IResult *pResult, void *pUserData)
 	if(pResult->NumArguments() == 1)
 	{
 		ConBinds(pResult, pUserData);
+		return;
+	}
+
+
+	const char *pCommand = pResult->GetString(1);
+
+	if(pBinds->Input() && pBinds->Input()->KeyIsPressed(BindSlot.m_Key))
+	{
+		pBinds->m_vDelayedBinds.erase(
+			std::remove_if(
+				pBinds->m_vDelayedBinds.begin(),
+				pBinds->m_vDelayedBinds.end(),
+				[&](const CBinds::CDelayedBind &b) { return b.m_Key == BindSlot.m_Key; }),
+			pBinds->m_vDelayedBinds.end());
+
+		pBinds->m_vDelayedBinds.push_back({BindSlot.m_Key, BindSlot.m_ModifierMask, pCommand});
 		return;
 	}
 

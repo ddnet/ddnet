@@ -87,5 +87,14 @@ public:
 private:
 	char *m_aapKeyBindings[MODIFIER_COMBINATION_COUNT][KEY_LAST];
 	std::vector<CBindSlot> m_vActiveBinds;
+
+	struct CDelayedBind
+	{
+		int m_Key;
+		int m_ModifierMask;
+		std::string m_Command;
+	};
+
+	std::vector<CDelayedBind> m_vDelayedBinds;
 };
 #endif
