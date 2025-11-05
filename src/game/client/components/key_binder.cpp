@@ -24,8 +24,7 @@ bool CKeyBinder::OnInput(const IInput::CEvent &Event)
 		return false;
 	}
 
-	int TriggeringEvent = (Event.m_Key == KEY_MOUSE_1) ? IInput::FLAG_PRESS : IInput::FLAG_RELEASE;
-	if(Event.m_Flags & TriggeringEvent)
+	if(Event.m_Flags & IInput::FLAG_RELEASE)
 	{
 		m_Key = Event;
 		m_GotKey = true;
