@@ -1,3 +1,4 @@
+# vim: set ts=2 sw=2 et
 cmake_minimum_required(VERSION 3.12...3.27.4)
 
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15 CACHE INTERNAL "Minimum macOS deployment version")
