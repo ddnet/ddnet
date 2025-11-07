@@ -88,9 +88,9 @@ void CMenusSettingsControls::Render(CUIRect MainView)
 	for(auto &Key : gs_aKeys)
 		Key.m_KeyId = Key.m_ModifierCombination = 0;
 
-	for(int Mod = 0; Mod < CBinds::MODIFIER_COMBINATION_COUNT; Mod++)
+	for(int Mod = KeyModifier::NONE; Mod < KeyModifier::COMBINATION_COUNT; Mod++)
 	{
-		for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
+		for(int KeyId = KEY_FIRST; KeyId < KEY_LAST; KeyId++)
 		{
 			const char *pBind = GameClient()->m_Binds.Get(KeyId, Mod);
 			if(!pBind[0])

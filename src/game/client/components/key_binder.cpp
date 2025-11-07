@@ -14,7 +14,7 @@ CKeyBinder::CKeyBinder()
 	m_pKeyReaderId = nullptr;
 	m_TakeKey = false;
 	m_GotKey = false;
-	m_ModifierCombination = CBinds::MODIFIER_NONE;
+	m_ModifierCombination = KeyModifier::NONE;
 }
 
 bool CKeyBinder::OnInput(const IInput::CEvent &Event)
@@ -33,7 +33,7 @@ bool CKeyBinder::OnInput(const IInput::CEvent &Event)
 		m_ModifierCombination = CBinds::GetModifierMask(Input());
 		if(m_ModifierCombination == CBinds::GetModifierMaskOfKey(Event.m_Key))
 		{
-			m_ModifierCombination = CBinds::MODIFIER_NONE;
+			m_ModifierCombination = KeyModifier::NONE;
 		}
 	}
 	return true;
@@ -54,7 +54,7 @@ int CKeyBinder::DoKeyReader(const void *pId, const CUIRect *pRect, int Key, int 
 	else if(ButtonResult == 2)
 	{
 		NewKey = 0;
-		*pNewModifierCombination = CBinds::MODIFIER_NONE;
+		*pNewModifierCombination = KeyModifier::NONE;
 	}
 
 	if(m_pKeyReaderId == pId && m_GotKey)

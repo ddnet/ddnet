@@ -12,6 +12,17 @@
 
 class IConfigManager;
 
+namespace KeyModifier
+{
+	inline constexpr int32_t NONE = 0;
+	inline constexpr int32_t CTRL = 1;
+	inline constexpr int32_t ALT = 2;
+	inline constexpr int32_t SHIFT = 3;
+	inline constexpr int32_t GUI = 4;
+	inline constexpr int32_t COUNT = 5;
+	inline constexpr int32_t COMBINATION_COUNT = 1 << COUNT;
+};
+
 class CBinds : public CComponent
 {
 	static void ConBind(IConsole::IResult *pResult, void *pUserData);
@@ -53,21 +64,9 @@ public:
 
 	bool m_MouseOnAction;
 
-	enum
-	{
-		MODIFIER_NONE = 0,
-		MODIFIER_CTRL,
-		MODIFIER_ALT,
-		MODIFIER_SHIFT,
-		MODIFIER_GUI,
-
-		MODIFIER_COUNT,
-	};
-	static constexpr auto MODIFIER_COMBINATION_COUNT = 1 << MODIFIER_COUNT;
-
 	CBindsSpecial m_SpecialBinds;
 
-	void Bind(int KeyId, const char *pStr, bool FreeOnly = false, int ModifierCombination = MODIFIER_NONE);
+	void Bind(int KeyId, const char *pStr, bool FreeOnly = false, int ModifierCombination = KeyModifier::NONE);
 	void SetDefaults();
 	void UnbindAll();
 	const char *Get(int KeyId, int ModifierCombination);
@@ -85,7 +84,7 @@ public:
 	void SetDDRaceBinds(bool FreeOnly);
 
 private:
-	char *m_aapKeyBindings[MODIFIER_COMBINATION_COUNT][KEY_LAST];
+	char *m_aapKeyBindings[KeyModifier::COMBINATION_COUNT][KEY_LAST];
 	std::vector<CBindSlot> m_vActiveBinds;
 };
 #endif
