@@ -39,6 +39,8 @@ public:
 	constexpr bool operator!=(const CBindSlot &Other) const { return !(*this == Other); }
 };
 
+inline constexpr CBindSlot EMPTY_BIND_SLOT = CBindSlot(KEY_UNKNOWN, KeyModifier::NONE);
+
 class CBinds : public CComponent
 {
 	static void ConBind(IConsole::IResult *pResult, void *pUserData);

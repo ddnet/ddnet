@@ -413,7 +413,7 @@ CBindSlot CBinds::GetBindSlot(const char *pBindString) const
 		else if(!str_comp_nocase(aMod, "gui"))
 			ModifierMask |= (1 << KeyModifier::GUI);
 		else
-			return {KEY_UNKNOWN, KeyModifier::NONE};
+			return EMPTY_BIND_SLOT;
 
 		if(str_find(pKey + 1, "+"))
 			pKey = str_next_token(pKey + 1, "+", aMod, sizeof(aMod));
