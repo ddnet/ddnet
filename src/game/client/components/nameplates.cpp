@@ -14,9 +14,44 @@
 #include <memory>
 #include <vector>
 
-static constexpr float DEFAULT_PADDING = 5.0f;
+enum class EHookStrongWeakState
+{
+	WEAK,
+	NEUTRAL,
+	STRONG
+};
+
+class CNamePlateData
+{
+public:
+	bool m_InGame;
+	ColorRGBA m_Color;
+	bool m_ShowName;
+	char m_aName[std::max<size_t>(MAX_NAME_LENGTH, protocol7::MAX_NAME_ARRAY_SIZE)];
+	bool m_ShowFriendMark;
+	bool m_ShowClientId;
+	int m_ClientId;
+	float m_FontSizeClientId;
+	bool m_ClientIdSeparateLine;
+	float m_FontSize;
+	bool m_ShowClan;
+	char m_aClan[std::max<size_t>(MAX_CLAN_LENGTH, protocol7::MAX_CLAN_ARRAY_SIZE)];
+	float m_FontSizeClan;
+	bool m_ShowDirection;
+	bool m_DirLeft;
+	bool m_DirJump;
+	bool m_DirRight;
+	float m_FontSizeDirection;
+	bool m_ShowHookStrongWeak;
+	EHookStrongWeakState m_HookStrongWeakState;
+	bool m_ShowHookStrongWeakId;
+	int m_HookStrongWeakId;
+	float m_FontSizeHookStrongWeak;
+};
 
 // Part Types
+
+static constexpr float DEFAULT_PADDING = 5.0f;
 
 class CNamePlatePart
 {
@@ -316,12 +351,12 @@ protected:
 		if(!m_Visible)
 			return false;
 		m_Color = Data.m_Color;
-		return m_FontSize != Data.m_FontSize || str_comp(m_aText, Data.m_pName) != 0;
+		return m_FontSize != Data.m_FontSize || str_comp(m_aText, Data.m_aName) != 0;
 	}
 	void UpdateText(CGameClient &This, const CNamePlateData &Data) override
 	{
 		m_FontSize = Data.m_FontSize;
-		str_copy(m_aText, Data.m_pName, sizeof(m_aText));
+		str_copy(m_aText, Data.m_aName, sizeof(m_aText));
 		CTextCursor Cursor;
 		Cursor.m_FontSize = m_FontSize;
 		This.TextRender()->CreateOrAppendTextContainer(m_TextContainerIndex, &Cursor, m_aText);
@@ -345,12 +380,12 @@ protected:
 		if(!m_Visible)
 			return false;
 		m_Color = Data.m_Color;
-		return m_FontSize != Data.m_FontSizeClan || str_comp(m_aText, Data.m_pClan) != 0;
+		return m_FontSize != Data.m_FontSizeClan || str_comp(m_aText, Data.m_aClan) != 0;
 	}
 	void UpdateText(CGameClient &This, const CNamePlateData &Data) override
 	{
 		m_FontSize = Data.m_FontSizeClan;
-		str_copy(m_aText, Data.m_pClan, sizeof(m_aText));
+		str_copy(m_aText, Data.m_aClan, sizeof(m_aText));
 		CTextCursor Cursor;
 		Cursor.m_FontSize = m_FontSize;
 		This.TextRender()->CreateOrAppendTextContainer(m_TextContainerIndex, &Cursor, m_aText);
@@ -610,7 +645,7 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 	Data.m_InGame = true;
 
 	Data.m_ShowName = pPlayerInfo->m_Local ? g_Config.m_ClNamePlatesOwn : g_Config.m_ClNamePlates;
-	Data.m_pName = GameClient()->m_aClients[pPlayerInfo->m_ClientId].m_aName;
+	str_copy(Data.m_aName, GameClient()->m_aClients[pPlayerInfo->m_ClientId].m_aName);
 	Data.m_ShowFriendMark = Data.m_ShowName && g_Config.m_ClNamePlatesFriendMark && GameClient()->m_aClients[pPlayerInfo->m_ClientId].m_Friend;
 	Data.m_ShowClientId = Data.m_ShowName && (g_Config.m_Debug || g_Config.m_ClNamePlatesIds);
 	Data.m_FontSize = 18.0f + 20.0f * g_Config.m_ClNamePlatesSize / 100.0f;
@@ -620,7 +655,7 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 	Data.m_FontSizeClientId = Data.m_ClientIdSeparateLine ? (18.0f + 20.0f * g_Config.m_ClNamePlatesIdsSize / 100.0f) : Data.m_FontSize;
 
 	Data.m_ShowClan = Data.m_ShowName && g_Config.m_ClNamePlatesClan;
-	Data.m_pClan = GameClient()->m_aClients[pPlayerInfo->m_ClientId].m_aClan;
+	str_copy(Data.m_aClan, GameClient()->m_aClients[pPlayerInfo->m_ClientId].m_aClan);
 	Data.m_FontSizeClan = 18.0f + 20.0f * g_Config.m_ClNamePlatesClanSize / 100.0f;
 
 	Data.m_FontSizeHookStrongWeak = 18.0f + 20.0f * g_Config.m_ClNamePlatesStrongSize / 100.0f;
@@ -748,20 +783,24 @@ void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
 	Data.m_Color.a = 1.0f;
 
 	Data.m_ShowName = g_Config.m_ClNamePlates || g_Config.m_ClNamePlatesOwn;
-	Data.m_pName = Dummy == 0 ? Client()->PlayerName() : Client()->DummyName();
+	const char *pName = Dummy == 0 ? Client()->PlayerName() : Client()->DummyName();
+	str_copy(Data.m_aName, str_utf8_skip_whitespaces(pName));
+	str_utf8_trim_right(Data.m_aName);
 	Data.m_FontSize = FontSize;
 
 	Data.m_ShowFriendMark = Data.m_ShowName && g_Config.m_ClNamePlatesFriendMark;
 
 	Data.m_ShowClientId = Data.m_ShowName && (g_Config.m_Debug || g_Config.m_ClNamePlatesIds);
-	Data.m_ClientId = Dummy + 1;
+	Data.m_ClientId = Dummy;
 	Data.m_ClientIdSeparateLine = g_Config.m_ClNamePlatesIdsSeparateLine;
 	Data.m_FontSizeClientId = Data.m_ClientIdSeparateLine ? (18.0f + 20.0f * g_Config.m_ClNamePlatesIdsSize / 100.0f) : Data.m_FontSize;
 
 	Data.m_ShowClan = Data.m_ShowName && g_Config.m_ClNamePlatesClan;
-	Data.m_pClan = Dummy == 0 ? g_Config.m_PlayerClan : g_Config.m_ClDummyClan;
-	if(!Data.m_pClan[0])
-		Data.m_pClan = "Clan Name";
+	const char *pClan = Dummy == 0 ? g_Config.m_PlayerClan : g_Config.m_ClDummyClan;
+	if(pClan[0] == '\0')
+		pClan = "Clan Name";
+	str_copy(Data.m_aClan, str_utf8_skip_whitespaces(pClan));
+	str_utf8_trim_right(Data.m_aClan);
 	Data.m_FontSizeClan = FontSizeClan;
 
 	Data.m_ShowDirection = g_Config.m_ClShowDirection != 0 ? true : false;
@@ -806,7 +845,7 @@ void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
 	const int TeeEmote = Distance < InteractionDistance ? EMOTE_HAPPY : (Dummy ? g_Config.m_ClDummyDefaultEyes : g_Config.m_ClPlayerDefaultEyes);
 	RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeRenderInfo, TeeEmote, TeeDirection, Position);
 	Position.y -= (float)g_Config.m_ClNamePlatesOffset;
-	NamePlate.Render(*GameClient(), Position - vec2(0.0f, (float)g_Config.m_ClNamePlatesOffset));
+	NamePlate.Render(*GameClient(), Position);
 	NamePlate.Reset(*GameClient());
 }
 
