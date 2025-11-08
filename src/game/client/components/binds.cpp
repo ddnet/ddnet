@@ -229,14 +229,19 @@ void CBinds::UnbindAll()
 	}
 }
 
-const char *CBinds::Get(int KeyId, int ModifierCombination)
+const char *CBinds::Get(int KeyId, int ModifierCombination) const
 {
 	dbg_assert(KeyId >= KEY_FIRST && KeyId < KEY_LAST, "KeyId invalid");
 	dbg_assert(ModifierCombination >= KeyModifier::NONE && ModifierCombination < KeyModifier::COMBINATION_COUNT, "ModifierCombination invalid");
 	return m_aapKeyBindings[ModifierCombination][KeyId] ? m_aapKeyBindings[ModifierCombination][KeyId] : "";
 }
 
-void CBinds::GetKey(const char *pBindStr, char *pBuf, size_t BufSize)
+const char *CBinds::Get(const CBindSlot &BindSlot) const
+{
+	return Get(BindSlot.m_Key, BindSlot.m_ModifierMask);
+}
+
+void CBinds::GetKey(const char *pBindStr, char *pBuf, size_t BufSize) const
 {
 	pBuf[0] = '\0';
 	for(int Modifier = KeyModifier::NONE; Modifier < KeyModifier::COMBINATION_COUNT; Modifier++)
@@ -396,7 +401,7 @@ void CBinds::ConUnbindAll(IConsole::IResult *pResult, void *pUserData)
 	pBinds->UnbindAll();
 }
 
-CBinds::CBindSlot CBinds::GetBindSlot(const char *pBindString) const
+CBindSlot CBinds::GetBindSlot(const char *pBindString) const
 {
 	int ModifierMask = KeyModifier::NONE;
 	char aMod[32];
@@ -413,7 +418,7 @@ CBinds::CBindSlot CBinds::GetBindSlot(const char *pBindString) const
 		else if(!str_comp_nocase(aMod, "gui"))
 			ModifierMask |= (1 << KeyModifier::GUI);
 		else
-			return {KEY_UNKNOWN, KeyModifier::NONE};
+			return EMPTY_BIND_SLOT;
 
 		if(str_find(pKey + 1, "+"))
 			pKey = str_next_token(pKey + 1, "+", aMod, sizeof(aMod));

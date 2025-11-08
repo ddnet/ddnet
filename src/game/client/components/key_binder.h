@@ -4,25 +4,29 @@
 #define GAME_CLIENT_COMPONENTS_KEY_BINDER_H
 
 #include <game/client/component.h>
-#include <game/client/ui_rect.h>
+#include <game/client/components/binds.h>
+#include <game/client/ui.h>
 
 // component to fetch keypresses, override all other input
 class CKeyBinder : public CComponent
 {
 public:
-	CKeyBinder();
 	int Sizeof() const override { return sizeof(*this); }
 	bool OnInput(const IInput::CEvent &Event) override;
 
-	int DoKeyReader(const void *pId, const CUIRect *pRect, int Key, int ModifierCombination, int *pNewModifierCombination);
+	class CKeyReaderResult
+	{
+	public:
+		CBindSlot m_Bind;
+		bool m_Aborted;
+	};
+	CKeyReaderResult DoKeyReader(CButtonContainer *pReaderButton, CButtonContainer *pClearButton, const CUIRect *pRect, const CBindSlot &CurrentBind, bool Activate);
 	bool IsActive() const;
 
 private:
-	const void *m_pKeyReaderId;
-	bool m_TakeKey;
-	bool m_GotKey;
-	IInput::CEvent m_Key;
-	int m_ModifierCombination;
+	const CButtonContainer *m_pKeyReaderId = nullptr;
+	bool m_TakeKey = false;
+	std::optional<CBindSlot> m_Key;
 };
 
 #endif

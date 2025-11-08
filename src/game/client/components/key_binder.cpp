@@ -9,13 +9,7 @@
 #include <game/client/ui.h>
 #include <game/localization.h>
 
-CKeyBinder::CKeyBinder()
-{
-	m_pKeyReaderId = nullptr;
-	m_TakeKey = false;
-	m_GotKey = false;
-	m_ModifierCombination = KeyModifier::NONE;
-}
+using namespace FontIcons;
 
 bool CKeyBinder::OnInput(const IInput::CEvent &Event)
 {
@@ -26,67 +20,77 @@ bool CKeyBinder::OnInput(const IInput::CEvent &Event)
 
 	if(Event.m_Flags & IInput::FLAG_RELEASE)
 	{
-		m_Key = Event;
-		m_GotKey = true;
-		m_TakeKey = false;
-
-		m_ModifierCombination = CBinds::GetModifierMask(Input());
-		if(m_ModifierCombination == CBinds::GetModifierMaskOfKey(Event.m_Key))
+		int ModifierCombination = CBinds::GetModifierMask(Input());
+		if(ModifierCombination == CBinds::GetModifierMaskOfKey(Event.m_Key))
 		{
-			m_ModifierCombination = KeyModifier::NONE;
+			ModifierCombination = KeyModifier::NONE;
 		}
+		m_Key = {Event.m_Key, ModifierCombination};
+		m_TakeKey = false;
 	}
 	return true;
 }
 
-int CKeyBinder::DoKeyReader(const void *pId, const CUIRect *pRect, int Key, int ModifierCombination, int *pNewModifierCombination)
+CKeyBinder::CKeyReaderResult CKeyBinder::DoKeyReader(CButtonContainer *pReaderButton, CButtonContainer *pClearButton, const CUIRect *pRect, const CBindSlot &CurrentBind, bool Activate)
 {
-	int NewKey = Key;
-	*pNewModifierCombination = ModifierCombination;
+	CKeyReaderResult Result = {CurrentBind, false};
 
-	const int ButtonResult = Ui()->DoButtonLogic(pId, 0, pRect, BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT);
-	if(ButtonResult == 1)
+	CUIRect KeyReaderButton, ClearButton;
+	pRect->VSplitRight(pRect->h, &KeyReaderButton, &ClearButton);
+
+	const int ClearButtonResult = Ui()->DoButton_FontIcon(
+		pClearButton, FONT_ICON_TRASH,
+		Result.m_Bind == CBindSlot(KEY_UNKNOWN, KeyModifier::NONE) ? 1 : 0,
+		&ClearButton, BUTTONFLAG_LEFT, IGraphics::CORNER_R);
+
+	const int ButtonResult = Ui()->DoButtonLogic(pReaderButton, 0, &KeyReaderButton, BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT);
+	if(ButtonResult == 1 || Activate)
 	{
-		m_pKeyReaderId = pId;
+		m_pKeyReaderId = pReaderButton;
 		m_TakeKey = true;
-		m_GotKey = false;
+		m_Key = std::nullopt;
 	}
-	else if(ButtonResult == 2)
+	else if(ButtonResult == 2 || ClearButtonResult != 0)
 	{
-		NewKey = 0;
-		*pNewModifierCombination = KeyModifier::NONE;
+		Result.m_Bind = CBindSlot(KEY_UNKNOWN, KeyModifier::NONE);
 	}
 
-	if(m_pKeyReaderId == pId && m_GotKey)
+	if(m_pKeyReaderId == pReaderButton && m_Key.has_value())
 	{
-		// abort with escape key
-		if(m_Key.m_Key != KEY_ESCAPE)
+		if(m_Key.value().m_Key == KEY_ESCAPE)
 		{
-			NewKey = m_Key.m_Key;
-			*pNewModifierCombination = m_ModifierCombination;
+			Result.m_Aborted = true;
+		}
+		else
+		{
+			Result.m_Bind = m_Key.value();
 		}
 		m_pKeyReaderId = nullptr;
-		m_GotKey = false;
+		m_Key = std::nullopt;
 		Ui()->SetActiveItem(nullptr);
 	}
 
 	char aBuf[64];
-	if(m_pKeyReaderId == pId && m_TakeKey)
+	if(m_pKeyReaderId == pReaderButton && m_TakeKey)
+	{
 		str_copy(aBuf, Localize("Press a key…"));
-	else if(NewKey == 0)
+	}
+	else if(Result.m_Bind.m_Key == KEY_UNKNOWN)
+	{
 		aBuf[0] = '\0';
+	}
 	else
 	{
-		GameClient()->m_Binds.GetKeyBindName(NewKey, *pNewModifierCombination, aBuf, sizeof(aBuf));
+		GameClient()->m_Binds.GetKeyBindName(Result.m_Bind.m_Key, Result.m_Bind.m_ModifierMask, aBuf, sizeof(aBuf));
 	}
 
-	const ColorRGBA Color = m_pKeyReaderId == pId && m_TakeKey ? ColorRGBA(0.0f, 1.0f, 0.0f, 0.4f) : ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f * Ui()->ButtonColorMul(pId));
-	pRect->Draw(Color, IGraphics::CORNER_ALL, 5.0f);
-	CUIRect Temp;
-	pRect->HMargin(1.0f, &Temp);
-	Ui()->DoLabel(&Temp, aBuf, Temp.h * CUi::ms_FontmodHeight, TEXTALIGN_MC);
+	const ColorRGBA Color = m_pKeyReaderId == pReaderButton && m_TakeKey ? ColorRGBA(0.0f, 1.0f, 0.0f, 0.4f) : ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f * Ui()->ButtonColorMul(pReaderButton));
+	KeyReaderButton.Draw(Color, IGraphics::CORNER_L, 5.0f);
+	CUIRect Label;
+	KeyReaderButton.HMargin(1.0f, &Label);
+	Ui()->DoLabel(&Label, aBuf, Label.h * CUi::ms_FontmodHeight, TEXTALIGN_MC);
 
-	return NewKey;
+	return Result;
 }
 
 bool CKeyBinder::IsActive() const

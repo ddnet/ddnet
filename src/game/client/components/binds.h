@@ -23,6 +23,24 @@ namespace KeyModifier
 	inline constexpr int32_t COMBINATION_COUNT = 1 << COUNT;
 };
 
+class CBindSlot
+{
+public:
+	int m_Key;
+	int m_ModifierMask;
+
+	constexpr CBindSlot(int Key, int ModifierMask) :
+		m_Key(Key),
+		m_ModifierMask(ModifierMask)
+	{
+	}
+
+	constexpr bool operator==(const CBindSlot &Other) const { return m_Key == Other.m_Key && m_ModifierMask == Other.m_ModifierMask; }
+	constexpr bool operator!=(const CBindSlot &Other) const { return !(*this == Other); }
+};
+
+inline constexpr CBindSlot EMPTY_BIND_SLOT = CBindSlot(KEY_UNKNOWN, KeyModifier::NONE);
+
 class CBinds : public CComponent
 {
 	static void ConBind(IConsole::IResult *pResult, void *pUserData);
@@ -32,18 +50,6 @@ class CBinds : public CComponent
 
 	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
 
-	class CBindSlot
-	{
-	public:
-		int m_Key;
-		int m_ModifierMask;
-
-		CBindSlot(int Key, int ModifierMask) :
-			m_Key(Key),
-			m_ModifierMask(ModifierMask)
-		{
-		}
-	};
 	CBindSlot GetBindSlot(const char *pBindString) const;
 
 	// free buffer after use
@@ -69,8 +75,9 @@ public:
 	void Bind(int KeyId, const char *pStr, bool FreeOnly = false, int ModifierCombination = KeyModifier::NONE);
 	void SetDefaults();
 	void UnbindAll();
-	const char *Get(int KeyId, int ModifierCombination);
-	void GetKey(const char *pBindStr, char *pBuf, size_t BufSize);
+	const char *Get(int KeyId, int ModifierCombination) const;
+	const char *Get(const CBindSlot &BindSlot) const;
+	void GetKey(const char *pBindStr, char *pBuf, size_t BufSize) const;
 	static int GetModifierMask(IInput *pInput);
 	static int GetModifierMaskOfKey(int Key);
 	static const char *GetModifierName(int Modifier);
