@@ -841,7 +841,7 @@ void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
 	const int TeeEmote = Distance < InteractionDistance ? EMOTE_HAPPY : (Dummy ? g_Config.m_ClDummyDefaultEyes : g_Config.m_ClPlayerDefaultEyes);
 	RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeRenderInfo, TeeEmote, TeeDirection, Position);
 	Position.y -= (float)g_Config.m_ClNamePlatesOffset;
-	NamePlate.Render(*GameClient(), Position - vec2(0.0f, (float)g_Config.m_ClNamePlatesOffset));
+	NamePlate.Render(*GameClient(), Position);
 	NamePlate.Reset(*GameClient());
 }
 
