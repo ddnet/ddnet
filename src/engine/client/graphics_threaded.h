@@ -186,8 +186,6 @@ public:
 		unsigned m_Cmd;
 		SCommand *m_pNext;
 	};
-	SCommand *m_pCmdBufferHead;
-	SCommand *m_pCmdBufferTail;
 
 	struct SState
 	{
@@ -623,7 +621,7 @@ public:
 	}
 
 	const SCommand *Head() const { return m_pCmdBufferHead; }
-	SCommand *Head() { return m_pCmdBufferHead; } // NOLINT(readability-make-member-function-const)
+	SCommand *Head() { return m_pCmdBufferHead; }
 
 	void Reset()
 	{
@@ -639,6 +637,10 @@ public:
 	{
 		m_RenderCallCount += RenderCallCountToAdd;
 	}
+
+private:
+	SCommand *m_pCmdBufferHead;
+	SCommand *m_pCmdBufferTail;
 };
 
 enum EGraphicsBackendErrorCodes

@@ -4092,8 +4092,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 
 	m_Layers.Init(Kernel()->RequestInterface<IMap>(), false);
 	m_Collision.Init(&m_Layers);
-	m_World.m_pTuningList = m_aTuningList;
-	m_World.m_Core.InitSwitchers(m_Collision.m_HighestSwitchNumber);
+	m_World.Init(&m_Collision, m_aTuningList);
 
 	char aMapName[IO_MAX_PATH_LENGTH];
 	int MapSize;
