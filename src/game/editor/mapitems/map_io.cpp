@@ -460,6 +460,7 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const std::functio
 	}
 
 	Clean();
+	bool ContainsUnused = false;
 
 	// load map info
 	{
@@ -776,10 +777,15 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const std::functio
 
 							for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 							{
-								if(IsValidTeleTile(pLayerTeleTiles[i].m_Type))
+								if(IsValidTeleTile(pLayerTeleTiles[i].m_Type) || m_pEditor->m_ReloadMapWithUnused)
+								{
 									pTiles->m_pTiles[i].m_Index = pLayerTeleTiles[i].m_Type;
+								}
 								else
+								{
 									pTiles->m_pTiles[i].m_Index = 0;
+									ContainsUnused = true;
+								}
 							}
 						}
 						DataFile.UnloadData(pTilemapItem->m_Tele);
@@ -796,10 +802,18 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const std::functio
 
 							for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 							{
-								if(IsValidSpeedupTile(pLayerSpeedupTiles[i].m_Type) && pLayerSpeedupTiles[i].m_Force > 0)
+								if(!IsValidSpeedupTile(pLayerSpeedupTiles[i].m_Type) && !m_pEditor->m_ReloadMapWithUnused)
+								{
+									ContainsUnused = true;
+								}
+								if(pLayerSpeedupTiles[i].m_Force > 0)
+								{
 									pTiles->m_pTiles[i].m_Index = pLayerSpeedupTiles[i].m_Type;
+								}
 								else
+								{
 									pTiles->m_pTiles[i].m_Index = 0;
+								}
 							}
 						}
 
@@ -823,19 +837,35 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const std::functio
 
 							for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 							{
-								if(((pLayerSwitchTiles[i].m_Type > (ENTITY_CRAZY_SHOTGUN + ENTITY_OFFSET) && pLayerSwitchTiles[i].m_Type < (ENTITY_DRAGGER_WEAK + ENTITY_OFFSET)) || pLayerSwitchTiles[i].m_Type == (ENTITY_LASER_O_FAST + 1 + ENTITY_OFFSET)))
-									continue;
-								else if(pLayerSwitchTiles[i].m_Type >= (ENTITY_ARMOR_1 + ENTITY_OFFSET) && pLayerSwitchTiles[i].m_Type <= (ENTITY_DOOR + ENTITY_OFFSET))
+								if(m_pEditor->m_ReloadMapWithUnused)
 								{
 									pTiles->m_pTiles[i].m_Index = pLayerSwitchTiles[i].m_Type;
 									pTiles->m_pTiles[i].m_Flags = pLayerSwitchTiles[i].m_Flags;
 									continue;
 								}
-
-								if(IsValidSwitchTile(pLayerSwitchTiles[i].m_Type))
+								else
 								{
-									pTiles->m_pTiles[i].m_Index = pLayerSwitchTiles[i].m_Type;
-									pTiles->m_pTiles[i].m_Flags = pLayerSwitchTiles[i].m_Flags;
+									if(((pLayerSwitchTiles[i].m_Type > (ENTITY_CRAZY_SHOTGUN + ENTITY_OFFSET) && pLayerSwitchTiles[i].m_Type < (ENTITY_DRAGGER_WEAK + ENTITY_OFFSET)) || pLayerSwitchTiles[i].m_Type == (ENTITY_LASER_O_FAST + 1 + ENTITY_OFFSET)))
+									{
+										ContainsUnused = true;
+										continue;
+									}
+									else if(pLayerSwitchTiles[i].m_Type >= (ENTITY_ARMOR_1 + ENTITY_OFFSET) && pLayerSwitchTiles[i].m_Type <= (ENTITY_DOOR + ENTITY_OFFSET))
+									{
+										pTiles->m_pTiles[i].m_Index = pLayerSwitchTiles[i].m_Type;
+										pTiles->m_pTiles[i].m_Flags = pLayerSwitchTiles[i].m_Flags;
+										continue;
+									}
+
+									if(IsValidSwitchTile(pLayerSwitchTiles[i].m_Type))
+									{
+										pTiles->m_pTiles[i].m_Index = pLayerSwitchTiles[i].m_Type;
+										pTiles->m_pTiles[i].m_Flags = pLayerSwitchTiles[i].m_Flags;
+									}
+									else
+									{
+										ContainsUnused = true;
+									}
 								}
 							}
 						}
@@ -852,10 +882,15 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const std::functio
 
 							for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 							{
-								if(IsValidTuneTile(pLayerTuneTiles[i].m_Type))
+								if(IsValidTuneTile(pLayerTuneTiles[i].m_Type) || m_pEditor->m_ReloadMapWithUnused)
+								{
 									pTiles->m_pTiles[i].m_Index = pLayerTuneTiles[i].m_Type;
+								}
 								else
+								{
 									pTiles->m_pTiles[i].m_Index = 0;
+									ContainsUnused = true;
+								}
 							}
 						}
 						DataFile.UnloadData(pTilemapItem->m_Tune);
@@ -1047,6 +1082,14 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const std::functio
 			}
 		}
 	}
+
+	if(ContainsUnused && !m_pEditor->m_ReloadMapWithUnused)
+	{
+		m_pEditor->m_PopupEventType = CEditor::POPEVENT_RELOAD_WITH_UNUSED;
+		m_pEditor->m_PopupEventActivated = true;
+	}
+	else if(m_pEditor->m_ReloadMapWithUnused)
+		m_pEditor->m_ReloadMapWithUnused = false;
 
 	PerformSanityChecks(ErrorHandler);
 
