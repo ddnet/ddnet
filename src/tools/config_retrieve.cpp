@@ -1,6 +1,6 @@
-#include <base/dbg.h>
 #include <base/fs.h>
 #include <base/io.h>
+#include <base/log.h>
 #include <base/str.h>
 
 #include <engine/shared/datafile.h>
@@ -8,12 +8,14 @@
 
 #include <game/mapitems.h>
 
+static constexpr const char *const TOOL_NAME = "config_retrieve";
+
 static void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 {
 	CDataFileReader Reader;
 	if(!Reader.Open(pStorage, pMapName, IStorage::TYPE_ABSOLUTE))
 	{
-		dbg_msg("config_retrieve", "error opening map '%s'", pMapName);
+		log_error(TOOL_NAME, "Failed to open map '%s' for reading", pMapName);
 		return;
 	}
 	bool ConfigFound = false;
@@ -36,7 +38,7 @@ static void Process(IStorage *pStorage, const char *pMapName, const char *pConfi
 		IOHANDLE Config = pStorage->OpenFile(pConfigName, IOFLAG_WRITE, IStorage::TYPE_ABSOLUTE);
 		if(!Config)
 		{
-			dbg_msg("config_retrieve", "error opening config for writing '%s'", pConfigName);
+			log_error(TOOL_NAME, "Failed to open config '%s' for writing", pConfigName);
 			Reader.Close();
 			return;
 		}

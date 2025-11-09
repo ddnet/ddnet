@@ -1,4 +1,3 @@
-#include <base/dbg.h>
 #include <base/fs.h>
 #include <base/logger.h>
 #include <base/mem.h>
@@ -14,6 +13,8 @@
 #include <algorithm>
 #include <cstdint>
 #include <vector>
+
+static constexpr const char *const TOOL_NAME = "map_optimize";
 
 static void ClearTransparentPixels(uint8_t *pImg, int Width, int Height)
 {
@@ -88,12 +89,12 @@ int main(int argc, const char **argv)
 	std::unique_ptr<IStorage> pStorage = std::unique_ptr<IStorage>(CreateStorage(IStorage::EInitializationType::BASIC, argc, argv));
 	if(!pStorage)
 	{
-		log_error("map_optimize", "Error creating basic storage");
+		log_error(TOOL_NAME, "Error creating basic storage");
 		return -1;
 	}
 	if(argc <= 1 || argc > 3)
 	{
-		dbg_msg("map_optimize", "Usage: map_optimize <source map filepath> [<dest map filepath>]");
+		log_error(TOOL_NAME, "Usage: %s <source map filepath> [<dest map filepath>]", argc > 0 ? argv[0] : TOOL_NAME);
 		return -1;
 	}
 
@@ -123,14 +124,14 @@ int main(int argc, const char **argv)
 	CDataFileReader Reader;
 	if(!Reader.Open(pStorage.get(), argv[1], IStorage::TYPE_ABSOLUTE))
 	{
-		dbg_msg("map_optimize", "Failed to open source file.");
+		log_error(TOOL_NAME, "Failed to open source file '%s'.", argv[1]);
 		return -1;
 	}
 
 	CDataFileWriter Writer;
 	if(!Writer.Open(pStorage.get(), aFilename, IStorage::TYPE_ABSOLUTE))
 	{
-		dbg_msg("map_optimize", "Failed to open target file.");
+		log_error(TOOL_NAME, "Failed to open target file '%s'.", aFilename);
 		return -1;
 	}
 

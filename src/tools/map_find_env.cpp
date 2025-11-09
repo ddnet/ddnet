@@ -1,4 +1,3 @@
-#include <base/dbg.h>
 #include <base/logger.h>
 #include <base/os.h>
 #include <base/str.h>
@@ -7,6 +6,8 @@
 #include <engine/storage.h>
 
 #include <game/mapitems.h>
+
+static constexpr const char *const TOOL_NAME = "map_find_env";
 
 class CEnvelopedQuad
 {
@@ -22,13 +23,13 @@ static bool OpenMap(const char pMapName[64], CDataFileReader &InputMap)
 	std::unique_ptr<IStorage> pStorage = CreateLocalStorage();
 	if(!pStorage)
 	{
-		log_error("map_find_env", "Error creating local storage");
+		log_error(TOOL_NAME, "Error creating local storage");
 		return false;
 	}
 
 	if(!InputMap.Open(pStorage.get(), pMapName, IStorage::TYPE_ABSOLUTE))
 	{
-		dbg_msg("map_find_env", "ERROR: unable to open map '%s'", pMapName);
+		log_error(TOOL_NAME, "Unable to open map '%s'", pMapName);
 		return false;
 	}
 	return true;
@@ -82,13 +83,13 @@ static void PrintEnvelopedQuads(const CEnvelopedQuad pEnvQuads[1024], const int 
 {
 	if(!QuadsCounter)
 	{
-		dbg_msg("map_find_env", "No quads found with env number #%d", EnvId + 1);
+		log_info(TOOL_NAME, "No quads found with env number #%d", EnvId + 1);
 		return;
 	}
 
-	dbg_msg("map_find_env", "Found %d quads with env number #%d:", QuadsCounter, EnvId + 1);
+	log_info(TOOL_NAME, "Found %d quads with env number #%d:", QuadsCounter, EnvId + 1);
 	for(int i = 0; i < QuadsCounter; i++)
-		dbg_msg("map_find_env", "%*d. Group: #%d - Layer: #%d - Pos: %d,%d", (int)(std::log10(absolute(QuadsCounter))) + 1, i + 1, pEnvQuads[i].m_GroupId, pEnvQuads[i].m_LayerId, pEnvQuads[i].m_TilePosX, pEnvQuads[i].m_TilePosY);
+		log_info(TOOL_NAME, "%*d. Group: #%d - Layer: #%d - Pos: %d,%d", (int)(std::log10(absolute(QuadsCounter))) + 1, i + 1, pEnvQuads[i].m_GroupId, pEnvQuads[i].m_LayerId, pEnvQuads[i].m_TilePosX, pEnvQuads[i].m_TilePosY);
 }
 
 static bool FindEnv(const char aFilename[64], const int EnvId)
@@ -131,9 +132,9 @@ int main(int argc, const char **argv)
 
 	if(argc < 3)
 	{
-		dbg_msg("map_find_env", "Invalid arguments");
-		dbg_msg("map_find_env", "Usage: %s <input_map> <env_number>", argv[0]);
-		dbg_msg("map_find_env", "Note: returned quads positions are relative to their layers");
+		log_error(TOOL_NAME, "Invalid arguments");
+		log_error(TOOL_NAME, "Usage: %s <input_map> <env_number>", argc > 0 ? argv[0] : TOOL_NAME);
+		log_error(TOOL_NAME, "Note: returned quads positions are relative to their layers");
 
 		return -1;
 	}
@@ -141,7 +142,7 @@ int main(int argc, const char **argv)
 	char aFilename[64];
 	str_copy(aFilename, argv[1]);
 	int EnvId = str_toint(argv[2]) - 1;
-	dbg_msg("map_find_env", "input_map='%s'; env_number='#%d';", aFilename, EnvId + 1);
+	log_info(TOOL_NAME, "input_map='%s'; env_number='#%d';", aFilename, EnvId + 1);
 
 	return FindEnv(aFilename, EnvId);
 }

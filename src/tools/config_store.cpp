@@ -12,12 +12,14 @@
 #include <algorithm>
 #include <vector>
 
+static constexpr const char *const TOOL_NAME = "config_store";
+
 static void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 {
 	CLineReader LineReader;
 	if(!LineReader.OpenFile(pStorage->OpenFile(pConfigName, IOFLAG_READ, IStorage::TYPE_ABSOLUTE)))
 	{
-		log_error("config_store", "Failed to import settings from '%s': could not open config for reading", pConfigName);
+		log_error(TOOL_NAME, "Failed to import settings from '%s': failed to open config for reading", pConfigName);
 		return;
 	}
 
@@ -32,7 +34,7 @@ static void Process(IStorage *pStorage, const char *pMapName, const char *pConfi
 	CDataFileReader Reader;
 	if(!Reader.Open(pStorage, pMapName, IStorage::TYPE_ABSOLUTE))
 	{
-		log_error("config_store", "Failed to import settings from '%s': failed to open map '%s' for reading", pConfigName, pMapName);
+		log_error(TOOL_NAME, "Failed to import settings from '%s': failed to open map '%s' for reading", pConfigName, pMapName);
 		return;
 	}
 
@@ -71,7 +73,7 @@ static void Process(IStorage *pStorage, const char *pMapName, const char *pConfi
 					int DataSize = Reader.GetDataSize(SettingsIndex);
 					if(DataSize == TotalLength && mem_comp(pSettings, pMapSettings, DataSize) == 0)
 					{
-						log_info("config_store", "Configs coincide, not updating map");
+						log_info(TOOL_NAME, "Configs coincide, not updating map");
 						free(pSettings);
 						return;
 					}
@@ -125,10 +127,10 @@ static void Process(IStorage *pStorage, const char *pMapName, const char *pConfi
 	Reader.Close();
 	if(!Writer.Open(pStorage, pMapName))
 	{
-		log_error("config_store", "Failed to import settings from '%s': failed to open map '%s' for writing", pConfigName, pMapName);
+		log_error(TOOL_NAME, "Failed to import settings from '%s': failed to open map '%s' for writing", pConfigName, pMapName);
 		return;
 	}
 	Writer.Finish();
-	log_info("config_store", "Imported settings from '%s' into '%s'", pConfigName, pMapName);
+	log_info(TOOL_NAME, "Imported settings from '%s' into '%s'", pConfigName, pMapName);
 }
 #include "config_common.h"

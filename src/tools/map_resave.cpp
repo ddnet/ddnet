@@ -7,7 +7,7 @@
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
 
-static const char *TOOL_NAME = "map_resave";
+static constexpr const char *const TOOL_NAME = "map_resave";
 
 static int ResaveMap(const char *pSourceMap, const char *pDestinationMap, IStorage *pStorage)
 {
@@ -64,7 +64,7 @@ int main(int argc, const char **argv)
 
 	if(argc != 3)
 	{
-		log_error(TOOL_NAME, "Usage: %s <source map> <destination map>", TOOL_NAME);
+		log_error(TOOL_NAME, "Usage: %s <source map> <destination map>", argc > 0 ? argv[0] : TOOL_NAME);
 		return -1;
 	}
 

@@ -12,19 +12,21 @@
 
 #include <game/mapitems.h>
 
+static constexpr const char *const TOOL_NAME = "map_extract";
+
 static void PrintMapInfo(CDataFileReader &Reader)
 {
 	const CMapItemInfo *pInfo = static_cast<CMapItemInfo *>(Reader.FindItem(MAPITEMTYPE_INFO, 0));
 	if(pInfo)
 	{
 		const char *pAuthor = Reader.GetDataString(pInfo->m_Author);
-		log_info("map_extract", "author:  %s", pAuthor == nullptr ? "(error)" : pAuthor);
+		log_info(TOOL_NAME, "author:  %s", pAuthor == nullptr ? "(error)" : pAuthor);
 		const char *pMapVersion = Reader.GetDataString(pInfo->m_MapVersion);
-		log_info("map_extract", "version: %s", pMapVersion == nullptr ? "(error)" : pMapVersion);
+		log_info(TOOL_NAME, "version: %s", pMapVersion == nullptr ? "(error)" : pMapVersion);
 		const char *pCredits = Reader.GetDataString(pInfo->m_Credits);
-		log_info("map_extract", "credits: %s", pCredits == nullptr ? "(error)" : pCredits);
+		log_info(TOOL_NAME, "credits: %s", pCredits == nullptr ? "(error)" : pCredits);
 		const char *pLicense = Reader.GetDataString(pInfo->m_License);
-		log_info("map_extract", "license: %s", pLicense == nullptr ? "(error)" : pLicense);
+		log_info(TOOL_NAME, "license: %s", pLicense == nullptr ? "(error)" : pLicense);
 	}
 }
 
@@ -41,7 +43,7 @@ static void ExtractMapImages(CDataFileReader &Reader, const char *pPathSave)
 		const char *pName = Reader.GetDataString(pItem->m_ImageName);
 		if(pName == nullptr || pName[0] == '\0')
 		{
-			log_error("map_extract", "failed to load name of image %d", i);
+			log_error(TOOL_NAME, "failed to load name of image %d", i);
 			continue;
 		}
 
@@ -51,13 +53,13 @@ static void ExtractMapImages(CDataFileReader &Reader, const char *pPathSave)
 
 		if(pItem->m_Version >= 2 && pItem->m_MustBe1 != 1)
 		{
-			log_error("map_extract", "ignoring image '%s' with unknown format %d", aBuf, pItem->m_MustBe1);
+			log_error(TOOL_NAME, "ignoring image '%s' with unknown format %d", aBuf, pItem->m_MustBe1);
 			continue;
 		}
 
 		if(pItem->m_Width <= 0 || pItem->m_Height <= 0)
 		{
-			log_error("map_extract", "ignoring image '%s' with invalid dimensions %dx%d", aBuf, pItem->m_Width, pItem->m_Height);
+			log_error(TOOL_NAME, "ignoring image '%s' with invalid dimensions %dx%d", aBuf, pItem->m_Width, pItem->m_Height);
 			continue;
 		}
 
@@ -67,10 +69,10 @@ static void ExtractMapImages(CDataFileReader &Reader, const char *pPathSave)
 		Image.m_Format = CImageInfo::FORMAT_RGBA;
 		Image.m_pData = static_cast<uint8_t *>(Reader.GetData(pItem->m_ImageData));
 
-		log_info("map_extract", "writing image: %s (%dx%d)", aBuf, pItem->m_Width, pItem->m_Height);
+		log_info(TOOL_NAME, "writing image: %s (%dx%d)", aBuf, pItem->m_Width, pItem->m_Height);
 		if(!CImageLoader::SavePng(io_open(aBuf, IOFLAG_WRITE), aBuf, Image))
 		{
-			log_error("map_extract", "failed to write image file. filename='%s'", aBuf);
+			log_error(TOOL_NAME, "failed to write image file. filename='%s'", aBuf);
 		}
 		Reader.UnloadData(pItem->m_ImageData);
 	}
@@ -89,7 +91,7 @@ static void ExtractMapSounds(CDataFileReader &Reader, const char *pPathSave)
 		const char *pName = Reader.GetDataString(pItem->m_SoundName);
 		if(pName == nullptr || pName[0] == '\0')
 		{
-			log_error("map_extract", "failed to load name of sound %d", i);
+			log_error(TOOL_NAME, "failed to load name of sound %d", i);
 			continue;
 		}
 
@@ -101,14 +103,14 @@ static void ExtractMapSounds(CDataFileReader &Reader, const char *pPathSave)
 		IOHANDLE Opus = io_open(aBuf, IOFLAG_WRITE);
 		if(Opus)
 		{
-			log_info("map_extract", "writing sound: %s (%d B)", aBuf, SoundDataSize);
+			log_info(TOOL_NAME, "writing sound: %s (%d B)", aBuf, SoundDataSize);
 			io_write(Opus, Reader.GetData(pItem->m_SoundData), SoundDataSize);
 			io_close(Opus);
 			Reader.UnloadData(pItem->m_SoundData);
 		}
 		else
 		{
-			log_error("map_extract", "failed to open sound file for writing. filename='%s'", aBuf);
+			log_error(TOOL_NAME, "failed to open sound file for writing. filename='%s'", aBuf);
 		}
 	}
 }
@@ -118,18 +120,18 @@ static bool ExtractMap(IStorage *pStorage, const char *pMapName, const char *pPa
 	CDataFileReader Reader;
 	if(!Reader.Open(pStorage, pMapName, IStorage::TYPE_ABSOLUTE))
 	{
-		log_error("map_extract", "error opening map '%s'", pMapName);
+		log_error(TOOL_NAME, "error opening map '%s'", pMapName);
 		return false;
 	}
 
 	const CMapItemVersion *pVersion = static_cast<CMapItemVersion *>(Reader.FindItem(MAPITEMTYPE_VERSION, 0));
 	if(pVersion == nullptr || pVersion->m_Version != 1)
 	{
-		log_error("map_extract", "unsupported map version '%s'", pMapName);
+		log_error(TOOL_NAME, "unsupported map version '%s'", pMapName);
 		return false;
 	}
 
-	log_info("map_extract", "Make sure you have the permission to use these images and sounds in your own maps");
+	log_info(TOOL_NAME, "Make sure you have the permission to use these images and sounds in your own maps");
 
 	PrintMapInfo(Reader);
 	ExtractMapImages(Reader, pPathSave);
@@ -147,7 +149,7 @@ int main(int argc, const char *argv[])
 	std::unique_ptr<IStorage> pStorage = CreateLocalStorage();
 	if(!pStorage)
 	{
-		log_error("map_extract", "Error creating local storage");
+		log_error(TOOL_NAME, "Error creating local storage");
 		return -1;
 	}
 
@@ -162,13 +164,13 @@ int main(int argc, const char *argv[])
 	}
 	else
 	{
-		log_error("map_extract", "usage: %s <map> [directory]", argv[0]);
+		log_error(TOOL_NAME, "Usage: %s <map> [directory]", argc > 0 ? argv[0] : TOOL_NAME);
 		return -1;
 	}
 
 	if(!fs_is_dir(pDir))
 	{
-		log_error("map_extract", "directory '%s' does not exist", pDir);
+		log_error(TOOL_NAME, "directory '%s' does not exist", pDir);
 		return -1;
 	}
 

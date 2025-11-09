@@ -1,7 +1,6 @@
 /* (c) DDNet developers. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.  */
 
-#include <base/dbg.h>
 #include <base/fs.h>
 #include <base/io.h>
 #include <base/logger.h>
@@ -16,11 +15,7 @@
 
 #include <utility>
 
-/*
-	Usage: map_replace_image <source map filepath> <dest map filepath> <current image name> <new image filepath>
-	Notes: map filepath must be relative to user default teeworlds folder
-		new image filepath must be absolute or relative to the current position
-*/
+static constexpr const char *const TOOL_NAME = "map_replace_image";
 
 static CDataFileReader g_DataReader;
 
@@ -35,14 +30,14 @@ static void *ReplaceImageItem(int Index, CMapItemImage *pImgItem, const char *pI
 	const char *pName = g_DataReader.GetDataString(pImgItem->m_ImageName);
 	if(pName == nullptr || pName[0] == '\0')
 	{
-		dbg_msg("map_replace_image", "failed to load name of image %d", Index);
+		log_error(TOOL_NAME, "failed to load name of image %d", Index);
 		return pImgItem;
 	}
 
 	if(str_comp(pImgName, pName) != 0)
 		return pImgItem;
 
-	dbg_msg("map_replace_image", "found image '%s'", pImgName);
+	log_info(TOOL_NAME, "found image '%s'", pImgName);
 
 	CImageInfo ImgInfo;
 	int PngliteIncompatible;
@@ -51,7 +46,7 @@ static void *ReplaceImageItem(int Index, CMapItemImage *pImgItem, const char *pI
 
 	if(ImgInfo.m_Format != CImageInfo::FORMAT_RGBA)
 	{
-		dbg_msg("map_replace_image", "ERROR: only RGBA PNG images are supported");
+		log_error(TOOL_NAME, "only RGBA PNG images are supported");
 		ImgInfo.Free();
 		return nullptr;
 	}
@@ -76,17 +71,17 @@ int main(int argc, const char **argv)
 
 	if(argc != 5)
 	{
-		dbg_msg("map_replace_image", "Invalid arguments");
-		dbg_msg("map_replace_image", "Usage: map_replace_image <source map filepath> <dest map filepath> <current image name> <new image filepath>");
-		dbg_msg("map_replace_image", "Notes: map filepath must be relative to user default teeworlds folder");
-		dbg_msg("map_replace_image", "       new image filepath must be absolute or relative to the current position");
+		log_error(TOOL_NAME, "Invalid arguments");
+		log_error(TOOL_NAME, "Usage: %s <source map filepath> <dest map filepath> <current image name> <new image filepath>", argc > 0 ? argv[0] : TOOL_NAME);
+		log_error(TOOL_NAME, "Notes: map filepath must be relative to user default teeworlds folder");
+		log_error(TOOL_NAME, "       new image filepath must be absolute or relative to the current position");
 		return -1;
 	}
 
 	std::unique_ptr<IStorage> pStorage = std::unique_ptr<IStorage>(CreateStorage(IStorage::EInitializationType::BASIC, argc, argv));
 	if(!pStorage)
 	{
-		log_error("map_replace_image", "Error creating basic storage");
+		log_error(TOOL_NAME, "Error creating basic storage");
 		return -1;
 	}
 
@@ -97,14 +92,14 @@ int main(int argc, const char **argv)
 
 	if(!g_DataReader.Open(pStorage.get(), pSourceFilename, IStorage::TYPE_ALL))
 	{
-		dbg_msg("map_replace_image", "failed to open source map. filename='%s'", pSourceFilename);
+		log_error(TOOL_NAME, "failed to open source map. filename='%s'", pSourceFilename);
 		return -1;
 	}
 
 	CDataFileWriter Writer;
 	if(!Writer.Open(pStorage.get(), pDestFilename))
 	{
-		dbg_msg("map_replace_image", "failed to open destination map. filename='%s'", pDestFilename);
+		log_error(TOOL_NAME, "failed to open destination map. filename='%s'", pDestFilename);
 		return -1;
 	}
 
@@ -138,7 +133,7 @@ int main(int argc, const char **argv)
 
 	if(g_NewDataId == -1)
 	{
-		dbg_msg("map_replace_image", "image '%s' not found on source map '%s'.", pImageName, pSourceFilename);
+		log_error(TOOL_NAME, "image '%s' not found on source map '%s'.", pImageName, pSourceFilename);
 		return -1;
 	}
 
@@ -169,6 +164,6 @@ int main(int argc, const char **argv)
 	g_DataReader.Close();
 	Writer.Finish();
 
-	dbg_msg("map_replace_image", "image '%s' replaced", pImageName);
+	log_info(TOOL_NAME, "image '%s' replaced", pImageName);
 	return 0;
 }

@@ -1,4 +1,3 @@
-#include <base/dbg.h>
 #include <base/logger.h>
 #include <base/mem.h>
 #include <base/os.h>
@@ -8,6 +7,8 @@
 #include <engine/storage.h>
 
 #include <game/mapitems.h>
+
+static constexpr const char *const TOOL_NAME = "map_replace_area";
 
 // global new layers data (set by ReplaceAreaTiles and ReplaceAreaQuads)
 static void *g_apNewData[1024];
@@ -67,9 +68,9 @@ int main(int argc, const char *argv[])
 
 	if(argc != 10)
 	{
-		dbg_msg("map_replace_area", "Invalid arguments");
-		dbg_msg("map_replace_area", "Usage: %s <from_map> <from_x> <from_y> <to_map> <to_x> <to_y> <width> <height> <output_map>", argv[0]);
-		dbg_msg("map_replace_area", "Note: use game layer tiles as a reference for both coordinates and sizes");
+		log_error(TOOL_NAME, "Invalid arguments");
+		log_error(TOOL_NAME, "Usage: %s <from_map> <from_x> <from_y> <to_map> <to_x> <to_y> <width> <height> <output_map>", argc > 0 ? argv[0] : TOOL_NAME);
+		log_error(TOOL_NAME, "Note: use game layer tiles as a reference for both coordinates and sizes");
 
 		return -1;
 	}
@@ -89,14 +90,14 @@ int main(int argc, const char *argv[])
 		aaaGameAreas[i][1][1] = aaaGameAreas[i][1][0] + str_tofloat(argv[8]) * 32; //y + height
 	}
 
-	dbg_msg("map_replace_area", "from_map='%s'; to_map='%s'; from_area='%fx,%fy'; to_area='%fx,%fy'; area_width='%fpx'; area_height='%fpx'; output_map='%s'",
+	log_info(TOOL_NAME, "from_map='%s'; to_map='%s'; from_area='%fx,%fy'; to_area='%fx,%fy'; area_width='%fpx'; area_height='%fpx'; output_map='%s'",
 		aaMapNames[0], aaMapNames[1], aaaGameAreas[0][0][0], aaaGameAreas[0][1][0], aaaGameAreas[1][0][0], aaaGameAreas[1][1][0],
 		aaaGameAreas[0][0][1] - aaaGameAreas[0][0][0], aaaGameAreas[0][1][1] - aaaGameAreas[0][1][0], aaMapNames[2]);
 
 	std::unique_ptr<IStorage> pStorage = CreateLocalStorage();
 	if(!pStorage)
 	{
-		log_error("map_replace_area", "Error creating local storage");
+		log_error(TOOL_NAME, "Error creating local storage");
 		return -1;
 	}
 
@@ -154,14 +155,14 @@ bool OpenMaps(IStorage *pStorage, const char aaMapNames[3][64], CDataFileReader 
 	{
 		if(!aInputMaps[i].Open(pStorage, aaMapNames[i], IStorage::TYPE_ABSOLUTE))
 		{
-			dbg_msg("map_replace_area", "ERROR: unable to open map '%s'", aaMapNames[i]);
+			log_error(TOOL_NAME, "unable to open map '%s'", aaMapNames[i]);
 			return false;
 		}
 	}
 
 	if(!OutputMap.Open(pStorage, aaMapNames[2], IStorage::TYPE_ABSOLUTE))
 	{
-		dbg_msg("map_replace_area", "ERROR: unable to open map '%s'", aaMapNames[2]);
+		log_error(TOOL_NAME, "unable to open map '%s'", aaMapNames[2]);
 		return false;
 	}
 
@@ -207,9 +208,9 @@ bool CompareLayers(const char aaMapNames[3][64], CDataFileReader aInputMaps[2])
 
 	if(aNum[0] != aNum[1])
 	{
-		dbg_msg("map_replace_area", "ERROR: different layers quantity");
+		log_error(TOOL_NAME, "different layers quantity");
 		for(int i = 0; i < 2; i++)
-			dbg_msg("map_replace_area", " \"%s\": %d layers", aaMapNames[i], aNum[i]);
+			log_error(TOOL_NAME, " \"%s\": %d layers", aaMapNames[i], aNum[i]);
 		return false;
 	}
 
@@ -221,9 +222,9 @@ bool CompareLayers(const char aaMapNames[3][64], CDataFileReader aInputMaps[2])
 
 		if(apItem[0]->m_Type != apItem[1]->m_Type)
 		{
-			dbg_msg("map_replace_area", "ERROR: different types on layer #%d", i);
+			log_error(TOOL_NAME, "different types on layer #%d", i);
 			for(int j = 0; j < 2; j++)
-				dbg_msg("map_replace_area", " \"%s\": %s", aaMapNames[j], apItem[j]->m_Type == LAYERTYPE_TILES ? "tiles layer" : "quad layer");
+				log_error(TOOL_NAME, " \"%s\": %s", aaMapNames[j], apItem[j]->m_Type == LAYERTYPE_TILES ? "tiles layer" : "quad layer");
 			return false;
 		}
 	}
@@ -246,7 +247,7 @@ void CompareGroups(const char aaMapNames[3][64], CDataFileReader aInputMaps[2])
 		bool SameConfig = apItem[0]->m_ParallaxX == apItem[1]->m_ParallaxX && apItem[0]->m_ParallaxY == apItem[1]->m_ParallaxY && apItem[0]->m_OffsetX == apItem[1]->m_OffsetX && apItem[0]->m_OffsetY == apItem[1]->m_OffsetY && apItem[0]->m_UseClipping == apItem[1]->m_UseClipping && apItem[0]->m_ClipX == apItem[1]->m_ClipX && apItem[0]->m_ClipY == apItem[1]->m_ClipY && apItem[0]->m_ClipW == apItem[1]->m_ClipW && apItem[0]->m_ClipH == apItem[1]->m_ClipH;
 
 		if(!SameConfig)
-			dbg_msg("map_replace_area", "WARNING: different configuration on layergroup #%d, this might lead to unexpected results", i);
+			log_warn(TOOL_NAME, "different configuration on layergroup #%d, this might lead to unexpected results", i);
 	}
 }
 

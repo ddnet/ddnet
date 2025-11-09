@@ -34,7 +34,7 @@ struct CDataContainer;
 
 CDataContainer *g_pData = nullptr; // NOLINT(misc-use-internal-linkage)
 
-static constexpr const char *TOOL_NAME = "map_render";
+static constexpr const char *const TOOL_NAME = "map_render";
 
 namespace MapRenderer
 {
@@ -383,7 +383,7 @@ int main(int argc, const char **argv)
 
 	if(InputMap.empty() || InvalidUsage)
 	{
-		PrintUsage(argv[0]);
+		PrintUsage(argc > 0 ? argv[0] : TOOL_NAME);
 		return 1;
 	}
 
