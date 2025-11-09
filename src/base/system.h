@@ -2130,6 +2130,7 @@ public:
 	{
 		cmdline_free(m_Argc, m_ppArgv);
 	}
+	CCmdlineFix(const CCmdlineFix &) = delete;
 };
 
 #if defined(CONF_FAMILY_WINDOWS)
@@ -2178,6 +2179,7 @@ class CWindowsComLifecycle
 public:
 	CWindowsComLifecycle(bool HasWindow);
 	~CWindowsComLifecycle();
+	CWindowsComLifecycle(const CWindowsComLifecycle &) = delete;
 };
 
 /**

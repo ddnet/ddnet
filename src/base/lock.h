@@ -130,6 +130,8 @@ public:
 		m_Lock.unlock();
 	}
 
+	CLockScope(const CLockScope &) = delete;
+
 private:
 	CLock &m_Lock;
 };
