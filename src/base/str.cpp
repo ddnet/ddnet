@@ -1074,3 +1074,179 @@ int str_utf8_rewind(const char *str, int cursor)
 	}
 	return cursor;
 }
+
+const char *str_utf8_find_nocase(const char *haystack, const char *needle, const char **end)
+{
+	while(*haystack) /* native implementation */
+	{
+		const char *a = haystack;
+		const char *b = needle;
+		const char *a_next = a;
+		const char *b_next = b;
+		while(*a && *b && str_utf8_tolower_codepoint(str_utf8_decode(&a_next)) == str_utf8_tolower_codepoint(str_utf8_decode(&b_next)))
+		{
+			a = a_next;
+			b = b_next;
+		}
+		if(!(*b))
+		{
+			if(end != nullptr)
+				*end = a_next;
+			return haystack;
+		}
+		str_utf8_decode(&haystack);
+	}
+
+	if(end != nullptr)
+		*end = nullptr;
+	return nullptr;
+}
+
+int str_utf8_comp_nocase(const char *a, const char *b)
+{
+	int code_a;
+	int code_b;
+
+	while(*a && *b)
+	{
+		code_a = str_utf8_tolower_codepoint(str_utf8_decode(&a));
+		code_b = str_utf8_tolower_codepoint(str_utf8_decode(&b));
+
+		if(code_a != code_b)
+			return code_a - code_b;
+	}
+	return (unsigned char)*a - (unsigned char)*b;
+}
+
+int str_utf8_comp_nocase_num(const char *a, const char *b, int num)
+{
+	int code_a;
+	int code_b;
+	const char *old_a = a;
+
+	if(num <= 0)
+		return 0;
+
+	while(*a && *b)
+	{
+		code_a = str_utf8_tolower_codepoint(str_utf8_decode(&a));
+		code_b = str_utf8_tolower_codepoint(str_utf8_decode(&b));
+
+		if(code_a != code_b)
+			return code_a - code_b;
+
+		if(a - old_a >= num)
+			return 0;
+	}
+
+	return (unsigned char)*a - (unsigned char)*b;
+}
+
+const char *str_utf8_skip_whitespaces(const char *str)
+{
+	const char *str_old;
+	int code;
+
+	while(*str)
+	{
+		str_old = str;
+		code = str_utf8_decode(&str);
+
+		// check if unicode is not empty
+		if(!str_utf8_isspace(code))
+		{
+			return str_old;
+		}
+	}
+
+	return str;
+}
+
+int str_utf8_forward(const char *str, int cursor)
+{
+	const char *ptr = str + cursor;
+	if(str_utf8_decode(&ptr) == 0)
+	{
+		return cursor;
+	}
+	return ptr - str;
+}
+
+int str_utf8_check(const char *str)
+{
+	int codepoint;
+	while((codepoint = str_utf8_decode(&str)))
+	{
+		if(codepoint == -1)
+		{
+			return 0;
+		}
+	}
+	return 1;
+}
+
+void str_utf8_copy_num(char *dst, const char *src, int dst_size, int num)
+{
+	int new_cursor;
+	int cursor = 0;
+
+	while(src[cursor] && num > 0)
+	{
+		new_cursor = str_utf8_forward(src, cursor);
+		if(new_cursor >= dst_size) // reserve 1 byte for the null termination
+			break;
+		else
+			cursor = new_cursor;
+		--num;
+	}
+
+	str_copy(dst, src, cursor < dst_size ? cursor + 1 : dst_size);
+}
+
+void str_utf8_stats(const char *str, size_t max_size, size_t max_count, size_t *size, size_t *count)
+{
+	const char *cursor = str;
+	*size = 0;
+	*count = 0;
+	while(*size < max_size && *count < max_count)
+	{
+		if(str_utf8_decode(&cursor) == 0)
+		{
+			break;
+		}
+		if((size_t)(cursor - str) >= max_size)
+		{
+			break;
+		}
+		*size = cursor - str;
+		++(*count);
+	}
+}
+
+size_t str_utf8_offset_bytes_to_chars(const char *str, size_t byte_offset)
+{
+	size_t char_offset = 0;
+	size_t current_offset = 0;
+	while(current_offset < byte_offset)
+	{
+		const size_t prev_byte_offset = current_offset;
+		current_offset = str_utf8_forward(str, current_offset);
+		if(current_offset == prev_byte_offset)
+			break;
+		char_offset++;
+	}
+	return char_offset;
+}
+
+size_t str_utf8_offset_chars_to_bytes(const char *str, size_t char_offset)
+{
+	size_t byte_offset = 0;
+	for(size_t i = 0; i < char_offset; i++)
+	{
+		const size_t prev_byte_offset = byte_offset;
+		byte_offset = str_utf8_forward(str, byte_offset);
+		if(byte_offset == prev_byte_offset)
+			break;
+	}
+	return byte_offset;
+}
