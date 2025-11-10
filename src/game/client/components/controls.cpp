@@ -23,7 +23,7 @@ CControls::CControls()
 	std::fill(std::begin(m_aMousePos), std::end(m_aMousePos), vec2(0.0f, 0.0f));
 	std::fill(std::begin(m_aMousePosOnAction), std::end(m_aMousePosOnAction), vec2(0.0f, 0.0f));
 	std::fill(std::begin(m_aTargetPos), std::end(m_aTargetPos), vec2(0.0f, 0.0f));
-	std::fill(std::begin(m_aInputType), std::end(m_aInputType), EInputType::ABSOLUTE);
+	std::fill(std::begin(m_aMouseInputType), std::end(m_aMouseInputType), EMouseInputType::ABSOLUTE);
 }
 
 void CControls::OnReset()
@@ -199,15 +199,15 @@ int CControls::SnapInput(int *pData)
 	if(Client()->ServerCapAnyPlayerFlag() && GameClient()->m_Camera.CamType() == CCamera::CAMTYPE_SPEC)
 		m_aInputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_SPEC_CAM;
 
-	switch(m_aInputType[g_Config.m_ClDummy])
+	switch(m_aMouseInputType[g_Config.m_ClDummy])
 	{
-	case CControls::EInputType::AUTOMATED:
+	case CControls::EMouseInputType::AUTOMATED:
 		m_aInputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_INPUT_ABSOLUTE;
 		break;
-	case CControls::EInputType::ABSOLUTE:
+	case CControls::EMouseInputType::ABSOLUTE:
 		m_aInputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_INPUT_ABSOLUTE | PLAYERFLAG_INPUT_MANUAL;
 		break;
-	case CControls::EInputType::RELATIVE:
+	case CControls::EMouseInputType::RELATIVE:
 		m_aInputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_INPUT_MANUAL;
 		break;
 	}
@@ -387,7 +387,7 @@ bool CControls::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 		if(Input()->GetActiveJoystick()->Absolute(&AbsoluteDirection.x, &AbsoluteDirection.y))
 		{
 			m_aMousePos[g_Config.m_ClDummy] = AbsoluteDirection * GetMaxMouseDistance();
-			GameClient()->m_Controls.m_aInputType[g_Config.m_ClDummy] = CControls::EInputType::ABSOLUTE;
+			GameClient()->m_Controls.m_aMouseInputType[g_Config.m_ClDummy] = CControls::EMouseInputType::ABSOLUTE;
 		}
 		return true;
 	}
@@ -418,7 +418,7 @@ bool CControls::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 		Factor *= GameClient()->m_Camera.m_Zoom;
 
 	m_aMousePos[g_Config.m_ClDummy] += vec2(x, y) * Factor;
-	GameClient()->m_Controls.m_aInputType[g_Config.m_ClDummy] = CControls::EInputType::RELATIVE;
+	GameClient()->m_Controls.m_aMouseInputType[g_Config.m_ClDummy] = CControls::EMouseInputType::RELATIVE;
 	ClampMousePos();
 	return true;
 }
