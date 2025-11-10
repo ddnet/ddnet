@@ -2,10 +2,10 @@
 
 #include <game/mapitems.h>
 
-CEditorImage::CEditorImage(CEditor *pEditor) :
-	m_AutoMapper(pEditor)
+CEditorImage::CEditorImage(CEditorMap *pMap) :
+	CMapObject(pMap),
+	m_AutoMapper(pMap)
 {
-	OnInit(pEditor);
 	m_Texture.Invalidate();
 }
 
@@ -16,11 +16,10 @@ CEditorImage::~CEditorImage()
 	m_pData = nullptr;
 }
 
-void CEditorImage::OnInit(CEditor *pEditor)
+void CEditorImage::OnAttach(CEditorMap *pMap)
 {
-	CEditorComponent::OnInit(pEditor);
-	RegisterSubComponent(m_AutoMapper);
-	InitSubComponents();
+	CMapObject::OnAttach(pMap);
+	m_AutoMapper.OnAttach(pMap);
 }
 
 void CEditorImage::AnalyseTileFlags()

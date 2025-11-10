@@ -4165,7 +4165,7 @@ bool CEditor::AddImage(const char *pFilename, int StorageType, void *pUser)
 		return false;
 	}
 
-	std::shared_ptr<CEditorImage> pImg = std::make_shared<CEditorImage>(pEditor);
+	std::shared_ptr<CEditorImage> pImg = std::make_shared<CEditorImage>(&pEditor->m_Map);
 	pImg->m_Width = ImgInfo.m_Width;
 	pImg->m_Height = ImgInfo.m_Height;
 	pImg->m_Format = ImgInfo.m_Format;
@@ -4230,7 +4230,7 @@ bool CEditor::AddSound(const char *pFilename, int StorageType, void *pUser)
 	}
 
 	// add sound
-	std::shared_ptr<CEditorSound> pSound = std::make_shared<CEditorSound>(pEditor);
+	std::shared_ptr<CEditorSound> pSound = std::make_shared<CEditorSound>(&pEditor->m_Map);
 	pSound->m_SoundId = SoundId;
 	pSound->m_DataSize = DataSize;
 	pSound->m_pData = pData;
@@ -7530,16 +7530,15 @@ void CEditor::Init()
 	m_aCursorTextures[CURSOR_RESIZE_H] = Graphics()->LoadTexture("editor/cursor_resize.png", IStorage::TYPE_ALL);
 	m_aCursorTextures[CURSOR_RESIZE_V] = m_aCursorTextures[CURSOR_RESIZE_H];
 
-	m_pTilesetPicker = std::make_shared<CLayerTiles>(this, 16, 16);
+	m_pTilesetPicker = std::make_shared<CLayerTiles>(&m_Map, 16, 16);
 	m_pTilesetPicker->MakePalette();
 	m_pTilesetPicker->m_Readonly = true;
 
-	m_pQuadsetPicker = std::make_shared<CLayerQuads>(this);
+	m_pQuadsetPicker = std::make_shared<CLayerQuads>(&m_Map);
 	m_pQuadsetPicker->NewQuad(0, 0, 64, 64);
 	m_pQuadsetPicker->m_Readonly = true;
 
-	m_pBrush = std::make_shared<CLayerGroup>();
-	m_pBrush->m_pMap = &m_Map;
+	m_pBrush = std::make_shared<CLayerGroup>(&m_Map);
 
 	Reset(false);
 }
@@ -7897,6 +7896,10 @@ void CEditor::OnRender()
 	Input()->Clear();
 
 	CLineInput::RenderCandidates();
+
+#if defined(CONF_DEBUG)
+	m_Map.CheckIntegrity();
+#endif
 }
 
 void CEditor::OnActivate()
@@ -8071,12 +8074,14 @@ bool CEditor::Append(const char *pFilename, int StorageType, bool IgnoreHistory)
 				dbg_msg("editor", "map already contains image %s but contents of appended image is different. Renaming to %s", (*MatchInCurrentMap)->m_aName, pNewImage->m_aName);
 
 				NewMap.ModifyImageIndex(s_ReplaceIndex(IndexToReplace, m_Map.m_vpImages.size()));
+				pNewImage->OnAttach(&m_Map);
 				m_Map.m_vpImages.push_back(pNewImage);
 			}
 		}
 		else
 		{
 			NewMap.ModifyImageIndex(s_ReplaceIndex(IndexToReplace, m_Map.m_vpImages.size()));
+			pNewImage->OnAttach(&m_Map);
 			m_Map.m_vpImages.push_back(pNewImage);
 		}
 	}
@@ -8095,7 +8100,10 @@ bool CEditor::Append(const char *pFilename, int StorageType, bool IgnoreHistory)
 
 	// transfer sounds
 	for(const auto &pSound : NewMap.m_vpSounds)
+	{
+		pSound->OnAttach(&m_Map);
 		m_Map.m_vpSounds.push_back(pSound);
+	}
 	NewMap.m_vpSounds.clear();
 
 	// transfer envelopes
@@ -8108,7 +8116,7 @@ bool CEditor::Append(const char *pFilename, int StorageType, bool IgnoreHistory)
 	{
 		if(pGroup != NewMap.m_pGameGroup)
 		{
-			pGroup->m_pMap = &m_Map;
+			pGroup->OnAttach(&m_Map);
 			m_Map.m_vpGroups.push_back(pGroup);
 		}
 	}
@@ -8134,6 +8142,8 @@ bool CEditor::Append(const char *pFilename, int StorageType, bool IgnoreHistory)
 
 	if(!IgnoreHistory)
 		m_EditorHistory.RecordAction(std::make_shared<CEditorActionAppendMap>(this, pFilename, Info, IndexMap));
+
+	m_Map.CheckIntegrity();
 
 	// all done \o/
 	return true;

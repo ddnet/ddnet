@@ -6,7 +6,7 @@
 class CLayerSounds : public CLayer
 {
 public:
-	explicit CLayerSounds(CEditor *pEditor);
+	explicit CLayerSounds(CEditorMap *pMap);
 	CLayerSounds(const CLayerSounds &Other);
 	~CLayerSounds() override;
 

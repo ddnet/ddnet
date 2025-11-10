@@ -2507,6 +2507,8 @@ if(CLIENT)
     layer_selector.h
     map_grid.cpp
     map_grid.h
+    map_object.cpp
+    map_object.h
     map_view.cpp
     map_view.h
     mapitems.h
@@ -2514,6 +2516,7 @@ if(CLIENT)
     mapitems/envelope.h
     mapitems/image.cpp
     mapitems/image.h
+    mapitems/layer.cpp
     mapitems/layer.h
     mapitems/layer_front.cpp
     mapitems/layer_front.h

@@ -5,8 +5,8 @@
 #include <game/editor/editor.h>
 #include <game/editor/editor_actions.h>
 
-CLayerGame::CLayerGame(CEditor *pEditor, int w, int h) :
-	CLayerTiles(pEditor, w, h)
+CLayerGame::CLayerGame(CEditorMap *pMap, int w, int h) :
+	CLayerTiles(pMap, w, h)
 {
 	str_copy(m_aName, "Game");
 	m_HasGame = true;
@@ -16,7 +16,7 @@ CLayerGame::~CLayerGame() = default;
 
 CTile CLayerGame::GetTile(int x, int y) const
 {
-	if(m_pEditor->m_Map.m_pFrontLayer && m_pEditor->m_Map.m_pFrontLayer->GetTile(x, y).m_Index == TILE_THROUGH_CUT)
+	if(Map()->m_pFrontLayer && Map()->m_pFrontLayer->GetTile(x, y).m_Index == TILE_THROUGH_CUT)
 	{
 		return CTile{TILE_THROUGH_CUT};
 	}
@@ -28,27 +28,27 @@ CTile CLayerGame::GetTile(int x, int y) const
 
 void CLayerGame::SetTile(int x, int y, CTile Tile)
 {
-	if(Tile.m_Index == TILE_THROUGH_CUT && m_pEditor->m_SelectEntitiesImage == "DDNet")
+	if(Tile.m_Index == TILE_THROUGH_CUT && Editor()->m_SelectEntitiesImage == "DDNet")
 	{
-		if(!m_pEditor->m_Map.m_pFrontLayer)
+		if(!Map()->m_pFrontLayer)
 		{
-			std::shared_ptr<CLayer> pLayerFront = std::make_shared<CLayerFront>(m_pEditor, m_Width, m_Height);
-			m_pEditor->m_Map.MakeFrontLayer(pLayerFront);
-			m_pEditor->m_Map.m_pGameGroup->AddLayer(pLayerFront);
-			int GameGroupIndex = std::find(m_pEditor->m_Map.m_vpGroups.begin(), m_pEditor->m_Map.m_vpGroups.end(), m_pEditor->m_Map.m_pGameGroup) - m_pEditor->m_Map.m_vpGroups.begin();
-			int LayerIndex = m_pEditor->m_Map.m_vpGroups[GameGroupIndex]->m_vpLayers.size() - 1;
-			m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(m_pEditor, GameGroupIndex, LayerIndex));
+			std::shared_ptr<CLayer> pLayerFront = std::make_shared<CLayerFront>(Map(), m_Width, m_Height);
+			Map()->MakeFrontLayer(pLayerFront);
+			Map()->m_pGameGroup->AddLayer(pLayerFront);
+			int GameGroupIndex = std::find(Map()->m_vpGroups.begin(), Map()->m_vpGroups.end(), Map()->m_pGameGroup) - Map()->m_vpGroups.begin();
+			int LayerIndex = Map()->m_vpGroups[GameGroupIndex]->m_vpLayers.size() - 1;
+			Editor()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(Editor(), GameGroupIndex, LayerIndex));
 		}
 		CLayerTiles::SetTile(x, y, CTile{TILE_NOHOOK});
-		m_pEditor->m_Map.m_pFrontLayer->CLayerTiles::SetTile(x, y, CTile{TILE_THROUGH_CUT}); // NOLINT(bugprone-parent-virtual-call)
+		Map()->m_pFrontLayer->CLayerTiles::SetTile(x, y, CTile{TILE_THROUGH_CUT}); // NOLINT(bugprone-parent-virtual-call)
 	}
 	else
 	{
-		if(m_pEditor->m_SelectEntitiesImage == "DDNet" && m_pEditor->m_Map.m_pFrontLayer && m_pEditor->m_Map.m_pFrontLayer->GetTile(x, y).m_Index == TILE_THROUGH_CUT)
+		if(Editor()->m_SelectEntitiesImage == "DDNet" && Map()->m_pFrontLayer && Map()->m_pFrontLayer->GetTile(x, y).m_Index == TILE_THROUGH_CUT)
 		{
-			m_pEditor->m_Map.m_pFrontLayer->CLayerTiles::SetTile(x, y, CTile{TILE_AIR}); // NOLINT(bugprone-parent-virtual-call)
+			Map()->m_pFrontLayer->CLayerTiles::SetTile(x, y, CTile{TILE_AIR}); // NOLINT(bugprone-parent-virtual-call)
 		}
-		if(m_pEditor->IsAllowPlaceUnusedTiles() || IsValidGameTile(Tile.m_Index))
+		if(Editor()->IsAllowPlaceUnusedTiles() || IsValidGameTile(Tile.m_Index))
 		{
 			CLayerTiles::SetTile(x, y, Tile);
 		}
@@ -71,7 +71,7 @@ bool CLayerGame::IsEmpty() const
 			{
 				continue;
 			}
-			if(m_pEditor->IsAllowPlaceUnusedTiles() || IsValidGameTile(Index))
+			if(Editor()->IsAllowPlaceUnusedTiles() || IsValidGameTile(Index))
 			{
 				return false;
 			}

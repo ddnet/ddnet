@@ -19,7 +19,7 @@ struct SSpeedupTileStateChange
 class CLayerSpeedup : public CLayerTiles
 {
 public:
-	CLayerSpeedup(CEditor *pEditor, int w, int h);
+	CLayerSpeedup(CEditorMap *pMap, int w, int h);
 	CLayerSpeedup(const CLayerSpeedup &Other);
 	~CLayerSpeedup() override;
 

@@ -2,8 +2,8 @@
 
 #include <game/editor/editor.h>
 
-CLayerTele::CLayerTele(CEditor *pEditor, int w, int h) :
-	CLayerTiles(pEditor, w, h)
+CLayerTele::CLayerTele(CEditorMap *pMap, int w, int h) :
+	CLayerTiles(pMap, w, h)
 {
 	str_copy(m_aName, "Tele");
 	m_HasTele = true;
@@ -48,14 +48,14 @@ void CLayerTele::Resize(int NewW, int NewH)
 	CLayerTiles::Resize(NewW, NewH);
 
 	// resize gamelayer too
-	if(m_pEditor->m_Map.m_pGameLayer->m_Width != NewW || m_pEditor->m_Map.m_pGameLayer->m_Height != NewH)
-		m_pEditor->m_Map.m_pGameLayer->Resize(NewW, NewH);
+	if(Map()->m_pGameLayer->m_Width != NewW || Map()->m_pGameLayer->m_Height != NewH)
+		Map()->m_pGameLayer->Resize(NewW, NewH);
 }
 
 void CLayerTele::Shift(EShiftDirection Direction)
 {
 	CLayerTiles::Shift(Direction);
-	ShiftImpl(m_pTeleTile, Direction, m_pEditor->m_ShiftBy);
+	ShiftImpl(m_pTeleTile, Direction, Editor()->m_ShiftBy);
 }
 
 bool CLayerTele::IsEmpty() const
@@ -69,7 +69,7 @@ bool CLayerTele::IsEmpty() const
 			{
 				continue;
 			}
-			if(m_pEditor->IsAllowPlaceUnusedTiles() || IsValidTeleTile(Index))
+			if(Editor()->IsAllowPlaceUnusedTiles() || IsValidTeleTile(Index))
 			{
 				return false;
 			}
@@ -86,10 +86,10 @@ void CLayerTele::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 	CLayerTele *pTeleLayer = static_cast<CLayerTele *>(pBrush);
 	int sx = ConvertX(WorldPos.x);
 	int sy = ConvertY(WorldPos.y);
-	if(str_comp(pTeleLayer->m_aFilename, m_pEditor->m_aFilename))
-		m_pEditor->m_TeleNumber = pTeleLayer->m_TeleNumber;
+	if(str_comp(pTeleLayer->m_aFilename, Editor()->m_aFilename))
+		Editor()->m_TeleNumber = pTeleLayer->m_TeleNumber;
 
-	bool Destructive = m_pEditor->m_BrushDrawDestructive || pTeleLayer->IsEmpty();
+	bool Destructive = Editor()->m_BrushDrawDestructive || pTeleLayer->IsEmpty();
 
 	for(int y = 0; y < pTeleLayer->m_Height; y++)
 		for(int x = 0; x < pTeleLayer->m_Width; x++)
@@ -111,7 +111,7 @@ void CLayerTele::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 				m_pTeleTile[TgtIndex].m_Type,
 				m_pTiles[TgtIndex].m_Index};
 
-			if((m_pEditor->IsAllowPlaceUnusedTiles() || IsValidTeleTile(pTeleLayer->m_pTiles[SrcIndex].m_Index)) && pTeleLayer->m_pTiles[SrcIndex].m_Index != TILE_AIR)
+			if((Editor()->IsAllowPlaceUnusedTiles() || IsValidTeleTile(pTeleLayer->m_pTiles[SrcIndex].m_Index)) && pTeleLayer->m_pTiles[SrcIndex].m_Index != TILE_AIR)
 			{
 				bool IsCheckpoint = IsTeleTileCheckpoint(pTeleLayer->m_pTiles[SrcIndex].m_Index);
 				if(!IsCheckpoint && !IsTeleTileNumberUsed(pTeleLayer->m_pTiles[SrcIndex].m_Index, false))
@@ -126,7 +126,7 @@ void CLayerTele::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 				}
 				else
 				{
-					if((!IsCheckpoint && !m_pEditor->m_TeleNumber) || (IsCheckpoint && !m_pEditor->m_TeleCheckpointNumber))
+					if((!IsCheckpoint && !Editor()->m_TeleNumber) || (IsCheckpoint && !Editor()->m_TeleCheckpointNumber))
 					{
 						m_pTeleTile[TgtIndex].m_Number = 0;
 						m_pTeleTile[TgtIndex].m_Type = 0;
@@ -142,7 +142,7 @@ void CLayerTele::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 					}
 					else
 					{
-						m_pTeleTile[TgtIndex].m_Number = IsCheckpoint ? m_pEditor->m_TeleCheckpointNumber : m_pEditor->m_TeleNumber;
+						m_pTeleTile[TgtIndex].m_Number = IsCheckpoint ? Editor()->m_TeleCheckpointNumber : Editor()->m_TeleNumber;
 					}
 				}
 
@@ -239,7 +239,7 @@ void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 
 	CLayerTele *pLt = static_cast<CLayerTele *>(pBrush);
 
-	bool Destructive = m_pEditor->m_BrushDrawDestructive || Empty || pLt->IsEmpty();
+	bool Destructive = Editor()->m_BrushDrawDestructive || Empty || pLt->IsEmpty();
 
 	for(int y = 0; y < h; y++)
 	{
@@ -262,7 +262,7 @@ void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 				m_pTeleTile[TgtIndex].m_Type,
 				m_pTiles[TgtIndex].m_Index};
 
-			if(Empty || (!m_pEditor->IsAllowPlaceUnusedTiles() && !IsValidTeleTile((pLt->m_pTiles[SrcIndex]).m_Index)))
+			if(Empty || (!Editor()->IsAllowPlaceUnusedTiles() && !IsValidTeleTile((pLt->m_pTiles[SrcIndex]).m_Index)))
 			{
 				m_pTiles[TgtIndex].m_Index = 0;
 				m_pTeleTile[TgtIndex].m_Type = 0;
@@ -285,10 +285,10 @@ void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 						// as tiles with number 0 would be ignored by previous versions.
 						m_pTeleTile[TgtIndex].m_Number = 255;
 					}
-					else if(!IsCheckpoint && ((pLt->m_pTeleTile[SrcIndex].m_Number == 0 && m_pEditor->m_TeleNumber) || m_pEditor->m_TeleNumber != pLt->m_TeleNumber))
-						m_pTeleTile[TgtIndex].m_Number = m_pEditor->m_TeleNumber;
-					else if(IsCheckpoint && ((pLt->m_pTeleTile[SrcIndex].m_Number == 0 && m_pEditor->m_TeleCheckpointNumber) || m_pEditor->m_TeleCheckpointNumber != pLt->m_TeleCheckpointNumber))
-						m_pTeleTile[TgtIndex].m_Number = m_pEditor->m_TeleCheckpointNumber;
+					else if(!IsCheckpoint && ((pLt->m_pTeleTile[SrcIndex].m_Number == 0 && Editor()->m_TeleNumber) || Editor()->m_TeleNumber != pLt->m_TeleNumber))
+						m_pTeleTile[TgtIndex].m_Number = Editor()->m_TeleNumber;
+					else if(IsCheckpoint && ((pLt->m_pTeleTile[SrcIndex].m_Number == 0 && Editor()->m_TeleCheckpointNumber) || Editor()->m_TeleCheckpointNumber != pLt->m_TeleCheckpointNumber))
+						m_pTeleTile[TgtIndex].m_Number = Editor()->m_TeleCheckpointNumber;
 					else
 						m_pTeleTile[TgtIndex].m_Number = pLt->m_pTeleTile[SrcIndex].m_Number;
 				}

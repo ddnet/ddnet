@@ -1,11 +1,11 @@
 #ifndef GAME_EDITOR_AUTO_MAP_H
 #define GAME_EDITOR_AUTO_MAP_H
 
-#include "component.h"
+#include <game/editor/map_object.h>
 
 #include <vector>
 
-class CAutoMapper : public CEditorComponent
+class CAutoMapper : public CMapObject
 {
 	class CIndexInfo
 	{
@@ -72,7 +72,7 @@ class CAutoMapper : public CEditorComponent
 	};
 
 public:
-	explicit CAutoMapper(CEditor *pEditor);
+	explicit CAutoMapper(CEditorMap *pMap);
 
 	void Load(const char *pTileName);
 	void Unload();

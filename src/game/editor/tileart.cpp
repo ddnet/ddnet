@@ -100,30 +100,30 @@ static std::vector<CImageInfo> ColorGroupsToImages(const std::vector<std::array<
 	return vImages;
 }
 
-static std::shared_ptr<CEditorImage> ImageInfoToEditorImage(CEditor *pEditor, const CImageInfo &Image, const char *pName)
+static std::shared_ptr<CEditorImage> ImageInfoToEditorImage(CEditorMap *pMap, const CImageInfo &Image, const char *pName)
 {
-	std::shared_ptr<CEditorImage> pEditorImage = std::make_shared<CEditorImage>(pEditor);
+	std::shared_ptr<CEditorImage> pEditorImage = std::make_shared<CEditorImage>(pMap);
 	pEditorImage->m_Width = Image.m_Width;
 	pEditorImage->m_Height = Image.m_Height;
 	pEditorImage->m_Format = Image.m_Format;
 	pEditorImage->m_pData = Image.m_pData;
 
-	int TextureLoadFlag = pEditor->Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
-	pEditorImage->m_Texture = pEditor->Graphics()->LoadTextureRaw(Image, TextureLoadFlag, pName);
+	int TextureLoadFlag = pMap->Editor()->Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+	pEditorImage->m_Texture = pMap->Editor()->Graphics()->LoadTextureRaw(Image, TextureLoadFlag, pName);
 	pEditorImage->m_External = 0;
 	str_copy(pEditorImage->m_aName, pName);
 
 	return pEditorImage;
 }
 
-static std::shared_ptr<CLayerTiles> AddLayerWithImage(CEditor *pEditor, const std::shared_ptr<CLayerGroup> &pGroup, int Width, int Height, const CImageInfo &Image, const char *pName)
+static std::shared_ptr<CLayerTiles> AddLayerWithImage(CEditorMap *pMap, const std::shared_ptr<CLayerGroup> &pGroup, int Width, int Height, const CImageInfo &Image, const char *pName)
 {
-	std::shared_ptr<CEditorImage> pEditorImage = ImageInfoToEditorImage(pEditor, Image, pName);
-	pEditor->m_Map.m_vpImages.push_back(pEditorImage);
+	std::shared_ptr<CEditorImage> pEditorImage = ImageInfoToEditorImage(pMap, Image, pName);
+	pMap->m_vpImages.push_back(pEditorImage);
 
-	std::shared_ptr<CLayerTiles> pLayer = std::make_shared<CLayerTiles>(pEditor, Width, Height);
+	std::shared_ptr<CLayerTiles> pLayer = std::make_shared<CLayerTiles>(pMap, Width, Height);
 	str_copy(pLayer->m_aName, pName);
-	pLayer->m_Image = pEditor->m_Map.m_vpImages.size() - 1;
+	pLayer->m_Image = pMap->m_vpImages.size() - 1;
 	pGroup->AddLayer(pLayer);
 
 	return pLayer;
@@ -155,7 +155,7 @@ void CEditor::AddTileart(bool IgnoreHistory)
 	for(size_t i = 0; i < vColorImages.size(); i++)
 	{
 		str_format(aImageName, sizeof(aImageName), "%s %" PRIzu, aTileArtFilename, i + 1);
-		std::shared_ptr<CLayerTiles> pLayer = AddLayerWithImage(this, pGroup, m_TileartImageInfo.m_Width, m_TileartImageInfo.m_Height, vColorImages[i], aImageName);
+		std::shared_ptr<CLayerTiles> pLayer = AddLayerWithImage(&m_Map, pGroup, m_TileartImageInfo.m_Width, m_TileartImageInfo.m_Height, vColorImages[i], aImageName);
 		SetTilelayerIndices(pLayer, vaColorGroups[i], m_TileartImageInfo);
 	}
 	auto IndexMap = m_Map.SortImages();

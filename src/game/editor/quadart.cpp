@@ -181,7 +181,7 @@ void CEditor::AddQuadArt(bool IgnoreHistory)
 	pGroup->m_ClipH = std::ceil(m_QuadArtImageInfo.m_Height * 1.f * m_QuadArtParameters.m_QuadPixelSize / m_QuadArtParameters.m_ImagePixelSize) + 2;
 	pGroup->m_ClipW = std::ceil(m_QuadArtImageInfo.m_Width * 1.f * m_QuadArtParameters.m_QuadPixelSize / m_QuadArtParameters.m_ImagePixelSize) + 2;
 
-	std::shared_ptr<CLayerQuads> pLayer = std::make_shared<CLayerQuads>(this);
+	std::shared_ptr<CLayerQuads> pLayer = std::make_shared<CLayerQuads>(&m_Map);
 	str_copy(pLayer->m_aName, aQuadArtName);
 	pGroup->AddLayer(pLayer);
 	pLayer->m_Flags |= LAYERFLAG_DETAIL;

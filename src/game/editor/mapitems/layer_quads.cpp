@@ -7,10 +7,9 @@
 #include <game/editor/editor.h>
 #include <game/editor/editor_actions.h>
 
-CLayerQuads::CLayerQuads(CEditor *pEditor) :
-	CLayer(pEditor)
+CLayerQuads::CLayerQuads(CEditorMap *pMap) :
+	CLayer(pMap, LAYERTYPE_QUADS)
 {
-	m_Type = LAYERTYPE_QUADS;
 	m_aName[0] = '\0';
 	m_Image = -1;
 }
@@ -27,18 +26,18 @@ CLayerQuads::~CLayerQuads() = default;
 void CLayerQuads::Render(bool QuadPicker)
 {
 	Graphics()->TextureClear();
-	if(m_Image >= 0 && (size_t)m_Image < m_pEditor->m_Map.m_vpImages.size())
-		Graphics()->TextureSet(m_pEditor->m_Map.m_vpImages[m_Image]->m_Texture);
+	if(m_Image >= 0 && (size_t)m_Image < Map()->m_vpImages.size())
+		Graphics()->TextureSet(Map()->m_vpImages[m_Image]->m_Texture);
 
 	Graphics()->BlendNone();
-	m_pEditor->RenderMap()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_OPAQUE, m_pEditor);
+	Editor()->RenderMap()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_OPAQUE, Editor());
 	Graphics()->BlendNormal();
-	m_pEditor->RenderMap()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_TRANSPARENT, m_pEditor);
+	Editor()->RenderMap()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_TRANSPARENT, Editor());
 }
 
 CQuad *CLayerQuads::NewQuad(int x, int y, int Width, int Height)
 {
-	m_pEditor->m_Map.OnModify();
+	Map()->OnModify();
 
 	m_vQuads.emplace_back();
 	CQuad *pQuad = &m_vQuads[m_vQuads.size() - 1];
@@ -87,7 +86,7 @@ void CLayerQuads::BrushSelecting(CUIRect Rect)
 int CLayerQuads::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 {
 	// create new layers
-	std::shared_ptr<CLayerQuads> pGrabbed = std::make_shared<CLayerQuads>(m_pEditor);
+	std::shared_ptr<CLayerQuads> pGrabbed = std::make_shared<CLayerQuads>(pBrush->Map());
 	pGrabbed->m_Image = m_Image;
 	pBrush->AddLayer(pGrabbed);
 
@@ -131,8 +130,8 @@ void CLayerQuads::BrushPlace(CLayer *pBrush, vec2 WorldPos)
 		m_vQuads.push_back(NewQuad);
 		vAddedQuads.push_back(NewQuad);
 	}
-	m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionQuadPlace>(m_pEditor, m_pEditor->m_SelectedGroup, m_pEditor->m_vSelectedLayers[0], vAddedQuads));
-	m_pEditor->m_Map.OnModify();
+	Editor()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionQuadPlace>(Editor(), Editor()->m_SelectedGroup, Editor()->m_vSelectedLayers[0], vAddedQuads));
+	Map()->OnModify();
 }
 
 void CLayerQuads::BrushFlipX()
@@ -142,7 +141,7 @@ void CLayerQuads::BrushFlipX()
 		std::swap(Quad.m_aPoints[0], Quad.m_aPoints[1]);
 		std::swap(Quad.m_aPoints[2], Quad.m_aPoints[3]);
 	}
-	m_pEditor->m_Map.OnModify();
+	Map()->OnModify();
 }
 
 void CLayerQuads::BrushFlipY()
@@ -152,7 +151,7 @@ void CLayerQuads::BrushFlipY()
 		std::swap(Quad.m_aPoints[0], Quad.m_aPoints[2]);
 		std::swap(Quad.m_aPoints[1], Quad.m_aPoints[3]);
 	}
-	m_pEditor->m_Map.OnModify();
+	Map()->OnModify();
 }
 
 static void Rotate(vec2 *pCenter, vec2 *pPoint, float Rotation)
@@ -206,19 +205,19 @@ CUi::EPopupMenuFunctionResult CLayerQuads::RenderProperties(CUIRect *pToolBox)
 
 	static int s_aIds[(int)ELayerQuadsProp::NUM_PROPS] = {0};
 	int NewVal = 0;
-	auto [State, Prop] = m_pEditor->DoPropertiesWithState<ELayerQuadsProp>(pToolBox, aProps, s_aIds, &NewVal);
+	auto [State, Prop] = Editor()->DoPropertiesWithState<ELayerQuadsProp>(pToolBox, aProps, s_aIds, &NewVal);
 	if(Prop != ELayerQuadsProp::PROP_NONE && (State == EEditState::END || State == EEditState::ONE_GO))
 	{
-		m_pEditor->m_Map.OnModify();
+		Map()->OnModify();
 	}
 
-	static CLayerQuadsPropTracker s_Tracker(m_pEditor);
+	static CLayerQuadsPropTracker s_Tracker(Editor());
 	s_Tracker.Begin(this, Prop, State);
 
 	if(Prop == ELayerQuadsProp::PROP_IMAGE)
 	{
 		if(NewVal >= 0)
-			m_Image = NewVal % m_pEditor->m_Map.m_vpImages.size();
+			m_Image = NewVal % Map()->m_vpImages.size();
 		else
 			m_Image = -1;
 	}
@@ -255,7 +254,7 @@ int CLayerQuads::SwapQuads(int Index0, int Index1)
 		return Index0;
 	if(Index0 == Index1)
 		return Index0;
-	m_pEditor->m_Map.OnModify();
+	Map()->OnModify();
 	std::swap(m_vQuads[Index0], m_vQuads[Index1]);
 	return Index1;
 }

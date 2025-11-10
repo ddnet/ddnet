@@ -850,10 +850,4 @@ private:
 	std::map<int, CPoint[5]> m_QuadDragOriginalPoints;
 };
 
-// make sure to inline this function
-inline const class IGraphics *CLayer::Graphics() const { return m_pEditor->Graphics(); }
-inline class IGraphics *CLayer::Graphics() { return m_pEditor->Graphics(); } // NOLINT(readability-make-member-function-const)
-inline const class ITextRender *CLayer::TextRender() const { return m_pEditor->TextRender(); }
-inline class ITextRender *CLayer::TextRender() { return m_pEditor->TextRender(); } // NOLINT(readability-make-member-function-const)
-
 #endif

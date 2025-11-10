@@ -41,9 +41,9 @@ static int HashLocation(uint32_t Seed, uint32_t Run, uint32_t Rule, uint32_t X, 
 	return Hash % HASH_MAX;
 }
 
-CAutoMapper::CAutoMapper(CEditor *pEditor)
+CAutoMapper::CAutoMapper(CEditorMap *pMap) :
+	CMapObject(pMap)
 {
-	OnInit(pEditor);
 }
 
 void CAutoMapper::Load(const char *pTileName)
@@ -410,8 +410,8 @@ void CAutoMapper::ProceedLocalized(CLayerTiles *pLayer, CLayerTiles *pGameLayer,
 	int UpdateToX = std::clamp(X + Width + 3 * pConf->m_EndX, 0, pLayer->m_Width);
 	int UpdateToY = std::clamp(Y + Height + 3 * pConf->m_EndY, 0, pLayer->m_Height);
 
-	CLayerTiles *pUpdateLayer = new CLayerTiles(Editor(), UpdateToX - UpdateFromX, UpdateToY - UpdateFromY);
-	CLayerTiles *pUpdateGame = new CLayerTiles(Editor(), UpdateToX - UpdateFromX, UpdateToY - UpdateFromY);
+	CLayerTiles *pUpdateLayer = new CLayerTiles(pLayer->Map(), UpdateToX - UpdateFromX, UpdateToY - UpdateFromY);
+	CLayerTiles *pUpdateGame = new CLayerTiles(pLayer->Map(), UpdateToX - UpdateFromX, UpdateToY - UpdateFromY);
 
 	for(int y = UpdateFromY; y < UpdateToY; y++)
 	{
@@ -484,7 +484,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, CLayerTiles *pGameLayer, int Refe
 		CLayerTiles *pBuffer = IsFilterable ? pGameLayer : pLayer;
 		if(pRun->m_AutomapCopy)
 		{
-			pReadLayer = new CLayerTiles(Editor(), LayerWidth, LayerHeight);
+			pReadLayer = new CLayerTiles(pLayer->Map(), LayerWidth, LayerHeight);
 
 			int LoopWidth = IsFilterable ? std::min(pGameLayer->m_Width, LayerWidth) : LayerWidth;
 			int LoopHeight = IsFilterable ? std::min(pGameLayer->m_Height, LayerHeight) : LayerHeight;
@@ -515,7 +515,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, CLayerTiles *pGameLayer, int Refe
 			{
 				CTile *pTile = &(pLayer->m_pTiles[y * LayerWidth + x]);
 				const CTile *pReadTile = &(pReadLayer->m_pTiles[y * LayerWidth + x]);
-				Editor()->m_Map.OnModify();
+				pLayer->Map()->OnModify();
 
 				for(size_t i = 0; i < pRun->m_vIndexRules.size(); ++i)
 				{

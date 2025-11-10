@@ -65,8 +65,8 @@ void CEditorMap::InsertEnvelope(int Index, std::shared_ptr<CEnvelope> &pEnvelope
 {
 	if(Index < 0 || Index >= (int)m_vpEnvelopes.size() + 1)
 		return;
-	m_pEditor->m_Map.m_vpEnvelopes.push_back(pEnvelope);
-	m_pEditor->m_SelectedEnvelope = m_pEditor->m_Map.MoveEnvelope((int)m_pEditor->m_Map.m_vpEnvelopes.size() - 1, Index);
+	m_vpEnvelopes.push_back(pEnvelope);
+	m_pEditor->m_SelectedEnvelope = MoveEnvelope((int)m_vpEnvelopes.size() - 1, Index);
 }
 
 void CEditorMap::UpdateEnvelopeReferences(int Index, std::shared_ptr<CEnvelope> &pEnvelope, std::vector<std::shared_ptr<IEditorEnvelopeReference>> &vpEditorObjectReferences)
@@ -180,8 +180,7 @@ std::vector<std::shared_ptr<IEditorEnvelopeReference>> CEditorMap::VisitEnvelope
 std::shared_ptr<CLayerGroup> CEditorMap::NewGroup()
 {
 	OnModify();
-	std::shared_ptr<CLayerGroup> pGroup = std::make_shared<CLayerGroup>();
-	pGroup->m_pMap = this;
+	std::shared_ptr<CLayerGroup> pGroup = std::make_shared<CLayerGroup>(this);
 	m_vpGroups.push_back(pGroup);
 	return pGroup;
 }
@@ -267,7 +266,7 @@ void CEditorMap::CreateDefault()
 	std::shared_ptr<CLayerGroup> pGroup = NewGroup();
 	pGroup->m_ParallaxX = 0;
 	pGroup->m_ParallaxY = 0;
-	std::shared_ptr<CLayerQuads> pLayer = std::make_shared<CLayerQuads>(m_pEditor);
+	std::shared_ptr<CLayerQuads> pLayer = std::make_shared<CLayerQuads>(this);
 	CQuad *pQuad = pLayer->NewQuad(0, 0, 1600, 1200);
 	pQuad->m_aColors[0].r = pQuad->m_aColors[1].r = 94;
 	pQuad->m_aColors[0].g = pQuad->m_aColors[1].g = 132;
@@ -279,16 +278,119 @@ void CEditorMap::CreateDefault()
 
 	// Add game group and layer
 	MakeGameGroup(NewGroup());
-	MakeGameLayer(std::make_shared<CLayerGame>(m_pEditor, 50, 50));
+	MakeGameLayer(std::make_shared<CLayerGame>(this, 50, 50));
 	m_pGameGroup->AddLayer(m_pGameLayer);
 
 	ResetModifiedState();
+	CheckIntegrity();
+}
+
+void CEditorMap::CheckIntegrity()
+{
+	const auto &&CheckObjectInMap = [&](const CMapObject *pMapObject, const char *pName) {
+		dbg_assert(pMapObject != nullptr, "%s missing in map", pName);
+		dbg_assert(pMapObject->Map() == this, "%s does not belong to map (object_map=%p, this_map=%p)", pName, pMapObject->Map(), this);
+	};
+	bool GameGroupMissing = true;
+	CheckObjectInMap(m_pGameGroup.get(), "Game group");
+	dbg_assert(m_pGameGroup->m_GameGroup, "Game group not marked as such");
+	bool GameLayerMissing = true;
+	CheckObjectInMap(m_pGameLayer.get(), "Game layer");
+	dbg_assert(m_pGameLayer->m_HasGame, "Game layer not marked as such");
+	bool FrontLayerMissing = false;
+	if(m_pFrontLayer != nullptr)
+	{
+		FrontLayerMissing = true;
+		CheckObjectInMap(m_pFrontLayer.get(), "Front layer");
+		dbg_assert(m_pFrontLayer->m_HasFront, "Front layer not marked as such");
+	}
+	bool TeleLayerMissing = false;
+	if(m_pTeleLayer != nullptr)
+	{
+		TeleLayerMissing = true;
+		CheckObjectInMap(m_pTeleLayer.get(), "Tele layer");
+		dbg_assert(m_pTeleLayer->m_HasTele, "Tele layer not marked as such");
+	}
+	bool SpeedupLayerMissing = false;
+	if(m_pSpeedupLayer != nullptr)
+	{
+		SpeedupLayerMissing = true;
+		CheckObjectInMap(m_pSpeedupLayer.get(), "Speedup layer");
+		dbg_assert(m_pSpeedupLayer->m_HasSpeedup, "Speedup layer not marked as such");
+	}
+	bool SwitchLayerMissing = false;
+	if(m_pSwitchLayer != nullptr)
+	{
+		SwitchLayerMissing = true;
+		CheckObjectInMap(m_pSwitchLayer.get(), "Switch layer");
+		dbg_assert(m_pSwitchLayer->m_HasSwitch, "Switch layer not marked as such");
+	}
+	bool TuneLayerMissing = false;
+	if(m_pTuneLayer != nullptr)
+	{
+		TuneLayerMissing = true;
+		CheckObjectInMap(m_pTuneLayer.get(), "Tune layer");
+		dbg_assert(m_pTuneLayer->m_HasTune, "Tune layer not marked as such");
+	}
+	for(const auto &pGroup : m_vpGroups)
+	{
+		CheckObjectInMap(pGroup.get(), "Group");
+		for(const auto &pLayer : pGroup->m_vpLayers)
+		{
+			CheckObjectInMap(pLayer.get(), "Layer");
+		}
+		if(pGroup == m_pGameGroup)
+		{
+			GameGroupMissing = false;
+			for(const auto &pLayer : pGroup->m_vpLayers)
+			{
+				if(pLayer == m_pGameLayer)
+				{
+					GameLayerMissing = false;
+				}
+				if(pLayer == m_pFrontLayer)
+				{
+					FrontLayerMissing = false;
+				}
+				if(pLayer == m_pTeleLayer)
+				{
+					TeleLayerMissing = false;
+				}
+				if(pLayer == m_pSpeedupLayer)
+				{
+					SpeedupLayerMissing = false;
+				}
+				if(pLayer == m_pSwitchLayer)
+				{
+					SwitchLayerMissing = false;
+				}
+				if(pLayer == m_pTuneLayer)
+				{
+					TuneLayerMissing = false;
+				}
+			}
+			dbg_assert(!GameLayerMissing, "Game layer missing in game group");
+			dbg_assert(!FrontLayerMissing, "Front layer missing in game group");
+			dbg_assert(!TeleLayerMissing, "Tele layer missing in game group");
+			dbg_assert(!SpeedupLayerMissing, "Speedup layer missing in game group");
+			dbg_assert(!SwitchLayerMissing, "Switch layer missing in game group");
+			dbg_assert(!TuneLayerMissing, "Tune layer missing in game group");
+		}
+	}
+	dbg_assert(!GameGroupMissing, "Game group missing in list of groups");
+	for(const auto &pImage : m_vpImages)
+	{
+		CheckObjectInMap(pImage.get(), "Image");
+	}
+	for(const auto &pSound : m_vpSounds)
+	{
+		CheckObjectInMap(pSound.get(), "Sound");
+	}
 }
 
 void CEditorMap::MakeGameLayer(const std::shared_ptr<CLayer> &pLayer)
 {
 	m_pGameLayer = std::static_pointer_cast<CLayerGame>(pLayer);
-	m_pGameLayer->m_pEditor = m_pEditor;
 }
 
 void CEditorMap::MakeGameGroup(std::shared_ptr<CLayerGroup> pGroup)
@@ -301,31 +403,26 @@ void CEditorMap::MakeGameGroup(std::shared_ptr<CLayerGroup> pGroup)
 void CEditorMap::MakeTeleLayer(const std::shared_ptr<CLayer> &pLayer)
 {
 	m_pTeleLayer = std::static_pointer_cast<CLayerTele>(pLayer);
-	m_pTeleLayer->m_pEditor = m_pEditor;
 }
 
 void CEditorMap::MakeSpeedupLayer(const std::shared_ptr<CLayer> &pLayer)
 {
 	m_pSpeedupLayer = std::static_pointer_cast<CLayerSpeedup>(pLayer);
-	m_pSpeedupLayer->m_pEditor = m_pEditor;
 }
 
 void CEditorMap::MakeFrontLayer(const std::shared_ptr<CLayer> &pLayer)
 {
 	m_pFrontLayer = std::static_pointer_cast<CLayerFront>(pLayer);
-	m_pFrontLayer->m_pEditor = m_pEditor;
 }
 
 void CEditorMap::MakeSwitchLayer(const std::shared_ptr<CLayer> &pLayer)
 {
 	m_pSwitchLayer = std::static_pointer_cast<CLayerSwitch>(pLayer);
-	m_pSwitchLayer->m_pEditor = m_pEditor;
 }
 
 void CEditorMap::MakeTuneLayer(const std::shared_ptr<CLayer> &pLayer)
 {
 	m_pTuneLayer = std::static_pointer_cast<CLayerTune>(pLayer);
-	m_pTuneLayer->m_pEditor = m_pEditor;
 }
 
 std::shared_ptr<CEditorImage> CEditorMap::SelectedImage() const
