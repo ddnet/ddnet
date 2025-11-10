@@ -248,7 +248,7 @@ public:
 
 	void Minimize() override;
 	void SetWindowParams(int FullscreenMode, bool IsBorderless) override;
-	bool SetWindowScreen(int Index) override;
+	bool SetWindowScreen(int Index, bool MoveToCenter) override;
 	bool UpdateDisplayMode(int Index) override;
 	int GetWindowScreen() override;
 	int WindowActive() override;

@@ -975,7 +975,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		s_ScreenDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_ScreenDropDownScrollRegion;
 		const int NewScreen = Ui()->DoDropDown(&ScreenDropDown, g_Config.m_GfxScreen, s_vpScreenNames.data(), s_vpScreenNames.size(), s_ScreenDropDownState);
 		if(NewScreen != g_Config.m_GfxScreen)
-			Graphics()->SwitchWindowScreen(NewScreen);
+			Graphics()->SwitchWindowScreen(NewScreen, true);
 	}
 
 	MainView.HSplitTop(2.0f, nullptr, &MainView);

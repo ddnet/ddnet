@@ -690,7 +690,7 @@ public:
 
 	virtual void Minimize() = 0;
 	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless) = 0;
-	virtual bool SetWindowScreen(int Index) = 0;
+	virtual bool SetWindowScreen(int Index, bool MoveToCenter) = 0;
 	virtual bool UpdateDisplayMode(int Index) = 0;
 	virtual int GetWindowScreen() = 0;
 	virtual int WindowActive() = 0;
@@ -1207,8 +1207,8 @@ public:
 	void Minimize() override;
 	void WarnPngliteIncompatibleImages(bool Warn) override;
 	void SetWindowParams(int FullscreenMode, bool IsBorderless) override;
-	bool SetWindowScreen(int Index) override;
-	bool SwitchWindowScreen(int Index) override;
+	bool SetWindowScreen(int Index, bool MoveToCenter) override;
+	bool SwitchWindowScreen(int Index, bool MoveToCenter) override;
 	void Move(int x, int y) override;
 	bool Resize(int w, int h, int RefreshRate) override;
 	void ResizeToScreen() override;

@@ -1600,11 +1600,13 @@ void CGraphicsBackend_SDL_GL::Minimize()
 
 void CGraphicsBackend_SDL_GL::SetWindowParams(int FullscreenMode, bool IsBorderless)
 {
+	// The flags have to be kept consistent with flags set in the CGraphics_Threaded::IssueInit function!
+
 	if(FullscreenMode > 0)
 	{
 		bool IsDesktopFullscreen = FullscreenMode == 2;
 #ifndef CONF_FAMILY_WINDOWS
-		//  special mode for windows only
+		//  Windowed fullscreen is only available on Windows, use desktop fullscreen on other platforms
 		IsDesktopFullscreen |= FullscreenMode == 3;
 #endif
 		if(FullscreenMode == 1)
@@ -1622,10 +1624,10 @@ void CGraphicsBackend_SDL_GL::SetWindowParams(int FullscreenMode, bool IsBorderl
 			SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
 			SDL_SetWindowResizable(m_pWindow, SDL_FALSE);
 		}
-		else
+		else // Windowed fullscreen
 		{
 			SDL_SetWindowFullscreen(m_pWindow, 0);
-			SDL_SetWindowBordered(m_pWindow, SDL_TRUE);
+			SDL_SetWindowBordered(m_pWindow, SDL_FALSE);
 			SDL_SetWindowResizable(m_pWindow, SDL_FALSE);
 			SDL_DisplayMode DpMode;
 			if(SDL_GetDesktopDisplayMode(g_Config.m_GfxScreen, &DpMode) < 0)
@@ -1639,7 +1641,7 @@ void CGraphicsBackend_SDL_GL::SetWindowParams(int FullscreenMode, bool IsBorderl
 			}
 		}
 	}
-	else
+	else // Windowed
 	{
 		SDL_SetWindowFullscreen(m_pWindow, 0);
 		SDL_SetWindowBordered(m_pWindow, SDL_bool(!IsBorderless));
@@ -1647,24 +1649,33 @@ void CGraphicsBackend_SDL_GL::SetWindowParams(int FullscreenMode, bool IsBorderl
 	}
 }
 
-bool CGraphicsBackend_SDL_GL::SetWindowScreen(int Index)
+bool CGraphicsBackend_SDL_GL::SetWindowScreen(int Index, bool MoveToCenter)
 {
 	if(Index < 0 || Index >= m_NumScreens)
 	{
+		log_error("gfx", "Invalid screen number: %d (min: 0, max: %d)", Index, m_NumScreens);
 		return false;
 	}
 
 	SDL_Rect ScreenPos;
 	if(SDL_GetDisplayBounds(Index, &ScreenPos) != 0)
 	{
+		log_error("gfx", "Unable to get bounds of screen %d: %s", Index, SDL_GetError());
 		return false;
 	}
-	// Todo SDL: remove this when fixed (changing screen when in fullscreen is bugged)
-	SDL_SetWindowBordered(m_pWindow, SDL_TRUE); //fixing primary monitor goes black when switch screen (borderless OpenGL)
 
-	SDL_SetWindowPosition(m_pWindow,
-		SDL_WINDOWPOS_CENTERED_DISPLAY(Index),
-		SDL_WINDOWPOS_CENTERED_DISPLAY(Index));
+	if(MoveToCenter)
+	{
+		SDL_SetWindowPosition(m_pWindow,
+			SDL_WINDOWPOS_CENTERED_DISPLAY(Index),
+			SDL_WINDOWPOS_CENTERED_DISPLAY(Index));
+	}
+	else
+	{
+		SDL_SetWindowPosition(m_pWindow,
+			SDL_WINDOWPOS_UNDEFINED_DISPLAY(Index),
+			SDL_WINDOWPOS_UNDEFINED_DISPLAY(Index));
+	}
 
 	return UpdateDisplayMode(Index);
 }

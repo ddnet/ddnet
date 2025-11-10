@@ -794,6 +794,11 @@ int CInput::Update()
 			// shortcuts
 			switch(Event.window.event)
 			{
+#if SDL_VERSION_ATLEAST(2, 0, 18)
+			case SDL_WINDOWEVENT_DISPLAY_CHANGED:
+				Graphics()->SwitchWindowScreen(Event.display.data1, false);
+				break;
+#endif
 			case SDL_WINDOWEVENT_MOVED:
 				Graphics()->Move(Event.window.data1, Event.window.data2);
 				break;
