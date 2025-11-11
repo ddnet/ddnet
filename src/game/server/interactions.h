@@ -3,14 +3,16 @@
 
 #include <engine/shared/protocol.h>
 
+class CGameContext;
+class CPlayer;
+class CCharacter;
+
 class CInteractions
 {
-	class CGameContext *m_pGameServer;
-	class CGameContext *GameServer();
-	class CPlayer *GetPlayer(int ClientId);
-	class CCharacter *Character(int ClientId);
-	bool IsSolo(int ClientId);
-	int GetDDRaceTeam(int ClientId);
+	const CPlayer *GetPlayer(const CGameContext *pGameServer, int ClientId) const;
+	const CCharacter *Character(const CGameContext *pGameServer, int ClientId) const;
+	bool IsSolo(const CGameContext *pGameServer, int ClientId) const;
+	int GetDDRaceTeam(const CGameContext *pGameServer, int ClientId) const;
 
 	int m_OwnerId = 0;
 	uint32_t m_UniqueOwnerId = 0;
@@ -21,7 +23,7 @@ class CInteractions
 	bool m_NoHitSelf = false;
 
 public:
-	void Init(class CGameContext *pGameServer, int OwnerId, uint32_t UniqueOwnerId);
+	void Init(int OwnerId, uint32_t UniqueOwnerId);
 	void FillOwnerConnected(
 		bool OwnerAlive,
 		int DDRaceTeam,
@@ -29,10 +31,10 @@ public:
 		bool NoHitOthers,
 		bool NoHitSelf);
 	void FillOwnerDisconnected();
-	bool CanSee(int ClientId);
-	bool CanHit(int ClientId);
-	CClientMask CanSeeMask();
-	CClientMask CanHitMask();
+	bool CanSee(const CGameContext *pGameServer, int ClientId) const;
+	bool CanHit(const CGameContext *pGameServer, int ClientId) const;
+	CClientMask CanSeeMask(const CGameContext *pGameServer) const;
+	CClientMask CanHitMask(const CGameContext *pGameServer) const;
 };
 
 #endif
