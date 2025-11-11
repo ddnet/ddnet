@@ -10,6 +10,17 @@
 class CGameContext;
 class CPlayer;
 
+// The teeworlds 0.7 client and older ddnet clients
+// only support up to 64 clients. And also only up to 64 client ids (0-63).
+// The CPlayerMapping class manages a mapping of real server internal
+// client ids in the range of 0-127 and the fake client ids send to clients
+// in the range of 0-63.
+//
+// If a client does not support 128 slots the server will only show the 64
+// closest players (that closest selection is currently not perfect)
+// to the client. Because these 64 closest players are not
+// guaranteed to have client ids in the range of 0-63 we need to maintain a
+// fake client id list for every old client.
 class CPlayerMapping
 {
 	class CGameContext *m_pGameServer;
