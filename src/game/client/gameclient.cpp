@@ -3229,8 +3229,6 @@ void CGameClient::UpdateLocalTuning()
 
 	vec2 LocalPos = m_Snap.m_pLocalCharacter ? vec2(m_Snap.m_pLocalCharacter->m_X, m_Snap.m_pLocalCharacter->m_Y) : vec2(m_Snap.m_pSpectatorInfo->m_X, m_Snap.m_pSpectatorInfo->m_Y);
 
-	m_GameWorld.m_Core.m_aTuning[g_Config.m_ClDummy] = m_aTuning[g_Config.m_ClDummy];
-
 	// update the tuning at the local position with the latest tunings received before the new snapshot
 	if(m_GameWorld.m_WorldConfig.m_UseTuneZones)
 	{
@@ -3293,13 +3291,6 @@ void CGameClient::UpdateLocalTuning()
 			m_aExpectingTuningSince[g_Config.m_ClDummy] = 0;
 			m_aReceivedTuning[g_Config.m_ClDummy] = false;
 		}
-	}
-
-	// if ddnetcharacter is available, ignore server-wide tunings for hook and collision
-	if(m_Snap.m_aCharacters[m_Snap.m_LocalClientId].m_HasExtendedData)
-	{
-		m_GameWorld.m_Core.m_aTuning[g_Config.m_ClDummy].m_PlayerCollision = 1;
-		m_GameWorld.m_Core.m_aTuning[g_Config.m_ClDummy].m_PlayerHooking = 1;
 	}
 }
 
@@ -3653,7 +3644,6 @@ void CGameClient::DetectStrongHook()
 		ToCharCur.Read(&m_Snap.m_aCharacters[ToPlayer].m_Cur);
 
 		CWorldCore World;
-		World.m_aTuning[g_Config.m_ClDummy] = m_aTuning[g_Config.m_ClDummy];
 
 		for(int Direction = 0; Direction < 2; Direction++)
 		{

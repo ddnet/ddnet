@@ -391,8 +391,3 @@ void CGameWorld::ReleaseHooked(int ClientId)
 		}
 	}
 }
-
-CTuningParams *CGameWorld::Tuning()
-{
-	return &m_Core.m_aTuning[0];
-}

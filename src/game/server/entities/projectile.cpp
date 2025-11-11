@@ -61,48 +61,23 @@ vec2 CProjectile::GetPos(float Time)
 {
 	float Curvature = 0;
 	float Speed = 0;
+	CTuningParams *pTuning = GetTuning(m_TuneZone);
 
 	switch(m_Type)
 	{
 	case WEAPON_GRENADE:
-		if(!m_TuneZone)
-		{
-			Curvature = Tuning()->m_GrenadeCurvature;
-			Speed = Tuning()->m_GrenadeSpeed;
-		}
-		else
-		{
-			Curvature = TuningList()[m_TuneZone].m_GrenadeCurvature;
-			Speed = TuningList()[m_TuneZone].m_GrenadeSpeed;
-		}
-
+		Curvature = pTuning->m_GrenadeCurvature;
+		Speed = pTuning->m_GrenadeSpeed;
 		break;
 
 	case WEAPON_SHOTGUN:
-		if(!m_TuneZone)
-		{
-			Curvature = Tuning()->m_ShotgunCurvature;
-			Speed = Tuning()->m_ShotgunSpeed;
-		}
-		else
-		{
-			Curvature = TuningList()[m_TuneZone].m_ShotgunCurvature;
-			Speed = TuningList()[m_TuneZone].m_ShotgunSpeed;
-		}
-
+		Curvature = pTuning->m_ShotgunCurvature;
+		Speed = pTuning->m_ShotgunSpeed;
 		break;
 
 	case WEAPON_GUN:
-		if(!m_TuneZone)
-		{
-			Curvature = Tuning()->m_GunCurvature;
-			Speed = Tuning()->m_GunSpeed;
-		}
-		else
-		{
-			Curvature = TuningList()[m_TuneZone].m_GunCurvature;
-			Speed = TuningList()[m_TuneZone].m_GunSpeed;
-		}
+		Curvature = pTuning->m_GunCurvature;
+		Speed = pTuning->m_GunSpeed;
 		break;
 	}
 

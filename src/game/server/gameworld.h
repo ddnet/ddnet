@@ -196,7 +196,6 @@ public:
 	*/
 	std::vector<CCharacter *> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, const CEntity *pNotThis = nullptr);
 
-	CTuningParams *Tuning();
 	const CTuningParams *TuningList() const { return m_pTuningList; }
 	CTuningParams *TuningList() { return m_pTuningList; }
 	const CTuningParams *GetTuning(int i) const { return &TuningList()[i]; }

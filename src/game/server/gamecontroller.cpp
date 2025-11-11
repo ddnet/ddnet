@@ -105,7 +105,7 @@ float IGameController::EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos, int DDTeam)
 
 void IGameController::EvaluateSpawnType(CSpawnEval *pEval, ESpawnType SpawnType, int DDTeam)
 {
-	const bool PlayerCollision = GameServer()->m_World.m_Core.m_aTuning[0].m_PlayerCollision;
+	const bool PlayerCollision = GameServer()->GlobalTuning()->m_PlayerCollision;
 
 	// make sure players keep spawning at the same tile
 	// on race maps no matter what
