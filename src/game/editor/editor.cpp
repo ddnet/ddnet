@@ -1220,12 +1220,12 @@ void CEditor::UpdateHotSoundSource(const CLayerSounds *pLayer)
 	}
 }
 
-void CEditor::PreparePointDrag(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int PointIndex)
+void CEditor::PreparePointDrag(const CQuad *pQuad, int QuadIndex, int PointIndex)
 {
 	m_QuadDragOriginalPoints[QuadIndex][PointIndex] = pQuad->m_aPoints[PointIndex];
 }
 
-void CEditor::DoPointDrag(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int PointIndex, ivec2 Offset)
+void CEditor::DoPointDrag(CQuad *pQuad, int QuadIndex, int PointIndex, ivec2 Offset)
 {
 	pQuad->m_aPoints[PointIndex] = m_QuadDragOriginalPoints[QuadIndex][PointIndex] + Offset;
 }
@@ -1740,8 +1740,8 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 						// When moving, we need to save the original position of all selected pivots
 						for(int Selected : m_vSelectedQuads)
 						{
-							CQuad *pCurrentQuad = &pLayer->m_vQuads[Selected];
-							PreparePointDrag(pLayer, pCurrentQuad, Selected, 4);
+							const CQuad *pCurrentQuad = &pLayer->m_vQuads[Selected];
+							PreparePointDrag(pCurrentQuad, Selected, 4);
 						}
 					}
 					else
@@ -1750,9 +1750,9 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 						// When moving, we need to save the original position of all selected quads points
 						for(int Selected : m_vSelectedQuads)
 						{
-							CQuad *pCurrentQuad = &pLayer->m_vQuads[Selected];
+							const CQuad *pCurrentQuad = &pLayer->m_vQuads[Selected];
 							for(size_t v = 0; v < 5; v++)
-								PreparePointDrag(pLayer, pCurrentQuad, Selected, v);
+								PreparePointDrag(pCurrentQuad, Selected, v);
 						}
 						// And precompute AABB of selection since it will not change during drag
 						if(g_Config.m_EdAlignQuads)
@@ -1775,7 +1775,7 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 				for(auto &Selected : m_vSelectedQuads)
 				{
 					CQuad *pCurrentQuad = &pLayer->m_vQuads[Selected];
-					DoPointDrag(pLayer, pCurrentQuad, Selected, 4, s_LastOffset);
+					DoPointDrag(pCurrentQuad, Selected, 4, s_LastOffset);
 				}
 			}
 			else if(s_Operation == OP_MOVE_ALL)
@@ -1795,7 +1795,7 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 				{
 					CQuad *pCurrentQuad = &pLayer->m_vQuads[Selected];
 					for(int v = 0; v < 5; v++)
-						DoPointDrag(pLayer, pCurrentQuad, Selected, v, s_LastOffset);
+						DoPointDrag(pCurrentQuad, Selected, v, s_LastOffset);
 				}
 			}
 			else if(s_Operation == OP_ROTATE)
@@ -2045,7 +2045,7 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 						{
 							for(int m = 0; m < 4; m++)
 								if(IsQuadPointSelected(Selected, m))
-									PreparePointDrag(pLayer, &pLayer->m_vQuads[Selected], Selected, m);
+									PreparePointDrag(&pLayer->m_vQuads[Selected], Selected, m);
 						}
 					}
 				}
@@ -2067,7 +2067,7 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 					{
 						if(IsQuadPointSelected(Selected, m))
 						{
-							DoPointDrag(pLayer, &pLayer->m_vQuads[Selected], Selected, m, s_LastOffset);
+							DoPointDrag(&pLayer->m_vQuads[Selected], Selected, m, s_LastOffset);
 						}
 					}
 				}
