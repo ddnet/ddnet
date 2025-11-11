@@ -153,6 +153,15 @@ void CGraphics_Threaded::ClipEnable(int x, int y, int w, int h)
 	m_State.m_ClipH = h;
 }
 
+bool CGraphics_Threaded::ClipFetch(int &x, int &y, int &w, int &h) const
+{
+	x = m_State.m_ClipX;
+	y = ScreenHeight() - m_State.m_ClipY - m_State.m_ClipH; // reverse of ClipEnable
+	w = m_State.m_ClipW;
+	h = m_State.m_ClipH;
+	return m_State.m_ClipEnable;
+}
+
 void CGraphics_Threaded::ClipDisable()
 {
 	m_State.m_ClipEnable = false;

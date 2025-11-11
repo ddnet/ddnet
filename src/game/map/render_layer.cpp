@@ -226,6 +226,64 @@ bool CRenderLayer::IsVisibleInClipRegion(const std::optional<CClipRegion> &ClipR
 	return Right >= ScreenX0 && Left <= ScreenX1 && Bottom >= ScreenY0 && Top <= ScreenY1;
 }
 
+bool CRenderLayer::SetGraphicsClip(const std::optional<CClipRegion> &ClipRegion, int GroupClip[4])
+{
+	if(!ClipRegion.has_value())
+		return false;
+
+	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+
+	float ScreenWidth = ScreenX1 - ScreenX0;
+	float ScreenHeight = ScreenY1 - ScreenY0;
+	float Left = ClipRegion->m_X - ScreenX0;
+	float Top = ClipRegion->m_Y - ScreenY0;
+	float Right = ClipRegion->m_X + ClipRegion->m_Width - ScreenX0;
+	float Bottom = ClipRegion->m_Y + ClipRegion->m_Height - ScreenY0;
+
+	int ClipX = (int)std::round(Left * Graphics()->ScreenWidth() / ScreenWidth);
+	int ClipY = (int)std::round(Top * Graphics()->ScreenHeight() / ScreenHeight);
+	int ClipW = (int)std::round(Right * Graphics()->ScreenWidth() / ScreenWidth) - ClipX;
+	int ClipH = (int)std::round(Bottom * Graphics()->ScreenHeight() / ScreenHeight) - ClipY;
+
+	if(Graphics()->ClipFetch(GroupClip[0], GroupClip[1], GroupClip[2], GroupClip[3]))
+	{
+		const int &GroupClipX = GroupClip[0];
+		const int &GroupClipY = GroupClip[1];
+		const int &GroupClipW = GroupClip[2];
+		const int &GroupClipH = GroupClip[3];
+
+		int ClipRight = ClipX + ClipW;
+		int ClipBottom = ClipY + ClipH;
+
+		int GroupRight = GroupClipX + GroupClipW;
+		int GroupBottom = GroupClipY + GroupClipH;
+
+		// intersection of two rectangles
+		ClipX = std::max(GroupClipX, ClipX);
+		ClipY = std::max(GroupClipY, ClipY);
+		ClipRight = std::min(GroupRight, ClipRight);
+		ClipBottom = std::min(GroupBottom, ClipBottom);
+
+		ClipW = ClipRight - ClipX;
+		ClipH = ClipBottom - ClipY;
+
+		Graphics()->ClipEnable(ClipX, ClipY, ClipW, ClipH);
+		return true;
+	}
+
+	Graphics()->ClipEnable(ClipX, ClipY, ClipW, ClipH);
+	return false;
+}
+
+void CRenderLayer::ResetGraphicsClip(int GroupClip[4], bool ClipEnabled)
+{
+	if(ClipEnabled)
+		Graphics()->ClipEnable(GroupClip[0], GroupClip[1], GroupClip[2], GroupClip[3]);
+	else
+		Graphics()->ClipDisable();
+}
+
 /**************
  * Group *
  **************/
@@ -313,6 +371,9 @@ void CRenderLayerTile::RenderTileLayer(const ColorRGBA &Color, const CRenderLaye
 
 	if(IsVisibleInClipRegion(m_LayerClip))
 	{
+		int GroupClip[4];
+		bool ClipChanged = SetGraphicsClip(m_LayerClip, GroupClip);
+
 		// create the indice buffers we want to draw -- reuse them
 		std::vector<char *> vpIndexOffsets;
 		std::vector<unsigned int> vDrawCounts;
@@ -349,6 +410,8 @@ void CRenderLayerTile::RenderTileLayer(const ColorRGBA &Color, const CRenderLaye
 				Graphics()->RenderTileLayer(Visuals.m_BufferContainerIndex, Color, vpIndexOffsets.data(), vDrawCounts.data(), DrawCount);
 			}
 		}
+
+		ResetGraphicsClip(GroupClip, ClipChanged);
 	}
 
 	if(Params.m_RenderTileBorder && (ScreenRectX1 > (int)Visuals.m_Width || ScreenRectY1 > (int)Visuals.m_Height || ScreenRectX0 < 0 || ScreenRectY0 < 0))
@@ -916,10 +979,13 @@ void CRenderLayerQuads::RenderQuadLayer(float Alpha, const CRenderLayerParams &P
 	if(Visuals.m_BufferContainerIndex == -1)
 		return; // no visuals were created
 
+	int GroupClip[4];
 	for(auto &QuadCluster : m_vQuadClusters)
 	{
 		if(!IsVisibleInClipRegion(QuadCluster.m_ClipRegion))
 			continue;
+
+		bool ClipChanged = SetGraphicsClip(QuadCluster.m_ClipRegion, GroupClip);
 
 		if(!QuadCluster.m_Grouped)
 		{
@@ -980,6 +1046,8 @@ void CRenderLayerQuads::RenderQuadLayer(float Alpha, const CRenderLayerParams &P
 			}
 			Graphics()->RenderQuadLayer(Visuals.m_BufferContainerIndex, &QInfo, (size_t)QuadCluster.m_NumQuads, QuadCluster.m_StartIndex, true);
 		}
+
+		ResetGraphicsClip(GroupClip, ClipChanged);
 	}
 
 	if(Params.m_DebugRenderClusterClips)
