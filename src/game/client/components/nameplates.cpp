@@ -377,7 +377,7 @@ protected:
 	bool UpdateNeeded(CGameClient &This, const CNamePlateData &Data) override
 	{
 		m_Visible = Data.m_ShowClan;
-		if(!m_Visible)
+		if(!m_Visible && Data.m_aClan[0] != '\0')
 			return false;
 		m_Color = Data.m_Color;
 		return m_FontSize != Data.m_FontSizeClan || str_comp(m_aText, Data.m_aClan) != 0;
