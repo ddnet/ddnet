@@ -6,36 +6,30 @@
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
 
-CGameContext *CInteractions::GameServer()
-{
-	return m_pGameServer;
-}
-
-CPlayer *CInteractions::GetPlayer(int ClientId)
+const CPlayer *CInteractions::GetPlayer(const CGameContext *pGameServer, int ClientId) const
 {
 	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "invalid client id %d", ClientId);
-	return GameServer()->m_apPlayers[ClientId];
+	return pGameServer->m_apPlayers[ClientId];
 }
 
-CCharacter *CInteractions::Character(int ClientId)
+const CCharacter *CInteractions::Character(const CGameContext *pGameServer, int ClientId) const
 {
-	return GameServer()->GetPlayerChar(ClientId);
+	return pGameServer->GetPlayerChar(ClientId);
 }
 
-bool CInteractions::IsSolo(int ClientId)
+bool CInteractions::IsSolo(const CGameContext *pGameServer, int ClientId) const
 {
-	CCharacter *pChr = Character(ClientId);
+	const CCharacter *pChr = Character(pGameServer, ClientId);
 	return pChr && pChr->Core()->m_Solo;
 }
 
-int CInteractions::GetDDRaceTeam(int ClientId)
+int CInteractions::GetDDRaceTeam(const CGameContext *pGameServer, int ClientId) const
 {
-	return GameServer()->GetDDRaceTeam(ClientId);
+	return pGameServer->GetDDRaceTeam(ClientId);
 }
 
-void CInteractions::Init(class CGameContext *pGameServer, int OwnerId, uint32_t UniqueOwnerId)
+void CInteractions::Init(int OwnerId, uint32_t UniqueOwnerId)
 {
-	m_pGameServer = pGameServer;
 	m_OwnerId = OwnerId;
 	m_UniqueOwnerId = UniqueOwnerId;
 }
@@ -61,9 +55,9 @@ void CInteractions::FillOwnerDisconnected()
 	// m_UniqueOwnerId = 0; // TODO: yes no maybe?
 }
 
-bool CInteractions::CanSee(int ClientId)
+bool CInteractions::CanSee(const CGameContext *pGameServer, int ClientId) const
 {
-	CPlayer *pPlayer = GetPlayer(ClientId);
+	const CPlayer *pPlayer = GetPlayer(pGameServer, ClientId);
 	if(!pPlayer)
 		return false; // Player doesn't exist
 
@@ -71,20 +65,20 @@ bool CInteractions::CanSee(int ClientId)
 	{ // Not spectator
 		if(ClientId != m_OwnerId)
 		{ // Actions of other players
-			if(!Character(ClientId))
+			if(!Character(pGameServer, ClientId))
 				return false; // Player is currently dead
 			if(pPlayer->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM)
 			{
-				if(GetDDRaceTeam(ClientId) != m_DDRaceTeam && GetDDRaceTeam(ClientId) != TEAM_SUPER)
+				if(GetDDRaceTeam(pGameServer, ClientId) != m_DDRaceTeam && GetDDRaceTeam(pGameServer, ClientId) != TEAM_SUPER)
 					return false; // In different teams
 			}
 			else if(pPlayer->m_ShowOthers == SHOW_OTHERS_OFF)
 			{
 				if(m_Solo)
 					return false; // When in solo part don't show others
-				if(IsSolo(ClientId))
+				if(IsSolo(pGameServer, ClientId))
 					return false; // When in solo part don't show others
-				if(GetDDRaceTeam(ClientId) != m_DDRaceTeam && GetDDRaceTeam(ClientId) != TEAM_SUPER)
+				if(GetDDRaceTeam(pGameServer, ClientId) != m_DDRaceTeam && GetDDRaceTeam(pGameServer, ClientId) != TEAM_SUPER)
 					return false; // In different teams
 			}
 		} // See everything of yourself
@@ -93,20 +87,20 @@ bool CInteractions::CanSee(int ClientId)
 	{ // Spectating specific player
 		if(pPlayer->SpectatorId() != m_OwnerId)
 		{ // Actions of other players
-			if(!Character(pPlayer->SpectatorId()))
+			if(!Character(pGameServer, pPlayer->SpectatorId()))
 				return false; // Player is currently dead
 			if(pPlayer->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM)
 			{
-				if(GetDDRaceTeam(pPlayer->SpectatorId()) != m_DDRaceTeam && GetDDRaceTeam(pPlayer->SpectatorId()) != TEAM_SUPER)
+				if(GetDDRaceTeam(pGameServer, pPlayer->SpectatorId()) != m_DDRaceTeam && GetDDRaceTeam(pGameServer, pPlayer->SpectatorId()) != TEAM_SUPER)
 					return false; // In different teams
 			}
 			else if(pPlayer->m_ShowOthers == SHOW_OTHERS_OFF)
 			{
 				if(m_Solo)
 					return false; // When in solo part don't show others
-				if(IsSolo(pPlayer->SpectatorId()))
+				if(IsSolo(pGameServer, pPlayer->SpectatorId()))
 					return false; // When in solo part don't show others
-				if(GetDDRaceTeam(pPlayer->SpectatorId()) != m_DDRaceTeam && GetDDRaceTeam(pPlayer->SpectatorId()) != TEAM_SUPER)
+				if(GetDDRaceTeam(pGameServer, pPlayer->SpectatorId()) != m_DDRaceTeam && GetDDRaceTeam(pGameServer, pPlayer->SpectatorId()) != TEAM_SUPER)
 					return false; // In different teams
 			}
 		} // See everything of player you're spectating
@@ -115,7 +109,7 @@ bool CInteractions::CanSee(int ClientId)
 	{ // Freeview
 		if(pPlayer->m_SpecTeam)
 		{ // Show only players in own team when spectating
-			if(GetDDRaceTeam(ClientId) != m_DDRaceTeam && GetDDRaceTeam(ClientId) != TEAM_SUPER)
+			if(GetDDRaceTeam(pGameServer, ClientId) != m_DDRaceTeam && GetDDRaceTeam(pGameServer, ClientId) != TEAM_SUPER)
 				return false; // in different teams
 		}
 	}
@@ -123,13 +117,13 @@ bool CInteractions::CanSee(int ClientId)
 	return true;
 }
 
-bool CInteractions::CanHit(int ClientId)
+bool CInteractions::CanHit(const CGameContext *pGameServer, int ClientId) const
 {
-	CPlayer *pPlayer = GetPlayer(ClientId);
+	const CPlayer *pPlayer = GetPlayer(pGameServer, ClientId);
 	if(!pPlayer)
 		return false;
 
-	if(m_DDRaceTeam && GetDDRaceTeam(ClientId) != m_DDRaceTeam)
+	if(m_DDRaceTeam && GetDDRaceTeam(pGameServer, ClientId) != m_DDRaceTeam)
 		return false;
 	if(m_Solo && m_UniqueOwnerId != pPlayer->GetUniqueCid())
 		return false;
@@ -141,7 +135,7 @@ bool CInteractions::CanHit(int ClientId)
 	return true;
 }
 
-CClientMask CInteractions::CanSeeMask()
+CClientMask CInteractions::CanSeeMask(const CGameContext *pGameServer) const
 {
 	if(m_DDRaceTeam == TEAM_SUPER)
 	{
@@ -151,7 +145,7 @@ CClientMask CInteractions::CanSeeMask()
 	CClientMask Mask;
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
-		if(CanSee(i))
+		if(CanSee(pGameServer, i))
 		{
 			Mask.set(i);
 		}
@@ -159,7 +153,7 @@ CClientMask CInteractions::CanSeeMask()
 	return Mask;
 }
 
-CClientMask CInteractions::CanHitMask()
+CClientMask CInteractions::CanHitMask(const CGameContext *pGameServer) const
 {
 	if(m_DDRaceTeam == TEAM_SUPER)
 	{
@@ -169,7 +163,7 @@ CClientMask CInteractions::CanHitMask()
 	CClientMask Mask;
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
-		if(CanHit(i))
+		if(CanHit(pGameServer, i))
 		{
 			Mask.set(i);
 		}

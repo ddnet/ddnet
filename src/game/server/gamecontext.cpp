@@ -217,7 +217,14 @@ CNetObj_PlayerInput CGameContext::GetLastPlayerInput(int ClientId) const
 	return m_aLastPlayerInput[ClientId];
 }
 
-class CCharacter *CGameContext::GetPlayerChar(int ClientId)
+CCharacter *CGameContext::GetPlayerChar(int ClientId)
+{
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS || !m_apPlayers[ClientId])
+		return nullptr;
+	return m_apPlayers[ClientId]->GetCharacter();
+}
+
+const CCharacter *CGameContext::GetPlayerChar(int ClientId) const
 {
 	if(ClientId < 0 || ClientId >= MAX_CLIENTS || !m_apPlayers[ClientId])
 		return nullptr;
