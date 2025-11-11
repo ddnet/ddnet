@@ -714,4 +714,152 @@ int str_utf8_isstart(char c);
  */
 int str_utf8_rewind(const char *str, int cursor);
 
+/**
+ * Finds a UTF-8 string inside another UTF-8 string case insensitively.
+ *
+ * @ingroup Strings
+ *
+ * @param haystack String to search in.
+ * @param needle String to search for.
+ * @param end A pointer that will be set to a pointer into haystack directly behind the
+ *            last character where the needle was found. Will be set to `nullptr `if needle
+ *            could not be found. Optional parameter.
+ *
+ * @return A pointer into haystack where the needle was found.
+ * @return Returns `nullptr` if needle could not be found.
+ *
+ * @remark The strings are treated as null-terminated strings.
+ */
+const char *str_utf8_find_nocase(const char *haystack, const char *needle, const char **end = nullptr);
+
+/**
+ * Compares two UTF-8 strings case insensitively.
+ *
+ * @ingroup Strings
+ *
+ * @param a String to compare.
+ * @param b String to compare.
+ *
+ * @return `< 0` if string a is less than string b.
+ * @return `0` if string a is equal to string b.
+ * @return `> 0` if string a is greater than string b.
+ */
+int str_utf8_comp_nocase(const char *a, const char *b);
+
+/**
+ * Compares up to `num` bytes of two UTF-8 strings case insensitively.
+ *
+ * @ingroup Strings
+ *
+ * @param a String to compare.
+ * @param b String to compare.
+ * @param num Maximum bytes to compare.
+ *
+ * @return `< 0` if string a is less than string b.
+ * @return `0` if string a is equal to string b.
+ * @return `> 0` if string a is greater than string b.
+ */
+int str_utf8_comp_nocase_num(const char *a, const char *b, int num);
+
+/**
+ * Skips leading characters that render as spaces.
+ *
+ * @ingroup Strings
+ *
+ * @param str Input string.
+ *
+ * @return Pointer to the first non-whitespace character found within the string.
+ * @remark The strings are treated as null-terminated strings.
+ */
+const char *str_utf8_skip_whitespaces(const char *str);
+
+/**
+ * Moves a cursor forwards in an UTF-8 string.
+ *
+ * @ingroup Strings
+ *
+ * @param str UTF-8 string.
+ * @param cursor Position in the string.
+ *
+ * @return New cursor position.
+ *
+ * @remark Won't move the cursor beyond the null-termination marker.
+ * @remark The strings are treated as null-terminated.
+ */
+int str_utf8_forward(const char *str, int cursor);
+
+/**
+ * Checks if a strings contains just valid UTF-8 characters.
+ *
+ * @ingroup Strings
+ *
+ * @param str Pointer to a possible UTF-8 string.
+ *
+ * @return `0` if invalid characters were found, `1` if only valid characters were found.
+ *
+ * @remark The string is treated as null-terminated UTF-8 string.
+ */
+int str_utf8_check(const char *str);
+
+/**
+ * Copies a number of UTF-8 characters from one string to another.
+ *
+ * @ingroup Strings
+ *
+ * @param dst Pointer to a buffer that shall receive the string.
+ * @param src String to be copied.
+ * @param dst_size Size of the buffer dst.
+ * @param num Maximum number of UTF-8 characters to be copied.
+ *
+ * @remark The strings are treated as null-terminated strings.
+ * @remark Garantees that dst string will contain null-termination.
+ */
+void str_utf8_copy_num(char *dst, const char *src, int dst_size, int num);
+
+/**
+ * Determines the byte size and UTF-8 character count of a UTF-8 string.
+ *
+ * @ingroup Strings
+ *
+ * @param str Pointer to the string.
+ * @param max_size Maximum number of bytes to count.
+ * @param max_count Maximum number of UTF-8 characters to count.
+ * @param size Pointer to store size (number of non. Zero bytes) of the string.
+ * @param count Pointer to store count of UTF-8 characters of the string.
+ *
+ * @remark The string is treated as null-terminated UTF-8 string.
+ * @remark It's the user's responsibility to make sure the bounds are aligned.
+ */
+void str_utf8_stats(const char *str, size_t max_size, size_t max_count, size_t *size, size_t *count);
+
+/**
+ * Converts a byte offset of a UTF-8 string to the UTF-8 character offset.
+ *
+ * @ingroup Strings
+ *
+ * @param str Pointer to the string.
+ * @param byte_offset Offset in bytes.
+ *
+ * @return Offset in UTF-8 characters. Clamped to the maximum length of the string in UTF-8 characters.
+ *
+ * @remark The string is treated as a null-terminated UTF-8 string.
+ * @remark It's the user's responsibility to make sure the bounds are aligned.
+ */
+size_t str_utf8_offset_bytes_to_chars(const char *str, size_t byte_offset);
+
+/**
+ * Converts a UTF-8 character offset of a UTF-8 string to the byte offset.
+ *
+ * @ingroup Strings
+ *
+ * @param str Pointer to the string.
+ * @param char_offset Offset in UTF-8 characters.
+ *
+ * @return Offset in bytes. Clamped to the maximum length of the string in bytes.
+ *
+ * @remark The string is treated as a null-terminated UTF-8 string.
+ * @remark It's the user's responsibility to make sure the bounds are aligned.
+ */
+size_t str_utf8_offset_chars_to_bytes(const char *str, size_t char_offset);
+
 #endif
