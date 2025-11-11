@@ -24,7 +24,7 @@ void CEditorImage::OnAttach(CEditorMap *pMap)
 
 void CEditorImage::AnalyseTileFlags()
 {
-	mem_zero(m_aTileFlags, sizeof(m_aTileFlags));
+	std::fill(std::begin(m_aTileFlags), std::end(m_aTileFlags), 0);
 
 	size_t TileWidth = m_Width / 16;
 	size_t TileHeight = m_Height / 16;

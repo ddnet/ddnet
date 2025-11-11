@@ -30,7 +30,7 @@ CCamera::CCamera()
 	m_GotoSwitchLastPos = ivec2(-1, -1);
 	m_GotoTeleLastPos = ivec2(-1, -1);
 
-	mem_zero(m_aLastPos, sizeof(m_aLastPos));
+	std::fill(std::begin(m_aLastPos), std::end(m_aLastPos), vec2(0.0f, 0.0f));
 	m_PrevCenter = vec2(0, 0);
 	m_Center = vec2(0, 0);
 
@@ -41,7 +41,7 @@ CCamera::CCamera()
 
 	m_LastTargetPos = vec2(0, 0);
 	m_DyncamTargetCameraOffset = vec2(0, 0);
-	mem_zero(m_aDyncamCurrentCameraOffset, sizeof(m_aDyncamCurrentCameraOffset));
+	std::fill(std::begin(m_aDyncamCurrentCameraOffset), std::end(m_aDyncamCurrentCameraOffset), vec2(0.0f, 0.0f));
 	m_DyncamSmoothingSpeedBias = 0.5f;
 
 	m_AutoSpecCamera = true;
