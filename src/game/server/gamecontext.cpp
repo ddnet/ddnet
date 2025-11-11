@@ -1301,6 +1301,9 @@ void CGameContext::OnTick()
 				Console()->ExecuteLine(m_aVoteCommand, m_VoteCreator);
 				SendChat(-1, TEAM_ALL, "Vote passed enforced by authorized player", -1, FLAG_SIX);
 				EndVote();
+
+				if(m_VoteCreator != -1 && m_apPlayers[m_VoteCreator])
+					m_apPlayers[m_VoteCreator]->m_LastVoteCall = 0;
 			}
 			else if(m_VoteEnforce == VOTE_ENFORCE_NO_ADMIN)
 			{
