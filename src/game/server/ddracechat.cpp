@@ -1159,7 +1159,7 @@ void CGameContext::AttemptJoinTeam(int ClientId, int Team)
 		Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
 			"chatresp",
-			"You are running a vote please try again after the vote is done!");
+			"You are running a vote, please try again after the vote is done!");
 		return;
 	}
 	else if(g_Config.m_SvTeam == SV_TEAM_FORBIDDEN || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
@@ -1173,7 +1173,7 @@ void CGameContext::AttemptJoinTeam(int ClientId, int Team)
 		Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
 			"chatresp",
-			"You must join a team and play with somebody or else you can\'t play");
+			"You must join a team and play with somebody or else you can't play");
 		pPlayer->GetCharacter()->m_LastStartWarning = Server()->Tick();
 	}
 
@@ -1199,7 +1199,7 @@ void CGameContext::AttemptJoinTeam(int ClientId, int Team)
 		if(pPlayer->m_LastDDRaceTeamChange + (int64_t)Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay > Server()->Tick())
 		{
 			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-				"You can\'t change teams that fast!");
+				"You can't change teams that fast!");
 		}
 		else if(Team != TEAM_FLOCK && m_pController->Teams().TeamLocked(Team) && !m_pController->Teams().IsInvited(Team, ClientId))
 		{
@@ -1712,7 +1712,7 @@ void CGameContext::ConSayTimeAll(IConsole::IResult *pResult, void *pUserData)
 	int64_t Time = (int64_t)100 * (float)(pSelf->Server()->Tick() - pChr->m_StartTime) / ((float)pSelf->Server()->TickSpeed());
 	const char *pName = pSelf->Server()->ClientName(pResult->m_ClientId);
 	str_time(Time, TIME_HOURS, aBufTime, sizeof(aBufTime));
-	str_format(aBuf, sizeof(aBuf), "%s\'s current race time is %s", pName, aBufTime);
+	str_format(aBuf, sizeof(aBuf), "%s's current race time is %s", pName, aBufTime);
 	pSelf->SendChat(-1, TEAM_ALL, aBuf, pResult->m_ClientId);
 }
 
