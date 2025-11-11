@@ -391,14 +391,14 @@ void CCharacter::FireWeapon()
 				float a = angle(Direction);
 				a += aSpreading[i + 2];
 				float v = 1 - (absolute(i) / (float)ShotSpread);
-				float Speed = mix((float)Tuning()->m_ShotgunSpeeddiff, 1.0f, v);
+				float Speed = mix((float)GlobalTuning()->m_ShotgunSpeeddiff, 1.0f, v);
 				new CProjectile(
 					GameWorld(),
 					WEAPON_SHOTGUN, //Type
 					GetCid(), //Owner
 					ProjStartPos, //Pos
 					direction(a) * Speed, //Dir
-					(int)(GameWorld()->GameTickSpeed() * Tuning()->m_ShotgunLifetime), //Span
+					(int)(GameWorld()->GameTickSpeed() * GlobalTuning()->m_ShotgunLifetime), //Span
 					false, //Freeze
 					false, //Explosive
 					-1 //SoundImpact
@@ -701,8 +701,8 @@ void CCharacter::HandleSkippableTiles(int Index)
 			constexpr float MaxSpeedScale = 5.0f;
 			if(MaxSpeed == 0)
 			{
-				float MaxRampSpeed = GetTuning(m_TuneZone)->m_VelrampRange / (50 * log(maximum((float)GetTuning(m_TuneZone)->m_VelrampCurvature, 1.01f)));
-				MaxSpeed = maximum(MaxRampSpeed, GetTuning(m_TuneZone)->m_VelrampStart / 50) * MaxSpeedScale;
+				float MaxRampSpeed = GetTuning(GetOverriddenTuneZone())->m_VelrampRange / (50 * log(maximum((float)GetTuning(GetOverriddenTuneZone())->m_VelrampCurvature, 1.01f)));
+				MaxSpeed = maximum(MaxRampSpeed, GetTuning(GetOverriddenTuneZone())->m_VelrampStart / 50) * MaxSpeedScale;
 			}
 
 			// (signed) length of projection
@@ -1018,9 +1018,6 @@ void CCharacter::HandleTuneLayer()
 {
 	int CurrentIndex = Collision()->GetMapIndex(m_Pos);
 	SetTuneZone(GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(CurrentIndex) : 0);
-
-	if(m_IsLocal)
-		GameWorld()->m_Core.m_aTuning[g_Config.m_ClDummy] = *GetTuning(GetOverriddenTuneZone()); // throw tunings (from specific zone if in a tunezone) into gamecore if the character is local
 	m_Core.m_Tuning = *GetTuning(GetOverriddenTuneZone());
 }
 
@@ -1367,7 +1364,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		}
 
 		// without ddnetcharacter we don't know if we have jetpack, so try to predict jetpack if strength isn't 0, on vanilla it's always 0
-		if(GameWorld()->m_WorldConfig.m_PredictWeapons && Tuning()->m_JetpackStrength != 0)
+		if(GameWorld()->m_WorldConfig.m_PredictWeapons && GetTuning(GetOverriddenTuneZone())->m_JetpackStrength != 0)
 		{
 			m_Core.m_Jetpack = true;
 			m_Core.m_aWeapons[WEAPON_GUN].m_Got = true;
@@ -1390,7 +1387,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 			}
 			else if(m_Core.m_Jumps < 2)
 				m_Core.m_Jumps = m_Core.m_JumpedTotal + 2;
-			if(Tuning()->m_AirJumpImpulse == 0)
+			if(GetTuning(GetOverriddenTuneZone())->m_AirJumpImpulse == 0)
 			{
 				m_Core.m_Jumps = 0;
 				m_Core.m_Jumped = 3;
@@ -1398,9 +1395,9 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		}
 
 		// set player collision
-		SetSolo(!Tuning()->m_PlayerCollision && !Tuning()->m_PlayerHooking);
-		m_Core.m_CollisionDisabled = !Tuning()->m_PlayerCollision;
-		m_Core.m_HookHitDisabled = !Tuning()->m_PlayerHooking;
+		SetSolo(!GetTuning(GetOverriddenTuneZone())->m_PlayerCollision && !GetTuning(GetOverriddenTuneZone())->m_PlayerHooking);
+		m_Core.m_CollisionDisabled = !GetTuning(GetOverriddenTuneZone())->m_PlayerCollision;
+		m_Core.m_HookHitDisabled = !GetTuning(GetOverriddenTuneZone())->m_PlayerHooking;
 
 		if(m_Core.m_HookTick != 0)
 			m_Core.m_EndlessHook = false;
