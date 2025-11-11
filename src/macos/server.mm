@@ -73,8 +73,8 @@ void runServer()
 			[pOpenDlg setCanChooseFiles:YES];
 			if([pOpenDlg runModal] != NSModalResponseOK)
 				return;
-			NSString *pFileName = [[pOpenDlg URL] path];
-			pArguments = [NSArray arrayWithObjects: @"-f", pFileName, nil];
+			NSString *pFilename = [[pOpenDlg URL] path];
+			pArguments = [NSArray arrayWithObjects: @"-f", pFilename, nil];
 			break;
 	}
 

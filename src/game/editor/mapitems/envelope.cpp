@@ -1,5 +1,7 @@
 #include "envelope.h"
 
+#include <base/system.h>
+
 #include <algorithm>
 #include <chrono>
 #include <limits>
@@ -61,9 +63,9 @@ std::pair<float, float> CEnvelope::GetValueRange(int ChannelMask)
 {
 	float Top = -std::numeric_limits<float>::infinity();
 	float Bottom = std::numeric_limits<float>::infinity();
-	CEnvPoint_runtime *pPrevPoint = nullptr;
-	for(auto &Point : m_vPoints)
+	for(size_t PointIndex = 0; PointIndex < m_vPoints.size(); ++PointIndex)
 	{
+		const auto &Point = m_vPoints[PointIndex];
 		for(int c = 0; c < GetChannels(); c++)
 		{
 			if(ChannelMask & (1 << c))
@@ -75,7 +77,7 @@ std::pair<float, float> CEnvelope::GetValueRange(int ChannelMask)
 					Bottom = minimum(Bottom, v);
 				}
 
-				if(Point.m_Curvetype == CURVETYPE_BEZIER)
+				if(PointIndex < m_vPoints.size() - 1 && Point.m_Curvetype == CURVETYPE_BEZIER)
 				{
 					// out-tangent handle
 					const float v = fx2f(Point.m_aValues[c] + Point.m_Bezier.m_aOutTangentDeltaY[c]);
@@ -83,7 +85,7 @@ std::pair<float, float> CEnvelope::GetValueRange(int ChannelMask)
 					Bottom = minimum(Bottom, v);
 				}
 
-				if(pPrevPoint != nullptr && pPrevPoint->m_Curvetype == CURVETYPE_BEZIER)
+				if(PointIndex > 0 && m_vPoints[PointIndex - 1].m_Curvetype == CURVETYPE_BEZIER)
 				{
 					// in-tangent handle
 					const float v = fx2f(Point.m_aValues[c] + Point.m_Bezier.m_aInTangentDeltaY[c]);
@@ -92,35 +94,27 @@ std::pair<float, float> CEnvelope::GetValueRange(int ChannelMask)
 				}
 			}
 		}
-		pPrevPoint = &Point;
 	}
-
 	return {Bottom, Top};
 }
 
 void CEnvelope::Eval(float Time, ColorRGBA &Result, size_t Channels)
 {
 	Channels = minimum<size_t>(Channels, GetChannels(), CEnvPoint::MAX_CHANNELS);
-	CRenderTools::RenderEvalEnvelope(&m_PointsAccess, std::chrono::nanoseconds((int64_t)((double)Time * (double)std::chrono::nanoseconds(1s).count())), Result, Channels);
+	CRenderMap::RenderEvalEnvelope(&m_PointsAccess, std::chrono::nanoseconds((int64_t)((double)Time * (double)std::chrono::nanoseconds(1s).count())), Result, Channels);
 }
 
-void CEnvelope::AddPoint(int Time, int v0, int v1, int v2, int v3)
+void CEnvelope::AddPoint(CFixedTime Time, std::array<int, CEnvPoint::MAX_CHANNELS> aValues)
 {
-	CEnvPoint_runtime p;
-	p.m_Time = Time;
-	p.m_aValues[0] = v0;
-	p.m_aValues[1] = v1;
-	p.m_aValues[2] = v2;
-	p.m_aValues[3] = v3;
-	p.m_Curvetype = CURVETYPE_LINEAR;
-	for(int c = 0; c < CEnvPoint::MAX_CHANNELS; c++)
-	{
-		p.m_Bezier.m_aInTangentDeltaX[c] = 0;
-		p.m_Bezier.m_aInTangentDeltaY[c] = 0;
-		p.m_Bezier.m_aOutTangentDeltaX[c] = 0;
-		p.m_Bezier.m_aOutTangentDeltaY[c] = 0;
-	}
-	m_vPoints.push_back(p);
+	CEnvPoint_runtime Point;
+	Point.m_Time = Time;
+	Point.m_Curvetype = CURVETYPE_LINEAR;
+	std::copy_n(aValues.begin(), std::size(Point.m_aValues), Point.m_aValues);
+	std::fill(std::begin(Point.m_Bezier.m_aInTangentDeltaX), std::end(Point.m_Bezier.m_aInTangentDeltaX), CFixedTime(0));
+	std::fill(std::begin(Point.m_Bezier.m_aInTangentDeltaY), std::end(Point.m_Bezier.m_aInTangentDeltaY), 0);
+	std::fill(std::begin(Point.m_Bezier.m_aOutTangentDeltaX), std::end(Point.m_Bezier.m_aOutTangentDeltaX), CFixedTime(0));
+	std::fill(std::begin(Point.m_Bezier.m_aOutTangentDeltaY), std::end(Point.m_Bezier.m_aOutTangentDeltaY), 0);
+	m_vPoints.emplace_back(Point);
 	Resort();
 }
 
@@ -128,7 +122,12 @@ float CEnvelope::EndTime() const
 {
 	if(m_vPoints.empty())
 		return 0.0f;
-	return m_vPoints.back().m_Time / 1000.0f;
+	return m_vPoints.back().m_Time.AsSeconds();
+}
+
+int CEnvelope::FindPointIndex(CFixedTime Time) const
+{
+	return m_PointsAccess.FindPointIndex(Time);
 }
 
 int CEnvelope::GetChannels() const

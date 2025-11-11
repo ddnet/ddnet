@@ -1,16 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <engine/shared/config.h>
-
-#include <engine/shared/protocolglue.h>
-#include <game/generated/protocol.h>
-#include <game/mapitems.h>
-#include <game/server/score.h>
-#include <game/teamscore.h>
-
-#include "gamecontext.h"
 #include "gamecontroller.h"
-#include "player.h"
 
 #include "entities/character.h"
 #include "entities/door.h"
@@ -19,6 +9,17 @@
 #include "entities/light.h"
 #include "entities/pickup.h"
 #include "entities/projectile.h"
+#include "gamecontext.h"
+#include "player.h"
+
+#include <engine/shared/config.h>
+#include <engine/shared/protocolglue.h>
+
+#include <generated/protocol.h>
+
+#include <game/mapitems.h>
+#include <game/server/score.h>
+#include <game/teamscore.h>
 
 IGameController::IGameController(class CGameContext *pGameServer) :
 	m_Teams(pGameServer), m_pLoadBestTimeResult(nullptr)
@@ -37,7 +38,7 @@ IGameController::IGameController(class CGameContext *pGameServer) :
 	m_GameFlags = 0;
 	m_aMapWish[0] = 0;
 
-	m_CurrentRecord = 0;
+	m_CurrentRecord.reset();
 }
 
 IGameController::~IGameController() = default;
@@ -49,7 +50,7 @@ void IGameController::DoActivityCheck()
 
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
-		if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS && Server()->GetAuthedState(i) == AUTHED_NO)
+		if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS && !Server()->IsRconAuthed(i))
 		{
 			if(Server()->Tick() > GameServer()->m_apPlayers[i]->m_LastActionTick + g_Config.m_SvInactiveKickTime * Server()->TickSpeed() * 60)
 			{
@@ -102,13 +103,20 @@ float IGameController::EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos, int DDTeam)
 	return Score;
 }
 
-void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type, int DDTeam)
+void IGameController::EvaluateSpawnType(CSpawnEval *pEval, ESpawnType SpawnType, int DDTeam)
 {
+	const bool PlayerCollision = GameServer()->m_World.m_Core.m_aTuning[0].m_PlayerCollision;
+
+	// make sure players keep spawning at the same tile
+	// on race maps no matter what
+	if(!PlayerCollision && pEval->m_Got)
+		return;
+
 	// j == 0: Find an empty slot, j == 1: Take any slot if no empty one found
-	for(int j = 0; j < 2 && !pEval->m_Got; j++)
+	for(int j = 0; j < 2; j++)
 	{
 		// get spawn point
-		for(const vec2 &SpawnPoint : m_avSpawnPoints[Type])
+		for(const vec2 &SpawnPoint : m_avSpawnPoints[SpawnType])
 		{
 			vec2 P = SpawnPoint;
 			if(j == 0)
@@ -121,13 +129,15 @@ void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type, int DDTeam)
 				for(int Index = 0; Index < 5 && Result == -1; ++Index)
 				{
 					Result = Index;
-					if(!GameServer()->m_World.m_Core.m_aTuning[0].m_PlayerCollision)
+					if(!PlayerCollision)
 						break;
 					for(int c = 0; c < Num; ++c)
 					{
 						CCharacter *pChr = static_cast<CCharacter *>(apEnts[c]);
+						const bool SameTeam = GameServer()->GetDDRaceTeam(pChr->GetPlayer()->GetCid()) == DDTeam;
+
 						if(GameServer()->Collision()->CheckPoint(SpawnPoint + aPositions[Index]) ||
-							distance(pChr->m_Pos, SpawnPoint + aPositions[Index]) <= pChr->GetProximityRadius())
+							(SameTeam && distance(pChr->m_Pos, SpawnPoint + aPositions[Index]) <= pChr->GetProximityRadius()))
 						{
 							Result = -1;
 							break;
@@ -158,9 +168,9 @@ bool IGameController::CanSpawn(int Team, vec2 *pOutPos, int DDTeam)
 		return false;
 
 	CSpawnEval Eval;
-	EvaluateSpawnType(&Eval, 0, DDTeam);
-	EvaluateSpawnType(&Eval, 1, DDTeam);
-	EvaluateSpawnType(&Eval, 2, DDTeam);
+	EvaluateSpawnType(&Eval, SPAWNTYPE_DEFAULT, DDTeam);
+	EvaluateSpawnType(&Eval, SPAWNTYPE_RED, DDTeam);
+	EvaluateSpawnType(&Eval, SPAWNTYPE_BLUE, DDTeam);
 
 	*pOutPos = Eval.m_Pos;
 	return Eval.m_Got;
@@ -184,8 +194,8 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 
 	if(Index >= ENTITY_SPAWN && Index <= ENTITY_SPAWN_BLUE && Initial)
 	{
-		const int Type = Index - ENTITY_SPAWN;
-		m_avSpawnPoints[Type].push_back(Pos);
+		const int SpawnType = Index - ENTITY_SPAWN;
+		m_avSpawnPoints[SpawnType].push_back(Pos);
 	}
 	else if(Index == ENTITY_DOOR)
 	{
@@ -376,7 +386,8 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 
 	if(Type != -1) // NOLINT(clang-analyzer-unix.Malloc)
 	{
-		CPickup *pPickup = new CPickup(&GameServer()->m_World, Type, SubType, Layer, Number);
+		int PickupFlags = TileFlagsToPickupFlags(Flags);
+		CPickup *pPickup = new CPickup(&GameServer()->m_World, Type, SubType, Layer, Number, PickupFlags);
 		pPickup->m_Pos = Pos;
 		return true; // NOLINT(clang-analyzer-unix.Malloc)
 	}
@@ -580,15 +591,15 @@ void IGameController::Snap(int SnappingClient)
 
 	if(pPlayer && (pPlayer->m_TimerType == CPlayer::TIMERTYPE_GAMETIMER || pPlayer->m_TimerType == CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST) && pPlayer->GetClientVersion() >= VERSION_DDNET_GAMETICK)
 	{
-		if((pPlayer->GetTeam() == TEAM_SPECTATORS || pPlayer->IsPaused()) && pPlayer->m_SpectatorId != SPEC_FREEVIEW && (pPlayer2 = GameServer()->m_apPlayers[pPlayer->m_SpectatorId]))
+		if((pPlayer->GetTeam() == TEAM_SPECTATORS || pPlayer->IsPaused()) && pPlayer->SpectatorId() != SPEC_FREEVIEW && (pPlayer2 = GameServer()->m_apPlayers[pPlayer->SpectatorId()]))
 		{
-			if((pChr = pPlayer2->GetCharacter()) && pChr->m_DDRaceState == DDRACE_STARTED)
+			if((pChr = pPlayer2->GetCharacter()) && pChr->m_DDRaceState == ERaceState::STARTED)
 			{
 				pGameInfoObj->m_WarmupTimer = -pChr->m_StartTime;
 				pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_RACETIME;
 			}
 		}
-		else if((pChr = pPlayer->GetCharacter()) && pChr->m_DDRaceState == DDRACE_STARTED)
+		else if((pChr = pPlayer->GetCharacter()) && pChr->m_DDRaceState == ERaceState::STARTED)
 		{
 			pGameInfoObj->m_WarmupTimer = -pChr->m_StartTime;
 			pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_RACETIME;
@@ -643,7 +654,7 @@ void IGameController::Snap(int SnappingClient)
 		if(!pRaceData)
 			return;
 
-		pRaceData->m_BestTime = round_to_int(m_CurrentRecord * 1000);
+		pRaceData->m_BestTime = m_CurrentRecord.has_value() ? round_to_int(m_CurrentRecord.value() * 1000) : -1;
 		pRaceData->m_Precision = 2;
 		pRaceData->m_RaceFlags = protocol7::RACEFLAG_KEEP_WANTED_WEAPON;
 	}
@@ -653,16 +664,6 @@ void IGameController::Snap(int SnappingClient)
 
 int IGameController::GetAutoTeam(int NotThisId)
 {
-	int aNumplayers[2] = {0, 0};
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if(GameServer()->m_apPlayers[i] && i != NotThisId)
-		{
-			if(GameServer()->m_apPlayers[i]->GetTeam() >= TEAM_RED && GameServer()->m_apPlayers[i]->GetTeam() <= TEAM_BLUE)
-				aNumplayers[GameServer()->m_apPlayers[i]->GetTeam()]++;
-		}
-	}
-
 	int Team = 0;
 
 	if(CanJoinTeam(Team, NotThisId, nullptr, 0))
@@ -736,4 +737,16 @@ void IGameController::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
 	// OnPlayerInfoChange(pPlayer);
+}
+
+int IGameController::TileFlagsToPickupFlags(int TileFlags) const
+{
+	int PickupFlags = 0;
+	if(TileFlags & TILEFLAG_XFLIP)
+		PickupFlags |= PICKUPFLAG_XFLIP;
+	if(TileFlags & TILEFLAG_YFLIP)
+		PickupFlags |= PICKUPFLAG_YFLIP;
+	if(TileFlags & TILEFLAG_ROTATE)
+		PickupFlags |= PICKUPFLAG_ROTATE;
+	return PickupFlags;
 }

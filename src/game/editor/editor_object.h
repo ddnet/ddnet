@@ -1,13 +1,8 @@
 #ifndef GAME_EDITOR_EDITOR_OBJECT_H
 #define GAME_EDITOR_EDITOR_OBJECT_H
 
-#include <functional>
-
-#include <engine/input.h>
-#include <game/client/ui_rect.h>
-
-class CUi;
 class CEditor;
+class IInput;
 class IClient;
 class CConfig;
 class IConsole;
@@ -16,7 +11,9 @@ class IGraphics;
 class ISound;
 class ITextRender;
 class IStorage;
+class CUi;
 class CRenderTools;
+class CRenderMap;
 
 class CEditorObject
 {
@@ -24,59 +21,35 @@ public:
 	virtual ~CEditorObject() = default;
 
 	/**
-	 * Initialise the component and interface pointers.
+	 * Initialize the interface pointers.
 	 * Needs to be the first function that is called.
-	 * The default implentation also resets the component.
 	 */
 	virtual void OnInit(CEditor *pEditor);
-
-	/**
-	 * Maybe calls `OnHot` or `OnActive`.
-	 */
-	virtual void OnUpdate();
-
-	/**
-	 * Gets called before `OnRender`. Should return true
-	 * if the event was consumed.
-	 */
-	virtual bool OnInput(const IInput::CEvent &Event);
-
-	virtual void OnRender(CUIRect View);
-
-	/**
-	 * Gets called after `OnRender` when the component is hot but not active.
-	 */
-	virtual void OnHot();
-
-	/**
-	 * Gets called after `OnRender` when the component is active.
-	 */
-	virtual void OnActive();
-
-	virtual void OnReset();
-	virtual void OnMapLoad();
-
-	bool IsHot();
-	void SetHot();
-	void UnsetHot();
-
-	bool IsActive();
-	void SetActive();
-	void SetInactive();
 
 	CEditor *Editor();
 	const CEditor *Editor() const;
 	IInput *Input();
+	const IInput *Input() const;
 	IClient *Client();
+	const IClient *Client() const;
 	CConfig *Config();
+	const CConfig *Config() const;
 	IConsole *Console();
+	const IConsole *Console() const;
 	IEngine *Engine();
+	const IEngine *Engine() const;
 	IGraphics *Graphics();
+	const IGraphics *Graphics() const;
 	ISound *Sound();
+	const ISound *Sound() const;
 	ITextRender *TextRender();
+	const ITextRender *TextRender() const;
 	IStorage *Storage();
+	const IStorage *Storage() const;
 	CUi *Ui();
-	CRenderTools *RenderTools();
+	const CUi *Ui() const;
+	CRenderMap *RenderMap();
+	const CRenderMap *RenderMap() const;
 
 private:
 	CEditor *m_pEditor;

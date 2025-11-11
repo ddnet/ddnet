@@ -1,15 +1,16 @@
-#include <cinttypes>
-#include <cstdio> // sscanf
+#include "auto_map.h"
 
-#include <engine/console.h>
+#include <base/log.h>
+
 #include <engine/shared/linereader.h>
 #include <engine/storage.h>
 
+#include <game/editor/editor_actions.h>
 #include <game/editor/mapitems/layer_tiles.h>
 #include <game/mapitems.h>
 
-#include "auto_map.h"
-#include "editor_actions.h"
+#include <cinttypes>
+#include <cstdio> // sscanf
 
 // Based on triple32inc from https://github.com/skeeto/hash-prospector/tree/79a6074062a84907df6e45b756134b74e2956760
 static uint32_t HashUInt32(uint32_t Num)
@@ -40,21 +41,24 @@ static int HashLocation(uint32_t Seed, uint32_t Run, uint32_t Rule, uint32_t X, 
 	return Hash % HASH_MAX;
 }
 
-CAutoMapper::CAutoMapper(CEditor *pEditor)
+CAutoMapper::CAutoMapper(CEditorMap *pMap) :
+	CMapObject(pMap)
 {
-	OnInit(pEditor);
 }
 
 void CAutoMapper::Load(const char *pTileName)
 {
 	char aPath[IO_MAX_PATH_LENGTH];
 	str_format(aPath, sizeof(aPath), "editor/automap/%s.rules", pTileName);
+	if(!Storage()->FileExists(aPath, IStorage::TYPE_ALL))
+	{
+		return; // Avoid error message if no rules exist
+	}
+
 	CLineReader LineReader;
 	if(!LineReader.OpenFile(Storage()->OpenFile(aPath, IOFLAG_READ, IStorage::TYPE_ALL)))
 	{
-		char aBuf[IO_MAX_PATH_LENGTH + 32];
-		str_format(aBuf, sizeof(aBuf), "failed to load %s", aPath);
-		Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor/automap", aBuf);
+		log_error("editor/automap", "Failed to load rules from '%s'", aPath);
 		return;
 	}
 
@@ -350,10 +354,7 @@ void CAutoMapper::Load(const char *pTileName)
 		}
 	}
 
-	char aBuf[IO_MAX_PATH_LENGTH + 16];
-	str_format(aBuf, sizeof(aBuf), "loaded %s", aPath);
-	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor/automap", aBuf);
-
+	log_trace("editor/automap", "Loaded '%s'", aPath);
 	m_FileLoaded = true;
 }
 
@@ -377,11 +378,12 @@ int CAutoMapper::CheckIndexFlag(int Flag, const char *pFlag, bool CheckNone) con
 	return Flag;
 }
 
-const char *CAutoMapper::GetConfigName(int Index)
+const char *CAutoMapper::GetConfigName(int Index) const
 {
 	if(Index < 0 || Index >= (int)m_vConfigs.size())
-		return "";
-
+	{
+		return "(unknown)";
+	}
 	return m_vConfigs[Index].m_aName;
 }
 
@@ -398,18 +400,18 @@ void CAutoMapper::ProceedLocalized(CLayerTiles *pLayer, CLayerTiles *pGameLayer,
 
 	CConfiguration *pConf = &m_vConfigs[ConfigId];
 
-	int CommitFromX = clamp(X + pConf->m_StartX, 0, pLayer->m_Width);
-	int CommitFromY = clamp(Y + pConf->m_StartY, 0, pLayer->m_Height);
-	int CommitToX = clamp(X + Width + pConf->m_EndX, 0, pLayer->m_Width);
-	int CommitToY = clamp(Y + Height + pConf->m_EndY, 0, pLayer->m_Height);
+	int CommitFromX = std::clamp(X + pConf->m_StartX, 0, pLayer->m_Width);
+	int CommitFromY = std::clamp(Y + pConf->m_StartY, 0, pLayer->m_Height);
+	int CommitToX = std::clamp(X + Width + pConf->m_EndX, 0, pLayer->m_Width);
+	int CommitToY = std::clamp(Y + Height + pConf->m_EndY, 0, pLayer->m_Height);
 
-	int UpdateFromX = clamp(X + 3 * pConf->m_StartX, 0, pLayer->m_Width);
-	int UpdateFromY = clamp(Y + 3 * pConf->m_StartY, 0, pLayer->m_Height);
-	int UpdateToX = clamp(X + Width + 3 * pConf->m_EndX, 0, pLayer->m_Width);
-	int UpdateToY = clamp(Y + Height + 3 * pConf->m_EndY, 0, pLayer->m_Height);
+	int UpdateFromX = std::clamp(X + 3 * pConf->m_StartX, 0, pLayer->m_Width);
+	int UpdateFromY = std::clamp(Y + 3 * pConf->m_StartY, 0, pLayer->m_Height);
+	int UpdateToX = std::clamp(X + Width + 3 * pConf->m_EndX, 0, pLayer->m_Width);
+	int UpdateToY = std::clamp(Y + Height + 3 * pConf->m_EndY, 0, pLayer->m_Height);
 
-	CLayerTiles *pUpdateLayer = new CLayerTiles(Editor(), UpdateToX - UpdateFromX, UpdateToY - UpdateFromY);
-	CLayerTiles *pUpdateGame = new CLayerTiles(Editor(), UpdateToX - UpdateFromX, UpdateToY - UpdateFromY);
+	CLayerTiles *pUpdateLayer = new CLayerTiles(pLayer->Map(), UpdateToX - UpdateFromX, UpdateToY - UpdateFromY);
+	CLayerTiles *pUpdateGame = new CLayerTiles(pLayer->Map(), UpdateToX - UpdateFromX, UpdateToY - UpdateFromY);
 
 	for(int y = UpdateFromY; y < UpdateToY; y++)
 	{
@@ -469,7 +471,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, CLayerTiles *pGameLayer, int Refe
 
 	static const int s_aTileIndex[] = {TILE_SOLID, TILE_DEATH, TILE_NOHOOK, TILE_FREEZE, TILE_UNFREEZE, TILE_DFREEZE, TILE_DUNFREEZE, TILE_LFREEZE, TILE_LUNFREEZE};
 
-	static_assert(std::size(g_apAutoMapReferenceNames) == std::size(s_aTileIndex) + 1, "g_apAutoMapReferenceNames and s_aTileIndex must include the same items");
+	static_assert(std::size(AUTOMAP_REFERENCE_NAMES) == std::size(s_aTileIndex) + 1, "AUTOMAP_REFERENCE_NAMES and s_aTileIndex must include the same items");
 
 	// for every run: copy tiles, automap, overwrite tiles
 	for(size_t h = 0; h < pConf->m_vRuns.size(); ++h)
@@ -482,7 +484,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, CLayerTiles *pGameLayer, int Refe
 		CLayerTiles *pBuffer = IsFilterable ? pGameLayer : pLayer;
 		if(pRun->m_AutomapCopy)
 		{
-			pReadLayer = new CLayerTiles(Editor(), LayerWidth, LayerHeight);
+			pReadLayer = new CLayerTiles(pLayer->Map(), LayerWidth, LayerHeight);
 
 			int LoopWidth = IsFilterable ? std::min(pGameLayer->m_Width, LayerWidth) : LayerWidth;
 			int LoopHeight = IsFilterable ? std::min(pGameLayer->m_Height, LayerHeight) : LayerHeight;
@@ -513,7 +515,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, CLayerTiles *pGameLayer, int Refe
 			{
 				CTile *pTile = &(pLayer->m_pTiles[y * LayerWidth + x]);
 				const CTile *pReadTile = &(pReadLayer->m_pTiles[y * LayerWidth + x]);
-				Editor()->m_Map.OnModify();
+				pLayer->Map()->OnModify();
 
 				for(size_t i = 0; i < pRun->m_vIndexRules.size(); ++i)
 				{

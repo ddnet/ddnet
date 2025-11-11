@@ -1,6 +1,7 @@
 // This file can be included several times.
 
 #ifndef REGISTER_QUICK_ACTION
+// This helps IDEs properly syntax highlight the uses of the macro below.
 #define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, button_color, description)
 #endif
 
@@ -216,7 +217,11 @@ REGISTER_QUICK_ACTION(
 REGISTER_QUICK_ACTION(
 	SaveAs,
 	"Save as",
-	[&]() { InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save as", "maps", true, CEditor::CallbackSaveMap, this); },
+	[&]() {
+		char aDefaultName[IO_MAX_PATH_LENGTH];
+		fs_split_file_extension(fs_filename(m_aFilename), aDefaultName, sizeof(aDefaultName));
+		m_FileBrowser.ShowFileDialog(IStorage::TYPE_SAVE, CFileBrowser::EFileType::MAP, "Save map", "Save as", "maps", aDefaultName, CallbackSaveMap, this);
+	},
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
@@ -227,18 +232,21 @@ REGISTER_QUICK_ACTION(
 	[&]() {
 		if(HasUnsavedData())
 		{
-			m_PopupEventType = POPEVENT_LOADCURRENT;
-			m_PopupEventActivated = true;
+			if(!m_PopupEventWasActivated)
+			{
+				m_PopupEventType = POPEVENT_LOADCURRENT;
+				m_PopupEventActivated = true;
+			}
 		}
 		else
 		{
 			LoadCurrentMap();
 		}
 	},
-	ALWAYS_FALSE,
+	[&]() -> bool { return Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK; },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"[Ctrl+Alt+L] Open the current ingame map for editing.")
+	"[Ctrl+Shift+L] Open the current ingame map for editing.")
 REGISTER_QUICK_ACTION(
 	Envelopes,
 	"Envelopes",
@@ -266,7 +274,7 @@ REGISTER_QUICK_ACTION(
 REGISTER_QUICK_ACTION(
 	AddImage,
 	"Add image",
-	[&]() { InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_IMG, "Add Image", "Add", "mapres", false, AddImage, this); },
+	[&]() { m_FileBrowser.ShowFileDialog(IStorage::TYPE_ALL, CFileBrowser::EFileType::IMAGE, "Add image", "Add", "mapres", "", AddImage, this); },
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
@@ -284,7 +292,6 @@ REGISTER_QUICK_ACTION(
 	"Show info: Off",
 	[&]() {
 		m_ShowTileInfo = SHOW_TILE_OFF;
-		m_ShowEnvelopePreview = SHOWENV_NONE;
 	},
 	ALWAYS_FALSE,
 	[&]() -> bool { return m_ShowTileInfo == SHOW_TILE_OFF; },
@@ -295,7 +302,6 @@ REGISTER_QUICK_ACTION(
 	"Show info: Dec",
 	[&]() {
 		m_ShowTileInfo = SHOW_TILE_DECIMAL;
-		m_ShowEnvelopePreview = SHOWENV_NONE;
 	},
 	ALWAYS_FALSE,
 	[&]() -> bool { return m_ShowTileInfo == SHOW_TILE_DECIMAL; },
@@ -306,12 +312,22 @@ REGISTER_QUICK_ACTION(
 	"Show info: Hex",
 	[&]() {
 		m_ShowTileInfo = SHOW_TILE_HEXADECIMAL;
-		m_ShowEnvelopePreview = SHOWENV_NONE;
 	},
 	ALWAYS_FALSE,
 	[&]() -> bool { return m_ShowTileInfo == SHOW_TILE_HEXADECIMAL; },
 	DEFAULT_BTN,
 	"[Ctrl+Shift+I] Show tile information in hexadecimal.")
+REGISTER_QUICK_ACTION(
+	PreviewQuadEnvelopes,
+	"Preview quad envelopes",
+	[&]() {
+		m_ShowEnvelopePreview = !m_ShowEnvelopePreview;
+		m_ActiveEnvelopePreview = EEnvelopePreview::NONE;
+	},
+	ALWAYS_FALSE,
+	[&]() -> bool { return m_ShowEnvelopePreview; },
+	DEFAULT_BTN,
+	"Toggle previewing the paths of quads with a position envelope when a quad layer is selected.")
 REGISTER_QUICK_ACTION(
 	DeleteLayer,
 	"Delete layer",

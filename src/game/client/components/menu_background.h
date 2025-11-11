@@ -18,7 +18,6 @@ class CMenuMap : public CBackgroundEngineMap
 class CTheme
 {
 public:
-	CTheme() {}
 	CTheme(const char *pName, bool HasDay, bool HasNight) :
 		m_Name(pName), m_HasDay(HasDay), m_HasNight(HasNight) {}
 
@@ -64,7 +63,10 @@ public:
 		POS_RESERVED2,
 
 		NUM_POS,
+	};
 
+	enum
+	{
 		POS_BROWSER_CUSTOM_NUM = (POS_BROWSER_CUSTOM4 - POS_BROWSER_CUSTOM0) + 1,
 		POS_SETTINGS_RESERVED_NUM = (POS_SETTINGS_RESERVED1 - POS_SETTINGS_RESERVED0) + 1,
 		POS_RESERVED_NUM = (POS_RESERVED2 - POS_RESERVED0) + 1,
@@ -100,9 +102,9 @@ private:
 
 public:
 	CMenuBackground();
-	~CMenuBackground() override {}
-	virtual int Sizeof() const override { return sizeof(*this); }
+	int Sizeof() const override { return sizeof(*this); }
 
+	void OnInterfacesInit(CGameClient *pClient) override;
 	void OnInit() override;
 	void OnMapLoad() override;
 	void OnRender() override;
@@ -113,7 +115,6 @@ public:
 	bool IsLoading() const { return m_Loading; }
 
 	class CCamera *GetCurCamera() override;
-	const char *LoadingTitle() const override;
 
 	void ChangePosition(int PositionNumber);
 

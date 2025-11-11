@@ -8,8 +8,6 @@
 
 using namespace FontIcons;
 
-const ColorRGBA CEditor::ms_DefaultPropColor = ColorRGBA(1, 1, 1, 0.5f);
-
 int CEditor::DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIds, int *pNewVal, const std::vector<ColorRGBA> &vColors)
 {
 	auto Res = DoPropertiesWithState<int>(pToolbox, pProps, pIds, pNewVal, vColors);
@@ -51,13 +49,13 @@ SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pPro
 			}
 			if(DoButton_FontIcon((char *)&pIds[i] + 1, FONT_ICON_MINUS, 0, &Dec, BUTTONFLAG_LEFT, "Decrease value.", IGraphics::CORNER_L, 7.0f))
 			{
-				*pNewVal = clamp(pProps[i].m_Value - 1, pProps[i].m_Min, pProps[i].m_Max);
+				*pNewVal = std::clamp(pProps[i].m_Value - 1, pProps[i].m_Min, pProps[i].m_Max);
 				Change = i;
 				State = EEditState::ONE_GO;
 			}
 			if(DoButton_FontIcon(((char *)&pIds[i]) + 2, FONT_ICON_PLUS, 0, &Inc, BUTTONFLAG_LEFT, "Increase value.", IGraphics::CORNER_R, 7.0f))
 			{
-				*pNewVal = clamp(pProps[i].m_Value + 1, pProps[i].m_Min, pProps[i].m_Max);
+				*pNewVal = std::clamp(pProps[i].m_Value + 1, pProps[i].m_Min, pProps[i].m_Max);
 				Change = i;
 				State = EEditState::ONE_GO;
 			}
@@ -156,25 +154,25 @@ SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pPro
 			Ui()->DoLabel(&Shifter, "Y", 10.0f, TEXTALIGN_MC);
 			if(DoButton_FontIcon(&pIds[i], FONT_ICON_MINUS, 0, &Left, BUTTONFLAG_LEFT, "Shift left.", IGraphics::CORNER_L, 7.0f))
 			{
-				*pNewVal = DIRECTION_LEFT;
+				*pNewVal = (int)EShiftDirection::LEFT;
 				Change = i;
 				State = EEditState::ONE_GO;
 			}
 			if(DoButton_FontIcon(((char *)&pIds[i]) + 3, FONT_ICON_PLUS, 0, &Right, BUTTONFLAG_LEFT, "Shift right.", IGraphics::CORNER_R, 7.0f))
 			{
-				*pNewVal = DIRECTION_RIGHT;
+				*pNewVal = (int)EShiftDirection::RIGHT;
 				Change = i;
 				State = EEditState::ONE_GO;
 			}
 			if(DoButton_FontIcon(((char *)&pIds[i]) + 1, FONT_ICON_MINUS, 0, &Up, BUTTONFLAG_LEFT, "Shift up.", IGraphics::CORNER_L, 7.0f))
 			{
-				*pNewVal = DIRECTION_UP;
+				*pNewVal = (int)EShiftDirection::UP;
 				Change = i;
 				State = EEditState::ONE_GO;
 			}
 			if(DoButton_FontIcon(((char *)&pIds[i]) + 2, FONT_ICON_PLUS, 0, &Down, BUTTONFLAG_LEFT, "Shift down.", IGraphics::CORNER_R, 7.0f))
 			{
-				*pNewVal = DIRECTION_DOWN;
+				*pNewVal = (int)EShiftDirection::DOWN;
 				Change = i;
 				State = EEditState::ONE_GO;
 			}
@@ -223,7 +221,7 @@ SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pPro
 			if(pProps[i].m_Value < 0)
 				pName = "None";
 			else
-				pName = g_apAutoMapReferenceNames[pProps[i].m_Value];
+				pName = AUTOMAP_REFERENCE_NAMES[pProps[i].m_Value];
 
 			if(DoButton_Ex(&pIds[i], pName, 0, &Shifter, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_ALL))
 				PopupSelectAutoMapReferenceInvoke(pProps[i].m_Value, Ui()->MouseX(), Ui()->MouseY());
@@ -245,8 +243,10 @@ SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pPro
 			Shifter.VSplitRight(10.0f, &Shifter, &Inc);
 			Shifter.VSplitLeft(10.0f, &Dec, &Shifter);
 
-			if(CurValue <= 0)
+			if(CurValue <= 0 || CurValue > (int)m_Map.m_vpEnvelopes.size())
+			{
 				str_copy(aBuf, "None:");
+			}
 			else if(m_Map.m_vpEnvelopes[CurValue - 1]->m_aName[0])
 			{
 				str_format(aBuf, sizeof(aBuf), "%s:", m_Map.m_vpEnvelopes[CurValue - 1]->m_aName);
@@ -257,7 +257,9 @@ SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pPro
 				}
 			}
 			else
+			{
 				aBuf[0] = '\0';
+			}
 
 			auto NewValueRes = UiDoValueSelector((char *)&pIds[i], &Shifter, aBuf, CurValue, 0, m_Map.m_vpEnvelopes.size(), 1, 1.0f, "Select envelope.", false, false, IGraphics::CORNER_NONE);
 			int NewVal = NewValueRes.m_Value;

@@ -4,30 +4,34 @@
 #define GAME_CLIENT_GAMECLIENT_H
 
 #include "render.h"
+
 #include <base/color.h>
 #include <base/vmath.h>
+
 #include <engine/client.h>
 #include <engine/client/enums.h>
 #include <engine/console.h>
 #include <engine/shared/config.h>
+#include <engine/shared/snapshot.h>
 
-#include <game/collision.h>
-#include <game/gamecore.h>
-#include <game/layers.h>
-#include <game/mapbugs.h>
-#include <game/teamscore.h>
+#include <generated/protocol7.h>
+#include <generated/protocolglue.h>
 
 #include <game/client/prediction/gameworld.h>
 #include <game/client/race.h>
-
-#include <game/generated/protocol7.h>
-#include <game/generated/protocolglue.h>
+#include <game/collision.h>
+#include <game/gamecore.h>
+#include <game/layers.h>
+#include <game/map/render_map.h>
+#include <game/mapbugs.h>
+#include <game/teamscore.h>
 
 // components
 #include "components/background.h"
 #include "components/binds.h"
 #include "components/broadcast.h"
 #include "components/camera.h"
+#include "components/censor.h"
 #include "components/chat.h"
 #include "components/console.h"
 #include "components/controls.h"
@@ -40,8 +44,11 @@
 #include "components/freezebars.h"
 #include "components/ghost.h"
 #include "components/hud.h"
+#include "components/important_alert.h"
 #include "components/infomessages.h"
 #include "components/items.h"
+#include "components/key_binder.h"
+#include "components/local_server.h"
 #include "components/mapimages.h"
 #include "components/maplayers.h"
 #include "components/mapsounds.h"
@@ -133,10 +140,12 @@ public:
 	CInfoMessages m_InfoMessages;
 	CCamera m_Camera;
 	CChat m_Chat;
+	CCensor m_Censor;
 	CMotd m_Motd;
 	CBroadcast m_Broadcast;
 	CGameConsole m_GameConsole;
 	CBinds m_Binds;
+	CKeyBinder m_KeyBinder;
 	CParticles m_Particles;
 	CMenus m_Menus;
 	CSkins m_Skins;
@@ -144,6 +153,7 @@ public:
 	CCountryFlags m_CountryFlags;
 	CFlow m_Flow;
 	CHud m_Hud;
+	CImportantAlert m_ImportantAlert;
 	CDebugHud m_DebugHud;
 	CControls m_Controls;
 	CEffects m_Effects;
@@ -162,8 +172,8 @@ public:
 	CItems m_Items;
 	CMapImages m_MapImages;
 
-	CMapLayers m_MapLayersBackground = CMapLayers{CMapLayers::TYPE_BACKGROUND};
-	CMapLayers m_MapLayersForeground = CMapLayers{CMapLayers::TYPE_FOREGROUND};
+	CMapLayers m_MapLayersBackground = CMapLayers{ERenderType::RENDERTYPE_BACKGROUND};
+	CMapLayers m_MapLayersForeground = CMapLayers{ERenderType::RENDERTYPE_FOREGROUND};
 	CBackground m_Background;
 	CMenuBackground m_MenuBackground;
 
@@ -173,6 +183,8 @@ public:
 	CGhost m_Ghost;
 
 	CTooltips m_Tooltips;
+
+	CLocalServer m_LocalServer;
 
 private:
 	std::vector<class CComponent *> m_vpAll;
@@ -196,6 +208,7 @@ private:
 	class IEditor *m_pEditor;
 	class IFriends *m_pFriends;
 	class IFriends *m_pFoes;
+	class IDiscord *m_pDiscord;
 #if defined(CONF_AUTOUPDATE)
 	class IUpdater *m_pUpdater;
 #endif
@@ -235,6 +248,7 @@ private:
 	static void ConchainRefreshSkins(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainSpecialDummy(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
+	static void ConTuneParam(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneZone(IConsole::IResult *pResult, void *pUserData);
 	static void ConMapbug(IConsole::IResult *pResult, void *pUserData);
 
@@ -267,6 +281,7 @@ public:
 	class IFavorites *Favorites() const { return m_pFavorites; }
 	class IServerBrowser *ServerBrowser() const { return m_pServerBrowser; }
 	class CRenderTools *RenderTools() { return &m_RenderTools; }
+	class CRenderMap *RenderMap() { return &m_RenderMap; }
 	class CLayers *Layers() { return &m_Layers; }
 	CCollision *Collision() { return &m_Collision; }
 	const CCollision *Collision() const { return &m_Collision; }
@@ -305,8 +320,6 @@ public:
 	int m_ServerMode;
 	CGameInfo m_GameInfo;
 
-	char m_aSavedLocalRconPassword[sizeof(g_Config.m_SvRconPassword)] = "";
-
 	int m_DemoSpecId;
 
 	vec2 m_LocalCharacterPos;
@@ -316,19 +329,23 @@ public:
 	CCharacterCore m_PredictedChar;
 
 	// snap pointers
-	struct CSnapState
+	class CSnapState
 	{
+	public:
 		const CNetObj_Character *m_pLocalCharacter;
 		const CNetObj_Character *m_pLocalPrevCharacter;
 		const CNetObj_PlayerInfo *m_pLocalInfo;
 		const CNetObj_SpectatorInfo *m_pSpectatorInfo;
 		const CNetObj_SpectatorInfo *m_pPrevSpectatorInfo;
-		const CNetObj_Flag *m_apFlags[2];
+		int m_NumFlags;
+		const CNetObj_Flag *m_apFlags[CSnapshot::MAX_ITEMS];
+		const CNetObj_Flag *m_apPrevFlags[CSnapshot::MAX_ITEMS];
 		const CNetObj_GameInfo *m_pGameInfoObj;
 		const CNetObj_GameData *m_pGameDataObj;
-		int m_GameDataSnapId;
+		const CNetObj_GameData *m_pPrevGameDataObj;
 
 		const CNetObj_PlayerInfo *m_apPlayerInfos[MAX_CLIENTS];
+		const CNetObj_PlayerInfo *m_apPrevPlayerInfos[MAX_CLIENTS];
 		const CNetObj_PlayerInfo *m_apInfoByScore[MAX_CLIENTS];
 		const CNetObj_PlayerInfo *m_apInfoByName[MAX_CLIENTS];
 		const CNetObj_PlayerInfo *m_apInfoByDDTeamScore[MAX_CLIENTS];
@@ -339,7 +356,6 @@ public:
 		int m_aTeamSize[2];
 		int m_HighestClientId;
 
-		// spectate data
 		class CSpectateInfo
 		{
 		public:
@@ -353,11 +369,12 @@ public:
 			int m_Deadzone;
 			int m_FollowFactor;
 			int m_SpectatorCount;
-		} m_SpecInfo;
+		};
+		CSpectateInfo m_SpecInfo;
 
-		//
-		struct CCharacterInfo
+		class CCharacterInfo
 		{
+		public:
 			bool m_Active;
 
 			// snapshots
@@ -365,23 +382,21 @@ public:
 			CNetObj_Character m_Cur;
 
 			CNetObj_DDNetCharacter m_ExtendedData;
-			const CNetObj_DDNetCharacter *m_PrevExtendedData;
+			const CNetObj_DDNetCharacter *m_pPrevExtendedData;
 			bool m_HasExtendedData;
 			bool m_HasExtendedDisplayInfo;
-
-			// interpolated position
-			vec2 m_Position;
 		};
-
 		CCharacterInfo m_aCharacters[MAX_CLIENTS];
 	};
 
 	CSnapState m_Snap;
-	int m_aLocalTuneZone[NUM_DUMMIES];
-	bool m_aReceivedTuning[NUM_DUMMIES];
-	int m_aExpectingTuningForZone[NUM_DUMMIES];
-	int m_aExpectingTuningSince[NUM_DUMMIES];
-	CTuningParams m_aTuning[NUM_DUMMIES];
+	int m_aLocalTuneZone[NUM_DUMMIES]; // current tunezone (0-255)
+	bool m_aReceivedTuning[NUM_DUMMIES]; // was tuning message received after zone change
+	int m_aExpectingTuningForZone[NUM_DUMMIES]; // tunezone changed, waiting for tuning for that zone
+	int m_aExpectingTuningSince[NUM_DUMMIES]; // how many snaps received since tunezone changed
+	CTuningParams m_aTuning[NUM_DUMMIES]; // current local player tuning, only what the player/dummy has
+
+	std::bitset<RECORDER_MAX> m_ActiveRecordings;
 
 	// spectate cursor data
 	class CCursorInfo
@@ -428,7 +443,6 @@ public:
 		char m_aClan[MAX_CLAN_LENGTH];
 		int m_Country;
 		char m_aSkinName[MAX_SKIN_LENGTH];
-		int m_SkinColor;
 		int m_Team;
 		int m_Emoticon;
 		float m_EmoticonStartFraction;
@@ -456,7 +470,7 @@ public:
 		CCharacterCore m_Predicted;
 		CCharacterCore m_PrevPredicted;
 
-		std::shared_ptr<CManagedTeeRenderInfo> m_pSkinInfo; // this is what the server reports
+		std::shared_ptr<CManagedTeeRenderInfo> m_pSkinInfo = nullptr; // this is what the server reports
 		CTeeRenderInfo m_RenderInfo; // this is what we use
 
 		float m_Angle;
@@ -476,6 +490,8 @@ public:
 
 		CNetObj_Character m_Snapped;
 		CNetObj_Character m_Evolved;
+
+		CNetMsg_Sv_PreInput m_aPreInputs[200];
 
 		// rendered characters
 		CNetObj_Character m_RenderCur;
@@ -555,10 +571,11 @@ public:
 	CClientStats m_aStats[MAX_CLIENTS];
 
 	CRenderTools m_RenderTools;
+	CRenderMap m_RenderMap;
 
 	void OnReset();
 
-	size_t ComponentCount() { return m_vpAll.size(); }
+	size_t ComponentCount() const { return m_vpAll.size(); }
 
 	// hooks
 	void OnConnected() override;
@@ -602,8 +619,10 @@ public:
 	void OnSkinUpdate(const char *pSkinName);
 	std::shared_ptr<CManagedTeeRenderInfo> CreateManagedTeeRenderInfo(const CTeeRenderInfo &TeeRenderInfo, const CSkinDescriptor &SkinDescriptor);
 	std::shared_ptr<CManagedTeeRenderInfo> CreateManagedTeeRenderInfo(const CClientData &Client);
+	void CollectManagedTeeRenderInfos(const std::function<void(const char *pSkinName)> &ActiveSkinAcceptor);
 
 	void RenderShutdownMessage() override;
+	void ProcessDemoSnapshot(CSnapshot *pSnap) override;
 
 	const char *GetItemName(int Type) const override;
 	const char *Version() const override;
@@ -611,7 +630,7 @@ public:
 	const char *NetVersion7() const override;
 	int DDNetVersion() const override;
 	const char *DDNetVersionStr() const override;
-	virtual int ClientVersion7() const override;
+	int ClientVersion7() const override;
 
 	void DoTeamChangeMessage7(const char *pName, int ClientId, int Team, const char *pPrefix = "");
 
@@ -644,15 +663,15 @@ public:
 	int LastRaceTick() const;
 	int CurrentRaceTime() const;
 
-	bool IsTeamPlay() { return m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS; }
+	bool IsTeamPlay() const { return m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS; }
 
-	bool AntiPingPlayers() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingPlayers && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK && (m_aTuning[g_Config.m_ClDummy].m_PlayerCollision || m_aTuning[g_Config.m_ClDummy].m_PlayerHooking); }
-	bool AntiPingGrenade() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingGrenade && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK; }
-	bool AntiPingWeapons() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingWeapons && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK; }
-	bool AntiPingGunfire() { return AntiPingGrenade() && AntiPingWeapons() && g_Config.m_ClAntiPingGunfire; }
+	bool AntiPingPlayers() const { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingPlayers && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK && (m_aTuning[g_Config.m_ClDummy].m_PlayerCollision || m_aTuning[g_Config.m_ClDummy].m_PlayerHooking); }
+	bool AntiPingGrenade() const { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingGrenade && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK; }
+	bool AntiPingWeapons() const { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingWeapons && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK; }
+	bool AntiPingGunfire() const { return AntiPingGrenade() && AntiPingWeapons() && g_Config.m_ClAntiPingGunfire; }
 	bool Predict() const;
-	bool PredictDummy() { return g_Config.m_ClPredictDummy && Client()->DummyConnected() && m_Snap.m_LocalClientId >= 0 && m_PredictedDummyId >= 0 && !m_aClients[m_PredictedDummyId].m_Paused; }
-	const CTuningParams *GetTuning(int i) { return &m_aTuningList[i]; }
+	bool PredictDummy() const { return g_Config.m_ClPredictDummy && Client()->DummyConnected() && m_Snap.m_LocalClientId >= 0 && m_PredictedDummyId >= 0 && !m_aClients[m_PredictedDummyId].m_Paused; }
+	const CTuningParams *GetTuning(int i) const { return &m_aTuningList[i]; }
 	ColorRGBA GetDDTeamColor(int DDTeam, float Lightness = 0.5f) const;
 	void FormatClientId(int ClientId, char (&aClientId)[16], EClientIdFormat Format) const;
 
@@ -758,7 +777,7 @@ public:
 		IGraphics::CTextureHandle m_SpriteNinjaBarEmpty;
 		IGraphics::CTextureHandle m_SpriteNinjaBarEmptyRight;
 
-		bool IsSixup()
+		bool IsSixup() const
 		{
 			return m_SpriteNinjaBarFullLeft.IsValid();
 		}
@@ -833,7 +852,9 @@ public:
 	{
 		IGraphics::CTextureHandle m_SpriteParticleSnowflake;
 		IGraphics::CTextureHandle m_SpriteParticleSparkle;
-		IGraphics::CTextureHandle m_aSpriteParticles[2];
+		IGraphics::CTextureHandle m_SpritePulley;
+		IGraphics::CTextureHandle m_SpriteHectagon;
+		IGraphics::CTextureHandle m_aSpriteParticles[4];
 	};
 
 	SClientExtrasSkin m_ExtrasSkin;
@@ -861,6 +882,7 @@ private:
 	std::vector<std::shared_ptr<CManagedTeeRenderInfo>> m_vpManagedTeeRenderInfos;
 	void UpdateManagedTeeRenderInfos();
 
+	void UpdateLocalTuning();
 	void UpdatePrediction();
 	void UpdateSpectatorCursor();
 	void UpdateRenderedCharacters();
@@ -877,6 +899,8 @@ private:
 
 	void LoadMapSettings();
 	CMapBugs m_MapBugs;
+
+	// tunings for every zone on the map, 0 is a global tune
 	CTuningParams m_aTuningList[NUM_TUNEZONES];
 	CTuningParams *TuningList() { return m_aTuningList; }
 
@@ -909,6 +933,9 @@ private:
 	};
 
 	SMultiView m_MultiView;
+
+	void OnSaveCodeNetMessage(const CNetMsg_Sv_SaveCode *pMsg);
+	void StoreSave(const char *pTeamMembers, const char *pGeneratedCode) const;
 };
 
 ColorRGBA CalculateNameColor(ColorHSLA TextColorHSL);

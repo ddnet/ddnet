@@ -15,35 +15,47 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest, ubuntu-22.04]
+        name: [ubuntu-latest-fancy, macOS-latest, windows-latest, ubuntu-22.04, windows-latest-mingw]
         include:
-        - os: ubuntu-latest
+        - name: ubuntu-latest-fancy
+          os: ubuntu-latest
           cmake-args: -G Ninja
           cmake-init-env: CXXFLAGS=-Werror
           package-file: "*-linux_x86_64.tar.xz"
-          fancy: true
-        - os: ubuntu-22.04
+          workaround-issue10203-run-after-configure:
+        - name: ubuntu-22.04
+          os: ubuntu-22.04
           cmake-path: /usr/bin/
           cmake-args: -G Ninja -DTEST_MYSQL=ON
           cmake-init-env: CXXFLAGS=-Werror
           gtest-env: GTEST_FILTER=-*SQLite*
           package-file: "*-linux_x86_64.tar.xz"
-          fancy: false
-        - os: macOS-latest
+          workaround-issue10203-run-after-configure:
+        - name: macOS-latest
+          os: macOS-latest
           cmake-args: -G Ninja
           cmake-init-env: CXXFLAGS=-Werror
           package-file: "*-macos.dmg"
-          fancy: false
-        - os: windows-latest
-          cmake-args: -A x64
+          workaround-issue10203-run-after-configure:
+        - name: windows-latest
+          os: windows-latest
+          cmake-args: -A x64 -DEXCEPTION_HANDLING=ON
           cmake-init-env: CXXFLAGS=/WX LDFLAGS=/WX
           package-file: "*-win64.zip"
-          fancy: false
+          workaround-issue10203-run-after-configure:
+        - name: windows-latest-mingw
+          os: windows-latest
+          cmake-args: -G Ninja -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DEXCEPTION_HANDLING=ON -DCMAKE_RC_COMPILER=windres -DCMAKE_AR=ar
+          cmake-init-env: CXXFLAGS=-Werror LDFLAGS=-Werror
+          package-file: "*-win64.zip"
+          # Delete outdated libwinpthread-1.dll after configuring to workaround https://github.com/ddnet/ddnet/issues/10203 when using MinGW.
+          # Adding this condition into the individual steps is not possible without using bash shell consistently, which does not work for windows-latest.
+          workaround-issue10203-run-after-configure: rm libwinpthread-1.dll
 
     steps:
     - uses: actions/checkout@v4
       with:
-        submodules: true
+        submodules: recursive
 
     - name: Prepare Linux
       if: contains(matrix.os, 'ubuntu')
@@ -54,7 +66,7 @@ jobs:
         sudo apt-get install pkg-config ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libvulkan-dev glslang-tools spirv-tools libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev libpng-dev valgrind gcovr libglew-dev -y
 
     - name: Prepare Linux (non-fancy)
-      if: ${{ contains(matrix.os, 'ubuntu') && !matrix.fancy }}
+      if: contains(matrix.os, 'ubuntu') && !contains(matrix.name, 'fancy')
       run: |
         curl -LO https://github.com/Kitware/CMake/releases/download/v3.13.4/cmake-3.13.4-Linux-x86_64.tar.gz
         sudo tar --strip-components 1 -C /usr -xf cmake-3.13.4-Linux-x86_64.tar.gz
@@ -74,7 +86,7 @@ jobs:
         EOF
 
     - name: Prepare Linux (fancy)
-      if: contains(matrix.os, 'ubuntu') && matrix.fancy
+      if: contains(matrix.os, 'ubuntu') && contains(matrix.name, 'fancy')
       run: |
         sudo apt-get install cmake libmariadb-dev libwebsockets-dev mariadb-server -y
         sudo systemctl stop mysql
@@ -99,17 +111,30 @@ jobs:
         echo /Library/Frameworks/Python.framework/Versions/3.12/bin >> $GITHUB_PATH
         sudo rm -rf /Library/Developer/CommandLineTools
 
+    - name: Prepare Windows MinGW
+      if: contains(matrix.os, 'windows') && contains(matrix.name, 'mingw')
+      run: |
+        rustup toolchain install stable-x86_64-pc-windows-gnu
+        rustup target add x86_64-pc-windows-gnu
+        rustup default stable-x86_64-pc-windows-gnu
+        rustup set default-host x86_64-pc-windows-gnu
+
     - name: Cache Rust dependencies
       uses: Swatinem/rust-cache@v2
+      with:
+          workspaces: |
+              src/mastersrv
+              src/masterping
+              ./
 
     - name: Build mastersrv
-      if: "!contains(matrix.os, 'ubuntu-22.04')"
+      if: ${{ !contains(matrix.os, 'ubuntu-22.04') }}
       run: |
         cd src/mastersrv
         cargo build
 
     - name: Build masterping
-      if: "!contains(matrix.os, 'ubuntu-22.04')"
+      if: ${{ !contains(matrix.os, 'ubuntu-22.04') }}
       run: |
         cd src/masterping
         cargo build
@@ -120,12 +145,13 @@ jobs:
         cd debug
         ${{ matrix.cmake-path }}cmake --version
         ${{ matrix.cmake-path }}cmake -E env ${{ matrix.cmake-init-env }} ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=Debug -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=. ..
-        ${{ matrix.cmake-path }}cmake --build . --config Debug --target everything ${{ matrix.build-args }}
+        ${{ matrix.workaround-issue10203-run-after-configure }}
+        ${{ matrix.cmake-path }}cmake --build . --config Debug --target everything
 
     - name: Test debug
       run: |
         cd debug
-        ${{ matrix.cmake-path }}cmake -E env ${{ matrix.gtest-env }} ${{ matrix.cmake-path }}cmake --build . --config Debug --target run_tests ${{ matrix.build-args }}
+        ${{ matrix.cmake-path }}cmake -E env ${{ matrix.gtest-env }} ${{ matrix.cmake-path }}cmake --build . --config Debug --target run_tests
 
     - name: Run debug server
       run: |
@@ -137,12 +163,13 @@ jobs:
         mkdir release
         cd release
         ${{ matrix.cmake-path }}cmake -E env ${{ matrix.cmake-init-env }} ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=Release -Werror=dev -DDOWNLOAD_GTEST=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. ..
-        ${{ matrix.cmake-path }}cmake --build . --config Release --target everything ${{ matrix.build-args }}
+        ${{ matrix.workaround-issue10203-run-after-configure }}
+        ${{ matrix.cmake-path }}cmake --build . --config Release --target everything
 
     - name: Test release
       run: |
         cd release
-        ${{ matrix.cmake-path }}cmake -E env ${{ matrix.gtest-env }} ${{ matrix.cmake-path }}cmake --build . --config Release --target run_tests ${{ matrix.build-args }}
+        ${{ matrix.cmake-path }}cmake -E env ${{ matrix.gtest-env }} ${{ matrix.cmake-path }}cmake --build . --config Release --target run_tests
 
     - name: Run release server
       run: |
@@ -155,13 +182,14 @@ jobs:
         mkdir headless
         cd headless
         ${{ matrix.cmake-path }}cmake -E env CXXFLAGS="--coverage -Werror" ${{ matrix.cmake-path }}cmake -E env LDFLAGS="--coverage -Werror" ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DHEADLESS_CLIENT=ON -DCMAKE_BUILD_TYPE=Debug -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=. ..
-        ${{ matrix.cmake-path }}cmake -E env RUSTFLAGS="-Clink-arg=--coverage" ${{ matrix.cmake-path }}cmake --build . --config Debug  ${{ matrix.build-args }}
+        ${{ matrix.workaround-issue10203-run-after-configure }}
+        ${{ matrix.cmake-path }}cmake -E env RUSTFLAGS="-Clink-arg=--coverage" ${{ matrix.cmake-path }}cmake --build . --config Debug
 
     - name: Test headless client (unit tests)
       if: contains(matrix.os, 'ubuntu-latest')
       run: |
         cd headless
-        ${{ matrix.cmake-path }}cmake -E env RUSTFLAGS="-Clink-arg=--coverage" RUSTDOCFLAGS="-Clink-arg=--coverage" ${{ matrix.cmake-path }}cmake --build . --config Debug --target run_tests ${{ matrix.build-args }}
+        ${{ matrix.cmake-path }}cmake -E env RUSTFLAGS="-Clink-arg=--coverage" RUSTDOCFLAGS="-Clink-arg=--coverage" ${{ matrix.cmake-path }}cmake --build . --config Debug --target run_tests
 
     - name: Upload Codecov report (unit tests)
       if: contains(matrix.os, 'ubuntu-latest')
@@ -170,21 +198,22 @@ jobs:
         flags: unittests
 
     - name: Build in release mode with debug info and all features on
-      if: matrix.fancy
+      if: contains(matrix.name, 'fancy')
       run: |
         mkdir fancy
         cd fancy
         ${{ matrix.cmake-path }}cmake -E env ${{ matrix.cmake-init-env }} ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=RelWithDebInfo -DDOWNLOAD_GTEST=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. -DANTIBOT=ON -DWEBSOCKETS=ON ..
-        ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo --target everything ${{ matrix.build-args }}
+        ${{ matrix.workaround-issue10203-run-after-configure }}
+        ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo --target everything
 
     - name: Test fancy
-      if: matrix.fancy
+      if: contains(matrix.name, 'fancy')
       run: |
         cd fancy
-        ${{ matrix.cmake-path }}cmake -E env ${{ matrix.gtest-env }} ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo --target run_tests ${{ matrix.build-args }}
+        ${{ matrix.cmake-path }}cmake -E env ${{ matrix.gtest-env }} ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo --target run_tests
 
     - name: Run fancy server
-      if: matrix.fancy
+      if: contains(matrix.name, 'fancy')
       run: |
         cd fancy
         ./DDNet-Server shutdown
@@ -194,7 +223,8 @@ jobs:
       run: |
         # Remove old coverage data:
         find headless -name '*.gcno' -o -name '*.gcda' -delete
-        python scripts/integration_test.py --valgrind-memcheck headless
+        cp src/mastersrv/target/debug/mastersrv headless
+        python scripts/integration_test.py --test-mastersrv --valgrind-memcheck headless
 
     - name: Upload Codecov report (integration tests)
       if: contains(matrix.os, 'ubuntu-latest')
@@ -205,14 +235,14 @@ jobs:
     - name: Package
       run: |
         cd release
-        ${{ matrix.cmake-path }}cmake --build . --config Release --target package_default ${{ matrix.build-args }}
+        ${{ matrix.cmake-path }}cmake --build . --config Release --target package_default
         mkdir artifacts
         mv ${{ matrix.package-file }} artifacts
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: ddnet-${{ matrix.os }}
+        name: ddnet-${{ matrix.name }}
         path: release/artifacts
 
   build-android:
@@ -222,7 +252,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        submodules: true
+        submodules: recursive
 
     - name: Validate Gradle Wrapper
       uses: gradle/actions/wrapper-validation@v4
@@ -263,6 +293,11 @@ jobs:
 
     - name: Cache Rust dependencies
       uses: Swatinem/rust-cache@v2
+      with:
+          workspaces: |
+              src/mastersrv
+              src/masterping
+              ./
 
     - name: Build Android app
       env:

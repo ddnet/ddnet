@@ -5,14 +5,15 @@
 #include "serverbrowser_http.h"
 #include "serverbrowser_ping_cache.h"
 
-#include <algorithm>
-#include <unordered_set>
-#include <vector>
-
 #include <base/hash_ctxt.h>
 #include <base/log.h>
 #include <base/system.h>
 
+#include <engine/console.h>
+#include <engine/engine.h>
+#include <engine/favorites.h>
+#include <engine/friends.h>
+#include <engine/http.h>
 #include <engine/shared/config.h>
 #include <engine/shared/json.h>
 #include <engine/shared/masterserver.h>
@@ -20,13 +21,12 @@
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
 #include <engine/shared/serverinfo.h>
-
-#include <engine/console.h>
-#include <engine/engine.h>
-#include <engine/favorites.h>
-#include <engine/friends.h>
-#include <engine/http.h>
 #include <engine/storage.h>
+
+#include <algorithm>
+#include <map>
+#include <set>
+#include <vector>
 
 class CSortWrap
 {
@@ -40,14 +40,21 @@ public:
 	bool operator()(int a, int b) { return (g_Config.m_BrSortOrder ? (m_pThis->*m_pfnSort)(b, a) : (m_pThis->*m_pfnSort)(a, b)); }
 };
 
-bool matchesPart(const char *a, const char *b)
+static bool MatchesPart(const char *a, const char *b)
 {
 	return str_utf8_find_nocase(a, b) != nullptr;
 }
 
-bool matchesExactly(const char *a, const char *b)
+static bool MatchesExactly(const char *a, const char *b)
 {
 	return str_comp(a, &b[1]) == 0;
+}
+
+static NETADDR CommunityAddressKey(const NETADDR &Addr)
+{
+	NETADDR AddressKey = Addr;
+	AddressKey.type &= ~NETTYPE_TW7;
+	return AddressKey;
 }
 
 CServerBrowser::CServerBrowser() :
@@ -492,12 +499,12 @@ void CServerBrowser::Filter()
 					{
 						continue;
 					}
-					auto MatchesFn = matchesPart;
+					auto MatchesFn = MatchesPart;
 					const int FilterLen = str_length(aFilterStrTrimmed);
 					if(aFilterStrTrimmed[0] == '"' && aFilterStrTrimmed[FilterLen - 1] == '"')
 					{
 						aFilterStrTrimmed[FilterLen - 1] = '\0';
-						MatchesFn = matchesExactly;
+						MatchesFn = MatchesExactly;
 					}
 
 					// match against server name
@@ -548,12 +555,12 @@ void CServerBrowser::Filter()
 					{
 						continue;
 					}
-					auto MatchesFn = matchesPart;
+					auto MatchesFn = MatchesPart;
 					const int FilterLen = str_length(aExcludeStrTrimmed);
 					if(aExcludeStrTrimmed[0] == '"' && aExcludeStrTrimmed[FilterLen - 1] == '"')
 					{
 						aExcludeStrTrimmed[FilterLen - 1] = '\0';
-						MatchesFn = matchesExactly;
+						MatchesFn = MatchesExactly;
 					}
 
 					// match against server name
@@ -683,40 +690,22 @@ void CServerBrowser::QueueRequest(CServerEntry *pEntry)
 	m_NumRequests++;
 }
 
-void ServerBrowserFormatAddresses(char *pBuffer, int BufferSize, NETADDR *pAddrs, int NumAddrs)
+static void ServerBrowserFormatAddresses(char *pBuffer, int BufferSize, NETADDR *pAddrs, int NumAddrs)
 {
+	pBuffer[0] = '\0';
 	for(int i = 0; i < NumAddrs; i++)
 	{
 		if(i != 0)
 		{
-			if(BufferSize <= 1)
-			{
-				return;
-			}
-			pBuffer[0] = ',';
-			pBuffer[1] = '\0';
-			pBuffer += 1;
-			BufferSize -= 1;
+			str_append(pBuffer, ",", BufferSize);
 		}
-		if(BufferSize <= 1)
-		{
-			return;
-		}
-		char aIpAddr[512];
-		net_addr_str(&pAddrs[i], aIpAddr, sizeof(aIpAddr), true);
 		if(pAddrs[i].type & NETTYPE_TW7)
 		{
-			str_format(
-				pBuffer,
-				BufferSize,
-				"tw-0.7+udp://%s",
-				aIpAddr);
-			return;
+			str_append(pBuffer, "tw-0.7+udp://", BufferSize);
 		}
-		str_copy(pBuffer, aIpAddr, BufferSize);
-		int Length = str_length(pBuffer);
-		pBuffer += Length;
-		BufferSize -= Length;
+		char aIpAddr[NETADDR_MAXSTRSIZE];
+		net_addr_str(&pAddrs[i], aIpAddr, sizeof(aIpAddr), true);
+		str_append(pBuffer, aIpAddr, BufferSize);
 	}
 }
 
@@ -756,16 +745,16 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info) cons
 		{
 		}
 
-		bool operator()(const CServerInfo::CClient &p0, const CServerInfo::CClient &p1) const
+		bool operator()(const CServerInfo::CClient &Client0, const CServerInfo::CClient &Client1) const
 		{
 			// Sort players before non players
-			if(p0.m_Player && !p1.m_Player)
+			if(Client0.m_Player && !Client1.m_Player)
 				return true;
-			if(!p0.m_Player && p1.m_Player)
+			if(!Client0.m_Player && Client1.m_Player)
 				return false;
 
-			int Score0 = p0.m_Score;
-			int Score1 = p1.m_Score;
+			int Score0 = Client0.m_Score;
+			int Score1 = Client1.m_Score;
 
 			if(m_ScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME || m_ScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME_BACKCOMPAT)
 			{
@@ -785,7 +774,7 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info) cons
 					return Score0 > Score1;
 			}
 
-			return str_comp_nocase(p0.m_aName, p1.m_aName) < 0;
+			return str_comp_nocase(Client0.m_aName, Client1.m_aName) < 0;
 		}
 	};
 
@@ -937,9 +926,8 @@ void CServerBrowser::OnServerInfoUpdate(const NETADDR &Addr, int Token, const CS
 			}
 		}
 
-		NETADDR Broadcast;
-		mem_zero(&Broadcast, sizeof(Broadcast));
-		Broadcast.type = m_pNetClient->NetType() | NETTYPE_LINK_BROADCAST;
+		NETADDR Broadcast = NETADDR_ZEROED;
+		Broadcast.type = (m_pNetClient->NetType() & ~(NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6)) | NETTYPE_LINK_BROADCAST;
 		int TokenBC = GenerateToken(Broadcast);
 		bool Drop = false;
 		Drop = Drop || BasicToken != GetBasicToken(TokenBC);
@@ -1015,7 +1003,7 @@ void CServerBrowser::Refresh(int Type, bool Force)
 
 		/* do the broadcast version */
 		mem_zero(&Packet, sizeof(Packet));
-		Packet.m_Address.type = m_pNetClient->NetType() | NETTYPE_LINK_BROADCAST;
+		Packet.m_Address.type = (m_pNetClient->NetType() & ~(NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6)) | NETTYPE_LINK_BROADCAST;
 		Packet.m_Flags = NETSENDFLAG_CONNLESS | NETSENDFLAG_EXTENDED;
 		Packet.m_DataSize = sizeof(aBuffer);
 		Packet.m_pData = aBuffer;
@@ -1036,7 +1024,7 @@ void CServerBrowser::Refresh(int Type, bool Force)
 
 		CNetChunk Packet7;
 		mem_zero(&Packet7, sizeof(Packet7));
-		Packet7.m_Address.type = m_pNetClient->NetType() | NETTYPE_TW7 | NETTYPE_LINK_BROADCAST;
+		Packet7.m_Address.type = (m_pNetClient->NetType() & ~(NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6)) | NETTYPE_TW7 | NETTYPE_LINK_BROADCAST;
 		Packet7.m_Flags = NETSENDFLAG_CONNLESS;
 		Packet7.m_DataSize = Packer.Size();
 		Packet7.m_pData = Packer.Data();
@@ -1188,7 +1176,7 @@ void CServerBrowser::UpdateFromHttp()
 		Want = [this, pWantedCommunity, IsNoneCommunity](const NETADDR *pAddrs, int NumAddrs) -> bool {
 			for(int AddressIndex = 0; AddressIndex < NumAddrs; AddressIndex++)
 			{
-				const auto CommunityServer = m_CommunityServersByAddr.find(pAddrs[AddressIndex]);
+				const auto CommunityServer = m_CommunityServersByAddr.find(CommunityAddressKey(pAddrs[AddressIndex]));
 				if(CommunityServer != m_CommunityServersByAddr.end())
 				{
 					if(IsNoneCommunity)
@@ -1377,6 +1365,7 @@ const json_value *CServerBrowser::LoadDDNetInfo()
 		UpdateServerCommunity(&m_ppServerlist[i]->m_Info);
 		UpdateServerRank(&m_ppServerlist[i]->m_Info);
 	}
+	ValidateServerlistType();
 	return m_pDDNetInfo;
 }
 
@@ -1612,7 +1601,7 @@ void CServerBrowser::LoadDDNetServers()
 		{
 			for(const auto &Server : Country.Servers())
 			{
-				m_CommunityServersByAddr.emplace(Server.Address(), CCommunityServer(NewCommunity.Id(), Country.Name(), Server.TypeName()));
+				m_CommunityServersByAddr.emplace(CommunityAddressKey(Server.Address()), CCommunityServer(NewCommunity.Id(), Country.Name(), Server.TypeName()));
 			}
 		}
 		m_vCommunities.push_back(std::move(NewCommunity));
@@ -1660,7 +1649,7 @@ void CServerBrowser::UpdateServerCommunity(CServerInfo *pInfo) const
 {
 	for(int AddressIndex = 0; AddressIndex < pInfo->m_NumAddresses; AddressIndex++)
 	{
-		const auto Community = m_CommunityServersByAddr.find(pInfo->m_aAddresses[AddressIndex]);
+		const auto Community = m_CommunityServersByAddr.find(CommunityAddressKey(pInfo->m_aAddresses[AddressIndex]));
 		if(Community != m_CommunityServersByAddr.end())
 		{
 			str_copy(pInfo->m_aCommunityId, Community->second.CommunityId());
@@ -1678,6 +1667,21 @@ void CServerBrowser::UpdateServerRank(CServerInfo *pInfo) const
 {
 	const CCommunity *pCommunity = Community(pInfo->m_aCommunityId);
 	pInfo->m_HasRank = pCommunity == nullptr ? CServerInfo::RANK_UNAVAILABLE : pCommunity->HasRank(pInfo->m_aMap);
+}
+
+void CServerBrowser::ValidateServerlistType()
+{
+	if(m_ServerlistType >= IServerBrowser::TYPE_FAVORITE_COMMUNITY_1 &&
+		m_ServerlistType <= IServerBrowser::TYPE_FAVORITE_COMMUNITY_5)
+	{
+		const size_t CommunityIndex = m_ServerlistType - IServerBrowser::TYPE_FAVORITE_COMMUNITY_1;
+		if(CommunityIndex >= FavoriteCommunities().size())
+		{
+			// Reset to internet type if there is no favorite community for the current browser type,
+			// in case communities have been removed.
+			m_ServerlistType = IServerBrowser::TYPE_INTERNET;
+		}
+	}
 }
 
 const char *CServerBrowser::GetTutorialServer()
@@ -1718,6 +1722,11 @@ bool CServerBrowser::IsGettingServerlist() const
 	return m_pHttp->IsRefreshing();
 }
 
+bool CServerBrowser::IsServerlistError() const
+{
+	return m_pHttp->IsError();
+}
+
 int CServerBrowser::LoadingProgression() const
 {
 	if(m_NumServers == 0)
@@ -1747,7 +1756,7 @@ CServerInfo::ERankState CCommunity::HasRank(const char *pMap) const
 	if(!HasRanks())
 		return CServerInfo::RANK_UNAVAILABLE;
 	const CCommunityMap Needle(pMap);
-	return m_FinishedMaps.count(Needle) == 0 ? CServerInfo::RANK_UNRANKED : CServerInfo::RANK_RANKED;
+	return !m_FinishedMaps.contains(Needle) ? CServerInfo::RANK_UNRANKED : CServerInfo::RANK_RANKED;
 }
 
 const std::vector<CCommunity> &CServerBrowser::Communities() const
@@ -1964,10 +1973,10 @@ const std::vector<CCommunityId> &CFavoriteCommunityFilterList::Entries() const
 }
 
 template<typename TNamedElement, typename TElementName>
-static bool IsSubsetEquals(const std::vector<const TNamedElement *> &vpLeft, const std::unordered_set<TElementName> &Right)
+static bool IsSubsetEquals(const std::vector<const TNamedElement *> &vpLeft, const std::set<TElementName> &Right)
 {
 	return vpLeft.size() <= Right.size() && std::all_of(vpLeft.begin(), vpLeft.end(), [&](const TNamedElement *pElem) {
-		return Right.count(TElementName(pElem->Name())) > 0;
+		return Right.contains(TElementName(pElem->Name()));
 	});
 }
 
@@ -2050,7 +2059,7 @@ void CExcludedCommunityCountryFilterList::Add(const char *pCountryName)
 void CExcludedCommunityCountryFilterList::Add(const char *pCommunityId, const char *pCountryName)
 {
 	CCommunityId CommunityId(pCommunityId);
-	if(m_Entries.find(CommunityId) == m_Entries.end())
+	if(!m_Entries.contains(CommunityId))
 	{
 		m_Entries[CommunityId] = {};
 	}
@@ -2087,8 +2096,7 @@ bool CExcludedCommunityCountryFilterList::Filtered(const char *pCountryName) con
 		return false;
 
 	const auto &CountryEntries = CommunityEntry->second;
-	return !IsSubsetEquals(m_pCommunityCache->SelectableCountries(), CountryEntries) &&
-	       CountryEntries.find(CCommunityCountryName(pCountryName)) != CountryEntries.end();
+	return !IsSubsetEquals(m_pCommunityCache->SelectableCountries(), CountryEntries) && CountryEntries.contains(CCommunityCountryName(pCountryName));
 }
 
 bool CExcludedCommunityCountryFilterList::Empty() const
@@ -2158,7 +2166,7 @@ void CExcludedCommunityCountryFilterList::Clean(const std::vector<CCommunity> &v
 			}
 		}
 		// Prevent filter that would exclude all allowed countries
-		std::unordered_set<CCommunityCountryName> UniqueCountries;
+		std::set<CCommunityCountryName> UniqueCountries;
 		for(const CCommunity &AllowedCommunity : vAllowedCommunities)
 		{
 			for(const CCommunityCountry &Country : AllowedCommunity.Countries())
@@ -2209,7 +2217,7 @@ void CExcludedCommunityTypeFilterList::Add(const char *pTypeName)
 void CExcludedCommunityTypeFilterList::Add(const char *pCommunityId, const char *pTypeName)
 {
 	CCommunityId CommunityId(pCommunityId);
-	if(m_Entries.find(CommunityId) == m_Entries.end())
+	if(!m_Entries.contains(CommunityId))
 	{
 		m_Entries[CommunityId] = {};
 	}
@@ -2246,8 +2254,7 @@ bool CExcludedCommunityTypeFilterList::Filtered(const char *pTypeName) const
 		return false;
 
 	const auto &TypeEntries = CommunityEntry->second;
-	return !IsSubsetEquals(m_pCommunityCache->SelectableTypes(), TypeEntries) &&
-	       TypeEntries.find(CCommunityTypeName(pTypeName)) != TypeEntries.end();
+	return !IsSubsetEquals(m_pCommunityCache->SelectableTypes(), TypeEntries) && TypeEntries.contains(CCommunityTypeName(pTypeName));
 }
 
 bool CExcludedCommunityTypeFilterList::Empty() const

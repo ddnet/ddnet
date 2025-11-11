@@ -24,7 +24,7 @@ private:
 static const char TEEHISTORIAN_NAME[] = "teehistorian@ddnet.tw";
 static const CUuid TEEHISTORIAN_UUID = CalculateUuid(TEEHISTORIAN_NAME);
 static const char TEEHISTORIAN_VERSION[] = "2";
-static const char TEEHISTORIAN_VERSION_MINOR[] = "9";
+static const char TEEHISTORIAN_VERSION_MINOR[] = "16";
 
 #define UUID(id, name) static const CUuid UUID_##id = CalculateUuid(name);
 #include <engine/shared/teehistorian_ex_chunks.h>
@@ -409,12 +409,12 @@ void CTeeHistorian::WriteTick()
 	CTeehistorianPacker TickPacker;
 	TickPacker.Reset();
 
-	int dt = m_Tick - m_LastWrittenTick - 1;
+	const int TickDelta = m_Tick - m_LastWrittenTick - 1;
 	TickPacker.AddInt(-TEEHISTORIAN_TICK_SKIP);
-	TickPacker.AddInt(dt);
+	TickPacker.AddInt(TickDelta);
 	if(m_Debug)
 	{
-		dbg_msg("teehistorian", "skip_ticks dt=%d", dt);
+		dbg_msg("teehistorian", "skip_ticks tick_delta=%d", TickDelta);
 	}
 	Write(TickPacker.Data(), TickPacker.Size());
 

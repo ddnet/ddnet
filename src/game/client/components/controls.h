@@ -6,9 +6,11 @@
 #include <base/vmath.h>
 
 #include <engine/client.h>
+#include <engine/console.h>
+
+#include <generated/protocol.h>
 
 #include <game/client/component.h>
-#include <game/generated/protocol.h>
 
 class CControls : public CComponent
 {
@@ -16,9 +18,18 @@ public:
 	float GetMinMouseDistance() const;
 	float GetMaxMouseDistance() const;
 
+	enum class EMouseInputType
+	{
+		ABSOLUTE,
+		RELATIVE,
+		AUTOMATED,
+	};
+
 	vec2 m_aMousePos[NUM_DUMMIES];
 	vec2 m_aMousePosOnAction[NUM_DUMMIES];
 	vec2 m_aTargetPos[NUM_DUMMIES];
+
+	EMouseInputType m_aMouseInputType[NUM_DUMMIES];
 
 	int m_aAmmoCount[NUM_WEAPONS];
 
@@ -30,17 +41,23 @@ public:
 	int m_aShowHookColl[NUM_DUMMIES];
 
 	CControls();
-	virtual int Sizeof() const override { return sizeof(*this); }
+	int Sizeof() const override { return sizeof(*this); }
 
-	virtual void OnReset() override;
-	virtual void OnRender() override;
-	virtual void OnMessage(int MsgType, void *pRawMsg) override;
-	virtual bool OnCursorMove(float x, float y, IInput::ECursorType CursorType) override;
-	virtual void OnConsoleInit() override;
+	void OnReset() override;
+	void OnRender() override;
+	void OnMessage(int MsgType, void *pRawMsg) override;
+	bool OnCursorMove(float x, float y, IInput::ECursorType CursorType) override;
+	void OnConsoleInit() override;
 	virtual void OnPlayerDeath();
 
 	int SnapInput(int *pData);
 	void ClampMousePos();
 	void ResetInput(int Dummy);
+
+private:
+	static void ConKeyInputState(IConsole::IResult *pResult, void *pUserData);
+	static void ConKeyInputCounter(IConsole::IResult *pResult, void *pUserData);
+	static void ConKeyInputSet(IConsole::IResult *pResult, void *pUserData);
+	static void ConKeyInputNextPrevWeapon(IConsole::IResult *pResult, void *pUserData);
 };
 #endif

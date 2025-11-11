@@ -3,6 +3,8 @@
 #ifndef ENGINE_SHARED_DEMO_H
 #define ENGINE_SHARED_DEMO_H
 
+#include "snapshot.h"
+
 #include <base/hash.h>
 
 #include <engine/demo.h>
@@ -10,8 +12,6 @@
 
 #include <functional>
 #include <vector>
-
-#include "snapshot.h"
 
 typedef std::function<void()> TUpdateIntraTimesFunc;
 
@@ -42,7 +42,7 @@ class CDemoRecorder : public IDemoRecorder
 
 public:
 	CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool NoMapData = false);
-	CDemoRecorder() {}
+	CDemoRecorder() = default;
 	~CDemoRecorder() override;
 
 	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, const SHA256_DIGEST &Sha256, unsigned MapCrc, const char *pType, unsigned MapSize, unsigned char *pMapData, IOHANDLE MapFile, DEMOFUNC_FILTER pfnFilter, void *pUser);
@@ -66,19 +66,21 @@ public:
 	class IListener
 	{
 	public:
-		virtual ~IListener() {}
+		virtual ~IListener() = default;
 		virtual void OnDemoPlayerSnapshot(void *pData, int Size) = 0;
 		virtual void OnDemoPlayerMessage(void *pData, int Size) = 0;
 	};
 
-	struct CPlaybackInfo
+	class CPlaybackInfo
 	{
+	public:
 		CDemoHeader m_Header;
 		CTimelineMarkers m_TimelineMarkers;
 
 		IDemoPlayer::CInfo m_Info;
 
 		int64_t m_LastUpdate;
+		int64_t m_LastScan;
 		int64_t m_CurrentTime;
 
 		int m_NextTick;
@@ -87,6 +89,10 @@ public:
 		float m_IntraTick;
 		float m_IntraTickSincePrev;
 		float m_TickTime;
+
+		bool m_LiveStateUpdating;
+		int m_LiveStateFailedCount;
+		int m_LiveStateUnchangedCount;
 	};
 
 private:
@@ -95,12 +101,13 @@ private:
 	TUpdateIntraTimesFunc m_UpdateIntraTimesFunc;
 
 	// Playback
-	struct SKeyFrame
+	class CKeyFrame
 	{
+	public:
 		int64_t m_Filepos;
 		int m_Tick;
 
-		SKeyFrame(int64_t Filepos, int Tick) :
+		CKeyFrame(int64_t Filepos, int Tick) :
 			m_Filepos(Filepos), m_Tick(Tick)
 		{
 		}
@@ -111,7 +118,7 @@ private:
 	int64_t m_MapOffset;
 	char m_aFilename[IO_MAX_PATH_LENGTH];
 	char m_aErrorMessage[256];
-	std::vector<SKeyFrame> m_vKeyFrames;
+	std::vector<CKeyFrame> m_vKeyFrames;
 	CMapInfo m_MapInfo;
 	int m_SpeedIndex;
 
@@ -142,7 +149,14 @@ private:
 	};
 	EReadChunkHeaderResult ReadChunkHeader(int *pType, int *pSize, int *pTick);
 	void DoTick();
-	bool ScanFile();
+	enum class EScanFileResult
+	{
+		SUCCESS,
+		ERROR_RECOVERABLE,
+		ERROR_UNRECOVERABLE,
+	};
+	EScanFileResult ScanFile();
+	void UpdateTimes();
 
 	int64_t Time();
 	bool m_Sixup;
@@ -159,7 +173,7 @@ public:
 	int Load(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, int StorageType);
 	unsigned char *GetMapData(class IStorage *pStorage);
 	bool ExtractMap(class IStorage *pStorage);
-	int Play();
+	void Play();
 	void Pause() override;
 	void Unpause() override;
 	void Stop(const char *pErrorMessage = "");
@@ -176,7 +190,7 @@ public:
 	const char *Filename() const { return m_aFilename; }
 	const char *ErrorMessage() const override { return m_aErrorMessage; }
 
-	int Update(bool RealTime = true);
+	void Update(bool RealTime = true);
 	bool IsSixup() const { return m_Sixup; }
 
 	const CPlaybackInfo *Info() const { return &m_Info; }

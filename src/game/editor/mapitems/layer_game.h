@@ -6,11 +6,13 @@
 class CLayerGame : public CLayerTiles
 {
 public:
-	CLayerGame(CEditor *pEditor, int w, int h);
-	~CLayerGame();
+	CLayerGame(CEditorMap *pMap, int w, int h);
+	~CLayerGame() override;
 
-	CTile GetTile(int x, int y) override;
+	[[nodiscard]] CTile GetTile(int x, int y) const override;
 	void SetTile(int x, int y, CTile Tile) override;
+	[[nodiscard]] bool IsEmpty() const override;
+
 	const char *TypeName() const override;
 
 	CUi::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;

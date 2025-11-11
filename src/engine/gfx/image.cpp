@@ -2,6 +2,24 @@
 
 #include <engine/image.h>
 
+CImageInfo::CImageInfo(CImageInfo &&Other)
+{
+	*this = std::move(Other);
+}
+
+CImageInfo &CImageInfo::operator=(CImageInfo &&Other)
+{
+	m_Width = Other.m_Width;
+	m_Height = Other.m_Height;
+	m_Format = Other.m_Format;
+	m_pData = Other.m_pData;
+	Other.m_Width = 0;
+	Other.m_Height = 0;
+	Other.m_Format = FORMAT_UNDEFINED;
+	Other.m_pData = nullptr;
+	return *this;
+}
+
 void CImageInfo::Free()
 {
 	m_Width = 0;

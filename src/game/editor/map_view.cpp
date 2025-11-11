@@ -1,12 +1,11 @@
 #include "map_view.h"
 
+#include "editor.h"
+
 #include <engine/keys.h>
 #include <engine/shared/config.h>
 
-#include <game/client/render.h>
 #include <game/client/ui.h>
-
-#include "editor.h"
 
 void CMapView::OnInit(CEditor *pEditor)
 {
@@ -27,7 +26,6 @@ void CMapView::OnReset()
 
 	m_ProofMode.OnReset();
 	m_MapGrid.OnReset();
-	m_ShowPicker = false;
 }
 
 void CMapView::OnMapLoad()
@@ -63,24 +61,17 @@ void CMapView::RenderGroupBorder()
 			std::shared_ptr<CLayer> pLayer = Editor()->GetSelectedLayerType(i, LAYERTYPE_TILES);
 			if(pLayer)
 			{
-				float w, h;
-				pLayer->GetSize(&w, &h);
-
-				IGraphics::CLineItem aArray[4] = {
-					IGraphics::CLineItem(0, 0, w, 0),
-					IGraphics::CLineItem(w, 0, w, h),
-					IGraphics::CLineItem(w, h, 0, h),
-					IGraphics::CLineItem(0, h, 0, 0)};
-				Graphics()->TextureClear();
-				Graphics()->LinesBegin();
-				Graphics()->LinesDraw(aArray, std::size(aArray));
-				Graphics()->LinesEnd();
+				CUIRect BorderRect;
+				BorderRect.x = 0.0f;
+				BorderRect.y = 0.0f;
+				pLayer->GetSize(&BorderRect.w, &BorderRect.h);
+				BorderRect.DrawOutline(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
 			}
 		}
 	}
 }
 
-void CMapView::RenderMap()
+void CMapView::RenderEditorMap()
 {
 	if(Editor()->m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->ShiftIsPressed() && !Input()->ModifierIsPressed() && Input()->KeyPress(KEY_G))
 	{
@@ -145,18 +136,18 @@ void CMapView::ZoomMouseTarget(float ZoomFactor)
 	// zoom to the current mouse position
 	// get absolute mouse position
 	float aPoints[4];
-	RenderTools()->MapScreenToWorld(
+	Graphics()->MapScreenToWorld(
 		GetWorldOffset().x, GetWorldOffset().y,
 		100.0f, 100.0f, 100.0f, 0.0f, 0.0f, Graphics()->ScreenAspect(), m_WorldZoom, aPoints);
 
 	float WorldWidth = aPoints[2] - aPoints[0];
 	float WorldHeight = aPoints[3] - aPoints[1];
 
-	float Mwx = aPoints[0] + WorldWidth * (Ui()->MouseX() / Ui()->Screen()->w);
-	float Mwy = aPoints[1] + WorldHeight * (Ui()->MouseY() / Ui()->Screen()->h);
+	float MouseWorldX = aPoints[0] + WorldWidth * (Ui()->MouseX() / Ui()->Screen()->w);
+	float MouseWorldY = aPoints[1] + WorldHeight * (Ui()->MouseY() / Ui()->Screen()->h);
 
 	// adjust camera
-	OffsetWorld((vec2(Mwx, Mwy) - GetWorldOffset()) * (1.0f - ZoomFactor));
+	OffsetWorld((vec2(MouseWorldX, MouseWorldY) - GetWorldOffset()) * (1.0f - ZoomFactor));
 }
 
 void CMapView::UpdateZoom()

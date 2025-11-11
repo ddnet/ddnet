@@ -19,30 +19,31 @@ struct SSwitchTileStateChange
 class CLayerSwitch : public CLayerTiles
 {
 public:
-	CLayerSwitch(CEditor *pEditor, int w, int h);
+	CLayerSwitch(CEditorMap *pMap, int w, int h);
 	CLayerSwitch(const CLayerSwitch &Other);
-	~CLayerSwitch();
+	~CLayerSwitch() override;
 
 	CSwitchTile *m_pSwitchTile;
 	unsigned char m_SwitchNumber;
 	unsigned char m_SwitchDelay;
 
 	void Resize(int NewW, int NewH) override;
-	void Shift(int Direction) override;
-	bool IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer) override;
-	void BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos) override;
+	void Shift(EShiftDirection Direction) override;
+	[[nodiscard]] bool IsEmpty() const override;
+	void BrushDraw(CLayer *pBrush, vec2 WorldPos) override;
 	void BrushFlipX() override;
 	void BrushFlipY() override;
 	void BrushRotate(float Amount) override;
-	void FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect) override;
-	virtual bool ContainsElementWithId(int Id);
-	virtual void GetPos(int Number, int Offset, ivec2 &SwitchPos);
+	void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect) override;
+	int FindNextFreeNumber() const;
+	bool ContainsElementWithId(int Id) const;
+	void GetPos(int Number, int Offset, ivec2 &SwitchPos);
 
 	int m_GotoSwitchOffset;
 	ivec2 m_GotoSwitchLastPos;
 
 	EditorTileStateChangeHistory<SSwitchTileStateChange> m_History;
-	inline void ClearHistory() override
+	void ClearHistory() override
 	{
 		CLayerTiles::ClearHistory();
 		m_History.clear();

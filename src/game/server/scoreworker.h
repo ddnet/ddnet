@@ -1,18 +1,19 @@
 #ifndef GAME_SERVER_SCOREWORKER_H
 #define GAME_SERVER_SCOREWORKER_H
 
+#include <engine/map.h>
+#include <engine/server/databases/connection_pool.h>
+#include <engine/shared/protocol.h>
+#include <engine/shared/uuid_manager.h>
+
+#include <game/server/save.h>
+#include <game/voting.h>
+
 #include <memory>
 #include <optional>
 #include <string>
 #include <utility>
 #include <vector>
-
-#include <engine/map.h>
-#include <engine/server/databases/connection_pool.h>
-#include <engine/shared/protocol.h>
-#include <engine/shared/uuid_manager.h>
-#include <game/server/save.h>
-#include <game/voting.h>
 
 class IDbConnection;
 class IGameController;
@@ -65,11 +66,7 @@ struct CScorePlayerResult : ISqlResult
 
 struct CScoreLoadBestTimeResult : ISqlResult
 {
-	CScoreLoadBestTimeResult() :
-		m_CurrentRecord(0)
-	{
-	}
-	float m_CurrentRecord;
+	std::optional<float> m_CurrentRecord = std::nullopt;
 };
 
 struct CSqlLoadBestTimeRequest : ISqlData
@@ -123,7 +120,8 @@ struct CSqlRandomMapRequest : ISqlData
 	char m_aServerType[32];
 	char m_aCurrentMap[MAX_MAP_LENGTH];
 	char m_aRequestingPlayer[MAX_NAME_LENGTH];
-	int m_Stars;
+	int m_MinStars;
+	int m_MaxStars;
 };
 
 struct CSqlScoreData : ISqlData
@@ -132,8 +130,6 @@ struct CSqlScoreData : ISqlData
 		ISqlData(std::move(pResult))
 	{
 	}
-
-	virtual ~CSqlScoreData(){};
 
 	char m_aMap[MAX_MAP_LENGTH];
 	char m_aGameUuid[UUID_MAXSTRSIZE];
@@ -150,16 +146,22 @@ struct CSqlScoreData : ISqlData
 
 struct CScoreSaveResult : ISqlResult
 {
-	CScoreSaveResult(int PlayerId) :
+	CScoreSaveResult(int PlayerId, const char *pPlayerName, const char *pServer) :
 		m_Status(SAVE_FAILED),
 		m_RequestingPlayer(PlayerId)
 	{
 		m_aMessage[0] = '\0';
 		m_aBroadcast[0] = '\0';
+		m_aCode[0] = '\0';
+		m_aGeneratedCode[0] = '\0';
+		str_copy(m_aRequestingPlayer, pPlayerName);
+		str_copy(m_aServer, pServer);
 	}
 	enum
 	{
 		SAVE_SUCCESS,
+		SAVE_WARNING,
+		SAVE_FALLBACKFILE,
 		// load team in the following two cases
 		SAVE_FAILED,
 		LOAD_SUCCESS,
@@ -169,7 +171,11 @@ struct CScoreSaveResult : ISqlResult
 	char m_aBroadcast[512];
 	CSaveTeam m_SavedTeam;
 	int m_RequestingPlayer;
+	char m_aRequestingPlayer[MAX_NAME_LENGTH];
 	CUuid m_SaveId;
+	char m_aServer[5];
+	char m_aCode[128];
+	char m_aGeneratedCode[128];
 };
 
 struct CSqlTeamScoreData : ISqlData
@@ -194,7 +200,6 @@ struct CSqlTeamSaveData : ISqlData
 		ISqlData(std::move(pResult))
 	{
 	}
-	virtual ~CSqlTeamSaveData(){};
 
 	char m_aClientName[MAX_NAME_LENGTH];
 	char m_aMap[MAX_MAP_LENGTH];
@@ -209,7 +214,6 @@ struct CSqlTeamLoadRequest : ISqlData
 		ISqlData(std::move(pResult))
 	{
 	}
-	virtual ~CSqlTeamLoadRequest(){};
 
 	char m_aCode[128];
 	char m_aMap[MAX_MAP_LENGTH];
@@ -227,7 +231,6 @@ public:
 	{
 		Reset();
 	}
-	~CPlayerData() {}
 
 	void Reset()
 	{

@@ -1,3 +1,5 @@
+#include "menus.h"
+
 #include <base/system.h>
 
 #include <engine/shared/config.h>
@@ -7,8 +9,6 @@
 #include <game/client/gameclient.h>
 #include <game/client/ui_listbox.h>
 #include <game/localization.h>
-
-#include "menus.h"
 
 #include <chrono>
 
@@ -247,7 +247,7 @@ static const CMenus::SCustomItem *GetCustomItem(int CurTab, size_t Index)
 }
 
 template<typename TName>
-void ClearAssetList(std::vector<TName> &vList, IGraphics *pGraphics)
+static void ClearAssetList(std::vector<TName> &vList, IGraphics *pGraphics)
 {
 	for(TName &Asset : vList)
 	{
@@ -270,7 +270,7 @@ void CMenus::ClearCustomItems(int CurTab)
 		m_vEntitiesList.clear();
 
 		// reload current entities
-		m_pClient->m_MapImages.ChangeEntitiesPath(g_Config.m_ClAssetsEntities);
+		GameClient()->m_MapImages.ChangeEntitiesPath(g_Config.m_ClAssetsEntities);
 	}
 	else if(CurTab == ASSETS_TAB_GAME)
 	{
@@ -311,7 +311,7 @@ void CMenus::ClearCustomItems(int CurTab)
 }
 
 template<typename TName, typename TCaller>
-void InitAssetList(std::vector<TName> &vAssetList, const char *pAssetPath, const char *pAssetName, FS_LISTDIR_CALLBACK pfnCallback, IGraphics *pGraphics, IStorage *pStorage, TCaller Caller)
+static void InitAssetList(std::vector<TName> &vAssetList, const char *pAssetPath, const char *pAssetName, FS_LISTDIR_CALLBACK pfnCallback, IGraphics *pGraphics, IStorage *pStorage, TCaller Caller)
 {
 	if(vAssetList.empty())
 	{
@@ -329,7 +329,7 @@ void InitAssetList(std::vector<TName> &vAssetList, const char *pAssetPath, const
 }
 
 template<typename TName>
-int InitSearchList(std::vector<const TName *> &vpSearchList, std::vector<TName> &vAssetList)
+static int InitSearchList(std::vector<const TName *> &vpSearchList, std::vector<TName> &vAssetList)
 {
 	vpSearchList.clear();
 	int ListSize = vAssetList.size();
@@ -565,7 +565,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 			if(s_CurCustomTab == ASSETS_TAB_ENTITIES)
 			{
 				str_copy(g_Config.m_ClAssetsEntities, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName);
-				m_pClient->m_MapImages.ChangeEntitiesPath(GetCustomItem(s_CurCustomTab, NewSelected)->m_aName);
+				GameClient()->m_MapImages.ChangeEntitiesPath(GetCustomItem(s_CurCustomTab, NewSelected)->m_aName);
 			}
 			else if(s_CurCustomTab == ASSETS_TAB_GAME)
 			{
@@ -599,7 +599,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	MainView.HSplitBottom(ms_ButtonHeight, &MainView, &QuickSearch);
 	QuickSearch.VSplitLeft(220.0f, &QuickSearch, &DirectoryButton);
 	QuickSearch.HSplitTop(5.0f, nullptr, &QuickSearch);
-	if(Ui()->DoEditBox_Search(&s_aFilterInputs[s_CurCustomTab], &QuickSearch, 14.0f, !Ui()->IsPopupOpen() && !m_pClient->m_GameConsole.IsActive()))
+	if(Ui()->DoEditBox_Search(&s_aFilterInputs[s_CurCustomTab], &QuickSearch, 14.0f, !Ui()->IsPopupOpen() && !GameClient()->m_GameConsole.IsActive()))
 	{
 		gs_aInitCustomList[s_CurCustomTab] = true;
 	}
@@ -651,7 +651,7 @@ void CMenus::ConchainAssetsEntities(IConsole::IResult *pResult, void *pUserData,
 		const char *pArg = pResult->GetString(0);
 		if(str_comp(pArg, g_Config.m_ClAssetsEntities) != 0)
 		{
-			pThis->m_pClient->m_MapImages.ChangeEntitiesPath(pArg);
+			pThis->GameClient()->m_MapImages.ChangeEntitiesPath(pArg);
 		}
 	}
 

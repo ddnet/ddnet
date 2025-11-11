@@ -596,7 +596,7 @@ Downloading %s:
 == İndiriliyor %s:
 
 Update failed! Check log…
-== Güncelleme sırasında hata oluştu!
+== Güncelleme sırasında hata oluştu…
 
 DDNet Client updated!
 == DDNet İstemcisi güncellendi!
@@ -934,10 +934,6 @@ https://wiki.ddnet.org/
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == Başlatma başarısız oldu. Konfigürasyon klasöründeki settings_ddnet.cfg dosyasında gfx_backend ayarını OpenGL veya Vulkan olarak değiştirmeyi deneyin.
-
-[Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== VRAM tükendi. Özellikle yüksek çözünürlüklü olan özel kaynakları (skinler, yapılar, vb.) silmeyi deneyin.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
@@ -1608,12 +1604,12 @@ Go back the specified duration
 == Belirtilen süre kadar geri git
 
 [Demo player duration]
-%d min.
-== %d dk.
+%s min.
+== %s dk.
 
 [Demo player duration]
-%d sec.
-== %d sn.
+%s sec.
+== %s sn.
 
 Change the skip duration
 == Atlanacak süreyi değiştir
@@ -2012,9 +2008,6 @@ Active: Hook
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
 == "%s" pnglite ile uyumlu değil ve eski DDnet versiyonları tarafından yüklenemiyor:
 
-Loading background map
-== Arkaplan haritası yükleniyor
-
 [Spectating Camera Mode Icon]
 AUTO
 == OTOMATİK
@@ -2113,69 +2106,384 @@ Renders your frame rate in the top right
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Türkçe çeviri Learath2, ardadem, h-kaan, eghwand ve Gokturk tarafından yapıldı
+== Türkçe çeviri Learath2, ardadem, h-kaan, eghwand, Gokturk ve WarHammer tarafından yapıldı
 
 Show spectator cursor
-== İzleyicinin imlecini göster
+== İzlenenin imlecini göster
+
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== VRAM bitmiş. 'cl_skins_loaded_max' değerini daha düşük bir değere ayarlamayı veya özel varlıkları (kaplamalar, varlıklar vb.), özellikle de yüksek çözünürlüklü olanları kaldırmayı deneyin.
 
 No demo with this filename exists
-== 
+== Bu isimle bir demo bulunmuyor
+
+This name cannot be used for files and folders
+== Bu isim dosya ve klasörler için kullanılamıyor
 
 Map size
-== 
+== Harita boyutu
+
+This skin name cannot be used.
+== Bu skin adı kullanılamıyor.
+
+Skin could not be loaded due to an error. Check the local console for details.
+== Skin bir sebepten dolayı yüklenemiyor. Detay için yerel konsolu kontrol et.
+
+Skin could not be found.
+== Skin bulunamadı.
+
+No skins match your filter criteria
+== Kriterlerine uygun skinler bulunamadı
 
 Show number of spectators
-== 
+== İzleyici sayısını göster
 
 [Show name plates]
 None
-== 
+== Hiçbiri
 
 [Show name plates]
 Own
-== 
+== Kendi
 
 [Show name plates]
 Others
-== 
+== Diğer
 
 [Show name plates]
 All
-== 
+== Hepsi
 
 Name plates offset
-== 
+== Oyuncu isimleri çıkıntısı
 
 Show friend icon in name plates
-== 
+== Arkadaş ikonunu oyuncu isimlerinde göster
 
-Show client IDs on a seperate line
-== 
+Show client IDs on a separate line
+== İstemci ID'lerini ayrı satırda göster
 
 Client IDs size
-== 
+== İstemci ID boyutu
 
 Show players' key presses
-== 
+== Oyuncu tuş basımlarını göster
 
 [Show players' key presses]
 None
-== 
+== Hiçbiri
 
 [Show players' key presses]
 Own
-== 
+== Kendi
 
 [Show players' key presses]
 Others
-== 
+== Diğer
 
 [Show players' key presses]
 All
-== 
+== Hepsi
+
+Preview player's name plate
+== Oyuncu ismini ön izle
 
 Preview dummy's name plate
-== 
+== Dummy ismini ön izle
+
+Dragger Outline Color
+== Dragger Ana hat Rengi
+
+Dragger Inner Color
+== Dragger İç Rengi
 
 AntiPing: prediction margin
-== 
+== AntiPing: tahmin marjı
+
+[Spectating]
+Following %d: %s
+== İzleniyor %d: %s
+
+Loading map
+== Harita yükleniyor
+
+Error checking player name
+== Oyuncu adı kontrol edilirken hata oluştu
+
+Could not check for existing player with your name. Check your internet connection.
+== Adınıza sahip mevcut oyuncu olup olmadığı kontrol edilemedi. İnternet bağlantınızı kontrol edin.
+
+Press Ctrl+Shift+G to disable debug graphs.
+== Hata ayıklama grafiğini devre dışı bırakmak için Ctrl+Shift+G tuşlarına basın.
+
+Server could not be started
+== Sunucu başlatılamadı
+
+Could not get server list from master server
+== Ana sunucudan sunucu listesi alınamadı
+
+[Demo playback]
+Live
+== Canlı
+
+[Demo playback]
+Go to Live
+== Canlıya Geç
+
+Save all changes before turning off the editor?
+== Editör kapatılmadan önce tüm değişiklikler kaydedilsin mi?
+
+Layout
+== Düzen
+
+Visibility
+== Görünürlük
+
+Behavior
+== Davranış
+
+Delete button
+== Buton sil
+
+Are you sure that you want to delete this button?
+== Bu butonu silmek istediğine emin misin?
+
+Duplicate
+== Çoğalt
+
+New button already created
+== Yeni buton zaten oluşturuldu
+
+A new button has already been created, please save or delete it before creating another one.
+== Yeni bir buton zaten oluşturuldu, başka bir buton oluşturmadan önce lütfen kaydedin veya silin.
+
+Please save your changes before duplicating a button.
+== Bir butonu çoğaltmadan önce lütfen değişiklikleri kaydedin.
+
+No space for button
+== Buton için yeterli alan yok
+
+There is not enough space available to place another button.
+== Başka bir buton yerleştirmek için yeterli alan yok.
+
+There is not enough space available to place another button with this size. The button has been resized.
+== Bu büyüklükte bir butonu yerleştirmek için yeterli alan yok. Buton yeniden boyutlandırıldı.
+
+Deselect
+== Seçimi iptal et
+
+You'll lose unsaved changes after deselecting.
+== Seçimi iptal ettikten sonra kaydedilmemiş değişiklikler kaybolacak.
+
+Width
+== Genişlik
+
+Height
+== Yükseklik
+
+Shape
+== Şekil
+
+[Touch button shape]
+Rectangle
+== Dikdörtgen
+
+[Touch button shape]
+Circle
+== Daire
+
+[Touch button label type]
+Plain
+== Düz
+
+[Touch button label type]
+Localized
+== Sabit
+
+[Touch button label type]
+Icon
+== Simge
+
+Behavior type
+== Davranış biçimi
+
+[Touch button behavior]
+Bind
+== Atama
+
+[Touch button behavior]
+Bind Toggle
+== Aç/Kapa
+
+[Touch button behavior]
+Predefined
+== Ön tanımlı
+
+Command
+== Komut
+
+Label
+== Başlık
+
+Label type
+== Başlık türü
+
+Add command
+== Komut ekle
+
+Delete command
+== Komut sil
+
+[Touch button visibility preview]
+Included
+== Dahil
+
+[Touch button visibility preview]
+Excluded
+== Hariç
+
+[Touch button visibility preview]
+Ignore
+== Yok say
+
+Long press on a touch button to select it.
+== Butonu seçmek için uzun bas.
+
+New button
+== Yeni buton
+
+Select button by touch
+== Butonu dokunarak seç
+
+No buttons match your filter criteria
+== Filtre kriterlerine uyan buton yok
+
+File
+== Dosya
+
+Buttons
+== Butonlar
+
+Active color
+== Aktif renk
+
+Inactive color
+== İnaktif renk
+
+Preview button visibility while the editor is active.
+== Editör aktifken önizleme butonunu göster.
+
+Show all buttons
+== Tüm butonları göster
+
+Save all changes before switching selected button?
+== Seçili butonu değiştirmeden önce tüm değişiklikler kaydedilsin mi?
+
+Discard
+== İptal et
+
+There is not enough space available for the button. Check its visibilities and size.
+== Buton için yeterli alan yok. Görünürlüğünü ve büyüklüğünü kontrol edin.
+
+Selected button not visible
+== Seçili buton görünmez
+
+The selected button is not visible. Do you want to deselect it or edit its visibility?
+== Seçili buton görünmez. Seçimi iptal etmek ya da görünürlüğünü değiştirmek ister misin?
+
+Edit
+== Düzenle
+
+Width and height are required to be within the range from %d to %d.
+== Genişlik ve yükseklik, %d ile %d aralığında olmalıdır.
+
+Button position is outside of the screen.
+== Buton pozisyonu ekranın dışında.
+
+The selected button is overlapping with other buttons.
+== Seçili buton diğer butonlarla çakışıyor.
+
+Wrong button settings
+== Hatalı buton ayarları
+
+[Touch button visibilities]
+Ingame
+== Oyun içi
+
+[Touch button visibilities]
+Zoom Allowed
+== Yakınlaştırma İzinli
+
+[Touch button visibilities]
+Vote Active
+== Oylama Aktif
+
+[Touch button visibilities]
+Dummy Allowed
+== Dummy İzinli
+
+[Touch button visibilities]
+Dummy Connected
+== Dummy bağlandı
+
+[Touch button visibilities]
+Rcon Authed
+== Rcon doğrulandı
+
+[Touch button visibilities]
+Demo Player
+== Demo Oynatıcı
+
+[Touch button visibilities]
+Extra Menu
+== Ekstra Menü
+
+[Predefined touch button behaviors]
+Ingame Menu
+== Oyun İçi Menü
+
+[Predefined touch button behaviors]
+Extra Menu
+== Ekstra Menü
+
+[Predefined touch button behaviors]
+Emoticon
+== İfade
+
+[Predefined touch button behaviors]
+Spectate
+== İzle
+
+[Predefined touch button behaviors]
+Swap Action
+== Eylemi Değiştir
+
+[Predefined touch button behaviors]
+Use Action
+== Eylemi Kullan
+
+[Predefined touch button behaviors]
+Joystick Action
+== Joystick Eylemi
+
+[Predefined touch button behaviors]
+Joystick Aim
+== Joystick Aim
+
+[Predefined touch button behaviors]
+Joystick Fire
+== Joystick Ateş
+
+[Predefined touch button behaviors]
+Joystick Hook
+== Joystick Kanca
+
+Chat background color
+== Sohbet arka plan rengi
+
+Censor profanity
+== Küfür Sansürü
+
+Download
+== İndir

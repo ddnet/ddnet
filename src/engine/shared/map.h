@@ -3,9 +3,10 @@
 #ifndef ENGINE_SHARED_MAP_H
 #define ENGINE_SHARED_MAP_H
 
+#include "datafile.h"
+
 #include <base/types.h>
 
-#include "datafile.h"
 #include <engine/map.h>
 
 class CMap : public IEngineMap
@@ -31,7 +32,7 @@ public:
 	void *FindItem(int Type, int Id) override;
 	int NumItems() const override;
 
-	bool Load(const char *pMapName) override;
+	[[nodiscard]] bool Load(const char *pMapName) override;
 	void Unload() override;
 	bool IsLoaded() const override;
 	IOHANDLE File() const override;

@@ -3,12 +3,12 @@
 #ifndef ENGINE_CLIENT_INPUT_H
 #define ENGINE_CLIENT_INPUT_H
 
-#include <SDL_events.h>
-#include <SDL_joystick.h>
 #include <engine/console.h>
-
 #include <engine/input.h>
 #include <engine/keys.h>
+
+#include <SDL_events.h>
+#include <SDL_joystick.h>
 
 #include <string>
 #include <vector>
@@ -37,9 +37,8 @@ public:
 		CInput *Input() { return m_pInput; }
 
 	public:
-		CJoystick() {}
 		CJoystick(CInput *pInput, int Index, SDL_Joystick *pDelegate);
-		virtual ~CJoystick() = default;
+		~CJoystick() override = default;
 
 		int GetIndex() const override { return m_Index; }
 		const char *GetName() const override { return m_aName; }
@@ -150,6 +149,7 @@ public:
 
 	void StartTextInput() override;
 	void StopTextInput() override;
+	void EnsureScreenKeyboardShown() override;
 	const char *GetComposition() const override { return m_CompositionString.c_str(); }
 	bool HasComposition() const override { return !m_CompositionString.empty(); }
 	int GetCompositionCursor() const override { return m_CompositionCursor; }

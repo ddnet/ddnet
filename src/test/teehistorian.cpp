@@ -1,11 +1,13 @@
-#include <gtest/gtest.h>
-
 #include <base/detect.h>
+
 #include <engine/external/json-parser/json.h>
 #include <engine/server.h>
 #include <engine/shared/config.h>
+
 #include <game/gamecore.h>
 #include <game/server/teehistorian.h>
+
+#include <gtest/gtest.h>
 
 #include <vector>
 
@@ -105,7 +107,7 @@ protected:
 	void Expect(const unsigned char *pOutput, size_t OutputSize)
 	{
 		static CUuid TEEHISTORIAN_UUID = CalculateUuid("teehistorian@ddnet.tw");
-		static const char PREFIX1[] = "{\"comment\":\"teehistorian@ddnet.tw\",\"version\":\"2\",\"version_minor\":\"9\",\"game_uuid\":\"a1eb7182-796e-3b3e-941d-38ca71b2a4a8\",\"server_version\":\"DDNet test\",\"start_time\":\"";
+		static const char PREFIX1[] = "{\"comment\":\"teehistorian@ddnet.tw\",\"version\":\"2\",\"version_minor\":\"16\",\"game_uuid\":\"a1eb7182-796e-3b3e-941d-38ca71b2a4a8\",\"server_version\":\"DDNet test\",\"start_time\":\"";
 		static const char PREFIX2[] = "\",\"server_name\":\"server name\",\"server_port\":\"8303\",\"game_type\":\"game type\",\"map_name\":\"Kobra 3 Solo\",\"map_size\":\"903514\",\"map_sha256\":\"0123456789012345678901234567890123456789012345678901234567890123\",\"map_crc\":\"eceaf25c\",\"prng_description\":\"test-prng:02468ace\",\"config\":{},\"tuning\":{},\"uuids\":[";
 		static const char PREFIX3[] = "]}";
 
@@ -421,7 +423,7 @@ TEST_F(TeeHistorian, Auth)
 		0x37, 0xec, 0xd3, 0xb8, 0x92, 0x18, 0x3b, 0xb9,
 		0xa7, 0x1b, 0xa9, 0x35, 0xb8, 0x6f, 0x6a, 0x81,
 		0x07,
-		// (AUTH_LOGIN) cid=1 level=2 auth_name="foobar"
+		// (AUTH_LOGIN) cid=1 level=2 auth_name="help"
 		0x02, 0x01, 'h', 'e', 'l', 'p', 0x00,
 		// EX uuid=d4f5abe8-edd2-3fb9-abd8-1c8bb84f4a63 data_len=7
 		0x4a,

@@ -1449,10 +1449,6 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 == Fehler während der Initialisierung. Versuch gfx_backend zu OpenGL oder Vulkan zu ändern in settings_ddnet.cfg im Konfigurations-Ordner und versuche es erneut.
 
 [Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== Kein VRAM mehr verfügbar. Versuch eigene Assets (Skins, Entitäten, usw.) zu löschen, insbesondere solche mit hoher Auflösung.
-
-[Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
 == Ein Fehler ist währen dem Aufnahme-Befehl aufgetreten. Versuch deinen Grafiktreiber zu aktualisieren.
 
@@ -1608,12 +1604,12 @@ Go back the specified duration
 == Gesetzte Dauer zurück
 
 [Demo player duration]
-%d min.
-== %d Min.
+%s min.
+== %s Min.
 
 [Demo player duration]
-%d sec.
-== %d Sek.
+%s sec.
+== %s Sek.
 
 Change the skip duration
 == Überspring-Dauer ändern
@@ -2009,9 +2005,6 @@ Active: Hook
 Preview 'Hook collisions' being pressed
 == Vorschau für 'Hakenkollisionen' gedrückt
 
-Loading background map
-== Hintergrund-Karte laden
-
 [Spectating Camera Mode Icon]
 AUTO
 == AUTO
@@ -2149,7 +2142,7 @@ Name plates offset
 Show friend icon in name plates
 == Freund-Icon in Spielername zeigen
 
-Show client IDs on a seperate line
+Show client IDs on a separate line
 == Client-IDs in eigener Linie zeigen
 
 Client IDs size
@@ -2179,3 +2172,318 @@ Preview dummy's name plate
 
 AntiPing: prediction margin
 == Anti-Ping: Vorhersagespanne
+
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== VRAM ausgegangen. Versuch 'cl_skins_loaded_max' auf einen niedrigeren Wert zu setzen oder entferne eigene Assets (Skins, Entitäten, usw.), insbesondere solche mit hoher Auflösung.
+
+This name cannot be used for files and folders
+== Dieser Name kann nicht für Dateien und Ordner genutzt werden
+
+This skin name cannot be used.
+== Dieser Skin-Name kann nicht genutzt werden.
+
+Skin could not be loaded due to an error. Check the local console for details.
+== Skin konnte wegen einem Fehler nicht geladen werden. Prüfe die lokale Konsole für Details.
+
+Skin could not be found.
+== Skin konnte nicht gefunden werden.
+
+No skins match your filter criteria
+== Keine Skins entsprechen deinen Filterkriterien.
+
+Preview player's name plate
+== Vorschau von Spielernamen
+
+Dragger Outline Color
+== Dragger-Außenfarbe
+
+Dragger Inner Color
+== Dragger-Innenfarbe
+
+[Spectating]
+Following %d: %s
+== Folge %d: %s
+
+Loading map
+== Karte laden
+
+Error checking player name
+== Fehler beim Prüfen des Spielernamens
+
+Could not check for existing player with your name. Check your internet connection.
+== Konnte nicht prüfen ob ein Spieler mit deinem Namen existiert. Prüfe deine Internetverbindung.
+
+Press Ctrl+Shift+G to disable debug graphs.
+== 
+
+Server could not be started
+== 
+
+Could not get server list from master server
+== 
+
+[Demo playback]
+Live
+== 
+
+[Demo playback]
+Go to Live
+== 
+
+Save all changes before turning off the editor?
+== 
+
+Layout
+== 
+
+Visibility
+== 
+
+Behavior
+== 
+
+Delete button
+== 
+
+Are you sure that you want to delete this button?
+== 
+
+Duplicate
+== 
+
+New button already created
+== 
+
+A new button has already been created, please save or delete it before creating another one.
+== 
+
+Please save your changes before duplicating a button.
+== 
+
+No space for button
+== 
+
+There is not enough space available to place another button.
+== 
+
+There is not enough space available to place another button with this size. The button has been resized.
+== 
+
+Deselect
+== 
+
+You'll lose unsaved changes after deselecting.
+== 
+
+Width
+== 
+
+Height
+== 
+
+Shape
+== 
+
+[Touch button shape]
+Rectangle
+== 
+
+[Touch button shape]
+Circle
+== 
+
+[Touch button label type]
+Plain
+== 
+
+[Touch button label type]
+Localized
+== 
+
+[Touch button label type]
+Icon
+== 
+
+Behavior type
+== 
+
+[Touch button behavior]
+Bind
+== 
+
+[Touch button behavior]
+Bind Toggle
+== 
+
+[Touch button behavior]
+Predefined
+== 
+
+Command
+== 
+
+Label
+== 
+
+Label type
+== 
+
+Add command
+== 
+
+Delete command
+== 
+
+[Touch button visibility preview]
+Included
+== 
+
+[Touch button visibility preview]
+Excluded
+== 
+
+[Touch button visibility preview]
+Ignore
+== 
+
+Long press on a touch button to select it.
+== 
+
+New button
+== 
+
+Select button by touch
+== 
+
+No buttons match your filter criteria
+== 
+
+File
+== 
+
+Buttons
+== 
+
+Active color
+== 
+
+Inactive color
+== 
+
+Preview button visibility while the editor is active.
+== 
+
+Show all buttons
+== 
+
+Save all changes before switching selected button?
+== 
+
+Discard
+== 
+
+There is not enough space available for the button. Check its visibilities and size.
+== 
+
+Selected button not visible
+== 
+
+The selected button is not visible. Do you want to deselect it or edit its visibility?
+== 
+
+Edit
+== 
+
+Width and height are required to be within the range from %d to %d.
+== 
+
+Button position is outside of the screen.
+== 
+
+The selected button is overlapping with other buttons.
+== 
+
+Wrong button settings
+== 
+
+[Touch button visibilities]
+Ingame
+== 
+
+[Touch button visibilities]
+Zoom Allowed
+== 
+
+[Touch button visibilities]
+Vote Active
+== 
+
+[Touch button visibilities]
+Dummy Allowed
+== 
+
+[Touch button visibilities]
+Dummy Connected
+== 
+
+[Touch button visibilities]
+Rcon Authed
+== 
+
+[Touch button visibilities]
+Demo Player
+== 
+
+[Touch button visibilities]
+Extra Menu
+== 
+
+[Predefined touch button behaviors]
+Ingame Menu
+== 
+
+[Predefined touch button behaviors]
+Extra Menu
+== 
+
+[Predefined touch button behaviors]
+Emoticon
+== 
+
+[Predefined touch button behaviors]
+Spectate
+== 
+
+[Predefined touch button behaviors]
+Swap Action
+== 
+
+[Predefined touch button behaviors]
+Use Action
+== 
+
+[Predefined touch button behaviors]
+Joystick Action
+== 
+
+[Predefined touch button behaviors]
+Joystick Aim
+== 
+
+[Predefined touch button behaviors]
+Joystick Fire
+== 
+
+[Predefined touch button behaviors]
+Joystick Hook
+== 
+
+Censor profanity
+== 
+
+Chat background color
+== 
+
+Download
+== 

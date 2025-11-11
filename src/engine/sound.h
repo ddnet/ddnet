@@ -3,10 +3,10 @@
 #ifndef ENGINE_SOUND_H
 #define ENGINE_SOUND_H
 
+#include <base/vmath.h>
+
 #include <engine/kernel.h>
 #include <engine/storage.h>
-
-#include <base/vmath.h>
 
 class ISound : public IInterface
 {
@@ -67,8 +67,8 @@ public:
 
 	virtual int LoadOpus(const char *pFilename, int StorageType = IStorage::TYPE_ALL) = 0;
 	virtual int LoadWV(const char *pFilename, int StorageType = IStorage::TYPE_ALL) = 0;
-	virtual int LoadOpusFromMem(const void *pData, unsigned DataSize, bool ForceLoad = false) = 0;
-	virtual int LoadWVFromMem(const void *pData, unsigned DataSize, bool ForceLoad = false) = 0;
+	virtual int LoadOpusFromMem(const void *pData, unsigned DataSize, bool ForceLoad, const char *pContextName) = 0;
+	virtual int LoadWVFromMem(const void *pData, unsigned DataSize, bool ForceLoad, const char *pContextName) = 0;
 	virtual void UnloadSample(int SampleId) = 0;
 
 	virtual float GetSampleTotalTime(int SampleId) = 0; // in s
@@ -102,7 +102,7 @@ public:
 	virtual void UnpauseAudioDevice() = 0;
 
 protected:
-	inline CVoiceHandle CreateVoiceHandle(int Index, int Age)
+	CVoiceHandle CreateVoiceHandle(int Index, int Age)
 	{
 		CVoiceHandle Voice;
 		Voice.m_Id = Index;
@@ -117,7 +117,7 @@ class IEngineSound : public ISound
 public:
 	virtual int Init() = 0;
 	virtual int Update() = 0;
-	virtual void Shutdown() override = 0;
+	void Shutdown() override = 0;
 };
 
 extern IEngineSound *CreateEngineSound();

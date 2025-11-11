@@ -17,7 +17,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        submodules: true
+        submodules: recursive
 
     - name: Prepare Linux
       run: |
@@ -35,7 +35,7 @@ jobs:
         export CXX=clang++
         export CXXFLAGS="-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer"
         export CFLAGS="-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer"
-        cmake -DCMAKE_BUILD_TYPE=Debug -DHEADLESS_CLIENT=ON -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=. ..
+        cmake -DCMAKE_BUILD_TYPE=Debug -DHEADLESS_CLIENT=ON -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON ..
         make -j"$(nproc)"
 
     - name: Run server and headless client with ASan and UBSan
@@ -63,10 +63,16 @@ jobs:
           exit 1
         fi
 
+    - name: Build mastersrv
+      run: |
+        cd src/mastersrv
+        cargo build
+        cp target/debug/mastersrv ../../clang-sanitizer
+
     - name: Run integration tests with ASan and UBSan
       run: |
         cd clang-sanitizer
-        python ../scripts/integration_test.py .
+        python ../scripts/integration_test.py --test-mastersrv .
         if test -n "$(find . -maxdepth 1 -name 'SAN.*' -print -quit)"
         then
           cat SAN.*

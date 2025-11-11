@@ -20,7 +20,7 @@ BraceWrapping:
   AfterEnum: true
   AfterExternBlock: false
   AfterFunction: true
-  AfterNamespace: false
+  AfterNamespace: true
   AfterStruct: true
   AfterUnion: true
   BeforeCatch: true
@@ -34,16 +34,33 @@ CommentPragmas: ''
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 ConstructorInitializerIndentWidth: 8
 ContinuationIndentWidth: 8
+IncludeBlocks: Regroup
 IncludeCategories:
   - Regex:           '^"'
     Priority:        1
-  - Regex:           '^<(engine|game|mastersrv|versionsrv>'
+  - Regex:           '^<antibot/'
     Priority:        2
-  - Regex:           '.*'
+  - Regex:           '^<base/'
     Priority:        3
+  - Regex:           '^<engine/'
+    Priority:        4
+  - Regex:           '^<generated/'
+    Priority:        5
+  - Regex:           '^<game/'
+    Priority:        6
+  - Regex:           '^<android/'
+    Priority:        7
+  - Regex:           '^<steam/'
+    Priority:        8
+  - Regex:           '^<.*\.h>'
+    Priority:        9
+  - Regex:           '.*'
+    Priority:        10
 IncludeIsMainRegex: '$'
 IndentWidth: 8
 KeepEmptyLinesAtTheStartOfBlocks: false
+NamespaceIndentation: All
+FixNamespaceComments: false
 PointerAlignment: Right
 ReflowComments: true
 SpaceBeforeParens: Never

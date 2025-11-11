@@ -12,6 +12,7 @@
 
 #include <base/color.h>
 #include <base/vmath.h>
+
 #include <engine/client/graphics_defines.h>
 
 class CGLSL;
@@ -24,7 +25,7 @@ public:
 
 	bool AddShader(CGLSL *pShader) const;
 
-	void LinkProgram();
+	bool LinkProgram();
 	void UseProgram() const;
 	TWGLuint GetProgramId() const;
 

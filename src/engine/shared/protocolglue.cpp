@@ -1,8 +1,47 @@
-#include <game/generated/protocol.h>
-#include <game/generated/protocol7.h>
-#include <game/generated/protocolglue.h>
-
 #include "protocolglue.h"
+
+#include <base/system.h>
+
+#include <engine/shared/network.h>
+
+#include <generated/protocol.h>
+#include <generated/protocol7.h>
+#include <generated/protocolglue.h>
+
+namespace protocol7
+{
+	enum
+	{
+		NET_PACKETFLAG_CONTROL = 1 << 0,
+		NET_PACKETFLAG_RESEND = 1 << 1,
+		NET_PACKETFLAG_COMPRESSION = 1 << 2,
+	};
+
+}
+
+int PacketFlags_SixToSeven(int Flags)
+{
+	int Seven = 0;
+	if(Flags & ::NET_PACKETFLAG_CONTROL)
+		Seven |= protocol7::NET_PACKETFLAG_CONTROL;
+	if(Flags & ::NET_PACKETFLAG_RESEND)
+		Seven |= protocol7::NET_PACKETFLAG_RESEND;
+	if(Flags & ::NET_PACKETFLAG_COMPRESSION)
+		Seven |= protocol7::NET_PACKETFLAG_COMPRESSION;
+	return Seven;
+}
+
+int PacketFlags_SevenToSix(int Flags)
+{
+	int Six = 0;
+	if(Flags & protocol7::NET_PACKETFLAG_CONTROL)
+		Six |= ::NET_PACKETFLAG_CONTROL;
+	if(Flags & protocol7::NET_PACKETFLAG_RESEND)
+		Six |= ::NET_PACKETFLAG_RESEND;
+	if(Flags & protocol7::NET_PACKETFLAG_COMPRESSION)
+		Six |= ::NET_PACKETFLAG_COMPRESSION;
+	return Six;
+}
 
 int GameFlags_ClampToSix(int Flags)
 {
@@ -75,11 +114,31 @@ void PickupType_SevenToSix(int Type7, int &Type6, int &SubType6)
 
 int PickupType_SixToSeven(int Type6, int SubType6)
 {
-	if(Type6 == POWERUP_WEAPON)
-		return SubType6 == WEAPON_SHOTGUN ? protocol7::PICKUP_SHOTGUN : SubType6 == WEAPON_GRENADE ? protocol7::PICKUP_GRENADE : protocol7::PICKUP_LASER;
-	else if(Type6 == POWERUP_NINJA)
-		return protocol7::PICKUP_NINJA;
-	else if(Type6 == POWERUP_ARMOR)
+	switch(Type6)
+	{
+	case POWERUP_WEAPON:
+		switch(SubType6)
+		{
+		case WEAPON_HAMMER: return protocol7::PICKUP_HAMMER;
+		case WEAPON_GUN: return protocol7::PICKUP_GUN;
+		case WEAPON_SHOTGUN: return protocol7::PICKUP_SHOTGUN;
+		case WEAPON_GRENADE: return protocol7::PICKUP_GRENADE;
+		case WEAPON_LASER: return protocol7::PICKUP_LASER;
+		case WEAPON_NINJA: return protocol7::PICKUP_NINJA;
+		default:
+			dbg_assert(false, "invalid subtype %d", SubType6);
+			dbg_break();
+		}
+	case POWERUP_NINJA: return protocol7::PICKUP_NINJA;
+	case POWERUP_HEALTH: return protocol7::PICKUP_HEALTH;
+	case POWERUP_ARMOR:
+	case POWERUP_ARMOR_SHOTGUN:
+	case POWERUP_ARMOR_GRENADE:
+	case POWERUP_ARMOR_NINJA:
+	case POWERUP_ARMOR_LASER:
 		return protocol7::PICKUP_ARMOR;
-	return 0;
+	default:
+		dbg_assert(false, "invalid type %d", Type6);
+		dbg_break();
+	}
 }

@@ -1,12 +1,12 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include "console.h"
+
 #include <base/lock.h>
 #include <base/logger.h>
 #include <base/math.h>
 #include <base/system.h>
-
-#include <game/generated/client_data.h>
 
 #include <engine/console.h>
 #include <engine/engine.h>
@@ -17,16 +17,14 @@
 #include <engine/storage.h>
 #include <engine/textrender.h>
 
+#include <generated/client_data.h>
+
+#include <game/client/gameclient.h>
+#include <game/client/ui.h>
 #include <game/localization.h>
 #include <game/version.h>
 
-#include <game/client/gameclient.h>
-#include <game/client/render.h>
-#include <game/client/ui.h>
-
 #include <iterator>
-
-#include "console.h"
 
 static constexpr float FONT_SIZE = 10.0f;
 static constexpr float LINE_SPACING = 1.0f;
@@ -178,9 +176,6 @@ static int PossibleKeys(const char *pStr, IInput *pInput, IConsole::FPossibleCal
 	return Index;
 }
 
-const ColorRGBA CGameConsole::ms_SearchHighlightColor = ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f);
-const ColorRGBA CGameConsole::ms_SearchSelectedColor = ColorRGBA(1.0f, 1.0f, 0.0f, 1.0f);
-
 CGameConsole::CInstance::CInstance(int Type)
 {
 	m_pHistoryEntry = nullptr;
@@ -215,6 +210,12 @@ CGameConsole::CInstance::CInstance(int Type)
 		if(pEntry->m_LineCount != -1)
 		{
 			m_NewLineCounter -= pEntry->m_LineCount;
+			for(auto &SearchMatch : m_vSearchMatches)
+			{
+				SearchMatch.m_StartLine += pEntry->m_LineCount;
+				SearchMatch.m_EndLine += pEntry->m_LineCount;
+				SearchMatch.m_EntryLine += pEntry->m_LineCount;
+			}
 		}
 	});
 
@@ -433,7 +434,7 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 			}
 			else
 			{
-				SelectNextSearchMatch(m_pGameConsole->m_pClient->Input()->ShiftIsPressed() ? -1 : 1);
+				SelectNextSearchMatch(m_pGameConsole->GameClient()->Input()->ShiftIsPressed() ? -1 : 1);
 			}
 
 			Handled = true;
@@ -481,7 +482,7 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 		}
 		else if(Event.m_Key == KEY_TAB)
 		{
-			const int Direction = m_pGameConsole->m_pClient->Input()->ShiftIsPressed() ? -1 : 1;
+			const int Direction = m_pGameConsole->GameClient()->Input()->ShiftIsPressed() ? -1 : 1;
 
 			if(!m_Searching)
 			{
@@ -648,14 +649,14 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 			char aBuf[IConsole::CMDLINE_LENGTH];
 			StrCopyUntilSpace(aBuf, sizeof(aBuf), aCmd);
 
-			const IConsole::CCommandInfo *pCommand = m_pGameConsole->m_pConsole->GetCommandInfo(aBuf, m_CompletionFlagmask,
+			const IConsole::ICommandInfo *pCommand = m_pGameConsole->m_pConsole->GetCommandInfo(aBuf, m_CompletionFlagmask,
 				m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands());
 			if(pCommand)
 			{
 				m_IsCommand = true;
-				m_pCommandName = pCommand->m_pName;
-				m_pCommandHelp = pCommand->m_pHelp;
-				m_pCommandParams = pCommand->m_pParams;
+				m_pCommandName = pCommand->Name();
+				m_pCommandHelp = pCommand->Help();
+				m_pCommandParams = pCommand->Params();
 			}
 			else
 				m_IsCommand = false;
@@ -726,13 +727,25 @@ void CGameConsole::CInstance::ScrollToCenter(int StartLine, int EndLine)
 void CGameConsole::CInstance::UpdateEntryTextAttributes(CBacklogEntry *pEntry) const
 {
 	CTextCursor Cursor;
-	m_pGameConsole->TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, FONT_SIZE, 0);
+	Cursor.m_FontSize = FONT_SIZE;
+	Cursor.m_Flags = 0;
 	Cursor.m_LineWidth = m_pGameConsole->Ui()->Screen()->w - 10;
 	Cursor.m_MaxLines = 10;
 	Cursor.m_LineSpacing = LINE_SPACING;
 	m_pGameConsole->TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
 	pEntry->m_YOffset = Cursor.Height();
 	pEntry->m_LineCount = Cursor.m_LineCount;
+}
+
+bool CGameConsole::CInstance::IsInputHidden() const
+{
+	if(m_Type != CONSOLETYPE_REMOTE)
+		return false;
+	if(m_pGameConsole->Client()->State() != IClient::STATE_ONLINE || m_Searching)
+		return false;
+	if(m_pGameConsole->Client()->RconAuthed())
+		return false;
+	return m_UserGot || !m_UsernameReq;
 }
 
 void CGameConsole::CInstance::SetSearching(bool Searching)
@@ -1119,12 +1132,13 @@ void CGameConsole::OnRender()
 		const float InitialY = y;
 
 		// render prompt
-		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, x, y + FONT_SIZE / 2.0f, FONT_SIZE, TEXTFLAG_RENDER);
+		CTextCursor PromptCursor;
+		PromptCursor.SetPosition(vec2(x, y + FONT_SIZE / 2.0f));
+		PromptCursor.m_FontSize = FONT_SIZE;
 
 		char aPrompt[32];
 		Prompt(aPrompt);
-		TextRender()->TextEx(&Cursor, aPrompt);
+		TextRender()->TextEx(&PromptCursor, aPrompt);
 
 		// check if mouse is pressed
 		const vec2 WindowSize = vec2(Graphics()->WindowWidth(), Graphics()->WindowHeight());
@@ -1171,13 +1185,17 @@ void CGameConsole::OnRender()
 			pConsole->m_HasSelection = false;
 		}
 
-		x = Cursor.m_X;
+		x = PromptCursor.m_X;
 
 		if(m_ConsoleState == CONSOLE_OPEN)
 		{
 			if(pConsole->m_MousePress.y >= pConsole->m_BoundingBox.m_Y && pConsole->m_MousePress.y < pConsole->m_BoundingBox.m_Y + pConsole->m_BoundingBox.m_H)
 			{
 				CLineInput::SMouseSelection *pMouseSelection = pConsole->m_Input.GetMouseSelection();
+				if(pMouseSelection->m_Selecting && !pConsole->m_MouseIsPress && pConsole->m_Input.IsActive())
+				{
+					Input()->EnsureScreenKeyboardShown();
+				}
 				pMouseSelection->m_Selecting = pConsole->m_MouseIsPress;
 				pMouseSelection->m_PressMouse = pConsole->m_MousePress;
 				pMouseSelection->m_ReleaseMouse = pConsole->m_MouseRelease;
@@ -1189,7 +1207,7 @@ void CGameConsole::OnRender()
 		}
 
 		// render console input (wrap line)
-		pConsole->m_Input.SetHidden(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed() && (pConsole->m_UserGot || !pConsole->m_UsernameReq));
+		pConsole->m_Input.SetHidden(pConsole->IsInputHidden());
 		if(m_ConsoleState == CONSOLE_OPEN)
 		{
 			pConsole->m_Input.Activate(EInputPriority::CONSOLE); // Ensure that the input is active
@@ -1205,9 +1223,6 @@ void CGameConsole::OnRender()
 			pConsole->m_HasSelection = false; // Clear console selection if we have a line input selection
 
 		y -= pConsole->m_BoundingBox.m_H - FONT_SIZE;
-		TextRender()->SetCursor(&Cursor, x, y, FONT_SIZE, TEXTFLAG_RENDER);
-		Cursor.m_LineWidth = Screen.w - 10.0f - x;
-		Cursor.m_LineSpacing = LINE_SPACING;
 
 		if(pConsole->m_LastInputHeight != pConsole->m_BoundingBox.m_H)
 		{
@@ -1230,8 +1245,8 @@ void CGameConsole::OnRender()
 			pConsole->GetCommand(pConsole->m_aCompletionBuffer, aCmd);
 			Info.m_pCurrentCmd = aCmd;
 
-			TextRender()->SetCursor(&Info.m_Cursor, InitialX - Info.m_Offset, InitialY + RowHeight + 2.0f, FONT_SIZE, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
-			Info.m_Cursor.m_LineWidth = std::numeric_limits<float>::max();
+			Info.m_Cursor.SetPosition(vec2(InitialX - Info.m_Offset, InitialY + RowHeight + 2.0f));
+			Info.m_Cursor.m_FontSize = FONT_SIZE;
 			const int NumCommands = m_pConsole->PossibleCommands(Info.m_pCurrentCmd, pConsole->m_CompletionFlagmask, m_ConsoleType != CGameConsole::CONSOLETYPE_LOCAL && Client()->RconAuthed() && Client()->UseTempRconCommands(), PossibleCommandsRenderCallback, &Info);
 			pConsole->m_CompletionRenderOffset = Info.m_Offset;
 
@@ -1271,7 +1286,8 @@ void CGameConsole::OnRender()
 		else if(pConsole->m_Searching && !pConsole->m_Input.IsEmpty())
 		{ // Render current match and match count
 			CTextCursor MatchInfoCursor;
-			TextRender()->SetCursor(&MatchInfoCursor, InitialX, InitialY + RowHeight + 2.0f, FONT_SIZE, TEXTFLAG_RENDER);
+			MatchInfoCursor.SetPosition(vec2(InitialX, InitialY + RowHeight + 2.0f));
+			MatchInfoCursor.m_FontSize = FONT_SIZE;
 			TextRender()->TextColor(0.8f, 0.8f, 0.8f, 1.0f);
 			if(!pConsole->m_vSearchMatches.empty())
 			{
@@ -1360,13 +1376,15 @@ void CGameConsole::OnRender()
 			const int LinesNotRendered = pEntry->m_LineCount - minimum((int)std::floor((y - LocalOffsetY) / RowHeight), pEntry->m_LineCount);
 			pConsole->m_LinesRendered -= LinesNotRendered;
 
-			TextRender()->SetCursor(&Cursor, 0.0f, y - OffsetY, FONT_SIZE, TEXTFLAG_RENDER);
-			Cursor.m_LineWidth = Screen.w - 10.0f;
-			Cursor.m_MaxLines = pEntry->m_LineCount;
-			Cursor.m_LineSpacing = LINE_SPACING;
-			Cursor.m_CalculateSelectionMode = (m_ConsoleState == CONSOLE_OPEN && pConsole->m_MousePress.y < pConsole->m_BoundingBox.m_Y && (pConsole->m_MouseIsPress || (pConsole->m_CurSelStart != pConsole->m_CurSelEnd) || pConsole->m_HasSelection)) ? TEXT_CURSOR_SELECTION_MODE_CALCULATE : TEXT_CURSOR_SELECTION_MODE_NONE;
-			Cursor.m_PressMouse = pConsole->m_MousePress;
-			Cursor.m_ReleaseMouse = pConsole->m_MouseRelease;
+			CTextCursor EntryCursor;
+			EntryCursor.SetPosition(vec2(0.0f, y - OffsetY));
+			EntryCursor.m_FontSize = FONT_SIZE;
+			EntryCursor.m_LineWidth = Screen.w - 10.0f;
+			EntryCursor.m_MaxLines = pEntry->m_LineCount;
+			EntryCursor.m_LineSpacing = LINE_SPACING;
+			EntryCursor.m_CalculateSelectionMode = (m_ConsoleState == CONSOLE_OPEN && pConsole->m_MousePress.y < pConsole->m_BoundingBox.m_Y && (pConsole->m_MouseIsPress || (pConsole->m_CurSelStart != pConsole->m_CurSelEnd) || pConsole->m_HasSelection)) ? TEXT_CURSOR_SELECTION_MODE_CALCULATE : TEXT_CURSOR_SELECTION_MODE_NONE;
+			EntryCursor.m_PressMouse = pConsole->m_MousePress;
+			EntryCursor.m_ReleaseMouse = pConsole->m_MouseRelease;
 
 			if(pConsole->m_Searching && pConsole->m_CurrentMatchIndex != -1)
 			{
@@ -1375,24 +1393,24 @@ void CGameConsole::OnRender()
 
 				auto CurrentSelectedOccurrence = pConsole->m_vSearchMatches[pConsole->m_CurrentMatchIndex];
 
-				std::vector<STextColorSplit> vColorSplits;
+				EntryCursor.m_vColorSplits.reserve(vMatches.size());
 				for(const auto &Match : vMatches)
 				{
 					bool IsSelected = CurrentSelectedOccurrence.m_EntryLine == Match.m_EntryLine && CurrentSelectedOccurrence.m_Pos == Match.m_Pos;
-					Cursor.m_vColorSplits.emplace_back(
+					EntryCursor.m_vColorSplits.emplace_back(
 						Match.m_Pos,
 						pConsole->m_Input.GetLength(),
 						IsSelected ? ms_SearchSelectedColor : ms_SearchHighlightColor);
 				}
 			}
 
-			TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
-			Cursor.m_vColorSplits = {};
+			TextRender()->TextEx(&EntryCursor, pEntry->m_aText, -1);
+			EntryCursor.m_vColorSplits = {};
 
-			if(Cursor.m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_CALCULATE)
+			if(EntryCursor.m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_CALCULATE)
 			{
-				pConsole->m_CurSelStart = minimum(Cursor.m_SelectionStart, Cursor.m_SelectionEnd);
-				pConsole->m_CurSelEnd = maximum(Cursor.m_SelectionStart, Cursor.m_SelectionEnd);
+				pConsole->m_CurSelStart = minimum(EntryCursor.m_SelectionStart, EntryCursor.m_SelectionEnd);
+				pConsole->m_CurSelEnd = maximum(EntryCursor.m_SelectionStart, EntryCursor.m_SelectionEnd);
 			}
 			pConsole->m_LinesRendered += First ? pEntry->m_LineCount - (pConsole->m_BacklogLastActiveLine - SkippedLines) : pEntry->m_LineCount;
 
@@ -1489,7 +1507,7 @@ bool CGameConsole::OnInput(const IInput::CEvent &Event)
 		Toggle(m_ConsoleType);
 	else if(!CurrentConsole()->OnInput(Event))
 	{
-		if(m_pClient->Input()->ModifierIsPressed() && Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_C)
+		if(GameClient()->Input()->ModifierIsPressed() && Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_C)
 			m_WantsSelectionCopy = true;
 	}
 
@@ -1526,7 +1544,7 @@ void CGameConsole::Toggle(int Type)
 			ConsoleForType(Type)->m_Input.Deactivate();
 			Input()->MouseModeRelative();
 			Ui()->SetEnabled(true);
-			m_pClient->OnRelease();
+			GameClient()->OnRelease();
 			m_ConsoleState = CONSOLE_CLOSING;
 		}
 	}
@@ -1579,6 +1597,20 @@ void CGameConsole::ConConsolePageDown(IConsole::IResult *pResult, void *pUserDat
 		pConsole->m_BacklogCurLine = 0;
 }
 
+void CGameConsole::ConConsolePageTop(IConsole::IResult *pResult, void *pUserData)
+{
+	CInstance *pConsole = ((CGameConsole *)pUserData)->CurrentConsole();
+	pConsole->m_BacklogCurLine += pConsole->GetLinesToScroll(-1, pConsole->m_LinesRendered);
+	pConsole->m_HasSelection = false;
+}
+
+void CGameConsole::ConConsolePageBottom(IConsole::IResult *pResult, void *pUserData)
+{
+	CInstance *pConsole = ((CGameConsole *)pUserData)->CurrentConsole();
+	pConsole->m_BacklogCurLine = 0;
+	pConsole->m_HasSelection = false;
+}
+
 void CGameConsole::ConchainConsoleOutputLevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CGameConsole *pSelf = (CGameConsole *)pUserData;
@@ -1623,6 +1655,8 @@ void CGameConsole::OnConsoleInit()
 
 	Console()->Register("console_page_up", "", CFGFLAG_CLIENT, ConConsolePageUp, this, "Previous page in console");
 	Console()->Register("console_page_down", "", CFGFLAG_CLIENT, ConConsolePageDown, this, "Next page in console");
+	Console()->Register("console_page_top", "", CFGFLAG_CLIENT, ConConsolePageTop, this, "Last page in console");
+	Console()->Register("console_page_bottom", "", CFGFLAG_CLIENT, ConConsolePageBottom, this, "First page in console");
 	Console()->Chain("console_output_level", ConchainConsoleOutputLevel, this);
 }
 

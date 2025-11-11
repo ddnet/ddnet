@@ -1,6 +1,5 @@
 #include "tooltips.h"
 
-#include <game/client/render.h>
 #include <game/client/ui.h>
 
 CTooltips::CTooltips()
@@ -29,15 +28,15 @@ inline void CTooltips::ClearActiveTooltip()
 void CTooltips::DoToolTip(const void *pId, const CUIRect *pNearRect, const char *pText, float WidthHint)
 {
 	uintptr_t Id = reinterpret_cast<uintptr_t>(pId);
-	const auto result = m_Tooltips.emplace(Id, CTooltip{
-							   pId,
-							   *pNearRect,
-							   pText,
-							   WidthHint,
-							   false});
-	CTooltip &Tooltip = result.first->second;
+	const auto &[Entry, WasInserted] = m_Tooltips.emplace(Id, CTooltip{
+									  pId,
+									  *pNearRect,
+									  pText,
+									  WidthHint,
+									  false});
+	CTooltip &Tooltip = Entry->second;
 
-	if(!result.second)
+	if(!WasInserted)
 	{
 		Tooltip.m_Rect = *pNearRect; // update in case of window resize
 		Tooltip.m_pText = pText; // update in case of language change
@@ -98,33 +97,34 @@ void CTooltips::OnRender()
 		// Try the top side.
 		if(Tooltip.m_Rect.y - Rect.h - Margin > pScreen->y)
 		{
-			Rect.x = clamp(Ui()->MouseX() - Rect.w / 2.0f, Margin, pScreen->w - Rect.w - Margin);
+			Rect.x = std::clamp(Ui()->MouseX() - Rect.w / 2.0f, Margin, pScreen->w - Rect.w - Margin);
 			Rect.y = Tooltip.m_Rect.y - Rect.h - Margin;
 		}
 		// Try the bottom side.
 		else if(Tooltip.m_Rect.y + Tooltip.m_Rect.h + Margin < pScreen->h)
 		{
-			Rect.x = clamp(Ui()->MouseX() - Rect.w / 2.0f, Margin, pScreen->w - Rect.w - Margin);
+			Rect.x = std::clamp(Ui()->MouseX() - Rect.w / 2.0f, Margin, pScreen->w - Rect.w - Margin);
 			Rect.y = Tooltip.m_Rect.y + Tooltip.m_Rect.h + Margin;
 		}
 		// Try the right side.
 		else if(Tooltip.m_Rect.x + Tooltip.m_Rect.w + Margin + Rect.w < pScreen->w)
 		{
 			Rect.x = Tooltip.m_Rect.x + Tooltip.m_Rect.w + Margin;
-			Rect.y = clamp(Ui()->MouseY() - Rect.h / 2.0f, Margin, pScreen->h - Rect.h - Margin);
+			Rect.y = std::clamp(Ui()->MouseY() - Rect.h / 2.0f, Margin, pScreen->h - Rect.h - Margin);
 		}
 		// Try the left side.
 		else if(Tooltip.m_Rect.x - Rect.w - Margin > pScreen->x)
 		{
 			Rect.x = Tooltip.m_Rect.x - Rect.w - Margin;
-			Rect.y = clamp(Ui()->MouseY() - Rect.h / 2.0f, Margin, pScreen->h - Rect.h - Margin);
+			Rect.y = std::clamp(Ui()->MouseY() - Rect.h / 2.0f, Margin, pScreen->h - Rect.h - Margin);
 		}
 
 		Rect.Draw(ColorRGBA(0.2f, 0.2f, 0.2f, 0.8f * AlphaFactor), IGraphics::CORNER_ALL, Padding);
 		Rect.Margin(Padding, &Rect);
 
 		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, Rect.x, Rect.y, FontSize, TEXTFLAG_RENDER);
+		Cursor.SetPosition(Rect.TopLeft());
+		Cursor.m_FontSize = FontSize;
 		Cursor.m_LineWidth = Tooltip.m_WidthHint;
 
 		STextContainerIndex TextContainerIndex;

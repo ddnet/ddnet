@@ -4,8 +4,10 @@
 #define GAME_CLIENT_COMPONENTS_SOUNDS_H
 
 #include <base/vmath.h>
+
 #include <engine/shared/jobs.h>
 #include <engine/sound.h>
+
 #include <game/client/component.h>
 
 class CSoundLoading : public IJob
@@ -24,11 +26,13 @@ class CSounds : public CComponent
 	{
 		QUEUE_SIZE = 32,
 	};
-	struct QueueEntry
+	class CQueueEntry
 	{
+	public:
 		int m_Channel;
 		int m_SetId;
-	} m_aQueue[QUEUE_SIZE];
+	};
+	CQueueEntry m_aQueue[QUEUE_SIZE];
 	int m_QueuePos;
 	int64_t m_QueueWaitTime;
 	std::shared_ptr<CSoundLoading> m_pSoundJob;
@@ -53,11 +57,11 @@ public:
 		CHN_MAPSOUND,
 	};
 
-	virtual int Sizeof() const override { return sizeof(*this); }
-	virtual void OnInit() override;
-	virtual void OnReset() override;
-	virtual void OnStateChange(int NewState, int OldState) override;
-	virtual void OnRender() override;
+	int Sizeof() const override { return sizeof(*this); }
+	void OnInit() override;
+	void OnReset() override;
+	void OnStateChange(int NewState, int OldState) override;
+	void OnRender() override;
 
 	void ClearQueue();
 	void Enqueue(int Channel, int SetId);

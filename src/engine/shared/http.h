@@ -2,7 +2,9 @@
 #define ENGINE_SHARED_HTTP_H
 
 #include <base/hash_ctxt.h>
+#include <base/system.h>
 
+#include <engine/http.h>
 #include <engine/shared/jobs.h>
 
 #include <algorithm>
@@ -12,8 +14,6 @@
 #include <mutex>
 #include <optional>
 #include <unordered_map>
-
-#include <engine/http.h>
 
 typedef struct _json_value json_value;
 class IStorage;
@@ -41,12 +41,13 @@ enum class IPRESOLVE
 	V6,
 };
 
-struct CTimeout
+class CTimeout
 {
-	long ConnectTimeoutMs;
-	long TimeoutMs;
-	long LowSpeedLimit;
-	long LowSpeedTime;
+public:
+	long m_ConnectTimeoutMs;
+	long m_TimeoutMs;
+	long m_LowSpeedLimit;
+	long m_LowSpeedTime;
 };
 
 class CHttpRequest : public IHttpRequest
@@ -74,8 +75,8 @@ class CHttpRequest : public IHttpRequest
 			return "POST";
 		}
 
-		// Unreachable, maybe assert instead?
-		return "UNKNOWN";
+		dbg_assert(false, "unreachable");
+		dbg_break();
 	}
 
 	char m_aUrl[256] = {0};
@@ -128,8 +129,8 @@ class CHttpRequest : public IHttpRequest
 
 	int m_StatusCode = 0;
 	bool m_HeadersEnded = false;
-	std::optional<int64_t> m_ResultDate = {};
-	std::optional<int64_t> m_ResultLastModified = {};
+	std::optional<int64_t> m_ResultDate = std::nullopt;
+	std::optional<int64_t> m_ResultLastModified = std::nullopt;
 
 	bool ShouldSkipRequest();
 	// Abort the request with an error if `BeforeInit()` returns false.
@@ -315,13 +316,13 @@ class CHttp : public IHttp
 
 	void *m_pThread = nullptr;
 
-	std::mutex m_Lock{};
-	std::condition_variable m_Cv{};
+	std::mutex m_Lock;
+	std::condition_variable m_Cv;
 	std::atomic<EState> m_State = UNINITIALIZED;
-	std::deque<std::shared_ptr<CHttpRequest>> m_PendingRequests{};
-	std::unordered_map<void *, std::shared_ptr<CHttpRequest>> m_RunningRequests{}; // void * == CURL *
+	std::deque<std::shared_ptr<CHttpRequest>> m_PendingRequests;
+	std::unordered_map<void *, std::shared_ptr<CHttpRequest>> m_RunningRequests; // void * == CURL *
 	std::chrono::milliseconds m_ShutdownDelay{};
-	std::optional<std::chrono::time_point<std::chrono::steady_clock>> m_ShutdownTime{};
+	std::optional<std::chrono::time_point<std::chrono::steady_clock>> m_ShutdownTime;
 	std::atomic<bool> m_Shutdown = false;
 
 	// Only to be used with curl_multi_wakeup
@@ -335,9 +336,9 @@ public:
 	bool Init(std::chrono::milliseconds ShutdownDelay);
 
 	// User
-	virtual void Run(std::shared_ptr<IHttpRequest> pRequest) override;
+	void Run(std::shared_ptr<IHttpRequest> pRequest) override;
 	void Shutdown() override;
-	~CHttp();
+	~CHttp() override;
 };
 
 #endif // ENGINE_SHARED_HTTP_H

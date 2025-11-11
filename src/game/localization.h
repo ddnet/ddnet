@@ -3,8 +3,6 @@
 #ifndef GAME_LOCALIZATION_H
 #define GAME_LOCALIZATION_H
 
-#include <base/system.h> // GNUC_ATTRIBUTE
-
 #include <engine/shared/memheap.h>
 
 #include <string>
@@ -14,11 +12,11 @@ class CLanguage
 {
 public:
 	CLanguage() = default;
-	CLanguage(const char *pName, const char *pFileName, int Code, const std::vector<std::string> &vLanguageCodes) :
-		m_Name(pName), m_FileName(pFileName), m_CountryCode(Code), m_vLanguageCodes(vLanguageCodes) {}
+	CLanguage(const char *pName, const char *pFilename, int Code, const std::vector<std::string> &vLanguageCodes) :
+		m_Name(pName), m_Filename(pFilename), m_CountryCode(Code), m_vLanguageCodes(vLanguageCodes) {}
 
 	std::string m_Name;
-	std::string m_FileName;
+	std::string m_Filename;
 	int m_CountryCode;
 	std::vector<std::string> m_vLanguageCodes;
 
@@ -34,7 +32,7 @@ class CLocalizationDatabase
 		unsigned m_ContextHash;
 		const char *m_pReplacement;
 
-		CString() {}
+		CString() = default;
 		CString(unsigned Hash, unsigned ContextHash, const char *pReplacement) :
 			m_Hash(Hash), m_ContextHash(ContextHash), m_pReplacement(pReplacement)
 		{
@@ -62,6 +60,6 @@ public:
 
 extern CLocalizationDatabase g_Localization;
 
-extern const char *Localize(const char *pStr, const char *pContext = "")
-	GNUC_ATTRIBUTE((format_arg(1)));
+[[gnu::format_arg(1)]] extern const char *Localize(const char *pStr, const char *pContext = "");
+
 #endif

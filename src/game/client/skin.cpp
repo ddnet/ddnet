@@ -134,19 +134,12 @@ CSkin::CSkin(const char *pName)
 // has to be kept in sync with m_aSkinNameRestrictions
 bool CSkin::IsValidName(const char *pName)
 {
-	if(pName[0] == '\0' || str_length(pName) >= (int)sizeof(CSkin("").m_aName))
+	if(str_length(pName) >= (int)sizeof(CSkin("").m_aName))
 	{
 		return false;
 	}
 
-	for(int i = 0; pName[i] != '\0'; ++i)
-	{
-		if(pName[i] == '"' || pName[i] == '/' || pName[i] == '\\')
-		{
-			return false;
-		}
-	}
-	return true;
+	return str_valid_filename(pName);
 }
 
 const char CSkin::m_aSkinNameRestrictions[] = "Skin names must be valid filenames shorter than 24 characters.";

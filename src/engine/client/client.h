@@ -3,11 +3,11 @@
 #ifndef ENGINE_CLIENT_CLIENT_H
 #define ENGINE_CLIENT_CLIENT_H
 
-#include <deque>
-#include <memory>
-#include <mutex>
+#include "graph.h"
+#include "smooth_time.h"
 
 #include <base/hash.h>
+#include <base/types.h>
 
 #include <engine/client.h>
 #include <engine/client/checksum.h>
@@ -25,8 +25,10 @@
 #include <engine/textrender.h>
 #include <engine/warning.h>
 
-#include "graph.h"
-#include "smooth_time.h"
+#include <chrono>
+#include <deque>
+#include <memory>
+#include <mutex>
 
 class CDemoEdit;
 class IDemoRecorder;
@@ -44,9 +46,6 @@ class ISteam;
 class INotifications;
 class IStorage;
 class IUpdater;
-
-#define CONNECTLINK_DOUBLE_SLASH "ddnet://"
-#define CONNECTLINK_NO_SLASH "ddnet:"
 
 class CServerCapabilities
 {
@@ -137,7 +136,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aCurrentMapPath[IO_MAX_PATH_LENGTH] = "";
 
 	char m_aTimeoutCodes[NUM_DUMMIES][32] = {"", ""};
-	bool m_aCodeRunAfterJoin[NUM_DUMMIES] = {false, false};
+	bool m_aDidPostConnect[NUM_DUMMIES] = {false, false};
 	bool m_GenerateTimeoutSeed = true;
 
 	char m_aCmdConnect[256] = "";
@@ -164,6 +163,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	SHA256_DIGEST m_MapDetailsSha256 = SHA256_ZEROED;
 	char m_aMapDetailsUrl[256] = "";
 
+	EInfoState m_InfoState = EInfoState::ERROR;
 	std::shared_ptr<CHttpRequest> m_pDDNetInfoTask = nullptr;
 
 	// time
@@ -265,6 +265,11 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	std::shared_ptr<ILogger> m_pFileLogger = nullptr;
 	std::shared_ptr<ILogger> m_pStdoutLogger = nullptr;
 
+	// For RenderDebug function
+	NETSTATS m_NetstatsPrev = {};
+	NETSTATS m_NetstatsCurrent = {};
+	std::chrono::nanoseconds m_NetstatsLastUpdate = std::chrono::nanoseconds(0);
+
 	// For DummyName function
 	char m_aAutomaticDummyName[MAX_NAME_LENGTH];
 
@@ -324,6 +329,9 @@ public:
 	void OnEnterGame(bool Dummy);
 	void EnterGame(int Conn) override;
 
+	// called once after being ingame for 1 second
+	void OnPostConnect(int Conn, bool Dummy);
+
 	void Connect(const char *pAddress, const char *pPassword = nullptr) override;
 	void DisconnectWithReason(const char *pReason);
 	void Disconnect() override;
@@ -376,6 +384,7 @@ public:
 	void ResetMapDownload(bool ResetActive);
 	void FinishMapDownload();
 
+	EInfoState InfoState() const override { return m_InfoState; }
 	void RequestDDNetInfo() override;
 	void ResetDDNetInfoTask();
 	void LoadDDNetInfo();
@@ -484,9 +493,6 @@ public:
 	virtual int HandleChecksum(int Conn, CUuid Uuid, CUnpacker *pUnpacker);
 
 	// gfx
-	void SwitchWindowScreen(int Index) override;
-	void SetWindowParams(int FullscreenMode, bool IsBorderless) override;
-	void ToggleWindowVSync() override;
 	void Notify(const char *pTitle, const char *pMessage) override;
 	void OnWindowResize() override;
 	void BenchmarkQuit(int Seconds, const char *pFilename);
@@ -533,8 +539,8 @@ public:
 	void ShellUnregister() override;
 #endif
 
-	void ShowMessageBox(const char *pTitle, const char *pMessage, EMessageBoxType Type = MESSAGE_BOX_TYPE_ERROR) override;
-	void GetGpuInfoString(char (&aGpuInfo)[256]) override;
+	std::optional<int> ShowMessageBox(const IGraphics::CMessageBox &MessageBox) override;
+	void GetGpuInfoString(char (&aGpuInfo)[512]) override;
 	void SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr<ILogger> &&pStdoutLogger);
 };
 

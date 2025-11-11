@@ -1,39 +1,39 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "debughud.h"
+
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
 
-#include <game/generated/protocol.h>
+#include <generated/protocol.h>
 
 #include <game/client/gameclient.h>
 #include <game/client/prediction/entities/character.h>
 #include <game/localization.h>
 
-#include "debughud.h"
-
 static constexpr int64_t GRAPH_MAX_VALUES = 128;
 
 CDebugHud::CDebugHud() :
-	m_RampGraph(GRAPH_MAX_VALUES),
-	m_ZoomedInGraph(GRAPH_MAX_VALUES)
+	m_RampGraph(GRAPH_MAX_VALUES, 2, false),
+	m_ZoomedInGraph(GRAPH_MAX_VALUES, 2, false)
 {
 }
 
 void CDebugHud::RenderNetCorrections()
 {
-	if(!g_Config.m_Debug || g_Config.m_DbgGraphs || !m_pClient->m_Snap.m_pLocalCharacter || !m_pClient->m_Snap.m_pLocalPrevCharacter)
+	if(!g_Config.m_Debug || g_Config.m_DbgGraphs || !GameClient()->m_Snap.m_pLocalCharacter || !GameClient()->m_Snap.m_pLocalPrevCharacter)
 		return;
 
 	const float Height = 300.0f;
 	const float Width = Height * Graphics()->ScreenAspect();
 	Graphics()->MapScreen(0.0f, 0.0f, Width, Height);
 
-	const float Velspeed = length(vec2(m_pClient->m_Snap.m_pLocalCharacter->m_VelX / 256.0f, m_pClient->m_Snap.m_pLocalCharacter->m_VelY / 256.0f)) * Client()->GameTickSpeed();
-	const float VelspeedX = m_pClient->m_Snap.m_pLocalCharacter->m_VelX / 256.0f * Client()->GameTickSpeed();
-	const float VelspeedY = m_pClient->m_Snap.m_pLocalCharacter->m_VelY / 256.0f * Client()->GameTickSpeed();
-	const float Ramp = VelocityRamp(Velspeed, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampStart, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampRange, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampCurvature);
-	const CCharacter *pCharacter = m_pClient->m_GameWorld.GetCharacterById(m_pClient->m_Snap.m_LocalClientId);
+	const float Velspeed = length(vec2(GameClient()->m_Snap.m_pLocalCharacter->m_VelX / 256.0f, GameClient()->m_Snap.m_pLocalCharacter->m_VelY / 256.0f)) * Client()->GameTickSpeed();
+	const float VelspeedX = GameClient()->m_Snap.m_pLocalCharacter->m_VelX / 256.0f * Client()->GameTickSpeed();
+	const float VelspeedY = GameClient()->m_Snap.m_pLocalCharacter->m_VelY / 256.0f * Client()->GameTickSpeed();
+	const float Ramp = VelocityRamp(Velspeed, GameClient()->m_aTuning[g_Config.m_ClDummy].m_VelrampStart, GameClient()->m_aTuning[g_Config.m_ClDummy].m_VelrampRange, GameClient()->m_aTuning[g_Config.m_ClDummy].m_VelrampCurvature);
+	const CCharacter *pCharacter = GameClient()->m_GameWorld.GetCharacterById(GameClient()->m_Snap.m_LocalClientId);
 
 	const float FontSize = 5.0f;
 	const float LineHeight = FontSize + 1.0f;
@@ -66,18 +66,18 @@ void CDebugHud::RenderNetCorrections()
 	str_format(aBuf, sizeof(aBuf), "%d / %d", pCharacter == nullptr ? -1 : pCharacter->GetPureTuneZone(), pCharacter == nullptr ? -1 : pCharacter->GetOverriddenTuneZone());
 	RenderRow("Tune zone (pure / override):", aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "%.2f", m_pClient->m_Snap.m_pLocalCharacter->m_X / 32.0f);
+	str_format(aBuf, sizeof(aBuf), "%.2f", GameClient()->m_Snap.m_pLocalCharacter->m_X / 32.0f);
 	RenderRow("Pos.x:", aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "%.2f", m_pClient->m_Snap.m_pLocalCharacter->m_Y / 32.0f);
+	str_format(aBuf, sizeof(aBuf), "%.2f", GameClient()->m_Snap.m_pLocalCharacter->m_Y / 32.0f);
 	RenderRow("Pos.y:", aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "%d", m_pClient->m_Snap.m_pLocalCharacter->m_Angle);
+	str_format(aBuf, sizeof(aBuf), "%d", GameClient()->m_Snap.m_pLocalCharacter->m_Angle);
 	RenderRow("Angle:", aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "%d", m_pClient->NetobjNumCorrections());
+	str_format(aBuf, sizeof(aBuf), "%d", GameClient()->NetobjNumCorrections());
 	RenderRow("Netobj corrections", aBuf);
-	RenderRow(" on:", m_pClient->NetobjCorrectedOn());
+	RenderRow(" on:", GameClient()->NetobjCorrectedOn());
 }
 
 void CDebugHud::RenderTuning()
@@ -92,11 +92,10 @@ void CDebugHud::RenderTuning()
 	if(g_Config.m_DbgTuning == DBG_TUNING_OFF)
 		return;
 
-	const CCharacter *pCharacter = m_pClient->m_GameWorld.GetCharacterById(m_pClient->m_Snap.m_LocalClientId);
+	const CCharacter *pCharacter = GameClient()->m_GameWorld.GetCharacterById(GameClient()->m_Snap.m_LocalClientId);
 
-	const CTuningParams StandardTuning;
-	const CTuningParams *pGlobalTuning = m_pClient->GetTuning(0);
-	const CTuningParams *pZoneTuning = !m_pClient->m_GameWorld.m_WorldConfig.m_UseTuneZones || pCharacter == nullptr ? nullptr : m_pClient->GetTuning(pCharacter->GetOverriddenTuneZone());
+	const CTuningParams *pGlobalTuning = GameClient()->GetTuning(0);
+	const CTuningParams *pZoneTuning = !GameClient()->m_GameWorld.m_WorldConfig.m_UseTuneZones || pCharacter == nullptr ? nullptr : GameClient()->GetTuning(pCharacter->GetOverriddenTuneZone());
 	const CTuningParams *pActiveTuning = pZoneTuning == nullptr ? pGlobalTuning : pZoneTuning;
 
 	const float Height = 300.0f;
@@ -135,7 +134,7 @@ void CDebugHud::RenderTuning()
 			CurrentZone = 0.0f;
 		else
 			pZoneTuning->Get(i, &CurrentZone);
-		StandardTuning.Get(i, &Standard);
+		CTuningParams::DEFAULT.Get(i, &Standard);
 
 		if(g_Config.m_DbgTuning == DBG_TUNING_SHOW_CHANGED && Standard == CurrentGlobal && (pZoneTuning == nullptr || Standard == CurrentZone))
 			continue; // skip unchanged params
@@ -170,9 +169,10 @@ void CDebugHud::RenderTuning()
 
 	// Render Velspeed.X * Ramp Graphs
 	Graphics()->MapScreen(0.0f, 0.0f, Graphics()->ScreenWidth(), Graphics()->ScreenHeight());
-	const float GraphSpacing = Graphics()->ScreenWidth() / 100.0f;
-	const float GraphW = Graphics()->ScreenWidth() / 4.0f;
-	const float GraphH = Graphics()->ScreenHeight() / 6.0f;
+	// Make sure graph positions and sizes are aligned with pixels to avoid lines overlapping graph edges
+	const float GraphSpacing = std::round(Graphics()->ScreenWidth() / 100.0f);
+	const float GraphW = std::round(Graphics()->ScreenWidth() / 4.0f);
+	const float GraphH = std::round(Graphics()->ScreenHeight() / 6.0f);
 	const float GraphX = GraphW;
 	const float GraphY = Graphics()->ScreenHeight() - GraphH - GraphSpacing;
 
@@ -191,7 +191,7 @@ void CDebugHud::RenderTuning()
 		{
 			// This is a calculation of the speed values per second on the X axis, from 270 to 34560 in steps of 270
 			const float Speed = (i + 1) * StepSizeRampGraph;
-			const float Ramp = VelocityRamp(Speed, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampStart, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampRange, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampCurvature);
+			const float Ramp = VelocityRamp(Speed, GameClient()->m_aTuning[g_Config.m_ClDummy].m_VelrampStart, GameClient()->m_aTuning[g_Config.m_ClDummy].m_VelrampRange, GameClient()->m_aTuning[g_Config.m_ClDummy].m_VelrampCurvature);
 			const float RampedSpeed = Speed * Ramp;
 			if(RampedSpeed >= PreviousRampedSpeed)
 			{
@@ -208,12 +208,12 @@ void CDebugHud::RenderTuning()
 
 		m_ZoomedInGraph.Init(0.0f, 0.0f);
 		PreviousRampedSpeed = 1.0f;
-		MiddleOfZoomedInGraph = m_SpeedTurningPoint;
+		m_MiddleOfZoomedInGraph = m_SpeedTurningPoint;
 		for(int64_t i = 0; i < GRAPH_MAX_VALUES; i++)
 		{
 			// This is a calculation of the speed values per second on the X axis, from (MiddleOfZoomedInGraph - 64 * StepSize) to (MiddleOfZoomedInGraph + 64 * StepSize)
-			const float Speed = MiddleOfZoomedInGraph - 64 * StepSizeZoomedInGraph + i * StepSizeZoomedInGraph;
-			const float Ramp = VelocityRamp(Speed, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampStart, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampRange, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampCurvature);
+			const float Speed = m_MiddleOfZoomedInGraph - 64 * StepSizeZoomedInGraph + i * StepSizeZoomedInGraph;
+			const float Ramp = VelocityRamp(Speed, GameClient()->m_aTuning[g_Config.m_ClDummy].m_VelrampStart, GameClient()->m_aTuning[g_Config.m_ClDummy].m_VelrampRange, GameClient()->m_aTuning[g_Config.m_ClDummy].m_VelrampCurvature);
 			const float RampedSpeed = Speed * Ramp;
 			if(RampedSpeed >= PreviousRampedSpeed)
 			{
@@ -238,8 +238,8 @@ void CDebugHud::RenderTuning()
 	str_format(aBuf, sizeof(aBuf), "Velspeed.X * Ramp in Bps (Velspeed %d to %d)", StepSizeRampGraph / 32, 128 * StepSizeRampGraph / 32);
 	m_RampGraph.Render(Graphics(), TextRender(), GraphX, GraphY, GraphW, GraphH, aBuf);
 	str_format(aBuf, sizeof(aBuf), "Max Velspeed before it ramps off:  %.2f Bps", m_SpeedTurningPoint / 32);
-	TextRender()->Text(GraphX, GraphY - GraphFontSize, GraphFontSize, aBuf);
-	str_format(aBuf, sizeof(aBuf), "Zoomed in on turning point (Velspeed %d to %d)", ((int)MiddleOfZoomedInGraph - 64 * StepSizeZoomedInGraph) / 32, ((int)MiddleOfZoomedInGraph + 64 * StepSizeZoomedInGraph) / 32);
+	TextRender()->Text(GraphX + 2.0f, GraphY + GraphH - GraphFontSize - 2.0f, GraphFontSize, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Zoomed in on turning point (Velspeed %d to %d)", ((int)m_MiddleOfZoomedInGraph - 64 * StepSizeZoomedInGraph) / 32, ((int)m_MiddleOfZoomedInGraph + 64 * StepSizeZoomedInGraph) / 32);
 	m_ZoomedInGraph.Render(Graphics(), TextRender(), GraphX + GraphW + GraphSpacing, GraphY, GraphW, GraphH, aBuf);
 }
 

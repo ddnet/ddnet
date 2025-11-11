@@ -1,4 +1,4 @@
-﻿%ds left
+%ds left
 == %ds ﻩﺪﻧﺎﻣ ﯽﻗﺎﺑ
 
 %i minute left
@@ -354,6 +354,7 @@ Quit
 
 Are you sure that you want to disconnect?
 == ؟ﯽﻨﮐ ﻝﺎﺼﺗﺍ ﻊﻄﻗ ﯼﺍﻮﺨﯿﻣ ﯽﻨﺌﻌﻤﻄﻣ
+
 Disconnect Dummy
 == ﯽﻣﺍﺩ ﻥﺩﺮﮐ ﻊﻄﻗ
 
@@ -781,10 +782,6 @@ Follow
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == .ﺪﯿﻨﮐ ﺵﻼﺗ ﻩﺭﺎﺑﻭﺩ ﻭ ﺪﯿﻫﺩ ﺮﯿﯿﻐﺗ Vulkan ﺎﯾ OpenGL ﻪﺑ ﺍﺭ gfx_backend ، settings_ddnet.cfg ﺭﺩ ،ﮓﯿﻔﻧﺎﮐ ﻪﺷﻮﭘ ﺭﺩ ﺪﯿﻨﮐ ﯽﻌﺳ. ﯼﺯﺍﺪﻧﺍ ﻩﺍﺭ ﻡﺎﮕﻨﻫ ﺭﺩ ﺎﻄﺧ
-
-[Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== .ﺪﻧﺭﺍﺩ ﯽﯾﻻﺎﺑ ﺡﻮﺿﻭ ﻪﮐ ﯽﯾﺎﻬﻧﺁ ﺹﻮﺼﺧ ﻪﺑ ،ﺪﯿﻨﮐ ﻑﺬﺣ ﺍﺭ (ﻩﺮﯿﻏ ﻭ ﺎﻫ ﺖﯾﺩﻮﺟﻮﻣ ،ﺎﻫ ﻦﯿﮑﺳﺍ) ﯽﺷﺭﺎﻔﺳ ﯼﺎﻫ ﯽﯾﺍﺭﺍﺩ ﺪﯿﻨﮐ ﯽﻌﺳ . ﮏﯿﻓﺍﺮﮔ ﻢﺠﺣ ﺩﻮﺒﻤﮐ
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
@@ -1671,12 +1668,12 @@ Go back the specified duration
 == ﺪﯿﻧﺍﺩﺮﮔﺮﺑ ﺐﻘﻋ ﻪﺑ ﺍﺭ ﻩﺪﺷ ﺺﺨﺸﻣ ﻥﺎﻣﺯ ﺕﺪﻣ
 
 [Demo player duration]
-%d min.
-== ﻪﻘﯿﻗﺩ %d
+%s min.
+== ﻪﻘﯿﻗﺩ %s
 
 [Demo player duration]
-%d sec.
-== ﻪﯿﻧﺎﺛ %d
+%s sec.
+== ﻪﯿﻧﺎﺛ %s
 
 Change the skip duration
 == ﻩﺪﺷ ﭗﯿﻜﺳﺍ ﻥﺎﻣﺯ ﺕﺪﻣ ﺮﯿﯿﻐﺗ
@@ -1907,9 +1904,6 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 Some fonts could not be loaded. Check the local console for details.
 == .ﺪﯿﻨﻛ ﯽﺳﺭﺮﺑ ﺍﺭ ﯽﻠﺤﻣ ﻝﻮﺴﻨﻛ ،ﺮﺘﺸﯿﺑ ﺕﺎﯿﺋﺰﺟ ىﺍﺮﺑ .ﺪﻧﺪﺸﻧ ىﺭﺍﺬﮔﺭﺎﺑ ﺎﻫﺖﻧﻮﻓ ﯽﺧﺮﺑ
 
-Loading background map
-== ﻪﻨﯿﻣﺯﺲﭘ ﻪﺸﻘﻧ ىﺭﺍﺬﮔﺭﺎﺑ ﻝﺎﺣ ﺭﺩ
-
 [Spectating Camera Mode Icon]
 AUTO
 == ﺭﺎﻛﺩﻮﺧ
@@ -2040,6 +2034,13 @@ Active: Hook
 English translation by the DDNet Team
 == Persian translation by OneShadow, Quick, younesdevil, Player, ArAsH and Fàłłéñ
 
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+Press Ctrl+Shift+G to disable debug graphs.
+== 
+
 No demo with this filename exists
 == 
 
@@ -2069,10 +2070,40 @@ Active
 Loading maps…
 == 
 
+[Spectating]
+Following %d: %s
+== 
+
+Server could not be started
+== 
+
+Loading map
+== 
+
+This name cannot be used for files and folders
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
+== 
+
+Could not get server list from master server
+== 
+
+[Demo playback]
+Live
+== 
+
+[Demo playback]
+Go to Live
+== 
+
 Map size
 == 
 
-https://wiki.ddnet.org/wiki/Touch_controls
+Save all changes before turning off the editor?
 == 
 
 Community
@@ -2105,10 +2136,270 @@ minimum
 maximum
 == 
 
+Layout
+== 
+
+Visibility
+== 
+
+Behavior
+== 
+
+Delete button
+== 
+
+Are you sure that you want to delete this button?
+== 
+
+Duplicate
+== 
+
+New button already created
+== 
+
+A new button has already been created, please save or delete it before creating another one.
+== 
+
+Please save your changes before duplicating a button.
+== 
+
+No space for button
+== 
+
+There is not enough space available to place another button.
+== 
+
+There is not enough space available to place another button with this size. The button has been resized.
+== 
+
+Deselect
+== 
+
+You'll lose unsaved changes after deselecting.
+== 
+
+Width
+== 
+
+Height
+== 
+
+Shape
+== 
+
+[Touch button shape]
+Rectangle
+== 
+
+[Touch button shape]
+Circle
+== 
+
+[Touch button label type]
+Plain
+== 
+
+[Touch button label type]
+Localized
+== 
+
+[Touch button label type]
+Icon
+== 
+
+Behavior type
+== 
+
+[Touch button behavior]
+Bind
+== 
+
+[Touch button behavior]
+Bind Toggle
+== 
+
+[Touch button behavior]
+Predefined
+== 
+
+Command
+== 
+
+Label
+== 
+
+Label type
+== 
+
+Add command
+== 
+
+Delete command
+== 
+
+[Touch button visibility preview]
+Included
+== 
+
+[Touch button visibility preview]
+Excluded
+== 
+
+[Touch button visibility preview]
+Ignore
+== 
+
+Long press on a touch button to select it.
+== 
+
+New button
+== 
+
+Select button by touch
+== 
+
+No buttons match your filter criteria
+== 
+
+File
+== 
+
+Buttons
+== 
+
+Active color
+== 
+
+Inactive color
+== 
+
+Preview button visibility while the editor is active.
+== 
+
+Show all buttons
+== 
+
+https://wiki.ddnet.org/wiki/Touch_controls
+== 
+
+Save all changes before switching selected button?
+== 
+
+Discard
+== 
+
+There is not enough space available for the button. Check its visibilities and size.
+== 
+
+Selected button not visible
+== 
+
+The selected button is not visible. Do you want to deselect it or edit its visibility?
+== 
+
+Edit
+== 
+
+Width and height are required to be within the range from %d to %d.
+== 
+
+Button position is outside of the screen.
+== 
+
+The selected button is overlapping with other buttons.
+== 
+
+Wrong button settings
+== 
+
+[Touch button visibilities]
+Ingame
+== 
+
+[Touch button visibilities]
+Zoom Allowed
+== 
+
+[Touch button visibilities]
+Vote Active
+== 
+
+[Touch button visibilities]
+Dummy Allowed
+== 
+
+[Touch button visibilities]
+Dummy Connected
+== 
+
+[Touch button visibilities]
+Rcon Authed
+== 
+
+[Touch button visibilities]
+Demo Player
+== 
+
+[Touch button visibilities]
+Extra Menu
+== 
+
+[Predefined touch button behaviors]
+Ingame Menu
+== 
+
+[Predefined touch button behaviors]
+Extra Menu
+== 
+
+[Predefined touch button behaviors]
+Emoticon
+== 
+
+[Predefined touch button behaviors]
+Spectate
+== 
+
+[Predefined touch button behaviors]
+Swap Action
+== 
+
+[Predefined touch button behaviors]
+Use Action
+== 
+
+[Predefined touch button behaviors]
+Joystick Action
+== 
+
+[Predefined touch button behaviors]
+Joystick Aim
+== 
+
+[Predefined touch button behaviors]
+Joystick Fire
+== 
+
+[Predefined touch button behaviors]
+Joystick Hook
+== 
+
 Saves file
 == 
 
 Open the saves file
+== 
+
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
+No skins match your filter criteria
 == 
 
 Show FPS
@@ -2121,6 +2412,12 @@ Show spectator cursor
 == 
 
 Show number of spectators
+== 
+
+Censor profanity
+== 
+
+Chat background color
 == 
 
 [Show name plates]
@@ -2145,7 +2442,7 @@ Name plates offset
 Show friend icon in name plates
 == 
 
-Show client IDs on a seperate line
+Show client IDs on a separate line
 == 
 
 Client IDs size
@@ -2170,10 +2467,22 @@ Others
 All
 == 
 
+Preview player's name plate
+== 
+
 Preview dummy's name plate
 == 
 
+Dragger Outline Color
+== 
+
+Dragger Inner Color
+== 
+
 AntiPing: prediction margin
+== 
+
+Download
 == 
 
 https://wiki.ddnet.org/wiki/Mapping

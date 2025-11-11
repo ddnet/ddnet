@@ -4,7 +4,9 @@
 #define ENGINE_DEMO_H
 
 #include "kernel.h"
+
 #include <base/hash.h>
+
 #include <engine/map.h>
 #include <engine/shared/uuid_manager.h>
 
@@ -17,8 +19,9 @@ enum
 
 static const unsigned char gs_aHeaderMarker[7] = {'T', 'W', 'D', 'E', 'M', 'O', 0};
 
-constexpr int g_DemoSpeeds = 22;
-extern const double g_aSpeeds[g_DemoSpeeds];
+static constexpr double DEMO_SPEEDS[] = {0.1, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, 12.0, 16.0, 20.0, 24.0, 28.0, 32.0, 40.0, 48.0, 56.0, 64.0};
+static constexpr int DEMO_SPEED_INDEX_DEFAULT = 4;
+static_assert(DEMO_SPEEDS[DEMO_SPEED_INDEX_DEFAULT] == 1.0);
 
 typedef bool (*DEMOFUNC_FILTER)(const void *pData, int DataSize, void *pUser);
 
@@ -64,6 +67,8 @@ public:
 	{
 	public:
 		bool m_Paused;
+		bool m_LiveDemo;
+		bool m_LivePlayback;
 		float m_Speed;
 
 		int m_FirstTick;
@@ -81,7 +86,6 @@ public:
 		TICK_NEXT, // go to the next tick
 	};
 
-	virtual ~IDemoPlayer() {}
 	virtual void SetSpeed(float Speed) = 0;
 	virtual void SetSpeedIndex(int SpeedIndex) = 0;
 	virtual void AdjustSpeedIndex(int Offset) = 0;
@@ -108,7 +112,6 @@ public:
 		REMOVE_FILE,
 	};
 
-	virtual ~IDemoRecorder() {}
 	virtual bool IsRecording() const = 0;
 	virtual int Stop(IDemoRecorder::EStopMode Mode, const char *pTargetFilename = "") = 0;
 	virtual int Length() const = 0;

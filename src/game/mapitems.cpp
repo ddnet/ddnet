@@ -1,5 +1,18 @@
 #include <game/mapitems.h>
 
+ColorRGBA CEnvPoint::ColorValue() const
+{
+	return ColorRGBA(fx2f(m_aValues[0]), fx2f(m_aValues[1]), fx2f(m_aValues[2]), fx2f(m_aValues[3]));
+}
+
+void CEnvPoint::SetColorValue(const ColorRGBA &Color)
+{
+	m_aValues[0] = f2fx(Color.r);
+	m_aValues[1] = f2fx(Color.g);
+	m_aValues[2] = f2fx(Color.b);
+	m_aValues[3] = f2fx(Color.a);
+}
+
 bool IsValidGameTile(int Index)
 {
 	return (
@@ -148,7 +161,9 @@ bool IsRotatableTile(int Index)
 		Index == TILE_ENTITIES_OFF_1 ||
 		Index == TILE_ENTITIES_OFF_2 ||
 		Index - ENTITY_OFFSET == ENTITY_CRAZY_SHOTGUN_EX ||
-		Index - ENTITY_OFFSET == ENTITY_CRAZY_SHOTGUN);
+		Index - ENTITY_OFFSET == ENTITY_CRAZY_SHOTGUN ||
+		(Index - ENTITY_OFFSET >= ENTITY_ARMOR_1 && Index - ENTITY_OFFSET <= ENTITY_WEAPON_LASER) ||
+		(Index - ENTITY_OFFSET >= ENTITY_ARMOR_SHOTGUN && Index - ENTITY_OFFSET <= ENTITY_ARMOR_LASER));
 }
 
 bool IsCreditsTile(int TileIndex)
@@ -164,12 +179,22 @@ bool IsCreditsTile(int TileIndex)
 		(TILE_CREDITS_8 == TileIndex));
 }
 
-int PackColor(CColor Color)
+int PackColor(const CColor &Color)
 {
-	int Res = 0;
-	Res |= Color.r << 24;
-	Res |= Color.g << 16;
-	Res |= Color.b << 8;
-	Res |= Color.a;
-	return Res;
+	int PackedColor = 0;
+	PackedColor |= (Color.r & 0xFF) << 24;
+	PackedColor |= (Color.g & 0xFF) << 16;
+	PackedColor |= (Color.b & 0xFF) << 8;
+	PackedColor |= Color.a & 0xFF;
+	return PackedColor;
+}
+
+CColor UnpackColor(int PackedColor)
+{
+	CColor Color;
+	Color.r = (PackedColor >> 24) & 0xFF;
+	Color.g = (PackedColor >> 16) & 0xFF;
+	Color.b = (PackedColor >> 8) & 0xFF;
+	Color.a = PackedColor & 0xFF;
+	return Color;
 }

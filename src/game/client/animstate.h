@@ -3,7 +3,7 @@
 #ifndef GAME_CLIENT_ANIMSTATE_H
 #define GAME_CLIENT_ANIMSTATE_H
 
-#include <game/generated/client_data.h>
+#include <generated/data_types.h>
 
 class CAnimState
 {

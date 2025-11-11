@@ -3,6 +3,7 @@
 #ifndef GAME_MAPITEMS_H
 #define GAME_MAPITEMS_H
 
+#include <base/color.h>
 #include <base/vmath.h>
 
 // layer types
@@ -19,7 +20,10 @@ enum
 	LAYERTYPE_TUNE,
 	LAYERTYPE_SOUNDS_DEPRECATED, // deprecated! do not use this, this is just for compatibility reasons
 	LAYERTYPE_SOUNDS,
+};
 
+enum
+{
 	MAPITEMTYPE_VERSION = 0,
 	MAPITEMTYPE_INFO,
 	MAPITEMTYPE_IMAGE,
@@ -31,7 +35,10 @@ enum
 	// High map item type numbers suggest that they use the alternate
 	// format with UUIDs. See src/engine/shared/datafile.cpp for some of
 	// the implementation.
+};
 
+enum
+{
 	CURVETYPE_STEP = 0,
 	CURVETYPE_LINEAR,
 	CURVETYPE_SLOW,
@@ -39,134 +46,149 @@ enum
 	CURVETYPE_SMOOTH,
 	CURVETYPE_BEZIER,
 	NUM_CURVETYPES,
+};
 
+enum
+{
 	// game layer tiles
 	// TODO define which Layer uses which tiles (needed for mapeditor)
 	ENTITY_NULL = 0,
-	ENTITY_SPAWN,
-	ENTITY_SPAWN_RED,
-	ENTITY_SPAWN_BLUE,
-	ENTITY_FLAGSTAND_RED,
-	ENTITY_FLAGSTAND_BLUE,
-	ENTITY_ARMOR_1,
-	ENTITY_HEALTH_1,
-	ENTITY_WEAPON_SHOTGUN,
-	ENTITY_WEAPON_GRENADE,
-	ENTITY_POWERUP_NINJA,
-	ENTITY_WEAPON_LASER,
-	//DDRace - Main Lasers
-	ENTITY_LASER_FAST_CCW,
-	ENTITY_LASER_NORMAL_CCW,
-	ENTITY_LASER_SLOW_CCW,
-	ENTITY_LASER_STOP,
-	ENTITY_LASER_SLOW_CW,
-	ENTITY_LASER_NORMAL_CW,
-	ENTITY_LASER_FAST_CW,
-	//DDRace - Laser Modifiers
-	ENTITY_LASER_SHORT,
-	ENTITY_LASER_MEDIUM,
-	ENTITY_LASER_LONG,
-	ENTITY_LASER_C_SLOW,
-	ENTITY_LASER_C_NORMAL,
-	ENTITY_LASER_C_FAST,
-	ENTITY_LASER_O_SLOW,
-	ENTITY_LASER_O_NORMAL,
-	ENTITY_LASER_O_FAST,
-	//DDRace - Plasma
+	ENTITY_SPAWN = 1,
+	ENTITY_SPAWN_RED = 2,
+	ENTITY_SPAWN_BLUE = 3,
+	ENTITY_FLAGSTAND_RED = 4,
+	ENTITY_FLAGSTAND_BLUE = 5,
+	ENTITY_ARMOR_1 = 6,
+	ENTITY_HEALTH_1 = 7,
+	ENTITY_WEAPON_SHOTGUN = 8,
+	ENTITY_WEAPON_GRENADE = 9,
+	ENTITY_POWERUP_NINJA = 10,
+	ENTITY_WEAPON_LASER = 11,
+
+	// DDRace - Main Lasers
+	ENTITY_LASER_FAST_CCW = 12,
+	ENTITY_LASER_NORMAL_CCW = 13,
+	ENTITY_LASER_SLOW_CCW = 14,
+	ENTITY_LASER_STOP = 15,
+	ENTITY_LASER_SLOW_CW = 16,
+	ENTITY_LASER_NORMAL_CW = 17,
+	ENTITY_LASER_FAST_CW = 18,
+
+	// DDRace - Laser Modifiers
+	ENTITY_LASER_SHORT = 19,
+	ENTITY_LASER_MEDIUM = 20,
+	ENTITY_LASER_LONG = 21,
+	ENTITY_LASER_C_SLOW = 22,
+	ENTITY_LASER_C_NORMAL = 23,
+	ENTITY_LASER_C_FAST = 24,
+	ENTITY_LASER_O_SLOW = 25,
+	ENTITY_LASER_O_NORMAL = 26,
+	ENTITY_LASER_O_FAST = 27,
+
+	// DDRace - Plasma
 	ENTITY_PLASMAE = 29,
-	ENTITY_PLASMAF,
-	ENTITY_PLASMA,
-	ENTITY_PLASMAU,
-	//DDRace - Shotgun
-	ENTITY_CRAZY_SHOTGUN_EX,
-	ENTITY_CRAZY_SHOTGUN,
-	//DDNet - Removing specific weapon
-	ENTITY_ARMOR_SHOTGUN,
-	ENTITY_ARMOR_GRENADE,
-	ENTITY_ARMOR_NINJA,
-	ENTITY_ARMOR_LASER,
-	//DDRace - Draggers
+	ENTITY_PLASMAF = 30,
+	ENTITY_PLASMA = 31,
+	ENTITY_PLASMAU = 32,
+
+	// DDRace - Shotgun
+	ENTITY_CRAZY_SHOTGUN_EX = 33,
+	ENTITY_CRAZY_SHOTGUN = 34,
+
+	// DDNet - Removing specific weapon
+	ENTITY_ARMOR_SHOTGUN = 35,
+	ENTITY_ARMOR_GRENADE = 36,
+	ENTITY_ARMOR_NINJA = 37,
+	ENTITY_ARMOR_LASER = 38,
+
+	// DDRace - Draggers
 	ENTITY_DRAGGER_WEAK = 42,
-	ENTITY_DRAGGER_NORMAL,
-	ENTITY_DRAGGER_STRONG,
-	//Draggers Behind Walls
-	ENTITY_DRAGGER_WEAK_NW,
-	ENTITY_DRAGGER_NORMAL_NW,
-	ENTITY_DRAGGER_STRONG_NW,
-	//Doors
+	ENTITY_DRAGGER_NORMAL = 43,
+	ENTITY_DRAGGER_STRONG = 44,
+	// Draggers Behind Walls
+	ENTITY_DRAGGER_WEAK_NW = 45,
+	ENTITY_DRAGGER_NORMAL_NW = 46,
+	ENTITY_DRAGGER_STRONG_NW = 47,
+
+	// Doors
 	ENTITY_DOOR = 49,
-	//End Of Lower Tiles
-	NUM_ENTITIES,
-	//Start From Top Left
-	//Tile Controllers
+	// End Of Lower Tiles
+
+	ENTITY_OFFSET = 255 - 16 * 4,
+};
+
+enum
+{
+	// Start From Top Left
+	// Tile Controllers
 	TILE_AIR = 0,
-	TILE_SOLID,
-	TILE_DEATH,
-	TILE_NOHOOK,
-	TILE_NOLASER,
-	TILE_THROUGH_CUT,
-	TILE_THROUGH,
-	TILE_JUMP,
+	TILE_SOLID = 1,
+	TILE_DEATH = 2,
+	TILE_NOHOOK = 3,
+	TILE_NOLASER = 4,
+	TILE_THROUGH_CUT = 5,
+	TILE_THROUGH = 6,
+	TILE_JUMP = 7,
 	TILE_FREEZE = 9,
-	TILE_TELEINEVIL,
-	TILE_UNFREEZE,
-	TILE_DFREEZE,
-	TILE_DUNFREEZE,
-	TILE_TELEINWEAPON,
-	TILE_TELEINHOOK,
+	TILE_TELEINEVIL = 10,
+	TILE_UNFREEZE = 11,
+	TILE_DFREEZE = 12,
+	TILE_DUNFREEZE = 13,
+	TILE_TELEINWEAPON = 14,
+	TILE_TELEINHOOK = 15,
 	TILE_WALLJUMP = 16,
-	TILE_EHOOK_ENABLE,
-	TILE_EHOOK_DISABLE,
-	TILE_HIT_ENABLE,
-	TILE_HIT_DISABLE,
-	TILE_SOLO_ENABLE,
-	TILE_SOLO_DISABLE,
-	//Switches
+	TILE_EHOOK_ENABLE = 17,
+	TILE_EHOOK_DISABLE = 18,
+	TILE_HIT_ENABLE = 19,
+	TILE_HIT_DISABLE = 20,
+	TILE_SOLO_ENABLE = 21,
+	TILE_SOLO_DISABLE = 22,
+	// Switches
 	TILE_SWITCHTIMEDOPEN = 22,
-	TILE_SWITCHTIMEDCLOSE,
-	TILE_SWITCHOPEN,
-	TILE_SWITCHCLOSE,
-	TILE_TELEIN,
-	TILE_TELEOUT,
+	TILE_SWITCHTIMEDCLOSE = 23,
+	TILE_SWITCHOPEN = 24,
+	TILE_SWITCHCLOSE = 25,
+	TILE_TELEIN = 26,
+	TILE_TELEOUT = 27,
 	TILE_SPEED_BOOST_OLD = 28,
-	TILE_SPEED_BOOST,
+	TILE_SPEED_BOOST = 29,
 	TILE_TELECHECK = 29,
-	TILE_TELECHECKOUT,
-	TILE_TELECHECKIN,
+	TILE_TELECHECKOUT = 30,
+	TILE_TELECHECKIN = 31,
 	TILE_REFILL_JUMPS = 32,
-	TILE_START,
-	TILE_FINISH,
+	TILE_START = 33,
+	TILE_FINISH = 34,
 	TILE_TIME_CHECKPOINT_FIRST = 35,
 	TILE_TIME_CHECKPOINT_LAST = 59,
 	TILE_STOP = 60,
-	TILE_STOPS,
-	TILE_STOPA,
-	TILE_TELECHECKINEVIL,
-	TILE_CP,
-	TILE_CP_F,
-	TILE_THROUGH_ALL,
-	TILE_THROUGH_DIR,
-	TILE_TUNE,
+	TILE_STOPS = 61,
+	TILE_STOPA = 62,
+	TILE_TELECHECKINEVIL = 63,
+	TILE_CP = 64,
+	TILE_CP_F = 65,
+	TILE_THROUGH_ALL = 66,
+	TILE_THROUGH_DIR = 67,
+	TILE_TUNE = 68,
 	TILE_OLDLASER = 71,
-	TILE_NPC,
-	TILE_EHOOK,
-	TILE_NOHIT,
-	TILE_NPH,
-	TILE_UNLOCK_TEAM,
+	TILE_NPC = 72,
+	TILE_EHOOK = 73,
+	TILE_NOHIT = 74,
+	TILE_NPH = 75,
+	TILE_UNLOCK_TEAM = 76,
 	TILE_ADD_TIME = 79,
 	TILE_NPC_DISABLE = 88,
-	TILE_UNLIMITED_JUMPS_DISABLE,
-	TILE_JETPACK_DISABLE,
-	TILE_NPH_DISABLE,
+	TILE_UNLIMITED_JUMPS_DISABLE = 89,
+	TILE_JETPACK_DISABLE = 90,
+	TILE_NPH_DISABLE = 91,
 	TILE_SUBTRACT_TIME = 95,
 	TILE_TELE_GUN_ENABLE = 96,
 	TILE_TELE_GUN_DISABLE = 97,
 	TILE_ALLOW_TELE_GUN = 98,
 	TILE_ALLOW_BLUE_TELE_GUN = 99,
 	TILE_NPC_ENABLE = 104,
-	TILE_UNLIMITED_JUMPS_ENABLE,
-	TILE_JETPACK_ENABLE,
-	TILE_NPH_ENABLE,
+	TILE_UNLIMITED_JUMPS_ENABLE = 105,
+	TILE_JETPACK_ENABLE = 106,
+	TILE_NPH_ENABLE = 107,
 	TILE_TELE_GRENADE_ENABLE = 112,
 	TILE_TELE_GRENADE_DISABLE = 113,
 	TILE_TELE_LASER_ENABLE = 128,
@@ -182,9 +204,13 @@ enum
 	TILE_CREDITS_7 = 158,
 	TILE_CREDITS_8 = 159,
 	TILE_ENTITIES_OFF_1 = 190,
-	TILE_ENTITIES_OFF_2,
-	//End of higher tiles
-	//Layers
+	TILE_ENTITIES_OFF_2 = 191,
+	// End of higher tiles
+};
+
+enum
+{
+	// Layers
 	LAYER_GAME = 0,
 	LAYER_FRONT,
 	LAYER_TELE,
@@ -192,26 +218,35 @@ enum
 	LAYER_SWITCH,
 	LAYER_TUNE,
 	NUM_LAYERS,
-	//Flags
-	TILEFLAG_XFLIP = 1,
-	TILEFLAG_YFLIP = 2,
-	TILEFLAG_OPAQUE = 4,
-	TILEFLAG_ROTATE = 8,
-	//Rotation
+};
+
+enum
+{
+	// Flags
+	TILEFLAG_XFLIP = 1 << 0,
+	TILEFLAG_YFLIP = 1 << 1,
+	TILEFLAG_OPAQUE = 1 << 2,
+	TILEFLAG_ROTATE = 1 << 3,
+};
+
+enum
+{
+	// Rotation
 	ROTATION_0 = 0,
 	ROTATION_90 = TILEFLAG_ROTATE,
 	ROTATION_180 = (TILEFLAG_XFLIP | TILEFLAG_YFLIP),
 	ROTATION_270 = (TILEFLAG_XFLIP | TILEFLAG_YFLIP | TILEFLAG_ROTATE),
+};
 
+enum
+{
 	LAYERFLAG_DETAIL = 1,
-	TILESLAYERFLAG_GAME = 1,
-	TILESLAYERFLAG_TELE = 2,
-	TILESLAYERFLAG_SPEEDUP = 4,
-	TILESLAYERFLAG_FRONT = 8,
-	TILESLAYERFLAG_SWITCH = 16,
-	TILESLAYERFLAG_TUNE = 32,
-
-	ENTITY_OFFSET = 255 - 16 * 4,
+	TILESLAYERFLAG_GAME = 1 << 0,
+	TILESLAYERFLAG_TELE = 1 << 1,
+	TILESLAYERFLAG_SPEEDUP = 1 << 2,
+	TILESLAYERFLAG_FRONT = 1 << 3,
+	TILESLAYERFLAG_SWITCH = 1 << 4,
+	TILESLAYERFLAG_TUNE = 1 << 5,
 };
 
 static constexpr size_t MAX_MAPIMAGES = 64;
@@ -219,6 +254,84 @@ static constexpr size_t MAX_MAPSOUNDS = 64;
 
 typedef ivec2 CPoint; // 22.10 fixed point
 typedef ivec4 CColor;
+
+class CFixedTime
+{
+	int m_FixedPoint;
+
+public:
+	constexpr CFixedTime() :
+		m_FixedPoint(0) {}
+	constexpr explicit CFixedTime(int FixedPoint) :
+		m_FixedPoint(FixedPoint) {}
+
+	constexpr int GetInternal() const
+	{
+		return m_FixedPoint;
+	}
+
+	constexpr float AsSeconds() const
+	{
+		return m_FixedPoint / 1000.0f;
+	}
+
+	constexpr static CFixedTime FromSeconds(float Seconds)
+	{
+		return CFixedTime((int)std::round(Seconds * 1000.0f));
+	}
+
+	constexpr bool operator<(const CFixedTime &Other) const
+	{
+		return m_FixedPoint < Other.m_FixedPoint;
+	}
+
+	constexpr bool operator<=(const CFixedTime &Other) const
+	{
+		return m_FixedPoint <= Other.m_FixedPoint;
+	}
+
+	constexpr bool operator>(const CFixedTime &Other) const
+	{
+		return m_FixedPoint > Other.m_FixedPoint;
+	}
+
+	constexpr bool operator>=(const CFixedTime &Other) const
+	{
+		return m_FixedPoint >= Other.m_FixedPoint;
+	}
+
+	constexpr bool operator==(const CFixedTime &Other) const
+	{
+		return m_FixedPoint == Other.m_FixedPoint;
+	}
+
+	constexpr bool operator!=(const CFixedTime &Other) const
+	{
+		return m_FixedPoint != Other.m_FixedPoint;
+	}
+
+	constexpr CFixedTime operator+(const CFixedTime &Other) const
+	{
+		return CFixedTime(m_FixedPoint + Other.m_FixedPoint);
+	}
+
+	constexpr CFixedTime operator-(const CFixedTime &Other) const
+	{
+		return CFixedTime(m_FixedPoint - Other.m_FixedPoint);
+	}
+
+	constexpr CFixedTime &operator+=(const CFixedTime &Other)
+	{
+		m_FixedPoint += Other.m_FixedPoint;
+		return *this;
+	}
+
+	constexpr CFixedTime &operator-=(const CFixedTime &Other)
+	{
+		m_FixedPoint -= Other.m_FixedPoint;
+		return *this;
+	}
+};
 
 class CQuad
 {
@@ -377,11 +490,14 @@ public:
 		MAX_CHANNELS = 4,
 	};
 
-	int m_Time; // in ms
+	CFixedTime m_Time;
 	int m_Curvetype; // CURVETYPE_* constants, any unknown value behaves like CURVETYPE_LINEAR
 	int m_aValues[MAX_CHANNELS]; // 1-4 depending on envelope (22.10 fixed point)
 
 	bool operator<(const CEnvPoint &Other) const { return m_Time < Other.m_Time; }
+
+	ColorRGBA ColorValue() const;
+	void SetColorValue(const ColorRGBA &Color);
 };
 
 // Represents additional envelope point information for CURVETYPE_BEZIER.
@@ -390,11 +506,10 @@ public:
 class CEnvPointBezier
 {
 public:
-	// DeltaX in ms and DeltaY as 22.10 fxp
-	int m_aInTangentDeltaX[CEnvPoint::MAX_CHANNELS];
-	int m_aInTangentDeltaY[CEnvPoint::MAX_CHANNELS];
-	int m_aOutTangentDeltaX[CEnvPoint::MAX_CHANNELS];
-	int m_aOutTangentDeltaY[CEnvPoint::MAX_CHANNELS];
+	CFixedTime m_aInTangentDeltaX[CEnvPoint::MAX_CHANNELS];
+	int m_aInTangentDeltaY[CEnvPoint::MAX_CHANNELS]; // 22.10 fxp
+	CFixedTime m_aOutTangentDeltaX[CEnvPoint::MAX_CHANNELS];
+	int m_aOutTangentDeltaY[CEnvPoint::MAX_CHANNELS]; // 22.10 fxp
 };
 
 // Written to maps on upstream Teeworlds for envelope points including bezier information instead of the basic
@@ -571,6 +686,8 @@ bool IsValidTuneTile(int Index);
 bool IsValidEntity(int Index);
 bool IsRotatableTile(int Index);
 bool IsCreditsTile(int TileIndex);
-int PackColor(CColor Color);
+
+int PackColor(const CColor &Color);
+CColor UnpackColor(int PackedColor);
 
 #endif

@@ -6,10 +6,12 @@
 #include <engine/engine.h>
 #include <engine/shared/config.h>
 #include <engine/sound.h>
+
+#include <generated/client_data.h>
+
 #include <game/client/components/camera.h>
 #include <game/client/components/menus.h>
 #include <game/client/gameclient.h>
-#include <game/generated/client_data.h>
 #include <game/localization.h>
 
 CSoundLoading::CSoundLoading(CGameClient *pGameClient, bool Render) :
@@ -45,14 +47,14 @@ void CSoundLoading::Run()
 
 void CSounds::UpdateChannels()
 {
-	const float NewGuiSoundVolume = g_Config.m_SndChatSoundVolume / 100.0f;
+	const float NewGuiSoundVolume = g_Config.m_SndChatVolume / 100.0f;
 	if(NewGuiSoundVolume != m_GuiSoundVolume)
 	{
 		m_GuiSoundVolume = NewGuiSoundVolume;
 		Sound()->SetChannel(CSounds::CHN_GUI, m_GuiSoundVolume, 0.0f);
 	}
 
-	const float NewGameSoundVolume = g_Config.m_SndGameSoundVolume / 100.0f;
+	const float NewGameSoundVolume = g_Config.m_SndGameVolume / 100.0f;
 	if(NewGameSoundVolume != m_GameSoundVolume)
 	{
 		m_GameSoundVolume = NewGameSoundVolume;
@@ -60,7 +62,7 @@ void CSounds::UpdateChannels()
 		Sound()->SetChannel(CSounds::CHN_GLOBAL, m_GameSoundVolume, 0.0f);
 	}
 
-	const float NewMapSoundVolume = g_Config.m_SndMapSoundVolume / 100.0f;
+	const float NewMapSoundVolume = g_Config.m_SndMapVolume / 100.0f;
 	if(NewMapSoundVolume != m_MapSoundVolume)
 	{
 		m_MapSoundVolume = NewMapSoundVolume;
@@ -105,14 +107,14 @@ void CSounds::OnInit()
 	// load sounds
 	if(g_Config.m_ClThreadsoundloading)
 	{
-		m_pSoundJob = std::make_shared<CSoundLoading>(m_pClient, false);
-		m_pClient->Engine()->AddJob(m_pSoundJob);
+		m_pSoundJob = std::make_shared<CSoundLoading>(GameClient(), false);
+		GameClient()->Engine()->AddJob(m_pSoundJob);
 		m_WaitForSoundJob = true;
-		m_pClient->m_Menus.RenderLoading(Localize("Loading DDNet Client"), Localize("Loading sound files"), 0);
+		GameClient()->m_Menus.RenderLoading(Localize("Loading DDNet Client"), Localize("Loading sound files"), 0);
 	}
 	else
 	{
-		CSoundLoading(m_pClient, true).Run();
+		CSoundLoading(GameClient(), true).Run();
 		m_WaitForSoundJob = false;
 	}
 }
@@ -143,7 +145,7 @@ void CSounds::OnRender()
 			return;
 	}
 
-	Sound()->SetListenerPosition(m_pClient->m_Camera.m_Center);
+	Sound()->SetListenerPosition(GameClient()->m_Camera.m_Center);
 	UpdateChannels();
 
 	// play sound from queue
@@ -155,7 +157,7 @@ void CSounds::OnRender()
 			Play(m_aQueue[0].m_Channel, m_aQueue[0].m_SetId, 1.0f);
 			m_QueueWaitTime = Now + time_freq() * 3 / 10; // wait 300ms before playing the next one
 			if(--m_QueuePos > 0)
-				mem_move(m_aQueue, m_aQueue + 1, m_QueuePos * sizeof(QueueEntry));
+				mem_move(m_aQueue, m_aQueue + 1, m_QueuePos * sizeof(CQueueEntry));
 		}
 	}
 }
@@ -169,7 +171,7 @@ void CSounds::ClearQueue()
 
 void CSounds::Enqueue(int Channel, int SetId)
 {
-	if(m_pClient->m_SuppressEvents)
+	if(GameClient()->m_SuppressEvents)
 		return;
 	if(m_QueuePos >= QUEUE_SIZE)
 		return;
@@ -227,7 +229,7 @@ bool CSounds::IsPlaying(int SetId)
 
 ISound::CVoiceHandle CSounds::PlaySample(int Channel, int SampleId, int Flags, float Volume)
 {
-	if(m_pClient->m_SuppressEvents || (Channel == CHN_MUSIC && !g_Config.m_SndMusic) || SampleId == -1)
+	if(GameClient()->m_SuppressEvents || (Channel == CHN_MUSIC && !g_Config.m_SndMusic) || SampleId == -1)
 		return ISound::CVoiceHandle();
 
 	if(Channel == CHN_MUSIC)
@@ -238,7 +240,7 @@ ISound::CVoiceHandle CSounds::PlaySample(int Channel, int SampleId, int Flags, f
 
 ISound::CVoiceHandle CSounds::PlaySampleAt(int Channel, int SampleId, int Flags, float Volume, vec2 Position)
 {
-	if(m_pClient->m_SuppressEvents || (Channel == CHN_MUSIC && !g_Config.m_SndMusic) || SampleId == -1)
+	if(GameClient()->m_SuppressEvents || (Channel == CHN_MUSIC && !g_Config.m_SndMusic) || SampleId == -1)
 		return ISound::CVoiceHandle();
 
 	if(Channel == CHN_MUSIC)

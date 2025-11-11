@@ -1,9 +1,11 @@
 #include "test.h"
-#include <gtest/gtest.h>
 
 #include <base/logger.h>
 #include <base/system.h>
+
 #include <engine/storage.h>
+
+#include <gtest/gtest.h>
 
 #include <algorithm>
 
@@ -62,7 +64,7 @@ public:
 		{
 			return m_IsDirectory < Other.m_IsDirectory;
 		}
-		return str_comp(m_aData, Other.m_aData) < 0;
+		return str_comp(m_aData, Other.m_aData) > 0;
 	}
 };
 
@@ -141,12 +143,34 @@ int main(int argc, const char **argv)
 	log_set_global_logger_default();
 	::testing::InitGoogleTest(&argc, const_cast<char **>(argv));
 	net_init();
-	if(secure_random_init())
-	{
-		fprintf(stderr, "random init failed\n");
-		return 1;
-	}
-	int Result = RUN_ALL_TESTS();
-	secure_random_uninit();
-	return Result;
+	return RUN_ALL_TESTS();
+}
+
+TEST(TestInfo, Sort)
+{
+	std::vector<CTestInfoPath> vEntries;
+	vEntries.resize(3);
+
+	const char aBasePath[] = "test_dir";
+	const char aSubPath[] = "test_dir/subdir";
+	const char aFilePath[] = "test_dir/subdir/file.txt";
+
+	vEntries[0].m_IsDirectory = true;
+	str_copy(vEntries[0].m_aData, aBasePath);
+
+	vEntries[1].m_IsDirectory = true;
+	str_copy(vEntries[1].m_aData, aSubPath);
+
+	vEntries[2].m_IsDirectory = false;
+	str_copy(vEntries[2].m_aData, aFilePath);
+
+	// Sorts directories after files.
+	std::sort(vEntries.begin(), vEntries.end());
+
+	EXPECT_FALSE(vEntries[0].m_IsDirectory);
+	EXPECT_EQ(str_comp(vEntries[0].m_aData, aFilePath), 0);
+	EXPECT_TRUE(vEntries[1].m_IsDirectory);
+	EXPECT_EQ(str_comp(vEntries[1].m_aData, aSubPath), 0);
+	EXPECT_TRUE(vEntries[2].m_IsDirectory);
+	EXPECT_EQ(str_comp(vEntries[2].m_aData, aBasePath), 0);
 }

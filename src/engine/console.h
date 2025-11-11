@@ -4,12 +4,14 @@
 #define ENGINE_CONSOLE_H
 
 #include "kernel.h"
+
 #include <base/color.h>
+
 #include <engine/storage.h>
 
 #include <memory>
 
-static const ColorRGBA gs_ConsoleDefaultColor(1, 1, 1, 1);
+static constexpr ColorRGBA gs_ConsoleDefaultColor(1, 1, 1, 1);
 
 enum LEVEL : char;
 struct CChecksumData;
@@ -24,22 +26,29 @@ public:
 		OUTPUT_LEVEL_STANDARD = 0,
 		OUTPUT_LEVEL_ADDINFO,
 		OUTPUT_LEVEL_DEBUG,
+	};
 
-		ACCESS_LEVEL_ADMIN = 0,
-		ACCESS_LEVEL_MOD,
-		ACCESS_LEVEL_HELPER,
-		ACCESS_LEVEL_USER,
-
+	enum
+	{
 		TEMPCMD_NAME_LENGTH = 64,
 		TEMPCMD_HELP_LENGTH = 192,
 		TEMPCMD_PARAMS_LENGTH = 96,
 
 		CMDLINE_LENGTH = 512,
 
+		CLIENT_ID_UNSPECIFIED = -1, // has full admin access on the server
 		CLIENT_ID_GAME = -2,
 		CLIENT_ID_NO_GAME = -3,
 
 		FILE_RECURSION_LIMIT = 16,
+	};
+
+	enum class EAccessLevel
+	{
+		ADMIN,
+		MODERATOR,
+		HELPER,
+		USER,
 	};
 
 	// TODO: rework this interface to reduce the amount of virtual calls
@@ -52,10 +61,7 @@ public:
 		IResult(int ClientId) :
 			m_NumArgs(0),
 			m_ClientId(ClientId) {}
-		IResult(const IResult &Other) :
-			m_NumArgs(Other.m_NumArgs),
-			m_ClientId(Other.m_ClientId) {}
-		virtual ~IResult() {}
+		virtual ~IResult() = default;
 
 		virtual int GetInteger(unsigned Index) const = 0;
 		virtual float GetFloat(unsigned Index) const = 0;
@@ -72,21 +78,14 @@ public:
 		virtual int GetVictim() const = 0;
 	};
 
-	class CCommandInfo
+	class ICommandInfo
 	{
-	protected:
-		int m_AccessLevel;
-
 	public:
-		CCommandInfo() { m_AccessLevel = ACCESS_LEVEL_ADMIN; }
-		virtual ~CCommandInfo() {}
-		const char *m_pName;
-		const char *m_pHelp;
-		const char *m_pParams;
-
-		virtual const CCommandInfo *NextCommandInfo(int AccessLevel, int FlagMask) const = 0;
-
-		int GetAccessLevel() const { return m_AccessLevel; }
+		virtual ~ICommandInfo() = default;
+		virtual const char *Name() const = 0;
+		virtual const char *Help() const = 0;
+		virtual const char *Params() const = 0;
+		virtual EAccessLevel GetAccessLevel() const = 0;
 	};
 
 	typedef void (*FTeeHistorianCommandCallback)(int ClientId, int FlagMask, const char *pCmd, IResult *pResult, void *pUser);
@@ -99,8 +98,9 @@ public:
 	static bool EmptyUnknownCommandCallback(const char *pCommand, void *pUser) { return false; }
 
 	virtual void Init() = 0;
-	virtual const CCommandInfo *FirstCommandInfo(int AccessLevel, int Flagmask) const = 0;
-	virtual const CCommandInfo *GetCommandInfo(const char *pName, int FlagMask, bool Temp) = 0;
+	virtual const ICommandInfo *FirstCommandInfo(EAccessLevel AccessLevel, int FlagMask) const = 0;
+	virtual const ICommandInfo *NextCommandInfo(const IConsole::ICommandInfo *pInfo, EAccessLevel AccessLevel, int FlagMask) const = 0;
+	virtual const ICommandInfo *GetCommandInfo(const char *pName, int FlagMask, bool Temp) = 0;
 	virtual int PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback = EmptyPossibleCommandCallback, void *pUser = nullptr) = 0;
 	virtual void ParseArguments(int NumArgs, const char **ppArguments) = 0;
 
@@ -112,10 +112,10 @@ public:
 	virtual void StoreCommands(bool Store) = 0;
 
 	virtual bool LineIsValid(const char *pStr) = 0;
-	virtual void ExecuteLine(const char *pStr, int ClientId = -1, bool InterpretSemicolons = true) = 0;
-	virtual void ExecuteLineFlag(const char *pStr, int FlasgMask, int ClientId = -1, bool InterpretSemicolons = true) = 0;
-	virtual void ExecuteLineStroked(int Stroke, const char *pStr, int ClientId = -1, bool InterpretSemicolons = true) = 0;
-	virtual bool ExecuteFile(const char *pFilename, int ClientId = -1, bool LogFailure = false, int StorageType = IStorage::TYPE_ALL) = 0;
+	virtual void ExecuteLine(const char *pStr, int ClientId = CLIENT_ID_UNSPECIFIED, bool InterpretSemicolons = true) = 0;
+	virtual void ExecuteLineFlag(const char *pStr, int FlasgMask, int ClientId = CLIENT_ID_UNSPECIFIED, bool InterpretSemicolons = true) = 0;
+	virtual void ExecuteLineStroked(int Stroke, const char *pStr, int ClientId = CLIENT_ID_UNSPECIFIED, bool InterpretSemicolons = true) = 0;
+	virtual bool ExecuteFile(const char *pFilename, int ClientId = CLIENT_ID_UNSPECIFIED, bool LogFailure = false, int StorageType = IStorage::TYPE_ALL) = 0;
 
 	/**
 	 * @deprecated Prefer using the `log_*` functions from base/log.h instead of this function for the following reasons:
@@ -128,7 +128,7 @@ public:
 	virtual void SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, void *pUser) = 0;
 	virtual void InitChecksum(CChecksumData *pData) const = 0;
 
-	virtual void SetAccessLevel(int AccessLevel) = 0;
+	virtual void SetAccessLevel(EAccessLevel AccessLevel) = 0;
 
 	static LEVEL ToLogLevel(int ConsoleLevel);
 	static int ToLogLevelFilter(int ConsoleLevel);

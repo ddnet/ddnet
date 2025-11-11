@@ -3,11 +3,15 @@
 #ifndef ENGINE_SERVER_SERVER_H
 #define ENGINE_SERVER_SERVER_H
 
+#include "antibot.h"
+#include "authmanager.h"
+#include "name_ban.h"
+#include "snap_id_pool.h"
+
 #include <base/hash.h>
 
 #include <engine/console.h>
 #include <engine/server.h>
-
 #include <engine/shared/demo.h>
 #include <engine/shared/econ.h>
 #include <engine/shared/fifo.h>
@@ -21,11 +25,6 @@
 #include <memory>
 #include <optional>
 #include <vector>
-
-#include "antibot.h"
-#include "authmanager.h"
-#include "name_ban.h"
-#include "snap_id_pool.h"
 
 #if defined(CONF_UPNP)
 #include "upnp.h"
@@ -104,6 +103,16 @@ public:
 		MAX_RCONCMD_SEND = 16,
 	};
 
+	enum class EDnsblState
+	{
+		NONE,
+		PENDING,
+		BLACKLISTED,
+		WHITELISTED,
+	};
+
+	static const char *DnsblStateStr(EDnsblState State);
+
 	class CClient
 	{
 	public:
@@ -116,15 +125,13 @@ public:
 			STATE_CONNECTING,
 			STATE_READY,
 			STATE_INGAME,
+		};
 
+		enum
+		{
 			SNAPRATE_INIT = 0,
 			SNAPRATE_FULL,
 			SNAPRATE_RECOVER,
-
-			DNSBL_STATE_NONE = 0,
-			DNSBL_STATE_PENDING,
-			DNSBL_STATE_BLACKLISTED,
-			DNSBL_STATE_WHITELISTED,
 		};
 
 		class CInput
@@ -146,6 +153,7 @@ public:
 		int m_LastInputTick;
 		CSnapshotStorage m_Snapshots;
 
+		CNetMsg_Sv_PreInput m_LastPreInput = {};
 		CInput m_LatestInput;
 		CInput m_aInputs[200]; // TODO: handle input better
 		int m_CurrentInput;
@@ -154,7 +162,6 @@ public:
 		char m_aClan[MAX_CLAN_LENGTH];
 		int m_Country;
 		std::optional<int> m_Score;
-		int m_Authed;
 		int m_AuthKey;
 		int m_AuthTries;
 		bool m_AuthHidden;
@@ -162,11 +169,12 @@ public:
 		int m_Flags;
 		bool m_ShowIps;
 		bool m_DebugDummy;
+		bool m_ForceHighBandwidthOnSpectate;
 		NETADDR m_DebugDummyAddr;
 		std::array<char, NETADDR_MAXSTRSIZE> m_aDebugDummyAddrString;
 		std::array<char, NETADDR_MAXSTRSIZE> m_aDebugDummyAddrStringNoPort;
 
-		const IConsole::CCommandInfo *m_pRconCmdToSend;
+		const IConsole::ICommandInfo *m_pRconCmdToSend;
 		enum
 		{
 			MAPLIST_UNINITIALIZED = -1,
@@ -182,7 +190,6 @@ public:
 
 		// DDRace
 
-		NETADDR m_Addr;
 		bool m_GotDDNetVersionPacket;
 		bool m_DDNetVersionSettled;
 		int m_DDNetVersion;
@@ -191,7 +198,7 @@ public:
 		int64_t m_RedirectDropTime;
 
 		// DNSBL
-		int m_DnsblState;
+		EDnsblState m_DnsblState;
 		std::shared_ptr<CHostLookup> m_pDnsblLookup;
 
 		bool m_Sixup;
@@ -200,12 +207,9 @@ public:
 		{
 			return m_State != STATE_EMPTY && !m_DebugDummy;
 		}
-
-		int ConsoleAccessLevel() const
-		{
-			return m_Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : m_Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER;
-		}
 	};
+
+	IConsole::EAccessLevel ConsoleAccessLevel(int ClientId) const;
 
 	CClient m_aClients[MAX_CLIENTS];
 	int m_aIdMap[MAX_CLIENTS * VANILLA_MAX_CLIENTS];
@@ -281,7 +285,7 @@ public:
 	std::shared_ptr<ILogger> m_pStdoutLogger = nullptr;
 
 	CServer();
-	~CServer();
+	~CServer() override;
 
 	bool IsClientNameAvailable(int ClientId, const char *pNameRequest);
 	bool SetClientNameImpl(int ClientId, const char *pNameRequest, bool Set);
@@ -311,6 +315,8 @@ public:
 	void SendLogLine(const CLogMessage *pMessage);
 	void SetRconCid(int ClientId) override;
 	int GetAuthedState(int ClientId) const override;
+	bool IsRconAuthed(int ClientId) const override;
+	bool IsRconAuthedAdmin(int ClientId) const override;
 	const char *GetAuthName(int ClientId) const override;
 	bool HasAuthHidden(int ClientId) const override;
 	void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pMapSha256, int *pMapCrc) override;
@@ -349,8 +355,8 @@ public:
 	// Accepts -1 as ClientId to mean "all clients with at least auth level admin"
 	void SendRconLogLine(int ClientId, const CLogMessage *pMessage);
 
-	void SendRconCmdAdd(const IConsole::CCommandInfo *pCommandInfo, int ClientId);
-	void SendRconCmdRem(const IConsole::CCommandInfo *pCommandInfo, int ClientId);
+	void SendRconCmdAdd(const IConsole::ICommandInfo *pCommandInfo, int ClientId);
+	void SendRconCmdRem(const IConsole::ICommandInfo *pCommandInfo, int ClientId);
 	void SendRconCmdGroupStart(int ClientId);
 	void SendRconCmdGroupEnd(int ClientId);
 	int NumRconCommands(int ClientId);
@@ -402,9 +408,9 @@ public:
 
 	void ExpireServerInfo() override;
 	void CacheServerInfo(CCache *pCache, int Type, bool SendClients);
-	void CacheServerInfoSixup(CCache *pCache, bool SendClients);
+	void CacheServerInfoSixup(CCache *pCache, bool SendClients, int MaxConsideredClients);
 	void SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool SendClients);
-	void GetServerInfoSixup(CPacker *pPacker, int Token, bool SendClients);
+	void GetServerInfoSixup(CPacker *pPacker, bool SendClients);
 	bool RateLimitServerInfoConnless();
 	void SendServerInfoConnless(const NETADDR *pAddr, int Token, int Type);
 	void UpdateRegisterServerInfo();
@@ -434,6 +440,7 @@ public:
 	static void ConLogout(IConsole::IResult *pResult, void *pUser);
 	static void ConShowIps(IConsole::IResult *pResult, void *pUser);
 	static void ConHideAuthStatus(IConsole::IResult *pResult, void *pUser);
+	static void ConForceHighBandwidthOnSpectate(IConsole::IResult *pResult, void *pUser);
 
 	static void ConAuthAdd(IConsole::IResult *pResult, void *pUser);
 	static void ConAuthAddHashed(IConsole::IResult *pResult, void *pUser);
@@ -462,9 +469,10 @@ public:
 	static void ConchainRconHelperPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainMapUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainSixupUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainRegisterCommunityTokenRedact(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainStdoutOutputLevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-	static void ConchainAnnouncementFileName(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainAnnouncementFilename(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainInputFifo(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 #if defined(CONF_FAMILY_UNIX)
@@ -492,16 +500,16 @@ public:
 	void InitDnsbl(int ClientId);
 	bool DnsblWhite(int ClientId) override
 	{
-		return m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_NONE ||
-		       m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_WHITELISTED;
+		return m_aClients[ClientId].m_DnsblState == EDnsblState::NONE ||
+		       m_aClients[ClientId].m_DnsblState == EDnsblState::WHITELISTED;
 	}
 	bool DnsblPending(int ClientId) override
 	{
-		return m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_PENDING;
+		return m_aClients[ClientId].m_DnsblState == EDnsblState::PENDING;
 	}
 	bool DnsblBlack(int ClientId) override
 	{
-		return m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED;
+		return m_aClients[ClientId].m_DnsblState == EDnsblState::BLACKLISTED;
 	}
 
 	void AuthRemoveKey(int KeySlot);
@@ -509,7 +517,7 @@ public:
 	const char *GetNetErrorString(int ClientId) override { return m_NetServer.ErrorString(ClientId); }
 	void ResetNetErrorString(int ClientId) override { m_NetServer.ResetErrorString(ClientId); }
 	bool SetTimedOut(int ClientId, int OrigId) override;
-	void SetTimeoutProtected(int ClientId) override { m_NetServer.SetTimeoutProtected(ClientId); }
+	void SetTimeoutProtected(int ClientId) override { m_NetServer.IgnoreTimeouts(ClientId); }
 
 	void SendMsgRaw(int ClientId, const void *pData, int Size, int Flags) override;
 
@@ -530,6 +538,8 @@ public:
 	void SendConnLoggingCommand(CONN_LOGGING_CMD Cmd, const NETADDR *pAddr);
 #endif
 };
+
+bool IsInterrupted();
 
 extern CServer *CreateServer();
 #endif

@@ -3,21 +3,21 @@
 #ifndef GAME_CLIENT_PREDICTION_ENTITIES_CHARACTER_H
 #define GAME_CLIENT_PREDICTION_ENTITIES_CHARACTER_H
 
-#include <game/client/prediction/entity.h>
+#include <generated/protocol.h>
 
+#include <game/client/prediction/entity.h>
 #include <game/gamecore.h>
-#include <game/generated/protocol.h>
+#include <game/race_state.h>
 
 enum
 {
-	FAKETUNE_FREEZE = 1,
-	FAKETUNE_SOLO = 2,
-	FAKETUNE_NOJUMP = 4,
-	FAKETUNE_NOCOLL = 8,
-	FAKETUNE_NOHOOK = 16,
-	FAKETUNE_JETPACK = 32,
-	FAKETUNE_NOHAMMER = 64,
-
+	FAKETUNE_FREEZE = 1 << 0,
+	FAKETUNE_SOLO = 1 << 1,
+	FAKETUNE_NOJUMP = 1 << 2,
+	FAKETUNE_NOCOLL = 1 << 3,
+	FAKETUNE_NOHOOK = 1 << 4,
+	FAKETUNE_JETPACK = 1 << 5,
+	FAKETUNE_NOHAMMER = 1 << 6,
 };
 
 class CCharacter : public CEntity
@@ -25,7 +25,7 @@ class CCharacter : public CEntity
 	friend class CGameWorld;
 
 public:
-	~CCharacter();
+	~CCharacter() override;
 
 	void PreTick() override;
 	void Tick() override;
@@ -33,7 +33,7 @@ public:
 
 	bool IsGrounded();
 
-	void SetWeapon(int W);
+	void SetWeapon(int Weapon);
 	void SetSolo(bool Solo);
 	void SetSuper(bool Super);
 	void HandleWeaponSwitch();
@@ -43,8 +43,8 @@ public:
 	void HandleNinja();
 	void HandleJetpack();
 
-	void OnPredictedInput(CNetObj_PlayerInput *pNewInput);
-	void OnDirectInput(CNetObj_PlayerInput *pNewInput);
+	void OnPredictedInput(const CNetObj_PlayerInput *pNewInput);
+	void OnDirectInput(const CNetObj_PlayerInput *pNewInput);
 	void ReleaseHook();
 	void ResetHook();
 	void ResetInput();
@@ -85,12 +85,12 @@ public:
 	bool m_LastRefillJumps;
 
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
-	int GetLastWeapon() { return m_LastWeapon; }
+	int GetLastWeapon() const { return m_LastWeapon; }
 	void SetLastWeapon(int LastWeap) { m_LastWeapon = LastWeap; }
-	int GetActiveWeapon() { return m_Core.m_ActiveWeapon; }
-	void SetActiveWeapon(int ActiveWeap);
+	int GetActiveWeapon() const { return m_Core.m_ActiveWeapon; }
+	void SetActiveWeapon(int ActiveWeapon);
 	CCharacterCore GetCore() { return m_Core; }
-	void SetCore(CCharacterCore Core) { m_Core = Core; }
+	void SetCore(const CCharacterCore &Core) { m_Core = Core; }
 	const CCharacterCore *Core() const { return &m_Core; }
 	bool GetWeaponGot(int Type) { return m_Core.m_aWeapons[Type].m_Got; }
 	void SetWeaponGot(int Type, bool Value) { m_Core.m_aWeapons[Type].m_Got = Value; }
@@ -109,16 +109,15 @@ public:
 			m_Input.m_TargetY = m_LatestInput.m_TargetY = -1;
 		}
 	};
-	int GetJumped() { return m_Core.m_Jumped; }
-	int GetAttackTick() { return m_AttackTick; }
-	int GetStrongWeakId() { return m_StrongWeakId; }
+	int GetJumped() const { return m_Core.m_Jumped; }
+	int GetAttackTick() const { return m_AttackTick; }
+	int GetStrongWeakId() const { return m_StrongWeakId; }
 
 	CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended = nullptr);
 	void Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal);
 	void SetCoreWorld(CGameWorld *pGameWorld);
 
 	int m_LastSnapWeapon;
-	int m_LastJetpackStrength;
 	bool m_KeepHooked;
 	int m_GameTeam;
 	bool m_CanMoveInFreeze;
@@ -129,16 +128,16 @@ public:
 	int GetOverriddenTuneZone() const;
 	int GetPureTuneZone() const;
 
-	bool HammerHitDisabled() { return m_Core.m_HammerHitDisabled; }
-	bool ShotgunHitDisabled() { return m_Core.m_ShotgunHitDisabled; }
-	bool LaserHitDisabled() { return m_Core.m_LaserHitDisabled; }
-	bool GrenadeHitDisabled() { return m_Core.m_GrenadeHitDisabled; }
+	bool HammerHitDisabled() const { return m_Core.m_HammerHitDisabled; }
+	bool ShotgunHitDisabled() const { return m_Core.m_ShotgunHitDisabled; }
+	bool LaserHitDisabled() const { return m_Core.m_LaserHitDisabled; }
+	bool GrenadeHitDisabled() const { return m_Core.m_GrenadeHitDisabled; }
 
-	bool IsSuper() { return m_Core.m_Super; }
+	bool IsSuper() const { return m_Core.m_Super; }
 
 private:
 	// weapon info
-	int m_aHitObjects[10];
+	int m_aHitObjects[MAX_CLIENTS];
 	int m_NumObjectsHit;
 
 	int m_LastWeapon;
@@ -176,20 +175,10 @@ private:
 	void DDRacePostCoreTick();
 	void HandleTuneLayer();
 
-	CTuningParams *CharacterTuning();
-
 	int m_StrongWeakId;
 
 	int m_LastWeaponSwitchTick;
 	int m_LastTuneZoneTick;
-};
-
-enum
-{
-	DDRACE_NONE = 0,
-	DDRACE_STARTED,
-	DDRACE_CHEAT, // no time and won't start again unless ordered by a mod or death
-	DDRACE_FINISHED
 };
 
 #endif

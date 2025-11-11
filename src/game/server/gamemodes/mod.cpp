@@ -1,5 +1,7 @@
 #include "mod.h"
 
+#include <engine/shared/config.h>
+
 // Exchange this to a string that identifies your game mode.
 // DM, TDM and CTF are reserved for teeworlds original modes.
 // DDraceNetwork and TestDDraceNetwork are used by DDNet.

@@ -1,12 +1,13 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <algorithm>
+#include "filecollection.h"
+
 #include <base/math.h>
 
 #include <engine/storage.h>
 
-#include "filecollection.h"
+#include <algorithm>
 
 void CFileCollection::Init(IStorage *pStorage, const char *pPath, const char *pFileDesc, const char *pFileExt, int MaxEntries)
 {
@@ -35,7 +36,7 @@ void CFileCollection::Init(IStorage *pStorage, const char *pPath, const char *pF
 		else
 		{
 			char aTimestring[TIMESTAMP_LENGTH];
-			str_timestamp_ex(FileEntry.m_Timestamp, aTimestring, sizeof(aBuf), FORMAT_NOSPACE);
+			str_timestamp_ex(FileEntry.m_Timestamp, aTimestring, sizeof(aTimestring), FORMAT_NOSPACE);
 			str_format(aBuf, sizeof(aBuf), "%s/%s_%s%s", m_aPath, m_aFileDesc, aTimestring, m_aFileExt);
 		}
 

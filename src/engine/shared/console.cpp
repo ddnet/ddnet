@@ -1,23 +1,59 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include "console.h"
+
+#include "config.h"
+#include "linereader.h"
+
 #include <base/color.h>
 #include <base/log.h>
 #include <base/math.h>
 #include <base/system.h>
 
 #include <engine/client/checksum.h>
+#include <engine/console.h>
 #include <engine/shared/protocol.h>
 #include <engine/storage.h>
 
-#include "config.h"
-#include "console.h"
-#include "linereader.h"
-
+#include <algorithm>
 #include <iterator> // std::size
 #include <new>
 
 // todo: rework this
+
+CConsole::CResult::CResult(int ClientId) :
+	IResult(ClientId)
+{
+	mem_zero(m_aStringStorage, sizeof(m_aStringStorage));
+	m_pArgsStart = nullptr;
+	m_pCommand = nullptr;
+	std::fill(std::begin(m_apArgs), std::end(m_apArgs), nullptr);
+}
+
+CConsole::CResult::CResult(const CResult &Other) :
+	IResult(Other)
+{
+	mem_copy(m_aStringStorage, Other.m_aStringStorage, sizeof(m_aStringStorage));
+	m_pArgsStart = m_aStringStorage + (Other.m_pArgsStart - Other.m_aStringStorage);
+	m_pCommand = m_aStringStorage + (Other.m_pCommand - Other.m_aStringStorage);
+	for(unsigned i = 0; i < Other.m_NumArgs; ++i)
+		m_apArgs[i] = m_aStringStorage + (Other.m_apArgs[i] - Other.m_aStringStorage);
+}
+
+void CConsole::CResult::AddArgument(const char *pArg)
+{
+	m_apArgs[m_NumArgs++] = pArg;
+}
+
+void CConsole::CResult::RemoveArgument(unsigned Index)
+{
+	dbg_assert(Index < m_NumArgs, "invalid argument index");
+	for(unsigned i = Index; i < m_NumArgs - 1; i++)
+		m_apArgs[i] = m_apArgs[i + 1];
+
+	m_apArgs[m_NumArgs--] = nullptr;
+}
 
 const char *CConsole::CResult::GetString(unsigned Index) const
 {
@@ -44,66 +80,76 @@ std::optional<ColorHSLA> CConsole::CResult::GetColor(unsigned Index, float Darke
 {
 	if(Index >= m_NumArgs)
 		return std::nullopt;
-
-	const char *pStr = m_apArgs[Index];
-	if(str_isallnum(pStr) || ((pStr[0] == '-' || pStr[0] == '+') && str_isallnum(pStr + 1))) // Teeworlds Color (Packed HSL)
-	{
-		unsigned long Value = str_toulong_base(pStr, 10);
-		if(Value == std::numeric_limits<unsigned long>::max())
-			return std::nullopt;
-		return ColorHSLA(Value, true).UnclampLighting(DarkestLighting);
-	}
-	else if(*pStr == '$') // Hex RGB/RGBA
-	{
-		auto ParsedColor = color_parse<ColorRGBA>(pStr + 1);
-		if(ParsedColor)
-			return color_cast<ColorHSLA>(ParsedColor.value());
-		else
-			return std::nullopt;
-	}
-	else if(!str_comp_nocase(pStr, "red"))
-		return ColorHSLA(0.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "yellow"))
-		return ColorHSLA(1.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "green"))
-		return ColorHSLA(2.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "cyan"))
-		return ColorHSLA(3.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "blue"))
-		return ColorHSLA(4.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "magenta"))
-		return ColorHSLA(5.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "white"))
-		return ColorHSLA(0, 0, 1);
-	else if(!str_comp_nocase(pStr, "gray"))
-		return ColorHSLA(0, 0, .5f);
-	else if(!str_comp_nocase(pStr, "black"))
-		return ColorHSLA(0, 0, 0);
-
-	return std::nullopt;
+	return ColorParse(m_apArgs[Index], DarkestLighting);
 }
 
-const IConsole::CCommandInfo *CConsole::CCommand::NextCommandInfo(int AccessLevel, int FlagMask) const
+void CConsole::CCommand::SetAccessLevel(EAccessLevel AccessLevel)
 {
-	const CCommand *pInfo = m_pNext;
-	while(pInfo)
-	{
-		if(pInfo->m_Flags & FlagMask && pInfo->m_AccessLevel >= AccessLevel)
-			break;
-		pInfo = pInfo->m_pNext;
-	}
-	return pInfo;
+	m_AccessLevel = AccessLevel;
 }
 
-const IConsole::CCommandInfo *CConsole::FirstCommandInfo(int AccessLevel, int FlagMask) const
+const IConsole::ICommandInfo *CConsole::FirstCommandInfo(EAccessLevel AccessLevel, int FlagMask) const
 {
-	for(const CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
+	for(const CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->Next())
 	{
 		if(pCommand->m_Flags & FlagMask && pCommand->GetAccessLevel() >= AccessLevel)
 			return pCommand;
 	}
 
 	return nullptr;
+}
+
+const IConsole::ICommandInfo *CConsole::NextCommandInfo(const IConsole::ICommandInfo *pInfo, EAccessLevel AccessLevel, int FlagMask) const
+{
+	const CCommand *pNext = ((CCommand *)pInfo)->Next();
+	while(pNext)
+	{
+		if(pNext->m_Flags & FlagMask && pNext->GetAccessLevel() >= AccessLevel)
+			break;
+		pNext = pNext->Next();
+	}
+	return pNext;
+}
+
+std::optional<CConsole::EAccessLevel> CConsole::AccessLevelToEnum(const char *pAccessLevel)
+{
+	// alias for legacy integer access levels
+	if(!str_comp(pAccessLevel, "0"))
+		return EAccessLevel::ADMIN;
+	if(!str_comp(pAccessLevel, "1"))
+		return EAccessLevel::MODERATOR;
+	if(!str_comp(pAccessLevel, "2"))
+		return EAccessLevel::HELPER;
+	if(!str_comp(pAccessLevel, "3"))
+		return EAccessLevel::USER;
+
+	// string access levels
+	if(!str_comp(pAccessLevel, "admin"))
+		return EAccessLevel::ADMIN;
+	if(!str_comp(pAccessLevel, "moderator"))
+		return EAccessLevel::MODERATOR;
+	if(!str_comp(pAccessLevel, "helper"))
+		return EAccessLevel::HELPER;
+	if(!str_comp(pAccessLevel, "all"))
+		return EAccessLevel::USER;
+	return std::nullopt;
+}
+
+const char *CConsole::AccessLevelToString(EAccessLevel AccessLevel)
+{
+	switch(AccessLevel)
+	{
+	case EAccessLevel::ADMIN:
+		return "admin";
+	case EAccessLevel::MODERATOR:
+		return "moderator";
+	case EAccessLevel::HELPER:
+		return "helper";
+	case EAccessLevel::USER:
+		return "all";
+	}
+	dbg_assert(false, "invalid access level: %d", (int)AccessLevel);
+	dbg_break();
 }
 
 // the maximum number of tokens occurs in a string of length CONSOLE_MAX_STR_LENGTH with tokens size 1 separated by single spaces
@@ -317,7 +363,7 @@ int IConsole::ToLogLevelFilter(int Level)
 	return Level + 2;
 }
 
-LOG_COLOR ColorToLogColor(ColorRGBA Color)
+static LOG_COLOR ColorToLogColor(ColorRGBA Color)
 {
 	return LOG_COLOR{
 		(uint8_t)(Color.r * 255.0),
@@ -354,7 +400,7 @@ void CConsole::SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, vo
 void CConsole::InitChecksum(CChecksumData *pData) const
 {
 	pData->m_NumCommands = 0;
-	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
+	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->Next())
 	{
 		if(pData->m_NumCommands < (int)(std::size(pData->m_aCommandsChecksum)))
 		{
@@ -369,6 +415,11 @@ void CConsole::InitChecksum(CChecksumData *pData) const
 	}
 }
 
+void CConsole::SetAccessLevel(EAccessLevel AccessLevel)
+{
+	m_AccessLevel = AccessLevel;
+}
+
 bool CConsole::LineIsValid(const char *pStr)
 {
 	if(!pStr || *pStr == 0)
@@ -376,7 +427,7 @@ bool CConsole::LineIsValid(const char *pStr)
 
 	do
 	{
-		CResult Result(-1);
+		CResult Result(IConsole::CLIENT_ID_UNSPECIFIED);
 		const char *pEnd = pStr;
 		const char *pNextPart = nullptr;
 		int InString = 0;
@@ -459,7 +510,14 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 			return;
 
 		if(!*Result.m_pCommand)
+		{
+			if(pNextPart)
+			{
+				pStr = pNextPart;
+				continue;
+			}
 			return;
+		}
 
 		CCommand *pCommand;
 		if(ClientId == IConsole::CLIENT_ID_GAME)
@@ -587,7 +645,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 int CConsole::PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback, void *pUser)
 {
 	int Index = 0;
-	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
+	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->Next())
 	{
 		if(pCommand->m_Flags & FlagMask && pCommand->m_Temp == Temp)
 		{
@@ -603,7 +661,7 @@ int CConsole::PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossi
 
 CConsole::CCommand *CConsole::FindCommand(const char *pName, int FlagMask)
 {
-	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
+	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->Next())
 	{
 		if(pCommand->m_Flags & FlagMask)
 		{
@@ -683,7 +741,7 @@ void CConsole::Con_Echo(IResult *pResult, void *pUserData)
 
 void CConsole::Con_Exec(IResult *pResult, void *pUserData)
 {
-	((CConsole *)pUserData)->ExecuteFile(pResult->GetString(0), -1, true, IStorage::TYPE_ALL);
+	((CConsole *)pUserData)->ExecuteFile(pResult->GetString(0), IConsole::CLIENT_ID_UNSPECIFIED, true, IStorage::TYPE_ALL);
 }
 
 void CConsole::ConCommandAccess(IResult *pResult, void *pUser)
@@ -695,20 +753,26 @@ void CConsole::ConCommandAccess(IResult *pResult, void *pUser)
 	{
 		if(pResult->NumArguments() == 2)
 		{
-			pCommand->SetAccessLevel(pResult->GetInteger(1));
-			str_format(aBuf, sizeof(aBuf), "moderator access for '%s' is now %s", pResult->GetString(0), pCommand->GetAccessLevel() ? "enabled" : "disabled");
+			std::optional<EAccessLevel> AccessLevel = AccessLevelToEnum(pResult->GetString(1));
+			if(!AccessLevel.has_value())
+			{
+				log_error("console", "Invalid access level '%s'. Allowed values are admin, moderator, helper and all.", pResult->GetString(1));
+				return;
+			}
+			pCommand->SetAccessLevel(AccessLevel.value());
+			str_format(aBuf, sizeof(aBuf), "moderator access for '%s' is now %s", pResult->GetString(0), pCommand->GetAccessLevel() >= EAccessLevel::MODERATOR ? "enabled" : "disabled");
 			pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
-			str_format(aBuf, sizeof(aBuf), "helper access for '%s' is now %s", pResult->GetString(0), pCommand->GetAccessLevel() >= ACCESS_LEVEL_HELPER ? "enabled" : "disabled");
+			str_format(aBuf, sizeof(aBuf), "helper access for '%s' is now %s", pResult->GetString(0), pCommand->GetAccessLevel() >= EAccessLevel::HELPER ? "enabled" : "disabled");
 			pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
-			str_format(aBuf, sizeof(aBuf), "user access for '%s' is now %s", pResult->GetString(0), pCommand->GetAccessLevel() >= ACCESS_LEVEL_USER ? "enabled" : "disabled");
+			str_format(aBuf, sizeof(aBuf), "user access for '%s' is now %s", pResult->GetString(0), pCommand->GetAccessLevel() >= EAccessLevel::USER ? "enabled" : "disabled");
 		}
 		else
 		{
-			str_format(aBuf, sizeof(aBuf), "moderator access for '%s' is %s", pResult->GetString(0), pCommand->GetAccessLevel() ? "enabled" : "disabled");
+			str_format(aBuf, sizeof(aBuf), "moderator access for '%s' is %s", pResult->GetString(0), pCommand->GetAccessLevel() >= EAccessLevel::MODERATOR ? "enabled" : "disabled");
 			pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
-			str_format(aBuf, sizeof(aBuf), "helper access for '%s' is %s", pResult->GetString(0), pCommand->GetAccessLevel() >= ACCESS_LEVEL_HELPER ? "enabled" : "disabled");
+			str_format(aBuf, sizeof(aBuf), "helper access for '%s' is %s", pResult->GetString(0), pCommand->GetAccessLevel() >= EAccessLevel::HELPER ? "enabled" : "disabled");
 			pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
-			str_format(aBuf, sizeof(aBuf), "user access for '%s' is %s", pResult->GetString(0), pCommand->GetAccessLevel() >= ACCESS_LEVEL_USER ? "enabled" : "disabled");
+			str_format(aBuf, sizeof(aBuf), "user access for '%s' is %s", pResult->GetString(0), pCommand->GetAccessLevel() >= EAccessLevel::USER ? "enabled" : "disabled");
 		}
 	}
 	else
@@ -720,13 +784,18 @@ void CConsole::ConCommandAccess(IResult *pResult, void *pUser)
 void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 {
 	CConsole *pConsole = static_cast<CConsole *>(pUser);
-	char aBuf[240];
-	mem_zero(aBuf, sizeof(aBuf));
+	char aBuf[240] = "";
 	int Used = 0;
-
-	for(CCommand *pCommand = pConsole->m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
+	std::optional<EAccessLevel> AccessLevel = AccessLevelToEnum(pResult->GetString(0));
+	if(!AccessLevel.has_value())
 	{
-		if(pCommand->m_Flags & pConsole->m_FlagMask && pCommand->GetAccessLevel() >= clamp(pResult->GetInteger(0), (int)ACCESS_LEVEL_ADMIN, (int)ACCESS_LEVEL_USER))
+		log_error("console", "Invalid access level '%s'. Allowed values are admin, moderator, helper and all.", pResult->GetString(0));
+		return;
+	}
+
+	for(CCommand *pCommand = pConsole->m_pFirstCommand; pCommand; pCommand = pCommand->Next())
+	{
+		if(pCommand->m_Flags & pConsole->m_FlagMask && pCommand->GetAccessLevel() >= AccessLevel.value())
 		{
 			int Length = str_length(pCommand->m_pName);
 			if(Used + Length + 2 < (int)(sizeof(aBuf)))
@@ -742,7 +811,6 @@ void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 			else
 			{
 				pConsole->Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
-				mem_zero(aBuf, sizeof(aBuf));
 				str_copy(aBuf, pCommand->m_pName);
 				Used = Length;
 			}
@@ -757,9 +825,7 @@ void CConsole::ConUserCommandStatus(IResult *pResult, void *pUser)
 	CConsole *pConsole = static_cast<CConsole *>(pUser);
 	CResult Result(pResult->m_ClientId);
 	Result.m_pCommand = "access_status";
-	char aBuf[4];
-	str_format(aBuf, sizeof(aBuf), "%d", (int)IConsole::ACCESS_LEVEL_USER);
-	Result.AddArgument(aBuf);
+	Result.AddArgument(AccessLevelToString(EAccessLevel::USER));
 
 	CConsole::ConCommandStatus(&Result, pConsole);
 }
@@ -777,7 +843,7 @@ void CConsole::TraverseChain(FCommandCallback *ppfnCallback, void **ppUserData)
 CConsole::CConsole(int FlagMask)
 {
 	m_FlagMask = FlagMask;
-	m_AccessLevel = ACCESS_LEVEL_ADMIN;
+	m_AccessLevel = EAccessLevel::ADMIN;
 	m_pRecycleList = nullptr;
 	m_TempCommands.Reset();
 	m_StoreCommands = true;
@@ -794,8 +860,8 @@ CConsole::CConsole(int FlagMask)
 	Register("echo", "r[text]", CFGFLAG_SERVER, Con_Echo, this, "Echo the text");
 	Register("exec", "r[file]", CFGFLAG_SERVER | CFGFLAG_CLIENT, Con_Exec, this, "Execute the specified file");
 
-	Register("access_level", "s[command] ?i[accesslevel]", CFGFLAG_SERVER, ConCommandAccess, this, "Specify command accessibility (admin = 0, moderator = 1, helper = 2, all = 3)");
-	Register("access_status", "i[accesslevel]", CFGFLAG_SERVER, ConCommandStatus, this, "List all commands which are accessible for admin = 0, moderator = 1, helper = 2, all = 3");
+	Register("access_level", "s[command] ?s['admin'|'moderator'|'helper'|'all']", CFGFLAG_SERVER, ConCommandAccess, this, "Specify command accessibility for given access level");
+	Register("access_status", "s['admin'|'moderator'|'helper'|'all']", CFGFLAG_SERVER, ConCommandStatus, this, "List all commands which are accessible for given access level");
 	Register("cmdlist", "", CFGFLAG_SERVER | CFGFLAG_CHAT, ConUserCommandStatus, this, "List all commands which are accessible for users");
 
 	// DDRace
@@ -808,7 +874,7 @@ CConsole::~CConsole()
 	CCommand *pCommand = m_pFirstCommand;
 	while(pCommand)
 	{
-		CCommand *pNext = pCommand->m_pNext;
+		CCommand *pNext = pCommand->Next();
 		{
 			FCommandCallback pfnCallback = pCommand->m_pfnCallback;
 			void *pUserData = pCommand->m_pUserData;
@@ -841,7 +907,7 @@ void CConsole::ParseArguments(int NumArgs, const char **ppArguments)
 		if(ppArguments[i][0] == '-' && ppArguments[i][1] == 'f' && ppArguments[i][2] == 0)
 		{
 			if(NumArgs - i > 1)
-				ExecuteFile(ppArguments[i + 1], -1, true, IStorage::TYPE_ABSOLUTE);
+				ExecuteFile(ppArguments[i + 1], IConsole::CLIENT_ID_UNSPECIFIED, true, IStorage::TYPE_ABSOLUTE);
 			i++;
 		}
 		else if(!str_comp("-s", ppArguments[i]) || !str_comp("--silent", ppArguments[i]))
@@ -861,20 +927,20 @@ void CConsole::AddCommandSorted(CCommand *pCommand)
 {
 	if(!m_pFirstCommand || str_comp(pCommand->m_pName, m_pFirstCommand->m_pName) <= 0)
 	{
-		if(m_pFirstCommand && m_pFirstCommand->m_pNext)
-			pCommand->m_pNext = m_pFirstCommand;
+		if(m_pFirstCommand && m_pFirstCommand->Next())
+			pCommand->SetNext(m_pFirstCommand);
 		else
-			pCommand->m_pNext = nullptr;
+			pCommand->SetNext(nullptr);
 		m_pFirstCommand = pCommand;
 	}
 	else
 	{
-		for(CCommand *p = m_pFirstCommand; p; p = p->m_pNext)
+		for(CCommand *p = m_pFirstCommand; p; p = p->Next())
 		{
-			if(!p->m_pNext || str_comp(pCommand->m_pName, p->m_pNext->m_pName) <= 0)
+			if(!p->Next() || str_comp(pCommand->m_pName, p->Next()->m_pName) <= 0)
 			{
-				pCommand->m_pNext = p->m_pNext;
-				p->m_pNext = pCommand;
+				pCommand->SetNext(p->Next());
+				p->SetNext(pCommand);
 				break;
 			}
 		}
@@ -905,7 +971,7 @@ void CConsole::Register(const char *pName, const char *pParams,
 		AddCommandSorted(pCommand);
 
 	if(pCommand->m_Flags & CFGFLAG_CHAT)
-		pCommand->SetAccessLevel(ACCESS_LEVEL_USER);
+		pCommand->SetAccessLevel(EAccessLevel::USER);
 }
 
 void CConsole::RegisterTemp(const char *pName, const char *pParams, int Flags, const char *pHelp)
@@ -918,7 +984,7 @@ void CConsole::RegisterTemp(const char *pName, const char *pParams, int Flags, c
 		str_copy(const_cast<char *>(pCommand->m_pHelp), pHelp, TEMPCMD_HELP_LENGTH);
 		str_copy(const_cast<char *>(pCommand->m_pParams), pParams, TEMPCMD_PARAMS_LENGTH);
 
-		m_pRecycleList = m_pRecycleList->m_pNext;
+		m_pRecycleList = m_pRecycleList->Next();
 	}
 	else
 	{
@@ -953,15 +1019,15 @@ void CConsole::DeregisterTemp(const char *pName)
 	if(m_pFirstCommand->m_Temp && str_comp(m_pFirstCommand->m_pName, pName) == 0)
 	{
 		pRemoved = m_pFirstCommand;
-		m_pFirstCommand = m_pFirstCommand->m_pNext;
+		m_pFirstCommand = m_pFirstCommand->Next();
 	}
 	else
 	{
-		for(CCommand *pCommand = m_pFirstCommand; pCommand->m_pNext; pCommand = pCommand->m_pNext)
-			if(pCommand->m_pNext->m_Temp && str_comp(pCommand->m_pNext->m_pName, pName) == 0)
+		for(CCommand *pCommand = m_pFirstCommand; pCommand->Next(); pCommand = pCommand->Next())
+			if(pCommand->Next()->m_Temp && str_comp(pCommand->Next()->m_pName, pName) == 0)
 			{
-				pRemoved = pCommand->m_pNext;
-				pCommand->m_pNext = pCommand->m_pNext->m_pNext;
+				pRemoved = pCommand->Next();
+				pCommand->SetNext(pCommand->Next()->Next());
 				break;
 			}
 	}
@@ -969,7 +1035,7 @@ void CConsole::DeregisterTemp(const char *pName)
 	// add to recycle list
 	if(pRemoved)
 	{
-		pRemoved->m_pNext = m_pRecycleList;
+		pRemoved->SetNext(m_pRecycleList);
 		m_pRecycleList = pRemoved;
 	}
 }
@@ -977,18 +1043,18 @@ void CConsole::DeregisterTemp(const char *pName)
 void CConsole::DeregisterTempAll()
 {
 	// set non temp as first one
-	for(; m_pFirstCommand && m_pFirstCommand->m_Temp; m_pFirstCommand = m_pFirstCommand->m_pNext)
+	for(; m_pFirstCommand && m_pFirstCommand->m_Temp; m_pFirstCommand = m_pFirstCommand->Next())
 		;
 
 	// remove temp entries from command list
-	for(CCommand *pCommand = m_pFirstCommand; pCommand && pCommand->m_pNext; pCommand = pCommand->m_pNext)
+	for(CCommand *pCommand = m_pFirstCommand; pCommand && pCommand->Next(); pCommand = pCommand->Next())
 	{
-		CCommand *pNext = pCommand->m_pNext;
+		CCommand *pNext = pCommand->Next();
 		if(pNext->m_Temp)
 		{
-			for(; pNext && pNext->m_Temp; pNext = pNext->m_pNext)
+			for(; pNext && pNext->m_Temp; pNext = pNext->Next())
 				;
-			pCommand->m_pNext = pNext;
+			pCommand->SetNext(pNext);
 		}
 	}
 
@@ -1040,13 +1106,13 @@ void CConsole::StoreCommands(bool Store)
 	m_StoreCommands = Store;
 }
 
-const IConsole::CCommandInfo *CConsole::GetCommandInfo(const char *pName, int FlagMask, bool Temp)
+const IConsole::ICommandInfo *CConsole::GetCommandInfo(const char *pName, int FlagMask, bool Temp)
 {
-	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
+	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->Next())
 	{
 		if(pCommand->m_Flags & FlagMask && pCommand->m_Temp == Temp)
 		{
-			if(str_comp_nocase(pCommand->m_pName, pName) == 0)
+			if(str_comp_nocase(pCommand->Name(), pName) == 0)
 				return pCommand;
 		}
 	}
@@ -1073,7 +1139,7 @@ bool CConsole::CResult::HasVictim() const
 
 void CConsole::CResult::SetVictim(int Victim)
 {
-	m_Victim = clamp<int>(Victim, VICTIM_NONE, MAX_CLIENTS - 1);
+	m_Victim = std::clamp<int>(Victim, VICTIM_NONE, MAX_CLIENTS - 1);
 }
 
 void CConsole::CResult::SetVictim(const char *pVictim)
@@ -1083,5 +1149,44 @@ void CConsole::CResult::SetVictim(const char *pVictim)
 	else if(!str_comp(pVictim, "all"))
 		m_Victim = VICTIM_ALL;
 	else
-		m_Victim = clamp<int>(str_toint(pVictim), 0, MAX_CLIENTS - 1);
+		m_Victim = std::clamp<int>(str_toint(pVictim), 0, MAX_CLIENTS - 1);
+}
+
+std::optional<ColorHSLA> CConsole::ColorParse(const char *pStr, float DarkestLighting)
+{
+	if(str_isallnum(pStr) || ((pStr[0] == '-' || pStr[0] == '+') && str_isallnum(pStr + 1))) // Teeworlds Color (Packed HSL)
+	{
+		unsigned long Value = str_toulong_base(pStr, 10);
+		if(Value == std::numeric_limits<unsigned long>::max())
+			return std::nullopt;
+		return ColorHSLA(Value, true).UnclampLighting(DarkestLighting);
+	}
+	else if(*pStr == '$') // Hex RGB/RGBA
+	{
+		auto ParsedColor = color_parse<ColorRGBA>(pStr + 1);
+		if(ParsedColor)
+			return color_cast<ColorHSLA>(ParsedColor.value());
+		else
+			return std::nullopt;
+	}
+	else if(!str_comp_nocase(pStr, "red"))
+		return ColorHSLA(0.0f / 6.0f, 1.0f, 0.5f);
+	else if(!str_comp_nocase(pStr, "yellow"))
+		return ColorHSLA(1.0f / 6.0f, 1.0f, 0.5f);
+	else if(!str_comp_nocase(pStr, "green"))
+		return ColorHSLA(2.0f / 6.0f, 1.0f, 0.5f);
+	else if(!str_comp_nocase(pStr, "cyan"))
+		return ColorHSLA(3.0f / 6.0f, 1.0f, 0.5f);
+	else if(!str_comp_nocase(pStr, "blue"))
+		return ColorHSLA(4.0f / 6.0f, 1.0f, 0.5f);
+	else if(!str_comp_nocase(pStr, "magenta"))
+		return ColorHSLA(5.0f / 6.0f, 1.0f, 0.5f);
+	else if(!str_comp_nocase(pStr, "white"))
+		return ColorHSLA(0.0f, 0.0f, 1.0f);
+	else if(!str_comp_nocase(pStr, "gray"))
+		return ColorHSLA(0.0f, 0.0f, 0.5f);
+	else if(!str_comp_nocase(pStr, "black"))
+		return ColorHSLA(0.0f, 0.0f, 0.0f);
+
+	return std::nullopt;
 }

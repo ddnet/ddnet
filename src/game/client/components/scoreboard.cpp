@@ -7,16 +7,15 @@
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
 
-#include <game/generated/protocol.h>
+#include <generated/client_data7.h>
+#include <generated/protocol.h>
 
 #include <game/client/animstate.h>
 #include <game/client/components/countryflags.h>
 #include <game/client/components/motd.h>
 #include <game/client/components/statboard.h>
 #include <game/client/gameclient.h>
-#include <game/client/render.h>
 #include <game/client/ui.h>
-#include <game/generated/client_data7.h>
 #include <game/localization.h>
 
 CScoreboard::CScoreboard()
@@ -162,7 +161,8 @@ void CScoreboard::RenderSpectators(CUIRect Spectators)
 	Spectators.Margin(10.0f, &Spectators);
 
 	CTextCursor Cursor;
-	TextRender()->SetCursor(&Cursor, Spectators.x, Spectators.y, 22.0f, TEXTFLAG_RENDER);
+	Cursor.SetPosition(Spectators.TopLeft());
+	Cursor.m_FontSize = 22.0f;
 	Cursor.m_LineWidth = Spectators.w;
 	Cursor.m_MaxLines = round_truncate(Spectators.h / Cursor.m_FontSize);
 
@@ -485,7 +485,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 			}
 			else
 			{
-				str_format(aBuf, sizeof(aBuf), "%d", clamp(pInfo->m_Score, -999, 99999));
+				str_format(aBuf, sizeof(aBuf), "%d", std::clamp(pInfo->m_Score, -999, 99999));
 			}
 			TextRender()->Text(ScoreOffset + ScoreLength - TextRender()->TextWidth(FontSize, aBuf), Row.y + (Row.h - FontSize) / 2.0f, FontSize, aBuf);
 
@@ -510,11 +510,11 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 				Graphics()->BlendNormal();
 				Graphics()->TextureSet(m_DeadTeeTexture);
 				Graphics()->QuadsBegin();
-				if(m_pClient->IsTeamPlay())
+				if(GameClient()->IsTeamPlay())
 				{
-					Graphics()->SetColor(m_pClient->m_Skins7.GetTeamColor(true, 0, m_pClient->m_aClients[pInfo->m_ClientId].m_Team, protocol7::SKINPART_BODY));
+					Graphics()->SetColor(GameClient()->m_Skins7.GetTeamColor(true, 0, GameClient()->m_aClients[pInfo->m_ClientId].m_Team, protocol7::SKINPART_BODY));
 				}
-				CTeeRenderInfo TeeInfo = m_pClient->m_aClients[pInfo->m_ClientId].m_RenderInfo;
+				CTeeRenderInfo TeeInfo = GameClient()->m_aClients[pInfo->m_ClientId].m_RenderInfo;
 				TeeInfo.m_Size *= TeeSizeMod;
 				IGraphics::CQuadItem QuadItem(TeeOffset, Row.y, TeeInfo.m_Size, TeeInfo.m_Size);
 				Graphics()->QuadsDrawTL(&QuadItem, 1);
@@ -533,7 +533,9 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 			// name
 			{
 				CTextCursor Cursor;
-				TextRender()->SetCursor(&Cursor, NameOffset, Row.y + (Row.h - FontSize) / 2.0f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_ELLIPSIS_AT_END);
+				Cursor.SetPosition(vec2(NameOffset, Row.y + (Row.h - FontSize) / 2.0f));
+				Cursor.m_FontSize = FontSize;
+				Cursor.m_Flags |= TEXTFLAG_ELLIPSIS_AT_END;
 				Cursor.m_LineWidth = NameLength;
 				if(ClientData.m_AuthLevel)
 				{
@@ -566,7 +568,9 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 					TextRender()->TextColor(TextColor);
 				}
 				CTextCursor Cursor;
-				TextRender()->SetCursor(&Cursor, ClanOffset + (ClanLength - minimum(TextRender()->TextWidth(FontSize, ClientData.m_aClan), ClanLength)) / 2.0f, Row.y + (Row.h - FontSize) / 2.0f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_ELLIPSIS_AT_END);
+				Cursor.SetPosition(vec2(ClanOffset + (ClanLength - minimum(TextRender()->TextWidth(FontSize, ClientData.m_aClan), ClanLength)) / 2.0f, Row.y + (Row.h - FontSize) / 2.0f));
+				Cursor.m_FontSize = FontSize;
+				Cursor.m_Flags |= TEXTFLAG_ELLIPSIS_AT_END;
 				Cursor.m_LineWidth = ClanLength;
 				TextRender()->TextEx(&Cursor, ClientData.m_aClan);
 			}
@@ -578,13 +582,13 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 			// ping
 			if(g_Config.m_ClEnablePingColor)
 			{
-				TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA((300.0f - clamp(pInfo->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f)));
+				TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA((300.0f - std::clamp(pInfo->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f)));
 			}
 			else
 			{
 				TextRender()->TextColor(TextRender()->DefaultTextColor());
 			}
-			str_format(aBuf, sizeof(aBuf), "%d", clamp(pInfo->m_Latency, 0, 999));
+			str_format(aBuf, sizeof(aBuf), "%d", std::clamp(pInfo->m_Latency, 0, 999));
 			TextRender()->Text(PingOffset + PingLength - TextRender()->TextWidth(FontSize, aBuf), Row.y + (Row.h - FontSize) / 2.0f, FontSize, aBuf);
 			TextRender()->TextColor(TextRender()->DefaultTextColor());
 

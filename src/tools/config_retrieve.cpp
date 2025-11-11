@@ -1,9 +1,11 @@
 #include <base/system.h>
+
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
+
 #include <game/mapitems.h>
 
-void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
+static void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 {
 	CDataFileReader Reader;
 	if(!Reader.Open(pStorage, pMapName, IStorage::TYPE_ABSOLUTE))

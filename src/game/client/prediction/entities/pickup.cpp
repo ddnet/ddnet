@@ -1,10 +1,13 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "pickup.h"
+
 #include "character.h"
+
+#include <generated/protocol.h>
+
 #include <game/client/pickup_data.h>
 #include <game/collision.h>
-#include <game/generated/protocol.h>
 #include <game/mapitems.h>
 
 static constexpr int gs_PickupPhysSize = 14;
@@ -24,12 +27,14 @@ void CPickup::Tick()
 				continue;
 			if(m_Layer == LAYER_SWITCH && m_Number > 0 && m_Number < (int)Switchers().size() && !Switchers()[m_Number].m_aStatus[pChr->Team()])
 				continue;
-			bool sound = false;
+			bool CreateSound = false;
 			// player picked us up, is someone was hooking us, let them go
 			switch(m_Type)
 			{
 			case POWERUP_HEALTH:
-				//pChr->Freeze();
+				if(!GameWorld()->m_WorldConfig.m_PredictDDRace)
+					continue;
+				pChr->Freeze();
 				break;
 
 			case POWERUP_ARMOR:
@@ -43,13 +48,13 @@ void CPickup::Tick()
 					{
 						pChr->SetWeaponGot(j, false);
 						pChr->SetWeaponAmmo(j, 0);
-						sound = true;
+						CreateSound = true;
 					}
 				}
 				pChr->SetNinjaActivationDir(vec2(0, 0));
 				pChr->SetNinjaActivationTick(-500);
 				pChr->SetNinjaCurrentMoveTime(0);
-				if(sound)
+				if(CreateSound)
 					pChr->SetLastWeapon(WEAPON_GUN);
 				if(pChr->GetActiveWeapon() >= WEAPON_SHOTGUN)
 					pChr->SetActiveWeapon(WEAPON_HAMMER);
@@ -152,6 +157,7 @@ CPickup::CPickup(CGameWorld *pGameWorld, int Id, const CPickupData *pPickup) :
 	m_Id = Id;
 	m_Number = pPickup->m_SwitchNumber;
 	m_Layer = m_Number > 0 ? LAYER_SWITCH : LAYER_GAME;
+	m_Flags = pPickup->m_Flags;
 }
 
 void CPickup::FillInfo(CNetObj_Pickup *pPickup)

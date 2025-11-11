@@ -4,9 +4,10 @@
 #include "laser_data.h"
 
 #include <engine/shared/snapshot.h>
-#include <game/client/prediction/gameworld.h>
-#include <game/generated/protocol.h>
 
+#include <generated/protocol.h>
+
+#include <game/client/prediction/gameworld.h>
 #include <game/collision.h>
 
 CLaserData ExtractLaserInfo(int NetObjType, const void *pData, CGameWorld *pGameWorld, const CNetObj_EntityEx *pEntEx)

@@ -1,17 +1,17 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "broadcast.h"
+
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
 
-#include <game/generated/protocol.h>
+#include <generated/protocol.h>
 
-#include <game/client/gameclient.h>
-
+#include <game/client/components/important_alert.h>
 #include <game/client/components/motd.h>
 #include <game/client/components/scoreboard.h>
-
-#include "broadcast.h"
+#include <game/client/gameclient.h>
 
 void CBroadcast::OnReset()
 {
@@ -36,8 +36,14 @@ void CBroadcast::OnRender()
 
 void CBroadcast::RenderServerBroadcast()
 {
-	if(m_pClient->m_Scoreboard.IsActive() || m_pClient->m_Motd.IsActive() || !g_Config.m_ClShowBroadcasts)
+	if(GameClient()->m_Scoreboard.IsActive() ||
+		GameClient()->m_Motd.IsActive() ||
+		GameClient()->m_ImportantAlert.IsActive() ||
+		!g_Config.m_ClShowBroadcasts)
+	{
 		return;
+	}
+
 	const float SecondsRemaining = (m_BroadcastTick - Client()->GameTick(g_Config.m_ClDummy)) / (float)Client()->GameTickSpeed();
 	if(SecondsRemaining <= 0.0f)
 	{
@@ -55,7 +61,8 @@ void CBroadcast::RenderServerBroadcast()
 	if(!m_TextContainerIndex.Valid())
 	{
 		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, m_BroadcastRenderOffset, 40.0f, 12.0f, TEXTFLAG_RENDER);
+		Cursor.SetPosition(vec2(m_BroadcastRenderOffset, 40.0f));
+		Cursor.m_FontSize = 12.0f;
 		Cursor.m_LineWidth = Width;
 		TextRender()->CreateTextContainer(m_TextContainerIndex, &Cursor, m_aBroadcastText);
 	}
@@ -93,7 +100,7 @@ void CBroadcast::DoBroadcast(const char *pText)
 		{
 			if(aLine[0] != '\0')
 			{
-				m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aLine, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
+				GameClient()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aLine, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
 			}
 		}
 	}

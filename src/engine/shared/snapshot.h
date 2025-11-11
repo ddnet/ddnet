@@ -3,11 +3,11 @@
 #ifndef ENGINE_SHARED_SNAPSHOT_H
 #define ENGINE_SHARED_SNAPSHOT_H
 
+#include <generated/protocol.h>
+#include <generated/protocol7.h>
+
 #include <cstddef>
 #include <cstdint>
-
-#include <game/generated/protocol.h>
-#include <game/generated/protocol7.h>
 
 // CSnapshot
 
@@ -53,6 +53,7 @@ public:
 	};
 
 	int NumItems() const { return m_NumItems; }
+	int DataSize() const { return m_DataSize; }
 	const CSnapshotItem *GetItem(int Index) const;
 	int GetItemSize(int Index) const;
 	int GetItemIndex(int Key) const;
@@ -62,6 +63,9 @@ public:
 	const void *FindItem(int Type, int Id) const;
 
 	unsigned Crc() const;
+	// Prints the raw snapshot data showing item and int boundaries.
+	// See also `CNetObjHandler::DebugDumpSnapshot(const CSnapshot *pSnap)`
+	// For more detailed annotations of the data.
 	void DebugDump() const;
 	bool IsValid(size_t ActualSize) const;
 

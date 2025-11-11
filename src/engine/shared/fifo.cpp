@@ -3,11 +3,12 @@
 #include <base/system.h>
 #if defined(CONF_FAMILY_UNIX)
 
-#include <cstdlib>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+#include <cstdlib>
 
 void CFifo::Init(IConsole *pConsole, const char *pFifoFile, int Flag)
 {
@@ -73,13 +74,13 @@ void CFifo::Update()
 		aBuf[i] = '\0';
 		if(str_utf8_check(pCur))
 		{
-			m_pConsole->ExecuteLineFlag(pCur, m_Flag, -1);
+			m_pConsole->ExecuteLineFlag(pCur, m_Flag, IConsole::CLIENT_ID_UNSPECIFIED);
 		}
 		pCur = aBuf + i + 1;
 	}
 	if(pCur < aBuf + Length && str_utf8_check(pCur)) // missed the last line
 	{
-		m_pConsole->ExecuteLineFlag(pCur, m_Flag, -1);
+		m_pConsole->ExecuteLineFlag(pCur, m_Flag, IConsole::CLIENT_ID_UNSPECIFIED);
 	}
 }
 
@@ -203,13 +204,13 @@ void CFifo::Update()
 			pBuf[i] = '\0';
 			if(pCur[0] != '\0' && str_utf8_check(pCur))
 			{
-				m_pConsole->ExecuteLineFlag(pCur, m_Flag, -1);
+				m_pConsole->ExecuteLineFlag(pCur, m_Flag, IConsole::CLIENT_ID_UNSPECIFIED);
 			}
 			pCur = pBuf + i + 1;
 		}
 		if(pCur < pBuf + Length && pCur[0] != '\0' && str_utf8_check(pCur)) // missed the last line
 		{
-			m_pConsole->ExecuteLineFlag(pCur, m_Flag, -1);
+			m_pConsole->ExecuteLineFlag(pCur, m_Flag, IConsole::CLIENT_ID_UNSPECIFIED);
 		}
 
 		free(pBuf);

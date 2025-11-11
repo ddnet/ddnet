@@ -169,9 +169,9 @@ public:
 	const char *GetEmptyText() const { return m_pEmptyText; }
 	void SetEmptyText(const char *pText) { m_pEmptyText = pText; }
 
-	void SetClipboardLineCallback(FClipboardLineCallback pfnClipboardLineCallback) { m_pfnClipboardLineCallback = pfnClipboardLineCallback; }
-	void SetDisplayTextCallback(FDisplayTextCallback pfnDisplayTextCallback) { m_pfnDisplayTextCallback = pfnDisplayTextCallback; }
-	void SetCalculateOffsetCallback(FCalculateOffsetCallback pfnCalculateOffsetCallback) { m_pfnCalculateOffsetCallback = pfnCalculateOffsetCallback; }
+	void SetClipboardLineCallback(const FClipboardLineCallback &pfnClipboardLineCallback) { m_pfnClipboardLineCallback = pfnClipboardLineCallback; }
+	void SetDisplayTextCallback(const FDisplayTextCallback &pfnDisplayTextCallback) { m_pfnDisplayTextCallback = pfnDisplayTextCallback; }
+	void SetCalculateOffsetCallback(const FCalculateOffsetCallback &pfnCalculateOffsetCallback) { m_pfnCalculateOffsetCallback = pfnCalculateOffsetCallback; }
 
 	bool ProcessInput(const IInput::CEvent &Event);
 	bool WasChanged()
@@ -214,19 +214,14 @@ public:
 class CLineInputNumber : public CLineInputBuffered<32>
 {
 public:
-	CLineInputNumber() :
-		CLineInputBuffered()
-	{
-	}
+	CLineInputNumber() = default;
 
-	CLineInputNumber(int Number) :
-		CLineInputBuffered()
+	CLineInputNumber(int Number)
 	{
 		SetInteger(Number);
 	}
 
-	CLineInputNumber(float Number) :
-		CLineInputBuffered()
+	CLineInputNumber(float Number)
 	{
 		SetFloat(Number);
 	}

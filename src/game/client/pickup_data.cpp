@@ -4,8 +4,10 @@
 #include "pickup_data.h"
 
 #include <engine/shared/snapshot.h>
+
+#include <generated/protocol.h>
+
 #include <game/collision.h>
-#include <game/generated/protocol.h>
 
 CPickupData ExtractPickupInfo(int NetObjType, const void *pData, const CNetObj_EntityEx *pEntEx)
 {
@@ -36,6 +38,7 @@ CPickupData ExtractPickupInfoDDNet(const CNetObj_DDNetPickup *pPickup)
 	Result.m_Type = pPickup->m_Type;
 	Result.m_Subtype = pPickup->m_Subtype;
 	Result.m_SwitchNumber = pPickup->m_SwitchNumber;
+	Result.m_Flags = pPickup->m_Flags;
 
 	return Result;
 }

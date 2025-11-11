@@ -14,6 +14,15 @@
 #   We don't want to use anonymous namespaces instead of static functions.
 # bugprone-suspicious-realloc-usage
 #   We generally don't handle memory allocation failures.
+# bugprone-crtp-constructor-accessibility
+#   We don't use many classes with Curiously Recurring Template Patterns
+#   and it's unlikely that they'd be used incorrectly. This check does not
+#   improve the readability of the code.
+# performance-noexcept-*
+#   Exceptions may be disabled later, adding noexcept is just noise
+
+HeaderFilterRegex: '.*'
+ExcludeHeaderFilterRegex: '(external/|generated/|include/|steam/steam_api_flat\.h)'
 
 Checks: >
   -*,
@@ -21,6 +30,7 @@ Checks: >
   -bugprone-assignment-in-if-condition,
   -bugprone-branch-clone,
   -bugprone-casting-through-void,
+  -bugprone-crtp-constructor-accessibility,
   -bugprone-easily-swappable-parameters,
   -bugprone-implicit-widening-of-multiplication-result,
   -bugprone-incorrect-roundings,
@@ -92,10 +102,12 @@ Checks: >
   -readability-simplify-boolean-expr,
   -readability-suspicious-call-argument,
   -readability-uppercase-literal-suffix,
+  -readability-use-concise-preprocessor-directives,
   -readability-use-std-min-max,
   performance-*,
   -performance-enum-size,
   -performance-no-int-to-ptr,
+  -performance-noexcept-*,
   portability-*,
 
 WarningsAsErrors:
@@ -117,7 +129,7 @@ CheckOptions:
   - key:             readability-identifier-naming.MemberPrefix
     value:           m_
   - key:             readability-identifier-naming.MemberIgnoredRegexp
-    value:           '^(m_ap|m_v|m_p|m_a|ms_p|[a-z]$).*'
+    value:           '^(ms?_(a|v|p|pfn)*[A-Z][a-zA-Z0-9]*|[abfghlrsuvwxyz])$'
   - key:             readability-identifier-naming.StaticVariablePrefix
     value:           s_
   - key:             readability-identifier-naming.ClassMethodCase
@@ -129,19 +141,19 @@ CheckOptions:
   - key:             readability-identifier-naming.StructPrefix
     value:           S
   - key:             readability-identifier-naming.StructIgnoredRegexp
-    value:           '^C.*'
+    value:           '^((GL_S|[CI])[A-Z](_?[a-zA-Z0-9])*|_json_value|NETADDR)$'
   - key:             readability-identifier-naming.ClassIgnoredRegexp
-    value:           '^(I|CCommandProcessorFragment_Vulkan$).*'
+    value:           '^([CI][A-Z](_?[a-zA-Z0-9])*)$'
   - key:             readability-identifier-naming.ParameterCase
     value:           CamelCase
   - key:             readability-identifier-naming.ParameterIgnoredRegexp
-    value:           '^(p|a|v|[a-z]$|[xy][0123]$).*'
+    value:           '^((a|v|p|pfn)+[A-Z][a-zA-Z0-9]*|[a-z]|[pxy][0-3]|p[xy])$'
   - key:             readability-identifier-naming.ClassMethodIgnoredRegexp
     value:           '^(Con_).*'
   - key:             readability-identifier-naming.ClassMemberIgnoredRegexp
-    value:           '^(m_a|m_v|m_p|ms_p|ms_a|ms_v|s_1024x1024ImgSize$|s_ImageBufferCacheId$|s_VertexBufferCacheId$|s_StagingBufferImageCacheId$|REPLACEMENT_CHARACTER$|(MAX|MIN)_FONT_SIZE$|MAXIMUM_ATLAS_DIMENSION$|INITIAL_ATLAS_DIMENSION$|MAX_SECTION_DIMENSION_MAPPED$|MIN_SECTION_DIMENSION$|s_StagingBufferCacheId$).*'
+    value:           '^(ms?_(a|v|p|pfn)*[A-Z][a-zA-Z0-9]*|[abfghlrsuvwxyz])$'
   - key:             readability-identifier-naming.LocalConstantIgnoredRegexp
-    value:           '^(p|a|v|s_|MAX_ANIM_SPEED$|DATA_OFFSET$|HEADER_LEN$|MIN_ANIM_SPEED$|[hwdcbqstf]$|[xt][0123]$|result$|sub$|it$|len$|d[xy]$).*'
+    value:           '^((a|v|p|pfn)+[A-Z][a-zA-Z0-9]*|[abcdfhpqstvw]|[aptvx][0-3]|d[xy])$'
   - key:             readability-identifier-naming.LocalVariableIgnoredRegexp
-    value:           '^(p|a|s_|FT_|TB_|s_|ul_|v|[xy]i$|[zijklxyhmrgbacwestnduvqf]$|[dmpwsitcf][xy]$|(ch|skel)[0-2]?$|it$|tw$|dt$|th$|ls$|func$|res$|shader$|len$|maxLength$|length$|offset$|offpos$|result$|bg$|sp$|url$|index$|ctxt$|key$|null$|logger$|LAST_MODIFIED$|teleNr$|target$|id$|hit$|hsl[0-2]?$|rgb[0-2]?$|dir$|tmp$|sub$|ret$|rendered$|size$|isWeaponCollide$|zerochar$|dist$|sound$|match$|best_matches$|matches$|nohook$|btn$|savedLayers$|l[hw]$|evilz$|sec$|min$|to2$|delay$|[xy]Fract$|[xy]Int$|imgg[xy]$|skip$|localPlayer$|fdratio$|[rgbat][0-2]$|[xy][0-3]$|x[rl]$).*'
+    value:           '^((a|v|p|pfn)+[A-Z][a-zA-Z0-9]*|[abcdefghijklmnpqrstuvwxyz]|[aptvxy][0-3]|[cdfimpstw][xy])$'
 

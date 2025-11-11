@@ -1,13 +1,14 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "laser.h"
+
 #include "character.h"
 
 #include <engine/shared/config.h>
 
-#include <game/generated/protocol.h>
-#include <game/mapitems.h>
+#include <generated/protocol.h>
 
+#include <game/mapitems.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
 
@@ -239,9 +240,9 @@ void CLaser::DoBounce()
 			{
 				// Delay specifies which weapon the tile should work for.
 				// Delay = 0 means all.
-				int delay = GameServer()->Collision()->GetSwitchDelay(MapIndex);
+				const int Delay = GameServer()->Collision()->GetSwitchDelay(MapIndex);
 
-				if((delay != 3 && delay != 0) && m_Type == WEAPON_LASER)
+				if((Delay != 3 && Delay != 0) && m_Type == WEAPON_LASER)
 				{
 					IsSwitchTeleGun = IsBlueSwitchTeleGun = false;
 				}
@@ -315,7 +316,7 @@ void CLaser::Snap(int SnappingClient)
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 	int LaserType = m_Type == WEAPON_LASER ? LASERTYPE_RIFLE : m_Type == WEAPON_SHOTGUN ? LASERTYPE_SHOTGUN : -1;
 
-	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetId(),
+	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Server()->IsSixup(SnappingClient), SnappingClient), GetId(),
 		m_Pos, m_From, m_EvalTick, m_Owner, LaserType, 0, m_Number);
 }
 

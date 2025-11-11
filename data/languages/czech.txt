@@ -436,8 +436,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Změna nastavení se projeví až po restartu hry.
 
-##### needs translation #####
-
 New name:
 == Nové jméno:
 
@@ -538,13 +536,13 @@ File already exists, do you want to overwrite it?
 == Soubor již existuje, chcete jej přepsat?
 
 Are you sure that you want to disconnect?
-== Jste si jisti, že se chcete odpojit?
+== Opravdu se chcete odpojit?
 
 Disconnect Dummy
 == Odpojit Dummyho
 
 Are you sure that you want to disconnect your dummy?
-== Jste si jisti, že chcete odpojit svého dummyho?
+== Opravdu chcete odpojit svého dummyho?
 
 Welcome to DDNet
 == Vítejte na DDNetu
@@ -919,7 +917,7 @@ Warning
 == Varování
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== Režim ladění povolen. Stisknutím kláves Ctrl + Shift + D deaktivujte režim ladění.
+== Režim ladění povolen. Stisknutím kláves Ctrl+Shift+D deaktivujte režim ladění.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == Pomocí klávesy k se zabijete (restartujte), pomocí q pauznete a můžete sledovat ostatní hráče. Otevřte nastavení pro další klávesové zkratky.
@@ -1042,10 +1040,6 @@ Update failed! Check log…
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == Inicializace se nezdařila. Zkuste změnit gfx_backend na OpenGL nebo Vulkan v settings_ddnet.cfg v adresáři s konfigurací a zkuste to znovu.
-
-[Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== Nedostatek VRAM. Zkuste odebrat vlastní aktiva (skins, entity, atd.), zejména ty s vysokým rozlišením.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
@@ -1314,7 +1308,7 @@ Are you sure that you want to remove the player '%s' from your friends list?
 == Opravdu chcete odstranit hráče '%s' ze seznamu přátel?
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== Jste si jisti, že chcete odstranit klan '%s' ze svého seznamu přátel?
+== Opravdu chcete odstranit klan '%s' ze svého seznamu přátel?
 
 Add Clan
 == Přidat Klan
@@ -1338,12 +1332,12 @@ Go back the specified duration
 == Vrátit se o zadanou dobu
 
 [Demo player duration]
-%d min.
-== %d min.
+%s min.
+== %s min.
 
 [Demo player duration]
-%d sec.
-== %d sec.
+%s sec.
+== %s sec.
 
 Change the skip duration
 == Změnit dobu přeskočení
@@ -1425,10 +1419,10 @@ Open the directory that contains the demo files
 == Otevřete adresář, který obsahuje soubory se záznamy
 
 Are you sure that you want to delete the folder '%s'?
-== Jste si jisti, že chcete smazat složku '%s'?
+== Opravdu chcete smazat složku '%s'?
 
 Are you sure that you want to delete the demo '%s'?
-== Jste si jisti, že chcete smazat záznam '%s'?
+== Opravdu chcete smazat záznam '%s'?
 
 Delete folder
 == Smazat složku
@@ -1833,7 +1827,7 @@ Show client IDs (scoreboard, chat, spectator)
 == Zobrazit ID klientů (výsledková tabulka, chat, divák)
 
 Are you sure that you want to delete '%s'?
-== Jste si jisti, že chcete smazat '%s'?
+== Opravdu chcete smazat '%s'?
 
 Delete skin
 == Odstranit skin
@@ -1909,275 +1903,587 @@ Eyes
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Czech translation by khubajsn, Petr, Medik, TeeWorlds-org and dobrykafe
+== Český překlad od khubajsn, Petr, Medik, TeeWorlds-org a dobrykafe
+
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== Nedostatek VRAM. Zkuste nastavit 'cl_skins_loaded_max' na nižší hodnotu nebo odstranit vlastní aktiva (skiny, entity, atd.), zejména ty s vysokým rozlišením.
 
 No demo with this filename exists
-== 
+== Neexistuje žádný záznam s tímto názvem
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
-== 
+== "%s" není kompatibilní s pnglite a nelze jej načíst starými DDNet verzemi:
 
 Some fonts could not be loaded. Check the local console for details.
-== 
-
-Loading background map
-== 
+== Některá písma nemohla být načtena. Podrobnosti najdete v místní konzole.
 
 Auto-sync player camera
-== 
+== Synchronizovat kameru hráče
 
 [Auto camera]
 Disabled
-== 
+== Zakázána
 
 [Auto camera]
 Enabled
-== 
+== Povolena
 
 [Auto camera]
 Unavailable for this player
-== 
+== Není k dispozici pro tohoto hráče
 
 [Auto camera]
 Inactive
-== 
+== Neaktivní
 
 [Auto camera]
 Active
-== 
+== Aktivní
 
 Loading maps…
-== 
+== Načítání map…
+
+[Spectating]
+Following %d: %s
+== Sledujete %d: %s
 
 [Spectating Camera Mode Icon]
 AUTO
-== 
+== AUTO
+
+Loading map
+== Načítání mapy
+
+This name cannot be used for files and folders
+== Tento název nelze použít pro soubory a složky
+
+Error checking player name
+== Chyba při kontrole jména hráče
+
+Could not check for existing player with your name. Check your internet connection.
+== Nepodařilo se vyhledat existujícího hráče s vaším jménem. Zkontrolujte připojení k internetu.
 
 Online friends (%d)
-== 
+== Online přátelé (%d)
 
 Add friends by entering their name below or by clicking their name in the player list.
-== 
+== Přidejte přátele zadáním jejich jména níže nebo kliknutím na jejich jméno v seznamu hráčů.
 
 Add clanmates by entering their clan below and leaving the name blank.
-== 
+== Přidejte členy klanu zadáním jejich klanu níže a ponecháním prázdného jména.
 
 Toggle auto camera
-== 
+== Přepnout automatickou kameru
 
 Map size
-== 
+== Velikost mapy
 
 Edit touch controls
-== 
+== Upravit dotykové ovládání
 
 Close
-== 
+== Zavřít
 
 https://wiki.ddnet.org/wiki/Touch_controls
-== 
+== https://wiki.ddnet.org/wiki/Touch_controls
 
 Save changes
-== 
+== Uložit změny
 
 Error saving touch controls
-== 
+== Chyba při ukládání dotykového ovládání
 
 Could not save touch controls to file. See local console for details.
-== 
+== Nepodařilo se uložit dotykové ovládání do souboru. Podrobnosti naleznete v místní konzoli.
 
 Unsaved changes
-== 
+== Neuložené změny
 
 Discard changes
-== 
+== Zahodit změny
 
 Are you sure that you want to discard the current changes to the touch controls?
-== 
+== Opravdu chcete zahodit aktuální změny dotykového ovládání?
 
 Are you sure that you want to reset the touch controls to default?
-== 
+== Opravdu chcete resetovat dotykové ovládání na výchozí nastavení?
 
 Import from clipboard
-== 
+== Vložit ze schránky
 
 Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
-== 
+== Opravdu chcete vložit dotykové ovládání ze schránky? Tímto se přepíše vaše aktuální dotykové ovládání.
 
 Export to clipboard
-== 
+== Uložit do schránky
 
 Direct touch input while ingame
-== 
+== Přímý dotykový vstup během hry
 
 [Direct touch input]
 Disabled
-== 
+== Zakázán
 
 [Direct touch input]
 Active action
-== 
+== Aktivní akce
 
 [Direct touch input]
 Aim
-== 
+== Míření
 
 [Direct touch input]
 Fire
-== 
+== Střelba
 
 [Direct touch input]
 Hook
-== 
+== Hák
 
 Direct touch input while spectating
-== 
+== Přímý dotykový vstup během sledování
 
 Error loading touch controls
-== 
+== Chyba při načítání dotykového ovládání
 
 Could not load touch controls from file. See local console for details.
-== 
+== Nelze načíst dotykové ovládání ze souboru. Podrobnosti naleznete v místní konzoli.
 
 Could not load default touch controls from file. See local console for details.
-== 
+== Nelze načíst výchozí dotykové ovládání ze souboru. Podrobnosti naleznete v místní konzoli.
 
 Could not load touch controls from clipboard. See local console for details.
-== 
+== Nelze načíst dotykové ovládání ze schránky. Podrobnosti naleznete v místní konzoli.
 
 Community
-== 
+== Komunita
 
 [Team status]
 forbidden
-== 
+== zakázány
 
 [Team status]
 solo
-== 
+== sólo
 
 [Team status]
 allowed
-== 
+== povoleny
 
 [Team status]
 required
-== 
+== požadovány
 
 Teams
-== 
+== Týmy
 
 [Team size]
 minimum
-== 
+== minimálně
 
 [Team size]
 maximum
-== 
+== maximálně
 
 Saves file
-== 
+== Soubor s uloženými hrami
 
 Open the saves file
-== 
+== Otevřít soubor s uloženými hrami
+
+This skin name cannot be used.
+== Tento název skinu nelze použít.
+
+Skin could not be loaded due to an error. Check the local console for details.
+== Skin se nepodařilo načíst kvůli chybě. Podrobnosti naleznete v místní konzoli.
+
+Skin could not be found.
+== Skin se nepodařilo najít.
+
+No skins match your filter criteria
+== Žádné skiny neodpovídají vašim kritériím filtru
 
 Show FPS
-== 
+== Ukázat FPS
 
 Renders your frame rate in the top right
-== 
+== Zobrazí snímkovou frekvenci v pravém horním rohu
 
 Show spectator cursor
-== 
+== Zobrazit kurzor při sledování
 
 Show number of spectators
-== 
+== Zobrazit počet diváků
 
 [Show name plates]
 None
-== 
+== Žádné
 
 [Show name plates]
 Own
-== 
+== Vlastní
 
 [Show name plates]
 Others
-== 
+== Ostatní
 
 [Show name plates]
 All
-== 
+== Všechny
 
 Name plates offset
-== 
+== Odsazení jmenovek
 
 Show friend icon in name plates
-== 
+== Zobrazit ikonu přítele na jmenovkách
 
 Show client IDs in name plates
-== 
+== Zobrazit ID klientů na jmenovkách
 
-Show client IDs on a seperate line
-== 
+Show client IDs on a separate line
+== Zobrazit ID klientů na samostatném řádku
 
 Client IDs size
-== 
+== Velikost ID klientů
 
 Hook Strength
-== 
+== Síla háku
 
 Size of hook strength icon and number indicator
-== 
+== Velikost ikony síly háku a číselného ukazatele
 
 Key Presses
-== 
+== Stisknutí kláves
 
 Show players' key presses
-== 
+== Zobrazit stisknuté klávesy hráčů
 
 [Show players' key presses]
 None
-== 
+== Žádné
 
 [Show players' key presses]
 Own
-== 
+== Vlastní
 
 [Show players' key presses]
 Others
-== 
+== Ostatní
 
 [Show players' key presses]
 All
-== 
+== Všechny
 
 Size of key press icons
-== 
+== Velikost ikon stisknutí kláves
+
+Preview player's name plate
+== Náhled jmenovky hráče
 
 Preview dummy's name plate
-== 
+== Náhled jmenovky dummyho
 
 Width of your own hook collision line
-== 
+== Šířka vlastní čáry kolize háku
 
 Width of others' hook collision line
-== 
+== Šířka ostatních čar kolize háku
 
 Preview 'Hook collisions' being pressed
-== 
+== Náhled stisknutí tlačítka 'Kolize háku'
+
+Dragger Outline Color
+== Vnější Barva Tahače
+
+Dragger Inner Color
+== Vnitřní Barva Tahače
 
 AntiPing: prediction margin
-== 
+== AntiPing: marže predikce
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
-== 
+== Server se nepodařilo spustit. Ujistěte se, že jste v nastavení aplikace povolili oznámení, aby server mohl běžet na pozadí.
 
 Aim
-== 
+== Míření
 
 Active: Fire
-== 
+== Aktivní: Střelba
 
 Active: Hook
-== 
+== Aktivní: Hák
+
+Press Ctrl+Shift+G to disable debug graphs.
+== Stisknutím Ctrl+Shift+G deaktivujete grafy ladění.
+
+Server could not be started
+== Server se nepodařilo spustit
+
+Could not get server list from master server
+== Nepodařilo se získat seznam serverů z hlavního serveru
+
+[Demo playback]
+Live
+== Živě
+
+[Demo playback]
+Go to Live
+== Přejít na živý přenos
+
+Save all changes before turning off the editor?
+== Uložit všechny změny před vypnutím editoru?
+
+Layout
+== Rozložení
+
+Visibility
+== Viditelnost
+
+Behavior
+== Chování
+
+Delete button
+== Smazat tlačítko
+
+Are you sure that you want to delete this button?
+== Opravdu chcete toto tlačítko smazat?
+
+Duplicate
+== Duplikát
+
+New button already created
+== Nové tlačítko již bylo vytvořeno
+
+A new button has already been created, please save or delete it before creating another one.
+== Nové tlačítko již bylo vytvořeno, před vytvořením dalšího jej prosím uložte nebo smažte.
+
+Please save your changes before duplicating a button.
+== Před duplikováním tlačítka prosím uložte změny.
+
+No space for button
+== Není místo pro tlačítko
+
+There is not enough space available to place another button.
+== Není dostatek místa pro umístění dalšího tlačítka.
+
+There is not enough space available to place another button with this size. The button has been resized.
+== Není dostatek místa pro umístění dalšího tlačítka této velikosti. Velikost tlačítka byla změněna.
+
+Deselect
+== Zrušit výběr
+
+You'll lose unsaved changes after deselecting.
+== Po zrušení výběru ztratíte neuložené změny.
+
+Width
+== Šířka
+
+Height
+== Výška
+
+Shape
+== Tvar
+
+[Touch button shape]
+Rectangle
+== Obdélník
+
+[Touch button shape]
+Circle
+== Kruh
+
+[Touch button label type]
+Plain
+== Prostý
+
+[Touch button label type]
+Localized
+== Lokalizované
+
+[Touch button label type]
+Icon
+== Ikona
+
+Behavior type
+== Typ chování
+
+[Touch button behavior]
+Bind
+== Bind
+
+[Touch button behavior]
+Bind Toggle
+== Bind přepínač
+
+[Touch button behavior]
+Predefined
+== Předdefinované
+
+Command
+== Příkaz
+
+Label
+== Štítek
+
+Label type
+== Typ štítku
+
+Add command
+== Přidat příkaz
+
+Delete command
+== Smazat příkaz
+
+[Touch button visibility preview]
+Included
+== Zahrnuto
+
+[Touch button visibility preview]
+Excluded
+== Vyloučeno
+
+[Touch button visibility preview]
+Ignore
+== Ignorovat
+
+Long press on a touch button to select it.
+== Dlouhým stisknutím dotykového tlačítka jej vyberete.
+
+New button
+== Nové tlačítko
+
+Select button by touch
+== Vyberte tlačítko dotykem
+
+No buttons match your filter criteria
+== Žádná tlačítka neodpovídají vašim kritériím filtru
+
+File
+== Soubor
+
+Buttons
+== Tlačítka
+
+Active color
+== Aktivní barva
+
+Inactive color
+== Neaktivní barva
+
+Preview button visibility while the editor is active.
+== Náhled viditelnosti tlačítka, když je editor aktivní.
+
+Show all buttons
+== Zobrazit všechna tlačítka
+
+Save all changes before switching selected button?
+== Uložit všechny změny před přepnutím vybraného tlačítka?
+
+Discard
+== Zahodit
+
+There is not enough space available for the button. Check its visibilities and size.
+== Pro tlačítko není dostatek místa. Zkontrolujte jeho viditelnost a velikost.
+
+Selected button not visible
+== Vybrané tlačítko není viditelné
+
+The selected button is not visible. Do you want to deselect it or edit its visibility?
+== Vybrané tlačítko není viditelné. Chcete jeho výběr zrušit nebo upravit jeho viditelnost?
+
+Edit
+== Upravit
+
+Width and height are required to be within the range from %d to %d.
+== Šířka a výška musí být v rozsahu od %d do %d.
+
+Button position is outside of the screen.
+== Poloha tlačítka je mimo obrazovku.
+
+The selected button is overlapping with other buttons.
+== Vybrané tlačítko se překrývá s jinými tlačítky.
+
+Wrong button settings
+== Špatné nastavení tlačítek
+
+[Touch button visibilities]
+Ingame
+== Ve hře
+
+[Touch button visibilities]
+Zoom Allowed
+== Přiblížení povoleno
+
+[Touch button visibilities]
+Vote Active
+== Hlasování aktivní
+
+[Touch button visibilities]
+Dummy Allowed
+== Dummy povolen
+
+[Touch button visibilities]
+Dummy Connected
+== Dummy připojen
+
+[Touch button visibilities]
+Rcon Authed
+== Rcon autorizován
+
+[Touch button visibilities]
+Demo Player
+== Přehrávač záznamů
+
+[Touch button visibilities]
+Extra Menu
+== Další menu
+
+[Predefined touch button behaviors]
+Ingame Menu
+== Menu ve hře
+
+[Predefined touch button behaviors]
+Extra Menu
+== Další menu
+
+[Predefined touch button behaviors]
+Emoticon
+== Emotikon
+
+[Predefined touch button behaviors]
+Spectate
+== Pozorovat
+
+[Predefined touch button behaviors]
+Swap Action
+== Zaměnit akci
+
+[Predefined touch button behaviors]
+Use Action
+== Použít akci
+
+[Predefined touch button behaviors]
+Joystick Action
+== Joystick: Akce
+
+[Predefined touch button behaviors]
+Joystick Aim
+== Joystick: Míření
+
+[Predefined touch button behaviors]
+Joystick Fire
+== Joystick: Střelba
+
+[Predefined touch button behaviors]
+Joystick Hook
+== Joystick: Hák
+
+Chat background color
+== Barva pozadí chatu
+
+Censor profanity
+== Cenzurovat nevhodná slova
+
+Download
+== Stáhnout

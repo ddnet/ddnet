@@ -17,14 +17,16 @@ public:
 	CPickup(CGameWorld *pGameWorld, int Id, const CPickupData *pPickup);
 	void FillInfo(CNetObj_Pickup *pPickup);
 	bool Match(CPickup *pPickup);
-	bool InDDNetTile() { return m_IsCoreActive; }
+	bool InDDNetTile() const { return m_IsCoreActive; }
 
 	int Type() const { return m_Type; }
 	int Subtype() const { return m_Subtype; }
+	int Flags() const { return m_Flags; }
 
 private:
 	int m_Type;
 	int m_Subtype;
+	int m_Flags;
 
 	// DDRace
 

@@ -3,12 +3,12 @@
 #ifndef GAME_SERVER_ENTITY_H
 #define GAME_SERVER_ENTITY_H
 
+#include "gameworld.h"
+#include "save.h"
+
 #include <base/vmath.h>
 
 #include <game/alloc.h>
-
-#include "gameworld.h"
-#include "save.h"
 
 class CCollision;
 class CGameContext;
@@ -122,12 +122,6 @@ public: // TODO: Maybe make protected
 				recording.
 	*/
 	virtual void Snap(int SnappingClient) {}
-
-	/*
-		Function: PostSnap
-			Called after all clients received their snapshot.
-	*/
-	virtual void PostSnap() {}
 
 	/*
 		Function: SwapClients

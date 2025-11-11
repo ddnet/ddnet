@@ -1,8 +1,10 @@
 #include <engine/shared/protocolglue.h>
 #include <engine/shared/snapshot.h>
 #include <engine/shared/translation_context.h>
+
+#include <generated/protocol7.h>
+
 #include <game/client/gameclient.h>
-#include <game/generated/protocol7.h>
 
 int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven, int Conn, bool Dummy)
 {
@@ -117,7 +119,7 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 			Info6.m_WarmupTimer = TranslationContext.m_GameStateEndTick7 - GameTick;
 
 		// hack to port 0.7 race timer to ddnet warmup gametimer hack
-		int TimerClientId = clamp(TranslationContext.m_aLocalClientId[Conn], 0, (int)MAX_CLIENTS);
+		int TimerClientId = std::clamp(TranslationContext.m_aLocalClientId[Conn], 0, (int)MAX_CLIENTS);
 		if(SpectatorId >= 0)
 			TimerClientId = SpectatorId;
 		const protocol7::CNetObj_PlayerInfoRace *pRaceInfo = TranslationContext.m_apPlayerInfosRace[TimerClientId];
@@ -146,13 +148,13 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 			return -2;
 
 		CNetObj_ClientInfo Info6 = {};
-		StrToInts(&Info6.m_Name0, 4, Client.m_aName);
-		StrToInts(&Info6.m_Clan0, 3, Client.m_aClan);
+		StrToInts(Info6.m_aName, std::size(Info6.m_aName), Client.m_aName);
+		StrToInts(Info6.m_aClan, std::size(Info6.m_aClan), Client.m_aClan);
 		Info6.m_Country = Client.m_Country;
-		StrToInts(&Info6.m_Skin0, 6, Client.m_aSkinName);
-		Info6.m_UseCustomColor = Client.m_UseCustomColor;
-		Info6.m_ColorBody = Client.m_ColorBody;
-		Info6.m_ColorFeet = Client.m_ColorFeet;
+		StrToInts(Info6.m_aSkin, std::size(Info6.m_aSkin), "default");
+		Info6.m_UseCustomColor = 0;
+		Info6.m_ColorBody = 0;
+		Info6.m_ColorFeet = 0;
 		mem_copy(pObj, &Info6, sizeof(CNetObj_ClientInfo));
 	}
 
@@ -462,8 +464,8 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 			CTranslationContext::CClientData &Client = TranslationContext.m_aClients[ClientId];
 			Client.m_Active = true;
 			Client.m_Team = pInfo->m_Team;
-			IntsToStr(pInfo->m_aName, 4, Client.m_aName, std::size(Client.m_aName));
-			IntsToStr(pInfo->m_aClan, 3, Client.m_aClan, std::size(Client.m_aClan));
+			IntsToStr(pInfo->m_aName, std::size(pInfo->m_aName), Client.m_aName, std::size(Client.m_aName));
+			IntsToStr(pInfo->m_aClan, std::size(pInfo->m_aClan), Client.m_aClan, std::size(Client.m_aClan));
 			Client.m_Country = pInfo->m_Country;
 
 			ApplySkin7InfoFromSnapObj(pInfo, ClientId);
@@ -518,13 +520,16 @@ int CGameClient::OnDemoRecSnap7(CSnapshot *pFrom, CSnapshot *pTo, int Conn)
 		protocol7::CNetObj_De_ClientInfo ClientInfoObj;
 		ClientInfoObj.m_Local = i == Client()->m_TranslationContext.m_aLocalClientId[Conn];
 		ClientInfoObj.m_Team = ClientData.m_Team;
-		StrToInts(ClientInfoObj.m_aName, 4, m_aClients[i].m_aName);
-		StrToInts(ClientInfoObj.m_aClan, 3, m_aClients[i].m_aClan);
+		StrToInts(ClientInfoObj.m_aName, std::size(ClientInfoObj.m_aName), m_aClients[i].m_aName);
+		StrToInts(ClientInfoObj.m_aClan, std::size(ClientInfoObj.m_aClan), m_aClients[i].m_aClan);
 		ClientInfoObj.m_Country = ClientData.m_Country;
 
 		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 		{
-			StrToInts(ClientInfoObj.m_aaSkinPartNames[Part], 6, m_aClients[i].m_aSixup[Conn].m_aaSkinPartNames[Part]);
+			StrToInts(
+				ClientInfoObj.m_aaSkinPartNames[Part],
+				std::size(ClientInfoObj.m_aaSkinPartNames[Part]),
+				m_aClients[i].m_aSixup[Conn].m_aaSkinPartNames[Part]);
 			ClientInfoObj.m_aUseCustomColors[Part] = m_aClients[i].m_aSixup[Conn].m_aUseCustomColors[Part];
 			ClientInfoObj.m_aSkinPartColors[Part] = m_aClients[i].m_aSixup[Conn].m_aSkinPartColors[Part];
 		}
@@ -533,8 +538,7 @@ int CGameClient::OnDemoRecSnap7(CSnapshot *pFrom, CSnapshot *pTo, int Conn)
 	}
 
 	// add tuning
-	CTuningParams StandardTuning;
-	if(mem_comp(&StandardTuning, &m_aTuning[Conn], sizeof(CTuningParams)) != 0)
+	if(mem_comp(&CTuningParams::DEFAULT, &m_aTuning[Conn], sizeof(CTuningParams)) != 0)
 	{
 		void *pItem = Builder.NewItem(protocol7::NETOBJTYPE_DE_TUNEPARAMS, 0, sizeof(protocol7::CNetObj_De_TuneParams));
 		if(!pItem)

@@ -1,3 +1,5 @@
+#include "background.h"
+
 #include <base/system.h>
 
 #include <engine/map.h>
@@ -5,14 +7,11 @@
 
 #include <game/client/components/mapimages.h>
 #include <game/client/components/maplayers.h>
-
 #include <game/client/gameclient.h>
 #include <game/layers.h>
 #include <game/localization.h>
 
-#include "background.h"
-
-CBackground::CBackground(int MapType, bool OnlineOnly) :
+CBackground::CBackground(ERenderType MapType, bool OnlineOnly) :
 	CMapLayers(MapType, OnlineOnly)
 {
 	m_pLayers = new CLayers;
@@ -34,17 +33,12 @@ CBackgroundEngineMap *CBackground::CreateBGMap()
 	return new CBackgroundEngineMap;
 }
 
-const char *CBackground::LoadingTitle() const
-{
-	return Localize("Loading background map");
-}
-
 void CBackground::OnInit()
 {
 	m_pBackgroundMap = CreateBGMap();
 	m_pMap = m_pBackgroundMap;
 
-	m_pImages->m_pClient = GameClient();
+	m_pImages->OnInterfacesInit(GameClient());
 	Kernel()->RegisterInterface(m_pBackgroundMap);
 	if(g_Config.m_ClBackgroundEntities[0] != '\0' && str_comp(g_Config.m_ClBackgroundEntities, CURRENT_MAP))
 		LoadBackground();

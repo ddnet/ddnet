@@ -1,12 +1,13 @@
 #ifndef ENGINE_FAVORITES_H
 #define ENGINE_FAVORITES_H
 
-#include <memory>
+#include "kernel.h"
 
 #include <base/types.h>
+
 #include <engine/shared/protocol.h>
 
-#include "kernel.h"
+#include <memory>
 
 class IConfigManager;
 
@@ -25,8 +26,6 @@ public:
 		NETADDR m_aAddrs[MAX_SERVER_ADDRESSES];
 		bool m_AllowPing;
 	};
-
-	virtual ~IFavorites() {}
 
 	virtual TRISTATE IsFavorite(const NETADDR *pAddrs, int NumAddrs) const = 0;
 	// Only considers the addresses that are actually favorites.

@@ -1,14 +1,16 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "projectile.h"
+
+#include "character.h"
+
 #include <engine/shared/config.h>
+
+#include <generated/protocol.h>
 
 #include <game/client/projectile_data.h>
 #include <game/collision.h>
-#include <game/generated/protocol.h>
 #include <game/mapitems.h>
-
-#include "character.h"
-#include "projectile.h"
 
 CProjectile::CProjectile(
 	CGameWorld *pGameWorld,
@@ -88,16 +90,16 @@ void CProjectile::Tick()
 	if(m_LifeSpan > -1)
 		m_LifeSpan--;
 
-	bool isWeaponCollide = false;
+	bool IsWeaponCollide = false;
 	if(
 		pOwnerChar &&
 		pTargetChr &&
 		!pTargetChr->CanCollide(m_Owner))
 	{
-		isWeaponCollide = true;
+		IsWeaponCollide = true;
 	}
 
-	if(((pTargetChr && (pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar)) || Collide || GameLayerClipped(CurPos)) && !isWeaponCollide)
+	if(((pTargetChr && (pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar)) || Collide || GameLayerClipped(CurPos)) && !IsWeaponCollide)
 	{
 		if(m_Explosive && (!pTargetChr || (!m_Freeze || (m_Type == WEAPON_SHOTGUN && Collide))))
 		{

@@ -9,8 +9,9 @@
 #include <engine/storage.h>
 #include <engine/textrender.h>
 
+#include <generated/client_data.h>
+
 #include <game/client/gameclient.h>
-#include <game/generated/client_data.h>
 #include <game/layers.h>
 #include <game/localization.h>
 #include <game/mapitems.h>
@@ -18,7 +19,7 @@
 CMapImages::CMapImages()
 {
 	m_Count = 0;
-	mem_zero(m_aEntitiesIsLoaded, sizeof(m_aEntitiesIsLoaded));
+	std::fill(std::begin(m_aEntitiesIsLoaded), std::end(m_aEntitiesIsLoaded), false);
 	m_SpeedupArrowIsLoaded = false;
 
 	str_copy(m_aEntitiesPath, "editor/entities_clear");
@@ -41,17 +42,22 @@ void CMapImages::OnInit()
 	Console()->Chain("cl_text_entities_size", ConchainClTextEntitiesSize, this);
 }
 
-void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
+void CMapImages::Unload()
 {
 	// unload all textures
 	for(int i = 0; i < m_Count; i++)
 	{
 		Graphics()->UnloadTexture(&m_aTextures[i]);
 	}
+}
+
+void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
+{
+	Unload();
 
 	int Start;
 	pMap->GetType(MAPITEMTYPE_IMAGE, &Start, &m_Count);
-	m_Count = clamp<int>(m_Count, 0, MAX_MAPIMAGES);
+	m_Count = std::clamp<int>(m_Count, 0, MAX_MAPIMAGES);
 
 	unsigned char aTextureUsedByTileOrQuadLayerFlag[MAX_MAPIMAGES] = {0}; // 0: nothing, 1(as flag): tile layer, 2(as flag): quad layer
 	for(int GroupIndex = 0; GroupIndex < pLayers->NumGroups(); GroupIndex++)
@@ -172,7 +178,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 void CMapImages::OnMapLoad()
 {
 	IMap *pMap = Kernel()->RequestInterface<IMap>();
-	CLayers *pLayers = m_pClient->Layers();
+	CLayers *pLayers = GameClient()->Layers();
 	OnMapLoadImpl(pLayers, pMap);
 }
 
@@ -442,7 +448,7 @@ void CMapImages::UpdateEntityLayerText(CImageInfo &TextImage, int TextureSize, i
 		float y = (CurrentNumber / 16) * 64;
 
 		int ApproximateTextWidth = TextRender()->CalculateTextWidth(aBuf, DigitsCount, 0, UniversalSuitableFontSize);
-		int XOffSet = (MaxWidth - clamp(ApproximateTextWidth, 0, MaxWidth)) / 2;
+		int XOffSet = (MaxWidth - std::clamp(ApproximateTextWidth, 0, MaxWidth)) / 2;
 
 		TextRender()->UploadEntityLayerText(TextImage, (TextImage.m_Width / 16) - XOffSet, (TextImage.m_Height / 16) - YOffset, aBuf, DigitsCount, x + XOffSet, y + YOffset, UniversalSuitableFontSize);
 	}
@@ -451,8 +457,8 @@ void CMapImages::UpdateEntityLayerText(CImageInfo &TextImage, int TextureSize, i
 void CMapImages::InitOverlayTextures()
 {
 	int TextureSize = 64 * m_TextureScale / 100;
-	TextureSize = clamp(TextureSize, 2, 64);
-	int TextureToVerticalCenterOffset = (64 - TextureSize) / 2; // should be used to move texture to the center of 64 pixels area
+	TextureSize = std::clamp(TextureSize, 2, 64);
+	int TextureToVerticalCenterOffset = (64 - TextureSize) / 2 + TextureSize * 0.1f; // should be used to move texture to the center of 64 pixels area
 
 	if(!m_OverlayBottomTexture.IsValid())
 	{

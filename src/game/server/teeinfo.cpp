@@ -1,19 +1,18 @@
-#include <base/color.h>
-#include <base/system.h>
-#include <game/generated/protocol7.h>
-
 #include "teeinfo.h"
 
-struct StdSkin
+#include <base/color.h>
+#include <base/system.h>
+
+class CStandardSkin
 {
-	char m_aSkinName[24];
-	// body, marking, decoration, hands, feet, eyes
-	char m_apSkinPartNames[protocol7::NUM_SKINPARTS][24];
+public:
+	char m_aSkinName[MAX_SKIN_LENGTH];
+	char m_aaSkinPartNames[protocol7::NUM_SKINPARTS][protocol7::MAX_SKIN_LENGTH];
 	bool m_aUseCustomColors[protocol7::NUM_SKINPARTS];
 	int m_aSkinPartColors[protocol7::NUM_SKINPARTS];
 };
 
-static StdSkin g_aStdSkins[] = {
+static constexpr CStandardSkin STANDARD_SKINS[] = {
 	{"default", {"standard", "", "", "standard", "standard", "standard"}, {true, false, false, true, true, false}, {1798004, 0, 0, 1799582, 1869630, 0}},
 	{"bluekitty", {"kitty", "whisker", "", "standard", "standard", "negative"}, {true, true, false, true, true, true}, {8681144, -8229413, 0, 7885547, 8868585, 9043712}},
 	{"bluestripe", {"standard", "stripes", "", "standard", "standard", "standard"}, {true, false, false, true, true, false}, {10187898, 0, 0, 750848, 1944919, 0}},
@@ -36,42 +35,42 @@ static StdSkin g_aStdSkins[] = {
 
 CTeeInfo::CTeeInfo(const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet)
 {
-	str_copy(m_aSkinName, pSkinName, sizeof(m_aSkinName));
+	str_copy(m_aSkinName, pSkinName);
 	m_UseCustomColor = UseCustomColor;
 	m_ColorBody = ColorBody;
 	m_ColorFeet = ColorFeet;
 }
 
-CTeeInfo::CTeeInfo(const char *apSkinPartNames[protocol7::NUM_SKINPARTS], const int *pUseCustomColors, const int *pSkinPartColors)
+CTeeInfo::CTeeInfo(const char *apSkinPartNames[protocol7::NUM_SKINPARTS], int aUseCustomColors[protocol7::NUM_SKINPARTS], int aSkinPartColors[protocol7::NUM_SKINPARTS])
 {
-	for(int i = 0; i < protocol7::NUM_SKINPARTS; i++)
+	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
-		str_copy(m_apSkinPartNames[i], apSkinPartNames[i], sizeof(m_apSkinPartNames[i]));
-		m_aUseCustomColors[i] = pUseCustomColors[i];
-		m_aSkinPartColors[i] = pSkinPartColors[i];
+		str_copy(m_aaSkinPartNames[Part], apSkinPartNames[Part]);
+		m_aUseCustomColors[Part] = aUseCustomColors[Part];
+		m_aSkinPartColors[Part] = aSkinPartColors[Part];
 	}
 }
 
 void CTeeInfo::ToSixup()
 {
 	// reset to default skin
-	for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
-		str_copy(m_apSkinPartNames[p], g_aStdSkins[0].m_apSkinPartNames[p], 24);
-		m_aUseCustomColors[p] = g_aStdSkins[0].m_aUseCustomColors[p];
-		m_aSkinPartColors[p] = g_aStdSkins[0].m_aSkinPartColors[p];
+		str_copy(m_aaSkinPartNames[Part], STANDARD_SKINS[0].m_aaSkinPartNames[Part]);
+		m_aUseCustomColors[Part] = STANDARD_SKINS[0].m_aUseCustomColors[Part];
+		m_aSkinPartColors[Part] = STANDARD_SKINS[0].m_aSkinPartColors[Part];
 	}
 
-	// check for std skin
-	for(auto &StdSkin : g_aStdSkins)
+	// check for standard skin
+	for(const auto &StandardSkin : STANDARD_SKINS)
 	{
-		if(!str_comp(m_aSkinName, StdSkin.m_aSkinName))
+		if(str_comp(m_aSkinName, StandardSkin.m_aSkinName) == 0)
 		{
-			for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+			for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 			{
-				str_copy(m_apSkinPartNames[p], StdSkin.m_apSkinPartNames[p], 24);
-				m_aUseCustomColors[p] = StdSkin.m_aUseCustomColors[p];
-				m_aSkinPartColors[p] = StdSkin.m_aSkinPartColors[p];
+				str_copy(m_aaSkinPartNames[Part], StandardSkin.m_aaSkinPartNames[Part]);
+				m_aUseCustomColors[Part] = StandardSkin.m_aUseCustomColors[Part];
+				m_aSkinPartColors[Part] = StandardSkin.m_aSkinPartColors[Part];
 			}
 			break;
 		}
@@ -79,8 +78,8 @@ void CTeeInfo::ToSixup()
 
 	if(m_UseCustomColor)
 	{
-		int ColorBody = ColorHSLA(m_ColorBody).UnclampLighting(ColorHSLA::DARKEST_LGT).Pack(ColorHSLA::DARKEST_LGT7);
-		int ColorFeet = ColorHSLA(m_ColorFeet).UnclampLighting(ColorHSLA::DARKEST_LGT).Pack(ColorHSLA::DARKEST_LGT7);
+		const int ColorBody = ColorHSLA(m_ColorBody).UnclampLighting(ColorHSLA::DARKEST_LGT).Pack(ColorHSLA::DARKEST_LGT7);
+		const int ColorFeet = ColorHSLA(m_ColorFeet).UnclampLighting(ColorHSLA::DARKEST_LGT).Pack(ColorHSLA::DARKEST_LGT7);
 		m_aUseCustomColors[protocol7::SKINPART_BODY] = true;
 		m_aUseCustomColors[protocol7::SKINPART_MARKING] = true;
 		m_aUseCustomColors[protocol7::SKINPART_DECORATION] = true;
@@ -97,48 +96,53 @@ void CTeeInfo::ToSixup()
 void CTeeInfo::FromSixup()
 {
 	// reset to default skin
-	str_copy(m_aSkinName, "default", sizeof(m_aSkinName));
+	str_copy(m_aSkinName, "default");
 	m_UseCustomColor = false;
 	m_ColorBody = 0;
 	m_ColorFeet = 0;
 
-	// check for std skin
-	for(auto &StdSkin : g_aStdSkins)
+	// check for standard skin
+	for(const auto &StandardSkin : STANDARD_SKINS)
 	{
-		bool match = true;
-		for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+		bool Match = true;
+		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 		{
-			if(str_comp(m_apSkinPartNames[p], StdSkin.m_apSkinPartNames[p]) || m_aUseCustomColors[p] != StdSkin.m_aUseCustomColors[p] || (m_aUseCustomColors[p] && m_aSkinPartColors[p] != StdSkin.m_aSkinPartColors[p]))
+			if(str_comp(m_aaSkinPartNames[Part], StandardSkin.m_aaSkinPartNames[Part]) != 0 ||
+				m_aUseCustomColors[Part] != StandardSkin.m_aUseCustomColors[Part] ||
+				(m_aUseCustomColors[Part] && m_aSkinPartColors[Part] != StandardSkin.m_aSkinPartColors[Part]))
 			{
-				match = false;
+				Match = false;
 				break;
 			}
 		}
-		if(match)
+		if(Match)
 		{
-			str_copy(m_aSkinName, StdSkin.m_aSkinName, sizeof(m_aSkinName));
+			str_copy(m_aSkinName, StandardSkin.m_aSkinName);
 			return;
 		}
 	}
 
 	// find closest match
-	int BestSkin = 0;
 	int BestMatches = -1;
-	for(int s = 0; s < 16; s++)
+	const CStandardSkin *pBestSkin = &STANDARD_SKINS[0];
+	for(const auto &StandardSkin : STANDARD_SKINS)
 	{
-		int matches = 0;
-		for(int p = 0; p < 3; p++)
-			if(str_comp(m_apSkinPartNames[p], g_aStdSkins[s].m_apSkinPartNames[p]) == 0)
-				matches++;
-
-		if(matches > BestMatches)
+		int Matches = 0;
+		for(int Part = 0; Part <= protocol7::SKINPART_DECORATION; Part++) // not all parts are considered for comparison
 		{
-			BestMatches = matches;
-			BestSkin = s;
+			if(str_comp(m_aaSkinPartNames[Part], StandardSkin.m_aaSkinPartNames[Part]) == 0)
+			{
+				Matches++;
+			}
+		}
+		if(Matches > BestMatches)
+		{
+			BestMatches = Matches;
+			pBestSkin = &StandardSkin;
 		}
 	}
 
-	str_copy(m_aSkinName, g_aStdSkins[BestSkin].m_aSkinName, sizeof(m_aSkinName));
+	str_copy(m_aSkinName, pBestSkin->m_aSkinName);
 	m_UseCustomColor = true;
 	m_ColorBody = ColorHSLA(m_aUseCustomColors[protocol7::SKINPART_BODY] ? m_aSkinPartColors[protocol7::SKINPART_BODY] : 255)
 			      .UnclampLighting(ColorHSLA::DARKEST_LGT7)

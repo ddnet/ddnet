@@ -1,42 +1,70 @@
+<!DOCTYPE html>
 <html>
 	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<style>
-		.game {
+		body {
+			background: #ccc;
+			font-family: sans-serif;
+		}
+		body, html, #canvas, #output {
+			margin: 0;
+			width: 100%;
+			height: 100%;
+		}
+		#canvas {
 			position: absolute;
 			top: 0px;
 			left: 0px;
-			margin: 0px;
 			border: 0;
-			width: 100%;
-			height: 100%;
 			overflow: hidden;
 			display: block;
+		}
+		#output {
+			padding: 10px;
+			overflow: scroll;
+			box-sizing: border-box;
 		}
 		</style>
 	</head>
 	<body>
-		<canvas class="game" id="canvas" width="100%" height="100%" oncontextmenu="event.preventDefault()"></canvas>
+		<canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
 		<p id="output"></p>
 		<script>
+			// https://stackoverflow.com/a/30970751
+			function escapeHtml(s) {
+				let lookup = {
+					'&': "&amp;",
+					'"': "&quot;",
+					'\'': "&apos;",
+					'<': "&lt;",
+					'>': "&gt;"
+				};
+				return s.replace(/[&"'<>]/g, c => lookup[c]);
+			}
+			var output = document.getElementById('output');
 			var Module = {
-				print: (function() {
-					var element = document.getElementById('output');
-					return function(text) {
-						element.innerHTML += text + "<br>";
-					};
-				})(),
+				print: function(text) {
+					console.log(text);
+					output.innerHTML += escapeHtml(text) + '<br>';
+					output.scrollTop = output.scrollHeight;
+				},
 				printErr: function(text) {
-						if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
-						if (0) {
-							dump(text + '\n');
-						}
-				},				
-				canvas: (function() {
-					var canvas = document.getElementById('canvas');
-					return canvas;
-				})()
+					console.error(text);
+					output.innerHTML += '<span style="color: red">' + escapeHtml(text) + '</span><br>';
+					output.scrollTop = output.scrollHeight;
+				},
+				onAbort: function() {
+					// Game over. Hide the canvas. The error will already be logged by printErr.
+					Module['canvas'].style.display = "none";
+				},
+				canvas: document.getElementById('canvas')
+			};
+			window.onerror = function(text) {
+				output.innerHTML += '<span style="color: red">' + escapeHtml(text + " (see console for details)") + '</span><br>';
+				output.scrollTop = output.scrollHeight;
+				Module['canvas'].style.display = "none";
 			};
 		</script>
 		<script src="DDNet.js"></script>

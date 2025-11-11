@@ -442,8 +442,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Trebuie să repornești jocul pentru aplicarea setărilor.
 
-##### needs translation #####
-
 New name:
 == Nume nou:
 
@@ -507,10 +505,6 @@ Name plates size
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == Eșuat în timpul inițializării. Încercați să schimbați gfx_backend la OpenGL sau Vulkan în settings_ddnet.cfg din dosarul de configurare și încercați din nou.
-
-[Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== Fără memorie video (VRAM). Încercați să eliminați resursele personalizate (costume, entități etc.), în special cele cu rezoluție mare.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
@@ -975,12 +969,12 @@ Go back the specified duration
 == Mergi înapoi cu durata specificată
 
 [Demo player duration]
-%d min.
-== %d min.
+%s min.
+== %s min.
 
 [Demo player duration]
-%d sec.
-== %d sec.
+%s sec.
+== %s sec.
 
 Change the skip duration
 == Schimbă durata de sărire
@@ -2014,9 +2008,6 @@ https://wiki.ddnet.org/wiki/Mapping
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
 == "%s" nu este compatibilă cu pnglite și nu poate fi încărcată de versiunile vechi DDNet:
 
-Loading background map
-== Se încarcă harta de fundal
-
 [Spectating Camera Mode Icon]
 AUTO
 == AUTO
@@ -2121,63 +2112,378 @@ Show spectator cursor
 == Afișează cursor spectator
 
 No demo with this filename exists
-== 
+== Nu există niciun demo cu acest nume de fișier
 
 Map size
-== 
+== Dimensiunea hărții
 
 Show number of spectators
-== 
+== Afișează numărul de spectatori
 
 [Show name plates]
 None
-== 
+== Niciuna
 
 [Show name plates]
 Own
-== 
+== Proprie
 
 [Show name plates]
 Others
-== 
+== Altele
 
 [Show name plates]
 All
-== 
+== Toate
 
 Name plates offset
-== 
+== Offset plăcuțe de nume
 
 Show friend icon in name plates
-== 
+== Afișați indicatorul de prieten în plăcuțele de nume
 
-Show client IDs on a seperate line
-== 
+Show client IDs on a separate line
+== Arată ID-urile de client pe o linie separată
 
 Client IDs size
-== 
+== Dimensiunea ID-urilor de client
 
 Show players' key presses
-== 
+== Afișați tastele apăsate de jucători
 
 [Show players' key presses]
 None
-== 
+== Niciuna
 
 [Show players' key presses]
 Own
-== 
+== Proprie
 
 [Show players' key presses]
 Others
-== 
+== Altele
 
 [Show players' key presses]
 All
-== 
+== Toate
 
 Preview dummy's name plate
-== 
+== Previzualizați plăcuța de nume a manechinului
 
 AntiPing: prediction margin
+== AntiPing: marja de predicție
+
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+Press Ctrl+Shift+G to disable debug graphs.
+== 
+
+[Spectating]
+Following %d: %s
+== 
+
+Server could not be started
+== 
+
+Loading map
+== 
+
+This name cannot be used for files and folders
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
+== 
+
+Could not get server list from master server
+== 
+
+[Demo playback]
+Live
+== 
+
+[Demo playback]
+Go to Live
+== 
+
+Save all changes before turning off the editor?
+== 
+
+Layout
+== 
+
+Visibility
+== 
+
+Behavior
+== 
+
+Delete button
+== 
+
+Are you sure that you want to delete this button?
+== 
+
+Duplicate
+== 
+
+New button already created
+== 
+
+A new button has already been created, please save or delete it before creating another one.
+== 
+
+Please save your changes before duplicating a button.
+== 
+
+No space for button
+== 
+
+There is not enough space available to place another button.
+== 
+
+There is not enough space available to place another button with this size. The button has been resized.
+== 
+
+Deselect
+== 
+
+You'll lose unsaved changes after deselecting.
+== 
+
+Width
+== 
+
+Height
+== 
+
+Shape
+== 
+
+[Touch button shape]
+Rectangle
+== 
+
+[Touch button shape]
+Circle
+== 
+
+[Touch button label type]
+Plain
+== 
+
+[Touch button label type]
+Localized
+== 
+
+[Touch button label type]
+Icon
+== 
+
+Behavior type
+== 
+
+[Touch button behavior]
+Bind
+== 
+
+[Touch button behavior]
+Bind Toggle
+== 
+
+[Touch button behavior]
+Predefined
+== 
+
+Command
+== 
+
+Label
+== 
+
+Label type
+== 
+
+Add command
+== 
+
+Delete command
+== 
+
+[Touch button visibility preview]
+Included
+== 
+
+[Touch button visibility preview]
+Excluded
+== 
+
+[Touch button visibility preview]
+Ignore
+== 
+
+Long press on a touch button to select it.
+== 
+
+New button
+== 
+
+Select button by touch
+== 
+
+No buttons match your filter criteria
+== 
+
+File
+== 
+
+Buttons
+== 
+
+Active color
+== 
+
+Inactive color
+== 
+
+Preview button visibility while the editor is active.
+== 
+
+Show all buttons
+== 
+
+Save all changes before switching selected button?
+== 
+
+Discard
+== 
+
+There is not enough space available for the button. Check its visibilities and size.
+== 
+
+Selected button not visible
+== 
+
+The selected button is not visible. Do you want to deselect it or edit its visibility?
+== 
+
+Edit
+== 
+
+Width and height are required to be within the range from %d to %d.
+== 
+
+Button position is outside of the screen.
+== 
+
+The selected button is overlapping with other buttons.
+== 
+
+Wrong button settings
+== 
+
+[Touch button visibilities]
+Ingame
+== 
+
+[Touch button visibilities]
+Zoom Allowed
+== 
+
+[Touch button visibilities]
+Vote Active
+== 
+
+[Touch button visibilities]
+Dummy Allowed
+== 
+
+[Touch button visibilities]
+Dummy Connected
+== 
+
+[Touch button visibilities]
+Rcon Authed
+== 
+
+[Touch button visibilities]
+Demo Player
+== 
+
+[Touch button visibilities]
+Extra Menu
+== 
+
+[Predefined touch button behaviors]
+Ingame Menu
+== 
+
+[Predefined touch button behaviors]
+Extra Menu
+== 
+
+[Predefined touch button behaviors]
+Emoticon
+== 
+
+[Predefined touch button behaviors]
+Spectate
+== 
+
+[Predefined touch button behaviors]
+Swap Action
+== 
+
+[Predefined touch button behaviors]
+Use Action
+== 
+
+[Predefined touch button behaviors]
+Joystick Action
+== 
+
+[Predefined touch button behaviors]
+Joystick Aim
+== 
+
+[Predefined touch button behaviors]
+Joystick Fire
+== 
+
+[Predefined touch button behaviors]
+Joystick Hook
+== 
+
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
+No skins match your filter criteria
+== 
+
+Censor profanity
+== 
+
+Chat background color
+== 
+
+Preview player's name plate
+== 
+
+Dragger Outline Color
+== 
+
+Dragger Inner Color
+== 
+
+Download
 == 

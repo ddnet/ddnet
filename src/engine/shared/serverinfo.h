@@ -21,10 +21,15 @@ public:
 		int m_Score;
 		bool m_IsPlayer;
 		bool m_IsAfk;
+		// skin info 0.6
 		char m_aSkin[MAX_SKIN_LENGTH];
 		bool m_CustomSkinColors;
 		int m_CustomSkinColorBody;
 		int m_CustomSkinColorFeet;
+		// skin info 0.7
+		char m_aaSkin7[protocol7::NUM_SKINPARTS][protocol7::MAX_SKIN_LENGTH];
+		bool m_aUseCustomSkinColor7[protocol7::NUM_SKINPARTS];
+		int m_aCustomSkinColor7[protocol7::NUM_SKINPARTS];
 	};
 
 	CClient m_aClients[SERVERINFO_MAX_CLIENTS];

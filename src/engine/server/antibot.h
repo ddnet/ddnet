@@ -2,6 +2,7 @@
 #define ENGINE_SERVER_ANTIBOT_H
 
 #include <antibot/antibot_data.h>
+
 #include <engine/antibot.h>
 
 class CAntibot : public IEngineAntibot
@@ -27,13 +28,13 @@ class CAntibot : public IEngineAntibot
 
 public:
 	CAntibot();
-	virtual ~CAntibot();
+	~CAntibot() override;
 
 	// Engine
 	void Init() override;
 
 	void OnEngineTick() override;
-	void OnEngineClientJoin(int ClientId, bool Sixup) override;
+	void OnEngineClientJoin(int ClientId) override;
 	void OnEngineClientDrop(int ClientId, const char *pReason) override;
 	bool OnEngineClientMessage(int ClientId, const void *pData, int Size, int Flags) override;
 	bool OnEngineServerMessage(int ClientId, const void *pData, int Size, int Flags) override;

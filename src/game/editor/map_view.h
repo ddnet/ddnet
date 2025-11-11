@@ -1,12 +1,12 @@
 #ifndef GAME_EDITOR_MAP_VIEW_H
 #define GAME_EDITOR_MAP_VIEW_H
 
-#include <base/vmath.h>
-
 #include "component.h"
 #include "map_grid.h"
 #include "proof_mode.h"
 #include "smooth_value.h"
+
+#include <base/vmath.h>
 
 class CLayerGroup;
 
@@ -21,7 +21,7 @@ public:
 	void UpdateZoom();
 
 	void RenderGroupBorder();
-	void RenderMap();
+	void RenderEditorMap();
 
 	bool IsFocused();
 	void Focus();
@@ -35,8 +35,6 @@ public:
 	 * Scale length according to zoom value.
 	 */
 	float ScaleLength(float Value) const;
-
-	bool m_ShowPicker; // TODO: make private
 
 	float GetWorldZoom() const;
 

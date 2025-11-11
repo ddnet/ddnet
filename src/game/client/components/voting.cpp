@@ -7,11 +7,11 @@
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
 
+#include <generated/protocol.h>
+
 #include <game/client/components/scoreboard.h>
 #include <game/client/components/sounds.h>
 #include <game/client/gameclient.h>
-#include <game/client/render.h>
-#include <game/generated/protocol.h>
 #include <game/localization.h>
 
 void CVoting::ConCallvote(IConsole::IResult *pResult, void *pUserData)
@@ -89,8 +89,7 @@ void CVoting::CallvoteOption(int OptionId, const char *pReason, bool ForceVote)
 		{
 			if(ForceVote)
 			{
-				char aBuf[128];
-				str_copy(aBuf, "force_vote option \"");
+				char aBuf[128] = "force_vote option \"";
 				char *pDst = aBuf + str_length(aBuf);
 				str_escape(&pDst, pOption->m_aDescription, aBuf + sizeof(aBuf));
 				str_append(aBuf, "\" \"");
@@ -116,8 +115,7 @@ void CVoting::RemovevoteOption(int OptionId)
 	{
 		if(OptionId == 0)
 		{
-			char aBuf[128];
-			str_copy(aBuf, "remove_vote \"");
+			char aBuf[128] = "remove_vote \"";
 			char *pDst = aBuf + str_length(aBuf);
 			str_escape(&pDst, pOption->m_aDescription, aBuf + sizeof(aBuf));
 			str_append(aBuf, "\"");
@@ -132,8 +130,7 @@ void CVoting::RemovevoteOption(int OptionId)
 
 void CVoting::AddvoteOption(const char *pDescription, const char *pCommand)
 {
-	char aBuf[128];
-	str_copy(aBuf, "add_vote \"");
+	char aBuf[128] = "add_vote \"";
 	char *pDst = aBuf + str_length(aBuf);
 	str_escape(&pDst, pDescription, aBuf + sizeof(aBuf));
 	str_append(aBuf, "\" \"");
@@ -269,7 +266,7 @@ void CVoting::OnMessage(int MsgType, void *pRawMsg)
 				char aBuf[512];
 				str_format(aBuf, sizeof(aBuf), "%s (%s)", m_aDescription, m_aReason);
 				Client()->Notify("DDNet Vote", aBuf);
-				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 1.0f);
+				GameClient()->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 1.0f);
 			}
 		}
 	}
@@ -338,7 +335,7 @@ void CVoting::OnMessage(int MsgType, void *pRawMsg)
 
 void CVoting::Render()
 {
-	if((!g_Config.m_ClShowVotesAfterVoting && !m_pClient->m_Scoreboard.IsActive() && TakenChoice()) || !IsVoting() || Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	if((!g_Config.m_ClShowVotesAfterVoting && !GameClient()->m_Scoreboard.IsActive() && TakenChoice()) || !IsVoting() || Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		return;
 	const int Seconds = SecondsLeft();
 	if(Seconds < 0)
@@ -365,7 +362,7 @@ void CVoting::Render()
 	LeftColumn.VSplitRight(2.0f, &LeftColumn, nullptr);
 
 	SProgressSpinnerProperties ProgressProps;
-	ProgressProps.m_Progress = clamp((time() - m_Opentime) / (float)(m_Closetime - m_Opentime), 0.0f, 1.0f);
+	ProgressProps.m_Progress = std::clamp((time() - m_Opentime) / (float)(m_Closetime - m_Opentime), 0.0f, 1.0f);
 	Ui()->RenderProgressSpinner(ProgressSpinner.Center(), ProgressSpinner.h / 2.0f, ProgressProps);
 
 	Ui()->DoLabel(&RightColumn, aBuf, 6.0f, TEXTALIGN_MR);
@@ -388,12 +385,12 @@ void CVoting::Render()
 	Row.VSplitMid(&LeftColumn, &RightColumn, 4.0f);
 
 	char aKey[64];
-	m_pClient->m_Binds.GetKey("vote yes", aKey, sizeof(aKey));
+	GameClient()->m_Binds.GetKey("vote yes", aKey, sizeof(aKey));
 	str_format(aBuf, sizeof(aBuf), "%s - %s", aKey, Localize("Vote yes"));
 	TextRender()->TextColor(TakenChoice() == 1 ? ColorRGBA(0.2f, 0.9f, 0.2f, 0.85f) : TextRender()->DefaultTextColor());
 	Ui()->DoLabel(&LeftColumn, aBuf, 6.0f, TEXTALIGN_ML);
 
-	m_pClient->m_Binds.GetKey("vote no", aKey, sizeof(aKey));
+	GameClient()->m_Binds.GetKey("vote no", aKey, sizeof(aKey));
 	str_format(aBuf, sizeof(aBuf), "%s - %s", Localize("Vote no"), aKey);
 	TextRender()->TextColor(TakenChoice() == -1 ? ColorRGBA(0.95f, 0.25f, 0.25f, 0.85f) : TextRender()->DefaultTextColor());
 	Ui()->DoLabel(&RightColumn, aBuf, 6.0f, TEXTALIGN_MR);

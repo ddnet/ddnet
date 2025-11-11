@@ -4,7 +4,7 @@
 
 #include <engine/graphics.h>
 
-IGraphics *CUIRect::s_pGraphics = nullptr;
+IGraphics *CUIRect::ms_pGraphics = nullptr;
 
 void CUIRect::HSplitMid(CUIRect *pTop, CUIRect *pBottom, float Spacing) const
 {
@@ -168,10 +168,24 @@ bool CUIRect::Inside(vec2 Point) const
 
 void CUIRect::Draw(ColorRGBA Color, int Corners, float Rounding) const
 {
-	s_pGraphics->DrawRect(x, y, w, h, Color, Corners, Rounding);
+	ms_pGraphics->DrawRect(x, y, w, h, Color, Corners, Rounding);
 }
 
 void CUIRect::Draw4(ColorRGBA ColorTopLeft, ColorRGBA ColorTopRight, ColorRGBA ColorBottomLeft, ColorRGBA ColorBottomRight, int Corners, float Rounding) const
 {
-	s_pGraphics->DrawRect4(x, y, w, h, ColorTopLeft, ColorTopRight, ColorBottomLeft, ColorBottomRight, Corners, Rounding);
+	ms_pGraphics->DrawRect4(x, y, w, h, ColorTopLeft, ColorTopRight, ColorBottomLeft, ColorBottomRight, Corners, Rounding);
+}
+
+void CUIRect::DrawOutline(ColorRGBA Color) const
+{
+	const IGraphics::CLineItem aArray[] = {
+		IGraphics::CLineItem(x, y, x + w, y),
+		IGraphics::CLineItem(x + w, y, x + w, y + h),
+		IGraphics::CLineItem(x + w, y + h, x, y + h),
+		IGraphics::CLineItem(x, y + h, x, y)};
+	ms_pGraphics->TextureClear();
+	ms_pGraphics->LinesBegin();
+	ms_pGraphics->SetColor(Color);
+	ms_pGraphics->LinesDraw(aArray, std::size(aArray));
+	ms_pGraphics->LinesEnd();
 }

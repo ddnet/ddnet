@@ -1,5 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "ui_scrollregion.h"
+
 #include <base/system.h>
 #include <base/vmath.h>
 
@@ -7,9 +9,12 @@
 #include <engine/keys.h>
 #include <engine/shared/config.h>
 
-#include "ui_scrollregion.h"
-
 CScrollRegion::CScrollRegion()
+{
+	Reset();
+}
+
+void CScrollRegion::Reset()
 {
 	m_ScrollY = 0.0f;
 	m_ContentH = 0.0f;
@@ -22,6 +27,7 @@ CScrollRegion::CScrollRegion()
 	m_AnimInitScrollY = 0.0f;
 	m_AnimTargetScrollY = 0.0f;
 
+	m_ClipRect = m_RailRect = m_LastAddedRect = CUIRect{0.0f, 0.0f, 0.0f, 0.0f};
 	m_SliderGrabPos = 0.0f;
 	m_ContentScrollOff = vec2(0.0f, 0.0f);
 	m_Params = CScrollRegionParams();
@@ -126,7 +132,7 @@ void CScrollRegion::End()
 		m_RequestScrollY = -1.0f;
 	}
 
-	m_AnimTargetScrollY = clamp(m_AnimTargetScrollY, 0.0f, MaxScroll);
+	m_AnimTargetScrollY = std::clamp(m_AnimTargetScrollY, 0.0f, MaxScroll);
 
 	if(absolute(m_AnimInitScrollY - m_AnimTargetScrollY) < 0.5f)
 		m_AnimTime = 0.0f;
@@ -134,6 +140,10 @@ void CScrollRegion::End()
 	if(m_AnimTime > 0.0f)
 	{
 		m_AnimTime -= Client()->RenderFrameTime();
+		if(m_AnimTime < 0.0f)
+		{
+			m_AnimTime = 0.0f;
+		}
 		float AnimProgress = (1.0f - std::pow(m_AnimTime / m_AnimTimeMax, 3.0f)); // cubic ease out
 		m_ScrollY = m_AnimInitScrollY + (m_AnimTargetScrollY - m_AnimInitScrollY) * AnimProgress;
 	}
@@ -153,7 +163,7 @@ void CScrollRegion::End()
 	{
 		float MouseY = Ui()->MouseY();
 		m_ScrollY += (MouseY - (Slider.y + m_SliderGrabPos)) / MaxSlider * MaxScroll;
-		m_SliderGrabPos = clamp(m_SliderGrabPos, 0.0f, SliderHeight);
+		m_SliderGrabPos = std::clamp(m_SliderGrabPos, 0.0f, SliderHeight);
 		m_AnimTargetScrollY = m_ScrollY;
 		m_AnimTime = 0.0f;
 		Grabbed = true;
@@ -186,7 +196,7 @@ void CScrollRegion::End()
 		Ui()->SetActiveItem(nullptr);
 	}
 
-	m_ScrollY = clamp(m_ScrollY, 0.0f, MaxScroll);
+	m_ScrollY = std::clamp(m_ScrollY, 0.0f, MaxScroll);
 	m_ContentScrollOff.y = -m_ScrollY;
 
 	Slider.Draw(m_Params.SliderColor(Grabbed, Ui()->HotItem() == pId), IGraphics::CORNER_ALL, Slider.w / 2.0f);
@@ -236,7 +246,7 @@ void CScrollRegion::ScrollRelative(EScrollRelative Direction, float SpeedMultipl
 
 void CScrollRegion::ScrollRelativeDirect(float ScrollAmount)
 {
-	m_RequestScrollY = clamp(m_ScrollY + ScrollAmount, 0.0f, m_ContentH - m_ClipRect.h);
+	m_RequestScrollY = std::clamp(m_ScrollY + ScrollAmount, 0.0f, m_ContentH - m_ClipRect.h);
 }
 
 void CScrollRegion::DoEdgeScrolling()

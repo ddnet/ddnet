@@ -1,6 +1,6 @@
 #ifndef GAME_MAPITEMS_EX_H
 #define GAME_MAPITEMS_EX_H
-#include <game/generated/protocol.h>
+#include <generated/protocol.h>
 
 enum
 {

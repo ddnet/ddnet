@@ -3,9 +3,9 @@
 #define BASE_COLOR_H
 
 #include <base/math.h>
-#include <base/vmath.h>
 
 #include <optional>
+#include <type_traits>
 
 /*
 	Title: Color handling
@@ -14,7 +14,7 @@
 	Function: RgbToHue
 		Determines the hue from RGB values
 */
-constexpr inline float RgbToHue(float r, float g, float b)
+constexpr float RgbToHue(float r, float g, float b)
 {
 	float h_min = minimum(r, g, b);
 	float h_max = maximum(r, g, b);
@@ -61,36 +61,14 @@ public:
 	{
 	}
 
-	constexpr color4_base(const vec4 &v4)
+	constexpr color4_base(float nx, float ny, float nz, float na) :
+		x(nx), y(ny), z(nz), a(na)
 	{
-		x = v4.x;
-		y = v4.y;
-		z = v4.z;
-		a = v4.w;
 	}
 
-	constexpr color4_base(const vec3 &v3)
+	constexpr color4_base(float nx, float ny, float nz) :
+		x(nx), y(ny), z(nz), a(1.0f)
 	{
-		x = v3.x;
-		y = v3.y;
-		z = v3.z;
-		a = 1.0f;
-	}
-
-	constexpr color4_base(float nx, float ny, float nz, float na)
-	{
-		x = nx;
-		y = ny;
-		z = nz;
-		a = na;
-	}
-
-	constexpr color4_base(float nx, float ny, float nz)
-	{
-		x = nx;
-		y = ny;
-		z = nz;
-		a = 1.0f;
 	}
 
 	constexpr color4_base(unsigned col, bool alpha = false)
@@ -101,8 +79,12 @@ public:
 		z = ((col >> 0) & 0xFF) / 255.0f;
 	}
 
-	constexpr vec4 v4() const { return vec4(x, y, z, a); }
-	constexpr operator vec4() const { return vec4(x, y, z, a); }
+	// Disallow casting between different instantiations of the color4_base template.
+	// The color_cast functions below should be used to convert between colors.
+	template<typename OtherDerivedT>
+	requires(!std::is_same_v<DerivedT, OtherDerivedT>)
+		color4_base(const color4_base<OtherDerivedT> &Other) = delete;
+
 	constexpr float &operator[](int index)
 	{
 		return ((float *)this)[index];
@@ -137,16 +119,6 @@ public:
 		return col;
 	}
 
-	constexpr DerivedT Multiply(const DerivedT &Other) const
-	{
-		DerivedT Color(static_cast<const DerivedT &>(*this));
-		Color.x *= Other.x;
-		Color.y *= Other.y;
-		Color.z *= Other.z;
-		Color.a *= Other.a;
-		return Color;
-	}
-
 	template<typename UnpackT>
 	constexpr static UnpackT UnpackAlphaLast(unsigned Color, bool Alpha = true)
 	{
@@ -173,7 +145,7 @@ class ColorHSLA : public color4_base<ColorHSLA>
 {
 public:
 	using color4_base::color4_base;
-	constexpr ColorHSLA(){};
+	constexpr ColorHSLA() = default;
 
 	constexpr static const float DARKEST_LGT = 0.5f;
 	constexpr static const float DARKEST_LGT7 = 61.0f / 255.0f;
@@ -194,7 +166,7 @@ public:
 	{
 		ColorHSLA col = *this;
 		col.l = (l - Darkest) / (1 - Darkest);
-		col.l = clamp(col.l, 0.0f, 1.0f);
+		col.l = std::clamp(col.l, 0.0f, 1.0f);
 		return col.Pack(Alpha);
 	}
 };
@@ -203,21 +175,42 @@ class ColorHSVA : public color4_base<ColorHSVA>
 {
 public:
 	using color4_base::color4_base;
-	constexpr ColorHSVA(){};
+	constexpr ColorHSVA() = default;
 };
 
 class ColorRGBA : public color4_base<ColorRGBA>
 {
 public:
 	using color4_base::color4_base;
-	constexpr ColorRGBA(){};
+	constexpr ColorRGBA() = default;
+
+	constexpr ColorRGBA Multiply(const ColorRGBA &Other) const
+	{
+		ColorRGBA Color = *this;
+		Color.r *= Other.r;
+		Color.g *= Other.g;
+		Color.b *= Other.b;
+		Color.a *= Other.a;
+		return Color;
+	}
+
+	template<Numeric T>
+	constexpr ColorRGBA Multiply(const T &Factor) const
+	{
+		ColorRGBA Color = *this;
+		Color.r *= Factor;
+		Color.g *= Factor;
+		Color.b *= Factor;
+		Color.a *= Factor;
+		return Color;
+	}
 };
 
 template<typename T, typename F>
 constexpr T color_cast(const F &) = delete;
 
 template<>
-constexpr inline ColorHSLA color_cast(const ColorRGBA &rgb)
+constexpr ColorHSLA color_cast(const ColorRGBA &rgb)
 {
 	float Min = minimum(rgb.r, rgb.g, rgb.b);
 	float Max = maximum(rgb.r, rgb.g, rgb.b);
@@ -231,69 +224,70 @@ constexpr inline ColorHSLA color_cast(const ColorRGBA &rgb)
 }
 
 template<>
-constexpr inline ColorRGBA color_cast(const ColorHSLA &hsl)
+constexpr ColorRGBA color_cast(const ColorHSLA &hsl)
 {
-	vec3 rgb = vec3(0, 0, 0);
-
 	float h1 = hsl.h * 6;
 	float c = (1.f - absolute(2 * hsl.l - 1)) * hsl.s;
 	float x = c * (1.f - absolute(std::fmod(h1, 2) - 1.f));
 
+	float r = 0.0f;
+	float g = 0.0f;
+	float b = 0.0f;
 	switch(round_truncate(h1))
 	{
 	case 0:
-		rgb.r = c;
-		rgb.g = x;
+		r = c;
+		g = x;
 		break;
 	case 1:
-		rgb.r = x;
-		rgb.g = c;
+		r = x;
+		g = c;
 		break;
 	case 2:
-		rgb.g = c;
-		rgb.b = x;
+		g = c;
+		b = x;
 		break;
 	case 3:
-		rgb.g = x;
-		rgb.b = c;
+		g = x;
+		b = c;
 		break;
 	case 4:
-		rgb.r = x;
-		rgb.b = c;
+		r = x;
+		b = c;
 		break;
 	case 5:
 	case 6:
-		rgb.r = c;
-		rgb.b = x;
+		r = c;
+		b = x;
 		break;
 	}
 
 	float m = hsl.l - (c / 2);
-	return ColorRGBA(rgb.r + m, rgb.g + m, rgb.b + m, hsl.a);
+	return ColorRGBA(r + m, g + m, b + m, hsl.a);
 }
 
 template<>
-constexpr inline ColorHSLA color_cast(const ColorHSVA &hsv)
+constexpr ColorHSLA color_cast(const ColorHSVA &hsv)
 {
 	float l = hsv.v * (1 - hsv.s * 0.5f);
 	return ColorHSLA(hsv.h, (l == 0.0f || l == 1.0f) ? 0 : (hsv.v - l) / minimum(l, 1 - l), l, hsv.a);
 }
 
 template<>
-constexpr inline ColorHSVA color_cast(const ColorHSLA &hsl)
+constexpr ColorHSVA color_cast(const ColorHSLA &hsl)
 {
 	float v = hsl.l + hsl.s * minimum(hsl.l, 1 - hsl.l);
 	return ColorHSVA(hsl.h, v == 0.0f ? 0 : 2 - (2 * hsl.l / v), v, hsl.a);
 }
 
 template<>
-constexpr inline ColorRGBA color_cast(const ColorHSVA &hsv)
+constexpr ColorRGBA color_cast(const ColorHSVA &hsv)
 {
 	return color_cast<ColorRGBA>(color_cast<ColorHSLA>(hsv));
 }
 
 template<>
-constexpr inline ColorHSVA color_cast(const ColorRGBA &rgb)
+constexpr ColorHSVA color_cast(const ColorRGBA &rgb)
 {
 	return color_cast<ColorHSVA>(color_cast<ColorHSLA>(rgb));
 }

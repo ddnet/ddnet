@@ -3,6 +3,11 @@
 
 // This file can be included several times.
 
+#ifndef MACRO_TUNING_PARAM
+// This helps IDEs properly syntax highlight the uses of the macro below.
+#define MACRO_TUNING_PARAM(Name, ScriptName, Value, Description)
+#endif
+
 // physics tuning
 MACRO_TUNING_PARAM(GroundControlSpeed, ground_control_speed, 10.0f, "Max speed the tee can get on ground")
 MACRO_TUNING_PARAM(GroundControlAccel, ground_control_accel, 100.0f / SERVER_TICK_SPEED, "Acceleration speed on the ground")

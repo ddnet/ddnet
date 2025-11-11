@@ -2,6 +2,7 @@
 #define ENGINE_HTTP_H
 
 #include "kernel.h"
+
 #include <memory>
 
 class IHttpRequest

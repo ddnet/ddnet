@@ -1,8 +1,12 @@
 #include "opengl_sl_program.h"
+
 #include "opengl_sl.h"
-#include <base/system.h>
 
 #include <base/detect.h>
+#include <base/log.h>
+#include <base/system.h>
+
+#include <string>
 
 #if defined(BACKEND_AS_OPENGL_ES) || !defined(CONF_BACKEND_OPENGL_ES)
 
@@ -48,24 +52,34 @@ void CGLSLProgram::DetachShaderById(TWGLuint ShaderId) const
 	glDetachShader(m_ProgramId, ShaderId);
 }
 
-void CGLSLProgram::LinkProgram()
+bool CGLSLProgram::LinkProgram()
 {
 	glLinkProgram(m_ProgramId);
-	int LinkStatus;
+	TWGLint LinkStatus;
 	glGetProgramiv(m_ProgramId, GL_LINK_STATUS, &LinkStatus);
 	m_IsLinked = LinkStatus == GL_TRUE;
 	if(!m_IsLinked)
 	{
-		char aInfoLog[1024];
-		char aFinalMessage[1536];
-		int LogLength;
-		glGetProgramInfoLog(m_ProgramId, 1024, &LogLength, aInfoLog);
-		str_format(aFinalMessage, sizeof(aFinalMessage), "Error! Shader program wasn't linked! The linker returned:\n\n%s", aInfoLog);
-		dbg_msg("glslprogram", "%s", aFinalMessage);
+		TWGLint LogLength = 0;
+		glGetProgramiv(m_ProgramId, GL_INFO_LOG_LENGTH, &LogLength);
+		if(LogLength > 0)
+		{
+			std::string Log(LogLength, '\0');
+			glGetProgramInfoLog(m_ProgramId, Log.size(), nullptr, &Log.front());
+			if(Log[Log.size() - 2] == '\n')
+			{
+				Log[Log.size() - 2] = '\0';
+			}
+			log_error("gfx/opengl/shader", "Failed to link shader program '%d'. The linker returned:\n%s", m_ProgramId, Log.c_str());
+		}
+		else
+		{
+			log_error("gfx/opengl/shader", "Failed to link shader program '%d'. The linker did not return an error.", m_ProgramId);
+		}
 	}
 
-	//detach all shaders attached to this program
 	DetachAllShaders();
+	return m_IsLinked;
 }
 
 void CGLSLProgram::DetachAllShaders() const

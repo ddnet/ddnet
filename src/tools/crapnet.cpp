@@ -5,7 +5,6 @@
 
 #include <cstdlib>
 #include <iterator> // std::size
-
 #include <thread>
 
 struct SPacket
@@ -46,7 +45,7 @@ static int g_ConfigInterval = 10; // seconds between different pingconfigs
 static int g_ConfigLog = 0;
 static int g_ConfigReorder = 0;
 
-void Run(unsigned short Port, NETADDR Dest)
+static void Run(unsigned short Port, NETADDR Dest)
 {
 	NETADDR Src = {NETTYPE_IPV4, {0, 0, 0, 0}, Port};
 	NETSOCKET Socket = net_udp_create(Src);

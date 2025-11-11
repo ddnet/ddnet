@@ -32,6 +32,11 @@ public:
 		FLAG_PRESS = 1 << 0,
 		FLAG_RELEASE = 1 << 1,
 		FLAG_TEXT = 1 << 2,
+		/**
+		 * Combined with @link FLAG_PRESS @endlink for key press events that
+		 * are being repeated when a key is held down.
+		 */
+		FLAG_REPEAT = 1 << 3,
 	};
 	enum ECursorType
 	{
@@ -88,6 +93,7 @@ public:
 	class IJoystick
 	{
 	public:
+		virtual ~IJoystick() = default;
 		virtual int GetIndex() const = 0;
 		virtual const char *GetName() const = 0;
 		virtual int GetNumAxes() const = 0;
@@ -178,6 +184,7 @@ public:
 	// text editing
 	virtual void StartTextInput() = 0;
 	virtual void StopTextInput() = 0;
+	virtual void EnsureScreenKeyboardShown() = 0;
 	virtual const char *GetComposition() const = 0;
 	virtual bool HasComposition() const = 0;
 	virtual int GetCompositionCursor() const = 0;
@@ -205,7 +212,7 @@ class IEngineInput : public IInput
 	MACRO_INTERFACE("engineinput")
 public:
 	virtual void Init() = 0;
-	virtual void Shutdown() override = 0;
+	void Shutdown() override = 0;
 	virtual int Update() = 0;
 };
 

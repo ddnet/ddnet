@@ -1,10 +1,11 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "lineinput.h"
+
+#include "ui.h"
+
 #include <engine/keys.h>
 #include <engine/shared/config.h>
-
-#include "lineinput.h"
-#include "ui.h"
 
 IInput *CLineInput::ms_pInput = nullptr;
 ITextRender *CLineInput::ms_pTextRender = nullptr;
@@ -17,7 +18,7 @@ EInputPriority CLineInput::ms_ActiveInputPriority = EInputPriority::NONE;
 vec2 CLineInput::ms_CompositionWindowPosition = vec2(0.0f, 0.0f);
 float CLineInput::ms_CompositionLineHeight = 0.0f;
 
-char CLineInput::ms_aStars[128] = {'\0'};
+char CLineInput::ms_aStars[128] = "";
 
 void CLineInput::SetBuffer(char *pStr, size_t MaxSize, size_t MaxChars)
 {
@@ -28,6 +29,7 @@ void CLineInput::SetBuffer(char *pStr, size_t MaxSize, size_t MaxChars)
 	m_MaxSize = MaxSize;
 	m_MaxChars = MaxChars;
 	m_WasChanged = m_pStr && pLastStr && m_WasChanged;
+	m_WasCursorChanged = m_pStr && pLastStr && m_WasCursorChanged;
 	if(!pLastStr)
 	{
 		m_CursorPos = m_SelectionStart = m_SelectionEnd = m_LastCompositionCursorPos = 0;
@@ -59,8 +61,8 @@ void CLineInput::SetRange(const char *pString, size_t Begin, size_t End)
 {
 	if(Begin > End)
 		std::swap(Begin, End);
-	Begin = clamp<size_t>(Begin, 0, m_Len);
-	End = clamp<size_t>(End, 0, m_Len);
+	Begin = std::clamp<size_t>(Begin, 0, m_Len);
+	End = std::clamp<size_t>(End, 0, m_Len);
 
 	size_t RemovedCharSize, RemovedCharCount;
 	str_utf8_stats(m_pStr + Begin, End - Begin + 1, m_MaxChars, &RemovedCharSize, &RemovedCharCount);
@@ -158,7 +160,7 @@ void CLineInput::MoveCursor(EMoveDirection Direction, bool MoveWord, const char 
 
 void CLineInput::SetCursorOffset(size_t Offset)
 {
-	m_SelectionStart = m_SelectionEnd = m_LastCompositionCursorPos = m_CursorPos = clamp<size_t>(Offset, 0, m_Len);
+	m_SelectionStart = m_SelectionEnd = m_LastCompositionCursorPos = m_CursorPos = std::clamp<size_t>(Offset, 0, m_Len);
 	m_WasCursorChanged = true;
 }
 
@@ -167,8 +169,8 @@ void CLineInput::SetSelection(size_t Start, size_t End)
 	dbg_assert(m_CursorPos == Start || m_CursorPos == End, "Selection and cursor offset got desynchronized");
 	if(Start > End)
 		std::swap(Start, End);
-	m_SelectionStart = clamp<size_t>(Start, 0, m_Len);
-	m_SelectionEnd = clamp<size_t>(End, 0, m_Len);
+	m_SelectionStart = std::clamp<size_t>(Start, 0, m_Len);
+	m_SelectionEnd = std::clamp<size_t>(End, 0, m_Len);
 	m_WasCursorChanged = true;
 }
 
@@ -438,7 +440,8 @@ STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Al
 		const STextBoundingBox BoundingBox = TextRender()->TextBoundingBox(FontSize, pDisplayStr, -1, LineWidth, LineSpacing);
 		const vec2 CursorPos = CUi::CalcAlignedCursorPos(pRect, BoundingBox.Size(), Align);
 
-		TextRender()->SetCursor(&Cursor, CursorPos.x, CursorPos.y, FontSize, TEXTFLAG_RENDER);
+		Cursor.SetPosition(CursorPos);
+		Cursor.m_FontSize = FontSize;
 		Cursor.m_LineWidth = LineWidth;
 		Cursor.m_ForceCursorRendering = Changed;
 		Cursor.m_LineSpacing = LineSpacing;
@@ -510,7 +513,9 @@ STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Al
 		m_CaretPosition = Cursor.m_CursorRenderedPosition;
 
 		CTextCursor CaretCursor;
-		TextRender()->SetCursor(&CaretCursor, CursorPos.x, CursorPos.y, FontSize, 0);
+		CaretCursor.SetPosition(CursorPos);
+		CaretCursor.m_FontSize = FontSize;
+		CaretCursor.m_Flags = 0;
 		CaretCursor.m_LineWidth = LineWidth;
 		CaretCursor.m_LineSpacing = LineSpacing;
 		CaretCursor.m_CursorMode = TEXT_CURSOR_CURSOR_MODE_SET;
@@ -521,8 +526,8 @@ STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Al
 	else
 	{
 		const STextBoundingBox BoundingBox = TextRender()->TextBoundingBox(FontSize, pDisplayStr, -1, LineWidth, LineSpacing);
-		const vec2 CursorPos = CUi::CalcAlignedCursorPos(pRect, BoundingBox.Size(), Align);
-		TextRender()->SetCursor(&Cursor, CursorPos.x, CursorPos.y, FontSize, TEXTFLAG_RENDER);
+		Cursor.SetPosition(CUi::CalcAlignedCursorPos(pRect, BoundingBox.Size(), Align));
+		Cursor.m_FontSize = FontSize;
 		Cursor.m_LineWidth = LineWidth;
 		Cursor.m_LineSpacing = LineSpacing;
 		Cursor.m_vColorSplits = vColorSplits;

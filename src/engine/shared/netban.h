@@ -2,6 +2,7 @@
 #define ENGINE_SHARED_NETBAN_H
 
 #include <base/system.h>
+
 #include <engine/console.h>
 
 inline int NetComp(const NETADDR *pAddr1, const NETADDR *pAddr2)
@@ -173,7 +174,7 @@ public:
 	class IConsole *Console() const { return m_pConsole; }
 	class IStorage *Storage() const { return m_pStorage; }
 
-	virtual ~CNetBan() {}
+	virtual ~CNetBan() = default;
 	void Init(class IConsole *pConsole, class IStorage *pStorage);
 	void Update();
 

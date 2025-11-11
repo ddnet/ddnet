@@ -1,10 +1,10 @@
 #include "editor_trackers.h"
 
-#include <game/editor/mapitems/layer_group.h>
-#include <game/editor/mapitems/layer_tiles.h>
-
 #include "editor.h"
 #include "editor_actions.h"
+
+#include <game/editor/mapitems/layer_group.h>
+#include <game/editor/mapitems/layer_tiles.h>
 
 CQuadEditTracker::CQuadEditTracker() :
 	m_pEditor(nullptr), m_TrackedProp(EQuadProp::PROP_NONE) {}
@@ -13,6 +13,16 @@ CQuadEditTracker::~CQuadEditTracker()
 {
 	m_InitalPoints.clear();
 	m_vSelectedQuads.clear();
+}
+
+bool CQuadEditTracker::QuadPointChanged(const std::vector<CPoint> &vCurrentPoints, int QuadIndex)
+{
+	for(size_t i = 0; i < vCurrentPoints.size(); i++)
+	{
+		if(vCurrentPoints[i] != m_InitalPoints[QuadIndex][i])
+			return true;
+	}
+	return false;
 }
 
 void CQuadEditTracker::BeginQuadTrack(const std::shared_ptr<CLayerQuads> &pLayer, const std::vector<int> &vSelectedQuads, int GroupIndex, int LayerIndex)
@@ -45,9 +55,12 @@ void CQuadEditTracker::EndQuadTrack()
 	{
 		auto &pQuad = m_pLayer->m_vQuads[QuadIndex];
 		auto vCurrentPoints = std::vector<CPoint>(pQuad.m_aPoints, pQuad.m_aPoints + 5);
-		vpActions.push_back(std::make_shared<CEditorActionEditQuadPoint>(m_pEditor, m_GroupIndex, m_LayerIndex, QuadIndex, m_InitalPoints[QuadIndex], vCurrentPoints));
+		if(QuadPointChanged(vCurrentPoints, QuadIndex))
+			vpActions.push_back(std::make_shared<CEditorActionEditQuadPoint>(m_pEditor, m_GroupIndex, m_LayerIndex, QuadIndex, m_InitalPoints[QuadIndex], vCurrentPoints));
 	}
-	m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionBulk>(m_pEditor, vpActions));
+
+	if(!vpActions.empty())
+		m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionBulk>(m_pEditor, vpActions));
 }
 
 void CQuadEditTracker::BeginQuadPropTrack(const std::shared_ptr<CLayerQuads> &pLayer, const std::vector<int> &vSelectedQuads, EQuadProp Prop, int GroupIndex, int LayerIndex)
@@ -90,7 +103,8 @@ void CQuadEditTracker::EndQuadPropTrack(EQuadProp Prop)
 		if(Prop == EQuadProp::PROP_POS_X || Prop == EQuadProp::PROP_POS_Y)
 		{
 			auto vCurrentPoints = std::vector<CPoint>(Quad.m_aPoints, Quad.m_aPoints + 5);
-			vpActions.push_back(std::make_shared<CEditorActionEditQuadPoint>(m_pEditor, m_GroupIndex, m_LayerIndex, QuadIndex, m_InitalPoints[QuadIndex], vCurrentPoints));
+			if(QuadPointChanged(vCurrentPoints, QuadIndex))
+				vpActions.push_back(std::make_shared<CEditorActionEditQuadPoint>(m_pEditor, m_GroupIndex, m_LayerIndex, QuadIndex, m_InitalPoints[QuadIndex], vCurrentPoints));
 		}
 		else
 		{
@@ -149,8 +163,7 @@ void CQuadEditTracker::AddQuadPointPropTrack(EQuadPointProp Prop)
 			{
 				if(m_SelectedQuadPoints & (1 << v))
 				{
-					int Color = PackColor(Quad.m_aColors[v]);
-					m_PreviousValuesPoint[QuadIndex][v][Prop] = Color;
+					m_PreviousValuesPoint[QuadIndex][v][Prop] = PackColor(Quad.m_aColors[v]);
 				}
 			}
 		}
@@ -193,7 +206,8 @@ void CQuadEditTracker::EndQuadPointPropTrack(EQuadPointProp Prop)
 		if(Prop == EQuadPointProp::PROP_POS_X || Prop == EQuadPointProp::PROP_POS_Y)
 		{
 			auto vCurrentPoints = std::vector<CPoint>(Quad.m_aPoints, Quad.m_aPoints + 5);
-			vpActions.push_back(std::make_shared<CEditorActionEditQuadPoint>(m_pEditor, m_GroupIndex, m_LayerIndex, QuadIndex, m_InitalPoints[QuadIndex], vCurrentPoints));
+			if(QuadPointChanged(vCurrentPoints, QuadIndex))
+				vpActions.push_back(std::make_shared<CEditorActionEditQuadPoint>(m_pEditor, m_GroupIndex, m_LayerIndex, QuadIndex, m_InitalPoints[QuadIndex], vCurrentPoints));
 		}
 		else
 		{
@@ -237,7 +251,8 @@ void CQuadEditTracker::EndQuadPointPropTrackAll()
 			if(Prop == EQuadPointProp::PROP_POS_X || Prop == EQuadPointProp::PROP_POS_Y)
 			{
 				auto vCurrentPoints = std::vector<CPoint>(Quad.m_aPoints, Quad.m_aPoints + 5);
-				vpActions.push_back(std::make_shared<CEditorActionEditQuadPoint>(m_pEditor, m_GroupIndex, m_LayerIndex, QuadIndex, m_InitalPoints[QuadIndex], vCurrentPoints));
+				if(QuadPointChanged(vCurrentPoints, QuadIndex))
+					vpActions.push_back(std::make_shared<CEditorActionEditQuadPoint>(m_pEditor, m_GroupIndex, m_LayerIndex, QuadIndex, m_InitalPoints[QuadIndex], vCurrentPoints));
 			}
 			else
 			{
@@ -341,7 +356,7 @@ void CEnvelopeEditorOperationTracker::HandlePointDragEnd(bool Switch)
 
 		if(Data.m_Time != Point.m_Time)
 		{ // Save time
-			vpActions.push_back(std::make_shared<CEditorActionEnvelopeEditPoint>(m_pEditor, EnvIndex, PointIndex, 0, CEditorActionEnvelopeEditPoint::EEditType::TIME, Data.m_Time, Point.m_Time));
+			vpActions.push_back(std::make_shared<CEditorActionEnvelopeEditPointTime>(m_pEditor, EnvIndex, PointIndex, Data.m_Time, Point.m_Time));
 		}
 
 		for(auto Value : Data.m_Values)
@@ -401,7 +416,8 @@ void CSoundSourceOperationTracker::HandlePointMove(EState State)
 	}
 	else if(State == EState::STATE_END)
 	{
-		m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionMoveSoundSource>(m_pEditor, m_pEditor->m_SelectedGroup, m_LayerIndex, m_pEditor->m_SelectedSource, m_Data.m_OriginalPoint, m_pSource->m_Position));
+		if(m_Data.m_OriginalPoint != m_pSource->m_Position)
+			m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionMoveSoundSource>(m_pEditor, m_pEditor->m_SelectedGroup, m_LayerIndex, m_pEditor->m_SelectedSource, m_Data.m_OriginalPoint, m_pSource->m_Position));
 	}
 }
 
@@ -444,9 +460,9 @@ int CLayerPropTracker::PropToValue(ELayerProp Prop)
 
 // -----------------------------------------------------------------------
 
-bool CLayerTilesPropTracker::EndChecker(ETilesProp Prop, EEditState State, int Value)
+bool CLayerTilesPropTracker::EndChecker(ETilesProp Prop, int Value)
 {
-	return (State == EEditState::END || State == EEditState::ONE_GO) && (Value != m_OriginalValue || Prop == ETilesProp::PROP_SHIFT);
+	return Value != m_OriginalValue || Prop == ETilesProp::PROP_SHIFT;
 }
 
 void CLayerTilesPropTracker::OnStart(ETilesProp Prop)
@@ -454,19 +470,19 @@ void CLayerTilesPropTracker::OnStart(ETilesProp Prop)
 	if(Prop == ETilesProp::PROP_WIDTH || Prop == ETilesProp::PROP_HEIGHT)
 	{
 		m_SavedLayers[LAYERTYPE_TILES] = m_pObject->Duplicate();
-		if(m_pObject->m_Game || m_pObject->m_Front || m_pObject->m_Switch || m_pObject->m_Speedup || m_pObject->m_Tune || m_pObject->m_Tele)
+		if(m_pObject->m_HasGame || m_pObject->m_HasFront || m_pObject->m_HasSwitch || m_pObject->m_HasSpeedup || m_pObject->m_HasTune || m_pObject->m_HasTele)
 		{ // Need to save all entities layers when any entity layer
-			if(m_pEditor->m_Map.m_pFrontLayer && !m_pObject->m_Front)
+			if(m_pEditor->m_Map.m_pFrontLayer && !m_pObject->m_HasFront)
 				m_SavedLayers[LAYERTYPE_FRONT] = m_pEditor->m_Map.m_pFrontLayer->Duplicate();
-			if(m_pEditor->m_Map.m_pTeleLayer && !m_pObject->m_Tele)
+			if(m_pEditor->m_Map.m_pTeleLayer && !m_pObject->m_HasTele)
 				m_SavedLayers[LAYERTYPE_TELE] = m_pEditor->m_Map.m_pTeleLayer->Duplicate();
-			if(m_pEditor->m_Map.m_pSwitchLayer && !m_pObject->m_Switch)
+			if(m_pEditor->m_Map.m_pSwitchLayer && !m_pObject->m_HasSwitch)
 				m_SavedLayers[LAYERTYPE_SWITCH] = m_pEditor->m_Map.m_pSwitchLayer->Duplicate();
-			if(m_pEditor->m_Map.m_pSpeedupLayer && !m_pObject->m_Speedup)
+			if(m_pEditor->m_Map.m_pSpeedupLayer && !m_pObject->m_HasSpeedup)
 				m_SavedLayers[LAYERTYPE_SPEEDUP] = m_pEditor->m_Map.m_pSpeedupLayer->Duplicate();
-			if(m_pEditor->m_Map.m_pTuneLayer && !m_pObject->m_Tune)
+			if(m_pEditor->m_Map.m_pTuneLayer && !m_pObject->m_HasTune)
 				m_SavedLayers[LAYERTYPE_TUNE] = m_pEditor->m_Map.m_pTuneLayer->Duplicate();
-			if(!m_pObject->m_Game)
+			if(!m_pObject->m_HasGame)
 				m_SavedLayers[LAYERTYPE_GAME] = m_pEditor->m_Map.m_pGameLayer->Duplicate();
 		}
 	}
@@ -491,6 +507,7 @@ int CLayerTilesPropTracker::PropToValue(ETilesProp Prop)
 	switch(Prop)
 	{
 	case ETilesProp::PROP_AUTOMAPPER: return m_pObject->m_AutoMapperConfig;
+	case ETilesProp::PROP_LIVE_GAMETILES: return m_pObject->m_LiveGameTiles;
 	case ETilesProp::PROP_COLOR: return PackColor(m_pObject->m_Color);
 	case ETilesProp::PROP_COLOR_ENV: return m_pObject->m_ColorEnv;
 	case ETilesProp::PROP_COLOR_ENV_OFFSET: return m_pObject->m_ColorEnvOffset;
@@ -547,9 +564,9 @@ void CLayerTilesCommonPropTracker::OnEnd(ETilesCommonProp Prop, int Value)
 	m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionBulk>(m_pEditor, vpActions, aDisplay));
 }
 
-bool CLayerTilesCommonPropTracker::EndChecker(ETilesCommonProp Prop, EEditState State, int Value)
+bool CLayerTilesCommonPropTracker::EndChecker(ETilesCommonProp Prop, int Value)
 {
-	return (State == EEditState::END || State == EEditState::ONE_GO) && (Value != m_OriginalValue || Prop == ETilesCommonProp::PROP_SHIFT);
+	return Value != m_OriginalValue || Prop == ETilesCommonProp::PROP_SHIFT;
 }
 
 int CLayerTilesCommonPropTracker::PropToValue(ETilesCommonProp Prop)

@@ -1,4 +1,5 @@
-#include <game/editor/editor.h>
+#include "image.h"
+#include "sound.h"
 
 #include <engine/client.h>
 #include <engine/console.h>
@@ -9,11 +10,9 @@
 #include <engine/sound.h>
 #include <engine/storage.h>
 
+#include <game/editor/editor.h>
 #include <game/gamecore.h>
 #include <game/mapitems_ex.h>
-
-#include "image.h"
-#include "sound.h"
 
 // compatibility with old sound layers
 class CSoundSourceDeprecated
@@ -29,13 +28,25 @@ public:
 	int m_SoundEnvOffset;
 };
 
-bool CEditorMap::Save(const char *pFileName, const std::function<void(const char *pErrorMessage)> &ErrorHandler)
+void CDataFileWriterFinishJob::Run()
 {
-	char aFileNameTmp[IO_MAX_PATH_LENGTH];
-	IStorage::FormatTmpPath(aFileNameTmp, sizeof(aFileNameTmp), pFileName);
+	m_Writer.Finish();
+}
+
+CDataFileWriterFinishJob::CDataFileWriterFinishJob(const char *pRealFilename, const char *pTempFilename, CDataFileWriter &&Writer) :
+	m_Writer(std::move(Writer))
+{
+	str_copy(m_aRealFilename, pRealFilename);
+	str_copy(m_aTempFilename, pTempFilename);
+}
+
+bool CEditorMap::Save(const char *pFilename, const std::function<void(const char *pErrorMessage)> &ErrorHandler)
+{
+	char aFilenameTmp[IO_MAX_PATH_LENGTH];
+	IStorage::FormatTmpPath(aFilenameTmp, sizeof(aFilenameTmp), pFilename);
 
 	char aBuf[IO_MAX_PATH_LENGTH + 64];
-	str_format(aBuf, sizeof(aBuf), "saving to '%s'...", aFileNameTmp);
+	str_format(aBuf, sizeof(aBuf), "saving to '%s'...", aFilenameTmp);
 	m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor", aBuf);
 
 	if(!PerformPreSaveSanityChecks(ErrorHandler))
@@ -44,9 +55,9 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 	}
 
 	CDataFileWriter Writer;
-	if(!Writer.Open(m_pEditor->Storage(), aFileNameTmp))
+	if(!Writer.Open(m_pEditor->Storage(), aFilenameTmp))
 	{
-		str_format(aBuf, sizeof(aBuf), "Error: Failed to open file '%s' for writing.", aFileNameTmp);
+		str_format(aBuf, sizeof(aBuf), "Error: Failed to open file '%s' for writing.", aFilenameTmp);
 		ErrorHandler(aBuf);
 		return false;
 	}
@@ -182,18 +193,18 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 				Item.m_Height = pLayerTiles->m_Height;
 				// Item.m_Flags = pLayerTiles->m_Game ? TILESLAYERFLAG_GAME : 0;
 
-				if(pLayerTiles->m_Tele)
+				if(pLayerTiles->m_HasTele)
 					Item.m_Flags = TILESLAYERFLAG_TELE;
-				else if(pLayerTiles->m_Speedup)
+				else if(pLayerTiles->m_HasSpeedup)
 					Item.m_Flags = TILESLAYERFLAG_SPEEDUP;
-				else if(pLayerTiles->m_Front)
+				else if(pLayerTiles->m_HasFront)
 					Item.m_Flags = TILESLAYERFLAG_FRONT;
-				else if(pLayerTiles->m_Switch)
+				else if(pLayerTiles->m_HasSwitch)
 					Item.m_Flags = TILESLAYERFLAG_SWITCH;
-				else if(pLayerTiles->m_Tune)
+				else if(pLayerTiles->m_HasTune)
 					Item.m_Flags = TILESLAYERFLAG_TUNE;
 				else
-					Item.m_Flags = pLayerTiles->m_Game ? TILESLAYERFLAG_GAME : 0;
+					Item.m_Flags = pLayerTiles->m_HasGame ? TILESLAYERFLAG_GAME : 0;
 
 				Item.m_Image = pLayerTiles->m_Image;
 
@@ -204,22 +215,22 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 				Item.m_Switch = -1;
 				Item.m_Tune = -1;
 
-				if(Item.m_Flags && !(pLayerTiles->m_Game))
+				if(Item.m_Flags && !(pLayerTiles->m_HasGame))
 				{
 					CTile *pEmptyTiles = (CTile *)calloc((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height, sizeof(CTile));
 					mem_zero(pEmptyTiles, (size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile));
 					Item.m_Data = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile), pEmptyTiles);
 					free(pEmptyTiles);
 
-					if(pLayerTiles->m_Tele)
+					if(pLayerTiles->m_HasTele)
 						Item.m_Tele = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTeleTile), std::static_pointer_cast<CLayerTele>(pLayerTiles)->m_pTeleTile);
-					else if(pLayerTiles->m_Speedup)
+					else if(pLayerTiles->m_HasSpeedup)
 						Item.m_Speedup = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CSpeedupTile), std::static_pointer_cast<CLayerSpeedup>(pLayerTiles)->m_pSpeedupTile);
-					else if(pLayerTiles->m_Front)
+					else if(pLayerTiles->m_HasFront)
 						Item.m_Front = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile), pLayerTiles->m_pTiles);
-					else if(pLayerTiles->m_Switch)
+					else if(pLayerTiles->m_HasSwitch)
 						Item.m_Switch = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CSwitchTile), std::static_pointer_cast<CLayerSwitch>(pLayerTiles)->m_pSwitchTile);
-					else if(pLayerTiles->m_Tune)
+					else if(pLayerTiles->m_HasTune)
 						Item.m_Tune = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTuneTile), std::static_pointer_cast<CLayerTune>(pLayerTiles)->m_pTuneTile);
 				}
 				else
@@ -396,7 +407,7 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 	}
 
 	// finish the data file
-	std::shared_ptr<CDataFileWriterFinishJob> pWriterFinishJob = std::make_shared<CDataFileWriterFinishJob>(pFileName, aFileNameTmp, std::move(Writer));
+	std::shared_ptr<CDataFileWriterFinishJob> pWriterFinishJob = std::make_shared<CDataFileWriterFinishJob>(pFilename, aFilenameTmp, std::move(Writer));
 	m_pEditor->Engine()->AddJob(pWriterFinishJob);
 	m_pEditor->m_WriterFinishJobs.push_back(pWriterFinishJob);
 
@@ -431,10 +442,10 @@ bool CEditorMap::PerformPreSaveSanityChecks(const std::function<void(const char 
 	return Success;
 }
 
-bool CEditorMap::Load(const char *pFileName, int StorageType, const std::function<void(const char *pErrorMessage)> &ErrorHandler)
+bool CEditorMap::Load(const char *pFilename, int StorageType, const std::function<void(const char *pErrorMessage)> &ErrorHandler)
 {
 	CDataFileReader DataFile;
-	if(!DataFile.Open(m_pEditor->Storage(), pFileName, StorageType))
+	if(!DataFile.Open(m_pEditor->Storage(), pFilename, StorageType))
 	{
 		ErrorHandler("Error: Failed to open map file. See local console for details.");
 		return false;
@@ -509,7 +520,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 			CMapItemImage_v2 *pItem = (CMapItemImage_v2 *)DataFile.GetItem(Start + i);
 
 			// copy base info
-			std::shared_ptr<CEditorImage> pImg = std::make_shared<CEditorImage>(m_pEditor);
+			std::shared_ptr<CEditorImage> pImg = std::make_shared<CEditorImage>(this);
 			pImg->m_External = pItem->m_External;
 
 			const char *pName = DataFile.GetDataString(pItem->m_ImageName);
@@ -593,7 +604,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 			CMapItemSound *pItem = (CMapItemSound *)DataFile.GetItem(Start + i);
 
 			// copy base info
-			std::shared_ptr<CEditorSound> pSound = std::make_shared<CEditorSound>(m_pEditor);
+			std::shared_ptr<CEditorSound> pSound = std::make_shared<CEditorSound>(this);
 
 			const char *pName = DataFile.GetDataString(pItem->m_SoundName);
 			if(pName == nullptr || pName[0] == '\0')
@@ -613,7 +624,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 				// load external
 				if(m_pEditor->Storage()->ReadFile(aBuf, IStorage::TYPE_ALL, &pSound->m_pData, &pSound->m_DataSize))
 				{
-					pSound->m_SoundId = m_pEditor->Sound()->LoadOpusFromMem(pSound->m_pData, pSound->m_DataSize, true);
+					pSound->m_SoundId = m_pEditor->Sound()->LoadOpusFromMem(pSound->m_pData, pSound->m_DataSize, true, pSound->m_aName);
 				}
 				else
 				{
@@ -627,7 +638,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 				void *pData = DataFile.GetData(pItem->m_SoundData);
 				pSound->m_pData = malloc(pSound->m_DataSize);
 				mem_copy(pSound->m_pData, pData, pSound->m_DataSize);
-				pSound->m_SoundId = m_pEditor->Sound()->LoadOpusFromMem(pSound->m_pData, pSound->m_DataSize, true);
+				pSound->m_SoundId = m_pEditor->Sound()->LoadOpusFromMem(pSound->m_pData, pSound->m_DataSize, true, pSound->m_aName);
 			}
 
 			m_vpSounds.push_back(pSound);
@@ -685,7 +696,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 					std::shared_ptr<CLayerTiles> pTiles;
 					if(pTilemapItem->m_Flags & TILESLAYERFLAG_GAME)
 					{
-						pTiles = std::make_shared<CLayerGame>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
+						pTiles = std::make_shared<CLayerGame>(this, pTilemapItem->m_Width, pTilemapItem->m_Height);
 						MakeGameLayer(pTiles);
 						MakeGameGroup(pGroup);
 					}
@@ -694,7 +705,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 						if(pTilemapItem->m_Version <= 2)
 							pTilemapItem->m_Tele = *((const int *)(pTilemapItem) + 15);
 
-						pTiles = std::make_shared<CLayerTele>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
+						pTiles = std::make_shared<CLayerTele>(this, pTilemapItem->m_Width, pTilemapItem->m_Height);
 						MakeTeleLayer(pTiles);
 					}
 					else if(pTilemapItem->m_Flags & TILESLAYERFLAG_SPEEDUP)
@@ -702,7 +713,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 						if(pTilemapItem->m_Version <= 2)
 							pTilemapItem->m_Speedup = *((const int *)(pTilemapItem) + 16);
 
-						pTiles = std::make_shared<CLayerSpeedup>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
+						pTiles = std::make_shared<CLayerSpeedup>(this, pTilemapItem->m_Width, pTilemapItem->m_Height);
 						MakeSpeedupLayer(pTiles);
 					}
 					else if(pTilemapItem->m_Flags & TILESLAYERFLAG_FRONT)
@@ -710,7 +721,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 						if(pTilemapItem->m_Version <= 2)
 							pTilemapItem->m_Front = *((const int *)(pTilemapItem) + 17);
 
-						pTiles = std::make_shared<CLayerFront>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
+						pTiles = std::make_shared<CLayerFront>(this, pTilemapItem->m_Width, pTilemapItem->m_Height);
 						MakeFrontLayer(pTiles);
 					}
 					else if(pTilemapItem->m_Flags & TILESLAYERFLAG_SWITCH)
@@ -718,7 +729,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 						if(pTilemapItem->m_Version <= 2)
 							pTilemapItem->m_Switch = *((const int *)(pTilemapItem) + 18);
 
-						pTiles = std::make_shared<CLayerSwitch>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
+						pTiles = std::make_shared<CLayerSwitch>(this, pTilemapItem->m_Width, pTilemapItem->m_Height);
 						MakeSwitchLayer(pTiles);
 					}
 					else if(pTilemapItem->m_Flags & TILESLAYERFLAG_TUNE)
@@ -726,13 +737,12 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 						if(pTilemapItem->m_Version <= 2)
 							pTilemapItem->m_Tune = *((const int *)(pTilemapItem) + 19);
 
-						pTiles = std::make_shared<CLayerTune>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
+						pTiles = std::make_shared<CLayerTune>(this, pTilemapItem->m_Width, pTilemapItem->m_Height);
 						MakeTuneLayer(pTiles);
 					}
 					else
 					{
-						pTiles = std::make_shared<CLayerTiles>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
-						pTiles->m_pEditor = m_pEditor;
+						pTiles = std::make_shared<CLayerTiles>(this, pTilemapItem->m_Width, pTilemapItem->m_Height);
 						pTiles->m_Color = pTilemapItem->m_Color;
 						pTiles->m_ColorEnv = pTilemapItem->m_ColorEnv;
 						pTiles->m_ColorEnvOffset = pTilemapItem->m_ColorEnvOffset;
@@ -742,13 +752,19 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 
 					pGroup->AddLayer(pTiles);
 					pTiles->m_Image = pTilemapItem->m_Image;
-					pTiles->m_Game = pTilemapItem->m_Flags & TILESLAYERFLAG_GAME;
+					pTiles->m_HasGame = pTilemapItem->m_Flags & TILESLAYERFLAG_GAME;
+
+					// validate image index
+					if(pTiles->m_Image < -1 || pTiles->m_Image >= (int)m_vpImages.size())
+					{
+						pTiles->m_Image = -1;
+					}
 
 					// load layer name
 					if(pTilemapItem->m_Version >= 3)
 						IntsToStr(pTilemapItem->m_aName, std::size(pTilemapItem->m_aName), pTiles->m_aName, std::size(pTiles->m_aName));
 
-					if(pTiles->m_Tele)
+					if(pTiles->m_HasTele)
 					{
 						void *pTeleData = DataFile.GetData(pTilemapItem->m_Tele);
 						unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Tele);
@@ -767,7 +783,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 						}
 						DataFile.UnloadData(pTilemapItem->m_Tele);
 					}
-					else if(pTiles->m_Speedup)
+					else if(pTiles->m_HasSpeedup)
 					{
 						void *pSpeedupData = DataFile.GetData(pTilemapItem->m_Speedup);
 						unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Speedup);
@@ -788,14 +804,14 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 
 						DataFile.UnloadData(pTilemapItem->m_Speedup);
 					}
-					else if(pTiles->m_Front)
+					else if(pTiles->m_HasFront)
 					{
 						void *pFrontData = DataFile.GetData(pTilemapItem->m_Front);
 						unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Front);
 						pTiles->ExtractTiles(pTilemapItem->m_Version, (CTile *)pFrontData, Size);
 						DataFile.UnloadData(pTilemapItem->m_Front);
 					}
-					else if(pTiles->m_Switch)
+					else if(pTiles->m_HasSwitch)
 					{
 						void *pSwitchData = DataFile.GetData(pTilemapItem->m_Switch);
 						unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Switch);
@@ -824,7 +840,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 						}
 						DataFile.UnloadData(pTilemapItem->m_Switch);
 					}
-					else if(pTiles->m_Tune)
+					else if(pTiles->m_HasTune)
 					{
 						void *pTuneData = DataFile.GetData(pTilemapItem->m_Tune);
 						unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Tune);
@@ -855,11 +871,15 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 				{
 					const CMapItemLayerQuads *pQuadsItem = (CMapItemLayerQuads *)pLayerItem;
 
-					std::shared_ptr<CLayerQuads> pQuads = std::make_shared<CLayerQuads>(m_pEditor);
+					std::shared_ptr<CLayerQuads> pQuads = std::make_shared<CLayerQuads>(this);
 					pQuads->m_Flags = pLayerItem->m_Flags;
 					pQuads->m_Image = pQuadsItem->m_Image;
+
+					// validate image index
 					if(pQuads->m_Image < -1 || pQuads->m_Image >= (int)m_vpImages.size())
+					{
 						pQuads->m_Image = -1;
+					}
 
 					// load layer name
 					if(pQuadsItem->m_Version >= 2)
@@ -881,13 +901,15 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 					if(pSoundsItem->m_Version < 1 || pSoundsItem->m_Version > 2)
 						continue;
 
-					std::shared_ptr<CLayerSounds> pSounds = std::make_shared<CLayerSounds>(m_pEditor);
+					std::shared_ptr<CLayerSounds> pSounds = std::make_shared<CLayerSounds>(this);
 					pSounds->m_Flags = pLayerItem->m_Flags;
 					pSounds->m_Sound = pSoundsItem->m_Sound;
 
-					// validate m_Sound
+					// validate sound index
 					if(pSounds->m_Sound < -1 || pSounds->m_Sound >= (int)m_vpSounds.size())
+					{
 						pSounds->m_Sound = -1;
+					}
 
 					// load layer name
 					IntsToStr(pSoundsItem->m_aName, std::size(pSoundsItem->m_aName), pSounds->m_aName, std::size(pSounds->m_aName));
@@ -910,13 +932,15 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 					if(pSoundsItem->m_Version < 1 || pSoundsItem->m_Version > 2)
 						continue;
 
-					std::shared_ptr<CLayerSounds> pSounds = std::make_shared<CLayerSounds>(m_pEditor);
+					std::shared_ptr<CLayerSounds> pSounds = std::make_shared<CLayerSounds>(this);
 					pSounds->m_Flags = pLayerItem->m_Flags;
 					pSounds->m_Sound = pSoundsItem->m_Sound;
 
-					// validate m_Sound
+					// validate sound index
 					if(pSounds->m_Sound < -1 || pSounds->m_Sound >= (int)m_vpSounds.size())
+					{
 						pSounds->m_Sound = -1;
+					}
 
 					// load layer name
 					IntsToStr(pSoundsItem->m_aName, std::size(pSoundsItem->m_aName), pSounds->m_aName, std::size(pSounds->m_aName));
@@ -1010,8 +1034,8 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 					{
 						std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(m_vpGroups[pItem->m_GroupId]->m_vpLayers[pItem->m_LayerId]);
 						// only load auto mappers for tile layers (not physics layers)
-						if(!(pTiles->m_Game || pTiles->m_Tele || pTiles->m_Speedup ||
-							   pTiles->m_Front || pTiles->m_Switch || pTiles->m_Tune))
+						if(!(pTiles->m_HasGame || pTiles->m_HasTele || pTiles->m_HasSpeedup ||
+							   pTiles->m_HasFront || pTiles->m_HasSwitch || pTiles->m_HasTune))
 						{
 							pTiles->m_AutoMapperConfig = pItem->m_AutomapperConfig;
 							pTiles->m_Seed = pItem->m_AutomapperSeed;
@@ -1023,12 +1047,10 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 		}
 	}
 
+	CheckIntegrity();
 	PerformSanityChecks(ErrorHandler);
 
-	m_Modified = false;
-	m_ModifiedAuto = false;
-	m_LastModifiedTime = -1.0f;
-	m_LastSaveTime = m_pEditor->Client()->GlobalTime();
+	ResetModifiedState();
 	return true;
 }
 

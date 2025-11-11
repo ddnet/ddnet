@@ -4,15 +4,16 @@
 #define GAME_CLIENT_UI_RECT_H
 
 #include <base/color.h>
+#include <base/vmath.h>
 
 class IGraphics;
 
 class CUIRect
 {
-	static IGraphics *s_pGraphics;
+	static IGraphics *ms_pGraphics;
 
 public:
-	static void Init(IGraphics *pGraphics) { s_pGraphics = pGraphics; }
+	static void Init(IGraphics *pGraphics) { ms_pGraphics = pGraphics; }
 
 	float x, y, w, h;
 
@@ -135,6 +136,13 @@ public:
 	 */
 	void Draw(ColorRGBA Color, int Corners, float Rounding) const;
 	void Draw4(ColorRGBA ColorTopLeft, ColorRGBA ColorTopRight, ColorRGBA ColorBottomLeft, ColorRGBA ColorBottomRight, int Corners, float Rounding) const;
+
+	/**
+	 * Draws the outline of *this* CUIRect using lines.
+	 *
+	 * @param Color The color to draw the outline in.
+	 */
+	void DrawOutline(ColorRGBA Color) const;
 
 	/**
 	 * Returns the top-left position of *this* CUIRect as a vec2.

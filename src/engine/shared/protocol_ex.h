@@ -6,7 +6,7 @@
 class CMsgPacker;
 class CUnpacker;
 
-enum
+enum // NOLINT(readability-enum-initial-value)
 {
 	NETMSG_EX_INVALID = UUID_INVALID,
 	NETMSG_EX_UNKNOWN = UUID_UNKNOWN,
@@ -18,11 +18,17 @@ enum
 #include "protocol_ex_msgs.h"
 #undef UUID
 	OFFSET_TEEHISTORIAN_UUID,
+};
 
+enum
+{
 	UNPACKMESSAGE_ERROR = 0,
 	UNPACKMESSAGE_OK,
 	UNPACKMESSAGE_ANSWER,
+};
 
+enum
+{
 	SERVERCAP_CURVERSION = 5,
 	SERVERCAPFLAG_DDNET = 1 << 0,
 	SERVERCAPFLAG_CHATTIMEOUTCODE = 1 << 1,
@@ -33,8 +39,6 @@ enum
 };
 
 void RegisterUuids(CUuidManager *pManager);
-bool NetworkExDefaultHandler(int *pId, CUuid *pUuid, CUnpacker *pUnpacker, CMsgPacker *pPacker, int Type);
-
 int UnpackMessageId(int *pId, bool *pSys, CUuid *pUuid, CUnpacker *pUnpacker, CMsgPacker *pPacker);
 
 #endif // ENGINE_SHARED_PROTOCOL_EX_H

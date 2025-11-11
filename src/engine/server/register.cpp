@@ -22,7 +22,10 @@ class CRegister : public IRegister
 		STATUS_NEEDCHALLENGE,
 		STATUS_NEEDINFO,
 		STATUS_ERROR,
+	};
 
+	enum
+	{
 		PROTOCOL_TW6_IPV6 = 0,
 		PROTOCOL_TW6_IPV4,
 		PROTOCOL_TW7_IPV6,
@@ -125,6 +128,9 @@ class CRegister : public IRegister
 	bool m_aProtocolEnabled[NUM_PROTOCOLS] = {true, true, true, true};
 	CProtocol m_aProtocols[NUM_PROTOCOLS];
 
+	bool m_GotCommunityToken = false;
+	char m_aCommunityToken[128];
+
 	int m_NumExtraHeaders = 0;
 	char m_aaExtraHeaders[8][128];
 
@@ -132,7 +138,7 @@ class CRegister : public IRegister
 	CUuid m_Secret = RandomUuid();
 	CUuid m_ChallengeSecret = RandomUuid();
 	bool m_GotServerInfo = false;
-	char m_aServerInfo[16384];
+	char m_aServerInfo[32768];
 
 public:
 	CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHttp *pHttp, int ServerPort, unsigned SixupSecurityToken);
@@ -275,7 +281,7 @@ void CRegister::CProtocol::SendRegister()
 	bool SendInfo;
 
 	{
-		CLockScope ls(m_pShared->m_pGlobal->m_Lock);
+		const CLockScope LockScope(m_pShared->m_pGlobal->m_Lock);
 		InfoSerial = m_pShared->m_pGlobal->m_InfoSerial;
 		SendInfo = InfoSerial > m_pShared->m_pGlobal->m_LatestSuccessfulInfoSerial;
 	}
@@ -301,6 +307,10 @@ void CRegister::CProtocol::SendRegister()
 		pRegister->HeaderString("Challenge-Token", m_aChallengeToken);
 	}
 	pRegister->HeaderInt("Info-Serial", InfoSerial);
+	if(m_pParent->m_GotCommunityToken)
+	{
+		pRegister->HeaderString("Community-Token", m_pParent->m_aCommunityToken);
+	}
 	for(int i = 0; i < m_pParent->m_NumExtraHeaders; i++)
 	{
 		pRegister->Header(m_pParent->m_aaExtraHeaders[i]);
@@ -311,7 +321,7 @@ void CRegister::CProtocol::SendRegister()
 
 	int RequestIndex;
 	{
-		CLockScope ls(m_pShared->m_Lock);
+		const CLockScope LockScope(m_pShared->m_Lock);
 		if(m_pShared->m_LatestResponseStatus != STATUS_OK)
 		{
 			log_info(ProtocolToSystem(m_Protocol), "registering...");
@@ -370,7 +380,7 @@ CRegister::CProtocol::CProtocol(CRegister *pParent, int Protocol) :
 
 void CRegister::CProtocol::CheckChallengeStatus()
 {
-	CLockScope ls(m_pShared->m_Lock);
+	const CLockScope LockScope(m_pShared->m_Lock);
 	// No requests in flight?
 	if(m_pShared->m_LatestResponseIndex == m_pShared->m_NumTotalRequests - 1)
 	{
@@ -464,10 +474,17 @@ void CRegister::CProtocol::CJob::Run()
 		return;
 	}
 	{
-		CLockScope ls(m_pShared->m_Lock);
-		if(Status != STATUS_OK || Status != m_pShared->m_LatestResponseStatus)
+		const CLockScope LockScope(m_pShared->m_Lock);
+		if(Status != m_pShared->m_LatestResponseStatus)
 		{
-			log_debug(ProtocolToSystem(m_Protocol), "status: %s", (const char *)StatusString);
+			if(Status != STATUS_OK)
+			{
+				log_debug(ProtocolToSystem(m_Protocol), "status: %s", (const char *)StatusString);
+			}
+			else
+			{
+				log_info(ProtocolToSystem(m_Protocol), "successfully registered");
+			}
 		}
 		if(Status == m_pShared->m_LatestResponseStatus && Status == STATUS_NEEDCHALLENGE)
 		{
@@ -483,7 +500,7 @@ void CRegister::CProtocol::CJob::Run()
 	}
 	if(Status == STATUS_OK)
 	{
-		CLockScope ls(m_pShared->m_pGlobal->m_Lock);
+		const CLockScope LockScope(m_pShared->m_pGlobal->m_Lock);
 		if(m_InfoSerial > m_pShared->m_pGlobal->m_LatestSuccessfulInfoSerial)
 		{
 			m_pShared->m_pGlobal->m_LatestSuccessfulInfoSerial = m_InfoSerial;
@@ -491,7 +508,7 @@ void CRegister::CProtocol::CJob::Run()
 	}
 	else if(Status == STATUS_NEEDINFO)
 	{
-		CLockScope ls(m_pShared->m_pGlobal->m_Lock);
+		const CLockScope LockScope(m_pShared->m_pGlobal->m_Lock);
 		if(m_InfoSerial == m_pShared->m_pGlobal->m_LatestSuccessfulInfoSerial)
 		{
 			// Tell other requests that they need to send the info again.
@@ -513,7 +530,7 @@ CRegister::CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHt
 		CProtocol(this, PROTOCOL_TW7_IPV4),
 	}
 {
-	const int HEADER_LEN = sizeof(SERVERBROWSE_CHALLENGE);
+	static constexpr int HEADER_LEN = sizeof(SERVERBROWSE_CHALLENGE);
 	mem_copy(m_aVerifyPacketPrefix, SERVERBROWSE_CHALLENGE, HEADER_LEN);
 	FormatUuid(m_ChallengeSecret, m_aVerifyPacketPrefix + HEADER_LEN, sizeof(m_aVerifyPacketPrefix) - HEADER_LEN);
 	m_aVerifyPacketPrefix[HEADER_LEN + UUID_MAXSTRSIZE - 1] = ':';
@@ -524,6 +541,7 @@ CRegister::CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHt
 	m_pConsole->Chain("sv_register", ConchainOnConfigChange, this);
 	m_pConsole->Chain("sv_register_extra", ConchainOnConfigChange, this);
 	m_pConsole->Chain("sv_register_url", ConchainOnConfigChange, this);
+	m_pConsole->Chain("sv_register_community_token", ConchainOnConfigChange, this);
 	m_pConsole->Chain("sv_sixup", ConchainOnConfigChange, this);
 	m_pConsole->Chain("sv_ipv4only", ConchainOnConfigChange, this);
 }
@@ -627,6 +645,11 @@ void CRegister::OnConfigChange()
 		m_aProtocolEnabled[PROTOCOL_TW6_IPV6] = false;
 		m_aProtocolEnabled[PROTOCOL_TW7_IPV6] = false;
 	}
+	m_GotCommunityToken = (bool)m_pConfig->m_SvRegisterCommunityToken[0];
+	if(m_GotCommunityToken)
+	{
+		str_copy(m_aCommunityToken, m_pConfig->m_SvRegisterCommunityToken);
+	}
 	m_NumExtraHeaders = 0;
 	const char *pRegisterExtra = m_pConfig->m_SvRegisterExtra;
 	char aHeader[128];
@@ -711,7 +734,7 @@ void CRegister::OnNewInfo(const char *pInfo)
 	m_GotServerInfo = true;
 	str_copy(m_aServerInfo, pInfo);
 	{
-		CLockScope ls(m_pGlobal->m_Lock);
+		const CLockScope LockScope(m_pGlobal->m_Lock);
 		m_pGlobal->m_InfoSerial += 1;
 	}
 

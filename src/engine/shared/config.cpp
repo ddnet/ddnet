@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include <base/log.h>
+#include <base/system.h>
 
 #include <engine/config.h>
 #include <engine/shared/config.h>
@@ -20,7 +21,7 @@ static void EscapeParam(char *pDst, const char *pSrc, int Size)
 
 void SConfigVariable::ExecuteLine(const char *pLine) const
 {
-	m_pConsole->ExecuteLine(pLine, (m_Flags & CFGFLAG_GAME) != 0 ? IConsole::CLIENT_ID_GAME : -1);
+	m_pConsole->ExecuteLine(pLine, (m_Flags & CFGFLAG_GAME) != 0 ? IConsole::CLIENT_ID_GAME : IConsole::CLIENT_ID_UNSPECIFIED);
 }
 
 bool SConfigVariable::CheckReadOnly() const
@@ -362,6 +363,14 @@ void CConfigManager::SetReadOnly(const char *pScriptName, bool ReadOnly)
 		}
 	}
 	dbg_assert(false, "Invalid command for SetReadOnly: '%s'", pScriptName);
+}
+
+void CConfigManager::SetGameSettingsReadOnly(bool ReadOnly)
+{
+	for(SConfigVariable *pVariable : m_vpGameVariables)
+	{
+		pVariable->m_ReadOnly = ReadOnly;
+	}
 }
 
 bool CConfigManager::Save()

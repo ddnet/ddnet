@@ -111,7 +111,7 @@ bool CMap::Load(const char *pMapName)
 
 					if(((int)TilemapCount / pTilemap->m_Width != pTilemap->m_Height) || (TilemapSize / sizeof(CTile) != TilemapCount))
 					{
-						log_error("map/load", "map layer too big (%d * %d * %ld causes an integer overflow)", pTilemap->m_Width, pTilemap->m_Height, sizeof(CTile));
+						log_error("map/load", "map layer too big (%d * %d * %d causes an integer overflow)", pTilemap->m_Width, pTilemap->m_Height, (int)sizeof(CTile));
 						return false;
 					}
 					CTile *pTiles = static_cast<CTile *>(malloc(TilemapSize));

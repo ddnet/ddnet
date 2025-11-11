@@ -5,15 +5,13 @@
 #include <engine/engine.h>
 #include <engine/map.h>
 #include <engine/server.h>
-#include <engine/storage.h>
-
 #include <engine/server/antibot.h>
 #include <engine/server/databases/connection.h>
 #include <engine/server/server.h>
 #include <engine/server/server_logger.h>
-
 #include <engine/shared/assertion_logger.h>
 #include <engine/shared/config.h>
+#include <engine/storage.h>
 
 #include <game/version.h>
 
@@ -28,14 +26,14 @@
 
 #include <csignal>
 
-volatile sig_atomic_t InterruptSignaled = 0;
+static volatile sig_atomic_t InterruptSignaled = 0;
 
 bool IsInterrupted()
 {
 	return InterruptSignaled;
 }
 
-void HandleSigIntTerm(int Param)
+static void HandleSigIntTerm(int Param)
 {
 	InterruptSignaled = 1;
 
@@ -92,11 +90,6 @@ int main(int argc, const char **argv)
 	vpLoggers.push_back(pFutureAssertionLogger);
 	log_set_global_logger(log_logger_collection(std::move(vpLoggers)).release());
 
-	if(secure_random_init() != 0)
-	{
-		log_error("secure", "could not initialize secure RNG");
-		return -1;
-	}
 	if(MysqlInit() != 0)
 	{
 		log_error("mysql", "failed to initialize MySQL library");
@@ -106,10 +99,6 @@ int main(int argc, const char **argv)
 	signal(SIGINT, HandleSigIntTerm);
 	signal(SIGTERM, HandleSigIntTerm);
 
-#if defined(CONF_EXCEPTION_HANDLING)
-	init_exception_handler();
-#endif
-
 	CServer *pServer = CreateServer();
 	pServer->SetLoggers(pFutureFileLogger, std::move(pStdoutLogger));
 
@@ -117,7 +106,7 @@ int main(int argc, const char **argv)
 	pKernel->RegisterInterface(pServer);
 
 	// create the components
-	IEngine *pEngine = CreateEngine(GAME_NAME, pFutureConsoleLogger, 2 * std::thread::hardware_concurrency() + 2);
+	IEngine *pEngine = CreateEngine(GAME_NAME, pFutureConsoleLogger);
 	pKernel->RegisterInterface(pEngine);
 
 	IStorage *pStorage = CreateStorage(IStorage::EInitializationType::SERVER, argc, argv);
@@ -130,15 +119,15 @@ int main(int argc, const char **argv)
 
 	pFutureAssertionLogger->Set(CreateAssertionLogger(pStorage, GAME_NAME));
 
-#if defined(CONF_EXCEPTION_HANDLING)
-	char aBuf[IO_MAX_PATH_LENGTH];
-	char aBufName[IO_MAX_PATH_LENGTH];
-	char aDate[64];
-	str_timestamp(aDate, sizeof(aDate));
-	str_format(aBufName, sizeof(aBufName), "dumps/" GAME_NAME "-Server_%s_crash_log_%s_%d_%s.RTP", CONF_PLATFORM_STRING, aDate, pid(), GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "");
-	pStorage->GetCompletePath(IStorage::TYPE_SAVE, aBufName, aBuf, sizeof(aBuf));
-	set_exception_handler_log_file(aBuf);
-#endif
+	{
+		char aBuf[IO_MAX_PATH_LENGTH];
+		char aBufName[IO_MAX_PATH_LENGTH];
+		char aDate[64];
+		str_timestamp(aDate, sizeof(aDate));
+		str_format(aBufName, sizeof(aBufName), "dumps/" GAME_NAME "-Server_%s_crash_log_%s_%d_%s.RTP", CONF_PLATFORM_STRING, aDate, pid(), GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "");
+		pStorage->GetCompletePath(IStorage::TYPE_SAVE, aBufName, aBuf, sizeof(aBuf));
+		crashdump_init_if_available(aBuf);
+	}
 
 	IConsole *pConsole = CreateConsole(CFGFLAG_SERVER | CFGFLAG_ECON).release();
 	pKernel->RegisterInterface(pConsole);
@@ -215,7 +204,6 @@ int main(int argc, const char **argv)
 	delete pKernel;
 
 	MysqlUninit();
-	secure_random_uninit();
 
 	return Ret;
 }

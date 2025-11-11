@@ -16,15 +16,13 @@ class IEngine : public IInterface
 	MACRO_INTERFACE("engine")
 
 public:
-	virtual ~IEngine() = default;
-
 	virtual void Init() = 0;
 	virtual void AddJob(std::shared_ptr<IJob> pJob) = 0;
 	virtual void ShutdownJobs() = 0;
 	virtual void SetAdditionalLogger(std::shared_ptr<ILogger> &&pLogger) = 0;
 };
 
-extern IEngine *CreateEngine(const char *pAppname, std::shared_ptr<CFutureLogger> pFutureLogger, int Jobs);
-extern IEngine *CreateTestEngine(const char *pAppname, int Jobs);
+extern IEngine *CreateEngine(const char *pAppname, std::shared_ptr<CFutureLogger> pFutureLogger);
+extern IEngine *CreateTestEngine(const char *pAppname);
 
 #endif

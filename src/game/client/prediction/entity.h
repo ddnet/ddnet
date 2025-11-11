@@ -3,11 +3,11 @@
 #ifndef GAME_CLIENT_PREDICTION_ENTITY_H
 #define GAME_CLIENT_PREDICTION_ENTITY_H
 
+#include "gameworld.h"
+
 #include <base/vmath.h>
 
 #include <game/alloc.h>
-
-#include "gameworld.h"
 
 class CEntity
 {
@@ -42,7 +42,7 @@ public:
 	float GetProximityRadius() const { return m_ProximityRadius; }
 	virtual bool CanCollide(int ClientId) { return true; }
 
-	void Destroy() { delete this; }
+	virtual void Destroy() { delete this; }
 	virtual void PreTick() {}
 	virtual void Tick() {}
 	virtual void TickDeferred() {}

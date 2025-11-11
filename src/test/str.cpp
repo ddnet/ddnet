@@ -1,8 +1,20 @@
-#include <gtest/gtest.h>
-
 #include <base/system.h>
 
 #include <game/gamecore.h>
+
+#include <gtest/gtest.h>
+
+#include <limits>
+
+typedef void (*TStringArgumentFunction)(char *pStr);
+template<TStringArgumentFunction Func>
+static void TestInplace(const char *pInput, const char *pOutput)
+{
+	char aBuf[512];
+	str_copy(aBuf, pInput);
+	Func(aBuf);
+	EXPECT_STREQ(aBuf, pOutput);
+}
 
 TEST(Str, StrDelim)
 {
@@ -185,13 +197,61 @@ TEST(Str, Utf8ToSkeleton)
 	EXPECT_EQ(aBuf[5], 'u');
 }
 
+TEST(Str, Utf8ToLowerCodepoint)
+{
+	EXPECT_TRUE(str_utf8_tolower_codepoint('A') == 'a');
+	EXPECT_TRUE(str_utf8_tolower_codepoint('z') == 'z');
+	EXPECT_TRUE(str_utf8_tolower_codepoint(192) == 224); // À -> à
+	EXPECT_TRUE(str_utf8_tolower_codepoint(7882) == 7883); // Ị -> ị
+}
+
+template<size_t BufferSize = 128>
+static void TestStrUtf8ToLower(const char *pInput, const char *pOutput)
+{
+	char aBuf[BufferSize];
+	str_utf8_tolower(pInput, aBuf, sizeof(aBuf));
+	EXPECT_STREQ(aBuf, pOutput);
+}
+
 TEST(Str, Utf8ToLower)
 {
-	EXPECT_TRUE(str_utf8_tolower('A') == 'a');
-	EXPECT_TRUE(str_utf8_tolower('z') == 'z');
-	EXPECT_TRUE(str_utf8_tolower(192) == 224); // À -> à
-	EXPECT_TRUE(str_utf8_tolower(7882) == 7883); // Ị -> ị
+	// See https://stackoverflow.com/a/18689585
+	TestStrUtf8ToLower<>("", "");
+	TestStrUtf8ToLower<>("a", "a");
+	TestStrUtf8ToLower<>("A", "a");
+	TestStrUtf8ToLower<>("z", "z");
+	TestStrUtf8ToLower<>("Z", "z");
+	TestStrUtf8ToLower<>("ABC", "abc");
+	TestStrUtf8ToLower<>("ÖÜÄẞ", "öüäß");
+	TestStrUtf8ToLower<>("Iİ", "ii");
+	TestStrUtf8ToLower<>("Ϊ", "ϊ");
+	TestStrUtf8ToLower<>("Į", "į");
+	TestStrUtf8ToLower<>("Җ", "җ");
+	TestStrUtf8ToLower<>("Ѹ", "ѹ");
+	TestStrUtf8ToLower<>("Ǆ", "ǆ");
+	TestStrUtf8ToLower<>("ⒹⒹＮＥＴ", "ⓓⓓｎｅｔ");
+	TestStrUtf8ToLower<>("Ⱥ", "ⱥ"); // lower case uses more bytes than upper case
 
+	TestStrUtf8ToLower<1>("ABC", "");
+	TestStrUtf8ToLower<2>("ABC", "a");
+	TestStrUtf8ToLower<3>("ABC", "ab");
+	TestStrUtf8ToLower<4>("ABC", "abc");
+
+	TestStrUtf8ToLower<1>("ȺȺȺ", "");
+	TestStrUtf8ToLower<2>("ȺȺȺ", "");
+	TestStrUtf8ToLower<3>("ȺȺȺ", "");
+	TestStrUtf8ToLower<4>("ȺȺȺ", "ⱥ");
+	TestStrUtf8ToLower<5>("ȺȺȺ", "ⱥ");
+	TestStrUtf8ToLower<6>("ȺȺȺ", "ⱥ");
+	TestStrUtf8ToLower<7>("ȺȺȺ", "ⱥⱥ");
+	TestStrUtf8ToLower<8>("ȺȺȺ", "ⱥⱥ");
+	TestStrUtf8ToLower<9>("ȺȺȺ", "ⱥⱥ");
+	TestStrUtf8ToLower<10>("ȺȺȺ", "ⱥⱥⱥ");
+	TestStrUtf8ToLower<11>("ȺȺȺ", "ⱥⱥⱥ");
+}
+
+TEST(Str, Utf8CompNocase)
+{
 	EXPECT_TRUE(str_utf8_comp_nocase("ÖlÜ", "ölü") == 0);
 	EXPECT_TRUE(str_utf8_comp_nocase("ÜlÖ", "ölü") > 0); // ü > ö
 	EXPECT_TRUE(str_utf8_comp_nocase("ÖlÜ", "ölüa") < 0); // NULL < a
@@ -513,6 +573,13 @@ TEST(Str, Base64)
 	EXPECT_STREQ(aBuf, "YXN1cmUu");
 	StrBase64Str(aBuf, sizeof(aBuf), "sure.");
 	EXPECT_STREQ(aBuf, "c3VyZS4=");
+
+	StrBase64Str(aBuf, 4, "pleasure.");
+	EXPECT_STREQ(aBuf, "cGx");
+	StrBase64Str(aBuf, 5, "pleasure.");
+	EXPECT_STREQ(aBuf, "cGxl");
+	StrBase64Str(aBuf, 6, "pleasure.");
+	EXPECT_STREQ(aBuf, "cGxlY");
 }
 
 TEST(Str, Base64Decode)
@@ -541,6 +608,9 @@ TEST(Str, Base64Decode)
 	str_copy(aOut, "XXXXXXXXXXXXXXXX", sizeof(aOut));
 	EXPECT_EQ(str_base64_decode(aOut, sizeof(aOut), "////"), 3);
 	EXPECT_STREQ(aOut, "\xff\xff\xffXXXXXXXXXXXXX");
+	str_copy(aOut, "XXXXXXXXXXXXXXXX", sizeof(aOut));
+	EXPECT_EQ(str_base64_decode(aOut, sizeof(aOut), "CQk+"), 3);
+	EXPECT_STREQ(aOut, "		>XXXXXXXXXXXXX");
 }
 
 TEST(Str, Base64DecodeError)
@@ -556,10 +626,17 @@ TEST(Str, Base64DecodeError)
 	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "AAA=AAAA"), 0);
 	// Invalid characters.
 	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "----"), 0);
+	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "A---"), 0);
+	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "AA--"), 0);
+	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "AAA-"), 0);
 	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "AAAA "), 0);
 	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "AAA "), 0);
 	// Invalid padding values.
 	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "//=="), 0);
+	// Wrong output buffer size.
+	EXPECT_LT(str_base64_decode(aBuf, 2, "cGxlYXN1cmUu"), 0);
+	EXPECT_LT(str_base64_decode(aBuf, 3, "cGxlYXN1cmUu"), 0);
+	EXPECT_LT(str_base64_decode(aBuf, 4, "cGxlYXN1cmUu"), 0);
 }
 
 TEST(Str, Tokenize)
@@ -611,6 +688,17 @@ TEST(Str, Format)
 	EXPECT_STREQ(aBuf, "99:");
 }
 
+TEST(Str, FormatNumber)
+{
+	char aBuf[16];
+	EXPECT_EQ(str_format(aBuf, sizeof(aBuf), "%d", 0), 1);
+	EXPECT_STREQ(aBuf, "0");
+	EXPECT_EQ(str_format(aBuf, sizeof(aBuf), "%d", std::numeric_limits<int>::min()), 11);
+	EXPECT_STREQ(aBuf, "-2147483648");
+	EXPECT_EQ(str_format(aBuf, sizeof(aBuf), "%d", std::numeric_limits<int>::max()), 10);
+	EXPECT_STREQ(aBuf, "2147483647");
+}
+
 TEST(Str, FormatTruncate)
 {
 	const char *pStr = "DDNet最好了";
@@ -659,6 +747,14 @@ TEST(Str, TrimWords)
 	EXPECT_STREQ(str_trim_words(pStr3, 3), "dddd");
 	EXPECT_STREQ(str_trim_words(pStr3, 4), "");
 	EXPECT_STREQ(str_trim_words(pStr3, 100), "");
+	const char *pStr4 = "";
+	EXPECT_STREQ(str_trim_words(pStr4, 0), "");
+	EXPECT_STREQ(str_trim_words(pStr4, 1), "");
+	EXPECT_STREQ(str_trim_words(pStr4, 2), "");
+	const char *pStr5 = "     ";
+	EXPECT_STREQ(str_trim_words(pStr5, 0), "");
+	EXPECT_STREQ(str_trim_words(pStr5, 1), "");
+	EXPECT_STREQ(str_trim_words(pStr5, 2), "");
 }
 
 TEST(Str, CopyNum)
@@ -927,118 +1023,152 @@ TEST(Str, HasCc)
 
 TEST(Str, SanitizeCc)
 {
-	char aBuf[64];
-	str_copy(aBuf, "");
-	str_sanitize_cc(aBuf);
-	EXPECT_STREQ(aBuf, "");
-	str_copy(aBuf, "a");
-	str_sanitize_cc(aBuf);
-	EXPECT_STREQ(aBuf, "a");
-	str_copy(aBuf, "Merhaba dünya!");
-	str_sanitize_cc(aBuf);
-	EXPECT_STREQ(aBuf, "Merhaba dünya!");
-
-	str_copy(aBuf, "\n");
-	str_sanitize_cc(aBuf);
-	EXPECT_STREQ(aBuf, " ");
-	str_copy(aBuf, "\r");
-	str_sanitize_cc(aBuf);
-	EXPECT_STREQ(aBuf, " ");
-	str_copy(aBuf, "\t");
-	str_sanitize_cc(aBuf);
-	EXPECT_STREQ(aBuf, " ");
-	str_copy(aBuf, "a\n");
-	str_sanitize_cc(aBuf);
-	EXPECT_STREQ(aBuf, "a ");
-	str_copy(aBuf, "a\rb");
-	str_sanitize_cc(aBuf);
-	EXPECT_STREQ(aBuf, "a b");
-	str_copy(aBuf, "\tb");
-	str_sanitize_cc(aBuf);
-	EXPECT_STREQ(aBuf, " b");
-	str_copy(aBuf, "\n\n");
-	str_sanitize_cc(aBuf);
-	EXPECT_STREQ(aBuf, "  ");
-	str_copy(aBuf, "\x1C");
-	str_sanitize_cc(aBuf);
-	EXPECT_STREQ(aBuf, " ");
-	str_copy(aBuf, "\x1D");
-	str_sanitize_cc(aBuf);
-	EXPECT_STREQ(aBuf, " ");
-	str_copy(aBuf, "\x1E");
-	str_sanitize_cc(aBuf);
-	EXPECT_STREQ(aBuf, " ");
-	str_copy(aBuf, "\x1F");
-	str_sanitize_cc(aBuf);
-	EXPECT_STREQ(aBuf, " ");
+	TestInplace<str_sanitize_cc>("", "");
+	TestInplace<str_sanitize_cc>("a", "a");
+	TestInplace<str_sanitize_cc>("Merhaba dünya!", "Merhaba dünya!");
+	TestInplace<str_sanitize_cc>("\n", " ");
+	TestInplace<str_sanitize_cc>("\r", " ");
+	TestInplace<str_sanitize_cc>("\t", " ");
+	TestInplace<str_sanitize_cc>("a\n", "a ");
+	TestInplace<str_sanitize_cc>("a\rb", "a b");
+	TestInplace<str_sanitize_cc>("\tb", " b");
+	TestInplace<str_sanitize_cc>("\n\n", "  ");
+	TestInplace<str_sanitize_cc>("\x1C", " ");
+	TestInplace<str_sanitize_cc>("\x1D", " ");
+	TestInplace<str_sanitize_cc>("\x1E", " ");
+	TestInplace<str_sanitize_cc>("\x1F", " ");
 }
 
 TEST(Str, Sanitize)
 {
-	char aBuf[64];
-	str_copy(aBuf, "");
-	str_sanitize(aBuf);
-	EXPECT_STREQ(aBuf, "");
-	str_copy(aBuf, "a");
-	str_sanitize(aBuf);
-	EXPECT_STREQ(aBuf, "a");
-	str_copy(aBuf, "Merhaba dünya!");
-	str_sanitize(aBuf);
-	EXPECT_STREQ(aBuf, "Merhaba dünya!");
-	str_copy(aBuf, "\n");
-	str_sanitize(aBuf);
-	EXPECT_STREQ(aBuf, "\n");
-	str_copy(aBuf, "\r");
-	str_sanitize(aBuf);
-	EXPECT_STREQ(aBuf, "\r");
-	str_copy(aBuf, "\t");
-	str_sanitize(aBuf);
-	EXPECT_STREQ(aBuf, "\t");
-	str_copy(aBuf, "a\n");
-	str_sanitize(aBuf);
-	EXPECT_STREQ(aBuf, "a\n");
-	str_copy(aBuf, "a\rb");
-	str_sanitize(aBuf);
-	EXPECT_STREQ(aBuf, "a\rb");
-	str_copy(aBuf, "\tb");
-	str_sanitize(aBuf);
-	EXPECT_STREQ(aBuf, "\tb");
-	str_copy(aBuf, "\n\n");
-	str_sanitize(aBuf);
-	EXPECT_STREQ(aBuf, "\n\n");
+	TestInplace<str_sanitize>("", "");
+	TestInplace<str_sanitize>("a", "a");
+	TestInplace<str_sanitize>("Merhaba dünya!", "Merhaba dünya!");
+	TestInplace<str_sanitize>("\n", "\n");
+	TestInplace<str_sanitize>("\r", "\r");
+	TestInplace<str_sanitize>("\t", "\t");
+	TestInplace<str_sanitize>("a\n", "a\n");
+	TestInplace<str_sanitize>("a\rb", "a\rb");
+	TestInplace<str_sanitize>("\tb", "\tb");
+	TestInplace<str_sanitize>("\n\n", "\n\n");
+	TestInplace<str_sanitize>("\x1C", " ");
+	TestInplace<str_sanitize>("\x1D", " ");
+	TestInplace<str_sanitize>("\x1E", " ");
+	TestInplace<str_sanitize>("\x1F", " ");
+}
 
-	str_copy(aBuf, "\x1C");
-	str_sanitize(aBuf);
-	EXPECT_STREQ(aBuf, " ");
-	str_copy(aBuf, "\x1D");
-	str_sanitize(aBuf);
-	EXPECT_STREQ(aBuf, " ");
-	str_copy(aBuf, "\x1E");
-	str_sanitize(aBuf);
-	EXPECT_STREQ(aBuf, " ");
-	str_copy(aBuf, "\x1F");
-	str_sanitize(aBuf);
-	EXPECT_STREQ(aBuf, " ");
+TEST(Str, SanitizeFilename)
+{
+	TestInplace<str_sanitize_filename>("", "");
+	TestInplace<str_sanitize_filename>("a", "a");
+	TestInplace<str_sanitize_filename>("Merhaba dünya!", "Merhaba dünya!");
+	TestInplace<str_sanitize_filename>("привет Наташа", "привет Наташа");
+	TestInplace<str_sanitize_filename>("ąçęįǫų", "ąçęįǫų");
+	TestInplace<str_sanitize_filename>("DDNet最好了", "DDNet最好了");
+	TestInplace<str_sanitize_filename>("aβい🐘", "aβい🐘");
+	TestInplace<str_sanitize_filename>("foo.bar", "foo.bar");
+	TestInplace<str_sanitize_filename>("foo.bar.baz", "foo.bar.baz");
+	TestInplace<str_sanitize_filename>(".a..b...c....d", ".a..b...c....d");
+	TestInplace<str_sanitize_filename>("\n", " ");
+	TestInplace<str_sanitize_filename>("\r", " ");
+	TestInplace<str_sanitize_filename>("\t", " ");
+	TestInplace<str_sanitize_filename>("a\n", "a ");
+	TestInplace<str_sanitize_filename>("a\rb", "a b");
+	TestInplace<str_sanitize_filename>("\tb", " b");
+	TestInplace<str_sanitize_filename>("\n\n", "  ");
+	TestInplace<str_sanitize_filename>("\x1C", " ");
+	TestInplace<str_sanitize_filename>("\x1D", " ");
+	TestInplace<str_sanitize_filename>("\x1E", " ");
+	TestInplace<str_sanitize_filename>("\x1F", " ");
+	TestInplace<str_sanitize_filename>("\u007F", " ");
+	TestInplace<str_sanitize_filename>("\\", " ");
+	TestInplace<str_sanitize_filename>("/", " ");
+	TestInplace<str_sanitize_filename>("|", " ");
+	TestInplace<str_sanitize_filename>(":", " ");
+	TestInplace<str_sanitize_filename>("*", " ");
+	TestInplace<str_sanitize_filename>("?", " ");
+	TestInplace<str_sanitize_filename>("<", " ");
+	TestInplace<str_sanitize_filename>(">", " ");
+	TestInplace<str_sanitize_filename>("\"", " ");
+	TestInplace<str_sanitize_filename>("\\/|:*?<>\"", "         ");
+}
+
+TEST(Str, ValidFilename)
+{
+	EXPECT_TRUE(str_valid_filename("a"));
+	EXPECT_TRUE(str_valid_filename("abc"));
+	EXPECT_TRUE(str_valid_filename("abc abc"));
+	EXPECT_TRUE(str_valid_filename("aa bb ccc dddd eeeee"));
+	EXPECT_TRUE(str_valid_filename("öüä"));
+	EXPECT_TRUE(str_valid_filename("привет Наташа"));
+	EXPECT_TRUE(str_valid_filename("ąçęįǫų"));
+	EXPECT_TRUE(str_valid_filename("DDNet最好了"));
+	EXPECT_TRUE(str_valid_filename("aβい🐘"));
+	EXPECT_TRUE(str_valid_filename("foo.bar"));
+	EXPECT_TRUE(str_valid_filename("foo.bar.baz"));
+	EXPECT_TRUE(str_valid_filename(".a..b...c....d"));
+
+	EXPECT_FALSE(str_valid_filename(""));
+	EXPECT_FALSE(str_valid_filename("aa\nbb"));
+	EXPECT_FALSE(str_valid_filename("aa\rbb"));
+	EXPECT_FALSE(str_valid_filename("aa\tbb"));
+	EXPECT_FALSE(str_valid_filename("aa\u001Cbb"));
+	EXPECT_FALSE(str_valid_filename("aa\u001Dbb"));
+	EXPECT_FALSE(str_valid_filename("aa\u001Ebb"));
+	EXPECT_FALSE(str_valid_filename("aa\u001Fbb"));
+	EXPECT_FALSE(str_valid_filename("aa\u007Fbb"));
+	EXPECT_FALSE(str_valid_filename("aa\\bb"));
+	EXPECT_FALSE(str_valid_filename("aa/bb"));
+	EXPECT_FALSE(str_valid_filename("aa|bb"));
+	EXPECT_FALSE(str_valid_filename("aa:bb"));
+	EXPECT_FALSE(str_valid_filename("aa*bb"));
+	EXPECT_FALSE(str_valid_filename("aa?bb"));
+	EXPECT_FALSE(str_valid_filename("aa<bb"));
+	EXPECT_FALSE(str_valid_filename("aa>bb"));
+	EXPECT_FALSE(str_valid_filename("aa\"bb"));
+	EXPECT_FALSE(str_valid_filename("\\/|:*?<>\""));
+	EXPECT_FALSE(str_valid_filename("aa bb")); // EM QUAD
+	EXPECT_FALSE(str_valid_filename("aa​bb")); // ZERO WIDTH SPACE
+	EXPECT_FALSE(str_valid_filename(" abc"));
+	EXPECT_FALSE(str_valid_filename("   abc"));
+	EXPECT_FALSE(str_valid_filename("abc "));
+	EXPECT_FALSE(str_valid_filename("abc   "));
+	EXPECT_FALSE(str_valid_filename("abc   abc"));
+	EXPECT_FALSE(str_valid_filename(" abc abc "));
+	EXPECT_FALSE(str_valid_filename("   abc   abc   "));
+	EXPECT_FALSE(str_valid_filename("abc."));
+	EXPECT_FALSE(str_valid_filename("abc..."));
+	EXPECT_FALSE(str_valid_filename("abc... "));
+	EXPECT_FALSE(str_valid_filename("abc ..."));
+
+	// reserved names
+	EXPECT_FALSE(str_valid_filename("con"));
+	EXPECT_FALSE(str_valid_filename("CON"));
+	EXPECT_FALSE(str_valid_filename("cOn"));
+	EXPECT_FALSE(str_valid_filename("con.txt"));
+	EXPECT_FALSE(str_valid_filename("con.tar.gz"));
+	EXPECT_FALSE(str_valid_filename("CON.TAR.GZ"));
+	EXPECT_FALSE(str_valid_filename("PRN"));
+	EXPECT_FALSE(str_valid_filename("AUX"));
+	EXPECT_FALSE(str_valid_filename("NUL"));
+	EXPECT_FALSE(str_valid_filename("COM4"));
+	EXPECT_FALSE(str_valid_filename("lpt²"));
+	// reserved names allowed as prefix if not separated by period
+	EXPECT_TRUE(str_valid_filename("console"));
+	EXPECT_TRUE(str_valid_filename("console.log"));
+	EXPECT_TRUE(str_valid_filename("console.tar.gz"));
+	EXPECT_TRUE(str_valid_filename("Auxiliary"));
+	EXPECT_TRUE(str_valid_filename("Null"));
+	EXPECT_TRUE(str_valid_filename("Null.txt"));
 }
 
 TEST(Str, CleanWhitespaces)
 {
-	char aBuf[64];
-	str_copy(aBuf, "aa bb ccc dddd eeeee");
-	str_clean_whitespaces(aBuf);
-	EXPECT_STREQ(aBuf, "aa bb ccc dddd eeeee");
-	str_copy(aBuf, "     ");
-	str_clean_whitespaces(aBuf);
-	EXPECT_STREQ(aBuf, "");
-	str_copy(aBuf, "     aa");
-	str_clean_whitespaces(aBuf);
-	EXPECT_STREQ(aBuf, "aa");
-	str_copy(aBuf, "aa     ");
-	str_clean_whitespaces(aBuf);
-	EXPECT_STREQ(aBuf, "aa");
-	str_copy(aBuf, "  aa   bb    ccc     dddd       eeeee    ");
-	str_clean_whitespaces(aBuf);
-	EXPECT_STREQ(aBuf, "aa bb ccc dddd eeeee");
+	TestInplace<str_clean_whitespaces>("aa bb ccc dddd eeeee", "aa bb ccc dddd eeeee");
+	TestInplace<str_clean_whitespaces>("     ", "");
+	TestInplace<str_clean_whitespaces>("     aa", "aa");
+	TestInplace<str_clean_whitespaces>("aa     ", "aa");
+	TestInplace<str_clean_whitespaces>("  aa   bb    ccc     dddd       eeeee    ", "aa bb ccc dddd eeeee");
 }
 
 TEST(Str, SkipToWhitespace)

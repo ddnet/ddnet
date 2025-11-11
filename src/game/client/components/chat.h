@@ -2,17 +2,18 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_CHAT_H
 #define GAME_CLIENT_COMPONENTS_CHAT_H
-#include <vector>
-
 #include <engine/console.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
 #include <engine/shared/ringbuffer.h>
 
+#include <generated/protocol7.h>
+
 #include <game/client/component.h>
 #include <game/client/lineinput.h>
 #include <game/client/render.h>
-#include <game/generated/protocol7.h>
+
+#include <vector>
 
 constexpr auto SAVES_FILE = "ddnet-saves.txt";
 
@@ -29,8 +30,13 @@ class CChat : public CComponent
 	};
 
 	CLineInputBuffered<MAX_LINE_LENGTH> m_Input;
-	struct CLine
+	class CLine
 	{
+	public:
+		CLine();
+		void Reset(CChat &This);
+
+		bool m_Initialized;
 		int64_t m_Time;
 		float m_aYOffset[2];
 		int m_ClientId;
@@ -65,11 +71,17 @@ class CChat : public CComponent
 		// client IDs for special messages
 		CLIENT_MSG = -2,
 		SERVER_MSG = -1,
+	};
 
+	enum
+	{
 		MODE_NONE = 0,
 		MODE_ALL,
 		MODE_TEAM,
+	};
 
+	enum
+	{
 		CHAT_SERVER = 0,
 		CHAT_HIGHLIGHT,
 		CHAT_CLIENT,
@@ -84,10 +96,11 @@ class CChat : public CComponent
 	int m_PlaceholderOffset;
 	int m_PlaceholderLength;
 	static char ms_aDisplayText[MAX_LINE_LENGTH];
-	struct CRateablePlayer
+	class CRateablePlayer
 	{
-		int ClientId;
-		int Score;
+	public:
+		int m_ClientId;
+		int m_Score;
 	};
 	CRateablePlayer m_aPlayerCompletionList[MAX_CLIENTS];
 	int m_PlayerCompletionListLength;
@@ -111,8 +124,8 @@ class CChat : public CComponent
 		bool operator==(const CCommand &Other) const { return str_comp(m_aName, Other.m_aName) == 0; }
 	};
 
-	std::vector<CCommand> m_vCommands;
-	bool m_CommandsNeedSorting;
+	std::vector<CCommand> m_vServerCommands;
+	bool m_ServerCommandsNeedSorting;
 
 	struct CHistoryEntry
 	{

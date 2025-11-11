@@ -2,11 +2,11 @@
 
 #include <game/editor/editor.h>
 
-CLayerTune::CLayerTune(CEditor *pEditor, int w, int h) :
-	CLayerTiles(pEditor, w, h)
+CLayerTune::CLayerTune(CEditorMap *pMap, int w, int h) :
+	CLayerTiles(pMap, w, h)
 {
 	str_copy(m_aName, "Tune");
-	m_Tune = 1;
+	m_HasTune = true;
 
 	m_pTuneTile = new CTuneTile[w * h];
 	mem_zero(m_pTuneTile, (size_t)w * h * sizeof(CTuneTile));
@@ -19,7 +19,7 @@ CLayerTune::CLayerTune(const CLayerTune &Other) :
 	CLayerTiles(Other)
 {
 	str_copy(m_aName, "Tune copy");
-	m_Tune = 1;
+	m_HasTune = true;
 
 	m_pTuneTile = new CTuneTile[m_Width * m_Height];
 	mem_copy(m_pTuneTile, Other.m_pTuneTile, (size_t)m_Width * m_Height * sizeof(CTuneTile));
@@ -48,40 +48,50 @@ void CLayerTune::Resize(int NewW, int NewH)
 	CLayerTiles::Resize(NewW, NewH);
 
 	// resize gamelayer too
-	if(m_pEditor->m_Map.m_pGameLayer->m_Width != NewW || m_pEditor->m_Map.m_pGameLayer->m_Height != NewH)
-		m_pEditor->m_Map.m_pGameLayer->Resize(NewW, NewH);
+	if(Map()->m_pGameLayer->m_Width != NewW || Map()->m_pGameLayer->m_Height != NewH)
+		Map()->m_pGameLayer->Resize(NewW, NewH);
 }
 
-void CLayerTune::Shift(int Direction)
+void CLayerTune::Shift(EShiftDirection Direction)
 {
 	CLayerTiles::Shift(Direction);
-	ShiftImpl(m_pTuneTile, Direction, m_pEditor->m_ShiftBy);
+	ShiftImpl(m_pTuneTile, Direction, Editor()->m_ShiftBy);
 }
 
-bool CLayerTune::IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer)
+bool CLayerTune::IsEmpty() const
 {
-	for(int y = 0; y < pLayer->m_Height; y++)
-		for(int x = 0; x < pLayer->m_Width; x++)
-			if(m_pEditor->IsAllowPlaceUnusedTiles() || IsValidTuneTile(pLayer->GetTile(x, y).m_Index))
+	for(int y = 0; y < m_Height; y++)
+	{
+		for(int x = 0; x < m_Width; x++)
+		{
+			const int Index = GetTile(x, y).m_Index;
+			if(Index == 0)
+			{
+				continue;
+			}
+			if(Editor()->IsAllowPlaceUnusedTiles() || IsValidTuneTile(Index))
+			{
 				return false;
-
+			}
+		}
+	}
 	return true;
 }
 
-void CLayerTune::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
+void CLayerTune::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 {
 	if(m_Readonly)
 		return;
 
-	std::shared_ptr<CLayerTune> pTuneLayer = std::static_pointer_cast<CLayerTune>(pBrush);
+	CLayerTune *pTuneLayer = static_cast<CLayerTune *>(pBrush);
 	int sx = ConvertX(WorldPos.x);
 	int sy = ConvertY(WorldPos.y);
-	if(str_comp(pTuneLayer->m_aFileName, m_pEditor->m_aFileName))
+	if(str_comp(pTuneLayer->m_aFilename, Editor()->m_aFilename))
 	{
-		m_pEditor->m_TuningNum = pTuneLayer->m_TuningNumber;
+		Editor()->m_TuningNumber = pTuneLayer->m_TuningNumber;
 	}
 
-	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(pTuneLayer);
+	bool Destructive = Editor()->m_BrushDrawDestructive || pTuneLayer->IsEmpty();
 
 	for(int y = 0; y < pTuneLayer->m_Height; y++)
 		for(int x = 0; x < pTuneLayer->m_Width; x++)
@@ -103,17 +113,17 @@ void CLayerTune::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 				m_pTuneTile[TgtIndex].m_Type,
 				m_pTiles[TgtIndex].m_Index};
 
-			if((m_pEditor->IsAllowPlaceUnusedTiles() || IsValidTuneTile(pTuneLayer->m_pTiles[SrcIndex].m_Index)) && pTuneLayer->m_pTiles[SrcIndex].m_Index != TILE_AIR)
+			if((Editor()->IsAllowPlaceUnusedTiles() || IsValidTuneTile(pTuneLayer->m_pTiles[SrcIndex].m_Index)) && pTuneLayer->m_pTiles[SrcIndex].m_Index != TILE_AIR)
 			{
-				if(m_pEditor->m_TuningNum != pTuneLayer->m_TuningNumber)
+				if(Editor()->m_TuningNumber != pTuneLayer->m_TuningNumber)
 				{
-					m_pTuneTile[TgtIndex].m_Number = m_pEditor->m_TuningNum;
+					m_pTuneTile[TgtIndex].m_Number = Editor()->m_TuningNumber;
 				}
 				else if(pTuneLayer->m_pTuneTile[SrcIndex].m_Number)
 					m_pTuneTile[TgtIndex].m_Number = pTuneLayer->m_pTuneTile[SrcIndex].m_Number;
 				else
 				{
-					if(!m_pEditor->m_TuningNum)
+					if(!Editor()->m_TuningNumber)
 					{
 						m_pTuneTile[TgtIndex].m_Number = 0;
 						m_pTuneTile[TgtIndex].m_Type = 0;
@@ -121,7 +131,7 @@ void CLayerTune::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 						continue;
 					}
 					else
-						m_pTuneTile[TgtIndex].m_Number = m_pEditor->m_TuningNum;
+						m_pTuneTile[TgtIndex].m_Number = Editor()->m_TuningNumber;
 				}
 
 				m_pTuneTile[TgtIndex].m_Type = pTuneLayer->m_pTiles[SrcIndex].m_Index;
@@ -201,21 +211,21 @@ void CLayerTune::BrushRotate(float Amount)
 	}
 }
 
-void CLayerTune::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect)
+void CLayerTune::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 {
 	if(m_Readonly || (!Empty && pBrush->m_Type != LAYERTYPE_TILES))
 		return;
 
-	Snap(&Rect); // corrects Rect; no need of <=
+	Snap(&Rect);
 
 	int sx = ConvertX(Rect.x);
 	int sy = ConvertY(Rect.y);
 	int w = ConvertX(Rect.w);
 	int h = ConvertY(Rect.h);
 
-	std::shared_ptr<CLayerTune> pLt = std::static_pointer_cast<CLayerTune>(pBrush);
+	CLayerTune *pLt = static_cast<CLayerTune *>(pBrush);
 
-	bool Destructive = m_pEditor->m_BrushDrawDestructive || Empty || IsEmpty(pLt);
+	bool Destructive = Editor()->m_BrushDrawDestructive || Empty || pLt->IsEmpty();
 
 	for(int y = 0; y < h; y++)
 	{
@@ -238,7 +248,7 @@ void CLayerTune::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRe
 				m_pTuneTile[TgtIndex].m_Type,
 				m_pTiles[TgtIndex].m_Index};
 
-			if(Empty || (!m_pEditor->IsAllowPlaceUnusedTiles() && !IsValidTuneTile((pLt->m_pTiles[SrcIndex]).m_Index)))
+			if(Empty || (!Editor()->IsAllowPlaceUnusedTiles() && !IsValidTuneTile((pLt->m_pTiles[SrcIndex]).m_Index)))
 			{
 				m_pTiles[TgtIndex].m_Index = 0;
 				m_pTuneTile[TgtIndex].m_Type = 0;
@@ -250,12 +260,12 @@ void CLayerTune::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRe
 			else
 			{
 				m_pTiles[TgtIndex] = pLt->m_pTiles[SrcIndex];
-				if(pLt->m_Tune && m_pTiles[TgtIndex].m_Index > 0)
+				if(pLt->m_HasTune && m_pTiles[TgtIndex].m_Index > 0)
 				{
 					m_pTuneTile[TgtIndex].m_Type = m_pTiles[fy * m_Width + fx].m_Index;
 
-					if((pLt->m_pTuneTile[SrcIndex].m_Number == 0 && m_pEditor->m_TuningNum) || m_pEditor->m_TuningNum != pLt->m_TuningNumber)
-						m_pTuneTile[TgtIndex].m_Number = m_pEditor->m_TuningNum;
+					if((pLt->m_pTuneTile[SrcIndex].m_Number == 0 && Editor()->m_TuningNumber) || Editor()->m_TuningNumber != pLt->m_TuningNumber)
+						m_pTuneTile[TgtIndex].m_Number = Editor()->m_TuningNumber;
 					else
 						m_pTuneTile[TgtIndex].m_Number = pLt->m_pTuneTile[SrcIndex].m_Number;
 				}
@@ -279,7 +289,19 @@ void CLayerTune::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRe
 	FlagModified(sx, sy, w, h);
 }
 
-bool CLayerTune::ContainsElementWithId(int Id)
+int CLayerTune::FindNextFreeNumber() const
+{
+	for(int i = 1; i <= 255; i++)
+	{
+		if(!ContainsElementWithId(i))
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
+bool CLayerTune::ContainsElementWithId(int Id) const
 {
 	for(int y = 0; y < m_Height; ++y)
 	{

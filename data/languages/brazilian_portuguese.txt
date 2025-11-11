@@ -1382,7 +1382,7 @@ Rifle Laser Outline Color
 == Cor de contorno do laser do rifle
 
 Rifle Laser Inner Color
-== Cor de interna do laser do rifle
+== Cor interna do laser do rifle
 
 Shotgun Laser Outline Color
 == Cor contorno do laser da espingarda
@@ -1447,10 +1447,6 @@ Are you sure that you want to reset the controls to their defaults?
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == Falha durante a inicialização. Tente alterar gfx_backend para OpenGL ou Vulkan em settings_ddnet.cfg no diretório de configuração e tente novamente.
-
-[Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== VRAM insuficiente. Tente remover recursos personalizados (skins, entidades, etc.), especialmente aqueles com alta resolução.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
@@ -1608,12 +1604,12 @@ Go back the specified duration
 == Voltar na duração especificada
 
 [Demo player duration]
-%d min.
-== %d min.
+%s min.
+== %s min.
 
 [Demo player duration]
-%d sec.
-== %d seg.
+%s sec.
+== %s seg.
 
 Change the skip duration
 == Alterar a duração de pulo
@@ -2012,9 +2008,6 @@ Active: Hook
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
 == "%s" não é compatível com pnglite e não pode ser carregado por versões antigas do DDNet:
 
-Loading background map
-== Carregando mapa de fundo
-
 [Spectating Camera Mode Icon]
 AUTO
 == AUTO
@@ -2119,63 +2112,378 @@ Show spectator cursor
 == Mostrar cursor do observador
 
 No demo with this filename exists
-== 
+== Não existe nnhuma demo com esse nome
 
 Map size
-== 
+== Tamanho do mapa
 
 Show number of spectators
-== 
+== Mostrar número de observadores
 
 [Show name plates]
 None
-== 
+== Nenhum
 
 [Show name plates]
 Own
-== 
+== Próprio
 
 [Show name plates]
 Others
-== 
+== Outros
 
 [Show name plates]
 All
-== 
+== Todos
 
 Name plates offset
-== 
+== Posição de placas de nome
 
 Show friend icon in name plates
-== 
+== Mostrar ícone de amigo em placas de nome
 
-Show client IDs on a seperate line
-== 
+Show client IDs on a separate line
+== Mostrar IDs de clientes em uma linha separada
 
 Client IDs size
-== 
+== Tamanho de IDs de cliente
 
 Show players' key presses
-== 
+== Mostrar pressionamentos de teclas dos jogadores
 
 [Show players' key presses]
 None
-== 
+== Nenhum
 
 [Show players' key presses]
 Own
-== 
+== Próprio
 
 [Show players' key presses]
 Others
-== 
+== Outros
 
 [Show players' key presses]
 All
-== 
+== Todos
 
 Preview dummy's name plate
-== 
+== Pré-visualizar placas de nome do dummy
 
 AntiPing: prediction margin
-== 
+== AntiPing: margem de previsão
+
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== Sem VRAM. Tente definir 'cl_skins_loaded_max' para um valor menor ou remova recursos personalizados (skins, entidades, etc.), especialmente aqueles com alta resolução.
+
+This name cannot be used for files and folders
+== Este nome não pode ser usado para arquivos e pastas
+
+This skin name cannot be used.
+== Este nome de skin não pode ser usado.
+
+Skin could not be loaded due to an error. Check the local console for details.
+== Não foi possível carregar a skin devido a um erro. Verifique o console local para detalhes.
+
+Skin could not be found.
+== Não foi possível encontrar a skin.
+
+No skins match your filter criteria
+== Nenhuma skin corresponde aos seus critérios de filtro
+
+Preview player's name plate
+== Pré-visualizar placa de identificação do jogador
+
+Dragger Outline Color
+== Cor de contorno do dragger
+
+Dragger Inner Color
+== Cor interna do dragger
+
+[Spectating]
+Following %d: %s
+== Seguindo %d: %s
+
+Loading map
+== Carregando mapa
+
+Error checking player name
+== Erro ao verificar nome de jogador
+
+Could not check for existing player with your name. Check your internet connection.
+== Não foi possível verificar se há um jogador com o seu nome. Verifique sua conexão de internet. 
+
+Press Ctrl+Shift+G to disable debug graphs.
+== Pressione Ctrl+Shift+G para desabilitar grafos de depuração.
+
+Server could not be started
+== O servidor não pôde ser iniciado
+
+Could not get server list from master server
+== Não foi possível obter a lista de servidores do servidor mestre
+
+[Demo playback]
+Live
+== Ao vivo
+
+[Demo playback]
+Go to Live
+== Ir para ao vivo
+
+Save all changes before turning off the editor?
+== Salvar todas as alterações antes de desligar o editor?
+
+Layout
+== Layout
+
+Visibility
+== Visibilidade
+
+Behavior
+== Comportamento
+
+Delete button
+== Excluir botão
+
+Are you sure that you want to delete this button?
+== Tem certeza de que deseja excluir este botão?
+
+Duplicate
+== Duplicar
+
+New button already created
+== Novo botão já criado
+
+A new button has already been created, please save or delete it before creating another one.
+== Um novo botão já foi criado, por favor salve-o ou exclua-o antes de criar outro.
+
+Please save your changes before duplicating a button.
+== Salve suas alterações antes de duplicar um botão.
+
+No space for button
+== Sem espaço para botão
+
+There is not enough space available to place another button.
+== Não há espaço disponível para colocar outro botão.
+
+There is not enough space available to place another button with this size. The button has been resized.
+== Não há espaço suficiente disponível para colocar outro botão com este tamanho. O botão foi redimensionado.
+
+Deselect
+== Desmarcar
+
+You'll lose unsaved changes after deselecting.
+== Você vai perder as alterações não salvas após desmarcar.
+
+Width
+== Largura
+
+Height
+== Altura
+
+Shape
+== Formato
+
+[Touch button shape]
+Rectangle
+== Retângulo
+
+[Touch button shape]
+Circle
+== Círculo
+
+[Touch button label type]
+Plain
+== Plano
+
+[Touch button label type]
+Localized
+== Localizado
+
+[Touch button label type]
+Icon
+== Ícone
+
+Behavior type
+== Tipo de comportamento
+
+[Touch button behavior]
+Bind
+== Atribuição
+
+[Touch button behavior]
+Bind Toggle
+== Alternar atribuição
+
+[Touch button behavior]
+Predefined
+== Predefinido
+
+Command
+== Comando
+
+Label
+== Rótulo
+
+Label type
+== Tipo de rótulo
+
+Add command
+== Adicionar comando
+
+Delete command
+== Excluir comando
+
+[Touch button visibility preview]
+Included
+== Incluído
+
+[Touch button visibility preview]
+Excluded
+== Excluído
+
+[Touch button visibility preview]
+Ignore
+== Ignorar
+
+Long press on a touch button to select it.
+== Matenha pressionado um botão de toque para selecioná-lo.
+
+New button
+== Novo botão
+
+Select button by touch
+== Selecione o botão por toque
+
+No buttons match your filter criteria
+== Novos botões correspondem ao seu critério de filtro
+
+File
+== Arquivo
+
+Buttons
+== Botões
+
+Active color
+== Cor ativa
+
+Inactive color
+== Cor inativa
+
+Preview button visibility while the editor is active.
+== Confira a visibilidade do botão enquanto o editor está ativo.
+
+Show all buttons
+== Mostrar todos os botões
+
+Save all changes before switching selected button?
+== Salvar todas as alterações antes de trocar o botão selecionado?
+
+Discard
+== Descartar
+
+There is not enough space available for the button. Check its visibilities and size.
+== Não há espaço suficiente disponível para o botão. Confirma suas visibilidades e seu tamanho.
+
+Selected button not visible
+== Botão selecionado não visível
+
+The selected button is not visible. Do you want to deselect it or edit its visibility?
+== O botão selecionado não está visível. Deseja desmarcá-lo ou editar sua visibilidade?
+
+Edit
+== Editar
+
+Width and height are required to be within the range from %d to %d.
+== Largura e altura são exigidas para estar dentro do intervalo de %d e %d.
+
+Button position is outside of the screen.
+== A posição do botão está fora da tela.
+
+The selected button is overlapping with other buttons.
+== O botão selecionado está se sobrepondo a outros botões.
+
+Wrong button settings
+== Configurações de botão incorretas
+
+[Touch button visibilities]
+Ingame
+== No jogo
+
+[Touch button visibilities]
+Zoom Allowed
+== Zoom permitido
+
+[Touch button visibilities]
+Vote Active
+== Voto ativo
+
+[Touch button visibilities]
+Dummy Allowed
+== Dummy permitido
+
+[Touch button visibilities]
+Dummy Connected
+== Dummy conectado
+
+[Touch button visibilities]
+Rcon Authed
+== Rcon autenticado
+
+[Touch button visibilities]
+Demo Player
+== Reprodutor de demo
+
+[Touch button visibilities]
+Extra Menu
+== Menu extra
+
+[Predefined touch button behaviors]
+Ingame Menu
+== Menu no jogo
+
+[Predefined touch button behaviors]
+Extra Menu
+== Menu extra
+
+[Predefined touch button behaviors]
+Emoticon
+== Emoticon
+
+[Predefined touch button behaviors]
+Spectate
+== Observar
+
+[Predefined touch button behaviors]
+Swap Action
+== Trocar ação
+
+[Predefined touch button behaviors]
+Use Action
+== Ação de usar
+
+[Predefined touch button behaviors]
+Joystick Action
+== Ação com joystick
+
+[Predefined touch button behaviors]
+Joystick Aim
+== Mirar com joystick
+
+[Predefined touch button behaviors]
+Joystick Fire
+== Atirar com joystick
+
+[Predefined touch button behaviors]
+Joystick Hook
+== Gancho com joystick
+
+Chat background color
+== Cor de fundo do chat
+
+Censor profanity
+== Censurar palavrões
+
+Download
+== Download

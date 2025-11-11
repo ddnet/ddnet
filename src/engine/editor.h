@@ -8,14 +8,12 @@ class IEditor : public IInterface
 {
 	MACRO_INTERFACE("editor")
 public:
-	virtual ~IEditor() {}
 	virtual void Init() = 0;
 	virtual void OnUpdate() = 0;
 	virtual void OnRender() = 0;
 	virtual void OnActivate() = 0;
 	virtual void OnWindowResize() = 0;
 	virtual void OnClose() = 0;
-	virtual void OnDialogClose() = 0;
 	virtual bool HasUnsavedData() const = 0;
 	virtual bool HandleMapDrop(const char *pFilename, int StorageType) = 0;
 	virtual bool Load(const char *pFilename, int StorageType) = 0;

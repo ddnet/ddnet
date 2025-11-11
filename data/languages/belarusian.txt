@@ -1394,7 +1394,7 @@ Learn
 == Вікі
 
 https://wiki.ddnet.org/
-== https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/be
 
 Tutorial
 == Навучанне
@@ -1573,12 +1573,12 @@ Go back the specified duration
 == Назад на выбраную працягласць
 
 [Demo player duration]
-%d min.
-== %d хв.
+%s min.
+== %s хв.
 
 [Demo player duration]
-%d sec.
-== %d сек.
+%s sec.
+== %s сек.
 
 Change the skip duration
 == Змяніць працягласць пропуску
@@ -1673,10 +1673,6 @@ A render command failed. Try to update your GPU drivers.
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == Памылка падчас ініцыялізацыі. Паспрабуйце змяніць gfx_backend на OpenGL або Vulcan у settings_dnet.cfg ў тэчцы канфігурацыйных файлаў і паспрабуйце яшчэ раз.
-
-[Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== Недахоп VRAM. Паспрабуйце выдаліць карыстацкія тэкстуры (скіны, энтыты і г.д.), асабліва тыя, якія маюць высокую разрознасць.
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
@@ -1827,355 +1823,667 @@ Team %d (%d/%d)
 == Каманда %d (%d/%d)
 
 https://wiki.ddnet.org/wiki/Mapping
-== https://wiki.ddnet.org/wiki/Mapping
+== https://wiki.ddnet.org/wiki/Mapping/be
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Belarusian translation by arionwt1997, Chill [TD] and PoKeMoN [TD]
+== Перакладзена на беларускую: arionwt1997, Chill [TD] і PoKeMoN [TD]
 
 Could not resolve connect address '%s'. See local console for details.
-== 
+== Не атрымалася вызначыць адрас падлучэння '%s'. Для атрымання дэталей праверце лакальную кансоль.
 
 Connect address error
-== 
+== Памылка адраса падлучэння
 
 Could not connect dummy
-== 
+== Не атрымалася падлучыць даммі
 
 No demo with this filename exists
-== 
+== Дэма з такім імем файла не існуе
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
-== 
+== "%s" не сумяшчальный з pnglite и не можа быць загружаны старымі версіямі DDNet
 
 Some fonts could not be loaded. Check the local console for details.
-== 
-
-Loading background map
-== 
+== Некаторыя шрыфты не атрымалася загрузіць. Для атрымання дэталей праверце лакальную кансоль.
 
 Auto-sync player camera
-== 
+== Аўтасінхранізацыя з камерай гульца
 
 [Auto camera]
 Disabled
-== 
+== Адключана
 
 [Auto camera]
 Enabled
-== 
+== Уключана
 
 [Auto camera]
 Unavailable for this player
-== 
+== Недаступна для гэтага гульца
 
 [Auto camera]
 Inactive
-== 
+== Неактыўная
 
 [Auto camera]
 Active
-== 
+== Актыўная
 
 Loading maps…
-== 
+== Загрузка карт…
 
 [Spectating Camera Mode Icon]
 AUTO
-== 
+== АЎТА
 
 Save skin
-== 
+== Захаваць скін
 
 Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== 
+== Вы ўпэўненыя, што хочаце захаваць ваш скін? Калі скін з гэтым імем ужо існуе, ён будзе заменены.
 
 Unable to save the skin
-== 
+== Немагчыма захаваць скін
 
 Unable to save the skin with a reserved name
-== 
+== Немагчыма захаваць скін з зарэзерваваным імём
 
 No local servers found (ports %d-%d)
-== 
+== Лакальныя серверы не знойдзены (парты %d-%d)
 
 Online friends (%d)
-== 
+== Сябры анлайн (%d)
 
 Add friends by entering their name below or by clicking their name in the player list.
-== 
+== Дадавайце сяброў, уводзячы іх імя ніжэй або націскаючы на іх імя ў спісе гульцоў.
 
 Add clanmates by entering their clan below and leaving the name blank.
-== 
+== Дадавайце чальцоў клана, уводзячы назву клана ніжэй і пакідаючы імя пустым.
 
 Toggle auto camera
-== 
+== Пераключэнне аўта камеры
 
 Map size
-== 
+== Памер карты
 
 Dummy is not allowed on this server
-== 
+== Даммі не дазволены на гэтым серверы
 
 Please wait…
-== 
+== Калі ласка пачакайце…
 
 Edit touch controls
-== 
+== Налады сэнсарнага кіравання
 
 Close
-== 
+== Зачыніць
 
 https://wiki.ddnet.org/wiki/Touch_controls
-== 
+== https://wiki.ddnet.org/wiki/Touch_controls/be
 
 Save changes
-== 
+== Захаваць змены
 
 Error saving touch controls
-== 
+== Памылка захавання налад сэнсарнага кіравання
 
 Could not save touch controls to file. See local console for details.
-== 
+== Не атрымалася захаваць налады сэнсарнага кіравання ў файл. Для атрымання дэталей праверце лакальную кансоль.
 
 Unsaved changes
-== 
+== Незахаваныя змены
 
 Discard changes
-== 
+== Адмяніць змены
 
 Are you sure that you want to discard the current changes to the touch controls?
-== 
+== Вы ўпэўненыя, што хочаце адмяніць бягучыя змены налад сэнсарнага кіравання?
 
 Are you sure that you want to reset the touch controls to default?
-== 
+== Вы ўпэўненыя, што хочаце скінуць налады сэнсарнага кіравання да значэнняў па змаўчанні?
 
 Import from clipboard
-== 
+== Імпарт з буфера абмену
 
 Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
-== 
+== Вы ўпэўненыя, што хочаце імпартаваць налады сэнсарнага кіравання з буфера абмену? Гэта перазапіша вашы бягучыя налады сэнсарнага кіравання.
 
 Export to clipboard
-== 
+== Экспарт у буфер абмену
 
 Direct touch input while ingame
-== 
+== Прамы дотык у гульні
 
 [Direct touch input]
 Disabled
-== 
+== Адключаны
 
 [Direct touch input]
 Active action
-== 
+== Актыўнае дзеянне
 
 [Direct touch input]
 Aim
-== 
+== Прыцэл
 
 [Direct touch input]
 Fire
-== 
+== Стрэл
 
 [Direct touch input]
 Hook
-== 
+== Крук
 
 Direct touch input while spectating
-== 
+== Прамы дотык, калі назіраешь
 
 Error loading touch controls
-== 
+== Памылка загрузцы налад сэнсарнага кіравання
 
 Could not load touch controls from file. See local console for details.
-== 
+== Не атрымалася загрузіць налады сэнсарнага кіравання з файла. Для атрымання дэталей праверце лакальную кансоль.
 
 Could not load default touch controls from file. See local console for details.
-== 
+== Не атрымалася загрузіць стандартныя налады сэнсарнага кіравання з файла. Для атрымання дэталей праверце лакальную кансоль.
 
 Could not load touch controls from clipboard. See local console for details.
-== 
+== Не атрымалася загрузіць налады сэнсарнага кіравання з буфера абмену. Для атрымання дэталей праверце лакальную кансоль.
 
 Community
-== 
+== Суполка
 
 [Team status]
 forbidden
-== 
+== забаронены
 
 [Team status]
 solo
-== 
+== сола
 
 [Team status]
 allowed
-== 
+== дазволены
 
 [Team status]
 required
-== 
+== патрабуюцца
 
 Teams
-== 
+== Каманды
 
 [Team size]
 minimum
-== 
+== мінімальны
 
 [Team size]
 maximum
-== 
+== максімальны
 
 [Hertz]
 Hz
-== 
+== Гц
 
 Saves file
-== 
+== Файл захаванняў
 
 Open the saves file
-== 
+== Адкрыць файл захаванняў
 
 Show FPS
-== 
+== Паказваць FPS
 
 Renders your frame rate in the top right
-== 
+== Выносіць вашу частату кадраў у верхні правы вугал
 
 Show spectator cursor
-== 
+== Паказваць курсор назіранага гульца пры назіранні
 
 Show client IDs (scoreboard, chat, spectator)
-== 
+== Паказваць ID кліентаў (табло, чат, назіральнік)
 
 Show number of spectators
-== 
+== Паказваць колькасць назіральнікаў
 
 [Show name plates]
 None
-== 
+== Ніякія
 
 [Show name plates]
 Own
-== 
+== Мае
 
 [Show name plates]
 Others
-== 
+== Іншыя
 
 [Show name plates]
 All
-== 
+== Усе
 
 Name plates offset
-== 
+== Зрушэнне таблічак з імёнамі
 
 Show friend icon in name plates
-== 
+== Паказваць іконку сябра ў таблічках з імёнамі
 
 Show client IDs in name plates
-== 
+== Паказваць ID кліента ў таблічках імёнаў
 
-Show client IDs on a seperate line
-== 
+Show client IDs on a separate line
+== Паказваць ID кліента ў асобным радку
 
 Client IDs size
-== 
+== Памер ID кліента
 
 Hook Strength
-== 
+== Сіла крука
 
 Size of hook strength icon and number indicator
-== 
+== Памер іконкі сілы крука і нумара індыкатара
 
 Key Presses
-== 
+== Націсканні клавіш
 
 Show players' key presses
-== 
+== Паказваць націснутыя гульцамі клавішы
 
 [Show players' key presses]
 None
-== 
+== Ніякія
 
 [Show players' key presses]
 Own
-== 
+== Мае
 
 [Show players' key presses]
 Others
-== 
+== Іншыя
 
 [Show players' key presses]
 All
-== 
+== Усе
 
 Size of key press icons
-== 
+== Памер іконак націснутых клавіш
 
 Preview dummy's name plate
-== 
+== Прадпрагляд таблічкі з імем даммі
 
 Width of your own hook collision line
-== 
+== Шырыня вашай лініі сутыкнення крука
 
 Width of others' hook collision line
-== 
+== Шырыня лініі сутыкнення крука іншага гульца
 
 Preview 'Hook collisions' being pressed
-== 
+== Прадпрагляд пры націсканні 'Сутыкненні крука'
 
 AntiPing: prediction margin
-== 
+== АнтыПінг: мяжа прагназавання
 
 Basic
-== 
+== Асноўныя
 
 Custom
-== 
+== Карыстацкія
 
 Are you sure that you want to delete '%s'?
-== 
+== Вы ўпэўненыя, што хочаце выдаліць '%s'?
 
 Delete skin
-== 
+== Выдаліць скін
 
 Unable to delete skin
-== 
+== Немагчыма выдаліць скін
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
-== 
+== Не атрымалася запусціць сервер. Не забудзьцеся даць дазвол на атрыманне апавяшчэнняў у наладах праграмы, каб сервер мог працаваць у фонавым рэжыме.
 
 [skins]
 Body
-== 
+== Цела
 
 [skins]
 Marking
-== 
+== Афарбоўка
 
 [skins]
 Decoration
-== 
+== Упрыгажэння
 
 [skins]
 Hands
-== 
+== Рукі
 
 [skins]
 Feet
-== 
+== Ногі
 
 [skins]
 Eyes
-== 
+== Вочы
 
 Aim
-== 
+== Прыцэл
 
 Active: Fire
-== 
+== Актыўна: Стрэл
 
 Active: Hook
+== Актыўна: Крук
+
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+Press Ctrl+Shift+G to disable debug graphs.
+== 
+
+[Spectating]
+Following %d: %s
+== 
+
+Server could not be started
+== 
+
+Loading map
+== 
+
+This name cannot be used for files and folders
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
+== 
+
+Could not get server list from master server
+== 
+
+[Demo playback]
+Live
+== 
+
+[Demo playback]
+Go to Live
+== 
+
+Save all changes before turning off the editor?
+== 
+
+Layout
+== 
+
+Visibility
+== 
+
+Behavior
+== 
+
+Delete button
+== 
+
+Are you sure that you want to delete this button?
+== 
+
+Duplicate
+== 
+
+New button already created
+== 
+
+A new button has already been created, please save or delete it before creating another one.
+== 
+
+Please save your changes before duplicating a button.
+== 
+
+No space for button
+== 
+
+There is not enough space available to place another button.
+== 
+
+There is not enough space available to place another button with this size. The button has been resized.
+== 
+
+Deselect
+== 
+
+You'll lose unsaved changes after deselecting.
+== 
+
+Width
+== 
+
+Height
+== 
+
+Shape
+== 
+
+[Touch button shape]
+Rectangle
+== 
+
+[Touch button shape]
+Circle
+== 
+
+[Touch button label type]
+Plain
+== 
+
+[Touch button label type]
+Localized
+== 
+
+[Touch button label type]
+Icon
+== 
+
+Behavior type
+== 
+
+[Touch button behavior]
+Bind
+== 
+
+[Touch button behavior]
+Bind Toggle
+== 
+
+[Touch button behavior]
+Predefined
+== 
+
+Command
+== 
+
+Label
+== 
+
+Label type
+== 
+
+Add command
+== 
+
+Delete command
+== 
+
+[Touch button visibility preview]
+Included
+== 
+
+[Touch button visibility preview]
+Excluded
+== 
+
+[Touch button visibility preview]
+Ignore
+== 
+
+Long press on a touch button to select it.
+== 
+
+New button
+== 
+
+Select button by touch
+== 
+
+No buttons match your filter criteria
+== 
+
+File
+== 
+
+Buttons
+== 
+
+Active color
+== 
+
+Inactive color
+== 
+
+Preview button visibility while the editor is active.
+== 
+
+Show all buttons
+== 
+
+Save all changes before switching selected button?
+== 
+
+Discard
+== 
+
+There is not enough space available for the button. Check its visibilities and size.
+== 
+
+Selected button not visible
+== 
+
+The selected button is not visible. Do you want to deselect it or edit its visibility?
+== 
+
+Edit
+== 
+
+Width and height are required to be within the range from %d to %d.
+== 
+
+Button position is outside of the screen.
+== 
+
+The selected button is overlapping with other buttons.
+== 
+
+Wrong button settings
+== 
+
+[Touch button visibilities]
+Ingame
+== 
+
+[Touch button visibilities]
+Zoom Allowed
+== 
+
+[Touch button visibilities]
+Vote Active
+== 
+
+[Touch button visibilities]
+Dummy Allowed
+== 
+
+[Touch button visibilities]
+Dummy Connected
+== 
+
+[Touch button visibilities]
+Rcon Authed
+== 
+
+[Touch button visibilities]
+Demo Player
+== 
+
+[Touch button visibilities]
+Extra Menu
+== 
+
+[Predefined touch button behaviors]
+Ingame Menu
+== 
+
+[Predefined touch button behaviors]
+Extra Menu
+== 
+
+[Predefined touch button behaviors]
+Emoticon
+== 
+
+[Predefined touch button behaviors]
+Spectate
+== 
+
+[Predefined touch button behaviors]
+Swap Action
+== 
+
+[Predefined touch button behaviors]
+Use Action
+== 
+
+[Predefined touch button behaviors]
+Joystick Action
+== 
+
+[Predefined touch button behaviors]
+Joystick Aim
+== 
+
+[Predefined touch button behaviors]
+Joystick Fire
+== 
+
+[Predefined touch button behaviors]
+Joystick Hook
+== 
+
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
+No skins match your filter criteria
+== 
+
+Censor profanity
+== 
+
+Chat background color
+== 
+
+Preview player's name plate
+== 
+
+Dragger Outline Color
+== 
+
+Dragger Inner Color
+== 
+
+Download
 == 

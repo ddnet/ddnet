@@ -1,11 +1,11 @@
 #ifndef GAME_EDITOR_AUTO_MAP_H
 #define GAME_EDITOR_AUTO_MAP_H
 
+#include <game/editor/map_object.h>
+
 #include <vector>
 
-#include "component.h"
-
-class CAutoMapper : public CEditorComponent
+class CAutoMapper : public CMapObject
 {
 	class CIndexInfo
 	{
@@ -72,7 +72,7 @@ class CAutoMapper : public CEditorComponent
 	};
 
 public:
-	explicit CAutoMapper(CEditor *pEditor);
+	explicit CAutoMapper(CEditorMap *pMap);
 
 	void Load(const char *pTileName);
 	void Unload();
@@ -80,12 +80,12 @@ public:
 	void ProceedLocalized(class CLayerTiles *pLayer, class CLayerTiles *pGameLayer, int ReferenceId, int ConfigId, int Seed = 0, int X = 0, int Y = 0, int Width = -1, int Height = -1);
 	void Proceed(class CLayerTiles *pLayer, class CLayerTiles *pGameLayer, int ReferenceId, int ConfigId, int Seed = 0, int SeedOffsetX = 0, int SeedOffsetY = 0);
 	int ConfigNamesNum() const { return m_vConfigs.size(); }
-	const char *GetConfigName(int Index);
+	const char *GetConfigName(int Index) const;
 
 	bool IsLoaded() const { return m_FileLoaded; }
 
 private:
-	std::vector<CConfiguration> m_vConfigs = {};
+	std::vector<CConfiguration> m_vConfigs;
 	bool m_FileLoaded = false;
 };
 

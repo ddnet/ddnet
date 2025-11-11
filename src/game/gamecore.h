@@ -3,17 +3,18 @@
 #ifndef GAME_GAMECORE_H
 #define GAME_GAMECORE_H
 
+#include "prng.h"
+
 #include <base/vmath.h>
 
-#include <map>
-#include <set>
-#include <vector>
-
 #include <engine/shared/protocol.h>
-#include <game/generated/protocol.h>
+
+#include <generated/protocol.h>
+
 #include <game/teamscore.h>
 
-#include "prng.h"
+#include <set>
+#include <vector>
 
 class CCollision;
 class CTeamsCore;
@@ -64,6 +65,8 @@ public:
 	bool Get(const char *pName, float *pValue) const;
 	static const char *Name(int Index) { return ms_apNames[Index]; }
 	float GetWeaponFireDelay(int Weapon) const;
+
+	static const CTuningParams DEFAULT;
 };
 
 // Do not use these function unless for legacy code!
@@ -111,8 +114,8 @@ enum
 	HOOK_IDLE = 0,
 	HOOK_RETRACT_START = 1,
 	HOOK_RETRACT_END = 3,
-	HOOK_FLYING,
-	HOOK_GRABBED,
+	HOOK_FLYING = 4,
+	HOOK_GRABBED = 5,
 
 	COREEVENT_GROUND_JUMP = 0x01,
 	COREEVENT_AIR_JUMP = 0x02,
@@ -153,7 +156,7 @@ public:
 		m_pPrng = nullptr;
 	}
 
-	int RandomOr0(int BelowThis)
+	int RandomOr0(int BelowThis) // NOLINT(readability-make-member-function-const)
 	{
 		if(BelowThis <= 1 || !m_pPrng)
 		{
@@ -194,8 +197,9 @@ public:
 	void SetHookedPlayer(int HookedPlayer);
 
 	int m_ActiveWeapon;
-	struct WeaponStat
+	class CWeaponStat
 	{
+	public:
 		int m_AmmoRegenStart;
 		int m_Ammo;
 		int m_Ammocost;

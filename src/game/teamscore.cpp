@@ -1,6 +1,8 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #include "teamscore.h"
+
 #include <base/system.h>
+
 #include <engine/shared/config.h>
 
 CTeamsCore::CTeamsCore()
@@ -20,7 +22,7 @@ int CTeamsCore::Team(int ClientId) const
 
 void CTeamsCore::Team(int ClientId, int Team)
 {
-	dbg_assert(Team >= TEAM_FLOCK && Team <= TEAM_SUPER, "invalid team");
+	dbg_assert(Team >= TEAM_FLOCK && Team < NUM_DDRACE_TEAMS, "invalid team %d", Team);
 	m_aTeam[ClientId] = Team;
 }
 

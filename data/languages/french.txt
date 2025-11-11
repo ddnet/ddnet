@@ -436,8 +436,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Les changements prendront effet au prochain redémarrage.
 
-##### needs translation #####
-
 New name:
 == Nouveau nom :
 
@@ -1388,10 +1386,6 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 == Échec lors de l'initialisation. Essayez de changer gfx_backend à OpenGL ou Vulkan dans le fichier settings_ddnet.cfg dans le dossier de configuration et réessayez.
 
 [Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== Mémoire graphique insuffisante. Essayez de retirer des ressources personnalisées (skins, entités, etc.), en particulier celles de haute résolution.
-
-[Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
 == Une erreur est survenue pendant l'enregistrement des commandes. Essayez de mettre à jour vos pilotes GPU.
 
@@ -1661,12 +1655,12 @@ Go back the specified duration
 == Saut arrière de la durée spécifiée
 
 [Demo player duration]
-%d min.
-== %d min.
+%s min.
+== %s min.
 
 [Demo player duration]
-%d sec.
-== %d sec.
+%s sec.
+== %s sec.
 
 Change the skip duration
 == Modifier la durée du saut
@@ -2015,13 +2009,17 @@ https://wiki.ddnet.org/wiki/Mapping
 English translation by the DDNet Team
 == French translation by lordskelethom, Ubu, Choupom, clecle226, SunnyPistache, Pipou, Chairn, T tee, NRK, Nouaa, Sucre, archimede67, Sukya, Emilcha and Yubel
 
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+Press Ctrl+Shift+G to disable debug graphs.
+== 
+
 No demo with this filename exists
 == 
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
-== 
-
-Loading background map
 == 
 
 Auto-sync player camera
@@ -2050,8 +2048,41 @@ Active
 Loading maps…
 == 
 
+[Spectating]
+Following %d: %s
+== 
+
 [Spectating Camera Mode Icon]
 AUTO
+== 
+
+Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
+== 
+
+Server could not be started
+== 
+
+Loading map
+== 
+
+This name cannot be used for files and folders
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
+== 
+
+Could not get server list from master server
+== 
+
+[Demo playback]
+Live
+== 
+
+[Demo playback]
+Go to Live
 == 
 
 Toggle auto camera
@@ -2060,7 +2091,7 @@ Toggle auto camera
 Map size
 == 
 
-https://wiki.ddnet.org/wiki/Touch_controls
+Save all changes before turning off the editor?
 == 
 
 Community
@@ -2093,10 +2124,270 @@ minimum
 maximum
 == 
 
+Layout
+== 
+
+Visibility
+== 
+
+Behavior
+== 
+
+Delete button
+== 
+
+Are you sure that you want to delete this button?
+== 
+
+Duplicate
+== 
+
+New button already created
+== 
+
+A new button has already been created, please save or delete it before creating another one.
+== 
+
+Please save your changes before duplicating a button.
+== 
+
+No space for button
+== 
+
+There is not enough space available to place another button.
+== 
+
+There is not enough space available to place another button with this size. The button has been resized.
+== 
+
+Deselect
+== 
+
+You'll lose unsaved changes after deselecting.
+== 
+
+Width
+== 
+
+Height
+== 
+
+Shape
+== 
+
+[Touch button shape]
+Rectangle
+== 
+
+[Touch button shape]
+Circle
+== 
+
+[Touch button label type]
+Plain
+== 
+
+[Touch button label type]
+Localized
+== 
+
+[Touch button label type]
+Icon
+== 
+
+Behavior type
+== 
+
+[Touch button behavior]
+Bind
+== 
+
+[Touch button behavior]
+Bind Toggle
+== 
+
+[Touch button behavior]
+Predefined
+== 
+
+Command
+== 
+
+Label
+== 
+
+Label type
+== 
+
+Add command
+== 
+
+Delete command
+== 
+
+[Touch button visibility preview]
+Included
+== 
+
+[Touch button visibility preview]
+Excluded
+== 
+
+[Touch button visibility preview]
+Ignore
+== 
+
+Long press on a touch button to select it.
+== 
+
+New button
+== 
+
+Select button by touch
+== 
+
+No buttons match your filter criteria
+== 
+
+File
+== 
+
+Buttons
+== 
+
+Active color
+== 
+
+Inactive color
+== 
+
+Preview button visibility while the editor is active.
+== 
+
+Show all buttons
+== 
+
+https://wiki.ddnet.org/wiki/Touch_controls
+== 
+
+Save all changes before switching selected button?
+== 
+
+Discard
+== 
+
+There is not enough space available for the button. Check its visibilities and size.
+== 
+
+Selected button not visible
+== 
+
+The selected button is not visible. Do you want to deselect it or edit its visibility?
+== 
+
+Edit
+== 
+
+Width and height are required to be within the range from %d to %d.
+== 
+
+Button position is outside of the screen.
+== 
+
+The selected button is overlapping with other buttons.
+== 
+
+Wrong button settings
+== 
+
+[Touch button visibilities]
+Ingame
+== 
+
+[Touch button visibilities]
+Zoom Allowed
+== 
+
+[Touch button visibilities]
+Vote Active
+== 
+
+[Touch button visibilities]
+Dummy Allowed
+== 
+
+[Touch button visibilities]
+Dummy Connected
+== 
+
+[Touch button visibilities]
+Rcon Authed
+== 
+
+[Touch button visibilities]
+Demo Player
+== 
+
+[Touch button visibilities]
+Extra Menu
+== 
+
+[Predefined touch button behaviors]
+Ingame Menu
+== 
+
+[Predefined touch button behaviors]
+Extra Menu
+== 
+
+[Predefined touch button behaviors]
+Emoticon
+== 
+
+[Predefined touch button behaviors]
+Spectate
+== 
+
+[Predefined touch button behaviors]
+Swap Action
+== 
+
+[Predefined touch button behaviors]
+Use Action
+== 
+
+[Predefined touch button behaviors]
+Joystick Action
+== 
+
+[Predefined touch button behaviors]
+Joystick Aim
+== 
+
+[Predefined touch button behaviors]
+Joystick Fire
+== 
+
+[Predefined touch button behaviors]
+Joystick Hook
+== 
+
 Saves file
 == 
 
 Open the saves file
+== 
+
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
+No skins match your filter criteria
 == 
 
 Show FPS
@@ -2109,6 +2400,12 @@ Show spectator cursor
 == 
 
 Show number of spectators
+== 
+
+Censor profanity
+== 
+
+Chat background color
 == 
 
 [Show name plates]
@@ -2136,7 +2433,7 @@ Show friend icon in name plates
 Show client IDs in name plates
 == 
 
-Show client IDs on a seperate line
+Show client IDs on a separate line
 == 
 
 Client IDs size
@@ -2173,11 +2470,20 @@ All
 Size of key press icons
 == 
 
+Preview player's name plate
+== 
+
 Preview dummy's name plate
+== 
+
+Dragger Outline Color
+== 
+
+Dragger Inner Color
 == 
 
 AntiPing: prediction margin
 == 
 
-Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
+Download
 == 

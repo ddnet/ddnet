@@ -3,9 +3,9 @@
 #ifndef ENGINE_FRIENDS_H
 #define ENGINE_FRIENDS_H
 
-#include <engine/shared/protocol.h>
-
 #include "kernel.h"
+
+#include <engine/shared/protocol.h>
 
 struct CFriendInfo
 {
@@ -24,9 +24,8 @@ public:
 		FRIEND_NO = 0,
 		FRIEND_CLAN,
 		FRIEND_PLAYER,
-
-		MAX_FRIENDS = 4096,
 	};
+	static constexpr auto MAX_FRIENDS = 4096;
 
 	virtual void Init(bool Foes = false) = 0;
 

@@ -1,14 +1,15 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #include "dragger.h"
+
 #include "character.h"
 #include "dragger_beam.h"
 
 #include <engine/server.h>
 #include <engine/shared/config.h>
 
-#include <game/generated/protocol.h>
-#include <game/mapitems.h>
+#include <generated/protocol.h>
 
+#include <game/mapitems.h>
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
 #include <game/server/teams.h>
@@ -28,7 +29,7 @@ CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool Ignore
 	{
 		TargetId = -1;
 	}
-	mem_zero(m_apDraggerBeam, sizeof(m_apDraggerBeam));
+	std::fill(std::begin(m_apDraggerBeam), std::end(m_apDraggerBeam), nullptr);
 	GameWorld()->InsertEntity(this);
 }
 
@@ -57,7 +58,7 @@ void CDragger::LookForPlayersToDrag()
 {
 	// Create a list of players who are in the range of the dragger
 	CEntity *apPlayersInRange[MAX_CLIENTS];
-	mem_zero(apPlayersInRange, sizeof(apPlayersInRange));
+	std::fill(std::begin(apPlayersInRange), std::end(apPlayersInRange), nullptr);
 
 	int NumPlayersInRange = GameServer()->m_World.FindEntities(m_Pos,
 		g_Config.m_SvDraggerRange - CCharacterCore::PhysicalSize(),
@@ -68,13 +69,10 @@ void CDragger::LookForPlayersToDrag()
 	bool aCanStillBeTeamTarget[MAX_CLIENTS];
 	bool aIsTarget[MAX_CLIENTS];
 	int aMinDistInTeam[MAX_CLIENTS];
-	mem_zero(aCanStillBeTeamTarget, sizeof(aCanStillBeTeamTarget));
-	mem_zero(aMinDistInTeam, sizeof(aMinDistInTeam));
-	mem_zero(aIsTarget, sizeof(aIsTarget));
-	for(int &TargetId : aClosestTargetIdInTeam)
-	{
-		TargetId = -1;
-	}
+	std::fill(std::begin(aCanStillBeTeamTarget), std::end(aCanStillBeTeamTarget), false);
+	std::fill(std::begin(aMinDistInTeam), std::end(aMinDistInTeam), 0);
+	std::fill(std::begin(aIsTarget), std::end(aIsTarget), false);
+	std::fill(std::begin(aClosestTargetIdInTeam), std::end(aClosestTargetIdInTeam), -1);
 
 	for(int i = 0; i < NumPlayersInRange; i++)
 	{
@@ -203,7 +201,7 @@ void CDragger::Snap(int SnappingClient)
 
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 
-	int Subtype = (m_IgnoreWalls ? 1 : 0) | (clamp(round_to_int(m_Strength - 1.f), 0, 2) << 1);
+	int Subtype = (m_IgnoreWalls ? 1 : 0) | (std::clamp(round_to_int(m_Strength - 1.f), 0, 2) << 1);
 
 	int StartTick;
 	if(SnappingClientVersion >= VERSION_DDNET_ENTITY_NETOBJS)
@@ -217,8 +215,8 @@ void CDragger::Snap(int SnappingClient)
 		if(SnappingClient != SERVER_DEMO_CLIENT &&
 			(GameServer()->m_apPlayers[SnappingClient]->GetTeam() == TEAM_SPECTATORS ||
 				GameServer()->m_apPlayers[SnappingClient]->IsPaused()) &&
-			GameServer()->m_apPlayers[SnappingClient]->m_SpectatorId != SPEC_FREEVIEW)
-			pChar = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorId);
+			GameServer()->m_apPlayers[SnappingClient]->SpectatorId() != SPEC_FREEVIEW)
+			pChar = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->SpectatorId());
 
 		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
 		if(pChar && m_Layer == LAYER_SWITCH && m_Number > 0 &&
@@ -232,7 +230,7 @@ void CDragger::Snap(int SnappingClient)
 			StartTick = Server()->Tick();
 	}
 
-	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetId(),
+	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Server()->IsSixup(SnappingClient), SnappingClient), GetId(),
 		m_Pos, m_Pos, StartTick, -1, LASERTYPE_DRAGGER, Subtype, m_Number);
 }
 

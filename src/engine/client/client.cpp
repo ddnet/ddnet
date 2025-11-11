@@ -1,6 +1,12 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include "client.h"
+
+#include "demoedit.h"
+#include "friends.h"
+#include "serverbrowser.h"
+
 #include <base/hash.h>
 #include <base/hash_ctxt.h>
 #include <base/log.h>
@@ -8,24 +14,19 @@
 #include <base/math.h>
 #include <base/system.h>
 
-#include <engine/external/json-parser/json.h>
-
 #include <engine/config.h>
 #include <engine/console.h>
 #include <engine/discord.h>
 #include <engine/editor.h>
 #include <engine/engine.h>
+#include <engine/external/json-parser/json.h>
 #include <engine/favorites.h>
 #include <engine/graphics.h>
 #include <engine/input.h>
 #include <engine/keys.h>
 #include <engine/map.h>
+#include <engine/notifications.h>
 #include <engine/serverbrowser.h>
-#include <engine/sound.h>
-#include <engine/steam.h>
-#include <engine/storage.h>
-#include <engine/textrender.h>
-
 #include <engine/shared/assertion_logger.h>
 #include <engine/shared/compression.h>
 #include <engine/shared/config.h>
@@ -39,24 +40,21 @@
 #include <engine/shared/protocol.h>
 #include <engine/shared/protocol7.h>
 #include <engine/shared/protocol_ex.h>
+#include <engine/shared/protocolglue.h>
 #include <engine/shared/rust_version.h>
 #include <engine/shared/snapshot.h>
 #include <engine/shared/uuid_manager.h>
+#include <engine/sound.h>
+#include <engine/steam.h>
+#include <engine/storage.h>
+#include <engine/textrender.h>
 
-#include <game/generated/protocol.h>
-#include <game/generated/protocol7.h>
-#include <game/generated/protocolglue.h>
-
-#include <engine/shared/protocolglue.h>
+#include <generated/protocol.h>
+#include <generated/protocol7.h>
+#include <generated/protocolglue.h>
 
 #include <game/localization.h>
 #include <game/version.h>
-
-#include "client.h"
-#include "demoedit.h"
-#include "friends.h"
-#include "notifications.h"
-#include "serverbrowser.h"
 
 #if defined(CONF_VIDEORECORDER)
 #include "video.h"
@@ -64,6 +62,8 @@
 
 #if defined(CONF_PLATFORM_ANDROID)
 #include <android/android_main.h>
+#elif defined(CONF_PLATFORM_EMSCRIPTEN)
+#include <emscripten/emscripten.h>
 #endif
 
 #include "SDL.h"
@@ -73,21 +73,20 @@
 
 #include <chrono>
 #include <limits>
-#include <new>
 #include <stack>
 #include <thread>
 #include <tuple>
 
 using namespace std::chrono_literals;
 
-static const ColorRGBA gs_ClientNetworkPrintColor{0.7f, 1, 0.7f, 1.0f};
-static const ColorRGBA gs_ClientNetworkErrPrintColor{1.0f, 0.25f, 0.25f, 1.0f};
+static constexpr ColorRGBA gs_ClientNetworkPrintColor{0.7f, 1, 0.7f, 1.0f};
+static constexpr ColorRGBA gs_ClientNetworkErrPrintColor{1.0f, 0.25f, 0.25f, 1.0f};
 
 CClient::CClient() :
 	m_DemoPlayer(&m_SnapshotDelta, true, [&]() { UpdateDemoIntraTimers(); }),
-	m_InputtimeMarginGraph(128),
-	m_aGametimeMarginGraphs{128, 128},
-	m_FpsGraph(4096)
+	m_InputtimeMarginGraph(128, 2, true),
+	m_aGametimeMarginGraphs{{128, 2, true}, {128, 2, true}},
+	m_FpsGraph(4096, 0, true)
 {
 	m_StateStartTime = time_get();
 	for(auto &DemoRecorder : m_aDemoRecorder)
@@ -131,10 +130,6 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 				MsgId = protocol7::NETMSG_INPUT;
 			else if(MsgId == NETMSG_RCON_AUTH)
 				MsgId = protocol7::NETMSG_RCON_AUTH;
-			else if(MsgId == NETMSGTYPE_CL_SETTEAM)
-				MsgId = protocol7::NETMSGTYPE_CL_SETTEAM;
-			else if(MsgId == NETMSGTYPE_CL_VOTE)
-				MsgId = protocol7::NETMSGTYPE_CL_VOTE;
 			else if(MsgId == NETMSG_PING)
 				MsgId = protocol7::NETMSG_PING;
 			else
@@ -316,7 +311,7 @@ float CClient::GotMaplistPercentage() const
 
 bool CClient::ConnectionProblems() const
 {
-	return m_aNetClient[g_Config.m_ClDummy].GotProblems(MaxLatencyTicks() * time_freq() / GameTickSpeed()) != 0;
+	return m_aNetClient[g_Config.m_ClDummy].GotProblems(MaxLatencyTicks() * time_freq() / GameTickSpeed());
 }
 
 void CClient::SendInput()
@@ -430,9 +425,12 @@ void CClient::SetState(EClientState State)
 
 	if(State == IClient::STATE_ONLINE)
 	{
-		const bool AnnounceAddr = m_ServerBrowser.IsRegistered(ServerAddress());
-		Discord()->SetGameInfo(ServerAddress(), m_aCurrentMap, AnnounceAddr);
-		Steam()->SetGameInfo(ServerAddress(), m_aCurrentMap, AnnounceAddr);
+		const bool Registered = m_ServerBrowser.IsRegistered(ServerAddress());
+		CServerInfo CurrentServerInfo;
+		GetServerInfo(&CurrentServerInfo);
+
+		Discord()->SetGameInfo(CurrentServerInfo, m_aCurrentMap, Registered);
+		Steam()->SetGameInfo(ServerAddress(), m_aCurrentMap, Registered);
 	}
 	else if(OldState == IClient::STATE_ONLINE)
 	{
@@ -488,7 +486,7 @@ void CClient::EnterGame(int Conn)
 	if(State() == IClient::STATE_DEMOPLAYBACK)
 		return;
 
-	m_aCodeRunAfterJoin[Conn] = false;
+	m_aDidPostConnect[Conn] = false;
 
 	// now we will wait for two snapshots
 	// to finish the connection
@@ -499,7 +497,74 @@ void CClient::EnterGame(int Conn)
 	m_CurrentServerNextPingTime = time_get() + time_freq() / 2;
 }
 
-void GenerateTimeoutCode(char *pBuffer, unsigned Size, char *pSeed, const NETADDR *pAddrs, int NumAddrs, bool Dummy)
+void CClient::OnPostConnect(int Conn, bool Dummy)
+{
+	if(!m_ServerCapabilities.m_ChatTimeoutCode)
+		return;
+
+	char aBuf[128];
+	char aBufMsg[256];
+	if(!g_Config.m_ClRunOnJoin[0] && !g_Config.m_ClDummyDefaultEyes && !g_Config.m_ClPlayerDefaultEyes)
+		str_format(aBufMsg, sizeof(aBufMsg), "/timeout %s", m_aTimeoutCodes[Conn]);
+	else
+		str_format(aBufMsg, sizeof(aBufMsg), "/mc;timeout %s", m_aTimeoutCodes[Conn]);
+
+	if(g_Config.m_ClDummyDefaultEyes || g_Config.m_ClPlayerDefaultEyes)
+	{
+		int Emote = ((g_Config.m_ClDummy) ? !Dummy : Dummy) ? g_Config.m_ClDummyDefaultEyes : g_Config.m_ClPlayerDefaultEyes;
+		char aBufEmote[128];
+		aBufEmote[0] = '\0';
+		switch(Emote)
+		{
+		case EMOTE_NORMAL:
+			break;
+		case EMOTE_PAIN:
+			str_format(aBufEmote, sizeof(aBufEmote), "emote pain %d", g_Config.m_ClEyeDuration);
+			break;
+		case EMOTE_HAPPY:
+			str_format(aBufEmote, sizeof(aBufEmote), "emote happy %d", g_Config.m_ClEyeDuration);
+			break;
+		case EMOTE_SURPRISE:
+			str_format(aBufEmote, sizeof(aBufEmote), "emote surprise %d", g_Config.m_ClEyeDuration);
+			break;
+		case EMOTE_ANGRY:
+			str_format(aBufEmote, sizeof(aBufEmote), "emote angry %d", g_Config.m_ClEyeDuration);
+			break;
+		case EMOTE_BLINK:
+			str_format(aBufEmote, sizeof(aBufEmote), "emote blink %d", g_Config.m_ClEyeDuration);
+			break;
+		}
+		if(aBufEmote[0])
+		{
+			str_format(aBuf, sizeof(aBuf), ";%s", aBufEmote);
+			str_append(aBufMsg, aBuf);
+		}
+	}
+	if(g_Config.m_ClRunOnJoin[0])
+	{
+		str_format(aBuf, sizeof(aBuf), ";%s", g_Config.m_ClRunOnJoin);
+		str_append(aBufMsg, aBuf);
+	}
+	if(IsSixup())
+	{
+		protocol7::CNetMsg_Cl_Say Msg7;
+		Msg7.m_Mode = protocol7::CHAT_ALL;
+		Msg7.m_Target = -1;
+		Msg7.m_pMessage = aBufMsg;
+		SendPackMsg(Conn, &Msg7, MSGFLAG_VITAL, true);
+	}
+	else
+	{
+		CNetMsg_Cl_Say MsgP;
+		MsgP.m_Team = 0;
+		MsgP.m_pMessage = aBufMsg;
+		CMsgPacker PackerTimeout(&MsgP);
+		MsgP.Pack(&PackerTimeout);
+		SendMsg(Conn, &PackerTimeout, MSGFLAG_VITAL);
+	}
+}
+
+static void GenerateTimeoutCode(char *pBuffer, unsigned Size, char *pSeed, const NETADDR *pAddrs, int NumAddrs, bool Dummy)
 {
 	MD5_CTX Md5;
 	md5_init(&Md5);
@@ -569,9 +634,9 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	{
 		NETADDR NextAddr;
 		char aHost[128];
-		int url = net_addr_from_url(&NextAddr, aBuffer, aHost, sizeof(aHost));
+		const int UrlParseResult = net_addr_from_url(&NextAddr, aBuffer, aHost, sizeof(aHost));
 		bool Sixup = NextAddr.type & NETTYPE_TW7;
-		if(url > 0)
+		if(UrlParseResult > 0)
 			str_copy(aHost, aBuffer);
 
 		if(net_host_lookup(aHost, &NextAddr, m_aNetClient[CONN_MAIN].NetType()) != 0)
@@ -669,6 +734,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 	}
 
 	m_aRconAuthed[0] = 0;
+	// Make sure to clear credentials completely from memory
 	mem_zero(m_aRconUsername, sizeof(m_aRconUsername));
 	mem_zero(m_aRconPassword, sizeof(m_aRconPassword));
 	m_MapDetailsPresent = false;
@@ -857,64 +923,74 @@ void CClient::SnapSetStaticsize7(int ItemType, int Size)
 void CClient::RenderDebug()
 {
 	if(!g_Config.m_Debug)
+	{
 		return;
+	}
 
-	static NETSTATS s_Prev, s_Current;
-	static int64_t s_LastSnapTime = 0;
-	static float s_FrameTimeAvg = 0;
+	const std::chrono::nanoseconds Now = time_get_nanoseconds();
+	if(Now - m_NetstatsLastUpdate > 1s)
+	{
+		m_NetstatsLastUpdate = Now;
+		m_NetstatsPrev = m_NetstatsCurrent;
+		net_stats(&m_NetstatsCurrent);
+	}
+
 	char aBuffer[512];
+	const float FontSize = 16.0f;
 
 	Graphics()->TextureSet(m_DebugFont);
 	Graphics()->MapScreen(0, 0, Graphics()->ScreenWidth(), Graphics()->ScreenHeight());
 	Graphics()->QuadsBegin();
 
-	if(time_get() - s_LastSnapTime > time_freq())
+	str_format(aBuffer, sizeof(aBuffer), "Game/predicted tick: %d/%d", m_aCurGameTick[g_Config.m_ClDummy], m_aPredTick[g_Config.m_ClDummy]);
+	Graphics()->QuadsText(2, 2, FontSize, aBuffer);
+
+	str_format(aBuffer, sizeof(aBuffer), "Prediction time: %d ms", GetPredictionTime());
+	Graphics()->QuadsText(2, 2 + FontSize, FontSize, aBuffer);
+
+	str_format(aBuffer, sizeof(aBuffer), "FPS: %3d", round_to_int(1.0f / m_FrameTimeAverage));
+	Graphics()->QuadsText(20.0f * FontSize, 2, FontSize, aBuffer);
+
+	str_format(aBuffer, sizeof(aBuffer), "Frametime: %4d us", round_to_int(m_FrameTimeAverage * 1000000.0f));
+	Graphics()->QuadsText(20.0f * FontSize, 2 + FontSize, FontSize, aBuffer);
+
+	str_format(aBuffer, sizeof(aBuffer), "%16s: %" PRIu64 " KiB", "Texture memory", Graphics()->TextureMemoryUsage() / 1024);
+	Graphics()->QuadsText(32.0f * FontSize, 2, FontSize, aBuffer);
+
+	str_format(aBuffer, sizeof(aBuffer), "%16s: %" PRIu64 " KiB", "Buffer memory", Graphics()->BufferMemoryUsage() / 1024);
+	Graphics()->QuadsText(32.0f * FontSize, 2 + FontSize, FontSize, aBuffer);
+
+	str_format(aBuffer, sizeof(aBuffer), "%16s: %" PRIu64 " KiB", "Streamed memory", Graphics()->StreamedMemoryUsage() / 1024);
+	Graphics()->QuadsText(32.0f * FontSize, 2 + 2 * FontSize, FontSize, aBuffer);
+
+	str_format(aBuffer, sizeof(aBuffer), "%16s: %" PRIu64 " KiB", "Staging memory", Graphics()->StagingMemoryUsage() / 1024);
+	Graphics()->QuadsText(32.0f * FontSize, 2 + 3 * FontSize, FontSize, aBuffer);
+
+	// Network
 	{
-		s_LastSnapTime = time_get();
-		s_Prev = s_Current;
-		net_stats(&s_Current);
+		const uint64_t OverheadSize = 14 + 20 + 8; // ETH + IP + UDP
+		const uint64_t SendPackets = m_NetstatsCurrent.sent_packets - m_NetstatsPrev.sent_packets;
+		const uint64_t SendBytes = m_NetstatsCurrent.sent_bytes - m_NetstatsPrev.sent_bytes;
+		const uint64_t SendTotal = SendBytes + SendPackets * OverheadSize;
+		const uint64_t RecvPackets = m_NetstatsCurrent.recv_packets - m_NetstatsPrev.recv_packets;
+		const uint64_t RecvBytes = m_NetstatsCurrent.recv_bytes - m_NetstatsPrev.recv_bytes;
+		const uint64_t RecvTotal = RecvBytes + RecvPackets * OverheadSize;
+
+		str_format(aBuffer, sizeof(aBuffer), "Send: %3" PRIu64 " %5" PRIu64 "+%4" PRIu64 "=%5" PRIu64 " (%3" PRIu64 " Kibit/s) average: %5" PRIu64,
+			SendPackets, SendBytes, SendPackets * OverheadSize, SendTotal, (SendTotal * 8) / 1024, SendPackets == 0 ? 0 : SendBytes / SendPackets);
+		Graphics()->QuadsText(2, 2 + 3 * FontSize, FontSize, aBuffer);
+		str_format(aBuffer, sizeof(aBuffer), "Recv: %3" PRIu64 " %5" PRIu64 "+%4" PRIu64 "=%5" PRIu64 " (%3" PRIu64 " Kibit/s) average: %5" PRIu64,
+			RecvPackets, RecvBytes, RecvPackets * OverheadSize, RecvTotal, (RecvTotal * 8) / 1024, RecvPackets == 0 ? 0 : RecvBytes / RecvPackets);
+		Graphics()->QuadsText(2, 2 + 4 * FontSize, FontSize, aBuffer);
 	}
 
-	/*
-		eth = 14
-		ip = 20
-		udp = 8
-		total = 42
-	*/
-	s_FrameTimeAvg = s_FrameTimeAvg * 0.9f + m_RenderFrameTime * 0.1f;
-	str_format(aBuffer, sizeof(aBuffer), "ticks: %8d %8d gfx mem(tex/buff/stream/staging): (%" PRIu64 " KiB/%" PRIu64 " KiB/%" PRIu64 " KiB/%" PRIu64 " KiB) fps: %3d",
-		m_aCurGameTick[g_Config.m_ClDummy], m_aPredTick[g_Config.m_ClDummy],
-		(Graphics()->TextureMemoryUsage() / 1024),
-		(Graphics()->BufferMemoryUsage() / 1024),
-		(Graphics()->StreamedMemoryUsage() / 1024),
-		(Graphics()->StagingMemoryUsage() / 1024),
-		(int)(1.0f / s_FrameTimeAvg + 0.5f));
-	Graphics()->QuadsText(2, 2, 16, aBuffer);
-
+	// Snapshots
 	{
-		uint64_t SendPackets = (s_Current.sent_packets - s_Prev.sent_packets);
-		uint64_t SendBytes = (s_Current.sent_bytes - s_Prev.sent_bytes);
-		uint64_t SendTotal = SendBytes + SendPackets * 42;
-		uint64_t RecvPackets = (s_Current.recv_packets - s_Prev.recv_packets);
-		uint64_t RecvBytes = (s_Current.recv_bytes - s_Prev.recv_bytes);
-		uint64_t RecvTotal = RecvBytes + RecvPackets * 42;
-
-		if(!SendPackets)
-			SendPackets++;
-		if(!RecvPackets)
-			RecvPackets++;
-		str_format(aBuffer, sizeof(aBuffer), "send: %3" PRIu64 " %5" PRIu64 "+%4" PRIu64 "=%5" PRIu64 " (%3" PRIu64 " Kibit/s) avg: %5" PRIu64 "\nrecv: %3" PRIu64 " %5" PRIu64 "+%4" PRIu64 "=%5" PRIu64 " (%3" PRIu64 " Kibit/s) avg: %5" PRIu64,
-			SendPackets, SendBytes, SendPackets * 42, SendTotal, (SendTotal * 8) / 1024, SendBytes / SendPackets,
-			RecvPackets, RecvBytes, RecvPackets * 42, RecvTotal, (RecvTotal * 8) / 1024, RecvBytes / RecvPackets);
-		Graphics()->QuadsText(2, 14, 16, aBuffer);
-	}
-
-	// render rates
-	{
-		int y = 0;
+		const float OffsetY = 2 + 6 * FontSize;
+		int Row = 0;
 		str_format(aBuffer, sizeof(aBuffer), "%5s %20s: %8s %8s %8s", "ID", "Name", "Rate", "Updates", "R/U");
-		Graphics()->QuadsText(2, 100 + y * 12, 16, aBuffer);
-		y++;
+		Graphics()->QuadsText(2, OffsetY + Row * 12, FontSize, aBuffer);
+		Row++;
 		for(int i = 0; i < NUM_NETOBJTYPES; i++)
 		{
 			if(m_SnapshotDelta.GetDataRate(i))
@@ -927,15 +1003,15 @@ void CClient::RenderDebug()
 					GameClient()->GetItemName(i),
 					m_SnapshotDelta.GetDataRate(i) / 8, m_SnapshotDelta.GetDataUpdates(i),
 					(m_SnapshotDelta.GetDataRate(i) / m_SnapshotDelta.GetDataUpdates(i)) / 8);
-				Graphics()->QuadsText(2, 100 + y * 12, 16, aBuffer);
-				y++;
+				Graphics()->QuadsText(2, OffsetY + Row * 12, FontSize, aBuffer);
+				Row++;
 			}
 		}
 		for(int i = CSnapshot::MAX_TYPE; i > (CSnapshot::MAX_TYPE - 64); i--)
 		{
 			if(m_SnapshotDelta.GetDataRate(i) && m_aapSnapshots[g_Config.m_ClDummy][IClient::SNAP_CURRENT])
 			{
-				int Type = m_aapSnapshots[g_Config.m_ClDummy][IClient::SNAP_CURRENT]->m_pAltSnap->GetExternalItemType(i);
+				const int Type = m_aapSnapshots[g_Config.m_ClDummy][IClient::SNAP_CURRENT]->m_pAltSnap->GetExternalItemType(i);
 				if(Type == UUID_INVALID)
 				{
 					str_format(
@@ -947,8 +1023,8 @@ void CClient::RenderDebug()
 						m_SnapshotDelta.GetDataRate(i) / 8,
 						m_SnapshotDelta.GetDataUpdates(i),
 						(m_SnapshotDelta.GetDataRate(i) / m_SnapshotDelta.GetDataUpdates(i)) / 8);
-					Graphics()->QuadsText(2, 100 + y * 12, 16, aBuffer);
-					y++;
+					Graphics()->QuadsText(2, OffsetY + Row * 12, FontSize, aBuffer);
+					Row++;
 				}
 				else if(Type != i)
 				{
@@ -961,15 +1037,13 @@ void CClient::RenderDebug()
 						m_SnapshotDelta.GetDataRate(i) / 8,
 						m_SnapshotDelta.GetDataUpdates(i),
 						(m_SnapshotDelta.GetDataRate(i) / m_SnapshotDelta.GetDataUpdates(i)) / 8);
-					Graphics()->QuadsText(2, 100 + y * 12, 16, aBuffer);
-					y++;
+					Graphics()->QuadsText(2, OffsetY + Row * 12, FontSize, aBuffer);
+					Row++;
 				}
 			}
 		}
 	}
 
-	str_format(aBuffer, sizeof(aBuffer), "pred: %d ms", GetPredictionTime());
-	Graphics()->QuadsText(2, 70, 16, aBuffer);
 	Graphics()->QuadsEnd();
 }
 
@@ -978,18 +1052,22 @@ void CClient::RenderGraphs()
 	if(!g_Config.m_DbgGraphs)
 		return;
 
+	// Make sure graph positions and sizes are aligned with pixels to avoid lines overlapping graph edges
 	Graphics()->MapScreen(0, 0, Graphics()->ScreenWidth(), Graphics()->ScreenHeight());
-	float w = Graphics()->ScreenWidth() / 4.0f;
-	float h = Graphics()->ScreenHeight() / 6.0f;
-	float sp = Graphics()->ScreenWidth() / 100.0f;
-	float x = Graphics()->ScreenWidth() - w - sp;
+	const float GraphW = std::round(Graphics()->ScreenWidth() / 4.0f);
+	const float GraphH = std::round(Graphics()->ScreenHeight() / 6.0f);
+	const float GraphSpacing = std::round(Graphics()->ScreenWidth() / 100.0f);
+	const float GraphX = Graphics()->ScreenWidth() - GraphW - GraphSpacing;
+
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
+	TextRender()->Text(GraphX, GraphSpacing * 5 - 12.0f - 10.0f, 12.0f, Localize("Press Ctrl+Shift+G to disable debug graphs."));
 
 	m_FpsGraph.Scale(time_freq());
-	m_FpsGraph.Render(Graphics(), TextRender(), x, sp * 5, w, h, "FPS");
+	m_FpsGraph.Render(Graphics(), TextRender(), GraphX, GraphSpacing * 5, GraphW, GraphH, "FPS");
 	m_InputtimeMarginGraph.Scale(5 * time_freq());
-	m_InputtimeMarginGraph.Render(Graphics(), TextRender(), x, sp * 6 + h, w, h, "Prediction Margin");
+	m_InputtimeMarginGraph.Render(Graphics(), TextRender(), GraphX, GraphSpacing * 6 + GraphH, GraphW, GraphH, "Prediction Margin");
 	m_aGametimeMarginGraphs[g_Config.m_ClDummy].Scale(5 * time_freq());
-	m_aGametimeMarginGraphs[g_Config.m_ClDummy].Render(Graphics(), TextRender(), x, sp * 7 + h * 2, w, h, "Gametime Margin");
+	m_aGametimeMarginGraphs[g_Config.m_ClDummy].Render(Graphics(), TextRender(), GraphX, GraphSpacing * 7 + GraphH * 2, GraphW, GraphH, "Gametime Margin");
 }
 
 void CClient::Restart()
@@ -1380,6 +1458,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 			{
 				m_CurrentServerInfo = Info;
 				m_CurrentServerInfoRequestTime = -1;
+				Discord()->UpdateServerInfo(Info, m_aCurrentMap);
 			}
 
 			bool ValidPong = false;
@@ -1549,13 +1628,10 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				return;
 			}
 
-			for(int i = 0; pMap[i]; i++) // protect the player from nasty map names
+			if(!str_valid_filename(pMap))
 			{
-				if(pMap[i] == '/' || pMap[i] == '\\')
-				{
-					DisconnectWithReason("strange character in map name");
-					return;
-				}
+				DisconnectWithReason("map name is not a valid filename");
+				return;
 			}
 
 			if(m_DummyConnected && !m_DummyReconnectOnReload)
@@ -1941,7 +2017,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					m_aSnapshotIncomingDataSize[Conn] = 0;
 				}
 
-				mem_copy((char *)m_aaSnapshotIncomingData[Conn] + Part * MAX_SNAPSHOT_PACKSIZE, pData, clamp(PartSize, 0, (int)sizeof(m_aaSnapshotIncomingData[Conn]) - Part * MAX_SNAPSHOT_PACKSIZE));
+				mem_copy((char *)m_aaSnapshotIncomingData[Conn] + Part * MAX_SNAPSHOT_PACKSIZE, pData, std::clamp(PartSize, 0, (int)sizeof(m_aaSnapshotIncomingData[Conn]) - Part * MAX_SNAPSHOT_PACKSIZE));
 				m_aSnapshotParts[Conn] |= (uint64_t)(1) << Part;
 
 				if(Part == NumParts - 1)
@@ -2066,8 +2142,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 
 					if(!Dummy)
 					{
-						// for antiping: if the projectile netobjects from the server contains extra data, this is removed and the original content restored before recording demo
-						SnapshotRemoveExtraProjectileInfo(pTmpBuffer3);
+						GameClient()->ProcessDemoSnapshot(pTmpBuffer3);
 
 						unsigned char aSnapSeven[CSnapshot::MAX_SIZE];
 						CSnapshot *pSnapSeven = (CSnapshot *)aSnapSeven;
@@ -2140,72 +2215,10 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						m_aGameTime[Conn].Update(&m_aGametimeMarginGraphs[Conn], (GameTick - 1) * time_freq() / GameTickSpeed(), TimeLeft, CSmoothTime::ADJUSTDIRECTION_DOWN);
 					}
 
-					if(m_aReceivedSnapshots[Conn] > GameTickSpeed() && !m_aCodeRunAfterJoin[Conn])
+					if(m_aReceivedSnapshots[Conn] > GameTickSpeed() && !m_aDidPostConnect[Conn])
 					{
-						if(m_ServerCapabilities.m_ChatTimeoutCode)
-						{
-							char aBuf[128];
-							char aBufMsg[256];
-							if(!g_Config.m_ClRunOnJoin[0] && !g_Config.m_ClDummyDefaultEyes && !g_Config.m_ClPlayerDefaultEyes)
-								str_format(aBufMsg, sizeof(aBufMsg), "/timeout %s", m_aTimeoutCodes[Conn]);
-							else
-								str_format(aBufMsg, sizeof(aBufMsg), "/mc;timeout %s", m_aTimeoutCodes[Conn]);
-
-							if(g_Config.m_ClDummyDefaultEyes || g_Config.m_ClPlayerDefaultEyes)
-							{
-								int Emote = ((g_Config.m_ClDummy) ? !Dummy : Dummy) ? g_Config.m_ClDummyDefaultEyes : g_Config.m_ClPlayerDefaultEyes;
-								char aBufEmote[128];
-								aBufEmote[0] = '\0';
-								switch(Emote)
-								{
-								case EMOTE_NORMAL:
-									break;
-								case EMOTE_PAIN:
-									str_format(aBufEmote, sizeof(aBufEmote), "emote pain %d", g_Config.m_ClEyeDuration);
-									break;
-								case EMOTE_HAPPY:
-									str_format(aBufEmote, sizeof(aBufEmote), "emote happy %d", g_Config.m_ClEyeDuration);
-									break;
-								case EMOTE_SURPRISE:
-									str_format(aBufEmote, sizeof(aBufEmote), "emote surprise %d", g_Config.m_ClEyeDuration);
-									break;
-								case EMOTE_ANGRY:
-									str_format(aBufEmote, sizeof(aBufEmote), "emote angry %d", g_Config.m_ClEyeDuration);
-									break;
-								case EMOTE_BLINK:
-									str_format(aBufEmote, sizeof(aBufEmote), "emote blink %d", g_Config.m_ClEyeDuration);
-									break;
-								}
-								if(aBufEmote[0])
-								{
-									str_format(aBuf, sizeof(aBuf), ";%s", aBufEmote);
-									str_append(aBufMsg, aBuf);
-								}
-							}
-							if(g_Config.m_ClRunOnJoin[0])
-							{
-								str_format(aBuf, sizeof(aBuf), ";%s", g_Config.m_ClRunOnJoin);
-								str_append(aBufMsg, aBuf);
-							}
-							if(IsSixup())
-							{
-								protocol7::CNetMsg_Cl_Say Msg7;
-								Msg7.m_Mode = protocol7::CHAT_ALL;
-								Msg7.m_Target = -1;
-								Msg7.m_pMessage = aBufMsg;
-								SendPackMsg(Conn, &Msg7, MSGFLAG_VITAL, true);
-							}
-							else
-							{
-								CNetMsg_Cl_Say MsgP;
-								MsgP.m_Team = 0;
-								MsgP.m_pMessage = aBufMsg;
-								CMsgPacker PackerTimeout(&MsgP);
-								MsgP.Pack(&PackerTimeout);
-								SendMsg(Conn, &PackerTimeout, MSGFLAG_VITAL);
-							}
-						}
-						m_aCodeRunAfterJoin[Conn] = true;
+						OnPostConnect(Conn, Dummy);
+						m_aDidPostConnect[Conn] = true;
 					}
 
 					// ack snapshot
@@ -2263,7 +2276,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			m_ExpectedMaplistEntries = -1;
 		}
 	}
-	else if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0)
+	// the client handles only vital messages https://github.com/ddnet/ddnet/issues/11178
+	else if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 || Msg == NETMSGTYPE_SV_PREINPUT)
 	{
 		// game message
 		if(!Dummy)
@@ -2356,8 +2370,7 @@ void CClient::FinishMapDownload()
 	SHA256_DIGEST *pSha256 = m_MapdownloadSha256Present ? &m_MapdownloadSha256 : nullptr;
 
 	bool FileSuccess = true;
-	if(Storage()->FileExists(m_aMapdownloadFilename, IStorage::TYPE_SAVE))
-		FileSuccess &= Storage()->RemoveFile(m_aMapdownloadFilename, IStorage::TYPE_SAVE);
+	FileSuccess &= Storage()->RemoveFile(m_aMapdownloadFilename, IStorage::TYPE_SAVE);
 	FileSuccess &= Storage()->RenameFile(m_aMapdownloadFilenameTemp, m_aMapdownloadFilename, IStorage::TYPE_SAVE);
 	if(!FileSuccess)
 	{
@@ -2397,7 +2410,7 @@ void CClient::ResetDDNetInfoTask()
 typedef std::tuple<int, int, int> TVersion;
 static const TVersion gs_InvalidVersion = std::make_tuple(-1, -1, -1);
 
-TVersion ToVersion(char *pStr)
+static TVersion ToVersion(char *pStr)
 {
 	int aVersion[3] = {0, 0, 0};
 	const char *p = strtok(pStr, ".");
@@ -2422,7 +2435,10 @@ void CClient::LoadDDNetInfo()
 	const json_value *pDDNetInfo = m_ServerBrowser.LoadDDNetInfo();
 
 	if(!pDDNetInfo)
+	{
+		m_InfoState = EInfoState::ERROR;
 		return;
+	}
 
 	const json_value &DDNetInfo = *pDDNetInfo;
 	const json_value &CurrentVersion = DDNetInfo["version"];
@@ -2496,6 +2512,7 @@ void CClient::LoadDDNetInfo()
 	}
 	const json_value &WarnPngliteIncompatibleImages = DDNetInfo["warn-pnglite-incompatible-images"];
 	Graphics()->WarnPngliteIncompatibleImages(WarnPngliteIncompatibleImages.type == json_boolean && (bool)WarnPngliteIncompatibleImages);
+	m_InfoState = EInfoState::SUCCESS;
 }
 
 int CClient::ConnectNetTypes() const
@@ -2886,6 +2903,7 @@ void CClient::Update()
 			if(m_ServerBrowser.DDNetInfoSha256() == m_pDDNetInfoTask->ResultSha256())
 			{
 				log_debug("client/info", "DDNet info already up-to-date");
+				m_InfoState = EInfoState::SUCCESS;
 			}
 			else
 			{
@@ -2898,6 +2916,7 @@ void CClient::Update()
 		else if(m_pDDNetInfoTask->State() == EHttpState::ERROR || m_pDDNetInfoTask->State() == EHttpState::ABORTED)
 		{
 			ResetDDNetInfoTask();
+			m_InfoState = EInfoState::ERROR;
 		}
 	}
 
@@ -3029,21 +3048,19 @@ void CClient::Run()
 		g_UuidManager.DebugDump();
 	}
 
-#ifndef CONF_WEBASM
 	char aNetworkError[256];
 	if(!InitNetworkClient(aNetworkError, sizeof(aNetworkError)))
 	{
 		log_error("client", "%s", aNetworkError);
-		ShowMessageBox("Network Error", aNetworkError);
+		ShowMessageBox({.m_pTitle = "Network Error", .m_pMessage = aNetworkError});
 		return;
 	}
-#endif
 
 	if(!m_Http.Init(std::chrono::seconds{1}))
 	{
 		const char *pErrorMessage = "Failed to initialize the HTTP client.";
 		log_error("client", "%s", pErrorMessage);
-		ShowMessageBox("HTTP Error", pErrorMessage);
+		ShowMessageBox({.m_pTitle = "HTTP Error", .m_pMessage = pErrorMessage});
 		return;
 	}
 
@@ -3051,11 +3068,21 @@ void CClient::Run()
 	m_pGraphics = CreateEngineGraphicsThreaded();
 	Kernel()->RegisterInterface(m_pGraphics); // IEngineGraphics
 	Kernel()->RegisterInterface(static_cast<IGraphics *>(m_pGraphics), false);
-	if(m_pGraphics->Init() != 0)
 	{
-		log_error("client", "couldn't init graphics");
-		ShowMessageBox("Graphics Error", "The graphics could not be initialized.");
-		return;
+		CMemoryLogger MemoryLogger;
+		MemoryLogger.SetParent(log_get_scope_logger());
+		bool Success;
+		{
+			CLogScope LogScope(&MemoryLogger);
+			Success = m_pGraphics->Init() == 0;
+		}
+		if(!Success)
+		{
+			log_error("client", "Failed to initialize the graphics (see details above)");
+			std::string Message = std::string("Failed to initialize the graphics. See details below.\n\n") + MemoryLogger.ConcatenatedLines();
+			ShowMessageBox({.m_pTitle = "Graphics Error", .m_pMessage = Message.c_str()});
+			return;
+		}
 	}
 
 	// make sure the first frame just clears everything to prevent undesired colors when waiting for io
@@ -3279,7 +3306,7 @@ void CClient::Run()
 					}
 				}
 
-				m_FrameTimeAvg = m_FrameTimeAvg * 0.9f + m_RenderFrameTime * 0.1f;
+				m_FrameTimeAverage = m_FrameTimeAverage * 0.9f + m_RenderFrameTime * 0.1f;
 
 				// keep the overflow time - it's used to make sure the gfx refreshrate is reached
 				int64_t AdditionalTime = g_Config.m_GfxRefreshRate ? ((Now - LastRenderTime) - (time_freq() / (int64_t)g_Config.m_GfxRefreshRate)) : 0;
@@ -3323,7 +3350,7 @@ void CClient::Run()
 			SleepTimeInNanoSeconds = (std::chrono::nanoseconds(1s) / (int64_t)g_Config.m_ClRefreshRate) - (Now - LastTime);
 			auto SleepTimeInNanoSecondsInner = SleepTimeInNanoSeconds;
 			auto NowInner = Now;
-			while((SleepTimeInNanoSecondsInner / std::chrono::nanoseconds(1us).count()) > 0ns)
+			while(std::chrono::duration_cast<std::chrono::microseconds>(SleepTimeInNanoSecondsInner) > 0us)
 			{
 				net_socket_read_wait(m_aNetClient[CONN_MAIN].m_Socket, SleepTimeInNanoSecondsInner);
 				auto NowInnerCalc = time_get_nanoseconds();
@@ -3403,21 +3430,21 @@ bool CClient::InitNetworkClient(char *pError, size_t ErrorSize)
 		}
 		BindAddr.port = PortRef;
 		unsigned RemainingAttempts = 25;
-		while(BindAddr.port == 0 || !m_aNetClient[i].Open(BindAddr))
+		while(!m_aNetClient[i].Open(BindAddr))
 		{
+			--RemainingAttempts;
+			if(RemainingAttempts == 0)
+			{
+				if(g_Config.m_Bindaddr[0])
+					str_format(pError, ErrorSize, "Could not open the network client, try changing or unsetting the bindaddr '%s'.", g_Config.m_Bindaddr);
+				else
+					str_copy(pError, "Could not open the network client.", ErrorSize);
+				return false;
+			}
 			if(BindAddr.port != 0)
 			{
-				--RemainingAttempts;
-				if(RemainingAttempts == 0)
-				{
-					if(g_Config.m_Bindaddr[0])
-						str_format(pError, ErrorSize, "Could not open the network client, try changing or unsetting the bindaddr '%s'.", g_Config.m_Bindaddr);
-					else
-						str_copy(pError, "Could not open the network client.", ErrorSize);
-					return false;
-				}
+				BindAddr.port = 0;
 			}
-			BindAddr.port = (secure_rand() % 64511) + 1024;
 		}
 	}
 	return true;
@@ -3902,6 +3929,9 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 	m_CurrentServerInfo.m_MapCrc = pMapInfo->m_Crc;
 	m_CurrentServerInfo.m_MapSize = pMapInfo->m_Size;
 
+	// enter demo playback state
+	SetState(IClient::STATE_DEMOPLAYBACK);
+
 	GameClient()->OnConnected();
 
 	// setup buffers
@@ -3916,9 +3946,6 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 		m_aapSnapshots[0][SnapshotType]->m_AltSnapSize = 0;
 		m_aapSnapshots[0][SnapshotType]->m_Tick = -1;
 	}
-
-	// enter demo playback state
-	SetState(IClient::STATE_DEMOPLAYBACK);
 
 	m_DemoPlayer.Play();
 	GameClient()->OnEnterGame();
@@ -4243,50 +4270,16 @@ int CClient::HandleChecksum(int Conn, CUuid Uuid, CUnpacker *pUnpacker)
 	return 0;
 }
 
-void CClient::SwitchWindowScreen(int Index)
-{
-	//Tested on windows 11 64 bit (gtx 1660 super, intel UHD 630 opengl 1.2.0, 3.3.0 and vulkan 1.1.0)
-	int IsFullscreen = g_Config.m_GfxFullscreen;
-	int IsBorderless = g_Config.m_GfxBorderless;
-
-	if(!Graphics()->SetWindowScreen(Index))
-	{
-		return;
-	}
-
-	SetWindowParams(3, false); // prevent DDNet to get stretch on monitors
-
-	CVideoMode CurMode;
-	Graphics()->GetCurrentVideoMode(CurMode, Index);
-
-	const int Depth = CurMode.m_Red + CurMode.m_Green + CurMode.m_Blue > 16 ? 24 : 16;
-	g_Config.m_GfxColorDepth = Depth;
-	g_Config.m_GfxScreenWidth = CurMode.m_WindowWidth;
-	g_Config.m_GfxScreenHeight = CurMode.m_WindowHeight;
-	g_Config.m_GfxScreenRefreshRate = CurMode.m_RefreshRate;
-
-	Graphics()->ResizeToScreen();
-
-	SetWindowParams(IsFullscreen, IsBorderless);
-}
-
 void CClient::ConchainWindowScreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 	if(pSelf->Graphics() && pResult->NumArguments())
 	{
 		if(g_Config.m_GfxScreen != pResult->GetInteger(0))
-			pSelf->SwitchWindowScreen(pResult->GetInteger(0));
+			pSelf->Graphics()->SwitchWindowScreen(pResult->GetInteger(0), true);
 	}
 	else
 		pfnCallback(pResult, pCallbackUserData);
-}
-
-void CClient::SetWindowParams(int FullscreenMode, bool IsBorderless)
-{
-	g_Config.m_GfxFullscreen = clamp(FullscreenMode, 0, 3);
-	g_Config.m_GfxBorderless = (int)IsBorderless;
-	Graphics()->SetWindowParams(FullscreenMode, IsBorderless);
 }
 
 void CClient::ConchainFullscreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -4295,7 +4288,7 @@ void CClient::ConchainFullscreen(IConsole::IResult *pResult, void *pUserData, IC
 	if(pSelf->Graphics() && pResult->NumArguments())
 	{
 		if(g_Config.m_GfxFullscreen != pResult->GetInteger(0))
-			pSelf->SetWindowParams(pResult->GetInteger(0), g_Config.m_GfxBorderless);
+			pSelf->Graphics()->SetWindowParams(pResult->GetInteger(0), g_Config.m_GfxBorderless);
 	}
 	else
 		pfnCallback(pResult, pCallbackUserData);
@@ -4307,16 +4300,10 @@ void CClient::ConchainWindowBordered(IConsole::IResult *pResult, void *pUserData
 	if(pSelf->Graphics() && pResult->NumArguments())
 	{
 		if(!g_Config.m_GfxFullscreen && (g_Config.m_GfxBorderless != pResult->GetInteger(0)))
-			pSelf->SetWindowParams(g_Config.m_GfxFullscreen, !g_Config.m_GfxBorderless);
+			pSelf->Graphics()->SetWindowParams(g_Config.m_GfxFullscreen, !g_Config.m_GfxBorderless);
 	}
 	else
 		pfnCallback(pResult, pCallbackUserData);
-}
-
-void CClient::ToggleWindowVSync()
-{
-	if(Graphics()->SetVSync(g_Config.m_GfxVsync ^ 1))
-		g_Config.m_GfxVsync ^= 1;
 }
 
 void CClient::Notify(const char *pTitle, const char *pMessage)
@@ -4342,7 +4329,7 @@ void CClient::ConchainWindowVSync(IConsole::IResult *pResult, void *pUserData, I
 	if(pSelf->Graphics() && pResult->NumArguments())
 	{
 		if(g_Config.m_GfxVsync != pResult->GetInteger(0))
-			pSelf->ToggleWindowVSync();
+			pSelf->Graphics()->SetVSync(pResult->GetInteger(0));
 	}
 	else
 		pfnCallback(pResult, pCallbackUserData);
@@ -4510,16 +4497,17 @@ void CClient::HandleConnectLink(const char *pLink)
 {
 	// Chrome works fine with ddnet:// but not with ddnet:
 	// Check ddnet:// before ddnet: because we don't want the // as part of connect command
-	if(str_startswith(pLink, CONNECTLINK_DOUBLE_SLASH))
-		str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK_DOUBLE_SLASH) - 1);
-	else if(str_startswith(pLink, CONNECTLINK_NO_SLASH))
-		str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK_NO_SLASH) - 1);
+	const char *pConnectLink = nullptr;
+	if((pConnectLink = str_startswith(pLink, CONNECTLINK_DOUBLE_SLASH)))
+		str_copy(m_aCmdConnect, pConnectLink);
+	else if((pConnectLink = str_startswith(pLink, CONNECTLINK_NO_SLASH)))
+		str_copy(m_aCmdConnect, pConnectLink);
 	else
 		str_copy(m_aCmdConnect, pLink);
 	// Edge appends / to the URL
-	const int len = str_length(m_aCmdConnect);
-	if(m_aCmdConnect[len - 1] == '/')
-		m_aCmdConnect[len - 1] = '\0';
+	const int Length = str_length(m_aCmdConnect);
+	if(m_aCmdConnect[Length - 1] == '/')
+		m_aCmdConnect[Length - 1] = '\0';
 }
 
 void CClient::HandleDemoPath(const char *pPath)
@@ -4560,26 +4548,6 @@ static bool SaveUnknownCommandCallback(const char *pCommand, void *pUser)
 	return true;
 }
 
-static Uint32 GetSdlMessageBoxFlags(IClient::EMessageBoxType Type)
-{
-	switch(Type)
-	{
-	case IClient::MESSAGE_BOX_TYPE_ERROR:
-		return SDL_MESSAGEBOX_ERROR;
-	case IClient::MESSAGE_BOX_TYPE_WARNING:
-		return SDL_MESSAGEBOX_WARNING;
-	case IClient::MESSAGE_BOX_TYPE_INFO:
-		return SDL_MESSAGEBOX_INFORMATION;
-	}
-	dbg_assert(false, "Type invalid");
-	return 0;
-}
-
-static void ShowMessageBox(const char *pTitle, const char *pMessage, IClient::EMessageBoxType Type = IClient::MESSAGE_BOX_TYPE_ERROR)
-{
-	SDL_ShowSimpleMessageBox(GetSdlMessageBoxFlags(Type), pTitle, pMessage, nullptr);
-}
-
 /*
 	Server Time
 	Client Mirror Time
@@ -4596,7 +4564,7 @@ static void ShowMessageBox(const char *pTitle, const char *pMessage, IClient::EM
 extern "C" int TWMain(int argc, const char **argv)
 #elif defined(CONF_PLATFORM_ANDROID)
 static int gs_AndroidStarted = false;
-extern "C" __attribute__((visibility("default"))) int SDL_main(int argc, char *argv[]);
+extern "C" [[gnu::visibility("default")]] int SDL_main(int argc, char *argv[]);
 int SDL_main(int argc, char *argv2[])
 #else
 int main(int argc, const char **argv)
@@ -4610,7 +4578,7 @@ int main(int argc, const char **argv)
 	// not to be initialized correctly when starting the app again.
 	if(gs_AndroidStarted)
 	{
-		::ShowMessageBox("Android Error", "The app was started, but not closed properly, this causes bugs. Please restart or manually close this task.");
+		ShowMessageBoxWithoutGraphics({.m_pTitle = "Android Error", .m_pMessage = "The app was started, but not closed properly, this causes bugs. Please restart or manually close this task."});
 		std::exit(0);
 	}
 	gs_AndroidStarted = true;
@@ -4618,10 +4586,6 @@ int main(int argc, const char **argv)
 	CWindowsComLifecycle WindowsComLifecycle(true);
 #endif
 	CCmdlineFix CmdlineFix(&argc, &argv);
-
-#if defined(CONF_EXCEPTION_HANDLING)
-	init_exception_handler();
-#endif
 
 	std::vector<std::shared_ptr<ILogger>> vpLoggers;
 	std::shared_ptr<ILogger> pStdoutLogger = nullptr;
@@ -4659,7 +4623,7 @@ int main(int argc, const char **argv)
 	if(pAndroidInitError != nullptr)
 	{
 		log_error("android", "%s", pAndroidInitError);
-		::ShowMessageBox("Android Error", pAndroidInitError);
+		ShowMessageBoxWithoutGraphics({.m_pTitle = "Android Error", .m_pMessage = pAndroidInitError});
 		std::exit(0);
 	}
 #endif
@@ -4673,7 +4637,7 @@ int main(int argc, const char **argv)
 		}
 	};
 	std::function<void()> PerformFinalCleanup = []() {
-#ifdef CONF_PLATFORM_ANDROID
+#if defined(CONF_PLATFORM_ANDROID)
 		// Forcefully terminate the entire process, to ensure that static variables
 		// will be initialized correctly when the app is started again after quitting.
 		// Returning from the main function is not enough, as this only results in the
@@ -4686,16 +4650,18 @@ int main(int argc, const char **argv)
 		//       ignores the activity lifecycle entirely, which may cause issues if
 		//       we ever used any global resources like the camera.
 		std::exit(0);
+#elif defined(CONF_PLATFORM_EMSCRIPTEN)
+		// Hide canvas after client quit as it will be entirely black without visible
+		// cursor, also blocking view of the console.
+		EM_ASM({
+			document.querySelector('#canvas').style.display = 'none';
+		});
 #endif
 	};
 	std::function<void()> PerformAllCleanup = [PerformCleanup, PerformFinalCleanup]() mutable {
 		PerformCleanup();
 		PerformFinalCleanup();
 	};
-
-	const bool RandInitFailed = secure_random_init() != 0;
-	if(!RandInitFailed)
-		CleanerFunctions.emplace([]() { secure_random_uninit(); });
 
 	// Register SDL for cleanup before creating the kernel and client,
 	// so SDL is shutdown after kernel and client. Otherwise the client
@@ -4720,28 +4686,78 @@ int main(int argc, const char **argv)
 	dbg_assert_set_handler([MainThreadId, pClient](const char *pMsg) {
 		if(MainThreadId != std::this_thread::get_id())
 			return;
-		char aVersionStr[128];
-		if(!os_version_str(aVersionStr, sizeof(aVersionStr)))
-			str_copy(aVersionStr, "unknown");
-		char aGpuInfo[256];
+		char aOsVersionString[128];
+		if(!os_version_str(aOsVersionString, sizeof(aOsVersionString)))
+		{
+			str_copy(aOsVersionString, "unknown");
+		}
+		char aGpuInfo[512];
 		pClient->GetGpuInfoString(aGpuInfo);
-		char aMessage[768];
+		char aMessage[2048];
 		str_format(aMessage, sizeof(aMessage),
 			"An assertion error occurred. Please write down or take a screenshot of the following information and report this error.\n"
-			"Please also share the assert log which you should find in the 'dumps' folder in your config directory.\n\n"
+			"Please also share the assert log"
+#if defined(CONF_CRASHDUMP)
+			" and crash log"
+#endif
+			" which you should find in the 'dumps' folder in your config directory.\n\n"
 			"%s\n\n"
-			"Platform: %s\n"
-			"Game version: %s %s\n"
+			"Platform: %s (%s)\n"
+			"Configuration: base"
+#if defined(CONF_AUTOUPDATE)
+			" + autoupdate"
+#endif
+#if defined(CONF_CRASHDUMP)
+			" + crashdump"
+#endif
+#if defined(CONF_DEBUG)
+			" + debug"
+#endif
+#if defined(CONF_DISCORD)
+			" + discord"
+#endif
+#if defined(CONF_VIDEORECORDER)
+			" + videorecorder"
+#endif
+#if defined(CONF_WEBSOCKETS)
+			" + websockets"
+#endif
+			"\n"
+			"Game version: %s %s %s\n"
 			"OS version: %s\n\n"
 			"%s", // GPU info
-			pMsg, CONF_PLATFORM_STRING, GAME_RELEASE_VERSION, GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "", aVersionStr,
+			pMsg,
+			CONF_PLATFORM_STRING, CONF_ARCH_ENDIAN_STRING,
+			GAME_NAME, GAME_RELEASE_VERSION, GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "",
+			aOsVersionString,
 			aGpuInfo);
-		pClient->ShowMessageBox("Assertion Error", aMessage);
+		// Also log all of this information to the assertion log file
+		log_error("assertion", "%s", aMessage);
+		std::vector<IGraphics::CMessageBoxButton> vButtons;
+		// Storage may not have been initialized yet and viewing files is not supported on Android yet
+#if !defined(CONF_PLATFORM_ANDROID)
+		if(pClient->Storage() != nullptr)
+		{
+			vButtons.push_back({.m_pLabel = "Show dumps"});
+		}
+#endif
+		vButtons.push_back({.m_pLabel = "OK", .m_Confirm = true, .m_Cancel = true});
+		const std::optional<int> MessageResult = pClient->ShowMessageBox({.m_pTitle = "Assertion Error", .m_pMessage = aMessage, .m_vButtons = vButtons});
+#if !defined(CONF_PLATFORM_ANDROID)
+		if(pClient->Storage() != nullptr && MessageResult && *MessageResult == 0)
+		{
+			char aDumpsPath[IO_MAX_PATH_LENGTH];
+			pClient->Storage()->GetCompletePath(IStorage::TYPE_SAVE, "dumps", aDumpsPath, sizeof(aDumpsPath));
+			pClient->ViewFile(aDumpsPath);
+		}
+#else
+		(void)MessageResult;
+#endif
 		// Client will crash due to assertion, don't call PerformAllCleanup in this inconsistent state
 	});
 
 	// create the components
-	IEngine *pEngine = CreateEngine(GAME_NAME, pFutureConsoleLogger, 2 * std::thread::hardware_concurrency() + 2);
+	IEngine *pEngine = CreateEngine(GAME_NAME, pFutureConsoleLogger);
 	pKernel->RegisterInterface(pEngine, false);
 	CleanerFunctions.emplace([pEngine]() {
 		// Engine has to be destroyed before the graphics so that skin download thread can finish
@@ -4759,8 +4775,8 @@ int main(int argc, const char **argv)
 		if(!pStorage)
 		{
 			log_error("client", "Failed to initialize the storage location (see details above)");
-			std::string Message = "Failed to initialize the storage location. See details below.\n\n" + MemoryLogger.ConcatenatedLines();
-			pClient->ShowMessageBox("Storage Error", Message.c_str());
+			std::string Message = std::string("Failed to initialize the storage location. See details below.\n\n") + MemoryLogger.ConcatenatedLines();
+			pClient->ShowMessageBox({.m_pTitle = "Storage Error", .m_pMessage = Message.c_str()});
 			PerformAllCleanup();
 			return -1;
 		}
@@ -4769,23 +4785,14 @@ int main(int argc, const char **argv)
 
 	pFutureAssertionLogger->Set(CreateAssertionLogger(pStorage, GAME_NAME));
 
-#if defined(CONF_EXCEPTION_HANDLING)
-	char aBufPath[IO_MAX_PATH_LENGTH];
-	char aBufName[IO_MAX_PATH_LENGTH];
-	char aDate[64];
-	str_timestamp(aDate, sizeof(aDate));
-	str_format(aBufName, sizeof(aBufName), "dumps/" GAME_NAME "_%s_crash_log_%s_%d_%s.RTP", CONF_PLATFORM_STRING, aDate, pid(), GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "");
-	pStorage->GetCompletePath(IStorage::TYPE_SAVE, aBufName, aBufPath, sizeof(aBufPath));
-	set_exception_handler_log_file(aBufPath);
-#endif
-
-	if(RandInitFailed)
 	{
-		const char *pError = "Failed to initialize the secure RNG.";
-		log_error("secure", "%s", pError);
-		pClient->ShowMessageBox("Secure RNG Error", pError);
-		PerformAllCleanup();
-		return -1;
+		char aBufPath[IO_MAX_PATH_LENGTH];
+		char aBufName[IO_MAX_PATH_LENGTH];
+		char aDate[64];
+		str_timestamp(aDate, sizeof(aDate));
+		str_format(aBufName, sizeof(aBufName), "dumps/" GAME_NAME "_%s_crash_log_%s_%d_%s.RTP", CONF_PLATFORM_STRING, aDate, pid(), GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "");
+		pStorage->GetCompletePath(IStorage::TYPE_SAVE, aBufName, aBufPath, sizeof(aBufPath));
+		crashdump_init_if_available(aBufPath);
 	}
 
 	IConsole *pConsole = CreateConsole(CFGFLAG_CLIENT).release();
@@ -4844,7 +4851,7 @@ int main(int argc, const char **argv)
 		{
 			const char *pError = "Failed to load config from '" CONFIG_FILE "'.";
 			log_error("client", "%s", pError);
-			pClient->ShowMessageBox("Config File Error", pError);
+			pClient->ShowMessageBox({.m_pTitle = "Config File Error", .m_pMessage = pError});
 			PerformAllCleanup();
 			return -1;
 		}
@@ -4942,7 +4949,7 @@ int main(int argc, const char **argv)
 		char aError[256];
 		str_format(aError, sizeof(aError), "Unable to initialize SDL base: %s", SDL_GetError());
 		log_error("client", "%s", aError);
-		pClient->ShowMessageBox("SDL Error", aError);
+		pClient->ShowMessageBox({.m_pTitle = "SDL Error", .m_pMessage = aError});
 		PerformAllCleanup();
 		return -1;
 	}
@@ -4966,7 +4973,7 @@ int main(int argc, const char **argv)
 
 	for(const SWarning &Warning : vQuittingWarnings)
 	{
-		::ShowMessageBox(Warning.m_aWarningTitle, Warning.m_aWarningMsg);
+		ShowMessageBoxWithoutGraphics({.m_pTitle = Warning.m_aWarningTitle, .m_pMessage = Warning.m_aWarningMsg});
 	}
 
 	if(Restarting)
@@ -5061,6 +5068,7 @@ void CClient::RequestDDNetInfo()
 	// Use ipv4 so we can know the ingame ip addresses of players before they join game servers
 	m_pDDNetInfoTask->IpResolve(IPRESOLVE::V4);
 	Http()->Run(m_pDDNetInfoTask);
+	m_InfoState = EInfoState::LOADING;
 }
 
 int CClient::GetPredictionTime()
@@ -5102,7 +5110,7 @@ void CClient::GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float Mix
 {
 	int64_t GameTime = m_aGameTime[g_Config.m_ClDummy].Get(time_get());
 	int64_t PredTime = m_PredictedTime.Get(time_get());
-	int64_t SmoothTime = clamp(GameTime + (int64_t)(MixAmount * (PredTime - GameTime)), GameTime, PredTime);
+	int64_t SmoothTime = std::clamp(GameTime + (int64_t)(MixAmount * (PredTime - GameTime)), GameTime, PredTime);
 
 	*pSmoothTick = (int)(SmoothTime * GameTickSpeed() / time_freq()) + 1;
 	*pSmoothIntraTick = (SmoothTime - (*pSmoothTick - 1) * time_freq() / GameTickSpeed()) / (float)(time_freq() / GameTickSpeed());
@@ -5183,7 +5191,7 @@ int CClient::UdpConnectivity(int NetType)
 	return Connectivity;
 }
 
-bool CClient::ViewLink(const char *pLink)
+static bool ViewLinkImpl(const char *pLink)
 {
 #if defined(CONF_PLATFORM_ANDROID)
 	if(SDL_OpenURL(pLink) == 0)
@@ -5202,10 +5210,20 @@ bool CClient::ViewLink(const char *pLink)
 #endif
 }
 
+bool CClient::ViewLink(const char *pLink)
+{
+	if(!str_startswith(pLink, "https://"))
+	{
+		log_error("client", "Failed to open link '%s': only https-links are allowed", pLink);
+		return false;
+	}
+	return ViewLinkImpl(pLink);
+}
+
 bool CClient::ViewFile(const char *pFilename)
 {
 #if defined(CONF_PLATFORM_MACOS)
-	return ViewLink(pFilename);
+	return ViewLinkImpl(pFilename);
 #else
 	// Create a file link so the path can contain forward and
 	// backward slashes. But the file link must be absolute.
@@ -5224,7 +5242,7 @@ bool CClient::ViewFile(const char *pFilename)
 
 	char aFileLink[IO_MAX_PATH_LENGTH];
 	str_format(aFileLink, sizeof(aFileLink), "file://%s%s", aWorkingDir, pFilename);
-	return ViewLink(aFileLink);
+	return ViewLinkImpl(aFileLink);
 #endif
 }
 
@@ -5276,21 +5294,42 @@ void CClient::ShellUnregister()
 }
 #endif
 
-void CClient::ShowMessageBox(const char *pTitle, const char *pMessage, EMessageBoxType Type)
+std::optional<int> CClient::ShowMessageBox(const IGraphics::CMessageBox &MessageBox)
 {
-	if(m_pGraphics == nullptr || !m_pGraphics->ShowMessageBox(GetSdlMessageBoxFlags(Type), pTitle, pMessage))
-		::ShowMessageBox(pTitle, pMessage, Type);
+	std::optional<int> Result = m_pGraphics == nullptr ? std::nullopt : m_pGraphics->ShowMessageBox(MessageBox);
+	if(!Result)
+	{
+		Result = ShowMessageBoxWithoutGraphics(MessageBox);
+	}
+	return Result;
 }
 
-void CClient::GetGpuInfoString(char (&aGpuInfo)[256])
+void CClient::GetGpuInfoString(char (&aGpuInfo)[512])
 {
-	if(m_pGraphics != nullptr && m_pGraphics->IsBackendInitialized())
+	if(m_pGraphics == nullptr || !m_pGraphics->IsBackendInitialized())
 	{
-		str_format(aGpuInfo, std::size(aGpuInfo), "GPU: %s - %s - %s", m_pGraphics->GetVendorString(), m_pGraphics->GetRendererString(), m_pGraphics->GetVersionString());
+		str_format(aGpuInfo, std::size(aGpuInfo),
+			"Graphics backend: %s %d.%d.%d\n"
+			"Graphics %s not yet initialized.",
+			g_Config.m_GfxBackend, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch,
+			m_pGraphics == nullptr ? "were" : "backend was");
 	}
 	else
 	{
-		str_copy(aGpuInfo, "Graphics backend was not yet initialized.");
+		// TODO: Even better would be if the backend could return its name and version, because the config variables can be outdated when the client was not restarted.
+		str_format(aGpuInfo, std::size(aGpuInfo),
+			"Graphics backend: %s %d.%d.%d\n"
+			"GPU: %s - %s - %s\n"
+			"Texture: %" PRIu64 " MiB, "
+			"Buffer: %" PRIu64 " MiB, "
+			"Streamed: %" PRIu64 " MiB, "
+			"Staging: %" PRIu64 " MiB",
+			g_Config.m_GfxBackend, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch,
+			m_pGraphics->GetVendorString(), m_pGraphics->GetRendererString(), m_pGraphics->GetVersionString(),
+			m_pGraphics->TextureMemoryUsage() / 1024 / 1024,
+			m_pGraphics->BufferMemoryUsage() / 1024 / 1024,
+			m_pGraphics->StreamedMemoryUsage() / 1024 / 1024,
+			m_pGraphics->StagingMemoryUsage() / 1024 / 1024);
 	}
 }
 

@@ -1,10 +1,10 @@
+#include "editor.h"
+#include "editor_actions.h"
+
 #include <engine/keys.h>
+
 #include <game/client/gameclient.h>
 #include <game/mapitems.h>
-
-#include "editor.h"
-
-#include "editor_actions.h"
 
 void CEditor::FillGameTiles(EGameTileOp FillTile) const
 {
@@ -56,7 +56,7 @@ void CEditor::AddGroup()
 
 void CEditor::AddSoundLayer()
 {
-	std::shared_ptr<CLayer> pSoundLayer = std::make_shared<CLayerSounds>(this);
+	std::shared_ptr<CLayer> pSoundLayer = std::make_shared<CLayerSounds>(&m_Map);
 	m_Map.m_vpGroups[m_SelectedGroup]->AddLayer(pSoundLayer);
 	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
 	SelectLayer(LayerIndex);
@@ -66,8 +66,7 @@ void CEditor::AddSoundLayer()
 
 void CEditor::AddTileLayer()
 {
-	std::shared_ptr<CLayer> pTileLayer = std::make_shared<CLayerTiles>(this, m_Map.m_pGameLayer->m_Width, m_Map.m_pGameLayer->m_Height);
-	pTileLayer->m_pEditor = this;
+	std::shared_ptr<CLayer> pTileLayer = std::make_shared<CLayerTiles>(&m_Map, m_Map.m_pGameLayer->m_Width, m_Map.m_pGameLayer->m_Height);
 	m_Map.m_vpGroups[m_SelectedGroup]->AddLayer(pTileLayer);
 	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
 	SelectLayer(LayerIndex);
@@ -77,7 +76,7 @@ void CEditor::AddTileLayer()
 
 void CEditor::AddQuadsLayer()
 {
-	std::shared_ptr<CLayer> pQuadLayer = std::make_shared<CLayerQuads>(this);
+	std::shared_ptr<CLayer> pQuadLayer = std::make_shared<CLayerQuads>(&m_Map);
 	m_Map.m_vpGroups[m_SelectedGroup]->AddLayer(pQuadLayer);
 	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
 	SelectLayer(LayerIndex);
@@ -87,7 +86,7 @@ void CEditor::AddQuadsLayer()
 
 void CEditor::AddSwitchLayer()
 {
-	std::shared_ptr<CLayer> pSwitchLayer = std::make_shared<CLayerSwitch>(this, m_Map.m_pGameLayer->m_Width, m_Map.m_pGameLayer->m_Height);
+	std::shared_ptr<CLayer> pSwitchLayer = std::make_shared<CLayerSwitch>(&m_Map, m_Map.m_pGameLayer->m_Width, m_Map.m_pGameLayer->m_Height);
 	m_Map.MakeSwitchLayer(pSwitchLayer);
 	m_Map.m_vpGroups[m_SelectedGroup]->AddLayer(pSwitchLayer);
 	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
@@ -98,7 +97,7 @@ void CEditor::AddSwitchLayer()
 
 void CEditor::AddFrontLayer()
 {
-	std::shared_ptr<CLayer> pFrontLayer = std::make_shared<CLayerFront>(this, m_Map.m_pGameLayer->m_Width, m_Map.m_pGameLayer->m_Height);
+	std::shared_ptr<CLayer> pFrontLayer = std::make_shared<CLayerFront>(&m_Map, m_Map.m_pGameLayer->m_Width, m_Map.m_pGameLayer->m_Height);
 	m_Map.MakeFrontLayer(pFrontLayer);
 	m_Map.m_vpGroups[m_SelectedGroup]->AddLayer(pFrontLayer);
 	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
@@ -109,7 +108,7 @@ void CEditor::AddFrontLayer()
 
 void CEditor::AddTuneLayer()
 {
-	std::shared_ptr<CLayer> pTuneLayer = std::make_shared<CLayerTune>(this, m_Map.m_pGameLayer->m_Width, m_Map.m_pGameLayer->m_Height);
+	std::shared_ptr<CLayer> pTuneLayer = std::make_shared<CLayerTune>(&m_Map, m_Map.m_pGameLayer->m_Width, m_Map.m_pGameLayer->m_Height);
 	m_Map.MakeTuneLayer(pTuneLayer);
 	m_Map.m_vpGroups[m_SelectedGroup]->AddLayer(pTuneLayer);
 	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
@@ -120,7 +119,7 @@ void CEditor::AddTuneLayer()
 
 void CEditor::AddSpeedupLayer()
 {
-	std::shared_ptr<CLayer> pSpeedupLayer = std::make_shared<CLayerSpeedup>(this, m_Map.m_pGameLayer->m_Width, m_Map.m_pGameLayer->m_Height);
+	std::shared_ptr<CLayer> pSpeedupLayer = std::make_shared<CLayerSpeedup>(&m_Map, m_Map.m_pGameLayer->m_Width, m_Map.m_pGameLayer->m_Height);
 	m_Map.MakeSpeedupLayer(pSpeedupLayer);
 	m_Map.m_vpGroups[m_SelectedGroup]->AddLayer(pSpeedupLayer);
 	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
@@ -131,7 +130,7 @@ void CEditor::AddSpeedupLayer()
 
 void CEditor::AddTeleLayer()
 {
-	std::shared_ptr<CLayer> pTeleLayer = std::make_shared<CLayerTele>(this, m_Map.m_pGameLayer->m_Width, m_Map.m_pGameLayer->m_Height);
+	std::shared_ptr<CLayer> pTeleLayer = std::make_shared<CLayerTele>(&m_Map, m_Map.m_pGameLayer->m_Width, m_Map.m_pGameLayer->m_Height);
 	m_Map.MakeTeleLayer(pTeleLayer);
 	m_Map.m_vpGroups[m_SelectedGroup]->AddLayer(pTeleLayer);
 	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
@@ -169,7 +168,7 @@ void CEditor::LayerSelectImage()
 
 	static SLayerPopupContext s_LayerPopupContext = {};
 	s_LayerPopupContext.m_pEditor = this;
-	Ui()->DoPopupMenu(&s_LayerPopupContext, Ui()->MouseX(), Ui()->MouseY(), 120, 270, &s_LayerPopupContext, PopupLayer);
+	Ui()->DoPopupMenu(&s_LayerPopupContext, Ui()->MouseX(), Ui()->MouseY(), 150, 300, &s_LayerPopupContext, PopupLayer);
 	PopupSelectImageInvoke(pTiles->m_Image, Ui()->MouseX(), Ui()->MouseY());
 }
 
@@ -218,16 +217,15 @@ void CEditor::DeleteSelectedLayer()
 
 void CEditor::TestMapLocally()
 {
-	const char *pFileNameNoMaps = str_startswith(m_aFileName, "maps/");
-	if(!pFileNameNoMaps)
+	const char *pFilenameNoMaps = str_startswith(m_aFilename, "maps/");
+	if(!pFilenameNoMaps)
 	{
 		ShowFileDialogError("The map isn't saved in the maps/ folder. It must be saved there to load on the server.");
 		return;
 	}
 
-	char aFileNameNoExt[IO_MAX_PATH_LENGTH];
-	fs_split_file_extension(pFileNameNoMaps, aFileNameNoExt, sizeof(aFileNameNoExt));
-	char aBuf[IO_MAX_PATH_LENGTH + 64];
+	char aFilenameNoExt[IO_MAX_PATH_LENGTH];
+	fs_split_file_extension(pFilenameNoMaps, aFilenameNoExt, sizeof(aFilenameNoExt));
 
 	if(Client()->RconAuthed())
 	{
@@ -235,31 +233,24 @@ void CEditor::TestMapLocally()
 		{
 			OnClose();
 			g_Config.m_ClEditor = 0;
-			str_format(aBuf, sizeof(aBuf), "change_map %s", aFileNameNoExt);
-			Client()->Rcon(aBuf);
+			char aMapChange[IO_MAX_PATH_LENGTH + 64];
+			str_format(aMapChange, sizeof(aMapChange), "change_map %s", aFilenameNoExt);
+			Client()->Rcon(aMapChange);
 			return;
 		}
 	}
 
 	CGameClient *pGameClient = (CGameClient *)Kernel()->RequestInterface<IGameClient>();
-	if(pGameClient->m_Menus.IsServerRunning())
+	if(pGameClient->m_LocalServer.IsServerRunning())
 	{
 		m_PopupEventType = CEditor::POPEVENT_RESTART_SERVER;
 		m_PopupEventActivated = true;
 	}
 	else
 	{
-		char aRegister[] = "sv_register 0";
-
-		char aRandomPass[17];
-		secure_random_password(aRandomPass, sizeof(aRandomPass), 16);
-		char aPass[64];
-		str_format(aPass, sizeof(aPass), "auth_add %s admin %s", DEFAULT_SAVED_RCON_USER, aRandomPass);
-		str_copy(pGameClient->m_aSavedLocalRconPassword, aRandomPass);
-
-		str_format(aBuf, sizeof(aBuf), "change_map %s", aFileNameNoExt);
-		const char *apArguments[] = {aRegister, aPass, aBuf};
-		pGameClient->m_Menus.RunServer(apArguments, std::size(apArguments));
+		char aMapChange[IO_MAX_PATH_LENGTH + 64];
+		str_format(aMapChange, sizeof(aMapChange), "change_map %s", aFilenameNoExt);
+		pGameClient->m_LocalServer.RunServer({"sv_register 0", aMapChange});
 		OnClose();
 		g_Config.m_ClEditor = 0;
 		Client()->Connect("localhost");

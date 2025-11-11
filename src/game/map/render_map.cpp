@@ -1,18 +1,17 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "render_map.h"
+
 #include <base/math.h>
 
 #include <engine/graphics.h>
 #include <engine/map.h>
-#include <engine/textrender.h>
-
 #include <engine/shared/config.h>
 #include <engine/shared/datafile.h>
 #include <engine/shared/map.h>
+#include <engine/textrender.h>
 
-#include "render.h"
-
-#include <game/generated/client_data.h>
+#include <generated/client_data.h>
 
 #include <game/mapitems.h>
 #include <game/mapitems_ex.h>
@@ -21,6 +20,35 @@
 #include <cmath>
 
 using namespace std::chrono_literals;
+
+int IEnvelopePointAccess::FindPointIndex(CFixedTime Time) const
+{
+	// binary search for the interval around Time
+	int Low = 0;
+	int High = NumPoints() - 2;
+	int FoundIndex = -1;
+
+	while(Low <= High)
+	{
+		int Mid = Low + (High - Low) / 2;
+		const CEnvPoint *pMid = GetPoint(Mid);
+		const CEnvPoint *pNext = GetPoint(Mid + 1);
+		if(Time >= pMid->m_Time && Time < pNext->m_Time)
+		{
+			FoundIndex = Mid;
+			break;
+		}
+		else if(Time < pMid->m_Time)
+		{
+			High = Mid - 1;
+		}
+		else
+		{
+			Low = Mid + 1;
+		}
+	}
+	return FoundIndex;
+}
 
 CMapBasedEnvelopePointAccess::CMapBasedEnvelopePointAccess(CDataFileReader *pReader)
 {
@@ -83,8 +111,8 @@ CMapBasedEnvelopePointAccess::CMapBasedEnvelopePointAccess(IMap *pMap) :
 
 void CMapBasedEnvelopePointAccess::SetPointsRange(int StartPoint, int NumPoints)
 {
-	m_StartPoint = clamp(StartPoint, 0, m_NumPointsMax);
-	m_NumPoints = clamp(NumPoints, 0, maximum(m_NumPointsMax - StartPoint, 0));
+	m_StartPoint = std::clamp(StartPoint, 0, m_NumPointsMax);
+	m_NumPoints = std::clamp(NumPoints, 0, maximum(m_NumPointsMax - StartPoint, 0));
 }
 
 int CMapBasedEnvelopePointAccess::StartPoint() const
@@ -170,7 +198,7 @@ static float SolveBezier(float x, float p0, float p1, float p2, float p3)
 		const double c = x0 / x3;
 
 		// substitute t = y - a / 3
-		const double sub = a / 3.0;
+		const double Substitute = a / 3.0;
 
 		// depressed form x^3 + px + q = 0
 		// cardano's method
@@ -183,39 +211,45 @@ static float SolveBezier(float x, float p0, float p1, float p2, float p3)
 		{
 			// only one 'real' solution
 			const double s = std::sqrt(D);
-			return std::cbrt(s - q) - std::cbrt(s + q) - sub;
+			return std::cbrt(s - q) - std::cbrt(s + q) - Substitute;
 		}
 		else if(D == 0.0)
 		{
 			// one single, one double solution or triple solution
 			const double s = std::cbrt(-q);
-			const double t = 2.0 * s - sub;
+			const double t = 2.0 * s - Substitute;
 
 			if(0.0 <= t && t <= 1.0001)
 				return t;
-			return (-s - sub);
+			return (-s - Substitute);
 		}
 		else
 		{
 			// Casus irreducibilis ... ,_,
-			const double phi = std::acos(-q / std::sqrt(-(p * p * p))) / 3.0;
+			const double Phi = std::acos(-q / std::sqrt(-(p * p * p))) / 3.0;
 			const double s = 2.0 * std::sqrt(-p);
 
-			const double t1 = s * std::cos(phi) - sub;
+			const double t1 = s * std::cos(Phi) - Substitute;
 
 			if(0.0 <= t1 && t1 <= 1.0001)
 				return t1;
 
-			const double t2 = -s * std::cos(phi + pi / 3.0) - sub;
+			const double t2 = -s * std::cos(Phi + pi / 3.0) - Substitute;
 
 			if(0.0 <= t2 && t2 <= 1.0001)
 				return t2;
-			return -s * std::cos(phi - pi / 3.0) - sub;
+			return -s * std::cos(Phi - pi / 3.0) - Substitute;
 		}
 	}
 }
 
-void CRenderTools::RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, std::chrono::nanoseconds TimeNanos, ColorRGBA &Result, size_t Channels)
+void CRenderMap::Init(IGraphics *pGraphics, ITextRender *pTextRender)
+{
+	m_pGraphics = pGraphics;
+	m_pTextRender = pTextRender;
+}
+
+void CRenderMap::RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, std::chrono::nanoseconds TimeNanos, ColorRGBA &Result, size_t Channels)
 {
 	const int NumPoints = pPoints->NumPoints();
 	if(NumPoints == 0)
@@ -234,91 +268,99 @@ void CRenderTools::RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, std::
 	}
 
 	const CEnvPoint *pLastPoint = pPoints->GetPoint(NumPoints - 1);
-	const int64_t MaxPointTime = (int64_t)pLastPoint->m_Time * std::chrono::nanoseconds(1ms).count();
+	const int64_t MaxPointTime = (int64_t)pLastPoint->m_Time.GetInternal() * std::chrono::nanoseconds(1ms).count();
 	if(MaxPointTime > 0) // TODO: remove this check when implementing a IO check for maps(in this case broken envelopes)
 		TimeNanos = std::chrono::nanoseconds(TimeNanos.count() % MaxPointTime);
 	else
 		TimeNanos = decltype(TimeNanos)::zero();
 
 	const double TimeMillis = TimeNanos.count() / (double)std::chrono::nanoseconds(1ms).count();
-	for(int i = 0; i < NumPoints - 1; i++)
+
+	int FoundIndex = pPoints->FindPointIndex(CFixedTime(TimeMillis));
+	if(FoundIndex == -1)
 	{
-		const CEnvPoint *pCurrentPoint = pPoints->GetPoint(i);
-		const CEnvPoint *pNextPoint = pPoints->GetPoint(i + 1);
-		if(TimeMillis >= pCurrentPoint->m_Time && TimeMillis < pNextPoint->m_Time)
+		for(size_t c = 0; c < Channels; c++)
 		{
-			const float Delta = pNextPoint->m_Time - pCurrentPoint->m_Time;
-			float a = (float)(TimeMillis - pCurrentPoint->m_Time) / Delta;
-
-			switch(pCurrentPoint->m_Curvetype)
-			{
-			case CURVETYPE_STEP:
-				a = 0.0f;
-				break;
-
-			case CURVETYPE_SLOW:
-				a = a * a * a;
-				break;
-
-			case CURVETYPE_FAST:
-				a = 1.0f - a;
-				a = 1.0f - a * a * a;
-				break;
-
-			case CURVETYPE_SMOOTH:
-				a = -2.0f * a * a * a + 3.0f * a * a; // second hermite basis
-				break;
-
-			case CURVETYPE_BEZIER:
-			{
-				const CEnvPointBezier *pCurrentPointBezier = pPoints->GetBezier(i);
-				const CEnvPointBezier *pNextPointBezier = pPoints->GetBezier(i + 1);
-				if(pCurrentPointBezier == nullptr || pNextPointBezier == nullptr)
-					break; // fallback to linear
-				for(size_t c = 0; c < Channels; c++)
-				{
-					// monotonic 2d cubic bezier curve
-					const vec2 p0 = vec2(pCurrentPoint->m_Time, fx2f(pCurrentPoint->m_aValues[c]));
-					const vec2 p3 = vec2(pNextPoint->m_Time, fx2f(pNextPoint->m_aValues[c]));
-
-					const vec2 OutTang = vec2(pCurrentPointBezier->m_aOutTangentDeltaX[c], fx2f(pCurrentPointBezier->m_aOutTangentDeltaY[c]));
-					const vec2 InTang = vec2(pNextPointBezier->m_aInTangentDeltaX[c], fx2f(pNextPointBezier->m_aInTangentDeltaY[c]));
-
-					vec2 p1 = p0 + OutTang;
-					vec2 p2 = p3 + InTang;
-
-					// validate bezier curve
-					p1.x = clamp(p1.x, p0.x, p3.x);
-					p2.x = clamp(p2.x, p0.x, p3.x);
-
-					// solve x(a) = time for a
-					a = clamp(SolveBezier(TimeMillis, p0.x, p1.x, p2.x, p3.x), 0.0f, 1.0f);
-
-					// value = y(t)
-					Result[c] = bezier(p0.y, p1.y, p2.y, p3.y, a);
-				}
-				return;
-			}
-
-			case CURVETYPE_LINEAR: [[fallthrough]];
-			default:
-				break;
-			}
-
-			for(size_t c = 0; c < Channels; c++)
-			{
-				const float v0 = fx2f(pCurrentPoint->m_aValues[c]);
-				const float v1 = fx2f(pNextPoint->m_aValues[c]);
-				Result[c] = v0 + (v1 - v0) * a;
-			}
-
-			return;
+			Result[c] = fx2f(pLastPoint->m_aValues[c]);
 		}
+		return;
+	}
+
+	const CEnvPoint *pCurrentPoint = pPoints->GetPoint(FoundIndex);
+	const CEnvPoint *pNextPoint = pPoints->GetPoint(FoundIndex + 1);
+
+	const CFixedTime Delta = pNextPoint->m_Time - pCurrentPoint->m_Time;
+	if(Delta <= CFixedTime(0))
+	{
+		for(size_t c = 0; c < Channels; c++)
+		{
+			Result[c] = fx2f(pCurrentPoint->m_aValues[c]);
+		}
+		return;
+	}
+
+	float a = (float)(TimeMillis - pCurrentPoint->m_Time.GetInternal()) / Delta.GetInternal();
+
+	switch(pCurrentPoint->m_Curvetype)
+	{
+	case CURVETYPE_STEP:
+		a = 0.0f;
+		break;
+
+	case CURVETYPE_SLOW:
+		a = a * a * a;
+		break;
+
+	case CURVETYPE_FAST:
+		a = 1.0f - a;
+		a = 1.0f - a * a * a;
+		break;
+
+	case CURVETYPE_SMOOTH:
+		a = -2.0f * a * a * a + 3.0f * a * a; // second hermite basis
+		break;
+
+	case CURVETYPE_BEZIER:
+	{
+		const CEnvPointBezier *pCurrentPointBezier = pPoints->GetBezier(FoundIndex);
+		const CEnvPointBezier *pNextPointBezier = pPoints->GetBezier(FoundIndex + 1);
+		if(pCurrentPointBezier == nullptr || pNextPointBezier == nullptr)
+			break; // fallback to linear
+		for(size_t c = 0; c < Channels; c++)
+		{
+			// monotonic 2d cubic bezier curve
+			const vec2 p0 = vec2(pCurrentPoint->m_Time.GetInternal(), fx2f(pCurrentPoint->m_aValues[c]));
+			const vec2 p3 = vec2(pNextPoint->m_Time.GetInternal(), fx2f(pNextPoint->m_aValues[c]));
+
+			const vec2 OutTang = vec2(pCurrentPointBezier->m_aOutTangentDeltaX[c].GetInternal(), fx2f(pCurrentPointBezier->m_aOutTangentDeltaY[c]));
+			const vec2 InTang = vec2(pNextPointBezier->m_aInTangentDeltaX[c].GetInternal(), fx2f(pNextPointBezier->m_aInTangentDeltaY[c]));
+
+			vec2 p1 = p0 + OutTang;
+			vec2 p2 = p3 + InTang;
+
+			// validate bezier curve
+			p1.x = std::clamp(p1.x, p0.x, p3.x);
+			p2.x = std::clamp(p2.x, p0.x, p3.x);
+
+			// solve x(a) = time for a
+			a = std::clamp(SolveBezier(TimeMillis, p0.x, p1.x, p2.x, p3.x), 0.0f, 1.0f);
+
+			// value = y(t)
+			Result[c] = bezier(p0.y, p1.y, p2.y, p3.y, a);
+		}
+		return;
+	}
+
+	case CURVETYPE_LINEAR: [[fallthrough]];
+	default:
+		break;
 	}
 
 	for(size_t c = 0; c < Channels; c++)
 	{
-		Result[c] = fx2f(pLastPoint->m_aValues[c]);
+		const float v0 = fx2f(pCurrentPoint->m_aValues[c]);
+		const float v1 = fx2f(pNextPoint->m_aValues[c]);
+		Result[c] = v0 + (v1 - v0) * a;
 	}
 }
 
@@ -330,15 +372,7 @@ static void Rotate(const CPoint *pCenter, CPoint *pPoint, float Rotation)
 	pPoint->y = (int)(x * std::sin(Rotation) + y * std::cos(Rotation) + pCenter->y);
 }
 
-void CRenderTools::RenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser) const
-{
-	if(!g_Config.m_ClShowQuads || g_Config.m_ClOverlayEntities == 100)
-		return;
-
-	ForceRenderQuads(pQuads, NumQuads, RenderFlags, pfnEval, pUser, (100 - g_Config.m_ClOverlayEntities) / 100.0f);
-}
-
-void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser, float Alpha) const
+void CRenderMap::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, IEnvelopeEval *pEnvEval, float Alpha)
 {
 	Graphics()->TrianglesBegin();
 	float Conv = 1 / 255.0f;
@@ -347,7 +381,7 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 		CQuad *pQuad = &pQuads[i];
 
 		ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-		pfnEval(pQuad->m_ColorEnvOffset, pQuad->m_ColorEnv, Color, 4, pUser);
+		pEnvEval->EnvelopeEval(pQuad->m_ColorEnvOffset, pQuad->m_ColorEnv, Color, 4);
 
 		if(Color.a <= 0.0f)
 			continue;
@@ -369,7 +403,7 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 			fx2f(pQuad->m_aTexcoords[3].x), fx2f(pQuad->m_aTexcoords[3].y));
 
 		ColorRGBA Position = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
-		pfnEval(pQuad->m_PosEnvOffset, pQuad->m_PosEnv, Position, 3, pUser);
+		pEnvEval->EnvelopeEval(pQuad->m_PosEnvOffset, pQuad->m_PosEnv, Position, 3);
 		const vec2 Offset = vec2(Position.r, Position.g);
 		const float Rotation = Position.b / 180.0f * pi;
 
@@ -403,9 +437,9 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 	Graphics()->TrianglesEnd();
 }
 
-void CRenderTools::RenderTileRectangle(int RectX, int RectY, int RectW, int RectH,
+void CRenderMap::RenderTileRectangle(int RectX, int RectY, int RectW, int RectH,
 	unsigned char IndexIn, unsigned char IndexOut,
-	float Scale, ColorRGBA Color, int RenderFlags) const
+	float Scale, ColorRGBA Color, int RenderFlags)
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -496,7 +530,74 @@ void CRenderTools::RenderTileRectangle(int RectX, int RectY, int RectW, int Rect
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, ColorRGBA Color, int RenderFlags) const
+void CRenderMap::RenderTile(int x, int y, unsigned char Index, float Scale, ColorRGBA Color)
+{
+	if(Graphics()->HasTextureArraysSupport())
+		Graphics()->QuadsTex3DBegin();
+	else
+		Graphics()->QuadsBegin();
+
+	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+
+	// calculate the final pixelsize for the tiles
+	float TilePixelSize = 1024 / Scale;
+	float FinalTileSize = Scale / (ScreenX1 - ScreenX0) * Graphics()->ScreenWidth();
+	float FinalTilesetScale = FinalTileSize / TilePixelSize;
+
+	float TexSize = 1024.0f;
+	float Frac = (1.25f / TexSize) * (1 / FinalTilesetScale);
+	float Nudge = (0.5f / TexSize) * (1 / FinalTilesetScale);
+
+	int tx = Index % 16;
+	int ty = Index / 16;
+	int Px0 = tx * (1024 / 16);
+	int Py0 = ty * (1024 / 16);
+	int Px1 = Px0 + (1024 / 16) - 1;
+	int Py1 = Py0 + (1024 / 16) - 1;
+
+	float x0 = Nudge + Px0 / TexSize + Frac;
+	float y0 = Nudge + Py0 / TexSize + Frac;
+	float x1 = Nudge + Px1 / TexSize - Frac;
+	float y1 = Nudge + Py0 / TexSize + Frac;
+	float x2 = Nudge + Px1 / TexSize - Frac;
+	float y2 = Nudge + Py1 / TexSize - Frac;
+	float x3 = Nudge + Px0 / TexSize + Frac;
+	float y3 = Nudge + Py1 / TexSize - Frac;
+
+	if(Graphics()->HasTextureArraysSupport())
+	{
+		x0 = 0;
+		y0 = 0;
+		x1 = x0 + 1;
+		y1 = y0;
+		x2 = x0 + 1;
+		y2 = y0 + 1;
+		x3 = x0;
+		y3 = y0 + 1;
+	}
+
+	if(Graphics()->HasTextureArraysSupport())
+	{
+		Graphics()->QuadsSetSubsetFree(x0, y0, x1, y1, x2, y2, x3, y3, Index);
+		IGraphics::CQuadItem QuadItem(x, y, Scale, Scale);
+		Graphics()->QuadsTex3DDrawTL(&QuadItem, 1);
+	}
+	else
+	{
+		Graphics()->QuadsSetSubsetFree(x0, y0, x1, y1, x2, y2, x3, y3);
+		IGraphics::CQuadItem QuadItem(x, y, Scale, Scale);
+		Graphics()->QuadsDrawTL(&QuadItem, 1);
+	}
+
+	if(Graphics()->HasTextureArraysSupport())
+		Graphics()->QuadsTex3DEnd();
+	else
+		Graphics()->QuadsEnd();
+	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+}
+
+void CRenderMap::RenderTilemap(CTile *pTiles, int w, int h, float Scale, ColorRGBA Color, int RenderFlags)
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -657,74 +758,7 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, Color
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderTile(int x, int y, unsigned char Index, float Scale, ColorRGBA Color) const
-{
-	if(Graphics()->HasTextureArraysSupport())
-		Graphics()->QuadsTex3DBegin();
-	else
-		Graphics()->QuadsBegin();
-
-	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-
-	// calculate the final pixelsize for the tiles
-	float TilePixelSize = 1024 / Scale;
-	float FinalTileSize = Scale / (ScreenX1 - ScreenX0) * Graphics()->ScreenWidth();
-	float FinalTilesetScale = FinalTileSize / TilePixelSize;
-
-	float TexSize = 1024.0f;
-	float Frac = (1.25f / TexSize) * (1 / FinalTilesetScale);
-	float Nudge = (0.5f / TexSize) * (1 / FinalTilesetScale);
-
-	int tx = Index % 16;
-	int ty = Index / 16;
-	int Px0 = tx * (1024 / 16);
-	int Py0 = ty * (1024 / 16);
-	int Px1 = Px0 + (1024 / 16) - 1;
-	int Py1 = Py0 + (1024 / 16) - 1;
-
-	float x0 = Nudge + Px0 / TexSize + Frac;
-	float y0 = Nudge + Py0 / TexSize + Frac;
-	float x1 = Nudge + Px1 / TexSize - Frac;
-	float y1 = Nudge + Py0 / TexSize + Frac;
-	float x2 = Nudge + Px1 / TexSize - Frac;
-	float y2 = Nudge + Py1 / TexSize - Frac;
-	float x3 = Nudge + Px0 / TexSize + Frac;
-	float y3 = Nudge + Py1 / TexSize - Frac;
-
-	if(Graphics()->HasTextureArraysSupport())
-	{
-		x0 = 0;
-		y0 = 0;
-		x1 = x0 + 1;
-		y1 = y0;
-		x2 = x0 + 1;
-		y2 = y0 + 1;
-		x3 = x0;
-		y3 = y0 + 1;
-	}
-
-	if(Graphics()->HasTextureArraysSupport())
-	{
-		Graphics()->QuadsSetSubsetFree(x0, y0, x1, y1, x2, y2, x3, y3, Index);
-		IGraphics::CQuadItem QuadItem(x, y, Scale, Scale);
-		Graphics()->QuadsTex3DDrawTL(&QuadItem, 1);
-	}
-	else
-	{
-		Graphics()->QuadsSetSubsetFree(x0, y0, x1, y1, x2, y2, x3, y3);
-		IGraphics::CQuadItem QuadItem(x, y, Scale, Scale);
-		Graphics()->QuadsDrawTL(&QuadItem, 1);
-	}
-
-	if(Graphics()->HasTextureArraysSupport())
-		Graphics()->QuadsTex3DEnd();
-	else
-		Graphics()->QuadsEnd();
-	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
-}
-
-void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale, int OverlayRenderFlag, float Alpha) const
+void CRenderMap::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
 {
 	if(!(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT))
 		return;
@@ -768,7 +802,7 @@ void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				// Auto-resize text to fit inside the tile
 				float ScaledWidth = TextRender()->TextWidth(Size * Scale, aBuf, -1);
-				float Factor = clamp(Scale / ScaledWidth, 0.0f, 1.0f);
+				float Factor = std::clamp(Scale / ScaledWidth, 0.0f, 1.0f);
 				float LocalSize = Size * Factor;
 				float ToCenterOffset = (1 - LocalSize) / 2.f;
 				TextRender()->Text((mx + 0.5f) * Scale - (ScaledWidth * Factor) / 2.0f, (my + ToCenterOffset) * Scale, LocalSize * Scale, aBuf);
@@ -779,7 +813,7 @@ void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, float Scale, int OverlayRenderFlag, float Alpha) const
+void CRenderMap::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -817,26 +851,46 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 
 			int Force = (int)pSpeedup[c].m_Force;
 			int MaxSpeed = (int)pSpeedup[c].m_MaxSpeed;
-			if(Force)
+			int Type = (int)pSpeedup[c].m_Type;
+			int Angle = (int)pSpeedup[c].m_Angle;
+			if((Force && Type == TILE_SPEED_BOOST_OLD) || ((Force || MaxSpeed) && Type == TILE_SPEED_BOOST) || (OverlayRenderFlag & OVERLAYRENDERFLAG_EDITOR && (Type || Force || MaxSpeed || Angle)))
 			{
-				// draw arrow
-				Graphics()->TextureSet(g_pData->m_aImages[IMAGE_SPEEDUP_ARROW].m_Id);
-				Graphics()->QuadsBegin();
-				Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
-				SelectSprite(SPRITE_SPEEDUP_ARROW);
-				Graphics()->QuadsSetRotation(pSpeedup[c].m_Angle * (pi / 180.0f));
-				DrawSprite(mx * Scale + 16, my * Scale + 16, 35.0f);
-				Graphics()->QuadsEnd();
-
-				// draw force and max speed
-				if(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT)
+				if(IsValidSpeedupTile(Type))
 				{
-					str_format(aBuf, sizeof(aBuf), "%d", Force);
-					TextRender()->Text(mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
-					if(MaxSpeed)
+					// draw arrow
+					Graphics()->TextureSet(g_pData->m_aImages[IMAGE_SPEEDUP_ARROW].m_Id);
+					Graphics()->QuadsBegin();
+					Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
+					Graphics()->SelectSprite(SPRITE_SPEEDUP_ARROW);
+					Graphics()->QuadsSetRotation(pSpeedup[c].m_Angle * (pi / 180.0f));
+					Graphics()->DrawSprite(mx * Scale + 16, my * Scale + 16, 35.0f);
+					Graphics()->QuadsEnd();
+
+					// draw force and max speed
+					if(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT)
 					{
+						str_format(aBuf, sizeof(aBuf), "%d", Force);
+						TextRender()->Text(mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
+						if(MaxSpeed)
+						{
+							str_format(aBuf, sizeof(aBuf), "%d", MaxSpeed);
+							TextRender()->Text(mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
+						}
+					}
+				}
+				else
+				{
+					// draw all three values
+					if(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT)
+					{
+						float LineSpacing = Size * Scale / 3.f;
+						float BaseY = (my + ToCenterOffset) * Scale;
+						str_format(aBuf, sizeof(aBuf), "%d", Force);
+						TextRender()->Text(mx * Scale, BaseY, LineSpacing, aBuf);
 						str_format(aBuf, sizeof(aBuf), "%d", MaxSpeed);
-						TextRender()->Text(mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
+						TextRender()->Text(mx * Scale, BaseY + LineSpacing, LineSpacing, aBuf);
+						str_format(aBuf, sizeof(aBuf), "%d", Angle);
+						TextRender()->Text(mx * Scale, BaseY + 2 * LineSpacing, LineSpacing, aBuf);
 					}
 				}
 			}
@@ -846,7 +900,7 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float Scale, int OverlayRenderFlag, float Alpha) const
+void CRenderMap::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
 {
 	if(!(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT))
 		return;
@@ -904,7 +958,7 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale, int OverlayRenderFlag, float Alpha) const
+void CRenderMap::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale, int OverlayRenderFlag, float Alpha)
 {
 	if(!(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT))
 		return;
@@ -948,7 +1002,7 @@ void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				// Auto-resize text to fit inside the tile
 				float ScaledWidth = TextRender()->TextWidth(Size * Scale, aBuf, -1);
-				float Factor = clamp(Scale / ScaledWidth, 0.0f, 1.0f);
+				float Factor = std::clamp(Scale / ScaledWidth, 0.0f, 1.0f);
 				float LocalSize = Size * Factor;
 				float ToCenterOffset = (1 - LocalSize) / 2.f;
 				TextRender()->Text((mx + 0.5f) * Scale - (ScaledWidth * Factor) / 2.0f, (my + ToCenterOffset) * Scale, LocalSize * Scale, aBuf);
@@ -959,7 +1013,7 @@ void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, ColorRGBA Color, int RenderFlags) const
+void CRenderMap::RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, ColorRGBA Color, int RenderFlags)
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -1076,7 +1130,7 @@ void CRenderTools::RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, Co
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderSwitchmap(CSwitchTile *pSwitchTile, int w, int h, float Scale, ColorRGBA Color, int RenderFlags) const
+void CRenderMap::RenderSwitchmap(CSwitchTile *pSwitchTile, int w, int h, float Scale, ColorRGBA Color, int RenderFlags)
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -1236,7 +1290,7 @@ void CRenderTools::RenderSwitchmap(CSwitchTile *pSwitchTile, int w, int h, float
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, ColorRGBA Color, int RenderFlags) const
+void CRenderMap::RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, ColorRGBA Color, int RenderFlags)
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -1351,4 +1405,25 @@ void CRenderTools::RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, Co
 	else
 		Graphics()->QuadsEnd();
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+}
+
+void CRenderMap::RenderDebugClip(float ClipX, float ClipY, float ClipW, float ClipH, ColorRGBA Color, float Zoom, const char *pLabel)
+{
+	Graphics()->TextureClear();
+	Graphics()->LinesBegin();
+	Graphics()->SetColor(Color);
+	IGraphics::CLineItem aLineItems[] = {
+		IGraphics::CLineItem(ClipX, ClipY, ClipX, ClipY + ClipH),
+		IGraphics::CLineItem(ClipX + ClipW, ClipY, ClipX + ClipW, ClipY + ClipH),
+		IGraphics::CLineItem(ClipX, ClipY, ClipX + ClipW, ClipY),
+		IGraphics::CLineItem(ClipX, ClipY + ClipH, ClipX + ClipW, ClipY + ClipH),
+	};
+	Graphics()->LinesDraw(aLineItems, std::size(aLineItems));
+	Graphics()->LinesEnd();
+
+	TextRender()->TextColor(Color);
+
+	// clamp zoom and set line width, because otherwise the text can be partially clipped out
+	TextRender()->Text(ClipX, ClipY, std::min(12.0f * Zoom, 20.0f), pLabel, ClipW);
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
 }

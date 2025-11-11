@@ -462,7 +462,7 @@ private:
 						if(GetX >= 0 && GetY >= 0 && GetX < w && GetY < h)
 						{
 							int Index = GetY * w + GetX;
-							float Mask = 1.f - clamp(length(vec2(sx, sy)) - OutlineCount, 0.f, 1.f);
+							float Mask = 1.f - std::clamp(length(vec2(sx, sy)) - OutlineCount, 0.f, 1.f);
 							c = maximum(c, int(pIn[Index] * Mask));
 						}
 					}
@@ -705,7 +705,7 @@ public:
 
 	const SGlyph *GetGlyph(int Chr, int FontSize)
 	{
-		FontSize = clamp(FontSize, MIN_FONT_SIZE, MAX_FONT_SIZE);
+		FontSize = std::clamp(FontSize, MIN_FONT_SIZE, MAX_FONT_SIZE);
 
 		// Find glyph index and most appropriate font face.
 		FT_Face Face;
@@ -804,8 +804,8 @@ public:
 				{
 					for(unsigned OffX = 0; OffX < pBitmap->width; ++OffX)
 					{
-						const int ImgOffX = clamp(x + OffX + WidthLastChars, x, (x + TexSubWidth) - 1);
-						const int ImgOffY = clamp(y + OffY, y, (y + TexSubHeight) - 1);
+						const int ImgOffX = std::clamp(x + OffX + WidthLastChars, x, (x + TexSubWidth) - 1);
+						const int ImgOffY = std::clamp(y + OffY, y, (y + TexSubHeight) - 1);
 						const size_t ImageOffset = ImgOffY * (TextImage.m_Width * PixelSize) + ImgOffX * PixelSize;
 						for(size_t i = 0; i < PixelSize - 1; ++i)
 						{
@@ -922,6 +922,24 @@ struct STextContainer
 		m_ContainerIndex = STextContainerIndex{};
 	}
 };
+
+float CTextCursor::Height() const
+{
+	return m_LineCount * (m_AlignedFontSize + m_AlignedLineSpacing);
+}
+
+STextBoundingBox CTextCursor::BoundingBox() const
+{
+	return {m_StartX, m_StartY, m_LongestLineWidth, Height()};
+}
+
+void CTextCursor::SetPosition(vec2 Position)
+{
+	m_StartX = Position.x;
+	m_StartY = Position.y;
+	m_X = Position.x;
+	m_Y = Position.y;
+}
 
 struct SFontLanguageVariant
 {
@@ -1328,67 +1346,20 @@ public:
 		m_pGlyphMap->SetVariantFaceByName(nullptr);
 	}
 
-	void SetCursor(CTextCursor *pCursor, float x, float y, float FontSize, int Flags) const override
-	{
-		pCursor->m_Flags = Flags;
-		pCursor->m_LineCount = 1;
-		pCursor->m_GlyphCount = 0;
-		pCursor->m_CharCount = 0;
-		pCursor->m_MaxLines = 0;
-
-		pCursor->m_LineSpacing = 0;
-		pCursor->m_AlignedLineSpacing = 0;
-
-		pCursor->m_StartX = x;
-		pCursor->m_StartY = y;
-		pCursor->m_LineWidth = -1.0f;
-		pCursor->m_X = x;
-		pCursor->m_Y = y;
-		pCursor->m_MaxCharacterHeight = 0.0f;
-		pCursor->m_LongestLineWidth = 0.0f;
-
-		pCursor->m_FontSize = FontSize;
-		pCursor->m_AlignedFontSize = FontSize;
-
-		pCursor->m_CalculateSelectionMode = TEXT_CURSOR_SELECTION_MODE_NONE;
-		pCursor->m_SelectionHeightFactor = 1.0f;
-		pCursor->m_PressMouse = vec2(0.0f, 0.0f);
-		pCursor->m_ReleaseMouse = vec2(0.0f, 0.0f);
-		pCursor->m_SelectionStart = 0;
-		pCursor->m_SelectionEnd = 0;
-
-		pCursor->m_CursorMode = TEXT_CURSOR_CURSOR_MODE_NONE;
-		pCursor->m_ForceCursorRendering = false;
-		pCursor->m_CursorCharacter = -1;
-		pCursor->m_CursorRenderedPosition = vec2(-1.0f, -1.0f);
-
-		pCursor->m_vColorSplits = {};
-	}
-
-	void MoveCursor(CTextCursor *pCursor, float x, float y) const override
-	{
-		pCursor->m_X += x;
-		pCursor->m_Y += y;
-	}
-
-	void SetCursorPosition(CTextCursor *pCursor, float x, float y) const override
-	{
-		pCursor->m_X = x;
-		pCursor->m_Y = y;
-	}
-
-	void Text(float x, float y, float Size, const char *pText, float LineWidth = -1.0f) override
+	void Text(float x, float y, float FontSize, const char *pText, float LineWidth = -1.0f) override
 	{
 		CTextCursor Cursor;
-		SetCursor(&Cursor, x, y, Size, TEXTFLAG_RENDER);
+		Cursor.SetPosition(vec2(x, y));
+		Cursor.m_FontSize = FontSize;
 		Cursor.m_LineWidth = LineWidth;
 		TextEx(&Cursor, pText, -1);
 	}
 
-	float TextWidth(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0, const STextSizeProperties &TextSizeProps = {}) override
+	float TextWidth(float FontSize, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0, const STextSizeProperties &TextSizeProps = {}) override
 	{
 		CTextCursor Cursor;
-		SetCursor(&Cursor, 0, 0, Size, Flags);
+		Cursor.m_FontSize = FontSize;
+		Cursor.m_Flags = Flags;
 		Cursor.m_LineWidth = LineWidth;
 		TextEx(&Cursor, pText, StrLength);
 		if(TextSizeProps.m_pHeight != nullptr)
@@ -1402,10 +1373,11 @@ public:
 		return Cursor.m_LongestLineWidth;
 	}
 
-	STextBoundingBox TextBoundingBox(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, float LineSpacing = 0.0f, int Flags = 0) override
+	STextBoundingBox TextBoundingBox(float FontSize, const char *pText, int StrLength = -1, float LineWidth = -1.0f, float LineSpacing = 0.0f, int Flags = 0) override
 	{
 		CTextCursor Cursor;
-		SetCursor(&Cursor, 0, 0, Size, Flags);
+		Cursor.m_FontSize = FontSize;
+		Cursor.m_Flags = Flags;
 		Cursor.m_LineWidth = LineWidth;
 		Cursor.m_LineSpacing = LineSpacing;
 		TextEx(&Cursor, pText, StrLength);
@@ -1504,7 +1476,7 @@ public:
 		TextContainer.m_Y = pCursor->m_Y;
 		TextContainer.m_Flags = pCursor->m_Flags;
 
-		if(pCursor->m_LineWidth <= 0)
+		if(pCursor->m_LineWidth <= 0.0f)
 			TextContainer.m_RenderFlags = m_RenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE;
 		else
 			TextContainer.m_RenderFlags = m_RenderFlags;
@@ -1565,7 +1537,7 @@ public:
 		const SGlyph *pEllipsisGlyph = nullptr;
 		if(pCursor->m_Flags & TEXTFLAG_ELLIPSIS_AT_END)
 		{
-			if(pCursor->m_LineWidth != -1 && pCursor->m_LineWidth < TextWidth(pCursor->m_FontSize, pText, -1, -1.0f))
+			if(pCursor->m_LineWidth > 0.0f && pCursor->m_LineWidth < TextWidth(pCursor->m_FontSize, pText))
 			{
 				pEllipsisGlyph = m_pGlyphMap->GetGlyph(0x2026, ActualSize); // …
 				if(pEllipsisGlyph == nullptr)
@@ -1688,7 +1660,7 @@ public:
 		{
 			bool NewLine = false;
 			const char *pBatchEnd = pEnd;
-			if(pCursor->m_LineWidth > 0 && !(pCursor->m_Flags & TEXTFLAG_STOP_AT_END) && !(pCursor->m_Flags & TEXTFLAG_ELLIPSIS_AT_END))
+			if(pCursor->m_LineWidth > 0.0f && !(pCursor->m_Flags & TEXTFLAG_STOP_AT_END) && !(pCursor->m_Flags & TEXTFLAG_ELLIPSIS_AT_END))
 			{
 				int Wlen = minimum(WordLength(pCurrent), (int)(pEnd - pCurrent));
 				CTextCursor Compare = *pCursor;
@@ -1698,7 +1670,7 @@ public:
 				Compare.m_Y = DrawY;
 				Compare.m_Flags &= ~TEXTFLAG_RENDER;
 				Compare.m_Flags |= TEXTFLAG_DISALLOW_NEWLINE;
-				Compare.m_LineWidth = -1;
+				Compare.m_LineWidth = -1.0f;
 				TextEx(&Compare, pCurrent, Wlen);
 
 				if(Compare.m_X - DrawX > pCursor->m_LineWidth)
@@ -1779,19 +1751,24 @@ public:
 						{
 							CharKerningEllipsis = m_pGlyphMap->Kerning(pGlyph, pEllipsisGlyph).x * Scale * pCursor->m_AlignedFontSize;
 						}
-						if(DrawX + CharKerning + Advance + CharKerningEllipsis + AdvanceEllipsis - pCursor->m_StartX > pCursor->m_LineWidth)
+						if(pCursor->m_LineWidth > 0.0f &&
+							DrawX + CharKerning + Advance + CharKerningEllipsis + AdvanceEllipsis - pCursor->m_StartX > pCursor->m_LineWidth)
 						{
 							// we hit the end, only render ellipsis and finish
 							pTmp = pEllipsis;
 							NextCharacter = 0x2026;
+							pCursor->m_Truncated = true;
 							continue;
 						}
 					}
 
-					if(pCursor->m_Flags & TEXTFLAG_STOP_AT_END && (DrawX + CharKerning) + Advance - pCursor->m_StartX > pCursor->m_LineWidth)
+					if(pCursor->m_LineWidth > 0.0f &&
+						(pCursor->m_Flags & TEXTFLAG_STOP_AT_END) != 0 &&
+						(DrawX + CharKerning) + Advance - pCursor->m_StartX > pCursor->m_LineWidth)
 					{
 						// we hit the end of the line, no more to render or count
 						pCurrent = pEnd;
+						pCursor->m_Truncated = true;
 						break;
 					}
 

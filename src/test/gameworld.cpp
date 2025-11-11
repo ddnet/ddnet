@@ -1,9 +1,9 @@
 #include "test.h"
-#include <gtest/gtest.h>
 
 #include <base/logger.h>
 #include <base/system.h>
 #include <base/types.h>
+
 #include <engine/engine.h>
 #include <engine/kernel.h>
 #include <engine/server/databases/connection.h>
@@ -13,11 +13,17 @@
 #include <engine/server/server_logger.h>
 #include <engine/shared/assertion_logger.h>
 #include <engine/shared/config.h>
-#include <game/generated/protocol.h>
+
+#include <generated/protocol.h>
+
 #include <game/server/entities/character.h>
 #include <game/server/gamecontext.h>
+#include <game/server/gamecontroller.h>
 #include <game/server/gameworld.h>
+#include <game/server/player.h>
 #include <game/version.h>
+
+#include <gtest/gtest.h>
 
 #include <memory>
 #include <thread>
@@ -55,7 +61,7 @@ public:
 		m_pKernel = std::unique_ptr<IKernel>(IKernel::Create());
 		m_pKernel->RegisterInterface(m_pServer);
 
-		IEngine *pEngine = CreateTestEngine(GAME_NAME, 1);
+		IEngine *pEngine = CreateTestEngine(GAME_NAME);
 		m_pKernel->RegisterInterface(pEngine);
 
 		m_TestInfo.m_DeleteTestStorageFilesOnSuccess = true;
@@ -247,4 +253,60 @@ TEST_F(CTestGameWorld, IntersectEntity)
 		-1, // CollideWith
 		nullptr /* pThisOnly */);
 	EXPECT_EQ(pIntersectedChar, pChrRight);
+}
+
+TEST_F(CTestGameWorld, BasicTick)
+{
+	int ClientId = 0;
+	bool Afk = true;
+	int LastWhisperTo = -1;
+	const int StartTeam = GameServer()->m_pController->GetAutoTeam(ClientId);
+	GameServer()->CreatePlayer(ClientId, StartTeam, Afk, LastWhisperTo);
+
+	GameServer()->OnTick();
+}
+
+TEST_F(CTestGameWorld, CharacterEmote)
+{
+	int ClientId = 0;
+	bool Afk = true;
+	int LastWhisperTo = -1;
+	GameServer()->CreatePlayer(ClientId, TEAM_RED, Afk, LastWhisperTo);
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	pPlayer->ForceSpawn(vec2(0, 0));
+	CCharacter *pChr = pPlayer->GetCharacter();
+	ASSERT_NE(pChr, nullptr);
+
+	// afk
+	pPlayer->SetAfk(true);
+	ASSERT_EQ(pChr->DetermineEyeEmote(), EMOTE_BLINK);
+
+	// not afk
+	pPlayer->SetAfk(false);
+	ASSERT_EQ(pChr->DetermineEyeEmote(), EMOTE_NORMAL);
+
+	// frozen
+	pChr->Freeze(10);
+	ASSERT_EQ(pChr->DetermineEyeEmote(), EMOTE_BLINK);
+
+	// frozen and paused
+	pPlayer->Pause(CPlayer::PAUSE_PAUSED, true);
+	ASSERT_EQ(pChr->DetermineEyeEmote(), EMOTE_NORMAL);
+
+	// ninja jetpack
+	pPlayer->Pause(CPlayer::PAUSE_NONE, true);
+	pChr->UnFreeze();
+	pPlayer->m_NinjaJetpack = true;
+	pChr->m_NinjaJetpack = true;
+	pChr->SetJetpack(true);
+	pChr->SetActiveWeapon(WEAPON_GUN);
+	ASSERT_EQ(pChr->DetermineEyeEmote(), EMOTE_HAPPY);
+
+	// /emote angry 3 chat command
+	pChr->SetEmote(EMOTE_ANGRY, GameServer()->Server()->Tick() + GameServer()->Server()->TickSpeed() * 3);
+	ASSERT_EQ(pChr->DetermineEyeEmote(), EMOTE_ANGRY);
+
+	// /emote angry 3 chat command and frozen
+	pChr->Freeze(10);
+	ASSERT_EQ(pChr->DetermineEyeEmote(), EMOTE_ANGRY);
 }

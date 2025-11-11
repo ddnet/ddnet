@@ -12,9 +12,8 @@
 
 #include <base/system.h>
 
-#include <engine/client/graphics_defines.h>
-
 #include <engine/client/backend/backend_base.h>
+#include <engine/client/graphics_defines.h>
 
 class CGLSLTWProgram;
 class CGLSLPrimitiveProgram;
@@ -31,7 +30,7 @@ protected:
 	struct CTexture
 	{
 		CTexture() :
-			m_Tex(0), m_Tex2DArray(0), m_Sampler(0), m_Sampler2DArray(0), m_LastWrapMode(CCommandBuffer::WRAP_REPEAT), m_MemSize(0), m_Width(0), m_Height(0), m_RescaleCount(0), m_ResizeWidth(0), m_ResizeHeight(0)
+			m_Tex(0), m_Tex2DArray(0), m_Sampler(0), m_Sampler2DArray(0), m_LastWrapMode(EWrapMode::REPEAT), m_MemSize(0), m_Width(0), m_Height(0), m_RescaleCount(0), m_ResizeWidth(0), m_ResizeHeight(0)
 		{
 		}
 
@@ -39,7 +38,7 @@ protected:
 		TWGLuint m_Tex2DArray; // or 3D texture as fallback
 		TWGLuint m_Sampler;
 		TWGLuint m_Sampler2DArray; // or 3D texture as fallback
-		int m_LastWrapMode;
+		EWrapMode m_LastWrapMode;
 
 		int m_MemSize;
 
@@ -65,7 +64,7 @@ protected:
 	bool m_HasNPOTTextures;
 
 	bool m_HasShaders;
-	int m_LastBlendMode; // avoid all possible opengl state changes
+	EBlendMode m_LastBlendMode; // avoid all possible opengl state changes
 	bool m_LastClipEnable;
 
 	int m_OpenGLTextureLodBIAS;
@@ -115,7 +114,7 @@ protected:
 
 	virtual void Cmd_RenderTileLayer(const CCommandBuffer::SCommand_RenderTileLayer *pCommand) { dbg_assert(false, "Call of unsupported Cmd_RenderTileLayer"); }
 	virtual void Cmd_RenderBorderTile(const CCommandBuffer::SCommand_RenderBorderTile *pCommand) { dbg_assert(false, "Call of unsupported Cmd_RenderBorderTile"); }
-	virtual void Cmd_RenderQuadLayer(const CCommandBuffer::SCommand_RenderQuadLayer *pCommand) { dbg_assert(false, "Call of unsupported Cmd_RenderQuadLayer"); }
+	virtual void Cmd_RenderQuadLayer(const CCommandBuffer::SCommand_RenderQuadLayer *pCommand, bool Grouped) { dbg_assert(false, "Call of unsupported Cmd_RenderQuadLayer"); }
 	virtual void Cmd_RenderText(const CCommandBuffer::SCommand_RenderText *pCommand) { dbg_assert(false, "Call of unsupported Cmd_RenderText"); }
 	virtual void Cmd_RenderQuadContainer(const CCommandBuffer::SCommand_RenderQuadContainer *pCommand) { dbg_assert(false, "Call of unsupported Cmd_RenderQuadContainer"); }
 	virtual void Cmd_RenderQuadContainerEx(const CCommandBuffer::SCommand_RenderQuadContainerEx *pCommand) { dbg_assert(false, "Call of unsupported Cmd_RenderQuadContainerEx"); }
@@ -123,7 +122,6 @@ protected:
 
 public:
 	CCommandProcessorFragment_OpenGL();
-	virtual ~CCommandProcessorFragment_OpenGL() = default;
 
 	ERunCommandReturnTypes RunCommand(const CCommandBuffer::SCommand *pBaseCommand) override;
 };

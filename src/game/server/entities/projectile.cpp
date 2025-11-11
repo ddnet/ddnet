@@ -1,13 +1,14 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "projectile.h"
+
 #include "character.h"
 
 #include <engine/shared/config.h>
 
-#include <game/generated/protocol.h>
-#include <game/mapitems.h>
+#include <generated/protocol.h>
 
+#include <game/mapitems.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
 
@@ -194,13 +195,13 @@ void CProjectile::Tick()
 			{
 				// Delay specifies which weapon the tile should work for.
 				// Delay = 0 means all.
-				int delay = GameServer()->Collision()->GetSwitchDelay(MapIndex);
+				int Delay = GameServer()->Collision()->GetSwitchDelay(MapIndex);
 
-				if(delay == 1 && m_Type != WEAPON_GUN)
+				if(Delay == 1 && m_Type != WEAPON_GUN)
 					IsSwitchTeleGun = IsBlueSwitchTeleGun = false;
-				if(delay == 2 && m_Type != WEAPON_GRENADE)
+				if(Delay == 2 && m_Type != WEAPON_GRENADE)
 					IsSwitchTeleGun = IsBlueSwitchTeleGun = false;
-				if(delay == 3 && m_Type != WEAPON_LASER)
+				if(Delay == 3 && m_Type != WEAPON_LASER)
 					IsSwitchTeleGun = IsBlueSwitchTeleGun = false;
 			}
 

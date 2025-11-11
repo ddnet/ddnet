@@ -30,6 +30,8 @@ protected:
 	CGLSLPrimitiveProgram *m_pPrimitiveProgramTextured;
 	CGLSLQuadProgram *m_pQuadProgram;
 	CGLSLQuadProgram *m_pQuadProgramTextured;
+	CGLSLQuadProgram *m_pQuadProgramGrouped;
+	CGLSLQuadProgram *m_pQuadProgramTexturedGrouped;
 	CGLSLTextProgram *m_pTextProgram;
 	CGLSLPrimitiveExProgram *m_pPrimitiveExProgram;
 	CGLSLPrimitiveExProgram *m_pPrimitiveExProgramTextured;
@@ -74,7 +76,7 @@ protected:
 	bool IsNewApi() override { return true; }
 
 	void UseProgram(CGLSLTWProgram *pProgram);
-	void UploadStreamBufferData(unsigned int PrimitiveType, const void *pVertices, size_t VertSize, unsigned int PrimitiveCount, bool AsTex3D = false);
+	void UploadStreamBufferData(EPrimitiveType PrimitiveType, const void *pVertices, size_t VertSize, unsigned int PrimitiveCount, bool AsTex3D = false);
 	void RenderText(const CCommandBuffer::SState &State, int DrawNum, int TextTextureIndex, int TextOutlineTextureIndex, int TextureSize, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor);
 
 	void TextureUpdate(int Slot, int X, int Y, int Width, int Height, int GLFormat, uint8_t *pTexData);
@@ -104,7 +106,7 @@ protected:
 
 	void Cmd_RenderTileLayer(const CCommandBuffer::SCommand_RenderTileLayer *pCommand) override;
 	void Cmd_RenderBorderTile(const CCommandBuffer::SCommand_RenderBorderTile *pCommand) override;
-	void Cmd_RenderQuadLayer(const CCommandBuffer::SCommand_RenderQuadLayer *pCommand) override;
+	void Cmd_RenderQuadLayer(const CCommandBuffer::SCommand_RenderQuadLayer *pCommand, bool Grouped) override;
 	void Cmd_RenderText(const CCommandBuffer::SCommand_RenderText *pCommand) override;
 	void Cmd_RenderQuadContainer(const CCommandBuffer::SCommand_RenderQuadContainer *pCommand) override;
 	void Cmd_RenderQuadContainerEx(const CCommandBuffer::SCommand_RenderQuadContainerEx *pCommand) override;

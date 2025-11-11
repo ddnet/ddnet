@@ -1,9 +1,9 @@
 #ifndef ENGINE_IMAGE_H
 #define ENGINE_IMAGE_H
 
-#include <cstdint>
-
 #include <base/color.h>
+
+#include <cstdint>
 
 /**
  * Represents an image that has been loaded into main memory.
@@ -22,6 +22,18 @@ public:
 		FORMAT_R = 2,
 		FORMAT_RA = 3,
 	};
+
+	CImageInfo() = default;
+
+	/**
+	 * Move assignment.
+	 */
+	CImageInfo &operator=(CImageInfo &&Other);
+
+	/**
+	 * Move constructor.
+	 */
+	CImageInfo(CImageInfo &&Other);
 
 	/**
 	 * Width of the image.

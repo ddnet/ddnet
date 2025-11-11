@@ -1,17 +1,17 @@
 #include <base/logger.h>
 #include <base/system.h>
+
 #include <engine/shared/stun.h>
+
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 int main(int argc, const char **argv)
 {
 	CCmdlineFix CmdlineFix(&argc, &argv);
 
 	log_set_global_logger_default();
-	if(secure_random_init() != 0)
-	{
-		log_error("stun", "could not initialize secure RNG");
-		return -1;
-	}
 
 	if(argc < 2)
 	{
@@ -49,7 +49,7 @@ int main(int argc, const char **argv)
 	unsigned char *pResponse;
 	while(true)
 	{
-		if(!net_socket_read_wait(Socket, 1000000))
+		if(!net_socket_read_wait(Socket, 1s))
 		{
 			log_error("stun", "no udp message received from server until timeout");
 			return 3;

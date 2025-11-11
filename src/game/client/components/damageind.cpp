@@ -1,14 +1,16 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "damageind.h"
+
 #include <base/color.h>
+
 #include <engine/demo.h>
 #include <engine/graphics.h>
-#include <game/client/gameclient.h>
-#include <game/client/render.h>
-#include <game/generated/client_data.h>
-#include <game/generated/protocol.h>
 
-#include "damageind.h"
+#include <generated/client_data.h>
+#include <generated/protocol.h>
+
+#include <game/client/gameclient.h>
 
 CDamageInd::CDamageInd()
 {
@@ -65,7 +67,7 @@ void CDamageInd::OnRender()
 		}
 		else
 		{
-			vec2 Pos = mix(m_aItems[i].m_Pos + m_aItems[i].m_Dir * 75.0f, m_aItems[i].m_Pos, clamp((m_aItems[i].m_RemainingLife - 0.60f) / 0.15f, 0.0f, 1.0f));
+			vec2 Pos = mix(m_aItems[i].m_Pos + m_aItems[i].m_Dir * 75.0f, m_aItems[i].m_Pos, std::clamp((m_aItems[i].m_RemainingLife - 0.60f) / 0.15f, 0.0f, 1.0f));
 			const float LifeAlpha = m_aItems[i].m_RemainingLife / 0.1f;
 			Graphics()->SetColor(m_aItems[i].m_Color.WithMultipliedAlpha(LifeAlpha));
 			Graphics()->QuadsSetRotation(m_aItems[i].m_StartAngle + m_aItems[i].m_RemainingLife * 2.0f);
@@ -85,9 +87,9 @@ void CDamageInd::OnInit()
 
 	m_DmgIndQuadContainerIndex = Graphics()->CreateQuadContainer(false);
 	float ScaleX, ScaleY;
-	RenderTools()->GetSpriteScale(SPRITE_STAR1, ScaleX, ScaleY);
+	Graphics()->GetSpriteScale(SPRITE_STAR1, ScaleX, ScaleY);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
-	RenderTools()->QuadContainerAddSprite(m_DmgIndQuadContainerIndex, 48.f * ScaleX, 48.f * ScaleY);
+	Graphics()->QuadContainerAddSprite(m_DmgIndQuadContainerIndex, 48.f * ScaleX, 48.f * ScaleY);
 	Graphics()->QuadContainerUpload(m_DmgIndQuadContainerIndex);
 }
 

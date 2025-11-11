@@ -8,7 +8,11 @@ CSmoothValue::CSmoothValue(float InitialValue, float MinValue, float MaxValue) :
 
 void CSmoothValue::SetValue(float Target)
 {
-	Target = clamp(Target, m_MinValue, m_MaxValue);
+	Target = std::clamp(Target, m_MinValue, m_MaxValue);
+	if(m_Value == Target)
+	{
+		return;
+	}
 
 	const float Now = Client()->GlobalTime();
 	float Current = m_Value;
@@ -54,7 +58,7 @@ bool CSmoothValue::UpdateValue()
 				m_Smoothing = false;
 			}
 		}
-		m_Value = clamp(m_Value, m_MinValue, m_MaxValue);
+		m_Value = std::clamp(m_Value, m_MinValue, m_MaxValue);
 
 		return true;
 	}
@@ -75,7 +79,7 @@ float CSmoothValue::GetValue() const
 void CSmoothValue::SetValueInstant(float Target)
 {
 	m_Smoothing = false;
-	m_Value = Target;
+	m_Value = std::clamp(Target, m_MinValue, m_MaxValue);
 }
 
 void CSmoothValue::SetValueRange(float MinValue, float MaxValue)

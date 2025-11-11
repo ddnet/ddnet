@@ -3,8 +3,9 @@
 #ifndef ENGINE_SHARED_PROTOCOL_H
 #define ENGINE_SHARED_PROTOCOL_H
 
-#include <bitset>
 #include <engine/shared/protocol7.h>
+
+#include <bitset>
 
 /*
 	Connection diagram - How the initialization works.
@@ -34,7 +35,7 @@ enum
 
 	// the first thing sent by the client
 	// contains the version info for the client
-	NETMSG_INFO = 1,
+	NETMSG_INFO,
 
 	// sent by server
 	NETMSG_MAP_CHANGE, // sent when client should switch map
@@ -100,11 +101,26 @@ enum
 	MAX_SKIN_LENGTH = 24,
 
 	// message packing
-	MSGFLAG_VITAL = 1,
-	MSGFLAG_FLUSH = 2,
-	MSGFLAG_NORECORD = 4,
-	MSGFLAG_RECORD = 8,
-	MSGFLAG_NOSEND = 16
+	/**
+	 * Guaranteed to be delivered, resent on packet loss.
+	 */
+	MSGFLAG_VITAL = 1 << 0,
+	/**
+	 * Makes the message be sent immediately. Without this flag the message will be delayed until the next flush.
+	 */
+	MSGFLAG_FLUSH = 1 << 1,
+	/**
+	 * Don't write message to demo recorders. This flag is server-side only, where sent messages are recorded by default.
+	 */
+	MSGFLAG_NORECORD = 1 << 2,
+	/**
+	 * Write message to demo recorders. This flag is client-side only, where sent messages are not recorded by default.
+	 */
+	MSGFLAG_RECORD = 1 << 3,
+	/**
+	 * Don't send the message to client/server. Useful combined with @link MSGFLAG_RECORD @endlink to record a message without sending it.
+	 */
+	MSGFLAG_NOSEND = 1 << 4,
 };
 
 enum
@@ -131,6 +147,9 @@ enum
 	VERSION_DDNET_PLAYERFLAG_SPEC_CAM = 18090,
 	VERSION_DDNET_RECONNECT = 18090,
 	VERSION_DDNET_128_PLAYERS = 19000,
+	VERSION_DDNET_PREINPUT = 19040,
+	VERSION_DDNET_SAVE_CODE = 19060,
+	VERSION_DDNET_IMPORTANT_ALERT = 19060,
 };
 
 enum

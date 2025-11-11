@@ -1,78 +1,33 @@
 #include "editor_object.h"
 
-#include "editor.h"
+#include <game/editor/editor.h>
 
 void CEditorObject::OnInit(CEditor *pEditor)
 {
 	m_pEditor = pEditor;
-	OnReset();
 }
-
-void CEditorObject::OnUpdate()
-{
-	if(IsActive())
-		OnActive();
-	else if(IsHot())
-		OnHot();
-}
-
-bool CEditorObject::OnInput(const IInput::CEvent &Event)
-{
-	return false;
-}
-
-void CEditorObject::OnRender(CUIRect View) {}
-
-void CEditorObject::OnReset() {}
-void CEditorObject::OnMapLoad() {}
-
-bool CEditorObject::IsHot()
-{
-	return Ui()->HotItem() == this;
-}
-
-void CEditorObject::SetHot()
-{
-	Ui()->SetHotItem(this);
-}
-
-void CEditorObject::UnsetHot()
-{
-	if(IsHot())
-		Ui()->SetHotItem(nullptr);
-}
-
-void CEditorObject::OnHot() {}
-
-bool CEditorObject::IsActive()
-{
-	return Ui()->CheckActiveItem(this);
-}
-
-void CEditorObject::SetActive()
-{
-	SetHot();
-	Ui()->SetActiveItem(this);
-}
-
-void CEditorObject::SetInactive()
-{
-	if(IsActive())
-		Ui()->SetActiveItem(nullptr);
-}
-
-void CEditorObject::OnActive() {}
 
 CEditor *CEditorObject::Editor() { return m_pEditor; }
 const CEditor *CEditorObject::Editor() const { return m_pEditor; }
 IInput *CEditorObject::Input() { return m_pEditor->Input(); }
+const IInput *CEditorObject::Input() const { return m_pEditor->Input(); }
 IClient *CEditorObject::Client() { return m_pEditor->Client(); }
+const IClient *CEditorObject::Client() const { return m_pEditor->Client(); }
 CConfig *CEditorObject::Config() { return m_pEditor->Config(); }
+const CConfig *CEditorObject::Config() const { return m_pEditor->Config(); }
 IConsole *CEditorObject::Console() { return m_pEditor->Console(); }
+const IConsole *CEditorObject::Console() const { return m_pEditor->Console(); }
 IEngine *CEditorObject::Engine() { return m_pEditor->Engine(); }
+const IEngine *CEditorObject::Engine() const { return m_pEditor->Engine(); }
 IGraphics *CEditorObject::Graphics() { return m_pEditor->Graphics(); }
+const IGraphics *CEditorObject::Graphics() const { return m_pEditor->Graphics(); }
 ISound *CEditorObject::Sound() { return m_pEditor->Sound(); }
+const ISound *CEditorObject::Sound() const { return m_pEditor->Sound(); }
 ITextRender *CEditorObject::TextRender() { return m_pEditor->TextRender(); }
+const ITextRender *CEditorObject::TextRender() const { return m_pEditor->TextRender(); }
 IStorage *CEditorObject::Storage() { return m_pEditor->Storage(); }
+const IStorage *CEditorObject::Storage() const { return m_pEditor->Storage(); }
 CUi *CEditorObject::Ui() { return m_pEditor->Ui(); }
-CRenderTools *CEditorObject::RenderTools() { return m_pEditor->RenderTools(); }
+const CUi *CEditorObject::Ui() const { return m_pEditor->Ui(); }
+CRenderMap *CEditorObject::RenderMap() { return m_pEditor->RenderMap(); }
+const CRenderMap *CEditorObject::RenderMap() const { return m_pEditor->RenderMap(); }

@@ -1,4 +1,6 @@
+#include <base/log.h>
 #include <base/system.h>
+
 #include <engine/favorites.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
@@ -145,6 +147,11 @@ TRISTATE CFavorites::IsPingAllowed(const NETADDR *pAddrs, int NumAddrs) const
 
 void CFavorites::Add(const NETADDR *pAddrs, int NumAddrs)
 {
+	if(NumAddrs == 0)
+	{
+		log_error("client", "discarding empty favorite group");
+		return;
+	}
 	// First make sure that all the addresses are not registered for some
 	// other favorite.
 	for(int i = 0; i < NumAddrs; i++)

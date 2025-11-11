@@ -1,5 +1,9 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "skins7.h"
+
+#include "menus.h"
+
 #include <base/color.h>
 #include <base/log.h>
 #include <base/math.h>
@@ -16,9 +20,6 @@
 
 #include <game/client/gameclient.h>
 #include <game/localization.h>
-
-#include "menus.h"
-#include "skins7.h"
 
 const char *const CSkins7::ms_apSkinPartNames[protocol7::NUM_SKINPARTS] = {"body", "marking", "decoration", "hands", "feet", "eyes"};
 const char *const CSkins7::ms_apSkinPartNamesLocalized[protocol7::NUM_SKINPARTS] = {Localizable("Body", "skins"), Localizable("Marking", "skins"), Localizable("Decoration", "skins"), Localizable("Hands", "skins"), Localizable("Feet", "skins"), Localizable("Eyes", "skins")};
@@ -113,7 +114,8 @@ static ColorRGBA DetermineBloodColor(int PartType, const CImageInfo &Info)
 		}
 	}
 
-	return ColorRGBA(normalize(vec3(aColors[0], aColors[1], aColors[2])));
+	const vec3 NormalizedColor = normalize(vec3(aColors[0], aColors[1], aColors[2]));
+	return ColorRGBA(NormalizedColor.x, NormalizedColor.y, NormalizedColor.z);
 }
 
 bool CSkins7::LoadSkinPart(int PartType, const char *pName, int DirType)
@@ -615,8 +617,8 @@ ColorRGBA CSkins7::GetTeamColor(int UseCustomColors, int PartColor, int Team, in
 	int MaxSat = 255;
 
 	int h = TeamHue;
-	int s = clamp(mix(TeamSat, PartSat, 0.2), MinSat, MaxSat);
-	int l = clamp(mix(TeamLgt, PartLgt, 0.2), (int)ColorHSLA::DARKEST_LGT7, 200);
+	int s = std::clamp(mix(TeamSat, PartSat, 0.2), MinSat, MaxSat);
+	int l = std::clamp(mix(TeamLgt, PartLgt, 0.2), (int)ColorHSLA::DARKEST_LGT7, 200);
 
 	int ColorVal = (h << 16) + (s << 8) + l;
 

@@ -3,12 +3,12 @@
 #ifndef ENGINE_SHARED_DATAFILE_H
 #define ENGINE_SHARED_DATAFILE_H
 
-#include <engine/storage.h>
+#include "uuid_manager.h"
 
 #include <base/hash.h>
 #include <base/types.h>
 
-#include "uuid_manager.h"
+#include <engine/storage.h>
 
 #include <cstdint>
 #include <map>
@@ -16,16 +16,13 @@
 
 enum
 {
-	ITEMTYPE_EX = 0xffff,
+	ITEMTYPE_EX = 0xFFFF,
 };
 
 // raw datafile access
 class CDataFileReader
 {
 	class CDatafile *m_pDataFile = nullptr;
-
-	void *GetDataImpl(int Index, bool Swap);
-	int GetFileDataSize(int Index) const;
 
 	int GetExternalItemType(int InternalType, CUuid *pUuid);
 	int GetInternalItemType(int ExternalType);
@@ -34,7 +31,7 @@ public:
 	~CDataFileReader();
 	CDataFileReader &operator=(CDataFileReader &&Other);
 
-	bool Open(class IStorage *pStorage, const char *pFilename, int StorageType);
+	[[nodiscard]] bool Open(class IStorage *pStorage, const char *pFilename, int StorageType);
 	void Close();
 	bool IsOpen() const;
 	IOHANDLE File() const;
@@ -106,11 +103,6 @@ private:
 		CUuid m_Uuid;
 	};
 
-	enum
-	{
-		MAX_ITEM_TYPES = 0x10000,
-	};
-
 	IOHANDLE m_File;
 	std::map<uint16_t, CItemTypeInfo, std::less<>> m_ItemTypes; // item types must be sorted in ascending order
 	std::vector<CItemInfo> m_vItems;
@@ -133,7 +125,7 @@ public:
 	}
 	~CDataFileWriter();
 
-	bool Open(class IStorage *pStorage, const char *pFilename, int StorageType = IStorage::TYPE_SAVE);
+	[[nodiscard]] bool Open(class IStorage *pStorage, const char *pFilename, int StorageType = IStorage::TYPE_SAVE);
 	int AddItem(int Type, int Id, size_t Size, const void *pData, const CUuid *pUuid = nullptr);
 	int AddData(size_t Size, const void *pData, ECompressionLevel CompressionLevel = COMPRESSION_DEFAULT);
 	int AddDataSwapped(size_t Size, const void *pData);

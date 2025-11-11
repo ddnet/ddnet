@@ -1,12 +1,13 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "particles.h"
+
 #include <base/math.h>
+
 #include <engine/demo.h>
 #include <engine/graphics.h>
 
-#include "particles.h"
-#include <game/client/render.h>
-#include <game/generated/client_data.h>
+#include <generated/client_data.h>
 
 #include <game/client/gameclient.h>
 
@@ -47,7 +48,7 @@ void CParticles::Add(int Group, CParticle *pPart, float TimePassed)
 	}
 	else
 	{
-		if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED)
+		if(GameClient()->m_Snap.m_pGameInfoObj && GameClient()->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED)
 			return;
 	}
 
@@ -159,7 +160,7 @@ void CParticles::OnRender()
 	}
 	else
 	{
-		if(m_pClient->m_Snap.m_pGameInfoObj && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED))
+		if(GameClient()->m_Snap.m_pGameInfoObj && !(GameClient()->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED))
 			Update((float)((t - m_LastRenderTime) / (double)time_freq()));
 	}
 
@@ -176,7 +177,7 @@ void CParticles::OnInit()
 	for(int i = 0; i <= (SPRITE_PART9 - SPRITE_PART_SLICE); ++i)
 	{
 		Graphics()->QuadsSetSubset(0, 0, 1, 1);
-		RenderTools()->QuadContainerAddSprite(m_ParticleQuadContainerIndex, 1.f);
+		Graphics()->QuadContainerAddSprite(m_ParticleQuadContainerIndex, 1.f);
 	}
 	Graphics()->QuadContainerUpload(m_ParticleQuadContainerIndex);
 
@@ -185,7 +186,7 @@ void CParticles::OnInit()
 	for(int i = 0; i <= (SPRITE_PART_SPARKLE - SPRITE_PART_SNOWFLAKE); ++i)
 	{
 		Graphics()->QuadsSetSubset(0, 0, 1, 1);
-		RenderTools()->QuadContainerAddSprite(m_ExtraParticleQuadContainerIndex, 1.f);
+		Graphics()->QuadContainerAddSprite(m_ExtraParticleQuadContainerIndex, 1.f);
 	}
 
 	Graphics()->QuadContainerUpload(m_ExtraParticleQuadContainerIndex);

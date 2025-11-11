@@ -4,13 +4,12 @@
 #include "editor.h"
 #include "editor_action.h"
 
+#include <game/editor/references.h>
+
 class CEditorActionLayerBase : public IEditorAction
 {
 public:
 	CEditorActionLayerBase(CEditor *pEditor, int GroupIndex, int LayerIndex);
-
-	virtual void Undo() override {}
-	virtual void Redo() override {}
 
 protected:
 	int m_GroupIndex;
@@ -231,9 +230,6 @@ class CEditorActionEditLayerPropBase : public CEditorActionLayerBase
 public:
 	CEditorActionEditLayerPropBase(CEditor *pEditor, int GroupIndex, int LayerIndex, E Prop, int Previous, int Current);
 
-	virtual void Undo() override {}
-	virtual void Redo() override {}
-
 protected:
 	E m_Prop;
 	int m_Previous;
@@ -308,7 +304,6 @@ public:
 		int m_Envelopes;
 	};
 
-public:
 	CEditorActionAppendMap(CEditor *pEditor, const char *pMapName, const SPrevInfo &PrevInfo, std::vector<int> &vImageIndexMap);
 
 	void Undo() override;
@@ -334,6 +329,20 @@ private:
 	int m_PreviousImageCount;
 	char m_aTileArtFile[IO_MAX_PATH_LENGTH];
 	std::vector<int> m_vImageIndexMap;
+};
+
+// --------------
+
+class CEditorActionQuadArt : public IEditorAction
+{
+public:
+	CEditorActionQuadArt(CEditor *pEditor, CQuadArtParameters Parameters);
+
+	void Undo() override;
+	void Redo() override;
+
+private:
+	CQuadArtParameters m_Parameters;
 };
 
 // ----------------------
@@ -368,19 +377,20 @@ private:
 class CEditorActionEnvelopeAdd : public IEditorAction
 {
 public:
-	CEditorActionEnvelopeAdd(CEditor *pEditor, const std::shared_ptr<CEnvelope> &pEnv);
+	CEditorActionEnvelopeAdd(CEditor *pEditor, CEnvelope::EType EnvelopeType);
 
 	void Undo() override;
 	void Redo() override;
 
 private:
-	std::shared_ptr<CEnvelope> m_pEnv;
+	CEnvelope::EType m_EnvelopeType;
+	int m_PreviousSelectedEnvelope;
 };
 
-class CEditorActionEveloppeDelete : public IEditorAction
+class CEditorActionEnvelopeDelete : public IEditorAction
 {
 public:
-	CEditorActionEveloppeDelete(CEditor *pEditor, int EnvelopeIndex);
+	CEditorActionEnvelopeDelete(CEditor *pEditor, int EnvelopeIndex, std::vector<std::shared_ptr<IEditorEnvelopeReference>> &vpObjectReferences, std::shared_ptr<CEnvelope> &pEnvelope);
 
 	void Undo() override;
 	void Redo() override;
@@ -388,6 +398,7 @@ public:
 private:
 	int m_EnvelopeIndex;
 	std::shared_ptr<CEnvelope> m_pEnv;
+	std::vector<std::shared_ptr<IEditorEnvelopeReference>> m_vpObjectReferences;
 };
 
 class CEditorActionEnvelopeEdit : public IEditorAction
@@ -412,15 +423,31 @@ private:
 	std::shared_ptr<CEnvelope> m_pEnv;
 };
 
+class CEditorActionEnvelopeEditPointTime : public IEditorAction
+{
+public:
+	CEditorActionEnvelopeEditPointTime(CEditor *pEditor, int EnvelopeIndex, int PointIndex, CFixedTime Previous, CFixedTime Current);
+
+	void Undo() override;
+	void Redo() override;
+
+private:
+	int m_EnvelopeIndex;
+	int m_PointIndex;
+	CFixedTime m_Previous;
+	CFixedTime m_Current;
+	std::shared_ptr<CEnvelope> m_pEnv;
+
+	void Apply(CFixedTime Value);
+};
+
 class CEditorActionEnvelopeEditPoint : public IEditorAction
 {
 public:
 	enum class EEditType
 	{
-		TIME,
 		VALUE,
 		CURVE_TYPE,
-		HANDLE
 	};
 
 	CEditorActionEnvelopeEditPoint(CEditor *pEditor, int EnvelopeIndex, int PointIndex, int Channel, EEditType EditType, int Previous, int Current);
@@ -443,14 +470,14 @@ private:
 class CEditorActionAddEnvelopePoint : public IEditorAction
 {
 public:
-	CEditorActionAddEnvelopePoint(CEditor *pEditor, int EnvIndex, int Time, ColorRGBA Channels);
+	CEditorActionAddEnvelopePoint(CEditor *pEditor, int EnvIndex, CFixedTime Time, ColorRGBA Channels);
 
 	void Undo() override;
 	void Redo() override;
 
 private:
 	int m_EnvIndex;
-	int m_Time;
+	CFixedTime m_Time;
 	ColorRGBA m_Channels;
 };
 
@@ -478,7 +505,7 @@ public:
 		POINT
 	};
 
-	CEditorActionEditEnvelopePointValue(CEditor *pEditor, int EnvIndex, int PointIndex, int Channel, EType Type, int OldTime, int OldValue, int NewTime, int NewValue);
+	CEditorActionEditEnvelopePointValue(CEditor *pEditor, int EnvIndex, int PointIndex, int Channel, EType Type, CFixedTime OldTime, int OldValue, CFixedTime NewTime, int NewValue);
 
 	void Undo() override;
 	void Redo() override;
@@ -488,9 +515,9 @@ private:
 	int m_PtIndex;
 	int m_Channel;
 	EType m_Type;
-	int m_OldTime;
+	CFixedTime m_OldTime;
 	int m_OldValue;
-	int m_NewTime;
+	CFixedTime m_NewTime;
 	int m_NewValue;
 
 	void Apply(bool Undo);
@@ -509,7 +536,8 @@ private:
 	int m_PointIndex;
 	int m_Channel;
 	bool m_In;
-	int m_Previous[2];
+	CFixedTime m_OldTime;
+	int m_OldValue;
 };
 
 class CEditorActionEditLayerSoundsProp : public CEditorActionEditLayerPropBase<ELayerSoundsProp>
@@ -573,7 +601,6 @@ public:
 private:
 	int m_SourceIndex;
 
-private:
 	void Apply(int Value);
 };
 
@@ -588,7 +615,6 @@ public:
 private:
 	int m_SourceIndex;
 
-private:
 	void Apply(int Value);
 };
 
@@ -603,7 +629,6 @@ public:
 private:
 	int m_SourceIndex;
 
-private:
 	void Apply(int Value);
 };
 

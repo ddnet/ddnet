@@ -1,6 +1,9 @@
 ﻿#include "editor_server_settings.h"
 #include "editor.h"
 
+#include <base/color.h>
+#include <base/system.h>
+
 #include <engine/keys.h>
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
@@ -11,9 +14,6 @@
 #include <game/client/ui_listbox.h>
 #include <game/editor/editor_actions.h>
 #include <game/editor/editor_history.h>
-
-#include <base/color.h>
-#include <base/system.h>
 
 #include <iterator>
 
@@ -123,7 +123,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	// redo button
 	ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
 	static int s_RedoButton = 0;
-	if(DoButton_FontIcon(&s_RedoButton, FONT_ICON_REDO, m_ServerSettingsHistory.CanRedo() ? 0 : -1, &Button, BUTTONFLAG_LEFT, "[Ctrl+Y] Redo the last command edit.", IGraphics::CORNER_R, 11.0f) || (CanMoveDown && Input()->AltIsPressed() && Ui()->ConsumeHotkey(CUi::HOTKEY_DOWN)))
+	if(DoButton_FontIcon(&s_RedoButton, FONT_ICON_REDO, m_ServerSettingsHistory.CanRedo() ? 0 : -1, &Button, BUTTONFLAG_LEFT, "[Ctrl+Y] Redo the last command edit.", IGraphics::CORNER_R, 11.0f))
 	{
 		m_ServerSettingsHistory.Redo();
 	}
@@ -132,7 +132,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
 	ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
 	static int s_UndoButton = 0;
-	if(DoButton_FontIcon(&s_UndoButton, FONT_ICON_UNDO, m_ServerSettingsHistory.CanUndo() ? 0 : -1, &Button, BUTTONFLAG_LEFT, "[Ctrl+Z] Undo the last command edit.", IGraphics::CORNER_L, 11.0f) || (CanMoveUp && Input()->AltIsPressed() && Ui()->ConsumeHotkey(CUi::HOTKEY_UP)))
+	if(DoButton_FontIcon(&s_UndoButton, FONT_ICON_UNDO, m_ServerSettingsHistory.CanUndo() ? 0 : -1, &Button, BUTTONFLAG_LEFT, "[Ctrl+Z] Undo the last command edit.", IGraphics::CORNER_L, 11.0f))
 	{
 		m_ServerSettingsHistory.Undo();
 	}
@@ -152,7 +152,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	const bool CanUpdate = GotSelection && CurrentInputValid && str_comp(m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand, m_SettingsCommandInput.GetString()) != 0;
 
 	static int s_UpdateButton = 0;
-	if(DoButton_FontIcon(&s_UpdateButton, FONT_ICON_PENCIL, CanUpdate ? 0 : -1, &Button, BUTTONFLAG_LEFT, "[Alt+Enter] Update the selected command based on the entered value.", IGraphics::CORNER_R, 9.0f) || (CanUpdate && Input()->AltIsPressed() && m_Dialog == DIALOG_NONE && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
+	if(DoButton_FontIcon(&s_UpdateButton, FONT_ICON_PENCIL, CanUpdate ? 0 : -1, &Button, BUTTONFLAG_LEFT, "[Alt+Enter] Update the selected command based on the entered value.", IGraphics::CORNER_R, 9.0f) || (CanUpdate && Input()->AltIsPressed() && m_Dialog == DIALOG_NONE && m_SettingsCommandInput.IsActive() && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
 	{
 		if(CollidingCommandIndex == -1)
 		{
@@ -219,7 +219,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	ToolBar.VSplitRight(100.0f, &ToolBar, nullptr);
 
 	static int s_AddButton = 0;
-	if(DoButton_FontIcon(&s_AddButton, CanReplace ? FONT_ICON_ARROWS_ROTATE : FONT_ICON_PLUS, CanAdd || CanReplace ? 0 : -1, &Button, BUTTONFLAG_LEFT, CanReplace ? "[Enter] Replace the corresponding command in the command list." : "[Enter] Add a command to the command list.", IGraphics::CORNER_L) || ((CanAdd || CanReplace) && !Input()->AltIsPressed() && m_Dialog == DIALOG_NONE && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
+	if(DoButton_FontIcon(&s_AddButton, CanReplace ? FONT_ICON_ARROWS_ROTATE : FONT_ICON_PLUS, CanAdd || CanReplace ? 0 : -1, &Button, BUTTONFLAG_LEFT, CanReplace ? "[Enter] Replace the corresponding command in the command list." : "[Enter] Add a command to the command list.", IGraphics::CORNER_L) || ((CanAdd || CanReplace) && !Input()->AltIsPressed() && m_Dialog == DIALOG_NONE && m_SettingsCommandInput.IsActive() && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
 	{
 		if(CanReplace)
 		{
@@ -294,10 +294,6 @@ void CEditor::DoMapSettingsEditBox(CMapSettingsBackend::CContext *pContext, cons
 	auto &Context = *pContext;
 	Context.SetFontSize(FontSize);
 
-	// Set current active context if input is active
-	if(pLineInput->IsActive())
-		CMapSettingsBackend::ms_pActiveContext = pContext;
-
 	// Small utility to render a floating part above the input rect.
 	// Use to display either the error or the current argument name
 	const float PartMargin = 4.0f;
@@ -351,7 +347,7 @@ void CEditor::DoMapSettingsEditBox(CMapSettingsBackend::CContext *pContext, cons
 
 	// Calculate x position of the dropdown and the floating part
 	float x = ToolBar.x + Context.CurrentArgPos() - pLineInput->GetScrollOffset();
-	x = clamp(x, ToolBar.x + PartMargin, ToolBar.x + ToolBar.w);
+	x = std::clamp(x, ToolBar.x + PartMargin, ToolBar.x + ToolBar.w);
 
 	if(pLineInput->IsActive())
 	{
@@ -407,7 +403,7 @@ int CEditor::DoEditBoxDropdown(SEditBoxDropdownContext *pDropdown, CLineInput *p
 	// Do an edit box with a possible dropdown
 	// This is a generic method which can display any data we want
 
-	pDropdown->m_Selected = clamp(pDropdown->m_Selected, -1, (int)vData.size() - 1);
+	pDropdown->m_Selected = std::clamp(pDropdown->m_Selected, -1, (int)vData.size() - 1);
 
 	if(Input()->KeyPress(KEY_SPACE) && Input()->ModifierIsPressed())
 	{ // Handle Ctrl+Space to show available options
@@ -1008,15 +1004,15 @@ void CEditor::RenderMapSettingsErrorDialog()
 	if(DoButton_Editor(&s_ConfirmButton, "Confirm", CanConfirm ? 0 : -1, &ConfimButton, BUTTONFLAG_LEFT, nullptr) || (CanConfirm && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
 	{
 		Execute();
-		m_Dialog = DIALOG_NONE;
+		OnDialogClose();
 	}
 
 	// Cancel - we load a new empty map
 	if(DoButton_Editor(&s_CancelButton, "Cancel", 0, &CancelButton, BUTTONFLAG_LEFT, nullptr) || (Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE)))
 	{
 		Reset();
-		m_aFileName[0] = 0;
-		m_Dialog = DIALOG_NONE;
+		m_aFilename[0] = 0;
+		OnDialogClose();
 	}
 }
 
@@ -1049,8 +1045,6 @@ void CEditor::MapSettingsDropdownRenderCallback(const SPossibleValueMatch &Match
 }
 
 // ----------------------------------------
-
-CMapSettingsBackend::CContext *CMapSettingsBackend::ms_pActiveContext = nullptr;
 
 void CMapSettingsBackend::OnInit(CEditor *pEditor)
 {
@@ -1370,8 +1364,8 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pLineInputStr, const c
 
 	// Also keep track of the visual X position of each argument within the input
 	float PosX = 0;
-	const float WW = m_pBackend->TextRender()->TextWidth(m_FontSize, " ");
-	PosX += m_pBackend->TextRender()->TextWidth(m_FontSize, m_aCommand);
+	const float WW = m_pLineInput != nullptr ? m_pBackend->TextRender()->TextWidth(m_FontSize, " ") : 0.0f;
+	PosX += m_pLineInput != nullptr ? m_pBackend->TextRender()->TextWidth(m_FontSize, m_aCommand) : 0.0f;
 
 	// Parsing beings
 	while(*pIterator)
@@ -1535,7 +1529,7 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pLineInputStr, const c
 			}
 		}
 
-		PosX += m_pBackend->TextRender()->TextWidth(m_FontSize, pArgStart, Length); // Advance argument position
+		PosX += m_pLineInput != nullptr ? m_pBackend->TextRender()->TextWidth(m_FontSize, pArgStart, Length) : 0.0f; // Advance argument position
 		ArgIndex++;
 	}
 }
@@ -1795,12 +1789,6 @@ const char *CMapSettingsBackend::CContext::InputString() const
 		return nullptr;
 	return m_pBackend->Input()->HasComposition() ? m_CompositionStringBuffer.c_str() : m_pLineInput->GetString();
 }
-
-const ColorRGBA CMapSettingsBackend::CContext::ms_ArgumentStringColor = ColorRGBA(84 / 255.0f, 1.0f, 1.0f, 1.0f);
-const ColorRGBA CMapSettingsBackend::CContext::ms_ArgumentNumberColor = ColorRGBA(0.1f, 0.9f, 0.05f, 1.0f);
-const ColorRGBA CMapSettingsBackend::CContext::ms_ArgumentUnknownColor = ColorRGBA(0.6f, 0.6f, 0.6f, 1.0f);
-const ColorRGBA CMapSettingsBackend::CContext::ms_CommentColor = ColorRGBA(0.5f, 0.5f, 0.5f, 1.0f);
-const ColorRGBA CMapSettingsBackend::CContext::ms_ErrorColor = ColorRGBA(240 / 255.0f, 70 / 255.0f, 70 / 255.0f, 1.0f);
 
 void CMapSettingsBackend::CContext::ColorArguments(std::vector<STextColorSplit> &vColorSplits) const
 {
@@ -2081,28 +2069,6 @@ void CMapSettingsBackend::CContext::GetCommandHelpText(char *pStr, int Length) c
 	str_copy(pStr, m_pCurrentSetting->m_pHelp, Length);
 }
 
-void CMapSettingsBackend::CContext::UpdateCompositionString()
-{
-	if(!m_pLineInput)
-		return;
-
-	const bool HasComposition = m_pBackend->Input()->HasComposition();
-
-	if(HasComposition)
-	{
-		const size_t CursorOffset = m_pLineInput->GetCursorOffset();
-		const size_t DisplayCursorOffset = m_pLineInput->OffsetFromActualToDisplay(CursorOffset);
-		const std::string DisplayStr = std::string(m_pLineInput->GetString());
-		std::string CompositionBuffer = DisplayStr.substr(0, DisplayCursorOffset) + m_pBackend->Input()->GetComposition() + DisplayStr.substr(DisplayCursorOffset);
-		if(CompositionBuffer != m_CompositionStringBuffer)
-		{
-			m_CompositionStringBuffer = CompositionBuffer;
-			Update();
-			UpdateCursor();
-		}
-	}
-}
-
 template<int N>
 void CMapSettingsBackend::CContext::FormatDisplayValue(const char *pValue, char (&aOut)[N])
 {
@@ -2116,20 +2082,6 @@ void CMapSettingsBackend::CContext::FormatDisplayValue(const char *pValue, char 
 	{
 		str_copy(aOut, pValue);
 	}
-}
-
-bool CMapSettingsBackend::OnInput(const IInput::CEvent &Event)
-{
-	if(ms_pActiveContext)
-		return ms_pActiveContext->OnInput(Event);
-
-	return false;
-}
-
-void CMapSettingsBackend::OnUpdate()
-{
-	if(ms_pActiveContext && ms_pActiveContext->m_pLineInput && ms_pActiveContext->m_pLineInput->IsActive())
-		ms_pActiveContext->UpdateCompositionString();
 }
 
 void CMapSettingsBackend::OnMapLoad()

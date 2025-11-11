@@ -3,6 +3,7 @@
 #ifndef GAME_CLIENT_COMPONENTS_EMOTICON_H
 #define GAME_CLIENT_COMPONENTS_EMOTICON_H
 #include <base/vmath.h>
+
 #include <engine/console.h>
 
 #include <game/client/component.h>
@@ -25,14 +26,14 @@ class CEmoticon : public CComponent
 
 public:
 	CEmoticon();
-	virtual int Sizeof() const override { return sizeof(*this); }
+	int Sizeof() const override { return sizeof(*this); }
 
-	virtual void OnReset() override;
-	virtual void OnConsoleInit() override;
-	virtual void OnRender() override;
-	virtual void OnRelease() override;
-	virtual bool OnCursorMove(float x, float y, IInput::ECursorType CursorType) override;
-	virtual bool OnInput(const IInput::CEvent &Event) override;
+	void OnReset() override;
+	void OnConsoleInit() override;
+	void OnRender() override;
+	void OnRelease() override;
+	bool OnCursorMove(float x, float y, IInput::ECursorType CursorType) override;
+	bool OnInput(const IInput::CEvent &Event) override;
 
 	void Emote(int Emoticon);
 	void EyeEmote(int EyeEmote);

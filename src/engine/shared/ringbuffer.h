@@ -45,7 +45,7 @@ protected:
 
 	void Init(void *pMemory, int Size, int Flags);
 	int PopFirst();
-	void SetPopCallback(const std::function<void(void *pCurrent)> PopCallback);
+	void SetPopCallback(std::function<void(void *pCurrent)> PopCallback);
 
 public:
 	enum
@@ -64,7 +64,7 @@ class CTypedRingBuffer : public CRingBufferBase
 public:
 	T *Allocate(int Size) { return (T *)CRingBufferBase::Allocate(Size); }
 	int PopFirst() { return CRingBufferBase::PopFirst(); }
-	void SetPopCallback(std::function<void(T *pCurrent)> PopCallback)
+	void SetPopCallback(const std::function<void(T *pCurrent)> &PopCallback)
 	{
 		CRingBufferBase::SetPopCallback([PopCallback](void *pCurrent) {
 			PopCallback((T *)pCurrent);
@@ -96,7 +96,7 @@ class CDynamicRingBuffer : public CTypedRingBuffer<T>
 public:
 	CDynamicRingBuffer(int Size, int Flags = 0) { Init(Size, Flags); }
 
-	virtual ~CDynamicRingBuffer()
+	~CDynamicRingBuffer()
 	{
 		free(m_pBuffer);
 	}

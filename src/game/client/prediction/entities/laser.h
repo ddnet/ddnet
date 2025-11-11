@@ -16,9 +16,9 @@ public:
 
 	void Tick() override;
 
-	const vec2 &GetFrom() { return m_From; }
-	const int &GetOwner() { return m_Owner; }
-	const int &GetEvalTick() { return m_EvalTick; }
+	const vec2 &GetFrom() const { return m_From; }
+	const int &GetOwner() const { return m_Owner; }
+	const int &GetEvalTick() const { return m_EvalTick; }
 	CLaser(CGameWorld *pGameWorld, int Id, CLaserData *pLaser);
 	bool Match(CLaser *pLaser);
 	CLaserData GetData() const;

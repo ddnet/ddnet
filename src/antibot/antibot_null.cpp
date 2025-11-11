@@ -42,7 +42,7 @@ void AntibotOnDirectInput(int /*ClientId*/) {}
 void AntibotOnCharacterTick(int /*ClientId*/) {}
 void AntibotOnHookAttach(int /*ClientId*/, bool /*Player*/) {}
 void AntibotOnEngineTick(void) {}
-void AntibotOnEngineClientJoin(int /*ClientId*/, bool /*Sixup*/) {}
+void AntibotOnEngineClientJoin(int /*ClientId*/) {}
 void AntibotOnEngineClientDrop(int /*ClientId*/, const char * /*pReason*/) {}
 bool AntibotOnEngineClientMessage(int /*ClientId*/, const void * /*pData*/, int /*Size*/, int /*Flags*/) { return false; }
 bool AntibotOnEngineServerMessage(int /*ClientId*/, const void * /*pData*/, int /*Size*/, int /*Flags*/) { return false; }

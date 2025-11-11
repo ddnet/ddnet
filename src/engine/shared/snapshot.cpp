@@ -1,17 +1,18 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "snapshot.h"
+
 #include "compression.h"
 #include "uuid_manager.h"
-
-#include <cstdlib>
-#include <limits>
 
 #include <base/math.h>
 #include <base/system.h>
 
-#include <game/generated/protocol7.h>
-#include <game/generated/protocolglue.h>
+#include <generated/protocol7.h>
+#include <generated/protocolglue.h>
+
+#include <cstdlib>
+#include <limits>
 
 // CSnapshot
 
@@ -174,7 +175,7 @@ struct CItemList
 	int m_aIndex[HASHLIST_BUCKET_SIZE];
 };
 
-inline size_t CalcHashId(int Key)
+static inline size_t CalcHashId(int Key)
 {
 	// djb2 (http://www.cse.yorku.ca/~oz/hash.html)
 	unsigned Hash = 5381;
@@ -255,10 +256,10 @@ void CSnapshotDelta::UndiffItem(const int *pPast, const int *pDiff, int *pOut, i
 
 CSnapshotDelta::CSnapshotDelta()
 {
-	mem_zero(m_aItemSizes, sizeof(m_aItemSizes));
-	mem_zero(m_aItemSizes7, sizeof(m_aItemSizes7));
-	mem_zero(m_aSnapshotDataRate, sizeof(m_aSnapshotDataRate));
-	mem_zero(m_aSnapshotDataUpdates, sizeof(m_aSnapshotDataUpdates));
+	std::fill(std::begin(m_aItemSizes), std::end(m_aItemSizes), 0);
+	std::fill(std::begin(m_aItemSizes7), std::end(m_aItemSizes7), 0);
+	std::fill(std::begin(m_aSnapshotDataRate), std::end(m_aSnapshotDataRate), 0);
+	std::fill(std::begin(m_aSnapshotDataUpdates), std::end(m_aSnapshotDataUpdates), 0);
 	mem_zero(&m_Empty, sizeof(m_Empty));
 }
 
@@ -351,7 +352,7 @@ int CSnapshotDelta::CreateDelta(const CSnapshot *pFrom, const CSnapshot *pTo, vo
 				*pData++ = pCurItem->Id();
 				if(IncludeSize)
 					*pData++ = ItemSize / sizeof(int32_t);
-				pData += ItemSize / sizeof(int32_t);
+				pData += ItemSize / sizeof(int32_t); // NOLINT(bugprone-sizeof-expression)
 				pDelta->m_NumUpdateItems++;
 			}
 		}
@@ -363,7 +364,7 @@ int CSnapshotDelta::CreateDelta(const CSnapshot *pFrom, const CSnapshot *pTo, vo
 				*pData++ = ItemSize / sizeof(int32_t);
 
 			mem_copy(pData, pCurItem->Data(), ItemSize);
-			pData += ItemSize / sizeof(int32_t);
+			pData += ItemSize / sizeof(int32_t); // NOLINT(bugprone-sizeof-expression)
 			pDelta->m_NumUpdateItems++;
 		}
 	}
@@ -602,7 +603,7 @@ int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const vo
 		}
 		m_aSnapshotDataUpdates[Type]++;
 
-		pData += ItemSize / sizeof(int32_t);
+		pData += ItemSize / sizeof(int32_t); // NOLINT(bugprone-sizeof-expression)
 	}
 
 	// finish up

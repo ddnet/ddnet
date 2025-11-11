@@ -4,12 +4,13 @@
 #include "projectile_data.h"
 
 #include <engine/shared/snapshot.h>
-#include <game/client/prediction/gameworld.h>
-#include <game/generated/protocol.h>
 
+#include <generated/protocol.h>
+
+#include <game/client/prediction/gameworld.h>
 #include <game/collision.h>
 
-bool UseProjectileExtraInfo(const CNetObj_Projectile *pProj)
+static bool UseProjectileExtraInfo(const CNetObj_Projectile *pProj)
 {
 	return pProj->m_VelY >= 0 && (pProj->m_VelY & LEGACYPROJECTILEFLAG_IS_DDNET) != 0;
 }
@@ -104,22 +105,14 @@ CProjectileData ExtractProjectileInfoDDNet(const CNetObj_DDNetProjectile *pProj)
 	return Result;
 }
 
-void SnapshotRemoveExtraProjectileInfo(CSnapshot *pSnap)
+void DemoObjectRemoveExtraProjectileInfo(CNetObj_Projectile *pProj)
 {
-	for(int Index = 0; Index < pSnap->NumItems(); Index++)
+	if(UseProjectileExtraInfo(pProj))
 	{
-		const CSnapshotItem *pItem = pSnap->GetItem(Index);
-		if(pItem->Type() == NETOBJTYPE_PROJECTILE)
-		{
-			CNetObj_Projectile *pProj = (CNetObj_Projectile *)((void *)pItem->Data());
-			if(UseProjectileExtraInfo(pProj))
-			{
-				CProjectileData Data = ExtractProjectileInfo(NETOBJTYPE_PROJECTILE, pProj, nullptr, nullptr);
-				pProj->m_X = Data.m_StartPos.x;
-				pProj->m_Y = Data.m_StartPos.y;
-				pProj->m_VelX = (int)(Data.m_StartVel.x * 100.0f);
-				pProj->m_VelY = (int)(Data.m_StartVel.y * 100.0f);
-			}
-		}
+		CProjectileData Data = ExtractProjectileInfo(NETOBJTYPE_PROJECTILE, pProj, nullptr, nullptr);
+		pProj->m_X = Data.m_StartPos.x;
+		pProj->m_Y = Data.m_StartPos.y;
+		pProj->m_VelX = (int)(Data.m_StartVel.x * 100.0f);
+		pProj->m_VelY = (int)(Data.m_StartVel.y * 100.0f);
 	}
 }

@@ -49,12 +49,12 @@ def main():
 	gen_server_content_source = "server_content_source" in sys.argv
 
 	if gen_client_content_header:
-		print("#ifndef CLIENT_CONTENT7_HEADER")
-		print("#define CLIENT_CONTENT7_HEADER")
+		print("#ifndef GENERATED_CLIENT_DATA7_H")
+		print("#define GENERATED_CLIENT_DATA7_H")
 
 	if gen_server_content_header:
-		print("#ifndef SERVER_CONTENT7_HEADER")
-		print("#define SERVER_CONTENT7_HEADER")
+		print("#ifndef GENERATED_SERVER_DATA7_H")
+		print("#define GENERATED_SERVER_DATA7_H")
 
 
 	if gen_client_content_header or gen_server_content_header:
@@ -84,9 +84,10 @@ def main():
 # NETWORK
 	if gen_network_header:
 
-		print("#ifndef GAME_GENERATED_PROTOCOL7_H")
-		print("#define GAME_GENERATED_PROTOCOL7_H")
+		print("#ifndef GENERATED_PROTOCOL7_H")
+		print("#define GENERATED_PROTOCOL7_H")
 		print("class CUnpacker;")
+		print("class CSnapshot;")
 		print("#include <engine/message.h>")
 		print("namespace protocol7 {")
 		print(network.RawHeader)
@@ -150,6 +151,8 @@ def main():
 		CNetObjHandler();
 
 		int ValidateObj(int Type, const void *pData, int Size);
+		void DebugDumpSnapshot(const CSnapshot *pSnap) const;
+		int DumpObj(int Type, const void *pData, int Size) const;
 		const char *GetObjName(int Type) const;
 		int GetObjSize(int Type) const;
 		const char *FailedObjOn() const;
@@ -163,7 +166,7 @@ def main():
 	""")
 
 		print("}")
-		print("#endif // GAME_GENERATED_PROTOCOL7_H")
+		print("#endif // GENERATED_PROTOCOL7_H")
 
 
 	if gen_network_source:
@@ -174,6 +177,7 @@ def main():
 		lines += ['#include <base/system.h>']
 		lines += ['#include <engine/shared/packer.h>']
 		lines += ['#include <engine/shared/protocol.h>']
+		lines += ['#include <engine/shared/snapshot.h>']
 
 		lines += ['namespace protocol7 {']
 
@@ -262,6 +266,46 @@ def main():
 
 		for item in network.Objects:
 			for line in item.emit_validate(network.Objects):
+				lines += ["\t" + line]
+			lines += ['\t']
+		lines += ['\t}']
+		lines += ['\treturn -1;']
+		lines += ['};']
+		lines += ['']
+
+		for l in lines:
+			print(l)
+
+		print("""\
+void CNetObjHandler::DebugDumpSnapshot(const ::CSnapshot *pSnap) const
+{
+	dbg_msg("snapshot", "data_size=%d num_items=%d", pSnap->DataSize(), pSnap->NumItems());
+	for(int i = 0; i < pSnap->NumItems(); i++)
+	{
+		const CSnapshotItem *pItem = pSnap->GetItem(i);
+		int Size = pSnap->GetItemSize(i);
+		int Type = pSnap->GetItemType(i);
+		const char *pName = GetObjName(pItem->Type());
+		if(Type > OFFSET_UUID && Type < g_UuidManager.NumUuids() + OFFSET_UUID)
+			pName = g_UuidManager.GetName(Type);
+		dbg_msg("snapshot", "\\t%s type=%d id=%d size=%d", pName, pItem->Type(), pItem->Id(), Size);
+		if(!DumpObj(Type, pItem->Data(), Size))
+			continue;
+
+		for(size_t b = 0; b < Size / sizeof(int32_t); b++)
+			dbg_msg("snapshot", "\\t\\t%3d %12d\\t%08x", (int)b, pItem->Data()[b], pItem->Data()[b]);
+	}
+}\n""")
+
+		lines = []
+		lines += ['int CNetObjHandler::DumpObj(int Type, const void *pData, int Size) const']
+		lines += ['{']
+		lines += ["\tchar aRawData[512];"]
+		lines += ['\tswitch(Type)']
+		lines += ['\t{']
+
+		for item in network.Objects:
+			for line in item.emit_dump(network.Objects):
 				lines += ["\t" + line]
 			lines += ['\t']
 		lines += ['\t}']

@@ -1,6 +1,9 @@
 #ifndef ENGINE_SHARED_PROTOCOLGLUE_H
 #define ENGINE_SHARED_PROTOCOLGLUE_H
 
+int PacketFlags_SixToSeven(int Flags);
+int PacketFlags_SevenToSix(int Flags);
+
 int GameFlags_ClampToSix(int Flags);
 int PlayerFlags_SevenToSix(int Flags);
 int PlayerFlags_SixToSeven(int Flags);

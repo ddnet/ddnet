@@ -10,7 +10,6 @@
 #include <engine/textrender.h>
 
 #include <chrono>
-#include <set>
 #include <string>
 #include <vector>
 
@@ -53,6 +52,7 @@ struct SUIAnimator
 class IScrollbarScale
 {
 public:
+	virtual ~IScrollbarScale() = default;
 	virtual float ToRelative(int AbsoluteValue, int Min, int Max) const = 0;
 	virtual int ToAbsolute(float RelativeValue, int Min, int Max) const = 0;
 };
@@ -104,6 +104,7 @@ public:
 class IButtonColorFunction
 {
 public:
+	virtual ~IButtonColorFunction() = default;
 	virtual ColorRGBA GetColor(bool Active, bool Hovered) const = 0;
 };
 class CDarkButtonColorFunction : public IButtonColorFunction
@@ -213,7 +214,16 @@ struct SLabelProperties
 	bool m_StopAtEnd = false;
 	bool m_EllipsisAtEnd = false;
 	bool m_EnableWidthCheck = true;
-	std::vector<STextColorSplit> m_vColorSplits = {};
+	float m_MinimumFontSize = 5.0f;
+	std::vector<STextColorSplit> m_vColorSplits;
+
+	void SetColor(const ColorRGBA &Color);
+};
+
+class CLabelResult
+{
+public:
+	bool m_Truncated;
 };
 
 enum EButtonFlags : unsigned
@@ -243,16 +253,16 @@ struct SMenuButtonProperties
 class CUIElementBase
 {
 private:
-	static CUi *s_pUI;
+	static CUi *ms_pUi;
 
 public:
-	static void Init(CUi *pUI) { s_pUI = pUI; }
+	static void Init(CUi *pUI) { ms_pUi = pUI; }
 
 	IClient *Client() const;
 	IGraphics *Graphics() const;
 	IInput *Input() const;
 	ITextRender *TextRender() const;
-	CUi *Ui() const { return s_pUI; }
+	CUi *Ui() const { return ms_pUi; }
 };
 
 class CButtonContainer
@@ -373,6 +383,8 @@ private:
 	};
 	CDoubleClickState m_DoubleClickState;
 	const void *m_pLastEditingItem = nullptr;
+	const void *m_pLastActiveScrollbar = nullptr;
+	int m_ScrollbarValue = 0;
 	float m_ActiveScrollbarOffset = 0.0f;
 	float m_ProgressSpinnerOffset = 0.0f;
 	class CValueSelectorState
@@ -566,17 +578,17 @@ public:
 	void ClipEnable(const CUIRect *pRect);
 	void ClipDisable();
 	const CUIRect *ClipArea() const;
-	inline bool IsClipped() const { return !m_vClips.empty(); }
+	bool IsClipped() const { return !m_vClips.empty(); }
 
-	int DoButtonLogic(const void *pId, int Checked, const CUIRect *pRect, const unsigned Flags);
+	int DoButtonLogic(const void *pId, int Checked, const CUIRect *pRect, unsigned Flags);
 	int DoDraggableButtonLogic(const void *pId, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted);
 	bool DoDoubleClickLogic(const void *pId);
 	EEditState DoPickerLogic(const void *pId, const CUIRect *pRect, float *pX, float *pY);
 	void DoSmoothScrollLogic(float *pScrollOffset, float *pScrollOffsetChange, float ViewPortSize, float TotalSize, bool SmoothClamp = false, float ScrollSpeed = 10.0f) const;
 	static vec2 CalcAlignedCursorPos(const CUIRect *pRect, vec2 TextSize, int Align, const float *pBiggestCharHeight = nullptr);
 
-	void DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {}) const;
-	void DoLabel_AutoLineSize(const char *pText, float FontSize, int Align, CUIRect *pRect, float LineSize, const SLabelProperties &LabelProps = {}) const;
+	CLabelResult DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {}) const;
+	CLabelResult DoLabel_AutoLineSize(const char *pText, float FontSize, int Align, CUIRect *pRect, float LineSize, const SLabelProperties &LabelProps = {}) const;
 
 	void DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {}, int StrLen = -1, const CTextCursor *pReadCursor = nullptr) const;
 	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {}, int StrLen = -1, const CTextCursor *pReadCursor = nullptr) const;
@@ -636,6 +648,7 @@ public:
 	bool DoEditBox_Search(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, bool HotkeyEnabled);
 
 	int DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pId, const std::function<const char *()> &GetTextLambda, const CUIRect *pRect, const SMenuButtonProperties &Props = {});
+	int DoButton_FontIcon(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, unsigned Flags, int Corners = IGraphics::CORNER_ALL, bool Enabled = true);
 	// only used for popup menus
 	int DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pText, const CUIRect *pRect, float Size, int Align, float Padding = 0.0f, bool TransparentInactive = false, bool Enabled = true);
 
@@ -649,6 +662,7 @@ public:
 		SCROLLBAR_OPTION_INFINITE = 1 << 0,
 		SCROLLBAR_OPTION_NOCLAMPVALUE = 1 << 1,
 		SCROLLBAR_OPTION_MULTILINE = 1 << 2,
+		SCROLLBAR_OPTION_DELAYUPDATE = 1 << 3,
 	};
 	float DoScrollbarV(const void *pId, const CUIRect *pRect, float Current);
 	float DoScrollbarH(const void *pId, const CUIRect *pRect, float Current, const ColorRGBA *pColorInner = nullptr);
