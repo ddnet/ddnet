@@ -797,10 +797,10 @@ void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
 
 	Data.m_ShowClan = Data.m_ShowName && g_Config.m_ClNamePlatesClan;
 	const char *pClan = Dummy == 0 ? g_Config.m_PlayerClan : g_Config.m_ClDummyClan;
-	if(pClan[0] == '\0')
-		pClan = "Clan Name";
 	str_copy(Data.m_aClan, str_utf8_skip_whitespaces(pClan));
 	str_utf8_trim_right(Data.m_aClan);
+	if(Data.m_aClan[0] == '\0')
+		str_copy(Data.m_aClan, "Clan Name");
 	Data.m_FontSizeClan = FontSizeClan;
 
 	Data.m_ShowDirection = g_Config.m_ClShowDirection != 0 ? true : false;
