@@ -2483,7 +2483,7 @@ Chat background color
 == Цвет фона
 
 Censor profanity
-== 
+== Фильтровать нецензурную лексику
 
 Download
-== 
+== Скачать
