@@ -2180,8 +2180,33 @@ Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom
 Press Ctrl+Shift+G to disable debug graphs.
 == 
 
+Team save in progress. You'll be able to load with '/load %s'
+== 
+
+Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails
+== 
+
+Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue
+== 
+
+Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue
+== 
+
+Save failed!
+== 
+
 [Spectating]
 Following %d: %s
+== 
+
+[Important alert message]
+Press Esc or Tab to dismiss…
+== 
+
+Server alert
+== 
+
+Moderator alert
 == 
 
 Server could not be started
@@ -2191,6 +2216,9 @@ Loading map
 == 
 
 This name cannot be used for files and folders
+== 
+
+You will be disconnected from the server.
 == 
 
 Error checking player name
@@ -2208,6 +2236,9 @@ Live
 
 [Demo playback]
 Go to Live
+== 
+
+Are you sure that you want to disconnect and play this demo?
 == 
 
 Save all changes before turning off the editor?

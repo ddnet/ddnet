@@ -1562,6 +1562,21 @@ Quitting. Please wait…
 Restarting. Please wait…
 == 
 
+Team save in progress. You'll be able to load with '/load %s'
+== 
+
+Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails
+== 
+
+Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue
+== 
+
+Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue
+== 
+
+Save failed!
+== 
+
 Auto-sync player camera
 == 
 
@@ -1633,6 +1648,19 @@ Following %s
 AUTO
 == 
 
+[Important alert message]
+Press Esc or Tab to dismiss…
+== 
+
+Server alert
+== 
+
+Moderator alert
+== 
+
+Press a key…
+== 
+
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
 == 
 
@@ -1649,9 +1677,6 @@ Some map sounds could not be loaded. Check the local console for details.
 == 
 
 Loading menu themes
-== 
-
-Press a key…
 == 
 
 Main menu
@@ -1691,6 +1716,9 @@ Unable to rename the folder
 == 
 
 (paused)
+== 
+
+You will be disconnected from the server.
 == 
 
 Videos directory
@@ -1838,6 +1866,9 @@ Map size
 
 [Demo details]
 map not included
+== 
+
+Are you sure that you want to disconnect and play this demo?
 == 
 
 Are you sure that you want to delete the folder '%s'?
@@ -2250,9 +2281,6 @@ Skin could not be found.
 No skins match your filter criteria
 == 
 
-Axis
-== 
-
 Show FPS
 == 
 
@@ -2433,6 +2461,9 @@ Delete skin
 == 
 
 Unable to delete skin
+== 
+
+Axis
 == 
 
 Download

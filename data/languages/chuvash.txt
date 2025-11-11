@@ -626,6 +626,21 @@ Restarting. Please wait…
 Loading skin files
 == 
 
+Team save in progress. You'll be able to load with '/load %s'
+== 
+
+Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails
+== 
+
+Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue
+== 
+
+Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue
+== 
+
+Save failed!
+== 
+
 Search
 == 
 
@@ -721,7 +736,20 @@ Server best:
 Personal best:
 == 
 
+[Important alert message]
+Press Esc or Tab to dismiss…
+== 
+
+Server alert
+== 
+
+Moderator alert
+== 
+
 Team %d
+== 
+
+Press a key…
 == 
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
@@ -749,9 +777,6 @@ Loading menu themes
 == 
 
 Reset
-== 
-
-Press a key…
 == 
 
 Settings
@@ -848,6 +873,9 @@ Speed
 == 
 
 Video name:
+== 
+
+You will be disconnected from the server.
 == 
 
 Videos directory
@@ -1175,6 +1203,9 @@ Demos directory
 == 
 
 Open the directory that contains the demo files
+== 
+
+Are you sure that you want to disconnect and play this demo?
 == 
 
 Are you sure that you want to delete the folder '%s'?
@@ -1710,110 +1741,6 @@ Skins directory
 Open the directory to add custom skins
 == 
 
-Hook collisions
-== 
-
-Zoom in
-== 
-
-Zoom out
-== 
-
-Default zoom
-== 
-
-Show others
-== 
-
-Show all
-== 
-
-Toggle dyncam
-== 
-
-Toggle ghost
-== 
-
-Converse
-== 
-
-Chat command
-== 
-
-Toggle dummy
-== 
-
-Dummy copy
-== 
-
-Hammerfly dummy
-== 
-
-Statboard
-== 
-
-Lock team
-== 
-
-Show entities
-== 
-
-Show HUD
-== 
-
-Enable controller
-== 
-
-Controller
-== 
-
-Ingame controller mode
-== 
-
-[Ingame controller mode]
-Relative
-== 
-
-[Ingame controller mode]
-Absolute
-== 
-
-Ingame controller sens.
-== 
-
-UI controller sens.
-== 
-
-Controller jitter tolerance
-== 
-
-No controller found. Plug in a controller.
-== 
-
-Axis
-== 
-
-Status
-== 
-
-Aim bind
-== 
-
-Mouse
-== 
-
-Ingame mouse sens.
-== 
-
-UI mouse sens.
-== 
-
-Reset controls
-== 
-
-Are you sure that you want to reset the controls to their defaults?
-== 
-
 Windowed
 == 
 
@@ -2227,6 +2154,9 @@ Overlay entities
 Show text entities
 == 
 
+Show others
+== 
+
 Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == 
 
@@ -2237,6 +2167,9 @@ Show quads
 == 
 
 Quads are used for background decoration
+== 
+
+Default zoom
 == 
 
 AntiPing
@@ -2333,6 +2266,104 @@ Assets directory
 == 
 
 Open the directory to add custom assets
+== 
+
+Hook collisions
+== 
+
+Zoom in
+== 
+
+Zoom out
+== 
+
+Show all
+== 
+
+Toggle dyncam
+== 
+
+Toggle ghost
+== 
+
+Converse
+== 
+
+Chat command
+== 
+
+Toggle dummy
+== 
+
+Dummy copy
+== 
+
+Hammerfly dummy
+== 
+
+Statboard
+== 
+
+Lock team
+== 
+
+Show entities
+== 
+
+Show HUD
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
+== 
+
+Mouse
+== 
+
+Controller
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Enable controller
+== 
+
+Ingame controller mode
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller.
+== 
+
+Axis
+== 
+
+Status
+== 
+
+Aim bind
 == 
 
 Discord
