@@ -117,7 +117,6 @@ private:
 	void StoreErrorStmt(const char *pContext);
 	bool ConnectImpl();
 	bool PrepareAndExecuteStatement(const char *pStmt);
-	//static void DeleteResult(MYSQL_RES *pResult);
 
 	union UParameterExtra
 	{

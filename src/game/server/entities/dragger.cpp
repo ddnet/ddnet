@@ -239,6 +239,6 @@ void CDragger::SwapClients(int Client1, int Client2)
 	std::swap(m_apDraggerBeam[Client1], m_apDraggerBeam[Client2]);
 	for(int &TargetId : m_aTargetIdInTeam)
 	{
-		TargetId = TargetId == Client1 ? Client2 : TargetId == Client2 ? Client1 : TargetId;
+		TargetId = TargetId == Client1 ? Client2 : (TargetId == Client2 ? Client1 : TargetId);
 	}
 }

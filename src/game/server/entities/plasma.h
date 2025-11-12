@@ -6,7 +6,7 @@
 
 /**
  * Plasma Bullets are projectiles fired from turrets at a specific target
- * 
+ *
  * When hitting a tee, plasma bullets can either freeze or unfreeze the player
  * Also, plasma projectiles can explode on impact. However, the player affected by the explosion is not necessarily the
  * one the plasma collided with, but if the affected player is not a solo player, then the team-mate with the lowest

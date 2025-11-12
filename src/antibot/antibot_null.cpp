@@ -17,8 +17,8 @@ void AntibotInit(CAntibotData *pCallbackData)
 	g_pData = pCallbackData;
 	g_pData->m_pfnLog("null antibot initialized", g_pData->m_pUser);
 }
-void AntibotRoundStart(CAntibotRoundData *pRoundData){};
-void AntibotRoundEnd(void){};
+void AntibotRoundStart(CAntibotRoundData *pRoundData) {};
+void AntibotRoundEnd(void) {};
 void AntibotUpdateData(void) {}
 void AntibotDestroy(void) { g_pData = 0; }
 void AntibotConsoleCommand(const char *pCommand)

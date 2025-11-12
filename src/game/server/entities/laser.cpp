@@ -245,8 +245,6 @@ void CLaser::DoBounce()
 				m_Type == WEAPON_LASER && (TileFIndex != TILE_ALLOW_TELE_GUN && TileFIndex != TILE_ALLOW_BLUE_TELE_GUN && !IsSwitchTeleGun && !IsBlueSwitchTeleGun);
 		}
 	}
-
-	//m_Owner = -1;
 }
 
 void CLaser::Reset()
@@ -298,7 +296,7 @@ void CLaser::Snap(int SnappingClient)
 		return;
 
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
-	int LaserType = m_Type == WEAPON_LASER ? LASERTYPE_RIFLE : m_Type == WEAPON_SHOTGUN ? LASERTYPE_SHOTGUN : -1;
+	int LaserType = m_Type == WEAPON_LASER ? LASERTYPE_RIFLE : (m_Type == WEAPON_SHOTGUN ? LASERTYPE_SHOTGUN : -1);
 
 	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Server()->IsSixup(SnappingClient), SnappingClient), GetId(),
 		m_Pos, m_From, m_EvalTick, m_Owner, LaserType, 0, m_Number);
@@ -306,5 +304,5 @@ void CLaser::Snap(int SnappingClient)
 
 void CLaser::SwapClients(int Client1, int Client2)
 {
-	m_Owner = m_Owner == Client1 ? Client2 : m_Owner == Client2 ? Client1 : m_Owner;
+	m_Owner = m_Owner == Client1 ? Client2 : (m_Owner == Client2 ? Client1 : m_Owner);
 }

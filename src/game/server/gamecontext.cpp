@@ -282,7 +282,6 @@ void CGameContext::FillAntibot(CAntibotRoundData *pData)
 void CGameContext::CreateDamageInd(vec2 Pos, float Angle, int Amount, CClientMask Mask)
 {
 	float a = 3 * pi / 2 + Angle;
-	//float a = get_angle(dir);
 	float s = a - pi / 3;
 	float e = a + pi / 3;
 	for(int i = 0; i < Amount; i++)
@@ -1112,7 +1111,6 @@ void CGameContext::OnTick()
 
 	UpdatePlayerMaps();
 
-	//if(world.paused) // make sure that the game object always updates
 	m_pController->Tick();
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -2111,7 +2109,7 @@ void *CGameContext::PreProcessMsg(int *pMsgId, CUnpacker *pUnpacker, int ClientI
 				}
 				char aCommand[IConsole::CMDLINE_LENGTH];
 				str_format(aCommand, sizeof(aCommand), "force_vote \"%s\" \"%s\" \"%s\"", pMsg7->m_pType, pMsg7->m_pValue, pMsg7->m_pReason);
-				Console()->SetAccessLevel(Authed == AUTHED_ADMIN ? IConsole::EAccessLevel::ADMIN : Authed == AUTHED_MOD ? IConsole::EAccessLevel::MODERATOR : IConsole::EAccessLevel::HELPER);
+				Console()->SetAccessLevel(Authed == AUTHED_ADMIN ? IConsole::EAccessLevel::ADMIN : (Authed == AUTHED_MOD ? IConsole::EAccessLevel::MODERATOR : IConsole::EAccessLevel::HELPER));
 				Console()->ExecuteLine(aCommand, ClientId, false);
 				Console()->SetAccessLevel(IConsole::EAccessLevel::ADMIN);
 				return nullptr;
@@ -2319,7 +2317,7 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientId, con
 			Console()->SetFlagMask(CFGFLAG_CHAT);
 			int Authed = Server()->GetAuthedState(ClientId);
 			if(Authed)
-				Console()->SetAccessLevel(Authed == AUTHED_ADMIN ? IConsole::EAccessLevel::ADMIN : Authed == AUTHED_MOD ? IConsole::EAccessLevel::MODERATOR : IConsole::EAccessLevel::HELPER);
+				Console()->SetAccessLevel(Authed == AUTHED_ADMIN ? IConsole::EAccessLevel::ADMIN : (Authed == AUTHED_MOD ? IConsole::EAccessLevel::MODERATOR : IConsole::EAccessLevel::HELPER));
 			else
 				Console()->SetAccessLevel(IConsole::EAccessLevel::USER);
 
@@ -5384,7 +5382,7 @@ void CGameContext::OnUpdatePlayerServerInfo(CJsonWriter *pJsonWriter, int Client
 	pJsonWriter->WriteAttribute("afk");
 	pJsonWriter->WriteBoolValue(m_apPlayers[ClientId]->IsAfk());
 
-	const int Team = m_pController->IsTeamPlay() ? m_apPlayers[ClientId]->GetTeam() : m_apPlayers[ClientId]->GetTeam() == TEAM_SPECTATORS ? -1 : GetDDRaceTeam(ClientId);
+	const int Team = m_pController->IsTeamPlay() ? m_apPlayers[ClientId]->GetTeam() : (m_apPlayers[ClientId]->GetTeam() == TEAM_SPECTATORS ? -1 : GetDDRaceTeam(ClientId));
 
 	pJsonWriter->WriteAttribute("team");
 	pJsonWriter->WriteIntValue(Team);

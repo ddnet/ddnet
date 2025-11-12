@@ -162,7 +162,7 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 	bool First = true;
 
 #define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
-	if((Flags)&CFGFLAG_SERVER && !((Flags)&CFGFLAG_NONTEEHISTORIC) && pGameInfo->m_pConfig->m_##Name != (Def)) \
+	if((Flags) & CFGFLAG_SERVER && !((Flags) & CFGFLAG_NONTEEHISTORIC) && pGameInfo->m_pConfig->m_##Name != (Def)) \
 	{ \
 		str_format(aJson, sizeof(aJson), "%s\"%s\":\"%d\"", \
 			First ? "" : ",", \
@@ -175,7 +175,7 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 #define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) MACRO_CONFIG_INT(Name, ScriptName, Def, 0, 0, Flags, Desc)
 
 #define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Flags, Desc) \
-	if((Flags)&CFGFLAG_SERVER && !((Flags)&CFGFLAG_NONTEEHISTORIC) && str_comp(pGameInfo->m_pConfig->m_##Name, (Def)) != 0) \
+	if((Flags) & CFGFLAG_SERVER && !((Flags) & CFGFLAG_NONTEEHISTORIC) && str_comp(pGameInfo->m_pConfig->m_##Name, (Def)) != 0) \
 	{ \
 		str_format(aJson, sizeof(aJson), "%s\"%s\":\"%s\"", \
 			First ? "" : ",", \
@@ -197,7 +197,7 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 	First = true;
 
 #define MACRO_TUNING_PARAM(Name, ScriptName, Value, Description) \
-	if(pGameInfo->m_pTuning->m_##Name.Get() != (int)((Value)*100)) \
+	if(pGameInfo->m_pTuning->m_##Name.Get() != (int)((Value) * 100)) \
 	{ \
 		str_format(aJson, sizeof(aJson), "%s\"%s\":\"%d\"", \
 			First ? "" : ",", \

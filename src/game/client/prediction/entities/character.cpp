@@ -505,7 +505,6 @@ void CCharacter::OnPredictedInput(const CNetObj_PlayerInput *pNewInput)
 
 	// copy new input
 	mem_copy(&m_Input, pNewInput, sizeof(m_Input));
-	//m_NumInputs++;
 
 	// it is not allowed to aim in the center
 	if(m_Input.m_TargetX == 0 && m_Input.m_TargetY == 0)
@@ -1135,7 +1134,7 @@ bool CCharacter::Freeze(int Seconds)
 	{
 		m_FreezeTime = Seconds * GameWorld()->GameTickSpeed();
 		m_Core.m_FreezeStart = GameWorld()->GameTick();
-		m_Core.m_FreezeEnd = m_Core.m_DeepFrozen ? -1 : m_FreezeTime == 0 ? 0 : GameWorld()->GameTick() + m_FreezeTime;
+		m_Core.m_FreezeEnd = m_Core.m_DeepFrozen ? -1 : (m_FreezeTime == 0 ? 0 : GameWorld()->GameTick() + m_FreezeTime);
 		return true;
 	}
 	return false;

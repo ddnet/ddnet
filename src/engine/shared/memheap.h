@@ -37,7 +37,7 @@ public:
 	const char *StoreString(const char *pSrc);
 
 	template<typename T, typename... TArgs>
-	T *Allocate(TArgs &&... Args)
+	T *Allocate(TArgs &&...Args)
 	{
 		return new(Allocate(sizeof(T), alignof(T))) T(std::forward<TArgs>(Args)...);
 	}
