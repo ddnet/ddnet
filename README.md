@@ -1,4 +1,4 @@
-[![DDraceNetwork](https://ddnet.org/ddnet-small.png)](https://ddnet.org) 
+[![DDraceNetwork](https://ddnet.org/ddnet-small.png)](https://ddnet.org)
 
 [![Build status](https://github.com/ddnet/ddnet/workflows/Build/badge.svg)](https://github.com/ddnet/ddnet/actions?query=workflow%3ABuild+event%3Apush+branch%3Amaster)
 [![Code coverage](https://codecov.io/gh/ddnet/ddnet/branch/master/graph/badge.svg)](https://codecov.io/gh/ddnet/ddnet/branch/master)
@@ -203,20 +203,7 @@ cmake --build build --target run_tests`
 
 ## Code formatting
 
-We use clang-format 10 to format the C++ code of this project. Execute `scripts/fix_style.py` after changing the code to ensure code is formatted properly, a GitHub central style checker will do the same and prevent your change from being submitted.
-
-On Arch Linux you can install clang-format 10 using the [clang-format-static-bin AUR package](https://aur.archlinux.org/packages/clang-format-static-bin/) with [yay](https://github.com/Jguer/yay#Binary):
-
-```sh
-yay -S clang-format-static-bin
-```
-
-Or on macOS you can install clang-format 10 using a [homebrew tap](https://github.com/r-lib/homebrew-taps):
-
-```sh
-brew install r-lib/taps/clang-format@10
-sudo ln -s /opt/homebrew/Cellar/clang-format@10/10.0.1/bin/clang-format /opt/homebrew/bin/clang-format-10
-```
+We use clang-format 20 to format the C++ code of this project. Execute `scripts/fix_style.py` after changing the code to ensure code is formatted properly, a GitHub central style checker will do the same and prevent your change from being submitted.
 
 ## Using AddressSanitizer + UndefinedBehaviourSanitizer or Valgrind's Memcheck
 
@@ -252,7 +239,7 @@ Now open up your Project folder, Visual Studio should automatically detect and c
 
 On your tools hotbar next to the triangular "Run" Button, you can now select what you want to start (e.g game-client or game-server) and build it.
 
-## Building on Windows with standalone MSVC build tools 
+## Building on Windows with standalone MSVC build tools
 
 First off you will need to install the MSVC [Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/), [Python 3](https://www.python.org/downloads/) as well as [Rust](https://www.rust-lang.org/tools/install).
 

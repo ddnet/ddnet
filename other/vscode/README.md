@@ -1,7 +1,7 @@
 Requirements:
 - clang
 - clangd
-- clang-format-10, needs to be in PATH (linux: https://aur.archlinux.org/packages/clang-format-static-bin)
+- clang-format-20, needs to be in PATH
 - clang-tidy
 - lldb
 - cmake
