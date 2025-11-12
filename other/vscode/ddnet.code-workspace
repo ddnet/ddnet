@@ -74,10 +74,8 @@
 			"unordered_set": "cpp",
 			"variant": "cpp"
 		},
-		// clang-format-10 has to be in your PATH
-		// for linux simply grep a static built clang-format-10 from here:
-		// https://aur.archlinux.org/packages/clang-format-static-bin
-		"clang-format.executable": "clang-format-10",
+		// clang-format-20 has to be in your PATH
+		"clang-format.executable": "clang-format-20",
 		"lldb.launch.expressions": "native",
 		"lldb.launch.initCommands": ["target stop-hook add --one-liner \"command script import ${workspaceFolder}/other/vscode/lldbinit.py\""],
 		"editor.defaultFormatter": "xaver.clang-format",

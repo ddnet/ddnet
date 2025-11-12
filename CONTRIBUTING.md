@@ -48,7 +48,7 @@ Such fix commits should ideally be squashed into one big commit using `git commi
 
 A lot of the style offenses can be fixed automatically by running the fix script `./scripts/fix_style.py`.
 
-We use clang-format 10 to format C++ code. If your package manager no longer provides this version, you can download it from https://pypi.org/project/clang-format/10.0.1.1/.
+We use clang-format 20 to format C++ code.
 
 ### Upper camel case for variables, methods, class names
 
@@ -253,7 +253,7 @@ Try finding descriptive names instead.
 
 Use member variables or pass state by parameter instead of using global or static variables since static variables share the same value across instances of a class.
 
-Avoid static variables ❌: 
+Avoid static variables ❌:
 
 ```cpp
 int CMyClass::Foo()
