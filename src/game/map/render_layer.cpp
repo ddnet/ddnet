@@ -642,6 +642,11 @@ void CRenderLayerTile::UploadTileData(std::optional<CTileLayerVisuals> &VisualsO
 		vTmpBorderCornersTexCoords.reserve((size_t)4);
 	}
 
+	int DrawLeft = m_pLayerTilemap->m_Width;
+	int DrawRight = 0;
+	int DrawTop = m_pLayerTilemap->m_Height;
+	int DrawBottom = 0;
+
 	int x = 0;
 	int y = 0;
 	for(y = 0; y < m_pLayerTilemap->m_Height; ++y)
@@ -658,7 +663,15 @@ void CRenderLayerTile::UploadTileData(std::optional<CTileLayerVisuals> &VisualsO
 			Visuals.m_vTilesOfLayer[y * m_pLayerTilemap->m_Width + x].SetIndexBufferByteOffset((offset_ptr32)(TilesHandledCount));
 
 			if(AddTile(vTmpTiles, vTmpTileTexCoords, Index, Flags, x, y, DoTextureCoords, AddAsSpeedup, AngleRotate))
+			{
 				Visuals.m_vTilesOfLayer[y * m_pLayerTilemap->m_Width + x].Draw(true);
+
+				// calculate clip region boundaries based on draws
+				DrawLeft = std::min(DrawLeft, x);
+				DrawRight = std::max(DrawRight, x);
+				DrawTop = std::min(DrawTop, y);
+				DrawBottom = std::max(DrawBottom, y);
+			}
 
 			// do the border tiles
 			if(x == 0)
@@ -710,6 +723,21 @@ void CRenderLayerTile::UploadTileData(std::optional<CTileLayerVisuals> &VisualsO
 					Visuals.m_vBorderBottom[x].Draw(true);
 			}
 		}
+	}
+
+	// shrink clip region
+	if(DrawLeft > DrawRight || DrawTop > DrawBottom)
+	{
+		// we are drawing nothing, layer is empty
+		m_LayerClip->m_Height = 0.0f;
+		m_LayerClip->m_Width = 0.0f;
+	}
+	else
+	{
+		m_LayerClip->m_X = DrawLeft * 32.0f;
+		m_LayerClip->m_Y = DrawTop * 32.0f;
+		m_LayerClip->m_Width = (DrawRight - DrawLeft + 1) * 32.0f;
+		m_LayerClip->m_Height = (DrawBottom - DrawTop + 1) * 32.0f;
 	}
 
 	// append one kill tile to the gamelayer
