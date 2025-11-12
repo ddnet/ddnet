@@ -211,6 +211,28 @@ void CGameContext::CommandCallback(int ClientId, int FlagMask, const char *pCmd,
 	}
 }
 
+void CGameContext::ConsoleIsInViewCallback(int ClientId, int CallerId, bool *pIsInView, void *pUser)
+{
+	CGameContext *pSelf = (CGameContext *)pUser;
+	*pIsInView = false;
+	if(CallerId < 0 || !pSelf->m_apPlayers[CallerId] || !pSelf->GetPlayerChar(ClientId))
+		return;
+
+	vec2 CheckPos = pSelf->GetPlayerChar(ClientId)->GetPos();
+	vec2 ShowDistance = pSelf->m_apPlayers[CallerId]->m_ShowDistance;
+	float dx = pSelf->m_apPlayers[CallerId]->m_ViewPos.x - CheckPos.x;
+	if(absolute(dx) > ShowDistance.x / 2.f)
+	{
+		return;
+	}
+	float dy = pSelf->m_apPlayers[CallerId]->m_ViewPos.y - CheckPos.y;
+	if(absolute(dy) > ShowDistance.y / 2.f)
+	{
+		return;
+	}
+	*pIsInView = true;
+}
+
 CNetObj_PlayerInput CGameContext::GetLastPlayerInput(int ClientId) const
 {
 	dbg_assert(0 <= ClientId && ClientId < MAX_CLIENTS, "invalid ClientId");
@@ -4076,6 +4098,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 
 	m_GameUuid = RandomUuid();
 	Console()->SetTeeHistorianCommandCallback(CommandCallback, this);
+	Console()->SetIsInViewCallback(ConsoleIsInViewCallback, this);
 
 	uint64_t aSeed[2];
 	secure_random_fill(aSeed, sizeof(aSeed));
