@@ -639,12 +639,16 @@ CMysqlConfig gMysqlConfig{
 auto g_pMysqlConn = CreateMysqlConnection(gMysqlConfig);
 #endif
 
-auto g_TestValues{
+// clang-format off
+auto g_TestValues
+{
 	testing::Values(
 #if defined(CONF_TEST_MYSQL)
 		g_pMysqlConn.get(),
 #endif
-		g_pSqliteConn.get())};
+		g_pSqliteConn.get())
+};
+// clang-format on
 
 #define INSTANTIATE(SUITE) \
 	INSTANTIATE_TEST_SUITE_P(Sql, SUITE, g_TestValues, \

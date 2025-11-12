@@ -226,8 +226,7 @@ void CInfoMessages::OnTeamKillMessage(const CNetMsg_Sv_KillMsgTeam *pMsg)
 			GameClient()->m_Teams.Team(ClientId) == pMsg->m_Team)
 		{
 			CCharacter *pChr = GameClient()->m_GameWorld.GetCharacterById(ClientId);
-			vStrongWeakSorted.emplace_back(ClientId, pMsg->m_First == ClientId ? MAX_CLIENTS : pChr ? pChr->GetStrongWeakId() :
-														  0);
+			vStrongWeakSorted.emplace_back(ClientId, pMsg->m_First == ClientId ? MAX_CLIENTS : (pChr ? pChr->GetStrongWeakId() : 0));
 		}
 	}
 	std::stable_sort(vStrongWeakSorted.begin(), vStrongWeakSorted.end(), [](auto &Left, auto &Right) { return Left.second > Right.second; });

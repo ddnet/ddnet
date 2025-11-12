@@ -216,8 +216,7 @@ void CLayerSpeedup::BrushRotate(float Amount)
 		Rotation += 4;
 
 	// 1 and 3 are both adjusted by 90, because for 3 the brush is also flipped
-	int Adjust = (Rotation == 0) ? 0 : (Rotation == 2) ? 180 :
-							     90;
+	int Adjust = (Rotation == 0) ? 0 : ((Rotation == 2) ? 180 : 90);
 	auto &&AdjustAngle = [Adjust](auto &Number) {
 		Number = (Number + Adjust % 360 + 360) % 360;
 	};

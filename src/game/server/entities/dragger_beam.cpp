@@ -140,8 +140,7 @@ void CDraggerBeam::Snap(int SnappingClient)
 
 void CDraggerBeam::SwapClients(int Client1, int Client2)
 {
-	m_ForClientId = m_ForClientId == Client1 ? Client2 : m_ForClientId == Client2 ? Client1 :
-											m_ForClientId;
+	m_ForClientId = m_ForClientId == Client1 ? Client2 : (m_ForClientId == Client2 ? Client1 : m_ForClientId);
 }
 
 ESaveResult CDraggerBeam::BlocksSave(int ClientId)
