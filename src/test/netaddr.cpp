@@ -139,9 +139,7 @@ TEST(NetAddrDeathTest, StrInvalid1)
 	ASSERT_DEATH({
 		NETADDR Addr = {0};
 		char aBuf[NETADDR_MAXSTRSIZE];
-		net_addr_str(&Addr, aBuf, sizeof(aBuf), true);
-	},
-		"");
+		net_addr_str(&Addr, aBuf, sizeof(aBuf), true); }, "");
 }
 
 TEST(NetAddrDeathTest, StrInvalid2)
@@ -149,9 +147,7 @@ TEST(NetAddrDeathTest, StrInvalid2)
 	ASSERT_DEATH({
 		NETADDR Addr = {0};
 		char aBuf[NETADDR_MAXSTRSIZE];
-		net_addr_str(&Addr, aBuf, sizeof(aBuf), false);
-	},
-		"");
+		net_addr_str(&Addr, aBuf, sizeof(aBuf), false); }, "");
 }
 
 TEST(NetAddr, IsLocal)

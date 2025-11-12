@@ -341,7 +341,8 @@ void CProjectile::Snap(int SnappingClient)
 
 void CProjectile::SwapClients(int Client1, int Client2)
 {
-	m_Owner = m_Owner == Client1 ? Client2 : m_Owner == Client2 ? Client1 : m_Owner;
+	m_Owner = m_Owner == Client1 ? Client2 : m_Owner == Client2 ? Client1 :
+								      m_Owner;
 }
 
 // DDRace

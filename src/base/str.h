@@ -442,7 +442,7 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, int
  * @return `1` - Item is in list.
  * @return `0` - Item isn't in list.
  *
-* @remark The strings are treated as null-terminated strings.
+ * @remark The strings are treated as null-terminated strings.
  */
 int str_in_list(const char *list, const char *delim, const char *needle);
 
