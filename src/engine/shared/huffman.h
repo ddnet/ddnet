@@ -24,7 +24,7 @@ class CHuffman
 		unsigned m_NumBits;
 
 		// don't use pointers for this. shorts are smaller so we can fit more data into the cache
-		unsigned short m_aLeafs[2];
+		unsigned short m_aLeaves[2];
 
 		// what the symbol represents
 		unsigned char m_Symbol;

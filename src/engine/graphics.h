@@ -585,7 +585,7 @@ public:
 		EMessageBoxType m_Type = EMessageBoxType::ERROR;
 		/**
 		 * Buttons shown in the message box. At least one button is required.
-		 * The buttons are layed out from left to right.
+		 * The buttons are laid out from left to right.
 		 */
 		std::vector<CMessageBoxButton> m_vButtons = {{.m_pLabel = "OK", .m_Confirm = true, .m_Cancel = true}};
 	};

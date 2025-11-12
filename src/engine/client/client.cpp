@@ -2032,7 +2032,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					unsigned char aTmpBuffer3[CSnapshot::MAX_SIZE];
 					CSnapshot *pTmpBuffer3 = (CSnapshot *)aTmpBuffer3; // Fix compiler warning for strict-aliasing
 
-					// reset snapshoting
+					// reset snapshotting
 					m_aSnapshotParts[Conn] = 0;
 
 					// find snapshot that we should use as delta

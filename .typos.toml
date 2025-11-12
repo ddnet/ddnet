@@ -1,0 +1,34 @@
+[files]
+extend-exclude = [
+	"build-*/",
+	"build/",
+	"data/countryflags",
+	"data/languages",
+	"data/skins",
+	"ddnet-libs",
+	"memcheck.supp",
+	"scripts/android/files/res",
+	"src/engine/external",
+
+	# tests with invalid words
+	"src/test/shell_execute.cpp",
+	"src/test/str.cpp",
+]
+
+[default]
+extend-ignore-re = [
+	'lod',
+	'LOD',
+	'Lod',
+	'PARM',
+	'PNGs',
+	'SEH',
+	'UPnP',
+	'Datas',
+	'datas',
+	'iy',
+	'cl_nameplates_ids_seperate_line',
+	'0x510E527FUL',
+	'I\*\*nteger',
+	's\*\*tring',
+]

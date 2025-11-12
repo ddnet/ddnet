@@ -58,7 +58,7 @@ inline constexpr auto NETTYPE_WEBSOCKET_IPV6 = 1 << 3;
 inline constexpr auto NETTYPE_LINK_BROADCAST = 1 << 4;
 /**
  * 0.7 address. This is a flag in NETADDR to avoid introducing a parameter to every networking function
- * to differenciate between 0.6 and 0.7 connections.
+ * to differentiate between 0.6 and 0.7 connections.
  */
 inline constexpr auto NETTYPE_TW7 = 1 << 5;
 

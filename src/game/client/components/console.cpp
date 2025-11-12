@@ -713,7 +713,7 @@ void CGameConsole::CInstance::ScrollToCenter(int StartLine, int EndLine)
 	if(m_BacklogCurLine == Target)
 		return;
 
-	// Compute acutal amount of lines to scroll to make sure lines fit in viewport and we don't have empty space
+	// Compute actual amount of lines to scroll to make sure lines fit in viewport and we don't have empty space
 	int Direction = m_BacklogCurLine - Target < 0 ? -1 : 1;
 	int LinesToScroll = absolute(Target - m_BacklogCurLine);
 	int ComputedLines = GetLinesToScroll(Direction, LinesToScroll);
@@ -811,7 +811,7 @@ void CGameConsole::CInstance::UpdateSearch()
 
 		int EntryLineCount = pEntry->m_LineCount;
 
-		// Find all occurences of the search string and save their positions
+		// Find all occurrences of the search string and save their positions
 		while(pSearchPos)
 		{
 			int Pos = pSearchPos - pEntry->m_aText;

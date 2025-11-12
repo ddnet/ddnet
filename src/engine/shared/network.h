@@ -221,7 +221,7 @@ public:
 class CNetConnection
 {
 	// TODO: is this needed because this needs to be aware of
-	// the ack sequencing number and is also responible for updating
+	// the ack sequencing number and is also responsible for updating
 	// that. this should be fixed.
 	friend class CNetRecvUnpacker;
 

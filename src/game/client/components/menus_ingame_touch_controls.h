@@ -30,7 +30,7 @@ public:
 		JOYSTICK_AIM,
 		JOYSTICK_FIRE,
 		JOYSTICK_HOOK,
-		NUM_PREDEFINEDS
+		NUM_PREDEFINEDTYPES
 	};
 
 	// Which menu is selected.

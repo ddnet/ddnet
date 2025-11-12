@@ -13,7 +13,7 @@ export LDFLAGS="$4"
 export ANDROID_NDK_ROOT=$ANDROID_NDK
 PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:$PATH
 
-function buid_openssl() {
+function build_openssl() {
 	_EXISTS_PROJECT=0
 	if [ -d "$1" ]; then
 		_EXISTS_PROJECT=1
@@ -39,10 +39,10 @@ function buid_openssl() {
 }
 
 if [[ "${2}" == "android" ]]; then
-	buid_openssl build_"$2"_arm android-arm "$1" "$2" ""
-	buid_openssl build_"$2"_arm64 android-arm64 "$1" "$2" ""
-	buid_openssl build_"$2"_x86 android-x86 "$1" "$2" ""
-	buid_openssl build_"$2"_x86_64 android-x86_64 "$1" "$2" ""
+	build_openssl build_"$2"_arm android-arm "$1" "$2" ""
+	build_openssl build_"$2"_arm64 android-arm64 "$1" "$2" ""
+	build_openssl build_"$2"_x86 android-x86 "$1" "$2" ""
+	build_openssl build_"$2"_x86_64 android-x86_64 "$1" "$2" ""
 elif [[ "${2}" == "webasm" ]]; then
-	buid_openssl build_"$2"_wasm linux-generic64 "$1" "$2" emmake
+	build_openssl build_"$2"_wasm linux-generic64 "$1" "$2" emmake
 fi
