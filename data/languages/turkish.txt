@@ -167,7 +167,7 @@ Graphics
 == Grafik
 
 Grenade
-== El bombası
+== Bomba Atar
 
 Hammer
 == Çekiç
@@ -200,7 +200,7 @@ Language
 == Dil
 
 MOTD
-== MOTD
+== Sunucu mesajı
 
 Map
 == Harita
@@ -293,7 +293,7 @@ Remove
 == Çıkar
 
 Remove friend
-== Arkadaşı sil
+== Arkadaşı çıkar
 
 Rename demo
 == Demonun adını değiştir
@@ -377,7 +377,7 @@ Team chat
 == Takım sohbeti
 
 The audio device couldn't be initialised.
-== Ses donanımı başlatılamadı.
+== Ses aygıtı başlatılamadı.
 
 The server is running a non-standard tuning on a pure game type.
 == Bu sunucu standart olmayan bir ayarı saf bir oyun türünde kullanıyor.
@@ -596,7 +596,7 @@ Downloading %s:
 == İndiriliyor %s:
 
 Update failed! Check log…
-== Güncelleme sırasında hata oluştu…
+== Güncelleme başarısız oldu! Günlük dosyasını kontrol edin…
 
 DDNet Client updated!
 == DDNet İstemcisi güncellendi!
@@ -656,7 +656,7 @@ Show clan above name plates
 == Oyuncu isimlerinin üstünde klanı göster
 
 Clan plates size
-== Boyut
+== Klan etiket boyutu
 
 Refresh Rate
 == Yenileme Hızı
@@ -668,10 +668,10 @@ Automatically create statboard csv
 == Otomatik olarak skor tablosunu csv olarak oluştur
 
 Max CSVs
-== Maksimum CSVs
+== Maksimum CSV sayısı
 
 Vanilla skins only
-== Sadece vanilla skinleri
+== Sadece orijinal skinler
 
 Fat skins (DDFat)
 == Şişko skinler (DDFat)
@@ -1507,7 +1507,7 @@ Set all to Rifle
 == Hepsini tüfeğe göre ayarla
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== Başlangıç çizgisini geçtiğinizde en iyi zamanınızın hareketlerini kopyalayan bir hayalet tee göster
+== Başlangıç çizgisini geçtiğinizde, en iyi sürenizin hareketlerini tekrarlayan bir hayalet tee göster
 
 Opacity
 == Opaklık
@@ -1519,7 +1519,7 @@ Quads are used for background decoration
 == Dörtgen yapılar arka plan dekorasyonu için kullanılır
 
 Tries to predict other entities to give a feel of low latency
-== Düşük gecikme hissi vermek için diğer yapıları tahmin etmeye çalışır
+== Düşük gecikme hissi vermek için diğer varlıkları tahmin etmeye çalışır
 
 Background
 == Arka plan
@@ -1576,7 +1576,7 @@ Stop server
 == Sunucuyu durdur
 
 Run server
-== Sunucu aç
+== Sunucuyu başlat
 
 Server executable not found, can't run server
 == Çalıştırılabilir sunucu bulunamadı, sunucu başlatılamıyor
@@ -1598,7 +1598,7 @@ Loading sound files
 == Ses dosyaları yükleniyor
 
 Moved ingame
-== Hareket edildi
+== Oyun içinde taşındın
 
 Go back the specified duration
 == Belirtilen süre kadar geri git
@@ -1621,7 +1621,7 @@ Render cut to video
 == Kesiti videoya dönüştür
 
 Error playing demo
-== Demo oynatırken hata oluştu
+== Demo oynatılırken hata oluştu
 
 Failed saving the replay!
 == Tekrar kaydedilemedi!
@@ -1645,7 +1645,7 @@ NOT CONNECTED
 == BAĞLI DEĞİL
 
 Match %d of %d
-== %d'den %d'yi eşleştir
+== %d/%d eşleşme
 
 No results
 == Sonuç yok
@@ -2487,3 +2487,34 @@ Censor profanity
 
 Download
 == İndir
+
+Team save in progress. You'll be able to load with '/load %s'
+== 
+
+Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails
+== 
+
+Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue
+== 
+
+Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue
+== 
+
+Save failed!
+== 
+
+[Important alert message]
+Press Esc or Tab to dismiss…
+== 
+
+Server alert
+== 
+
+Moderator alert
+== 
+
+You will be disconnected from the server.
+== 
+
+Are you sure that you want to disconnect and play this demo?
+== 

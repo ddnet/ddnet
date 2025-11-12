@@ -1812,6 +1812,21 @@ No demo with this filename exists
 Some fonts could not be loaded. Check the local console for details.
 == 
 
+Team save in progress. You'll be able to load with '/load %s'
+== 
+
+Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails
+== 
+
+Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue
+== 
+
+Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue
+== 
+
+Save failed!
+== 
+
 Auto-sync player camera
 == 
 
@@ -1850,6 +1865,16 @@ Following %s
 AUTO
 == 
 
+[Important alert message]
+Press Esc or Tab to dismiss…
+== 
+
+Server alert
+== 
+
+Moderator alert
+== 
+
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
 == 
 
@@ -1866,6 +1891,9 @@ Are you sure you want to save your skin? If a skin with this name already exists
 == 
 
 This name cannot be used for files and folders
+== 
+
+You will be disconnected from the server.
 == 
 
 Error checking player name
@@ -1913,6 +1941,9 @@ Toggle auto camera
 == 
 
 Map size
+== 
+
+Are you sure that you want to disconnect and play this demo?
 == 
 
 Dummy is not allowed on this server
@@ -2301,9 +2332,6 @@ Skin could not be found.
 No skins match your filter criteria
 == 
 
-Converse
-== 
-
 Show FPS
 == 
 
@@ -2430,6 +2458,9 @@ Delete skin
 == 
 
 Unable to delete skin
+== 
+
+Converse
 == 
 
 Download

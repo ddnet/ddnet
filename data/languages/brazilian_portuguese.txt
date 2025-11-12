@@ -863,7 +863,7 @@ Converse
 == Conversar
 
 Successfully saved the replay!
-== A reprodução foi salva com sucesso
+== A reprodução foi salva com sucesso!
 
 Default length
 == Duração padrão
@@ -905,7 +905,7 @@ Please enter your nickname below.
 == Por favor, insira seu apelido abaixo.
 
 Video name:
-== Nome do vídeo
+== Nome do vídeo:
 
 Connect Dummy
 == Conectar dummy
@@ -2212,7 +2212,7 @@ Error checking player name
 == Erro ao verificar nome de jogador
 
 Could not check for existing player with your name. Check your internet connection.
-== Não foi possível verificar se há um jogador com o seu nome. Verifique sua conexão de internet. 
+== Não foi possível verificar se há um jogador com o seu nome. Verifique sua conexão de internet.
 
 Press Ctrl+Shift+G to disable debug graphs.
 == Pressione Ctrl+Shift+G para desabilitar grafos de depuração.
@@ -2487,3 +2487,34 @@ Censor profanity
 
 Download
 == Download
+
+Team save in progress. You'll be able to load with '/load %s'
+== 
+
+Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails
+== 
+
+Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue
+== 
+
+Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue
+== 
+
+Save failed!
+== 
+
+[Important alert message]
+Press Esc or Tab to dismiss…
+== 
+
+Server alert
+== 
+
+Moderator alert
+== 
+
+You will be disconnected from the server.
+== 
+
+Are you sure that you want to disconnect and play this demo?
+== 

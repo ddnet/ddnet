@@ -674,7 +674,7 @@ Automatically take game over screenshot
 == Automatisches Bildschirmfoto am Spielende
 
 Gameplay
-== Gameplay
+== Spiel
 
 Laser
 == Laser
@@ -1005,7 +1005,7 @@ Background music volume
 == Hintergrundmusik-Lautst.
 
 Assets
-== Assets
+== Ressourcen
 
 Entities
 == Entitäten
@@ -1017,7 +1017,7 @@ Particles
 == Partikel
 
 Assets directory
-== Assets-Ordner
+== Ressourcen-Ordner
 
 https://wiki.ddnet.org/
 == https://wiki.ddnet.org/wiki/Main_Page/de
@@ -1307,7 +1307,7 @@ Initializing components
 == Initialisiere Komponenten
 
 Initializing assets
-== Initialisiere Assets
+== Initialisiere Ressourcen
 
 Initializing map logic
 == Initialisiere Kartenlogik
@@ -1343,7 +1343,7 @@ Your movements are not taken into account when calculating the line colors
 == Deine Bewegungen werden bei der Berechnung von Linienfarben nicht berücksichtigt
 
 Loading assets
-== Lade Assets
+== Lade Ressourcen
 
 Loading race demo files
 == Lade Rennen-Demo-Dateien
@@ -1458,7 +1458,7 @@ A render command failed. Try to update your GPU drivers.
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
-== Einreichen der Render-Befhle fehlgeschlagen. Versuch deinen Grafiktreiber zu aktualisieren.
+== Einreichen der Render-Befehle fehlgeschlagen. Versuch deinen Grafiktreiber zu aktualisieren.
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
@@ -1488,7 +1488,7 @@ Unregister protocol and file extensions
 == Entferne die Registrierungen für Protokoll- und Datei-Erweiterungen
 
 Open the directory to add custom assets
-== Öffne den Ordner um eigene Assets hinzuzufügen
+== Öffne den Ordner um eigene Ressourcen hinzuzufügen
 
 Save power by lowering refresh rate (higher input latency)
 == Spare Energie durch geringere Bildwiederholrate (höhere Inputverzögerung)
@@ -2175,7 +2175,7 @@ AntiPing: prediction margin
 
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
-== VRAM ausgegangen. Versuch 'cl_skins_loaded_max' auf einen niedrigeren Wert zu setzen oder entferne eigene Assets (Skins, Entitäten, usw.), insbesondere solche mit hoher Auflösung.
+== VRAM ausgegangen. Versuch 'cl_skins_loaded_max' auf einen niedrigeren Wert zu setzen oder entferne eigene Ressourcen (Skins, Entitäten, usw.), insbesondere solche mit hoher Auflösung.
 
 This name cannot be used for files and folders
 == Dieser Name kann nicht für Dateien und Ordner genutzt werden
@@ -2215,275 +2215,306 @@ Could not check for existing player with your name. Check your internet connecti
 == Konnte nicht prüfen ob ein Spieler mit deinem Namen existiert. Prüfe deine Internetverbindung.
 
 Press Ctrl+Shift+G to disable debug graphs.
-== 
+== Drück Strg+Shift+G um die Debug-Graphen zu deaktivieren.
 
 Server could not be started
-== 
+== Server konnte nicht gestartet werden
 
 Could not get server list from master server
-== 
+== Serverliste von Masterserver konnte nicht geladen werden
 
 [Demo playback]
 Live
-== 
+== Live
 
 [Demo playback]
 Go to Live
-== 
+== Gehe live
 
 Save all changes before turning off the editor?
-== 
+== Alle Änderungen speichern bevor der Editor verlassen wird?
 
 Layout
-== 
+== Layout
 
 Visibility
-== 
+== Sichtbarkeit
 
 Behavior
-== 
+== Verhalten
 
 Delete button
-== 
+== Knopf löschen
 
 Are you sure that you want to delete this button?
-== 
+== Bist du sicher, dass du diesen Knopf löschen möchtest?
 
 Duplicate
-== 
+== Duplizieren
 
 New button already created
-== 
+== Neuer Button bereits erstellt
 
 A new button has already been created, please save or delete it before creating another one.
-== 
+== Eine neue Taste wurde bereits erstellt, bitte speichere oder lösche sie, bevor du eine neue erstellst.
 
 Please save your changes before duplicating a button.
-== 
+== Bitte speichere deine Änderungen, bevor du einen Button duplizierst.
 
 No space for button
-== 
+== Kein Platz für Button
 
 There is not enough space available to place another button.
-== 
+== Es gibt nicht genug Platz um einen weiteren Button zu erstellen.
 
 There is not enough space available to place another button with this size. The button has been resized.
-== 
+== Es gibt nicht genug Platz um einen Button dieser Größe zu erstellen. Der Button wurde verkleinert.
 
 Deselect
-== 
+== Deselektieren
 
 You'll lose unsaved changes after deselecting.
-== 
+== Ungespeicherte Änderungen gehen beim Deselektieren verloren.
 
 Width
-== 
+== Breite
 
 Height
-== 
+== Höhe
 
 Shape
-== 
+== Form
 
 [Touch button shape]
 Rectangle
-== 
+== Rechteck
 
 [Touch button shape]
 Circle
-== 
+== Kreis
 
 [Touch button label type]
 Plain
-== 
+== Normal
 
 [Touch button label type]
 Localized
-== 
+== Übersetzt
 
 [Touch button label type]
 Icon
-== 
+== Icon
 
 Behavior type
-== 
+== Verhalten
 
 [Touch button behavior]
 Bind
-== 
+== Taste
 
 [Touch button behavior]
 Bind Toggle
-== 
+== Taste an/aus
 
 [Touch button behavior]
 Predefined
-== 
+== Vordefiniert
 
 Command
-== 
+== Befehl
 
 Label
-== 
+== Beschriftung
 
 Label type
-== 
+== Beschriftungsart
 
 Add command
-== 
+== Befehl hinzufügen
 
 Delete command
-== 
+== Befehl entfernen
 
 [Touch button visibility preview]
 Included
-== 
+== Ja
 
 [Touch button visibility preview]
 Excluded
-== 
+== Nein
 
 [Touch button visibility preview]
 Ignore
-== 
+== Ignoriert
 
 Long press on a touch button to select it.
-== 
+== Drücke lange auf einen Button um ihn auszuwählen.
 
 New button
-== 
+== Neuer Button
 
 Select button by touch
-== 
+== Drücke Button um ihn zu selektieren
 
 No buttons match your filter criteria
-== 
+== Kein Button entspricht deinen Kriterien
 
 File
-== 
+== Datei
 
 Buttons
-== 
+== Buttons
 
 Active color
-== 
+== Aktiver Button
 
 Inactive color
-== 
+== Inaktiver Button
 
 Preview button visibility while the editor is active.
-== 
+== Buttonsichtbarkeitsvorschau während der Editor aktiv ist.
 
 Show all buttons
-== 
+== Zeige alle Tasten
 
 Save all changes before switching selected button?
-== 
+== Alle Änderungen speichern vor dem Tastenwechsel?
 
 Discard
-== 
+== Verwerfen
 
 There is not enough space available for the button. Check its visibilities and size.
-== 
+== Es gibt nicht genug Platz für den Button. Schau dir seine Sichtbarkeit und Größe an.
 
 Selected button not visible
-== 
+== Ausgewählter Button nicht sichtbar
 
 The selected button is not visible. Do you want to deselect it or edit its visibility?
-== 
+== Der ausgewählte Button ist nicht sichtbar. Möchtest du ihn abwählen oder seine Sichtbarkeit bearbeiten?
 
 Edit
-== 
+== Bearbeiten
 
 Width and height are required to be within the range from %d to %d.
-== 
+== Breite und Höhe müssen zwischen %d und %d liegen.
 
 Button position is outside of the screen.
-== 
+== Der Button ist außerhalb des Bildschirms.
 
 The selected button is overlapping with other buttons.
-== 
+== Die ausgewählte Taste überlappt andere Tasten.
 
 Wrong button settings
-== 
+== Ungültige Buttoneinstellungen
 
 [Touch button visibilities]
 Ingame
-== 
+== Im Spiel
 
 [Touch button visibilities]
 Zoom Allowed
-== 
+== Zoom erlaubt
 
 [Touch button visibilities]
 Vote Active
-== 
+== Abstimmung
 
 [Touch button visibilities]
 Dummy Allowed
-== 
+== Dummy erlaubt
 
 [Touch button visibilities]
 Dummy Connected
-== 
+== Dummy verbunden
 
 [Touch button visibilities]
 Rcon Authed
-== 
+== Authentifiziert
 
 [Touch button visibilities]
 Demo Player
-== 
+== Demo-Player
 
 [Touch button visibilities]
 Extra Menu
-== 
+== Extramenü
 
 [Predefined touch button behaviors]
 Ingame Menu
-== 
+== Spielmenü
 
 [Predefined touch button behaviors]
 Extra Menu
-== 
+== Extramenü
 
 [Predefined touch button behaviors]
 Emoticon
-== 
+== Emoticon
 
 [Predefined touch button behaviors]
 Spectate
-== 
+== Zuschauen
 
 [Predefined touch button behaviors]
 Swap Action
-== 
+== Aktion tauschen
 
 [Predefined touch button behaviors]
 Use Action
-== 
+== Aktion ausführen
 
 [Predefined touch button behaviors]
 Joystick Action
-== 
+== Joystickaktion
 
 [Predefined touch button behaviors]
 Joystick Aim
-== 
+== Joystickzielen
 
 [Predefined touch button behaviors]
 Joystick Fire
-== 
+== Joystickfeuern
 
 [Predefined touch button behaviors]
 Joystick Hook
-== 
+== Joystickhaken
 
 Censor profanity
-== 
+== Schimpfwörter zensieren
 
 Chat background color
-== 
+== Chathintergrundfarbe
 
 Download
+== Herunterladen
+
+Team save in progress. You'll be able to load with '/load %s'
+== 
+
+Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails
+== 
+
+Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue
+== 
+
+Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue
+== 
+
+Save failed!
+== 
+
+[Important alert message]
+Press Esc or Tab to dismiss…
+== 
+
+Server alert
+== 
+
+Moderator alert
+== 
+
+You will be disconnected from the server.
+== 
+
+Are you sure that you want to disconnect and play this demo?
 == 
