@@ -597,6 +597,9 @@ void CGameContext::CallVote(int ClientId, const char *pDesc, const char *pCmd, c
 	pPlayer->m_Vote = 1;
 	pPlayer->m_VotePos = m_VotePos = 1;
 	pPlayer->m_LastVoteCall = Now;
+
+	CNetMsg_Sv_YourVote Msg = {pPlayer->m_Vote};
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientId);
 }
 
 void CGameContext::SendChatTarget(int To, const char *pText, int VersionFlags) const
