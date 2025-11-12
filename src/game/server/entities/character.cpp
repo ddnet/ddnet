@@ -187,7 +187,9 @@ void CCharacter::SetSuper(bool Super)
 	if(Super && !WasSuper)
 	{
 		m_TeamBeforeSuper = Team();
-		Teams()->SetCharacterTeam(GetPlayer()->GetCid(), TEAM_SUPER);
+		char aError[512];
+		if(!Teams()->SetCharacterTeam(GetPlayer()->GetCid(), TEAM_SUPER, aError, sizeof(aError)))
+			log_error("character", "failed to set super: %s", aError);
 		m_DDRaceState = ERaceState::CHEATED;
 	}
 	else if(!Super && WasSuper)

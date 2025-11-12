@@ -380,37 +380,75 @@ void CGameTeams::CheckTeamFinished(int Team)
 	}
 }
 
-const char *CGameTeams::SetCharacterTeam(int ClientId, int Team)
+bool CGameTeams::CanJoinTeam(int ClientId, int Team, char *pError, int ErrorSize) const
 {
 	int CurrentTeam = m_Core.Team(ClientId);
 
 	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
-		return "Invalid client ID";
+	{
+		str_format(pError, ErrorSize, "Invalid client ID: %d", ClientId);
+		return false;
+	}
 	if(Team < 0 || Team > NUM_DDRACE_TEAMS)
-		return "Invalid team number";
+	{
+		str_format(pError, ErrorSize, "Invalid team number: %d", Team);
+		return false;
+	}
 	if(Team != TEAM_SUPER && m_aTeamState[Team] > ETeamState::OPEN && !m_aPractice[Team] && !m_aTeamFlock[Team])
-		return "This team started already";
+	{
+		str_copy(pError, "This team started already", ErrorSize);
+		return false;
+	}
 	if(CurrentTeam == Team)
-		return "You are in this team already";
+	{
+		str_copy(pError, "You are in this team already", ErrorSize);
+		return false;
+	}
 	if(!Character(ClientId))
-		return "Your character is not valid";
+	{
+		str_copy(pError, "Your character is not valid", ErrorSize);
+		return false;
+	}
 	if(Team == TEAM_SUPER && !Character(ClientId)->IsSuper())
-		return "You can't join super team if you don't have super rights";
+	{
+		str_copy(pError, "You can't join super team if you don't have super rights", ErrorSize);
+		return false;
+	}
 	if(Team != TEAM_SUPER && Character(ClientId)->m_DDRaceState != ERaceState::NONE && (m_aTeamState[CurrentTeam] < ETeamState::FINISHED || Team != 0))
-		return "You have started racing already";
+	{
+		str_copy(pError, "You have started racing already", ErrorSize);
+		return false;
+	}
 	// No cheating through noob filter with practice and then leaving team
 	if(m_aPractice[CurrentTeam] && !m_pGameContext->PracticeByDefault())
-		return "You have used practice mode already";
+	{
+		str_copy(pError, "You have used practice mode already", ErrorSize);
+		return false;
+	}
 
 	// you can not join a team which is currently in the process of saving,
 	// because the save-process can fail and then the team is reset into the game
 	if(Team != TEAM_SUPER && GetSaving(Team))
-		return "This team is currently saving";
+	{
+		str_copy(pError, "This team is currently saving", ErrorSize);
+		return false;
+	}
 	if(CurrentTeam != TEAM_SUPER && GetSaving(CurrentTeam))
-		return "Your team is currently saving";
+	{
+		str_copy(pError, "Your team is currently saving", ErrorSize);
+		return false;
+	}
+
+	return true;
+}
+
+bool CGameTeams::SetCharacterTeam(int ClientId, int Team, char *pError, int ErrorSize)
+{
+	if(!CanJoinTeam(ClientId, Team, pError, ErrorSize))
+		return false;
 
 	SetForceCharacterTeam(ClientId, Team);
-	return nullptr;
+	return true;
 }
 
 void CGameTeams::SetForceCharacterTeam(int ClientId, int Team)
@@ -836,12 +874,22 @@ CCharacter *CGameTeams::Character(int ClientId)
 	return GameServer()->GetPlayerChar(ClientId);
 }
 
+const CCharacter *CGameTeams::Character(int ClientId) const
+{
+	return GameServer()->GetPlayerChar(ClientId);
+}
+
 CPlayer *CGameTeams::GetPlayer(int ClientId)
 {
 	return GameServer()->m_apPlayers[ClientId];
 }
 
-class CGameContext *CGameTeams::GameServer()
+CGameContext *CGameTeams::GameServer()
+{
+	return m_pGameContext;
+}
+
+const CGameContext *CGameTeams::GameServer() const
 {
 	return m_pGameContext;
 }
