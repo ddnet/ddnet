@@ -30,7 +30,7 @@ BraceWrapping:
   SplitEmptyRecord: true
 #ColumnLimit: 100
 ColumnLimit: 0
-CommentPragmas: ''
+CommentPragmas: '^[^ ]'
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 ConstructorInitializerIndentWidth: 8
 ContinuationIndentWidth: 8
