@@ -81,14 +81,13 @@ protected:
 		Reset(&m_GameInfo);
 	}
 
-	static void WriteBuffer(std::vector<unsigned char> &vBuffer, const void *pData, size_t DataSize)
+	static void WriteBuffer(std::vector<unsigned char> &vBuffer, const void *pData, const int &DataSize)
 	{
 		if(DataSize <= 0)
 			return;
 
-		const size_t OldSize = vBuffer.size();
-		vBuffer.resize(OldSize + DataSize);
-		mem_copy(&vBuffer[OldSize], pData, DataSize);
+		const unsigned char *Bytes = static_cast<const unsigned char *>(pData);
+		vBuffer.insert(vBuffer.end(), Bytes, Bytes + DataSize);
 	}
 
 	static void Write(const void *pData, int DataSize, void *pUser)
@@ -107,18 +106,20 @@ protected:
 	void Expect(const unsigned char *pOutput, size_t OutputSize)
 	{
 		static CUuid TEEHISTORIAN_UUID = CalculateUuid("teehistorian@ddnet.tw");
-		static const char PREFIX1[] = "{\"comment\":\"teehistorian@ddnet.tw\",\"version\":\"2\",\"version_minor\":\"16\",\"game_uuid\":\"a1eb7182-796e-3b3e-941d-38ca71b2a4a8\",\"server_version\":\"DDNet test\",\"start_time\":\"";
-		static const char PREFIX2[] = "\",\"server_name\":\"server name\",\"server_port\":\"8303\",\"game_type\":\"game type\",\"map_name\":\"Kobra 3 Solo\",\"map_size\":\"903514\",\"map_sha256\":\"0123456789012345678901234567890123456789012345678901234567890123\",\"map_crc\":\"eceaf25c\",\"prng_description\":\"test-prng:02468ace\",\"config\":{},\"tuning\":{},\"uuids\":[";
-		static const char PREFIX3[] = "]}";
+		std::string_view PREFIX1 = "{\"comment\":\"teehistorian@ddnet.tw\",\"version\":\"2\",\"version_minor\":\"16\",\"game_uuid\":\"a1eb7182-796e-3b3e-941d-38ca71b2a4a8\",\"server_version\":\"DDNet test\",\"start_time\":\"";
+		std::string_view PREFIX2 = "\",\"server_name\":\"server name\",\"server_port\":\"8303\",\"game_type\":\"game type\",\"map_name\":\"Kobra 3 Solo\",\"map_size\":\"903514\",\"map_sha256\":\"0123456789012345678901234567890123456789012345678901234567890123\",\"map_crc\":\"eceaf25c\",\"prng_description\":\"test-prng:02468ace\",\"config\":{},\"tuning\":{},\"uuids\":[";
+		std::string_view PREFIX3 = "]}";
 
 		char aTimeBuf[64];
 		str_timestamp_ex(m_GameInfo.m_StartTime, aTimeBuf, sizeof(aTimeBuf), "%Y-%m-%dT%H:%M:%S%z");
 
 		std::vector<unsigned char> vBuffer;
 		WriteBuffer(vBuffer, &TEEHISTORIAN_UUID, sizeof(TEEHISTORIAN_UUID));
-		WriteBuffer(vBuffer, PREFIX1, str_length(PREFIX1));
+		const auto PREFIX1Len = str_length(PREFIX1.data());
+		WriteBuffer(vBuffer, PREFIX1.data(), PREFIX1Len);
 		WriteBuffer(vBuffer, aTimeBuf, str_length(aTimeBuf));
-		WriteBuffer(vBuffer, PREFIX2, str_length(PREFIX2));
+		const auto PREFIX2Len = str_length(PREFIX2.data());
+		WriteBuffer(vBuffer, PREFIX2.data(), PREFIX2Len);
 		for(int i = 0; i < m_UuidManager.NumUuids(); i++)
 		{
 			char aBuf[64];
@@ -127,9 +128,9 @@ protected:
 				m_UuidManager.GetName(OFFSET_UUID + i));
 			WriteBuffer(vBuffer, aBuf, str_length(aBuf));
 		}
-		WriteBuffer(vBuffer, PREFIX3, str_length(PREFIX3));
+		WriteBuffer(vBuffer, PREFIX3.data(), str_length(PREFIX3.data()));
 		WriteBuffer(vBuffer, "", 1);
-		WriteBuffer(vBuffer, pOutput, OutputSize);
+		WriteBuffer(vBuffer, pOutput, static_cast<int>(OutputSize));
 
 		ExpectFull(vBuffer.data(), vBuffer.size());
 	}
