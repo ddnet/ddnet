@@ -86,14 +86,13 @@ void IGameController::DoActivityCheck()
 	}
 }
 
-float IGameController::EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos, int DDTeam)
+float IGameController::EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos, int ClientId)
 {
 	float Score = 0.0f;
 	CCharacter *pC = static_cast<CCharacter *>(GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER));
 	for(; pC; pC = (CCharacter *)pC->TypeNext())
 	{
-		// ignore players in other teams
-		if(GameServer()->GetDDRaceTeam(pC->GetPlayer()->GetCid()) != DDTeam)
+		if(!pC->CanCollide(ClientId))
 			continue;
 
 		float d = distance(Pos, pC->m_Pos);
@@ -103,9 +102,14 @@ float IGameController::EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos, int DDTeam)
 	return Score;
 }
 
-void IGameController::EvaluateSpawnType(CSpawnEval *pEval, ESpawnType SpawnType, int DDTeam)
+void IGameController::EvaluateSpawnType(CSpawnEval *pEval, ESpawnType SpawnType, int ClientId)
 {
 	const bool PlayerCollision = GameServer()->GlobalTuning()->m_PlayerCollision;
+
+	bool PlayerCollisionDisabled = false;
+	CCharacter *pPlayerCharacter = GameServer()->GetPlayerChar(ClientId);
+	if(pPlayerCharacter)
+		PlayerCollisionDisabled = pPlayerCharacter->GetCore().m_CollisionDisabled;
 
 	// make sure players keep spawning at the same tile
 	// on race maps no matter what
@@ -129,15 +133,15 @@ void IGameController::EvaluateSpawnType(CSpawnEval *pEval, ESpawnType SpawnType,
 				for(int Index = 0; Index < 5 && Result == -1; ++Index)
 				{
 					Result = Index;
-					if(!PlayerCollision)
+					if(!PlayerCollision || PlayerCollisionDisabled)
 						break;
 					for(int c = 0; c < Num; ++c)
 					{
 						CCharacter *pChr = static_cast<CCharacter *>(apEnts[c]);
-						const bool SameTeam = GameServer()->GetDDRaceTeam(pChr->GetPlayer()->GetCid()) == DDTeam;
+						const bool CanCollide = pChr->CanCollide(ClientId) && !pChr->GetCore().m_CollisionDisabled;
 
 						if(GameServer()->Collision()->CheckPoint(SpawnPoint + aPositions[Index]) ||
-							(SameTeam && distance(pChr->m_Pos, SpawnPoint + aPositions[Index]) <= pChr->GetProximityRadius()))
+							(CanCollide && distance(pChr->m_Pos, SpawnPoint + aPositions[Index]) <= pChr->GetProximityRadius()))
 						{
 							Result = -1;
 							break;
@@ -150,7 +154,7 @@ void IGameController::EvaluateSpawnType(CSpawnEval *pEval, ESpawnType SpawnType,
 				P += aPositions[Result];
 			}
 
-			float S = EvaluateSpawnPos(pEval, P, DDTeam);
+			float S = EvaluateSpawnPos(pEval, P, ClientId);
 			if(!pEval->m_Got || (j == 0 && pEval->m_Score > S))
 			{
 				pEval->m_Got = true;
@@ -161,16 +165,16 @@ void IGameController::EvaluateSpawnType(CSpawnEval *pEval, ESpawnType SpawnType,
 	}
 }
 
-bool IGameController::CanSpawn(int Team, vec2 *pOutPos, int DDTeam)
+bool IGameController::CanSpawn(int Team, vec2 *pOutPos, int ClientId)
 {
 	// spectators can't spawn
 	if(Team == TEAM_SPECTATORS)
 		return false;
 
 	CSpawnEval Eval;
-	EvaluateSpawnType(&Eval, SPAWNTYPE_DEFAULT, DDTeam);
-	EvaluateSpawnType(&Eval, SPAWNTYPE_RED, DDTeam);
-	EvaluateSpawnType(&Eval, SPAWNTYPE_BLUE, DDTeam);
+	EvaluateSpawnType(&Eval, SPAWNTYPE_DEFAULT, ClientId);
+	EvaluateSpawnType(&Eval, SPAWNTYPE_RED, ClientId);
+	EvaluateSpawnType(&Eval, SPAWNTYPE_BLUE, ClientId);
 
 	*pOutPos = Eval.m_Pos;
 	return Eval.m_Got;

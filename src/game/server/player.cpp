@@ -740,7 +740,7 @@ void CPlayer::TryRespawn()
 {
 	vec2 SpawnPos;
 
-	if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos, GameServer()->GetDDRaceTeam(m_ClientId)))
+	if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos, m_ClientId))
 		return;
 
 	m_WeakHookSpawn = false;

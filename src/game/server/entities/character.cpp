@@ -2025,7 +2025,7 @@ void CCharacter::HandleTiles(int Index)
 		}
 		// if no checkpointout have been found (or if there no recorded checkpoint), teleport to start
 		vec2 SpawnPos;
-		if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), &SpawnPos, GameServer()->GetDDRaceTeam(GetPlayer()->GetCid())))
+		if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), &SpawnPos, GetPlayer()->GetCid()))
 		{
 			m_Core.m_Pos = SpawnPos;
 			m_Core.m_Vel = vec2(0, 0);
@@ -2060,7 +2060,7 @@ void CCharacter::HandleTiles(int Index)
 		}
 		// if no checkpointout have been found (or if there no recorded checkpoint), teleport to start
 		vec2 SpawnPos;
-		if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), &SpawnPos, GameServer()->GetDDRaceTeam(GetPlayer()->GetCid())))
+		if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), &SpawnPos, GetPlayer()->GetCid()))
 		{
 			m_Core.m_Pos = SpawnPos;
 
