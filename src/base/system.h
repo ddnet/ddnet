@@ -73,6 +73,19 @@
 	} while(false)
 
 /**
+ * Breaks into the debugger with a message.
+ *
+ * @ingroup Debug
+ * @param fmt A printf styled format message that should be printed in case the
+ * code is reached.
+ *
+ * @remark Also works in release mode.
+ *
+ * @see dbg_break
+ */
+#define dbg_assert_failed(fmt, ...) dbg_assert_imp(__FILE__, __LINE__, fmt, ##__VA_ARGS__)
+
+/**
  * Use dbg_assert instead!
  *
  * @ingroup Debug

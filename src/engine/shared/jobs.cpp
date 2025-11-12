@@ -94,8 +94,7 @@ void CJobPool::RunLoop()
 					pJob->m_State = IJob::STATE_ABORTED;
 					continue;
 				}
-				dbg_assert(false, "Job state invalid. Job was reused or uninitialized.");
-				dbg_break();
+				dbg_assert_failed("Job state invalid. Job was reused or uninitialized.");
 			}
 
 			// remember running jobs so we can abort them
@@ -115,7 +114,7 @@ void CJobPool::RunLoop()
 			{
 				if(OldStateRunning != IJob::STATE_ABORTED)
 				{
-					dbg_assert(false, "Job state invalid, must be either running or aborted");
+					dbg_assert_failed("Job state invalid, must be either running or aborted");
 				}
 			}
 		}

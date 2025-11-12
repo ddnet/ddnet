@@ -133,7 +133,7 @@ CTouchControls::CUnitRect CTouchControls::CalculateHitbox(const CUnitRect &Rect,
 		}
 		return Hitbox;
 	}
-	default: dbg_assert(false, "Unhandled shape");
+	default: dbg_assert_failed("Unhandled shape");
 	}
 }
 
@@ -219,8 +219,7 @@ vec2 CTouchControls::CTouchButton::ClampTouchPosition(vec2 TouchPosition) const
 		break;
 	}
 	default:
-		dbg_assert(false, "Unhandled shape");
-		break;
+		dbg_assert_failed("Unhandled shape");
 	}
 	return TouchPosition;
 }
@@ -234,7 +233,7 @@ bool CTouchControls::CTouchButton::IsInside(vec2 TouchPosition) const
 	case EButtonShape::CIRCLE:
 		return distance(TouchPosition, m_ScreenRect.Center()) <= minimum(m_ScreenRect.w, m_ScreenRect.h) / 2.0f;
 	default:
-		dbg_assert(false, "Unhandled shape");
+		dbg_assert_failed("Unhandled shape");
 		return false;
 	}
 }
@@ -302,8 +301,7 @@ void CTouchControls::CTouchButton::Render(std::optional<bool> Selected, std::opt
 		break;
 	}
 	default:
-		dbg_assert(false, "Unhandled shape");
-		break;
+		dbg_assert_failed("Unhandled shape");
 	}
 
 	const float FontSize = 22.0f;
@@ -396,7 +394,7 @@ void CTouchControls::CTouchButtonBehavior::SetActive(const IInput::CTouchFingerS
 	}
 	else
 	{
-		dbg_assert(false, "Touch button must be inactive or use same finger");
+		dbg_assert_failed("Touch button must be inactive or use same finger");
 	}
 }
 
@@ -937,8 +935,7 @@ int CTouchControls::NextActiveAction(int Action) const
 	case ACTION_HOOK:
 		return ACTION_FIRE;
 	default:
-		dbg_assert(false, "Action invalid for NextActiveAction");
-		dbg_break();
+		dbg_assert_failed("Action invalid for NextActiveAction");
 	}
 }
 
@@ -953,8 +950,7 @@ int CTouchControls::NextDirectTouchAction() const
 		case EDirectTouchSpectateMode::AIM:
 			return ACTION_AIM;
 		default:
-			dbg_assert(false, "m_DirectTouchSpectate invalid");
-			return NUM_ACTIONS;
+			dbg_assert_failed("m_DirectTouchSpectate invalid");
 		}
 	}
 	else
@@ -972,8 +968,7 @@ int CTouchControls::NextDirectTouchAction() const
 		case EDirectTouchIngameMode::HOOK:
 			return ACTION_HOOK;
 		default:
-			dbg_assert(false, "m_DirectTouchIngame invalid");
-			return NUM_ACTIONS;
+			dbg_assert_failed("m_DirectTouchIngame invalid");
 		}
 	}
 }

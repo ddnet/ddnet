@@ -754,6 +754,5 @@ const char *CExplanations::Explain(EGametype Gametype, int Tile, int Layer)
 	case EGametype::BLOCKWORLDS:
 		return nullptr; // TODO: Explanations for Blockworlds
 	}
-	dbg_assert(false, "Gametype invalid: %d", (int)Gametype);
-	dbg_break();
+	dbg_assert_failed("Gametype invalid: %d", (int)Gametype);
 }

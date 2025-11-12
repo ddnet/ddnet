@@ -114,7 +114,7 @@ bool CSqliteConnection::Connect(char *pError, int ErrorSize)
 {
 	if(m_InUse.exchange(true))
 	{
-		dbg_assert(false, "Tried connecting while the connection is in use");
+		dbg_assert_failed("Tried connecting while the connection is in use");
 	}
 	if(!ConnectImpl(pError, ErrorSize))
 	{

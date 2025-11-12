@@ -2110,8 +2110,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 	}
 	else
 	{
-		dbg_assert(false, "m_PopupEventType invalid");
-		return CUi::POPUP_CLOSE_CURRENT;
+		dbg_assert_failed("m_PopupEventType invalid");
 	}
 
 	CUIRect Label, ButtonBar, Button;

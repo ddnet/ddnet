@@ -235,8 +235,7 @@ IOHANDLE io_open(const char *filename, int flags)
 	}
 	else
 	{
-		dbg_assert(false, "logic error");
-		return nullptr;
+		dbg_assert_failed("logic error");
 	}
 	HANDLE handle = CreateFileW(wide_filename.c_str(), desired_access, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, creation_disposition, FILE_ATTRIBUTE_NORMAL, nullptr);
 	if(handle == INVALID_HANDLE_VALUE)
@@ -262,8 +261,7 @@ IOHANDLE io_open(const char *filename, int flags)
 	}
 	else
 	{
-		dbg_assert(false, "logic error");
-		return nullptr;
+		dbg_assert_failed("logic error");
 	}
 	return fopen(filename, open_mode);
 #endif
@@ -367,8 +365,7 @@ int io_seek(IOHANDLE io, int64_t offset, ESeekOrigin origin)
 		real_origin = SEEK_END;
 		break;
 	default:
-		dbg_assert(false, "origin invalid");
-		return -1;
+		dbg_assert_failed("origin invalid");
 	}
 #if defined(CONF_FAMILY_WINDOWS)
 	return _fseeki64((FILE *)io, offset, real_origin);
@@ -1206,7 +1203,7 @@ void net_addr_str(const NETADDR *addr, char *string, int max_length, bool add_po
 	}
 	else
 	{
-		dbg_assert(false, "unknown NETADDR type %d", addr->type);
+		dbg_assert_failed("unknown NETADDR type %d", addr->type);
 	}
 }
 
@@ -1653,7 +1650,7 @@ static int priv_net_create_socket(int domain, int type, const NETADDR *bindaddr)
 	}
 	else
 	{
-		dbg_assert(false, "socket type invalid: %d", type);
+		dbg_assert_failed("socket type invalid: %d", type);
 	}
 
 	if(bind(sock, (sockaddr *)&addr, addr_len) != 0)
@@ -2960,8 +2957,7 @@ ETimeSeason time_season()
 	case 10:
 		return SEASON_AUTUMN;
 	default:
-		dbg_assert(false, "Invalid month");
-		dbg_break();
+		dbg_assert_failed("Invalid month");
 	}
 }
 
@@ -3331,8 +3327,7 @@ PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state, c
 		info.nShow = SW_SHOWMINNOACTIVE;
 		break;
 	default:
-		dbg_assert(false, "window_state invalid");
-		dbg_break();
+		dbg_assert_failed("window_state invalid");
 	}
 	info.fMask = SEE_MASK_NOCLOSEPROCESS;
 	// Save and restore the FPU control word because ShellExecute might change it
@@ -3482,8 +3477,7 @@ static void ensure_secure_random_init()
 		if(!CryptAcquireContext(&secure_random_data.provider, nullptr, nullptr, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
 		{
 			const DWORD LastError = GetLastError();
-			dbg_assert(false, "Failed to initialize secure random: CryptAcquireContext failure (%ld '%s')", LastError, windows_format_system_message(LastError).c_str());
-			dbg_break();
+			dbg_assert_failed("Failed to initialize secure random: CryptAcquireContext failure (%ld '%s')", LastError, windows_format_system_message(LastError).c_str());
 		}
 #else
 		secure_random_data.urandom = io_open("/dev/urandom", IOFLAG_READ);
@@ -3535,8 +3529,7 @@ void secure_random_fill(void *bytes, unsigned length)
 	if(!CryptGenRandom(secure_random_data.provider, length, (unsigned char *)bytes))
 	{
 		const DWORD LastError = GetLastError();
-		dbg_assert(false, "CryptGenRandom failure (%ld '%s')", LastError, windows_format_system_message(LastError).c_str());
-		dbg_break();
+		dbg_assert_failed("CryptGenRandom failure (%ld '%s')", LastError, windows_format_system_message(LastError).c_str());
 	}
 #else
 	dbg_assert(length == io_read(secure_random_data.urandom, bytes, length), "io_read returned with a short read");

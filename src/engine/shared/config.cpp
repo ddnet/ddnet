@@ -362,7 +362,7 @@ void CConfigManager::SetReadOnly(const char *pScriptName, bool ReadOnly)
 			return;
 		}
 	}
-	dbg_assert(false, "Invalid command for SetReadOnly: '%s'", pScriptName);
+	dbg_assert_failed("Invalid command for SetReadOnly: '%s'", pScriptName);
 }
 
 void CConfigManager::SetGameSettingsReadOnly(bool ReadOnly)

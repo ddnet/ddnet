@@ -111,8 +111,7 @@ void CMapRenderer::Load(ERenderType Type, CLayers *pLayers, IMapImages *pMapImag
 						pTileLayer);
 					break;
 				default:
-					dbg_assert(false, "Unknown LayerType %d", LayerType);
-					break;
+					dbg_assert_failed("Unknown LayerType %d", LayerType);
 				}
 			}
 			else if(pLayer->m_Type == LAYERTYPE_QUADS)

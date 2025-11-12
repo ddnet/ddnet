@@ -706,8 +706,7 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 		Data.m_ShowDirection = pPlayerInfo->m_Local;
 		break;
 	default:
-		dbg_assert(false, "ShowDirectionConfig invalid");
-		dbg_break();
+		dbg_assert_failed("ShowDirectionConfig invalid");
 	}
 	if(Data.m_ShowDirection)
 	{

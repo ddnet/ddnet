@@ -511,7 +511,7 @@ bool CMysqlConnection::IsNull(int Col)
 	if(mysql_stmt_fetch_column(m_pStmt.get(), &Bind, Col, 0))
 	{
 		StoreErrorStmt("fetch_column:null");
-		dbg_assert(false, "Error in IsNull: error fetching column %s", m_aErrorDetail);
+		dbg_assert_failed("Error in IsNull: error fetching column %s", m_aErrorDetail);
 	}
 	return IsNull;
 }
@@ -534,7 +534,7 @@ float CMysqlConnection::GetFloat(int Col)
 	if(mysql_stmt_fetch_column(m_pStmt.get(), &Bind, Col, 0))
 	{
 		StoreErrorStmt("fetch_column:float");
-		dbg_assert(false, "Error in GetFloat: error fetching column %s", m_aErrorDetail);
+		dbg_assert_failed("Error in GetFloat: error fetching column %s", m_aErrorDetail);
 	}
 	dbg_assert(!IsNull, "Error in GetFloat: NULL");
 	return Value;
@@ -558,7 +558,7 @@ int CMysqlConnection::GetInt(int Col)
 	if(mysql_stmt_fetch_column(m_pStmt.get(), &Bind, Col, 0))
 	{
 		StoreErrorStmt("fetch_column:int");
-		dbg_assert(false, "Error in GetInt: error fetching column %s", m_aErrorDetail);
+		dbg_assert_failed("Error in GetInt: error fetching column %s", m_aErrorDetail);
 	}
 	dbg_assert(!IsNull, "Error in GetInt: NULL");
 	return Value;
@@ -582,7 +582,7 @@ int64_t CMysqlConnection::GetInt64(int Col)
 	if(mysql_stmt_fetch_column(m_pStmt.get(), &Bind, Col, 0))
 	{
 		StoreErrorStmt("fetch_column:int64");
-		dbg_assert(false, "Error in GetInt64: error fetching column %s", m_aErrorDetail);
+		dbg_assert_failed("Error in GetInt64: error fetching column %s", m_aErrorDetail);
 	}
 	dbg_assert(!IsNull, "Error in GetInt64: NULL");
 	return Value;
@@ -613,7 +613,7 @@ void CMysqlConnection::GetString(int Col, char *pBuffer, int BufferSize)
 	if(mysql_stmt_fetch_column(m_pStmt.get(), &Bind, Col, 0))
 	{
 		StoreErrorStmt("fetch_column:string");
-		dbg_assert(false, "Error in GetString: error fetching column %s", m_aErrorDetail);
+		dbg_assert_failed("Error in GetString: error fetching column %s", m_aErrorDetail);
 	}
 	dbg_assert(!IsNull, "Error in GetString: NULL");
 	dbg_assert(!Error, "Error in GetString: truncation occurred");
@@ -638,7 +638,7 @@ int CMysqlConnection::GetBlob(int Col, unsigned char *pBuffer, int BufferSize)
 	if(mysql_stmt_fetch_column(m_pStmt.get(), &Bind, Col, 0))
 	{
 		StoreErrorStmt("fetch_column:blob");
-		dbg_assert(false, "Error in GetBlob: error fetching column %s", m_aErrorDetail);
+		dbg_assert_failed("Error in GetBlob: error fetching column %s", m_aErrorDetail);
 	}
 	dbg_assert(!IsNull, "Error in GetBlob: NULL");
 	dbg_assert(!Error, "Error in GetBlob: truncation occurred");

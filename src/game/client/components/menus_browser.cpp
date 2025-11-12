@@ -1489,8 +1489,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 			str_format(aBuf, sizeof(aBuf), Localize("Offline (%d)", "friends (server browser)"), (int)m_avFriends[FriendType].size());
 			break;
 		default:
-			dbg_assert(false, "FriendType invalid");
-			break;
+			dbg_assert_failed("FriendType invalid");
 		}
 		Ui()->DoLabel(&GroupLabel, aBuf, FontSize, TEXTALIGN_ML);
 		if(Ui()->DoButtonLogic(&s_aListExtended[FriendType], 0, &Header, BUTTONFLAG_LEFT))
@@ -1788,8 +1787,7 @@ void CMenus::RenderServerbrowserToolBox(CUIRect ToolBox)
 		RenderServerbrowserFriends(ToolBox);
 		return;
 	default:
-		dbg_assert(false, "ui_toolbox_page invalid");
-		return;
+		dbg_assert_failed("ui_toolbox_page invalid");
 	}
 }
 
@@ -1816,7 +1814,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		GameClient()->m_MenuBackground.ChangePosition(g_Config.m_UiPage - PAGE_FAVORITE_COMMUNITY_1 + CMenuBackground::POS_BROWSER_CUSTOM0);
 		break;
 	default:
-		dbg_assert(false, "ui_page invalid for RenderServerbrowser");
+		dbg_assert_failed("ui_page invalid for RenderServerbrowser");
 	}
 
 	// clang-format off
