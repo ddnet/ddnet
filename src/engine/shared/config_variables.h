@@ -509,6 +509,7 @@ MACRO_CONFIG_INT(DbgRenderGroupClips, dbg_render_group_clips, 0, 0, 1, CFGFLAG_C
 MACRO_CONFIG_INT(DbgRenderQuadClips, dbg_render_quad_clips, 0, 0, 1, CFGFLAG_CLIENT, "Debug quad layer clipping")
 MACRO_CONFIG_INT(DbgRenderClusterClips, dbg_render_cluster_clips, 0, 0, 1, CFGFLAG_CLIENT, "Debug quad layer cluster clipping")
 MACRO_CONFIG_INT(DbgRenderTileClips, dbg_render_tile_clips, 0, 0, 1, CFGFLAG_CLIENT, "Debug tile layer clipping")
+MACRO_CONFIG_INT(DbgRenderTileBorderClips, dbg_render_tile_border_clips, 0, 0, 1, CFGFLAG_CLIENT, "Debug tile layer border clipping")
 #ifdef CONF_DEBUG
 MACRO_CONFIG_INT(DbgStress, dbg_stress, 0, 0, 1, CFGFLAG_CLIENT, "Stress systems (Debug build only)")
 MACRO_CONFIG_STR(DbgStressServer, dbg_stress_server, 32, "localhost", CFGFLAG_CLIENT, "Server to stress (Debug build only)")
