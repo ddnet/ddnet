@@ -245,8 +245,6 @@ void CLaser::DoBounce()
 				m_Type == WEAPON_LASER && (TileFIndex != TILE_ALLOW_TELE_GUN && TileFIndex != TILE_ALLOW_BLUE_TELE_GUN && !IsSwitchTeleGun && !IsBlueSwitchTeleGun);
 		}
 	}
-
-	//m_Owner = -1;
 }
 
 void CLaser::Reset()

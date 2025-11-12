@@ -282,7 +282,6 @@ void CGameContext::FillAntibot(CAntibotRoundData *pData)
 void CGameContext::CreateDamageInd(vec2 Pos, float Angle, int Amount, CClientMask Mask)
 {
 	float a = 3 * pi / 2 + Angle;
-	//float a = get_angle(dir);
 	float s = a - pi / 3;
 	float e = a + pi / 3;
 	for(int i = 0; i < Amount; i++)
@@ -1112,7 +1111,6 @@ void CGameContext::OnTick()
 
 	UpdatePlayerMaps();
 
-	//if(world.paused) // make sure that the game object always updates
 	m_pController->Tick();
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
