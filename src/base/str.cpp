@@ -37,11 +37,6 @@ void str_truncate(char *dst, int dst_size, const char *src, int truncation_len)
 	str_copy(dst, src, size);
 }
 
-int str_length(const char *str)
-{
-	return (int)strlen(str);
-}
-
 char str_uppercase(char c)
 {
 	if(c >= 'a' && c <= 'z')

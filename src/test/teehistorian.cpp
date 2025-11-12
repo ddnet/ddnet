@@ -81,14 +81,13 @@ protected:
 		Reset(&m_GameInfo);
 	}
 
-	static void WriteBuffer(std::vector<unsigned char> &vBuffer, const void *pData, size_t DataSize)
+	static void WriteBuffer(std::vector<unsigned char> &vBuffer, const void *pData, const int &DataSize)
 	{
 		if(DataSize <= 0)
 			return;
 
-		const size_t OldSize = vBuffer.size();
-		vBuffer.resize(OldSize + DataSize);
-		mem_copy(&vBuffer[OldSize], pData, DataSize);
+		const unsigned char *Bytes = static_cast<const unsigned char *>(pData);
+		vBuffer.insert(vBuffer.end(), Bytes, Bytes + DataSize);
 	}
 
 	static void Write(const void *pData, int DataSize, void *pUser)
@@ -116,9 +115,11 @@ protected:
 
 		std::vector<unsigned char> vBuffer;
 		WriteBuffer(vBuffer, &TEEHISTORIAN_UUID, sizeof(TEEHISTORIAN_UUID));
-		WriteBuffer(vBuffer, PREFIX1, str_length(PREFIX1));
+		const auto PREFIX1Len = str_length(PREFIX1);
+		WriteBuffer(vBuffer, PREFIX1, PREFIX1Len);
 		WriteBuffer(vBuffer, aTimeBuf, str_length(aTimeBuf));
-		WriteBuffer(vBuffer, PREFIX2, str_length(PREFIX2));
+		const auto PREFIX2Len = str_length(PREFIX2);
+		WriteBuffer(vBuffer, PREFIX2, PREFIX2Len);
 		for(int i = 0; i < m_UuidManager.NumUuids(); i++)
 		{
 			char aBuf[64];
@@ -129,7 +130,7 @@ protected:
 		}
 		WriteBuffer(vBuffer, PREFIX3, str_length(PREFIX3));
 		WriteBuffer(vBuffer, "", 1);
-		WriteBuffer(vBuffer, pOutput, OutputSize);
+		WriteBuffer(vBuffer, pOutput, static_cast<int>(OutputSize));
 
 		ExpectFull(vBuffer.data(), vBuffer.size());
 	}
