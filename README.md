@@ -1,6 +1,6 @@
-[![DDraceNetwork](https://ddnet.org/ddnet-small.png)](https://ddnet.org) 
+[![DDraceNetwork](https://ddnet.org/ddnet-small.png)](https://ddnet.org)
 
-[![Build status](https://github.com/ddnet/ddnet/workflows/Build/badge.svg)](https://github.com/ddnet/ddnet/actions?query=workflow%3ABuild+event%3Apush+branch%3Amaster)
+[![Build status](https://github.com/ddnet/ddnet/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/ddnet/ddnet/actions/workflows/build.yml?branch=master)
 [![Code coverage](https://codecov.io/gh/ddnet/ddnet/branch/master/graph/badge.svg)](https://codecov.io/gh/ddnet/ddnet/branch/master)
 [![Translation status](https://hosted.weblate.org/widget/ddnet/ddnet/svg-badge.svg)](https://hosted.weblate.org/engage/ddnet/)
 
@@ -252,7 +252,7 @@ Now open up your Project folder, Visual Studio should automatically detect and c
 
 On your tools hotbar next to the triangular "Run" Button, you can now select what you want to start (e.g game-client or game-server) and build it.
 
-## Building on Windows with standalone MSVC build tools 
+## Building on Windows with standalone MSVC build tools
 
 First off you will need to install the MSVC [Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/), [Python 3](https://www.python.org/downloads/) as well as [Rust](https://www.rust-lang.org/tools/install).
 
