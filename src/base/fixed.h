@@ -1,89 +1,95 @@
-#ifndef ENGINE_SHARED_FIXED_POINT_NUMBER_H
-#define ENGINE_SHARED_FIXED_POINT_NUMBER_H
+#ifndef BASE_FIXED_H
+#define BASE_FIXED_H
 
 #include <cstddef>
 #include <cstdint>
 #include <limits>
 
-class CFixedPointNumber
+class CFixed
 {
-public:
 	using Underlying = int32_t;
 
 	// Fixed-point format: 3 decimal places -> SCALE = 1000.
 	static constexpr Underlying SCALE = 1000;
 	static constexpr int NUM_DECIMAL_DIGITS = 3;
 
+public:
+	// Create from integer value.
+	static constexpr CFixed FromInt(int Value) { return FromRaw(Value * SCALE); }
+
 	// Runtime parse from C-string (strict: only [-]123 or [-]123.456, no spaces/suffixes/inf/nan).
-	static bool FromStr(const char *pStr, CFixedPointNumber &Out);
+	static bool FromStr(const char *pStr, CFixed &Out);
 
 	// Compile-time parse for string literals.
 	template<size_t N>
-	static consteval CFixedPointNumber FromLiteral(const char (&Lit)[N])
+	static consteval CFixed FromLiteral(const char (&Lit)[N])
 	{
-		Underlying V{};
+		Underlying V = 0;
 		if(!ParseLiteral(Lit, N, V))
 		{
-			return CFixedPointNumber(0);
+			return CFixed(0);
 		}
 		return FromRaw(V);
 	}
 
-	// Convert to C-string. Returns a pointer to a thread_local buffer.
-	const char *AsStr() const;
+	// Convert to C-string. Writes to the provided buffer.
+	void AsStr(char *pBuffer, size_t BufferSize) const;
 
-	// Raw access and conversions.
-	static constexpr CFixedPointNumber FromRaw(const Underlying V) { return CFixedPointNumber(V); }
-	constexpr bool IsZero() const { return m_Value == 0; }
+	// Conversions.
+	[[nodiscard]] constexpr bool IsZero() const { return m_Value == 0; }
 	constexpr explicit operator float() const { return static_cast<float>(m_Value) / static_cast<float>(SCALE); }
 
 	// Comparisons.
-	constexpr bool operator==(const CFixedPointNumber &O) const { return m_Value == O.m_Value; }
-	constexpr bool operator!=(const CFixedPointNumber &O) const { return m_Value != O.m_Value; }
-	constexpr bool operator<(const CFixedPointNumber &O) const { return m_Value < O.m_Value; }
-	constexpr bool operator<=(const CFixedPointNumber &O) const { return m_Value <= O.m_Value; }
-	constexpr bool operator>(const CFixedPointNumber &O) const { return m_Value > O.m_Value; }
-	constexpr bool operator>=(const CFixedPointNumber &O) const { return m_Value >= O.m_Value; }
+	constexpr bool operator==(const CFixed &O) const { return m_Value == O.m_Value; }
+	constexpr bool operator!=(const CFixed &O) const { return m_Value != O.m_Value; }
+	constexpr bool operator<(const CFixed &O) const { return m_Value < O.m_Value; }
+	constexpr bool operator<=(const CFixed &O) const { return m_Value <= O.m_Value; }
+	constexpr bool operator>(const CFixed &O) const { return m_Value > O.m_Value; }
+	constexpr bool operator>=(const CFixed &O) const { return m_Value >= O.m_Value; }
 
-	constexpr CFixedPointNumber() = default;
+	constexpr CFixed() = default;
 
 private:
 	Underlying m_Value;
 
-	constexpr explicit CFixedPointNumber(const Underlying V) :
+	constexpr explicit CFixed(const Underlying V) :
 		m_Value(V) {}
+
+	// Raw access.
+	static constexpr CFixed FromRaw(const Underlying V) { return CFixed(V); }
 
 	// Runtime parsing entry.
 	static bool ParseRuntime(const char *p, Underlying &Out);
 
+	// Helper functions for parsing.
+	static bool AccumWholeProtect(Underlying &Whole, int Digit);
+	static int RoundFrac3(int Frac, int FirstDroppedDigit);
+
 	// Compile-time literal parsing (fully defined here).
 	static consteval bool ParseLiteral(const char *p, const size_t N, Underlying &Out)
 	{
-		// Minimal constexpr helpers.
-		auto IsDigit = [](const char C) consteval { return C >= '0' && C <= '9'; };
-
-		if(N == 0)
+		if(N <= 1)
 			return false;
 
 		const char *Cur = p;
-		const char *End = p + (N > 0 ? N - 1 : 0); // Exclude the trailing '\0'.
+		const char *End = p + (N - 1); // Exclude the trailing '\0'.
 		if(Cur == End)
 			return false;
 
 		// Sign.
 		bool Neg = false;
-		if(*Cur == '+' || *Cur == '-')
+		if(Cur < End && (*Cur == '+' || *Cur == '-'))
 		{
 			Neg = (*Cur == '-');
 			++Cur;
+			if(Cur == End) // Just a sign with no digits
+				return false;
 		}
-		if(Cur == End)
-			return false;
 
 		// Whole part.
 		Underlying Whole = 0;
 		int DigitsWhole = 0;
-		while(Cur < End && IsDigit(*Cur))
+		while(Cur < End && (*Cur >= '0' && *Cur <= '9'))
 		{
 			const int Digit = *Cur - '0';
 			using U = Underlying;
@@ -94,8 +100,6 @@ private:
 			++Cur;
 			++DigitsWhole;
 		}
-		if(DigitsWhole == 0 && (Cur >= End || *Cur != '.'))
-			return false;
 
 		// Fractional part.
 		int Frac = 0;
@@ -104,15 +108,7 @@ private:
 		if(Cur < End && *Cur == '.')
 		{
 			++Cur;
-			if(Cur == End)
-			{
-				// Allowed: "123." -> no fractional digits, treated as integer.
-			}
-			else if(!IsDigit(*Cur))
-			{
-				return false;
-			}
-			while(Cur < End && IsDigit(*Cur))
+			while(Cur < End && (*Cur >= '0' && *Cur <= '9'))
 			{
 				const int D = *Cur - '0';
 				if(FracDigits < NUM_DECIMAL_DIGITS)
@@ -128,7 +124,11 @@ private:
 			}
 		}
 
-		// Must end exactly at End.
+		// Validation: must have at least one digit (whole or fractional)
+		if(DigitsWhole == 0 && FracDigits == 0)
+			return false;
+
+		// Must have consumed entire string
 		if(Cur != End)
 			return false;
 
@@ -170,4 +170,4 @@ private:
 	}
 };
 
-#endif // ENGINE_SHARED_FIXED_POINT_NUMBER_H
+#endif // BASE_FIXED_H

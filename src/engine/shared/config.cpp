@@ -109,9 +109,9 @@ void SIntConfigVariable::ResetToOld()
 
 // -----
 
-void SFloatConfigVariable::CommandCallback(IConsole::IResult *pResult, void *pUserData)
+void SFixedConfigVariable::CommandCallback(IConsole::IResult *pResult, void *pUserData)
 {
-	SFloatConfigVariable *pData = static_cast<SFloatConfigVariable *>(pUserData);
+	SFixedConfigVariable *pData = static_cast<SFixedConfigVariable *>(pUserData);
 
 	if(pResult->NumArguments())
 	{
@@ -119,14 +119,14 @@ void SFloatConfigVariable::CommandCallback(IConsole::IResult *pResult, void *pUs
 			return;
 
 		const char *pArg = pResult->GetString(0);
-		CFixedPointNumber ParsedValue;
-		if(!CFixedPointNumber::FromStr(pArg, ParsedValue))
+		CFixed ParsedValue;
+		if(!CFixed::FromStr(pArg, ParsedValue))
 		{
 			pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "config", "Invalid value: not a decimal number ignored");
 			return;
 		}
 
-		CFixedPointNumber Value = ParsedValue;
+		CFixed Value = ParsedValue;
 
 		if(pData->m_Min != pData->m_Max)
 		{
@@ -142,33 +142,37 @@ void SFloatConfigVariable::CommandCallback(IConsole::IResult *pResult, void *pUs
 	}
 	else
 	{
-		char aBuf[32];
-		str_format(aBuf, sizeof(aBuf), "Value: %s", pData->m_pVariable->AsStr());
+		char aValueStr[32];
+		pData->m_pVariable->AsStr(aValueStr, sizeof(aValueStr));
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "Value: %s", aValueStr);
 		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "config", aBuf);
 	}
 }
 
-void SFloatConfigVariable::Register()
+void SFixedConfigVariable::Register()
 {
 	m_pConsole->Register(m_pScriptName, "?s", m_Flags, CommandCallback, this, m_pHelp);
 }
 
-bool SFloatConfigVariable::IsDefault() const
+bool SFixedConfigVariable::IsDefault() const
 {
 	return *m_pVariable == m_Default;
 }
 
-void SFloatConfigVariable::Serialize(char *pOut, size_t Size, const CFixedPointNumber &Value) const
+void SFixedConfigVariable::Serialize(char *pOut, size_t Size, const CFixed &Value) const
 {
-	str_format(pOut, Size, "%s %s", m_pScriptName, Value.AsStr());
+	char aValueStr[32];
+	Value.AsStr(aValueStr, sizeof(aValueStr));
+	str_format(pOut, Size, "%s %s", m_pScriptName, aValueStr);
 }
 
-void SFloatConfigVariable::Serialize(char *pOut, size_t Size) const
+void SFixedConfigVariable::Serialize(char *pOut, size_t Size) const
 {
 	Serialize(pOut, Size, *m_pVariable);
 }
 
-void SFloatConfigVariable::SetValue(const CFixedPointNumber &Value)
+void SFixedConfigVariable::SetValue(const CFixed &Value)
 {
 	if(CheckReadOnly())
 		return;
@@ -177,12 +181,12 @@ void SFloatConfigVariable::SetValue(const CFixedPointNumber &Value)
 	ExecuteLine(aBuf);
 }
 
-void SFloatConfigVariable::ResetToDefault()
+void SFixedConfigVariable::ResetToDefault()
 {
 	SetValue(m_Default);
 }
 
-void SFloatConfigVariable::ResetToOld()
+void SFixedConfigVariable::ResetToOld()
 {
 	*m_pVariable = m_OldValue;
 }
@@ -397,13 +401,13 @@ void CConfigManager::Init()
 		AddVariable(m_ConfigHeap.Allocate<SStringConfigVariable>(m_pConsole, #ScriptName, SConfigVariable::VAR_STRING, Flags, pHelp, g_Config.m_##Name, Def, Len, pOldValue)); \
 	}
 
-#define MACRO_CONFIG_FLOAT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
+#define MACRO_CONFIG_FIXED(Name, ScriptName, Def, Min, Max, Flags, Desc) \
 	{ \
-		const CFixedPointNumber DefaultValue = CFixedPointNumber::FromLiteral(#Def); \
-		const CFixedPointNumber MinValue = CFixedPointNumber::FromLiteral(#Min); \
-		const CFixedPointNumber MaxValue = CFixedPointNumber::FromLiteral(#Max); \
+		const CFixed DefaultValue = CFixed::FromLiteral(#Def); \
+		const CFixed MinValue = CFixed::FromLiteral(#Min); \
+		const CFixed MaxValue = CFixed::FromLiteral(#Max); \
 		const char *pHelp = MinValue == MaxValue ? Desc " (default: " #Def ")" : (MaxValue.IsZero() ? Desc " (default: " #Def ", min: " #Min ")" : Desc " (default: " #Def ", min: " #Min ", max: " #Max ")"); \
-		AddVariable(m_ConfigHeap.Allocate<SFloatConfigVariable>(m_pConsole, #ScriptName, SConfigVariable::VAR_FLOAT, Flags, pHelp, &g_Config.m_##Name, DefaultValue, MinValue, MaxValue)); \
+		AddVariable(m_ConfigHeap.Allocate<SFixedConfigVariable>(m_pConsole, #ScriptName, SConfigVariable::VAR_FIXED, Flags, pHelp, &g_Config.m_##Name, DefaultValue, MinValue, MaxValue)); \
 	}
 
 #include "config_variables.h"
@@ -591,18 +595,18 @@ void CConfigManager::Con_Toggle(IConsole::IResult *pResult, void *pUserData)
 			const bool EqualToFirst = *pIntVariable->m_pVariable == pResult->GetInteger(1);
 			pIntVariable->SetValue(pResult->GetInteger(EqualToFirst ? 2 : 1));
 		}
-		else if(pVariable->m_Type == SConfigVariable::VAR_FLOAT)
+		else if(pVariable->m_Type == SConfigVariable::VAR_FIXED)
 		{
-			SFloatConfigVariable *pFloatVariable = static_cast<SFloatConfigVariable *>(pVariable);
-			CFixedPointNumber FirstValue;
-			CFixedPointNumber SecondValue;
-			if(!CFixedPointNumber::FromStr(pResult->GetString(1), FirstValue) || !CFixedPointNumber::FromStr(pResult->GetString(2), SecondValue))
+			SFixedConfigVariable *pFixedVariable = static_cast<SFixedConfigVariable *>(pVariable);
+			CFixed FirstValue;
+			CFixed SecondValue;
+			if(!CFixed::FromStr(pResult->GetString(1), FirstValue) || !CFixed::FromStr(pResult->GetString(2), SecondValue))
 			{
 				pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "config", "Invalid decimal number for toggle command.");
 				return;
 			}
-			const bool EqualToFirst = *pFloatVariable->m_pVariable == FirstValue;
-			pFloatVariable->SetValue(EqualToFirst ? SecondValue : FirstValue);
+			const bool EqualToFirst = *pFixedVariable->m_pVariable == FirstValue;
+			pFixedVariable->SetValue(EqualToFirst ? SecondValue : FirstValue);
 		}
 		else if(pVariable->m_Type == SConfigVariable::VAR_COLOR)
 		{
@@ -642,17 +646,17 @@ void CConfigManager::Con_ToggleStroke(IConsole::IResult *pResult, void *pUserDat
 			pIntVariable->SetValue(pResult->GetInteger(0) == 0 ? pResult->GetInteger(3) : pResult->GetInteger(2));
 			return;
 		}
-		if(pVariable->m_Type == SConfigVariable::VAR_FLOAT)
+		if(pVariable->m_Type == SConfigVariable::VAR_FIXED)
 		{
-			SFloatConfigVariable *pFloatVariable = static_cast<SFloatConfigVariable *>(pVariable);
-			CFixedPointNumber FirstValue;
-			CFixedPointNumber SecondValue;
-			if(!CFixedPointNumber::FromStr(pResult->GetString(2), FirstValue) || !CFixedPointNumber::FromStr(pResult->GetString(3), SecondValue))
+			SFixedConfigVariable *pFixedVariable = static_cast<SFixedConfigVariable *>(pVariable);
+			CFixed FirstValue;
+			CFixed SecondValue;
+			if(!CFixed::FromStr(pResult->GetString(2), FirstValue) || !CFixed::FromStr(pResult->GetString(3), SecondValue))
 			{
 				pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "config", "Invalid decimal number for toggle command.");
 				return;
 			}
-			pFloatVariable->SetValue(pResult->GetInteger(0) == 0 ? SecondValue : FirstValue);
+			pFixedVariable->SetValue(pResult->GetInteger(0) == 0 ? SecondValue : FirstValue);
 			return;
 		}
 	}

@@ -1995,6 +1995,8 @@ set_src(BASE GLOB_RECURSE src/base
   crashdump.cpp
   detect.h
   dynamic.h
+  fixed.cpp
+  fixed.h
   fs.cpp
   fs.h
   hash.cpp
@@ -2080,8 +2082,6 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   fifo.h
   filecollection.cpp
   filecollection.h
-  fixed_point_number.cpp
-  fixed_point_number.h
   global_uuid_manager.cpp
   host_lookup.cpp
   host_lookup.h
@@ -3039,6 +3039,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     csv.cpp
     datafile.cpp
     editor.cpp
+    fixed.cpp
     fs.cpp
     gameworld.cpp
     git_revision.cpp

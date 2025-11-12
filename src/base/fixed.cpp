@@ -1,4 +1,4 @@
-#include "fixed_point_number.h"
+#include "fixed.h"
 
 #include <charconv>
 #include <limits>
@@ -24,11 +24,13 @@ static void TrimTrailingZerosAfterDot(const char *Begin, char *&End)
 	*End = '\0';
 }
 
-const char *CFixedPointNumber::AsStr() const
+void CFixed::AsStr(char *pBuffer, size_t BufferSize) const
 {
-	// Sign + up to 10 digits + '.' + 3 fractional + NUL.
-	static thread_local char s_Buf[1 + 10 + 1 + NUM_DECIMAL_DIGITS + 1];
-	char *Dst = s_Buf;
+	if(!pBuffer || BufferSize == 0)
+		return;
+
+	char *Dst = pBuffer;
+	char *End = pBuffer + BufferSize;
 
 	Underlying Value = m_Value;
 	const bool Neg = Value < 0;
@@ -39,32 +41,48 @@ const char *CFixedPointNumber::AsStr() const
 	const Underlying Frac = Value % SCALE;
 
 	if(Neg)
+	{
+		if(Dst >= End - 1)
+		{
+			*pBuffer = '\0';
+			return;
+		}
 		*Dst++ = '-';
+	}
 
-	const auto ToChars = std::to_chars(Dst, s_Buf + sizeof(s_Buf), Whole);
+	const auto ToChars = std::to_chars(Dst, End, Whole);
 	if(ToChars.ec != std::errc())
 	{
-		*s_Buf = '\0';
-		return s_Buf;
+		*pBuffer = '\0';
+		return;
 	}
 	Dst = ToChars.ptr;
 
 	if(Frac != 0)
 	{
+		if(Dst >= End - 1)
+		{
+			*pBuffer = '\0';
+			return;
+		}
 		*Dst++ = '.';
+		if(Dst + NUM_DECIMAL_DIGITS >= End)
+		{
+			*pBuffer = '\0';
+			return;
+		}
 		WritePadded3(Dst, Frac);
-		TrimTrailingZerosAfterDot(s_Buf, Dst);
+		TrimTrailingZerosAfterDot(pBuffer, Dst);
 	}
 	else
 	{
 		*Dst = '\0';
 	}
-	return s_Buf;
 }
 
-static bool AccumWholeProtect(CFixedPointNumber::Underlying &Whole, const int Digit)
+bool CFixed::AccumWholeProtect(Underlying &Whole, int Digit)
 {
-	using U = CFixedPointNumber::Underlying;
+	using U = Underlying;
 	constexpr U MaxU = std::numeric_limits<U>::max();
 	if(Whole > (MaxU - Digit) / 10)
 		return false;
@@ -72,19 +90,19 @@ static bool AccumWholeProtect(CFixedPointNumber::Underlying &Whole, const int Di
 	return true;
 }
 
-static int RoundFrac3(int Frac, const int FirstDroppedDigit)
+int CFixed::RoundFrac3(int Frac, int FirstDroppedDigit)
 {
 	// Round by the first dropped digit.
 	if(FirstDroppedDigit >= 5)
 	{
 		Frac += 1;
-		if(Frac >= CFixedPointNumber::SCALE)
-			Frac = CFixedPointNumber::SCALE - 1;
+		if(Frac >= SCALE)
+			Frac = SCALE - 1;
 	}
 	return Frac;
 }
 
-bool CFixedPointNumber::ParseRuntime(const char *p, Underlying &Out)
+bool CFixed::ParseRuntime(const char *p, Underlying &Out)
 {
 	if(!p || *p == '\0')
 		return false;
@@ -117,8 +135,6 @@ bool CFixedPointNumber::ParseRuntime(const char *p, Underlying &Out)
 	if(*p == '.')
 	{
 		++p;
-		if(!(*p >= '0' && *p <= '9') && *p != '\0')
-			return false;
 		while(*p && (*p >= '0' && *p <= '9'))
 		{
 			const int D = *p - '0';
@@ -134,6 +150,10 @@ bool CFixedPointNumber::ParseRuntime(const char *p, Underlying &Out)
 			++p;
 		}
 	}
+
+	// Validation: must have at least one digit (whole or fractional)
+	if(DigitsWhole == 0 && FracDigits == 0)
+		return false;
 
 	if(FracDigits == 0)
 	{
@@ -168,7 +188,7 @@ bool CFixedPointNumber::ParseRuntime(const char *p, Underlying &Out)
 	return true;
 }
 
-bool CFixedPointNumber::FromStr(const char *pStr, CFixedPointNumber &Out)
+bool CFixed::FromStr(const char *pStr, CFixed &Out)
 {
 	Underlying V{};
 	if(!ParseRuntime(pStr, V))

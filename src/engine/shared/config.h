@@ -4,10 +4,10 @@
 #define ENGINE_SHARED_CONFIG_H
 
 #include <base/detect.h>
+#include <base/fixed.h>
 
 #include <engine/config.h>
 #include <engine/console.h>
-#include <engine/shared/fixed_point_number.h>
 #include <engine/shared/memheap.h>
 
 #include <vector>
@@ -28,9 +28,9 @@ public:
 #define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
 	static constexpr int ms_##Name = Def; \
 	int m_##Name;
-#define MACRO_CONFIG_FLOAT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
-	static constexpr CFixedPointNumber ms_##Name = CFixedPointNumber::FromLiteral(#Def); \
-	CFixedPointNumber m_##Name;
+#define MACRO_CONFIG_FIXED(Name, ScriptName, Def, Min, Max, Flags, Desc) \
+	static constexpr CFixed ms_##Name = CFixed::FromLiteral(#Def); \
+	CFixed m_##Name;
 #define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) \
 	static constexpr unsigned ms_##Name = Def; \
 	unsigned m_##Name;
@@ -39,7 +39,7 @@ public:
 	char m_##Name[Len]; // Flawfinder: ignore
 #include "config_variables.h"
 #undef MACRO_CONFIG_INT
-#undef MACRO_CONFIG_FLOAT
+#undef MACRO_CONFIG_FIXED
 #undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR
 };
@@ -72,7 +72,7 @@ struct SConfigVariable
 	enum EVariableType
 	{
 		VAR_INT,
-		VAR_FLOAT,
+		VAR_FIXED,
 		VAR_COLOR,
 		VAR_STRING,
 	};
@@ -138,15 +138,15 @@ struct SIntConfigVariable : public SConfigVariable
 	void ResetToOld() override;
 };
 
-struct SFloatConfigVariable : public SConfigVariable
+struct SFixedConfigVariable : public SConfigVariable
 {
-	CFixedPointNumber *m_pVariable;
-	CFixedPointNumber m_Default;
-	CFixedPointNumber m_Min;
-	CFixedPointNumber m_Max;
-	CFixedPointNumber m_OldValue;
+	CFixed *m_pVariable;
+	CFixed m_Default;
+	CFixed m_Min;
+	CFixed m_Max;
+	CFixed m_OldValue;
 
-	SFloatConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, CFixedPointNumber *pVariable, CFixedPointNumber Default, CFixedPointNumber Min, CFixedPointNumber Max) :
+	SFixedConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, CFixed *pVariable, CFixed Default, CFixed Min, CFixed Max) :
 		SConfigVariable(pConsole, pScriptName, Type, Flags, pHelp),
 		m_pVariable(pVariable),
 		m_Default(Default),
@@ -157,14 +157,14 @@ struct SFloatConfigVariable : public SConfigVariable
 		*m_pVariable = m_Default;
 	}
 
-	~SFloatConfigVariable() override = default;
+	~SFixedConfigVariable() override = default;
 
 	static void CommandCallback(IConsole::IResult *pResult, void *pUserData);
 	void Register() override;
 	bool IsDefault() const override;
-	void Serialize(char *pOut, size_t Size, const CFixedPointNumber &Value) const;
+	void Serialize(char *pOut, size_t Size, const CFixed &Value) const;
 	void Serialize(char *pOut, size_t Size) const override;
-	void SetValue(const CFixedPointNumber &Value);
+	void SetValue(const CFixed &Value);
 	void ResetToDefault() override;
 	void ResetToOld() override;
 };
