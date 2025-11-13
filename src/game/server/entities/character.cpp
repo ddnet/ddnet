@@ -1250,31 +1250,7 @@ void CCharacter::Snap(int SnappingClient)
 
 	// translate id, if we are not in the map of the other person display us as weapon and our hook as a laser
 	if(SnappingClient > -1 && !Server()->Translate(Id, SnappingClient))
-	{
-		int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
-		bool Sixup = Server()->IsSixup(SnappingClient);
-		int Subtype = GetActiveWeapon();
-		int SnapId = m_aUntranslatedId[EUntranslatedMap::ID_WEAPON];
-		int Type = Subtype == WEAPON_NINJA ? POWERUP_NINJA : POWERUP_WEAPON;
-		int Number = 0;
-		int PickupFlags = 0;
-		CSnapContext SnapContext = CSnapContext(SnappingClientVersion, Sixup, -1);
-		GameServer()->SnapPickup(SnapContext, SnapId, m_Pos, Type, Subtype, Number, PickupFlags);
-
-		if(m_Core.m_HookState != HOOK_IDLE && m_Core.m_HookState != HOOK_RETRACTED)
-		{
-			CNetObj_Laser *pLaser = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_aUntranslatedId[EUntranslatedMap::ID_HOOK], sizeof(CNetObj_Laser)));
-			if(!pLaser)
-				return;
-
-			pLaser->m_X = round_to_int(m_Core.m_HookPos.x);
-			pLaser->m_Y = round_to_int(m_Core.m_HookPos.y);
-			pLaser->m_FromX = round_to_int(m_Pos.x);
-			pLaser->m_FromY = round_to_int(m_Pos.y);
-			pLaser->m_StartTick = Server()->Tick() - 3;
-		}
 		return;
-	}
 
 	// otherwise show our normal tee and send ddnet character stuff
 	SnapCharacter(SnappingClient, Id);
