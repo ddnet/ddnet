@@ -56,7 +56,6 @@ public:
 	void SetJumps(int Jumps);
 	void SetSolo(bool Solo);
 	void SetSuper(bool Super);
-	void SetInvincible(bool Invincible);
 	void SetLiveFrozen(bool Active);
 	void SetDeepFrozen(bool Active);
 	void HandleWeaponSwitch();
@@ -205,7 +204,6 @@ public:
 	bool SameTeam(int ClientId);
 	void StopRecording();
 	bool m_NinjaJetpack;
-	int m_TeamBeforeSuper;
 	int m_FreezeTime;
 	bool m_FrozenLastTick;
 	int m_TuneZone;
@@ -267,8 +265,8 @@ public:
 	bool LaserHitDisabled() const { return m_Core.m_LaserHitDisabled; }
 	bool GrenadeHitDisabled() const { return m_Core.m_GrenadeHitDisabled; }
 
-	bool IsSuper() const { return m_Core.m_Super; }
-
+	//bool IsInvincible() const { return m_Core.m_Invincible; }
+	bool IsSuper() const { return/* m_Core.m_Super && */m_Core.m_Invincible; }
 	CSaveTee &GetLastRescueTeeRef(int Mode = RESCUEMODE_AUTO) { return m_RescueTee[Mode]; }
 	CTuningParams *GetTuning(int Zone) { return &TuningList()[Zone]; }
 };

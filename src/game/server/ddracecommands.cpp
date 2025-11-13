@@ -138,37 +138,12 @@ void CGameContext::ConUnEndlessHook(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
-void CGameContext::ConSuper(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientId(pResult->m_ClientId))
-		return;
-	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
-	if(pChr && !pChr->IsSuper())
-	{
-		pChr->SetSuper(true);
-		pChr->UnFreeze();
-	}
-}
-
-void CGameContext::ConUnSuper(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientId(pResult->m_ClientId))
-		return;
-	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
-	if(pChr && pChr->IsSuper())
-	{
-		pChr->SetSuper(false);
-	}
-}
-
-void CGameContext::ConToggleInvincible(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConToggleSuper(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
 	if(pChr)
-		pChr->SetInvincible(pResult->NumArguments() == 0 ? !pChr->Core()->m_Invincible : pResult->GetInteger(0));
+		pChr->SetSuper(pResult->NumArguments() == 0 ? !pChr->IsSuper() : pResult->GetInteger(0));
 }
 
 void CGameContext::ConSolo(IConsole::IResult *pResult, void *pUserData)
@@ -523,7 +498,7 @@ void CGameContext::ConSetDDRTeam(IConsole::IResult *pResult, void *pUserData)
 	int Target = pResult->GetVictim();
 	int Team = pResult->GetInteger(1);
 
-	if(Team < TEAM_FLOCK || Team >= TEAM_SUPER)
+	if(!pController->Teams().IsValidTeamNumber(Team))
 		return;
 
 	CCharacter *pChr = pSelf->GetPlayerChar(Target);

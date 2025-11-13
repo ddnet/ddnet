@@ -137,11 +137,11 @@ enum
 
 struct SSwitchers
 {
-	bool m_aStatus[NUM_DDRACE_TEAMS];
+	bool m_aStatus[NUM_ALL_TEAMS];
 	bool m_Initial;
-	int m_aEndTick[NUM_DDRACE_TEAMS];
-	int m_aType[NUM_DDRACE_TEAMS];
-	int m_aLastUpdateTick[NUM_DDRACE_TEAMS];
+	int m_aEndTick[NUM_ALL_TEAMS];
+	int m_aType[NUM_ALL_TEAMS];
+	int m_aLastUpdateTick[NUM_ALL_TEAMS];
 };
 
 class CWorldCore
