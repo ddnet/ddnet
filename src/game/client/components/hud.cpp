@@ -1544,6 +1544,9 @@ void CHud::RenderMovementInformation()
 
 void CHud::RenderSpectatorHud()
 {
+	if(!g_Config.m_ClShowhudSpectator)
+		return;
+
 	// draw the box
 	Graphics()->DrawRect(m_Width - 180.0f, m_Height - 15.0f, 180.0f, 15.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_TL, 5.0f);
 
