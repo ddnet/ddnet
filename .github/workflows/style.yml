@@ -77,7 +77,7 @@ jobs:
       run: scripts/check_unused_header_files.py
 
     - name: Check standard header includes
-      run: scripts/check_standard_headers.sh
+      run: scripts/check_standard_headers.py
 
     - name: Check absolute includes
       run: "! grep --exclude-dir rust-bridge -rE '^#include \"(antibot|base|engine|game|steam|test)/' src/"
