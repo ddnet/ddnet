@@ -6,6 +6,7 @@ extend-exclude = [
 	"data/languages",
 	"data/skins",
 	"ddnet-libs",
+	"other/icons/*.icns",
 	"memcheck.supp",
 	"scripts/android/files/res",
 	"src/engine/external",
