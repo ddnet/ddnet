@@ -2406,6 +2406,54 @@ void CGameContext::ConPracticeToggleInvincible(IConsole::IResult *pResult, void 
 		ConToggleInvincible(pResult, pUserData);
 }
 
+void CGameContext::ConPracticeToggleCollision(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	auto *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+
+	pChr->SetCollisionDisabled(!pChr->Core()->m_CollisionDisabled);
+}
+
+void CGameContext::ConPracticeToggleHookCollision(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	auto *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+
+	pChr->SetHookHitDisabled(!pChr->Core()->m_HookHitDisabled);
+}
+
+void CGameContext::ConPracticeToggleHitOthers(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	auto *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+
+	if(pResult->NumArguments() == 0 || str_comp(pResult->GetString(0), "all") == 0)
+	{
+		bool IsEnabled = (pChr->HammerHitDisabled() && pChr->ShotgunHitDisabled() &&
+				  pChr->GrenadeHitDisabled() && pChr->LaserHitDisabled());
+		pChr->SetHammerHitDisabled(!IsEnabled);
+		pChr->SetShotgunHitDisabled(!IsEnabled);
+		pChr->SetGrenadeHitDisabled(!IsEnabled);
+		pChr->SetLaserHitDisabled(!IsEnabled);
+		return;
+	}
+
+	if(str_comp(pResult->GetString(0), "hammer") == 0)
+		pChr->SetHammerHitDisabled(!pChr->HammerHitDisabled());
+	else if(str_comp(pResult->GetString(0), "shotgun") == 0)
+		pChr->SetShotgunHitDisabled(!pChr->ShotgunHitDisabled());
+	else if(str_comp(pResult->GetString(0), "grenade") == 0)
+		pChr->SetGrenadeHitDisabled(!pChr->GrenadeHitDisabled());
+	else if(str_comp(pResult->GetString(0), "laser") == 0)
+		pChr->SetLaserHitDisabled(!pChr->LaserHitDisabled());
+}
+
 void CGameContext::ConPracticeAddWeapon(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
