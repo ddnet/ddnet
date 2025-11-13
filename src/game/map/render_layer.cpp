@@ -726,21 +726,18 @@ void CRenderLayerTile::UploadTileData(std::optional<CTileLayerVisuals> &VisualsO
 	}
 
 	// shrink clip region
-	if(CurOverlay == 0)
+	if(DrawLeft > DrawRight || DrawTop > DrawBottom)
 	{
-		if(DrawLeft > DrawRight || DrawTop > DrawBottom)
-		{
-			// we are drawing nothing, layer is empty
-			m_LayerClip->m_Height = 0.0f;
-			m_LayerClip->m_Width = 0.0f;
-		}
-		else
-		{
-			m_LayerClip->m_X = DrawLeft * 32.0f;
-			m_LayerClip->m_Y = DrawTop * 32.0f;
-			m_LayerClip->m_Width = (DrawRight - DrawLeft + 1) * 32.0f;
-			m_LayerClip->m_Height = (DrawBottom - DrawTop + 1) * 32.0f;
-		}
+		// we are drawing nothing, layer is empty
+		m_LayerClip->m_Height = 0.0f;
+		m_LayerClip->m_Width = 0.0f;
+	}
+	else
+	{
+		m_LayerClip->m_X = DrawLeft * 32.0f;
+		m_LayerClip->m_Y = DrawTop * 32.0f;
+		m_LayerClip->m_Width = (DrawRight - DrawLeft + 1) * 32.0f;
+		m_LayerClip->m_Height = (DrawBottom - DrawTop + 1) * 32.0f;
 	}
 
 	// append one kill tile to the gamelayer
