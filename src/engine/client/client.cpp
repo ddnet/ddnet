@@ -502,7 +502,6 @@ void CClient::OnPostConnect(int Conn, bool Dummy)
 	if(!m_ServerCapabilities.m_ChatTimeoutCode)
 		return;
 
-	char aBuf[128];
 	char aBufMsg[256];
 	if(!g_Config.m_ClRunOnJoin[0] && !g_Config.m_ClDummyDefaultEyes && !g_Config.m_ClPlayerDefaultEyes)
 		str_format(aBufMsg, sizeof(aBufMsg), "/timeout %s", m_aTimeoutCodes[Conn]);
@@ -512,38 +511,28 @@ void CClient::OnPostConnect(int Conn, bool Dummy)
 	if(g_Config.m_ClDummyDefaultEyes || g_Config.m_ClPlayerDefaultEyes)
 	{
 		int Emote = ((g_Config.m_ClDummy) ? !Dummy : Dummy) ? g_Config.m_ClDummyDefaultEyes : g_Config.m_ClPlayerDefaultEyes;
-		char aBufEmote[128];
-		aBufEmote[0] = '\0';
-		switch(Emote)
+
+		if(Emote != EMOTE_NORMAL)
 		{
-		case EMOTE_NORMAL:
-			break;
-		case EMOTE_PAIN:
-			str_format(aBufEmote, sizeof(aBufEmote), "emote pain %d", g_Config.m_ClEyeDuration);
-			break;
-		case EMOTE_HAPPY:
-			str_format(aBufEmote, sizeof(aBufEmote), "emote happy %d", g_Config.m_ClEyeDuration);
-			break;
-		case EMOTE_SURPRISE:
-			str_format(aBufEmote, sizeof(aBufEmote), "emote surprise %d", g_Config.m_ClEyeDuration);
-			break;
-		case EMOTE_ANGRY:
-			str_format(aBufEmote, sizeof(aBufEmote), "emote angry %d", g_Config.m_ClEyeDuration);
-			break;
-		case EMOTE_BLINK:
-			str_format(aBufEmote, sizeof(aBufEmote), "emote blink %d", g_Config.m_ClEyeDuration);
-			break;
-		}
-		if(aBufEmote[0])
-		{
-			str_format(aBuf, sizeof(aBuf), ";%s", aBufEmote);
+			char aBuf[16];
+			static const char *s_EMOTE_NAMES[] = {
+				"pain",
+				"happy",
+				"surprise",
+				"angry",
+				"blink",
+			};
+			static_assert(std::size(s_EMOTE_NAMES) == NUM_EMOTES - 1, "The size of EMOTE_NAMES must match NUM_EMOTES - 1");
+
+			str_append(aBufMsg, ";");
+			str_format(aBuf, sizeof(aBuf), "emote %s %d", s_EMOTE_NAMES[Emote], g_Config.m_ClEyeDuration);
 			str_append(aBufMsg, aBuf);
 		}
 	}
 	if(g_Config.m_ClRunOnJoin[0])
 	{
-		str_format(aBuf, sizeof(aBuf), ";%s", g_Config.m_ClRunOnJoin);
-		str_append(aBufMsg, aBuf);
+		str_append(aBufMsg, ";");
+		str_append(aBufMsg, g_Config.m_ClRunOnJoin);
 	}
 	if(IsSixup())
 	{
