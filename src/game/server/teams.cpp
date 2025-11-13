@@ -48,8 +48,7 @@ void CGameTeams::Reset()
 void CGameTeams::ResetRoundState(int Team)
 {
 	ResetInvited(Team);
-	if(Team != TEAM_SUPER)
-		ResetSwitchers(Team);
+	ResetSwitchers(Team);
 
 	if(!m_pGameContext->PracticeByDefault())
 		m_aPractice[Team] = false;
@@ -86,7 +85,7 @@ void CGameTeams::OnCharacterStart(int ClientId)
 	if((g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO || (m_Core.Team(ClientId) != TEAM_FLOCK && !m_aTeamFlock[m_Core.Team(ClientId)])) && pStartingChar->m_DDRaceState == ERaceState::FINISHED)
 		return;
 	if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO &&
-		(m_Core.Team(ClientId) == TEAM_FLOCK || TeamFlock(m_Core.Team(ClientId)) || m_Core.Team(ClientId) == TEAM_SUPER))
+		(m_Core.Team(ClientId) == TEAM_FLOCK || TeamFlock(m_Core.Team(ClientId))))
 	{
 		if(TeamFlock(m_Core.Team(ClientId)) && (m_aTeamState[m_Core.Team(ClientId)] < ETeamState::STARTED))
 			ChangeTeamState(m_Core.Team(ClientId), ETeamState::STARTED);
@@ -195,7 +194,7 @@ void CGameTeams::OnCharacterStart(int ClientId)
 
 void CGameTeams::OnCharacterFinish(int ClientId)
 {
-	if(((m_Core.Team(ClientId) == TEAM_FLOCK || m_aTeamFlock[m_Core.Team(ClientId)]) && g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO) || m_Core.Team(ClientId) == TEAM_SUPER)
+	if(((m_Core.Team(ClientId) == TEAM_FLOCK || m_aTeamFlock[m_Core.Team(ClientId)]) && g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO))
 	{
 		CPlayer *pPlayer = GetPlayer(ClientId);
 		if(pPlayer && pPlayer->IsPlaying())
@@ -236,7 +235,7 @@ void CGameTeams::Tick()
 		}
 	}
 
-	for(int i = 0; i < TEAM_SUPER; i++)
+	for(int i = 0; i < NUM_DDRACE_TEAMS; i++)
 	{
 		if(m_aTeamUnfinishableKillTick[i] == -1 || m_aTeamState[i] != ETeamState::STARTED_UNFINISHABLE)
 		{
@@ -390,12 +389,12 @@ bool CGameTeams::CanJoinTeam(int ClientId, int Team, char *pError, int ErrorSize
 		str_format(pError, ErrorSize, "Invalid client ID: %d", ClientId);
 		return false;
 	}
-	if(!IsValidTeamNumber(Team) && Team != TEAM_SUPER)
+	if(!IsValidTeamNumber(Team))
 	{
 		str_format(pError, ErrorSize, "Invalid team number: %d", Team);
 		return false;
 	}
-	if(Team != TEAM_SUPER && m_aTeamState[Team] > ETeamState::OPEN && !m_aPractice[Team] && !m_aTeamFlock[Team])
+	if(m_aTeamState[Team] > ETeamState::OPEN && !m_aPractice[Team] && !m_aTeamFlock[Team])
 	{
 		str_copy(pError, "This team started already", ErrorSize);
 		return false;
@@ -410,12 +409,7 @@ bool CGameTeams::CanJoinTeam(int ClientId, int Team, char *pError, int ErrorSize
 		str_copy(pError, "You can't change teams while you are dead/a spectator.", ErrorSize);
 		return false;
 	}
-	if(Team == TEAM_SUPER && !Character(ClientId)->IsSuper())
-	{
-		str_copy(pError, "You can't join super team if you don't have super rights", ErrorSize);
-		return false;
-	}
-	if(Team != TEAM_SUPER && Character(ClientId)->m_DDRaceState != ERaceState::NONE && (m_aTeamState[CurrentTeam] < ETeamState::FINISHED || Team != 0))
+	if(Character(ClientId)->m_DDRaceState != ERaceState::NONE && (m_aTeamState[CurrentTeam] < ETeamState::FINISHED || Team != 0))
 	{
 		str_copy(pError, "You have started racing already", ErrorSize);
 		return false;
@@ -429,12 +423,12 @@ bool CGameTeams::CanJoinTeam(int ClientId, int Team, char *pError, int ErrorSize
 
 	// you can not join a team which is currently in the process of saving,
 	// because the save-process can fail and then the team is reset into the game
-	if(Team != TEAM_SUPER && GetSaving(Team))
+	if(GetSaving(Team))
 	{
 		str_copy(pError, "This team is currently saving", ErrorSize);
 		return false;
 	}
-	if(CurrentTeam != TEAM_SUPER && GetSaving(CurrentTeam))
+	if(GetSaving(CurrentTeam))
 	{
 		str_copy(pError, "Your team is currently saving", ErrorSize);
 		return false;
@@ -458,7 +452,7 @@ void CGameTeams::SetForceCharacterTeam(int ClientId, int Team)
 	m_aTeeFinished[ClientId] = false;
 	int OldTeam = m_Core.Team(ClientId);
 
-	if(Team != OldTeam && (OldTeam != TEAM_FLOCK || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO) && OldTeam != TEAM_SUPER && m_aTeamState[OldTeam] != ETeamState::EMPTY)
+	if(Team != OldTeam && (OldTeam != TEAM_FLOCK || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO) && m_aTeamState[OldTeam] != ETeamState::EMPTY)
 	{
 		bool NoElseInOldTeam = Count(OldTeam) <= 1;
 		if(NoElseInOldTeam)
@@ -489,7 +483,7 @@ void CGameTeams::SetForceCharacterTeam(int ClientId, int Team)
 		m_pGameContext->m_World.RemoveEntitiesFromPlayer(ClientId);
 	}
 
-	if(Team != TEAM_SUPER && (m_aTeamState[Team] == ETeamState::EMPTY || (m_aTeamLocked[Team] && !m_aTeamFlock[Team])))
+	if(m_aTeamState[Team] == ETeamState::EMPTY || (m_aTeamLocked[Team] && !m_aTeamFlock[Team]))
 	{
 		if(!m_aTeamLocked[Team])
 			ChangeTeamState(Team, ETeamState::OPEN);
@@ -500,9 +494,6 @@ void CGameTeams::SetForceCharacterTeam(int ClientId, int Team)
 
 int CGameTeams::Count(int Team) const
 {
-	if(Team == TEAM_SUPER)
-		return -1;
-
 	int Count = 0;
 
 	for(int i = 0; i < MAX_CLIENTS; ++i)
@@ -556,13 +547,6 @@ bool CGameTeams::TeamFinished(int Team)
 
 CClientMask CGameTeams::TeamMask(int Team, int ExceptId, int Asker, int VersionFlags)
 {
-	if(Team == TEAM_SUPER)
-	{
-		if(ExceptId == -1)
-			return CClientMask().set();
-		return CClientMask().set().reset(ExceptId);
-	}
-
 	CClientMask Mask;
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
@@ -582,7 +566,7 @@ CClientMask CGameTeams::TeamMask(int Team, int ExceptId, int Asker, int VersionF
 					continue; // Player is currently dead
 				if(GetPlayer(i)->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM)
 				{
-					if(m_Core.Team(i) != Team && m_Core.Team(i) != TEAM_SUPER)
+					if(m_Core.Team(i) != Team)
 						continue; // In different teams
 				}
 				else if(GetPlayer(i)->m_ShowOthers == SHOW_OTHERS_OFF)
@@ -591,7 +575,7 @@ CClientMask CGameTeams::TeamMask(int Team, int ExceptId, int Asker, int VersionF
 						continue; // When in solo part don't show others
 					if(m_Core.GetSolo(i))
 						continue; // When in solo part don't show others
-					if(m_Core.Team(i) != Team && m_Core.Team(i) != TEAM_SUPER)
+					if(m_Core.Team(i) != Team)
 						continue; // In different teams
 				}
 			} // See everything of yourself
@@ -604,7 +588,7 @@ CClientMask CGameTeams::TeamMask(int Team, int ExceptId, int Asker, int VersionF
 					continue; // Player is currently dead
 				if(GetPlayer(i)->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM)
 				{
-					if(m_Core.Team(GetPlayer(i)->SpectatorId()) != Team && m_Core.Team(GetPlayer(i)->SpectatorId()) != TEAM_SUPER)
+					if(m_Core.Team(GetPlayer(i)->SpectatorId()) != Team)
 						continue; // In different teams
 				}
 				else if(GetPlayer(i)->m_ShowOthers == SHOW_OTHERS_OFF)
@@ -613,7 +597,7 @@ CClientMask CGameTeams::TeamMask(int Team, int ExceptId, int Asker, int VersionF
 						continue; // When in solo part don't show others
 					if(m_Core.GetSolo(GetPlayer(i)->SpectatorId()))
 						continue; // When in solo part don't show others
-					if(m_Core.Team(GetPlayer(i)->SpectatorId()) != Team && m_Core.Team(GetPlayer(i)->SpectatorId()) != TEAM_SUPER)
+					if(m_Core.Team(GetPlayer(i)->SpectatorId()) != Team)
 						continue; // In different teams
 				}
 			} // See everything of player you're spectating
@@ -622,7 +606,7 @@ CClientMask CGameTeams::TeamMask(int Team, int ExceptId, int Asker, int VersionF
 		{ // Freeview
 			if(GetPlayer(i)->m_SpecTeam)
 			{ // Show only players in own team when spectating
-				if(m_Core.Team(i) != Team && m_Core.Team(i) != TEAM_SUPER)
+				if(m_Core.Team(i) != Team)
 					continue; // in different teams
 			}
 		}
@@ -1207,7 +1191,7 @@ void CGameTeams::OnCharacterDeath(int ClientId, int Weapon)
 		return;
 	bool Locked = TeamLocked(Team) && Weapon != WEAPON_GAME;
 
-	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO && Team != TEAM_SUPER)
+	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
 	{
 		ChangeTeamState(Team, ETeamState::OPEN);
 		if(m_aPractice[Team])
@@ -1350,7 +1334,7 @@ void CGameTeams::ResetSavedTeam(int ClientId, int Team)
 
 std::optional<int> CGameTeams::GetFirstEmptyTeam() const
 {
-	for(int i = 1; i < TEAM_SUPER; i++)
+	for(int i = 1; i < NUM_DDRACE_TEAMS - 1; i++) // no TEAM_SUPER
 		if(m_aTeamState[i] == ETeamState::EMPTY)
 			return i;
 	return std::nullopt;

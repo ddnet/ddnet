@@ -65,12 +65,6 @@ bool CPlasma::HitCharacter(CCharacter *pTarget)
 		return false;
 	}
 
-	// Super player should not be able to stop the plasma bullets
-	if(pHitPlayer->Team() == TEAM_SUPER)
-	{
-		return false;
-	}
-
 	m_Freeze ? pHitPlayer->Freeze() : pHitPlayer->Unfreeze();
 	if(m_Explosive)
 	{

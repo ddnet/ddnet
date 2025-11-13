@@ -65,11 +65,6 @@ void CGun::Fire()
 	{
 		CCharacter *pTarget = static_cast<CCharacter *>(apPlayersInRange[i]);
 		const int &TargetTeam = pTarget->Team();
-		// Do not fire at super players
-		if(TargetTeam == TEAM_SUPER)
-		{
-			continue;
-		}
 		// If the turret is disabled for the target's team, the turret will not fire
 		if(m_Layer == LAYER_SWITCH && m_Number > 0 &&
 			!Switchers()[m_Number].m_aStatus[TargetTeam])

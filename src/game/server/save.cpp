@@ -490,8 +490,7 @@ bool CSaveTee::IsHooking() const
 void CSaveHotReloadTee::Save(CCharacter *pChr, bool AddPenalty)
 {
 	m_SaveTee.Save(pChr, AddPenalty);
-	m_Super = pChr->m_Core.m_Super;
-	m_Invincible = pChr->m_Core.m_Invincible;
+	m_Super = pChr->IsSuper();
 	m_SavedTeleTee = pChr->GetPlayer()->m_LastTeleTee;
 	m_LastDeath = pChr->GetPlayer()->m_LastDeath;
 }
@@ -499,8 +498,8 @@ void CSaveHotReloadTee::Save(CCharacter *pChr, bool AddPenalty)
 bool CSaveHotReloadTee::Load(CCharacter *pChr, int Team)
 {
 	bool Result = m_SaveTee.Load(pChr, Team);
-	pChr->SetSuper(m_Super);
-	pChr->m_Core.m_Invincible = m_Invincible;
+	pChr->m_Core.m_Invincible = m_Super;
+	pChr->m_Core.m_Super = m_Super; // separate because setter also sets endless jump
 	pChr->GetPlayer()->m_LastTeleTee = m_SavedTeleTee;
 	pChr->GetPlayer()->m_LastDeath = m_LastDeath;
 
