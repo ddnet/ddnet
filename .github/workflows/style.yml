@@ -25,7 +25,7 @@ jobs:
         sudo apt-get install ddnet-tools shellcheck tidy pkg-config cmake doxygen graphviz ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev python3-clang libvulkan-dev glslang-tools spirv-tools libglew-dev -y
         rustup default stable
         pip3 install pylint
-         wget https://github.com/muttleyxd/clang-tools-static-binaries/releases/download/master-796e77c/clang-format-20_linux-amd64
+        wget https://github.com/muttleyxd/clang-tools-static-binaries/releases/download/master-796e77c/clang-format-20_linux-amd64
         echo "bbb30a777d075dfbe91aa146a1ea1fa0c1d4745efa9c5490ebf9f5a7a7dec679c22f1c6015d5c85cb5b5b22964d86ae65002f1d4145bfdd7f27022d981b58979  clang-format-20_linux-amd64" | sha512sum -c
         mv clang-format-20_linux-amd64 ~/.local/bin/clang-format
         chmod +x ~/.local/bin/clang-format
