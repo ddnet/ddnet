@@ -125,6 +125,7 @@ public:
 	bool GetSaving(int TeamId) const;
 	void SetPractice(int Team, bool Enabled);
 	bool IsPractice(int Team);
+	bool IsValidTeamNumber(int Team) const;
 };
 
 #endif

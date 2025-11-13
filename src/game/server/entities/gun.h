@@ -11,7 +11,6 @@
  * A turret fires plasma bullets with a certain firing rate (sv_plasma_per_sec) at the closest player of a team for whom
  * the following criteria are met:
  * - The player is within the turret range (sv_plasma_range)
- * - The player is not a super player
  * - The turret is activated
  * - The initial trajectory of the plasma bullet to be generated would not be stopped by any solid block
  * With the exception of solo players, for whom plasma bullets will always be fired, regardless of the rest of the team,
