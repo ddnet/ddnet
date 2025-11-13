@@ -142,8 +142,6 @@ void CVoting::AddvoteOption(const char *pDescription, const char *pCommand)
 
 void CVoting::Vote(int v)
 {
-	if(m_Voted == 0)
-		m_Voted = v;
 	CNetMsg_Cl_Vote Msg = {v};
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
 }
