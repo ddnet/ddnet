@@ -119,19 +119,11 @@ void SColorConfigVariable::CommandCallback(IConsole::IResult *pResult, void *pUs
 			return;
 
 		const auto Color = pResult->GetColor(0, pData->m_DarkestLighting);
-		if(Color)
-		{
-			const unsigned Value = Color->Pack(pData->m_DarkestLighting, pData->m_Alpha);
+		const unsigned Value = Color->Pack(pData->m_DarkestLighting, pData->m_Alpha);
 
-			*pData->m_pVariable = Value;
-			if(pResult->m_ClientId != IConsole::CLIENT_ID_GAME)
-				pData->m_OldValue = Value;
-		}
-		else
-		{
-			str_format(aBuf, sizeof(aBuf), "%s is not a valid color.", pResult->GetString(0));
-			pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "config", aBuf);
-		}
+		*pData->m_pVariable = Value;
+		if(pResult->m_ClientId != IConsole::CLIENT_ID_GAME)
+			pData->m_OldValue = Value;
 	}
 	else
 	{
