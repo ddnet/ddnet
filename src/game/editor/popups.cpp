@@ -1161,7 +1161,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 	static int s_ShapeTypeButton = 0;
 	if(pEditor->DoButton_Editor(&s_ShapeTypeButton, s_apShapeNames[pSource->m_Shape.m_Type], 0, &ShapeButton, BUTTONFLAG_LEFT, "Change sound source shape."))
 	{
-		pEditor->m_EditorHistory.Execute(std::make_shared<CEditorActionEditSoundSource>(pEditor, pEditor->m_SelectedGroup, pEditor->m_vSelectedLayers[0], pEditor->m_SelectedSource, CEditorActionEditSoundSource::EEditType::SHAPE, (pSource->m_Shape.m_Type + 1) % CSoundShape::NUM_SHAPES));
+		pEditor->m_EditorHistory.Execute(std::make_shared<CEditorActionEditSoundSourceShape>(pEditor, pEditor->m_SelectedGroup, pEditor->m_vSelectedLayers[0], pEditor->m_SelectedSource, (pSource->m_Shape.m_Type + 1) % CSoundShape::NUM_SHAPES));
 	}
 
 	CProperty aProps[] = {
