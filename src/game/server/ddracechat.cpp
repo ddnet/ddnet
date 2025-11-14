@@ -2468,6 +2468,23 @@ void CGameContext::ConPracticeRemoveWeapon(IConsole::IResult *pResult, void *pUs
 		ConRemoveWeapon(pResult, pUserData);
 }
 
+void CGameContext::ConColor(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return;
+
+	pPlayer->m_TeeInfos.m_ColorBody = pResult->GetColor(0, 0.0f).value_or(ColorHSLA(0, 0, 0)).Pack(false);
+	pPlayer->m_TeeInfos.m_UseCustomColor = true;
+
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "Set color to %d", pPlayer->m_TeeInfos.m_ColorBody);
+	pSelf->SendChatTarget(pResult->m_ClientId, aBuf);
+}
+
 void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

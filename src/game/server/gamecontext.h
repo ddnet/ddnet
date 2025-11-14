@@ -555,6 +555,7 @@ private:
 	static void ConPracticeRemoveWeapon(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConProtectedKill(IConsole::IResult *pResult, void *pUserData);
+	static void ConColor(IConsole::IResult *pResult, void *pUserData);
 	static void ConModerate(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConList(IConsole::IResult *pResult, void *pUserData);
