@@ -726,18 +726,23 @@ void CRenderLayerTile::UploadTileData(std::optional<CTileLayerVisuals> &VisualsO
 	}
 
 	// shrink clip region
-	if(DrawLeft > DrawRight || DrawTop > DrawBottom)
+	// we only apply the clip once for the first overlay type (tile visuals). Physic layers can have multiple layers for text, e.g. speedup force
+	// the first overlay is always the largest and you will never find an overlay, where the text is written over AIR
+	if(CurOverlay == 0)
 	{
-		// we are drawing nothing, layer is empty
-		m_LayerClip->m_Height = 0.0f;
-		m_LayerClip->m_Width = 0.0f;
-	}
-	else
-	{
-		m_LayerClip->m_X = DrawLeft * 32.0f;
-		m_LayerClip->m_Y = DrawTop * 32.0f;
-		m_LayerClip->m_Width = (DrawRight - DrawLeft + 1) * 32.0f;
-		m_LayerClip->m_Height = (DrawBottom - DrawTop + 1) * 32.0f;
+		if(DrawLeft > DrawRight || DrawTop > DrawBottom)
+		{
+			// we are drawing nothing, layer is empty
+			m_LayerClip->m_Height = 0.0f;
+			m_LayerClip->m_Width = 0.0f;
+		}
+		else
+		{
+			m_LayerClip->m_X = DrawLeft * 32.0f;
+			m_LayerClip->m_Y = DrawTop * 32.0f;
+			m_LayerClip->m_Width = (DrawRight - DrawLeft + 1) * 32.0f;
+			m_LayerClip->m_Height = (DrawBottom - DrawTop + 1) * 32.0f;
+		}
 	}
 
 	// append one kill tile to the gamelayer
