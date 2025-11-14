@@ -181,8 +181,8 @@ class CCharacterCore
 	CCollision *m_pCollision;
 
 public:
-	static constexpr float PhysicalSize() { return 28.0f; };
-	static constexpr vec2 PhysicalSizeVec2() { return vec2(28.0f, 28.0f); };
+	static constexpr float PhysicalSize() { return 28.0f; }
+	static constexpr vec2 PhysicalSizeVec2() { return vec2(28.0f, 28.0f); }
 	vec2 m_Pos;
 	vec2 m_Vel;
 

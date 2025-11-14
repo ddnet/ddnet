@@ -240,7 +240,7 @@ static const char *GetGLErrorName(GLenum Type)
 	else if(Type == GL_DEBUG_TYPE_POP_GROUP)
 		return "POP_GROUP";
 	return "UNKNOWN";
-};
+}
 
 static const char *GetGLSeverity(GLenum Type)
 {

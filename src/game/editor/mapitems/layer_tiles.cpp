@@ -292,7 +292,7 @@ static void InitGrabbedLayer(std::shared_ptr<T> &pLayer, CLayerTiles *pThisLayer
 		pLayer->m_Color = pThisLayer->m_Color;
 		pLayer->m_Color.a = 255;
 	}
-};
+}
 
 int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 {

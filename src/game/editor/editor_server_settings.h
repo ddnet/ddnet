@@ -248,7 +248,7 @@ public:
 		const std::shared_ptr<IMapSetting> &Setting() const { return m_pCurrentSetting; }
 		CLineInput *LineInput() const { return m_pLineInput; }
 		void SetFontSize(float FontSize) { m_FontSize = FontSize; }
-		int CommentOffset() const { return m_CommentOffset; };
+		int CommentOffset() const { return m_CommentOffset; }
 
 		int CheckCollision(ECollisionCheckResult &Result) const;
 		int CheckCollision(const std::vector<CEditorMapSetting> &vSettings, ECollisionCheckResult &Result) const;
@@ -342,7 +342,7 @@ private:
 
 	private:
 		CArgumentConstraintsBuilder(TArgumentConstraints *pContainer) :
-			m_pContainer(pContainer) {};
+			m_pContainer(pContainer) {}
 
 		TArgumentConstraints *m_pContainer;
 
