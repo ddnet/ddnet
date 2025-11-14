@@ -1301,7 +1301,7 @@ void CMenusIngameTouchControls::SaveCachedSettingsToTarget(CTouchControls::CTouc
 	}
 	else
 	{
-		dbg_assert_failed("Unknown m_EditBehaviorType = %d", (int)m_EditBehaviorType);
+		dbg_assert_failed("Invalid m_EditBehaviorType: %d", static_cast<int>(m_EditBehaviorType));
 	}
 	pTargetButton->UpdatePointers();
 }

@@ -141,7 +141,7 @@ public:
 
 	int GetFileDataSize(int Index) const
 	{
-		dbg_assert(Index >= 0 && Index < m_Header.m_NumRawData, "Index invalid: %d", Index);
+		dbg_assert(Index >= 0 && Index < m_Header.m_NumRawData, "Invalid Index: %d", Index);
 
 		if(Index == m_Header.m_NumRawData - 1)
 		{
@@ -292,7 +292,7 @@ public:
 
 	int GetFileItemSize(int Index) const
 	{
-		dbg_assert(Index >= 0 && Index < m_Header.m_NumItems, "Index invalid: %d", Index);
+		dbg_assert(Index >= 0 && Index < m_Header.m_NumItems, "Invalid Index: %d", Index);
 
 		if(Index == m_Header.m_NumItems - 1)
 		{
@@ -309,7 +309,7 @@ public:
 
 	CDatafileItem *GetItem(int Index) const
 	{
-		dbg_assert(Index >= 0 && Index < m_Header.m_NumItems, "Index invalid: %d", Index);
+		dbg_assert(Index >= 0 && Index < m_Header.m_NumItems, "Invalid Index: %d", Index);
 
 		return static_cast<CDatafileItem *>(static_cast<void *>(m_Info.m_pItemStart + m_Info.m_pItemOffsets[Index]));
 	}
@@ -993,8 +993,8 @@ int CDataFileWriter::GetExtendedItemTypeIndex(int Type, const CUuid *pUuid)
 
 int CDataFileWriter::AddItem(int Type, int Id, size_t Size, const void *pData, const CUuid *pUuid)
 {
-	dbg_assert((Type >= 0 && Type <= MAX_ITEM_TYPE) || Type >= OFFSET_UUID || (Type == -1 && pUuid != nullptr), "Invalid type: %d", Type);
-	dbg_assert(Id >= 0 && Id <= MAX_ITEM_ID, "Invalid ID: %d", Id);
+	dbg_assert((Type >= 0 && Type <= MAX_ITEM_TYPE) || Type >= OFFSET_UUID || (Type == -1 && pUuid != nullptr), "Invalid Type: %d", Type);
+	dbg_assert(Id >= 0 && Id <= MAX_ITEM_ID, "Invalid Id: %d", Id);
 	dbg_assert(Size == 0 || pData != nullptr, "Data missing"); // Items without data are allowed
 	dbg_assert(Size <= (size_t)std::numeric_limits<int>::max(), "Data too large");
 	dbg_assert(Size % sizeof(int) == 0, "Invalid data boundary");
@@ -1100,7 +1100,7 @@ static int CompressionLevelToZlib(CDataFileWriter::ECompressionLevel Compression
 	case CDataFileWriter::COMPRESSION_BEST:
 		return Z_BEST_COMPRESSION;
 	default:
-		dbg_assert_failed("CompressionLevel invalid");
+		dbg_assert_failed("Invalid CompressionLevel: %d", static_cast<int>(CompressionLevel));
 	}
 }
 
@@ -1170,7 +1170,7 @@ void CDataFileWriter::Finish()
 	int ItemCount = 0;
 	for(const auto &[Type, ItemType] : m_ItemTypes)
 	{
-		dbg_assert(ItemType.m_Num > 0, "Invalid item type entry");
+		dbg_assert(ItemType.m_Num > 0, "Invalid ItemType.m_Num: %d", ItemType.m_Num);
 
 		CDatafileItemType Info;
 		Info.m_Type = Type;

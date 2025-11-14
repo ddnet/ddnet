@@ -69,13 +69,13 @@ public:
 
 	int SnapNumItems(int SnapId)
 	{
-		dbg_assert(SnapId >= 0 && SnapId < IClient::NUM_SNAPSHOT_TYPES, "invalid SnapId");
+		dbg_assert(SnapId >= 0 && SnapId < IClient::NUM_SNAPSHOT_TYPES, "Invalid SnapId: %d", SnapId);
 		return m_apAltSnapshots[SnapId]->NumItems();
 	}
 
 	IClient::CSnapItem SnapGetItem(int SnapId, int Index)
 	{
-		dbg_assert(SnapId >= 0 && SnapId < IClient::NUM_SNAPSHOT_TYPES, "invalid SnapId");
+		dbg_assert(SnapId >= 0 && SnapId < IClient::NUM_SNAPSHOT_TYPES, "Invalid SnapId: %d", SnapId);
 		const CSnapshot *pSnapshot = m_apAltSnapshots[SnapId];
 		const CSnapshotItem *pSnapshotItem = m_apAltSnapshots[SnapId]->GetItem(Index);
 		IClient::CSnapItem Item;

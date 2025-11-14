@@ -261,7 +261,7 @@ IOHANDLE io_open(const char *filename, int flags)
 	}
 	else
 	{
-		dbg_assert_failed("logic error");
+		dbg_assert_failed("Invalid flags: %d", flags);
 	}
 	return fopen(filename, open_mode);
 #endif
@@ -365,7 +365,7 @@ int io_seek(IOHANDLE io, int64_t offset, ESeekOrigin origin)
 		real_origin = SEEK_END;
 		break;
 	default:
-		dbg_assert_failed("origin invalid");
+		dbg_assert_failed("Invalid origin: %d", origin);
 	}
 #if defined(CONF_FAMILY_WINDOWS)
 	return _fseeki64((FILE *)io, offset, real_origin);
@@ -2957,7 +2957,7 @@ ETimeSeason time_season()
 	case 10:
 		return SEASON_AUTUMN;
 	default:
-		dbg_assert_failed("Invalid month");
+		dbg_assert_failed("Invalid month: %d", time_info->tm_mon);
 	}
 }
 
@@ -3327,7 +3327,7 @@ PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state, c
 		info.nShow = SW_SHOWMINNOACTIVE;
 		break;
 	default:
-		dbg_assert_failed("window_state invalid");
+		dbg_assert_failed("Invalid window_state: %d", static_cast<int>(window_state));
 	}
 	info.fMask = SEE_MASK_NOCLOSEPROCESS;
 	// Save and restore the FPU control word because ShellExecute might change it
