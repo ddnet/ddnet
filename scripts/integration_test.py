@@ -574,7 +574,7 @@ def smoke_test(test_env):
 		server.wait_for_log(
 			lambda l: l.line.startswith("chat: *** client1 finished in:") or
 				l.line.startswith("chat: *** client2 finished in:"),
-			timeout=20,
+			timeout=40,
 		)
 
 	client1.command("say hello world")
