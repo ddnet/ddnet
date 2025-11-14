@@ -646,4 +646,8 @@ Messages = [
 	NetMessageEx("Sv_ModeratorAlert", "moderator-alert@netmsg.ddnet.org", [
 		NetString("m_pMessage"),
 	]),
+
+	NetMessageEx("Cl_EnableSpectatorCount", "enable-spectator-count@netmsg.ddnet.org", [
+		NetBool("m_Enable"),
+	]),
 ]
