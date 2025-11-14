@@ -225,7 +225,8 @@ public:
 	CGameWorld m_World;
 
 	// helper functions
-	class CCharacter *GetPlayerChar(int ClientId);
+	CCharacter *GetPlayerChar(int ClientId);
+	const CCharacter *GetPlayerChar(int ClientId) const;
 	bool EmulateBug(int Bug) const;
 	std::vector<SSwitchers> &Switchers() { return m_World.m_Core.m_vSwitchers; }
 

@@ -40,7 +40,7 @@ class CGameTeams
 	// the message from playing for a long time in an unfinishable team.
 	int m_aTeamUnfinishableKillTick[NUM_DDRACE_TEAMS];
 
-	class CGameContext *m_pGameContext;
+	CGameContext *m_pGameContext;
 
 	/**
 	 * Kill the whole team.
@@ -60,8 +60,10 @@ public:
 
 	// helper methods
 	CCharacter *Character(int ClientId);
+	const CCharacter *Character(int ClientId) const;
 	CPlayer *GetPlayer(int ClientId);
-	class CGameContext *GameServer();
+	CGameContext *GameServer();
+	const CGameContext *GameServer() const;
 	class IServer *Server();
 
 	void OnCharacterStart(int ClientId);
@@ -70,8 +72,12 @@ public:
 	void OnCharacterDeath(int ClientId, int Weapon);
 	void Tick();
 
-	// returns nullptr if successful, error string if failed
-	const char *SetCharacterTeam(int ClientId, int Team);
+	// sets pError to an empty string on success (true)
+	// and sets pError if it returns false
+	bool CanJoinTeam(int ClientId, int Team, char *pError, int ErrorSize) const;
+
+	// returns true if successful. Writes error into pError on failure
+	bool SetCharacterTeam(int ClientId, int Team, char *pError, int ErrorSize);
 	void CheckTeamFinished(int Team);
 
 	void ChangeTeamState(int Team, ETeamState State);

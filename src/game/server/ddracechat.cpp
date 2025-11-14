@@ -1196,6 +1196,7 @@ void CGameContext::AttemptJoinTeam(int ClientId, int Team)
 			Team = EmptyTeam.value();
 		}
 
+		char aError[512];
 		if(pPlayer->m_LastDDRaceTeamChange + (int64_t)Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay > Server()->Tick())
 		{
 			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
@@ -1214,9 +1215,9 @@ void CGameContext::AttemptJoinTeam(int ClientId, int Team)
 			str_format(aBuf, sizeof(aBuf), "This team already has the maximum allowed size of %d players", g_Config.m_SvMaxTeamSize);
 			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 		}
-		else if(const char *pError = m_pController->Teams().SetCharacterTeam(pPlayer->GetCid(), Team))
+		else if(!m_pController->Teams().SetCharacterTeam(pPlayer->GetCid(), Team, aError, sizeof(aError)))
 		{
-			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", pError);
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aError);
 		}
 		else
 		{
