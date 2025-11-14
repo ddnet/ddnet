@@ -330,7 +330,7 @@ public:
 	void EnterGame(int Conn) override;
 
 	// called once after being ingame for 1 second
-	void OnPostConnect(int Conn, bool Dummy);
+	void OnPostConnect(int Conn);
 
 	void Connect(const char *pAddress, const char *pPassword = nullptr) override;
 	void DisconnectWithReason(const char *pReason);
