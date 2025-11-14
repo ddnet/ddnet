@@ -2655,7 +2655,7 @@ void CClient::UpdateDemoIntraTimers()
 	m_aGameIntraTick[0] = pInfo->m_IntraTick;
 	m_aGameTickTime[0] = pInfo->m_TickTime;
 	m_aGameIntraTickSincePrev[0] = pInfo->m_IntraTickSincePrev;
-};
+}
 
 void CClient::Update()
 {

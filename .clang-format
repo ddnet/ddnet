@@ -63,6 +63,7 @@ NamespaceIndentation: All
 FixNamespaceComments: false
 PointerAlignment: Right
 ReflowComments: true
+RemoveSemicolon: true
 SpaceBeforeParens: Never
 SpaceAfterTemplateKeyword: false
 TabWidth: 8

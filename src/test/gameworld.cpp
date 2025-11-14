@@ -127,7 +127,7 @@ public:
 		GameServer()->OnInit(nullptr);
 		pServer->ReadAnnouncementsFile();
 		pServer->InitMaplist();
-	};
+	}
 
 	~CTestGameWorld() override
 	{
@@ -136,7 +136,7 @@ public:
 		m_pGameServer->OnShutdown(nullptr);
 		m_pServer->m_pMap->Unload();
 		m_pServer->DbPool()->OnShutdown();
-	};
+	}
 };
 
 TEST_F(CTestGameWorld, ClosestCharacter)

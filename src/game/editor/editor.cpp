@@ -4845,7 +4845,7 @@ void CEditor::RemoveTimeOffsetEnvelope(const std::shared_ptr<CEnvelope> &pEnvelo
 		Point.m_Time -= TimeOffset;
 
 	m_OffsetEnvelopeX += TimeOffset.AsSeconds() / m_ZoomEnvelopeX.GetValue();
-};
+}
 
 static float ClampDelta(float Val, float Delta, float Min, float Max)
 {
