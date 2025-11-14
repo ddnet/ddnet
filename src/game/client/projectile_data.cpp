@@ -74,7 +74,7 @@ CProjectileData ExtractProjectileInfoDDNet(const CNetObj_DDNetProjectile *pProj)
 	CProjectileData Result = {vec2(0, 0)};
 
 	Result.m_StartPos = vec2(pProj->m_X / 100.0f, pProj->m_Y / 100.0f);
-	Result.m_StartVel = vec2(pProj->m_VelX / 1e6f, pProj->m_VelY / 1e6f);
+	Result.m_StartVel = pProj->m_Owner < 0 ? vec2(pProj->m_VelX, pProj->m_VelY) / 1e6f : vec2(pProj->m_VelX, pProj->m_VelY);
 
 	if(pProj->m_Flags & PROJECTILEFLAG_NORMALIZE_VEL)
 	{
