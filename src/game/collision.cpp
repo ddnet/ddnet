@@ -245,7 +245,7 @@ static int GetMoveRestrictionsMask(int Direction)
 	case MR_DIR_DOWN: return CANTMOVE_DOWN;
 	case MR_DIR_LEFT: return CANTMOVE_LEFT;
 	case MR_DIR_UP: return CANTMOVE_UP;
-	default: dbg_assert_failed("invalid dir");
+	default: dbg_assert_failed("Invalid Direction: %d", Direction);
 	}
 }
 
@@ -271,7 +271,7 @@ int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void 
 			vec2(0, 1),
 			vec2(-1, 0),
 			vec2(0, -1)};
-	dbg_assert(0.0f <= Distance && Distance <= 32.0f, "invalid distance");
+	dbg_assert(0.0f <= Distance && Distance <= 32.0f, "Invalid Distance: %f", Distance);
 	int Restrictions = 0;
 	for(int d = 0; d < NUM_MR_DIRS; d++)
 	{
@@ -1069,7 +1069,7 @@ int CCollision::Entity(int x, int y, int Layer) const
 	case LAYER_TUNE:
 		return m_pTune[Index].m_Type - ENTITY_OFFSET;
 	default:
-		dbg_assert_failed("Layer invalid");
+		dbg_assert_failed("Invalid Layer: %d", Layer);
 	}
 }
 

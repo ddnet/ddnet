@@ -307,7 +307,7 @@ const char *CServer::DnsblStateStr(EDnsblState State)
 		return "white";
 	}
 
-	dbg_assert_failed("unreachable");
+	dbg_assert_failed("Invalid dnsbl State: %d", static_cast<int>(State));
 }
 
 IConsole::EAccessLevel CServer::ConsoleAccessLevel(int ClientId) const
@@ -323,7 +323,7 @@ IConsole::EAccessLevel CServer::ConsoleAccessLevel(int ClientId) const
 		return IConsole::EAccessLevel::HELPER;
 	};
 
-	dbg_assert_failed("invalid auth level: %d", AuthLevel);
+	dbg_assert_failed("Invalid AuthLevel: %d", AuthLevel);
 }
 
 bool CServer::IsClientNameAvailable(int ClientId, const char *pNameRequest)
@@ -352,7 +352,7 @@ bool CServer::IsClientNameAvailable(int ClientId, const char *pNameRequest)
 
 bool CServer::SetClientNameImpl(int ClientId, const char *pNameRequest, bool Set)
 {
-	dbg_assert(0 <= ClientId && ClientId < MAX_CLIENTS, "invalid client id");
+	dbg_assert(0 <= ClientId && ClientId < MAX_CLIENTS, "Invalid ClientId: %d", ClientId);
 	if(m_aClients[ClientId].m_State < CClient::STATE_READY)
 		return false;
 
@@ -408,7 +408,7 @@ bool CServer::SetClientNameImpl(int ClientId, const char *pNameRequest, bool Set
 
 bool CServer::SetClientClanImpl(int ClientId, const char *pClanRequest, bool Set)
 {
-	dbg_assert(0 <= ClientId && ClientId < MAX_CLIENTS, "invalid client id");
+	dbg_assert(0 <= ClientId && ClientId < MAX_CLIENTS, "Invalid ClientId: %d", ClientId);
 	if(m_aClients[ClientId].m_State < CClient::STATE_READY)
 		return false;
 
@@ -522,7 +522,7 @@ void CServer::Ban(int ClientId, int Seconds, const char *pReason, bool VerbatimR
 
 void CServer::ReconnectClient(int ClientId)
 {
-	dbg_assert(0 <= ClientId && ClientId < MAX_CLIENTS, "invalid client id");
+	dbg_assert(0 <= ClientId && ClientId < MAX_CLIENTS, "Invalid ClientId: %d", ClientId);
 
 	if(GetClientVersion(ClientId) < VERSION_DDNET_RECONNECT)
 	{
@@ -545,7 +545,7 @@ void CServer::ReconnectClient(int ClientId)
 
 void CServer::RedirectClient(int ClientId, int Port)
 {
-	dbg_assert(0 <= ClientId && ClientId < MAX_CLIENTS, "invalid client id");
+	dbg_assert(0 <= ClientId && ClientId < MAX_CLIENTS, "Invalid ClientId: %d", ClientId);
 
 	bool SupportsRedirect = GetClientVersion(ClientId) >= VERSION_DDNET_REDIRECT;
 
@@ -624,7 +624,7 @@ void CServer::SetRconCid(int ClientId)
 
 int CServer::GetAuthedState(int ClientId) const
 {
-	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "ClientId is not valid");
+	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "Invalid ClientId: %d", ClientId);
 	dbg_assert(m_aClients[ClientId].m_State != CServer::CClient::STATE_EMPTY, "Client slot is empty");
 	return m_AuthManager.KeyLevel(m_aClients[ClientId].m_AuthKey);
 }
@@ -641,8 +641,8 @@ bool CServer::IsRconAuthedAdmin(int ClientId) const
 
 const char *CServer::GetAuthName(int ClientId) const
 {
-	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "ClientId is not valid");
-	dbg_assert(m_aClients[ClientId].m_State != CServer::CClient::STATE_EMPTY, "Client slot is empty");
+	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "Invalid ClientId: %d", ClientId);
+	dbg_assert(m_aClients[ClientId].m_State != CServer::CClient::STATE_EMPTY, "Client slot %d is empty", ClientId);
 	int Key = m_aClients[ClientId].m_AuthKey;
 	dbg_assert(Key != -1, "Client not authed");
 	return m_AuthManager.KeyIdent(Key);
@@ -650,13 +650,13 @@ const char *CServer::GetAuthName(int ClientId) const
 
 bool CServer::HasAuthHidden(int ClientId) const
 {
-	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "ClientId is not valid");
+	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "Invalid ClientId: %d", ClientId);
 	return m_aClients[ClientId].m_AuthHidden;
 }
 
 bool CServer::GetClientInfo(int ClientId, CClientInfo *pInfo) const
 {
-	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "ClientId is not valid");
+	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "Invalid ClientId: %d", ClientId);
 	dbg_assert(pInfo != nullptr, "pInfo cannot be null");
 
 	if(m_aClients[ClientId].m_State == CClient::STATE_INGAME)
@@ -682,7 +682,7 @@ bool CServer::GetClientInfo(int ClientId, CClientInfo *pInfo) const
 
 void CServer::SetClientDDNetVersion(int ClientId, int DDNetVersion)
 {
-	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "ClientId is not valid");
+	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "Invalid ClientId: %d", ClientId);
 
 	if(m_aClients[ClientId].m_State == CClient::STATE_INGAME)
 	{
@@ -693,8 +693,8 @@ void CServer::SetClientDDNetVersion(int ClientId, int DDNetVersion)
 
 const NETADDR *CServer::ClientAddr(int ClientId) const
 {
-	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "ClientId is not valid");
-	dbg_assert(m_aClients[ClientId].m_State != CServer::CClient::STATE_EMPTY, "Client slot is empty");
+	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "Invalid ClientId: %d", ClientId);
+	dbg_assert(m_aClients[ClientId].m_State != CServer::CClient::STATE_EMPTY, "Client slot %d is empty", ClientId);
 #ifdef CONF_DEBUG
 	if(m_aClients[ClientId].m_DebugDummy)
 	{
@@ -706,8 +706,8 @@ const NETADDR *CServer::ClientAddr(int ClientId) const
 
 const std::array<char, NETADDR_MAXSTRSIZE> &CServer::ClientAddrStringImpl(int ClientId, bool IncludePort) const
 {
-	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "ClientId is not valid");
-	dbg_assert(m_aClients[ClientId].m_State != CServer::CClient::STATE_EMPTY, "Client slot is empty");
+	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "Invalid ClientId: %d", ClientId);
+	dbg_assert(m_aClients[ClientId].m_State != CServer::CClient::STATE_EMPTY, "Client slot %d is empty", ClientId);
 #ifdef CONF_DEBUG
 	if(m_aClients[ClientId].m_DebugDummy)
 	{
@@ -2323,7 +2323,7 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 	case SERVERINFO_64_LEGACY: Remaining = 24; break;
 	case SERVERINFO_VANILLA: Remaining = VANILLA_MAX_CLIENTS; break;
 	case SERVERINFO_INGAME: Remaining = VANILLA_MAX_CLIENTS; break;
-	default: dbg_assert_failed("unreachable");
+	default: dbg_assert_failed("Invalid Type: %d", Type);
 	}
 
 	// Use the following strategy for sending:
@@ -2486,7 +2486,7 @@ void CServer::CacheServerInfoSixup(CCache *pCache, bool SendClients, int MaxCons
 				}
 				else
 				{
-					dbg_assert(Packer.Size() <= MaxPacketSize, "Max packet size exceeded while repacking");
+					dbg_assert(Packer.Size() <= MaxPacketSize, "Max packet size exceeded while repacking. Packer.Size()=%d MaxPacketSize=%d", Packer.Size(), MaxPacketSize);
 				}
 			}
 		}
@@ -2539,7 +2539,7 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool Sen
 		}
 		else
 		{
-			dbg_assert_failed("unknown serverinfo type");
+			dbg_assert_failed("Invalid serverinfo Type: %d", Type);
 		}
 
 		p.AddRaw(Chunk.m_vData.data(), Chunk.m_vData.size());
@@ -4387,7 +4387,7 @@ void CServer::SnapFreeId(int Id)
 
 void *CServer::SnapNewItem(int Type, int Id, int Size)
 {
-	dbg_assert(Id >= -1 && Id <= 0xffff, "incorrect id");
+	dbg_assert(Id >= -1 && Id <= 0xffff, "Invalid snap item Id: %d", Id);
 	return Id < 0 ? nullptr : m_SnapshotBuilder.NewItem(Type, Id, Size);
 }
 
