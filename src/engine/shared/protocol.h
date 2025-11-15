@@ -154,6 +154,7 @@ enum
 
 enum
 {
+	TUNEZONE_OVERRIDE_NONE = -1,
 	NUM_TUNEZONES = 256,
 };
 
