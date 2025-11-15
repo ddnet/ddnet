@@ -4027,6 +4027,8 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("lock", "?i['0'|'1']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConLock, this, "Toggle team lock so no one else can join and so the team restarts when a player dies. /lock 0 to unlock, /lock 1 to lock");
 	Console()->Register("unlock", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConUnlock, this, "Unlock a team");
 	Console()->Register("invite", "r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInvite, this, "Invite a person to a locked team");
+	Console()->Register("cancelinvite", "r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConCancelInvite, this, "Cancel invite");
+	Console()->Register("blockinvites", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConBlockInvites, this, "Enable or disable receiving team invites");
 	Console()->Register("join", "r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConJoin, this, "Join the team of the specified player");
 	Console()->Register("team0mode", "?i['0'|'1']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTeam0Mode, this, "Toggle team between team 0 and team mode. This mode will make your team behave like team 0.");
 
