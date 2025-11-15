@@ -510,7 +510,7 @@ void CClient::OnPostConnect(int Conn)
 
 	if(g_Config.m_ClDummyDefaultEyes || g_Config.m_ClPlayerDefaultEyes)
 	{
-		int Emote = Conn ? g_Config.m_ClDummyDefaultEyes : g_Config.m_ClPlayerDefaultEyes;
+		int Emote = Conn == CONN_DUMMY ? g_Config.m_ClDummyDefaultEyes : g_Config.m_ClPlayerDefaultEyes;
 
 		if(Emote != EMOTE_NORMAL)
 		{
