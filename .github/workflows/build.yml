@@ -22,7 +22,6 @@ jobs:
           cmake-args: -G Ninja
           cmake-init-env: CXXFLAGS=-Werror
           package-file: "*-linux_x86_64.tar.xz"
-          workaround-issue10203-run-after-configure:
         - name: ubuntu-22.04
           os: ubuntu-22.04
           cmake-path: /usr/bin/
@@ -30,19 +29,16 @@ jobs:
           cmake-init-env: CXXFLAGS=-Werror
           gtest-env: GTEST_FILTER=-*SQLite*
           package-file: "*-linux_x86_64.tar.xz"
-          workaround-issue10203-run-after-configure:
         - name: macOS-latest
           os: macOS-latest
           cmake-args: -G Ninja
           cmake-init-env: CXXFLAGS=-Werror
           package-file: "*-macos.dmg"
-          workaround-issue10203-run-after-configure:
         - name: windows-latest
           os: windows-latest
           cmake-args: -A x64 -DEXCEPTION_HANDLING=ON
           cmake-init-env: CXXFLAGS=/WX LDFLAGS=/WX
           package-file: "*-win64.zip"
-          workaround-issue10203-run-after-configure:
         - name: windows-latest-mingw
           os: windows-latest
           cmake-args: -G Ninja -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DEXCEPTION_HANDLING=ON -DCMAKE_RC_COMPILER=windres -DCMAKE_AR=ar
