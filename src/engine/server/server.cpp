@@ -2657,6 +2657,35 @@ void CServer::UpdateRegisterServerInfo()
 	JsonWriter.WriteAttribute("requires_login");
 	JsonWriter.WriteBoolValue(false);
 
+	{
+		bool FoundFlags = false;
+		auto Flag = [&](const char *pFlag) {
+			if(!FoundFlags)
+			{
+				JsonWriter.WriteAttribute("flags");
+				JsonWriter.BeginArray();
+				FoundFlags = true;
+			}
+			JsonWriter.WriteStrValue(pFlag);
+		};
+
+		if(g_Config.m_SvRegisterCommunityToken[0] && g_Config.m_SvOfficialTutorial[0])
+		{
+			SHA256_DIGEST Sha256 = sha256(g_Config.m_SvOfficialTutorial, str_length(g_Config.m_SvOfficialTutorial));
+			char aSha256[SHA256_MAXSTRSIZE];
+			sha256_str(Sha256, aSha256, sizeof(aSha256));
+			if(str_comp(aSha256, "8a11dc71274313e78a09ff58b8e696fb5009ce8606d12077ceb78ebf99a57464") == 0)
+			{
+				Flag("tutorial");
+			}
+		}
+
+		if(FoundFlags)
+		{
+			JsonWriter.EndArray();
+		}
+	}
+
 	JsonWriter.WriteAttribute("clients");
 	JsonWriter.BeginArray();
 
