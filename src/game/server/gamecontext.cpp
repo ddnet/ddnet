@@ -2923,7 +2923,6 @@ void CGameContext::OnEmoticonNetMessage(const CNetMsg_Cl_Emoticon *pMsg, int Cli
 			EmoteType = EMOTE_SURPRISE;
 			break;
 		case EMOTICON_DOTDOT:
-		case EMOTICON_DROP:
 		case EMOTICON_ZZZ:
 			EmoteType = EMOTE_BLINK;
 			break;
@@ -2941,6 +2940,9 @@ void CGameContext::OnEmoticonNetMessage(const CNetMsg_Cl_Emoticon *pMsg, int Cli
 		case EMOTICON_SPLATTEE:
 		case EMOTICON_ZOMG:
 			EmoteType = EMOTE_ANGRY;
+			break;
+		case EMOTICON_DROP:
+			EmoteType = EMOTE_CRYING;
 			break;
 		default:
 			break;

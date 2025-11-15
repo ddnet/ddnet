@@ -1553,6 +1553,8 @@ void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData)
 			EmoteType = EMOTE_SURPRISE;
 		else if(!str_comp_nocase(pResult->GetString(0), "normal"))
 			EmoteType = EMOTE_NORMAL;
+		else if(!str_comp_nocase(pResult->GetString(0), "crying"))
+			EmoteType = EMOTE_CRYING;
 		else
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD,
