@@ -1817,109 +1817,61 @@ void CEditorActionDeleteSoundSource::Redo()
 
 // ---------------
 
-CEditorActionEditSoundSource::CEditorActionEditSoundSource(CEditor *pEditor, int GroupIndex, int LayerIndex, int SourceIndex, EEditType Type, int Value) :
-	CEditorActionLayerBase(pEditor, GroupIndex, LayerIndex), m_SourceIndex(SourceIndex), m_EditType(Type), m_CurrentValue(Value), m_pSavedObject(nullptr)
+CEditorActionEditSoundSourceShape::CEditorActionEditSoundSourceShape(CEditor *pEditor, int GroupIndex, int LayerIndex, int SourceIndex, int Value) :
+	CEditorActionLayerBase(pEditor, GroupIndex, LayerIndex), m_SourceIndex(SourceIndex), m_CurrentValue(Value)
 {
 	Save();
 
-	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Edit sound source %d in layer %d of group %d", SourceIndex, LayerIndex, GroupIndex);
+	static const char *const SHAPE_NAMES[] = {
+		"rectangle",
+		"circle",
+	};
+	static_assert(std::size(SHAPE_NAMES) == (size_t)CSoundShape::NUM_SHAPES);
+	str_format(m_aDisplayText, sizeof(m_aDisplayText),
+		"Edit shape of sound source %d in layer %d of group %d to %s",
+		SourceIndex, LayerIndex, GroupIndex, SHAPE_NAMES[Value]);
 }
 
-void CEditorActionEditSoundSource::Undo()
+void CEditorActionEditSoundSourceShape::Undo()
 {
 	std::shared_ptr<CLayerSounds> pLayerSounds = std::static_pointer_cast<CLayerSounds>(m_pLayer);
 	CSoundSource *pSource = &pLayerSounds->m_vSources[m_SourceIndex];
 
-	if(m_EditType == EEditType::SHAPE)
-	{
-		CSoundShape *pSavedShape = (CSoundShape *)m_pSavedObject;
-		pSource->m_Shape.m_Type = pSavedShape->m_Type;
+	pSource->m_Shape = m_SavedShape;
 
-		// set default values
-		switch(pSource->m_Shape.m_Type)
-		{
-		case CSoundShape::SHAPE_CIRCLE:
-		{
-			pSource->m_Shape.m_Circle.m_Radius = pSavedShape->m_Circle.m_Radius;
-			break;
-		}
-		case CSoundShape::SHAPE_RECTANGLE:
-		{
-			pSource->m_Shape.m_Rectangle.m_Width = pSavedShape->m_Rectangle.m_Width;
-			pSource->m_Shape.m_Rectangle.m_Height = pSavedShape->m_Rectangle.m_Height;
-			break;
-		}
-		}
+	m_pEditor->m_Map.OnModify();
+}
+
+void CEditorActionEditSoundSourceShape::Redo()
+{
+	std::shared_ptr<CLayerSounds> pLayerSounds = std::static_pointer_cast<CLayerSounds>(m_pLayer);
+	CSoundSource *pSource = &pLayerSounds->m_vSources[m_SourceIndex];
+
+	pSource->m_Shape.m_Type = m_CurrentValue;
+
+	// set default values
+	switch(pSource->m_Shape.m_Type)
+	{
+	case CSoundShape::SHAPE_CIRCLE:
+	{
+		pSource->m_Shape.m_Circle.m_Radius = 1000;
+		break;
+	}
+	case CSoundShape::SHAPE_RECTANGLE:
+	{
+		pSource->m_Shape.m_Rectangle.m_Width = f2fx(1000.0f);
+		pSource->m_Shape.m_Rectangle.m_Height = f2fx(800.0f);
+		break;
+	}
 	}
 
 	m_pEditor->m_Map.OnModify();
 }
 
-void CEditorActionEditSoundSource::Redo()
+void CEditorActionEditSoundSourceShape::Save()
 {
 	std::shared_ptr<CLayerSounds> pLayerSounds = std::static_pointer_cast<CLayerSounds>(m_pLayer);
-	CSoundSource *pSource = &pLayerSounds->m_vSources[m_SourceIndex];
-
-	if(m_EditType == EEditType::SHAPE)
-	{
-		pSource->m_Shape.m_Type = m_CurrentValue;
-
-		// set default values
-		switch(pSource->m_Shape.m_Type)
-		{
-		case CSoundShape::SHAPE_CIRCLE:
-		{
-			pSource->m_Shape.m_Circle.m_Radius = 1000.0f;
-			break;
-		}
-		case CSoundShape::SHAPE_RECTANGLE:
-		{
-			pSource->m_Shape.m_Rectangle.m_Width = f2fx(1000.0f);
-			pSource->m_Shape.m_Rectangle.m_Height = f2fx(800.0f);
-			break;
-		}
-		}
-	}
-
-	m_pEditor->m_Map.OnModify();
-}
-
-void CEditorActionEditSoundSource::Save()
-{
-	std::shared_ptr<CLayerSounds> pLayerSounds = std::static_pointer_cast<CLayerSounds>(m_pLayer);
-	CSoundSource *pSource = &pLayerSounds->m_vSources[m_SourceIndex];
-
-	if(m_EditType == EEditType::SHAPE)
-	{
-		CSoundShape *pShapeInfo = new CSoundShape;
-		pShapeInfo->m_Type = pSource->m_Shape.m_Type;
-
-		switch(pSource->m_Shape.m_Type)
-		{
-		case CSoundShape::SHAPE_CIRCLE:
-		{
-			pShapeInfo->m_Circle.m_Radius = pSource->m_Shape.m_Circle.m_Radius;
-			break;
-		}
-		case CSoundShape::SHAPE_RECTANGLE:
-		{
-			pShapeInfo->m_Rectangle.m_Width = pSource->m_Shape.m_Rectangle.m_Width;
-			pShapeInfo->m_Rectangle.m_Height = pSource->m_Shape.m_Rectangle.m_Height;
-			break;
-		}
-		}
-
-		m_pSavedObject = pShapeInfo;
-	}
-}
-
-CEditorActionEditSoundSource::~CEditorActionEditSoundSource()
-{
-	if(m_EditType == EEditType::SHAPE)
-	{
-		CSoundShape *pSavedShape = (CSoundShape *)m_pSavedObject;
-		delete pSavedShape;
-	}
+	m_SavedShape = pLayerSounds->m_vSources[m_SourceIndex].m_Shape;
 }
 
 // -----

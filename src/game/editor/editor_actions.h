@@ -565,27 +565,20 @@ private:
 	CSoundSource m_Source;
 };
 
-class CEditorActionEditSoundSource : public CEditorActionLayerBase
+class CEditorActionEditSoundSourceShape : public CEditorActionLayerBase
 {
 public:
-	enum class EEditType
-	{
-		SHAPE
-	};
-
-	CEditorActionEditSoundSource(CEditor *pEditor, int GroupIndex, int LayerIndex, int SourceIndex, EEditType Type, int Value);
-	~CEditorActionEditSoundSource() override;
+	CEditorActionEditSoundSourceShape(CEditor *pEditor, int GroupIndex, int LayerIndex, int SourceIndex, int Value);
 
 	void Undo() override;
 	void Redo() override;
 
 private:
 	int m_SourceIndex;
-	EEditType m_EditType;
 	int m_CurrentValue;
 
 	std::vector<int> m_vOriginalValues;
-	void *m_pSavedObject;
+	CSoundShape m_SavedShape;
 
 	void Save();
 };
