@@ -75,6 +75,8 @@ public:
 	virtual void Unload() = 0;
 
 	bool IsVisibleInClipRegion(const std::optional<CClipRegion> &ClipRegion) const;
+	bool SetGraphicsClip(const std::optional<CClipRegion> &ClipRegion, int GroupClip[4]);
+	void ResetGraphicsClip(int GroupClip[4], bool ClipEnabled);
 	int GetGroup() const { return m_GroupId; }
 
 protected:

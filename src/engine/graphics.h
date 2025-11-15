@@ -257,6 +257,7 @@ public:
 	virtual void Clear(float r, float g, float b, bool ForceClearNow = false) = 0;
 
 	virtual void ClipEnable(int x, int y, int w, int h) = 0;
+	virtual bool ClipFetch(int &x, int &y, int &w, int &h) const = 0;
 	virtual void ClipDisable() = 0;
 
 	virtual void MapScreen(float TopLeftX, float TopLeftY, float BottomRightX, float BottomRightY) = 0;

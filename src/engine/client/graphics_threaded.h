@@ -899,6 +899,7 @@ public:
 	CGraphics_Threaded();
 
 	void ClipEnable(int x, int y, int w, int h) override;
+	bool ClipFetch(int &x, int &y, int &w, int &h) const override;
 	void ClipDisable() override;
 
 	void BlendNone() override;
