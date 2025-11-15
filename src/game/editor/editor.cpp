@@ -7374,11 +7374,12 @@ void CEditor::RenderSwitchEntities(const std::shared_ptr<CLayerTiles> &pTiles)
 				{
 					unsigned char NumberDoorLength = 0;
 					unsigned char IndexDoorLength = GetIndex(y + aOffsets[i].y, x + aOffsets[i].x, NumberDoorLength);
-					if(IndexDoorLength >= ENTITY_LASER_SHORT && IndexDoorLength <= ENTITY_LASER_LONG)
+					if((IndexDoorLength >= ENTITY_LASER_SHORT && IndexDoorLength <= ENTITY_LASER_LONG) || IndexDoorLength == ENTITY_LASER_LEN)
 					{
 						float XOff = std::cos(i * pi / 4.0f);
 						float YOff = std::sin(i * pi / 4.0f);
-						int Length = (IndexDoorLength - ENTITY_LASER_SHORT + 1) * 3;
+
+						float Length = IndexDoorLength == ENTITY_LASER_LEN ? std::clamp(NumberDoorLength / 4.f, 0.5f, 64.f) : (IndexDoorLength - ENTITY_LASER_SHORT + 1) * 3;
 						vec2 Pos(x + 0.5f, y + 0.5f);
 						vec2 To(x + XOff * Length + 0.5f, y + YOff * Length + 0.5f);
 						pGameClient->m_Items.RenderLaser(To * TileSize, Pos * TileSize, OuterColor, InnerColor, 1.0f, TicksHead, (int)LASERTYPE_DOOR);
