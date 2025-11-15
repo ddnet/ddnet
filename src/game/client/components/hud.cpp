@@ -1263,7 +1263,13 @@ void CHud::RenderSpectatorCount()
 	}
 	else
 	{
-		Count = GameClient()->m_Snap.m_SpecInfo.m_SpectatorCount;
+		const CNetObj_SpectatorCount *pSpectatorCount = GameClient()->m_Snap.m_pSpectatorCount;
+		if(!pSpectatorCount)
+		{
+			m_LastSpectatorCountTick = Client()->GameTick(g_Config.m_ClDummy);
+			return;
+		}
+		Count = pSpectatorCount->m_NumSpectators;
 	}
 
 	if(Count == 0)
