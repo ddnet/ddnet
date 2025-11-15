@@ -10,6 +10,7 @@
 
 class CEditor;
 struct SMapSettingInt;
+struct SMapSettingFixed;
 struct SMapSettingCommand;
 struct IMapSetting;
 class CLineInput;
@@ -311,6 +312,7 @@ private:
 	void LoadAllMapSettings();
 	void LoadCommand(const char *pName, const char *pArgs, const char *pHelp);
 	void LoadSettingInt(const std::shared_ptr<SMapSettingInt> &pSetting);
+	void LoadSettingFixed(const std::shared_ptr<SMapSettingFixed> &pSetting);
 	void LoadSettingCommand(const std::shared_ptr<SMapSettingCommand> &pSetting);
 	void InitValueLoaders();
 	void LoadPossibleValues(const CSettingValuesBuilder &Builder, const std::shared_ptr<IMapSetting> &pSetting);
