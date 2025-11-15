@@ -3386,8 +3386,14 @@ void CGameContext::ConSay(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConSetTeam(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Team = pResult->GetInteger(1);
+	if(!pSelf->m_pController->IsValidTeam(Team))
+	{
+		log_info("server", "invalid team");
+		return;
+	}
+
 	int ClientId = std::clamp(pResult->GetInteger(0), 0, (int)MAX_CLIENTS - 1);
-	int Team = std::clamp(pResult->GetInteger(1), -1, 1);
 	int Delay = pResult->NumArguments() > 2 ? pResult->GetInteger(2) : 0;
 	if(!pSelf->m_apPlayers[ClientId])
 		return;
@@ -3406,7 +3412,12 @@ void CGameContext::ConSetTeam(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConSetTeamAll(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Team = std::clamp(pResult->GetInteger(0), -1, 1);
+	int Team = pResult->GetInteger(0);
+	if(!pSelf->m_pController->IsValidTeam(Team))
+	{
+		log_info("server", "invalid team");
+		return;
+	}
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "All players were moved to the %s", pSelf->m_pController->GetTeamName(Team));

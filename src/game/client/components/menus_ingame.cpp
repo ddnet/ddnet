@@ -170,14 +170,14 @@ void CMenus::RenderGame(CUIRect MainView)
 		}
 		else
 		{
-			if(GameClient()->m_Snap.m_pLocalInfo->m_Team != TEAM_RED)
+			if(GameClient()->m_Snap.m_pLocalInfo->m_Team != TEAM_GAME)
 			{
 				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
 				ButtonBar.VSplitLeft(5.0f, nullptr, &ButtonBar);
 				static CButtonContainer s_JoinGameButton;
 				if(!Client()->DummyConnecting() && DoButton_Menu(&s_JoinGameButton, Localize("Join game"), 0, &Button))
 				{
-					GameClient()->SendSwitchTeam(TEAM_RED);
+					GameClient()->SendSwitchTeam(TEAM_GAME);
 					SetActive(false);
 				}
 			}
