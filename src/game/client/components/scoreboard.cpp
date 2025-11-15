@@ -157,6 +157,17 @@ void CScoreboard::RenderGoals(CUIRect Goals)
 
 void CScoreboard::RenderSpectators(CUIRect Spectators)
 {
+	int RemainingSpectators = 0;
+	for(const CNetObj_PlayerInfo *pInfo : GameClient()->m_Snap.m_apInfoByName)
+	{
+		if(!pInfo || pInfo->m_Team != TEAM_SPECTATORS)
+			continue;
+		++RemainingSpectators;
+	}
+
+	if(RemainingSpectators == 0)
+		return;
+
 	Spectators.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_ALL, 15.0f);
 	Spectators.Margin(10.0f, &Spectators);
 
@@ -165,14 +176,6 @@ void CScoreboard::RenderSpectators(CUIRect Spectators)
 	Cursor.m_FontSize = 22.0f;
 	Cursor.m_LineWidth = Spectators.w;
 	Cursor.m_MaxLines = round_truncate(Spectators.h / Cursor.m_FontSize);
-
-	int RemainingSpectators = 0;
-	for(const CNetObj_PlayerInfo *pInfo : GameClient()->m_Snap.m_apInfoByName)
-	{
-		if(!pInfo || pInfo->m_Team != TEAM_SPECTATORS)
-			continue;
-		++RemainingSpectators;
-	}
 
 	TextRender()->TextEx(&Cursor, Localize("Spectators"));
 
