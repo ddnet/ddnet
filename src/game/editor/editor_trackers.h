@@ -117,14 +117,6 @@ private:
 		CPoint m_OriginalPoint;
 	};
 	SData m_Data;
-
-	enum EState
-	{
-		STATE_BEGIN,
-		STATE_EDITING,
-		STATE_END
-	};
-	void HandlePointMove(EState State);
 };
 
 struct SPropTrackerHelper
