@@ -2254,7 +2254,6 @@ void CCharacter::DDRacePostCoreTick()
 		m_Core.m_Jumped = 1;
 	}
 
-	// TODO, endlessjump is split from invincible, what to do here
 	if(m_Core.m_EndlessJump && m_Core.m_Jumped > 1)
 	{
 		// players with infinite jumps always have light feet
