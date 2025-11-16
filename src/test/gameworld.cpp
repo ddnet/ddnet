@@ -309,4 +309,8 @@ TEST_F(CTestGameWorld, CharacterEmote)
 	// /emote angry 3 chat command and frozen
 	pChr->Freeze(10);
 	ASSERT_EQ(pChr->DetermineEyeEmote(), EMOTE_ANGRY);
+
+	// /emote crying 3 chat command
+	pChr->SetEmote(EMOTE_CRYING, GameServer()->Server()->Tick() + GameServer()->Server()->TickSpeed() * 3);
+	ASSERT_EQ(pChr->DetermineEyeEmote(), EMOTE_CRYING);
 }
