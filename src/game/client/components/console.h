@@ -82,6 +82,10 @@ class CGameConsole : public CComponent
 		const char *m_pCommandHelp;
 		const char *m_pCommandParams;
 
+		bool m_CompletionDirty;
+		std::vector<const char *> m_vCommandSuggestions;
+		std::vector<const char *> m_vArgumentSuggestions;
+
 		bool m_Searching = false;
 		struct SSearchMatch
 		{
@@ -134,6 +138,7 @@ class CGameConsole : public CComponent
 		void UpdateEntryTextAttributes(CBacklogEntry *pEntry) const;
 
 		bool IsInputHidden() const;
+		void UpdateCompletionSuggestions();
 
 	private:
 		void SetSearching(bool Searching);
