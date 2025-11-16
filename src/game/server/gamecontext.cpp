@@ -4083,6 +4083,7 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("hitothers", "?s['all'|'hammer'|'shotgun'|'grenade'|'laser']", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeToggleHitOthers, this, "Toggles hit others");
 
 	Console()->Register("kill", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConProtectedKill, this, "Kill yourself when kill-protected during a long game (use f1, kill for regular kill)");
+	Console()->Register("color", "c[color]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConColor, this, "");
 }
 
 void CGameContext::OnInit(const void *pPersistentData)
