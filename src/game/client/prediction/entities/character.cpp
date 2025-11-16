@@ -35,8 +35,8 @@ void CCharacter::SetSolo(bool Solo)
 void CCharacter::SetSuper(bool Super)
 {
 	m_Core.m_Super = Super;
-	if(m_Core.m_Super)
-		TeamsCore()->Team(GetCid(), TeamsCore()->m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER);
+	if(m_Core.m_Super && TeamsCore()->m_IsDDRace16)
+		TeamsCore()->Team(GetCid(), VANILLA_TEAM_SUPER);
 }
 
 bool CCharacter::IsGrounded()
@@ -1141,9 +1141,9 @@ void CCharacter::DDRacePostCoreTick()
 		m_Core.m_Jumped = 1;
 	}
 
-	if((m_Core.m_Super || m_Core.m_EndlessJump) && m_Core.m_Jumped > 1)
+	if(m_Core.m_EndlessJump && m_Core.m_Jumped > 1)
 	{
-		// Super players and players with infinite jumps always have light feet
+		// players with infinite jumps always have light feet
 		m_Core.m_Jumped = 1;
 	}
 

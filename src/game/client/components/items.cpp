@@ -468,7 +468,6 @@ void CItems::OnRender()
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		return;
 
-	bool IsSuper = GameClient()->IsLocalCharSuper();
 	int Ticks = Client()->GameTick(g_Config.m_ClDummy) % Client()->GameTickSpeed();
 	bool BlinkingPickup = (Ticks % 22) < 4;
 	bool BlinkingGun = (Ticks % 22) < 4;
@@ -486,7 +485,7 @@ void CItems::OnRender()
 	{
 		for(auto *pProj = (CProjectile *)GameClient()->m_PrevPredictedWorld.FindFirst(CGameWorld::ENTTYPE_PROJECTILE); pProj; pProj = (CProjectile *)pProj->NextEntity())
 		{
-			if(!IsSuper && pProj->m_Number > 0 && pProj->m_Number < (int)aSwitchers.size() && !aSwitchers[pProj->m_Number].m_aStatus[SwitcherTeam] && (pProj->m_Explosive ? BlinkingProjEx : BlinkingProj))
+			if(pProj->m_Number > 0 && pProj->m_Number < (int)aSwitchers.size() && !aSwitchers[pProj->m_Number].m_aStatus[SwitcherTeam] && (pProj->m_Explosive ? BlinkingProjEx : BlinkingProj))
 				continue;
 
 			CProjectileData Data = pProj->GetData();
@@ -502,7 +501,7 @@ void CItems::OnRender()
 		}
 		for(auto *pPickup = (CPickup *)GameClient()->m_PrevPredictedWorld.FindFirst(CGameWorld::ENTTYPE_PICKUP); pPickup; pPickup = (CPickup *)pPickup->NextEntity())
 		{
-			if(!IsSuper && pPickup->m_Layer == LAYER_SWITCH && pPickup->m_Number > 0 && pPickup->m_Number < (int)aSwitchers.size() && !aSwitchers[pPickup->m_Number].m_aStatus[SwitcherTeam] && BlinkingPickup)
+			if(pPickup->m_Layer == LAYER_SWITCH && pPickup->m_Number > 0 && pPickup->m_Number < (int)aSwitchers.size() && !aSwitchers[pPickup->m_Number].m_aStatus[SwitcherTeam] && BlinkingPickup)
 				continue;
 
 			if(pPickup->InDDNetTile())
@@ -527,7 +526,7 @@ void CItems::OnRender()
 		if(Item.m_Type == NETOBJTYPE_PROJECTILE || Item.m_Type == NETOBJTYPE_DDRACEPROJECTILE || Item.m_Type == NETOBJTYPE_DDNETPROJECTILE)
 		{
 			CProjectileData Data = ExtractProjectileInfo(Item.m_Type, pData, &GameClient()->m_GameWorld, pEntEx);
-			bool Inactive = !IsSuper && Data.m_SwitchNumber > 0 && Data.m_SwitchNumber < (int)aSwitchers.size() && !aSwitchers[Data.m_SwitchNumber].m_aStatus[SwitcherTeam];
+			bool Inactive = Data.m_SwitchNumber > 0 && Data.m_SwitchNumber < (int)aSwitchers.size() && !aSwitchers[Data.m_SwitchNumber].m_aStatus[SwitcherTeam];
 			if(Inactive && (Data.m_Explosive ? BlinkingProjEx : BlinkingProj))
 				continue;
 			if(UsePredicted)
@@ -553,7 +552,7 @@ void CItems::OnRender()
 		else if(Item.m_Type == NETOBJTYPE_PICKUP || Item.m_Type == NETOBJTYPE_DDNETPICKUP)
 		{
 			CPickupData Data = ExtractPickupInfo(Item.m_Type, pData, pEntEx);
-			bool Inactive = !IsSuper && Data.m_SwitchNumber > 0 && Data.m_SwitchNumber < (int)aSwitchers.size() && !aSwitchers[Data.m_SwitchNumber].m_aStatus[SwitcherTeam];
+			bool Inactive = Data.m_SwitchNumber > 0 && Data.m_SwitchNumber < (int)aSwitchers.size() && !aSwitchers[Data.m_SwitchNumber].m_aStatus[SwitcherTeam];
 
 			if(Inactive && BlinkingPickup)
 				continue;
@@ -577,7 +576,7 @@ void CItems::OnRender()
 			}
 
 			CLaserData Data = ExtractLaserInfo(Item.m_Type, pData, &GameClient()->m_GameWorld, pEntEx);
-			bool Inactive = !IsSuper && Data.m_SwitchNumber > 0 && Data.m_SwitchNumber < (int)aSwitchers.size() && !aSwitchers[Data.m_SwitchNumber].m_aStatus[SwitcherTeam];
+			bool Inactive = Data.m_SwitchNumber > 0 && Data.m_SwitchNumber < (int)aSwitchers.size() && !aSwitchers[Data.m_SwitchNumber].m_aStatus[SwitcherTeam];
 
 			bool IsEntBlink = false;
 			int EntStartTick = -1;
@@ -598,7 +597,7 @@ void CItems::OnRender()
 			}
 			else if(Data.m_Type == LASERTYPE_DOOR)
 			{
-				if(Data.m_Predict && (Inactive || IsSuper))
+				if(Data.m_Predict && Inactive)
 				{
 					Data.m_From.x = Data.m_To.x;
 					Data.m_From.y = Data.m_To.y;
