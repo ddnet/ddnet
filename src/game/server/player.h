@@ -97,7 +97,7 @@ public:
 	int m_LastCommandPos;
 	int m_LastWhisperTo;
 	int m_LastInvited;
-	bool m_IgnoreTeamInvite = false;
+	bool m_IgnoreTeamInvite;
 	int m_IgnoreTeamID = -1;
 	int m_SendVoteIndex;
 
