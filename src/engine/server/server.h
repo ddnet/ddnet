@@ -197,6 +197,9 @@ public:
 		CUuid m_ConnectionId;
 		int64_t m_RedirectDropTime;
 
+		int m_aIdMap[LEGACY_MAX_CLIENTS];
+		int m_aReverseIdMap[MAX_CLIENTS];
+
 		// DNSBL
 		EDnsblState m_DnsblState;
 		std::shared_ptr<CHostLookup> m_pDnsblLookup;
@@ -212,7 +215,6 @@ public:
 	IConsole::EAccessLevel ConsoleAccessLevel(int ClientId) const;
 
 	CClient m_aClients[MAX_CLIENTS];
-	int m_aIdMap[MAX_CLIENTS * VANILLA_MAX_CLIENTS];
 
 	CSnapshotDelta m_SnapshotDelta;
 	CSnapshotBuilder m_SnapshotBuilder;
@@ -493,6 +495,7 @@ public:
 	void InitMaplist();
 
 	int *GetIdMap(int ClientId) override;
+	int *GetReverseIdMap(int ClientId) override;
 
 	void InitDnsbl(int ClientId);
 	bool DnsblWhite(int ClientId) override

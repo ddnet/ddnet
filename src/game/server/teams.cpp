@@ -9,6 +9,7 @@
 #include <base/system.h>
 
 #include <engine/shared/config.h>
+#include <engine/shared/protocol.h>
 
 #include <game/mapitems.h>
 #include <game/server/entities/character.h>
@@ -644,8 +645,43 @@ void CGameTeams::SendTeamsState(int ClientId)
 
 	for(unsigned i = 0; i < MAX_CLIENTS; i++)
 	{
-		Msg.AddInt(m_Core.Team(i));
-		MsgLegacy.AddInt(m_Core.Team(i));
+		if(GameServer()->GetClientVersion(ClientId) >= VERSION_DDNET_128_PLAYERS || Server()->MaxClients() <= LEGACY_MAX_CLIENTS)
+		{
+			Msg.AddInt(m_Core.Team(i));
+			MsgLegacy.AddInt(m_Core.Team(i));
+		}
+		else
+		{
+			// see others selector
+			int Indicator = GameServer()->m_PlayerMapping.GetSeeOthersInd(ClientId, i);
+			if(Indicator != -1)
+			{
+				int Team = -1;
+				if(Indicator == CPlayerMapping::SEE_OTHERS_IND_BUTTON)
+					Team = 49;
+				else if(Indicator == CPlayerMapping::SEE_OTHERS_IND_PLAYER)
+					Team = 28;
+
+				if(Team != -1)
+				{
+					Msg.AddInt(Team);
+					continue;
+				}
+			}
+
+			int Team = 0;
+			int TranslatedId = i;
+			if(Server()->ReverseTranslate(TranslatedId, ClientId))
+			{
+				Team = m_Core.Team(TranslatedId);
+				if(Team == TEAM_SUPER)
+					Team = LEGACY_MAX_CLIENTS;
+				else if(Team > LEGACY_MAX_CLIENTS)
+					Team = 0;
+			}
+			Msg.AddInt(Team);
+			MsgLegacy.AddInt(Team);
+		}
 	}
 
 	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
