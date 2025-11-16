@@ -52,6 +52,7 @@ void CPlayer::Reset()
 	m_LastSetTeam = 0;
 	m_LastInvited = 0;
 	m_IgnoreTeamInvite = false;
+	m_IgnoreTeam[NUM_DDRACE_TEAMS] = false;
 	m_WeakHookSpawn = false;
 
 	int *pIdMap = Server()->GetIdMap(m_ClientId);

@@ -1288,8 +1288,7 @@ void CGameContext::ConInvite(IConsole::IResult *pResult, void *pUserData)
 			return;
 		}
 
-		if(pSelf->m_apPlayers[Target]->m_IgnoreTeamInvite &&
-			pSelf->m_apPlayers[Target]->m_IgnoreTeamID == Team)
+		if(pSelf->m_apPlayers[Target]->m_IgnoreTeam[Team])
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "The server does not send the invite because of the previous cancelation");
 			return;
@@ -1359,7 +1358,7 @@ void CGameContext::ConCancelInvite(IConsole::IResult *pResult, void *pUserData)
 
 	pController->Teams().SetClientInvited(Team, Target, false);
 	pSelf->m_apPlayers[Target]->m_IgnoreTeamInvite = true;
-	pSelf->m_apPlayers[Target]->m_IgnoreTeamID = Team;
+	pSelf->m_apPlayers[Target]->m_IgnoreTeam[Team] = true;
 
 	pSelf->m_apPlayers[ClientId]->m_LastInvited = pSelf->Server()->Tick();
 

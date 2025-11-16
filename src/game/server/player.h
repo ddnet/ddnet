@@ -15,6 +15,7 @@
 #include <memory>
 #include <optional>
 
+#include <game/teamscore.h>
 class CCharacter;
 class CGameContext;
 class IServer;
@@ -98,6 +99,7 @@ public:
 	int m_LastWhisperTo;
 	int m_LastInvited;
 	bool m_IgnoreTeamInvite;
+	bool m_IgnoreTeam[NUM_DDRACE_TEAMS];
 	int m_IgnoreTeamID = -1;
 	int m_SendVoteIndex;
 
