@@ -20,6 +20,7 @@
 #include <engine/map.h>
 #include <engine/server/server.h>
 #include <engine/shared/config.h>
+#include <engine/shared/console.h>
 #include <engine/shared/datafile.h>
 #include <engine/shared/json.h>
 #include <engine/shared/linereader.h>
@@ -200,6 +201,38 @@ void CGameContext::TeeHistorianWrite(const void *pData, int DataSize, void *pUse
 {
 	CGameContext *pSelf = (CGameContext *)pUser;
 	aio_write(pSelf->m_pTeeHistorianFile, pData, DataSize);
+}
+
+std::vector<int> CGameContext::ClientsForVictim(int ClientId, int Victim, void *pUser)
+{
+	CGameContext *pSelf = (CGameContext *)pUser;
+
+	// TODO: return by r-value https://www.geeksforgeeks.org/cpp/how-to-return-a-vector-from-a-function-in-cpp/
+	std::vector<int> vClientIds;
+	vClientIds.clear();
+
+	switch(Victim)
+	{
+	case -3 /* CConsole::CResult::VICTIM_NONE */:
+		break;
+	case -2 /* CConsole::CResult::VICTIM_ME */:
+		vClientIds.emplace_back(ClientId);
+		break;
+	case -1 /* CConsole::CResult::VICTIM_ALL */:
+		for(int i = 0; i < pSelf->Server()->MaxClients(); i++)
+		{
+			if(!pSelf->Server()->ClientIngame(i))
+				continue;
+
+			vClientIds.emplace_back(i);
+		}
+		break;
+	default: // if it is not a special victim it is a client id
+		vClientIds.emplace_back(Victim);
+		break;
+	};
+
+	return vClientIds;
 }
 
 void CGameContext::CommandCallback(int ClientId, int FlagMask, const char *pCmd, IConsole::IResult *pResult, void *pUser)
@@ -4100,6 +4133,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 	m_Events.SetGameServer(this);
 
 	m_GameUuid = RandomUuid();
+	Console()->SetGetVictimsCommandCallback(ClientsForVictim, this);
 	Console()->SetTeeHistorianCommandCallback(CommandCallback, this);
 
 	uint64_t aSeed[2];

@@ -384,6 +384,12 @@ void CConsole::Print(int Level, const char *pFrom, const char *pStr, ColorRGBA P
 	}
 }
 
+void CConsole::SetGetVictimsCommandCallback(FGetVictimsCommandCallback pfnCallback, void *pUser)
+{
+	m_pfnGetVictimsCommandCallback = pfnCallback;
+	m_pGetVictimsCommandUserData = pUser;
+}
+
 void CConsole::SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser)
 {
 	m_pfnTeeHistorianCommandCallback = pfnCallback;
@@ -594,14 +600,11 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 							m_pfnTeeHistorianCommandCallback(ClientId, m_FlagMask, pCommand->m_pName, &Result, m_pTeeHistorianCommandUserdata);
 						}
 
-						if(Result.GetVictim() == CResult::VICTIM_ME)
-							Result.SetVictim(ClientId);
-
-						if(Result.HasVictim() && Result.GetVictim() == CResult::VICTIM_ALL)
+						if(m_pfnGetVictimsCommandCallback)
 						{
-							for(int i = 0; i < MAX_CLIENTS; i++)
+							for(int VictimId : m_pfnGetVictimsCommandCallback(ClientId, Result.GetVictim(), m_pGetVictimsCommandUserData))
 							{
-								Result.SetVictim(i);
+								Result.SetVictim(VictimId);
 								pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
 							}
 						}
