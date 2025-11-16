@@ -97,6 +97,7 @@ public:
 	int m_LastCommandPos;
 	int m_LastWhisperTo;
 	int m_LastInvited;
+	bool m_BlockTeamInvites;
 
 	int m_SendVoteIndex;
 
