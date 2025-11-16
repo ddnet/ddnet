@@ -734,6 +734,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 	m_pConsole->DeregisterTempAll();
 	m_ExpectedMaplistEntries = -1;
 	m_vMaplistEntries.clear();
+	GameClient()->ForceUpdateConsoleRemoteCompletionSuggestions();
 	m_aNetClient[CONN_MAIN].Disconnect(pReason);
 	SetState(IClient::STATE_OFFLINE);
 	m_pMap->Unload();
@@ -1885,6 +1886,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			if(!Unpacker.Error())
 			{
 				m_pConsole->RegisterTemp(pName, pParams, CFGFLAG_SERVER, pHelp);
+				GameClient()->ForceUpdateConsoleRemoteCompletionSuggestions();
 			}
 			m_GotRconCommands++;
 		}
@@ -1894,6 +1896,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			if(!Unpacker.Error())
 			{
 				m_pConsole->DeregisterTemp(pName);
+				GameClient()->ForceUpdateConsoleRemoteCompletionSuggestions();
 			}
 		}
 		else if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_AUTH_STATUS)
@@ -1919,6 +1922,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					m_pConsole->DeregisterTempAll();
 					m_ExpectedRconCommands = -1;
 					m_vMaplistEntries.clear();
+					GameClient()->ForceUpdateConsoleRemoteCompletionSuggestions();
 					m_ExpectedMaplistEntries = -1;
 				}
 			}
@@ -2248,6 +2252,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				if(pMapName[0] != '\0')
 				{
 					m_vMaplistEntries.emplace_back(pMapName);
+					GameClient()->ForceUpdateConsoleRemoteCompletionSuggestions();
 				}
 			}
 		}
@@ -2258,6 +2263,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				return;
 
 			m_vMaplistEntries.clear();
+			GameClient()->ForceUpdateConsoleRemoteCompletionSuggestions();
 			m_ExpectedMaplistEntries = ExpectedMaplistEntries;
 		}
 		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_MAPLIST_GROUP_END)
