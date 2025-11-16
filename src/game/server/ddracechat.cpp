@@ -1,4 +1,4 @@
-/* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
+﻿/* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #include "gamecontext.h"
 #include "player.h"
 #include "score.h"
@@ -1288,9 +1288,10 @@ void CGameContext::ConInvite(IConsole::IResult *pResult, void *pUserData)
 			return;
 		}
 
-		if(pSelf->m_apPlayers[Target]->m_BlockTeamInvites)
+		if(pSelf->m_apPlayers[Target]->m_IgnoreTeamInvite &&
+			pSelf->m_apPlayers[Target]->m_IgnoreTeamID == Team)
 		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "This player is not accepting invites");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "The server does not send the invite because of the previous cancelation");
 			return;
 		}
 
@@ -1320,71 +1321,54 @@ void CGameContext::ConCancelInvite(IConsole::IResult *pResult, void *pUserData)
 	auto *pController = pSelf->m_pController;
 	const char *pName = pResult->GetString(0);
 
-	int ClientID = pResult->m_ClientId;
-	int Team = pController->Teams().m_Core.Team(pResult->m_ClientId);
-	if(Team > TEAM_FLOCK && Team < TEAM_SUPER)
+	int ClientId = pResult->m_ClientId;
+	int Team = pController->Teams().m_Core.Team(ClientId);
+	if(Team <= TEAM_FLOCK || Team >= TEAM_SUPER)
 	{
-		int Target = -1;
-		for(int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if(!str_comp(pName, pSelf->Server()->ClientName(i)))
-			{
-				Target = i;
-				break;
-			}
-		}
-
-		if(Target < 0)
-		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Player not found");
-			return;
-		}
-
-		if(pSelf->m_apPlayers[ClientID] && pSelf->m_apPlayers[ClientID]->m_LastInvited + g_Config.m_SvInviteFrequency * pSelf->Server()->TickSpeed() > pSelf->Server()->Tick())
-		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Can't cancel this quickly");
-			return;
-		}
-
-		if(!pController->Teams().IsInvited(Team, Target))
-		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "This player is not invited to your team");
-			return;
-		}
-
-		pController->Teams().SetClientInvited(Team, Target, false);
-
-		pSelf->m_apPlayers[ClientID]->m_LastInvited = pSelf->Server()->Tick();
-
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "You canceled the invite for %s", pSelf->Server()->ClientName(Target));
-		pSelf->SendChatTarget(ClientID, aBuf);
-
-		str_format(aBuf, sizeof(aBuf), "'%s' canceled your team %d invitation.", pSelf->Server()->ClientName(ClientID), Team);
-		pSelf->SendChatTarget(Target, aBuf);
-	}
-	else
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Can't cancel invites in this team");
-}
-
-void CGameContext::ConBlockInvites(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	int ClientID = pResult->m_ClientId;
-
-	if(!pSelf->m_apPlayers[ClientID])
 		return;
+	}
 
-	if(pSelf->m_apPlayers[ClientID]->m_BlockTeamInvites)
+	int Target = -1;
+	for(int TargetId = 0; TargetId < MAX_CLIENTS; TargetId++)
 	{
-		pSelf->m_apPlayers[ClientID]->m_BlockTeamInvites = false;
-		pSelf->SendChatTarget(ClientID, "You are now accepting team invites.");
+		if(!str_comp(pName, pSelf->Server()->ClientName(TargetId)))
+		{
+			Target = TargetId;
+			break;
+		}
 	}
-	else
+
+	if(Target < 0)
 	{
-		pSelf->m_apPlayers[ClientID]->m_BlockTeamInvites = true;
-		pSelf->SendChatTarget(ClientID, "You are now blocking team invites.");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Player not found");
+		return;
 	}
+
+	if(pSelf->m_apPlayers[ClientId] && pSelf->m_apPlayers[ClientId]->m_LastInvited + g_Config.m_SvInviteFrequency * pSelf->Server()->TickSpeed() > pSelf->Server()->Tick())
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Can't cancel this quickly");
+		return;
+	}
+
+	if(!pController->Teams().IsInvited(Team, Target))
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "This player is not invited to your team");
+		return;
+	}
+
+	pController->Teams().SetClientInvited(Team, Target, false);
+	pSelf->m_apPlayers[Target]->m_IgnoreTeamInvite = true;
+	pSelf->m_apPlayers[Target]->m_IgnoreTeamID = Team;
+
+	pSelf->m_apPlayers[ClientId]->m_LastInvited = pSelf->Server()->Tick();
+
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "You canceled the invite for %s", pSelf->Server()->ClientName(Target));
+	pSelf->SendChatTarget(ClientId, aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "'%s' canceled your team %d invitation.", pSelf->Server()->ClientName(ClientId), Team);
+	pSelf->SendChatTarget(Target, aBuf);
 }
 
 void CGameContext::ConTeam0Mode(IConsole::IResult *pResult, void *pUserData)

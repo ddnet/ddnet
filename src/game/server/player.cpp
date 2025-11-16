@@ -51,7 +51,7 @@ void CPlayer::Reset()
 	m_TeamChangeTick = Server()->Tick();
 	m_LastSetTeam = 0;
 	m_LastInvited = 0;
-	m_BlockTeamInvites = false;
+	std::bitset<NUM_TEAMS> m_IgnoreTeamInvite = false;
 	m_WeakHookSpawn = false;
 
 	int *pIdMap = Server()->GetIdMap(m_ClientId);

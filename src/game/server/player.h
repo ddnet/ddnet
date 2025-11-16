@@ -97,8 +97,8 @@ public:
 	int m_LastCommandPos;
 	int m_LastWhisperTo;
 	int m_LastInvited;
-	bool m_BlockTeamInvites;
-
+	bool m_IgnoreTeamInvite = false;
+	int m_IgnoreTeamID = -1;
 	int m_SendVoteIndex;
 
 	CTeeInfo m_TeeInfos;
