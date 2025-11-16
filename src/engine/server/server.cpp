@@ -595,6 +595,7 @@ int CServer::Init()
 		Client.m_Latency = 0;
 		Client.m_Sixup = false;
 		Client.m_RedirectDropTime = 0;
+		Client.m_DummyClientId = -1;
 	}
 
 	m_CurrentGameTick = MIN_TICK;
@@ -1153,6 +1154,7 @@ int CServer::NewClientNoAuthCallback(int ClientId, void *pUser)
 	pThis->m_aClients[ClientId].m_DDNetVersion = VERSION_NONE;
 	pThis->m_aClients[ClientId].m_GotDDNetVersionPacket = false;
 	pThis->m_aClients[ClientId].m_DDNetVersionSettled = false;
+	pThis->m_aClients[ClientId].m_DummyClientId = -1;
 	pThis->m_aClients[ClientId].Reset();
 
 	pThis->GameServer()->TeehistorianRecordPlayerJoin(ClientId, false);
@@ -1187,6 +1189,7 @@ int CServer::NewClientCallback(int ClientId, void *pUser, bool Sixup)
 	pThis->m_aClients[ClientId].m_DDNetVersion = VERSION_NONE;
 	pThis->m_aClients[ClientId].m_GotDDNetVersionPacket = false;
 	pThis->m_aClients[ClientId].m_DDNetVersionSettled = false;
+	pThis->m_aClients[ClientId].m_DummyClientId = -1;
 	pThis->m_aClients[ClientId].Reset();
 	pThis->m_aClients[ClientId].m_Sixup = Sixup;
 
@@ -1278,6 +1281,11 @@ int CServer::DelClientCallback(int ClientId, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientId].m_Sixup = false;
 	pThis->m_aClients[ClientId].m_RedirectDropTime = 0;
 	pThis->m_aClients[ClientId].m_HasPersistentData = false;
+	if(pThis->m_aClients[ClientId].m_DummyClientId != -1)
+	{
+		pThis->m_aClients[pThis->m_aClients[ClientId].m_DummyClientId].m_DummyClientId = -1;
+		pThis->m_aClients[ClientId].m_DummyClientId = -1;
+	}
 
 	pThis->GameServer()->TeehistorianRecordPlayerDrop(ClientId, pReason);
 	pThis->Antibot()->OnEngineClientDrop(ClientId, pReason);
@@ -1711,6 +1719,20 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				m_aClients[ClientId].m_DDNetVersionSettled = true;
 				m_aClients[ClientId].m_GotDDNetVersionPacket = true;
 				m_aClients[ClientId].m_State = CClient::STATE_AUTH;
+
+				for(int i = 0; i < MAX_CLIENTS; i++)
+				{
+					if(i == ClientId || m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
+						continue;
+
+					if(m_aClients[ClientId].m_ConnectionId != m_aClients[i].m_ConnectionId ||
+						m_aClients[ClientId].m_DDNetVersion != m_aClients[i].m_DDNetVersion)
+						continue;
+
+					m_aClients[ClientId].m_DummyClientId = i;
+					m_aClients[i].m_DummyClientId = ClientId;
+					break;
+				}
 			}
 		}
 		else if(Msg == NETMSG_INFO)

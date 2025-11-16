@@ -196,6 +196,7 @@ public:
 		char m_aDDNetVersionStr[64];
 		CUuid m_ConnectionId;
 		int64_t m_RedirectDropTime;
+		int m_DummyClientId;
 
 		// DNSBL
 		EDnsblState m_DnsblState;
