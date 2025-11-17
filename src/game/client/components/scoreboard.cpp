@@ -98,20 +98,20 @@ void CScoreboard::RenderTitle(CUIRect TitleBar, int Team, const char *pTitle)
 		}
 	}
 
-	const float TitleFontSize = 40.0f;
+	const float TitleFontSize = 20.0f;
 	const float ScoreTextWidth = TextRender()->TextWidth(TitleFontSize, aScore);
 
-	TitleBar.VMargin(20.0f, &TitleBar);
+	TitleBar.VMargin(10.0f, &TitleBar);
 	CUIRect TitleLabel, ScoreLabel;
 	if(Team == TEAM_RED)
 	{
 		TitleBar.VSplitRight(ScoreTextWidth, &TitleLabel, &ScoreLabel);
-		TitleLabel.VSplitRight(10.0f, &TitleLabel, nullptr);
+		TitleLabel.VSplitRight(5.0f, &TitleLabel, nullptr);
 	}
 	else
 	{
 		TitleBar.VSplitLeft(ScoreTextWidth, &ScoreLabel, &TitleLabel);
-		TitleLabel.VSplitLeft(10.0f, nullptr, &TitleLabel);
+		TitleLabel.VSplitLeft(5.0f, nullptr, &TitleLabel);
 	}
 
 	{
@@ -129,10 +129,10 @@ void CScoreboard::RenderTitle(CUIRect TitleBar, int Team, const char *pTitle)
 
 void CScoreboard::RenderGoals(CUIRect Goals)
 {
-	Goals.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_ALL, 15.0f);
-	Goals.VMargin(10.0f, &Goals);
+	Goals.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_ALL, 7.5f);
+	Goals.VMargin(5.0f, &Goals);
 
-	const float FontSize = 20.0f;
+	const float FontSize = 10.0f;
 	const CNetObj_GameInfo *pGameInfoObj = GameClient()->m_Snap.m_pGameInfoObj;
 	char aBuf[64];
 
@@ -157,12 +157,12 @@ void CScoreboard::RenderGoals(CUIRect Goals)
 
 void CScoreboard::RenderSpectators(CUIRect Spectators)
 {
-	Spectators.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_ALL, 15.0f);
-	Spectators.Margin(10.0f, &Spectators);
+	Spectators.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_ALL, 7.5f);
+	Spectators.Margin(5.0f, &Spectators);
 
 	CTextCursor Cursor;
 	Cursor.SetPosition(Spectators.TopLeft());
-	Cursor.m_FontSize = 22.0f;
+	Cursor.m_FontSize = 11.0f;
 	Cursor.m_LineWidth = Spectators.w;
 	Cursor.m_MaxLines = round_truncate(Spectators.h / Cursor.m_FontSize);
 
@@ -250,7 +250,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 	const CNetObj_GameData *pGameDataObj = GameClient()->m_Snap.m_pGameDataObj;
 	const bool TimeScore = GameClient()->m_GameInfo.m_TimeScore;
 	const int NumPlayers = CountEnd - CountStart;
-	const bool LowScoreboardWidth = Scoreboard.w < 700.0f;
+	const bool LowScoreboardWidth = Scoreboard.w < 350.0f;
 
 	bool Race7 = Client()->IsSixup() && pGameInfoObj && pGameInfoObj->m_GameFlags & protocol7::GAMEFLAG_RACE;
 
@@ -262,76 +262,76 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 	float FontSize;
 	if(NumPlayers <= 8)
 	{
-		LineHeight = 60.0f;
-		TeeSizeMod = 1.0f;
-		Spacing = 16.0f;
-		RoundRadius = 10.0f;
-		FontSize = 24.0f;
+		LineHeight = 30.0f;
+		TeeSizeMod = 0.5f;
+		Spacing = 8.0f;
+		RoundRadius = 5.0f;
+		FontSize = 12.0f;
 	}
 	else if(NumPlayers <= 12)
 	{
-		LineHeight = 50.0f;
-		TeeSizeMod = 0.9f;
-		Spacing = 5.0f;
-		RoundRadius = 10.0f;
-		FontSize = 24.0f;
+		LineHeight = 25.0f;
+		TeeSizeMod = 0.45f;
+		Spacing = 2.5f;
+		RoundRadius = 5.0f;
+		FontSize = 12.0f;
 	}
 	else if(NumPlayers <= 16)
-	{
-		LineHeight = 40.0f;
-		TeeSizeMod = 0.8f;
-		Spacing = 0.0f;
-		RoundRadius = 5.0f;
-		FontSize = 24.0f;
-	}
-	else if(NumPlayers <= 24)
-	{
-		LineHeight = 27.0f;
-		TeeSizeMod = 0.6f;
-		Spacing = 0.0f;
-		RoundRadius = 5.0f;
-		FontSize = 20.0f;
-	}
-	else if(NumPlayers <= 32)
 	{
 		LineHeight = 20.0f;
 		TeeSizeMod = 0.4f;
 		Spacing = 0.0f;
-		RoundRadius = 5.0f;
-		FontSize = 16.0f;
+		RoundRadius = 2.5f;
+		FontSize = 12.0f;
 	}
-	else if(LowScoreboardWidth)
+	else if(NumPlayers <= 24)
 	{
-		LineHeight = 15.0f;
-		TeeSizeMod = 0.25f;
+		LineHeight = 13.5f;
+		TeeSizeMod = 0.3f;
 		Spacing = 0.0f;
-		RoundRadius = 2.0f;
-		FontSize = 14.0f;
+		RoundRadius = 2.5f;
+		FontSize = 10.0f;
 	}
-	else
+	else if(NumPlayers <= 32)
 	{
 		LineHeight = 10.0f;
 		TeeSizeMod = 0.2f;
 		Spacing = 0.0f;
-		RoundRadius = 2.0f;
-		FontSize = 10.0f;
+		RoundRadius = 2.5f;
+		FontSize = 8.0f;
+	}
+	else if(LowScoreboardWidth)
+	{
+		LineHeight = 7.5f;
+		TeeSizeMod = 0.125f;
+		Spacing = 0.0f;
+		RoundRadius = 1.0f;
+		FontSize = 7.0f;
+	}
+	else
+	{
+		LineHeight = 5.0f;
+		TeeSizeMod = 0.1f;
+		Spacing = 0.0f;
+		RoundRadius = 1.0f;
+		FontSize = 5.0f;
 	}
 
-	const float ScoreOffset = Scoreboard.x + 40.0f;
+	const float ScoreOffset = Scoreboard.x + 20.0f;
 	const float ScoreLength = TextRender()->TextWidth(FontSize, TimeScore ? "00:00:00" : "99999");
-	const float TeeOffset = ScoreOffset + ScoreLength + 20.0f;
+	const float TeeOffset = ScoreOffset + ScoreLength + 10.0f;
 	const float TeeLength = 60.0f * TeeSizeMod;
 	const float NameOffset = TeeOffset + TeeLength;
-	const float NameLength = (LowScoreboardWidth ? 180.0f : 300.0f) - TeeLength;
+	const float NameLength = (LowScoreboardWidth ? 90.0f : 150.0f) - TeeLength;
 	const float CountryLength = (LineHeight - Spacing - TeeSizeMod * 5.0f) * 2.0f;
-	const float PingLength = 55.0f;
-	const float PingOffset = Scoreboard.x + Scoreboard.w - PingLength - 20.0f;
+	const float PingLength = 27.5f;
+	const float PingOffset = Scoreboard.x + Scoreboard.w - PingLength - 10.0f;
 	const float CountryOffset = PingOffset - CountryLength;
-	const float ClanOffset = NameOffset + NameLength + 5.0f;
-	const float ClanLength = CountryOffset - ClanOffset - 5.0f;
+	const float ClanOffset = NameOffset + NameLength + 2.5f;
+	const float ClanLength = CountryOffset - ClanOffset - 2.5f;
 
 	// render headlines
-	const float HeadlineFontsize = 22.0f;
+	const float HeadlineFontsize = 11.0f;
 	CUIRect Headline;
 	Scoreboard.HSplitTop(HeadlineFontsize * 2.0f, &Headline, &Scoreboard);
 	const float HeadlineY = Headline.y + Headline.h / 2.0f - HeadlineFontsize / 2.0f;
@@ -431,7 +431,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 							str_format(aBuf, sizeof(aBuf), "%d", DDTeam);
 						else
 							str_format(aBuf, sizeof(aBuf), Localize("%d\n(%d/%d)", "Team and size"), DDTeam, CurrentDDTeamSize, MaxTeamSize);
-						TextRender()->Text(State.m_TeamStartX, maximum(State.m_TeamStartY + Row.h / 2.0f - TeamFontSize, State.m_TeamStartY + 3.0f /* padding top */), TeamFontSize, aBuf);
+						TextRender()->Text(State.m_TeamStartX, maximum(State.m_TeamStartY + Row.h / 2.0f - TeamFontSize, State.m_TeamStartY + 1.5f /* padding top */), TeamFontSize, aBuf);
 					}
 					else
 					{
@@ -441,7 +441,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 							str_format(aBuf, sizeof(aBuf), Localize("Team %d (%d/%d)"), DDTeam, CurrentDDTeamSize, MaxTeamSize);
 						else
 							str_format(aBuf, sizeof(aBuf), Localize("Team %d"), DDTeam);
-						TextRender()->Text(Row.x + Row.w / 2.0f - TextRender()->TextWidth(TeamFontSize, aBuf) / 2.0f + 10.0f, Row.y + Row.h, TeamFontSize, aBuf);
+						TextRender()->Text(Row.x + Row.w / 2.0f - TextRender()->TextWidth(TeamFontSize, aBuf) / 2.0f + 5.0f, Row.y + Row.h, TeamFontSize, aBuf);
 					}
 
 					CurrentDDTeamSize = 0;
@@ -497,7 +497,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 				Graphics()->TextureSet(pGameDataObj->m_FlagCarrierBlue == pInfo->m_ClientId ? GameClient()->m_GameSkin.m_SpriteFlagBlue : GameClient()->m_GameSkin.m_SpriteFlagRed);
 				Graphics()->QuadsBegin();
 				Graphics()->QuadsSetSubset(1.0f, 0.0f, 0.0f, 1.0f);
-				IGraphics::CQuadItem QuadItem(TeeOffset, Row.y - 5.0f - Spacing / 2.0f, Row.h / 2.0f, Row.h);
+				IGraphics::CQuadItem QuadItem(TeeOffset, Row.y - 2.5f - Spacing / 2.0f, Row.h / 2.0f, Row.h);
 				Graphics()->QuadsDrawTL(&QuadItem, 1);
 				Graphics()->QuadsEnd();
 			}
@@ -622,19 +622,19 @@ void CScoreboard::RenderRecordingNotification(float x)
 	if(aBuf[0] == '\0')
 		return;
 
-	const float FontSize = 20.0f;
+	const float FontSize = 10.0f;
 
-	CUIRect Rect = {x, 0.0f, TextRender()->TextWidth(FontSize, aBuf) + 60.0f, 50.0f};
-	Rect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_B, 15.0f);
-	Rect.VSplitLeft(20.0f, nullptr, &Rect);
-	Rect.VSplitRight(10.0f, &Rect, nullptr);
+	CUIRect Rect = {x, 0.0f, TextRender()->TextWidth(FontSize, aBuf) + 30.0f, 25.0f};
+	Rect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_B, 7.5f);
+	Rect.VSplitLeft(10.0f, nullptr, &Rect);
+	Rect.VSplitRight(5.0f, &Rect, nullptr);
 
 	CUIRect Circle;
-	Rect.VSplitLeft(20.0f, &Circle, &Rect);
+	Rect.VSplitLeft(10.0f, &Circle, &Rect);
 	Circle.HMargin((Circle.h - Circle.w) / 2.0f, &Circle);
 	Circle.Draw(ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f), IGraphics::CORNER_ALL, Circle.h / 2.0f);
 
-	Rect.VSplitLeft(10.0f, nullptr, &Rect);
+	Rect.VSplitLeft(5.0f, nullptr, &Rect);
 	Ui()->DoLabel(&Rect, aBuf, FontSize, TEXTALIGN_ML);
 }
 
@@ -650,20 +650,19 @@ void CScoreboard::OnRender()
 	if(GameClient()->m_Motd.IsActive())
 		GameClient()->m_Motd.Clear();
 
-	const float Height = 400.0f * 3.0f;
-	const float Width = Height * Graphics()->ScreenAspect();
-	Graphics()->MapScreen(0, 0, Width, Height);
+	const CUIRect Screen = *Ui()->Screen();
+	Ui()->MapScreen();
 
 	const CNetObj_GameInfo *pGameInfoObj = GameClient()->m_Snap.m_pGameInfoObj;
 	const bool Teams = GameClient()->IsTeamPlay();
 	const auto &aTeamSize = GameClient()->m_Snap.m_aTeamSize;
 	const int NumPlayers = Teams ? maximum(aTeamSize[TEAM_RED], aTeamSize[TEAM_BLUE]) : aTeamSize[TEAM_RED];
 
-	const float ScoreboardSmallWidth = 750.0f + 20.0f;
-	const float ScoreboardWidth = !Teams && NumPlayers <= 16 ? ScoreboardSmallWidth : 1500.0f;
-	const float TitleHeight = 60.0f;
+	const float ScoreboardSmallWidth = 375.0f + 10.0f;
+	const float ScoreboardWidth = !Teams && NumPlayers <= 16 ? ScoreboardSmallWidth : 750.0f;
+	const float TitleHeight = 30.0f;
 
-	CUIRect Scoreboard = {(Width - ScoreboardWidth) / 2.0f, 150.0f, ScoreboardWidth, 710.0f + TitleHeight};
+	CUIRect Scoreboard = {(Screen.w - ScoreboardWidth) / 2.0f, 75.0f, ScoreboardWidth, 355.0f + TitleHeight};
 	CScoreboardRenderState RenderState{};
 
 	if(Teams)
@@ -706,21 +705,21 @@ void CScoreboard::OnRender()
 				str_copy(aTitle, Localize("Draw!"));
 			}
 
-			const float TitleFontSize = 72.0f;
-			CUIRect GameOverTitle = {Scoreboard.x, Scoreboard.y - TitleFontSize - 12.0f, Scoreboard.w, TitleFontSize};
+			const float TitleFontSize = 36.0f;
+			CUIRect GameOverTitle = {Scoreboard.x, Scoreboard.y - TitleFontSize - 6.0f, Scoreboard.w, TitleFontSize};
 			Ui()->DoLabel(&GameOverTitle, aTitle, TitleFontSize, TEXTALIGN_MC);
 			TextRender()->TextColor(TextRender()->DefaultTextColor());
 		}
 
 		CUIRect RedScoreboard, BlueScoreboard, RedTitle, BlueTitle;
-		Scoreboard.VSplitMid(&RedScoreboard, &BlueScoreboard, 15.0f);
+		Scoreboard.VSplitMid(&RedScoreboard, &BlueScoreboard, 7.5f);
 		RedScoreboard.HSplitTop(TitleHeight, &RedTitle, &RedScoreboard);
 		BlueScoreboard.HSplitTop(TitleHeight, &BlueTitle, &BlueScoreboard);
 
-		RedTitle.Draw(ColorRGBA(0.975f, 0.17f, 0.17f, 0.5f), IGraphics::CORNER_T, 15.0f);
-		BlueTitle.Draw(ColorRGBA(0.17f, 0.46f, 0.975f, 0.5f), IGraphics::CORNER_T, 15.0f);
-		RedScoreboard.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_B, 15.0f);
-		BlueScoreboard.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_B, 15.0f);
+		RedTitle.Draw(ColorRGBA(0.975f, 0.17f, 0.17f, 0.5f), IGraphics::CORNER_T, 7.5f);
+		BlueTitle.Draw(ColorRGBA(0.17f, 0.46f, 0.975f, 0.5f), IGraphics::CORNER_T, 7.5f);
+		RedScoreboard.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_B, 7.5f);
+		BlueScoreboard.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_B, 7.5f);
 
 		RenderTitle(RedTitle, TEAM_RED, pRedTeamName == nullptr ? Localize("Red team") : pRedTeamName);
 		RenderTitle(BlueTitle, TEAM_BLUE, pBlueTeamName == nullptr ? Localize("Blue team") : pBlueTeamName);
@@ -729,7 +728,7 @@ void CScoreboard::OnRender()
 	}
 	else
 	{
-		Scoreboard.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_ALL, 15.0f);
+		Scoreboard.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_ALL, 7.5f);
 
 		const char *pTitle;
 		if(pGameInfoObj && (pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER))
@@ -780,17 +779,17 @@ void CScoreboard::OnRender()
 		}
 	}
 
-	CUIRect Spectators = {(Width - ScoreboardSmallWidth) / 2.0f, Scoreboard.y + Scoreboard.h + 10.0f, ScoreboardSmallWidth, 200.0f};
+	CUIRect Spectators = {(Screen.w - ScoreboardSmallWidth) / 2.0f, Scoreboard.y + Scoreboard.h + 5.0f, ScoreboardSmallWidth, 100.0f};
 	if(pGameInfoObj && (pGameInfoObj->m_ScoreLimit || pGameInfoObj->m_TimeLimit || (pGameInfoObj->m_RoundNum && pGameInfoObj->m_RoundCurrent)))
 	{
 		CUIRect Goals;
-		Spectators.HSplitTop(50.0f, &Goals, &Spectators);
-		Spectators.HSplitTop(10.0f, nullptr, &Spectators);
+		Spectators.HSplitTop(25.0f, &Goals, &Spectators);
+		Spectators.HSplitTop(5.0f, nullptr, &Spectators);
 		RenderGoals(Goals);
 	}
 	RenderSpectators(Spectators);
 
-	RenderRecordingNotification((Width / 7) * 4 + 20);
+	RenderRecordingNotification((Screen.w / 7) * 4 + 10);
 }
 
 bool CScoreboard::IsActive() const
