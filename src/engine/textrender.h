@@ -71,6 +71,7 @@ namespace FontIcons
 	[[maybe_unused]] static const char *FONT_ICON_LOCK = "\xEF\x80\xA3";
 	[[maybe_unused]] static const char *FONT_ICON_MAGNIFYING_GLASS = "\xEF\x80\x82";
 	[[maybe_unused]] static const char *FONT_ICON_HEART = "\xEF\x80\x84";
+	[[maybe_unused]] static const char *FONT_ICON_HEART_CRACK = "\xEF\x9E\xA9";
 	[[maybe_unused]] static const char *FONT_ICON_STAR = "\xEF\x80\x85";
 	[[maybe_unused]] static const char *FONT_ICON_XMARK = "\xEF\x80\x8D";
 	[[maybe_unused]] static const char *FONT_ICON_CIRCLE = "\xEF\x84\x91";
@@ -139,6 +140,8 @@ namespace FontIcons
 	[[maybe_unused]] static const char *FONT_ICON_EYE = "\xEF\x81\xAE";
 	[[maybe_unused]] static const char *FONT_ICON_EYE_SLASH = "\xEF\x81\xB0";
 	[[maybe_unused]] static const char *FONT_ICON_EYE_DROPPER = "\xEF\x87\xBB";
+	[[maybe_unused]] static const char *FONT_ICON_COMMENT = "\xEF\x81\xB5";
+	[[maybe_unused]] static const char *FONT_ICON_COMMENT_SLASH = "\xEF\x92\xB3";
 
 	[[maybe_unused]] static const char *FONT_ICON_DICE_ONE = "\xEF\x94\xA5";
 	[[maybe_unused]] static const char *FONT_ICON_DICE_TWO = "\xEF\x94\xA8";
