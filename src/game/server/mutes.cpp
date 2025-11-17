@@ -29,7 +29,7 @@ CMutes::CMutes(const char *pSystemName) :
 {
 }
 
-bool CMutes::Mute(const NETADDR *pAddr, int Seconds, const char *pReason, bool InitialDelay)
+bool CMutes::Mute(const NETADDR *pAddr, int Seconds, const char *pReason, const char *pClientName, bool InitialDelay)
 {
 	if(!in_range(Seconds, 1, 365 * 24 * 60 * 60))
 	{
@@ -46,6 +46,17 @@ bool CMutes::Mute(const NETADDR *pAddr, int Seconds, const char *pReason, bool I
 		Mute.m_Expire = Expire;
 		str_copy(Mute.m_aReason, pReason);
 		Mute.m_InitialDelay = InitialDelay;
+		if(pClientName)
+		{
+			str_copy(Mute.m_aClientName, pClientName);
+			Mute.m_NameKnown = true;
+		}
+		else
+		{
+			Mute.m_aClientName[0] = '\0';
+			Mute.m_NameKnown = false;
+		}
+
 		return true;
 	}
 	if(Expire > Mute.m_Expire)
@@ -67,7 +78,10 @@ void CMutes::UnmuteIndex(int Index)
 	auto It = std::next(m_Mutes.begin(), Index);
 	char aAddrString[NETADDR_MAXSTRSIZE];
 	net_addr_str(&It->first, aAddrString, sizeof(aAddrString), false);
-	log_info(m_pSystemName, "Unmuted: %s", aAddrString);
+	if(It->second.m_NameKnown)
+		log_info(m_pSystemName, "Unmuted: '%s' (<{%s}>)", It->second.m_aClientName, aAddrString);
+	else
+		log_info(m_pSystemName, "Unmuted: (unknown) (<{%s}>)", aAddrString);
 	m_Mutes.erase(It);
 }
 
@@ -82,7 +96,10 @@ void CMutes::UnmuteAddr(const NETADDR *pAddr)
 		log_info(m_pSystemName, "No mutes for this IP address found: %s", aAddrString);
 		return;
 	}
-	log_info(m_pSystemName, "Unmuted: %s", aAddrString);
+	if(It->second.m_NameKnown)
+		log_info(m_pSystemName, "Unmuted: '%s' (<{%s}>)", It->second.m_aClientName, aAddrString);
+	else
+		log_info(m_pSystemName, "Unmuted: (unknown) (<{%s}>)", aAddrString);
 	m_Mutes.erase(It);
 }
 
@@ -148,10 +165,32 @@ void CMutes::Print(int Page) const
 		{
 			break;
 		}
+
 		char aAddrString[NETADDR_MAXSTRSIZE];
 		net_addr_str(&Addr, aAddrString, sizeof(aAddrString), false);
-		log_info(m_pSystemName, "#%d '%s' muted for %d seconds (%s)",
-			Count, aAddrString, MuteEntry.SecondsLeft(), MuteEntry.m_aReason[0] == '\0' ? "No reason given" : MuteEntry.m_aReason);
+
+		if(MuteEntry.m_NameKnown)
+		{
+			log_info(
+				m_pSystemName,
+				"#%d '%s' (<{%s}>) muted for %d seconds (%s)",
+				Count,
+				MuteEntry.m_aClientName,
+				aAddrString,
+				MuteEntry.SecondsLeft(),
+				MuteEntry.m_aReason[0] == '\0' ? "No reason given" : MuteEntry.m_aReason);
+		}
+		else
+		{
+			log_info(
+				m_pSystemName,
+				"#%d (unknown) (<{%s}>) muted for %d seconds (%s)",
+				Count,
+				aAddrString,
+				MuteEntry.SecondsLeft(),
+				MuteEntry.m_aReason[0] == '\0' ? "No reason given" : MuteEntry.m_aReason);
+		}
+
 		Count++;
 	}
 	log_info(m_pSystemName, "%d %s, showing entries %d - %d (page %d/%d)",
@@ -160,7 +199,7 @@ void CMutes::Print(int Page) const
 
 void CGameContext::MuteWithMessage(const NETADDR *pAddr, int Seconds, const char *pReason, const char *pDisplayName)
 {
-	if(!m_Mutes.Mute(pAddr, Seconds, pReason, false))
+	if(!m_Mutes.Mute(pAddr, Seconds, pReason, pDisplayName, false))
 	{
 		return;
 	}
@@ -179,7 +218,7 @@ void CGameContext::MuteWithMessage(const NETADDR *pAddr, int Seconds, const char
 
 void CGameContext::VoteMuteWithMessage(const NETADDR *pAddr, int Seconds, const char *pReason, const char *pDisplayName)
 {
-	if(!m_VoteMutes.Mute(pAddr, Seconds, pReason, false))
+	if(!m_VoteMutes.Mute(pAddr, Seconds, pReason, pDisplayName, false))
 	{
 		return;
 	}
@@ -228,7 +267,8 @@ void CGameContext::ConMuteIp(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "";
-	pSelf->m_Mutes.Mute(&Addr, pResult->GetInteger(1), pReason, false);
+
+	pSelf->m_Mutes.Mute(&Addr, pResult->GetInteger(1), pReason, nullptr, false);
 }
 
 void CGameContext::ConUnmute(IConsole::IResult *pResult, void *pUserData)
@@ -305,7 +345,8 @@ void CGameContext::ConVoteMuteIp(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "";
-	pSelf->m_VoteMutes.Mute(&Addr, pResult->GetInteger(1), pReason, false);
+
+	pSelf->m_VoteMutes.Mute(&Addr, pResult->GetInteger(1), pReason, nullptr, false);
 }
 
 void CGameContext::ConVoteUnmute(IConsole::IResult *pResult, void *pUserData)
