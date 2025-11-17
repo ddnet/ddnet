@@ -1526,6 +1526,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_NoWeakHookAndBounce = false;
 	Info.m_NoSkinChangeForFrozen = false;
 	Info.m_DDRaceTeam = false;
+	Info.m_TimeType = ETimeType::TIME_TYPE_NEGATIVE_SECONDS; // seconds;
 
 	if(Version >= 0)
 	{
@@ -1588,6 +1589,10 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	if(Version >= 10)
 	{
 		Info.m_DDRaceTeam = Flags2 & GAMEINFOFLAG2_DDRACE_TEAM;
+	}
+	if(Version >= 11)
+	{
+		Info.m_TimeType = Flags2 & GAMEINFOFLAG2_TIMESCORE_MILLISECONDS ? ETimeType::TIME_TYPE_MILLISECONDS : ETimeType::TIME_TYPE_NEGATIVE_SECONDS;
 	}
 
 	return Info;
@@ -2077,16 +2082,34 @@ void CGameClient::OnNewSnapshot()
 					((pPlayer2->m_Score == -1) ? std::numeric_limits<int>::max() : pPlayer2->m_Score));
 			});
 	else
-		std::stable_sort(m_Snap.m_apInfoByScore, m_Snap.m_apInfoByScore + MAX_CLIENTS,
-			[TimeScore](const CNetObj_PlayerInfo *pPlayer1, const CNetObj_PlayerInfo *pPlayer2) -> bool {
-				if(!pPlayer2)
-					return static_cast<bool>(pPlayer1);
-				if(!pPlayer1)
-					return false;
-				return (((TimeScore && pPlayer1->m_Score == -9999) ? std::numeric_limits<int>::min() : pPlayer1->m_Score) >
-					((TimeScore && pPlayer2->m_Score == -9999) ? std::numeric_limits<int>::min() : pPlayer2->m_Score));
-			});
-
+	{
+		// old server sends time in negative seconds
+		if(m_GameInfo.m_TimeType == ETimeType::TIME_TYPE_NEGATIVE_SECONDS)
+		{
+			std::stable_sort(m_Snap.m_apInfoByScore, m_Snap.m_apInfoByScore + MAX_CLIENTS,
+				[TimeScore](const CNetObj_PlayerInfo *pPlayer1, const CNetObj_PlayerInfo *pPlayer2) -> bool {
+					if(!pPlayer2)
+						return static_cast<bool>(pPlayer1);
+					if(!pPlayer1)
+						return false;
+					return (((TimeScore && pPlayer1->m_Score == -9999) ? std::numeric_limits<int>::min() : pPlayer1->m_Score) >
+						((TimeScore && pPlayer2->m_Score == -9999) ? std::numeric_limits<int>::min() : pPlayer2->m_Score));
+				});
+		}
+		// (positive) milliseconds
+		else if(m_GameInfo.m_TimeType == ETimeType::TIME_TYPE_MILLISECONDS)
+		{
+			std::stable_sort(m_Snap.m_apInfoByScore, m_Snap.m_apInfoByScore + MAX_CLIENTS,
+				[](const CNetObj_PlayerInfo *pPlayer1, const CNetObj_PlayerInfo *pPlayer2) -> bool {
+					if(!pPlayer2)
+						return static_cast<bool>(pPlayer1);
+					if(!pPlayer1)
+						return false;
+					return (((pPlayer1->m_Score == -9999) ? std::numeric_limits<int>::max() : pPlayer1->m_Score) <
+						((pPlayer2->m_Score == -9999) ? std::numeric_limits<int>::max() : pPlayer2->m_Score));
+				});
+		}
+	}
 	// sort player infos by DDRace Team (and score between)
 	int Index = 0;
 	for(int Team = TEAM_FLOCK; Team <= TEAM_SUPER; ++Team)
