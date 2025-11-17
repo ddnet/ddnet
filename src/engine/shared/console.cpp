@@ -276,6 +276,15 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat, bool IsColor)
 				}
 
 				// validate args
+				if(IsColor)
+				{
+					auto Color = ColorParse(pResult->GetString(pResult->NumArguments() - 1), 0.0f);
+					if(!Color.has_value())
+					{
+						Error = PARSEARGS_INVALID_COLOR;
+						break;
+					}
+				}
 				if(Command == 'i')
 				{
 					// don't validate colors here
@@ -573,6 +582,8 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 						char aBuf[CMDLINE_LENGTH + 64];
 						if(Error == PARSEARGS_INVALID_INTEGER)
 							str_format(aBuf, sizeof(aBuf), "%s is not a valid integer.", Result.GetString(Result.NumArguments() - 1));
+						else if(Error == PARSEARGS_INVALID_COLOR)
+							str_format(aBuf, sizeof(aBuf), "%s is not a valid color.", Result.GetString(Result.NumArguments() - 1));
 						else if(Error == PARSEARGS_INVALID_FLOAT)
 							str_format(aBuf, sizeof(aBuf), "%s is not a valid decimal number.", Result.GetString(Result.NumArguments() - 1));
 						else
