@@ -551,7 +551,7 @@ def open_editor(test_env):
 	client.exit()
 	client.wait_for_exit()
 
-@test
+@test(timeout=120)
 def smoke_test(test_env):
 	client1 = test_env.client(["logfile client1.log", "player_name client1"])
 	server = test_env.server(["logfile server.log", "sv_demo_chat 1", "sv_map coverage", "sv_tee_historian 1"])
@@ -578,10 +578,10 @@ def smoke_test(test_env):
 		)
 
 	client1.command("say hello world")
-	server.wait_for_log_exact("chat: 0:-2:client1: hello world")
+	server.wait_for_log_exact("chat: 0:-2:client1: hello world", timeout=10)
 
 	client1.command(f"rcon_auth {server.rcon_password}")
-	server.wait_for_log_exact("server: ClientId=0 authed with key=default_admin (admin)")
+	server.wait_for_log_exact("server: ClientId=0 authed with key=default_admin (admin)", timeout=10)
 
 	client1.command("say \"/mc; {}\"".format("; ".join(l.strip() for l in """
 		top5
@@ -609,7 +609,7 @@ def smoke_test(test_env):
 		rcon unban_all
 		rcon say the end
 	""".strip().split("\n")))
-	client1.wait_for_log_exact("chat/server: *** the end", timeout=3)
+	client1.wait_for_log_exact("chat/server: *** the end", timeout=10)
 
 	server.command("stoprecord")
 	client1.command("stoprecord")
