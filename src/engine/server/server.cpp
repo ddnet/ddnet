@@ -4375,6 +4375,7 @@ void CServer::RegisterCommands()
 
 	Console()->Chain("sv_name", ConchainSpecialInfoupdate, this);
 	Console()->Chain("password", ConchainSpecialInfoupdate, this);
+	Console()->Chain("sv_reserved_slots", ConchainSpecialInfoupdate, this);
 	Console()->Chain("sv_spectator_slots", ConchainSpecialInfoupdate, this);
 
 	Console()->Chain("sv_max_clients_per_ip", ConchainMaxclientsperipUpdate, this);
