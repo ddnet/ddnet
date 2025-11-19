@@ -1411,8 +1411,8 @@ void CServer::SendRconLogLine(int ClientId, const CLogMessage *pMessage)
 	const char *pStart = str_find(pLine, "<{");
 	const char *pEnd = pStart == nullptr ? nullptr : str_find(pStart + 2, "}>");
 	const char *pLineWithoutIps;
-	char aLine[512];
-	char aLineWithoutIps[512];
+	char aLine[sizeof(CLogMessage().m_aLine)];
+	char aLineWithoutIps[sizeof(CLogMessage().m_aLine)];
 	aLine[0] = '\0';
 	aLineWithoutIps[0] = '\0';
 
@@ -1422,11 +1422,11 @@ void CServer::SendRconLogLine(int ClientId, const CLogMessage *pMessage)
 	}
 	else
 	{
-		str_append(aLine, pLine, pStart - pLine + 1);
-		str_append(aLine, pStart + 2, pStart - pLine + pEnd - pStart - 1);
+		str_append(aLine, pLine, minimum<size_t>(pStart - pLine + 1, sizeof(aLine)));
+		str_append(aLine, pStart + 2, minimum<size_t>(pStart - pLine + pEnd - pStart - 1, sizeof(aLine)));
 		str_append(aLine, pEnd + 2);
 
-		str_append(aLineWithoutIps, pLine, pStart - pLine + 1);
+		str_append(aLineWithoutIps, pLine, minimum<size_t>(pStart - pLine + 1, sizeof(aLine)));
 		str_append(aLineWithoutIps, "XXX");
 		str_append(aLineWithoutIps, pEnd + 2);
 
