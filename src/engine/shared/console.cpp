@@ -90,23 +90,23 @@ void CConsole::CCommand::SetAccessLevel(EAccessLevel AccessLevel)
 	m_AccessLevel = AccessLevel;
 }
 
-const IConsole::ICommandInfo *CConsole::FirstCommandInfo(EAccessLevel AccessLevel, int FlagMask) const
+const IConsole::ICommandInfo *CConsole::FirstCommandInfo(int ClientId, int FlagMask) const
 {
 	for(const CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->Next())
 	{
-		if(pCommand->m_Flags & FlagMask && pCommand->GetAccessLevel() >= AccessLevel)
+		if(pCommand->m_Flags & FlagMask && CanUseCommand(ClientId, pCommand))
 			return pCommand;
 	}
 
 	return nullptr;
 }
 
-const IConsole::ICommandInfo *CConsole::NextCommandInfo(const IConsole::ICommandInfo *pInfo, EAccessLevel AccessLevel, int FlagMask) const
+const IConsole::ICommandInfo *CConsole::NextCommandInfo(const IConsole::ICommandInfo *pInfo, int ClientId, int FlagMask) const
 {
 	const CCommand *pNext = ((CCommand *)pInfo)->Next();
 	while(pNext)
 	{
-		if(pNext->m_Flags & FlagMask && pNext->GetAccessLevel() >= AccessLevel)
+		if(pNext->m_Flags & FlagMask && CanUseCommand(ClientId, pNext))
 			break;
 		pNext = pNext->Next();
 	}
@@ -407,6 +407,12 @@ void CConsole::SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, vo
 	m_pUnknownCommandUserdata = pUser;
 }
 
+void CConsole::SetCanUseCommandCallback(FCanUseCommandCallback pfnCallback, void *pUser)
+{
+	m_pfnCanUseCommandCallback = pfnCallback;
+	m_pCanUseCommandUserData = pUser;
+}
+
 void CConsole::InitChecksum(CChecksumData *pData) const
 {
 	pData->m_NumCommands = 0;
@@ -423,11 +429,6 @@ void CConsole::InitChecksum(CChecksumData *pData) const
 		}
 		pData->m_NumCommands += 1;
 	}
-}
-
-void CConsole::SetAccessLevel(EAccessLevel AccessLevel)
-{
-	m_AccessLevel = AccessLevel;
 }
 
 bool CConsole::LineIsValid(const char *pStr)
@@ -557,7 +558,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 					Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 				}
 			}
-			else if(pCommand->GetAccessLevel() >= m_AccessLevel)
+			else if(CanUseCommand(Result.m_ClientId, pCommand))
 			{
 				int IsStrokeCommand = 0;
 				if(Result.m_pCommand[0] == '+')
@@ -652,6 +653,14 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 
 		pStr = pNextPart;
 	}
+}
+
+bool CConsole::CanUseCommand(int ClientId, const IConsole::ICommandInfo *pCommand) const
+{
+	// the fallback is needed for the client and rust tests
+	if(!m_pfnCanUseCommandCallback)
+		return true;
+	return m_pfnCanUseCommandCallback(ClientId, pCommand, m_pCanUseCommandUserData);
 }
 
 int CConsole::PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback, void *pUser)
@@ -753,7 +762,7 @@ void CConsole::Con_Echo(IResult *pResult, void *pUserData)
 
 void CConsole::Con_Exec(IResult *pResult, void *pUserData)
 {
-	((CConsole *)pUserData)->ExecuteFile(pResult->GetString(0), IConsole::CLIENT_ID_UNSPECIFIED, true, IStorage::TYPE_ALL);
+	((CConsole *)pUserData)->ExecuteFile(pResult->GetString(0), pResult->m_ClientId, true, IStorage::TYPE_ALL);
 }
 
 void CConsole::ConCommandAccess(IResult *pResult, void *pUser)
@@ -855,7 +864,6 @@ void CConsole::TraverseChain(FCommandCallback *ppfnCallback, void **ppUserData)
 CConsole::CConsole(int FlagMask)
 {
 	m_FlagMask = FlagMask;
-	m_AccessLevel = EAccessLevel::ADMIN;
 	m_pRecycleList = nullptr;
 	m_TempCommands.Reset();
 	m_StoreCommands = true;
