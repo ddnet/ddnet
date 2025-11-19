@@ -232,7 +232,7 @@ void CMenusSettingsControls::UpdateBindOptions()
 			if(ExistingOption == m_vBindOptions.end())
 			{
 				// Bind option not found for command, add custom bind option.
-				CBindOption NewOption = {EBindOptionGroup::CUSTOM, pBind, pBind};
+				CBindOption NewOption = {EBindOptionGroup::CUSTOM, nullptr, pBind};
 				ExistingOption = m_vBindOptions.insert(
 					std::upper_bound(m_vBindOptions.begin() + m_NumPredefinedBindOptions, m_vBindOptions.end(), NewOption, [&](const CBindOption &Option1, const CBindOption &Option2) {
 						return str_utf8_comp_nocase(Option1.m_Command.c_str(), Option2.m_Command.c_str()) < 0;
@@ -505,7 +505,7 @@ void CMenusSettingsControls::RenderSettingsBinds(EBindOptionGroup Group, CUIRect
 		{
 			LabelProps.SetColor(ColorRGBA(0.4f, 0.4f, 0.9f, 1.0f));
 		}
-		const CLabelResult LabelResult = Ui()->DoLabel(&Label, BindOption.m_Group == EBindOptionGroup::CUSTOM ? BindOption.m_pLabel : Localize(BindOption.m_pLabel),
+		const CLabelResult LabelResult = Ui()->DoLabel(&Label, BindOption.m_Group == EBindOptionGroup::CUSTOM ? BindOption.m_Command.c_str() : Localize(BindOption.m_pLabel),
 			FONT_SIZE, TEXTALIGN_ML, LabelProps);
 		if(BindOption.m_Group != EBindOptionGroup::CUSTOM || LabelResult.m_Truncated)
 		{
