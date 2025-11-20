@@ -620,7 +620,7 @@ bool CServer::StrHideIps(const char *pInput, char *pOutputWithIps, int OutputWit
 	}
 
 	str_append(pOutputWithIps, pInput, minimum<size_t>(pStart - pInput + 1, OutputWithIpsSize));
-	str_append(pOutputWithIps, pStart + 2, minimum<size_t>(pStart - pInput + pEnd - pStart - 1, OutputWithIpsSize));
+	str_append(pOutputWithIps, pStart + 2, minimum<size_t>(pEnd - pInput - 1, OutputWithIpsSize));
 	str_append(pOutputWithIps, pEnd + 2, OutputWithIpsSize);
 
 	str_append(pOutputWithoutIps, pInput, minimum<size_t>(pStart - pInput + 1, OutputWithoutIpsSize));
