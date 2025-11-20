@@ -394,7 +394,9 @@ void CSoundSourceOperationTracker::Begin(CSoundSource *pSource, ESoundSourceOp O
 	m_LayerIndex = LayerIndex;
 
 	if(m_TrackedOp == ESoundSourceOp::OP_MOVE)
-		HandlePointMove(EState::STATE_BEGIN);
+	{
+		m_Data.m_OriginalPoint = m_pSource->m_Position;
+	}
 }
 
 void CSoundSourceOperationTracker::End()
@@ -403,22 +405,15 @@ void CSoundSourceOperationTracker::End()
 		return;
 
 	if(m_TrackedOp == ESoundSourceOp::OP_MOVE)
-		HandlePointMove(EState::STATE_END);
-
-	m_TrackedOp = ESoundSourceOp::OP_NONE;
-}
-
-void CSoundSourceOperationTracker::HandlePointMove(EState State)
-{
-	if(State == EState::STATE_BEGIN)
-	{
-		m_Data.m_OriginalPoint = m_pSource->m_Position;
-	}
-	else if(State == EState::STATE_END)
 	{
 		if(m_Data.m_OriginalPoint != m_pSource->m_Position)
-			m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionMoveSoundSource>(m_pEditor, m_pEditor->m_SelectedGroup, m_LayerIndex, m_pEditor->m_SelectedSource, m_Data.m_OriginalPoint, m_pSource->m_Position));
+		{
+			m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionMoveSoundSource>(
+				m_pEditor, m_pEditor->m_SelectedGroup, m_LayerIndex, m_pEditor->m_SelectedSource, m_Data.m_OriginalPoint, m_pSource->m_Position));
+		}
 	}
+
+	m_TrackedOp = ESoundSourceOp::OP_NONE;
 }
 
 // -----------------------------------------------------------------------
