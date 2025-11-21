@@ -2901,6 +2901,9 @@ void CGameClient::CClientData::Reset()
 
 	for(auto &Info : m_aSixup)
 		Info.Reset();
+
+	m_pGameClient->Sound()->StopVoice(m_SfxFallingWoosh);
+	m_SfxFallingWoosh = ISound::CVoiceHandle();
 }
 
 CSkinDescriptor CGameClient::CClientData::ToSkinDescriptor() const
