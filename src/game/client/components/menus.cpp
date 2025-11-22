@@ -2288,13 +2288,15 @@ void CMenus::OnWindowResize()
 
 void CMenus::OnRender()
 {
-	Ui()->StartCheck();
-
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	{
+		Ui()->StartCheck();
 		SetActive(true);
+	}
 
 	if(Client()->State() == IClient::STATE_ONLINE && GameClient()->m_ServerMode == CGameClient::SERVERMODE_PUREMOD)
 	{
+		Ui()->StartCheck();
 		Client()->Disconnect();
 		SetActive(true);
 		PopupMessage(Localize("Disconnected"), Localize("The server is running a non-standard tuning on a pure game type."), Localize("Ok"));
@@ -2304,14 +2306,18 @@ void CMenus::OnRender()
 	{
 		if(Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
 		{
+			Ui()->StartCheck();
 			SetActive(true);
 		}
 		else if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		{
-			Ui()->FinishCheck();
 			Ui()->ClearHotkeys();
 			return;
 		}
+	}
+	else
+	{
+		Ui()->StartCheck();
 	}
 
 	UpdateColors();
