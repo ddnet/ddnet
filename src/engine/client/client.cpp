@@ -521,6 +521,7 @@ void CClient::OnPostConnect(int Conn)
 				"surprise",
 				"angry",
 				"blink",
+				"crying",
 			};
 			static_assert(std::size(s_EMOTE_NAMES) == NUM_EMOTES - 1, "The size of EMOTE_NAMES must match NUM_EMOTES - 1");
 

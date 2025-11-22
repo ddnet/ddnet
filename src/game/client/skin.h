@@ -6,6 +6,8 @@
 #include <engine/graphics.h>
 #include <engine/shared/protocol.h>
 
+#include <generated/protocol.h>
+
 // do this better and nicer
 class CSkin
 {
@@ -24,7 +26,7 @@ public:
 		IGraphics::CTextureHandle m_Hands;
 		IGraphics::CTextureHandle m_HandsOutline;
 
-		IGraphics::CTextureHandle m_aEyes[6];
+		IGraphics::CTextureHandle m_aEyes[NUM_EMOTES];
 
 		void Reset();
 		void Unload(IGraphics *pGraphics);
