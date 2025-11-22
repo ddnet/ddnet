@@ -6,6 +6,7 @@
 #include "memheap.h"
 
 #include <engine/console.h>
+#include <engine/server/authmanager.h>
 #include <engine/storage.h>
 
 #include <optional>
@@ -15,7 +16,6 @@ class CConsole : public IConsole
 {
 	class CCommand : public ICommandInfo
 	{
-		EAccessLevel m_AccessLevel;
 		CCommand *m_pNext;
 
 	public:
@@ -31,12 +31,17 @@ class CConsole : public IConsole
 		FCommandCallback m_pfnCallback;
 		void *m_pUserData;
 
+		std::vector<const CRconRole *> m_vRoles;
+
 		const char *Name() const override { return m_pName; }
 		const char *Help() const override { return m_pHelp; }
 		const char *Params() const override { return m_pParams; }
 		int Flags() const override { return m_Flags; }
-		EAccessLevel GetAccessLevel() const override { return m_AccessLevel; }
-		void SetAccessLevel(EAccessLevel AccessLevel);
+
+		bool HasRole(const CRconRole *pRole) const override;
+		bool AddRole(const CRconRole *pRole) override;
+		bool RemoveRole(const CRconRole *pRole) override;
+		const std::vector<const CRconRole *> &Roles() const override { return m_vRoles; }
 	};
 
 	class CChain
@@ -71,8 +76,6 @@ class CConsole : public IConsole
 	static void Con_Chain(IResult *pResult, void *pUserData);
 	static void Con_Echo(IResult *pResult, void *pUserData);
 	static void Con_Exec(IResult *pResult, void *pUserData);
-	static void ConCommandAccess(IResult *pResult, void *pUser);
-	static void ConCommandStatus(IConsole::IResult *pResult, void *pUser);
 
 	void ExecuteLineStroked(int Stroke, const char *pStr, int ClientId = IConsole::CLIENT_ID_UNSPECIFIED, bool InterpretSemicolons = true) override;
 
@@ -174,7 +177,7 @@ public:
 	void Init() override;
 	const ICommandInfo *FirstCommandInfo(int ClientId, int FlagMask) const override;
 	const ICommandInfo *NextCommandInfo(const IConsole::ICommandInfo *pInfo, int ClientId, int FlagMask) const override;
-	const ICommandInfo *GetCommandInfo(const char *pName, int FlagMask, bool Temp) override;
+	ICommandInfo *GetCommandInfo(const char *pName, int FlagMask, bool Temp) override;
 	int PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback, void *pUser) override;
 
 	void ParseArguments(int NumArgs, const char **ppArguments) override;
@@ -196,27 +199,11 @@ public:
 	void SetCanUseCommandCallback(FCanUseCommandCallback pfnCallback, void *pUser) override;
 	void InitChecksum(CChecksumData *pData) const override;
 
-	/**
-	 * Converts access level string to access level enum.
-	 *
-	 * @param pAccessLevel should be either "admin", "mod", "moderator", "helper" or "user".
-	 * @return `std::nullopt` on error otherwise one of the auth enums such as `EAccessLevel::ADMIN`.
-	 */
-	static std::optional<EAccessLevel> AccessLevelToEnum(const char *pAccessLevel);
-
-	/**
-	 * Converts access level enum to access level string.
-	 *
-	 * @param AccessLevel should be one of these: `EAccessLevel::ADMIN`, `EAccessLevel::MODERATOR`, `EAccessLevel::HELPER` or `EAccessLevel::USER`.
-	 * @return `nullptr` on error or access level string like "admin".
-	 */
-	static const char *AccessLevelToString(EAccessLevel AccessLevel);
-
 	static std::optional<ColorHSLA> ColorParse(const char *pStr, float DarkestLighting);
 
 	// DDRace
 
-	static void ConUserCommandStatus(IConsole::IResult *pResult, void *pUser);
+	static void ConCmdlistChat(IConsole::IResult *pResult, void *pUser);
 
 	bool Cheated() const override { return m_Cheated; }
 
