@@ -179,6 +179,42 @@ constexpr bool closest_point_on_line(vector2_base<T> line_pointA, vector2_base<T
 		return false;
 }
 
+constexpr int intersect_line_circle(const vec2 LineStart, const vec2 LineEnd, const vec2 CircleCenter, float Radius, vec2 aIntersections[2])
+{
+	vec2 Delta = LineEnd - LineStart;
+	vec2 Offset = LineStart - CircleCenter;
+
+	// A * Time^2 + B * Time + c == 0
+	float A = length_squared(Delta);
+	float B = 2.0f * dot(Offset, Delta);
+	float C = dot(Offset, Offset) - Radius * Radius;
+
+	float Discriminant = B * B - 4.0f * A * C;
+	if(Discriminant < 0.0f || A == 0.0f)
+	{
+		// no intersection
+		return 0;
+	}
+	else if(Discriminant == 0.0f)
+	{
+		// tangent
+		float Time = -B / (2.0f * A);
+		aIntersections[0] = LineStart + Delta * Time;
+		return 1;
+	}
+	else
+	{
+		Discriminant = std::sqrt(Discriminant);
+		float Time1 = (-B - Discriminant) / (2.0f * A);
+		float Time2 = (-B + Discriminant) / (2.0f * A);
+
+		aIntersections[0] = LineStart + Delta * Time1;
+		aIntersections[1] = LineStart + Delta * Time2;
+
+		return 2;
+	}
+}
+
 // ------------------------------------
 template<Numeric T>
 class vector3_base

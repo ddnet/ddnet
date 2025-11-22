@@ -3075,6 +3075,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     timestamp.cpp
     unix.cpp
     uuid.cpp
+    vmath.cpp
   )
   set(TESTS_EXTRA
     src/engine/client/blocklist_driver.cpp
