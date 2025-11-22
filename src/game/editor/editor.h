@@ -528,6 +528,14 @@ public:
 		ALL,
 	};
 	EEnvelopePreview m_ActiveEnvelopePreview = EEnvelopePreview::NONE;
+	enum class EQuadEnvelopePointOperation
+	{
+		NONE = 0,
+		MOVE,
+		ROTATE,
+	};
+	EQuadEnvelopePointOperation m_QuadEnvelopePointOperation = EQuadEnvelopePointOperation::NONE;
+
 	bool m_ShowPicker;
 
 	std::vector<int> m_vSelectedLayers;
@@ -682,8 +690,8 @@ public:
 	void PopupSelectAutoMapReferenceInvoke(int Current, float x, float y);
 	int PopupSelectAutoMapReferenceResult();
 
-	void DoQuadEnvelopes(const std::vector<CQuad> &vQuads, IGraphics::CTextureHandle Texture = IGraphics::CTextureHandle());
-	void DoQuadEnvPoint(const CQuad *pQuad, int QuadIndex, int PointIndex);
+	void DoQuadEnvelopes(const CLayerQuads *pLayerQuads);
+	void DoQuadEnvPoint(const CQuad *pQuad, CEnvelope *pEnvelope, int QuadIndex, int PointIndex);
 	void DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int v);
 	void UpdateHotQuadPoint(const CLayerQuads *pLayer);
 
