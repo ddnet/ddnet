@@ -3059,7 +3059,6 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     prng.cpp
     score.cpp
     secure_random.cpp
-    server.cpp
     serverbrowser.cpp
     serverinfo.cpp
     shell_execute.cpp
