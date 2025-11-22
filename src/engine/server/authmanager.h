@@ -25,7 +25,6 @@ class CRconRole
 	bool m_IsAdmin = false;
 	bool m_HasReservedSlots = false;
 	bool m_CanTeleOthers = false;
-	std::vector<std::string> m_vRconCommands;
 	std::vector<CRconRole *> m_vpParents;
 	std::vector<CRconRole *> m_vpCanKick;
 
@@ -58,10 +57,6 @@ public:
 
 	// admin is the strongest role with full access
 	bool IsAdmin() const { return m_IsAdmin; }
-
-	bool CanUseRconCommand(const char *pCommand);
-	bool AllowCommand(const char *pCommand);
-	bool DisallowCommand(const char *pCommand);
 
 	void LogRconCommandAccess(int MaxLineLength);
 

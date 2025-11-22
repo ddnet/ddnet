@@ -7,9 +7,11 @@
 
 #include <base/color.h>
 
+#include <engine/server/authmanager.h>
 #include <engine/storage.h>
 
 #include <memory>
+#include <vector>
 
 static constexpr ColorRGBA gs_ConsoleDefaultColor(1, 1, 1, 1);
 
@@ -78,6 +80,11 @@ public:
 		virtual const char *Help() const = 0;
 		virtual const char *Params() const = 0;
 		virtual int Flags() const = 0;
+
+		virtual bool HasRole(const CRconRole *pRole) const = 0;
+		virtual bool AddRole(const CRconRole *pRole) = 0;
+		virtual bool RemoveRole(const CRconRole *pRole) = 0;
+		virtual const std::vector<const CRconRole *> &Roles() const = 0;
 	};
 
 	typedef void (*FTeeHistorianCommandCallback)(int ClientId, int FlagMask, const char *pCmd, IResult *pResult, void *pUser);
@@ -93,7 +100,7 @@ public:
 	virtual void Init() = 0;
 	virtual const ICommandInfo *FirstCommandInfo(int ClientId, int FlagMask) const = 0;
 	virtual const ICommandInfo *NextCommandInfo(const IConsole::ICommandInfo *pInfo, int ClientId, int FlagMask) const = 0;
-	virtual const ICommandInfo *GetCommandInfo(const char *pName, int FlagMask, bool Temp) = 0;
+	virtual ICommandInfo *GetCommandInfo(const char *pName, int FlagMask, bool Temp) = 0;
 	virtual int PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback = EmptyPossibleCommandCallback, void *pUser = nullptr) = 0;
 	virtual void ParseArguments(int NumArgs, const char **ppArguments) = 0;
 

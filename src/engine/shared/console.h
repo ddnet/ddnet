@@ -6,6 +6,7 @@
 #include "memheap.h"
 
 #include <engine/console.h>
+#include <engine/server/authmanager.h>
 #include <engine/storage.h>
 
 #include <optional>
@@ -30,10 +31,17 @@ class CConsole : public IConsole
 		FCommandCallback m_pfnCallback;
 		void *m_pUserData;
 
+		std::vector<const CRconRole *> m_vRoles;
+
 		const char *Name() const override { return m_pName; }
 		const char *Help() const override { return m_pHelp; }
 		const char *Params() const override { return m_pParams; }
 		int Flags() const override { return m_Flags; }
+
+		bool HasRole(const CRconRole *pRole) const override;
+		bool AddRole(const CRconRole *pRole) override;
+		bool RemoveRole(const CRconRole *pRole) override;
+		const std::vector<const CRconRole *> &Roles() const override { return m_vRoles; }
 	};
 
 	class CChain
@@ -169,7 +177,7 @@ public:
 	void Init() override;
 	const ICommandInfo *FirstCommandInfo(int ClientId, int FlagMask) const override;
 	const ICommandInfo *NextCommandInfo(const IConsole::ICommandInfo *pInfo, int ClientId, int FlagMask) const override;
-	const ICommandInfo *GetCommandInfo(const char *pName, int FlagMask, bool Temp) override;
+	ICommandInfo *GetCommandInfo(const char *pName, int FlagMask, bool Temp) override;
 	int PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback, void *pUser) override;
 
 	void ParseArguments(int NumArgs, const char **ppArguments) override;

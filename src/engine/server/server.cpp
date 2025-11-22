@@ -3570,7 +3570,7 @@ bool CServer::CanClientUseCommand(int ClientId, const IConsole::ICommandInfo *pC
 	CRconRole *pRole = RoleOrNullptr(ClientId);
 	if(!pRole)
 		return false;
-	return pRole->CanUseRconCommand(pCommand->Name());
+	return pCommand->HasRole(pRole);
 }
 
 void CServer::AuthRemoveKey(int KeySlot)
@@ -3886,14 +3886,14 @@ void CServer::ConRoleAllow(IConsole::IResult *pResult, void *pUser)
 		return;
 	}
 
-	const IConsole::ICommandInfo *pInfo = pThis->Console()->GetCommandInfo(pCommand, CFGFLAG_SERVER, false);
+	IConsole::ICommandInfo *pInfo = pThis->Console()->GetCommandInfo(pCommand, CFGFLAG_SERVER, false);
 	if(!pInfo)
 	{
 		log_error("auth", "No such command: '%s'.", pCommand);
 		return;
 	}
 
-	if(pRole->AllowCommand(pCommand))
+	if(pInfo->AddRole(pRole))
 	{
 		log_info("auth", "Role '%s' can now use command '%s'.", pRoleName, pCommand);
 	}
@@ -3924,14 +3924,14 @@ void CServer::ConRoleDisallow(IConsole::IResult *pResult, void *pUser)
 		return;
 	}
 
-	const IConsole::ICommandInfo *pInfo = pThis->Console()->GetCommandInfo(pCommand, CFGFLAG_SERVER, false);
+	IConsole::ICommandInfo *pInfo = pThis->Console()->GetCommandInfo(pCommand, CFGFLAG_SERVER, false);
 	if(!pInfo)
 	{
 		log_error("auth", "No such command: '%s'.", pCommand);
 		return;
 	}
 
-	if(pRole->DisallowCommand(pCommand))
+	if(pInfo->RemoveRole(pRole))
 	{
 		log_info("auth", "Role '%s' can no longer use command '%s'.", pRoleName, pCommand);
 	}
@@ -3996,7 +3996,7 @@ void CServer::ConAccessLevel(IConsole::IResult *pResult, void *pUser)
 	const char *pCommand = pResult->GetString(0);
 	const char *pRoleName = pResult->GetString(1);
 
-	const IConsole::ICommandInfo *pInfo = pThis->Console()->GetCommandInfo(pCommand, CFGFLAG_SERVER, false);
+	IConsole::ICommandInfo *pInfo = pThis->Console()->GetCommandInfo(pCommand, CFGFLAG_SERVER, false);
 	if(!pInfo)
 	{
 		log_error("server", "No such command: '%s'.", pCommand);
@@ -4031,17 +4031,17 @@ void CServer::ConAccessLevel(IConsole::IResult *pResult, void *pUser)
 
 		if(!str_comp(pRole->Name(), RoleName::ADMIN))
 		{
-			pModerator->DisallowCommand(pCommand);
-			pHelper->DisallowCommand(pCommand);
+			pInfo->RemoveRole(pModerator);
+			pInfo->RemoveRole(pModerator);
 		}
 		else if(!str_comp(pRole->Name(), RoleName::MODERATOR))
 		{
-			pModerator->AllowCommand(pCommand);
-			pHelper->DisallowCommand(pCommand);
+			pInfo->AddRole(pModerator);
+			pInfo->RemoveRole(pHelper);
 		}
 		else if(!str_comp(pRole->Name(), RoleName::HELPER))
 		{
-			pHelper->AllowCommand(pCommand);
+			pInfo->AddRole(pHelper);
 		}
 		else
 		{
@@ -4055,13 +4055,13 @@ void CServer::ConAccessLevel(IConsole::IResult *pResult, void *pUser)
 
 	if(pResult->NumArguments() == 2)
 	{
-		log_info("server", "moderator access for '%s' is now %s", pCommand, pModerator->CanUseRconCommand(pCommand) ? "enabled" : "disabled");
-		log_info("server", "helper access for '%s' is now %s", pCommand, pHelper->CanUseRconCommand(pCommand) ? "enabled" : "disabled");
+		log_info("server", "moderator access for '%s' is now %s", pCommand, pInfo->HasRole(pModerator) ? "enabled" : "disabled");
+		log_info("server", "helper access for '%s' is now %s", pCommand, pInfo->HasRole(pHelper) ? "enabled" : "disabled");
 	}
 	else
 	{
-		log_info("server", "moderator access for '%s' is %s", pCommand, pModerator->CanUseRconCommand(pCommand) ? "enabled" : "disabled");
-		log_info("server", "helper access for '%s' is %s", pCommand, pHelper->CanUseRconCommand(pCommand) ? "enabled" : "disabled");
+		log_info("server", "moderator access for '%s' is %s", pCommand, pInfo->HasRole(pModerator) ? "enabled" : "disabled");
+		log_info("server", "helper access for '%s' is %s", pCommand, pInfo->HasRole(pHelper) ? "enabled" : "disabled");
 	}
 }
 

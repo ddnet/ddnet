@@ -20,6 +20,36 @@
 #include <iterator> // std::size
 #include <new>
 
+bool CConsole::CCommand::HasRole(const CRconRole *pRole) const
+{
+	// heinrich??? what do i do here??????
+	
+	// i kinda need this=???????
+	
+	// for(parent in role.parents)
+	// 	std::find(m_vRoles.begin(), m_vRoles.end(), parent) != m_vRoles.end();
+
+	return std::find(m_vRoles.begin(), m_vRoles.end(), pRole) != m_vRoles.end();
+}
+
+bool CConsole::CCommand::AddRole(const CRconRole *pRole)
+{
+	if(HasRole(pRole))
+		return false;
+
+	m_vRoles.emplace_back(pRole);
+	return true;
+}
+
+bool CConsole::CCommand::RemoveRole(const CRconRole *pRole)
+{
+	if(!HasRole(pRole))
+		return false;
+
+	m_vRoles.erase(std::remove(m_vRoles.begin(), m_vRoles.end(), pRole), m_vRoles.end());
+	return true;
+}
+
 // todo: rework this
 
 CConsole::CResult::CResult(int ClientId) :
@@ -1020,7 +1050,7 @@ void CConsole::StoreCommands(bool Store)
 	m_StoreCommands = Store;
 }
 
-const IConsole::ICommandInfo *CConsole::GetCommandInfo(const char *pName, int FlagMask, bool Temp)
+IConsole::ICommandInfo *CConsole::GetCommandInfo(const char *pName, int FlagMask, bool Temp)
 {
 	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->Next())
 	{

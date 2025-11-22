@@ -116,81 +116,9 @@ bool CRconRole::CanTeleOthers() const
 	});
 }
 
-bool CRconRole::CanUseRconCommand(const char *pCommand)
-{
-	if(IsAdmin())
-		return true;
-
-	bool CanDirect = std::ranges::any_of(
-		m_vRconCommands,
-		[pCommand](const std::string &Command) {
-			return str_comp_nocase(Command.c_str(), pCommand) == 0;
-		});
-
-	if(CanDirect)
-		return true;
-
-	return std::any_of(m_vpParents.cbegin(), m_vpParents.cend(), [pCommand](CRconRole *pParent) {
-		return pParent->CanUseRconCommand(pCommand);
-	});
-}
-
-bool CRconRole::AllowCommand(const char *pCommand)
-{
-	if(CanUseRconCommand(pCommand))
-		return false;
-
-	m_vRconCommands.emplace_back(pCommand);
-	return true;
-}
-
-bool CRconRole::DisallowCommand(const char *pCommand)
-{
-	if(!CanUseRconCommand(pCommand))
-		return false;
-
-	m_vRconCommands.erase(std::remove(m_vRconCommands.begin(), m_vRconCommands.end(), pCommand), m_vRconCommands.end());
-	return true;
-}
-
 void CRconRole::LogRconCommandAccess(int MaxLineLength)
 {
-	int CurrentLineLen = 0;
-	char *pLine = (char *)malloc(MaxLineLength);
-	pLine[0] = '\0';
-	for(const std::string &Command : m_vRconCommands)
-	{
-		const char *pCommand = Command.c_str();
-		int CmdLen = str_length(pCommand);
-		if(CurrentLineLen + CmdLen + 2 < MaxLineLength)
-		{
-			if(CurrentLineLen > 0)
-			{
-				CurrentLineLen += str_length(", ");
-				str_append(pLine, ", ", MaxLineLength);
-			}
-			CurrentLineLen += CmdLen;
-			str_append(pLine, pCommand, MaxLineLength);
-		}
-		else
-		{
-			log_info("server", "%s", pLine);
-			CurrentLineLen = CmdLen;
-			str_copy(pLine, pCommand, MaxLineLength);
-		}
-	}
-	if(CurrentLineLen > 0)
-		log_info("server", "%s", pLine);
-	free(pLine);
-
-	for(CRconRole *pParent : m_vpParents)
-	{
-		if(pParent->m_vRconCommands.empty())
-			continue;
-
-		log_info("server", "Commands inherited from role '%s':", pParent->Name());
-		pParent->LogRconCommandAccess(MaxLineLength);
-	}
+	log_info("server", "todo");
 }
 
 bool CRconRole::IsValidName(const char *pName)
@@ -464,15 +392,6 @@ bool CAuthManager::AddRoleImpl(const char *pName, bool IsAdmin)
 
 	m_Roles.insert({pName, CRconRole(pName, IsAdmin)});
 	return true;
-}
-
-bool CAuthManager::CanRoleUseCommand(const char *pRoleName, const char *pCommand)
-{
-	CRconRole *pRole = FindRole(pRoleName);
-	if(!pRole)
-		return false;
-
-	return pRole->CanUseRconCommand(pCommand);
 }
 
 void CAuthManager::GetRoleNames(char *pBuf, size_t BufSize)
