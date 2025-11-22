@@ -1,5 +1,7 @@
 #include <base/system.h>
 
+#include <engine/server/server.h>
+
 #include <game/gamecore.h>
 
 #include <gtest/gtest.h>

@@ -605,6 +605,30 @@ int CServer::Init()
 	return 0;
 }
 
+bool CServer::StrHideIps(const char *pInput, char *pOutputWithIps, int OutputWithIpsSize, char *pOutputWithoutIps, int OutputWithoutIpsSize)
+{
+	const char *pStart = str_find(pInput, "<{");
+	const char *pEnd = pStart == nullptr ? nullptr : str_find(pStart + 2, "}>");
+	pOutputWithIps[0] = '\0';
+	pOutputWithoutIps[0] = '\0';
+
+	if(pStart == nullptr || pEnd == nullptr)
+	{
+		str_copy(pOutputWithIps, pInput, OutputWithIpsSize);
+		str_copy(pOutputWithoutIps, pInput, OutputWithoutIpsSize);
+		return false;
+	}
+
+	str_append(pOutputWithIps, pInput, minimum<size_t>(pStart - pInput + 1, OutputWithIpsSize));
+	str_append(pOutputWithIps, pStart + 2, minimum<size_t>(pEnd - pInput - 1, OutputWithIpsSize));
+	str_append(pOutputWithIps, pEnd + 2, OutputWithIpsSize);
+
+	str_append(pOutputWithoutIps, pInput, minimum<size_t>(pStart - pInput + 1, OutputWithoutIpsSize));
+	str_append(pOutputWithoutIps, "XXX", OutputWithoutIpsSize);
+	str_append(pOutputWithoutIps, pEnd + 2, OutputWithoutIpsSize);
+	return true;
+}
+
 void CServer::SendLogLine(const CLogMessage *pMessage)
 {
 	if(pMessage->m_Level <= IConsole::ToLogLevelFilter(g_Config.m_ConsoleOutputLevel))
@@ -1407,45 +1431,22 @@ void CServer::SendRconLine(int ClientId, const char *pLine)
 
 void CServer::SendRconLogLine(int ClientId, const CLogMessage *pMessage)
 {
-	const char *pLine = pMessage->m_aLine;
-	const char *pStart = str_find(pLine, "<{");
-	const char *pEnd = pStart == nullptr ? nullptr : str_find(pStart + 2, "}>");
-	const char *pLineWithoutIps;
 	char aLine[sizeof(CLogMessage().m_aLine)];
 	char aLineWithoutIps[sizeof(CLogMessage().m_aLine)];
-	aLine[0] = '\0';
-	aLineWithoutIps[0] = '\0';
-
-	if(pStart == nullptr || pEnd == nullptr)
-	{
-		pLineWithoutIps = pLine;
-	}
-	else
-	{
-		str_append(aLine, pLine, minimum<size_t>(pStart - pLine + 1, sizeof(aLine)));
-		str_append(aLine, pStart + 2, minimum<size_t>(pStart - pLine + pEnd - pStart - 1, sizeof(aLine)));
-		str_append(aLine, pEnd + 2);
-
-		str_append(aLineWithoutIps, pLine, minimum<size_t>(pStart - pLine + 1, sizeof(aLine)));
-		str_append(aLineWithoutIps, "XXX");
-		str_append(aLineWithoutIps, pEnd + 2);
-
-		pLine = aLine;
-		pLineWithoutIps = aLineWithoutIps;
-	}
+	StrHideIps(pMessage->m_aLine, aLine, sizeof(aLine), aLineWithoutIps, sizeof(aLineWithoutIps));
 
 	if(ClientId == -1)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if(m_aClients[i].m_State != CClient::STATE_EMPTY && IsRconAuthedAdmin(i))
-				SendRconLine(i, m_aClients[i].m_ShowIps ? pLine : pLineWithoutIps);
+				SendRconLine(i, m_aClients[i].m_ShowIps ? aLine : aLineWithoutIps);
 		}
 	}
 	else
 	{
 		if(m_aClients[ClientId].m_State != CClient::STATE_EMPTY)
-			SendRconLine(ClientId, m_aClients[ClientId].m_ShowIps ? pLine : pLineWithoutIps);
+			SendRconLine(ClientId, m_aClients[ClientId].m_ShowIps ? aLine : aLineWithoutIps);
 	}
 }
 
