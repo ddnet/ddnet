@@ -607,26 +607,49 @@ int CServer::Init()
 
 bool CServer::StrHideIps(const char *pInput, char *pOutputWithIps, int OutputWithIpsSize, char *pOutputWithoutIps, int OutputWithoutIpsSize)
 {
-	const char *pStart = str_find(pInput, "<{");
-	const char *pEnd = pStart == nullptr ? nullptr : str_find(pStart + 2, "}>");
-	pOutputWithIps[0] = '\0';
-	pOutputWithoutIps[0] = '\0';
+	auto StrHideIpsImpl = [](const char *pInputImpl, char *pOutputWithIpsImpl, int OutputWithIpsSizeImpl, char *pOutputWithoutIpsImpl, int OutputWithoutIpsSizeImpl) {
+		const char *pStart = str_find(pInputImpl, "<{");
+		const char *pEnd = pStart == nullptr ? nullptr : str_find(pStart + 2, "}>");
+		pOutputWithIpsImpl[0] = '\0';
+		pOutputWithoutIpsImpl[0] = '\0';
 
-	if(pStart == nullptr || pEnd == nullptr)
+		if(pStart == nullptr || pEnd == nullptr)
+		{
+			str_copy(pOutputWithIpsImpl, pInputImpl, OutputWithIpsSizeImpl);
+			str_copy(pOutputWithoutIpsImpl, pInputImpl, OutputWithIpsSizeImpl);
+			return false;
+		}
+
+		str_append(pOutputWithIpsImpl, pInputImpl, minimum<size_t>(pStart - pInputImpl + 1, OutputWithIpsSizeImpl));
+		str_append(pOutputWithIpsImpl, pStart + 2, minimum<size_t>(pEnd - pInputImpl - 1, OutputWithIpsSizeImpl));
+		str_append(pOutputWithIpsImpl, pEnd + 2, OutputWithIpsSizeImpl);
+
+		str_append(pOutputWithoutIpsImpl, pInputImpl, minimum<size_t>(pStart - pInputImpl + 1, OutputWithoutIpsSizeImpl));
+		str_append(pOutputWithoutIpsImpl, "XXX", OutputWithoutIpsSizeImpl);
+		str_append(pOutputWithoutIpsImpl, pEnd + 2, OutputWithoutIpsSizeImpl);
+		return true;
+	};
+
+	bool HasHiddenIps = StrHideIpsImpl(pInput, pOutputWithIps, OutputWithIpsSize, pOutputWithoutIps, OutputWithoutIpsSize);
+
+	constexpr int IpHideLimit = 10;
+	for(int Hide = 0; Hide < IpHideLimit && HasHiddenIps; ++Hide)
 	{
-		str_copy(pOutputWithIps, pInput, OutputWithIpsSize);
-		str_copy(pOutputWithoutIps, pInput, OutputWithoutIpsSize);
-		return false;
+		char aLineBufferWithoutIps[sizeof(CLogMessage().m_aLine)];
+		char aLineBuffer[sizeof(CLogMessage().m_aLine)];
+
+		// we can't do aLine and aLineWithoutIps at the same time, because both need a different input string
+		str_copy(aLineBuffer, pOutputWithIps);
+		bool HasHidesWithIps = StrHideIpsImpl(aLineBuffer, pOutputWithIps, OutputWithIpsSize, aLineBufferWithoutIps, sizeof(aLineBufferWithoutIps));
+
+		str_copy(aLineBufferWithoutIps, pOutputWithoutIps);
+		bool HasHidesWithoutIps = StrHideIpsImpl(aLineBufferWithoutIps, aLineBuffer, sizeof(aLineBuffer), pOutputWithoutIps, OutputWithoutIpsSize);
+
+		if(!HasHidesWithIps && !HasHidesWithoutIps)
+			break;
 	}
 
-	str_append(pOutputWithIps, pInput, minimum<size_t>(pStart - pInput + 1, OutputWithIpsSize));
-	str_append(pOutputWithIps, pStart + 2, minimum<size_t>(pEnd - pInput - 1, OutputWithIpsSize));
-	str_append(pOutputWithIps, pEnd + 2, OutputWithIpsSize);
-
-	str_append(pOutputWithoutIps, pInput, minimum<size_t>(pStart - pInput + 1, OutputWithoutIpsSize));
-	str_append(pOutputWithoutIps, "XXX", OutputWithoutIpsSize);
-	str_append(pOutputWithoutIps, pEnd + 2, OutputWithoutIpsSize);
-	return true;
+	return HasHiddenIps;
 }
 
 void CServer::SendLogLine(const CLogMessage *pMessage)
