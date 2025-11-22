@@ -12,7 +12,7 @@ class CEnvelope
 public:
 	std::vector<CEnvPoint_runtime> m_vPoints;
 	char m_aName[32] = "";
-	bool m_Synchronized = false;
+	bool m_Synchronized = true;
 
 	enum class EType
 	{
