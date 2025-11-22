@@ -249,16 +249,16 @@ void CProjectile::Tick()
 		return;
 	}
 
-	int x = GameServer()->Collision()->GetIndex(PrevPos, CurPos);
-	int z;
+	int Index = GameServer()->Collision()->GetIndex(PrevPos, CurPos);
+	int TeleNumber;
 	if(g_Config.m_SvOldTeleportWeapons)
-		z = GameServer()->Collision()->IsTeleport(x);
+		TeleNumber = GameServer()->Collision()->IsTeleport(Index);
 	else
-		z = GameServer()->Collision()->IsTeleportWeapon(x);
-	if(z && !GameServer()->Collision()->TeleOuts(z - 1).empty())
+		TeleNumber = GameServer()->Collision()->IsTeleportWeapon(Index);
+	if(TeleNumber && !GameServer()->Collision()->TeleOuts(TeleNumber - 1).empty())
 	{
-		int TeleOut = GameServer()->m_World.m_Core.RandomOr0(GameServer()->Collision()->TeleOuts(z - 1).size());
-		m_Pos = GameServer()->Collision()->TeleOuts(z - 1)[TeleOut];
+		int TeleOut = GameServer()->m_World.m_Core.RandomOr0(GameServer()->Collision()->TeleOuts(TeleNumber - 1).size());
+		m_Pos = GameServer()->Collision()->TeleOuts(TeleNumber - 1)[TeleOut];
 		m_StartTick = Server()->Tick();
 	}
 }
