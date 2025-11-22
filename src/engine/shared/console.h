@@ -111,7 +111,7 @@ class CConsole : public IConsole
 		const char *GetString(unsigned Index) const override;
 		int GetInteger(unsigned Index) const override;
 		float GetFloat(unsigned Index) const override;
-		std::optional<ColorHSLA> GetColor(unsigned Index, float DarkestLighting) const override;
+		ColorHSLA GetColor(unsigned Index, float DarkestLighting) const override;
 
 		// DDRace
 
