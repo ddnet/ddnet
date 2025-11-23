@@ -93,6 +93,11 @@ enum
 	WEAPON_WORLD = -1, // death tiles etc
 };
 
+enum
+{
+	TEAM_GAME = TEAM_RED,
+};
+
 class CNetObjHandler
 {
 	const char *m_pMsgFailedOn;

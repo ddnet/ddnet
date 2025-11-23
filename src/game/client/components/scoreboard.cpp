@@ -742,11 +742,11 @@ void CScoreboard::OnRender()
 
 		CUIRect Title;
 		Scoreboard.HSplitTop(TitleHeight, &Title, &Scoreboard);
-		RenderTitle(Title, TEAM_RED, pTitle);
+		RenderTitle(Title, TEAM_GAME, pTitle);
 
 		if(NumPlayers <= 16)
 		{
-			RenderScoreboard(Scoreboard, TEAM_RED, 0, NumPlayers, RenderState);
+			RenderScoreboard(Scoreboard, TEAM_GAME, 0, NumPlayers, RenderState);
 		}
 		else if(NumPlayers <= 64)
 		{
@@ -762,8 +762,8 @@ void CScoreboard::OnRender()
 
 			CUIRect LeftScoreboard, RightScoreboard;
 			Scoreboard.VSplitMid(&LeftScoreboard, &RightScoreboard);
-			RenderScoreboard(LeftScoreboard, TEAM_RED, 0, PlayersPerSide, RenderState);
-			RenderScoreboard(RightScoreboard, TEAM_RED, PlayersPerSide, 2 * PlayersPerSide, RenderState);
+			RenderScoreboard(LeftScoreboard, TEAM_GAME, 0, PlayersPerSide, RenderState);
+			RenderScoreboard(RightScoreboard, TEAM_GAME, PlayersPerSide, 2 * PlayersPerSide, RenderState);
 		}
 		else
 		{
@@ -774,7 +774,7 @@ void CScoreboard::OnRender()
 			{
 				CUIRect Column;
 				RemainingScoreboard.VSplitLeft(Scoreboard.w / NumColumns, &Column, &RemainingScoreboard);
-				RenderScoreboard(Column, TEAM_RED, i * PlayersPerColumn, (i + 1) * PlayersPerColumn, RenderState);
+				RenderScoreboard(Column, TEAM_GAME, i * PlayersPerColumn, (i + 1) * PlayersPerColumn, RenderState);
 			}
 		}
 	}
