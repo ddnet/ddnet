@@ -4,44 +4,39 @@
 #define GAME_CLIENT_COMPONENTS_MAPLAYERS_H
 
 #include <game/client/component.h>
+#include <game/client/components/envelope_state.h>
 #include <game/map/map_renderer.h>
-
-#include <cstdint>
-#include <memory>
 
 class CCamera;
 class CLayers;
 class CMapImages;
 class ColorRGBA;
 
-class CMapLayers : public CComponent, public IEnvelopeEval
+class CMapLayers : public CComponent
 {
 	friend class CBackground;
 	friend class CMenuBackground;
 
 	CLayers *m_pLayers;
 	CMapImages *m_pImages;
-	std::shared_ptr<CMapBasedEnvelopePointAccess> m_pEnvelopePoints;
-
 	ERenderType m_Type;
 	bool m_OnlineOnly;
 
 public:
-	static void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels, IMap *pMap, CMapBasedEnvelopePointAccess *pEnvelopePoints, IClient *pClient, CGameClient *pGameClient, bool OnlineOnly);
-	void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels) override;
-
 	CMapLayers(ERenderType Type, bool OnlineOnly = true);
 	int Sizeof() const override { return sizeof(*this); }
 	void OnInit() override;
 	void OnRender() override;
 	void OnMapLoad() override;
-	void Unload();
 
 	virtual CCamera *GetCurCamera();
+
+	CEnvelopeState &EnvEvaluator() { return m_EnvEvaluator; }
 
 private:
 	CRenderLayerParams m_Params;
 	CMapRenderer m_MapRenderer;
+	CEnvelopeState m_EnvEvaluator;
 };
 
 #endif
