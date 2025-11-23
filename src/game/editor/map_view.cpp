@@ -51,14 +51,14 @@ void CMapView::Focus()
 
 void CMapView::RenderGroupBorder()
 {
-	std::shared_ptr<CLayerGroup> pGroup = Editor()->GetSelectedGroup();
+	std::shared_ptr<CLayerGroup> pGroup = Editor()->Map()->SelectedGroup();
 	if(pGroup)
 	{
 		pGroup->MapScreen();
 
-		for(size_t i = 0; i < Editor()->m_vSelectedLayers.size(); i++)
+		for(size_t i = 0; i < Editor()->Map()->m_vSelectedLayers.size(); i++)
 		{
-			std::shared_ptr<CLayer> pLayer = Editor()->GetSelectedLayerType(i, LAYERTYPE_TILES);
+			std::shared_ptr<CLayer> pLayer = Editor()->Map()->SelectedLayerType(i, LAYERTYPE_TILES);
 			if(pLayer)
 			{
 				CUIRect BorderRect;
@@ -112,10 +112,10 @@ void CMapView::RenderEditorMap()
 		}
 	}
 
-	std::shared_ptr<CLayerTiles> pSelectedTilesLayer = std::static_pointer_cast<CLayerTiles>(Editor()->GetSelectedLayerType(0, LAYERTYPE_TILES));
+	std::shared_ptr<CLayerTiles> pSelectedTilesLayer = std::static_pointer_cast<CLayerTiles>(Editor()->Map()->SelectedLayerType(0, LAYERTYPE_TILES));
 	if(Editor()->m_ShowTileInfo != CEditor::SHOW_TILE_OFF && pSelectedTilesLayer && pSelectedTilesLayer->m_Visible && m_Zoom.GetValue() <= 300.0f)
 	{
-		Editor()->GetSelectedGroup()->MapScreen();
+		Editor()->Map()->SelectedGroup()->MapScreen();
 		pSelectedTilesLayer->ShowInfo();
 	}
 }

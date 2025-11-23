@@ -49,7 +49,7 @@ bool CLayerSelector::SelectByTile()
 	{
 		if(!IsFound)
 			m_SelectionOffset = 1;
-		Editor()->SelectLayer(MatchedLayer, MatchedGroup);
+		Editor()->Map()->SelectLayer(MatchedLayer, MatchedGroup);
 		return true;
 	}
 	return false;
