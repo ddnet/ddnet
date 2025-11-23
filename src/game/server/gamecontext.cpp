@@ -71,7 +71,9 @@ void CClientChatLogger::Log(const CLogMessage *pMessage)
 	}
 }
 
-void CGameContext::Construct(bool Resetting)
+CGameContext::CGameContext(bool Resetting) :
+	m_Mutes("mutes"),
+	m_VoteMutes("votemutes")
 {
 	m_Resetting = false;
 	m_pServer = nullptr;
@@ -125,12 +127,12 @@ void CGameContext::Construct(bool Resetting)
 	m_TeeHistorianActive = false;
 }
 
-void CGameContext::Destruct(bool Resetting)
+CGameContext::~CGameContext()
 {
 	for(auto &pPlayer : m_apPlayers)
 		delete pPlayer;
 
-	if(!Resetting)
+	if(!m_Resetting)
 	{
 		for(auto &pSavedTee : m_apSavedTees)
 			delete pSavedTee;
@@ -143,25 +145,6 @@ void CGameContext::Destruct(bool Resetting)
 
 	delete m_pScore;
 	m_pScore = nullptr;
-}
-
-CGameContext::CGameContext() :
-	m_Mutes("mutes"),
-	m_VoteMutes("votemutes")
-{
-	Construct(false);
-}
-
-CGameContext::CGameContext(bool Reset) :
-	m_Mutes("mutes"),
-	m_VoteMutes("votemutes")
-{
-	Construct(Reset);
-}
-
-CGameContext::~CGameContext()
-{
-	Destruct(m_Resetting);
 }
 
 void CGameContext::Clear()
