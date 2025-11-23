@@ -111,11 +111,7 @@ void CLight::Snap(int SnappingClient)
 	vec2 From = m_Pos;
 	int StartTick = -1;
 
-	if(pChr && pChr->Team() == TEAM_SUPER)
-	{
-		From = m_Pos;
-	}
-	else if(pChr && m_Layer == LAYER_SWITCH && m_Number > 0 && Switchers()[m_Number].m_aStatus[pChr->Team()])
+	if(pChr && m_Layer == LAYER_SWITCH && m_Number > 0 && Switchers()[m_Number].m_aStatus[pChr->Team()])
 	{
 		From = m_To;
 	}
