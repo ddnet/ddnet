@@ -1434,7 +1434,21 @@ void CServer::SendRconLogLine(int ClientId, const CLogMessage *pMessage)
 {
 	char aLine[sizeof(CLogMessage().m_aLine)];
 	char aLineWithoutIps[sizeof(CLogMessage().m_aLine)];
-	StrHideIps(pMessage->m_aLine, aLine, sizeof(aLine), aLineWithoutIps, sizeof(aLineWithoutIps));
+	bool HasHiddenIps = StrHideIps(pMessage->m_aLine, aLine, sizeof(aLine), aLineWithoutIps, sizeof(aLineWithoutIps));
+
+	constexpr int IpHideLimit = 10;
+	for(int Hide = 0; Hide < IpHideLimit && HasHiddenIps; ++Hide)
+	{
+		char aLineBufferWithoutIps[500];
+		char aLineBuffer[500];
+
+		// we can't do aLine and aLineWithoutIps at the same time, because both need a different input string
+		str_copy(aLineBuffer, aLine);
+		CServer::StrHideIps(aLineBuffer, aLine, sizeof(aLine), aLineBufferWithoutIps, sizeof(aLineBufferWithoutIps));
+
+		str_copy(aLineBufferWithoutIps, aLineWithoutIps);
+		HasHiddenIps = CServer::StrHideIps(aLineBufferWithoutIps, aLineBuffer, sizeof(aLineBuffer), aLineWithoutIps, sizeof(aLineWithoutIps));
+	}
 
 	if(ClientId == -1)
 	{
