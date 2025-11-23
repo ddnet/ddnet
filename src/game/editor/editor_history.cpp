@@ -34,7 +34,7 @@ void CEditorHistory::RecordAction(const std::shared_ptr<IEditorAction> &pAction,
 	if(pDisplay == nullptr)
 		m_vpUndoActions.emplace_back(pAction);
 	else
-		m_vpUndoActions.emplace_back(std::make_shared<CEditorActionBulk>(m_pEditor, std::vector<std::shared_ptr<IEditorAction>>{pAction}, pDisplay));
+		m_vpUndoActions.emplace_back(std::make_shared<CEditorActionBulk>(Map(), std::vector<std::shared_ptr<IEditorAction>>{pAction}, pDisplay));
 }
 
 bool CEditorHistory::Undo()
@@ -85,7 +85,7 @@ void CEditorHistory::EndBulk(const char *pDisplay)
 
 	// Record bulk action
 	if(!m_vpBulkActions.empty())
-		RecordAction(std::make_shared<CEditorActionBulk>(m_pEditor, m_vpBulkActions, pDisplay, true));
+		RecordAction(std::make_shared<CEditorActionBulk>(Map(), m_vpBulkActions, pDisplay, true));
 
 	m_vpBulkActions.clear();
 }

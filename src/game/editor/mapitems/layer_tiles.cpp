@@ -99,7 +99,7 @@ void CLayerTiles::SetTile(int x, int y, CTile Tile)
 				Map()->m_pGameGroup->AddLayer(pLayerTele);
 				int GameGroupIndex = std::find(Map()->m_vpGroups.begin(), Map()->m_vpGroups.end(), Map()->m_pGameGroup) - Map()->m_vpGroups.begin();
 				int LayerIndex = Map()->m_vpGroups[GameGroupIndex]->m_vpLayers.size() - 1;
-				Editor()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(Editor(), GameGroupIndex, LayerIndex));
+				Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(Map(), GameGroupIndex, LayerIndex));
 			}
 
 			pLayer = Map()->m_pTeleLayer;
@@ -806,9 +806,9 @@ void CLayerTiles::FillGameTiles(EGameTileOp Fill)
 				const int NewW = pGLayer->m_Width < m_Width + OffsetX ? m_Width + OffsetX : pGLayer->m_Width;
 				const int NewH = pGLayer->m_Height < m_Height + OffsetY ? m_Height + OffsetY : pGLayer->m_Height;
 				pGLayer->Resize(NewW, NewH);
-				vpActions.push_back(std::make_shared<CEditorActionEditLayerTilesProp>(Editor(), GameGroupIndex, GameLayerIndex, ETilesProp::PROP_WIDTH, PrevW, NewW));
+				vpActions.push_back(std::make_shared<CEditorActionEditLayerTilesProp>(Map(), GameGroupIndex, GameLayerIndex, ETilesProp::PROP_WIDTH, PrevW, NewW));
 				const std::shared_ptr<CEditorActionEditLayerTilesProp> &Action1 = std::static_pointer_cast<CEditorActionEditLayerTilesProp>(vpActions[vpActions.size() - 1]);
-				vpActions.push_back(std::make_shared<CEditorActionEditLayerTilesProp>(Editor(), GameGroupIndex, GameLayerIndex, ETilesProp::PROP_HEIGHT, PrevH, NewH));
+				vpActions.push_back(std::make_shared<CEditorActionEditLayerTilesProp>(Map(), GameGroupIndex, GameLayerIndex, ETilesProp::PROP_HEIGHT, PrevH, NewH));
 				const std::shared_ptr<CEditorActionEditLayerTilesProp> &Action2 = std::static_pointer_cast<CEditorActionEditLayerTilesProp>(vpActions[vpActions.size() - 1]);
 
 				Action1->SetSavedLayers(SavedLayers);
@@ -828,10 +828,10 @@ void CLayerTiles::FillGameTiles(EGameTileOp Fill)
 				}
 			}
 
-			vpActions.push_back(std::make_shared<CEditorBrushDrawAction>(Editor(), GameGroupIndex));
+			vpActions.push_back(std::make_shared<CEditorBrushDrawAction>(Map(), GameGroupIndex));
 			char aDisplay[256];
 			str_format(aDisplay, sizeof(aDisplay), "Construct '%s' game tiles (x%d)", GAME_TILE_OP_NAMES[(int)Fill], Changes);
-			Editor()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionBulk>(Editor(), vpActions, aDisplay, true));
+			Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionBulk>(Map(), vpActions, aDisplay, true));
 		}
 		else
 		{
@@ -841,7 +841,7 @@ void CLayerTiles::FillGameTiles(EGameTileOp Fill)
 				Map()->MakeTeleLayer(pLayer);
 				Map()->m_pGameGroup->AddLayer(pLayer);
 
-				vpActions.push_back(std::make_shared<CEditorActionAddLayer>(Editor(), GameGroupIndex, Map()->m_pGameGroup->m_vpLayers.size() - 1));
+				vpActions.push_back(std::make_shared<CEditorActionAddLayer>(Map(), GameGroupIndex, Map()->m_pGameGroup->m_vpLayers.size() - 1));
 
 				if(m_Width != pGLayer->m_Width || m_Height > pGLayer->m_Height)
 				{
@@ -863,9 +863,9 @@ void CLayerTiles::FillGameTiles(EGameTileOp Fill)
 					int PrevW = pGLayer->m_Width;
 					int PrevH = pGLayer->m_Height;
 					pLayer->Resize(NewW, NewH);
-					vpActions.push_back(std::make_shared<CEditorActionEditLayerTilesProp>(Editor(), GameGroupIndex, GameLayerIndex, ETilesProp::PROP_WIDTH, PrevW, NewW));
+					vpActions.push_back(std::make_shared<CEditorActionEditLayerTilesProp>(Map(), GameGroupIndex, GameLayerIndex, ETilesProp::PROP_WIDTH, PrevW, NewW));
 					const std::shared_ptr<CEditorActionEditLayerTilesProp> &Action1 = std::static_pointer_cast<CEditorActionEditLayerTilesProp>(vpActions[vpActions.size() - 1]);
-					vpActions.push_back(std::make_shared<CEditorActionEditLayerTilesProp>(Editor(), GameGroupIndex, GameLayerIndex, ETilesProp::PROP_HEIGHT, PrevH, NewH));
+					vpActions.push_back(std::make_shared<CEditorActionEditLayerTilesProp>(Map(), GameGroupIndex, GameLayerIndex, ETilesProp::PROP_HEIGHT, PrevH, NewH));
 					const std::shared_ptr<CEditorActionEditLayerTilesProp> &Action2 = std::static_pointer_cast<CEditorActionEditLayerTilesProp>(vpActions[vpActions.size() - 1]);
 
 					Action1->SetSavedLayers(SavedLayers);
@@ -888,8 +888,8 @@ void CLayerTiles::FillGameTiles(EGameTileOp Fill)
 				int NewH = pTLayer->m_Height < m_Height + OffsetY ? m_Height + OffsetY : pTLayer->m_Height;
 				pTLayer->Resize(NewW, NewH);
 				std::shared_ptr<CEditorActionEditLayerTilesProp> Action1, Action2;
-				vpActions.push_back(Action1 = std::make_shared<CEditorActionEditLayerTilesProp>(Editor(), GameGroupIndex, TeleLayerIndex, ETilesProp::PROP_WIDTH, PrevW, NewW));
-				vpActions.push_back(Action2 = std::make_shared<CEditorActionEditLayerTilesProp>(Editor(), GameGroupIndex, TeleLayerIndex, ETilesProp::PROP_HEIGHT, PrevH, NewH));
+				vpActions.push_back(Action1 = std::make_shared<CEditorActionEditLayerTilesProp>(Map(), GameGroupIndex, TeleLayerIndex, ETilesProp::PROP_WIDTH, PrevW, NewW));
+				vpActions.push_back(Action2 = std::make_shared<CEditorActionEditLayerTilesProp>(Map(), GameGroupIndex, TeleLayerIndex, ETilesProp::PROP_HEIGHT, PrevH, NewH));
 
 				Action1->SetSavedLayers(SavedLayers);
 				Action2->SetSavedLayers(SavedLayers);
@@ -924,10 +924,10 @@ void CLayerTiles::FillGameTiles(EGameTileOp Fill)
 				}
 			}
 
-			vpActions.push_back(std::make_shared<CEditorBrushDrawAction>(Editor(), GameGroupIndex));
+			vpActions.push_back(std::make_shared<CEditorBrushDrawAction>(Map(), GameGroupIndex));
 			char aDisplay[256];
 			str_format(aDisplay, sizeof(aDisplay), "Construct 'tele' game tiles (x%d)", Changes);
-			Editor()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionBulk>(Editor(), vpActions, aDisplay, true));
+			Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionBulk>(Map(), vpActions, aDisplay, true));
 		}
 	}
 }
@@ -1007,7 +1007,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 					if(!m_TilesHistory.empty()) // Sometimes pressing that button causes the automap to run so we should be able to undo that
 					{
 						// record undo
-						Editor()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(Editor(), Editor()->m_SelectedGroup, Editor()->m_vSelectedLayers[0], "Auto map", m_TilesHistory));
+						Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(Map(), Editor()->m_SelectedGroup, Editor()->m_vSelectedLayers[0], "Auto map", m_TilesHistory));
 						ClearHistory();
 					}
 				}
@@ -1018,7 +1018,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 			{
 				Map()->m_vpImages[m_Image]->m_AutoMapper.Proceed(this, Map()->m_pGameLayer.get(), m_AutoMapperReference, m_AutoMapperConfig, m_Seed);
 				// record undo
-				Editor()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(Editor(), Editor()->m_SelectedGroup, Editor()->m_vSelectedLayers[0], "Auto map", m_TilesHistory));
+				Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(Map(), Editor()->m_SelectedGroup, Editor()->m_vSelectedLayers[0], "Auto map", m_TilesHistory));
 				ClearHistory();
 				return CUi::POPUP_CLOSE_CURRENT;
 			}
@@ -1059,9 +1059,8 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	int NewVal = 0;
 	auto [State, Prop] = Editor()->DoPropertiesWithState<ETilesProp>(pToolBox, aProps, s_aIds, &NewVal);
 
-	static CLayerTilesPropTracker s_Tracker(Editor());
-	s_Tracker.Begin(this, Prop, State);
-	Editor()->m_EditorHistory.BeginBulk();
+	Map()->m_LayerTilesPropTracker.Begin(this, Prop, State);
+	Map()->m_EditorHistory.BeginBulk();
 
 	if(Prop == ETilesProp::PROP_WIDTH && NewVal > 1)
 	{
@@ -1155,7 +1154,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		m_LiveGameTiles = NewVal != 0;
 	}
 
-	s_Tracker.End(Prop, State);
+	Map()->m_LayerTilesPropTracker.End(Prop, State);
 
 	// Check if modified property could have an effect on automapper
 	if((State == EEditState::END || State == EEditState::ONE_GO) && HasAutomapEffect(Prop))
@@ -1165,7 +1164,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		// Record undo if automapper was ran
 		if(m_AutoAutoMap && !m_TilesHistory.empty())
 		{
-			Editor()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(Editor(), Editor()->m_SelectedGroup, Editor()->m_vSelectedLayers[0], "Auto map", m_TilesHistory));
+			Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(Map(), Editor()->m_SelectedGroup, Editor()->m_vSelectedLayers[0], "Auto map", m_TilesHistory));
 			ClearHistory();
 		}
 	}
@@ -1173,13 +1172,14 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	// End undo bulk, taking the first action display as the displayed text in the history
 	// This is usually the resulting text of the edit layer tiles prop action
 	// Since we may also squeeze a tile changes action, we want both to appear as one, thus using a bulk
-	Editor()->m_EditorHistory.EndBulk(0);
+	Map()->m_EditorHistory.EndBulk(0);
 
 	return CUi::POPUP_KEEP_OPEN;
 }
 
-CUi::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, std::vector<std::shared_ptr<CLayerTiles>> &vpLayers, std::vector<int> &vLayerIndices)
+CUi::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditorMap *pEditorMap, CUIRect *pToolbox, std::vector<std::shared_ptr<CLayerTiles>> &vpLayers, std::vector<int> &vLayerIndices)
 {
+	CEditor *pEditor = pEditorMap->Editor();
 	if(State.m_Modified)
 	{
 		CUIRect Commit;
@@ -1202,18 +1202,18 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 					SavedLayers[LAYERTYPE_TILES] = pLayer->Duplicate();
 					if(pLayer->m_HasGame || pLayer->m_HasFront || pLayer->m_HasSwitch || pLayer->m_HasSpeedup || pLayer->m_HasTune || pLayer->m_HasTele)
 					{ // Need to save all entities layers when any entity layer
-						if(pEditor->m_Map.m_pFrontLayer && !pLayer->m_HasFront)
-							SavedLayers[LAYERTYPE_FRONT] = pEditor->m_Map.m_pFrontLayer->Duplicate();
-						if(pEditor->m_Map.m_pTeleLayer && !pLayer->m_HasTele)
-							SavedLayers[LAYERTYPE_TELE] = pEditor->m_Map.m_pTeleLayer->Duplicate();
-						if(pEditor->m_Map.m_pSwitchLayer && !pLayer->m_HasSwitch)
-							SavedLayers[LAYERTYPE_SWITCH] = pEditor->m_Map.m_pSwitchLayer->Duplicate();
-						if(pEditor->m_Map.m_pSpeedupLayer && !pLayer->m_HasSpeedup)
-							SavedLayers[LAYERTYPE_SPEEDUP] = pEditor->m_Map.m_pSpeedupLayer->Duplicate();
-						if(pEditor->m_Map.m_pTuneLayer && !pLayer->m_HasTune)
-							SavedLayers[LAYERTYPE_TUNE] = pEditor->m_Map.m_pTuneLayer->Duplicate();
+						if(pEditorMap->m_pFrontLayer && !pLayer->m_HasFront)
+							SavedLayers[LAYERTYPE_FRONT] = pEditorMap->m_pFrontLayer->Duplicate();
+						if(pEditorMap->m_pTeleLayer && !pLayer->m_HasTele)
+							SavedLayers[LAYERTYPE_TELE] = pEditorMap->m_pTeleLayer->Duplicate();
+						if(pEditorMap->m_pSwitchLayer && !pLayer->m_HasSwitch)
+							SavedLayers[LAYERTYPE_SWITCH] = pEditorMap->m_pSwitchLayer->Duplicate();
+						if(pEditorMap->m_pSpeedupLayer && !pLayer->m_HasSpeedup)
+							SavedLayers[LAYERTYPE_SPEEDUP] = pEditorMap->m_pSpeedupLayer->Duplicate();
+						if(pEditorMap->m_pTuneLayer && !pLayer->m_HasTune)
+							SavedLayers[LAYERTYPE_TUNE] = pEditorMap->m_pTuneLayer->Duplicate();
 						if(!pLayer->m_HasGame)
-							SavedLayers[LAYERTYPE_GAME] = pEditor->m_Map.m_pGameLayer->Duplicate();
+							SavedLayers[LAYERTYPE_GAME] = pEditorMap->m_pGameLayer->Duplicate();
 					}
 
 					int PrevW = pLayer->m_Width;
@@ -1223,14 +1223,14 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 					if(PrevW != State.m_Width)
 					{
 						std::shared_ptr<CEditorActionEditLayerTilesProp> pAction;
-						vpActions.push_back(pAction = std::make_shared<CEditorActionEditLayerTilesProp>(pEditor, GroupIndex, LayerIndex, ETilesProp::PROP_WIDTH, PrevW, State.m_Width));
+						vpActions.push_back(pAction = std::make_shared<CEditorActionEditLayerTilesProp>(pEditorMap, GroupIndex, LayerIndex, ETilesProp::PROP_WIDTH, PrevW, State.m_Width));
 						pAction->SetSavedLayers(SavedLayers);
 					}
 
 					if(PrevH != State.m_Height)
 					{
 						std::shared_ptr<CEditorActionEditLayerTilesProp> pAction;
-						vpActions.push_back(pAction = std::make_shared<CEditorActionEditLayerTilesProp>(pEditor, GroupIndex, LayerIndex, ETilesProp::PROP_HEIGHT, PrevH, State.m_Height));
+						vpActions.push_back(pAction = std::make_shared<CEditorActionEditLayerTilesProp>(pEditorMap, GroupIndex, LayerIndex, ETilesProp::PROP_HEIGHT, PrevH, State.m_Height));
 						pAction->SetSavedLayers(SavedLayers);
 					}
 				}
@@ -1239,7 +1239,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 				{
 					const int PackedColor = PackColor(pLayer->m_Color);
 					pLayer->m_Color = UnpackColor(State.m_Color);
-					vpActions.push_back(std::make_shared<CEditorActionEditLayerTilesProp>(pEditor, GroupIndex, LayerIndex, ETilesProp::PROP_COLOR, PackedColor, State.m_Color));
+					vpActions.push_back(std::make_shared<CEditorActionEditLayerTilesProp>(pEditorMap, GroupIndex, LayerIndex, ETilesProp::PROP_COLOR, PackedColor, State.m_Color));
 				}
 
 				pLayer->FlagModified(0, 0, pLayer->m_Width, pLayer->m_Height);
@@ -1248,7 +1248,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 
 			char aDisplay[256];
 			str_format(aDisplay, sizeof(aDisplay), "Edit %d layers common properties: %s", (int)vpLayers.size(), HasModifiedColor && HasModifiedSize ? "color, size" : (HasModifiedColor ? "color" : "size"));
-			pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionBulk>(pEditor, vpActions, aDisplay));
+			pEditorMap->m_EditorHistory.RecordAction(std::make_shared<CEditorActionBulk>(pEditorMap, vpActions, aDisplay));
 		}
 	}
 	else
@@ -1290,11 +1290,10 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 	int NewVal = 0;
 	auto [PropState, Prop] = pEditor->DoPropertiesWithState<ETilesCommonProp>(pToolbox, aProps, s_aIds, &NewVal);
 
-	static CLayerTilesCommonPropTracker s_Tracker(pEditor);
-	s_Tracker.m_vpLayers = vpLayers;
-	s_Tracker.m_vLayerIndices = vLayerIndices;
+	pEditorMap->m_LayerTilesCommonPropTracker.m_vpLayers = vpLayers;
+	pEditorMap->m_LayerTilesCommonPropTracker.m_vLayerIndices = vLayerIndices;
 
-	s_Tracker.Begin(nullptr, Prop, PropState);
+	pEditorMap->m_LayerTilesCommonPropTracker.Begin(nullptr, Prop, PropState);
 
 	if(Prop == ETilesCommonProp::PROP_WIDTH && NewVal > 1)
 	{
@@ -1330,7 +1329,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 		State.m_Color = NewVal;
 	}
 
-	s_Tracker.End(Prop, PropState);
+	pEditorMap->m_LayerTilesCommonPropTracker.End(Prop, PropState);
 
 	if(PropState == EEditState::END || PropState == EEditState::ONE_GO)
 	{

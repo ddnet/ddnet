@@ -42,16 +42,16 @@ void CEditor::AddQuadOrSound()
 	}
 
 	if(pLayer->m_Type == LAYERTYPE_QUADS)
-		m_EditorHistory.Execute(std::make_shared<CEditorActionNewEmptyQuad>(this, m_SelectedGroup, m_vSelectedLayers[0], x, y));
+		m_Map.m_EditorHistory.Execute(std::make_shared<CEditorActionNewEmptyQuad>(&m_Map, m_SelectedGroup, m_vSelectedLayers[0], x, y));
 	else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
-		m_EditorHistory.Execute(std::make_shared<CEditorActionNewEmptySound>(this, m_SelectedGroup, m_vSelectedLayers[0], x, y));
+		m_Map.m_EditorHistory.Execute(std::make_shared<CEditorActionNewEmptySound>(&m_Map, m_SelectedGroup, m_vSelectedLayers[0], x, y));
 }
 
 void CEditor::AddGroup()
 {
 	m_Map.NewGroup();
 	m_SelectedGroup = m_Map.m_vpGroups.size() - 1;
-	m_EditorHistory.RecordAction(std::make_shared<CEditorActionGroup>(this, m_SelectedGroup, false));
+	m_Map.m_EditorHistory.RecordAction(std::make_shared<CEditorActionGroup>(&m_Map, m_SelectedGroup, false));
 }
 
 void CEditor::AddSoundLayer()
@@ -61,7 +61,7 @@ void CEditor::AddSoundLayer()
 	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
 	SelectLayer(LayerIndex);
 	m_Map.m_vpGroups[m_SelectedGroup]->m_Collapse = false;
-	m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(this, m_SelectedGroup, LayerIndex));
+	m_Map.m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(&m_Map, m_SelectedGroup, LayerIndex));
 }
 
 void CEditor::AddTileLayer()
@@ -71,7 +71,7 @@ void CEditor::AddTileLayer()
 	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
 	SelectLayer(LayerIndex);
 	m_Map.m_vpGroups[m_SelectedGroup]->m_Collapse = false;
-	m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(this, m_SelectedGroup, LayerIndex));
+	m_Map.m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(&m_Map, m_SelectedGroup, LayerIndex));
 }
 
 void CEditor::AddQuadsLayer()
@@ -81,7 +81,7 @@ void CEditor::AddQuadsLayer()
 	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
 	SelectLayer(LayerIndex);
 	m_Map.m_vpGroups[m_SelectedGroup]->m_Collapse = false;
-	m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(this, m_SelectedGroup, LayerIndex));
+	m_Map.m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(&m_Map, m_SelectedGroup, LayerIndex));
 }
 
 void CEditor::AddSwitchLayer()
@@ -92,7 +92,7 @@ void CEditor::AddSwitchLayer()
 	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
 	SelectLayer(LayerIndex);
 	m_pBrush->Clear();
-	m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(this, m_SelectedGroup, LayerIndex));
+	m_Map.m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(&m_Map, m_SelectedGroup, LayerIndex));
 }
 
 void CEditor::AddFrontLayer()
@@ -103,7 +103,7 @@ void CEditor::AddFrontLayer()
 	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
 	SelectLayer(LayerIndex);
 	m_pBrush->Clear();
-	m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(this, m_SelectedGroup, LayerIndex));
+	m_Map.m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(&m_Map, m_SelectedGroup, LayerIndex));
 }
 
 void CEditor::AddTuneLayer()
@@ -114,7 +114,7 @@ void CEditor::AddTuneLayer()
 	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
 	SelectLayer(LayerIndex);
 	m_pBrush->Clear();
-	m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(this, m_SelectedGroup, LayerIndex));
+	m_Map.m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(&m_Map, m_SelectedGroup, LayerIndex));
 }
 
 void CEditor::AddSpeedupLayer()
@@ -125,7 +125,7 @@ void CEditor::AddSpeedupLayer()
 	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
 	SelectLayer(LayerIndex);
 	m_pBrush->Clear();
-	m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(this, m_SelectedGroup, LayerIndex));
+	m_Map.m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(&m_Map, m_SelectedGroup, LayerIndex));
 }
 
 void CEditor::AddTeleLayer()
@@ -136,7 +136,7 @@ void CEditor::AddTeleLayer()
 	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
 	SelectLayer(LayerIndex);
 	m_pBrush->Clear();
-	m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(this, m_SelectedGroup, LayerIndex));
+	m_Map.m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(&m_Map, m_SelectedGroup, LayerIndex));
 }
 
 bool CEditor::IsNonGameTileLayerSelected() const
@@ -198,7 +198,7 @@ void CEditor::DeleteSelectedLayer()
 	if(m_Map.m_pGameLayer == pCurrentLayer)
 		return;
 
-	m_EditorHistory.RecordAction(std::make_shared<CEditorActionDeleteLayer>(this, m_SelectedGroup, m_vSelectedLayers[0]));
+	m_Map.m_EditorHistory.RecordAction(std::make_shared<CEditorActionDeleteLayer>(&m_Map, m_SelectedGroup, m_vSelectedLayers[0]));
 
 	if(pCurrentLayer == m_Map.m_pFrontLayer)
 		m_Map.m_pFrontLayer = nullptr;

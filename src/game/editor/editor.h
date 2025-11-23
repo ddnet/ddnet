@@ -845,13 +845,6 @@ public:
 
 	void AdjustBrushSpecialTiles(bool UseNextFree, int Adjust = 0);
 
-	// Undo/Redo
-	CEditorHistory m_EditorHistory;
-	CEditorHistory m_ServerSettingsHistory;
-	CEditorHistory m_EnvelopeEditorHistory;
-	CQuadEditTracker m_QuadTracker;
-	CEnvelopeEditorOperationTracker m_EnvOpTracker;
-
 private:
 	CEditorHistory &ActiveHistory();
 

@@ -162,7 +162,7 @@ void CEditor::AddTileart(bool IgnoreHistory)
 
 	if(!IgnoreHistory)
 	{
-		m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileArt>(this, ImageCount, m_aTileartFilename, IndexMap));
+		m_Map.m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileArt>(&m_Map, ImageCount, m_aTileartFilename, IndexMap));
 	}
 
 	m_TileartImageInfo.Free();
