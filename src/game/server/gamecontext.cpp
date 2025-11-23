@@ -71,7 +71,9 @@ void CClientChatLogger::Log(const CLogMessage *pMessage)
 	}
 }
 
-void CGameContext::Construct()
+CGameContext::CGameContext() :
+	m_Mutes("mutes"),
+	m_VoteMutes("votemutes")
 {
 	m_pServer = nullptr;
 
@@ -121,7 +123,7 @@ void CGameContext::Construct()
 	m_TeeHistorianActive = false;
 }
 
-void CGameContext::Destruct()
+CGameContext::~CGameContext()
 {
 	for(auto &pPlayer : m_apPlayers)
 		delete pPlayer;
@@ -136,18 +138,6 @@ void CGameContext::Destruct()
 
 	delete m_pScore;
 	m_pScore = nullptr;
-}
-
-CGameContext::CGameContext() :
-	m_Mutes("mutes"),
-	m_VoteMutes("votemutes")
-{
-	Construct();
-}
-
-CGameContext::~CGameContext()
-{
-	Destruct();
 }
 
 void CGameContext::TeeHistorianWrite(const void *pData, int DataSize, void *pUser)
