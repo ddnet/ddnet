@@ -614,6 +614,8 @@ public:
 	void OnLanguageChange();
 	void HandleLanguageChanged();
 
+	void ForceUpdateConsoleRemoteCompletionSuggestions() override;
+
 	void RefreshSkin(const std::shared_ptr<CManagedTeeRenderInfo> &pManagedTeeRenderInfo);
 	void RefreshSkins(int SkinDescriptorFlags);
 	void OnSkinUpdate(const char *pSkinName);
