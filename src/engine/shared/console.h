@@ -76,6 +76,9 @@ class CConsole : public IConsole
 
 	void ExecuteLineStroked(int Stroke, const char *pStr, int ClientId = IConsole::CLIENT_ID_UNSPECIFIED, bool InterpretSemicolons = true) override;
 
+	FGetVictimsCommandCallback m_pfnGetVictimsCommandCallback = nullptr;
+	void *m_pGetVictimsCommandUserData = nullptr;
+
 	FTeeHistorianCommandCallback m_pfnTeeHistorianCommandCallback;
 	void *m_pTeeHistorianCommandUserdata;
 
@@ -191,6 +194,7 @@ public:
 	bool ExecuteFile(const char *pFilename, int ClientId = IConsole::CLIENT_ID_UNSPECIFIED, bool LogFailure = false, int StorageType = IStorage::TYPE_ALL) override;
 
 	void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = gs_ConsoleDefaultColor) const override;
+	void SetGetVictimsCommandCallback(FGetVictimsCommandCallback pfnCallback, void *pUser) override;
 	void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser) override;
 	void SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, void *pUser) override;
 	void SetCanUseCommandCallback(FCanUseCommandCallback pfnCallback, void *pUser) override;
