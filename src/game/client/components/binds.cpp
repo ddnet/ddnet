@@ -49,6 +49,13 @@ void CBinds::Bind(int KeyId, const char *pStr, bool FreeOnly, int ModifierCombin
 	if(FreeOnly && Get(KeyId, ModifierCombination)[0])
 		return;
 
+	auto ActiveBind = std::find(m_vActiveBinds.begin(), m_vActiveBinds.end(), CBindSlot(KeyId, ModifierCombination));
+	if(ActiveBind != m_vActiveBinds.end())
+	{
+		dbg_assert(m_aapKeyBindings[ActiveBind->m_ModifierMask][ActiveBind->m_Key] != nullptr,
+			"Active bind (key=%d, mod=%d) without bind command", ActiveBind->m_Key, ActiveBind->m_ModifierMask);
+		m_vActiveBinds.erase(ActiveBind);
+	}
 	free(m_aapKeyBindings[ModifierCombination][KeyId]);
 	m_aapKeyBindings[ModifierCombination][KeyId] = nullptr;
 
@@ -127,8 +134,15 @@ bool CBinds::OnInput(const IInput::CEvent &Event)
 		auto ActiveBind = std::find_if(m_vActiveBinds.begin(), m_vActiveBinds.end(), [&](const CBindSlot &Bind) {
 			return Event.m_Key == Bind.m_Key;
 		});
+		const bool Repeat = Event.m_Flags & IInput::FLAG_REPEAT;
 		if(ActiveBind == m_vActiveBinds.end())
 		{
+			if(Repeat)
+			{
+				// Only the first, non-repeated press event is allowed to activate binds.
+				return true;
+			}
+
 			const auto &&OnKeyPress = [&](int Mask) {
 				const char *pBind = m_aapKeyBindings[Mask][Event.m_Key];
 				if(g_Config.m_ClSubTickAiming)
@@ -138,8 +152,8 @@ bool CBinds::OnInput(const IInput::CEvent &Event)
 						m_MouseOnAction = true;
 					}
 				}
-				Console()->ExecuteLineStroked(1, pBind);
 				m_vActiveBinds.emplace_back(Event.m_Key, Mask);
+				Console()->ExecuteLineStroked(1, pBind);
 			};
 
 			if(m_aapKeyBindings[ModifierMask][Event.m_Key])
@@ -157,6 +171,11 @@ bool CBinds::OnInput(const IInput::CEvent &Event)
 		}
 		else
 		{
+			if(!Repeat)
+			{
+				return true;
+			}
+
 			// Repeat active bind while key is held down
 			// Have to check for nullptr again because the previous execute can unbind itself
 			if(m_aapKeyBindings[ActiveBind->m_ModifierMask][ActiveBind->m_Key])
