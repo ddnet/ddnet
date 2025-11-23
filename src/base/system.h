@@ -1280,7 +1280,7 @@ int str_format_opt(char *buffer, int buffer_size, const char *format, Args... ar
 }
 
 template<>
-inline int str_format_opt(char *buffer, int buffer_size, const char *format, int val)
+inline int str_format_opt(char *buffer, int buffer_size, const char *format, int val) // NOLINT(readability-inconsistent-declaration-parameter-name)
 {
 	if(strcmp(format, "%d") == 0)
 	{
