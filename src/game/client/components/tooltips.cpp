@@ -56,7 +56,15 @@ void CTooltips::OnRender()
 	{
 		CTooltip &Tooltip = m_ActiveTooltip.value();
 
-		if(Ui()->HotItem() != Tooltip.m_pId)
+		float MouseX = Ui()->MouseX();
+		float MouseY = Ui()->MouseY();
+		// check if we inside a tooltip
+		auto IsMouseInside = [&](const CUIRect &r) {
+			return MouseX >= r.x && MouseY <= r.x + r.w &&
+			       MouseY >= r.y && MouseY <= r.y + r.h;
+		};
+
+		if(!IsMouseInside(Tooltip.m_Rect))
 		{
 			Tooltip.m_OnScreen = false;
 			ClearActiveTooltip();
