@@ -12,8 +12,8 @@ extend-exclude = [
 	"src/engine/external",
 
 	# tests with invalid words
-	"src/test/shell_execute.cpp",
-	"src/test/str.cpp",
+	"src/test/shell_execute_test.cpp",
+	"src/test/str_test.cpp",
 ]
 
 [default]
