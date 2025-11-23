@@ -169,8 +169,8 @@ class CGameContext : public IGameServer
 	static void ConchainPracticeByDefaultUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConDumpLog(IConsole::IResult *pResult, void *pUserData);
 
-	void Construct(int Resetting);
-	void Destruct(int Resetting);
+	void Construct(bool Resetting);
+	void Destruct(bool Resetting);
 	void AddVote(const char *pDescription, const char *pCommand);
 	static int MapScan(const char *pName, int IsDir, int DirType, void *pUserData);
 
@@ -203,7 +203,7 @@ public:
 	protocol7::CNetObjHandler *GetNetObjHandler7() override { return &m_NetObjHandler7; }
 
 	CGameContext();
-	CGameContext(int Reset);
+	CGameContext(bool Reset);
 	~CGameContext() override;
 
 	void Clear();
