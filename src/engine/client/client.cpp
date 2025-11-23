@@ -12,6 +12,7 @@
 #include <base/log.h>
 #include <base/logger.h>
 #include <base/math.h>
+#include <base/str.h>
 #include <base/system.h>
 
 #include <engine/config.h>
@@ -1067,6 +1068,13 @@ void CClient::Restart()
 void CClient::Quit()
 {
 	SetState(IClient::STATE_QUITTING);
+}
+
+void CClient::ResetSocket()
+{
+	char aError[256];
+	if(!InitNetworkClient(aError, sizeof(aError), true))
+		log_error("net", "%s", aError);
 }
 
 const char *CClient::PlayerName() const
@@ -3049,7 +3057,7 @@ void CClient::Run()
 	}
 
 	char aNetworkError[256];
-	if(!InitNetworkClient(aNetworkError, sizeof(aNetworkError)))
+	if(!InitNetworkClient(aNetworkError, sizeof(aNetworkError), false))
 	{
 		log_error("client", "%s", aNetworkError);
 		ShowMessageBox({.m_pTitle = "Network Error", .m_pMessage = aNetworkError});
@@ -3397,7 +3405,7 @@ void CClient::Run()
 	m_pTextRender->Shutdown();
 }
 
-bool CClient::InitNetworkClient(char *pError, size_t ErrorSize)
+bool CClient::InitNetworkClient(char *pError, size_t ErrorSize, bool Reopen)
 {
 	NETADDR BindAddr;
 	if(g_Config.m_Bindaddr[0] == '\0')
@@ -3410,8 +3418,36 @@ bool CClient::InitNetworkClient(char *pError, size_t ErrorSize)
 		return false;
 	}
 	BindAddr.type = NETTYPE_ALL;
+	char aFailedClients[64] = "";
 	for(unsigned int i = 0; i < std::size(m_aNetClient); i++)
 	{
+		auto Failed = [&]() {
+			switch(i)
+			{
+			case CONN_MAIN:
+				str_append(aFailedClients, "main, ", sizeof(aFailedClients));
+				break;
+			case CONN_DUMMY:
+				str_append(aFailedClients, "dummy, ", sizeof(aFailedClients));
+				break;
+			case CONN_CONTACT:
+				str_append(aFailedClients, "contact, ", sizeof(aFailedClients));
+				break;
+			default:
+				dbg_assert_failed("unreachable");
+			}
+		};
+
+		if(m_aNetClient[i].State() != NETSTATE_OFFLINE)
+		{
+			if(Reopen)
+			{
+				Failed();
+				continue;
+			}
+			dbg_assert_failed("unreachable");
+		}
+
 		int &PortRef = i == CONN_MAIN ? g_Config.m_ClPort : (i == CONN_DUMMY ? g_Config.m_ClDummyPort : g_Config.m_ClContactPort);
 		if(PortRef < 1024) // Reject users setting ports that we don't want to use
 		{
@@ -3424,6 +3460,11 @@ bool CClient::InitNetworkClient(char *pError, size_t ErrorSize)
 			--RemainingAttempts;
 			if(RemainingAttempts == 0)
 			{
+				if(Reopen)
+				{
+					Failed();
+					continue;
+				}
 				if(g_Config.m_Bindaddr[0])
 					str_format(pError, ErrorSize, "Could not open the network client, try changing or unsetting the bindaddr '%s'.", g_Config.m_Bindaddr);
 				else
@@ -3435,6 +3476,13 @@ bool CClient::InitNetworkClient(char *pError, size_t ErrorSize)
 				BindAddr.port = 0;
 			}
 		}
+	}
+	if(aFailedClients[0] != '\0')
+	{
+		size_t Len = strlen(aFailedClients);
+		aFailedClients[Len - sizeof(", ") + 1] = '\0';
+		str_format(pError, ErrorSize, "Could not open network client: %s", aFailedClients);
+		return false;
 	}
 	return true;
 }
@@ -3507,6 +3555,12 @@ void CClient::Con_Ping(IConsole::IResult *pResult, void *pUserData)
 	CMsgPacker Msg(NETMSG_PING, true);
 	pSelf->SendMsg(CONN_MAIN, &Msg, MSGFLAG_FLUSH);
 	pSelf->m_PingStartTime = time_get();
+}
+
+void CClient::ConNetReset(IConsole::IResult *pResult, void *pUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	pSelf->ResetSocket();
 }
 
 void CClient::AutoScreenshot_Start()
@@ -4371,6 +4425,14 @@ void CClient::ConchainInputFifo(IConsole::IResult *pResult, void *pUserData, ICo
 	}
 }
 
+void CClient::ConchainNetReset(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments())
+		pSelf->ResetSocket();
+}
+
 void CClient::ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
@@ -4407,6 +4469,7 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("disconnect", "", CFGFLAG_CLIENT, Con_Disconnect, this, "Disconnect from the server");
 	m_pConsole->Register("ping", "", CFGFLAG_CLIENT, Con_Ping, this, "Ping the current server");
 	m_pConsole->Register("screenshot", "", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_Screenshot, this, "Take a screenshot");
+	m_pConsole->Register("net_reset", "", CFGFLAG_CLIENT, ConNetReset, this, "Rebinds the client's listening address and port");
 
 #if defined(CONF_VIDEORECORDER)
 	m_pConsole->Register("start_video", "?r[file]", CFGFLAG_CLIENT, Con_StartVideo, this, "Start recording a video");
@@ -4437,6 +4500,10 @@ void CClient::RegisterCommands()
 	m_pConsole->Chain("cl_timeout_seed", ConchainTimeoutSeed, this);
 	m_pConsole->Chain("cl_replays", ConchainReplays, this);
 	m_pConsole->Chain("cl_input_fifo", ConchainInputFifo, this);
+	m_pConsole->Chain("cl_port", ConchainNetReset, this);
+	m_pConsole->Chain("cl_dummy_port", ConchainNetReset, this);
+	m_pConsole->Chain("cl_contact_port", ConchainNetReset, this);
+	m_pConsole->Chain("bindaddr", ConchainNetReset, this);
 
 	m_pConsole->Chain("password", ConchainPassword, this);
 
