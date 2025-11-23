@@ -141,11 +141,8 @@ void CGameContext::Destruct(bool Resetting)
 		delete m_pVoteOptionHeap;
 	}
 
-	if(m_pScore)
-	{
-		delete m_pScore;
-		m_pScore = nullptr;
-	}
+	delete m_pScore;
+	m_pScore = nullptr;
 }
 
 CGameContext::CGameContext() :
