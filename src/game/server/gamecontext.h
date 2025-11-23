@@ -125,8 +125,6 @@ class CGameContext : public IGameServer
 	CMapBugs m_MapBugs;
 	CPrng m_Prng;
 
-	bool m_Resetting;
-
 	static void CommandCallback(int ClientId, int FlagMask, const char *pCmd, IConsole::IResult *pResult, void *pUser);
 	static void TeeHistorianWrite(const void *pData, int DataSize, void *pUser);
 
@@ -169,8 +167,6 @@ class CGameContext : public IGameServer
 	static void ConchainPracticeByDefaultUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConDumpLog(IConsole::IResult *pResult, void *pUserData);
 
-	void Construct(int Resetting);
-	void Destruct(int Resetting);
 	void AddVote(const char *pDescription, const char *pCommand);
 	static int MapScan(const char *pName, int IsDir, int DirType, void *pUserData);
 
@@ -203,10 +199,7 @@ public:
 	protocol7::CNetObjHandler *GetNetObjHandler7() override { return &m_NetObjHandler7; }
 
 	CGameContext();
-	CGameContext(int Reset);
 	~CGameContext() override;
-
-	void Clear();
 
 	CEventHandler m_Events;
 	CPlayer *m_apPlayers[MAX_CLIENTS];

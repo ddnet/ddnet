@@ -71,15 +71,10 @@ void CClientChatLogger::Log(const CLogMessage *pMessage)
 	}
 }
 
-enum
+CGameContext::CGameContext() :
+	m_Mutes("mutes"),
+	m_VoteMutes("votemutes")
 {
-	RESET,
-	NO_RESET
-};
-
-void CGameContext::Construct(int Resetting)
-{
-	m_Resetting = false;
 	m_pServer = nullptr;
 
 	for(auto &pPlayer : m_apPlayers)
@@ -113,87 +108,36 @@ void CGameContext::Construct(int Resetting)
 	m_LatestLog = 0;
 	mem_zero(&m_aLogs, sizeof(m_aLogs));
 
-	if(Resetting == NO_RESET)
-	{
-		for(auto &pSavedTee : m_apSavedTees)
-			pSavedTee = nullptr;
+	for(auto &pSavedTee : m_apSavedTees)
+		pSavedTee = nullptr;
 
-		for(auto &pSavedTeam : m_apSavedTeams)
-			pSavedTeam = nullptr;
+	for(auto &pSavedTeam : m_apSavedTeams)
+		pSavedTeam = nullptr;
 
-		std::fill(std::begin(m_aTeamMapping), std::end(m_aTeamMapping), -1);
+	std::fill(std::begin(m_aTeamMapping), std::end(m_aTeamMapping), -1);
 
-		m_NonEmptySince = 0;
-		m_pVoteOptionHeap = new CHeap();
-	}
+	m_NonEmptySince = 0;
+	m_pVoteOptionHeap = new CHeap();
 
 	m_aDeleteTempfile[0] = 0;
 	m_TeeHistorianActive = false;
 }
 
-void CGameContext::Destruct(int Resetting)
+CGameContext::~CGameContext()
 {
 	for(auto &pPlayer : m_apPlayers)
 		delete pPlayer;
 
-	if(Resetting == NO_RESET)
-	{
-		for(auto &pSavedTee : m_apSavedTees)
-			delete pSavedTee;
+	for(auto &pSavedTee : m_apSavedTees)
+		delete pSavedTee;
 
-		for(auto &pSavedTeam : m_apSavedTeams)
-			delete pSavedTeam;
+	for(auto &pSavedTeam : m_apSavedTeams)
+		delete pSavedTeam;
 
-		delete m_pVoteOptionHeap;
-	}
+	delete m_pVoteOptionHeap;
 
-	if(m_pScore)
-	{
-		delete m_pScore;
-		m_pScore = nullptr;
-	}
-}
-
-CGameContext::CGameContext() :
-	m_Mutes("mutes"),
-	m_VoteMutes("votemutes")
-{
-	Construct(NO_RESET);
-}
-
-CGameContext::CGameContext(int Reset) :
-	m_Mutes("mutes"),
-	m_VoteMutes("votemutes")
-{
-	Construct(Reset);
-}
-
-CGameContext::~CGameContext()
-{
-	Destruct(m_Resetting ? RESET : NO_RESET);
-}
-
-void CGameContext::Clear()
-{
-	CHeap *pVoteOptionHeap = m_pVoteOptionHeap;
-	CVoteOptionServer *pVoteOptionFirst = m_pVoteOptionFirst;
-	CVoteOptionServer *pVoteOptionLast = m_pVoteOptionLast;
-	int NumVoteOptions = m_NumVoteOptions;
-	CTuningParams Tuning = m_aTuningList[0];
-	CMutes Mutes = m_Mutes;
-	CMutes VoteMutes = m_VoteMutes;
-
-	m_Resetting = true;
-	this->~CGameContext();
-	new(this) CGameContext(RESET);
-
-	m_pVoteOptionHeap = pVoteOptionHeap;
-	m_pVoteOptionFirst = pVoteOptionFirst;
-	m_pVoteOptionLast = pVoteOptionLast;
-	m_NumVoteOptions = NumVoteOptions;
-	m_aTuningList[0] = Tuning;
-	m_Mutes = Mutes;
-	m_VoteMutes = VoteMutes;
+	delete m_pScore;
+	m_pScore = nullptr;
 }
 
 void CGameContext::TeeHistorianWrite(const void *pData, int DataSize, void *pUser)
@@ -4550,7 +4494,6 @@ void CGameContext::OnShutdown(void *pPersistentData)
 	Layers()->Unload();
 	delete m_pController;
 	m_pController = nullptr;
-	Clear();
 }
 
 void CGameContext::LoadMapSettings()
