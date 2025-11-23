@@ -167,29 +167,6 @@ CGameContext::~CGameContext()
 	Destruct(m_Resetting);
 }
 
-void CGameContext::Clear()
-{
-	CHeap *pVoteOptionHeap = m_pVoteOptionHeap;
-	CVoteOptionServer *pVoteOptionFirst = m_pVoteOptionFirst;
-	CVoteOptionServer *pVoteOptionLast = m_pVoteOptionLast;
-	int NumVoteOptions = m_NumVoteOptions;
-	CTuningParams Tuning = m_aTuningList[0];
-	CMutes Mutes = m_Mutes;
-	CMutes VoteMutes = m_VoteMutes;
-
-	m_Resetting = true;
-	this->~CGameContext();
-	new(this) CGameContext(true);
-
-	m_pVoteOptionHeap = pVoteOptionHeap;
-	m_pVoteOptionFirst = pVoteOptionFirst;
-	m_pVoteOptionLast = pVoteOptionLast;
-	m_NumVoteOptions = NumVoteOptions;
-	m_aTuningList[0] = Tuning;
-	m_Mutes = Mutes;
-	m_VoteMutes = VoteMutes;
-}
-
 void CGameContext::TeeHistorianWrite(const void *pData, int DataSize, void *pUser)
 {
 	CGameContext *pSelf = (CGameContext *)pUser;
@@ -4544,7 +4521,6 @@ void CGameContext::OnShutdown(void *pPersistentData)
 	Layers()->Unload();
 	delete m_pController;
 	m_pController = nullptr;
-	Clear();
 }
 
 void CGameContext::LoadMapSettings()

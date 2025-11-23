@@ -206,8 +206,6 @@ public:
 	CGameContext(bool Reset);
 	~CGameContext() override;
 
-	void Clear();
-
 	CEventHandler m_Events;
 	CPlayer *m_apPlayers[MAX_CLIENTS];
 	// keep last input to always apply when none is sent
