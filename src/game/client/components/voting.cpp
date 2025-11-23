@@ -233,8 +233,8 @@ void CVoting::ClearOptions()
 void CVoting::OnReset()
 {
 	m_Opentime = m_Closetime = 0;
-	m_aDescription[0] = 0;
-	m_aReason[0] = 0;
+	m_aDescription[0] = '\0';
+	m_aReason[0] = '\0';
 	m_Yes = m_No = m_Pass = m_Total = 0;
 	m_Voted = 0;
 	m_ReceivingOptions = false;

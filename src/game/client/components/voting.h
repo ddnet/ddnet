@@ -7,9 +7,8 @@
 #include <engine/shared/memheap.h>
 
 #include <game/client/component.h>
+#include <game/client/ui_rect.h>
 #include <game/voting.h>
-
-class CUIRect;
 
 class CVoting : public CComponent
 {
@@ -26,13 +25,6 @@ class CVoting : public CComponent
 	int m_Yes, m_No, m_Pass, m_Total;
 	bool m_ReceivingOptions;
 
-	void RemoveOption(const char *pDescription);
-	void ClearOptions();
-	void Callvote(const char *pType, const char *pValue, const char *pReason);
-
-	void RenderBars(CUIRect Bars) const;
-
-public:
 	int m_NumVoteOptions;
 	CVoteOptionClient *m_pFirst;
 	CVoteOptionClient *m_pLast;
@@ -40,11 +32,18 @@ public:
 	CVoteOptionClient *m_pRecycleFirst;
 	CVoteOptionClient *m_pRecycleLast;
 
+	void RemoveOption(const char *pDescription);
+	void ClearOptions();
+	void Callvote(const char *pType, const char *pValue, const char *pReason);
+
+	void RenderBars(CUIRect Bars) const;
+
+public:
 	CVoting();
 	int Sizeof() const override { return sizeof(*this); }
 	void OnReset() override;
 	void OnConsoleInit() override;
-	void OnMessage(int Msgtype, void *pRawMsg) override;
+	void OnMessage(int MsgType, void *pRawMsg) override;
 
 	void Render();
 
@@ -63,6 +62,8 @@ public:
 	const char *VoteDescription() const { return m_aDescription; }
 	const char *VoteReason() const { return m_aReason; }
 	bool IsReceivingOptions() const { return m_ReceivingOptions; }
+	int NumOptions() const { return m_NumVoteOptions; }
+	const CVoteOptionClient *FirstOption() const { return m_pFirst; }
 };
 
 #endif
