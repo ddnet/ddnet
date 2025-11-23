@@ -82,6 +82,11 @@ class CGameConsole : public CComponent
 		const char *m_pCommandHelp;
 		const char *m_pCommandParams;
 
+		bool m_CompletionDirty;
+		bool m_QueueResetAnimation;
+		std::vector<const char *> m_vpCommandSuggestions;
+		std::vector<const char *> m_vpArgumentSuggestions;
+
 		bool m_Searching = false;
 		struct SSearchMatch
 		{
@@ -134,6 +139,7 @@ class CGameConsole : public CComponent
 		void UpdateEntryTextAttributes(CBacklogEntry *pEntry) const;
 
 		bool IsInputHidden() const;
+		void UpdateCompletionSuggestions();
 
 	private:
 		void SetSearching(bool Searching);
@@ -204,5 +210,7 @@ public:
 
 	void Toggle(int Type);
 	bool IsActive() const { return m_ConsoleState != CONSOLE_CLOSED; }
+
+	void ForceUpdateRemoteCompletionSuggestions();
 };
 #endif

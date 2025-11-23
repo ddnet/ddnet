@@ -295,6 +295,11 @@ void CGameClient::InitializeLanguage()
 	g_Localization.Load(g_Config.m_ClLanguagefile, Storage(), Console());
 }
 
+void CGameClient::ForceUpdateConsoleRemoteCompletionSuggestions()
+{
+	m_GameConsole.ForceUpdateRemoteCompletionSuggestions();
+}
+
 void CGameClient::OnInit()
 {
 	const int64_t OnInitStart = time_get();

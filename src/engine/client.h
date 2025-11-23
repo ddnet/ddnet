@@ -398,6 +398,8 @@ public:
 	virtual void ProcessDemoSnapshot(class CSnapshot *pSnap) = 0;
 
 	virtual void InitializeLanguage() = 0;
+
+	virtual void ForceUpdateConsoleRemoteCompletionSuggestions() = 0;
 };
 
 extern IGameClient *CreateGameClient();
