@@ -71,9 +71,8 @@ void CClientChatLogger::Log(const CLogMessage *pMessage)
 	}
 }
 
-void CGameContext::Construct(bool Resetting)
+void CGameContext::Construct()
 {
-	m_Resetting = false;
 	m_pServer = nullptr;
 
 	for(auto &pPlayer : m_apPlayers)
@@ -107,39 +106,33 @@ void CGameContext::Construct(bool Resetting)
 	m_LatestLog = 0;
 	mem_zero(&m_aLogs, sizeof(m_aLogs));
 
-	if(!Resetting)
-	{
-		for(auto &pSavedTee : m_apSavedTees)
-			pSavedTee = nullptr;
+	for(auto &pSavedTee : m_apSavedTees)
+		pSavedTee = nullptr;
 
-		for(auto &pSavedTeam : m_apSavedTeams)
-			pSavedTeam = nullptr;
+	for(auto &pSavedTeam : m_apSavedTeams)
+		pSavedTeam = nullptr;
 
-		std::fill(std::begin(m_aTeamMapping), std::end(m_aTeamMapping), -1);
+	std::fill(std::begin(m_aTeamMapping), std::end(m_aTeamMapping), -1);
 
-		m_NonEmptySince = 0;
-		m_pVoteOptionHeap = new CHeap();
-	}
+	m_NonEmptySince = 0;
+	m_pVoteOptionHeap = new CHeap();
 
 	m_aDeleteTempfile[0] = 0;
 	m_TeeHistorianActive = false;
 }
 
-void CGameContext::Destruct(bool Resetting)
+void CGameContext::Destruct()
 {
 	for(auto &pPlayer : m_apPlayers)
 		delete pPlayer;
 
-	if(!Resetting)
-	{
-		for(auto &pSavedTee : m_apSavedTees)
-			delete pSavedTee;
+	for(auto &pSavedTee : m_apSavedTees)
+		delete pSavedTee;
 
-		for(auto &pSavedTeam : m_apSavedTeams)
-			delete pSavedTeam;
+	for(auto &pSavedTeam : m_apSavedTeams)
+		delete pSavedTeam;
 
-		delete m_pVoteOptionHeap;
-	}
+	delete m_pVoteOptionHeap;
 
 	if(m_pScore)
 	{
@@ -152,19 +145,12 @@ CGameContext::CGameContext() :
 	m_Mutes("mutes"),
 	m_VoteMutes("votemutes")
 {
-	Construct(false);
-}
-
-CGameContext::CGameContext(bool Reset) :
-	m_Mutes("mutes"),
-	m_VoteMutes("votemutes")
-{
-	Construct(Reset);
+	Construct();
 }
 
 CGameContext::~CGameContext()
 {
-	Destruct(m_Resetting);
+	Destruct();
 }
 
 void CGameContext::TeeHistorianWrite(const void *pData, int DataSize, void *pUser)
