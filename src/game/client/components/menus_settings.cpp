@@ -427,7 +427,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		pEmote = &g_Config.m_ClDummyDefaultEyes;
 	}
 
-	const float EyeButtonSize = 40.0f;
+	const float EyeButtonSize = 32.0f;
 	const bool RenderEyesBelow = MainView.w < 750.0f;
 	CUIRect YourSkin, Checkboxes, SkinPrefix, Eyes, Button, Label;
 	MainView.HSplitTop(90.0f, &YourSkin, &MainView);

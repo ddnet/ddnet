@@ -393,6 +393,8 @@ void CRenderTools::RenderTee7(const CAnimState *pAnim, const CTeeRenderInfo *pIn
 				{
 					switch(Emote)
 					{
+					case EMOTE_CRYING:
+						[[fallthrough]];
 					case EMOTE_PAIN:
 						Graphics()->SelectSprite7(client_data7::SPRITE_TEE_EYES_PAIN);
 						break;
@@ -535,6 +537,10 @@ void CRenderTools::RenderTee6(const CAnimState *pAnim, const CTeeRenderInfo *pIn
 					case EMOTE_ANGRY:
 						EyeQuadOffset = 3;
 						TeeEye = SPRITE_TEE_EYE_ANGRY - SPRITE_TEE_EYE_NORMAL;
+						break;
+					case EMOTE_CRYING:
+						EyeQuadOffset = 2;
+						TeeEye = SPRITE_TEE_EYE_CRYING - SPRITE_TEE_EYE_NORMAL;
 						break;
 					default:
 						EyeQuadOffset = 4;
