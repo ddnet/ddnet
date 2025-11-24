@@ -142,7 +142,7 @@ void CMapSounds::OnRender()
 	for(auto &Source : m_vSourceQueue)
 	{
 		static float s_Time = 0.0f;
-		if(GameClient()->m_Snap.m_pGameInfoObj) // && !(GameClient()->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED))
+		if(GameClient()->m_Snap.m_pGameInfoObj)
 		{
 			s_Time = mix((Client()->PrevGameTick(g_Config.m_ClDummy) - GameClient()->m_Snap.m_pGameInfoObj->m_RoundStartTick) / (float)Client()->GameTickSpeed(),
 				(Client()->GameTick(g_Config.m_ClDummy) - GameClient()->m_Snap.m_pGameInfoObj->m_RoundStartTick) / (float)Client()->GameTickSpeed(),
