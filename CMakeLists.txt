@@ -1995,6 +1995,8 @@ set_src(BASE GLOB_RECURSE src/base
   crashdump.cpp
   detect.h
   dynamic.h
+  fixed.cpp
+  fixed.h
   fs.cpp
   fs.h
   hash.cpp
@@ -3037,6 +3039,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     csv.cpp
     datafile.cpp
     editor.cpp
+    fixed.cpp
     fs.cpp
     gameworld.cpp
     git_revision.cpp

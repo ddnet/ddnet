@@ -4,6 +4,7 @@
 #define ENGINE_SHARED_CONFIG_H
 
 #include <base/detect.h>
+#include <base/fixed.h>
 
 #include <engine/config.h>
 #include <engine/console.h>
@@ -27,6 +28,9 @@ public:
 #define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
 	static constexpr int ms_##Name = Def; \
 	int m_##Name;
+#define MACRO_CONFIG_FIXED(Name, ScriptName, Def, Min, Max, Flags, Desc) \
+	static constexpr CFixed ms_##Name = CFixed::FromLiteral(#Def); \
+	CFixed m_##Name;
 #define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) \
 	static constexpr unsigned ms_##Name = Def; \
 	unsigned m_##Name;
@@ -35,6 +39,7 @@ public:
 	char m_##Name[Len]; // Flawfinder: ignore
 #include "config_variables.h"
 #undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_FIXED
 #undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR
 };
@@ -67,6 +72,7 @@ struct SConfigVariable
 	enum EVariableType
 	{
 		VAR_INT,
+		VAR_FIXED,
 		VAR_COLOR,
 		VAR_STRING,
 	};
@@ -128,6 +134,37 @@ struct SIntConfigVariable : public SConfigVariable
 	void Serialize(char *pOut, size_t Size, int Value) const;
 	void Serialize(char *pOut, size_t Size) const override;
 	void SetValue(int Value);
+	void ResetToDefault() override;
+	void ResetToOld() override;
+};
+
+struct SFixedConfigVariable : public SConfigVariable
+{
+	CFixed *m_pVariable;
+	CFixed m_Default;
+	CFixed m_Min;
+	CFixed m_Max;
+	CFixed m_OldValue;
+
+	SFixedConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, CFixed *pVariable, CFixed Default, CFixed Min, CFixed Max) :
+		SConfigVariable(pConsole, pScriptName, Type, Flags, pHelp),
+		m_pVariable(pVariable),
+		m_Default(Default),
+		m_Min(Min),
+		m_Max(Max),
+		m_OldValue(Default)
+	{
+		*m_pVariable = m_Default;
+	}
+
+	~SFixedConfigVariable() override = default;
+
+	static void CommandCallback(IConsole::IResult *pResult, void *pUserData);
+	void Register() override;
+	bool IsDefault() const override;
+	void Serialize(char *pOut, size_t Size, const CFixed &Value) const;
+	void Serialize(char *pOut, size_t Size) const override;
+	void SetValue(const CFixed &Value);
 	void ResetToDefault() override;
 	void ResetToOld() override;
 };
