@@ -15,10 +15,10 @@ error_found=0
 # Check each source file for C headers
 for file in $files; do
 	# First check if the file includes any C headers for more efficiency when no C header is used
-	if grep -E "#include\s+<($c_headers_regex)\.h>" "$file" > /dev/null; then
+	if grep -E "^\s*#include\s+<($c_headers_regex)\.h>" "$file" > /dev/null; then
 		# Check each C header individually to print an error message with the appropriate replacement C++ header
 		for ((i = 0; i < ${#c_headers[@]}; i++)); do
-			if grep -E "#include\s+<${c_headers[i]}\.h>" "$file" > /dev/null; then
+			if grep -E "^\s*#include\s+<${c_headers[i]}\.h>" "$file" > /dev/null; then
 				echo "Error: '$file' includes C header '${c_headers[i]}.h'. Include the C++ header '${c_headers_map[i]}' instead."
 			fi
 		done
