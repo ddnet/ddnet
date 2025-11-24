@@ -387,6 +387,9 @@ bool CSound::DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize, c
 		return false;
 	}
 
+	if(g_Config.m_Debug)
+		log_info("sound/opus", "Loaded '%s' (index %d) (loop_start %d)", pContextName, Sample.m_Index, Sample.m_LoopStart);
+
 	return true;
 }
 
@@ -517,6 +520,9 @@ bool CSound::DecodeWV(CSample &Sample, const void *pData, unsigned DataSize, con
 		return false;
 	}
 
+	if(g_Config.m_Debug)
+		log_info("sound/wv", "Loaded '%s' (index %d)", pContextName, Sample.m_Index);
+
 	return true;
 }
 
@@ -549,9 +555,6 @@ int CSound::LoadOpus(const char *pFilename, int StorageType)
 		UnloadSample(pSample->m_Index);
 		return -1;
 	}
-
-	if(g_Config.m_Debug)
-		log_trace("sound/opus", "Loaded '%s' (index %d)", pFilename, pSample->m_Index);
 
 	RateConvert(*pSample);
 	return pSample->m_Index;
@@ -586,9 +589,6 @@ int CSound::LoadWV(const char *pFilename, int StorageType)
 		UnloadSample(pSample->m_Index);
 		return -1;
 	}
-
-	if(g_Config.m_Debug)
-		log_trace("sound/wv", "Loaded '%s' (index %d)", pFilename, pSample->m_Index);
 
 	RateConvert(*pSample);
 	return pSample->m_Index;
