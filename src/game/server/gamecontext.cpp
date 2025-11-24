@@ -71,13 +71,9 @@ void CClientChatLogger::Log(const CLogMessage *pMessage)
 	}
 }
 
-enum
-{
-	RESET,
-	NO_RESET
-};
-
-void CGameContext::Construct(int Resetting)
+CGameContext::CGameContext(bool Resetting) :
+	m_Mutes("mutes"),
+	m_VoteMutes("votemutes")
 {
 	m_Resetting = false;
 	m_pServer = nullptr;
@@ -113,7 +109,7 @@ void CGameContext::Construct(int Resetting)
 	m_LatestLog = 0;
 	mem_zero(&m_aLogs, sizeof(m_aLogs));
 
-	if(Resetting == NO_RESET)
+	if(!Resetting)
 	{
 		for(auto &pSavedTee : m_apSavedTees)
 			pSavedTee = nullptr;
@@ -131,12 +127,12 @@ void CGameContext::Construct(int Resetting)
 	m_TeeHistorianActive = false;
 }
 
-void CGameContext::Destruct(int Resetting)
+CGameContext::~CGameContext()
 {
 	for(auto &pPlayer : m_apPlayers)
 		delete pPlayer;
 
-	if(Resetting == NO_RESET)
+	if(!m_Resetting)
 	{
 		for(auto &pSavedTee : m_apSavedTees)
 			delete pSavedTee;
@@ -147,30 +143,8 @@ void CGameContext::Destruct(int Resetting)
 		delete m_pVoteOptionHeap;
 	}
 
-	if(m_pScore)
-	{
-		delete m_pScore;
-		m_pScore = nullptr;
-	}
-}
-
-CGameContext::CGameContext() :
-	m_Mutes("mutes"),
-	m_VoteMutes("votemutes")
-{
-	Construct(NO_RESET);
-}
-
-CGameContext::CGameContext(int Reset) :
-	m_Mutes("mutes"),
-	m_VoteMutes("votemutes")
-{
-	Construct(Reset);
-}
-
-CGameContext::~CGameContext()
-{
-	Destruct(m_Resetting ? RESET : NO_RESET);
+	delete m_pScore;
+	m_pScore = nullptr;
 }
 
 void CGameContext::Clear()
@@ -185,7 +159,7 @@ void CGameContext::Clear()
 
 	m_Resetting = true;
 	this->~CGameContext();
-	new(this) CGameContext(RESET);
+	new(this) CGameContext(true);
 
 	m_pVoteOptionHeap = pVoteOptionHeap;
 	m_pVoteOptionFirst = pVoteOptionFirst;
