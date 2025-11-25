@@ -69,6 +69,7 @@ public:
 	bool Freeze();
 	bool UnFreeze();
 	void GiveAllWeapons();
+	void ResetPickups();
 	int Team();
 	bool CanCollide(int ClientId) override;
 	bool SameTeam(int ClientId);
@@ -78,6 +79,7 @@ public:
 	vec2 m_PrevPos;
 	vec2 m_PrevPrevPos;
 	int m_TeleCheckpoint;
+	int m_RngSeed;
 
 	int m_TileIndex;
 	int m_TileFIndex;

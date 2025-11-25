@@ -235,6 +235,7 @@ public:
 	bool m_TeleGunTeleport;
 	bool m_IsBlueTeleGunTeleport;
 	int m_StrongWeakId;
+	int m_RngSeed;
 
 	int m_SpawnTick;
 	int m_WeaponChangeTick;

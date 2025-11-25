@@ -23,6 +23,7 @@
 #include <game/server/score.h>
 #include <game/server/teams.h>
 #include <game/team_state.h>
+#include <game/random_hash.h>
 
 MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
 
@@ -48,6 +49,7 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 	{
 		CurrentTimeCp = 0.0f;
 	}
+	m_RngSeed = -1;
 }
 
 void CCharacter::Reset()
@@ -72,6 +74,8 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 
 	m_pPlayer = pPlayer;
 	m_Pos = Pos;
+
+	m_RngSeed = static_cast<int>(GameServer()->m_World.m_Core.m_pPrng->RandomBits() & INT_MAX);
 
 	mem_zero(&m_LatestPrevPrevInput, sizeof(m_LatestPrevPrevInput));
 	m_LatestPrevPrevInput.m_TargetY = -1;
@@ -1315,6 +1319,7 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacter->m_Jumps = m_Core.m_Jumps;
 	pDDNetCharacter->m_TeleCheckpoint = m_TeleCheckpoint;
 	pDDNetCharacter->m_StrongWeakId = m_StrongWeakId;
+	pDDNetCharacter->m_RngSeed = m_RngSeed;
 
 	// Display Information
 	pDDNetCharacter->m_JumpedTotal = m_Core.m_JumpedTotal;
@@ -1980,7 +1985,7 @@ void CCharacter::HandleTiles(int Index)
 	{
 		if(m_Core.m_Super || m_Core.m_Invincible)
 			return;
-		int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleOuts(Teleport - 1).size());
+		int TeleOut = RandomHash::HashMany(GetPlayer()->GetCid(), Server()->Tick(), m_RngSeed) % Collision()->TeleOuts(Teleport - 1).size();
 		m_Core.m_Pos = Collision()->TeleOuts(Teleport - 1)[TeleOut];
 		if(!g_Config.m_SvTeleportHoldHook)
 		{
@@ -1995,7 +2000,7 @@ void CCharacter::HandleTiles(int Index)
 	{
 		if(m_Core.m_Super || m_Core.m_Invincible)
 			return;
-		int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleOuts(EvilTeleport - 1).size());
+		int TeleOut = RandomHash::HashMany(GetPlayer()->GetCid(), Server()->Tick(), m_RngSeed) % Collision()->TeleOuts(EvilTeleport - 1).size();
 		m_Core.m_Pos = Collision()->TeleOuts(EvilTeleport - 1)[TeleOut];
 		if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons)
 		{
@@ -2022,7 +2027,7 @@ void CCharacter::HandleTiles(int Index)
 		{
 			if(!Collision()->TeleCheckOuts(k).empty())
 			{
-				int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleCheckOuts(k).size());
+				int TeleOut = RandomHash::HashMany(GetPlayer()->GetCid(), Server()->Tick(), m_RngSeed) % Collision()->TeleCheckOuts(k).size();
 				m_Core.m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
 				m_Core.m_Vel = vec2(0, 0);
 
@@ -2059,7 +2064,7 @@ void CCharacter::HandleTiles(int Index)
 		{
 			if(!Collision()->TeleCheckOuts(k).empty())
 			{
-				int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleCheckOuts(k).size());
+				int TeleOut = RandomHash::HashMany(GetPlayer()->GetCid(), Server()->Tick(), m_RngSeed) % Collision()->TeleCheckOuts(k).size();
 				m_Core.m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
 
 				if(!g_Config.m_SvTeleportHoldHook)
