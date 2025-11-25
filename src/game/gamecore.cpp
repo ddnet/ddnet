@@ -7,6 +7,7 @@
 #include "teamscore.h"
 
 #include <base/system.h>
+#include <game/random_hash.h>
 
 #include <engine/shared/config.h>
 
@@ -389,7 +390,8 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 				SetHookedPlayer(-1);
 
 				m_NewHook = true;
-				int RandomOut = m_pWorld->RandomOr0(m_pCollision->TeleOuts(TeleNr - 1).size());
+				int RandomOut = RandomHash::HashMany(m_Id, m_Tick, m_RngSeed) % m_pCollision->TeleOuts(TeleNr - 1).size();
+
 				m_HookPos = m_pCollision->TeleOuts(TeleNr - 1)[RandomOut] + TargetDirection * PhysicalSize() * 1.5f;
 				m_HookDir = TargetDirection;
 				m_HookTeleBase = m_HookPos;
@@ -672,6 +674,9 @@ void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 
 	// Available jumps
 	m_Jumps = pObjDDNet->m_Jumps;
+
+	// Rng
+	m_RngSeed = pObjDDNet->m_RngSeed;
 
 	// Display Information
 	// We only accept the display information when it is received, which means it is not -1 in each case.

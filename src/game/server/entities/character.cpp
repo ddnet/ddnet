@@ -2250,6 +2250,8 @@ void CCharacter::DDRaceTick()
 	TrySetRescue(RESCUEMODE_AUTO);
 
 	m_Core.m_Id = GetPlayer()->GetCid();
+	m_Core.m_RngSeed = m_RngSeed;
+	m_Core.m_Tick = Server()->Tick();
 }
 
 void CCharacter::DDRacePostCoreTick()
@@ -2461,6 +2463,7 @@ void CCharacter::DDRaceInit()
 	m_LastBroadcast = 0;
 	m_TeamBeforeSuper = 0;
 	m_Core.m_Id = GetPlayer()->GetCid();
+	m_Core.m_Tick = Server()->Tick();
 	m_TeleCheckpoint = 0;
 	m_Core.m_EndlessHook = g_Config.m_SvEndlessDrag;
 	if(g_Config.m_SvHit)

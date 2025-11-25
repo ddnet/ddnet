@@ -240,6 +240,7 @@ public:
 
 	// DDRace
 	int m_Id;
+	int m_Tick;
 	bool m_Reset;
 	CCollision *Collision() { return m_pCollision; }
 
@@ -269,6 +270,7 @@ public:
 	bool m_IsInFreeze;
 	bool m_DeepFrozen;
 	bool m_LiveFrozen;
+	int m_RngSeed;
 	CTuningParams m_Tuning;
 
 private:
