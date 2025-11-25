@@ -11,6 +11,7 @@
 #include <game/client/projectile_data.h>
 #include <game/collision.h>
 #include <game/mapitems.h>
+#include <game/random_hash.h>
 
 CProjectile::CProjectile(
 	CGameWorld *pGameWorld,
@@ -147,6 +148,30 @@ void CProjectile::Tick()
 			GameWorld()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pOwnerChar ? -1 : pOwnerChar->Team()), CClientMask().set());
 		}
 		m_MarkedForDestroy = true;
+	}
+
+	CCharacter* pLocalChar = GameWorld()->GetCharacterById(GameWorld()->m_LocalClientId);
+	bool PredictTele = pLocalChar && pLocalChar->m_RngSeed >= 0;
+	if (PredictTele) 
+	{
+		int MapIndex = Collision()->GetIndex(PrevPos, CurPos);
+		int Tele;
+		if (g_Config.m_SvOldTeleportWeapons)
+			Tele = Collision()->IsTeleport(MapIndex);
+		else
+			Tele = Collision()->IsTeleportWeapon(MapIndex);
+
+		if (Tele && !Collision()->TeleOuts(Tele - 1).empty())
+		{
+			int TeleOut;
+			if (pOwnerChar)
+				TeleOut = RandomHash::HashMany(m_Owner, m_StartTick, MapIndex, GameWorld()->GameTick(), pOwnerChar->m_RngSeed) % Collision()->TeleOuts(Tele - 1).size();
+			else
+				TeleOut = RandomHash::HashMany(GetId(), m_StartTick, MapIndex, GameWorld()->GameTick()) % Collision()->TeleOuts(Tele - 1).size();
+
+			m_Pos = Collision()->TeleOuts(Tele - 1)[TeleOut];
+			m_StartTick = GameWorld()->GameTick();
+		}
 	}
 }
 

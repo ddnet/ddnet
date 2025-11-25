@@ -11,6 +11,7 @@
 #include <game/mapitems.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
+#include <game/random_hash.h>
 
 CProjectile::CProjectile(
 	CGameWorld *pGameWorld,
@@ -249,16 +250,21 @@ void CProjectile::Tick()
 		return;
 	}
 
-	int x = GameServer()->Collision()->GetIndex(PrevPos, CurPos);
-	int z;
+	int MapIndex = GameServer()->Collision()->GetIndex(PrevPos, CurPos);
+	int Tele;
 	if(g_Config.m_SvOldTeleportWeapons)
-		z = GameServer()->Collision()->IsTeleport(x);
+		Tele = GameServer()->Collision()->IsTeleport(MapIndex);
 	else
-		z = GameServer()->Collision()->IsTeleportWeapon(x);
-	if(z && !GameServer()->Collision()->TeleOuts(z - 1).empty())
+		Tele = GameServer()->Collision()->IsTeleportWeapon(MapIndex);
+	if(Tele && !GameServer()->Collision()->TeleOuts(Tele - 1).empty())
 	{
-		int TeleOut = GameServer()->m_World.m_Core.RandomOr0(GameServer()->Collision()->TeleOuts(z - 1).size());
-		m_Pos = GameServer()->Collision()->TeleOuts(z - 1)[TeleOut];
+		int TeleOut;
+		if (pOwnerChar)
+			TeleOut = RandomHash::HashMany(m_Owner, m_StartTick, MapIndex, Server()->Tick(), pOwnerChar->m_RngSeed) % GameServer()->Collision()->TeleOuts(Tele - 1).size();
+		else
+			TeleOut = RandomHash::HashMany(GetId(), m_StartTick, MapIndex, Server()->Tick()) % GameServer()->Collision()->TeleOuts(Tele - 1).size();
+
+		m_Pos = GameServer()->Collision()->TeleOuts(Tele - 1)[TeleOut];
 		m_StartTick = Server()->Tick();
 	}
 }

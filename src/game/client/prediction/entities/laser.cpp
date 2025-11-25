@@ -11,6 +11,7 @@
 #include <game/client/laser_data.h>
 #include <game/collision.h>
 #include <game/mapitems.h>
+#include <game/random_hash.h>
 
 CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
@@ -23,6 +24,8 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_Dir = Direction;
 	m_Bounces = 0;
 	m_EvalTick = 0;
+	m_TelePos = vec2(0, 0);
+	m_WasTele = false;
 	m_Type = Type;
 	m_ZeroEnergyBounceInLastTick = false;
 	m_TuneZone = GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
@@ -36,7 +39,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	vec2 At;
 	CCharacter *pOwnerChar = GameWorld()->GetCharacterById(m_Owner);
 	CCharacter *pHit;
-	bool DontHitSelf = (g_Config.m_SvOldLaser || !GameWorld()->m_WorldConfig.m_IsDDRace) || (m_Bounces == 0);
+	bool DontHitSelf = (g_Config.m_SvOldLaser || !GameWorld()->m_WorldConfig.m_IsDDRace) || (m_Bounces == 0 && !m_WasTele);
 
 	if(pOwnerChar ? (!pOwnerChar->LaserHitDisabled() && m_Type == WEAPON_LASER) || (!pOwnerChar->ShotgunHitDisabled() && m_Type == WEAPON_SHOTGUN) : g_Config.m_SvHit)
 		pHit = GameWorld()->IntersectCharacter(m_Pos, To, 0.f, At, DontHitSelf ? pOwnerChar : nullptr, m_Owner);
@@ -100,10 +103,18 @@ void CLaser::DoBounce()
 	m_PrevPos = m_Pos;
 	vec2 Coltile;
 
+	if (m_WasTele)
+	{
+		m_PrevPos = m_TelePos;
+		m_Pos = m_TelePos;
+		m_TelePos = vec2(0, 0);
+	}
+
 	int Res;
+	int Tele;
 	vec2 To = m_Pos + m_Dir * m_Energy;
 
-	Res = Collision()->IntersectLineTeleWeapon(m_Pos, To, &Coltile, &To);
+	Res = Collision()->IntersectLineTeleWeapon(m_Pos, To, &Coltile, &To, &Tele);
 
 	if(Res)
 	{
@@ -142,7 +153,26 @@ void CLaser::DoBounce()
 			}
 			m_ZeroEnergyBounceInLastTick = Distance == 0.0f;
 
-			m_Bounces++;
+			CCharacter* pLocalChar = GameWorld()->GetCharacterById(GameWorld()->m_LocalClientId);
+			bool PredictTele = pLocalChar && pLocalChar->m_RngSeed >= 0;
+			if (PredictTele && Res == TILE_TELEINWEAPON && !Collision()->TeleOuts(Tele - 1).empty())
+			{
+				int MapIndex = Collision()->GetPureMapIndex(Coltile.x, Coltile.y);
+				int TeleOut;
+				CCharacter* pOwnerChar = GameWorld()->GetCharacterById(m_Owner);
+				if (pOwnerChar)
+					TeleOut = RandomHash::HashMany(m_Owner, m_EvalTick, GameWorld()->GameTick(), pOwnerChar->m_RngSeed) % Collision()->TeleOuts(Tele - 1).size();
+				else
+					TeleOut = RandomHash::HashMany(GetId(), m_EvalTick, GameWorld()->GameTick(), MapIndex) % Collision()->TeleOuts(Tele - 1).size();
+
+				m_TelePos = Collision()->TeleOuts(Tele - 1)[TeleOut];
+				m_WasTele = true;
+			}
+			else
+			{
+				m_Bounces++;
+				m_WasTele = false;
+			}
 
 			int BounceNum = GetTuning(m_TuneZone)->m_LaserBounceNum;
 

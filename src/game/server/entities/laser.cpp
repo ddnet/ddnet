@@ -11,6 +11,7 @@
 #include <game/mapitems.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
+#include <game/random_hash.h>
 
 CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
@@ -107,7 +108,7 @@ void CLaser::DoBounce()
 	vec2 Coltile;
 
 	int Res;
-	int z;
+	int Tele;
 
 	if(m_WasTele)
 	{
@@ -118,7 +119,7 @@ void CLaser::DoBounce()
 
 	vec2 To = m_Pos + m_Dir * m_Energy;
 
-	Res = GameServer()->Collision()->IntersectLineTeleWeapon(m_Pos, To, &Coltile, &To, &z);
+	Res = GameServer()->Collision()->IntersectLineTeleWeapon(m_Pos, To, &Coltile, &To, &Tele);
 
 	if(Res)
 	{
@@ -157,10 +158,17 @@ void CLaser::DoBounce()
 			}
 			m_ZeroEnergyBounceInLastTick = Distance == 0.0f;
 
-			if(Res == TILE_TELEINWEAPON && !GameServer()->Collision()->TeleOuts(z - 1).empty())
+			if(Res == TILE_TELEINWEAPON && !GameServer()->Collision()->TeleOuts(Tele - 1).empty())
 			{
-				int TeleOut = GameServer()->m_World.m_Core.RandomOr0(GameServer()->Collision()->TeleOuts(z - 1).size());
-				m_TelePos = GameServer()->Collision()->TeleOuts(z - 1)[TeleOut];
+				int MapIndex = GameServer()->Collision()->GetPureMapIndex(Coltile.x, Coltile.y);
+				int TeleOut;
+				CCharacter* pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+				if(pOwnerChar)
+					TeleOut = RandomHash::HashMany(m_Owner, m_EvalTick, Server()->Tick(), pOwnerChar->m_RngSeed) % GameServer()->Collision()->TeleOuts(Tele - 1).size();
+				else
+					TeleOut = RandomHash::HashMany(GetId(), m_EvalTick, Server()->Tick(), MapIndex) % GameServer()->Collision()->TeleOuts(Tele - 1).size();
+
+				m_TelePos = GameServer()->Collision()->TeleOuts(Tele - 1)[TeleOut];
 				m_WasTele = true;
 			}
 			else
