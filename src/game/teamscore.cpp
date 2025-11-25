@@ -22,7 +22,7 @@ int CTeamsCore::Team(int ClientId) const
 
 void CTeamsCore::Team(int ClientId, int Team)
 {
-	dbg_assert(Team >= TEAM_FLOCK && Team < NUM_DDRACE_TEAMS, "invalid team %d", Team);
+	dbg_assert(Team >= TEAM_FLOCK && Team < NUM_DDRACE_TEAMS, "Invalid Team: %d", Team);
 	m_aTeam[ClientId] = Team;
 }
 
