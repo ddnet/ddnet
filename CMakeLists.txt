@@ -2173,6 +2173,8 @@ set_src(GAME_SHARED GLOB src/game
   prng.cpp
   prng.h
   race_state.h
+  random_hash.cpp
+  random_hash.h
   team_state.h
   teamscore.cpp
   teamscore.h
