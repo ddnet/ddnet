@@ -1177,70 +1177,62 @@ void CGameContext::AttemptJoinTeam(int ClientId, int Team)
 		pPlayer->GetCharacter()->m_LastStartWarning = Server()->Tick();
 	}
 
-	if(pPlayer->GetCharacter() == nullptr)
+	if(Team < 0 || Team >= TEAM_SUPER)
+	{
+		auto EmptyTeam = m_pController->Teams().GetFirstEmptyTeam();
+		if(!EmptyTeam.has_value())
+		{
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
+				"No empty team left.");
+			return;
+		}
+		Team = EmptyTeam.value();
+	}
+
+	char aError[512];
+	if(pPlayer->m_LastDDRaceTeamChange + (int64_t)Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay > Server()->Tick())
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-			"You can't change teams while you are dead/a spectator.");
+			"You can't change teams that fast!");
+	}
+	else if(Team != TEAM_FLOCK && m_pController->Teams().TeamLocked(Team) && !m_pController->Teams().IsInvited(Team, ClientId))
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
+			g_Config.m_SvInvite ?
+				"This team is locked using /lock. Only members of the team can unlock it using /lock." :
+				"This team is locked using /lock. Only members of the team can invite you or unlock it using /lock.");
+	}
+	else if(Team != TEAM_FLOCK && m_pController->Teams().Count(Team) >= g_Config.m_SvMaxTeamSize && !m_pController->Teams().TeamFlock(Team) && !m_pController->Teams().IsPractice(Team))
+	{
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "This team already has the maximum allowed size of %d players", g_Config.m_SvMaxTeamSize);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
+	}
+	else if(!m_pController->Teams().SetCharacterTeam(pPlayer->GetCid(), Team, aError, sizeof(aError)))
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aError);
 	}
 	else
 	{
-		if(Team < 0 || Team >= TEAM_SUPER)
+		if(PracticeByDefault())
 		{
-			auto EmptyTeam = m_pController->Teams().GetFirstEmptyTeam();
-			if(!EmptyTeam.has_value())
-			{
-				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-					"No empty team left.");
-				return;
-			}
-			Team = EmptyTeam.value();
+			// joined an empty team
+			if(m_pController->Teams().Count(Team) == 1)
+				m_pController->Teams().SetPractice(Team, true);
 		}
 
-		char aError[512];
-		if(pPlayer->m_LastDDRaceTeamChange + (int64_t)Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay > Server()->Tick())
-		{
-			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-				"You can't change teams that fast!");
-		}
-		else if(Team != TEAM_FLOCK && m_pController->Teams().TeamLocked(Team) && !m_pController->Teams().IsInvited(Team, ClientId))
-		{
-			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-				g_Config.m_SvInvite ?
-					"This team is locked using /lock. Only members of the team can unlock it using /lock." :
-					"This team is locked using /lock. Only members of the team can invite you or unlock it using /lock.");
-		}
-		else if(Team != TEAM_FLOCK && m_pController->Teams().Count(Team) >= g_Config.m_SvMaxTeamSize && !m_pController->Teams().TeamFlock(Team) && !m_pController->Teams().IsPractice(Team))
-		{
-			char aBuf[512];
-			str_format(aBuf, sizeof(aBuf), "This team already has the maximum allowed size of %d players", g_Config.m_SvMaxTeamSize);
-			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
-		}
-		else if(!m_pController->Teams().SetCharacterTeam(pPlayer->GetCid(), Team, aError, sizeof(aError)))
-		{
-			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aError);
-		}
-		else
-		{
-			if(PracticeByDefault())
-			{
-				// joined an empty team
-				if(m_pController->Teams().Count(Team) == 1)
-					m_pController->Teams().SetPractice(Team, true);
-			}
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "'%s' joined team %d",
+			Server()->ClientName(pPlayer->GetCid()),
+			Team);
+		SendChat(-1, TEAM_ALL, aBuf);
+		pPlayer->m_LastDDRaceTeamChange = Server()->Tick();
 
-			char aBuf[512];
-			str_format(aBuf, sizeof(aBuf), "'%s' joined team %d",
-				Server()->ClientName(pPlayer->GetCid()),
-				Team);
-			SendChat(-1, TEAM_ALL, aBuf);
-			pPlayer->m_LastDDRaceTeamChange = Server()->Tick();
+		if(m_pController->Teams().IsPractice(Team))
+			SendChatTarget(pPlayer->GetCid(), "Practice mode enabled for your team, happy practicing!");
 
-			if(m_pController->Teams().IsPractice(Team))
-				SendChatTarget(pPlayer->GetCid(), "Practice mode enabled for your team, happy practicing!");
-
-			if(m_pController->Teams().TeamFlock(Team))
-				SendChatTarget(pPlayer->GetCid(), "Team 0 mode enabled for your team. This will make your team behave like team 0.");
-		}
+		if(m_pController->Teams().TeamFlock(Team))
+			SendChatTarget(pPlayer->GetCid(), "Team 0 mode enabled for your team. This will make your team behave like team 0.");
 	}
 }
 
