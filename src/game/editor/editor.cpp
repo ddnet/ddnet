@@ -3289,7 +3289,7 @@ void CEditor::UpdateHotQuadPoint(const CLayerQuads *pLayer)
 			for(const auto &EnvPoint : m_Map.m_vpEnvelopes[Quad.m_PosEnv]->m_vPoints)
 			{
 				const vec2 Position = vec2(fx2f(Quad.m_aPoints[4].x) + fx2f(EnvPoint.m_aValues[0]), fx2f(Quad.m_aPoints[4].y) + fx2f(EnvPoint.m_aValues[1]));
-				if(UpdateMinimum(Position, &EnvPoint))
+				if(UpdateMinimum(Position, &EnvPoint) && Ui()->ActiveItem() == nullptr)
 				{
 					m_CurrentQuadIndex = &Quad - pLayer->m_vQuads.data();
 				}
