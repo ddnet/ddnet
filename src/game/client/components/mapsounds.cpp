@@ -198,6 +198,37 @@ void CMapSounds::OnRender()
 		if(!Source.m_Voice.IsValid())
 			continue;
 
+		auto SoundEnvelopeTriggerCallback = [&](bool IsDefault, bool IsLooping, bool IsPlaying, bool Reset) {
+			const int &SampleId = m_aSounds[Source.m_Sound];
+			int Flags = 0;
+			if(!Source.m_pSource->m_Pan)
+				Flags |= ISound::FLAG_NO_PANNING;
+			if(Reset)
+				Sound()->Stop(SampleId);
+
+			// reset to default behavior
+			if(IsDefault)
+			{
+				bool SourceLoop = Source.m_pSource->m_Loop > 0;
+				if(SourceLoop != Sound()->IsLooping(SampleId))
+					Sound()->SetLooping(SampleId, SourceLoop);
+				return;
+			}
+
+			// sync playing
+			if(Sound()->IsPlaying(SampleId) != IsPlaying)
+			{
+				if(!IsPlaying)
+					Sound()->Pause(SampleId);
+				else
+					Sound()->Play(CSounds::CHN_MAPSOUND, SampleId, Flags, 1.0f);
+			}
+
+			// update looping
+			if(Sound()->IsLooping(SampleId) != IsLooping)
+				Sound()->SetLooping(SampleId, IsLooping);
+		};
+
 		ColorRGBA Position = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
 		CEnvelopeState &EnvEvaluator = GameClient()->m_MapLayersBackground.EnvEvaluator();
 		EnvEvaluator.EnvelopeEval(Source.m_pSource->m_PosEnvOffset, Source.m_pSource->m_PosEnv, Position, 2);
@@ -213,10 +244,12 @@ void CMapSounds::OnRender()
 
 		Sound()->SetVoicePosition(Source.m_Voice, vec2(x, y));
 
-		ColorRGBA Volume = ColorRGBA(1.0f, 0.0f, 0.0f, 0.0f);
-		EnvEvaluator.EnvelopeEval(Source.m_pSource->m_SoundEnvOffset, Source.m_pSource->m_SoundEnv, Volume, 1);
-
-		Sound()->SetVoiceVolume(Source.m_Voice, std::clamp(Volume.r, 0.0f, 1.0f));
+		if(Source.m_pSource->m_SoundEnv >= 0)
+		{
+			ColorRGBA Volume = ColorRGBA(1.0f, 0.0f, 0.0f, 0.0f);
+			EnvEvaluator.EnvelopeEval(Source.m_pSource->m_SoundEnvOffset, Source.m_pSource->m_SoundEnv, Volume, 1, SoundEnvelopeTriggerCallback);
+			Sound()->SetVoiceVolume(Source.m_Voice, std::clamp(Volume.r, 0.0f, 1.0f));
+		}
 	}
 }
 
