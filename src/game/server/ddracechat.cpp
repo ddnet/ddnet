@@ -1316,6 +1316,10 @@ void CGameContext::ConTeam0Mode(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientId(pResult->m_ClientId))
 		return;
 
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return;
+
 	if(g_Config.m_SvTeam == SV_TEAM_FORBIDDEN || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO || g_Config.m_SvTeam == SV_TEAM_MANDATORY)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
@@ -1333,7 +1337,6 @@ void CGameContext::ConTeam0Mode(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	int Team = pController->Teams().m_Core.Team(pResult->m_ClientId);
-	bool Mode = pController->Teams().TeamFlock(Team);
 
 	if(Team <= TEAM_FLOCK || Team >= TEAM_SUPER)
 	{
@@ -1350,14 +1353,18 @@ void CGameContext::ConTeam0Mode(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	if(pResult->NumArguments() > 0)
-		Mode = !pResult->GetInteger(0);
-
 	if(pSelf->ProcessSpamProtection(pResult->m_ClientId, false))
 		return;
 
+	bool Mode = pController->Teams().TeamFlock(Team);
+	bool Voted = pResult->NumArguments() == 0 || pResult->GetInteger(0);
+
 	char aBuf[512];
-	if(Mode)
+	if(Mode && Voted)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "Team 0 mode is already enabled");
+	}
+	else if(Mode && !Voted)
 	{
 		if(pController->Teams().Count(Team) > g_Config.m_SvMaxTeamSize)
 		{
@@ -1370,6 +1377,16 @@ void CGameContext::ConTeam0Mode(IConsole::IResult *pResult, void *pUserData)
 
 			str_format(aBuf, sizeof(aBuf), "'%s' disabled team 0 mode.", pSelf->Server()->ClientName(pResult->m_ClientId));
 			pSelf->SendChatTeam(Team, aBuf);
+
+			for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+			{
+				if(pController->Teams().m_Core.Team(ClientId) == Team)
+				{
+					CPlayer *pPlayer2 = pSelf->m_apPlayers[ClientId];
+					if(pPlayer2)
+						pPlayer2->m_VotedForTeam0Mode = false;
+				}
+			}
 		}
 	}
 	else
@@ -1380,10 +1397,39 @@ void CGameContext::ConTeam0Mode(IConsole::IResult *pResult, void *pUserData)
 		}
 		else
 		{
-			pController->Teams().SetTeamFlock(Team, true);
+			if(Voted == pPlayer->m_VotedForTeam0Mode)
+				return;
 
-			str_format(aBuf, sizeof(aBuf), "'%s' enabled team 0 mode. This will make your team behave like team 0.", pSelf->Server()->ClientName(pResult->m_ClientId));
-			pSelf->SendChatTeam(Team, aBuf);
+			pPlayer->m_VotedForTeam0Mode = Voted;
+
+			int NumCurrentVotes = 0;
+			int TeamSize = 0;
+
+			for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+			{
+				if(pController->Teams().m_Core.Team(ClientId) == Team)
+				{
+					CPlayer *pPlayer2 = pSelf->m_apPlayers[ClientId];
+					if(pPlayer2 && pPlayer2->m_VotedForTeam0Mode)
+						NumCurrentVotes++;
+					TeamSize++;
+				}
+			}
+
+			int NumRequiredVotes = TeamSize / 2 + 1;
+			if(NumCurrentVotes >= NumRequiredVotes)
+			{
+				pController->Teams().SetTeamFlock(Team, true);
+
+				str_copy(aBuf, "Team 0 mode enabled for your team. This will make your team behave like team 0.");
+				pSelf->SendChatTeam(Team, aBuf);
+			}
+			else
+			{
+				str_format(aBuf, sizeof(aBuf), "'%s' voted to %s /team0mode mode for your team, which means your team will behave like team 0. Type /team0mode to vote (%d/%d required votes)",
+					pSelf->Server()->ClientName(pResult->m_ClientId), Voted ? "enable" : "disable", NumCurrentVotes, NumRequiredVotes);
+				pSelf->SendChatTeam(Team, aBuf);
+			}
 		}
 	}
 }

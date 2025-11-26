@@ -58,6 +58,7 @@ void CGameTeams::ResetRoundState(int Team)
 		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
 		{
 			GameServer()->m_apPlayers[i]->m_VotedForPractice = false;
+			GameServer()->m_apPlayers[i]->m_VotedForTeam0Mode = false;
 			GameServer()->m_apPlayers[i]->m_SwapTargetsClientId = -1;
 			m_aLastSwap[i] = 0;
 		}
@@ -483,6 +484,7 @@ void CGameTeams::SetForceCharacterTeam(int ClientId, int Team)
 		if(GetPlayer(ClientId))
 		{
 			GetPlayer(ClientId)->m_VotedForPractice = false;
+			GetPlayer(ClientId)->m_VotedForTeam0Mode = false;
 			GetPlayer(ClientId)->m_SwapTargetsClientId = -1;
 		}
 		m_pGameContext->m_World.RemoveEntitiesFromPlayer(ClientId);
@@ -523,6 +525,7 @@ void CGameTeams::KillTeam(int Team, int NewStrongId, int ExceptId)
 		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
 		{
 			GameServer()->m_apPlayers[i]->m_VotedForPractice = false;
+			GameServer()->m_apPlayers[i]->m_VotedForTeam0Mode = false;
 			if(i != ExceptId)
 			{
 				GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_SELF, false);
