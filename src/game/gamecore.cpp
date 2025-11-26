@@ -316,6 +316,8 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		if(m_NewHook)
 		{
 			HookBase = m_HookTeleBase;
+			// The clients dead reckoning doesn't get m_HookTeleBase so anytime it's used we need to reset 
+			m_Reset = true;
 		}
 		vec2 NewPos = m_HookPos + m_HookDir * m_Tuning.m_HookFireSpeed;
 		if(distance(HookBase, NewPos) > m_Tuning.m_HookLength)
