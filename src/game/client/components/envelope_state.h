@@ -32,6 +32,12 @@ public:
 	std::vector<CEnvelopeTrigger> m_EnvTriggers;
 };
 
+class CEnvelopeTriggerState {
+public:
+	EEnvelopeTriggerType m_State;
+	int m_HitTime;
+};
+
 class CEnvelopeState : public CComponent, public IEnvelopeEval
 {
 public:
