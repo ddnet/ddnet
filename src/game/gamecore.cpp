@@ -181,6 +181,7 @@ void CCharacterCore::Reset()
 	m_IsInFreeze = false;
 	m_DeepFrozen = false;
 	m_LiveFrozen = false;
+	m_CanSkipInterpolation = false;
 
 	// never initialize both to 0
 	m_Input.m_TargetX = 0;
@@ -191,6 +192,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 {
 	m_MoveRestrictions = m_pCollision->GetMoveRestrictions(UseInput ? IsSwitchActiveCb : nullptr, this, m_Pos);
 	m_TriggeredEvents = 0;
+	m_CanSkipInterpolation = false;
 
 	// get ground state
 	const bool Grounded = m_pCollision->CheckPoint(m_Pos.x + PhysicalSize() / 2, m_Pos.y + PhysicalSize() / 2 + 5) || m_pCollision->CheckPoint(m_Pos.x - PhysicalSize() / 2, m_Pos.y + PhysicalSize() / 2 + 5);

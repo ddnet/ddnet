@@ -1021,6 +1021,7 @@ void CCharacter::HandleTiles(int Index)
 				return;
 			int TeleOut = RandomHash::HashMany(m_Core.m_Id, GameWorld()->GameTick(), m_RngSeed) % Collision()->TeleOuts(Teleport - 1).size();
 			m_Core.m_Pos = Collision()->TeleOuts(Teleport - 1)[TeleOut];
+			m_Core.m_CanSkipInterpolation = true;
 			if (!g_Config.m_SvTeleportHoldHook)
 			{
 				ResetHook();
@@ -1036,6 +1037,7 @@ void CCharacter::HandleTiles(int Index)
 				return;
 			int TeleOut = RandomHash::HashMany(m_Core.m_Id, GameWorld()->GameTick(), m_RngSeed) % Collision()->TeleOuts(EvilTeleport - 1).size();
 			m_Core.m_Pos = Collision()->TeleOuts(EvilTeleport - 1)[TeleOut];
+			m_Core.m_CanSkipInterpolation = true;
 			if (!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons)
 			{
 				m_Core.m_Vel = vec2(0, 0);
@@ -1063,6 +1065,7 @@ void CCharacter::HandleTiles(int Index)
 				{
 					int TeleOut = RandomHash::HashMany(m_Core.m_Id, GameWorld()->GameTick(), m_RngSeed) % Collision()->TeleCheckOuts(k).size();
 					m_Core.m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
+					m_Core.m_CanSkipInterpolation = true;
 					m_Core.m_Vel = vec2(0, 0);
 
 					if (!g_Config.m_SvTeleportHoldHook)
@@ -1089,6 +1092,7 @@ void CCharacter::HandleTiles(int Index)
 				{
 					int TeleOut = RandomHash::HashMany(m_Core.m_Id, GameWorld()->GameTick(), m_RngSeed) % Collision()->TeleCheckOuts(k).size();
 					m_Core.m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
+					m_Core.m_CanSkipInterpolation = true;
 
 					if (!g_Config.m_SvTeleportHoldHook)
 					{
