@@ -7,6 +7,31 @@
 
 #include <memory>
 
+enum EEnvelopeTriggerType
+{
+	DEFAULT = 0,
+	STOP,
+	START_ONCE,
+	START_LOOP,
+	RESET_STOP,
+	RESET_START_ONCE,
+	RESET_START_LOOP,
+	NUM_ENV_TRIGGERS,
+};
+
+class CEnvelopeTrigger {
+public:
+	int m_EnvId;
+	EEnvelopeTriggerType m_State;
+	static const char *ConsoleName(EEnvelopeTriggerType Trigger);
+	static EEnvelopeTriggerType FromName(const char* pTriggerName);
+};
+
+class CEnvelopeTriggerZone {
+public:
+	std::vector<CEnvelopeTrigger> m_EnvTriggers;
+};
+
 class CEnvelopeState : public CComponent, public IEnvelopeEval
 {
 public:
