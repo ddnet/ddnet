@@ -171,6 +171,8 @@ struct SValueLoader
 {
 	static void LoadTuneValues(const CSettingValuesBuilder &TuneBuilder);
 	static void LoadTuneZoneValues(const CSettingValuesBuilder &TuneZoneBuilder);
+	static void LoadEnvTriggerValues(const CSettingValuesBuilder &EnvTriggerBuilder);
+	static void LoadArgumentEnvTriggerValues(CArgumentValuesListBuilder &&EnvTriggerBuilder);
 	static void LoadMapBugs(const CSettingValuesBuilder &BugBuilder);
 	static void LoadArgumentTuneValues(CArgumentValuesListBuilder &&ArgBuilder);
 };

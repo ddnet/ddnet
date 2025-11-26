@@ -64,3 +64,44 @@ void CEnvelopeState::EnvelopeEval(int TimeOffsetMillis, int EnvelopeIndex, Color
 
 	CRenderMap::RenderEvalEnvelope(m_pEnvelopePoints.get(), Time + milliseconds(TimeOffsetMillis), Result, Channels);
 }
+
+const char *CEnvelopeTrigger::ConsoleName(EEnvelopeTriggerType Trigger)
+{
+	switch(Trigger)
+	{
+	case EEnvelopeTriggerType::DEFAULT:
+		return "default";
+	case EEnvelopeTriggerType::STOP:
+		return "stop";
+	case EEnvelopeTriggerType::START_ONCE:
+		return "start_once";
+	case EEnvelopeTriggerType::START_LOOP:
+		return "start_loop";
+	case EEnvelopeTriggerType::RESET_STOP:
+		return "reset_stop";
+	case EEnvelopeTriggerType::RESET_START_ONCE:
+		return "reset_start_once";
+	case EEnvelopeTriggerType::RESET_START_LOOP:
+		return "reset_start_loop";
+	default:
+		dbg_assert_failed("unknown envelope trigger type");
+	}
+}
+
+EEnvelopeTriggerType CEnvelopeTrigger::FromName(const char *pTriggerName)
+{
+	if(str_comp(pTriggerName, "stop") == 0)
+		return EEnvelopeTriggerType::STOP;
+	if(str_comp(pTriggerName, "start_once") == 0)
+		return EEnvelopeTriggerType::START_ONCE;
+	if(str_comp(pTriggerName, "start_loop") == 0)
+		return EEnvelopeTriggerType::START_LOOP;
+	if(str_comp(pTriggerName, "reset_stop") == 0)
+		return EEnvelopeTriggerType::RESET_STOP;
+	if(str_comp(pTriggerName, "reset_start_once") == 0)
+		return EEnvelopeTriggerType::RESET_START_ONCE;
+	if(str_comp(pTriggerName, "reset_start_loop") == 0)
+		return EEnvelopeTriggerType::RESET_START_LOOP;
+
+	return EEnvelopeTriggerType::DEFAULT;
+}
