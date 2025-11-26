@@ -7,6 +7,7 @@
 #include <engine/graphics.h>
 
 #include <game/client/component.h>
+#include <game/client/ui.h>
 #include <game/client/ui_rect.h>
 
 class CScoreboard : public CComponent
@@ -28,12 +29,35 @@ class CScoreboard : public CComponent
 	void RenderRecordingNotification(float x);
 
 	static void ConKeyScoreboard(IConsole::IResult *pResult, void *pUserData);
+	static void ConToggleScoreboardCursor(IConsole::IResult *pResult, void *pUserData);
+
 	const char *GetTeamName(int Team) const;
 
 	bool m_Active;
 	float m_ServerRecord;
 
 	IGraphics::CTextureHandle m_DeadTeeTexture;
+
+	std::optional<vec2> m_LastMousePos;
+	bool m_MouseUnlocked = false;
+
+	void SetUiMousePos(vec2 Pos);
+
+	class CScoreboardPopupContext : public SPopupMenuId
+	{
+	public:
+		CScoreboard *m_pScoreboard = nullptr;
+		CButtonContainer m_FriendAction;
+		CButtonContainer m_MuteAction;
+		CButtonContainer m_EmoticonAction;
+
+		CButtonContainer m_SpectateButton;
+
+		int m_ClientId;
+		bool m_IsLocal;
+	} m_ScoreboardPopupContext;
+
+	static CUi::EPopupMenuFunctionResult PopupScoreboard(void *pContext, CUIRect View, bool Active);
 
 public:
 	CScoreboard();
@@ -44,6 +68,8 @@ public:
 	void OnRender() override;
 	void OnRelease() override;
 	void OnMessage(int MsgType, void *pRawMsg) override;
+	bool OnCursorMove(float x, float y, IInput::ECursorType CursorType) override;
+	bool OnInput(const IInput::CEvent &Event) override;
 
 	bool IsActive() const;
 };

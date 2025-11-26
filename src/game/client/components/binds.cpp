@@ -520,10 +520,16 @@ void CBinds::SetDDRaceBinds(bool FreeOnly)
 		Bind(KEY_KP_3, "say /emote pain 999999", FreeOnly);
 		Bind(KEY_KP_4, "say /emote surprise 999999", FreeOnly);
 		Bind(KEY_KP_5, "say /emote blink 999999", FreeOnly);
-		Bind(KEY_MOUSE_3, "+spectate", FreeOnly);
 		Bind(KEY_MINUS, "spectate_previous", FreeOnly);
 		Bind(KEY_EQUALS, "spectate_next", FreeOnly);
 	}
 
-	g_Config.m_ClDDRaceBindsSet = 1;
+	if(g_Config.m_ClDDRaceBindsSet < 2)
+	{
+		const bool DontModifySpectate = FreeOnly && str_comp(Get(KEY_MOUSE_3, KeyModifier::NONE), "+spectate") != 0;
+		Bind(KEY_MOUSE_3, "toggle_scoreboard_cursor; +spectate", DontModifySpectate);
+		Bind(KEY_LALT, "toggle_scoreboard_cursor", FreeOnly);
+	}
+
+	g_Config.m_ClDDRaceBindsSet = 2;
 }
