@@ -406,7 +406,7 @@ bool CGameTeams::CanJoinTeam(int ClientId, int Team, char *pError, int ErrorSize
 	}
 	if(!Character(ClientId))
 	{
-		str_copy(pError, "Your character is not valid", ErrorSize);
+		str_copy(pError, "You can't change teams while you are dead/a spectator.", ErrorSize);
 		return false;
 	}
 	if(Team == TEAM_SUPER && !Character(ClientId)->IsSuper())
