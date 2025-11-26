@@ -420,7 +420,7 @@ void CGameClient::OnInit()
 		m_Menus.RenderLoading(pLoadingDDNetCaption, pLoadingMessageAssets, 1);
 	}
 
-	m_GameWorld.Init(Collision(), m_aTuningList, &m_MapBugs);
+	m_GameWorld.Init(Collision(), m_aTuningList, &m_MapBugs, m_NumEnvs);
 	OnReset();
 
 	// Set free binds to DDRace binds if it's active
@@ -4592,9 +4592,8 @@ void CGameClient::LoadMapSettings()
 	}
 
 	// reset envelope triggers
-	m_EnvTriggerList.clear();
-
-	// TODO: Load triggers
+	int EnvStart;
+	pMap->GetType(MAPITEMTYPE_ENVELOPE, &EnvStart, &m_NumEnvs);
 }
 
 void CGameClient::ConTuneParam(IConsole::IResult *pResult, void *pUserData)
@@ -4628,13 +4627,13 @@ void CGameClient::ConEnvTrigger(IConsole::IResult *pResult, void *pUserData)
 
 	if(TriggerZoneId >= 0 && TriggerZoneId < 256)
 	{
-		if(!pSelf->m_EnvTriggerList.contains(TriggerZoneId))
+		if(!pSelf->m_GameWorld.EnvTriggerList().contains(TriggerZoneId))
 		{
 			CEnvelopeTriggerZone Zone;
-			pSelf->m_EnvTriggerList[TriggerZoneId] = Zone;
+			pSelf->m_GameWorld.EnvTriggerList()[TriggerZoneId] = Zone;
 		}
 
-		CEnvelopeTriggerZone &TriggerZone = pSelf->m_EnvTriggerList[TriggerZoneId];
+		CEnvelopeTriggerZone &TriggerZone = pSelf->m_GameWorld.EnvTriggerList()[TriggerZoneId];
 
 		CEnvelopeTrigger EnvTrigger;
 		EnvTrigger.m_EnvId = EnvelopeId;
