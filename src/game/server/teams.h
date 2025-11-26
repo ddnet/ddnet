@@ -62,9 +62,11 @@ public:
 	CCharacter *Character(int ClientId);
 	const CCharacter *Character(int ClientId) const;
 	CPlayer *GetPlayer(int ClientId);
+	const CPlayer *GetPlayer(int ClientId) const;
 	CGameContext *GameServer();
 	const CGameContext *GameServer() const;
-	class IServer *Server();
+	IServer *Server();
+	const IServer *Server() const;
 
 	void OnCharacterStart(int ClientId);
 	void OnCharacterFinish(int ClientId);

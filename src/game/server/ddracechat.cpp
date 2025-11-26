@@ -1190,12 +1190,7 @@ void CGameContext::AttemptJoinTeam(int ClientId, int Team)
 	}
 
 	char aError[512];
-	if(pPlayer->m_LastDDRaceTeamChange + (int64_t)Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay > Server()->Tick())
-	{
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-			"You can't change teams that fast!");
-	}
-	else if(Team != TEAM_FLOCK && m_pController->Teams().TeamLocked(Team) && !m_pController->Teams().IsInvited(Team, ClientId))
+	if(Team != TEAM_FLOCK && m_pController->Teams().TeamLocked(Team) && !m_pController->Teams().IsInvited(Team, ClientId))
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 			g_Config.m_SvInvite ?

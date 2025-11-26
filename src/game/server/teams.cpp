@@ -389,6 +389,17 @@ bool CGameTeams::CanJoinTeam(int ClientId, int Team, char *pError, int ErrorSize
 		str_format(pError, ErrorSize, "Invalid client ID: %d", ClientId);
 		return false;
 	}
+	const CPlayer *pPlayer = GetPlayer(ClientId);
+	if(!pPlayer)
+	{
+		str_format(pError, ErrorSize, "There is no player with ClientId %d", ClientId);
+		return false;
+	}
+	if(pPlayer->m_LastDDRaceTeamChange + (int64_t)Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay > Server()->Tick())
+	{
+		str_copy(pError, "You can't change teams that fast!", ErrorSize);
+		return false;
+	}
 	if(Team < 0 || Team > NUM_DDRACE_TEAMS)
 	{
 		str_format(pError, ErrorSize, "Invalid team number: %d", Team);
@@ -884,6 +895,11 @@ CPlayer *CGameTeams::GetPlayer(int ClientId)
 	return GameServer()->m_apPlayers[ClientId];
 }
 
+const CPlayer *CGameTeams::GetPlayer(int ClientId) const
+{
+	return GameServer()->m_apPlayers[ClientId];
+}
+
 CGameContext *CGameTeams::GameServer()
 {
 	return m_pGameContext;
@@ -894,7 +910,12 @@ const CGameContext *CGameTeams::GameServer() const
 	return m_pGameContext;
 }
 
-class IServer *CGameTeams::Server()
+IServer *CGameTeams::Server()
+{
+	return m_pGameContext->Server();
+}
+
+const IServer *CGameTeams::Server() const
 {
 	return m_pGameContext->Server();
 }
