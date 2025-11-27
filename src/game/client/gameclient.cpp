@@ -724,29 +724,7 @@ void CGameClient::OnReset()
 void CGameClient::UpdatePositions()
 {
 	// local character position
-	if(g_Config.m_ClPredict && Client()->State() != IClient::STATE_DEMOPLAYBACK)
-	{
-		if(!AntiPingPlayers())
-		{
-			if(!m_Snap.m_pLocalCharacter || (m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER))
-			{
-				// don't use predicted
-			}
-			else
-				m_LocalCharacterPos = mix(m_PredictedPrevChar.m_Pos, m_PredictedChar.m_Pos, Client()->PredIntraGameTick(g_Config.m_ClDummy));
-		}
-		else
-		{
-			if(!(m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER))
-			{
-				if(m_Snap.m_pLocalCharacter)
-					m_LocalCharacterPos = mix(m_PredictedPrevChar.m_Pos, m_PredictedChar.m_Pos, Client()->PredIntraGameTick(g_Config.m_ClDummy));
-			}
-			//		else
-			//			m_LocalCharacterPos = mix(m_PredictedPrevChar.m_Pos, m_PredictedChar.m_Pos, Client()->PredIntraGameTick(g_Config.m_ClDummy));
-		}
-	}
-	else if(m_Snap.m_pLocalCharacter && m_Snap.m_pLocalPrevCharacter)
+	if(!Predict() && m_Snap.m_pLocalCharacter && m_Snap.m_pLocalPrevCharacter)
 	{
 		m_LocalCharacterPos = mix(
 			vec2(m_Snap.m_pLocalPrevCharacter->m_X, m_Snap.m_pLocalPrevCharacter->m_Y),
