@@ -9,9 +9,9 @@
 #include <generated/protocol.h>
 
 #include <game/mapitems.h>
+#include <game/random_hash.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
-#include <game/random_hash.h>
 
 CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
@@ -162,7 +162,7 @@ void CLaser::DoBounce()
 			{
 				int MapIndex = GameServer()->Collision()->GetPureMapIndex(Coltile.x, Coltile.y);
 				int TeleOut;
-				CCharacter* pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+				CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 				if(pOwnerChar)
 					TeleOut = RandomHash::HashMany(m_Owner, m_EvalTick, Server()->Tick(), pOwnerChar->m_RngSeed) % GameServer()->Collision()->TeleOuts(Tele - 1).size();
 				else

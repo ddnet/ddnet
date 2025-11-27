@@ -9,9 +9,9 @@
 #include <generated/protocol.h>
 
 #include <game/mapitems.h>
+#include <game/random_hash.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
-#include <game/random_hash.h>
 
 CProjectile::CProjectile(
 	CGameWorld *pGameWorld,
@@ -259,7 +259,7 @@ void CProjectile::Tick()
 	if(Tele && !GameServer()->Collision()->TeleOuts(Tele - 1).empty())
 	{
 		int TeleOut;
-		if (pOwnerChar)
+		if(pOwnerChar)
 			TeleOut = RandomHash::HashMany(m_Owner, m_StartTick, MapIndex, Server()->Tick(), pOwnerChar->m_RngSeed) % GameServer()->Collision()->TeleOuts(Tele - 1).size();
 		else
 			TeleOut = RandomHash::HashMany(GetId(), m_StartTick, MapIndex, Server()->Tick()) % GameServer()->Collision()->TeleOuts(Tele - 1).size();

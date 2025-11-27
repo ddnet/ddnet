@@ -17,13 +17,13 @@
 #include <generated/server_data.h>
 
 #include <game/mapitems.h>
+#include <game/random_hash.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/server/teams.h>
 #include <game/team_state.h>
-#include <game/random_hash.h>
 
 MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
 

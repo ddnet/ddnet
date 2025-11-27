@@ -103,7 +103,7 @@ void CLaser::DoBounce()
 	m_PrevPos = m_Pos;
 	vec2 Coltile;
 
-	if (m_WasTele)
+	if(m_WasTele)
 	{
 		m_PrevPos = m_TelePos;
 		m_Pos = m_TelePos;
@@ -153,14 +153,14 @@ void CLaser::DoBounce()
 			}
 			m_ZeroEnergyBounceInLastTick = Distance == 0.0f;
 
-			CCharacter* pLocalChar = GameWorld()->GetCharacterById(GameWorld()->m_LocalClientId);
+			CCharacter *pLocalChar = GameWorld()->GetCharacterById(GameWorld()->m_LocalClientId);
 			bool PredictTele = pLocalChar && pLocalChar->m_RngSeed >= 0;
-			if (PredictTele && Res == TILE_TELEINWEAPON && !Collision()->TeleOuts(Tele - 1).empty())
+			if(PredictTele && Res == TILE_TELEINWEAPON && !Collision()->TeleOuts(Tele - 1).empty())
 			{
 				int MapIndex = Collision()->GetPureMapIndex(Coltile.x, Coltile.y);
 				int TeleOut;
-				CCharacter* pOwnerChar = GameWorld()->GetCharacterById(m_Owner);
-				if (pOwnerChar)
+				CCharacter *pOwnerChar = GameWorld()->GetCharacterById(m_Owner);
+				if(pOwnerChar)
 					TeleOut = RandomHash::HashMany(m_Owner, m_EvalTick, GameWorld()->GameTick(), pOwnerChar->m_RngSeed) % Collision()->TeleOuts(Tele - 1).size();
 				else
 					TeleOut = RandomHash::HashMany(GetId(), m_EvalTick, GameWorld()->GameTick(), MapIndex) % Collision()->TeleOuts(Tele - 1).size();

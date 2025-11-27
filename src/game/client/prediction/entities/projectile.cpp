@@ -150,21 +150,21 @@ void CProjectile::Tick()
 		m_MarkedForDestroy = true;
 	}
 
-	CCharacter* pLocalChar = GameWorld()->GetCharacterById(GameWorld()->m_LocalClientId);
+	CCharacter *pLocalChar = GameWorld()->GetCharacterById(GameWorld()->m_LocalClientId);
 	bool PredictTele = pLocalChar && pLocalChar->m_RngSeed >= 0;
-	if (PredictTele) 
+	if(PredictTele)
 	{
 		int MapIndex = Collision()->GetIndex(PrevPos, CurPos);
 		int Tele;
-		if (g_Config.m_SvOldTeleportWeapons)
+		if(g_Config.m_SvOldTeleportWeapons)
 			Tele = Collision()->IsTeleport(MapIndex);
 		else
 			Tele = Collision()->IsTeleportWeapon(MapIndex);
 
-		if (Tele && !Collision()->TeleOuts(Tele - 1).empty())
+		if(Tele && !Collision()->TeleOuts(Tele - 1).empty())
 		{
 			int TeleOut;
-			if (pOwnerChar)
+			if(pOwnerChar)
 				TeleOut = RandomHash::HashMany(m_Owner, m_StartTick, MapIndex, GameWorld()->GameTick(), pOwnerChar->m_RngSeed) % Collision()->TeleOuts(Tele - 1).size();
 			else
 				TeleOut = RandomHash::HashMany(GetId(), m_StartTick, MapIndex, GameWorld()->GameTick()) % Collision()->TeleOuts(Tele - 1).size();

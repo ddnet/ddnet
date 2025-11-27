@@ -3,7 +3,7 @@
 // MurMur3 32 bit finalizer mixer
 // Has known good bias and avalanche
 // Marginally better 32 bit mixers exist, but this one is tested, and good enough
-uint32_t murmur3mix32(uint32_t x)
+static uint32_t murmur3mix32(uint32_t x)
 {
 	x ^= x >> 16;
 	x *= 0x85ebca6bu;
@@ -24,7 +24,7 @@ namespace RandomHash
 	uint32_t HashInts(const int32_t *Values, size_t Count)
 	{
 		uint32_t State = 0x1234567u;
-		for (size_t i = 0; i < Count; ++i)
+		for(size_t i = 0; i < Count; ++i)
 		{
 			HashAppend(State, Values[i]);
 		}
