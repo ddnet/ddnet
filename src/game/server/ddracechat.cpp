@@ -754,7 +754,7 @@ void CGameContext::ConUnPractice(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	if(Teams.Count(Team) > g_Config.m_SvMaxTeamSize && pSelf->m_pController->Teams().TeamLocked(Team))
+	if(Teams.TeamSize(Team) > g_Config.m_SvMaxTeamSize && pSelf->m_pController->Teams().TeamLocked(Team))
 	{
 		log_info("chatresp", "Can't disable practice. This team exceeds the maximum allowed size of %d players for regular team", g_Config.m_SvMaxTeamSize);
 		return;
@@ -1202,7 +1202,7 @@ void CGameContext::AttemptJoinTeam(int ClientId, int Team)
 				"This team is locked using /lock. Only members of the team can unlock it using /lock." :
 				"This team is locked using /lock. Only members of the team can invite you or unlock it using /lock.");
 	}
-	else if(Team != TEAM_FLOCK && m_pController->Teams().Count(Team) >= g_Config.m_SvMaxTeamSize && !m_pController->Teams().TeamFlock(Team) && !m_pController->Teams().IsPractice(Team))
+	else if(Team != TEAM_FLOCK && m_pController->Teams().TeamSize(Team) >= g_Config.m_SvMaxTeamSize && !m_pController->Teams().TeamFlock(Team) && !m_pController->Teams().IsPractice(Team))
 	{
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "This team already has the maximum allowed size of %d players", g_Config.m_SvMaxTeamSize);
@@ -1217,7 +1217,7 @@ void CGameContext::AttemptJoinTeam(int ClientId, int Team)
 		if(PracticeByDefault())
 		{
 			// joined an empty team
-			if(m_pController->Teams().Count(Team) == 1)
+			if(m_pController->Teams().TeamSize(Team) == 1)
 				m_pController->Teams().SetPractice(Team, true);
 		}
 
@@ -1351,7 +1351,7 @@ void CGameContext::ConTeam0Mode(IConsole::IResult *pResult, void *pUserData)
 	char aBuf[512];
 	if(Mode)
 	{
-		if(pController->Teams().Count(Team) > g_Config.m_SvMaxTeamSize)
+		if(pController->Teams().TeamSize(Team) > g_Config.m_SvMaxTeamSize)
 		{
 			str_format(aBuf, sizeof(aBuf), "Can't disable team 0 mode. This team exceeds the maximum allowed size of %d players for regular team", g_Config.m_SvMaxTeamSize);
 			pSelf->SendChatTarget(pResult->m_ClientId, aBuf);

@@ -3834,7 +3834,7 @@ void CGameContext::ConchainPracticeByDefaultUpdate(IConsole::IResult *pResult, v
 
 		for(int Team = 0; Team < NUM_DDRACE_TEAMS; Team++)
 		{
-			if(Team == TEAM_FLOCK || pSelf->m_pController->Teams().Count(Team) == 0)
+			if(Team == TEAM_FLOCK || pSelf->m_pController->Teams().TeamSize(Team) == 0)
 			{
 				pSelf->m_pController->Teams().SetPractice(Team, Enable);
 			}
