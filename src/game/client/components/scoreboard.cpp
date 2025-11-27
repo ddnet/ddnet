@@ -37,9 +37,6 @@ void CScoreboard::ConKeyScoreboard(IConsole::IResult *pResult, void *pUserData)
 {
 	CScoreboard *pSelf = static_cast<CScoreboard *>(pUserData);
 
-	if(pSelf->GameClient()->m_Menus.IsActive())
-		return;
-
 	pSelf->GameClient()->m_Spectator.OnRelease();
 	pSelf->GameClient()->m_Emoticon.OnRelease();
 
@@ -58,7 +55,9 @@ void CScoreboard::ConToggleScoreboardCursor(IConsole::IResult *pResult, void *pU
 {
 	CScoreboard *pSelf = static_cast<CScoreboard *>(pUserData);
 
-	if(!pSelf->IsActive() || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	if(!pSelf->IsActive() ||
+		pSelf->GameClient()->m_Menus.IsActive() ||
+		pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		return;
 	}
