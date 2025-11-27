@@ -1,6 +1,7 @@
 #ifndef GAME_RANDOM_HASH_H
 #define GAME_RANDOM_HASH_H
 
+#include <cstddef>
 #include <cstdint>
 
 namespace RandomHash
