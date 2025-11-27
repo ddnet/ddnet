@@ -1158,7 +1158,7 @@ void CGameTeams::ProcessSaveTeam()
 			if(!TeamValid)
 			{
 				GameServer()->SendChatTeam(Team, "Your team has been killed because it contains an invalid tee state");
-				KillTeam(Team, -1, -1);
+				KillTeam(Team, -1);
 			}
 
 			char aSaveId[UUID_MAXSTRSIZE];
