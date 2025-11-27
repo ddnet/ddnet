@@ -13,6 +13,7 @@
 #include <game/client/animstate.h>
 #include <game/client/components/countryflags.h>
 #include <game/client/components/motd.h>
+#include <game/client/components/scoreboard_lock.h>
 #include <game/client/components/statboard.h>
 #include <game/client/gameclient.h>
 #include <game/client/ui.h>
@@ -21,6 +22,12 @@
 CScoreboard::CScoreboard()
 {
 	OnReset();
+	m_pScoreboardLock = new CScoreboardLock();
+}
+
+CScoreboard::~CScoreboard()
+{
+	delete m_pScoreboardLock;
 }
 
 void CScoreboard::SetUiMousePos(vec2 Pos)
@@ -399,6 +406,11 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 
 	const CNetObj_GameInfo *pGameInfoObj = GameClient()->m_Snap.m_pGameInfoObj;
 	const CNetObj_GameData *pGameDataObj = GameClient()->m_Snap.m_pGameDataObj;
+
+	const CGameClient::CClientData *pClientDataList = GameClient()->m_aClients;
+	const CNetObj_PlayerInfo *const *ppPlayerInfoSorted = GameClient()->m_Snap.m_apInfoByDDTeamScore;
+	const CNetObj_PlayerInfo *const *ppPlayerInfoById = GameClient()->m_Snap.m_apPlayerInfos;
+
 	const bool TimeScore = GameClient()->m_GameInfo.m_TimeScore;
 	const int NumPlayers = CountEnd - CountStart;
 	const bool LowScoreboardWidth = Scoreboard.w < 350.0f;
@@ -502,12 +514,51 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 	char aBuf[64];
 	int MaxTeamSize = Config()->m_SvMaxTeamSize;
 
+	// handle scoreboard locking
+	if(m_MouseUnlocked)
+	{
+		if(!m_pScoreboardLock->IsSet())
+		{
+			m_pScoreboardLock->Set(ppPlayerInfoSorted, pClientDataList, Team);
+		}
+		else
+		{
+			m_pScoreboardLock->Update(ppPlayerInfoById);
+		}
+	}
+	else if(m_pScoreboardLock->IsSet())
+	{
+		m_pScoreboardLock->Reset();
+	}
+
+	auto FetchPlayerInfo = [&](int ArrayId) -> const CNetObj_PlayerInfo * {
+		if(m_pScoreboardLock->IsSet())
+		{
+			if(m_pScoreboardLock->IsInactive(ArrayId))
+				return nullptr;
+			if(m_pScoreboardLock->IsDisconnected(ArrayId))
+				return m_pScoreboardLock->DisconnectedPlayerInfo(ArrayId);
+			return ppPlayerInfoById[m_pScoreboardLock->ClientId(ArrayId)];
+		}
+		return ppPlayerInfoSorted[ArrayId];
+	};
+
+	auto FetchClientData = [&](int ArrayId, int ClientId) -> const CGameClient::CClientData & {
+		if(m_pScoreboardLock->IsSet())
+		{
+			if(m_pScoreboardLock->IsDisconnected(ArrayId) || m_pScoreboardLock->IsInactive(ArrayId))
+				return *m_pScoreboardLock->DisconnectedClientData(ArrayId);
+		}
+		return pClientDataList[ClientId];
+	};
+
 	for(int RenderDead = 0; RenderDead < 2; RenderDead++)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			// make sure that we render the correct team
-			const CNetObj_PlayerInfo *pInfo = GameClient()->m_Snap.m_apInfoByDDTeamScore[i];
+			const CNetObj_PlayerInfo *pInfo = FetchPlayerInfo(i);
+
 			if(!pInfo || pInfo->m_Team != Team)
 				continue;
 
@@ -528,7 +579,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 
 			for(int j = i + 1; j < MAX_CLIENTS; j++)
 			{
-				const CNetObj_PlayerInfo *pInfoNext = GameClient()->m_Snap.m_apInfoByDDTeamScore[j];
+				const CNetObj_PlayerInfo *pInfoNext = FetchPlayerInfo(j);
 				if(!pInfoNext || pInfoNext->m_Team != Team)
 					continue;
 
@@ -540,7 +591,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 			{
 				for(int j = i - 1; j >= 0; j--)
 				{
-					const CNetObj_PlayerInfo *pInfoPrev = GameClient()->m_Snap.m_apInfoByDDTeamScore[j];
+					const CNetObj_PlayerInfo *pInfoPrev = FetchPlayerInfo(j);
 					if(!pInfoPrev || pInfoPrev->m_Team != Team)
 						continue;
 
@@ -608,6 +659,49 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 				Row.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, RoundRadius);
 			}
 
+			const CGameClient::CClientData &ClientData = FetchClientData(i, pInfo->m_ClientId);
+			bool Disconnected = m_pScoreboardLock->IsDisconnected(i);
+			bool PlayerActive = !Disconnected && ClientData.m_Active;
+
+			// mouse unlocking
+			if(m_MouseUnlocked)
+			{
+				// highlight hovered player
+				{
+					if(PlayerActive)
+					{
+						if(Ui()->HotItem() == &ClientData)
+						{
+							Row.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.3f), IGraphics::CORNER_ALL, RoundRadius);
+						}
+					}
+					else // darken player column as the player left the server
+					{
+						Row.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.3f), IGraphics::CORNER_ALL, RoundRadius);
+					}
+				}
+
+				// player popup
+				{
+					const int ButtonResult = Ui()->DoButtonLogic(&ClientData, 0, &Row, BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT);
+
+					// don't open the popup or highlight the player if the player doesn't exist anymore or the slot is occupied by a new player
+					if(PlayerActive)
+					{
+						if(ButtonResult != 0)
+						{
+							m_ScoreboardPopupContext.m_pScoreboard = this;
+							m_ScoreboardPopupContext.m_ClientId = pInfo->m_ClientId;
+							m_ScoreboardPopupContext.m_IsLocal = GameClient()->m_aLocalIds[0] == pInfo->m_ClientId ||
+											     (Client()->DummyConnected() && GameClient()->m_aLocalIds[1] == pInfo->m_ClientId);
+
+							Ui()->DoPopupMenu(&m_ScoreboardPopupContext, Ui()->MouseX(), Ui()->MouseY(), 110.0f,
+								m_ScoreboardPopupContext.m_IsLocal ? 58.5f : 87.5f, &m_ScoreboardPopupContext, PopupScoreboard);
+						}
+					}
+				}
+			}
+
 			// score
 			if(Race7)
 			{
@@ -653,53 +747,33 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 				Graphics()->QuadsEnd();
 			}
 
-			const CGameClient::CClientData &ClientData = GameClient()->m_aClients[pInfo->m_ClientId];
-
-			if(m_MouseUnlocked)
-			{
-				const int ButtonResult = Ui()->DoButtonLogic(&m_aPlayers[pInfo->m_ClientId].m_PlayerButtonId, 0, &Row, BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT);
-				if(ButtonResult != 0)
-				{
-					m_ScoreboardPopupContext.m_pScoreboard = this;
-					m_ScoreboardPopupContext.m_ClientId = pInfo->m_ClientId;
-					m_ScoreboardPopupContext.m_IsLocal = GameClient()->m_aLocalIds[0] == pInfo->m_ClientId ||
-									     (Client()->DummyConnected() && GameClient()->m_aLocalIds[1] == pInfo->m_ClientId);
-					m_ScoreboardPopupContext.m_IsSpectating = false;
-
-					Ui()->DoPopupMenu(&m_ScoreboardPopupContext, Ui()->MouseX(), Ui()->MouseY(), 110.0f,
-						m_ScoreboardPopupContext.m_IsLocal ? 58.5f : 87.5f, &m_ScoreboardPopupContext, PopupScoreboard);
-				}
-
-				if(Ui()->HotItem() == &m_aPlayers[pInfo->m_ClientId].m_PlayerButtonId)
-				{
-					Row.Draw(ColorRGBA(0.7f, 0.7f, 0.7f, 0.7f), IGraphics::CORNER_ALL, RoundRadius);
-				}
-			}
-
 			// skin
-			if(RenderDead)
+			if(!Disconnected)
 			{
-				Graphics()->BlendNormal();
-				Graphics()->TextureSet(m_DeadTeeTexture);
-				Graphics()->QuadsBegin();
-				if(GameClient()->IsTeamPlay())
+				if(RenderDead)
 				{
-					Graphics()->SetColor(GameClient()->m_Skins7.GetTeamColor(true, 0, GameClient()->m_aClients[pInfo->m_ClientId].m_Team, protocol7::SKINPART_BODY));
+					Graphics()->BlendNormal();
+					Graphics()->TextureSet(m_DeadTeeTexture);
+					Graphics()->QuadsBegin();
+					if(GameClient()->IsTeamPlay())
+					{
+						Graphics()->SetColor(GameClient()->m_Skins7.GetTeamColor(true, 0, GameClient()->m_aClients[pInfo->m_ClientId].m_Team, protocol7::SKINPART_BODY));
+					}
+					CTeeRenderInfo TeeInfo = GameClient()->m_aClients[pInfo->m_ClientId].m_RenderInfo;
+					TeeInfo.m_Size *= TeeSizeMod;
+					IGraphics::CQuadItem QuadItem(TeeOffset, Row.y, TeeInfo.m_Size, TeeInfo.m_Size);
+					Graphics()->QuadsDrawTL(&QuadItem, 1);
+					Graphics()->QuadsEnd();
 				}
-				CTeeRenderInfo TeeInfo = GameClient()->m_aClients[pInfo->m_ClientId].m_RenderInfo;
-				TeeInfo.m_Size *= TeeSizeMod;
-				IGraphics::CQuadItem QuadItem(TeeOffset, Row.y, TeeInfo.m_Size, TeeInfo.m_Size);
-				Graphics()->QuadsDrawTL(&QuadItem, 1);
-				Graphics()->QuadsEnd();
-			}
-			else
-			{
-				CTeeRenderInfo TeeInfo = ClientData.m_RenderInfo;
-				TeeInfo.m_Size *= TeeSizeMod;
-				vec2 OffsetToMid;
-				CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState::GetIdle(), &TeeInfo, OffsetToMid);
-				const vec2 TeeRenderPos = vec2(TeeOffset + TeeLength / 2, Row.y + Row.h / 2.0f + OffsetToMid.y);
-				RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
+				else
+				{
+					CTeeRenderInfo TeeInfo = ClientData.m_RenderInfo;
+					TeeInfo.m_Size *= TeeSizeMod;
+					vec2 OffsetToMid;
+					CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState::GetIdle(), &TeeInfo, OffsetToMid);
+					const vec2 TeeRenderPos = vec2(TeeOffset + TeeLength / 2, Row.y + Row.h / 2.0f + OffsetToMid.y);
+					RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
+				}
 			}
 
 			// name
@@ -977,6 +1051,12 @@ void CScoreboard::OnRender()
 			RenderTools()->RenderCursor(Ui()->MousePos(), 24.0f);
 
 		Ui()->FinishCheck();
+	}
+
+	// we have one lock for all team scoreboards, lock it after rendering everything once
+	if(m_MouseUnlocked && !m_pScoreboardLock->IsSet())
+	{
+		m_pScoreboardLock->Lock();
 	}
 }
 
