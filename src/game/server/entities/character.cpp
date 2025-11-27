@@ -75,7 +75,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_pPlayer = pPlayer;
 	m_Pos = Pos;
 
-	m_RngSeed = std::abs(static_cast<int>(GameServer()->m_World.m_Core.m_pPrng->RandomBits()));
+	m_RngSeed = static_cast<int>(GameServer()->m_World.m_Core.m_pPrng->RandomBits() & INT_MAX);
 
 	mem_zero(&m_LatestPrevPrevInput, sizeof(m_LatestPrevPrevInput));
 	m_LatestPrevPrevInput.m_TargetY = -1;
