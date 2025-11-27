@@ -21,33 +21,36 @@
 
 using namespace std::chrono_literals;
 
-int IEnvelopePointAccess::FindPointIndex(CFixedTime Time) const
+int IEnvelopePointAccess::FindPointIndex(const CFixedTime &Time) const
 {
-	// binary search for the interval around Time
-	int Low = 0;
-	int High = NumPoints() - 2;
-	int FoundIndex = -1;
+	int PointNum = NumPoints();
 
-	while(Low <= High)
+	// early exit on the interval borders, we need the first and the next point to exist
+	if(PointNum < 2 || Time < GetPoint(0)->m_Time || Time >= GetPoint(PointNum - 1)->m_Time)
+		return -1;
+
+	// binary search for the interval around Time
+	// find first point with time > Time, this implementation follows std::upper_bound
+	int Count = PointNum - 2; // we removed the start and end points
+	int It, Step;
+	int Index = 1; // we removed the start point, so we can start later
+	while(Count > 0)
 	{
-		int Mid = Low + (High - Low) / 2;
-		const CEnvPoint *pMid = GetPoint(Mid);
-		const CEnvPoint *pNext = GetPoint(Mid + 1);
-		if(Time >= pMid->m_Time && Time < pNext->m_Time)
+		It = Index;
+		Step = Count / 2;
+		It += Step;
+
+		if(Time >= GetPoint(It)->m_Time)
 		{
-			FoundIndex = Mid;
-			break;
-		}
-		else if(Time < pMid->m_Time)
-		{
-			High = Mid - 1;
+			Index = ++It;
+			Count -= Step + 1;
 		}
 		else
-		{
-			Low = Mid + 1;
-		}
+			Count = Step;
 	}
-	return FoundIndex;
+
+	// return the point before the interval
+	return Index - 1;
 }
 
 CMapBasedEnvelopePointAccess::CMapBasedEnvelopePointAccess(CDataFileReader *pReader)
