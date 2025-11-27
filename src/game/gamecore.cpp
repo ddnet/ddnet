@@ -7,9 +7,10 @@
 #include "teamscore.h"
 
 #include <base/system.h>
-#include <game/random_hash.h>
 
 #include <engine/shared/config.h>
+
+#include <game/random_hash.h>
 
 #include <limits>
 
@@ -318,7 +319,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		if(m_NewHook)
 		{
 			HookBase = m_HookTeleBase;
-			// The clients dead reckoning doesn't get m_HookTeleBase so anytime it's used we need to reset 
+			// The clients dead reckoning doesn't get m_HookTeleBase so anytime it's used we need to reset
 			m_Reset = true;
 		}
 		vec2 NewPos = m_HookPos + m_HookDir * m_Tuning.m_HookFireSpeed;

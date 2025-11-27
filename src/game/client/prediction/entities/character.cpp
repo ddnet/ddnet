@@ -1013,62 +1013,63 @@ void CCharacter::HandleTiles(int Index)
 			m_Core.m_Jumps = NewJumps;
 	}
 
-	if (m_RngSeed >= 0) {
+	if(m_RngSeed >= 0)
+	{
 		int Teleport = Collision()->IsTeleport(MapIndex);
-		if (!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && Teleport && !Collision()->TeleOuts(Teleport - 1).empty())
+		if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && Teleport && !Collision()->TeleOuts(Teleport - 1).empty())
 		{
-			if (m_Core.m_Super || m_Core.m_Invincible)
+			if(m_Core.m_Super || m_Core.m_Invincible)
 				return;
 			int TeleOut = RandomHash::HashMany(m_Core.m_Id, GameWorld()->GameTick(), m_RngSeed) % Collision()->TeleOuts(Teleport - 1).size();
 			m_Core.m_Pos = Collision()->TeleOuts(Teleport - 1)[TeleOut];
 			m_Core.m_CanSkipInterpolation = true;
-			if (!g_Config.m_SvTeleportHoldHook)
+			if(!g_Config.m_SvTeleportHoldHook)
 			{
 				ResetHook();
 			}
-			if (g_Config.m_SvTeleportLoseWeapons)
+			if(g_Config.m_SvTeleportLoseWeapons)
 				ResetPickups();
 			return;
 		}
 		const int EvilTeleport = Collision()->IsEvilTeleport(MapIndex);
-		if (EvilTeleport && !Collision()->TeleOuts(EvilTeleport - 1).empty())
+		if(EvilTeleport && !Collision()->TeleOuts(EvilTeleport - 1).empty())
 		{
-			if (m_Core.m_Super || m_Core.m_Invincible)
+			if(m_Core.m_Super || m_Core.m_Invincible)
 				return;
 			int TeleOut = RandomHash::HashMany(m_Core.m_Id, GameWorld()->GameTick(), m_RngSeed) % Collision()->TeleOuts(EvilTeleport - 1).size();
 			m_Core.m_Pos = Collision()->TeleOuts(EvilTeleport - 1)[TeleOut];
 			m_Core.m_CanSkipInterpolation = true;
-			if (!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons)
+			if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons)
 			{
 				m_Core.m_Vel = vec2(0, 0);
 
-				if (!g_Config.m_SvTeleportHoldHook)
+				if(!g_Config.m_SvTeleportHoldHook)
 				{
 					ResetHook();
 					GameWorld()->ReleaseHooked(m_Core.m_Id);
 				}
-				if (g_Config.m_SvTeleportLoseWeapons)
+				if(g_Config.m_SvTeleportLoseWeapons)
 				{
 					ResetPickups();
 				}
 			}
 			return;
 		}
-		if (Collision()->IsCheckEvilTeleport(MapIndex))
+		if(Collision()->IsCheckEvilTeleport(MapIndex))
 		{
-			if (m_Core.m_Super || m_Core.m_Invincible)
+			if(m_Core.m_Super || m_Core.m_Invincible)
 				return;
 			// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
-			for (int k = m_TeleCheckpoint - 1; k >= 0; k--)
+			for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
 			{
-				if (!Collision()->TeleCheckOuts(k).empty())
+				if(!Collision()->TeleCheckOuts(k).empty())
 				{
 					int TeleOut = RandomHash::HashMany(m_Core.m_Id, GameWorld()->GameTick(), m_RngSeed) % Collision()->TeleCheckOuts(k).size();
 					m_Core.m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
 					m_Core.m_CanSkipInterpolation = true;
 					m_Core.m_Vel = vec2(0, 0);
 
-					if (!g_Config.m_SvTeleportHoldHook)
+					if(!g_Config.m_SvTeleportHoldHook)
 					{
 						ResetHook();
 						GameWorld()->ReleaseHooked(m_Core.m_Id);
@@ -1081,20 +1082,20 @@ void CCharacter::HandleTiles(int Index)
 
 			return;
 		}
-		if (Collision()->IsCheckTeleport(MapIndex))
+		if(Collision()->IsCheckTeleport(MapIndex))
 		{
-			if (m_Core.m_Super || m_Core.m_Invincible)
+			if(m_Core.m_Super || m_Core.m_Invincible)
 				return;
 			// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
-			for (int k = m_TeleCheckpoint - 1; k >= 0; k--)
+			for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
 			{
-				if (!Collision()->TeleCheckOuts(k).empty())
+				if(!Collision()->TeleCheckOuts(k).empty())
 				{
 					int TeleOut = RandomHash::HashMany(m_Core.m_Id, GameWorld()->GameTick(), m_RngSeed) % Collision()->TeleCheckOuts(k).size();
 					m_Core.m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
 					m_Core.m_CanSkipInterpolation = true;
 
-					if (!g_Config.m_SvTeleportHoldHook)
+					if(!g_Config.m_SvTeleportHoldHook)
 					{
 						ResetHook();
 					}
@@ -1294,10 +1295,10 @@ void CCharacter::GiveAllWeapons()
 
 void CCharacter::ResetPickups()
 {
-	for (int i = WEAPON_SHOTGUN; i < NUM_WEAPONS - 1; i++)
+	for(int i = WEAPON_SHOTGUN; i < NUM_WEAPONS - 1; i++)
 	{
 		m_Core.m_aWeapons[i].m_Got = false;
-		if (m_Core.m_ActiveWeapon == i)
+		if(m_Core.m_ActiveWeapon == i)
 			m_Core.m_ActiveWeapon = WEAPON_GUN;
 	}
 }
