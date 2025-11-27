@@ -166,7 +166,7 @@ void CLaser::DoBounce()
 				if(pOwnerChar)
 					TeleOut = RandomHash::HashMany(m_Owner, m_EvalTick, Server()->Tick(), pOwnerChar->m_RngSeed) % GameServer()->Collision()->TeleOuts(Tele - 1).size();
 				else
-					TeleOut = RandomHash::HashMany(m_EvalTick, Server()->Tick(), MapIndex) % GameServer()->Collision()->TeleOuts(Tele - 1).size();
+					TeleOut = RandomHash::HashMany(GetId(), m_EvalTick, Server()->Tick(), MapIndex) % GameServer()->Collision()->TeleOuts(Tele - 1).size();
 
 				m_TelePos = GameServer()->Collision()->TeleOuts(Tele - 1)[TeleOut];
 				m_WasTele = true;

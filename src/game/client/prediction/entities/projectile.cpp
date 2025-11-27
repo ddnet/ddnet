@@ -167,7 +167,7 @@ void CProjectile::Tick()
 			if(pOwnerChar)
 				TeleOut = RandomHash::HashMany(m_Owner, m_StartTick, MapIndex, GameWorld()->GameTick(), pOwnerChar->m_RngSeed) % Collision()->TeleOuts(Tele - 1).size();
 			else
-				TeleOut = RandomHash::HashMany(m_StartTick, MapIndex, GameWorld()->GameTick()) % Collision()->TeleOuts(Tele - 1).size();
+				TeleOut = RandomHash::HashMany(GetId(), m_StartTick, MapIndex, GameWorld()->GameTick()) % Collision()->TeleOuts(Tele - 1).size();
 
 			m_Pos = Collision()->TeleOuts(Tele - 1)[TeleOut];
 			m_StartTick = GameWorld()->GameTick();
