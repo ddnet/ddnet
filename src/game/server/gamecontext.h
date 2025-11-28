@@ -81,6 +81,8 @@ public:
 	bool m_Initialized = false;
 	bool m_InitialDelay;
 	char m_aReason[128];
+	char m_aClientName[MAX_NAME_LENGTH];
+	bool m_NameKnown;
 
 	int SecondsLeft() const;
 };
@@ -90,7 +92,7 @@ class CMutes
 public:
 	CMutes(const char *pSystemName);
 
-	bool Mute(const NETADDR *pAddr, int Seconds, const char *pReason, bool InitialDelay);
+	bool Mute(const NETADDR *pAddr, int Seconds, const char *pReason, const char *pClientName, bool InitialDelay);
 	void UnmuteIndex(int Index);
 	void UnmuteAddr(const NETADDR *pAddr);
 	void UnmuteExpired();
