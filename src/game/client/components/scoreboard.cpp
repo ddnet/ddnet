@@ -57,6 +57,7 @@ void CScoreboard::ConToggleScoreboardCursor(IConsole::IResult *pResult, void *pU
 
 	if(!pSelf->IsActive() ||
 		pSelf->GameClient()->m_Menus.IsActive() ||
+		pSelf->GameClient()->m_Chat.IsActive() ||
 		pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		return;
@@ -743,7 +744,7 @@ void CScoreboard::OnRender()
 	if(!IsActive())
 		return;
 
-	if(!GameClient()->m_Menus.IsActive())
+	if(!GameClient()->m_Menus.IsActive() && !GameClient()->m_Chat.IsActive())
 	{
 		Ui()->StartCheck();
 		Ui()->Update();
@@ -894,7 +895,7 @@ void CScoreboard::OnRender()
 
 	RenderRecordingNotification((Screen.w / 7) * 4 + 10);
 
-	if(!GameClient()->m_Menus.IsActive())
+	if(!GameClient()->m_Menus.IsActive() && !GameClient()->m_Chat.IsActive())
 	{
 		Ui()->RenderPopupMenus();
 
