@@ -653,6 +653,8 @@ int CServer::GetAuthedState(int ClientId) const
 		return AUTHED_ADMIN;
 	if(ClientId == IConsole::CLIENT_ID_GAME)
 		return AUTHED_ADMIN;
+	if(ClientId == IConsole::CLIENT_ID_NO_GAME)
+		return AUTHED_ADMIN;
 	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "Invalid ClientId: %d", ClientId);
 	dbg_assert(m_aClients[ClientId].m_State != CServer::CClient::STATE_EMPTY, "Client slot %d is empty", ClientId);
 	return m_AuthManager.KeyLevel(m_aClients[ClientId].m_AuthKey);
