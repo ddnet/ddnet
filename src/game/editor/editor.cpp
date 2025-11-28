@@ -8012,13 +8012,13 @@ bool CEditor::Append(const char *pFilename, int StorageType, bool IgnoreHistory)
 
 	// Keep a map to check if specific indices have already been replaced to prevent
 	// replacing those indices again when transferring images
-	static std::map<int *, bool> s_ReplacedMap;
-	static const auto &&s_ReplaceIndex = [](int ToReplace, int ReplaceWith) {
-		return [ToReplace, ReplaceWith](int *pIndex) {
-			if(*pIndex == ToReplace && !s_ReplacedMap[pIndex])
+	std::map<int *, bool> ReplacedIndicesMap;
+	const auto &&ReplaceIndex = [&ReplacedIndicesMap](int ToReplace, int ReplaceWith) {
+		return [&ReplacedIndicesMap, ToReplace, ReplaceWith](int *pIndex) {
+			if(*pIndex == ToReplace && !ReplacedIndicesMap[pIndex])
 			{
 				*pIndex = ReplaceWith;
-				s_ReplacedMap[pIndex] = true;
+				ReplacedIndicesMap[pIndex] = true;
 			}
 		};
 	};
@@ -8033,7 +8033,6 @@ bool CEditor::Append(const char *pFilename, int StorageType, bool IgnoreHistory)
 	};
 
 	// Transfer non-duplicate images
-	s_ReplacedMap.clear();
 	for(auto NewMapIt = NewMap.m_vpImages.begin(); NewMapIt != NewMap.m_vpImages.end(); ++NewMapIt)
 	{
 		const auto &pNewImage = *NewMapIt;
@@ -8055,7 +8054,7 @@ bool CEditor::Append(const char *pFilename, int StorageType, bool IgnoreHistory)
 				dbg_msg("editor", "map already contains image %s with the same data, removing duplicate", pNewImage->m_aName);
 
 				// In the new map, replace the index of the duplicate image to the index of the same in the current map.
-				NewMap.ModifyImageIndex(s_ReplaceIndex(IndexToReplace, IndexToReplaceWith));
+				NewMap.ModifyImageIndex(ReplaceIndex(IndexToReplace, IndexToReplaceWith));
 			}
 			else
 			{
@@ -8064,14 +8063,14 @@ bool CEditor::Append(const char *pFilename, int StorageType, bool IgnoreHistory)
 
 				dbg_msg("editor", "map already contains image %s but contents of appended image is different. Renaming to %s", (*MatchInCurrentMap)->m_aName, pNewImage->m_aName);
 
-				NewMap.ModifyImageIndex(s_ReplaceIndex(IndexToReplace, m_Map.m_vpImages.size()));
+				NewMap.ModifyImageIndex(ReplaceIndex(IndexToReplace, m_Map.m_vpImages.size()));
 				pNewImage->OnAttach(&m_Map);
 				m_Map.m_vpImages.push_back(pNewImage);
 			}
 		}
 		else
 		{
-			NewMap.ModifyImageIndex(s_ReplaceIndex(IndexToReplace, m_Map.m_vpImages.size()));
+			NewMap.ModifyImageIndex(ReplaceIndex(IndexToReplace, m_Map.m_vpImages.size()));
 			pNewImage->OnAttach(&m_Map);
 			m_Map.m_vpImages.push_back(pNewImage);
 		}
