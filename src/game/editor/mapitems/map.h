@@ -47,6 +47,8 @@ public:
 	const char *GetTempFilename() const { return m_aTempFilename; }
 };
 
+using FErrorHandler = std::function<void(const char *pErrorMessage)>;
+
 class CEditorMap
 {
 public:
@@ -155,10 +157,10 @@ public:
 	void CheckIntegrity();
 
 	// io
-	bool Save(const char *pFilename, const std::function<void(const char *pErrorMessage)> &ErrorHandler);
-	bool PerformPreSaveSanityChecks(const std::function<void(const char *pErrorMessage)> &ErrorHandler);
-	bool Load(const char *pFilename, int StorageType, const std::function<void(const char *pErrorMessage)> &ErrorHandler);
-	void PerformSanityChecks(const std::function<void(const char *pErrorMessage)> &ErrorHandler);
+	bool Save(const char *pFilename, const FErrorHandler &ErrorHandler);
+	bool PerformPreSaveSanityChecks(const FErrorHandler &ErrorHandler);
+	bool Load(const char *pFilename, int StorageType, const FErrorHandler &ErrorHandler);
+	void PerformSanityChecks(const FErrorHandler &ErrorHandler);
 
 	void MakeGameGroup(std::shared_ptr<CLayerGroup> pGroup);
 	void MakeGameLayer(const std::shared_ptr<CLayer> &pLayer);
