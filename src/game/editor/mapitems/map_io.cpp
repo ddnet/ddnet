@@ -40,7 +40,7 @@ CDataFileWriterFinishJob::CDataFileWriterFinishJob(const char *pRealFilename, co
 	str_copy(m_aTempFilename, pTempFilename);
 }
 
-bool CEditorMap::Save(const char *pFilename, const std::function<void(const char *pErrorMessage)> &ErrorHandler)
+bool CEditorMap::Save(const char *pFilename, const FErrorHandler &ErrorHandler)
 {
 	char aFilenameTmp[IO_MAX_PATH_LENGTH];
 	IStorage::FormatTmpPath(aFilenameTmp, sizeof(aFilenameTmp), pFilename);
@@ -414,7 +414,7 @@ bool CEditorMap::Save(const char *pFilename, const std::function<void(const char
 	return true;
 }
 
-bool CEditorMap::PerformPreSaveSanityChecks(const std::function<void(const char *pErrorMessage)> &ErrorHandler)
+bool CEditorMap::PerformPreSaveSanityChecks(const FErrorHandler &ErrorHandler)
 {
 	bool Success = true;
 	char aErrorMessage[256];
@@ -442,7 +442,7 @@ bool CEditorMap::PerformPreSaveSanityChecks(const std::function<void(const char 
 	return Success;
 }
 
-bool CEditorMap::Load(const char *pFilename, int StorageType, const std::function<void(const char *pErrorMessage)> &ErrorHandler)
+bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandler &ErrorHandler)
 {
 	CDataFileReader DataFile;
 	if(!DataFile.Open(m_pEditor->Storage(), pFilename, StorageType))
@@ -1054,7 +1054,7 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const std::functio
 	return true;
 }
 
-void CEditorMap::PerformSanityChecks(const std::function<void(const char *pErrorMessage)> &ErrorHandler)
+void CEditorMap::PerformSanityChecks(const FErrorHandler &ErrorHandler)
 {
 	// Check if there are any images with a width or height that is not divisible by 16 which are
 	// used in tile layers. Reset the image for these layers, to prevent crashes with some drivers.
