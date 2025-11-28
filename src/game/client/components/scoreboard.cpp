@@ -64,6 +64,11 @@ void CScoreboard::ConToggleScoreboardCursor(IConsole::IResult *pResult, void *pU
 
 	pSelf->m_MouseUnlocked = !pSelf->m_MouseUnlocked;
 
+	if(!pSelf->m_MouseUnlocked)
+	{
+		pSelf->Ui()->ClosePopupMenus();
+	}
+
 	vec2 OldMousePos = pSelf->Ui()->MousePos();
 
 	if(pSelf->m_LastMousePos == std::nullopt)
