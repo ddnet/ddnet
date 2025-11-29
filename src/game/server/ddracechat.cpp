@@ -796,9 +796,11 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 
 	int Team = Teams.m_Core.Team(pResult->m_ClientId);
 
-	if(!Teams.IsValidTeamNumber(Team))
+	if(Team == TEAM_SUPER)
 	{
-		log_info("chatresp", "You aren't in a valid team.");
+		log_info(
+			"chatresp",
+			"Turn off super to use swap feature, which means you can swap positions with each other.");
 		return;
 	}
 
