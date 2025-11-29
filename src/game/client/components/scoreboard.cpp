@@ -33,6 +33,14 @@ void CScoreboard::SetUiMousePos(vec2 Pos)
 	Ui()->OnCursorMove(Pos.x - UpdatedMousePos.x, Pos.y - UpdatedMousePos.y);
 }
 
+void CScoreboard::LockMouse()
+{
+	Ui()->ClosePopupMenus();
+	m_MouseUnlocked = false;
+	SetUiMousePos(m_LastMousePos.value());
+	m_LastMousePos = Ui()->MousePos();
+}
+
 void CScoreboard::ConKeyScoreboard(IConsole::IResult *pResult, void *pUserData)
 {
 	CScoreboard *pSelf = static_cast<CScoreboard *>(pUserData);
@@ -44,10 +52,7 @@ void CScoreboard::ConKeyScoreboard(IConsole::IResult *pResult, void *pUserData)
 
 	if(!pSelf->IsActive() && pSelf->m_MouseUnlocked)
 	{
-		pSelf->Ui()->ClosePopupMenus();
-		pSelf->m_MouseUnlocked = false;
-		pSelf->SetUiMousePos(pSelf->m_LastMousePos.value());
-		pSelf->m_LastMousePos = pSelf->Ui()->MousePos();
+		pSelf->LockMouse();
 	}
 }
 
@@ -110,10 +115,7 @@ void CScoreboard::OnRelease()
 
 	if(m_MouseUnlocked)
 	{
-		Ui()->ClosePopupMenus();
-		m_MouseUnlocked = false;
-		SetUiMousePos(m_LastMousePos.value());
-		m_LastMousePos = Ui()->MousePos();
+		LockMouse();
 	}
 }
 
@@ -144,6 +146,12 @@ bool CScoreboard::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 
 bool CScoreboard::OnInput(const IInput::CEvent &Event)
 {
+	if(m_MouseUnlocked && Event.m_Key == KEY_ESCAPE && (Event.m_Flags & IInput::FLAG_PRESS))
+	{
+		LockMouse();
+		return true;
+	}
+
 	return IsActive() && m_MouseUnlocked;
 }
 
@@ -908,7 +916,6 @@ void CScoreboard::OnRender()
 			RenderTools()->RenderCursor(Ui()->MousePos(), 24.0f);
 
 		Ui()->FinishCheck();
-		Ui()->ClearHotkeys();
 	}
 }
 
