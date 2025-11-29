@@ -518,11 +518,11 @@ CSaveTeam::~CSaveTeam()
 
 ESaveResult CSaveTeam::Save(CGameContext *pGameServer, int Team, bool Dry, bool Force)
 {
-	if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && (Team <= 0 || MAX_CLIENTS <= Team) && !Force)
-		return ESaveResult::TEAM_FLOCK;
-
 	IGameController *pController = pGameServer->m_pController;
 	CGameTeams *pTeams = &pController->Teams();
+
+	if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && (Team == TEAM_FLOCK || !pTeams->IsValidTeamNumber(Team)) && !Force)
+		return ESaveResult::TEAM_FLOCK;
 
 	if(pTeams->TeamFlock(Team) && !Force)
 	{
