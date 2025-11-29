@@ -2501,20 +2501,20 @@ Team successfully saved by %s. The database connection failed, using generated s
 == 
 
 Save failed!
-== 
+== 저장 실패!
 
 [Important alert message]
 Press Esc or Tab to dismiss…
-== 
+== Esc 또는 Tap를 눌러 닫기...
 
 Server alert
-== 
+== 서버 알림
 
 Moderator alert
-== 
+== 모더레이터 알림
 
 You will be disconnected from the server.
-== 
+== 해당 서버에서 나가지게 됩니다.
 
 Are you sure that you want to disconnect and play this demo?
-== 
+== 이 데모를 재생하기 위해 서버를 나가시겠습니까?
