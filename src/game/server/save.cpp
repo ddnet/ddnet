@@ -529,7 +529,7 @@ ESaveResult CSaveTeam::Save(CGameContext *pGameServer, int Team, bool Dry, bool 
 		return ESaveResult::TEAM_0_MODE;
 	}
 
-	m_MembersCount = pTeams->Count(Team);
+	m_MembersCount = pTeams->TeamSize(Team);
 	if(m_MembersCount <= 0)
 	{
 		return ESaveResult::TEAM_NOT_FOUND;

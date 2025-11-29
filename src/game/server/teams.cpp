@@ -144,7 +144,7 @@ void CGameTeams::OnCharacterStart(int ClientId)
 		m_aTeamSentStartWarning[m_Core.Team(ClientId)] = false;
 		m_aTeamUnfinishableKillTick[m_Core.Team(ClientId)] = -1;
 
-		int NumPlayers = Count(m_Core.Team(ClientId));
+		int NumPlayers = TeamSize(m_Core.Team(ClientId));
 
 		char aBuf[512];
 		str_format(
@@ -280,7 +280,7 @@ void CGameTeams::Tick()
 		{
 			continue;
 		}
-		if(Count(i) <= 1)
+		if(TeamSize(i) <= 1)
 		{
 			continue;
 		}
@@ -459,7 +459,7 @@ void CGameTeams::SetForceCharacterTeam(int ClientId, int Team)
 
 	if(Team != OldTeam && (OldTeam != TEAM_FLOCK || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO) && OldTeam != TEAM_SUPER && m_aTeamState[OldTeam] != ETeamState::EMPTY)
 	{
-		bool NoElseInOldTeam = Count(OldTeam) <= 1;
+		bool NoElseInOldTeam = TeamSize(OldTeam) <= 1;
 		if(NoElseInOldTeam)
 		{
 			m_aTeamState[OldTeam] = ETeamState::EMPTY;
@@ -497,7 +497,7 @@ void CGameTeams::SetForceCharacterTeam(int ClientId, int Team)
 	}
 }
 
-int CGameTeams::Count(int Team) const
+int CGameTeams::TeamSize(int Team) const
 {
 	if(Team == TEAM_SUPER)
 		return -1;
@@ -1062,7 +1062,7 @@ void CGameTeams::ProcessSaveTeam()
 		if(m_apSaveTeamResult[Team] == nullptr || !m_apSaveTeamResult[Team]->m_Completed)
 			continue;
 
-		int TeamSize = m_apSaveTeamResult[Team]->m_SavedTeam.GetMembersCount();
+		int Size = m_apSaveTeamResult[Team]->m_SavedTeam.GetMembersCount();
 		int State = -1;
 
 		switch(m_apSaveTeamResult[Team]->m_Status)
@@ -1089,7 +1089,7 @@ void CGameTeams::ProcessSaveTeam()
 		{
 			GameServer()->SendSaveCode(
 				Team,
-				TeamSize,
+				Size,
 				State,
 				(State == SAVESTATE_DONE) ? "" : m_apSaveTeamResult[Team]->m_aMessage,
 				m_apSaveTeamResult[Team]->m_aRequestingPlayer,
@@ -1114,7 +1114,7 @@ void CGameTeams::ProcessSaveTeam()
 					m_apSaveTeamResult[Team]->m_SaveId,
 					m_apSaveTeamResult[Team]->m_SavedTeam.GetString());
 			}
-			for(int i = 0; i < TeamSize; i++)
+			for(int i = 0; i < Size; i++)
 			{
 				if(m_apSaveTeamResult[Team]->m_SavedTeam.m_pSavedTees->IsHooking())
 				{
@@ -1132,7 +1132,7 @@ void CGameTeams::ProcessSaveTeam()
 		case CScoreSaveResult::SAVE_FAILED:
 			if(GameServer()->TeeHistorianActive())
 				GameServer()->TeeHistorian()->RecordTeamSaveFailure(Team);
-			if(Count(Team) > 0)
+			if(TeamSize(Team) > 0)
 			{
 				// load weak/strong order to prevent switching weak/strong while saving
 				m_apSaveTeamResult[Team]->m_SavedTeam.Load(GameServer(), Team, false);
@@ -1149,7 +1149,7 @@ void CGameTeams::ProcessSaveTeam()
 			}
 
 			bool TeamValid = false;
-			if(Count(Team) > 0)
+			if(TeamSize(Team) > 0)
 			{
 				// keep current weak/strong order as on some maps there is no other way of switching
 				TeamValid = m_apSaveTeamResult[Team]->m_SavedTeam.Load(GameServer(), Team, true);
@@ -1158,7 +1158,7 @@ void CGameTeams::ProcessSaveTeam()
 			if(!TeamValid)
 			{
 				GameServer()->SendChatTeam(Team, "Your team has been killed because it contains an invalid tee state");
-				KillTeam(Team, -1, -1);
+				KillTeam(Team, -1);
 			}
 
 			char aSaveId[UUID_MAXSTRSIZE];
@@ -1235,10 +1235,10 @@ void CGameTeams::OnCharacterDeath(int ClientId, int Weapon)
 			if(!m_pGameContext->PracticeByDefault())
 				m_aPractice[Team] = false;
 
-			if(Count(Team) > 1)
+			if(TeamSize(Team) > 1)
 			{
 				// Disband team if the team has more players than allowed.
-				if(Count(Team) > g_Config.m_SvMaxTeamSize)
+				if(TeamSize(Team) > g_Config.m_SvMaxTeamSize)
 				{
 					GameServer()->SendChatTeam(Team, "This team was disbanded because there are more players than allowed in the team.");
 					SetTeamLock(Team, false);
