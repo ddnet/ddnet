@@ -964,15 +964,6 @@ void CGameContext::ConCancelSwap(IConsole::IResult *pResult, void *pUserData)
 
 	int Team = Teams.m_Core.Team(pResult->m_ClientId);
 
-	if(!pSelf->m_pController->Teams().IsValidTeamNumber(Team))
-	{
-		pSelf->Console()->Print(
-			IConsole::OUTPUT_LEVEL_STANDARD,
-			"chatresp",
-			"You aren't in a valid team.");
-		return;
-	}
-
 	bool SwapPending = pPlayer->m_SwapTargetsClientId != -1 && !pSelf->Server()->ClientSlotEmpty(pPlayer->m_SwapTargetsClientId);
 
 	if(!SwapPending)
