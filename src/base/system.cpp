@@ -2864,31 +2864,33 @@ int64_t time_timestamp()
 	return time(nullptr);
 }
 
-static struct tm *time_localtime_threadlocal(time_t *time_data)
+static tm time_localtime_threadlocal(time_t *time_data)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	// The result of localtime is thread-local on Windows
 	// https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/localtime-localtime32-localtime64
-	return localtime(time_data);
+	tm *time = localtime(time_data);
 #else
 	// Thread-local buffer for the result of localtime_r
-	thread_local struct tm time_info_buf;
-	return localtime_r(time_data, &time_info_buf);
+	thread_local tm time_info_buf;
+	tm *time = localtime_r(time_data, &time_info_buf);
 #endif
+	dbg_assert(time != nullptr, "Failed to get local time for time data %" PRId64, (int64_t)time_data);
+	return *time;
 }
 
 int time_houroftheday()
 {
 	time_t time_data;
 	time(&time_data);
-	struct tm *time_info = time_localtime_threadlocal(&time_data);
-	return time_info->tm_hour;
+	const tm time_info = time_localtime_threadlocal(&time_data);
+	return time_info.tm_hour;
 }
 
-static bool time_iseasterday(time_t time_data, struct tm *time_info)
+static bool time_iseasterday(time_t time_data, tm time_info)
 {
 	// compute Easter day (Sunday) using https://en.wikipedia.org/w/index.php?title=Computus&oldid=890710285#Anonymous_Gregorian_algorithm
-	int Y = time_info->tm_year + 1900;
+	int Y = time_info.tm_year + 1900;
 	int a = Y % 19;
 	int b = Y / 100;
 	int c = Y % 100;
@@ -2908,8 +2910,8 @@ static bool time_iseasterday(time_t time_data, struct tm *time_info)
 	for(int day_offset = -1; day_offset <= 2; day_offset++)
 	{
 		time_data = time_data + day_offset * 60 * 60 * 24;
-		time_info = time_localtime_threadlocal(&time_data);
-		if(time_info->tm_mon == month - 1 && time_info->tm_mday == day)
+		const tm offset_time_info = time_localtime_threadlocal(&time_data);
+		if(offset_time_info.tm_mon == month - 1 && offset_time_info.tm_mday == day)
 			return true;
 	}
 	return false;
@@ -2919,17 +2921,17 @@ ETimeSeason time_season()
 {
 	time_t time_data;
 	time(&time_data);
-	struct tm *time_info = time_localtime_threadlocal(&time_data);
+	const tm time_info = time_localtime_threadlocal(&time_data);
 
-	if((time_info->tm_mon == 11 && time_info->tm_mday == 31) || (time_info->tm_mon == 0 && time_info->tm_mday == 1))
+	if((time_info.tm_mon == 11 && time_info.tm_mday == 31) || (time_info.tm_mon == 0 && time_info.tm_mday == 1))
 	{
 		return SEASON_NEWYEAR;
 	}
-	else if(time_info->tm_mon == 11 && time_info->tm_mday >= 24 && time_info->tm_mday <= 26)
+	else if(time_info.tm_mon == 11 && time_info.tm_mday >= 24 && time_info.tm_mday <= 26)
 	{
 		return SEASON_XMAS;
 	}
-	else if((time_info->tm_mon == 9 && time_info->tm_mday == 31) || (time_info->tm_mon == 10 && time_info->tm_mday == 1))
+	else if((time_info.tm_mon == 9 && time_info.tm_mday == 31) || (time_info.tm_mon == 10 && time_info.tm_mday == 1))
 	{
 		return SEASON_HALLOWEEN;
 	}
@@ -2938,7 +2940,7 @@ ETimeSeason time_season()
 		return SEASON_EASTER;
 	}
 
-	switch(time_info->tm_mon)
+	switch(time_info.tm_mon)
 	{
 	case 11:
 	case 0:
@@ -2957,7 +2959,7 @@ ETimeSeason time_season()
 	case 10:
 		return SEASON_AUTUMN;
 	default:
-		dbg_assert_failed("Invalid month: %d", time_info->tm_mon);
+		dbg_assert_failed("Invalid month: %d", time_info.tm_mon);
 	}
 }
 
@@ -3088,8 +3090,8 @@ int str_utf8_dist_buffer(const char *a_utf8, const char *b_utf8, int *buf, int b
 #endif
 void str_timestamp_ex(time_t time_data, char *buffer, int buffer_size, const char *format)
 {
-	struct tm *time_info = time_localtime_threadlocal(&time_data);
-	strftime(buffer, buffer_size, format, time_info);
+	const tm time_info = time_localtime_threadlocal(&time_data);
+	strftime(buffer, buffer_size, format, &time_info);
 	buffer[buffer_size - 1] = 0; /* assure null termination */
 }
 
