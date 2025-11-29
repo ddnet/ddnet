@@ -42,6 +42,7 @@ class CScoreboard : public CComponent
 	bool m_MouseUnlocked = false;
 
 	void SetUiMousePos(vec2 Pos);
+	void LockMouse();
 
 	class CScoreboardPopupContext : public SPopupMenuId
 	{
