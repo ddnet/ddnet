@@ -1620,12 +1620,9 @@ static inline int MsgFromSixup(int Msg, bool System)
 
 bool CServer::CheckReservedSlotAuth(int ClientId, const char *pPassword)
 {
-	char aBuf[256];
-
 	if(Config()->m_SvReservedSlotsPass[0] && !str_comp(Config()->m_SvReservedSlotsPass, pPassword))
 	{
-		str_format(aBuf, sizeof(aBuf), "cid=%d joining reserved slot with reserved pass", ClientId);
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+		log_info("server", "ClientId=%d joining reserved slot with reserved slots password", ClientId);
 		return true;
 	}
 
@@ -1641,8 +1638,7 @@ bool CServer::CheckReservedSlotAuth(int ClientId, const char *pPassword)
 		int Slot = m_AuthManager.FindKey(aName);
 		if(m_AuthManager.CheckKey(Slot, pInnerPassword + 1) && m_AuthManager.KeyLevel(Slot) >= Config()->m_SvReservedSlotsAuthLevel)
 		{
-			str_format(aBuf, sizeof(aBuf), "cid=%d joining reserved slot with key=%s", ClientId, m_AuthManager.KeyIdent(Slot));
-			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+			log_info("server", "ClientId=%d joining reserved slot with key='%s'", ClientId, m_AuthManager.KeyIdent(Slot));
 			return true;
 		}
 	}
@@ -1963,9 +1959,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			{
 				if(GameServer()->PlayerExists(ClientId))
 				{
-					char aBuf[256];
-					str_format(aBuf, sizeof(aBuf), "ClientId=%d rcon='%s'", ClientId, pCmd);
-					Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+					log_info("server", "ClientId=%d key='%s' rcon='%s'", ClientId, GetAuthName(ClientId), pCmd);
 					m_RconClientId = ClientId;
 					m_RconAuthLevel = GetAuthedState(ClientId);
 					{
@@ -2043,30 +2037,28 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 						}
 					}
 
-					char aBuf[256];
 					const char *pIdent = m_AuthManager.KeyIdent(KeySlot);
 					switch(AuthLevel)
 					{
 					case AUTHED_ADMIN:
 					{
 						SendRconLine(ClientId, "Admin authentication successful. Full remote console access granted.");
-						str_format(aBuf, sizeof(aBuf), "ClientId=%d authed with key=%s (admin)", ClientId, pIdent);
+						log_info("server", "ClientId=%d authed with key='%s' (admin)", ClientId, pIdent);
 						break;
 					}
 					case AUTHED_MOD:
 					{
 						SendRconLine(ClientId, "Moderator authentication successful. Limited remote console access granted.");
-						str_format(aBuf, sizeof(aBuf), "ClientId=%d authed with key=%s (moderator)", ClientId, pIdent);
+						log_info("server", "ClientId=%d authed with key='%s' (moderator)", ClientId, pIdent);
 						break;
 					}
 					case AUTHED_HELPER:
 					{
 						SendRconLine(ClientId, "Helper authentication successful. Limited remote console access granted.");
-						str_format(aBuf, sizeof(aBuf), "ClientId=%d authed with key=%s (helper)", ClientId, pIdent);
+						log_info("server", "ClientId=%d authed with key='%s' (helper)", ClientId, pIdent);
 						break;
 					}
 					}
-					Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 
 					// DDRace
 					GameServer()->OnSetAuthed(ClientId, AuthLevel);
@@ -3530,7 +3522,7 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 					pAuthStr = "(Helper)";
 				}
 
-				str_format(aAuthStr, sizeof(aAuthStr), " key=%s %s", pThis->m_AuthManager.KeyIdent(pThis->m_aClients[i].m_AuthKey), pAuthStr);
+				str_format(aAuthStr, sizeof(aAuthStr), " key='%s' %s", pThis->m_AuthManager.KeyIdent(pThis->m_aClients[i].m_AuthKey), pAuthStr);
 			}
 
 			const char *pClientPrefix = "";
@@ -4175,24 +4167,22 @@ void CServer::LogoutClient(int ClientId, const char *pReason)
 	m_aClients[ClientId].m_pRconCmdToSend = nullptr;
 	m_aClients[ClientId].m_MaplistEntryToSend = CClient::MAPLIST_UNINITIALIZED;
 
-	char aBuf[64];
 	if(*pReason)
 	{
+		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "Logged out by %s.", pReason);
 		SendRconLine(ClientId, aBuf);
-		str_format(aBuf, sizeof(aBuf), "ClientId=%d with key=%s logged out by %s", ClientId, m_AuthManager.KeyIdent(m_aClients[ClientId].m_AuthKey), pReason);
+		log_info("server", "ClientId=%d with key='%s' logged out by %s", ClientId, m_AuthManager.KeyIdent(m_aClients[ClientId].m_AuthKey), pReason);
 	}
 	else
 	{
 		SendRconLine(ClientId, "Logout successful.");
-		str_format(aBuf, sizeof(aBuf), "ClientId=%d with key=%s logged out", ClientId, m_AuthManager.KeyIdent(m_aClients[ClientId].m_AuthKey));
+		log_info("server", "ClientId=%d with key='%s' logged out", ClientId, m_AuthManager.KeyIdent(m_aClients[ClientId].m_AuthKey));
 	}
 
 	m_aClients[ClientId].m_AuthKey = -1;
 
 	GameServer()->OnSetAuthed(ClientId, AUTHED_NO);
-
-	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 }
 
 void CServer::LogoutKey(int Key, const char *pReason)
