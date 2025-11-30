@@ -1410,7 +1410,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 			UnFreeze();
 		}
 
-		m_TuneZoneOverride = -1;
+		m_TuneZoneOverride = TuneZone::OVERRIDE_NONE;
 	}
 
 	vec2 PosBefore = m_Pos;
@@ -1504,7 +1504,7 @@ void CCharacter::SetTuneZone(int Zone)
 
 int CCharacter::GetOverriddenTuneZone() const
 {
-	return m_TuneZoneOverride < 0 ? m_TuneZone : m_TuneZoneOverride;
+	return m_TuneZoneOverride == TuneZone::OVERRIDE_NONE ? m_TuneZone : m_TuneZoneOverride;
 }
 
 int CCharacter::GetPureTuneZone() const
