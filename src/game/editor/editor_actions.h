@@ -1,10 +1,23 @@
 #ifndef GAME_EDITOR_EDITOR_ACTIONS_H
 #define GAME_EDITOR_EDITOR_ACTIONS_H
 
-#include "editor.h"
 #include "editor_action.h"
 
-#include <game/editor/references.h>
+#include <game/editor/mapitems/envelope.h>
+#include <game/editor/mapitems/layer_speedup.h>
+#include <game/editor/mapitems/layer_switch.h>
+#include <game/editor/mapitems/layer_tele.h>
+#include <game/editor/mapitems/layer_tiles.h>
+#include <game/editor/mapitems/layer_tune.h>
+#include <game/editor/quadart.h>
+#include <game/mapitems.h>
+
+#include <memory>
+#include <string>
+#include <vector>
+
+class CEditorMap;
+class IEditorEnvelopeReference;
 
 class CEditorActionLayerBase : public IEditorAction
 {

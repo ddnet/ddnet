@@ -7,6 +7,7 @@
 
 #include <game/editor/editor_actions.h>
 #include <game/editor/mapitems/layer_tiles.h>
+#include <game/editor/mapitems/map.h>
 #include <game/mapitems.h>
 
 #include <cinttypes>

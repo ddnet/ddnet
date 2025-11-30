@@ -3,9 +3,9 @@
 
 #include <engine/client.h>
 #include <engine/console.h>
+#include <engine/engine.h>
 #include <engine/gfx/image_manipulation.h>
 #include <engine/graphics.h>
-#include <engine/serverbrowser.h>
 #include <engine/shared/datafile.h>
 #include <engine/sound.h>
 #include <engine/storage.h>

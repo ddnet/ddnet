@@ -1,10 +1,13 @@
 #ifndef GAME_EDITOR_REFERENCES_H
 #define GAME_EDITOR_REFERENCES_H
 
-#include <game/editor/mapitems/envelope.h>
-#include <game/editor/mapitems/layer_quads.h>
-#include <game/editor/mapitems/layer_sounds.h>
-#include <game/editor/mapitems/layer_tiles.h>
+#include <memory>
+#include <vector>
+
+class CEnvelope;
+class CLayerQuads;
+class CLayerSounds;
+class CLayerTiles;
 
 class IEditorEnvelopeReference
 {

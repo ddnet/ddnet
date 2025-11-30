@@ -11,6 +11,7 @@
 #include <game/editor/mapitems/layer_sounds.h>
 #include <game/editor/mapitems/layer_tiles.h>
 #include <game/editor/mapitems/sound.h>
+#include <game/editor/references.h>
 
 void CEditorMap::CMapInfo::Reset()
 {

@@ -12,6 +12,7 @@
 
 #include <engine/client.h>
 #include <engine/console.h>
+#include <engine/engine.h>
 #include <engine/gfx/image_loader.h>
 #include <engine/gfx/image_manipulation.h>
 #include <engine/graphics.h>
@@ -4530,6 +4531,11 @@ void CEditor::RenderSounds(CUIRect ToolBox)
 			m_FileBrowser.ShowFileDialog(IStorage::TYPE_ALL, CFileBrowser::EFileType::SOUND, "Add sound", "Add", "mapres", "", AddSound, this);
 	}
 	s_ScrollRegion.End();
+}
+
+bool CEditor::CStringKeyComparator::operator()(const char *pLhs, const char *pRhs) const
+{
+	return str_comp(pLhs, pRhs) < 0;
 }
 
 void CEditor::ShowFileDialogError(const char *pFormat, ...)

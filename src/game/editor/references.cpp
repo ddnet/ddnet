@@ -1,5 +1,10 @@
 #include "references.h"
 
+#include <game/editor/mapitems/envelope.h>
+#include <game/editor/mapitems/layer_quads.h>
+#include <game/editor/mapitems/layer_sounds.h>
+#include <game/editor/mapitems/layer_tiles.h>
+
 void CLayerTilesEnvelopeReference::SetEnvelope(const std::shared_ptr<CEnvelope> &pEnvelope, int EnvIndex)
 {
 	if(pEnvelope->Type() == CEnvelope::EType::COLOR)

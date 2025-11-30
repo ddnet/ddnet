@@ -13,7 +13,6 @@
 #include <game/editor/editor_trackers.h>
 #include <game/editor/mapitems/envelope.h>
 #include <game/editor/mapitems/layer.h>
-#include <game/editor/references.h>
 
 #include <functional>
 #include <memory>
@@ -32,6 +31,7 @@ class CLayerSwitch;
 class CLayerTele;
 class CLayerTune;
 class CQuad;
+class IEditorEnvelopeReference;
 
 class CDataFileWriterFinishJob : public IJob
 {
