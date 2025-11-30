@@ -104,6 +104,7 @@ void CProjectile::Tick()
 		if(m_Explosive && (!pTargetChr || (!m_Freeze || (m_Type == WEAPON_SHOTGUN && Collide))))
 		{
 			GameWorld()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()), CClientMask().set());
+			GameWorld()->AddPredictedSound(ColPos, m_SoundImpact, m_Owner);
 		}
 		else if(m_Freeze)
 		{
@@ -145,6 +146,7 @@ void CProjectile::Tick()
 				pOwnerChar = GameWorld()->GetCharacterById(m_Owner);
 
 			GameWorld()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pOwnerChar ? -1 : pOwnerChar->Team()), CClientMask().set());
+			GameWorld()->AddPredictedSound(ColPos, m_SoundImpact, m_Owner);
 		}
 		m_MarkedForDestroy = true;
 	}

@@ -346,6 +346,8 @@ void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage,
 	if(Owner < 0 && m_WorldConfig.m_IsSolo && !(Weapon == WEAPON_SHOTGUN && m_WorldConfig.m_IsDDRace))
 		return;
 
+	// todo explosion particile
+
 	// deal damage
 	CEntity *apEnts[MAX_CLIENTS];
 	float Radius = 135.0f;
