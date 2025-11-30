@@ -148,6 +148,8 @@ private:
 
 	int m_MoveRestrictions;
 
+	int m_PainSoundTimer;
+
 	// these are non-heldback inputs
 	CNetObj_PlayerInput m_LatestPrevInput;
 	CNetObj_PlayerInput m_LatestInput;
