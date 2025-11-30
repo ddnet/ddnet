@@ -13,6 +13,7 @@
 #include <game/mapitems.h>
 #include <game/server/entities/character.h>
 #include <game/team_state.h>
+#include <game/teamscore.h>
 
 CGameTeams::CGameTeams(CGameContext *pGameContext) :
 	m_pGameContext(pGameContext)
@@ -1438,5 +1439,6 @@ bool CGameTeams::IsPractice(int Team)
 
 bool CGameTeams::IsValidTeamNumber(int Team) const
 {
+	dbg_assert(Team >= TEAM_FLOCK, "Invalid Team: %d", Team);
 	return Team >= TEAM_FLOCK && Team < NUM_DDRACE_TEAMS - 1; // no TEAM_SUPER
 }
