@@ -2476,7 +2476,7 @@ void CGameClient::OnPredict()
 			{
 				if(CCharacter *pChar = m_PredictedWorld.GetCharacterById(i))
 				{
-					if(pDummyChar == pChar || pLocalChar == pChar)
+					if(i == m_aLocalIds[0] || (Client()->DummyConnected() && i == m_aLocalIds[1]))
 						continue;
 
 					const CNetMsg_Sv_PreInput PreInput = m_aClients[i].m_aPreInputs[Tick % 200];
