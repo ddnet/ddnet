@@ -3263,7 +3263,7 @@ void CGameClient::UpdateLocalTuning()
 	{
 		int TuneZone =
 			m_Snap.m_aCharacters[m_Snap.m_LocalClientId].m_HasExtendedData &&
-					m_Snap.m_aCharacters[m_Snap.m_LocalClientId].m_ExtendedData.m_TuneZoneOverride != -1 ?
+					m_Snap.m_aCharacters[m_Snap.m_LocalClientId].m_ExtendedData.m_TuneZoneOverride != TuneZone::OVERRIDE_NONE ?
 				m_Snap.m_aCharacters[m_Snap.m_LocalClientId].m_ExtendedData.m_TuneZoneOverride :
 				Collision()->IsTune(Collision()->GetMapIndex(LocalPos));
 
@@ -4506,7 +4506,7 @@ void CGameClient::LoadMapSettings()
 	m_MapBugs = CMapBugs::Create(Client()->GetCurrentMap(), pMap->MapSize(), pMap->Sha256());
 
 	// Reset Tunezones
-	for(int TuneZone = 0; TuneZone < NUM_TUNEZONES; TuneZone++)
+	for(int TuneZone = 0; TuneZone < TuneZone::NUM; TuneZone++)
 	{
 		TuningList()[TuneZone] = CTuningParams::DEFAULT;
 		TuningList()[TuneZone].Set("gun_curvature", 0);
@@ -4566,7 +4566,7 @@ void CGameClient::ConTuneZone(IConsole::IResult *pResult, void *pUserData)
 	const char *pParamName = pResult->GetString(1);
 	float NewValue = pResult->GetFloat(2);
 
-	if(List >= 0 && List < NUM_TUNEZONES)
+	if(List >= 0 && List < TuneZone::NUM)
 		pSelf->TuningList()[List].Set(pParamName, NewValue);
 }
 

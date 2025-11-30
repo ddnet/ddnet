@@ -904,7 +904,7 @@ private:
 	CMapBugs m_MapBugs;
 
 	// tunings for every zone on the map, 0 is a global tune
-	CTuningParams m_aTuningList[NUM_TUNEZONES];
+	CTuningParams m_aTuningList[TuneZone::NUM];
 	CTuningParams *TuningList() { return m_aTuningList; }
 
 	float m_LastShowDistanceZoom;
