@@ -2218,10 +2218,6 @@ int CGraphics_Threaded::IssueInit()
 			Flags |= IGraphicsBackend::INITFLAG_BORDERLESS;
 		}
 	}
-	else // Windowed fullscreen
-	{
-		Flags |= IGraphicsBackend::INITFLAG_BORDERLESS;
-	}
 	if(g_Config.m_GfxVsync)
 	{
 		Flags |= IGraphicsBackend::INITFLAG_VSYNC;
