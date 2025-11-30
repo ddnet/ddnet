@@ -225,6 +225,9 @@ void CServer::CClient::Reset()
 	m_NextMapChunk = 0;
 	m_Flags = 0;
 	m_RedirectDropTime = 0;
+
+	std::fill(std::begin(m_aIdMap), std::end(m_aIdMap), -1);
+	std::fill(std::begin(m_aReverseIdMap), std::end(m_aReverseIdMap), -1);
 }
 
 CServer::CServer()
@@ -3004,6 +3007,9 @@ void CServer::UpdateDebugDummies(bool ForceDisconnect)
 			GameServer()->OnClientConnected(ClientId, nullptr);
 			Client.m_State = CClient::STATE_INGAME;
 			str_format(Client.m_aName, sizeof(Client.m_aName), "Debug dummy %d", DummyIndex + 1);
+			Client.m_DDNetVersion = DDNET_VERSION_NUMBER;
+			Client.m_GotDDNetVersionPacket = true;
+			Client.m_DDNetVersionSettled = true;
 			GameServer()->OnClientEnter(ClientId);
 		}
 		else if(!AddDummy && Client.m_DebugDummy)
@@ -4567,7 +4573,12 @@ void CServer::InitMaplist()
 
 int *CServer::GetIdMap(int ClientId)
 {
-	return m_aIdMap + VANILLA_MAX_CLIENTS * ClientId;
+	return m_aClients[ClientId].m_aIdMap;
+}
+
+int *CServer::GetReverseIdMap(int ClientId)
+{
+	return m_aClients[ClientId].m_aReverseIdMap;
 }
 
 bool CServer::SetTimedOut(int ClientId, int OrigId)
@@ -4593,6 +4604,11 @@ bool CServer::SetTimedOut(int ClientId, int OrigId)
 	m_aClients[ClientId].m_DDNetVersion = m_aClients[OrigId].m_DDNetVersion;
 	m_aClients[ClientId].m_GotDDNetVersionPacket = m_aClients[OrigId].m_GotDDNetVersionPacket;
 	m_aClients[ClientId].m_DDNetVersionSettled = m_aClients[OrigId].m_DDNetVersionSettled;
+
+	// important to call OnSetTimedOut before we remove the original client but after we swapped already
+	GameServer()->OnSetTimedOut(ClientId);
+
+	DelClientCallback(OrigId, "Timeout Protection used", this);
 	return true;
 }
 

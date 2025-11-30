@@ -139,6 +139,8 @@ void CCharacter::Destroy()
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCid()] = nullptr;
 	m_Alive = false;
 	SetSolo(false);
+	for(int Id : m_aUntranslatedId)
+		Server()->SnapFreeId(Id);
 }
 
 void CCharacter::SetWeapon(int W)
@@ -1247,18 +1249,22 @@ void CCharacter::Snap(int SnappingClient)
 {
 	int Id = m_pPlayer->GetCid();
 
-	if(!Server()->Translate(Id, SnappingClient))
-		return;
-
 	if(!CanSnapCharacter(SnappingClient))
 	{
 		return;
 	}
 
+	// TODO: revisit `Id` being used before and after it is mutated in Server()->Translate()
+
 	// always snap the snapping client, even if it is not in view
 	if(!IsSnappingCharacterInView(SnappingClient) && Id != SnappingClient)
 		return;
 
+	// translate id, if we are not in the map of the other person display us as weapon and our hook as a laser
+	if(SnappingClient > -1 && !Server()->Translate(Id, SnappingClient))
+		return;
+
+	// otherwise show our normal tee and send ddnet character stuff
 	SnapCharacter(SnappingClient, Id);
 
 	CNetObj_DDNetCharacter *pDDNetCharacter = Server()->SnapNewItem<CNetObj_DDNetCharacter>(Id);
@@ -1314,7 +1320,8 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacter->m_FreezeEnd = m_Core.m_DeepFrozen ? -1 : (m_FreezeTime == 0 ? 0 : Server()->Tick() + m_FreezeTime);
 	pDDNetCharacter->m_Jumps = m_Core.m_Jumps;
 	pDDNetCharacter->m_TeleCheckpoint = m_TeleCheckpoint;
-	pDDNetCharacter->m_StrongWeakId = m_StrongWeakId;
+	CPlayer *pSnappedPlayer = SnappingClient >= 0 ? GameServer()->m_apPlayers[SnappingClient] : nullptr;
+	pDDNetCharacter->m_StrongWeakId = pSnappedPlayer ? pSnappedPlayer->m_aStrongWeakId[Id] : m_StrongWeakId;
 
 	// Display Information
 	pDDNetCharacter->m_JumpedTotal = m_Core.m_JumpedTotal;
@@ -2497,6 +2504,9 @@ void CCharacter::DDRaceInit()
 	{
 		GameServer()->SendStartWarning(GetPlayer()->GetCid(), "Please join a team before you start");
 	}
+
+	for(int &Id : m_aUntranslatedId)
+		Id = Server()->SnapNewId();
 }
 
 void CCharacter::Rescue()
