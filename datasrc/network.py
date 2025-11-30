@@ -261,6 +261,7 @@ Objects = [
 		NetIntAny("m_TargetX", default=0),
 		NetIntAny("m_TargetY", default=0),
 		NetIntRange("m_TuneZoneOverride", -1, 'NUM_TUNEZONES-1', default=-1),
+		NetIntRange("m_RngSeed", -1, 'max_int', default=-1),
 	], validate_size=False),
 
 	NetObjectEx("DDNetPlayer", "player@netobj.ddnet.tw", [
