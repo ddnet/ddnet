@@ -523,7 +523,7 @@ void CGameContext::ConSetDDRTeam(IConsole::IResult *pResult, void *pUserData)
 	int Target = pResult->GetVictim();
 	int Team = pResult->GetInteger(1);
 
-	if(Team < TEAM_FLOCK || Team >= TEAM_SUPER)
+	if(!pController->Teams().IsValidTeamNumber(Team))
 		return;
 
 	CCharacter *pChr = pSelf->GetPlayerChar(Target);

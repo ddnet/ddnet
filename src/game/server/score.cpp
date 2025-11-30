@@ -348,7 +348,7 @@ void CScore::LoadTeam(const char *pCode, int ClientId)
 		GameServer()->SendChatTarget(ClientId, "Team load already in progress");
 		return;
 	}
-	if(Team < TEAM_FLOCK || Team >= MAX_CLIENTS || (g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team == TEAM_FLOCK))
+	if(!pController->Teams().IsValidTeamNumber(Team) || (g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team == TEAM_FLOCK))
 	{
 		GameServer()->SendChatTarget(ClientId, "You have to be in a team (from 1-63)");
 		return;
