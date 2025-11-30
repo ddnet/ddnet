@@ -648,7 +648,7 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 
 	int Team = Teams.m_Core.Team(pResult->m_ClientId);
 
-	if(!Teams.IsValidTeamNumber(Team) || (Team == TEAM_FLOCK && g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO))
+	if(Team == TEAM_FLOCK && g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO)
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
@@ -838,18 +838,7 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	CGameTeams &Teams = pSelf->m_pController->Teams();
-
 	int Team = Teams.m_Core.Team(pResult->m_ClientId);
-
-	if(!Teams.IsValidTeamNumber(Team))
-	{
-		pSelf->Console()->Print(
-			IConsole::OUTPUT_LEVEL_STANDARD,
-			"chatresp",
-			"You aren't in a valid team.");
-		return;
-	}
-
 	int TargetClientId = -1;
 	if(pResult->NumArguments() == 1)
 	{
@@ -963,16 +952,6 @@ void CGameContext::ConCancelSwap(IConsole::IResult *pResult, void *pUserData)
 	CGameTeams &Teams = pSelf->m_pController->Teams();
 
 	int Team = Teams.m_Core.Team(pResult->m_ClientId);
-
-	if(!pSelf->m_pController->Teams().IsValidTeamNumber(Team))
-	{
-		pSelf->Console()->Print(
-			IConsole::OUTPUT_LEVEL_STANDARD,
-			"chatresp",
-			"You aren't in a valid team.");
-		return;
-	}
-
 	bool SwapPending = pPlayer->m_SwapTargetsClientId != -1 && !pSelf->Server()->ClientSlotEmpty(pPlayer->m_SwapTargetsClientId);
 
 	if(!SwapPending)
@@ -1086,7 +1065,7 @@ void CGameContext::ConLock(IConsole::IResult *pResult, void *pUserData)
 	if(pResult->NumArguments() > 0)
 		Lock = !pResult->GetInteger(0);
 
-	if(Team == TEAM_FLOCK || !pSelf->m_pController->Teams().IsValidTeamNumber(Team))
+	if(Team == TEAM_FLOCK)
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
@@ -1130,7 +1109,8 @@ void CGameContext::ConUnlock(IConsole::IResult *pResult, void *pUserData)
 
 	int Team = pSelf->GetDDRaceTeam(pResult->m_ClientId);
 
-	if(Team == TEAM_FLOCK || !pSelf->m_pController->Teams().IsValidTeamNumber(Team))
+	// TODO: should this print an error?
+	if(Team == TEAM_FLOCK)
 		return;
 
 	if(pSelf->ProcessSpamProtection(pResult->m_ClientId, false))
@@ -1256,7 +1236,7 @@ void CGameContext::ConInvite(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	int Team = pController->Teams().m_Core.Team(pResult->m_ClientId);
-	if(Team != TEAM_FLOCK && pController->Teams().IsValidTeamNumber(Team))
+	if(Team != TEAM_FLOCK)
 	{
 		int Target = -1;
 		for(int i = 0; i < MAX_CLIENTS; i++)
@@ -1327,7 +1307,7 @@ void CGameContext::ConTeam0Mode(IConsole::IResult *pResult, void *pUserData)
 	int Team = pController->Teams().m_Core.Team(pResult->m_ClientId);
 	bool Mode = pController->Teams().TeamFlock(Team);
 
-	if(Team == TEAM_FLOCK || !pController->Teams().IsValidTeamNumber(Team))
+	if(Team == TEAM_FLOCK)
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
