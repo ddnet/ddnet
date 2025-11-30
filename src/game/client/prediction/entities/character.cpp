@@ -298,6 +298,9 @@ void CCharacter::FireWeapon()
 		if(m_Core.m_HammerHitDisabled)
 			break;
 
+		// on the server: GameServer()->CreateSound(m_Pos, SOUND_HAMMER_FIRE, TeamMask());
+		GameWorld()->AddPredictedSound(m_Pos, SOUND_HAMMER_FIRE, GetCid());
+
 		CEntity *apEnts[MAX_CLIENTS];
 		int Hits = 0;
 		int Num = GameWorld()->FindEntities(ProjStartPos, m_ProximityRadius * 0.5f, apEnts,
