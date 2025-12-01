@@ -102,7 +102,7 @@ jobs:
       run: |
         cd clang-sanitizer
         set +e
-        python ../scripts/integration_test.py --test-mastersrv .
+        python ../scripts/integration_test.py --show-full-output --test-mastersrv .
         integration_test_result=$?
         set -e
         if [ $integration_test_result -ne 0 ]; then

@@ -98,7 +98,7 @@ YELLOW = "\x1b[33m"
 
 
 class TestRunner:
-	def __init__(self, ddnet, ddnet_server, ddnet_mastersrv, repo_dir, test_dir, valgrind_memcheck, keep_tmpdirs, timeout_multiplier):
+	def __init__(self, ddnet, ddnet_server, ddnet_mastersrv, repo_dir, test_dir, show_full_output, valgrind_memcheck, keep_tmpdirs, timeout_multiplier):
 		self.ddnet = ddnet
 		self.ddnet_server = ddnet_server
 		self.ddnet_mastersrv = ddnet_mastersrv
@@ -106,6 +106,7 @@ class TestRunner:
 		self.data_dir = os.path.join(test_dir, "data")
 		self.test_dir = test_dir
 		self.extra_env_vars = {}
+		self.show_full_output = show_full_output
 		self.keep_tmpdirs = keep_tmpdirs
 		self.timeout_multiplier = timeout_multiplier
 		self.valgrind_memcheck = valgrind_memcheck
@@ -122,12 +123,18 @@ class TestRunner:
 			except Exception as e:  # noqa: BLE001 blind-except
 				env.kill_all()
 				error = "".join(traceback.format_exception(type(e), e, e.__traceback__))
+				error = error + env.format_valgrind_memcheck_errors()
+				error = error + env.format_stdout_stderr()
 				tmp_dir_cleanup = False
 			else:
 				env.kill_all()
 				error = None
 				if self.valgrind_memcheck:
-					error = env.check_valgrind_memcheck_errors()
+					error = env.format_valgrind_memcheck_errors()
+					if error:
+						error = error + env.format_stdout_stderr()
+					else:
+						error = None
 		finally:
 			if tmp_dir_cleanup:
 				shutil.rmtree(tmp_dir)
@@ -203,16 +210,16 @@ add_path {relpath(self.runner.data_dir, tmp_dir)}
 		self.num_mastersrvs = 0
 		self.processes = []
 		self.run_id = uuid4()
-		self.full_stderrs = []
+		self.full_stdouts_stderrs = []
 		self.test_timeout_queue = Queue()
 		run_test_timeout_thread(f"{self.name}_timeout", self, self.test_timeout_queue, TimeoutParam(timeout, f"{self.name} test"))
 
 	def __del__(self):
 		self.kill_all()
 
-	def register_process(self, process, full_stderr):
+	def register_process(self, process, name, full_stdout, full_stderr):
 		self.processes.append(process)
-		self.full_stderrs.append(full_stderr)
+		self.full_stdouts_stderrs.append((name, full_stdout, full_stderr))
 
 	def register_events_queue(self, queue):
 		self.test_timeout_queue.put(queue)
@@ -234,10 +241,30 @@ add_path {relpath(self.runner.data_dir, tmp_dir)}
 		while self.processes:
 			self.processes.pop().wait()
 
-	def check_valgrind_memcheck_errors(self):
-		if any(any("== ERROR SUMMARY: " in line and "== ERROR SUMMARY: 0" not in line for line in stderr) for stderr in self.full_stderrs):
-			return "\n".join(line for stderr in self.full_stderrs for line in stderr if line.startswith("=="))
-		return None
+	def format_valgrind_memcheck_errors(self) -> str:
+		for name, _, stderr in self.full_stdouts_stderrs:
+			if any("== ERROR SUMMARY: " in line and "== ERROR SUMMARY: 0" not in line for line in stderr):
+				joined_errors = "\n".join(line for line in stderr if line.startswith("=="))
+				return f"--- valgrind memcheck: {name} ---\n{joined_errors}\n"
+		return ""
+
+	def format_stdout_stderr(self) -> str:
+		max_lines = 5
+		error = ""
+		for name, stdout, stderr in self.full_stdouts_stderrs:
+			if stdout:
+				if self.runner.show_full_output or len(stdout) <= max_lines:
+					joined_stdout = "\n".join(stdout)
+				else:
+					joined_stdout = f"({len(stdout) - max_lines} more lines)\n" + "\n".join(stdout[-max_lines:])
+				error = error + f"--- stdout: {name} ---\n{joined_stdout}\n"
+			if stderr:
+				if self.runner.show_full_output or len(stderr) <= max_lines:
+					joined_stderr = "\n".join(stderr)
+				else:
+					joined_stderr = f"({len(stderr) - max_lines} more lines)\n" + "\n".join(stderr[-max_lines:])
+				error = error + f"--- stderr: {name} ---\n{joined_stderr}\n"
+		return error
 
 
 def run_lines_thread(name, file, output_filename, output_list, output_queue):
@@ -324,7 +351,7 @@ class Runnable:
 		stderr_wrapper = io.TextIOWrapper(self.process.stderr, encoding="utf-8")
 		self.full_stdout = []
 		self.full_stderr = []
-		test_env.register_process(self.process, self.full_stderr)
+		test_env.register_process(self.process, self.name, self.full_stdout, self.full_stderr)
 		self.events = Queue()
 		test_env.register_events_queue(self.events)
 		self.next_timeout_id = 0
@@ -802,6 +829,7 @@ def main():
 
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--keep-tmpdirs", action="store_true", help="keep temporary directories used for the tests")
+	parser.add_argument("--show-full-output", action="store_true", help="print the full stdout and stderr on test failures")
 	parser.add_argument("--test-mastersrv", action="store_true", help="enforce testing of mastersrv")
 	parser.add_argument("--timeout-multiplier", type=float, default=1, help="multiply all timeouts by this value")
 	parser.add_argument("--valgrind-memcheck", action="store_true", help="use valgrind's memcheck on client and server")
@@ -832,6 +860,7 @@ def main():
 		ddnet_mastersrv=ddnet_mastersrv,
 		repo_dir=repo_dir,
 		test_dir=args.builddir,
+		show_full_output=args.show_full_output,
 		valgrind_memcheck=args.valgrind_memcheck,
 		keep_tmpdirs=args.keep_tmpdirs,
 		timeout_multiplier=args.timeout_multiplier,
