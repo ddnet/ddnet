@@ -42,13 +42,6 @@ class Log(namedtuple("Log", "timestamp level line")):
 		pass
 
 
-class LogParseError(namedtuple("LogParseError", "line")):
-	def raise_on_error(self, timeout_id):
-		Log.parse(self.line)
-		# The above should have raised an error.
-		raise RuntimeError("log line shouldn't parse")
-
-
 class Exit(namedtuple("Exit", "")):
 	def raise_on_error(self, timeout_id):
 		pass
@@ -258,11 +251,11 @@ def run_lines_thread(name, file, output_filename, output_list, output_queue):
 			output_list.append(line)
 			if output_queue is not None:
 				try:
-					log = Log.parse(line)
+					output_queue.put(Log.parse(line))
 				except ValueError:
-					output_queue.put(LogParseError(line))
-				else:
-					output_queue.put(log)
+					# The client will sometimes print multiple log lines without timestamp and level, for example on assertion errors.
+					# We store log lines verbatim if they could not be parsed, so we can output the log lines on test failures.
+					output_queue.put(Log(timestamp=None, level=None, line=line))
 
 	Thread(name=name, target=thread, daemon=True).start()
 
