@@ -1123,6 +1123,11 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	int GlewMajor = 0;
 	int GlewMinor = 0;
 	int GlewPatch = 0;
+	*pScreen = 0;
+	*pWidth = *pDesktopWidth = *pCurrentWidth = 800;
+	*pHeight = *pDesktopHeight = *pCurrentHeight = 600;
+	*pRefreshRate = 60;
+	*pFsaaSamples = 0;
 	log_info("gfx", "Created headless context");
 #else
 	// print sdl version
