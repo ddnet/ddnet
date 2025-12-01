@@ -98,7 +98,17 @@ float CPlayers::GetPlayerTargetAngle(
 	int ClientId,
 	float Intra)
 {
-	if(GameClient()->m_Snap.m_LocalClientId == ClientId && !GameClient()->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if(GameClient()->PredictDummy() && GameClient()->m_aLocalIds[!g_Config.m_ClDummy] == ClientId)
+	{
+		if(g_Config.m_ClDummyHammer)
+			return angle(vec2(GameClient()->m_HammerInput.m_TargetX, GameClient()->m_HammerInput.m_TargetY));
+
+		return angle(vec2(GameClient()->m_DummyInput.m_TargetX, GameClient()->m_DummyInput.m_TargetY));
+	}
+
+	// with dummy copy, use the same angle as local player
+	if((GameClient()->m_Snap.m_LocalClientId == ClientId || (GameClient()->PredictDummy() && g_Config.m_ClDummyCopyMoves && GameClient()->m_aLocalIds[!g_Config.m_ClDummy] == ClientId)) &&
+		!GameClient()->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		// calculate what would be sent to the server from our current input
 		vec2 Direction = normalize(vec2((int)GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].x, (int)GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].y));
@@ -177,10 +187,12 @@ void CPlayers::RenderHookCollLine(
 			if(ClientId == GameClient()->m_aLocalIds[i])
 			{
 				Aim = GameClient()->m_Controls.m_aShowHookColl[i];
-				break;
 			}
 		}
 	}
+
+	if(GameClient()->PredictDummy() && g_Config.m_ClDummyCopyMoves && GameClient()->m_aLocalIds[!g_Config.m_ClDummy] == ClientId)
+		Aim = false; // don't use unpredicted with copy moves
 
 #if defined(CONF_VIDEORECORDER)
 	if(IVideo::Current() && !g_Config.m_ClVideoShowHookCollOther && !Local)
@@ -191,6 +203,14 @@ void CPlayers::RenderHookCollLine(
 	bool RenderHookCollPlayer = Aim && (Local ? g_Config.m_ClShowHookCollOwn : g_Config.m_ClShowHookCollOther) > 0;
 	if(Local && GameClient()->m_GameInfo.m_AllowHookColl && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		RenderHookCollPlayer = GameClient()->m_Controls.m_aShowHookColl[g_Config.m_ClDummy] && g_Config.m_ClShowHookCollOwn > 0;
+
+	if(GameClient()->m_GameInfo.m_AllowHookColl && GameClient()->PredictDummy() && g_Config.m_ClDummyCopyMoves &&
+		GameClient()->m_aLocalIds[!g_Config.m_ClDummy] == ClientId && GameClient()->m_Controls.m_aShowHookColl[g_Config.m_ClDummy] &&
+		Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	{
+		RenderHookCollPlayer = g_Config.m_ClShowHookCollOther > 0;
+	}
+
 	if(!AlwaysRenderHookColl && !RenderHookCollPlayer)
 		return;
 
