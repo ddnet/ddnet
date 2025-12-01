@@ -2023,6 +2023,8 @@ set_src(BASE GLOB_RECURSE src/base
   unicode/tolower_data.cpp
   unicode/tolower_data.h
   vmath.h
+  windows.cpp
+  windows.h
 )
 set_src(ENGINE_INTERFACE GLOB src/engine
   antibot.h

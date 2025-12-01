@@ -14,6 +14,7 @@
 #include <base/math.h>
 #include <base/str.h>
 #include <base/system.h>
+#include <base/windows.h>
 
 #include <engine/config.h>
 #include <engine/console.h>
