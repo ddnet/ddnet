@@ -73,6 +73,11 @@ namespace protocol7
 		MAX_SKIN_LENGTH = 24,
 		MAX_SKIN_ARRAY_SIZE = MAX_SKIN_LENGTH * UTF8_BYTE_LENGTH + 1,
 	};
+
+	namespace FinishTime
+	{
+		inline constexpr int NOT_FINISHED = -1;
+	}
 }
 
 #endif

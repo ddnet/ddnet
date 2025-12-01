@@ -158,6 +158,13 @@ namespace TuneZone
 	inline constexpr int NUM = 256;
 };
 
+namespace FinishTime
+{
+	inline constexpr int NOT_FINISHED_TIMESCORE = -9999;
+	inline constexpr int NOT_FINISHED_MILLIS = -1;
+	inline constexpr int UNSET = -2;
+}
+
 typedef std::bitset<MAX_CLIENTS> CClientMask;
 
 #endif
