@@ -3,7 +3,7 @@
 #include "editor.h"
 
 #include <base/log.h>
-#include <base/system.h>
+#include <base/str.h>
 
 #include <engine/keys.h>
 

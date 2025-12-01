@@ -1,18 +1,20 @@
 #ifndef GAME_EDITOR_EDITOR_TRACKERS_H
 #define GAME_EDITOR_EDITOR_TRACKERS_H
 
+#include <game/client/ui.h>
 #include <game/editor/map_object.h>
 #include <game/editor/mapitems.h>
-#include <game/editor/mapitems/layer_quads.h>
 #include <game/mapitems.h>
 
 #include <map>
 #include <memory>
 #include <vector>
 
-class CLayerTiles;
+class CLayer;
 class CLayerGroup;
+class CLayerQuads;
 class CLayerSounds;
+class CLayerTiles;
 class CSoundSource;
 
 class CQuadEditTracker : public CMapObject

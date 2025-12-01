@@ -5,7 +5,8 @@
 
 #include <game/client/lineinput.h>
 #include <game/client/ui_rect.h>
-#include <game/editor/quick_action.h>
+
+class CQuickAction;
 
 class CPrompt : public CEditorComponent
 {

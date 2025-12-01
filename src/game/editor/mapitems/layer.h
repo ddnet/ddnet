@@ -1,8 +1,6 @@
 #ifndef GAME_EDITOR_MAPITEMS_LAYER_H
 #define GAME_EDITOR_MAPITEMS_LAYER_H
 
-#include <base/system.h>
-
 #include <game/client/ui.h>
 #include <game/client/ui_rect.h>
 #include <game/editor/map_object.h>

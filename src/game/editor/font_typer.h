@@ -7,10 +7,13 @@
 
 #include <engine/graphics.h>
 
-#include <game/editor/mapitems/layer_tiles.h>
+#include <game/client/ui.h>
 
 #include <chrono>
 #include <memory>
+
+class CLayer;
+class CLayerTiles;
 
 class CFontTyper : public CEditorComponent
 {
@@ -24,7 +27,7 @@ class CFontTyper : public CEditorComponent
 	bool m_Active = false;
 	std::chrono::nanoseconds m_CursorRenderTime;
 	IGraphics::CTextureHandle m_CursorTextTexture;
-	std::shared_ptr<class CLayer> m_pLastLayer;
+	std::shared_ptr<CLayer> m_pLastLayer;
 	CUi::SConfirmPopupContext m_ConfirmActivatePopupContext;
 	int m_TilesPlacedSinceActivate = 0;
 
