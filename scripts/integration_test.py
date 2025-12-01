@@ -327,8 +327,8 @@ class Runnable:
 			stdout=subprocess.PIPE,
 			stderr=subprocess.PIPE,
 		)
-		stdout_wrapper = io.TextIOWrapper(self.process.stdout, encoding="utf-8", newline="\n")
-		stderr_wrapper = io.TextIOWrapper(self.process.stderr, encoding="utf-8", newline="\n")
+		stdout_wrapper = io.TextIOWrapper(self.process.stdout, encoding="utf-8")
+		stderr_wrapper = io.TextIOWrapper(self.process.stderr, encoding="utf-8")
 		self.full_stdout = []
 		self.full_stderr = []
 		test_env.register_process(self.process, self.full_stderr)
