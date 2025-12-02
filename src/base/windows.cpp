@@ -118,7 +118,7 @@ static std::wstring filename_from_path(const std::wstring &path)
 	return pos == std::wstring::npos ? path : path.substr(pos + 1);
 }
 
-bool shell_register_protocol(const char *protocol_name, const char *executable, bool *updated)
+bool windows_shell_register_protocol(const char *protocol_name, const char *executable, bool *updated)
 {
 	const std::wstring protocol_name_wide = windows_utf8_to_wide(protocol_name);
 	const std::wstring executable_wide = windows_utf8_to_wide(executable);
@@ -218,7 +218,7 @@ bool shell_register_protocol(const char *protocol_name, const char *executable, 
 	return true;
 }
 
-bool shell_register_extension(const char *extension, const char *description, const char *executable_name, const char *executable, bool *updated)
+bool windows_shell_register_extension(const char *extension, const char *description, const char *executable_name, const char *executable, bool *updated)
 {
 	const std::wstring extension_wide = windows_utf8_to_wide(extension);
 	const std::wstring executable_name_wide = windows_utf8_to_wide(executable_name);
@@ -354,7 +354,7 @@ bool shell_register_extension(const char *extension, const char *description, co
 	return true;
 }
 
-bool shell_register_application(const char *name, const char *executable, bool *updated)
+bool windows_shell_register_application(const char *name, const char *executable, bool *updated)
 {
 	const std::wstring name_wide = windows_utf8_to_wide(name);
 	const std::wstring executable_filename = filename_from_path(windows_utf8_to_wide(executable));
@@ -403,7 +403,7 @@ bool shell_register_application(const char *name, const char *executable, bool *
 	return true;
 }
 
-bool shell_unregister_class(const char *shell_class, bool *updated)
+bool windows_shell_unregister_class(const char *shell_class, bool *updated)
 {
 	const std::wstring class_wide = windows_utf8_to_wide(shell_class);
 
@@ -432,7 +432,7 @@ bool shell_unregister_class(const char *shell_class, bool *updated)
 	return true;
 }
 
-bool shell_unregister_application(const char *executable, bool *updated)
+bool windows_shell_unregister_application(const char *executable, bool *updated)
 {
 	const std::wstring executable_filename = filename_from_path(windows_utf8_to_wide(executable));
 
@@ -461,7 +461,7 @@ bool shell_unregister_application(const char *executable, bool *updated)
 	return true;
 }
 
-void shell_update()
+void windows_shell_update()
 {
 	SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, nullptr, nullptr);
 }

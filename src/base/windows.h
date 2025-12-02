@@ -102,12 +102,12 @@ public:
  *
  * @remark The caller must later call @link shell_update @endlink, iff the shell needs to be updated.
  */
-bool shell_register_protocol(const char *protocol_name, const char *executable, bool *updated);
+bool windows_shell_register_protocol(const char *protocol_name, const char *executable, bool *updated);
 
 /**
  * Registers a file extension.
  *
- * @ingroup Shell
+ * @ingroup Windows
  *
  * @param extension The file extension, including the leading dot.
  * @param description A readable description for the file extension.
@@ -119,12 +119,12 @@ bool shell_register_protocol(const char *protocol_name, const char *executable, 
  *
  * @remark The caller must later call @link shell_update @endlink, iff the shell needs to be updated.
  */
-bool shell_register_extension(const char *extension, const char *description, const char *executable_name, const char *executable, bool *updated);
+bool windows_shell_register_extension(const char *extension, const char *description, const char *executable_name, const char *executable, bool *updated);
 
 /**
  * Registers an application.
  *
- * @ingroup Shell
+ * @ingroup Windows
  *
  * @param name Readable name of the application.
  * @param executable The absolute path of the executable being registered.
@@ -134,7 +134,7 @@ bool shell_register_extension(const char *extension, const char *description, co
  *
  * @remark The caller must later call @link shell_update @endlink, iff the shell needs to be updated.
  */
-bool shell_register_application(const char *name, const char *executable, bool *updated);
+bool windows_shell_register_application(const char *name, const char *executable, bool *updated);
 
 /**
  * Unregisters a protocol or file extension handler.
@@ -150,7 +150,7 @@ bool shell_register_application(const char *name, const char *executable, bool *
  *
  * @remark The caller must later call @link shell_update @endlink, iff the shell needs to be updated.
  */
-bool shell_unregister_class(const char *shell_class, bool *updated);
+bool windows_shell_unregister_class(const char *shell_class, bool *updated);
 
 /**
  * Unregisters an application.
@@ -164,7 +164,7 @@ bool shell_unregister_class(const char *shell_class, bool *updated);
  *
  * @remark The caller must later call @link shell_update @endlink, iff the shell needs to be updated.
  */
-bool shell_unregister_application(const char *executable, bool *updated);
+bool windows_shell_unregister_application(const char *executable, bool *updated);
 
 /**
  * Notifies the system that a protocol or file extension has been changed and the shell needs to be updated.
@@ -173,7 +173,7 @@ bool shell_unregister_application(const char *executable, bool *updated);
  *
  * @remark This is a potentially expensive operation, so it should only be called when necessary.
  */
-void shell_update();
+void windows_shell_update();
 
 #endif
 
