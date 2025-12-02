@@ -331,18 +331,20 @@ CEditorActionEditQuadPoint::CEditorActionEditQuadPoint(CEditorMap *pMap, int Gro
 
 void CEditorActionEditQuadPoint::Undo()
 {
-	std::shared_ptr<CLayerQuads> pLayerQuads = std::static_pointer_cast<CLayerQuads>(m_pLayer);
-	CQuad &Quad = pLayerQuads->m_vQuads[m_QuadIndex];
-	for(int k = 0; k < 5; k++)
-		Quad.m_aPoints[k] = m_vPreviousPoints[k];
+	Apply(m_vPreviousPoints);
 }
 
 void CEditorActionEditQuadPoint::Redo()
 {
+	Apply(m_vCurrentPoints);
+}
+
+void CEditorActionEditQuadPoint::Apply(const std::vector<CPoint> &vValue)
+{
 	std::shared_ptr<CLayerQuads> pLayerQuads = std::static_pointer_cast<CLayerQuads>(m_pLayer);
 	CQuad &Quad = pLayerQuads->m_vQuads[m_QuadIndex];
-	for(int k = 0; k < 5; k++)
-		Quad.m_aPoints[k] = m_vCurrentPoints[k];
+	dbg_assert(std::size(Quad.m_aPoints) == vValue.size(), "Expected %d values, got %d", (int)std::size(Quad.m_aPoints), (int)vValue.size());
+	std::copy_n(vValue.begin(), std::size(Quad.m_aPoints), Quad.m_aPoints);
 }
 
 CEditorActionEditQuadProp::CEditorActionEditQuadProp(CEditorMap *pMap, int GroupIndex, int LayerIndex, int QuadIndex, EQuadProp Prop, int Previous, int Current) :
