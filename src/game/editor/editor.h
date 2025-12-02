@@ -636,6 +636,7 @@ public:
 	public:
 		CEditor *m_pEditor;
 		int m_SelectedQuadIndex;
+		int m_Color;
 	};
 	CQuadPopupContext m_QuadPopupContext;
 	static CUi::EPopupMenuFunctionResult PopupQuad(void *pContext, CUIRect View, bool Active);

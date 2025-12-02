@@ -1042,6 +1042,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 		{"Pos Y", fx2i(pCurrentQuad->m_aPoints[4].y), PROPTYPE_INT, -1000000, 1000000},
 		{"Pos. Env", pCurrentQuad->m_PosEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
 		{"Pos. TO", pCurrentQuad->m_PosEnvOffset, PROPTYPE_INT, -1000000, 1000000},
+		{"Color", pQuadPopupContext->m_Color, PROPTYPE_COLOR, 0, 0},
 		{"Color Env", pCurrentQuad->m_ColorEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
 		{"Color TO", pCurrentQuad->m_ColorEnvOffset, PROPTYPE_INT, -1000000, 1000000},
 		{nullptr},
@@ -1095,6 +1096,11 @@ CUi::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 		else if(Prop == EQuadProp::PROP_POS_ENV_OFFSET)
 		{
 			pQuad->m_PosEnvOffset = NewVal;
+		}
+		else if(Prop == EQuadProp::PROP_COLOR)
+		{
+			pQuadPopupContext->m_Color = NewVal;
+			std::fill(std::begin(pQuad->m_aColors), std::end(pQuad->m_aColors), UnpackColor(NewVal));
 		}
 		else if(Prop == EQuadProp::PROP_COLOR_ENV)
 		{
