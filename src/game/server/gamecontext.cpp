@@ -1276,9 +1276,11 @@ void CGameContext::OnTick()
 			}
 			else if(m_VoteEnforce == VOTE_ENFORCE_YES_ADMIN)
 			{
-				Console()->ExecuteLine(m_aVoteCommand, m_VoteCreator);
-				SendChat(-1, TEAM_ALL, "Vote passed enforced by authorized player", -1, FLAG_SIX);
+				Server()->SetRconCid(IServer::RCON_CID_VOTE);
+				Console()->ExecuteLine(m_aVoteCommand);
+				Server()->SetRconCid(IServer::RCON_CID_SERV);
 				EndVote();
+				SendChat(-1, TEAM_ALL, "Vote passed enforced by authorized player", -1, FLAG_SIX);
 
 				if(m_VoteCreator != -1 && m_apPlayers[m_VoteCreator])
 					m_apPlayers[m_VoteCreator]->m_LastVoteCall = 0;
