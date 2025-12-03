@@ -295,6 +295,10 @@ public:
 	virtual const char *GetMapName() const = 0;
 
 	virtual bool IsSixup(int ClientId) const = 0;
+
+	// TAS support
+	virtual void SetTick(int Tick) = 0;
+	virtual void ForceFullSnapshots() = 0;
 };
 
 class IGameServer : public IInterface

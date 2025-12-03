@@ -6,6 +6,7 @@
 #include "eventhandler.h"
 #include "gameworld.h"
 #include "teehistorian.h"
+#include "tas/tas_controller.h"
 
 #include <engine/console.h>
 #include <engine/server.h>
@@ -127,6 +128,9 @@ class CGameContext : public IGameServer
 
 	bool m_Resetting;
 
+	// TAS Server
+	std::unique_ptr<CTasController> m_pTasController;
+
 	static void CommandCallback(int ClientId, int FlagMask, const char *pCmd, IConsole::IResult *pResult, void *pUser);
 	static void TeeHistorianWrite(const void *pData, int DataSize, void *pUser);
 
@@ -197,6 +201,8 @@ public:
 	IAntibot *Antibot() { return m_pAntibot; }
 	CTeeHistorian *TeeHistorian() { return &m_TeeHistorian; }
 	bool TeeHistorianActive() const { return m_TeeHistorianActive; }
+	CTasController *TasController() { return m_pTasController.get(); }
+	bool IsTasMode() const { return m_pTasController && m_pTasController->IsEnabled(); }
 	CNetObjHandler *GetNetObjHandler() override { return &m_NetObjHandler; }
 	protocol7::CNetObjHandler *GetNetObjHandler7() override { return &m_NetObjHandler7; }
 

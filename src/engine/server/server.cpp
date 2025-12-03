@@ -4601,6 +4601,25 @@ void CServer::SetErrorShutdown(const char *pReason)
 	str_copy(m_aErrorShutdownReason, pReason);
 }
 
+void CServer::SetTick(int Tick)
+{
+	m_CurrentGameTick = Tick;
+	m_GameStartTime = time_get() - (int64_t)Tick * time_freq() / SERVER_TICK_SPEED;
+}
+
+void CServer::ForceFullSnapshots()
+{
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(m_aClients[i].m_State == CClient::STATE_INGAME)
+		{
+			m_aClients[i].m_LastAckedSnapshot = -1;
+			m_aClients[i].m_Snapshots.PurgeAll();
+			m_aClients[i].m_SnapRate = CClient::SNAPRATE_RECOVER;
+		}
+	}
+}
+
 void CServer::SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr<ILogger> &&pStdoutLogger)
 {
 	m_pFileLogger = pFileLogger;

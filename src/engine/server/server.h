@@ -526,6 +526,10 @@ public:
 
 	bool IsSixup(int ClientId) const override { return ClientId != SERVER_DEMO_CLIENT && m_aClients[ClientId].m_Sixup; }
 
+	// TAS support
+	void SetTick(int Tick) override;
+	void ForceFullSnapshots() override;
+
 	void SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr<ILogger> &&pStdoutLogger);
 
 #ifdef CONF_FAMILY_UNIX

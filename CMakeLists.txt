@@ -2821,6 +2821,14 @@ if(SERVER)
     teehistorian.h
     teeinfo.cpp
     teeinfo.h
+    tas/tas_commands.cpp
+    tas/tas_commands.h
+    tas/tas_controller.cpp
+    tas/tas_controller.h
+    tas/tas_history.cpp
+    tas/tas_history.h
+    tas/tas_state.cpp
+    tas/tas_state.h
   )
   set(GAME_GENERATED_SERVER
     "src/generated/server_data.cpp"

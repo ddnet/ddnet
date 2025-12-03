@@ -7,6 +7,7 @@
 #include "gamemodes/mod.h"
 #include "player.h"
 #include "score.h"
+#include "tas/tas_commands.h"
 #include "teeinfo.h"
 
 #include <antibot/antibot_data.h>
@@ -1068,6 +1069,14 @@ void CGameContext::OnPreTickTeehistorian()
 
 void CGameContext::OnTick()
 {
+	// TAS pre-tick handling
+	if(m_pTasController && m_pTasController->IsEnabled())
+	{
+		m_pTasController->OnPreTick();
+		if(!m_pTasController->ShouldAdvanceTick())
+			return; // Skip tick if TAS is paused
+	}
+
 	// check tuning
 	CheckPureTuning();
 
@@ -1368,6 +1377,12 @@ void CGameContext::OnTick()
 		}
 		m_TeeHistorian.EndPlayers();
 		m_TeeHistorian.BeginInputs();
+	}
+
+	// TAS post-tick handling
+	if(m_pTasController && m_pTasController->IsEnabled())
+	{
+		m_pTasController->OnPostTick();
 	}
 	// Warning: do not put code in this function directly above or below this comment
 }
@@ -3895,6 +3910,9 @@ void CGameContext::OnConsoleInit()
 
 	RegisterDDRaceCommands();
 	RegisterChatCommands();
+
+	// Register TAS commands (available even if TAS mode is disabled - commands will check mode)
+	RegisterTasCommands(this, Console());
 }
 
 void CGameContext::RegisterDDRaceCommands()
@@ -4191,6 +4209,20 @@ void CGameContext::OnInit(const void *pPersistentData)
 		m_pController = new CGameControllerMod(this);
 	else
 		m_pController = new CGameControllerDDRace(this);
+
+	// TAS Server initialization
+	if(g_Config.m_SvTasServer)
+	{
+		m_pTasController = std::make_unique<CTasController>(this);
+		m_pTasController->SetMode(g_Config.m_SvTasCollaborative ? ETasMode::COLLABORATIVE : ETasMode::SINGLE_CONTROL);
+
+		// Configure history from config
+		m_pTasController->History()->SetMaxHistoryTicks(g_Config.m_SvTasHistoryMinutes * 60 * SERVER_TICK_SPEED);
+		m_pTasController->History()->SetMaxMemoryBytes(static_cast<size_t>(g_Config.m_SvTasMaxMemoryMB) * 1024 * 1024);
+		m_pTasController->History()->SetKeyframeInterval(g_Config.m_SvTasKeyframeInterval);
+
+		dbg_msg("tas", "TAS server mode enabled");
+	}
 
 	ReadCensorList();
 

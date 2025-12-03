@@ -298,6 +298,13 @@ MACRO_CONFIG_INT(SvRescueDelay, sv_rescue_delay, 1, 0, 1000, CFGFLAG_SERVER, "Nu
 MACRO_CONFIG_INT(SvPractice, sv_practice, 1, 0, 1, CFGFLAG_SERVER, "Enable practice mode for teams. Means you can use /rescue, but in turn your rank doesn't count.")
 MACRO_CONFIG_INT(SvPracticeByDefault, sv_practice_by_default, 0, 0, 1, CFGFLAG_SERVER, "Enable use of practice commands by default. Requires sv_test_cmds 1.")
 
+// TAS Server
+MACRO_CONFIG_INT(SvTasServer, sv_tas_server, 0, 0, 1, CFGFLAG_SERVER, "Enable TAS server mode (setting only works in initial config)")
+MACRO_CONFIG_INT(SvTasHistoryMinutes, sv_tas_history_minutes, 30, 1, 120, CFGFLAG_SERVER, "Minutes of TAS history to keep")
+MACRO_CONFIG_INT(SvTasMaxMemoryMB, sv_tas_max_memory_mb, 2048, 256, 8192, CFGFLAG_SERVER, "Maximum memory for TAS history in MB")
+MACRO_CONFIG_INT(SvTasKeyframeInterval, sv_tas_keyframe_interval, 50, 10, 500, CFGFLAG_SERVER, "Ticks between full state keyframes")
+MACRO_CONFIG_INT(SvTasCollaborative, sv_tas_collaborative, 0, 0, 1, CFGFLAG_SERVER, "Allow multiple clients to control TAS")
+
 MACRO_CONFIG_INT(ClVideoPauseWithDemo, cl_video_pausewithdemo, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Pause video rendering when demo playing pause")
 MACRO_CONFIG_INT(ClVideoShowhud, cl_video_showhud, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show ingame HUD when rendering video")
 MACRO_CONFIG_INT(ClVideoShowChat, cl_video_showchat, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show chat when rendering video")
