@@ -49,12 +49,12 @@ void CEnvelopeState::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Resu
 		{
 			static const nanoseconds s_NanosPerTick = nanoseconds(1s) / static_cast<int64_t>(Client()->GameTickSpeed());
 
-			// get the lerp of the current tick and prev
+			// get the lerp of the current tick and the next tick
 			const int MinTick = Client()->PrevGameTick(g_Config.m_ClDummy) - GameClient()->m_Snap.m_pGameInfoObj->m_RoundStartTick;
 			const int CurTick = Client()->GameTick(g_Config.m_ClDummy) - GameClient()->m_Snap.m_pGameInfoObj->m_RoundStartTick;
 
 			double TickRatio = mix<double>(0, CurTick - MinTick, (double)Client()->IntraGameTick(g_Config.m_ClDummy));
-			Time = duration_cast<nanoseconds>(TickRatio * s_NanosPerTick) + MinTick * s_NanosPerTick;
+			Time = duration_cast<nanoseconds>(TickRatio * s_NanosPerTick) + CurTick * s_NanosPerTick;
 		}
 		else
 		{
