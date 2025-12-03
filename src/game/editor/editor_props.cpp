@@ -44,7 +44,10 @@ SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pPro
 			if(NewValue != pProps[i].m_Value || (NewValueRes.m_State != EEditState::NONE && NewValueRes.m_State != EEditState::EDITING))
 			{
 				*pNewVal = NewValue;
-				Change = i;
+				if(NewValueRes.m_State != EEditState::NONE)
+				{
+					Change = i;
+				}
 				State = NewValueRes.m_State;
 			}
 			if(DoButton_FontIcon((char *)&pIds[i] + 1, FONT_ICON_MINUS, 0, &Dec, BUTTONFLAG_LEFT, "Decrease value.", IGraphics::CORNER_L, 7.0f))
@@ -104,7 +107,10 @@ SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pPro
 			if(NewValue != pProps[i].m_Value || (NewValueRes.m_State != EEditState::NONE && NewValueRes.m_State != EEditState::EDITING))
 			{
 				*pNewVal = NewValue % 360;
-				Change = i;
+				if(NewValueRes.m_State != EEditState::NONE)
+				{
+					Change = i;
+				}
 				State = NewValueRes.m_State;
 			}
 		}
@@ -115,7 +121,10 @@ SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pPro
 				if(NewValue != pProps[i].m_Value || m_ColorPickerPopupContext.m_State != EEditState::EDITING)
 				{
 					*pNewVal = NewValue;
-					Change = i;
+					if(m_ColorPickerPopupContext.m_State != EEditState::NONE)
+					{
+						Change = i;
+					}
 					State = m_ColorPickerPopupContext.m_State;
 				}
 			};
@@ -266,7 +275,10 @@ SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pPro
 			if(NewVal != CurValue || (NewValueRes.m_State != EEditState::NONE && NewValueRes.m_State != EEditState::EDITING))
 			{
 				*pNewVal = NewVal;
-				Change = i;
+				if(NewValueRes.m_State != EEditState::NONE)
+				{
+					Change = i;
+				}
 				State = NewValueRes.m_State;
 			}
 

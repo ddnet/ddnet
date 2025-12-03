@@ -249,6 +249,7 @@ public:
 
 		m_QuadKnifeActive = false;
 		m_QuadKnifeCount = 0;
+		m_QuadKnifeSelectedQuadIndex = -1;
 		std::fill(std::begin(m_aQuadKnifePoints), std::end(m_aQuadKnifePoints), vec2(0.0f, 0.0f));
 
 		for(size_t i = 0; i < std::size(m_aSavedColors); ++i)
@@ -533,8 +534,6 @@ public:
 
 	std::vector<int> m_vSelectedLayers;
 	std::vector<int> m_vSelectedQuads;
-	int m_SelectedQuadPoint;
-	int m_SelectedQuadIndex;
 	int m_SelectedGroup;
 	int m_SelectedQuadPoints;
 	int m_SelectedEnvelope;
@@ -548,6 +547,7 @@ public:
 
 	bool m_QuadKnifeActive;
 	int m_QuadKnifeCount;
+	int m_QuadKnifeSelectedQuadIndex;
 	vec2 m_aQuadKnifePoints[4];
 
 	// Color palette and pipette
@@ -631,8 +631,24 @@ public:
 		CLayerTiles::SCommonPropState m_CommonPropState;
 	};
 	static CUi::EPopupMenuFunctionResult PopupLayer(void *pContext, CUIRect View, bool Active);
+	class CQuadPopupContext : public SPopupMenuId
+	{
+	public:
+		CEditor *m_pEditor;
+		int m_SelectedQuadIndex;
+		int m_Color;
+	};
+	CQuadPopupContext m_QuadPopupContext;
 	static CUi::EPopupMenuFunctionResult PopupQuad(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupSource(void *pContext, CUIRect View, bool Active);
+	class CPointPopupContext : public SPopupMenuId
+	{
+	public:
+		CEditor *m_pEditor;
+		int m_SelectedQuadPoint;
+		int m_SelectedQuadIndex;
+	};
+	CPointPopupContext m_PointPopupContext;
 	static CUi::EPopupMenuFunctionResult PopupPoint(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupEnvPoint(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupEnvPointMulti(void *pContext, CUIRect View, bool Active);

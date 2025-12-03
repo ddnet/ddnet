@@ -23,6 +23,7 @@ public:
 	explicit CQuadEditTracker(CEditorMap *pMap);
 
 	bool QuadPointChanged(const std::vector<CPoint> &vCurrentPoints, int QuadIndex);
+	bool QuadColorChanged(const std::vector<CColor> &vCurrentColors, int QuadIndex);
 
 	void BeginQuadTrack(const std::shared_ptr<CLayerQuads> &pLayer, const std::vector<int> &vSelectedQuads, int GroupIndex = -1, int LayerIndex = -1);
 	void EndQuadTrack();
@@ -39,6 +40,7 @@ private:
 	std::vector<int> m_vSelectedQuads;
 	int m_SelectedQuadPoints;
 	std::map<int, std::vector<CPoint>> m_InitialPoints;
+	std::map<int, std::vector<CColor>> m_InitialColors;
 
 	bool m_Tracking = false;
 	std::shared_ptr<CLayerQuads> m_pLayer;

@@ -112,6 +112,24 @@ private:
 	int m_QuadIndex;
 	std::vector<CPoint> m_vPreviousPoints;
 	std::vector<CPoint> m_vCurrentPoints;
+
+	void Apply(const std::vector<CPoint> &vValue);
+};
+
+class CEditorActionEditQuadColor : public CEditorActionLayerBase
+{
+public:
+	CEditorActionEditQuadColor(CEditorMap *pMap, int GroupIndex, int LayerIndex, int QuadIndex, std::vector<CColor> const &vPreviousColors, std::vector<CColor> const &vCurrentColors);
+
+	void Undo() override;
+	void Redo() override;
+
+private:
+	int m_QuadIndex;
+	std::vector<CColor> m_vPreviousColors;
+	std::vector<CColor> m_vCurrentColors;
+
+	void Apply(std::vector<CColor> &vValue);
 };
 
 class CEditorActionEditQuadProp : public CEditorActionLayerBase
