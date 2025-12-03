@@ -21,14 +21,21 @@ static void HashAppend(uint32_t &State, int32_t Value)
 
 namespace RandomHash
 {
-	uint32_t HashInts(const int32_t *Values, size_t Count)
+	uint32_t HashInts(std::initializer_list<int> Values)
 	{
 		uint32_t State = 0x1234567u;
-		for(size_t i = 0; i < Count; ++i)
-		{
-			HashAppend(State, Values[i]);
-		}
+		for(int x : Values)
+			HashAppend(State, static_cast<int32_t>(x));
 
 		return murmur3mix32(State);
+	}
+
+	int SeededRandomIntBelow(int Below, std::initializer_list<int> Values)
+	{
+		if(Below <= 1)
+			return 0;
+
+		uint32_t Hash = HashInts(Values);
+		return static_cast<int>(Hash % static_cast<uint32_t>(Below));
 	}
 } // namespace RandomHash

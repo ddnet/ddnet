@@ -1020,7 +1020,7 @@ void CCharacter::HandleTiles(int Index)
 		{
 			if(m_Core.m_Super || m_Core.m_Invincible)
 				return;
-			int TeleOut = RandomHash::HashMany(m_Core.m_Id, GameWorld()->GameTick(), m_RngSeed) % Collision()->TeleOuts(Teleport - 1).size();
+			int TeleOut = RandomHash::SeededRandomIntBelow(Collision()->TeleOuts(Teleport - 1).size(), {m_Core.m_Id, GameWorld()->GameTick(), m_RngSeed});
 			m_Core.m_Pos = Collision()->TeleOuts(Teleport - 1)[TeleOut];
 			m_Core.m_CanSkipInterpolation = true;
 			if(!g_Config.m_SvTeleportHoldHook)
@@ -1036,7 +1036,7 @@ void CCharacter::HandleTiles(int Index)
 		{
 			if(m_Core.m_Super || m_Core.m_Invincible)
 				return;
-			int TeleOut = RandomHash::HashMany(m_Core.m_Id, GameWorld()->GameTick(), m_RngSeed) % Collision()->TeleOuts(EvilTeleport - 1).size();
+			int TeleOut = RandomHash::SeededRandomIntBelow(Collision()->TeleOuts(EvilTeleport - 1).size(), {m_Core.m_Id, GameWorld()->GameTick(), m_RngSeed});
 			m_Core.m_Pos = Collision()->TeleOuts(EvilTeleport - 1)[TeleOut];
 			m_Core.m_CanSkipInterpolation = true;
 			if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons)
@@ -1064,7 +1064,7 @@ void CCharacter::HandleTiles(int Index)
 			{
 				if(!Collision()->TeleCheckOuts(TeleCpId).empty())
 				{
-					int TeleOut = RandomHash::HashMany(m_Core.m_Id, GameWorld()->GameTick(), m_RngSeed) % Collision()->TeleCheckOuts(TeleCpId).size();
+					int TeleOut = RandomHash::SeededRandomIntBelow(Collision()->TeleCheckOuts(TeleCpId).size(), {m_Core.m_Id, GameWorld()->GameTick(), m_RngSeed});
 					m_Core.m_Pos = Collision()->TeleCheckOuts(TeleCpId)[TeleOut];
 					m_Core.m_CanSkipInterpolation = true;
 					m_Core.m_Vel = vec2(0, 0);
@@ -1091,7 +1091,7 @@ void CCharacter::HandleTiles(int Index)
 			{
 				if(!Collision()->TeleCheckOuts(TeleCpId).empty())
 				{
-					int TeleOut = RandomHash::HashMany(m_Core.m_Id, GameWorld()->GameTick(), m_RngSeed) % Collision()->TeleCheckOuts(TeleCpId).size();
+					int TeleOut = RandomHash::SeededRandomIntBelow(Collision()->TeleCheckOuts(TeleCpId).size(), {m_Core.m_Id, GameWorld()->GameTick(), m_RngSeed});
 					m_Core.m_Pos = Collision()->TeleCheckOuts(TeleCpId)[TeleOut];
 					m_Core.m_CanSkipInterpolation = true;
 

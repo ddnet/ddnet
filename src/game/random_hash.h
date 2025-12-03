@@ -3,17 +3,13 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <initializer_list>
 
 namespace RandomHash
 {
-	uint32_t HashInts(const int32_t *Values, size_t Count);
+	uint32_t HashInts(std::initializer_list<int> Values);
 
-	template<typename... Ts>
-	inline uint32_t HashMany(Ts... Values)
-	{
-		int32_t Temp[] = {static_cast<int32_t>(Values)...};
-		return HashInts(Temp, sizeof...(Ts));
-	}
+	int SeededRandomIntBelow(int Below, std::initializer_list<int> Values);
 
 } // namespace RandomHash
 

@@ -395,7 +395,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 				SetHookedPlayer(-1);
 
 				m_NewHook = true;
-				int RandomOut = RandomHash::HashMany(m_Id, m_Tick, m_RngSeed) % m_pCollision->TeleOuts(TeleNr - 1).size();
+				int RandomOut = RandomHash::SeededRandomIntBelow(m_pCollision->TeleOuts(TeleNr - 1).size(), {m_Id, m_Tick, m_RngSeed});
 
 				m_HookPos = m_pCollision->TeleOuts(TeleNr - 1)[RandomOut] + TargetDirection * PhysicalSize() * 1.5f;
 				m_HookDir = TargetDirection;

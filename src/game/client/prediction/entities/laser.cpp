@@ -161,9 +161,9 @@ void CLaser::DoBounce()
 				int TeleOut;
 				CCharacter *pOwnerChar = GameWorld()->GetCharacterById(m_Owner);
 				if(pOwnerChar)
-					TeleOut = RandomHash::HashMany(m_Owner, m_EvalTick, GameWorld()->GameTick(), pOwnerChar->m_RngSeed) % Collision()->TeleOuts(Tele - 1).size();
+					TeleOut = RandomHash::SeededRandomIntBelow(Collision()->TeleOuts(Tele - 1).size(), {m_Owner, m_EvalTick, GameWorld()->GameTick(), pOwnerChar->m_RngSeed});
 				else
-					TeleOut = RandomHash::HashMany(GetId(), m_EvalTick, GameWorld()->GameTick(), MapIndex) % Collision()->TeleOuts(Tele - 1).size();
+					TeleOut = RandomHash::SeededRandomIntBelow(Collision()->TeleOuts(Tele - 1).size(), {GetId(), m_EvalTick, GameWorld()->GameTick(), MapIndex});
 
 				m_TelePos = Collision()->TeleOuts(Tele - 1)[TeleOut];
 				m_WasTele = true;
