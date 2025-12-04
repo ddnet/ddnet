@@ -14,6 +14,7 @@
 #include <base/math.h>
 #include <base/str.h>
 #include <base/system.h>
+#include <base/windows.h>
 
 #include <engine/config.h>
 #include <engine/console.h>
@@ -5322,16 +5323,16 @@ void CClient::ShellRegister()
 	}
 
 	bool Updated = false;
-	if(!shell_register_protocol("ddnet", aFullPath, &Updated))
+	if(!windows_shell_register_protocol("ddnet", aFullPath, &Updated))
 		log_error("client", "Failed to register ddnet protocol");
-	if(!shell_register_extension(".map", "Map File", GAME_NAME, aFullPath, &Updated))
+	if(!windows_shell_register_extension(".map", "Map File", GAME_NAME, aFullPath, &Updated))
 		log_error("client", "Failed to register .map file extension");
-	if(!shell_register_extension(".demo", "Demo File", GAME_NAME, aFullPath, &Updated))
+	if(!windows_shell_register_extension(".demo", "Demo File", GAME_NAME, aFullPath, &Updated))
 		log_error("client", "Failed to register .demo file extension");
-	if(!shell_register_application(GAME_NAME, aFullPath, &Updated))
+	if(!windows_shell_register_application(GAME_NAME, aFullPath, &Updated))
 		log_error("client", "Failed to register application");
 	if(Updated)
-		shell_update();
+		windows_shell_update();
 }
 
 void CClient::ShellUnregister()
@@ -5345,16 +5346,16 @@ void CClient::ShellUnregister()
 	}
 
 	bool Updated = false;
-	if(!shell_unregister_class("ddnet", &Updated))
+	if(!windows_shell_unregister_class("ddnet", &Updated))
 		log_error("client", "Failed to unregister ddnet protocol");
-	if(!shell_unregister_class(GAME_NAME ".map", &Updated))
+	if(!windows_shell_unregister_class(GAME_NAME ".map", &Updated))
 		log_error("client", "Failed to unregister .map file extension");
-	if(!shell_unregister_class(GAME_NAME ".demo", &Updated))
+	if(!windows_shell_unregister_class(GAME_NAME ".demo", &Updated))
 		log_error("client", "Failed to unregister .demo file extension");
-	if(!shell_unregister_application(aFullPath, &Updated))
+	if(!windows_shell_unregister_application(aFullPath, &Updated))
 		log_error("client", "Failed to unregister application");
 	if(Updated)
-		shell_update();
+		windows_shell_update();
 }
 #endif
 

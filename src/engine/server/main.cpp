@@ -1,5 +1,6 @@
 #include <base/logger.h>
 #include <base/system.h>
+#include <base/windows.h>
 
 #include <engine/console.h>
 #include <engine/engine.h>

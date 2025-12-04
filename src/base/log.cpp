@@ -1,6 +1,7 @@
 #include "color.h"
 #include "logger.h"
 #include "system.h"
+#include "windows.h"
 
 #include <atomic>
 #include <cstdio>
