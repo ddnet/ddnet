@@ -515,7 +515,10 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 
 	CUIRect SearchInfoAndAddr, ServersAndConnect, ServersPlayersOnline, SearchAndInfo, ServerAddr, ConnectButtons;
-	StatusBox.VSplitRight(135.0f, &SearchInfoAndAddr, &ServersAndConnect);
+	const char *pNoLoginRequiredText = Localize("No login required");
+	const float NoLoginRequiredTextWidth = TextRender()->TextWidth(14.0f, pNoLoginRequiredText);
+	const float NoLoginRequiredCheckBoxWidth = 18.0f + NoLoginRequiredTextWidth + 5.0f;  // checkbox margin + text + right margin
+	StatusBox.VSplitRight(135.0f + NoLoginRequiredCheckBoxWidth, &SearchInfoAndAddr, &ServersAndConnect);
 	if(SearchInfoAndAddr.w > 350.0f)
 		SearchInfoAndAddr.VSplitLeft(350.0f, &SearchInfoAndAddr, nullptr);
 	SearchInfoAndAddr.HSplitTop(40.0f, &SearchAndInfo, &ServerAddr);
@@ -618,8 +621,16 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 
 	// buttons
 	{
-		CUIRect ButtonRefresh, ButtonConnect;
+		CUIRect CheckBoxNoLoginRequired, ButtonRefresh, ButtonConnect;
+
+		ConnectButtons.VSplitLeft(NoLoginRequiredCheckBoxWidth, &CheckBoxNoLoginRequired, &ConnectButtons);
 		ConnectButtons.VSplitMid(&ButtonRefresh, &ButtonConnect, 5.0f);
+
+		// no login required checkbox
+		{
+			if(DoButton_CheckBox(&g_Config.m_BrFilterLogin, pNoLoginRequiredText, g_Config.m_BrFilterLogin, &CheckBoxNoLoginRequired))
+				g_Config.m_BrFilterLogin ^= 1;
+		}
 
 		// refresh button
 		{
@@ -706,10 +717,6 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	View.HSplitTop(RowHeight, &Button, &View);
 	if(DoButton_CheckBox(&g_Config.m_BrFilterPw, Localize("No password"), g_Config.m_BrFilterPw, &Button))
 		g_Config.m_BrFilterPw ^= 1;
-
-	View.HSplitTop(RowHeight, &Button, &View);
-	if(DoButton_CheckBox(&g_Config.m_BrFilterLogin, Localize("No login required"), g_Config.m_BrFilterLogin, &Button))
-		g_Config.m_BrFilterLogin ^= 1;
 
 	View.HSplitTop(RowHeight, &Button, &View);
 	if(DoButton_CheckBox(&g_Config.m_BrFilterGametypeStrict, Localize("Strict gametype filter"), g_Config.m_BrFilterGametypeStrict, &Button))
