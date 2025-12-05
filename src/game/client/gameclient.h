@@ -905,7 +905,6 @@ private:
 	// tunings for every zone on the map, 0 is a global tune
 	CTuningParams m_aTuningList[TuneZone::NUM];
 	CTuningParams *TuningList() { return m_aTuningList; }
-	int m_NumEnvs;
 
 	float m_LastShowDistanceZoom;
 	float m_LastZoom;

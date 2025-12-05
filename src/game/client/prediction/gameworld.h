@@ -38,7 +38,8 @@ public:
 
 	CGameWorld();
 	~CGameWorld();
-	void Init(CCollision *pCollision, CTuningParams *pTuningList, const CMapBugs *pMapBugs, int NumEnvelopes);
+	void Init(CCollision *pCollision, CTuningParams *pTuningList, const CMapBugs *pMapBugs);
+	void SetNumEnvelopes(int NumEnvelopes) { m_NumEnvelopes = NumEnvelopes; }
 
 	CEntity *FindFirst(int Type);
 	CEntity *FindLast(int Type);

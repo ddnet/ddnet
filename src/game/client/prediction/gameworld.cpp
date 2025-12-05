@@ -50,12 +50,11 @@ CGameWorld::~CGameWorld()
 		m_pParent->m_pChild = nullptr;
 }
 
-void CGameWorld::Init(CCollision *pCollision, CTuningParams *pTuningList, const CMapBugs *pMapBugs, int NumEnvelopes)
+void CGameWorld::Init(CCollision *pCollision, CTuningParams *pTuningList, const CMapBugs *pMapBugs)
 {
 	m_pCollision = pCollision;
 	m_pTuningList = pTuningList;
 	m_pMapBugs = pMapBugs;
-	m_NumEnvelopes = NumEnvelopes;
 }
 
 CEntity *CGameWorld::FindFirst(int Type)
