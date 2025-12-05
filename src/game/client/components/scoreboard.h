@@ -56,9 +56,18 @@ class CScoreboard : public CComponent
 
 		int m_ClientId;
 		bool m_IsLocal;
+		bool m_IsSpectating;
 	} m_ScoreboardPopupContext;
 
 	static CUi::EPopupMenuFunctionResult PopupScoreboard(void *pContext, CUIRect View, bool Active);
+
+	class CPlayerElement
+	{
+	public:
+		char m_PlayerButtonId;
+		char m_SpectatorSecondLineButtonId;
+	};
+	CPlayerElement m_aPlayers[MAX_CLIENTS];
 
 public:
 	CScoreboard();
