@@ -25,7 +25,7 @@ using namespace FontIcons;
 
 static constexpr ColorRGBA gs_HighlightedTextColor = ColorRGBA(0.4f, 0.4f, 1.0f, 1.0f);
 
-static ColorRGBA PlayerBackgroundColor(bool Friend, bool Clan, bool Afk, bool Inside)
+static ColorRGBA PlayerBackgroundColor(bool Friend, bool Clan, bool Afk, bool InSelectedServer, bool Inside)
 {
 	static const ColorRGBA COLORS[] = {ColorRGBA(0.5f, 1.0f, 0.5f), ColorRGBA(0.4f, 0.4f, 1.0f), ColorRGBA(0.75f, 0.75f, 0.75f)};
 	static const ColorRGBA COLORS_AFK[] = {ColorRGBA(1.0f, 1.0f, 0.5f), ColorRGBA(0.4f, 0.75f, 1.0f), ColorRGBA(0.6f, 0.6f, 0.6f)};
@@ -36,7 +36,7 @@ static ColorRGBA PlayerBackgroundColor(bool Friend, bool Clan, bool Afk, bool In
 		i = 1;
 	else
 		i = 2;
-	return (Afk ? COLORS_AFK[i] : COLORS[i]).WithAlpha(Inside ? 0.45f : 0.3f);
+	return (Afk ? COLORS_AFK[i] : COLORS[i]).WithAlpha(0.3f + (Inside ? 0.15f : 0.0f) + (InSelectedServer ? 0.12f : 0.0f));
 }
 
 template<size_t N>
@@ -1269,7 +1269,7 @@ void CMenus::RenderServerbrowserInfoScoreboard(CUIRect View, const CServerInfo *
 		CUIRect Skin, Name, Clan, Score, Flag;
 		Name = Item.m_Rect;
 
-		const ColorRGBA Color = PlayerBackgroundColor(CurrentClient.m_FriendState == IFriends::FRIEND_PLAYER, CurrentClient.m_FriendState == IFriends::FRIEND_CLAN, CurrentClient.m_Afk, false);
+		const ColorRGBA Color = PlayerBackgroundColor(CurrentClient.m_FriendState == IFriends::FRIEND_PLAYER, CurrentClient.m_FriendState == IFriends::FRIEND_CLAN, CurrentClient.m_Afk, false, false);
 		Name.Draw(Color, IGraphics::CORNER_ALL, 4.0f);
 		Name.VSplitLeft(1.0f, nullptr, &Name);
 		Name.VSplitLeft(34.0f, &Score, &Name);
@@ -1523,7 +1523,11 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 				{
 					GameClient()->m_Tooltips.DoToolTip(Friend.ListItemId(), &Rect, Localize("Click to select server. Double click to join your friend."));
 				}
-				const ColorRGBA Color = PlayerBackgroundColor(FriendType == FRIEND_PLAYER_ON, FriendType == FRIEND_CLAN_ON, FriendType == FRIEND_OFF ? true : Friend.IsAfk(), Inside);
+
+				// Compare unsorted server id of the friend with the unsorted id of the currently selected server
+				bool InSelectedServer = m_SelectedIndex >= 0 && Friend.ServerInfo() && Friend.ServerInfo()->m_ServerIndex == ServerBrowser()->SortedGet(m_SelectedIndex)->m_ServerIndex;
+
+				const ColorRGBA Color = PlayerBackgroundColor(FriendType == FRIEND_PLAYER_ON, FriendType == FRIEND_CLAN_ON, FriendType == FRIEND_OFF ? true : Friend.IsAfk(), InSelectedServer, Inside);
 				Rect.Draw(Color, IGraphics::CORNER_ALL, 5.0f);
 				Rect.Margin(2.0f, &Rect);
 
