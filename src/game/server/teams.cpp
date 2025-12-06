@@ -727,7 +727,7 @@ void CGameTeams::OnTeamFinish(int Team, CPlayer **Players, unsigned int Size, in
 	{
 		aPlayerCids[i] = Players[i]->GetCid();
 
-		if(g_Config.m_SvRejoinTeam0 && g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && (!IsValidTeamNumber(m_Core.Team(Players[i]->GetCid())) || !m_aTeamLocked[m_Core.Team(Players[i]->GetCid())]))
+		if(g_Config.m_SvRejoinTeam0 && g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && !m_aTeamLocked[m_Core.Team(Players[i]->GetCid())])
 		{
 			SetForceCharacterTeam(Players[i]->GetCid(), TEAM_FLOCK);
 			char aBuf[512];
@@ -1185,7 +1185,7 @@ void CGameTeams::OnCharacterSpawn(int ClientId)
 	if(GetSaving(Team))
 		return;
 
-	if(!IsValidTeamNumber(Team) || !m_aTeamLocked[Team])
+	if(!m_aTeamLocked[Team])
 	{
 		if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO)
 			SetForceCharacterTeam(ClientId, TEAM_FLOCK);
@@ -1275,13 +1275,15 @@ void CGameTeams::OnCharacterDeath(int ClientId, int Weapon)
 
 void CGameTeams::SetTeamLock(int Team, bool Lock)
 {
-	if(Team != TEAM_FLOCK && IsValidTeamNumber(Team))
+	AssertValidTeamNumber(Team);
+	if(Team != TEAM_FLOCK)
 		m_aTeamLocked[Team] = Lock;
 }
 
 void CGameTeams::SetTeamFlock(int Team, bool Mode)
 {
-	if(Team != TEAM_FLOCK && IsValidTeamNumber(Team))
+	AssertValidTeamNumber(Team);
+	if(Team != TEAM_FLOCK)
 		m_aTeamFlock[Team] = Mode;
 }
 
@@ -1292,7 +1294,8 @@ void CGameTeams::ResetInvited(int Team)
 
 void CGameTeams::SetClientInvited(int Team, int ClientId, bool Invited)
 {
-	if(Team != TEAM_FLOCK && IsValidTeamNumber(Team))
+	AssertValidTeamNumber(Team);
+	if(Team != TEAM_FLOCK)
 	{
 		if(Invited)
 			m_aInvited[Team].set(ClientId);
@@ -1357,7 +1360,8 @@ ETeamState CGameTeams::GetTeamState(int Team) const
 
 bool CGameTeams::TeamLocked(int Team) const
 {
-	if(Team == TEAM_FLOCK || !IsValidTeamNumber(Team))
+	AssertValidTeamNumber(Team);
+	if(Team == TEAM_FLOCK)
 		return false;
 
 	return m_aTeamLocked[Team];
@@ -1365,8 +1369,9 @@ bool CGameTeams::TeamLocked(int Team) const
 
 bool CGameTeams::TeamFlock(int Team) const
 {
+	AssertValidTeamNumber(Team);
 	// this is for team0mode, TEAM_FLOCK is handled differently
-	if(Team == TEAM_FLOCK || !IsValidTeamNumber(Team))
+	if(Team == TEAM_FLOCK)
 		return false;
 
 	return m_aTeamFlock[Team];
@@ -1399,8 +1404,7 @@ void CGameTeams::SetSaving(int TeamId, std::shared_ptr<CScoreSaveResult> &SaveRe
 
 bool CGameTeams::GetSaving(int TeamId) const
 {
-	if(!IsValidTeamNumber(TeamId))
-		return false;
+	AssertValidTeamNumber(TeamId);
 	if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && TeamId == TEAM_FLOCK)
 		return false;
 
@@ -1409,8 +1413,7 @@ bool CGameTeams::GetSaving(int TeamId) const
 
 void CGameTeams::SetPractice(int Team, bool Enabled)
 {
-	if(!IsValidTeamNumber(Team))
-		return;
+	AssertValidTeamNumber(Team);
 	if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team == TEAM_FLOCK)
 	{
 		// allow to enable practice in team 0, for practice by default
@@ -1423,8 +1426,7 @@ void CGameTeams::SetPractice(int Team, bool Enabled)
 
 bool CGameTeams::IsPractice(int Team)
 {
-	if(!IsValidTeamNumber(Team))
-		return false;
+	AssertValidTeamNumber(Team);
 	if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team == TEAM_FLOCK)
 	{
 		if(GameServer()->PracticeByDefault())
@@ -1438,5 +1440,10 @@ bool CGameTeams::IsPractice(int Team)
 
 bool CGameTeams::IsValidTeamNumber(int Team) const
 {
-	return Team >= TEAM_FLOCK && Team < NUM_DDRACE_TEAMS - 1; // no TEAM_SUPER
+	return m_Core.IsValidTeam(Team);
+}
+
+void CGameTeams::AssertValidTeamNumber(int Team) const
+{
+	m_Core.AssertValidTeam(Team);
 }
