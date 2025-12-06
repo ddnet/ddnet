@@ -2358,8 +2358,8 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 			if(m_aClients[i].m_Score.has_value())
 			{
 				Score = m_aClients[i].m_Score.value();
-				if(Score == 9999)
-					Score = -10000;
+				if(Score == -FinishTime::NOT_FINISHED_TIMESCORE)
+					Score = FinishTime::NOT_FINISHED_TIMESCORE - 1;
 				else if(Score == 0) // 0 time isn't displayed otherwise.
 					Score = -1;
 				else
@@ -2367,7 +2367,7 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 			}
 			else
 			{
-				Score = -9999;
+				Score = FinishTime::NOT_FINISHED_TIMESCORE;
 			}
 
 			ADD_INT(q, Score); // client score
@@ -2701,7 +2701,7 @@ void CServer::UpdateRegisterServerInfo()
 			JsonWriter.WriteIntValue(m_aClients[i].m_Country); // ISO 3166-1 numeric
 
 			JsonWriter.WriteAttribute("score");
-			JsonWriter.WriteIntValue(m_aClients[i].m_Score.value_or(-9999));
+			JsonWriter.WriteIntValue(m_aClients[i].m_Score.value_or(FinishTime::NOT_FINISHED_TIMESCORE));
 
 			JsonWriter.WriteAttribute("is_player");
 			JsonWriter.WriteBoolValue(GameServer()->IsClientPlayer(i));
