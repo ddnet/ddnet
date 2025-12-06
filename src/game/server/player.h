@@ -235,6 +235,7 @@ public:
 	bool m_NotEligibleForFinish;
 	int64_t m_EligibleForFinishCheck;
 	bool m_VotedForPractice;
+	bool m_VotedForTeam0Mode;
 	int m_SwapTargetsClientId; //Client ID of the swap target for the given player
 	bool m_BirthdayAnnounced;
 
