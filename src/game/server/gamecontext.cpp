@@ -2012,11 +2012,10 @@ void *CGameContext::PreProcessMsg(int *pMsgId, CUnpacker *pUnpacker, int ClientI
 			pMsg->m_pClan = pMsg7->m_pClan;
 			pMsg->m_Country = pMsg7->m_Country;
 
-			CTeeInfo Info(pMsg7->m_apSkinPartNames, pMsg7->m_aUseCustomColors, pMsg7->m_aSkinPartColors);
-			Info.FromSixup();
-			pPlayer->m_TeeInfos = Info;
+			pPlayer->m_TeeInfos = CTeeInfo(pMsg7->m_apSkinPartNames, pMsg7->m_aUseCustomColors, pMsg7->m_aSkinPartColors);
+			pPlayer->m_TeeInfos.FromSixup();
 
-			str_copy(s_aRawMsg + sizeof(*pMsg), Info.m_aSkinName, sizeof(s_aRawMsg) - sizeof(*pMsg));
+			str_copy(s_aRawMsg + sizeof(*pMsg), pPlayer->m_TeeInfos.m_aSkinName, sizeof(s_aRawMsg) - sizeof(*pMsg));
 
 			pMsg->m_pSkin = s_aRawMsg + sizeof(*pMsg);
 			pMsg->m_UseCustomColor = pPlayer->m_TeeInfos.m_UseCustomColor;
