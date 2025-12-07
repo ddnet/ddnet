@@ -2173,7 +2173,7 @@ Adjust the opacity of entities belonging to other teams, such as tees and name p
 Show others (own team only)
 == 
 
-Show quads
+Show background quads
 == 
 
 Quads are used for background decoration
@@ -2329,6 +2329,9 @@ Spectate previous
 Screenshot
 == 
 
+Scoreboard cursor
+== 
+
 Statboard
 == 
 
@@ -2451,6 +2454,21 @@ Draw!
 == 
 
 Game over
+== 
+
+Add friend
+== 
+
+Unmute
+== 
+
+Mute
+== 
+
+Unmute emoticons
+== 
+
+Mute emoticons
 == 
 
 [skins]

@@ -607,9 +607,6 @@ Overlay entities
 Show others
 == 顯示其他玩家
 
-Show quads
-== 顯示背景
-
 Default zoom
 == 預設縮放
 
@@ -2517,4 +2514,25 @@ You will be disconnected from the server.
 == 
 
 Are you sure that you want to disconnect and play this demo?
+== 
+
+Show background quads
+== 
+
+Scoreboard cursor
+== 
+
+Add friend
+== 
+
+Unmute
+== 
+
+Mute
+== 
+
+Unmute emoticons
+== 
+
+Mute emoticons
 == 

@@ -919,9 +919,6 @@ Show text entities
 Show others (own team only)
 == 팀 내의 다른 플레이어 표시
 
-Show quads
-== 배경 표시
-
 AntiPing
 == 안티 핑
 
@@ -2517,4 +2514,25 @@ You will be disconnected from the server.
 == 
 
 Are you sure that you want to disconnect and play this demo?
+== 
+
+Show background quads
+== 
+
+Scoreboard cursor
+== 
+
+Add friend
+== 
+
+Unmute
+== 
+
+Mute
+== 
+
+Unmute emoticons
+== 
+
+Mute emoticons
 == 
