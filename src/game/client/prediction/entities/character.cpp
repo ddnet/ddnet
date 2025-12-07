@@ -1033,7 +1033,6 @@ void CCharacter::HandleEnvelopeTriggerTiles(int MapIndex)
 		if(GameWorld()->EnvTriggerList().contains(TriggerZoneId) && m_LastEnvelopeTriggerZone != TriggerZoneId)
 		{
 			m_LastEnvelopeTriggerZone = TriggerZoneId;
-			int HitTime = GameWorld()->GameTick();
 			const CEnvelopeTriggerZone &TriggerZone = GameWorld()->EnvTriggerList()[TriggerZoneId];
 
 			// copy state from zone so they are used by the rendering automatically

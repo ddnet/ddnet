@@ -200,7 +200,7 @@ void CEnvelopeTriggerState::Update(std::chrono::nanoseconds &Time)
 		}
 		else
 		{
-			m_CurrentTime = m_Duration;
+			m_CurrentTime = std::chrono::nanoseconds::zero();
 			m_IsPlaying = false;
 		}
 	}

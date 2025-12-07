@@ -114,7 +114,7 @@ public:
 
 	std::unordered_map<int, CEnvelopeTriggerZone> &EnvTriggerList() { return m_EnvTriggerList; }
 	std::unordered_map<int, CEnvelopeTriggerState> &EnvTriggerState() { return m_EnvTriggerState; }
-	const int NumEnvelopes() const { return m_NumEnvelopes; }
+	int NumEnvelopes() const { return m_NumEnvelopes; }
 
 private:
 	void RemoveEntities();
