@@ -3,8 +3,6 @@
 #include <game/client/gameclient.h>
 #include <game/localization.h>
 
-using namespace std::chrono_literals;
-
 CEnvelopeState::CEnvelopeState(IMap *pMap, bool OnlineOnly) :
 	m_pMap(pMap)
 {
@@ -53,7 +51,7 @@ void CEnvelopeState::EnvelopeEval(int TimeOffsetMillis, int EnvelopeIndex, Color
 			Time = duration_cast<nanoseconds>(TickRatio * NanosPerTick()) + MinTick * NanosPerTick();
 
 			// handle envelope triggers
-			auto EnvelopeState = GameClient()->m_GameWorld.EnvTriggerState().find(Env);
+			auto EnvelopeState = GameClient()->m_GameWorld.EnvTriggerState().find(EnvelopeIndex);
 			if(EnvelopeState != GameClient()->m_GameWorld.EnvTriggerState().end())
 			{
 				CEnvelopeTriggerState &TriggerState = EnvelopeState->second;
@@ -81,12 +79,6 @@ void CEnvelopeState::EnvelopeEval(int TimeOffsetMillis, int EnvelopeIndex, Color
 	}
 
 	CRenderMap::RenderEvalEnvelope(m_pEnvelopePoints.get(), Time + milliseconds(TimeOffsetMillis), Result, Channels);
-}
-
-constexpr std::chrono::nanoseconds CEnvelopeState::NanosPerTick()
-{
-	// I can't use Client()->GameTickSpeed() here
-	return std::chrono::nanoseconds(1s) / static_cast<int64_t>(50);
 }
 
 std::chrono::milliseconds CEnvelopeState::EnvelopeDuration() const
@@ -200,7 +192,7 @@ void CEnvelopeTriggerState::Update(std::chrono::nanoseconds &Time)
 		}
 		else
 		{
-			m_CurrentTime = m_Duration;
+			m_CurrentTime = std::chrono::nanoseconds::zero();
 			m_IsPlaying = false;
 		}
 	}

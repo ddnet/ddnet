@@ -390,6 +390,12 @@ Objects = [
 		NetIntAny("m_EntityClass"),
 	]),
 
+	# Envelope info for animations
+	NetObjectEx("EnvelopeTrigger", "envelope-trigger@netobj.ddnet.tw", [
+		NetTick("m_StartTick"),
+		NetIntAny("m_Type"),
+	]),
+
 	NetEventEx("MapSoundWorld:Common", "map-sound-world@netevent.ddnet.org", [
 		NetIntAny("m_SoundId"),
 	]),

@@ -1021,19 +1021,32 @@ void CCharacter::HandleEnvelopeTriggerTiles(int MapIndex)
 	if(MapIndex < 0)
 	{
 		m_LastEnvelopeTriggerZone = -1;
+		return;
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_ENV_TRIGGER)
-	{
-		int StartDelay = Collision()->GetSwitchDelay(MapIndex);
-		int TriggerZoneId = Collision()->GetSwitchNumber(MapIndex);
 
-		// lets support 256^2 trigger zones
-		TriggerZoneId = TriggerZoneId + StartDelay * 256;
+	int TuneZone = Collision()->IsTune(MapIndex);
+	bool IsEnvTrigger = Collision()->GetSwitchType(MapIndex) == TILE_ENV_TRIGGER;
+
+	if(IsEnvTrigger || TuneZone > 0)
+	{
+		int TriggerZoneId;
+
+		if(!IsEnvTrigger && TuneZone > 0)
+		{
+			TriggerZoneId = GameWorld()->TuneZoneToEnvZone()[TuneZone];
+		}
+		else
+		{
+			int StartDelay = Collision()->GetSwitchDelay(MapIndex);
+			TriggerZoneId = Collision()->GetSwitchNumber(MapIndex);
+
+			// we are supporting 256^2 - 1 trigger zones
+			TriggerZoneId = TriggerZoneId + StartDelay * 256;
+		}
 
 		if(GameWorld()->EnvTriggerList().contains(TriggerZoneId) && m_LastEnvelopeTriggerZone != TriggerZoneId)
 		{
 			m_LastEnvelopeTriggerZone = TriggerZoneId;
-			int HitTime = GameWorld()->GameTick();
 			const CEnvelopeTriggerZone &TriggerZone = GameWorld()->EnvTriggerList()[TriggerZoneId];
 
 			// copy state from zone so they are used by the rendering automatically

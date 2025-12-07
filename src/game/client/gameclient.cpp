@@ -193,6 +193,7 @@ void CGameClient::OnConsoleInit()
 	Console()->Register("tune", "s[tuning] ?f[value]", CFGFLAG_GAME, ConTuneParam, this, "Tune variable to value");
 	Console()->Register("tune_zone", "i[zone] s[tuning] f[value]", CFGFLAG_GAME, ConTuneZone, this, "Tune in zone a variable to value");
 	Console()->Register("env_trigger", "i[zone] i[env] s[trigger_type]", CFGFLAG_GAME, ConEnvTrigger, this, "Set a trigger type for an env in a trigger zone");
+	Console()->Register("tune_zone_env_trigger", "i[zone] i[envzone]", CFGFLAG_GAME, ConTuneZoneEnvTrigger, this, "Make a tune zone activate an env zone");
 	Console()->Register("mapbug", "s[mapbug]", CFGFLAG_GAME, ConMapbug, this, "Enable map compatibility mode using the specified bug (example: grenade-doubleexplosion@ddnet.tw)");
 
 	for(auto &pComponent : m_vpAll)
@@ -1987,6 +1988,27 @@ void CGameClient::OnNewSnapshot()
 				else
 					m_aSwitchStateTeam[g_Config.m_ClDummy] = -1;
 				GotSwitchStateTeam = true;
+			}
+			else if(Item.m_Type == NETOBJTYPE_ENVELOPETRIGGER)
+			{
+				const CNetObj_EnvelopeTrigger *pEnvelopeData = static_cast<const CNetObj_EnvelopeTrigger *>(Item.m_pData);
+				int EnvelopeId = Item.m_Id;
+				if(EnvelopeId >= 0 &&
+					pEnvelopeData->m_Type >= 0 && pEnvelopeData->m_Type < NUM_ENV_TRIGGERS &&
+					pEnvelopeData->m_StartTick <= Client()->GameTick(g_Config.m_ClDummy))
+				{
+					auto LastStateIt = m_GameWorld.EnvTriggerState().find(EnvelopeId);
+					CEnvelopeTriggerState *pOldState = nullptr;
+					if(LastStateIt != m_GameWorld.EnvTriggerState().end())
+					{
+						pOldState = &LastStateIt->second;
+					}
+
+					std::chrono::nanoseconds EnvelopeTime = (Client()->GameTick(g_Config.m_ClDummy) - pEnvelopeData->m_StartTick) * CEnvelopeState::NanosPerTick();
+					CEnvelopeTriggerState State((EEnvelopeTriggerType)pEnvelopeData->m_Type, pOldState);
+					State.SetEnvelopeTime(EnvelopeTime);
+					m_GameWorld.EnvTriggerState()[EnvelopeId] = State;
+				}
 			}
 		}
 	}
@@ -4641,6 +4663,18 @@ void CGameClient::ConEnvTrigger(IConsole::IResult *pResult, void *pUserData)
 		EnvTrigger.m_State = CEnvelopeTrigger::FromName(pTriggerName);
 
 		TriggerZone.m_EnvTriggers.emplace_back(EnvTrigger);
+	}
+}
+
+void CGameClient::ConTuneZoneEnvTrigger(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameClient *pSelf = (CGameClient *)pUserData;
+	int TuneZoneId = pResult->GetInteger(0);
+	int EnvZoneId = pResult->GetInteger(1);
+
+	if(TuneZoneId >= 0 && TuneZoneId < 256 && EnvZoneId >= 0 && EnvZoneId < 256 * 256)
+	{
+		pSelf->m_GameWorld.TuneZoneToEnvZone()[TuneZoneId] = EnvZoneId;
 	}
 }
 
