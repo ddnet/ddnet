@@ -637,8 +637,14 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 	m_pMapBugs = pFrom->m_pMapBugs;
 	m_Teams = pFrom->m_Teams;
 	m_Core.m_vSwitchers = pFrom->m_Core.m_vSwitchers;
+
+	m_EnvTriggerList = pFrom->m_EnvTriggerList;
+	m_EnvTriggerState = pFrom->m_EnvTriggerState;
+	m_TuneZoneToEnvZone = pFrom->m_TuneZoneToEnvZone;
+
 	// delete the previous entities
 	Clear();
+
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		m_apCharacters[i] = nullptr;

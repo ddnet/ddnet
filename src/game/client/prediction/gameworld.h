@@ -114,7 +114,9 @@ public:
 
 	std::unordered_map<int, CEnvelopeTriggerZone> &EnvTriggerList() { return m_EnvTriggerList; }
 	std::unordered_map<int, CEnvelopeTriggerState> &EnvTriggerState() { return m_EnvTriggerState; }
-	const int NumEnvelopes() const { return m_NumEnvelopes; }
+	std::unordered_map<int, int> &TuneZoneToEnvZone() { return m_TuneZoneToEnvZone; }
+
+	int NumEnvelopes() const { return m_NumEnvelopes; }
 
 private:
 	void RemoveEntities();
@@ -131,6 +133,7 @@ private:
 	// give up on an array datatype, this is sparse or used to infinity
 	std::unordered_map<int, CEnvelopeTriggerZone> m_EnvTriggerList;
 	std::unordered_map<int, CEnvelopeTriggerState> m_EnvTriggerState;
+	std::unordered_map<int, int> m_TuneZoneToEnvZone;
 	int m_NumEnvelopes;
 };
 
