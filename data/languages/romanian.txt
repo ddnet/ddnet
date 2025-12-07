@@ -1750,9 +1750,6 @@ Adjust the opacity of entities belonging to other teams, such as tees and name p
 Show others (own team only)
 == Arată alții (doar echipa proprie)
 
-Show quads
-== Arată quad-urile
-
 Quads are used for background decoration
 == Quad-urile sunt utilizate pentru decorarea fundalului
 
@@ -2516,5 +2513,26 @@ Dragger Outline Color
 Dragger Inner Color
 == 
 
+Show background quads
+== 
+
+Scoreboard cursor
+== 
+
 Download
+== 
+
+Add friend
+== 
+
+Unmute
+== 
+
+Mute
+== 
+
+Unmute emoticons
+== 
+
+Mute emoticons
 == 

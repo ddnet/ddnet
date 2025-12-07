@@ -1844,9 +1844,6 @@ Adjust the opacity of entities belonging to other teams, such as tees and name p
 Show others (own team only)
 == Mostrar outros (apenas a tua equipa)
 
-Show quads
-== Mostrar quadriláteros
-
 Quads are used for background decoration
 == Os quadriláteros são usados para decoração de fundo
 
@@ -2510,10 +2507,31 @@ Dragger Outline Color
 Dragger Inner Color
 == 
 
+Show background quads
+== 
+
 AntiPing: prediction margin
 == 
 
+Scoreboard cursor
+== 
+
 Download
+== 
+
+Add friend
+== 
+
+Unmute
+== 
+
+Mute
+== 
+
+Unmute emoticons
+== 
+
+Mute emoticons
 == 
 
 https://wiki.ddnet.org/wiki/Mapping

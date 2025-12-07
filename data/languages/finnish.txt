@@ -1714,9 +1714,6 @@ Show text entities
 Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == Säädä muiden joukkueiden entiteettien, kuten teen ja nimilaattojen, läpinäkyvyyttä
 
-Show quads
-== Näytä quadit
-
 Quads are used for background decoration
 == Quadit ovat taustakoristelua varten
 
@@ -2442,6 +2439,9 @@ Dragger Outline Color
 Dragger Inner Color
 == 
 
+Show background quads
+== 
+
 AntiPing: prediction margin
 == 
 
@@ -2463,6 +2463,9 @@ Unable to delete skin
 Converse
 == 
 
+Scoreboard cursor
+== 
+
 Download
 == 
 
@@ -2475,6 +2478,21 @@ Download
 == 
 
 Team %d (%d/%d)
+== 
+
+Add friend
+== 
+
+Unmute
+== 
+
+Mute
+== 
+
+Unmute emoticons
+== 
+
+Mute emoticons
 == 
 
 [skins]

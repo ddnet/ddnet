@@ -832,9 +832,6 @@ Show text entities
 Show others (own team only)
 == Mostrar otros (solo equipo propio)
 
-Show quads
-== Mostrar quads
-
 AntiPing
 == AntiPing
 
@@ -2517,4 +2514,25 @@ You will be disconnected from the server.
 == 
 
 Are you sure that you want to disconnect and play this demo?
+== 
+
+Show background quads
+== 
+
+Scoreboard cursor
+== 
+
+Add friend
+== 
+
+Unmute
+== 
+
+Mute
+== 
+
+Unmute emoticons
+== 
+
+Mute emoticons
 == 

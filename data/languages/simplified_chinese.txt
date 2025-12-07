@@ -607,9 +607,6 @@ Overlay entities
 Show others
 == 显示其他玩家
 
-Show quads
-== 显示背景
-
 Default zoom
 == 默认缩放
 
@@ -647,7 +644,7 @@ Check now
 == 检查更新
 
 Loading DDNet Client
-== 加载 DDNet 客户端中…
+== 正在加载 DDNet 客户端
 
 Browser
 == 浏览
@@ -893,13 +890,13 @@ Please enter your nickname below.
 == 请在下方输入你的昵称。
 
 Server best:
-== 服务器最佳
+== 服务器最佳:
 
 Learn
 == 教程 Wiki
 
 Personal best:
-== 个人最佳
+== 个人最佳：
 
 Render demo
 == 渲染回放
@@ -908,7 +905,7 @@ Replace video
 == 替换视频
 
 Video name:
-== 视频名称
+== 视频名称：
 
 Connect Dummy
 == 连接分身
@@ -1173,25 +1170,25 @@ Team %d
 == 队伍 %d
 
 Position:
-== 坐标
+== 坐标：
 
 Speed:
-== 速度
+== 速度：
 
 Angle:
-== 角度
+== 角度：
 
 Trying to determine UDP connectivity…
 == 正在尝试检测 UDP 连接…
 
 UDP seems to be filtered.
-== UDP 疑似被过滤
+== UDP 疑似被过滤。
 
 UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
 == UDP 与 TCP 的 IP 地址并不相同。请尝试屏蔽 VPN 、代理网络以及网络加速器。
 
 No answer from server yet.
-== 服务器无响应
+== 服务器无响应。
 
 Download community skins
 == 下载社区皮肤
@@ -1274,7 +1271,7 @@ Loading map file from storage
 == 正在从硬盘中加载地图文件
 
 Why are you slowmo replaying to read this?
-== 所以你为什么要慢速回放来看这个
+== 你为什么要慢放来读这段话？
 
 Initializing components
 == 正在初始化游戏引擎
@@ -1412,7 +1409,7 @@ Freeze Laser Inner Color
 == 冻结激光实心颜色
 
 Menu opened. Press Esc key again to close menu.
-== 菜单已打开，再次点击 Esc 以关闭
+== 菜单已打开，再次点击 Esc 以关闭。
 
 Set all to Rifle
 == 统一为激光枪颜色
@@ -1463,7 +1460,7 @@ An error during command recording occurred. Try to update your GPU drivers.
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
-== 渲染指令错误。请尝试更新显卡驱动程序
+== 渲染指令错误。请尝试更新显卡驱动程序。
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
@@ -1532,10 +1529,10 @@ Click to select server. Double click to join your friend.
 == 单击以选择此服务器。双击加入好友所在服务器。
 
 Click to remove this player from your friends list.
-== 单击从你的好友列表移除此玩家
+== 单击以从你的好友列表移除此玩家。
 
 Click to remove this clan from your friends list.
-== 单击从你的好友列表移除此战队
+== 单击以从你的好友列表移除此战队。
 
 Add Clan
 == 添加战队
@@ -1571,10 +1568,10 @@ Graphics card
 == 显卡
 
 Quitting. Please wait…
-== 正在退出，请稍等
+== 正在退出，请稍等…
 
 Restarting. Please wait…
-== 正在重启，请稍等
+== 正在重启，请稍等…
 
 Multi-View
 == 多人同框视角
@@ -1604,7 +1601,7 @@ Delete folder
 == 删除文件夹
 
 Unable to delete the folder '%s'. Make sure it's empty first.
-== 无法删除 "%s" ，请确保你已清空该文件夹
+== 无法删除 "%s" ，请确保你已清空该文件夹。
 
 Moved ingame
 == 游戏内移动
@@ -1657,7 +1654,7 @@ Created
 == 创建日期
 
 Netversion
-== Netversion
+== 网络协议版本
 
 [Demo details]
 map not included
@@ -1721,7 +1718,7 @@ Are you sure that you want to restart?
 == 确定要重新开始？
 
 There's an unsaved map in the editor, you might want to save it.
-== 编辑器中有尚未保存的地图，你或需要保存
+== 编辑器中有尚未保存的地图，你或需要保存。
 
 Continue anyway?
 == 仍要退出？
@@ -1917,10 +1914,10 @@ Online friends (%d)
 == 在线好友 (%d人)
 
 Add friends by entering their name below or by clicking their name in the player list.
-== 在下方输入好友名称或点击玩家列表中的好友名称即可添加好友
+== 在下方输入好友名称或点击玩家列表中的好友名称即可添加好友。
 
 Add clanmates by entering their clan below and leaving the name blank.
-== 在下方输入战队并留空名称即可添加战队
+== 在下方输入战队并留空名称即可添加战队。
 
 Edit touch controls
 == 编辑触控设置
@@ -2015,7 +2012,7 @@ Active: Hook
 == 当前：钩索
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
-== "%s" 与 pnglite 不兼容，无法被旧版本 DDNet 加载
+== "%s" 与 pnglite 不兼容，无法被旧版本 DDNet 加载：
 
 [Spectating Camera Mode Icon]
 AUTO
@@ -2215,7 +2212,7 @@ Could not check for existing player with your name. Check your internet connecti
 == 无法验证是否已存在相同名称的玩家。请检查你的网络连接。
 
 Press Ctrl+Shift+G to disable debug graphs.
-== 按下 Ctrl+Shift+G 以关闭调试图表
+== 按下 Ctrl+Shift+G 以关闭调试图表。
 
 Server could not be started
 == 无法启动服务器
@@ -2372,7 +2369,7 @@ Inactive color
 == 按键未激活时颜色
 
 Preview button visibility while the editor is active.
-== 按键编辑器打开时用于预览按键的可见度
+== 按键编辑器打开时用于预览按键的可见度。
 
 Show all buttons
 == 显示所有按键
@@ -2489,32 +2486,53 @@ Download
 == 下载
 
 Team save in progress. You'll be able to load with '/load %s'
-== 
+== 队伍正在存档中。完成后可使用 "/load %s" 继续
 
 Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails
-== 
+== 队伍正在存档中。成功后可使用 "/load %s"，失败时可使用 "/load %s" 继续
 
 Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue
-== 
+== 队伍已由 %s 成功存档。数据库连接失败，为避免冲突，改用生成的存档代码。使用 "/load %s" 以继续
 
 Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue
-== 
+== 队伍已由 %1$s 成功存档。数据库连接失败，为避免冲突，改用生成的存档代码。在 %3$s 上使用 "/load %2$s" 以继续
 
 Save failed!
-== 
+== 存档失败！
 
 [Important alert message]
 Press Esc or Tab to dismiss…
-== 
+== 按 Esc 或 Tab 关闭…
 
 Server alert
-== 
+== 服务器警告
 
 Moderator alert
-== 
+== 管理员警告
 
 You will be disconnected from the server.
-== 
+== 你即将从服务器断开连接。
 
 Are you sure that you want to disconnect and play this demo?
+== 确定要断开连接并播放此回放吗？
+
+Show background quads
+== 
+
+Scoreboard cursor
+== 
+
+Add friend
+== 
+
+Unmute
+== 
+
+Mute
+== 
+
+Unmute emoticons
+== 
+
+Mute emoticons
 == 

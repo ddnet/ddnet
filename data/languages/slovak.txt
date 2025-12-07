@@ -1575,9 +1575,6 @@ Adjust the opacity of entities belonging to other teams, such as tees and name p
 Show others (own team only)
 == Zobraziť ostatné (len vlastný tím)
 
-Show quads
-== Zobraziť quads
-
 Quads are used for background decoration
 == Quads sa používajú na dekoráciu pozadia
 
@@ -2517,4 +2514,25 @@ You will be disconnected from the server.
 == 
 
 Are you sure that you want to disconnect and play this demo?
+== 
+
+Show background quads
+== 
+
+Scoreboard cursor
+== 
+
+Add friend
+== 
+
+Unmute
+== 
+
+Mute
+== 
+
+Unmute emoticons
+== 
+
+Mute emoticons
 == 

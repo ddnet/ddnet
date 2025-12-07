@@ -886,9 +886,6 @@ Show text entities
 Show others (own team only)
 == Mostra altri (solo la propria squadra)
 
-Show quads
-== Mostra quads
-
 AntiPing
 == AntiPing
 
@@ -2399,6 +2396,9 @@ Only save improvements
 Overlay entities
 == 
 
+Show background quads
+== 
+
 AntiPing: prediction margin
 == 
 
@@ -2430,6 +2430,9 @@ Converse
 == 
 
 Chat command
+== 
+
+Scoreboard cursor
 == 
 
 Mouse
@@ -2478,6 +2481,21 @@ Super
 == 
 
 Team %d (%d/%d)
+== 
+
+Add friend
+== 
+
+Unmute
+== 
+
+Mute
+== 
+
+Unmute emoticons
+== 
+
+Mute emoticons
 == 
 
 [skins]

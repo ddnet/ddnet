@@ -2,37 +2,37 @@ Connected
 == Konektita
 
 Loading map file from storage
-== Ŝargas mapdosieron el la diskaparato
+== Ŝargas mapdosieron el konservejo
 
 Loading DDNet Client
-== Ŝargas DDNet
+== Ŝargas DDNet-klienton
 
 Warning
 == Averto
 
 All
-== Ĉio
+== Ĉiuj
 
 Team
 == Teamo
 
 Chat
-== Diskutejo
+== Babilejo
 
 Game paused
-== Paŭzata ludo
+== Ludo paŭzita
 
 Warmup
 == Trejnado
 
 Connection Problems…
-== Konekta problemoj…
+== Konektaj problemoj…
 
 Please balance teams!
 == Bonvolu ekvilibrigi teamojn!
 
 %ds left
-== Restas %ds
+== %ds restas
 
 Reason:
 == Kialo:
@@ -44,7 +44,7 @@ Vote no
 == Voĉdoni ne
 
 Speed:
-== Rapideco:
+== Rapido:
 
 Spectate
 == Spekti
@@ -56,13 +56,13 @@ News
 == Novaĵoj
 
 Internet
-== Internet
+== Interreto
 
 LAN
 == LAN
 
 Favorites
-== Favoratoj
+== Plej ŝatataj
 
 Game
 == Ludo
@@ -71,7 +71,7 @@ Players
 == Ludantoj
 
 Server info
-== Servila informoj
+== Servilaj informoj
 
 Browser
 == Retumilo
@@ -80,25 +80,25 @@ Ghost
 == Fantomo
 
 Call vote
-== Voĉdoni
+== Baloti
 
 Connecting to
-== Konektas al
+== Konektado al
 
 Abort
 == Nuligi
 
 Downloading map
-== Elŝutas mapon
+== Elŝutado de mapo
 
 Disconnected
 == Malkonektita
 
 Ok
-== Okej
+== Bone
 
 Reconnect in %d sec
-== Rekonektiĝos post %d sek
+== Rekonektos post %d sek
 
 Try again
 == Reprovi
@@ -107,37 +107,37 @@ Quit
 == Eliri
 
 Are you sure that you want to quit?
-== Ĉu vi certas eliri?
+== Ĉu vi certas ke vi volas eliri?
 
 Disconnect
 == Malkonektiĝi
 
 Are you sure that you want to disconnect?
-== Ĉu vi certas malkonektiĝi?
+== Ĉu vi certas ke vi volas malkonektiĝi?
 
 Disconnect Dummy
 == Malkonektigi pupon
 
 Are you sure that you want to disconnect your dummy?
-== Ĉu vi certas malkonektiĝi vian pupon?
+== Ĉu vi certas ke vi volas malkonektigi vian pupon?
 
 Welcome to DDNet
 == Bonvenon en DDNet
 
 Please enter your nickname below.
-== Bonvolu tajpi vian kromnomon.
+== Bonvolu entajpi vian kromnomon sube.
 
 Existing Player
 == Ekzista ludanto
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== Vian kromnomon '%s' estas jam uzata (%d poentoj). Ĉu vi tamen volas uzi ĝin?
+== Via kromnomo '%s' estas jam uzata (%d poentoj). Ĉu vi tamen volas uzi ĝin?
 
 Checking for existing player with your name
-== Kontrolas ekzistan ludanton kun via nomo
+== Kontrolas por ekzistan ludanton kun via nomo
 
 Are you sure that you want to disconnect and switch to a different server?
-== Ĉu vi certas malkonektiĝi kaj movi al alia servilo?
+== Ĉu vi certas ke vi volas malkonektiĝi kaj ŝanĝi al alia servilo?
 
 No
 == Ne
@@ -167,25 +167,25 @@ New name:
 == Nova nomo:
 
 Show chat
-== Montri la diskutejon
+== Montri babilejon
 
 Use sounds
 == Uzi sonojn
 
 Speed
-== Rapideco
+== Rapido
 
 Join Tutorial Server
-== Aliĝi al la lernila servilo
+== Aliĝi al lernila servilo
 
 Skip Tutorial
-== Pasi la lernilo
+== Preterpasi la lernilon
 
 Nickname
 == Kromnomo
 
 Theme
-== Temo
+== Etoso
 
 AFR
 == AFR
@@ -212,13 +212,13 @@ Type
 == Tipo
 
 Getting server list from master server
-== Elŝutas servilaro de ĉefa servilo
+== Akirado de servilaro de ĉefa servilo
 
 No servers found
-== Neniuj serviloj trovitaj
+== Neniu servilo trovita
 
 No servers match your filter criteria
-== Neniuj serviloj kun via filtro
+== Neniu servilo kun via filtro
 
 Search
 == Serĉi
@@ -230,7 +230,7 @@ Exclude
 == %d de %d serviloj
 
 %d of %d server
-== %d de %d servilo
+== servilo %d el %d
 
 %d players
 == %d ludantoj
@@ -239,7 +239,7 @@ Exclude
 == %d ludanto
 
 Server address:
-== Retadreso de servilo:
+== Servila adreso:
 
 Count players only
 == Nur nombri ludantojn
@@ -248,7 +248,7 @@ Show friends only
 == Nur montri amikojn
 
 No password
-== Neniu pasvorto
+== Sen pasvorto
 
 Game types:
 == Ludtipoj:
@@ -257,7 +257,7 @@ Countries
 == Landoj
 
 Favorite
-== Favorati
+== Plej ŝatata
 
 Name
 == Nomo
@@ -269,7 +269,7 @@ Add Friend
 == Aldoni amikon
 
 Remove chat
-== Malmontri la diskutejon
+== Malmontri babilejon
 
 Folder
 == Dosierujo
@@ -281,16 +281,16 @@ Connect Dummy
 == Konektigi pupon
 
 Connecting dummy
-== Pupo konektas
+== Konektigado de pupo
 
 Join red
-== Aliĝi al ruĝa taemo
+== Aniĝi la ruĝajn
 
 Join blue
-== Aliĝi al blua teamo
+== Aniĝi la bluajn
 
 Join game
-== Aliĝi al la ludo
+== Aliĝi al ludo
 
 Kill
 == Mortiĝi
@@ -302,10 +302,7 @@ Player
 == Ludanto
 
 Address
-== Retadreso
-
-Ping
-== Latenco
+== Adreso
 
 Version
 == Versio
@@ -320,7 +317,7 @@ Map
 == Mapo
 
 MOTD
-== MDLT
+== Mesaĝo de la tago
 
 Change settings
 == Ŝanĝi agordojn
@@ -332,13 +329,13 @@ Move player to spectators
 == Movi ludanton al spektantoj
 
 Force vote
-== Forci voĉdonon
+== Perforte baloti
 
 Vote description:
-== Voĉdona priskribo:
+== Balota priskribo:
 
 Vote command:
-== Voĉdona komando:
+== Balota komando:
 
 Add
 == Aldoni
@@ -365,13 +362,13 @@ Fire
 == Pafi
 
 Hook
-== Hoki
+== Hoko
 
 Show others
-== Montri aliaj
+== Montri aliulojn
 
 Show all
-== Montri ĉiuj
+== Montri ĉiujn
 
 Hammer
 == Martelo
@@ -404,7 +401,7 @@ Language
 == Lingvo
 
 General
-== Ĝenerala
+== Ĝeneralaj
 
 Appearance
 == Aspekto
@@ -422,7 +419,7 @@ Assets
 == Bildoj
 
 DDNet Client needs to be restarted to complete update!
-== Vi devas relanci DDNet por kompletigi la ĝisdatigon.
+== DDNet necesas esti relanĉota por kompletigi la ĝisdatigon!
 
 You must restart the game for all settings to take effect.
 == Vi devas relanci la ludon por aktivigi ĉiujn agordojn.
@@ -431,7 +428,7 @@ Show dummy actions
 == Montri la agojn de la pupo
 
 Team message
-== Mesaĝo de teamo
+== Teama mesaĝo
 
 Friend message
 == Mesaĝo de amiko
@@ -440,7 +437,7 @@ Normal message
 == Normala mesaĝo
 
 Preview
-== Antaŭrigardilo
+== Antaŭrigardo
 
 A Tee
 == Tejo
@@ -464,7 +461,7 @@ https://ddnet.org/discord
 == https://ddnet.org/discord
 
 Learn
-== Lerni
+== Ekscii
 
 https://wiki.ddnet.org/
 == https://wiki.ddnet.org/
@@ -482,7 +479,7 @@ Stop server
 == Halti servilon
 
 Run server
-== Lanci servilon
+== Lanĉi servilon
 
 Editor
 == Redaktilo
@@ -492,13 +489,13 @@ Play
 == Ludi
 
 DDNet %s is out!
-== DDNet %s estas disponebla!
+== DDNet %s eldonita!
 
 Downloading %s:
-== Elŝutas %s:
+== Elŝutado de %s:
 
 Restart
-== Relanci
+== Relanĉi
 
 Spectators
 == Spektantoj
@@ -526,31 +523,70 @@ Deaths
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Esperanto translation by dannyhpy
+== Esperanta traduko de dannyhpy kaj Szafranek13
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Iniciado fiaskis. Provu ŝanĝi gfx_backend al OpenGL aŭ Vulkan en settings_ddnet.cfg en la konfigura dosierujo kaj reprovu.
 
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== Manko de videomemoro. Provu agordi 'cl_skins_loaded_max' al pli malalta valoro aŭ forigi proprajn
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
-== 
+== Eraro dum registrada komando okazis. Provu ĝisdatigi peliloj por via grafika procesoro.
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
-== 
+== Bildiga komando fiaskis. Provu ĝisdatigi peliloj por via grafika procesoro.
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
-== 
+== Sendado de la bildigaj komandoj fiaskis. Provu ĝisdatigi peliloj por via grafika procesoro.
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
-== 
+== Fiaskis permuti kadrobufrojn. Provu ĝisdatigi peliloj por via grafika procesoro.
+
+Connect address error
+== Eraro en konekta adreso
+
+Press Ctrl+Shift+G to disable debug graphs.
+== Premi Ctrl+Shift+G por malŝalti sencimigajn grafeojn.
+
+Could not save downloaded map. Try manually deleting this file: %s
+== Ne eblis konservi elŝutitan mapon. Provu permane forigi ĉi tiun dosieron: %s
+
+Could not connect dummy
+== Ne eblis konekti pupon
+
+Error playing demo
+== Eraris ludante demon
+
+Successfully saved the replay!
+== Sukcese konservis la revidigon!
+
+Failed saving the replay!
+== Fiaskis konservi la revidigon!
+
+Sound error
+== Sona eraro
+
+The audio device couldn't be initialised.
+== La sonaparato ne povis esti pravalorizita.
+
+Saving settings to '%s' failed
+== Konservado de agordoj al '%s' fiaskis
+
+Error saving settings
+== Eraris konservante agordojn
+
+Replay feature is disabled!
+== Revidiga funkcio estas malŝaltita!
+
+No demo with this filename exists
+== Neekzistas demo kun tiu dosiernomo
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
@@ -565,45 +601,6 @@ Could not initialize the given graphics backend, this is probably because you di
 == 
 
 Could not resolve connect address '%s'. See local console for details.
-== 
-
-Connect address error
-== 
-
-Press Ctrl+Shift+G to disable debug graphs.
-== 
-
-Could not save downloaded map. Try manually deleting this file: %s
-== 
-
-Could not connect dummy
-== 
-
-Error playing demo
-== 
-
-Successfully saved the replay!
-== 
-
-Failed saving the replay!
-== 
-
-Sound error
-== 
-
-The audio device couldn't be initialised.
-== 
-
-Saving settings to '%s' failed
-== 
-
-Error saving settings
-== 
-
-Replay feature is disabled!
-== 
-
-No demo with this filename exists
 == 
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
@@ -928,6 +925,9 @@ The server is running a non-standard tuning on a pure game type.
 == 
 
 Loading menu images
+== 
+
+Ping
 == 
 
 No local servers found (ports %d-%d)
@@ -2173,7 +2173,7 @@ Adjust the opacity of entities belonging to other teams, such as tees and name p
 Show others (own team only)
 == 
 
-Show quads
+Show background quads
 == 
 
 Quads are used for background decoration
@@ -2329,6 +2329,9 @@ Spectate previous
 Screenshot
 == 
 
+Scoreboard cursor
+== 
+
 Statboard
 == 
 
@@ -2451,6 +2454,21 @@ Draw!
 == 
 
 Game over
+== 
+
+Add friend
+== 
+
+Unmute
+== 
+
+Mute
+== 
+
+Unmute emoticons
+== 
+
+Mute emoticons
 == 
 
 [skins]

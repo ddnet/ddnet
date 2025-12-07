@@ -9,7 +9,7 @@
 
 [Demo player duration]
 %s min.
-== %sхв
+== %s хв.
 
 %d new mentions
 == Нових згадок: %d
@@ -32,7 +32,7 @@
 
 [Demo player duration]
 %s sec.
-== %sс
+== %s с.
 
 %d/%d KiB (%.1f KiB/s)
 == %d/%d КіБ (%.1f КіБ/с)
@@ -51,10 +51,10 @@
 == Залишилося: %iхв
 
 %i second left
-== Залишилося: %iс
+== Залишилося: %i секунд
 
 %i seconds left
-== Залишилося: %iс
+== %i секунд залишилося
 
 %s wins!
 == %s перемагає!
@@ -947,10 +947,10 @@ Ingame controller mode
 == Режим контролера у грі
 
 Ingame controller sens.
-== Чутливість у грі
+== Чутливість контролера в грі.
 
 Ingame mouse sens.
-== Чутливість у грі
+== Чутливість миші в грі.
 
 Initializing assets
 == Ініціалізація текстур
@@ -1241,7 +1241,7 @@ Only save improvements
 == Зберігати лише покращення
 
 Opacity
-== Непрозор.
+== Непрозорість
 
 Opacity of freeze bars inside freeze
 == Непрозорість смуги заморозки в заморозці
@@ -1510,7 +1510,7 @@ Search
 == Пошук
 
 Searching
-== Пошук
+== Пошук триває
 
 Sending initial client info
 == Надсилання початкових даних клієнта
@@ -1658,9 +1658,6 @@ Show text entities
 
 Show tiles layers from BG map
 == Показувати плитки з мапи фону
-
-Show quads
-== Показувати квади
 
 Show votes window after voting
 == Показувати голосування навіть після голосу
@@ -1877,10 +1874,10 @@ UI Color
 == Колір інтерфейсу
 
 UI controller sens.
-== Чутл. в інтерфейсі
+== Чутливість контролера в інтерфейсі.
 
 UI mouse sens.
-== Чутл. в інтерфейсі
+== Чутливість миші в інтерфейсі.
 
 Unable to delete skin
 == Не вдалося видалити скін
@@ -1944,7 +1941,7 @@ Use team colors for name plates
 == Фарбувати ніки в кольори команд
 
 V-Sync
-== V-Sync
+== Вертикальна синхронізація
 
 Vanilla skins only
 == Лише ванільні скіни
@@ -1980,7 +1977,7 @@ Warmup
 == Розминка
 
 Warning
-== Увага!
+== Попередження
 
 Weapon
 == Зброя
@@ -2086,11 +2083,11 @@ Teams
 
 [Team size]
 minimum
-== мін.
+== мінімум
 
 [Team size]
 maximum
-== макс.
+== максимум
 
 Saves file
 == Файл збережень
@@ -2106,7 +2103,7 @@ Renders your frame rate in the top right
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Український переклад від .ua, Ivan., SwiatoslaW, 404_not_found, EGYT5453, veydzh3r та Animeuz
+== Український переклад від .ua, Ivan., SwiatoslaW, 404_not_found, EGYT5453, veydzh3r та NyrrCly
 
 Show spectator cursor
 == Показувати вказівник глядача
@@ -2337,7 +2334,7 @@ Delete command
 
 [Touch button visibility preview]
 Included
-== Увімкнено
+== Включено
 
 [Touch button visibility preview]
 Excluded
@@ -2489,32 +2486,53 @@ Download
 == Завантажити
 
 Team save in progress. You'll be able to load with '/load %s'
-== 
+== Збереження команди триває. Ви зможете завантажити її командою '/load %s'
 
 Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails
-== 
+== Збереження команди триває. Ви зможете завантажити її командою '/load %s', якщо збереження буде успішним, або командою '/load %s', якщо воно не вдасться
 
 Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue
-== 
+== Команду успішно збережено гравцем %s. Підключення до бази даних не вдалося, використано згенерований код збереження, щоб уникнути конфліктів. Використайте '/load %s', щоб продовжити
 
 Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue
-== 
+== Команду успішно збережено гравцем %s. Підключення до бази даних не вдалося, тому використано згенерований код збереження, щоб уникнути конфліктів. Використайте '/load %s' на %s, щоб продовжити
 
 Save failed!
-== 
+== Збереження не вдалося!
 
 [Important alert message]
 Press Esc or Tab to dismiss…
-== 
+== Натисніть Esc або Tab, щоб закрити…
 
 Server alert
-== 
+== Попередження сервера
 
 Moderator alert
-== 
+== Попередження модератора
 
 You will be disconnected from the server.
-== 
+== Вас буде від’єднано від сервера.
 
 Are you sure that you want to disconnect and play this demo?
+== Ви впевнені, що хочете від’єднатись та відтворити це демо?
+
+Show background quads
+== 
+
+Scoreboard cursor
+== 
+
+Add friend
+== 
+
+Unmute
+== 
+
+Mute
+== 
+
+Unmute emoticons
+== 
+
+Mute emoticons
 == 

@@ -838,9 +838,6 @@ Show text entities
 Show others (own team only)
 == Diğerlerini göster (sadece kendi takımını)
 
-Show quads
-== Dörtgen yapıları göster
-
 AntiPing
 == AntiPing
 
@@ -1318,10 +1315,10 @@ Absolute
 == Mutlak
 
 Ingame controller sens.
-== Oyun içi kontrolcü hassasiyeti
+== Oyun içi kontrolcü hassasiyeti.
 
 UI controller sens.
-== Arayüz kontrolcü hassasiyeti 
+== Arayüz kontrolcü hassasiyeti.
 
 Controller jitter tolerance
 == Kontrolcü titreşim toleransı
@@ -1342,10 +1339,10 @@ Mouse
 == Fare
 
 Ingame mouse sens.
-== Oyun hassasiyeti
+== Oyun içi fare hassasiyeti.
 
 UI mouse sens.
-== Arayüz hassasiyeti
+== Arayüz fare hassasiyeti.
 
 Reset controls
 == Kontrolleri sıfırla
@@ -1372,7 +1369,7 @@ Desktop fullscreen
 == Masaüstü tam ekran
 
 Allows maps to render with more detail
-== Haritaların daha detaylı işlenmesine izin ver
+== Haritaların daha detaylı işlenmesini sağlar
 
 Renderer
 == İşleyici
@@ -1408,10 +1405,10 @@ Name Plate
 == İsim Etiketi
 
 Hook Collisions
-== Kanca kesişmeleri
+== Kanca Kesişmeleri
 
 Show health, shields and ammo
-== Can, kalkan ve cephaneyi göster 
+== Can, kalkan ve cephaneyi göster
 
 DDRace HUD
 == DDRace arayüzü
@@ -1420,7 +1417,7 @@ Show DDRace HUD
 == DDRace arayüzünü göster
 
 Show jumps indicator
-== Kaç zıplama kaldığını göster
+== Zıplama göstergesini aç
 
 Show dummy actions
 == Dummy aksiyonlarını göster
@@ -1684,10 +1681,10 @@ Are you sure that you want to restart?
 == Yeniden başlatmak istediğinizden eminmisiniz?
 
 There's an unsaved map in the editor, you might want to save it.
-== Editörde kaydedilmemiş bir harita var, kaydetmek isteyebilirsiniz
+== Editörde kaydedilmemiş bir harita var, kaydetmek isteyebilirsiniz.
 
 Continue anyway?
-== Yine de devam et
+== Yine de devam et?
 
 Videos directory
 == Video dizini
@@ -1765,7 +1762,7 @@ No login required
 == Giriş yapılmasına gerek yok
 
 Netversion
-==  Netversion
+== Netversion
 
 Player info change cooldown
 == Oyuncu bilgisini değiştirmek için bekleme süresi
@@ -1944,7 +1941,7 @@ Import from clipboard
 == Panodan içeri aktar
 
 Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
-== Dokunmatik ayarlarını panodan içeri aktarmak istediğine emin misin? Bu şu anki kontrollerin üzerine yazılacak. 
+== Dokunmatik ayarlarını panodan içeri aktarmak istediğine emin misin? Bu şu anki kontrollerin üzerine yazılacak.
 
 Export to clipboard
 == Panodan dışarı aktar
@@ -1988,7 +1985,7 @@ Could not load touch controls from clipboard. See local console for details.
 == Dokunmatik ayarları panodan yüklenemedi. Detaylar için konsola bakın.
 
 Width of your own hook collision line
-== Kendi kancanın çarpışma çizgisi kalınlığı 
+== Kendi kanca çarpışma çizginizin kalınlığı
 
 Width of others' hook collision line
 == Başkalarının kancalarının çarpışma çizgisi kalınlığı
@@ -2093,7 +2090,7 @@ maximum
 == maksimum
 
 Saves file
-== Dosyayı kaydet 
+== Kayıt dosyası
 
 Open the saves file
 == Kayıt dosyasını aç
@@ -2489,32 +2486,53 @@ Download
 == İndir
 
 Team save in progress. You'll be able to load with '/load %s'
-== 
+== Takım kaydediliyor. '/load %s' ile yükleyebilirsiniz
 
 Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails
-== 
+== Takım kaydediliyor. Kayıt başarılı olursa '/load %s', başarısız olursa '/load %s' ile yükleyebilirsiniz
 
 Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue
-== 
+== Takım %s tarafından başarıyla kaydedildi. Veritabanı bağlantısı başarısız, çakışmayı önlemek için otomatik kayıt kodu kullanılıyor. Devam etmek için '/load %s' kullanın
 
 Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue
-== 
+== Takım %s tarafından başarıyla kaydedildi. Veritabanı bağlantısı başarısız, çakışmayı önlemek için otomatik kayıt kodu kullanılıyor. Devam etmek için '/load %s' komutunu %s sunucusunda kullanın
 
 Save failed!
-== 
+== Kayıt başarısız!
 
 [Important alert message]
 Press Esc or Tab to dismiss…
-== 
+== Kapatmak için Esc veya Tab basın…
 
 Server alert
-== 
+== Sunucu uyarısı
 
 Moderator alert
-== 
+== Moderatör uyarısı
 
 You will be disconnected from the server.
-== 
+== Sunucudan bağlantınız kesilecek.
 
 Are you sure that you want to disconnect and play this demo?
+== Bağlantıyı kesip bu demoyu oynatmak istediğinizden emin misiniz?
+
+Show background quads
+== 
+
+Scoreboard cursor
+== 
+
+Add friend
+== 
+
+Unmute
+== 
+
+Mute
+== 
+
+Unmute emoticons
+== 
+
+Mute emoticons
 == 

@@ -820,9 +820,6 @@ Show text entities
 Show others (own team only)
 == Prikaži ostale (samo vlastiti tim)
 
-Show quads
-== Prikaži quads
-
 AntiPing: predict other players
 == AntiPing: preduhitri ostale igrače
 
@@ -2286,6 +2283,9 @@ Overlay entities
 Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == 
 
+Show background quads
+== 
+
 Quads are used for background decoration
 == 
 
@@ -2353,6 +2353,9 @@ Open the directory to add custom assets
 == 
 
 Chat command
+== 
+
+Scoreboard cursor
 == 
 
 Reset controls
@@ -2466,6 +2469,21 @@ Auto
 == 
 
 Replay
+== 
+
+Add friend
+== 
+
+Unmute
+== 
+
+Mute
+== 
+
+Unmute emoticons
+== 
+
+Mute emoticons
 == 
 
 [skins]

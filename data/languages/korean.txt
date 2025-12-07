@@ -919,9 +919,6 @@ Show text entities
 Show others (own team only)
 == 팀 내의 다른 플레이어 표시
 
-Show quads
-== 배경 표시
-
 AntiPing
 == 안티 핑
 
@@ -2488,6 +2485,22 @@ AntiPing: prediction margin
 Download
 == 다운로드
 
+[Important alert message]
+Press Esc or Tab to dismiss…
+== Esc 또는 Tab를 눌러 닫기…
+
+Server alert
+== 서버 알림
+
+Moderator alert
+== 모더레이터 알림
+
+You will be disconnected from the server.
+== 현재 서버에서 연결이 끊깁니다.
+
+Are you sure that you want to disconnect and play this demo?
+== 데모를 재생하기 위해 연결을 끊으시겠습니까?
+
 Team save in progress. You'll be able to load with '/load %s'
 == 
 
@@ -2503,18 +2516,23 @@ Team successfully saved by %s. The database connection failed, using generated s
 Save failed!
 == 
 
-[Important alert message]
-Press Esc or Tab to dismiss…
+Show background quads
 == 
 
-Server alert
+Scoreboard cursor
 == 
 
-Moderator alert
+Add friend
 == 
 
-You will be disconnected from the server.
+Unmute
 == 
 
-Are you sure that you want to disconnect and play this demo?
+Mute
+== 
+
+Unmute emoticons
+== 
+
+Mute emoticons
 == 

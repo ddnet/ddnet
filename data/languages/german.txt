@@ -514,9 +514,6 @@ Ratio
 AntiPing
 == Anti-Ping
 
-Show quads
-== Quads anzeigen
-
 Map sound volume
 == Karten-Lautstärke
 
@@ -2244,31 +2241,31 @@ Behavior
 == Verhalten
 
 Delete button
-== Knopf löschen
+== Taste löschen
 
 Are you sure that you want to delete this button?
-== Bist du sicher, dass du diesen Knopf löschen möchtest?
+== Bist du sicher, dass du diese Taste löschen möchtest?
 
 Duplicate
 == Duplizieren
 
 New button already created
-== Neuer Button bereits erstellt
+== Neue Taste bereits erstellt
 
 A new button has already been created, please save or delete it before creating another one.
 == Eine neue Taste wurde bereits erstellt, bitte speichere oder lösche sie, bevor du eine neue erstellst.
 
 Please save your changes before duplicating a button.
-== Bitte speichere deine Änderungen, bevor du einen Button duplizierst.
+== Bitte speichere deine Änderungen, bevor du eine Taste duplizierst.
 
 No space for button
-== Kein Platz für Button
+== Kein Platz für eine Taste
 
 There is not enough space available to place another button.
-== Es gibt nicht genug Platz um einen weiteren Button zu erstellen.
+== Es gibt nicht genug Platz um eine weitere Taste zu erstellen.
 
 There is not enough space available to place another button with this size. The button has been resized.
-== Es gibt nicht genug Platz um einen Button dieser Größe zu erstellen. Der Button wurde verkleinert.
+== Es gibt nicht genug Platz um eine Taste dieser Größe zu erstellen. Die Taste wurde verkleinert.
 
 Deselect
 == Deselektieren
@@ -2348,7 +2345,7 @@ Ignore
 == Ignoriert
 
 Long press on a touch button to select it.
-== Drücke lange auf einen Button um ihn auszuwählen.
+== Drücke lange auf eine Taste um sie auszuwählen.
 
 New button
 == Neuer Button
@@ -2489,32 +2486,53 @@ Download
 == Herunterladen
 
 Team save in progress. You'll be able to load with '/load %s'
-== 
+== Team Speicher-Prozess läuft. Du wirst später mit '/load %s' laden können
 
 Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails
-== 
+== Team Speicher-Prozess läuft. Du wirst entweder mit '/load %s' beim erfolgreichen oder mit '/load %s' beim fehlgeschlagenen Speichern laden können
 
 Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue
-== 
+== Team wurde von %s erfolgreich gespeichert. Die Datenbankverbindung ist fehlgeschlagen, es wird ein generierter Speicher-Code benutzt um Kollisionen zu vermeiden. Benutze '/load %s' um fortzufahren
 
 Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue
-== 
+== Team wurde von %s erfolgreich gespeichert. Die Datenbankverbindung ist fehlgeschlagen, es wird ein generierter Speicher-Code benutzt um Kollisionen zu vermeiden. Benutze '/load %s' auf %s um fortzufahren
 
 Save failed!
-== 
+== Speichern fehlgeschlagen!
 
 [Important alert message]
 Press Esc or Tab to dismiss…
-== 
+== Drücke Esc oder Tab um zu verwerfen…
 
 Server alert
-== 
+== Server Alarm
 
 Moderator alert
-== 
+== Moderator Alarm
 
 You will be disconnected from the server.
-== 
+== Deine Verbindung zum Server wird getrennt werden.
 
 Are you sure that you want to disconnect and play this demo?
+== Bist du sicher, dass du die Verbindung trennen möchtest um die Demo abzuspielen?
+
+Show background quads
+== 
+
+Scoreboard cursor
+== 
+
+Add friend
+== 
+
+Unmute
+== 
+
+Mute
+== 
+
+Unmute emoticons
+== 
+
+Mute emoticons
 == 
