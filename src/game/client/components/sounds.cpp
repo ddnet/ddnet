@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include "sounds.h"
+#include <base/str.h>
 
 #include <engine/engine.h>
 #include <engine/shared/config.h>
@@ -33,7 +34,12 @@ void CSoundLoading::Run()
 			if(State() == IJob::STATE_ABORTED)
 				return;
 
-			int Id = m_pGameClient->Sound()->LoadWV(g_pData->m_aSounds[s].m_aSounds[i].m_pFilename);
+			const char *pFilename = g_pData->m_aSounds[s].m_aSounds[i].m_pFilename;
+			int Id;
+			if(str_endswith(pFilename, ".opus"))
+				Id = m_pGameClient->Sound()->LoadOpus(pFilename);
+			else
+				Id = m_pGameClient->Sound()->LoadWV(pFilename);
 			g_pData->m_aSounds[s].m_aSounds[i].m_Id = Id;
 			// try to render a frame
 			if(m_Render)
