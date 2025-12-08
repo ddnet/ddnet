@@ -15,8 +15,6 @@ IClient *CEditorObject::Client() { return m_pEditor->Client(); }
 const IClient *CEditorObject::Client() const { return m_pEditor->Client(); }
 CConfig *CEditorObject::Config() { return m_pEditor->Config(); }
 const CConfig *CEditorObject::Config() const { return m_pEditor->Config(); }
-IConsole *CEditorObject::Console() { return m_pEditor->Console(); }
-const IConsole *CEditorObject::Console() const { return m_pEditor->Console(); }
 IEngine *CEditorObject::Engine() { return m_pEditor->Engine(); }
 const IEngine *CEditorObject::Engine() const { return m_pEditor->Engine(); }
 IGraphics *CEditorObject::Graphics() { return m_pEditor->Graphics(); }

@@ -6,7 +6,6 @@
 
 #include <base/color.h>
 
-#include <engine/console.h>
 #include <engine/graphics.h>
 #include <engine/input.h>
 #include <engine/keys.h>

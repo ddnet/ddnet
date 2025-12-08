@@ -110,7 +110,6 @@ class CEditor : public IEditor, public IEnvelopeEval
 	class IClient *m_pClient = nullptr;
 	class IConfigManager *m_pConfigManager = nullptr;
 	class CConfig *m_pConfig = nullptr;
-	class IConsole *m_pConsole = nullptr;
 	class IEngine *m_pEngine = nullptr;
 	class IGraphics *m_pGraphics = nullptr;
 	class ITextRender *m_pTextRender = nullptr;
@@ -153,7 +152,6 @@ public:
 	class IClient *Client() const { return m_pClient; }
 	class IConfigManager *ConfigManager() const { return m_pConfigManager; }
 	class CConfig *Config() const { return m_pConfig; }
-	class IConsole *Console() const { return m_pConsole; }
 	class IEngine *Engine() const { return m_pEngine; }
 	class IGraphics *Graphics() const { return m_pGraphics; }
 	class ISound *Sound() const { return m_pSound; }
