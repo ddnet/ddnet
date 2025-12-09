@@ -39,6 +39,12 @@ void CImportantAlert::OnRender()
 	{
 		return;
 	}
+#if defined(CONF_VIDEORECORDER)
+	if(IVideo::Current() && !g_Config.m_ClVideoShowImportantAlerts)
+	{
+		return;
+	}
+#endif
 	RenderImportantAlert();
 }
 
