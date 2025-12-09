@@ -883,6 +883,9 @@ Show others
 Unfinished map
 == Oavklarad bana
 
+Show quads
+== Visa quads
+
 Show names in chat in team colors
 == Visa namn in chatten med lagets färger
 
@@ -2514,25 +2517,4 @@ You will be disconnected from the server.
 == 
 
 Are you sure that you want to disconnect and play this demo?
-== 
-
-Show background quads
-== 
-
-Scoreboard cursor
-== 
-
-Add friend
-== 
-
-Unmute
-== 
-
-Mute
-== 
-
-Unmute emoticons
-== 
-
-Mute emoticons
 == 

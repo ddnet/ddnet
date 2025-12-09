@@ -832,6 +832,9 @@ Show text entities
 Show others (own team only)
 == Laat anderen zien (alleen eigen team)
 
+Show quads
+== Laat quads zien
+
 AntiPing
 == AntiPing
 
@@ -2510,29 +2513,8 @@ Dragger Outline Color
 Dragger Inner Color
 == 
 
-Show background quads
-== 
-
 AntiPing: prediction margin
 == 
 
-Scoreboard cursor
-== 
-
 Download
-== 
-
-Add friend
-== 
-
-Unmute
-== 
-
-Mute
-== 
-
-Unmute emoticons
-== 
-
-Mute emoticons
 == 

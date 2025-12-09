@@ -2163,7 +2163,7 @@ Adjust the opacity of entities belonging to other teams, such as tees and name p
 Show others (own team only)
 == 
 
-Show background quads
+Show quads
 == 
 
 Quads are used for background decoration
@@ -2301,9 +2301,6 @@ Dummy copy
 Hammerfly dummy
 == 
 
-Scoreboard cursor
-== 
-
 Statboard
 == 
 
@@ -2439,21 +2436,6 @@ Auto
 == 
 
 Replay
-== 
-
-Add friend
-== 
-
-Unmute
-== 
-
-Mute
-== 
-
-Unmute emoticons
-== 
-
-Mute emoticons
 == 
 
 [skins]

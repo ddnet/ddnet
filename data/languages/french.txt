@@ -847,6 +847,9 @@ Automatically create statboard csv
 Video name:
 == Nom de la vidéo
 
+Show quads
+== Afficher les quads
+
 Best
 == Meilleur
 
@@ -2510,29 +2513,8 @@ Dragger Outline Color
 Dragger Inner Color
 == 
 
-Show background quads
-== 
-
 AntiPing: prediction margin
 == 
 
-Scoreboard cursor
-== 
-
 Download
-== 
-
-Add friend
-== 
-
-Unmute
-== 
-
-Mute
-== 
-
-Unmute emoticons
-== 
-
-Mute emoticons
 == 
