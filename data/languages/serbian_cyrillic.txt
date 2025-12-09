@@ -865,9 +865,6 @@ Show text entities
 Show others (own team only)
 == Прикажи остале (само свој тим)
 
-Show quads
-== Прикажи quads
-
 AntiPing
 == AntiPing
 
@@ -2424,6 +2421,9 @@ Enable ghost
 Only save improvements
 == 
 
+Show background quads
+== 
+
 AntiPing: prediction margin
 == 
 
@@ -2454,6 +2454,9 @@ Unable to delete skin
 Open the directory to add custom assets
 == 
 
+Scoreboard cursor
+== 
+
 Reset controls
 == 
 
@@ -2478,6 +2481,21 @@ Download
 == 
 
 Team %d (%d/%d)
+== 
+
+Add friend
+== 
+
+Unmute
+== 
+
+Mute
+== 
+
+Unmute emoticons
+== 
+
+Mute emoticons
 == 
 
 [skins]

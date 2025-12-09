@@ -304,9 +304,6 @@ Player
 Address
 == Adreso
 
-Ping
-== 
-
 Version
 == Versio
 
@@ -552,21 +549,6 @@ Submitting the render commands failed. Try to update your GPU drivers.
 Failed to swap framebuffers. Try to update your GPU drivers.
 == Fiaskis permuti kadrobufrojn. Provu ĝisdatigi peliloj por via grafika procesoro.
 
-[Graphics error]
-Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
-
-[Graphics error]
-Could not initialize the given graphics backend, reverting to the default backend now.
-== 
-
-[Graphics error]
-Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
-
-Could not resolve connect address '%s'. See local console for details.
-== 
-
 Connect address error
 == Eraro en konekta adreso
 
@@ -605,6 +587,21 @@ Replay feature is disabled!
 
 No demo with this filename exists
 == Neekzistas demo kun tiu dosiernomo
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not resolve connect address '%s'. See local console for details.
+== 
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
@@ -928,6 +925,9 @@ The server is running a non-standard tuning on a pure game type.
 == 
 
 Loading menu images
+== 
+
+Ping
 == 
 
 No local servers found (ports %d-%d)
@@ -2173,7 +2173,7 @@ Adjust the opacity of entities belonging to other teams, such as tees and name p
 Show others (own team only)
 == 
 
-Show quads
+Show background quads
 == 
 
 Quads are used for background decoration
@@ -2329,6 +2329,9 @@ Spectate previous
 Screenshot
 == 
 
+Scoreboard cursor
+== 
+
 Statboard
 == 
 
@@ -2451,6 +2454,21 @@ Draw!
 == 
 
 Game over
+== 
+
+Add friend
+== 
+
+Unmute
+== 
+
+Mute
+== 
+
+Unmute emoticons
+== 
+
+Mute emoticons
 == 
 
 [skins]

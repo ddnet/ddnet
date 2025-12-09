@@ -838,9 +838,6 @@ Show text entities
 Show others (own team only)
 == Diğerlerini göster (sadece kendi takımını)
 
-Show quads
-== Dörtgen yapıları göster
-
 AntiPing
 == AntiPing
 
@@ -2518,3 +2515,24 @@ You will be disconnected from the server.
 
 Are you sure that you want to disconnect and play this demo?
 == Bağlantıyı kesip bu demoyu oynatmak istediğinizden emin misiniz?
+
+Show background quads
+== 
+
+Scoreboard cursor
+== 
+
+Add friend
+== 
+
+Unmute
+== 
+
+Mute
+== 
+
+Unmute emoticons
+== 
+
+Mute emoticons
+== 

@@ -517,9 +517,6 @@ Ratio
 AntiPing
 == AntiPing
 
-Show quads
-== Mostrar els quads
-
 Map sound volume
 == Volum del so del mapa
 
@@ -2362,6 +2359,9 @@ Only save improvements
 Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == 
 
+Show background quads
+== 
+
 Quads are used for background decoration
 == 
 
@@ -2402,6 +2402,9 @@ Loading assets
 == 
 
 Open the directory to add custom assets
+== 
+
+Scoreboard cursor
 == 
 
 Reset controls
@@ -2475,6 +2478,21 @@ Super
 == 
 
 Team %d (%d/%d)
+== 
+
+Add friend
+== 
+
+Unmute
+== 
+
+Mute
+== 
+
+Unmute emoticons
+== 
+
+Mute emoticons
 == 
 
 [skins]

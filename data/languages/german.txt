@@ -514,9 +514,6 @@ Ratio
 AntiPing
 == Anti-Ping
 
-Show quads
-== Quads anzeigen
-
 Map sound volume
 == Karten-Lautstärke
 
@@ -2518,3 +2515,24 @@ You will be disconnected from the server.
 
 Are you sure that you want to disconnect and play this demo?
 == Bist du sicher, dass du die Verbindung trennen möchtest um die Demo abzuspielen?
+
+Show background quads
+== 
+
+Scoreboard cursor
+== 
+
+Add friend
+== 
+
+Unmute
+== 
+
+Mute
+== 
+
+Unmute emoticons
+== 
+
+Mute emoticons
+== 
