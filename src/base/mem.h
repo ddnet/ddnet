@@ -15,7 +15,7 @@
  */
 
 /**
- * Copies a a memory block.
+ * Copies a memory block.
  *
  * @ingroup Memory
  *
@@ -23,14 +23,14 @@
  * @param source Source to copy.
  * @param size Size of the block to copy.
  *
- * @remark This functions DOES NOT handle cases where the source and destination is overlapping.
+ * @remark This functions DOES NOT handle cases where the source and destination overlap.
  *
  * @see mem_move
  */
 void mem_copy(void *dest, const void *source, size_t size);
 
 /**
- * Copies a a memory block.
+ * Copies a memory block.
  *
  * @ingroup Memory
  *
@@ -38,7 +38,7 @@ void mem_copy(void *dest, const void *source, size_t size);
  * @param source Source to copy.
  * @param size Size of the block to copy.
  *
- * @remark This functions handles the cases where the source and destination is overlapping.
+ * @remark This functions handles the cases where the source and destination overlap.
  *
  * @see mem_copy
  */
@@ -60,7 +60,7 @@ inline void mem_zero(T *block, size_t size)
 }
 
 /**
- * Compares two blocks of memory
+ * Compares two blocks of memory of the same size, lexicographically.
  *
  * @ingroup Memory
  *
@@ -68,9 +68,9 @@ inline void mem_zero(T *block, size_t size)
  * @param b Second block of data.
  * @param size Size of the data to compare.
  *
- * @return `< 0` if block a is less than block b.
- * @return `0` if block a is equal to block b.
- * @return `> 0` if block a is greater than block b.
+ * @return `< 0` if block `a` is less than block `b`.
+ * @return `0` if block `a` is equal to block `b`.
+ * @return `> 0` if block `a` is greater than block `b`.
  */
 int mem_comp(const void *a, const void *b, size_t size);
 
