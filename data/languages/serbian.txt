@@ -862,9 +862,6 @@ Show text entities
 Show others (own team only)
 == Prikaži ostale (samo svoj tim)
 
-Show quads
-== Prikaži quads
-
 AntiPing
 == AntiPing
 
@@ -2445,6 +2442,9 @@ Enable ghost
 Only save improvements
 == 
 
+Show background quads
+== 
+
 AntiPing: prediction margin
 == 
 
@@ -2469,6 +2469,9 @@ Delete skin
 Unable to delete skin
 == 
 
+Scoreboard cursor
+== 
+
 Download
 == 
 
@@ -2481,6 +2484,21 @@ Download
 == 
 
 Team %d (%d/%d)
+== 
+
+Add friend
+== 
+
+Unmute
+== 
+
+Mute
+== 
+
+Unmute emoticons
+== 
+
+Mute emoticons
 == 
 
 [skins]

@@ -1348,9 +1348,6 @@ Adjust the opacity of entities belonging to other teams, such as tees and name p
 Show others (own team only)
 == (ﯽﺼﺨﺷ ﻢﯿﺗ ﻂﻘﻓ) ﻥﺍﺮﮕﯾﺩ ﺶﯾﺎﻤﻧ
 
-Show quads
-== ﺎﻫ ﯽﯾﺎﺗﺭﺎﻬﭼ ﺶﯾﺎﻤﻧ
-
 Quads are used for background decoration
 == ﺩﻮﺷ ﯽﻣ ﻩﺩﺎﻔﺘﺳﺍ ﻪﻨﯿﻣﺯﺲﭘ ﻦﯿﯾﺰﺗ ﯼﺍﺮﺑ ﯽﯾﺎﺗﺭﺎﻬﭼ
 
@@ -2510,10 +2507,31 @@ Dragger Outline Color
 Dragger Inner Color
 == 
 
+Show background quads
+== 
+
 AntiPing: prediction margin
 == 
 
+Scoreboard cursor
+== 
+
 Download
+== 
+
+Add friend
+== 
+
+Unmute
+== 
+
+Mute
+== 
+
+Unmute emoticons
+== 
+
+Mute emoticons
 == 
 
 https://wiki.ddnet.org/wiki/Mapping

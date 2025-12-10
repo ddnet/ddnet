@@ -502,9 +502,6 @@ Ratio
 AntiPing
 == AntiPing
 
-Show quads
-== Quads ﺭﺎﻬﻇﺍ
-
 Map sound volume
 == ﺏﺎﻤﻟﺍ ﺕﻮﺻ
 
@@ -2335,6 +2332,9 @@ Only save improvements
 Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == 
 
+Show background quads
+== 
+
 Quads are used for background decoration
 == 
 
@@ -2390,6 +2390,9 @@ Open the directory to add custom assets
 == 
 
 Chat command
+== 
+
+Scoreboard cursor
 == 
 
 Reset controls
@@ -2475,6 +2478,21 @@ Super
 == 
 
 Team %d (%d/%d)
+== 
+
+Add friend
+== 
+
+Unmute
+== 
+
+Mute
+== 
+
+Unmute emoticons
+== 
+
+Mute emoticons
 == 
 
 [skins]
