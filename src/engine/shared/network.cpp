@@ -22,56 +22,60 @@ void WriteSecurityToken(unsigned char *pData, SECURITY_TOKEN Token)
 	uint_to_bytes_be(pData, Token);
 }
 
-void CNetRecvUnpacker::Clear()
+void CPacketChunkUnpacker::FeedPacket(const NETADDR &Addr, const CNetPacketConstruct &Packet, CNetConnection *pConnection, int ClientId)
 {
-	m_Valid = false;
-}
-
-void CNetRecvUnpacker::Start(const NETADDR *pAddr, CNetConnection *pConnection, int ClientId)
-{
-	m_Addr = *pAddr;
+	dbg_assert(!m_Valid, "Chunk unpacker is already unpacking");
+	m_Valid = true;
+	m_Addr = Addr;
 	m_pConnection = pConnection;
 	m_ClientId = ClientId;
 	m_CurrentChunk = 0;
-	m_Valid = true;
+	m_Data = Packet;
+	dbg_assert((m_Data.m_Flags & (NET_PACKETFLAG_CONNLESS | NET_PACKETFLAG_CONTROL)) == 0 && m_Data.m_DataSize > 0 && m_Data.m_NumChunks > 0,
+		"Invalid packet for chunk unpacker: flags=%d size=%d chunks=%d", m_Data.m_Flags, m_Data.m_DataSize, m_Data.m_NumChunks);
 }
 
-// TODO: rename this function
-int CNetRecvUnpacker::FetchChunk(CNetChunk *pChunk)
+bool CPacketChunkUnpacker::UnpackNextChunk(CNetChunk *pChunk)
 {
-	CNetChunkHeader Header;
-	unsigned char *pEnd = m_Data.m_aChunkData + m_Data.m_DataSize;
+	if(!m_Valid)
+	{
+		return false;
+	}
+
+	const unsigned char *const pEnd = m_Data.m_aChunkData + m_Data.m_DataSize;
 
 	while(true)
 	{
-		unsigned char *pData = m_Data.m_aChunkData;
-
-		// check for old data to unpack
-		if(!m_Valid || m_CurrentChunk >= m_Data.m_NumChunks)
+		if(m_CurrentChunk >= m_Data.m_NumChunks)
 		{
-			Clear();
-			return 0;
+			m_Valid = false;
+			return false;
 		}
 
+		unsigned char *pData = m_Data.m_aChunkData;
+
 		// TODO: add checking here so we don't read too far
+		const int HeaderSplit = m_pConnection->m_Sixup ? 6 : 4;
 		for(int i = 0; i < m_CurrentChunk; i++)
 		{
-			pData = Header.Unpack(pData, (m_pConnection && m_pConnection->m_Sixup) ? 6 : 4);
-			pData += Header.m_Size;
+			CNetChunkHeader SkippedHeader;
+			pData = SkippedHeader.Unpack(pData, HeaderSplit);
+			pData += SkippedHeader.m_Size;
 		}
 
 		// unpack the header
-		pData = Header.Unpack(pData, (m_pConnection && m_pConnection->m_Sixup) ? 6 : 4);
+		CNetChunkHeader Header;
+		pData = Header.Unpack(pData, HeaderSplit);
 		m_CurrentChunk++;
 
 		if(pData + Header.m_Size > pEnd)
 		{
-			Clear();
-			return 0;
+			m_Valid = false;
+			return false;
 		}
 
 		// handle sequence stuff
-		if(m_pConnection && (Header.m_Flags & NET_CHUNKFLAG_VITAL))
+		if((Header.m_Flags & NET_CHUNKFLAG_VITAL) != 0)
 		{
 			// anti spoof: ignore unknown sequence
 			if(Header.m_Sequence == (m_pConnection->m_Ack + 1) % NET_MAX_SEQUENCE || m_pConnection->m_UnknownSeq)
@@ -101,7 +105,7 @@ int CNetRecvUnpacker::FetchChunk(CNetChunk *pChunk)
 		pChunk->m_Flags = Header.m_Flags;
 		pChunk->m_DataSize = Header.m_Size;
 		pChunk->m_pData = pData;
-		return 1;
+		return true;
 	}
 }
 
