@@ -217,7 +217,7 @@ void CEditor::DeleteSelectedLayer()
 
 void CEditor::TestMapLocally()
 {
-	const char *pFilenameNoMaps = str_startswith(m_aFilename, "maps/");
+	const char *pFilenameNoMaps = str_startswith(m_Map.m_aFilename, "maps/");
 	if(!pFilenameNoMaps)
 	{
 		ShowFileDialogError("The map isn't saved in the maps/ folder. It must be saved there to load on the server.");

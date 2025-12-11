@@ -238,6 +238,8 @@ void CEditorMap::ModifySoundIndex(const FIndexModifyFunction &IndexModifyFunctio
 
 void CEditorMap::Clean()
 {
+	m_aFilename[0] = '\0';
+	m_ValidSaveFilename = false;
 	ResetModifiedState();
 
 	m_vpGroups.clear();

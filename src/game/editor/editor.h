@@ -211,9 +211,7 @@ public:
 
 		m_BrushColorEnabled = true;
 
-		m_aFilename[0] = '\0';
-		m_aFilenamePending[0] = '\0';
-		m_ValidSaveFilename = false;
+		m_aFilenamePendingLoad[0] = '\0';
 
 		m_PopupEventActivated = false;
 		m_PopupEventWasActivated = false;
@@ -336,7 +334,6 @@ public:
 	 */
 	float m_LastAutosaveUpdateTime = -1.0f;
 	void HandleAutosave();
-	bool PerformAutosave();
 	void HandleWriterFinishJobs();
 
 	// TODO: The name of the ShowFileDialogError function is not accurate anymore, this is used for generic error messages.
@@ -414,9 +411,10 @@ public:
 
 	bool m_BrushColorEnabled;
 
-	char m_aFilename[IO_MAX_PATH_LENGTH];
-	char m_aFilenamePending[IO_MAX_PATH_LENGTH];
-	bool m_ValidSaveFilename;
+	/**
+	 * File which is pending to be loaded by @link POPEVENT_LOADDROP @endlink.
+	 */
+	char m_aFilenamePendingLoad[IO_MAX_PATH_LENGTH] = "";
 
 	enum
 	{

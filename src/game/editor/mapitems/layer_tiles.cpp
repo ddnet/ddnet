@@ -346,7 +346,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		pGrabbed->m_TeleNumber = Editor()->m_TeleNumber;
 		pGrabbed->m_TeleCheckpointNumber = Editor()->m_TeleCheckpointNumber;
 
-		str_copy(pGrabbed->m_aFilename, Editor()->m_aFilename);
+		str_copy(pGrabbed->m_aFilename, pGrabbed->Map()->m_aFilename);
 	}
 	else if(m_HasSpeedup)
 	{
@@ -390,7 +390,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		pGrabbed->m_SpeedupForce = Editor()->m_SpeedupForce;
 		pGrabbed->m_SpeedupMaxSpeed = Editor()->m_SpeedupMaxSpeed;
 		pGrabbed->m_SpeedupAngle = Editor()->m_SpeedupAngle;
-		str_copy(pGrabbed->m_aFilename, Editor()->m_aFilename);
+		str_copy(pGrabbed->m_aFilename, pGrabbed->Map()->m_aFilename);
 	}
 	else if(m_HasSwitch)
 	{
@@ -432,7 +432,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 
 		pGrabbed->m_SwitchNumber = Editor()->m_SwitchNumber;
 		pGrabbed->m_SwitchDelay = Editor()->m_SwitchDelay;
-		str_copy(pGrabbed->m_aFilename, Editor()->m_aFilename);
+		str_copy(pGrabbed->m_aFilename, pGrabbed->Map()->m_aFilename);
 	}
 
 	else if(m_HasTune)
@@ -470,7 +470,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		}
 
 		pGrabbed->m_TuningNumber = Editor()->m_TuningNumber;
-		str_copy(pGrabbed->m_aFilename, Editor()->m_aFilename);
+		str_copy(pGrabbed->m_aFilename, pGrabbed->Map()->m_aFilename);
 	}
 	else // game, front and tiles layers
 	{
@@ -495,7 +495,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		for(int y = 0; y < r.h; y++)
 			for(int x = 0; x < r.w; x++)
 				pGrabbed->m_pTiles[y * pGrabbed->m_Width + x] = GetTile(r.x + x, r.y + y);
-		str_copy(pGrabbed->m_aFilename, Editor()->m_aFilename);
+		str_copy(pGrabbed->m_aFilename, pGrabbed->Map()->m_aFilename);
 	}
 
 	return 1;

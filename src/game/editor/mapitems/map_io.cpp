@@ -6,7 +6,9 @@
 #include <engine/engine.h>
 #include <engine/gfx/image_manipulation.h>
 #include <engine/graphics.h>
+#include <engine/shared/config.h>
 #include <engine/shared/datafile.h>
+#include <engine/shared/filecollection.h>
 #include <engine/sound.h>
 #include <engine/storage.h>
 
@@ -1047,6 +1049,8 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 		}
 	}
 
+	str_copy(m_aFilename, pFilename);
+
 	CheckIntegrity();
 	PerformSanityChecks(ErrorHandler);
 
@@ -1086,5 +1090,43 @@ void CEditorMap::PerformSanityChecks(const FErrorHandler &ErrorHandler)
 			}
 		}
 		++ImageIndex;
+	}
+}
+
+bool CEditorMap::PerformAutosave(const std::function<void(const char *pErrorMessage)> &ErrorHandler)
+{
+	char aDate[20];
+	char aAutosavePath[IO_MAX_PATH_LENGTH];
+	str_timestamp(aDate, sizeof(aDate));
+	char aFilenameNoExt[IO_MAX_PATH_LENGTH];
+	if(m_aFilename[0] == '\0')
+	{
+		str_copy(aFilenameNoExt, "unnamed");
+	}
+	else
+	{
+		const char *pFilename = fs_filename(m_aFilename);
+		str_truncate(aFilenameNoExt, sizeof(aFilenameNoExt), pFilename, str_length(pFilename) - str_length(".map"));
+	}
+	str_format(aAutosavePath, sizeof(aAutosavePath), "maps/auto/%s_%s.map", aFilenameNoExt, aDate);
+
+	m_LastSaveTime = Editor()->Client()->GlobalTime();
+	if(Save(aAutosavePath, ErrorHandler))
+	{
+		m_ModifiedAuto = false;
+		// Clean up autosaves
+		if(g_Config.m_EdAutosaveMax)
+		{
+			CFileCollection AutosavedMaps;
+			AutosavedMaps.Init(Editor()->Storage(), "maps/auto", aFilenameNoExt, ".map", g_Config.m_EdAutosaveMax);
+		}
+		return true;
+	}
+	else
+	{
+		char aErrorMessage[IO_MAX_PATH_LENGTH + 128];
+		str_format(aErrorMessage, sizeof(aErrorMessage), "Failed to automatically save map to file '%s'.", aAutosavePath);
+		ErrorHandler(aErrorMessage);
+		return false;
 	}
 }

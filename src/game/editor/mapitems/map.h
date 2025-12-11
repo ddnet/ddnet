@@ -75,6 +75,8 @@ public:
 	const CEditor *Editor() const { return m_pEditor; }
 	CEditor *Editor() { return m_pEditor; }
 
+	char m_aFilename[IO_MAX_PATH_LENGTH];
+	bool m_ValidSaveFilename;
 	/**
 	 * Map has unsaved changes for manual save.
 	 */
@@ -161,6 +163,7 @@ public:
 	bool PerformPreSaveSanityChecks(const FErrorHandler &ErrorHandler);
 	bool Load(const char *pFilename, int StorageType, const FErrorHandler &ErrorHandler);
 	void PerformSanityChecks(const FErrorHandler &ErrorHandler);
+	bool PerformAutosave(const FErrorHandler &ErrorHandler);
 
 	void MakeGameGroup(std::shared_ptr<CLayerGroup> pGroup);
 	void MakeGameLayer(const std::shared_ptr<CLayer> &pLayer);

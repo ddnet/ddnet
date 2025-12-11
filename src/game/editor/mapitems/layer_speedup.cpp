@@ -83,7 +83,7 @@ void CLayerSpeedup::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 	CLayerSpeedup *pSpeedupLayer = static_cast<CLayerSpeedup *>(pBrush);
 	int sx = ConvertX(WorldPos.x);
 	int sy = ConvertY(WorldPos.y);
-	if(str_comp(pSpeedupLayer->m_aFilename, Editor()->m_aFilename))
+	if(str_comp(pSpeedupLayer->m_aFilename, pSpeedupLayer->Map()->m_aFilename))
 	{
 		Editor()->m_SpeedupAngle = pSpeedupLayer->m_SpeedupAngle;
 		Editor()->m_SpeedupForce = pSpeedupLayer->m_SpeedupForce;

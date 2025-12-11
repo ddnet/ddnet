@@ -1012,7 +1012,6 @@ void CEditor::RenderMapSettingsErrorDialog()
 	if(DoButton_Editor(&s_CancelButton, "Cancel", 0, &CancelButton, BUTTONFLAG_LEFT, nullptr) || (Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE)))
 	{
 		Reset();
-		m_aFilename[0] = 0;
 		OnDialogClose();
 	}
 }
