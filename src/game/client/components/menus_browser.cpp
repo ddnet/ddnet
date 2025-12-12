@@ -1700,7 +1700,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 		ServerFriends.HSplitTop(3.0f, nullptr, &ServerFriends);
 		ServerFriends.HSplitTop(18.0f, &Button, &ServerFriends);
 		static CButtonContainer s_AddButton;
-		if(DoButton_Menu(&s_AddButton, s_NameInput.IsEmpty() && !s_ClanInput.IsEmpty() ? Localize("Add Clan") : Localize("Add Friend"), 0, &Button))
+		if(DoButton_Menu(&s_AddButton, s_NameInput.IsEmpty() && !s_ClanInput.IsEmpty() ? Localize("Add clan") : Localize("Add friend"), 0, &Button))
 		{
 			GameClient()->Friends()->AddFriend(s_NameInput.GetString(), s_ClanInput.GetString());
 			s_NameInput.Clear();
