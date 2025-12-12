@@ -1,8 +1,9 @@
 #include "image.h"
 #include "sound.h"
 
+#include <base/log.h>
+
 #include <engine/client.h>
-#include <engine/console.h>
 #include <engine/engine.h>
 #include <engine/gfx/image_manipulation.h>
 #include <engine/graphics.h>
@@ -47,9 +48,7 @@ bool CEditorMap::Save(const char *pFilename, const FErrorHandler &ErrorHandler)
 	char aFilenameTmp[IO_MAX_PATH_LENGTH];
 	IStorage::FormatTmpPath(aFilenameTmp, sizeof(aFilenameTmp), pFilename);
 
-	char aBuf[IO_MAX_PATH_LENGTH + 64];
-	str_format(aBuf, sizeof(aBuf), "saving to '%s'...", aFilenameTmp);
-	m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor", aBuf);
+	log_info("editor/save", "Saving map to '%s'...", aFilenameTmp);
 
 	if(!PerformPreSaveSanityChecks(ErrorHandler))
 	{
@@ -59,6 +58,7 @@ bool CEditorMap::Save(const char *pFilename, const FErrorHandler &ErrorHandler)
 	CDataFileWriter Writer;
 	if(!Writer.Open(m_pEditor->Storage(), aFilenameTmp))
 	{
+		char aBuf[IO_MAX_PATH_LENGTH + 64];
 		str_format(aBuf, sizeof(aBuf), "Error: Failed to open file '%s' for writing.", aFilenameTmp);
 		ErrorHandler(aBuf);
 		return false;
@@ -154,6 +154,8 @@ bool CEditorMap::Save(const char *pFilename, const FErrorHandler &ErrorHandler)
 	int AutomapperCount = 0;
 	for(const auto &pGroup : m_vpGroups)
 	{
+		log_trace("editor/save", "Saving group");
+
 		CMapItemGroup GItem;
 		GItem.m_Version = 3;
 
@@ -176,7 +178,7 @@ bool CEditorMap::Save(const char *pFilename, const FErrorHandler &ErrorHandler)
 		{
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
-				m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving tiles layer");
+				log_trace("editor/save", "Saving tiles layer");
 				std::shared_ptr<CLayerTiles> pLayerTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
 				pLayerTiles->PrepareForSave();
 
@@ -263,7 +265,7 @@ bool CEditorMap::Save(const char *pFilename, const FErrorHandler &ErrorHandler)
 			}
 			else if(pLayer->m_Type == LAYERTYPE_QUADS)
 			{
-				m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving quads layer");
+				log_trace("editor/save", "Saving quads layer");
 				std::shared_ptr<CLayerQuads> pLayerQuads = std::static_pointer_cast<CLayerQuads>(pLayer);
 				CMapItemLayerQuads Item;
 				Item.m_Version = 2;
@@ -296,7 +298,7 @@ bool CEditorMap::Save(const char *pFilename, const FErrorHandler &ErrorHandler)
 			}
 			else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
 			{
-				m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving sounds layer");
+				log_trace("editor/save", "Saving sounds layer");
 				std::shared_ptr<CLayerSounds> pLayerSounds = std::static_pointer_cast<CLayerSounds>(pLayer);
 				CMapItemLayerSounds Item;
 				Item.m_Version = 2;
@@ -336,7 +338,7 @@ bool CEditorMap::Save(const char *pFilename, const FErrorHandler &ErrorHandler)
 	}
 
 	// save envelopes
-	m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving envelopes");
+	log_trace("editor/save", "Saving envelopes");
 	int PointCount = 0;
 	for(size_t e = 0; e < m_vpEnvelopes.size(); e++)
 	{
@@ -353,7 +355,7 @@ bool CEditorMap::Save(const char *pFilename, const FErrorHandler &ErrorHandler)
 	}
 
 	// save points
-	m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving envelope points");
+	log_trace("editor/save", "Saving envelope points");
 	bool BezierUsed = false;
 	for(const auto &pEnvelope : m_vpEnvelopes)
 	{

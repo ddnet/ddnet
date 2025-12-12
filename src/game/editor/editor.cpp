@@ -11,7 +11,6 @@
 #include <base/system.h>
 
 #include <engine/client.h>
-#include <engine/console.h>
 #include <engine/engine.h>
 #include <engine/gfx/image_loader.h>
 #include <engine/gfx/image_manipulation.h>
@@ -7494,7 +7493,6 @@ void CEditor::Init()
 	m_pClient = Kernel()->RequestInterface<IClient>();
 	m_pConfigManager = Kernel()->RequestInterface<IConfigManager>();
 	m_pConfig = m_pConfigManager->Values();
-	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pEngine = Kernel()->RequestInterface<IEngine>();
 	m_pGraphics = Kernel()->RequestInterface<IGraphics>();
 	m_pTextRender = Kernel()->RequestInterface<ITextRender>();
@@ -7744,7 +7742,7 @@ void CEditor::HandleWriterFinishJobs()
 	{
 		str_format(aBuf, sizeof(aBuf), "Saving failed: Could not remove old map file '%s'.", pJob->GetRealFilename());
 		ShowFileDialogError("%s", aBuf);
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor/save", aBuf);
+		log_error("editor/save", "%s", aBuf);
 		return;
 	}
 
@@ -7752,12 +7750,11 @@ void CEditor::HandleWriterFinishJobs()
 	{
 		str_format(aBuf, sizeof(aBuf), "Saving failed: Could not move temporary map file '%s' to '%s'.", pJob->GetTempFilename(), pJob->GetRealFilename());
 		ShowFileDialogError("%s", aBuf);
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor/save", aBuf);
+		log_error("editor/save", "%s", aBuf);
 		return;
 	}
 
-	str_format(aBuf, sizeof(aBuf), "saving '%s' done", pJob->GetRealFilename());
-	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor/save", aBuf);
+	log_trace("editor/save", "Saved map to '%s'.", pJob->GetRealFilename());
 
 	// send rcon.. if we can
 	if(Client()->RconAuthed() && g_Config.m_EdAutoMapReload)
@@ -7915,7 +7912,7 @@ bool CEditor::Save(const char *pFilename)
 
 	const auto &&ErrorHandler = [this](const char *pErrorMessage) {
 		ShowFileDialogError("%s", pErrorMessage);
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor/save", pErrorMessage);
+		log_error("editor/save", "%s", pErrorMessage);
 	};
 	return m_Map.Save(pFilename, ErrorHandler);
 }
@@ -7939,7 +7936,7 @@ bool CEditor::Load(const char *pFilename, int StorageType)
 {
 	const auto &&ErrorHandler = [this](const char *pErrorMessage) {
 		ShowFileDialogError("%s", pErrorMessage);
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor/load", pErrorMessage);
+		log_error("editor/load", "%s", pErrorMessage);
 	};
 
 	Reset();
@@ -7963,7 +7960,7 @@ bool CEditor::Append(const char *pFilename, int StorageType, bool IgnoreHistory)
 
 	const auto &&ErrorHandler = [this](const char *pErrorMessage) {
 		ShowFileDialogError("%s", pErrorMessage);
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor/append", pErrorMessage);
+		log_error("editor/append", "%s", pErrorMessage);
 	};
 	if(!NewMap.Load(pFilename, StorageType, std::move(ErrorHandler)))
 		return false;
