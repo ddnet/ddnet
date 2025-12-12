@@ -2237,6 +2237,11 @@ bool CEditor::IsInTriangle(vec2 Point, vec2 A, vec2 B, vec2 C)
 
 void CEditor::DoQuadKnife(int QuadIndex)
 {
+	if(m_Dialog != DIALOG_NONE || Ui()->IsPopupOpen())
+	{
+		return;
+	}
+
 	std::shared_ptr<CLayerQuads> pLayer = std::static_pointer_cast<CLayerQuads>(GetSelectedLayerType(0, LAYERTYPE_QUADS));
 	CQuad *pQuad = &pLayer->m_vQuads[QuadIndex];
 
