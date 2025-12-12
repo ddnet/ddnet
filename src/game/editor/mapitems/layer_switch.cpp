@@ -54,7 +54,7 @@ void CLayerSwitch::Resize(int NewW, int NewH)
 void CLayerSwitch::Shift(EShiftDirection Direction)
 {
 	CLayerTiles::Shift(Direction);
-	ShiftImpl(m_pSwitchTile, Direction, Editor()->m_ShiftBy);
+	ShiftImpl(m_pSwitchTile, Direction, Map()->m_ShiftBy);
 }
 
 bool CLayerSwitch::IsEmpty() const

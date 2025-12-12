@@ -7438,7 +7438,6 @@ void CEditor::Reset(bool CreateDefault)
 
 	m_ActiveEnvelopePreview = EEnvelopePreview::NONE;
 	m_QuadEnvelopePointOperation = EQuadEnvelopePointOperation::NONE;
-	m_ShiftBy = 1;
 
 	m_ResetZoomEnvelope = true;
 	m_SettingsCommandInput.Clear();

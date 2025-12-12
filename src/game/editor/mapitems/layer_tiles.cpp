@@ -709,7 +709,7 @@ void CLayerTiles::Resize(int NewW, int NewH)
 
 void CLayerTiles::Shift(EShiftDirection Direction)
 {
-	ShiftImpl(m_pTiles, Direction, Editor()->m_ShiftBy);
+	ShiftImpl(m_pTiles, Direction, Map()->m_ShiftBy);
 }
 
 void CLayerTiles::ShowInfo()
@@ -1029,7 +1029,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		{"Width", m_Width, PROPTYPE_INT, 1, 100000},
 		{"Height", m_Height, PROPTYPE_INT, 1, 100000},
 		{"Shift", 0, PROPTYPE_SHIFT, 0, 0},
-		{"Shift by", Editor()->m_ShiftBy, PROPTYPE_INT, 1, 100000},
+		{"Shift by", Map()->m_ShiftBy, PROPTYPE_INT, 1, 100000},
 		{"Image", m_Image, PROPTYPE_IMAGE, 0, 0},
 		{"Color", PackColor(m_Color), PROPTYPE_COLOR, 0, 0},
 		{"Color Env", m_ColorEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
@@ -1088,7 +1088,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	}
 	else if(Prop == ETilesProp::PROP_SHIFT_BY)
 	{
-		Editor()->m_ShiftBy = NewVal;
+		Map()->m_ShiftBy = NewVal;
 	}
 	else if(Prop == ETilesProp::PROP_IMAGE)
 	{
@@ -1281,7 +1281,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 		{"Width", State.m_Width, PROPTYPE_INT, 1, 100000},
 		{"Height", State.m_Height, PROPTYPE_INT, 1, 100000},
 		{"Shift", 0, PROPTYPE_SHIFT, 0, 0},
-		{"Shift by", pEditor->m_ShiftBy, PROPTYPE_INT, 1, 100000},
+		{"Shift by", pEditorMap->m_ShiftBy, PROPTYPE_INT, 1, 100000},
 		{"Color", State.m_Color, PROPTYPE_COLOR, 0, 0},
 		{nullptr},
 	};
@@ -1322,7 +1322,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 	}
 	else if(Prop == ETilesCommonProp::PROP_SHIFT_BY)
 	{
-		pEditor->m_ShiftBy = NewVal;
+		pEditorMap->m_ShiftBy = NewVal;
 	}
 	else if(Prop == ETilesCommonProp::PROP_COLOR)
 	{

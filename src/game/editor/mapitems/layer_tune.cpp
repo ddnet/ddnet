@@ -55,7 +55,7 @@ void CLayerTune::Resize(int NewW, int NewH)
 void CLayerTune::Shift(EShiftDirection Direction)
 {
 	CLayerTiles::Shift(Direction);
-	ShiftImpl(m_pTuneTile, Direction, Editor()->m_ShiftBy);
+	ShiftImpl(m_pTuneTile, Direction, Map()->m_ShiftBy);
 }
 
 bool CLayerTune::IsEmpty() const
