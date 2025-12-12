@@ -611,7 +611,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 			// score
 			if(Race7)
 			{
-				if(pInfo->m_Score == -1)
+				if(pInfo->m_Score == protocol7::FinishTime::NOT_FINISHED)
 				{
 					aBuf[0] = '\0';
 				}
@@ -625,7 +625,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 			}
 			else if(TimeScore)
 			{
-				if(pInfo->m_Score == -9999)
+				if(pInfo->m_Score == FinishTime::NOT_FINISHED_TIMESCORE)
 				{
 					aBuf[0] = '\0';
 				}
