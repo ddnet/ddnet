@@ -160,10 +160,14 @@ void CScoreboard::RenderTitle(CUIRect TitleBar, int Team, const char *pTitle)
 	dbg_assert(Team == TEAM_RED || Team == TEAM_BLUE, "Team invalid");
 
 	char aScore[128] = "";
+	char aCentiSeconds[3] = "";
 	if(GameClient()->m_GameInfo.m_TimeScore)
 	{
-		if(m_ServerRecord > 0)
+		if(m_ServerRecord > 0.0f)
 		{
+			// show centiseconds if we are under an hour
+			if(m_ServerRecord < 60 * 60)
+				str_format(aCentiSeconds, sizeof(aCentiSeconds), "%02d", (int)std::round((m_ServerRecord - std::floor(m_ServerRecord)) * 100.0f));
 			str_time_float(m_ServerRecord, TIME_HOURS, aScore, sizeof(aScore));
 		}
 	}
@@ -190,7 +194,16 @@ void CScoreboard::RenderTitle(CUIRect TitleBar, int Team, const char *pTitle)
 	}
 
 	const float TitleFontSize = 20.0f;
-	const float ScoreTextWidth = TextRender()->TextWidth(TitleFontSize, aScore);
+	const float CentisecondsFontSize = TitleFontSize * (15.0f / 20.0f);
+
+	float CentisecondHeight, ScoreHeight;
+	STextSizeProperties CentisecondProperties, ScoreProperties;
+
+	CentisecondProperties.m_pHeight = &CentisecondHeight;
+	ScoreProperties.m_pHeight = &ScoreHeight;
+
+	const float ScoreTextWidthCentiseconds = TextRender()->TextWidth(CentisecondsFontSize, aCentiSeconds, -1, -1.0f, 0, CentisecondProperties);
+	const float ScoreTextWidth = TextRender()->TextWidth(TitleFontSize, aScore, -1, -1.0f, 0, ScoreProperties) + ScoreTextWidthCentiseconds;
 
 	TitleBar.VMargin(10.0f, &TitleBar);
 	CUIRect TitleLabel, ScoreLabel;
@@ -214,7 +227,20 @@ void CScoreboard::RenderTitle(CUIRect TitleBar, int Team, const char *pTitle)
 
 	if(aScore[0] != '\0')
 	{
-		Ui()->DoLabel(&ScoreLabel, aScore, TitleFontSize, Team == TEAM_RED ? TEXTALIGN_MR : TEXTALIGN_ML);
+		if(ScoreTextWidthCentiseconds > 0.0f)
+		{
+			CUIRect CentisecondLabel;
+			ScoreLabel.VSplitRight(ScoreTextWidthCentiseconds, &ScoreLabel, &CentisecondLabel);
+
+			// The height is not perfect, `TitleFontSize / 10.0f` is an error term
+			float HSplitLocation = CentisecondLabel.h - ScoreHeight + CentisecondHeight + TitleFontSize / 10.0f;
+
+			CentisecondLabel.HSplitTop(HSplitLocation, &CentisecondLabel, nullptr);
+			Ui()->DoLabel(&ScoreLabel, aScore, TitleFontSize, TEXTALIGN_MR);
+			Ui()->DoLabel(&CentisecondLabel, aCentiSeconds, CentisecondsFontSize, TEXTALIGN_ML);
+		}
+		else
+			Ui()->DoLabel(&ScoreLabel, aScore, TitleFontSize, Team == TEAM_RED ? TEXTALIGN_MR : TEXTALIGN_ML);
 	}
 }
 
@@ -400,10 +426,13 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 	const CNetObj_GameInfo *pGameInfoObj = GameClient()->m_Snap.m_pGameInfoObj;
 	const CNetObj_GameData *pGameDataObj = GameClient()->m_Snap.m_pGameDataObj;
 	const bool TimeScore = GameClient()->m_GameInfo.m_TimeScore;
+	const bool MillisecondScore = GameClient()->m_ReceivedDDNetPlayerFinishTimes;
 	const int NumPlayers = CountEnd - CountStart;
 	const bool LowScoreboardWidth = Scoreboard.w < 350.0f;
 
 	bool Race7 = Client()->IsSixup() && pGameInfoObj && pGameInfoObj->m_GameFlags & protocol7::GAMEFLAG_RACE;
+
+	const bool UseTime = Race7 || TimeScore || MillisecondScore;
 
 	// calculate measurements
 	float LineHeight;
@@ -468,9 +497,11 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 		FontSize = 5.0f;
 	}
 
+	const float CentisecondFontSize = FontSize * (15.0f / 20.0f);
+
 	const float ScoreOffset = Scoreboard.x + 20.0f;
-	const float ScoreLength = TextRender()->TextWidth(FontSize, TimeScore ? "00:00:00" : "99999");
-	const float TeeOffset = ScoreOffset + ScoreLength + 10.0f;
+	const float ScoreLength = TextRender()->TextWidth(FontSize, UseTime ? "00:00:00" : "99999");
+	const float TeeOffset = ScoreOffset + ScoreLength + 20.0f;
 	const float TeeLength = 60.0f * TeeSizeMod;
 	const float NameOffset = TeeOffset + TeeLength;
 	const float NameLength = (LowScoreboardWidth ? 90.0f : 150.0f) - TeeLength;
@@ -486,7 +517,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 	CUIRect Headline;
 	Scoreboard.HSplitTop(HeadlineFontsize * 2.0f, &Headline, &Scoreboard);
 	const float HeadlineY = Headline.y + Headline.h / 2.0f - HeadlineFontsize / 2.0f;
-	const char *pScore = TimeScore ? Localize("Time") : Localize("Score");
+	const char *pScore = UseTime ? Localize("Time") : Localize("Score");
 	TextRender()->Text(ScoreOffset + ScoreLength - TextRender()->TextWidth(HeadlineFontsize, pScore), HeadlineY, HeadlineFontsize, pScore);
 	TextRender()->Text(NameOffset, HeadlineY, HeadlineFontsize, Localize("Name"));
 	const char *pClanLabel = Localize("Clan");
@@ -608,37 +639,51 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 				Row.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, RoundRadius);
 			}
 
+			const CGameClient::CClientData &ClientData = GameClient()->m_aClients[pInfo->m_ClientId];
+
 			// score
-			if(Race7)
-			{
-				if(pInfo->m_Score == protocol7::FinishTime::NOT_FINISHED)
+			float ScoreY = Row.y + (Row.h - FontSize) / 2.0f;
+
+			auto RenderTime = [&](int Seconds, bool NotFinished, int Millis) {
+				if(NotFinished)
 				{
 					aBuf[0] = '\0';
+					return;
 				}
-				else
+
+				str_time(((int64_t)absolute(Seconds)) * 100, TIME_HOURS, aBuf, sizeof(aBuf));
+				TextRender()->Text(ScoreOffset + ScoreLength - TextRender()->TextWidth(FontSize, aBuf), ScoreY, FontSize, aBuf);
+
+				// show milliseconds or centiseconds if we are under an hour
+				if(Millis >= 0 && Seconds < 60 * 60)
 				{
-					// 0.7 uses milliseconds and ddnets str_time wants centiseconds
-					// 0.7 servers can also send the amount of precision the client should use
-					// we ignore that and always show 3 digit precision
-					str_time((int64_t)absolute(pInfo->m_Score / 10), TIME_MINS_CENTISECS, aBuf, sizeof(aBuf));
+					Millis %= 1000;
+					bool HasMillis = (Millis % 10) != 0;
+					if(!HasMillis)
+						str_format(aBuf, sizeof(aBuf), "%02d", (int)std::round(Millis / 10));
+					else
+						str_format(aBuf, sizeof(aBuf), "%03d", Millis);
+					TextRender()->Text(ScoreOffset + ScoreLength, ScoreY + Row.h / 40.0f, CentisecondFontSize, aBuf);
 				}
+			};
+
+			if(Race7)
+			{
+				RenderTime(pInfo->m_Score / 1000, pInfo->m_Score == protocol7::FinishTime::NOT_FINISHED, pInfo->m_Score % 1000);
+			}
+			else if(MillisecondScore)
+			{
+				RenderTime(ClientData.m_FinishTimeSeconds, ClientData.m_FinishTimeSeconds == FinishTime::NOT_FINISHED_MILLIS, ClientData.m_FinishTimeMillis);
 			}
 			else if(TimeScore)
 			{
-				if(pInfo->m_Score == FinishTime::NOT_FINISHED_TIMESCORE)
-				{
-					aBuf[0] = '\0';
-				}
-				else
-				{
-					str_time((int64_t)absolute(pInfo->m_Score) * 100, TIME_HOURS, aBuf, sizeof(aBuf));
-				}
+				RenderTime(pInfo->m_Score, pInfo->m_Score == FinishTime::NOT_FINISHED_TIMESCORE, -1);
 			}
 			else
 			{
 				str_format(aBuf, sizeof(aBuf), "%d", std::clamp(pInfo->m_Score, -999, 99999));
+				TextRender()->Text(ScoreOffset + ScoreLength - TextRender()->TextWidth(FontSize, aBuf), ScoreY, FontSize, aBuf);
 			}
-			TextRender()->Text(ScoreOffset + ScoreLength - TextRender()->TextWidth(FontSize, aBuf), Row.y + (Row.h - FontSize) / 2.0f, FontSize, aBuf);
 
 			// CTF flag
 			if(pGameInfoObj && (pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS) &&
@@ -652,8 +697,6 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 				Graphics()->QuadsDrawTL(&QuadItem, 1);
 				Graphics()->QuadsEnd();
 			}
-
-			const CGameClient::CClientData &ClientData = GameClient()->m_aClients[pInfo->m_ClientId];
 
 			if(m_MouseUnlocked)
 			{
