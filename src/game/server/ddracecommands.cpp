@@ -1,6 +1,8 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #include "gamecontext.h"
 
+#include <base/log.h>
+
 #include <engine/antibot.h>
 #include <engine/shared/config.h>
 
@@ -9,6 +11,7 @@
 #include <game/server/player.h>
 #include <game/server/save.h>
 #include <game/server/teams.h>
+#include <game/teamscore.h>
 
 void CGameContext::ConGoLeft(IConsole::IResult *pResult, void *pUserData)
 {
@@ -523,8 +526,11 @@ void CGameContext::ConSetDDRTeam(IConsole::IResult *pResult, void *pUserData)
 	int Target = pResult->GetVictim();
 	int Team = pResult->GetInteger(1);
 
-	if(!pController->Teams().IsValidTeamNumber(Team))
+	if(Team < 0 || !pController->Teams().IsValidTeamNumber(Team))
+	{
+		log_error("server", "Invalid DDRace Team: %d", Team);
 		return;
+	}
 
 	CCharacter *pChr = pSelf->GetPlayerChar(Target);
 
