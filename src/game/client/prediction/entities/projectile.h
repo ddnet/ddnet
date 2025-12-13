@@ -45,7 +45,6 @@ private:
 	int m_Owner;
 	int m_Type;
 	int m_SoundImpact;
-	float m_Force;
 	int m_StartTick;
 	bool m_Explosive;
 
