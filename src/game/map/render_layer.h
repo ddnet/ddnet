@@ -74,7 +74,7 @@ public:
 	virtual bool IsGroup() const { return false; }
 	virtual void Unload() = 0;
 
-	bool IsVisibleInClipRegion(const std::optional<CClipRegion> &ClipRegion) const;
+	bool IsVisibleInClipRegion(const std::optional<CClipRegion> &ClipRegion, const CRenderLayerParams &Params) const;
 	int GetGroup() const { return m_GroupId; }
 
 protected:
