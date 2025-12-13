@@ -268,6 +268,11 @@ void CEditorMap::Clean()
 	m_SelectedSound = 0;
 
 	m_ShiftBy = 1;
+
+	m_QuadKnife.m_Active = false;
+	m_QuadKnife.m_Count = 0;
+	m_QuadKnife.m_SelectedQuadIndex = -1;
+	std::fill(std::begin(m_QuadKnife.m_aPoints), std::end(m_QuadKnife.m_aPoints), vec2(0.0f, 0.0f));
 }
 
 void CEditorMap::CreateDefault()
