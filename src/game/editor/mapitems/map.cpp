@@ -266,6 +266,8 @@ void CEditorMap::Clean()
 
 	m_SelectedImage = 0;
 	m_SelectedSound = 0;
+
+	m_ShiftBy = 1;
 }
 
 void CEditorMap::CreateDefault()

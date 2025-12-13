@@ -55,7 +55,7 @@ void CLayerTele::Resize(int NewW, int NewH)
 void CLayerTele::Shift(EShiftDirection Direction)
 {
 	CLayerTiles::Shift(Direction);
-	ShiftImpl(m_pTeleTile, Direction, Editor()->m_ShiftBy);
+	ShiftImpl(m_pTeleTile, Direction, Map()->m_ShiftBy);
 }
 
 bool CLayerTele::IsEmpty() const

@@ -138,6 +138,8 @@ public:
 	int m_SelectedImage;
 	int m_SelectedSound;
 
+	int m_ShiftBy;
+
 	std::shared_ptr<CEnvelope> NewEnvelope(CEnvelope::EType Type);
 	void InsertEnvelope(int Index, std::shared_ptr<CEnvelope> &pEnvelope);
 	void UpdateEnvelopeReferences(int Index, std::shared_ptr<CEnvelope> &pEnvelope, std::vector<std::shared_ptr<IEditorEnvelopeReference>> &vpEditorObjectReferences);

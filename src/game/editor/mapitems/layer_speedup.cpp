@@ -52,7 +52,7 @@ void CLayerSpeedup::Resize(int NewW, int NewH)
 void CLayerSpeedup::Shift(EShiftDirection Direction)
 {
 	CLayerTiles::Shift(Direction);
-	ShiftImpl(m_pSpeedupTile, Direction, Editor()->m_ShiftBy);
+	ShiftImpl(m_pSpeedupTile, Direction, Map()->m_ShiftBy);
 }
 
 bool CLayerSpeedup::IsEmpty() const
