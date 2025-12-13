@@ -192,6 +192,7 @@ void CGameClient::OnConsoleInit()
 	// register game commands to allow the client prediction to load settings from the map
 	Console()->Register("tune", "s[tuning] ?f[value]", CFGFLAG_GAME, ConTuneParam, this, "Tune variable to value");
 	Console()->Register("tune_zone", "i[zone] s[tuning] f[value]", CFGFLAG_GAME, ConTuneZone, this, "Tune in zone a variable to value");
+	Console()->Register("env_trigger", "i[zone] i[env] s[trigger_type]", CFGFLAG_GAME, ConEnvTrigger, this, "Set a trigger type for an env in a trigger zone");
 	Console()->Register("mapbug", "s[mapbug]", CFGFLAG_GAME, ConMapbug, this, "Enable map compatibility mode using the specified bug (example: grenade-doubleexplosion@ddnet.tw)");
 
 	for(auto &pComponent : m_vpAll)
@@ -4587,6 +4588,11 @@ void CGameClient::LoadMapSettings()
 		pMap->UnloadData(pItem->m_Settings);
 		break;
 	}
+
+	// reset envelope triggers
+	int EnvStart, NumEnvs;
+	pMap->GetType(MAPITEMTYPE_ENVELOPE, &EnvStart, &NumEnvs);
+	m_GameWorld.SetNumEnvelopes(NumEnvs);
 }
 
 void CGameClient::ConTuneParam(IConsole::IResult *pResult, void *pUserData)
@@ -4609,6 +4615,31 @@ void CGameClient::ConTuneZone(IConsole::IResult *pResult, void *pUserData)
 
 	if(List >= 0 && List < TuneZone::NUM)
 		pSelf->TuningList()[List].Set(pParamName, NewValue);
+}
+
+void CGameClient::ConEnvTrigger(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameClient *pSelf = (CGameClient *)pUserData;
+	int TriggerZoneId = pResult->GetInteger(0);
+	int EnvelopeId = pResult->GetInteger(1);
+	const char *pTriggerName = pResult->GetString(2);
+
+	if(TriggerZoneId >= 0 && TriggerZoneId < 256 * 256)
+	{
+		if(!pSelf->m_GameWorld.EnvTriggerList().contains(TriggerZoneId))
+		{
+			CEnvelopeTriggerZone Zone;
+			pSelf->m_GameWorld.EnvTriggerList()[TriggerZoneId] = Zone;
+		}
+
+		CEnvelopeTriggerZone &TriggerZone = pSelf->m_GameWorld.EnvTriggerList()[TriggerZoneId];
+
+		CEnvelopeTrigger EnvTrigger;
+		EnvTrigger.m_EnvId = EnvelopeId;
+		EnvTrigger.m_State = CEnvelopeTrigger::FromName(pTriggerName);
+
+		TriggerZone.m_EnvTriggers.emplace_back(EnvTrigger);
+	}
 }
 
 void CGameClient::ConMapbug(IConsole::IResult *pResult, void *pUserData)
