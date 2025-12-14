@@ -1737,7 +1737,7 @@ Decoration
 
 [skins]
 Hands
-== 손 
+== 손
 
 [skins]
 Feet
@@ -2369,7 +2369,7 @@ Selected button not visible
 == 선택한 버튼이 보이지 않음
 
 The selected button is not visible. Do you want to deselect it or edit its visibility?
-== 선택한 버튼이 보이지 않습니다. 선택을 해제하거나 표시 조건을 수정하시겠습니까? 
+== 선택한 버튼이 보이지 않습니다. 선택을 해제하거나 표시 조건을 수정하시겠습니까?
 
 Edit
 == 수정

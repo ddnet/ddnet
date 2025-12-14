@@ -1497,7 +1497,7 @@ Grabs
 == 9+ новых згадак
 
 A demo with this name already exists
-== Дэма з такой назвай ужо існуе 
+== Дэма з такой назвай ужо існуе
 
 No server selected
 == Сервер не абраны

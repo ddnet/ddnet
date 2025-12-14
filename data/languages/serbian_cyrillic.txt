@@ -1292,7 +1292,7 @@ Highlight Color
 == Истакнута Боја
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== Када кренеш да се тркаш, прикажи твог најбржег духа 
+== Када кренеш да се тркаш, прикажи твог најбржег духа
 
 Opacity
 == Провидност

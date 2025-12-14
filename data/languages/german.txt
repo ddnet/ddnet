@@ -119,7 +119,7 @@ Error
 == Fehlgeschlagen
 
 Error loading demo
-== Fehler beim Laden der Aufnahme, die Datei ist ungültig.
+== Fehler beim Laden der Aufnahme
 
 Favorite
 == Favorit
@@ -999,7 +999,7 @@ Skins directory
 == Skin-Ordner
 
 Background music volume
-== Hintergrundmusik-Lautst.
+== Hintergrundmusik-Lautstärke
 
 Assets
 == Ressourcen
@@ -2187,7 +2187,7 @@ Skin could not be found.
 == Skin konnte nicht gefunden werden.
 
 No skins match your filter criteria
-== Keine Skins entsprechen deinen Filterkriterien.
+== Keine Skins entsprechen deinen Filterkriterien
 
 Preview player's name plate
 == Vorschau von Spielernamen
@@ -2486,16 +2486,16 @@ Download
 == Herunterladen
 
 Team save in progress. You'll be able to load with '/load %s'
-== Team Speicher-Prozess läuft. Du wirst später mit '/load %s' laden können
+== Team wird gespeichert. Du wirst später mit '/load %s' laden können
 
 Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails
-== Team Speicher-Prozess läuft. Du wirst entweder mit '/load %s' beim erfolgreichen oder mit '/load %s' beim fehlgeschlagenen Speichern laden können
+== Team wird gespeichert. Du wirst entweder mit '/load %s' beim erfolgreichen oder mit '/load %s' beim fehlgeschlagenen Speichern laden können
 
 Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue
-== Team wurde von %s erfolgreich gespeichert. Die Datenbankverbindung ist fehlgeschlagen, es wird ein generierter Speicher-Code benutzt um Kollisionen zu vermeiden. Benutze '/load %s' um fortzufahren
+== Team wurde erfolgreich von %s gespeichert. Die Datenbankverbindung ist fehlgeschlagen, es wird ein generierter Speicher-Code benutzt um Kollisionen zu vermeiden. Benutze '/load %s' um fortzufahren
 
 Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue
-== Team wurde von %s erfolgreich gespeichert. Die Datenbankverbindung ist fehlgeschlagen, es wird ein generierter Speicher-Code benutzt um Kollisionen zu vermeiden. Benutze '/load %s' auf %s um fortzufahren
+== Team wurde erfolgreich von %s gespeichert. Die Datenbankverbindung ist fehlgeschlagen, es wird ein generierter Speicher-Code benutzt um Kollisionen zu vermeiden. Benutze '/load %s' auf %s um fortzufahren
 
 Save failed!
 == Speichern fehlgeschlagen!
@@ -2517,22 +2517,22 @@ Are you sure that you want to disconnect and play this demo?
 == Bist du sicher, dass du die Verbindung trennen möchtest um die Demo abzuspielen?
 
 Show background quads
-== 
+== Hintergrund-Quads anzeigen
 
 Scoreboard cursor
-== 
+== Punktetafel Mauszeiger
 
 Add friend
-== 
+== Freund hinzufügen
 
 Unmute
-== 
+== Stummschaltung aufheben
 
 Mute
-== 
+== Stummschalten
 
 Unmute emoticons
-== 
+== Emoticons anzeigen
 
 Mute emoticons
-== 
+== Emoticons stummschalten
