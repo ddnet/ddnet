@@ -1027,9 +1027,9 @@ CUi::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 	static int s_SliceButton = 0;
 	if(pEditor->DoButton_Editor(&s_SliceButton, "Slice", 0, &Button, BUTTONFLAG_LEFT, "Enable quad knife mode."))
 	{
-		pEditor->m_QuadKnifeActive = true;
-		pEditor->m_QuadKnifeCount = 0;
-		pEditor->m_QuadKnifeSelectedQuadIndex = pQuadPopupContext->m_SelectedQuadIndex;
+		pEditor->m_Map.m_QuadKnife.m_Active = true;
+		pEditor->m_Map.m_QuadKnife.m_Count = 0;
+		pEditor->m_Map.m_QuadKnife.m_SelectedQuadIndex = pQuadPopupContext->m_SelectedQuadIndex;
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
 

@@ -140,6 +140,17 @@ public:
 
 	int m_ShiftBy;
 
+	// Quad knife
+	class CQuadKnife
+	{
+	public:
+		bool m_Active;
+		int m_SelectedQuadIndex;
+		int m_Count;
+		vec2 m_aPoints[4];
+	};
+	CQuadKnife m_QuadKnife;
+
 	std::shared_ptr<CEnvelope> NewEnvelope(CEnvelope::EType Type);
 	void InsertEnvelope(int Index, std::shared_ptr<CEnvelope> &pEnvelope);
 	void UpdateEnvelopeReferences(int Index, std::shared_ptr<CEnvelope> &pEnvelope, std::vector<std::shared_ptr<IEditorEnvelopeReference>> &vpEditorObjectReferences);

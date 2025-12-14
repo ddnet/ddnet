@@ -162,7 +162,7 @@ void CEditor::AddSelectedLayer(int LayerIndex)
 {
 	m_vSelectedLayers.push_back(LayerIndex);
 
-	m_QuadKnifeActive = false;
+	m_Map.m_QuadKnife.m_Active = false;
 }
 
 void CEditor::SelectQuad(int Index)
@@ -2243,6 +2243,7 @@ void CEditor::DoQuadKnife(int QuadIndex)
 
 	std::shared_ptr<CLayerQuads> pLayer = std::static_pointer_cast<CLayerQuads>(GetSelectedLayerType(0, LAYERTYPE_QUADS));
 	CQuad *pQuad = &pLayer->m_vQuads[QuadIndex];
+	CEditorMap::CQuadKnife &QuadKnife = m_Map.m_QuadKnife;
 
 	const bool IgnoreGrid = Input()->AltIsPressed();
 	float SnapRadius = 4.f * m_MouseWorldScale;
@@ -2260,7 +2261,7 @@ void CEditor::DoQuadKnife(int QuadIndex)
 
 	if(Ui()->MouseButtonClicked(1))
 	{
-		m_QuadKnifeActive = false;
+		QuadKnife.m_Active = false;
 		return;
 	}
 
@@ -2354,37 +2355,37 @@ void CEditor::DoQuadKnife(int QuadIndex)
 
 	if(Ui()->MouseButtonClicked(0) && ValidPosition)
 	{
-		m_aQuadKnifePoints[m_QuadKnifeCount] = Point;
-		m_QuadKnifeCount++;
+		QuadKnife.m_aPoints[QuadKnife.m_Count] = Point;
+		QuadKnife.m_Count++;
 	}
 
-	if(m_QuadKnifeCount == 4)
+	if(QuadKnife.m_Count == 4)
 	{
-		if(IsInTriangle(m_aQuadKnifePoints[3], m_aQuadKnifePoints[0], m_aQuadKnifePoints[1], m_aQuadKnifePoints[2]) ||
-			IsInTriangle(m_aQuadKnifePoints[1], m_aQuadKnifePoints[0], m_aQuadKnifePoints[2], m_aQuadKnifePoints[3]))
+		if(IsInTriangle(QuadKnife.m_aPoints[3], QuadKnife.m_aPoints[0], QuadKnife.m_aPoints[1], QuadKnife.m_aPoints[2]) ||
+			IsInTriangle(QuadKnife.m_aPoints[1], QuadKnife.m_aPoints[0], QuadKnife.m_aPoints[2], QuadKnife.m_aPoints[3]))
 		{
 			// Fix concave order
-			std::swap(m_aQuadKnifePoints[0], m_aQuadKnifePoints[3]);
-			std::swap(m_aQuadKnifePoints[1], m_aQuadKnifePoints[2]);
+			std::swap(QuadKnife.m_aPoints[0], QuadKnife.m_aPoints[3]);
+			std::swap(QuadKnife.m_aPoints[1], QuadKnife.m_aPoints[2]);
 		}
 
-		std::swap(m_aQuadKnifePoints[2], m_aQuadKnifePoints[3]);
+		std::swap(QuadKnife.m_aPoints[2], QuadKnife.m_aPoints[3]);
 
 		CQuad *pResult = pLayer->NewQuad(64, 64, 64, 64);
 		pQuad = &pLayer->m_vQuads[QuadIndex];
 
 		for(int i = 0; i < 4; i++)
 		{
-			int t = IsInTriangle(m_aQuadKnifePoints[i], v[0], v[3], v[2]) ? 2 : 1;
+			int t = IsInTriangle(QuadKnife.m_aPoints[i], v[0], v[3], v[2]) ? 2 : 1;
 
 			vec2 A = vec2(fx2f(pQuad->m_aPoints[0].x), fx2f(pQuad->m_aPoints[0].y));
 			vec2 B = vec2(fx2f(pQuad->m_aPoints[3].x), fx2f(pQuad->m_aPoints[3].y));
 			vec2 C = vec2(fx2f(pQuad->m_aPoints[t].x), fx2f(pQuad->m_aPoints[t].y));
 
 			float TriArea = TriangleArea(A, B, C);
-			float WeightA = TriangleArea(m_aQuadKnifePoints[i], B, C) / TriArea;
-			float WeightB = TriangleArea(m_aQuadKnifePoints[i], C, A) / TriArea;
-			float WeightC = TriangleArea(m_aQuadKnifePoints[i], A, B) / TriArea;
+			float WeightA = TriangleArea(QuadKnife.m_aPoints[i], B, C) / TriArea;
+			float WeightB = TriangleArea(QuadKnife.m_aPoints[i], C, A) / TriArea;
+			float WeightC = TriangleArea(QuadKnife.m_aPoints[i], A, B) / TriArea;
 
 			pResult->m_aColors[i].r = (int)std::round(pQuad->m_aColors[0].r * WeightA + pQuad->m_aColors[3].r * WeightB + pQuad->m_aColors[t].r * WeightC);
 			pResult->m_aColors[i].g = (int)std::round(pQuad->m_aColors[0].g * WeightA + pQuad->m_aColors[3].g * WeightB + pQuad->m_aColors[t].g * WeightC);
@@ -2394,14 +2395,14 @@ void CEditor::DoQuadKnife(int QuadIndex)
 			pResult->m_aTexcoords[i].x = (int)std::round(pQuad->m_aTexcoords[0].x * WeightA + pQuad->m_aTexcoords[3].x * WeightB + pQuad->m_aTexcoords[t].x * WeightC);
 			pResult->m_aTexcoords[i].y = (int)std::round(pQuad->m_aTexcoords[0].y * WeightA + pQuad->m_aTexcoords[3].y * WeightB + pQuad->m_aTexcoords[t].y * WeightC);
 
-			pResult->m_aPoints[i].x = f2fx(m_aQuadKnifePoints[i].x);
-			pResult->m_aPoints[i].y = f2fx(m_aQuadKnifePoints[i].y);
+			pResult->m_aPoints[i].x = f2fx(QuadKnife.m_aPoints[i].x);
+			pResult->m_aPoints[i].y = f2fx(QuadKnife.m_aPoints[i].y);
 		}
 
 		pResult->m_aPoints[4].x = ((pResult->m_aPoints[0].x + pResult->m_aPoints[3].x) / 2 + (pResult->m_aPoints[1].x + pResult->m_aPoints[2].x) / 2) / 2;
 		pResult->m_aPoints[4].y = ((pResult->m_aPoints[0].y + pResult->m_aPoints[3].y) / 2 + (pResult->m_aPoints[1].y + pResult->m_aPoints[2].y) / 2) / 2;
 
-		m_QuadKnifeCount = 0;
+		QuadKnife.m_Count = 0;
 		m_Map.m_EditorHistory.RecordAction(std::make_shared<CEditorActionNewQuad>(&m_Map, m_SelectedGroup, m_vSelectedLayers[0]));
 	}
 
@@ -2419,25 +2420,25 @@ void CEditor::DoQuadKnife(int QuadIndex)
 	Graphics()->LinesDraw(aEdges, std::size(aEdges));
 
 	IGraphics::CLineItem aLines[4];
-	int LineCount = maximum(m_QuadKnifeCount - 1, 0);
+	int LineCount = maximum(QuadKnife.m_Count - 1, 0);
 
 	for(int i = 0; i < LineCount; i++)
-		aLines[i] = IGraphics::CLineItem(m_aQuadKnifePoints[i], m_aQuadKnifePoints[i + 1]);
+		aLines[i] = IGraphics::CLineItem(QuadKnife.m_aPoints[i], QuadKnife.m_aPoints[i + 1]);
 
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 	Graphics()->LinesDraw(aLines, LineCount);
 
 	if(ValidPosition)
 	{
-		if(m_QuadKnifeCount > 0)
+		if(QuadKnife.m_Count > 0)
 		{
-			IGraphics::CLineItem LineCurrent(Point, m_aQuadKnifePoints[m_QuadKnifeCount - 1]);
+			IGraphics::CLineItem LineCurrent(Point, QuadKnife.m_aPoints[QuadKnife.m_Count - 1]);
 			Graphics()->LinesDraw(&LineCurrent, 1);
 		}
 
-		if(m_QuadKnifeCount == 3)
+		if(QuadKnife.m_Count == 3)
 		{
-			IGraphics::CLineItem LineClose(Point, m_aQuadKnifePoints[0]);
+			IGraphics::CLineItem LineClose(Point, QuadKnife.m_aPoints[0]);
 			Graphics()->LinesDraw(&LineClose, 1);
 		}
 	}
@@ -2447,11 +2448,11 @@ void CEditor::DoQuadKnife(int QuadIndex)
 
 	IGraphics::CQuadItem aMarkers[4];
 
-	for(int i = 0; i < m_QuadKnifeCount; i++)
-		aMarkers[i] = IGraphics::CQuadItem(m_aQuadKnifePoints[i].x, m_aQuadKnifePoints[i].y, 5.f * m_MouseWorldScale, 5.f * m_MouseWorldScale);
+	for(int i = 0; i < QuadKnife.m_Count; i++)
+		aMarkers[i] = IGraphics::CQuadItem(QuadKnife.m_aPoints[i].x, QuadKnife.m_aPoints[i].y, 5.f * m_MouseWorldScale, 5.f * m_MouseWorldScale);
 
 	Graphics()->SetColor(0.f, 0.f, 1.f, 1.f);
-	Graphics()->QuadsDraw(aMarkers, m_QuadKnifeCount);
+	Graphics()->QuadsDraw(aMarkers, QuadKnife.m_Count);
 
 	if(ValidPosition)
 	{
@@ -3036,7 +3037,7 @@ void CEditor::DoMapEditor(CUIRect View)
 					m_pBrush->Clear();
 				}
 
-				if(!Input()->ModifierIsPressed() && Ui()->MouseButton(0) && s_Operation == OP_NONE && !m_QuadKnifeActive)
+				if(!Input()->ModifierIsPressed() && Ui()->MouseButton(0) && s_Operation == OP_NONE && !m_Map.m_QuadKnife.m_Active)
 				{
 					Ui()->SetActiveItem(&m_MapEditorId);
 
@@ -3114,9 +3115,9 @@ void CEditor::DoMapEditor(CUIRect View)
 						if(m_ActiveEnvelopePreview == EEnvelopePreview::NONE)
 							m_ActiveEnvelopePreview = EEnvelopePreview::ALL;
 
-						if(m_QuadKnifeActive)
+						if(m_Map.m_QuadKnife.m_Active)
 						{
-							DoQuadKnife(m_vSelectedQuads[m_QuadKnifeSelectedQuadIndex]);
+							DoQuadKnife(m_vSelectedQuads[m_Map.m_QuadKnife.m_SelectedQuadIndex]);
 						}
 						else
 						{
