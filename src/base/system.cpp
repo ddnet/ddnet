@@ -2456,6 +2456,87 @@ int fs_storage_path(const char *appname, char *path, int max)
 #endif
 }
 
+char *fs_executable_path(char *buffer, int buffer_size, bool remove_name)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	wchar_t wide_path[IO_MAX_PATH_LENGTH];
+	if(GetModuleFileNameW(nullptr, wide_path, std::size(wide_path)) == 0 || GetLastError() != ERROR_SUCCESS)
+	{
+		buffer[0] = '\0';
+		return nullptr;
+	}
+	const std::optional<std::string> path = windows_wide_to_utf8(wide_path);
+	if(!path.has_value())
+	{
+		buffer[0] = '\0';
+		return nullptr;
+	}
+	str_copy(buffer, path.value().c_str(), buffer_size);
+	if(remove_name)
+	{
+		fs_parent_dir(buffer);
+	}
+	return buffer;
+#elif defined(CONF_PLATFORM_MACOS)
+	// Get the size
+	uint32_t path_size = 0;
+	_NSGetExecutablePath(nullptr, &path_size);
+
+	char *path = (char *)malloc(path_size);
+	if(_NSGetExecutablePath(path, &path_size) != 0)
+	{
+		free(path);
+		buffer[0] = '\0';
+		return nullptr;
+	}
+	char real_path[IO_MAX_PATH_LENGTH];
+	if(realpath(path, real_path) != nullptr) // _NSGetExecutablePath may return relative paths
+	{
+		free(path);
+		str_copy(buffer, real_path, buffer_size);
+		if(remove_name)
+		{
+			fs_parent_dir(buffer);
+		}
+		return buffer;
+	}
+	str_copy(buffer, path, buffer_size);
+	free(path);
+	if(remove_name)
+	{
+		fs_parent_dir(buffer);
+	}
+	return buffer;
+#else
+	char path[IO_MAX_PATH_LENGTH];
+	static const char *NAMES[] = {
+		"/proc/self/exe", // Linux, Android
+		"/proc/curproc/exe", // NetBSD
+		"/proc/curproc/file", // DragonFly
+	};
+	for(auto &name : NAMES)
+	{
+		if(ssize_t bytes_written = readlink(name, path, sizeof(path)); bytes_written != -1)
+		{
+			path[bytes_written] = '\0'; // readlink does NOT null-terminate
+			// if the file gets deleted or replaced (not renamed) linux appends (deleted) to the symlink
+			if(char *deleted = strstr(path, " (deleted)"); deleted != nullptr)
+			{
+				*deleted = '\0';
+			}
+			str_copy(buffer, path, buffer_size);
+			if(remove_name)
+			{
+				fs_parent_dir(buffer);
+			}
+			return buffer;
+		}
+	}
+	buffer[0] = '\0';
+	return nullptr;
+#endif
+}
+
 int fs_makedir_rec_for(const char *path)
 {
 	char buffer[IO_MAX_PATH_LENGTH];

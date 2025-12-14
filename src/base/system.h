@@ -1395,6 +1395,23 @@ int fs_makedir_rec_for(const char *path);
 int fs_storage_path(const char *appname, char *path, int max);
 
 /**
+ * Gets the absolute path to the executable
+ *
+ * @ingroup Filesystem
+ *
+ * @param buffer Buffer that will receive the path of the executable.
+ * @param buffer_size Size of the buffer.
+ * @param remove_name Whether to remove the filename from the path.
+ *
+ * @return Pointer to the buffer on success, `nullptr` on failure.
+ *
+ * @remark Removes the executable name from the path by default
+ *
+ * @remark The strings are treated as null-terminated strings.
+ */
+char *fs_executable_path(char *buffer, int buffer_size, bool remove_name = true);
+
+/**
  * Checks if a file exists.
  *
  * @ingroup Filesystem
