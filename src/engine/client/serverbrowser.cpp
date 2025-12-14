@@ -80,7 +80,6 @@ CServerBrowser::CServerBrowser() :
 
 CServerBrowser::~CServerBrowser()
 {
-	free(m_ppServerlist);
 	free(m_pSortedServerlist);
 	json_value_free(m_pDDNetInfo);
 
@@ -847,13 +846,15 @@ CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR *pAddrs, int Num
 
 	if(m_NumServers == m_NumServerCapacity)
 	{
-		CServerEntry **ppNewlist;
 		m_NumServerCapacity += 100;
-		ppNewlist = (CServerEntry **)calloc(m_NumServerCapacity, sizeof(CServerEntry *)); // NOLINT(bugprone-sizeof-expression)
+		std::unique_ptr<CServerEntry *[]> ppNewList = std::make_unique<CServerEntry *[]>(m_NumServerCapacity);
+
 		if(m_NumServers > 0)
-			mem_copy(ppNewlist, m_ppServerlist, m_NumServers * sizeof(CServerEntry *)); // NOLINT(bugprone-sizeof-expression)
-		free(m_ppServerlist);
-		m_ppServerlist = ppNewlist;
+		{
+			std::memcpy(ppNewList.get(), m_ppServerlist.get(), m_NumServers * sizeof(CServerEntry *)); // NOLINT(bugprone-bitwise-pointer-cast)
+		}
+
+		m_ppServerlist = std::move(ppNewList);
 	}
 
 	// add to list

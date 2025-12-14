@@ -12,6 +12,7 @@
 
 #include <functional>
 #include <map>
+#include <memory>
 #include <set>
 
 typedef struct _json_value json_value;
@@ -333,7 +334,7 @@ private:
 	const char *m_pHttpPrevBestUrl = nullptr;
 
 	CHeap m_ServerlistHeap;
-	CServerEntry **m_ppServerlist;
+	std::unique_ptr<CServerEntry *[]> m_ppServerlist;
 	int *m_pSortedServerlist;
 	std::unordered_map<NETADDR, int> m_ByAddr;
 
