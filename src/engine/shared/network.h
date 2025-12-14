@@ -360,6 +360,7 @@ private:
 	EState m_State;
 
 	NETADDR m_PeerAddr;
+	std::array<char, NETADDR_MAXSTRSIZE> m_aPeerAddrStr;
 	NETSOCKET m_Socket;
 
 	char m_aBuffer[NET_MAX_PACKETSIZE];
@@ -370,12 +371,16 @@ private:
 	bool m_LineEndingDetected;
 	char m_aLineEnding[3];
 
+	void SetPeerAddr(const NETADDR *pAddr);
+	void ClearPeerAddr();
+
 public:
 	int Init(NETSOCKET Socket, const NETADDR *pAddr);
 	void Disconnect(const char *pReason);
 
 	EState State() const { return m_State; }
 	const NETADDR *PeerAddress() const { return &m_PeerAddr; }
+	const std::array<char, NETADDR_MAXSTRSIZE> &PeerAddressString() const { return m_aPeerAddrStr; }
 	const char *ErrorString() const { return m_aErrorString; }
 
 	void Reset();
@@ -534,6 +539,7 @@ public:
 
 	// status requests
 	const NETADDR *ClientAddr(int ClientId) const { return m_aSlots[ClientId].m_Connection.PeerAddress(); }
+	const std::array<char, NETADDR_MAXSTRSIZE> &ClientAddrString(int ClientId) const { return m_aSlots[ClientId].m_Connection.PeerAddressString(); }
 	CNetBan *NetBan() const { return m_pNetBan; }
 };
 
