@@ -1208,10 +1208,10 @@ Ingame controller mode
 == 游戏内控制器瞄准模式
 
 Ingame controller sens.
-== 摇杆灵敏度（游戏）
+== 游戏摇杆灵敏度
 
 UI controller sens.
-== 摇杆灵敏度（界面）
+== 界面摇杆灵敏度
 
 Controller jitter tolerance
 == 摇杆死区
@@ -1226,10 +1226,10 @@ Mouse
 == 鼠标
 
 Ingame mouse sens.
-== 鼠标灵敏度（游戏）
+== 游戏鼠标灵敏度
 
 UI mouse sens.
-== 鼠标灵敏度（界面）
+== 界面鼠标灵敏度
 
 Controller
 == 控制器
@@ -2517,22 +2517,22 @@ Are you sure that you want to disconnect and play this demo?
 == 确定要断开连接并播放此回放吗？
 
 Show background quads
-== 
+== 显示背景贴图
 
 Scoreboard cursor
-== 
+== 显示计分板光标
 
 Add friend
-== 
+== 添加好友
 
 Unmute
-== 
+== 取消屏蔽
 
 Mute
-== 
+== 屏蔽
 
 Unmute emoticons
-== 
+== 取消屏蔽表情
 
 Mute emoticons
-== 
+== 屏蔽表情

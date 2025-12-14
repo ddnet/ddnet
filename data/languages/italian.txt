@@ -1140,7 +1140,7 @@ Delete folder
 == Cancella cartella
 
 Download community skins
-== Scarica skin comunitá 
+== Scarica skin comunitá
 
 Choose default eyes when joining a server
 == Scegli degli occhi di default quando entri in un server
@@ -1258,7 +1258,7 @@ When you cross the start line, show a ghost tee replicating the movements of you
 == Quando attraversi la linea di partenza, mostra una maglietta fantasma che riproduce i movimenti del tuo miglior tempo
 
 Opacity
-== Opacitá 
+== Opacitá
 
 Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == Regola l'opacità delle entità appartenenti ad altri team, come magliette e targhette

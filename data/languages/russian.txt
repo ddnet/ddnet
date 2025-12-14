@@ -1601,7 +1601,7 @@ Moved ingame
 == Перемещены в игре
 
 Go back the specified duration
-== Отмотать назад на заданное время 
+== Отмотать назад на заданное время
 
 [Demo player duration]
 %s min.
@@ -2517,22 +2517,22 @@ Are you sure that you want to disconnect and play this demo?
 == Вы уверены, что хотите отключиться и запустить демо?
 
 Show background quads
-== 
+== Показать фоновые квады
 
 Scoreboard cursor
-== 
+== Курсор табло
 
 Add friend
-== 
+== Добавить в друзья
 
 Unmute
-== 
+== Разглушить
 
 Mute
-== 
+== Заглушить
 
 Unmute emoticons
-== 
+== Включить эмоции
 
 Mute emoticons
-== 
+== Выключить эмоции

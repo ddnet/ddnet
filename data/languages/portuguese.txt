@@ -1456,7 +1456,7 @@ Skip the main menu
 
 [Hertz]
 Hz
-== Hz 
+== Hz
 
 Save power by lowering refresh rate (higher input latency)
 == Poupa energia ao baixar a taxa de atualização (maior latência de entrada)

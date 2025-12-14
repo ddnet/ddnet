@@ -908,7 +908,7 @@ Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == Debug mód bekapcsolva. Nyomd meg a Ctrl+Shift+D billentyűparancsot, hogy kikapcsold.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-==  Használd a K gombot az újraéledéshez, Q betű a megfigyeléshez. Nézd meg a beállításokat a többi bind-ért.
+== Használd a K gombot az újraéledéshez, Q betű a megfigyeléshez. Nézd meg a beállításokat a többi bind-ért.
 
 Existing Player
 == Létező játékos
