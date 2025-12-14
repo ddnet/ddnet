@@ -103,11 +103,11 @@ class CSoundSourceOperationTracker : public CMapObject
 public:
 	explicit CSoundSourceOperationTracker(CEditorMap *pMap);
 
-	void Begin(CSoundSource *pSource, ESoundSourceOp Operation, int LayerIndex);
+	void Begin(const CSoundSource *pSource, ESoundSourceOp Operation, int LayerIndex);
 	void End();
 
 private:
-	CSoundSource *m_pSource;
+	const CSoundSource *m_pSource;
 	ESoundSourceOp m_TrackedOp;
 	int m_LayerIndex;
 
@@ -138,7 +138,7 @@ public:
 		m_CurrentGroupIndex(-1),
 		m_Tracking(false) {}
 
-	void Begin(T *pObject, E Prop, EEditState State, int GroupIndex = -1, int LayerIndex = -1)
+	void Begin(const T *pObject, E Prop, EEditState State, int GroupIndex = -1, int LayerIndex = -1)
 	{
 		if(m_Tracking || Prop == static_cast<E>(-1))
 			return;
@@ -185,7 +185,7 @@ protected:
 	}
 
 	int m_OriginalValue;
-	T *m_pObject;
+	const T *m_pObject;
 	int m_OriginalLayerIndex;
 	int m_OriginalGroupIndex;
 	int m_CurrentLayerIndex;
