@@ -53,11 +53,11 @@ int IEnvelopePointAccess::FindPointIndex(CFixedTime Time) const
 CMapBasedEnvelopePointAccess::CMapBasedEnvelopePointAccess(CDataFileReader *pReader)
 {
 	bool FoundBezierEnvelope = false;
-	int EnvStart, EnvNum;
-	pReader->GetType(MAPITEMTYPE_ENVELOPE, &EnvStart, &EnvNum);
-	for(int EnvIndex = 0; EnvIndex < EnvNum; EnvIndex++)
+	int EnvelopeStart, EnvelopeNum;
+	pReader->GetType(MAPITEMTYPE_ENVELOPE, &EnvelopeStart, &EnvelopeNum);
+	for(int EnvelopeIndex = 0; EnvelopeIndex < EnvelopeNum; EnvelopeIndex++)
 	{
-		CMapItemEnvelope *pEnvelope = static_cast<CMapItemEnvelope *>(pReader->GetItem(EnvStart + EnvIndex));
+		CMapItemEnvelope *pEnvelope = static_cast<CMapItemEnvelope *>(pReader->GetItem(EnvelopeStart + EnvelopeIndex));
 		if(pEnvelope->m_Version >= CMapItemEnvelope::VERSION_TEEWORLDS_BEZIER)
 		{
 			FoundBezierEnvelope = true;

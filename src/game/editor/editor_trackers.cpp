@@ -338,11 +338,11 @@ void CEnvelopeEditorOperationTracker::HandlePointDragStart()
 {
 	// Figure out which points are selected and which channels
 	// Save their X and Y position (time and value)
-	auto pEnv = Map()->m_vpEnvelopes[Editor()->m_SelectedEnvelope];
+	auto pEnvelope = Map()->m_vpEnvelopes[Editor()->m_SelectedEnvelope];
 
 	for(auto [PointIndex, Channel] : Editor()->m_vSelectedEnvelopePoints)
 	{
-		auto &Point = pEnv->m_vPoints[PointIndex];
+		auto &Point = pEnvelope->m_vPoints[PointIndex];
 		auto &Data = m_SavedValues[PointIndex];
 		Data.m_Values[Channel] = Point.m_aValues[Channel];
 		if(Data.m_Used)
@@ -357,19 +357,19 @@ void CEnvelopeEditorOperationTracker::HandlePointDragEnd(bool Switch)
 	if(Switch && m_TrackedOp != EEnvelopeEditorOp::OP_SCALE)
 		return;
 
-	int EnvIndex = Editor()->m_SelectedEnvelope;
-	auto pEnv = Map()->m_vpEnvelopes[EnvIndex];
+	int EnvelopeIndex = Editor()->m_SelectedEnvelope;
+	auto pEnvelope = Map()->m_vpEnvelopes[EnvelopeIndex];
 	std::vector<std::shared_ptr<IEditorAction>> vpActions;
 
 	for(auto const &Entry : m_SavedValues)
 	{
 		int PointIndex = Entry.first;
-		auto &Point = pEnv->m_vPoints[PointIndex];
+		auto &Point = pEnvelope->m_vPoints[PointIndex];
 		const auto &Data = Entry.second;
 
 		if(Data.m_Time != Point.m_Time)
 		{ // Save time
-			vpActions.push_back(std::make_shared<CEditorActionEnvelopeEditPointTime>(Map(), EnvIndex, PointIndex, Data.m_Time, Point.m_Time));
+			vpActions.push_back(std::make_shared<CEditorActionEnvelopeEditPointTime>(Map(), EnvelopeIndex, PointIndex, Data.m_Time, Point.m_Time));
 		}
 
 		for(auto Value : Data.m_Values)
@@ -378,7 +378,7 @@ void CEnvelopeEditorOperationTracker::HandlePointDragEnd(bool Switch)
 			int Channel = Value.first;
 			if(Value.second != Point.m_aValues[Channel])
 			{ // Save value
-				vpActions.push_back(std::make_shared<CEditorActionEnvelopeEditPoint>(Map(), EnvIndex, PointIndex, Channel, CEditorActionEnvelopeEditPoint::EEditType::VALUE, Value.second, Point.m_aValues[Channel]));
+				vpActions.push_back(std::make_shared<CEditorActionEnvelopeEditPoint>(Map(), EnvelopeIndex, PointIndex, Channel, CEditorActionEnvelopeEditPoint::EEditType::VALUE, Value.second, Point.m_aValues[Channel]));
 			}
 		}
 	}

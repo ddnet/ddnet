@@ -18,9 +18,9 @@ CEnvelopeExtrema::CEnvelopeExtrema(IMap *pMap) :
 	CalculateExtrema();
 }
 
-void CEnvelopeExtrema::CalculateEnvelope(const CMapItemEnvelope *pEnvelopeItem, int EnvId)
+void CEnvelopeExtrema::CalculateEnvelope(const CMapItemEnvelope *pEnvelopeItem, int EnvelopeIndex)
 {
-	CEnvelopeExtremaItem &EnvExt = m_vEnvelopeExtrema[EnvId];
+	CEnvelopeExtremaItem &EnvExt = m_vEnvelopeExtrema[EnvelopeIndex];
 
 	// setup default values
 	for(int Channel = 0; Channel < 2; ++Channel)
@@ -81,21 +81,21 @@ void CEnvelopeExtrema::CalculateEnvelope(const CMapItemEnvelope *pEnvelopeItem, 
 
 void CEnvelopeExtrema::CalculateExtrema()
 {
-	int EnvStart, EnvNum;
-	m_pMap->GetType(MAPITEMTYPE_ENVELOPE, &EnvStart, &EnvNum);
-	m_vEnvelopeExtrema.resize(EnvNum);
-	for(int EnvId = 0; EnvId < EnvNum; ++EnvId)
+	int EnvelopeStart, EnvelopeNum;
+	m_pMap->GetType(MAPITEMTYPE_ENVELOPE, &EnvelopeStart, &EnvelopeNum);
+	m_vEnvelopeExtrema.resize(EnvelopeNum);
+	for(int EnvelopeIndex = 0; EnvelopeIndex < EnvelopeNum; ++EnvelopeIndex)
 	{
-		const CMapItemEnvelope *pItem = static_cast<const CMapItemEnvelope *>(m_pMap->GetItem(EnvStart + EnvId));
-		CalculateEnvelope(pItem, EnvId);
+		const CMapItemEnvelope *pItem = static_cast<const CMapItemEnvelope *>(m_pMap->GetItem(EnvelopeStart + EnvelopeIndex));
+		CalculateEnvelope(pItem, EnvelopeIndex);
 	}
 }
 
-const CEnvelopeExtrema::CEnvelopeExtremaItem &CEnvelopeExtrema::GetExtrema(int Env) const
+const CEnvelopeExtrema::CEnvelopeExtremaItem &CEnvelopeExtrema::GetExtrema(int EnvelopeIndex) const
 {
-	if(Env == -1)
+	if(EnvelopeIndex == -1)
 		return m_EnvelopeExtremaItemNone; // No envelope just means no movement
-	else if(Env < -1 || Env >= (int)m_vEnvelopeExtrema.size())
+	else if(EnvelopeIndex < -1 || EnvelopeIndex >= (int)m_vEnvelopeExtrema.size())
 		return m_EnvelopeExtremaItemInvalid;
-	return m_vEnvelopeExtrema[Env];
+	return m_vEnvelopeExtrema[EnvelopeIndex];
 }

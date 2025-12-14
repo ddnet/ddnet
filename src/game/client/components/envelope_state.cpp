@@ -14,19 +14,19 @@ CEnvelopeState::CEnvelopeState(IMap *pMap, bool OnlineOnly) :
 	m_OnlineOnly = OnlineOnly;
 }
 
-void CEnvelopeState::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels)
+void CEnvelopeState::EnvelopeEval(int TimeOffsetMillis, int EnvelopeIndex, ColorRGBA &Result, size_t Channels)
 {
 	using namespace std::chrono;
 
 	if(!m_pMap)
 		return;
 
-	int EnvStart, EnvNum;
-	m_pMap->GetType(MAPITEMTYPE_ENVELOPE, &EnvStart, &EnvNum);
-	if(Env < 0 || Env >= EnvNum)
+	int EnvelopeStart, EnvelopeNum;
+	m_pMap->GetType(MAPITEMTYPE_ENVELOPE, &EnvelopeStart, &EnvelopeNum);
+	if(EnvelopeIndex < 0 || EnvelopeIndex >= EnvelopeNum)
 		return;
 
-	const CMapItemEnvelope *pItem = (CMapItemEnvelope *)m_pMap->GetItem(EnvStart + Env);
+	const CMapItemEnvelope *pItem = (CMapItemEnvelope *)m_pMap->GetItem(EnvelopeStart + EnvelopeIndex);
 	if(pItem->m_Channels <= 0)
 		return;
 	Channels = minimum<size_t>(Channels, pItem->m_Channels, CEnvPoint::MAX_CHANNELS);
