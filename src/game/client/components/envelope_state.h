@@ -13,7 +13,7 @@ public:
 	CEnvelopeState() :
 		m_pEnvelopePoints(nullptr), m_pMap(nullptr) {}
 	CEnvelopeState(IMap *pMap, bool OnlineOnly);
-	void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels) override;
+	void EnvelopeEval(int TimeOffsetMillis, int EnvelopeIndex, ColorRGBA &Result, size_t Channels) override;
 
 	int Sizeof() const override { return sizeof(*this); }
 

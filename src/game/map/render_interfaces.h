@@ -23,7 +23,7 @@ class IEnvelopeEval
 {
 public:
 	virtual ~IEnvelopeEval() = default;
-	virtual void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels) = 0;
+	virtual void EnvelopeEval(int TimeOffsetMillis, int EnvelopeIndex, ColorRGBA &Result, size_t Channels) = 0;
 };
 
 class IMapImages

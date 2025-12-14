@@ -984,11 +984,11 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 	{
 		const CMapBasedEnvelopePointAccess EnvelopePoints(&DataFile);
 
-		int EnvStart, EnvNum;
-		DataFile.GetType(MAPITEMTYPE_ENVELOPE, &EnvStart, &EnvNum);
-		for(int e = 0; e < EnvNum; e++)
+		int EnvelopeStart, EnvelopeNum;
+		DataFile.GetType(MAPITEMTYPE_ENVELOPE, &EnvelopeStart, &EnvelopeNum);
+		for(int EnvelopeIndex = 0; EnvelopeIndex < EnvelopeNum; EnvelopeIndex++)
 		{
-			CMapItemEnvelope *pItem = (CMapItemEnvelope *)DataFile.GetItem(EnvStart + e);
+			CMapItemEnvelope *pItem = (CMapItemEnvelope *)DataFile.GetItem(EnvelopeStart + EnvelopeIndex);
 			int Channels = pItem->m_Channels;
 			if(Channels <= 0 || Channels == 2 || Channels > CEnvPoint::MAX_CHANNELS)
 			{
@@ -998,26 +998,26 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 			if(Channels != pItem->m_Channels)
 			{
 				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "Error: Envelope %d had an invalid number of channels, %d, which was changed to %d.", e, pItem->m_Channels, Channels);
+				str_format(aBuf, sizeof(aBuf), "Error: Envelope %d had an invalid number of channels, %d, which was changed to %d.", EnvelopeIndex, pItem->m_Channels, Channels);
 				ErrorHandler(aBuf);
 			}
 
-			std::shared_ptr<CEnvelope> pEnv = std::make_shared<CEnvelope>(Channels);
-			pEnv->m_vPoints.resize(pItem->m_NumPoints);
-			for(int p = 0; p < pItem->m_NumPoints; p++)
+			std::shared_ptr<CEnvelope> pEnvelope = std::make_shared<CEnvelope>(Channels);
+			pEnvelope->m_vPoints.resize(pItem->m_NumPoints);
+			for(int PointIndex = 0; PointIndex < pItem->m_NumPoints; PointIndex++)
 			{
-				const CEnvPoint *pPoint = EnvelopePoints.GetPoint(pItem->m_StartPoint + p);
+				const CEnvPoint *pPoint = EnvelopePoints.GetPoint(pItem->m_StartPoint + PointIndex);
 				if(pPoint != nullptr)
-					mem_copy(&pEnv->m_vPoints[p], pPoint, sizeof(CEnvPoint));
-				const CEnvPointBezier *pPointBezier = EnvelopePoints.GetBezier(pItem->m_StartPoint + p);
+					mem_copy(&pEnvelope->m_vPoints[PointIndex], pPoint, sizeof(CEnvPoint));
+				const CEnvPointBezier *pPointBezier = EnvelopePoints.GetBezier(pItem->m_StartPoint + PointIndex);
 				if(pPointBezier != nullptr)
-					mem_copy(&pEnv->m_vPoints[p].m_Bezier, pPointBezier, sizeof(CEnvPointBezier));
+					mem_copy(&pEnvelope->m_vPoints[PointIndex].m_Bezier, pPointBezier, sizeof(CEnvPointBezier));
 			}
 			if(pItem->m_aName[0] != -1) // compatibility with old maps
-				IntsToStr(pItem->m_aName, std::size(pItem->m_aName), pEnv->m_aName, std::size(pEnv->m_aName));
-			m_vpEnvelopes.push_back(pEnv);
+				IntsToStr(pItem->m_aName, std::size(pItem->m_aName), pEnvelope->m_aName, std::size(pEnvelope->m_aName));
+			m_vpEnvelopes.push_back(pEnvelope);
 			if(pItem->m_Version >= 2)
-				pEnv->m_Synchronized = pItem->m_Synchronized;
+				pEnvelope->m_Synchronized = pItem->m_Synchronized;
 		}
 	}
 
