@@ -5,6 +5,7 @@
 #include <base/system.h>
 
 #include <engine/config.h>
+#include <engine/console.h>
 #include <engine/shared/config.h>
 #include <engine/shared/console.h>
 #include <engine/shared/protocol.h>

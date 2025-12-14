@@ -427,7 +427,7 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 
 	if(m_Type == CGameConsole::CONSOLETYPE_LOCAL)
 	{
-		m_pGameConsole->m_pConsole->ExecuteLine(pLine);
+		m_pGameConsole->m_pConsole->ExecuteLine(pLine, IConsole::CLIENT_ID_UNSPECIFIED);
 	}
 	else
 	{
