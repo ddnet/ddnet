@@ -50,7 +50,7 @@ Body
 == Krop
 
 Call vote
-==  Lav afstemning
+== Lav afstemning
 
 Change settings
 == Ændre indstillinger
@@ -596,7 +596,7 @@ Exclude
 == %d ud af %d servere
 
 %d of %d server
-==  %d af %d server
+== %d af %d server
 
 %d players
 == %d spillere
@@ -1091,7 +1091,7 @@ Error saving settings
 == Fejl under lagring af indstillinger
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== Bredden af ​​tekstur %s er ikke delelig med %d, eller højden er ikke delelig med %d, hvilket kan forårsage visuelle fejl.
+== Bredden af tekstur %s er ikke delelig med %d, eller højden er ikke delelig med %d, hvilket kan forårsage visuelle fejl.
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
 == "%s" er ikke kompatibel med pnglite og kan ikke indlæses af gamle DDNet-versioner:
@@ -1446,10 +1446,10 @@ Speed up the demo
 == Søt farten for demoen op
 
 Mark the beginning of a cut (right click to reset)
-== Marker begyndelsen af ​​et klip (højreklik for at nulstille)
+== Marker begyndelsen af et klip (højreklik for at nulstille)
 
 Mark the end of a cut (right click to reset)
-== Marker slutningen af ​​et klip (højreklik for at nulstille)
+== Marker slutningen af et klip (højreklik for at nulstille)
 
 Export cut as a separate demo
 == Eksportér klip som en separat demo
@@ -1984,7 +1984,7 @@ Only save improvements
 == Gem kun forbedringer
 
 Adjust the opacity of entities belonging to other teams, such as tees and name plates
-== Juster opaciteten af ​​enheder, der tilhører andre hold, såsom tees og navneskilte
+== Juster opaciteten af enheder, der tilhører andre hold, såsom tees og navneskilte
 
 Quads are used for background decoration
 == Quads bruges til baggrundsdekoration

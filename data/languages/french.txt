@@ -1413,7 +1413,7 @@ File '%s' already exists, do you want to overwrite it?
 == Le fichier '%s' existe déjà, voulez-vous l'écraser ?
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== Êtes-vous sûr de vouloir retirer le joueur '%s' de votre liste d'amis ? 
+== Êtes-vous sûr de vouloir retirer le joueur '%s' de votre liste d'amis ?
 
 Are you sure that you want to remove the clan '%s' from your friends list?
 == Êtes-vous sûr de vouloir retirer le clan '%s' de votre liste d'amis ?
@@ -1482,7 +1482,7 @@ Door Laser Inner Color
 == Couleur porte laser (intérieur)
 
 Freeze Laser Outline Color
-== Couleur laser gelant (contour) 
+== Couleur laser gelant (contour)
 
 Freeze Laser Inner Color
 == Couleur laser gelant (intérieur)

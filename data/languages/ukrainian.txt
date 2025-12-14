@@ -51,7 +51,7 @@
 == Залишилося: %iхв
 
 %i second left
-== Залишилося: %i секунд
+== %i секунда залишилася
 
 %i seconds left
 == %i секунд залишилося
@@ -2517,22 +2517,22 @@ Are you sure that you want to disconnect and play this demo?
 == Ви впевнені, що хочете від’єднатись та відтворити це демо?
 
 Show background quads
-== 
+== Показати фонові квади
 
 Scoreboard cursor
-== 
+== Курсор таблиці результатів
 
 Add friend
-== 
+== Додати друга
 
 Unmute
-== 
+== Увімкнути повідомлення
 
 Mute
-== 
+== Вимкнути повідомлення
 
 Unmute emoticons
-== 
+== Увімкнути емоції
 
 Mute emoticons
-== 
+== Вимкнути емоції
