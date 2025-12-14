@@ -3131,7 +3131,7 @@ int str_time(int64_t centisecs, int format, char *buffer, int buffer_size)
 
 int str_time_float(float secs, int format, char *buffer, int buffer_size)
 {
-	return str_time(llroundf(secs * 1000) / 10, format, buffer, buffer_size);
+	return str_time(static_cast<int64_t>(roundf(secs * 1000) / 10), format, buffer, buffer_size);
 }
 
 void net_stats(NETSTATS *stats_inout)
