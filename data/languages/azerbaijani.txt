@@ -113,7 +113,7 @@ Dynamic Camera
 == Dinamik Kamera
 
 Emoticon
-== Emosiya 
+== Emosiya
 
 Error
 == Xəta
@@ -257,7 +257,7 @@ Ping
 == Ping
 
 Pistol
-== Tapança 
+== Tapança
 
 Play background music
 == Fon musiqisini çal
@@ -317,7 +317,7 @@ Server address:
 == Server ünvanı:
 
 Server info
-== Server haqqında 
+== Server haqqında
 
 Server not full
 == Sunucu dolu deyil
@@ -548,7 +548,7 @@ DDraceNetwork is a cooperative online game where the goal is for you and your gr
 == DDraceNetwork korperativ onlayn oyundur, bu xəritədə məqsəd siz və sizin qrupunuzun ən qısa zamanda finiş nöqtəsinə çatmağıdır. Yeni gələn oyunçular üçün asan xəritələrdə yəni  Novice(Təcrübəsiz) serverlərdə oynamağını tövsiyyə edirik. Hər hansı bir server seçmədən əvvəl, sizə yaxın bir server seçmək üçün ping-i nəzərdən keçirin.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== İntihar etmək (yenidən başlamaq) üçün k düyməsi, oyunu dayandırıb digər oyunçuları izləmək üçün q düyməsini istifadə edə bilərsiniz. Digər düymələrə parametrlərdən baxa bilərsiniz. 
+== İntihar etmək (yenidən başlamaq) üçün k düyməsi, oyunu dayandırıb digər oyunçuları izləmək üçün q düyməsini istifadə edə bilərsiniz. Digər düymələrə parametrlərdən baxa bilərsiniz.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Serverlərə qoşulmadan əvvəl parametrləri nəzərdən keçirib özünüzə uyğun konfiqurasiya etməyinizi tövsiyyə edirik.
@@ -569,7 +569,7 @@ Search
 == Ara
 
 Exclude
-== Qəric 
+== Qəric
 
 Player country:
 == Oyunçu ölkəsi
@@ -605,7 +605,7 @@ Update now
 == yeniləmə
 
 Restart
-== Yenidən başlatmaq 
+== Yenidən başlatmaq
 
 Remove chat
 == Söhbəti silin
@@ -638,10 +638,10 @@ Connect Dummy
 == Dummy daxil ol
 
 Deactivate
-== Qeyri-aktiv etmək 
+== Qeyri-aktiv etmək
 
 Activate
-== Aktivləşdirmək 
+== Aktivləşdirmək
 
 Save
 == Saxla
@@ -764,7 +764,7 @@ Map sound volume
 == Xəritə səs səviyyəsi
 
 HUD
-== interfeys 
+== interfeys
 
 DDNet
 == DDNet
@@ -994,7 +994,7 @@ Sending initial client info
 == İlkin məlumatlar kliente göndərilir
 
 Warning
-== Xəbərdarlıq 
+== Xəbərdarlıq
 
 Quitting. Please wait…
 == Çıxılır. Zəhmət olmasa, gözləyin…
@@ -1063,7 +1063,7 @@ Unable to rename the folder
 == Qovluğun adı dəyişdirilə bilmədi
 
 File '%s' already exists, do you want to overwrite it?
-==  '%s' faylı hal-hazırda mövcuddur, əvəz edilsin??
+== '%s' faylı hal-hazırda mövcuddur, əvəz edilsin??
 
 (paused)
 == (fasilədə)
@@ -1235,7 +1235,7 @@ Unable to delete the demo '%s'
 == '%s' demosu silinə bilmədi.
 
 Unable to delete the folder '%s'. Make sure it's empty first.
-==  '%s' qovluğu silinə bilmədi. Əvvəlcə boş olduğundan əmin olun.
+== '%s' qovluğu silinə bilmədi. Əvvəlcə boş olduğundan əmin olun.
 
 Loading ghost files
 == Ruh faylların yüklənməsi
@@ -1286,13 +1286,13 @@ Create a random skin
 == Təsadüfi skin yaradın
 
 Skin Database
-== Skin verilənlər bazası 
+== Skin verilənlər bazası
 
 Skins directory
 == Skin qovluq
 
 Open the directory to add custom skins
-==  Xüsusi örtük(?) etmək üçün kataloqu açın.
+== Xüsusi örtük(?) etmək üçün kataloqu açın.
 
 Chat command
 == Söhbət əmri
@@ -1351,7 +1351,7 @@ Are you sure that you want to reset the controls to their defaults?
 == Kontrolleri varsayılan değerlerine döndürmek istediğine emin misin?
 
 Cancel
-== İmtina etmək 
+== İmtina etmək
 
 Dummy
 == Dummy
@@ -1381,10 +1381,10 @@ custom
 == xüsusi
 
 Graphics card
-== Video kart 
+== Video kart
 
 auto
-== avtomatik 
+== avtomatik
 
 Game sound volume
 == Oyun səs səviyyəsi
@@ -1402,7 +1402,7 @@ Assets
 == Mənbələr
 
 Name Plate
-==  İstifadəçi adı
+== İstifadəçi adı
 
 Hook Collisions
 == Qarmaq kəsişmələri
@@ -1414,7 +1414,7 @@ DDRace HUD
 == DDRace interfeysi
 
 Show DDRace HUD
-== DDRace interfeysi göstər 
+== DDRace interfeysi göstər
 
 Show jumps indicator
 == Neçə tullanma qaldığını göstər
@@ -1423,7 +1423,7 @@ Show dummy actions
 == Dummy hərəkətlərini göstər
 
 Show player position
-== Oyunçu pozisyalarını göstər 
+== Oyunçu pozisyalarını göstər
 
 Show player speed
 == Oyunçu sürətini göstər
@@ -1516,7 +1516,7 @@ Quads are used for background decoration
 == Dördbucaq binalar arxa plan dekorasiyası üçün istifadə edilir
 
 Tries to predict other entities to give a feel of low latency
-== Kiçik gecikmə hissi vermək üçün digər binaları təxmin etməyə çalışdır 
+== Kiçik gecikmə hissi vermək üçün digər binaları təxmin etməyə çalışdır
 
 Background
 == Arxa fon
@@ -1876,7 +1876,7 @@ Hz
 
 [skins]
 Body
-== Gövdə 
+== Gövdə
 
 [skins]
 Marking

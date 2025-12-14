@@ -2517,22 +2517,22 @@ Are you sure that you want to disconnect and play this demo?
 == Bağlantıyı kesip bu demoyu oynatmak istediğinizden emin misiniz?
 
 Show background quads
-== 
+== Arka plan dörtgenlerini göster
 
 Scoreboard cursor
-== 
+== Skor tablosu imleci
 
 Add friend
-== 
+== Arkadaş ekle
 
 Unmute
-== 
+== Sessizi aç
 
 Mute
-== 
+== Sessize al
 
 Unmute emoticons
-== 
+== İfadeleri göster
 
 Mute emoticons
-== 
+== İfadeleri gizle

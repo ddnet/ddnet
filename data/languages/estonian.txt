@@ -623,7 +623,7 @@ Exclude
 == Välista
 
 %d of %d servers
-== %d serverit %d -st 
+== %d serverit %d -st
 
 %d of %d server
 == %d server %d -st
@@ -1205,7 +1205,7 @@ A demo with this name already exists
 == Demo sellise nimega on juba olemas
 
 A folder with this name already exists
-== Kaust sellise nimega on juba olemas 
+== Kaust sellise nimega on juba olemas
 
 Unable to rename the folder
 == Ei saa kausta ümber nimetada

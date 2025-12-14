@@ -1272,7 +1272,7 @@ Add Clan
 == Lisää Klaani
 
 Server filter
-== Palvelimen 
+== Palvelimen
 
 Friends
 == Ystävät
@@ -1511,7 +1511,7 @@ Ingame controller sens.
 == Pelissä ohjaimen herkkyys
 
 UI controller sens.
-== Käyttöliittymässä 
+== Käyttöliittymässä
 
 Controller jitter tolerance
 == Ohjaimen häiriösieto

@@ -1,20 +1,20 @@
 %ds left
-== 還剩%d秒
+== 還剩 %d 秒
 
 %i minute left
-== 還剩下%i分鐘
+== 還剩下 %i 分鐘
 
 %i minutes left
-== 還剩下%i分鐘
+== 還剩下 %i 分鐘
 
 %i second left
-== 還剩下%i秒鐘
+== 還剩下 %i 秒鐘
 
 %i seconds left
-== 還剩下%i秒鐘
+== 還剩下 %i 秒鐘
 
 %s wins!
-== %s勝利！
+== %s 勝利！
 
 Abort
 == 取消
@@ -890,13 +890,13 @@ Please enter your nickname below.
 == 請輸入你的暱稱。
 
 Server best:
-== 伺服器最佳
+== 伺服器最佳：
 
 Learn
 == 教程Wiki
 
 Personal best:
-== 個人最佳
+== 個人最佳：
 
 Render demo
 == 渲染回放
@@ -905,7 +905,7 @@ Replace video
 == 替換影片
 
 Video name:
-== 影片名稱
+== 影片名稱：
 
 Connect Dummy
 == 連線分身
@@ -972,7 +972,7 @@ Existing Player
 == 玩家已存在
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== 你使用的暱稱 "%s" 在DDNet中有%d分的記錄，這可能代表這個暱稱已經被其他人使用過。確認要使用這個名字嗎？
+== 你使用的暱稱 "%s" 在 DDNet 中有 %d 分的記錄，這可能代表這個暱稱已經被其他人使用過。確認要使用這個名字嗎？
 
 Checking for existing player with your name
 == 正在查詢該暱稱的DDNet記錄
@@ -1116,7 +1116,7 @@ Windowed fullscreen
 == 視窗化全螢幕
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 紋理檔案 %s 并非 RGBA 格式，這可能會導致顯示錯誤
+== 紋理檔案 %s 并非 RGBA 格式，這可能會導致顯示錯誤。
 
 Join Tutorial Server
 == 加入教學伺服器
@@ -1170,25 +1170,25 @@ Team %d
 == 隊伍 %d
 
 Position:
-== 坐標
+== 坐標：
 
 Speed:
-== 速度
+== 速度：
 
 Angle:
-== 角度
+== 角度：
 
 Trying to determine UDP connectivity…
 == 正在嘗試檢測 UDP 連接…
 
 UDP seems to be filtered.
-== UDP 疑似被過濾
+== UDP 疑似被過濾。
 
 UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
 == UDP 與 TCP 的 IP 地址并不相同。請嘗試屏蔽 VPN 、代理網路以及網路加速器。
 
 No answer from server yet.
-== 伺服器無響應
+== 伺服器無響應。
 
 Download community skins
 == 下載社區外觀
@@ -1271,7 +1271,7 @@ Loading map file from storage
 == 正在從硬盤中載入地圖檔案
 
 Why are you slowmo replaying to read this?
-== 所以你爲什麽要慢速回放來看這個？
+== 你為什麽要慢速回放來看這句？
 
 Initializing components
 == 正在初始化游戲引擎
@@ -1409,7 +1409,7 @@ Freeze Laser Inner Color
 == 凍結鐳射實心顔色
 
 Menu opened. Press Esc key again to close menu.
-== 選單已打開，再次按下 Esc 以關閉
+== 選單已打開，再次按下 Esc 以關閉。
 
 Set all to Rifle
 == 統一為鐳射槍顔色
@@ -1526,13 +1526,13 @@ Offline (%d)
 == 離線（%d）
 
 Click to select server. Double click to join your friend.
-== 點擊以選擇伺服器，雙擊以直接加入好友所在伺服器
+== 點擊以選擇伺服器，雙擊以直接加入好友所在伺服器。
 
 Click to remove this player from your friends list.
-== 點擊以將此好友從好友列表中移除
+== 點擊以將此好友從好友列表中移除。
 
 Click to remove this clan from your friends list.
-== 點擊以將此戰隊從好友列表中移除
+== 點擊以將此戰隊從好友列表中移除。
 
 Add Clan
 == 新增戰隊
@@ -1568,10 +1568,10 @@ Graphics card
 == 顯示卡
 
 Quitting. Please wait…
-== 正在退出，請稍等
+== 正在退出，請稍等…
 
 Restarting. Please wait…
-== 正在重啟，請稍等
+== 正在重啟，請稍等…
 
 Multi-View
 == 多人同框視角
@@ -1601,7 +1601,7 @@ Delete folder
 == 刪除資料夾
 
 Unable to delete the folder '%s'. Make sure it's empty first.
-== 無法刪除 "%s" ，請確保你已清空該資料夾
+== 無法刪除 "%s" ，請確保你已清空該資料夾。
 
 Moved ingame
 == 遊戲內移動
@@ -1718,7 +1718,7 @@ Are you sure that you want to restart?
 == 確定要重新開始？
 
 There's an unsaved map in the editor, you might want to save it.
-== 編輯器中有尚未儲存的地圖，你或需要儲存
+== 編輯器中有尚未儲存的地圖，你或需要儲存。
 
 Continue anyway?
 == 仍要退出？
@@ -1914,10 +1914,10 @@ Online friends (%d)
 == 在線好友（%d人）
 
 Add friends by entering their name below or by clicking their name in the player list.
-== 在下方輸入好友名稱或點擊玩家列表中的好友的名稱即可添加好友
+== 在下方輸入好友名稱或點擊玩家列表中的好友的名稱即可添加好友。
 
 Add clanmates by entering their clan below and leaving the name blank.
-== 在下方輸入戰隊名並留空名稱即可添加戰隊
+== 在下方輸入戰隊名並留空名稱即可添加戰隊。
 
 Edit touch controls
 == 編輯觸控設定
@@ -2012,7 +2012,7 @@ Active: Hook
 == 當前：鉤索
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
-== "%s" 與pnglite不兼容，無法被舊版本DDNet加載
+== "%s" 與 pnglite 不兼容，無法被舊版本 DDNet 加載：
 
 [Spectating Camera Mode Icon]
 AUTO
@@ -2345,7 +2345,7 @@ Ignore
 == 忽略
 
 Long press on a touch button to select it.
-== 長按觸控按鍵以選擇
+== 長按觸控按鍵以選擇。
 
 New button
 == 新增按鍵
@@ -2369,7 +2369,7 @@ Inactive color
 == 按鍵未啟用時顏色
 
 Preview button visibility while the editor is active.
-== 在編輯器打開時預覽按鍵顯示狀態
+== 在編輯器打開時預覽按鍵顯示狀態。
 
 Show all buttons
 == 顯示所有按鍵
@@ -2486,53 +2486,53 @@ Download
 == 下載
 
 Team save in progress. You'll be able to load with '/load %s'
-== 
+== 隊伍正在存檔。成功後可使用 "/load %s" 載入存檔
 
 Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails
-== 
+== 隊伍正在存檔。成功後可使用 "/load %s" 載入存檔，若失敗可使用 "/load %s" 載入
 
 Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue
-== 
+== %s 已儲存隊伍進度。數據庫連線失敗，為免衝突，請改用生成的存檔代碼。以 "/load %s"載入存檔
 
 Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue
-== 
+== %s 已儲存隊伍進度。數據庫連線失敗，為免衝突，請改用生成的存檔代碼。在 %s 以 "/load %s"載入存檔
 
 Save failed!
-== 
+== 存檔失敗！
 
 [Important alert message]
 Press Esc or Tab to dismiss…
-== 
+== 按下 Esc 或 Tab 關閉…
 
 Server alert
-== 
+== 伺服器警告
 
 Moderator alert
-== 
+== 管理員警告
 
 You will be disconnected from the server.
-== 
+== 你將從伺服器斷開連線。
 
 Are you sure that you want to disconnect and play this demo?
-== 
+== 確定要斷開連線並播放此回放？
 
 Show background quads
-== 
+== 顯示背景貼圖
 
 Scoreboard cursor
-== 
+== 顯示計分板指標
 
 Add friend
-== 
+== 新增好友
 
 Unmute
-== 
+== 取消靜音
 
 Mute
-== 
+== 靜音
 
 Unmute emoticons
-== 
+== 取消隱藏表情
 
 Mute emoticons
-== 
+== 隱藏表情

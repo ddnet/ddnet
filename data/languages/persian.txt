@@ -945,7 +945,7 @@ Speed up the demo
 == ﻮﻣﺩ ﺖﻋﺮﺳ ﻥﺩﺮﮐ ﺩﺎﯾﺯ
 
 Export cut as a separate demo
-==  ﻦﻛ ﺭﺩﺎﺻ ﻪﻧﺎﮔﺍﺪﺟ ﻮﻣﺩ ﻚﯾ ﻥﺍﻮﻨﻋﻪﺑ ﺍﺭ ﺵﺮﺑ
+== ﻦﻛ ﺭﺩﺎﺻ ﻪﻧﺎﮔﺍﺪﺟ ﻮﻣﺩ ﻚﯾ ﻥﺍﻮﻨﻋﻪﺑ ﺍﺭ ﺵﺮﺑ
 
 Go back one marker
 == ﺩﺮﮔﺮﺑ ﺐﻘﻋ ﻪﺑ ﺮﮕﻧﺎﺸﻧ ﮏﯾ
@@ -1253,7 +1253,7 @@ Clan plates size
 == ﻦﻠﮐ ﯼﺎﻫ‌کﻼﭘ ﻩﺯﺍﺪﻧﺍ
 
 Use team colors for name plates
-==  ﻡﺎﻧ کﻼﭘ ﯼﺍﺮﺑ ﯽﻤﯿﺗ ﯼﺎﻫ ﮓﻧﺭ ﺯﺍ ﻩﺩﺎﻔﺘﺳﺍ
+== ﻡﺎﻧ کﻼﭘ ﯼﺍﺮﺑ ﯽﻤﯿﺗ ﯼﺎﻫ ﮓﻧﺭ ﺯﺍ ﻩﺩﺎﻔﺘﺳﺍ
 
 Hook collision line
 == ﺏﻼﻗ ﺩﺭﻮﺧﺮﺑ ﻂﺧ
@@ -1289,7 +1289,7 @@ Weapons
 == ﺎﻫ ﺡﻼﺳ
 
 Rifle Laser Outline Color
-==  ﺭﺰﯿﻟ ﮓﻨﻔﺗ ﯽﻧﻭﺮﯿﺑ ﻂﺧ ﮓﻧﺭ
+== ﺭﺰﯿﻟ ﮓﻨﻔﺗ ﯽﻧﻭﺮﯿﺑ ﻂﺧ ﮓﻧﺭ
 
 Rifle Laser Inner Color
 == ﺭﺰﯿﻟ ﮓﻨﻔﺗ ﯽﻠﺧﺍﺩ ﮓﻧﺭ
@@ -1771,22 +1771,22 @@ Info Messages
 == ﺎﻫ ﻡﺎﯿﭘ ﺕﺎﻋﻼﻃﺍ
 
 Show local time always
-==  ﺖﭼ ﯽﮕﺸﯿﻤﻫ ﻥﺩﺍﺩ ﻥﺎﺸﻧ
+== ﺖﭼ ﯽﮕﺸﯿﻤﻫ ﻥﺩﺍﺩ ﻥﺎﺸﻧ
 
 Show client IDs (scoreboard, chat, spectator)
-==  (ﺮﮔﺎﺷﺎﻤﺗ ،ﺖﭼ ،ﺯﺎﯿﺘﻣﺍ) ﺖﻨﯾﻼﻛ ىﺎﻫ ﻪﺳﺎﻨﺷ ﺶﯾﺎﻤﻧ
+== (ﺮﮔﺎﺷﺎﻤﺗ ،ﺖﭼ ،ﺯﺎﯿﺘﻣﺍ) ﺖﻨﯾﻼﻛ ىﺎﻫ ﻪﺳﺎﻨﺷ ﺶﯾﺎﻤﻧ
 
 Always show chat
-==  ﺖﭼ ﯽﮕﺸﯿﻤﻫ ﻥﺩﺍﺩ ﻥﺎﺸﻧ
+== ﺖﭼ ﯽﮕﺸﯿﻤﻫ ﻥﺩﺍﺩ ﻥﺎﺸﻧ
 
 Show only chat messages from team members
 == ﺩﻮﺸﯿﻣ ﺖﻓﺎﯾﺭﺩ ﻢﯿﺗ ىﺎﻀﻋﺍ ﺯﺍ ﻪﻛ ﯽﯾﺎﻫ ﻡﺎﯿﭘ ﺶﯾﺎﻤﻧ
 
 Chat font size
-==  ﺖﭼ ﺖﻧﻮﻓ ﻩﺯﺍﺪﻧﺍ
+== ﺖﭼ ﺖﻧﻮﻓ ﻩﺯﺍﺪﻧﺍ
 
 Chat width
-==   ﺖﭼ ﺽﺮﻋ
+== ﺖﭼ ﺽﺮﻋ
 
 Show hook strength icon indicator
 == کﻮﻫ ﺕﺭﺪﻗ ﺩﺪﻋ ﺮﮕﻧﺎﺸﻧ ﺶﯾﺎﻤﻧ
@@ -1795,10 +1795,10 @@ Show hook strength number indicator
 == کﻮﻫ ﺕﺭﺪﻗ ﺩﺪﻋ ﺮﮕﻧﺎﺸﻧ ﺶﯾﺎﻤﻧ
 
 Authed name color in scoreboard
-==  ﺯﺎﯿﺘﻣﺍ ىﻮﻠﺑﺎﺗ ﺭﺩ ﻩﺪﺷ ﺪﯿﯾﺎﺗ ﻡﺎﻧ ﮓﻧﺭ
+== ﺯﺎﯿﺘﻣﺍ ىﻮﻠﺑﺎﺗ ﺭﺩ ﻩﺪﺷ ﺪﯿﯾﺎﺗ ﻡﺎﻧ ﮓﻧﺭ
 
 Same clan color in scoreboard
-==  ﺯﺎﯿﺘﻣﺍ ىﻮﻠﺑﺎﺗ ﺭﺩ ﯽﻨﻠﻛ ﻢﻫ ﮓﻧﺭ
+== ﺯﺎﯿﺘﻣﺍ ىﻮﻠﺑﺎﺗ ﺭﺩ ﯽﻨﻠﻛ ﻢﻫ ﮓﻧﺭ
 
 Show own player's hook collision line
 == ﻦﻜﯾﺯﺎﺑ کﻮﻫ ﺭﺰﯿﻟ ﺶﯾﺎﻤﻧ
@@ -1810,7 +1810,7 @@ Always show other players' hook collision lines
 == ﺮﮕﯾﺩ ﻥﺎﻨﻜﯾﺯﺎﺑ کﻮﻫ ﺭﺰﯿﻟ ﯽﮕﺸﯿﻤﻫ ﺶﯾﺎﻤﻧ
 
 Show finish messages
-==  ﭗﻣ ﻥﺎﯾﺎﭘ ىﺎﻫ ﻡﺎﯿﭘ ﺶﯾﺎﻤﻧ
+== ﭗﻣ ﻥﺎﯾﺎﭘ ىﺎﻫ ﻡﺎﯿﭘ ﺶﯾﺎﻤﻧ
 
 Enable ghost
 == ﺡﻭﺭ ﺖﻟﺎﺣ ىﺯﺎﺳ ﻝﺎﻌﻓ
@@ -1822,10 +1822,10 @@ Regular background color
 == ﻢﻈﻨﻣ ﻪﻨﯿﻣﺯ ﺲﭘ ﮓﻧﺭ
 
 Entities background color
-==  ﺎﻫ ﺖﯾﺩﻮﺟﻮﻣ ﻪﻨﯿﻣﺯ ﺲﭘ ﮓﻧﺭ
+== ﺎﻫ ﺖﯾﺩﻮﺟﻮﻣ ﻪﻨﯿﻣﺯ ﺲﭘ ﮓﻧﺭ
 
 Unregister protocol and file extensions
-==  ﺖﺳﺍ ﻩﺪﺸﻧ ﺖﺒﺛ ﻞﯾﺎﻓ ﺪﻧﻮﺴﭘ ﻭ ﻞﻜﺗﻭﺮﭘ
+== ﺖﺳﺍ ﻩﺪﺸﻧ ﺖﺒﺛ ﻞﯾﺎﻓ ﺪﻧﻮﺴﭘ ﻭ ﻞﻜﺗﻭﺮﭘ
 
 Basic
 == ﻪﯾﺎﭘ
@@ -1834,7 +1834,7 @@ Custom
 == ﯽﺷﺭﺎﻔﺳ
 
 Are you sure that you want to delete '%s'?
-==  ؟ﺪﯿﻨﻛ ﻑﺬﺣ ﺍﺭ '%s' ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﻪﻛ ﺪﯿﺘﺴﻫ ﻦﺌﻤﻄﻣ ﺎﯾﺁ
+== ؟ﺪﯿﻨﻛ ﻑﺬﺣ ﺍﺭ '%s' ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﻪﻛ ﺪﯿﺘﺴﻫ ﻦﺌﻤﻄﻣ ﺎﯾﺁ
 
 Delete skin
 == ﻦﯿﻜﺳﺍ ﻑﺬﺣ
@@ -1992,7 +1992,7 @@ Could not load touch controls from clipboard. See local console for details.
 == ﺕﺎﯿﺋﺰﺟ ىﺍﺮﺑ .ﺖﺴﯿﻧ ﺩﺭﻮﺑﭗﯿﻠﻛ ﺯﺍ ﯽﺴﻤﻟ ىﺎﻫﻝﺮﺘﻨﻛ ىﺭﺍﺬﮔﺭﺎﺑ ﻪﺑ ﺭﺩﺎﻗ .ﺪﯿﻨﻛ ﯽﺳﺭﺮﺑ ﺍﺭ ﯽﻠﺤﻣ ﻝﻮﺴﻨﻛ ،ﺮﺘﺸﯿﺑ
 
 Show client IDs in name plates
-==  ﻡﺎﻧ کﻼﭘ ﺭﺩ ﺮﺑﺭﺎﻛ ىﺎﻫﻪﺳﺎﻨﺷ ﺶﯾﺎﻤﻧ
+== ﻡﺎﻧ کﻼﭘ ﺭﺩ ﺮﺑﺭﺎﻛ ىﺎﻫﻪﺳﺎﻨﺷ ﺶﯾﺎﻤﻧ
 
 Hook Strength
 == ﺏﻼﻗ ﺕﺭﺪﻗ
