@@ -157,11 +157,11 @@ int main(int argc, const char **argv)
 	// execute autoexec file
 	if(pStorage->FileExists(AUTOEXEC_SERVER_FILE, IStorage::TYPE_ALL))
 	{
-		pConsole->ExecuteFile(AUTOEXEC_SERVER_FILE);
+		pConsole->ExecuteFile(AUTOEXEC_SERVER_FILE, IConsole::CLIENT_ID_UNSPECIFIED);
 	}
 	else // fallback
 	{
-		pConsole->ExecuteFile(AUTOEXEC_FILE);
+		pConsole->ExecuteFile(AUTOEXEC_FILE, IConsole::CLIENT_ID_UNSPECIFIED);
 	}
 
 	// parse the command line arguments

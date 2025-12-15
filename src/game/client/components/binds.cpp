@@ -6,6 +6,7 @@
 #include <base/system.h>
 
 #include <engine/config.h>
+#include <engine/console.h>
 #include <engine/shared/config.h>
 
 #include <game/client/components/chat.h>
@@ -138,7 +139,7 @@ bool CBinds::OnInput(const IInput::CEvent &Event)
 						m_MouseOnAction = true;
 					}
 				}
-				Console()->ExecuteLineStroked(1, pBind);
+				Console()->ExecuteLineStroked(1, pBind, IConsole::CLIENT_ID_UNSPECIFIED);
 				m_vActiveBinds.emplace_back(Event.m_Key, Mask);
 			};
 
@@ -161,7 +162,7 @@ bool CBinds::OnInput(const IInput::CEvent &Event)
 			// Have to check for nullptr again because the previous execute can unbind itself
 			if(m_aapKeyBindings[ActiveBind->m_ModifierMask][ActiveBind->m_Key])
 			{
-				Console()->ExecuteLineStroked(1, m_aapKeyBindings[ActiveBind->m_ModifierMask][ActiveBind->m_Key]);
+				Console()->ExecuteLineStroked(1, m_aapKeyBindings[ActiveBind->m_ModifierMask][ActiveBind->m_Key], IConsole::CLIENT_ID_UNSPECIFIED);
 			}
 			Handled = true;
 		}
@@ -183,7 +184,7 @@ bool CBinds::OnInput(const IInput::CEvent &Event)
 			{
 				return;
 			}
-			Console()->ExecuteLineStroked(0, m_aapKeyBindings[Bind.m_ModifierMask][Bind.m_Key]);
+			Console()->ExecuteLineStroked(0, m_aapKeyBindings[Bind.m_ModifierMask][Bind.m_Key], IConsole::CLIENT_ID_UNSPECIFIED);
 		};
 
 		// Release active bind that uses this primary key

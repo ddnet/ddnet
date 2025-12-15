@@ -5,6 +5,7 @@
 #include <base/system.h>
 
 #include <engine/client.h>
+#include <engine/console.h>
 #include <engine/external/json-parser/json.h>
 #include <engine/shared/config.h>
 #include <engine/shared/jsonwriter.h>
@@ -500,7 +501,7 @@ void CTouchControls::CEmoticonTouchButtonBehavior::OnDeactivate(bool ByFinger)
 {
 	if(!ByFinger)
 		return;
-	m_pTouchControls->Console()->ExecuteLineStroked(1, "+emote");
+	m_pTouchControls->Console()->ExecuteLineStroked(1, "+emote", IConsole::CLIENT_ID_UNSPECIFIED);
 }
 
 // Spectate button: keeps the spectate menu open, next touch in spectate menu will close it again.
@@ -513,7 +514,7 @@ void CTouchControls::CSpectateTouchButtonBehavior::OnDeactivate(bool ByFinger)
 {
 	if(!ByFinger)
 		return;
-	m_pTouchControls->Console()->ExecuteLineStroked(1, "+spectate");
+	m_pTouchControls->Console()->ExecuteLineStroked(1, "+spectate", IConsole::CLIENT_ID_UNSPECIFIED);
 }
 
 // Swap action button:
@@ -537,7 +538,7 @@ void CTouchControls::CSwapActionTouchButtonBehavior::OnActivate()
 	if(m_pTouchControls->m_JoystickPressCount != 0)
 	{
 		m_ActiveAction = m_pTouchControls->NextActiveAction(m_pTouchControls->m_ActionSelected);
-		m_pTouchControls->Console()->ExecuteLineStroked(1, ACTION_COMMANDS[m_ActiveAction]);
+		m_pTouchControls->Console()->ExecuteLineStroked(1, ACTION_COMMANDS[m_ActiveAction], IConsole::CLIENT_ID_UNSPECIFIED);
 	}
 	else
 	{
@@ -549,7 +550,7 @@ void CTouchControls::CSwapActionTouchButtonBehavior::OnDeactivate(bool ByFinger)
 {
 	if(m_ActiveAction != NUM_ACTIONS)
 	{
-		m_pTouchControls->Console()->ExecuteLineStroked(0, ACTION_COMMANDS[m_ActiveAction]);
+		m_pTouchControls->Console()->ExecuteLineStroked(0, ACTION_COMMANDS[m_ActiveAction], IConsole::CLIENT_ID_UNSPECIFIED);
 		m_ActiveAction = NUM_ACTIONS;
 	}
 }
@@ -567,12 +568,12 @@ CTouchControls::CButtonLabel CTouchControls::CUseActionTouchButtonBehavior::GetL
 void CTouchControls::CUseActionTouchButtonBehavior::OnActivate()
 {
 	m_ActiveAction = m_pTouchControls->m_ActionSelected;
-	m_pTouchControls->Console()->ExecuteLineStroked(1, ACTION_COMMANDS[m_ActiveAction]);
+	m_pTouchControls->Console()->ExecuteLineStroked(1, ACTION_COMMANDS[m_ActiveAction], IConsole::CLIENT_ID_UNSPECIFIED);
 }
 
 void CTouchControls::CUseActionTouchButtonBehavior::OnDeactivate(bool ByFinger)
 {
-	m_pTouchControls->Console()->ExecuteLineStroked(0, ACTION_COMMANDS[m_ActiveAction]);
+	m_pTouchControls->Console()->ExecuteLineStroked(0, ACTION_COMMANDS[m_ActiveAction], IConsole::CLIENT_ID_UNSPECIFIED);
 	m_ActiveAction = NUM_ACTIONS;
 }
 
@@ -592,7 +593,7 @@ void CTouchControls::CJoystickTouchButtonBehavior::OnActivate()
 	OnUpdate();
 	if(m_ActiveAction != ACTION_AIM)
 	{
-		m_pTouchControls->Console()->ExecuteLineStroked(1, ACTION_COMMANDS[m_ActiveAction]);
+		m_pTouchControls->Console()->ExecuteLineStroked(1, ACTION_COMMANDS[m_ActiveAction], IConsole::CLIENT_ID_UNSPECIFIED);
 	}
 	m_pTouchControls->m_JoystickPressCount++;
 }
@@ -601,7 +602,7 @@ void CTouchControls::CJoystickTouchButtonBehavior::OnDeactivate(bool ByFinger)
 {
 	if(m_ActiveAction != ACTION_AIM)
 	{
-		m_pTouchControls->Console()->ExecuteLineStroked(0, ACTION_COMMANDS[m_ActiveAction]);
+		m_pTouchControls->Console()->ExecuteLineStroked(0, ACTION_COMMANDS[m_ActiveAction], IConsole::CLIENT_ID_UNSPECIFIED);
 	}
 	m_ActiveAction = NUM_ACTIONS;
 	m_pTouchControls->m_JoystickPressCount--;
@@ -670,13 +671,13 @@ CTouchControls::CButtonLabel CTouchControls::CBindTouchButtonBehavior::GetLabel(
 
 void CTouchControls::CBindTouchButtonBehavior::OnActivate()
 {
-	m_pTouchControls->Console()->ExecuteLineStroked(1, m_Command.c_str());
+	m_pTouchControls->Console()->ExecuteLineStroked(1, m_Command.c_str(), IConsole::CLIENT_ID_UNSPECIFIED);
 	m_Repeating = false;
 }
 
 void CTouchControls::CBindTouchButtonBehavior::OnDeactivate(bool ByFinger)
 {
-	m_pTouchControls->Console()->ExecuteLineStroked(0, m_Command.c_str());
+	m_pTouchControls->Console()->ExecuteLineStroked(0, m_Command.c_str(), IConsole::CLIENT_ID_UNSPECIFIED);
 }
 
 void CTouchControls::CBindTouchButtonBehavior::OnUpdate()
@@ -689,7 +690,7 @@ void CTouchControls::CBindTouchButtonBehavior::OnUpdate()
 		if(m_AccumulatedRepeatingTime >= BIND_REPEAT_RATE)
 		{
 			m_AccumulatedRepeatingTime -= BIND_REPEAT_RATE;
-			m_pTouchControls->Console()->ExecuteLineStroked(1, m_Command.c_str());
+			m_pTouchControls->Console()->ExecuteLineStroked(1, m_Command.c_str(), IConsole::CLIENT_ID_UNSPECIFIED);
 		}
 	}
 	else if(Now - m_ActivationStartTime >= BIND_REPEAT_INITIAL_DELAY)
@@ -724,7 +725,7 @@ CTouchControls::CButtonLabel CTouchControls::CBindToggleTouchButtonBehavior::Get
 
 void CTouchControls::CBindToggleTouchButtonBehavior::OnActivate()
 {
-	m_pTouchControls->Console()->ExecuteLine(m_vCommands[m_ActiveCommandIndex].m_Command.c_str());
+	m_pTouchControls->Console()->ExecuteLine(m_vCommands[m_ActiveCommandIndex].m_Command.c_str(), IConsole::CLIENT_ID_UNSPECIFIED);
 	m_ActiveCommandIndex = (m_ActiveCommandIndex + 1) % m_vCommands.size();
 }
 
@@ -1025,7 +1026,7 @@ void CTouchControls::UpdateButtonsGame(const std::vector<IInput::CTouchFingerSta
 			m_aDirectTouchActionStates[Action].m_Active = false;
 			if(Action != ACTION_AIM)
 			{
-				Console()->ExecuteLineStroked(0, ACTION_COMMANDS[Action]);
+				Console()->ExecuteLineStroked(0, ACTION_COMMANDS[Action], IConsole::CLIENT_ID_UNSPECIFIED);
 			}
 		}
 		else
@@ -1172,7 +1173,7 @@ void CTouchControls::UpdateButtonsGame(const std::vector<IInput::CTouchFingerSta
 	// Activate action after the mouse position is set.
 	if(ActivateAction != ACTION_AIM && ActivateAction != NUM_ACTIONS)
 	{
-		Console()->ExecuteLineStroked(1, ACTION_COMMANDS[ActivateAction]);
+		Console()->ExecuteLineStroked(1, ACTION_COMMANDS[ActivateAction], IConsole::CLIENT_ID_UNSPECIFIED);
 	}
 }
 

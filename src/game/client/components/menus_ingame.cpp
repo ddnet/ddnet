@@ -9,6 +9,7 @@
 #include <base/math.h>
 #include <base/system.h>
 
+#include <engine/console.h>
 #include <engine/demo.h>
 #include <engine/favorites.h>
 #include <engine/friends.h>
@@ -207,7 +208,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			static CButtonContainer s_PauseButton;
 			if(DoButton_Menu(&s_PauseButton, (!Paused && !Spec) ? Localize("Pause") : Localize("Join game"), 0, &Button))
 			{
-				Console()->ExecuteLine("say /pause");
+				Console()->ExecuteLine("say /pause", IConsole::CLIENT_ID_UNSPECIFIED);
 				SetActive(false);
 			}
 		}
@@ -269,7 +270,7 @@ void CMenus::RenderGame(CUIRect MainView)
 		static CButtonContainer s_RemoveConsoleButton;
 		if(DoButton_Menu(&s_RemoveConsoleButton, Localize("Remote console"), 0, &Button))
 		{
-			Console()->ExecuteLine("toggle_remote_console");
+			Console()->ExecuteLine("toggle_remote_console", IConsole::CLIENT_ID_UNSPECIFIED);
 		}
 
 		ButtonBar2.VSplitRight(5.0f, &ButtonBar2, nullptr);
@@ -277,7 +278,7 @@ void CMenus::RenderGame(CUIRect MainView)
 		static CButtonContainer s_LocalConsoleButton;
 		if(DoButton_Menu(&s_LocalConsoleButton, Localize("Console"), 0, &Button))
 		{
-			Console()->ExecuteLine("toggle_local_console");
+			Console()->ExecuteLine("toggle_local_console", IConsole::CLIENT_ID_UNSPECIFIED);
 		}
 		// Only when these are all false, the preview page is rendered. Once the page is not rendered, update is needed upon next rendering.
 		if(!GameClient()->m_TouchControls.IsEditingActive() || m_MenusIngameTouchControls.m_CurrentMenu != CMenusIngameTouchControls::EMenuType::MENU_BUTTONS || GameClient()->m_TouchControls.IsButtonEditing())
