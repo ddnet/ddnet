@@ -6,6 +6,8 @@
 #error "This header should only be included when compiling for Android"
 #endif
 
+#include <cstddef>
+
 /**
  * @defgroup Android Android
  *
