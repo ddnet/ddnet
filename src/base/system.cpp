@@ -2516,7 +2516,7 @@ char *fs_executable_path(char *buffer, int buffer_size, bool remove_name)
 	};
 	for(auto &name : NAMES)
 	{
-		if(ssize_t bytes_written = readlink(name, path, sizeof(path)); bytes_written != -1)
+		if(ssize_t bytes_written = readlink(name, path, sizeof(path) - 1); bytes_written != -1)
 		{
 			path[bytes_written] = '\0'; // readlink does NOT null-terminate
 			// if the file gets deleted or replaced (not renamed) linux appends (deleted) to the symlink
