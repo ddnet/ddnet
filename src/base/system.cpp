@@ -2456,7 +2456,7 @@ int fs_storage_path(const char *appname, char *path, int max)
 #endif
 }
 
-char *fs_executable_path(char *buffer, int buffer_size, bool remove_name)
+char *fs_executable_path(char *buffer, int buffer_size)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	wchar_t wide_path[IO_MAX_PATH_LENGTH];
@@ -2472,10 +2472,6 @@ char *fs_executable_path(char *buffer, int buffer_size, bool remove_name)
 		return nullptr;
 	}
 	str_copy(buffer, path.value().c_str(), buffer_size);
-	if(remove_name)
-	{
-		fs_parent_dir(buffer);
-	}
 	return buffer;
 #elif defined(CONF_PLATFORM_MACOS)
 	// Get the size
@@ -2494,19 +2490,11 @@ char *fs_executable_path(char *buffer, int buffer_size, bool remove_name)
 	{
 		free(path);
 		str_copy(buffer, real_path, buffer_size);
-		if(remove_name)
-		{
-			fs_parent_dir(buffer);
-		}
 		return buffer;
 	}
-	str_copy(buffer, path, buffer_size);
 	free(path);
-	if(remove_name)
-	{
-		fs_parent_dir(buffer);
-	}
-	return buffer;
+	buffer[0] = '\0';
+	return nullptr;
 #else
 	char path[IO_MAX_PATH_LENGTH];
 	static const char *NAMES[] = {
@@ -2525,10 +2513,6 @@ char *fs_executable_path(char *buffer, int buffer_size, bool remove_name)
 				*deleted = '\0';
 			}
 			str_copy(buffer, path, buffer_size);
-			if(remove_name)
-			{
-				fs_parent_dir(buffer);
-			}
 			return buffer;
 		}
 	}

@@ -364,6 +364,7 @@ public:
 
 		if(fs_executable_path(m_aBinarydir, sizeof(m_aBinarydir)) != nullptr)
 		{
+			fs_parent_dir(m_aBinarydir);
 			return;
 		}
 
