@@ -51,6 +51,7 @@ file(GLOB_RECURSE GLSL_SHADER_FILES
   "data/shader/vulkan/*.frag"
   "data/shader/vulkan/*.vert"
 )
+list(SORT GLSL_SHADER_FILES)
 
 set(TMP_SHADER_SHA256_LIST "")
 foreach(GLSL_SHADER_FILE ${GLSL_SHADER_FILES})
