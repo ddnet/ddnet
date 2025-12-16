@@ -1717,10 +1717,17 @@ public:
 				{
 					if((pCursor->m_Flags & TEXTFLAG_DISALLOW_NEWLINE) == 0)
 					{
-						pLastGlyph = nullptr;
-						if(!StartNewLine())
+						if(StartNewLine())
+						{
+							pLastGlyph = nullptr;
+							continue;
+						}
+						else
+						{
+							pCurrent = pEnd;
+							pCursor->m_Truncated = true;
 							break;
-						continue;
+						}
 					}
 					else
 					{
