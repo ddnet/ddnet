@@ -260,10 +260,10 @@ public:
 	int LoadingProgression() const override;
 	void RequestResort() { m_NeedResort = true; }
 
-	int NumServers() const override { return m_NumServers; }
+	int NumServers() const override { return m_vpServerlist.size(); }
 	int Players(const CServerInfo &Item) const override;
 	int Max(const CServerInfo &Item) const override;
-	int NumSortedServers() const override { return m_NumSortedServers; }
+	int NumSortedServers() const override { return m_vSortedServerlist.size(); }
 	int NumSortedPlayers() const override { return m_NumSortedPlayers; }
 	const CServerInfo *SortedGet(int Index) const override;
 
@@ -333,8 +333,8 @@ private:
 	const char *m_pHttpPrevBestUrl = nullptr;
 
 	CHeap m_ServerlistHeap;
-	CServerEntry **m_ppServerlist;
-	int *m_pSortedServerlist;
+	std::vector<CServerEntry *> m_vpServerlist;
+	std::vector<int> m_vSortedServerlist;
 	std::unordered_map<NETADDR, int> m_ByAddr;
 
 	std::vector<CCommunity> m_vCommunities;
@@ -361,11 +361,7 @@ private:
 	// used instead of g_Config.br_max_requests to get more servers
 	int m_CurrentMaxRequests;
 
-	int m_NumSortedServers;
-	int m_NumSortedServersCapacity;
 	int m_NumSortedPlayers;
-	int m_NumServers;
-	int m_NumServerCapacity;
 
 	int m_ServerlistType;
 	int64_t m_BroadcastTime;
