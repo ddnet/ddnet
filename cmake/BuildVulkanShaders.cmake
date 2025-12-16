@@ -1,3 +1,4 @@
+# Find glslangValidator
 find_program(GLSLANG_VALIDATOR_PROGRAM
   NAMES glslang glslangValidator
 )
@@ -22,10 +23,11 @@ if(NOT GLSLANG_VALIDATOR_PROGRAM)
   endif()
 
   if(NOT GLSLANG_VALIDATOR_PROGRAM_FOUND)
-    message(FATAL_ERROR "glslangValidator binary was not found. Did you install the Vulkan SDK / packages ?")
+    message(FATAL_ERROR "glslangValidator binary was not found. Did you install the Vulkan SDK / packages?")
   endif()
 endif()
 
+# Find spirv-opt
 find_program(SPIRV_OPTIMIZER_PROGRAM spirv-opt)
 set(SPIRV_OPTIMIZER_PROGRAM_FOUND TRUE)
 if(NOT SPIRV_OPTIMIZER_PROGRAM)
@@ -47,12 +49,14 @@ if(NOT SPIRV_OPTIMIZER_PROGRAM)
   endif()
 endif()
 
+# Find Vulkan shader files
 file(GLOB_RECURSE GLSL_SHADER_FILES
   "data/shader/vulkan/*.frag"
   "data/shader/vulkan/*.vert"
 )
 list(SORT GLSL_SHADER_FILES)
 
+# Generate shader SHA256 list to determine changes
 set(TMP_SHADER_SHA256_LIST "")
 foreach(GLSL_SHADER_FILE ${GLSL_SHADER_FILES})
   file(SHA256 ${GLSL_SHADER_FILE} TMP_FILE_SHA)
@@ -68,6 +72,7 @@ if("${VULKAN_SHADER_FILE_SHA256}" STREQUAL "${GLSL_SHADER_SHA256}")
   set(FOUND_MATCHING_SHA256_FILE TRUE)
 endif()
 
+# Settings
 set(TW_VULKAN_VERSION "vulkan100")
 
 set(GLSLANG_VALIDATOR_COMMAND_LIST)
@@ -85,8 +90,9 @@ function(generate_shader_file FILE_ARGS1 FILE_ARGS2 FILE_NAME FILE_OUTPUT_NAME)
   set(GLSLANG_VALIDATOR_COMMAND_LIST ${GLSLANG_VALIDATOR_COMMAND_LIST} PARENT_SCOPE)
 endfunction()
 
+# Compile shaders if changed
 if(NOT FOUND_MATCHING_SHA256_FILE)
-  message(STATUS "Building vulkan shaders")
+  message(STATUS "Building Vulkan shaders")
   execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory "${PROJECT_BINARY_DIR}/data/shader/vulkan/")
 
   unset(VULKAN_SHADER_FILE_LIST CACHE)
@@ -166,7 +172,6 @@ if(NOT FOUND_MATCHING_SHA256_FILE)
   file(REMOVE ${GLSLANG_VALIDATOR_DELETE_LIST})
 
   set(VULKAN_SHADER_FILE_LIST ${VULKAN_SHADER_FILE_LIST} CACHE STRING "Vulkan shader file list" FORCE)
-
-  message(STATUS "Finished building vulkan shaders")
   set(VULKAN_SHADER_FILE_SHA256 ${GLSL_SHADER_SHA256} CACHE STRING "Vulkan shader file hash" FORCE)
+  message(STATUS "Finished building Vulkan shaders")
 endif()
