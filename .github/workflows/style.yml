@@ -22,7 +22,7 @@ jobs:
     - name: Prepare Linux
       run: |
         sudo apt-get update -y
-        sudo apt-get install ddnet-tools shellcheck tidy pkg-config cmake doxygen graphviz ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev python3-clang libvulkan-dev glslang-tools spirv-tools libglew-dev -y
+        sudo apt-get install ddnet-tools shellcheck tidy pkg-config cmake doxygen graphviz ninja-build python3-clang -y
         rustup default stable
         pip3 install ruff
         wget https://github.com/muttleyxd/clang-tools-static-binaries/releases/download/master-796e77c/clang-format-20_linux-amd64
@@ -112,7 +112,7 @@ jobs:
       run: |
         mkdir release
         cd release
-        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DDOWNLOAD_GTEST=OFF ..
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DCLIENT=OFF -DDOWNLOAD_GTEST=OFF ..
         cmake --build . --config Release --target dilate
 
     - name: Check dilated images
