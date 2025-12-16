@@ -418,9 +418,9 @@ void CServerBrowser::Filter()
 	m_vSortedServerlist.reserve(m_vpServerlist.size());
 
 	// filter the servers
-	for(int i = 0; i < (int)m_vpServerlist.size(); i++)
+	for(int ServerIndex = 0; ServerIndex < (int)m_vpServerlist.size(); ServerIndex++)
 	{
-		CServerInfo &Info = m_vpServerlist[i]->m_Info;
+		CServerInfo &Info = m_vpServerlist[ServerIndex]->m_Info;
 		bool Filtered = false;
 
 		if(g_Config.m_BrFilterEmpty && Info.m_NumFilteredPlayers == 0)
@@ -580,7 +580,7 @@ void CServerBrowser::Filter()
 			if(!g_Config.m_BrFilterFriends || Info.m_FriendState != IFriends::FRIEND_NO)
 			{
 				m_NumSortedPlayers += Info.m_NumFilteredPlayers;
-				m_vSortedServerlist.push_back(i);
+				m_vSortedServerlist.push_back(ServerIndex);
 			}
 		}
 	}
