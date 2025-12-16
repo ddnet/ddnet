@@ -834,6 +834,10 @@ CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR *pAddrs, int Num
 
 	// add to list
 	pEntry->m_Info.m_ServerIndex = ServerIndex;
+	if(m_vpServerlist.capacity() == 0)
+	{
+		m_vpServerlist.reserve(128);
+	}
 	m_vpServerlist.push_back(pEntry);
 
 	return pEntry;
@@ -1135,6 +1139,7 @@ void CServerBrowser::UpdateFromHttp()
 	}
 
 	int NumServers = m_pHttp->NumServers();
+	m_vpServerlist.reserve(NumServers);
 	std::function<bool(const NETADDR *, int)> Want = [](const NETADDR *pAddrs, int NumAddrs) { return true; };
 	if(m_ServerlistType == IServerBrowser::TYPE_FAVORITES)
 	{
