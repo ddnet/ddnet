@@ -123,28 +123,32 @@ void CGameControllerDDRace::SetArmorProgress(CCharacter *pCharacter, int Progres
 int CGameControllerDDRace::SnapPlayerScore(int SnappingClient, CPlayer *pPlayer)
 {
 	bool HideScore = g_Config.m_SvHideScore && SnappingClient != pPlayer->GetCid();
+	std::optional<float> Score = GameServer()->Score()->PlayerData(pPlayer->GetCid())->m_BestTime;
 
 	if(Server()->IsSixup(SnappingClient))
 	{
-		if(!pPlayer->m_Score.has_value() || HideScore)
+		if(!Score.has_value() || HideScore)
 			return protocol7::FinishTime::NOT_FINISHED;
 
 		// Times are in milliseconds for 0.7
-		return GameServer()->Score()->PlayerData(pPlayer->GetCid())->m_BestTime * 1000;
+		return Score.value() * 1000.0f;
 	}
 
 	// This is the time sent to the player while ingame (do not confuse to the one reported to the master server).
 	// Due to clients expecting this as a negative value, we have to make sure it's negative.
 	// Special numbers:
 	// -9999 or FinishTime::NOT_FINISHED_TIMESCORE: means no time and isn't displayed in the scoreboard.
-	if(!pPlayer->m_Score.has_value() || HideScore)
+	if(!Score.has_value() || HideScore)
 		return FinishTime::NOT_FINISHED_TIMESCORE;
+
+	// Times are in seconds for 0.6
+	int ScoreSeconds = Score.value();
 
 	// shift the time by a second if the player actually took 9999
 	// seconds to finish the map.
-	if(-pPlayer->m_Score.value() == FinishTime::NOT_FINISHED_TIMESCORE)
-		return -pPlayer->m_Score.value() - 1;
-	return -pPlayer->m_Score.value();
+	if(-ScoreSeconds == FinishTime::NOT_FINISHED_TIMESCORE)
+		return -ScoreSeconds - 1;
+	return -ScoreSeconds;
 }
 
 void CGameControllerDDRace::OnPlayerConnect(CPlayer *pPlayer)

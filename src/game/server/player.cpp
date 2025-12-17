@@ -123,7 +123,6 @@ void CPlayer::Reset()
 	m_Whispers = true;
 
 	m_LastPause = 0;
-	m_Score.reset();
 
 	// Variable initialized:
 	m_LastSqlQuery = 0;
@@ -181,8 +180,6 @@ void CPlayer::Tick()
 
 	if(m_ChatScore > 0)
 		m_ChatScore--;
-
-	Server()->SetClientScore(m_ClientId, m_Score);
 
 	if(m_Moderating && m_Afk)
 	{
@@ -461,11 +458,13 @@ void CPlayer::Snap(int SnappingClient)
 	if(m_Paused == PAUSE_PAUSED)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_PAUSED;
 
+	std::optional<float> BestTime = GameServer()->Score()->PlayerData(m_ClientId)->m_BestTime;
+
 	// set precise finish time instead of timescore
-	if(m_Score.has_value() && (!g_Config.m_SvHideScore || SnappingClient == m_ClientId))
+	if(BestTime.has_value() && (!g_Config.m_SvHideScore || SnappingClient == m_ClientId))
 	{
 		// same as in str_time_float
-		int64_t TimeMilliseconds = static_cast<int64_t>(std::roundf(GameServer()->Score()->PlayerData(m_ClientId)->m_BestTime * 1000.0f));
+		int64_t TimeMilliseconds = static_cast<int64_t>(std::roundf(BestTime.value() * 1000.0f));
 		int Seconds = static_cast<int>(TimeMilliseconds / 1000);
 		int Millis = static_cast<int>(TimeMilliseconds % 1000);
 
@@ -984,7 +983,7 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 			if(Result.m_Data.m_Info.m_Time.has_value())
 			{
 				GameServer()->Score()->PlayerData(m_ClientId)->Set(Result.m_Data.m_Info.m_Time.value(), Result.m_Data.m_Info.m_aTimeCp);
-				m_Score = Result.m_Data.m_Info.m_Time;
+				Server()->SetClientScore(m_ClientId, Result.m_Data.m_Info.m_Time.value());
 			}
 			Server()->ExpireServerInfo();
 			int Birthday = Result.m_Data.m_Info.m_Birthday;
