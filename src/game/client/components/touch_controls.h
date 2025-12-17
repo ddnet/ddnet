@@ -599,7 +599,7 @@ private:
 	int m_LastWidth = -10;
 	int m_LastHeight = -10;
 	void BuildPositionXY(std::vector<CUnitRect> vVisibleButtonRects, CUnitRect MyRect);
-	CUnitRect FindPositionXY(std::vector<CUnitRect> &vVisibleButtonRects, CUnitRect MyRect);
+	std::optional<CUnitRect> FindPositionXY(std::vector<CUnitRect> &vVisibleButtonRects, CUnitRect MyRect);
 
 	// This is how editor render buttons.
 	void RenderButtonsEditor();
@@ -630,7 +630,7 @@ public:
 	CTouchButton *NewButton();
 	void DeleteSelectedButton();
 	bool IsRectOverlapping(CUnitRect MyRect, EButtonShape Shape) const;
-	CUnitRect UpdatePosition(CUnitRect MyRect, EButtonShape Shape, bool Ignore = false); // If Ignore == true, then the function will also try to avoid m_pSelectedButton.
+	std::optional<CUnitRect> UpdatePosition(CUnitRect MyRect, EButtonShape Shape, bool Ignore = false); // If Ignore == true, then the function will also try to avoid m_pSelectedButton.
 	void ResetButtonPointers();
 	void ResetVirtualVisibilities();
 	CUIRect CalculateScreenFromUnitRect(CUnitRect Unit, EButtonShape Shape = EButtonShape::RECT) const;
@@ -645,7 +645,6 @@ public:
 	void SetShownRect(std::optional<CUnitRect> Rect) { m_ShownRect = Rect; }
 	CTouchButton *SelectedButton() const { return m_pSelectedButton; }
 	void SetSelectedButton(CTouchButton *TargetButton) { m_pSelectedButton = TargetButton; }
-	bool NoRealButtonSelected() const { return m_pSelectedButton == nullptr; }
 	void RemakeSampleButton() { m_pSampleButton = std::make_unique<CTouchButton>(this); }
 	CTouchButton *SampleButton() const { return m_pSampleButton.get(); }
 	bool IsButtonEditing() const { return m_pSelectedButton != nullptr || m_pSampleButton != nullptr; }

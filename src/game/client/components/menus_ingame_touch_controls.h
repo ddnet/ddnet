@@ -161,10 +161,11 @@ public:
 	void CacheAllSettingsFromTarget(CTouchControls::CTouchButton *pTargetButton);
 	void SaveCachedSettingsToTarget(CTouchControls::CTouchButton *pTargetButton) const;
 	void SetPosInputs(CTouchControls::CUnitRect MyRect);
+	CTouchControls::CUnitRect GetPosInputs() const;
 	void InputPosFunction(CLineInputNumber *pInput);
 	void UpdateSampleButton();
 	void ResetButtonPointers();
-	void NewVirtualButton();
+	bool NewButton(CTouchControls::CUnitRect Rect, CTouchControls::EButtonShape Shape);
 	void ResolveIssues();
 	int CalculatePredefinedType(const char *pType) const;
 	std::string DetermineTouchButtonCommandLabel(CTouchControls::CTouchButton *pButton) const;
