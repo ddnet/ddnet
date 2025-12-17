@@ -140,7 +140,6 @@ class Int(BaseType):
 		self.value = value
 	def EmitDefinition(self, _name):
 		return [f"{int(self.value)}"]
-		#return ["%d /* %s */"%(self.value, self._target_name)]
 
 class Float(BaseType):
 	def __init__(self, value):
@@ -150,7 +149,6 @@ class Float(BaseType):
 		self.value = value
 	def EmitDefinition(self, _name):
 		return [f"{self.value:f}f"]
-		#return ["%d /* %s */"%(self.value, self._target_name)]
 
 class String(BaseType):
 	def __init__(self, value):
