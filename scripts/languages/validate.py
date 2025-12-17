@@ -7,7 +7,7 @@ import twlang
 os.chdir(os.path.dirname(__file__) + "/../..")
 
 # Taken from https://stackoverflow.com/questions/30011379/how-can-i-parse-a-c-format-string-in-python
-cfmt = '''
+cfmt = """
 (                                  # start of capture group 1
 %                                  # literal "%"
 (?:                                # first option
@@ -18,15 +18,17 @@ cfmt = '''
 [cCdiouxXeEfgGaAnpsSZ]             # type
 ) |                                # OR
 %%)                                # literal "%%"
-'''
+"""
 
 total_errors = 0
+
 
 def print_validation_error(error, filename, error_line):
 	print(f"Invalid: {translated}")
 	print(f"- {error} in {filename}:{error_line + 1}\n")
 	global total_errors
 	total_errors += 1
+
 
 if len(sys.argv) > 1:
 	languages = sys.argv[1:]

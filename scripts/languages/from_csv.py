@@ -4,6 +4,7 @@ import csv
 import os
 import twlang
 
+
 def ddnet_entry(source, context, target, **_kwargs):
 	if context != "":
 		return f"""\
@@ -16,6 +17,7 @@ def ddnet_entry(source, context, target, **_kwargs):
 {source}
 == {target}
 """
+
 
 def main():
 	parser = argparse.ArgumentParser(description="Convert Weblate CSV files in the specified directory into DDNet translation files.")
@@ -32,6 +34,7 @@ def main():
 		key = mapping[entry.name]
 		with open(f"{prefix}/data/languages/{key}.txt", "w", encoding="utf-8") as f:
 			f.write(out)
+
 
 if __name__ == "__main__":
 	main()

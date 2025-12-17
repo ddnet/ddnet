@@ -13,6 +13,7 @@ EXCEPTIONS = [
 	"src/tools/config_common.h",
 ]
 
+
 def check_file(filename):
 	if filename in EXCEPTIONS:
 		return False
@@ -34,6 +35,7 @@ def check_file(filename):
 			break
 	return error
 
+
 def check_dir(directory):
 	errors = 0
 	file_list = os.listdir(directory)
@@ -46,5 +48,6 @@ def check_dir(directory):
 			errors += check_file(path)
 	return errors
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
 	sys.exit(int(check_dir(PATH) != 0))

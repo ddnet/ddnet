@@ -5,12 +5,15 @@ import os
 
 os.chdir(os.path.dirname(__file__) + "/..")
 
+
 def hash_bytes(b):
 	return f"0x{hashlib.sha256(b).hexdigest()[:8]}"
+
 
 def hash_file(filename):
 	with open(filename, "rb") as f:
 		return hash_bytes(f.read())
+
 
 def main():
 	p = argparse.ArgumentParser(description="Checksums source files")
@@ -25,17 +28,21 @@ def main():
 	hashes_files = [hash_file(file) for file in files]
 	hashes_extra = [hash_bytes(line) for line in extra]
 	hashes = hashes_files + hashes_extra
-	print("""\
+	print(
+		"""\
 #include <engine/client/checksum.h>
 
 void CChecksumData::InitFiles()
 {
-""", end="")
+""",
+		end="",
+	)
 	print(f"\tm_NumFiles = {len(hashes_files)};")
 	print(f"\tm_NumExtra = {len(hashes_extra)};")
 	for i, h in enumerate(hashes):
 		print(f"\tm_aFiles[0x{i:03x}] = {h};")
 	print("}")
+
 
 if __name__ == "__main__":
 	main()
