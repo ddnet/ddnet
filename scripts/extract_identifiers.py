@@ -3,15 +3,17 @@ import csv
 import os
 import sys
 
-import clang.cindex # pylint: disable=import-error
+import clang.cindex  # pylint: disable=import-error
 
-from clang.cindex import CursorKind, LinkageKind, StorageClass, TypeKind # pylint: disable=import-error
+from clang.cindex import CursorKind, LinkageKind, StorageClass, TypeKind  # pylint: disable=import-error
 
 try:
 	from tqdm import tqdm
 except ImportError:
+
 	def tqdm(it, *_args, **_kwargs):
 		return it
+
 
 def traverse_namespaced(root, filter_files=None, skip_namespaces=1, namespace=()):
 	if root.location.file is not None and root.location.file.name not in filter_files:
@@ -24,6 +26,7 @@ def traverse_namespaced(root, filter_files=None, skip_namespaces=1, namespace=()
 			namespace += (root.spelling,)
 	for node in root.get_children():
 		yield from traverse_namespaced(node, filter_files, skip_namespaces, namespace)
+
 
 INTERESTING_NODE_KINDS = {
 	CursorKind.CLASS_DECL: "class",
@@ -38,8 +41,10 @@ INTERESTING_NODE_KINDS = {
 	CursorKind.FUNCTION_DECL: "function",
 }
 
+
 def is_array_type(typ):
 	return typ.kind in (TypeKind.CONSTANTARRAY, TypeKind.DEPENDENTSIZEDARRAY, TypeKind.INCOMPLETEARRAY)
+
 
 def get_complex_type(typ):
 	if typ.spelling in ("IOHANDLE", "LOCK"):
@@ -65,6 +70,7 @@ def get_complex_type(typ):
 			return "a" + get_complex_type(typ.get_template_argument_type(0))
 	return ""
 
+
 def is_static_member_definition_hack(node):
 	last_colons = False
 	for t in node.get_tokens():
@@ -79,6 +85,7 @@ def is_static_member_definition_hack(node):
 			return False
 	return False
 
+
 def is_const(typ):
 	if typ.is_const_qualified():
 		return True
@@ -86,8 +93,10 @@ def is_const(typ):
 		return is_const(typ.element_type)
 	return False
 
+
 class ParseError(RuntimeError):
 	pass
+
 
 def process_source_file(out, file, extra_args, break_on):
 	args = extra_args + ["-Isrc"]
@@ -140,7 +149,8 @@ def process_source_file(out, file, extra_args, break_on):
 				"name": node.spelling,
 			})
 			if node.spelling == break_on:
-				breakpoint() # pylint: disable=forgotten-debug-statement
+				breakpoint()  # pylint: disable=forgotten-debug-statement
+
 
 def main():
 	p = argparse.ArgumentParser(description="Extracts identifier data from a Teeworlds source file and its header, outputting the data as CSV to stdout")
@@ -164,6 +174,7 @@ def main():
 		except ParseError:
 			error = True
 	return int(error)
+
 
 if __name__ == "__main__":
 	sys.exit(main())

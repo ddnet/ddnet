@@ -29,6 +29,7 @@ with open("src/engine/keys.h", "w", encoding="utf-8") as f:
 	print("{", file=f)
 
 	next_id = 0
+
 	def print_key(enum_name, readable_name, numeric_id=-1):
 		global next_id
 		if numeric_id == -1:
@@ -39,7 +40,7 @@ with open("src/engine/keys.h", "w", encoding="utf-8") as f:
 		keynames[numeric_id] = readable_name
 		next_id = max(next_id, numeric_id + 1)
 
-	with open("scripts/SDL_scancode.h", 'r', encoding="utf-8") as scancodes_file:
+	with open("scripts/SDL_scancode.h", "r", encoding="utf-8") as scancodes_file:
 		for line in scancodes_file:
 			if "SDL_SCANCODE_" in line:
 				l = line.strip().split("=")
@@ -95,14 +96,14 @@ with open("src/engine/keys.h", "w", encoding="utf-8") as f:
 with open("src/engine/client/keynames.cpp", "w", encoding="utf-8") as f:
 	print("/* AUTO GENERATED! DO NOT EDIT MANUALLY! See scripts/gen_keys.py */", file=f)
 	print("", file=f)
-	print("#include \"keynames.h\"", file=f)
+	print('#include "keynames.h"', file=f)
 	print("", file=f)
 	print("/**", file=f)
 	print(" * Do not use directly! Use the @link IInput::KeyName @endlink function.", file=f)
 	print(" */", file=f)
 	print("extern const char g_aaKeyStrings[512][20] = {", file=f)
 	for n in keynames:
-		print(f"\t\"{n}\",", file=f)
+		print(f'\t"{n}",', file=f)
 	print("};", file=f)
 
 # generate keynames.h file

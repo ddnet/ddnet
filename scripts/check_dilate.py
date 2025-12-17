@@ -4,13 +4,14 @@ import os
 import subprocess
 import sys
 
+
 def check_file(dilate_path, filename):
 	executable_path = os.path.join(dilate_path, "dilate")
 	try:
 		with subprocess.Popen(
 			[executable_path, "--dry-run", filename],
 			stdout=subprocess.PIPE,
-			stderr=subprocess.PIPE
+			stderr=subprocess.PIPE,
 		) as process:
 			process.communicate()
 			not_dilated = process.returncode != 0
@@ -21,6 +22,7 @@ def check_file(dilate_path, filename):
 		print(f"Error: Executable not found at '{executable_path}'.")
 		return 1
 
+
 def check_dir(dilate_path, directory):
 	errors = 0
 	for file in os.listdir(directory):
@@ -30,6 +32,7 @@ def check_dir(dilate_path, directory):
 		elif file.endswith(".png"):
 			errors += check_file(dilate_path, path)
 	return errors
+
 
 def main(arguments):
 	if len(arguments) != 3:
@@ -45,6 +48,7 @@ def main(arguments):
 
 	print(f"Success: All .png files in '{check_path}' are dilated.")
 	return 0
+
 
 if __name__ == "__main__":
 	sys.exit(main(sys.argv))

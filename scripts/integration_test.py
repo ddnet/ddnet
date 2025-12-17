@@ -22,6 +22,7 @@ import traceback
 
 # TODO: check for valgrind errors
 
+
 class Log(namedtuple("Log", "timestamp level line")):
 	@classmethod
 	def parse(cls, line):
@@ -36,46 +37,56 @@ class Log(namedtuple("Log", "timestamp level line")):
 			# Rust log
 			datetime, level, line = line.split(" ", 2)
 			return cls(datetime.removeprefix("["), level, line.removeprefix(" ").replace("]", ":", 1))
+
 	def raise_on_error(self, timeout_id):
 		pass
 
+
 class LogParseError(namedtuple("LogParseError", "line")):
-	def raise_on_error(self, timeout_id): # pylint: disable=unused-argument
+	def raise_on_error(self, timeout_id):  # pylint: disable=unused-argument
 		Log.parse(self.line)
 		# The above should have raised an error.
 		raise RuntimeError("log line shouldn't parse")
 
+
 class Exit(namedtuple("Exit", "")):
-	def raise_on_error(self, timeout_id): # pylint: disable=unused-argument
+	def raise_on_error(self, timeout_id):  # pylint: disable=unused-argument
 		pass
 
+
 class UncleanExit(namedtuple("UncleanExit", "reason")):
-	def raise_on_error(self, timeout_id): # pylint: disable=unused-argument
+	def raise_on_error(self, timeout_id):  # pylint: disable=unused-argument
 		raise RuntimeError(f"unclean exit: {self.reason}")
 
+
 class TestTimeout(namedtuple("TestTimeout", "")):
-	def raise_on_error(self, timeout_id): # pylint: disable=unused-argument
+	def raise_on_error(self, timeout_id):  # pylint: disable=unused-argument
 		raise TimeoutError("test timeout")
+
 
 class Timeout(namedtuple("Timeout", ["id", "description"])):
 	def raise_on_error(self, timeout_id):
 		if timeout_id == self.id:
 			raise TimeoutError(f"timeout waiting for {self.description}")
 
+
 # This class is used to track that each timeout value is multiplied by
 # `timeout_multiplier` exactly once.
 class TimeoutParam(namedtuple("Timeout", ["start", "unmultiplied_duration", "description"])):
 	def __new__(cls, duration, description):
 		return super().__new__(cls, time(), duration, description)
+
 	def remaining_duration(self, test_env):
 		duration = test_env.runner.timeout_multiplier * self.unmultiplied_duration
 		return max((self.start + duration) - time(), 0)
+
 
 def relpath(path, start=os.curdir):
 	try:
 		return os.path.relpath(path, start)
 	except ValueError:
 		return os.path.realpath(path)
+
 
 def popen(args, *, cwd, **kwargs):
 	# If cwd is set, we might need to fix up the program path: On Windows, the
@@ -86,10 +97,12 @@ def popen(args, *, cwd, **kwargs):
 			args = [relpath(os.path.join(cwd, args[0]))] + args[1:]
 	return subprocess.Popen(args, cwd=cwd, **kwargs)
 
-GREEN="\x1b[32m"
-RED="\x1b[31m"
-RESET="\x1b[m"
-YELLOW="\x1b[33m"
+
+GREEN = "\x1b[32m"
+RED = "\x1b[31m"
+RESET = "\x1b[m"
+YELLOW = "\x1b[33m"
+
 
 class TestRunner:
 	def __init__(self, ddnet, ddnet_server, ddnet_mastersrv, repo_dir, dir, valgrind_memcheck, keep_tmpdirs, timeout_multiplier):
@@ -113,7 +126,7 @@ class TestRunner:
 			env = TestEnvironment(self, test.name, tmp_dir, timeout=test.timeout)
 			try:
 				test(env)
-			except Exception as e: # pylint: disable=broad-exception-caught
+			except Exception as e:  # pylint: disable=broad-exception-caught
 				env.kill_all()
 				error = "".join(traceback.format_exception(type(e), e, e.__traceback__))
 				tmp_dir_cleanup = False
@@ -170,6 +183,7 @@ class TestRunner:
 		print()
 		return bool(failed)
 
+
 class TestEnvironment:
 	def __init__(self, runner, name, tmp_dir, timeout):
 		self.runner = runner
@@ -224,15 +238,16 @@ add_path {relpath(self.runner.data_dir, tmp_dir)}
 	def kill_all(self):
 		for process in self.processes:
 			if process.poll() is None:
-				#print("warning: process hasn't terminated") # TODO
+				# print("warning: process hasn't terminated") # TODO
 				process.kill()
 		while self.processes:
 			self.processes.pop().wait()
 
 	def check_valgrind_memcheck_errors(self):
-		if any(any("== ERROR SUMMARY: " in line and not "== ERROR SUMMARY: 0" in line for line in stderr) for stderr in self.full_stderrs):
+		if any(any("== ERROR SUMMARY: " in line and "== ERROR SUMMARY: 0" not in line for line in stderr) for stderr in self.full_stderrs):
 			return "\n".join(line for stderr in self.full_stderrs for line in stderr if line.startswith("=="))
 		return None
+
 
 def run_lines_thread(name, file, output_filename, output_list, output_queue):
 	def thread():
@@ -240,7 +255,7 @@ def run_lines_thread(name, file, output_filename, output_list, output_queue):
 		for line in file:
 			if output_file is None:
 				# pylint: disable=consider-using-with
-				output_file = open(output_filename, "w", buffering=1, encoding="utf-8") # line buffering
+				output_file = open(output_filename, "w", buffering=1, encoding="utf-8")  # line buffering
 			output_file.write(line)
 			line = line.rstrip("\r\n")
 			output_list.append(line)
@@ -251,7 +266,9 @@ def run_lines_thread(name, file, output_filename, output_list, output_queue):
 					output_queue.put(LogParseError(line))
 				else:
 					output_queue.put(log)
+
 	Thread(name=name, target=thread, daemon=True).start()
+
 
 def run_exit_thread(name, process, queue, allow_unclean_exit):
 	def thread():
@@ -260,7 +277,9 @@ def run_exit_thread(name, process, queue, allow_unclean_exit):
 			queue.put(Exit())
 		else:
 			queue.put(UncleanExit(f"exit code {exit_code}"))
+
 	Thread(name=name, target=thread, daemon=True).start()
+
 
 def run_timeout_thread(name, test_env, input_queue, output_queue):
 	def thread():
@@ -274,7 +293,9 @@ def run_timeout_thread(name, test_env, input_queue, output_queue):
 				param = None
 				del id
 			# TODO: quit this thread
+
 	Thread(name=name, target=thread, daemon=True).start()
+
 
 def run_test_timeout_thread(name, test_env, input_queue, param):
 	def thread():
@@ -289,7 +310,9 @@ def run_test_timeout_thread(name, test_env, input_queue, param):
 				break
 			else:
 				outputs.append(new_output)
+
 	Thread(name=name, target=thread, daemon=True).start()
+
 
 class Runnable:
 	# pylint: disable=dangerous-default-value
@@ -299,9 +322,7 @@ class Runnable:
 		intersection = set(cur_env_vars) & (set(test_env.runner.extra_env_vars) | set(extra_env_vars))
 		if intersection:
 			# pylint: disable=consider-using-f-string
-			raise ValueError("conflicting environment variable(s): {}".format(
-				", ".join(sorted(intersection))
-			))
+			raise ValueError("conflicting environment variable(s): {}".format(", ".join(sorted(intersection))))
 		new_env_vars = {**cur_env_vars, **test_env.runner.extra_env_vars, **extra_env_vars}
 		self.process = popen(
 			test_env.run_prefix_args + args,
@@ -327,15 +348,18 @@ class Runnable:
 		run_lines_thread(f"{global_name}_stdout", stdout_wrapper, stdout_path, self.full_stdout, self.events if not log_is_stderr else None)
 		run_lines_thread(f"{global_name}_stderr", stderr_wrapper, stderr_path, self.full_stderr, self.events if log_is_stderr else None)
 		run_exit_thread(f"{global_name}_exit", self.process, self.events, allow_unclean_exit)
+
 	def register_timeout(self, timeout, description):
 		timeout_id = self.next_timeout_id
 		self.next_timeout_id += 1
 		self.timeout_queue.put((timeout_id, TimeoutParam(timeout, description)))
 		return timeout_id
+
 	def next_event(self, timeout_id):
 		event = self.events.get()
 		event.raise_on_error(timeout_id)
 		return event
+
 	def clear_events(self):
 		while True:
 			try:
@@ -344,6 +368,7 @@ class Runnable:
 				break
 			else:
 				event.raise_on_error(None)
+
 	def wait_for_log(self, fn, description, timeout=1):
 		timeout_id = self.register_timeout(timeout, description)
 		while True:
@@ -353,12 +378,16 @@ class Runnable:
 			elif isinstance(event, Log):
 				if fn(event):
 					return event
+
 	def wait_for_log_prefix(self, prefix, timeout=1):
 		self.wait_for_log(lambda l: l.line.startswith(prefix), description=f"log line with prefix `{prefix}`", timeout=timeout)
+
 	def wait_for_log_suffix(self, suffix, timeout=1):
 		self.wait_for_log(lambda l: l.line.endswith(suffix), description=f"log line with suffix `{suffix}`", timeout=timeout)
+
 	def wait_for_log_exact(self, line, timeout=1):
 		self.wait_for_log(lambda l: l.line == line, description=f"log line exactly matching `{line}`", timeout=timeout)
+
 	def wait_for_exit(self, timeout=10):
 		timeout_id = self.register_timeout(timeout, "exit")
 		while True:
@@ -366,18 +395,21 @@ class Runnable:
 			if isinstance(event, Exit):
 				return
 
+
 def fifo_name(test_env, name):
 	if os.name != "nt":
 		return os.path.join(test_env.tmp_dir, f"{name}.fifo")
 	else:
 		return f"{test_env.name}_{test_env.run_id}_{name}"
 
+
 def open_fifo(name):
 	if os.name != "nt":
 		name_arg = os.open(name, flags=os.O_WRONLY)
 	else:
-		name_arg = fr"\\.\pipe\{name}"
-	return open(name_arg, "w", buffering=1, encoding="utf-8") # line buffering
+		name_arg = rf"\\.\pipe\{name}"
+	return open(name_arg, "w", buffering=1, encoding="utf-8")  # line buffering
+
 
 class Client(Runnable):
 	# pylint: disable=dangerous-default-value
@@ -394,17 +426,22 @@ class Client(Runnable):
 				test_env.ddnet,
 				f"cl_input_fifo {self.fifo_name}",
 				"gfx_fullscreen 0",
-			] + extra_args,
+			]
+			+ extra_args,
 		)
 		test_env.num_clients += 1
+
 	def command(self, command):
 		if self.fifo is None:
 			self.fifo = open_fifo(self.fifo_name)
 		self.fifo.write(f"{command}\n")
+
 	def exit(self):
 		self.command("quit")
+
 	def wait_for_startup(self, timeout=15):
 		self.wait_for_log_prefix("client: version", timeout=timeout)
+
 
 class Server(Runnable):
 	# pylint: disable=dangerous-default-value
@@ -421,27 +458,33 @@ class Server(Runnable):
 				test_env.ddnet_server,
 				f"sv_input_fifo {self.fifo_name}",
 				"sv_register 0",
-			] + extra_args,
+			]
+			+ extra_args,
 		)
 		test_env.num_servers += 1
+
 	def command(self, command):
 		if self.fifo is None:
 			self.fifo = open_fifo(self.fifo_name)
 		self.fifo.write(f"{command}\n")
+
 	def next_event(self, timeout_id):
 		event = super().next_event(timeout_id)
 		if isinstance(event, Log):
 			if event.line.startswith("server: using port "):
-				self.port = int(event.line[len("server: using port "):]) # pylint: disable=attribute-defined-outside-init
+				self.port = int(event.line[len("server: using port ") :])  # pylint: disable=attribute-defined-outside-init
 			elif event.line.startswith("server: | rcon password: '"):
-				_, self.rcon_password, _ = event.line.split("'") # pylint: disable=attribute-defined-outside-init
+				_, self.rcon_password, _ = event.line.split("'")  # pylint: disable=attribute-defined-outside-init
 			elif event.line.startswith("teehistorian: recording to '"):
-				_, self.teehistorian_filename, _ = event.line.split("'") # pylint: disable=attribute-defined-outside-init
+				_, self.teehistorian_filename, _ = event.line.split("'")  # pylint: disable=attribute-defined-outside-init
 		return event
+
 	def exit(self):
 		self.command("shutdown")
+
 	def wait_for_startup(self, timeout=5):
 		self.wait_for_log_prefix("server: version", timeout=timeout)
+
 
 class Mastersrv(Runnable):
 	# pylint: disable=dangerous-default-value
@@ -455,26 +498,34 @@ class Mastersrv(Runnable):
 				"--listen",
 				"[::]:0",
 				"--test-servers-route",
-			] + extra_args,
+			]
+			+ extra_args,
 			extra_env_vars={"RUST_LOG": "info,mastersrv=debug"},
 			log_is_stderr=True,
-			allow_unclean_exit=True, # We don't have a way to exit the mastersrv cleanly.
+			allow_unclean_exit=True,  # We don't have a way to exit the mastersrv cleanly.
 		)
 		test_env.num_mastersrvs += 1
+
 	def next_event(self, timeout_id):
 		event = super().next_event(timeout_id)
 		if isinstance(event, Log):
 			if event.line.startswith("warp::server: listening on http://[::]:"):
-				self.port = int(event.line[len("warp::server: listening on http://[::]:"):]) # pylint: disable=attribute-defined-outside-init
+				self.port = int(event.line[len("warp::server: listening on http://[::]:") :])  # pylint: disable=attribute-defined-outside-init
 		return event
+
 	def exit(self):
 		self.process.terminate()
+
 	def wait_for_startup(self, timeout=5):
 		self.wait_for_log_prefix("warp::server: listening on http://[::]:", timeout=timeout)
+
 	def servers_json(self):
 		return json.loads(urlopen(f"http://[::1]:{self.port}/ddnet/15/test-servers.json").read())
 
+
 ALL_TESTS = []
+
+
 def test(test=None, *, requires_mastersrv=False, timeout=60):
 	def apply(test):
 		test.name = test.__name__
@@ -482,14 +533,17 @@ def test(test=None, *, requires_mastersrv=False, timeout=60):
 		test.timeout = timeout
 		ALL_TESTS.append(test)
 		return test
+
 	if test is None:
 		return apply
 	else:
 		return apply(test)
 
+
 def wait_for_startup(l):
 	for el in l:
 		el.wait_for_startup()
+
 
 @test(timeout=10)
 def meta_timeout(test_env):
@@ -505,6 +559,7 @@ def meta_timeout(test_env):
 	server.exit()
 	server.wait_for_exit()
 
+
 @test(timeout=0.1)
 def meta_test_timeout(test_env):
 	server = test_env.server()
@@ -517,6 +572,7 @@ def meta_test_timeout(test_env):
 		raise AssertionError("timeout should have triggered")
 	# with the global timeout disabled, better exit the test quickly without waiting
 
+
 @test
 def start_server(test_env):
 	server = test_env.server()
@@ -524,12 +580,14 @@ def start_server(test_env):
 	server.exit()
 	server.wait_for_exit()
 
+
 @test
 def start_client(test_env):
 	client = test_env.client(["gfx_fullscreen 1"])
 	wait_for_startup([client])
 	client.exit()
 	client.wait_for_exit()
+
 
 # TODO: make this less verbose
 @test
@@ -545,6 +603,7 @@ def client_can_connect(test_env):
 	server.wait_for_exit()
 	client.wait_for_exit()
 
+
 @test
 def open_editor(test_env):
 	client = test_env.client(["maps/coverage.map"])
@@ -552,6 +611,7 @@ def open_editor(test_env):
 	client.command("cl_editor 0")
 	client.exit()
 	client.wait_for_exit()
+
 
 @test
 def smoke_test(test_env):
@@ -574,8 +634,7 @@ def smoke_test(test_env):
 	server.wait_for_log_prefix("server: player has entered the game", timeout=10)
 	for _ in range(5):
 		server.wait_for_log(
-			lambda l: l.line.startswith("chat: *** client1 finished in:") or
-				l.line.startswith("chat: *** client2 finished in:"),
+			lambda l: l.line.startswith("chat: *** client1 finished in:") or l.line.startswith("chat: *** client2 finished in:"),
 			description="log lines with client1 and client2 finishes",
 			timeout=40,
 		)
@@ -586,7 +645,11 @@ def smoke_test(test_env):
 	client1.command(f"rcon_auth {server.rcon_password}")
 	server.wait_for_log_exact("server: ClientId=0 authed with key='default_admin' (admin)")
 
-	client1.command("say \"/mc; {}\"".format("; ".join(l.strip() for l in """
+	client1.command(
+		'say "/mc; {}"'.format(
+			"; ".join(
+				l.strip()
+				for l in """
 		top5
 		rank
 		team 512
@@ -602,8 +665,14 @@ def smoke_test(test_env):
 		timer broadcast
 		cmdlist
 		saytime
-	""".strip().split("\n"))))
-	client1.command("; ".join(l.strip() for l in """
+	""".strip().split("\n")
+			)
+		)
+	)
+	client1.command(
+		"; ".join(
+			l.strip()
+			for l in """
 		rcon say hello from admin
 		rcon broadcast test
 		rcon status
@@ -611,7 +680,9 @@ def smoke_test(test_env):
 		rcon muteid 1 900 spam
 		rcon unban_all
 		rcon say the end
-	""".strip().split("\n")))
+	""".strip().split("\n")
+		)
+	)
 	client1.wait_for_log_exact("chat/server: *** the end", timeout=3)
 
 	server.command("stoprecord")
@@ -653,11 +724,11 @@ def smoke_test(test_env):
 	ranks = sorted(rank[:2] + rank[3:] for rank in ranks)
 
 	expected_ranks = [
-		('coverage', 'client1', 6248.56, 'UNK', 0.42, 0.5, 0.0, 0.66, 0.92, 0.02, 300.18, 300.46, 300.76, 300.88, 300.98, 301.02, 301.04, 301.06, 301.08, 301.18, 301.38, 301.66, 307.34, 308.08, 308.1, 308.14, 308.44, 6248.5, 6248.54, game_uuid, 0),
-		('coverage', 'client1', 168300.5, 'UNK', 0.02, 0.06, 0.12, 15300.14, 15300.18, 30600.2, 30600.22, 45900.24, 45900.26, 61200.28, 61200.3, 76500.32, 76500.34, 91800.36, 91800.36, 107100.38, 107100.4, 122400.42, 122400.42, 137700.44, 137700.45, 137700.45, 153000.48, 153000.48, 0.0, game_uuid, 0),
-		('coverage', 'client2', 302.02, 'UNK', 0.42, 0.5, 0.0, 0.66, 0.92, 0.02, 300.18, 300.46, 300.76, 300.88, 300.98, 301.16, 301.24, 301.28, 301.3, 301.86, 301.96, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, game_uuid, 0),
-		('coverage', 'client2', 1020.38, 'UNK', 1021.34, 0.02, 0.04, 0.04, 0.06, 600.08, 600.1, 600.12, 600.12, 1020.14, 1020.16, 1020.18, 1020.2, 1020.2, 1020.22, 1020.24, 1020.26, 1020.26, 1020.28, 1020.3, 1020.3, 1020.32, 1020.34, 1020.34, 1020.36, game_uuid, 0),
-		('coverage', 'client2', 1020.98, 'UNK', 0.02, 0.1, 0.2, 0.26, 0.32, 600.36, 600.42, 600.46, 600.5, 1020.54, 1020.58, 1020.6, 1020.64, 1020.66, 1020.7, 1020.72, 1020.76, 1020.78, 1020.8, 1020.84, 1020.86, 1020.88, 1020.9, 1020.94, 1020.96, game_uuid, 0),
+		("coverage", "client1", 6248.56, "UNK", 0.42, 0.5, 0.0, 0.66, 0.92, 0.02, 300.18, 300.46, 300.76, 300.88, 300.98, 301.02, 301.04, 301.06, 301.08, 301.18, 301.38, 301.66, 307.34, 308.08, 308.1, 308.14, 308.44, 6248.5, 6248.54, game_uuid, 0),
+		("coverage", "client1", 168300.5, "UNK", 0.02, 0.06, 0.12, 15300.14, 15300.18, 30600.2, 30600.22, 45900.24, 45900.26, 61200.28, 61200.3, 76500.32, 76500.34, 91800.36, 91800.36, 107100.38, 107100.4, 122400.42, 122400.42, 137700.44, 137700.45, 137700.45, 153000.48, 153000.48, 0.0, game_uuid, 0),
+		("coverage", "client2", 302.02, "UNK", 0.42, 0.5, 0.0, 0.66, 0.92, 0.02, 300.18, 300.46, 300.76, 300.88, 300.98, 301.16, 301.24, 301.28, 301.3, 301.86, 301.96, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, game_uuid, 0),
+		("coverage", "client2", 1020.38, "UNK", 1021.34, 0.02, 0.04, 0.04, 0.06, 600.08, 600.1, 600.12, 600.12, 1020.14, 1020.16, 1020.18, 1020.2, 1020.2, 1020.22, 1020.24, 1020.26, 1020.26, 1020.28, 1020.3, 1020.3, 1020.32, 1020.34, 1020.34, 1020.36, game_uuid, 0),
+		("coverage", "client2", 1020.98, "UNK", 0.02, 0.1, 0.2, 0.26, 0.32, 600.36, 600.42, 600.46, 600.5, 1020.54, 1020.58, 1020.6, 1020.64, 1020.66, 1020.7, 1020.72, 1020.76, 1020.78, 1020.8, 1020.84, 1020.86, 1020.88, 1020.9, 1020.94, 1020.96, game_uuid, 0),
 	]
 
 	if not ranks:
@@ -666,12 +737,14 @@ def smoke_test(test_env):
 	if not test_env.runner.valgrind_memcheck and ranks != expected_ranks:
 		raise AssertionError(f"unexpected ranks:\n{ranks}\n\n{expected_ranks}")
 
+
 @test(requires_mastersrv=True)
 def start_mastersrv(test_env):
 	mastersrv = test_env.mastersrv()
 	wait_for_startup([mastersrv])
 	mastersrv.exit()
 	mastersrv.wait_for_exit()
+
 
 @test(requires_mastersrv=True)
 def server_can_register(test_env):
@@ -686,8 +759,7 @@ def server_can_register(test_env):
 	server.wait_for_log_suffix("successfully registered", timeout=5)
 	server.wait_for_log_suffix("successfully registered", timeout=5)
 	servers_json = mastersrv.servers_json()
-	if len(servers_json["servers"]) != 1 or servers_json["servers"][0]["info"]["map"]["name"] != "Tutorial" \
-			or len(servers_json["servers"][0]["addresses"]) != 2:
+	if len(servers_json["servers"]) != 1 or servers_json["servers"][0]["info"]["map"]["name"] != "Tutorial" or len(servers_json["servers"][0]["addresses"]) != 2:
 		raise AssertionError(f"unexpected servers.json\n{servers_json}")
 	server.exit()
 	mastersrv.wait_for_log_prefix("mastersrv: successfully removed", timeout=5)
@@ -697,6 +769,7 @@ def server_can_register(test_env):
 		raise AssertionError(f"unexpected servers.json\n{servers_json}")
 	mastersrv.exit()
 	mastersrv.wait_for_exit()
+
 
 def server_can_register_protocol(test_env, protocol_config, protocol_log, protocol_scheme):
 	mastersrv = test_env.mastersrv()
@@ -709,9 +782,7 @@ def server_can_register_protocol(test_env, protocol_config, protocol_log, protoc
 	wait_for_startup([server])
 	server.wait_for_log_exact(f"register/{protocol_log}: successfully registered", timeout=5)
 	servers_json = mastersrv.servers_json()
-	if len(servers_json["servers"]) != 1 or servers_json["servers"][0]["info"]["map"]["name"] != "Tutorial" \
-			or len(servers_json["servers"][0]["addresses"]) != 1 \
-			or not servers_json["servers"][0]["addresses"][0].startswith(f"{protocol_scheme}://[::1]:"):
+	if len(servers_json["servers"]) != 1 or servers_json["servers"][0]["info"]["map"]["name"] != "Tutorial" or len(servers_json["servers"][0]["addresses"]) != 1 or not servers_json["servers"][0]["addresses"][0].startswith(f"{protocol_scheme}://[::1]:"):
 		raise AssertionError(f"unexpected servers.json\n{servers_json}")
 	server.exit()
 	mastersrv.wait_for_log_prefix(f"mastersrv: successfully removed {protocol_scheme}://[::1]:", timeout=5)
@@ -721,22 +792,27 @@ def server_can_register_protocol(test_env, protocol_config, protocol_log, protoc
 	mastersrv.exit()
 	mastersrv.wait_for_exit()
 
+
 @test(requires_mastersrv=True)
 def server_can_register_tw_0_6(test_env):
 	server_can_register_protocol(test_env, "tw0.6/ipv6", "6/ipv6", "tw-0.6+udp")
+
 
 @test(requires_mastersrv=True)
 def server_can_register_tw_0_7(test_env):
 	server_can_register_protocol(test_env, "tw0.7/ipv6", "7/ipv6", "tw-0.7+udp")
 
+
 EXE_SUFFIX = ""
 if os.name == "nt":
 	EXE_SUFFIX = ".exe"
 
+
 def main():
 	repo_dir = relpath(os.path.join(os.path.dirname(__file__), ".."))
 
-	import argparse # pylint: disable=import-outside-toplevel
+	import argparse  # pylint: disable=import-outside-toplevel
+
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--keep-tmpdirs", action="store_true", help="keep temporary directories used for the tests")
 	parser.add_argument("--test-mastersrv", action="store_true", help="enforce testing of mastersrv")
@@ -773,6 +849,7 @@ def main():
 		keep_tmpdirs=args.keep_tmpdirs,
 		timeout_multiplier=args.timeout_multiplier,
 	).run_tests(tests)
+
 
 if __name__ == "__main__":
 	sys.exit(main())

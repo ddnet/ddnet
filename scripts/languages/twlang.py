@@ -3,10 +3,12 @@ import os
 import re
 from collections import OrderedDict
 
+
 class LanguageDecodeError(Exception):
 	def __init__(self, message, filename, line):
-		error = f"File \"{filename}\", line {line+1}: {message}"
+		error = f'File "{filename}", line {line + 1}: {message}'
 		super().__init__(error)
+
 
 def decode(fileobj, elements_per_key, allow_context=True):
 	data = {}
@@ -26,7 +28,7 @@ def decode(fileobj, elements_per_key, allow_context=True):
 				raise LanguageDecodeError("Context not allowed in this file", fileobj.name, index)
 			current_context = line[1:-1]
 		elif line[:3] == "== ":
-			if len(data[current_key]) >= 1+elements_per_key:
+			if len(data[current_key]) >= 1 + elements_per_key:
 				raise LanguageDecodeError("Wrong number of elements per key", fileobj.name, index)
 			if current_key:
 				translation = line[3:]
@@ -35,16 +37,16 @@ def decode(fileobj, elements_per_key, allow_context=True):
 				raise LanguageDecodeError("Element before key given", fileobj.name, index)
 		else:
 			if current_key:
-				if len(data[current_key]) != 1+elements_per_key:
+				if len(data[current_key]) != 1 + elements_per_key:
 					raise LanguageDecodeError("Wrong number of elements per key", fileobj.name, index)
 				data[current_key].append(index - 1 if current_context else index)
 			if line in data:
 				raise LanguageDecodeError("Key defined multiple times: " + line, fileobj.name, index)
 			data[(line, current_context)] = [index - 1 if current_context else index]
 			current_key = (line, current_context)
-	if len(data[current_key]) != 1+elements_per_key:
+	if len(data[current_key]) != 1 + elements_per_key:
 		raise LanguageDecodeError("Wrong number of elements per key", fileobj.name, index)
-	data[current_key].append(index+1)
+	data[current_key].append(index + 1)
 	new_data = {}
 	for key, value in data.items():
 		if key[0]:
@@ -67,7 +69,7 @@ def check_folder(path):
 			if not any(f.endswith(x) for x in [".cpp", ".c", ".h"]):
 				continue
 			for sentence in check_file(os.path.join(path2, f)):
-				key = (sentence[1:][0].replace("\\\"", "\""), sentence[1:][1].replace("\\\"", "\""))
+				key = (sentence[1:][0].replace('\\"', '"'), sentence[1:][1].replace('\\"', '"'))
 				englishlist[key] = None
 	return englishlist
 
@@ -79,7 +81,7 @@ def language_index():
 
 def languages():
 	index = language_index()
-	langs = {"data/languages/"+key+".txt": [key]+elements for key, elements in index.items()}
+	langs = {"data/languages/" + key + ".txt": [key] + elements for key, elements in index.items()}
 	return langs
 
 

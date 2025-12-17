@@ -11,6 +11,7 @@
 import sys
 import unicode
 
+
 def generate_decompositions():
 	ud = unicode.data()
 	con = unicode.confusables()
@@ -28,10 +29,10 @@ def generate_decompositions():
 	# Z: Space
 	ignore = category("C") | category("M") | category("Z")
 
-	con[0x006C] = [0x0069] # LATIN SMALL LETTER L -> LATIN SMALL LETTER I
-	con[0x00A1] = [0x0069] # INVERTED EXCLAMATION MARK -> LATIN SMALL LETTER I
-	con[0x2800] = [] # BRAILLE PATTERN BLANK
-	con[0xFFFC] = [] # OBJECT REPLACEMENT CHARACTER
+	con[0x006C] = [0x0069]  # LATIN SMALL LETTER L -> LATIN SMALL LETTER I
+	con[0x00A1] = [0x0069]  # INVERTED EXCLAMATION MARK -> LATIN SMALL LETTER I
+	con[0x2800] = []  # BRAILLE PATTERN BLANK
+	con[0xFFFC] = []  # OBJECT REPLACEMENT CHARACTER
 
 	interesting = ignore | set(nfd) | set(con)
 
@@ -50,6 +51,7 @@ def generate_decompositions():
 		return [c for c in result if c not in ignore]
 
 	return {c: gen(c) for c in interesting}
+
 
 def gen_header(decompositions, len_set):
 	print("""\
@@ -72,6 +74,7 @@ struct DECOMP_SLICE
 	print("extern const int32_t decomp_chars[NUM_DECOMPS];")
 	print("extern const struct DECOMP_SLICE decomp_slices[NUM_DECOMPS];")
 	print("extern const int32_t decomp_data[];")
+
 
 def gen_data(decompositions, decomposition_set, decomposition_offsets, len_set):
 	print("""\
@@ -107,6 +110,7 @@ def gen_data(decompositions, decomposition_set, decomposition_offsets, len_set):
 			print(f"\t0x{c:x},")
 	print("};")
 
+
 def main():
 	decompositions = generate_decompositions()
 
@@ -131,5 +135,6 @@ def main():
 	elif data:
 		gen_data(decompositions, decomposition_set, decomposition_offsets, len_set)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
 	main()

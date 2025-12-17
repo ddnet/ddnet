@@ -24,7 +24,7 @@ for lang in langs:
 				supported += 1
 			else:
 				unused += 1
-	table.append([lang, len(trans), empty, len(local)-supported, unused])
+	table.append([lang, len(trans), empty, len(local) - supported, unused])
 
 table.sort(key=lambda l: l[3])
 table = [["filename", "total", "empty", "missing", "unused"]] + table

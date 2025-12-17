@@ -4,7 +4,8 @@ import network
 
 from datatypes import EmitDefinition, EmitTypeDeclaration
 
-def create_enum_table(names, num, start = 0):
+
+def create_enum_table(names, num, start=0):
 	lines = []
 	lines += ["enum", "{"]
 	if len(names) > 0 and start != 0:
@@ -51,7 +52,7 @@ def gen_network_header():
 	print(network.RawHeader)
 
 	for e in network.Enums:
-		for line in create_enum_table([f"{e.name}_{v}" for v in e.values], f'NUM_{e.name}S', e.start): # pylint: disable=no-member
+		for line in create_enum_table([f"{e.name}_{v}" for v in e.values], f"NUM_{e.name}S", e.start):  # pylint: disable=no-member
 			print(line)
 		print("")
 
@@ -62,18 +63,18 @@ def gen_network_header():
 
 	non_extended = [o for o in network.Objects if o.ex is None]
 	extended = [o for o in network.Objects if o.ex is not None]
-	for line in create_enum_table(["NETOBJTYPE_EX"]+[o.enum_name for o in non_extended], "NUM_NETOBJTYPES"):
+	for line in create_enum_table(["NETOBJTYPE_EX"] + [o.enum_name for o in non_extended], "NUM_NETOBJTYPES"):
 		print(line)
-	for line in create_enum_table(["__NETOBJTYPE_UUID_HELPER=OFFSET_GAME_UUID-1"]+[o.enum_name for o in extended], "OFFSET_NETMSGTYPE_UUID"):
+	for line in create_enum_table(["__NETOBJTYPE_UUID_HELPER=OFFSET_GAME_UUID-1"] + [o.enum_name for o in extended], "OFFSET_NETMSGTYPE_UUID"):
 		print(line)
 	print("")
 
 	non_extended = [o for o in network.Messages if o.ex is None]
 	extended = [o for o in network.Messages if o.ex is not None]
-	for line in create_enum_table(["NETMSGTYPE_EX"]+[o.enum_name for o in non_extended], "NUM_NETMSGTYPES"):
+	for line in create_enum_table(["NETMSGTYPE_EX"] + [o.enum_name for o in non_extended], "NUM_NETMSGTYPES"):
 		print(line)
 	print("")
-	for line in create_enum_table(["__NETMSGTYPE_UUID_HELPER=OFFSET_NETMSGTYPE_UUID-1"]+[o.enum_name for o in extended], "OFFSET_MAPITEMTYPE_UUID"):
+	for line in create_enum_table(["__NETMSGTYPE_UUID_HELPER=OFFSET_NETMSGTYPE_UUID-1"] + [o.enum_name for o in extended], "OFFSET_MAPITEMTYPE_UUID"):
 		print(line)
 	print("")
 
@@ -177,7 +178,6 @@ int CNetObjHandler::ClampInt(const char *pErrorMsg, int Value, int Min, int Max)
 }
 	""")
 
-
 	lines = []
 	lines += ["const char *CNetObjHandler::ms_apObjNames[] = {"]
 	lines += ['\t"EX/UUID",']
@@ -190,26 +190,26 @@ int CNetObjHandler::ClampInt(const char *pErrorMsg, int Value, int Min, int Max)
 	lines += ['\t""', "};", ""]
 
 	lines += ["int CNetObjHandler::ms_aObjSizes[] = {"]
-	lines += ['\t0,']
-	lines += [f'\tsizeof({o.struct_name}),' for o in network.Objects if o.ex is None]
-	lines += ['\t0', "};", ""]
+	lines += ["\t0,"]
+	lines += [f"\tsizeof({o.struct_name})," for o in network.Objects if o.ex is None]
+	lines += ["\t0", "};", ""]
 
 	lines += ["int CNetObjHandler::ms_aUnpackedObjSizes[] = {"]
-	lines += ['\t16,']
-	lines += [f'\tsizeof({o.struct_name}),' for o in network.Objects if o.ex is None]
+	lines += ["\t16,"]
+	lines += [f"\tsizeof({o.struct_name})," for o in network.Objects if o.ex is None]
 	lines += ["};", ""]
 
 	lines += ["int CNetObjHandler::ms_aUnpackedExObjSizes[] = {"]
-	lines += ['\t0,']
-	lines += [f'\tsizeof({o.struct_name}),' for o in network.Objects if o.ex is not None]
+	lines += ["\t0,"]
+	lines += [f"\tsizeof({o.struct_name})," for o in network.Objects if o.ex is not None]
 	lines += ["};", ""]
 
-	lines += ['const char *CNetObjHandler::ms_apMsgNames[] = {']
+	lines += ["const char *CNetObjHandler::ms_apMsgNames[] = {"]
 	lines += ['\t"invalid",']
 	lines += [f'\t"{msg.name}",' for msg in network.Messages if msg.ex is None]
 	lines += ['\t""', "};", ""]
 
-	lines += ['const char *CNetObjHandler::ms_apExMsgNames[] = {']
+	lines += ["const char *CNetObjHandler::ms_apExMsgNames[] = {"]
 	lines += ['\t"invalid",']
 	lines += [f'\t"{msg.name}",' for msg in network.Messages if msg.ex is not None]
 	lines += ['\t""', "};", ""]
@@ -286,27 +286,28 @@ void CNetObjHandler::DebugDumpSnapshot(const CSnapshot *pSnap) const
 	""")
 
 	lines = []
-	lines += ['int CNetObjHandler::DumpObj(int Type, const void *pData, int Size) const']
-	lines += ['{']
+	lines += ["int CNetObjHandler::DumpObj(int Type, const void *pData, int Size) const"]
+	lines += ["{"]
 	lines += ["\tchar aRawData[512];"]
 	lines += ["\tchar aStr[128];"]
 	lines += ["\tint aInts[2] = {0x0, (int)0x80808080};"]
-	lines += ['\tswitch(Type)']
-	lines += ['\t{']
+	lines += ["\tswitch(Type)"]
+	lines += ["\t{"]
 
 	for item in network.Objects:
 		for line in item.emit_dump(network.Objects):
 			lines += ["\t" + line]
-		lines += ['\t']
-	lines += ['\t}']
-	lines += ['\treturn -1;']
-	lines += ['};']
-	lines += ['']
+		lines += ["\t"]
+	lines += ["\t}"]
+	lines += ["\treturn -1;"]
+	lines += ["};"]
+	lines += [""]
 	for line in lines:
 		print(line)
 
 	lines = []
-	lines += ["""\
+	lines += [
+		"""\
 void *CNetObjHandler::SecureUnpackObj(int Type, CUnpacker *pUnpacker)
 {
 	m_pObjFailedOn = 0;
@@ -321,14 +322,16 @@ void *CNetObjHandler::SecureUnpackObj(int Type, CUnpacker *pUnpacker)
 		}
 		break;
 	}
-	"""]
+	"""
+	]
 
 	for item in network.Objects:
 		for line in item.emit_uncompressed_unpack_and_validate(network.Objects):
 			lines += ["\t" + line]
-		lines += ['\t']
+		lines += ["\t"]
 
-	lines += ["""\
+	lines += [
+		"""\
 	default:
 		m_pObjFailedOn = "(type out of range)";
 		break;
@@ -342,26 +345,29 @@ void *CNetObjHandler::SecureUnpackObj(int Type, CUnpacker *pUnpacker)
 	m_pObjFailedOn = "";
 	return m_aUnpackedData;
 }
-	"""]
+	"""
+	]
 	for line in lines:
 		print(line)
 
-
 	lines = []
-	lines += ["""\
+	lines += [
+		"""\
 void *CNetObjHandler::SecureUnpackMsg(int Type, CUnpacker *pUnpacker)
 {
 	m_pMsgFailedOn = 0;
 	switch(Type)
 	{
-	"""]
+	"""
+	]
 
 	for item in network.Messages:
 		for line in item.emit_unpack_msg():
 			lines += ["\t" + line]
-		lines += ['\t']
+		lines += ["\t"]
 
-	lines += ["""\
+	lines += [
+		"""\
 	default:
 		m_pMsgFailedOn = "(type out of range)";
 		break;
@@ -375,58 +381,65 @@ void *CNetObjHandler::SecureUnpackMsg(int Type, CUnpacker *pUnpacker)
 	m_pMsgFailedOn = "";
 	return m_aUnpackedData;
 }
-	"""]
+	"""
+	]
 	for line in lines:
 		print(line)
 
-
 	lines = []
-	lines += ["""\
+	lines += [
+		"""\
 bool CNetObjHandler::TeeHistorianRecordMsg(int Type)
 {
 	switch(Type)
 	{
-	"""]
+	"""
+	]
 
 	empty = True
 	for msg in network.Messages:
 		if not msg.teehistorian:
-			lines += [f'\tcase {msg.enum_name}:']
+			lines += [f"\tcase {msg.enum_name}:"]
 			empty = False
 	if not empty:
-		lines += ['\t\treturn false;']
+		lines += ["\t\treturn false;"]
 
-	lines += ["""\
+	lines += [
+		"""\
 	default:
 		return true;
 	}
 }
-	"""]
+	"""
+	]
 	for line in lines:
 		print(line)
 
-
 	lines = []
-	lines += ["""\
+	lines += [
+		"""\
 void RegisterGameUuids(CUuidManager *pManager)
 {
-	"""]
+	"""
+	]
 
 	for item in network.Objects + network.Messages:
 		if item.ex is not None:
 			lines += [f'\tpManager->RegisterName({item.enum_name}, "{item.ex}");']
 
-	lines += ["""
+	lines += [
+		"""
 	RegisterMapItemTypeUuids(pManager);
 }
-	"""]
+	"""
+	]
 	for line in lines:
 		print(line)
 
 
 def gen_common_content_types_header():
 	# print some includes
-	print('#include <engine/graphics.h>')
+	print("#include <engine/graphics.h>")
 
 	# emit the type declarations
 	with open("datasrc/content.py", "rb") as content_file:
@@ -445,16 +458,17 @@ def gen_common_content_header():
 	print('#include "data_types.h"')
 
 	# the container pointer
-	print('extern CDataContainer *g_pData;')
+	print("extern CDataContainer *g_pData;")
 
 	# enums
 	EmitEnum([f"IMAGE_{i.name.value.upper()}" for i in content.container.images.items], "NUM_IMAGES")
 	EmitEnum([f"ANIM_{i.name.value.upper()}" for i in content.container.animations.items], "NUM_ANIMS")
 	EmitEnum([f"SPRITE_{i.name.value.upper()}" for i in content.container.sprites.items], "NUM_SPRITES")
 
+
 def gen_common_content_source():
 	EmitDefinition(content.container, "datacontainer")
-	print('CDataContainer *g_pData = &datacontainer;')
+	print("CDataContainer *g_pData = &datacontainer;")
 
 
 def gen_content_types_header():
@@ -489,22 +503,21 @@ def gen_server_content_source():
 
 
 def main():
-	parser = argparse.ArgumentParser(
-		description=('Generate C++ Source Files for the Teeworlds Network Protocol')
-	)
+	parser = argparse.ArgumentParser(description=("Generate C++ Source Files for the Teeworlds Network Protocol"))
 	FUNCTION_MAP = {
-						'network_header': gen_network_header,
-						'network_source': gen_network_source,
-						'content_types_header': gen_content_types_header,
-						'client_content_header': gen_client_content_header,
-						'client_content_source': gen_client_content_source,
-						'server_content_header': gen_server_content_header,
-						'server_content_source': gen_server_content_source,
-					}
+		"network_header": gen_network_header,
+		"network_source": gen_network_source,
+		"content_types_header": gen_content_types_header,
+		"client_content_header": gen_client_content_header,
+		"client_content_source": gen_client_content_source,
+		"server_content_header": gen_server_content_header,
+		"server_content_source": gen_server_content_source,
+	}
 
-	parser.add_argument('file_to_generate', choices=FUNCTION_MAP.keys())
+	parser.add_argument("file_to_generate", choices=FUNCTION_MAP.keys())
 	args = parser.parse_args()
 	FUNCTION_MAP[args.file_to_generate]()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
 	main()

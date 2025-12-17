@@ -4,14 +4,18 @@ import base64
 import binascii
 import secrets
 
+
 def _crc32(bytes):
 	return binascii.crc32(bytes).to_bytes(4, "big")
+
 
 def _add_crc32(s):
 	return s + _urlsafe_encode(_crc32(s.encode("ascii")))
 
+
 def _urlsafe_encode(bytes):
 	return base64.urlsafe_b64encode(bytes).decode("ascii").rstrip("=")
+
 
 def _generate_token_impl():
 	token = secrets.token_urlsafe(22)
@@ -22,8 +26,10 @@ def _generate_token_impl():
 	mastersrv_token = _add_crc32(f"ddvc_{shared_prefix}{half_sha256}")
 	return user_token, mastersrv_token
 
+
 def _unwanted_token(token):
 	return "-" in token or token.count("_") > 1
+
 
 def generate_token(verbose=False):
 	while True:
@@ -33,6 +39,7 @@ def generate_token(verbose=False):
 		if _unwanted_token(user_token) or _unwanted_token(mastersrv_token):
 			continue
 		return user_token, mastersrv_token
+
 
 def main():
 	parser = argparse.ArgumentParser(description="Generate a community token for use with the mastersrv")
@@ -44,6 +51,7 @@ def main():
 		print()
 	print(f"user:      {user_token}")
 	print(f"mastersrv: {mastersrv_token}")
+
 
 if __name__ == "__main__":
 	main()

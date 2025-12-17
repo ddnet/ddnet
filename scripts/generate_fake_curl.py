@@ -9,19 +9,19 @@ os.chdir(os.path.dirname(__file__) + "/..")
 PATH = "src/"
 
 
-CURL_RE=re.compile(r"\bcurl_\w*")
+CURL_RE = re.compile(r"\bcurl_\w*")
+
 
 def get_curl_calls(path):
 	names = set()
 	for directory, _, files in os.walk(path):
 		for filename in files:
-			if (filename.endswith(".cpp") or
-					filename.endswith(".c") or
-					filename.endswith(".h")):
+			if filename.endswith(".cpp") or filename.endswith(".c") or filename.endswith(".h"):
 				with open(os.path.join(directory, filename), encoding="utf-8") as f:
 					contents = f.read()
 				names = names.union(CURL_RE.findall(contents))
 	return names
+
 
 def assembly_source(names):
 	names = sorted(names)
@@ -34,8 +34,10 @@ def assembly_source(names):
 		result.append(f"{name}:")
 	return "\n".join(result + [""])
 
-DEFAULT_OUTPUT="libcurl.so"
-DEFAULT_SONAME="libcurl.so.4"
+
+DEFAULT_OUTPUT = "libcurl.so"
+DEFAULT_SONAME = "libcurl.so.4"
+
 
 def main():
 	p = argparse.ArgumentParser(description="Create a stub shared object for linking")
@@ -59,16 +61,22 @@ def main():
 			print(f"using {f.name} as temporary file")
 		f.write(assembly_source(functions))
 		f.flush()
-		subprocess.check_call([
-			"cc",
-		] + extra_link_args + [
-			"-shared",
-			"-nostdlib", # don't need to link to libc
-			f"-Wl,-soname,{args.soname}",
-			"-o", args.output,
-			f.name,
-		])
+		subprocess.check_call(
+			[
+				"cc",
+			]
+			+ extra_link_args
+			+ [
+				"-shared",
+				"-nostdlib",  # don't need to link to libc
+				f"-Wl,-soname,{args.soname}",
+				"-o",
+				args.output,
+				f.name,
+			]
+		)
 		subprocess.check_call(["strip", args.output])
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
 	main()

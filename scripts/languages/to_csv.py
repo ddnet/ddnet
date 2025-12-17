@@ -4,6 +4,7 @@ import csv
 import os
 import twlang
 
+
 def main():
 	parser = argparse.ArgumentParser(description="Convert DDNet translation files into Weblate CSV files in the specified directory.")
 	parser.add_argument("out_dir", metavar="OUT_DIR", help="Directory to output the Weblate CSV files in")
@@ -25,6 +26,7 @@ def main():
 					"context": context,
 					"target": translation,
 				})
+
 
 if __name__ == "__main__":
 	main()
