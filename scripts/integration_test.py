@@ -244,7 +244,7 @@ add_path {relpath(self.runner.data_dir, tmp_dir)}
 			self.processes.pop().wait()
 
 	def check_valgrind_memcheck_errors(self):
-		if any(any("== ERROR SUMMARY: " in line and not "== ERROR SUMMARY: 0" in line for line in stderr) for stderr in self.full_stderrs):
+		if any(any("== ERROR SUMMARY: " in line and "== ERROR SUMMARY: 0" not in line for line in stderr) for stderr in self.full_stderrs):
 			return "\n".join(line for stderr in self.full_stderrs for line in stderr if line.startswith("=="))
 		return None
 

@@ -37,7 +37,7 @@ def find_config_variables(config_variables):
 		for file in files:
 			if not variables_not_found:
 				break
-			if file.endswith((".cpp", ".h")) and not "external" in root:
+			if file.endswith((".cpp", ".h")) and "external" not in root:
 				filepath = os.path.join(root, file)
 				with open(filepath, "r", encoding="utf-8") as f:
 					content = f.read()
