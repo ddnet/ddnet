@@ -766,7 +766,7 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 
 	float Diff = absolute(Time - pData->m_BestTime);
 
-	if(Time - pData->m_BestTime < 0)
+	if(Diff < 0)
 	{
 		// new record \o/
 		pData->m_RecordStopTick = Server()->Tick() + Server()->TickSpeed();
