@@ -484,12 +484,13 @@ void CPlayer::Snap(int SnappingClient)
 	// set precise finish time instead of timescore
 	if(m_Score.has_value() && (!g_Config.m_SvHideScore || SnappingClient == m_ClientId))
 	{
-		float Seconds, Millis;
-		Millis = std::modf(GameServer()->Score()->PlayerData(m_ClientId)->m_BestTime, &Seconds);
-		Millis = std::floor(Millis * 1000.0f);
+		// same as in str_time_float
+		int64_t TimeMilliseconds = static_cast<int64_t>(std::roundf(GameServer()->Score()->PlayerData(m_ClientId)->m_BestTime * 1000.0f));
+		int Seconds = static_cast<int>(TimeMilliseconds / 1000);
+		int Millis = static_cast<int>(TimeMilliseconds % 1000);
 
-		pDDNetPlayer->m_FinishTimeSeconds = static_cast<int>(Seconds);
-		pDDNetPlayer->m_FinishTimeMillis = static_cast<int>(Millis);
+		pDDNetPlayer->m_FinishTimeSeconds = Seconds;
+		pDDNetPlayer->m_FinishTimeMillis = Millis;
 	}
 	else
 	{
