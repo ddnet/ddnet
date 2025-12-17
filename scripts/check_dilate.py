@@ -10,7 +10,7 @@ def check_file(dilate_path, filename):
 		with subprocess.Popen(
 			[executable_path, "--dry-run", filename],
 			stdout=subprocess.PIPE,
-			stderr=subprocess.PIPE
+			stderr=subprocess.PIPE,
 		) as process:
 			process.communicate()
 			not_dilated = process.returncode != 0

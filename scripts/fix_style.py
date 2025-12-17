@@ -17,7 +17,7 @@ IGNORE_FILES = [
 ]
 IGNORE_DIRS = [
 	"src/game/generated",
-	"src/rust-bridge"
+	"src/rust-bridge",
 ]
 def filter_ignored(filenames):
 	result = []
@@ -37,7 +37,8 @@ def find_clang_format(version):
 	for binary in (
 		"clang-format",
 		f"clang-format-{version}",
-		f"/opt/clang-format-static/clang-format-{version}"):
+		f"/opt/clang-format-static/clang-format-{version}",
+	):
 		try:
 			out = subprocess.check_output([binary, "--version"])
 		except FileNotFoundError:

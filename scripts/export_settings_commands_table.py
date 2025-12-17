@@ -172,43 +172,43 @@ def export_settings_commands_table():
 		+ "\n" +
 		export_commands(
 			[command for command in commands if "CFGFLAG_SERVER" in command['flags'] and "CFGFLAG_GAME" in command['flags']]
-		)
+		),
 	)
 
 	export_block("Server Settings",
 		export_settings(
 			[setting for setting in settings if "CFGFLAG_SERVER" in setting['flags']]
-		)
+		),
 	)
 
 	export_block("Econ Settings",
 		export_settings(
 			[setting for setting in settings if "CFGFLAG_ECON" in setting['flags']]
-		)
+		),
 	)
 
 	export_block("Server Commands",
 		export_commands(
 			[command for command in commands if "CFGFLAG_SERVER" in command['flags'] and "CFGFLAG_CHAT" not in command['flags']]
-		)
+		),
 	)
 
 	export_block("Chat Commands",
 		export_commands(
 			[command for command in commands if "CFGFLAG_SERVER" in command['flags'] and "CFGFLAG_CHAT" in command['flags']]
-		)
+		),
 	)
 
 	export_block("Client Settings",
 		export_settings(
 			[setting for setting in settings if "CFGFLAG_CLIENT" in setting['flags']]
-		)
+		),
 	)
 
 	export_block("Client Commands",
 		export_commands(
 			[command for command in commands if "CFGFLAG_CLIENT" in command['flags']]
-		)
+		),
 	)
 
 	export_block("Tunings",
@@ -216,7 +216,7 @@ def export_settings_commands_table():
 			parse_tunings(
 				read_files("src/game/tuning.h")
 			)
-		)
+		),
 	)
 
 if __name__ == "__main__":
