@@ -24,7 +24,7 @@ jobs:
         sudo apt-get update -y
         sudo apt-get install ddnet-tools shellcheck tidy pkg-config cmake doxygen graphviz ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev python3-clang libvulkan-dev glslang-tools spirv-tools libglew-dev -y
         rustup default stable
-        pip3 install pylint
+        pip3 install ruff
         wget https://github.com/muttleyxd/clang-tools-static-binaries/releases/download/master-796e77c/clang-format-20_linux-amd64
         echo "bbb30a777d075dfbe91aa146a1ea1fa0c1d4745efa9c5490ebf9f5a7a7dec679c22f1c6015d5c85cb5b5b22964d86ae65002f1d4145bfdd7f27022d981b58979  clang-format-20_linux-amd64" | sha512sum -c
         mv clang-format-20_linux-amd64 ~/.local/bin/clang-format
@@ -60,10 +60,15 @@ jobs:
     - name: Shell format (shfmt)
       run: find . -type f -name '*.sh' -print0 | xargs -0 shfmt -d
 
-    - name: Pylint
+    - name: Check Python code style (ruff format)
       run: |
-        pylint --version
-        find . -type f -name "*.py" -not -path './ddnet-libs/*' -not -path './googletest-src/*' -print0 | xargs -0 pylint --disable=no-else-raise,no-else-return,redefined-builtin,redefined-outer-name
+        ruff --version
+        ruff format
+
+    - name: Check Python code style (ruff check)
+      run: |
+        ruff --version
+        ruff check
 
     - name: Check header guards
       run: scripts/check_header_guards.py

@@ -1,0 +1,21 @@
+include = [
+    "datasrc/**.py",
+    "scripts/**.py",
+]
+exclude = [
+    "datasrc/network.py", # TODO: makes formatting worse
+    "datasrc/seven/**.py", # don't touch, mostly copied from 0.7
+]
+
+indent-width = 8
+line-length = 320
+target-version = "py39"
+
+[format]
+indent-style = "tab"
+preview = true # allow complex single line arguments to start on the same line, like `fn({`
+
+[lint]
+ignore = [
+    "E741", # ambiguous-variable-name: prohibits `l` as variable name
+]
