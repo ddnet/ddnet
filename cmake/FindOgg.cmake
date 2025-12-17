@@ -24,6 +24,7 @@ find_package_handle_standard_args(Ogg DEFAULT_MSG OGG_INCLUDEDIR)
 mark_as_advanced(OGG_INCLUDEDIR OGG_LIBRARY)
 
 if(OGG_FOUND)
+  is_bundled(OGG_BUNDLED "${OGG_LIBRARY}")
   set(OGG_INCLUDE_DIRS ${OGG_INCLUDEDIR})
   if(OGG_LIBRARY)
     set(OGG_LIBRARIES ${OGG_LIBRARY})
