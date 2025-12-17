@@ -741,19 +741,19 @@ void CGameTeams::OnTeamFinish(int Team, CPlayer **Players, unsigned int Size, in
 		GameServer()->Score()->SaveTeamScore(Team, aPlayerCids, Size, TimeTicks, pTimestamp);
 }
 
-void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp)
+void CGameTeams::OnFinish(CPlayer *pPlayer, int TimeTicks, const char *pTimestamp)
 {
-	if(!Player || !Player->IsPlaying())
+	if(!pPlayer || !pPlayer->IsPlaying())
 		return;
 
 	float Time = TimeTicks / (float)Server()->TickSpeed();
 
 	// TODO:DDRace:btd: this ugly
-	const int ClientId = Player->GetCid();
+	const int ClientId = pPlayer->GetCid();
 	CPlayerData *pData = GameServer()->Score()->PlayerData(ClientId);
 
 	char aBuf[128];
-	SetLastTimeCp(Player, -1);
+	SetLastTimeCp(pPlayer, -1);
 	// Note that the "finished in" message is parsed by the client
 	str_format(aBuf, sizeof(aBuf),
 		"%s finished in: %d minute(s) %5.2f second(s)",
@@ -816,7 +816,7 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 	if(!pData->m_BestTime || Time < pData->m_BestTime)
 	{
 		// update the score
-		pData->Set(Time, GetCurrentTimeCp(Player));
+		pData->Set(Time, GetCurrentTimeCp(pPlayer));
 		CallSaveScore = true;
 		NeedToSendNewPersonalRecord = true;
 	}
@@ -824,7 +824,7 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 	if(CallSaveScore)
 		if(g_Config.m_SvNamelessScore || !str_startswith(Server()->ClientName(ClientId), "nameless tee"))
 			GameServer()->Score()->SaveScore(ClientId, TimeTicks, pTimestamp,
-				GetCurrentTimeCp(Player), Player->m_NotEligibleForFinish);
+				GetCurrentTimeCp(pPlayer), pPlayer->m_NotEligibleForFinish);
 
 	bool NeedToSendNewServerRecord = false;
 	// update server best time
@@ -842,7 +842,7 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 		}
 	}
 
-	SetDDRaceState(Player, ERaceState::FINISHED);
+	SetDDRaceState(pPlayer, ERaceState::FINISHED);
 	if(NeedToSendNewServerRecord)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
@@ -853,19 +853,19 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 			}
 		}
 	}
-	if(!NeedToSendNewServerRecord && NeedToSendNewPersonalRecord && Player->GetClientVersion() >= VERSION_DDRACE)
+	if(!NeedToSendNewServerRecord && NeedToSendNewPersonalRecord && pPlayer->GetClientVersion() >= VERSION_DDRACE)
 	{
 		GameServer()->SendRecord(ClientId);
 	}
 
 	int TTime = (int)Time;
-	if(!Player->m_Score.has_value() || TTime < Player->m_Score.value())
+	if(!pPlayer->m_Score.has_value() || TTime < pPlayer->m_Score.value())
 	{
-		Player->m_Score = TTime;
+		pPlayer->m_Score = TTime;
 	}
 
 	// Confetti
-	CCharacter *pChar = Player->GetCharacter();
+	CCharacter *pChar = pPlayer->GetCharacter();
 	m_pGameContext->CreateFinishEffect(pChar->m_Pos, pChar->TeamMask());
 }
 
