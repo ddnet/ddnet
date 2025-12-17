@@ -91,5 +91,5 @@ def translations(filename):
 
 
 def localizes():
-	englishlist = list(check_folder("src"))
-	return englishlist
+	english_list = list(check_folder("src"))
+	return english_list

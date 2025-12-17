@@ -5,16 +5,16 @@ import binascii
 import secrets
 
 
-def _crc32(bytes):
-	return binascii.crc32(bytes).to_bytes(4, "big")
+def _crc32(bytes_):
+	return binascii.crc32(bytes_).to_bytes(4, "big")
 
 
 def _add_crc32(s):
 	return s + _urlsafe_encode(_crc32(s.encode("ascii")))
 
 
-def _urlsafe_encode(bytes):
-	return base64.urlsafe_b64encode(bytes).decode("ascii").rstrip("=")
+def _urlsafe_encode(bytes_):
+	return base64.urlsafe_b64encode(bytes_).decode("ascii").rstrip("=")
 
 
 def _generate_token_impl():

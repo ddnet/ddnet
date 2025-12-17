@@ -105,13 +105,13 @@ YELLOW = "\x1b[33m"
 
 
 class TestRunner:
-	def __init__(self, ddnet, ddnet_server, ddnet_mastersrv, repo_dir, dir, valgrind_memcheck, keep_tmpdirs, timeout_multiplier):
+	def __init__(self, ddnet, ddnet_server, ddnet_mastersrv, repo_dir, test_dir, valgrind_memcheck, keep_tmpdirs, timeout_multiplier):
 		self.ddnet = ddnet
 		self.ddnet_server = ddnet_server
 		self.ddnet_mastersrv = ddnet_mastersrv
 		self.repo_dir = repo_dir
-		self.data_dir = os.path.join(dir, "data")
-		self.dir = dir
+		self.data_dir = os.path.join(test_dir, "data")
+		self.test_dir = test_dir
 		self.extra_env_vars = {}
 		self.keep_tmpdirs = keep_tmpdirs
 		self.timeout_multiplier = timeout_multiplier
@@ -120,13 +120,13 @@ class TestRunner:
 			self.timeout_multiplier *= 10
 
 	def run_test(self, test):
-		tmp_dir = tempfile.mkdtemp(prefix=f"integration_{test.name}_", dir=self.dir)
+		tmp_dir = tempfile.mkdtemp(prefix=f"integration_{test.name}_", dir=self.test_dir)
 		tmp_dir_cleanup = not self.keep_tmpdirs
 		try:
 			env = TestEnvironment(self, test.name, tmp_dir, timeout=test.timeout)
 			try:
 				test(env)
-			except Exception as e:  # pylint: disable=broad-exception-caught
+			except Exception as e:  # pylint: disable=broad-exception-caught  # noqa: BLE001
 				env.kill_all()
 				error = "".join(traceback.format_exception(type(e), e, e.__traceback__))
 				tmp_dir_cleanup = False
@@ -287,11 +287,11 @@ def run_timeout_thread(name, test_env, input_queue, output_queue):
 		while True:
 			timeout = param.remaining_duration(test_env) if param is not None else None
 			try:
-				id, param = input_queue.get(timeout=timeout)
+				id_, param = input_queue.get(timeout=timeout)
 			except queue.Empty:
-				output_queue.put(Timeout(id, param.description))
+				output_queue.put(Timeout(id_, param.description))
 				param = None
-				del id
+				del id_
 			# TODO: quit this thread
 
 	Thread(name=name, target=thread, daemon=True).start()
@@ -316,7 +316,7 @@ def run_test_timeout_thread(name, test_env, input_queue, param):
 
 class Runnable:
 	# pylint: disable=dangerous-default-value
-	def __init__(self, test_env, name, args, *, extra_env_vars={}, log_is_stderr=False, allow_unclean_exit=False):
+	def __init__(self, test_env, name, args, *, extra_env_vars={}, log_is_stderr=False, allow_unclean_exit=False):  # noqa: B006 mutable-default-arguments
 		self.name = name
 		cur_env_vars = dict(os.environ)
 		intersection = set(cur_env_vars) & (set(test_env.runner.extra_env_vars) | set(extra_env_vars))
@@ -413,7 +413,7 @@ def open_fifo(name):
 
 class Client(Runnable):
 	# pylint: disable=dangerous-default-value
-	def __init__(self, test_env, extra_args=[]):
+	def __init__(self, test_env, extra_args=[]):  # noqa: B006 mutable-default-arguments
 		name = f"client{test_env.num_clients}"
 		self.fifo_name = fifo_name(test_env, name)
 		# Delay opening the FIFO until the client has started, because it will
@@ -445,7 +445,7 @@ class Client(Runnable):
 
 class Server(Runnable):
 	# pylint: disable=dangerous-default-value
-	def __init__(self, test_env, extra_args=[]):
+	def __init__(self, test_env, extra_args=[]):  # noqa: B006 mutable-default-arguments
 		name = f"server{test_env.num_servers}"
 		self.fifo_name = fifo_name(test_env, name)
 		# Delay opening the FIFO until the server has started, because it will
@@ -488,7 +488,7 @@ class Server(Runnable):
 
 class Mastersrv(Runnable):
 	# pylint: disable=dangerous-default-value
-	def __init__(self, test_env, extra_args=[]):
+	def __init__(self, test_env, extra_args=[]):  # noqa: B006 mutable-default-arguments
 		name = f"mastersrv{test_env.num_mastersrvs}"
 		super().__init__(
 			test_env,
@@ -844,7 +844,7 @@ def main():
 		ddnet_server=ddnet_server,
 		ddnet_mastersrv=ddnet_mastersrv,
 		repo_dir=repo_dir,
-		dir=args.builddir,
+		test_dir=args.builddir,
 		valgrind_memcheck=args.valgrind_memcheck,
 		keep_tmpdirs=args.keep_tmpdirs,
 		timeout_multiplier=args.timeout_multiplier,

@@ -4,8 +4,8 @@ import csv
 def confusables():
 	with open("confusables.txt", encoding="utf-8-sig") as f:
 		# Filter comments
-		f = map(lambda line: line.split("#")[0], f)
-		return list(csv.DictReader(f, fieldnames=["Value", "Target", "Category"], delimiter=";"))
+		lines = (line.split("#")[0] for line in f)
+		return list(csv.DictReader(lines, fieldnames=["Value", "Target", "Category"], delimiter=";"))
 
 
 UNICODEDATA_FIELDS = (
