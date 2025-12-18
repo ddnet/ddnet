@@ -76,36 +76,36 @@ void CMapView::RenderEditorMap()
 	if(Editor()->m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->ShiftIsPressed() && !Input()->ModifierIsPressed() && Input()->KeyPress(KEY_G))
 	{
 		const bool AnyHidden =
-			!Editor()->m_Map.m_pGameLayer->m_Visible ||
-			(Editor()->m_Map.m_pFrontLayer && !Editor()->m_Map.m_pFrontLayer->m_Visible) ||
-			(Editor()->m_Map.m_pTeleLayer && !Editor()->m_Map.m_pTeleLayer->m_Visible) ||
-			(Editor()->m_Map.m_pSpeedupLayer && !Editor()->m_Map.m_pSpeedupLayer->m_Visible) ||
-			(Editor()->m_Map.m_pTuneLayer && !Editor()->m_Map.m_pTuneLayer->m_Visible) ||
-			(Editor()->m_Map.m_pSwitchLayer && !Editor()->m_Map.m_pSwitchLayer->m_Visible);
-		Editor()->m_Map.m_pGameLayer->m_Visible = AnyHidden;
-		if(Editor()->m_Map.m_pFrontLayer)
-			Editor()->m_Map.m_pFrontLayer->m_Visible = AnyHidden;
-		if(Editor()->m_Map.m_pTeleLayer)
-			Editor()->m_Map.m_pTeleLayer->m_Visible = AnyHidden;
-		if(Editor()->m_Map.m_pSpeedupLayer)
-			Editor()->m_Map.m_pSpeedupLayer->m_Visible = AnyHidden;
-		if(Editor()->m_Map.m_pTuneLayer)
-			Editor()->m_Map.m_pTuneLayer->m_Visible = AnyHidden;
-		if(Editor()->m_Map.m_pSwitchLayer)
-			Editor()->m_Map.m_pSwitchLayer->m_Visible = AnyHidden;
+			!Editor()->Map()->m_pGameLayer->m_Visible ||
+			(Editor()->Map()->m_pFrontLayer && !Editor()->Map()->m_pFrontLayer->m_Visible) ||
+			(Editor()->Map()->m_pTeleLayer && !Editor()->Map()->m_pTeleLayer->m_Visible) ||
+			(Editor()->Map()->m_pSpeedupLayer && !Editor()->Map()->m_pSpeedupLayer->m_Visible) ||
+			(Editor()->Map()->m_pTuneLayer && !Editor()->Map()->m_pTuneLayer->m_Visible) ||
+			(Editor()->Map()->m_pSwitchLayer && !Editor()->Map()->m_pSwitchLayer->m_Visible);
+		Editor()->Map()->m_pGameLayer->m_Visible = AnyHidden;
+		if(Editor()->Map()->m_pFrontLayer)
+			Editor()->Map()->m_pFrontLayer->m_Visible = AnyHidden;
+		if(Editor()->Map()->m_pTeleLayer)
+			Editor()->Map()->m_pTeleLayer->m_Visible = AnyHidden;
+		if(Editor()->Map()->m_pSpeedupLayer)
+			Editor()->Map()->m_pSpeedupLayer->m_Visible = AnyHidden;
+		if(Editor()->Map()->m_pTuneLayer)
+			Editor()->Map()->m_pTuneLayer->m_Visible = AnyHidden;
+		if(Editor()->Map()->m_pSwitchLayer)
+			Editor()->Map()->m_pSwitchLayer->m_Visible = AnyHidden;
 	}
 
-	for(auto &pGroup : Editor()->m_Map.m_vpGroups)
+	for(auto &pGroup : Editor()->Map()->m_vpGroups)
 	{
 		if(pGroup->m_Visible)
 			pGroup->Render();
 	}
 
 	// render the game, tele, speedup, front, tune and switch above everything else
-	if(Editor()->m_Map.m_pGameGroup->m_Visible)
+	if(Editor()->Map()->m_pGameGroup->m_Visible)
 	{
-		Editor()->m_Map.m_pGameGroup->MapScreen();
-		for(auto &pLayer : Editor()->m_Map.m_pGameGroup->m_vpLayers)
+		Editor()->Map()->m_pGameGroup->MapScreen();
+		for(auto &pLayer : Editor()->Map()->m_pGameGroup->m_vpLayers)
 		{
 			if(pLayer->m_Visible && pLayer->IsEntitiesLayer())
 				pLayer->Render();
