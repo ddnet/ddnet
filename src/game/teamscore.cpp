@@ -12,7 +12,7 @@ CTeamsCore::CTeamsCore()
 
 bool CTeamsCore::SameTeam(int ClientId1, int ClientId2) const
 {
-	return m_aTeam[ClientId1] == TEAM_SUPER || m_aTeam[ClientId2] == TEAM_SUPER || m_aTeam[ClientId1] == m_aTeam[ClientId2];
+	return m_aTeam[ClientId1] == m_aTeam[ClientId2];
 }
 
 int CTeamsCore::Team(int ClientId) const
