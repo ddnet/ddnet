@@ -1085,9 +1085,9 @@ void CGameContext::OnPreTickTeehistorian()
 		else
 			m_TeeHistorian.RecordPlayerTeam(i, 0);
 	}
-	for(int i = 0; i < NUM_DDRACE_TEAMS; i++)
+	for(int TeamId = 0; TeamId < NUM_DDRACE_TEAMS; TeamId++)
 	{
-		m_TeeHistorian.RecordTeamPractice(i, m_pController->Teams().IsPractice(i));
+		m_TeeHistorian.RecordTeamPractice(TeamId, m_pController->Teams().IsPractice(TeamId));
 	}
 }
 

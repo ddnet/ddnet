@@ -235,21 +235,21 @@ void CGameTeams::Tick()
 		}
 	}
 
-	for(int i = 0; i < NUM_DDRACE_TEAMS; i++)
+	for(int TeamId = 0; TeamId < NUM_DDRACE_TEAMS; TeamId++)
 	{
-		if(m_aTeamUnfinishableKillTick[i] == -1 || m_aTeamState[i] != ETeamState::STARTED_UNFINISHABLE)
+		if(m_aTeamUnfinishableKillTick[TeamId] == -1 || m_aTeamState[TeamId] != ETeamState::STARTED_UNFINISHABLE)
 		{
 			continue;
 		}
-		if(Now >= m_aTeamUnfinishableKillTick[i])
+		if(Now >= m_aTeamUnfinishableKillTick[TeamId])
 		{
-			if(m_aPractice[i])
+			if(m_aPractice[TeamId])
 			{
-				m_aTeamUnfinishableKillTick[i] = -1;
+				m_aTeamUnfinishableKillTick[TeamId] = -1;
 				continue;
 			}
-			GameServer()->SendChatTeam(i, "Your team was killed because it couldn't finish anymore and hasn't entered /practice mode");
-			KillTeam(i, -1);
+			GameServer()->SendChatTeam(TeamId, "Your team was killed because it couldn't finish anymore and hasn't entered /practice mode");
+			KillTeam(TeamId, -1);
 		}
 	}
 
@@ -1334,9 +1334,9 @@ void CGameTeams::ResetSavedTeam(int ClientId, int Team)
 
 std::optional<int> CGameTeams::GetFirstEmptyTeam() const
 {
-	for(int i = 1; i < NUM_DDRACE_TEAMS - 1; i++) // no TEAM_SUPER
-		if(m_aTeamState[i] == ETeamState::EMPTY)
-			return i;
+	for(int TeamId = 1; TeamId < NUM_DDRACE_TEAMS - 1; TeamId++) // no TEAM_SUPER
+		if(m_aTeamState[TeamId] == ETeamState::EMPTY)
+			return TeamId;
 	return std::nullopt;
 }
 
