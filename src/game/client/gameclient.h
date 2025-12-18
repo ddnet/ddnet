@@ -703,7 +703,6 @@ public:
 	void Echo(const char *pString) override;
 	bool IsOtherTeam(int ClientId) const;
 	int SwitchStateTeam() const;
-	bool IsLocalCharSuper() const;
 	bool CanDisplayWarning() const override;
 
 	IMap *Map() override { return m_pMap.get(); }
