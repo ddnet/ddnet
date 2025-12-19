@@ -1,5 +1,6 @@
 #include "fifo.h"
 
+#include <base/log.h>
 #include <base/system.h>
 #if defined(CONF_FAMILY_UNIX)
 
@@ -29,21 +30,21 @@ void CFifo::Init(IConsole *pConsole, const char *pFifoFile, int Flag)
 
 	if(!S_ISFIFO(Attribute.st_mode))
 	{
-		dbg_msg("fifo", "'%s' is not a fifo, removing", m_aFilename);
+		log_warn("fifo", "'%s' is not a fifo, removing", m_aFilename);
 		fs_remove(m_aFilename);
 		mkfifo(m_aFilename, 0600);
 		stat(m_aFilename, &Attribute);
 
 		if(!S_ISFIFO(Attribute.st_mode))
 		{
-			dbg_msg("fifo", "can't remove file '%s'", m_aFilename);
+			log_error("fifo", "can't remove file '%s'", m_aFilename);
 			return;
 		}
 	}
 
 	m_File = open(m_aFilename, O_RDONLY | O_NONBLOCK);
 	if(m_File < 0)
-		dbg_msg("fifo", "can't open file '%s'", m_aFilename);
+		log_error("fifo", "can't open file '%s'", m_aFilename);
 }
 
 void CFifo::Shutdown()
@@ -117,10 +118,10 @@ void CFifo::Init(IConsole *pConsole, const char *pFifoFile, int Flag)
 	{
 		const DWORD LastError = GetLastError();
 		const std::string ErrorMsg = windows_format_system_message(LastError);
-		dbg_msg("fifo", "failed to create named pipe '%s' (%ld %s)", m_aFilename, LastError, ErrorMsg.c_str());
+		log_error("fifo", "failed to create named pipe '%s' (%ld %s)", m_aFilename, LastError, ErrorMsg.c_str());
 	}
 	else
-		dbg_msg("fifo", "created named pipe '%s'", m_aFilename);
+		log_info("fifo", "created named pipe '%s'", m_aFilename);
 }
 
 void CFifo::Shutdown()
@@ -152,7 +153,7 @@ void CFifo::Update()
 		if(LastError != ERROR_PIPE_CONNECTED) // pipe already connected, not an error
 		{
 			const std::string ErrorMsg = windows_format_system_message(LastError);
-			dbg_msg("fifo", "failed to connect named pipe '%s' (%ld %s)", m_aFilename, LastError, ErrorMsg.c_str());
+			log_error("fifo", "failed to connect named pipe '%s' (%ld %s)", m_aFilename, LastError, ErrorMsg.c_str());
 			return;
 		}
 	}
@@ -172,7 +173,7 @@ void CFifo::Update()
 			else
 			{
 				const std::string ErrorMsg = windows_format_system_message(LastError);
-				dbg_msg("fifo", "failed to peek at pipe '%s' (%ld %s)", m_aFilename, LastError, ErrorMsg.c_str());
+				log_error("fifo", "failed to peek at pipe '%s' (%ld %s)", m_aFilename, LastError, ErrorMsg.c_str());
 			}
 			return;
 		}
@@ -185,7 +186,7 @@ void CFifo::Update()
 		{
 			const DWORD LastError = GetLastError();
 			const std::string ErrorMsg = windows_format_system_message(LastError);
-			dbg_msg("fifo", "failed to read from pipe '%s' (%ld %s)", m_aFilename, LastError, ErrorMsg.c_str());
+			log_error("fifo", "failed to read from pipe '%s' (%ld %s)", m_aFilename, LastError, ErrorMsg.c_str());
 			free(pBuf);
 			return;
 		}
