@@ -16,6 +16,12 @@ indent-style = "tab"
 preview = true # allow complex single line arguments to start on the same line, like `fn({`
 
 [lint]
+extend-select = [
+    "A", # detect shadowed builtins
+    "B006", # mutable default arguments
+    "BLE", # disallow catch-all exceptions
+]
+
 ignore = [
     "E741", # ambiguous-variable-name: prohibits `l` as variable name
 ]
