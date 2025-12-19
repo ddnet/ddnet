@@ -481,6 +481,7 @@ void CGameConsole::CInstance::GetCommand(const char *pInput, char (&aCmd)[IConso
 		m_CompletionCommandEnd = m_CompletionCommandStart + (End - Start);
 		aInput[m_CompletionCommandEnd] = '\0';
 	}
+	m_CompletionCommandStart = str_skip_whitespaces_const(aInput + m_CompletionCommandStart) - aInput;
 
 	str_copy(aCmd, aInput + m_CompletionCommandStart, sizeof(aCmd));
 }

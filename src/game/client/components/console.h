@@ -121,13 +121,13 @@ class CGameConsole : public CComponent
 
 		const char *GetString() const { return m_Input.GetString(); }
 		/**
-		 * Gets the command at the current cursor including surrounding spaces.
+		 * Gets the command at the current cursor including trailing spaces.
 		 * Commands are split by semicolons.
 		 *
 		 * So if the current console input is for example "hello; world ;foo"
 		 *                                                        ^
 		 *                   and the cursor is here  -------------/
-		 * The result would be " world "
+		 * The result would be "world "
 		 *
 		 * @param pInput the console input line
 		 * @param aCmd the command the cursor is at
