@@ -8,10 +8,10 @@ class CTargetSwitchData;
 class CTargetSwitch : public CEntity
 {
 public:
-	CTargetSwitch(CGameWorld *pGameWorld, int Id, const CTargetSwitchData *pData);
+	CTargetSwitch(CGameWorld *pGameWorld, int Id, const CNetObj_DDNetTargetSwitch *pData);
 
 	bool Match(const CTargetSwitch *pTarget) const;
-	void Read(const CTargetSwitchData *pData);
+	void Read(const CNetObj_DDNetTargetSwitch *pData);
 
 	void Reset();
 	void Tick() override;
