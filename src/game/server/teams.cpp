@@ -764,9 +764,9 @@ void CGameTeams::OnFinish(CPlayer *pPlayer, int TimeTicks, const char *pTimestam
 	else
 		GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1., CGameContext::FLAG_SIX);
 
-	float Diff = absolute(Time - pData->m_BestTime);
+	float Diff = absolute(Time - pData->m_BestTime.value_or(0.0f));
 
-	if(Time - pData->m_BestTime < 0)
+	if(Time - pData->m_BestTime.value_or(0.0f) < 0)
 	{
 		// new record \o/
 		pData->m_RecordStopTick = Server()->Tick() + Server()->TickSpeed();
@@ -783,7 +783,7 @@ void CGameTeams::OnFinish(CPlayer *pPlayer, int TimeTicks, const char *pTimestam
 		else
 			GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1, CGameContext::FLAG_SIX);
 	}
-	else if(pData->m_BestTime != 0) // tee has already finished?
+	else if(pData->m_BestTime.has_value()) // tee has already finished?
 	{
 		Server()->StopRecord(ClientId);
 
@@ -859,9 +859,10 @@ void CGameTeams::OnFinish(CPlayer *pPlayer, int TimeTicks, const char *pTimestam
 	}
 
 	int TTime = (int)Time;
-	if(!pPlayer->m_Score.has_value() || TTime < pPlayer->m_Score.value())
+	std::optional<float> Score = GameServer()->Score()->PlayerData(ClientId)->m_BestTime;
+	if(!Score.has_value() || TTime < Score.value())
 	{
-		pPlayer->m_Score = TTime;
+		Server()->SetClientScore(ClientId, TTime);
 	}
 
 	// Confetti

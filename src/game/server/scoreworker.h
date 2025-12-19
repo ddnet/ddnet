@@ -234,7 +234,7 @@ public:
 
 	void Reset()
 	{
-		m_BestTime = 0;
+		m_BestTime.reset();
 		for(float &BestTimeCp : m_aBestTimeCp)
 			BestTimeCp = 0;
 
@@ -254,7 +254,7 @@ public:
 			m_aBestTimeCp[i] = aTimeCp[i];
 	}
 
-	float m_BestTime;
+	std::optional<float> m_BestTime;
 	float m_aBestTimeCp[NUM_CHECKPOINTS];
 
 	int m_RecordStopTick;

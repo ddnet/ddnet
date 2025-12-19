@@ -14,6 +14,7 @@ public:
 
 	void HandleCharacterTiles(class CCharacter *pChr, int MapIndex) override;
 	void SetArmorProgress(CCharacter *pCharacter, int Progress) override;
+	int SnapPlayerScore(int SnappingClient, CPlayer *pPlayer) override;
 
 	void OnPlayerConnect(class CPlayer *pPlayer) override;
 	void OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason) override;

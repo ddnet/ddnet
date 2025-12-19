@@ -4,6 +4,8 @@
 
 #include <engine/server.h>
 #include <engine/shared/config.h>
+#include <engine/shared/protocol.h>
+#include <engine/shared/protocol7.h>
 
 #include <game/mapitems.h>
 #include <game/server/entities/character.h>
@@ -116,6 +118,37 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 void CGameControllerDDRace::SetArmorProgress(CCharacter *pCharacter, int Progress)
 {
 	pCharacter->SetArmor(std::clamp(10 - (Progress / 15), 0, 10));
+}
+
+int CGameControllerDDRace::SnapPlayerScore(int SnappingClient, CPlayer *pPlayer)
+{
+	bool HideScore = g_Config.m_SvHideScore && SnappingClient != pPlayer->GetCid();
+	std::optional<float> Score = GameServer()->Score()->PlayerData(pPlayer->GetCid())->m_BestTime;
+
+	if(Server()->IsSixup(SnappingClient))
+	{
+		if(!Score.has_value() || HideScore)
+			return protocol7::FinishTime::NOT_FINISHED;
+
+		// Times are in milliseconds for 0.7
+		return Score.value() * 1000.0f;
+	}
+
+	// This is the time sent to the player while ingame (do not confuse to the one reported to the master server).
+	// Due to clients expecting this as a negative value, we have to make sure it's negative.
+	// Special numbers:
+	// -9999 or FinishTime::NOT_FINISHED_TIMESCORE: means no time and isn't displayed in the scoreboard.
+	if(!Score.has_value() || HideScore)
+		return FinishTime::NOT_FINISHED_TIMESCORE;
+
+	// Times are in seconds for 0.6
+	int ScoreSeconds = Score.value();
+
+	// shift the time by a second if the player actually took 9999
+	// seconds to finish the map.
+	if(-ScoreSeconds == FinishTime::NOT_FINISHED_TIMESCORE)
+		return -ScoreSeconds - 1;
+	return -ScoreSeconds;
 }
 
 void CGameControllerDDRace::OnPlayerConnect(CPlayer *pPlayer)
