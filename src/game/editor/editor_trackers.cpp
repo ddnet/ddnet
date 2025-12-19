@@ -400,7 +400,7 @@ CSoundSourceOperationTracker::CSoundSourceOperationTracker(CEditorMap *pMap) :
 {
 }
 
-void CSoundSourceOperationTracker::Begin(CSoundSource *pSource, ESoundSourceOp Operation, int LayerIndex)
+void CSoundSourceOperationTracker::Begin(const CSoundSource *pSource, ESoundSourceOp Operation, int LayerIndex)
 {
 	if(m_TrackedOp == Operation || m_TrackedOp != ESoundSourceOp::OP_NONE)
 		return;
