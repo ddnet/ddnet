@@ -1719,6 +1719,10 @@ bool CScoreWorker::SaveTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 		if(NumInserted == 1)
 		{
 			pResult->m_Status = CScoreSaveResult::SAVE_SUCCESS;
+			if(UseGeneratedCode)
+			{
+				pResult->m_aCode[0] = '\0';
+			}
 			if(w != Write::NORMAL)
 			{
 				if(str_comp(pData->m_aServer, g_Config.m_SvSqlServerName) == 0)
