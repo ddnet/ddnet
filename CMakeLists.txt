@@ -2814,6 +2814,8 @@ if(SERVER)
     gamemodes/mod.h
     gameworld.cpp
     gameworld.h
+    interactions.cpp
+    interactions.h
     mutes.cpp
     player.cpp
     player.h
