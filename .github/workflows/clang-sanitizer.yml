@@ -13,6 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CARGO_HTTP_MULTIPLEXING: false
+      UBSAN_OPTIONS: suppressions=../ubsan.supp:log_path=SAN:print_stacktrace=1:halt_on_error=0
+      ASAN_OPTIONS: log_path=SAN:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1:detect_leaks=1:halt_on_error=0
+      LSAN_OPTIONS: suppressions=../lsan.supp
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -33,33 +36,59 @@ jobs:
         cd clang-sanitizer
         export CC=clang
         export CXX=clang++
-        export CXXFLAGS="-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer"
-        export CFLAGS="-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer"
-        cmake -DCMAKE_BUILD_TYPE=Debug -DHEADLESS_CLIENT=ON -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON ..
-        make -j"$(nproc)"
+        SAN_FLAGS="-fsanitize=address,undefined,leak -fsanitize-recover=all -fno-omit-frame-pointer -fno-common"
+        export CXXFLAGS="$SAN_FLAGS"
+        export CFLAGS="$SAN_FLAGS"
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DHEADLESS_CLIENT=ON -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON ..
+        cmake --build . --config Debug --target everything
 
     - name: Run server and headless client with ASan and UBSan
       run: |
         cd clang-sanitizer
-        export UBSAN_OPTIONS=suppressions=../ubsan.supp:log_path=SAN:print_stacktrace=1:halt_on_errors=0
-        export ASAN_OPTIONS=log_path=SAN:print_stacktrace=1:check_initialization_order=1:detect_leaks=1:halt_on_errors=0
-        export LSAN_OPTIONS=suppressions=../lsan.supp
-        ./DDNet "cl_download_skins 0;quit" || true
-        ./DDNet-Server shutdown || true
-        if test -n "$(find . -maxdepth 1 -name 'SAN.*' -print -quit)"
-        then
-          cat SAN.*
+        set +e
+        ./DDNet "cl_download_skins 0;quit"
+        client_result=$?
+        ./DDNet-Server shutdown
+        server_result=$?
+        set -e
+        if [ $client_result -ne 0 ]; then
+          echo -e "\033[31mFAILED: Client exit code $client_result\033[m"
+          failed=true
+        fi
+        if [ $server_result -ne 0 ]; then
+          echo -e "\033[31mFAILED: Server exit code $server_result\033[m"
+          failed=true
+        fi
+        san_files=$(find . -maxdepth 1 -type f -name 'SAN.*' -print -quit)
+        if [ -n "$san_files" ]; then
+          echo -e "\033[31mFAILED: Sanitizer errors:\033[m"
+          cat $san_files
+          failed=true
+        fi
+        if [ "$failed" = true ]; then
           exit 1
         fi
 
     - name: Run unit tests with ASan and UBSan
       run: |
         cd clang-sanitizer
-        cmake --build . --config Debug --target run_cxx_tests
+        set +e
         # Rust tests work locally, but still not in CI, even with the same directory
-        if test -n "$(find . -maxdepth 1 -name 'SAN.*' -print -quit)"
-        then
-          cat SAN.*
+        cmake --build . --config Debug --target run_cxx_tests
+        unit_test_result=$?
+        set -e
+        failed=false
+        if [ $unit_test_result -ne 0 ]; then
+          echo -e "\033[31mFAILED: Unit test exit code $unit_test_result\033[m"
+          failed=true
+        fi
+        san_files=$(find . -maxdepth 1 -type f -name 'SAN.*' -print -quit)
+        if [ -n "$san_files" ]; then
+          echo -e "\033[31mFAILED: Sanitizer errors:\033[m"
+          cat $san_files
+          failed=true
+        fi
+        if [ "$failed" = true ]; then
           exit 1
         fi
 
@@ -72,9 +101,21 @@ jobs:
     - name: Run integration tests with ASan and UBSan
       run: |
         cd clang-sanitizer
+        set +e
         python ../scripts/integration_test.py --test-mastersrv .
-        if test -n "$(find . -maxdepth 1 -name 'SAN.*' -print -quit)"
-        then
-          cat SAN.*
+        integration_test_result=$?
+        set -e
+        if [ $integration_test_result -ne 0 ]; then
+          echo -e "\033[31mFAILED: Integration test exit code $integration_test_result\033[m"
+          failed=true
+        fi
+        # TODO: This should be integrated into integration_test.py directly to log sanitizer errors for each test case individually
+        san_files=$(find . -maxdepth 2 -type f -path './integration_*/SAN.*' -print -quit)
+        if [ -n "$san_files" ]; then
+          echo -e "\033[31mFAILED: Sanitizer errors:\033[m"
+          cat $san_files
+          failed=true
+        fi
+        if [ "$failed" = true ]; then
           exit 1
         fi
