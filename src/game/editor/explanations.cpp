@@ -519,15 +519,15 @@ const char *CExplanations::ExplainDDNet(int Tile, int Layer)
 		break;
 	case ENTITY_OFFSET + ENTITY_TARGET_SWITCH_CLOSE:
 		if(Layer == LAYER_SWITCH)
-			return "TARGET CLOSE: When hit with any weapon (except pistol), activates switch with the same number.";
+			return "TARGET CLOSE: Activates switch with the same number when hit with any weapon (except pistol).";
 		break;
 	case ENTITY_OFFSET + ENTITY_TARGET_SWITCH_OPEN:
 		if(Layer == LAYER_SWITCH)
-			return "TARGET OPEN: When hit with any weapon (except pistol), deactivates switch with the same number.";
+			return "TARGET OPEN: Deactivates switch with the same number when hit with any weapon (except pistol).";
 		break;
 	case ENTITY_OFFSET + ENTITY_TARGET_SWITCH_ALTERNATE:
 		if(Layer == LAYER_SWITCH)
-			return "TARGET ALTERNATE: When hit with any weapon (except pistol), alternates state for switch the same number.";
+			return "TARGET ALTERNATE: Alternates state for switch with the same number when hit with any weapon (except pistol).";
 		break;
 	case TILE_TELE_GUN_ENABLE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)

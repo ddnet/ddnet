@@ -377,6 +377,7 @@ Objects = [
     
 	NetEventEx("TargetHit:Common", "targethit@netevent.ddnet.org", [
 		NetBool("m_Weakly"),
+		NetIntRange("m_ClientIdHitFrom", -1, 'MAX_CLIENTS-1'),
 	]),
 
 	NetObjectEx("MyOwnEvent", "my-own-event@heinrich5991.de", [

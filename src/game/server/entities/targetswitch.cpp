@@ -10,10 +10,10 @@
 #include <game/teamscore.h>
 
 // fills up an entire block to allow hammering thru a wall from any side
-static constexpr int gs_TargetSwitchSize = 30;
+static constexpr int TARGET_SWITCH_SIZE = 30;
 
 CTargetSwitch::CTargetSwitch(CGameWorld *pGameWorld, vec2 Pos, int Type, int Layer, int Number, int Flags, int Delay) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_TARGETSWITCH, Pos, gs_TargetSwitchSize)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_TARGETSWITCH, Pos, TARGET_SWITCH_SIZE)
 {
 	m_Core = vec2(0.0f, 0.0f);
 	m_Type = Type;
@@ -69,7 +69,7 @@ void CTargetSwitch::GetHit(int ClientId, bool Weakly, int ForcedTeam)
 
 	if(Weakly)
 	{
-		GameServer()->CreateTargetHit(m_Pos, true, Mask);
+		GameServer()->CreateTargetHit(m_Pos, true, ClientId, Mask);
 		return;
 	}
 
@@ -99,13 +99,13 @@ void CTargetSwitch::GetHit(int ClientId, bool Weakly, int ForcedTeam)
 	// Hitting this switch changed something, provide feedback
 	if(PreviousSwitchStatus != Switchers()[m_Number].m_aStatus[TeamHitFrom])
 	{
-		GameServer()->CreateTargetHit(m_Pos, false, Mask);
+		GameServer()->CreateTargetHit(m_Pos, false, ClientId, Mask);
 	}
 }
 
 void CTargetSwitch::Move()
 {
-	if(Server()->Tick() % (int)(Server()->TickSpeed() * 0.04f) == 0)
+	if(Server()->Tick() % 2 == 0)
 	{
 		GameServer()->Collision()->MoverSpeed(m_Pos.x, m_Pos.y, &m_Core);
 		m_Pos += m_Core;

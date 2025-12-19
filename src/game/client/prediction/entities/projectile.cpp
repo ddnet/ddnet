@@ -104,10 +104,22 @@ void CProjectile::Tick()
 		IsWeaponCollide = true;
 	}
 
-	if((((pTargetChr || pTargetTargetSwitch) &&
-		    (pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar || pTargetTargetSwitch)) ||
-		   Collide || GameLayerClipped(CurPos)) &&
-		!IsWeaponCollide)
+	bool HasEntityCollision = pTargetChr || pTargetTargetSwitch;
+	bool CanHitEntity = false;
+	if(HasEntityCollision)
+	{
+		if(pOwnerChar)
+		{
+			CanHitEntity = !pOwnerChar->GrenadeHitDisabled();
+		}
+		else
+		{
+			CanHitEntity = g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar || pTargetTargetSwitch;
+		}
+	}
+	bool ShouldCollide = (HasEntityCollision && CanHitEntity) || Collide || GameLayerClipped(CurPos);
+
+	if(ShouldCollide && !IsWeaponCollide)
 	{
 		if(m_Explosive && (!pTargetChr || (!m_Freeze || (m_Type == WEAPON_SHOTGUN && Collide))))
 		{
@@ -127,8 +139,8 @@ void CProjectile::Tick()
 			constexpr int TargetSwitchCooldown = 4;
 			if(m_TargetSwitchCollisionCooldown <= 0)
 			{
-				CEntity *apTargetEnts[MAX_CLIENTS];
-				Num = GameWorld()->FindEntities(CurPos, 1.0f, apTargetEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_TARGETSWITCH);
+				CEntity *apTargetEnts[TargetSwitch::MAX_TARGET_SWITCHES];
+				Num = GameWorld()->FindEntities(CurPos, 1.0f, apTargetEnts, TargetSwitch::MAX_TARGET_SWITCHES, CGameWorld::ENTTYPE_TARGETSWITCH);
 				if(Num > 0)
 				{
 					Collide = true;
@@ -137,11 +149,13 @@ void CProjectile::Tick()
 				for(int i = 0; i < Num; ++i)
 				{
 					auto *pTargetSwitch = static_cast<CTargetSwitch *>(apTargetEnts[i]);
-					if(pTargetSwitch && (m_Layer != LAYER_SWITCH))
+					if(pTargetSwitch && m_Layer != LAYER_SWITCH)
+					{
 						for(int TargetSwitchTeam = 0; TargetSwitchTeam < TEAM_SUPER; ++TargetSwitchTeam)
 						{
 							pTargetSwitch->GetHit(-1, m_Type == WEAPON_WORLD, TargetSwitchTeam);
 						}
+					}
 				}
 			}
 		}

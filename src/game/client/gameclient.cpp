@@ -1366,7 +1366,7 @@ void CGameClient::ProcessEvents()
 		const IClient::CSnapItem Item = Client()->SnapGetItem(SnapType, Index);
 
 		// TODO: We don't have enough info about us, others, to know a correct alpha or volume value.
-		const float Alpha = 1.0f;
+		float Alpha = 1.0f;
 		const float Volume = 1.0f;
 
 		if(Item.m_Type == NETEVENTTYPE_DAMAGEIND)
@@ -1427,7 +1427,15 @@ void CGameClient::ProcessEvents()
 		{
 			const CNetEvent_TargetHit *pEvent = (const CNetEvent_TargetHit *)Item.m_pData;
 			if(!pEvent->m_Weakly)
-				m_Effects.TargetHit(vec2(pEvent->m_X, pEvent->m_Y), Alpha);
+			{
+				if(pEvent->m_ClientIdHitFrom != -1 &&
+					IsOtherTeam(pEvent->m_ClientIdHitFrom))
+				{
+					Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
+				}
+
+				m_Effects.TargetHit(vec2(pEvent->m_X, pEvent->m_Y), Alpha, Volume);
+			}
 		}
 	}
 }
@@ -1634,11 +1642,11 @@ void CGameClient::OnNewSnapshot()
 		TempCore.Write(pCharacter);
 	};
 
+	ProcessEvents();
+
 	InvalidateSnapshot();
 
 	m_NewTick = true;
-
-	ProcessEvents();
 
 #ifdef CONF_DEBUG
 	if(g_Config.m_DbgStress)

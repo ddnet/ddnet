@@ -2481,8 +2481,6 @@ if(CLIENT)
     sixup_translate_snapshot.cpp
     skin.cpp
     skin.h
-    targetswitch_data.cpp
-    targetswitch_data.h
     ui.cpp
     ui.h
     ui_listbox.cpp

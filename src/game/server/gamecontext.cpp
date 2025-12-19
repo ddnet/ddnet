@@ -347,10 +347,10 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 		}
 	}
 
-	CEntity *apTargetEnts[MAX_CLIENTS];
+	CEntity *apTargetEnts[TargetSwitch::MAX_TARGET_SWITCHES];
 	// Targets need a bigger force to activate
 	Radius = 60.0f;
-	Num = m_World.FindEntities(Pos, Radius, apTargetEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_TARGETSWITCH);
+	Num = m_World.FindEntities(Pos, Radius, apTargetEnts, TargetSwitch::MAX_TARGET_SWITCHES, CGameWorld::ENTTYPE_TARGETSWITCH);
 	for(int i = 0; i < Num; i++)
 	{
 		auto *pTarget = static_cast<CTargetSwitch *>(apTargetEnts[i]);
@@ -407,7 +407,7 @@ void CGameContext::CreateFinishEffect(vec2 Pos, CClientMask Mask)
 	}
 }
 
-void CGameContext::CreateTargetHit(vec2 Pos, bool Weakly, CClientMask Mask)
+void CGameContext::CreateTargetHit(vec2 Pos, bool Weakly, int ClientIdHitFrom, CClientMask Mask)
 {
 	CNetEvent_TargetHit *pEvent = m_Events.Create<CNetEvent_TargetHit>(Mask);
 	if(pEvent)
@@ -415,6 +415,7 @@ void CGameContext::CreateTargetHit(vec2 Pos, bool Weakly, CClientMask Mask)
 		pEvent->m_X = (int)Pos.x;
 		pEvent->m_Y = (int)Pos.y;
 		pEvent->m_Weakly = Weakly;
+		pEvent->m_ClientIdHitFrom = ClientIdHitFrom;
 	}
 }
 
@@ -618,30 +619,7 @@ bool CGameContext::SnapTargetSwitch(const CSnapContext &Context, int SnapId, con
 		CompatPowerup = Switchers()[SwitchNumber].m_aStatus[GetDDRaceTeam(Context.ClientId())] ? POWERUP_HEALTH : POWERUP_ARMOR;
 		break;
 	}
-
-	if(Context.IsSixup())
-	{
-		protocol7::CNetObj_Pickup *pPickup = Server()->SnapNewItem<protocol7::CNetObj_Pickup>(SnapId);
-		if(!pPickup)
-			return false;
-
-		pPickup->m_X = (int)Pos.x;
-		pPickup->m_Y = (int)Pos.y;
-		pPickup->m_Type = PickupType_SixToSeven(CompatPowerup, 0);
-	}
-	else
-	{
-		CNetObj_Pickup *pPickup = Server()->SnapNewItem<CNetObj_Pickup>(SnapId);
-		if(!pPickup)
-			return false;
-
-		pPickup->m_X = (int)Pos.x;
-		pPickup->m_Y = (int)Pos.y;
-		pPickup->m_Type = CompatPowerup;
-		pPickup->m_Subtype = 0;
-	}
-
-	return true;
+	return SnapPickup(Context, SnapId, Pos, CompatPowerup, 0, SwitchNumber, Flags);
 }
 
 void CGameContext::CallVote(int ClientId, const char *pDesc, const char *pCmd, const char *pReason, const char *pChatmsg, const char *pSixupDesc)

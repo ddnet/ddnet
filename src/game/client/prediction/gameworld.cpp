@@ -18,7 +18,6 @@
 #include <game/client/laser_data.h>
 #include <game/client/pickup_data.h>
 #include <game/client/projectile_data.h>
-#include <game/client/targetswitch_data.h>
 #include <game/mapbugs.h>
 #include <game/mapitems.h>
 
@@ -387,10 +386,10 @@ void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage,
 			}
 	}
 
-	CEntity *apTargetEnts[MAX_CLIENTS];
+	CEntity *apTargetEnts[TargetSwitch::MAX_TARGET_SWITCHES];
 	// Targets need a bigger force to activate
 	Radius = 60.0f;
-	Num = FindEntities(Pos, Radius, apTargetEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_TARGETSWITCH);
+	Num = FindEntities(Pos, Radius, apTargetEnts, TargetSwitch::MAX_TARGET_SWITCHES, CGameWorld::ENTTYPE_TARGETSWITCH);
 	for(int i = 0; i < Num; i++)
 	{
 		auto *pTarget = static_cast<CTargetSwitch *>(apTargetEnts[i]);
@@ -610,14 +609,14 @@ void CGameWorld::NetObjAdd(int ObjId, int ObjType, const void *pObjData, const C
 	}
 	else if(ObjType == NETOBJTYPE_DDNETTARGETSWITCH && m_WorldConfig.m_PredictWeapons)
 	{
-		CTargetSwitchData Data = ExtractTargetSwitchInfo(pObjData);
-		CTargetSwitch NetTargetSwitch = CTargetSwitch(this, ObjId, &Data);
+		const CNetObj_DDNetTargetSwitch *pTargetSwitchNetObj = (const CNetObj_DDNetTargetSwitch *)pObjData;
+		CTargetSwitch NetTargetSwitch = CTargetSwitch(this, ObjId, pTargetSwitchNetObj);
 		if(CTargetSwitch *pTargetSwitch = (CTargetSwitch *)GetEntity(ObjId, ENTTYPE_TARGETSWITCH))
 		{
 			if(NetTargetSwitch.Match(pTargetSwitch))
 			{
 				pTargetSwitch->Keep();
-				pTargetSwitch->Read(&Data);
+				pTargetSwitch->Read(pTargetSwitchNetObj);
 				return;
 			}
 		}
@@ -792,9 +791,9 @@ CEntity *CGameWorld::FindMatch(int ObjId, int ObjType, const void *pObjData)
 	}
 	case NETOBJTYPE_DDNETTARGETSWITCH:
 	{
-		CTargetSwitchData Data = ExtractTargetSwitchInfo(pObjData);
+		const CNetObj_DDNetTargetSwitch *pTargetSwitchNetObj = (const CNetObj_DDNetTargetSwitch *)pObjData;
 		CTargetSwitch *pEnt = (CTargetSwitch *)GetEntity(ObjId, ENTTYPE_TARGETSWITCH);
-		if(pEnt && CTargetSwitch(this, ObjId, &Data).Match(pEnt))
+		if(pEnt && CTargetSwitch(this, ObjId, pTargetSwitchNetObj).Match(pEnt))
 		{
 			return pEnt;
 		}

@@ -182,9 +182,9 @@ void CCharacter::HandleNinja()
 				pChr->TakeDamage(vec2(0, -10.0f), g_pData->m_Weapons.m_Ninja.m_pBase->m_Damage, GetCid(), WEAPON_NINJA);
 			}
 
-			CEntity *apTargetEnts[MAX_CLIENTS];
+			CEntity *apTargetEnts[TargetSwitch::MAX_TARGET_SWITCHES];
 			Radius = GetProximityRadius() * 2.0f;
-			Num = GameWorld()->FindEntities(OldPos, Radius, apTargetEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_TARGETSWITCH);
+			Num = GameWorld()->FindEntities(OldPos, Radius, apTargetEnts, TargetSwitch::MAX_TARGET_SWITCHES, CGameWorld::ENTTYPE_TARGETSWITCH);
 
 			for(int i = 0; i < Num; ++i)
 			{
@@ -378,9 +378,9 @@ void CCharacter::FireWeapon()
 			Hits++;
 		}
 
-		CEntity *apTargetEnts[MAX_CLIENTS];
+		CEntity *apTargetEnts[TargetSwitch::MAX_TARGET_SWITCHES];
 		Num = GameWorld()->FindEntities(ProjStartPos, GetProximityRadius() * 0.5f, apTargetEnts,
-			MAX_CLIENTS, CGameWorld::ENTTYPE_TARGETSWITCH);
+			TargetSwitch::MAX_TARGET_SWITCHES, CGameWorld::ENTTYPE_TARGETSWITCH);
 
 		for(int i = 0; i < Num; ++i)
 		{

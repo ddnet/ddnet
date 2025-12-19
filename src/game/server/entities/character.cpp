@@ -378,9 +378,9 @@ void CCharacter::HandleNinja()
 				pChr->TakeDamage(vec2(0, -10.0f), g_pData->m_Weapons.m_Ninja.m_pBase->m_Damage, m_pPlayer->GetCid(), WEAPON_NINJA);
 			}
 
-			CEntity *apTargetEnts[MAX_CLIENTS];
+			CEntity *apTargetEnts[TargetSwitch::MAX_TARGET_SWITCHES];
 			Radius = GetProximityRadius() * 2.0f;
-			Num = GameServer()->m_World.FindEntities(OldPos, Radius, apTargetEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_TARGETSWITCH);
+			Num = GameServer()->m_World.FindEntities(OldPos, Radius, apTargetEnts, TargetSwitch::MAX_TARGET_SWITCHES, CGameWorld::ENTTYPE_TARGETSWITCH);
 
 			for(int i = 0; i < Num; ++i)
 			{
@@ -388,9 +388,9 @@ void CCharacter::HandleNinja()
 
 				// make sure we haven't Hit this object before
 				bool AlreadyHit = false;
-				for(int j = 0; j < m_NumObjectsHit; j++)
+				for(int j = 0; j < m_NumTargetSwitchesHit; j++)
 				{
-					if(m_apHitObjects[j] == pTarget)
+					if(m_apHitTargetSwitches[j] == pTarget)
 						AlreadyHit = true;
 				}
 				if(AlreadyHit)
@@ -401,8 +401,8 @@ void CCharacter::HandleNinja()
 
 				// TODO: consider if this is good behavior
 				GameServer()->CreateSound(pTarget->m_Pos, SOUND_NINJA_HIT, TeamMask());
-				if(m_NumObjectsHit < 10)
-					m_apHitObjects[m_NumObjectsHit++] = pTarget;
+				dbg_assert(m_NumTargetSwitchesHit < TargetSwitch::MAX_TARGET_SWITCHES, "m_aHitTargetSwitches overflow");
+				m_apHitTargetSwitches[m_NumTargetSwitchesHit++] = pTarget;
 
 				pTarget->GetHit(m_pPlayer->GetCid());
 			}
