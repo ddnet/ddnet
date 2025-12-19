@@ -3948,7 +3948,8 @@ void CGameContext::RegisterDDRaceCommands()
 	Console()->Register("unweapons", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnWeapons, this, "Removes all weapons from you");
 	Console()->Register("ninja", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConNinja, this, "Makes you a ninja");
 	Console()->Register("unninja", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnNinja, this, "Removes ninja from you");
-	Console()->Register("super", "?i['0'|'1']", CFGFLAG_SERVER | CMDFLAG_TEST, ConToggleSuper, this, "Toggles super mode");
+	Console()->Register("super", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConSuper, this, "Makes you super");
+	Console()->Register("unsuper", "", CFGFLAG_SERVER, ConUnSuper, this, "Removes super from you");
 	Console()->Register("infinite_jump", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConEndlessJump, this, "Gives you infinite jump");
 	Console()->Register("uninfinite_jump", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnEndlessJump, this, "Removes infinite jump from you");
 	Console()->Register("endless_hook", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConEndlessHook, this, "Gives you endless hook");
