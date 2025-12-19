@@ -3753,9 +3753,9 @@ void CGameContext::ConVote(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
 	if(str_comp_nocase(pResult->GetString(0), "yes") == 0)
-		pSelf->ForceVote(pResult->m_ClientId, true);
+		pSelf->ForceVote(true);
 	else if(str_comp_nocase(pResult->GetString(0), "no") == 0)
-		pSelf->ForceVote(pResult->m_ClientId, false);
+		pSelf->ForceVote(false);
 }
 
 void CGameContext::ConVotes(IConsole::IResult *pResult, void *pUserData)
@@ -5249,7 +5249,7 @@ bool CGameContext::PlayerModerating() const
 	return std::any_of(std::begin(m_apPlayers), std::end(m_apPlayers), [](const CPlayer *pPlayer) { return pPlayer && pPlayer->m_Moderating; });
 }
 
-void CGameContext::ForceVote(int EnforcerId, bool Success)
+void CGameContext::ForceVote(bool Success)
 {
 	// check if there is a vote running
 	if(!m_VoteCloseTime)

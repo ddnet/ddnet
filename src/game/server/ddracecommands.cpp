@@ -166,6 +166,8 @@ void CGameContext::ConUnSuper(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConToggleInvincible(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
 	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
 	if(pChr)
 		pChr->SetInvincible(pResult->NumArguments() == 0 ? !pChr->Core()->m_Invincible : pResult->GetInteger(0));
@@ -427,6 +429,8 @@ void CGameContext::ConToCheckTeleporter(IConsole::IResult *pResult, void *pUserD
 void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
 	int Tele = pResult->NumArguments() == 2 ? pResult->GetInteger(0) : pResult->m_ClientId;
 	int TeleTo = pResult->NumArguments() ? pResult->GetInteger(pResult->NumArguments() - 1) : pResult->m_ClientId;
 	int AuthLevel = pSelf->Server()->GetAuthedState(pResult->m_ClientId);
@@ -547,15 +551,15 @@ void CGameContext::ConVoteNo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	pSelf->ForceVote(pResult->m_ClientId, false);
+	pSelf->ForceVote(false);
 }
 
 void CGameContext::ConDrySave(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
-
 	if(!pPlayer || !pSelf->Server()->IsRconAuthedAdmin(pResult->m_ClientId))
 		return;
 

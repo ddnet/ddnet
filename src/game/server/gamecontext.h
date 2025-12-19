@@ -395,7 +395,7 @@ public:
 	bool PlayerExists(int ClientId) const override { return m_apPlayers[ClientId]; }
 	// Returns true if someone is actively moderating.
 	bool PlayerModerating() const;
-	void ForceVote(int EnforcerId, bool Success);
+	void ForceVote(bool Success);
 
 	// Checks if player can vote and notify them about the reason
 	bool RateLimitPlayerVote(int ClientId);
