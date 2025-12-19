@@ -407,7 +407,7 @@ void CEffects::HammerHit(vec2 Pos, float Alpha, float Volume)
 		GameClient()->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_HAMMER_HIT, Volume, Pos);
 }
 
-void CEffects::TargetHit(vec2 Pos, float Alpha)
+void CEffects::TargetHit(vec2 Pos, float Alpha, float Volume)
 {
 	for(int i = 0; i < 8; i++)
 	{
@@ -423,13 +423,15 @@ void CEffects::TargetHit(vec2 Pos, float Alpha)
 		p.m_Rotspeed = 0.f;
 		p.m_Gravity = 0.f;
 		p.m_Friction = 0.45f;
-		p.m_StartAlpha = Alpha;
 		p.m_Collides = false;
 		p.m_FlowAffected = false;
+		p.m_Color = ColorRGBA(1.0f, 1.0f, 1.0f, Alpha);
+		p.m_StartAlpha = Alpha;
+		p.m_EndAlpha = Alpha;
 		GameClient()->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
-		if(g_Config.m_SndGame)
-			GameClient()->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_HIT, 1.0f, Pos);
 	}
+	if(g_Config.m_SndGame)
+		GameClient()->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_HIT, Alpha * Volume, Pos);
 }
 
 void CEffects::OnRender()

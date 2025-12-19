@@ -2,18 +2,17 @@
 
 #include "character.h"
 
-#include <game/client/targetswitch_data.h>
 #include <game/collision.h>
 #include <game/mapitems.h>
 
 // fills up an entire block to allow hammering thru a wall from any side
-static constexpr int gs_TargetSwitchSize = 30;
+static constexpr int TARGET_SWITCH_SIZE = 30;
 
-CTargetSwitch::CTargetSwitch(CGameWorld *pGameWorld, int Id, const CTargetSwitchData *pData) :
+CTargetSwitch::CTargetSwitch(CGameWorld *pGameWorld, int Id, const CNetObj_DDNetTargetSwitch *pData) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_TARGETSWITCH)
 {
 	m_Id = Id;
-	m_ProximityRadius = gs_TargetSwitchSize;
+	m_ProximityRadius = TARGET_SWITCH_SIZE;
 	m_Layer = LAYER_SWITCH;
 	m_Core = vec2(0.0f, 0.0f);
 
@@ -25,9 +24,9 @@ bool CTargetSwitch::Match(const CTargetSwitch *pTarget) const
 	return pTarget->m_Type == m_Type && pTarget->m_Number == m_Number && pTarget->m_Delay == m_Delay && pTarget->m_Flags == m_Flags;
 }
 
-void CTargetSwitch::Read(const CTargetSwitchData *pData)
+void CTargetSwitch::Read(const CNetObj_DDNetTargetSwitch *pData)
 {
-	m_Pos = pData->m_Pos;
+	m_Pos = vec2(pData->m_X, pData->m_Y);
 	m_Type = pData->m_Type;
 	m_Number = pData->m_SwitchNumber;
 	m_Delay = pData->m_SwitchDelay;
@@ -84,7 +83,7 @@ void CTargetSwitch::GetHit(int ClientId, bool Weakly, int ForcedTeam)
 }
 void CTargetSwitch::Move()
 {
-	if(GameWorld()->GameTick() % (int)(GameWorld()->GameTickSpeed() * 0.04f) == 0)
+	if(GameWorld()->GameTick() % 2 == 0)
 	{
 		Collision()->MoverSpeed(m_Pos.x, m_Pos.y, &m_Core);
 		m_Pos += m_Core;

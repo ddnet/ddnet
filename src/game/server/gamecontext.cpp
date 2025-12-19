@@ -346,10 +346,10 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 		}
 	}
 
-	CEntity *apTargetEnts[MAX_CLIENTS];
+	CEntity *apTargetEnts[MAX_TARGET_SWITCHES];
 	// Targets need a bigger force to activate
 	Radius = 60.0f;
-	Num = m_World.FindEntities(Pos, Radius, apTargetEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_TARGETSWITCH);
+	Num = m_World.FindEntities(Pos, Radius, apTargetEnts, MAX_TARGET_SWITCHES, CGameWorld::ENTTYPE_TARGETSWITCH);
 	for(int i = 0; i < Num; i++)
 	{
 		auto *pTarget = static_cast<CTargetSwitch *>(apTargetEnts[i]);
@@ -406,7 +406,7 @@ void CGameContext::CreateFinishEffect(vec2 Pos, CClientMask Mask)
 	}
 }
 
-void CGameContext::CreateTargetHit(vec2 Pos, bool Weakly, CClientMask Mask)
+void CGameContext::CreateTargetHit(vec2 Pos, bool Weakly, int ClientIdHitFrom, CClientMask Mask)
 {
 	CNetEvent_TargetHit *pEvent = m_Events.Create<CNetEvent_TargetHit>(Mask);
 	if(pEvent)
@@ -414,6 +414,7 @@ void CGameContext::CreateTargetHit(vec2 Pos, bool Weakly, CClientMask Mask)
 		pEvent->m_X = (int)Pos.x;
 		pEvent->m_Y = (int)Pos.y;
 		pEvent->m_Weakly = Weakly;
+		pEvent->m_ClientIdHitFrom = ClientIdHitFrom;
 	}
 }
 
