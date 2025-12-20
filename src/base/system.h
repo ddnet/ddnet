@@ -1402,13 +1402,13 @@ int fs_storage_path(const char *appname, char *path, int max);
  * @param buffer Buffer that will receive the path of the executable.
  * @param buffer_size Size of the buffer.
  *
- * @return Pointer to the buffer on success, `nullptr` on failure.
+ * @return `0` on success. Negative value on failure.
  *
  * @remark The executable name is included in the result
  *
  * @remark The strings are treated as null-terminated strings.
  */
-char *fs_executable_path(char *buffer, int buffer_size);
+int fs_executable_path(char *buffer, int buffer_size);
 
 /**
  * Checks if a file exists.

@@ -2456,23 +2456,23 @@ int fs_storage_path(const char *appname, char *path, int max)
 #endif
 }
 
-char *fs_executable_path(char *buffer, int buffer_size)
+int fs_executable_path(char *buffer, int buffer_size)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	wchar_t wide_path[IO_MAX_PATH_LENGTH];
 	if(GetModuleFileNameW(nullptr, wide_path, std::size(wide_path)) == 0 || GetLastError() != ERROR_SUCCESS)
 	{
 		buffer[0] = '\0';
-		return nullptr;
+		return -1;
 	}
 	const std::optional<std::string> path = windows_wide_to_utf8(wide_path);
 	if(!path.has_value())
 	{
 		buffer[0] = '\0';
-		return nullptr;
+		return -1;
 	}
 	str_copy(buffer, path.value().c_str(), buffer_size);
-	return buffer;
+	return 0;
 #elif defined(CONF_PLATFORM_MACOS)
 	// Get the size
 	uint32_t path_size = 0;
@@ -2483,18 +2483,18 @@ char *fs_executable_path(char *buffer, int buffer_size)
 	{
 		free(path);
 		buffer[0] = '\0';
-		return nullptr;
+		return -1;
 	}
 	char real_path[IO_MAX_PATH_LENGTH];
 	if(realpath(path, real_path) != nullptr) // _NSGetExecutablePath may return relative paths
 	{
 		free(path);
 		str_copy(buffer, real_path, buffer_size);
-		return buffer;
+		return 0;
 	}
 	free(path);
 	buffer[0] = '\0';
-	return nullptr;
+	return -1;
 #else
 	char path[IO_MAX_PATH_LENGTH];
 	static const char *NAMES[] = {
@@ -2513,11 +2513,11 @@ char *fs_executable_path(char *buffer, int buffer_size)
 				*deleted = '\0';
 			}
 			str_copy(buffer, path, buffer_size);
-			return buffer;
+			return 0;
 		}
 	}
 	buffer[0] = '\0';
-	return nullptr;
+	return -1;
 #endif
 }
 
