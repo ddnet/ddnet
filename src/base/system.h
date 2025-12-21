@@ -1395,7 +1395,7 @@ int fs_makedir_rec_for(const char *path);
 int fs_storage_path(const char *appname, char *path, int max);
 
 /**
- * Gets the absolute path to the executable
+ * Gets the absolute path to the executable.
  *
  * @ingroup Filesystem
  *
@@ -1404,7 +1404,7 @@ int fs_storage_path(const char *appname, char *path, int max);
  *
  * @return `0` on success. Negative value on failure.
  *
- * @remark The executable name is included in the result
+ * @remark The executable name is included in the result.
  *
  * @remark The strings are treated as null-terminated strings.
  */
