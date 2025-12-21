@@ -2507,10 +2507,10 @@ int fs_executable_path(char *buffer, int buffer_size)
 		if(ssize_t bytes_written = readlink(name, path, sizeof(path) - 1); bytes_written != -1)
 		{
 			path[bytes_written] = '\0'; // readlink does NOT null-terminate
-			// if the file gets deleted or replaced (not renamed) linux appends (deleted) to the symlink
-			if(char *deleted = strstr(path, " (deleted)"); deleted != nullptr)
+			// if the file gets deleted or replaced (not renamed) linux appends (deleted) to the symlink (see https://man7.org/linux/man-pages/man5/proc_pid_exe.5.html)
+			if(const char *deleted = str_endswith(path, " (deleted)"); deleted != nullptr)
 			{
-				*deleted = '\0';
+				path[deleted - path] = '\0';
 			}
 			str_copy(buffer, path, buffer_size);
 			return 0;
