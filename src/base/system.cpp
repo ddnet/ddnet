@@ -426,39 +426,15 @@ IOHANDLE io_stderr()
 
 IOHANDLE io_current_exe()
 {
-	// From https://stackoverflow.com/a/1024937.
-#if defined(CONF_FAMILY_WINDOWS)
-	wchar_t wide_path[IO_MAX_PATH_LENGTH];
-	if(GetModuleFileNameW(nullptr, wide_path, std::size(wide_path)) == 0 || GetLastError() != ERROR_SUCCESS)
+	char path[IO_MAX_PATH_LENGTH];
+	if(fs_executable_path(path, sizeof(path)) != 0)
 	{
 		return nullptr;
 	}
-	const std::optional<std::string> path = windows_wide_to_utf8(wide_path);
-	return path.has_value() ? io_open(path.value().c_str(), IOFLAG_READ) : nullptr;
-#elif defined(CONF_PLATFORM_MACOS)
-	char path[IO_MAX_PATH_LENGTH];
-	uint32_t path_size = sizeof(path);
-	if(_NSGetExecutablePath(path, &path_size))
+	else
 	{
-		return 0;
+		return io_open(path, IOFLAG_READ);
 	}
-	return io_open(path, IOFLAG_READ);
-#else
-	static const char *NAMES[] = {
-		"/proc/self/exe", // Linux, Android
-		"/proc/curproc/exe", // NetBSD
-		"/proc/curproc/file", // DragonFly
-	};
-	for(auto &name : NAMES)
-	{
-		IOHANDLE result = io_open(name, IOFLAG_READ);
-		if(result)
-		{
-			return result;
-		}
-	}
-	return 0;
-#endif
 }
 
 #define ASYNC_BUFSIZE (8 * 1024)
@@ -2458,6 +2434,7 @@ int fs_storage_path(const char *appname, char *path, int max)
 
 int fs_executable_path(char *buffer, int buffer_size)
 {
+	// https://stackoverflow.com/a/1024937
 #if defined(CONF_FAMILY_WINDOWS)
 	wchar_t wide_path[IO_MAX_PATH_LENGTH];
 	if(GetModuleFileNameW(nullptr, wide_path, std::size(wide_path)) == 0 || GetLastError() != ERROR_SUCCESS)
