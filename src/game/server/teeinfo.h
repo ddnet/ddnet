@@ -20,7 +20,7 @@ public:
 
 	CTeeInfo() = default;
 	CTeeInfo(const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet);
-	CTeeInfo(const char *apSkinPartNames[protocol7::NUM_SKINPARTS], int aUseCustomColors[protocol7::NUM_SKINPARTS], int aSkinPartColors[protocol7::NUM_SKINPARTS]);
+	CTeeInfo(const char *const apSkinPartNames[protocol7::NUM_SKINPARTS], const int aUseCustomColors[protocol7::NUM_SKINPARTS], const int aSkinPartColors[protocol7::NUM_SKINPARTS]);
 
 	void FromSixup();
 	void ToSixup();

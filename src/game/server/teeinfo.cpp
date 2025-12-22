@@ -33,7 +33,7 @@ static constexpr CStandardSkin STANDARD_SKINS[] = {
 	{"greensward", {"greensward", "duodonny", "", "standard", "standard", "standard"}, {true, true, false, false, false, false}, {5635840, -11141356, 65408, 65408, 65408, 65408}},
 };
 
-CTeeInfo::CTeeInfo(const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet)
+CTeeInfo::CTeeInfo(const char *const pSkinName, int UseCustomColor, int ColorBody, int ColorFeet)
 {
 	str_copy(m_aSkinName, pSkinName);
 	m_UseCustomColor = UseCustomColor;
@@ -41,7 +41,7 @@ CTeeInfo::CTeeInfo(const char *pSkinName, int UseCustomColor, int ColorBody, int
 	m_ColorFeet = ColorFeet;
 }
 
-CTeeInfo::CTeeInfo(const char *apSkinPartNames[protocol7::NUM_SKINPARTS], int aUseCustomColors[protocol7::NUM_SKINPARTS], int aSkinPartColors[protocol7::NUM_SKINPARTS])
+CTeeInfo::CTeeInfo(const char *const apSkinPartNames[protocol7::NUM_SKINPARTS], const int aUseCustomColors[protocol7::NUM_SKINPARTS], const int aSkinPartColors[protocol7::NUM_SKINPARTS])
 {
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
