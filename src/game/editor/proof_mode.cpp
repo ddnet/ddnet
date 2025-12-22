@@ -60,13 +60,13 @@ void CProofMode::ResetMenuBackgroundPositions()
 	std::array<vec2, CMenuBackground::NUM_POS> aBackgroundPositions = GenerateMenuBackgroundPositions();
 	m_vMenuBackgroundPositions.assign(aBackgroundPositions.begin(), aBackgroundPositions.end());
 
-	if(Editor()->m_Map.m_pGameLayer)
+	if(Editor()->Map()->m_pGameLayer)
 	{
-		for(int y = 0; y < Editor()->m_Map.m_pGameLayer->m_Height; ++y)
+		for(int y = 0; y < Editor()->Map()->m_pGameLayer->m_Height; ++y)
 		{
-			for(int x = 0; x < Editor()->m_Map.m_pGameLayer->m_Width; ++x)
+			for(int x = 0; x < Editor()->Map()->m_pGameLayer->m_Width; ++x)
 			{
-				CTile Tile = Editor()->m_Map.m_pGameLayer->GetTile(x, y);
+				CTile Tile = Editor()->Map()->m_pGameLayer->GetTile(x, y);
 				if(Tile.m_Index >= TILE_TIME_CHECKPOINT_FIRST && Tile.m_Index <= TILE_TIME_CHECKPOINT_LAST)
 				{
 					int ArrayIndex = std::clamp<int>((Tile.m_Index - TILE_TIME_CHECKPOINT_FIRST), 0, CMenuBackground::NUM_POS);
@@ -97,7 +97,7 @@ void CProofMode::RenderScreenSizes()
 	// render screen sizes
 	if(m_ProofBorders != PROOF_BORDER_OFF)
 	{
-		std::shared_ptr<CLayerGroup> pGameGroup = Editor()->m_Map.m_pGameGroup;
+		std::shared_ptr<CLayerGroup> pGameGroup = Editor()->Map()->m_pGameGroup;
 		pGameGroup->MapScreen();
 
 		Graphics()->TextureClear();

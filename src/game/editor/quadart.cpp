@@ -173,7 +173,7 @@ void CEditor::AddQuadArt(bool IgnoreHistory)
 	char aQuadArtName[IO_MAX_PATH_LENGTH];
 	IStorage::StripPathAndExtension(m_QuadArtParameters.m_aFilename, aQuadArtName, sizeof(aQuadArtName));
 
-	std::shared_ptr<CLayerGroup> pGroup = m_Map.NewGroup();
+	std::shared_ptr<CLayerGroup> pGroup = Map()->NewGroup();
 	str_copy(pGroup->m_aName, aQuadArtName);
 	pGroup->m_UseClipping = true;
 	pGroup->m_ClipX = -1;
@@ -181,7 +181,7 @@ void CEditor::AddQuadArt(bool IgnoreHistory)
 	pGroup->m_ClipH = std::ceil(m_QuadArtImageInfo.m_Height * 1.f * m_QuadArtParameters.m_QuadPixelSize / m_QuadArtParameters.m_ImagePixelSize) + 2;
 	pGroup->m_ClipW = std::ceil(m_QuadArtImageInfo.m_Width * 1.f * m_QuadArtParameters.m_QuadPixelSize / m_QuadArtParameters.m_ImagePixelSize) + 2;
 
-	std::shared_ptr<CLayerQuads> pLayer = std::make_shared<CLayerQuads>(&m_Map);
+	std::shared_ptr<CLayerQuads> pLayer = std::make_shared<CLayerQuads>(Map());
 	str_copy(pLayer->m_aName, aQuadArtName);
 	pGroup->AddLayer(pLayer);
 	pLayer->m_Flags |= LAYERFLAG_DETAIL;
@@ -190,9 +190,9 @@ void CEditor::AddQuadArt(bool IgnoreHistory)
 	QuadArt.Create(pLayer);
 
 	if(!IgnoreHistory)
-		m_Map.m_EditorHistory.RecordAction(std::make_shared<CEditorActionQuadArt>(&m_Map, m_QuadArtParameters));
+		Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionQuadArt>(Map(), m_QuadArtParameters));
 
-	m_Map.OnModify();
+	Map()->OnModify();
 	OnDialogClose();
 }
 

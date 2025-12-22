@@ -59,7 +59,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	static CListBox s_ListBox;
 	s_ListBox.SetActive(!m_MapSettingsCommandContext.m_DropdownContext.m_ListBox.Active() && m_Dialog == DIALOG_NONE && !Ui()->IsPopupOpen());
 
-	bool GotSelection = s_ListBox.Active() && s_CommandSelectedIndex >= 0 && (size_t)s_CommandSelectedIndex < m_Map.m_vSettings.size();
+	bool GotSelection = s_ListBox.Active() && s_CommandSelectedIndex >= 0 && (size_t)s_CommandSelectedIndex < Map()->m_vSettings.size();
 	const bool CurrentInputValid = m_MapSettingsCommandContext.Valid(); // Use the context to validate the input
 
 	CUIRect ToolBar, Button, Label, List, DragBar;
@@ -78,31 +78,31 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	static int s_DeleteButton = 0;
 	if(DoButton_FontIcon(&s_DeleteButton, FONT_ICON_TRASH, GotSelection ? 0 : -1, &Button, BUTTONFLAG_LEFT, "[Delete] Delete the selected command from the command list.", IGraphics::CORNER_ALL, 9.0f) || (GotSelection && CLineInput::GetActiveInput() == nullptr && m_Dialog == DIALOG_NONE && Ui()->ConsumeHotkey(CUi::HOTKEY_DELETE)))
 	{
-		m_Map.m_ServerSettingsHistory.RecordAction(std::make_shared<CEditorCommandAction>(&m_Map, CEditorCommandAction::EType::DELETE, &s_CommandSelectedIndex, s_CommandSelectedIndex, m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand));
+		Map()->m_ServerSettingsHistory.RecordAction(std::make_shared<CEditorCommandAction>(Map(), CEditorCommandAction::EType::DELETE, &s_CommandSelectedIndex, s_CommandSelectedIndex, Map()->m_vSettings[s_CommandSelectedIndex].m_aCommand));
 
-		m_Map.m_vSettings.erase(m_Map.m_vSettings.begin() + s_CommandSelectedIndex);
-		if(s_CommandSelectedIndex >= (int)m_Map.m_vSettings.size())
-			s_CommandSelectedIndex = m_Map.m_vSettings.size() - 1;
+		Map()->m_vSettings.erase(Map()->m_vSettings.begin() + s_CommandSelectedIndex);
+		if(s_CommandSelectedIndex >= (int)Map()->m_vSettings.size())
+			s_CommandSelectedIndex = Map()->m_vSettings.size() - 1;
 		if(s_CommandSelectedIndex >= 0)
-			m_SettingsCommandInput.Set(m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand);
+			m_SettingsCommandInput.Set(Map()->m_vSettings[s_CommandSelectedIndex].m_aCommand);
 		else
 			m_SettingsCommandInput.Clear();
-		m_Map.OnModify();
+		Map()->OnModify();
 		m_MapSettingsCommandContext.Update();
 		s_ListBox.ScrollToSelected();
 	}
 
 	// move down button
 	ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
-	const bool CanMoveDown = GotSelection && s_CommandSelectedIndex < (int)m_Map.m_vSettings.size() - 1;
+	const bool CanMoveDown = GotSelection && s_CommandSelectedIndex < (int)Map()->m_vSettings.size() - 1;
 	static int s_DownButton = 0;
 	if(DoButton_FontIcon(&s_DownButton, FONT_ICON_SORT_DOWN, CanMoveDown ? 0 : -1, &Button, BUTTONFLAG_LEFT, "[Alt+Down] Move the selected command down.", IGraphics::CORNER_R, 11.0f) || (CanMoveDown && Input()->AltIsPressed() && Ui()->ConsumeHotkey(CUi::HOTKEY_DOWN)))
 	{
-		m_Map.m_ServerSettingsHistory.RecordAction(std::make_shared<CEditorCommandAction>(&m_Map, CEditorCommandAction::EType::MOVE_DOWN, &s_CommandSelectedIndex, s_CommandSelectedIndex));
+		Map()->m_ServerSettingsHistory.RecordAction(std::make_shared<CEditorCommandAction>(Map(), CEditorCommandAction::EType::MOVE_DOWN, &s_CommandSelectedIndex, s_CommandSelectedIndex));
 
-		std::swap(m_Map.m_vSettings[s_CommandSelectedIndex], m_Map.m_vSettings[s_CommandSelectedIndex + 1]);
+		std::swap(Map()->m_vSettings[s_CommandSelectedIndex], Map()->m_vSettings[s_CommandSelectedIndex + 1]);
 		s_CommandSelectedIndex++;
-		m_Map.OnModify();
+		Map()->OnModify();
 		s_ListBox.ScrollToSelected();
 	}
 
@@ -113,32 +113,32 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	static int s_UpButton = 0;
 	if(DoButton_FontIcon(&s_UpButton, FONT_ICON_SORT_UP, CanMoveUp ? 0 : -1, &Button, BUTTONFLAG_LEFT, "[Alt+Up] Move the selected command up.", IGraphics::CORNER_L, 11.0f) || (CanMoveUp && Input()->AltIsPressed() && Ui()->ConsumeHotkey(CUi::HOTKEY_UP)))
 	{
-		m_Map.m_ServerSettingsHistory.RecordAction(std::make_shared<CEditorCommandAction>(&m_Map, CEditorCommandAction::EType::MOVE_UP, &s_CommandSelectedIndex, s_CommandSelectedIndex));
+		Map()->m_ServerSettingsHistory.RecordAction(std::make_shared<CEditorCommandAction>(Map(), CEditorCommandAction::EType::MOVE_UP, &s_CommandSelectedIndex, s_CommandSelectedIndex));
 
-		std::swap(m_Map.m_vSettings[s_CommandSelectedIndex], m_Map.m_vSettings[s_CommandSelectedIndex - 1]);
+		std::swap(Map()->m_vSettings[s_CommandSelectedIndex], Map()->m_vSettings[s_CommandSelectedIndex - 1]);
 		s_CommandSelectedIndex--;
-		m_Map.OnModify();
+		Map()->OnModify();
 		s_ListBox.ScrollToSelected();
 	}
 
 	// redo button
 	ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
 	static int s_RedoButton = 0;
-	if(DoButton_FontIcon(&s_RedoButton, FONT_ICON_REDO, m_Map.m_ServerSettingsHistory.CanRedo() ? 0 : -1, &Button, BUTTONFLAG_LEFT, "[Ctrl+Y] Redo the last command edit.", IGraphics::CORNER_R, 11.0f))
+	if(DoButton_FontIcon(&s_RedoButton, FONT_ICON_REDO, Map()->m_ServerSettingsHistory.CanRedo() ? 0 : -1, &Button, BUTTONFLAG_LEFT, "[Ctrl+Y] Redo the last command edit.", IGraphics::CORNER_R, 11.0f))
 	{
-		m_Map.m_ServerSettingsHistory.Redo();
+		Map()->m_ServerSettingsHistory.Redo();
 	}
 
 	// undo button
 	ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
 	ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
 	static int s_UndoButton = 0;
-	if(DoButton_FontIcon(&s_UndoButton, FONT_ICON_UNDO, m_Map.m_ServerSettingsHistory.CanUndo() ? 0 : -1, &Button, BUTTONFLAG_LEFT, "[Ctrl+Z] Undo the last command edit.", IGraphics::CORNER_L, 11.0f))
+	if(DoButton_FontIcon(&s_UndoButton, FONT_ICON_UNDO, Map()->m_ServerSettingsHistory.CanUndo() ? 0 : -1, &Button, BUTTONFLAG_LEFT, "[Ctrl+Z] Undo the last command edit.", IGraphics::CORNER_L, 11.0f))
 	{
-		m_Map.m_ServerSettingsHistory.Undo();
+		Map()->m_ServerSettingsHistory.Undo();
 	}
 
-	GotSelection = s_ListBox.Active() && s_CommandSelectedIndex >= 0 && (size_t)s_CommandSelectedIndex < m_Map.m_vSettings.size();
+	GotSelection = s_ListBox.Active() && s_CommandSelectedIndex >= 0 && (size_t)s_CommandSelectedIndex < Map()->m_vSettings.size();
 
 	int CollidingCommandIndex = -1;
 	ECollisionCheckResult CheckResult = ECollisionCheckResult::ERROR;
@@ -150,7 +150,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	const bool CanAdd = CheckResult == ECollisionCheckResult::ADD;
 	const bool CanReplace = CheckResult == ECollisionCheckResult::REPLACE;
 
-	const bool CanUpdate = GotSelection && CurrentInputValid && str_comp(m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand, m_SettingsCommandInput.GetString()) != 0;
+	const bool CanUpdate = GotSelection && CurrentInputValid && str_comp(Map()->m_vSettings[s_CommandSelectedIndex].m_aCommand, m_SettingsCommandInput.GetString()) != 0;
 
 	static int s_UpdateButton = 0;
 	if(DoButton_FontIcon(&s_UpdateButton, FONT_ICON_PENCIL, CanUpdate ? 0 : -1, &Button, BUTTONFLAG_LEFT, "[Alt+Enter] Update the selected command based on the entered value.", IGraphics::CORNER_R, 9.0f) || (CanUpdate && Input()->AltIsPressed() && m_Dialog == DIALOG_NONE && m_SettingsCommandInput.IsActive() && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
@@ -159,9 +159,9 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 		{
 			bool Found = false;
 			int i;
-			for(i = 0; i < (int)m_Map.m_vSettings.size(); ++i)
+			for(i = 0; i < (int)Map()->m_vSettings.size(); ++i)
 			{
-				if(i != s_CommandSelectedIndex && !str_comp(m_Map.m_vSettings[i].m_aCommand, m_SettingsCommandInput.GetString()))
+				if(i != s_CommandSelectedIndex && !str_comp(Map()->m_vSettings[i].m_aCommand, m_SettingsCommandInput.GetString()))
 				{
 					Found = true;
 					break;
@@ -169,15 +169,15 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 			}
 			if(Found)
 			{
-				m_Map.m_ServerSettingsHistory.RecordAction(std::make_shared<CEditorCommandAction>(&m_Map, CEditorCommandAction::EType::DELETE, &s_CommandSelectedIndex, s_CommandSelectedIndex, m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand));
-				m_Map.m_vSettings.erase(m_Map.m_vSettings.begin() + s_CommandSelectedIndex);
+				Map()->m_ServerSettingsHistory.RecordAction(std::make_shared<CEditorCommandAction>(Map(), CEditorCommandAction::EType::DELETE, &s_CommandSelectedIndex, s_CommandSelectedIndex, Map()->m_vSettings[s_CommandSelectedIndex].m_aCommand));
+				Map()->m_vSettings.erase(Map()->m_vSettings.begin() + s_CommandSelectedIndex);
 				s_CommandSelectedIndex = i > s_CommandSelectedIndex ? i - 1 : i;
 			}
 			else
 			{
 				const char *pStr = m_SettingsCommandInput.GetString();
-				m_Map.m_ServerSettingsHistory.RecordAction(std::make_shared<CEditorCommandAction>(&m_Map, CEditorCommandAction::EType::EDIT, &s_CommandSelectedIndex, s_CommandSelectedIndex, m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand, pStr));
-				str_copy(m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand, pStr);
+				Map()->m_ServerSettingsHistory.RecordAction(std::make_shared<CEditorCommandAction>(Map(), CEditorCommandAction::EType::EDIT, &s_CommandSelectedIndex, s_CommandSelectedIndex, Map()->m_vSettings[s_CommandSelectedIndex].m_aCommand, pStr));
+				str_copy(Map()->m_vSettings[s_CommandSelectedIndex].m_aCommand, pStr);
 			}
 		}
 		else
@@ -185,8 +185,8 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 			if(s_CommandSelectedIndex == CollidingCommandIndex)
 			{ // If we are editing the currently collinding line, then we can just call EDIT on it
 				const char *pStr = m_SettingsCommandInput.GetString();
-				m_Map.m_ServerSettingsHistory.RecordAction(std::make_shared<CEditorCommandAction>(&m_Map, CEditorCommandAction::EType::EDIT, &s_CommandSelectedIndex, s_CommandSelectedIndex, m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand, pStr));
-				str_copy(m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand, pStr);
+				Map()->m_ServerSettingsHistory.RecordAction(std::make_shared<CEditorCommandAction>(Map(), CEditorCommandAction::EType::EDIT, &s_CommandSelectedIndex, s_CommandSelectedIndex, Map()->m_vSettings[s_CommandSelectedIndex].m_aCommand, pStr));
+				str_copy(Map()->m_vSettings[s_CommandSelectedIndex].m_aCommand, pStr);
 			}
 			else
 			{ // If not, then editing the current selected line will result in the deletion of the colliding line, and the editing of the selected line
@@ -195,20 +195,20 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf), "Delete command %d; Edit command %d", CollidingCommandIndex, s_CommandSelectedIndex);
 
-				m_Map.m_ServerSettingsHistory.BeginBulk();
+				Map()->m_ServerSettingsHistory.BeginBulk();
 				// Delete the colliding command
-				m_Map.m_ServerSettingsHistory.RecordAction(std::make_shared<CEditorCommandAction>(&m_Map, CEditorCommandAction::EType::DELETE, &s_CommandSelectedIndex, CollidingCommandIndex, m_Map.m_vSettings[CollidingCommandIndex].m_aCommand));
-				m_Map.m_vSettings.erase(m_Map.m_vSettings.begin() + CollidingCommandIndex);
+				Map()->m_ServerSettingsHistory.RecordAction(std::make_shared<CEditorCommandAction>(Map(), CEditorCommandAction::EType::DELETE, &s_CommandSelectedIndex, CollidingCommandIndex, Map()->m_vSettings[CollidingCommandIndex].m_aCommand));
+				Map()->m_vSettings.erase(Map()->m_vSettings.begin() + CollidingCommandIndex);
 				// Edit the selected command
 				s_CommandSelectedIndex = s_CommandSelectedIndex > CollidingCommandIndex ? s_CommandSelectedIndex - 1 : s_CommandSelectedIndex;
-				m_Map.m_ServerSettingsHistory.RecordAction(std::make_shared<CEditorCommandAction>(&m_Map, CEditorCommandAction::EType::EDIT, &s_CommandSelectedIndex, s_CommandSelectedIndex, m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand, pStr));
-				str_copy(m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand, pStr);
+				Map()->m_ServerSettingsHistory.RecordAction(std::make_shared<CEditorCommandAction>(Map(), CEditorCommandAction::EType::EDIT, &s_CommandSelectedIndex, s_CommandSelectedIndex, Map()->m_vSettings[s_CommandSelectedIndex].m_aCommand, pStr));
+				str_copy(Map()->m_vSettings[s_CommandSelectedIndex].m_aCommand, pStr);
 
-				m_Map.m_ServerSettingsHistory.EndBulk(aBuf);
+				Map()->m_ServerSettingsHistory.EndBulk(aBuf);
 			}
 		}
 
-		m_Map.OnModify();
+		Map()->OnModify();
 		s_ListBox.ScrollToSelected();
 		m_SettingsCommandInput.Clear();
 		m_MapSettingsCommandContext.Reset(); // Reset context
@@ -228,17 +228,17 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 			s_CommandSelectedIndex = CollidingCommandIndex;
 
 			const char *pStr = m_SettingsCommandInput.GetString();
-			m_Map.m_ServerSettingsHistory.RecordAction(std::make_shared<CEditorCommandAction>(&m_Map, CEditorCommandAction::EType::EDIT, &s_CommandSelectedIndex, s_CommandSelectedIndex, m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand, pStr));
-			str_copy(m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand, pStr);
+			Map()->m_ServerSettingsHistory.RecordAction(std::make_shared<CEditorCommandAction>(Map(), CEditorCommandAction::EType::EDIT, &s_CommandSelectedIndex, s_CommandSelectedIndex, Map()->m_vSettings[s_CommandSelectedIndex].m_aCommand, pStr));
+			str_copy(Map()->m_vSettings[s_CommandSelectedIndex].m_aCommand, pStr);
 		}
 		else if(CanAdd)
 		{
-			m_Map.m_vSettings.emplace_back(m_SettingsCommandInput.GetString());
-			s_CommandSelectedIndex = m_Map.m_vSettings.size() - 1;
-			m_Map.m_ServerSettingsHistory.RecordAction(std::make_shared<CEditorCommandAction>(&m_Map, CEditorCommandAction::EType::ADD, &s_CommandSelectedIndex, s_CommandSelectedIndex, m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand));
+			Map()->m_vSettings.emplace_back(m_SettingsCommandInput.GetString());
+			s_CommandSelectedIndex = Map()->m_vSettings.size() - 1;
+			Map()->m_ServerSettingsHistory.RecordAction(std::make_shared<CEditorCommandAction>(Map(), CEditorCommandAction::EType::ADD, &s_CommandSelectedIndex, s_CommandSelectedIndex, Map()->m_vSettings[s_CommandSelectedIndex].m_aCommand));
 		}
 
-		m_Map.OnModify();
+		Map()->OnModify();
 		s_ListBox.ScrollToSelected();
 		m_SettingsCommandInput.Clear();
 		m_MapSettingsCommandContext.Reset(); // Reset context
@@ -253,11 +253,11 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	TextRender()->TextColor(TextRender()->DefaultTextColor());
 
 	// command list
-	s_ListBox.DoStart(15.0f, m_Map.m_vSettings.size(), 1, 3, s_CommandSelectedIndex, &List);
+	s_ListBox.DoStart(15.0f, Map()->m_vSettings.size(), 1, 3, s_CommandSelectedIndex, &List);
 
-	for(size_t i = 0; i < m_Map.m_vSettings.size(); i++)
+	for(size_t i = 0; i < Map()->m_vSettings.size(); i++)
 	{
-		const CListboxItem Item = s_ListBox.DoNextItem(&m_Map.m_vSettings[i], s_CommandSelectedIndex >= 0 && (size_t)s_CommandSelectedIndex == i);
+		const CListboxItem Item = s_ListBox.DoNextItem(&Map()->m_vSettings[i], s_CommandSelectedIndex >= 0 && (size_t)s_CommandSelectedIndex == i);
 		if(!Item.m_Visible)
 			continue;
 
@@ -266,7 +266,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 		SLabelProperties Props;
 		Props.m_MaxWidth = Label.w;
 		Props.m_EllipsisAtEnd = true;
-		Ui()->DoLabel(&Label, m_Map.m_vSettings[i].m_aCommand, 10.0f, TEXTALIGN_ML, Props);
+		Ui()->DoLabel(&Label, Map()->m_vSettings[i].m_aCommand, 10.0f, TEXTALIGN_ML, Props);
 	}
 
 	const int NewSelected = s_ListBox.DoEnd();
@@ -275,7 +275,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 		s_CommandSelectedIndex = NewSelected;
 		if(m_SettingsCommandInput.IsEmpty() || !Input()->ModifierIsPressed()) // Allow ctrl+click to only change selection
 		{
-			m_SettingsCommandInput.Set(m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand);
+			m_SettingsCommandInput.Set(Map()->m_vSettings[s_CommandSelectedIndex].m_aCommand);
 			m_MapSettingsCommandContext.Update();
 			m_MapSettingsCommandContext.UpdateCursor(true);
 		}
@@ -614,7 +614,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 		bool DisplayFixInput = false;
 		float DropdownHeight = 110.0f;
 
-		for(int i = 0; i < (int)m_Map.m_vSettings.size(); i++)
+		for(int i = 0; i < (int)Map()->m_vSettings.size(); i++)
 		{
 			CUIRect Slot;
 
@@ -778,7 +778,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 
 				// Draw the label
 				Props.m_MaxWidth = Label.w;
-				Ui()->DoLabel(&Label, m_Map.m_vSettings[i].m_aCommand, 10.0f, TEXTALIGN_ML, Props);
+				Ui()->DoLabel(&Label, Map()->m_vSettings[i].m_aCommand, 10.0f, TEXTALIGN_ML, Props);
 
 				// Draw the list of duplicates, with a "Choose" button for each duplicate
 				// In case a duplicate is also invalid, then we draw a "Fix" button which behaves like the fix button above
@@ -859,7 +859,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 						//                       If we write any other setting, like "sv_hit 1", it won't work as it does not match "sv_deepfly".
 						// To do that, we use the context and we check for collision with the current map setting
 						ECollisionCheckResult Res = ECollisionCheckResult::ERROR;
-						s_Context.CheckCollision({m_Map.m_vSettings[i]}, Res);
+						s_Context.CheckCollision({Map()->m_vSettings[i]}, Res);
 						bool Valid = s_Context.Valid() && Res == ECollisionCheckResult::REPLACE;
 
 						if(DoButton_Editor(&s_Ok, "Done", Valid ? 0 : -1, &OkBtn, BUTTONFLAG_LEFT, "Confirm editing of this command.") || (s_Input.IsActive() && Valid && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
@@ -943,7 +943,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 		{
 			if(FixedSetting.m_Context.m_Fixed)
 			{
-				str_copy(m_Map.m_vSettings[FixedSetting.m_Index].m_aCommand, FixedSetting.m_aSetting);
+				str_copy(Map()->m_vSettings[FixedSetting.m_Index].m_aCommand, FixedSetting.m_aSetting);
 			}
 		}
 
@@ -958,7 +958,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 				if(!Setting.m_Context.m_Chosen)
 					vSettingsToErase.emplace_back(Setting.m_aSetting);
 				else
-					vSettingsToErase.emplace_back(m_Map.m_vSettings[Setting.m_CollidingIndex].m_aCommand);
+					vSettingsToErase.emplace_back(Map()->m_vSettings[Setting.m_CollidingIndex].m_aCommand);
 			}
 		}
 
@@ -967,25 +967,25 @@ void CEditor::RenderMapSettingsErrorDialog()
 		{
 			if(DeletedSetting.m_Context.m_Deleted)
 			{
-				m_Map.m_vSettings.erase(
-					std::remove_if(m_Map.m_vSettings.begin(), m_Map.m_vSettings.end(), [&](const CEditorMapSetting &MapSetting) {
+				Map()->m_vSettings.erase(
+					std::remove_if(Map()->m_vSettings.begin(), Map()->m_vSettings.end(), [&](const CEditorMapSetting &MapSetting) {
 						return str_comp_nocase(MapSetting.m_aCommand, DeletedSetting.m_aSetting) == 0;
 					}),
-					m_Map.m_vSettings.end());
+					Map()->m_vSettings.end());
 			}
 		}
 
 		// Erase settings to erase
 		for(auto &Setting : vSettingsToErase)
 		{
-			m_Map.m_vSettings.erase(
-				std::remove_if(m_Map.m_vSettings.begin(), m_Map.m_vSettings.end(), [&](const CEditorMapSetting &MapSetting) {
+			Map()->m_vSettings.erase(
+				std::remove_if(Map()->m_vSettings.begin(), Map()->m_vSettings.end(), [&](const CEditorMapSetting &MapSetting) {
 					return str_comp_nocase(MapSetting.m_aCommand, Setting.m_aCommand) == 0;
 				}),
-				m_Map.m_vSettings.end());
+				Map()->m_vSettings.end());
 		}
 
-		m_Map.OnModify();
+		Map()->OnModify();
 	};
 
 	auto &&FixAllUnknown = [&] {
@@ -1839,7 +1839,7 @@ void CMapSettingsBackend::CContext::ColorArguments(std::vector<STextColorSplit> 
 
 int CMapSettingsBackend::CContext::CheckCollision(ECollisionCheckResult &Result) const
 {
-	return CheckCollision(m_pBackend->Editor()->m_Map.m_vSettings, Result);
+	return CheckCollision(m_pBackend->Editor()->Map()->m_vSettings, Result);
 }
 
 int CMapSettingsBackend::CContext::CheckCollision(const std::vector<CEditorMapSetting> &vSettings, ECollisionCheckResult &Result) const
@@ -2089,7 +2089,7 @@ void CMapSettingsBackend::OnMapLoad()
 	// Load & validate all map settings
 	m_LoadedMapSettings.Reset();
 
-	auto &vLoadedMapSettings = Editor()->m_Map.m_vSettings;
+	auto &vLoadedMapSettings = Editor()->Map()->m_vSettings;
 
 	// Keep a vector of valid map settings, to check collision against: m_vValidLoadedMapSettings
 
