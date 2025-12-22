@@ -23,28 +23,60 @@ void CFifo::Init(IConsole *pConsole, const char *pFifoFile, int Flag)
 	str_copy(m_aFilename, pFifoFile);
 	m_Flag = Flag;
 
-	mkfifo(m_aFilename, 0600);
-
-	struct stat Attribute;
-	stat(m_aFilename, &Attribute);
-
-	if(!S_ISFIFO(Attribute.st_mode))
+	bool IsFifo;
+	if(mkfifo(m_aFilename, 0600) == 0)
 	{
-		log_warn("fifo", "'%s' is not a fifo, removing", m_aFilename);
-		fs_remove(m_aFilename);
-		mkfifo(m_aFilename, 0600);
-		stat(m_aFilename, &Attribute);
-
+		struct stat Attribute;
+		if(stat(m_aFilename, &Attribute) == 0)
+		{
+			IsFifo = S_ISFIFO(Attribute.st_mode);
+		}
+		else
+		{
+			log_warn("fifo", "Failed to stat fifo '%s' (%d '%s')", m_aFilename, errno, strerror(errno));
+			IsFifo = false;
+		}
+	}
+	else
+	{
+		log_warn("fifo", "Failed to create fifo '%s' (%d '%s')", m_aFilename, errno, strerror(errno));
+		IsFifo = false;
+	}
+	if(!IsFifo)
+	{
+		log_warn("fifo", "File '%s' is not a fifo, removing", m_aFilename);
+		if(fs_remove(m_aFilename) != 0)
+		{
+			log_error("fifo", "Failed to remove non-fifo '%s'", m_aFilename); // details logged in fs_remove
+			return;
+		}
+		if(mkfifo(m_aFilename, 0600) != 0)
+		{
+			log_error("fifo", "Failed to create fifo '%s' (%d '%s')", m_aFilename, errno, strerror(errno));
+			return;
+		}
+		struct stat Attribute;
+		if(stat(m_aFilename, &Attribute) != 0)
+		{
+			log_error("fifo", "Failed to stat fifo '%s' (%d '%s')", m_aFilename, errno, strerror(errno));
+			return;
+		}
 		if(!S_ISFIFO(Attribute.st_mode))
 		{
-			log_error("fifo", "can't remove file '%s'", m_aFilename);
+			log_error("fifo", "File '%s' is not a fifo", m_aFilename);
 			return;
 		}
 	}
 
 	m_File = open(m_aFilename, O_RDONLY | O_NONBLOCK);
 	if(m_File < 0)
-		log_error("fifo", "can't open file '%s'", m_aFilename);
+	{
+		log_error("fifo", "Failed to open fifo '%s' (%d '%s')", m_aFilename, errno, strerror(errno));
+	}
+	else
+	{
+		log_info("fifo", "Opened fifo '%s'", m_aFilename);
+	}
 }
 
 void CFifo::Shutdown()
@@ -117,11 +149,12 @@ void CFifo::Init(IConsole *pConsole, const char *pFifoFile, int Flag)
 	if(m_pPipe == INVALID_HANDLE_VALUE)
 	{
 		const DWORD LastError = GetLastError();
-		const std::string ErrorMsg = windows_format_system_message(LastError);
-		log_error("fifo", "failed to create named pipe '%s' (%ld %s)", m_aFilename, LastError, ErrorMsg.c_str());
+		log_error("fifo", "Failed to create named pipe '%s' (%ld '%s')", m_aFilename, LastError, windows_format_system_message(LastError).c_str());
 	}
 	else
-		log_info("fifo", "created named pipe '%s'", m_aFilename);
+	{
+		log_info("fifo", "Created named pipe '%s'", m_aFilename);
+	}
 }
 
 void CFifo::Shutdown()
@@ -152,8 +185,7 @@ void CFifo::Update()
 		}
 		if(LastError != ERROR_PIPE_CONNECTED) // pipe already connected, not an error
 		{
-			const std::string ErrorMsg = windows_format_system_message(LastError);
-			log_error("fifo", "failed to connect named pipe '%s' (%ld %s)", m_aFilename, LastError, ErrorMsg.c_str());
+			log_error("fifo", "Failed to connect named pipe '%s' (%ld '%s')", m_aFilename, LastError, windows_format_system_message(LastError).c_str());
 			return;
 		}
 	}
@@ -172,8 +204,7 @@ void CFifo::Update()
 			}
 			else
 			{
-				const std::string ErrorMsg = windows_format_system_message(LastError);
-				log_error("fifo", "failed to peek at pipe '%s' (%ld %s)", m_aFilename, LastError, ErrorMsg.c_str());
+				log_error("fifo", "Failed to peek at pipe '%s' (%ld '%s')", m_aFilename, LastError, windows_format_system_message(LastError).c_str());
 			}
 			return;
 		}
@@ -185,8 +216,7 @@ void CFifo::Update()
 		if(!ReadFile(m_pPipe, pBuf, BytesAvailable, &Length, nullptr))
 		{
 			const DWORD LastError = GetLastError();
-			const std::string ErrorMsg = windows_format_system_message(LastError);
-			log_error("fifo", "failed to read from pipe '%s' (%ld %s)", m_aFilename, LastError, ErrorMsg.c_str());
+			log_error("fifo", "Failed to read from pipe '%s' (%ld '%s')", m_aFilename, LastError, windows_format_system_message(LastError).c_str());
 			free(pBuf);
 			return;
 		}
