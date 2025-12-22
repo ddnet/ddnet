@@ -2462,16 +2462,9 @@ int fs_executable_path(char *buffer, int buffer_size)
 		buffer[0] = '\0';
 		return -1;
 	}
-	char real_path[IO_MAX_PATH_LENGTH];
-	if(realpath(path, real_path) != nullptr) // _NSGetExecutablePath may return relative paths
-	{
-		free(path);
-		str_copy(buffer, real_path, buffer_size);
-		return 0;
-	}
+	str_copy(buffer, path, buffer_size);
 	free(path);
-	buffer[0] = '\0';
-	return -1;
+	return 0;
 #else
 	char path[IO_MAX_PATH_LENGTH];
 	static const char *NAMES[] = {
