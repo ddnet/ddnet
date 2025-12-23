@@ -142,16 +142,16 @@ public:
 	virtual void Snap(int SnappingClient);
 
 	/**
-	 * Sets the score value that will be shown in the scoreboard
+	 * Sets the score value that will be shown in the scoreboard.
 	 *
-	 * @param SnappingClient Client Id of the player that will receive the snapshot
-	 * @param pPlayer CPlayer that is being snapped
+	 * @param SnappingClient Client ID of the player that will receive the snapshot.
+	 * @param pPlayer Player that is being snapped.
 	 *
-	 * @return the score value that will be included in the snapshot
+	 * @return the score value that will be included in the snapshot.
 	 */
 	virtual int SnapPlayerScore(int SnappingClient, CPlayer *pPlayer) { return 0; }
 
-	//spawn
+	// spawn
 	virtual bool CanSpawn(int Team, vec2 *pOutPos, int ClientId);
 
 	virtual void DoTeamChange(class CPlayer *pPlayer, int Team, bool DoChatMsg = true);
