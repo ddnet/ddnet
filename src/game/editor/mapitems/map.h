@@ -261,6 +261,8 @@ public:
 	bool IsSoundUsed(int SoundIndex) const;
 	CSoundSource *SelectedSoundSource() const;
 
+	void PlaceBorderTiles();
+
 private:
 	CEditor *m_pEditor;
 };

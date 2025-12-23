@@ -7098,29 +7098,6 @@ void CEditor::Init()
 	Reset(false);
 }
 
-void CEditor::PlaceBorderTiles()
-{
-	std::shared_ptr<CLayerTiles> pT = std::static_pointer_cast<CLayerTiles>(Map()->SelectedLayerType(0, LAYERTYPE_TILES));
-
-	for(int i = 0; i < pT->m_Width * pT->m_Height; ++i)
-	{
-		if(i % pT->m_Width < 2 || i % pT->m_Width > pT->m_Width - 3 || i < pT->m_Width * 2 || i > pT->m_Width * (pT->m_Height - 2))
-		{
-			int x = i % pT->m_Width;
-			int y = i / pT->m_Width;
-
-			CTile Current = pT->m_pTiles[i];
-			Current.m_Index = 1;
-			pT->SetTile(x, y, Current);
-		}
-	}
-
-	int GameGroupIndex = std::find(Map()->m_vpGroups.begin(), Map()->m_vpGroups.end(), Map()->m_pGameGroup) - Map()->m_vpGroups.begin();
-	Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorBrushDrawAction>(Map(), GameGroupIndex), "Tool 'Make borders'");
-
-	Map()->OnModify();
-}
-
 void CEditor::HandleCursorMovement()
 {
 	const vec2 UpdatedMousePos = Ui()->UpdatedMousePos();

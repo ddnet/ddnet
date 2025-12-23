@@ -521,8 +521,6 @@ public:
 	CQuadArtParameters m_QuadArtParameters;
 	void AddQuadArt(bool IgnoreHistory = false);
 
-	void PlaceBorderTiles();
-
 	// editor_ui.cpp
 	void UpdateTooltip(const void *pId, const CUIRect *pRect, const char *pToolTip);
 	ColorRGBA GetButtonColor(const void *pId, int Checked);
