@@ -126,7 +126,7 @@ class TestRunner:
 			env = TestEnvironment(self, test.name, tmp_dir, timeout=test.timeout)
 			try:
 				test(env)
-			except Exception as e:  # pylint: disable=broad-exception-caught  # noqa: BLE001
+			except Exception as e:  # pylint: disable=broad-exception-caught  # noqa: BLE001 blind-except
 				env.kill_all()
 				error = "".join(traceback.format_exception(type(e), e, e.__traceback__))
 				tmp_dir_cleanup = False
