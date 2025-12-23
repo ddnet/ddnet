@@ -83,12 +83,6 @@ void CEnvelopeState::EnvelopeEval(int TimeOffsetMillis, int EnvelopeIndex, Color
 	CRenderMap::RenderEvalEnvelope(m_pEnvelopePoints.get(), Time + milliseconds(TimeOffsetMillis), Result, Channels);
 }
 
-constexpr std::chrono::nanoseconds CEnvelopeState::NanosPerTick()
-{
-	// I can't use Client()->GameTickSpeed() here
-	return std::chrono::nanoseconds(1s) / static_cast<int64_t>(50);
-}
-
 std::chrono::milliseconds CEnvelopeState::EnvelopeDuration() const
 {
 	const CEnvPoint *pLastEnvPoint = m_pEnvelopePoints->GetPoint(m_pEnvelopePoints->NumPoints() - 1);

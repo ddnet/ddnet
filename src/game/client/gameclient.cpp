@@ -1993,6 +1993,26 @@ void CGameClient::OnNewSnapshot()
 					m_aSwitchStateTeam[g_Config.m_ClDummy] = -1;
 				GotSwitchStateTeam = true;
 			}
+			else if(Item.m_Type == NETOBJTYPE_ENVELOPETRIGGER)
+			{
+				const CNetObj_EnvelopeTrigger *pEnvelopeData = (const CNetObj_EnvelopeTrigger *)Item.m_pData;
+				int EnvelopeId = Item.m_Id;
+				if(EnvelopeId >= 0 &&
+					pEnvelopeData->m_Type >= 0 && pEnvelopeData->m_Type < NUM_ENV_TRIGGERS &&
+					pEnvelopeData->m_StartTick <= Client()->GameTick(g_Config.m_ClDummy))
+				{
+					auto LastStateIt = m_GameWorld.EnvTriggerState().find(EnvelopeId);
+					CEnvelopeTriggerState *pOldState = nullptr;
+					if(LastStateIt != m_GameWorld.EnvTriggerState().end())
+					{
+						pOldState = &LastStateIt->second;
+					}
+					std::chrono::nanoseconds EnvelopeTime = (Client()->GameTick(g_Config.m_ClDummy) - pEnvelopeData->m_StartTick) * CEnvelopeState::NanosPerTick();
+					CEnvelopeTriggerState State((EEnvelopeTriggerType)pEnvelopeData->m_Type, pOldState);
+					State.SetEnvelopeTime(EnvelopeTime);
+					m_GameWorld.EnvTriggerState()[EnvelopeId] = State;
+				}
+			}
 		}
 	}
 

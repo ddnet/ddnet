@@ -49,6 +49,7 @@ public:
 	const std::chrono::nanoseconds &EnvelopeTime() const { return m_CurrentTime; }
 	const std::chrono::nanoseconds &Duration() const { return m_Duration; }
 	void SetDuration(std::chrono::nanoseconds &Duration) { m_Duration = Duration; }
+	void SetEnvelopeTime(std::chrono::nanoseconds &EnvelopeTime) { m_CurrentTime = EnvelopeTime; }
 
 private:
 	bool m_IsDefault;
@@ -66,12 +67,17 @@ public:
 		m_pEnvelopePoints(nullptr), m_pMap(nullptr) {}
 	CEnvelopeState(IMap *pMap, bool OnlineOnly);
 	void EnvelopeEval(int TimeOffsetMillis, int EnvelopeIndex, ColorRGBA &Result, size_t Channels) override;
+	static constexpr std::chrono::nanoseconds NanosPerTick()
+	{
+		using namespace std::chrono_literals;
+		// I can't use Client()->GameTickSpeed() here
+		return std::chrono::nanoseconds(1s) / static_cast<int64_t>(50);
+	}
 
 	int Sizeof() const override { return sizeof(*this); }
 
 private:
 	std::chrono::milliseconds EnvelopeDuration() const;
-	static constexpr std::chrono::nanoseconds NanosPerTick();
 	std::shared_ptr<CMapBasedEnvelopePointAccess> m_pEnvelopePoints;
 	IMap *m_pMap;
 	bool m_OnlineOnly;

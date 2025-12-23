@@ -775,3 +775,27 @@ bool CGameWorld::EmulateBug(int Bug) const
 {
 	return m_pMapBugs->Contains(Bug);
 }
+
+void CGameWorld::TriggerEnvelopeZone(int EnvelopeZone)
+{
+	if(!m_EnvTriggerList.contains(EnvelopeZone))
+		return;
+
+	const CEnvelopeTriggerZone &TriggerZone = m_EnvTriggerList[EnvelopeZone];
+
+	// copy state from zone so they are used by the rendering automatically
+	for(const auto &EnvState : TriggerZone.m_EnvTriggers)
+	{
+		if(EnvState.m_EnvId >= 0 && EnvState.m_State != EEnvelopeTriggerType::NUM_ENV_TRIGGERS)
+		{
+			auto LastStateIt = m_EnvTriggerState.find(EnvState.m_EnvId);
+			CEnvelopeTriggerState *pOldState = nullptr;
+			if(LastStateIt != m_EnvTriggerState.end())
+			{
+				pOldState = &LastStateIt->second;
+			}
+			CEnvelopeTriggerState State(EnvState.m_State, pOldState);
+			m_EnvTriggerState[EnvState.m_EnvId] = State;
+		}
+	}
+}

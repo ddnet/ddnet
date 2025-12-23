@@ -40,6 +40,7 @@ public:
 	~CGameWorld();
 	void Init(CCollision *pCollision, CTuningParams *pTuningList, const CMapBugs *pMapBugs);
 	void SetNumEnvelopes(int NumEnvelopes) { m_NumEnvelopes = NumEnvelopes; }
+	void TriggerEnvelopeZone(int EnvelopeZone);
 
 	CEntity *FindFirst(int Type);
 	CEntity *FindLast(int Type);

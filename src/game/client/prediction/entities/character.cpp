@@ -1043,26 +1043,10 @@ void CCharacter::HandleEnvelopeTriggerTiles(int MapIndex)
 			TriggerZoneId = TriggerZoneId + StartDelay * 256;
 		}
 
-		if(GameWorld()->EnvTriggerList().contains(TriggerZoneId) && m_LastEnvelopeTriggerZone != TriggerZoneId)
+		if(m_LastEnvelopeTriggerZone != TriggerZoneId)
 		{
+			m_pGameWorld->TriggerEnvelopeZone(TriggerZoneId);
 			m_LastEnvelopeTriggerZone = TriggerZoneId;
-			const CEnvelopeTriggerZone &TriggerZone = GameWorld()->EnvTriggerList()[TriggerZoneId];
-
-			// copy state from zone so they are used by the rendering automatically
-			for(const auto &EnvState : TriggerZone.m_EnvTriggers)
-			{
-				if(EnvState.m_EnvId >= 0 && EnvState.m_State != EEnvelopeTriggerType::NUM_ENV_TRIGGERS)
-				{
-					auto LastStateIt = GameWorld()->EnvTriggerState().find(EnvState.m_EnvId);
-					CEnvelopeTriggerState *pOldState = nullptr;
-					if(LastStateIt != GameWorld()->EnvTriggerState().end())
-					{
-						pOldState = &LastStateIt->second;
-					}
-					CEnvelopeTriggerState State(EnvState.m_State, pOldState);
-					GameWorld()->EnvTriggerState()[EnvState.m_EnvId] = State;
-				}
-			}
 		}
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_ENV_RESET_STOP)
