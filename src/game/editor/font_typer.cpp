@@ -114,7 +114,7 @@ bool CFontTyper::OnInput(const IInput::CEvent &Event)
 	{
 		m_TextIndex.x--;
 		m_TextLineLen--;
-		if(Editor()->Input()->KeyIsPressed(KEY_LCTRL))
+		if(Input()->KeyIsPressed(KEY_LCTRL))
 		{
 			while(pLayer->GetTile(m_TextIndex.x, m_TextIndex.y).m_Index)
 			{
@@ -129,7 +129,7 @@ bool CFontTyper::OnInput(const IInput::CEvent &Event)
 	{
 		m_TextIndex.x++;
 		m_TextLineLen++;
-		if(Editor()->Input()->KeyIsPressed(KEY_LCTRL))
+		if(Input()->KeyIsPressed(KEY_LCTRL))
 		{
 			while(pLayer->GetTile(m_TextIndex.x, m_TextIndex.y).m_Index)
 			{
@@ -240,14 +240,14 @@ void CFontTyper::OnRender(CUIRect View)
 	{
 		std::shared_ptr<CLayerGroup> pGroup = Editor()->GetSelectedGroup();
 		pGroup->MapScreen();
-		Editor()->Graphics()->WrapClamp();
-		Editor()->Graphics()->TextureSet(m_CursorTextTexture);
-		Editor()->Graphics()->QuadsBegin();
-		Editor()->Graphics()->SetColor(1, 1, 1, 1);
+		Graphics()->WrapClamp();
+		Graphics()->TextureSet(m_CursorTextTexture);
+		Graphics()->QuadsBegin();
+		Graphics()->SetColor(1, 1, 1, 1);
 		IGraphics::CQuadItem QuadItem(m_TextIndex.x * 32, m_TextIndex.y * 32, 32.0f, 32.0f);
-		Editor()->Graphics()->QuadsDrawTL(&QuadItem, 1);
-		Editor()->Graphics()->QuadsEnd();
-		Editor()->Graphics()->WrapNormal();
-		Editor()->Ui()->MapScreen();
+		Graphics()->QuadsDrawTL(&QuadItem, 1);
+		Graphics()->QuadsEnd();
+		Graphics()->WrapNormal();
+		Ui()->MapScreen();
 	}
 }
