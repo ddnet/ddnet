@@ -2951,9 +2951,8 @@ void CGameContext::OnKillNetMessage(const CNetMsg_Cl_Kill *pMsg, int ClientId)
 	if(!pChr)
 		return;
 	int Team = GetDDRaceTeam(ClientId);
-	if (Team != TEAM_FLOCK
-		&& pChr->m_StartTime > 0
-		&& m_pController->Teams().IsValidTeamNumber(Team) && !m_pController->Teams().IsAllowLeaderCommands(ClientId, Team)) {
+	if(Team != TEAM_FLOCK && pChr->m_StartTime > 0 && m_pController->Teams().IsValidTeamNumber(Team) && !m_pController->Teams().IsAllowLeaderCommands(ClientId, Team))
+	{
 		SendChatTarget(ClientId, "Due to this team having a leader, only the leader can kill. If you really want to kill and be sent to team 0, type /kill");
 		return;
 	}
@@ -4030,7 +4029,6 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("team0mode", "?i['0'|'1']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTeam0Mode, this, "Toggle team between team 0 and team mode. This mode will make your team behave like team 0.");
 
 	Console()->Register("setteamleader", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConSetTeamLeader, this, "Sets player r (or you, by default) to the team leader. Having a team leader disables normal players the access to commands like /lock.");
-
 
 	Console()->Register("showothers", "?i['0'|'1'|'2']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConShowOthers, this, "Whether to show players from other teams or not (off by default), optional i = 0 for off, i = 1 for on, i = 2 for own team only");
 	Console()->Register("showall", "?i['0'|'1']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConShowAll, this, "Whether to show players at any distance (off by default), optional i = 0 for off else for on");

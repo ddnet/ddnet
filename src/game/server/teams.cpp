@@ -1206,8 +1206,9 @@ void CGameTeams::OnCharacterDeath(int ClientId, int Weapon)
 	if(GetSaving(Team))
 		return;
 	bool Locked = TeamLocked(Team) && Weapon != WEAPON_GAME;
-	// only check leader stuff for kill tile, because we already check for WEAPON_SELF in the kill netmsg / kill command  
-	if (!IsAllowLeaderCommands(ClientId, Team) && Weapon == WEAPON_WORLD) { 
+	// only check leader stuff for kill tile, because we already check for WEAPON_SELF in the kill netmsg / kill command
+	if(!IsAllowLeaderCommands(ClientId, Team) && Weapon == WEAPON_WORLD)
+	{
 		Locked = false;
 	}
 	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO && Team != TEAM_SUPER)
@@ -1449,18 +1450,20 @@ bool CGameTeams::HasLeader(int Team)
 		return false;
 	}
 
-	for (int i = 0; i < MAX_CLIENTS; i++) {
-		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i]->m_IsTeamLeader) {
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i]->m_IsTeamLeader)
+		{
 			return true;
 		}
 	}
-	
+
 	return false;
 }
 
-bool CGameTeams::IsAllowLeaderCommands(int ClientId, int Team) 
+bool CGameTeams::IsAllowLeaderCommands(int ClientId, int Team)
 {
-    return GetPlayer(ClientId) != nullptr && (GetPlayer(ClientId)->m_IsTeamLeader || !HasLeader(Team));
+	return GetPlayer(ClientId) != nullptr && (GetPlayer(ClientId)->m_IsTeamLeader || !HasLeader(Team));
 }
 
 bool CGameTeams::IsValidTeamNumber(int Team) const
