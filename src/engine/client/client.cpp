@@ -4649,6 +4649,7 @@ int main(int argc, const char **argv)
 	gs_AndroidStarted = true;
 #elif defined(CONF_FAMILY_WINDOWS)
 	CWindowsComLifecycle WindowsComLifecycle(true);
+	windows_set_thread_priority(nullptr, 1);
 #endif
 	CCmdlineFix CmdlineFix(&argc, &argv);
 
