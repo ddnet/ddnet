@@ -560,6 +560,7 @@ private:
 	static void ConList(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetDDRTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConUninvite(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetTeamLeader(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConReloadCensorlist(IConsole::IResult *pResult, void *pUserData);
 

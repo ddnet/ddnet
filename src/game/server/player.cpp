@@ -144,6 +144,7 @@ void CPlayer::Reset()
 	m_NotEligibleForFinish = false;
 	m_EligibleForFinishCheck = 0;
 	m_VotedForPractice = false;
+	m_IsTeamLeader = false;
 	m_SwapTargetsClientId = -1;
 	m_BirthdayAnnounced = false;
 	m_RescueMode = RESCUEMODE_AUTO;

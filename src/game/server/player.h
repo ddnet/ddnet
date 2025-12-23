@@ -236,6 +236,7 @@ public:
 	bool m_VotedForPractice;
 	int m_SwapTargetsClientId; //Client ID of the swap target for the given player
 	bool m_BirthdayAnnounced;
+	bool m_IsTeamLeader;
 
 	int m_RescueMode;
 

@@ -484,6 +484,7 @@ void CGameTeams::SetForceCharacterTeam(int ClientId, int Team)
 		{
 			GetPlayer(ClientId)->m_VotedForPractice = false;
 			GetPlayer(ClientId)->m_SwapTargetsClientId = -1;
+			GetPlayer(ClientId)->m_IsTeamLeader = false;
 		}
 		m_pGameContext->m_World.RemoveEntitiesFromPlayer(ClientId);
 	}
@@ -1435,6 +1436,23 @@ bool CGameTeams::IsPractice(int Team)
 	}
 
 	return m_aPractice[Team];
+}
+bool CGameTeams::HasLeader(int Team)
+{
+	if(!IsValidTeamNumber(Team))
+		return false;
+	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO || Team == TEAM_FLOCK)
+	{
+		return false;
+	}
+
+	for (int i = 0; i < MAX_CLIENTS; i++) {
+		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i]->m_IsTeamLeader) {
+			return true;
+		}
+	}
+	
+	return false;
 }
 
 bool CGameTeams::IsValidTeamNumber(int Team) const
