@@ -67,8 +67,8 @@ def main():
 			input_file = sys.stdin
 		output_file = sys.stdout
 	else:
-		input_file = open(args.config, encoding="utf-8")  # pylint: disable=consider-using-with
-		output_file = tempfile.NamedTemporaryFile("w", dir=os.getcwd(), prefix=f"{args.config}.", delete=False)  # pylint: disable=consider-using-with
+		input_file = open(args.config, encoding="utf-8")
+		output_file = tempfile.NamedTemporaryFile("w", dir=os.getcwd(), prefix=f"{args.config}.", delete=False)
 
 	for line in input_file:
 		parsed = parse_line(line)

@@ -1,7 +1,7 @@
 import sys
 from .datatypes import EmitDefinition
-from . import content # pylint: disable=no-name-in-module
-from . import network # pylint: disable=no-name-in-module
+from . import content
+from . import network
 
 def create_enum_table(names, num):
 	lines = []
