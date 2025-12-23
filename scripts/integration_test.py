@@ -396,18 +396,20 @@ class Runnable:
 				return
 
 
-def fifo_name(test_env, name):
+def fifo_name_path(test_env, name):
 	if os.name != "nt":
-		return os.path.join(test_env.tmp_dir, f"{name}.fifo")
+		fifo_name = f"{name}.fifo"
+		return (fifo_name, os.path.join(test_env.tmp_dir, fifo_name))
 	else:
-		return f"{test_env.name}_{test_env.run_id}_{name}"
+		pipe_name = f"{test_env.name}_{test_env.run_id}_{name}"
+		return (pipe_name, rf"\\.\pipe\{pipe_name}")
 
 
 def open_fifo(name):
 	if os.name != "nt":
 		name_arg = os.open(name, flags=os.O_WRONLY)
 	else:
-		name_arg = rf"\\.\pipe\{name}"
+		name_arg = name
 	return open(name_arg, "w", buffering=1, encoding="utf-8")  # line buffering
 
 
@@ -415,7 +417,7 @@ class Client(Runnable):
 	# pylint: disable=dangerous-default-value
 	def __init__(self, test_env, extra_args=[]):  # noqa: B006 mutable-default-arguments
 		name = f"client{test_env.num_clients}"
-		self.fifo_name = fifo_name(test_env, name)
+		self.fifo_name, self.fifo_path = fifo_name_path(test_env, name)
 		# Delay opening the FIFO until the client has started, because it will
 		# block.
 		self.fifo = None
@@ -433,7 +435,7 @@ class Client(Runnable):
 
 	def command(self, command):
 		if self.fifo is None:
-			self.fifo = open_fifo(self.fifo_name)
+			self.fifo = open_fifo(self.fifo_path)
 		self.fifo.write(f"{command}\n")
 
 	def exit(self):
@@ -447,7 +449,7 @@ class Server(Runnable):
 	# pylint: disable=dangerous-default-value
 	def __init__(self, test_env, extra_args=[]):  # noqa: B006 mutable-default-arguments
 		name = f"server{test_env.num_servers}"
-		self.fifo_name = fifo_name(test_env, name)
+		self.fifo_name, self.fifo_path = fifo_name_path(test_env, name)
 		# Delay opening the FIFO until the server has started, because it will
 		# block.
 		self.fifo = None
@@ -465,7 +467,7 @@ class Server(Runnable):
 
 	def command(self, command):
 		if self.fifo is None:
-			self.fifo = open_fifo(self.fifo_name)
+			self.fifo = open_fifo(self.fifo_path)
 		self.fifo.write(f"{command}\n")
 
 	def next_event(self, timeout_id):
