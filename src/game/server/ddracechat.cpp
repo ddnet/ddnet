@@ -1078,8 +1078,14 @@ void CGameContext::ConLock(IConsole::IResult *pResult, void *pUserData)
 			"Teams are disabled");
 		return;
 	}
-
+	
 	int Team = pSelf->GetDDRaceTeam(pResult->m_ClientId);
+	if (!pSelf->m_pController->Teams().IsAllowLeaderCommands(pResult->m_ClientId, Team)) {
+
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
+			"Only your team leader(s) can lock the team.");
+		return;		
+	}
 
 	bool Lock = pSelf->m_pController->Teams().TeamLocked(Team);
 
@@ -1129,10 +1135,15 @@ void CGameContext::ConUnlock(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	int Team = pSelf->GetDDRaceTeam(pResult->m_ClientId);
-
+	
 	if(Team == TEAM_FLOCK || !pSelf->m_pController->Teams().IsValidTeamNumber(Team))
 		return;
+	if (!pSelf->m_pController->Teams().IsAllowLeaderCommands(pResult->m_ClientId, Team)) {
 
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
+			"Only your team leader(s) can unlock the team.");
+		return;		
+	}
 	if(pSelf->ProcessSpamProtection(pResult->m_ClientId, false))
 		return;
 
@@ -1333,6 +1344,13 @@ void CGameContext::ConTeam0Mode(IConsole::IResult *pResult, void *pUserData)
 			IConsole::OUTPUT_LEVEL_STANDARD,
 			"chatresp",
 			"This team can't have the mode changed");
+		return;
+	}
+	if (!pController->Teams().IsAllowLeaderCommands(pResult->m_ClientId, Team)) {
+		pSelf->Console()->Print(
+			IConsole::OUTPUT_LEVEL_STANDARD,
+			"chatresp",
+			"Only the team leader(s) can change the mode");
 		return;
 	}
 

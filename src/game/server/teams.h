@@ -126,6 +126,7 @@ public:
 	void SetPractice(int Team, bool Enabled);
 	bool IsPractice(int Team);
 	bool HasLeader(int Team);
+	bool IsAllowLeaderCommands(int ClientId, int Team);
 	bool IsValidTeamNumber(int Team) const;
 };
 

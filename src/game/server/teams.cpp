@@ -1455,6 +1455,11 @@ bool CGameTeams::HasLeader(int Team)
 	return false;
 }
 
+bool CGameTeams::IsAllowLeaderCommands(int ClientId, int Team) 
+{
+    return GetPlayer(ClientId) != nullptr && (GetPlayer(ClientId)->m_IsTeamLeader || !HasLeader(Team));
+}
+
 bool CGameTeams::IsValidTeamNumber(int Team) const
 {
 	return Team >= TEAM_FLOCK && Team < NUM_DDRACE_TEAMS - 1; // no TEAM_SUPER
