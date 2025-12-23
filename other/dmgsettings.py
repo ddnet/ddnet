@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=undefined-variable
 from __future__ import unicode_literals
 import os.path
 
@@ -45,7 +44,7 @@ def icon_from_app(app_path):
 # volume_name = 'DDNet'
 
 # Volume format (see hdiutil create -help)
-format = defines.get('format', 'UDBZ') # pylint: disable=redefined-builtin
+format = defines.get('format', 'UDBZ')
 
 # Compression level (if relevant)
 compression_level = 9

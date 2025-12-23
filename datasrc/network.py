@@ -1,6 +1,3 @@
-# pylint: skip-file
-# See https://github.com/ddnet/ddnet/issues/3507
-
 from datatypes import Enum, Flags, NetArray, NetBool, NetEvent, NetEventEx, NetIntAny, NetTwIntString, NetIntRange
 from datatypes import NetMessage, NetMessageEx, NetObject, NetObjectEx, NetString, NetStringHalfStrict, NetStringStrict, NetTick
 

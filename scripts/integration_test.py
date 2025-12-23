@@ -43,24 +43,24 @@ class Log(namedtuple("Log", "timestamp level line")):
 
 
 class LogParseError(namedtuple("LogParseError", "line")):
-	def raise_on_error(self, timeout_id):  # pylint: disable=unused-argument
+	def raise_on_error(self, timeout_id):
 		Log.parse(self.line)
 		# The above should have raised an error.
 		raise RuntimeError("log line shouldn't parse")
 
 
 class Exit(namedtuple("Exit", "")):
-	def raise_on_error(self, timeout_id):  # pylint: disable=unused-argument
+	def raise_on_error(self, timeout_id):
 		pass
 
 
 class UncleanExit(namedtuple("UncleanExit", "reason")):
-	def raise_on_error(self, timeout_id):  # pylint: disable=unused-argument
+	def raise_on_error(self, timeout_id):
 		raise RuntimeError(f"unclean exit: {self.reason}")
 
 
 class TestTimeout(namedtuple("TestTimeout", "")):
-	def raise_on_error(self, timeout_id):  # pylint: disable=unused-argument
+	def raise_on_error(self, timeout_id):
 		raise TimeoutError("test timeout")
 
 
@@ -126,7 +126,7 @@ class TestRunner:
 			env = TestEnvironment(self, test.name, tmp_dir, timeout=test.timeout)
 			try:
 				test(env)
-			except Exception as e:  # pylint: disable=broad-exception-caught  # noqa: BLE001
+			except Exception as e:  # noqa: BLE001 blind-except
 				env.kill_all()
 				error = "".join(traceback.format_exception(type(e), e, e.__traceback__))
 				tmp_dir_cleanup = False
@@ -143,7 +143,6 @@ class TestRunner:
 
 	def run_tests(self, tests):
 		tests = list(tests)
-		# pylint: disable=consider-using-f-string
 		print("running {} test{}".format(len(tests), "s" if len(tests) != 1 else ""))
 		start = time()
 		failed = []
@@ -202,7 +201,6 @@ add_path {relpath(self.runner.data_dir, tmp_dir)}
 				"valgrind",
 				"--tool=memcheck",
 				"--gen-suppressions=all",
-				# pylint: disable=consider-using-f-string
 				"--suppressions={}".format(relpath(os.path.join(runner.repo_dir, "memcheck.supp"), self.tmp_dir)),
 				"--track-origins=yes",
 			]
@@ -254,7 +252,6 @@ def run_lines_thread(name, file, output_filename, output_list, output_queue):
 		output_file = None
 		for line in file:
 			if output_file is None:
-				# pylint: disable=consider-using-with
 				output_file = open(output_filename, "w", buffering=1, encoding="utf-8")  # line buffering
 			output_file.write(line)
 			line = line.rstrip("\r\n")
@@ -315,13 +312,11 @@ def run_test_timeout_thread(name, test_env, input_queue, param):
 
 
 class Runnable:
-	# pylint: disable=dangerous-default-value
 	def __init__(self, test_env, name, args, *, extra_env_vars={}, log_is_stderr=False, allow_unclean_exit=False):  # noqa: B006 mutable-default-arguments
 		self.name = name
 		cur_env_vars = dict(os.environ)
 		intersection = set(cur_env_vars) & (set(test_env.runner.extra_env_vars) | set(extra_env_vars))
 		if intersection:
-			# pylint: disable=consider-using-f-string
 			raise ValueError("conflicting environment variable(s): {}".format(", ".join(sorted(intersection))))
 		new_env_vars = {**cur_env_vars, **test_env.runner.extra_env_vars, **extra_env_vars}
 		self.process = popen(
@@ -414,7 +409,6 @@ def open_fifo(name):
 
 
 class Client(Runnable):
-	# pylint: disable=dangerous-default-value
 	def __init__(self, test_env, extra_args=[]):  # noqa: B006 mutable-default-arguments
 		name = f"client{test_env.num_clients}"
 		self.fifo_name, self.fifo_path = fifo_name_path(test_env, name)
@@ -446,7 +440,6 @@ class Client(Runnable):
 
 
 class Server(Runnable):
-	# pylint: disable=dangerous-default-value
 	def __init__(self, test_env, extra_args=[]):  # noqa: B006 mutable-default-arguments
 		name = f"server{test_env.num_servers}"
 		self.fifo_name, self.fifo_path = fifo_name_path(test_env, name)
@@ -474,11 +467,11 @@ class Server(Runnable):
 		event = super().next_event(timeout_id)
 		if isinstance(event, Log):
 			if event.line.startswith("server: using port "):
-				self.port = int(event.line[len("server: using port ") :])  # pylint: disable=attribute-defined-outside-init
+				self.port = int(event.line[len("server: using port ") :])
 			elif event.line.startswith("server: | rcon password: '"):
-				_, self.rcon_password, _ = event.line.split("'")  # pylint: disable=attribute-defined-outside-init
+				_, self.rcon_password, _ = event.line.split("'")
 			elif event.line.startswith("teehistorian: recording to '"):
-				_, self.teehistorian_filename, _ = event.line.split("'")  # pylint: disable=attribute-defined-outside-init
+				_, self.teehistorian_filename, _ = event.line.split("'")
 		return event
 
 	def exit(self):
@@ -489,7 +482,6 @@ class Server(Runnable):
 
 
 class Mastersrv(Runnable):
-	# pylint: disable=dangerous-default-value
 	def __init__(self, test_env, extra_args=[]):  # noqa: B006 mutable-default-arguments
 		name = f"mastersrv{test_env.num_mastersrvs}"
 		super().__init__(
@@ -512,7 +504,7 @@ class Mastersrv(Runnable):
 		event = super().next_event(timeout_id)
 		if isinstance(event, Log):
 			if event.line.startswith("warp::server: listening on http://[::]:"):
-				self.port = int(event.line[len("warp::server: listening on http://[::]:") :])  # pylint: disable=attribute-defined-outside-init
+				self.port = int(event.line[len("warp::server: listening on http://[::]:") :])
 		return event
 
 	def exit(self):
@@ -813,7 +805,7 @@ if os.name == "nt":
 def main():
 	repo_dir = relpath(os.path.join(os.path.dirname(__file__), ".."))
 
-	import argparse  # pylint: disable=import-outside-toplevel
+	import argparse
 
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--keep-tmpdirs", action="store_true", help="keep temporary directories used for the tests")

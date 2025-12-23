@@ -3,9 +3,9 @@ import csv
 import os
 import sys
 
-import clang.cindex  # pylint: disable=import-error
+import clang.cindex
 
-from clang.cindex import CursorKind, LinkageKind, StorageClass, TypeKind  # pylint: disable=import-error
+from clang.cindex import CursorKind, LinkageKind, StorageClass, TypeKind
 
 try:
 	from tqdm import tqdm
@@ -149,7 +149,7 @@ def process_source_file(out, file, extra_args, break_on):
 				"name": node.spelling,
 			})
 			if node.spelling == break_on:
-				breakpoint()  # pylint: disable=forgotten-debug-statement
+				breakpoint()
 
 
 def main():
