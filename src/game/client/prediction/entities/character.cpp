@@ -35,8 +35,6 @@ void CCharacter::SetSolo(bool Solo)
 void CCharacter::SetSuper(bool Super)
 {
 	m_Core.m_Super = Super;
-	if(m_Core.m_Super && TeamsCore()->m_IsDDRace16)
-		TeamsCore()->Team(GetCid(), VANILLA_TEAM_SUPER);
 }
 
 bool CCharacter::IsGrounded()
