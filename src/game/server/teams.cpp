@@ -1206,7 +1206,10 @@ void CGameTeams::OnCharacterDeath(int ClientId, int Weapon)
 	if(GetSaving(Team))
 		return;
 	bool Locked = TeamLocked(Team) && Weapon != WEAPON_GAME;
-
+	// only check leader stuff for kill tile, because we already check for WEAPON_SELF in the kill netmsg / kill command  
+	if (!IsAllowLeaderCommands(ClientId, Team) && Weapon == WEAPON_WORLD) { 
+		Locked = false;
+	}
 	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO && Team != TEAM_SUPER)
 	{
 		ChangeTeamState(Team, ETeamState::OPEN);

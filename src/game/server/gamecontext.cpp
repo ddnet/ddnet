@@ -2950,7 +2950,13 @@ void CGameContext::OnKillNetMessage(const CNetMsg_Cl_Kill *pMsg, int ClientId)
 	CCharacter *pChr = pPlayer->GetCharacter();
 	if(!pChr)
 		return;
-
+	int Team = GetDDRaceTeam(ClientId);
+	if (Team != TEAM_FLOCK
+		&& pChr->m_StartTime > 0
+		&& m_pController->Teams().IsValidTeamNumber(Team) && !m_pController->Teams().IsAllowLeaderCommands(ClientId, Team)) {
+		SendChatTarget(ClientId, "Due to this team having a leader, only the leader can kill. If you really want to kill and be sent to team 0, type /kill");
+		return;
+	}
 	// Kill Protection
 	int CurrTime = (Server()->Tick() - pChr->m_StartTime) / Server()->TickSpeed();
 	if(g_Config.m_SvKillProtection != 0 && CurrTime >= (60 * g_Config.m_SvKillProtection) && pChr->m_DDRaceState == ERaceState::STARTED)

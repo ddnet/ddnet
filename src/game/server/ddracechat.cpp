@@ -2490,6 +2490,14 @@ void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
 	CCharacter *pChr = pPlayer->GetCharacter();
 	if(!pChr)
 		return;
+	int Team = pSelf->GetDDRaceTeam(pResult->m_ClientId);
+	if (Team != TEAM_FLOCK && pSelf->m_pController->Teams().IsValidTeamNumber(Team) 
+		&& pChr->m_StartTime > 0
+		&& !pSelf->m_pController->Teams().IsAllowLeaderCommands(pResult->m_ClientId, Team)) {
+		pPlayer->KillCharacter(WEAPON_GAME);
+		pPlayer->Respawn();
+		return;
+	}
 
 	int CurrTime = (pSelf->Server()->Tick() - pChr->m_StartTime) / pSelf->Server()->TickSpeed();
 	if(g_Config.m_SvKillProtection != 0 && CurrTime >= (60 * g_Config.m_SvKillProtection) && pChr->m_DDRaceState == ERaceState::STARTED)
