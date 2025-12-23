@@ -681,6 +681,71 @@ std::vector<std::shared_ptr<IEditorEnvelopeReference>> CEditorMap::VisitEnvelope
 	return vpUpdatedReferences;
 }
 
+bool CEditorMap::IsEnvelopeUsed(int EnvelopeIndex) const
+{
+	for(const auto &pGroup : m_vpGroups)
+	{
+		for(const auto &pLayer : pGroup->m_vpLayers)
+		{
+			if(pLayer->m_Type == LAYERTYPE_QUADS)
+			{
+				std::shared_ptr<CLayerQuads> pLayerQuads = std::static_pointer_cast<CLayerQuads>(pLayer);
+				for(const auto &Quad : pLayerQuads->m_vQuads)
+				{
+					if(Quad.m_PosEnv == EnvelopeIndex || Quad.m_ColorEnv == EnvelopeIndex)
+					{
+						return true;
+					}
+				}
+			}
+			else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
+			{
+				std::shared_ptr<CLayerSounds> pLayerSounds = std::static_pointer_cast<CLayerSounds>(pLayer);
+				for(const auto &Source : pLayerSounds->m_vSources)
+				{
+					if(Source.m_PosEnv == EnvelopeIndex || Source.m_SoundEnv == EnvelopeIndex)
+					{
+						return true;
+					}
+				}
+			}
+			else if(pLayer->m_Type == LAYERTYPE_TILES)
+			{
+				std::shared_ptr<CLayerTiles> pLayerTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
+				if(pLayerTiles->m_ColorEnv == EnvelopeIndex)
+				{
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+void CEditorMap::RemoveUnusedEnvelopes()
+{
+	m_EnvelopeEditorHistory.BeginBulk();
+	int DeletedCount = 0;
+	for(size_t EnvelopeIndex = 0; EnvelopeIndex < m_vpEnvelopes.size();)
+	{
+		if(IsEnvelopeUsed(EnvelopeIndex))
+		{
+			++EnvelopeIndex;
+		}
+		else
+		{
+			// deleting removes the shared ptr from the map
+			std::shared_ptr<CEnvelope> pEnvelope = m_vpEnvelopes[EnvelopeIndex];
+			auto vpObjectReferences = DeleteEnvelope(EnvelopeIndex);
+			m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeDelete>(this, EnvelopeIndex, vpObjectReferences, pEnvelope));
+			DeletedCount++;
+		}
+	}
+	char aDisplay[256];
+	str_format(aDisplay, sizeof(aDisplay), "Tool 'Remove unused envelopes': delete %d envelopes", DeletedCount);
+	m_EnvelopeEditorHistory.EndBulk(aDisplay);
+}
+
 int CEditorMap::FindEnvPointIndex(int Index, int Channel) const
 {
 	auto Iter = std::find(

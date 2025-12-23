@@ -4323,69 +4323,6 @@ void CEditor::RenderTooltip(CUIRect TooltipRect)
 	Ui()->DoLabel(&TooltipRect, aBuf, 10.0f, TEXTALIGN_ML, Props);
 }
 
-bool CEditor::IsEnvelopeUsed(int EnvelopeIndex) const
-{
-	for(const auto &pGroup : Map()->m_vpGroups)
-	{
-		for(const auto &pLayer : pGroup->m_vpLayers)
-		{
-			if(pLayer->m_Type == LAYERTYPE_QUADS)
-			{
-				std::shared_ptr<CLayerQuads> pLayerQuads = std::static_pointer_cast<CLayerQuads>(pLayer);
-				for(const auto &Quad : pLayerQuads->m_vQuads)
-				{
-					if(Quad.m_PosEnv == EnvelopeIndex || Quad.m_ColorEnv == EnvelopeIndex)
-					{
-						return true;
-					}
-				}
-			}
-			else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
-			{
-				std::shared_ptr<CLayerSounds> pLayerSounds = std::static_pointer_cast<CLayerSounds>(pLayer);
-				for(const auto &Source : pLayerSounds->m_vSources)
-				{
-					if(Source.m_PosEnv == EnvelopeIndex || Source.m_SoundEnv == EnvelopeIndex)
-					{
-						return true;
-					}
-				}
-			}
-			else if(pLayer->m_Type == LAYERTYPE_TILES)
-			{
-				std::shared_ptr<CLayerTiles> pLayerTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
-				if(pLayerTiles->m_ColorEnv == EnvelopeIndex)
-					return true;
-			}
-		}
-	}
-	return false;
-}
-
-void CEditor::RemoveUnusedEnvelopes()
-{
-	Map()->m_EnvelopeEditorHistory.BeginBulk();
-	int DeletedCount = 0;
-	for(size_t EnvelopeIndex = 0; EnvelopeIndex < Map()->m_vpEnvelopes.size();)
-	{
-		if(IsEnvelopeUsed(EnvelopeIndex))
-		{
-			++EnvelopeIndex;
-		}
-		else
-		{
-			// deleting removes the shared ptr from the map
-			std::shared_ptr<CEnvelope> pEnvelope = Map()->m_vpEnvelopes[EnvelopeIndex];
-			auto vpObjectReferences = Map()->DeleteEnvelope(EnvelopeIndex);
-			Map()->m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeDelete>(Map(), EnvelopeIndex, vpObjectReferences, pEnvelope));
-			DeletedCount++;
-		}
-	}
-	char aDisplay[256];
-	str_format(aDisplay, sizeof(aDisplay), "Tool 'Remove unused envelopes': delete %d envelopes", DeletedCount);
-	Map()->m_EnvelopeEditorHistory.EndBulk(aDisplay);
-}
-
 void CEditor::ZoomAdaptOffsetX(float ZoomFactor, const CUIRect &View)
 {
 	float PosX = g_Config.m_EdZoomTarget ? (Ui()->MouseX() - View.x) / View.w : 0.5f;
@@ -4817,7 +4754,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		ColorRGBA EnvColor = ColorRGBA(1, 1, 1, 0.5f);
 		if(!Map()->m_vpEnvelopes.empty())
 		{
-			EnvColor = IsEnvelopeUsed(Map()->m_SelectedEnvelope) ? ColorRGBA(1, 0.7f, 0.7f, 0.5f) : ColorRGBA(0.7f, 1, 0.7f, 0.5f);
+			EnvColor = Map()->IsEnvelopeUsed(Map()->m_SelectedEnvelope) ? ColorRGBA(1, 0.7f, 0.7f, 0.5f) : ColorRGBA(0.7f, 1, 0.7f, 0.5f);
 		}
 
 		static int s_EnvelopeSelector = 0;
