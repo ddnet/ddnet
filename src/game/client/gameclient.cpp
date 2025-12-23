@@ -2417,8 +2417,11 @@ void CGameClient::UpdateEditorIngameMoved()
 	}
 }
 
-void CGameClient::ApplyPredictInputs(int Tick, bool Direct, CGameWorld& GameWorld)
+void CGameClient::ApplyPreInputs(int Tick, bool Direct, CGameWorld& GameWorld)
 {
+	if(!g_Config.m_ClAntiPingPreInput)
+		return;
+	
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(CCharacter *pChar = GameWorld.GetCharacterById(i))
@@ -2548,10 +2551,7 @@ void CGameClient::OnPredict()
 		if(pDummyInputData && !DummyFirst)
 			pDummyChar->OnDirectInput(pDummyInputData);
 
-		if(g_Config.m_ClAntiPingPreInput)
-		{
-			ApplyPredictInputs(Tick, true, m_PredictedWorld);
-		}
+		ApplyPreInputs(Tick, true, m_PredictedWorld);
 
 		m_PredictedWorld.m_GameTick = Tick;
 		if(pInputData)
@@ -2559,10 +2559,7 @@ void CGameClient::OnPredict()
 		if(pDummyInputData)
 			pDummyChar->OnPredictedInput(pDummyInputData);
 
-		if(g_Config.m_ClAntiPingPreInput)
-		{
-			ApplyPredictInputs(Tick, false, m_PredictedWorld);
-		}
+		ApplyPreInputs(Tick, false, m_PredictedWorld);
 
 		m_PredictedWorld.Tick();
 
@@ -3423,10 +3420,7 @@ void CGameClient::UpdatePrediction()
 			if(pDummyInput)
 				pDummyChar->OnDirectInput(pDummyInput);
 			
-			if(g_Config.m_ClAntiPingPreInput)
-			{
-				ApplyPredictInputs(Tick, true, m_GameWorld);
-			}
+			ApplyPreInputs(Tick, true, m_GameWorld);
 
 			m_GameWorld.m_GameTick = Tick;
 			if(pInput)
@@ -3434,10 +3428,7 @@ void CGameClient::UpdatePrediction()
 			if(pDummyInput)
 				pDummyChar->OnPredictedInput(pDummyInput);
 			
-			if(g_Config.m_ClAntiPingPreInput)
-			{
-				ApplyPredictInputs(Tick, false, m_GameWorld);
-			}
+			ApplyPreInputs(Tick, false, m_GameWorld);
 
 			m_GameWorld.Tick();
 

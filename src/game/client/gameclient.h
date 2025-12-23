@@ -653,7 +653,7 @@ public:
 	void SendKill() const;
 	void SendReadyChange7();
 
-	void ApplyPredictInputs(int Tick, bool Direct, CGameWorld& GameWorld);
+	void ApplyPreInputs(int Tick, bool Direct, CGameWorld& GameWorld);
 
 	int m_aNextChangeInfo[NUM_DUMMIES];
 
