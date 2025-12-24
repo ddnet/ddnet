@@ -4020,6 +4020,7 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("points", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConPoints, this, "Shows the global points of a player beginning with name r (your rank by default)");
 	Console()->Register("top5points", "?i[number]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTopPoints, this, "Shows five points of the global point ladder beginning with rank i (1 by default)");
 	Console()->Register("timecp", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTimeCP, this, "Set your checkpoints based on another player");
+	Console()->Register("teamleader", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConSetTeamLeader, this, "Set player as the team leader (defaults to you). When a team leader is set, rest of the team cannot use commands like /lock");
 
 	Console()->Register("team", "?i[id]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTeam, this, "Lets you join team i (shows your team if left blank)");
 	Console()->Register("lock", "?i['0'|'1']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConLock, this, "Toggle team lock so no one else can join and so the team restarts when a player dies. /lock 0 to unlock, /lock 1 to lock");
@@ -4027,8 +4028,6 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("invite", "r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInvite, this, "Invite a person to a locked team");
 	Console()->Register("join", "r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConJoin, this, "Join the team of the specified player");
 	Console()->Register("team0mode", "?i['0'|'1']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTeam0Mode, this, "Toggle team between team 0 and team mode. This mode will make your team behave like team 0.");
-
-	Console()->Register("setteamleader", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConSetTeamLeader, this, "Set player as the team leader (defaults to you). When a team leader is set, rest of the team cannot use commands like /lock");
 
 	Console()->Register("showothers", "?i['0'|'1'|'2']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConShowOthers, this, "Whether to show players from other teams or not (off by default), optional i = 0 for off, i = 1 for on, i = 2 for own team only");
 	Console()->Register("showall", "?i['0'|'1']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConShowAll, this, "Whether to show players at any distance (off by default), optional i = 0 for off else for on");

@@ -126,10 +126,10 @@ public:
 	bool GetSaving(int TeamId) const;
 	void SetPractice(int Team, bool Enabled);
 	bool IsPractice(int Team);
-	bool HasLeader(int Team);
+	bool HasLeader(int Team) const;
 	bool IsAllowLeaderCommands(int ClientId, int Team);
 	void SetTeamLeader(int ClientId, bool Set);
-	bool IsTeamLeader(int ClientId);
+	bool IsTeamLeader(int ClientId) const;
 	bool IsValidTeamNumber(int Team) const;
 };
 

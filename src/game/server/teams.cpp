@@ -1442,7 +1442,7 @@ bool CGameTeams::IsPractice(int Team)
 
 	return m_aPractice[Team];
 }
-bool CGameTeams::HasLeader(int Team)
+bool CGameTeams::HasLeader(int Team) const
 {
 	if(!IsValidTeamNumber(Team))
 		return false;
@@ -1462,7 +1462,7 @@ bool CGameTeams::HasLeader(int Team)
 	return false;
 }
 
-bool CGameTeams::IsTeamLeader(int ClientId)
+bool CGameTeams::IsTeamLeader(int ClientId) const
 {
 	if(!CheckClientId(ClientId))
 		return false;

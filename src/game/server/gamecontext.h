@@ -479,6 +479,7 @@ private:
 	static void ConPoints(IConsole::IResult *pResult, void *pUserData);
 	static void ConTopPoints(IConsole::IResult *pResult, void *pUserData);
 	static void ConTimeCP(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetTeamLeader(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConDND(IConsole::IResult *pResult, void *pUserData);
 	static void ConWhispers(IConsole::IResult *pResult, void *pUserData);
@@ -560,7 +561,6 @@ private:
 	static void ConList(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetDDRTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConUninvite(IConsole::IResult *pResult, void *pUserData);
-	static void ConSetTeamLeader(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConReloadCensorlist(IConsole::IResult *pResult, void *pUserData);
 
