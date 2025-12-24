@@ -2445,7 +2445,7 @@ void CGameContext::ConSetTeamLeader(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	if(Teams.HasLeader(Team) && !pPlayer->m_IsTeamLeader)
+	if(Teams.HasLeader(Team) && !Teams.IsTeamLeader(pPlayer->GetCid()))
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
@@ -2488,7 +2488,7 @@ void CGameContext::ConSetTeamLeader(IConsole::IResult *pResult, void *pUserData)
 		}
 	}
 
-	if(pPlayerToPromote->m_IsTeamLeader)
+	if(Teams.IsTeamLeader(pPlayerToPromote->GetCid()))
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
@@ -2497,7 +2497,7 @@ void CGameContext::ConSetTeamLeader(IConsole::IResult *pResult, void *pUserData)
 	}
 	else
 	{
-		pPlayerToPromote->m_IsTeamLeader = true;
+		Teams.SetTeamLeader(pPlayerToPromote->GetCid(), true);
 
 		char aBuf[128];
 		if(pPlayerToPromote == pPlayer)
