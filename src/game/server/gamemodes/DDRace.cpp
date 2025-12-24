@@ -190,6 +190,7 @@ void CGameControllerDDRace::OnPlayerDisconnect(CPlayer *pPlayer, const char *pRe
 	for(int Team = TEAM_FLOCK + 1; Team < TEAM_SUPER; Team++)
 		if(Teams().IsInvited(Team, ClientId))
 			Teams().SetClientInvited(Team, ClientId, false);
+	Teams().SetTeamLeader(pPlayer->GetCid(), false);
 }
 
 void CGameControllerDDRace::OnReset()

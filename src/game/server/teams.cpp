@@ -28,6 +28,7 @@ void CGameTeams::Reset()
 		m_aTeeStarted[i] = false;
 		m_aTeeFinished[i] = false;
 		m_aLastChat[i] = 0;
+		m_aTeamLeader[i] = false;
 		SendTeamsState(i);
 	}
 
@@ -484,7 +485,7 @@ void CGameTeams::SetForceCharacterTeam(int ClientId, int Team)
 		{
 			GetPlayer(ClientId)->m_VotedForPractice = false;
 			GetPlayer(ClientId)->m_SwapTargetsClientId = -1;
-			GetPlayer(ClientId)->m_IsTeamLeader = false;
+			SetTeamLeader(ClientId, false);
 		}
 		m_pGameContext->m_World.RemoveEntitiesFromPlayer(ClientId);
 	}
@@ -1452,7 +1453,7 @@ bool CGameTeams::HasLeader(int Team)
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i]->m_IsTeamLeader)
+		if(m_Core.Team(i) == Team && IsTeamLeader(i))
 		{
 			return true;
 		}
@@ -1461,9 +1462,23 @@ bool CGameTeams::HasLeader(int Team)
 	return false;
 }
 
+bool CGameTeams::IsTeamLeader(int ClientId)
+{
+	if(!CheckClientId(ClientId))
+		return false;
+	return m_aTeamLeader[ClientId]; //GetPlayer(ClientId)->m_IsTeamLeader;
+}
+void CGameTeams::SetTeamLeader(int ClientId, bool Set)
+{
+	if(!CheckClientId(ClientId))
+		return;
+	m_aTeamLeader[ClientId] = Set;
+	// return true;//GetPlayer(ClientId)->m_IsTeamLeader;
+}
+
 bool CGameTeams::IsAllowLeaderCommands(int ClientId, int Team)
 {
-	return GetPlayer(ClientId) != nullptr && (GetPlayer(ClientId)->m_IsTeamLeader || !HasLeader(Team));
+	return GetPlayer(ClientId) != nullptr && (IsTeamLeader(ClientId) || !HasLeader(Team));
 }
 
 bool CGameTeams::IsValidTeamNumber(int Team) const
