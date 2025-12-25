@@ -29,6 +29,23 @@ if(NOT VULKAN_FOUND)
     )
   else()
     set_extra_dirs_lib(VULKAN vulkan)
+
+    if(DEFINED ENV{VULKAN_SDK})
+      list(APPEND HINTS_VULKAN_INCLUDEDIR
+        "$ENV{VULKAN_SDK}/include"
+      )
+      if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        list(APPEND HINTS_VULKAN_LIBDIR
+          "$ENV{VULKAN_SDK}/lib"
+        )
+      else()
+        list(APPEND HINTS_VULKAN_LIBDIR
+          "$ENV{VULKAN_SDK}/lib32"
+          "$ENV{VULKAN_SDK}/lib"
+        )
+      endif()
+    endif()
+
     find_library(VULKAN_LIBRARIES
       NAMES vulkan vulkan-1
       HINTS ${HINTS_VULKAN_LIBDIR} ${PC_VULKAN_LIBDIR} ${PC_VULKAN_LIBRARY_DIRS}

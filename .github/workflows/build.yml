@@ -59,7 +59,7 @@ jobs:
         sudo apt-get update -y
         # mount: /var/lib/grub/esp: special device /dev/disk/by-id/scsi-... does not exist.
         # sudo apt-get upgrade -y
-        sudo apt-get install pkg-config ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libvulkan-dev glslang-tools spirv-tools libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev libpng-dev valgrind gcovr libglew-dev -y
+        sudo apt-get install pkg-config ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev libpng-dev valgrind gcovr libglew-dev -y
 
     - name: Prepare Linux (non-fancy)
       if: contains(matrix.os, 'ubuntu') && !contains(matrix.name, 'fancy')
@@ -101,7 +101,7 @@ jobs:
       if: contains(matrix.os, 'macOS')
       run: |
         brew update || true
-        brew install pkg-config sdl2 ffmpeg ninja molten-vk vulkan-headers glslang spirv-tools rust || true
+        brew install pkg-config sdl2 ffmpeg ninja molten-vk rust || true
         brew upgrade freetype
         pip3 install --break-system-packages dmgbuild
         echo /Library/Frameworks/Python.framework/Versions/3.12/bin >> $GITHUB_PATH
@@ -114,6 +114,12 @@ jobs:
         rustup target add x86_64-pc-windows-gnu
         rustup default stable-x86_64-pc-windows-gnu
         rustup set default-host x86_64-pc-windows-gnu
+
+    - name: Install Vulkan SDK
+      uses: humbletim/install-vulkan-sdk@v1.2
+      with:
+        version: 1.3.296.0
+        cache: true
 
     - name: Cache Rust dependencies
       uses: Swatinem/rust-cache@v2
@@ -256,7 +262,7 @@ jobs:
     - name: Prepare Linux
       run: |
         sudo apt-get update -y
-        sudo apt-get install cmake ninja-build openjdk-21-jdk p7zip-full curl glslang-tools openssl
+        sudo apt-get install cmake ninja-build openjdk-21-jdk p7zip-full curl openssl
         cargo install cargo-ndk
         rustup target add armv7-linux-androideabi
         rustup target add i686-linux-android
@@ -286,6 +292,12 @@ jobs:
         rm commandlinetools-linux-11076708_latest.zip
         mv cmdline-tools latest
         yes | latest/bin/sdkmanager --licenses
+
+    - name: Install Vulkan SDK
+      uses: humbletim/install-vulkan-sdk@v1.2
+      with:
+        version: 1.3.296.0
+        cache: true
 
     - name: Cache Rust dependencies
       uses: Swatinem/rust-cache@v2
