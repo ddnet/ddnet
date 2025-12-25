@@ -98,7 +98,15 @@ float CPlayers::GetPlayerTargetAngle(
 	int ClientId,
 	float Intra)
 {
-	if(GameClient()->m_Snap.m_LocalClientId == ClientId && !GameClient()->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if(GameClient()->PredictDummy() && GameClient()->m_aLocalIds[!g_Config.m_ClDummy] == ClientId)
+	{
+		const CNetObj_PlayerInput &Input = g_Config.m_ClDummyHammer ? GameClient()->m_HammerInput : GameClient()->m_DummyInput;
+		return angle(vec2(Input.m_TargetX, Input.m_TargetY));
+	}
+
+	// with dummy copy, use the same angle as local player
+	if((GameClient()->m_Snap.m_LocalClientId == ClientId || (GameClient()->PredictDummy() && g_Config.m_ClDummyCopyMoves && GameClient()->m_aLocalIds[!g_Config.m_ClDummy] == ClientId)) &&
+		!GameClient()->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		// calculate what would be sent to the server from our current input
 		vec2 Direction = normalize(vec2((int)GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].x, (int)GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].y));
@@ -161,13 +169,15 @@ void CPlayers::RenderHookCollLine(
 
 	dbg_assert(in_range(ClientId, MAX_CLIENTS - 1), "invalid client id (%d)", ClientId);
 
+	if(!GameClient()->m_GameInfo.m_AllowHookColl)
+		return;
+
 	bool Local = GameClient()->m_Snap.m_LocalClientId == ClientId;
 
-	float Intra = GameClient()->m_aClients[ClientId].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
-	float Angle = GetPlayerTargetAngle(&Prev, &Player, ClientId, Intra);
-
-	vec2 Direction = direction(Angle);
-	vec2 Position = GameClient()->m_aClients[ClientId].m_RenderPos;
+#if defined(CONF_VIDEORECORDER)
+	if(IVideo::Current() && !g_Config.m_ClVideoShowHookCollOther && !Local)
+		return;
+#endif
 
 	bool Aim = (Player.m_PlayerFlags & PLAYERFLAG_AIM);
 	if(!Client()->ServerCapAnyPlayerFlag())
@@ -182,17 +192,29 @@ void CPlayers::RenderHookCollLine(
 		}
 	}
 
-#if defined(CONF_VIDEORECORDER)
-	if(IVideo::Current() && !g_Config.m_ClVideoShowHookCollOther && !Local)
-		return;
-#endif
+	if(GameClient()->PredictDummy() && g_Config.m_ClDummyCopyMoves && GameClient()->m_aLocalIds[!g_Config.m_ClDummy] == ClientId)
+		Aim = false; // don't use unpredicted with copy moves
 
-	bool AlwaysRenderHookColl = GameClient()->m_GameInfo.m_AllowHookColl && (Local ? g_Config.m_ClShowHookCollOwn : g_Config.m_ClShowHookCollOther) == 2;
+	bool AlwaysRenderHookColl = (Local ? g_Config.m_ClShowHookCollOwn : g_Config.m_ClShowHookCollOther) == 2;
 	bool RenderHookCollPlayer = Aim && (Local ? g_Config.m_ClShowHookCollOwn : g_Config.m_ClShowHookCollOther) > 0;
-	if(Local && GameClient()->m_GameInfo.m_AllowHookColl && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if(Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		RenderHookCollPlayer = GameClient()->m_Controls.m_aShowHookColl[g_Config.m_ClDummy] && g_Config.m_ClShowHookCollOwn > 0;
+
+	if(GameClient()->PredictDummy() && g_Config.m_ClDummyCopyMoves &&
+		GameClient()->m_aLocalIds[!g_Config.m_ClDummy] == ClientId && GameClient()->m_Controls.m_aShowHookColl[g_Config.m_ClDummy] &&
+		Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	{
+		RenderHookCollPlayer = g_Config.m_ClShowHookCollOther > 0;
+	}
+
 	if(!AlwaysRenderHookColl && !RenderHookCollPlayer)
 		return;
+
+	float Intra = GameClient()->m_aClients[ClientId].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
+	float Angle = GetPlayerTargetAngle(&Prev, &Player, ClientId, Intra);
+
+	vec2 Direction = direction(Angle);
+	vec2 Position = GameClient()->m_aClients[ClientId].m_RenderPos;
 
 	static constexpr float HOOK_START_DISTANCE = CCharacterCore::PhysicalSize() * 1.5f;
 	float HookLength = (float)GameClient()->m_aClients[ClientId].m_Predicted.m_Tuning.m_HookLength;
