@@ -146,7 +146,9 @@ void CSound::Mix(short *pFinalOut, unsigned Frames)
 		if(Voice.m_Tick == Voice.m_pSample->m_NumFrames)
 		{
 			if(Voice.m_Flags & ISound::FLAG_LOOP)
-				Voice.m_Tick = 0;
+			{
+				Voice.m_Tick = Voice.m_pSample->m_LoopStart;
+			}
 			else
 			{
 				Voice.m_pSample = nullptr;
@@ -324,6 +326,10 @@ void CSound::RateConvert(CSample &Sample) const
 		}
 	}
 
+	// adjust looping position
+	const double Factor = m_MixingRate / Sample.m_Rate;
+	Sample.m_LoopStart = std::round((double)Sample.m_LoopStart * Factor);
+
 	// free old data and apply new
 	free(Sample.m_pData);
 	Sample.m_pData = pNewData;
@@ -371,21 +377,49 @@ bool CSound::DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize, c
 			Pos += Read;
 		}
 
-		op_free(pOpusFile);
-
 		Sample.m_pData = pSampleData;
 		Sample.m_NumFrames = Pos;
 		Sample.m_Rate = 48000;
 		Sample.m_Channels = NumChannels;
-		Sample.m_LoopStart = -1;
-		Sample.m_LoopEnd = -1;
+		Sample.m_LoopStart = 0;
 		Sample.m_PausedAt = 0;
+
+		const OpusTags *pTags = op_tags(pOpusFile, -1);
+		if(pTags)
+		{
+			for(int i = 0; i < pTags->comments; ++i)
+			{
+				const char *pComment = pTags->user_comments[i];
+				if(!pComment)
+					continue;
+				if(!str_startswith(pComment, "LOOP_START="))
+					continue;
+				int LoopStart = -1;
+				if(!str_toint(pComment + str_length("LOOP_START="), &LoopStart))
+				{
+					log_error("sound/opus", "Invalid LOOP_START tag. Value='%s' Filename='%s'", pComment + str_length("LOOP_START="), pContextName);
+					break;
+				}
+				if(LoopStart < 0 || LoopStart >= Sample.m_NumFrames)
+				{
+					log_error("sound/opus", "Tag LOOP_START out of range. Value=%d Min=0 Max=%d Filename='%s'", LoopStart, Sample.m_NumFrames - 1, pContextName);
+					break;
+				}
+				Sample.m_LoopStart = LoopStart;
+				break;
+			}
+		}
+
+		op_free(pOpusFile);
 	}
 	else
 	{
 		log_error("sound/opus", "Failed to decode sample, error %d. Filename='%s'", OpusError, pContextName);
 		return false;
 	}
+
+	if(g_Config.m_Debug)
+		log_info("sound/opus", "Loaded '%s' (index %d) (loop_start %d)", pContextName, Sample.m_Index, Sample.m_LoopStart);
 
 	return true;
 }
@@ -504,8 +538,7 @@ bool CSound::DecodeWV(CSample &Sample, const void *pData, unsigned DataSize, con
 		Sample.m_NumFrames = NumSamples;
 		Sample.m_Rate = SampleRate;
 		Sample.m_Channels = NumChannels;
-		Sample.m_LoopStart = -1;
-		Sample.m_LoopEnd = -1;
+		Sample.m_LoopStart = 0;
 		Sample.m_PausedAt = 0;
 
 		s_pWVBuffer = nullptr;
@@ -516,6 +549,9 @@ bool CSound::DecodeWV(CSample &Sample, const void *pData, unsigned DataSize, con
 		s_pWVBuffer = nullptr;
 		return false;
 	}
+
+	if(g_Config.m_Debug)
+		log_info("sound/wv", "Loaded '%s' (index %d)", pContextName, Sample.m_Index);
 
 	return true;
 }
@@ -550,9 +586,6 @@ int CSound::LoadOpus(const char *pFilename, int StorageType)
 		return -1;
 	}
 
-	if(g_Config.m_Debug)
-		log_trace("sound/opus", "Loaded '%s' (index %d)", pFilename, pSample->m_Index);
-
 	RateConvert(*pSample);
 	return pSample->m_Index;
 }
@@ -586,9 +619,6 @@ int CSound::LoadWV(const char *pFilename, int StorageType)
 		UnloadSample(pSample->m_Index);
 		return -1;
 	}
-
-	if(g_Config.m_Debug)
-		log_trace("sound/wv", "Loaded '%s' (index %d)", pFilename, pSample->m_Index);
 
 	RateConvert(*pSample);
 	return pSample->m_Index;
@@ -785,21 +815,22 @@ void CSound::SetVoiceTimeOffset(CVoiceHandle Voice, float TimeOffset)
 
 	if(!m_aVoices[VoiceId].m_pSample)
 		return;
+	const auto &Sample = *m_aVoices[VoiceId].m_pSample;
 
 	int Tick = 0;
 	bool IsLooping = m_aVoices[VoiceId].m_Flags & ISound::FLAG_LOOP;
-	uint64_t TickOffset = m_aVoices[VoiceId].m_pSample->m_Rate * TimeOffset;
-	if(m_aVoices[VoiceId].m_pSample->m_NumFrames > 0 && IsLooping)
-		Tick = TickOffset % m_aVoices[VoiceId].m_pSample->m_NumFrames;
+	uint64_t TickOffset = Sample.m_Rate * TimeOffset;
+	if(Sample.m_NumFrames > 0 && IsLooping && TickOffset > (uint64_t)Sample.m_NumFrames)
+		Tick = (TickOffset - Sample.m_LoopStart) % (Sample.m_NumFrames - Sample.m_LoopStart) + Sample.m_LoopStart;
 	else
-		Tick = std::clamp(TickOffset, (uint64_t)0, (uint64_t)m_aVoices[VoiceId].m_pSample->m_NumFrames);
+		Tick = std::clamp(TickOffset, (uint64_t)0, (uint64_t)Sample.m_NumFrames);
 
 	// at least 200msec off, else depend on buffer size
-	float Threshold = maximum(0.2f * m_aVoices[VoiceId].m_pSample->m_Rate, (float)m_MaxFrames);
+	float Threshold = maximum(0.2f * Sample.m_Rate, (float)m_MaxFrames);
 	if(absolute(m_aVoices[VoiceId].m_Tick - Tick) > Threshold)
 	{
 		// take care of looping (modulo!)
-		if(!(IsLooping && (minimum(m_aVoices[VoiceId].m_Tick, Tick) + m_aVoices[VoiceId].m_pSample->m_NumFrames - maximum(m_aVoices[VoiceId].m_Tick, Tick)) <= Threshold))
+		if(!(IsLooping && (minimum(m_aVoices[VoiceId].m_Tick, Tick) + Sample.m_NumFrames - maximum(m_aVoices[VoiceId].m_Tick, Tick)) <= Threshold))
 		{
 			m_aVoices[VoiceId].m_Tick = Tick;
 		}
