@@ -632,19 +632,22 @@ def smoke_test(test_env):
 	client1 = test_env.client(["logfile client1.log", "player_name client1"])
 	server = test_env.server(["logfile server.log", "sv_demo_chat 1", "sv_map coverage", "sv_tee_historian 1"])
 	wait_for_startup([client1, server])
+	# Start client2 after client1 to avoid fetching resources twice.
+	# Wait for both clients to start to avoid flaky behavior due time required for the client to launch.
+	client2 = test_env.client(["logfile client2.log", "player_name client2"])
+	wait_for_startup([client2])
 
+	server.command("record server")
 	client1.command("debug 1")
 	client1.command("stdout_output_level 2; loglevel 2")
 	client1.command(f"connect localhost:{server.port}")
 	server.wait_for_log_prefix("server: player has entered the game", timeout=10)
-	server.command("record server")
 	client1.wait_for_log_exact("client: state change. last=2 current=3", timeout=10)
 	client1.command("stdout_output_level 0; loglevel 0")
 	client1.command("debug 0")
 	client1.command("record client1")
 
-	client2 = test_env.client(["logfile client2.log", "player_name client2", f"connect localhost:{server.port}"])
-	wait_for_startup([client2])
+	client2.command(f"connect localhost:{server.port}")
 	server.wait_for_log_prefix("server: player has entered the game", timeout=10)
 	for _ in range(5):
 		server.wait_for_log(
