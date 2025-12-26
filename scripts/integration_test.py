@@ -619,6 +619,20 @@ def client_can_connect(test_env):
 
 
 @test
+def client_can_connect_7(test_env):
+	client = test_env.client()
+	server = test_env.server()
+	wait_for_startup([client, server])
+	client.command(f"connect tw-0.7+udp://localhost:{server.port}")
+	server.wait_for_log_prefix("server: player has entered the game", timeout=10)
+	server.exit()
+	client.wait_for_log_exact("client: offline error='Server shutdown'")
+	client.exit()
+	server.wait_for_exit()
+	client.wait_for_exit()
+
+
+@test
 def open_editor(test_env):
 	client = test_env.client(["maps/coverage.map"])
 	client.wait_for_log_exact("editor/load: Loaded map 'maps/coverage.map'", timeout=10)
