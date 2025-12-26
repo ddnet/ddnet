@@ -1998,6 +1998,8 @@ set_src(BASE GLOB_RECURSE src/base
   color.cpp
   color.h
   crashdump.cpp
+  dbg.cpp
+  dbg.h
   detect.h
   dynamic.h
   fs.cpp
