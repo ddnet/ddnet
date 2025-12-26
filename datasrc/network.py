@@ -390,6 +390,12 @@ Objects = [
 		NetIntAny("m_EntityClass"),
 	]),
 
+ 	# the current best time in the server
+	NetObjectEx("MapBestTime", "map-best-time@netobj.ddnet.org", [
+			NetIntRange("m_MapBestTimeSeconds", 'FinishTime::UNSET', 'max_int', default='FinishTime::UNSET'),
+			NetIntRange("m_MapBestTimeMillis", 0, 999, default=0),
+	]),
+
 	NetEventEx("MapSoundWorld:Common", "map-sound-world@netevent.ddnet.org", [
 		NetIntAny("m_SoundId"),
 	]),

@@ -151,6 +151,25 @@ int CGameControllerDDRace::SnapPlayerScore(int SnappingClient, CPlayer *pPlayer)
 	return -ScoreSeconds;
 }
 
+void CGameControllerDDRace::SnapMapBestTime(int SnappingClient)
+{
+	if(Server()->IsSixup(SnappingClient) || GameServer()->GetClientVersion(SnappingClient) < VERSION_DDNET_MAP_BESTTIME)
+		return;
+
+	CNetObj_MapBestTime *pMsg = Server()->SnapNewItem<CNetObj_MapBestTime>(0);
+	if(m_CurrentRecord.has_value() && !g_Config.m_SvHideScore && m_CurrentRecord.value() > 0)
+	{
+		int64_t TimeMilliseconds = static_cast<int64_t>(std::roundf(m_CurrentRecord.value() * 1000.0f));
+		pMsg->m_MapBestTimeSeconds = static_cast<int>(TimeMilliseconds / 1000);
+		pMsg->m_MapBestTimeMillis = static_cast<int>(TimeMilliseconds % 1000);
+	}
+	else
+	{
+		pMsg->m_MapBestTimeSeconds = FinishTime::NOT_FINISHED_MILLIS;
+		pMsg->m_MapBestTimeMillis = 0;
+	}
+}
+
 void CGameControllerDDRace::OnPlayerConnect(CPlayer *pPlayer)
 {
 	IGameController::OnPlayerConnect(pPlayer);
