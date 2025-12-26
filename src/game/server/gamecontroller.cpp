@@ -669,12 +669,28 @@ void IGameController::Snap(int SnappingClient)
 		if(!pRaceData)
 			return;
 
-		pRaceData->m_BestTime = m_CurrentRecord.has_value() && !g_Config.m_SvHideScore ? round_to_int(m_CurrentRecord.value() * 1000) : -1;
+		CFinishTime MapTime = SnapMapBestTime(SnappingClient);
+		int BestTime = MapTime.m_Seconds > 0 ? MapTime.m_Seconds * 1000 + MapTime.m_Milliseconds : -1;
+
+		pRaceData->m_BestTime = BestTime;
 		pRaceData->m_Precision = 2;
 		pRaceData->m_RaceFlags = protocol7::RACEFLAG_KEEP_WANTED_WEAPON;
 	}
 
 	GameServer()->SnapSwitchers(SnappingClient);
+
+	if(!Server()->IsSixup(SnappingClient) && GameServer()->GetClientVersion(SnappingClient) >= VERSION_DDNET_MAP_BESTTIME)
+	{
+		CFinishTime MapTime = SnapMapBestTime(SnappingClient);
+		if(MapTime.m_Seconds != FinishTime::UNSET)
+		{
+			CNetObj_MapBestTime *pMapTimeMsg = Server()->SnapNewItem<CNetObj_MapBestTime>(0);
+			if(!pMapTimeMsg)
+				return;
+			pMapTimeMsg->m_MapBestTimeSeconds = MapTime.m_Seconds;
+			pMapTimeMsg->m_MapBestTimeMillis = MapTime.m_Milliseconds;
+		}
+	}
 }
 
 int IGameController::GetAutoTeam(int NotThisId)

@@ -165,6 +165,19 @@ IGameController::CFinishTime CGameControllerDDRace::SnapPlayerTime(int SnappingC
 	return CFinishTime::NotFinished();
 }
 
+IGameController::CFinishTime CGameControllerDDRace::SnapMapBestTime(int SnappingClient)
+{
+	if(m_CurrentRecord.has_value() && !g_Config.m_SvHideScore)
+	{
+		// same as in str_time_float
+		int64_t TimeMilliseconds = static_cast<int64_t>(std::roundf(m_CurrentRecord.value() * 1000.0f));
+		int Seconds = static_cast<int>(TimeMilliseconds / 1000);
+		int Millis = static_cast<int>(TimeMilliseconds % 1000);
+		return CFinishTime(Seconds, Millis);
+	}
+	return CFinishTime::NotFinished();
+}
+
 void CGameControllerDDRace::OnPlayerConnect(CPlayer *pPlayer)
 {
 	IGameController::OnPlayerConnect(pPlayer);
