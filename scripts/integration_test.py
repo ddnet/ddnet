@@ -442,6 +442,7 @@ class Client(Runnable):
 				test_env.ddnet,
 				f"cl_input_fifo {self.fifo_name}",
 				"gfx_fullscreen 0",
+				"cl_save_settings 0",
 			]
 			+ extra_args,
 		)
@@ -643,7 +644,7 @@ def open_editor(test_env):
 
 @test
 def smoke_test(test_env):
-	client1 = test_env.client(["logfile client1.log", "player_name client1"])
+	client1 = test_env.client(["logfile client1.log", "player_name client1", "cl_save_settings 1"])
 	server = test_env.server(["logfile server.log", "sv_demo_chat 1", "sv_map coverage", "sv_tee_historian 1"])
 	wait_for_startup([client1, server])
 	# Start client2 after client1 to avoid fetching resources twice.
