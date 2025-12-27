@@ -3,6 +3,7 @@
 #ifndef GAME_CLIENT_PREDICTION_GAMEWORLD_H
 #define GAME_CLIENT_PREDICTION_GAMEWORLD_H
 
+#include <game/client/components/envelope_state.h>
 #include <game/gamecore.h>
 #include <game/teamscore.h>
 
@@ -38,6 +39,8 @@ public:
 	CGameWorld();
 	~CGameWorld();
 	void Init(CCollision *pCollision, CTuningParams *pTuningList, const CMapBugs *pMapBugs);
+	void SetNumEnvelopes(int NumEnvelopes) { m_NumEnvelopes = NumEnvelopes; }
+	void TriggerEnvelopeZone(int EnvelopeZone);
 
 	CEntity *FindFirst(int Type);
 	CEntity *FindLast(int Type);
@@ -110,6 +113,12 @@ public:
 
 	bool EmulateBug(int Bug) const;
 
+	std::unordered_map<int, CEnvelopeTriggerZone> &EnvTriggerList() { return m_EnvTriggerList; }
+	std::unordered_map<int, CEnvelopeTriggerState> &EnvTriggerState() { return m_EnvTriggerState; }
+	std::unordered_map<int, int> &TuneZoneToEnvZone() { return m_TuneZoneToEnvZone; }
+
+	int NumEnvelopes() const { return m_NumEnvelopes; }
+
 private:
 	void RemoveEntities();
 
@@ -121,6 +130,12 @@ private:
 	CCollision *m_pCollision;
 	CTuningParams *m_pTuningList;
 	const CMapBugs *m_pMapBugs;
+
+	// give up on an array datatype, this is sparse or used to infinity
+	std::unordered_map<int, CEnvelopeTriggerZone> m_EnvTriggerList;
+	std::unordered_map<int, CEnvelopeTriggerState> m_EnvTriggerState;
+	std::unordered_map<int, int> m_TuneZoneToEnvZone;
+	int m_NumEnvelopes;
 };
 
 class CCharOrder
