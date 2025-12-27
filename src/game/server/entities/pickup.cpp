@@ -57,8 +57,6 @@ void CPickup::Tick()
 				break;
 
 			case POWERUP_ARMOR:
-				if(pChr->Team() == TEAM_SUPER)
-					continue;
 				for(int j = WEAPON_SHOTGUN; j < NUM_WEAPONS; j++)
 				{
 					if(pChr->GetWeaponGot(j))
@@ -81,8 +79,6 @@ void CPickup::Tick()
 				break;
 
 			case POWERUP_ARMOR_SHOTGUN:
-				if(pChr->Team() == TEAM_SUPER)
-					continue;
 				if(pChr->GetWeaponGot(WEAPON_SHOTGUN))
 				{
 					pChr->SetWeaponGot(WEAPON_SHOTGUN, false);
@@ -95,8 +91,6 @@ void CPickup::Tick()
 				break;
 
 			case POWERUP_ARMOR_GRENADE:
-				if(pChr->Team() == TEAM_SUPER)
-					continue;
 				if(pChr->GetWeaponGot(WEAPON_GRENADE))
 				{
 					pChr->SetWeaponGot(WEAPON_GRENADE, false);
@@ -109,16 +103,12 @@ void CPickup::Tick()
 				break;
 
 			case POWERUP_ARMOR_NINJA:
-				if(pChr->Team() == TEAM_SUPER)
-					continue;
 				pChr->SetNinjaActivationDir(vec2(0, 0));
 				pChr->SetNinjaActivationTick(-500);
 				pChr->SetNinjaCurrentMoveTime(0);
 				break;
 
 			case POWERUP_ARMOR_LASER:
-				if(pChr->Team() == TEAM_SUPER)
-					continue;
 				if(pChr->GetWeaponGot(WEAPON_LASER))
 				{
 					pChr->SetWeaponGot(WEAPON_LASER, false);
