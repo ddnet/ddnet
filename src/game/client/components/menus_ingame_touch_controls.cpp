@@ -295,106 +295,109 @@ bool CMenusIngameTouchControls::RenderBehaviorSettingBlock(CUIRect Block)
 		SetUnsavedChanges(true);
 		Changed = true;
 	}
-	if(m_EditBehaviorType != EBehaviorType::BIND_TOGGLE)
+	switch(m_EditBehaviorType)
+	{
+	case EBehaviorType::BIND:
 	{
 		Block.HSplitTop(ROWSIZE, &EditBox, &Block);
 		Block.HSplitTop(ROWGAP, nullptr, &Block);
 		EditBox.VSplitMid(&LeftButton, &MiddleButton);
-		if(m_EditBehaviorType == EBehaviorType::BIND)
+		str_format(aBuf, sizeof(aBuf), "%s:", Localize("Command"));
+		Ui()->DoLabel(&LeftButton, aBuf, FONTSIZE, TEXTALIGN_ML);
+		if(Ui()->DoClearableEditBox(&m_vBehaviorElements[0]->m_InputCommand, &MiddleButton, 10.0f))
 		{
-			str_format(aBuf, sizeof(aBuf), "%s:", Localize("Command"));
-			Ui()->DoLabel(&LeftButton, aBuf, FONTSIZE, TEXTALIGN_ML);
-			if(Ui()->DoClearableEditBox(&m_vBehaviorElements[0]->m_InputCommand, &MiddleButton, 10.0f))
-			{
-				m_vBehaviorElements[0]->UpdateCommand();
-				SetUnsavedChanges(true);
-				Changed = true;
-			}
+			m_vBehaviorElements[0]->UpdateCommand();
+			SetUnsavedChanges(true);
+			Changed = true;
 		}
-		else if(m_EditBehaviorType == EBehaviorType::PREDEFINED)
-		{
-			str_format(aBuf, sizeof(aBuf), "%s:", Localize("Type"));
-			Ui()->DoLabel(&LeftButton, aBuf, FONTSIZE, TEXTALIGN_ML);
-			static CUi::SDropDownState s_ButtonPredefinedDropDownState;
-			static CScrollRegion s_ButtonPredefinedDropDownScrollRegion;
-			const char **apPredefinedNames = PredefinedNames();
-			s_ButtonPredefinedDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_ButtonPredefinedDropDownScrollRegion;
-			const EPredefinedType NewPredefined = (EPredefinedType)Ui()->DoDropDown(&MiddleButton, (int)m_PredefinedBehaviorType, apPredefinedNames, std::size(BEHAVIOR_FACTORIES_EDITOR), s_ButtonPredefinedDropDownState);
-			if(NewPredefined != m_PredefinedBehaviorType)
-			{
-				m_PredefinedBehaviorType = NewPredefined;
-				SetUnsavedChanges(true);
-				Changed = true;
-			}
-		}
-		Block.HSplitTop(ROWSIZE, &EditBox, &Block);
-		Block.HSplitTop(ROWGAP, nullptr, &Block);
-		EditBox.VSplitMid(&LeftButton, &MiddleButton);
-		if(m_EditBehaviorType == EBehaviorType::BIND)
-		{
-			str_format(aBuf, sizeof(aBuf), "%s:", Localize("Label"));
-			Ui()->DoLabel(&LeftButton, aBuf, FONTSIZE, TEXTALIGN_ML);
-			if(Ui()->DoClearableEditBox(&m_vBehaviorElements[0]->m_InputLabel, &MiddleButton, 10.0f))
-			{
-				m_vBehaviorElements[0]->UpdateLabel();
-				SetUnsavedChanges(true);
-				Changed = true;
-			}
-		}
-		else if(m_EditBehaviorType == EBehaviorType::PREDEFINED && m_PredefinedBehaviorType == EPredefinedType::EXTRA_MENU) // Extra menu type, needs to input number.
-		{
-			// Increase & Decrease button share 1/2 width, the rest is for label.
-			EditBox.VSplitLeft(ROWSIZE, &LeftButton, &MiddleButton);
-			static CButtonContainer s_ExtraMenuDecreaseButton;
-			if(Ui()->DoButton_FontIcon(&s_ExtraMenuDecreaseButton, FontIcons::FONT_ICON_MINUS, 0, &LeftButton, BUTTONFLAG_LEFT))
-			{
-				if(m_CachedExtraMenuNumber > 0)
-				{
-					// Menu Number also counts from 1, but written as 0.
-					m_CachedExtraMenuNumber--;
-					SetUnsavedChanges(true);
-					Changed = true;
-				}
-			}
 
-			MiddleButton.VSplitRight(ROWSIZE, &LeftButton, &MiddleButton);
-			Ui()->DoLabel(&LeftButton, std::to_string(m_CachedExtraMenuNumber + 1).c_str(), FONTSIZE, TEXTALIGN_MC);
-			static CButtonContainer s_ExtraMenuIncreaseButton;
-			if(Ui()->DoButton_FontIcon(&s_ExtraMenuIncreaseButton, FontIcons::FONT_ICON_PLUS, 0, &MiddleButton, BUTTONFLAG_LEFT))
-			{
-				if(m_CachedExtraMenuNumber < CTouchControls::MAX_EXTRA_MENU_NUMBER - 1)
-				{
-					m_CachedExtraMenuNumber++;
-					SetUnsavedChanges(true);
-					Changed = true;
-				}
-			}
-		}
 		Block.HSplitTop(ROWSIZE, &EditBox, &Block);
 		Block.HSplitTop(ROWGAP, nullptr, &Block);
 		EditBox.VSplitMid(&LeftButton, &MiddleButton);
-		if(m_EditBehaviorType == EBehaviorType::BIND)
+		str_format(aBuf, sizeof(aBuf), "%s:", Localize("Label"));
+		Ui()->DoLabel(&LeftButton, aBuf, FONTSIZE, TEXTALIGN_ML);
+		if(Ui()->DoClearableEditBox(&m_vBehaviorElements[0]->m_InputLabel, &MiddleButton, 10.0f))
 		{
-			str_format(aBuf, sizeof(aBuf), "%s:", Localize("Label type"));
-			Ui()->DoLabel(&LeftButton, aBuf, FONTSIZE, TEXTALIGN_ML);
-			CTouchControls::CButtonLabel::EType NewButtonLabelType = m_vBehaviorElements[0]->m_CachedCommands.m_LabelType;
-			MiddleButton.VSplitLeft(MiddleButton.w / 3.0f, &LeftButton, &MiddleButton);
-			MiddleButton.VSplitMid(&MiddleButton, &RightButton);
-			if(GameClient()->m_Menus.DoButton_Menu(&m_vBehaviorElements[0]->m_aLabelTypeRadios[0], apLabelTypes[0], NewButtonLabelType == CTouchControls::CButtonLabel::EType::PLAIN ? 1 : 0, &LeftButton, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_L))
-				NewButtonLabelType = CTouchControls::CButtonLabel::EType::PLAIN;
-			if(GameClient()->m_Menus.DoButton_Menu(&m_vBehaviorElements[0]->m_aLabelTypeRadios[1], apLabelTypes[1], NewButtonLabelType == CTouchControls::CButtonLabel::EType::LOCALIZED ? 1 : 0, &MiddleButton, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_NONE))
-				NewButtonLabelType = CTouchControls::CButtonLabel::EType::LOCALIZED;
-			if(GameClient()->m_Menus.DoButton_Menu(&m_vBehaviorElements[0]->m_aLabelTypeRadios[2], apLabelTypes[2], NewButtonLabelType == CTouchControls::CButtonLabel::EType::ICON ? 1 : 0, &RightButton, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_R))
-				NewButtonLabelType = CTouchControls::CButtonLabel::EType::ICON;
-			if(NewButtonLabelType != m_vBehaviorElements[0]->m_CachedCommands.m_LabelType)
+			m_vBehaviorElements[0]->UpdateLabel();
+			SetUnsavedChanges(true);
+			Changed = true;
+		}
+
+		Block.HSplitTop(ROWSIZE, &EditBox, &Block);
+		Block.HSplitTop(ROWGAP, nullptr, &Block);
+		EditBox.VSplitMid(&LeftButton, &MiddleButton);
+		str_format(aBuf, sizeof(aBuf), "%s:", Localize("Label type"));
+		Ui()->DoLabel(&LeftButton, aBuf, FONTSIZE, TEXTALIGN_ML);
+		CTouchControls::CButtonLabel::EType NewButtonLabelType = m_vBehaviorElements[0]->m_CachedCommands.m_LabelType;
+		MiddleButton.VSplitLeft(MiddleButton.w / 3.0f, &LeftButton, &MiddleButton);
+		MiddleButton.VSplitMid(&MiddleButton, &RightButton);
+		if(GameClient()->m_Menus.DoButton_Menu(&m_vBehaviorElements[0]->m_aLabelTypeRadios[0], apLabelTypes[0], NewButtonLabelType == CTouchControls::CButtonLabel::EType::PLAIN ? 1 : 0, &LeftButton, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_L))
+			NewButtonLabelType = CTouchControls::CButtonLabel::EType::PLAIN;
+		if(GameClient()->m_Menus.DoButton_Menu(&m_vBehaviorElements[0]->m_aLabelTypeRadios[1], apLabelTypes[1], NewButtonLabelType == CTouchControls::CButtonLabel::EType::LOCALIZED ? 1 : 0, &MiddleButton, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_NONE))
+			NewButtonLabelType = CTouchControls::CButtonLabel::EType::LOCALIZED;
+		if(GameClient()->m_Menus.DoButton_Menu(&m_vBehaviorElements[0]->m_aLabelTypeRadios[2], apLabelTypes[2], NewButtonLabelType == CTouchControls::CButtonLabel::EType::ICON ? 1 : 0, &RightButton, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_R))
+			NewButtonLabelType = CTouchControls::CButtonLabel::EType::ICON;
+		if(NewButtonLabelType != m_vBehaviorElements[0]->m_CachedCommands.m_LabelType)
+		{
+			Changed = true;
+			SetUnsavedChanges(true);
+			m_vBehaviorElements[0]->m_CachedCommands.m_LabelType = NewButtonLabelType;
+		}
+		break;
+	}
+	case EBehaviorType::PREDEFINED:
+	{
+		Block.HSplitTop(ROWSIZE, &EditBox, &Block);
+		Block.HSplitTop(ROWGAP, nullptr, &Block);
+		EditBox.VSplitMid(&LeftButton, &MiddleButton);
+		str_format(aBuf, sizeof(aBuf), "%s:", Localize("Type"));
+		Ui()->DoLabel(&LeftButton, aBuf, FONTSIZE, TEXTALIGN_ML);
+		static CUi::SDropDownState s_ButtonPredefinedDropDownState;
+		static CScrollRegion s_ButtonPredefinedDropDownScrollRegion;
+		const char **apPredefinedNames = PredefinedNames();
+		s_ButtonPredefinedDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_ButtonPredefinedDropDownScrollRegion;
+		const EPredefinedType NewPredefined = (EPredefinedType)Ui()->DoDropDown(&MiddleButton, (int)m_PredefinedBehaviorType, apPredefinedNames, std::size(BEHAVIOR_FACTORIES_EDITOR), s_ButtonPredefinedDropDownState);
+		if(NewPredefined != m_PredefinedBehaviorType)
+		{
+			m_PredefinedBehaviorType = NewPredefined;
+			SetUnsavedChanges(true);
+			Changed = true;
+		}
+
+		if(m_PredefinedBehaviorType != EPredefinedType::EXTRA_MENU)
+			break;
+
+		Block.HSplitTop(ROWSIZE, &EditBox, &Block);
+		Block.HSplitTop(ROWGAP, nullptr, &Block);
+		EditBox.VSplitMid(&LeftButton, &MiddleButton);
+		EditBox.VSplitLeft(ROWSIZE, &LeftButton, &MiddleButton);
+		static CButtonContainer s_ExtraMenuDecreaseButton;
+		if(Ui()->DoButton_FontIcon(&s_ExtraMenuDecreaseButton, FontIcons::FONT_ICON_MINUS, 0, &LeftButton, BUTTONFLAG_LEFT))
+		{
+			if(m_CachedExtraMenuNumber > 0)
 			{
-				Changed = true;
+				// Menu Number also counts from 1, but written as 0.
+				m_CachedExtraMenuNumber--;
 				SetUnsavedChanges(true);
-				m_vBehaviorElements[0]->m_CachedCommands.m_LabelType = NewButtonLabelType;
+				Changed = true;
 			}
 		}
+
+		MiddleButton.VSplitRight(ROWSIZE, &LeftButton, &MiddleButton);
+		Ui()->DoLabel(&LeftButton, std::to_string(m_CachedExtraMenuNumber + 1).c_str(), FONTSIZE, TEXTALIGN_MC);
+		static CButtonContainer s_ExtraMenuIncreaseButton;
+		if(Ui()->DoButton_FontIcon(&s_ExtraMenuIncreaseButton, FontIcons::FONT_ICON_PLUS, 0, &MiddleButton, BUTTONFLAG_LEFT))
+		{
+			if(m_CachedExtraMenuNumber < CTouchControls::MAX_EXTRA_MENU_NUMBER - 1)
+			{
+				m_CachedExtraMenuNumber++;
+				SetUnsavedChanges(true);
+				Changed = true;
+			}
+		}
+		break;
 	}
-	else
+	case EBehaviorType::BIND_TOGGLE:
 	{
 		static CScrollRegion s_BindToggleScrollRegion;
 		CScrollRegionParams ScrollParam;
@@ -500,7 +503,7 @@ bool CMenusIngameTouchControls::RenderBehaviorSettingBlock(CUIRect Block)
 					NewButtonLabelType = CTouchControls::CButtonLabel::EType::PLAIN;
 				if(GameClient()->m_Menus.DoButton_Menu(&m_vBehaviorElements[CommandIndex]->m_aLabelTypeRadios[1], apLabelTypes[1], NewButtonLabelType == CTouchControls::CButtonLabel::EType::LOCALIZED ? 1 : 0, &MiddleButton, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_NONE))
 					NewButtonLabelType = CTouchControls::CButtonLabel::EType::LOCALIZED;
-				if(GameClient()->m_Menus.DoButton_Menu(&m_vBehaviorElements[CommandIndex]->m_aLabelTypeRadios[2], apLabelTypes[2], NewButtonLabelType == CTouchControls::CButtonLabel::EType::PLAIN ? 1 : 0, &RightButton, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_R))
+				if(GameClient()->m_Menus.DoButton_Menu(&m_vBehaviorElements[CommandIndex]->m_aLabelTypeRadios[2], apLabelTypes[2], NewButtonLabelType == CTouchControls::CButtonLabel::EType::ICON ? 1 : 0, &RightButton, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_R))
 					NewButtonLabelType = CTouchControls::CButtonLabel::EType::ICON;
 				if(NewButtonLabelType != m_vBehaviorElements[CommandIndex]->m_CachedCommands.m_LabelType)
 				{
@@ -526,7 +529,11 @@ bool CMenusIngameTouchControls::RenderBehaviorSettingBlock(CUIRect Block)
 			}
 		}
 		s_BindToggleScrollRegion.End();
+		break;
 	}
+	default: dbg_assert_failed("Unknown behavior type %d to render.", (int)m_EditBehaviorType);
+	}
+
 	return Changed;
 }
 
