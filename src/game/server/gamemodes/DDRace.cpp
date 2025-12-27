@@ -151,6 +151,20 @@ int CGameControllerDDRace::SnapPlayerScore(int SnappingClient, CPlayer *pPlayer)
 	return -ScoreSeconds;
 }
 
+IGameController::CFinishTime CGameControllerDDRace::SnapPlayerTime(int SnappingClient, CPlayer *pPlayer)
+{
+	std::optional<float> BestTime = GameServer()->Score()->PlayerData(pPlayer->GetCid())->m_BestTime;
+	if(BestTime.has_value() && (!g_Config.m_SvHideScore || SnappingClient == pPlayer->GetCid()))
+	{
+		// same as in str_time_float
+		int64_t TimeMilliseconds = static_cast<int64_t>(std::roundf(BestTime.value() * 1000.0f));
+		int Seconds = static_cast<int>(TimeMilliseconds / 1000);
+		int Millis = static_cast<int>(TimeMilliseconds % 1000);
+		return CFinishTime(Seconds, Millis);
+	}
+	return CFinishTime::NotFinished();
+}
+
 void CGameControllerDDRace::OnPlayerConnect(CPlayer *pPlayer)
 {
 	IGameController::OnPlayerConnect(pPlayer);
