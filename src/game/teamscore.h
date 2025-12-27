@@ -31,6 +31,9 @@ public:
 
 	CTeamsCore();
 
+	bool IsValidTeam(int Team) const;
+	void AssertValidTeam(int Team) const;
+
 	bool SameTeam(int ClientId1, int ClientId2) const;
 
 	bool CanKeepHook(int ClientId1, int ClientId2) const;
