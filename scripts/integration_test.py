@@ -764,8 +764,7 @@ def smoke_test(test_env):
 
 	if not ranks:
 		raise AssertionError("no ranks found")
-	# TODO: why do the results under valgrind differ?
-	if not test_env.runner.valgrind_memcheck and ranks != expected_ranks:
+	if ranks != expected_ranks:
 		raise AssertionError(f"unexpected ranks:\n{ranks}\n\n{expected_ranks}")
 
 
