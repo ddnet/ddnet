@@ -1,4 +1,7 @@
 #include <base/detect.h>
+#if defined(CONF_FAMILY_WINDOWS)
+#include <base/windows.h>
+#endif
 
 #ifndef CONF_BACKEND_OPENGL_ES
 #include <GL/glew.h>
@@ -100,6 +103,9 @@ void CGraphicsBackend_Threaded::StartProcessor(ICommandProcessor *pProcessor)
 #if !defined(CONF_PLATFORM_EMSCRIPTEN)
 	std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
 	m_pThread = thread_init(ThreadFunc, this, "Graphics thread");
+#if defined(CONF_FAMILY_WINDOWS)
+	windows_set_thread_priority(m_pThread, 1);
+#endif
 	// wait for the thread to start
 	m_BufferSwapCond.wait(Lock, [this]() -> bool { return m_Started; });
 #endif

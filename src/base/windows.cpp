@@ -466,4 +466,15 @@ void windows_shell_update()
 	SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, nullptr, nullptr);
 }
 
+void windows_set_thread_priority(void *thread, int priority)
+{
+	if(thread == nullptr)
+		thread = GetCurrentThread();
+
+	if(!SetThreadPriority(thread, priority))
+	{
+		windows_print_error("set_thread_priority", "Failed to set thread priority", GetLastError());
+	}
+}
+
 #endif

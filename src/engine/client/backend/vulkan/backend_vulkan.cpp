@@ -3,6 +3,9 @@
 #include <base/log.h>
 #include <base/math.h>
 #include <base/system.h>
+#if defined(CONF_FAMILY_WINDOWS)
+#include <base/windows.h>
+#endif
 
 #include <engine/client/backend/backend_base.h>
 #include <engine/client/backend/vulkan/backend_vulkan.h>
@@ -7558,6 +7561,9 @@ public:
 				std::unique_lock<std::mutex> Lock(pRenderThread->m_Mutex);
 				m_vpRenderThreads.emplace_back(pRenderThread);
 				pRenderThread->m_Thread = std::thread([this, i]() { RunThread(i); });
+#if defined(CONF_FAMILY_WINDOWS)
+				windows_set_thread_priority(reinterpret_cast<void *>(pRenderThread->m_Thread.native_handle()), 1);
+#endif
 				// wait until thread started
 				pRenderThread->m_Cond.wait(Lock, [pRenderThread]() -> bool { return pRenderThread->m_Started; });
 			}
