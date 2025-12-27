@@ -151,6 +151,13 @@ public:
 	 */
 	virtual int SnapPlayerScore(int SnappingClient, CPlayer *pPlayer) { return 0; }
 
+	/**
+	 * Snaps the current server record / best time of the current map
+	 *
+	 * @param SnappingClient Client ID of the player that will receive the snapshot.
+	 */
+	virtual void SnapMapBestTime(int SnappingClient) {}
+
 	// spawn
 	virtual bool CanSpawn(int Team, vec2 *pOutPos, int ClientId);
 

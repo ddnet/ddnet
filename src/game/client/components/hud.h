@@ -127,7 +127,6 @@ private:
 	void RenderRecord();
 	void RenderDDRaceEffects();
 	float m_TimeCpDiff;
-	float m_ServerRecord;
 	float m_aPlayerRecord[NUM_DUMMIES];
 	float m_FinishTimeDiff;
 	int m_DDRaceTime;

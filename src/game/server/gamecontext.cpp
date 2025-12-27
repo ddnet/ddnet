@@ -4760,6 +4760,9 @@ bool CGameContext::IsRunningKickOrSpecVote(int ClientId) const
 
 void CGameContext::SendRecord(int ClientId)
 {
+	if(!Server()->IsSixup(ClientId) && GetClientVersion(ClientId) >= VERSION_DDNET_MAP_BESTTIME)
+		return;
+
 	CNetMsg_Sv_Record Msg;
 	CNetMsg_Sv_RecordLegacy MsgLegacy;
 	MsgLegacy.m_PlayerTimeBest = Msg.m_PlayerTimeBest = round_to_int(Score()->PlayerData(ClientId)->m_BestTime.value_or(0.0f) * 100.0f);

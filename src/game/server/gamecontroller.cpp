@@ -675,6 +675,7 @@ void IGameController::Snap(int SnappingClient)
 	}
 
 	GameServer()->SnapSwitchers(SnappingClient);
+	SnapMapBestTime(SnappingClient);
 }
 
 int IGameController::GetAutoTeam(int NotThisId)
