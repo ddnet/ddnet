@@ -65,7 +65,7 @@ sed -i "s/org.ddnet.client/${APK_PACKAGE_NAME}/g" src/main/java/"${APK_PACKAGE_F
 sed -i "s/org.ddnet.client/${APK_PACKAGE_NAME}/g" src/main/java/"${APK_PACKAGE_FOLDER}"/ServerService.java
 sed -i "s/org.ddnet.client/${APK_PACKAGE_NAME}/g" proguard-rules.pro
 
-# disable hid manager for now
+# Disable HID manager as we compile SDL without hidapi and libusb support
 sed -i "s/mHIDDeviceManager = HIDDeviceManager.acquire(this);/mHIDDeviceManager=null;/g" src/main/java/org/libsdl/app/SDLActivity.java
 
 if [[ "${APK_BUILD_TYPE}" == "Debug" ]]; then
@@ -84,8 +84,3 @@ else
 	build_gradle assembleRelease
 fi
 cp build/outputs/apk/"$RELEASE_TYPE_NAME"/"$APK_BASENAME"-"$RELEASE_TYPE_NAME".apk "$APK_BASENAME".apk
-
-if [[ "${APK_BUILD_TYPE}" == "Release" ]]; then
-	build_gradle bundleRelease
-	cp build/outputs/bundle/"$RELEASE_TYPE_NAME"/"$APK_BASENAME"-"$RELEASE_TYPE_NAME".aab "$APK_BASENAME".aab
-fi

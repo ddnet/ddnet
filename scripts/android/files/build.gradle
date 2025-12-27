@@ -6,7 +6,7 @@ buildscript {
 		mavenCentral()
 	}
 	dependencies {
-		classpath 'com.android.tools.build:gradle:8.3.0'
+		classpath 'com.android.tools.build:gradle:8.13.0'
 	}
 }
 
@@ -17,12 +17,13 @@ java {
 }
 
 android {
-	compileSdkVersion 34
+	compileSdkVersion 36
+	buildToolsVersion "36.1.0"
 	defaultConfig {
 		applicationId "org.ddnet.client"
-		namespace("org.ddnet.client")
+		namespace = "org.ddnet.client"
 		minSdkVersion 24
-		targetSdkVersion 34
+		targetSdkVersion 36
 		versionCode TW_VERSION_CODE
 		versionName "TW_VERSION_NAME"
 	}
@@ -36,18 +37,19 @@ android {
 	}
 	buildTypes {
 		release {
-			signingConfig signingConfigs.release
-			minifyEnabled true
-			shrinkResources true
+			signingConfig = signingConfigs.release
+			minifyEnabled = true
+			shrinkResources = true
 			proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 		}
 		debug {
-			debuggable true
-			minifyEnabled false
-			shrinkResources false
+			debuggable = true
+			minifyEnabled = false
+			shrinkResources = false
 		}
 	}
 	packagingOptions {
+		doNotStrip '**/*.so'
 		jniLibs {
 			useLegacyPackaging = true
 		}
@@ -59,10 +61,10 @@ android {
 		}
 	}
 	lintOptions {
-		abortOnError false
+		abortOnError = false
 	}
 	dependencies {
-		implementation 'androidx.core:core:1.13.1'
+		implementation 'androidx.core:core:1.17.0'
 	}
 }
 
@@ -73,7 +75,7 @@ allprojects {
 	}
 	gradle.projectsEvaluated {
 		tasks.withType(JavaCompile) {
-			options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+			options.compilerArgs << "-Xlint:deprecation"
 		}
 	}
 }
