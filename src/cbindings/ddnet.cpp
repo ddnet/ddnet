@@ -30,12 +30,14 @@ CServerLib::~CServerLib()
 	}
 }
 
-CPlayer *CServerLib::GetPlayer(uint32_t Id) {
-	dbg_assert(Id < MAX_CLIENTS, "invalid PlayerId");
+CPlayer *CServerLib::GetPlayer(int32_t Id) {
+    dbg_assert(Id >= 0, "invalid PlayerId");
+    dbg_assert(Id < MAX_CLIENTS, "invalid PlayerId");
 	return GameContext()->m_apPlayers[Id];
 }
 
-const CPlayer *CServerLib::GetPlayer(uint32_t Id) const {
+const CPlayer *CServerLib::GetPlayer(int32_t Id) const {
+    dbg_assert(Id >= 0, "invalid PlayerId");
 	dbg_assert(Id < MAX_CLIENTS, "invalid PlayerId");
 	return GameContext()->m_apPlayers[Id];
 }
@@ -152,7 +154,8 @@ int CServerLib::Init(const char *pDirectory) {
 // Game trait
 // ---------------------------------------------------------------------------
 
-void CServerLib::PlayerJoin(uint32_t Id) {
+void CServerLib::PlayerJoin(int32_t Id) {
+    dbg_assert(Id >= 0, "invalid PlayerId");
 	dbg_assert(Id < MAX_CLIENTS, "invalid ClientId");
 	auto& Client = m_pServer->m_aClients[Id];
 	Client.Reset();
@@ -161,11 +164,9 @@ void CServerLib::PlayerJoin(uint32_t Id) {
 	m_pServer->GameServer()->OnClientConnected(Id, nullptr);
 }
 
-void CServerLib::PlayerReady(uint32_t Id) {
-	if(!m_pServer || Id >= MAX_CLIENTS)
-	{
-		return;
-	}
+void CServerLib::PlayerReady(int32_t Id) {
+    dbg_assert(Id >= 0, "invalid PlayerId");
+    dbg_assert(Id < MAX_CLIENTS, "invalid ClientId");
 
 	auto &Client = m_pServer->m_aClients[Id];
 	if(Client.m_State == CServer::CClient::STATE_INGAME)
@@ -177,21 +178,23 @@ void CServerLib::PlayerReady(uint32_t Id) {
 	m_pServer->GameServer()->OnClientEnter(Id);
 }
 
-void CServerLib::PlayerInput(uint32_t ClientId, const CNetObj_PlayerInput *pInput)
+void CServerLib::PlayerInput(int32_t Id, const CNetObj_PlayerInput *pInput)
 {
-	if(!m_pServer || ClientId >= MAX_CLIENTS || pInput == nullptr)
+    dbg_assert(Id >= 0, "invalid PlayerId");
+    dbg_assert(Id < MAX_CLIENTS, "invalid ClientId");
+	if(pInput == nullptr)
 	{
 		return;
 	}
 
-	auto &Client = m_pServer->m_aClients[ClientId];
+	auto &Client = m_pServer->m_aClients[Id];
 	if(Client.m_State != CServer::CClient::STATE_INGAME)
 	{
 		return;
 	}
 
-	m_aInputs[ClientId] = *pInput;
-	m_aHasInput[ClientId] = true;
+	m_aInputs[Id] = *pInput;
+	m_aHasInput[Id] = true;
 
 	CServer::CClient::CInput *pStoredInput = &Client.m_aInputs[Client.m_CurrentInput];
 	mem_zero(pStoredInput, sizeof(*pStoredInput));
@@ -202,12 +205,10 @@ void CServerLib::PlayerInput(uint32_t ClientId, const CNetObj_PlayerInput *pInpu
 	Client.m_CurrentInput = (Client.m_CurrentInput + 1) % 200;
 }
 
-void CServerLib::PlayerLeave(uint32_t Id)
+void CServerLib::PlayerLeave(int32_t Id)
 {
-	if(!m_pServer || Id >= MAX_CLIENTS)
-	{
-		return;
-	}
+    dbg_assert(Id >= 0, "invalid PlayerId");
+    dbg_assert(Id < MAX_CLIENTS, "invalid ClientId");
 
 	auto &Client = m_pServer->m_aClients[Id];
 	if(Client.m_State != CServer::CClient::STATE_EMPTY)
@@ -219,9 +220,11 @@ void CServerLib::PlayerLeave(uint32_t Id)
 	m_aHasInput[Id] = false;
 }
 
-void CServerLib::PlayerNet(uint32_t Id, const unsigned char *pNetMsg, uint32_t Len)
+void CServerLib::PlayerNet(int32_t Id, const unsigned char *pNetMsg, uint32_t Len)
 {
-	if(!m_pServer || Id >= MAX_CLIENTS || pNetMsg == nullptr || Len == 0)
+    dbg_assert(Id >= 0, "invalid PlayerId");
+    dbg_assert(Id < MAX_CLIENTS, "invalid ClientId");
+	if(pNetMsg == nullptr || Len == 0)
 	{
 		return;
 	}
@@ -248,7 +251,7 @@ void CServerLib::PlayerNet(uint32_t Id, const unsigned char *pNetMsg, uint32_t L
 	GameContext()->OnMessage(Msg, &Unpacker, Id);
 }
 
-void CServerLib::OnCommand(uint32_t Id, const char *pCommand)
+void CServerLib::OnCommand(int32_t Id, const char *pCommand)
 {
 	CPlayer *pPlayer = GetPlayer(Id);
 	if(!pPlayer || m_pServer->m_aClients[Id].m_State != CServer::CClient::STATE_INGAME)
@@ -263,7 +266,7 @@ void CServerLib::OnCommand(uint32_t Id, const char *pCommand)
 	pConsole->ExecuteLine(pCommand, Id, false);
 }
 
-void CServerLib::SwapTees(uint32_t Id1, uint32_t Id2)
+void CServerLib::SwapTees(int32_t Id1, int32_t Id2)
 {
 	GameContext()->m_World.SwapClients(Id1, Id2);
 }
@@ -316,23 +319,23 @@ void CServerLib::Tick(int32_t CurTime)
 // GameValidator trait
 // ---------------------------------------------------------------------------
 
-uint32_t CServerLib::MaxTeeId() const {
+int32_t CServerLib::MaxTeeId() const {
 	// TODO: keep track of current max PlayerId
 	return MAX_CLIENTS;
 }
 
-int32_t CServerLib::PlayerTeam(uint32_t Id) const {
+int32_t CServerLib::PlayerTeam(int32_t Id) const {
 	const CPlayer *pPlayer = GetPlayer(Id);
 	if(!pPlayer)
 		return 0;
 	return GameContext()->GetDDRaceTeam(static_cast<int>(Id));
 }
 
-void CServerLib::SetPlayerTeam(uint32_t Id, int32_t Team) {
+void CServerLib::SetPlayerTeam(int32_t Id, int32_t Team) {
 	GameContext()->m_pController->DoTeamChange(GetPlayer(Id), Team);
 }
 
-void CServerLib::TeePos(uint32_t Id, bool *pHasPos, int32_t *pX, int32_t *pY) const {
+void CServerLib::TeePos(int32_t Id, bool *pHasPos, int32_t *pX, int32_t *pY) const {
 	*pHasPos = false;
 	*pX = 0;
 	*pY = 0;
@@ -348,7 +351,7 @@ void CServerLib::TeePos(uint32_t Id, bool *pHasPos, int32_t *pX, int32_t *pY) co
 	*pY = round_to_int(pChar->m_Pos.y);
 }
 
-void CServerLib::SetTeePos(uint32_t Id, bool HasPos, int32_t X, int32_t Y) {
+void CServerLib::SetTeePos(int32_t Id, bool HasPos, int32_t X, int32_t Y) {
 	CPlayer *pPlayer = GetPlayer(Id);
 	if(!pPlayer)
 		return;

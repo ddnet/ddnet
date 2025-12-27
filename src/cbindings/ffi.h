@@ -35,25 +35,25 @@ PUB void ddnet_free(DdnetBindings* Self);
 PUB const char** dump_configs();
 
 // Game trait
-PUB void ddnet_player_join(DdnetBindings Self, uint32_t Id);
-PUB void ddnet_player_ready(DdnetBindings Self, uint32_t Id);
-PUB void ddnet_player_input(DdnetBindings Self, uint32_t Id, const CNetObj_PlayerInput *pInput);
-PUB void ddnet_player_leave(DdnetBindings Self, uint32_t Id);
+PUB void ddnet_player_join(DdnetBindings Self, int32_t Id);
+PUB void ddnet_player_ready(DdnetBindings Self, int32_t Id);
+PUB void ddnet_player_input(DdnetBindings Self, int32_t Id, const CNetObj_PlayerInput *pInput);
+PUB void ddnet_player_leave(DdnetBindings Self, int32_t Id);
 
-PUB void ddnet_player_net(DdnetBindings Self, uint32_t Id, const unsigned char *pNetMsg, uint32_t Len);
-PUB void ddnet_on_command(DdnetBindings Self, uint32_t Id, const char *pCommand);
+PUB void ddnet_player_net(DdnetBindings Self, int32_t Id, const unsigned char *pNetMsg, uint32_t Len);
+PUB void ddnet_on_command(DdnetBindings Self, int32_t Id, const char *pCommand);
 
-PUB void ddnet_swap_tees(DdnetBindings Self, uint32_t Id1, uint32_t Id2);
+PUB void ddnet_swap_tees(DdnetBindings Self, int32_t Id1, int32_t Id2);
 
 PUB bool ddnet_is_empty(DdnetBindings Self);
 PUB void ddnet_tick(DdnetBindings Self, int32_t CurTime);
 
 // GameValidator trait
-PUB uint32_t ddnet_max_tee_id(DdnetBindings Self); // TODO: const?
-PUB int32_t ddnet_player_team(DdnetBindings Self, uint32_t Id); // TODO: const?
-PUB void ddnet_set_player_team(DdnetBindings Self, uint32_t Id, int32_t Team);
-PUB void ddnet_tee_pos(DdnetBindings Self, uint32_t Id, bool *pHasPos, int32_t *pX, int32_t *pY); // TODO: const?
-PUB void ddnet_set_tee_pos(DdnetBindings Self, uint32_t Id, bool HasPos, int32_t X, int32_t Y);
+PUB int32_t ddnet_max_tee_id(DdnetBindings Self);
+PUB int32_t ddnet_player_team(DdnetBindings Self, int32_t Id);
+PUB void ddnet_set_player_team(DdnetBindings Self, int32_t Id, int32_t Team);
+PUB void ddnet_tee_pos(DdnetBindings Self, int32_t Id, bool *pHasPos, int32_t *pX, int32_t *pY);
+PUB void ddnet_set_tee_pos(DdnetBindings Self, int32_t Id, bool HasPos, int32_t X, int32_t Y);
 
 // Snapper trait
 PUB void ddnet_snap(DdnetBindings Self, const uint8_t **ppData, uint32_t *pLen);

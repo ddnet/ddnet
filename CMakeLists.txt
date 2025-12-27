@@ -3065,7 +3065,7 @@ if(CPP_LIB)
       "-Wl,-z,defs"
       "-Wl,--exclude-libs,ALL"
     )
-  elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+  elseif(TARGET_OS STREQUAL "mac")
     # Tighten macOS too
     target_link_options(${TARGET_CPP_LIB} PRIVATE "-Wl,-undefined,error")
   endif()

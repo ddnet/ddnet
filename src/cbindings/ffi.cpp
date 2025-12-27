@@ -56,38 +56,38 @@ void ddnet_free(DdnetBindings* pSelf)
 // Game trait
 // ---------------------------------------------------------------------------
 
-void ddnet_player_join(DdnetBindings Self, uint32_t Id)
+void ddnet_player_join(DdnetBindings Self, int32_t Id)
 {
 	Lib(Self)->PlayerJoin(Id);
 }
 
-void ddnet_player_ready(DdnetBindings Self, uint32_t Id)
+void ddnet_player_ready(DdnetBindings Self, int32_t Id)
 {
 	Lib(Self)->PlayerReady(Id);
 }
 
-void ddnet_player_input(DdnetBindings Self, uint32_t Id, const CNetObj_PlayerInput *pInput)
+void ddnet_player_input(DdnetBindings Self, int32_t Id, const CNetObj_PlayerInput *pInput)
 {
 	Lib(Self)->PlayerInput(Id, pInput);
 }
 
-void ddnet_player_leave(DdnetBindings Self, uint32_t Id)
+void ddnet_player_leave(DdnetBindings Self, int32_t Id)
 {
 	Lib(Self)->PlayerLeave(Id);
 }
 
 
-void ddnet_player_net(DdnetBindings Self, uint32_t Id, const unsigned char *pNetMsg, uint32_t Len)
+void ddnet_player_net(DdnetBindings Self, int32_t Id, const unsigned char *pNetMsg, uint32_t Len)
 {
 	Lib(Self)->PlayerNet(Id, pNetMsg, Len);
 }
 
-void ddnet_on_command(DdnetBindings Self, uint32_t Id, const char *pCommand)
+void ddnet_on_command(DdnetBindings Self, int32_t Id, const char *pCommand)
 {
 	Lib(Self)->OnCommand(Id, pCommand);
 }
 
-void ddnet_swap_tees(DdnetBindings Self, uint32_t Id1, uint32_t Id2)
+void ddnet_swap_tees(DdnetBindings Self, int32_t Id1, int32_t Id2)
 {
 	Lib(Self)->SwapTees(Id1, Id2);
 }
@@ -105,27 +105,27 @@ void ddnet_tick(DdnetBindings Self, int32_t CurTime)
 // GameValidator trait
 // ---------------------------------------------------------------------------
 
-uint32_t ddnet_max_tee_id(DdnetBindings Self)
+int32_t ddnet_max_tee_id(DdnetBindings Self)
 {
 	return Lib(Self)->MaxTeeId();
 }
 
-int32_t ddnet_player_team(DdnetBindings Self, uint32_t Id)
+int32_t ddnet_player_team(DdnetBindings Self, int32_t Id)
 {
 	return Lib(Self)->PlayerTeam(Id);
 }
 
-void ddnet_set_player_team(DdnetBindings Self, uint32_t Id, int32_t Team)
+void ddnet_set_player_team(DdnetBindings Self, int32_t Id, int32_t Team)
 {
 	Lib(Self)->SetPlayerTeam(Id, Team);
 }
 
-void ddnet_tee_pos(DdnetBindings Self, uint32_t Id, bool *pHasPos, int32_t *pX, int32_t *pY)
+void ddnet_tee_pos(DdnetBindings Self, int32_t Id, bool *pHasPos, int32_t *pX, int32_t *pY)
 {
 	Lib(Self)->TeePos(Id, pHasPos, pX, pY);
 }
 
-void ddnet_set_tee_pos(DdnetBindings Self, uint32_t Id, bool HasPos, int32_t X, int32_t Y)
+void ddnet_set_tee_pos(DdnetBindings Self, int32_t Id, bool HasPos, int32_t X, int32_t Y)
 {
 	Lib(Self)->SetTeePos(Id, HasPos, X, Y);
 }
