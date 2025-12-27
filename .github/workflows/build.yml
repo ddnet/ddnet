@@ -39,11 +39,13 @@ jobs:
           cmake-args: -A x64 -DEXCEPTION_HANDLING=ON
           cmake-init-env: CXXFLAGS=/WX LDFLAGS=/WX
           package-file: "*-win64.zip"
+          executable-suffix: .exe
         - name: windows-latest-mingw
           os: windows-latest
           cmake-args: -G Ninja -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DEXCEPTION_HANDLING=ON -DCMAKE_RC_COMPILER=windres -DCMAKE_AR=ar
           cmake-init-env: CXXFLAGS=-Werror LDFLAGS=-Werror
           package-file: "*-win64.zip"
+          executable-suffix: .exe
           # Delete outdated libwinpthread-1.dll after configuring to workaround https://github.com/ddnet/ddnet/issues/10203 when using MinGW.
           # Adding this condition into the individual steps is not possible without using bash shell consistently, which does not work for windows-latest.
           workaround-issue10203-run-after-configure: rm libwinpthread-1.dll
@@ -179,6 +181,15 @@ jobs:
         ./DDNet-Server shutdown
 
     - name: Build headless client
+      if: ${{ !contains(matrix.os, 'ubuntu') }}
+      run: |
+        mkdir headless
+        cd headless
+        ${{ matrix.cmake-path }}cmake -E env ${{ matrix.cmake-init-env }} ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DHEADLESS_CLIENT=ON -DCMAKE_BUILD_TYPE=Debug -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=. ..
+        ${{ matrix.workaround-issue10203-run-after-configure }}
+        ${{ matrix.cmake-path }}cmake --build . --config Debug
+
+    - name: Build headless client with code coverage
       if: contains(matrix.os, 'ubuntu-latest')
       run: |
         mkdir headless
@@ -188,6 +199,12 @@ jobs:
         ${{ matrix.cmake-path }}cmake -E env RUSTFLAGS="-Clink-arg=--coverage" ${{ matrix.cmake-path }}cmake --build . --config Debug
 
     - name: Test headless client (unit tests)
+      if: ${{ !contains(matrix.os, 'ubuntu') }}
+      run: |
+        cd headless
+        ${{ matrix.cmake-path }}cmake --build . --config Debug --target run_tests
+
+    - name: Test headless client (unit tests) with code coverage
       if: contains(matrix.os, 'ubuntu-latest')
       run: |
         cd headless
@@ -220,12 +237,18 @@ jobs:
         cd fancy
         ./DDNet-Server shutdown
 
-    - name: Run integration tests with Valgrind's Memcheck
+    - name: Run integration tests
+      if: ${{ !contains(matrix.os, 'ubuntu') }}
+      run: |
+        cp src/mastersrv/target/debug/mastersrv${{ matrix.executable-suffix }} headless
+        python scripts/integration_test.py --show-full-output --test-mastersrv headless
+
+    - name: Run integration tests with Valgrind's Memcheck and code coverage
       if: contains(matrix.os, 'ubuntu-latest')
       run: |
         # Remove old coverage data:
         find headless -name '*.gcno' -o -name '*.gcda' -delete
-        cp src/mastersrv/target/debug/mastersrv headless
+        cp src/mastersrv/target/debug/mastersrv${{ matrix.executable-suffix }} headless
         python scripts/integration_test.py --show-full-output --test-mastersrv --valgrind-memcheck headless
 
     - name: Upload Codecov report (integration tests)
