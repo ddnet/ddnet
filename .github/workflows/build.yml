@@ -238,18 +238,53 @@ jobs:
         ./DDNet-Server shutdown
 
     - name: Run integration tests
+      id: integration_test
       if: ${{ !contains(matrix.os, 'ubuntu') }}
+      continue-on-error: true
       run: |
         cp src/mastersrv/target/debug/mastersrv${{ matrix.executable-suffix }} headless
         python scripts/integration_test.py --show-full-output --test-mastersrv headless
 
     - name: Run integration tests with Valgrind's Memcheck and code coverage
+      id: integration_test_valgrind
       if: contains(matrix.os, 'ubuntu-latest')
+      continue-on-error: true
       run: |
         # Remove old coverage data:
         find headless -name '*.gcno' -o -name '*.gcda' -delete
         cp src/mastersrv/target/debug/mastersrv${{ matrix.executable-suffix }} headless
         python scripts/integration_test.py --show-full-output --test-mastersrv --valgrind-memcheck headless
+
+    - name: Upload integration test results
+      id: integration_test_artifact_upload
+      if: steps.integration_test.outcome == 'failure' || steps.integration_test_valgrind.outcome == 'failure'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ddnet-${{ matrix.name }}-integration-test-results
+        path: headless/integration_*
+        if-no-files-found: error
+
+    - name: Summarize integration test results
+      if: steps.integration_test.outcome == 'failure' || steps.integration_test_valgrind.outcome == 'failure'
+      shell: bash
+      run: |
+        echo -e "\033[31mFAILED: Integration test failed. Refer to the workflow logs and uploaded artifacts in the steps above for details.\033[m"
+        echo "### Integration test failed" >> $GITHUB_STEP_SUMMARY
+        echo >> $GITHUB_STEP_SUMMARY
+        echo "See summary below. Refer to the workflow logs and uploaded artifacts for details." >> $GITHUB_STEP_SUMMARY
+        echo >> $GITHUB_STEP_SUMMARY
+        echo "Artifact URL: ${{ steps.integration_test_artifact_upload.outputs.artifact-url }}" >> $GITHUB_STEP_SUMMARY
+        for integration_dir in headless/integration_*; do
+          echo >> $GITHUB_STEP_SUMMARY
+          echo "<details><summary>Test $(basename "$integration_dir")</summary>" >> $GITHUB_STEP_SUMMARY
+          echo >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat "$integration_dir/test_failure.log" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo >> $GITHUB_STEP_SUMMARY
+          echo "</details>" >> $GITHUB_STEP_SUMMARY
+        done
+        exit 1
 
     - name: Upload Codecov report (integration tests)
       if: contains(matrix.os, 'ubuntu-latest')
