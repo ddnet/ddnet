@@ -735,11 +735,12 @@ def smoke_test(test_env):
 	client1.wait_for_log_prefix("chat/server: *** client1 finished in:", timeout=20)
 	client2.wait_for_log_prefix("chat/server: *** client1 finished in:", timeout=20)
 
+	# Wait for first client to quit before quitting second client, to avoid saving config to the same file at the same time.
 	client1.exit()
-	client2.exit()
-	server.exit()
 	client1.wait_for_exit()
+	client2.exit()
 	client2.wait_for_exit()
+	server.exit()
 	server.wait_for_exit()
 
 	if not all(any(word in line for line in client1.full_stdout) for word in "cmdlist pause rank points".split()):
