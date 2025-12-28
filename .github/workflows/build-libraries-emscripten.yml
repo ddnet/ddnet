@@ -1,0 +1,32 @@
+name: Build Emscripten (WebAssembly) libraries
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-libraries-emscripten:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Prepare Linux
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install autoconf automake cmake libtool m4 ninja-build
+        git clone https://github.com/emscripten-core/emsdk emsdk
+        cd emsdk
+        ./emsdk install 4.0.22
+        ./emsdk activate 4.0.22
+
+    - name: Build Emscripten (WebAssembly) libraries
+      run: |
+        source emsdk/emsdk_env.sh
+        export M4=/usr/bin/m4
+        scripts/compile_libs/gen_libs.sh build-webasm-libs webasm
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ddnet-libs-webasm
+        path: build-webasm-libs/ddnet-libs
