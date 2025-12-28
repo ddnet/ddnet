@@ -102,8 +102,8 @@ jobs:
     - name: Prepare macOS
       if: contains(matrix.os, 'macOS')
       run: |
-        brew update || true
-        brew install pkg-config sdl2 ffmpeg ninja molten-vk rust || true
+        brew update
+        brew install ffmpeg molten-vk ninja pkg-config rust sdl2
         brew upgrade freetype
         pip3 install --break-system-packages dmgbuild
         echo /Library/Frameworks/Python.framework/Versions/3.12/bin >> $GITHUB_PATH
