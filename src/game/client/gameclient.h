@@ -653,6 +653,8 @@ public:
 	void SendKill() const;
 	void SendReadyChange7();
 
+	void ApplyPreInputs(int Tick, bool Direct, CGameWorld &GameWorld);
+
 	int m_aNextChangeInfo[NUM_DUMMIES];
 
 	// DDRace
