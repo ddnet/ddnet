@@ -766,7 +766,9 @@ def smoke_test(test_env):
 	if not ranks:
 		raise AssertionError("no ranks found")
 	if ranks != expected_ranks:
-		raise AssertionError(f"unexpected ranks:\n{ranks}\n\n{expected_ranks}")
+		ranks_string = "\n".join([str(rank) for rank in ranks])
+		expected_ranks_string = "\n".join([str(rank) for rank in expected_ranks])
+		raise AssertionError(f"unexpected ranks.\n\nactual:\n{ranks_string}\n\nexpected:\n{expected_ranks_string}")
 
 
 @test(requires_mastersrv=True)
