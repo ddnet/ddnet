@@ -89,10 +89,10 @@ public:
 	virtual void SetSpeed(float Speed) = 0;
 	virtual void SetSpeedIndex(int SpeedIndex) = 0;
 	virtual void AdjustSpeedIndex(int Offset) = 0;
-	virtual int SeekPercent(float Percent) = 0;
-	virtual int SeekTime(float Seconds) = 0;
-	virtual int SeekTick(ETickOffset TickOffset) = 0;
-	virtual int SetPos(int WantedTick) = 0;
+	virtual bool SeekPercent(float Percent) = 0;
+	virtual bool SeekTime(float Seconds) = 0;
+	virtual bool SeekTick(ETickOffset TickOffset) = 0;
+	virtual bool SetPos(int WantedTick) = 0;
 	virtual void Pause() = 0;
 	virtual void Unpause() = 0;
 	virtual const char *ErrorMessage() const = 0;
