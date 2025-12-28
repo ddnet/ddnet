@@ -133,6 +133,7 @@ class TestRunner:
 					error = env.format_valgrind_memcheck_errors()
 					if error:
 						error = error + env.format_stdout_stderr()
+						tmp_dir_cleanup = False
 					else:
 						error = None
 		finally:
