@@ -25,13 +25,10 @@ class CConfig
 {
 public:
 #define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
-	static constexpr int ms_##Name = Def; \
 	int m_##Name;
 #define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) \
-	static constexpr unsigned ms_##Name = Def; \
 	unsigned m_##Name;
 #define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Flags, Desc) \
-	static constexpr const char *ms_p##Name = Def; \
 	char m_##Name[Len]; // Flawfinder: ignore
 #include "config_variables.h"
 #undef MACRO_CONFIG_INT
@@ -40,6 +37,20 @@ public:
 };
 
 extern CConfig g_Config;
+
+namespace DefaultConfig
+{
+#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
+	static constexpr int Name = Def;
+#define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) \
+	static constexpr unsigned Name = Def;
+#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Flags, Desc) \
+	static constexpr const char *const Name = Def;
+#include "config_variables.h"
+#undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_COL
+#undef MACRO_CONFIG_STR
+}
 
 enum
 {
