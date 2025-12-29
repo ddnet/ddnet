@@ -96,7 +96,7 @@ void CEmoticon::OnRender()
 		return;
 	}
 
-	if(GameClient()->m_Snap.m_SpecInfo.m_Active)
+	if(GameClient()->m_Snap.m_SpecInfo.m_Active || !GameClient()->m_Snap.m_pLocalCharacter)
 	{
 		m_Active = false;
 		m_WasActive = false;
