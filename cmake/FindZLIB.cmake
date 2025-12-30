@@ -8,7 +8,7 @@ if(NOT PREFER_BUNDLED_LIBS)
   endif()
 endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+if(TARGET_OS STREQUAL "emscripten")
   set_extra_dirs_lib(ZLIB zlib)
   find_library(ZLIB_LIBRARY
     NAMES z
