@@ -1642,8 +1642,6 @@ void CGameClient::OnNewSnapshot()
 		TempCore.Write(pCharacter);
 	};
 
-	ProcessEvents();
-
 	InvalidateSnapshot();
 
 	m_NewTick = true;
@@ -2035,6 +2033,9 @@ void CGameClient::OnNewSnapshot()
 			m_Controls.OnPlayerDeath();
 		}
 	}
+
+	ProcessEvents();
+
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		if(m_Snap.m_LocalClientId == -1 && m_DemoSpecId == SPEC_FOLLOW)

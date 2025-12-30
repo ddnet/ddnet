@@ -272,9 +272,7 @@ void CItems::RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent,
 
 void CItems::RenderTargetSwitch(const CNetObj_DDNetTargetSwitch *pData)
 {
-	if(pData->m_SwitchNumber < 0 || pData->m_SwitchNumber >= (int)GameClient()->Switchers().size())
-		return;
-	const vec2 Pos = vec2{(float)pData->m_X, (float)pData->m_Y};
+	const vec2 Pos = vec2(pData->m_X, pData->m_Y);
 	const int SwitchState = GameClient()->Switchers()[pData->m_SwitchNumber].m_aStatus[GameClient()->SwitchStateTeam()];
 	const bool Open = pData->m_Type == TARGETSWITCHTYPE_OPEN || (pData->m_Type == TARGETSWITCHTYPE_ALTERNATE && SwitchState);
 	const int QuadOffset = Open ? m_TargetSwitchOpenOffset : m_TargetSwitchCloseOffset;
@@ -282,7 +280,7 @@ void CItems::RenderTargetSwitch(const CNetObj_DDNetTargetSwitch *pData)
 
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 	Graphics()->QuadsSetRotation(0);
-	Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, QuadOffset, Pos.x, Pos.y, 1.2, 1.2);
+	Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, QuadOffset, Pos.x, Pos.y, 1.2f, 1.2f);
 	Graphics()->QuadsSetRotation(0);
 }
 
@@ -641,7 +639,7 @@ void CItems::OnRender()
 		}
 		else if(Item.m_Type == NETOBJTYPE_DDNETTARGETSWITCH)
 		{
-			CNetObj_DDNetTargetSwitch *pTargetSwitchNetObj = (CNetObj_DDNetTargetSwitch *)pData;
+			const CNetObj_DDNetTargetSwitch *pTargetSwitchNetObj = (const CNetObj_DDNetTargetSwitch *)pData;
 			if(pTargetSwitchNetObj->m_SwitchNumber > 0 && pTargetSwitchNetObj->m_SwitchNumber < (int)aSwitchers.size())
 			{
 				RenderTargetSwitch(pTargetSwitchNetObj);
