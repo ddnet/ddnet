@@ -817,7 +817,14 @@ void CScoreboard::OnRender()
 		return;
 
 	if(!IsActive())
+	{
+		// lock mouse if scoreboard was opened by being dead or game pause
+		if(m_MouseUnlocked)
+		{
+			LockMouse();
+		}
 		return;
+	}
 
 	if(!GameClient()->m_Menus.IsActive() && !GameClient()->m_Chat.IsActive())
 	{
