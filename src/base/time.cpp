@@ -19,16 +19,16 @@ void set_new_tick()
 
 static_assert(std::chrono::steady_clock::is_steady, "Compiler does not support steady clocks, it might be out of date.");
 static_assert(std::chrono::steady_clock::period::den / std::chrono::steady_clock::period::num >= 1000000000, "Compiler has a bad timer precision and might be out of date.");
-static const std::chrono::time_point<std::chrono::steady_clock> tw_start_time = std::chrono::steady_clock::now();
+static const std::chrono::time_point<std::chrono::steady_clock> GLOBAL_START_TIME = std::chrono::steady_clock::now();
 
 std::chrono::nanoseconds time_get_nanoseconds()
 {
-	return std::chrono::nanoseconds(time_get_impl());
+	return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - GLOBAL_START_TIME);
 }
 
 int64_t time_get_impl()
 {
-	return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - tw_start_time).count();
+	return time_get_nanoseconds().count();
 }
 
 int64_t time_get()
