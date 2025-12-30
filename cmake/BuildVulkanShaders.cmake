@@ -23,7 +23,7 @@ if(NOT GLSLANG_VALIDATOR_PROGRAM)
   endif()
 
   if(NOT GLSLANG_VALIDATOR_PROGRAM_FOUND)
-    message(FATAL_ERROR "glslangValidator binary was not found. Did you install the Vulkan SDK / packages?")
+    message(FATAL_ERROR "glslangValidator binary was not found. Install the Vulkan SDK / packages. Alternatively, set VULKAN=OFF to build without Vulkan.")
   endif()
 endif()
 
@@ -45,7 +45,7 @@ if(NOT SPIRV_OPTIMIZER_PROGRAM)
   endif()
 
   if(NOT SPIRV_OPTIMIZER_PROGRAM_FOUND)
-    message(FATAL_ERROR "spirv-opt binary was not found. Did you install the Vulkan SDK / packages?")
+    message(FATAL_ERROR "spirv-opt binary was not found. Install the Vulkan SDK / packages. Alternatively, set VULKAN=OFF to build without Vulkan.")
   endif()
 endif()
 

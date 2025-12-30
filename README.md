@@ -158,9 +158,9 @@ FLUSH PRIVILEGES;
 	Default value is OFF.
 
 * **-DVULKAN=[ON|OFF]** <br>
-	Whether to enable the vulkan backend.
-	On Windows you need to install the Vulkan SDK and set the `VULKAN_SDK` environment flag accordingly.
-	Default value is ON for Windows x86\_64 and Linux, and OFF for Windows x86 and macOS.
+	Whether to enable the Vulkan graphics backend.
+	You need to install the [Vulkan SDK](https://vulkan.lunarg.com/sdk/home) and set the `VULKAN_SDK` environment flag accordingly.
+	Default value is ON for Linux, and OFF for Windows and macOS.
 
 * **-GNinja** <br>
 	Use the Ninja build system instead of Make. This automatically parallelizes the build and is generally faster. Compile with `ninja` instead of `make`. Install Ninja with `sudo apt install ninja-build` on Debian, `sudo pacman -S --needed ninja` on Arch Linux.
@@ -241,7 +241,13 @@ On your tools hotbar next to the triangular "Run" Button, you can now select wha
 
 ## Building on Windows with standalone MSVC build tools
 
-First off you will need to install the MSVC [Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/), [Python 3](https://www.python.org/downloads/) as well as [Rust](https://www.rust-lang.org/tools/install).
+First off you will need to install the following dependencies:
+
+- [MSVC Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/),
+- [Python 3](https://www.python.org/downloads/windows/),
+- [Rust](https://www.rust-lang.org/tools/install).
+
+To compile with the Vulkan graphics backend (disabled by default), you also need to install the [Vulkan SDK](https://vulkan.lunarg.com/sdk/home).
 
 To compile and build DDNet on Windows, use your IDE of choice either with a CMake integration (e.g Visual Studio Code), or by ~~**deprecated**~~ using the CMake GUI.
 
@@ -249,7 +255,7 @@ Configure CMake to use the MSVC Build Tools appropriate to your System by your I
 
 If you're using Visual Studio Code, you can use the [CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools) extension to configure and build the project.
 
-You can then open the project folder in VSC and press `Ctrl+Shift+P` to open the command palette, then search for `CMake: Configure`
+You can then open the project folder in Visual Studio Code and press `Ctrl+Shift+P` to open the command palette, then search for `CMake: Configure`.
 
 This will open up a prompt for you to select a kit, select your `Visual Studio` version and save it. You can now use the GUI (bottom left) to compile and build your project.
 
