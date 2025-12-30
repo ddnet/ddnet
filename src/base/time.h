@@ -12,21 +12,29 @@
  * Time utilities.
  *
  * @defgroup Time Time
+ *
+ * @ref Timestamp
  */
 
 /**
  * Timestamp related functions.
  *
  * @defgroup Timestamp Timestamps
+ *
+ * @ref Time
  */
 
 /**
+ * Clears the cached sample of the high resolution timer.
+ *
  * @ingroup Time
+ *
+ * @see time_get
  */
 void set_new_tick();
 
 /**
- * Fetches a sample from a high resolution timer and converts it in nanoseconds.
+ * Fetches a sample from a high resolution timer and converts it to nanoseconds.
  *
  * @ingroup Time
  *
@@ -48,14 +56,15 @@ std::chrono::nanoseconds time_get_nanoseconds();
 int64_t time_get_impl();
 
 /**
- * Fetches a sample from a high resolution timer.
+ * Fetches a cached sample from a high resolution timer.
  *
  * @ingroup Time
  *
  * @return Current value of the timer.
  *
  * @remark To know how fast the timer is ticking, see @link time_freq @endlink.
- * @remark Uses @link time_get_impl @endlink to fetch the sample.
+ * @remark The value is cached for each tick, see @link set_new_tick @endlink.
+ *         Uses @link time_get_impl @endlink to fetch the uncached sample.
  *
  * @see time_freq time_get_impl
  */
@@ -87,6 +96,8 @@ int64_t time_timestamp();
 int time_houroftheday();
 
 /**
+ * A season of the year or seasonal event.
+ *
  * @ingroup Time
  */
 enum ETimeSeason
@@ -107,13 +118,11 @@ enum ETimeSeason
  * @ingroup Time
  *
  * @return One of the SEASON_* enum literals.
- *
- * @see SEASON_SPRING
  */
 ETimeSeason time_season();
 
 /**
- * Copies a timestamp in the format year-month-day_hour-minute-second to the string.
+ * Copies a timestamp of the current time in the format `year-month-day_hour-minute-second` to the string.
  *
  * @ingroup Timestamp
  *
@@ -123,7 +132,32 @@ ETimeSeason time_season();
  * @remark Guarantees that buffer string will contain null-termination.
  */
 void str_timestamp(char *buffer, int buffer_size);
+
+/**
+ * Copies a timestamp of the current time in the given format to the string.
+ *
+ * @ingroup Timestamp
+ *
+ * @param buffer Pointer to a buffer that shall receive the timestamp string.
+ * @param buffer_size Size of the buffer.
+ * @param format Time formatting string. See https://cppreference.com/w/c/chrono/strftime.html for format description.
+ *
+ * @remark Guarantees that buffer string will contain null-termination.
+ */
 [[gnu::format(strftime, 3, 0)]] void str_timestamp_format(char *buffer, int buffer_size, const char *format);
+
+/**
+ * Copies a timestamp of the given time in the given format to the string.
+ *
+ * @ingroup Timestamp
+ *
+ * @param time The time value to represent as a string.
+ * @param buffer Pointer to a buffer that shall receive the timestamp string.
+ * @param buffer_size Size of the buffer.
+ * @param format Time formatting string. See https://cppreference.com/w/c/chrono/strftime.html for format description.
+ *
+ * @remark Guarantees that buffer string will contain null-termination.
+ */
 [[gnu::format(strftime, 4, 0)]] void str_timestamp_ex(time_t time, char *buffer, int buffer_size, const char *format);
 
 /**
@@ -135,7 +169,7 @@ void str_timestamp(char *buffer, int buffer_size);
  * @param format The time format to use (for example `FORMAT_NOSPACE` below).
  * @param timestamp Pointer to the timestamp result.
  *
- * @return true on success, false if the string could not be parsed with the specified format
+ * @return `true` on success, `false` if the string could not be parsed with the specified format.
  */
 [[gnu::format(strftime, 2, 0)]] bool timestamp_from_str(const char *string, const char *format, time_t *timestamp);
 
