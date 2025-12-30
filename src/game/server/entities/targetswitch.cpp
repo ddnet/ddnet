@@ -97,7 +97,7 @@ void CTargetSwitch::GetHit(int ClientId, bool Weakly, int ForcedTeam)
 	}
 
 	// Hitting this switch changed something, provide feedback
-	if(PreviousSwitchStatus != Switchers()[m_Number].m_aStatus[TeamHitFrom])
+	if(PreviousSwitchStatus != Switchers()[m_Number].m_aStatus[TeamHitFrom] || m_Delay != 0)
 	{
 		GameServer()->CreateTargetHit(m_Pos, false, ClientId, Mask);
 	}
