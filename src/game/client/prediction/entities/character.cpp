@@ -485,10 +485,23 @@ void CCharacter::FireWeapon()
 
 	m_AttackTick = GameWorld()->GameTick(); // NOLINT(clang-analyzer-unix.Malloc)
 
+	if(m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo > 0)
+	{
+		m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo--;
+	}
+
 	// -1 is no weapon, handled here so pain sound still plays when firing in freeze
 	if(!m_ReloadTimer && m_Core.m_ActiveWeapon != -1)
 	{
 		m_ReloadTimer = GetTuning(GetOverriddenTuneZone())->GetWeaponFireDelay(m_Core.m_ActiveWeapon) * GameWorld()->GameTickSpeed();
+	}
+
+	if(GameWorld()->m_WorldConfig.m_IsDDRace && m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo == 0)
+	{
+		SetWeaponGot(m_Core.m_ActiveWeapon, false);
+		SetLastWeapon(WEAPON_GUN);
+		GameWorld()->CreatePredictedSound(m_Pos, SOUND_WEAPON_NOAMMO, GetCid());
+		SetActiveWeapon(WEAPON_HAMMER);
 	}
 }
 

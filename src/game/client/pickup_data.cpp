@@ -39,6 +39,7 @@ CPickupData ExtractPickupInfoDDNet(const CNetObj_DDNetPickup *pPickup)
 	Result.m_Subtype = pPickup->m_Subtype;
 	Result.m_SwitchNumber = pPickup->m_SwitchNumber;
 	Result.m_Flags = pPickup->m_Flags;
+	Result.m_SwitchDelay = pPickup->m_SwitchDelay;
 
 	return Result;
 }

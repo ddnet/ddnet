@@ -379,11 +379,11 @@ const char *CExplanations::ExplainDDNet(int Tile, int Layer)
 		break;
 	case ENTITY_OFFSET + ENTITY_WEAPON_SHOTGUN:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
-			return "SHOTGUN: Drags the tees towards it. Bounces off the walls.";
+			return "SHOTGUN: Drags the tees towards it. Bounces off the walls. Use a switch layer delay to set a limited number of ammo.";
 		break;
 	case ENTITY_OFFSET + ENTITY_WEAPON_GRENADE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
-			return "GRENADE LAUNCHER: Throws exploding bullets. Also known as rocket.";
+			return "GRENADE LAUNCHER: Throws exploding bullets. Also known as rocket. Use a switch layer delay to set a limited number of ammo.";
 		break;
 	case ENTITY_OFFSET + ENTITY_POWERUP_NINJA:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
@@ -391,7 +391,7 @@ const char *CExplanations::ExplainDDNet(int Tile, int Layer)
 		break;
 	case ENTITY_OFFSET + ENTITY_WEAPON_LASER:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
-			return "LASER: Unfreezes hit tee. Bounces off the walls. Also known as laser.";
+			return "LASER: Unfreezes hit tee. Bounces off the walls. Also known as laser. Use a switch layer delay to set a limited number of ammo.";
 		break;
 	case ENTITY_OFFSET + ENTITY_LASER_FAST_CCW:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
