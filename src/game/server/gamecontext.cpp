@@ -2790,6 +2790,7 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 
 		// reload scores
 		Score()->PlayerData(ClientId)->Reset();
+		Server()->SetClientScore(ClientId, std::nullopt);
 		Score()->LoadPlayerData(ClientId);
 
 		SixupNeedsUpdate = true;
