@@ -909,8 +909,28 @@ void CInput::ProcessSystemMessage(SDL_SysWMmsg *pMsg)
 #endif
 }
 
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+extern "C" {
+
+// This will be called from Emscripten JS code
+char aEmscriptenDropFile[IO_MAX_PATH_LENGTH] = "";
+void EmscriptenCallbackDropFile(const char *pFile)
+{
+	str_copy(aEmscriptenDropFile, pFile);
+}
+}
+#endif
+
 bool CInput::GetDropFile(char *aBuf, int Len)
 {
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+	if(aEmscriptenDropFile[0] != '\0')
+	{
+		str_copy(aBuf, aEmscriptenDropFile, Len);
+		aEmscriptenDropFile[0] = '\0';
+		return true;
+	}
+#endif
 	if(m_aDropFile[0] != '\0')
 	{
 		str_copy(aBuf, m_aDropFile, Len);

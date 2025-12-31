@@ -66,6 +66,78 @@
 				output.scrollTop = output.scrollHeight;
 				Module['canvas'].style.display = "none";
 			};
+			Module['canvas'].addEventListener('dragover', e => {
+				e.preventDefault();
+				e.dataTransfer.dropEffect = "none";
+				if (!e.dataTransfer.items) {
+					return;
+				}
+				for (const item of e.dataTransfer.items) {
+					if (item.kind == 'file' || item.kind == 'string') {
+						e.dataTransfer.dropEffect = "copy";
+						return;
+					}
+				}
+			});
+			Module['canvas'].addEventListener('drop', async e => {
+				e.preventDefault();
+				if (!e.dataTransfer.items) {
+					return;
+				}
+				var dropFile = null;
+				var dropPath = null;
+				var dropLink = null;
+				for (const item of e.dataTransfer.items) {
+					if (item.kind == 'file') {
+						const file = item.getAsFile();
+						const isDemo = file.name.endsWith(".demo");
+						const isMap = file.name.endsWith(".map");
+						const homePath = "/home/web_user/.local/share/ddnet"
+						var path;
+						if (isDemo) {
+							path = `${homePath}/demos`
+						} else if (isMap) {
+							path = `${homePath}/maps`
+						} else {
+							continue;
+						}
+						if (dropLink != null) {
+							alert("You cannot drop files and links at the same time.");
+							break;
+						}
+						if (dropFile != null) {
+							alert("You cannot open multiple files at the same time. Only the first file will be opened.");
+							break;
+						}
+						dropFile = file;
+						dropPath = path;
+					} else if (item.kind == 'string') {
+						const string = e.dataTransfer.getData(item.type);
+						if (string.startsWith('ddnet://')) {
+							if (dropFile != null) {
+								alert("You cannot drop files and links at the same time.");
+								break;
+							}
+							if (dropLink != null && dropLink != string) {
+								alert("You cannot connect to multiple URLs at the same time. You will be connected to the first URL.");
+								break;
+							}
+							dropLink = string;
+						}
+					}
+				}
+				if (dropFile != null) {
+					const buffer = await dropFile.arrayBuffer();
+					const data = new Uint8Array(buffer);
+					FS.createPath(dropPath, "upload", true, true);
+					FS.writeFile(`${dropPath}/upload/${dropFile.name}`, data);
+					Module.ccall('EmscriptenCallbackDropFile', null, ['string'], [`${dropPath}/upload/${dropFile.name}`]);
+				} else if (dropLink != null) {
+					Module.ccall('EmscriptenCallbackDropFile', null, ['string'], [dropLink]);
+				} else {
+					alert("The items you dropped are not supported. You can drop .demo and .map files, as well as ddnet:// links.");
+				}
+			});
 		</script>
 		<script src="DDNet.js"></script>
 	</body>
