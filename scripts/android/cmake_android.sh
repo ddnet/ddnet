@@ -112,6 +112,24 @@ fi
 
 export TW_VERSION_NAME=$ANDROID_VERSION_NAME
 
+if [ -z ${SOURCE_DATE_EPOCH+x} ]; then
+	if SOURCE_DATE_EPOCH="$(git log -1 --format=%ct 2> /dev/null)"; then
+		export SOURCE_DATE_EPOCH
+	elif [ -e source_date_epoch ]; then
+		SOURCE_DATE_EPOCH="$(cat source_date_epoch)"
+		export SOURCE_DATE_EPOCH
+	else
+		unset SOURCE_DATE_EPOCH
+		if [ -z ${TW_ALLOW_NON_REPRODUCIBLE_BUILD+x} ]; then
+			log_warn "Building non-reproducibly"
+		else
+			log_error "Cannot build reproducibly: Source directory not in git repository, not from an official source download and \`SOURCE_DATE_EPOCH\` is unset."
+			log_error "Set \`TW_ALLOW_NON_REPRODUCIBLE_BUILD=1\` to build unreproducibly and ignore this check."
+			exit 1
+		fi
+	fi
+fi
+
 function build_for_type() {
 	# Remove absolute build paths from binary
 	build_extra_cflags="-ffile-prefix-map=${ANDROID_TOOLCHAIN_ROOT}=ANDROID_TOOLCHAIN_ROOT"
@@ -119,17 +137,6 @@ function build_for_type() {
 		build_extra_cflags="${build_extra_cflags} ${ANDROID_EXTRA_RELEASE_CFLAGS}"
 	fi
 
-	if [[ -n ${SOURCE_DATE_EPOCH:-} ]]; then
-		: # Prefer the explicitly passed date
-	elif [[ -f source_date_epoch ]]; then
-		SOURCE_DATE_EPOCH=$(cat source_date_epoch)
-	elif git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
-		SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
-	else
-		log_error "For reproducibility build inside a git repository, or provide either a SOURCE_DATE_EPOCH env. variable or source_date_epoch file, containing the seconds since Jan 1, 1970, 00:00:00 UTC"
-		exit 1
-	fi
-	export SOURCE_DATE_EPOCH
 	cmake \
 		-H. \
 		-G "Ninja" \
