@@ -487,12 +487,25 @@ void CCharacter::FireWeapon()
 
 	m_AttackTick = GameWorld()->GameTick(); // NOLINT(clang-analyzer-unix.Malloc)
 
+	if(m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo > 0)
+	{
+		m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo--;
+	}
+
 	if(!m_ReloadTimer)
 	{
 		float FireDelay;
 		GetTuning(GetOverriddenTuneZone())->Get(offsetof(CTuningParams, m_HammerFireDelay) / sizeof(CTuneParam) + m_Core.m_ActiveWeapon, &FireDelay);
 
 		m_ReloadTimer = FireDelay * GameWorld()->GameTickSpeed() / 1000;
+	}
+
+	if(GameWorld()->m_WorldConfig.m_IsDDRace && m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo == 0)
+	{
+		SetWeaponGot(m_Core.m_ActiveWeapon, false);
+		SetLastWeapon(WEAPON_GUN);
+		GameWorld()->CreatePredictedSound(m_Pos, SOUND_WEAPON_NOAMMO, GetCid());
+		SetActiveWeapon(WEAPON_HAMMER);
 	}
 }
 

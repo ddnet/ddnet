@@ -156,7 +156,7 @@ bool CSaveTee::Load(CCharacter *pChr, std::optional<int> Team)
 	{
 		pChr->m_Core.m_aWeapons[i].m_AmmoRegenStart = m_aWeapons[i].m_AmmoRegenStart;
 		// m_Ammo not used anymore for tracking freeze following https://github.com/ddnet/ddnet/pull/2086
-		pChr->m_Core.m_aWeapons[i].m_Ammo = -1;
+		pChr->m_Core.m_aWeapons[i].m_Ammo = m_aWeapons[i].m_Ammo;
 		pChr->m_Core.m_aWeapons[i].m_Ammocost = m_aWeapons[i].m_Ammocost;
 		pChr->m_Core.m_aWeapons[i].m_Got = m_aWeapons[i].m_Got;
 	}

@@ -317,6 +317,7 @@ Objects = [
 		NetIntRange("m_Subtype", 0, 'max_int'),
 		NetIntAny("m_SwitchNumber"),
 		NetIntAny("m_Flags", default=0),
+		NetIntAny("m_SwitchDelay", default=0),
 	]),
 
 	NetObjectEx("DDNetSpectatorInfo", "spectator-info@netobj.ddnet.org", [

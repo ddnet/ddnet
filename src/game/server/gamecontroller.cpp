@@ -180,7 +180,7 @@ bool IGameController::CanSpawn(int Team, vec2 *pOutPos, int ClientId)
 	return Eval.m_Got;
 }
 
-bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
+bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number, int Delay)
 {
 	dbg_assert(Index >= 0, "Invalid entity index");
 
@@ -391,7 +391,7 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 	if(Type != -1) // NOLINT(clang-analyzer-unix.Malloc)
 	{
 		int PickupFlags = TileFlagsToPickupFlags(Flags);
-		CPickup *pPickup = new CPickup(&GameServer()->m_World, Type, SubType, Layer, Number, PickupFlags);
+		CPickup *pPickup = new CPickup(&GameServer()->m_World, Type, SubType, Layer, Number, PickupFlags, Delay);
 		pPickup->m_Pos = Pos;
 		return true; // NOLINT(clang-analyzer-unix.Malloc)
 	}
@@ -643,7 +643,9 @@ void IGameController::Snap(int SnappingClient)
 		GAMEINFOFLAG_ENTITIES_DDRACE |
 		GAMEINFOFLAG_ENTITIES_RACE |
 		GAMEINFOFLAG_RACE;
-	pGameInfoEx->m_Flags2 = GAMEINFOFLAG2_HUD_DDRACE | GAMEINFOFLAG2_DDRACE_TEAM | GAMEINFOFLAG2_PREDICT_EVENTS;
+	pGameInfoEx->m_Flags2 =
+		GAMEINFOFLAG2_HUD_DDRACE | GAMEINFOFLAG2_DDRACE_TEAM |
+		GAMEINFOFLAG2_PREDICT_EVENTS | GAMEINFOFLAG2_HUD_AMMO;
 	if(g_Config.m_SvNoWeakHook)
 		pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_NO_WEAK_HOOK;
 	pGameInfoEx->m_Version = GAMEINFO_CURVERSION;
