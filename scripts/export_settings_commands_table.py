@@ -40,6 +40,7 @@ def parse_arguments(arguments_line, num, name):
 
 def parse_flags(flags_str, name):
 	flags = flags_str.split(" | ")
+	flags = ["CFGFLAG_SERVER" if flag == "CFGFLAG_DEBUG_SERVER" else flag for flag in flags]
 	for flag in flags:
 		if flag not in SUPPORTED_COMMAND_FLAGS:
 			raise RuntimeError(f"Failed to parse {name} with unknown flag: {flag}")
