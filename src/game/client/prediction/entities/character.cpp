@@ -456,6 +456,11 @@ void CCharacter::FireWeapon()
 
 	m_AttackTick = GameWorld()->GameTick(); // NOLINT(clang-analyzer-unix.Malloc)
 
+	if(m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo > 0)
+	{
+		m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo--;
+	}
+
 	if(!m_ReloadTimer)
 	{
 		float FireDelay;
@@ -1179,7 +1184,14 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove)
 	}
 	else
 	{
-		m_Core.m_aWeapons[Weapon].m_Ammo = Ammo::INFINITE;
+		if(GameWorld()->m_WorldConfig.m_IsVanilla)
+		{
+			m_Core.m_aWeapons[Weapon].m_Ammo = g_pData->m_Weapons.m_aId[Weapon].m_Maxammo;
+		}
+		else
+		{
+			m_Core.m_aWeapons[Weapon].m_Ammo = Ammo::INFINITE;
+		}
 	}
 
 	m_Core.m_aWeapons[Weapon].m_Got = !Remove;

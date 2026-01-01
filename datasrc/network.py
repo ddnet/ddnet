@@ -206,6 +206,7 @@ Objects = [
 		NetIntRange("m_PlayerFlags", 0, 256),
 		NetIntRange("m_Health", 0, 10),
 		NetIntRange("m_Armor", 0, 10),
+		# -1 is infinite ammo, 0 to 10 is normal ammo count
 		NetIntRange("m_AmmoCount", 'Ammo::INFINITE', 'Ammo::MAX'),
 		NetIntRange("m_Weapon", -1, 'NUM_WEAPONS-1'),
 		NetIntRange("m_Emote", 0, len(Emotes)),
