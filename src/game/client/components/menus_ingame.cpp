@@ -465,6 +465,11 @@ void CMenus::PopupConfirmTurnOffEditor()
 	}
 }
 
+void CMenus::PopupConfirmOpenWiki()
+{
+	Client()->ViewLink(Localize("https://wiki.ddnet.org/wiki/Touch_controls"));
+}
+
 void CMenus::RenderPlayers(CUIRect MainView)
 {
 	CUIRect Button, Button2, ButtonBar, PlayerList, Player;

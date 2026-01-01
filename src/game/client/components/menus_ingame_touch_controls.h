@@ -171,6 +171,9 @@ public:
 	std::string DetermineTouchButtonCommandLabel(CTouchControls::CTouchButton *pButton) const;
 	const char **VisibilityNames() const;
 	const char **PredefinedNames() const;
+	const char *HelpMessageForBehaviorType(EBehaviorType Type) const;
+	const char *HelpMessageForPredefinedType(EPredefinedType Type) const;
+	const char *HelpMessageForVisibilityType(CTouchControls::EButtonVisibility Type) const;
 
 	class CBehaviorFactoryEditor
 	{
