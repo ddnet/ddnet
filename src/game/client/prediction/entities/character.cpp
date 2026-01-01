@@ -487,7 +487,7 @@ void CCharacter::GiveNinja()
 	m_Core.m_Ninja.m_ActivationTick = GameWorld()->GameTick();
 	m_Core.m_aWeapons[WEAPON_NINJA].m_Got = true;
 	if(m_FreezeTime == 0)
-		m_Core.m_aWeapons[WEAPON_NINJA].m_Ammo = -1;
+		m_Core.m_aWeapons[WEAPON_NINJA].m_Ammo = Ammo::INFINITE;
 	if(m_Core.m_ActiveWeapon != WEAPON_NINJA)
 		m_LastWeapon = m_Core.m_ActiveWeapon;
 	SetActiveWeapon(WEAPON_NINJA);
@@ -1179,7 +1179,7 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove)
 	}
 	else
 	{
-		m_Core.m_aWeapons[Weapon].m_Ammo = -1;
+		m_Core.m_aWeapons[Weapon].m_Ammo = Ammo::INFINITE;
 	}
 
 	m_Core.m_aWeapons[Weapon].m_Got = !Remove;
@@ -1283,7 +1283,7 @@ void CCharacter::ResetPrediction()
 	for(int w = 0; w < NUM_WEAPONS; w++)
 	{
 		SetWeaponGot(w, false);
-		SetWeaponAmmo(w, -1);
+		SetWeaponAmmo(w, Ammo::INFINITE);
 	}
 	if(m_Core.HookedPlayer() >= 0)
 	{
@@ -1367,7 +1367,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		{
 			m_Core.m_Jetpack = true;
 			m_Core.m_aWeapons[WEAPON_GUN].m_Got = true;
-			m_Core.m_aWeapons[WEAPON_GUN].m_Ammo = -1;
+			m_Core.m_aWeapons[WEAPON_GUN].m_Ammo = Ammo::INFINITE;
 			m_NinjaJetpack = pChar->m_Weapon == WEAPON_NINJA;
 		}
 		else if(pChar->m_Weapon != WEAPON_NINJA)
@@ -1432,7 +1432,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 	// set the current weapon
 	if(pChar->m_Weapon >= 0 && pChar->m_Weapon != WEAPON_NINJA)
 	{
-		m_Core.m_aWeapons[pChar->m_Weapon].m_Ammo = (GameWorld()->m_WorldConfig.m_InfiniteAmmo || pChar->m_Weapon == WEAPON_HAMMER) ? -1 : pChar->m_AmmoCount;
+		m_Core.m_aWeapons[pChar->m_Weapon].m_Ammo = (GameWorld()->m_WorldConfig.m_InfiniteAmmo || pChar->m_Weapon == WEAPON_HAMMER) ? Ammo::INFINITE : pChar->m_AmmoCount;
 		if(pChar->m_Weapon != m_Core.m_ActiveWeapon)
 			SetActiveWeapon(pChar->m_Weapon);
 	}
