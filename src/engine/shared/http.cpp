@@ -18,11 +18,6 @@
 
 #include <curl/curl.h>
 
-// There is a stray constant on Windows/MSVC...
-#ifdef ERROR
-#undef ERROR
-#endif
-
 static int CurlDebug(CURL *pHandle, curl_infotype Type, char *pData, size_t DataSize, void *pUser)
 {
 	char TypeChar;
