@@ -1440,6 +1440,9 @@ public:
 
 	void TextEx(CTextCursor *pCursor, const char *pText, int Length = -1) override
 	{
+		if(pText[0] == '\0')
+			return;
+
 		const unsigned OldRenderFlags = m_RenderFlags;
 		m_RenderFlags |= TEXT_RENDER_FLAG_ONE_TIME_USE;
 		STextContainerIndex TextCont;
