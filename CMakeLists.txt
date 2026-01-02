@@ -1520,7 +1520,7 @@ set(EXPECTED_DATA
   mapres/generic_clear.png
   mapres/generic_deathtiles.png
   mapres/generic_lamps.png
-  mapres/generic_shadows_0.7.png
+  mapres/generic_shadows.png
   mapres/generic_unhookable.png
   mapres/generic_unhookable_0.7.png
   mapres/grass_doodads.png
