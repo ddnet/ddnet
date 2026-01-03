@@ -3,10 +3,15 @@
 #include "controls.h"
 
 #include <base/math.h>
+#include <base/str.h>
+#include <base/system.h>
+#include <base/time.h>
 #include <base/vmath.h>
 
 #include <engine/client.h>
 #include <engine/shared/config.h>
+#include <engine/shared/linereader.h>
+#include <engine/storage.h>
 
 #include <generated/protocol.h>
 
@@ -35,6 +40,8 @@ void CControls::OnReset()
 		AmmoCount = 0;
 
 	m_LastSendTime = 0;
+	StopTasPlayback();
+	StopTasRecording(false);
 }
 
 void CControls::ResetInput(int Dummy)
@@ -166,6 +173,10 @@ void CControls::OnConsoleInit()
 		static CInputSet s_Set = {this, {&m_aInputData[0].m_PrevWeapon, &m_aInputData[1].m_PrevWeapon}, 0};
 		Console()->Register("+prevweapon", "", CFGFLAG_CLIENT, ConKeyInputNextPrevWeapon, &s_Set, "Switch to previous weapon");
 	}
+
+	Console()->Register("tas_record", "?s[filename]", CFGFLAG_CLIENT, ConTasRecord, this, "Record TAS inputs to tas/<filename>.tas");
+	Console()->Register("tas_play", "s[filename]", CFGFLAG_CLIENT, ConTasPlay, this, "Play TAS inputs from tas/<filename>.tas");
+	Console()->Register("tas_stop", "", CFGFLAG_CLIENT, ConTasStop, this, "Stop TAS recording/playback");
 }
 
 void CControls::OnMessage(int Msg, void *pRawMsg)
@@ -182,6 +193,24 @@ void CControls::OnMessage(int Msg, void *pRawMsg)
 
 int CControls::SnapInput(int *pData)
 {
+	if(m_TasPlaying)
+	{
+		if(m_TasPlaybackIndex >= m_vTasInputs.size())
+		{
+			StopTasPlayback();
+		}
+		else
+		{
+			const CNetObj_PlayerInput &Input = m_vTasInputs[m_TasPlaybackIndex++];
+			m_aInputData[g_Config.m_ClDummy] = Input;
+			m_aLastData[g_Config.m_ClDummy] = Input;
+			m_aMousePos[g_Config.m_ClDummy] = vec2(Input.m_TargetX, Input.m_TargetY);
+			m_LastSendTime = time_get();
+			mem_copy(pData, &m_aInputData[g_Config.m_ClDummy], sizeof(m_aInputData[0]));
+			return sizeof(m_aInputData[0]);
+		}
+	}
+
 	// update player state
 	if(GameClient()->m_Chat.IsActive())
 		m_aInputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_CHATTING;
@@ -327,12 +356,238 @@ int CControls::SnapInput(int *pData)
 	// copy and return size
 	m_aLastData[g_Config.m_ClDummy] = m_aInputData[g_Config.m_ClDummy];
 
+	if(m_TasRecording)
+	{
+		m_vTasInputs.push_back(m_aInputData[g_Config.m_ClDummy]);
+	}
+
 	if(!Send)
 		return 0;
 
 	m_LastSendTime = time_get();
 	mem_copy(pData, &m_aInputData[g_Config.m_ClDummy], sizeof(m_aInputData[0]));
 	return sizeof(m_aInputData[0]);
+}
+
+void CControls::ConTasRecord(IConsole::IResult *pResult, void *pUserData)
+{
+	auto *pControls = static_cast<CControls *>(pUserData);
+	char aName[IO_MAX_PATH_LENGTH];
+	if(pResult->NumArguments() > 0)
+	{
+		str_copy(aName, pResult->GetString(0));
+	}
+	else
+	{
+		char aTimestamp[32];
+		str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_NOSPACE);
+		str_format(aName, sizeof(aName), "tas_%s", aTimestamp);
+	}
+	pControls->StartTasRecording(aName);
+}
+
+void CControls::ConTasPlay(IConsole::IResult *pResult, void *pUserData)
+{
+	auto *pControls = static_cast<CControls *>(pUserData);
+	pControls->StartTasPlayback(pResult->GetString(0));
+}
+
+void CControls::ConTasStop(IConsole::IResult *pResult, void *pUserData)
+{
+	auto *pControls = static_cast<CControls *>(pUserData);
+	pControls->StopTasPlayback();
+	pControls->StopTasRecording(true);
+}
+
+void CControls::StartTasRecording(const char *pFilename)
+{
+	if(m_TasRecording)
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tas", "Already recording TAS inputs.");
+		return;
+	}
+	StopTasPlayback();
+
+	char aName[IO_MAX_PATH_LENGTH];
+	str_copy(aName, pFilename);
+	str_sanitize_filename(aName);
+	if(str_endswith(aName, ".tas"))
+		aName[str_length(aName) - str_length(".tas")] = '\0';
+	if(aName[0] == '\0')
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tas", "Invalid TAS filename.");
+		return;
+	}
+
+	Storage()->CreateFolder("tas", IStorage::TYPE_SAVE);
+	str_format(m_aTasFilename, sizeof(m_aTasFilename), "tas/%s.tas", aName);
+	m_vTasInputs.clear();
+	m_TasRecording = true;
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tas", "Started TAS recording.");
+}
+
+void CControls::StopTasRecording(bool SaveToFile)
+{
+	if(!m_TasRecording)
+		return;
+
+	if(SaveToFile)
+	{
+		if(SaveTasFile(m_aTasFilename))
+		{
+			char aMsg[IO_MAX_PATH_LENGTH + 64];
+			str_format(aMsg, sizeof(aMsg), "Saved TAS recording to '%s'.", m_aTasFilename);
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tas", aMsg);
+		}
+		else
+		{
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tas", "Failed to save TAS recording.");
+		}
+	}
+	m_TasRecording = false;
+	m_vTasInputs.clear();
+	m_aTasFilename[0] = '\0';
+}
+
+void CControls::StartTasPlayback(const char *pFilename)
+{
+	if(m_TasPlaying)
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tas", "Already playing TAS inputs.");
+		return;
+	}
+	StopTasRecording(true);
+
+	char aName[IO_MAX_PATH_LENGTH];
+	str_copy(aName, pFilename);
+	str_sanitize_filename(aName);
+	if(str_endswith(aName, ".tas"))
+		aName[str_length(aName) - str_length(".tas")] = '\0';
+	if(aName[0] == '\0')
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tas", "Invalid TAS filename.");
+		return;
+	}
+
+	char aPath[IO_MAX_PATH_LENGTH];
+	str_format(aPath, sizeof(aPath), "tas/%s.tas", aName);
+	if(!LoadTasFile(aPath))
+		return;
+
+	m_TasPlaybackIndex = 0;
+	m_TasPlaying = true;
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tas", "Started TAS playback.");
+}
+
+void CControls::StopTasPlayback()
+{
+	if(!m_TasPlaying)
+		return;
+
+	m_TasPlaying = false;
+	m_TasPlaybackIndex = 0;
+	m_vTasInputs.clear();
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tas", "Stopped TAS playback.");
+}
+
+bool CControls::SaveTasFile(const char *pFilename) const
+{
+	IOHANDLE File = Storage()->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	if(!File)
+		return false;
+
+	const char *pHeader = "TAS1\n";
+	io_write(File, pHeader, str_length(pHeader));
+
+	char aLine[256];
+	for(const auto &Input : m_vTasInputs)
+	{
+		str_format(aLine, sizeof(aLine), "%d %d %d %d %d %d %d %d %d %d\n",
+			Input.m_Direction,
+			Input.m_Jump,
+			Input.m_Fire,
+			Input.m_Hook,
+			Input.m_WantedWeapon,
+			Input.m_NextWeapon,
+			Input.m_PrevWeapon,
+			Input.m_TargetX,
+			Input.m_TargetY,
+			Input.m_PlayerFlags);
+		io_write(File, aLine, str_length(aLine));
+	}
+
+	io_close(File);
+	return true;
+}
+
+bool CControls::LoadTasFile(const char *pFilename)
+{
+	CLineReader LineReader;
+	if(!LineReader.OpenFile(Storage()->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_SAVE)))
+	{
+		char aMsg[IO_MAX_PATH_LENGTH + 64];
+		str_format(aMsg, sizeof(aMsg), "Failed to load TAS file '%s'.", pFilename);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tas", aMsg);
+		return false;
+	}
+
+	m_vTasInputs.clear();
+	bool HeaderHandled = false;
+	while(const char *pLine = LineReader.Get())
+	{
+		if(pLine[0] == '\0' || pLine[0] == '#')
+			continue;
+
+		if(!HeaderHandled)
+		{
+			HeaderHandled = true;
+			if(str_comp(pLine, "TAS1") == 0)
+				continue;
+		}
+
+		CNetObj_PlayerInput Input;
+		if(!ParseTasLine(pLine, Input))
+			continue;
+		m_vTasInputs.push_back(Input);
+	}
+
+	if(m_vTasInputs.empty())
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tas", "TAS file is empty or invalid.");
+		return false;
+	}
+
+	return true;
+}
+
+bool CControls::ParseTasLine(const char *pLine, CNetObj_PlayerInput &Input)
+{
+	const char *pCursor = pLine;
+	char aToken[64];
+	int aValues[10];
+	for(int i = 0; i < 10; i++)
+	{
+		if(!pCursor)
+			return false;
+		pCursor = str_next_token(pCursor, " \t", aToken, sizeof(aToken));
+		if(aToken[0] == '\0')
+			return false;
+		if(!str_toint(aToken, &aValues[i]))
+			return false;
+	}
+
+	mem_zero(&Input, sizeof(Input));
+	Input.m_Direction = aValues[0];
+	Input.m_Jump = aValues[1];
+	Input.m_Fire = aValues[2];
+	Input.m_Hook = aValues[3];
+	Input.m_WantedWeapon = aValues[4];
+	Input.m_NextWeapon = aValues[5];
+	Input.m_PrevWeapon = aValues[6];
+	Input.m_TargetX = aValues[7];
+	Input.m_TargetY = aValues[8];
+	Input.m_PlayerFlags = aValues[9];
+	return true;
 }
 
 void CControls::OnRender()
