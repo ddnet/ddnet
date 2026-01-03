@@ -457,6 +457,8 @@ void CPlayer::Snap(int SnappingClient)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_SPEC;
 	if(m_Paused == PAUSE_PAUSED)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_PAUSED;
+	if(GameServer()->m_pController->Teams().IsTeamLeader(m_ClientId))
+		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_TEAMLEADER;
 
 	std::optional<float> BestTime = GameServer()->Score()->PlayerData(m_ClientId)->m_BestTime;
 
