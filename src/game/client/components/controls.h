@@ -3,6 +3,7 @@
 #ifndef GAME_CLIENT_COMPONENTS_CONTROLS_H
 #define GAME_CLIENT_COMPONENTS_CONTROLS_H
 
+#include <base/types.h>
 #include <base/vmath.h>
 
 #include <engine/client.h>
@@ -11,6 +12,8 @@
 #include <generated/protocol.h>
 
 #include <game/client/component.h>
+
+#include <vector>
 
 class CControls : public CComponent
 {
@@ -59,5 +62,23 @@ private:
 	static void ConKeyInputCounter(IConsole::IResult *pResult, void *pUserData);
 	static void ConKeyInputSet(IConsole::IResult *pResult, void *pUserData);
 	static void ConKeyInputNextPrevWeapon(IConsole::IResult *pResult, void *pUserData);
+
+	static void ConTasRecord(IConsole::IResult *pResult, void *pUserData);
+	static void ConTasPlay(IConsole::IResult *pResult, void *pUserData);
+	static void ConTasStop(IConsole::IResult *pResult, void *pUserData);
+
+	void StartTasRecording(const char *pFilename);
+	void StopTasRecording(bool SaveToFile);
+	void StartTasPlayback(const char *pFilename);
+	void StopTasPlayback();
+	bool SaveTasFile(const char *pFilename) const;
+	bool LoadTasFile(const char *pFilename);
+	static bool ParseTasLine(const char *pLine, CNetObj_PlayerInput &Input);
+
+	bool m_TasRecording = false;
+	bool m_TasPlaying = false;
+	size_t m_TasPlaybackIndex = 0;
+	std::vector<CNetObj_PlayerInput> m_vTasInputs;
+	char m_aTasFilename[IO_MAX_PATH_LENGTH] = {};
 };
 #endif
