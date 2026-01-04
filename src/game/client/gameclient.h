@@ -487,6 +487,7 @@ public:
 		bool m_Afk;
 		bool m_Paused;
 		bool m_Spec;
+		bool m_TeamLeader;
 
 		int m_FinishTimeSeconds;
 		int m_FinishTimeMillis;
