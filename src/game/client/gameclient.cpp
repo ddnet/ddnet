@@ -2418,6 +2418,46 @@ void CGameClient::UpdateEditorIngameMoved()
 	}
 }
 
+void CGameClient::ApplyPreInputs(int Tick, bool Direct, CGameWorld &GameWorld)
+{
+	if(!g_Config.m_ClAntiPingPreInput)
+		return;
+
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+	{
+		if(CCharacter *pChar = GameWorld.GetCharacterById(ClientId))
+		{
+			if(ClientId == m_aLocalIds[0] || (Client()->DummyConnected() && ClientId == m_aLocalIds[1]))
+				continue;
+
+			const CNetMsg_Sv_PreInput PreInput = m_aClients[ClientId].m_aPreInputs[Tick % 200];
+			if(PreInput.m_IntendedTick != Tick)
+				continue;
+
+			//convert preinput to input
+			CNetObj_PlayerInput Input = {0};
+			Input.m_Direction = PreInput.m_Direction;
+			Input.m_TargetX = PreInput.m_TargetX;
+			Input.m_TargetY = PreInput.m_TargetY;
+			Input.m_Jump = PreInput.m_Jump;
+			Input.m_Fire = PreInput.m_Fire;
+			Input.m_Hook = PreInput.m_Hook;
+			Input.m_WantedWeapon = PreInput.m_WantedWeapon;
+			Input.m_NextWeapon = PreInput.m_NextWeapon;
+			Input.m_PrevWeapon = PreInput.m_PrevWeapon;
+
+			if(Direct)
+			{
+				pChar->OnDirectInput(&Input);
+			}
+			else
+			{
+				pChar->OnPredictedInput(&Input);
+			}
+		}
+	}
+}
+
 void CGameClient::OnPredict()
 {
 	// store the previous values so we can detect prediction errors
@@ -2512,35 +2552,7 @@ void CGameClient::OnPredict()
 		if(pDummyInputData && !DummyFirst)
 			pDummyChar->OnDirectInput(pDummyInputData);
 
-		if(g_Config.m_ClAntiPingPreInput)
-		{
-			for(int i = 0; i < MAX_CLIENTS; i++)
-			{
-				if(CCharacter *pChar = m_PredictedWorld.GetCharacterById(i))
-				{
-					if(i == m_aLocalIds[0] || (Client()->DummyConnected() && i == m_aLocalIds[1]))
-						continue;
-
-					const CNetMsg_Sv_PreInput PreInput = m_aClients[i].m_aPreInputs[Tick % 200];
-					if(PreInput.m_IntendedTick != Tick)
-						continue;
-
-					//convert preinput to input
-					CNetObj_PlayerInput Input = {0};
-					Input.m_Direction = PreInput.m_Direction;
-					Input.m_TargetX = PreInput.m_TargetX;
-					Input.m_TargetY = PreInput.m_TargetY;
-					Input.m_Jump = PreInput.m_Jump;
-					Input.m_Fire = PreInput.m_Fire;
-					Input.m_Hook = PreInput.m_Hook;
-					Input.m_WantedWeapon = PreInput.m_WantedWeapon;
-					Input.m_NextWeapon = PreInput.m_NextWeapon;
-					Input.m_PrevWeapon = PreInput.m_PrevWeapon;
-
-					pChar->OnDirectInput(&Input);
-				}
-			}
-		}
+		ApplyPreInputs(Tick, true, m_PredictedWorld);
 
 		m_PredictedWorld.m_GameTick = Tick;
 		if(pInputData)
@@ -2548,35 +2560,7 @@ void CGameClient::OnPredict()
 		if(pDummyInputData)
 			pDummyChar->OnPredictedInput(pDummyInputData);
 
-		if(g_Config.m_ClAntiPingPreInput)
-		{
-			for(int i = 0; i < MAX_CLIENTS; i++)
-			{
-				if(CCharacter *pChar = m_PredictedWorld.GetCharacterById(i))
-				{
-					if(pDummyChar == pChar || pLocalChar == pChar)
-						continue;
-
-					const CNetMsg_Sv_PreInput PreInput = m_aClients[i].m_aPreInputs[Tick % 200];
-					if(PreInput.m_IntendedTick != Tick)
-						continue;
-
-					//convert preinput to input
-					CNetObj_PlayerInput Input = {0};
-					Input.m_Direction = PreInput.m_Direction;
-					Input.m_TargetX = PreInput.m_TargetX;
-					Input.m_TargetY = PreInput.m_TargetY;
-					Input.m_Jump = PreInput.m_Jump;
-					Input.m_Fire = PreInput.m_Fire;
-					Input.m_Hook = PreInput.m_Hook;
-					Input.m_WantedWeapon = PreInput.m_WantedWeapon;
-					Input.m_NextWeapon = PreInput.m_NextWeapon;
-					Input.m_PrevWeapon = PreInput.m_PrevWeapon;
-
-					pChar->OnPredictedInput(&Input);
-				}
-			}
-		}
+		ApplyPreInputs(Tick, false, m_PredictedWorld);
 
 		m_PredictedWorld.Tick();
 
@@ -3436,11 +3420,17 @@ void CGameClient::UpdatePrediction()
 				pLocalChar->OnDirectInput(pInput);
 			if(pDummyInput)
 				pDummyChar->OnDirectInput(pDummyInput);
+
+			ApplyPreInputs(Tick, true, m_GameWorld);
+
 			m_GameWorld.m_GameTick = Tick;
 			if(pInput)
 				pLocalChar->OnPredictedInput(pInput);
 			if(pDummyInput)
 				pDummyChar->OnPredictedInput(pDummyInput);
+
+			ApplyPreInputs(Tick, false, m_GameWorld);
+
 			m_GameWorld.Tick();
 
 			for(int i = 0; i < MAX_CLIENTS; i++)
