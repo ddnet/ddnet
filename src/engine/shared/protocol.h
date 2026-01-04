@@ -162,6 +162,13 @@ namespace FinishTime
 	inline constexpr int UNSET = -2;
 }
 
+namespace Ammo
+{
+	inline constexpr int INFINITE = -1;
+	// weapons can have more than 10 ammo, but the client receives max 10
+	inline constexpr int MAX = 10;
+}
+
 typedef std::bitset<MAX_CLIENTS> CClientMask;
 
 #endif
