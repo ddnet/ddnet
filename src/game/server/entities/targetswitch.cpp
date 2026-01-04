@@ -51,7 +51,7 @@ void CTargetSwitch::Snap(int SnappingClient)
 	GameServer()->SnapTargetSwitch(CSnapContext(SnappingClientVersion, Sixup, SnappingClient), GetId(), m_Pos, m_Type, m_Number, m_Delay, 0);
 }
 
-void CTargetSwitch::GetHit(int ClientId, bool Weakly, int ForcedTeam)
+void CTargetSwitch::GetHit(int ClientId, int ForcedTeam)
 {
 	CClientMask Mask;
 	int TeamHitFrom;
@@ -65,12 +65,6 @@ void CTargetSwitch::GetHit(int ClientId, bool Weakly, int ForcedTeam)
 		Mask.reset();
 		Mask.set(ForcedTeam);
 		TeamHitFrom = ForcedTeam;
-	}
-
-	if(Weakly)
-	{
-		GameServer()->CreateTargetHit(m_Pos, true, ClientId, Mask);
-		return;
 	}
 
 	bool PreviousSwitchStatus = Switchers()[m_Number].m_aStatus[TeamHitFrom];
@@ -99,7 +93,7 @@ void CTargetSwitch::GetHit(int ClientId, bool Weakly, int ForcedTeam)
 	// Hitting this switch changed something, provide feedback
 	if(PreviousSwitchStatus != Switchers()[m_Number].m_aStatus[TeamHitFrom] || m_Delay != 0)
 	{
-		GameServer()->CreateTargetHit(m_Pos, false, ClientId, Mask);
+		GameServer()->CreateTargetHit(m_Pos, ClientId, Mask);
 	}
 }
 

@@ -153,18 +153,42 @@ void CProjectile::Tick()
 	{
 		if(m_Explosive /*??*/ && (!pTargetChr || (pTargetChr && (!m_Freeze || (m_Type == WEAPON_SHOTGUN && Collide)))))
 		{
-			int Number = 1;
-			if(GameServer()->EmulateBug(BUG_GRENADE_DOUBLEEXPLOSION) && m_LifeSpan == -1)
+			if(!pTargetTargetSwitch)
 			{
-				Number = 2;
+				int Number = 1;
+				if(GameServer()->EmulateBug(BUG_GRENADE_DOUBLEEXPLOSION) && m_LifeSpan == -1)
+				{
+					Number = 2;
+				}
+				for(int i = 0; i < Number; i++)
+				{
+					GameServer()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),
+						(m_Owner != -1) ? TeamMask : CClientMask().set());
+					GameServer()->CreateSound(ColPos, m_SoundImpact,
+						(m_Owner != -1) ? TeamMask : CClientMask().set());
+				}
 			}
-			for(int i = 0; i < Number; i++)
+			else
 			{
-				GameServer()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),
-					(m_Owner != -1) ? TeamMask : CClientMask().set());
-				GameServer()->CreateSound(ColPos, m_SoundImpact,
-					(m_Owner != -1) ? TeamMask : CClientMask().set());
-				// Don't handle target switch GetHit(), it's handled in CreateExplosion
+				// target switch GetHit() is handled in CreateExplosion
+				// If the pellet itself (not its explosion) intersects a target switch, set Collide
+				if(m_TargetSwitchCollisionCooldown <= 0)
+				{
+					GameServer()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),
+						(m_Owner != -1) ? TeamMask : CClientMask().set());
+
+					CEntity *apTargetEnts[TargetSwitch::MAX_TARGET_SWITCHES];
+					int Num = GameWorld()->FindEntities(CurPos, 1.0f, apTargetEnts, TargetSwitch::MAX_TARGET_SWITCHES, CGameWorld::ENTTYPE_TARGETSWITCH);
+					if(Num > 0)
+					{
+						Collide = true;
+						m_TargetSwitchCollisionCooldown = TargetSwitch::SWITCH_COOLDOWN_TICKS;
+					}
+				}
+				else
+				{
+					m_TargetSwitchCollisionCooldown--;
+				}
 			}
 		}
 		else if(m_Freeze)
@@ -178,7 +202,6 @@ void CProjectile::Tick()
 					pChr->Freeze();
 			}
 
-			constexpr int TargetSwitchCooldown = 4;
 			if(m_TargetSwitchCollisionCooldown <= 0)
 			{
 				CEntity *apTargetEnts[TargetSwitch::MAX_TARGET_SWITCHES];
@@ -186,7 +209,7 @@ void CProjectile::Tick()
 				if(Num > 0)
 				{
 					Collide = true;
-					m_TargetSwitchCollisionCooldown = TargetSwitchCooldown;
+					m_TargetSwitchCollisionCooldown = TargetSwitch::SWITCH_COOLDOWN_TICKS;
 				}
 				for(int i = 0; i < Num; ++i)
 				{
@@ -195,7 +218,7 @@ void CProjectile::Tick()
 					{
 						for(int TargetSwitchTeam = 0; TargetSwitchTeam < TEAM_SUPER; ++TargetSwitchTeam)
 						{
-							pTargetSwitch->GetHit(-1, m_Type == WEAPON_WORLD, TargetSwitchTeam);
+							pTargetSwitch->GetHit(-1, TargetSwitchTeam);
 						}
 					}
 				}
@@ -209,8 +232,8 @@ void CProjectile::Tick()
 			pTargetChr->TakeDamage(vec2(0, 0), 0, m_Owner, m_Type);
 		else if(pTargetTargetSwitch)
 		{
-			if(pOwnerChar)
-				pTargetTargetSwitch->GetHit(pOwnerChar->GetPlayer()->GetCid(), m_Type == WEAPON_GUN);
+			if(pOwnerChar && m_Type != WEAPON_GUN)
+				pTargetTargetSwitch->GetHit(pOwnerChar->GetPlayer()->GetCid());
 		}
 
 		if(pOwnerChar && !GameLayerClipped(ColPos) &&

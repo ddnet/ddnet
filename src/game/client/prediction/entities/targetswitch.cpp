@@ -43,7 +43,7 @@ void CTargetSwitch::Tick()
 	Move();
 }
 
-void CTargetSwitch::GetHit(int ClientId, bool Weakly, int ForcedTeam)
+void CTargetSwitch::GetHit(int ClientId, int ForcedTeam)
 {
 	int TeamHitFrom;
 	if(ForcedTeam == -1 && ClientId != -1)
@@ -53,11 +53,6 @@ void CTargetSwitch::GetHit(int ClientId, bool Weakly, int ForcedTeam)
 	else
 	{
 		TeamHitFrom = ForcedTeam;
-	}
-
-	if(Weakly)
-	{
-		return;
 	}
 
 	const int EndTick = m_Delay ? GameWorld()->GameTick() + 1 + m_Delay * GameWorld()->GameTickSpeed() : 0;
