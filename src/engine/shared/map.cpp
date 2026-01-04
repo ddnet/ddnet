@@ -168,8 +168,10 @@ void CMap::ExtractTiles(CTile *pDest, size_t DestSize, const CTile *pSrc, size_t
 	{
 		for(unsigned Counter = 0; Counter <= pSrc[SrcIndex].m_Skip && DestIndex < DestSize; Counter++)
 		{
-			pDest[DestIndex] = pSrc[SrcIndex];
+			pDest[DestIndex].m_Index = pSrc[SrcIndex].m_Index;
+			pDest[DestIndex].m_Flags = pSrc[SrcIndex].m_Flags;
 			pDest[DestIndex].m_Skip = 0;
+			pDest[DestIndex].m_Reserved = 0;
 			DestIndex++;
 		}
 		SrcIndex++;
