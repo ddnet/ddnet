@@ -695,6 +695,9 @@ void CGameClient::OnReset()
 	m_CharOrder.Reset();
 	std::fill(std::begin(m_aSwitchStateTeam), std::end(m_aSwitchStateTeam), -1);
 
+	m_MapBestTimeSeconds = FinishTime::UNSET;
+	m_MapBestTimeMillis = 0;
+
 	// m_MapBugs and m_aTuningList are reset in LoadMapSettings
 
 	m_LastShowDistanceZoom = 0.0f;
@@ -1213,6 +1216,20 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 	{
 		const CNetMsg_Sv_SaveCode *pMsg = (CNetMsg_Sv_SaveCode *)pRawMsg;
 		OnSaveCodeNetMessage(pMsg);
+	}
+	else if(MsgId == NETMSGTYPE_SV_RECORD || MsgId == NETMSGTYPE_SV_RECORDLEGACY)
+	{
+		CNetMsg_Sv_Record *pMsg = static_cast<CNetMsg_Sv_Record *>(pRawMsg);
+		if(pMsg->m_ServerTimeBest > 0)
+		{
+			m_MapBestTimeSeconds = pMsg->m_ServerTimeBest / 100;
+			m_MapBestTimeMillis = (pMsg->m_ServerTimeBest % 100) * 10;
+		}
+		else if(m_MapBestTimeSeconds == FinishTime::UNSET)
+		{
+			m_MapBestTimeSeconds = FinishTime::NOT_FINISHED_MILLIS;
+			m_MapBestTimeMillis = 0;
+		}
 	}
 }
 
@@ -1986,6 +2003,12 @@ void CGameClient::OnNewSnapshot()
 				else
 					m_aSwitchStateTeam[g_Config.m_ClDummy] = -1;
 				GotSwitchStateTeam = true;
+			}
+			else if(Item.m_Type == NETOBJTYPE_MAPBESTTIME)
+			{
+				const CNetObj_MapBestTime *pMapBestTimeData = static_cast<const CNetObj_MapBestTime *>(Item.m_pData);
+				m_MapBestTimeSeconds = pMapBestTimeData->m_MapBestTimeSeconds;
+				m_MapBestTimeMillis = pMapBestTimeData->m_MapBestTimeMillis;
 			}
 		}
 	}
