@@ -175,6 +175,18 @@ bool windows_shell_unregister_application(const char *executable, bool *updated)
  */
 void windows_shell_update();
 
+/**
+ * Tries to elevate the thread's priority.
+ *
+ * @ingroup Windows
+ *
+ * @param thread The handle of the thread to set the priority for. `nullptr` for the current thread.
+ * @param priority The priority level to set.
+ *
+ * @remark Elevating the thread priority increases the chance the CPU picks it first.
+ */
+void windows_set_thread_priority(void *thread, int priority);
+
 #endif
 
 #endif
