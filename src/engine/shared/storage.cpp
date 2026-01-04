@@ -362,6 +362,12 @@ public:
 		return;
 #endif
 
+		if(fs_executable_path(m_aBinarydir, sizeof(m_aBinarydir)) == 0)
+		{
+			fs_parent_dir(m_aBinarydir);
+			return;
+		}
+
 		// check for usable path in argv[0]
 		{
 			unsigned int Pos = ~0U;
@@ -378,14 +384,12 @@ public:
 				{
 					return;
 				}
-#if defined(CONF_PLATFORM_MACOS)
-				str_append(m_aBinarydir, "/../../../DDNet-Server.app/Contents/MacOS");
-				str_format(aBuf, sizeof(aBuf), "%s/" PLAT_SERVER_EXEC, m_aBinarydir);
+				// Also look for client binary. (see https://github.com/ddnet/ddnet/issues/11418)
+				str_format(aBuf, sizeof(aBuf), "%s/" PLAT_CLIENT_EXEC, m_aBinarydir);
 				if(fs_is_file(aBuf))
 				{
 					return;
 				}
-#endif
 			}
 		}
 
