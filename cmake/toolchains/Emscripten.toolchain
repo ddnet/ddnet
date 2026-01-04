@@ -57,6 +57,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s GL_ASSERTIONS=1")
 	# TODO: With `emmalloc-memvalidate` launch fails with `Assertion failed: multithreadingLock == 1, at: /emsdk/emscripten/system/lib/emmalloc.c,407,validate_memory_regions`
 	set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s MALLOC=emmalloc-debug")
+	# Support stdout/stderr being captured by emrun tool. Not enabled in release mode because it tries to send the output with POST requests to `stdio.html`.
+	set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} --emrun")
 else()
 	# Will drastically reduce code size but also increases compile and link time significantly.
 	set(WASM_CXX_FLAGS "${WASM_CXX_FLAGS} -O3")
