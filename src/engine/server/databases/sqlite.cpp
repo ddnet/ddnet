@@ -72,7 +72,7 @@ private:
 
 	// returns true if an error was formatted
 	bool FormatError(int Result, char *pError, int ErrorSize);
-	void AssertNoError(int Result);
+	void AssertNoError(DBG_LOCATION Loc, int Result);
 
 	std::atomic_bool m_InUse;
 };
@@ -211,42 +211,42 @@ bool CSqliteConnection::PrepareStatement(const char *pStmt, char *pError, int Er
 void CSqliteConnection::BindString(int Idx, const char *pString)
 {
 	int Result = sqlite3_bind_text(m_pStmt, Idx, pString, -1, nullptr);
-	AssertNoError(Result);
+	AssertNoError(DBG_HERE, Result);
 	m_Done = false;
 }
 
 void CSqliteConnection::BindBlob(int Idx, unsigned char *pBlob, int Size)
 {
 	int Result = sqlite3_bind_blob(m_pStmt, Idx, pBlob, Size, nullptr);
-	AssertNoError(Result);
+	AssertNoError(DBG_HERE, Result);
 	m_Done = false;
 }
 
 void CSqliteConnection::BindInt(int Idx, int Value)
 {
 	int Result = sqlite3_bind_int(m_pStmt, Idx, Value);
-	AssertNoError(Result);
+	AssertNoError(DBG_HERE, Result);
 	m_Done = false;
 }
 
 void CSqliteConnection::BindInt64(int Idx, int64_t Value)
 {
 	int Result = sqlite3_bind_int64(m_pStmt, Idx, Value);
-	AssertNoError(Result);
+	AssertNoError(DBG_HERE, Result);
 	m_Done = false;
 }
 
 void CSqliteConnection::BindFloat(int Idx, float Value)
 {
 	int Result = sqlite3_bind_double(m_pStmt, Idx, (double)Value);
-	AssertNoError(Result);
+	AssertNoError(DBG_HERE, Result);
 	m_Done = false;
 }
 
 void CSqliteConnection::BindNull(int Idx)
 {
 	int Result = sqlite3_bind_null(m_pStmt, Idx);
-	AssertNoError(Result);
+	AssertNoError(DBG_HERE, Result);
 	m_Done = false;
 }
 
@@ -384,13 +384,12 @@ bool CSqliteConnection::FormatError(int Result, char *pError, int ErrorSize)
 	return false;
 }
 
-void CSqliteConnection::AssertNoError(int Result)
+void CSqliteConnection::AssertNoError(DBG_LOCATION Loc, int Result)
 {
 	char aBuf[128];
 	if(FormatError(Result, aBuf, sizeof(aBuf)))
 	{
-		dbg_msg("sqlite", "unexpected sqlite error: %s", aBuf);
-		dbg_assert(0, "sqlite error");
+		dbg_assert_failed_loc(Loc, "sqlite", "unexpected sqlite error: %s", aBuf);
 	}
 }
 
