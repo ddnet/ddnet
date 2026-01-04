@@ -27,6 +27,7 @@ static const constexpr float MAINMARGIN = 10.0f;
 static const constexpr float SUBMARGIN = 5.0f;
 static const constexpr float ROWSIZE = 25.0f;
 static const constexpr float ROWGAP = 5.0f;
+static const constexpr float TITLESIZE = 20.0f;
 static const constexpr float FONTSIZE = 15.0f;
 
 const CMenusIngameTouchControls::CBehaviorFactoryEditor CMenusIngameTouchControls::BEHAVIOR_FACTORIES_EDITOR[] = {
@@ -277,6 +278,8 @@ bool CMenusIngameTouchControls::RenderBehaviorSettingBlock(CUIRect Block)
 	Block.HSplitTop(ROWSIZE, &EditBox, &Block);
 	Block.HSplitTop(ROWGAP, nullptr, &Block);
 	EditBox.VSplitMid(&LeftButton, &MiddleButton);
+	MiddleButton.VSplitRight(MiddleButton.h, &MiddleButton, &RightButton);
+	MiddleButton.VSplitRight(ROWGAP, &MiddleButton, nullptr);
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Behavior type"));
 	Ui()->DoLabel(&LeftButton, aBuf, FONTSIZE, TEXTALIGN_ML);
@@ -294,6 +297,19 @@ bool CMenusIngameTouchControls::RenderBehaviorSettingBlock(CUIRect Block)
 		}
 		SetUnsavedChanges(true);
 		Changed = true;
+	}
+	static CButtonContainer s_OpenBehaviorHelpButton;
+	if(Ui()->DoButton_FontIcon(&s_OpenBehaviorHelpButton, FontIcons::FONT_ICON_QUESTION, 0, &RightButton, BUTTONFLAG_LEFT))
+	{
+		const char *pHelpMessage;
+		switch(m_EditBehaviorType)
+		{
+		case EBehaviorType::BIND: pHelpMessage = Localize("Buttons with this behavior execute console commands like regular key binds"); break;
+		case EBehaviorType::BIND_TOGGLE: pHelpMessage = Localize("Buttons with this behavior cycle between executing one of two or more specified commands"); break;
+		case EBehaviorType::PREDEFINED: pHelpMessage = Localize("Buttons with this behavior execute some predefined actions"); break;
+		default: dbg_assert_failed("Unknown behavior %d", (int)m_EditBehaviorType);
+		}
+		GameClient()->m_Menus.PopupMessage(Localize("Info"), pHelpMessage, Localize("Ok"));
 	}
 	switch(m_EditBehaviorType)
 	{
@@ -350,6 +366,8 @@ bool CMenusIngameTouchControls::RenderBehaviorSettingBlock(CUIRect Block)
 		Block.HSplitTop(ROWSIZE, &EditBox, &Block);
 		Block.HSplitTop(ROWGAP, nullptr, &Block);
 		EditBox.VSplitMid(&LeftButton, &MiddleButton);
+		MiddleButton.VSplitRight(MiddleButton.h, &MiddleButton, &RightButton);
+		MiddleButton.VSplitRight(ROWGAP, &MiddleButton, nullptr);
 		str_format(aBuf, sizeof(aBuf), "%s:", Localize("Type"));
 		Ui()->DoLabel(&LeftButton, aBuf, FONTSIZE, TEXTALIGN_ML);
 		static CUi::SDropDownState s_ButtonPredefinedDropDownState;
@@ -362,6 +380,26 @@ bool CMenusIngameTouchControls::RenderBehaviorSettingBlock(CUIRect Block)
 			m_PredefinedBehaviorType = NewPredefined;
 			SetUnsavedChanges(true);
 			Changed = true;
+		}
+		static CButtonContainer s_OpenPredefinedBehaviorHelpButton;
+		if(Ui()->DoButton_FontIcon(&s_OpenPredefinedBehaviorHelpButton, FontIcons::FONT_ICON_QUESTION, 0, &RightButton, BUTTONFLAG_LEFT))
+		{
+			const char *pHelpMessage;
+			switch(m_PredefinedBehaviorType)
+			{
+			case EPredefinedType::INGAME_MENU: pHelpMessage = Localize("Opens the ingame menu immediately when released."); break;
+			case EPredefinedType::EXTRA_MENU: pHelpMessage = Localize("The extra menu button which toggles visibility of buttons with \"Extra Menu\" visibilities. Also opens the ingame menu on long press."); break;
+			case EPredefinedType::EMOTICON: pHelpMessage = Localize("Opens the emoticon selector (this does not work with binds)."); break;
+			case EPredefinedType::SPECTATE: pHelpMessage = Localize("Opens the spectator menu (this does not work with binds)."); break;
+			case EPredefinedType::SWAP_ACTION: pHelpMessage = Localize("Swaps the active action (fire and hook) for direct touch input and virtual joysticks."); break;
+			case EPredefinedType::USE_ACTION: pHelpMessage = Localize("Uses the active action with the current aiming position."); break;
+			case EPredefinedType::JOYSTICK_ACTION: pHelpMessage = Localize("Virtual joystick which uses the active action."); break;
+			case EPredefinedType::JOYSTICK_AIM: pHelpMessage = Localize("Virtual joystick which only aims without using an action."); break;
+			case EPredefinedType::JOYSTICK_FIRE: pHelpMessage = Localize("Virtual joystick which always uses fire."); break;
+			case EPredefinedType::JOYSTICK_HOOK: pHelpMessage = Localize("Virtual joystick which always uses hook."); break;
+			default: dbg_assert_failed("Unknown behavior %d", (int)m_PredefinedBehaviorType);
+			}
+			GameClient()->m_Menus.PopupMessage(Localize("Info"), pHelpMessage, Localize("Ok"));
 		}
 
 		if(m_PredefinedBehaviorType != EPredefinedType::EXTRA_MENU)
@@ -541,7 +579,7 @@ bool CMenusIngameTouchControls::RenderVisibilitySettingBlock(CUIRect Block)
 {
 	// Visibilities time. This is button's visibility, not virtual.
 	bool Changed = false;
-	CUIRect EditBox, LeftButton, MiddleButton, RightButton;
+	CUIRect EditBox, LeftButton, MiddleButton, RightButton, Label;
 
 	// Block.HSplitTop(ROWGAP, nullptr, &Block);
 	static CScrollRegion s_VisibilityScrollRegion;
@@ -551,6 +589,7 @@ bool CMenusIngameTouchControls::RenderVisibilitySettingBlock(CUIRect Block)
 	s_VisibilityScrollRegion.Begin(&Block, &ScrollOffset, &ScrollParam);
 	Block.y += ScrollOffset.y;
 
+	static CButtonContainer s_aHelpButtons[(int)CTouchControls::EButtonVisibility::NUM_VISIBILITIES];
 	static std::vector<CButtonContainer> s_avVisibilitySelector[(int)CTouchControls::EButtonVisibility::NUM_VISIBILITIES];
 	if(s_avVisibilitySelector[0].empty())
 		std::for_each_n(s_avVisibilitySelector, (int)CTouchControls::EButtonVisibility::NUM_VISIBILITIES, [](auto &Element) {
@@ -563,16 +602,41 @@ bool CMenusIngameTouchControls::RenderVisibilitySettingBlock(CUIRect Block)
 		Block.HSplitTop(ROWGAP, nullptr, &Block);
 		if(s_VisibilityScrollRegion.AddRect(EditBox))
 		{
-			EditBox.VSplitMid(&LeftButton, &MiddleButton);
+			EditBox.VSplitMid(&Label, &MiddleButton);
 			MiddleButton.VSplitLeft(ScrollParam.m_ScrollbarWidth / 2.0f, nullptr, &MiddleButton);
+			// We'll only do help button for the first extra menu visibility.
+			if(Current <= (unsigned)CTouchControls::EButtonVisibility::EXTRA_MENU_1)
+			{
+				Label.VSplitLeft(Label.h, &LeftButton, &Label);
+				Label.VSplitLeft(ROWGAP, nullptr, &Label);
+				const char *pHelpMessage;
+				switch((CTouchControls::EButtonVisibility)Current)
+				{
+				case CTouchControls::EButtonVisibility::INGAME: pHelpMessage = Localize("Player is ingame, i.e. not spectating."); break;
+				case CTouchControls::EButtonVisibility::ZOOM_ALLOWED: pHelpMessage = Localize("Zoom is allowed on this server."); break;
+				case CTouchControls::EButtonVisibility::VOTE_ACTIVE: pHelpMessage = Localize("A vote is currently active."); break;
+				case CTouchControls::EButtonVisibility::DUMMY_ALLOWED: pHelpMessage = Localize("Dummy is allowed on this server."); break;
+				case CTouchControls::EButtonVisibility::DUMMY_CONNECTED: pHelpMessage = Localize("Dummy is currently connected."); break;
+				case CTouchControls::EButtonVisibility::RCON_AUTHED: pHelpMessage = Localize("Player is currently authed in rcon."); break;
+				case CTouchControls::EButtonVisibility::DEMO_PLAYER: pHelpMessage = Localize("Demo player is currently active."); break;
+				case CTouchControls::EButtonVisibility::EXTRA_MENU_1: pHelpMessage = Localize("The extra menu with the given number is activated."); break;
+				default: dbg_assert_failed("Unknown visibility type %d", Current);
+				}
+				if(Ui()->DoButton_FontIcon(&s_aHelpButtons[Current], FontIcons::FONT_ICON_QUESTION, 0, &LeftButton, BUTTONFLAG_LEFT))
+				{
+					GameClient()->m_Menus.PopupMessage(Localize("Info"), pHelpMessage, Localize("Ok"));
+				}
+			}
 			if(Current < (unsigned)CTouchControls::EButtonVisibility::EXTRA_MENU_1)
-				Ui()->DoLabel(&LeftButton, ppVisibilities[Current], FONTSIZE, TEXTALIGN_ML);
+			{
+				Ui()->DoLabel(&Label, ppVisibilities[Current], FONTSIZE, TEXTALIGN_ML);
+			}
 			else
 			{
 				unsigned ExtraMenuNumber = Current - (unsigned)CTouchControls::EButtonVisibility::EXTRA_MENU_1 + 1;
 				char aBuf[64];
 				str_format(aBuf, sizeof(aBuf), "%s %d", ppVisibilities[(int)CTouchControls::EButtonVisibility::EXTRA_MENU_1], ExtraMenuNumber);
-				Ui()->DoLabel(&LeftButton, aBuf, FONTSIZE, TEXTALIGN_ML);
+				Ui()->DoLabel(&Label, aBuf, FONTSIZE, TEXTALIGN_ML);
 			}
 			MiddleButton.VSplitLeft(MiddleButton.w / 3.0f, &LeftButton, &MiddleButton);
 			MiddleButton.VSplitMid(&MiddleButton, &RightButton);
@@ -602,13 +666,25 @@ bool CMenusIngameTouchControls::RenderVisibilitySettingBlock(CUIRect Block)
 
 void CMenusIngameTouchControls::RenderTouchButtonBrowser(CUIRect MainView)
 {
-	CUIRect LeftButton, MiddleButton, RightButton, EditBox, LabelRect, CommandRect, X, Y, W, H;
+	CUIRect LeftButton, MiddleButton, RightButton, EditBox, LabelRect, CommandRect, X, Y, W, H, Row;
 	MainView.h = 600.0f - 40.0f - MainView.y;
 	MainView.Draw(CMenus::ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 	MainView.Margin(MAINMARGIN, &MainView);
-	MainView.HSplitTop(ROWSIZE, &RightButton, &MainView);
-	Ui()->DoLabel(&RightButton, Localize("Long press on a touch button to select it."), 15.0f, TEXTALIGN_MC);
-	MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
+
+	MainView.HSplitTop(ROWSIZE, &Row, &MainView);
+	Row.VSplitLeft(Row.h, nullptr, &Row);
+	Row.VSplitRight(Row.h, &Row, &RightButton);
+	Row.VMargin(5.0f, &Row);
+	Ui()->DoLabel(&Row, Localize("Button browser"), TITLESIZE, TEXTALIGN_MC);
+	static CButtonContainer s_OpenHelpButton;
+	if(Ui()->DoButton_FontIcon(&s_OpenHelpButton, FontIcons::FONT_ICON_QUESTION, 0, &RightButton, BUTTONFLAG_LEFT))
+	{
+		GameClient()->m_Menus.PopupMessage(Localize("Info"),
+			Localize("You can select buttons directly in the browser, or long press on a touch button on the screen to select it.\nYou can also move and zoom the button by touch."),
+			Localize("Ok"));
+	}
+
+	MainView.HSplitTop(ROWGAP, nullptr, &MainView);
 	MainView.HSplitTop(ROWSIZE, &EditBox, &MainView);
 	EditBox.VSplitLeft((EditBox.w - SUBMARGIN) / 2.0f, &LeftButton, &EditBox);
 	static CButtonContainer s_NewButton;
@@ -883,7 +959,7 @@ void CMenusIngameTouchControls::RenderConfigSettings(CUIRect MainView)
 	MainView.HSplitTop(MAINMARGIN, nullptr, &MainView);
 	MainView.HSplitTop(ROWSIZE, &EditBox, &MainView);
 	static CButtonContainer s_ActiveColorPicker;
-	ColorHSLA ColorTest = GameClient()->m_Menus.DoLine_ColorPicker(&s_ActiveColorPicker, ROWSIZE, 15.0f, 5.0f, &EditBox, Localize("Active color"), &m_ColorActive, GameClient()->m_TouchControls.DefaultBackgroundColorActive(), false, nullptr, true);
+	ColorHSLA ColorTest = GameClient()->m_Menus.DoLine_ColorPicker(&s_ActiveColorPicker, ROWSIZE, FONTSIZE, 5.0f, &EditBox, Localize("Active color"), &m_ColorActive, GameClient()->m_TouchControls.DefaultBackgroundColorActive(), false, nullptr, true);
 	GameClient()->m_TouchControls.SetBackgroundColorActive(color_cast<ColorRGBA>(ColorHSLA(m_ColorActive, true)));
 	if(color_cast<ColorRGBA>(ColorTest) != GameClient()->m_TouchControls.BackgroundColorActive())
 		GameClient()->m_TouchControls.SetEditingChanges(true);
@@ -891,7 +967,7 @@ void CMenusIngameTouchControls::RenderConfigSettings(CUIRect MainView)
 	MainView.HSplitTop(ROWGAP, nullptr, &MainView);
 	MainView.HSplitTop(ROWSIZE, &EditBox, &MainView);
 	static CButtonContainer s_InactiveColorPicker;
-	ColorTest = GameClient()->m_Menus.DoLine_ColorPicker(&s_InactiveColorPicker, ROWSIZE, 15.0f, 5.0f, &EditBox, Localize("Inactive color"), &m_ColorInactive, GameClient()->m_TouchControls.DefaultBackgroundColorInactive(), false, nullptr, true);
+	ColorTest = GameClient()->m_Menus.DoLine_ColorPicker(&s_InactiveColorPicker, ROWSIZE, FONTSIZE, 5.0f, &EditBox, Localize("Inactive color"), &m_ColorInactive, GameClient()->m_TouchControls.DefaultBackgroundColorInactive(), false, nullptr, true);
 	GameClient()->m_TouchControls.SetBackgroundColorInactive(color_cast<ColorRGBA>(ColorHSLA(m_ColorInactive, true)));
 	if(color_cast<ColorRGBA>(ColorTest) != GameClient()->m_TouchControls.BackgroundColorInactive())
 		GameClient()->m_TouchControls.SetEditingChanges(true);
@@ -931,13 +1007,22 @@ void CMenusIngameTouchControls::RenderConfigSettings(CUIRect MainView)
 
 void CMenusIngameTouchControls::RenderPreviewSettings(CUIRect MainView)
 {
-	CUIRect EditBox;
+	CUIRect EditBox, Button;
 	MainView.h = 600.0f - 40.0f - MainView.y;
 	MainView.Draw(CMenus::ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
-	MainView.VMargin(MAINMARGIN, &MainView);
-	MainView.HMargin(MAINMARGIN, &MainView);
+	MainView.Margin(MAINMARGIN, &MainView);
 	MainView.HSplitTop(ROWSIZE, &EditBox, &MainView);
-	Ui()->DoLabel(&EditBox, Localize("Preview button visibility while the editor is active."), FONTSIZE, TEXTALIGN_MC);
+	MainView.HSplitTop(ROWGAP, nullptr, &MainView);
+	EditBox.VSplitLeft(EditBox.h, nullptr, &EditBox);
+	EditBox.VSplitRight(EditBox.h, &EditBox, &Button);
+	EditBox.VMargin(5.0f, &EditBox);
+	Ui()->DoLabel(&EditBox, Localize("Preview visibilities"), TITLESIZE, TEXTALIGN_MC);
+	static CButtonContainer s_OpenHelpButton;
+	if(Ui()->DoButton_FontIcon(&s_OpenHelpButton, FontIcons::FONT_ICON_QUESTION, 0, &Button, BUTTONFLAG_LEFT))
+	{
+		GameClient()->m_Menus.PopupMessage(Localize("Info"), Localize("Preview button visibility while the editor is active."), Localize("Ok"));
+	}
+
 	MainView.HSplitBottom(ROWSIZE, &MainView, &EditBox);
 	MainView.HSplitBottom(ROWGAP, &MainView, nullptr);
 	EditBox.VSplitLeft(MAINMARGIN, nullptr, &EditBox);
@@ -994,12 +1079,14 @@ void CMenusIngameTouchControls::RenderTouchControlsEditor(CUIRect MainView)
 	Row.VSplitLeft(Row.h, nullptr, &Row);
 	Row.VSplitRight(Row.h, &Row, &Button);
 	Row.VMargin(5.0f, &Label);
-	Ui()->DoLabel(&Label, Localize("Edit touch controls"), 20.0f, TEXTALIGN_MC);
+	Ui()->DoLabel(&Label, Localize("Edit touch controls"), TITLESIZE, TEXTALIGN_MC);
 
 	static CButtonContainer s_OpenHelpButton;
 	if(Ui()->DoButton_FontIcon(&s_OpenHelpButton, FontIcons::FONT_ICON_QUESTION, 0, &Button, BUTTONFLAG_LEFT))
 	{
-		Client()->ViewLink(Localize("https://wiki.ddnet.org/wiki/Touch_controls"));
+		GameClient()->m_Menus.PopupConfirm(Localize("Info"),
+			Localize("Your touch controls can be saved to file there, only changes that are saved to file will take effect upon next entering.\nYou can find more infos at wiki."),
+			Localize("Open wiki"), Localize("Ok"), &CMenus::PopupConfirmOpenWiki);
 	}
 
 	MainView.HSplitTop(ROWSIZE, &Row, &MainView);

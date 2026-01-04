@@ -9,7 +9,7 @@
 class CMenusIngameTouchControls : public CComponentInterfaces
 {
 public:
-	static constexpr const float BUTTON_EDITOR_WIDTH = 700.0f;
+	static const constexpr float BUTTON_EDITOR_WIDTH = 700.0f;
 	enum class EBehaviorType
 	{
 		BIND,
