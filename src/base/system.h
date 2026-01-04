@@ -1546,17 +1546,6 @@ void secure_random_password(char *buffer, unsigned length, unsigned pw_length);
 void secure_random_fill(void *bytes, unsigned length);
 
 /**
- * Returns random `int`.
- *
- * @ingroup Secure-Random
- *
- * @return Random int.
- *
- * @remark Can be used as a replacement for the `rand` function.
- */
-int secure_rand();
-
-/**
  * Returns a random nonnegative integer below the given number,
  * with a uniform distribution.
  *
