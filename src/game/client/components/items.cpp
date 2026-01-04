@@ -275,7 +275,17 @@ void CItems::RenderTargetSwitch(const CNetObj_DDNetTargetSwitch *pData)
 	const vec2 Pos = vec2(pData->m_X, pData->m_Y);
 	const int SwitchState = GameClient()->Switchers()[pData->m_SwitchNumber].m_aStatus[GameClient()->SwitchStateTeam()];
 	const bool Open = pData->m_Type == TARGETSWITCHTYPE_OPEN || (pData->m_Type == TARGETSWITCHTYPE_ALTERNATE && SwitchState);
+	const bool Alternate = pData->m_Type == TARGETSWITCHTYPE_ALTERNATE;
 	const int QuadOffset = Open ? m_TargetSwitchOpenOffset : m_TargetSwitchCloseOffset;
+
+	if(Alternate)
+	{
+		Graphics()->TextureSet(GameClient()->m_ExtrasSkin.m_TargetSwitchAlternateDecal);
+		Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+		Graphics()->QuadsSetRotation(0);
+		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_TargetSwitchAlternateDecalOffset, Pos.x, Pos.y, 1.2f, 1.2f);
+	}
+
 	Graphics()->TextureSet(Open ? GameClient()->m_ExtrasSkin.m_TargetSwitchOpen : GameClient()->m_ExtrasSkin.m_TargetSwitchClose);
 
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
@@ -717,6 +727,10 @@ void CItems::OnInit()
 	Graphics()->GetSpriteScale(SPRITE_TARGETSWITCH_OPEN, ScaleX, ScaleY);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	m_TargetSwitchOpenOffset = Graphics()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 64.f * ScaleX, 64.f * ScaleY);
+
+	Graphics()->GetSpriteScale(SPRITE_TARGETSWITCH_ALTERNATE_DECAL, ScaleX, ScaleY);
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	m_TargetSwitchAlternateDecalOffset = Graphics()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 64.f * ScaleX, 64.f * ScaleY);
 
 	IGraphics::CQuadItem Brick(0, 0, 16.0f, 16.0f);
 	m_DoorHeadOffset = Graphics()->QuadContainerAddQuads(m_ItemsQuadContainerIndex, &Brick, 1);

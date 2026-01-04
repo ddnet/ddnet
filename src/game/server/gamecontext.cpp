@@ -354,14 +354,21 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 	for(int i = 0; i < Num; i++)
 	{
 		auto *pTarget = static_cast<CTargetSwitch *>(apTargetEnts[i]);
-		if((GetPlayerChar(Owner) ? !GetPlayerChar(Owner)->GrenadeHitDisabled() : g_Config.m_SvHit) || NoDamage)
-		{
-			if((GetPlayerChar(Owner) ? GetPlayerChar(Owner)->GrenadeHitDisabled() : !g_Config.m_SvHit) || NoDamage)
-			{
-				continue;
-			}
+		bool GrenadeHitDisabled = (GetPlayerChar(Owner) ? GetPlayerChar(Owner)->GrenadeHitDisabled() : !g_Config.m_SvHit);
+		if(GrenadeHitDisabled)
+			continue;
 
+		if(Owner != -1)
+		{
 			pTarget->GetHit(Owner);
+		}
+		else
+		{
+			// Hit by a explosive shotgun bullet, hit for all teams
+			for(int TargetSwitchTeam = 0; TargetSwitchTeam < TEAM_SUPER; ++TargetSwitchTeam)
+			{
+				pTarget->GetHit(-1, TargetSwitchTeam);
+			}
 		}
 	}
 }
@@ -407,14 +414,13 @@ void CGameContext::CreateFinishEffect(vec2 Pos, CClientMask Mask)
 	}
 }
 
-void CGameContext::CreateTargetHit(vec2 Pos, bool Weakly, int ClientIdHitFrom, CClientMask Mask)
+void CGameContext::CreateTargetHit(vec2 Pos, int ClientIdHitFrom, CClientMask Mask)
 {
 	CNetEvent_TargetHit *pEvent = m_Events.Create<CNetEvent_TargetHit>(Mask);
 	if(pEvent)
 	{
 		pEvent->m_X = (int)Pos.x;
 		pEvent->m_Y = (int)Pos.y;
-		pEvent->m_Weakly = Weakly;
 		pEvent->m_ClientIdHitFrom = ClientIdHitFrom;
 	}
 }

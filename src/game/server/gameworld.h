@@ -7,6 +7,7 @@
 
 #include <game/gamecore.h>
 
+#include <unordered_set>
 #include <vector>
 
 class CCollision;
@@ -109,6 +110,22 @@ public:
 	 * @return Pointer to the closest hit or `nullptr` if there is no intersection.
 	 */
 	CTargetSwitch *IntersectTargetSwitch(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos);
+
+	/**
+	 * Finds the first CEntity of any of the given types that intersects the line.
+	 *
+	 * @param Pos0 Start position.
+	 * @param Pos1 End position.
+	 * @param Radius How far from the line the @link CEntity @endlink is allowed to be.
+	 * @param Types Unordered set of entity types checked for intersection.
+	 * @param NewPos Intersection position.
+	 * @param pNotThis Entity to ignore intersecting with.
+	 * @param CollideWith Only find entities that can collide with that Client Id (pass -1 to ignore this check).
+	 * @param pThisOnly Only search this specific entity and ignore all others.
+	 *
+	 * @return Pointer to the closest hit or `nullptr` if there is no intersection.
+	 */
+	CEntity *IntersectEntities(vec2 Pos0, vec2 Pos1, float Radius, const std::unordered_set<int> &Types, vec2 &NewPos, const CEntity *pNotThis = nullptr, int CollideWith = -1, const CEntity *pThisOnly = nullptr);
 
 	/**
 	 * Finds the CEntity that intersects the line.

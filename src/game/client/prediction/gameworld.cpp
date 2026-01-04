@@ -268,41 +268,54 @@ CTargetSwitch *CGameWorld::IntersectTargetSwitch(vec2 Pos0, vec2 Pos1, float Rad
 	return (CTargetSwitch *)IntersectEntity(Pos0, Pos1, Radius, ENTTYPE_TARGETSWITCH, NewPos);
 }
 
-CEntity *CGameWorld::IntersectEntity(vec2 Pos0, vec2 Pos1, float Radius, int Type, vec2 &NewPos, const CEntity *pNotThis, int CollideWith, const CEntity *pThisOnly)
+CEntity *CGameWorld::IntersectEntities(vec2 Pos0, vec2 Pos1, float Radius, const std::unordered_set<int> &Types, vec2 &NewPos, const CEntity *pNotThis, int CollideWith, const CEntity *pThisOnly)
 {
 	float ClosestLen = distance(Pos0, Pos1) * 100.0f;
 	CEntity *pClosest = nullptr;
 
-	CEntity *pEntity = FindFirst(Type);
-	for(; pEntity; pEntity = pEntity->TypeNext())
+	for(int Type : Types)
 	{
-		if(pEntity == pNotThis)
+		if(Type < 0 || Type >= NUM_ENTTYPES)
 			continue;
 
-		if(pThisOnly && pEntity != pThisOnly)
-			continue;
-
-		if(CollideWith != -1 && !pEntity->CanCollide(CollideWith))
-			continue;
-
-		vec2 IntersectPos;
-		if(closest_point_on_line(Pos0, Pos1, pEntity->m_Pos, IntersectPos))
+		CEntity *pEntity = FindFirst(Type);
+		for(; pEntity; pEntity = pEntity->TypeNext())
 		{
-			float Len = distance(pEntity->m_Pos, IntersectPos);
-			if(Len < pEntity->m_ProximityRadius + Radius)
+			if(pEntity == pNotThis)
+				continue;
+
+			if(pThisOnly && pEntity != pThisOnly)
+				continue;
+
+			if(CollideWith != -1 && !pEntity->CanCollide(CollideWith))
+				continue;
+
+			vec2 IntersectPos;
+			if(closest_point_on_line(Pos0, Pos1, pEntity->m_Pos, IntersectPos))
 			{
-				Len = distance(Pos0, IntersectPos);
-				if(Len < ClosestLen)
+				float Len = distance(pEntity->m_Pos, IntersectPos);
+				if(Len < pEntity->m_ProximityRadius + Radius)
 				{
-					NewPos = IntersectPos;
-					ClosestLen = Len;
-					pClosest = pEntity;
+					Len = distance(Pos0, IntersectPos);
+					if(Len < ClosestLen)
+					{
+						NewPos = IntersectPos;
+						ClosestLen = Len;
+						pClosest = pEntity;
+					}
 				}
 			}
 		}
 	}
 
 	return pClosest;
+}
+
+CEntity *CGameWorld::IntersectEntity(vec2 Pos0, vec2 Pos1, float Radius, int Type, vec2 &NewPos, const CEntity *pNotThis, int CollideWith, const CEntity *pThisOnly)
+{
+	std::unordered_set<int> Types;
+	Types.insert(Type);
+	return IntersectEntities(Pos0, Pos1, Radius, Types, NewPos, pNotThis, CollideWith, pThisOnly);
 }
 
 std::vector<CCharacter *> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, const CEntity *pNotThis)

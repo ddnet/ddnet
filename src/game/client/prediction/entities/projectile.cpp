@@ -136,7 +136,6 @@ void CProjectile::Tick()
 					pChr->Freeze();
 			}
 
-			constexpr int TargetSwitchCooldown = 4;
 			if(m_TargetSwitchCollisionCooldown <= 0)
 			{
 				CEntity *apTargetEnts[TargetSwitch::MAX_TARGET_SWITCHES];
@@ -144,7 +143,7 @@ void CProjectile::Tick()
 				if(Num > 0)
 				{
 					Collide = true;
-					m_TargetSwitchCollisionCooldown = TargetSwitchCooldown;
+					m_TargetSwitchCollisionCooldown = TargetSwitch::SWITCH_COOLDOWN_TICKS;
 				}
 				for(int i = 0; i < Num; ++i)
 				{
@@ -153,15 +152,15 @@ void CProjectile::Tick()
 					{
 						for(int TargetSwitchTeam = 0; TargetSwitchTeam < TEAM_SUPER; ++TargetSwitchTeam)
 						{
-							pTargetSwitch->GetHit(-1, m_Type == WEAPON_WORLD, TargetSwitchTeam);
+							pTargetSwitch->GetHit(-1, TargetSwitchTeam);
 						}
 					}
 				}
 			}
 		}
-		else if(pTargetTargetSwitch && pOwnerChar)
+		else if(pTargetTargetSwitch && pOwnerChar && m_Type != WEAPON_GUN)
 		{
-			pTargetTargetSwitch->GetHit(pOwnerChar->GetCid(), m_Type == WEAPON_GUN);
+			pTargetTargetSwitch->GetHit(pOwnerChar->GetCid());
 		}
 		if(Collide && m_Bouncing != 0)
 		{

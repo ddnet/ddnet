@@ -1426,16 +1426,14 @@ void CGameClient::ProcessEvents()
 		else if(Item.m_Type == NETEVENTTYPE_TARGETHIT)
 		{
 			const CNetEvent_TargetHit *pEvent = (const CNetEvent_TargetHit *)Item.m_pData;
-			if(!pEvent->m_Weakly)
-			{
-				if(pEvent->m_ClientIdHitFrom != -1 &&
-					IsOtherTeam(pEvent->m_ClientIdHitFrom))
-				{
-					Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
-				}
 
-				m_Effects.TargetHit(vec2(pEvent->m_X, pEvent->m_Y), Alpha, Volume);
+			if(pEvent->m_ClientIdHitFrom != -1 &&
+				IsOtherTeam(pEvent->m_ClientIdHitFrom))
+			{
+				Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
 			}
+
+			m_Effects.TargetHit(vec2(pEvent->m_X, pEvent->m_Y), Alpha, Volume);
 		}
 	}
 }
@@ -4337,6 +4335,7 @@ void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTexture(&m_ExtrasSkin.m_SpriteHectagon);
 		Graphics()->UnloadTexture(&m_ExtrasSkin.m_TargetSwitchOpen);
 		Graphics()->UnloadTexture(&m_ExtrasSkin.m_TargetSwitchClose);
+		Graphics()->UnloadTexture(&m_ExtrasSkin.m_TargetSwitchAlternateDecal);
 
 		for(auto &SpriteParticle : m_ExtrasSkin.m_aSpriteParticles)
 			SpriteParticle = IGraphics::CTextureHandle();
@@ -4382,6 +4381,7 @@ void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 
 		m_ExtrasSkin.m_TargetSwitchOpen = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_TARGETSWITCH_OPEN]);
 		m_ExtrasSkin.m_TargetSwitchClose = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_TARGETSWITCH_CLOSE]);
+		m_ExtrasSkin.m_TargetSwitchAlternateDecal = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_TARGETSWITCH_ALTERNATE_DECAL]);
 
 		m_ExtrasSkinLoaded = true;
 	}

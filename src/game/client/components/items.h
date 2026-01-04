@@ -47,6 +47,7 @@ private:
 	int m_FreezeHeadOffset;
 	int m_TargetSwitchOpenOffset;
 	int m_TargetSwitchCloseOffset;
+	int m_TargetSwitchAlternateDecalOffset;
 };
 
 #endif

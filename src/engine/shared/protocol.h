@@ -159,6 +159,7 @@ namespace TuneZone
 namespace TargetSwitch
 {
 	inline constexpr int MAX_TARGET_SWITCHES = 256;
+	inline constexpr int SWITCH_COOLDOWN_TICKS = 4;
 };
 
 namespace FinishTime

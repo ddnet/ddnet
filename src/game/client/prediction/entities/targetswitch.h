@@ -16,7 +16,7 @@ public:
 	void Reset();
 	void Tick() override;
 
-	void GetHit(int ClientId, bool Weakly = false, int ForcedTeam = -1);
+	void GetHit(int ClientId, int ForcedTeam = -1);
 
 private:
 	int m_Type;
