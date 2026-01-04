@@ -2542,7 +2542,8 @@ int fs_remove(const char *filename)
 	}
 	const std::wstring wide_filename = windows_utf8_to_wide(filename);
 
-	unsigned random_num = secure_rand();
+	unsigned random_num;
+	secure_random_fill(&random_num, sizeof(random_num));
 	std::wstring wide_filename_temp;
 	do
 	{
@@ -3156,13 +3157,6 @@ void secure_random_fill(void *bytes, unsigned length)
 #else
 	dbg_assert(length == io_read(secure_random_data.urandom, bytes, length), "io_read returned with a short read");
 #endif
-}
-
-int secure_rand()
-{
-	unsigned int i;
-	secure_random_fill(&i, sizeof(i));
-	return (int)(i % RAND_MAX);
 }
 
 // From https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2.

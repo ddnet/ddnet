@@ -2997,7 +2997,7 @@ void CServer::UpdateDebugDummies(bool ForceDisconnect)
 			Client.m_DebugDummyAddr.ip[11] = 0x00;
 			uint_to_bytes_be(&Client.m_DebugDummyAddr.ip[12], ClientId);
 			// Port: random like normal clients
-			Client.m_DebugDummyAddr.port = (secure_rand() % (65535 - 1024)) + 1024;
+			Client.m_DebugDummyAddr.port = secure_rand_below(65535 - 1024) + 1024;
 			net_addr_str(&Client.m_DebugDummyAddr, Client.m_aDebugDummyAddrString.data(), Client.m_aDebugDummyAddrString.size(), true);
 			net_addr_str(&Client.m_DebugDummyAddr, Client.m_aDebugDummyAddrStringNoPort.data(), Client.m_aDebugDummyAddrStringNoPort.size(), false);
 
