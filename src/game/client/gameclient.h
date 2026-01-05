@@ -69,7 +69,10 @@
 #include "components/touch_controls.h"
 #include "components/voting.h"
 
+#include <memory>
 #include <vector>
+
+class IMap;
 
 class CGameInfo
 {
@@ -699,6 +702,9 @@ public:
 	int SwitchStateTeam() const;
 	bool IsLocalCharSuper() const;
 	bool CanDisplayWarning() const override;
+
+	IMap *Map() override { return m_pMap.get(); }
+	const IMap *Map() const override { return m_pMap.get(); }
 	CNetObjHandler *GetNetObjHandler() override;
 	protocol7::CNetObjHandler *GetNetObjHandler7() override;
 
@@ -886,6 +892,8 @@ public:
 	int m_MapBestTimeMillis;
 
 private:
+	std::unique_ptr<IMap> m_pMap;
+
 	std::vector<CSnapEntities> m_vSnapEntities;
 	void SnapCollectEntities();
 

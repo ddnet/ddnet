@@ -38,7 +38,6 @@ class IConfigManager;
 class IDiscord;
 class IEngine;
 class IEngineInput;
-class IEngineMap;
 class IEngineSound;
 class IFriends;
 class ILogger;
@@ -70,7 +69,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	IGameClient *m_pGameClient = nullptr;
 	IEngineGraphics *m_pGraphics = nullptr;
 	IEngineInput *m_pInput = nullptr;
-	IEngineMap *m_pMap = nullptr;
 	IEngineSound *m_pSound = nullptr;
 	ISteam *m_pSteam = nullptr;
 	INotifications *m_pNotifications = nullptr;
@@ -278,6 +276,7 @@ public:
 	IDiscord *Discord() { return m_pDiscord; }
 	IEngine *Engine() { return m_pEngine; }
 	IGameClient *GameClient() { return m_pGameClient; }
+	const IGameClient *GameClient() const { return m_pGameClient; }
 	IEngineGraphics *Graphics() { return m_pGraphics; }
 	IEngineInput *Input() { return m_pInput; }
 	IEngineSound *Sound() { return m_pSound; }

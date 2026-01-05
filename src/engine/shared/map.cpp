@@ -10,6 +10,11 @@
 
 CMap::CMap() = default;
 
+CMap::~CMap()
+{
+	Unload();
+}
+
 int CMap::GetDataSize(int Index) const
 {
 	return m_DataFile.GetDataSize(Index);
@@ -70,12 +75,8 @@ int CMap::NumItems() const
 	return m_DataFile.NumItems();
 }
 
-bool CMap::Load(const char *pMapName, int StorageType)
+bool CMap::Load(IStorage *pStorage, const char *pMapName, int StorageType)
 {
-	IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
-	if(!pStorage)
-		return false;
-
 	// Ensure current datafile is not left in an inconsistent state if loading fails,
 	// by loading the new datafile separately first.
 	CDataFileReader NewDataFile;
@@ -178,4 +179,7 @@ void CMap::ExtractTiles(CTile *pDest, size_t DestSize, const CTile *pSrc, size_t
 	}
 }
 
-extern IEngineMap *CreateEngineMap() { return new CMap; }
+extern std::unique_ptr<IMap> CreateMap()
+{
+	return std::make_unique<CMap>();
+}
