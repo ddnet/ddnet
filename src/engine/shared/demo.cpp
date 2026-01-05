@@ -1199,7 +1199,7 @@ void CDemoPlayer::Update(bool RealTime)
 	{
 		if(m_Info.m_Info.m_LiveDemo &&
 			m_Info.m_Info.m_Speed > 1.0f &&
-			m_Info.m_Info.m_LastTick - m_Info.m_Info.m_CurrentTick <= (DeltaTime * (double)m_Info.m_Info.m_Speed / Freq + 2) * SERVER_TICK_SPEED)
+			m_Info.m_Info.m_LastTick - m_Info.m_Info.m_CurrentTick <= (DeltaTime * (double)m_Info.m_Info.m_Speed / Freq + 2) * (float)SERVER_TICK_SPEED)
 		{
 			// Reset to default speed if we are fast-forwarding to the end of a live demo,
 			// to prevent playback error due to final demo chunk data still being written.

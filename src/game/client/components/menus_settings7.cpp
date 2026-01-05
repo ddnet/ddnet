@@ -252,7 +252,7 @@ void CMenus::RenderSettingsTeeCustom7(CUIRect MainView)
 	CustomColorsButton.VSplitRight(30.0f, &CustomColorsButton, &RandomSkinButton);
 	CustomColorsButton.VSplitRight(20.0f, &CustomColorsButton, nullptr);
 
-	const float ButtonWidth = ButtonBar.w / protocol7::NUM_SKINPARTS;
+	const float ButtonWidth = ButtonBar.w / (float)protocol7::NUM_SKINPARTS;
 
 	static CButtonContainer s_aSkinPartButtons[protocol7::NUM_SKINPARTS];
 	for(int i = 0; i < protocol7::NUM_SKINPARTS; i++)
