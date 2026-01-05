@@ -323,7 +323,7 @@ jobs:
         sudo apt-get install ninja-build openjdk-21-jdk openssl
         curl -LO https://github.com/Kitware/CMake/releases/download/v3.22.1/cmake-3.22.1-Linux-x86_64.tar.gz
         mkdir -p /home/runner/cmake
-        sudo tar --strip-components 1 -C /home/runner/cmake -xf cmake-3.22.1-Linux-x86_64.tar.gz
+        tar --strip-components 1 -C /home/runner/cmake -xf cmake-3.22.1-Linux-x86_64.tar.gz
         rustup default 1.92.0
         cargo install cargo-ndk
         rustup target add armv7-linux-androideabi
@@ -364,4 +364,65 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: ddnet-android
+        path: artifacts
+
+  build-emscripten:
+    runs-on: ubuntu-24.04
+    env:
+      CARGO_HTTP_MULTIPLEXING: false
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Prepare Linux
+      run: |
+        curl -LO https://github.com/Kitware/CMake/releases/download/v3.22.1/cmake-3.22.1-Linux-x86_64.tar.gz
+        mkdir -p /home/runner/cmake
+        tar --strip-components 1 -C /home/runner/cmake -xf cmake-3.22.1-Linux-x86_64.tar.gz
+        rustup default 1.89.0
+        rustup target add wasm32-unknown-emscripten
+        git clone https://github.com/emscripten-core/emsdk emsdk
+        cd emsdk
+        ./emsdk install 4.0.22
+        ./emsdk activate 4.0.22
+
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@v2
+      with:
+          workspaces: |
+              src/mastersrv
+              src/masterping
+              ./
+
+    - name: Build headless Emscripten client in debug mode
+      run: |
+        export PATH=/home/runner/cmake/bin:$PATH
+        source emsdk/emsdk_env.sh
+        emcmake cmake -H. -G "Unix Makefiles" -B build-emscripten-headless -DCMAKE_BUILD_TYPE=Debug -DVIDEORECORDER=OFF -DVULKAN=OFF -DSERVER=OFF -DTOOLS=OFF -DHEADLESS_CLIENT=ON -DPREFER_BUNDLED_LIBS=ON
+        cmake --build build-emscripten-headless --target game-client -j$(nproc)
+
+    - name: Test headless Emscripten client
+      run: |
+        export MOZ_HEADLESS=1
+        source emsdk/emsdk_env.sh
+        emrun --browser firefox build-emscripten-headless/DDNet.html -- "quit"
+
+    - name: Build Emscripten client in release mode
+      run: |
+        export PATH=/home/runner/cmake/bin:$PATH
+        source emsdk/emsdk_env.sh
+        # -G "Unix Makefiles" required due to https://gitlab.kitware.com/cmake/cmake/-/issues/16395
+        emcmake cmake -H. -G "Unix Makefiles" -B build-emscripten-release -DCMAKE_BUILD_TYPE=Release -DVIDEORECORDER=OFF -DVULKAN=OFF -DSERVER=OFF -DTOOLS=OFF -DPREFER_BUNDLED_LIBS=ON
+        cmake --build build-emscripten-release --target game-client -j$(nproc)
+        mkdir artifacts
+        mv build-emscripten-release/DDNet.data artifacts
+        mv build-emscripten-release/DDNet.js artifacts
+        mv build-emscripten-release/DDNet.wasm artifacts
+        cp other/emscripten/minimal.html artifacts/DDNet.html
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ddnet-emscripten
         path: artifacts
