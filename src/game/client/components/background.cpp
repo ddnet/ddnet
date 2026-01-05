@@ -71,7 +71,7 @@ void CBackground::LoadBackground()
 				m_Loaded = true;
 			}
 		}
-		else if(m_pMap->Load(aBuf))
+		else if(m_pMap->Load(aBuf, IStorage::TYPE_ALL))
 		{
 			m_pLayers->Init(m_pMap, true);
 			NeedImageLoading = true;

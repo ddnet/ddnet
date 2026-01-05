@@ -70,7 +70,7 @@ int CMap::NumItems() const
 	return m_DataFile.NumItems();
 }
 
-bool CMap::Load(const char *pMapName)
+bool CMap::Load(const char *pMapName, int StorageType)
 {
 	IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
 	if(!pStorage)
@@ -79,7 +79,7 @@ bool CMap::Load(const char *pMapName)
 	// Ensure current datafile is not left in an inconsistent state if loading fails,
 	// by loading the new datafile separately first.
 	CDataFileReader NewDataFile;
-	if(!NewDataFile.Open(pStorage, pMapName, IStorage::TYPE_ALL))
+	if(!NewDataFile.Open(pStorage, pMapName, StorageType))
 		return false;
 
 	// Check version
