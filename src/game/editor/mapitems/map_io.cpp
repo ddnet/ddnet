@@ -812,7 +812,14 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 					{
 						void *pFrontData = DataFile.GetData(pTilemapItem->m_Front);
 						unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Front);
-						pTiles->ExtractTiles(pTilemapItem->m_Version, (CTile *)pFrontData, Size);
+						if(!pTiles->ExtractTiles(pTilemapItem->m_Version, (CTile *)pFrontData, Size))
+						{
+							ErrorHandler("Error: Failed to load tile layer data.");
+							// TODO: keep previous map loaded on errors
+							Clean();
+							CreateDefault();
+							return false;
+						}
 						DataFile.UnloadData(pTilemapItem->m_Front);
 					}
 					else if(pTiles->m_HasSwitch)
@@ -867,7 +874,14 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 					{
 						void *pData = DataFile.GetData(pTilemapItem->m_Data);
 						unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Data);
-						pTiles->ExtractTiles(pTilemapItem->m_Version, (CTile *)pData, Size);
+						if(!pTiles->ExtractTiles(pTilemapItem->m_Version, (CTile *)pData, Size))
+						{
+							ErrorHandler("Error: Failed to load tile layer data.");
+							// TODO: keep previous map loaded on errors
+							Clean();
+							CreateDefault();
+							return false;
+						}
 						DataFile.UnloadData(pTilemapItem->m_Data);
 					}
 				}
