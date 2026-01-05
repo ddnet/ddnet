@@ -115,6 +115,8 @@ CGameContext::CGameContext(bool Resetting) :
 
 	if(!Resetting)
 	{
+		m_pMap = CreateMap();
+
 		for(auto &pSavedTee : m_apSavedTees)
 			pSavedTee = nullptr;
 
@@ -138,6 +140,9 @@ CGameContext::~CGameContext()
 
 	if(!m_Resetting)
 	{
+		m_pMap->Unload();
+		m_pMap = nullptr;
+
 		for(auto &pSavedTee : m_apSavedTees)
 			delete pSavedTee;
 
@@ -160,6 +165,8 @@ void CGameContext::Clear()
 	CTuningParams Tuning = m_aTuningList[0];
 	CMutes Mutes = m_Mutes;
 	CMutes VoteMutes = m_VoteMutes;
+	std::unique_ptr<IMap> pMap;
+	std::swap(pMap, m_pMap);
 
 	m_Resetting = true;
 	this->~CGameContext();
@@ -172,6 +179,7 @@ void CGameContext::Clear()
 	m_aTuningList[0] = Tuning;
 	m_Mutes = Mutes;
 	m_VoteMutes = VoteMutes;
+	std::swap(pMap, m_pMap);
 }
 
 void CGameContext::TeeHistorianWrite(const void *pData, int DataSize, void *pUser)
@@ -4134,7 +4142,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 	for(int i = 0; i < NUM_NETOBJTYPES; i++)
 		Server()->SnapSetStaticsize(i, m_NetObjHandler.GetObjSize(i));
 
-	m_Layers.Init(Kernel()->RequestInterface<IMap>(), false);
+	m_Layers.Init(Map(), false);
 	m_Collision.Init(&m_Layers);
 	m_World.Init(&m_Collision, m_aTuningList);
 
@@ -4583,7 +4591,7 @@ void CGameContext::OnShutdown(void *pPersistentData)
 
 void CGameContext::LoadMapSettings()
 {
-	IMap *pMap = Kernel()->RequestInterface<IMap>();
+	IMap *pMap = Map();
 	int Start, Num;
 	pMap->GetType(MAPITEMTYPE_INFO, &Start, &Num);
 	for(int i = Start; i < Start + Num; i++)

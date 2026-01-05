@@ -21,6 +21,7 @@
 #define CONNECTLINK_DOUBLE_SLASH "ddnet://"
 #define CONNECTLINK_NO_SLASH "ddnet:"
 
+class IMap;
 struct SWarning;
 
 enum
@@ -412,6 +413,8 @@ public:
 	virtual bool CanDisplayWarning() const = 0;
 	virtual void RenderShutdownMessage() = 0;
 
+	virtual IMap *Map() = 0;
+	virtual const IMap *Map() const = 0;
 	virtual CNetObjHandler *GetNetObjHandler() = 0;
 	virtual protocol7::CNetObjHandler *GetNetObjHandler7() = 0;
 

@@ -35,7 +35,7 @@ void CMapSounds::PlayAt(int Channel, int SoundId, vec2 Position)
 
 void CMapSounds::OnMapLoad()
 {
-	IMap *pMap = Kernel()->RequestInterface<IMap>();
+	IMap *pMap = GameClient()->Map();
 
 	Clear();
 

@@ -737,7 +737,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 	GameClient()->ForceUpdateConsoleRemoteCompletionSuggestions();
 	m_aNetClient[CONN_MAIN].Disconnect(pReason);
 	SetState(IClient::STATE_OFFLINE);
-	m_pMap->Unload();
+	GameClient()->Map()->Unload();
 	m_CurrentServerPingInfoType = -1;
 	m_CurrentServerPingBasicToken = -1;
 	m_CurrentServerPingToken = -1;
@@ -1155,30 +1155,30 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, const std
 	if((bool)m_LoadingCallback)
 		m_LoadingCallback(IClient::LOADING_CALLBACK_DETAIL_MAP);
 
-	if(!m_pMap->Load(pFilename, IStorage::TYPE_ALL))
+	if(!GameClient()->Map()->Load(Storage(), pFilename, IStorage::TYPE_ALL))
 	{
 		str_format(s_aErrorMsg, sizeof(s_aErrorMsg), "map '%s' not found", pFilename);
 		return s_aErrorMsg;
 	}
 
-	if(WantedSha256.has_value() && m_pMap->Sha256() != WantedSha256.value())
+	if(WantedSha256.has_value() && GameClient()->Map()->Sha256() != WantedSha256.value())
 	{
 		char aWanted[SHA256_MAXSTRSIZE];
 		char aGot[SHA256_MAXSTRSIZE];
 		sha256_str(WantedSha256.value(), aWanted, sizeof(aWanted));
-		sha256_str(m_pMap->Sha256(), aGot, sizeof(aWanted));
+		sha256_str(GameClient()->Map()->Sha256(), aGot, sizeof(aWanted));
 		str_format(s_aErrorMsg, sizeof(s_aErrorMsg), "map differs from the server. %s != %s", aGot, aWanted);
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", s_aErrorMsg);
-		m_pMap->Unload();
+		GameClient()->Map()->Unload();
 		return s_aErrorMsg;
 	}
 
 	// Only check CRC if we don't have the secure SHA256.
-	if(!WantedSha256.has_value() && m_pMap->Crc() != WantedCrc)
+	if(!WantedSha256.has_value() && GameClient()->Map()->Crc() != WantedCrc)
 	{
-		str_format(s_aErrorMsg, sizeof(s_aErrorMsg), "map differs from the server. %08x != %08x", m_pMap->Crc(), WantedCrc);
+		str_format(s_aErrorMsg, sizeof(s_aErrorMsg), "map differs from the server. %08x != %08x", GameClient()->Map()->Crc(), WantedCrc);
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", s_aErrorMsg);
-		m_pMap->Unload();
+		GameClient()->Map()->Unload();
 		return s_aErrorMsg;
 	}
 
@@ -3020,7 +3020,6 @@ void CClient::InitInterfaces()
 	m_pSound = Kernel()->RequestInterface<IEngineSound>();
 	m_pGameClient = Kernel()->RequestInterface<IGameClient>();
 	m_pInput = Kernel()->RequestInterface<IEngineInput>();
-	m_pMap = Kernel()->RequestInterface<IEngineMap>();
 	m_pConfigManager = Kernel()->RequestInterface<IConfigManager>();
 	m_pConfig = m_pConfigManager->Values();
 #if defined(CONF_AUTOUPDATE)
@@ -4063,12 +4062,12 @@ void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int 
 		aFilename,
 		IsSixup() ? GameClient()->NetVersion7() : GameClient()->NetVersion(),
 		m_aCurrentMap,
-		m_pMap->Sha256(),
-		m_pMap->Crc(),
+		GameClient()->Map()->Sha256(),
+		GameClient()->Map()->Crc(),
 		"client",
-		m_pMap->Size(),
+		GameClient()->Map()->Size(),
 		nullptr,
-		m_pMap->File(),
+		GameClient()->Map()->File(),
 		nullptr,
 		nullptr);
 }
@@ -4860,10 +4859,6 @@ int main(int argc, const char **argv)
 	pKernel->RegisterInterface(pEngineTextRender); // IEngineTextRender
 	pKernel->RegisterInterface(static_cast<ITextRender *>(pEngineTextRender), false);
 
-	IEngineMap *pEngineMap = CreateEngineMap();
-	pKernel->RegisterInterface(pEngineMap); // IEngineMap
-	pKernel->RegisterInterface(static_cast<IMap *>(pEngineMap), false);
-
 	IDiscord *pDiscord = CreateDiscord();
 	pKernel->RegisterInterface(pDiscord);
 
@@ -5051,12 +5046,12 @@ const char *CClient::GetCurrentMapPath() const
 
 SHA256_DIGEST CClient::GetCurrentMapSha256() const
 {
-	return m_pMap->Sha256();
+	return GameClient()->Map()->Sha256();
 }
 
 unsigned CClient::GetCurrentMapCrc() const
 {
-	return m_pMap->Crc();
+	return GameClient()->Map()->Crc();
 }
 
 void CClient::RaceRecord_Start(const char *pFilename)
@@ -5069,12 +5064,12 @@ void CClient::RaceRecord_Start(const char *pFilename)
 		pFilename,
 		IsSixup() ? GameClient()->NetVersion7() : GameClient()->NetVersion(),
 		m_aCurrentMap,
-		m_pMap->Sha256(),
-		m_pMap->Crc(),
+		GameClient()->Map()->Sha256(),
+		GameClient()->Map()->Crc(),
 		"client",
-		m_pMap->Size(),
+		GameClient()->Map()->Size(),
 		nullptr,
-		m_pMap->File(),
+		GameClient()->Map()->File(),
 		nullptr,
 		nullptr);
 }

@@ -22,6 +22,7 @@
 #include <type_traits>
 
 struct CAntibotRoundData;
+class IMap;
 
 // When recording a demo on the server, the ClientId -1 is used
 enum
@@ -366,6 +367,8 @@ public:
 	virtual const char *Version() const = 0;
 	virtual const char *NetVersion() const = 0;
 
+	virtual IMap *Map() = 0;
+	virtual const IMap *Map() const = 0;
 	virtual CNetObjHandler *GetNetObjHandler() = 0;
 	virtual protocol7::CNetObjHandler *GetNetObjHandler7() = 0;
 

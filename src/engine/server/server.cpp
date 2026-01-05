@@ -2890,7 +2890,7 @@ int CServer::LoadMap(const char *pMapName)
 	{
 		return 0;
 	}
-	if(!m_pMap->Load(aBuf, IStorage::TYPE_ALL))
+	if(!GameServer()->Map()->Load(Storage(), aBuf, IStorage::TYPE_ALL))
 	{
 		return 0;
 	}
@@ -2899,8 +2899,8 @@ int CServer::LoadMap(const char *pMapName)
 	m_IdPool.TimeoutIds();
 
 	// get the crc of the map
-	m_aCurrentMapSha256[MAP_TYPE_SIX] = m_pMap->Sha256();
-	m_aCurrentMapCrc[MAP_TYPE_SIX] = m_pMap->Crc();
+	m_aCurrentMapSha256[MAP_TYPE_SIX] = GameServer()->Map()->Sha256();
+	m_aCurrentMapCrc[MAP_TYPE_SIX] = GameServer()->Map()->Crc();
 	char aBufMsg[256];
 	char aSha256[SHA256_MAXSTRSIZE];
 	sha256_str(m_aCurrentMapSha256[MAP_TYPE_SIX], aSha256, sizeof(aSha256));
@@ -3455,7 +3455,7 @@ int CServer::Run()
 	Engine()->ShutdownJobs();
 
 	GameServer()->OnShutdown(nullptr);
-	m_pMap->Unload();
+	GameServer()->Map()->Unload();
 	DbPool()->OnShutdown();
 
 #if defined(CONF_UPNP)
@@ -4351,7 +4351,6 @@ void CServer::RegisterCommands()
 {
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pGameServer = Kernel()->RequestInterface<IGameServer>();
-	m_pMap = Kernel()->RequestInterface<IEngineMap>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pAntibot = Kernel()->RequestInterface<IEngineAntibot>();
 

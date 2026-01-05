@@ -36,7 +36,6 @@ class CLogMessage;
 class CMsgPacker;
 class CPacker;
 class IEngine;
-class IEngineMap;
 class ILogger;
 
 class CServerBan : public CNetBan
@@ -220,8 +219,6 @@ public:
 	CFifo m_Fifo;
 	CServerBan m_ServerBan;
 	CHttp m_Http;
-
-	IEngineMap *m_pMap;
 
 	int64_t m_GameStartTime;
 
