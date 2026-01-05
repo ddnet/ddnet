@@ -83,7 +83,9 @@ static int TestMap(const char *pMapPath, bool CalcHashes, IStorage *pStorage)
 int main(int argc, const char **argv)
 {
 	const CCmdlineFix CmdlineFix(&argc, &argv);
-	log_set_global_logger_default();
+	ILogger *pDefaultLogger = log_logger_default().release();
+	pDefaultLogger->SetFilter(CLogFilter{LEVEL_DEBUG});
+	log_set_global_logger(pDefaultLogger);
 
 	const char *pMapPath;
 	bool CalcHashes;

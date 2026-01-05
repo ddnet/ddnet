@@ -11,6 +11,7 @@
 #include <engine/storage.h>
 
 #include <cstdint>
+#include <functional>
 #include <map>
 #include <vector>
 
@@ -18,6 +19,15 @@ enum
 {
 	ITEMTYPE_EX = 0xFFFF,
 };
+
+/**
+ * The data processor function is called after a particular data item is first successfully uncompressed.
+ * The function can validate the data and return `std::make_pair(nullptr, 0)` on error or the original data
+ * on success. The function can also replace the data and return a new data pointer and size. The new data
+ * must be allocated with `malloc`. When returning different data or on errors, the original data must be
+ * freed by the function using `free`.
+ */
+typedef std::function<std::pair<void *, size_t>(void *pData, size_t Size)> FDataProcessor;
 
 // raw datafile access
 class CDataFileReader
@@ -41,7 +51,7 @@ public:
 	void *GetData(int Index);
 	void *GetDataSwapped(int Index); // makes sure that the data is 32bit LE ints when saved
 	const char *GetDataString(int Index);
-	void ReplaceData(int Index, char *pData, size_t Size); // memory for data must have been allocated with malloc
+	void AddDataProcessor(int Index, FDataProcessor DataProcessor);
 	void UnloadData(int Index);
 	int NumData() const;
 
@@ -50,6 +60,7 @@ public:
 	void GetType(int Type, int *pStart, int *pNum);
 	int FindItemIndex(int Type, int Id);
 	void *FindItem(int Type, int Id);
+	bool OverrideItemData(int Index, const void *pData, size_t Size);
 	int NumItems() const;
 
 	const char *FullName() const;

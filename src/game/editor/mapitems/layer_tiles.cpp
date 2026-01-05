@@ -7,7 +7,6 @@
 #include <engine/graphics.h>
 #include <engine/keys.h>
 #include <engine/shared/config.h>
-#include <engine/shared/map.h>
 
 #include <game/editor/editor.h>
 #include <game/editor/editor_actions.h>
@@ -135,20 +134,6 @@ void CLayerTiles::PrepareForSave()
 		for(int y = 0; y < m_Height; y++)
 			for(int x = 0; x < m_Width; x++)
 				m_pTiles[y * m_Width + x].m_Flags |= Map()->m_vpImages[m_Image]->m_aTileFlags[m_pTiles[y * m_Width + x].m_Index];
-	}
-}
-
-void CLayerTiles::ExtractTiles(const CTile *pSavedTiles, size_t SavedTilesSize) const
-{
-	const size_t DestSize = (size_t)m_Width * m_Height;
-	if(SavedTilesSize >= DestSize)
-	{
-		mem_copy(m_pTiles, pSavedTiles, DestSize * sizeof(CTile));
-		for(size_t TileIndex = 0; TileIndex < DestSize; ++TileIndex)
-		{
-			m_pTiles[TileIndex].m_Skip = 0;
-			m_pTiles[TileIndex].m_MustBe0 = 0;
-		}
 	}
 }
 
@@ -1008,40 +993,37 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		FillGameTiles((EGameTileOp)Selected);
 	}
 
-	if(Map()->m_pGameLayer.get() != this)
+	if(m_Image >= 0 && (size_t)m_Image < Map()->m_vpImages.size() && Map()->m_vpImages[m_Image]->m_Automapper.IsLoaded() && m_AutomapperConfig != -1)
 	{
-		if(m_Image >= 0 && (size_t)m_Image < Map()->m_vpImages.size() && Map()->m_vpImages[m_Image]->m_Automapper.IsLoaded() && m_AutomapperConfig != -1)
+		pToolBox->HSplitBottom(2.0f, pToolBox, nullptr);
+		pToolBox->HSplitBottom(12.0f, pToolBox, &Button);
+		if(m_Seed != 0)
 		{
-			pToolBox->HSplitBottom(2.0f, pToolBox, nullptr);
-			pToolBox->HSplitBottom(12.0f, pToolBox, &Button);
-			if(m_Seed != 0)
+			CUIRect ButtonAuto;
+			Button.VSplitRight(16.0f, &Button, &ButtonAuto);
+			Button.VSplitRight(2.0f, &Button, nullptr);
+			static int s_AutomapperButtonAuto = 0;
+			if(Editor()->DoButton_Editor(&s_AutomapperButtonAuto, "A", m_AutoAutomapper, &ButtonAuto, BUTTONFLAG_LEFT, "Automatically run the automapper after modifications."))
 			{
-				CUIRect ButtonAuto;
-				Button.VSplitRight(16.0f, &Button, &ButtonAuto);
-				Button.VSplitRight(2.0f, &Button, nullptr);
-				static int s_AutomapperButtonAuto = 0;
-				if(Editor()->DoButton_Editor(&s_AutomapperButtonAuto, "A", m_AutoAutomapper, &ButtonAuto, BUTTONFLAG_LEFT, "Automatically run the automapper after modifications."))
+				m_AutoAutomapper = !m_AutoAutomapper;
+				FlagModified(0, 0, m_Width, m_Height);
+				if(!m_TilesHistory.empty()) // Sometimes pressing that button causes the automap to run so we should be able to undo that
 				{
-					m_AutoAutomapper = !m_AutoAutomapper;
-					FlagModified(0, 0, m_Width, m_Height);
-					if(!m_TilesHistory.empty()) // Sometimes pressing that button causes the automap to run so we should be able to undo that
-					{
-						// record undo
-						Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(Map(), Map()->m_SelectedGroup, Map()->m_vSelectedLayers[0], "Auto map", m_TilesHistory));
-						ClearHistory();
-					}
+					// record undo
+					Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(Map(), Map()->m_SelectedGroup, Map()->m_vSelectedLayers[0], "Auto map", m_TilesHistory));
+					ClearHistory();
 				}
 			}
+		}
 
-			static int s_AutomapperButton = 0;
-			if(Editor()->DoButton_Editor(&s_AutomapperButton, "Automap", 0, &Button, BUTTONFLAG_LEFT, "Run the automapper."))
-			{
-				Map()->m_vpImages[m_Image]->m_Automapper.Proceed(this, Map()->m_pGameLayer.get(), m_AutomapperReference, m_AutomapperConfig, m_Seed);
-				// record undo
-				Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(Map(), Map()->m_SelectedGroup, Map()->m_vSelectedLayers[0], "Auto map", m_TilesHistory));
-				ClearHistory();
-				return CUi::POPUP_CLOSE_CURRENT;
-			}
+		static int s_AutomapperButton = 0;
+		if(Editor()->DoButton_Editor(&s_AutomapperButton, "Automap", 0, &Button, BUTTONFLAG_LEFT, "Run the automapper."))
+		{
+			Map()->m_vpImages[m_Image]->m_Automapper.Proceed(this, Map()->m_pGameLayer.get(), m_AutomapperReference, m_AutomapperConfig, m_Seed);
+			// record undo
+			Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(Map(), Map()->m_SelectedGroup, Map()->m_vSelectedLayers[0], "Auto map", m_TilesHistory));
+			ClearHistory();
+			return CUi::POPUP_CLOSE_CURRENT;
 		}
 	}
 
