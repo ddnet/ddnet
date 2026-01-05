@@ -139,6 +139,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 					!str_comp(pName, "grass_doodads") ||
 					!str_comp(pName, "grass_main") ||
 					!str_comp(pName, "winter_main") ||
+					!str_comp(pName, "generic_shadows") ||
 					!str_comp(pName, "generic_unhookable");
 			}
 			str_format(aPath, sizeof(aPath), "mapres/%s%s.png", pName, Translated ? "_0.7" : "");
