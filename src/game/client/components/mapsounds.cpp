@@ -215,10 +215,8 @@ void CMapSounds::OnRender()
 
 		ColorRGBA Volume = ColorRGBA(1.0f, 0.0f, 0.0f, 0.0f);
 		EnvEvaluator.EnvelopeEval(Source.m_pSource->m_SoundEnvOffset, Source.m_pSource->m_SoundEnv, Volume, 1);
-		if(Volume.r < 1.0f)
-		{
-			Sound()->SetVoiceVolume(Source.m_Voice, Volume.r);
-		}
+
+		Sound()->SetVoiceVolume(Source.m_Voice, std::clamp(Volume.r, 0.0f, 1.0f));
 	}
 }
 
