@@ -517,6 +517,18 @@ const char *CExplanations::ExplainDDNet(int Tile, int Layer)
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT || Layer == LAYER_SWITCH)
 			return "DOOR: Combined with LASER LENGTH creates doors. Doesn't allow to go through it (only with NINJA).";
 		break;
+	case ENTITY_OFFSET + ENTITY_TARGET_SWITCH_CLOSE:
+		if(Layer == LAYER_SWITCH)
+			return "TARGET CLOSE: Activates switch with the same number when hit with any weapon (except pistol).";
+		break;
+	case ENTITY_OFFSET + ENTITY_TARGET_SWITCH_OPEN:
+		if(Layer == LAYER_SWITCH)
+			return "TARGET OPEN: Deactivates switch with the same number when hit with any weapon (except pistol).";
+		break;
+	case ENTITY_OFFSET + ENTITY_TARGET_SWITCH_ALTERNATE:
+		if(Layer == LAYER_SWITCH)
+			return "TARGET ALTERNATE: Alternates state for switch with the same number when hit with any weapon (except pistol).";
+		break;
 	case TILE_TELE_GUN_ENABLE:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "TELEGUN: Turn gun on as telegun weapon.";

@@ -1366,7 +1366,7 @@ void CGameClient::ProcessEvents()
 		const IClient::CSnapItem Item = Client()->SnapGetItem(SnapType, Index);
 
 		// TODO: We don't have enough info about us, others, to know a correct alpha or volume value.
-		const float Alpha = 1.0f;
+		float Alpha = 1.0f;
 		const float Volume = 1.0f;
 
 		if(Item.m_Type == NETEVENTTYPE_DAMAGEIND)
@@ -1422,6 +1422,20 @@ void CGameClient::ProcessEvents()
 				continue;
 
 			m_MapSounds.PlayAt(CSounds::CHN_WORLD, pEvent->m_SoundId, vec2(pEvent->m_X, pEvent->m_Y));
+		}
+		else if(Item.m_Type == NETEVENTTYPE_TARGETHIT)
+		{
+			const CNetEvent_TargetHit *pEvent = (const CNetEvent_TargetHit *)Item.m_pData;
+			if(!pEvent->m_Weakly)
+			{
+				if(pEvent->m_ClientIdHitFrom != -1 &&
+					IsOtherTeam(pEvent->m_ClientIdHitFrom))
+				{
+					Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
+				}
+
+				m_Effects.TargetHit(vec2(pEvent->m_X, pEvent->m_Y), Alpha, Volume);
+			}
 		}
 	}
 }
@@ -1631,8 +1645,6 @@ void CGameClient::OnNewSnapshot()
 	InvalidateSnapshot();
 
 	m_NewTick = true;
-
-	ProcessEvents();
 
 #ifdef CONF_DEBUG
 	if(g_Config.m_DbgStress)
@@ -2021,6 +2033,9 @@ void CGameClient::OnNewSnapshot()
 			m_Controls.OnPlayerDeath();
 		}
 	}
+
+	ProcessEvents();
+
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		if(m_Snap.m_LocalClientId == -1 && m_DemoSpecId == SPEC_FOLLOW)
@@ -4310,6 +4325,8 @@ void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTexture(&m_ExtrasSkin.m_SpriteParticleSparkle);
 		Graphics()->UnloadTexture(&m_ExtrasSkin.m_SpritePulley);
 		Graphics()->UnloadTexture(&m_ExtrasSkin.m_SpriteHectagon);
+		Graphics()->UnloadTexture(&m_ExtrasSkin.m_TargetSwitchOpen);
+		Graphics()->UnloadTexture(&m_ExtrasSkin.m_TargetSwitchClose);
 
 		for(auto &SpriteParticle : m_ExtrasSkin.m_aSpriteParticles)
 			SpriteParticle = IGraphics::CTextureHandle();
@@ -4352,6 +4369,9 @@ void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 		m_ExtrasSkin.m_aSpriteParticles[1] = m_ExtrasSkin.m_SpriteParticleSparkle;
 		m_ExtrasSkin.m_aSpriteParticles[2] = m_ExtrasSkin.m_SpritePulley;
 		m_ExtrasSkin.m_aSpriteParticles[3] = m_ExtrasSkin.m_SpriteHectagon;
+
+		m_ExtrasSkin.m_TargetSwitchOpen = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_TARGETSWITCH_OPEN]);
+		m_ExtrasSkin.m_TargetSwitchClose = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_TARGETSWITCH_CLOSE]);
 
 		m_ExtrasSkinLoaded = true;
 	}
@@ -4690,7 +4710,10 @@ void CGameClient::SnapCollectEntities()
 		const IClient::CSnapItem Item = Client()->SnapGetItem(IClient::SNAP_CURRENT, Index);
 		if(Item.m_Type == NETOBJTYPE_ENTITYEX)
 			vItemEx.push_back({Item, nullptr});
-		else if(Item.m_Type == NETOBJTYPE_PICKUP || Item.m_Type == NETOBJTYPE_DDNETPICKUP || Item.m_Type == NETOBJTYPE_LASER || Item.m_Type == NETOBJTYPE_DDNETLASER || Item.m_Type == NETOBJTYPE_PROJECTILE || Item.m_Type == NETOBJTYPE_DDRACEPROJECTILE || Item.m_Type == NETOBJTYPE_DDNETPROJECTILE)
+		else if(Item.m_Type == NETOBJTYPE_PICKUP || Item.m_Type == NETOBJTYPE_DDNETPICKUP ||
+			Item.m_Type == NETOBJTYPE_LASER || Item.m_Type == NETOBJTYPE_DDNETLASER ||
+			Item.m_Type == NETOBJTYPE_PROJECTILE || Item.m_Type == NETOBJTYPE_DDRACEPROJECTILE ||
+			Item.m_Type == NETOBJTYPE_DDNETPROJECTILE || Item.m_Type == NETOBJTYPE_DDNETTARGETSWITCH)
 			vItemData.push_back({Item, nullptr});
 	}
 

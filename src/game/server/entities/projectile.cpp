@@ -3,6 +3,7 @@
 #include "projectile.h"
 
 #include "character.h"
+#include "targetswitch.h"
 
 #include <engine/shared/config.h>
 
@@ -11,6 +12,7 @@
 #include <game/mapitems.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
+#include <game/server/player.h>
 
 CProjectile::CProjectile(
 	CGameWorld *pGameWorld,
@@ -42,6 +44,7 @@ CProjectile::CProjectile(
 
 	m_InitDir = InitDir;
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
+	m_TargetSwitchCollisionCooldown = 0;
 
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	m_BelongsToPracticeTeam = pOwnerChar && pOwnerChar->Teams()->IsPractice(pOwnerChar->Team());
@@ -102,6 +105,11 @@ void CProjectile::Tick()
 	if(pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit)
 		pTargetChr = GameServer()->m_World.IntersectCharacter(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pOwnerChar, m_Owner);
 
+	CTargetSwitch *pTargetTargetSwitch = nullptr;
+
+	if(pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit)
+		pTargetTargetSwitch = GameServer()->m_World.IntersectTargetSwitch(PrevPos, ColPos, 0.f, ColPos);
+
 	if(m_LifeSpan > -1)
 		m_LifeSpan--;
 
@@ -126,7 +134,22 @@ void CProjectile::Tick()
 		return;
 	}
 
-	if(((pTargetChr && (pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar)) || Collide || GameLayerClipped(CurPos)) && !IsWeaponCollide)
+	bool HasEntityCollision = pTargetChr || pTargetTargetSwitch;
+	bool CanHitEntity = false;
+	if(HasEntityCollision)
+	{
+		if(pOwnerChar)
+		{
+			CanHitEntity = !pOwnerChar->GrenadeHitDisabled();
+		}
+		else
+		{
+			CanHitEntity = g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar || pTargetTargetSwitch;
+		}
+	}
+	bool ShouldCollide = (HasEntityCollision && CanHitEntity) || Collide || GameLayerClipped(CurPos);
+
+	if(ShouldCollide && !IsWeaponCollide)
 	{
 		if(m_Explosive /*??*/ && (!pTargetChr || (pTargetChr && (!m_Freeze || (m_Type == WEAPON_SHOTGUN && Collide)))))
 		{
@@ -141,6 +164,7 @@ void CProjectile::Tick()
 					(m_Owner != -1) ? TeamMask : CClientMask().set());
 				GameServer()->CreateSound(ColPos, m_SoundImpact,
 					(m_Owner != -1) ? TeamMask : CClientMask().set());
+				// Don't handle target switch GetHit(), it's handled in CreateExplosion
 			}
 		}
 		else if(m_Freeze)
@@ -153,9 +177,41 @@ void CProjectile::Tick()
 				if(pChr && (m_Layer != LAYER_SWITCH || (m_Layer == LAYER_SWITCH && m_Number > 0 && Switchers()[m_Number].m_aStatus[pChr->Team()])))
 					pChr->Freeze();
 			}
+
+			constexpr int TargetSwitchCooldown = 4;
+			if(m_TargetSwitchCollisionCooldown <= 0)
+			{
+				CEntity *apTargetEnts[TargetSwitch::MAX_TARGET_SWITCHES];
+				Num = GameWorld()->FindEntities(CurPos, 1.0f, apTargetEnts, TargetSwitch::MAX_TARGET_SWITCHES, CGameWorld::ENTTYPE_TARGETSWITCH);
+				if(Num > 0)
+				{
+					Collide = true;
+					m_TargetSwitchCollisionCooldown = TargetSwitchCooldown;
+				}
+				for(int i = 0; i < Num; ++i)
+				{
+					auto *pTargetSwitch = static_cast<CTargetSwitch *>(apTargetEnts[i]);
+					if(pTargetSwitch && m_Layer != LAYER_SWITCH)
+					{
+						for(int TargetSwitchTeam = 0; TargetSwitchTeam < TEAM_SUPER; ++TargetSwitchTeam)
+						{
+							pTargetSwitch->GetHit(-1, m_Type == WEAPON_WORLD, TargetSwitchTeam);
+						}
+					}
+				}
+			}
+			else
+			{
+				m_TargetSwitchCollisionCooldown--;
+			}
 		}
 		else if(pTargetChr)
 			pTargetChr->TakeDamage(vec2(0, 0), 0, m_Owner, m_Type);
+		else if(pTargetTargetSwitch)
+		{
+			if(pOwnerChar)
+				pTargetTargetSwitch->GetHit(pOwnerChar->GetPlayer()->GetCid(), m_Type == WEAPON_GUN);
+		}
 
 		if(pOwnerChar && !GameLayerClipped(ColPos) &&
 			((m_Type == WEAPON_GRENADE && pOwnerChar->HasTelegunGrenade()) || (m_Type == WEAPON_GUN && pOwnerChar->HasTelegunGun())))
