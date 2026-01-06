@@ -4276,22 +4276,15 @@ void CGameContext::OnInit(const void *pPersistentData)
 
 void CGameContext::CreateAllEntities(bool Initial)
 {
-	const CMapItemLayerTilemap *pTileMap = m_Layers.GameLayer();
-	const CTile *pTiles = static_cast<CTile *>(Kernel()->RequestInterface<IMap>()->GetData(pTileMap->m_Data));
+	const CTile *pTiles = m_Collision.GameLayer();
+	const CTile *pFront = m_Collision.FrontLayer();
+	const CSwitchTile *pSwitch = m_Collision.SwitchLayer();
 
-	const CTile *pFront = nullptr;
-	if(m_Layers.FrontLayer())
-		pFront = static_cast<CTile *>(Kernel()->RequestInterface<IMap>()->GetData(m_Layers.FrontLayer()->m_Front));
-
-	const CSwitchTile *pSwitch = nullptr;
-	if(m_Layers.SwitchLayer())
-		pSwitch = static_cast<CSwitchTile *>(Kernel()->RequestInterface<IMap>()->GetData(m_Layers.SwitchLayer()->m_Switch));
-
-	for(int y = 0; y < pTileMap->m_Height; y++)
+	for(int y = 0; y < m_Collision.GetHeight(); y++)
 	{
-		for(int x = 0; x < pTileMap->m_Width; x++)
+		for(int x = 0; x < m_Collision.GetWidth(); x++)
 		{
-			const int Index = y * pTileMap->m_Width + x;
+			const int Index = y * m_Collision.GetWidth() + x;
 
 			// Game layer
 			{
