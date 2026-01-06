@@ -36,7 +36,7 @@ class IEngineMap : public IMap
 {
 	MACRO_INTERFACE("enginemap")
 public:
-	[[nodiscard]] virtual bool Load(const char *pMapName) = 0;
+	[[nodiscard]] virtual bool Load(const char *pMapName, int StorageType) = 0;
 	virtual void Unload() = 0;
 	virtual bool IsLoaded() const = 0;
 	virtual IOHANDLE File() const = 0;
