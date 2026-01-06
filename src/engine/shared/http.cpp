@@ -101,10 +101,10 @@ static bool CalculateSha256(const char *pAbsoluteFilename, SHA256_DIGEST *pSha25
 
 bool CHttpRequest::ShouldSkipRequest()
 {
-	if(m_WriteToFile && m_ExpectedSha256 != SHA256_ZEROED)
+	if(m_WriteToFile && m_ExpectedSha256.has_value())
 	{
 		SHA256_DIGEST Sha256;
-		if(CalculateSha256(m_aDestAbsolute, &Sha256) && Sha256 == m_ExpectedSha256)
+		if(CalculateSha256(m_aDestAbsolute, &Sha256) && Sha256 == m_ExpectedSha256.value())
 		{
 			log_debug("http", "skipping download because expected file already exists: %s", m_aDest);
 			return true;
@@ -397,14 +397,14 @@ void CHttpRequest::OnCompletionInternal(void *pHandle, unsigned int Result)
 	if(State == EHttpState::DONE)
 	{
 		m_ActualSha256 = sha256_finish(&m_ActualSha256Ctx);
-		if(m_ExpectedSha256 != SHA256_ZEROED && m_ActualSha256 != m_ExpectedSha256)
+		if(m_ExpectedSha256.has_value() && m_ActualSha256.value() != m_ExpectedSha256.value())
 		{
 			if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::FAILURE)
 			{
 				char aActualSha256[SHA256_MAXSTRSIZE];
-				sha256_str(m_ActualSha256, aActualSha256, sizeof(aActualSha256));
+				sha256_str(m_ActualSha256.value(), aActualSha256, sizeof(aActualSha256));
 				char aExpectedSha256[SHA256_MAXSTRSIZE];
-				sha256_str(m_ExpectedSha256, aExpectedSha256, sizeof(aExpectedSha256));
+				sha256_str(m_ExpectedSha256.value(), aExpectedSha256, sizeof(aExpectedSha256));
 				log_error("http", "SHA256 mismatch: got=%s, expected=%s, url=%s", aActualSha256, aExpectedSha256, m_aUrl);
 			}
 			State = EHttpState::ERROR;
@@ -555,7 +555,8 @@ json_value *CHttpRequest::ResultJson() const
 const SHA256_DIGEST &CHttpRequest::ResultSha256() const
 {
 	dbg_assert(State() == EHttpState::DONE, "Request not done");
-	return m_ActualSha256;
+	dbg_assert(m_ActualSha256.has_value(), "Result SHA256 missing");
+	return m_ActualSha256.value();
 }
 
 int CHttpRequest::StatusCode() const

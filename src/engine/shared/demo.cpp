@@ -905,9 +905,12 @@ bool CDemoPlayer::ExtractMap(class IStorage *pStorage)
 		return false;
 
 	// handle sha256
-	SHA256_DIGEST Sha256 = SHA256_ZEROED;
+	std::optional<SHA256_DIGEST> Sha256;
 	if(m_Info.m_Header.m_Version >= gs_Sha256Version)
+	{
 		Sha256 = m_MapInfo.m_Sha256;
+		dbg_assert(Sha256.has_value(), "SHA256 missing for version %d demo", m_Info.m_Header.m_Version);
+	}
 	else
 	{
 		Sha256 = sha256(pMapData, m_MapInfo.m_Size);
@@ -916,7 +919,7 @@ bool CDemoPlayer::ExtractMap(class IStorage *pStorage)
 
 	// construct name
 	char aSha[SHA256_MAXSTRSIZE], aMapFilename[IO_MAX_PATH_LENGTH];
-	sha256_str(Sha256, aSha, sizeof(aSha));
+	sha256_str(Sha256.value(), aSha, sizeof(aSha));
 	str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%s.map", m_Info.m_Header.m_aMapName, aSha);
 
 	// save map
@@ -1280,7 +1283,10 @@ bool CDemoPlayer::GetDemoInfo(IStorage *pStorage, IConsole *pConsole, const char
 {
 	mem_zero(pDemoHeader, sizeof(CDemoHeader));
 	mem_zero(pTimelineMarkers, sizeof(CTimelineMarkers));
-	mem_zero(pMapInfo, sizeof(CMapInfo));
+	pMapInfo->m_aName[0] = '\0';
+	pMapInfo->m_Sha256 = std::nullopt;
+	pMapInfo->m_Crc = 0;
+	pMapInfo->m_Size = 0;
 
 	IOHANDLE File = pStorage->OpenFile(pFilename, IOFLAG_READ, StorageType);
 	if(!File)
@@ -1319,14 +1325,15 @@ bool CDemoPlayer::GetDemoInfo(IStorage *pStorage, IConsole *pConsole, const char
 		}
 	}
 
-	SHA256_DIGEST Sha256 = SHA256_ZEROED;
+	std::optional<SHA256_DIGEST> Sha256;
 	if(pDemoHeader->m_Version >= gs_Sha256Version)
 	{
 		CUuid ExtensionUuid = {};
 		const unsigned ExtensionUuidSize = io_read(File, &ExtensionUuid.m_aData, sizeof(ExtensionUuid.m_aData));
 		if(ExtensionUuidSize == sizeof(ExtensionUuid.m_aData) && ExtensionUuid == SHA256_EXTENSION)
 		{
-			if(io_read(File, &Sha256, sizeof(SHA256_DIGEST)) != sizeof(SHA256_DIGEST))
+			SHA256_DIGEST ReadSha256;
+			if(io_read(File, &ReadSha256, sizeof(SHA256_DIGEST)) != sizeof(SHA256_DIGEST))
 			{
 				if(pErrorMessage != nullptr)
 					str_copy(pErrorMessage, "Error reading SHA256", ErrorMessageSize);
@@ -1335,6 +1342,7 @@ bool CDemoPlayer::GetDemoInfo(IStorage *pStorage, IConsole *pConsole, const char
 				io_close(File);
 				return false;
 			}
+			Sha256 = ReadSha256;
 		}
 		else
 		{
@@ -1414,16 +1422,23 @@ bool CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 	const CMapInfo *pMapInfo = DemoPlayer.GetMapInfo();
 	const CDemoPlayer::CPlaybackInfo *pInfo = DemoPlayer.Info();
 
-	SHA256_DIGEST Sha256 = pMapInfo->m_Sha256;
+	std::optional<SHA256_DIGEST> Sha256 = pMapInfo->m_Sha256;
 	if(pInfo->m_Header.m_Version < gs_Sha256Version)
 	{
 		if(DemoPlayer.ExtractMap(m_pStorage))
+		{
 			Sha256 = pMapInfo->m_Sha256;
+		}
+	}
+	if(!Sha256.has_value())
+	{
+		log_error_color(DEMO_PRINT_COLOR, "demo/slice", "Failed to start demo slicing because map SHA256 could not be determined.");
+		return false;
 	}
 
 	CDemoRecorder DemoRecorder(m_pSnapshotDelta);
 	unsigned char *pMapData = DemoPlayer.GetMapData(m_pStorage);
-	const int Result = DemoRecorder.Start(m_pStorage, m_pConsole, pDst, pInfo->m_Header.m_aNetversion, pMapInfo->m_aName, Sha256, pMapInfo->m_Crc, pInfo->m_Header.m_aType, pMapInfo->m_Size, pMapData, nullptr, pfnFilter, pUser) == -1;
+	const int Result = DemoRecorder.Start(m_pStorage, m_pConsole, pDst, pInfo->m_Header.m_aNetversion, pMapInfo->m_aName, Sha256.value(), pMapInfo->m_Crc, pInfo->m_Header.m_aType, pMapInfo->m_Size, pMapData, nullptr, pfnFilter, pUser) == -1;
 	free(pMapData);
 	if(Result != 0)
 	{

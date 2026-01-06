@@ -13,6 +13,7 @@
 
 #include <generated/protocol7.h>
 
+#include <optional>
 #include <unordered_set>
 #include <vector>
 
@@ -213,7 +214,7 @@ class CCommunity
 
 	char m_aId[CServerInfo::MAX_COMMUNITY_ID_LENGTH];
 	char m_aName[64];
-	SHA256_DIGEST m_IconSha256;
+	std::optional<SHA256_DIGEST> m_IconSha256;
 	char m_aIconUrl[128];
 	std::vector<CCommunityCountry> m_vCountries;
 	std::vector<CCommunityType> m_vTypes;
@@ -221,7 +222,7 @@ class CCommunity
 	std::unordered_set<CCommunityMap, CCommunityMap::SHash> m_FinishedMaps;
 
 public:
-	CCommunity(const char *pId, const char *pName, SHA256_DIGEST IconSha256, const char *pIconUrl) :
+	CCommunity(const char *pId, const char *pName, std::optional<SHA256_DIGEST> IconSha256, const char *pIconUrl) :
 		m_IconSha256(IconSha256)
 	{
 		str_copy(m_aId, pId);
@@ -232,7 +233,7 @@ public:
 	const char *Id() const { return m_aId; }
 	const char *Name() const { return m_aName; }
 	const char *IconUrl() const { return m_aIconUrl; }
-	const SHA256_DIGEST &IconSha256() const { return m_IconSha256; }
+	const std::optional<SHA256_DIGEST> &IconSha256() const { return m_IconSha256; }
 	const std::vector<CCommunityCountry> &Countries() const { return m_vCountries; }
 	const std::vector<CCommunityType> &Types() const { return m_vTypes; }
 	bool HasCountry(const char *pCountryName) const;
@@ -361,7 +362,7 @@ public:
 	virtual unsigned CurrentCommunitiesHash() const = 0;
 
 	virtual bool DDNetInfoAvailable() const = 0;
-	virtual SHA256_DIGEST DDNetInfoSha256() const = 0;
+	virtual std::optional<SHA256_DIGEST> DDNetInfoSha256() const = 0;
 
 	virtual ICommunityCache &CommunityCache() = 0;
 	virtual const ICommunityCache &CommunityCache() const = 0;
