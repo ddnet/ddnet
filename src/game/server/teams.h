@@ -5,10 +5,13 @@
 #include <engine/shared/protocol.h>
 
 #include <game/race_state.h>
-#include <game/server/gamecontext.h>
 #include <game/team_state.h>
 #include <game/teamscore.h>
 
+#include <memory>
+#include <optional>
+
+class CGameContext;
 class CCharacter;
 class CPlayer;
 struct CScoreSaveResult;

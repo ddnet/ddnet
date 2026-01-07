@@ -10,7 +10,7 @@ public:
 	CGameControllerDDRace(class CGameContext *pGameServer);
 	~CGameControllerDDRace() override;
 
-	CScore *Score();
+	class CScore *Score();
 
 	void HandleCharacterTiles(class CCharacter *pChr, int MapIndex) override;
 	void SetArmorProgress(CCharacter *pCharacter, int Progress) override;
