@@ -569,8 +569,8 @@ CClientMask CGameTeams::TeamMask(int Team, int ExceptId, int Asker, int VersionF
 			continue; // Explicitly excluded
 		if(!GetPlayer(i))
 			continue; // Player doesn't exist
-		if(!((Server()->IsSixup(i) && (VersionFlags & CGameContext::FLAG_SIXUP)) ||
-			   (!Server()->IsSixup(i) && (VersionFlags & CGameContext::FLAG_SIX))))
+		if(!((Server()->IsSixup(i) && (VersionFlags & FLAG_SIXUP)) ||
+			   (!Server()->IsSixup(i) && (VersionFlags & FLAG_SIX))))
 			continue;
 
 		if(!(GetPlayer(i)->GetTeam() == TEAM_SPECTATORS || GetPlayer(i)->IsPaused()))
@@ -760,9 +760,9 @@ void CGameTeams::OnFinish(CPlayer *pPlayer, int TimeTicks, const char *pTimestam
 		Server()->ClientName(ClientId), (int)Time / 60,
 		Time - ((int)Time / 60 * 60));
 	if(g_Config.m_SvHideScore)
-		GameServer()->SendChatTarget(ClientId, aBuf, CGameContext::FLAG_SIX);
+		GameServer()->SendChatTarget(ClientId, aBuf, FLAG_SIX);
 	else
-		GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1., CGameContext::FLAG_SIX);
+		GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1., FLAG_SIX);
 
 	float Diff = absolute(Time - pData->m_BestTime.value_or(0.0f));
 
@@ -779,9 +779,9 @@ void CGameTeams::OnFinish(CPlayer *pPlayer, int TimeTicks, const char *pTimestam
 			str_format(aBuf, sizeof(aBuf), "New record: %5.2f second(s) better.",
 				Diff);
 		if(g_Config.m_SvHideScore)
-			GameServer()->SendChatTarget(ClientId, aBuf, CGameContext::FLAG_SIX);
+			GameServer()->SendChatTarget(ClientId, aBuf, FLAG_SIX);
 		else
-			GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1, CGameContext::FLAG_SIX);
+			GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1, FLAG_SIX);
 	}
 	else if(pData->m_BestTime.has_value()) // tee has already finished?
 	{
@@ -801,7 +801,7 @@ void CGameTeams::OnFinish(CPlayer *pPlayer, int TimeTicks, const char *pTimestam
 				str_format(aBuf, sizeof(aBuf),
 					"%5.2f second(s) worse, better luck next time.",
 					Diff);
-			GameServer()->SendChatTarget(ClientId, aBuf, CGameContext::FLAG_SIX); // this is private, sent only to the tee
+			GameServer()->SendChatTarget(ClientId, aBuf, FLAG_SIX); // this is private, sent only to the tee
 		}
 	}
 	else

@@ -82,7 +82,7 @@ public:
 
 	void ChangeTeamState(int Team, ETeamState State);
 
-	CClientMask TeamMask(int Team, int ExceptId = -1, int Asker = -1, int VersionFlags = CGameContext::FLAG_SIX | CGameContext::FLAG_SIXUP);
+	CClientMask TeamMask(int Team, int ExceptId = -1, int Asker = -1, int VersionFlags = FLAG_SIX | FLAG_SIXUP);
 
 	int Count(int Team) const;
 

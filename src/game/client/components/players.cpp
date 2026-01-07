@@ -1006,7 +1006,7 @@ void CPlayers::CreateNinjaTeeRenderInfo()
 	CTeeRenderInfo NinjaTeeRenderInfo;
 	NinjaTeeRenderInfo.m_Size = 64.0f;
 	CSkinDescriptor NinjaSkinDescriptor;
-	NinjaSkinDescriptor.m_Flags |= CSkinDescriptor::FLAG_SIX;
+	NinjaSkinDescriptor.m_Flags |= FLAG_SIX;
 	str_copy(NinjaSkinDescriptor.m_aSkinName, "x_ninja");
 	m_pNinjaTeeRenderInfo = GameClient()->CreateManagedTeeRenderInfo(NinjaTeeRenderInfo, NinjaSkinDescriptor);
 }
@@ -1016,7 +1016,7 @@ void CPlayers::CreateSpectatorTeeRenderInfo()
 	CTeeRenderInfo SpectatorTeeRenderInfo;
 	SpectatorTeeRenderInfo.m_Size = 64.0f;
 	CSkinDescriptor SpectatorSkinDescriptor;
-	SpectatorSkinDescriptor.m_Flags |= CSkinDescriptor::FLAG_SIX;
+	SpectatorSkinDescriptor.m_Flags |= FLAG_SIX;
 	str_copy(SpectatorSkinDescriptor.m_aSkinName, "x_spec");
 	m_pSpectatorTeeRenderInfo = GameClient()->CreateManagedTeeRenderInfo(SpectatorTeeRenderInfo, SpectatorSkinDescriptor);
 }

@@ -837,7 +837,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	if(ShouldRefresh)
 	{
-		GameClient()->RefreshSkins(CSkinDescriptor::FLAG_SIX);
+		GameClient()->RefreshSkins(FLAG_SIX);
 	}
 }
 

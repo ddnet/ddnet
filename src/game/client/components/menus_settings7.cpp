@@ -221,7 +221,7 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 		// reset render flags for possible loading screen
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
-		GameClient()->RefreshSkins(CSkinDescriptor::FLAG_SEVEN);
+		GameClient()->RefreshSkins(FLAG_SIXUP);
 	}
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);

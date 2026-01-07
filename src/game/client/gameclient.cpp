@@ -2755,11 +2755,11 @@ void CGameClient::CClientData::UpdateSkinInfo()
 	}
 
 	const auto &&ApplySkinProperties = [&]() {
-		if(SkinDescriptor.m_Flags & CSkinDescriptor::FLAG_SIX)
+		if(SkinDescriptor.m_Flags & FLAG_SIX)
 		{
 			m_pSkinInfo->TeeRenderInfo().ApplyColors(m_UseCustomColor, m_ColorBody, m_ColorFeet);
 		}
-		if(SkinDescriptor.m_Flags & CSkinDescriptor::FLAG_SEVEN)
+		if(SkinDescriptor.m_Flags & FLAG_SIXUP)
 		{
 			for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
 			{
@@ -2942,12 +2942,12 @@ CSkinDescriptor CGameClient::CClientData::ToSkinDescriptor() const
 	CTranslationContext::CClientData &TranslatedClient = m_pGameClient->m_pClient->m_TranslationContext.m_aClients[ClientId()];
 	if(m_Active && !TranslatedClient.m_Active)
 	{
-		SkinDescriptor.m_Flags |= CSkinDescriptor::FLAG_SIX;
+		SkinDescriptor.m_Flags |= FLAG_SIX;
 		str_copy(SkinDescriptor.m_aSkinName, m_aSkinName);
 	}
 	else if(TranslatedClient.m_Active)
 	{
-		SkinDescriptor.m_Flags |= CSkinDescriptor::FLAG_SEVEN;
+		SkinDescriptor.m_Flags |= FLAG_SIXUP;
 		for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
 		{
 			for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
@@ -4363,12 +4363,12 @@ void CGameClient::RefreshSkin(const std::shared_ptr<CManagedTeeRenderInfo> &pMan
 	CTeeRenderInfo &TeeInfo = pManagedTeeRenderInfo->TeeRenderInfo();
 	const CSkinDescriptor &SkinDescriptor = pManagedTeeRenderInfo->SkinDescriptor();
 
-	if(SkinDescriptor.m_Flags & CSkinDescriptor::FLAG_SIX)
+	if(SkinDescriptor.m_Flags & FLAG_SIX)
 	{
 		TeeInfo.Apply(m_Skins.Find(SkinDescriptor.m_aSkinName));
 	}
 
-	if(SkinDescriptor.m_Flags & CSkinDescriptor::FLAG_SEVEN)
+	if(SkinDescriptor.m_Flags & FLAG_SIXUP)
 	{
 		for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
 		{
@@ -4415,11 +4415,11 @@ void CGameClient::RefreshSkins(int SkinDescriptorFlags)
 			m_Menus.RenderLoading(Localize("Loading skin files"), "", 0);
 		}
 	};
-	if(SkinDescriptorFlags & CSkinDescriptor::FLAG_SIX)
+	if(SkinDescriptorFlags & FLAG_SIX)
 	{
 		m_Skins.Refresh(ProgressCallback);
 	}
-	if(SkinDescriptorFlags & CSkinDescriptor::FLAG_SEVEN)
+	if(SkinDescriptorFlags & FLAG_SIXUP)
 	{
 		m_Skins7.Refresh(ProgressCallback);
 	}
@@ -4468,7 +4468,7 @@ void CGameClient::OnSkinUpdate(const char *pSkinName)
 
 	for(std::shared_ptr<CManagedTeeRenderInfo> &pManagedTeeRenderInfo : m_vpManagedTeeRenderInfos)
 	{
-		if(!(pManagedTeeRenderInfo->SkinDescriptor().m_Flags & CSkinDescriptor::FLAG_SIX) ||
+		if(!(pManagedTeeRenderInfo->SkinDescriptor().m_Flags & FLAG_SIX) ||
 			!NameMatches(pManagedTeeRenderInfo->SkinDescriptor().m_aSkinName))
 		{
 			continue;
@@ -4509,7 +4509,7 @@ void CGameClient::CollectManagedTeeRenderInfos(const std::function<void(const ch
 {
 	for(const std::shared_ptr<CManagedTeeRenderInfo> &pManagedTeeRenderInfo : m_vpManagedTeeRenderInfos)
 	{
-		if(pManagedTeeRenderInfo->m_SkinDescriptor.m_Flags & CSkinDescriptor::FLAG_SIX)
+		if(pManagedTeeRenderInfo->m_SkinDescriptor.m_Flags & FLAG_SIX)
 		{
 			ActiveSkinAcceptor(pManagedTeeRenderInfo->m_SkinDescriptor.m_aSkinName);
 		}
@@ -4522,7 +4522,7 @@ void CGameClient::ConchainRefreshSkins(IConsole::IResult *pResult, void *pUserDa
 	pfnCallback(pResult, pCallbackUserData);
 	if(pResult->NumArguments() && pThis->m_Menus.IsInit())
 	{
-		pThis->RefreshSkins(CSkinDescriptor::FLAG_SIX);
+		pThis->RefreshSkins(FLAG_SIX);
 	}
 }
 
@@ -4533,7 +4533,7 @@ void CGameClient::ConchainRefreshEventSkins(IConsole::IResult *pResult, void *pU
 	if(pResult->NumArguments() && pThis->m_Menus.IsInit())
 	{
 		pThis->m_Skins.RefreshEventSkins();
-		pThis->RefreshSkins(CSkinDescriptor::FLAG_SIX);
+		pThis->RefreshSkins(FLAG_SIX);
 	}
 }
 

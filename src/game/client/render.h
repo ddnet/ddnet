@@ -32,11 +32,7 @@ class CQuad;
 class CSkinDescriptor
 {
 public:
-	enum
-	{
-		FLAG_SIX = 1,
-		FLAG_SEVEN = 2,
-	};
+	// FLAG_SIX or FLAG_SIXUP
 	unsigned m_Flags;
 
 	char m_aSkinName[MAX_SKIN_LENGTH];

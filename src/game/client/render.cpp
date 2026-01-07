@@ -35,7 +35,7 @@ void CSkinDescriptor::Reset()
 
 bool CSkinDescriptor::IsValid() const
 {
-	return (m_Flags & (FLAG_SIX | FLAG_SEVEN)) != 0;
+	return (m_Flags & (FLAG_SIX | FLAG_SIXUP)) != 0;
 }
 
 bool CSkinDescriptor::operator==(const CSkinDescriptor &Other) const
@@ -53,7 +53,7 @@ bool CSkinDescriptor::operator==(const CSkinDescriptor &Other) const
 		}
 	}
 
-	if(m_Flags & FLAG_SEVEN)
+	if(m_Flags & FLAG_SIXUP)
 	{
 		for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
 		{

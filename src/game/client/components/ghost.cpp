@@ -370,7 +370,7 @@ void CGhost::OnRender()
 void CGhost::UpdateTeeRenderInfo(CGhostItem &Ghost)
 {
 	CSkinDescriptor SkinDescriptor;
-	SkinDescriptor.m_Flags = CSkinDescriptor::FLAG_SIX;
+	SkinDescriptor.m_Flags = FLAG_SIX;
 	IntsToStr(Ghost.m_Skin.m_aSkin, std::size(Ghost.m_Skin.m_aSkin), SkinDescriptor.m_aSkinName, std::size(SkinDescriptor.m_aSkinName));
 	if(!CSkin::IsValidName(SkinDescriptor.m_aSkinName))
 	{

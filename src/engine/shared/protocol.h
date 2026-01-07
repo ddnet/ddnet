@@ -149,6 +149,12 @@ enum
 	VERSION_DDNET_IMPORTANT_ALERT = 19060,
 };
 
+enum
+{
+	FLAG_SIX = 1 << 0,
+	FLAG_SIXUP = 1 << 1,
+};
+
 namespace TuneZone
 {
 	inline constexpr int OVERRIDE_NONE = -1;
