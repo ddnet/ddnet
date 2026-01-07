@@ -3,10 +3,12 @@
 #include "player.h"
 #include "teams.h"
 
+#include <engine/server.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
 
 #include <game/server/entities/character.h>
+#include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
 #include <game/team_state.h>
 
