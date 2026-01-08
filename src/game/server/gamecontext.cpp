@@ -4400,10 +4400,32 @@ bool CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 	char aConfig[IO_MAX_PATH_LENGTH];
 	str_format(aConfig, sizeof(aConfig), "maps/%s.cfg", g_Config.m_SvMap);
 
-	CLineReader LineReader;
-	if(!LineReader.OpenFile(Storage()->OpenFile(aConfig, IOFLAG_READ, IStorage::TYPE_ALL)))
+	std::vector<const char *> vpLines;
+	int TotalLength = 0;
+
+	CLineReader ResetFileLineReader;
+	if(ResetFileLineReader.OpenFile(Storage()->OpenFile(g_Config.m_SvResetFile, IOFLAG_READ, IStorage::TYPE_ALL)))
 	{
-		// No map-specific config, just return.
+		while(const char *pLine = ResetFileLineReader.Get())
+		{
+			vpLines.push_back(pLine);
+			TotalLength += str_length(pLine) + 1;
+		}
+	}
+
+	CLineReader LineReader;
+	if(LineReader.OpenFile(Storage()->OpenFile(aConfig, IOFLAG_READ, IStorage::TYPE_ALL)))
+	{
+		while(const char *pLine = LineReader.Get())
+		{
+			vpLines.push_back(pLine);
+			TotalLength += str_length(pLine) + 1;
+		}
+	}
+
+	if(vpLines.empty())
+	{
+		// No map-specific config or reset.cfg, just return.
 		return true;
 	}
 
@@ -4412,14 +4434,6 @@ bool CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 	{
 		log_error("mapchange", "Failed to import settings from '%s': failed to open map '%s' for reading", aConfig, pNewMapName);
 		return false;
-	}
-
-	std::vector<const char *> vpLines;
-	int TotalLength = 0;
-	while(const char *pLine = LineReader.Get())
-	{
-		vpLines.push_back(pLine);
-		TotalLength += str_length(pLine) + 1;
 	}
 
 	char *pSettings = (char *)malloc(maximum(1, TotalLength));
