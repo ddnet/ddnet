@@ -4,6 +4,8 @@
 
 #include <game/server/gamecontroller.h>
 
+class CScore;
+
 class CGameControllerDDRace : public IGameController
 {
 public:

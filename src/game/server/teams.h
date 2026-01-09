@@ -9,6 +9,9 @@
 #include <game/team_state.h>
 #include <game/teamscore.h>
 
+#include <memory>
+#include <optional>
+
 class CCharacter;
 class CPlayer;
 struct CScoreSaveResult;
