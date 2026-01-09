@@ -270,9 +270,21 @@ void CPlayers::RenderHookCollLine(
 			if(!HookEnteredTelehook)
 			{
 				vec2 RetractingHookEndPos = BasePos + normalize(SegmentEndPos - BasePos) * HookLength;
-				if(GameClient()->IntersectCharacter(SegmentStartPos, RetractingHookEndPos, HitPos, ClientId, &IntersectedPlayerPosition) != -1)
+
+				// you can't hook a player, if the hook is behind solids, however you miss the solids as well
+				int Hit = Collision()->IntersectLineTeleHook(SegmentStartPos, RetractingHookEndPos, &HitPos, nullptr, &Tele);
+
+				if(GameClient()->IntersectCharacter(SegmentStartPos, HitPos, RetractingHookEndPos, ClientId, &IntersectedPlayerPosition) != -1)
 				{
-					AddHookPlayerSegment(LineStartPos, SegmentEndPos, IntersectedPlayerPosition, HitPos);
+					AddHookPlayerSegment(LineStartPos, SegmentEndPos, IntersectedPlayerPosition, RetractingHookEndPos);
+					break;
+				}
+
+				// Retracting hooks don't go through hook teleporters
+				if(Hit && Hit != TILE_TELEINHOOK)
+				{
+					// The hook misses the player, but also misses the solid
+					vLineSegments.emplace_back(LineStartPos, SegmentStartPos);
 					break;
 				}
 			}
