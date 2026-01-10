@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import os.path
-import os
 
 import plistlib
 def read_plist(path):
@@ -105,7 +104,7 @@ icon_locations = {
 #
 # Other color components may be expressed either in the range 0 to 1, or
 # as percentages (e.g. 60% is equivalent to 0.6).
-background = background
+background = defines.get('background', 'builtin-arrow')
 
 show_status_bar = False
 show_tab_view = False
