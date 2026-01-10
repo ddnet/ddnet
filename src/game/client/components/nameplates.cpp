@@ -51,6 +51,11 @@ public:
 
 // Part Types
 
+static float ConfigToFontSize(int Value)
+{
+	return 18.0f + 20.0f * static_cast<float>(Value) / 100.0f;
+}
+
 static constexpr float DEFAULT_PADDING = 5.0f;
 
 class CNamePlatePart
@@ -78,7 +83,7 @@ public:
 
 using PartsVector = std::vector<std::unique_ptr<CNamePlatePart>>;
 
-static constexpr ColorRGBA s_OutlineColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f);
+static constexpr ColorRGBA OUTLINE_COLOR = ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f);
 
 class CNamePlatePartText : public CNamePlatePart
 {
@@ -87,6 +92,8 @@ protected:
 	virtual bool UpdateNeeded(CGameClient &This, const CNamePlateData &Data) = 0;
 	virtual void UpdateText(CGameClient &This, const CNamePlateData &Data) = 0;
 	ColorRGBA m_Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+	bool m_IsTag = false; // Use color as background, add some extra padding
+	int m_QuadContainer = -1; // For tag background
 	CNamePlatePartText(CGameClient &This) :
 		CNamePlatePart(This)
 	{
@@ -96,56 +103,100 @@ protected:
 public:
 	void Update(CGameClient &This, const CNamePlateData &Data) override
 	{
-		if(!UpdateNeeded(This, Data) && m_TextContainerIndex.Valid())
-			return;
-
-		// Set flags
-		unsigned int Flags = ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE;
-		if(Data.m_InGame)
-			Flags |= ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGNMENT; // Prevent jittering from rounding
-		This.TextRender()->SetRenderFlags(Flags);
-
-		if(Data.m_InGame)
+		bool UpdateQuad = false;
+		// Update text if invalid or text should change
+		// UpdateNeeded must be called as it could update Color as well
+		if(UpdateNeeded(This, Data) || !m_TextContainerIndex.Valid())
 		{
-			// Create text at standard zoom
-			float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-			This.Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-			This.Graphics()->MapScreenToInterface(This.m_Camera.m_Center.x, This.m_Camera.m_Center.y);
+			// Set flags
+			unsigned Flags = ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE;
+			if(Data.m_InGame)
+				Flags |= ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGNMENT; // Prevent jittering from rounding
+			This.TextRender()->SetRenderFlags(Flags);
+
 			This.TextRender()->DeleteTextContainer(m_TextContainerIndex);
-			UpdateText(This, Data);
-			This.Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+			if(Data.m_InGame)
+			{
+				// Create text at standard zoom when in game
+				float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+				This.Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+				This.Graphics()->MapScreenToInterface(This.m_Camera.m_Center.x, This.m_Camera.m_Center.y);
+				UpdateText(This, Data);
+				This.Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+			}
+			else
+			{
+				UpdateText(This, Data);
+			}
+			This.TextRender()->SetRenderFlags(0);
+
+			// Calculate size
+			if(m_TextContainerIndex.Valid())
+			{
+				const STextBoundingBox Bounding = This.TextRender()->GetBoundingBoxTextContainer(m_TextContainerIndex);
+				m_Size = vec2(Bounding.m_W, Bounding.m_H);
+				if(m_IsTag)
+					m_Size += vec2(m_Size.y * 0.8f, 0.0f); // Extra padding
+			}
+			else
+			{
+				m_Size = vec2(0.0f, 0.0f);
+			}
+			if(m_IsTag)
+				UpdateQuad = true; // Need to update quad even if invalid
 		}
-		else
+		// If a tag and there's not a quad, create one and visa versa
+		if(m_IsTag && m_QuadContainer == -1)
 		{
-			UpdateText(This, Data);
+			UpdateQuad = true;
 		}
-
-		This.TextRender()->SetRenderFlags(0);
-
-		if(!m_TextContainerIndex.Valid())
+		else if(!m_IsTag && m_QuadContainer != -1)
 		{
-			m_Visible = false;
-			return;
+			This.Graphics()->DeleteQuadContainer(m_QuadContainer);
 		}
-
-		const STextBoundingBox Container = This.TextRender()->GetBoundingBoxTextContainer(m_TextContainerIndex);
-		m_Size = vec2(Container.m_W, Container.m_H);
+		// Update quad, just delete it if it would be empty
+		if(UpdateQuad)
+		{
+			This.Graphics()->DeleteQuadContainer(m_QuadContainer);
+		}
+		if(UpdateQuad && m_Size != vec2(0.0f, 0.0f))
+		{
+			This.Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f); // Color set on render
+			m_QuadContainer = This.Graphics()->CreateRectQuadContainer(0.0f, -1.0f, m_Size.x, m_Size.y + 2.0f, m_Size.y / 4.0f, IGraphics::CORNER_ALL);
+		}
 	}
 	void Reset(CGameClient &This) override
 	{
 		This.TextRender()->DeleteTextContainer(m_TextContainerIndex);
+		This.Graphics()->DeleteQuadContainer(m_QuadContainer);
 	}
 	void Render(CGameClient &This, vec2 Pos) const override
 	{
 		if(!m_TextContainerIndex.Valid())
 			return;
 
-		ColorRGBA OutlineColor, Color;
-		Color = m_Color;
-		OutlineColor = s_OutlineColor.WithMultipliedAlpha(m_Color.a);
-		This.TextRender()->RenderTextContainer(m_TextContainerIndex,
-			Color, OutlineColor,
-			Pos.x - Size().x / 2.0f, Pos.y - Size().y / 2.0f);
+		if(m_IsTag)
+		{
+			ColorRGBA BackgroundColor = m_Color.WithMultipliedAlpha(0.75f);
+			This.Graphics()->SetColor(BackgroundColor);
+			This.Graphics()->TextureClear();
+			This.Graphics()->RenderQuadContainerEx(m_QuadContainer, 0, -1,
+				Pos.x - Size().x / 2.0f, Pos.y - Size().y / 2.0f);
+
+			ColorRGBA Color = ColorRGBA(0.0f, 0.0f, 0.0f, m_Color.a);
+			ColorRGBA OutlineColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+			This.TextRender()->RenderTextContainer(m_TextContainerIndex,
+				Color, OutlineColor,
+				Pos.x - Size().x / 2.0f + Size().y * 0.4f, Pos.y - Size().y / 2.0f);
+		}
+		else
+		{
+			ColorRGBA Color = m_Color;
+			ColorRGBA OutlineColor = OUTLINE_COLOR.WithMultipliedAlpha(m_Color.a);
+			This.TextRender()->RenderTextContainer(m_TextContainerIndex,
+				Color, OutlineColor,
+				Pos.x - Size().x / 2.0f, Pos.y - Size().y / 2.0f);
+		}
 	}
 };
 
@@ -279,7 +330,7 @@ private:
 protected:
 	bool UpdateNeeded(CGameClient &This, const CNamePlateData &Data) override
 	{
-		m_Visible = Data.m_ShowClientId && (Data.m_ClientIdSeparateLine == m_ClientIdSeparateLine);
+		m_Visible = Data.m_ShowClientId && Data.m_ClientIdSeparateLine == m_ClientIdSeparateLine;
 		if(!m_Visible)
 			return false;
 		m_Color = Data.m_Color;
@@ -289,10 +340,7 @@ protected:
 	{
 		m_FontSize = Data.m_FontSizeClientId;
 		m_ClientId = Data.m_ClientId;
-		if(m_ClientIdSeparateLine)
-			str_format(m_aText, sizeof(m_aText), "%d", m_ClientId);
-		else
-			str_format(m_aText, sizeof(m_aText), "%d:", m_ClientId);
+		str_format(m_aText, sizeof(m_aText), "%d", m_ClientId);
 		CTextCursor Cursor;
 		Cursor.m_FontSize = m_FontSize;
 		This.TextRender()->CreateOrAppendTextContainer(m_TextContainerIndex, &Cursor, m_aText);
@@ -303,6 +351,7 @@ public:
 		CNamePlatePartText(This)
 	{
 		m_ClientIdSeparateLine = ClientIdSeparateLine;
+		m_IsTag = !ClientIdSeparateLine;
 	}
 };
 
@@ -648,18 +697,18 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 	str_copy(Data.m_aName, GameClient()->m_aClients[pPlayerInfo->m_ClientId].m_aName);
 	Data.m_ShowFriendMark = Data.m_ShowName && g_Config.m_ClNamePlatesFriendMark && GameClient()->m_aClients[pPlayerInfo->m_ClientId].m_Friend;
 	Data.m_ShowClientId = Data.m_ShowName && (g_Config.m_Debug || g_Config.m_ClNamePlatesIds);
-	Data.m_FontSize = 18.0f + 20.0f * g_Config.m_ClNamePlatesSize / 100.0f;
+	Data.m_FontSize = ConfigToFontSize(g_Config.m_ClNamePlatesSize);
 
 	Data.m_ClientId = pPlayerInfo->m_ClientId;
 	Data.m_ClientIdSeparateLine = g_Config.m_ClNamePlatesIdsSeparateLine;
-	Data.m_FontSizeClientId = Data.m_ClientIdSeparateLine ? (18.0f + 20.0f * g_Config.m_ClNamePlatesIdsSize / 100.0f) : Data.m_FontSize;
+	Data.m_FontSizeClientId = Data.m_ClientIdSeparateLine ? ConfigToFontSize(g_Config.m_ClNamePlatesIdsSize) : Data.m_FontSize;
 
 	Data.m_ShowClan = Data.m_ShowName && g_Config.m_ClNamePlatesClan;
 	str_copy(Data.m_aClan, GameClient()->m_aClients[pPlayerInfo->m_ClientId].m_aClan);
-	Data.m_FontSizeClan = 18.0f + 20.0f * g_Config.m_ClNamePlatesClanSize / 100.0f;
+	Data.m_FontSizeClan = ConfigToFontSize(g_Config.m_ClNamePlatesClanSize);
 
-	Data.m_FontSizeHookStrongWeak = 18.0f + 20.0f * g_Config.m_ClNamePlatesStrongSize / 100.0f;
-	Data.m_FontSizeDirection = 18.0f + 20.0f * g_Config.m_ClDirectionSize / 100.0f;
+	Data.m_FontSizeHookStrongWeak = ConfigToFontSize(g_Config.m_ClNamePlatesStrongSize);
+	Data.m_FontSizeDirection = ConfigToFontSize(g_Config.m_ClDirectionSize);
 
 	if(g_Config.m_ClNamePlatesAlways == 0)
 		Alpha *= std::clamp(1.0f - std::pow(distance(GameClient()->m_Controls.m_aTargetPos[g_Config.m_ClDummy], Position) / 200.0f, 16.0f), 0.0f, 1.0f);
@@ -761,7 +810,6 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 		}
 	}
 
-	// Check if the nameplate is actually on screen
 	CNamePlate &NamePlate = m_pData->m_aNamePlates[pPlayerInfo->m_ClientId];
 	NamePlate.Update(*GameClient(), Data);
 	NamePlate.Render(*GameClient(), Position - vec2(0.0f, (float)g_Config.m_ClNamePlatesOffset));
@@ -769,11 +817,11 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 
 void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
 {
-	const float FontSize = 18.0f + 20.0f * g_Config.m_ClNamePlatesSize / 100.0f;
-	const float FontSizeClan = 18.0f + 20.0f * g_Config.m_ClNamePlatesClanSize / 100.0f;
+	const float FontSize = ConfigToFontSize(g_Config.m_ClNamePlatesSize);
+	const float FontSizeClan = ConfigToFontSize(g_Config.m_ClNamePlatesClanSize);
 
-	const float FontSizeDirection = 18.0f + 20.0f * g_Config.m_ClDirectionSize / 100.0f;
-	const float FontSizeHookStrongWeak = 18.0f + 20.0f * g_Config.m_ClNamePlatesStrongSize / 100.0f;
+	const float FontSizeDirection = ConfigToFontSize(g_Config.m_ClDirectionSize);
+	const float FontSizeHookStrongWeak = ConfigToFontSize(g_Config.m_ClNamePlatesStrongSize);
 
 	CNamePlateData Data;
 
@@ -792,7 +840,7 @@ void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
 	Data.m_ShowClientId = Data.m_ShowName && (g_Config.m_Debug || g_Config.m_ClNamePlatesIds);
 	Data.m_ClientId = Dummy;
 	Data.m_ClientIdSeparateLine = g_Config.m_ClNamePlatesIdsSeparateLine;
-	Data.m_FontSizeClientId = Data.m_ClientIdSeparateLine ? (18.0f + 20.0f * g_Config.m_ClNamePlatesIdsSize / 100.0f) : Data.m_FontSize;
+	Data.m_FontSizeClientId = Data.m_ClientIdSeparateLine ? ConfigToFontSize(g_Config.m_ClNamePlatesIdsSize) : Data.m_FontSize;
 
 	Data.m_ShowClan = Data.m_ShowName && g_Config.m_ClNamePlatesClan;
 	const char *pClan = Dummy == 0 ? g_Config.m_PlayerClan : g_Config.m_ClDummyClan;
