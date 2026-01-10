@@ -2,15 +2,29 @@
 
 extern "C" int TWMain(int argc, const char **argv);
 
+static BOOL IsRunningInsideDDNetApp(void)
+{
+	NSBundle *bundle = [NSBundle mainBundle];
+	if(!bundle)
+		return NO;
+	NSString *bundlePath = [bundle bundlePath];
+	if(!bundlePath)
+		return NO;
+	return [[bundlePath lastPathComponent] isEqualToString:@"DDNet.app"];
+}
+
 int main(int argc, const char **argv)
 {
 	BOOL FinderLaunch = argc >= 2 && !strncmp(argv[1], "-psn", 4);
 
-	NSString *pResourcePath = [[NSBundle mainBundle] resourcePath];
-	if(!pResourcePath)
-		return -1;
+	if(IsRunningInsideDDNetApp())
+	{
+		NSString *pResourcePath = [[NSBundle mainBundle] resourcePath];
+		if(!pResourcePath)
+			return -1;
 
-	[[NSFileManager defaultManager] changeCurrentDirectoryPath:pResourcePath];
+		[[NSFileManager defaultManager] changeCurrentDirectoryPath:pResourcePath];
+	}
 
 	if(FinderLaunch)
 	{
