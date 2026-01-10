@@ -180,6 +180,9 @@ FLUSH PRIVILEGES;
 * **-DSECURITY_COMPILER_FLAGS=[ON|OFF]** <br>
 	Whether to set security-relevant compiler flags like `-D_FORTIFY_SOURCE=2` and `-fstack-protector-all`. Default Value is ON.
 
+* **-DMACOS_CODESIGN=[ON|OFF]** <br>
+	Whether to sign code when building the DMG on macOS.
+
 ## Running tests (Debian/Ubuntu)
 
 In order to run the tests, you need to install the following library `libgtest-dev`.
