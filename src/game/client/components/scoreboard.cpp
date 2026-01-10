@@ -912,7 +912,7 @@ void CScoreboard::OnRender()
 		}
 		else
 		{
-			pTitle = Client()->GetCurrentMap();
+			pTitle = GameClient()->Map()->BaseName();
 		}
 
 		CUIRect Title;

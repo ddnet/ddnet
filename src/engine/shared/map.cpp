@@ -3,6 +3,7 @@
 #include "map.h"
 
 #include <base/log.h>
+#include <base/system.h>
 
 #include <engine/storage.h>
 
@@ -75,12 +76,12 @@ int CMap::NumItems() const
 	return m_DataFile.NumItems();
 }
 
-bool CMap::Load(IStorage *pStorage, const char *pMapName, int StorageType)
+bool CMap::Load(const char *pFullName, IStorage *pStorage, const char *pPath, int StorageType)
 {
 	// Ensure current datafile is not left in an inconsistent state if loading fails,
 	// by loading the new datafile separately first.
 	CDataFileReader NewDataFile;
-	if(!NewDataFile.Open(pStorage, pMapName, StorageType))
+	if(!NewDataFile.Open(pFullName, pStorage, pPath, StorageType))
 		return false;
 
 	// Check version
@@ -131,6 +132,13 @@ bool CMap::Load(IStorage *pStorage, const char *pMapName, int StorageType)
 	return true;
 }
 
+bool CMap::Load(IStorage *pStorage, const char *pPath, int StorageType)
+{
+	char aFilename[IO_MAX_PATH_LENGTH];
+	fs_split_file_extension(fs_filename(pPath), aFilename, sizeof(aFilename));
+	return Load(aFilename, pStorage, pPath, StorageType);
+}
+
 void CMap::Unload()
 {
 	m_DataFile.Close();
@@ -144,6 +152,21 @@ bool CMap::IsLoaded() const
 IOHANDLE CMap::File() const
 {
 	return m_DataFile.File();
+}
+
+const char *CMap::FullName() const
+{
+	return m_DataFile.FullName();
+}
+
+const char *CMap::BaseName() const
+{
+	return m_DataFile.BaseName();
+}
+
+const char *CMap::Path() const
+{
+	return m_DataFile.Path();
 }
 
 SHA256_DIGEST CMap::Sha256() const

@@ -228,7 +228,7 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 		if(!m_Loaded && ((HasDayHint && IsDaytime) || (HasNightHint && !IsDaytime)))
 		{
 			str_format(aBuf, sizeof(aBuf), "themes/%s_%s.map", pMenuMap, IsDaytime ? "day" : "night");
-			if(m_pMap->Load(Storage(), aBuf, IStorage::TYPE_ALL))
+			if(m_pMap->Load(pMenuMap, Storage(), aBuf, IStorage::TYPE_ALL))
 			{
 				m_Loaded = true;
 			}
@@ -237,7 +237,7 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 		if(!m_Loaded)
 		{
 			str_format(aBuf, sizeof(aBuf), "themes/%s.map", pMenuMap);
-			if(m_pMap->Load(Storage(), aBuf, IStorage::TYPE_ALL))
+			if(m_pMap->Load(pMenuMap, Storage(), aBuf, IStorage::TYPE_ALL))
 			{
 				m_Loaded = true;
 			}
@@ -246,7 +246,7 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 		if(!m_Loaded && ((HasDayHint && !IsDaytime) || (HasNightHint && IsDaytime)))
 		{
 			str_format(aBuf, sizeof(aBuf), "themes/%s_%s.map", pMenuMap, IsDaytime ? "night" : "day");
-			if(m_pMap->Load(Storage(), aBuf, IStorage::TYPE_ALL))
+			if(m_pMap->Load(pMenuMap, Storage(), aBuf, IStorage::TYPE_ALL))
 			{
 				m_Loaded = true;
 			}
