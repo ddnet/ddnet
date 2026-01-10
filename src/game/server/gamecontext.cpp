@@ -4438,7 +4438,7 @@ bool CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 	}
 
 	CDataFileReader Reader;
-	if(!Reader.Open(Storage(), pNewMapName, IStorage::TYPE_ALL))
+	if(!Reader.Open(g_Config.m_SvMap, Storage(), pNewMapName, IStorage::TYPE_ALL))
 	{
 		log_error("mapchange", "Failed to import settings from '%s': failed to open map '%s' for reading", aConfig, pNewMapName);
 		return false;

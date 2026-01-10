@@ -293,8 +293,6 @@ public:
 
 	virtual void SendMsgRaw(int ClientId, const void *pData, int Size, int Flags) = 0;
 
-	virtual const char *GetMapName() const = 0;
-
 	virtual bool IsSixup(int ClientId) const = 0;
 };
 

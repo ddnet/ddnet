@@ -429,8 +429,8 @@ void CClient::SetState(EClientState State)
 		CServerInfo CurrentServerInfo;
 		GetServerInfo(&CurrentServerInfo);
 
-		Discord()->SetGameInfo(CurrentServerInfo, m_aCurrentMap, Registered);
-		Steam()->SetGameInfo(ServerAddress(), m_aCurrentMap, Registered);
+		Discord()->SetGameInfo(CurrentServerInfo, GameClient()->Map()->BaseName(), Registered);
+		Steam()->SetGameInfo(ServerAddress(), GameClient()->Map()->BaseName(), Registered);
 	}
 	else if(OldState == IClient::STATE_ONLINE)
 	{
@@ -1155,7 +1155,7 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, const std
 	if((bool)m_LoadingCallback)
 		m_LoadingCallback(IClient::LOADING_CALLBACK_DETAIL_MAP);
 
-	if(!GameClient()->Map()->Load(Storage(), pFilename, IStorage::TYPE_ALL))
+	if(!GameClient()->Map()->Load(pName, Storage(), pFilename, IStorage::TYPE_ALL))
 	{
 		str_format(s_aErrorMsg, sizeof(s_aErrorMsg), "map '%s' not found", pFilename);
 		return s_aErrorMsg;
@@ -1191,9 +1191,6 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, const std
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "loaded map '%s'", pFilename);
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", aBuf);
-
-	str_copy(m_aCurrentMap, pName);
-	str_copy(m_aCurrentMapPath, pFilename);
 
 	return nullptr;
 }
@@ -1470,7 +1467,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 			{
 				m_CurrentServerInfo = Info;
 				m_CurrentServerInfoRequestTime = -1;
-				Discord()->UpdateServerInfo(Info, m_aCurrentMap);
+				Discord()->UpdateServerInfo(Info, GameClient()->Map()->BaseName());
 			}
 
 			bool ValidPong = false;
@@ -3879,7 +3876,7 @@ void CClient::SaveReplay(const int Length, const char *pFilename)
 		{
 			char aTimestamp[20];
 			str_timestamp(aTimestamp, sizeof(aTimestamp));
-			str_format(aFilename, sizeof(aFilename), "demos/replays/%s_%s_(replay).demo", m_aCurrentMap, aTimestamp);
+			str_format(aFilename, sizeof(aFilename), "demos/replays/%s_%s_(replay).demo", GameClient()->Map()->BaseName(), aTimestamp);
 		}
 		else
 		{
@@ -4061,7 +4058,7 @@ void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int 
 		m_pConsole,
 		aFilename,
 		IsSixup() ? GameClient()->NetVersion7() : GameClient()->NetVersion(),
-		m_aCurrentMap,
+		GameClient()->Map()->BaseName(),
 		GameClient()->Map()->Sha256(),
 		GameClient()->Map()->Crc(),
 		"client",
@@ -4079,7 +4076,7 @@ void CClient::DemoRecorder_HandleAutoStart()
 		DemoRecorder(RECORDER_AUTO)->Stop(IDemoRecorder::EStopMode::KEEP_FILE);
 
 		char aFilename[IO_MAX_PATH_LENGTH];
-		str_format(aFilename, sizeof(aFilename), "auto/%s", m_aCurrentMap);
+		str_format(aFilename, sizeof(aFilename), "auto/%s", GameClient()->Map()->BaseName());
 		DemoRecorder_Start(aFilename, true, RECORDER_AUTO);
 
 		if(g_Config.m_ClAutoDemoMax)
@@ -4103,7 +4100,7 @@ void CClient::DemoRecorder_UpdateReplayRecorder()
 	if(g_Config.m_ClReplays && !DemoRecorder(RECORDER_REPLAYS)->IsRecording())
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
-		str_format(aFilename, sizeof(aFilename), "replays/replay_tmp_%s", m_aCurrentMap);
+		str_format(aFilename, sizeof(aFilename), "replays/replay_tmp_%s", GameClient()->Map()->BaseName());
 		DemoRecorder_Start(aFilename, true, RECORDER_REPLAYS);
 	}
 }
@@ -4136,7 +4133,7 @@ void CClient::Con_Record(IConsole::IResult *pResult, void *pUserData)
 	if(pResult->NumArguments())
 		pSelf->DemoRecorder_Start(pResult->GetString(0), false, RECORDER_MANUAL);
 	else
-		pSelf->DemoRecorder_Start(pSelf->m_aCurrentMap, true, RECORDER_MANUAL);
+		pSelf->DemoRecorder_Start(pSelf->GameClient()->Map()->BaseName(), true, RECORDER_MANUAL);
 }
 
 void CClient::Con_StopRecord(IConsole::IResult *pResult, void *pUserData)
@@ -5034,16 +5031,6 @@ int main(int argc, const char **argv)
 
 // DDRace
 
-const char *CClient::GetCurrentMap() const
-{
-	return m_aCurrentMap;
-}
-
-const char *CClient::GetCurrentMapPath() const
-{
-	return m_aCurrentMapPath;
-}
-
 void CClient::RaceRecord_Start(const char *pFilename)
 {
 	dbg_assert(State() == IClient::STATE_ONLINE, "Client must be online to record demo");
@@ -5053,7 +5040,7 @@ void CClient::RaceRecord_Start(const char *pFilename)
 		m_pConsole,
 		pFilename,
 		IsSixup() ? GameClient()->NetVersion7() : GameClient()->NetVersion(),
-		m_aCurrentMap,
+		GameClient()->Map()->BaseName(),
 		GameClient()->Map()->Sha256(),
 		GameClient()->Map()->Crc(),
 		"client",

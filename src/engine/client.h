@@ -300,9 +300,6 @@ public:
 
 	// DDRace
 
-	virtual const char *GetCurrentMap() const = 0;
-	virtual const char *GetCurrentMapPath() const = 0;
-
 	const char *News() const { return m_aNews; }
 	int Points() const { return m_Points; }
 	int64_t ReconnectTime() const { return m_ReconnectTime; }

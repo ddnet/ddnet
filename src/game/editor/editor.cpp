@@ -7433,19 +7433,19 @@ void CEditor::OnDialogClose()
 
 void CEditor::LoadCurrentMap()
 {
-	if(Load(m_pClient->GetCurrentMapPath(), IStorage::TYPE_SAVE))
+	CGameClient *pGameClient = (CGameClient *)Kernel()->RequestInterface<IGameClient>();
+
+	if(Load(pGameClient->Map()->Path(), IStorage::TYPE_SAVE))
 	{
-		Map()->m_ValidSaveFilename = !str_startswith(m_pClient->GetCurrentMapPath(), "downloadedmaps/");
+		Map()->m_ValidSaveFilename = !str_startswith(pGameClient->Map()->Path(), "downloadedmaps/");
 	}
 	else
 	{
-		Load(m_pClient->GetCurrentMapPath(), IStorage::TYPE_ALL);
+		Load(pGameClient->Map()->Path(), IStorage::TYPE_ALL);
 		Map()->m_ValidSaveFilename = false;
 	}
 
-	CGameClient *pGameClient = (CGameClient *)Kernel()->RequestInterface<IGameClient>();
 	vec2 Center = pGameClient->m_Camera.m_Center;
-
 	MapView()->SetWorldOffset(Center);
 }
 

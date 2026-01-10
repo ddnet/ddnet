@@ -130,9 +130,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	// pinging
 	int64_t m_PingStartTime = 0;
 
-	char m_aCurrentMap[IO_MAX_PATH_LENGTH] = "";
-	char m_aCurrentMapPath[IO_MAX_PATH_LENGTH] = "";
-
 	char m_aTimeoutCodes[NUM_DUMMIES][32] = {"", ""};
 	bool m_aDidPostConnect[NUM_DUMMIES] = {false, false};
 	bool m_GenerateTimeoutSeed = true;
@@ -505,9 +502,6 @@ public:
 
 	void GenerateTimeoutSeed() override;
 	void GenerateTimeoutCodes(const NETADDR *pAddrs, int NumAddrs);
-
-	const char *GetCurrentMap() const override;
-	const char *GetCurrentMapPath() const override;
 
 	void RaceRecord_Start(const char *pFilename) override;
 	void RaceRecord_Stop() override;

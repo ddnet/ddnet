@@ -4660,7 +4660,7 @@ static bool UnknownMapSettingCallback(const char *pCommand, void *pUser)
 
 void CGameClient::LoadMapSettings()
 {
-	m_MapBugs = CMapBugs::Create(Client()->GetCurrentMap(), Map()->Size(), Map()->Sha256());
+	m_MapBugs = CMapBugs::Create(Map()->BaseName(), Map()->Size(), Map()->Sha256());
 
 	// Reset Tunezones
 	for(int TuneZone = 0; TuneZone < TuneZone::NUM; TuneZone++)
@@ -5262,7 +5262,7 @@ void CGameClient::StoreSave(const char *pTeamMembers, const char *pGeneratedCode
 	const char *apColumns[std::size(SAVES_HEADER)] = {
 		aTimestamp,
 		pTeamMembers,
-		Client()->GetCurrentMap(),
+		Map()->BaseName(),
 		pGeneratedCode,
 	};
 

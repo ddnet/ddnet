@@ -254,8 +254,6 @@ public:
 		NUM_RECORDERS = MAX_CLIENTS + 2,
 	};
 
-	char m_aCurrentMap[IO_MAX_PATH_LENGTH];
-	const char *m_pCurrentMapName;
 	SHA256_DIGEST m_aCurrentMapSha256[NUM_MAP_TYPES];
 	unsigned m_aCurrentMapCrc[NUM_MAP_TYPES];
 	unsigned char *m_apCurrentMapData[NUM_MAP_TYPES];
@@ -414,7 +412,6 @@ public:
 	void PumpNetwork(bool PacketWaiting);
 
 	void ChangeMap(const char *pMap) override;
-	const char *GetMapName() const override;
 	void ReloadMap() override;
 	int LoadMap(const char *pMapName);
 
