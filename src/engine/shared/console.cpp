@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <iterator> // std::size
 #include <new>
+#include <optional>
 
 // todo: rework this
 
@@ -214,7 +215,7 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat, bool IsColor)
 				{
 					if(Command == 'v')
 					{
-						pResult->SetVictim(CResult::VICTIM_ME);
+						pResult->SetVictim("me");
 						break;
 					}
 					Command = NextParam(pFormat);
@@ -392,6 +393,12 @@ void CConsole::Print(int Level, const char *pFrom, const char *pStr, ColorRGBA P
 	{
 		log_log(LogLevel, pFrom, "%s", pStr);
 	}
+}
+
+void CConsole::SetGetVictimsCommandCallback(FGetVictimsCommandCallback pfnCallback, void *pUser)
+{
+	m_pfnGetVictimsCommandCallback = pfnCallback;
+	m_pGetVictimsCommandUserData = pUser;
 }
 
 void CConsole::SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser)
@@ -607,14 +614,17 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 							m_pfnTeeHistorianCommandCallback(ClientId, m_FlagMask, pCommand->m_pName, &Result, m_pTeeHistorianCommandUserdata);
 						}
 
-						if(Result.GetVictim() == CResult::VICTIM_ME)
-							Result.SetVictim(ClientId);
-
-						if(Result.HasVictim() && Result.GetVictim() == CResult::VICTIM_ALL)
+						if(m_pfnGetVictimsCommandCallback && Result.m_aSpecialVictim[0])
 						{
-							for(int i = 0; i < MAX_CLIENTS; i++)
+							std::optional<std::vector<int>> Victims = m_pfnGetVictimsCommandCallback(ClientId, Result.m_aSpecialVictim, m_pGetVictimsCommandUserData);
+							if(!Victims.has_value())
 							{
-								Result.SetVictim(i);
+								log_error("console", "Invalid victim '%s'", Result.m_aSpecialVictim);
+								return;
+							}
+							for(int VictimId : Victims.value())
+							{
+								Result.SetVictim(VictimId);
 								pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
 							}
 						}
@@ -1143,32 +1153,32 @@ std::unique_ptr<IConsole> CreateConsole(int FlagMask) { return std::make_unique<
 
 int CConsole::CResult::GetVictim() const
 {
-	return m_Victim;
+	dbg_assert(m_VictimId.has_value(), "m_VictimId has no value");
+	return m_VictimId.value();
 }
 
 void CConsole::CResult::ResetVictim()
 {
-	m_Victim = VICTIM_NONE;
-}
-
-bool CConsole::CResult::HasVictim() const
-{
-	return m_Victim != VICTIM_NONE;
+	m_VictimId = std::nullopt;
+	m_aSpecialVictim[0] = '\0';
 }
 
 void CConsole::CResult::SetVictim(int Victim)
 {
-	m_Victim = std::clamp<int>(Victim, VICTIM_NONE, MAX_CLIENTS - 1);
+	m_VictimId = std::clamp<int>(Victim, 0, MAX_CLIENTS - 1);
 }
 
 void CConsole::CResult::SetVictim(const char *pVictim)
 {
-	if(!str_comp(pVictim, "me"))
-		m_Victim = VICTIM_ME;
-	else if(!str_comp(pVictim, "all"))
-		m_Victim = VICTIM_ALL;
-	else
-		m_Victim = std::clamp<int>(str_toint(pVictim), 0, MAX_CLIENTS - 1);
+	int Value;
+	if(!str_toint(pVictim, &Value) ||
+		Value == std::numeric_limits<int>::max() || Value == std::numeric_limits<int>::min())
+	{
+		str_copy(m_aSpecialVictim, pVictim);
+		return;
+	}
+
+	SetVictim(Value);
 }
 
 std::optional<ColorHSLA> CConsole::ColorParse(const char *pStr, float DarkestLighting)
