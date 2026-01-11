@@ -27,6 +27,7 @@ private:
 	int m_Type;
 	int m_Subtype;
 	int m_Flags;
+	int m_Delay;
 
 	// DDRace
 
