@@ -302,8 +302,6 @@ public:
 
 	virtual const char *GetCurrentMap() const = 0;
 	virtual const char *GetCurrentMapPath() const = 0;
-	virtual SHA256_DIGEST GetCurrentMapSha256() const = 0;
-	virtual unsigned GetCurrentMapCrc() const = 0;
 
 	const char *News() const { return m_aNews; }
 	int Points() const { return m_Points; }

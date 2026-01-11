@@ -508,8 +508,6 @@ public:
 
 	const char *GetCurrentMap() const override;
 	const char *GetCurrentMapPath() const override;
-	SHA256_DIGEST GetCurrentMapSha256() const override;
-	unsigned GetCurrentMapCrc() const override;
 
 	void RaceRecord_Start(const char *pFilename) override;
 	void RaceRecord_Stop() override;
