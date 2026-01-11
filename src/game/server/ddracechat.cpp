@@ -964,7 +964,7 @@ void CGameContext::ConCancelSwap(IConsole::IResult *pResult, void *pUserData)
 
 	int Team = Teams.m_Core.Team(pResult->m_ClientId);
 
-	if(!pSelf->m_pController->Teams().IsValidTeamNumber(Team))
+	if(!Teams.IsValidTeamNumber(Team))
 	{
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
@@ -2392,11 +2392,11 @@ void CGameContext::ConPracticeUnEndlessHook(IConsole::IResult *pResult, void *pU
 		ConUnEndlessHook(pResult, pUserData);
 }
 
-void CGameContext::ConPracticeToggleInvincible(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConPracticeToggleSuper(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(pSelf->GetPracticeCharacter(pResult))
-		ConToggleInvincible(pResult, pUserData);
+		ConToggleSuper(pResult, pUserData);
 }
 
 void CGameContext::ConPracticeToggleCollision(IConsole::IResult *pResult, void *pUserData)
