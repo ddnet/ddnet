@@ -1666,54 +1666,10 @@ void CEditorActionEditEnvelopePointValue::Apply(bool Undo)
 
 // ---------------------
 
-CEditorActionResetEnvelopePointTangent::CEditorActionResetEnvelopePointTangent(CEditorMap *pMap, int EnvelopeIndex, int PointIndex, int Channel, bool In) :
-	IEditorAction(pMap), m_EnvelopeIndex(EnvelopeIndex), m_PointIndex(PointIndex), m_Channel(Channel), m_In(In)
+CEditorActionResetEnvelopePointTangent::CEditorActionResetEnvelopePointTangent(CEditorMap *pMap, int EnvelopeIndex, int PointIndex, int Channel, bool In, CFixedTime OldTime, int OldValue) :
+	CEditorActionEditEnvelopePointValue(pMap, EnvelopeIndex, PointIndex, Channel, In ? EType::TANGENT_IN : EType::TANGENT_OUT, OldTime, OldValue, CFixedTime(0), 0)
 {
-	std::shared_ptr<CEnvelope> pEnvelope = Map()->m_vpEnvelopes[EnvelopeIndex];
-	if(In)
-	{
-		m_OldTime = pEnvelope->m_vPoints[PointIndex].m_Bezier.m_aInTangentDeltaX[Channel];
-		m_OldValue = pEnvelope->m_vPoints[PointIndex].m_Bezier.m_aInTangentDeltaY[Channel];
-	}
-	else
-	{
-		m_OldTime = pEnvelope->m_vPoints[PointIndex].m_Bezier.m_aOutTangentDeltaX[Channel];
-		m_OldValue = pEnvelope->m_vPoints[PointIndex].m_Bezier.m_aOutTangentDeltaY[Channel];
-	}
-
-	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Reset point %d of env %d tangent %s", m_PointIndex, m_EnvelopeIndex, m_In ? "in" : "out");
-}
-
-void CEditorActionResetEnvelopePointTangent::Undo()
-{
-	std::shared_ptr<CEnvelope> pEnvelope = Map()->m_vpEnvelopes[m_EnvelopeIndex];
-	if(m_In)
-	{
-		pEnvelope->m_vPoints[m_PointIndex].m_Bezier.m_aInTangentDeltaX[m_Channel] = m_OldTime;
-		pEnvelope->m_vPoints[m_PointIndex].m_Bezier.m_aInTangentDeltaY[m_Channel] = m_OldValue;
-	}
-	else
-	{
-		pEnvelope->m_vPoints[m_PointIndex].m_Bezier.m_aOutTangentDeltaX[m_Channel] = m_OldTime;
-		pEnvelope->m_vPoints[m_PointIndex].m_Bezier.m_aOutTangentDeltaY[m_Channel] = m_OldValue;
-	}
-	Map()->OnModify();
-}
-
-void CEditorActionResetEnvelopePointTangent::Redo()
-{
-	std::shared_ptr<CEnvelope> pEnvelope = Map()->m_vpEnvelopes[m_EnvelopeIndex];
-	if(m_In)
-	{
-		pEnvelope->m_vPoints[m_PointIndex].m_Bezier.m_aInTangentDeltaX[m_Channel] = CFixedTime(0);
-		pEnvelope->m_vPoints[m_PointIndex].m_Bezier.m_aInTangentDeltaY[m_Channel] = 0.0f;
-	}
-	else
-	{
-		pEnvelope->m_vPoints[m_PointIndex].m_Bezier.m_aOutTangentDeltaX[m_Channel] = CFixedTime(0);
-		pEnvelope->m_vPoints[m_PointIndex].m_Bezier.m_aOutTangentDeltaY[m_Channel] = 0.0f;
-	}
-	Map()->OnModify();
+	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Reset point %d of env %d tangent %s", PointIndex, EnvelopeIndex, In ? "in" : "out");
 }
 
 // ------------------

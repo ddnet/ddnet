@@ -1550,12 +1550,14 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEnvPoint(void *pContext, CUIRect Vie
 		if(pEditor->IsTangentInSelected())
 		{
 			auto [SelectedIndex, SelectedChannel] = pEditor->m_SelectedTangentInPoint;
-			pEditor->Map()->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionResetEnvelopePointTangent>(pEditor->Map(), pEditor->m_SelectedEnvelope, SelectedIndex, SelectedChannel, true));
+			const auto &[OldTime, OldValue] = pEditor->EnvGetSelectedTimeAndValue();
+			pEditor->Map()->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionResetEnvelopePointTangent>(pEditor->Map(), pEditor->m_SelectedEnvelope, SelectedIndex, SelectedChannel, true, OldTime, OldValue));
 		}
 		else if(pEditor->IsTangentOutSelected())
 		{
 			auto [SelectedIndex, SelectedChannel] = pEditor->m_SelectedTangentOutPoint;
-			pEditor->Map()->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionResetEnvelopePointTangent>(pEditor->Map(), pEditor->m_SelectedEnvelope, SelectedIndex, SelectedChannel, false));
+			const auto &[OldTime, OldValue] = pEditor->EnvGetSelectedTimeAndValue();
+			pEditor->Map()->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionResetEnvelopePointTangent>(pEditor->Map(), pEditor->m_SelectedEnvelope, SelectedIndex, SelectedChannel, false, OldTime, OldValue));
 		}
 		else
 		{

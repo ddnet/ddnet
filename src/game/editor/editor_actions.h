@@ -554,21 +554,10 @@ private:
 	void Apply(bool Undo);
 };
 
-class CEditorActionResetEnvelopePointTangent : public IEditorAction
+class CEditorActionResetEnvelopePointTangent : public CEditorActionEditEnvelopePointValue
 {
 public:
-	CEditorActionResetEnvelopePointTangent(CEditorMap *pMap, int EnvelopeIndex, int PointIndex, int Channel, bool In);
-
-	void Undo() override;
-	void Redo() override;
-
-private:
-	int m_EnvelopeIndex;
-	int m_PointIndex;
-	int m_Channel;
-	bool m_In;
-	CFixedTime m_OldTime;
-	int m_OldValue;
+	CEditorActionResetEnvelopePointTangent(CEditorMap *pMap, int EnvelopeIndex, int PointIndex, int Channel, bool In, CFixedTime OldTime, int OldValue);
 };
 
 class CEditorActionEditLayerSoundsProp : public CEditorActionEditLayerPropBase<ELayerSoundsProp>
