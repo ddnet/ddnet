@@ -31,6 +31,14 @@ bool CLocalServer::RunServer(const std::vector<const char *> &vpArguments)
 #else
 	char aBuf[IO_MAX_PATH_LENGTH];
 	Storage()->GetBinaryPath(PLAT_SERVER_EXEC, aBuf, sizeof(aBuf));
+#if defined(CONF_PLATFORM_MACOS)
+	if(!fs_is_file(aBuf))
+	{
+		fs_parent_dir(aBuf);
+		str_append(aBuf, "/../../../DDNet-Server.app/Contents/MacOS/");
+		str_append(aBuf, PLAT_SERVER_EXEC);
+	}
+#endif
 	// No / in binary path means to search in $PATH, so it is expected that the file can't be opened. Just try executing anyway.
 	if(str_find(aBuf, "/") == nullptr || fs_is_file(aBuf))
 	{
