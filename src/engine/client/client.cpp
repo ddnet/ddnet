@@ -1148,7 +1148,7 @@ void CClient::Render()
 	RenderGraphs();
 }
 
-const char *CClient::LoadMap(const char *pName, const char *pFilename, SHA256_DIGEST *pWantedSha256, unsigned WantedCrc)
+const char *CClient::LoadMap(const char *pName, const char *pFilename, const std::optional<SHA256_DIGEST> &WantedSha256, unsigned WantedCrc)
 {
 	static char s_aErrorMsg[128];
 
@@ -1163,11 +1163,11 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, SHA256_DI
 		return s_aErrorMsg;
 	}
 
-	if(pWantedSha256 && m_pMap->Sha256() != *pWantedSha256)
+	if(WantedSha256.has_value() && m_pMap->Sha256() != WantedSha256.value())
 	{
 		char aWanted[SHA256_MAXSTRSIZE];
 		char aGot[SHA256_MAXSTRSIZE];
-		sha256_str(*pWantedSha256, aWanted, sizeof(aWanted));
+		sha256_str(WantedSha256.value(), aWanted, sizeof(aWanted));
 		sha256_str(m_pMap->Sha256(), aGot, sizeof(aWanted));
 		str_format(s_aErrorMsg, sizeof(s_aErrorMsg), "map differs from the server. %s != %s", aGot, aWanted);
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", s_aErrorMsg);
@@ -1176,7 +1176,7 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, SHA256_DI
 	}
 
 	// Only check CRC if we don't have the secure SHA256.
-	if(!pWantedSha256 && m_pMap->Crc() != WantedCrc)
+	if(!WantedSha256.has_value() && m_pMap->Crc() != WantedCrc)
 	{
 		str_format(s_aErrorMsg, sizeof(s_aErrorMsg), "map differs from the server. %08x != %08x", m_pMap->Crc(), WantedCrc);
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", s_aErrorMsg);
@@ -1200,7 +1200,7 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, SHA256_DI
 	return nullptr;
 }
 
-static void FormatMapDownloadFilename(const char *pName, const SHA256_DIGEST *pSha256, int Crc, bool Temp, char *pBuffer, int BufferSize)
+static void FormatMapDownloadFilename(const char *pName, const std::optional<SHA256_DIGEST> &Sha256, int Crc, bool Temp, char *pBuffer, int BufferSize)
 {
 	char aSuffix[32];
 	if(Temp)
@@ -1212,10 +1212,10 @@ static void FormatMapDownloadFilename(const char *pName, const SHA256_DIGEST *pS
 		str_copy(aSuffix, ".map");
 	}
 
-	if(pSha256)
+	if(Sha256.has_value())
 	{
 		char aSha256[SHA256_MAXSTRSIZE];
-		sha256_str(*pSha256, aSha256, sizeof(aSha256));
+		sha256_str(Sha256.value(), aSha256, sizeof(aSha256));
 		str_format(pBuffer, BufferSize, "downloadedmaps/%s_%s%s", pName, aSha256, aSuffix);
 	}
 	else
@@ -1224,15 +1224,15 @@ static void FormatMapDownloadFilename(const char *pName, const SHA256_DIGEST *pS
 	}
 }
 
-const char *CClient::LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedSha256, int WantedCrc)
+const char *CClient::LoadMapSearch(const char *pMapName, const std::optional<SHA256_DIGEST> &WantedSha256, int WantedCrc)
 {
 	char aBuf[512];
 	char aWanted[SHA256_MAXSTRSIZE + 16];
 	aWanted[0] = 0;
-	if(pWantedSha256)
+	if(WantedSha256.has_value())
 	{
 		char aWantedSha256[SHA256_MAXSTRSIZE];
-		sha256_str(*pWantedSha256, aWantedSha256, sizeof(aWantedSha256));
+		sha256_str(WantedSha256.value(), aWantedSha256, sizeof(aWantedSha256));
 		str_format(aWanted, sizeof(aWanted), "sha256=%s ", aWantedSha256);
 	}
 	str_format(aBuf, sizeof(aBuf), "loading map, map=%s wanted %scrc=%08x", pMapName, aWanted, WantedCrc);
@@ -1240,21 +1240,21 @@ const char *CClient::LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedS
 
 	// try the normal maps folder
 	str_format(aBuf, sizeof(aBuf), "maps/%s.map", pMapName);
-	const char *pError = LoadMap(pMapName, aBuf, pWantedSha256, WantedCrc);
+	const char *pError = LoadMap(pMapName, aBuf, WantedSha256, WantedCrc);
 	if(!pError)
 		return nullptr;
 
 	// try the downloaded maps
-	FormatMapDownloadFilename(pMapName, pWantedSha256, WantedCrc, false, aBuf, sizeof(aBuf));
-	pError = LoadMap(pMapName, aBuf, pWantedSha256, WantedCrc);
+	FormatMapDownloadFilename(pMapName, WantedSha256, WantedCrc, false, aBuf, sizeof(aBuf));
+	pError = LoadMap(pMapName, aBuf, WantedSha256, WantedCrc);
 	if(!pError)
 		return nullptr;
 
 	// backward compatibility with old names
-	if(pWantedSha256)
+	if(WantedSha256.has_value())
 	{
-		FormatMapDownloadFilename(pMapName, nullptr, WantedCrc, false, aBuf, sizeof(aBuf));
-		pError = LoadMap(pMapName, aBuf, pWantedSha256, WantedCrc);
+		FormatMapDownloadFilename(pMapName, std::nullopt, WantedCrc, false, aBuf, sizeof(aBuf));
+		pError = LoadMap(pMapName, aBuf, WantedSha256, WantedCrc);
 		if(!pError)
 			return nullptr;
 	}
@@ -1264,7 +1264,7 @@ const char *CClient::LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedS
 	str_format(aFilename, sizeof(aFilename), "%s.map", pMapName);
 	if(Storage()->FindFile(aFilename, "maps", IStorage::TYPE_ALL, aBuf, sizeof(aBuf)))
 	{
-		pError = LoadMap(pMapName, aBuf, pWantedSha256, WantedCrc);
+		pError = LoadMap(pMapName, aBuf, WantedSha256, WantedCrc);
 		if(!pError)
 			return nullptr;
 	}
@@ -1653,15 +1653,15 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 
 			ResetMapDownload(true);
 
-			SHA256_DIGEST *pMapSha256 = nullptr;
+			std::optional<SHA256_DIGEST> MapSha256;
 			const char *pMapUrl = nullptr;
 			if(MapDetailsWerePresent && str_comp(m_aMapDetailsName, pMap) == 0 && m_MapDetailsCrc == MapCrc)
 			{
-				pMapSha256 = &m_MapDetailsSha256;
+				MapSha256 = m_MapDetailsSha256;
 				pMapUrl = m_aMapDetailsUrl[0] ? m_aMapDetailsUrl : nullptr;
 			}
 
-			if(LoadMapSearch(pMap, pMapSha256, MapCrc) == nullptr)
+			if(LoadMapSearch(pMap, MapSha256, MapCrc) == nullptr)
 			{
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "loading done");
 				SetLoadingStateDetail(IClient::LOADING_STATE_DETAIL_SENDING_READY);
@@ -1670,20 +1670,19 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			else
 			{
 				// start map download
-				FormatMapDownloadFilename(pMap, pMapSha256, MapCrc, false, m_aMapdownloadFilename, sizeof(m_aMapdownloadFilename));
-				FormatMapDownloadFilename(pMap, pMapSha256, MapCrc, true, m_aMapdownloadFilenameTemp, sizeof(m_aMapdownloadFilenameTemp));
+				FormatMapDownloadFilename(pMap, MapSha256, MapCrc, false, m_aMapdownloadFilename, sizeof(m_aMapdownloadFilename));
+				FormatMapDownloadFilename(pMap, MapSha256, MapCrc, true, m_aMapdownloadFilenameTemp, sizeof(m_aMapdownloadFilenameTemp));
 
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf), "starting to download map to '%s'", m_aMapdownloadFilenameTemp);
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", aBuf);
 
 				str_copy(m_aMapdownloadName, pMap);
-				m_MapdownloadSha256Present = (bool)pMapSha256;
-				m_MapdownloadSha256 = pMapSha256 ? *pMapSha256 : SHA256_ZEROED;
+				m_MapdownloadSha256 = MapSha256;
 				m_MapdownloadCrc = MapCrc;
 				m_MapdownloadTotalsize = MapSize;
 
-				if(pMapSha256)
+				if(MapSha256.has_value())
 				{
 					char aUrl[256];
 					char aEscaped[256];
@@ -1694,7 +1693,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					m_pMapdownloadTask = HttpGetFile(pMapUrl ? pMapUrl : aUrl, Storage(), m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE);
 					m_pMapdownloadTask->Timeout(CTimeout{g_Config.m_ClMapDownloadConnectTimeoutMs, 0, g_Config.m_ClMapDownloadLowSpeedLimit, g_Config.m_ClMapDownloadLowSpeedTime});
 					m_pMapdownloadTask->MaxResponseSize(MapSize);
-					m_pMapdownloadTask->ExpectSha256(*pMapSha256);
+					m_pMapdownloadTask->ExpectSha256(MapSha256.value());
 					Http()->Run(m_pMapdownloadTask);
 				}
 				else
@@ -2369,8 +2368,7 @@ void CClient::ResetMapDownload(bool ResetActive)
 	if(ResetActive)
 	{
 		m_MapdownloadChunk = 0;
-		m_MapdownloadSha256Present = false;
-		m_MapdownloadSha256 = SHA256_ZEROED;
+		m_MapdownloadSha256 = std::nullopt;
 		m_MapdownloadCrc = 0;
 		m_MapdownloadTotalsize = -1;
 		m_MapdownloadAmount = 0;
@@ -2384,8 +2382,6 @@ void CClient::FinishMapDownload()
 {
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "download complete, loading map");
 
-	SHA256_DIGEST *pSha256 = m_MapdownloadSha256Present ? &m_MapdownloadSha256 : nullptr;
-
 	bool FileSuccess = true;
 	FileSuccess &= Storage()->RemoveFile(m_aMapdownloadFilename, IStorage::TYPE_SAVE);
 	FileSuccess &= Storage()->RenameFile(m_aMapdownloadFilenameTemp, m_aMapdownloadFilename, IStorage::TYPE_SAVE);
@@ -2397,7 +2393,7 @@ void CClient::FinishMapDownload()
 		return;
 	}
 
-	const char *pError = LoadMap(m_aMapdownloadName, m_aMapdownloadFilename, pSha256, m_MapdownloadCrc);
+	const char *pError = LoadMap(m_aMapdownloadName, m_aMapdownloadFilename, m_MapdownloadSha256, m_MapdownloadCrc);
 	if(!pError)
 	{
 		ResetMapDownload(true);
@@ -3955,9 +3951,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 
 	// load map
 	const CMapInfo *pMapInfo = m_DemoPlayer.GetMapInfo();
-	int Crc = pMapInfo->m_Crc;
-	SHA256_DIGEST Sha = pMapInfo->m_Sha256;
-	const char *pError = LoadMapSearch(pMapInfo->m_aName, Sha != SHA256_ZEROED ? &Sha : nullptr, Crc);
+	const char *pError = LoadMapSearch(pMapInfo->m_aName, pMapInfo->m_Sha256, pMapInfo->m_Crc);
 	if(pError)
 	{
 		if(!m_DemoPlayer.ExtractMap(Storage()))
@@ -3966,8 +3960,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 			return pError;
 		}
 
-		Sha = m_DemoPlayer.GetMapInfo()->m_Sha256;
-		pError = LoadMapSearch(pMapInfo->m_aName, &Sha, Crc);
+		pError = LoadMapSearch(pMapInfo->m_aName, pMapInfo->m_Sha256, pMapInfo->m_Crc);
 		if(pError)
 		{
 			DisconnectWithReason(pError);
