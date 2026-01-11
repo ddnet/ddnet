@@ -2430,6 +2430,8 @@ if(CLIENT)
     components/race_demo.h
     components/scoreboard.cpp
     components/scoreboard.h
+    components/scoreboard_lock.cpp
+    components/scoreboard_lock.h
     components/skins.cpp
     components/skins.h
     components/skins7.cpp
