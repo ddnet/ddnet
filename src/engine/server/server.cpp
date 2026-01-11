@@ -1070,9 +1070,19 @@ void CServer::DoSnapshot()
 			int DeltaTick = -1;
 			const CSnapshot *pDeltashot = CSnapshot::EmptySnapshot();
 			{
-				int DeltashotSize = m_aClients[i].m_Snapshots.Get(m_aClients[i].m_LastAckedSnapshot, nullptr, &pDeltashot, nullptr);
+				int DeltashotSize;
+				if(m_aClients[i].m_LastAckedSnapshot >= MIN_TICK)
+				{
+					DeltashotSize = m_aClients[i].m_Snapshots.Get(m_aClients[i].m_LastAckedSnapshot, nullptr, &pDeltashot, nullptr);
+				}
+				else
+				{
+					DeltashotSize = -1;
+				}
 				if(DeltashotSize >= 0)
+				{
 					DeltaTick = m_aClients[i].m_LastAckedSnapshot;
+				}
 				else
 				{
 					// no acked package found, force client to recover rate
@@ -1847,19 +1857,27 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		{
 			const int LastAckedSnapshot = Unpacker.GetInt();
 			int IntendedTick = Unpacker.GetInt();
-			int Size = Unpacker.GetInt();
-			if(Unpacker.Error() || Size / 4 > MAX_INPUT_SIZE || IntendedTick < MIN_TICK || IntendedTick >= MAX_TICK)
+			const int Size = Unpacker.GetInt();
+			if(Unpacker.Error() ||
+				Size % (int)sizeof(int32_t) != 0 ||
+				Size / (int)sizeof(int32_t) > MAX_INPUT_SIZE ||
+				IntendedTick < MIN_TICK || IntendedTick >= MAX_TICK ||
+				LastAckedSnapshot < -1 || LastAckedSnapshot >= MAX_TICK)
 			{
 				return;
 			}
 
 			m_aClients[ClientId].m_LastAckedSnapshot = LastAckedSnapshot;
-			if(m_aClients[ClientId].m_LastAckedSnapshot > 0)
+			if(m_aClients[ClientId].m_LastAckedSnapshot >= MIN_TICK)
+			{
 				m_aClients[ClientId].m_SnapRate = CClient::SNAPRATE_FULL;
 
-			int64_t TagTime;
-			if(m_aClients[ClientId].m_Snapshots.Get(m_aClients[ClientId].m_LastAckedSnapshot, &TagTime, nullptr, nullptr) >= 0)
-				m_aClients[ClientId].m_Latency = (int)(((time_get() - TagTime) * 1000) / time_freq());
+				int64_t TagTime;
+				if(m_aClients[ClientId].m_Snapshots.Get(m_aClients[ClientId].m_LastAckedSnapshot, &TagTime, nullptr, nullptr) >= 0)
+				{
+					m_aClients[ClientId].m_Latency = (int)(((time_get() - TagTime) * 1000) / time_freq());
+				}
+			}
 
 			// add message to report the input timing
 			// skip packets that are old
@@ -1882,7 +1900,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 			pInput->m_GameTick = IntendedTick;
 
-			for(int i = 0; i < Size / 4; i++)
+			for(int i = 0; i < Size / (int)sizeof(int32_t); i++)
 			{
 				pInput->m_aData[i] = Unpacker.GetInt();
 			}
