@@ -2953,7 +2953,12 @@ void CGameContext::OnKillNetMessage(const CNetMsg_Cl_Kill *pMsg, int ClientId)
 	CCharacter *pChr = pPlayer->GetCharacter();
 	if(!pChr)
 		return;
-
+	int Team = GetDDRaceTeam(ClientId);
+	if(Team != TEAM_FLOCK && pChr->m_StartTime > 0 && m_pController->Teams().IsValidTeamNumber(Team) && !m_pController->Teams().IsAllowLeaderCommands(ClientId, Team))
+	{
+		SendChatTarget(ClientId, "Due to this team having a leader, only the leader can kill. If you really want to kill and be sent to team 0, type /kill");
+		return;
+	}
 	// Kill Protection
 	int CurrTime = (Server()->Tick() - pChr->m_StartTime) / Server()->TickSpeed();
 	if(g_Config.m_SvKillProtection != 0 && CurrTime >= (60 * g_Config.m_SvKillProtection) && pChr->m_DDRaceState == ERaceState::STARTED)
@@ -4018,6 +4023,7 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("points", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConPoints, this, "Shows the global points of a player beginning with name r (your rank by default)");
 	Console()->Register("top5points", "?i[number]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTopPoints, this, "Shows five points of the global point ladder beginning with rank i (1 by default)");
 	Console()->Register("timecp", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTimeCP, this, "Set your checkpoints based on another player");
+	Console()->Register("teamleader", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConSetTeamLeader, this, "Set player as the team leader (defaults to you). When a team leader is set, rest of the team cannot use commands like /lock");
 
 	Console()->Register("team", "?i[id]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTeam, this, "Lets you join team i (shows your team if left blank)");
 	Console()->Register("lock", "?i['0'|'1']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConLock, this, "Toggle team lock so no one else can join and so the team restarts when a player dies. /lock 0 to unlock, /lock 1 to lock");
