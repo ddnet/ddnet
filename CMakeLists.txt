@@ -1980,7 +1980,26 @@ generate_source7("src/generated/client_data7.cpp" "client_content_source")
 generate_source7("src/generated/client_data7.h" "client_content_header")
 
 generate_maps("src/generated/protocolglue.h" "map_header")
-generate_maps("src/generated/protocolglue.cpp" "map_source")
+generate_maps("src/generated/protocolglue_generated.cpp" "map_source")
+
+add_custom_target(generate_all
+  DEPENDS
+    src/generated/client_data.cpp
+    src/generated/client_data.h
+    src/generated/data_types.h
+    src/generated/protocol.cpp
+    src/generated/protocol.h
+    src/generated/server_data.cpp
+    src/generated/server_data.h
+    src/generated/protocol7.cpp
+    src/generated/protocol7.h
+    src/generated/client_data7.cpp
+    src/generated/client_data7.h
+    src/generated/protocolglue.h
+    src/generated/protocolglue_generated.cpp
+    ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp
+    src/generated/wordlist.h
+)
 
 add_custom_command(OUTPUT "src/generated/wordlist.h"
   COMMAND ${Python3_EXECUTABLE} scripts/wordlist.py > ${PROJECT_BINARY_DIR}/src/generated/wordlist.h
@@ -2199,7 +2218,7 @@ set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "src/game/version
 # A bit hacky, but these are needed to register all the UUIDs, even for stuff
 # that doesn't link game.
 set(ENGINE_UUID_SHARED
-  src/generated/protocolglue.cpp
+  src/generated/protocolglue_generated.cpp
   src/generated/protocolglue.h
   src/generated/protocol7.cpp
   src/generated/protocol7.h
@@ -2242,6 +2261,8 @@ add_library(engine-gfx EXCLUDE_FROM_ALL OBJECT ${ENGINE_GFX})
 target_include_directories(engine-gfx PRIVATE ${PNG_INCLUDE_DIRS})
 add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_UUID_SHARED} ${BASE})
 add_library(game-shared EXCLUDE_FROM_ALL OBJECT ${GAME_SHARED} ${GAME_GENERATED_SHARED})
+add_dependencies(engine-shared generate_all)
+add_dependencies(game-shared generate_all)
 list(APPEND TARGETS_OWN engine-gfx engine-shared game-shared)
 
 if(DISCORD AND NOT DISCORD_DYNAMIC)
