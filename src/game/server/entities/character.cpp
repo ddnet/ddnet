@@ -17,6 +17,7 @@
 #include <generated/server_data.h>
 
 #include <game/mapitems.h>
+#include <game/random_hash.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/player.h>
@@ -48,6 +49,7 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 	{
 		CurrentTimeCp = 0.0f;
 	}
+	m_RngSeed = -1;
 }
 
 void CCharacter::Reset()
@@ -72,6 +74,8 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_pPlayer = pPlayer;
 	m_Pos = Pos;
 
+	m_RngSeed = static_cast<int>(GameServer()->m_World.m_Core.m_pPrng->RandomBits() & INT_MAX);
+
 	mem_zero(&m_LatestPrevPrevInput, sizeof(m_LatestPrevPrevInput));
 	m_LatestPrevPrevInput.m_TargetY = -1;
 	m_NumInputs = 0;
@@ -84,6 +88,8 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_Core.m_ActiveWeapon = WEAPON_GUN;
 	m_Core.m_Pos = m_Pos;
 	m_Core.m_Id = m_pPlayer->GetCid();
+	m_Core.m_RngSeed = m_RngSeed;
+	m_Core.m_Tick = Server()->Tick();
 	int TuneZone = Collision()->IsTune(Collision()->GetMapIndex(Pos));
 	m_Core.m_Tuning = TuningList()[TuneZone];
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCid()] = &m_Core;
@@ -862,6 +868,8 @@ void CCharacter::TickDeferred()
 	bool StuckBefore = Collision()->TestBox(m_Core.m_Pos, CCharacterCore::PhysicalSizeVec2());
 
 	m_Core.m_Id = m_pPlayer->GetCid();
+	m_Core.m_RngSeed = m_RngSeed;
+	m_Core.m_Tick = Server()->Tick();
 	m_Core.Move();
 	bool StuckAfterMove = Collision()->TestBox(m_Core.m_Pos, CCharacterCore::PhysicalSizeVec2());
 	m_Core.Quantize();
@@ -1316,6 +1324,7 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacter->m_Jumps = m_Core.m_Jumps;
 	pDDNetCharacter->m_TeleCheckpoint = m_TeleCheckpoint;
 	pDDNetCharacter->m_StrongWeakId = m_StrongWeakId;
+	pDDNetCharacter->m_RngSeed = m_RngSeed;
 
 	// Display Information
 	pDDNetCharacter->m_JumpedTotal = m_Core.m_JumpedTotal;
@@ -1976,13 +1985,13 @@ void CCharacter::HandleTiles(int Index)
 		m_LastBonus = false;
 	}
 
-	int z = Collision()->IsTeleport(MapIndex);
-	if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && z && !Collision()->TeleOuts(z - 1).empty())
+	int Teleport = Collision()->IsTeleport(MapIndex);
+	if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && Teleport && !Collision()->TeleOuts(Teleport - 1).empty())
 	{
 		if(m_Core.m_Super || m_Core.m_Invincible)
 			return;
-		int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleOuts(z - 1).size());
-		m_Core.m_Pos = Collision()->TeleOuts(z - 1)[TeleOut];
+		int TeleOut = RandomHash::SeededRandomIntBelow(Collision()->TeleOuts(Teleport - 1).size(), {GetPlayer()->GetCid(), Server()->Tick(), m_RngSeed});
+		m_Core.m_Pos = Collision()->TeleOuts(Teleport - 1)[TeleOut];
 		if(!g_Config.m_SvTeleportHoldHook)
 		{
 			ResetHook();
@@ -1996,7 +2005,7 @@ void CCharacter::HandleTiles(int Index)
 	{
 		if(m_Core.m_Super || m_Core.m_Invincible)
 			return;
-		int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleOuts(EvilTeleport - 1).size());
+		int TeleOut = RandomHash::SeededRandomIntBelow(Collision()->TeleOuts(EvilTeleport - 1).size(), {GetPlayer()->GetCid(), Server()->Tick(), m_RngSeed});
 		m_Core.m_Pos = Collision()->TeleOuts(EvilTeleport - 1)[TeleOut];
 		if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons)
 		{
@@ -2019,12 +2028,12 @@ void CCharacter::HandleTiles(int Index)
 		if(m_Core.m_Super || m_Core.m_Invincible)
 			return;
 		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
-		for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
+		for(int TeleCpId = m_TeleCheckpoint - 1; TeleCpId >= 0; TeleCpId--)
 		{
-			if(!Collision()->TeleCheckOuts(k).empty())
+			if(!Collision()->TeleCheckOuts(TeleCpId).empty())
 			{
-				int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleCheckOuts(k).size());
-				m_Core.m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
+				int TeleOut = RandomHash::SeededRandomIntBelow(Collision()->TeleCheckOuts(TeleCpId).size(), {GetPlayer()->GetCid(), Server()->Tick(), m_RngSeed});
+				m_Core.m_Pos = Collision()->TeleCheckOuts(TeleCpId)[TeleOut];
 				m_Core.m_Vel = vec2(0, 0);
 
 				if(!g_Config.m_SvTeleportHoldHook)
@@ -2056,12 +2065,12 @@ void CCharacter::HandleTiles(int Index)
 		if(m_Core.m_Super || m_Core.m_Invincible)
 			return;
 		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
-		for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
+		for(int TeleCpId = m_TeleCheckpoint - 1; TeleCpId >= 0; TeleCpId--)
 		{
-			if(!Collision()->TeleCheckOuts(k).empty())
+			if(!Collision()->TeleCheckOuts(TeleCpId).empty())
 			{
-				int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleCheckOuts(k).size());
-				m_Core.m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
+				int TeleOut = RandomHash::SeededRandomIntBelow(Collision()->TeleCheckOuts(TeleCpId).size(), {GetPlayer()->GetCid(), Server()->Tick(), m_RngSeed});
+				m_Core.m_Pos = Collision()->TeleCheckOuts(TeleCpId)[TeleOut];
 
 				if(!g_Config.m_SvTeleportHoldHook)
 				{
@@ -2246,6 +2255,8 @@ void CCharacter::DDRaceTick()
 	TrySetRescue(RESCUEMODE_AUTO);
 
 	m_Core.m_Id = GetPlayer()->GetCid();
+	m_Core.m_RngSeed = m_RngSeed;
+	m_Core.m_Tick = Server()->Tick();
 }
 
 void CCharacter::DDRacePostCoreTick()
@@ -2393,18 +2404,18 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove)
 
 void CCharacter::GiveAllWeapons()
 {
-	for(int i = WEAPON_GUN; i < NUM_WEAPONS - 1; i++)
+	for(int WeaponId = WEAPON_GUN; WeaponId < NUM_WEAPONS - 1; WeaponId++)
 	{
-		GiveWeapon(i);
+		GiveWeapon(WeaponId);
 	}
 }
 
 void CCharacter::ResetPickups()
 {
-	for(int i = WEAPON_SHOTGUN; i < NUM_WEAPONS - 1; i++)
+	for(int WeaponId = WEAPON_SHOTGUN; WeaponId < NUM_WEAPONS - 1; WeaponId++)
 	{
-		m_Core.m_aWeapons[i].m_Got = false;
-		if(m_Core.m_ActiveWeapon == i)
+		m_Core.m_aWeapons[WeaponId].m_Got = false;
+		if(m_Core.m_ActiveWeapon == WeaponId)
 			m_Core.m_ActiveWeapon = WEAPON_GUN;
 	}
 }
