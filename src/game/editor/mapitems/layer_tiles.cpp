@@ -792,7 +792,7 @@ void CLayerTiles::FillGameTiles(EGameTileOp Fill)
 	int Result = GameTileOpToIndex(Fill);
 	if(Result > -1)
 	{
-		std::shared_ptr<CLayerGroup> pGroup = Map()->m_vpGroups[Editor()->m_SelectedGroup];
+		std::shared_ptr<CLayerGroup> pGroup = Map()->m_vpGroups[Map()->m_SelectedGroup];
 		m_FillGameTile = Result;
 		const int OffsetX = -pGroup->m_OffsetX / 32;
 		const int OffsetY = -pGroup->m_OffsetY / 32;
@@ -947,7 +947,7 @@ bool CLayerTiles::CanFillGameTiles() const
 	if(EntitiesLayer)
 		return false;
 
-	std::shared_ptr<CLayerGroup> pGroup = Map()->m_vpGroups[Editor()->m_SelectedGroup];
+	std::shared_ptr<CLayerGroup> pGroup = Map()->m_vpGroups[Map()->m_SelectedGroup];
 
 	// Game tiles can only be constructed if the layer is relative to the game layer
 	return !(pGroup->m_OffsetX % 32) && !(pGroup->m_OffsetY % 32) && pGroup->m_ParallaxX == 100 && pGroup->m_ParallaxY == 100;
@@ -1016,7 +1016,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 					if(!m_TilesHistory.empty()) // Sometimes pressing that button causes the automap to run so we should be able to undo that
 					{
 						// record undo
-						Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(Map(), Editor()->m_SelectedGroup, Editor()->m_vSelectedLayers[0], "Auto map", m_TilesHistory));
+						Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(Map(), Map()->m_SelectedGroup, Map()->m_vSelectedLayers[0], "Auto map", m_TilesHistory));
 						ClearHistory();
 					}
 				}
@@ -1027,7 +1027,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 			{
 				Map()->m_vpImages[m_Image]->m_AutoMapper.Proceed(this, Map()->m_pGameLayer.get(), m_AutoMapperReference, m_AutoMapperConfig, m_Seed);
 				// record undo
-				Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(Map(), Editor()->m_SelectedGroup, Editor()->m_vSelectedLayers[0], "Auto map", m_TilesHistory));
+				Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(Map(), Map()->m_SelectedGroup, Map()->m_vSelectedLayers[0], "Auto map", m_TilesHistory));
 				ClearHistory();
 				return CUi::POPUP_CLOSE_CURRENT;
 			}
@@ -1173,7 +1173,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		// Record undo if automapper was ran
 		if(m_AutoAutoMap && !m_TilesHistory.empty())
 		{
-			Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(Map(), Editor()->m_SelectedGroup, Editor()->m_vSelectedLayers[0], "Auto map", m_TilesHistory));
+			Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(Map(), Map()->m_SelectedGroup, Map()->m_vSelectedLayers[0], "Auto map", m_TilesHistory));
 			ClearHistory();
 		}
 	}
@@ -1201,7 +1201,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 
 			std::vector<std::shared_ptr<IEditorAction>> vpActions;
 			int j = 0;
-			int GroupIndex = pEditor->m_SelectedGroup;
+			int GroupIndex = pEditorMap->m_SelectedGroup;
 			for(auto &pLayer : vpLayers)
 			{
 				int LayerIndex = vLayerIndices[j++];
