@@ -3,6 +3,7 @@
 #include "map.h"
 
 #include <base/log.h>
+#include <base/system.h>
 
 #include <engine/storage.h>
 
@@ -86,7 +87,7 @@ bool CMap::Load(const char *pMapName, int StorageType)
 	const CMapItemVersion *pItem = (CMapItemVersion *)NewDataFile.FindItem(MAPITEMTYPE_VERSION, 0);
 	if(pItem == nullptr || pItem->m_Version != 1)
 	{
-		log_error("map/load", "Error: map version not supported.");
+		log_error("map/load", "Map version not supported.");
 		NewDataFile.Close();
 		return false;
 	}
@@ -104,21 +105,65 @@ bool CMap::Load(const char *pMapName, int StorageType)
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
 				CMapItemLayerTilemap *pTilemap = reinterpret_cast<CMapItemLayerTilemap *>(pLayer);
-				if(pTilemap->m_Version >= CMapItemLayerTilemap::VERSION_TEEWORLDS_TILESKIP)
-				{
-					const size_t TilemapCount = (size_t)pTilemap->m_Width * pTilemap->m_Height;
-					const size_t TilemapSize = TilemapCount * sizeof(CTile);
 
-					if(((int)TilemapCount / pTilemap->m_Width != pTilemap->m_Height) || (TilemapSize / sizeof(CTile) != TilemapCount))
-					{
-						log_error("map/load", "map layer too big (%d * %d * %d causes an integer overflow)", pTilemap->m_Width, pTilemap->m_Height, (int)sizeof(CTile));
-						return false;
-					}
+				const size_t TilemapCount = (size_t)pTilemap->m_Width * pTilemap->m_Height;
+				const size_t TilemapSize = TilemapCount * sizeof(CTile);
+
+				if(((int)TilemapCount / pTilemap->m_Width != pTilemap->m_Height) || (TilemapSize / sizeof(CTile) != TilemapCount))
+				{
+					log_error("map/load", "Map layer %d in group %d is too big (%d * %d * %d causes an integer overflow).",
+						l, g, pTilemap->m_Width, pTilemap->m_Height, (int)sizeof(CTile));
+					return false;
+				}
+
+				const CTile *pSavedTiles = static_cast<CTile *>(NewDataFile.GetData(pTilemap->m_Data));
+				const size_t SavedTilesSize = NewDataFile.GetDataSize(pTilemap->m_Data) / sizeof(CTile);
+
+				if(pSavedTiles == nullptr)
+				{
+					log_error("map/load", "Tile data of layer %d in group %d is missing or corrupted.", l, g);
+					return false;
+				}
+				else if(pTilemap->m_Version >= CMapItemLayerTilemap::VERSION_TEEWORLDS_TILESKIP)
+				{
 					CTile *pTiles = static_cast<CTile *>(malloc(TilemapSize));
 					if(!pTiles)
+					{
+						log_error("map/load", "Failed to allocate memory for layer %d in group %d (size %d * %d).",
+							l, g, pTilemap->m_Width, pTilemap->m_Height);
 						return false;
-					ExtractTiles(pTiles, (size_t)pTilemap->m_Width * pTilemap->m_Height, static_cast<CTile *>(NewDataFile.GetData(pTilemap->m_Data)), NewDataFile.GetDataSize(pTilemap->m_Data) / sizeof(CTile));
+					}
+					else if(!ExtractTiles(pTiles, (size_t)pTilemap->m_Width * pTilemap->m_Height, pSavedTiles, SavedTilesSize))
+					{
+						free(pTiles);
+						log_error("map/load", "Failed to extract tiles of layer %d in group %d.", l, g);
+						return false;
+					}
 					NewDataFile.ReplaceData(pTilemap->m_Data, reinterpret_cast<char *>(pTiles), TilemapSize);
+				}
+				else if(SavedTilesSize < TilemapCount)
+				{
+					log_error("map/load", "Tile data of layer %d in group %d is truncated (got %" PRIzu ", wanted %" PRIzu ").",
+						l, g, SavedTilesSize, TilemapCount);
+					return false;
+				}
+				else
+				{
+					for(size_t TileIndex = 0; TileIndex < TilemapCount; ++TileIndex)
+					{
+						if(pSavedTiles[TileIndex].m_Skip != 0)
+						{
+							log_error("map/load", "Tile data of layer %d in group %d contains non-zero skip value at index %" PRIzu " but version %d does not use tileskip.",
+								l, g, TileIndex, CMapItemLayerTilemap::VERSION_TEEWORLDS_TILESKIP);
+							return false;
+						}
+						if(pSavedTiles[TileIndex].m_Reserved != 0)
+						{
+							log_error("map/load", "Tile data of layer %d in group %d contains non-zero padding value at index %" PRIzu ".",
+								l, g, TileIndex);
+							return false;
+						}
+					}
 				}
 			}
 		}
@@ -160,12 +205,17 @@ int CMap::MapSize() const
 	return m_DataFile.MapSize();
 }
 
-void CMap::ExtractTiles(CTile *pDest, size_t DestSize, const CTile *pSrc, size_t SrcSize)
+bool CMap::ExtractTiles(CTile *pDest, size_t DestSize, const CTile *pSrc, size_t SrcSize)
 {
 	size_t DestIndex = 0;
 	size_t SrcIndex = 0;
 	while(DestIndex < DestSize && SrcIndex < SrcSize)
 	{
+		if(pSrc[SrcIndex].m_Reserved != 0)
+		{
+			log_error("map/load", "Tile layer data contains non-zero padding value at index %" PRIzu ".", SrcIndex);
+			return false;
+		}
 		for(unsigned Counter = 0; Counter <= pSrc[SrcIndex].m_Skip && DestIndex < DestSize; Counter++)
 		{
 			pDest[DestIndex].m_Index = pSrc[SrcIndex].m_Index;
@@ -176,6 +226,12 @@ void CMap::ExtractTiles(CTile *pDest, size_t DestSize, const CTile *pSrc, size_t
 		}
 		SrcIndex++;
 	}
+	if(DestIndex != DestSize)
+	{
+		log_error("map/load", "Tile layer data is truncated (got %" PRIzu ", wanted %" PRIzu ").", DestIndex, DestSize);
+		return false;
+	}
+	return true;
 }
 
 extern IEngineMap *CreateEngineMap() { return new CMap; }
