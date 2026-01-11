@@ -2149,7 +2149,7 @@ void CCharacter::SetTeams(CGameTeams *pTeams)
 bool CCharacter::TrySetRescue(int RescueMode)
 {
 	bool Set = false;
-	if(g_Config.m_SvRescue || ((g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO || Team() > TEAM_FLOCK) && Teams()->IsValidTeamNumber(Team())))
+	if(g_Config.m_SvRescue || ((g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO || Team() > TEAM_FLOCK)))
 	{
 		// check for nearby health pickups (also freeze)
 		bool InHealthPickup = false;

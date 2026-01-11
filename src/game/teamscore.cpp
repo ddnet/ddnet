@@ -10,6 +10,17 @@ CTeamsCore::CTeamsCore()
 	Reset();
 }
 
+bool CTeamsCore::IsValidTeam(int Team) const
+{
+	// TODO: @KebsCS remove TEAM_SUPER here
+	return Team >= TEAM_FLOCK && Team < NUM_DDRACE_TEAMS;
+}
+
+void CTeamsCore::AssertValidTeam(int Team) const
+{
+	dbg_assert(IsValidTeam(Team), "Invalid Team: %d", Team);
+}
+
 bool CTeamsCore::SameTeam(int ClientId1, int ClientId2) const
 {
 	return m_aTeam[ClientId1] == TEAM_SUPER || m_aTeam[ClientId2] == TEAM_SUPER || m_aTeam[ClientId1] == m_aTeam[ClientId2];
@@ -22,7 +33,7 @@ int CTeamsCore::Team(int ClientId) const
 
 void CTeamsCore::Team(int ClientId, int Team)
 {
-	dbg_assert(Team >= TEAM_FLOCK && Team < NUM_DDRACE_TEAMS, "Invalid Team: %d", Team);
+	AssertValidTeam(Team);
 	m_aTeam[ClientId] = Team;
 }
 

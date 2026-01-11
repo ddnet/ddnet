@@ -129,6 +129,7 @@ public:
 	void SetPractice(int Team, bool Enabled);
 	bool IsPractice(int Team);
 	bool IsValidTeamNumber(int Team) const;
+	void AssertValidTeamNumber(int Team) const;
 };
 
 #endif

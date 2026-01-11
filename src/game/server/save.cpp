@@ -522,8 +522,9 @@ ESaveResult CSaveTeam::Save(CGameContext *pGameServer, int Team, bool Dry, bool 
 {
 	IGameController *pController = pGameServer->m_pController;
 	CGameTeams *pTeams = &pController->Teams();
+	pTeams->AssertValidTeamNumber(Team);
 
-	if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && (Team == TEAM_FLOCK || !pTeams->IsValidTeamNumber(Team)) && !Force)
+	if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && (Team == TEAM_FLOCK) && !Force)
 		return ESaveResult::TEAM_FLOCK;
 
 	if(pTeams->TeamFlock(Team) && !Force)
