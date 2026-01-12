@@ -607,9 +607,6 @@ void CGameClient::OnConnected()
 		// snap
 		Client()->Rcon("crashmeplx");
 
-		if(g_Config.m_ClAutoDemoOnConnect)
-			Client()->DemoRecorder_HandleAutoStart();
-
 		m_LocalServer.RconAuthIfPossible();
 	}
 }
