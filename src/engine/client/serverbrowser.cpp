@@ -1358,7 +1358,7 @@ void CServerBrowser::LoadDDNetInfoJson()
 	unsigned Length;
 	if(!m_pStorage->ReadFile(DDNET_INFO_FILE, IStorage::TYPE_SAVE, &pBuf, &Length))
 	{
-		m_DDNetInfoSha256 = SHA256_ZEROED;
+		// Keep old info if available
 		return;
 	}
 
@@ -1592,7 +1592,7 @@ void CServerBrowser::LoadDDNetServers()
 
 	// Add default none community
 	{
-		CCommunity NoneCommunity(COMMUNITY_NONE, "None", SHA256_ZEROED, "");
+		CCommunity NoneCommunity(COMMUNITY_NONE, "None", std::nullopt, "");
 		NoneCommunity.m_vCountries.emplace_back(COMMUNITY_COUNTRY_NONE, -1);
 		NoneCommunity.m_vTypes.emplace_back(COMMUNITY_TYPE_NONE);
 		m_vCommunities.push_back(std::move(NoneCommunity));

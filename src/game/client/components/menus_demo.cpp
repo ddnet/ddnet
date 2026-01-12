@@ -1422,12 +1422,12 @@ void CMenus::RenderDemoBrowserDetails(CUIRect DetailsView)
 	Contents.HSplitTop(4.0f, nullptr, &Contents);
 
 	Contents.HSplitTop(18.0f, &Left, &Contents);
-	if(pItem->m_MapInfo.m_Sha256 != SHA256_ZEROED)
+	if(pItem->m_MapInfo.m_Sha256.has_value())
 	{
 		Ui()->DoLabel(&Left, "SHA256", FontSize, TEXTALIGN_ML);
 		Contents.HSplitTop(18.0f, &Left, &Contents);
 		char aSha[SHA256_MAXSTRSIZE];
-		sha256_str(pItem->m_MapInfo.m_Sha256, aSha, sizeof(aSha));
+		sha256_str(pItem->m_MapInfo.m_Sha256.value(), aSha, sizeof(aSha));
 		SLabelProperties Props;
 		Props.m_MaxWidth = Left.w;
 		Props.m_EllipsisAtEnd = true;
