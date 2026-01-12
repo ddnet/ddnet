@@ -149,7 +149,7 @@ void SColorConfigVariable::CommandCallback(IConsole::IResult *pResult, void *pUs
 
 void SColorConfigVariable::Register()
 {
-	m_pConsole->Register(m_pScriptName, "?i", m_Flags, CommandCallback, this, m_pHelp);
+	m_pConsole->Register(m_pScriptName, "?c", m_Flags, CommandCallback, this, m_pHelp);
 }
 
 bool SColorConfigVariable::IsDefault() const
