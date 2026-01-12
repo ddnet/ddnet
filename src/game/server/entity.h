@@ -31,7 +31,6 @@ private:
 	CCollision *m_pCCollision;
 
 	int m_Id;
-	int m_ObjType;
 
 	/*
 		Variable: m_ProximityRadius
@@ -180,6 +179,7 @@ public: // TODO: Maybe make protected
 
 	int m_Number;
 	int m_Layer;
+	int m_ObjType;
 };
 
 bool NetworkClipped(const CGameContext *pGameServer, int SnappingClient, vec2 CheckPos);

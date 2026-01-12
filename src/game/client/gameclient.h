@@ -866,6 +866,9 @@ public:
 		IGraphics::CTextureHandle m_SpritePulley;
 		IGraphics::CTextureHandle m_SpriteHectagon;
 		IGraphics::CTextureHandle m_aSpriteParticles[4];
+		IGraphics::CTextureHandle m_TargetSwitchOpen;
+		IGraphics::CTextureHandle m_TargetSwitchClose;
+		IGraphics::CTextureHandle m_TargetSwitchAlternateDecal;
 	};
 
 	SClientExtrasSkin m_ExtrasSkin;

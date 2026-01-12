@@ -3,6 +3,7 @@
 #include "laser.h"
 
 #include "character.h"
+#include "targetswitch.h"
 
 #include <engine/shared/config.h>
 
@@ -11,6 +12,8 @@
 #include <game/client/laser_data.h>
 #include <game/collision.h>
 #include <game/mapitems.h>
+
+#include <unordered_set>
 
 CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
@@ -30,21 +33,39 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	DoBounce();
 }
 
-bool CLaser::HitCharacter(vec2 From, vec2 To)
+bool CLaser::HitFirstEntity(vec2 From, vec2 To)
 {
 	static const vec2 StackedLaserShotgunBugSpeed = vec2(-2147483648.0f, -2147483648.0f);
 	vec2 At;
 	CCharacter *pOwnerChar = GameWorld()->GetCharacterById(m_Owner);
-	CCharacter *pHit;
-	bool DontHitSelf = (g_Config.m_SvOldLaser || !GameWorld()->m_WorldConfig.m_IsDDRace) || (m_Bounces == 0);
+	const bool DontHitSelf = (g_Config.m_SvOldLaser || !GameWorld()->m_WorldConfig.m_IsDDRace) || (m_Bounces == 0);
+	const bool WeaponCanHit = pOwnerChar ? (!pOwnerChar->LaserHitDisabled() && m_Type == WEAPON_LASER) || (!pOwnerChar->ShotgunHitDisabled() && m_Type == WEAPON_SHOTGUN) : g_Config.m_SvHit;
 
-	if(pOwnerChar ? (!pOwnerChar->LaserHitDisabled() && m_Type == WEAPON_LASER) || (!pOwnerChar->ShotgunHitDisabled() && m_Type == WEAPON_SHOTGUN) : g_Config.m_SvHit)
-		pHit = GameWorld()->IntersectCharacter(m_Pos, To, 0.f, At, DontHitSelf ? pOwnerChar : nullptr, m_Owner);
-	else
-		pHit = GameWorld()->IntersectCharacter(m_Pos, To, 0.f, At, DontHitSelf ? pOwnerChar : nullptr, m_Owner, pOwnerChar);
+	const CEntity *pNotThis = DontHitSelf ? static_cast<CEntity *>(pOwnerChar) : nullptr;
+	const CEntity *pThisOnly = WeaponCanHit ? nullptr : static_cast<CEntity *>(pOwnerChar);
+	std::unordered_set<int> Types;
+	Types.insert(CGameWorld::ENTTYPE_CHARACTER);
+	if(WeaponCanHit)
+		Types.insert(CGameWorld::ENTTYPE_TARGETSWITCH);
 
-	if(!pHit || (pHit == pOwnerChar && g_Config.m_SvOldLaser) || (pHit != pOwnerChar && pOwnerChar ? (pOwnerChar->LaserHitDisabled() && m_Type == WEAPON_LASER) || (pOwnerChar->ShotgunHitDisabled() && m_Type == WEAPON_SHOTGUN) : !g_Config.m_SvHit))
+	CEntity *pHitEntity = GameWorld()->IntersectEntities(m_Pos, To, 0.f, Types, At, pNotThis, m_Owner, pThisOnly);
+	if(!pHitEntity)
 		return false;
+
+	if(pHitEntity->m_ObjType == CGameWorld::ENTTYPE_TARGETSWITCH)
+	{
+		auto *pTarget = static_cast<CTargetSwitch *>(pHitEntity);
+		pTarget->GetHit(m_Owner);
+		m_From = From;
+		m_Pos = At;
+		m_Energy = -1;
+		return true;
+	}
+
+	auto *pHit = static_cast<CCharacter *>(pHitEntity);
+	if((pHit == pOwnerChar && g_Config.m_SvOldLaser) || (pHit != pOwnerChar && pOwnerChar ? (pOwnerChar->LaserHitDisabled() && m_Type == WEAPON_LASER) || (pOwnerChar->ShotgunHitDisabled() && m_Type == WEAPON_SHOTGUN) : !g_Config.m_SvHit))
+		return false;
+
 	m_From = From;
 	m_Pos = At;
 	m_Energy = -1;
@@ -85,6 +106,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	{
 		pHit->UnFreeze();
 	}
+
 	return true;
 }
 
@@ -107,7 +129,7 @@ void CLaser::DoBounce()
 
 	if(Res)
 	{
-		if(!HitCharacter(m_Pos, To))
+		if(!HitFirstEntity(m_Pos, To))
 		{
 			// intersected
 			m_From = m_Pos;
@@ -152,7 +174,7 @@ void CLaser::DoBounce()
 	}
 	else
 	{
-		if(!HitCharacter(m_Pos, To))
+		if(!HitFirstEntity(m_Pos, To))
 		{
 			m_From = m_Pos;
 			m_Pos = To;

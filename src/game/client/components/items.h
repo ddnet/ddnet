@@ -11,6 +11,7 @@
 
 class CProjectileData;
 class CLaserData;
+class CTargetSwitchData;
 
 class CItems : public CComponent
 {
@@ -18,6 +19,7 @@ class CItems : public CComponent
 	void RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCurrent, bool IsPredicted, int Flags);
 	void RenderFlags();
 	void RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent, const CNetObj_GameData *pPrevGameData, const CNetObj_GameData *pCurGameData);
+	void RenderTargetSwitch(const CNetObj_DDNetTargetSwitch *pData);
 	void RenderLaser(const CLaserData *pCurrent, bool IsPredicted = false);
 
 	int m_ItemsQuadContainerIndex;
@@ -43,6 +45,9 @@ private:
 	int m_DoorHeadOffset;
 	int m_PulleyHeadOffset;
 	int m_FreezeHeadOffset;
+	int m_TargetSwitchOpenOffset;
+	int m_TargetSwitchCloseOffset;
+	int m_TargetSwitchAlternateDecalOffset;
 };
 
 #endif

@@ -3,6 +3,7 @@
 #include "projectile.h"
 
 #include "character.h"
+#include "targetswitch.h"
 
 #include <engine/shared/config.h>
 
@@ -38,6 +39,8 @@ CProjectile::CProjectile(
 	m_Layer = Layer;
 	m_Number = Number;
 	m_Freeze = Freeze;
+
+	m_TargetSwitchCollisionCooldown = 0;
 
 	m_TuneZone = GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
 
@@ -87,6 +90,8 @@ void CProjectile::Tick()
 	if(GameWorld()->m_WorldConfig.m_IsSolo && !(m_Type == WEAPON_SHOTGUN && GameWorld()->m_WorldConfig.m_IsDDRace))
 		pTargetChr = nullptr;
 
+	CTargetSwitch *pTargetTargetSwitch = GameWorld()->IntersectTargetSwitch(PrevPos, ColPos, 0.f, ColPos);
+
 	if(m_LifeSpan > -1)
 		m_LifeSpan--;
 
@@ -99,7 +104,22 @@ void CProjectile::Tick()
 		IsWeaponCollide = true;
 	}
 
-	if(((pTargetChr && (pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar)) || Collide || GameLayerClipped(CurPos)) && !IsWeaponCollide)
+	bool HasEntityCollision = pTargetChr || pTargetTargetSwitch;
+	bool CanHitEntity = false;
+	if(HasEntityCollision)
+	{
+		if(pOwnerChar)
+		{
+			CanHitEntity = !pOwnerChar->GrenadeHitDisabled();
+		}
+		else
+		{
+			CanHitEntity = g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar || pTargetTargetSwitch;
+		}
+	}
+	bool ShouldCollide = (HasEntityCollision && CanHitEntity) || Collide || GameLayerClipped(CurPos);
+
+	if(ShouldCollide && !IsWeaponCollide)
 	{
 		if(m_Explosive && (!pTargetChr || (!m_Freeze || (m_Type == WEAPON_SHOTGUN && Collide))))
 		{
@@ -115,6 +135,32 @@ void CProjectile::Tick()
 				if(pChr && (m_Layer != LAYER_SWITCH || (m_Layer == LAYER_SWITCH && m_Number > 0 && m_Number < (int)Switchers().size() && Switchers()[m_Number].m_aStatus[pChr->Team()])))
 					pChr->Freeze();
 			}
+
+			if(m_TargetSwitchCollisionCooldown <= 0)
+			{
+				CEntity *apTargetEnts[TargetSwitch::MAX_TARGET_SWITCHES];
+				Num = GameWorld()->FindEntities(CurPos, 1.0f, apTargetEnts, TargetSwitch::MAX_TARGET_SWITCHES, CGameWorld::ENTTYPE_TARGETSWITCH);
+				if(Num > 0)
+				{
+					Collide = true;
+					m_TargetSwitchCollisionCooldown = TargetSwitch::SWITCH_COOLDOWN_TICKS;
+				}
+				for(int i = 0; i < Num; ++i)
+				{
+					auto *pTargetSwitch = static_cast<CTargetSwitch *>(apTargetEnts[i]);
+					if(pTargetSwitch && m_Layer != LAYER_SWITCH)
+					{
+						for(int TargetSwitchTeam = 0; TargetSwitchTeam < TEAM_SUPER; ++TargetSwitchTeam)
+						{
+							pTargetSwitch->GetHit(-1, TargetSwitchTeam);
+						}
+					}
+				}
+			}
+		}
+		else if(pTargetTargetSwitch && pOwnerChar && m_Type != WEAPON_GUN)
+		{
+			pTargetTargetSwitch->GetHit(pOwnerChar->GetCid());
 		}
 		if(Collide && m_Bouncing != 0)
 		{

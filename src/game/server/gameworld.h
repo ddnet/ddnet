@@ -7,11 +7,13 @@
 
 #include <game/gamecore.h>
 
+#include <unordered_set>
 #include <vector>
 
 class CCollision;
 class CEntity;
 class CCharacter;
+class CTargetSwitch;
 
 /*
 	Class: Game World
@@ -28,6 +30,7 @@ public:
 		ENTTYPE_PICKUP,
 		ENTTYPE_FLAG,
 		ENTTYPE_CHARACTER,
+		ENTTYPE_TARGETSWITCH,
 		NUM_ENTTYPES
 	};
 
@@ -82,31 +85,61 @@ public:
 	 *
 	 * @see IntersectEntity
 	 *
-	 * @param Pos0 Start position
-	 * @param Pos1 End position
-	 * @param Radius How far from the line the @link CCharacter @endlink is allowed to be
-	 * @param NewPos Intersection position
-	 * @param pNotThis Character to ignore intersecting with
-	 * @param CollideWith Only find entities that can collide with that Client Id (pass -1 to ignore this check)
-	 * @param pThisOnly Only search this specific character and ignore all others
+	 * @param Pos0 Start position.
+	 * @param Pos1 End position.
+	 * @param Radius How far from the line the @link CCharacter @endlink is allowed to be.
+	 * @param NewPos Intersection position.
+	 * @param pNotThis Character to ignore intersecting with.
+	 * @param CollideWith Only find entities that can collide with that Client Id (pass -1 to ignore this check).
+	 * @param pThisOnly Only search this specific character and ignore all others.
 	 *
 	 * @return Pointer to the closest hit or `nullptr` if there is no intersection.
 	 */
 	CCharacter *IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, const CCharacter *pNotThis = nullptr, int CollideWith = -1, const CCharacter *pThisOnly = nullptr);
 
 	/**
+	 * Finds the CTargetSwitch that intersects the line.
+	 *
+	 * @see IntersectEntity
+	 *
+	 * @param Pos0 Start position.
+	 * @param Pos1 End position.
+	 * @param Radius How far from the line the @link CTargetSwitch @endlink is allowed to be.
+	 * @param NewPos Intersection position.
+	 *
+	 * @return Pointer to the closest hit or `nullptr` if there is no intersection.
+	 */
+	CTargetSwitch *IntersectTargetSwitch(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos);
+
+	/**
+	 * Finds the first CEntity of any of the given types that intersects the line.
+	 *
+	 * @param Pos0 Start position.
+	 * @param Pos1 End position.
+	 * @param Radius How far from the line the @link CEntity @endlink is allowed to be.
+	 * @param Types Unordered set of entity types checked for intersection.
+	 * @param NewPos Intersection position.
+	 * @param pNotThis Entity to ignore intersecting with.
+	 * @param CollideWith Only find entities that can collide with that Client Id (pass -1 to ignore this check).
+	 * @param pThisOnly Only search this specific entity and ignore all others.
+	 *
+	 * @return Pointer to the closest hit or `nullptr` if there is no intersection.
+	 */
+	CEntity *IntersectEntities(vec2 Pos0, vec2 Pos1, float Radius, const std::unordered_set<int> &Types, vec2 &NewPos, const CEntity *pNotThis = nullptr, int CollideWith = -1, const CEntity *pThisOnly = nullptr);
+
+	/**
 	 * Finds the CEntity that intersects the line.
 	 *
 	 * @see IntersectCharacter
 	 *
-	 * @param Pos0 Start position
-	 * @param Pos1 End position
-	 * @param Radius How far from the line the @link CEntity @endlink is allowed to be
-	 * @param Type Type of the entity to intersect
-	 * @param NewPos Intersection position
-	 * @param pNotThis Entity to ignore intersecting with
-	 * @param CollideWith Only find entities that can collide with that Client Id (pass -1 to ignore this check)
-	 * @param pThisOnly Only search this specific entity and ignore all others
+	 * @param Pos0 Start position.
+	 * @param Pos1 End position.
+	 * @param Radius How far from the line the @link CEntity @endlink is allowed to be.
+	 * @param Type Type of the entity to intersect.
+	 * @param NewPos Intersection position.
+	 * @param pNotThis Entity to ignore intersecting with.
+	 * @param CollideWith Only find entities that can collide with that Client Id (pass -1 to ignore this check).
+	 * @param pThisOnly Only search this specific entity and ignore all others.
 	 *
 	 * @return Pointer to the closest hit or `nullptr` if there is no intersection.
 	 */

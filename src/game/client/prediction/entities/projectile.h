@@ -54,6 +54,9 @@ private:
 	int m_Bouncing;
 	bool m_Freeze;
 	int m_TuneZone;
+
+	// for moving shotgun pellets
+	int m_TargetSwitchCollisionCooldown;
 };
 
 #endif

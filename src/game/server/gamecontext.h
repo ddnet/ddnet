@@ -278,12 +278,14 @@ public:
 	void CreateDeath(vec2 Pos, int ClientId, CClientMask Mask = CClientMask().set());
 	void CreateBirthdayEffect(vec2 Pos, CClientMask Mask = CClientMask().set());
 	void CreateFinishEffect(vec2 Pos, CClientMask Mask = CClientMask().set());
+	void CreateTargetHit(vec2 Pos, int ClientIdHitFrom, CClientMask Mask = CClientMask().set());
 	void CreateSound(vec2 Pos, int Sound, CClientMask Mask = CClientMask().set());
 	void CreateSoundGlobal(int Sound, int Target = -1) const;
 
 	void SnapSwitchers(int SnappingClient);
 	bool SnapLaserObject(const CSnapContext &Context, int SnapId, const vec2 &To, const vec2 &From, int StartTick, int Owner = -1, int LaserType = -1, int Subtype = -1, int SwitchNumber = -1) const;
 	bool SnapPickup(const CSnapContext &Context, int SnapId, const vec2 &Pos, int Type, int SubType, int SwitchNumber, int Flags) const;
+	bool SnapTargetSwitch(const CSnapContext &Context, int SnapId, const vec2 &Pos, int Type, int SwitchNumber, int SwitchDelay, int Flags = 0);
 
 	enum
 	{

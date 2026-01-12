@@ -4,6 +4,7 @@
 
 #include "laser.h"
 #include "projectile.h"
+#include "targetswitch.h"
 
 #include <engine/shared/config.h>
 
@@ -135,9 +136,36 @@ void CCharacter::HandleNinja()
 
 		// check if we Hit anything along the way
 		{
+			CEntity *apTargetEnts[TargetSwitch::MAX_TARGET_SWITCHES];
+			float Radius = GetProximityRadius() * 2.0f;
+			int Num = GameWorld()->FindEntities(OldPos, Radius, apTargetEnts, TargetSwitch::MAX_TARGET_SWITCHES, CGameWorld::ENTTYPE_TARGETSWITCH);
+
+			for(int i = 0; i < Num; ++i)
+			{
+				auto *pTarget = static_cast<CTargetSwitch *>(apTargetEnts[i]);
+
+				// make sure we haven't Hit this object before
+				bool AlreadyHit = false;
+				for(int j = 0; j < m_NumTargetSwitchesHit; j++)
+				{
+					if(m_aHitObjects[j] == pTarget->GetId())
+						AlreadyHit = true;
+				}
+				if(AlreadyHit)
+					continue;
+
+				if(distance(pTarget->m_Pos, m_Pos) > Radius)
+					continue;
+
+				dbg_assert(m_NumTargetSwitchesHit < TargetSwitch::MAX_TARGET_SWITCHES, "m_aHitTargetSwitches overflow");
+				m_apHitTargetSwitches[m_NumTargetSwitchesHit++] = pTarget;
+
+				pTarget->GetHit(m_Core.m_Id);
+			}
+
 			CEntity *apEnts[MAX_CLIENTS];
-			float Radius = m_ProximityRadius * 2.0f;
-			int Num = GameWorld()->FindEntities(OldPos, Radius, apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+			Radius = m_ProximityRadius * 2.0f;
+			Num = GameWorld()->FindEntities(OldPos, Radius, apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 
 			// check that we're not in solo part
 			if(TeamsCore()->GetSolo(GetCid()))
@@ -351,6 +379,17 @@ void CCharacter::FireWeapon()
 			Hits++;
 		}
 
+		CEntity *apTargetEnts[TargetSwitch::MAX_TARGET_SWITCHES];
+		Num = GameWorld()->FindEntities(ProjStartPos, GetProximityRadius() * 0.5f, apTargetEnts,
+			TargetSwitch::MAX_TARGET_SWITCHES, CGameWorld::ENTTYPE_TARGETSWITCH);
+
+		for(int i = 0; i < Num; ++i)
+		{
+			auto *pTarget = static_cast<CTargetSwitch *>(apTargetEnts[i]);
+			pTarget->GetHit(m_Core.m_Id);
+			Hits++;
+		}
+
 		// if we Hit anything, we have to wait for the reload
 		if(Hits)
 		{
@@ -446,6 +485,7 @@ void CCharacter::FireWeapon()
 	{
 		// reset Hit objects
 		m_NumObjectsHit = 0;
+		m_NumTargetSwitchesHit = 0;
 
 		m_Core.m_Ninja.m_ActivationDir = Direction;
 		m_Core.m_Ninja.m_CurrentMoveTime = g_pData->m_Weapons.m_Ninja.m_Movetime * GameWorld()->GameTickSpeed() / 1000;
@@ -1244,6 +1284,7 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar,
 	m_Core.m_LeftWall = true;
 	m_ReloadTimer = 0;
 	m_NumObjectsHit = 0;
+	m_NumTargetSwitchesHit = 0;
 	m_LastRefillJumps = false;
 	m_CanMoveInFreeze = false;
 	m_TeleCheckpoint = 0;

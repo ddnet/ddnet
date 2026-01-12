@@ -22,7 +22,6 @@ protected:
 	CGameWorld *m_pGameWorld;
 	bool m_MarkedForDestroy;
 	int m_Id;
-	int m_ObjType;
 
 public:
 	int GetId() const { return m_Id; }
@@ -52,6 +51,7 @@ public:
 	vec2 m_Pos;
 	int m_Number;
 	int m_Layer;
+	int m_ObjType;
 
 	int m_SnapTicks;
 	int m_DestroyTick;

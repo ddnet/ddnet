@@ -10,6 +10,7 @@
 #include "entities/pickup.h"
 #include "entities/plasma.h"
 #include "entities/projectile.h"
+#include "entities/targetswitch.h"
 #include "entity.h"
 
 #include <engine/shared/config.h>
@@ -262,41 +263,59 @@ CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, v
 	return (CCharacter *)IntersectEntity(Pos0, Pos1, Radius, ENTTYPE_CHARACTER, NewPos, pNotThis, CollideWith, pThisOnly);
 }
 
-CEntity *CGameWorld::IntersectEntity(vec2 Pos0, vec2 Pos1, float Radius, int Type, vec2 &NewPos, const CEntity *pNotThis, int CollideWith, const CEntity *pThisOnly)
+CTargetSwitch *CGameWorld::IntersectTargetSwitch(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos)
+{
+	return (CTargetSwitch *)IntersectEntity(Pos0, Pos1, Radius, ENTTYPE_TARGETSWITCH, NewPos);
+}
+
+CEntity *CGameWorld::IntersectEntities(vec2 Pos0, vec2 Pos1, float Radius, const std::unordered_set<int> &Types, vec2 &NewPos, const CEntity *pNotThis, int CollideWith, const CEntity *pThisOnly)
 {
 	float ClosestLen = distance(Pos0, Pos1) * 100.0f;
 	CEntity *pClosest = nullptr;
 
-	CEntity *pEntity = FindFirst(Type);
-	for(; pEntity; pEntity = pEntity->TypeNext())
+	for(int Type : Types)
 	{
-		if(pEntity == pNotThis)
+		if(Type < 0 || Type >= NUM_ENTTYPES)
 			continue;
 
-		if(pThisOnly && pEntity != pThisOnly)
-			continue;
-
-		if(CollideWith != -1 && !pEntity->CanCollide(CollideWith))
-			continue;
-
-		vec2 IntersectPos;
-		if(closest_point_on_line(Pos0, Pos1, pEntity->m_Pos, IntersectPos))
+		CEntity *pEntity = FindFirst(Type);
+		for(; pEntity; pEntity = pEntity->TypeNext())
 		{
-			float Len = distance(pEntity->m_Pos, IntersectPos);
-			if(Len < pEntity->m_ProximityRadius + Radius)
+			if(pEntity == pNotThis)
+				continue;
+
+			if(pThisOnly && pEntity != pThisOnly)
+				continue;
+
+			if(CollideWith != -1 && !pEntity->CanCollide(CollideWith))
+				continue;
+
+			vec2 IntersectPos;
+			if(closest_point_on_line(Pos0, Pos1, pEntity->m_Pos, IntersectPos))
 			{
-				Len = distance(Pos0, IntersectPos);
-				if(Len < ClosestLen)
+				float Len = distance(pEntity->m_Pos, IntersectPos);
+				if(Len < pEntity->m_ProximityRadius + Radius)
 				{
-					NewPos = IntersectPos;
-					ClosestLen = Len;
-					pClosest = pEntity;
+					Len = distance(Pos0, IntersectPos);
+					if(Len < ClosestLen)
+					{
+						NewPos = IntersectPos;
+						ClosestLen = Len;
+						pClosest = pEntity;
+					}
 				}
 			}
 		}
 	}
 
 	return pClosest;
+}
+
+CEntity *CGameWorld::IntersectEntity(vec2 Pos0, vec2 Pos1, float Radius, int Type, vec2 &NewPos, const CEntity *pNotThis, int CollideWith, const CEntity *pThisOnly)
+{
+	std::unordered_set<int> Types;
+	Types.insert(Type);
+	return IntersectEntities(Pos0, Pos1, Radius, Types, NewPos, pNotThis, CollideWith, pThisOnly);
 }
 
 std::vector<CCharacter *> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, const CEntity *pNotThis)
@@ -378,6 +397,24 @@ void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage,
 				if(GetCharacterById(Owner) ? GetCharacterById(Owner)->GrenadeHitDisabled() : !g_Config.m_SvHit || NoDamage)
 					break;
 			}
+	}
+
+	CEntity *apTargetEnts[TargetSwitch::MAX_TARGET_SWITCHES];
+	// Targets need a bigger force to activate
+	Radius = 60.0f;
+	Num = FindEntities(Pos, Radius, apTargetEnts, TargetSwitch::MAX_TARGET_SWITCHES, CGameWorld::ENTTYPE_TARGETSWITCH);
+	for(int i = 0; i < Num; i++)
+	{
+		auto *pTarget = static_cast<CTargetSwitch *>(apTargetEnts[i]);
+		if((GetCharacterById(Owner) ? !GetCharacterById(Owner)->GrenadeHitDisabled() : g_Config.m_SvHit) || NoDamage)
+		{
+			if((GetCharacterById(Owner) ? GetCharacterById(Owner)->GrenadeHitDisabled() : !g_Config.m_SvHit) || NoDamage)
+			{
+				continue;
+			}
+
+			pTarget->GetHit(Owner);
+		}
 	}
 }
 
@@ -583,6 +620,22 @@ void CGameWorld::NetObjAdd(int ObjId, int ObjType, const void *pObjData, const C
 			InsertEntity(pEnt);
 		}
 	}
+	else if(ObjType == NETOBJTYPE_DDNETTARGETSWITCH && m_WorldConfig.m_PredictWeapons)
+	{
+		const CNetObj_DDNetTargetSwitch *pTargetSwitchNetObj = (const CNetObj_DDNetTargetSwitch *)pObjData;
+		CTargetSwitch NetTargetSwitch = CTargetSwitch(this, ObjId, pTargetSwitchNetObj);
+		if(CTargetSwitch *pTargetSwitch = (CTargetSwitch *)GetEntity(ObjId, ENTTYPE_TARGETSWITCH))
+		{
+			if(NetTargetSwitch.Match(pTargetSwitch))
+			{
+				pTargetSwitch->Keep();
+				pTargetSwitch->Read(pTargetSwitchNetObj);
+				return;
+			}
+		}
+		CEntity *pEnt = new CTargetSwitch(NetTargetSwitch);
+		InsertEntity(pEnt);
+	}
 }
 
 void CGameWorld::NetObjEnd()
@@ -662,6 +715,8 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 				pCopy = new CPickup(*((CPickup *)pEnt));
 			else if(Type == ENTTYPE_PLASMA)
 				pCopy = new CPlasma(*((CPlasma *)pEnt));
+			else if(Type == ENTTYPE_TARGETSWITCH)
+				pCopy = new CTargetSwitch(*((CTargetSwitch *)pEnt));
 			if(pCopy)
 			{
 				pCopy->m_pParent = pEnt;
@@ -742,6 +797,16 @@ CEntity *CGameWorld::FindMatch(int ObjId, int ObjType, const void *pObjData)
 		CPickupData Data = ExtractPickupInfo(ObjType, pObjData, nullptr);
 		CPickup *pEnt = (CPickup *)GetEntity(ObjId, ENTTYPE_PICKUP);
 		if(pEnt && CPickup(this, ObjId, &Data).Match(pEnt))
+		{
+			return pEnt;
+		}
+		return nullptr;
+	}
+	case NETOBJTYPE_DDNETTARGETSWITCH:
+	{
+		const CNetObj_DDNetTargetSwitch *pTargetSwitchNetObj = (const CNetObj_DDNetTargetSwitch *)pObjData;
+		CTargetSwitch *pEnt = (CTargetSwitch *)GetEntity(ObjId, ENTTYPE_TARGETSWITCH);
+		if(pEnt && CTargetSwitch(this, ObjId, pTargetSwitchNetObj).Match(pEnt))
 		{
 			return pEnt;
 		}

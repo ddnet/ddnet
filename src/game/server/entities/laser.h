@@ -19,7 +19,7 @@ public:
 	int GetOwnerId() const override { return m_Owner; }
 
 protected:
-	bool HitCharacter(vec2 From, vec2 To);
+	bool HitFirstEntity(vec2 From, vec2 To);
 	void DoBounce();
 
 private:

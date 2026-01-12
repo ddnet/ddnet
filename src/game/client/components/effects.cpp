@@ -407,6 +407,33 @@ void CEffects::HammerHit(vec2 Pos, float Alpha, float Volume)
 		GameClient()->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_HAMMER_HIT, Volume, Pos);
 }
 
+void CEffects::TargetHit(vec2 Pos, float Alpha, float Volume)
+{
+	for(int i = 0; i < 8; i++)
+	{
+		CParticle p;
+		p.SetDefault();
+		p.m_Spr = SPRITE_PART_BALL;
+		p.m_Pos = Pos;
+		p.m_Vel = direction(2.0f * pi * i / 8) * 600.0f;
+		p.m_LifeSpan = 0.5f;
+		p.m_StartSize = 12.0f;
+		p.m_EndSize = 0.f;
+		p.m_Rot = 0.f;
+		p.m_Rotspeed = 0.f;
+		p.m_Gravity = 0.f;
+		p.m_Friction = 0.45f;
+		p.m_Collides = false;
+		p.m_FlowAffected = false;
+		p.m_Color = ColorRGBA(1.0f, 1.0f, 1.0f, Alpha);
+		p.m_StartAlpha = Alpha;
+		p.m_EndAlpha = Alpha;
+		GameClient()->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
+	}
+	if(g_Config.m_SndGame)
+		GameClient()->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_HIT, Alpha * Volume, Pos);
+}
+
 void CEffects::OnRender()
 {
 	float Speed = 1.0f;

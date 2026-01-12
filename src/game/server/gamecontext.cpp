@@ -3,6 +3,7 @@
 #include "gamecontext.h"
 
 #include "entities/character.h"
+#include "entities/targetswitch.h"
 #include "gamemodes/DDRace.h"
 #include "gamemodes/mod.h"
 #include "player.h"
@@ -345,6 +346,31 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 			pChr->TakeDamage(ForceDir * Dmg * 2, (int)Dmg, Owner, Weapon);
 		}
 	}
+
+	CEntity *apTargetEnts[TargetSwitch::MAX_TARGET_SWITCHES];
+	// Targets need a bigger force to activate
+	Radius = 60.0f;
+	Num = m_World.FindEntities(Pos, Radius, apTargetEnts, TargetSwitch::MAX_TARGET_SWITCHES, CGameWorld::ENTTYPE_TARGETSWITCH);
+	for(int i = 0; i < Num; i++)
+	{
+		auto *pTarget = static_cast<CTargetSwitch *>(apTargetEnts[i]);
+		bool GrenadeHitDisabled = (GetPlayerChar(Owner) ? GetPlayerChar(Owner)->GrenadeHitDisabled() : !g_Config.m_SvHit);
+		if(GrenadeHitDisabled)
+			continue;
+
+		if(Owner != -1)
+		{
+			pTarget->GetHit(Owner);
+		}
+		else
+		{
+			// Hit by a explosive shotgun bullet, hit for all teams
+			for(int TargetSwitchTeam = 0; TargetSwitchTeam < TEAM_SUPER; ++TargetSwitchTeam)
+			{
+				pTarget->GetHit(-1, TargetSwitchTeam);
+			}
+		}
+	}
 }
 
 void CGameContext::CreatePlayerSpawn(vec2 Pos, CClientMask Mask)
@@ -385,6 +411,17 @@ void CGameContext::CreateFinishEffect(vec2 Pos, CClientMask Mask)
 	{
 		pEvent->m_X = (int)Pos.x;
 		pEvent->m_Y = (int)Pos.y;
+	}
+}
+
+void CGameContext::CreateTargetHit(vec2 Pos, int ClientIdHitFrom, CClientMask Mask)
+{
+	CNetEvent_TargetHit *pEvent = m_Events.Create<CNetEvent_TargetHit>(Mask);
+	if(pEvent)
+	{
+		pEvent->m_X = (int)Pos.x;
+		pEvent->m_Y = (int)Pos.y;
+		pEvent->m_ClientIdHitFrom = ClientIdHitFrom;
 	}
 }
 
@@ -556,6 +593,39 @@ bool CGameContext::SnapPickup(const CSnapContext &Context, int SnapId, const vec
 	}
 
 	return true;
+}
+
+bool CGameContext::SnapTargetSwitch(const CSnapContext &Context, int SnapId, const vec2 &Pos, int Type, int SwitchNumber, int SwitchDelay, int Flags)
+{
+	if(Context.GetClientVersion() >= VERSION_DDNET_TARGETSWITCH)
+	{
+		CNetObj_DDNetTargetSwitch *pTargetSwitch = Server()->SnapNewItem<CNetObj_DDNetTargetSwitch>(SnapId);
+		if(!pTargetSwitch)
+			return false;
+
+		pTargetSwitch->m_X = (int)Pos.x;
+		pTargetSwitch->m_Y = (int)Pos.y;
+		pTargetSwitch->m_Type = Type;
+		pTargetSwitch->m_SwitchNumber = SwitchNumber;
+		pTargetSwitch->m_SwitchDelay = SwitchDelay;
+		pTargetSwitch->m_Flags = Flags;
+		return true;
+	}
+
+	int CompatPowerup = 0;
+	switch(Type)
+	{
+	case TARGETSWITCHTYPE_OPEN:
+		CompatPowerup = POWERUP_HEALTH;
+		break;
+	case TARGETSWITCHTYPE_CLOSE:
+		CompatPowerup = POWERUP_ARMOR;
+		break;
+	case TARGETSWITCHTYPE_ALTERNATE:
+		CompatPowerup = Switchers()[SwitchNumber].m_aStatus[GetDDRaceTeam(Context.ClientId())] ? POWERUP_HEALTH : POWERUP_ARMOR;
+		break;
+	}
+	return SnapPickup(Context, SnapId, Pos, CompatPowerup, 0, SwitchNumber, Flags);
 }
 
 void CGameContext::CallVote(int ClientId, const char *pDesc, const char *pCmd, const char *pReason, const char *pChatmsg, const char *pSixupDesc)
@@ -4361,7 +4431,7 @@ void CGameContext::CreateAllEntities(bool Initial)
 				// if(SwitchType == TILE_DOOR_OFF)
 				if(SwitchType >= ENTITY_OFFSET)
 				{
-					m_pController->OnEntity(SwitchType - ENTITY_OFFSET, x, y, LAYER_SWITCH, pSwitch[Index].m_Flags, Initial, pSwitch[Index].m_Number);
+					m_pController->OnEntity(SwitchType - ENTITY_OFFSET, x, y, LAYER_SWITCH, pSwitch[Index].m_Flags, Initial, pSwitch[Index].m_Number, pSwitch[Index].m_Delay);
 				}
 			}
 		}
