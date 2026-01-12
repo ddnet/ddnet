@@ -1179,6 +1179,12 @@ void CGameContext::ConInvite(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	int Team = pController->Teams().m_Core.Team(pResult->m_ClientId);
+	if(!pSelf->m_pController->Teams().IsAllowLeaderCommands(pResult->m_ClientId, Team))
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
+			"Only your team leader(s) can invite other players.");
+		return;
+	}
 	if(Team != TEAM_FLOCK && pController->Teams().IsValidTeamNumber(Team))
 	{
 		int Target = pSelf->FindClientIdByName(pName).value_or(-1);
