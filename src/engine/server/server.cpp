@@ -1320,14 +1320,6 @@ void CServer::SendRconType(int ClientId, bool UsernameReq)
 	SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
 }
 
-void CServer::GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pMapSha256, int *pMapCrc)
-{
-	str_copy(pMapName, GameServer()->Map()->BaseName(), MapNameSize);
-	*pMapSize = m_aCurrentMapSize[MAP_TYPE_SIX];
-	*pMapSha256 = m_aCurrentMapSha256[MAP_TYPE_SIX];
-	*pMapCrc = m_aCurrentMapCrc[MAP_TYPE_SIX];
-}
-
 void CServer::SendCapabilities(int ClientId)
 {
 	CMsgPacker Msg(NETMSG_CAPABILITIES, true);
