@@ -98,7 +98,7 @@ public:
 		m_UpdateActivity = true;
 	}
 
-	void SetGameInfo(const CServerInfo &ServerInfo, const char *pMapName, bool Registered) override
+	void SetGameInfo(const CServerInfo &ServerInfo, bool Registered) override
 	{
 		mem_zero(&m_Activity, sizeof(DiscordActivity));
 
@@ -109,7 +109,7 @@ public:
 		m_Activity.instance = true;
 
 		str_copy(m_Activity.details, ServerInfo.m_aName, sizeof(m_Activity.details));
-		str_copy(m_Activity.state, pMapName, sizeof(m_Activity.state));
+		str_copy(m_Activity.state, ServerInfo.m_aMap, sizeof(m_Activity.state));
 		m_Activity.party.size.current_size = ServerInfo.m_NumClients;
 		m_Activity.party.size.max_size = ServerInfo.m_MaxClients;
 		// private makes it so the game isn't public to join, but there's 'Ask to Join' button instead
@@ -127,7 +127,7 @@ public:
 		m_UpdateActivity = true;
 	}
 
-	void UpdateServerInfo(const CServerInfo &ServerInfo, const char *pMapName) override
+	void UpdateServerInfo(const CServerInfo &ServerInfo) override
 	{
 		if(!m_Activity.instance)
 			return;
@@ -135,7 +135,7 @@ public:
 		UpdateServerIp(ServerInfo);
 
 		str_copy(m_Activity.details, ServerInfo.m_aName, sizeof(m_Activity.details));
-		str_copy(m_Activity.state, pMapName, sizeof(m_Activity.state));
+		str_copy(m_Activity.state, ServerInfo.m_aMap, sizeof(m_Activity.state));
 		m_Activity.party.size.max_size = ServerInfo.m_MaxClients;
 		m_UpdateActivity = true;
 	}
@@ -213,8 +213,8 @@ class CDiscordStub : public IDiscord
 {
 	void Update() override {}
 	void ClearGameInfo() override {}
-	void SetGameInfo(const CServerInfo &ServerInfo, const char *pMapName, bool Registered) override {}
-	void UpdateServerInfo(const CServerInfo &ServerInfo, const char *pMapName) override {}
+	void SetGameInfo(const CServerInfo &ServerInfo, bool Registered) override {}
+	void UpdateServerInfo(const CServerInfo &ServerInfo) override {}
 	void UpdatePlayerCount(int Count) override {}
 };
 
