@@ -1224,8 +1224,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		}
 		else if(m_MapBestTimeSeconds == FinishTime::UNSET)
 		{
-			m_MapBestTimeSeconds = FinishTime::NOT_FINISHED_MILLIS;
-			m_MapBestTimeMillis = 0;
+			// some PvP mods based on DDNet accidentally send a best time of 0, despite having no finished races
 		}
 	}
 }
