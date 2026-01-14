@@ -18,6 +18,7 @@ public:
 	void SetArmorProgress(CCharacter *pCharacter, int Progress) override;
 	int SnapPlayerScore(int SnappingClient, CPlayer *pPlayer) override;
 	CFinishTime SnapPlayerTime(int SnappingClient, CPlayer *pPlayer) override;
+	CFinishTime SnapMapBestTime(int SnappingClient) override;
 
 	void OnPlayerConnect(class CPlayer *pPlayer) override;
 	void OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason) override;

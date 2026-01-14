@@ -105,7 +105,6 @@ void CScoreboard::OnInit()
 void CScoreboard::OnReset()
 {
 	m_Active = false;
-	m_ServerRecord = -1.0f;
 	m_MouseUnlocked = false;
 	m_LastMousePos = std::nullopt;
 }
@@ -117,20 +116,6 @@ void CScoreboard::OnRelease()
 	if(m_MouseUnlocked)
 	{
 		LockMouse();
-	}
-}
-
-void CScoreboard::OnMessage(int MsgType, void *pRawMsg)
-{
-	if(MsgType == NETMSGTYPE_SV_RECORD)
-	{
-		CNetMsg_Sv_Record *pMsg = static_cast<CNetMsg_Sv_Record *>(pRawMsg);
-		m_ServerRecord = pMsg->m_ServerTimeBest / 100.0f;
-	}
-	else if(MsgType == NETMSGTYPE_SV_RECORDLEGACY)
-	{
-		CNetMsg_Sv_RecordLegacy *pMsg = static_cast<CNetMsg_Sv_RecordLegacy *>(pRawMsg);
-		m_ServerRecord = pMsg->m_ServerTimeBest / 100.0f;
 	}
 }
 
@@ -161,11 +146,12 @@ void CScoreboard::RenderTitle(CUIRect TitleBar, int Team, const char *pTitle)
 	dbg_assert(Team == TEAM_RED || Team == TEAM_BLUE, "Team invalid");
 
 	char aScore[128] = "";
-	if(GameClient()->m_GameInfo.m_TimeScore)
+	if(GameClient()->m_MapBestTimeSeconds != FinishTime::UNSET)
 	{
-		if(m_ServerRecord > 0)
+		if(GameClient()->m_MapBestTimeSeconds != FinishTime::NOT_FINISHED_MILLIS)
 		{
-			str_time_float(m_ServerRecord, TIME_HOURS, aScore, sizeof(aScore));
+			int64_t TimeCentiseconds = static_cast<int64_t>(GameClient()->m_MapBestTimeSeconds) * 100 + static_cast<int64_t>(GameClient()->m_MapBestTimeMillis) / 10;
+			str_time(TimeCentiseconds, TIME_HOURS, aScore, sizeof(aScore));
 		}
 	}
 	else if(GameClient()->IsTeamPlay())

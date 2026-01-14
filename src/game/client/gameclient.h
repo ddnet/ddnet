@@ -882,6 +882,8 @@ public:
 	void ResetMultiView();
 	int FindFirstMultiViewId();
 	void CleanMultiViewId(int ClientId);
+	int m_MapBestTimeSeconds;
+	int m_MapBestTimeMillis;
 
 private:
 	std::vector<CSnapEntities> m_vSnapEntities;

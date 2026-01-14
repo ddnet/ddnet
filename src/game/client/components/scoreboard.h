@@ -34,7 +34,6 @@ class CScoreboard : public CComponent
 	const char *GetTeamName(int Team) const;
 
 	bool m_Active;
-	float m_ServerRecord;
 
 	IGraphics::CTextureHandle m_DeadTeeTexture;
 
@@ -77,7 +76,6 @@ public:
 	void OnReset() override;
 	void OnRender() override;
 	void OnRelease() override;
-	void OnMessage(int MsgType, void *pRawMsg) override;
 	bool OnCursorMove(float x, float y, IInput::ECursorType CursorType) override;
 	bool OnInput(const IInput::CEvent &Event) override;
 
