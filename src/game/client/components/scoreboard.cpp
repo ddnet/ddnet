@@ -595,6 +595,29 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 				Row.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, RoundRadius);
 			}
 
+			const CGameClient::CClientData &ClientData = GameClient()->m_aClients[pInfo->m_ClientId];
+
+			if(m_MouseUnlocked)
+			{
+				const int ButtonResult = Ui()->DoButtonLogic(&m_aPlayers[pInfo->m_ClientId].m_PlayerButtonId, 0, &Row, BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT);
+				if(ButtonResult != 0)
+				{
+					m_ScoreboardPopupContext.m_pScoreboard = this;
+					m_ScoreboardPopupContext.m_ClientId = pInfo->m_ClientId;
+					m_ScoreboardPopupContext.m_IsLocal = GameClient()->m_aLocalIds[0] == pInfo->m_ClientId ||
+									     (Client()->DummyConnected() && GameClient()->m_aLocalIds[1] == pInfo->m_ClientId);
+					m_ScoreboardPopupContext.m_IsSpectating = false;
+
+					Ui()->DoPopupMenu(&m_ScoreboardPopupContext, Ui()->MouseX(), Ui()->MouseY(), 110.0f,
+						m_ScoreboardPopupContext.m_IsLocal ? 58.5f : 87.5f, &m_ScoreboardPopupContext, PopupScoreboard);
+				}
+
+				if(Ui()->HotItem() == &m_aPlayers[pInfo->m_ClientId].m_PlayerButtonId)
+				{
+					Row.Draw(ColorRGBA(0.7f, 0.7f, 0.7f, 0.7f), IGraphics::CORNER_ALL, RoundRadius);
+				}
+			}
+
 			// score
 			if(Race7)
 			{
@@ -638,29 +661,6 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 				IGraphics::CQuadItem QuadItem(TeeOffset, Row.y - 2.5f - Spacing / 2.0f, Row.h / 2.0f, Row.h);
 				Graphics()->QuadsDrawTL(&QuadItem, 1);
 				Graphics()->QuadsEnd();
-			}
-
-			const CGameClient::CClientData &ClientData = GameClient()->m_aClients[pInfo->m_ClientId];
-
-			if(m_MouseUnlocked)
-			{
-				const int ButtonResult = Ui()->DoButtonLogic(&m_aPlayers[pInfo->m_ClientId].m_PlayerButtonId, 0, &Row, BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT);
-				if(ButtonResult != 0)
-				{
-					m_ScoreboardPopupContext.m_pScoreboard = this;
-					m_ScoreboardPopupContext.m_ClientId = pInfo->m_ClientId;
-					m_ScoreboardPopupContext.m_IsLocal = GameClient()->m_aLocalIds[0] == pInfo->m_ClientId ||
-									     (Client()->DummyConnected() && GameClient()->m_aLocalIds[1] == pInfo->m_ClientId);
-					m_ScoreboardPopupContext.m_IsSpectating = false;
-
-					Ui()->DoPopupMenu(&m_ScoreboardPopupContext, Ui()->MouseX(), Ui()->MouseY(), 110.0f,
-						m_ScoreboardPopupContext.m_IsLocal ? 58.5f : 87.5f, &m_ScoreboardPopupContext, PopupScoreboard);
-				}
-
-				if(Ui()->HotItem() == &m_aPlayers[pInfo->m_ClientId].m_PlayerButtonId)
-				{
-					Row.Draw(ColorRGBA(0.7f, 0.7f, 0.7f, 0.7f), IGraphics::CORNER_ALL, RoundRadius);
-				}
 			}
 
 			// skin
