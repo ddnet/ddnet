@@ -647,13 +647,16 @@ void CHttp::RunLoop()
 		// We may have been woken up for a shutdown
 		if(m_Shutdown)
 		{
+			if(m_RunningRequests.empty() && m_PendingRequests.empty())
+				break;
+
 			auto Now = std::chrono::steady_clock::now();
 			if(!m_ShutdownTime.has_value())
 			{
 				m_ShutdownTime = Now + m_ShutdownDelay;
 				s_NextTimeout = m_ShutdownDelay.count();
 			}
-			else if(m_ShutdownTime < Now || m_RunningRequests.empty())
+			else if(m_ShutdownTime < Now)
 			{
 				break;
 			}
