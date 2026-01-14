@@ -1758,6 +1758,7 @@ void CGameClient::OnNewSnapshot()
 					m_aClients[Item.m_Id].m_Afk = pInfo->m_Flags & EXPLAYERFLAG_AFK;
 					m_aClients[Item.m_Id].m_Paused = pInfo->m_Flags & EXPLAYERFLAG_PAUSED;
 					m_aClients[Item.m_Id].m_Spec = pInfo->m_Flags & EXPLAYERFLAG_SPEC;
+					m_aClients[Item.m_Id].m_TeamLeader = pInfo->m_Flags & EXPLAYERFLAG_TEAMLEADER;
 					m_aClients[Item.m_Id].m_FinishTimeSeconds = pInfo->m_FinishTimeSeconds;
 					m_aClients[Item.m_Id].m_FinishTimeMillis = pInfo->m_FinishTimeMillis;
 
