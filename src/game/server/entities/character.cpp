@@ -352,7 +352,7 @@ void CCharacter::HandleNinja()
 
 				// Don't hit players in solo parts
 				if(Teams()->m_Core.GetSolo(ClientId))
-					return;
+					continue;
 
 				// make sure we haven't Hit this object before
 				bool AlreadyHit = false;
