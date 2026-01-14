@@ -14,8 +14,8 @@ public:
 	virtual void Update() = 0;
 
 	virtual void ClearGameInfo() = 0;
-	virtual void SetGameInfo(const CServerInfo &ServerInfo, const char *pMapName, bool Registered) = 0;
-	virtual void UpdateServerInfo(const CServerInfo &ServerInfo, const char *pMapName) = 0;
+	virtual void SetGameInfo(const CServerInfo &ServerInfo, bool Registered) = 0;
+	virtual void UpdateServerInfo(const CServerInfo &ServerInfo) = 0;
 	virtual void UpdatePlayerCount(int Count) = 0;
 };
 
