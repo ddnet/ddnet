@@ -22,9 +22,6 @@ Abort
 Add
 == 추가
 
-Add Friend
-== 친구 추가
-
 Address
 == 주소
 
@@ -389,7 +386,7 @@ Use team colors for name plates
 == 이름에 팀 색상 사용
 
 V-Sync
-== V-Sync
+== 수직 동기화
 
 Version
 == 버전
@@ -500,7 +497,7 @@ Name plates size
 == 이름 표시 크기
 
 Successfully saved the replay!
-== 리플레이 저장에 성공했습니다!
+== 리플레이 저장 성공!
 
 Replay feature is disabled!
 == 리플레이 기능이 비활성화됐습니다!
@@ -1573,9 +1570,6 @@ Add friends by entering their name below or by clicking their name in the player
 Add clanmates by entering their clan below and leaving the name blank.
 == 아래에 이름을 빈칸으로 두고 클랜명만 입력해 클랜원을 추가합니다.
 
-Add Clan
-== 클랜 추가
-
 Server filter
 == 서버 필터
 
@@ -1775,7 +1769,7 @@ Error playing demo
 == 데모 재생 오류
 
 Failed saving the replay!
-== 리플레이 저장에 실패했습니다!
+== 리플레이 저장 실패!
 
 Saving settings to '%s' failed
 == '%s' 설정 저장 실패
@@ -2231,12 +2225,6 @@ Are you sure that you want to delete this button?
 Duplicate
 == 복제
 
-New button already created
-== 이미 생성된 새 버튼
-
-A new button has already been created, please save or delete it before creating another one.
-== 새 버튼이 이미 생성됐습니다. 다른 버튼을 생성하기 전에 저장하거나 삭제하십시오.
-
 Please save your changes before duplicating a button.
 == 버튼을 복제하기 전에 변경사항을 저장하십시오.
 
@@ -2245,9 +2233,6 @@ No space for button
 
 There is not enough space available to place another button.
 == 다른 버튼을 배치할 공간이 부족합니다.
-
-There is not enough space available to place another button with this size. The button has been resized.
-== 이 크기의 다른 버튼을 배치할 공간이 부족합니다. 버튼의 크기가 재조절됐습니다.
 
 Deselect
 == 선택 해제
@@ -2325,9 +2310,6 @@ Excluded
 [Touch button visibility preview]
 Ignore
 == 무시
-
-Long press on a touch button to select it.
-== 버튼을 길게 눌러 선택하십시오.
 
 New button
 == 새 버튼
@@ -2487,7 +2469,7 @@ Download
 
 [Important alert message]
 Press Esc or Tab to dismiss…
-== Esc 또는 Tab를 눌러 닫기…
+== Esc 또는 Tab을 눌러 닫기…
 
 Server alert
 == 서버 알림
@@ -2502,37 +2484,127 @@ Are you sure that you want to disconnect and play this demo?
 == 데모를 재생하기 위해 연결을 끊으시겠습니까?
 
 Team save in progress. You'll be able to load with '/load %s'
-== 
+== 팀 진행 상태를 저장 중입니다. 이후 '/load %s'(으)로 불러올 수 있습니다.
 
 Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails
-== 
+== 팀 진행 상태를 저장 중입니다. 저장 성공 시 '/load %s'(으)로, 실패 시 '/load %s'(으)로 불러올 수 있습니다.
 
 Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue
-== 
+== %s 님이 팀 진행 상태를 저장했습니다. 데이터베이스 연결에 실패하여, 충돌 방지를 위해 생성된 저장 코드를 사용했습니다. '/load %s'을(를) 사용해 계속하십시오.
 
 Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue
-== 
+== %1$s 님이 팀 진행 상태를 저장했습니다. 데이터베이스 연결에 실패하여, 충돌 방지를 위해 생성된 저장 코드를 사용했습니다. %3$s 에서 '/load %2$s'을(를) 사용해 계속하십시오.
 
 Save failed!
-== 
+== 저장 실패!
 
 Show background quads
-== 
+== 맵 배경 표시
 
 Scoreboard cursor
-== 
+== 점수판 커서
 
 Add friend
-== 
+== 친구 추가
 
 Unmute
-== 
+== 채팅 차단 해제
 
 Mute
-== 
+== 채팅 차단
 
 Unmute emoticons
-== 
+== 이모티콘 차단 해제
 
 Mute emoticons
+== 이모티콘 차단
+
+There's an unsaved change in the touch controls editor, you might want to save it.
+== 
+
+Start and connect to local server
+== 
+
+Add clan
+== 
+
+Info
+== 
+
+Button browser
+== 
+
+You can select buttons directly in the list below, or long press on a touch button on the screen to select it. You can also move and resize buttons by touch.
+== 
+
+Preview visibilities
+== 
+
+You can manage your touch controls settings on this page. Only changes that are saved will be available after restarting the client. You can share your touch controls with others by exporting them to the clipboard.\n\nYou can find more detailed information about the touch controls on the DDNet Wiki.
+== 
+
+Open DDNet Wiki
+== 
+
+Buttons with this behavior execute console commands like regular key binds.
+== 
+
+Buttons with this behavior cycle between executing one of two or more specified commands.
+== 
+
+Buttons with this behavior execute some predefined actions.
+== 
+
+Opens the ingame menu immediately when released.
+== 
+
+The extra menu button which toggles visibility of buttons with "Extra Menu" visibilities. Also opens the ingame menu on long press.
+== 
+
+Opens the emoticon selector (this does not work with binds).
+== 
+
+Opens the spectator menu (this does not work with binds).
+== 
+
+Swaps the active action (fire and hook) for direct touch input and virtual joysticks.
+== 
+
+Uses the active action with the current aiming position.
+== 
+
+Virtual joystick which uses the active action.
+== 
+
+Virtual joystick which only aims without using an action.
+== 
+
+Virtual joystick which always uses fire.
+== 
+
+Virtual joystick which always uses hook.
+== 
+
+Player is ingame, i.e. not spectating.
+== 
+
+Zoom is allowed on this server.
+== 
+
+A vote is currently active.
+== 
+
+Dummy is allowed on this server.
+== 
+
+Dummy is currently connected.
+== 
+
+Player is currently authed in rcon.
+== 
+
+Demo player is currently active.
+== 
+
+The extra menu with the given number is activated.
 == 
