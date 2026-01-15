@@ -1978,7 +1978,7 @@ generate_source7("src/generated/client_data7.cpp" "client_content_source")
 generate_source7("src/generated/client_data7.h" "client_content_header")
 
 generate_maps("src/generated/protocolglue.h" "map_header")
-generate_maps("src/generated/protocolglue.cpp" "map_source")
+generate_maps("src/generated/protocolglue_generated.cpp" "map_source")
 
 add_custom_command(OUTPUT "src/generated/wordlist.h"
   COMMAND ${Python3_EXECUTABLE} scripts/wordlist.py > ${PROJECT_BINARY_DIR}/src/generated/wordlist.h
@@ -2193,7 +2193,7 @@ set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "src/game/version
 # A bit hacky, but these are needed to register all the UUIDs, even for stuff
 # that doesn't link game.
 set(ENGINE_UUID_SHARED
-  src/generated/protocolglue.cpp
+  src/generated/protocolglue_generated.cpp
   src/generated/protocolglue.h
   src/generated/protocol7.cpp
   src/generated/protocol7.h
