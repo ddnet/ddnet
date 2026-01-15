@@ -22,9 +22,6 @@ Abort
 Add
 == Pridať
 
-Add Friend
-== Pridať Priateľa
-
 Address
 == Adresa
 
@@ -891,9 +888,6 @@ Are you sure that you want to remove the player '%s' from your friends list?
 
 Are you sure that you want to remove the clan '%s' from your friends list?
 == Naozaj chcete odstrániť klan '%s' zo svojho zoznamu priateľov?
-
-Add Clan
-== Pridať Klan
 
 Server filter
 == Filter servera
@@ -2249,12 +2243,6 @@ Are you sure that you want to delete this button?
 Duplicate
 == Duplikát
 
-New button already created
-== Nové tlačidlo už bolo vytvorené
-
-A new button has already been created, please save or delete it before creating another one.
-== Nové tlačidlo už bolo vytvorené, pred vytvorením ďalšieho ho prosím uložte alebo zmažte.
-
 Please save your changes before duplicating a button.
 == Pred duplikovaním tlačidla prosím uložte zmeny.
 
@@ -2263,9 +2251,6 @@ No space for button
 
 There is not enough space available to place another button.
 == Nie je dostatok miesta na umiestnenie ďalšieho tlačidla.
-
-There is not enough space available to place another button with this size. The button has been resized.
-== Nie je dostatok miesta na umiestnenie ďalšieho tlačidla tejto veľkosti. Veľkosť tlačidla bola zmenená.
 
 Deselect
 == Zrušiť výber
@@ -2343,9 +2328,6 @@ Excluded
 [Touch button visibility preview]
 Ignore
 == Ignorovať
-
-Long press on a touch button to select it.
-== Dlhým stlačením dotykového tlačidla ho vyberiete.
 
 New button
 == Nové tlačidlo
@@ -2510,19 +2492,109 @@ Server alert
 Moderator alert
 == 
 
+There's an unsaved change in the touch controls editor, you might want to save it.
+== 
+
 You will be disconnected from the server.
 == 
 
+Start and connect to local server
+== 
+
+Add clan
+== 
+
+Add friend
+== 
+
 Are you sure that you want to disconnect and play this demo?
+== 
+
+Info
+== 
+
+Button browser
+== 
+
+You can select buttons directly in the list below, or long press on a touch button on the screen to select it. You can also move and resize buttons by touch.
+== 
+
+Preview visibilities
+== 
+
+You can manage your touch controls settings on this page. Only changes that are saved will be available after restarting the client. You can share your touch controls with others by exporting them to the clipboard.\n\nYou can find more detailed information about the touch controls on the DDNet Wiki.
+== 
+
+Open DDNet Wiki
+== 
+
+Buttons with this behavior execute console commands like regular key binds.
+== 
+
+Buttons with this behavior cycle between executing one of two or more specified commands.
+== 
+
+Buttons with this behavior execute some predefined actions.
+== 
+
+Opens the ingame menu immediately when released.
+== 
+
+The extra menu button which toggles visibility of buttons with "Extra Menu" visibilities. Also opens the ingame menu on long press.
+== 
+
+Opens the emoticon selector (this does not work with binds).
+== 
+
+Opens the spectator menu (this does not work with binds).
+== 
+
+Swaps the active action (fire and hook) for direct touch input and virtual joysticks.
+== 
+
+Uses the active action with the current aiming position.
+== 
+
+Virtual joystick which uses the active action.
+== 
+
+Virtual joystick which only aims without using an action.
+== 
+
+Virtual joystick which always uses fire.
+== 
+
+Virtual joystick which always uses hook.
+== 
+
+Player is ingame, i.e. not spectating.
+== 
+
+Zoom is allowed on this server.
+== 
+
+A vote is currently active.
+== 
+
+Dummy is allowed on this server.
+== 
+
+Dummy is currently connected.
+== 
+
+Player is currently authed in rcon.
+== 
+
+Demo player is currently active.
+== 
+
+The extra menu with the given number is activated.
 == 
 
 Show background quads
 == 
 
 Scoreboard cursor
-== 
-
-Add friend
 == 
 
 Unmute

@@ -22,9 +22,6 @@ Abort
 Add
 == Afegir
 
-Add Friend
-== Afegir amic
-
 Address
 == Direcció
 
@@ -1404,6 +1401,9 @@ There's an unsaved map in the editor, you might want to save it.
 Continue anyway?
 == 
 
+There's an unsaved change in the touch controls editor, you might want to save it.
+== 
+
 This name cannot be used for files and folders
 == 
 
@@ -1473,6 +1473,9 @@ Loading menu images
 No local servers found (ports %d-%d)
 == 
 
+Start and connect to local server
+== 
+
 Could not get server list from master server
 == 
 
@@ -1522,7 +1525,10 @@ Are you sure that you want to remove the player '%s' from your friends list?
 Are you sure that you want to remove the clan '%s' from your friends list?
 == 
 
-Add Clan
+Add clan
+== 
+
+Add friend
 == 
 
 Server filter
@@ -1692,6 +1698,9 @@ Could not load default touch controls from file. See local console for details.
 Could not load touch controls from clipboard. See local console for details.
 == 
 
+https://wiki.ddnet.org/wiki/Touch_controls
+== 
+
 Community
 == 
 
@@ -1767,22 +1776,7 @@ Are you sure that you want to delete this button?
 Duplicate
 == 
 
-New button already created
-== 
-
-A new button has already been created, please save or delete it before creating another one.
-== 
-
 Please save your changes before duplicating a button.
-== 
-
-No space for button
-== 
-
-There is not enough space available to place another button.
-== 
-
-There is not enough space available to place another button with this size. The button has been resized.
 == 
 
 Deselect
@@ -1835,6 +1829,9 @@ Bind Toggle
 Predefined
 == 
 
+Info
+== 
+
 Command
 == 
 
@@ -1862,7 +1859,10 @@ Excluded
 Ignore
 == 
 
-Long press on a touch button to select it.
+Button browser
+== 
+
+You can select buttons directly in the list below, or long press on a touch button on the screen to select it. You can also move and resize buttons by touch.
 == 
 
 New button
@@ -1912,13 +1912,19 @@ Hook
 Direct touch input while spectating
 == 
 
+Preview visibilities
+== 
+
 Preview button visibility while the editor is active.
 == 
 
 Show all buttons
 == 
 
-https://wiki.ddnet.org/wiki/Touch_controls
+You can manage your touch controls settings on this page. Only changes that are saved will be available after restarting the client. You can share your touch controls with others by exporting them to the clipboard.\n\nYou can find more detailed information about the touch controls on the DDNet Wiki.
+== 
+
+Open DDNet Wiki
 == 
 
 Error saving touch controls
@@ -1948,6 +1954,9 @@ Save all changes before switching selected button?
 Discard
 == 
 
+No space for button
+== 
+
 There is not enough space available for the button. Check its visibilities and size.
 == 
 
@@ -1970,6 +1979,9 @@ The selected button is overlapping with other buttons.
 == 
 
 Wrong button settings
+== 
+
+There is not enough space available to place another button.
 == 
 
 [Touch button visibilities]
@@ -2042,6 +2054,69 @@ Joystick Fire
 
 [Predefined touch button behaviors]
 Joystick Hook
+== 
+
+Buttons with this behavior execute console commands like regular key binds.
+== 
+
+Buttons with this behavior cycle between executing one of two or more specified commands.
+== 
+
+Buttons with this behavior execute some predefined actions.
+== 
+
+Opens the ingame menu immediately when released.
+== 
+
+The extra menu button which toggles visibility of buttons with "Extra Menu" visibilities. Also opens the ingame menu on long press.
+== 
+
+Opens the emoticon selector (this does not work with binds).
+== 
+
+Opens the spectator menu (this does not work with binds).
+== 
+
+Swaps the active action (fire and hook) for direct touch input and virtual joysticks.
+== 
+
+Uses the active action with the current aiming position.
+== 
+
+Virtual joystick which uses the active action.
+== 
+
+Virtual joystick which only aims without using an action.
+== 
+
+Virtual joystick which always uses fire.
+== 
+
+Virtual joystick which always uses hook.
+== 
+
+Player is ingame, i.e. not spectating.
+== 
+
+Zoom is allowed on this server.
+== 
+
+A vote is currently active.
+== 
+
+Dummy is allowed on this server.
+== 
+
+Dummy is currently connected.
+== 
+
+Player is currently authed in rcon.
+== 
+
+Demo player is currently active.
+== 
+
+The extra menu with the given number is activated.
 == 
 
 [Hertz]
@@ -2478,9 +2553,6 @@ Super
 == 
 
 Team %d (%d/%d)
-== 
-
-Add friend
 == 
 
 Unmute
