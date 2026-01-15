@@ -10,6 +10,8 @@
 #include <game/client/ui.h>
 #include <game/client/ui_rect.h>
 
+class CScoreboardLock;
+
 class CScoreboard : public CComponent
 {
 	struct CScoreboardRenderState
@@ -43,6 +45,8 @@ class CScoreboard : public CComponent
 	void SetUiMousePos(vec2 Pos);
 	void LockMouse();
 
+	CScoreboardLock *m_pScoreboardLock;
+
 	class CScoreboardPopupContext : public SPopupMenuId
 	{
 	public:
@@ -70,6 +74,7 @@ class CScoreboard : public CComponent
 
 public:
 	CScoreboard();
+	~CScoreboard() override;
 	int Sizeof() const override { return sizeof(*this); }
 	void OnConsoleInit() override;
 	void OnInit() override;
