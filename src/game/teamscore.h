@@ -9,7 +9,6 @@ enum
 	TEAM_FLOCK = 0,
 	TEAM_SUPER = 64,
 	NUM_DDRACE_TEAMS = TEAM_SUPER + 1,
-	VANILLA_TEAM_SUPER = VANILLA_MAX_CLIENTS
 };
 
 // do not change the values of the following enum
