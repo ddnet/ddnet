@@ -372,39 +372,12 @@ IOHANDLE io_stderr()
 
 IOHANDLE io_current_exe()
 {
-	// From https://stackoverflow.com/a/1024937.
-#if defined(CONF_FAMILY_WINDOWS)
-	wchar_t wide_path[IO_MAX_PATH_LENGTH];
-	if(GetModuleFileNameW(nullptr, wide_path, std::size(wide_path)) == 0 || GetLastError() != ERROR_SUCCESS)
+	char path[IO_MAX_PATH_LENGTH];
+	if(fs_executable_path(path, sizeof(path)) != 0)
 	{
 		return nullptr;
 	}
-	const std::optional<std::string> path = windows_wide_to_utf8(wide_path);
-	return path.has_value() ? io_open(path.value().c_str(), IOFLAG_READ) : nullptr;
-#elif defined(CONF_PLATFORM_MACOS)
-	char path[IO_MAX_PATH_LENGTH];
-	uint32_t path_size = sizeof(path);
-	if(_NSGetExecutablePath(path, &path_size))
-	{
-		return 0;
-	}
 	return io_open(path, IOFLAG_READ);
-#else
-	static const char *NAMES[] = {
-		"/proc/self/exe", // Linux, Android
-		"/proc/curproc/exe", // NetBSD
-		"/proc/curproc/file", // DragonFly
-	};
-	for(auto &name : NAMES)
-	{
-		IOHANDLE result = io_open(name, IOFLAG_READ);
-		if(result)
-		{
-			return result;
-		}
-	}
-	return 0;
-#endif
 }
 
 #define ASYNC_BUFSIZE (8 * 1024)
@@ -2364,6 +2337,65 @@ int fs_storage_path(const char *appname, char *path, int max)
 #endif
 
 	return 0;
+#endif
+}
+
+int fs_executable_path(char *buffer, int buffer_size)
+{
+	// https://stackoverflow.com/a/1024937
+#if defined(CONF_FAMILY_WINDOWS)
+	wchar_t wide_path[IO_MAX_PATH_LENGTH];
+	if(GetModuleFileNameW(nullptr, wide_path, std::size(wide_path)) == 0 || GetLastError() != ERROR_SUCCESS)
+	{
+		buffer[0] = '\0';
+		return -1;
+	}
+	const std::optional<std::string> path = windows_wide_to_utf8(wide_path);
+	if(!path.has_value())
+	{
+		buffer[0] = '\0';
+		return -1;
+	}
+	str_copy(buffer, path.value().c_str(), buffer_size);
+	return 0;
+#elif defined(CONF_PLATFORM_MACOS)
+	// Get the size
+	uint32_t path_size = 0;
+	_NSGetExecutablePath(nullptr, &path_size);
+
+	char *path = (char *)malloc(path_size);
+	if(_NSGetExecutablePath(path, &path_size) != 0)
+	{
+		free(path);
+		buffer[0] = '\0';
+		return -1;
+	}
+	str_copy(buffer, path, buffer_size);
+	free(path);
+	return 0;
+#else
+	char path[IO_MAX_PATH_LENGTH];
+	static const char *NAMES[] = {
+		"/proc/self/exe", // Linux, Android
+		"/proc/curproc/exe", // NetBSD
+		"/proc/curproc/file", // DragonFly
+	};
+	for(auto &name : NAMES)
+	{
+		if(ssize_t bytes_written = readlink(name, path, sizeof(path) - 1); bytes_written != -1)
+		{
+			path[bytes_written] = '\0'; // readlink does NOT null-terminate
+			// if the file gets deleted or replaced (not renamed) linux appends (deleted) to the symlink (see https://man7.org/linux/man-pages/man5/proc_pid_exe.5.html)
+			if(const char *deleted = str_endswith(path, " (deleted)"); deleted != nullptr)
+			{
+				path[deleted - path] = '\0';
+			}
+			str_copy(buffer, path, buffer_size);
+			return 0;
+		}
+	}
+	buffer[0] = '\0';
+	return -1;
 #endif
 }
 
