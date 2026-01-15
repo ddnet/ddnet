@@ -29,6 +29,7 @@ void CGameTeams::Reset()
 		m_aTeeStarted[i] = false;
 		m_aTeeFinished[i] = false;
 		m_aLastChat[i] = 0;
+		m_aTeamLeader[i] = false;
 		SendTeamsState(i);
 	}
 
@@ -485,6 +486,7 @@ void CGameTeams::SetForceCharacterTeam(int ClientId, int Team)
 		{
 			GetPlayer(ClientId)->m_VotedForPractice = false;
 			GetPlayer(ClientId)->m_SwapTargetsClientId = -1;
+			SetTeamLeader(ClientId, false);
 		}
 		m_pGameContext->m_World.RemoveEntitiesFromPlayer(ClientId);
 	}
@@ -1206,7 +1208,11 @@ void CGameTeams::OnCharacterDeath(int ClientId, int Weapon)
 	if(GetSaving(Team))
 		return;
 	bool Locked = TeamLocked(Team) && Weapon != WEAPON_GAME;
-
+	// only check leader stuff for kill tile, because we already check for WEAPON_SELF in the kill netmsg / kill command
+	if(!IsAllowLeaderCommands(ClientId, Team) && Weapon == WEAPON_WORLD)
+	{
+		Locked = false;
+	}
 	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO && Team != TEAM_SUPER)
 	{
 		ChangeTeamState(Team, ETeamState::OPEN);
@@ -1436,6 +1442,44 @@ bool CGameTeams::IsPractice(int Team)
 	}
 
 	return m_aPractice[Team];
+}
+bool CGameTeams::HasLeader(int Team) const
+{
+	if(!IsValidTeamNumber(Team))
+		return false;
+	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO || Team == TEAM_FLOCK)
+	{
+		return false;
+	}
+
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(m_Core.Team(i) == Team && IsTeamLeader(i))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool CGameTeams::IsTeamLeader(int ClientId) const
+{
+	if(!CheckClientId(ClientId))
+		return false;
+	return m_aTeamLeader[ClientId]; //GetPlayer(ClientId)->m_IsTeamLeader;
+}
+void CGameTeams::SetTeamLeader(int ClientId, bool Set)
+{
+	if(!CheckClientId(ClientId))
+		return;
+	m_aTeamLeader[ClientId] = Set;
+	// return true;//GetPlayer(ClientId)->m_IsTeamLeader;
+}
+
+bool CGameTeams::IsAllowLeaderCommands(int ClientId, int Team)
+{
+	return GetPlayer(ClientId) != nullptr && (IsTeamLeader(ClientId) || !HasLeader(Team));
 }
 
 bool CGameTeams::IsValidTeamNumber(int Team) const
