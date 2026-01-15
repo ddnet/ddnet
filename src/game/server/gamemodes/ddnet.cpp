@@ -1,6 +1,6 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 /* Based on Race mod stuff and tweaked by GreYFoX@GTi and others to fit our DDRace needs. */
-#include "DDRace.h"
+#include "ddnet.h"
 
 #include <engine/server.h>
 #include <engine/shared/config.h>
@@ -17,21 +17,21 @@
 #define GAME_TYPE_NAME "DDraceNetwork"
 #define TEST_TYPE_NAME "TestDDraceNetwork"
 
-CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer) :
+CGameControllerDDNet::CGameControllerDDNet(class CGameContext *pGameServer) :
 	IGameController(pGameServer)
 {
 	m_pGameType = g_Config.m_SvTestingCommands ? TEST_TYPE_NAME : GAME_TYPE_NAME;
 	m_GameFlags = protocol7::GAMEFLAG_RACE;
 }
 
-CGameControllerDDRace::~CGameControllerDDRace() = default;
+CGameControllerDDNet::~CGameControllerDDNet() = default;
 
-CScore *CGameControllerDDRace::Score()
+CScore *CGameControllerDDNet::Score()
 {
 	return GameServer()->Score();
 }
 
-void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
+void CGameControllerDDNet::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 {
 	CPlayer *pPlayer = pChr->GetPlayer();
 	const int ClientId = pPlayer->GetCid();
@@ -115,12 +115,12 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 	}
 }
 
-void CGameControllerDDRace::SetArmorProgress(CCharacter *pCharacter, int Progress)
+void CGameControllerDDNet::SetArmorProgress(CCharacter *pCharacter, int Progress)
 {
 	pCharacter->SetArmor(std::clamp(10 - (Progress / 15), 0, 10));
 }
 
-int CGameControllerDDRace::SnapPlayerScore(int SnappingClient, CPlayer *pPlayer)
+int CGameControllerDDNet::SnapPlayerScore(int SnappingClient, CPlayer *pPlayer)
 {
 	bool HideScore = g_Config.m_SvHideScore && SnappingClient != pPlayer->GetCid();
 	std::optional<float> Score = GameServer()->Score()->PlayerData(pPlayer->GetCid())->m_BestTime;
@@ -151,7 +151,7 @@ int CGameControllerDDRace::SnapPlayerScore(int SnappingClient, CPlayer *pPlayer)
 	return -ScoreSeconds;
 }
 
-IGameController::CFinishTime CGameControllerDDRace::SnapPlayerTime(int SnappingClient, CPlayer *pPlayer)
+IGameController::CFinishTime CGameControllerDDNet::SnapPlayerTime(int SnappingClient, CPlayer *pPlayer)
 {
 	std::optional<float> BestTime = GameServer()->Score()->PlayerData(pPlayer->GetCid())->m_BestTime;
 	if(BestTime.has_value() && (!g_Config.m_SvHideScore || SnappingClient == pPlayer->GetCid()))
@@ -165,7 +165,7 @@ IGameController::CFinishTime CGameControllerDDRace::SnapPlayerTime(int SnappingC
 	return CFinishTime::NotFinished();
 }
 
-IGameController::CFinishTime CGameControllerDDRace::SnapMapBestTime(int SnappingClient)
+IGameController::CFinishTime CGameControllerDDNet::SnapMapBestTime(int SnappingClient)
 {
 	if(m_CurrentRecord.has_value() && !g_Config.m_SvHideScore)
 	{
@@ -178,7 +178,7 @@ IGameController::CFinishTime CGameControllerDDRace::SnapMapBestTime(int Snapping
 	return CFinishTime::NotFinished();
 }
 
-void CGameControllerDDRace::OnPlayerConnect(CPlayer *pPlayer)
+void CGameControllerDDNet::OnPlayerConnect(CPlayer *pPlayer)
 {
 	IGameController::OnPlayerConnect(pPlayer);
 	int ClientId = pPlayer->GetCid();
@@ -201,7 +201,7 @@ void CGameControllerDDRace::OnPlayerConnect(CPlayer *pPlayer)
 	}
 }
 
-void CGameControllerDDRace::OnPlayerDisconnect(CPlayer *pPlayer, const char *pReason)
+void CGameControllerDDNet::OnPlayerDisconnect(CPlayer *pPlayer, const char *pReason)
 {
 	int ClientId = pPlayer->GetCid();
 	bool WasModerator = pPlayer->m_Moderating && Server()->ClientIngame(ClientId);
@@ -219,20 +219,20 @@ void CGameControllerDDRace::OnPlayerDisconnect(CPlayer *pPlayer, const char *pRe
 			Teams().SetClientInvited(Team, ClientId, false);
 }
 
-void CGameControllerDDRace::OnReset()
+void CGameControllerDDNet::OnReset()
 {
 	IGameController::OnReset();
 	Teams().Reset();
 }
 
-void CGameControllerDDRace::Tick()
+void CGameControllerDDNet::Tick()
 {
 	IGameController::Tick();
 	Teams().ProcessSaveTeam();
 	Teams().Tick();
 }
 
-void CGameControllerDDRace::DoTeamChange(class CPlayer *pPlayer, int Team, bool DoChatMsg)
+void CGameControllerDDNet::DoTeamChange(class CPlayer *pPlayer, int Team, bool DoChatMsg)
 {
 	if(!IsValidTeam(Team))
 		return;

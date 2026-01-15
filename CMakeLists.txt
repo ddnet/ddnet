@@ -2814,8 +2814,8 @@ if(SERVER)
     gamecontext.h
     gamecontroller.cpp
     gamecontroller.h
-    gamemodes/DDRace.cpp
-    gamemodes/DDRace.h
+    gamemodes/ddnet.cpp
+    gamemodes/ddnet.h
     gamemodes/mod.cpp
     gamemodes/mod.h
     gameworld.cpp

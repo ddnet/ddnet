@@ -10,7 +10,7 @@
 
 #include <game/mapitems.h>
 #include <game/server/gamecontext.h>
-#include <game/server/gamemodes/DDRace.h>
+#include <game/server/gamemodes/ddnet.h>
 
 CProjectile::CProjectile(
 	CGameWorld *pGameWorld,
