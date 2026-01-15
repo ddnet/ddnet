@@ -1987,6 +1987,13 @@ add_custom_command(OUTPUT "src/generated/wordlist.h"
     scripts/wordlist.py
 )
 
+add_custom_target(generate_protocol
+  DEPENDS
+    src/generated/protocol.h
+    src/generated/protocol7.h
+    src/generated/protocolglue.h
+)
+
 ########################################################################
 # SHARED
 ########################################################################
@@ -2236,6 +2243,8 @@ add_library(engine-gfx EXCLUDE_FROM_ALL OBJECT ${ENGINE_GFX})
 target_include_directories(engine-gfx PRIVATE ${PNG_INCLUDE_DIRS})
 add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_UUID_SHARED} ${BASE})
 add_library(game-shared EXCLUDE_FROM_ALL OBJECT ${GAME_SHARED} ${GAME_GENERATED_SHARED})
+add_dependencies(engine-shared generate_protocol)
+add_dependencies(game-shared generate_protocol)
 list(APPEND TARGETS_OWN engine-gfx engine-shared game-shared)
 
 if(DISCORD AND NOT DISCORD_DYNAMIC)
