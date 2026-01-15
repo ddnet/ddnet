@@ -22,7 +22,9 @@ class CScoreboard : public CComponent
 			m_TeamStartX(0), m_TeamStartY(0), m_CurrentDDTeamSize(0) {}
 	};
 
-	void RenderTitle(CUIRect TitleBar, int Team, const char *pTitle);
+	void RenderTitleScore(CUIRect ScoreLabel, int Team, float TitleFontSize);
+	void RenderTitle(CUIRect TitleLabel, int Team, const char *pTitle, float TitleFontSize);
+	void RenderTitleBar(CUIRect TitleBar, int Team, const char *pTitle);
 	void RenderGoals(CUIRect Goals);
 	void RenderSpectators(CUIRect Spectators);
 	void RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart, int CountEnd, CScoreboardRenderState &State);

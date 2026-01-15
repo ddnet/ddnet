@@ -671,6 +671,9 @@ public:
 	// progress bar
 	void RenderProgressBar(CUIRect ProgressBar, float Progress);
 
+	// render time with hundredths or thousands aligned to the right of the UIRect
+	void RenderTime(CUIRect TimeRect, float FontSize, int Seconds, bool NotFinished, int Millis, bool TrueMilliseconds) const;
+
 	// progress spinner
 	void RenderProgressSpinner(vec2 Center, float OuterRadius, const SProgressSpinnerProperties &Props = {}) const;
 
