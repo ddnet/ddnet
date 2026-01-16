@@ -1978,13 +1978,20 @@ generate_source7("src/generated/client_data7.cpp" "client_content_source")
 generate_source7("src/generated/client_data7.h" "client_content_header")
 
 generate_maps("src/generated/protocolglue.h" "map_header")
-generate_maps("src/generated/protocolglue.cpp" "map_source")
+generate_maps("src/generated/protocolglue_generated.cpp" "map_source")
 
 add_custom_command(OUTPUT "src/generated/wordlist.h"
   COMMAND ${Python3_EXECUTABLE} scripts/wordlist.py > ${PROJECT_BINARY_DIR}/src/generated/wordlist.h
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   DEPENDS
     scripts/wordlist.py
+)
+
+add_custom_target(generate_protocol
+  DEPENDS
+    src/generated/protocol.h
+    src/generated/protocol7.h
+    src/generated/protocolglue.h
 )
 
 ########################################################################
@@ -2197,7 +2204,7 @@ set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "src/game/version
 # A bit hacky, but these are needed to register all the UUIDs, even for stuff
 # that doesn't link game.
 set(ENGINE_UUID_SHARED
-  src/generated/protocolglue.cpp
+  src/generated/protocolglue_generated.cpp
   src/generated/protocolglue.h
   src/generated/protocol7.cpp
   src/generated/protocol7.h
@@ -2240,6 +2247,8 @@ add_library(engine-gfx EXCLUDE_FROM_ALL OBJECT ${ENGINE_GFX})
 target_include_directories(engine-gfx PRIVATE ${PNG_INCLUDE_DIRS})
 add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_UUID_SHARED} ${BASE})
 add_library(game-shared EXCLUDE_FROM_ALL OBJECT ${GAME_SHARED} ${GAME_GENERATED_SHARED})
+add_dependencies(engine-shared generate_protocol)
+add_dependencies(game-shared generate_protocol)
 list(APPEND TARGETS_OWN engine-gfx engine-shared game-shared)
 
 if(DISCORD AND NOT DISCORD_DYNAMIC)
