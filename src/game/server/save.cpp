@@ -9,7 +9,7 @@
 
 #include <game/server/entities/character.h>
 #include <game/server/gamecontext.h>
-#include <game/server/gamemodes/DDRace.h>
+#include <game/server/gamemodes/ddnet.h>
 #include <game/team_state.h>
 
 #include <cstdio> // sscanf

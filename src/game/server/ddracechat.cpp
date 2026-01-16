@@ -10,7 +10,7 @@
 
 #include <game/mapitems.h>
 #include <game/server/entities/character.h>
-#include <game/server/gamemodes/DDRace.h>
+#include <game/server/gamemodes/ddnet.h>
 #include <game/server/teams.h>
 #include <game/team_state.h>
 #include <game/teamscore.h>
