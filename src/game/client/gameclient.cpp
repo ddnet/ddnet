@@ -1668,6 +1668,7 @@ void CGameClient::OnNewSnapshot()
 
 	bool FoundGameInfoEx = false;
 	bool GotSwitchStateTeam = false;
+	bool HasUnsetDDNetFinishTimes = false;
 	m_aSwitchStateTeam[g_Config.m_ClDummy] = -1;
 
 	for(auto &Client : m_aClients)
@@ -1760,8 +1761,8 @@ void CGameClient::OnNewSnapshot()
 					m_aClients[Item.m_Id].m_FinishTimeSeconds = pInfo->m_FinishTimeSeconds;
 					m_aClients[Item.m_Id].m_FinishTimeMillis = pInfo->m_FinishTimeMillis;
 
-					if(m_aClients[Item.m_Id].m_FinishTimeSeconds != FinishTime::UNSET)
-						m_ReceivedDDNetPlayerFinishTimes = true;
+					if(m_aClients[Item.m_Id].m_FinishTimeSeconds == FinishTime::UNSET)
+						HasUnsetDDNetFinishTimes = true;
 
 					if(Item.m_Id == m_Snap.m_LocalClientId && (m_aClients[Item.m_Id].m_Paused || m_aClients[Item.m_Id].m_Spec))
 					{
@@ -2081,6 +2082,9 @@ void CGameClient::OnNewSnapshot()
 		// update foe state
 		m_aClients[i].m_Foe = !(i == m_Snap.m_LocalClientId || !m_Snap.m_apPlayerInfos[i] || !Foes()->IsFriend(m_aClients[i].m_aName, m_aClients[i].m_aClan, true));
 	}
+
+	// check if we received all finish times
+	m_ReceivedDDNetPlayerFinishTimes = m_ReceivedDDNetPlayer && !HasUnsetDDNetFinishTimes;
 
 	// sort player infos by name
 	mem_copy(m_Snap.m_apInfoByName, m_Snap.m_apPlayerInfos, sizeof(m_Snap.m_apInfoByName));
