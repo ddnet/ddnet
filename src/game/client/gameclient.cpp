@@ -4565,7 +4565,7 @@ void CGameClient::LoadMapSettings()
 {
 	IEngineMap *pMap = Kernel()->RequestInterface<IEngineMap>();
 
-	m_MapBugs = CMapBugs::Create(Client()->GetCurrentMap(), pMap->MapSize(), pMap->Sha256());
+	m_MapBugs = CMapBugs::Create(Client()->GetCurrentMap(), pMap->Size(), pMap->Sha256());
 
 	// Reset Tunezones
 	for(int TuneZone = 0; TuneZone < TuneZone::NUM; TuneZone++)

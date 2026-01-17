@@ -53,7 +53,7 @@ public:
 
 	SHA256_DIGEST Sha256() const;
 	unsigned Crc() const;
-	int MapSize() const;
+	int Size() const;
 };
 
 // write access
