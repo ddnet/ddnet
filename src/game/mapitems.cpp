@@ -97,6 +97,8 @@ bool IsValidSpeedupTile(int Index)
 bool IsValidSwitchTile(int Index)
 {
 	return (
+		Index == TILE_SOLID ||
+		Index == TILE_NOHOOK ||
 		Index == TILE_JUMP ||
 		Index == TILE_FREEZE ||
 		Index == TILE_DFREEZE ||

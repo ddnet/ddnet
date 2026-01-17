@@ -39,6 +39,7 @@ void CCharacter::SetSuper(bool Super)
 
 bool CCharacter::IsGrounded()
 {
+	COL_SCOPED_TEAM_CONTEXT(Collision(), Team());
 	if(Collision()->CheckPoint(m_Pos.x + GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5))
 		return true;
 	if(Collision()->CheckPoint(m_Pos.x - GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5))
@@ -128,6 +129,7 @@ void CCharacter::HandleNinja()
 		// Set velocity
 		m_Core.m_Vel = m_Core.m_Ninja.m_ActivationDir * g_pData->m_Weapons.m_Ninja.m_Velocity;
 		vec2 OldPos = m_Pos;
+		COL_SCOPED_TEAM_CONTEXT(Collision(), Team());
 		Collision()->MoveBox(&m_Core.m_Pos, &m_Core.m_Vel, vec2(m_ProximityRadius, m_ProximityRadius), vec2(GetTuning(GetOverriddenTuneZone())->m_GroundElasticityX, GetTuning(GetOverriddenTuneZone())->m_GroundElasticityY));
 
 		// reset velocity so the client doesn't predict stuff

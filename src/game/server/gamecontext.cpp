@@ -4109,7 +4109,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 		Server()->SnapSetStaticsize(i, m_NetObjHandler.GetObjSize(i));
 
 	m_Layers.Init(Kernel()->RequestInterface<IMap>(), false);
-	m_Collision.Init(&m_Layers);
+	m_Collision.Init(&m_Layers, &m_World.m_Core.m_vSwitchers);
 	m_World.Init(&m_Collision, m_aTuningList);
 
 	char aMapName[IO_MAX_PATH_LENGTH];
