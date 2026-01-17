@@ -319,7 +319,7 @@ void CRenderLayerTile::RenderTileLayer(const ColorRGBA &Color, const CRenderLaye
 
 		int X0 = std::max(ScreenRectX0, 0);
 		int X1 = std::min(ScreenRectX1, (int)Visuals.m_Width);
-		int XR = X1 - 1;
+		int XR = X1 == std::numeric_limits<int>::min() ? X1 : X1 - 1;
 		if(X0 <= XR)
 		{
 			int Y0 = std::max(ScreenRectY0, 0);
