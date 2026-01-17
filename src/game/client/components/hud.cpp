@@ -594,6 +594,7 @@ void CHud::RenderCursor()
 {
 	int CurWeapon = 0;
 	vec2 TargetPos;
+	vec2 SnapBindPos = vec2(0, 0);
 	float Alpha = 1.0f;
 
 	const vec2 Center = GameClient()->m_Camera.m_Center;
@@ -606,6 +607,10 @@ void CHud::RenderCursor()
 		// Render local cursor
 		CurWeapon = maximum(0, GameClient()->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS);
 		TargetPos = GameClient()->m_Controls.m_aTargetPos[g_Config.m_ClDummy];
+		if(g_Config.m_ClSnapAimTo45)
+		{
+			SnapBindPos = GameClient()->m_Controls.m_aSnapAimTo45TargetPos[g_Config.m_ClDummy];
+		}
 	}
 	else
 	{
@@ -635,6 +640,12 @@ void CHud::RenderCursor()
 	Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
 	Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteWeaponCursors[CurWeapon]);
 	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aCursorOffset[CurWeapon], TargetPos.x, TargetPos.y);
+	if(g_Config.m_ClSnapAimTo45)
+	{
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.5f);
+		Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteWeaponCursors[CurWeapon]);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aCursorOffset[CurWeapon], SnapBindPos.x, SnapBindPos.y);
+	}
 }
 
 void CHud::PrepareAmmoHealthAndArmorQuads()
