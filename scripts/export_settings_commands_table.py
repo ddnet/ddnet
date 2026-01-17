@@ -8,6 +8,25 @@ import re
 import sys
 
 
+SUPPORTED_COMMAND_FLAGS = [
+	"CFGFLAG_SAVE",
+	"CFGFLAG_CLIENT",
+	"CFGFLAG_SERVER",
+	"CFGFLAG_STORE",
+	"CFGFLAG_MASTER",
+	"CFGFLAG_ECON",
+	"CMDFLAG_TEST",
+	"CFGFLAG_CHAT",
+	"CFGFLAG_GAME",
+	"CFGFLAG_NONTEEHISTORIC",
+	"CFGFLAG_COLLIGHT",
+	"CFGFLAG_COLLIGHT7",
+	"CFGFLAG_COLALPHA",
+	"CFGFLAG_INSENSITIVE",
+	"CMDFLAG_PRACTICE",
+]
+
+
 def parse_arguments(arguments_line, num, name):
 	try:
 		arguments_line = arguments_line.replace("\\n", "\\\\n")
@@ -19,6 +38,14 @@ def parse_arguments(arguments_line, num, name):
 		raise RuntimeError(f"Failed to parse {name} arguments: {arguments_line}") from e
 
 
+def parse_flags(flags_str, name):
+	flags = flags_str.split(" | ")
+	for flag in flags:
+		if flag not in SUPPORTED_COMMAND_FLAGS:
+			raise RuntimeError(f"Failed to parse {name} with unknown flag: {flag}")
+	return flags
+
+
 def parse_commands(lines):
 	parsed_commands = []
 	for line in lines:
@@ -26,7 +53,8 @@ def parse_commands(lines):
 		if args is None or "CFGFLAG_" not in args[1]:
 			continue
 		parsed = parse_arguments(args[1], num=6, name="command")
-		parsed_commands.append({"name": parsed[0], "flags": parsed[2], "arguments": parsed[1], "description": parsed[5]})
+		flags = parse_flags(parsed[2], f"command '{parsed[0]}'")
+		parsed_commands.append({"name": parsed[0], "flags": flags, "arguments": parsed[1], "description": parsed[5]})
 	parsed_commands.sort(key=lambda command: command["name"])
 	return parsed_commands
 
@@ -52,15 +80,15 @@ def parse_settings(lines):
 
 		if args[1] == "STR":
 			parsed = parse_arguments(args[2], num=6, name="string setting")
-			flags = parsed[4]
+			flags = parse_flags(parsed[4], f"string setting '{parsed[1]}'")
 			setting = {"type": "string", "flags": flags, "name": parsed[1], "description": parsed[5], "default": f'"{parsed[3]}"'}
 		elif args[1] == "INT":
 			parsed = parse_arguments(args[2], num=7, name="int setting")
-			flags = parsed[5]
+			flags = parse_flags(parsed[5], f"int setting '{parsed[1]}'")
 			setting = {"type": "int", "flags": flags, "name": parsed[1], "description": parsed[6], "default": parse_value(parsed[2]), "min": parse_value(parsed[3]), "max": parse_value(parsed[4])}
 		elif args[1] == "COL":
 			parsed = parse_arguments(args[2], num=5, name="color setting")
-			flags = parsed[3]
+			flags = parse_flags(parsed[3], f"color setting '{parsed[1]}'")
 			setting = {"type": "color", "flags": flags, "name": parsed[1], "description": parsed[4], "default": parse_value(parsed[2])}
 		else:
 			raise RuntimeError(f"Failed to parse settings type: {args[1]}")
