@@ -42,6 +42,7 @@ private:
 	bool m_TeleportCancelled;
 	bool m_IsBlueTeleport;
 	bool m_BelongsToPracticeTeam;
+	bool m_LastHitTargetSwitch;
 };
 
 #endif

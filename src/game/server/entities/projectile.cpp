@@ -258,13 +258,17 @@ void CProjectile::Tick()
 					IsSwitchTeleGun = IsBlueSwitchTeleGun = false;
 			}
 
-			if(TileFIndex == TILE_ALLOW_TELE_GUN || TileFIndex == TILE_ALLOW_BLUE_TELE_GUN || IsSwitchTeleGun || IsBlueSwitchTeleGun || pTargetChr)
+			if(TileFIndex == TILE_ALLOW_TELE_GUN || TileFIndex == TILE_ALLOW_BLUE_TELE_GUN || IsSwitchTeleGun || IsBlueSwitchTeleGun || pTargetChr || pTargetTargetSwitch)
 			{
 				bool Found;
 				vec2 PossiblePos;
 
 				if(!Collide)
-					Found = GetNearestAirPosPlayer(pTargetChr ? pTargetChr->m_Pos : ColPos, &PossiblePos);
+				{
+					vec2 CheckPos = pTargetChr ? pTargetChr->m_Pos : pTargetTargetSwitch ? pTargetTargetSwitch->m_Pos :
+													       ColPos;
+					Found = GetNearestAirPosPlayer(CheckPos, &PossiblePos);
+				}
 				else
 					Found = GetNearestAirPos(NewPos, CurPos, &PossiblePos);
 
@@ -272,7 +276,7 @@ void CProjectile::Tick()
 				{
 					pOwnerChar->m_TeleGunPos = PossiblePos;
 					pOwnerChar->m_TeleGunTeleport = true;
-					pOwnerChar->m_IsBlueTeleGunTeleport = TileFIndex == TILE_ALLOW_BLUE_TELE_GUN || IsBlueSwitchTeleGun;
+					pOwnerChar->m_IsBlueTeleGunTeleport = TileFIndex == TILE_ALLOW_BLUE_TELE_GUN || IsBlueSwitchTeleGun || pTargetTargetSwitch;
 				}
 			}
 		}

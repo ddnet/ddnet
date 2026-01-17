@@ -30,6 +30,7 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_TeleportCancelled = false;
 	m_IsBlueTeleport = false;
 	m_ZeroEnergyBounceInLastTick = false;
+	m_LastHitTargetSwitch = false;
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	m_TeamMask = pOwnerChar ? pOwnerChar->TeamMask() : CClientMask();
@@ -53,6 +54,7 @@ bool CLaser::HitFirstEntity(vec2 From, vec2 To)
 	Types.insert(CGameWorld::ENTTYPE_CHARACTER);
 	if(WeaponCanHit)
 		Types.insert(CGameWorld::ENTTYPE_TARGETSWITCH);
+	m_LastHitTargetSwitch = false;
 
 	CEntity *pHitEntity = GameWorld()->IntersectEntities(m_Pos, To, 0.f, Types, At, pNotThis, m_Owner, pThisOnly);
 	if(!pHitEntity)
@@ -61,6 +63,7 @@ bool CLaser::HitFirstEntity(vec2 From, vec2 To)
 	if(pHitEntity->m_ObjType == CGameWorld::ENTTYPE_TARGETSWITCH)
 	{
 		auto *pTarget = static_cast<CTargetSwitch *>(pHitEntity);
+		m_LastHitTargetSwitch = true;
 		pTarget->GetHit(m_Owner);
 		m_From = From;
 		m_Pos = At;
@@ -210,7 +213,8 @@ void CLaser::DoBounce()
 	}
 
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	if(m_Owner >= 0 && m_Energy <= 0 && !m_TeleportCancelled && pOwnerChar &&
+	const bool TeleportAllowed = (!m_TeleportCancelled || m_LastHitTargetSwitch);
+	if(m_Owner >= 0 && m_Energy <= 0 && TeleportAllowed && pOwnerChar &&
 		pOwnerChar->IsAlive() && pOwnerChar->HasTelegunLaser() && m_Type == WEAPON_LASER)
 	{
 		vec2 PossiblePos;
@@ -234,11 +238,14 @@ void CLaser::DoBounce()
 		{
 			pOwnerChar->m_TeleGunPos = PossiblePos;
 			pOwnerChar->m_TeleGunTeleport = true;
-			pOwnerChar->m_IsBlueTeleGunTeleport = m_IsBlueTeleport;
+			const bool BlueTeleport = m_IsBlueTeleport || m_LastHitTargetSwitch;
+			pOwnerChar->m_IsBlueTeleGunTeleport = BlueTeleport;
 		}
+		m_LastHitTargetSwitch = false;
 	}
 	else if(m_Owner >= 0)
 	{
+		m_LastHitTargetSwitch = false;
 		int MapIndex = GameServer()->Collision()->GetPureMapIndex(Coltile);
 		int TileFIndex = GameServer()->Collision()->GetFrontTileIndex(MapIndex);
 		bool IsSwitchTeleGun = GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_ALLOW_TELE_GUN;
@@ -266,6 +273,10 @@ void CLaser::DoBounce()
 			m_TeleportCancelled =
 				m_Type == WEAPON_LASER && (TileFIndex != TILE_ALLOW_TELE_GUN && TileFIndex != TILE_ALLOW_BLUE_TELE_GUN && !IsSwitchTeleGun && !IsBlueSwitchTeleGun);
 		}
+	}
+	else
+	{
+		m_LastHitTargetSwitch = false;
 	}
 }
 

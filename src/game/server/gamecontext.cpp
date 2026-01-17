@@ -3,12 +3,12 @@
 #include "gamecontext.h"
 
 #include "entities/character.h"
+#include "entities/targetswitch.h"
 #include "gamemodes/ddnet.h"
 #include "gamemodes/mod.h"
 #include "player.h"
 #include "score.h"
 #include "teeinfo.h"
-#include "entities/targetswitch.h"
 
 #include <antibot/antibot_data.h>
 
