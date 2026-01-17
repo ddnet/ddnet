@@ -43,7 +43,7 @@ public:
 
 	virtual SHA256_DIGEST Sha256() const = 0;
 	virtual unsigned Crc() const = 0;
-	virtual int MapSize() const = 0;
+	virtual int Size() const = 0;
 };
 
 extern IEngineMap *CreateEngineMap();

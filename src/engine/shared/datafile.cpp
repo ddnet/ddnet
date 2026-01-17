@@ -908,7 +908,7 @@ unsigned CDataFileReader::Crc() const
 	return m_pDataFile->m_Crc;
 }
 
-int CDataFileReader::MapSize() const
+int CDataFileReader::Size() const
 {
 	dbg_assert(m_pDataFile != nullptr, "File not open");
 
