@@ -2114,19 +2114,8 @@ void CExcludedCommunityCountryFilterList::Clean(const std::vector<CCommunity> &v
 		if(CommunityEntry != m_Entries.end())
 		{
 			auto &CountryEntries = CommunityEntry->second;
-			for(auto It = CountryEntries.begin(); It != CountryEntries.end();)
-			{
-				if(AllowedCommunity.HasCountry(It->Name()))
-				{
-					++It;
-				}
-				else
-				{
-					It = CountryEntries.erase(It);
-				}
-			}
 			// Prevent filter that would exclude all allowed countries
-			if(CountryEntries.size() == AllowedCommunity.Countries().size())
+			if(std::ranges::all_of(AllowedCommunity.Countries(), [&](const CCommunityCountry &Country) { return CountryEntries.contains(Country.Name()); }))
 			{
 				CountryEntries.clear();
 			}
@@ -2137,17 +2126,6 @@ void CExcludedCommunityCountryFilterList::Clean(const std::vector<CCommunity> &v
 	if(AllCommunityEntry != m_Entries.end())
 	{
 		auto &CountryEntries = AllCommunityEntry->second;
-		for(auto It = CountryEntries.begin(); It != CountryEntries.end();)
-		{
-			if(std::any_of(vAllowedCommunities.begin(), vAllowedCommunities.end(), [&](const auto &Community) { return Community.HasCountry(It->Name()); }))
-			{
-				++It;
-			}
-			else
-			{
-				It = CountryEntries.erase(It);
-			}
-		}
 		// Prevent filter that would exclude all allowed countries
 		std::set<CCommunityCountryName> UniqueCountries;
 		for(const CCommunity &AllowedCommunity : vAllowedCommunities)
@@ -2157,7 +2135,7 @@ void CExcludedCommunityCountryFilterList::Clean(const std::vector<CCommunity> &v
 				UniqueCountries.emplace(Country.Name());
 			}
 		}
-		if(CountryEntries.size() == UniqueCountries.size())
+		if(std::ranges::all_of(UniqueCountries, [&](const CCommunityCountryName &Name) { return CountryEntries.contains(Name); }))
 		{
 			CountryEntries.clear();
 		}
