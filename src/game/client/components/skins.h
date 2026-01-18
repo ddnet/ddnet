@@ -81,7 +81,7 @@ public:
 			 */
 			UNLOADED,
 			/**
-			 * Skin is unloaded and should be loaded when a slot is free. Skin will enter @link LOADING @endlink
+			 * Skin is unloaded and should be loaded when a slot is free. Skin will enter @link EState::LOADING @endlink
 			 * state when maximum number of loaded skins is not exceeded.
 			 */
 			PENDING,
