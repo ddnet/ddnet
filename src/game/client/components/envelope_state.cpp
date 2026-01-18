@@ -3,10 +3,6 @@
 #include <game/client/gameclient.h>
 #include <game/localization.h>
 
-#include <chrono>
-
-using namespace std::chrono_literals;
-
 CEnvelopeState::CEnvelopeState(IMap *pMap, bool OnlineOnly) :
 	m_pMap(pMap)
 {
@@ -47,14 +43,34 @@ void CEnvelopeState::EnvelopeEval(int TimeOffsetMillis, int EnvelopeIndex, Color
 		// online rendering
 		if(GameClient()->m_Snap.m_pGameInfoObj)
 		{
-			static const nanoseconds s_NanosPerTick = nanoseconds(1s) / static_cast<int64_t>(Client()->GameTickSpeed());
-
 			// get the lerp of the current tick and prev
 			const int MinTick = Client()->PrevGameTick(g_Config.m_ClDummy) - GameClient()->m_Snap.m_pGameInfoObj->m_RoundStartTick;
 			const int CurTick = Client()->GameTick(g_Config.m_ClDummy) - GameClient()->m_Snap.m_pGameInfoObj->m_RoundStartTick;
 
 			double TickRatio = mix<double>(0, CurTick - MinTick, (double)Client()->IntraGameTick(g_Config.m_ClDummy));
-			Time = duration_cast<nanoseconds>(TickRatio * s_NanosPerTick) + MinTick * s_NanosPerTick;
+			Time = duration_cast<nanoseconds>(TickRatio * NanosPerTick()) + MinTick * NanosPerTick();
+
+			// handle envelope triggers
+			auto EnvelopeState = GameClient()->m_GameWorld.EnvTriggerState().find(EnvelopeIndex);
+			if(EnvelopeState != GameClient()->m_GameWorld.EnvTriggerState().end())
+			{
+				CEnvelopeTriggerState &TriggerState = EnvelopeState->second;
+
+				/* Initialize if not already done, we can't do this earlier,
+				 * because we are missing the envelope points and the time */
+				if(TriggerState.Duration() == nanoseconds::zero())
+				{
+					TriggerState.InitTimes(EnvelopeDuration(), Time);
+				}
+
+				TriggerState.Update(Time);
+
+				// default mode still needs updates, but just runs on global timer
+				if(!EnvelopeState->second.IsDefault())
+				{
+					Time = TriggerState.EnvelopeTime();
+				}
+			}
 		}
 		else
 		{
@@ -63,6 +79,14 @@ void CEnvelopeState::EnvelopeEval(int TimeOffsetMillis, int EnvelopeIndex, Color
 	}
 
 	CRenderMap::RenderEvalEnvelope(m_pEnvelopePoints.get(), Time + milliseconds(TimeOffsetMillis), Result, Channels);
+}
+
+std::chrono::milliseconds CEnvelopeState::EnvelopeDuration() const
+{
+	const CEnvPoint *pLastEnvPoint = m_pEnvelopePoints->GetPoint(m_pEnvelopePoints->NumPoints() - 1);
+	const CFixedTime &LastEnvPointTime = pLastEnvPoint->m_Time;
+
+	return std::chrono::milliseconds(LastEnvPointTime.GetInternal());
 }
 
 const char *CEnvelopeTrigger::ConsoleName(EEnvelopeTriggerType Trigger)
@@ -104,4 +128,74 @@ EEnvelopeTriggerType CEnvelopeTrigger::FromName(const char *pTriggerName)
 		return EEnvelopeTriggerType::RESET_START_LOOP;
 
 	return EEnvelopeTriggerType::DEFAULT;
+}
+
+CEnvelopeTriggerState::CEnvelopeTriggerState(EEnvelopeTriggerType Type, CEnvelopeTriggerState *pOld)
+{
+	if(pOld != nullptr)
+	{
+		m_Duration = pOld->m_Duration;
+		m_LastGlobalTime = pOld->m_LastGlobalTime;
+	}
+	else
+	{
+		m_Duration = std::chrono::nanoseconds::zero();
+		m_LastGlobalTime = std::chrono::nanoseconds::zero();
+	}
+
+	// Envelope Time
+	if(pOld != nullptr && (Type == EEnvelopeTriggerType::STOP || Type == EEnvelopeTriggerType::START_ONCE || Type == EEnvelopeTriggerType::START_LOOP))
+	{
+		m_CurrentTime = pOld->m_CurrentTime;
+	}
+	else
+	{
+		m_CurrentTime = std::chrono::nanoseconds::zero();
+	}
+
+	m_IsPlaying = !(Type == EEnvelopeTriggerType::STOP || Type == EEnvelopeTriggerType::RESET_STOP);
+	m_IsLooping = (Type == EEnvelopeTriggerType::START_LOOP || Type == EEnvelopeTriggerType::RESET_START_LOOP);
+	m_IsDefault = (Type == EEnvelopeTriggerType::DEFAULT);
+}
+
+void CEnvelopeTriggerState::InitTimes(const std::chrono::nanoseconds &Duration, const std::chrono::nanoseconds &Time)
+{
+	m_Duration = Duration;
+	m_LastGlobalTime = Time;
+}
+
+void CEnvelopeTriggerState::Update(std::chrono::nanoseconds &Time)
+{
+	// default mode just keeps running in current time
+	if(m_IsDefault)
+	{
+		m_LastGlobalTime = Time;
+		return;
+	}
+
+	// we're not playing so we don't update the time
+	if(!m_IsPlaying)
+	{
+		// keep updating, so the starting delta is correct
+		m_LastGlobalTime = Time;
+		return;
+	}
+
+	// update with delta T, current Time can be behind due to stopping
+	m_CurrentTime += Time - m_LastGlobalTime;
+
+	if(m_CurrentTime > m_Duration)
+	{
+		if(m_IsLooping)
+		{
+			m_CurrentTime -= m_Duration;
+		}
+		else
+		{
+			m_CurrentTime = std::chrono::nanoseconds::zero();
+			m_IsPlaying = false;
+		}
+	}
+
+	m_LastGlobalTime = Time;
 }
