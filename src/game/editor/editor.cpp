@@ -5072,6 +5072,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		{
 			Map()->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionEnvelopeAdd>(Map(), CEnvelope::EType::SOUND));
 			pEnvelope = Map()->m_vpEnvelopes[m_SelectedEnvelope];
+			CurrentEnvelopeSwitched = true;
 		}
 
 		ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
@@ -5081,6 +5082,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		{
 			Map()->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionEnvelopeAdd>(Map(), CEnvelope::EType::COLOR));
 			pEnvelope = Map()->m_vpEnvelopes[m_SelectedEnvelope];
+			CurrentEnvelopeSwitched = true;
 		}
 
 		ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
@@ -5090,6 +5092,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		{
 			Map()->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionEnvelopeAdd>(Map(), CEnvelope::EType::POSITION));
 			pEnvelope = Map()->m_vpEnvelopes[m_SelectedEnvelope];
+			CurrentEnvelopeSwitched = true;
 		}
 
 		if(m_SelectedEnvelope >= 0)
