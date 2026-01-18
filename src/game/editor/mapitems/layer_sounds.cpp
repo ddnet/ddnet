@@ -153,7 +153,7 @@ void CLayerSounds::BrushPlace(CLayer *pBrush, vec2 WorldPos)
 		m_vSources.push_back(NewSource);
 		vAddedSources.push_back(NewSource);
 	}
-	Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionSoundPlace>(Map(), Editor()->m_SelectedGroup, Editor()->m_vSelectedLayers[0], vAddedSources));
+	Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionSoundPlace>(Map(), Map()->m_SelectedGroup, Map()->m_vSelectedLayers[0], vAddedSources));
 	Map()->OnModify();
 }
 
