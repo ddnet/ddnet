@@ -400,11 +400,13 @@ public:
 	};
 	CCache m_aServerInfoCache[3 * 2];
 	CCache m_aSixupServerInfoCache[2];
-	bool m_ServerInfoNeedsUpdate;
+	bool m_ServerInfoNeedsUpdate = false;
+	bool m_ServerInfoNeedsResend = false;
 
 	void FillAntibot(CAntibotRoundData *pData) override;
 
 	void ExpireServerInfo() override;
+	void ExpireServerInfoAndQueueResend();
 	void CacheServerInfo(CCache *pCache, int Type, bool SendClients);
 	void CacheServerInfoSixup(CCache *pCache, bool SendClients, int MaxConsideredClients);
 	void SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool SendClients);
@@ -412,7 +414,7 @@ public:
 	bool RateLimitServerInfoConnless();
 	void SendServerInfoConnless(const NETADDR *pAddr, int Token, int Type);
 	void UpdateRegisterServerInfo();
-	void UpdateServerInfo(bool Resend = false);
+	void UpdateServerInfo(bool Resend);
 
 	void PumpNetwork(bool PacketWaiting);
 
