@@ -99,6 +99,12 @@ enum
 	CMDFLAG_PRACTICE = 1 << 14,
 };
 
+#ifdef CONF_DEBUG
+#define CFGFLAG_DEBUG_SERVER CFGFLAG_SERVER
+#else
+#define CFGFLAG_DEBUG_SERVER 0
+#endif
+
 struct SConfigVariable
 {
 	enum EVariableType
