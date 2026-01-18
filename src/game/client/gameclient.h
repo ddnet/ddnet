@@ -254,6 +254,7 @@ private:
 	static void ConTuneParam(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneZone(IConsole::IResult *pResult, void *pUserData);
 	static void ConEnvTrigger(IConsole::IResult *pResult, void *pUserData);
+	static void ConTuneZoneEnvTrigger(IConsole::IResult *pResult, void *pUserData);
 	static void ConMapbug(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConchainMenuMap(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -921,9 +922,6 @@ private:
 	// tunings for every zone on the map, 0 is a global tune
 	CTuningParams m_aTuningList[TuneZone::NUM];
 	CTuningParams *TuningList() { return m_aTuningList; }
-
-	// give up on an array datatype, this is sparse or used to infinity
-	std::unordered_map<int, CEnvelopeTriggerZone> m_EnvTriggerList;
 
 	float m_LastShowDistanceZoom;
 	float m_LastZoom;

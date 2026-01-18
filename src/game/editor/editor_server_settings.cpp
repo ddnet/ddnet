@@ -1085,7 +1085,8 @@ void CMapSettingsBackend::LoadAllMapSettings()
 	// Load list of commands
 	LoadCommand("tune", "s[tuning] f[value]", "Tune variable to value or show current value");
 	LoadCommand("tune_zone", "i[zone] s[tuning] f[value]", "Tune in zone a variable to value");
-	LoadCommand("env_trigger", "i[zone] i[env] s[trigger_type]", "Set a trigger type for an env in a trigger zone");
+	LoadCommand("env_trigger", "i[zone] s[trigger_type] i[env]", "Set a trigger type for an env in a trigger zone");
+	LoadCommand("tune_zone_env_trigger", "i[zone], i[envzone]", "Make a tune zone trigger an env zone");
 	LoadCommand("tune_zone_enter", "i[zone] r[message]", "Which message to display on zone enter; use 0 for normal area");
 	LoadCommand("tune_zone_leave", "i[zone] r[message]", "Which message to display on zone leave; use 0 for normal area");
 	LoadCommand("mapbug", "s[mapbug]", "Enable map compatibility mode using the specified bug (example: grenade-doubleexplosion@ddnet.tw)");
@@ -1177,7 +1178,8 @@ void CMapSettingsBackend::LoadConstraints()
 	Command("tune_zone_leave", 2).Unique(0);
 	Command("switch_open", 1).Unique(0);
 	Command("mapbug", 1).Unique(0);
-	Command("env_trigger", 3).Multiple(0).Unique(1);
+	Command("env_trigger", 3).Multiple(0);
+	Command("tune_zone_env_trigger", 2).Unique(0);
 }
 
 void CMapSettingsBackend::PossibleConfigVariableCallback(const SConfigVariable *pVariable, void *pUserData)
@@ -2181,7 +2183,7 @@ void SValueLoader::LoadTuneZoneValues(const CSettingValuesBuilder &TuneZoneBuild
 
 void SValueLoader::LoadEnvTriggerValues(const CSettingValuesBuilder &EnvTriggerBuilder)
 {
-	LoadArgumentEnvTriggerValues(EnvTriggerBuilder.Argument(2));
+	LoadArgumentEnvTriggerValues(EnvTriggerBuilder.Argument(1));
 }
 
 void SValueLoader::LoadMapBugs(const CSettingValuesBuilder &BugBuilder)

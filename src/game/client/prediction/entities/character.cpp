@@ -767,6 +767,9 @@ void CCharacter::HandleTiles(int Index)
 	m_TileFIndex = Collision()->GetFrontTileIndex(MapIndex);
 	m_MoveRestrictions = Collision()->GetMoveRestrictions(IsSwitchActiveCb, this, m_Pos, 18.0f, MapIndex);
 
+	// handle envelopes even if we disabled prediction
+	HandleEnvelopeTriggerTiles(MapIndex);
+
 	if(!GameWorld()->m_WorldConfig.m_PredictTiles)
 		return;
 
@@ -1050,6 +1053,74 @@ void CCharacter::HandleTiles(int Index)
 	}
 }
 
+void CCharacter::HandleEnvelopeTriggerTiles(int MapIndex)
+{
+	if(MapIndex < 0)
+	{
+		m_LastEnvelopeTriggerZone = -1;
+		return;
+	}
+
+	int TuneZone = Collision()->IsTune(MapIndex);
+	bool IsEnvTrigger = Collision()->GetSwitchType(MapIndex) == TILE_ENV_TRIGGER;
+
+	if(IsEnvTrigger || TuneZone > 0)
+	{
+		int TriggerZoneId;
+
+		if(!IsEnvTrigger && TuneZone > 0)
+		{
+			TriggerZoneId = GameWorld()->TuneZoneToEnvZone()[TuneZone];
+		}
+		else
+		{
+			int StartDelay = Collision()->GetSwitchDelay(MapIndex);
+			TriggerZoneId = Collision()->GetSwitchNumber(MapIndex);
+
+			// we are supporting 256^2 - 1 trigger zones
+			TriggerZoneId = TriggerZoneId + StartDelay * 256;
+		}
+
+		if(GameWorld()->EnvTriggerList().contains(TriggerZoneId) && m_LastEnvelopeTriggerZone != TriggerZoneId)
+		{
+			m_LastEnvelopeTriggerZone = TriggerZoneId;
+			const CEnvelopeTriggerZone &TriggerZone = GameWorld()->EnvTriggerList()[TriggerZoneId];
+
+			// copy state from zone so they are used by the rendering automatically
+			for(const auto &EnvState : TriggerZone.m_EnvTriggers)
+			{
+				if(EnvState.m_EnvId >= 0 && EnvState.m_State != EEnvelopeTriggerType::NUM_ENV_TRIGGERS)
+				{
+					auto LastStateIt = GameWorld()->EnvTriggerState().find(EnvState.m_EnvId);
+					CEnvelopeTriggerState *pOldState = nullptr;
+					if(LastStateIt != GameWorld()->EnvTriggerState().end())
+					{
+						pOldState = &LastStateIt->second;
+					}
+					CEnvelopeTriggerState State(EnvState.m_State, pOldState);
+					GameWorld()->EnvTriggerState()[EnvState.m_EnvId] = State;
+				}
+			}
+		}
+	}
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_ENV_RESET_STOP)
+	{
+		if(m_LastEnvelopeTriggerZone != -2)
+		{
+			m_LastEnvelopeTriggerZone = -2;
+			for(int EnvId = 0; EnvId < GameWorld()->NumEnvelopes(); ++EnvId)
+			{
+				CEnvelopeTriggerState State(EEnvelopeTriggerType::STOP, nullptr);
+				GameWorld()->EnvTriggerState()[EnvId] = State;
+			}
+		}
+	}
+	else
+	{
+		m_LastEnvelopeTriggerZone = -1;
+	}
+}
+
 void CCharacter::HandleTuneLayer()
 {
 	int CurrentIndex = Collision()->GetMapIndex(m_Pos);
@@ -1283,6 +1354,7 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar,
 	m_CanMoveInFreeze = false;
 	m_TeleCheckpoint = 0;
 	m_StrongWeakId = 0;
+	m_LastEnvelopeTriggerZone = -1;
 
 	mem_zero(&m_Input, sizeof(m_Input));
 	// never initialize both to zero
