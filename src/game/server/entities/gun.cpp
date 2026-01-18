@@ -89,6 +89,7 @@ void CGun::Fire()
 		}
 
 		// Turrets can shoot only at reachable, alive players
+		COL_SCOPED_TEAM_CONTEXT(Collision(), pTarget->Team());
 		int IsReachable = !GameServer()->Collision()->IntersectLine(m_Pos, pTarget->m_Pos, nullptr, nullptr);
 		if(IsReachable && pTarget->IsAlive())
 		{

@@ -115,6 +115,7 @@ bool CPlasma::HitCharacter(CCharacter *pTarget)
 bool CPlasma::HitObstacle(CCharacter *pTarget)
 {
 	// Check if the plasma bullet is stopped by a solid block or a laser stopper
+	COL_SCOPED_TEAM_CONTEXT(Collision(), pTarget->Team());
 	int HasIntersection = Collision()->IntersectNoLaser(m_Pos, m_Pos + m_Core, nullptr, nullptr);
 	if(HasIntersection)
 	{
