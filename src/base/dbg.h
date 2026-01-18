@@ -24,14 +24,7 @@
  *
  * @see dbg_break
  */
-#define dbg_assert(test, fmt, ...) \
-	do \
-	{ \
-		if(!(test)) \
-		{ \
-			dbg_assert_imp(__FILE__, __LINE__, fmt, ##__VA_ARGS__); \
-		} \
-	} while(false)
+#define dbg_assert(test, fmt, ...) dbg_assert_loc(DBG_HERE, test, fmt, ##__VA_ARGS__)
 
 /**
  * Breaks into the debugger with a message.
@@ -44,7 +37,7 @@
  *
  * @see dbg_break
  */
-#define dbg_assert_failed(fmt, ...) dbg_assert_imp(__FILE__, __LINE__, fmt, ##__VA_ARGS__)
+#define dbg_assert_failed(fmt, ...) dbg_assert_failed_loc(DBG_HERE, fmt, ##__VA_ARGS__)
 
 /**
  * Use the @link dbg_assert @endlink function instead!
@@ -55,6 +48,26 @@
  */
 [[gnu::format(printf, 3, 4)]] [[noreturn]] void
 dbg_assert_imp(const char *filename, int line, const char *fmt, ...);
+
+struct DBG_LOCATION
+{
+	const char *filename;
+	int line;
+};
+
+#define DBG_HERE (DBG_LOCATION{__FILE__, __LINE__})
+
+#define dbg_assert_loc(loc, test, fmt, ...) \
+	do \
+	{ \
+		if(!(test)) \
+		{ \
+			dbg_assert_imp(loc.filename, loc.line, fmt, ##__VA_ARGS__); \
+		} \
+	} while(false)
+
+#define dbg_assert_failed_loc(loc, fmt, ...) \
+	dbg_assert_imp(loc.filename, loc.line, fmt, ##__VA_ARGS__)
 
 /**
  * Checks whether the program is currently shutting down due to a failed
