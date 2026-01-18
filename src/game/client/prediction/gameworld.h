@@ -66,7 +66,7 @@ public:
 	CCharacter *GetCharacterById(int Id) { return (Id >= 0 && Id < MAX_CLIENTS) ? m_apCharacters[Id] : nullptr; }
 
 	// from gamecontext
-	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, CClientMask Mask);
+	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, CClientMask Mask, int Id = -1);
 
 	// for client side prediction
 	struct
@@ -83,6 +83,7 @@ public:
 		bool m_UseTuneZones;
 		bool m_BugDDRaceInput;
 		bool m_NoWeakHookAndBounce;
+		bool m_PredictEvents;
 	} m_WorldConfig;
 
 	bool m_IsValidCopy;
@@ -109,6 +110,34 @@ public:
 	CTuningParams *GetTuning(int i) { return &TuningList()[i]; }
 
 	bool EmulateBug(int Bug) const;
+
+	class CPredictedEvent
+	{
+	public:
+		int m_EventId;
+		vec2 m_Pos; // NetEvent's Pos are integers
+		int m_Id; // identifier to prevent adding the same event multiple times
+		int m_Tick;
+
+		int m_ExtraInfo;
+		bool m_Handled = false;
+
+		CPredictedEvent(int EventId, vec2 Pos, int Id, int Tick, int ExtraInfo = -1) :
+			m_EventId(EventId), m_Pos(vec2((int)Pos.x, (int)Pos.y)), m_Id(Id), m_Tick(Tick), m_ExtraInfo(ExtraInfo)
+		{
+		}
+	};
+
+	std::vector<CPredictedEvent> m_PredictedEvents;
+
+	void CreatePredictedEvent(const CPredictedEvent &NewEvent);
+	bool CheckPredictedEventHandled(const CPredictedEvent &CheckEvent);
+	void PlayPredictedEvents(int Tick);
+
+	void CreatePredictedSound(vec2 Pos, int SoundId, int Id = -1);
+	void CreatePredictedExplosionEvent(vec2 Pos, int Id = -1);
+	void CreatePredictedHammerHitEvent(vec2 Pos, int Id = -1);
+	void CreatePredictedDamageIndEvent(vec2 Pos, float Angle, int Amount, int Id = -1);
 
 private:
 	void RemoveEntities();
