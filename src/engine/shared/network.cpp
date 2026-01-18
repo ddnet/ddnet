@@ -400,12 +400,12 @@ void CNetBase::SendControlMsgWithToken7(NETSOCKET Socket, NETADDR *pAddr, TOKEN 
 
 unsigned char *CNetChunkHeader::Pack(unsigned char *pData, int Split) const
 {
-	pData[0] = ((m_Flags & 3) << 6) | ((m_Size >> Split) & 0x3f);
+	pData[0] = ((m_Flags & 0b00000011) << 6) | ((m_Size >> Split) & 0b00111111);
 	pData[1] = (m_Size & ((1 << Split) - 1));
 	if(m_Flags & NET_CHUNKFLAG_VITAL)
 	{
-		pData[1] |= (m_Sequence >> 2) & (~((1 << Split) - 1));
-		pData[2] = m_Sequence & 0xff;
+		pData[1] |= (m_Sequence >> 2) & 0b11000000;
+		pData[2] = m_Sequence & 0b11111111;
 		return pData + 3;
 	}
 	return pData + 2;
@@ -413,14 +413,14 @@ unsigned char *CNetChunkHeader::Pack(unsigned char *pData, int Split) const
 
 unsigned char *CNetChunkHeader::Unpack(unsigned char *pData, int Split)
 {
-	m_Flags = (pData[0] >> 6) & 3;
-	m_Size = ((pData[0] & 0x3f) << Split) | (pData[1] & ((1 << Split) - 1));
-	m_Sequence = -1;
+	m_Flags = (pData[0] >> 6) & 0b00000011;
+	m_Size = ((pData[0] & 0b00111111) << Split) | (pData[1] & ((1 << Split) - 1));
 	if(m_Flags & NET_CHUNKFLAG_VITAL)
 	{
-		m_Sequence = ((pData[1] & (~((1 << Split) - 1))) << 2) | pData[2];
+		m_Sequence = ((pData[1] & 0b11000000) << 2) | pData[2];
 		return pData + 3;
 	}
+	m_Sequence = -1;
 	return pData + 2;
 }
 
