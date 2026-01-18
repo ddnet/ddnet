@@ -1235,7 +1235,18 @@ void CGameTeams::OnCharacterDeath(int ClientId, int Weapon)
 			ChangeTeamState(Team, ETeamState::OPEN);
 
 			if(!m_pGameContext->PracticeByDefault())
+			{
+				for(int i = 0; i < MAX_CLIENTS; i++)
+				{
+					if(m_Core.Team(i) == Team)
+					{
+						CPlayer *pPlayer = GameServer()->m_apPlayers[i];
+						if(pPlayer && !g_Config.m_SvPauseable && pPlayer->IsPaused() == -1 * CPlayer::PAUSE_SPEC)
+							pPlayer->Pause(CPlayer::PAUSE_PAUSED, true);
+					}
+				}
 				m_aPractice[Team] = false;
+			}
 
 			if(Count(Team) > 1)
 			{
