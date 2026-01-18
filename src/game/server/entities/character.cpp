@@ -668,7 +668,7 @@ void CCharacter::GiveNinja()
 {
 	m_Core.m_Ninja.m_ActivationTick = Server()->Tick();
 	m_Core.m_aWeapons[WEAPON_NINJA].m_Got = true;
-	m_Core.m_aWeapons[WEAPON_NINJA].m_Ammo = -1;
+	m_Core.m_aWeapons[WEAPON_NINJA].m_Ammo = Ammo::INFINITE;
 	if(m_Core.m_ActiveWeapon != WEAPON_NINJA)
 		m_LastWeapon = m_Core.m_ActiveWeapon;
 	m_Core.m_ActiveWeapon = WEAPON_NINJA;
@@ -1124,7 +1124,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 	if(m_pPlayer->m_NinjaJetpack && m_Core.m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN && !m_Core.m_DeepFrozen && m_FreezeTime == 0 && !m_Core.m_HasTelegunGun)
 	{
 		Weapon = WEAPON_NINJA;
-		AmmoCount = 10;
+		AmmoCount = Ammo::MAX;
 	}
 
 	if(m_pPlayer->GetCid() == SnappingClient || SnappingClient == SERVER_DEMO_CLIENT ||
@@ -2385,7 +2385,7 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove)
 	}
 	else
 	{
-		m_Core.m_aWeapons[Weapon].m_Ammo = -1;
+		m_Core.m_aWeapons[Weapon].m_Ammo = Ammo::INFINITE;
 	}
 
 	m_Core.m_aWeapons[Weapon].m_Got = !Remove;
