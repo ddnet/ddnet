@@ -218,6 +218,7 @@ class CCommunity
 	char m_aIconUrl[128];
 	std::vector<CCommunityCountry> m_vCountries;
 	std::vector<CCommunityType> m_vTypes;
+	int m_NumPlayers = 0;
 	bool m_HasFinishes = false;
 	std::unordered_set<CCommunityMap, CCommunityMap::SHash> m_FinishedMaps;
 
@@ -240,6 +241,7 @@ public:
 	bool HasType(const char *pTypeName) const;
 	bool HasRanks() const { return m_HasFinishes; }
 	CServerInfo::ERankState HasRank(const char *pMap) const;
+	int NumPlayers() const { return m_NumPlayers; }
 };
 
 class IFilterList
