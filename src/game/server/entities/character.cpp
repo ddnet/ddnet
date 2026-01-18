@@ -636,11 +636,24 @@ void CCharacter::FireWeapon()
 
 	m_AttackTick = Server()->Tick();
 
+	if(m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo > 0)
+	{
+		m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo--;
+	}
+
 	if(!m_ReloadTimer)
 	{
 		float FireDelay;
 		GetTuning(m_TuneZone)->Get(offsetof(CTuningParams, m_HammerFireDelay) / sizeof(CTuneParam) + m_Core.m_ActiveWeapon, &FireDelay);
 		m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
+	}
+
+	if(m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo == 0)
+	{
+		SetWeaponGot(m_Core.m_ActiveWeapon, false);
+		SetLastWeapon(WEAPON_GUN);
+		GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
+		SetActiveWeapon(WEAPON_HAMMER);
 	}
 }
 
@@ -1132,7 +1145,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 	{
 		Health = m_Health;
 		Armor = m_Armor;
-		AmmoCount = (m_FreezeTime == 0) ? m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo : 0;
+		AmmoCount = m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo;
 	}
 
 	if(!Server()->IsSixup(SnappingClient))
