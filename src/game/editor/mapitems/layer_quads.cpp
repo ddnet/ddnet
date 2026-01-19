@@ -130,7 +130,7 @@ void CLayerQuads::BrushPlace(CLayer *pBrush, vec2 WorldPos)
 		m_vQuads.push_back(NewQuad);
 		vAddedQuads.push_back(NewQuad);
 	}
-	Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionQuadPlace>(Map(), Editor()->m_SelectedGroup, Editor()->m_vSelectedLayers[0], vAddedQuads));
+	Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionQuadPlace>(Map(), Map()->m_SelectedGroup, Map()->m_vSelectedLayers[0], vAddedQuads));
 	Map()->OnModify();
 }
 
