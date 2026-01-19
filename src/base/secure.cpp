@@ -64,7 +64,7 @@ void generate_password(char *buffer, unsigned length, const unsigned short *rand
 	}
 }
 
-#define MAX_PASSWORD_LENGTH 128
+static constexpr unsigned MAX_PASSWORD_LENGTH = 128;
 
 void secure_random_password(char *buffer, unsigned length, unsigned pw_length)
 {
@@ -79,8 +79,6 @@ void secure_random_password(char *buffer, unsigned length, unsigned pw_length)
 
 	generate_password(buffer, length, random, pw_length / 2);
 }
-
-#undef MAX_PASSWORD_LENGTH
 
 void secure_random_fill(void *bytes, unsigned length)
 {
