@@ -78,6 +78,7 @@ void CSaveTee::Save(CCharacter *pChr, bool AddPenalty)
 
 	m_TuneZone = pChr->m_TuneZone;
 	m_TuneZoneOld = pChr->m_TuneZoneOld;
+	m_TuneZoneOverride = pChr->m_TuneZoneOverride;
 
 	if(pChr->m_StartTime)
 		m_Time = pChr->Server()->Tick() - pChr->m_StartTime;
@@ -190,6 +191,7 @@ bool CSaveTee::Load(CCharacter *pChr, std::optional<int> Team)
 
 	pChr->m_TuneZone = m_TuneZone;
 	pChr->m_TuneZoneOld = m_TuneZoneOld;
+	pChr->m_TuneZoneOverride = m_TuneZoneOverride;
 
 	if(m_Time)
 		pChr->m_StartTime = pChr->Server()->Tick() - m_Time;
@@ -314,7 +316,8 @@ char *CSaveTee::GetString(const CSaveTeam *pTeam)
 		"%d\t" // m_ReloadTimer
 		"%d\t" // m_TeeStarted
 		"%d\t" //m_LiveFreeze
-		"%f\t%f\t%d\t%d\t%d", // m_Ninja
+		"%f\t%f\t%d\t%d\t%d\t" // m_Ninja
+		"%d", // m_TuneZoneOverride
 		m_aName, m_Alive, m_Paused, m_NeededFaketuning, m_TeeFinished, m_IsSolo,
 		// weapons
 		m_aWeapons[0].m_AmmoRegenStart, m_aWeapons[0].m_Ammo, m_aWeapons[0].m_Ammocost, m_aWeapons[0].m_Got,
@@ -348,7 +351,8 @@ char *CSaveTee::GetString(const CSaveTeam *pTeam)
 		m_ReloadTimer,
 		m_TeeStarted,
 		m_LiveFrozen,
-		m_Ninja.m_ActivationDir.x, m_Ninja.m_ActivationDir.y, m_Ninja.m_ActivationTick, m_Ninja.m_CurrentMoveTime, m_Ninja.m_OldVelAmount);
+		m_Ninja.m_ActivationDir.x, m_Ninja.m_ActivationDir.y, m_Ninja.m_ActivationTick, m_Ninja.m_CurrentMoveTime, m_Ninja.m_OldVelAmount,
+		m_TuneZoneOverride);
 	return m_aString;
 }
 
@@ -389,7 +393,8 @@ int CSaveTee::FromString(const char *pString)
 		"%d\t" // m_ReloadTimer
 		"%d\t" // m_TeeStarted
 		"%d\t" // m_LiveFreeze
-		"%f\t%f\t%d\t%d\t%d", // m_Ninja
+		"%f\t%f\t%d\t%d\t%d\t" // m_Ninja
+		"%d", // m_TuneZoneOverride
 		m_aName, &m_Alive, &m_Paused, &m_NeededFaketuning, &m_TeeFinished, &m_IsSolo,
 		// weapons
 		&m_aWeapons[0].m_AmmoRegenStart, &m_aWeapons[0].m_Ammo, &m_aWeapons[0].m_Ammocost, &m_aWeapons[0].m_Got,
@@ -423,7 +428,8 @@ int CSaveTee::FromString(const char *pString)
 		&m_ReloadTimer,
 		&m_TeeStarted,
 		&m_LiveFrozen,
-		&m_Ninja.m_ActivationDir.x, &m_Ninja.m_ActivationDir.y, &m_Ninja.m_ActivationTick, &m_Ninja.m_CurrentMoveTime, &m_Ninja.m_OldVelAmount);
+		&m_Ninja.m_ActivationDir.x, &m_Ninja.m_ActivationDir.y, &m_Ninja.m_ActivationTick, &m_Ninja.m_CurrentMoveTime, &m_Ninja.m_OldVelAmount,
+		&m_TuneZoneOverride);
 	switch(Num) // Don't forget to update this when you save / load more / less.
 	{
 	case 96:
@@ -467,6 +473,9 @@ int CSaveTee::FromString(const char *pString)
 		m_Ninja.m_OldVelAmount = 0;
 		[[fallthrough]];
 	case 115:
+		m_TuneZoneOverride = TuneZone::OVERRIDE_NONE;
+		[[fallthrough]];
+	case 116:
 		return 0;
 	default:
 		dbg_msg("load", "failed to load tee-string");
