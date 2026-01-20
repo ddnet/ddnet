@@ -4,6 +4,7 @@
 
 #include <engine/engine.h>
 #include <engine/gfx/image_manipulation.h>
+#include <engine/http.h>
 #include <engine/storage.h>
 
 CCommunityIcons::CAbstractCommunityIconJob::CAbstractCommunityIconJob(CCommunityIcons *pCommunityIcons, const char *pCommunityId, int StorageType) :
@@ -15,13 +16,13 @@ CCommunityIcons::CAbstractCommunityIconJob::CAbstractCommunityIconJob(CCommunity
 }
 
 CCommunityIcons::CCommunityIconDownloadJob::CCommunityIconDownloadJob(CCommunityIcons *pCommunityIcons, const char *pCommunityId, const char *pUrl, const SHA256_DIGEST &Sha256) :
-	CHttpRequest(pUrl),
 	CAbstractCommunityIconJob(pCommunityIcons, pCommunityId, IStorage::TYPE_SAVE)
 {
-	WriteToFile(pCommunityIcons->Storage(), m_aPath, IStorage::TYPE_SAVE);
-	ExpectSha256(Sha256);
-	Timeout(CTimeout{0, 0, 0, 0});
-	LogProgress(HTTPLOG::FAILURE);
+	m_pHttpRequest = CreateHttpRequest(pUrl);
+	m_pHttpRequest->WriteToFile(pCommunityIcons->Storage(), m_aPath, IStorage::TYPE_SAVE);
+	m_pHttpRequest->ExpectSha256(Sha256);
+	m_pHttpRequest->Timeout(CTimeout{0, 0, 0, 0});
+	m_pHttpRequest->LogProgress(HTTPLOG::FAILURE);
 }
 
 void CCommunityIcons::CCommunityIconLoadJob::Run()
@@ -164,9 +165,9 @@ void CCommunityIcons::Update()
 	if(!m_CommunityIconDownloadJobs.empty())
 	{
 		std::shared_ptr<CCommunityIconDownloadJob> pJob = m_CommunityIconDownloadJobs.front();
-		if(pJob->Done())
+		if(pJob->HttpRequest()->Done())
 		{
-			if(pJob->State() == EHttpState::DONE)
+			if(pJob->HttpRequest()->State() == EHttpState::DONE)
 			{
 				std::shared_ptr<CCommunityIconLoadJob> pLoadJob = std::make_shared<CCommunityIconLoadJob>(this, pJob->CommunityId(), IStorage::TYPE_SAVE);
 				Engine()->AddJob(pLoadJob);
@@ -211,7 +212,7 @@ void CCommunityIcons::Update()
 		if(ExistingDownload == m_CommunityIconDownloadJobs.end() && (ExistingIcon == m_vCommunityIcons.end() || ExistingIcon->m_Sha256 != Community.IconSha256().value()))
 		{
 			std::shared_ptr<CCommunityIconDownloadJob> pJob = std::make_shared<CCommunityIconDownloadJob>(this, Community.Id(), Community.IconUrl(), Community.IconSha256().value());
-			Http()->Run(pJob);
+			Http()->Run(pJob->HttpRequest());
 			m_CommunityIconDownloadJobs.push_back(pJob);
 		}
 	}

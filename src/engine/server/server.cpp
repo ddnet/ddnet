@@ -16,6 +16,7 @@
 #include <engine/config.h>
 #include <engine/console.h>
 #include <engine/engine.h>
+#include <engine/http.h>
 #include <engine/map.h>
 #include <engine/server.h>
 #include <engine/server/authmanager.h>
@@ -27,7 +28,6 @@
 #include <engine/shared/fifo.h>
 #include <engine/shared/filecollection.h>
 #include <engine/shared/host_lookup.h>
-#include <engine/shared/http.h>
 #include <engine/shared/json.h>
 #include <engine/shared/jsonwriter.h>
 #include <engine/shared/linereader.h>
