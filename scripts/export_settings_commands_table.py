@@ -11,7 +11,9 @@ import sys
 SUPPORTED_COMMAND_FLAGS = [
 	"CFGFLAG_SAVE",
 	"CFGFLAG_CLIENT",
+	"CFGFLAG_DEBUG_CLIENT",
 	"CFGFLAG_SERVER",
+	"CFGFLAG_DEBUG_SERVER",
 	"CFGFLAG_STORE",
 	"CFGFLAG_MASTER",
 	"CFGFLAG_ECON",
@@ -40,7 +42,6 @@ def parse_arguments(arguments_line, num, name):
 
 def parse_flags(flags_str, name):
 	flags = flags_str.split(" | ")
-	flags = ["CFGFLAG_SERVER" if flag == "CFGFLAG_DEBUG_SERVER" else flag for flag in flags]
 	for flag in flags:
 		if flag not in SUPPORTED_COMMAND_FLAGS:
 			raise RuntimeError(f"Failed to parse {name} with unknown flag: {flag}")
