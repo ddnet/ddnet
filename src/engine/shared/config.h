@@ -101,8 +101,10 @@ enum
 
 #ifdef CONF_DEBUG
 #define CFGFLAG_DEBUG_SERVER CFGFLAG_SERVER
+#define CFGFLAG_DEBUG_CLIENT CFGFLAG_CLIENT
 #else
 #define CFGFLAG_DEBUG_SERVER 0
+#define CFGFLAG_DEBUG_CLIENT 0
 #endif
 
 struct SConfigVariable
