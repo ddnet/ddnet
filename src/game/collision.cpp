@@ -730,13 +730,38 @@ int CCollision::IsSpeedup(int Index) const
 	return 0;
 }
 
-int CCollision::IsTune(int Index) const
+int CCollision::GetTuneNumber(int Index) const
 {
 	if(Index < 0 || !m_pTune)
 		return 0;
 
 	if(m_pTune[Index].m_Type)
 		return m_pTune[Index].m_Number;
+
+	return 0;
+}
+
+int CCollision::GetTuneType(int Index) const
+{
+	if(Index < 0 || !m_pTune)
+		return 0;
+
+	if(m_pTune[Index].m_Type)
+		return m_pTune[Index].m_Type;
+
+	return 0;
+}
+
+int CCollision::IsTuneZoneTile(int Index) const
+{
+	if(Index < 0 || !m_pTune)
+		return 0;
+
+	if(m_pTune[Index].m_Type == TILE_TUNE)
+	{
+		if(m_pTune[Index].m_Number)
+			return m_pTune[Index].m_Number;
+	}
 
 	return 0;
 }
