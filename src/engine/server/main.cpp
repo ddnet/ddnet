@@ -211,10 +211,10 @@ int main(int argc, const char **argv)
 }
 
 #if defined(CONF_PLATFORM_ANDROID)
-#if !defined(ANDROID_PACKAGE_NAME)
-#error "ANDROID_PACKAGE_NAME must define the package name when compiling for Android (using underscores instead of dots, e.g. org_example_app)"
+#if !defined(ANDROID_PACKAGE_NAME_JNI)
+#error "ANDROID_PACKAGE_NAME_JNI must define the package name when compiling for Android (using underscores instead of dots, e.g. org_example_app)"
 #endif
-// Helpers to force macro expansion else the ANDROID_PACKAGE_NAME macro is not expanded
+// Helpers to force macro expansion else the ANDROID_PACKAGE_NAME_JNI macro is not expanded
 #define EXPAND_MACRO(x) x
 #define JNI_MAKE_NAME(PACKAGE, CLASS, FUNCTION) Java_##PACKAGE##_##CLASS##_##FUNCTION
 #define JNI_EXPORTED_FUNCTION(PACKAGE, CLASS, FUNCTION, RETURN_TYPE, ...) \
@@ -233,7 +233,7 @@ std::vector<std::string> FetchAndroidServerCommandQueue()
 	return vResult;
 }
 
-JNI_EXPORTED_FUNCTION(ANDROID_PACKAGE_NAME, NativeServer, runServer, jint, JNIEnv *pEnv, jobject Object, jstring WorkingDirectory, jobjectArray ArgumentsArray)
+JNI_EXPORTED_FUNCTION(ANDROID_PACKAGE_NAME_JNI, NativeServer, runServer, jint, JNIEnv *pEnv, jobject Object, jstring WorkingDirectory, jobjectArray ArgumentsArray)
 {
 	// Set working directory to external storage location. This is not possible
 	// in Java so we pass the intended working directory to the native code.
@@ -268,7 +268,7 @@ JNI_EXPORTED_FUNCTION(ANDROID_PACKAGE_NAME, NativeServer, runServer, jint, JNIEn
 	return main(vpArguments.size(), vpArguments.data());
 }
 
-JNI_EXPORTED_FUNCTION(ANDROID_PACKAGE_NAME, NativeServer, executeCommand, void, JNIEnv *pEnv, jobject Object, jstring Command)
+JNI_EXPORTED_FUNCTION(ANDROID_PACKAGE_NAME_JNI, NativeServer, executeCommand, void, JNIEnv *pEnv, jobject Object, jstring Command)
 {
 	const char *pCommand = pEnv->GetStringUTFChars(Command, nullptr);
 	{
