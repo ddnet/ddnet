@@ -560,7 +560,7 @@ public:
 	bool MouseHovered(const CUIRect *pRect) const { return MouseInside(pRect) && MouseInsideClip(); }
 	void ConvertMouseMove(float *pX, float *pY, IInput::ECursorType CursorType) const;
 	void UpdateTouchState(CTouchState &State) const;
-	void ResetMouseSlow() { m_MouseSlow = false; }
+	void SetMouseSlow(bool MouseSlow) { m_MouseSlow = MouseSlow; }
 
 	bool ConsumeHotkey(EHotkey Hotkey);
 	void ClearHotkeys() { m_HotkeysPressed = 0; }

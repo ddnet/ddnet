@@ -7381,7 +7381,7 @@ void CEditor::OnUpdate()
 
 void CEditor::OnRender()
 {
-	Ui()->ResetMouseSlow();
+	Ui()->SetMouseSlow(false);
 
 	// toggle gui
 	if(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_TAB))
