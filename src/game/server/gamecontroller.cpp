@@ -448,6 +448,12 @@ void IGameController::OnPlayerDisconnect(class CPlayer *pPlayer, const char *pRe
 		str_format(aBuf, sizeof(aBuf), "leave player='%d:%s'", ClientId, Server()->ClientName(ClientId));
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
 	}
+
+	protocol7::CNetMsg_Sv_ClientDrop Msg;
+	Msg.m_ClientId = ClientId;
+	Msg.m_pReason = pReason;
+	Msg.m_Silent = false;
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);
 }
 
 void IGameController::EndRound()
