@@ -225,6 +225,8 @@ public:
 	int MoveEnvelope(int IndexFrom, int IndexTo);
 	template<typename F>
 	std::vector<std::shared_ptr<IEditorEnvelopeReference>> VisitEnvelopeReferences(F &&Visitor);
+	bool IsEnvelopeUsed(int EnvelopeIndex) const;
+	void RemoveUnusedEnvelopes();
 
 	// Envelope points
 	int FindEnvPointIndex(int Index, int Channel) const;

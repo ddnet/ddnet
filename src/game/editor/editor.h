@@ -700,9 +700,6 @@ public:
 	static bool AddImage(const char *pFilename, int StorageType, void *pUser);
 	static bool AddSound(const char *pFilename, int StorageType, void *pUser);
 
-	bool IsEnvelopeUsed(int EnvelopeIndex) const;
-	void RemoveUnusedEnvelopes();
-
 	static bool IsVanillaImage(const char *pImage);
 
 	void RenderLayers(CUIRect LayersBox);
