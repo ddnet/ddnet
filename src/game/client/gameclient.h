@@ -666,6 +666,7 @@ public:
 	unsigned int m_DummyFire;
 	bool m_ReceivedDDNetPlayer;
 	bool m_ReceivedDDNetPlayerFinishTimes;
+	bool m_ReceivedDDNetPlayerFinishTimesMillis;
 
 	class CTeamsCore m_Teams;
 

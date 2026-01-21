@@ -1565,6 +1565,61 @@ void CUi::RenderProgressBar(CUIRect ProgressBar, float Progress)
 	ProgressBar.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f), IGraphics::CORNER_ALL, Rounding);
 }
 
+void CUi::RenderTime(CUIRect TimeRect, float FontSize, int Seconds, bool NotFinished, int Millis, bool TrueMilliseconds) const
+{
+	if(NotFinished)
+		return;
+
+	char aBuf[128];
+
+	str_time(((int64_t)absolute(Seconds)) * 100, TIME_HOURS, aBuf, sizeof(aBuf));
+
+	// align in vertical middle
+	vec2 Cursor = TimeRect.TopLeft();
+	float TextHeight = 0.0f;
+	float SecondsMaxHeight = 0.0f;
+	STextSizeProperties TextSizeProps{};
+	TextSizeProps.m_pMaxCharacterHeightInLine = &SecondsMaxHeight;
+	TextSizeProps.m_pHeight = &TextHeight;
+
+	float SecondsWidth = std::min(TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f, 0, TextSizeProps), TimeRect.w);
+	Cursor.x += TimeRect.w - SecondsWidth; // align right
+	Cursor.y += ((TimeRect.h - SecondsMaxHeight) / 2.0f - (FontSize - SecondsMaxHeight));
+
+	// show milliseconds or centiseconds if we are under an hour
+	if(Millis >= 0 && Seconds < 60 * 60)
+	{
+		constexpr float GoldenRatio = 0.61803398875f;
+		const float CentisecondFontSize = FontSize * GoldenRatio;
+
+		// format 2 or 3 digits
+		char aMillis[4];
+		Millis %= 1000;
+		if(!TrueMilliseconds)
+			str_format(aMillis, sizeof(aMillis), "%02d", (int)std::round(Millis / 10));
+		else
+			str_format(aMillis, sizeof(aMillis), "%03d", Millis);
+
+		float MillisWidth = TextRender()->TextWidth(CentisecondFontSize, aMillis, -1, -1.0f, 0, TextSizeProps);
+
+		// make space for millis, but put them 1/6th of a char tighter together
+		Cursor.x -= MillisWidth - (TrueMilliseconds ? MillisWidth / (3 * 6) : MillisWidth / (2 * 6));
+
+		vec2 CursorMillis = TimeRect.TopLeft();
+		CursorMillis.x += TimeRect.w - MillisWidth; // align right
+		CursorMillis.y += ((TimeRect.h - SecondsMaxHeight) / 2.0f - (CentisecondFontSize - SecondsMaxHeight));
+		CursorMillis.y -= (CursorMillis.y - Cursor.y) * GoldenRatio;
+
+		TextRender()->Text(Cursor.x, Cursor.y, FontSize, aBuf);
+		TextRender()->Text(CursorMillis.x, CursorMillis.y, CentisecondFontSize, aMillis);
+	}
+	else
+	{
+		str_time(((int64_t)absolute(Seconds)) * 100, TIME_HOURS, aBuf, sizeof(aBuf));
+		TextRender()->Text(Cursor.x, Cursor.y, FontSize, aBuf);
+	}
+}
+
 void CUi::RenderProgressSpinner(vec2 Center, float OuterRadius, const SProgressSpinnerProperties &Props) const
 {
 	Graphics()->TextureClear();
