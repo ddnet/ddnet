@@ -1007,7 +1007,7 @@ bool CMenus::CanDisplayWarning() const
 void CMenus::Render()
 {
 	Ui()->MapScreen();
-	Ui()->ResetMouseSlow();
+	Ui()->SetMouseSlow(false);
 
 	static int s_Frame = 0;
 	if(s_Frame == 0)

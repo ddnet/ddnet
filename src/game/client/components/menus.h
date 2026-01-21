@@ -452,6 +452,8 @@ protected:
 
 	// found in menus_demo.cpp
 	vec2 m_DemoControlsPositionOffset = vec2(0.0f, 0.0f);
+	bool m_PausedBeforeSeeking;
+	float m_PrevSeekAmount;
 	float m_LastPauseChange = -1.0f;
 	float m_LastSpeedChange = -1.0f;
 	static constexpr int DEFAULT_SKIP_DURATION_INDEX = 3;
