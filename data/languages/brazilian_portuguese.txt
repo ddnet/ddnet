@@ -2520,91 +2520,91 @@ Mute emoticons
 == Silenciar emoticons
 
 There's an unsaved change in the touch controls editor, you might want to save it.
-== 
+== Há uma alteração não salva no editor de controles de toque, você pode querer salvá-la.
 
 Start and connect to local server
-== 
+== Iniciar e conectar a um servidor local
 
 Add clan
-== 
+== Adicionar clã
 
 Info
-== 
+== Info
 
 Button browser
-== 
+== Navegador de botões
 
 You can select buttons directly in the list below, or long press on a touch button on the screen to select it. You can also move and resize buttons by touch.
-== 
+== Você pode selecionar botões diretamente na lista abaixo, ou segurar um botão na tela para selecioná-lo. Você também pode mover e redimensionar botões por toque.
 
 Preview visibilities
-== 
+== Pré-visualizar visibilidades
 
 You can manage your touch controls settings on this page. Only changes that are saved will be available after restarting the client. You can share your touch controls with others by exporting them to the clipboard.\n\nYou can find more detailed information about the touch controls on the DDNet Wiki.
-== 
+== Você pode gerenciar suas configurações de controles de toque nesta página. Somente alterações que estão salvas estarão disponíveis após reiniciar o cliente. Você pode compartilhar seus controles de toque com outros exportando-os para a área de transferências\n\nVocê pode encontrar informações mais detalhadas sobre os controles de toque no DDNet Wiki.
 
 Open DDNet Wiki
-== 
+== Abrir DDNet Wiki
 
 Buttons with this behavior execute console commands like regular key binds.
-== 
+== Botões com este comportamento executam comandos de console assim como associações de teclas.
 
 Buttons with this behavior cycle between executing one of two or more specified commands.
-== 
+== Botões com esse comportamento alternam entre a execução de um de dois ou mais comandos especificados.
 
 Buttons with this behavior execute some predefined actions.
-== 
+== Botões com este comportamento executam algumas ações predefinidas.
 
 Opens the ingame menu immediately when released.
-== 
+== Abre o menu do jogo imediatamente quando liberado.
 
 The extra menu button which toggles visibility of buttons with "Extra Menu" visibilities. Also opens the ingame menu on long press.
-== 
+== O botão de menu extra alterna a visibilidade dos botões com a opção "Menu extra". Também abre o menu do jogo ao ser pressionado e mantido pressionado.
 
 Opens the emoticon selector (this does not work with binds).
-== 
+== Abre o seletor de emoticons (isso não funciona com binds).
 
 Opens the spectator menu (this does not work with binds).
-== 
+== Abre o menu de observador (isso não funciona com associações de teclas).
 
 Swaps the active action (fire and hook) for direct touch input and virtual joysticks.
-== 
+== Troca a ação ativa (atirar e gancho) para entrada por toque direto e joysticks virtuais.
 
 Uses the active action with the current aiming position.
-== 
+== Usa a ação ativa com a atual posição da mira.
 
 Virtual joystick which uses the active action.
-== 
+== Joystick virtual que usa a ação ativa.
 
 Virtual joystick which only aims without using an action.
-== 
+== Joystick virtual que só mira sem usar uma ação.
 
 Virtual joystick which always uses fire.
-== 
+== Joystick virtual que sempre usa atirar.
 
 Virtual joystick which always uses hook.
-== 
+== Joystick virtual que sempre usa gancho.
 
 Player is ingame, i.e. not spectating.
-== 
+== Jogador está jogando, ou seja, não está como observador.
 
 Zoom is allowed on this server.
-== 
+== Zoom é permitido neste servidor.
 
 A vote is currently active.
-== 
+== Uma votação está atualmente em andamento.
 
 Dummy is allowed on this server.
-== 
+== Dummy é permitido neste servidor.
 
 Dummy is currently connected.
-== 
+== Dummy está atualmente conectado.
 
 Player is currently authed in rcon.
-== 
+== Jogador está atualmente autenticado no rcon.
 
 Demo player is currently active.
-== 
+== O reprodutor de demos está atualmente ativo.
 
 The extra menu with the given number is activated.
-== 
+== O menu extra com o número fornecido está ativo.

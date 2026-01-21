@@ -824,7 +824,7 @@ Refresh Rate
 == Częstotliwość odświeżania
 
 Video name:
-== Nazwa wideo
+== Nazwa wideo:
 
 Restart
 == Restart
@@ -1536,10 +1536,10 @@ Absolute
 == Absolutny
 
 Ingame controller sens.
-== Czułość kontrolera w grze
+== Czułość kontrolera w grze.
 
 UI controller sens.
-== Czułość kontrolera w menu
+== Czułość kontrolera w menu.
 
 Controller jitter tolerance
 == Tolerancja drgania kontrolera
@@ -1557,10 +1557,10 @@ Mouse
 == Mysz
 
 Ingame mouse sens.
-== Czułość myszy w grze
+== Czułość myszy w grze.
 
 UI mouse sens.
-== Czułość myszy w menu
+== Czułość myszy w menu.
 
 Cancel
 == Anuluj
@@ -1736,7 +1736,7 @@ An error during command recording occurred. Try to update your GPU drivers.
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
-== Nie powiodła się komenda renderowania. Spróbuj zaktualizować sterowniki karty graficznej
+== Nie powiodła się komenda renderowania. Spróbuj zaktualizować sterowniki karty graficznej.
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
@@ -2169,7 +2169,7 @@ Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom
 == Brak VRAM'u. Spróbuj ustawić 'cl_skins_loaded_max' na mniejszą wartość, lub usuń własne zasoby (skiny, entities, itd.), szczególnie te z wysoką rozdzielczością.
 
 This name cannot be used for files and folders
-== Ta nazwa nie może zostać użyta do plików i folderów.
+== Ta nazwa nie może zostać użyta do plików i folderów
 
 This skin name cannot be used.
 == Ta nazwa skina nie może zostać użyta.
@@ -2181,7 +2181,7 @@ Skin could not be found.
 == Skin nie został znaleziony.
 
 No skins match your filter criteria
-== Nie znaleziono skina spełniającego twoje kryteria.
+== Nie znaleziono skina spełniającego twoje kryteria
 
 Preview player's name plate
 == Podgląd plakietki gracza
@@ -2384,7 +2384,7 @@ The selected button is overlapping with other buttons.
 == Aktywny przycisk nakłada się na inne przyciski.
 
 Wrong button settings
-== Złe ustawienia przycisku.
+== Błędne ustawienia przycisku
 
 [Touch button visibilities]
 Ingame
@@ -2520,22 +2520,22 @@ Mute emoticons
 == Wycisz emotikony
 
 There's an unsaved change in the touch controls editor, you might want to save it.
-== 
+== Masz niezapisany zmiany w edytorze sterowania, które możesz chcieć zapisać.
 
 Start and connect to local server
-== 
+== Uruchom i połącz się z serwerem lokalnym
 
 Add clan
-== 
+== Dodaj klan
 
 Info
-== 
+== Informacje
 
 Button browser
-== 
+== Przegląd przycisków
 
 You can select buttons directly in the list below, or long press on a touch button on the screen to select it. You can also move and resize buttons by touch.
-== 
+== Możesz bezpośrednio wybrać przyciski w poniższej liście, lub przytrzymać przycisk dotykowy na ekranie, aby go zaznaczyć. Możesz również przemieścić i skalować przyciski poprzez dotyk.
 
 Preview visibilities
 == 
@@ -2562,10 +2562,10 @@ The extra menu button which toggles visibility of buttons with "Extra Menu" visi
 == 
 
 Opens the emoticon selector (this does not work with binds).
-== 
+== Otwiera koło emotikon (nie działa z bindami).
 
 Opens the spectator menu (this does not work with binds).
-== 
+== Otwiera menu obserwatora (nie działa z bindami).
 
 Swaps the active action (fire and hook) for direct touch input and virtual joysticks.
 == 
@@ -2589,22 +2589,22 @@ Player is ingame, i.e. not spectating.
 == 
 
 Zoom is allowed on this server.
-== 
+== Zoom jest dozwolony na tym serwerze.
 
 A vote is currently active.
-== 
+== Aktualnie trwa głosowanie.
 
 Dummy is allowed on this server.
-== 
+== Kukła jest dozwolona na tym serwerze.
 
 Dummy is currently connected.
-== 
+== Kukła jest już połączona.
 
 Player is currently authed in rcon.
-== 
+== Gracz jest zalogowany do rcon.
 
 Demo player is currently active.
-== 
+== Odtwarzacz demo jest włączony.
 
 The extra menu with the given number is activated.
 == 

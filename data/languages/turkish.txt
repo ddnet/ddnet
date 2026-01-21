@@ -2520,91 +2520,91 @@ Mute emoticons
 == İfadeleri gizle
 
 There's an unsaved change in the touch controls editor, you might want to save it.
-== 
+== Dokunmatik ayarlarında kaydedilmemiş bir değişiklik var, kaydetmek isteyebilirsiniz.
 
 Start and connect to local server
-== 
+== Yerel sunucuyu başlat ve bağlan
 
 Add clan
-== 
+== Klan ekle
 
 Info
-== 
+== Bilgi
 
 Button browser
-== 
+== Buton tarayıcısı
 
 You can select buttons directly in the list below, or long press on a touch button on the screen to select it. You can also move and resize buttons by touch.
-== 
+== Butonları aşağıdaki listeden direkt seçebilirsiniz, ya da ekrandaki butona uzun basıp seçebilirsiniz. Ayrıca dokunarak butonların yerini değiştirebilir ve yeniden boyutlandırabilirsiniz.
 
 Preview visibilities
-== 
+== Görünürlüğü önizle
 
 You can manage your touch controls settings on this page. Only changes that are saved will be available after restarting the client. You can share your touch controls with others by exporting them to the clipboard.\n\nYou can find more detailed information about the touch controls on the DDNet Wiki.
-== 
+== Bu sayfada dokunmatik ayarlarını yönetebilirsiniz. Sadece kaydedilen değişiklikler istemciyi tekrar başlatınca geçerli olacak. Dokunmatik ayarlarınızı panoya kopyalayarak başkalarıyla paylaşabilirsiniz.\n\nDDNet Wiki'de dokunmatik kontrol ile ilgili daha detaylı bilgi edinebilirsiniz.
 
 Open DDNet Wiki
-== 
+== DDNet Wiki'yi aç
 
 Buttons with this behavior execute console commands like regular key binds.
-== 
+== Bu davranıştaki butonlar sıradan atamalar gibi konsol komutlarını çalıştırır.
 
 Buttons with this behavior cycle between executing one of two or more specified commands.
-== 
+== Bu davranışa sahip butonlar iki veya daha fazla belirlenmiş komuttan birini sırayla çalıştırır.
 
 Buttons with this behavior execute some predefined actions.
-== 
+== Bu davranışa sahip butonlar önceden belirlenmiş bazı eylemleri çalıştırır.
 
 Opens the ingame menu immediately when released.
-== 
+== Serbest bırakıldığında hemen oyun içi menüyü açar.
 
 The extra menu button which toggles visibility of buttons with "Extra Menu" visibilities. Also opens the ingame menu on long press.
-== 
+== "Ekstra Menü" görünürlüğüne sahip butonların görünürlüğünü değiştiren ekstra menü butonu. Ayrıca uzun basıldığında oyun içi menüyü açar.
 
 Opens the emoticon selector (this does not work with binds).
-== 
+== İfade seçiciyi açar (atamalarla çalışmaz).
 
 Opens the spectator menu (this does not work with binds).
-== 
+== İzleyici menüsünü açar (atamalarla çalışmaz).
 
 Swaps the active action (fire and hook) for direct touch input and virtual joysticks.
-== 
+== Aktif eylemi (ateş ve kanca) doğrudan dokunma girişi ve sanal kumanda ile değiştirir.
 
 Uses the active action with the current aiming position.
-== 
+== Aktif eylemi geçerli hedef konumuyla kullanır.
 
 Virtual joystick which uses the active action.
-== 
+== Aktif eylemi kullanan sanal kumanda.
 
 Virtual joystick which only aims without using an action.
-== 
+== Herhangi bir eylem kullanmadan hedef alan sanal kumanda.
 
 Virtual joystick which always uses fire.
-== 
+== Sürekli ateş eylemini kullanan sanal kumanda.
 
 Virtual joystick which always uses hook.
-== 
+== Sürekli kanca eylemini kullanan sanal kumanda.
 
 Player is ingame, i.e. not spectating.
-== 
+== Oyuncu oyunda, yani izleyicide değil.
 
 Zoom is allowed on this server.
-== 
+== Bu sunucuda yakınlaştırma serbest.
 
 A vote is currently active.
-== 
+== Şu an zaten bir oylama var.
 
 Dummy is allowed on this server.
-== 
+== Bu sunucuda dummy kullanmak serbest.
 
 Dummy is currently connected.
-== 
+== Dummy şu anda bağlı.
 
 Player is currently authed in rcon.
-== 
+== Oyuncu şu anda rcon'da doğrulandı.
 
 Demo player is currently active.
-== 
+== Demo oynatıcı şu anda aktif.
 
 The extra menu with the given number is activated.
-== 
+== Belirtilen sayıda ekstra menü aktif edildi.

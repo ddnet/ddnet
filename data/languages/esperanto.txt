@@ -2246,16 +2246,16 @@ Adjust the opacity of entities belonging to other teams, such as tees and name p
 == 
 
 Show others (own team only)
-== 
+== Montri aliulojn (nur via teamo)
 
 Show background quads
-== 
+== Montri fonajn quad-ojn
 
 Quads are used for background decoration
-== 
+== Quadoj estas uzataj por fona ornamado
 
 Default zoom
-== 
+== Defaŭlta zomo
 
 AntiPing
 == 
@@ -2276,61 +2276,61 @@ AntiPing: prediction margin
 == 
 
 Background
-== 
+== Fono
 
 Regular background color
-== 
+== Ordinara fona koloro
 
 Entities background color
-== 
+== Fona koloro de entoj
 
 Use current map as background
-== 
+== Uzi nunan mapon kiel fono
 
 Show tiles layers from BG map
 == 
 
 Miscellaneous
-== 
+== Aliaj
 
 New random timeout code
-== 
+== Nova hazarda tempolima kodo
 
 Run on join
 == 
 
 Chat command (e.g. showall 1)
-== 
+== Babileja komando (ekz. showall 1)
 
 Unregister protocol and file extensions
-== 
+== Malregistri protokolon kaj dosiersufikson
 
 DDNet Client updated!
-== 
+== DDNet-kliento ĝisdatigita!
 
 No updates available
-== 
+== Neniu ĝisdatigo disponebla
 
 Basic
 == 
 
 Custom
-== 
+== Propra
 
 Are you sure that you want to delete '%s'?
-== 
+== Ĉu vi certas ke vi volas forigi '%s'?
 
 Delete skin
-== 
+== Forigi haŭton
 
 Unable to delete skin
-== 
+== Ne eblas forigi haŭton
 
 Emoticons
-== 
+== Emoĝioj
 
 Particles
-== 
+== Partikloj
 
 Extras
 == 
@@ -2345,64 +2345,64 @@ Open the directory to add custom assets
 == 
 
 Hook collisions
-== 
+== Hokaj kolizioj
 
 Zoom in
-== 
+== Zomi
 
 Zoom out
-== 
+== Malzomi
 
 Toggle dyncam
 == 
 
 Toggle ghost
-== 
+== Baskuligi fantomon
 
 Shotgun
-== 
+== Kartoĉa fusilo
 
 Grenade
-== 
+== Grenadĵetilo
 
 Next weapon
-== 
+== Sekva batalilo
 
 Prev. weapon
-== 
+== Antaŭa batalilo
 
 Team chat
-== 
+== Teama babilejo
 
 Converse
-== 
+== Konversacii
 
 Chat command
-== 
+== Babileja komando
 
 Toggle dummy
-== 
+== Baskuligi pupon
 
 Dummy copy
-== 
+== Pupo kopii movojn
 
 Hammerfly dummy
 == 
 
 Emoticon
-== 
+== Emoĝio
 
 Spectator mode
-== 
+== Spektanta reĝimo
 
 Spectate next
-== 
+== Spekti sekvan
 
 Spectate previous
-== 
+== Spekti antaŭan
 
 Screenshot
-== 
+== Ekrankopio
 
 Scoreboard cursor
 == 
@@ -2411,10 +2411,10 @@ Statboard
 == 
 
 Lock team
-== 
+== Ŝlosi teamon
 
 Show entities
-== 
+== Montri entojn
 
 Show HUD
 == 
@@ -2426,51 +2426,51 @@ Are you sure that you want to reset the controls to their defaults?
 == 
 
 Controller
-== 
+== Ludregilo
 
 Movement
-== 
+== Movado
 
 Voting
-== 
+== Balotado
 
 Ingame mouse sens.
-== 
+== Enluda musa sentemo
 
 UI mouse sens.
-== 
+== Enmenua musa sentemo
 
 Enable controller
-== 
+== Ŝalti ludregilon
 
 Ingame controller mode
 == 
 
 [Ingame controller mode]
 Relative
-== 
+== Relativa
 
 [Ingame controller mode]
 Absolute
-== 
+== Absoluta
 
 Ingame controller sens.
-== 
+== Enluda ludregila sentemo
 
 UI controller sens.
-== 
+== Enmenua ludregila sentemo
 
 Controller jitter tolerance
 == 
 
 No controller found. Plug in a controller.
-== 
+== Neniu ludregilo trovita. Konektu ludregilon.
 
 Axis
-== 
+== Akso
 
 Status
-== 
+== Stato
 
 Aim bind
 == 
@@ -2479,36 +2479,36 @@ Can't find a Tutorial server
 == 
 
 Update failed! Check log…
-== 
+== Ĝisdatigo fiaskis! Kontrolu protokolon…
 
 Download
-== 
+== Elŝuti
 
 Loading race demo files
 == 
 
 [Spectators]
 %d others…
-== 
+== %d aliaj…
 
 Score
-== 
+== Poentoj
 
 Super
 == 
 
 [Team and size]
 %d\n(%d/%d)
-== 
+== %d\n(%d/%d)
 
 Team %d (%d/%d)
-== 
+== Teamo %d (%d/%d)
 
 Manual
-== 
+== Permana
 
 Race
-== 
+== Vetkuro
 
 Auto
 == 

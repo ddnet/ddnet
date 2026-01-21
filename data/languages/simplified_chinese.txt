@@ -2523,10 +2523,10 @@ There's an unsaved change in the touch controls editor, you might want to save i
 == 
 
 Start and connect to local server
-== 
+== 运行并连接到本地服务器
 
 Add clan
-== 
+== 添加战队
 
 Info
 == 
