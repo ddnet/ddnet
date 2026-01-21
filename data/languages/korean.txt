@@ -1745,10 +1745,10 @@ Aim
 == 조준
 
 Active: Fire
-== 발사 활성화
+== 발사 활성 상태
 
 Active: Hook
-== 갈고리 활성화
+== 갈고리 활성 상태
 
 Moved ingame
 == 게임 내에서 이동됨
@@ -1806,11 +1806,11 @@ Unavailable for this player
 
 [Auto camera]
 Inactive
-== 비활성화
+== 비활성 상태
 
 [Auto camera]
 Active
-== 활성화
+== 활성 상태
 
 Match %d of %d
 == 경기 %d / %d
@@ -1995,7 +1995,7 @@ Disabled
 
 [Direct touch input]
 Active action
-== 동작 활성화
+== 활성 동작
 
 [Direct touch input]
 Aim
@@ -2333,7 +2333,7 @@ Inactive color
 == 비활성화 시 색상
 
 Preview button visibility while the editor is active.
-== 편집기가 활성화 상태일 때 버튼 표시 상태를 미리보기합니다.
+== 편집기 활성화 시의 버튼 표시 상태를 미리보기합니다.
 
 Show all buttons
 == 모든 버튼 표시
@@ -2378,7 +2378,7 @@ Zoom Allowed
 
 [Touch button visibilities]
 Vote Active
-== 투표 활성화
+== 투표 진행 시
 
 [Touch button visibilities]
 Dummy Allowed
