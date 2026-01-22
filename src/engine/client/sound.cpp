@@ -146,7 +146,9 @@ void CSound::Mix(short *pFinalOut, unsigned Frames)
 		if(Voice.m_Tick == Voice.m_pSample->m_NumFrames)
 		{
 			if(Voice.m_Flags & ISound::FLAG_LOOP)
-				Voice.m_Tick = 0;
+			{
+				Voice.m_Tick = Voice.m_pSample->m_LoopStart;
+			}
 			else
 			{
 				Voice.m_pSample = nullptr;
@@ -324,6 +326,10 @@ void CSound::RateConvert(CSample &Sample) const
 		}
 	}
 
+	// adjust looping position, note that this is not precise
+	const float Factor = m_MixingRate / Sample.m_Rate;
+	Sample.m_LoopStart = Sample.m_LoopStart * Factor;
+
 	// free old data and apply new
 	free(Sample.m_pData);
 	Sample.m_pData = pNewData;
@@ -371,15 +377,40 @@ bool CSound::DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize, c
 			Pos += Read;
 		}
 
-		op_free(pOpusFile);
-
 		Sample.m_pData = pSampleData;
 		Sample.m_NumFrames = Pos;
 		Sample.m_Rate = 48000;
 		Sample.m_Channels = NumChannels;
-		Sample.m_LoopStart = -1;
-		Sample.m_LoopEnd = -1;
+		Sample.m_LoopStart = 0;
 		Sample.m_PausedAt = 0;
+
+		const OpusTags *pTags = op_tags(pOpusFile, -1);
+		if(pTags)
+		{
+			for(int i = 0; i < pTags->comments; ++i)
+			{
+				const char *pComment = pTags->user_comments[i];
+				if(!pComment)
+					continue;
+				if(!str_startswith(pComment, "LOOP_START="))
+					continue;
+				int LoopStart = -1;
+				if(!str_toint(pComment + str_length("LOOP_START="), &LoopStart))
+				{
+					log_error("sound/opus", "Invalid LOOP_START tag. Value='%s' Filename='%s'", pComment + str_length("LOOP_START="), pContextName);
+					break;
+				}
+				if(LoopStart < 0 || LoopStart >= Sample.m_NumFrames)
+				{
+					log_error("sound/opus", "Tag LOOP_START out of range. Value=%d Min=0 Max=%d Filename='%s'", LoopStart, Sample.m_NumFrames - 1, pContextName);
+					break;
+				}
+				Sample.m_LoopStart = LoopStart;
+				break;
+			}
+		}
+
+		op_free(pOpusFile);
 	}
 	else
 	{
@@ -504,8 +535,7 @@ bool CSound::DecodeWV(CSample &Sample, const void *pData, unsigned DataSize, con
 		Sample.m_NumFrames = NumSamples;
 		Sample.m_Rate = SampleRate;
 		Sample.m_Channels = NumChannels;
-		Sample.m_LoopStart = -1;
-		Sample.m_LoopEnd = -1;
+		Sample.m_LoopStart = 0;
 		Sample.m_PausedAt = 0;
 
 		s_pWVBuffer = nullptr;

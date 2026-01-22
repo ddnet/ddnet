@@ -535,6 +535,8 @@ public:
 
 		// 0.7 Skin
 		CSixup m_aSixup[NUM_DUMMIES];
+
+		ISound::CVoiceHandle m_SfxFallingWoosh;
 	};
 
 	CClientData m_aClients[MAX_CLIENTS];

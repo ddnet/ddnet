@@ -613,6 +613,42 @@ void CPlayers::RenderPlayer(
 	if(!InAir && WantOtherDir && length(Vel * 50) > 500.0f)
 		GameClient()->m_Effects.SkidTrail(Position, Vel, Player.m_Direction, Alpha, Volume);
 
+	// Update woosh sound effect
+	// TODO: vfx?
+	for(auto &Client : GameClient()->m_aClients)
+	{
+		const auto &Char = GameClient()->m_Snap.m_aCharacters[Client.ClientId()];
+		const bool IsPlaying = Client.m_SfxFallingWoosh.IsValid();
+		if(!Char.m_Active && IsPlaying)
+		{
+			Sound()->StopVoice(Client.m_SfxFallingWoosh);
+			Client.m_SfxFallingWoosh = ISound::CVoiceHandle();
+			continue;
+		}
+
+		static constexpr float FALLING_WOOSH_SPEED = 14.0f;
+		const float MaxVel = std::max(std::abs(Vel.x), std::abs(Vel.y));
+		const bool ShouldPlaying = MaxVel >= FALLING_WOOSH_SPEED;
+		if(ShouldPlaying)
+		{
+			const float WooshVolume = MaxVel / (FALLING_WOOSH_SPEED * 2.0f);
+			if(IsPlaying)
+			{
+				Sound()->SetVoicePosition(Client.m_SfxFallingWoosh, Client.m_RenderPos);
+				Sound()->SetVoiceVolume(Client.m_SfxFallingWoosh, WooshVolume);
+			}
+			else
+			{
+				Client.m_SfxFallingWoosh = Sound()->PlayAt(CSounds::CHN_WORLD, GameClient()->m_Sounds.GetSampleId(SOUND_FALLING_WOOSH), ISound::FLAG_LOOP, WooshVolume, Client.m_RenderPos);
+			}
+		}
+		else
+		{
+			Sound()->StopVoice(Client.m_SfxFallingWoosh);
+			Client.m_SfxFallingWoosh = ISound::CVoiceHandle();
+		}
+	}
+
 	// draw gun
 	if(Player.m_Weapon >= 0)
 	{
