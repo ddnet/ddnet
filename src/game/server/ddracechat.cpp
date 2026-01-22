@@ -789,6 +789,7 @@ void CGameContext::ConPracticeCmdList(IConsole::IResult *pResult, void *pUserDat
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
+	int ClientId = pResult->m_ClientId;
 	char aPracticeCommands[256] = "Available practice commands: ";
 	for(const IConsole::ICommandInfo *pCmd = pSelf->Console()->FirstCommandInfo(pResult->m_ClientId, CMDFLAG_PRACTICE);
 		pCmd; pCmd = pSelf->Console()->NextCommandInfo(pCmd, pResult->m_ClientId, CMDFLAG_PRACTICE))
@@ -799,12 +800,12 @@ void CGameContext::ConPracticeCmdList(IConsole::IResult *pResult, void *pUserDat
 
 		if(str_length(aCommand) + str_length(aPracticeCommands) > 255)
 		{
-			pSelf->SendChatTarget(pResult->m_ClientId, aPracticeCommands);
+			pSelf->SendChatTarget(ClientId, aPracticeCommands);
 			aPracticeCommands[0] = '\0';
 		}
 		str_append(aPracticeCommands, aCommand);
 	}
-	pSelf->SendChatTarget(pResult->m_ClientId, aPracticeCommands);
+	pSelf->SendChatTarget(ClientId, aPracticeCommands);
 }
 
 void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
