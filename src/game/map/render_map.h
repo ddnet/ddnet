@@ -39,7 +39,6 @@ class CMapBasedEnvelopePointAccess : public IEnvelopePointAccess
 	CEnvPointBezier_upstream *m_pPointsBezierUpstream;
 
 public:
-	CMapBasedEnvelopePointAccess(class CDataFileReader *pReader);
 	CMapBasedEnvelopePointAccess(class IMap *pMap);
 	void SetPointsRange(int StartPoint, int NumPoints);
 	int StartPoint() const;

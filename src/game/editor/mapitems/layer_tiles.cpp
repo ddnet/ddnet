@@ -137,14 +137,10 @@ void CLayerTiles::PrepareForSave()
 	}
 }
 
-void CLayerTiles::ExtractTiles(int TilemapItemVersion, const CTile *pSavedTiles, size_t SavedTilesSize) const
+void CLayerTiles::ExtractTiles(const CTile *pSavedTiles, size_t SavedTilesSize) const
 {
 	const size_t DestSize = (size_t)m_Width * m_Height;
-	if(TilemapItemVersion >= CMapItemLayerTilemap::VERSION_TEEWORLDS_TILESKIP)
-	{
-		CMap::ExtractTiles(m_pTiles, DestSize, pSavedTiles, SavedTilesSize);
-	}
-	else if(SavedTilesSize >= DestSize)
+	if(SavedTilesSize >= DestSize)
 	{
 		mem_copy(m_pTiles, pSavedTiles, DestSize * sizeof(CTile));
 		for(size_t TileIndex = 0; TileIndex < DestSize; ++TileIndex)
