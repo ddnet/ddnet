@@ -500,7 +500,7 @@ bool CSaveHotReloadTee::Load(CCharacter *pChr, int Team)
 {
 	bool Result = m_SaveTee.Load(pChr, Team);
 	pChr->SetSuper(m_Super);
-	pChr->m_Core.m_Invincible = m_Invincible;
+	pChr->SetInvincible(m_Invincible);
 	pChr->GetPlayer()->m_LastTeleTee = m_SavedTeleTee;
 	pChr->GetPlayer()->m_LastDeath = m_LastDeath;
 
