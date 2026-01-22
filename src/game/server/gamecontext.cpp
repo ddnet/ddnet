@@ -1720,39 +1720,31 @@ void CGameContext::OnClientEnter(int ClientId)
 			continue;
 
 		CPlayer *pPlayer = m_apPlayers[i];
+		Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
 
-		if(Server()->IsSixup(i))
-			Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
+		// existing infos for new player
+		protocol7::CNetMsg_Sv_ClientInfo ClientInfoMsg;
+		ClientInfoMsg.m_ClientId = i;
+		ClientInfoMsg.m_Local = 0;
+		ClientInfoMsg.m_Team = pPlayer->GetTeam();
+		ClientInfoMsg.m_pName = Server()->ClientName(i);
+		ClientInfoMsg.m_pClan = Server()->ClientClan(i);
+		ClientInfoMsg.m_Country = Server()->ClientCountry(i);
+		ClientInfoMsg.m_Silent = 0;
 
-		if(Server()->IsSixup(ClientId))
+		for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
 		{
-			// existing infos for new player
-			protocol7::CNetMsg_Sv_ClientInfo ClientInfoMsg;
-			ClientInfoMsg.m_ClientId = i;
-			ClientInfoMsg.m_Local = 0;
-			ClientInfoMsg.m_Team = pPlayer->GetTeam();
-			ClientInfoMsg.m_pName = Server()->ClientName(i);
-			ClientInfoMsg.m_pClan = Server()->ClientClan(i);
-			ClientInfoMsg.m_Country = Server()->ClientCountry(i);
-			ClientInfoMsg.m_Silent = 0;
-
-			for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
-			{
-				ClientInfoMsg.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_aaSkinPartNames[p];
-				ClientInfoMsg.m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
-				ClientInfoMsg.m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
-			}
-
-			Server()->SendPackMsg(&ClientInfoMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
+			ClientInfoMsg.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_aaSkinPartNames[p];
+			ClientInfoMsg.m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
+			ClientInfoMsg.m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
 		}
+
+		Server()->SendPackMsg(&ClientInfoMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 	}
 
 	// local info
-	if(Server()->IsSixup(ClientId))
-	{
-		NewClientInfoMsg.m_Local = 1;
-		Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
-	}
+	NewClientInfoMsg.m_Local = 1;
+	Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 
 	// initial chat delay
 	if(g_Config.m_SvChatInitialDelay != 0 && m_apPlayers[ClientId]->m_JoinTick > m_NonEmptySince + 10 * Server()->TickSpeed())
