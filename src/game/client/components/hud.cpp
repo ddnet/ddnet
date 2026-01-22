@@ -650,86 +650,97 @@ void CHud::RenderCursor()
 
 void CHud::PrepareAmmoHealthAndArmorQuads()
 {
-	float x = 5;
-	float y = 5;
-	IGraphics::CQuadItem Array[10];
+	const float QuadX = 5;
+	const float QuadY = 5;
+	IGraphics::CQuadItem aItems[10];
+	const int ItemsSize = static_cast<int>(std::size(aItems));
+	static_assert(ItemsSize == Ammo::MAX, "Max ammo doesn't match number of items that can be shown on the HUD");
 
 	// ammo of the different weapons
 	for(int i = 0; i < NUM_WEAPONS; ++i)
 	{
 		// 0.6
-		for(int n = 0; n < 10; n++)
-			Array[n] = IGraphics::CQuadItem(x + n * 12, y, 10, 10);
+		for(int n = 0; n < Ammo::MAX; n++)
+			aItems[n] = IGraphics::CQuadItem(QuadX + n * 12, QuadY, 10, 10);
 
-		m_aAmmoOffset[i] = Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
+		m_aAmmoOffset[i] = Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, aItems, Ammo::MAX);
 
 		// 0.7
 		if(i == WEAPON_GRENADE)
 		{
 			// special case for 0.7 grenade
-			for(int n = 0; n < 10; n++)
-				Array[n] = IGraphics::CQuadItem(1 + x + n * 12, y, 10, 10);
+			for(int n = 0; n < Ammo::MAX; n++)
+				aItems[n] = IGraphics::CQuadItem(1 + QuadX + n * 12, QuadY, 10, 10);
 		}
 		else
 		{
-			for(int n = 0; n < 10; n++)
-				Array[n] = IGraphics::CQuadItem(x + n * 12, y, 12, 12);
+			for(int n = 0; n < Ammo::MAX; n++)
+				aItems[n] = IGraphics::CQuadItem(QuadX + n * 12, QuadY, 12, 12);
 		}
 
-		Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
+		Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, aItems, Ammo::MAX);
 	}
 
 	// health
-	for(int i = 0; i < 10; ++i)
-		Array[i] = IGraphics::CQuadItem(x + i * 12, y, 10, 10);
-	m_HealthOffset = Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
+	for(int i = 0; i < ItemsSize; ++i)
+		aItems[i] = IGraphics::CQuadItem(QuadX + i * 12, QuadY, 10, 10);
+	m_HealthOffset = Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, aItems, ItemsSize);
 
 	// 0.7
-	for(int i = 0; i < 10; ++i)
-		Array[i] = IGraphics::CQuadItem(x + i * 12, y, 12, 12);
-	Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
+	for(int i = 0; i < ItemsSize; ++i)
+		aItems[i] = IGraphics::CQuadItem(QuadX + i * 12, QuadY, 12, 12);
+	Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, aItems, ItemsSize);
 
 	// empty health
-	for(int i = 0; i < 10; ++i)
-		Array[i] = IGraphics::CQuadItem(x + i * 12, y, 10, 10);
-	m_EmptyHealthOffset = Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
+	for(int i = 0; i < ItemsSize; ++i)
+		aItems[i] = IGraphics::CQuadItem(QuadX + i * 12, QuadY, 10, 10);
+	m_EmptyHealthOffset = Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, aItems, ItemsSize);
 
 	// 0.7
-	for(int i = 0; i < 10; ++i)
-		Array[i] = IGraphics::CQuadItem(x + i * 12, y, 12, 12);
-	Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
+	for(int i = 0; i < ItemsSize; ++i)
+		aItems[i] = IGraphics::CQuadItem(QuadX + i * 12, QuadY, 12, 12);
+	Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, aItems, ItemsSize);
 
 	// armor meter
-	for(int i = 0; i < 10; ++i)
-		Array[i] = IGraphics::CQuadItem(x + i * 12, y + 12, 10, 10);
-	m_ArmorOffset = Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
+	for(int i = 0; i < ItemsSize; ++i)
+		aItems[i] = IGraphics::CQuadItem(QuadX + i * 12, QuadY + 12, 10, 10);
+	m_ArmorOffset = Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, aItems, ItemsSize);
 
 	// 0.7
-	for(int i = 0; i < 10; ++i)
-		Array[i] = IGraphics::CQuadItem(x + i * 12, y + 12, 12, 12);
-	Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
+	for(int i = 0; i < ItemsSize; ++i)
+		aItems[i] = IGraphics::CQuadItem(QuadX + i * 12, QuadY + 12, 12, 12);
+	Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, aItems, ItemsSize);
 
 	// empty armor meter
-	for(int i = 0; i < 10; ++i)
-		Array[i] = IGraphics::CQuadItem(x + i * 12, y + 12, 10, 10);
-	m_EmptyArmorOffset = Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
+	for(int i = 0; i < ItemsSize; ++i)
+		aItems[i] = IGraphics::CQuadItem(QuadX + i * 12, QuadY + 12, 10, 10);
+	m_EmptyArmorOffset = Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, aItems, ItemsSize);
 
 	// 0.7
-	for(int i = 0; i < 10; ++i)
-		Array[i] = IGraphics::CQuadItem(x + i * 12, y + 12, 12, 12);
-	Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
+	for(int i = 0; i < ItemsSize; ++i)
+		aItems[i] = IGraphics::CQuadItem(QuadX + i * 12, QuadY + 12, 12, 12);
+	Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, aItems, ItemsSize);
 }
 
-void CHud::RenderAmmoHealthAndArmor(const CNetObj_Character *pCharacter)
+void CHud::RenderAmmoHealthAndArmor(int ClientId)
 {
+	const bool IsLocal = ClientId == GameClient()->m_Snap.m_LocalClientId;
+	const CNetObj_Character *pCharacter = IsLocal ?
+						      GameClient()->m_Snap.m_pLocalCharacter :
+						      &GameClient()->m_Snap.m_aCharacters[ClientId].m_Cur;
+
 	if(!pCharacter)
 		return;
 
-	bool IsSixupGameSkin = GameClient()->m_GameSkin.IsSixup();
-	int QuadOffsetSixup = (IsSixupGameSkin ? 10 : 0);
+	const bool IsSixupGameSkin = GameClient()->m_GameSkin.IsSixup();
+	const int QuadOffsetSixup = (IsSixupGameSkin ? 10 : 0);
 
 	if(GameClient()->m_GameInfo.m_HudAmmo)
 	{
+		const int AmmoCount = IsLocal ?
+					      GameClient()->m_aClients[ClientId].m_Predicted.m_aWeapons[GameClient()->m_aClients[ClientId].m_Predicted.m_ActiveWeapon].m_Ammo :
+					      pCharacter->m_AmmoCount;
+
 		// ammo display
 		float AmmoOffsetY = GameClient()->m_GameInfo.m_HudHealthArmor ? 24 : 0;
 		int CurWeapon = pCharacter->m_Weapon % NUM_WEAPONS;
@@ -739,7 +750,11 @@ void CHud::RenderAmmoHealthAndArmor(const CNetObj_Character *pCharacter)
 			if(!GameClient()->m_GameInfo.m_HudDDRace && Client()->IsSixup())
 			{
 				const int Max = g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000;
-				float NinjaProgress = std::clamp(pCharacter->m_AmmoCount - Client()->GameTick(g_Config.m_ClDummy), 0, Max) / (float)Max;
+				float NinjaProgress;
+				if(IsLocal)
+					NinjaProgress = std::clamp(GameClient()->m_aClients[ClientId].m_Predicted.m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000 - Client()->GameTick(g_Config.m_ClDummy), 0, Max) / (float)Max;
+				else
+					NinjaProgress = std::clamp(AmmoCount - Client()->GameTick(g_Config.m_ClDummy), 0, Max) / (float)Max;
 				RenderNinjaBarPos(5 + 10 * 12, 5, 6.f, 24.f, NinjaProgress);
 			}
 		}
@@ -748,11 +763,11 @@ void CHud::RenderAmmoHealthAndArmor(const CNetObj_Character *pCharacter)
 			Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteWeaponProjectiles[CurWeapon]);
 			if(AmmoOffsetY > 0)
 			{
-				Graphics()->RenderQuadContainerEx(m_HudQuadContainerIndex, m_aAmmoOffset[CurWeapon] + QuadOffsetSixup, std::clamp(pCharacter->m_AmmoCount, 0, 10), 0, AmmoOffsetY);
+				Graphics()->RenderQuadContainerEx(m_HudQuadContainerIndex, m_aAmmoOffset[CurWeapon] + QuadOffsetSixup, std::clamp(AmmoCount, 0, Ammo::MAX), 0, AmmoOffsetY);
 			}
 			else
 			{
-				Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_aAmmoOffset[CurWeapon] + QuadOffsetSixup, std::clamp(pCharacter->m_AmmoCount, 0, 10));
+				Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_aAmmoOffset[CurWeapon] + QuadOffsetSixup, std::clamp(AmmoCount, 0, Ammo::MAX));
 			}
 		}
 	}
@@ -777,16 +792,17 @@ void CHud::PreparePlayerStateQuads()
 {
 	float x = 5;
 	float y = 5 + 24;
-	IGraphics::CQuadItem Array[10];
+	IGraphics::CQuadItem aItems[10];
+	const int ItemsSize = static_cast<int>(std::size(aItems));
 
 	// Quads for displaying the available and used jumps
-	for(int i = 0; i < 10; ++i)
-		Array[i] = IGraphics::CQuadItem(x + i * 12, y, 12, 12);
-	m_AirjumpOffset = Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
+	for(int i = 0; i < ItemsSize; ++i)
+		aItems[i] = IGraphics::CQuadItem(x + i * 12, y, 12, 12);
+	m_AirjumpOffset = Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, aItems, ItemsSize);
 
-	for(int i = 0; i < 10; ++i)
-		Array[i] = IGraphics::CQuadItem(x + i * 12, y, 12, 12);
-	m_AirjumpEmptyOffset = Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
+	for(int i = 0; i < ItemsSize; ++i)
+		aItems[i] = IGraphics::CQuadItem(x + i * 12, y, 12, 12);
+	m_AirjumpEmptyOffset = Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, aItems, ItemsSize);
 
 	// Quads for displaying weapons
 	for(int Weapon = 0; Weapon < NUM_WEAPONS; ++Weapon)
@@ -1690,7 +1706,7 @@ void CHud::OnRender()
 		{
 			if(g_Config.m_ClShowhudHealthAmmo)
 			{
-				RenderAmmoHealthAndArmor(GameClient()->m_Snap.m_pLocalCharacter);
+				RenderAmmoHealthAndArmor(GameClient()->m_Snap.m_LocalClientId);
 			}
 			if(GameClient()->m_Snap.m_aCharacters[GameClient()->m_Snap.m_LocalClientId].m_HasExtendedData && g_Config.m_ClShowhudDDRace && GameClient()->m_GameInfo.m_HudDDRace)
 			{
@@ -1705,7 +1721,7 @@ void CHud::OnRender()
 			int SpectatorId = GameClient()->m_Snap.m_SpecInfo.m_SpectatorId;
 			if(SpectatorId != SPEC_FREEVIEW && g_Config.m_ClShowhudHealthAmmo)
 			{
-				RenderAmmoHealthAndArmor(&GameClient()->m_Snap.m_aCharacters[SpectatorId].m_Cur);
+				RenderAmmoHealthAndArmor(SpectatorId);
 			}
 			if(SpectatorId != SPEC_FREEVIEW &&
 				GameClient()->m_Snap.m_aCharacters[SpectatorId].m_HasExtendedData &&

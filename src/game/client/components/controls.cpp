@@ -176,7 +176,7 @@ void CControls::OnMessage(int Msg, void *pRawMsg)
 		if(g_Config.m_ClAutoswitchWeapons)
 			m_aInputData[g_Config.m_ClDummy].m_WantedWeapon = pMsg->m_Weapon + 1;
 		// We don't really know ammo count, until we'll switch to that weapon, but any non-zero count will suffice here
-		m_aAmmoCount[maximum(0, pMsg->m_Weapon % NUM_WEAPONS)] = 10;
+		m_aAmmoCount[maximum(0, pMsg->m_Weapon % NUM_WEAPONS)] = Ammo::MAX;
 	}
 }
 
