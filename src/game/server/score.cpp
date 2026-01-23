@@ -269,6 +269,21 @@ void CScore::ShowPoints(int ClientId, const char *pName)
 	ExecPlayerThread(CScoreWorker::ShowPoints, "show points", ClientId, pName, 0);
 }
 
+void CScore::ShowPointsForExtraInfo(int RequestingClientId, int TargetClientId, const char *pName)
+{
+	if(RateLimitPlayer(RequestingClientId))
+		return;
+
+	auto pResult = std::make_shared<CScorePlayerExtraInfoResult>();
+	pResult->m_RequestingClientId = RequestingClientId;
+	pResult->m_TargetClientId = TargetClientId;
+	GameServer()->m_vPlayerExtraInfoResults.push_back(pResult);
+
+	auto Tmp = std::make_unique<CSqlPlayerExtraInfoRequest>(pResult);
+	str_copy(Tmp->m_aName, pName, sizeof(Tmp->m_aName));
+	m_pPool->Execute(CScoreWorker::PlayerExtraInfo, std::move(Tmp), "player extra info");
+}
+
 void CScore::ShowTopPoints(int ClientId, int Offset)
 {
 	if(RateLimitPlayer(ClientId))
