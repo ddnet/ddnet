@@ -576,6 +576,14 @@ void CGameContext::ConMapInfo(IConsole::IResult *pResult, void *pUserData)
 	if(!pPlayer)
 		return;
 
+	// use cached map info for current map
+	const bool IsCurrentMap = pResult->NumArguments() == 0 || str_comp_nocase(pResult->GetString(0), pSelf->Server()->GetMapName()) == 0;
+	if(IsCurrentMap && pSelf->m_aMapInfoMessage[0] != '\0')
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, pSelf->m_aMapInfoMessage);
+		return;
+	}
+
 	if(pResult->NumArguments() > 0)
 		pSelf->Score()->MapInfo(pResult->m_ClientId, pResult->GetString(0));
 	else

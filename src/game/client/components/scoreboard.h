@@ -58,9 +58,20 @@ class CScoreboard : public CComponent
 		int m_ClientId;
 		bool m_IsLocal;
 		bool m_IsSpectating;
+
+		static CUi::EPopupMenuFunctionResult Render(void *pContext, CUIRect View, bool Active);
 	} m_ScoreboardPopupContext;
 
-	static CUi::EPopupMenuFunctionResult PopupScoreboard(void *pContext, CUIRect View, bool Active);
+	class CMapTitlePopupContext : public SPopupMenuId
+	{
+	public:
+		CScoreboard *m_pScoreboard = nullptr;
+
+		float m_FontSize;
+
+		static CUi::EPopupMenuFunctionResult Render(void *pContext, CUIRect View, bool Active);
+	} m_MapTitlePopupContext;
+	char m_MapTitleButtonId;
 
 	class CPlayerElement
 	{

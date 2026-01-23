@@ -124,6 +124,20 @@ void CScore::LoadBestTime()
 	m_pPool->Execute(CScoreWorker::LoadBestTime, std::move(Tmp), "load best time");
 }
 
+void CScore::LoadMapInfo()
+{
+	if(m_pGameServer->m_pLoadMapInfoResult)
+		return; // already in progress
+
+	auto pResult = std::make_shared<CScorePlayerResult>();
+	m_pGameServer->m_pLoadMapInfoResult = pResult;
+
+	auto Tmp = std::make_unique<CSqlPlayerRequest>(pResult);
+	str_copy(Tmp->m_aName, Server()->GetMapName(), sizeof(Tmp->m_aName));
+	Tmp->m_aRequestingPlayer[0] = '\0'; // no player, so no "your time" in result
+	m_pPool->Execute(CScoreWorker::MapInfo, std::move(Tmp), "load map info");
+}
+
 void CScore::LoadPlayerData(int ClientId, const char *pName)
 {
 	ExecPlayerThread(CScoreWorker::LoadPlayerData, "load player data", ClientId, pName, 0);

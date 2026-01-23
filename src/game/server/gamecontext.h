@@ -56,6 +56,7 @@ class IEngine;
 class IStorage;
 struct CAntibotRoundData;
 struct CScoreRandomMapResult;
+struct CScorePlayerResult;
 
 struct CSnapContext
 {
@@ -409,6 +410,10 @@ public:
 	bool PracticeByDefault() const;
 
 	std::shared_ptr<CScoreRandomMapResult> m_SqlRandomMapResult;
+
+	// cached map info from database
+	std::shared_ptr<CScorePlayerResult> m_pLoadMapInfoResult;
+	char m_aMapInfoMessage[512];
 
 private:
 	// starting 1 to make 0 the special value "no client id"

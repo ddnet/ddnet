@@ -696,6 +696,7 @@ void CGameClient::OnReset()
 
 	m_MapBestTimeSeconds = FinishTime::UNSET;
 	m_MapBestTimeMillis = 0;
+	m_aMapDescription[0] = '\0';
 
 	// m_MapBugs and m_aTuningList are reset in LoadMapSettings
 
@@ -1228,6 +1229,11 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		{
 			// some PvP mods based on DDNet accidentally send a best time of 0, despite having no finished races
 		}
+	}
+	else if(MsgId == NETMSGTYPE_SV_MAPINFO)
+	{
+		CNetMsg_Sv_MapInfo *pMsg = static_cast<CNetMsg_Sv_MapInfo *>(pRawMsg);
+		str_copy(m_aMapDescription, pMsg->m_pDescription);
 	}
 }
 

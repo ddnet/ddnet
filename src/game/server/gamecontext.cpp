@@ -93,6 +93,9 @@ CGameContext::CGameContext(bool Resetting) :
 
 	m_SqlRandomMapResult = nullptr;
 
+	m_pLoadMapInfoResult = nullptr;
+	m_aMapInfoMessage[0] = '\0';
+
 	m_pScore = nullptr;
 
 	m_VoteCreator = -1;
@@ -1371,6 +1374,19 @@ void CGameContext::OnTick()
 		m_SqlRandomMapResult = nullptr;
 	}
 
+	// check for map info result from database
+	if(m_pLoadMapInfoResult != nullptr && m_pLoadMapInfoResult->m_Completed)
+	{
+		if(m_pLoadMapInfoResult->m_Success && m_pLoadMapInfoResult->m_Data.m_aaMessages[0][0] != '\0')
+		{
+			str_copy(m_aMapInfoMessage, m_pLoadMapInfoResult->m_Data.m_aaMessages[0]);
+			CNetMsg_Sv_MapInfo MapInfoMsg;
+			MapInfoMsg.m_pDescription = m_aMapInfoMessage;
+			Server()->SendPackMsg(&MapInfoMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);
+		}
+		m_pLoadMapInfoResult = nullptr;
+	}
+
 	// Record player position at the end of the tick
 	if(m_TeeHistorianActive)
 	{
@@ -1691,6 +1707,14 @@ void CGameContext::OnClientEnter(int ClientId)
 		SendVoteSet(ClientId);
 
 	Server()->ExpireServerInfo();
+
+	// send map info if loaded from database
+	if(m_aMapInfoMessage[0] != '\0')
+	{
+		CNetMsg_Sv_MapInfo MapInfoMsg;
+		MapInfoMsg.m_pDescription = m_aMapInfoMessage;
+		Server()->SendPackMsg(&MapInfoMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
+	}
 
 	CPlayer *pNewPlayer = m_apPlayers[ClientId];
 	mem_zero(&m_aLastPlayerInput[ClientId], sizeof(m_aLastPlayerInput[ClientId]));
@@ -4267,6 +4291,9 @@ void CGameContext::OnInit(const void *pPersistentData)
 	{
 		m_pScore = new CScore(this, ((CServer *)Server())->DbPool());
 	}
+
+	// load map info from database
+	Score()->LoadMapInfo();
 
 	// create all entities from the game layer
 	CreateAllEntities(true);
