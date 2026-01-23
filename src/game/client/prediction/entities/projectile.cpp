@@ -11,6 +11,7 @@
 #include <game/client/projectile_data.h>
 #include <game/collision.h>
 #include <game/mapitems.h>
+#include <game/random_hash.h>
 
 CProjectile::CProjectile(
 	CGameWorld *pGameWorld,
@@ -155,6 +156,30 @@ void CProjectile::Tick()
 			GameWorld()->CreatePredictedSound(ColPos, m_SoundImpact, m_StartTick);
 		}
 		m_MarkedForDestroy = true;
+	}
+
+	CCharacter *pLocalChar = GameWorld()->GetCharacterById(GameWorld()->m_LocalClientId);
+	bool PredictTele = pLocalChar && pLocalChar->m_RngSeed >= 0;
+	if(PredictTele)
+	{
+		int MapIndex = Collision()->GetIndex(PrevPos, CurPos);
+		int Tele;
+		if(g_Config.m_SvOldTeleportWeapons)
+			Tele = Collision()->IsTeleport(MapIndex);
+		else
+			Tele = Collision()->IsTeleportWeapon(MapIndex);
+
+		if(Tele && !Collision()->TeleOuts(Tele - 1).empty())
+		{
+			int TeleOut;
+			if(pOwnerChar)
+				TeleOut = RandomHash::SeededRandomIntBelow(Collision()->TeleOuts(Tele - 1).size(), {m_Owner, m_StartTick, MapIndex, GameWorld()->GameTick(), pOwnerChar->m_RngSeed});
+			else
+				TeleOut = RandomHash::SeededRandomIntBelow(Collision()->TeleOuts(Tele - 1).size(), {GetId(), m_StartTick, MapIndex, GameWorld()->GameTick()});
+
+			m_Pos = Collision()->TeleOuts(Tele - 1)[TeleOut];
+			m_StartTick = GameWorld()->GameTick();
+		}
 	}
 }
 

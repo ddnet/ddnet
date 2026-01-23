@@ -3709,11 +3709,15 @@ void CGameClient::UpdateRenderedCharacters()
 			m_aClients[i].m_PrevPredicted.Write(&m_aClients[i].m_RenderPrev);
 
 			m_aClients[i].m_IsPredicted = true;
+			float IntraTick = Client()->PredIntraGameTick(g_Config.m_ClDummy);
+
+			if(m_aClients[i].m_Predicted.m_CanSkipInterpolation)
+				IntraTick = 1.0f; // This is fine for PredIntraGameTick because it has a range between 0.0f and 1.0f during prediction
 
 			Pos = mix(
 				vec2(m_aClients[i].m_RenderPrev.m_X, m_aClients[i].m_RenderPrev.m_Y),
 				vec2(m_aClients[i].m_RenderCur.m_X, m_aClients[i].m_RenderCur.m_Y),
-				m_aClients[i].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy));
+				IntraTick);
 
 			if(i == m_Snap.m_LocalClientId || (PredictDummy() && i == m_aLocalIds[!g_Config.m_ClDummy]))
 			{

@@ -11,6 +11,7 @@
 
 #include <game/collision.h>
 #include <game/mapitems.h>
+#include <game/random_hash.h>
 
 // Character, "physical" player's part
 
@@ -1048,6 +1049,103 @@ void CCharacter::HandleTiles(int Index)
 		if(NewJumps != m_Core.m_Jumps)
 			m_Core.m_Jumps = NewJumps;
 	}
+
+	if(m_RngSeed >= 0)
+	{
+		int Teleport = Collision()->IsTeleport(MapIndex);
+		if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && Teleport && !Collision()->TeleOuts(Teleport - 1).empty())
+		{
+			if(m_Core.m_Super || m_Core.m_Invincible)
+				return;
+			int TeleOut = RandomHash::SeededRandomIntBelow(Collision()->TeleOuts(Teleport - 1).size(), {m_Core.m_Id, GameWorld()->GameTick(), m_RngSeed});
+			m_Core.m_Pos = Collision()->TeleOuts(Teleport - 1)[TeleOut];
+			m_Core.m_CanSkipInterpolation = true;
+			if(!g_Config.m_SvTeleportHoldHook)
+			{
+				ResetHook();
+			}
+			if(g_Config.m_SvTeleportLoseWeapons)
+				ResetPickups();
+			return;
+		}
+		const int EvilTeleport = Collision()->IsEvilTeleport(MapIndex);
+		if(EvilTeleport && !Collision()->TeleOuts(EvilTeleport - 1).empty())
+		{
+			if(m_Core.m_Super || m_Core.m_Invincible)
+				return;
+			int TeleOut = RandomHash::SeededRandomIntBelow(Collision()->TeleOuts(EvilTeleport - 1).size(), {m_Core.m_Id, GameWorld()->GameTick(), m_RngSeed});
+			m_Core.m_Pos = Collision()->TeleOuts(EvilTeleport - 1)[TeleOut];
+			m_Core.m_CanSkipInterpolation = true;
+			if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons)
+			{
+				m_Core.m_Vel = vec2(0, 0);
+
+				if(!g_Config.m_SvTeleportHoldHook)
+				{
+					ResetHook();
+					GameWorld()->ReleaseHooked(m_Core.m_Id);
+				}
+				if(g_Config.m_SvTeleportLoseWeapons)
+				{
+					ResetPickups();
+				}
+			}
+			return;
+		}
+		if(Collision()->IsCheckEvilTeleport(MapIndex))
+		{
+			if(m_Core.m_Super || m_Core.m_Invincible)
+				return;
+			// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
+			for(int TeleCpId = m_TeleCheckpoint - 1; TeleCpId >= 0; TeleCpId--)
+			{
+				if(!Collision()->TeleCheckOuts(TeleCpId).empty())
+				{
+					int TeleOut = RandomHash::SeededRandomIntBelow(Collision()->TeleCheckOuts(TeleCpId).size(), {m_Core.m_Id, GameWorld()->GameTick(), m_RngSeed});
+					m_Core.m_Pos = Collision()->TeleCheckOuts(TeleCpId)[TeleOut];
+					m_Core.m_CanSkipInterpolation = true;
+					m_Core.m_Vel = vec2(0, 0);
+
+					if(!g_Config.m_SvTeleportHoldHook)
+					{
+						ResetHook();
+						GameWorld()->ReleaseHooked(m_Core.m_Id);
+					}
+					return;
+				}
+			}
+			// TODO: We should predict a teleport to spawn here
+			// This is not currently possible because the spawn position depends on off-screen tees
+
+			return;
+		}
+		if(Collision()->IsCheckTeleport(MapIndex))
+		{
+			if(m_Core.m_Super || m_Core.m_Invincible)
+				return;
+			// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
+			for(int TeleCpId = m_TeleCheckpoint - 1; TeleCpId >= 0; TeleCpId--)
+			{
+				if(!Collision()->TeleCheckOuts(TeleCpId).empty())
+				{
+					int TeleOut = RandomHash::SeededRandomIntBelow(Collision()->TeleCheckOuts(TeleCpId).size(), {m_Core.m_Id, GameWorld()->GameTick(), m_RngSeed});
+					m_Core.m_Pos = Collision()->TeleCheckOuts(TeleCpId)[TeleOut];
+					m_Core.m_CanSkipInterpolation = true;
+
+					if(!g_Config.m_SvTeleportHoldHook)
+					{
+						ResetHook();
+					}
+
+					return;
+				}
+			}
+			// TODO: We should predict a teleport to spawn here
+			// This is not currently possible because the spawn position depends on off-screen tees
+
+			return;
+		}
+	}
 }
 
 void CCharacter::HandleTuneLayer()
@@ -1104,6 +1202,8 @@ void CCharacter::DDRaceTick()
 				Collision()->GetFrontCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH ||
 				Collision()->GetFrontCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH ||
 				Collision()->GetFrontCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH);
+
+	m_Core.m_Tick = GameWorld()->GameTick();
 }
 
 void CCharacter::DDRacePostCoreTick()
@@ -1224,9 +1324,19 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove)
 
 void CCharacter::GiveAllWeapons()
 {
-	for(int i = WEAPON_GUN; i < NUM_WEAPONS - 1; i++)
+	for(int WeaponId = WEAPON_GUN; WeaponId < NUM_WEAPONS - 1; WeaponId++)
 	{
-		GiveWeapon(i);
+		GiveWeapon(WeaponId);
+	}
+}
+
+void CCharacter::ResetPickups()
+{
+	for(int WeaponId = WEAPON_SHOTGUN; WeaponId < NUM_WEAPONS - 1; WeaponId++)
+	{
+		m_Core.m_aWeapons[WeaponId].m_Got = false;
+		if(m_Core.m_ActiveWeapon == WeaponId)
+			m_Core.m_ActiveWeapon = WEAPON_GUN;
 	}
 }
 
@@ -1275,6 +1385,7 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar,
 	m_Core.Reset();
 	m_Core.Init(&GameWorld()->m_Core, GameWorld()->Collision(), GameWorld()->Teams());
 	m_Core.m_Id = Id;
+	m_Core.m_Tick = GameWorld()->GameTick();
 	mem_zero(&m_Core.m_Ninja, sizeof(m_Core.m_Ninja));
 	m_Core.m_LeftWall = true;
 	m_ReloadTimer = 0;
@@ -1283,6 +1394,7 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar,
 	m_CanMoveInFreeze = false;
 	m_TeleCheckpoint = 0;
 	m_StrongWeakId = 0;
+	m_RngSeed = -1;
 
 	mem_zero(&m_Input, sizeof(m_Input));
 	// never initialize both to zero
@@ -1344,6 +1456,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		m_TeleCheckpoint = pExtended->m_TeleCheckpoint;
 		m_StrongWeakId = pExtended->m_StrongWeakId;
 		m_TuneZoneOverride = pExtended->m_TuneZoneOverride;
+		m_RngSeed = pExtended->m_RngSeed;
 
 		const bool Ninja = (pExtended->m_Flags & CHARACTERFLAG_WEAPON_NINJA) != 0;
 		if(Ninja && m_Core.m_ActiveWeapon != WEAPON_NINJA)
@@ -1448,6 +1561,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		}
 
 		m_TuneZoneOverride = TuneZone::OVERRIDE_NONE;
+		m_RngSeed = -1;
 	}
 
 	vec2 PosBefore = m_Pos;

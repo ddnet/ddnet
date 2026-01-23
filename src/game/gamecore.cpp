@@ -10,6 +10,8 @@
 
 #include <engine/shared/config.h>
 
+#include <game/random_hash.h>
+
 #include <limits>
 
 const char *CTuningParams::ms_apNames[] =
@@ -180,6 +182,7 @@ void CCharacterCore::Reset()
 	m_IsInFreeze = false;
 	m_DeepFrozen = false;
 	m_LiveFrozen = false;
+	m_CanSkipInterpolation = false;
 
 	// never initialize both to 0
 	m_Input.m_TargetX = 0;
@@ -190,6 +193,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 {
 	m_MoveRestrictions = m_pCollision->GetMoveRestrictions(UseInput ? IsSwitchActiveCb : nullptr, this, m_Pos);
 	m_TriggeredEvents = 0;
+	m_CanSkipInterpolation = false;
 
 	// get ground state
 	const bool Grounded = m_pCollision->CheckPoint(m_Pos.x + PhysicalSize() / 2, m_Pos.y + PhysicalSize() / 2 + 5) || m_pCollision->CheckPoint(m_Pos.x - PhysicalSize() / 2, m_Pos.y + PhysicalSize() / 2 + 5);
@@ -315,6 +319,8 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		if(m_NewHook)
 		{
 			HookBase = m_HookTeleBase;
+			// The clients dead reckoning doesn't get m_HookTeleBase so anytime it's used we need to reset
+			m_Reset = true;
 		}
 		vec2 NewPos = m_HookPos + m_HookDir * m_Tuning.m_HookFireSpeed;
 		if(distance(HookBase, NewPos) > m_Tuning.m_HookLength)
@@ -389,7 +395,8 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 				SetHookedPlayer(-1);
 
 				m_NewHook = true;
-				int RandomOut = m_pWorld->RandomOr0(m_pCollision->TeleOuts(TeleNr - 1).size());
+				int RandomOut = RandomHash::SeededRandomIntBelow(m_pCollision->TeleOuts(TeleNr - 1).size(), {m_Id, m_Tick, m_RngSeed});
+
 				m_HookPos = m_pCollision->TeleOuts(TeleNr - 1)[RandomOut] + TargetDirection * PhysicalSize() * 1.5f;
 				m_HookDir = TargetDirection;
 				m_HookTeleBase = m_HookPos;
@@ -672,6 +679,9 @@ void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 
 	// Available jumps
 	m_Jumps = pObjDDNet->m_Jumps;
+
+	// Rng
+	m_RngSeed = pObjDDNet->m_RngSeed;
 
 	// Display Information
 	// We only accept the display information when it is received, which means it is not -1 in each case.
