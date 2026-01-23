@@ -664,4 +664,13 @@ Messages = [
 	NetMessageEx("Sv_MapInfo", "map-info@netmsg.ddnet.org", [
 		NetString("m_pDescription"),
 	]),
+
+	NetMessageEx("Cl_RequestPlayerDetails", "request-player-details@netmsg.ddnet.org", [
+		NetIntRange("m_ClientId", 0, 'MAX_CLIENTS-1'),
+	]),
+
+	NetMessageEx("Sv_PlayerDetails", "player-details@netmsg.ddnet.org", [
+		NetIntRange("m_ClientId", 0, 'MAX_CLIENTS-1'),
+		NetString("m_pText"),
+	]),
 ]

@@ -895,6 +895,10 @@ public:
 	int m_MapBestTimeMillis;
 	char m_aMapDescription[512];
 
+	// cached player extra info (points etc.)
+	char m_aaPlayerDetails[MAX_CLIENTS][64];
+	void RequestPlayerDetails(int ClientId) const;
+
 private:
 	std::unique_ptr<IMap> m_pMap;
 

@@ -61,6 +61,7 @@ class IStorage;
 struct CAntibotRoundData;
 struct CScoreRandomMapResult;
 struct CScorePlayerResult;
+struct CScorePlayerDetailsResult;
 
 struct CSnapContext
 {
@@ -361,6 +362,7 @@ public:
 	void OnEmoticonNetMessage(const CNetMsg_Cl_Emoticon *pMsg, int ClientId);
 	void OnKillNetMessage(const CNetMsg_Cl_Kill *pMsg, int ClientId);
 	void OnEnableSpectatorCountNetMessage(const CNetMsg_Cl_EnableSpectatorCount *pMsg, int ClientId);
+	void OnRequestPlayerDetailsNetMessage(const CNetMsg_Cl_RequestPlayerDetails *pMsg, int ClientId);
 	void OnStartInfoNetMessage(const CNetMsg_Cl_StartInfo *pMsg, int ClientId);
 
 	bool OnClientDataPersist(int ClientId, void *pData) override;
@@ -425,6 +427,9 @@ public:
 	// cached map info from database
 	std::shared_ptr<CScorePlayerResult> m_pLoadMapInfoResult;
 	char m_aMapInfoMessage[512];
+
+	// pending player extra info requests
+	std::vector<std::shared_ptr<CScorePlayerDetailsResult>> m_vPlayerDetailsResults;
 
 private:
 	// starting 1 to make 0 the special value "no client id"
