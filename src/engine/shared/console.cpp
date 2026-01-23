@@ -772,21 +772,16 @@ void CConsole::ConCommandAccess(IResult *pResult, void *pUser)
 	pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
 
-void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
+void CConsole::PrintCommandList(EAccessLevel MinAccessLevel, int ExcludeFlagMask)
 {
-	CConsole *pConsole = static_cast<CConsole *>(pUser);
 	char aBuf[240] = "";
 	int Used = 0;
-	std::optional<EAccessLevel> AccessLevel = AccessLevelToEnum(pResult->GetString(0));
-	if(!AccessLevel.has_value())
-	{
-		log_error("console", "Invalid access level '%s'. Allowed values are admin, moderator, helper and all.", pResult->GetString(0));
-		return;
-	}
 
-	for(CCommand *pCommand = pConsole->m_pFirstCommand; pCommand; pCommand = pCommand->Next())
+	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->Next())
 	{
-		if(pCommand->m_Flags & pConsole->m_FlagMask && pCommand->GetAccessLevel() >= AccessLevel.value())
+		if((pCommand->m_Flags & m_FlagMask) &&
+			!(pCommand->m_Flags & ExcludeFlagMask) &&
+			pCommand->GetAccessLevel() >= MinAccessLevel)
 		{
 			int Length = str_length(pCommand->m_pName);
 			if(Used + Length + 2 < (int)(sizeof(aBuf)))
@@ -801,24 +796,32 @@ void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 			}
 			else
 			{
-				pConsole->Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
+				Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 				str_copy(aBuf, pCommand->m_pName);
 				Used = Length;
 			}
 		}
 	}
 	if(Used > 0)
-		pConsole->Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
+		Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
+}
+
+void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
+{
+	CConsole *pConsole = static_cast<CConsole *>(pUser);
+	std::optional<EAccessLevel> AccessLevel = AccessLevelToEnum(pResult->GetString(0));
+	if(!AccessLevel.has_value())
+	{
+		log_error("console", "Invalid access level '%s'. Allowed values are admin, moderator, helper and all.", pResult->GetString(0));
+		return;
+	}
+	pConsole->PrintCommandList(AccessLevel.value(), 0);
 }
 
 void CConsole::ConUserCommandStatus(IResult *pResult, void *pUser)
 {
 	CConsole *pConsole = static_cast<CConsole *>(pUser);
-	CResult Result(pResult->m_ClientId);
-	Result.m_pCommand = "access_status";
-	Result.AddArgument(AccessLevelToString(EAccessLevel::USER));
-
-	CConsole::ConCommandStatus(&Result, pConsole);
+	pConsole->PrintCommandList(EAccessLevel::USER, CMDFLAG_PRACTICE);
 }
 
 void CConsole::TraverseChain(FCommandCallback *ppfnCallback, void **ppUserData)
