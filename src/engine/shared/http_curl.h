@@ -1,6 +1,9 @@
 #ifndef ENGINE_SHARED_HTTP_CURL_H
 #define ENGINE_SHARED_HTTP_CURL_H
 
+#include <base/detect.h>
+#if !defined(CONF_PLATFORM_EMSCRIPTEN)
+
 #include <engine/http.h>
 
 #include <curl/curl.h>
@@ -83,4 +86,5 @@ private:
 	void RunLoop();
 };
 
+#endif // !CONF_PLATFORM_EMSCRIPTEN
 #endif // ENGINE_SHARED_HTTP_CURL_H

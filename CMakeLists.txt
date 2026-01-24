@@ -517,7 +517,9 @@ if(TARGET_OS STREQUAL "android")
 endif()
 find_package(ZLIB)
 find_package(Crypto)
-find_package(Curl)
+if(NOT TARGET_OS STREQUAL "emscripten")
+  find_package(Curl)
+endif()
 if(CLIENT AND VIDEORECORDER)
   find_package(FFMPEG)
 endif()
@@ -607,7 +609,9 @@ function(show_dependency_status OUTPUT_NAME NAME)
   endif()
 endfunction()
 
-show_dependency_status("Curl" CURL)
+if(NOT TARGET_OS STREQUAL "emscripten")
+  show_dependency_status("Curl" CURL)
+endif()
 if(CLIENT AND VIDEORECORDER)
   show_dependency_status("FFmpeg" FFMPEG)
 endif()
@@ -646,8 +650,7 @@ endif()
 if(CLIENT AND VULKAN)
   show_dependency_status("Vulkan" VULKAN)
 endif()
-
-if(NOT(CURL_FOUND))
+if(NOT(CURL_FOUND) AND NOT TARGET_OS STREQUAL "emscripten")
   message(SEND_ERROR "You must install Curl to compile ${CMAKE_PROJECT_NAME}")
 endif()
 if(NOT(Python3_FOUND))
@@ -2208,6 +2211,8 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   host_lookup.h
   http_curl.cpp
   http_curl.h
+  http_emscripten.cpp
+  http_emscripten.h
   huffman.cpp
   huffman.h
   jobs.cpp
