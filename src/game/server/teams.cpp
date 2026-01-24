@@ -829,7 +829,7 @@ void CGameTeams::OnFinish(CPlayer *pPlayer, int TimeTicks, const char *pTimestam
 
 	bool NeedToSendNewServerRecord = false;
 	// update server best time
-	if(GameServer()->m_pController->m_CurrentRecord == 0)
+	if(!GameServer()->m_pController->m_CurrentRecord.has_value())
 	{
 		GameServer()->Score()->LoadBestTime();
 	}
