@@ -346,6 +346,7 @@ public:
 	virtual int LoadingProgression() const = 0;
 
 	virtual int NumServers() const = 0;
+	virtual const CServerInfo *Get(int Index) const = 0;
 
 	virtual int Players(const CServerInfo &Item) const = 0;
 	virtual int Max(const CServerInfo &Item) const = 0;

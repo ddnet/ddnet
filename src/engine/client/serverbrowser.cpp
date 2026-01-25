@@ -322,6 +322,13 @@ const CServerInfo *CServerBrowser::SortedGet(int Index) const
 	return &m_vpServerlist[m_vSortedServerlist[Index]]->m_Info;
 }
 
+const CServerInfo *CServerBrowser::Get(int Index) const
+{
+	if(Index < 0 || Index >= (int)m_vpServerlist.size())
+		return nullptr;
+	return &m_vpServerlist[Index]->m_Info;
+}
+
 int CServerBrowser::GenerateToken(const NETADDR &Addr) const
 {
 	SHA256_CTX Sha256;
@@ -573,10 +580,10 @@ void CServerBrowser::Filter()
 			}
 		}
 
+		UpdateServerFriends(&Info);
+
 		if(!Filtered)
 		{
-			UpdateServerFriends(&Info);
-
 			if(!g_Config.m_BrFilterFriends || Info.m_FriendState != IFriends::FRIEND_NO)
 			{
 				m_NumSortedPlayers += Info.m_NumFilteredPlayers;
