@@ -969,6 +969,12 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 			{
 				GameServer()->Score()->PlayerData(m_ClientId)->Set(Result.m_Data.m_Info.m_Time.value(), Result.m_Data.m_Info.m_aTimeCp);
 				Server()->SetClientScore(m_ClientId, Result.m_Data.m_Info.m_Time.value());
+				// update map best time if player's time is better
+				if(!GameServer()->m_pController->m_CurrentRecord.has_value() ||
+					Result.m_Data.m_Info.m_Time.value() < GameServer()->m_pController->m_CurrentRecord.value())
+				{
+					GameServer()->Score()->LoadBestTime();
+				}
 			}
 			Server()->ExpireServerInfo();
 			int Birthday = Result.m_Data.m_Info.m_Birthday;
