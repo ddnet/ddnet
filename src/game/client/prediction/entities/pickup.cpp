@@ -10,7 +10,7 @@
 #include <game/collision.h>
 #include <game/mapitems.h>
 
-static constexpr int gs_PickupPhysSize = 14;
+static constexpr int PICKUP_PHYSICS_RADIUS = 14;
 
 void CPickup::Tick()
 {
@@ -163,7 +163,7 @@ void CPickup::Move()
 }
 
 CPickup::CPickup(CGameWorld *pGameWorld, int Id, const CPickupData *pPickup) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP, vec2(0, 0), gs_PickupPhysSize)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP, vec2(0, 0), PICKUP_PHYSICS_RADIUS)
 {
 	m_Pos = pPickup->m_Pos;
 	m_Type = pPickup->m_Type;

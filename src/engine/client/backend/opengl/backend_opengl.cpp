@@ -317,9 +317,9 @@ bool CCommandProcessorFragment_OpenGL::InitOpenGL(const SCommand_Init *pCommand)
 
 	const char *pRendererString = (const char *)glGetString(GL_RENDERER);
 
-	str_copy(pCommand->m_pVendorString, pVendorString, gs_GpuInfoStringSize);
-	str_copy(pCommand->m_pVersionString, pVersionString, gs_GpuInfoStringSize);
-	str_copy(pCommand->m_pRendererString, pRendererString, gs_GpuInfoStringSize);
+	str_copy(pCommand->m_pVendorString, pVendorString, GPU_INFO_STRING_SIZE);
+	str_copy(pCommand->m_pVersionString, pVersionString, GPU_INFO_STRING_SIZE);
+	str_copy(pCommand->m_pRendererString, pRendererString, GPU_INFO_STRING_SIZE);
 
 	// parse version string
 	ParseVersionString(pCommand->m_RequestedBackend, pVersionString, pCommand->m_pCapabilities->m_ContextMajor, pCommand->m_pCapabilities->m_ContextMinor, pCommand->m_pCapabilities->m_ContextPatch);

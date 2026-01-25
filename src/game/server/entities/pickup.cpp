@@ -11,10 +11,10 @@
 #include <game/server/player.h>
 #include <game/teamscore.h>
 
-static constexpr int gs_PickupPhysSize = 14;
+static constexpr int PICKUP_PHYSICS_RADIUS = 14;
 
 CPickup::CPickup(CGameWorld *pGameWorld, int Type, int SubType, int Layer, int Number, int Flags) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP, vec2(0, 0), gs_PickupPhysSize)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP, vec2(0, 0), PICKUP_PHYSICS_RADIUS)
 {
 	m_Core = vec2(0.0f, 0.0f);
 	m_Type = Type;
