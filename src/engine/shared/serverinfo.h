@@ -21,6 +21,7 @@ public:
 		int m_Score;
 		bool m_IsPlayer;
 		bool m_IsAfk;
+		int m_Team;
 		// skin info 0.6
 		char m_aSkin[MAX_SKIN_LENGTH];
 		bool m_CustomSkinColors;
@@ -38,6 +39,7 @@ public:
 	int m_MaxPlayers;
 	int m_NumPlayers; // Not serialized.
 	CServerInfo::EClientScoreKind m_ClientScoreKind;
+	CServerInfo::EClientTeamKind m_ClientTeamKind;
 	bool m_Passworded;
 	char m_aGameType[16];
 	char m_aName[64];

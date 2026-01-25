@@ -68,6 +68,7 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 	const json_value &MaxClients = ServerInfo["max_clients"];
 	const json_value &MaxPlayers = ServerInfo["max_players"];
 	const json_value &ClientScoreKind = ServerInfo["client_score_kind"];
+	const json_value &ClientTeamKind = ServerInfo["client_team_kind"];
 	const json_value &Passworded = ServerInfo["passworded"];
 	const json_value &GameType = ServerInfo["game_type"];
 	const json_value &Name = ServerInfo["name"];
@@ -81,6 +82,7 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 	Error = Error || MaxPlayers.type != json_integer;
 	Error = Error || Passworded.type != json_boolean;
 	Error = Error || (ClientScoreKind.type != json_none && ClientScoreKind.type != json_string);
+	Error = Error || (ClientTeamKind.type != json_none && ClientTeamKind.type != json_string);
 	Error = Error || GameType.type != json_string || str_has_cc(GameType);
 	Error = Error || Name.type != json_string || str_has_cc(Name);
 	Error = Error || MapName.type != json_string || str_has_cc(MapName);
@@ -100,6 +102,19 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 	else if(ClientScoreKind.type == json_string && str_startswith(ClientScoreKind, "time"))
 	{
 		pOut->m_ClientScoreKind = CServerInfo::CLIENT_SCORE_KIND_TIME;
+	}
+	pOut->m_ClientTeamKind = CServerInfo::CLIENT_TEAM_KIND_UNSPECIFIED;
+	if(ClientTeamKind.type == json_string && str_startswith(ClientTeamKind, "vanilla"))
+	{
+		pOut->m_ClientTeamKind = CServerInfo::CLIENT_TEAM_KIND_VANILLA;
+	}
+	else if(ClientTeamKind.type == json_string && str_startswith(ClientTeamKind, "ddrace"))
+	{
+		pOut->m_ClientTeamKind = CServerInfo::CLIENT_TEAM_KIND_DDRACE;
+	}
+	else if(ClientTeamKind.type == json_string && str_startswith(ClientTeamKind, "none"))
+	{
+		pOut->m_ClientTeamKind = CServerInfo::CLIENT_TEAM_KIND_NONE;
 	}
 	pOut->m_RequiresLogin = false;
 	if(RequiresLogin.type == json_boolean)
@@ -145,6 +160,16 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 			pClient->m_IsAfk = false;
 			if(IsAfk.type == json_boolean)
 				pClient->m_IsAfk = IsAfk;
+
+			const json_value &Team = Client["team"];
+			pClient->m_Team = 0;
+			if(Team.type == json_integer)
+			{
+				int TeamValue = json_int_get(&Team);
+				if(TeamValue < -1 || TeamValue > 64)
+					return true;
+				pClient->m_Team = TeamValue;
+			}
 
 			// check if a skin is also available
 			bool HasSkin = false;
@@ -240,6 +265,7 @@ bool CServerInfo2::operator==(const CServerInfo2 &Other) const
 	Unequal = Unequal || m_MaxPlayers != Other.m_MaxPlayers;
 	Unequal = Unequal || m_NumPlayers != Other.m_NumPlayers;
 	Unequal = Unequal || m_ClientScoreKind != Other.m_ClientScoreKind;
+	Unequal = Unequal || m_ClientTeamKind != Other.m_ClientTeamKind;
 	Unequal = Unequal || m_Passworded != Other.m_Passworded;
 	Unequal = Unequal || str_comp(m_aGameType, Other.m_aGameType) != 0;
 	Unequal = Unequal || str_comp(m_aName, Other.m_aName) != 0;
@@ -259,6 +285,7 @@ bool CServerInfo2::operator==(const CServerInfo2 &Other) const
 		Unequal = Unequal || m_aClients[i].m_Score != Other.m_aClients[i].m_Score;
 		Unequal = Unequal || m_aClients[i].m_IsPlayer != Other.m_aClients[i].m_IsPlayer;
 		Unequal = Unequal || m_aClients[i].m_IsAfk != Other.m_aClients[i].m_IsAfk;
+		Unequal = Unequal || m_aClients[i].m_Team != Other.m_aClients[i].m_Team;
 		if(Unequal)
 		{
 			return false;
@@ -275,6 +302,7 @@ CServerInfo2::operator CServerInfo() const
 	Result.m_MaxPlayers = m_MaxPlayers;
 	Result.m_NumPlayers = m_NumPlayers;
 	Result.m_ClientScoreKind = m_ClientScoreKind;
+	Result.m_ClientTeamKind = m_ClientTeamKind;
 	Result.m_RequiresLogin = m_RequiresLogin;
 	Result.m_Flags = m_Passworded ? SERVER_FLAG_PASSWORD : 0;
 	str_copy(Result.m_aGameType, m_aGameType);
@@ -290,6 +318,7 @@ CServerInfo2::operator CServerInfo() const
 		Result.m_aClients[i].m_Score = m_aClients[i].m_Score;
 		Result.m_aClients[i].m_Player = m_aClients[i].m_IsPlayer;
 		Result.m_aClients[i].m_Afk = m_aClients[i].m_IsAfk;
+		Result.m_aClients[i].m_Team = m_aClients[i].m_Team;
 
 		// 0.6 skin
 		str_copy(Result.m_aClients[i].m_aSkin, m_aClients[i].m_aSkin);

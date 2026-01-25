@@ -72,6 +72,7 @@ namespace FontIcons
 	[[maybe_unused]] static const char *FONT_ICON_MAGNIFYING_GLASS = "\xEF\x80\x82";
 	[[maybe_unused]] static const char *FONT_ICON_HEART = "\xEF\x80\x84";
 	[[maybe_unused]] static const char *FONT_ICON_HEART_CRACK = "\xEF\x9E\xA9";
+	[[maybe_unused]] static const char *FONT_ICON_SHIELD_HEART = "\xEE\x95\xB4";
 	[[maybe_unused]] static const char *FONT_ICON_STAR = "\xEF\x80\x85";
 	[[maybe_unused]] static const char *FONT_ICON_XMARK = "\xEF\x80\x8D";
 	[[maybe_unused]] static const char *FONT_ICON_CIRCLE = "\xEF\x84\x91";

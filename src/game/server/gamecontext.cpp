@@ -4720,6 +4720,12 @@ const char *CGameContext::GameType() const
 }
 const char *CGameContext::Version() const { return GAME_VERSION; }
 const char *CGameContext::NetVersion() const { return GAME_NETVERSION; }
+const char *CGameContext::TeamKind() const
+{
+	if(g_Config.m_SvSoloServer)
+		return "none";
+	return m_pController->IsTeamPlay() ? "vanilla" : "ddrace";
+}
 
 IGameServer *CreateGameServer() { return new CGameContext; }
 
@@ -5403,7 +5409,19 @@ void CGameContext::OnUpdatePlayerServerInfo(CJsonWriter *pJsonWriter, int Client
 	pJsonWriter->WriteAttribute("afk");
 	pJsonWriter->WriteBoolValue(m_apPlayers[ClientId]->IsAfk());
 
-	const int Team = m_pController->IsTeamPlay() ? m_apPlayers[ClientId]->GetTeam() : (m_apPlayers[ClientId]->GetTeam() == TEAM_SPECTATORS ? -1 : GetDDRaceTeam(ClientId));
+	int Team;
+	if(m_pController->IsTeamPlay())
+	{
+		Team = m_apPlayers[ClientId]->GetTeam();
+	}
+	else if(m_apPlayers[ClientId]->GetTeam() == TEAM_SPECTATORS)
+	{
+		Team = -1;
+	}
+	else
+	{
+		Team = GetDDRaceTeam(ClientId);
+	}
 
 	pJsonWriter->WriteAttribute("team");
 	pJsonWriter->WriteIntValue(Team);
