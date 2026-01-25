@@ -927,7 +927,7 @@ void CGameContext::SendVoteSet(int ClientId)
 	{
 		for(int i = 0; i < Server()->MaxClients(); i++)
 		{
-			if(!m_apPlayers[i])
+			if(!CanParticipateInVote(i))
 				continue;
 			if(!Server()->IsSixup(i))
 				Server()->SendPackMsg(&Msg6, MSGFLAG_VITAL, i);
@@ -937,6 +937,8 @@ void CGameContext::SendVoteSet(int ClientId)
 	}
 	else
 	{
+		if(!CanParticipateInVote(ClientId))
+			return;
 		if(!Server()->IsSixup(ClientId))
 			Server()->SendPackMsg(&Msg6, MSGFLAG_VITAL, ClientId);
 		else
@@ -949,7 +951,7 @@ void CGameContext::SendVoteStatus(int ClientId, int Total, int Yes, int No)
 	if(ClientId == -1)
 	{
 		for(int i = 0; i < MAX_CLIENTS; ++i)
-			if(Server()->ClientIngame(i))
+			if(Server()->ClientIngame(i) && CanParticipateInVote(i))
 				SendVoteStatus(i, Total, Yes, No);
 		return;
 	}
@@ -975,6 +977,33 @@ void CGameContext::AbortVoteKickOnDisconnect(int ClientId)
 	if(m_VoteCloseTime && ((str_startswith(m_aVoteCommand, "kick ") && str_toint(&m_aVoteCommand[5]) == ClientId) ||
 				      (str_startswith(m_aVoteCommand, "set_team ") && str_toint(&m_aVoteCommand[9]) == ClientId)))
 		m_VoteEnforce = VOTE_ENFORCE_ABORT;
+}
+
+bool CGameContext::CanParticipateInVote(int ClientId)
+{
+	if(!m_apPlayers[ClientId])
+		return false;
+
+	if(Server()->IsRconAuthed(ClientId))
+		return true;
+
+	// players could have switched the team, send to everyone to clear the popup
+	if(!m_VoteCloseTime)
+		return true;
+
+	if(IsOptionVote())
+		return true;
+
+	// spectators cannot participate in kick/spec votes
+	if(m_apPlayers[ClientId]->GetTeam() == TEAM_SPECTATORS)
+		return false;
+
+	CCharacter *pCreatorChar = GetPlayerChar(m_VoteCreator);
+	CCharacter *pPlayerChar = GetPlayerChar(ClientId);
+	if(pCreatorChar && pPlayerChar)
+		return pCreatorChar->Team() == pPlayerChar->Team();
+
+	return true;
 }
 
 void CGameContext::CheckPureTuning()
