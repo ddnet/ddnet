@@ -64,7 +64,7 @@ void IGameController::DoActivityCheck()
 				break;
 				case 1:
 				{
-					// move player to spectator if the reserved slots aren't filled yet, kick him otherwise
+					// move player to spectator if the reserved slots aren't filled yet, kick them otherwise
 					int Spectators = 0;
 					for(auto &pPlayer : GameServer()->m_apPlayers)
 						if(pPlayer && pPlayer->GetTeam() == TEAM_SPECTATORS)

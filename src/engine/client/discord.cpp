@@ -157,7 +157,7 @@ public:
 		if(!m_Activity.instance)
 			return;
 
-		// secret is only shared when player is joining the game, or when he's invited for private games
+		// secret is only shared when player is joining the game, or when they are invited for private games
 		if(str_length(ServerInfo.m_aAddress) < (int)sizeof(m_Activity.secrets.join))
 		{
 			str_copy(m_Activity.secrets.join, ServerInfo.m_aAddress, sizeof(m_Activity.secrets.join));
