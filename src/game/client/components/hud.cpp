@@ -728,7 +728,7 @@ void CHud::RenderAmmoHealthAndArmor(const CNetObj_Character *pCharacter)
 	bool IsSixupGameSkin = GameClient()->m_GameSkin.IsSixup();
 	int QuadOffsetSixup = (IsSixupGameSkin ? 10 : 0);
 
-	if(GameClient()->m_GameInfo.m_HudAmmo)
+	if(GameClient()->m_GameInfo.m_HudAmmo && !GameClient()->m_GameInfo.m_HudDDRace)
 	{
 		// ammo display
 		float AmmoOffsetY = GameClient()->m_GameInfo.m_HudHealthArmor ? 24 : 0;
@@ -893,8 +893,7 @@ void CHud::RenderPlayerState(const int ClientId)
 		}
 
 		// render available and used jumps
-		int JumpsOffsetY = ((GameClient()->m_GameInfo.m_HudHealthArmor && g_Config.m_ClShowhudHealthAmmo ? 24 : 0) +
-				    (GameClient()->m_GameInfo.m_HudAmmo && g_Config.m_ClShowhudHealthAmmo ? 12 : 0));
+		int JumpsOffsetY = GameClient()->m_GameInfo.m_HudHealthArmor && g_Config.m_ClShowhudHealthAmmo ? 24 : 0;
 		if(JumpsOffsetY > 0)
 		{
 			Graphics()->TextureSet(GameClient()->m_HudSkin.m_SpriteHudAirjump);
@@ -912,8 +911,7 @@ void CHud::RenderPlayerState(const int ClientId)
 	}
 
 	float x = 5 + 12;
-	float y = (5 + 12 + (GameClient()->m_GameInfo.m_HudHealthArmor && g_Config.m_ClShowhudHealthAmmo ? 24 : 0) +
-		   (GameClient()->m_GameInfo.m_HudAmmo && g_Config.m_ClShowhudHealthAmmo ? 12 : 0));
+	float y = 5 + 12 + (GameClient()->m_GameInfo.m_HudHealthArmor && g_Config.m_ClShowhudHealthAmmo ? 24 : 0);
 
 	// render weapons
 	{
@@ -949,13 +947,49 @@ void CHud::RenderPlayerState(const int ClientId)
 		}
 	}
 
-	// render capabilities
-	x = 5;
 	y += 12;
 	if(TotalJumpsToDisplay > 0)
 	{
 		y += 12;
 	}
+
+	if(GameClient()->m_GameInfo.m_HudAmmo)
+	{
+		x = 0;
+
+		int ActiveWeapon;
+		int Ammo;
+		// pCharacter is predicted but doesn't work in demo playback
+		if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
+		{
+			ActiveWeapon = pCharacter->m_ActiveWeapon;
+			Ammo = pCharacter->m_aWeapons[ActiveWeapon].m_Ammo;
+		}
+		else
+		{
+			ActiveWeapon = pPlayer->m_Weapon;
+			Ammo = pPlayer->m_AmmoCount;
+		}
+
+		// guard against modded no weapon
+		ActiveWeapon = std::max(static_cast<int>(WEAPON_HAMMER), ActiveWeapon);
+
+		const bool IsSixupGameSkin = GameClient()->m_GameSkin.IsSixup();
+		const int QuadOffsetSixup = (IsSixupGameSkin ? 10 : 0);
+		if(GameClient()->m_GameSkin.m_aSpriteWeaponProjectiles[ActiveWeapon].IsValid() &&
+			(ActiveWeapon == WEAPON_SHOTGUN || ActiveWeapon == WEAPON_GRENADE || ActiveWeapon == WEAPON_LASER) &&
+			Ammo > 0)
+		{
+			Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteWeaponProjectiles[ActiveWeapon]);
+			Graphics()->RenderQuadContainerEx(m_HudQuadContainerIndex, m_aAmmoOffset[ActiveWeapon] + QuadOffsetSixup,
+				std::clamp(Ammo, 0, 10), x, y);
+
+			y += 20;
+		}
+	}
+
+	// render capabilities
+	x = 5;
 	bool HasCapabilities = false;
 	if(pCharacter->m_EndlessJump)
 	{

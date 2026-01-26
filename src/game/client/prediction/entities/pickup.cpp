@@ -123,10 +123,28 @@ void CPickup::Tick()
 				break;
 
 			case POWERUP_WEAPON:
-				if(m_Subtype >= 0 && m_Subtype < NUM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) != -1))
+				if(GameWorld()->m_WorldConfig.m_IsDDRace && GameWorld()->m_WorldConfig.m_PredictDDRace)
 				{
-					pChr->GiveWeapon(m_Subtype);
+					const int Ammo = m_Delay == 0 ? -1 : m_Delay;
+					if(m_Subtype >= 0 && m_Subtype < NUM_WEAPONS &&
+						(!pChr->GetWeaponGot(m_Subtype) || (pChr->GetWeaponAmmo(m_Subtype) != -1 && (Ammo == -1 || pChr->GetWeaponAmmo(m_Subtype) < Ammo))))
+					{
+						pChr->GiveWeapon(m_Subtype);
+						pChr->SetWeaponAmmo(m_Subtype, Ammo);
+						CreateSound = true;
+					}
+				}
+				else
+				{
+					if(m_Subtype >= 0 && m_Subtype < NUM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) != -1))
+					{
+						pChr->GiveWeapon(m_Subtype);
+						CreateSound = true;
+					}
+				}
 
+				if(CreateSound)
+				{
 					if(m_Subtype == WEAPON_GRENADE)
 						GameWorld()->CreatePredictedSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->GetCid());
 					else if(m_Subtype == WEAPON_SHOTGUN)
@@ -174,6 +192,7 @@ CPickup::CPickup(CGameWorld *pGameWorld, int Id, const CPickupData *pPickup) :
 	m_Number = pPickup->m_SwitchNumber;
 	m_Layer = m_Number > 0 ? LAYER_SWITCH : LAYER_GAME;
 	m_Flags = pPickup->m_Flags;
+	m_Delay = pPickup->m_SwitchDelay;
 }
 
 void CPickup::FillInfo(CNetObj_Pickup *pPickup)

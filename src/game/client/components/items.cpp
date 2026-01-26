@@ -136,7 +136,7 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemId)
 	}
 }
 
-void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCurrent, bool IsPredicted, int Flags)
+void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCurrent, bool IsPredicted, int Flags, int Delay)
 {
 	int CurWeapon = std::clamp(pCurrent->m_Subtype, 0, NUM_WEAPONS - 1);
 	int QuadOffset = 2;
@@ -225,6 +225,52 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 
 	Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, QuadOffset, Pos.x, Pos.y, Scale.x, Scale.y);
 	Graphics()->QuadsSetRotation(0);
+
+	if(pCurrent->m_Type == POWERUP_WEAPON)
+	{
+		for(int Ammo = 0; Ammo < std::min(Delay, 3); Ammo++)
+		{
+			Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteWeaponProjectiles[CurWeapon]);
+			Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+
+			vec2 AmmoScale = vec2(0.6f, 0.6f);
+			float GapSize = 15;
+			float HeightOffset = 20;
+
+			if(CurWeapon == WEAPON_SHOTGUN)
+			{
+				AmmoScale = vec2(0.75f, 0.75f);
+				HeightOffset = 17;
+			}
+			else if(CurWeapon == WEAPON_GRENADE)
+			{
+				GapSize = 20;
+			}
+			else if(CurWeapon == WEAPON_LASER)
+			{
+				HeightOffset = 23;
+			}
+
+			vec2 ExtraPos = vec2(30 - Ammo * GapSize, -HeightOffset);
+
+			if(Flags & PICKUPFLAG_XFLIP)
+				ExtraPos.x = -ExtraPos.x;
+
+			if(Flags & PICKUPFLAG_YFLIP)
+				ExtraPos.y = -ExtraPos.y;
+
+			if(Flags & PICKUPFLAG_ROTATE)
+			{
+				std::swap(ExtraPos.x, ExtraPos.y);
+				Graphics()->QuadsSetRotation(90.f * (pi / 180));
+			}
+
+			Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_aProjectileOffset[CurWeapon],
+				Pos.x + ExtraPos.x, Pos.y + ExtraPos.y, AmmoScale.x, AmmoScale.y);
+
+			Graphics()->QuadsSetRotation(0);
+		}
+	}
 }
 
 void CItems::RenderFlags()
@@ -512,7 +558,7 @@ void CItems::OnRender()
 					CNetObj_Pickup Data, Prev;
 					pPickup->FillInfo(&Data);
 					pPrev->FillInfo(&Prev);
-					RenderPickup(&Prev, &Data, true, pPickup->Flags());
+					RenderPickup(&Prev, &Data, true, pPickup->Flags(), pPickup->Delay());
 				}
 			}
 		}
@@ -565,7 +611,7 @@ void CItems::OnRender()
 			}
 			const void *pPrev = Client()->SnapFindItem(IClient::SNAP_PREV, Item.m_Type, Item.m_Id);
 			if(pPrev)
-				RenderPickup((const CNetObj_Pickup *)pPrev, (const CNetObj_Pickup *)pData, false, Data.m_Flags);
+				RenderPickup((const CNetObj_Pickup *)pPrev, (const CNetObj_Pickup *)pData, false, Data.m_Flags, Data.m_SwitchDelay);
 		}
 		else if(Item.m_Type == NETOBJTYPE_LASER || Item.m_Type == NETOBJTYPE_DDNETLASER)
 		{

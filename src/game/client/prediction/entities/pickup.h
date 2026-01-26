@@ -22,11 +22,13 @@ public:
 	int Type() const { return m_Type; }
 	int Subtype() const { return m_Subtype; }
 	int Flags() const { return m_Flags; }
+	int Delay() const { return m_Delay; }
 
 private:
 	int m_Type;
 	int m_Subtype;
 	int m_Flags;
+	int m_Delay;
 
 	// DDRace
 

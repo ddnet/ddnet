@@ -17,6 +17,7 @@ public:
 	int m_Subtype;
 	int m_SwitchNumber;
 	int m_Flags;
+	int m_SwitchDelay;
 };
 
 CPickupData ExtractPickupInfo(int NetObjType, const void *pData, const CNetObj_EntityEx *pEntEx);
