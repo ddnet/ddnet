@@ -22,8 +22,8 @@ static void AnimSeqEval(const CAnimSequence *pSeq, float Time, CAnimKeyframe *pF
 	}
 	else
 	{
-		CAnimKeyframe *pFrame1 = nullptr;
-		CAnimKeyframe *pFrame2 = nullptr;
+		const CAnimKeyframe *pFrame1 = nullptr;
+		const CAnimKeyframe *pFrame2 = nullptr;
 		float Blend = 0.0f;
 
 		// TODO: make this smarter.. binary search
@@ -65,7 +65,7 @@ void CAnimState::AnimAdd(CAnimState *pState, const CAnimState *pAdded, float Amo
 	AnimAddKeyframe(&pState->m_Attach, pAdded->GetAttach(), Amount);
 }
 
-void CAnimState::Set(CAnimation *pAnim, float Time)
+void CAnimState::Set(const CAnimation *pAnim, float Time)
 {
 	AnimSeqEval(&pAnim->m_Body, Time, &m_Body);
 	AnimSeqEval(&pAnim->m_BackFoot, Time, &m_BackFoot);
@@ -73,7 +73,7 @@ void CAnimState::Set(CAnimation *pAnim, float Time)
 	AnimSeqEval(&pAnim->m_Attach, Time, &m_Attach);
 }
 
-void CAnimState::Add(CAnimation *pAnim, float Time, float Amount)
+void CAnimState::Add(const CAnimation *pAnim, float Time, float Amount)
 {
 	CAnimState Add;
 	Add.Set(pAnim, Time);
