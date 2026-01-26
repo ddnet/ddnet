@@ -21,7 +21,7 @@ void AntibotRoundStart(CAntibotRoundData *pRoundData) {}
 void AntibotRoundEnd(void) {}
 void AntibotUpdateData(void) {}
 void AntibotDestroy(void) { g_pData = 0; }
-void AntibotConsoleCommand(const char *pCommand)
+void AntibotConsoleCommand(int ClientId, const char *pCommand)
 {
 	if(strcmp(pCommand, "dump") == 0)
 	{
