@@ -22,7 +22,7 @@ jobs:
     - name: Prepare Linux
       run: |
         sudo apt-get update -y
-        sudo apt-get install ddnet-tools shellcheck tidy pkg-config cmake doxygen graphviz ninja-build python3-clang -y
+        sudo apt-get install ddnet-tools shellcheck tidy pkg-config cmake graphviz ninja-build python3-clang -y
         rustup default stable
         pip3 install ruff
         wget https://github.com/muttleyxd/clang-tools-static-binaries/releases/download/master-796e77c/clang-format-20_linux-amd64
@@ -31,6 +31,9 @@ jobs:
         chmod +x ~/.local/bin/clang-format
         wget -O ~/.local/bin/shfmt https://github.com/mvdan/sh/releases/download/v3.8.0/shfmt_v3.8.0_linux_amd64
         chmod +x ~/.local/bin/shfmt
+        wget --quiet -O doxygen.tar.gz https://www.doxygen.nl/files/doxygen-1.16.1.linux.bin.tar.gz
+        tar xf doxygen.tar.gz
+        mv doxygen-1.16.1/bin/doxygen ~/.local/bin
 
     - name: Cache Rust dependencies
       uses: Swatinem/rust-cache@v2
@@ -44,9 +47,6 @@ jobs:
       run: |
         doxygen --version
         doxygen -q
-        # TODO: Files included for macro-based lists like config variables and editor actions cannot be found by Doxygen version 1.9.8 used in the CI.
-        #       Remove this ignored warning when the version is upgraded to one where this is fixed.
-        sed -i -E '/warning: include file .* not found, perhaps you forgot to add its directory to INCLUDE_PATH/d' docs/warn.log
         if [ -s docs/warn.log ]; then
           echo "--------------------------------------------------"
           echo "Doxygen warnings:"
