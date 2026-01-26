@@ -1467,9 +1467,11 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 	SetTuneZone(GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0);
 
 	// set the current weapon
-	if(pChar->m_Weapon >= 0 && pChar->m_Weapon != WEAPON_NINJA)
+	if(pChar->m_Weapon != WEAPON_NINJA)
 	{
-		m_Core.m_aWeapons[pChar->m_Weapon].m_Ammo = (GameWorld()->m_WorldConfig.m_InfiniteAmmo || pChar->m_Weapon == WEAPON_HAMMER) ? -1 : pChar->m_AmmoCount;
+		if(pChar->m_Weapon >= 0)
+			m_Core.m_aWeapons[pChar->m_Weapon].m_Ammo = (GameWorld()->m_WorldConfig.m_InfiniteAmmo || pChar->m_Weapon == WEAPON_HAMMER) ? -1 : pChar->m_AmmoCount;
+
 		if(pChar->m_Weapon != m_Core.m_ActiveWeapon)
 			SetActiveWeapon(pChar->m_Weapon);
 	}
@@ -1522,7 +1524,7 @@ void CCharacter::SetActiveWeapon(int ActiveWeapon)
 {
 	if(ActiveWeapon < WEAPON_HAMMER || ActiveWeapon >= NUM_WEAPONS)
 	{
-		m_Core.m_ActiveWeapon = WEAPON_HAMMER;
+		m_Core.m_ActiveWeapon = -1;
 	}
 	else
 	{
