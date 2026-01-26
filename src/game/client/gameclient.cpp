@@ -2626,8 +2626,6 @@ void CGameClient::OnPredict()
 
 		m_PredictedWorld.Tick();
 
-		HandlePredictedEvents(Tick);
-
 		// fetch the current characters
 		if(Tick == PredictionTick)
 		{
@@ -2689,6 +2687,8 @@ void CGameClient::OnPredict()
 				if(Events & COREEVENT_AIR_JUMP)
 					m_Effects.AirJump(Pos, 1.0f, 1.0f);
 		}
+
+		HandlePredictedEvents(Tick);
 	}
 
 	// detect mispredictions of other players and make corrections smoother when possible
