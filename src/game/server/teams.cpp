@@ -116,7 +116,7 @@ void CGameTeams::OnCharacterStart(int ClientId)
 			str_format(
 				aBuf,
 				sizeof(aBuf),
-				"%s has finished and didn't go through start yet, wait for him or join another team.",
+				"%s has finished and didn't go through start yet, wait for them or join another team.",
 				Server()->ClientName(i));
 			GameServer()->SendChatTarget(ClientId, aBuf);
 			m_aLastChat[ClientId] = Tick;

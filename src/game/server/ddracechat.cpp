@@ -1816,7 +1816,7 @@ void CGameContext::ConRescue(IConsole::IResult *pResult, void *pUserData)
 
 	if(pPlayer->m_RescueMode == RESCUEMODE_MANUAL)
 	{
-		// if character can't set his rescue state then we should rescue him instead
+		// if character can't set their rescue state then we should rescue them instead
 		GoRescue = !pChr->TrySetRescue(RESCUEMODE_MANUAL);
 	}
 
