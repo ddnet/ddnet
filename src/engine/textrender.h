@@ -99,6 +99,7 @@ namespace FontIcons
 	[[maybe_unused]] static const char *FONT_ICON_LIST_UL = "\xEF\x83\x8A";
 	[[maybe_unused]] static const char *FONT_ICON_INFO = "\xEF\x84\xA9";
 	[[maybe_unused]] static const char *FONT_ICON_TERMINAL = "\xEF\x84\xA0";
+	[[maybe_unused]] static const char *FONT_ICON_USER = "\xEF\x80\x87";
 
 	[[maybe_unused]] static const char *FONT_ICON_SLASH = "\xEF\x9C\x95";
 	[[maybe_unused]] static const char *FONT_ICON_PLAY = "\xEF\x81\x8B";

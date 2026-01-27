@@ -424,6 +424,11 @@ void CServerBrowser::Filter()
 	m_vSortedServerlist.clear();
 	m_vSortedServerlist.reserve(m_vpServerlist.size());
 
+	for(auto &Community : m_vCommunities)
+	{
+		Community.m_NumPlayers = 0;
+	}
+
 	// filter the servers
 	for(int ServerIndex = 0; ServerIndex < (int)m_vpServerlist.size(); ServerIndex++)
 	{
@@ -590,7 +595,22 @@ void CServerBrowser::Filter()
 				m_vSortedServerlist.push_back(ServerIndex);
 			}
 		}
+
+		if(Info.m_NumClients > 0)
+		{
+			auto Community = std::find_if(m_vCommunities.begin(), m_vCommunities.end(), [Info](const auto &Elem) {
+				return str_comp(Elem.Id(), Info.m_aCommunityId) == 0;
+			});
+			if(Community != m_vCommunities.end())
+			{
+				Community->m_NumPlayers += Info.m_NumClients;
+			}
+		}
 	}
+
+	std::stable_sort(m_vCommunities.begin(), m_vCommunities.end(), [](const CCommunity &Lhs, const CCommunity &Rhs) {
+		return Lhs.NumPlayers() > Rhs.NumPlayers();
+	});
 }
 
 int CServerBrowser::SortHash() const
@@ -1356,6 +1376,7 @@ const json_value *CServerBrowser::LoadDDNetInfo()
 		UpdateServerRank(&pEntry->m_Info);
 	}
 	ValidateServerlistType();
+	RequestResort();
 	return m_pDDNetInfo;
 }
 
