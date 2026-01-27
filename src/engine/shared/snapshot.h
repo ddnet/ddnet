@@ -160,17 +160,16 @@ class CSnapshotBuilder
 	int m_NumItems;
 
 	int m_aExtendedItemTypes[MAX_EXTENDED_ITEM_TYPES];
-	int m_NumExtendedItemTypes;
+	int m_NumExtendedItemTypes = 0;
 
 	bool AddExtendedItemType(int Index);
 	int GetExtendedItemTypeIndex(int TypeId);
 	int GetTypeFromIndex(int Index) const;
 
+	bool m_Building = false;
 	bool m_Sixup = false;
 
 public:
-	CSnapshotBuilder();
-
 	void Init(bool Sixup = false);
 	void Init7(const CSnapshot *pSnapshot);
 
