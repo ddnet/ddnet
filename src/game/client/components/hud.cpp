@@ -351,8 +351,7 @@ void CHud::RenderScoreHud()
 							int64_t TimeSeconds = static_cast<int64_t>(absolute(ClientData.m_FinishTimeSeconds));
 							int64_t TimeMillis = TimeSeconds * 1000 + (absolute(ClientData.m_FinishTimeMillis) % 1000);
 
-							// show centiseconds if we are under an hour
-							str_time(TimeMillis / 10, TimeSeconds < 60 * 60 ? TIME_MINS_CENTISECS : TIME_HOURS, aScore[t], sizeof(aScore[t]));
+							str_time(TimeMillis / 10, TIME_HOURS, aScore[t], sizeof(aScore[t]));
 						}
 						else if(apPlayerInfo[t]->m_Score != FinishTime::NOT_FINISHED_TIMESCORE)
 						{
