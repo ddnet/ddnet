@@ -23,7 +23,7 @@
 
 using namespace FontIcons;
 
-static constexpr ColorRGBA gs_HighlightedTextColor = ColorRGBA(0.4f, 0.4f, 1.0f, 1.0f);
+static constexpr ColorRGBA HIGHLIGHTED_TEXT_COLOR = ColorRGBA(0.4f, 0.4f, 1.0f, 1.0f);
 
 static ColorRGBA PlayerBackgroundColor(bool Friend, bool Clan, bool Afk, bool InSelectedServer, bool Inside)
 {
@@ -395,7 +395,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit & IServerBrowser::QUICK_SERVERNAME))
 					Printed = PrintHighlighted(pItem->m_aName, [&](const char *pFilteredStr, const int FilterLen) {
 						Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME_1), &Button, pItem->m_aName, FontSize, TEXTALIGN_ML, Props, (int)(pFilteredStr - pItem->m_aName));
-						TextRender()->TextColor(gs_HighlightedTextColor);
+						TextRender()->TextColor(HIGHLIGHTED_TEXT_COLOR);
 						Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME_2), &Button, pFilteredStr, FontSize, TEXTALIGN_ML, Props, FilterLen, &pUiElement->Rect(UI_ELEM_NAME_1)->m_Cursor);
 						TextRender()->TextColor(TextRender()->DefaultTextColor());
 						Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME_3), &Button, pFilteredStr + FilterLen, FontSize, TEXTALIGN_ML, Props, -1, &pUiElement->Rect(UI_ELEM_NAME_2)->m_Cursor);
@@ -437,7 +437,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit & IServerBrowser::QUICK_MAPNAME))
 					Printed = PrintHighlighted(pItem->m_aMap, [&](const char *pFilteredStr, const int FilterLen) {
 						Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_MAP_1), &Button, pItem->m_aMap, FontSize, TEXTALIGN_ML, Props, (int)(pFilteredStr - pItem->m_aMap));
-						TextRender()->TextColor(gs_HighlightedTextColor);
+						TextRender()->TextColor(HIGHLIGHTED_TEXT_COLOR);
 						Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_MAP_2), &Button, pFilteredStr, FontSize, TEXTALIGN_ML, Props, FilterLen, &pUiElement->Rect(UI_ELEM_MAP_1)->m_Cursor);
 						TextRender()->TextColor(TextRender()->DefaultTextColor());
 						Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_MAP_3), &Button, pFilteredStr + FilterLen, FontSize, TEXTALIGN_ML, Props, -1, &pUiElement->Rect(UI_ELEM_MAP_2)->m_Cursor);
@@ -465,7 +465,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 				str_format(aTemp, sizeof(aTemp), "%i/%i", pItem->m_NumFilteredPlayers, ServerBrowser()->Max(*pItem));
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit & IServerBrowser::QUICK_PLAYER))
 				{
-					TextRender()->TextColor(gs_HighlightedTextColor);
+					TextRender()->TextColor(HIGHLIGHTED_TEXT_COLOR);
 				}
 				Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_PLAYERS), &Button, aTemp, FontSize, TEXTALIGN_MR);
 				TextRender()->TextColor(TextRender()->DefaultTextColor());
@@ -1395,7 +1395,7 @@ void CMenus::RenderServerbrowserInfoScoreboard(CUIRect View, const CServerInfo *
 		if(g_Config.m_BrFilterString[0])
 			Printed = PrintHighlighted(pName, [&](const char *pFilteredStr, const int FilterLen) {
 				TextRender()->TextEx(&NameCursor, pName, (int)(pFilteredStr - pName));
-				TextRender()->TextColor(gs_HighlightedTextColor);
+				TextRender()->TextColor(HIGHLIGHTED_TEXT_COLOR);
 				TextRender()->TextEx(&NameCursor, pFilteredStr, FilterLen);
 				TextRender()->TextColor(TextRender()->DefaultTextColor());
 				TextRender()->TextEx(&NameCursor, pFilteredStr + FilterLen, -1);

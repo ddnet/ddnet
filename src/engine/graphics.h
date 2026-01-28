@@ -130,8 +130,8 @@ struct GL_SVertexTex3DStream
 	GL_STexCoord3D m_Tex;
 };
 
-static constexpr size_t gs_GraphicsMaxQuadsRenderCount = 256;
-static constexpr size_t gs_GraphicsMaxParticlesRenderCount = 512;
+static constexpr size_t GRAPHICS_MAX_QUADS_RENDER_COUNT = 256;
+static constexpr size_t GRAPHICS_MAX_PARTICLES_RENDER_COUNT = 512;
 
 enum EGraphicsDriverAgeType
 {

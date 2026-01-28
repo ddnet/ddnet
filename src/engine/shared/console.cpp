@@ -363,7 +363,7 @@ void CConsole::Print(int Level, const char *pFrom, const char *pStr, ColorRGBA P
 {
 	LEVEL LogLevel = IConsole::ToLogLevel(Level);
 	// if console colors are not enabled or if the color is pure white, use default terminal color
-	if(g_Config.m_ConsoleEnableColors && PrintColor != gs_ConsoleDefaultColor)
+	if(g_Config.m_ConsoleEnableColors && PrintColor != CONSOLE_DEFAULT_COLOR)
 	{
 		log_log_color(LogLevel, ColorToLogColor(PrintColor), pFrom, "%s", pStr);
 	}

@@ -191,7 +191,7 @@ public:
 	void ExecuteLineFlag(const char *pStr, int FlagMask, int ClientId = IConsole::CLIENT_ID_UNSPECIFIED, bool InterpretSemicolons = true) override;
 	bool ExecuteFile(const char *pFilename, int ClientId = IConsole::CLIENT_ID_UNSPECIFIED, bool LogFailure = false, int StorageType = IStorage::TYPE_ALL) override;
 
-	void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = gs_ConsoleDefaultColor) const override;
+	void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = CONSOLE_DEFAULT_COLOR) const override;
 	void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser) override;
 	void SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, void *pUser) override;
 	void SetCanUseCommandCallback(FCanUseCommandCallback pfnCallback, void *pUser) override;

@@ -3760,7 +3760,7 @@ public:
 			int DevApiPatch = (int)VK_API_VERSION_PATCH(DeviceProp.apiVersion);
 
 			auto IsDenied = CCommandProcessorFragment_Vulkan::IsGpuDenied(DeviceProp.vendorID, DeviceProp.driverVersion, DevApiMajor, DevApiMinor, DevApiPatch);
-			if((DevApiMajor > gs_BackendVulkanMajor || (DevApiMajor == gs_BackendVulkanMajor && DevApiMinor >= gs_BackendVulkanMinor)) && !IsDenied)
+			if((DevApiMajor > BACKEND_VULKAN_VERSION_MAJOR || (DevApiMajor == BACKEND_VULKAN_VERSION_MAJOR && DevApiMinor >= BACKEND_VULKAN_VERSION_MINOR)) && !IsDenied)
 			{
 				STWGraphicGpu::STWGraphicGpuItem NewGpu;
 				str_copy(NewGpu.m_aName, DeviceProp.deviceName);
@@ -3803,7 +3803,7 @@ public:
 			int DevApiMinor = (int)VK_API_VERSION_MINOR(DeviceProp.apiVersion);
 			int DevApiPatch = (int)VK_API_VERSION_PATCH(DeviceProp.apiVersion);
 
-			str_copy(pRendererName, DeviceProp.deviceName, gs_GpuInfoStringSize);
+			str_copy(pRendererName, DeviceProp.deviceName, GPU_INFO_STRING_SIZE);
 			const char *pVendorNameStr = NULL;
 			switch(DeviceProp.vendorID)
 			{
@@ -3838,8 +3838,8 @@ public:
 			}
 
 			char aBuff[256];
-			str_copy(pVendorName, pVendorNameStr, gs_GpuInfoStringSize);
-			str_format(pVersionName, gs_GpuInfoStringSize, "Vulkan %d.%d.%d (driver: %s)", DevApiMajor, DevApiMinor, DevApiPatch, GetDriverVersion(aBuff, DeviceProp.driverVersion, DeviceProp.vendorID));
+			str_copy(pVendorName, pVendorNameStr, GPU_INFO_STRING_SIZE);
+			str_format(pVersionName, GPU_INFO_STRING_SIZE, "Vulkan %d.%d.%d (driver: %s)", DevApiMajor, DevApiMinor, DevApiPatch, GetDriverVersion(aBuff, DeviceProp.driverVersion, DeviceProp.vendorID));
 
 			// get important device limits
 			m_NonCoherentMemAlignment = DeviceProp.limits.nonCoherentAtomSize;
@@ -7110,7 +7110,7 @@ public:
 
 		ExecBuffer.m_IndexBuffer = m_RenderIndexBuffer;
 
-		ExecBuffer.m_EstimatedRenderCallCount = ((pCommand->m_QuadNum - 1) / gs_GraphicsMaxQuadsRenderCount) + 1;
+		ExecBuffer.m_EstimatedRenderCallCount = ((pCommand->m_QuadNum - 1) / GRAPHICS_MAX_QUADS_RENDER_COUNT) + 1;
 
 		ExecBufferFillDynamicStates(pCommand->m_State, ExecBuffer);
 	}
@@ -7172,7 +7172,7 @@ public:
 			size_t RenderOffset = 0;
 			while(DrawCount > 0)
 			{
-				uint32_t RealDrawCount = (DrawCount > gs_GraphicsMaxQuadsRenderCount ? gs_GraphicsMaxQuadsRenderCount : DrawCount);
+				uint32_t RealDrawCount = (DrawCount > GRAPHICS_MAX_QUADS_RENDER_COUNT ? GRAPHICS_MAX_QUADS_RENDER_COUNT : DrawCount);
 				VkDeviceSize IndexOffset = (VkDeviceSize)((ptrdiff_t)(pCommand->m_QuadOffset + RenderOffset) * 6);
 
 				// create uniform buffer
@@ -7393,7 +7393,7 @@ public:
 
 	void Cmd_RenderQuadContainerAsSpriteMultiple_FillExecuteBuffer(SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand_RenderQuadContainerAsSpriteMultiple *pCommand)
 	{
-		BufferContainer_FillExecuteBuffer(ExecBuffer, pCommand->m_State, (size_t)pCommand->m_BufferContainerIndex, ((pCommand->m_DrawCount - 1) / gs_GraphicsMaxParticlesRenderCount) + 1);
+		BufferContainer_FillExecuteBuffer(ExecBuffer, pCommand->m_State, (size_t)pCommand->m_BufferContainerIndex, ((pCommand->m_DrawCount - 1) / GRAPHICS_MAX_PARTICLES_RENDER_COUNT) + 1);
 	}
 
 	[[nodiscard]] bool Cmd_RenderQuadContainerAsSpriteMultiple(const CCommandBuffer::SCommand_RenderQuadContainerAsSpriteMultiple *pCommand, SRenderCommandExecuteBuffer &ExecBuffer)
@@ -7621,9 +7621,9 @@ public:
 			pThread->m_Cond.notify_one();
 
 			// set this to true, if you want to benchmark the render thread times
-			static constexpr bool s_BenchmarkRenderThreads = false;
+			static constexpr bool BENCHMARK_RENDER_THREADS = false;
 			std::chrono::nanoseconds ThreadRenderTime = 0ns;
-			if(IsVerbose() && s_BenchmarkRenderThreads)
+			if(IsVerbose() && BENCHMARK_RENDER_THREADS)
 			{
 				ThreadRenderTime = time_get_nanoseconds();
 			}
@@ -7649,7 +7649,7 @@ public:
 				}
 			}
 
-			if(IsVerbose() && s_BenchmarkRenderThreads)
+			if(IsVerbose() && BENCHMARK_RENDER_THREADS)
 			{
 				dbg_msg("vulkan", "render thread %" PRIzu " took %d ns to finish", ThreadIndex, (int)(time_get_nanoseconds() - ThreadRenderTime).count());
 			}

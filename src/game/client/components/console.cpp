@@ -52,7 +52,7 @@ void CConsoleLogger::Log(const CLogMessage *pMessage)
 	{
 		return;
 	}
-	ColorRGBA Color = gs_ConsoleDefaultColor;
+	ColorRGBA Color = CONSOLE_DEFAULT_COLOR;
 	if(pMessage->m_HaveColor)
 	{
 		Color.r = pMessage->m_Color.r / 255.0;

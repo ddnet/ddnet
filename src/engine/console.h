@@ -11,7 +11,7 @@
 
 #include <memory>
 
-static constexpr ColorRGBA gs_ConsoleDefaultColor(1, 1, 1, 1);
+static constexpr ColorRGBA CONSOLE_DEFAULT_COLOR = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 
 enum LEVEL : char;
 struct CChecksumData;
@@ -133,7 +133,7 @@ public:
 	 * - They support all five log levels.
 	 * - They do not require a pointer to `IConsole` to be used.
 	 */
-	virtual void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = gs_ConsoleDefaultColor) const = 0;
+	virtual void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = CONSOLE_DEFAULT_COLOR) const = 0;
 	virtual void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser) = 0;
 	virtual void SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, void *pUser) = 0;
 	virtual void SetCanUseCommandCallback(FCanUseCommandCallback pfnCallback, void *pUser) = 0;
