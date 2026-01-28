@@ -3,7 +3,9 @@
 data/
 !/data/
 
-docs/
+# explicitly ignore Doxygen output
+docs/warn.log
+docs/html
 
 bundle/
 !/other/bundle/
