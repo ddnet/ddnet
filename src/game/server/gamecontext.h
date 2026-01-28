@@ -383,6 +383,7 @@ public:
 	const char *GameType() const override;
 	const char *Version() const override;
 	const char *NetVersion() const override;
+	const char *TeamKind() const override;
 
 	// DDRace
 	void OnPreTickTeehistorian() override;

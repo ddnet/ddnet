@@ -749,6 +749,11 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info) cons
 		}
 	}
 
+	if(pEntry->m_Info.m_ClientTeamKind == CServerInfo::CLIENT_TEAM_KIND_UNSPECIFIED)
+	{
+		pEntry->m_Info.m_ClientTeamKind = CServerInfo::CLIENT_TEAM_KIND_NONE;
+	}
+
 	class CPlayerScoreNameLess
 	{
 		const int m_ScoreKind;
@@ -793,6 +798,23 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info) cons
 	};
 
 	std::sort(pEntry->m_Info.m_aClients, pEntry->m_Info.m_aClients + Info.m_NumReceivedClients, CPlayerScoreNameLess(pEntry->m_Info.m_ClientScoreKind));
+
+	for(int ReceivedClientId = 0; ReceivedClientId < pEntry->m_Info.m_NumReceivedClients; ReceivedClientId++)
+		pEntry->m_Info.m_aSortedClientsByTeam[ReceivedClientId] = ReceivedClientId;
+
+	if(pEntry->m_Info.m_ClientTeamKind != CServerInfo::CLIENT_TEAM_KIND_NONE)
+	{
+		std::stable_sort(pEntry->m_Info.m_aSortedClientsByTeam, pEntry->m_Info.m_aSortedClientsByTeam + pEntry->m_Info.m_NumReceivedClients, [&](int Index1, int Index2) {
+			const int Team1 = pEntry->m_Info.m_aClients[Index1].m_Team;
+			const int Team2 = pEntry->m_Info.m_aClients[Index2].m_Team;
+			// spectators are last
+			if(Team1 == -1)
+				return false;
+			if(Team2 == -1)
+				return true;
+			return Team1 < Team2;
+		});
+	}
 
 	pEntry->m_GotInfo = 1;
 }

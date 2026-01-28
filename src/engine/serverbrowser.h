@@ -50,6 +50,14 @@ public:
 		CLIENT_SCORE_KIND_TIME_BACKCOMPAT,
 	};
 
+	enum EClientTeamKind
+	{
+		CLIENT_TEAM_KIND_UNSPECIFIED,
+		CLIENT_TEAM_KIND_NONE,
+		CLIENT_TEAM_KIND_VANILLA,
+		CLIENT_TEAM_KIND_DDRACE,
+	};
+
 	enum ERankState
 	{
 		RANK_UNAVAILABLE,
@@ -73,6 +81,7 @@ public:
 		int m_Score;
 		bool m_Player;
 		bool m_Afk;
+		int m_Team;
 		int m_FriendState;
 		// skin info 0.6
 		char m_aSkin[MAX_SKIN_LENGTH];
@@ -104,6 +113,7 @@ public:
 	int m_NumPlayers;
 	int m_Flags;
 	EClientScoreKind m_ClientScoreKind;
+	EClientTeamKind m_ClientTeamKind;
 	TRISTATE m_Favorite;
 	TRISTATE m_FavoriteAllowPing;
 	char m_aCommunityId[MAX_COMMUNITY_ID_LENGTH];
@@ -121,6 +131,7 @@ public:
 	char m_aVersion[32];
 	char m_aAddress[MAX_SERVER_ADDRESSES * NETADDR_MAXSTRSIZE];
 	CClient m_aClients[SERVERINFO_MAX_CLIENTS];
+	int m_aSortedClientsByTeam[SERVERINFO_MAX_CLIENTS];
 	int m_NumFilteredPlayers;
 	bool m_RequiresLogin;
 
