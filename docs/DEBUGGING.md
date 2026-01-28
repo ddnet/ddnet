@@ -19,3 +19,26 @@ Check the SAN.\* files afterwards. This finds more problems than memcheck, runs 
 
 For valgrind's memcheck compile a normal Debug build and run with: `valgrind --tool=memcheck ./DDNet`
 Expect a large slow down.
+
+## Symbolizing a crash dump (.RTP):
+Symbolizing converts raw crash data into humanly readable stacktraces.
+
+**Download the crash dump**  
+    Make sure it has the original filename because it contains important information.
+
+**Download the debug symbols**  
+    Get them from https://ddnet.org/downloads/symbols/ with matching git hash and platform (win32/64, steam/non-steam).  
+   - The git hash and platform are found in the filename of the crash dump.
+   - If the filename does not contain `steam`, then it is the standalone version.
+
+3. **Install binutils**  
+   Install `addr2line` and `objdump` using your systems package manager or from msys2 for Windows:
+   - **[MSYS2](https://packages.msys2.org/packages/mingw-w64-x86_64-binutils)**
+   - **Ubuntu/Debian**: `sudo apt install binutils`
+
+4. **Run the script**  
+```sh
+   bash scripts/parse_drmingw.sh <path to server/client symbols exe> <path to server/client crash dump>
+```
+   - The script is found under `./scripts/`
+   - On Windows, you need to explicitly run with `bash` and not in a Windows terminal.
