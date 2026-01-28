@@ -3676,10 +3676,10 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 	LayersBox.HSplitTop(RowHeight + 1.0f, &CollapseAllButton, &LayersBox);
 	if(s_ScrollRegion.AddRect(CollapseAllButton))
 	{
-		unsigned long TotalCollapsed = 0;
+		size_t TotalCollapsed = 0;
 		for(const auto &pGroup : Map()->m_vpGroups)
 		{
-			if(pGroup->m_Collapse)
+			if(pGroup->m_vpLayers.empty() || pGroup->m_Collapse)
 			{
 				TotalCollapsed++;
 			}
@@ -3695,7 +3695,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 			{
 				if(TotalCollapsed == Map()->m_vpGroups.size())
 					pGroup->m_Collapse = false;
-				else
+				else if(!pGroup->m_vpLayers.empty())
 					pGroup->m_Collapse = true;
 			}
 		}
