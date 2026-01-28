@@ -434,12 +434,12 @@ void CSoundSourceOperationTracker::End()
 
 // -----------------------------------------------------------------------
 
-int SPropTrackerHelper::GetDefaultGroupIndex(CEditorMap *pMap)
+int CPropTrackerHelper::GetDefaultGroupIndex(CEditorMap *pMap)
 {
 	return pMap->m_SelectedGroup;
 }
 
-int SPropTrackerHelper::GetDefaultLayerIndex(CEditorMap *pMap)
+int CPropTrackerHelper::GetDefaultLayerIndex(CEditorMap *pMap)
 {
 	return pMap->m_vSelectedLayers[0];
 }
