@@ -591,13 +591,13 @@ void CGameContext::ConReloadCensorlist(IConsole::IResult *pResult, void *pUserDa
 void CGameContext::ConDumpAntibot(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->Antibot()->ConsoleCommand("dump");
+	pSelf->Antibot()->ConsoleCommand(pResult->m_ClientId, "dump");
 }
 
 void CGameContext::ConAntibot(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->Antibot()->ConsoleCommand(pResult->GetString(0));
+	pSelf->Antibot()->ConsoleCommand(pResult->m_ClientId, pResult->GetString(0));
 }
 
 void CGameContext::ConDumpLog(IConsole::IResult *pResult, void *pUserData)
