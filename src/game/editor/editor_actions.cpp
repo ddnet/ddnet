@@ -1,5 +1,7 @@
 #include "editor_actions.h"
 
+#include <base/log.h>
+
 #include <game/editor/editor.h>
 #include <game/editor/mapitems.h>
 #include <game/editor/mapitems/image.h>
@@ -1255,8 +1257,12 @@ void CEditorActionAppendMap::Undo()
 
 void CEditorActionAppendMap::Redo()
 {
+	const auto &&ErrorHandler = [this](const char *pErrorMessage) {
+		Editor()->ShowFileDialogError("%s", pErrorMessage);
+		log_error("editor/append", "%s", pErrorMessage);
+	};
 	// Redo is just re-appending the same map
-	Editor()->Append(m_aMapName, IStorage::TYPE_ALL, true);
+	Map()->Append(m_aMapName, IStorage::TYPE_ALL, true, ErrorHandler);
 }
 
 // ---------------------------

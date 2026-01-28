@@ -14,6 +14,7 @@
 #include <engine/storage.h>
 
 #include <game/editor/editor.h>
+#include <game/editor/editor_actions.h>
 #include <game/gamecore.h>
 #include <game/mapitems_ex.h>
 
@@ -1060,6 +1061,145 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 	SelectGameLayer();
 
 	ResetModifiedState();
+	return true;
+}
+
+bool CEditorMap::Append(const char *pFilename, int StorageType, bool IgnoreHistory, const FErrorHandler &ErrorHandler)
+{
+	CEditorMap NewMap(Editor());
+	if(!NewMap.Load(pFilename, StorageType, ErrorHandler))
+		return false;
+
+	CEditorActionAppendMap::SPrevInfo Info{
+		(int)m_vpGroups.size(),
+		(int)m_vpImages.size(),
+		(int)m_vpSounds.size(),
+		(int)m_vpEnvelopes.size()};
+
+	// Keep a map to check if specific indices have already been replaced to prevent
+	// replacing those indices again when transferring images
+	std::map<int *, bool> ReplacedIndicesMap;
+	const auto &&ReplaceIndex = [&ReplacedIndicesMap](int ToReplace, int ReplaceWith) {
+		return [&ReplacedIndicesMap, ToReplace, ReplaceWith](int *pIndex) {
+			if(*pIndex == ToReplace && !ReplacedIndicesMap[pIndex])
+			{
+				*pIndex = ReplaceWith;
+				ReplacedIndicesMap[pIndex] = true;
+			}
+		};
+	};
+
+	const auto &&Rename = [&](const std::shared_ptr<CEditorImage> &pImage) {
+		char aRenamed[IO_MAX_PATH_LENGTH];
+		int DuplicateCount = 1;
+		str_copy(aRenamed, pImage->m_aName);
+		while(std::find_if(m_vpImages.begin(), m_vpImages.end(), [aRenamed](const std::shared_ptr<CEditorImage> &OtherImage) { return str_comp(OtherImage->m_aName, aRenamed) == 0; }) != m_vpImages.end())
+			str_format(aRenamed, sizeof(aRenamed), "%s (%d)", pImage->m_aName, DuplicateCount++); // Rename to "image_name (%d)"
+		str_copy(pImage->m_aName, aRenamed);
+	};
+
+	// Transfer non-duplicate images
+	for(auto NewMapIt = NewMap.m_vpImages.begin(); NewMapIt != NewMap.m_vpImages.end(); ++NewMapIt)
+	{
+		const auto &pNewImage = *NewMapIt;
+		auto NameIsTaken = [pNewImage](const std::shared_ptr<CEditorImage> &OtherImage) { return str_comp(pNewImage->m_aName, OtherImage->m_aName) == 0; };
+		auto MatchInCurrentMap = std::find_if(m_vpImages.begin(), m_vpImages.end(), NameIsTaken);
+
+		const bool IsDuplicate = MatchInCurrentMap != m_vpImages.end();
+		const int IndexToReplace = NewMapIt - NewMap.m_vpImages.begin();
+
+		if(IsDuplicate)
+		{
+			// Check for image data
+			const bool ImageDataEquals = (*MatchInCurrentMap)->DataEquals(*pNewImage);
+
+			if(ImageDataEquals)
+			{
+				const int IndexToReplaceWith = MatchInCurrentMap - m_vpImages.begin();
+
+				dbg_msg("editor", "map already contains image %s with the same data, removing duplicate", pNewImage->m_aName);
+
+				// In the new map, replace the index of the duplicate image to the index of the same in the current map.
+				NewMap.ModifyImageIndex(ReplaceIndex(IndexToReplace, IndexToReplaceWith));
+			}
+			else
+			{
+				// Rename image and add it
+				Rename(pNewImage);
+
+				dbg_msg("editor", "map already contains image %s but contents of appended image is different. Renaming to %s", (*MatchInCurrentMap)->m_aName, pNewImage->m_aName);
+
+				NewMap.ModifyImageIndex(ReplaceIndex(IndexToReplace, m_vpImages.size()));
+				pNewImage->OnAttach(this);
+				m_vpImages.push_back(pNewImage);
+			}
+		}
+		else
+		{
+			NewMap.ModifyImageIndex(ReplaceIndex(IndexToReplace, m_vpImages.size()));
+			pNewImage->OnAttach(this);
+			m_vpImages.push_back(pNewImage);
+		}
+	}
+	NewMap.m_vpImages.clear();
+
+	// modify indices
+	const auto &&ModifyAddIndex = [](int AddAmount) {
+		return [AddAmount](int *pIndex) {
+			if(*pIndex >= 0)
+				*pIndex += AddAmount;
+		};
+	};
+	NewMap.ModifySoundIndex(ModifyAddIndex(m_vpSounds.size()));
+	NewMap.ModifyEnvelopeIndex(ModifyAddIndex(m_vpEnvelopes.size()));
+
+	// transfer sounds
+	for(const auto &pSound : NewMap.m_vpSounds)
+	{
+		pSound->OnAttach(this);
+		m_vpSounds.push_back(pSound);
+	}
+	NewMap.m_vpSounds.clear();
+
+	// transfer envelopes
+	for(const auto &pEnvelope : NewMap.m_vpEnvelopes)
+		m_vpEnvelopes.push_back(pEnvelope);
+	NewMap.m_vpEnvelopes.clear();
+
+	// transfer groups
+	for(const auto &pGroup : NewMap.m_vpGroups)
+	{
+		if(pGroup != NewMap.m_pGameGroup)
+		{
+			pGroup->OnAttach(this);
+			m_vpGroups.push_back(pGroup);
+		}
+	}
+	NewMap.m_vpGroups.clear();
+
+	// transfer server settings
+	for(const auto &pSetting : NewMap.m_vSettings)
+	{
+		// Check if setting already exists
+		bool AlreadyExists = false;
+		for(const auto &pExistingSetting : m_vSettings)
+		{
+			if(!str_comp(pExistingSetting.m_aCommand, pSetting.m_aCommand))
+				AlreadyExists = true;
+		}
+		if(!AlreadyExists)
+			m_vSettings.push_back(pSetting);
+	}
+	NewMap.m_vSettings.clear();
+
+	auto IndexMap = SortImages();
+
+	if(!IgnoreHistory)
+		m_EditorHistory.RecordAction(std::make_shared<CEditorActionAppendMap>(this, pFilename, Info, IndexMap));
+
+	CheckIntegrity();
+
+	// all done \o/
 	return true;
 }
 

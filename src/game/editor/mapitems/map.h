@@ -178,6 +178,7 @@ public:
 	bool Save(const char *pFilename, const FErrorHandler &ErrorHandler);
 	bool PerformPreSaveSanityChecks(const FErrorHandler &ErrorHandler);
 	bool Load(const char *pFilename, int StorageType, const FErrorHandler &ErrorHandler);
+	bool Append(const char *pFilename, int StorageType, bool IgnoreHistory, const FErrorHandler &ErrorHandler);
 	void PerformSanityChecks(const FErrorHandler &ErrorHandler);
 	bool PerformAutosave(const FErrorHandler &ErrorHandler);
 
