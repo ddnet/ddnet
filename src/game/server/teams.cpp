@@ -1207,7 +1207,9 @@ void CGameTeams::OnCharacterDeath(int ClientId, int Weapon)
 	if(GetSaving(Team))
 		return;
 	bool Locked = TeamLocked(Team) && Weapon != WEAPON_GAME;
-	// only check leader stuff for kill tile, because we already check for WEAPON_SELF in the kill netmsg / kill command
+	// this is the logic that will be applied when a non-leader jumps into a kill tile
+	// or a non-leader uses the /kill command
+	// we set the team to be unlocked for just this kill, so that no other teammembers get murdered
 	if(!IsAllowLeaderCommands(ClientId, Team) && Weapon == WEAPON_WORLD)
 	{
 		Locked = false;

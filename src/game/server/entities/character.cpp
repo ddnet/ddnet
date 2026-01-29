@@ -1046,7 +1046,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 
 void CCharacter::SendDeathMessageIfNotInLockedTeam(int Killer, int Weapon, int ModeSpecial)
 {
-	if((Team() == TEAM_FLOCK || Teams()->TeamFlock(Team()) || Teams()->Count(Team()) == 1 || Teams()->GetTeamState(Team()) == ETeamState::OPEN || !Teams()->TeamLocked(Team())))
+	if((Team() == TEAM_FLOCK || Teams()->TeamFlock(Team()) || Teams()->Count(Team()) == 1 || Teams()->GetTeamState(Team()) == ETeamState::OPEN || !Teams()->TeamLocked(Team()) || !Teams()->IsAllowLeaderCommands(m_pPlayer->GetCid(), Team())))
 	{
 		CNetMsg_Sv_KillMsg Msg;
 		Msg.m_Killer = Killer;
