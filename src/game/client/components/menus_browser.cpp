@@ -21,6 +21,8 @@
 #include <game/client/ui_listbox.h>
 #include <game/localization.h>
 
+#include <ranges>
+
 using namespace FontIcons;
 
 static constexpr ColorRGBA HIGHLIGHTED_TEXT_COLOR = ColorRGBA(0.4f, 0.4f, 1.0f, 1.0f);
@@ -923,8 +925,9 @@ void CMenus::RenderServerbrowserDDNetFilter(CUIRect View,
 		const int Click = Ui()->DoButtonLogic(pItemId, 0, &Item, BUTTONFLAG_ALL);
 		if(Click == 1 || Click == 2)
 		{
-			// left/right click to toggle filter
-			if(Filter.Empty())
+			// left/right click to toggle filter when none is active
+			// don't use Empty() to prevent interference from unselectable items
+			if(std::ranges::none_of(std::views::iota(0, MaxItems), [&](int j) { return Filter.Filtered(GetItemName(j)); }))
 			{
 				if(Click == 1)
 				{
