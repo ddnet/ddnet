@@ -4,6 +4,9 @@
 
 #include "image.h"
 
+#include <base/log.h>
+#include <base/system.h>
+
 #include <engine/keys.h>
 #include <engine/shared/config.h>
 #include <engine/shared/map.h>
@@ -137,22 +140,46 @@ void CLayerTiles::PrepareForSave()
 	}
 }
 
-void CLayerTiles::ExtractTiles(int TilemapItemVersion, const CTile *pSavedTiles, size_t SavedTilesSize) const
+bool CLayerTiles::ExtractTiles(int TilemapItemVersion, const CTile *pSavedTiles, size_t SavedTilesSize) const
 {
-	const size_t DestSize = (size_t)m_Width * m_Height;
-	if(TilemapItemVersion >= CMapItemLayerTilemap::VERSION_TEEWORLDS_TILESKIP)
+	if(pSavedTiles == nullptr)
 	{
-		CMap::ExtractTiles(m_pTiles, DestSize, pSavedTiles, SavedTilesSize);
+		log_error("map/load", "Tile layer data is missing or corrupted.");
+		return false;
+	}
+
+	const size_t DestSize = (size_t)m_Width * m_Height;
+	const size_t DestTileSize = DestSize * sizeof(CTile);
+
+	if(((int)DestSize / m_Width != m_Height) || (DestTileSize / sizeof(CTile) != DestSize))
+	{
+		log_error("map/load", "Tile layer is too big (%d * %d * %d causes an integer overflow).", m_Width, m_Height, (int)sizeof(CTile));
+		return false;
+	}
+	else if(TilemapItemVersion >= CMapItemLayerTilemap::VERSION_TEEWORLDS_TILESKIP)
+	{
+		return CMap::ExtractTiles(m_pTiles, DestSize, pSavedTiles, SavedTilesSize);
 	}
 	else if(SavedTilesSize >= DestSize)
 	{
-		mem_copy(m_pTiles, pSavedTiles, DestSize * sizeof(CTile));
+		mem_copy(m_pTiles, pSavedTiles, DestTileSize);
 		for(size_t TileIndex = 0; TileIndex < DestSize; ++TileIndex)
 		{
-			m_pTiles[TileIndex].m_Skip = 0;
-			m_pTiles[TileIndex].m_Reserved = 0;
+			if(m_pTiles[TileIndex].m_Skip != 0)
+			{
+				log_error("map/load", "Tile layer data contains non-zero skip value at index %" PRIzu " but version %d does not use tileskip.", TileIndex, TilemapItemVersion);
+				return false;
+			}
+			if(m_pTiles[TileIndex].m_Reserved != 0)
+			{
+				log_error("map/load", "Tile layer data contains non-zero padding value at index %" PRIzu ".", TileIndex);
+				return false;
+			}
 		}
+		return true;
 	}
+	log_error("map/load", "Tile layer data is truncated (got %" PRIzu ", wanted %" PRIzu ").", SavedTilesSize, DestSize);
+	return false;
 }
 
 void CLayerTiles::MakePalette() const
