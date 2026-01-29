@@ -79,6 +79,7 @@ enum class EArgumentCompletionType
 	TUNE,
 	SETTING,
 	KEY,
+	ENV,
 };
 
 class CArgumentCompletionEntry
@@ -96,6 +97,7 @@ static const CArgumentCompletionEntry gs_aArgumentCompletionEntries[] = {
 	{EArgumentCompletionType::TUNE, "tune_reset", 0},
 	{EArgumentCompletionType::TUNE, "toggle_tune", 0},
 	{EArgumentCompletionType::TUNE, "tune_zone", 1},
+	{EArgumentCompletionType::ENV, "env_trigger", 1},
 	{EArgumentCompletionType::SETTING, "reset", 0},
 	{EArgumentCompletionType::SETTING, "toggle", 0},
 	{EArgumentCompletionType::SETTING, "access_level", 0},
@@ -155,6 +157,21 @@ static int PossibleTunings(const char *pStr, IConsole::FPossibleCallback pfnCall
 		if(str_find_nocase(CTuningParams::Name(i), pStr))
 		{
 			pfnCallback(Index, CTuningParams::Name(i), pUser);
+			Index++;
+		}
+	}
+	return Index;
+}
+
+static int PossibleEnvTrigger(const char *pStr, IConsole::FPossibleCallback pfnCallback = IConsole::EmptyPossibleCommandCallback, void *pUser = nullptr)
+{
+	int Index = 0;
+	for(int EnvelopeTriggerId = 0; EnvelopeTriggerId < EEnvelopeTriggerType::NUM_ENV_TRIGGERS; EnvelopeTriggerId++)
+	{
+		EEnvelopeTriggerType Trigger = static_cast<EEnvelopeTriggerType>(EnvelopeTriggerId);
+		if(str_find_nocase(CEnvelopeTrigger::ConsoleName(Trigger), pStr))
+		{
+			pfnCallback(Index, CEnvelopeTrigger::ConsoleName(Trigger), pUser);
 			Index++;
 		}
 	}
@@ -374,6 +391,8 @@ void CGameConsole::CInstance::UpdateCompletionSuggestions()
 			m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBufferArgument, m_CompletionFlagmask, UseTempCommands, CollectPossibleCommandsCallback, &m_vpArgumentSuggestions);
 		else if(CompletionType == EArgumentCompletionType::KEY)
 			PossibleKeys(m_aCompletionBufferArgument, m_pGameConsole->Input(), CollectPossibleCommandsCallback, &m_vpArgumentSuggestions);
+		else if(CompletionType == EArgumentCompletionType::ENV)
+			PossibleEnvTrigger(m_aCompletionBufferArgument, CollectPossibleCommandsCallback, &m_vpArgumentSuggestions);
 		SortCompletions(m_vpArgumentSuggestions, m_aCompletionBufferArgument);
 	}
 

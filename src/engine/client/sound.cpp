@@ -1022,6 +1022,31 @@ bool CSound::IsPlaying(int SampleId)
 	return std::any_of(std::begin(m_aVoices), std::end(m_aVoices), [pSample](const auto &Voice) { return Voice.m_pSample == pSample; });
 }
 
+bool CSound::IsLooping(int SampleId)
+{
+	dbg_assert(SampleId >= 0 && SampleId < NUM_SAMPLES, "SampleId invalid");
+	const CLockScope LockScope(m_SoundLock);
+	const CSample *pSample = &m_aSamples[SampleId];
+	dbg_assert(m_aSamples[SampleId].IsLoaded(), "Sample not loaded");
+	auto *pVoice = std::find_if(std::begin(m_aVoices), std::end(m_aVoices), [pSample](const auto &Voice) { return Voice.m_pSample == pSample; });
+	return pVoice && pVoice->m_Flags & FLAG_LOOP;
+}
+
+void CSound::SetLooping(int SampleId, bool Loop)
+{
+	dbg_assert(SampleId >= 0 && SampleId < NUM_SAMPLES, "SampleId invalid");
+	const CLockScope LockScope(m_SoundLock);
+	const CSample *pSample = &m_aSamples[SampleId];
+	dbg_assert(m_aSamples[SampleId].IsLoaded(), "Sample not loaded");
+	auto *pVoice = std::find_if(std::begin(m_aVoices), std::end(m_aVoices), [pSample](const auto &Voice) { return Voice.m_pSample == pSample; });
+	if(!pVoice)
+		return;
+	if(Loop)
+		pVoice->m_Flags |= FLAG_LOOP;
+	else
+		pVoice->m_Flags &= ~FLAG_LOOP;
+}
+
 void CSound::PauseAudioDevice()
 {
 	SDL_PauseAudioDevice(m_Device, 1);
