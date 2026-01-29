@@ -1387,6 +1387,31 @@ void CGameContext::OnTick()
 		m_pLoadMapInfoResult = nullptr;
 	}
 
+	// check for player extra info results from database
+	for(auto It = m_vPlayerExtraInfoResults.begin(); It != m_vPlayerExtraInfoResults.end();)
+	{
+		if((*It)->m_Completed)
+		{
+			if((*It)->m_Success && (*It)->m_aMessage[0] != '\0')
+			{
+				int RequestingClientId = (*It)->m_RequestingClientId;
+				int TargetClientId = (*It)->m_TargetClientId;
+				if(m_apPlayers[RequestingClientId])
+				{
+					CNetMsg_Sv_PlayerExtraInfo Msg;
+					Msg.m_ClientId = TargetClientId;
+					Msg.m_pText = (*It)->m_aMessage;
+					Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, RequestingClientId);
+				}
+			}
+			It = m_vPlayerExtraInfoResults.erase(It);
+		}
+		else
+		{
+			++It;
+		}
+	}
+
 	// Record player position at the end of the tick
 	if(m_TeeHistorianActive)
 	{
@@ -2240,6 +2265,10 @@ void CGameContext::OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientId)
 			break;
 		case NETMSGTYPE_CL_ENABLESPECTATORCOUNT:
 			OnEnableSpectatorCountNetMessage(static_cast<CNetMsg_Cl_EnableSpectatorCount *>(pRawMsg), ClientId);
+			break;
+		case NETMSGTYPE_CL_REQUESTPLAYEREXTRAINFO:
+			OnRequestPlayerExtraInfoNetMessage(static_cast<CNetMsg_Cl_RequestPlayerExtraInfo *>(pRawMsg), ClientId);
+			break;
 		default:
 			break;
 		}
@@ -2998,6 +3027,18 @@ void CGameContext::OnEnableSpectatorCountNetMessage(const CNetMsg_Cl_EnableSpect
 		return;
 
 	pPlayer->m_EnableSpectatorCount = pMsg->m_Enable;
+}
+
+void CGameContext::OnRequestPlayerExtraInfoNetMessage(const CNetMsg_Cl_RequestPlayerExtraInfo *pMsg, int ClientId)
+{
+	if(pMsg->m_ClientId < 0 || pMsg->m_ClientId >= MAX_CLIENTS)
+		return;
+
+	CPlayer *pTargetPlayer = m_apPlayers[pMsg->m_ClientId];
+	if(!pTargetPlayer)
+		return;
+
+	Score()->ShowPointsForExtraInfo(ClientId, pMsg->m_ClientId, Server()->ClientName(pMsg->m_ClientId));
 }
 
 void CGameContext::OnStartInfoNetMessage(const CNetMsg_Cl_StartInfo *pMsg, int ClientId)
