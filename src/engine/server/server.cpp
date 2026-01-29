@@ -251,8 +251,6 @@ CServer::CServer()
 	m_MapReload = false;
 	m_SameMapReload = false;
 	m_ReloadedWhenEmpty = false;
-	m_aCurrentMap[0] = '\0';
-	m_pCurrentMapName = m_aCurrentMap;
 	m_aMapDownloadUrl[0] = '\0';
 
 	m_RconClientId = IServer::RCON_CID_SERV;
@@ -1320,14 +1318,6 @@ void CServer::SendRconType(int ClientId, bool UsernameReq)
 	SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
 }
 
-void CServer::GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pMapSha256, int *pMapCrc)
-{
-	str_copy(pMapName, GetMapName(), MapNameSize);
-	*pMapSize = m_aCurrentMapSize[MAP_TYPE_SIX];
-	*pMapSha256 = m_aCurrentMapSha256[MAP_TYPE_SIX];
-	*pMapCrc = m_aCurrentMapCrc[MAP_TYPE_SIX];
-}
-
 void CServer::SendCapabilities(int ClientId)
 {
 	CMsgPacker Msg(NETMSG_CAPABILITIES, true);
@@ -1341,7 +1331,7 @@ void CServer::SendMap(int ClientId)
 	int MapType = IsSixup(ClientId) ? MAP_TYPE_SIXUP : MAP_TYPE_SIX;
 	{
 		CMsgPacker Msg(NETMSG_MAP_DETAILS, true);
-		Msg.AddString(GetMapName(), 0);
+		Msg.AddString(GameServer()->Map()->BaseName(), 0);
 		Msg.AddRaw(&m_aCurrentMapSha256[MapType].data, sizeof(m_aCurrentMapSha256[MapType].data));
 		Msg.AddInt(m_aCurrentMapCrc[MapType]);
 		Msg.AddInt(m_aCurrentMapSize[MapType]);
@@ -1357,7 +1347,7 @@ void CServer::SendMap(int ClientId)
 	}
 	{
 		CMsgPacker Msg(NETMSG_MAP_CHANGE, true);
-		Msg.AddString(GetMapName(), 0);
+		Msg.AddString(GameServer()->Map()->BaseName(), 0);
 		Msg.AddInt(m_aCurrentMapCrc[MapType]);
 		Msg.AddInt(m_aCurrentMapSize[MapType]);
 		if(MapType == MAP_TYPE_SIXUP)
@@ -2229,7 +2219,7 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 			p.AddString(aBuf, 64);
 		}
 	}
-	p.AddString(GetMapName(), 32);
+	p.AddString(GameServer()->Map()->BaseName(), 32);
 
 	if(Type == SERVERINFO_EXTENDED)
 	{
@@ -2433,7 +2423,7 @@ void CServer::CacheServerInfoSixup(CCache *pCache, bool SendClients, int MaxCons
 		Packer.AddString(aName, 64);
 	}
 	Packer.AddString(Config()->m_SvHostname, 128);
-	Packer.AddString(GetMapName(), 32);
+	Packer.AddString(GameServer()->Map()->BaseName(), 32);
 
 	// gametype
 	Packer.AddString(GameServer()->GameType(), 16);
@@ -2633,7 +2623,7 @@ void CServer::UpdateRegisterServerInfo()
 	JsonWriter.WriteAttribute("map");
 	JsonWriter.BeginObject();
 	JsonWriter.WriteAttribute("name");
-	JsonWriter.WriteStrValue(GetMapName());
+	JsonWriter.WriteStrValue(GameServer()->Map()->BaseName());
 	JsonWriter.WriteAttribute("sha256");
 	JsonWriter.WriteStrValue(aMapSha256);
 	JsonWriter.WriteAttribute("size");
@@ -2856,15 +2846,10 @@ void CServer::PumpNetwork(bool PacketWaiting)
 	m_Econ.Update();
 }
 
-const char *CServer::GetMapName() const
-{
-	return m_pCurrentMapName;
-}
-
 void CServer::ChangeMap(const char *pMap)
 {
 	str_copy(Config()->m_SvMap, pMap);
-	m_MapReload = str_comp(Config()->m_SvMap, m_aCurrentMap) != 0;
+	m_MapReload = str_comp(Config()->m_SvMap, GameServer()->Map()->FullName()) != 0;
 }
 
 void CServer::ReloadMap()
@@ -2888,7 +2873,7 @@ int CServer::LoadMap(const char *pMapName)
 	{
 		return 0;
 	}
-	if(!m_pMap->Load(aBuf, IStorage::TYPE_ALL))
+	if(!GameServer()->Map()->Load(pMapName, Storage(), aBuf, IStorage::TYPE_ALL))
 	{
 		return 0;
 	}
@@ -2897,16 +2882,13 @@ int CServer::LoadMap(const char *pMapName)
 	m_IdPool.TimeoutIds();
 
 	// get the crc of the map
-	m_aCurrentMapSha256[MAP_TYPE_SIX] = m_pMap->Sha256();
-	m_aCurrentMapCrc[MAP_TYPE_SIX] = m_pMap->Crc();
+	m_aCurrentMapSha256[MAP_TYPE_SIX] = GameServer()->Map()->Sha256();
+	m_aCurrentMapCrc[MAP_TYPE_SIX] = GameServer()->Map()->Crc();
 	char aBufMsg[256];
 	char aSha256[SHA256_MAXSTRSIZE];
 	sha256_str(m_aCurrentMapSha256[MAP_TYPE_SIX], aSha256, sizeof(aSha256));
 	str_format(aBufMsg, sizeof(aBufMsg), "%s sha256 is %s", aBuf, aSha256);
 	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBufMsg);
-
-	str_copy(m_aCurrentMap, pMapName);
-	m_pCurrentMapName = fs_filename(m_aCurrentMap);
 
 	// load complete map into memory for download
 	{
@@ -3238,7 +3220,7 @@ int CServer::Run()
 				{
 					str_format(aBuf, sizeof(aBuf), "failed to load map. mapname='%s'", Config()->m_SvMap);
 					Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
-					str_copy(Config()->m_SvMap, m_aCurrentMap);
+					str_copy(Config()->m_SvMap, GameServer()->Map()->FullName());
 				}
 			}
 
@@ -3453,7 +3435,7 @@ int CServer::Run()
 	Engine()->ShutdownJobs();
 
 	GameServer()->OnShutdown(nullptr);
-	m_pMap->Unload();
+	GameServer()->Map()->Unload();
 	DbPool()->OnShutdown();
 
 #if defined(CONF_UPNP)
@@ -3805,13 +3787,13 @@ void CServer::DemoRecorder_HandleAutoStart()
 		char aTimestamp[20];
 		str_timestamp(aTimestamp, sizeof(aTimestamp));
 		char aFilename[IO_MAX_PATH_LENGTH];
-		str_format(aFilename, sizeof(aFilename), "demos/auto/server/%s_%s.demo", GetMapName(), aTimestamp);
+		str_format(aFilename, sizeof(aFilename), "demos/auto/server/%s_%s.demo", GameServer()->Map()->BaseName(), aTimestamp);
 		m_aDemoRecorder[RECORDER_AUTO].Start(
 			Storage(),
 			m_pConsole,
 			aFilename,
 			GameServer()->NetVersion(),
-			GetMapName(),
+			GameServer()->Map()->BaseName(),
 			m_aCurrentMapSha256[MAP_TYPE_SIX],
 			m_aCurrentMapCrc[MAP_TYPE_SIX],
 			"server",
@@ -3835,7 +3817,7 @@ void CServer::SaveDemo(int ClientId, float Time)
 	if(IsRecording(ClientId))
 	{
 		char aNewFilename[IO_MAX_PATH_LENGTH];
-		str_format(aNewFilename, sizeof(aNewFilename), "demos/%s_%s_%05.2f.demo", GetMapName(), m_aClients[ClientId].m_aName, Time);
+		str_format(aNewFilename, sizeof(aNewFilename), "demos/%s_%s_%05.2f.demo", GameServer()->Map()->BaseName(), m_aClients[ClientId].m_aName, Time);
 		m_aDemoRecorder[ClientId].Stop(IDemoRecorder::EStopMode::KEEP_FILE, aNewFilename);
 	}
 }
@@ -3845,13 +3827,13 @@ void CServer::StartRecord(int ClientId)
 	if(Config()->m_SvPlayerDemoRecord)
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
-		str_format(aFilename, sizeof(aFilename), "demos/%s_%d_%d_tmp.demo", GetMapName(), m_NetServer.Address().port, ClientId);
+		str_format(aFilename, sizeof(aFilename), "demos/%s_%d_%d_tmp.demo", GameServer()->Map()->BaseName(), m_NetServer.Address().port, ClientId);
 		m_aDemoRecorder[ClientId].Start(
 			Storage(),
 			Console(),
 			aFilename,
 			GameServer()->NetVersion(),
-			GetMapName(),
+			GameServer()->Map()->BaseName(),
 			m_aCurrentMapSha256[MAP_TYPE_SIX],
 			m_aCurrentMapCrc[MAP_TYPE_SIX],
 			"server",
@@ -3913,7 +3895,7 @@ void CServer::ConRecord(IConsole::IResult *pResult, void *pUser)
 		pServer->Console(),
 		aFilename,
 		pServer->GameServer()->NetVersion(),
-		pServer->GetMapName(),
+		pServer->GameServer()->Map()->BaseName(),
 		pServer->m_aCurrentMapSha256[MAP_TYPE_SIX],
 		pServer->m_aCurrentMapCrc[MAP_TYPE_SIX],
 		"server",
@@ -4242,11 +4224,11 @@ void CServer::ConchainRconHelperPasswordChange(IConsole::IResult *pResult, void 
 
 void CServer::ConchainMapUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
+	CServer *pThis = static_cast<CServer *>(pUserData);
 	pfnCallback(pResult, pCallbackUserData);
-	if(pResult->NumArguments() >= 1)
+	if(pResult->NumArguments() >= 1 && pThis->GameServer()->Map()->IsLoaded())
 	{
-		CServer *pThis = static_cast<CServer *>(pUserData);
-		pThis->m_MapReload = str_comp(pThis->Config()->m_SvMap, pThis->m_aCurrentMap) != 0;
+		pThis->m_MapReload = str_comp(pThis->Config()->m_SvMap, pThis->GameServer()->Map()->FullName()) != 0;
 	}
 }
 
@@ -4254,8 +4236,10 @@ void CServer::ConchainSixupUpdate(IConsole::IResult *pResult, void *pUserData, I
 {
 	pfnCallback(pResult, pCallbackUserData);
 	CServer *pThis = static_cast<CServer *>(pUserData);
-	if(pResult->NumArguments() >= 1 && pThis->m_aCurrentMap[0] != '\0')
+	if(pResult->NumArguments() >= 1 && pThis->GameServer()->Map()->IsLoaded())
+	{
 		pThis->m_MapReload |= (pThis->m_apCurrentMapData[MAP_TYPE_SIXUP] != nullptr) != (pResult->GetInteger(0) != 0);
+	}
 }
 
 void CServer::ConchainRegisterCommunityTokenRedact(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -4349,7 +4333,6 @@ void CServer::RegisterCommands()
 {
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pGameServer = Kernel()->RequestInterface<IGameServer>();
-	m_pMap = Kernel()->RequestInterface<IEngineMap>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pAntibot = Kernel()->RequestInterface<IEngineAntibot>();
 

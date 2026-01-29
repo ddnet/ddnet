@@ -638,7 +638,7 @@ void CChat::StoreSave(const char *pText)
 	const char *apColumns[4] = {
 		aTimestamp,
 		aName,
-		Client()->GetCurrentMap(),
+		GameClient()->Map()->BaseName(),
 		aSaveCode,
 	};
 

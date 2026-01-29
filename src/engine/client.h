@@ -21,6 +21,7 @@
 #define CONNECTLINK_DOUBLE_SLASH "ddnet://"
 #define CONNECTLINK_NO_SLASH "ddnet:"
 
+class IMap;
 struct SWarning;
 
 enum
@@ -274,11 +275,6 @@ public:
 
 	// DDRace
 
-	virtual const char *GetCurrentMap() const = 0;
-	virtual const char *GetCurrentMapPath() const = 0;
-	virtual SHA256_DIGEST GetCurrentMapSha256() const = 0;
-	virtual unsigned GetCurrentMapCrc() const = 0;
-
 	const char *News() const { return m_aNews; }
 	int Points() const { return m_Points; }
 	int64_t ReconnectTime() const { return m_ReconnectTime; }
@@ -387,6 +383,8 @@ public:
 	virtual bool CanDisplayWarning() const = 0;
 	virtual void RenderShutdownMessage() = 0;
 
+	virtual IMap *Map() = 0;
+	virtual const IMap *Map() const = 0;
 	virtual CNetObjHandler *GetNetObjHandler() = 0;
 	virtual protocol7::CNetObjHandler *GetNetObjHandler7() = 0;
 

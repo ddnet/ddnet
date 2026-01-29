@@ -136,10 +136,6 @@ int main(int argc, const char **argv)
 	IConfigManager *pConfigManager = CreateConfigManager();
 	pKernel->RegisterInterface(pConfigManager);
 
-	IEngineMap *pEngineMap = CreateEngineMap();
-	pKernel->RegisterInterface(pEngineMap); // IEngineMap
-	pKernel->RegisterInterface(static_cast<IMap *>(pEngineMap), false);
-
 	IEngineAntibot *pEngineAntibot = CreateEngineAntibot();
 	pKernel->RegisterInterface(pEngineAntibot); // IEngineAntibot
 	pKernel->RegisterInterface(static_cast<IAntibot *>(pEngineAntibot), false);
