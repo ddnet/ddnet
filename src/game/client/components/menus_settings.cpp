@@ -1772,6 +1772,7 @@ bool CMenus::RenderHslaScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alp
 		Graphics()->TrianglesEnd();
 
 		Color[i] = Ui()->DoScrollbarH(&((char *)pColor)[i], &Button, Color[i], &HandleColor);
+		GameClient()->m_Tooltips.DoToolTip(&((char *)pColor)[i], &Button, Localize("Use left mouse button to drag and change the value. Hold shift to be more precise."));
 	}
 
 	if(OriginalColor != Color)
