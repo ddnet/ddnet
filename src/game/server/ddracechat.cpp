@@ -1244,6 +1244,26 @@ void CGameContext::AttemptJoinTeam(int ClientId, int Team)
 
 		if(m_pController->Teams().TeamFlock(Team))
 			SendChatTarget(pPlayer->GetCid(), "Team 0 mode enabled for your team. This will make your team behave like team 0.");
+		if(!m_pController->Teams().IsAllowLeaderCommands(pPlayer->GetCid(), Team))
+		{
+			str_copy(aBuf, "", sizeof(aBuf));
+			int leaders = 0;
+			for(int i = 0; i < MAX_CLIENTS; i++)
+			{
+				if(m_pController->Teams().IsAllowLeaderCommands(i, Team))
+				{
+					if(str_comp(aBuf, "") != 0)
+						str_append(aBuf, ", ");
+					str_append(aBuf, Server()->ClientName(i));
+					leaders++;
+				}
+			}
+			if(leaders > 1)
+				SendChatTarget(pPlayer->GetCid(), "Team leader mode is enabled for your team. These are your team leaders:");
+			else
+				SendChatTarget(pPlayer->GetCid(), "Team leader mode is enabled for your team. This is your team leader:");
+			SendChatTarget(pPlayer->GetCid(), aBuf);
+		}
 	}
 }
 
