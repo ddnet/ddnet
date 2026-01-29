@@ -3432,14 +3432,22 @@ void CGameClient::UpdatePrediction()
 
 	if(!m_Snap.m_pLocalCharacter)
 	{
-		if(CCharacter *pLocalChar = m_GameWorld.GetCharacterById(m_Snap.m_LocalClientId))
-			pLocalChar->Destroy();
-		return;
+		// When paused, character is still in the world, don't destroy it so prediction can keep running
+		const bool LocalPlayerPausedInWorld = m_Snap.m_aCharacters[m_Snap.m_LocalClientId].m_Active && m_aClients[m_Snap.m_LocalClientId].m_Paused;
+		if(!LocalPlayerPausedInWorld)
+		{
+			if(CCharacter *pLocalChar = m_GameWorld.GetCharacterById(m_Snap.m_LocalClientId))
+				pLocalChar->Destroy();
+			return;
+		}
 	}
 
-	if(m_Snap.m_pLocalCharacter->m_AmmoCount > 0 && m_Snap.m_pLocalCharacter->m_Weapon != WEAPON_NINJA)
-		m_GameWorld.m_WorldConfig.m_InfiniteAmmo = false;
-	m_GameWorld.m_WorldConfig.m_IsSolo = !m_Snap.m_aCharacters[m_Snap.m_LocalClientId].m_HasExtendedData && !m_aTuning[g_Config.m_ClDummy].m_PlayerCollision && !m_aTuning[g_Config.m_ClDummy].m_PlayerHooking;
+	if(m_Snap.m_pLocalCharacter)
+	{
+		if(m_Snap.m_pLocalCharacter->m_AmmoCount > 0 && m_Snap.m_pLocalCharacter->m_Weapon != WEAPON_NINJA)
+			m_GameWorld.m_WorldConfig.m_InfiniteAmmo = false;
+		m_GameWorld.m_WorldConfig.m_IsSolo = !m_Snap.m_aCharacters[m_Snap.m_LocalClientId].m_HasExtendedData && !m_aTuning[g_Config.m_ClDummy].m_PlayerCollision && !m_aTuning[g_Config.m_ClDummy].m_PlayerHooking;
+	}
 
 	CCharacter *pLocalChar = m_GameWorld.GetCharacterById(m_Snap.m_LocalClientId);
 	CCharacter *pDummyChar = nullptr;
