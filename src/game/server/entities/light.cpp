@@ -75,6 +75,7 @@ void CLight::Step()
 	Move();
 	const vec2 Direction = vec2(std::sin(m_Rotation), std::cos(m_Rotation));
 	const vec2 NextPosition = m_Pos + normalize(Direction) * m_CurveLength;
+	COL_SCOPED_TEAM_CONTEXT(GameServer()->Collision(), -1);
 	GameServer()->Collision()->IntersectNoLaser(m_Pos, NextPosition, &m_To, nullptr);
 }
 

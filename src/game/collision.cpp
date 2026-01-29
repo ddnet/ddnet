@@ -10,6 +10,7 @@
 #include <engine/shared/config.h>
 
 #include <game/collision.h>
+#include <game/gamecore.h>
 #include <game/layers.h>
 #include <game/mapitems.h>
 
@@ -47,11 +48,12 @@ CCollision::~CCollision()
 	Unload();
 }
 
-void CCollision::Init(class CLayers *pLayers)
+void CCollision::Init(class CLayers *pLayers, std::vector<SSwitchers> *vpSwitchers)
 {
 	Unload();
 
 	m_pLayers = pLayers;
+	m_vpSwitchers = vpSwitchers;
 	m_Width = m_pLayers->GameLayer()->m_Width;
 	m_Height = m_pLayers->GameLayer()->m_Height;
 	m_pTiles = static_cast<CTile *>(m_pLayers->Map()->GetData(m_pLayers->GameLayer()->m_Data));
@@ -111,7 +113,7 @@ void CCollision::Init(class CLayers *pLayers)
 
 			if(Index <= TILE_NPH_ENABLE)
 			{
-				if((Index >= TILE_JUMP && Index <= TILE_SUBTRACT_TIME) || Index == TILE_ALLOW_TELE_GUN || Index == TILE_ALLOW_BLUE_TELE_GUN)
+				if((Index >= TILE_JUMP && Index <= TILE_SUBTRACT_TIME) || Index == TILE_ALLOW_TELE_GUN || Index == TILE_ALLOW_BLUE_TELE_GUN || Index == TILE_SOLID || Index == TILE_NOHOOK)
 					m_pSwitch[i].m_Type = Index;
 				else
 					m_pSwitch[i].m_Type = 0;
@@ -154,6 +156,7 @@ void CCollision::Unload()
 	m_Width = 0;
 	m_Height = 0;
 	m_pLayers = nullptr;
+	m_vpSwitchers = nullptr;
 
 	m_HighestSwitchNumber = 0;
 
@@ -320,8 +323,24 @@ int CCollision::GetTile(int x, int y) const
 	int Ny = std::clamp(y / 32, 0, m_Height - 1);
 	const int Index = Ny * m_Width + Nx;
 
+	const int SwitchIndex = IsSwitchSolid(Index);
+	if(SwitchIndex > 0)
+		return SwitchIndex;
+
 	if(m_pTiles[Index].m_Index >= TILE_SOLID && m_pTiles[Index].m_Index <= TILE_NOLASER)
 		return m_pTiles[Index].m_Index;
+	return 0;
+}
+
+int CCollision::IsSwitchSolid(int Index) const
+{
+	if(m_pSwitch && m_vpSwitchers != nullptr && m_CurrTeam != -1)
+	{
+		const int SwitchIndex = GetSwitchType(Index);
+		const int SwitchNumber = GetSwitchNumber(Index);
+		if((SwitchIndex == TILE_SOLID || SwitchIndex == TILE_NOHOOK) && m_vpSwitchers->at(SwitchNumber).m_aStatus[m_CurrTeam])
+			return SwitchIndex;
+	}
 	return 0;
 }
 
@@ -1147,15 +1166,13 @@ int CCollision::IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2
 	{
 		float a = i / Distance;
 		vec2 Pos = mix(Pos0, Pos1, a);
-		int Nx = std::clamp(round_to_int(Pos.x) / 32, 0, m_Width - 1);
-		int Ny = std::clamp(round_to_int(Pos.y) / 32, 0, m_Height - 1);
-		if(GetIndex(Nx, Ny) == TILE_SOLID || GetIndex(Nx, Ny) == TILE_NOHOOK || GetIndex(Nx, Ny) == TILE_NOLASER || GetFrontIndex(Nx, Ny) == TILE_NOLASER)
+		if(IsSolid(round_to_int(Pos.x), round_to_int(Pos.y)) || IsNoLaser(round_to_int(Pos.x), round_to_int(Pos.y)) || IsFrontNoLaser(round_to_int(Pos.x), round_to_int(Pos.y)))
 		{
 			if(pOutCollision)
 				*pOutCollision = Pos;
 			if(pOutBeforeCollision)
 				*pOutBeforeCollision = Last;
-			if(GetFrontIndex(Nx, Ny) == TILE_NOLASER)
+			if(IsFrontNoLaser(round_to_int(Pos.x), round_to_int(Pos.y)))
 				return GetFrontCollisionAt(Pos.x, Pos.y);
 			else
 				return GetCollisionAt(Pos.x, Pos.y);

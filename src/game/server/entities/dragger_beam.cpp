@@ -60,6 +60,7 @@ void CDraggerBeam::Tick()
 	}
 
 	// When the dragger can no longer reach the target player, the dragger beam dissolves
+	COL_SCOPED_TEAM_CONTEXT(Collision(), pTarget->Team());
 	int IsReachable =
 		m_IgnoreWalls ?
 			!GameServer()->Collision()->IntersectNoLaserNoWalls(m_Pos, pTarget->m_Pos, nullptr, nullptr) :

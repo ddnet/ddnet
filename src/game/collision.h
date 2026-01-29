@@ -17,6 +17,7 @@ class CSpeedupTile;
 class CSwitchTile;
 class CTuneTile;
 class CDoorTile;
+struct SSwitchers;
 
 enum
 {
@@ -37,7 +38,7 @@ public:
 	CCollision();
 	~CCollision();
 
-	void Init(CLayers *pLayers);
+	void Init(CLayers *pLayers, std::vector<SSwitchers> *vpSwitchers = nullptr);
 	void Unload();
 	void FillAntibot(CAntibotMapData *pMapData) const;
 
@@ -99,6 +100,9 @@ public:
 	int GetSwitchNumber(int Index) const;
 	int GetSwitchDelay(int Index) const;
 
+	int IsSwitchSolid(int Index) const;
+	std::vector<SSwitchers> *m_vpSwitchers;
+
 	int IsSolid(int x, int y) const;
 	bool IsThrough(int x, int y, int OffsetX, int OffsetY, vec2 Pos0, vec2 Pos1) const;
 	bool IsHookBlocker(int x, int y, vec2 Pos0, vec2 Pos1) const;
@@ -144,6 +148,28 @@ public:
 	const std::vector<vec2> &TeleCheckOuts(int Number) { return m_TeleCheckOuts[Number]; }
 	const std::vector<vec2> &TeleOthers(int Number) { return m_TeleOthers[Number]; }
 
+	// Teams are required for togglable solid tiles in a static layer... Automatic cleanup with RAII \o/
+	class CTeamContext
+	{
+		CCollision *m_pCollision;
+		int m_PrevTeam;
+	public:
+		CTeamContext(CCollision *pCollision, int Team) : m_pCollision(pCollision), m_PrevTeam(pCollision->m_CurrTeam)
+		{
+			m_pCollision->m_CurrTeam = Team;
+		}
+		~CTeamContext()
+		{
+			m_pCollision->m_CurrTeam = m_PrevTeam;
+		}
+	};
+
+	// Essentially for correcut team use in GetTile() or IsSwitchSolid everywhere when needed
+	#define COL_NAME_CONCAT_IMPL(var, line) var##line
+	#define COL_NAME_CONCAT(var, line) COL_NAME_CONCAT_IMPL(var, line)
+	#define COL_SCOPED_TEAM_CONTEXT(pCollision, Team) \
+		CCollision::CTeamContext COL_NAME_CONCAT(_ColTeamContext_, __LINE__)(pCollision, Team)
+
 private:
 	CLayers *m_pLayers;
 
@@ -166,6 +192,8 @@ private:
 	std::map<int, std::vector<vec2>> m_TeleCheckOuts;
 	// TILE_TELEINEVIL, TILE_TELECHECK, TILE_TELECHECKIN, TILE_TELECHECKINEVIL
 	std::map<int, std::vector<vec2>> m_TeleOthers;
+
+	mutable int m_CurrTeam = 0;
 };
 
 void ThroughOffset(vec2 Pos0, vec2 Pos1, int *pOffsetX, int *pOffsetY);

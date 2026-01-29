@@ -79,8 +79,10 @@ void CProjectile::Tick()
 	vec2 CurPos = GetPos(Ct);
 	vec2 ColPos;
 	vec2 NewPos;
-	int Collide = Collision()->IntersectLine(PrevPos, CurPos, &ColPos, &NewPos);
+
 	CCharacter *pOwnerChar = GameWorld()->GetCharacterById(m_Owner);
+	COL_SCOPED_TEAM_CONTEXT(Collision(), pOwnerChar ? pOwnerChar->Team() : -1);
+	int Collide = Collision()->IntersectLine(PrevPos, CurPos, &ColPos, &NewPos);
 
 	CCharacter *pTargetChr = GameWorld()->IntersectCharacter(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pOwnerChar, m_Owner);
 

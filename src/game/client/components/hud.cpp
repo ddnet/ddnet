@@ -846,6 +846,7 @@ void CHud::RenderPlayerState(const int ClientId)
 		if(GameClient()->m_Snap.m_aCharacters[ClientId].m_HasExtendedDisplayInfo)
 		{
 			bool Grounded = false;
+			COL_SCOPED_TEAM_CONTEXT(Collision(), GameClient()->SwitchStateTeam());
 			if(Collision()->CheckPoint(pPlayer->m_X + CCharacterCore::PhysicalSize() / 2,
 				   pPlayer->m_Y + CCharacterCore::PhysicalSize() / 2 + 5))
 			{
