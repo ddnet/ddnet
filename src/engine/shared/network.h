@@ -40,11 +40,6 @@ CURRENT:
 		(unsigned char padding[3])	// 24 bit extra in case it's a connection less packet
 									// this is to make sure that it's compatible with the
 									// old protocol
-
-	chunk header: 2-3 bytes
-		unsigned char flags_size; // 2bit flags, 6 bit size
-		unsigned char size_seq; // 4bit size, 4bit seq
-		(unsigned char seq;) // 8bit seq, if vital flag is set
 */
 
 enum
@@ -141,6 +136,33 @@ struct CNetChunk
 	unsigned char m_aExtraData[NET_CONNLESS_EXTRA_SIZE];
 };
 
+/**
+ * Network chunk header.
+ *
+ * Packed into 2-3 bytes as follows:
+ *
+ * ```
+ * // 2 bit flags, 6 bit size
+ * // FFZZZZZZ
+ * unsigned char flags_size;
+ *
+ * // 4 or 6 bit size, 2 bit sequence (if vital flag is set)
+ * // QQ00zzzz (0.6 protocol, with Split=4)
+ * // QQzzzzzz (0.7 protocol, with Split=6)
+ * unsigned char size_seq;
+ *
+ * // 8 bit sequence (if vital flag is set)
+ * // qqqqqqqq
+ * unsigned char seq;
+ *
+ * F = flags (NET_CHUNKFLAG_VITAL and NET_CHUNKFLAG_RESEND)
+ * Z = size (upper bits)
+ * z = size (lower bits)
+ * Q = sequence (upper bits)
+ * q = sequence (lower bits)
+ * 0 = should be zero otherwise it messes up the sequence for old 0.6 servers/clients
+ * ```
+ */
 class CNetChunkHeader
 {
 public:
