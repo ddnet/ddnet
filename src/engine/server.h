@@ -318,7 +318,8 @@ public:
 	//
 	// GlobalSnap is true when sending snapshots to all clients,
 	// otherwise only forced high bandwidth clients would receive snap.
-	virtual void OnSnap(int ClientId, bool GlobalSnap) = 0;
+	// RecordingDemo is true when this snapshot will be recorded to a demo.
+	virtual void OnSnap(int ClientId, bool GlobalSnap, bool RecordingDemo) = 0;
 
 	// Called after sending snapshots to all clients.
 	//
