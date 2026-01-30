@@ -726,7 +726,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 	// Make sure to clear credentials completely from memory
 	mem_zero(m_aRconUsername, sizeof(m_aRconUsername));
 	mem_zero(m_aRconPassword, sizeof(m_aRconPassword));
-	m_MapDetailsPresent = false;
+	m_MapDetails = std::nullopt;
 	m_ServerSentCapabilities = false;
 	m_UseTempRconCommands = 0;
 	m_ExpectedRconCommands = -1;
@@ -1594,12 +1594,13 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				pMapUrl = "";
 			}
 
-			m_MapDetailsPresent = true;
+			m_MapDetails = std::make_optional<CMapDetails>();
+			CMapDetails &MapDetails = m_MapDetails.value();
+			str_copy(MapDetails.m_aName, pMap);
 			(void)MapSize;
-			str_copy(m_aMapDetailsName, pMap);
-			m_MapDetailsSha256 = *pMapSha256;
-			m_MapDetailsCrc = MapCrc;
-			str_copy(m_aMapDetailsUrl, pMapUrl);
+			MapDetails.m_Crc = MapCrc;
+			MapDetails.m_Sha256 = *pMapSha256;
+			str_copy(MapDetails.m_aUrl, pMapUrl);
 		}
 		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_CAPABILITIES)
 		{
@@ -1624,8 +1625,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				m_ServerCapabilities = GetServerCapabilities(0, 0, IsSixup());
 				m_CanReceiveServerCapabilities = false;
 			}
-			bool MapDetailsWerePresent = m_MapDetailsPresent;
-			m_MapDetailsPresent = false;
+			std::optional<CMapDetails> MapDetails = std::nullopt;
+			std::swap(MapDetails, m_MapDetails);
 
 			const char *pMap = Unpacker.GetString(CUnpacker::SANITIZE_CC | CUnpacker::SKIP_START_WHITESPACES);
 			int MapCrc = Unpacker.GetInt();
@@ -1655,10 +1656,12 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 
 			std::optional<SHA256_DIGEST> MapSha256;
 			const char *pMapUrl = nullptr;
-			if(MapDetailsWerePresent && str_comp(m_aMapDetailsName, pMap) == 0 && m_MapDetailsCrc == MapCrc)
+			if(MapDetails.has_value() &&
+				str_comp(MapDetails->m_aName, pMap) == 0 &&
+				MapDetails->m_Crc == MapCrc)
 			{
-				MapSha256 = m_MapDetailsSha256;
-				pMapUrl = m_aMapDetailsUrl[0] ? m_aMapDetailsUrl : nullptr;
+				MapSha256 = MapDetails->m_Sha256;
+				pMapUrl = MapDetails->m_aUrl[0] ? MapDetails->m_aUrl : nullptr;
 			}
 
 			if(LoadMapSearch(pMap, MapSha256, MapCrc) == nullptr)
