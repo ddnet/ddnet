@@ -1597,7 +1597,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			m_MapDetails = std::make_optional<CMapDetails>();
 			CMapDetails &MapDetails = m_MapDetails.value();
 			str_copy(MapDetails.m_aName, pMap);
-			(void)MapSize;
+			MapDetails.m_Size = MapSize;
 			MapDetails.m_Crc = MapCrc;
 			MapDetails.m_Sha256 = *pMapSha256;
 			str_copy(MapDetails.m_aUrl, pMapUrl);
@@ -1658,6 +1658,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			const char *pMapUrl = nullptr;
 			if(MapDetails.has_value() &&
 				str_comp(MapDetails->m_aName, pMap) == 0 &&
+				MapDetails->m_Size == MapSize &&
 				MapDetails->m_Crc == MapCrc)
 			{
 				MapSha256 = MapDetails->m_Sha256;

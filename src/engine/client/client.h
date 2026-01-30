@@ -160,6 +160,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	{
 	public:
 		char m_aName[256];
+		int m_Size;
 		int m_Crc;
 		SHA256_DIGEST m_Sha256;
 		char m_aUrl[256];
