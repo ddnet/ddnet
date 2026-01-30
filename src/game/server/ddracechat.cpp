@@ -1162,7 +1162,12 @@ void CGameContext::AttemptJoinTeam(int ClientId, int Team)
 	if(!pPlayer)
 		return;
 
-	if(IsRunningKickOrSpecVote(ClientId))
+	if(!m_pController->Teams().IsValidTeamNumber(Team))
+	{
+		log_info("chatresp", "Invalid Team: %d", Team);
+		return;
+	}
+	else if(IsRunningKickOrSpecVote(ClientId))
 	{
 		Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
@@ -1183,18 +1188,6 @@ void CGameContext::AttemptJoinTeam(int ClientId, int Team)
 			"chatresp",
 			"You must join a team and play with somebody or else you can't play");
 		pPlayer->GetCharacter()->m_LastStartWarning = Server()->Tick();
-	}
-
-	if(!m_pController->Teams().IsValidTeamNumber(Team))
-	{
-		auto EmptyTeam = m_pController->Teams().GetFirstEmptyTeam();
-		if(!EmptyTeam.has_value())
-		{
-			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-				"No empty team left.");
-			return;
-		}
-		Team = EmptyTeam.value();
 	}
 
 	char aError[512];
@@ -1398,9 +1391,22 @@ void CGameContext::ConTeam(IConsole::IResult *pResult, void *pUserData)
 	if(!pPlayer)
 		return;
 
+	int Team = pResult->GetInteger(0);
+
+	if(Team < 0 || Team >= NUM_DDRACE_TEAMS)
+	{
+		auto EmptyTeam = pSelf->m_pController->Teams().GetFirstEmptyTeam();
+		if(!EmptyTeam.has_value())
+		{
+			log_info("chatresp", "No empty team left.");
+			return;
+		}
+		Team = EmptyTeam.value();
+	}
+
 	if(pResult->NumArguments() > 0)
 	{
-		pSelf->AttemptJoinTeam(pResult->m_ClientId, pResult->GetInteger(0));
+		pSelf->AttemptJoinTeam(pResult->m_ClientId, Team);
 	}
 	else
 	{
