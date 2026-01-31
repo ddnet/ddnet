@@ -1356,7 +1356,7 @@ void CHud::RenderDummyActions()
 	float y = StartY + 2;
 	float x = StartX + 2;
 	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
-	if(g_Config.m_ClDummyHammer)
+	if((g_Config.m_ClDummyHammer & 1) == 1)
 	{
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}

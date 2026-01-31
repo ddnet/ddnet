@@ -100,7 +100,7 @@ float CPlayers::GetPlayerTargetAngle(
 {
 	if(GameClient()->PredictDummy() && GameClient()->m_aLocalIds[!g_Config.m_ClDummy] == ClientId)
 	{
-		const CNetObj_PlayerInput &Input = g_Config.m_ClDummyHammer ? GameClient()->m_HammerInput : GameClient()->m_DummyInput;
+		const CNetObj_PlayerInput &Input = g_Config.m_ClDummyHammer != (GameClient()->m_DummyInput.m_Fire & ~1) ? GameClient()->m_HammerInput : GameClient()->m_DummyInput;
 		return angle(vec2(Input.m_TargetX, Input.m_TargetY));
 	}
 
