@@ -11,6 +11,8 @@
 #include <engine/shared/protocol.h>
 #include <engine/storage.h>
 
+#include <generated/protocol.h>
+
 CConfig g_Config;
 
 // ----------------------- Config Variables
@@ -106,6 +108,48 @@ void SIntConfigVariable::ResetToDefault()
 void SIntConfigVariable::ResetToOld()
 {
 	*m_pVariable = m_OldValue;
+}
+
+// -----
+
+void SInputConfigVariable::CommandCallback(IConsole::IResult *pResult, void *pUserData)
+{
+	SInputConfigVariable *pData = static_cast<SInputConfigVariable *>(pUserData);
+
+	if(pResult->NumArguments())
+	{
+		if(pData->CheckReadOnly())
+			return;
+
+		int Value = pResult->GetInteger(0);
+
+		// do clamping
+		if(Value < 0)
+			Value = 0;
+		if(Value > 1)
+			Value = 1;
+
+		if((*pData->m_pVariable & 1) != Value)
+			*pData->m_pVariable = (*pData->m_pVariable + 1) & INPUT_STATE_MASK;
+		if(pResult->m_ClientId != IConsole::CLIENT_ID_GAME)
+			pData->m_OldValue = Value;
+	}
+	else
+	{
+		char aBuf[32];
+		str_format(aBuf, sizeof(aBuf), "Value: %d", *pData->m_pVariable);
+		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "config", aBuf);
+	}
+}
+
+void SInputConfigVariable::Register()
+{
+	m_pConsole->Register(m_pScriptName, "?i", m_Flags, CommandCallback, this, m_pHelp);
+}
+
+void SInputConfigVariable::Serialize(char *pOut, size_t Size, int Value) const
+{
+	str_format(pOut, Size, "%s %i", m_pScriptName, Value & 1);
 }
 
 // -----
@@ -292,6 +336,12 @@ void CConfigManager::Init()
 		AddVariable(m_ConfigHeap.Allocate<SIntConfigVariable>(m_pConsole, #ScriptName, SConfigVariable::VAR_INT, Flags, pHelp, &g_Config.m_##Name, Def, Min, Max)); \
 	}
 
+#define MACRO_CONFIG_INP(Name, ScriptName, Flags, Desc) \
+	{ \
+		const char *pHelp = Desc " (default: 0, min: 0, max: 1)"; \
+		AddVariable(m_ConfigHeap.Allocate<SInputConfigVariable>(m_pConsole, #ScriptName, SConfigVariable::VAR_INP, Flags, pHelp, &g_Config.m_##Name)); \
+	}
+
 #define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) \
 	{ \
 		const size_t HelpSize = (size_t)str_length(Desc) + 32; \
@@ -313,6 +363,7 @@ void CConfigManager::Init()
 #include "config_variables.h"
 
 #undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_INP
 #undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR
 
@@ -495,6 +546,12 @@ void CConfigManager::Con_Toggle(IConsole::IResult *pResult, void *pUserData)
 			const bool EqualToFirst = *pIntVariable->m_pVariable == pResult->GetInteger(1);
 			pIntVariable->SetValue(pResult->GetInteger(EqualToFirst ? 2 : 1));
 		}
+		else if(pVariable->m_Type == SConfigVariable::VAR_INP)
+		{
+			SInputConfigVariable *pInputVariable = static_cast<SInputConfigVariable *>(pVariable);
+			const bool EqualToFirst = *pInputVariable->m_pVariable == (pResult->GetInteger(1) & 1);
+			pInputVariable->SetValue(pResult->GetInteger(EqualToFirst ? 2 : 1));
+		}
 		else if(pVariable->m_Type == SConfigVariable::VAR_COLOR)
 		{
 			SColorConfigVariable *pColorVariable = static_cast<SColorConfigVariable *>(pVariable);
@@ -525,14 +582,22 @@ void CConfigManager::Con_ToggleStroke(IConsole::IResult *pResult, void *pUserDat
 	for(SConfigVariable *pVariable : pConfigManager->m_vpAllVariables)
 	{
 		if((pVariable->m_Flags & pConsole->FlagMask()) == 0 ||
-			pVariable->m_Type != SConfigVariable::VAR_INT ||
+			(pVariable->m_Type != SConfigVariable::VAR_INT && pVariable->m_Type != SConfigVariable::VAR_INP) ||
 			str_comp(pScriptName, pVariable->m_pScriptName) != 0)
 		{
 			continue;
 		}
 
-		SIntConfigVariable *pIntVariable = static_cast<SIntConfigVariable *>(pVariable);
-		pIntVariable->SetValue(pResult->GetInteger(0) == 0 ? pResult->GetInteger(3) : pResult->GetInteger(2));
+		if(pVariable->m_Type == SConfigVariable::VAR_INT)
+		{
+			SIntConfigVariable *pIntVariable = static_cast<SIntConfigVariable *>(pVariable);
+			pIntVariable->SetValue(pResult->GetInteger(0) == 0 ? pResult->GetInteger(3) : pResult->GetInteger(2));
+		}
+		else if(pVariable->m_Type == SConfigVariable::VAR_INP)
+		{
+			SInputConfigVariable *pInputVariable = static_cast<SInputConfigVariable *>(pVariable);
+			pInputVariable->SetValue((pResult->GetInteger(0) & 1) == 0 ? pResult->GetInteger(3) : pResult->GetInteger(2));
+		}
 		return;
 	}
 

@@ -88,6 +88,10 @@ def parse_settings(lines):
 			parsed = parse_arguments(args[2], num=7, name="int setting")
 			flags = parse_flags(parsed[5], f"int setting '{parsed[1]}'")
 			setting = {"type": "int", "flags": flags, "name": parsed[1], "description": parsed[6], "default": parse_value(parsed[2]), "min": parse_value(parsed[3]), "max": parse_value(parsed[4])}
+		elif args[1] == "INP":
+			parsed = parse_arguments(args[2], num=4, name="int setting")
+			flags = parse_flags(parsed[2], f"int setting '{parsed[1]}'")
+			setting = {"type": "int", "flags": flags, "name": parsed[1], "description": parsed[3], "default": 0, "min": 0, "max": 1}
 		elif args[1] == "COL":
 			parsed = parse_arguments(args[2], num=5, name="color setting")
 			flags = parse_flags(parsed[3], f"color setting '{parsed[1]}'")

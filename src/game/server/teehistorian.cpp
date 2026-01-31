@@ -172,6 +172,8 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 		First = false; \
 	}
 
+#define MACRO_CONFIG_INP(Name, ScriptName, Flags, Desc) MACRO_CONFIG_INT(Name, ScriptName, 0, 0, 1, Flags, Desc)
+
 #define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) MACRO_CONFIG_INT(Name, ScriptName, Def, 0, 0, Flags, Desc)
 
 #define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Flags, Desc) \
@@ -188,6 +190,7 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 #include <engine/shared/config_variables.h>
 
 #undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_INP
 #undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR
 
