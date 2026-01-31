@@ -967,6 +967,18 @@ void CConsole::Register(const char *pName, const char *pParams,
 		pCommand->SetAccessLevel(EAccessLevel::USER);
 }
 
+static void RegisterFunctionalCallback(CConsole::IResult *pResult, void *pUserData)
+{
+	const CConsole::FCommandCallbackNew *pCallback = (CConsole::FCommandCallbackNew *)pUserData;
+	if(pCallback && *pCallback)
+		(*pCallback)(*pResult);
+}
+void CConsole::Register(const char *pName, const char *pParams, const char *pHelp, int Flags, const FCommandCallbackNew &Callback)
+{
+	const FCommandCallbackNew *pCallback = new FCommandCallbackNew(Callback);
+	Register(pName, pParams, Flags, RegisterFunctionalCallback, (void *)pCallback, pHelp);
+}
+
 void CConsole::RegisterTemp(const char *pName, const char *pParams, int Flags, const char *pHelp)
 {
 	CCommand *pCommand;
@@ -1084,6 +1096,21 @@ void CConsole::Chain(const char *pName, FChainCommandCallback pfnChainFunc, void
 	// chain
 	pCommand->m_pfnCallback = Con_Chain;
 	pCommand->m_pUserData = pChainInfo;
+}
+
+static void ChainFunctionalCallback(CConsole::IResult *pResult, void *pUserData, CConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	const CConsole::FChainCommandCallbackNew *pChainCallback = (CConsole::FChainCommandCallbackNew *)pUserData;
+
+	if(pChainCallback && *pChainCallback)
+		(*pChainCallback)(*pResult, [pfnCallback, pCallbackUserData](CConsole::IResult &Result) {
+			pfnCallback(&Result, pCallbackUserData);
+		});
+}
+void CConsole::Chain(const char *pName, const FChainCommandCallbackNew &ChainCallback)
+{
+	const FChainCommandCallbackNew *pChainCallback = new FChainCommandCallbackNew(ChainCallback);
+	Chain(pName, ChainFunctionalCallback, (void *)pChainCallback);
 }
 
 void CConsole::StoreCommands(bool Store)
