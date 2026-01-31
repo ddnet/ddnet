@@ -1315,35 +1315,45 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 	CUIRect Box, Part;
 	Box = Screen;
 	if(m_Popup != POPUP_FIRST_LAUNCH)
+	{
 		Box.Margin(150.0f, &Box);
+	}
 
-	// render the box
+	// Background
 	Box.Draw(BgColor, IGraphics::CORNER_ALL, 15.0f);
 
-	Box.HSplitTop(20.f, &Part, &Box);
-	Box.HSplitTop(24.f, &Part, &Box);
-	Part.VMargin(20.f, &Part);
-	SLabelProperties Props;
-	Props.m_MaxWidth = (int)Part.w;
+	// Title
+	{
+		CUIRect Title;
+		Box.HSplitTop(20.0f, nullptr, &Box);
+		Box.HSplitTop(24.0f, &Title, &Box);
+		Box.HSplitTop(20.0f, nullptr, &Box);
+		Title.VMargin(20.0f, &Title);
 
-	if(TextRender()->TextWidth(24.f, pTitle, -1, -1.0f) > Part.w)
-		Ui()->DoLabel(&Part, pTitle, 24.f, TEXTALIGN_ML, Props);
-	else
-		Ui()->DoLabel(&Part, pTitle, 24.f, TEXTALIGN_MC);
+		const float TitleFontSize = 24.0f;
+		if(TextRender()->TextWidth(TitleFontSize, pTitle) > Title.w)
+			Ui()->DoLabel(&Title, pTitle, TitleFontSize, TEXTALIGN_ML, {.m_MaxWidth = Title.w});
+		else
+			Ui()->DoLabel(&Title, pTitle, TitleFontSize, TEXTALIGN_MC);
+	}
 
-	Box.HSplitTop(20.f, &Part, &Box);
-	Box.HSplitTop(24.f, &Part, &Box);
-	Part.VMargin(20.f, &Part);
+	// Extra text (optional)
+	{
+		CUIRect ExtraText;
+		Box.HSplitTop(24.0f, &ExtraText, &Box);
+		ExtraText.VMargin(20.0f, &ExtraText);
+		if(pExtraText[0] != '\0')
+		{
+			const float ExtraTextFontSize = m_Popup == POPUP_FIRST_LAUNCH ? 16.0f : 20.0f;
 
-	float FontSize = m_Popup == POPUP_FIRST_LAUNCH ? 16.0f : 20.f;
-
-	Props.m_MaxWidth = (int)Part.w;
-	if(TopAlign)
-		Ui()->DoLabel(&Part, pExtraText, FontSize, TEXTALIGN_TL, Props);
-	else if(TextRender()->TextWidth(FontSize, pExtraText, -1, -1.0f) > Part.w)
-		Ui()->DoLabel(&Part, pExtraText, FontSize, TEXTALIGN_ML, Props);
-	else
-		Ui()->DoLabel(&Part, pExtraText, FontSize, TEXTALIGN_MC);
+			if(TopAlign)
+				Ui()->DoLabel(&ExtraText, pExtraText, ExtraTextFontSize, TEXTALIGN_TL, {.m_MaxWidth = ExtraText.w});
+			else if(TextRender()->TextWidth(ExtraTextFontSize, pExtraText) > ExtraText.w)
+				Ui()->DoLabel(&ExtraText, pExtraText, ExtraTextFontSize, TEXTALIGN_ML, {.m_MaxWidth = ExtraText.w});
+			else
+				Ui()->DoLabel(&ExtraText, pExtraText, ExtraTextFontSize, TEXTALIGN_MC);
+		}
+	}
 
 	if(m_Popup == POPUP_MESSAGE || m_Popup == POPUP_CONFIRM)
 	{
@@ -1392,14 +1402,12 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		if(GameClient()->Editor()->HasUnsavedData())
 		{
 			str_format(aBuf, sizeof(aBuf), "%s\n\n%s", Localize("There's an unsaved map in the editor, you might want to save it."), Localize("Continue anyway?"));
-			Props.m_MaxWidth = Part.w - 20.0f;
-			Ui()->DoLabel(&Box, aBuf, 20.f, TEXTALIGN_ML, Props);
+			Ui()->DoLabel(&Box, aBuf, 20.0f, TEXTALIGN_ML, {.m_MaxWidth = Part.w - 20.0f});
 		}
 		else if(GameClient()->m_TouchControls.HasEditingChanges() || m_MenusIngameTouchControls.UnsavedChanges())
 		{
 			str_format(aBuf, sizeof(aBuf), "%s\n\n%s", Localize("There's an unsaved change in the touch controls editor, you might want to save it."), Localize("Continue anyway?"));
-			Props.m_MaxWidth = Part.w - 20.0f;
-			Ui()->DoLabel(&Box, aBuf, 20.f, TEXTALIGN_ML, Props);
+			Ui()->DoLabel(&Box, aBuf, 20.0f, TEXTALIGN_ML, {.m_MaxWidth = Part.w - 20.0f});
 		}
 
 		// buttons
