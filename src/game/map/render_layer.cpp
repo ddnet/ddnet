@@ -1677,6 +1677,9 @@ CRenderLayerEntityTune::CRenderLayerEntityTune(int GroupId, int LayerId, int Fla
 void CRenderLayerEntityTune::GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const
 {
 	*pIndex = m_pTuneTiles[y * m_pLayerTilemap->m_Width + x].m_Type;
+	if(CurOverlay == 1)
+		*pIndex = m_pTuneTiles[y * m_pLayerTilemap->m_Width + x].m_Number;
+	
 	*pFlags = 0;
 }
 
@@ -1686,9 +1689,36 @@ int CRenderLayerEntityTune::GetDataIndex(unsigned int &TileSize) const
 	return m_pLayerTilemap->m_Tune;
 }
 
+void CRenderLayerEntityTune::Init()
+{
+	UploadTileData(m_VisualTiles, 0, false);
+	UploadTileData(m_VisualTuneNumber, 1, false);	
+}
+
 void CRenderLayerEntityTune::InitTileData()
 {
 	m_pTuneTiles = GetData<CTuneTile>();
+}
+
+void CRenderLayerEntityTune::Unload()
+{
+	CRenderLayerTile::Unload();
+	if(m_VisualTuneNumber.has_value())
+	{
+		m_VisualTuneNumber->Unload();
+		m_VisualTuneNumber = std::nullopt;
+	}
+}
+
+void CRenderLayerEntityTune::RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params)
+{
+	Graphics()->BlendNormal();
+	RenderTileLayer(Color, Params);
+	if(Params.m_RenderText)
+	{
+		Graphics()->TextureSet(m_pMapImages->GetOverlayTop());
+		RenderTileLayer(Color, Params, &m_VisualTuneNumber.value());
+	}
 }
 
 void CRenderLayerEntityTune::RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params)
