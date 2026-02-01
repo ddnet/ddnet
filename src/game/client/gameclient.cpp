@@ -515,8 +515,11 @@ void CGameClient::OnDummySwap()
 		m_Controls.ResetInput(PlayerOrDummy);
 		m_Controls.m_aInputData[PlayerOrDummy].m_Hook = 0;
 	}
-	const int PrevDummyFire = m_DummyInput.m_Fire;
+	int PrevDummyFire = m_DummyInput.m_Fire;
 	m_DummyInput = m_Controls.m_aInputData[!g_Config.m_ClDummy];
+	// preserve existing behavior - old dummy, now player, should fire immediately upon swap
+	if((g_Config.m_ClDummyHammer & 1) == 1)
+		PrevDummyFire = (PrevDummyFire + 2) & INPUT_STATE_MASK;
 	m_Controls.m_aInputData[g_Config.m_ClDummy].m_Fire = PrevDummyFire;
 	g_Config.m_ClDummyHammer = (m_DummyInput.m_Fire & ~1 & INPUT_STATE_MASK) | (g_Config.m_ClDummyHammer & 1);
 	g_Config.m_ClDummyFire = (m_DummyInput.m_Fire & ~1 & INPUT_STATE_MASK) | (g_Config.m_ClDummyFire & 1);
