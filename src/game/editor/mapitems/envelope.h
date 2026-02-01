@@ -18,7 +18,7 @@ public:
 	{
 		POSITION,
 		COLOR,
-		SOUND
+		SOUND,
 	};
 	explicit CEnvelope(EType Type);
 	explicit CEnvelope(int NumChannels);

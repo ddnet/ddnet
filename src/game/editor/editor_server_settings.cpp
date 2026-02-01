@@ -67,7 +67,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	DragBar.y -= 2.0f;
 	DragBar.w += 2.0f;
 	DragBar.h += 4.0f;
-	DoEditorDragBar(View, &DragBar, EDragSide::SIDE_TOP, &m_aExtraEditorSplits[EXTRAEDITOR_SERVER_SETTINGS]);
+	DoEditorDragBar(View, &DragBar, EDragSide::TOP, &m_aExtraEditorSplits[EXTRAEDITOR_SERVER_SETTINGS]);
 	View.HSplitTop(20.0f, &ToolBar, &View);
 	View.HSplitTop(2.0f, nullptr, &List);
 	ToolBar.HMargin(2.0f, &ToolBar);

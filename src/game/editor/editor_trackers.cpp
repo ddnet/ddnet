@@ -8,7 +8,7 @@
 
 CQuadEditTracker::CQuadEditTracker(CEditorMap *pMap) :
 	CMapObject(pMap),
-	m_TrackedProp(EQuadProp::PROP_NONE) {}
+	m_TrackedProp(EQuadProp::NONE) {}
 
 bool CQuadEditTracker::QuadPointChanged(const std::vector<CPoint> &vCurrentPoints, int QuadIndex)
 {
@@ -70,7 +70,7 @@ void CQuadEditTracker::EndQuadTrack()
 
 void CQuadEditTracker::BeginQuadPropTrack(const std::shared_ptr<CLayerQuads> &pLayer, const std::vector<int> &vSelectedQuads, EQuadProp Prop, int GroupIndex, int LayerIndex)
 {
-	if(m_TrackedProp != EQuadProp::PROP_NONE)
+	if(m_TrackedProp != EQuadProp::NONE)
 		return;
 	m_TrackedProp = Prop;
 	m_pLayer = pLayer;
@@ -82,17 +82,17 @@ void CQuadEditTracker::BeginQuadPropTrack(const std::shared_ptr<CLayerQuads> &pL
 	for(auto QuadIndex : vSelectedQuads)
 	{
 		auto &Quad = pLayer->m_vQuads[QuadIndex];
-		if(Prop == EQuadProp::PROP_POS_X || Prop == EQuadProp::PROP_POS_Y)
+		if(Prop == EQuadProp::POS_X || Prop == EQuadProp::POS_Y)
 			m_InitialPoints[QuadIndex] = std::vector<CPoint>(std::begin(Quad.m_aPoints), std::end(Quad.m_aPoints));
-		else if(Prop == EQuadProp::PROP_POS_ENV)
+		else if(Prop == EQuadProp::POS_ENV)
 			m_PreviousValues[QuadIndex] = Quad.m_PosEnv;
-		else if(Prop == EQuadProp::PROP_POS_ENV_OFFSET)
+		else if(Prop == EQuadProp::POS_ENV_OFFSET)
 			m_PreviousValues[QuadIndex] = Quad.m_PosEnvOffset;
-		else if(Prop == EQuadProp::PROP_COLOR)
+		else if(Prop == EQuadProp::COLOR)
 			m_InitialColors[QuadIndex] = std::vector<CColor>(std::begin(Quad.m_aColors), std::end(Quad.m_aColors));
-		else if(Prop == EQuadProp::PROP_COLOR_ENV)
+		else if(Prop == EQuadProp::COLOR_ENV)
 			m_PreviousValues[QuadIndex] = Quad.m_ColorEnv;
-		else if(Prop == EQuadProp::PROP_COLOR_ENV_OFFSET)
+		else if(Prop == EQuadProp::COLOR_ENV_OFFSET)
 			m_PreviousValues[QuadIndex] = Quad.m_ColorEnvOffset;
 	}
 }
@@ -100,20 +100,20 @@ void CQuadEditTracker::EndQuadPropTrack(EQuadProp Prop)
 {
 	if(m_TrackedProp != Prop)
 		return;
-	m_TrackedProp = EQuadProp::PROP_NONE;
+	m_TrackedProp = EQuadProp::NONE;
 
 	std::vector<std::shared_ptr<IEditorAction>> vpActions;
 
 	for(auto QuadIndex : m_vSelectedQuads)
 	{
 		auto &Quad = m_pLayer->m_vQuads[QuadIndex];
-		if(Prop == EQuadProp::PROP_POS_X || Prop == EQuadProp::PROP_POS_Y)
+		if(Prop == EQuadProp::POS_X || Prop == EQuadProp::POS_Y)
 		{
 			auto vCurrentPoints = std::vector<CPoint>(std::begin(Quad.m_aPoints), std::end(Quad.m_aPoints));
 			if(QuadPointChanged(vCurrentPoints, QuadIndex))
 				vpActions.push_back(std::make_shared<CEditorActionEditQuadPoint>(Map(), m_GroupIndex, m_LayerIndex, QuadIndex, m_InitialPoints[QuadIndex], vCurrentPoints));
 		}
-		else if(Prop == EQuadProp::PROP_COLOR)
+		else if(Prop == EQuadProp::COLOR)
 		{
 			auto vCurrentColors = std::vector<CColor>(std::begin(Quad.m_aColors), std::end(Quad.m_aColors));
 			if(QuadColorChanged(vCurrentColors, QuadIndex))
@@ -122,13 +122,13 @@ void CQuadEditTracker::EndQuadPropTrack(EQuadProp Prop)
 		else
 		{
 			int Value = 0;
-			if(Prop == EQuadProp::PROP_POS_ENV)
+			if(Prop == EQuadProp::POS_ENV)
 				Value = Quad.m_PosEnv;
-			else if(Prop == EQuadProp::PROP_POS_ENV_OFFSET)
+			else if(Prop == EQuadProp::POS_ENV_OFFSET)
 				Value = Quad.m_PosEnvOffset;
-			else if(Prop == EQuadProp::PROP_COLOR_ENV)
+			else if(Prop == EQuadProp::COLOR_ENV)
 				Value = Quad.m_ColorEnv;
-			else if(Prop == EQuadProp::PROP_COLOR_ENV_OFFSET)
+			else if(Prop == EQuadProp::COLOR_ENV_OFFSET)
 				Value = Quad.m_ColorEnvOffset;
 
 			if(Value != m_PreviousValues[QuadIndex])
@@ -168,9 +168,9 @@ void CQuadEditTracker::AddQuadPointPropTrack(EQuadPointProp Prop)
 	for(auto QuadIndex : m_vSelectedQuads)
 	{
 		auto &Quad = m_pLayer->m_vQuads[QuadIndex];
-		if(Prop == EQuadPointProp::PROP_POS_X || Prop == EQuadPointProp::PROP_POS_Y)
+		if(Prop == EQuadPointProp::POS_X || Prop == EQuadPointProp::POS_Y)
 			m_InitialPoints[QuadIndex] = std::vector<CPoint>(std::begin(Quad.m_aPoints), std::end(Quad.m_aPoints));
-		else if(Prop == EQuadPointProp::PROP_COLOR)
+		else if(Prop == EQuadPointProp::COLOR)
 		{
 			for(int v = 0; v < 4; v++)
 			{
@@ -180,7 +180,7 @@ void CQuadEditTracker::AddQuadPointPropTrack(EQuadPointProp Prop)
 				}
 			}
 		}
-		else if(Prop == EQuadPointProp::PROP_TEX_U)
+		else if(Prop == EQuadPointProp::TEX_U)
 		{
 			for(int v = 0; v < 4; v++)
 			{
@@ -190,7 +190,7 @@ void CQuadEditTracker::AddQuadPointPropTrack(EQuadPointProp Prop)
 				}
 			}
 		}
-		else if(Prop == EQuadPointProp::PROP_TEX_V)
+		else if(Prop == EQuadPointProp::TEX_V)
 		{
 			for(int v = 0; v < 4; v++)
 			{
@@ -216,7 +216,7 @@ void CQuadEditTracker::EndQuadPointPropTrack(EQuadPointProp Prop)
 	for(auto QuadIndex : m_vSelectedQuads)
 	{
 		auto &Quad = m_pLayer->m_vQuads[QuadIndex];
-		if(Prop == EQuadPointProp::PROP_POS_X || Prop == EQuadPointProp::PROP_POS_Y)
+		if(Prop == EQuadPointProp::POS_X || Prop == EQuadPointProp::POS_Y)
 		{
 			auto vCurrentPoints = std::vector<CPoint>(std::begin(Quad.m_aPoints), std::end(Quad.m_aPoints));
 			if(QuadPointChanged(vCurrentPoints, QuadIndex))
@@ -229,15 +229,15 @@ void CQuadEditTracker::EndQuadPointPropTrack(EQuadPointProp Prop)
 			{
 				if(m_SelectedQuadPoints & (1 << v))
 				{
-					if(Prop == EQuadPointProp::PROP_COLOR)
+					if(Prop == EQuadPointProp::COLOR)
 					{
 						Value = PackColor(Quad.m_aColors[v]);
 					}
-					else if(Prop == EQuadPointProp::PROP_TEX_U)
+					else if(Prop == EQuadPointProp::TEX_U)
 					{
 						Value = Quad.m_aTexcoords[v].x;
 					}
-					else if(Prop == EQuadPointProp::PROP_TEX_V)
+					else if(Prop == EQuadPointProp::TEX_V)
 					{
 						Value = Quad.m_aTexcoords[v].y;
 					}
@@ -261,7 +261,7 @@ void CQuadEditTracker::EndQuadPointPropTrackAll()
 		for(auto QuadIndex : m_vSelectedQuads)
 		{
 			auto &Quad = m_pLayer->m_vQuads[QuadIndex];
-			if(Prop == EQuadPointProp::PROP_POS_X || Prop == EQuadPointProp::PROP_POS_Y)
+			if(Prop == EQuadPointProp::POS_X || Prop == EQuadPointProp::POS_Y)
 			{
 				auto vCurrentPoints = std::vector<CPoint>(std::begin(Quad.m_aPoints), std::end(Quad.m_aPoints));
 				if(QuadPointChanged(vCurrentPoints, QuadIndex))
@@ -274,15 +274,15 @@ void CQuadEditTracker::EndQuadPointPropTrackAll()
 				{
 					if(m_SelectedQuadPoints & (1 << v))
 					{
-						if(Prop == EQuadPointProp::PROP_COLOR)
+						if(Prop == EQuadPointProp::COLOR)
 						{
 							Value = PackColor(Quad.m_aColors[v]);
 						}
-						else if(Prop == EQuadPointProp::PROP_TEX_U)
+						else if(Prop == EQuadPointProp::TEX_U)
 						{
 							Value = Quad.m_aTexcoords[v].x;
 						}
-						else if(Prop == EQuadPointProp::PROP_TEX_V)
+						else if(Prop == EQuadPointProp::TEX_V)
 						{
 							Value = Quad.m_aTexcoords[v].y;
 						}
@@ -308,14 +308,14 @@ void CEnvelopeEditorOperationTracker::Begin(EEnvelopeEditorOp Operation)
 	if(m_TrackedOp == Operation)
 		return;
 
-	if(m_TrackedOp != EEnvelopeEditorOp::OP_NONE)
+	if(m_TrackedOp != EEnvelopeEditorOp::NONE)
 	{
 		Stop(true);
 	}
 
 	m_TrackedOp = Operation;
 
-	if(Operation == EEnvelopeEditorOp::OP_DRAG_POINT || Operation == EEnvelopeEditorOp::OP_DRAG_POINT_X || Operation == EEnvelopeEditorOp::OP_DRAG_POINT_Y || Operation == EEnvelopeEditorOp::OP_SCALE)
+	if(Operation == EEnvelopeEditorOp::DRAG_POINT || Operation == EEnvelopeEditorOp::DRAG_POINT_X || Operation == EEnvelopeEditorOp::DRAG_POINT_Y || Operation == EEnvelopeEditorOp::SCALE)
 	{
 		HandlePointDragStart();
 	}
@@ -323,15 +323,15 @@ void CEnvelopeEditorOperationTracker::Begin(EEnvelopeEditorOp Operation)
 
 void CEnvelopeEditorOperationTracker::Stop(bool Switch)
 {
-	if(m_TrackedOp == EEnvelopeEditorOp::OP_NONE)
+	if(m_TrackedOp == EEnvelopeEditorOp::NONE)
 		return;
 
-	if(m_TrackedOp == EEnvelopeEditorOp::OP_DRAG_POINT || m_TrackedOp == EEnvelopeEditorOp::OP_DRAG_POINT_X || m_TrackedOp == EEnvelopeEditorOp::OP_DRAG_POINT_Y || m_TrackedOp == EEnvelopeEditorOp::OP_SCALE)
+	if(m_TrackedOp == EEnvelopeEditorOp::DRAG_POINT || m_TrackedOp == EEnvelopeEditorOp::DRAG_POINT_X || m_TrackedOp == EEnvelopeEditorOp::DRAG_POINT_Y || m_TrackedOp == EEnvelopeEditorOp::SCALE)
 	{
 		HandlePointDragEnd(Switch);
 	}
 
-	m_TrackedOp = EEnvelopeEditorOp::OP_NONE;
+	m_TrackedOp = EEnvelopeEditorOp::NONE;
 }
 
 void CEnvelopeEditorOperationTracker::HandlePointDragStart()
@@ -354,7 +354,7 @@ void CEnvelopeEditorOperationTracker::HandlePointDragStart()
 
 void CEnvelopeEditorOperationTracker::HandlePointDragEnd(bool Switch)
 {
-	if(Switch && m_TrackedOp != EEnvelopeEditorOp::OP_SCALE)
+	if(Switch && m_TrackedOp != EEnvelopeEditorOp::SCALE)
 		return;
 
 	int EnvelopeIndex = Map()->m_SelectedEnvelope;
@@ -395,21 +395,21 @@ void CEnvelopeEditorOperationTracker::HandlePointDragEnd(bool Switch)
 CSoundSourceOperationTracker::CSoundSourceOperationTracker(CEditorMap *pMap) :
 	CMapObject(pMap),
 	m_pSource(nullptr),
-	m_TrackedOp(ESoundSourceOp::OP_NONE),
+	m_TrackedOp(ESoundSourceOp::NONE),
 	m_LayerIndex(-1)
 {
 }
 
 void CSoundSourceOperationTracker::Begin(const CSoundSource *pSource, ESoundSourceOp Operation, int LayerIndex)
 {
-	if(m_TrackedOp == Operation || m_TrackedOp != ESoundSourceOp::OP_NONE)
+	if(m_TrackedOp == Operation || m_TrackedOp != ESoundSourceOp::NONE)
 		return;
 
 	m_TrackedOp = Operation;
 	m_pSource = pSource;
 	m_LayerIndex = LayerIndex;
 
-	if(m_TrackedOp == ESoundSourceOp::OP_MOVE)
+	if(m_TrackedOp == ESoundSourceOp::MOVE)
 	{
 		m_Data.m_OriginalPoint = m_pSource->m_Position;
 	}
@@ -417,10 +417,10 @@ void CSoundSourceOperationTracker::Begin(const CSoundSource *pSource, ESoundSour
 
 void CSoundSourceOperationTracker::End()
 {
-	if(m_TrackedOp == ESoundSourceOp::OP_NONE)
+	if(m_TrackedOp == ESoundSourceOp::NONE)
 		return;
 
-	if(m_TrackedOp == ESoundSourceOp::OP_MOVE)
+	if(m_TrackedOp == ESoundSourceOp::MOVE)
 	{
 		if(m_Data.m_OriginalPoint != m_pSource->m_Position)
 		{
@@ -429,7 +429,7 @@ void CSoundSourceOperationTracker::End()
 		}
 	}
 
-	m_TrackedOp = ESoundSourceOp::OP_NONE;
+	m_TrackedOp = ESoundSourceOp::NONE;
 }
 
 // -----------------------------------------------------------------------
@@ -448,7 +448,7 @@ int CPropTrackerHelper::GetDefaultLayerIndex(CEditorMap *pMap)
 
 void CLayerPropTracker::OnEnd(ELayerProp Prop, int Value)
 {
-	if(Prop == ELayerProp::PROP_GROUP)
+	if(Prop == ELayerProp::GROUP)
 	{
 		Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionEditLayersGroupAndOrder>(Map(), m_OriginalGroupIndex, std::vector<int>{m_OriginalLayerIndex}, m_CurrentGroupIndex, std::vector<int>{m_CurrentLayerIndex}));
 	}
@@ -462,9 +462,9 @@ int CLayerPropTracker::PropToValue(ELayerProp Prop)
 {
 	switch(Prop)
 	{
-	case ELayerProp::PROP_GROUP: return m_CurrentGroupIndex;
-	case ELayerProp::PROP_HQ: return m_pObject->m_Flags;
-	case ELayerProp::PROP_ORDER: return m_CurrentLayerIndex;
+	case ELayerProp::GROUP: return m_CurrentGroupIndex;
+	case ELayerProp::HQ: return m_pObject->m_Flags;
+	case ELayerProp::ORDER: return m_CurrentLayerIndex;
 	default: return 0;
 	}
 }
@@ -473,12 +473,12 @@ int CLayerPropTracker::PropToValue(ELayerProp Prop)
 
 bool CLayerTilesPropTracker::EndChecker(ETilesProp Prop, int Value)
 {
-	return Value != m_OriginalValue || Prop == ETilesProp::PROP_SHIFT;
+	return Value != m_OriginalValue || Prop == ETilesProp::SHIFT;
 }
 
 void CLayerTilesPropTracker::OnStart(ETilesProp Prop)
 {
-	if(Prop == ETilesProp::PROP_WIDTH || Prop == ETilesProp::PROP_HEIGHT)
+	if(Prop == ETilesProp::WIDTH || Prop == ETilesProp::HEIGHT)
 	{
 		m_SavedLayers[LAYERTYPE_TILES] = m_pObject->Duplicate();
 		if(m_pObject->m_HasGame || m_pObject->m_HasFront || m_pObject->m_HasSwitch || m_pObject->m_HasSpeedup || m_pObject->m_HasTune || m_pObject->m_HasTele)
@@ -497,7 +497,7 @@ void CLayerTilesPropTracker::OnStart(ETilesProp Prop)
 				m_SavedLayers[LAYERTYPE_GAME] = Map()->m_pGameLayer->Duplicate();
 		}
 	}
-	else if(Prop == ETilesProp::PROP_SHIFT)
+	else if(Prop == ETilesProp::SHIFT)
 	{
 		m_SavedLayers[LAYERTYPE_TILES] = m_pObject->Duplicate();
 	}
@@ -517,16 +517,16 @@ int CLayerTilesPropTracker::PropToValue(ETilesProp Prop)
 {
 	switch(Prop)
 	{
-	case ETilesProp::PROP_AUTOMAPPER: return m_pObject->m_AutoMapperConfig;
-	case ETilesProp::PROP_LIVE_GAMETILES: return m_pObject->m_LiveGameTiles;
-	case ETilesProp::PROP_COLOR: return PackColor(m_pObject->m_Color);
-	case ETilesProp::PROP_COLOR_ENV: return m_pObject->m_ColorEnv;
-	case ETilesProp::PROP_COLOR_ENV_OFFSET: return m_pObject->m_ColorEnvOffset;
-	case ETilesProp::PROP_HEIGHT: return m_pObject->m_Height;
-	case ETilesProp::PROP_WIDTH: return m_pObject->m_Width;
-	case ETilesProp::PROP_IMAGE: return m_pObject->m_Image;
-	case ETilesProp::PROP_SEED: return m_pObject->m_Seed;
-	case ETilesProp::PROP_SHIFT_BY: return Map()->m_ShiftBy;
+	case ETilesProp::AUTOMAPPER: return m_pObject->m_AutoMapperConfig;
+	case ETilesProp::LIVE_GAMETILES: return m_pObject->m_LiveGameTiles;
+	case ETilesProp::COLOR: return PackColor(m_pObject->m_Color);
+	case ETilesProp::COLOR_ENV: return m_pObject->m_ColorEnv;
+	case ETilesProp::COLOR_ENV_OFFSET: return m_pObject->m_ColorEnvOffset;
+	case ETilesProp::HEIGHT: return m_pObject->m_Height;
+	case ETilesProp::WIDTH: return m_pObject->m_Width;
+	case ETilesProp::IMAGE: return m_pObject->m_Image;
+	case ETilesProp::SEED: return m_pObject->m_Seed;
+	case ETilesProp::SHIFT_BY: return Map()->m_ShiftBy;
 	default: return 0;
 	}
 }
@@ -537,7 +537,7 @@ void CLayerTilesCommonPropTracker::OnStart(ETilesCommonProp Prop)
 {
 	for(auto &pLayer : m_vpLayers)
 	{
-		if(Prop == ETilesCommonProp::PROP_SHIFT)
+		if(Prop == ETilesCommonProp::SHIFT)
 		{
 			m_SavedLayers[pLayer][LAYERTYPE_TILES] = pLayer->Duplicate();
 		}
@@ -549,9 +549,9 @@ void CLayerTilesCommonPropTracker::OnEnd(ETilesCommonProp Prop, int Value)
 	std::vector<std::shared_ptr<IEditorAction>> vpActions;
 
 	static std::map<ETilesCommonProp, ETilesProp> s_PropMap{
-		{ETilesCommonProp::PROP_COLOR, ETilesProp::PROP_COLOR},
-		{ETilesCommonProp::PROP_SHIFT, ETilesProp::PROP_SHIFT},
-		{ETilesCommonProp::PROP_SHIFT_BY, ETilesProp::PROP_SHIFT_BY}};
+		{ETilesCommonProp::COLOR, ETilesProp::COLOR},
+		{ETilesCommonProp::SHIFT, ETilesProp::SHIFT},
+		{ETilesCommonProp::SHIFT_BY, ETilesProp::SHIFT_BY}};
 
 	int j = 0;
 	for(auto &pLayer : m_vpLayers)
@@ -577,12 +577,12 @@ void CLayerTilesCommonPropTracker::OnEnd(ETilesCommonProp Prop, int Value)
 
 bool CLayerTilesCommonPropTracker::EndChecker(ETilesCommonProp Prop, int Value)
 {
-	return Value != m_OriginalValue || Prop == ETilesCommonProp::PROP_SHIFT;
+	return Value != m_OriginalValue || Prop == ETilesCommonProp::SHIFT;
 }
 
 int CLayerTilesCommonPropTracker::PropToValue(ETilesCommonProp Prop)
 {
-	if(Prop == ETilesCommonProp::PROP_SHIFT_BY)
+	if(Prop == ETilesCommonProp::SHIFT_BY)
 		return Map()->m_ShiftBy;
 	return 0;
 }
@@ -598,16 +598,16 @@ int CLayerGroupPropTracker::PropToValue(EGroupProp Prop)
 {
 	switch(Prop)
 	{
-	case EGroupProp::PROP_ORDER: return Map()->m_SelectedGroup;
-	case EGroupProp::PROP_POS_X: return m_pObject->m_OffsetX;
-	case EGroupProp::PROP_POS_Y: return m_pObject->m_OffsetY;
-	case EGroupProp::PROP_PARA_X: return m_pObject->m_ParallaxX;
-	case EGroupProp::PROP_PARA_Y: return m_pObject->m_ParallaxY;
-	case EGroupProp::PROP_USE_CLIPPING: return m_pObject->m_UseClipping;
-	case EGroupProp::PROP_CLIP_X: return m_pObject->m_ClipX;
-	case EGroupProp::PROP_CLIP_Y: return m_pObject->m_ClipY;
-	case EGroupProp::PROP_CLIP_W: return m_pObject->m_ClipW;
-	case EGroupProp::PROP_CLIP_H: return m_pObject->m_ClipH;
+	case EGroupProp::ORDER: return Map()->m_SelectedGroup;
+	case EGroupProp::POS_X: return m_pObject->m_OffsetX;
+	case EGroupProp::POS_Y: return m_pObject->m_OffsetY;
+	case EGroupProp::PARA_X: return m_pObject->m_ParallaxX;
+	case EGroupProp::PARA_Y: return m_pObject->m_ParallaxY;
+	case EGroupProp::USE_CLIPPING: return m_pObject->m_UseClipping;
+	case EGroupProp::CLIP_X: return m_pObject->m_ClipX;
+	case EGroupProp::CLIP_Y: return m_pObject->m_ClipY;
+	case EGroupProp::CLIP_W: return m_pObject->m_ClipW;
+	case EGroupProp::CLIP_H: return m_pObject->m_ClipH;
 	default: return 0;
 	}
 }
@@ -622,7 +622,7 @@ void CLayerQuadsPropTracker::OnEnd(ELayerQuadsProp Prop, int Value)
 
 int CLayerQuadsPropTracker::PropToValue(ELayerQuadsProp Prop)
 {
-	if(Prop == ELayerQuadsProp::PROP_IMAGE)
+	if(Prop == ELayerQuadsProp::IMAGE)
 		return m_pObject->m_Image;
 	return 0;
 }
@@ -637,7 +637,7 @@ void CLayerSoundsPropTracker::OnEnd(ELayerSoundsProp Prop, int Value)
 
 int CLayerSoundsPropTracker::PropToValue(ELayerSoundsProp Prop)
 {
-	if(Prop == ELayerSoundsProp::PROP_SOUND)
+	if(Prop == ELayerSoundsProp::SOUND)
 		return m_pObject->m_Sound;
 	return 0;
 }
@@ -653,16 +653,16 @@ int CSoundSourcePropTracker::PropToValue(ESoundProp Prop)
 {
 	switch(Prop)
 	{
-	case ESoundProp::PROP_POS_X: return m_pObject->m_Position.x;
-	case ESoundProp::PROP_POS_Y: return m_pObject->m_Position.y;
-	case ESoundProp::PROP_LOOP: return m_pObject->m_Loop;
-	case ESoundProp::PROP_PAN: return m_pObject->m_Pan;
-	case ESoundProp::PROP_TIME_DELAY: return m_pObject->m_TimeDelay;
-	case ESoundProp::PROP_FALLOFF: return m_pObject->m_Falloff;
-	case ESoundProp::PROP_POS_ENV: return m_pObject->m_PosEnv;
-	case ESoundProp::PROP_POS_ENV_OFFSET: return m_pObject->m_PosEnvOffset;
-	case ESoundProp::PROP_SOUND_ENV: return m_pObject->m_SoundEnv;
-	case ESoundProp::PROP_SOUND_ENV_OFFSET: return m_pObject->m_SoundEnvOffset;
+	case ESoundProp::POS_X: return m_pObject->m_Position.x;
+	case ESoundProp::POS_Y: return m_pObject->m_Position.y;
+	case ESoundProp::LOOP: return m_pObject->m_Loop;
+	case ESoundProp::PAN: return m_pObject->m_Pan;
+	case ESoundProp::TIME_DELAY: return m_pObject->m_TimeDelay;
+	case ESoundProp::FALLOFF: return m_pObject->m_Falloff;
+	case ESoundProp::POS_ENV: return m_pObject->m_PosEnv;
+	case ESoundProp::POS_ENV_OFFSET: return m_pObject->m_PosEnvOffset;
+	case ESoundProp::SOUND_ENV: return m_pObject->m_SoundEnv;
+	case ESoundProp::SOUND_ENV_OFFSET: return m_pObject->m_SoundEnvOffset;
 	default: return 0;
 	}
 }
@@ -678,8 +678,8 @@ int CSoundSourceRectShapePropTracker::PropToValue(ERectangleShapeProp Prop)
 {
 	switch(Prop)
 	{
-	case ERectangleShapeProp::PROP_RECTANGLE_WIDTH: return m_pObject->m_Shape.m_Rectangle.m_Width;
-	case ERectangleShapeProp::PROP_RECTANGLE_HEIGHT: return m_pObject->m_Shape.m_Rectangle.m_Height;
+	case ERectangleShapeProp::RECTANGLE_WIDTH: return m_pObject->m_Shape.m_Rectangle.m_Width;
+	case ERectangleShapeProp::RECTANGLE_HEIGHT: return m_pObject->m_Shape.m_Rectangle.m_Height;
 	default: return 0;
 	}
 }
@@ -693,7 +693,7 @@ int CSoundSourceCircleShapePropTracker::PropToValue(ECircleShapeProp Prop)
 {
 	switch(Prop)
 	{
-	case ECircleShapeProp::PROP_CIRCLE_RADIUS: return m_pObject->m_Shape.m_Circle.m_Radius;
+	case ECircleShapeProp::CIRCLE_RADIUS: return m_pObject->m_Shape.m_Circle.m_Radius;
 	default: return 0;
 	}
 }

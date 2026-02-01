@@ -55,21 +55,21 @@ private:
 
 enum class EEnvelopeEditorOp
 {
-	OP_NONE = 0,
-	OP_SELECT,
-	OP_DRAG_POINT,
-	OP_DRAG_POINT_X,
-	OP_DRAG_POINT_Y,
-	OP_CONTEXT_MENU,
-	OP_BOX_SELECT,
-	OP_SCALE
+	NONE = 0,
+	SELECT,
+	DRAG_POINT,
+	DRAG_POINT_X,
+	DRAG_POINT_Y,
+	CONTEXT_MENU,
+	BOX_SELECT,
+	SCALE,
 };
 
 enum class ESoundSourceOp
 {
-	OP_NONE = 0,
-	OP_MOVE,
-	OP_CONTEXT_MENU,
+	NONE = 0,
+	MOVE,
+	CONTEXT_MENU,
 };
 
 class CEnvelopeEditorOperationTracker : public CMapObject
@@ -80,10 +80,10 @@ public:
 
 	void Begin(EEnvelopeEditorOp Operation);
 	void Stop(bool Switch = true);
-	void Reset() { m_TrackedOp = EEnvelopeEditorOp::OP_NONE; }
+	void Reset() { m_TrackedOp = EEnvelopeEditorOp::NONE; }
 
 private:
-	EEnvelopeEditorOp m_TrackedOp = EEnvelopeEditorOp::OP_NONE;
+	EEnvelopeEditorOp m_TrackedOp = EEnvelopeEditorOp::NONE;
 
 	class CPointData
 	{
