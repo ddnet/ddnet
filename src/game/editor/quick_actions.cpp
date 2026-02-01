@@ -250,9 +250,15 @@ void CEditor::TestMapLocally()
 	{
 		char aMapChange[IO_MAX_PATH_LENGTH + 64];
 		str_format(aMapChange, sizeof(aMapChange), "change_map %s", aFilenameNoExt);
-		pGameClient->m_LocalServer.RunServer({"sv_register 0", aMapChange});
-		OnClose();
-		g_Config.m_ClEditor = 0;
-		Client()->Connect("localhost");
+		if(pGameClient->m_LocalServer.RunServer({"sv_register 0", aMapChange}))
+		{
+			OnClose();
+			g_Config.m_ClEditor = 0;
+			Client()->Connect("localhost");
+		}
+		else
+		{
+			ShowFileDialogError("Local server could not be started.");
+		}
 	}
 }
