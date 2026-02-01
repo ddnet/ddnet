@@ -1679,7 +1679,7 @@ void CRenderLayerEntityTune::GetTileData(unsigned char *pIndex, unsigned char *p
 	*pIndex = m_pTuneTiles[y * m_pLayerTilemap->m_Width + x].m_Type;
 	if(CurOverlay == 1)
 		*pIndex = m_pTuneTiles[y * m_pLayerTilemap->m_Width + x].m_Number;
-	
+
 	*pFlags = 0;
 }
 
@@ -1692,7 +1692,7 @@ int CRenderLayerEntityTune::GetDataIndex(unsigned int &TileSize) const
 void CRenderLayerEntityTune::Init()
 {
 	UploadTileData(m_VisualTiles, 0, false);
-	UploadTileData(m_VisualTuneNumber, 1, false);	
+	UploadTileData(m_VisualTuneNumber, 1, false);
 }
 
 void CRenderLayerEntityTune::InitTileData()
