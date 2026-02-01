@@ -11,7 +11,6 @@
 #include <game/mapitems.h>
 
 #include <array>
-#include <chrono>
 
 /************************
  * Render Buffer Helper *
@@ -1716,8 +1715,8 @@ void CRenderLayerEntityTune::RenderTileLayerWithTileBuffer(const ColorRGBA &Colo
 	RenderTileLayer(Color, Params);
 	if(Params.m_RenderText)
 	{
-		Graphics()->TextureSet(m_pMapImages->GetOverlayTop());
-		RenderTileLayer(Color, Params, &m_VisualTuneNumber.value());
+		Graphics()->TextureSet(m_pMapImages->GetOverlayMiniCenter());
+		RenderTileLayer(Color.WithAlpha(0.6), Params, &m_VisualTuneNumber.value());
 	}
 }
 
