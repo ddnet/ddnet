@@ -523,6 +523,7 @@ void CServer::Ban(int ClientId, int Seconds, const char *pReason, bool VerbatimR
 void CServer::ReconnectClient(int ClientId)
 {
 	dbg_assert(0 <= ClientId && ClientId < MAX_CLIENTS, "Invalid ClientId: %d", ClientId);
+	dbg_assert(m_aClients[ClientId].m_State != CClient::STATE_EMPTY, "Client slot empty: %d", ClientId);
 
 	if(GetClientVersion(ClientId) < VERSION_DDNET_RECONNECT)
 	{
@@ -546,6 +547,7 @@ void CServer::ReconnectClient(int ClientId)
 void CServer::RedirectClient(int ClientId, int Port)
 {
 	dbg_assert(0 <= ClientId && ClientId < MAX_CLIENTS, "Invalid ClientId: %d", ClientId);
+	dbg_assert(m_aClients[ClientId].m_State != CClient::STATE_EMPTY, "Client slot empty: %d", ClientId);
 
 	bool SupportsRedirect = GetClientVersion(ClientId) >= VERSION_DDNET_REDIRECT;
 
