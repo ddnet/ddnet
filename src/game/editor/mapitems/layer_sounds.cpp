@@ -167,14 +167,14 @@ CUi::EPopupMenuFunctionResult CLayerSounds::RenderProperties(CUIRect *pToolBox)
 	static int s_aIds[(int)ELayerSoundsProp::NUM_PROPS] = {0};
 	int NewVal = 0;
 	auto [State, Prop] = Editor()->DoPropertiesWithState<ELayerSoundsProp>(pToolBox, aProps, s_aIds, &NewVal);
-	if(Prop != ELayerSoundsProp::PROP_NONE && (State == EEditState::END || State == EEditState::ONE_GO))
+	if(Prop != ELayerSoundsProp::NONE && (State == EEditState::END || State == EEditState::ONE_GO))
 	{
 		Map()->OnModify();
 	}
 
 	Map()->m_LayerSoundsPropTracker.Begin(this, Prop, State);
 
-	if(Prop == ELayerSoundsProp::PROP_SOUND)
+	if(Prop == ELayerSoundsProp::SOUND)
 	{
 		if(NewVal >= 0)
 			m_Sound = NewVal % Map()->m_vpSounds.size();

@@ -188,7 +188,7 @@ enum class ECollisionCheckResult
 {
 	ERROR,
 	REPLACE,
-	ADD
+	ADD,
 };
 
 class CMapSettingsBackend : public CEditorComponent

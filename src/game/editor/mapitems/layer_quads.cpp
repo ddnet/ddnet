@@ -206,14 +206,14 @@ CUi::EPopupMenuFunctionResult CLayerQuads::RenderProperties(CUIRect *pToolBox)
 	static int s_aIds[(int)ELayerQuadsProp::NUM_PROPS] = {0};
 	int NewVal = 0;
 	auto [State, Prop] = Editor()->DoPropertiesWithState<ELayerQuadsProp>(pToolBox, aProps, s_aIds, &NewVal);
-	if(Prop != ELayerQuadsProp::PROP_NONE && (State == EEditState::END || State == EEditState::ONE_GO))
+	if(Prop != ELayerQuadsProp::NONE && (State == EEditState::END || State == EEditState::ONE_GO))
 	{
 		Map()->OnModify();
 	}
 
 	Map()->m_LayerQuadPropTracker.Begin(this, Prop, State);
 
-	if(Prop == ELayerQuadsProp::PROP_IMAGE)
+	if(Prop == ELayerQuadsProp::IMAGE)
 	{
 		if(NewVal >= 0)
 			m_Image = NewVal % Map()->m_vpImages.size();

@@ -682,19 +682,19 @@ CUi::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 
 	// cut the properties that aren't needed
 	if(pEditor->Map()->SelectedGroup()->m_GameGroup)
-		aProps[(int)EGroupProp::PROP_POS_X].m_pName = nullptr;
+		aProps[(int)EGroupProp::POS_X].m_pName = nullptr;
 
 	static int s_aIds[(int)EGroupProp::NUM_PROPS] = {0};
 	int NewVal = 0;
 	auto [State, Prop] = pEditor->DoPropertiesWithState<EGroupProp>(&View, aProps, s_aIds, &NewVal);
-	if(Prop != EGroupProp::PROP_NONE && (State == EEditState::END || State == EEditState::ONE_GO))
+	if(Prop != EGroupProp::NONE && (State == EEditState::END || State == EEditState::ONE_GO))
 	{
 		pEditor->Map()->OnModify();
 	}
 
 	pEditor->Map()->m_LayerGroupPropTracker.Begin(pEditor->Map()->SelectedGroup().get(), Prop, State);
 
-	if(Prop == EGroupProp::PROP_ORDER)
+	if(Prop == EGroupProp::ORDER)
 	{
 		pEditor->Map()->m_SelectedGroup = pEditor->Map()->MoveGroup(pEditor->Map()->m_SelectedGroup, NewVal);
 	}
@@ -702,39 +702,39 @@ CUi::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 	// these can not be changed on the game group
 	if(!pEditor->Map()->SelectedGroup()->m_GameGroup)
 	{
-		if(Prop == EGroupProp::PROP_PARA_X)
+		if(Prop == EGroupProp::PARA_X)
 		{
 			pEditor->Map()->m_vpGroups[pEditor->Map()->m_SelectedGroup]->m_ParallaxX = NewVal;
 		}
-		else if(Prop == EGroupProp::PROP_PARA_Y)
+		else if(Prop == EGroupProp::PARA_Y)
 		{
 			pEditor->Map()->m_vpGroups[pEditor->Map()->m_SelectedGroup]->m_ParallaxY = NewVal;
 		}
-		else if(Prop == EGroupProp::PROP_POS_X)
+		else if(Prop == EGroupProp::POS_X)
 		{
 			pEditor->Map()->m_vpGroups[pEditor->Map()->m_SelectedGroup]->m_OffsetX = -NewVal;
 		}
-		else if(Prop == EGroupProp::PROP_POS_Y)
+		else if(Prop == EGroupProp::POS_Y)
 		{
 			pEditor->Map()->m_vpGroups[pEditor->Map()->m_SelectedGroup]->m_OffsetY = -NewVal;
 		}
-		else if(Prop == EGroupProp::PROP_USE_CLIPPING)
+		else if(Prop == EGroupProp::USE_CLIPPING)
 		{
 			pEditor->Map()->m_vpGroups[pEditor->Map()->m_SelectedGroup]->m_UseClipping = NewVal;
 		}
-		else if(Prop == EGroupProp::PROP_CLIP_X)
+		else if(Prop == EGroupProp::CLIP_X)
 		{
 			pEditor->Map()->m_vpGroups[pEditor->Map()->m_SelectedGroup]->m_ClipX = NewVal;
 		}
-		else if(Prop == EGroupProp::PROP_CLIP_Y)
+		else if(Prop == EGroupProp::CLIP_Y)
 		{
 			pEditor->Map()->m_vpGroups[pEditor->Map()->m_SelectedGroup]->m_ClipY = NewVal;
 		}
-		else if(Prop == EGroupProp::PROP_CLIP_W)
+		else if(Prop == EGroupProp::CLIP_W)
 		{
 			pEditor->Map()->m_vpGroups[pEditor->Map()->m_SelectedGroup]->m_ClipW = NewVal;
 		}
-		else if(Prop == EGroupProp::PROP_CLIP_H)
+		else if(Prop == EGroupProp::CLIP_H)
 		{
 			pEditor->Map()->m_vpGroups[pEditor->Map()->m_SelectedGroup]->m_ClipH = NewVal;
 		}
@@ -825,18 +825,18 @@ CUi::EPopupMenuFunctionResult CEditor::PopupLayer(void *pContext, CUIRect View, 
 	static int s_aIds[(int)ELayerProp::NUM_PROPS] = {0};
 	int NewVal = 0;
 	auto [State, Prop] = pEditor->DoPropertiesWithState<ELayerProp>(&View, aProps, s_aIds, &NewVal);
-	if(Prop != ELayerProp::PROP_NONE && (State == EEditState::END || State == EEditState::ONE_GO))
+	if(Prop != ELayerProp::NONE && (State == EEditState::END || State == EEditState::ONE_GO))
 	{
 		pEditor->Map()->OnModify();
 	}
 
 	pEditor->Map()->m_LayerPropTracker.Begin(pCurrentLayer.get(), Prop, State);
 
-	if(Prop == ELayerProp::PROP_ORDER)
+	if(Prop == ELayerProp::ORDER)
 	{
 		pEditor->Map()->SelectLayer(pCurrentGroup->MoveLayer(pEditor->Map()->m_vSelectedLayers[0], NewVal));
 	}
-	else if(Prop == ELayerProp::PROP_GROUP)
+	else if(Prop == ELayerProp::GROUP)
 	{
 		if(NewVal >= 0 && (size_t)NewVal < pEditor->Map()->m_vpGroups.size() && NewVal != pEditor->Map()->m_SelectedGroup)
 		{
@@ -848,7 +848,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupLayer(void *pContext, CUIRect View, 
 			pEditor->Map()->SelectLayer(pEditor->Map()->m_vpGroups[NewVal]->m_vpLayers.size() - 1);
 		}
 	}
-	else if(Prop == ELayerProp::PROP_HQ)
+	else if(Prop == ELayerProp::HQ)
 	{
 		pCurrentLayer->m_Flags &= ~LAYERFLAG_DETAIL;
 		if(NewVal)
@@ -1049,7 +1049,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 	static int s_aIds[(int)EQuadProp::NUM_PROPS] = {0};
 	int NewVal = 0;
 	auto [State, Prop] = pEditor->DoPropertiesWithState<EQuadProp>(&View, aProps, s_aIds, &NewVal);
-	if(Prop != EQuadProp::PROP_NONE && (State == EEditState::START || State == EEditState::ONE_GO))
+	if(Prop != EQuadProp::NONE && (State == EEditState::START || State == EEditState::ONE_GO))
 	{
 		pEditor->Map()->m_QuadTracker.BeginQuadPropTrack(pLayer, pEditor->Map()->m_vSelectedQuads, Prop);
 	}
@@ -1057,7 +1057,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 	const float OffsetX = i2fx(NewVal) - pCurrentQuad->m_aPoints[4].x;
 	const float OffsetY = i2fx(NewVal) - pCurrentQuad->m_aPoints[4].y;
 
-	if(Prop == EQuadProp::PROP_ORDER && pLayer)
+	if(Prop == EQuadProp::ORDER && pLayer)
 	{
 		const int QuadIndex = pLayer->SwapQuads(pEditor->Map()->m_vSelectedQuads[pQuadPopupContext->m_SelectedQuadIndex], NewVal);
 		pEditor->Map()->m_vSelectedQuads[pQuadPopupContext->m_SelectedQuadIndex] = QuadIndex;
@@ -1065,17 +1065,17 @@ CUi::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 
 	for(auto &pQuad : vpQuads)
 	{
-		if(Prop == EQuadProp::PROP_POS_X)
+		if(Prop == EQuadProp::POS_X)
 		{
 			for(auto &Point : pQuad->m_aPoints)
 				Point.x += OffsetX;
 		}
-		else if(Prop == EQuadProp::PROP_POS_Y)
+		else if(Prop == EQuadProp::POS_Y)
 		{
 			for(auto &Point : pQuad->m_aPoints)
 				Point.y += OffsetY;
 		}
-		else if(Prop == EQuadProp::PROP_POS_ENV)
+		else if(Prop == EQuadProp::POS_ENV)
 		{
 			int Index = std::clamp(NewVal - 1, -1, (int)pEditor->Map()->m_vpEnvelopes.size() - 1);
 			int StepDirection = Index < pQuad->m_PosEnv ? -1 : 1;
@@ -1091,16 +1091,16 @@ CUi::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 				}
 			}
 		}
-		else if(Prop == EQuadProp::PROP_POS_ENV_OFFSET)
+		else if(Prop == EQuadProp::POS_ENV_OFFSET)
 		{
 			pQuad->m_PosEnvOffset = NewVal;
 		}
-		else if(Prop == EQuadProp::PROP_COLOR)
+		else if(Prop == EQuadProp::COLOR)
 		{
 			pQuadPopupContext->m_Color = NewVal;
 			std::fill(std::begin(pQuad->m_aColors), std::end(pQuad->m_aColors), UnpackColor(NewVal));
 		}
-		else if(Prop == EQuadProp::PROP_COLOR_ENV)
+		else if(Prop == EQuadProp::COLOR_ENV)
 		{
 			int Index = std::clamp(NewVal - 1, -1, (int)pEditor->Map()->m_vpEnvelopes.size() - 1);
 			int StepDirection = Index < pQuad->m_ColorEnv ? -1 : 1;
@@ -1116,13 +1116,13 @@ CUi::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 				}
 			}
 		}
-		else if(Prop == EQuadProp::PROP_COLOR_ENV_OFFSET)
+		else if(Prop == EQuadProp::COLOR_ENV_OFFSET)
 		{
 			pQuad->m_ColorEnvOffset = NewVal;
 		}
 	}
 
-	if(Prop != EQuadProp::PROP_NONE && (State == EEditState::END || State == EEditState::ONE_GO))
+	if(Prop != EQuadProp::NONE && (State == EEditState::END || State == EEditState::ONE_GO))
 	{
 		pEditor->Map()->m_QuadTracker.EndQuadPropTrack(Prop);
 		pEditor->Map()->OnModify();
@@ -1187,38 +1187,38 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 	static int s_aIds[(int)ESoundProp::NUM_PROPS] = {0};
 	int NewVal = 0;
 	auto [State, Prop] = pEditor->DoPropertiesWithState<ESoundProp>(&View, aProps, s_aIds, &NewVal);
-	if(Prop != ESoundProp::PROP_NONE && (State == EEditState::END || State == EEditState::ONE_GO))
+	if(Prop != ESoundProp::NONE && (State == EEditState::END || State == EEditState::ONE_GO))
 	{
 		pEditor->Map()->OnModify();
 	}
 
 	pEditor->Map()->m_SoundSourcePropTracker.Begin(pSource, Prop, State);
 
-	if(Prop == ESoundProp::PROP_POS_X)
+	if(Prop == ESoundProp::POS_X)
 	{
 		pSource->m_Position.x = NewVal * 1000;
 	}
-	else if(Prop == ESoundProp::PROP_POS_Y)
+	else if(Prop == ESoundProp::POS_Y)
 	{
 		pSource->m_Position.y = NewVal * 1000;
 	}
-	else if(Prop == ESoundProp::PROP_LOOP)
+	else if(Prop == ESoundProp::LOOP)
 	{
 		pSource->m_Loop = NewVal;
 	}
-	else if(Prop == ESoundProp::PROP_PAN)
+	else if(Prop == ESoundProp::PAN)
 	{
 		pSource->m_Pan = NewVal;
 	}
-	else if(Prop == ESoundProp::PROP_TIME_DELAY)
+	else if(Prop == ESoundProp::TIME_DELAY)
 	{
 		pSource->m_TimeDelay = NewVal;
 	}
-	else if(Prop == ESoundProp::PROP_FALLOFF)
+	else if(Prop == ESoundProp::FALLOFF)
 	{
 		pSource->m_Falloff = NewVal;
 	}
-	else if(Prop == ESoundProp::PROP_POS_ENV)
+	else if(Prop == ESoundProp::POS_ENV)
 	{
 		int Index = std::clamp(NewVal - 1, -1, (int)pEditor->Map()->m_vpEnvelopes.size() - 1);
 		const int StepDirection = Index < pSource->m_PosEnv ? -1 : 1;
@@ -1231,11 +1231,11 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 			}
 		}
 	}
-	else if(Prop == ESoundProp::PROP_POS_ENV_OFFSET)
+	else if(Prop == ESoundProp::POS_ENV_OFFSET)
 	{
 		pSource->m_PosEnvOffset = NewVal;
 	}
-	else if(Prop == ESoundProp::PROP_SOUND_ENV)
+	else if(Prop == ESoundProp::SOUND_ENV)
 	{
 		int Index = std::clamp(NewVal - 1, -1, (int)pEditor->Map()->m_vpEnvelopes.size() - 1);
 		const int StepDirection = Index < pSource->m_SoundEnv ? -1 : 1;
@@ -1248,7 +1248,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 			}
 		}
 	}
-	else if(Prop == ESoundProp::PROP_SOUND_ENV_OFFSET)
+	else if(Prop == ESoundProp::SOUND_ENV_OFFSET)
 	{
 		pSource->m_SoundEnvOffset = NewVal;
 	}
@@ -1268,14 +1268,14 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 		static int s_aCircleIds[(int)ECircleShapeProp::NUM_PROPS] = {0};
 		NewVal = 0;
 		auto [LocalState, LocalProp] = pEditor->DoPropertiesWithState<ECircleShapeProp>(&View, aCircleProps, s_aCircleIds, &NewVal);
-		if(LocalProp != ECircleShapeProp::PROP_NONE && (LocalState == EEditState::END || LocalState == EEditState::ONE_GO))
+		if(LocalProp != ECircleShapeProp::NONE && (LocalState == EEditState::END || LocalState == EEditState::ONE_GO))
 		{
 			pEditor->Map()->OnModify();
 		}
 
 		pEditor->Map()->m_SoundSourceCircleShapePropTracker.Begin(pSource, LocalProp, LocalState);
 
-		if(LocalProp == ECircleShapeProp::PROP_CIRCLE_RADIUS)
+		if(LocalProp == ECircleShapeProp::CIRCLE_RADIUS)
 		{
 			pSource->m_Shape.m_Circle.m_Radius = NewVal;
 		}
@@ -1295,18 +1295,18 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 		static int s_aRectangleIds[(int)ERectangleShapeProp::NUM_PROPS] = {0};
 		NewVal = 0;
 		auto [LocalState, LocalProp] = pEditor->DoPropertiesWithState<ERectangleShapeProp>(&View, aRectangleProps, s_aRectangleIds, &NewVal);
-		if(LocalProp != ERectangleShapeProp::PROP_NONE && (LocalState == EEditState::END || LocalState == EEditState::ONE_GO))
+		if(LocalProp != ERectangleShapeProp::NONE && (LocalState == EEditState::END || LocalState == EEditState::ONE_GO))
 		{
 			pEditor->Map()->OnModify();
 		}
 
 		pEditor->Map()->m_SoundSourceRectShapePropTracker.Begin(pSource, LocalProp, LocalState);
 
-		if(LocalProp == ERectangleShapeProp::PROP_RECTANGLE_WIDTH)
+		if(LocalProp == ERectangleShapeProp::RECTANGLE_WIDTH)
 		{
 			pSource->m_Shape.m_Rectangle.m_Width = NewVal * 1024;
 		}
-		else if(LocalProp == ERectangleShapeProp::PROP_RECTANGLE_HEIGHT)
+		else if(LocalProp == ERectangleShapeProp::RECTANGLE_HEIGHT)
 		{
 			pSource->m_Shape.m_Rectangle.m_Height = NewVal * 1024;
 		}
@@ -1348,7 +1348,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupPoint(void *pContext, CUIRect View, 
 	static int s_aIds[(int)EQuadPointProp::NUM_PROPS] = {0};
 	int NewVal = 0;
 	auto [State, Prop] = pEditor->DoPropertiesWithState<EQuadPointProp>(&View, aProps, s_aIds, &NewVal);
-	if(Prop != EQuadPointProp::PROP_NONE && (State == EEditState::START || State == EEditState::ONE_GO))
+	if(Prop != EQuadPointProp::NONE && (State == EEditState::START || State == EEditState::ONE_GO))
 	{
 		pEditor->Map()->m_QuadTracker.BeginQuadPointPropTrack(pLayer, pEditor->Map()->m_vSelectedQuads, pEditor->Map()->m_SelectedQuadPoints);
 		pEditor->Map()->m_QuadTracker.AddQuadPointPropTrack(Prop);
@@ -1356,19 +1356,19 @@ CUi::EPopupMenuFunctionResult CEditor::PopupPoint(void *pContext, CUIRect View, 
 
 	for(CQuad *pQuad : vpQuads)
 	{
-		if(Prop == EQuadPointProp::PROP_POS_X)
+		if(Prop == EQuadPointProp::POS_X)
 		{
 			for(int v = 0; v < 4; v++)
 				if(pEditor->Map()->IsQuadCornerSelected(v))
 					pQuad->m_aPoints[v].x = i2fx(fx2i(pQuad->m_aPoints[v].x) + NewVal - X);
 		}
-		else if(Prop == EQuadPointProp::PROP_POS_Y)
+		else if(Prop == EQuadPointProp::POS_Y)
 		{
 			for(int v = 0; v < 4; v++)
 				if(pEditor->Map()->IsQuadCornerSelected(v))
 					pQuad->m_aPoints[v].y = i2fx(fx2i(pQuad->m_aPoints[v].y) + NewVal - Y);
 		}
-		else if(Prop == EQuadPointProp::PROP_COLOR)
+		else if(Prop == EQuadPointProp::COLOR)
 		{
 			for(int v = 0; v < 4; v++)
 			{
@@ -1378,13 +1378,13 @@ CUi::EPopupMenuFunctionResult CEditor::PopupPoint(void *pContext, CUIRect View, 
 				}
 			}
 		}
-		else if(Prop == EQuadPointProp::PROP_TEX_U)
+		else if(Prop == EQuadPointProp::TEX_U)
 		{
 			for(int v = 0; v < 4; v++)
 				if(pEditor->Map()->IsQuadCornerSelected(v))
 					pQuad->m_aTexcoords[v].x = f2fx(fx2f(pQuad->m_aTexcoords[v].x) + (NewVal - TextureU) / 1024.0f);
 		}
-		else if(Prop == EQuadPointProp::PROP_TEX_V)
+		else if(Prop == EQuadPointProp::TEX_V)
 		{
 			for(int v = 0; v < 4; v++)
 				if(pEditor->Map()->IsQuadCornerSelected(v))
@@ -1392,7 +1392,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupPoint(void *pContext, CUIRect View, 
 		}
 	}
 
-	if(Prop != EQuadPointProp::PROP_NONE && (State == EEditState::END || State == EEditState::ONE_GO))
+	if(Prop != EQuadPointProp::NONE && (State == EEditState::END || State == EEditState::ONE_GO))
 	{
 		pEditor->Map()->m_QuadTracker.EndQuadPointPropTrack(Prop);
 		pEditor->Map()->OnModify();

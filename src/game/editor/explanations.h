@@ -11,7 +11,7 @@ public:
 		FNG,
 		RACE,
 		VANILLA,
-		BLOCKWORLDS
+		BLOCKWORLDS,
 	};
 	static const char *Explain(EGametype Gametype, int Tile, int Layer);
 
