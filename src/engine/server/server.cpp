@@ -270,6 +270,8 @@ CServer::CServer()
 
 	m_aErrorShutdownReason[0] = 0;
 
+	m_SnapThreaded.SetServer(this);
+
 	Init();
 }
 
@@ -517,7 +519,7 @@ void CServer::Kick(int ClientId, const char *pReason)
 
 void CServer::Ban(int ClientId, int Seconds, const char *pReason, bool VerbatimReason)
 {
-	m_NetServer.NetBan()->BanAddr(ClientAddr(ClientId), Seconds, pReason, VerbatimReason);
+	m_NetServer.BanAddr(ClientAddr(ClientId), Seconds, pReason, VerbatimReason);
 }
 
 void CServer::ReconnectClient(int ClientId)
@@ -848,7 +850,7 @@ int CServer::GetClientVersion(int ClientId) const
 	return VERSION_NONE;
 }
 
-static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup)
+bool CServer::RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup)
 {
 	int MsgId = pMsg->m_MsgId;
 	Packer.Reset();
@@ -1052,6 +1054,14 @@ void CServer::DoSnapshot()
 				m_aDemoRecorder[i].RecordSnapshot(Tick(), aData, SnapshotSize);
 			}
 
+			if(Config()->m_SvNetThreaded && Config()->m_SvSnapThreaded)
+			{
+				std::unique_ptr<uint8_t[]> pCopy(new uint8_t[SnapshotSize]);
+				mem_copy(pCopy.get(), aData, SnapshotSize);
+				m_SnapThreaded.EnqueueRawSnapshot(i, m_CurrentGameTick, m_aClients[i].m_Sixup, m_aClients[i].m_LastAckedSnapshot, std::move(pCopy), SnapshotSize);
+				continue;
+			}
+
 			int Crc = pData->Crc();
 
 			// remove old snapshots
@@ -1148,6 +1158,7 @@ int CServer::ClientRejoinCallback(int ClientId, void *pUser)
 	pThis->m_aClients[ClientId].m_DDNetVersionSettled = false;
 
 	pThis->m_aClients[ClientId].Reset();
+	pThis->m_SnapThreaded.ResetStorage(ClientId);
 
 	pThis->GameServer()->TeehistorianRecordPlayerRejoin(ClientId);
 	pThis->Antibot()->OnEngineClientDrop(ClientId, "rejoin");
@@ -1180,6 +1191,7 @@ int CServer::NewClientNoAuthCallback(int ClientId, void *pUser)
 	pThis->m_aClients[ClientId].m_GotDDNetVersionPacket = false;
 	pThis->m_aClients[ClientId].m_DDNetVersionSettled = false;
 	pThis->m_aClients[ClientId].Reset();
+	pThis->m_SnapThreaded.ResetStorage(ClientId);
 
 	pThis->GameServer()->TeehistorianRecordPlayerJoin(ClientId, false);
 	pThis->Antibot()->OnEngineClientJoin(ClientId);
@@ -1214,6 +1226,7 @@ int CServer::NewClientCallback(int ClientId, void *pUser, bool Sixup)
 	pThis->m_aClients[ClientId].m_GotDDNetVersionPacket = false;
 	pThis->m_aClients[ClientId].m_DDNetVersionSettled = false;
 	pThis->m_aClients[ClientId].Reset();
+	pThis->m_SnapThreaded.ResetStorage(ClientId);
 	pThis->m_aClients[ClientId].m_Sixup = Sixup;
 
 	pThis->GameServer()->TeehistorianRecordPlayerJoin(ClientId, Sixup);
@@ -1304,6 +1317,7 @@ int CServer::DelClientCallback(int ClientId, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientId].m_Sixup = false;
 	pThis->m_aClients[ClientId].m_RedirectDropTime = 0;
 	pThis->m_aClients[ClientId].m_HasPersistentData = false;
+	pThis->m_SnapThreaded.ResetStorage(ClientId);
 
 	pThis->GameServer()->TeehistorianRecordPlayerDrop(ClientId, pReason);
 	pThis->Antibot()->OnEngineClientDrop(ClientId, pReason);
@@ -1673,7 +1687,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 		if(m_aClients[ClientId].m_Traffic > Limit)
 		{
-			m_NetServer.NetBan()->BanAddr(&pPacket->m_Address, 600, "Stressing network", false);
+			m_NetServer.BanAddr(&pPacket->m_Address, 600, "Stressing network", false);
 			return;
 		}
 		if(Diff > 100)
@@ -1853,8 +1867,16 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				m_aClients[ClientId].m_SnapRate = CClient::SNAPRATE_FULL;
 
 			int64_t TagTime;
-			if(m_aClients[ClientId].m_Snapshots.Get(m_aClients[ClientId].m_LastAckedSnapshot, &TagTime, nullptr, nullptr) >= 0)
-				m_aClients[ClientId].m_Latency = (int)(((time_get() - TagTime) * 1000) / time_freq());
+			if(Config()->m_SvNetThreaded && Config()->m_SvSnapThreaded)
+			{
+				if(m_SnapThreaded.TryGetTagTime(ClientId, m_aClients[ClientId].m_LastAckedSnapshot, TagTime))
+					m_aClients[ClientId].m_Latency = (int)(((time_get() - TagTime) * 1000) / time_freq());
+			}
+			else
+			{
+				if(m_aClients[ClientId].m_Snapshots.Get(m_aClients[ClientId].m_LastAckedSnapshot, &TagTime, nullptr, nullptr) >= 0)
+					m_aClients[ClientId].m_Latency = (int)(((time_get() - TagTime) * 1000) / time_freq());
+			}
 
 			// add message to report the input timing
 			// skip packets that are old
@@ -2807,7 +2829,7 @@ void CServer::PumpNetwork(bool PacketWaiting)
 						Packer.AddRaw(SERVERBROWSE_INFO, sizeof(SERVERBROWSE_INFO));
 						Packer.AddInt(SrvBrwsToken);
 						GetServerInfoSixup(&Packer, RateLimitServerInfoConnless());
-						CNetBase::SendPacketConnlessWithToken7(m_NetServer.Socket(), &Packet.m_Address, Packer.Data(), Packer.Size(), ResponseToken, m_NetServer.GetToken(Packet.m_Address));
+						m_NetServer.SendPacketConnlessWithToken7(&Packet.m_Address, Packer.Data(), Packer.Size(), ResponseToken, m_NetServer.GetToken(Packet.m_Address));
 					}
 					else if(Type != -1)
 					{
@@ -3085,7 +3107,7 @@ int CServer::Run()
 	BindAddr.type = Config()->m_SvIpv4Only ? NETTYPE_IPV4 : NETTYPE_ALL;
 
 	int Port = Config()->m_SvPort;
-	for(BindAddr.port = Port != 0 ? Port : 8303; !m_NetServer.Open(BindAddr, &m_ServerBan, Config()->m_SvMaxClients, Config()->m_SvMaxClientsPerIp); BindAddr.port++)
+	for(BindAddr.port = Port != 0 ? Port : 8303; !m_NetServer.Open(BindAddr, &m_ServerBan, Config()->m_SvMaxClients, Config()->m_SvMaxClientsPerIp, &m_SnapThreaded); BindAddr.port++)
 	{
 		if(Port != 0 || BindAddr.port >= 8310)
 		{
@@ -3093,6 +3115,9 @@ int CServer::Run()
 			return -1;
 		}
 	}
+
+	if(Config()->m_SvNetThreaded && Config()->m_SvSnapThreaded)
+		m_SnapThreaded.Start();
 
 	if(Port == 0)
 		log_info("server", "using port %d", BindAddr.port);
@@ -3197,6 +3222,7 @@ int CServer::Run()
 						SendMap(ClientId);
 						bool HasPersistentData = m_aClients[ClientId].m_HasPersistentData;
 						m_aClients[ClientId].Reset();
+						m_SnapThreaded.ResetStorage(ClientId);
 						m_aClients[ClientId].m_HasPersistentData = HasPersistentData;
 						m_aClients[ClientId].m_State = CClient::STATE_CONNECTING;
 					}
@@ -3357,7 +3383,7 @@ int CServer::Run()
 
 								if(Config()->m_SvDnsblBan)
 								{
-									m_NetServer.NetBan()->BanAddr(ClientAddr(ClientId), 60, Config()->m_SvDnsblBanReason, true);
+									m_NetServer.BanAddr(ClientAddr(ClientId), 60, Config()->m_SvDnsblBanReason, true);
 								}
 							}
 						}
@@ -3415,14 +3441,14 @@ int CServer::Run()
 				!m_aDemoRecorder[RECORDER_MANUAL].IsRecording() &&
 				!m_aDemoRecorder[RECORDER_AUTO].IsRecording())
 			{
-				PacketWaiting = net_socket_read_wait(m_NetServer.Socket(), 1s);
+				PacketWaiting = m_NetServer.NetWaitNonActive();
 			}
 			else
 			{
 				set_new_tick();
 				LastTime = time_get();
-				const auto MicrosecondsToWait = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::nanoseconds(TickStartTime(m_CurrentGameTick + 1) - LastTime)) + 1us;
-				PacketWaiting = MicrosecondsToWait > 0us ? net_socket_read_wait(m_NetServer.Socket(), MicrosecondsToWait) : true;
+				int64_t TimeToTick = TickStartTime(m_CurrentGameTick + 1) - LastTime;
+				PacketWaiting = m_NetServer.NetWait(TimeToTick);
 			}
 			if(IsInterrupted())
 			{
@@ -3440,7 +3466,9 @@ int CServer::Run()
 		log_info("server", "shutdown from game server (%s)", m_aErrorShutdownReason);
 		pDisconnectReason = m_aErrorShutdownReason;
 	}
-	// disconnect all clients on shutdown
+
+	m_NetServer.SetAcceptingNewConnections(false);
+
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
@@ -4436,6 +4464,7 @@ void *CServer::SnapNewItem(int Type, int Id, int Size)
 void CServer::SnapSetStaticsize(int ItemType, int Size)
 {
 	m_SnapshotDelta.SetStaticsize(ItemType, Size);
+	m_SnapThreaded.SetStaticsize(ItemType, Size);
 }
 
 CServer *CreateServer() { return new CServer(); }

@@ -705,6 +705,12 @@ MACRO_CONFIG_INT(SvConnlimitTime, sv_connlimit_time, 20, 0, 1000, CFGFLAG_SERVER
 MACRO_CONFIG_STR(SvConnLoggingServer, sv_conn_logging_server, 128, "", CFGFLAG_SERVER, "Unix socket server for IP address logging (Unix only)")
 #endif
 
+// Network
+MACRO_CONFIG_INT(SvNetThreaded, sv_net_threaded, 0, 0, 1, CFGFLAG_SERVER, "Run network I/O in dedicated thread")
+MACRO_CONFIG_INT(SvSnapThreaded, sv_snap_threaded, 1, 0, 1, CFGFLAG_SERVER, "Move part of snap handling to thread(required: sv_net_threaded)")
+MACRO_CONFIG_INT(SvNetWait, sv_net_wait, 1, 0, 1, CFGFLAG_SERVER, "Waiting for incoming network data")
+MACRO_CONFIG_INT(SvNetWaitMin, sv_net_wait_min, 500000, 0, 0x7FFFFFFF, CFGFLAG_SERVER, "Minimal waiting delay for incoming network data")
+
 MACRO_CONFIG_INT(ClUnpredictedShadow, cl_unpredicted_shadow, 0, -1, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show unpredicted shadow tee (0 = off, 1 = on, -1 = don't even show in debug mode)")
 MACRO_CONFIG_INT(ClPredictFreeze, cl_predict_freeze, 1, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Predict freeze tiles (0 = off, 1 = on, 2 = partial (allow a small amount of movement in freeze)")
 MACRO_CONFIG_INT(ClShowNinja, cl_show_ninja, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show ninja skin")

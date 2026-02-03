@@ -817,6 +817,40 @@ void sphore_destroy(SEMAPHORE *sem)
 {
 	dbg_assert(CloseHandle((HANDLE)*sem), "CloseHandle failure");
 }
+int sphore_wait_deadline_ns(SEMAPHORE *sem, long long ns_from_now)
+{
+	// If the deadline is in the past/zero, we simply wait for the semaphore.
+	if(ns_from_now < 0)
+	{
+		sphore_wait(sem);
+		return 1;
+	}
+
+	// Lazy one-time allocation of a high-resolution timer.
+	static HANDLE s_hTimer = nullptr;
+	if(!s_hTimer)
+	{
+		s_hTimer = CreateWaitableTimerExW(nullptr, nullptr,
+			CREATE_WAITABLE_TIMER_HIGH_RESOLUTION, TIMER_ALL_ACCESS);
+		if(!s_hTimer) // fallback to a regular timer (in case of old SDK/runtime)
+			s_hTimer = CreateWaitableTimerW(nullptr, FALSE, nullptr);
+	}
+
+	long long ticks100 = ns_from_now / 100;
+	if(ticks100 < 1)
+		ticks100 = 1; // minimum 100 ns
+	LARGE_INTEGER due;
+	due.QuadPart = -ticks100;
+
+	BOOL ok = SetWaitableTimerEx(s_hTimer, &due, 0, nullptr, nullptr, nullptr, 0);
+	if(!ok)
+		ok = SetWaitableTimer(s_hTimer, &due, 0, nullptr, nullptr, FALSE);
+
+	HANDLE handles[2] = {(HANDLE)*sem, s_hTimer};
+	DWORD r = WaitForMultipleObjects(2, handles, FALSE, INFINITE);
+
+	return (r == WAIT_OBJECT_0) ? 1 : 0;
+}
 #elif defined(CONF_PLATFORM_MACOS)
 void sphore_init(SEMAPHORE *sem)
 {
@@ -845,6 +879,34 @@ void sphore_destroy(SEMAPHORE *sem)
 	str_format(aBuf, sizeof(aBuf), "/%d.%p", pid(), (void *)sem);
 	dbg_assert(sem_unlink(aBuf) == 0, "sem_unlink failure");
 }
+int sphore_wait_deadline_ns(SEMAPHORE *sem, long long ns_from_now)
+{
+	if(ns_from_now < 0)
+	{
+		sphore_wait(sem);
+		return 1;
+	}
+
+	timespec now;
+	clock_gettime(CLOCK_REALTIME, &now);
+
+	long long ns = (long long)now.tv_sec * 1000000000LL + now.tv_nsec + ns_from_now;
+	if(ns < 0)
+		ns = 0;
+
+	timespec ts;
+	ts.tv_sec = (time_t)(ns / 1000000000LL);
+	ts.tv_nsec = (long)(ns % 1000000000LL);
+
+	for(;;)
+	{
+		if(sem_timedwait(*sem, &ts) == 0)
+			return 1;
+		if(errno == ETIMEDOUT)
+			return 0;
+		dbg_assert(errno == EINTR, "sem_timedwait failure");
+	}
+}
 #elif defined(CONF_FAMILY_UNIX)
 void sphore_init(SEMAPHORE *sem)
 {
@@ -866,6 +928,80 @@ void sphore_signal(SEMAPHORE *sem)
 void sphore_destroy(SEMAPHORE *sem)
 {
 	dbg_assert(sem_destroy(sem) == 0, "sem_destroy failure");
+}
+int sphore_wait_deadline_ns(SEMAPHORE *sem, long long ns_from_now)
+{
+	if(ns_from_now < 0)
+	{
+		sphore_wait(sem);
+		return 1;
+	}
+
+	struct timespec now;
+	clock_gettime(CLOCK_MONOTONIC, &now);
+
+	long long ns = (long long)now.tv_sec * 1000000000LL + now.tv_nsec + ns_from_now;
+	if(ns < 0)
+		ns = 0;
+
+	struct timespec ts;
+	ts.tv_sec = (time_t)(ns / 1000000000LL);
+	ts.tv_nsec = (long)(ns % 1000000000L);
+
+	if(ts.tv_nsec >= 1000000000L)
+	{
+		ts.tv_nsec -= 1000000000L;
+		ts.tv_sec++;
+	}
+	if(ts.tv_nsec < 0)
+	{
+		ts.tv_nsec += 1000000000L;
+		ts.tv_sec--;
+	}
+
+	for(;;)
+	{
+#if HAVE_SEM_CLOCKWAIT
+		if(sem_clockwait(sem, CLOCK_MONOTONIC, &ts) == 0)
+			return 1;
+		if(errno == ETIMEDOUT)
+			return 0;
+		dbg_assert(errno == EINTR, "sem_clockwait failure");
+#else
+		struct timespec now_mono, now_real;
+		clock_gettime(CLOCK_MONOTONIC, &now_mono);
+		clock_gettime(CLOCK_REALTIME, &now_real);
+
+		struct timespec rel;
+		rel.tv_sec = ts.tv_sec - now_mono.tv_sec;
+		rel.tv_nsec = ts.tv_nsec - now_mono.tv_nsec;
+		if(rel.tv_nsec < 0)
+		{
+			rel.tv_nsec += 1000000000L;
+			rel.tv_sec--;
+		}
+		if(rel.tv_sec < 0)
+		{
+			errno = ETIMEDOUT;
+			return 0;
+		}
+
+		struct timespec real_abs;
+		real_abs.tv_sec = now_real.tv_sec + rel.tv_sec;
+		real_abs.tv_nsec = now_real.tv_nsec + rel.tv_nsec;
+		if(real_abs.tv_nsec >= 1000000000L)
+		{
+			real_abs.tv_nsec -= 1000000000L;
+			real_abs.tv_sec++;
+		}
+
+		if(sem_timedwait(sem, &real_abs) == 0)
+			return 1;
+		if(errno == ETIMEDOUT)
+			return 0;
+		dbg_assert(errno == EINTR, "sem_timedwait failure");
+#endif
+	}
 }
 #endif
 

@@ -2080,6 +2080,8 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   warning.h
 )
 set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
+  AtomicOps.h
+  ReaderWriterQueue.h
   assertion_logger.cpp
   assertion_logger.h
   compression.cpp
@@ -2125,6 +2127,8 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   masterserver.h
   memheap.cpp
   memheap.h
+  net_io_thread.cpp
+  net_io_thread.h
   netban.cpp
   netban.h
   network.cpp
@@ -2149,11 +2153,15 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   serverinfo.cpp
   serverinfo.h
   sixup_translate_snapshot.cpp
+  snap_tasks.h
+  snap_threaded.cpp
+  snap_threaded.h
   snapshot.cpp
   snapshot.h
   storage.cpp
   stun.cpp
   stun.h
+  task_processor.h
   teehistorian_ex.cpp
   teehistorian_ex.h
   teehistorian_ex_chunks.h

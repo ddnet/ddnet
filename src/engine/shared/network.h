@@ -3,17 +3,22 @@
 #ifndef ENGINE_SHARED_NETWORK_H
 #define ENGINE_SHARED_NETWORK_H
 
+#include "config.h"
 #include "ringbuffer.h"
 #include "stun.h"
 
 #include <base/types.h>
 
 #include <array>
+#include <atomic>
 #include <optional>
 
 class CHuffman;
 class CNetBan;
 class CPacker;
+class CNetRange;
+class CSnapThreaded;
+class CMsgPacker;
 
 /*
 
@@ -236,6 +241,22 @@ public:
 		ERROR,
 	};
 
+	struct CConnStateDelta
+	{
+		bool m_StateChanged = false;
+		bool m_SecurityTokenChanged = false;
+		bool m_ErrorChanged = false;
+		bool m_TimeoutProtectedChanged = false;
+		bool m_TimeoutSituationChanged = false;
+
+		EState m_State = EState::OFFLINE;
+		int m_SecurityToken = NET_SECURITY_TOKEN_UNKNOWN;
+		char m_aErrorString[256]{};
+		bool m_TimeoutProtected = false;
+		bool m_TimeoutSituation = false;
+	};
+	typedef void (*NETFUNC_CONN_DIRTY)(int ClientId, const CConnStateDelta &Delta, void *pUser);
+
 	SECURITY_TOKEN m_SecurityToken;
 
 private:
@@ -284,10 +305,18 @@ private:
 	void ResendChunk(CNetChunkResend *pResend);
 	void Resend();
 
+	int m_ClientId = -1;
+	NETFUNC_CONN_DIRTY m_pfnDirty = nullptr;
+	void *m_pDirtyUser = nullptr;
+
 public:
 	bool m_TimeoutProtected;
 	bool m_TimeoutSituation;
 
+	void SetState(EState Value);
+	void SetSecurityToken(SECURITY_TOKEN Value);
+	void SetTimeoutProtected(bool Value);
+	void SetTimeoutSituation(bool Value);
 	void SetToken7(TOKEN Token);
 
 	void Reset(bool Rejoin = false);
@@ -299,7 +328,7 @@ public:
 	int Update();
 	int Flush();
 
-	int Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_TOKEN SecurityToken = NET_SECURITY_TOKEN_UNSUPPORTED, SECURITY_TOKEN ResponseToken = NET_SECURITY_TOKEN_UNSUPPORTED);
+	int Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_TOKEN SecurityToken = NET_SECURITY_TOKEN_UNSUPPORTED, SECURITY_TOKEN ResponseToken = NET_SECURITY_TOKEN_UNSUPPORTED, int Slot = -1);
 	int QueueChunk(int Flags, int DataSize, const void *pData);
 
 	const char *ErrorString();
@@ -316,7 +345,7 @@ public:
 		*pNumAddrs = m_NumConnectAddrs;
 	}
 
-	void ResetErrorString() { m_aErrorString[0] = 0; }
+	void ResetErrorString();
 	const char *ErrorString() const { return m_aErrorString; }
 
 	// Needed for GotProblems in NetClient
@@ -337,6 +366,9 @@ public:
 
 	bool m_Sixup;
 	SECURITY_TOKEN m_Token;
+
+	void SetDirtyObserver(int ClientId, NETFUNC_CONN_DIRTY pFn, void *pUser);
+	void EmitDirty(const CConnStateDelta &Delta) const;
 };
 
 class CConsoleNetConnection
@@ -398,8 +430,61 @@ private:
 	CNetPacketConstruct m_Data;
 };
 
+class INetServer
+{
+public:
+	virtual ~INetServer() = default;
+	virtual int SetCallbacks(NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_NEWCLIENT_NOAUTH pfnNewClientNoAuth, NETFUNC_CLIENTREJOIN pfnClientRejoin, NETFUNC_DELCLIENT pfnDelClient, void *pUser) = 0;
+
+	virtual bool Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int MaxClientsPerIp, CSnapThreaded *pSnapThreaded) = 0;
+	virtual void Close() = 0;
+
+	virtual int Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken) = 0;
+	virtual int Send(CNetChunk *pChunk) = 0;
+	virtual void Update() = 0;
+
+	virtual void Drop(int ClientId, const char *pReason) = 0;
+
+	virtual const NETADDR *ClientAddr(int ClientId) const = 0;
+	virtual const std::array<char, NETADDR_MAXSTRSIZE> &ClientAddrString(int ClientId, bool IncludePort) const = 0;
+	virtual bool HasSecurityToken(int ClientId) const = 0;
+	virtual NETADDR Address() const = 0;
+	virtual NETSOCKET Socket() const = 0;
+	virtual CNetBan *NetBan() const = 0;
+	virtual int NetType() const = 0;
+	virtual int MaxClients() const = 0;
+	virtual int NumOnlineClients() = 0;
+
+	virtual void SendTokenSixup(NETADDR &Addr, SECURITY_TOKEN Token) = 0;
+
+	virtual void SetMaxClientsPerIp(int Max) = 0;
+	virtual bool HasErrored(int ClientId) = 0;
+	virtual void ResumeOldConnection(int ClientId, int OrigId) = 0;
+	virtual void ResumeOldConnectionProtected(int ClientId) = 0;
+	virtual void IgnoreTimeouts(int ClientId) = 0;
+
+	virtual void ResetErrorString(int ClientId) = 0;
+	virtual const char *ErrorString(int ClientId) = 0;
+
+	virtual SECURITY_TOKEN GetGlobalToken() = 0;
+	virtual SECURITY_TOKEN GetToken(const NETADDR &Addr) = 0;
+	virtual SECURITY_TOKEN GetVanillaToken(const NETADDR &Addr) = 0;
+
+	virtual void SetAcceptingNewConnections(bool Value) = 0;
+	virtual CNetConnection::EState State(int ClientId) = 0;
+
+	virtual void BanAddr(const NETADDR *pAddr, int Seconds, const char *pReason, bool VerbatimReason = false) = 0;
+	virtual void BanRange(const CNetRange *pRange, int Seconds, const char *pReason) = 0;
+
+	virtual bool NetWait(int64_t TimeToTick) = 0;
+	virtual bool NetWaitActive() = 0;
+	virtual bool NetWaitNonActive() = 0;
+
+	virtual void SendPacketConnlessWithToken7(NETADDR *pAddr, const void *pData, int DataSize, SECURITY_TOKEN Token, SECURITY_TOKEN ResponseToken) = 0;
+};
+
 // server side
-class CNetServer
+class CNetServer : public INetServer
 {
 	struct CSlot
 	{
@@ -414,8 +499,10 @@ class CNetServer
 		int m_Conns;
 	};
 
+	std::atomic<bool> m_AcceptingNewConnections{false};
+
 	NETADDR m_Address;
-	NETSOCKET m_Socket;
+	NETSOCKET m_Socket = nullptr;
 	CNetBan *m_pNetBan;
 	CSlot m_aSlots[NET_MAX_CLIENTS];
 	int m_MaxClients = NET_MAX_CLIENTS;
@@ -425,6 +512,7 @@ class CNetServer
 	NETFUNC_NEWCLIENT_NOAUTH m_pfnNewClientNoAuth;
 	NETFUNC_DELCLIENT m_pfnDelClient;
 	NETFUNC_CLIENTREJOIN m_pfnClientRejoin;
+	CNetConnection::NETFUNC_CONN_DIRTY m_pfnConnDirty = nullptr;
 	void *m_pUser;
 
 	unsigned char m_aSecurityTokenSeed[16];
@@ -437,6 +525,9 @@ class CNetServer
 
 	CPacketChunkUnpacker m_PacketChunkUnpacker;
 	CNetPacketConstruct m_RecvBuffer;
+
+	CSnapThreaded *m_pSnapThreaded = nullptr;
+	void *m_pConnDirtyUser = nullptr;
 
 	void OnTokenCtrlMsg(NETADDR &Addr, int ControlMsg, const CNetPacketConstruct &Packet);
 	int OnSixupCtrlMsg(NETADDR &Addr, CNetChunk *pChunk, int ControlMsg, const CNetPacketConstruct &Packet, SECURITY_TOKEN &ResponseToken, SECURITY_TOKEN Token);
@@ -452,46 +543,64 @@ class CNetServer
 	void SendMsgs(NETADDR &Addr, const CPacker **ppMsgs, int Num);
 
 public:
+	~CNetServer() override = default;
 	int SetCallbacks(NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_DELCLIENT pfnDelClient, void *pUser);
-	int SetCallbacks(NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_NEWCLIENT_NOAUTH pfnNewClientNoAuth, NETFUNC_CLIENTREJOIN pfnClientRejoin, NETFUNC_DELCLIENT pfnDelClient, void *pUser);
+	int SetCallbacks(NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_NEWCLIENT_NOAUTH pfnNewClientNoAuth, NETFUNC_CLIENTREJOIN pfnClientRejoin, NETFUNC_DELCLIENT pfnDelClient, void *pUser) override;
+	void SetConnDirtyObserver(CNetConnection::NETFUNC_CONN_DIRTY pFn, void *pUser);
 
 	//
-	bool Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int MaxClientsPerIp);
-	void Close();
+	bool Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int MaxClientsPerIp, CSnapThreaded *pSnapThreaded) override;
+	void Close() override;
 
 	//
-	int Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken);
-	int Send(CNetChunk *pChunk);
-	void Update();
+	int Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken) override;
+	int Send(CNetChunk *pChunk) override;
+	void Update() override;
 
 	//
-	void Drop(int ClientId, const char *pReason);
+	void Drop(int ClientId, const char *pReason) override;
 
 	// status requests
-	const NETADDR *ClientAddr(int ClientId) const { return m_aSlots[ClientId].m_Connection.PeerAddress(); }
-	const std::array<char, NETADDR_MAXSTRSIZE> &ClientAddrString(int ClientId, bool IncludePort) const { return m_aSlots[ClientId].m_Connection.PeerAddressString(IncludePort); }
-	bool HasSecurityToken(int ClientId) const { return m_aSlots[ClientId].m_Connection.SecurityToken() != NET_SECURITY_TOKEN_UNSUPPORTED; }
-	NETADDR Address() const { return m_Address; }
-	NETSOCKET Socket() const { return m_Socket; }
-	CNetBan *NetBan() const { return m_pNetBan; }
-	int NetType() const { return net_socket_type(m_Socket); }
-	int MaxClients() const { return m_MaxClients; }
+	const NETADDR *ClientAddr(int ClientId) const override { return m_aSlots[ClientId].m_Connection.PeerAddress(); }
+	const std::array<char, NETADDR_MAXSTRSIZE> &ClientAddrString(int ClientId, bool IncludePort) const override { return m_aSlots[ClientId].m_Connection.PeerAddressString(IncludePort); }
+	bool HasSecurityToken(int ClientId) const override { return m_aSlots[ClientId].m_Connection.SecurityToken() != NET_SECURITY_TOKEN_UNSUPPORTED; }
+	NETADDR Address() const override { return m_Address; }
+	NETSOCKET Socket() const override { return m_Socket; }
+	CNetBan *NetBan() const override { return m_pNetBan; }
+	int NetType() const override { return net_socket_type(m_Socket); }
+	int MaxClients() const override { return m_MaxClients; }
+	int NumOnlineClients() override;
 
-	void SendTokenSixup(NETADDR &Addr, SECURITY_TOKEN Token);
+	void SendTokenSixup(NETADDR &Addr, SECURITY_TOKEN Token) override;
 
 	//
-	void SetMaxClientsPerIp(int Max);
-	bool HasErrored(int ClientId);
-	void ResumeOldConnection(int ClientId, int OrigId);
-	void IgnoreTimeouts(int ClientId);
+	void SetMaxClientsPerIp(int Max) override;
+	bool HasErrored(int ClientId) override;
+	void ResumeOldConnection(int ClientId, int OrigId) override;
+	void ResumeOldConnectionProtected(int ClientId) override;
+	void IgnoreTimeouts(int ClientId) override;
 
-	void ResetErrorString(int ClientId);
-	const char *ErrorString(int ClientId);
+	void ResetErrorString(int ClientId) override;
+	const char *ErrorString(int ClientId) override;
 
 	// anti spoof
-	SECURITY_TOKEN GetGlobalToken();
-	SECURITY_TOKEN GetToken(const NETADDR &Addr);
-	SECURITY_TOKEN GetVanillaToken(const NETADDR &Addr);
+	SECURITY_TOKEN GetGlobalToken() override;
+	SECURITY_TOKEN GetToken(const NETADDR &Addr) override;
+	SECURITY_TOKEN GetVanillaToken(const NETADDR &Addr) override;
+
+	void SetAcceptingNewConnections(bool Value) override;
+	CNetConnection::EState State(int ClientId) override;
+
+	void BanAddr(const NETADDR *pAddr, int Seconds, const char *pReason, bool VerbatimReason = false) override;
+	void BanRange(const CNetRange *pRange, int Seconds, const char *pReason) override;
+
+	bool NetWait(int64_t TimeToTick) override;
+	bool NetWaitActive() override;
+	bool NetWaitNonActive() override;
+
+	void SendPacketConnlessWithToken7(NETADDR *pAddr, const void *pData, int DataSize, SECURITY_TOKEN Token, SECURITY_TOKEN ResponseToken) override;
+	void ProcessSnap();
+	int SendMsg(CMsgPacker *pMsg, int Flags, int ClientId, bool SixUp);
 };
 
 class CNetConsole

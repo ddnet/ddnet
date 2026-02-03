@@ -543,6 +543,17 @@ void sphore_signal(SEMAPHORE *sem);
 void sphore_destroy(SEMAPHORE *sem);
 
 /**
+ * Wait on a semaphore until a relative deadline using a high-resolution wait.
+ * Cross-platform: on Windows — WaitableTimer (HIGH_RES) + WaitForMultipleObjects,
+ * on POSIX — sem_timedwait for an absolute deadline.
+ *
+ * @param sem            Semaphore handle.
+ * @param ns_from_now    Relative timeout in nanoseconds. <0 => infinite wait (like sphore_wait).
+ * @return 1 if semaphore signaled before deadline, 0 on timeout.
+ */
+int sphore_wait_deadline_ns(SEMAPHORE *sem, long long ns_from_now);
+
+/**
  * @defgroup Network Networking
  */
 

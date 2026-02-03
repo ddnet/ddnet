@@ -161,20 +161,6 @@ bool CSnapshot::IsValid(size_t ActualSize) const
 }
 
 // CSnapshotDelta
-
-enum
-{
-	HASHLIST_SIZE = 256,
-	HASHLIST_BUCKET_SIZE = 64,
-};
-
-struct CItemList
-{
-	int m_Num;
-	int m_aKeys[HASHLIST_BUCKET_SIZE];
-	int m_aIndex[HASHLIST_BUCKET_SIZE];
-};
-
 static inline size_t CalcHashId(int Key)
 {
 	// djb2 (http://www.cse.yorku.ca/~oz/hash.html)
@@ -254,6 +240,13 @@ void CSnapshotDelta::UndiffItem(const int *pPast, const int *pDiff, int *pOut, i
 	}
 }
 
+CItemList *CSnapshotDelta::AcquireHashlist()
+{
+	if(!m_Hashlist)
+		m_Hashlist = std::make_unique<CItemList[]>(HASHLIST_SIZE);
+	return m_Hashlist.get();
+}
+
 CSnapshotDelta::CSnapshotDelta()
 {
 	std::fill(std::begin(m_aItemSizes), std::end(m_aItemSizes), 0);
@@ -301,7 +294,7 @@ int CSnapshotDelta::CreateDelta(const CSnapshot *pFrom, const CSnapshot *pTo, vo
 	pDelta->m_NumUpdateItems = 0;
 	pDelta->m_NumTempItems = 0;
 
-	CItemList aHashlist[HASHLIST_SIZE];
+	CItemList *aHashlist = AcquireHashlist();
 	GenerateHash(aHashlist, pTo);
 
 	// pack deleted stuff

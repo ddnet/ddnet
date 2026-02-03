@@ -8,6 +8,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 
 // CSnapshot
 
@@ -74,6 +75,19 @@ public:
 
 // CSnapshotDelta
 
+enum
+{
+	HASHLIST_SIZE = 256,
+	HASHLIST_BUCKET_SIZE = 64,
+};
+
+struct CItemList
+{
+	int m_Num;
+	int m_aKeys[HASHLIST_BUCKET_SIZE];
+	int m_aIndex[HASHLIST_BUCKET_SIZE];
+};
+
 class CSnapshotDelta
 {
 public:
@@ -96,8 +110,11 @@ private:
 	uint64_t m_aSnapshotDataRate[CSnapshot::MAX_TYPE + 1];
 	uint64_t m_aSnapshotDataUpdates[CSnapshot::MAX_TYPE + 1];
 	CData m_Empty;
+	std::unique_ptr<CItemList[]> m_Hashlist;
 
 	static void UndiffItem(const int *pPast, const int *pDiff, int *pOut, int Size, uint64_t *pDataRate);
+
+	CItemList *AcquireHashlist();
 
 public:
 	static int DiffItem(const int *pPast, const int *pCurrent, int *pOut, int Size);
@@ -180,6 +197,7 @@ public:
 	int *GetItemData(int Key);
 
 	int Finish(void *pSnapdata);
+	bool IsSixup() const { return m_Sixup; }
 };
 
-#endif // ENGINE_SNAPSHOT_H
+#endif // ENGINE_SHARED_SNAPSHOT_H

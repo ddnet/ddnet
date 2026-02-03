@@ -3,14 +3,21 @@
 #include "config.h"
 #include "netban.h"
 #include "network.h"
+#include "snap_tasks.h"
+#include "snap_threaded.h"
 
 #include <base/hash_ctxt.h>
+#include <base/log.h>
 #include <base/math.h>
 #include <base/system.h>
 
 #include <engine/shared/compression.h>
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
+
+#include <generated/protocolglue.h>
+
+using namespace std::chrono_literals;
 
 const int g_DummyMapCrc = 0xD6909B17;
 const unsigned char g_aDummyMapData[] = {
@@ -38,11 +45,13 @@ const unsigned char g_aDummyMapData[] = {
 	0x78, 0x9C, 0x63, 0x64, 0x60, 0x60, 0x60, 0x44, 0xC2, 0x00, 0x00, 0x38,
 	0x00, 0x05};
 
-bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int MaxClientsPerIp)
+bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int MaxClientsPerIp, CSnapThreaded *pSnapThreaded)
 {
 	// zero out the whole structure
 	this->~CNetServer();
 	new(this) CNetServer{};
+
+	m_pSnapThreaded = pSnapThreaded;
 
 	// open socket
 	m_Socket = net_udp_create(BindAddr);
@@ -60,10 +69,19 @@ bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int Ma
 
 	secure_random_fill(m_aSecurityTokenSeed, sizeof(m_aSecurityTokenSeed));
 
-	for(auto &Slot : m_aSlots)
-		Slot.m_Connection.Init(m_Socket, true);
+	for(int i = 0; i < NET_MAX_CLIENTS; ++i)
+	{
+		CSlot *Slot = &m_aSlots[i];
+		Slot->m_Connection.Init(m_Socket, true);
+		Slot->m_Connection.SetDirtyObserver(i, m_pfnConnDirty, m_pConnDirtyUser);
+	}
 
 	return true;
+}
+
+void CNetServer::SetAcceptingNewConnections(bool Value)
+{
+	m_AcceptingNewConnections.store(Value, std::memory_order_release);
 }
 
 int CNetServer::SetCallbacks(NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_DELCLIENT pfnDelClient, void *pUser)
@@ -82,6 +100,12 @@ int CNetServer::SetCallbacks(NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_NEWCLIENT_N
 	m_pfnDelClient = pfnDelClient;
 	m_pUser = pUser;
 	return 0;
+}
+
+void CNetServer::SetConnDirtyObserver(CNetConnection::NETFUNC_CONN_DIRTY pFn, void *pUser)
+{
+	m_pfnConnDirty = pFn;
+	m_pConnDirtyUser = pUser;
 }
 
 void CNetServer::Close()
@@ -166,6 +190,18 @@ int CNetServer::NumClientsWithAddr(NETADDR Addr)
 	}
 
 	return FoundAddr;
+}
+
+int CNetServer::NumOnlineClients()
+{
+	int Found = 0;
+	for(int i = 0; i < MaxClients(); ++i)
+	{
+		if(m_aSlots[i].m_Connection.State() != CNetConnection::EState::ONLINE)
+			continue;
+		Found++;
+	}
+	return Found;
 }
 
 bool CNetServer::Connlimit(NETADDR Addr)
@@ -744,6 +780,11 @@ void CNetServer::ResumeOldConnection(int ClientId, int OrigId)
 	m_aSlots[OrigId].m_Connection.Reset();
 }
 
+void CNetServer::ResumeOldConnectionProtected(int ClientId)
+{
+	m_aSlots[ClientId].m_Connection.SetTimeoutProtected(true);
+}
+
 void CNetServer::IgnoreTimeouts(int ClientId)
 {
 	m_aSlots[ClientId].m_Connection.m_TimeoutProtected = true;
@@ -757,4 +798,169 @@ void CNetServer::ResetErrorString(int ClientId)
 const char *CNetServer::ErrorString(int ClientId)
 {
 	return m_aSlots[ClientId].m_Connection.ErrorString();
+}
+
+CNetConnection::EState CNetServer::State(int ClientId)
+{
+	return m_aSlots[ClientId].m_Connection.State();
+}
+
+void CNetServer::BanAddr(const NETADDR *pAddr, int Seconds, const char *pReason, bool VerbatimReason)
+{
+	if(m_pNetBan)
+		m_pNetBan->BanAddr(pAddr, Seconds, pReason, VerbatimReason);
+}
+
+void CNetServer::BanRange(const CNetRange *pRange, int Seconds, const char *pReason)
+{
+	if(m_pNetBan)
+		m_pNetBan->BanRange(pRange, Seconds, pReason);
+}
+
+bool CNetServer::NetWait(int64_t TimeToTick)
+{
+	const auto MicrosecondsToWait = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::nanoseconds(TimeToTick)) + 1us;
+	if(g_Config.m_SvNetWait)
+		return MicrosecondsToWait > 0us ? net_socket_read_wait(m_Socket, MicrosecondsToWait) : true;
+	return MicrosecondsToWait > 0us && g_Config.m_SvNetWaitMin > 0 ? net_socket_read_wait(m_Socket, std::min(MicrosecondsToWait, std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::nanoseconds(g_Config.m_SvNetWaitMin)))) : true;
+}
+
+bool CNetServer::NetWaitActive()
+{
+	return net_socket_read_wait(m_Socket, 500us);
+}
+
+bool CNetServer::NetWaitNonActive()
+{
+	return net_socket_read_wait(m_Socket, 1s);
+}
+
+void CNetServer::SendPacketConnlessWithToken7(NETADDR *pAddr, const void *pData, int DataSize, SECURITY_TOKEN Token, SECURITY_TOKEN ResponseToken)
+{
+	CNetBase::SendPacketConnlessWithToken7(m_Socket, pAddr, pData, DataSize, Token, ResponseToken);
+}
+
+void CNetServer::ProcessSnap()
+{
+	SSnapSendResult r;
+	while(m_pSnapThreaded->TryPopResult(r))
+	{
+		if(r.m_Empty)
+		{
+			CMsgPacker Msg(NETMSG_SNAPEMPTY, true);
+			Msg.AddInt(r.m_Tick);
+			Msg.AddInt(r.m_Tick - r.m_DeltaTick);
+			SendMsg(&Msg, MSGFLAG_FLUSH, r.m_ClientId, r.m_SixUp);
+			continue;
+		}
+
+		const int NumPackets = r.NumPackets();
+		for(int n = 0; n < NumPackets; ++n)
+		{
+			const auto &Slice = r.m_Slices[n];
+			const int Chunk = Slice.m_Size;
+
+			if(NumPackets == 1)
+			{
+				CMsgPacker Msg(NETMSG_SNAPSINGLE, true);
+				Msg.AddInt(r.m_Tick);
+				Msg.AddInt(r.m_Tick - r.m_DeltaTick);
+				Msg.AddInt(r.m_Crc);
+				Msg.AddInt(Chunk);
+				Msg.AddRaw(r.m_Buffer->data() + Slice.m_Offset, Chunk);
+				SendMsg(&Msg, MSGFLAG_FLUSH, r.m_ClientId, r.m_SixUp);
+			}
+			else
+			{
+				CMsgPacker Msg(NETMSG_SNAP, true);
+				Msg.AddInt(r.m_Tick);
+				Msg.AddInt(r.m_Tick - r.m_DeltaTick);
+				Msg.AddInt(NumPackets);
+				Msg.AddInt(n);
+				Msg.AddInt(r.m_Crc);
+				Msg.AddInt(Chunk);
+				Msg.AddRaw(r.m_Buffer->data() + Slice.m_Offset, Chunk);
+				SendMsg(&Msg, MSGFLAG_FLUSH, r.m_ClientId, r.m_SixUp);
+			}
+		}
+	}
+}
+
+static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup)
+{
+	int MsgId = pMsg->m_MsgId;
+	Packer.Reset();
+
+	if(Sixup && !pMsg->m_NoTranslate)
+	{
+		if(pMsg->m_System)
+		{
+			if(MsgId >= OFFSET_UUID)
+				;
+			else if(MsgId >= NETMSG_MAP_CHANGE && MsgId <= NETMSG_MAP_DATA)
+				;
+			else if(MsgId >= NETMSG_CON_READY && MsgId <= NETMSG_INPUTTIMING)
+				MsgId += 1;
+			else if(MsgId == NETMSG_RCON_LINE)
+				MsgId = protocol7::NETMSG_RCON_LINE;
+			else if(MsgId >= NETMSG_PING && MsgId <= NETMSG_PING_REPLY)
+				MsgId += 4;
+			else if(MsgId >= NETMSG_RCON_CMD_ADD && MsgId <= NETMSG_RCON_CMD_REM)
+				MsgId -= 11;
+			else
+			{
+				log_error("net", "DROP send sys %d", MsgId);
+				return false;
+			}
+		}
+		else
+		{
+			if(MsgId >= 0 && MsgId < OFFSET_UUID)
+				MsgId = Msg_SixToSeven(MsgId);
+
+			if(MsgId < 0)
+				return false;
+		}
+	}
+
+	if(MsgId < OFFSET_UUID)
+	{
+		Packer.AddInt((MsgId << 1) | (pMsg->m_System ? 1 : 0));
+	}
+	else
+	{
+		Packer.AddInt(pMsg->m_System ? 1 : 0); // NETMSG_EX, NETMSGTYPE_EX
+		g_UuidManager.PackUuid(MsgId, &Packer);
+	}
+	Packer.AddRaw(pMsg->Data(), pMsg->Size());
+
+	return true;
+}
+
+int CNetServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientId, bool SixUp)
+{
+	CNetChunk Packet;
+	mem_zero(&Packet, sizeof(CNetChunk));
+	if(Flags & MSGFLAG_VITAL)
+		Packet.m_Flags |= NETSENDFLAG_VITAL;
+	if(Flags & MSGFLAG_FLUSH)
+		Packet.m_Flags |= NETSENDFLAG_FLUSH;
+
+	if(ClientId >= 0)
+	{
+		CPacker Pack;
+		if(!RepackMsg(pMsg, Pack, SixUp))
+			return -1;
+
+		Packet.m_ClientId = ClientId;
+		Packet.m_pData = Pack.Data();
+		Packet.m_DataSize = Pack.Size();
+
+		if(!(Flags & MSGFLAG_NOSEND))
+		{
+			Send(&Packet);
+		}
+	}
+
+	return 0;
 }

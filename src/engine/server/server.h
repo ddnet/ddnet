@@ -16,9 +16,11 @@
 #include <engine/shared/econ.h>
 #include <engine/shared/fifo.h>
 #include <engine/shared/http.h>
+#include <engine/shared/net_io_thread.h>
 #include <engine/shared/netban.h>
 #include <engine/shared/network.h>
 #include <engine/shared/protocol.h>
+#include <engine/shared/snap_threaded.h>
 #include <engine/shared/snapshot.h>
 #include <engine/shared/uuid_manager.h>
 
@@ -215,11 +217,12 @@ public:
 	CSnapshotDelta m_SnapshotDelta;
 	CSnapshotBuilder m_SnapshotBuilder;
 	CSnapIdPool m_IdPool;
-	CNetServer m_NetServer;
+	CNetIOThread m_NetServer;
 	CEcon m_Econ;
 	CFifo m_Fifo;
 	CServerBan m_ServerBan;
 	CHttp m_Http;
+	CSnapThreaded m_SnapThreaded;
 
 	IEngineMap *m_pMap;
 
@@ -331,6 +334,7 @@ public:
 	int DistinctClientCount() const override;
 
 	int GetClientVersion(int ClientId) const override;
+	static bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup);
 	int SendMsg(CMsgPacker *pMsg, int Flags, int ClientId) override;
 
 	void DoSnapshot();

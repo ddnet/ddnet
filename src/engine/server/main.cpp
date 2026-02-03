@@ -174,6 +174,7 @@ int main(int argc, const char **argv)
 	pConfigManager->SetReadOnly("sv_port", true);
 	pConfigManager->SetReadOnly("bindaddr", true);
 	pConfigManager->SetReadOnly("logfile", true);
+	pConfigManager->SetReadOnly("sv_net_threaded", true);
 
 	if(g_Config.m_Logfile[0])
 	{
