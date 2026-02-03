@@ -998,6 +998,7 @@ private:
 	VkPhysicalDevice m_VKGPU;
 	uint32_t m_VKGraphicsQueueIndex = std::numeric_limits<uint32_t>::max();
 	VkDevice m_VKDevice;
+	VkPipelineCache m_PipelineCache = VK_NULL_HANDLE;
 	VkQueue m_VKGraphicsQueue, m_VKPresentQueue;
 	VkSurfaceKHR m_VKPresentSurface;
 	SSwapImgViewportExtent m_VKSwapImgAndViewportExtent;
@@ -4766,7 +4767,7 @@ public:
 			PipelineInfo.pDynamicState = &DynamicStateCreate;
 		}
 
-		if(vkCreateGraphicsPipelines(m_VKDevice, VK_NULL_HANDLE, 1, &PipelineInfo, nullptr, &Pipeline) != VK_SUCCESS)
+		if(vkCreateGraphicsPipelines(m_VKDevice, m_PipelineCache, 1, &PipelineInfo, nullptr, &Pipeline) != VK_SUCCESS)
 		{
 			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "Creating the graphic pipeline failed.");
 			return false;
@@ -6032,6 +6033,85 @@ public:
 		return VK_SAMPLE_COUNT_1_BIT;
 	}
 
+	[[nodiscard]] bool CreatePipelineCache()
+	{
+		VkPipelineCacheCreateInfo CacheCreateInfo{};
+		CacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
+
+		// Try to load existing cache
+		void *pCacheData = nullptr;
+		unsigned CacheDataSize = 0;
+		if(m_pStorage->ReadFile("vulkan/pipeline_cache.bin", IStorage::TYPE_SAVE, &pCacheData, &CacheDataSize))
+		{
+			// Validate header before use (Vulkan spec recommends validation)
+			if(CacheDataSize >= sizeof(uint32_t) * 4)
+			{
+				CacheCreateInfo.initialDataSize = CacheDataSize;
+				CacheCreateInfo.pInitialData = pCacheData;
+				dbg_msg("vulkan", "loaded pipeline cache (%" PRIu32 " bytes)", CacheDataSize);
+			}
+			else
+			{
+				dbg_msg("vulkan", "pipeline cache invalid (too small), creating new cache");
+			}
+		}
+		else
+		{
+			dbg_msg("vulkan", "no pipeline cache found, creating new cache");
+		}
+
+		VkResult Res = vkCreatePipelineCache(m_VKDevice, &CacheCreateInfo, nullptr, &m_PipelineCache);
+		free(pCacheData);
+
+		if(Res != VK_SUCCESS)
+		{
+			SetWarning(EGfxWarningType::GFX_WARNING_TYPE_INIT_FAILED, "Failed to create pipeline cache");
+			dbg_msg("vulkan", "failed to create pipeline cache");
+			m_PipelineCache = VK_NULL_HANDLE;
+			// Non-fatal - continue without cache
+		}
+
+		return true;
+	}
+
+	void DestroyPipelineCache()
+	{
+		if(m_PipelineCache == VK_NULL_HANDLE)
+			return;
+
+		// Get cache data size
+		size_t CacheDataSize = 0;
+		if(vkGetPipelineCacheData(m_VKDevice, m_PipelineCache, &CacheDataSize, nullptr) == VK_SUCCESS && CacheDataSize > 0)
+		{
+			std::vector<uint8_t> vCacheData(CacheDataSize);
+			if(vkGetPipelineCacheData(m_VKDevice, m_PipelineCache, &CacheDataSize, vCacheData.data()) == VK_SUCCESS)
+			{
+				// Ensure directory exists
+				m_pStorage->CreateFolder("vulkan", IStorage::TYPE_SAVE);
+
+				// Write to file
+				IOHANDLE File = m_pStorage->OpenFile("vulkan/pipeline_cache.bin", IOFLAG_WRITE, IStorage::TYPE_SAVE);
+				if(File)
+				{
+					io_write(File, vCacheData.data(), CacheDataSize);
+					io_close(File);
+					dbg_msg("vulkan", "saved pipeline cache (%" PRIzu " bytes)", CacheDataSize);
+				}
+				else
+				{
+					dbg_msg("vulkan", "failed to save pipeline cache (could not open file)");
+				}
+			}
+			else
+			{
+				dbg_msg("vulkan", "failed to save pipeline cache (could not retrieve data)");
+			}
+		}
+
+		vkDestroyPipelineCache(m_VKDevice, m_PipelineCache, nullptr);
+		m_PipelineCache = VK_NULL_HANDLE;
+	}
+
 	int InitVulkanSwapChain(VkSwapchainKHR &OldSwapChain)
 	{
 		OldSwapChain = VK_NULL_HANDLE;
@@ -6136,6 +6216,9 @@ public:
 				return -1;
 
 			if(!CreateQuadUniformDescriptorSetLayout())
+				return -1;
+
+			if(!CreatePipelineCache())
 				return -1;
 
 			VkSwapchainKHR OldSwapChain = VK_NULL_HANDLE;
@@ -6641,6 +6724,8 @@ public:
 
 		DestroyIndexBuffer(m_IndexBuffer, m_IndexBufferMemory);
 		DestroyIndexBuffer(m_RenderIndexBuffer, m_RenderIndexBufferMemory);
+
+		DestroyPipelineCache();
 
 		CleanupVulkan<true>(m_SwapChainImageCount);
 
