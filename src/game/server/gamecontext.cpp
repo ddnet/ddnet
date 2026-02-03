@@ -4615,13 +4615,13 @@ void CGameContext::LoadMapSettings()
 	Console()->ExecuteFile(aBuf, IConsole::CLIENT_ID_NO_GAME);
 }
 
-void CGameContext::OnSnap(int ClientId, bool GlobalSnap)
+void CGameContext::OnSnap(int ClientId, bool GlobalSnap, bool RecordingDemo)
 {
 	// sixup should only snap during global snap
 	dbg_assert(!Server()->IsSixup(ClientId) || GlobalSnap, "sixup should only snap during global snap");
 
 	// add tuning to demo
-	if(Server()->IsRecording(ClientId > -1 ? ClientId : MAX_CLIENTS) && mem_comp(&CTuningParams::DEFAULT, &m_aTuningList[0], sizeof(CTuningParams)) != 0)
+	if(RecordingDemo && mem_comp(&CTuningParams::DEFAULT, &m_aTuningList[0], sizeof(CTuningParams)) != 0)
 	{
 		CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
 		int *pParams = (int *)&m_aTuningList[0];

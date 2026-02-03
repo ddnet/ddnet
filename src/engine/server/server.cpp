@@ -1006,7 +1006,7 @@ void CServer::DoSnapshot()
 
 		// build snap and possibly add some messages
 		m_SnapshotBuilder.Init();
-		GameServer()->OnSnap(-1, IsGlobalSnap);
+		GameServer()->OnSnap(-1, IsGlobalSnap, true);
 		int SnapshotSize = m_SnapshotBuilder.Finish(aData);
 
 		// write snapshot
@@ -1039,7 +1039,7 @@ void CServer::DoSnapshot()
 			m_SnapshotBuilder.Init(m_aClients[i].m_Sixup);
 
 			// only snap events on global ticks
-			GameServer()->OnSnap(i, IsGlobalSnap);
+			GameServer()->OnSnap(i, IsGlobalSnap, m_aDemoRecorder[i].IsRecording());
 
 			// finish snapshot
 			char aData[CSnapshot::MAX_SIZE];
