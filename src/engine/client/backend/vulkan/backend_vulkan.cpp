@@ -1028,7 +1028,7 @@ private:
 	SPipelineContainer m_QuadGroupedPipeline;
 
 	std::vector<VkPipeline> m_vLastPipeline;
-	std::vector<std::array<VkDescriptorSet, 2>> m_vvLastDescriptorSets;
+	std::vector<VkDescriptorSet> m_vLastDescriptorSet;
 
 	std::vector<VkCommandPool> m_vCommandPools;
 
@@ -2176,7 +2176,7 @@ protected:
 					std::unique_lock<std::mutex> Lock(pRenderThread->m_Mutex);
 					pRenderThread->m_Cond.wait(Lock, [&pRenderThread] { return !pRenderThread->m_IsRendering; });
 					m_vLastPipeline[ThreadIndex + 1] = VK_NULL_HANDLE;
-					m_vvLastDescriptorSets[ThreadIndex + 1] = {VK_NULL_HANDLE, VK_NULL_HANDLE};
+					m_vLastDescriptorSet[ThreadIndex + 1] = VK_NULL_HANDLE;
 				}
 			}
 		}
@@ -2425,8 +2425,8 @@ protected:
 
 		for(auto &LastPipe : m_vLastPipeline)
 			LastPipe = VK_NULL_HANDLE;
-		for(auto &LastDescrSets : m_vvLastDescriptorSets)
-			LastDescrSets = {VK_NULL_HANDLE, VK_NULL_HANDLE};
+		for(auto &LastDescrSet : m_vLastDescriptorSet)
+			LastDescrSet = VK_NULL_HANDLE;
 
 		return true;
 	}
@@ -3328,6 +3328,15 @@ protected:
 		}
 	}
 
+	void BindDescriptorSets(size_t RenderThreadIndex, VkCommandBuffer &CommandBuffer, VkPipelineLayout PipeLayout, VkDescriptorSet Descriptor)
+	{
+		if(m_vLastDescriptorSet[RenderThreadIndex] != Descriptor)
+		{
+			vkCmdBindDescriptorSets(CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, PipeLayout, 0, 1, &Descriptor, 0, nullptr);
+			m_vLastDescriptorSet[RenderThreadIndex] = Descriptor;
+		}
+	}
+
 	/**************************
 	 * RENDERING IMPLEMENTATION
 	 ***************************/
@@ -3379,11 +3388,7 @@ protected:
 
 		if(IsTextured)
 		{
-			if(m_vvLastDescriptorSets[ExecBuffer.m_ThreadIndex][0] != ExecBuffer.m_aDescriptors[0].m_Descriptor)
-			{
-				vkCmdBindDescriptorSets(CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, PipeLayout, 0, 1, &ExecBuffer.m_aDescriptors[0].m_Descriptor, 0, nullptr);
-				m_vvLastDescriptorSets[ExecBuffer.m_ThreadIndex][0] = ExecBuffer.m_aDescriptors[0].m_Descriptor;
-			}
+			BindDescriptorSets(ExecBuffer.m_ThreadIndex, CommandBuffer, PipeLayout, ExecBuffer.m_aDescriptors[0].m_Descriptor);
 		}
 
 		SUniformTileGPosBorder VertexPushConstants;
@@ -3466,11 +3471,7 @@ protected:
 
 		if(IsTextured)
 		{
-			if(m_vvLastDescriptorSets[ExecBuffer.m_ThreadIndex][0] != ExecBuffer.m_aDescriptors[0].m_Descriptor)
-			{
-				vkCmdBindDescriptorSets(CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, PipeLayout, 0, 1, &ExecBuffer.m_aDescriptors[0].m_Descriptor, 0, nullptr);
-				m_vvLastDescriptorSets[ExecBuffer.m_ThreadIndex][0] = ExecBuffer.m_aDescriptors[0].m_Descriptor;
-			}
+			BindDescriptorSets(ExecBuffer.m_ThreadIndex, CommandBuffer, PipeLayout, ExecBuffer.m_aDescriptors[0].m_Descriptor);
 		}
 
 		vkCmdPushConstants(CommandBuffer, PipeLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SUniformGPos), m.data());
@@ -5485,7 +5486,7 @@ public:
 		m_vImageLastFrameCheck.clear();
 
 		m_vLastPipeline.clear();
-		m_vvLastDescriptorSets.clear();
+		m_vLastDescriptorSet.clear();
 
 		for(size_t i = 0; i < m_ThreadCount; ++i)
 		{
@@ -6186,7 +6187,7 @@ public:
 		}
 
 		m_vLastPipeline.resize(m_ThreadCount, VK_NULL_HANDLE);
-		m_vvLastDescriptorSets.resize(m_ThreadCount, {VK_NULL_HANDLE, VK_NULL_HANDLE});
+		m_vLastDescriptorSet.resize(m_ThreadCount, VK_NULL_HANDLE);
 
 		m_vvFrameDelayedBufferCleanup.resize(m_SwapChainImageCount);
 		m_vvFrameDelayedTextureCleanup.resize(m_SwapChainImageCount);
@@ -7159,11 +7160,7 @@ public:
 
 		if(IsTextured)
 		{
-			if(m_vvLastDescriptorSets[ExecBuffer.m_ThreadIndex][0] != ExecBuffer.m_aDescriptors[0].m_Descriptor)
-			{
-				vkCmdBindDescriptorSets(CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, PipeLayout, 0, 1, &ExecBuffer.m_aDescriptors[0].m_Descriptor, 0, nullptr);
-				m_vvLastDescriptorSets[ExecBuffer.m_ThreadIndex][0] = ExecBuffer.m_aDescriptors[0].m_Descriptor;
-			}
+			BindDescriptorSets(ExecBuffer.m_ThreadIndex, CommandBuffer, PipeLayout, ExecBuffer.m_aDescriptors[0].m_Descriptor);
 		}
 
 		uint32_t DrawCount = (uint32_t)pCommand->m_QuadNum;
@@ -7259,11 +7256,7 @@ public:
 
 		vkCmdBindIndexBuffer(CommandBuffer, ExecBuffer.m_IndexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-		if(m_vvLastDescriptorSets[ExecBuffer.m_ThreadIndex][0] != ExecBuffer.m_aDescriptors[0].m_Descriptor)
-		{
-			vkCmdBindDescriptorSets(CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, PipeLayout, 0, 1, &ExecBuffer.m_aDescriptors[0].m_Descriptor, 0, nullptr);
-			m_vvLastDescriptorSets[ExecBuffer.m_ThreadIndex][0] = ExecBuffer.m_aDescriptors[0].m_Descriptor;
-		}
+		BindDescriptorSets(ExecBuffer.m_ThreadIndex, CommandBuffer, PipeLayout, ExecBuffer.m_aDescriptors[0].m_Descriptor);
 
 		SUniformGTextPos PosTexSizeConstant;
 		mem_copy(PosTexSizeConstant.m_aPos, m.data(), m.size() * sizeof(float));
@@ -7339,11 +7332,7 @@ public:
 
 		if(IsTextured)
 		{
-			if(m_vvLastDescriptorSets[ExecBuffer.m_ThreadIndex][0] != ExecBuffer.m_aDescriptors[0].m_Descriptor)
-			{
-				vkCmdBindDescriptorSets(CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, PipeLayout, 0, 1, &ExecBuffer.m_aDescriptors[0].m_Descriptor, 0, nullptr);
-				m_vvLastDescriptorSets[ExecBuffer.m_ThreadIndex][0] = ExecBuffer.m_aDescriptors[0].m_Descriptor;
-			}
+			BindDescriptorSets(ExecBuffer.m_ThreadIndex, CommandBuffer, PipeLayout, ExecBuffer.m_aDescriptors[0].m_Descriptor);
 		}
 
 		vkCmdPushConstants(CommandBuffer, PipeLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SUniformGPos), m.data());
@@ -7389,11 +7378,7 @@ public:
 
 		if(IsTextured)
 		{
-			if(m_vvLastDescriptorSets[ExecBuffer.m_ThreadIndex][0] != ExecBuffer.m_aDescriptors[0].m_Descriptor)
-			{
-				vkCmdBindDescriptorSets(CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, PipeLayout, 0, 1, &ExecBuffer.m_aDescriptors[0].m_Descriptor, 0, nullptr);
-				m_vvLastDescriptorSets[ExecBuffer.m_ThreadIndex][0] = ExecBuffer.m_aDescriptors[0].m_Descriptor;
-			}
+			BindDescriptorSets(ExecBuffer.m_ThreadIndex, CommandBuffer, PipeLayout, ExecBuffer.m_aDescriptors[0].m_Descriptor);
 		}
 
 		SUniformPrimExGVertColor PushConstantColor;
@@ -7455,11 +7440,7 @@ public:
 		VkDeviceSize IndexOffset = (VkDeviceSize)((ptrdiff_t)pCommand->m_pOffset);
 		vkCmdBindIndexBuffer(CommandBuffer, ExecBuffer.m_IndexBuffer, IndexOffset, VK_INDEX_TYPE_UINT32);
 
-		if(m_vvLastDescriptorSets[ExecBuffer.m_ThreadIndex][0] != ExecBuffer.m_aDescriptors[0].m_Descriptor)
-		{
-			vkCmdBindDescriptorSets(CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, PipeLayout, 0, 1, &ExecBuffer.m_aDescriptors[0].m_Descriptor, 0, nullptr);
-			m_vvLastDescriptorSets[ExecBuffer.m_ThreadIndex][0] = ExecBuffer.m_aDescriptors[0].m_Descriptor;
-		}
+		BindDescriptorSets(ExecBuffer.m_ThreadIndex, CommandBuffer, PipeLayout, ExecBuffer.m_aDescriptors[0].m_Descriptor);
 
 		if(CanBePushed)
 		{
