@@ -4,6 +4,7 @@
 #include "score.h"
 
 #include <base/log.h>
+#include <base/system.h>
 
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
@@ -849,12 +850,11 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 
 	int Team = Teams.m_Core.Team(pResult->m_ClientId);
 
-	if(!Teams.IsValidTeamNumber(Team))
+	if(Team == TEAM_SUPER)
 	{
-		pSelf->Console()->Print(
-			IConsole::OUTPUT_LEVEL_STANDARD,
+		log_info(
 			"chatresp",
-			"You aren't in a valid team.");
+			"Turn off super to use swap feature, which means you can swap positions with each other.");
 		return;
 	}
 
@@ -971,15 +971,6 @@ void CGameContext::ConCancelSwap(IConsole::IResult *pResult, void *pUserData)
 	CGameTeams &Teams = pSelf->m_pController->Teams();
 
 	int Team = Teams.m_Core.Team(pResult->m_ClientId);
-
-	if(!pSelf->m_pController->Teams().IsValidTeamNumber(Team))
-	{
-		pSelf->Console()->Print(
-			IConsole::OUTPUT_LEVEL_STANDARD,
-			"chatresp",
-			"You aren't in a valid team.");
-		return;
-	}
 
 	bool SwapPending = pPlayer->m_SwapTargetsClientId != -1 && !pSelf->Server()->ClientSlotEmpty(pPlayer->m_SwapTargetsClientId);
 
