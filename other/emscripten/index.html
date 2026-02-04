@@ -3,15 +3,94 @@
 	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="The DDNet client running in a web browser.">
+		<title>DDNet Web</title>
+		<link rel="icon" type="image/x-icon" href="DDNet.ico">
 		<style>
 		body {
-			background: #ccc;
-			font-family: sans-serif;
+			background: url('background.png') #ccc;
+			background-size: cover;
+			background-position: center center;
+			font-family: 'Arial', 'Helvetica', sans-serif;
 		}
-		body, html, #canvas, #output {
-			margin: 0;
+		body, html, #canvas {
 			width: 100%;
 			height: 100%;
+			margin: 0;
+		}
+		h1, h2 {
+			margin: 5px 0 15px 0;
+			color: #ffa500;
+		}
+		button {
+			height: 30px;
+			padding: 0 20px;
+			border: none;
+			border-radius: 6px;
+			background-color: #ffa500;
+			transition: background-color 0.3s linear;
+			color: #fff;
+			font-weight: bold;
+			cursor: pointer;
+		}
+		button:hover {
+			background-color: #f27400;
+		}
+		button[disabled] {
+			background-color: #965518;
+			cursor: not-allowed;
+		}
+		#controls, #output {
+			padding: 15px;
+			border-radius: 15px;
+			box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+			background-color: rgba(255, 255, 255, 0.85);
+		}
+		#controls {
+			position: sticky;
+			width: 850px;
+			height: fit-content;
+			box-sizing: border-box;
+			margin: 0 auto;
+			transform: translate(0, 10vh);
+		}
+		#controls h1 {
+			text-align: center;
+		}
+		#drop-target {
+			width: 500px;
+			margin: 15px auto;
+			padding: 0 15px;
+			border: 2px dashed #ffa500;
+			border-radius: 6px;
+			background: #ffa50020;
+			cursor: pointer;
+		}
+		#drop-target-status {
+			font-style: italic;
+			text-align: center;
+		}
+		#drop-target:hover, #drop-target[drop-active=true] {
+			background: #ffa50035;
+		}
+		#launch-button {
+			position: relative;
+			display: block;
+			width: 250px;
+			margin: 0 auto;
+			z-index: 1;
+		}
+		#launch-button-progress {
+			position: absolute;
+			left: 0;
+			top: 0;
+			width: 0%;
+			height: 100%;
+			border-radius: 6px;
+			transition: width 0.3s linear;
+			background: #ffa500;
+			z-index: -1;
 		}
 		#canvas {
 			position: absolute;
@@ -22,21 +101,62 @@
 			display: block;
 		}
 		#output {
-			padding: 10px;
-			overflow: hidden scroll;
+			position: sticky;
+			width: 90%;
+			height: 90%;
+			inset: 0px;
+			margin: 0 auto;
 			box-sizing: border-box;
+			transform: translate(0, 5vh);
+			display: flex;
+			flex-direction: column;
 		}
-		#output .line {
+		#outputcontent {
+			overflow: hidden scroll;
+			flex: 1;
+		}
+		#outputcontent .line {
 			border-left: 5px solid;
 			padding-left: 10px;
 		}
 		</style>
 	</head>
 	<body>
-		<div id="output"></div>
-		<canvas id="canvas">Canvas not supported.</canvas>
+		<div id="controls">
+			<h1>DDNet Web</h1>
+			<p>This is an experimental version of the <a href="https://ddnet.org/downloads/">DDNet client</a> running in a web browser.</p>
+			<p>It currently has the following limitations:</p>
+			<ul>
+				<li>The server list and community information cannot be loaded. Skins cannot be downloaded.</li>
+				<li>Connecting to most servers is not possible. Servers must be compiled with support for WebSockets.</li>
+				<li>No settings, demos, maps or any other files are saved when the client is closed.</li>
+			</ul>
+			<div id="drop-target">
+				<p>You can drop a <code>.demo</code> file, <code>.map</code> file or a <code>ddnet://</code> link here, or click to select a file.
+				You can also drop files and links directly into the window after starting the client.</p>
+				<p id="drop-target-status">No file or link selected</p>
+				<input id="drop-target-file-input" type="file" accept=".demo,.map" hidden>
+			</div>
+			<button id="launch-button" disabled>
+				<span id="launch-button-progress"></span>
+				<span id="launch-button-label">Loading…</span>
+			</button>
+			<noscript><p><b>You need to allow JavaScript in your browser to use this website.</b></p></noscript>
+		</div>
+		<div id="output" style="display: none">
+			<h2>Console log</h2>
+			<div id="outputcontent"></div>
+		</div>
+		<canvas id="canvas" style="display: none">Canvas not supported.</canvas>
 		<script>
-			var output = document.getElementById('output');
+			const output = document.getElementById('output');
+			const outputContent = document.getElementById('outputcontent');
+			const launchButton = document.getElementById('launch-button');
+			const launchButtonProgress = document.getElementById('launch-button-progress');
+			const launchButtonLabel = document.getElementById('launch-button-label');
+			const dropTarget = document.getElementById('drop-target');
+			const dropTargetStatus = document.getElementById('drop-target-status');
+			const dropTargetFileInput = document.getElementById('drop-target-file-input');
 			function appendOutput(message, bold, textColor, borderColor) {
 				const span = document.createElement("span");
 				span.textContent = message;
@@ -50,9 +170,9 @@
 				if (bold) {
 					span.style.fontWeight = "bold";
 				}
-				output.appendChild(span);
-				output.appendChild(document.createElement("br"));
-				output.scrollTop = output.scrollHeight;
+				outputContent.appendChild(span);
+				outputContent.appendChild(document.createElement("br"));
+				outputContent.scrollTop = outputContent.scrollHeight;
 			}
 			function parseAnsiColorRgb(line) {
 				// Only handles RGB format because our logging system only uses that.
@@ -63,7 +183,13 @@
 				const [, r, g, b, message] = match;
 				return { color: `rgb(${r}, ${g}, ${b})`, message: message };
 			}
+			function sanitizeFilename(filename) {
+				return filename.replace(/[\/\\\?\|\*<>:"]/g, "_");
+			}
+			var loadOnLaunch = { file: null, path: null, link: null };
 			var Module = {
+				noInitialRun: true,
+				arguments: [],
 				print: function(text) {
 					const parsedLine = parseAnsiColorRgb(text);
 					console.log(parsedLine.message);
@@ -72,6 +198,15 @@
 				printErr: function(text) {
 					console.error(text);
 					appendOutput(text, false, "red");
+				},
+				onRuntimeInitialized: function() {
+					const oldTransition = launchButton.style.transition;
+					launchButton.style.transition = "none";
+					launchButton.disabled = false;
+					launchButtonLabel.textContent = "Start DDNet client";
+					launchButtonProgress.style.display = "none";
+					launchButton.offsetHeight; // Force reflow to avoid transition
+					launchButton.style.transition = oldTransition;
 				},
 				onExit: function() {
 					// After client quits, hide the canvas and reset the cursor, as the canvas
@@ -83,10 +218,16 @@
 					const restartButton = document.createElement("button");
 					restartButton.textContent = "Reload page";
 					restartButton.style.marginTop = "10px";
-					restartButton.style.padding = "5px";
 					restartButton.addEventListener('click', e => location.reload());
-					output.appendChild(restartButton);
-					output.scrollTop = output.scrollHeight;
+					outputContent.appendChild(restartButton);
+					outputContent.scrollTop = outputContent.scrollHeight;
+				},
+				totalDependencies: 0,
+				monitorRunDependencies(left) {
+					this.totalDependencies = Math.max(this.totalDependencies, left);
+					const value = this.totalDependencies - left;
+					launchButtonLabel.textContent = this.totalDependencies == 1 ? "Loading…" : `Loading… (${value}/${this.totalDependencies})`;
+					launchButtonProgress.style.width = `${value * 100.0 / this.totalDependencies}%`;
 				},
 				canvas: document.getElementById('canvas')
 			};
@@ -103,6 +244,145 @@
 				appendOutput(`The WebGL context was lost: ${e.statusMessage || "Unknown error"}`, true, "red");
 				Module.ccall('EmscriptenCallbackQuit', null, [], []);
 			});
+
+			// Launch button
+			launchButton.addEventListener('click', async e => {
+				document.getElementById('controls').style.display = "none";
+				output.style.display = "flex";
+				Module['canvas'].style.display = "block";
+				var arguments = Module.arguments;
+				if (loadOnLaunch.file != null) {
+					const buffer = await loadOnLaunch.file.arrayBuffer();
+					const data = new Uint8Array(buffer);
+					FS.mkdirTree(`${loadOnLaunch.path}/upload`);
+					const filePath = `${loadOnLaunch.path}/upload/${sanitizeFilename(loadOnLaunch.file.name)}`;
+					FS.writeFile(filePath, data);
+					arguments.push(filePath);
+				} else if (loadOnLaunch.link != null) {
+					arguments.push(loadOnLaunch.link);
+				}
+				Module.callMain(arguments);
+			});
+
+			// Handlers for pre-launch drop target
+			function getDropFilePath(file) {
+				const homePath = "/home/web_user/.local/share/ddnet"
+				var path;
+				if (file.name.endsWith(".demo")) {
+					return `${homePath}/demos`;
+				} else if (file.name.endsWith(".map")) {
+					return `${homePath}/maps`;
+				} else {
+					return null;
+				}
+			}
+			function getDroppedItemFromDataTransfer(dataTransfer) {
+				var result = { file: null, path: null, link: null};
+				if (!dataTransfer.items) {
+					return result;
+				}
+				for (const item of dataTransfer.items) {
+					if (item.kind == 'file') {
+						const file = item.getAsFile();
+						const path = getDropFilePath(file);
+						if (path == null) {
+							continue;
+						}
+						if (result.link != null) {
+							alert("You cannot drop files and links at the same time.");
+							break;
+						}
+						if (result.file != null) {
+							alert("You cannot open multiple files at the same time. Only the first file will be opened.");
+							break;
+						}
+						result.file = file;
+						result.path = path;
+					} else if (item.kind == 'string') {
+						const string = dataTransfer.getData(item.type);
+						if (string.startsWith('ddnet://')) {
+							if (result.file != null) {
+								alert("You cannot drop files and links at the same time.");
+								break;
+							}
+							if (result.link != null && result.link != string) {
+								alert("You cannot connect to multiple URLs at the same time. You will be connected to the first URL.");
+								break;
+							}
+							result.link = string;
+						}
+					}
+				}
+				return result;
+			}
+			document.addEventListener('dragover', e => {
+				if(e.target != dropTarget && e.target != Module['canvas']) {
+					// Prevent items from being dropped outside of the designated drop target and canvas.
+					e.preventDefault();
+					e.dataTransfer.dropEffect = "none";
+				}
+			}, true);
+			document.addEventListener('drop', e => {
+				if(e.target != dropTarget && e.target != Module['canvas']) {
+					e.preventDefault();
+				}
+			}, true);
+			dropTarget.addEventListener('dragover', e => {
+				e.preventDefault();
+				e.dataTransfer.dropEffect = "none";
+				if (!e.dataTransfer.items) {
+					return;
+				}
+				for (const item of e.dataTransfer.items) {
+					if (item.kind == 'file' || item.kind == 'string') {
+						e.dataTransfer.dropEffect = "copy";
+						dropTarget.setAttribute("drop-active", true);
+						return;
+					}
+				}
+			});
+			dropTarget.addEventListener('dragleave', e => {
+				dropTarget.removeAttribute("drop-active");
+			});
+			dropTarget.addEventListener('drop', async e => {
+				e.preventDefault();
+				const droppedItem = getDroppedItemFromDataTransfer(e.dataTransfer);
+				if (droppedItem.file != null) {
+					loadOnLaunch.file = droppedItem.file;
+					loadOnLaunch.path = droppedItem.path;
+					loadOnLaunch.link = null;
+					dropTargetStatus.textContent = `Selected file: ${droppedItem.file.name}`;
+				} else if (droppedItem.link != null) {
+					loadOnLaunch.file = null;
+					loadOnLaunch.path = null;
+					loadOnLaunch.link = droppedItem.link;
+					dropTargetStatus.textContent = `Selected link: ${droppedItem.link}`;
+				} else {
+					alert("The items you dropped are not supported. You can drop .demo and .map files, as well as ddnet:// links.");
+				}
+				dropTarget.removeAttribute("drop-active");
+			});
+
+			// Event handlers for pre-launch drop target file input
+			dropTarget.addEventListener('click', e => {
+				dropTargetFileInput.click();
+			})
+			dropTargetFileInput.addEventListener('change', e => {
+				if (e.target.files.length == 0) {
+					return;
+				}
+				const path = getDropFilePath(e.target.files[0]);
+				if (path == null) {
+					alert("The file you selected is not supported. You can select .demo and .map files.");
+					return;
+				}
+				loadOnLaunch.file = e.target.files[0];
+				loadOnLaunch.path = path;
+				loadOnLaunch.link = null;
+				dropTargetStatus.textContent = `Selected file: ${loadOnLaunch.file.name}`;
+			});
+
+			// Event handlers for canvas drop target
 			Module['canvas'].addEventListener('dragover', e => {
 				e.preventDefault();
 				e.dataTransfer.dropEffect = "none";
@@ -118,64 +398,21 @@
 			});
 			Module['canvas'].addEventListener('drop', async e => {
 				e.preventDefault();
-				if (!e.dataTransfer.items) {
-					return;
-				}
-				var dropFile = null;
-				var dropPath = null;
-				var dropLink = null;
-				for (const item of e.dataTransfer.items) {
-					if (item.kind == 'file') {
-						const file = item.getAsFile();
-						const isDemo = file.name.endsWith(".demo");
-						const isMap = file.name.endsWith(".map");
-						const homePath = "/home/web_user/.local/share/ddnet"
-						var path;
-						if (isDemo) {
-							path = `${homePath}/demos`
-						} else if (isMap) {
-							path = `${homePath}/maps`
-						} else {
-							continue;
-						}
-						if (dropLink != null) {
-							alert("You cannot drop files and links at the same time.");
-							break;
-						}
-						if (dropFile != null) {
-							alert("You cannot open multiple files at the same time. Only the first file will be opened.");
-							break;
-						}
-						dropFile = file;
-						dropPath = path;
-					} else if (item.kind == 'string') {
-						const string = e.dataTransfer.getData(item.type);
-						if (string.startsWith('ddnet://')) {
-							if (dropFile != null) {
-								alert("You cannot drop files and links at the same time.");
-								break;
-							}
-							if (dropLink != null && dropLink != string) {
-								alert("You cannot connect to multiple URLs at the same time. You will be connected to the first URL.");
-								break;
-							}
-							dropLink = string;
-						}
-					}
-				}
-				if (dropFile != null) {
-					const buffer = await dropFile.arrayBuffer();
+				const droppedItem = getDroppedItemFromDataTransfer(e.dataTransfer);
+				if (droppedItem.file != null) {
+					const buffer = await droppedItem.file.arrayBuffer();
 					const data = new Uint8Array(buffer);
-					FS.createPath(dropPath, "upload", true, true);
-					FS.writeFile(`${dropPath}/upload/${dropFile.name}`, data);
-					Module.ccall('EmscriptenCallbackDropFile', null, ['string'], [`${dropPath}/upload/${dropFile.name}`]);
-				} else if (dropLink != null) {
-					Module.ccall('EmscriptenCallbackDropFile', null, ['string'], [dropLink]);
+					FS.mkdirTree(`${droppedItem.path}/upload`);
+					const filePath = `${droppedItem.path}/upload/${sanitizeFilename(droppedItem.file.name)}`;
+					FS.writeFile(filePath, data);
+					Module.ccall('EmscriptenCallbackDropFile', null, ['string'], [filePath]);
+				} else if (droppedItem.link != null) {
+					Module.ccall('EmscriptenCallbackDropFile', null, ['string'], [droppedItem.link]);
 				} else {
 					alert("The items you dropped are not supported. You can drop .demo and .map files, as well as ddnet:// links.");
 				}
 			});
 		</script>
-		<script src="DDNet.js"></script>
+		<script async src="DDNet.js"></script>
 	</body>
 </html> 
