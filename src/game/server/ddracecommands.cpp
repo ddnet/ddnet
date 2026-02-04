@@ -1,9 +1,12 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #include "gamecontext.h"
 
+#include <base/log.h>
+
 #include <engine/antibot.h>
 #include <engine/shared/config.h>
 
+#include <game/mapitems.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamemodes/ddnet.h>
 #include <game/server/player.h>
@@ -336,6 +339,32 @@ void CGameContext::ConUnEndlessJump(IConsole::IResult *pResult, void *pUserData)
 	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
 	if(pChr)
 		pChr->SetEndlessJump(false);
+}
+
+void CGameContext::ConSetSwitch(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
+	if(!pChr)
+	{
+		log_info("chatresp", "You can't set switch while you are dead/a spectator.");
+		return;
+	}
+	const int Team = pChr->Team();
+	const int Switch = pResult->GetInteger(0);
+	if(!in_range(Switch, (int)pSelf->Switchers().size() - 1))
+	{
+		log_info("chatresp", "Invalid switch ID");
+		return;
+	}
+	const bool State = pResult->NumArguments() == 1 ? !pSelf->Switchers()[Switch].m_aStatus[Team] : pResult->GetInteger(1) != 0;
+	const int EndTick = pResult->NumArguments() == 3 ? pSelf->Server()->Tick() + 1 + pResult->GetInteger(2) * pSelf->Server()->TickSpeed() : 0;
+	pSelf->Switchers()[Switch].m_aStatus[Team] = State;
+	pSelf->Switchers()[Switch].m_aEndTick[Team] = EndTick;
+	if(State)
+		pSelf->Switchers()[Switch].m_aType[Team] = EndTick ? TILE_SWITCHTIMEDOPEN : TILE_SWITCHOPEN;
+	else
+		pSelf->Switchers()[Switch].m_aType[Team] = EndTick ? TILE_SWITCHTIMEDCLOSE : TILE_SWITCHCLOSE;
 }
 
 void CGameContext::ConUnWeapons(IConsole::IResult *pResult, void *pUserData)
