@@ -427,9 +427,8 @@ jobs:
 
     - name: Test headless Emscripten client
       run: |
-        export MOZ_HEADLESS=1
         source emsdk/emsdk_env.sh
-        emrun --browser firefox build-emscripten-headless/index.html -- "quit"
+        emrun --browser firefox --browser-args=-headless --port 8000 --silence_timeout=30 --timeout=300 --kill_start --kill_exit build-emscripten-headless/index.html -- "quit" "#__emrun_autostart__"
 
     - name: Build Emscripten client in release mode
       run: |
