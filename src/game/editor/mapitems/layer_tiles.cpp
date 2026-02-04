@@ -579,7 +579,7 @@ void CLayerTiles::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 				continue;
 
 			bool HasTile = GetTile(fx, fy).m_Index;
-			if(pTileLayer->GetTile(x, y).m_Index == TILE_THROUGH_CUT)
+			if(pTileLayer->CLayerTiles::GetTile(x, y).m_Index == TILE_THROUGH_CUT)
 			{
 				if(m_HasGame && Map()->m_pFrontLayer)
 				{
@@ -594,7 +594,7 @@ void CLayerTiles::BrushDraw(CLayer *pBrush, vec2 WorldPos)
 			if(!Destructive && HasTile)
 				continue;
 
-			SetTile(fx, fy, pTileLayer->GetTile(x, y));
+			SetTile(fx, fy, pTileLayer->CLayerTiles::GetTile(x, y));
 		}
 
 	FlagModified(sx, sy, pTileLayer->m_Width, pTileLayer->m_Height);
