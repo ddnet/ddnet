@@ -419,7 +419,7 @@ jobs:
         mv build-emscripten-release/DDNet.data artifacts
         mv build-emscripten-release/DDNet.js artifacts
         mv build-emscripten-release/DDNet.wasm artifacts
-        cp other/emscripten/minimal.html artifacts/DDNet.html
+        cp other/emscripten/index.html artifacts
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
