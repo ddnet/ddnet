@@ -11,6 +11,7 @@
 #include <game/editor/mapitems/layer_quads.h>
 #include <game/editor/mapitems/layer_sounds.h>
 #include <game/editor/mapitems/map.h>
+#include <game/localization.h>
 
 CEditorBrushDrawAction::CEditorBrushDrawAction(CEditorMap *pMap, int Group) :
 	IEditorAction(pMap), m_Group(Group)
@@ -1316,7 +1317,7 @@ void CEditorActionTileArt::Redo()
 {
 	if(!Graphics()->LoadPng(Editor()->m_TileartImageInfo, m_aTileArtFile, IStorage::TYPE_ALL))
 	{
-		Editor()->ShowFileDialogError("Failed to load image from file '%s'.", m_aTileArtFile);
+		Editor()->ShowFileDialogError(Localize("Failed to load image from file '%s'."), m_aTileArtFile);
 		return;
 	}
 
@@ -1345,7 +1346,7 @@ void CEditorActionQuadArt::Redo()
 
 	if(!Graphics()->LoadPng(Editor()->m_QuadArtImageInfo, Editor()->m_QuadArtParameters.m_aFilename, IStorage::TYPE_ALL))
 	{
-		Editor()->ShowFileDialogError("Failed to load image from file '%s'.", Editor()->m_QuadArtParameters.m_aFilename);
+		Editor()->ShowFileDialogError(Localize("Failed to load image from file '%s'."), Editor()->m_QuadArtParameters.m_aFilename);
 		return;
 	}
 	Editor()->AddQuadArt(true);

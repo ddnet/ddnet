@@ -8,6 +8,7 @@
 #include <engine/keys.h>
 
 #include <game/editor/editor_actions.h>
+#include <game/localization.h>
 
 #include <algorithm>
 
@@ -56,7 +57,7 @@ bool CFontTyper::OnInput(const IInput::CEvent &Event)
 			{
 				m_ConfirmActivatePopupContext.Reset();
 				m_ConfirmActivatePopupContext.YesNoButtons();
-				str_copy(m_ConfirmActivatePopupContext.m_aMessage, "Enable text mode? Pressing letters and numbers on your keyboard will place tiles.");
+				str_copy(m_ConfirmActivatePopupContext.m_aMessage, Localize("Enable text mode? Pressing letters and numbers on your keyboard will place tiles."));
 				Ui()->ShowPopupConfirm(Ui()->MouseX(), Ui()->MouseY(), &m_ConfirmActivatePopupContext);
 			}
 		}
@@ -181,7 +182,7 @@ void CFontTyper::TextModeOff()
 	if(Editor()->m_Dialog == DIALOG_PSEUDO_FONT_TYPER)
 		Editor()->m_Dialog = DIALOG_NONE;
 	if(m_TilesPlacedSinceActivate)
-		Editor()->Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorBrushDrawAction>(Editor()->Map(), Editor()->Map()->m_SelectedGroup), "Font typer");
+		Editor()->Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorBrushDrawAction>(Editor()->Map(), Editor()->Map()->m_SelectedGroup), Localize("Font typer"));
 	m_TilesPlacedSinceActivate = 0;
 	m_Active = false;
 	m_pLastLayer = nullptr;
@@ -210,7 +211,7 @@ void CFontTyper::OnRender(CUIRect View)
 
 	if(Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
 		TextModeOff();
-	str_copy(Editor()->m_aTooltip, "Type on your keyboard to insert letters and numbers. Press Escape to end text mode.");
+	str_copy(Editor()->m_aTooltip, Localize("Type on your keyboard to insert letters and numbers. Press Escape to end text mode."));
 
 	std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(Editor()->Map()->SelectedLayerType(0, LAYERTYPE_TILES));
 	if(!pLayer)

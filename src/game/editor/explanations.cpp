@@ -2,6 +2,7 @@
 
 #include <base/system.h>
 
+#include <game/localization.h>
 #include <game/mapitems.h>
 
 // DDNet entity explanations by Lady Saavik

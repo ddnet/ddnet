@@ -1917,6 +1917,15 @@ Could not get server list from master server
 Example of usage
 == 
 
+Error loading communities
+== 
+
+Click to remove this community from your favorites.
+== 
+
+Click to add this community to your favorites.
+== 
+
 Online friends (%d)
 == 
 
@@ -2606,5 +2615,1513 @@ Active: Fire
 Active: Hook
 == 
 
+Failed to load map from file '%s'.
+== 
+
+Failed to save map to file '%s'.
+== 
+
+Failed to write image to file '%s'.
+== 
+
+Failed to open file '%s'.
+== 
+
+Custom entities cannot have the same name as default entities.
+== 
+
+Failed to load image from file '%s'.
+== 
+
+Play/pause audio preview.
+== 
+
+Stop audio preview.
+== 
+
+HD
+== 
+
+[Ctrl+H] Toggle high detail.
+== 
+
+Change the animation settings.
+== 
+
+Select proof mode.
+== 
+
+Zoom
+== 
+
+Toggle preview of how layers will be zoomed ingame.
+== 
+
+Change the grid settings.
+== 
+
+Rotation of the brush in degrees. Use left mouse button to drag and change the value. Hold shift to be more precise.
+== 
+
+Switch
+== 
+
+Speedup
+== 
+
+Tune
+== 
+
+Tele
+== 
+
+Destructive
+== 
+
+[Ctrl+D] Toggle brush draw mode: preserve or override existing tiles.
+== 
+
+Left mouse button to move. Hold alt to ignore grid.
+== 
+
+Hold shift to keep alignment on one axis.
+== 
+
+Left mouse button to move. Hold shift to move pivot. Hold alt to ignore grid. Shift+right click to delete.
+== 
+
+Left mouse button to move. Hold shift to move the texture. Hold alt to ignore grid.
+== 
+
+Left click inside the quad to select an area to slice. Hold alt to ignore grid. Right click to leave knife mode.
+== 
+
+Left mouse button to move. Hold ctrl to rotate. Hold alt to ignore grid.
+== 
+
+FNG
+== 
+
+Vanilla
+== 
+
+Use left mouse button to drag and create a brush. Hold shift to select multiple quads. Press R to rotate selected quads. Use ctrl+right click to select layer.
+== 
+
+Use left mouse button to drag and create a brush. Use ctrl+right click to select layer of hovered tile.
+== 
+
+Use left mouse button to drag and create a brush.
+== 
+
+Use left mouse button to paint with the brush. Right click to clear the brush. Hold Alt to lock the mouse movement to a single axis.
+== 
+
+Switch proof position to
+== 
+
+Current proof position at
+== 
+
+Click to show the color picker. Shift+right click to copy color to clipboard. Shift+left click to paste color from clipboard.
+== 
+
+Left click to toggle visibility. Right click to show this group only.
+== 
+
+Select group. Shift+left click to select all layers. Double click to expand.
+== 
+
+Select group. Shift+left click to select all layers. Double click to collapse.
+== 
+
+Left click to toggle visibility. Right click to show only this layer within its group.
+== 
+
+Tiles
+== 
+
+Quads
+== 
+
+Sounds
+== 
+
+Select layer. Hold shift to select multiple.
+== 
+
+Expand all
+== 
+
+Collapse all
+== 
+
+Expand or collapse all groups.
+== 
+
+Image named '%s' was already added.
+== 
+
+Sound named '%s' was already added.
+== 
+
+Failed to open sound file '%s'.
+== 
+
+Failed to load sound from file '%s'.
+== 
+
+Embedded
+== 
+
+External
+== 
+
+Select image.
+== 
+
+Select sound.
+== 
+
+Add sound
+== 
+
+Load a new sound to use in the map.
+== 
+
+Go to layers management.
+== 
+
+Go to images management.
+== 
+
+Go to sounds management.
+== 
+
+Sound+
+== 
+
+Create a new sound envelope.
+== 
+
+Color+
+== 
+
+Create a new color envelope.
+== 
+
+Pos.+
+== 
+
+Create a new position envelope.
+== 
+
+Delete this envelope.
+== 
+
+Move this envelope to the right.
+== 
+
+Move this envelope to the left.
+== 
+
+Select the envelope.
+== 
+
+Select previous envelope.
+== 
+
+Select next envelope.
+== 
+
+Name:
+== 
+
+The name of the selected envelope.
+== 
+
+R
+== 
+
+G
+== 
+
+B
+== 
+
+A
+== 
+
+Volume of the envelope.
+== 
+
+X-axis of the envelope.
+== 
+
+Y-axis of the envelope.
+== 
+
+Rotation of the envelope.
+== 
+
+Red value of the envelope.
+== 
+
+Green value of the envelope.
+== 
+
+Blue value of the envelope.
+== 
+
+Alpha value of the envelope.
+== 
+
+Double click to create a new point. Use shift to change the zoom axis. Press S to scale selected envelope points.
+== 
+
+L
+== 
+
+S
+== 
+
+M
+== 
+
+Switch curve type (N = step, L = linear, S = slow, F = fast, M = smooth, B = bezier).
+== 
+
+Envelope point. Left mouse to drag. Hold ctrl to be more precise. Hold shift to alter time. Shift+right click to delete.
+== 
+
+Bezier out-tangent. Left mouse to drag. Hold ctrl to be more precise. Shift+right click to reset.
+== 
+
+Bezier in-tangent. Left mouse to drag. Hold ctrl to be more precise. Shift+right click to reset.
+== 
+
+Press shift to scale the time. Press alt to scale along midpoint. Press ctrl to be more precise.
+== 
+
+Show map editor history.
+== 
+
+Envelope
+== 
+
+Show envelope editor history.
+== 
+
+Show server settings editor history.
+== 
+
+Editor history. Click on an action to undo all actions above.
+== 
+
+Clear the history.
+== 
+
+Loaded map
+== 
+
+Change the size of the editor by dragging.
+== 
+
+Tools
+== 
+
+This map has unsaved changes.
+== 
+
+File: %s
+== 
+
+X: %.1f, Y: %.1f, Z: %.1f, A: %.1f, G: %i  %s
+== 
+
+[F1] Open the DDNet Wiki page for the map editor in a web browser.
+== 
+
 https://wiki.ddnet.org/wiki/Mapping
+== 
+
+Failed to open the link '%s' in the default web browser.
+== 
+
+[Escape] Exit from the editor.
+== 
+
+Use shift+mouse wheel up/down to adjust the tele numbers. Use ctrl+f to change all tele numbers to the first unused number.
+== 
+
+Saving…
+== 
+
+Left click to pick a color from the screen. Right click to cancel pipette mode.
+== 
+
+Saving failed: Could not remove old map file '%s'.
+== 
+
+Saving failed: Could not move temporary map file '%s' to '%s'.
+== 
+
+Use left mouse button to drag and change the value. Hold shift to be more precise. Right click to edit as text.
+== 
+
+Decrease value.
+== 
+
+Increase value.
+== 
+
+[axis]
+X
+== 
+
+[axis]
+Y
+== 
+
+Shift left.
+== 
+
+Shift right.
+== 
+
+Shift up.
+== 
+
+Shift down.
+== 
+
+None:
+== 
+
+Select envelope.
+== 
+
+Disallow/allow unknown or invalid commands.
+== 
+
+Enter a server setting. Press ctrl+space to show available settings.
+== 
+
+Map settings error
+== 
+
+Below is a report of the invalid map settings found when loading the map. Please fix them before proceeding further.
+== 
+
+Fix
+== 
+
+Delete this command.
+== 
+
+Fix this command.
+== 
+
+Done
+== 
+
+Cancel fixing this command.
+== 
+
+Confirm editing of this command.
+== 
+
+Choose
+== 
+
+Choose this command.
+== 
+
+Override with this command.
+== 
+
+Fix this command (needed before it can be chosen).
+== 
+
+Allow all unknown settings
+== 
+
+Tune variable to value or show current value
+== 
+
+Tune in zone a variable to value
+== 
+
+Which message to display on zone enter; use 0 for normal area
+== 
+
+Which message to display on zone leave; use 0 for normal area
+== 
+
+Enable map compatibility mode using the specified bug (example: grenade-doubleexplosion@ddnet.tw)
+== 
+
+Whether a switch is deactivated by default (otherwise activated)
+== 
+
+Invalid
+== 
+
+Unknown
+== 
+
+Incomplete
+== 
+
+Invalid argument value: %s at position %d for argument '%s': out of range [%d, %d]
+== 
+
+Too many arguments
+== 
+
+Unknown server setting: %s
+== 
+
+Time modified %s
+== 
+
+Sort by time modified.
+== 
+
+Filename %s
+== 
+
+Sort by filename.
+== 
+
+Current path: %s
+== 
+
+Filename:
+== 
+
+Search:
+== 
+
+Open the selected folder.
+== 
+
+Save file with the specified name.
+== 
+
+Open the selected file.
+== 
+
+Open
+== 
+
+This name cannot be used for files and folders.
+== 
+
+Close this dialog.
+== 
+
+Refresh
+== 
+
+Refresh the list of files.
+== 
+
+Show directory
+== 
+
+Open the current directory in the file browser.
+== 
+
+Failed to open the directory '%s'.
+== 
+
+Delete the selected folder.
+== 
+
+Delete the selected file.
+== 
+
+New folder
+== 
+
+Create a new folder.
+== 
+
+Size: %d × %d
+== 
+
+Failed to load the image (check the local console for details).
+== 
+
+Failed to load the sound (check the local console for details). Make sure you enabled sounds in the settings.
+== 
+
+Create new folder
+== 
+
+Create
+== 
+
+Failed to create the folder '%s'.
+== 
+
+Confirm delete
+== 
+
+Are you sure that you want to delete the %s '%s'?
+== 
+
+folder
+== 
+
+file
+== 
+
+Failed to delete folder '%s'. Make sure it's empty first. Check the local console for details.
+== 
+
+Failed to delete file '%s'. Check the local console for details.
+== 
+
+Confirm overwrite
+== 
+
+The file '%s' already exists.\n\nAre you sure that you want to overwrite it?
+== 
+
+Overwrite
+== 
+
+Enable text mode? Pressing letters and numbers on your keyboard will place tiles.
+== 
+
+Font typer
+== 
+
+Type on your keyboard to insert letters and numbers. Press Escape to end text mode.
+== 
+
+Default
+== 
+
+Reset to normal grid size.
+== 
+
+New
+== 
+
+[Ctrl+N] Create a new map.
+== 
+
+Load
+== 
+
+[Ctrl+L] Open a map for editing.
+== 
+
+Load map
+== 
+
+Append
+== 
+
+[Ctrl+A] Open a map and add everything from that map to the current one.
+== 
+
+Append map
+== 
+
+[Ctrl+S] Save the current map.
+== 
+
+Save map
+== 
+
+Save copy
+== 
+
+[Ctrl+Shift+Alt+S] Save a copy of the current map under a new name.
+== 
+
+Exit
+== 
+
+Remove unused envelopes
+== 
+
+Remove all unused envelopes from the map.
+== 
+
+Are you sure that you want to remove all unused envelopes from this map?
+== 
+
+Place border
+== 
+
+Place tiles in a 2-tile wide border at the edges of the selected tile layer.
+== 
+
+No tile layer selected
+== 
+
+Goto position
+== 
+
+Go to a specified coordinate point on the map.
+== 
+
+Add tileart
+== 
+
+Generate tileart from image.
+== 
+
+Add quadart
+== 
+
+Generate quadart from image.
+== 
+
+Entities: %s
+== 
+
+Choose game layer entities image for different gametypes.
+== 
+
+Custom…
+== 
+
+Brush coloring
+== 
+
+Disable brush coloring.
+== 
+
+Enable brush coloring.
+== 
+
+Allow unused
+== 
+
+[Ctrl+U] Disallow placing unused tiles.
+== 
+
+[Ctrl+U] Allow placing unused tiles.
+== 
+
+Show info
+== 
+
+Preview quad envelopes
+== 
+
+Do not preview the paths of quads with a position envelope when a quad layer is selected.
+== 
+
+Preview the paths of quads with a position envelope when a quad layer is selected.
+== 
+
+Align quads
+== 
+
+Do not perform quad alignment to other quads/points when moving quads.
+== 
+
+Allow quad alignment to other quads/points when moving quads.
+== 
+
+Show quads bounds
+== 
+
+Do not show quad bounds when moving quads.
+== 
+
+Show quad bounds when moving quads.
+== 
+
+Auto map reload
+== 
+
+Do not run 'hot_reload' on the local server while rcon authed on map save.
+== 
+
+Run 'hot_reload' on the local server while rcon authed on map save.
+== 
+
+Select layers by tile
+== 
+
+Do not select layers when ctrl+right clicking on a tile.
+== 
+
+Select layers when ctrl+right clicking on a tile.
+== 
+
+Show ingame entities
+== 
+
+Do not show how weapons, shields, hearts and flags appear ingame.
+== 
+
+Show how weapons, shields, hearts and flags appear ingame.
+== 
+
+Delete group
+== 
+
+Delete the group.
+== 
+
+Clean up game tiles
+== 
+
+Remove game tiles that aren't based on a layer.
+== 
+
+Order
+== 
+
+Pos X
+== 
+
+Pos Y
+== 
+
+Para X
+== 
+
+Para Y
+== 
+
+Use Clipping
+== 
+
+Clip X
+== 
+
+Clip Y
+== 
+
+Clip W
+== 
+
+Clip H
+== 
+
+Duplicate layer
+== 
+
+Create an identical copy of the selected layer.
+== 
+
+Group
+== 
+
+Detail
+== 
+
+Delete the current quad.
+== 
+
+Aspect ratio
+== 
+
+Resize the current quad based on the aspect ratio of its image.
+== 
+
+Center pivot
+== 
+
+Center the pivot of the current quad.
+== 
+
+Align
+== 
+
+Align coordinates of the quad points.
+== 
+
+Square
+== 
+
+Square the current quad.
+== 
+
+Slice
+== 
+
+Enable quad knife mode.
+== 
+
+Pos. Env
+== 
+
+Pos. TO
+== 
+
+Color
+== 
+
+Color Env
+== 
+
+Color TO
+== 
+
+Delete the current sound source.
+== 
+
+Rectangle
+== 
+
+Circle
+== 
+
+Change sound source shape.
+== 
+
+Loop
+== 
+
+Pan
+== 
+
+Delay
+== 
+
+Falloff
+== 
+
+Sound Env
+== 
+
+Sound. TO
+== 
+
+Radius
+== 
+
+Tex U
+== 
+
+Tex V
+== 
+
+Color:
+== 
+
+Edit color of point %d of envelope %d
+== 
+
+Value:
+== 
+
+The value of the selected envelope point.
+== 
+
+Time (in s):
+== 
+
+The time of the selected envelope point.
+== 
+
+Reset tangent point to default value.
+== 
+
+Delete current envelope point in all channels.
+== 
+
+Project onto
+== 
+
+Project all selected envelopes onto the curve between the first and last selected envelope.
+== 
+
+Linear
+== 
+
+Slow
+== 
+
+Fast
+== 
+
+Step
+== 
+
+Smooth
+== 
+
+Project points
+== 
+
+Embed
+== 
+
+Embed the image into the map file.
+== 
+
+Embedding is not possible because the image could not be loaded.
+== 
+
+Make external
+== 
+
+Remove the image from the map file.
+== 
+
+Re-import
+== 
+
+Re-import the image from the mapres folder.
+== 
+
+Error: could not find image '%s' in the mapres folder.
+== 
+
+Select the wanted image:
+== 
+
+Replace
+== 
+
+Replace the image with a new one.
+== 
+
+Replace image
+== 
+
+Remove the image from the map.
+== 
+
+Export
+== 
+
+Export the image to a separate file.
+== 
+
+Exporting is not possible because the image could not be loaded.
+== 
+
+Save image
+== 
+
+Re-import the sound from the mapres folder.
+== 
+
+Error: could not find sound '%s' in the mapres folder.
+== 
+
+Select the wanted sound:
+== 
+
+Exporting is not possible because the sound could not be loaded.
+== 
+
+Save sound
+== 
+
+Map details
+== 
+
+Author:
+== 
+
+Version:
+== 
+
+Credits:
+== 
+
+License:
+== 
+
+Confirm
+== 
+
+Exit the editor
+== 
+
+The map contains unsaved data, you might want to save it before you exit the editor.\n\nContinue anyway?
+== 
+
+The map contains unsaved data, you might want to save it before you load a new map.\n\nContinue anyway?
+== 
+
+New map
+== 
+
+The map contains unsaved data, you might want to save it before you create a new map.\n\nContinue anyway?
+== 
+
+Large layer
+== 
+
+You are trying to set the height or width of a layer to more than 1000 tiles. This is actually possible, but only rarely necessary. It may cause the editor to work slower and will result in a larger file size as well as higher memory usage for client and server.
+== 
+
+Unused tiles disabled
+== 
+
+Unused tiles can't be placed by default because they could get a use later and then destroy your map.\n\nActivate the 'Allow unused' setting to be able to place every tile.
+== 
+
+Image width/height
+== 
+
+The width or height of this image is not divisible by 16. This is required for images used in tile layers.
+== 
+
+Max images
+== 
+
+Max sounds
+== 
+
+Place border tiles
+== 
+
+This is going to overwrite any existing tiles around the edges of the layer.\n\nContinue?
+== 
+
+Big image
+== 
+
+The selected image is big. Converting it to tileart may take some time.\n\nContinue anyway?
+== 
+
+Many colors
+== 
+
+The selected image contains many colors, which will lead to a big mapfile. You may want to consider reducing the number of colors.\n\nContinue anyway?
+== 
+
+Too many colors
+== 
+
+The client only supports 64 images but more would be needed to add the selected image as tileart.
+== 
+
+The selected image is really big. Expect performance issues!\n\nContinue anyway?
+== 
+
+Remove image
+== 
+
+This image is used in the map. Removing it will reset all layers that use this image to their default.\n\nRemove anyway?
+== 
+
+Remove sound
+== 
+
+This sound is used in the map. Removing it will reset all layers that use this sound to their default.\n\nRemove anyway?
+== 
+
+Restart server
+== 
+
+You have a local server running, but you are not authorized or connected.\n\nDo you want to restart the server and reconnect?
+== 
+
+Restarting server
+== 
+
+Local server is restarting. Please wait…
+== 
+
+None
+== 
+
+Air
+== 
+
+Hookable
+== 
+
+Death
+== 
+
+Unhookable
+== 
+
+Hookthrough
+== 
+
+Freeze
+== 
+
+Unfreeze
+== 
+
+Deep Freeze
+== 
+
+Deep Unfreeze
+== 
+
+Blue Check-Tele
+== 
+
+Red Check-Tele
+== 
+
+Live Freeze
+== 
+
+Live Unfreeze
+== 
+
+F
+== 
+
+[Ctrl+F] Find next free tele number.
+== 
+
+[Ctrl+F] Find next free checkpoint number.
+== 
+
+N
+== 
+
+[N] Show next tele with this number.
+== 
+
+Number
+== 
+
+Checkpoint
+== 
+
+View
+== 
+
+Force
+== 
+
+Max Speed
+== 
+
+Angle
+== 
+
+[Ctrl+F] Find empty slot.
+== 
+
+[N] Show next switcher with this number.
+== 
+
+[Ctrl+F] Find unused zone.
+== 
+
+[N] Show next tune tile with this number.
+== 
+
+Zone
+== 
+
+X
+== 
+
+Y
+== 
+
+Go
+== 
+
+Load custom entities
+== 
+
+Decrease animation speed.
+== 
+
+Increase animation speed.
+== 
+
+Reset to normal animation speed.
+== 
+
+Configure Quadart
+== 
+
+The map isn't saved in the maps/ folder. It must be saved there to load on the server.
+== 
+
+Toggle grid
+== 
+
+[Ctrl+G] Toggle grid.
+== 
+
+Game tiles: Air
+== 
+
+Construct game tiles from this layer.
+== 
+
+Game tiles: Hookable
+== 
+
+Game tiles: Death
+== 
+
+Game tiles: Unhookable
+== 
+
+Game tiles: Hookthrough
+== 
+
+Game tiles: Freeze
+== 
+
+Game tiles: Unfreeze
+== 
+
+Game tiles: Deep Freeze
+== 
+
+Game tiles: Deep Unfreeze
+== 
+
+Game tiles: Blue Check Tele
+== 
+
+Game tiles: Red Check Tele
+== 
+
+Game tiles: Live Freeze
+== 
+
+Game tiles: Live Unfreeze
+== 
+
+Add group
+== 
+
+Add a new group.
+== 
+
+Reset zoom
+== 
+
+[Numpad*] Zoom to normal and remove editor offset.
+== 
+
+[Numpad-] Zoom out.
+== 
+
+[Numpad+] Zoom in.
+== 
+
+Refocus
+== 
+
+[Home] Restore map focus.
+== 
+
+Proof
+== 
+
+Toggle proof borders. These borders represent the area that a player can see with default zoom.
+== 
+
+Add tile layer
+== 
+
+Create a new tile layer.
+== 
+
+Add switch layer
+== 
+
+Create a new switch layer.
+== 
+
+Add tune layer
+== 
+
+Create a new tuning layer.
+== 
+
+Add speedup layer
+== 
+
+Create a new speedup layer.
+== 
+
+Add tele layer
+== 
+
+Create a new tele layer.
+== 
+
+Add front layer
+== 
+
+Create a new item layer.
+== 
+
+Add quads layer
+== 
+
+Create a new quads layer.
+== 
+
+Add sound layer
+== 
+
+Create a new sound layer.
+== 
+
+Save as
+== 
+
+[Ctrl+Shift+S] Save the current map under a new name.
+== 
+
+Load current map
+== 
+
+[Ctrl+Shift+L] Open the current ingame map for editing.
+== 
+
+Envelopes
+== 
+
+Toggle the envelope editor.
+== 
+
+Server settings
+== 
+
+Toggle the server settings editor.
+== 
+
+History
+== 
+
+Toggle the editor history view.
+== 
+
+Add image
+== 
+
+Load a new image to use in the map.
+== 
+
+Layer: add image
+== 
+
+Pick mapres image for currently selected layer.
+== 
+
+Show info: Off
+== 
+
+Do not show tile information.
+== 
+
+Show info: Dec
+== 
+
+[Ctrl+I] Show tile information.
+== 
+
+Show info: Hex
+== 
+
+[Ctrl+Shift+I] Show tile information in hexadecimal.
+== 
+
+Toggle previewing the paths of quads with a position envelope when a quad layer is selected.
+== 
+
+Delete layer
+== 
+
+Delete the layer.
+== 
+
+Pipette
+== 
+
+[Ctrl+Shift+C] Color pipette. Pick a color from the screen by clicking on it.
+== 
+
+Adjust the map details of the current map.
+== 
+
+Add quad
+== 
+
+[Ctrl+Q] Add a new quad.
+== 
+
+Add sound source
+== 
+
+[Ctrl+Q] Add a new sound source.
+== 
+
+Test map locally
+== 
+
+Run a local server with the current map and connect you to it.
+== 
+
+Construct '%s' game tiles (x%d)
+== 
+
+Construct 'tele' game tiles (x%d)
+== 
+
+Game tiles
+== 
+
+Game tiles: %s
+== 
+
+Automatically run the automapper after modifications.
+== 
+
+Auto map
+== 
+
+Automap
+== 
+
+Run the automapper.
+== 
+
+Shift
+== 
+
+Shift by
+== 
+
+Image
+== 
+
+Auto Rule
+== 
+
+Reference
+== 
+
+Live Gametiles
+== 
+
+Seed
+== 
+
+Commit
+== 
+
+Apply the changes.
+== 
+
+Edit %d layers common properties: %s
+== 
+
+Editing multiple layers
 == 

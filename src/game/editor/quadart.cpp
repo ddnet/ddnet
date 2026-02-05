@@ -4,6 +4,7 @@
 #include "editor_actions.h"
 
 #include <game/editor/mapitems/image.h>
+#include <game/localization.h>
 
 #include <algorithm>
 #include <array>
@@ -207,7 +208,7 @@ bool CEditor::CallbackAddQuadArt(const char *pFilepath, int StorageType, void *p
 
 	if(!pEditor->Graphics()->LoadPng(pEditor->m_QuadArtImageInfo, pFilepath, StorageType))
 	{
-		pEditor->ShowFileDialogError("Failed to load image from file '%s'.", pFilepath);
+		pEditor->ShowFileDialogError(Localize("Failed to load image from file '%s'."), pFilepath);
 		return false;
 	}
 

@@ -4,6 +4,7 @@
 #include <engine/keys.h>
 
 #include <game/client/gameclient.h>
+#include <game/localization.h>
 #include <game/mapitems.h>
 
 void CEditor::FillGameTiles(EGameTileOp FillTile) const
@@ -220,7 +221,7 @@ void CEditor::TestMapLocally()
 	const char *pFilenameNoMaps = str_startswith(Map()->m_aFilename, "maps/");
 	if(!pFilenameNoMaps)
 	{
-		ShowFileDialogError("The map isn't saved in the maps/ folder. It must be saved there to load on the server.");
+		ShowFileDialogError(Localize("The map isn't saved in the maps/ folder. It must be saved there to load on the server."));
 		return;
 	}
 

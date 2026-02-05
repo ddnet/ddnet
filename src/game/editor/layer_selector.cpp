@@ -3,6 +3,7 @@
 #include "editor.h"
 
 #include <engine/shared/config.h>
+#include <game/localization.h>
 
 void CLayerSelector::OnInit(CEditor *pEditor)
 {

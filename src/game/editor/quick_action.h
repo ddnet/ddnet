@@ -1,8 +1,12 @@
 #ifndef GAME_EDITOR_QUICK_ACTION_H
 #define GAME_EDITOR_QUICK_ACTION_H
 
+#include <base/system.h>
+
 #include <functional>
 #include <utility>
+
+#include <game/localization.h>
 
 typedef std::function<void()> FButtonClickCallback;
 typedef std::function<bool()> FButtonDisabledCallback;

@@ -11,6 +11,7 @@
 #include <game/editor/editor.h>
 #include <game/editor/editor_actions.h>
 #include <game/editor/enums.h>
+#include <game/localization.h>
 
 #include <iterator>
 #include <numeric>
@@ -839,7 +840,7 @@ void CLayerTiles::FillGameTiles(EGameTileOp Fill)
 
 			vpActions.push_back(std::make_shared<CEditorBrushDrawAction>(Map(), GameGroupIndex));
 			char aDisplay[256];
-			str_format(aDisplay, sizeof(aDisplay), "Construct '%s' game tiles (x%d)", GAME_TILE_OP_NAMES[(int)Fill], Changes);
+			str_format(aDisplay, sizeof(aDisplay), Localize("Construct '%s' game tiles (x%d)"), GAME_TILE_OP_NAMES[(int)Fill], Changes);
 			Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionBulk>(Map(), vpActions, aDisplay, true));
 		}
 		else
@@ -935,7 +936,7 @@ void CLayerTiles::FillGameTiles(EGameTileOp Fill)
 
 			vpActions.push_back(std::make_shared<CEditorBrushDrawAction>(Map(), GameGroupIndex));
 			char aDisplay[256];
-			str_format(aDisplay, sizeof(aDisplay), "Construct 'tele' game tiles (x%d)", Changes);
+			str_format(aDisplay, sizeof(aDisplay), Localize("Construct 'tele' game tiles (x%d)"), Changes);
 			Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionBulk>(Map(), vpActions, aDisplay, true));
 		}
 	}
@@ -984,14 +985,15 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 			}
 		};
 
-		char aBuf[128] = "Game tiles";
+		char aBuf[128];
+		str_copy(aBuf, Localize("Game tiles"));
 		if(m_LiveGameTiles)
 		{
 			auto TileOp = GameTileToOp(m_FillGameTile);
 			if(TileOp != EGameTileOp::AIR)
-				str_format(aBuf, sizeof(aBuf), "Game tiles: %s", GAME_TILE_OP_NAMES[(size_t)TileOp]);
+				str_format(aBuf, sizeof(aBuf), Localize("Game tiles: %s"), GAME_TILE_OP_NAMES[(size_t)TileOp]);
 		}
-		if(Editor()->DoButton_Editor(&s_GameTilesButton, aBuf, 0, &Button, BUTTONFLAG_LEFT, "Construct game tiles from this layer."))
+		if(Editor()->DoButton_Editor(&s_GameTilesButton, aBuf, 0, &Button, BUTTONFLAG_LEFT, Localize("Construct game tiles from this layer.")))
 			Editor()->PopupSelectGametileOpInvoke(Editor()->Ui()->MouseX(), Editor()->Ui()->MouseY());
 		const int Selected = Editor()->PopupSelectGameTileOpResult();
 		FillGameTiles((EGameTileOp)Selected);
@@ -1009,25 +1011,25 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 				Button.VSplitRight(16.0f, &Button, &ButtonAuto);
 				Button.VSplitRight(2.0f, &Button, nullptr);
 				static int s_AutoMapperButtonAuto = 0;
-				if(Editor()->DoButton_Editor(&s_AutoMapperButtonAuto, "A", m_AutoAutoMap, &ButtonAuto, BUTTONFLAG_LEFT, "Automatically run the automapper after modifications."))
+				if(Editor()->DoButton_Editor(&s_AutoMapperButtonAuto, "A", m_AutoAutoMap, &ButtonAuto, BUTTONFLAG_LEFT, Localize("Automatically run the automapper after modifications.")))
 				{
 					m_AutoAutoMap = !m_AutoAutoMap;
 					FlagModified(0, 0, m_Width, m_Height);
 					if(!m_TilesHistory.empty()) // Sometimes pressing that button causes the automap to run so we should be able to undo that
 					{
 						// record undo
-						Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(Map(), Map()->m_SelectedGroup, Map()->m_vSelectedLayers[0], "Auto map", m_TilesHistory));
+						Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(Map(), Map()->m_SelectedGroup, Map()->m_vSelectedLayers[0], Localize("Auto map"), m_TilesHistory));
 						ClearHistory();
 					}
 				}
 			}
 
 			static int s_AutoMapperButton = 0;
-			if(Editor()->DoButton_Editor(&s_AutoMapperButton, "Automap", 0, &Button, BUTTONFLAG_LEFT, "Run the automapper."))
+			if(Editor()->DoButton_Editor(&s_AutoMapperButton, Localize("Automap"), 0, &Button, BUTTONFLAG_LEFT, Localize("Run the automapper.")))
 			{
 				Map()->m_vpImages[m_Image]->m_AutoMapper.Proceed(this, Map()->m_pGameLayer.get(), m_AutoMapperReference, m_AutoMapperConfig, m_Seed);
 				// record undo
-				Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(Map(), Map()->m_SelectedGroup, Map()->m_vSelectedLayers[0], "Auto map", m_TilesHistory));
+				Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(Map(), Map()->m_SelectedGroup, Map()->m_vSelectedLayers[0], Localize("Auto map"), m_TilesHistory));
 				ClearHistory();
 				return CUi::POPUP_CLOSE_CURRENT;
 			}
@@ -1035,18 +1037,18 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	}
 
 	CProperty aProps[] = {
-		{"Width", m_Width, PROPTYPE_INT, 2, 100000},
-		{"Height", m_Height, PROPTYPE_INT, 2, 100000},
-		{"Shift", 0, PROPTYPE_SHIFT, 0, 0},
-		{"Shift by", Map()->m_ShiftBy, PROPTYPE_INT, 1, 100000},
-		{"Image", m_Image, PROPTYPE_IMAGE, 0, 0},
+		{Localize("Width"), m_Width, PROPTYPE_INT, 2, 100000},
+		{Localize("Height"), m_Height, PROPTYPE_INT, 2, 100000},
+		{Localize("Shift"), 0, PROPTYPE_SHIFT, 0, 0},
+		{Localize("Shift by"), Map()->m_ShiftBy, PROPTYPE_INT, 1, 100000},
+		{Localize("Image"), m_Image, PROPTYPE_IMAGE, 0, 0},
 		{"Color", PackColor(m_Color), PROPTYPE_COLOR, 0, 0},
-		{"Color Env", m_ColorEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
-		{"Color TO", m_ColorEnvOffset, PROPTYPE_INT, -1000000, 1000000},
-		{"Auto Rule", m_AutoMapperConfig, PROPTYPE_AUTOMAPPER, m_Image, 0},
-		{"Reference", m_AutoMapperReference, PROPTYPE_AUTOMAPPER_REFERENCE, 0, 0},
-		{"Live Gametiles", m_LiveGameTiles, PROPTYPE_BOOL, 0, 1},
-		{"Seed", m_Seed, PROPTYPE_INT, 0, 1000000000},
+		{Localize("Color Env"), m_ColorEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
+		{Localize("Color TO"), m_ColorEnvOffset, PROPTYPE_INT, -1000000, 1000000},
+		{Localize("Auto Rule"), m_AutoMapperConfig, PROPTYPE_AUTOMAPPER, m_Image, 0},
+		{Localize("Reference"), m_AutoMapperReference, PROPTYPE_AUTOMAPPER_REFERENCE, 0, 0},
+		{Localize("Live Gametiles"), m_LiveGameTiles, PROPTYPE_BOOL, 0, 1},
+		{Localize("Seed"), m_Seed, PROPTYPE_INT, 0, 1000000000},
 		{nullptr},
 	};
 
@@ -1173,7 +1175,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		// Record undo if automapper was ran
 		if(m_AutoAutoMap && !m_TilesHistory.empty())
 		{
-			Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(Map(), Map()->m_SelectedGroup, Map()->m_vSelectedLayers[0], "Auto map", m_TilesHistory));
+			Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(Map(), Map()->m_SelectedGroup, Map()->m_vSelectedLayers[0], Localize("Auto map"), m_TilesHistory));
 			ClearHistory();
 		}
 	}
@@ -1194,7 +1196,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 		CUIRect Commit;
 		pToolbox->HSplitBottom(20.0f, pToolbox, &Commit);
 		static int s_CommitButton = 0;
-		if(pEditor->DoButton_Editor(&s_CommitButton, "Commit", 0, &Commit, BUTTONFLAG_LEFT, "Apply the changes."))
+		if(pEditor->DoButton_Editor(&s_CommitButton, Localize("Commit"), 0, &Commit, BUTTONFLAG_LEFT, Localize("Apply the changes.")))
 		{
 			bool HasModifiedSize = (State.m_Modified & SCommonPropState::MODIFIED_SIZE) != 0;
 			bool HasModifiedColor = (State.m_Modified & SCommonPropState::MODIFIED_COLOR) != 0;
@@ -1256,7 +1258,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 			State.m_Modified = 0;
 
 			char aDisplay[256];
-			str_format(aDisplay, sizeof(aDisplay), "Edit %d layers common properties: %s", (int)vpLayers.size(), HasModifiedColor && HasModifiedSize ? "color, size" : (HasModifiedColor ? "color" : "size"));
+			str_format(aDisplay, sizeof(aDisplay), Localize("Edit %d layers common properties: %s"), (int)vpLayers.size(), HasModifiedColor && HasModifiedSize ? "color, size" : (HasModifiedColor ? "color" : "size"));
 			pEditorMap->m_EditorHistory.RecordAction(std::make_shared<CEditorActionBulk>(pEditorMap, vpActions, aDisplay));
 		}
 	}
@@ -1281,16 +1283,16 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 		pEditor->TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f));
 		SLabelProperties Props;
 		Props.m_MaxWidth = Warning.w;
-		pEditor->Ui()->DoLabel(&Warning, "Editing multiple layers", 9.0f, TEXTALIGN_ML, Props);
+		pEditor->Ui()->DoLabel(&Warning, Localize("Editing multiple layers"), 9.0f, TEXTALIGN_ML, Props);
 		pEditor->TextRender()->TextColor(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
 		pToolbox->HSplitTop(2.0f, nullptr, pToolbox);
 	}
 
 	CProperty aProps[] = {
-		{"Width", State.m_Width, PROPTYPE_INT, 2, 100000},
-		{"Height", State.m_Height, PROPTYPE_INT, 2, 100000},
-		{"Shift", 0, PROPTYPE_SHIFT, 0, 0},
-		{"Shift by", pEditorMap->m_ShiftBy, PROPTYPE_INT, 1, 100000},
+		{Localize("Width"), State.m_Width, PROPTYPE_INT, 2, 100000},
+		{Localize("Height"), State.m_Height, PROPTYPE_INT, 2, 100000},
+		{Localize("Shift"), 0, PROPTYPE_SHIFT, 0, 0},
+		{Localize("Shift by"), pEditorMap->m_ShiftBy, PROPTYPE_INT, 1, 100000},
 		{"Color", State.m_Color, PROPTYPE_COLOR, 0, 0},
 		{nullptr},
 	};

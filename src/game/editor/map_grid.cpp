@@ -3,6 +3,7 @@
 #include "editor.h"
 
 #include <engine/keys.h>
+#include <game/localization.h>
 
 static constexpr int MIN_GRID_FACTOR = 1;
 static constexpr int MAX_GRID_FACTOR = 15;
@@ -179,7 +180,7 @@ CUi::EPopupMenuFunctionResult CMapGrid::PopupGridSettings(void *pContext, CUIRec
 	View.HSplitBottom(12.0f, &View, &Button);
 
 	static char s_DefaultButton;
-	if(pMapGrid->Editor()->DoButton_Ex(&s_DefaultButton, "Default", 0, &Button, BUTTONFLAG_LEFT, "Reset to normal grid size.", IGraphics::CORNER_ALL))
+	if(pMapGrid->Editor()->DoButton_Ex(&s_DefaultButton, Localize("Default"), 0, &Button, BUTTONFLAG_LEFT, Localize("Reset to normal grid size."), IGraphics::CORNER_ALL))
 	{
 		pMapGrid->SetFactor(1);
 	}

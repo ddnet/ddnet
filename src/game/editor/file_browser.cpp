@@ -8,6 +8,7 @@
 #include <engine/storage.h>
 
 #include <game/editor/editor.h>
+#include <game/localization.h>
 
 using namespace FontIcons;
 
@@ -126,8 +127,8 @@ void CFileBrowser::OnRender(CUIRect _)
 		static constexpr const char *SORT_INDICATORS[] = {"", "▲", "▼"};
 
 		char aLabelButtonSortTimeModified[64];
-		str_format(aLabelButtonSortTimeModified, sizeof(aLabelButtonSortTimeModified), "Time modified %s", SORT_INDICATORS[(int)m_SortByTimeModified]);
-		if(Editor()->DoButton_Editor(&m_ButtonSortTimeModifiedId, aLabelButtonSortTimeModified, 0, &ButtonTimeModified, BUTTONFLAG_LEFT, "Sort by time modified."))
+		str_format(aLabelButtonSortTimeModified, sizeof(aLabelButtonSortTimeModified), Localize("Time modified %s"), SORT_INDICATORS[(int)m_SortByTimeModified]);
+		if(Editor()->DoButton_Editor(&m_ButtonSortTimeModifiedId, aLabelButtonSortTimeModified, 0, &ButtonTimeModified, BUTTONFLAG_LEFT, Localize("Sort by time modified.")))
 		{
 			if(m_SortByTimeModified == ESortDirection::ASCENDING)
 			{
@@ -146,8 +147,8 @@ void CFileBrowser::OnRender(CUIRect _)
 		}
 
 		char aLabelButtonSortFilename[64];
-		str_format(aLabelButtonSortFilename, sizeof(aLabelButtonSortFilename), "Filename %s", SORT_INDICATORS[(int)m_SortByFilename]);
-		if(Editor()->DoButton_Editor(&m_ButtonSortFilenameId, aLabelButtonSortFilename, 0, &ButtonFilename, BUTTONFLAG_LEFT, "Sort by filename."))
+		str_format(aLabelButtonSortFilename, sizeof(aLabelButtonSortFilename), Localize("Filename %s"), SORT_INDICATORS[(int)m_SortByFilename]);
+		if(Editor()->DoButton_Editor(&m_ButtonSortFilenameId, aLabelButtonSortFilename, 0, &ButtonFilename, BUTTONFLAG_LEFT, Localize("Sort by filename.")))
 		{
 			if(m_SortByFilename == ESortDirection::DESCENDING)
 			{
@@ -175,7 +176,7 @@ void CFileBrowser::OnRender(CUIRect _)
 		char aPath[IO_MAX_PATH_LENGTH];
 		Storage()->GetCompletePath(m_vpFilteredFileList[m_SelectedFileIndex]->m_StorageType, m_pCurrentPath, aPath, sizeof(aPath));
 		char aPathLabel[128 + IO_MAX_PATH_LENGTH];
-		str_format(aPathLabel, sizeof(aPathLabel), "Current path: %s", aPath);
+		str_format(aPathLabel, sizeof(aPathLabel), Localize("Current path: %s"), aPath);
 		Ui()->DoLabel(&PathBox, aPathLabel, 10.0f, TEXTALIGN_ML, {.m_MaxWidth = PathBox.w, .m_EllipsisAtEnd = true});
 	}
 
@@ -185,7 +186,7 @@ void CFileBrowser::OnRender(CUIRect _)
 	if(m_SaveAction)
 	{
 		// Filename input when saving
-		Ui()->DoLabel(&FileBoxLabel, "Filename:", 10.0f, TEXTALIGN_ML);
+		Ui()->DoLabel(&FileBoxLabel, Localize("Filename:"), 10.0f, TEXTALIGN_ML);
 		if(Ui()->DoEditBox(&m_FilenameInput, &FileBox, 10.0f))
 		{
 			// Remove '/' and '\'
@@ -203,7 +204,7 @@ void CFileBrowser::OnRender(CUIRect _)
 	else
 	{
 		// Filter input when loading
-		Ui()->DoLabel(&FileBoxLabel, "Search:", 10.0f, TEXTALIGN_ML);
+		Ui()->DoLabel(&FileBoxLabel, Localize("Search:"), 10.0f, TEXTALIGN_ML);
 		if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
 		{
 			Ui()->SetActiveItem(&m_FilterInput);
@@ -302,8 +303,8 @@ void CFileBrowser::OnRender(CUIRect _)
 	CUIRect Button;
 	ButtonBar.VSplitRight(50.0f, &ButtonBar, &Button);
 	const bool IsDir = m_SelectedFileIndex >= 0 && m_vpFilteredFileList[m_SelectedFileIndex]->m_IsDir;
-	const char *pOpenTooltip = IsDir ? "Open the selected folder." : (m_SaveAction ? "Save file with the specified name." : "Open the selected file.");
-	if(Editor()->DoButton_Editor(&m_ButtonOkId, IsDir ? "Open" : m_aButtonText, 0, &Button, BUTTONFLAG_LEFT, pOpenTooltip) ||
+	const char *pOpenTooltip = IsDir ? Localize("Open the selected folder.") : (m_SaveAction ? Localize("Save file with the specified name.") : Localize("Open the selected file."));
+	if(Editor()->DoButton_Editor(&m_ButtonOkId, IsDir ? Localize("Open") : m_aButtonText, 0, &Button, BUTTONFLAG_LEFT, pOpenTooltip) ||
 		m_ListBox.WasItemActivated() ||
 		(m_ListBox.Active() && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
 	{
@@ -374,7 +375,7 @@ void CFileBrowser::OnRender(CUIRect _)
 			fs_split_file_extension(fs_filename(aSaveFilePath), aFilename, sizeof(aFilename));
 			if(m_SaveAction && !str_valid_filename(aFilename))
 			{
-				Editor()->ShowFileDialogError("This name cannot be used for files and folders.");
+				Editor()->ShowFileDialogError(Localize("This name cannot be used for files and folders."));
 			}
 			else if(m_SaveAction && Storage()->FileExists(aSaveFilePath, StorageType))
 			{
@@ -395,7 +396,7 @@ void CFileBrowser::OnRender(CUIRect _)
 
 	ButtonBar.VSplitRight(ButtonSpacing, &ButtonBar, nullptr);
 	ButtonBar.VSplitRight(50.0f, &ButtonBar, &Button);
-	if(Editor()->DoButton_Editor(&m_ButtonCancelId, "Cancel", 0, &Button, BUTTONFLAG_LEFT, "Close this dialog.") ||
+	if(Editor()->DoButton_Editor(&m_ButtonCancelId, Localize("Cancel"), 0, &Button, BUTTONFLAG_LEFT, Localize("Close this dialog.")) ||
 		(m_ListBox.Active() && Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE)))
 	{
 		Editor()->OnDialogClose();
@@ -403,7 +404,7 @@ void CFileBrowser::OnRender(CUIRect _)
 
 	ButtonBar.VSplitRight(ButtonSpacing, &ButtonBar, nullptr);
 	ButtonBar.VSplitRight(50.0f, &ButtonBar, &Button);
-	if(Editor()->DoButton_Editor(&m_ButtonRefreshId, "Refresh", 0, &Button, BUTTONFLAG_LEFT, "Refresh the list of files.") ||
+	if(Editor()->DoButton_Editor(&m_ButtonRefreshId, Localize("Refresh"), 0, &Button, BUTTONFLAG_LEFT, Localize("Refresh the list of files.")) ||
 		(m_ListBox.Active() && (Input()->KeyIsPressed(KEY_F5) || (Input()->ModifierIsPressed() && Input()->KeyIsPressed(KEY_R)))))
 	{
 		FilelistPopulate(m_StorageType, true);
@@ -413,13 +414,13 @@ void CFileBrowser::OnRender(CUIRect _)
 	{
 		ButtonBar.VSplitRight(ButtonSpacing, &ButtonBar, nullptr);
 		ButtonBar.VSplitRight(90.0f, &ButtonBar, &Button);
-		if(Editor()->DoButton_Editor(&m_ButtonShowDirectoryId, "Show directory", 0, &Button, BUTTONFLAG_LEFT, "Open the current directory in the file browser."))
+		if(Editor()->DoButton_Editor(&m_ButtonShowDirectoryId, Localize("Show directory"), 0, &Button, BUTTONFLAG_LEFT, Localize("Open the current directory in the file browser.")))
 		{
 			char aOpenPath[IO_MAX_PATH_LENGTH];
 			Storage()->GetCompletePath(m_vpFilteredFileList[m_SelectedFileIndex]->m_StorageType, m_pCurrentPath, aOpenPath, sizeof(aOpenPath));
 			if(!Client()->ViewFile(aOpenPath))
 			{
-				Editor()->ShowFileDialogError("Failed to open the directory '%s'.", aOpenPath);
+				Editor()->ShowFileDialogError(Localize("Failed to open the directory '%s'."), aOpenPath);
 			}
 		}
 	}
@@ -431,7 +432,7 @@ void CFileBrowser::OnRender(CUIRect _)
 		!m_vpFilteredFileList[m_SelectedFileIndex]->m_IsLink &&
 		str_comp(m_vpFilteredFileList[m_SelectedFileIndex]->m_aFilename, "..") != 0)
 	{
-		if(Editor()->DoButton_Editor(&m_ButtonDeleteId, "Delete", 0, &Button, BUTTONFLAG_LEFT, IsDir ? "Delete the selected folder." : "Delete the selected file.") ||
+		if(Editor()->DoButton_Editor(&m_ButtonDeleteId, Localize("Delete"), 0, &Button, BUTTONFLAG_LEFT, IsDir ? Localize("Delete the selected folder.") : Localize("Delete the selected file.")) ||
 			(m_ListBox.Active() && Ui()->ConsumeHotkey(CUi::HOTKEY_DELETE)))
 		{
 			m_PopupConfirmDelete.m_pFileBrowser = this;
@@ -448,7 +449,7 @@ void CFileBrowser::OnRender(CUIRect _)
 	if(!m_ShowingRoot && m_StorageType == IStorage::TYPE_SAVE)
 	{
 		ButtonBar.VSplitLeft(70.0f, &Button, &ButtonBar);
-		if(Editor()->DoButton_Editor(&m_ButtonNewFolderId, "New folder", 0, &Button, BUTTONFLAG_LEFT, "Create a new folder."))
+		if(Editor()->DoButton_Editor(&m_ButtonNewFolderId, Localize("New folder"), 0, &Button, BUTTONFLAG_LEFT, Localize("Create a new folder.")))
 		{
 			m_PopupNewFolder.m_pFileBrowser = this;
 			m_PopupNewFolder.m_NewFolderNameInput.Clear();
@@ -538,7 +539,7 @@ void CFileBrowser::RenderFilePreview(CUIRect Preview)
 			Preview.HSplitTop(20.0f, &PreviewLabel, &PreviewImage);
 
 			char aSizeLabel[64];
-			str_format(aSizeLabel, sizeof(aSizeLabel), "Size: %d × %d", m_PreviewImageWidth, m_PreviewImageHeight);
+			str_format(aSizeLabel, sizeof(aSizeLabel), Localize("Size: %d × %d"), m_PreviewImageWidth, m_PreviewImageHeight);
 			Ui()->DoLabel(&PreviewLabel, aSizeLabel, 12.0f, TEXTALIGN_ML);
 
 			int Width = m_PreviewImageWidth;
@@ -563,7 +564,7 @@ void CFileBrowser::RenderFilePreview(CUIRect Preview)
 		}
 		else if(m_PreviewState == EPreviewState::ERROR)
 		{
-			Ui()->DoLabel(&Preview, "Failed to load the image (check the local console for details).", 12.0f, TEXTALIGN_TL, {.m_MaxWidth = Preview.w});
+			Ui()->DoLabel(&Preview, Localize("Failed to load the image (check the local console for details)."), 12.0f, TEXTALIGN_TL, {.m_MaxWidth = Preview.w});
 		}
 	}
 	else if(m_FileType == CFileBrowser::EFileType::SOUND)
@@ -576,7 +577,7 @@ void CFileBrowser::RenderFilePreview(CUIRect Preview)
 		}
 		else if(m_PreviewState == EPreviewState::ERROR)
 		{
-			Ui()->DoLabel(&Preview, "Failed to load the sound (check the local console for details). Make sure you enabled sounds in the settings.", 12.0f, TEXTALIGN_TL, {.m_MaxWidth = Preview.w});
+			Ui()->DoLabel(&Preview, Localize("Failed to load the sound (check the local console for details). Make sure you enabled sounds in the settings."), 12.0f, TEXTALIGN_TL, {.m_MaxWidth = Preview.w});
 		}
 	}
 }
@@ -706,7 +707,7 @@ void CFileBrowser::FilelistPopulate(int StorageType, bool KeepSelection)
 		{
 			CFilelistItem Item;
 			str_copy(Item.m_aFilename, m_pCurrentPath);
-			str_copy(Item.m_aDisplayName, "All combined");
+			str_copy(Item.m_aDisplayName, Localize("All combined"));
 			Item.m_IsDir = true;
 			Item.m_IsLink = true;
 			Item.m_StorageType = IStorage::TYPE_ALL;
@@ -867,32 +868,32 @@ CUi::EPopupMenuFunctionResult CFileBrowser::CPopupNewFolder::Render(void *pConte
 	ButtonBar.VSplitRight(110.0f, &ButtonBar, &ButtonCreate);
 
 	View.HSplitTop(20.0f, &Label, &View);
-	pFileBrowser->Ui()->DoLabel(&Label, "Create new folder", 20.0f, TEXTALIGN_MC);
+	pFileBrowser->Ui()->DoLabel(&Label, Localize("Create new folder"), 20.0f, TEXTALIGN_MC);
 	View.HSplitTop(10.0f, nullptr, &View);
 
 	View.HSplitTop(20.0f, &Label, &View);
-	pFileBrowser->Ui()->DoLabel(&Label, "Name:", 10.0f, TEXTALIGN_ML);
+	pFileBrowser->Ui()->DoLabel(&Label, Localize("Name:"), 10.0f, TEXTALIGN_ML);
 	Label.VSplitLeft(50.0f, nullptr, &FolderName);
 	FolderName.HMargin(2.0f, &FolderName);
 	pEditor->DoEditBox(&pNewFolderContext->m_NewFolderNameInput, &FolderName, 12.0f);
 
-	if(pEditor->DoButton_Editor(&pNewFolderContext->m_ButtonCancelId, "Cancel", 0, &ButtonCancel, BUTTONFLAG_LEFT, nullptr))
+	if(pEditor->DoButton_Editor(&pNewFolderContext->m_ButtonCancelId, Localize("Cancel"), 0, &ButtonCancel, BUTTONFLAG_LEFT, nullptr))
 	{
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
 
-	if(pEditor->DoButton_Editor(&pNewFolderContext->m_ButtonCreateId, "Create", 0, &ButtonCreate, BUTTONFLAG_LEFT, nullptr) ||
+	if(pEditor->DoButton_Editor(&pNewFolderContext->m_ButtonCreateId, Localize("Create"), 0, &ButtonCreate, BUTTONFLAG_LEFT, nullptr) ||
 		(Active && pFileBrowser->Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
 	{
 		char aFolderPath[IO_MAX_PATH_LENGTH];
 		str_format(aFolderPath, sizeof(aFolderPath), "%s/%s", pFileBrowser->m_pCurrentPath, pNewFolderContext->m_NewFolderNameInput.GetString());
 		if(!str_valid_filename(pNewFolderContext->m_NewFolderNameInput.GetString()))
 		{
-			pEditor->ShowFileDialogError("This name cannot be used for files and folders.");
+			pEditor->ShowFileDialogError(Localize("This name cannot be used for files and folders."));
 		}
 		else if(!pFileBrowser->Storage()->CreateFolder(aFolderPath, pFileBrowser->m_StorageType))
 		{
-			pEditor->ShowFileDialogError("Failed to create the folder '%s'.", aFolderPath);
+			pEditor->ShowFileDialogError(Localize("Failed to create the folder '%s'."), aFolderPath);
 		}
 		else
 		{
@@ -920,19 +921,19 @@ CUi::EPopupMenuFunctionResult CFileBrowser::CPopupConfirmDelete::Render(void *pC
 	ButtonBar.VSplitLeft(110.0f, &ButtonCancel, &ButtonBar);
 	ButtonBar.VSplitRight(110.0f, &ButtonBar, &ButtonDelete);
 
-	pFileBrowser->Ui()->DoLabel(&Label, "Confirm delete", 20.0f, TEXTALIGN_MC);
+	pFileBrowser->Ui()->DoLabel(&Label, Localize("Confirm delete"), 20.0f, TEXTALIGN_MC);
 
 	char aMessage[IO_MAX_PATH_LENGTH + 128];
-	str_format(aMessage, sizeof(aMessage), "Are you sure that you want to delete the %s '%s'?",
-		pConfirmDeleteContext->m_IsDirectory ? "folder" : "file", pConfirmDeleteContext->m_aDeletePath);
+	str_format(aMessage, sizeof(aMessage), Localize("Are you sure that you want to delete the %s '%s'?"),
+		pConfirmDeleteContext->m_IsDirectory ? Localize("folder") : Localize("file"), pConfirmDeleteContext->m_aDeletePath);
 	pFileBrowser->Ui()->DoLabel(&View, aMessage, 10.0f, TEXTALIGN_ML, {.m_MaxWidth = View.w});
 
-	if(pEditor->DoButton_Editor(&pConfirmDeleteContext->m_ButtonCancelId, "Cancel", 0, &ButtonCancel, BUTTONFLAG_LEFT, nullptr))
+	if(pEditor->DoButton_Editor(&pConfirmDeleteContext->m_ButtonCancelId, Localize("Cancel"), 0, &ButtonCancel, BUTTONFLAG_LEFT, nullptr))
 	{
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
 
-	if(pEditor->DoButton_Editor(&pConfirmDeleteContext->m_ButtonDeleteId, "Delete", EditorButtonChecked::DANGEROUS_ACTION, &ButtonDelete, BUTTONFLAG_LEFT, nullptr) ||
+	if(pEditor->DoButton_Editor(&pConfirmDeleteContext->m_ButtonDeleteId, Localize("Delete"), EditorButtonChecked::DANGEROUS_ACTION, &ButtonDelete, BUTTONFLAG_LEFT, nullptr) ||
 		(Active && pFileBrowser->Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
 	{
 		if(pConfirmDeleteContext->m_IsDirectory)
@@ -943,7 +944,7 @@ CUi::EPopupMenuFunctionResult CFileBrowser::CPopupConfirmDelete::Render(void *pC
 			}
 			else
 			{
-				pEditor->ShowFileDialogError("Failed to delete folder '%s'. Make sure it's empty first. Check the local console for details.", pConfirmDeleteContext->m_aDeletePath);
+				pEditor->ShowFileDialogError(Localize("Failed to delete folder '%s'. Make sure it's empty first. Check the local console for details."), pConfirmDeleteContext->m_aDeletePath);
 			}
 		}
 		else
@@ -954,7 +955,7 @@ CUi::EPopupMenuFunctionResult CFileBrowser::CPopupConfirmDelete::Render(void *pC
 			}
 			else
 			{
-				pEditor->ShowFileDialogError("Failed to delete file '%s'. Check the local console for details.", pConfirmDeleteContext->m_aDeletePath);
+				pEditor->ShowFileDialogError(Localize("Failed to delete file '%s'. Check the local console for details."), pConfirmDeleteContext->m_aDeletePath);
 			}
 		}
 		pFileBrowser->UpdateFilenameInput();
@@ -977,19 +978,19 @@ CUi::EPopupMenuFunctionResult CFileBrowser::CPopupConfirmOverwrite::Render(void 
 	ButtonBar.VSplitLeft(110.0f, &ButtonCancel, &ButtonBar);
 	ButtonBar.VSplitRight(110.0f, &ButtonBar, &ButtonOverride);
 
-	pFileBrowser->Ui()->DoLabel(&Label, "Confirm overwrite", 20.0f, TEXTALIGN_MC);
+	pFileBrowser->Ui()->DoLabel(&Label, Localize("Confirm overwrite"), 20.0f, TEXTALIGN_MC);
 
 	char aMessage[IO_MAX_PATH_LENGTH + 128];
-	str_format(aMessage, sizeof(aMessage), "The file '%s' already exists.\n\nAre you sure that you want to overwrite it?",
+	str_format(aMessage, sizeof(aMessage), Localize("The file '%s' already exists.\n\nAre you sure that you want to overwrite it?"),
 		pConfirmOverwriteContext->m_aOverwritePath);
 	pFileBrowser->Ui()->DoLabel(&View, aMessage, 10.0f, TEXTALIGN_ML, {.m_MaxWidth = View.w});
 
-	if(pEditor->DoButton_Editor(&pConfirmOverwriteContext->m_ButtonCancelId, "Cancel", 0, &ButtonCancel, BUTTONFLAG_LEFT, nullptr))
+	if(pEditor->DoButton_Editor(&pConfirmOverwriteContext->m_ButtonCancelId, Localize("Cancel"), 0, &ButtonCancel, BUTTONFLAG_LEFT, nullptr))
 	{
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
 
-	if(pEditor->DoButton_Editor(&pConfirmOverwriteContext->m_ButtonOverwriteId, "Overwrite", EditorButtonChecked::DANGEROUS_ACTION, &ButtonOverride, BUTTONFLAG_LEFT, nullptr) ||
+	if(pEditor->DoButton_Editor(&pConfirmOverwriteContext->m_ButtonOverwriteId, Localize("Overwrite"), EditorButtonChecked::DANGEROUS_ACTION, &ButtonOverride, BUTTONFLAG_LEFT, nullptr) ||
 		(Active && pFileBrowser->Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
 	{
 		pFileBrowser->m_pfnOpenCallback(pConfirmOverwriteContext->m_aOverwritePath, IStorage::TYPE_SAVE, pFileBrowser->m_pOpenCallbackUser);

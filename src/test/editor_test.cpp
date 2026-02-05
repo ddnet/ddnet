@@ -1,5 +1,7 @@
 #include <base/system.h>
 
+#include <game/localization.h>
+
 #include <gtest/gtest.h>
 
 bool is_letter(char c) { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }

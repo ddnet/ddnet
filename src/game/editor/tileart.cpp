@@ -2,6 +2,7 @@
 #include "editor_actions.h"
 
 #include <game/editor/mapitems/image.h>
+#include <game/localization.h>
 
 #include <array>
 
@@ -195,7 +196,7 @@ bool CEditor::CallbackAddTileart(const char *pFilepath, int StorageType, void *p
 
 	if(!pEditor->Graphics()->LoadPng(pEditor->m_TileartImageInfo, pFilepath, StorageType))
 	{
-		pEditor->ShowFileDialogError("Failed to load image from file '%s'.", pFilepath);
+		pEditor->ShowFileDialogError(Localize("Failed to load image from file '%s'."), pFilepath);
 		return false;
 	}
 

@@ -104,7 +104,7 @@ bool CEditor::CallbackOpenMap(const char *pFilename, int StorageType, void *pUse
 	}
 	else
 	{
-		pEditor->ShowFileDialogError("Failed to load map from file '%s'.", pFilename);
+		pEditor->ShowFileDialogError(Localize("Failed to load map from file '%s'."), pFilename);
 		return false;
 	}
 }
@@ -123,7 +123,7 @@ bool CEditor::CallbackAppendMap(const char *pFilename, int StorageType, void *pU
 	}
 	else
 	{
-		pEditor->ShowFileDialogError("Failed to load map from file '%s'.", pFilename);
+		pEditor->ShowFileDialogError(Localize("Failed to load map from file '%s'."), pFilename);
 		return false;
 	}
 }
@@ -146,7 +146,7 @@ bool CEditor::CallbackSaveMap(const char *pFilename, int StorageType, void *pUse
 	}
 	else
 	{
-		pEditor->ShowFileDialogError("Failed to save map to file '%s'.", pFilename);
+		pEditor->ShowFileDialogError(Localize("Failed to save map to file '%s'."), pFilename);
 		return false;
 	}
 
@@ -179,7 +179,7 @@ bool CEditor::CallbackSaveCopyMap(const char *pFilename, int StorageType, void *
 	}
 	else
 	{
-		pEditor->ShowFileDialogError("Failed to save map to file '%s'.", pFilename);
+		pEditor->ShowFileDialogError(Localize("Failed to save map to file '%s'."), pFilename);
 		return false;
 	}
 }
@@ -199,7 +199,7 @@ bool CEditor::CallbackSaveImage(const char *pFilename, int StorageType, void *pU
 	}
 	else
 	{
-		pEditor->ShowFileDialogError("Failed to write image to file '%s'.", pFilename);
+		pEditor->ShowFileDialogError(Localize("Failed to write image to file '%s'."), pFilename);
 		return false;
 	}
 }
@@ -220,7 +220,7 @@ bool CEditor::CallbackSaveSound(const char *pFilename, int StorageType, void *pU
 		pEditor->OnDialogClose();
 		return true;
 	}
-	pEditor->ShowFileDialogError("Failed to open file '%s'.", pFilename);
+	pEditor->ShowFileDialogError(Localize("Failed to open file '%s'."), pFilename);
 	return false;
 }
 
@@ -233,14 +233,14 @@ bool CEditor::CallbackCustomEntities(const char *pFilename, int StorageType, voi
 
 	if(std::find(pEditor->m_vSelectEntitiesFiles.begin(), pEditor->m_vSelectEntitiesFiles.end(), std::string(aBuf)) != pEditor->m_vSelectEntitiesFiles.end())
 	{
-		pEditor->ShowFileDialogError("Custom entities cannot have the same name as default entities.");
+		pEditor->ShowFileDialogError(Localize("Custom entities cannot have the same name as default entities."));
 		return false;
 	}
 
 	CImageInfo ImgInfo;
 	if(!pEditor->Graphics()->LoadPng(ImgInfo, pFilename, StorageType))
 	{
-		pEditor->ShowFileDialogError("Failed to load image from file '%s'.", pFilename);
+		pEditor->ShowFileDialogError(Localize("Failed to load image from file '%s'."), pFilename);
 		return false;
 	}
 
@@ -261,7 +261,7 @@ void CEditor::DoAudioPreview(CUIRect View, const void *pPlayPauseButtonId, const
 	// play/pause button
 	{
 		View.VSplitLeft(View.h, &Button, &View);
-		if(DoButton_FontIcon(pPlayPauseButtonId, Sound()->IsPlaying(SampleId) ? FONT_ICON_PAUSE : FONT_ICON_PLAY, 0, &Button, BUTTONFLAG_LEFT, "Play/pause audio preview.", IGraphics::CORNER_ALL) ||
+		if(DoButton_FontIcon(pPlayPauseButtonId, Sound()->IsPlaying(SampleId) ? FONT_ICON_PAUSE : FONT_ICON_PLAY, 0, &Button, BUTTONFLAG_LEFT, Localize("Play/pause audio preview."), IGraphics::CORNER_ALL) ||
 			(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_SPACE)))
 		{
 			if(Sound()->IsPlaying(SampleId))
@@ -281,7 +281,7 @@ void CEditor::DoAudioPreview(CUIRect View, const void *pPlayPauseButtonId, const
 	{
 		View.VSplitLeft(2.0f, nullptr, &View);
 		View.VSplitLeft(View.h, &Button, &View);
-		if(DoButton_FontIcon(pStopButtonId, FONT_ICON_STOP, 0, &Button, BUTTONFLAG_LEFT, "Stop audio preview.", IGraphics::CORNER_ALL))
+		if(DoButton_FontIcon(pStopButtonId, FONT_ICON_STOP, 0, &Button, BUTTONFLAG_LEFT, Localize("Stop audio preview."), IGraphics::CORNER_ALL))
 		{
 			Sound()->Stop(SampleId);
 		}
@@ -387,7 +387,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		// detail button
 		ToolbarTop.VSplitLeft(40.0f, &Button, &ToolbarTop);
 		static int s_HqButton = 0;
-		if(DoButton_Editor(&s_HqButton, "HD", m_ShowDetail, &Button, BUTTONFLAG_LEFT, "[Ctrl+H] Toggle high detail.") ||
+		if(DoButton_Editor(&s_HqButton, Localize("HD"), m_ShowDetail, &Button, BUTTONFLAG_LEFT, Localize("[Ctrl+H] Toggle high detail.")) ||
 			(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_H) && ModPressed))
 		{
 			m_ShowDetail = !m_ShowDetail;
@@ -408,7 +408,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		// animation settings button
 		ToolbarTop.VSplitLeft(14.0f, &Button, &ToolbarTop);
 		static char s_AnimateSettingsButton;
-		if(DoButton_FontIcon(&s_AnimateSettingsButton, FONT_ICON_CIRCLE_CHEVRON_DOWN, 0, &Button, BUTTONFLAG_LEFT, "Change the animation settings.", IGraphics::CORNER_R, 8.0f))
+		if(DoButton_FontIcon(&s_AnimateSettingsButton, FONT_ICON_CIRCLE_CHEVRON_DOWN, 0, &Button, BUTTONFLAG_LEFT, Localize("Change the animation settings."), IGraphics::CORNER_R, 8.0f))
 		{
 			m_AnimateUpdatePopup = true;
 			static SPopupMenuId s_PopupAnimateSettingsId;
@@ -426,7 +426,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 
 		ToolbarTop.VSplitLeft(14.0f, &Button, &ToolbarTop);
 		static int s_ProofModeButton = 0;
-		if(DoButton_FontIcon(&s_ProofModeButton, FONT_ICON_CIRCLE_CHEVRON_DOWN, 0, &Button, BUTTONFLAG_LEFT, "Select proof mode.", IGraphics::CORNER_R, 8.0f))
+		if(DoButton_FontIcon(&s_ProofModeButton, FONT_ICON_CIRCLE_CHEVRON_DOWN, 0, &Button, BUTTONFLAG_LEFT, Localize("Select proof mode."), IGraphics::CORNER_R, 8.0f))
 		{
 			static SPopupMenuId s_PopupProofModeId;
 			Ui()->DoPopupMenu(&s_PopupProofModeId, Button.x, Button.y + Button.h, 60.0f, 36.0f, this, PopupProofMode);
@@ -437,7 +437,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		// zoom button
 		ToolbarTop.VSplitLeft(40.0f, &Button, &ToolbarTop);
 		static int s_ZoomButton = 0;
-		if(DoButton_Editor(&s_ZoomButton, "Zoom", m_PreviewZoom, &Button, BUTTONFLAG_LEFT, "Toggle preview of how layers will be zoomed ingame."))
+		if(DoButton_Editor(&s_ZoomButton, Localize("Zoom"), m_PreviewZoom, &Button, BUTTONFLAG_LEFT, Localize("Toggle preview of how layers will be zoomed ingame.")))
 		{
 			m_PreviewZoom = !m_PreviewZoom;
 		}
@@ -456,7 +456,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		// grid settings button
 		ToolbarTop.VSplitLeft(14.0f, &Button, &ToolbarTop);
 		static char s_GridSettingsButton;
-		if(DoButton_FontIcon(&s_GridSettingsButton, FONT_ICON_CIRCLE_CHEVRON_DOWN, 0, &Button, BUTTONFLAG_LEFT, "Change the grid settings.", IGraphics::CORNER_R, 8.0f))
+		if(DoButton_FontIcon(&s_GridSettingsButton, FONT_ICON_CIRCLE_CHEVRON_DOWN, 0, &Button, BUTTONFLAG_LEFT, Localize("Change the grid settings."), IGraphics::CORNER_R, 8.0f))
 		{
 			MapView()->MapGrid()->DoSettingsPopup(vec2(Button.x, Button.y + Button.h));
 		}
@@ -547,7 +547,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 			}
 
 			ToolbarTop.VSplitLeft(30.0f, &Button, &ToolbarTop);
-			auto RotationAmountRes = UiDoValueSelector(&s_RotationAmount, &Button, "", s_RotationAmount, TileLayer ? 90 : 1, 359, TileLayer ? 90 : 1, TileLayer ? 10.0f : 2.0f, "Rotation of the brush in degrees. Use left mouse button to drag and change the value. Hold shift to be more precise.", true, false, IGraphics::CORNER_NONE);
+			auto RotationAmountRes = UiDoValueSelector(&s_RotationAmount, &Button, "", s_RotationAmount, TileLayer ? 90 : 1, 359, TileLayer ? 90 : 1, TileLayer ? 10.0f : 2.0f, Localize("Rotation of the brush in degrees. Use left mouse button to drag and change the value. Hold shift to be more precise."), true, false, IGraphics::CORNER_NONE);
 			s_RotationAmount = RotationAmountRes.m_Value;
 
 			ToolbarTop.VSplitLeft(25.0f, &Button, &ToolbarTop);
@@ -616,25 +616,25 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 					int ExtraWidth = 0;
 					if(pS == Map()->m_pSwitchLayer)
 					{
-						pButtonName = "Switch";
+						pButtonName = Localize("Switch");
 						pfnPopupFunc = PopupSwitch;
 						Rows = 3;
 					}
 					else if(pS == Map()->m_pSpeedupLayer)
 					{
-						pButtonName = "Speedup";
+						pButtonName = Localize("Speedup");
 						pfnPopupFunc = PopupSpeedup;
 						Rows = 3;
 					}
 					else if(pS == Map()->m_pTuneLayer)
 					{
-						pButtonName = "Tune";
+						pButtonName = Localize("Tune");
 						pfnPopupFunc = PopupTune;
 						Rows = 2;
 					}
 					else if(pS == Map()->m_pTeleLayer)
 					{
-						pButtonName = "Tele";
+						pButtonName = Localize("Tele");
 						pfnPopupFunc = PopupTele;
 						Rows = 3;
 						ExtraWidth = 50;
@@ -692,7 +692,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		{
 			ToolbarBottom.VSplitLeft(65.0f, &Button, &ToolbarBottom);
 			static int s_BrushDrawModeButton = 0;
-			if(DoButton_Editor(&s_BrushDrawModeButton, "Destructive", m_BrushDrawDestructive, &Button, BUTTONFLAG_LEFT, "[Ctrl+D] Toggle brush draw mode: preserve or override existing tiles.") ||
+			if(DoButton_Editor(&s_BrushDrawModeButton, Localize("Destructive"), m_BrushDrawDestructive, &Button, BUTTONFLAG_LEFT, Localize("[Ctrl+D] Toggle brush draw mode: preserve or override existing tiles.")) ||
 				(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_D) && ModPressed && !ShiftPressed))
 				m_BrushDrawDestructive = !m_BrushDrawDestructive;
 			ToolbarBottom.VSplitLeft(5.0f, &Button, &ToolbarBottom);
@@ -709,7 +709,7 @@ void CEditor::DoToolbarImages(CUIRect ToolBar)
 	if(pSelectedImage != nullptr)
 	{
 		char aLabel[64];
-		str_format(aLabel, sizeof(aLabel), "Size: %" PRIzu " × %" PRIzu, pSelectedImage->m_Width, pSelectedImage->m_Height);
+		str_format(aLabel, sizeof(aLabel), Localize("Size: %" PRIzu " × %" PRIzu), pSelectedImage->m_Width, pSelectedImage->m_Height);
 		Ui()->DoLabel(&ToolBarBottom, aLabel, 12.0f, TEXTALIGN_ML);
 	}
 }
@@ -813,7 +813,7 @@ void CEditor::DoSoundSource(int LayerIndex, CSoundSource *pSource, int Index)
 		m_pUiGotContext = pSource;
 
 		Graphics()->SetColor(1, 1, 1, 1);
-		str_copy(m_aTooltip, "Left mouse button to move. Hold alt to ignore grid.");
+		str_copy(m_aTooltip, Localize("Left mouse button to move. Hold alt to ignore grid."));
 
 		if(Ui()->MouseButton(0))
 		{
@@ -1481,7 +1481,7 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 			EAxis Axis = GetDragAxis(s_LastOffset);
 			DrawAxis(Axis, s_OriginalPosition, pQuad->m_aPoints[4]);
 
-			str_copy(m_aTooltip, "Hold shift to keep alignment on one axis.");
+			str_copy(m_aTooltip, Localize("Hold shift to keep alignment on one axis."));
 		}
 
 		if(s_Operation == OP_MOVE_PIVOT)
@@ -1604,7 +1604,7 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 		m_pUiGotContext = pId;
 
 		Graphics()->SetColor(1, 1, 1, 1);
-		str_copy(m_aTooltip, "Left mouse button to move. Hold shift to move pivot. Hold alt to ignore grid. Shift+right click to delete.");
+		str_copy(m_aTooltip, Localize("Left mouse button to move. Hold shift to move pivot. Hold alt to ignore grid. Shift+right click to delete."));
 
 		if(Ui()->MouseButton(0))
 		{
@@ -1773,7 +1773,7 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 			// Alignments
 			DrawPointAlignments(s_Alignments, s_LastOffset);
 
-			str_copy(m_aTooltip, "Hold shift to keep alignment on one axis.");
+			str_copy(m_aTooltip, Localize("Hold shift to keep alignment on one axis."));
 		}
 
 		if(s_Operation == OP_CONTEXT_MENU)
@@ -1827,7 +1827,7 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 		m_pUiGotContext = pId;
 
 		Graphics()->SetColor(1, 1, 1, 1);
-		str_copy(m_aTooltip, "Left mouse button to move. Hold shift to move the texture. Hold alt to ignore grid.");
+		str_copy(m_aTooltip, Localize("Left mouse button to move. Hold shift to move the texture. Hold alt to ignore grid."));
 
 		if(Ui()->MouseButton(0))
 		{
@@ -1902,7 +1902,7 @@ void CEditor::DoQuadKnife(int QuadIndex)
 		vec2(fx2f(pQuad->m_aPoints[3].x), fx2f(pQuad->m_aPoints[3].y)),
 		vec2(fx2f(pQuad->m_aPoints[2].x), fx2f(pQuad->m_aPoints[2].y))};
 
-	str_copy(m_aTooltip, "Left click inside the quad to select an area to slice. Hold alt to ignore grid. Right click to leave knife mode.");
+	str_copy(m_aTooltip, Localize("Left click inside the quad to select an area to slice. Hold alt to ignore grid. Right click to leave knife mode."));
 
 	if(Ui()->MouseButtonClicked(1))
 	{
@@ -2305,7 +2305,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, CEnvelope *pEnvelope, int QuadI
 	else if(Ui()->HotItem() == pPoint && Map()->m_CurrentQuadIndex == QuadIndex)
 	{
 		Graphics()->SetColor(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
-		str_copy(m_aTooltip, "Left mouse button to move. Hold ctrl to rotate. Hold alt to ignore grid.");
+		str_copy(m_aTooltip, Localize("Left mouse button to move. Hold ctrl to rotate. Hold alt to ignore grid."));
 
 		if(Ui()->MouseButton(0))
 		{
@@ -2538,11 +2538,11 @@ void CEditor::DoMapEditor(CUIRect View)
 				CExplanations::EGametype ExplanationGametype;
 				if(m_SelectEntitiesImage == "DDNet")
 					ExplanationGametype = CExplanations::EGametype::DDNET;
-				else if(m_SelectEntitiesImage == "FNG")
+				else if(m_SelectEntitiesImage == Localize("FNG"))
 					ExplanationGametype = CExplanations::EGametype::FNG;
-				else if(m_SelectEntitiesImage == "Race")
+				else if(m_SelectEntitiesImage == Localize("Race"))
 					ExplanationGametype = CExplanations::EGametype::RACE;
-				else if(m_SelectEntitiesImage == "Vanilla")
+				else if(m_SelectEntitiesImage == Localize("Vanilla"))
 					ExplanationGametype = CExplanations::EGametype::VANILLA;
 				else if(m_SelectEntitiesImage == "blockworlds")
 					ExplanationGametype = CExplanations::EGametype::BLOCKWORLDS;
@@ -2557,18 +2557,18 @@ void CEditor::DoMapEditor(CUIRect View)
 				}
 			}
 			else if(m_pBrush->IsEmpty() && Map()->SelectedLayerType(0, LAYERTYPE_QUADS) != nullptr)
-				str_copy(m_aTooltip, "Use left mouse button to drag and create a brush. Hold shift to select multiple quads. Press R to rotate selected quads. Use ctrl+right click to select layer.");
+				str_copy(m_aTooltip, Localize("Use left mouse button to drag and create a brush. Hold shift to select multiple quads. Press R to rotate selected quads. Use ctrl+right click to select layer."));
 			else if(m_pBrush->IsEmpty())
 			{
 				if(g_Config.m_EdLayerSelector)
-					str_copy(m_aTooltip, "Use left mouse button to drag and create a brush. Use ctrl+right click to select layer of hovered tile.");
+					str_copy(m_aTooltip, Localize("Use left mouse button to drag and create a brush. Use ctrl+right click to select layer of hovered tile."));
 				else
-					str_copy(m_aTooltip, "Use left mouse button to drag and create a brush.");
+					str_copy(m_aTooltip, Localize("Use left mouse button to drag and create a brush."));
 			}
 			else
 			{
 				// Alt behavior handled in CEditor::MouseAxisLock
-				str_copy(m_aTooltip, "Use left mouse button to paint with the brush. Right click to clear the brush. Hold Alt to lock the mouse movement to a single axis.");
+				str_copy(m_aTooltip, Localize("Use left mouse button to paint with the brush. Right click to clear the brush. Hold Alt to lock the mouse movement to a single axis."));
 			}
 
 			if(Ui()->CheckActiveItem(&m_MapEditorId))
@@ -2825,9 +2825,10 @@ void CEditor::DoMapEditor(CUIRect View)
 					}
 					else if(Ui()->HotItem() == &MapView()->ProofMode()->m_vMenuBackgroundPositions[i])
 					{
-						char aTooltipPrefix[32] = "Switch proof position to";
+						char aTooltipPrefix[32];
+					str_copy(aTooltipPrefix, Localize("Switch proof position to"));
 						if(i == MapView()->ProofMode()->m_CurrentMenuProofIndex)
-							str_copy(aTooltipPrefix, "Current proof position at");
+							str_copy(aTooltipPrefix, Localize("Current proof position at"));
 
 						char aNumBuf[8];
 						if(i < (TILE_TIME_CHECKPOINT_LAST - TILE_TIME_CHECKPOINT_FIRST))
@@ -2841,7 +2842,7 @@ void CEditor::DoMapEditor(CUIRect View)
 						for(int k : MapView()->ProofMode()->m_vMenuBackgroundCollisions.at(i))
 						{
 							if(k == MapView()->ProofMode()->m_CurrentMenuProofIndex)
-								str_copy(aTooltipPrefix, "Current proof position at");
+								str_copy(aTooltipPrefix, Localize("Current proof position at"));
 
 							Pos = MapView()->ProofMode()->m_vMenuBackgroundPositions[k];
 							Pos += MapView()->GetWorldOffset() - MapView()->ProofMode()->m_vMenuBackgroundPositions[MapView()->ProofMode()->m_CurrentMenuProofIndex];
@@ -2984,7 +2985,7 @@ void CEditor::DoColorPickerButton(const void *pId, const CUIRect *pRect, ColorRG
 	pRect->Margin(1.0f, &ColorRect);
 	ColorRect.Draw(Color, IGraphics::CORNER_ALL, 3.0f);
 
-	const int ButtonResult = DoButtonLogic(pId, 0, pRect, BUTTONFLAG_ALL, "Click to show the color picker. Shift+right click to copy color to clipboard. Shift+left click to paste color from clipboard.");
+	const int ButtonResult = DoButtonLogic(pId, 0, pRect, BUTTONFLAG_ALL, Localize("Click to show the color picker. Shift+right click to copy color to clipboard. Shift+left click to paste color from clipboard."));
 	if(Input()->ShiftIsPressed())
 	{
 		if(ButtonResult == 1)
@@ -3186,7 +3187,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		{
 			Slot.VSplitLeft(15.0f, &VisibleToggle, &Slot);
 
-			const int MouseClick = DoButton_FontIcon(&Map()->m_vpGroups[g]->m_Visible, Map()->m_vpGroups[g]->m_Visible ? FONT_ICON_EYE : FONT_ICON_EYE_SLASH, Map()->m_vpGroups[g]->m_Collapse ? 1 : 0, &VisibleToggle, BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT, "Left click to toggle visibility. Right click to show this group only.", IGraphics::CORNER_L, 8.0f);
+			const int MouseClick = DoButton_FontIcon(&Map()->m_vpGroups[g]->m_Visible, Map()->m_vpGroups[g]->m_Visible ? FONT_ICON_EYE : FONT_ICON_EYE_SLASH, Map()->m_vpGroups[g]->m_Collapse ? 1 : 0, &VisibleToggle, BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT, Localize("Left click to toggle visibility. Right click to show this group only."), IGraphics::CORNER_L, 8.0f);
 			if(MouseClick == 1)
 			{
 				Map()->m_vpGroups[g]->m_Visible = !Map()->m_vpGroups[g]->m_Visible;
@@ -3228,7 +3229,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 			bool Clicked;
 			bool Abrupted;
 			if(int Result = DoButton_DraggableEx(Map()->m_vpGroups[g].get(), aBuf, g == Map()->m_SelectedGroup, &Slot, &Clicked, &Abrupted,
-				   BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT, Map()->m_vpGroups[g]->m_Collapse ? "Select group. Shift+left click to select all layers. Double click to expand." : "Select group. Shift+left click to select all layers. Double click to collapse.", IGraphics::CORNER_R))
+				   BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT, Map()->m_vpGroups[g]->m_Collapse ? Localize("Select group. Shift+left click to select all layers. Double click to expand.") : Localize("Select group. Shift+left click to select all layers. Double click to collapse."), IGraphics::CORNER_R))
 			{
 				if(s_Operation == OP_NONE)
 				{
@@ -3345,7 +3346,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 			Slot.VSplitLeft(12.0f, nullptr, &Slot);
 			Slot.VSplitLeft(15.0f, &VisibleToggle, &Button);
 
-			const int MouseClick = DoButton_FontIcon(&Map()->m_vpGroups[g]->m_vpLayers[i]->m_Visible, Map()->m_vpGroups[g]->m_vpLayers[i]->m_Visible ? FONT_ICON_EYE : FONT_ICON_EYE_SLASH, 0, &VisibleToggle, BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT, "Left click to toggle visibility. Right click to show only this layer within its group.", IGraphics::CORNER_L, 8.0f);
+			const int MouseClick = DoButton_FontIcon(&Map()->m_vpGroups[g]->m_vpLayers[i]->m_Visible, Map()->m_vpGroups[g]->m_vpLayers[i]->m_Visible ? FONT_ICON_EYE : FONT_ICON_EYE_SLASH, 0, &VisibleToggle, BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT, Localize("Left click to toggle visibility. Right click to show only this layer within its group."), IGraphics::CORNER_L, 8.0f);
 			if(MouseClick == 1)
 			{
 				Map()->m_vpGroups[g]->m_vpLayers[i]->m_Visible = !Map()->m_vpGroups[g]->m_vpLayers[i]->m_Visible;
@@ -3389,17 +3390,17 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 				if(Map()->m_vpGroups[g]->m_vpLayers[i]->m_Type == LAYERTYPE_TILES)
 				{
 					std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(Map()->m_vpGroups[g]->m_vpLayers[i]);
-					str_copy(aBuf, pTiles->m_Image >= 0 ? Map()->m_vpImages[pTiles->m_Image]->m_aName : "Tiles");
+					str_copy(aBuf, pTiles->m_Image >= 0 ? Map()->m_vpImages[pTiles->m_Image]->m_aName : Localize("Tiles"));
 				}
 				else if(Map()->m_vpGroups[g]->m_vpLayers[i]->m_Type == LAYERTYPE_QUADS)
 				{
 					std::shared_ptr<CLayerQuads> pQuads = std::static_pointer_cast<CLayerQuads>(Map()->m_vpGroups[g]->m_vpLayers[i]);
-					str_copy(aBuf, pQuads->m_Image >= 0 ? Map()->m_vpImages[pQuads->m_Image]->m_aName : "Quads");
+					str_copy(aBuf, pQuads->m_Image >= 0 ? Map()->m_vpImages[pQuads->m_Image]->m_aName : Localize("Quads"));
 				}
 				else if(Map()->m_vpGroups[g]->m_vpLayers[i]->m_Type == LAYERTYPE_SOUNDS)
 				{
 					std::shared_ptr<CLayerSounds> pSounds = std::static_pointer_cast<CLayerSounds>(Map()->m_vpGroups[g]->m_vpLayers[i]);
-					str_copy(aBuf, pSounds->m_Sound >= 0 ? Map()->m_vpSounds[pSounds->m_Sound]->m_aName : "Sounds");
+					str_copy(aBuf, pSounds->m_Sound >= 0 ? Map()->m_vpSounds[pSounds->m_Sound]->m_aName : Localize("Sounds"));
 				}
 			}
 
@@ -3412,7 +3413,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 			bool Clicked;
 			bool Abrupted;
 			if(int Result = DoButton_DraggableEx(Map()->m_vpGroups[g]->m_vpLayers[i].get(), aBuf, Checked, &Button, &Clicked, &Abrupted,
-				   BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT, "Select layer. Hold shift to select multiple.", IGraphics::CORNER_R))
+				   BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT, Localize("Select layer. Hold shift to select multiple."), IGraphics::CORNER_R))
 			{
 				if(s_Operation == OP_NONE)
 				{
@@ -3689,11 +3690,11 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 			}
 		}
 
-		const char *pActionText = TotalCollapsed == Map()->m_vpGroups.size() ? "Expand all" : "Collapse all";
+		const char *pActionText = TotalCollapsed == Map()->m_vpGroups.size() ? Localize("Expand all") : Localize("Collapse all");
 
 		CollapseAllButton.HSplitTop(RowHeight, &CollapseAllButton, nullptr);
 		static int s_CollapseAllButton = 0;
-		if(DoButton_Editor(&s_CollapseAllButton, pActionText, 0, &CollapseAllButton, BUTTONFLAG_LEFT, "Expand or collapse all groups."))
+		if(DoButton_Editor(&s_CollapseAllButton, pActionText, 0, &CollapseAllButton, BUTTONFLAG_LEFT, Localize("Expand or collapse all groups.")))
 		{
 			for(const auto &pGroup : Map()->m_vpGroups)
 			{
@@ -3749,7 +3750,7 @@ bool CEditor::ReplaceImage(const char *pFilename, int StorageType, bool CheckDup
 		{
 			if(!str_comp(pImage->m_aName, aBuf))
 			{
-				ShowFileDialogError("Image named '%s' was already added.", pImage->m_aName);
+				ShowFileDialogError(Localize("Image named '%s' was already added."), pImage->m_aName);
 				return false;
 			}
 		}
@@ -3758,7 +3759,7 @@ bool CEditor::ReplaceImage(const char *pFilename, int StorageType, bool CheckDup
 	CImageInfo ImgInfo;
 	if(!Graphics()->LoadPng(ImgInfo, pFilename, StorageType))
 	{
-		ShowFileDialogError("Failed to load image from file '%s'.", pFilename);
+		ShowFileDialogError(Localize("Failed to load image from file '%s'."), pFilename);
 		return false;
 	}
 
@@ -3802,7 +3803,7 @@ bool CEditor::AddImage(const char *pFilename, int StorageType, void *pUser)
 	{
 		if(!str_comp(pImage->m_aName, aBuf))
 		{
-			pEditor->ShowFileDialogError("Image named '%s' was already added.", pImage->m_aName);
+			pEditor->ShowFileDialogError(Localize("Image named '%s' was already added."), pImage->m_aName);
 			return false;
 		}
 	}
@@ -3817,7 +3818,7 @@ bool CEditor::AddImage(const char *pFilename, int StorageType, void *pUser)
 	CImageInfo ImgInfo;
 	if(!pEditor->Graphics()->LoadPng(ImgInfo, pFilename, StorageType))
 	{
-		pEditor->ShowFileDialogError("Failed to load image from file '%s'.", pFilename);
+		pEditor->ShowFileDialogError(Localize("Failed to load image from file '%s'."), pFilename);
 		return false;
 	}
 
@@ -3855,7 +3856,7 @@ bool CEditor::AddSound(const char *pFilename, int StorageType, void *pUser)
 	{
 		if(!str_comp(pSound->m_aName, aBuf))
 		{
-			pEditor->ShowFileDialogError("Sound named '%s' was already added.", pSound->m_aName);
+			pEditor->ShowFileDialogError(Localize("Sound named '%s' was already added."), pSound->m_aName);
 			return false;
 		}
 	}
@@ -3872,7 +3873,7 @@ bool CEditor::AddSound(const char *pFilename, int StorageType, void *pUser)
 	unsigned DataSize;
 	if(!pEditor->Storage()->ReadFile(pFilename, StorageType, &pData, &DataSize))
 	{
-		pEditor->ShowFileDialogError("Failed to open sound file '%s'.", pFilename);
+		pEditor->ShowFileDialogError(Localize("Failed to open sound file '%s'."), pFilename);
 		return false;
 	}
 
@@ -3881,7 +3882,7 @@ bool CEditor::AddSound(const char *pFilename, int StorageType, void *pUser)
 	if(SoundId == -1)
 	{
 		free(pData);
-		pEditor->ShowFileDialogError("Failed to load sound from file '%s'.", pFilename);
+		pEditor->ShowFileDialogError(Localize("Failed to load sound from file '%s'."), pFilename);
 		return false;
 	}
 
@@ -3909,7 +3910,7 @@ bool CEditor::ReplaceSound(const char *pFilename, int StorageType, bool CheckDup
 		{
 			if(!str_comp(pSound->m_aName, aBuf))
 			{
-				ShowFileDialogError("Sound named '%s' was already added.", pSound->m_aName);
+				ShowFileDialogError(Localize("Sound named '%s' was already added."), pSound->m_aName);
 				return false;
 			}
 		}
@@ -3920,7 +3921,7 @@ bool CEditor::ReplaceSound(const char *pFilename, int StorageType, bool CheckDup
 	unsigned DataSize;
 	if(!Storage()->ReadFile(pFilename, StorageType, &pData, &DataSize))
 	{
-		ShowFileDialogError("Failed to open sound file '%s'.", pFilename);
+		ShowFileDialogError(Localize("Failed to open sound file '%s'."), pFilename);
 		return false;
 	}
 
@@ -3929,7 +3930,7 @@ bool CEditor::ReplaceSound(const char *pFilename, int StorageType, bool CheckDup
 	if(SoundId == -1)
 	{
 		free(pData);
-		ShowFileDialogError("Failed to load sound from file '%s'.", pFilename);
+		ShowFileDialogError(Localize("Failed to load sound from file '%s'."), pFilename);
 		return false;
 	}
 
@@ -3995,7 +3996,7 @@ void CEditor::RenderImagesList(CUIRect ToolBox)
 		CUIRect Slot;
 		ToolBox.HSplitTop(RowHeight + 3.0f, &Slot, &ToolBox);
 		if(s_ScrollRegion.AddRect(Slot))
-			Ui()->DoLabel(&Slot, e == 0 ? "Embedded" : "External", 12.0f, TEXTALIGN_MC);
+			Ui()->DoLabel(&Slot, e == 0 ? Localize("Embedded") : Localize("External"), 12.0f, TEXTALIGN_MC);
 
 		for(int i = 0; i < (int)Map()->m_vpImages.size(); i++)
 		{
@@ -4033,7 +4034,7 @@ void CEditor::RenderImagesList(CUIRect ToolBox)
 			}
 
 			if(int Result = DoButton_Ex(&Map()->m_vpImages[i], Map()->m_vpImages[i]->m_aName, Selected, &Slot,
-				   BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT, "Select image.", IGraphics::CORNER_ALL))
+				   BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT, Localize("Select image."), IGraphics::CORNER_ALL))
 			{
 				Map()->m_SelectedImage = i;
 
@@ -4127,7 +4128,7 @@ void CEditor::RenderSounds(CUIRect ToolBox)
 	CUIRect Slot;
 	ToolBox.HSplitTop(RowHeight + 3.0f, &Slot, &ToolBox);
 	if(s_ScrollRegion.AddRect(Slot))
-		Ui()->DoLabel(&Slot, "Embedded", 12.0f, TEXTALIGN_MC);
+		Ui()->DoLabel(&Slot, Localize("Embedded"), 12.0f, TEXTALIGN_MC);
 
 	for(int i = 0; i < (int)Map()->m_vpSounds.size(); i++)
 	{
@@ -4149,7 +4150,7 @@ void CEditor::RenderSounds(CUIRect ToolBox)
 			Selected += 2; // Sound is unused
 
 		if(int Result = DoButton_Ex(&Map()->m_vpSounds[i], Map()->m_vpSounds[i]->m_aName, Selected, &Slot,
-			   BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT, "Select sound.", IGraphics::CORNER_ALL))
+			   BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT, Localize("Select sound."), IGraphics::CORNER_ALL))
 		{
 			Map()->m_SelectedSound = i;
 
@@ -4180,8 +4181,8 @@ void CEditor::RenderSounds(CUIRect ToolBox)
 	{
 		AddSoundButton.HSplitTop(5.0f, nullptr, &AddSoundButton);
 		AddSoundButton.HSplitTop(RowHeight, &AddSoundButton, nullptr);
-		if(DoButton_Editor(&s_AddSoundButton, "Add sound", 0, &AddSoundButton, BUTTONFLAG_LEFT, "Load a new sound to use in the map."))
-			m_FileBrowser.ShowFileDialog(IStorage::TYPE_ALL, CFileBrowser::EFileType::SOUND, "Add sound", "Add", "mapres", "", AddSound, this);
+		if(DoButton_Editor(&s_AddSoundButton, Localize("Add sound"), 0, &AddSoundButton, BUTTONFLAG_LEFT, Localize("Load a new sound to use in the map.")))
+			m_FileBrowser.ShowFileDialog(IStorage::TYPE_ALL, CFileBrowser::EFileType::SOUND, Localize("Add sound"), Localize("Add"), "mapres", "", AddSound, this);
 	}
 	s_ScrollRegion.End();
 }
@@ -4254,21 +4255,21 @@ void CEditor::RenderModebar(CUIRect View)
 	{
 		ModeButtons.VSplitLeft(ButtonWidth, &ModeButton, &ModeButtons);
 		static int s_LayersButton = 0;
-		if(DoButton_FontIcon(&s_LayersButton, FONT_ICON_LAYER_GROUP, m_Mode == MODE_LAYERS, &ModeButton, BUTTONFLAG_LEFT, "Go to layers management.", IGraphics::CORNER_L))
+		if(DoButton_FontIcon(&s_LayersButton, FONT_ICON_LAYER_GROUP, m_Mode == MODE_LAYERS, &ModeButton, BUTTONFLAG_LEFT, Localize("Go to layers management."), IGraphics::CORNER_L))
 		{
 			m_Mode = MODE_LAYERS;
 		}
 
 		ModeButtons.VSplitLeft(ButtonWidth, &ModeButton, &ModeButtons);
 		static int s_ImagesButton = 0;
-		if(DoButton_FontIcon(&s_ImagesButton, FONT_ICON_IMAGE, m_Mode == MODE_IMAGES, &ModeButton, BUTTONFLAG_LEFT, "Go to images management.", IGraphics::CORNER_NONE))
+		if(DoButton_FontIcon(&s_ImagesButton, FONT_ICON_IMAGE, m_Mode == MODE_IMAGES, &ModeButton, BUTTONFLAG_LEFT, Localize("Go to images management."), IGraphics::CORNER_NONE))
 		{
 			m_Mode = MODE_IMAGES;
 		}
 
 		ModeButtons.VSplitLeft(ButtonWidth, &ModeButton, &ModeButtons);
 		static int s_SoundsButton = 0;
-		if(DoButton_FontIcon(&s_SoundsButton, FONT_ICON_MUSIC, m_Mode == MODE_SOUNDS, &ModeButton, BUTTONFLAG_LEFT, "Go to sounds management.", IGraphics::CORNER_R))
+		if(DoButton_FontIcon(&s_SoundsButton, FONT_ICON_MUSIC, m_Mode == MODE_SOUNDS, &ModeButton, BUTTONFLAG_LEFT, Localize("Go to sounds management."), IGraphics::CORNER_R))
 		{
 			m_Mode = MODE_SOUNDS;
 		}
@@ -4635,7 +4636,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 		static int s_NewSoundButton = 0;
-		if(DoButton_Editor(&s_NewSoundButton, "Sound+", 0, &Button, BUTTONFLAG_LEFT, "Create a new sound envelope."))
+		if(DoButton_Editor(&s_NewSoundButton, Localize("Sound+"), 0, &Button, BUTTONFLAG_LEFT, Localize("Create a new sound envelope.")))
 		{
 			Map()->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionEnvelopeAdd>(Map(), CEnvelope::EType::SOUND));
 			pEnvelope = Map()->m_vpEnvelopes[Map()->m_SelectedEnvelope];
@@ -4645,7 +4646,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
 		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 		static int s_New4dButton = 0;
-		if(DoButton_Editor(&s_New4dButton, "Color+", 0, &Button, BUTTONFLAG_LEFT, "Create a new color envelope."))
+		if(DoButton_Editor(&s_New4dButton, Localize("Color+"), 0, &Button, BUTTONFLAG_LEFT, Localize("Create a new color envelope.")))
 		{
 			Map()->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionEnvelopeAdd>(Map(), CEnvelope::EType::COLOR));
 			pEnvelope = Map()->m_vpEnvelopes[Map()->m_SelectedEnvelope];
@@ -4655,7 +4656,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
 		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 		static int s_New2dButton = 0;
-		if(DoButton_Editor(&s_New2dButton, "Pos.+", 0, &Button, BUTTONFLAG_LEFT, "Create a new position envelope."))
+		if(DoButton_Editor(&s_New2dButton, Localize("Pos.+"), 0, &Button, BUTTONFLAG_LEFT, Localize("Create a new position envelope.")))
 		{
 			Map()->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionEnvelopeAdd>(Map(), CEnvelope::EType::POSITION));
 			pEnvelope = Map()->m_vpEnvelopes[Map()->m_SelectedEnvelope];
@@ -4668,7 +4669,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			ToolBar.VSplitRight(10.0f, &ToolBar, nullptr);
 			ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
 			static int s_DeleteButton = 0;
-			if(DoButton_Editor(&s_DeleteButton, "✗", 0, &Button, BUTTONFLAG_LEFT, "Delete this envelope."))
+			if(DoButton_Editor(&s_DeleteButton, "✗", 0, &Button, BUTTONFLAG_LEFT, Localize("Delete this envelope.")))
 			{
 				auto vpObjectReferences = Map()->DeleteEnvelope(Map()->m_SelectedEnvelope);
 				Map()->m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeDelete>(Map(), Map()->m_SelectedEnvelope, vpObjectReferences, pEnvelope));
@@ -4686,7 +4687,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
 			ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
 			static int s_MoveRightButton = 0;
-			if(DoButton_Ex(&s_MoveRightButton, "→", (Map()->m_SelectedEnvelope >= (int)Map()->m_vpEnvelopes.size() - 1 ? -1 : 0), &Button, BUTTONFLAG_LEFT, "Move this envelope to the right.", IGraphics::CORNER_R))
+			if(DoButton_Ex(&s_MoveRightButton, "→", (Map()->m_SelectedEnvelope >= (int)Map()->m_vpEnvelopes.size() - 1 ? -1 : 0), &Button, BUTTONFLAG_LEFT, Localize("Move this envelope to the right."), IGraphics::CORNER_R))
 			{
 				int MoveTo = Map()->m_SelectedEnvelope + 1;
 				int MoveFrom = Map()->m_SelectedEnvelope;
@@ -4702,7 +4703,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			// Move left button
 			ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
 			static int s_MoveLeftButton = 0;
-			if(DoButton_Ex(&s_MoveLeftButton, "←", (Map()->m_SelectedEnvelope <= 0 ? -1 : 0), &Button, BUTTONFLAG_LEFT, "Move this envelope to the left.", IGraphics::CORNER_L))
+			if(DoButton_Ex(&s_MoveLeftButton, "←", (Map()->m_SelectedEnvelope <= 0 ? -1 : 0), &Button, BUTTONFLAG_LEFT, Localize("Move this envelope to the left."), IGraphics::CORNER_L))
 			{
 				int MoveTo = Map()->m_SelectedEnvelope - 1;
 				int MoveFrom = Map()->m_SelectedEnvelope;
@@ -4762,7 +4763,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		}
 
 		static int s_EnvelopeSelector = 0;
-		auto NewValueRes = UiDoValueSelector(&s_EnvelopeSelector, &Shifter, aBuf, Map()->m_SelectedEnvelope + 1, 1, Map()->m_vpEnvelopes.size(), 1, 1.0f, "Select the envelope.", false, false, IGraphics::CORNER_NONE, &EnvColor, false);
+		auto NewValueRes = UiDoValueSelector(&s_EnvelopeSelector, &Shifter, aBuf, Map()->m_SelectedEnvelope + 1, 1, Map()->m_vpEnvelopes.size(), 1, 1.0f, Localize("Select the envelope."), false, false, IGraphics::CORNER_NONE, &EnvColor, false);
 		int NewValue = NewValueRes.m_Value;
 		if(NewValue - 1 != Map()->m_SelectedEnvelope)
 		{
@@ -4771,7 +4772,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		}
 
 		static int s_PrevButton = 0;
-		if(DoButton_FontIcon(&s_PrevButton, FONT_ICON_MINUS, 0, &Dec, BUTTONFLAG_LEFT, "Select previous envelope.", IGraphics::CORNER_L, 7.0f))
+		if(DoButton_FontIcon(&s_PrevButton, FONT_ICON_MINUS, 0, &Dec, BUTTONFLAG_LEFT, Localize("Select previous envelope."), IGraphics::CORNER_L, 7.0f))
 		{
 			Map()->m_SelectedEnvelope--;
 			if(Map()->m_SelectedEnvelope < 0)
@@ -4780,7 +4781,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		}
 
 		static int s_NextButton = 0;
-		if(DoButton_FontIcon(&s_NextButton, FONT_ICON_PLUS, 0, &Inc, BUTTONFLAG_LEFT, "Select next envelope.", IGraphics::CORNER_R, 7.0f))
+		if(DoButton_FontIcon(&s_NextButton, FONT_ICON_PLUS, 0, &Inc, BUTTONFLAG_LEFT, Localize("Select next envelope."), IGraphics::CORNER_R, 7.0f))
 		{
 			Map()->m_SelectedEnvelope++;
 			if(Map()->m_SelectedEnvelope >= (int)Map()->m_vpEnvelopes.size())
@@ -4792,13 +4793,13 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		{
 			ToolBar.VSplitLeft(15.0f, nullptr, &ToolBar);
 			ToolBar.VSplitLeft(40.0f, &Button, &ToolBar);
-			Ui()->DoLabel(&Button, "Name:", 10.0f, TEXTALIGN_MR);
+			Ui()->DoLabel(&Button, Localize("Name:"), 10.0f, TEXTALIGN_MR);
 
 			ToolBar.VSplitLeft(3.0f, nullptr, &ToolBar);
 			ToolBar.VSplitLeft(ToolBar.w > ToolBar.h * 40 ? 80.0f : 60.0f, &Button, &ToolBar);
 
 			s_NameInput.SetBuffer(pEnvelope->m_aName, sizeof(pEnvelope->m_aName));
-			if(DoEditBox(&s_NameInput, &Button, 10.0f, IGraphics::CORNER_ALL, "The name of the selected envelope."))
+			if(DoEditBox(&s_NameInput, &Button, 10.0f, IGraphics::CORNER_ALL, Localize("The name of the selected envelope.")))
 			{
 				Map()->OnModify();
 			}
@@ -4831,15 +4832,15 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		static const char *s_aapNames[4][CEnvPoint::MAX_CHANNELS] = {
 			{"V", "", "", ""},
 			{"", "", "", ""},
-			{"X", "Y", "R", ""},
-			{"R", "G", "B", "A"},
+			{"X", "Y", Localize("R"), ""},
+			{Localize("R"), Localize("G"), Localize("B"), Localize("A")},
 		};
 
 		static const char *s_aapDescriptions[4][CEnvPoint::MAX_CHANNELS] = {
-			{"Volume of the envelope.", "", "", ""},
+			{Localize("Volume of the envelope."), "", "", ""},
 			{"", "", "", ""},
-			{"X-axis of the envelope.", "Y-axis of the envelope.", "Rotation of the envelope.", ""},
-			{"Red value of the envelope.", "Green value of the envelope.", "Blue value of the envelope.", "Alpha value of the envelope."},
+			{Localize("X-axis of the envelope."), Localize("Y-axis of the envelope."), Localize("Rotation of the envelope."), ""},
+			{Localize("Red value of the envelope."), Localize("Green value of the envelope."), Localize("Blue value of the envelope."), Localize("Alpha value of the envelope.")},
 		};
 
 		static int s_aChannelButtons[CEnvPoint::MAX_CHANNELS] = {0};
@@ -4954,7 +4955,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			}
 
 			m_ActiveEnvelopePreview = EEnvelopePreview::SELECTED;
-			str_copy(m_aTooltip, "Double click to create a new point. Use shift to change the zoom axis. Press S to scale selected envelope points.");
+			str_copy(m_aTooltip, Localize("Double click to create a new point. Use shift to change the zoom axis. Press S to scale selected envelope points."));
 		}
 
 		UpdateZoomEnvelopeX(View);
@@ -5166,14 +5167,14 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				CurveButton.w = CurveBar.h;
 				CurveButton.x -= CurveButton.w / 2.0f;
 				const void *pId = &pEnvelope->m_vPoints[i].m_Curvetype;
-				static const char *const TYPE_NAMES[NUM_CURVETYPES] = {"N", "L", "S", "F", "M", "B"};
+				static const char *const TYPE_NAMES[NUM_CURVETYPES] = {"N", Localize("L"), Localize("S"), "F", Localize("M"), Localize("B")};
 				const char *pTypeName = "!?";
 				if(0 <= pEnvelope->m_vPoints[i].m_Curvetype && pEnvelope->m_vPoints[i].m_Curvetype < (int)std::size(TYPE_NAMES))
 					pTypeName = TYPE_NAMES[pEnvelope->m_vPoints[i].m_Curvetype];
 
 				if(CurveButton.x >= View.x)
 				{
-					const int ButtonResult = DoButton_Editor(pId, pTypeName, 0, &CurveButton, BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT, "Switch curve type (N = step, L = linear, S = slow, F = fast, M = smooth, B = bezier).");
+					const int ButtonResult = DoButton_Editor(pId, pTypeName, 0, &CurveButton, BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT, Localize("Switch curve type (N = step, L = linear, S = slow, F = fast, M = smooth, B = bezier)."));
 					if(ButtonResult == 1)
 					{
 						const int PrevCurve = pEnvelope->m_vPoints[i].m_Curvetype;
@@ -5422,7 +5423,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 							m_ActiveEnvelopePreview = EEnvelopePreview::SELECTED;
 							Graphics()->SetColor(1, 1, 1, 1);
-							str_copy(m_aTooltip, "Envelope point. Left mouse to drag. Hold ctrl to be more precise. Hold shift to alter time. Shift+right click to delete.");
+							str_copy(m_aTooltip, Localize("Envelope point. Left mouse to drag. Hold ctrl to be more precise. Hold shift to alter time. Shift+right click to delete."));
 							m_pUiGotContext = pId;
 						}
 						else
@@ -5557,7 +5558,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 								m_ActiveEnvelopePreview = EEnvelopePreview::SELECTED;
 								Graphics()->SetColor(1, 1, 1, 1);
-								str_copy(m_aTooltip, "Bezier out-tangent. Left mouse to drag. Hold ctrl to be more precise. Shift+right click to reset.");
+								str_copy(m_aTooltip, Localize("Bezier out-tangent. Left mouse to drag. Hold ctrl to be more precise. Shift+right click to reset."));
 								m_pUiGotContext = pId;
 							}
 							else
@@ -5690,7 +5691,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 								m_ActiveEnvelopePreview = EEnvelopePreview::SELECTED;
 								Graphics()->SetColor(1, 1, 1, 1);
-								str_copy(m_aTooltip, "Bezier in-tangent. Left mouse to drag. Hold ctrl to be more precise. Shift+right click to reset.");
+								str_copy(m_aTooltip, Localize("Bezier in-tangent. Left mouse to drag. Hold ctrl to be more precise. Shift+right click to reset."));
 								m_pUiGotContext = pId;
 							}
 							else
@@ -5748,7 +5749,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 		if(s_Operation == EEnvelopeEditorOp::SCALE)
 		{
-			str_copy(m_aTooltip, "Press shift to scale the time. Press alt to scale along midpoint. Press ctrl to be more precise.");
+			str_copy(m_aTooltip, Localize("Press shift to scale the time. Press alt to scale along midpoint. Press ctrl to be more precise."));
 
 			if(Input()->ShiftIsPressed())
 			{
@@ -6022,21 +6023,21 @@ void CEditor::RenderEditorHistory(CUIRect View)
 	{
 		TypeButtons.VSplitLeft(HistoryTypeBtnSize, &HistoryTypeButton, &TypeButtons);
 		static int s_EditorHistoryButton = 0;
-		if(DoButton_Ex(&s_EditorHistoryButton, "Editor", s_HistoryType == EDITOR_HISTORY, &HistoryTypeButton, BUTTONFLAG_LEFT, "Show map editor history.", IGraphics::CORNER_L))
+		if(DoButton_Ex(&s_EditorHistoryButton, Localize("Editor"), s_HistoryType == EDITOR_HISTORY, &HistoryTypeButton, BUTTONFLAG_LEFT, Localize("Show map editor history."), IGraphics::CORNER_L))
 		{
 			s_HistoryType = EDITOR_HISTORY;
 		}
 
 		TypeButtons.VSplitLeft(HistoryTypeBtnSize, &HistoryTypeButton, &TypeButtons);
 		static int s_EnvelopeEditorHistoryButton = 0;
-		if(DoButton_Ex(&s_EnvelopeEditorHistoryButton, "Envelope", s_HistoryType == ENVELOPE_HISTORY, &HistoryTypeButton, BUTTONFLAG_LEFT, "Show envelope editor history.", IGraphics::CORNER_NONE))
+		if(DoButton_Ex(&s_EnvelopeEditorHistoryButton, Localize("Envelope"), s_HistoryType == ENVELOPE_HISTORY, &HistoryTypeButton, BUTTONFLAG_LEFT, Localize("Show envelope editor history."), IGraphics::CORNER_NONE))
 		{
 			s_HistoryType = ENVELOPE_HISTORY;
 		}
 
 		TypeButtons.VSplitLeft(HistoryTypeBtnSize, &HistoryTypeButton, &TypeButtons);
 		static int s_ServerSettingsHistoryButton = 0;
-		if(DoButton_Ex(&s_ServerSettingsHistoryButton, "Settings", s_HistoryType == SERVER_SETTINGS_HISTORY, &HistoryTypeButton, BUTTONFLAG_LEFT, "Show server settings editor history.", IGraphics::CORNER_R))
+		if(DoButton_Ex(&s_ServerSettingsHistoryButton, Localize("Settings"), s_HistoryType == SERVER_SETTINGS_HISTORY, &HistoryTypeButton, BUTTONFLAG_LEFT, Localize("Show server settings editor history."), IGraphics::CORNER_R))
 		{
 			s_HistoryType = SERVER_SETTINGS_HISTORY;
 		}
@@ -6046,7 +6047,7 @@ void CEditor::RenderEditorHistory(CUIRect View)
 	InfoProps.m_MaxWidth = ToolBar.w - 60.f;
 	InfoProps.m_EllipsisAtEnd = true;
 	Label.VSplitLeft(8.0f, nullptr, &Label);
-	Ui()->DoLabel(&Label, "Editor history. Click on an action to undo all actions above.", 10.0f, TEXTALIGN_ML, InfoProps);
+	Ui()->DoLabel(&Label, Localize("Editor history. Click on an action to undo all actions above."), 10.0f, TEXTALIGN_ML, InfoProps);
 
 	CEditorHistory *pCurrentHistory;
 	if(s_HistoryType == EDITOR_HISTORY)
@@ -6062,7 +6063,7 @@ void CEditor::RenderEditorHistory(CUIRect View)
 	ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
 	ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
 	static int s_DeleteButton = 0;
-	if(DoButton_FontIcon(&s_DeleteButton, FONT_ICON_TRASH, (!pCurrentHistory->m_vpUndoActions.empty() || !pCurrentHistory->m_vpRedoActions.empty()) ? 0 : -1, &Button, BUTTONFLAG_LEFT, "Clear the history.", IGraphics::CORNER_ALL, 9.0f) || (GotSelection && CLineInput::GetActiveInput() == nullptr && m_Dialog == DIALOG_NONE && Ui()->ConsumeHotkey(CUi::HOTKEY_DELETE)))
+	if(DoButton_FontIcon(&s_DeleteButton, FONT_ICON_TRASH, (!pCurrentHistory->m_vpUndoActions.empty() || !pCurrentHistory->m_vpRedoActions.empty()) ? 0 : -1, &Button, BUTTONFLAG_LEFT, Localize("Clear the history."), IGraphics::CORNER_ALL, 9.0f) || (GotSelection && CLineInput::GetActiveInput() == nullptr && m_Dialog == DIALOG_NONE && Ui()->ConsumeHotkey(CUi::HOTKEY_DELETE)))
 	{
 		pCurrentHistory->Clear();
 		s_ActionSelectedIndex = 0;
@@ -6105,14 +6106,14 @@ void CEditor::RenderEditorHistory(CUIRect View)
 		Ui()->DoLabel(&Label, pCurrentHistory->m_vpUndoActions[UndoSize - i - 1]->DisplayText(), 10.0f, TEXTALIGN_ML, Props);
 	}
 
-	{ // Base action "Loaded map" that cannot be undone
+	{ // Base action Localize("Loaded map") that cannot be undone
 		static int s_BaseAction;
 		const CListboxItem Item = s_ListBox.DoNextItem(&s_BaseAction, s_ActionSelectedIndex == RedoSize + UndoSize);
 		if(Item.m_Visible)
 		{
 			Item.m_Rect.VMargin(5.0f, &Label);
 
-			Ui()->DoLabel(&Label, "Loaded map", 10.0f, TEXTALIGN_ML);
+			Ui()->DoLabel(&Label, Localize("Loaded map"), 10.0f, TEXTALIGN_ML);
 		}
 	}
 
@@ -6160,7 +6161,7 @@ void CEditor::DoEditorDragBar(CUIRect View, CUIRect *pDragBar, EDragSide Side, f
 
 	bool Clicked;
 	bool Abrupted;
-	if(int Result = DoButton_DraggableEx(pDragBar, "", 8, pDragBar, &Clicked, &Abrupted, 0, "Change the size of the editor by dragging."))
+	if(int Result = DoButton_DraggableEx(pDragBar, "", 8, pDragBar, &Clicked, &Abrupted, 0, Localize("Change the size of the editor by dragging.")))
 	{
 		if(s_Operation == OP_NONE && Result == 1)
 		{
@@ -6201,7 +6202,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	CUIRect FileButton;
 	static int s_FileButton = 0;
 	MenuBar.VSplitLeft(60.0f, &FileButton, &MenuBar);
-	if(DoButton_Ex(&s_FileButton, "File", 0, &FileButton, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_T, EditorFontSizes::MENU, TEXTALIGN_ML))
+	if(DoButton_Ex(&s_FileButton, Localize("File"), 0, &FileButton, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_T, EditorFontSizes::MENU, TEXTALIGN_ML))
 	{
 		static SPopupMenuId s_PopupMenuFileId;
 		Ui()->DoPopupMenu(&s_PopupMenuFileId, FileButton.x, FileButton.y + FileButton.h - 1.0f, 120.0f, 188.0f, this, PopupMenuFile, PopupProperties);
@@ -6212,7 +6213,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	CUIRect ToolsButton;
 	static int s_ToolsButton = 0;
 	MenuBar.VSplitLeft(60.0f, &ToolsButton, &MenuBar);
-	if(DoButton_Ex(&s_ToolsButton, "Tools", 0, &ToolsButton, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_T, EditorFontSizes::MENU, TEXTALIGN_ML))
+	if(DoButton_Ex(&s_ToolsButton, Localize("Tools"), 0, &ToolsButton, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_T, EditorFontSizes::MENU, TEXTALIGN_ML))
 	{
 		static SPopupMenuId s_PopupMenuToolsId;
 		Ui()->DoPopupMenu(&s_PopupMenuToolsId, ToolsButton.x, ToolsButton.y + ToolsButton.h - 1.0f, 200.0f, 78.0f, this, PopupMenuTools, PopupProperties);
@@ -6223,7 +6224,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	CUIRect SettingsButton;
 	static int s_SettingsButton = 0;
 	MenuBar.VSplitLeft(60.0f, &SettingsButton, &MenuBar);
-	if(DoButton_Ex(&s_SettingsButton, "Settings", 0, &SettingsButton, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_T, EditorFontSizes::MENU, TEXTALIGN_ML))
+	if(DoButton_Ex(&s_SettingsButton, Localize("Settings"), 0, &SettingsButton, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_T, EditorFontSizes::MENU, TEXTALIGN_ML))
 	{
 		static SPopupMenuId s_PopupMenuSettingsId;
 		Ui()->DoPopupMenu(&s_PopupMenuSettingsId, SettingsButton.x, SettingsButton.y + SettingsButton.h - 1.0f, 280.0f, 148.0f, this, PopupMenuSettings, PopupProperties);
@@ -6247,11 +6248,11 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 		static int s_ChangedIndicator;
-		DoButtonLogic(&s_ChangedIndicator, 0, &ChangedIndicator, BUTTONFLAG_NONE, "This map has unsaved changes."); // just for the tooltip, result unused
+		DoButtonLogic(&s_ChangedIndicator, 0, &ChangedIndicator, BUTTONFLAG_NONE, Localize("This map has unsaved changes.")); // just for the tooltip, result unused
 	}
 
 	char aBuf[IO_MAX_PATH_LENGTH + 32];
-	str_format(aBuf, sizeof(aBuf), "File: %s", Map()->m_aFilename);
+	str_format(aBuf, sizeof(aBuf), Localize("File: %s"), Map()->m_aFilename);
 	SLabelProperties Props;
 	Props.m_MaxWidth = MenuBar.w;
 	Props.m_EllipsisAtEnd = true;
@@ -6260,22 +6261,22 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	char aTimeStr[6];
 	str_timestamp_format(aTimeStr, sizeof(aTimeStr), "%H:%M");
 
-	str_format(aBuf, sizeof(aBuf), "X: %.1f, Y: %.1f, Z: %.1f, A: %.1f, G: %i  %s", Ui()->MouseWorldX() / 32.0f, Ui()->MouseWorldY() / 32.0f, MapView()->Zoom()->GetValue(), m_AnimateSpeed, MapView()->MapGrid()->Factor(), aTimeStr);
+	str_format(aBuf, sizeof(aBuf), Localize("X: %.1f, Y: %.1f, Z: %.1f, A: %.1f, G: %i  %s"), Ui()->MouseWorldX() / 32.0f, Ui()->MouseWorldY() / 32.0f, MapView()->Zoom()->GetValue(), m_AnimateSpeed, MapView()->MapGrid()->Factor(), aTimeStr);
 	Ui()->DoLabel(&Info, aBuf, 10.0f, TEXTALIGN_MR);
 
 	static int s_HelpButton = 0;
-	if(DoButton_Editor(&s_HelpButton, "?", 0, &Help, BUTTONFLAG_LEFT, "[F1] Open the DDNet Wiki page for the map editor in a web browser.") ||
+	if(DoButton_Editor(&s_HelpButton, "?", 0, &Help, BUTTONFLAG_LEFT, Localize("[F1] Open the DDNet Wiki page for the map editor in a web browser.")) ||
 		(Input()->KeyPress(KEY_F1) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr))
 	{
 		const char *pLink = Localize("https://wiki.ddnet.org/wiki/Mapping");
 		if(!Client()->ViewLink(pLink))
 		{
-			ShowFileDialogError("Failed to open the link '%s' in the default web browser.", pLink);
+			ShowFileDialogError(Localize("Failed to open the link '%s' in the default web browser."), pLink);
 		}
 	}
 
 	static int s_CloseButton = 0;
-	if(DoButton_Editor(&s_CloseButton, "×", 0, &Close, BUTTONFLAG_LEFT, "[Escape] Exit from the editor."))
+	if(DoButton_Editor(&s_CloseButton, "×", 0, &Close, BUTTONFLAG_LEFT, Localize("[Escape] Exit from the editor.")))
 	{
 		OnClose();
 		g_Config.m_ClEditor = 0;
@@ -6566,7 +6567,7 @@ void CEditor::Render()
 				return pLayer->m_Type == LAYERTYPE_TILES && std::static_pointer_cast<CLayerTiles>(pLayer)->m_HasTele;
 			});
 			if(HasTeleTiles)
-				str_copy(m_aTooltip, "Use shift+mouse wheel up/down to adjust the tele numbers. Use ctrl+f to change all tele numbers to the first unused number.");
+				str_copy(m_aTooltip, Localize("Use shift+mouse wheel up/down to adjust the tele numbers. Use ctrl+f to change all tele numbers to the first unused number."));
 
 			if(Input()->ShiftIsPressed())
 			{
@@ -6639,7 +6640,7 @@ void CEditor::RenderSavingIndicator(CUIRect View)
 	if(m_WriterFinishJobs.empty())
 		return;
 
-	const char *pText = "Saving…";
+	const char *pText = Localize("Saving…");
 	const float FontSize = 24.0f;
 
 	Ui()->MapScreen();
@@ -6684,7 +6685,7 @@ void CEditor::UpdateColorPipette()
 	}
 
 	// Simulate button overlaying the entire screen to intercept all clicks for color pipette.
-	const int ButtonResult = DoButtonLogic(&s_PipetteScreenButton, 0, Ui()->Screen(), BUTTONFLAG_ALL, "Left click to pick a color from the screen. Right click to cancel pipette mode.");
+	const int ButtonResult = DoButtonLogic(&s_PipetteScreenButton, 0, Ui()->Screen(), BUTTONFLAG_ALL, Localize("Left click to pick a color from the screen. Right click to cancel pipette mode."));
 	// Don't handle clicks if we are panning, so the pipette stays active while panning.
 	// Checking m_pContainerPanned alone is not enough, as this variable is reset when
 	// panning ends before this function is called.
@@ -7286,7 +7287,7 @@ void CEditor::HandleWriterFinishJobs()
 	char aBuf[2 * IO_MAX_PATH_LENGTH + 128];
 	if(!Storage()->RemoveFile(pJob->GetRealFilename(), IStorage::TYPE_SAVE))
 	{
-		str_format(aBuf, sizeof(aBuf), "Saving failed: Could not remove old map file '%s'.", pJob->GetRealFilename());
+		str_format(aBuf, sizeof(aBuf), Localize("Saving failed: Could not remove old map file '%s'."), pJob->GetRealFilename());
 		ShowFileDialogError("%s", aBuf);
 		log_error("editor/save", "%s", aBuf);
 		return;
@@ -7294,7 +7295,7 @@ void CEditor::HandleWriterFinishJobs()
 
 	if(!Storage()->RenameFile(pJob->GetTempFilename(), pJob->GetRealFilename(), IStorage::TYPE_SAVE))
 	{
-		str_format(aBuf, sizeof(aBuf), "Saving failed: Could not move temporary map file '%s' to '%s'.", pJob->GetTempFilename(), pJob->GetRealFilename());
+		str_format(aBuf, sizeof(aBuf), Localize("Saving failed: Could not move temporary map file '%s' to '%s'."), pJob->GetTempFilename(), pJob->GetRealFilename());
 		ShowFileDialogError("%s", aBuf);
 		log_error("editor/save", "%s", aBuf);
 		return;

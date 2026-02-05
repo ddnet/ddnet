@@ -6,6 +6,7 @@
 
 #include <game/client/ui_listbox.h>
 #include <game/editor/quick_action.h>
+#include <game/localization.h>
 
 static bool FuzzyMatch(const char *pHaystack, const char *pNeedle)
 {

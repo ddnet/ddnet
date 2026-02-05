@@ -15,6 +15,7 @@
 #include <game/client/ui_listbox.h>
 #include <game/editor/editor_actions.h>
 #include <game/editor/editor_history.h>
+#include <game/localization.h>
 
 #include <iterator>
 
@@ -248,7 +249,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	// command input (use remaining toolbar width)
 	if(!ShowServerSettingsEditorLast) // Just activated
 		Ui()->SetActiveItem(&m_SettingsCommandInput);
-	m_SettingsCommandInput.SetEmptyText("Command");
+	m_SettingsCommandInput.SetEmptyText(Localize("Command"));
 
 	TextRender()->TextColor(TextRender()->DefaultTextColor());
 
@@ -325,7 +326,7 @@ void CEditor::DoMapSettingsEditBox(CMapSettingsBackend::CContext *pContext, cons
 	ToolBar.VSplitRight(ToolBar.h, &ToolBar, &Button);
 
 	// Do the unknown command toggle button
-	if(DoButton_FontIcon(&Context.m_AllowUnknownCommands, FONT_ICON_QUESTION, Context.m_AllowUnknownCommands, &Button, BUTTONFLAG_LEFT, "Disallow/allow unknown or invalid commands.", IGraphics::CORNER_R))
+	if(DoButton_FontIcon(&Context.m_AllowUnknownCommands, FONT_ICON_QUESTION, Context.m_AllowUnknownCommands, &Button, BUTTONFLAG_LEFT, Localize("Disallow/allow unknown or invalid commands."), IGraphics::CORNER_R))
 	{
 		Context.m_AllowUnknownCommands = !Context.m_AllowUnknownCommands;
 		Context.Update();
@@ -336,7 +337,7 @@ void CEditor::DoMapSettingsEditBox(CMapSettingsBackend::CContext *pContext, cons
 	Context.ColorArguments(vColorSplits);
 
 	// Do and render clearable edit box with the colors
-	if(DoClearableEditBox(pLineInput, &ToolBar, FontSize, IGraphics::CORNER_L, "Enter a server setting. Press ctrl+space to show available settings.", vColorSplits))
+	if(DoClearableEditBox(pLineInput, &ToolBar, FontSize, IGraphics::CORNER_L, Localize("Enter a server setting. Press ctrl+space to show available settings."), vColorSplits))
 	{
 		Context.Update(); // Update the context when contents change
 		Context.m_DropdownContext.m_ShouldHide = false;
@@ -572,7 +573,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 	// title bar
 	Title.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 4.0f);
 	Title.VMargin(10.0f, &Title);
-	Ui()->DoLabel(&Title, "Map settings error", 12.0f, TEXTALIGN_ML);
+	Ui()->DoLabel(&Title, Localize("Map settings error"), 12.0f, TEXTALIGN_ML);
 
 	// Render body
 	{
@@ -584,7 +585,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 		CUIRect Text;
 		View.HSplitTop(30.0f, &Text, &View);
 		Props.m_MaxWidth = Text.w;
-		Ui()->DoLabel(&Text, "Below is a report of the invalid map settings found when loading the map. Please fix them before proceeding further.", 10.0f, TEXTALIGN_MC, Props);
+		Ui()->DoLabel(&Text, Localize("Below is a report of the invalid map settings found when loading the map. Please fix them before proceeding further."), 10.0f, TEXTALIGN_MC, Props);
 
 		// Mixed list
 		CUIRect List = View;
@@ -634,7 +635,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 					Slot.HMargin(1.0f, &Slot);
 
 					if(!IsFixing && !pInvalidSetting->m_Context.m_Fixed)
-					{ // Display "Fix" and "delete" buttons if we're not fixing the command and the command has not been fixed
+					{ // Display Localize("Fix") and "delete" buttons if we're not fixing the command and the command has not been fixed
 						CUIRect FixBtn, DelBtn;
 						Slot.VSplitRight(30.0f, &Slot, &DelBtn);
 						Slot.VSplitRight(5.0f, &Slot, nullptr);
@@ -645,18 +646,18 @@ void CEditor::RenderMapSettingsErrorDialog()
 						FixBtn.HMargin(1.0f, &FixBtn);
 
 						// Delete button
-						if(DoButton_FontIcon(&pInvalidSetting->m_Context.m_Deleted, FONT_ICON_TRASH, pInvalidSetting->m_Context.m_Deleted, &DelBtn, BUTTONFLAG_LEFT, "Delete this command.", IGraphics::CORNER_ALL, 10.0f))
+						if(DoButton_FontIcon(&pInvalidSetting->m_Context.m_Deleted, FONT_ICON_TRASH, pInvalidSetting->m_Context.m_Deleted, &DelBtn, BUTTONFLAG_LEFT, Localize("Delete this command."), IGraphics::CORNER_ALL, 10.0f))
 							pInvalidSetting->m_Context.m_Deleted = !pInvalidSetting->m_Context.m_Deleted;
 
 						// Fix button
-						if(DoButton_Editor(&pInvalidSetting->m_Context.m_Fixed, "Fix", !pInvalidSetting->m_Context.m_Deleted ? (s_FixingCommandIndex == -1 ? 0 : (IsFixing ? 1 : -1)) : -1, &FixBtn, BUTTONFLAG_LEFT, "Fix this command."))
+						if(DoButton_Editor(&pInvalidSetting->m_Context.m_Fixed, Localize("Fix"), !pInvalidSetting->m_Context.m_Deleted ? (s_FixingCommandIndex == -1 ? 0 : (IsFixing ? 1 : -1)) : -1, &FixBtn, BUTTONFLAG_LEFT, Localize("Fix this command.")))
 						{
 							s_FixingCommandIndex = i;
 							SetInput(pInvalidSetting->m_aSetting);
 						}
 					}
 					else if(IsFixing)
-					{ // If we're fixing this command, then display "Done" and "Cancel" buttons
+					{ // If we're fixing this command, then display Localize("Done") and "Cancel" buttons
 						// Also setup the input rect
 						CUIRect OkBtn, CancelBtn;
 						Slot.VSplitRight(50.0f, &Slot, &CancelBtn);
@@ -669,20 +670,20 @@ void CEditor::RenderMapSettingsErrorDialog()
 
 						// Buttons
 						static int s_Cancel = 0, s_Ok = 0;
-						if(DoButton_Editor(&s_Cancel, "Cancel", 0, &CancelBtn, BUTTONFLAG_LEFT, "Cancel fixing this command.") || Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
+						if(DoButton_Editor(&s_Cancel, Localize("Cancel"), 0, &CancelBtn, BUTTONFLAG_LEFT, Localize("Cancel fixing this command.")) || Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
 						{
 							s_FixingCommandIndex = -1;
 							s_Input.Clear();
 						}
 
-						// "Done" button only enabled if the fixed setting is valid
+						// Localize("Done") button only enabled if the fixed setting is valid
 						// For that we use a local CContext s_Context and use it to check
 						// that the setting is valid and that it is not a duplicate
 						ECollisionCheckResult Res = ECollisionCheckResult::ERROR;
 						s_Context.CheckCollision(vSettingsValid, Res);
 						bool Valid = s_Context.Valid() && Res == ECollisionCheckResult::ADD;
 
-						if(DoButton_Editor(&s_Ok, "Done", Valid ? 0 : -1, &OkBtn, BUTTONFLAG_LEFT, "Confirm editing of this command.") || (s_Input.IsActive() && Valid && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
+						if(DoButton_Editor(&s_Ok, Localize("Done"), Valid ? 0 : -1, &OkBtn, BUTTONFLAG_LEFT, Localize("Confirm editing of this command.")) || (s_Input.IsActive() && Valid && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
 						{
 							// Mark the setting is being fixed
 							pInvalidSetting->m_Context.m_Fixed = true;
@@ -768,7 +769,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 					Label.VSplitRight(50.0f, &Label, &ChooseBtn);
 					Label.VSplitRight(5.0f, &Label, nullptr);
 					ChooseBtn.HMargin(1.0f, &ChooseBtn);
-					if(DoButton_Editor(&vDuplicates, "Choose", Chosen == -1, &ChooseBtn, BUTTONFLAG_LEFT, "Choose this command."))
+					if(DoButton_Editor(&vDuplicates, Localize("Choose"), Chosen == -1, &ChooseBtn, BUTTONFLAG_LEFT, Localize("Choose this command.")))
 					{
 						if(Chosen != -1)
 							vSettingsInvalid[vDuplicates[Chosen]].m_Context.m_Chosen = false;
@@ -780,8 +781,8 @@ void CEditor::RenderMapSettingsErrorDialog()
 				Props.m_MaxWidth = Label.w;
 				Ui()->DoLabel(&Label, Map()->m_vSettings[i].m_aCommand, 10.0f, TEXTALIGN_ML, Props);
 
-				// Draw the list of duplicates, with a "Choose" button for each duplicate
-				// In case a duplicate is also invalid, then we draw a "Fix" button which behaves like the fix button above
+				// Draw the list of duplicates, with a Localize("Choose") button for each duplicate
+				// In case a duplicate is also invalid, then we draw a Localize("Fix") button which behaves like the fix button above
 				// Duplicate settings name are shown in light blue, or in purple if they are also invalid
 				Slot.VSplitLeft(10.0f, nullptr, &Slot);
 				for(int DuplicateIndex = 0; DuplicateIndex < (int)vDuplicates.size(); DuplicateIndex++)
@@ -797,13 +798,13 @@ void CEditor::RenderMapSettingsErrorDialog()
 
 					if(!IsFixing)
 					{
-						// If not fixing, then display "Choose" and maybe "Fix" buttons.
+						// If not fixing, then display Localize("Choose") and maybe Localize("Fix") buttons.
 
 						CUIRect ChooseBtn;
 						SubSlot.VSplitRight(50.0f, &SubSlot, &ChooseBtn);
 						SubSlot.VSplitRight(5.0f, &SubSlot, nullptr);
 						ChooseBtn.HMargin(1.0f, &ChooseBtn);
-						if(DoButton_Editor(&Duplicate.m_Context.m_Chosen, "Choose", IsInvalid && !Duplicate.m_Context.m_Fixed ? -1 : Duplicate.m_Context.m_Chosen, &ChooseBtn, BUTTONFLAG_LEFT, "Override with this command."))
+						if(DoButton_Editor(&Duplicate.m_Context.m_Chosen, Localize("Choose"), IsInvalid && !Duplicate.m_Context.m_Fixed ? -1 : Duplicate.m_Context.m_Chosen, &ChooseBtn, BUTTONFLAG_LEFT, Localize("Override with this command.")))
 						{
 							Duplicate.m_Context.m_Chosen = !Duplicate.m_Context.m_Chosen;
 							if(Chosen != -1 && Chosen != DuplicateIndex)
@@ -820,7 +821,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 								SubSlot.VSplitRight(30.0f, &SubSlot, &FixBtn);
 								SubSlot.VSplitRight(10.0f, &SubSlot, nullptr);
 								FixBtn.HMargin(1.0f, &FixBtn);
-								if(DoButton_Editor(&Duplicate.m_Context.m_Fixed, "Fix", s_FixingCommandIndex == -1 ? 0 : (IsFixing ? 1 : -1), &FixBtn, BUTTONFLAG_LEFT, "Fix this command (needed before it can be chosen)."))
+								if(DoButton_Editor(&Duplicate.m_Context.m_Fixed, Localize("Fix"), s_FixingCommandIndex == -1 ? 0 : (IsFixing ? 1 : -1), &FixBtn, BUTTONFLAG_LEFT, Localize("Fix this command (needed before it can be chosen).")))
 								{
 									s_FixingCommandIndex = Duplicate.m_Index;
 									SetInput(Duplicate.m_aSetting);
@@ -834,7 +835,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 					}
 					else
 					{
-						// If we're fixing, display "Done" and "Cancel" buttons
+						// If we're fixing, display Localize("Done") and "Cancel" buttons
 						CUIRect OkBtn, CancelBtn;
 						SubSlot.VSplitRight(50.0f, &SubSlot, &CancelBtn);
 						SubSlot.VSplitRight(5.0f, &SubSlot, nullptr);
@@ -845,7 +846,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 						OkBtn.HMargin(1.0f, &OkBtn);
 
 						static int s_Cancel = 0, s_Ok = 0;
-						if(DoButton_Editor(&s_Cancel, "Cancel", 0, &CancelBtn, BUTTONFLAG_LEFT, "Cancel fixing this command.") || Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
+						if(DoButton_Editor(&s_Cancel, Localize("Cancel"), 0, &CancelBtn, BUTTONFLAG_LEFT, Localize("Cancel fixing this command.")) || Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
 						{
 							s_FixingCommandIndex = -1;
 							s_Input.Clear();
@@ -862,7 +863,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 						s_Context.CheckCollision({Map()->m_vSettings[i]}, Res);
 						bool Valid = s_Context.Valid() && Res == ECollisionCheckResult::REPLACE;
 
-						if(DoButton_Editor(&s_Ok, "Done", Valid ? 0 : -1, &OkBtn, BUTTONFLAG_LEFT, "Confirm editing of this command.") || (s_Input.IsActive() && Valid && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
+						if(DoButton_Editor(&s_Ok, Localize("Done"), Valid ? 0 : -1, &OkBtn, BUTTONFLAG_LEFT, Localize("Confirm editing of this command.")) || (s_Input.IsActive() && Valid && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
 						{
 							if(Valid) // Just to make sure
 							{
@@ -996,7 +997,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 	};
 
 	// Fix all unknown settings
-	if(DoButton_Editor(&s_FixAllButton, "Allow all unknown settings", CanFixAllUnknown ? 0 : -1, &FixAllUnknownButton, BUTTONFLAG_LEFT, nullptr))
+	if(DoButton_Editor(&s_FixAllButton, Localize("Allow all unknown settings"), CanFixAllUnknown ? 0 : -1, &FixAllUnknownButton, BUTTONFLAG_LEFT, nullptr))
 	{
 		FixAllUnknown();
 	}
@@ -1009,7 +1010,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 	}
 
 	// Cancel - we load a new empty map
-	if(DoButton_Editor(&s_CancelButton, "Cancel", 0, &CancelButton, BUTTONFLAG_LEFT, nullptr) || (Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE)))
+	if(DoButton_Editor(&s_CancelButton, Localize("Cancel"), 0, &CancelButton, BUTTONFLAG_LEFT, nullptr) || (Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE)))
 	{
 		Reset();
 		OnDialogClose();
@@ -1083,12 +1084,12 @@ void CMapSettingsBackend::LoadAllMapSettings()
 	Editor()->ConfigManager()->PossibleConfigVariables("", CFGFLAG_GAME, PossibleConfigVariableCallback, this);
 
 	// Load list of commands
-	LoadCommand("tune", "s[tuning] f[value]", "Tune variable to value or show current value");
-	LoadCommand("tune_zone", "i[zone] s[tuning] f[value]", "Tune in zone a variable to value");
-	LoadCommand("tune_zone_enter", "i[zone] r[message]", "Which message to display on zone enter; use 0 for normal area");
-	LoadCommand("tune_zone_leave", "i[zone] r[message]", "Which message to display on zone leave; use 0 for normal area");
-	LoadCommand("mapbug", "s[mapbug]", "Enable map compatibility mode using the specified bug (example: grenade-doubleexplosion@ddnet.tw)");
-	LoadCommand("switch_open", "i[switch]", "Whether a switch is deactivated by default (otherwise activated)");
+	LoadCommand("tune", "s[tuning] f[value]", Localize("Tune variable to value or show current value"));
+	LoadCommand("tune_zone", "i[zone] s[tuning] f[value]", Localize("Tune in zone a variable to value"));
+	LoadCommand("tune_zone_enter", "i[zone] r[message]", Localize("Which message to display on zone enter; use 0 for normal area"));
+	LoadCommand("tune_zone_leave", "i[zone] r[message]", Localize("Which message to display on zone leave; use 0 for normal area"));
+	LoadCommand("mapbug", "s[mapbug]", Localize("Enable map compatibility mode using the specified bug (example: grenade-doubleexplosion@ddnet.tw)"));
+	LoadCommand("switch_open", "i[switch]", Localize("Whether a switch is deactivated by default (otherwise activated)"));
 }
 
 void CMapSettingsBackend::LoadCommand(const char *pName, const char *pArgs, const char *pHelp)
@@ -1491,16 +1492,16 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pLineInputStr, const c
 				if(Error == SCommandParseError::ERROR_INVALID_VALUE || Error == SCommandParseError::ERROR_UNKNOWN_VALUE || Error == SCommandParseError::ERROR_INCOMPLETE)
 				{
 					static const std::map<int, const char *> s_Names = {
-						{SCommandParseError::ERROR_INVALID_VALUE, "Invalid"},
-						{SCommandParseError::ERROR_UNKNOWN_VALUE, "Unknown"},
-						{SCommandParseError::ERROR_INCOMPLETE, "Incomplete"},
+						{SCommandParseError::ERROR_INVALID_VALUE, Localize("Invalid")},
+						{SCommandParseError::ERROR_UNKNOWN_VALUE, Localize("Unknown")},
+						{SCommandParseError::ERROR_INCOMPLETE, Localize("Incomplete")},
 					};
 					str_format(m_Error.m_aMessage, sizeof(m_Error.m_aMessage), "%s argument value: %s at position %d for argument '%s'", s_Names.at(Error), aFormattedValue, (int)ErrorArg.m_Start, SettingArg.m_aName);
 				}
 				else
 				{
 					std::shared_ptr<SMapSettingInt> pSettingInt = std::static_pointer_cast<SMapSettingInt>(m_pCurrentSetting);
-					str_format(m_Error.m_aMessage, sizeof(m_Error.m_aMessage), "Invalid argument value: %s at position %d for argument '%s': out of range [%d, %d]", aFormattedValue, (int)ErrorArg.m_Start, SettingArg.m_aName, pSettingInt->m_Min, pSettingInt->m_Max);
+					str_format(m_Error.m_aMessage, sizeof(m_Error.m_aMessage), Localize("Invalid argument value: %s at position %d for argument '%s': out of range [%d, %d]"), aFormattedValue, (int)ErrorArg.m_Start, SettingArg.m_aName, pSettingInt->m_Min, pSettingInt->m_Max);
 				}
 				m_Error.m_ArgIndex = ErrorArgIndex;
 				m_Error.m_Type = Error;
@@ -1513,7 +1514,7 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pLineInputStr, const c
 			{
 				if(m_pCurrentSetting != nullptr)
 				{
-					str_copy(m_Error.m_aMessage, "Too many arguments");
+					str_copy(m_Error.m_aMessage, Localize("Too many arguments"));
 					m_Error.m_ArgIndex = ArgIndex;
 					break;
 				}
@@ -1521,7 +1522,7 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pLineInputStr, const c
 				{
 					char aFormattedValue[256];
 					FormatDisplayValue(m_aCommand, aFormattedValue);
-					str_format(m_Error.m_aMessage, sizeof(m_Error.m_aMessage), "Unknown server setting: %s", aFormattedValue);
+					str_format(m_Error.m_aMessage, sizeof(m_Error.m_aMessage), Localize("Unknown server setting: %s"), aFormattedValue);
 					m_Error.m_ArgIndex = -1;
 					break;
 				}
@@ -1697,7 +1698,7 @@ void CMapSettingsBackend::CContext::UpdatePossibleMatches()
 			// Fill the error if we do not allow unknown commands
 			char aFormattedValue[256];
 			FormatDisplayValue(m_aCommand, aFormattedValue);
-			str_format(m_Error.m_aMessage, sizeof(m_Error.m_aMessage), "Unknown server setting: %s", aFormattedValue);
+			str_format(m_Error.m_aMessage, sizeof(m_Error.m_aMessage), Localize("Unknown server setting: %s"), aFormattedValue);
 			m_Error.m_ArgIndex = -1;
 		}
 	}
