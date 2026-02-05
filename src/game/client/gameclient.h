@@ -889,6 +889,10 @@ public:
 	int m_MapBestTimeMillis;
 	char m_aMapDescription[512];
 
+	// cached player extra info (points etc.)
+	char m_aaPlayerExtraInfo[MAX_CLIENTS][512];
+	void RequestPlayerExtraInfo(int ClientId);
+
 private:
 	std::vector<CSnapEntities> m_vSnapEntities;
 	void SnapCollectEntities();

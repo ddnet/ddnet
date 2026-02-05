@@ -1881,6 +1881,46 @@ bool CScoreWorker::LoadTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 	return true;
 }
 
+bool CScoreWorker::PlayerExtraInfo(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+{
+	const auto *pData = dynamic_cast<const CSqlPlayerExtraInfoRequest *>(pGameData);
+	auto *pResult = dynamic_cast<CScorePlayerExtraInfoResult *>(pGameData->m_pResult.get());
+
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf),
+		"SELECT ("
+		"  SELECT COUNT(Name) + 1 FROM %s_points WHERE Points > ("
+		"    SELECT Points FROM %s_points WHERE Name = ?"
+		")) as Ranking, Points, Name "
+		"FROM %s_points WHERE Name = ?",
+		pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
+	if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return false;
+	}
+	pSqlServer->BindString(1, pData->m_aName);
+	pSqlServer->BindString(2, pData->m_aName);
+
+	bool End;
+	if(!pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		return false;
+	}
+	if(!End)
+	{
+		int Rank = pSqlServer->GetInt(1);
+		int Points = pSqlServer->GetInt(2);
+		str_format(pResult->m_aMessage, sizeof(pResult->m_aMessage),
+			"#%d, Points: %d",
+			Rank, Points);
+	}
+	else
+	{
+		str_copy(pResult->m_aMessage, "Points: 0");
+	}
+	return true;
+}
+
 bool CScoreWorker::GetSaves(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
 	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
