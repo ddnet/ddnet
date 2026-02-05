@@ -1,5 +1,6 @@
 #include <base/lock.h>
 #include <base/system.h>
+#include <base/thread.h>
 #include <base/tl/threading.h>
 
 #include <gtest/gtest.h>

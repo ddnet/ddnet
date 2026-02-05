@@ -1,6 +1,7 @@
 #include "test.h"
 
 #include <base/system.h>
+#include <base/thread.h>
 
 #include <engine/shared/host_lookup.h>
 #include <engine/shared/jobs.h>
