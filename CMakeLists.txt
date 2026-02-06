@@ -1606,6 +1606,8 @@ set(EXPECTED_DATA
   shader/vulkan/prim3d.vert
   shader/vulkan/primex.frag
   shader/vulkan/primex.vert
+  shader/vulkan/progressspinner.frag
+  shader/vulkan/progressspinner.vert
   shader/vulkan/quad.frag
   shader/vulkan/quad.vert
   shader/vulkan/spritemulti.frag

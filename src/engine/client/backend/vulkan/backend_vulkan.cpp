@@ -733,6 +733,16 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		SUniformTextGFragmentConstants m_Constants;
 	};
 
+	struct SUniformProgressSpinnerFragment
+	{
+		float m_InnerRadius;
+		float m_ArcStart;
+		float m_ArcLen;
+		float m_Padding;
+		ColorRGBA m_FilledColor;
+		ColorRGBA m_UnfilledColor;
+	};
+
 	struct SUniformTileGPos
 	{
 		float m_aPos[4 * 2];
@@ -1026,6 +1036,7 @@ private:
 	SPipelineContainer m_SpriteMultiPushPipeline;
 	SPipelineContainer m_QuadPipeline;
 	SPipelineContainer m_QuadGroupedPipeline;
+	SPipelineContainer m_ProgressSpinnerPipeline;
 
 	std::vector<VkPipeline> m_vLastPipeline;
 
@@ -4907,6 +4918,37 @@ public:
 		return Ret;
 	}
 
+	[[nodiscard]] bool CreateProgressSpinnerGraphicsPipelineImpl(const char *pVertName, const char *pFragName, SPipelineContainer &PipeContainer, EVulkanBackendBlendModes BlendMode, EVulkanBackendClipModes DynamicMode)
+	{
+		std::array<VkVertexInputAttributeDescription, 3> aAttributeDescriptions = {};
+		aAttributeDescriptions[0] = {0, 0, VK_FORMAT_R32G32_SFLOAT, 0};
+		aAttributeDescriptions[1] = {1, 0, VK_FORMAT_R32G32_SFLOAT, sizeof(float) * 2};
+		aAttributeDescriptions[2] = {2, 0, VK_FORMAT_R8G8B8A8_UNORM, sizeof(float) * (2 + 2)};
+
+		std::array<VkDescriptorSetLayout, 1> aSetLayouts = {};
+
+		std::array<VkPushConstantRange, 2> aPushConstants{};
+		aPushConstants[0] = {VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SUniformGPos)};
+		aPushConstants[1] = {VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(SUniformGPos), sizeof(SUniformProgressSpinnerFragment)};
+
+		return CreateGraphicsPipeline<false>(pVertName, pFragName, PipeContainer, sizeof(float) * (2 + 2) + sizeof(uint8_t) * 4, aAttributeDescriptions, aSetLayouts, aPushConstants, VULKAN_BACKEND_TEXTURE_MODE_NOT_TEXTURED, BlendMode, DynamicMode);
+	}
+
+	[[nodiscard]] bool CreateProgressSpinnerGraphicsPipeline(const char *pVertName, const char *pFragName)
+	{
+		bool Ret = true;
+
+		for(size_t i = 0; i < VULKAN_BACKEND_BLEND_MODE_COUNT; ++i)
+		{
+			for(size_t j = 0; j < VULKAN_BACKEND_CLIP_MODE_COUNT; ++j)
+			{
+				Ret &= CreateProgressSpinnerGraphicsPipelineImpl(pVertName, pFragName, m_ProgressSpinnerPipeline, EVulkanBackendBlendModes(i), EVulkanBackendClipModes(j));
+			}
+		}
+
+		return Ret;
+	}
+
 	template<bool HasSampler>
 	[[nodiscard]] bool CreateTileGraphicsPipelineImpl(const char *pVertName, const char *pFragName, bool IsBorder, SPipelineContainer &PipeContainer, EVulkanBackendTextureModes TexMode, EVulkanBackendBlendModes BlendMode, EVulkanBackendClipModes DynamicMode)
 	{
@@ -5429,6 +5471,7 @@ public:
 		m_SpriteMultiPushPipeline.Destroy(m_VKDevice);
 		m_QuadPipeline.Destroy(m_VKDevice);
 		m_QuadGroupedPipeline.Destroy(m_VKDevice);
+		m_ProgressSpinnerPipeline.Destroy(m_VKDevice);
 
 		DestroyFramebuffers();
 
@@ -6116,6 +6159,9 @@ public:
 			return -1;
 
 		if(!CreateQuadGroupedGraphicsPipeline<true>("shader/vulkan/quad_grouped_textured.vert.spv", "shader/vulkan/quad_grouped_textured.frag.spv"))
+			return -1;
+
+		if(!CreateProgressSpinnerGraphicsPipeline("shader/vulkan/progressspinner.vert.spv", "shader/vulkan/progressspinner.frag.spv"))
 			return -1;
 
 		m_SwapchainCreated = true;
@@ -7494,81 +7540,75 @@ public:
 
 	[[nodiscard]] bool Cmd_RenderProgressSpinner(const CCommandBuffer::SCommand_RenderProgressSpinner *pCommand, SRenderCommandExecuteBuffer &ExecBuffer)
 	{
-		constexpr int NumSegments = 64;
-		constexpr int NumTriangles = NumSegments * 2;
-		CCommandBuffer::SVertex aVertices[NumTriangles * 3];
+		std::array<float, (size_t)4 * 2> m;
+		GetStateMatrix(pCommand->m_State, m);
 
+		bool IsTextured;
+		size_t BlendModeIndex;
+		size_t DynamicIndex;
+		size_t AddressModeIndex;
+		GetStateIndices(ExecBuffer, pCommand->m_State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
+
+		auto &PipeLayout = GetPipeLayout(m_ProgressSpinnerPipeline, false, BlendModeIndex, DynamicIndex);
+		auto &PipeLine = GetPipeline(m_ProgressSpinnerPipeline, false, BlendModeIndex, DynamicIndex);
+
+		VkCommandBuffer *pCommandBuffer;
+		if(!GetGraphicCommandBuffer(pCommandBuffer, ExecBuffer.m_ThreadIndex))
+			return false;
+		auto &CommandBuffer = *pCommandBuffer;
+
+		BindPipeline(ExecBuffer.m_ThreadIndex, CommandBuffer, ExecBuffer, PipeLine, pCommand->m_State);
+
+		// Build a quad covering the spinner, with UV in [-1, 1]
 		float CenterX = pCommand->m_CenterX;
 		float CenterY = pCommand->m_CenterY;
-		float OuterR = pCommand->m_OuterRadius;
-		float InnerR = pCommand->m_InnerRadius;
-		float ArcStart = pCommand->m_ArcStart;
-		float ArcLen = pCommand->m_ArcLen;
+		float R = pCommand->m_OuterRadius;
 
-		auto MakeColor = [](ColorRGBA c) -> CCommandBuffer::SColor {
-			return CCommandBuffer::SColor{
-				(unsigned char)(c.r * 255.0f),
-				(unsigned char)(c.g * 255.0f),
-				(unsigned char)(c.b * 255.0f),
-				(unsigned char)(c.a * 255.0f)};
-		};
+		CCommandBuffer::SVertex aVertices[4];
+		// Top-left
+		aVertices[0].m_Pos = {CenterX - R, CenterY - R};
+		aVertices[0].m_Tex = {-1.0f, -1.0f};
+		aVertices[0].m_Color = {255, 255, 255, 255};
+		// Top-right
+		aVertices[1].m_Pos = {CenterX + R, CenterY - R};
+		aVertices[1].m_Tex = {1.0f, -1.0f};
+		aVertices[1].m_Color = {255, 255, 255, 255};
+		// Bottom-right
+		aVertices[2].m_Pos = {CenterX + R, CenterY + R};
+		aVertices[2].m_Tex = {1.0f, 1.0f};
+		aVertices[2].m_Color = {255, 255, 255, 255};
+		// Bottom-left
+		aVertices[3].m_Pos = {CenterX - R, CenterY + R};
+		aVertices[3].m_Tex = {-1.0f, 1.0f};
+		aVertices[3].m_Color = {255, 255, 255, 255};
 
-		CCommandBuffer::SColor FilledColor = MakeColor(pCommand->m_FilledColor);
-		CCommandBuffer::SColor UnfilledColor = MakeColor(pCommand->m_UnfilledColor);
+		VkBuffer VKBuffer;
+		SDeviceMemoryBlock VKBufferMem;
+		size_t BufferOff = 0;
+		if(!CreateStreamVertexBuffer(ExecBuffer.m_ThreadIndex, VKBuffer, VKBufferMem, BufferOff, aVertices, sizeof(aVertices)))
+			return false;
 
-		float AngleStep = 2.0f * pi / NumSegments;
-		float FilledEnd = ArcStart + ArcLen * 2.0f * pi;
+		std::array<VkBuffer, 1> aVertexBuffers = {VKBuffer};
+		std::array<VkDeviceSize, 1> aOffsets = {(VkDeviceSize)BufferOff};
+		vkCmdBindVertexBuffers(CommandBuffer, 0, 1, aVertexBuffers.data(), aOffsets.data());
 
-		int VertIdx = 0;
-		for(int i = 0; i < NumSegments; ++i)
-		{
-			float Angle1 = ArcStart + i * AngleStep;
-			float Angle2 = ArcStart + (i + 1) * AngleStep;
+		vkCmdBindIndexBuffer(CommandBuffer, ExecBuffer.m_IndexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-			// Determine if this segment is in the filled arc
-			float SegMid = Angle1 + AngleStep * 0.5f;
-			bool Filled = (ArcLen >= 1.0f) || (ArcLen > 0.0f && SegMid < FilledEnd);
-			CCommandBuffer::SColor Color = Filled ? FilledColor : UnfilledColor;
+		vkCmdPushConstants(CommandBuffer, PipeLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SUniformGPos), m.data());
 
-			float Cos1 = std::cos(Angle1);
-			float Sin1 = std::sin(Angle1);
-			float Cos2 = std::cos(Angle2);
-			float Sin2 = std::sin(Angle2);
+		SUniformProgressSpinnerFragment FragConstants;
+		FragConstants.m_InnerRadius = pCommand->m_InnerRadius / pCommand->m_OuterRadius;
+		FragConstants.m_ArcStart = pCommand->m_ArcStart;
+		FragConstants.m_ArcLen = pCommand->m_ArcLen;
+		FragConstants.m_Padding = 0.0f;
+		FragConstants.m_FilledColor = pCommand->m_FilledColor;
+		FragConstants.m_UnfilledColor = pCommand->m_UnfilledColor;
 
-			// Inner1, Inner2, Outer1
-			aVertices[VertIdx].m_Pos = {CenterX + Cos1 * InnerR, CenterY + Sin1 * InnerR};
-			aVertices[VertIdx].m_Tex = {0.0f, 0.0f};
-			aVertices[VertIdx].m_Color = Color;
-			VertIdx++;
+		vkCmdPushConstants(CommandBuffer, PipeLayout, VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(SUniformGPos), sizeof(SUniformProgressSpinnerFragment), &FragConstants);
 
-			aVertices[VertIdx].m_Pos = {CenterX + Cos2 * InnerR, CenterY + Sin2 * InnerR};
-			aVertices[VertIdx].m_Tex = {0.0f, 0.0f};
-			aVertices[VertIdx].m_Color = Color;
-			VertIdx++;
+		vkCmdDrawIndexed(CommandBuffer, 6, 1, 0, 0, 0);
 
-			aVertices[VertIdx].m_Pos = {CenterX + Cos1 * OuterR, CenterY + Sin1 * OuterR};
-			aVertices[VertIdx].m_Tex = {0.0f, 0.0f};
-			aVertices[VertIdx].m_Color = Color;
-			VertIdx++;
-
-			// Outer1, Inner2, Outer2
-			aVertices[VertIdx].m_Pos = {CenterX + Cos1 * OuterR, CenterY + Sin1 * OuterR};
-			aVertices[VertIdx].m_Tex = {0.0f, 0.0f};
-			aVertices[VertIdx].m_Color = Color;
-			VertIdx++;
-
-			aVertices[VertIdx].m_Pos = {CenterX + Cos2 * InnerR, CenterY + Sin2 * InnerR};
-			aVertices[VertIdx].m_Tex = {0.0f, 0.0f};
-			aVertices[VertIdx].m_Color = Color;
-			VertIdx++;
-
-			aVertices[VertIdx].m_Pos = {CenterX + Cos2 * OuterR, CenterY + Sin2 * OuterR};
-			aVertices[VertIdx].m_Tex = {0.0f, 0.0f};
-			aVertices[VertIdx].m_Color = Color;
-			VertIdx++;
-		}
-
-		return RenderStandard<CCommandBuffer::SVertex, false>(ExecBuffer, pCommand->m_State, EPrimitiveType::TRIANGLES, aVertices, NumTriangles);
+		return true;
 	}
 
 	[[nodiscard]] bool Cmd_WindowCreateNtf(const CCommandBuffer::SCommand_WindowCreateNtf *pCommand)

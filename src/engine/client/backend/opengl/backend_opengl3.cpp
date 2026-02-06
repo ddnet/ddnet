@@ -1472,12 +1472,12 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderProgressSpinner(const CComma
 	aVertices[1].m_Tex = {1.0f, -1.0f};
 	aVertices[1].m_Color = {255, 255, 255, 255};
 
-	aVertices[2].m_Pos = {CenterX - R, CenterY + R};
-	aVertices[2].m_Tex = {-1.0f, 1.0f};
+	aVertices[2].m_Pos = {CenterX + R, CenterY + R};
+	aVertices[2].m_Tex = {1.0f, 1.0f};
 	aVertices[2].m_Color = {255, 255, 255, 255};
 
-	aVertices[3].m_Pos = {CenterX + R, CenterY + R};
-	aVertices[3].m_Tex = {1.0f, 1.0f};
+	aVertices[3].m_Pos = {CenterX - R, CenterY + R};
+	aVertices[3].m_Tex = {-1.0f, 1.0f};
 	aVertices[3].m_Color = {255, 255, 255, 255};
 
 	UploadStreamBufferData(EPrimitiveType::QUADS, aVertices, sizeof(CCommandBuffer::SVertex), 1);
