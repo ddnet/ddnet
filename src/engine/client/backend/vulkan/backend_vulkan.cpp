@@ -1272,6 +1272,7 @@ protected:
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_RENDER_QUAD_CONTAINER)] = {true, [this](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) { Cmd_RenderQuadContainer_FillExecuteBuffer(ExecBuffer, static_cast<const CCommandBuffer::SCommand_RenderQuadContainer *>(pBaseCommand)); }, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_RenderQuadContainer(static_cast<const CCommandBuffer::SCommand_RenderQuadContainer *>(pBaseCommand), ExecBuffer); }};
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_RENDER_QUAD_CONTAINER_EX)] = {true, [this](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) { Cmd_RenderQuadContainerEx_FillExecuteBuffer(ExecBuffer, static_cast<const CCommandBuffer::SCommand_RenderQuadContainerEx *>(pBaseCommand)); }, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_RenderQuadContainerEx(static_cast<const CCommandBuffer::SCommand_RenderQuadContainerEx *>(pBaseCommand), ExecBuffer); }};
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_RENDER_QUAD_CONTAINER_SPRITE_MULTIPLE)] = {true, [this](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) { Cmd_RenderQuadContainerAsSpriteMultiple_FillExecuteBuffer(ExecBuffer, static_cast<const CCommandBuffer::SCommand_RenderQuadContainerAsSpriteMultiple *>(pBaseCommand)); }, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_RenderQuadContainerAsSpriteMultiple(static_cast<const CCommandBuffer::SCommand_RenderQuadContainerAsSpriteMultiple *>(pBaseCommand), ExecBuffer); }};
+		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_RENDER_PROGRESS_SPINNER)] = {true, [this](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) { Cmd_RenderProgressSpinner_FillExecuteBuffer(ExecBuffer, static_cast<const CCommandBuffer::SCommand_RenderProgressSpinner *>(pBaseCommand)); }, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_RenderProgressSpinner(static_cast<const CCommandBuffer::SCommand_RenderProgressSpinner *>(pBaseCommand), ExecBuffer); }};
 
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_SWAP)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_Swap(static_cast<const CCommandBuffer::SCommand_Swap *>(pBaseCommand)); }};
 
@@ -7482,6 +7483,92 @@ public:
 		}
 
 		return true;
+	}
+
+	void Cmd_RenderProgressSpinner_FillExecuteBuffer(SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand_RenderProgressSpinner *pCommand)
+	{
+		ExecBuffer.m_IndexBuffer = m_IndexBuffer;
+		ExecBuffer.m_EstimatedRenderCallCount = 1;
+		ExecBufferFillDynamicStates(pCommand->m_State, ExecBuffer);
+	}
+
+	[[nodiscard]] bool Cmd_RenderProgressSpinner(const CCommandBuffer::SCommand_RenderProgressSpinner *pCommand, SRenderCommandExecuteBuffer &ExecBuffer)
+	{
+		constexpr int NumSegments = 64;
+		constexpr int NumTriangles = NumSegments * 2;
+		CCommandBuffer::SVertex aVertices[NumTriangles * 3];
+
+		float CenterX = pCommand->m_CenterX;
+		float CenterY = pCommand->m_CenterY;
+		float OuterR = pCommand->m_OuterRadius;
+		float InnerR = pCommand->m_InnerRadius;
+		float ArcStart = pCommand->m_ArcStart;
+		float ArcLen = pCommand->m_ArcLen;
+
+		auto MakeColor = [](ColorRGBA c) -> CCommandBuffer::SColor {
+			return CCommandBuffer::SColor{
+				(unsigned char)(c.r * 255.0f),
+				(unsigned char)(c.g * 255.0f),
+				(unsigned char)(c.b * 255.0f),
+				(unsigned char)(c.a * 255.0f)};
+		};
+
+		CCommandBuffer::SColor FilledColor = MakeColor(pCommand->m_FilledColor);
+		CCommandBuffer::SColor UnfilledColor = MakeColor(pCommand->m_UnfilledColor);
+
+		float AngleStep = 2.0f * pi / NumSegments;
+		float FilledEnd = ArcStart + ArcLen * 2.0f * pi;
+
+		int VertIdx = 0;
+		for(int i = 0; i < NumSegments; ++i)
+		{
+			float Angle1 = ArcStart + i * AngleStep;
+			float Angle2 = ArcStart + (i + 1) * AngleStep;
+
+			// Determine if this segment is in the filled arc
+			float SegMid = Angle1 + AngleStep * 0.5f;
+			bool Filled = (ArcLen >= 1.0f) || (ArcLen > 0.0f && SegMid < FilledEnd);
+			CCommandBuffer::SColor Color = Filled ? FilledColor : UnfilledColor;
+
+			float Cos1 = std::cos(Angle1);
+			float Sin1 = std::sin(Angle1);
+			float Cos2 = std::cos(Angle2);
+			float Sin2 = std::sin(Angle2);
+
+			// Inner1, Inner2, Outer1
+			aVertices[VertIdx].m_Pos = {CenterX + Cos1 * InnerR, CenterY + Sin1 * InnerR};
+			aVertices[VertIdx].m_Tex = {0.0f, 0.0f};
+			aVertices[VertIdx].m_Color = Color;
+			VertIdx++;
+
+			aVertices[VertIdx].m_Pos = {CenterX + Cos2 * InnerR, CenterY + Sin2 * InnerR};
+			aVertices[VertIdx].m_Tex = {0.0f, 0.0f};
+			aVertices[VertIdx].m_Color = Color;
+			VertIdx++;
+
+			aVertices[VertIdx].m_Pos = {CenterX + Cos1 * OuterR, CenterY + Sin1 * OuterR};
+			aVertices[VertIdx].m_Tex = {0.0f, 0.0f};
+			aVertices[VertIdx].m_Color = Color;
+			VertIdx++;
+
+			// Outer1, Inner2, Outer2
+			aVertices[VertIdx].m_Pos = {CenterX + Cos1 * OuterR, CenterY + Sin1 * OuterR};
+			aVertices[VertIdx].m_Tex = {0.0f, 0.0f};
+			aVertices[VertIdx].m_Color = Color;
+			VertIdx++;
+
+			aVertices[VertIdx].m_Pos = {CenterX + Cos2 * InnerR, CenterY + Sin2 * InnerR};
+			aVertices[VertIdx].m_Tex = {0.0f, 0.0f};
+			aVertices[VertIdx].m_Color = Color;
+			VertIdx++;
+
+			aVertices[VertIdx].m_Pos = {CenterX + Cos2 * OuterR, CenterY + Sin2 * OuterR};
+			aVertices[VertIdx].m_Tex = {0.0f, 0.0f};
+			aVertices[VertIdx].m_Color = Color;
+			VertIdx++;
+		}
+
+		return RenderStandard<CCommandBuffer::SVertex, false>(ExecBuffer, pCommand->m_State, EPrimitiveType::TRIANGLES, aVertices, NumTriangles);
 	}
 
 	[[nodiscard]] bool Cmd_WindowCreateNtf(const CCommandBuffer::SCommand_WindowCreateNtf *pCommand)

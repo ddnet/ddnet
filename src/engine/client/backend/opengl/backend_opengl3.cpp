@@ -109,6 +109,7 @@ bool CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	m_pPrimitiveExProgramRotationless = new CGLSLPrimitiveExProgram;
 	m_pPrimitiveExProgramTexturedRotationless = new CGLSLPrimitiveExProgram;
 	m_pSpriteProgramMultiple = new CGLSLSpriteMultipleProgram;
+	m_pProgressSpinnerProgram = new CGLSLProgressSpinnerProgram;
 	m_LastProgramId = 0;
 
 	CGLSLCompiler ShaderCompiler(g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch, m_IsOpenGLES, m_OpenGLTextureLodBIAS / 1000.0f);
@@ -401,6 +402,27 @@ bool CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 		m_pSpriteProgramMultiple->SetUniformVec2(m_pSpriteProgramMultiple->m_LocCenter, 1, aCenter);
 	}
 
+	{
+		CGLSL VertexShader;
+		CGLSL FragmentShader;
+		VertexShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/progressspinner.vert", GL_VERTEX_SHADER);
+		FragmentShader.LoadShader(&ShaderCompiler, pCommand->m_pStorage, "shader/progressspinner.frag", GL_FRAGMENT_SHADER);
+
+		m_pProgressSpinnerProgram->CreateProgram();
+		m_pProgressSpinnerProgram->AddShader(&VertexShader);
+		m_pProgressSpinnerProgram->AddShader(&FragmentShader);
+		m_pProgressSpinnerProgram->LinkProgram();
+
+		UseProgram(m_pProgressSpinnerProgram);
+
+		m_pProgressSpinnerProgram->m_LocPos = m_pProgressSpinnerProgram->GetUniformLoc("gPos");
+		m_pProgressSpinnerProgram->m_LocInnerRadius = m_pProgressSpinnerProgram->GetUniformLoc("gInnerRadius");
+		m_pProgressSpinnerProgram->m_LocArcStart = m_pProgressSpinnerProgram->GetUniformLoc("gArcStart");
+		m_pProgressSpinnerProgram->m_LocArcLen = m_pProgressSpinnerProgram->GetUniformLoc("gArcLen");
+		m_pProgressSpinnerProgram->m_LocFilledColor = m_pProgressSpinnerProgram->GetUniformLoc("gFilledColor");
+		m_pProgressSpinnerProgram->m_LocUnfilledColor = m_pProgressSpinnerProgram->GetUniformLoc("gUnfilledColor");
+	}
+
 	m_LastStreamBuffer = 0;
 
 	glGenBuffers(MAX_STREAM_BUFFER_COUNT, m_aPrimitiveDrawBufferId);
@@ -488,6 +510,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Shutdown(const SCommand_Shutdown *
 	m_pPrimitiveExProgramRotationless->DeleteProgram();
 	m_pPrimitiveExProgramTexturedRotationless->DeleteProgram();
 	m_pSpriteProgramMultiple->DeleteProgram();
+	m_pProgressSpinnerProgram->DeleteProgram();
 
 	// clean up everything
 	delete m_pPrimitiveProgram;
@@ -508,6 +531,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Shutdown(const SCommand_Shutdown *
 	delete m_pPrimitiveExProgramRotationless;
 	delete m_pPrimitiveExProgramTexturedRotationless;
 	delete m_pSpriteProgramMultiple;
+	delete m_pProgressSpinnerProgram;
 
 	glBindVertexArray(0);
 	glDeleteBuffers(MAX_STREAM_BUFFER_COUNT, m_aPrimitiveDrawBufferId);
@@ -1422,6 +1446,52 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadContainerAsSpriteMultipl
 		RenderOffset += RSPCount;
 		DrawCount -= RSPCount;
 	}
+}
+
+void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderProgressSpinner(const CCommandBuffer::SCommand_RenderProgressSpinner *pCommand)
+{
+	UseProgram(m_pProgressSpinnerProgram);
+	SetState(pCommand->m_State, m_pProgressSpinnerProgram);
+
+	m_pProgressSpinnerProgram->SetUniform(m_pProgressSpinnerProgram->m_LocInnerRadius, pCommand->m_InnerRadius / pCommand->m_OuterRadius);
+	m_pProgressSpinnerProgram->SetUniform(m_pProgressSpinnerProgram->m_LocArcStart, pCommand->m_ArcStart);
+	m_pProgressSpinnerProgram->SetUniform(m_pProgressSpinnerProgram->m_LocArcLen, pCommand->m_ArcLen);
+	m_pProgressSpinnerProgram->SetUniformVec4(m_pProgressSpinnerProgram->m_LocFilledColor, 1, (float *)&pCommand->m_FilledColor);
+	m_pProgressSpinnerProgram->SetUniformVec4(m_pProgressSpinnerProgram->m_LocUnfilledColor, 1, (float *)&pCommand->m_UnfilledColor);
+
+	float CenterX = pCommand->m_CenterX;
+	float CenterY = pCommand->m_CenterY;
+	float R = pCommand->m_OuterRadius;
+
+	CCommandBuffer::SVertex aVertices[4];
+	aVertices[0].m_Pos = {CenterX - R, CenterY - R};
+	aVertices[0].m_Tex = {-1.0f, -1.0f};
+	aVertices[0].m_Color = {255, 255, 255, 255};
+
+	aVertices[1].m_Pos = {CenterX + R, CenterY - R};
+	aVertices[1].m_Tex = {1.0f, -1.0f};
+	aVertices[1].m_Color = {255, 255, 255, 255};
+
+	aVertices[2].m_Pos = {CenterX - R, CenterY + R};
+	aVertices[2].m_Tex = {-1.0f, 1.0f};
+	aVertices[2].m_Color = {255, 255, 255, 255};
+
+	aVertices[3].m_Pos = {CenterX + R, CenterY + R};
+	aVertices[3].m_Tex = {1.0f, 1.0f};
+	aVertices[3].m_Color = {255, 255, 255, 255};
+
+	UploadStreamBufferData(EPrimitiveType::QUADS, aVertices, sizeof(CCommandBuffer::SVertex), 1);
+
+	glBindVertexArray(m_aPrimitiveDrawVertexId[m_LastStreamBuffer]);
+
+	if(m_aLastIndexBufferBound[m_LastStreamBuffer] != m_QuadDrawIndexBufferId)
+	{
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferId);
+		m_aLastIndexBufferBound[m_LastStreamBuffer] = m_QuadDrawIndexBufferId;
+	}
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+	m_LastStreamBuffer = (m_LastStreamBuffer + 1 >= MAX_STREAM_BUFFER_COUNT ? 0 : m_LastStreamBuffer + 1);
 }
 
 #endif

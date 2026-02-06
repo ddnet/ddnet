@@ -1588,6 +1588,8 @@ set(EXPECTED_DATA
   shader/prim.vert
   shader/primex.frag
   shader/primex.vert
+  shader/progressspinner.frag
+  shader/progressspinner.vert
   shader/quad.frag
   shader/quad.vert
   shader/spritemulti.frag
