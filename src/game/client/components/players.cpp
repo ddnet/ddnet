@@ -257,6 +257,7 @@ void CPlayers::RenderHookCollLine(
 	// simulate the hook into the future
 	int HookTick;
 	bool HookEnteredTelehook = false;
+	std::optional<IGraphics::CLineItem> HookTipLineSegment;
 	for(HookTick = 0; HookTick < MaxHookTicks; ++HookTick)
 	{
 		int Tele;
@@ -270,7 +271,6 @@ void CPlayers::RenderHookCollLine(
 			if(!HookEnteredTelehook)
 			{
 				vec2 RetractingHookEndPos = BasePos + normalize(SegmentEndPos - BasePos) * HookLength;
-
 				// you can't hook a player, if the hook is behind solids, however you miss the solids as well
 				int Hit = Collision()->IntersectLineTeleHook(SegmentStartPos, RetractingHookEndPos, &HitPos, nullptr, &Tele);
 
@@ -285,8 +285,15 @@ void CPlayers::RenderHookCollLine(
 				{
 					// The hook misses the player, but also misses the solid
 					vLineSegments.emplace_back(LineStartPos, SegmentStartPos);
+
+					// The player hook misses due to a solid
+					HookTipLineSegment = IGraphics::CLineItem(SegmentStartPos, HitPos);
 					break;
 				}
+
+				// we are missing the player, the solid hookline stopped already, but we want this extra line segment
+				// the player-hooking-hook is only longer, if we didn't go through a tele hook
+				HookTipLineSegment = IGraphics::CLineItem(SegmentStartPos, RetractingHookEndPos);
 			}
 
 			// the line is too long here, and the hook retracts, use old position
@@ -397,8 +404,7 @@ void CPlayers::RenderHookCollLine(
 		float LineWidth = 0.5f + (float)(HookCollSize - 1) * 0.25f;
 		const vec2 PerpToAngle = normalize(vec2(Direction.y, -Direction.x)) * GameClient()->m_Camera.m_Zoom;
 
-		for(const auto &LineSegment : vLineSegments)
-		{
+		auto ConvertLineSegments = [&](const IGraphics::CLineItem &LineSegment) {
 			vec2 DrawInitPos(LineSegment.m_X0, LineSegment.m_Y0);
 			vec2 DrawFinishPos(LineSegment.m_X1, LineSegment.m_Y1);
 			vec2 Pos0 = DrawFinishPos + PerpToAngle * -LineWidth;
@@ -406,10 +412,26 @@ void CPlayers::RenderHookCollLine(
 			vec2 Pos2 = DrawInitPos + PerpToAngle * -LineWidth;
 			vec2 Pos3 = DrawInitPos + PerpToAngle * LineWidth;
 			vLineQuadSegments.emplace_back(Pos0.x, Pos0.y, Pos1.x, Pos1.y, Pos2.x, Pos2.y, Pos3.x, Pos3.y);
+		};
+
+		for(const auto &LineSegment : vLineSegments)
+		{
+			ConvertLineSegments(LineSegment);
 		}
+
+		vLineSegments.clear();
+
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(HookCollColor.WithAlpha(Alpha));
 		Graphics()->QuadsDrawFreeform(vLineQuadSegments.data(), vLineQuadSegments.size());
+		if(HookTipLineSegment.has_value())
+		{
+			vLineQuadSegments.clear();
+			ConvertLineSegments(HookTipLineSegment.value());
+			HookCollColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorTeeColl));
+			Graphics()->SetColor(HookCollColor.WithAlpha(Alpha));
+			Graphics()->QuadsDrawFreeform(vLineQuadSegments.data(), vLineQuadSegments.size());
+		}
 		Graphics()->QuadsEnd();
 	}
 	else
@@ -417,6 +439,12 @@ void CPlayers::RenderHookCollLine(
 		Graphics()->LinesBegin();
 		Graphics()->SetColor(HookCollColor.WithAlpha(Alpha));
 		Graphics()->LinesDraw(vLineSegments.data(), vLineSegments.size());
+		if(HookTipLineSegment.has_value())
+		{
+			HookCollColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorTeeColl));
+			Graphics()->SetColor(HookCollColor.WithAlpha(Alpha));
+			Graphics()->LinesDraw(&HookTipLineSegment.value(), 1);
+		}
 		Graphics()->LinesEnd();
 	}
 }
