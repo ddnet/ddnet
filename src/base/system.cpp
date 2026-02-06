@@ -46,15 +46,7 @@
 #include <cerrno>
 
 #if defined(CONF_PLATFORM_MACOS)
-// some lock and pthread functions are already defined in headers
-// included from Carbon.h
-// this prevents having duplicate definitions of those
-#define _lock_set_user_
-#define _task_user_
-
-#include <Carbon/Carbon.h>
 #include <CoreFoundation/CoreFoundation.h>
-#include <mach/mach_time.h>
 
 #if defined(__MAC_10_10) && __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_10
 #include <pthread/qos.h>
