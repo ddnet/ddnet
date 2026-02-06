@@ -3,6 +3,7 @@
 #include <base/log.h>
 #include <base/math.h>
 #include <base/system.h>
+#include <base/thread.h>
 
 #include <engine/external/json-parser/json.h>
 #include <engine/shared/config.h>

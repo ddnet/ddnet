@@ -3,6 +3,7 @@
 #include "connection.h"
 
 #include <base/system.h>
+#include <base/thread.h>
 
 #include <engine/console.h>
 #include <engine/shared/config.h>
