@@ -242,8 +242,7 @@ static const CMenus::SCustomItem *GetCustomItem(int CurTab, size_t Index)
 		return gs_vpSearchHudList[Index];
 	else if(CurTab == ASSETS_TAB_EXTRAS)
 		return gs_vpSearchExtrasList[Index];
-
-	return nullptr;
+	dbg_assert_failed("Invalid CurTab: %d", CurTab);
 }
 
 template<typename TName>
@@ -306,6 +305,10 @@ void CMenus::ClearCustomItems(int CurTab)
 
 		// reload current DDNet particles skin
 		GameClient()->LoadExtrasSkin(g_Config.m_ClAssetExtras);
+	}
+	else
+	{
+		dbg_assert_failed("Invalid CurTab: %d", CurTab);
 	}
 	gs_aInitCustomList[CurTab] = true;
 }
@@ -414,6 +417,10 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	else if(s_CurCustomTab == ASSETS_TAB_EXTRAS)
 	{
 		InitAssetList(m_vExtrasList, "assets/extras", "extras", ExtrasScan, Graphics(), Storage(), &User);
+	}
+	else
+	{
+		dbg_assert_failed("Invalid s_CurCustomTab: %d", s_CurCustomTab);
 	}
 
 	MainView.HSplitTop(10.0f, nullptr, &MainView);
