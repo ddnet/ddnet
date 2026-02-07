@@ -23,8 +23,8 @@ void main()
 
 	// Ring SDF with smooth edges
 	float ringAA = fwidth(dist);
-	float outerMask = 1.0 - smoothstep(1.0 - ringAA, 1.0, dist);
-	float innerMask = smoothstep(gFragConst.gInnerRadius, gFragConst.gInnerRadius + ringAA, dist);
+	float outerMask = 1.0 - smoothstep(1.0 - ringAA * 0.5, 1.0 + ringAA * 0.5, dist);
+	float innerMask = smoothstep(gFragConst.gInnerRadius - ringAA * 0.5, gFragConst.gInnerRadius + ringAA * 0.5, dist);
 	float ringMask = outerMask * innerMask;
 
 	if(ringMask <= 0.0)
@@ -48,8 +48,8 @@ void main()
 		vec2 startDir = vec2(sin(gFragConst.gArcStart), -cos(gFragConst.gArcStart));
 		vec2 endDir = vec2(sin(endAngle), -cos(endAngle));
 
-		float sinFromStart = dir.x * startDir.y - dir.y * startDir.x;
-		float sinFromEnd = endDir.x * dir.y - endDir.y * dir.x;
+		float sinFromStart = startDir.x * dir.y - startDir.y * dir.x;
+		float sinFromEnd = dir.x * endDir.y - dir.y * endDir.x;
 
 		float aaWidth = max(length(dFdx(texCoord)), length(dFdy(texCoord))) / dist;
 

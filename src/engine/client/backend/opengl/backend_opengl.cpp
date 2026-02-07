@@ -1009,40 +1009,24 @@ void CCommandProcessorFragment_OpenGL::Cmd_RenderProgressSpinner(const CCommandB
 		bool Filled = (ArcLen >= 1.0f) || (ArcLen > 0.0f && SegMid < FilledEnd);
 		GL_SColor Color = Filled ? FilledColor : UnfilledColor;
 
-		float Cos1 = std::cos(Angle1);
-		float Sin1 = std::sin(Angle1);
-		float Cos2 = std::cos(Angle2);
-		float Sin2 = std::sin(Angle2);
+		float DirX1 = std::sin(Angle1);
+		float DirY1 = -std::cos(Angle1);
+		float DirX2 = std::sin(Angle2);
+		float DirY2 = -std::cos(Angle2);
 
-		aVertices[VertIdx].m_Pos = {CenterX + Cos1 * InnerR, CenterY + Sin1 * InnerR};
-		aVertices[VertIdx].m_Tex = {0.0f, 0.0f};
-		aVertices[VertIdx].m_Color = Color;
-		VertIdx++;
+		const auto &&AddVertex = [&](float X, float Y, GL_SColor VertColor) {
+			aVertices[VertIdx].m_Pos = {X, Y};
+			aVertices[VertIdx].m_Tex = {0.0f, 0.0f};
+			aVertices[VertIdx].m_Color = VertColor;
+			VertIdx++;
+		};
 
-		aVertices[VertIdx].m_Pos = {CenterX + Cos2 * InnerR, CenterY + Sin2 * InnerR};
-		aVertices[VertIdx].m_Tex = {0.0f, 0.0f};
-		aVertices[VertIdx].m_Color = Color;
-		VertIdx++;
-
-		aVertices[VertIdx].m_Pos = {CenterX + Cos1 * OuterR, CenterY + Sin1 * OuterR};
-		aVertices[VertIdx].m_Tex = {0.0f, 0.0f};
-		aVertices[VertIdx].m_Color = Color;
-		VertIdx++;
-
-		aVertices[VertIdx].m_Pos = {CenterX + Cos1 * OuterR, CenterY + Sin1 * OuterR};
-		aVertices[VertIdx].m_Tex = {0.0f, 0.0f};
-		aVertices[VertIdx].m_Color = Color;
-		VertIdx++;
-
-		aVertices[VertIdx].m_Pos = {CenterX + Cos2 * InnerR, CenterY + Sin2 * InnerR};
-		aVertices[VertIdx].m_Tex = {0.0f, 0.0f};
-		aVertices[VertIdx].m_Color = Color;
-		VertIdx++;
-
-		aVertices[VertIdx].m_Pos = {CenterX + Cos2 * OuterR, CenterY + Sin2 * OuterR};
-		aVertices[VertIdx].m_Tex = {0.0f, 0.0f};
-		aVertices[VertIdx].m_Color = Color;
-		VertIdx++;
+		AddVertex(CenterX + DirX1 * InnerR, CenterY + DirY1 * InnerR, Color);
+		AddVertex(CenterX + DirX2 * InnerR, CenterY + DirY2 * InnerR, Color);
+		AddVertex(CenterX + DirX1 * OuterR, CenterY + DirY1 * OuterR, Color);
+		AddVertex(CenterX + DirX1 * OuterR, CenterY + DirY1 * OuterR, Color);
+		AddVertex(CenterX + DirX2 * InnerR, CenterY + DirY2 * InnerR, Color);
+		AddVertex(CenterX + DirX2 * OuterR, CenterY + DirY2 * OuterR, Color);
 	}
 
 	glVertexPointer(2, GL_FLOAT, sizeof(CCommandBuffer::SVertex), (char *)aVertices);
