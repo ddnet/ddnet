@@ -144,20 +144,45 @@ public:
 
 	void SetLoadingCallback(TLoadingCallback &&Func) { m_LoadingCallback = std::move(Func); }
 
-	// tick time access
+	// Game time.
+	//
+	// There are 50 ticks per second, by default we only send snapshot on
+	// every second tick.
+
+	// Tick of the second to most recently received snapshot (usually 2
+	// less than `GameTick`).
 	int PrevGameTick(int Conn) const { return m_aPrevGameTick[Conn]; }
+	// Tick of most recently received snapshot.
 	int GameTick(int Conn) const { return m_aCurGameTick[Conn]; }
+	// The tick we should predict to. Comes from a magic black box called
+	// "smooth time".
 	int PredGameTick(int Conn) const { return m_aPredTick[Conn]; }
+	// Linear interpolation parameter between `PrevGameTick` (0) and
+	// `GameTick` (1). Can be outside the interval [0, 1].
 	float IntraGameTick(int Conn) const { return m_aGameIntraTick[Conn]; }
+	// Linear interpolation parameter between `PredGameTick - 1` (0) and
+	// `PredGameTick` (1). Can be outside the interval [0, 1].
 	float PredIntraGameTick(int Conn) const { return m_aPredIntraTick[Conn]; }
+	// (Fractional) ticks since `PrevGameTick`.
 	float IntraGameTickSincePrev(int Conn) const { return m_aGameIntraTickSincePrev[Conn]; }
+	// Time in seconds since the second to most recently received snapshot.
 	float GameTickTime(int Conn) const { return m_aGameTickTime[Conn]; }
+	// 50
 	int GameTickSpeed() const { return SERVER_TICK_SPEED; }
 
-	// other time access
-	float RenderFrameTime() const { return m_RenderFrameTime; }
+	// Other time.
+
+	// Time in seconds since a map was joined, or `GlobalTime` if that
+	// hasn't happened yet.
 	float LocalTime() const { return m_LocalTime; }
+	// Time in seconds since the client was opened.
 	float GlobalTime() const { return m_GlobalTime; }
+
+	// Render statistics.
+
+	// Duration in seconds of the previous render cycle.
+	float RenderFrameTime() const { return m_RenderFrameTime; }
+	// Exponentially weighted average of frame times.
 	float FrameTimeAverage() const { return m_FrameTimeAverage; }
 
 	// actions
