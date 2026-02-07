@@ -210,6 +210,19 @@ void CGameWorld::Tick()
 		// update all objects
 		for(int i = 0; i < NUM_ENTTYPES; i++)
 		{
+			// Apply pending laser unfreezes before any character processing
+			// This ensures consistent rocket jump behavior regardless of client id order
+			if(i == ENTTYPE_CHARACTER)
+			{
+				auto *pEnt = m_apFirstEntityTypes[i];
+				for(; pEnt;)
+				{
+					m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
+					((CCharacter *)pEnt)->ApplyPendingLaserUnfreeze();
+					pEnt = m_pNextTraverseEntity;
+				}
+			}
+
 			// It's important to call PreTick() and Tick() after each other.
 			// If we call PreTick() before, and Tick() after other entities have been processed, it causes physics changes such as a stronger shotgun or grenade.
 			if(g_Config.m_SvNoWeakHook && i == ENTTYPE_CHARACTER)

@@ -84,6 +84,10 @@ public:
 
 	bool m_LastRefillJumps;
 
+	bool m_HasPendingLaserUnfreeze;
+	void SetPendingLaserUnfreeze() { m_HasPendingLaserUnfreeze = true; }
+	void ApplyPendingLaserUnfreeze();
+
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
 	int GetLastWeapon() const { return m_LastWeapon; }
 	void SetLastWeapon(int LastWeap) { m_LastWeapon = LastWeap; }

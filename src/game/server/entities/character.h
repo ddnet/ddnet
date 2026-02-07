@@ -235,6 +235,10 @@ public:
 	bool m_IsBlueTeleGunTeleport;
 	int m_StrongWeakId;
 
+	bool m_HasPendingLaserUnfreeze;
+	void SetPendingLaserUnfreeze() { m_HasPendingLaserUnfreeze = true; }
+	void ApplyPendingLaserUnfreeze();
+
 	int m_SpawnTick;
 	int m_WeaponChangeTick;
 
