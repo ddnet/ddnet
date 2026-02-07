@@ -118,6 +118,8 @@ void CLaser::DoBounce()
 
 	vec2 To = m_Pos + m_Dir * m_Energy;
 
+	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+	COL_SCOPED_TEAM_CONTEXT(Collision(), pOwnerChar ? pOwnerChar->Team() : -1);
 	Res = GameServer()->Collision()->IntersectLineTeleWeapon(m_Pos, To, &Coltile, &To, &z);
 
 	if(Res)
@@ -134,6 +136,8 @@ void CLaser::DoBounce()
 			int f = 0;
 			if(Res == -1)
 			{
+				// Unset team context for this specific purpose and scope
+				COL_SCOPED_TEAM_CONTEXT(Collision(), -1);
 				f = GameServer()->Collision()->GetTile(round_to_int(Coltile.x), round_to_int(Coltile.y));
 				GameServer()->Collision()->SetCollisionAt(round_to_int(Coltile.x), round_to_int(Coltile.y), TILE_SOLID);
 			}
@@ -187,7 +191,6 @@ void CLaser::DoBounce()
 		}
 	}
 
-	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	if(m_Owner >= 0 && m_Energy <= 0 && !m_TeleportCancelled && pOwnerChar &&
 		pOwnerChar->IsAlive() && pOwnerChar->HasTelegunLaser() && m_Type == WEAPON_LASER)
 	{

@@ -103,6 +103,8 @@ void CLaser::DoBounce()
 	int Res;
 	vec2 To = m_Pos + m_Dir * m_Energy;
 
+	CCharacter *pOwnerChar = GameWorld()->GetCharacterById(m_Owner);
+	COL_SCOPED_TEAM_CONTEXT(Collision(), pOwnerChar ? pOwnerChar->Team() : -1);
 	Res = Collision()->IntersectLineTeleWeapon(m_Pos, To, &Coltile, &To);
 
 	if(Res)
@@ -119,6 +121,8 @@ void CLaser::DoBounce()
 			int f = 0;
 			if(Res == -1)
 			{
+				// Unset team context for this specific purpose and scope
+				COL_SCOPED_TEAM_CONTEXT(Collision(), -1);
 				f = Collision()->GetTile(round_to_int(Coltile.x), round_to_int(Coltile.y));
 				Collision()->SetCollisionAt(round_to_int(Coltile.x), round_to_int(Coltile.y), TILE_SOLID);
 			}

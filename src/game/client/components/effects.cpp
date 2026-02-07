@@ -351,6 +351,7 @@ void CEffects::Explosion(vec2 Pos, float Alpha)
 
 	// Nudge position slightly to edge of closest tile so the
 	// smoke doesn't get stuck inside the tile.
+	COL_SCOPED_TEAM_CONTEXT(Collision(), GameClient()->SwitchStateTeam());
 	if(Collision()->CheckPoint(Pos))
 	{
 		const vec2 DistanceToTopLeft = Pos - vec2(round_truncate(Pos.x / 32), round_truncate(Pos.y / 32)) * 32;
