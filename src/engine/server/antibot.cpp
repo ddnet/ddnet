@@ -98,9 +98,9 @@ void CAntibot::RoundEnd()
 	m_pGameServer = 0;
 	free(m_RoundData.m_Map.m_pTiles);
 }
-void CAntibot::ConsoleCommand(const char *pCommand)
+void CAntibot::ConsoleCommand(int ClientId, const char *pCommand)
 {
-	AntibotConsoleCommand(pCommand);
+	AntibotConsoleCommand(ClientId, pCommand);
 }
 void CAntibot::Update()
 {
@@ -230,7 +230,7 @@ void CAntibot::RoundEnd()
 {
 	m_pGameServer = nullptr;
 }
-void CAntibot::ConsoleCommand(const char *pCommand)
+void CAntibot::ConsoleCommand(int ClientId, const char *pCommand)
 {
 	if(str_comp(pCommand, "dump") == 0)
 	{
