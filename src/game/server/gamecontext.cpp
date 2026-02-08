@@ -115,6 +115,8 @@ CGameContext::CGameContext(bool Resetting) :
 
 	if(!Resetting)
 	{
+		m_pMap = CreateMap();
+
 		for(auto &pSavedTee : m_apSavedTees)
 			pSavedTee = nullptr;
 
@@ -138,6 +140,9 @@ CGameContext::~CGameContext()
 
 	if(!m_Resetting)
 	{
+		m_pMap->Unload();
+		m_pMap = nullptr;
+
 		for(auto &pSavedTee : m_apSavedTees)
 			delete pSavedTee;
 
@@ -160,6 +165,8 @@ void CGameContext::Clear()
 	CTuningParams Tuning = m_aTuningList[0];
 	CMutes Mutes = m_Mutes;
 	CMutes VoteMutes = m_VoteMutes;
+	std::unique_ptr<IMap> pMap;
+	std::swap(pMap, m_pMap);
 
 	m_Resetting = true;
 	this->~CGameContext();
@@ -172,6 +179,7 @@ void CGameContext::Clear()
 	m_aTuningList[0] = Tuning;
 	m_Mutes = Mutes;
 	m_VoteMutes = VoteMutes;
+	std::swap(pMap, m_pMap);
 }
 
 void CGameContext::TeeHistorianWrite(const void *pData, int DataSize, void *pUser)
@@ -4134,16 +4142,10 @@ void CGameContext::OnInit(const void *pPersistentData)
 	for(int i = 0; i < NUM_NETOBJTYPES; i++)
 		Server()->SnapSetStaticsize(i, m_NetObjHandler.GetObjSize(i));
 
-	m_Layers.Init(Kernel()->RequestInterface<IMap>(), false);
+	m_Layers.Init(Map(), false);
 	m_Collision.Init(&m_Layers);
 	m_World.Init(&m_Collision, m_aTuningList);
-
-	char aMapName[IO_MAX_PATH_LENGTH];
-	int MapSize;
-	SHA256_DIGEST MapSha256;
-	int MapCrc;
-	Server()->GetMapInfo(aMapName, sizeof(aMapName), &MapSize, &MapSha256, &MapCrc);
-	m_MapBugs = CMapBugs::Create(aMapName, MapSize, MapSha256);
+	m_MapBugs = CMapBugs::Create(Map()->BaseName(), Map()->Size(), Map()->Sha256());
 
 	// Reset Tunezones
 	for(int i = 0; i < TuneZone::NUM; i++)
@@ -4268,10 +4270,10 @@ void CGameContext::OnInit(const void *pPersistentData)
 		GameInfo.m_pTuning = GlobalTuning();
 		GameInfo.m_pUuids = &g_UuidManager;
 
-		GameInfo.m_pMapName = aMapName;
-		GameInfo.m_MapSize = MapSize;
-		GameInfo.m_MapSha256 = MapSha256;
-		GameInfo.m_MapCrc = MapCrc;
+		GameInfo.m_pMapName = Map()->BaseName();
+		GameInfo.m_MapSize = Map()->Size();
+		GameInfo.m_MapSha256 = Map()->Sha256();
+		GameInfo.m_MapCrc = Map()->Crc();
 
 		if(pPersistent)
 		{
@@ -4430,7 +4432,7 @@ bool CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 	}
 
 	CDataFileReader Reader;
-	if(!Reader.Open(Storage(), pNewMapName, IStorage::TYPE_ALL))
+	if(!Reader.Open(g_Config.m_SvMap, Storage(), pNewMapName, IStorage::TYPE_ALL))
 	{
 		log_error("mapchange", "Failed to import settings from '%s': failed to open map '%s' for reading", aConfig, pNewMapName);
 		return false;
@@ -4583,7 +4585,7 @@ void CGameContext::OnShutdown(void *pPersistentData)
 
 void CGameContext::LoadMapSettings()
 {
-	IMap *pMap = Kernel()->RequestInterface<IMap>();
+	IMap *pMap = Map();
 	int Start, Num;
 	pMap->GetType(MAPITEMTYPE_INFO, &Start, &Num);
 	for(int i = Start; i < Start + Num; i++)
