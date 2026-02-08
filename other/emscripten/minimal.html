@@ -23,37 +23,55 @@
 		}
 		#output {
 			padding: 10px;
-			overflow: scroll;
+			overflow: hidden scroll;
 			box-sizing: border-box;
+		}
+		#output .line {
+			border-left: 5px solid;
+			padding-left: 10px;
 		}
 		</style>
 	</head>
 	<body>
+		<div id="output"></div>
 		<canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
-		<p id="output"></p>
 		<script>
-			// https://stackoverflow.com/a/30970751
-			function escapeHtml(s) {
-				let lookup = {
-					'&': "&amp;",
-					'"': "&quot;",
-					'\'': "&apos;",
-					'<': "&lt;",
-					'>': "&gt;"
-				};
-				return s.replace(/[&"'<>]/g, c => lookup[c]);
-			}
 			var output = document.getElementById('output');
+			function appendOutput(message, bold, textColor, borderColor) {
+				const span = document.createElement("span");
+				span.textContent = message;
+				span.className = "line";
+				if (textColor) {
+					span.style.color = textColor;
+				}
+				if (borderColor) {
+					span.style.borderColor = borderColor;
+				}
+				if (bold) {
+					span.style.fontWeight = "bold";
+				}
+				output.appendChild(span);
+				output.appendChild(document.createElement("br"));
+				output.scrollTop = output.scrollHeight;
+			}
+			function parseAnsiColorRgb(line) {
+				// Only handles RGB format because our logging system only uses that.
+				const match = line.match(/^\x1b\[38;2;(\d+);(\d+);(\d+)m([\s\S]*?)\x1b\[0m$/);
+				if (!match) {
+					return { color: "black", message: line };
+				}
+				const [, r, g, b, message] = match;
+				return { color: `rgb(${r}, ${g}, ${b})`, message: message };
+			}
 			var Module = {
 				print: function(text) {
-					console.log(text);
-					output.innerHTML += escapeHtml(text) + '<br>';
-					output.scrollTop = output.scrollHeight;
+					const parsedLine = parseAnsiColorRgb(text);
+					console.log(parsedLine.message);
+					appendOutput(parsedLine.message, false, undefined, parsedLine.color);
 				},
 				printErr: function(text) {
 					console.error(text);
-					output.innerHTML += '<span style="color: red">' + escapeHtml(text) + '</span><br>';
-					output.scrollTop = output.scrollHeight;
+					appendOutput(text, false, "red");
 				},
 				onAbort: function() {
 					// Game over. Hide the canvas. The error will already be logged by printErr.
@@ -62,8 +80,7 @@
 				canvas: document.getElementById('canvas')
 			};
 			window.onerror = function(text) {
-				output.innerHTML += '<span style="color: red">' + escapeHtml(text + " (see console for details)") + '</span><br>';
-				output.scrollTop = output.scrollHeight;
+				appendOutput(text, true, "red");
 				Module['canvas'].style.display = "none";
 			};
 			Module['canvas'].addEventListener('dragover', e => {
