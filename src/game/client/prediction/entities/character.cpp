@@ -1198,6 +1198,14 @@ bool CCharacter::UnFreeze()
 	return false;
 }
 
+void CCharacter::ApplyPendingLaserUnfreeze()
+{
+	if(!m_HasPendingLaserUnfreeze)
+		return;
+	m_HasPendingLaserUnfreeze = false;
+	UnFreeze();
+}
+
 void CCharacter::GiveWeapon(int Weapon, bool Remove)
 {
 	if(Weapon == WEAPON_NINJA)
@@ -1317,6 +1325,7 @@ void CCharacter::ResetPrediction()
 	m_Core.m_DeepFrozen = false;
 	m_Core.m_LiveFrozen = false;
 	m_FrozenLastTick = false;
+	m_HasPendingLaserUnfreeze = false;
 	for(int w = 0; w < NUM_WEAPONS; w++)
 	{
 		SetWeaponGot(w, false);

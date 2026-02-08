@@ -34,6 +34,7 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 	m_Armor = 0;
 	m_TriggeredEvents7 = 0;
 	m_StrongWeakId = 0;
+	m_HasPendingLaserUnfreeze = false;
 
 	m_Input = LastInput;
 	// never initialize both to zero
@@ -68,6 +69,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 
 	m_TeleGunTeleport = false;
 	m_IsBlueTeleGunTeleport = false;
+	m_HasPendingLaserUnfreeze = false;
 
 	m_pPlayer = pPlayer;
 	m_Pos = Pos;
@@ -1043,6 +1045,14 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 	m_Core.m_Vel = ClampVel(m_MoveRestrictions, Temp);
 
 	return true;
+}
+
+void CCharacter::ApplyPendingLaserUnfreeze()
+{
+	if(!m_HasPendingLaserUnfreeze)
+		return;
+	m_HasPendingLaserUnfreeze = false;
+	UnFreeze();
 }
 
 void CCharacter::SendDeathMessageIfNotInLockedTeam(int Killer, int Weapon, int ModeSpecial)
