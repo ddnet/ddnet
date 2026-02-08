@@ -4,12 +4,12 @@
 
 #include <base/color.h>
 
+#include <engine/font_icons.h>
+
 #include <game/client/components/binds.h>
 #include <game/client/gameclient.h>
 #include <game/client/ui.h>
 #include <game/localization.h>
-
-using namespace FontIcons;
 
 bool CKeyBinder::OnInput(const IInput::CEvent &Event)
 {
@@ -39,7 +39,7 @@ CKeyBinder::CKeyReaderResult CKeyBinder::DoKeyReader(CButtonContainer *pReaderBu
 	pRect->VSplitRight(pRect->h, &KeyReaderButton, &ClearButton);
 
 	const int ClearButtonResult = Ui()->DoButton_FontIcon(
-		pClearButton, FONT_ICON_TRASH,
+		pClearButton, FontIcon::TRASH,
 		Result.m_Bind == CBindSlot(KEY_UNKNOWN, KeyModifier::NONE) ? 1 : 0,
 		&ClearButton, BUTTONFLAG_LEFT, IGraphics::CORNER_R);
 
