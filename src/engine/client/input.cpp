@@ -686,6 +686,18 @@ static int TranslateMouseWheelEventKey(const SDL_MouseWheelEvent &MouseWheelEven
 	}
 }
 
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+extern "C" {
+
+// This will be called from Emscripten JS code
+bool EmscriptenQuit = false;
+void EmscriptenCallbackQuit()
+{
+	EmscriptenQuit = true;
+}
+}
+#endif
+
 int CInput::Update()
 {
 	const int64_t Now = time_get();
@@ -708,6 +720,13 @@ int CInput::Update()
 			AddKeyEvent(Key, Flags);
 		}
 	};
+
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+	if(EmscriptenQuit)
+	{
+		return 1;
+	}
+#endif
 
 	while(SDL_PollEvent(&Event))
 	{

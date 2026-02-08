@@ -16,6 +16,9 @@ set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s PTHREAD_POOL_SIZE_STRICT=2")
 # Bad, but we sometimes need to block on the main thread because PROXY_TO_PTHREAD is not supported yet.
 set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s ALLOW_BLOCKING_ON_MAIN_THREAD=1")
 
+# Ensure execution ends after main() returns, so global destructors and Module.onExit are invoked.
+set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s EXIT_RUNTIME=1")
+
 # Filesystem support for loading files with C API functions.
 set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s FILESYSTEM=1 -s FORCE_FILESYSTEM=1")
 
@@ -29,7 +32,7 @@ set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s FULL_ES3=1")
 
 # Make sure C callback functions are available to JS.
 set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s DEFAULT_LIBRARY_FUNCS_TO_INCLUDE=[\\$autoResumeAudioContext,\\$dynCall]")
-set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s EXPORTED_FUNCTIONS=_main,_EmscriptenCallbackDropFile")
+set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s EXPORTED_FUNCTIONS=_main,_EmscriptenCallbackDropFile,_EmscriptenCallbackQuit")
 set(WASM_LINKER_FLAGS "${WASM_LINKER_FLAGS} -s EXPORTED_RUNTIME_METHODS=ccall")
 
 # Very important: use same stack size that other platforms have, as the default of 64 KiB that Emscripten uses is too small for our code and causes stack overflows.

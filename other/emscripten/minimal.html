@@ -34,7 +34,7 @@
 	</head>
 	<body>
 		<div id="output"></div>
-		<canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+		<canvas id="canvas">Canvas not supported.</canvas>
 		<script>
 			var output = document.getElementById('output');
 			function appendOutput(message, bold, textColor, borderColor) {
@@ -73,16 +73,36 @@
 					console.error(text);
 					appendOutput(text, false, "red");
 				},
-				onAbort: function() {
-					// Game over. Hide the canvas. The error will already be logged by printErr.
+				onExit: function() {
+					// After client quits, hide the canvas and reset the cursor, as the canvas
+					// will be entirely black, also blocking the view of the console output.
 					Module['canvas'].style.display = "none";
+					// Make sure to reset cursor because it sometimes does not become visible.
+					Module['canvas'].style.cursor = "default";
+					appendOutput("Client closed. Reload the page to restart.", true);
+					const restartButton = document.createElement("button");
+					restartButton.textContent = "Reload page";
+					restartButton.style.marginTop = "10px";
+					restartButton.style.padding = "5px";
+					restartButton.addEventListener('click', e => location.reload());
+					output.appendChild(restartButton);
+					output.scrollTop = output.scrollHeight;
 				},
 				canvas: document.getElementById('canvas')
 			};
 			window.onerror = function(text) {
 				appendOutput(text, true, "red");
-				Module['canvas'].style.display = "none";
 			};
+			Module['canvas'].addEventListener('contextmenu', e => e.preventDefault());
+			Module['canvas'].addEventListener('webglcontextcreationerror', e => {
+				appendOutput(`Failed to create WebGL context: ${e.statusMessage || "Unknown error"}`, true, "red");
+			});
+			Module['canvas'].addEventListener('webglcontextlost', e => {
+				// The client cannot currently recover from GL context loss, because it
+				// would require reloading all textures, framebuffers etc.
+				appendOutput(`The WebGL context was lost: ${e.statusMessage || "Unknown error"}`, true, "red");
+				Module.ccall('EmscriptenCallbackQuit', null, [], []);
+			});
 			Module['canvas'].addEventListener('dragover', e => {
 				e.preventDefault();
 				e.dataTransfer.dropEffect = "none";
