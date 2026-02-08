@@ -110,6 +110,10 @@ if(NOT FOUND_MATCHING_SHA256_FILE)
   generate_shader_file("" "" "${PROJECT_SOURCE_DIR}/data/shader/vulkan/prim3d.vert" "data/shader/vulkan/prim3d.vert.spv")
   generate_shader_file("-DTW_TEXTURED" "" "${PROJECT_SOURCE_DIR}/data/shader/vulkan/prim3d.vert" "data/shader/vulkan/prim3d_textured.vert.spv")
   
+  # progress spinner
+  generate_shader_file("" "" "${PROJECT_SOURCE_DIR}/data/shader/vulkan/progressspinner.frag" "data/shader/vulkan/progressspinner.frag.spv")
+  generate_shader_file("" "" "${PROJECT_SOURCE_DIR}/data/shader/vulkan/progressspinner.vert" "data/shader/vulkan/progressspinner.vert.spv")
+
   # text
   generate_shader_file("" "" "${PROJECT_SOURCE_DIR}/data/shader/vulkan/text.frag" "data/shader/vulkan/text.frag.spv")
   generate_shader_file("" "" "${PROJECT_SOURCE_DIR}/data/shader/vulkan/text.vert" "data/shader/vulkan/text.vert.spv")

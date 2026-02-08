@@ -152,6 +152,7 @@ public:
 		CMD_RENDER_QUAD_CONTAINER, // render a quad buffer container
 		CMD_RENDER_QUAD_CONTAINER_EX, // render a quad buffer container with extended parameters
 		CMD_RENDER_QUAD_CONTAINER_SPRITE_MULTIPLE, // render a quad buffer container as sprite multiple times
+		CMD_RENDER_PROGRESS_SPINNER, // render a progress spinner with SDF on modern backends
 
 		// swap
 		CMD_SWAP,
@@ -448,6 +449,21 @@ public:
 		unsigned int m_DrawNum;
 		unsigned int m_DrawCount;
 		void *m_pOffset;
+	};
+
+	struct SCommand_RenderProgressSpinner : public SCommand
+	{
+		SCommand_RenderProgressSpinner() :
+			SCommand(CMD_RENDER_PROGRESS_SPINNER) {}
+		SState m_State;
+		float m_CenterX;
+		float m_CenterY;
+		float m_OuterRadius;
+		float m_InnerRadius;
+		float m_ArcStart; // radians, 0 = top, clockwise
+		float m_ArcLen; // fraction [0, 1] of full circle
+		ColorRGBA m_FilledColor;
+		ColorRGBA m_UnfilledColor;
 	};
 
 	struct SCommand_TrySwapAndReadPixel : public SCommand
@@ -1103,6 +1119,8 @@ public:
 	void RenderQuadContainerEx(int ContainerIndex, int QuadOffset, int QuadDrawNum, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) override;
 	void RenderQuadContainerAsSprite(int ContainerIndex, int QuadOffset, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) override;
 	void RenderQuadContainerAsSpriteMultiple(int ContainerIndex, int QuadOffset, int DrawCount, SRenderSpriteInfo *pRenderInfo) override;
+
+	void RenderProgressSpinner(vec2 Center, float OuterRadius, float InnerRadius, float ArcStart, float ArcLen, ColorRGBA FilledColor, ColorRGBA UnfilledColor) override;
 
 	// sprites
 private:

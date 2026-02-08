@@ -1622,42 +1622,20 @@ void CUi::RenderTime(CUIRect TimeRect, float FontSize, int Seconds, bool NotFini
 
 void CUi::RenderProgressSpinner(vec2 Center, float OuterRadius, const SProgressSpinnerProperties &Props) const
 {
-	Graphics()->TextureClear();
-	Graphics()->QuadsBegin();
-
-	// The filled and unfilled segments need to begin at the same angle offset
-	// or the differences in pixel alignment will make the filled segments flicker.
-	const float SegmentsAngle = 2.0f * pi / Props.m_Segments;
 	const float InnerRadius = OuterRadius * 0.75f;
-	const float AngleOffset = -0.5f * pi;
-	Graphics()->SetColor(Props.m_Color.WithMultipliedAlpha(0.5f));
-	for(int i = 0; i < Props.m_Segments; ++i)
-	{
-		const vec2 Dir1 = direction(AngleOffset + i * SegmentsAngle);
-		const vec2 Dir2 = direction(AngleOffset + (i + 1) * SegmentsAngle);
-		IGraphics::CFreeformItem Item = IGraphics::CFreeformItem(
-			Center + Dir1 * InnerRadius, Center + Dir2 * InnerRadius,
-			Center + Dir1 * OuterRadius, Center + Dir2 * OuterRadius);
-		Graphics()->QuadsDrawFreeform(&Item, 1);
-	}
+	const bool Indeterminate = Props.m_Progress < 0.0f;
+	const float ArcLen = Indeterminate ? 0.333f : Props.m_Progress;
+	const float ArcStart = Indeterminate ? (m_ProgressSpinnerOffset * 2.0f * pi) : 0.0f;
 
-	const float FilledRatio = Props.m_Progress < 0.0f ? 0.333f : Props.m_Progress;
-	const int FilledSegmentOffset = Props.m_Progress < 0.0f ? round_to_int(m_ProgressSpinnerOffset * Props.m_Segments) : 0;
-	const int FilledNumSegments = minimum<int>(Props.m_Segments * FilledRatio + (Props.m_Progress < 0.0f ? 0 : 1), Props.m_Segments);
-	Graphics()->SetColor(Props.m_Color);
-	for(int i = 0; i < FilledNumSegments; ++i)
-	{
-		const float Angle1 = AngleOffset + (i + FilledSegmentOffset) * SegmentsAngle;
-		const float Angle2 = AngleOffset + ((i + 1 == FilledNumSegments && Props.m_Progress >= 0.0f) ? (2.0f * pi * Props.m_Progress) : ((i + FilledSegmentOffset + 1) * SegmentsAngle));
-		IGraphics::CFreeformItem Item = IGraphics::CFreeformItem(
-			Center.x + std::cos(Angle1) * InnerRadius, Center.y + std::sin(Angle1) * InnerRadius,
-			Center.x + std::cos(Angle2) * InnerRadius, Center.y + std::sin(Angle2) * InnerRadius,
-			Center.x + std::cos(Angle1) * OuterRadius, Center.y + std::sin(Angle1) * OuterRadius,
-			Center.x + std::cos(Angle2) * OuterRadius, Center.y + std::sin(Angle2) * OuterRadius);
-		Graphics()->QuadsDrawFreeform(&Item, 1);
-	}
-
-	Graphics()->QuadsEnd();
+	Graphics()->TextureClear();
+	Graphics()->RenderProgressSpinner(
+		Center,
+		OuterRadius,
+		InnerRadius,
+		ArcStart,
+		ArcLen,
+		Props.m_Color,
+		Props.m_Color.WithMultipliedAlpha(0.5f));
 }
 
 void CUi::DoPopupMenu(const SPopupMenuId *pId, float X, float Y, float Width, float Height, void *pContext, FPopupMenuFunction pfnFunc, const SPopupMenuProperties &Props)

@@ -119,6 +119,7 @@ protected:
 	virtual void Cmd_RenderQuadContainer(const CCommandBuffer::SCommand_RenderQuadContainer *pCommand) { dbg_assert_failed("Call of unsupported Cmd_RenderQuadContainer"); }
 	virtual void Cmd_RenderQuadContainerEx(const CCommandBuffer::SCommand_RenderQuadContainerEx *pCommand) { dbg_assert_failed("Call of unsupported Cmd_RenderQuadContainerEx"); }
 	virtual void Cmd_RenderQuadContainerAsSpriteMultiple(const CCommandBuffer::SCommand_RenderQuadContainerAsSpriteMultiple *pCommand) { dbg_assert_failed("Call of unsupported Cmd_RenderQuadContainerAsSpriteMultiple"); }
+	virtual void Cmd_RenderProgressSpinner(const CCommandBuffer::SCommand_RenderProgressSpinner *pCommand);
 
 public:
 	CCommandProcessorFragment_OpenGL();
