@@ -1,2 +1,7 @@
 Style:
-  AngledHeaders: ["base/.*", "engine/.*", "game/.*", "generated/.*"]
+  AngledHeaders: [
+    "base/.*",
+    "engine/.*",
+    "game/.*",
+    "generated/.*"
+  ]
