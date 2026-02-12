@@ -435,7 +435,9 @@ void CServerBrowser::Filter()
 		CServerInfo &Info = m_vpServerlist[ServerIndex]->m_Info;
 		bool Filtered = false;
 
-		if(g_Config.m_BrFilterEmpty && Info.m_NumFilteredPlayers == 0)
+		if(g_Config.m_BrFilterNotEmpty && Info.m_NumFilteredPlayers != 0)
+			Filtered = true;
+		else if(g_Config.m_BrFilterEmpty && Info.m_NumFilteredPlayers == 0)
 			Filtered = true;
 		else if(g_Config.m_BrFilterFull && Players(Info) == Max(Info))
 			Filtered = true;
@@ -627,6 +629,8 @@ int CServerBrowser::SortHash() const
 	i |= g_Config.m_BrFilterCountry << 14;
 	i |= g_Config.m_BrFilterConnectingPlayers << 15;
 	i |= g_Config.m_BrFilterLogin << 16;
+	i |= g_Config.m_BrFilterNotEmpty << 17;
+
 	return i;
 }
 

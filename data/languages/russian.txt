@@ -322,6 +322,9 @@ Server info
 Server not full
 == Сервер не заполнен
 
+Server is empty
+== Пустой сервер
+
 Shotgun
 == Дробовик
 

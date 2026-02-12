@@ -705,8 +705,19 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	View.HSplitBottom(3.0f, &View, nullptr);
 
 	View.HSplitTop(RowHeight, &Button, &View);
+	if(DoButton_CheckBox(&g_Config.m_BrFilterNotEmpty, Localize("Server is empty"), g_Config.m_BrFilterNotEmpty, &Button))
+	{
+		g_Config.m_BrFilterNotEmpty ^= 1;
+		g_Config.m_BrFilterEmpty = 0;
+		g_Config.m_BrFilterFriends = 0;
+	}
+
+	View.HSplitTop(RowHeight, &Button, &View);
 	if(DoButton_CheckBox(&g_Config.m_BrFilterEmpty, Localize("Has people playing"), g_Config.m_BrFilterEmpty, &Button))
+	{
 		g_Config.m_BrFilterEmpty ^= 1;
+		g_Config.m_BrFilterNotEmpty = 0;
+	}
 
 	View.HSplitTop(RowHeight, &Button, &View);
 	if(DoButton_CheckBox(&g_Config.m_BrFilterSpectators, Localize("Count players only"), g_Config.m_BrFilterSpectators, &Button))
@@ -718,7 +729,10 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 
 	View.HSplitTop(RowHeight, &Button, &View);
 	if(DoButton_CheckBox(&g_Config.m_BrFilterFriends, Localize("Show friends only"), g_Config.m_BrFilterFriends, &Button))
+	{
 		g_Config.m_BrFilterFriends ^= 1;
+		g_Config.m_BrFilterNotEmpty = 0;
+	}
 
 	View.HSplitTop(RowHeight, &Button, &View);
 	if(DoButton_CheckBox(&g_Config.m_BrFilterPw, Localize("No password"), g_Config.m_BrFilterPw, &Button))
@@ -855,6 +869,7 @@ void CMenus::ResetServerbrowserFilters()
 	g_Config.m_BrFilterString[0] = '\0';
 	g_Config.m_BrExcludeString[0] = '\0';
 	g_Config.m_BrFilterFull = 0;
+	g_Config.m_BrFilterNotEmpty = 0;
 	g_Config.m_BrFilterEmpty = 0;
 	g_Config.m_BrFilterSpectators = 0;
 	g_Config.m_BrFilterFriends = 0;
