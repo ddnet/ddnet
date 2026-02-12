@@ -620,9 +620,20 @@ void CGhost::OnMessage(int MsgType, void *pRawMsg)
 			int Time = CRaceHelper::TimeFromFinishMessage(pMsg->m_pMessage, aName, sizeof(aName));
 			if(Time > 0 && GameClient()->m_Snap.m_LocalClientId >= 0 && str_comp(aName, GameClient()->m_aClients[GameClient()->m_Snap.m_LocalClientId].m_aName) == 0)
 			{
-				StopRecord(Time);
+				if(m_Recording)
+					StopRecord(Time);
 				StopRender();
 			}
+		}
+	}
+	else if(MsgType == NETMSGTYPE_SV_RACEFINISH)
+	{
+		CNetMsg_Sv_RaceFinish *pMsg = (CNetMsg_Sv_RaceFinish *)pRawMsg;
+		if(m_Recording && pMsg->m_ClientId == GameClient()->m_Snap.m_LocalClientId)
+		{
+			if(m_Recording)
+				StopRecord(pMsg->m_Time);
+			StopRender();
 		}
 	}
 }

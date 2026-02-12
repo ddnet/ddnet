@@ -158,6 +158,16 @@ void CRaceDemo::OnMessage(int MsgType, void *pRawMsg)
 			}
 		}
 	}
+	else if(MsgType == NETMSGTYPE_SV_RACEFINISH)
+	{
+		CNetMsg_Sv_RaceFinish *pMsg = (CNetMsg_Sv_RaceFinish *)pRawMsg;
+		if(m_RaceState == RACE_STARTED && pMsg->m_ClientId == GameClient()->m_Snap.m_LocalClientId)
+		{
+			m_RaceState = RACE_FINISHED;
+			m_RecordStopTick = Client()->GameTick(g_Config.m_ClDummy) + Client()->GameTickSpeed();
+			m_Time = pMsg->m_Time;
+		}
+	}
 }
 
 void CRaceDemo::OnMapLoad()
