@@ -156,11 +156,16 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_MapdownloadTotalsize = -1;
 	std::optional<SHA256_DIGEST> m_MapdownloadSha256;
 
-	bool m_MapDetailsPresent = false;
-	char m_aMapDetailsName[256] = "";
-	int m_MapDetailsCrc = 0;
-	SHA256_DIGEST m_MapDetailsSha256;
-	char m_aMapDetailsUrl[256] = "";
+	class CMapDetails
+	{
+	public:
+		char m_aName[256];
+		int m_Size;
+		int m_Crc;
+		SHA256_DIGEST m_Sha256;
+		char m_aUrl[256];
+	};
+	std::optional<CMapDetails> m_MapDetails;
 
 	EInfoState m_InfoState = EInfoState::ERROR;
 	std::shared_ptr<CHttpRequest> m_pDDNetInfoTask = nullptr;
