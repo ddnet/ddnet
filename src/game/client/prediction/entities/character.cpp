@@ -369,6 +369,8 @@ void CCharacter::FireWeapon()
 			pTarget->UnFreeze();
 
 			Hits++;
+
+			AntiPingInterference(pTarget->GetCid());
 		}
 
 		// if we Hit anything, we have to wait for the reload
@@ -627,6 +629,16 @@ void CCharacter::Tick()
 	HandleWeapons();
 
 	DDRacePostCoreTick();
+
+	// antiping
+	if(IsInterfering())
+	{
+		// Disable dynamic interaction based antiping when player moved or hooked a wall
+		if((!m_FreezeTime || g_Config.m_ClAntiPingPlayers != 3) && (m_Input.m_Direction != m_PrevInput.m_Direction || m_Input.m_Jump != m_PrevInput.m_Jump || m_Core.m_TriggeredEvents & COREEVENT_HOOK_ATTACH_GROUND))
+		{
+			m_Interfering = false;
+		}
+	}
 
 	// Previnput
 	m_PrevInput = m_Input;
@@ -1275,6 +1287,7 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar,
 	m_Core.Reset();
 	m_Core.Init(&GameWorld()->m_Core, GameWorld()->Collision(), GameWorld()->Teams());
 	m_Core.m_Id = Id;
+	m_Core.SetAntiPingInterfereCallback(AntiPingInterfereCb, this);
 	mem_zero(&m_Core.m_Ninja, sizeof(m_Core.m_Ninja));
 	m_Core.m_LeftWall = true;
 	m_ReloadTimer = 0;
@@ -1293,6 +1306,35 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar,
 
 	ResetPrediction();
 	Read(pChar, pExtended, false);
+}
+
+void CCharacter::AntiPingInterfereCb(int ClientId, bool DisallowReset, void *pUser)
+{
+	CCharacter *pThis = (CCharacter *)pUser;
+	// Enable antiping for players that we hook or bump while unfrozen, the unfrozen check helps when being saved in gores
+	// If we interfered with a player that bounces or hooks someone else, we want to chain the prediction
+	// thus interfering players can enable antiping on others
+	if(!pThis->m_FreezeTime)
+	{
+		pThis->AntiPingInterference(ClientId, DisallowReset);
+	}
+}
+
+void CCharacter::AntiPingInterference(int ClientId, bool DisallowReset)
+{
+	bool AllowEnablePrediction = m_IsLocal || m_Interfering;
+	if(!AllowEnablePrediction && !DisallowReset)
+	{
+		// disable antiping on players if a non-predicted player interacts with them, but not player bounces here
+		if(!GameWorld()->GetCharacterById(ClientId)->m_FreezeTime || g_Config.m_ClAntiPingPlayers != 3)
+		{
+			GameWorld()->GetCharacterById(ClientId)->m_Interfering = false;
+		}
+	}
+	else if(AllowEnablePrediction)
+	{
+		GameWorld()->GetCharacterById(ClientId)->m_Interfering = true;
+	}
 }
 
 void CCharacter::ResetPrediction()
@@ -1329,6 +1371,7 @@ void CCharacter::ResetPrediction()
 	}
 	m_LastWeaponSwitchTick = 0;
 	m_LastTuneZoneTick = 0;
+	m_Interfering = false;
 }
 
 void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal)
@@ -1361,6 +1404,14 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 			}
 			else if(pExtended->m_FreezeEnd == -1)
 				m_Core.m_DeepFrozen = true;
+
+			// We wait for the server to tell us who is frozen instead of using predicted Freeze() function
+			// because that can still mispredict and would cause jitter by enabling and disabling antiping
+			if(pExtended->m_FreezeEnd != 0 && g_Config.m_ClAntiPingPlayers == 3)
+			{
+				// If wanted, every frozen player will always be predicted to catch them easier
+				m_Interfering = true;
+			}
 		}
 		else
 			UnFreeze();
