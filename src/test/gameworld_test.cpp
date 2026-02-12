@@ -295,7 +295,7 @@ TEST_F(CTestGameWorld, CharacterEmote)
 
 	// ninja jetpack
 	pPlayer->Pause(CPlayer::PAUSE_NONE, true);
-	pChr->UnFreeze();
+	pChr->Unfreeze();
 	pPlayer->m_NinjaJetpack = true;
 	pChr->m_NinjaJetpack = true;
 	pChr->SetJetpack(true);

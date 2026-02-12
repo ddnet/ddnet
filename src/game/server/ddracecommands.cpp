@@ -150,7 +150,7 @@ void CGameContext::ConSuper(IConsole::IResult *pResult, void *pUserData)
 	if(pChr && !pChr->IsSuper())
 	{
 		pChr->SetSuper(true);
-		pChr->UnFreeze();
+		pChr->Unfreeze();
 	}
 }
 
@@ -206,14 +206,14 @@ void CGameContext::ConFreeze(IConsole::IResult *pResult, void *pUserData)
 		pChr->Freeze();
 }
 
-void CGameContext::ConUnFreeze(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConUnfreeze(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(!CheckClientId(pResult->m_ClientId))
 		return;
 	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
 	if(pChr)
-		pChr->UnFreeze();
+		pChr->Unfreeze();
 }
 
 void CGameContext::ConDeep(IConsole::IResult *pResult, void *pUserData)
@@ -235,7 +235,7 @@ void CGameContext::ConUnDeep(IConsole::IResult *pResult, void *pUserData)
 	if(pChr)
 	{
 		pChr->SetDeepFrozen(false);
-		pChr->UnFreeze();
+		pChr->Unfreeze();
 	}
 }
 
@@ -484,7 +484,7 @@ void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 		}
 		pSelf->Teleport(pChr, Pos);
 		pChr->ResetJumps();
-		pChr->UnFreeze();
+		pChr->Unfreeze();
 		pChr->SetVelocity(vec2(0, 0));
 	}
 }
