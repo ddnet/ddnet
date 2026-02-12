@@ -9,12 +9,13 @@
 
 #include <engine/map.h>
 
-class CMap : public IEngineMap
+class CMap : public IMap
 {
 	CDataFileReader m_DataFile;
 
 public:
 	CMap();
+	~CMap() override;
 
 	CDataFileReader *GetReader() { return &m_DataFile; }
 
@@ -32,11 +33,15 @@ public:
 	void *FindItem(int Type, int Id) override;
 	int NumItems() const override;
 
-	[[nodiscard]] bool Load(const char *pMapName, int StorageType) override;
+	[[nodiscard]] bool Load(const char *pFullName, IStorage *pStorage, const char *pPath, int StorageType) override;
+	[[nodiscard]] bool Load(IStorage *pStorage, const char *pPath, int StorageType) override;
 	void Unload() override;
 	bool IsLoaded() const override;
 	IOHANDLE File() const override;
 
+	const char *FullName() const override;
+	const char *BaseName() const override;
+	const char *Path() const override;
 	SHA256_DIGEST Sha256() const override;
 	unsigned Crc() const override;
 	int Size() const override;

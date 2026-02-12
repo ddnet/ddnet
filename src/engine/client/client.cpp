@@ -429,8 +429,8 @@ void CClient::SetState(EClientState State)
 		CServerInfo CurrentServerInfo;
 		GetServerInfo(&CurrentServerInfo);
 
-		Discord()->SetGameInfo(CurrentServerInfo, m_aCurrentMap, Registered);
-		Steam()->SetGameInfo(ServerAddress(), m_aCurrentMap, Registered);
+		Discord()->SetGameInfo(CurrentServerInfo, GameClient()->Map()->BaseName(), Registered);
+		Steam()->SetGameInfo(ServerAddress(), GameClient()->Map()->BaseName(), Registered);
 	}
 	else if(OldState == IClient::STATE_ONLINE)
 	{
@@ -737,7 +737,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 	GameClient()->ForceUpdateConsoleRemoteCompletionSuggestions();
 	m_aNetClient[CONN_MAIN].Disconnect(pReason);
 	SetState(IClient::STATE_OFFLINE);
-	m_pMap->Unload();
+	GameClient()->Map()->Unload();
 	m_CurrentServerPingInfoType = -1;
 	m_CurrentServerPingBasicToken = -1;
 	m_CurrentServerPingToken = -1;
@@ -1155,30 +1155,30 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, const std
 	if((bool)m_LoadingCallback)
 		m_LoadingCallback(IClient::LOADING_CALLBACK_DETAIL_MAP);
 
-	if(!m_pMap->Load(pFilename, IStorage::TYPE_ALL))
+	if(!GameClient()->Map()->Load(pName, Storage(), pFilename, IStorage::TYPE_ALL))
 	{
 		str_format(s_aErrorMsg, sizeof(s_aErrorMsg), "map '%s' not found", pFilename);
 		return s_aErrorMsg;
 	}
 
-	if(WantedSha256.has_value() && m_pMap->Sha256() != WantedSha256.value())
+	if(WantedSha256.has_value() && GameClient()->Map()->Sha256() != WantedSha256.value())
 	{
 		char aWanted[SHA256_MAXSTRSIZE];
 		char aGot[SHA256_MAXSTRSIZE];
 		sha256_str(WantedSha256.value(), aWanted, sizeof(aWanted));
-		sha256_str(m_pMap->Sha256(), aGot, sizeof(aWanted));
+		sha256_str(GameClient()->Map()->Sha256(), aGot, sizeof(aWanted));
 		str_format(s_aErrorMsg, sizeof(s_aErrorMsg), "map differs from the server. %s != %s", aGot, aWanted);
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", s_aErrorMsg);
-		m_pMap->Unload();
+		GameClient()->Map()->Unload();
 		return s_aErrorMsg;
 	}
 
 	// Only check CRC if we don't have the secure SHA256.
-	if(!WantedSha256.has_value() && m_pMap->Crc() != WantedCrc)
+	if(!WantedSha256.has_value() && GameClient()->Map()->Crc() != WantedCrc)
 	{
-		str_format(s_aErrorMsg, sizeof(s_aErrorMsg), "map differs from the server. %08x != %08x", m_pMap->Crc(), WantedCrc);
+		str_format(s_aErrorMsg, sizeof(s_aErrorMsg), "map differs from the server. %08x != %08x", GameClient()->Map()->Crc(), WantedCrc);
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", s_aErrorMsg);
-		m_pMap->Unload();
+		GameClient()->Map()->Unload();
 		return s_aErrorMsg;
 	}
 
@@ -1191,9 +1191,6 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, const std
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "loaded map '%s'", pFilename);
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", aBuf);
-
-	str_copy(m_aCurrentMap, pName);
-	str_copy(m_aCurrentMapPath, pFilename);
 
 	return nullptr;
 }
@@ -1470,7 +1467,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 			{
 				m_CurrentServerInfo = Info;
 				m_CurrentServerInfoRequestTime = -1;
-				Discord()->UpdateServerInfo(Info, m_aCurrentMap);
+				Discord()->UpdateServerInfo(Info, GameClient()->Map()->BaseName());
 			}
 
 			bool ValidPong = false;
@@ -3024,7 +3021,6 @@ void CClient::InitInterfaces()
 	m_pSound = Kernel()->RequestInterface<IEngineSound>();
 	m_pGameClient = Kernel()->RequestInterface<IGameClient>();
 	m_pInput = Kernel()->RequestInterface<IEngineInput>();
-	m_pMap = Kernel()->RequestInterface<IEngineMap>();
 	m_pConfigManager = Kernel()->RequestInterface<IConfigManager>();
 	m_pConfig = m_pConfigManager->Values();
 #if defined(CONF_AUTOUPDATE)
@@ -3884,7 +3880,7 @@ void CClient::SaveReplay(const int Length, const char *pFilename)
 		{
 			char aTimestamp[20];
 			str_timestamp(aTimestamp, sizeof(aTimestamp));
-			str_format(aFilename, sizeof(aFilename), "demos/replays/%s_%s_(replay).demo", m_aCurrentMap, aTimestamp);
+			str_format(aFilename, sizeof(aFilename), "demos/replays/%s_%s_(replay).demo", GameClient()->Map()->BaseName(), aTimestamp);
 		}
 		else
 		{
@@ -4066,13 +4062,13 @@ void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int 
 		m_pConsole,
 		aFilename,
 		IsSixup() ? GameClient()->NetVersion7() : GameClient()->NetVersion(),
-		m_aCurrentMap,
-		m_pMap->Sha256(),
-		m_pMap->Crc(),
+		GameClient()->Map()->BaseName(),
+		GameClient()->Map()->Sha256(),
+		GameClient()->Map()->Crc(),
 		"client",
-		m_pMap->Size(),
+		GameClient()->Map()->Size(),
 		nullptr,
-		m_pMap->File(),
+		GameClient()->Map()->File(),
 		nullptr,
 		nullptr);
 }
@@ -4084,7 +4080,7 @@ void CClient::DemoRecorder_HandleAutoStart()
 		DemoRecorder(RECORDER_AUTO)->Stop(IDemoRecorder::EStopMode::KEEP_FILE);
 
 		char aFilename[IO_MAX_PATH_LENGTH];
-		str_format(aFilename, sizeof(aFilename), "auto/%s", m_aCurrentMap);
+		str_format(aFilename, sizeof(aFilename), "auto/%s", GameClient()->Map()->BaseName());
 		DemoRecorder_Start(aFilename, true, RECORDER_AUTO);
 
 		if(g_Config.m_ClAutoDemoMax)
@@ -4108,7 +4104,7 @@ void CClient::DemoRecorder_UpdateReplayRecorder()
 	if(g_Config.m_ClReplays && !DemoRecorder(RECORDER_REPLAYS)->IsRecording())
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
-		str_format(aFilename, sizeof(aFilename), "replays/replay_tmp_%s", m_aCurrentMap);
+		str_format(aFilename, sizeof(aFilename), "replays/replay_tmp_%s", GameClient()->Map()->BaseName());
 		DemoRecorder_Start(aFilename, true, RECORDER_REPLAYS);
 	}
 }
@@ -4141,7 +4137,7 @@ void CClient::Con_Record(IConsole::IResult *pResult, void *pUserData)
 	if(pResult->NumArguments())
 		pSelf->DemoRecorder_Start(pResult->GetString(0), false, RECORDER_MANUAL);
 	else
-		pSelf->DemoRecorder_Start(pSelf->m_aCurrentMap, true, RECORDER_MANUAL);
+		pSelf->DemoRecorder_Start(pSelf->GameClient()->Map()->BaseName(), true, RECORDER_MANUAL);
 }
 
 void CClient::Con_StopRecord(IConsole::IResult *pResult, void *pUserData)
@@ -4864,10 +4860,6 @@ int main(int argc, const char **argv)
 	pKernel->RegisterInterface(pEngineTextRender); // IEngineTextRender
 	pKernel->RegisterInterface(static_cast<ITextRender *>(pEngineTextRender), false);
 
-	IEngineMap *pEngineMap = CreateEngineMap();
-	pKernel->RegisterInterface(pEngineMap); // IEngineMap
-	pKernel->RegisterInterface(static_cast<IMap *>(pEngineMap), false);
-
 	IDiscord *pDiscord = CreateDiscord();
 	pKernel->RegisterInterface(pDiscord);
 
@@ -5043,26 +5035,6 @@ int main(int argc, const char **argv)
 
 // DDRace
 
-const char *CClient::GetCurrentMap() const
-{
-	return m_aCurrentMap;
-}
-
-const char *CClient::GetCurrentMapPath() const
-{
-	return m_aCurrentMapPath;
-}
-
-SHA256_DIGEST CClient::GetCurrentMapSha256() const
-{
-	return m_pMap->Sha256();
-}
-
-unsigned CClient::GetCurrentMapCrc() const
-{
-	return m_pMap->Crc();
-}
-
 void CClient::RaceRecord_Start(const char *pFilename)
 {
 	dbg_assert(State() == IClient::STATE_ONLINE, "Client must be online to record demo");
@@ -5072,13 +5044,13 @@ void CClient::RaceRecord_Start(const char *pFilename)
 		m_pConsole,
 		pFilename,
 		IsSixup() ? GameClient()->NetVersion7() : GameClient()->NetVersion(),
-		m_aCurrentMap,
-		m_pMap->Sha256(),
-		m_pMap->Crc(),
+		GameClient()->Map()->BaseName(),
+		GameClient()->Map()->Sha256(),
+		GameClient()->Map()->Crc(),
 		"client",
-		m_pMap->Size(),
+		GameClient()->Map()->Size(),
 		nullptr,
-		m_pMap->File(),
+		GameClient()->Map()->File(),
 		nullptr,
 		nullptr);
 }

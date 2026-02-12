@@ -112,6 +112,7 @@ void CGameClient::OnConsoleInit()
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
 	m_pHttp = Kernel()->RequestInterface<IHttp>();
+	m_pMap = CreateMap();
 
 	// make a list of all the systems, make sure to add them in the correct render order
 	m_vpAll.insert(m_vpAll.end(), {&m_Skins,
@@ -579,7 +580,7 @@ void CGameClient::OnConnected()
 	const char *pLoadMapContent = Localize("Initializing map logic");
 	// render loading before skip is calculated
 	m_Menus.RenderLoading(pConnectCaption, pLoadMapContent, 0);
-	m_Layers.Init(Kernel()->RequestInterface<IMap>(), false);
+	m_Layers.Init(Map(), false);
 	m_Collision.Init(Layers());
 	m_GameWorld.m_Core.InitSwitchers(m_Collision.m_HighestSwitchNumber);
 	m_GameWorld.m_PredictedEvents.clear();
@@ -4659,9 +4660,7 @@ static bool UnknownMapSettingCallback(const char *pCommand, void *pUser)
 
 void CGameClient::LoadMapSettings()
 {
-	IEngineMap *pMap = Kernel()->RequestInterface<IEngineMap>();
-
-	m_MapBugs = CMapBugs::Create(Client()->GetCurrentMap(), pMap->Size(), pMap->Sha256());
+	m_MapBugs = CMapBugs::Create(Map()->BaseName(), Map()->Size(), Map()->Sha256());
 
 	// Reset Tunezones
 	for(int TuneZone = 0; TuneZone < TuneZone::NUM; TuneZone++)
@@ -4676,12 +4675,12 @@ void CGameClient::LoadMapSettings()
 
 	// Load map tunings
 	int Start, Num;
-	pMap->GetType(MAPITEMTYPE_INFO, &Start, &Num);
+	Map()->GetType(MAPITEMTYPE_INFO, &Start, &Num);
 	for(int i = Start; i < Start + Num; i++)
 	{
 		int ItemId;
-		CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)pMap->GetItem(i, nullptr, &ItemId);
-		int ItemSize = pMap->GetItemSize(i);
+		CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)Map()->GetItem(i, nullptr, &ItemId);
+		int ItemSize = Map()->GetItemSize(i);
 		if(!pItem || ItemId != 0)
 			continue;
 
@@ -4690,8 +4689,8 @@ void CGameClient::LoadMapSettings()
 		if(!(pItem->m_Settings > -1))
 			break;
 
-		int Size = pMap->GetDataSize(pItem->m_Settings);
-		char *pSettings = (char *)pMap->GetData(pItem->m_Settings);
+		int Size = Map()->GetDataSize(pItem->m_Settings);
+		char *pSettings = (char *)Map()->GetData(pItem->m_Settings);
 		char *pNext = pSettings;
 		Console()->SetUnknownCommandCallback(UnknownMapSettingCallback, nullptr);
 		while(pNext < pSettings + Size)
@@ -4701,7 +4700,7 @@ void CGameClient::LoadMapSettings()
 			pNext += StrSize;
 		}
 		Console()->SetUnknownCommandCallback(IConsole::EmptyUnknownCommandCallback, nullptr);
-		pMap->UnloadData(pItem->m_Settings);
+		Map()->UnloadData(pItem->m_Settings);
 		break;
 	}
 }
@@ -5263,7 +5262,7 @@ void CGameClient::StoreSave(const char *pTeamMembers, const char *pGeneratedCode
 	const char *apColumns[std::size(SAVES_HEADER)] = {
 		aTimestamp,
 		pTeamMembers,
-		Client()->GetCurrentMap(),
+		Map()->BaseName(),
 		pGeneratedCode,
 	};
 

@@ -36,7 +36,6 @@ class CLogMessage;
 class CMsgPacker;
 class CPacker;
 class IEngine;
-class IEngineMap;
 class ILogger;
 
 class CServerBan : public CNetBan
@@ -221,8 +220,6 @@ public:
 	CServerBan m_ServerBan;
 	CHttp m_Http;
 
-	IEngineMap *m_pMap;
-
 	int64_t m_GameStartTime;
 
 	enum
@@ -257,8 +254,6 @@ public:
 		NUM_RECORDERS = MAX_CLIENTS + 2,
 	};
 
-	char m_aCurrentMap[IO_MAX_PATH_LENGTH];
-	const char *m_pCurrentMapName;
 	SHA256_DIGEST m_aCurrentMapSha256[NUM_MAP_TYPES];
 	unsigned m_aCurrentMapCrc[NUM_MAP_TYPES];
 	unsigned char *m_apCurrentMapData[NUM_MAP_TYPES];
@@ -315,7 +310,6 @@ public:
 	bool IsRconAuthedAdmin(int ClientId) const override;
 	const char *GetAuthName(int ClientId) const override;
 	bool HasAuthHidden(int ClientId) const override;
-	void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pMapSha256, int *pMapCrc) override;
 	bool GetClientInfo(int ClientId, CClientInfo *pInfo) const override;
 	void SetClientDDNetVersion(int ClientId, int DDNetVersion) override;
 	const NETADDR *ClientAddr(int ClientId) const override;
@@ -417,7 +411,6 @@ public:
 	void PumpNetwork(bool PacketWaiting);
 
 	void ChangeMap(const char *pMap) override;
-	const char *GetMapName() const override;
 	void ReloadMap() override;
 	int LoadMap(const char *pMapName);
 

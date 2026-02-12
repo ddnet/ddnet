@@ -124,8 +124,8 @@ CGhostCharacter *CGhost::CGhostPath::Get(int Index)
 
 void CGhost::GetPath(char *pBuf, int Size, const char *pPlayerName, int Time) const
 {
-	const char *pMap = Client()->GetCurrentMap();
-	SHA256_DIGEST Sha256 = Client()->GetCurrentMapSha256();
+	const char *pMap = GameClient()->Map()->BaseName();
+	SHA256_DIGEST Sha256 = GameClient()->Map()->Sha256();
 	char aSha256[SHA256_MAXSTRSIZE];
 	sha256_str(Sha256, aSha256, sizeof(aSha256));
 
@@ -150,7 +150,7 @@ void CGhost::AddInfos(const CNetObj_Character *pChar, const CNetObj_DDNetCharact
 	if(g_Config.m_ClRaceSaveGhost && !GhostRecorder()->IsRecording() && NumTicks > 0)
 	{
 		GetPath(m_aTmpFilename, sizeof(m_aTmpFilename), m_CurGhost.m_aPlayer);
-		GhostRecorder()->Start(m_aTmpFilename, Client()->GetCurrentMap(), Client()->GetCurrentMapSha256(), m_CurGhost.m_aPlayer);
+		GhostRecorder()->Start(m_aTmpFilename, GameClient()->Map()->BaseName(), GameClient()->Map()->Sha256(), m_CurGhost.m_aPlayer);
 
 		GhostRecorder()->WriteData(GHOSTDATA_TYPE_START_TICK, &m_CurGhost.m_StartTick, sizeof(int));
 		GhostRecorder()->WriteData(GHOSTDATA_TYPE_SKIN, &m_CurGhost.m_Skin, sizeof(CGhostSkin));
@@ -457,7 +457,7 @@ int CGhost::Load(const char *pFilename)
 	if(Slot == -1)
 		return -1;
 
-	if(!GhostLoader()->Load(pFilename, Client()->GetCurrentMap(), Client()->GetCurrentMapSha256(), Client()->GetCurrentMapCrc()))
+	if(!GhostLoader()->Load(pFilename, GameClient()->Map()->BaseName(), GameClient()->Map()->Sha256(), GameClient()->Map()->Crc()))
 		return -1;
 
 	const CGhostInfo *pInfo = GhostLoader()->GetInfo();
@@ -559,7 +559,7 @@ void CGhost::SaveGhost(CMenus::CGhostItem *pItem)
 
 	int NumTicks = pGhost->m_Path.Size();
 	GetPath(pItem->m_aFilename, sizeof(pItem->m_aFilename), pItem->m_aPlayer, pItem->m_Time);
-	GhostRecorder()->Start(pItem->m_aFilename, Client()->GetCurrentMap(), Client()->GetCurrentMapSha256(), pItem->m_aPlayer);
+	GhostRecorder()->Start(pItem->m_aFilename, GameClient()->Map()->BaseName(), GameClient()->Map()->Sha256(), pItem->m_aPlayer);
 
 	GhostRecorder()->WriteData(GHOSTDATA_TYPE_START_TICK, &pGhost->m_StartTick, sizeof(int));
 	GhostRecorder()->WriteData(GHOSTDATA_TYPE_SKIN, &pGhost->m_Skin, sizeof(CGhostSkin));

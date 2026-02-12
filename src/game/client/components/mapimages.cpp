@@ -178,9 +178,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 
 void CMapImages::OnMapLoad()
 {
-	IMap *pMap = Kernel()->RequestInterface<IMap>();
-	CLayers *pLayers = GameClient()->Layers();
-	OnMapLoadImpl(pLayers, pMap);
+	OnMapLoadImpl(GameClient()->Layers(), GameClient()->Map());
 }
 
 void CMapImages::LoadBackground(class CLayers *pLayers, class IMap *pMap)
