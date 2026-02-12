@@ -196,7 +196,7 @@ public:
 	void Pause(bool Pause);
 	bool Freeze(int Seconds);
 	bool Freeze();
-	bool UnFreeze();
+	bool Unfreeze();
 	void GiveAllWeapons();
 	void ResetPickups();
 	void ResetJumps();

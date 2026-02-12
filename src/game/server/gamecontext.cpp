@@ -3958,7 +3958,7 @@ void CGameContext::RegisterDDRaceCommands()
 	Console()->Register("solo", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConSolo, this, "Puts you into solo part");
 	Console()->Register("unsolo", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnSolo, this, "Puts you out of solo part");
 	Console()->Register("freeze", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConFreeze, this, "Puts you into freeze");
-	Console()->Register("unfreeze", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnFreeze, this, "Puts you out of freeze");
+	Console()->Register("unfreeze", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnfreeze, this, "Puts you out of freeze");
 	Console()->Register("deep", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConDeep, this, "Puts you into deep freeze");
 	Console()->Register("undeep", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnDeep, this, "Puts you out of deep freeze");
 	Console()->Register("livefreeze", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConLiveFreeze, this, "Makes you live frozen");
