@@ -17,8 +17,6 @@ public:
 	CMap();
 	~CMap() override;
 
-	CDataFileReader *GetReader() { return &m_DataFile; }
-
 	int GetDataSize(int Index) const override;
 	void *GetData(int Index) override;
 	void *GetDataSwapped(int Index) override;
