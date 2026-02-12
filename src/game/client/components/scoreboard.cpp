@@ -407,8 +407,10 @@ void CScoreboard::RenderSpectators(CUIRect Spectators)
 								     (Client()->DummyConnected() && GameClient()->m_aLocalIds[1] == pInfo->m_ClientId);
 				m_ScoreboardPopupContext.m_IsSpectating = true;
 
+				GameClient()->RequestPlayerExtraInfo(pInfo->m_ClientId);
+
 				Ui()->DoPopupMenu(&m_ScoreboardPopupContext, Ui()->MouseX(), Ui()->MouseY(), 110.0f,
-					m_ScoreboardPopupContext.m_IsLocal ? 30.0f : 60.0f, &m_ScoreboardPopupContext, CScoreboardPopupContext::Render);
+					(m_ScoreboardPopupContext.m_IsLocal ? 30.0f : 60.0f) + 16.0f, &m_ScoreboardPopupContext, CScoreboardPopupContext::Render);
 			}
 
 			if(Ui()->HotItem() == &m_aPlayers[pInfo->m_ClientId].m_PlayerButtonId || Ui()->HotItem() == &m_aPlayers[pInfo->m_ClientId].m_SpectatorSecondLineButtonId)
@@ -659,8 +661,10 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 									     (Client()->DummyConnected() && GameClient()->m_aLocalIds[1] == pInfo->m_ClientId);
 					m_ScoreboardPopupContext.m_IsSpectating = false;
 
+					GameClient()->RequestPlayerExtraInfo(pInfo->m_ClientId);
+
 					Ui()->DoPopupMenu(&m_ScoreboardPopupContext, Ui()->MouseX(), Ui()->MouseY(), 110.0f,
-						m_ScoreboardPopupContext.m_IsLocal ? 58.5f : 87.5f, &m_ScoreboardPopupContext, CScoreboardPopupContext::Render);
+						(m_ScoreboardPopupContext.m_IsLocal ? 58.5f : 87.5f) + 16.0f, &m_ScoreboardPopupContext, CScoreboardPopupContext::Render);
 				}
 
 				if(Ui()->HotItem() == &m_aPlayers[pInfo->m_ClientId].m_PlayerButtonId)
@@ -1179,6 +1183,9 @@ CUi::EPopupMenuFunctionResult CScoreboard::CScoreboardPopupContext::Render(void 
 			}
 		}
 	}
+
+	View.HSplitTop(ItemSpacing * 2, nullptr, &View);
+	pUi->DoLabel(&View, pScoreboard->GameClient()->m_aaPlayerExtraInfo[pPopupContext->m_ClientId], FontSize, TEXTALIGN_MC);
 
 	return CUi::POPUP_KEEP_OPEN;
 }

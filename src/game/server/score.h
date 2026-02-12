@@ -62,6 +62,7 @@ public:
 
 	void ShowTopPoints(int ClientId, int Offset = 1);
 	void ShowPoints(int ClientId, const char *pName);
+	void ShowPointsForExtraInfo(int RequestingClientId, int TargetClientId, const char *pName);
 
 	void ShowTimes(int ClientId, const char *pName, int Offset = 1);
 	void ShowTimes(int ClientId, int Offset = 1);
