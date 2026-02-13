@@ -70,6 +70,7 @@ public:
 
 	void OnPredictedInput(const CNetObj_PlayerInput *pNewInput);
 	void OnDirectInput(const CNetObj_PlayerInput *pNewInput);
+	const CNetObj_PlayerInput &LatestInput() const { return m_LatestInput; }
 	void ReleaseHook();
 	void ResetHook();
 	void ResetInput();
