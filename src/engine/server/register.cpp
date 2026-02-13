@@ -65,6 +65,7 @@ class CRegister : public IRegister
 			int m_NumTotalRequests GUARDED_BY(m_Lock) = 0;
 			int m_LatestResponseStatus GUARDED_BY(m_Lock) = STATUS_NONE;
 			int m_LatestResponseIndex GUARDED_BY(m_Lock) = -1;
+			bool m_StatusChecked GUARDED_BY(m_Lock) = false;
 		};
 
 		class CJob : public IJob
@@ -76,6 +77,7 @@ class CRegister : public IRegister
 			std::shared_ptr<CShared> m_pShared;
 			std::shared_ptr<CHttpRequest> m_pRegister;
 			IHttp *m_pHttp;
+			void ReportError();
 			void Run() override;
 
 		public:
@@ -100,7 +102,7 @@ class CRegister : public IRegister
 		bool m_HaveChallengeToken = false;
 		char m_aChallengeToken[128] = {0};
 
-		void CheckChallengeStatus();
+		void CheckStatus();
 
 	public:
 		int64_t m_PrevRegister = -1;
@@ -111,6 +113,7 @@ class CRegister : public IRegister
 		void SendRegister();
 		void SendDeleteIfRegistered(bool Shutdown);
 		void Update();
+		void OnSwitchMaster();
 	};
 
 	CConfig *m_pConfig;
@@ -127,9 +130,13 @@ class CRegister : public IRegister
 	std::shared_ptr<CGlobal> m_pGlobal = std::make_shared<CGlobal>();
 	bool m_aProtocolEnabled[NUM_PROTOCOLS] = {true, true, true, true};
 	CProtocol m_aProtocols[NUM_PROTOCOLS];
+	int m_NumProtocolEnabled = 0;
 
 	bool m_GotCommunityToken = false;
 	char m_aCommunityToken[128];
+
+	int m_NumMastersrvError = 0;
+	int m_MastersrvIndex = 0;
 
 	int m_NumExtraHeaders = 0;
 	char m_aaExtraHeaders[8][128];
@@ -139,6 +146,9 @@ class CRegister : public IRegister
 	CUuid m_ChallengeSecret = RandomUuid();
 	bool m_GotServerInfo = false;
 	char m_aServerInfo[32768];
+
+	void TryNextMaster();
+	char m_aaMastersrvUrls[5][128];
 
 public:
 	CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHttp *pHttp, int ServerPort, unsigned SixupSecurityToken);
@@ -285,11 +295,11 @@ void CRegister::CProtocol::SendRegister()
 	std::unique_ptr<CHttpRequest> pRegister;
 	if(SendInfo)
 	{
-		pRegister = HttpPostJson(m_pParent->m_pConfig->m_SvRegisterUrl, m_pParent->m_aServerInfo);
+		pRegister = HttpPostJson(m_pParent->m_aaMastersrvUrls[m_pParent->m_MastersrvIndex], m_pParent->m_aServerInfo);
 	}
 	else
 	{
-		pRegister = HttpPost(m_pParent->m_pConfig->m_SvRegisterUrl, (unsigned char *)"", 0);
+		pRegister = HttpPost(m_pParent->m_aaMastersrvUrls[m_pParent->m_MastersrvIndex], (unsigned char *)"", 0);
 	}
 	pRegister->HeaderString("Address", aAddress);
 	pRegister->HeaderString("Secret", aSecret);
@@ -348,7 +358,7 @@ void CRegister::CProtocol::SendDeleteIfRegistered(bool Shutdown)
 	char aSecret[UUID_MAXSTRSIZE];
 	FormatUuid(m_pParent->m_Secret, aSecret, sizeof(aSecret));
 
-	std::shared_ptr<CHttpRequest> pDelete = HttpPost(m_pParent->m_pConfig->m_SvRegisterUrl, (const unsigned char *)"", 0);
+	std::shared_ptr<CHttpRequest> pDelete = HttpPost(m_pParent->m_aaMastersrvUrls[m_pParent->m_MastersrvIndex], (const unsigned char *)"", 0);
 	pDelete->HeaderString("Action", "delete");
 	pDelete->HeaderString("Address", aAddress);
 	pDelete->HeaderString("Secret", aSecret);
@@ -374,11 +384,11 @@ CRegister::CProtocol::CProtocol(CRegister *pParent, int Protocol) :
 {
 }
 
-void CRegister::CProtocol::CheckChallengeStatus()
+void CRegister::CProtocol::CheckStatus()
 {
 	const CLockScope LockScope(m_pShared->m_Lock);
 	// No requests in flight?
-	if(m_pShared->m_LatestResponseIndex == m_pShared->m_NumTotalRequests - 1)
+	if(m_pShared->m_LatestResponseIndex == m_pShared->m_NumTotalRequests - 1 && !m_pShared->m_StatusChecked)
 	{
 		switch(m_pShared->m_LatestResponseStatus)
 		{
@@ -393,17 +403,49 @@ void CRegister::CProtocol::CheckChallengeStatus()
 			// Act immediately if the master requests more info.
 			m_NextRegister = time_get();
 			break;
+		case STATUS_OK:
+			m_pParent->m_NumMastersrvError = 0;
+			break;
+		case STATUS_ERROR:
+			m_pParent->m_NumMastersrvError++;
+			m_pParent->TryNextMaster();
+			break;
 		}
+		m_pShared->m_StatusChecked = true;
 	}
 }
 
 void CRegister::CProtocol::Update()
 {
-	CheckChallengeStatus();
+	CheckStatus();
 	if(time_get() >= m_NextRegister)
 	{
 		SendRegister();
 	}
+}
+
+void CRegister::CProtocol::OnSwitchMaster()
+{
+	// send this to make sure this master wouldn't register us after we switched.
+	char aAddress[64];
+	str_format(aAddress, sizeof(aAddress), "%sconnecting-address.invalid:%d", ProtocolToScheme(m_Protocol), m_pParent->m_ServerPort);
+
+	char aSecret[UUID_MAXSTRSIZE];
+	FormatUuid(m_pParent->m_Secret, aSecret, sizeof(aSecret));
+
+	std::shared_ptr<CHttpRequest> pDelete = HttpPost(m_pParent->m_aaMastersrvUrls[m_pParent->m_MastersrvIndex], (const unsigned char *)"", 0);
+	pDelete->HeaderString("Action", "delete");
+	pDelete->HeaderString("Address", aAddress);
+	pDelete->HeaderString("Secret", aSecret);
+	for(int i = 0; i < m_pParent->m_NumExtraHeaders; i++)
+	{
+		pDelete->Header(m_pParent->m_aaExtraHeaders[i]);
+	}
+	pDelete->LogProgress(HTTPLOG::NONE);
+	pDelete->IpResolve(ProtocolToIpresolve(m_Protocol));
+	m_pParent->m_pHttp->Run(pDelete);
+
+	m_NextRegister = time_get() + time_freq() * 3; // add 3 seconds delay
 }
 
 void CRegister::CProtocol::OnToken(const char *pToken)
@@ -412,10 +454,21 @@ void CRegister::CProtocol::OnToken(const char *pToken)
 	m_HaveChallengeToken = true;
 	str_copy(m_aChallengeToken, pToken);
 
-	CheckChallengeStatus();
+	CheckStatus();
 	if(time_get() >= m_NextRegister)
 	{
 		SendRegister();
+	}
+}
+
+void CRegister::CProtocol::CJob::ReportError()
+{
+	const CLockScope LockScope(m_pShared->m_Lock);
+	if(m_Index > m_pShared->m_LatestResponseIndex)
+	{
+		m_pShared->m_LatestResponseIndex = m_Index;
+		m_pShared->m_LatestResponseStatus = STATUS_ERROR;
+		m_pShared->m_StatusChecked = false;
 	}
 }
 
@@ -427,12 +480,14 @@ void CRegister::CProtocol::CJob::Run()
 	{
 		// TODO: exponential backoff
 		log_error(ProtocolToSystem(m_Protocol), "error sending request to master");
+		ReportError();
 		return;
 	}
 	json_value *pJson = m_pRegister->ResultJson();
 	if(!pJson)
 	{
 		log_error(ProtocolToSystem(m_Protocol), "non-JSON response from master");
+		ReportError();
 		return;
 	}
 	const json_value &Json = *pJson;
@@ -441,6 +496,7 @@ void CRegister::CProtocol::CJob::Run()
 	{
 		json_value_free(pJson);
 		log_error(ProtocolToSystem(m_Protocol), "invalid JSON response from master");
+		ReportError();
 		return;
 	}
 	int Status;
@@ -448,6 +504,7 @@ void CRegister::CProtocol::CJob::Run()
 	{
 		log_error(ProtocolToSystem(m_Protocol), "invalid status from master: %s", (const char *)StatusString);
 		json_value_free(pJson);
+		ReportError();
 		return;
 	}
 	if(Status == STATUS_ERROR)
@@ -457,16 +514,19 @@ void CRegister::CProtocol::CJob::Run()
 		{
 			json_value_free(pJson);
 			log_error(ProtocolToSystem(m_Protocol), "invalid JSON error response from master");
+			ReportError();
 			return;
 		}
 		log_error(ProtocolToSystem(m_Protocol), "error response from master: %d: %s", m_pRegister->StatusCode(), (const char *)Message);
 		json_value_free(pJson);
+		ReportError();
 		return;
 	}
 	if(m_pRegister->StatusCode() >= 400)
 	{
 		log_error(ProtocolToSystem(m_Protocol), "non-success status code %d from master without error code", m_pRegister->StatusCode());
 		json_value_free(pJson);
+		ReportError();
 		return;
 	}
 	{
@@ -486,12 +546,14 @@ void CRegister::CProtocol::CJob::Run()
 		{
 			log_error(ProtocolToSystem(m_Protocol), "ERROR: the master server reports that clients can not connect to this server.");
 			log_error(ProtocolToSystem(m_Protocol), "ERROR: configure your firewall/nat to let through udp on port %d.", m_ServerPort);
+			Status = STATUS_ERROR;
 		}
 		json_value_free(pJson);
 		if(m_Index > m_pShared->m_LatestResponseIndex)
 		{
 			m_pShared->m_LatestResponseIndex = m_Index;
 			m_pShared->m_LatestResponseStatus = Status;
+			m_pShared->m_StatusChecked = false;
 		}
 	}
 	if(Status == STATUS_OK)
@@ -531,6 +593,9 @@ CRegister::CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHt
 	FormatUuid(m_ChallengeSecret, m_aVerifyPacketPrefix + HEADER_LEN, sizeof(m_aVerifyPacketPrefix) - HEADER_LEN);
 	m_aVerifyPacketPrefix[HEADER_LEN + UUID_MAXSTRSIZE - 1] = ':';
 
+	for(int i = 0; i < 4; i++)
+		str_format(m_aaMastersrvUrls[i], sizeof(m_aaMastersrvUrls[i]), "https://register%d.ddnet.org/ddnet/15/register", i + 1);
+	m_aaMastersrvUrls[4][0] = '\0';
 	// The DDNet code uses the `unsigned` security token in big-endian byte order.
 	str_format(m_aConnlessTokenHex, sizeof(m_aConnlessTokenHex), "%08x", SixupSecurityToken);
 
@@ -540,6 +605,26 @@ CRegister::CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHt
 	m_pConsole->Chain("sv_register_community_token", ConchainOnConfigChange, this);
 	m_pConsole->Chain("sv_sixup", ConchainOnConfigChange, this);
 	m_pConsole->Chain("sv_ipv4only", ConchainOnConfigChange, this);
+}
+
+void CRegister::TryNextMaster()
+{
+	if(m_NumMastersrvError < 3 * m_NumProtocolEnabled) // count every protocol
+		return;
+	for(int i = 0; i < NUM_PROTOCOLS; i++)
+	{
+		if(!m_aProtocolEnabled[i])
+		{
+			continue;
+		}
+		m_aProtocols[i].OnSwitchMaster();
+	}
+	do
+	{
+		m_MastersrvIndex = (m_MastersrvIndex + 1) % 5;
+	} while(!m_aaMastersrvUrls[m_MastersrvIndex][0]);
+	log_info("register", "try to switch master to '%s' after %d total request errors", m_aaMastersrvUrls[m_MastersrvIndex], m_NumMastersrvError);
+	m_NumMastersrvError = 0;
 }
 
 void CRegister::Update()
@@ -664,13 +749,33 @@ void CRegister::OnConfigChange()
 		str_copy(m_aaExtraHeaders[m_NumExtraHeaders], aHeader);
 		m_NumExtraHeaders += 1;
 	}
-	// Don't start registering before the first `CRegister::Update` call.
-	if(!m_GotFirstUpdateCall)
+	if(str_comp_nocase(m_aaMastersrvUrls[4], m_pConfig->m_SvRegisterUrl))
 	{
-		return;
+		str_copy(m_aaMastersrvUrls[4], m_pConfig->m_SvRegisterUrl);
+		m_MastersrvIndex = 4;
+		for(int i = 0; i < NUM_PROTOCOLS; i++)
+		{
+			if(!m_aProtocolEnabled[i] || !m_GotFirstUpdateCall)
+			{
+				continue;
+			}
+			m_aProtocols[i].OnSwitchMaster();
+		}
+		m_NumMastersrvError = 0; // reset error num
 	}
+
+	m_NumProtocolEnabled = 0;
 	for(int i = 0; i < NUM_PROTOCOLS; i++)
 	{
+		if(m_aProtocolEnabled[i])
+		{
+			m_NumProtocolEnabled++;
+		}
+		// Don't start registering before the first `CRegister::Update` call.
+		if(!m_GotFirstUpdateCall)
+		{
+			continue;
+		}
 		if(aOldProtocolEnabled[i] == m_aProtocolEnabled[i])
 		{
 			continue;
