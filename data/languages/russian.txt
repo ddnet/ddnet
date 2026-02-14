@@ -2162,7 +2162,7 @@ Preview dummy's name plate
 == Просмотр дамми
 
 AntiPing: prediction margin
-== Антипинг: Предел предсказаний
+== Антипинг: Запас предсказания
 
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
