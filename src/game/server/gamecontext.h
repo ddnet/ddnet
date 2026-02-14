@@ -231,6 +231,8 @@ public:
 	// helper functions
 	CCharacter *GetPlayerChar(int ClientId);
 	const CCharacter *GetPlayerChar(int ClientId) const;
+	const CPlayer *GetPlayerByName(const char *pName) const;
+	CPlayer *GetPlayerByName(const char *pName);
 	bool EmulateBug(int Bug) const;
 	std::vector<SSwitchers> &Switchers() { return m_World.m_Core.m_vSwitchers; }
 

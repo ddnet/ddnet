@@ -13,6 +13,7 @@
 
 #include <base/logger.h>
 #include <base/math.h>
+#include <base/str.h>
 #include <base/system.h>
 
 #include <engine/console.h>
@@ -215,6 +216,38 @@ const CCharacter *CGameContext::GetPlayerChar(int ClientId) const
 	if(ClientId < 0 || ClientId >= MAX_CLIENTS || !m_apPlayers[ClientId])
 		return nullptr;
 	return m_apPlayers[ClientId]->GetCharacter();
+}
+
+const CPlayer *CGameContext::GetPlayerByName(const char *pName) const
+{
+	if(!pName)
+		return nullptr;
+
+	for(const CPlayer *pPlayer : m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+		if(str_comp(pName, Server()->ClientName(pPlayer->GetCid())))
+			continue;
+		return pPlayer;
+	}
+	return nullptr;
+}
+
+CPlayer *CGameContext::GetPlayerByName(const char *pName)
+{
+	if(!pName)
+		return nullptr;
+
+	for(CPlayer *pPlayer : m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+		if(str_comp(pName, Server()->ClientName(pPlayer->GetCid())))
+			continue;
+		return pPlayer;
+	}
+	return nullptr;
 }
 
 bool CGameContext::EmulateBug(int Bug) const
@@ -5059,13 +5092,8 @@ void CGameContext::Whisper(int ClientId, char *pStr)
 			*pDst = '\0';
 			pStr++;
 
-			for(Victim = 0; Victim < MAX_CLIENTS; Victim++)
-			{
-				if(Server()->ClientIngame(Victim) && str_comp(pName, Server()->ClientName(Victim)) == 0)
-				{
-					break;
-				}
-			}
+			const CPlayer *pVictim = GetPlayerByName(pName);
+			Victim = pVictim ? pVictim->GetCid() : -1;
 		}
 	}
 	else
@@ -5081,16 +5109,12 @@ void CGameContext::Whisper(int ClientId, char *pStr)
 			if(pStr[0] == ' ')
 			{
 				pStr[0] = '\0';
-				for(Victim = 0; Victim < MAX_CLIENTS; Victim++)
-				{
-					if(Server()->ClientIngame(Victim) && str_comp(pName, Server()->ClientName(Victim)) == 0)
-					{
-						break;
-					}
-				}
+
+				const CPlayer *pVictim = GetPlayerByName(pName);
+				Victim = pVictim ? pVictim->GetCid() : -1;
 
 				pStr[0] = ' ';
-				if(Victim < MAX_CLIENTS)
+				if(!pVictim)
 					break;
 			}
 			pStr++;
