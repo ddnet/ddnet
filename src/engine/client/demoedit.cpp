@@ -1,5 +1,7 @@
 #include "demoedit.h"
 
+#include <base/str.h>
+
 #include <engine/shared/demo.h>
 #include <engine/storage.h>
 

@@ -3,7 +3,8 @@
 #include <engine/server/databases/connection_pool.h>
 
 #if defined(CONF_MYSQL)
-#include <base/tl/threading.h>
+#include <base/sphore.h>
+#include <base/system.h>
 
 #include <engine/console.h>
 

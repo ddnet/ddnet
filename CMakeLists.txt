@@ -2027,6 +2027,8 @@ set_src(BASE GLOB_RECURSE src/base
   rust.h
   secure.cpp
   secure.h
+  sphore.cpp
+  sphore.h
   str.cpp
   str.h
   system.cpp
@@ -2035,7 +2037,6 @@ set_src(BASE GLOB_RECURSE src/base
   thread.h
   time.cpp
   time.h
-  tl/threading.h
   types.h
   unicode/confusables.cpp
   unicode/confusables.h

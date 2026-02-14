@@ -4,7 +4,7 @@
 #define ENGINE_SHARED_JOBS_H
 
 #include <base/lock.h>
-#include <base/system.h>
+#include <base/sphore.h>
 
 #include <atomic>
 #include <deque>
