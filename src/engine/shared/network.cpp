@@ -400,6 +400,8 @@ void CNetBase::SendControlMsgWithToken7(NETSOCKET Socket, NETADDR *pAddr, TOKEN 
 
 unsigned char *CNetChunkHeader::Pack(unsigned char *pData, int Split) const
 {
+	dbg_assert(m_Size >= 0 && m_Size < 1 << (Split + 6), "Invalid network chunk size: %d", m_Size);
+
 	pData[0] = ((m_Flags & 3) << 6) | ((m_Size >> Split) & 0x3f);
 	pData[1] = (m_Size & ((1 << Split) - 1));
 	if(m_Flags & NET_CHUNKFLAG_VITAL)
