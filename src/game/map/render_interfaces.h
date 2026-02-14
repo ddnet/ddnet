@@ -19,11 +19,13 @@ enum ERenderType
 	RENDERTYPE_FULL_DESIGN,
 };
 
+typedef std::function<void(bool, bool, bool, bool)> EnvelopeEvalCallback;
+
 class IEnvelopeEval
 {
 public:
 	virtual ~IEnvelopeEval() = default;
-	virtual void EnvelopeEval(int TimeOffsetMillis, int EnvelopeIndex, ColorRGBA &Result, size_t Channels) = 0;
+	virtual void EnvelopeEval(int TimeOffsetMillis, int EnvelopeIndex, ColorRGBA &Result, size_t Channels, EnvelopeEvalCallback Callback = {}) = 0;
 };
 
 class IMapImages
