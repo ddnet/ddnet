@@ -211,6 +211,7 @@ public:
 	bool m_FrozenLastTick;
 	int m_TuneZone;
 	int m_TuneZoneOld;
+	int m_TuneZoneOverride;
 	int m_PainSoundTimer;
 	int m_LastMove;
 	int m_StartTime;
@@ -262,6 +263,8 @@ public:
 	bool HasTelegunGun() const { return m_Core.m_HasTelegunGun; }
 	bool HasTelegunGrenade() const { return m_Core.m_HasTelegunGrenade; }
 	bool HasTelegunLaser() const { return m_Core.m_HasTelegunLaser; }
+
+	int GetOverriddenTuneZone() const { return m_TuneZoneOverride == TuneZone::OVERRIDE_NONE ? m_TuneZone : m_TuneZoneOverride; }
 
 	bool HammerHitDisabled() const { return m_Core.m_HammerHitDisabled; }
 	bool ShotgunHitDisabled() const { return m_Core.m_ShotgunHitDisabled; }
