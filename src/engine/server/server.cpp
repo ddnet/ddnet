@@ -1355,7 +1355,7 @@ void CServer::SendMap(int ClientId)
 		if(MapType == MAP_TYPE_SIXUP)
 		{
 			Msg.AddInt(Config()->m_SvMapWindow);
-			Msg.AddInt(1024 - 128);
+			Msg.AddInt(NET_MAX_CHUNK_SIZE - 128);
 			Msg.AddRaw(m_aCurrentMapSha256[MapType].data, sizeof(m_aCurrentMapSha256[MapType].data));
 		}
 		SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientId);
@@ -1367,7 +1367,7 @@ void CServer::SendMap(int ClientId)
 void CServer::SendMapData(int ClientId, int Chunk)
 {
 	int MapType = IsSixup(ClientId) ? MAP_TYPE_SIXUP : MAP_TYPE_SIX;
-	unsigned int ChunkSize = 1024 - 128;
+	unsigned int ChunkSize = NET_MAX_CHUNK_SIZE - 128;
 	unsigned int Offset = Chunk * ChunkSize;
 	int Last = 0;
 
@@ -1561,7 +1561,7 @@ void CServer::UpdateClientMaplistEntries(int ClientId)
 	if((size_t)Client.m_MaplistEntryToSend < m_vMaplistEntries.size())
 	{
 		CMsgPacker Msg(NETMSG_MAPLIST_ADD, true);
-		int Limit = NET_MAX_PAYLOAD - 128;
+		int Limit = NET_MAX_CHUNK_SIZE - 128;
 		while((size_t)Client.m_MaplistEntryToSend < m_vMaplistEntries.size())
 		{
 			// Space for null termination not included in Limit
