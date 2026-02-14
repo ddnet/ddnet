@@ -13,6 +13,7 @@
 
 #include <base/logger.h>
 #include <base/math.h>
+#include <base/str.h>
 #include <base/system.h>
 
 #include <engine/console.h>
@@ -215,6 +216,39 @@ const CCharacter *CGameContext::GetPlayerChar(int ClientId) const
 	if(ClientId < 0 || ClientId >= MAX_CLIENTS || !m_apPlayers[ClientId])
 		return nullptr;
 	return m_apPlayers[ClientId]->GetCharacter();
+}
+
+const CPlayer *CGameContext::FindPlayerByName(const char *pName) const
+{
+	std::optional<int> ClientId = FindClientIdByName(pName);
+	if(!ClientId.has_value())
+		return nullptr;
+	return m_apPlayers[ClientId.value()];
+}
+
+CPlayer *CGameContext::FindPlayerByName(const char *pName)
+{
+	std::optional<int> ClientId = FindClientIdByName(pName);
+	if(!ClientId.has_value())
+		return nullptr;
+	return m_apPlayers[ClientId.value()];
+}
+
+std::optional<int> CGameContext::FindClientIdByName(const char *pName) const
+{
+	if(!pName)
+		return std::nullopt;
+
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+	{
+		if(!Server()->ClientIngame(ClientId))
+			continue;
+		if(str_comp(pName, Server()->ClientName(ClientId)))
+			continue;
+
+		return ClientId;
+	}
+	return std::nullopt;
 }
 
 bool CGameContext::EmulateBug(int Bug) const
@@ -5059,13 +5093,7 @@ void CGameContext::Whisper(int ClientId, char *pStr)
 			*pDst = '\0';
 			pStr++;
 
-			for(Victim = 0; Victim < MAX_CLIENTS; Victim++)
-			{
-				if(Server()->ClientIngame(Victim) && str_comp(pName, Server()->ClientName(Victim)) == 0)
-				{
-					break;
-				}
-			}
+			Victim = FindClientIdByName(pName).value_or(-1);
 		}
 	}
 	else
@@ -5081,16 +5109,11 @@ void CGameContext::Whisper(int ClientId, char *pStr)
 			if(pStr[0] == ' ')
 			{
 				pStr[0] = '\0';
-				for(Victim = 0; Victim < MAX_CLIENTS; Victim++)
-				{
-					if(Server()->ClientIngame(Victim) && str_comp(pName, Server()->ClientName(Victim)) == 0)
-					{
-						break;
-					}
-				}
+
+				Victim = FindClientIdByName(pName).value_or(-1);
 
 				pStr[0] = ' ';
-				if(Victim < MAX_CLIENTS)
+				if(Victim != -1)
 					break;
 			}
 			pStr++;
