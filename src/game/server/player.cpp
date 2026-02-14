@@ -115,7 +115,7 @@ void CPlayer::Reset()
 	m_ShowAll = g_Config.m_SvShowAllDefault;
 	m_EnableSpectatorCount = true;
 	m_ShowDistance = vec2(1200, 800);
-	m_SpecTeam = false;
+	m_SpecTeam = CPlayer::SPECTEAM_ALL;
 	m_NinjaJetpack = false;
 
 	m_Paused = PAUSE_NONE;

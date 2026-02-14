@@ -1206,8 +1206,13 @@ bool CCharacter::CanSnapCharacter(int SnappingClient)
 	{
 		if(pSnapPlayer->SpectatorId() != SPEC_FREEVIEW && !CanCollide(pSnapPlayer->SpectatorId()) && (pSnapPlayer->m_ShowOthers == SHOW_OTHERS_OFF || (pSnapPlayer->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM && !SameTeam(pSnapPlayer->SpectatorId()))))
 			return false;
-		else if(pSnapPlayer->SpectatorId() == SPEC_FREEVIEW && !CanCollide(SnappingClient) && pSnapPlayer->m_SpecTeam && !SameTeam(SnappingClient))
-			return false;
+		else if(pSnapPlayer->SpectatorId() == SPEC_FREEVIEW)
+		{
+			if(pSnapPlayer->m_SpecTeam == CPlayer::SPECTEAM_OWN && !SameTeam(SnappingClient) && !CanCollide(SnappingClient))
+				return false;
+			else if(pSnapPlayer->m_SpecTeam >= 0 && Team() != pSnapPlayer->m_SpecTeam && pSnapChar != this)
+				return false;
+		}
 	}
 	else if(pSnapChar && !pSnapChar->m_Core.m_Super && !CanCollide(SnappingClient) && (pSnapPlayer->m_ShowOthers == SHOW_OTHERS_OFF || (pSnapPlayer->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM && !SameTeam(SnappingClient))))
 		return false;

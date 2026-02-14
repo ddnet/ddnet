@@ -1529,10 +1529,21 @@ void CGameContext::ConSpecTeam(IConsole::IResult *pResult, void *pUserData)
 	if(!pPlayer)
 		return;
 
-	if(pResult->NumArguments())
-		pPlayer->m_SpecTeam = pResult->GetInteger(0);
+	if(!pResult->NumArguments())
+	{
+		if(pPlayer->m_SpecTeam != CPlayer::SPECTEAM_ALL)
+		{
+			pPlayer->m_SpecTeam = CPlayer::SPECTEAM_ALL;
+		}
+		else
+		{
+			pPlayer->m_SpecTeam = CPlayer::SPECTEAM_OWN;
+		}
+	}
 	else
-		pPlayer->m_SpecTeam = !pPlayer->m_SpecTeam;
+	{
+		pPlayer->m_SpecTeam = pResult->GetInteger(0);
+	}
 }
 
 void CGameContext::ConSayTime(IConsole::IResult *pResult, void *pUserData)
