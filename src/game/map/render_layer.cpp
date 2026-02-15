@@ -859,23 +859,14 @@ void CRenderLayerTile::CTileLayerVisuals::Unload()
 	Graphics()->DeleteBufferContainer(m_BufferContainerIndex);
 }
 
-int CRenderLayerTile::GetDataIndex(unsigned int &TileSize) const
+int CRenderLayerTile::GetDataIndex() const
 {
-	TileSize = sizeof(CTile);
 	return m_pLayerTilemap->m_Data;
 }
 
 void *CRenderLayerTile::GetRawData() const
 {
-	unsigned int TileSize;
-	unsigned int DataIndex = GetDataIndex(TileSize);
-	void *pTiles = m_pMap->GetData(DataIndex);
-	int Size = m_pMap->GetDataSize(DataIndex);
-
-	if(!pTiles || Size < m_pLayerTilemap->m_Width * m_pLayerTilemap->m_Height * (int)TileSize)
-		return nullptr;
-
-	return pTiles;
+	return m_pMap->GetData(GetDataIndex());
 }
 
 void CRenderLayerTile::OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap, std::shared_ptr<CEnvelopeManager> &pEnvelopeManager, IMap *pMap, IMapImages *pMapImages, std::optional<FRenderUploadCallback> &FRenderUploadCallbackOptional)
@@ -1438,9 +1429,8 @@ ColorRGBA CRenderLayerEntityGame::GetDeathBorderColor() const
 CRenderLayerEntityFront::CRenderLayerEntityFront(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap) :
 	CRenderLayerEntityBase(GroupId, LayerId, Flags, pLayerTilemap) {}
 
-int CRenderLayerEntityFront::GetDataIndex(unsigned int &TileSize) const
+int CRenderLayerEntityFront::GetDataIndex() const
 {
-	TileSize = sizeof(CTile);
 	return m_pLayerTilemap->m_Front;
 }
 
@@ -1448,9 +1438,8 @@ int CRenderLayerEntityFront::GetDataIndex(unsigned int &TileSize) const
 CRenderLayerEntityTele::CRenderLayerEntityTele(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap) :
 	CRenderLayerEntityBase(GroupId, LayerId, Flags, pLayerTilemap) {}
 
-int CRenderLayerEntityTele::GetDataIndex(unsigned int &TileSize) const
+int CRenderLayerEntityTele::GetDataIndex() const
 {
-	TileSize = sizeof(CTeleTile);
 	return m_pLayerTilemap->m_Tele;
 }
 
@@ -1518,9 +1507,8 @@ IGraphics::CTextureHandle CRenderLayerEntitySpeedup::GetTexture() const
 	return m_pMapImages->GetSpeedupArrow();
 }
 
-int CRenderLayerEntitySpeedup::GetDataIndex(unsigned int &TileSize) const
+int CRenderLayerEntitySpeedup::GetDataIndex() const
 {
-	TileSize = sizeof(CSpeedupTile);
 	return m_pLayerTilemap->m_Speedup;
 }
 
@@ -1598,9 +1586,8 @@ IGraphics::CTextureHandle CRenderLayerEntitySwitch::GetTexture() const
 	return m_pMapImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH);
 }
 
-int CRenderLayerEntitySwitch::GetDataIndex(unsigned int &TileSize) const
+int CRenderLayerEntitySwitch::GetDataIndex() const
 {
-	TileSize = sizeof(CSwitchTile);
 	return m_pLayerTilemap->m_Switch;
 }
 
@@ -1680,9 +1667,8 @@ void CRenderLayerEntityTune::GetTileData(unsigned char *pIndex, unsigned char *p
 	*pFlags = 0;
 }
 
-int CRenderLayerEntityTune::GetDataIndex(unsigned int &TileSize) const
+int CRenderLayerEntityTune::GetDataIndex() const
 {
-	TileSize = sizeof(CTuneTile);
 	return m_pLayerTilemap->m_Tune;
 }
 

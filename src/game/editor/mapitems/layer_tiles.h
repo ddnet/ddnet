@@ -162,7 +162,6 @@ public:
 	void ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction) override;
 
 	void PrepareForSave();
-	void ExtractTiles(const CTile *pSavedTiles, size_t SavedTilesSize) const;
 
 	void GetSize(float *pWidth, float *pHeight) override
 	{
