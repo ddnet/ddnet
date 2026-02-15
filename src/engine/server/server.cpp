@@ -945,32 +945,37 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientId)
 	}
 	else
 	{
-		CPacker Pack;
-		if(!RepackMsg(pMsg, Pack, m_aClients[ClientId].m_Sixup))
-			return -1;
-
-		Packet.m_ClientId = ClientId;
-		Packet.m_pData = Pack.Data();
-		Packet.m_DataSize = Pack.Size();
-
-		if(Antibot()->OnEngineServerMessage(ClientId, Packet.m_pData, Packet.m_DataSize, Flags))
-		{
-			return 0;
-		}
-
 		// write message to demo recorders
-		if(!(Flags & MSGFLAG_NORECORD))
+		if(!(Flags & MSGFLAG_NORECORD) &&
+			(m_aDemoRecorder[ClientId].IsRecording() || m_aDemoRecorder[RECORDER_MANUAL].IsRecording() || m_aDemoRecorder[RECORDER_AUTO].IsRecording()))
 		{
-			if(m_aDemoRecorder[ClientId].IsRecording())
-				m_aDemoRecorder[ClientId].RecordMessage(Pack.Data(), Pack.Size());
-			if(m_aDemoRecorder[RECORDER_MANUAL].IsRecording())
-				m_aDemoRecorder[RECORDER_MANUAL].RecordMessage(Pack.Data(), Pack.Size());
-			if(m_aDemoRecorder[RECORDER_AUTO].IsRecording())
-				m_aDemoRecorder[RECORDER_AUTO].RecordMessage(Pack.Data(), Pack.Size());
+			CPacker Pack6;
+			if(RepackMsg(pMsg, Pack6, false)) // server only records 0.6 messages to demos
+			{
+				if(m_aDemoRecorder[ClientId].IsRecording())
+					m_aDemoRecorder[ClientId].RecordMessage(Pack6.Data(), Pack6.Size());
+				if(m_aDemoRecorder[RECORDER_MANUAL].IsRecording())
+					m_aDemoRecorder[RECORDER_MANUAL].RecordMessage(Pack6.Data(), Pack6.Size());
+				if(m_aDemoRecorder[RECORDER_AUTO].IsRecording())
+					m_aDemoRecorder[RECORDER_AUTO].RecordMessage(Pack6.Data(), Pack6.Size());
+			}
 		}
 
 		if(!(Flags & MSGFLAG_NOSEND))
+		{
+			CPacker Pack;
+			if(!RepackMsg(pMsg, Pack, m_aClients[ClientId].m_Sixup))
+				return -1;
+
+			Packet.m_ClientId = ClientId;
+			Packet.m_pData = Pack.Data();
+			Packet.m_DataSize = Pack.Size();
+			if(Antibot()->OnEngineServerMessage(ClientId, Packet.m_pData, Packet.m_DataSize, Flags))
+			{
+				return 0;
+			}
 			m_NetServer.Send(&Packet);
+		}
 	}
 
 	return 0;
