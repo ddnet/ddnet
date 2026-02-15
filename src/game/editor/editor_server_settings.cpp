@@ -1005,10 +1005,10 @@ void CEditor::RenderMapSettingsErrorDialog()
 		OnDialogClose();
 	}
 
-	// Cancel - we load a new empty map
+	// Cancel - close the map currently being loaded
 	if(DoButton_Editor(&s_CancelButton, "Cancel", 0, &CancelButton, BUTTONFLAG_LEFT, nullptr) || (Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE)))
 	{
-		Reset();
+		CloseMap(m_SelectedMap, false);
 		OnDialogClose();
 	}
 }

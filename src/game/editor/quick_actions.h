@@ -17,6 +17,14 @@ REGISTER_QUICK_ACTION(
 	DEFAULT_BTN,
 	"[F1] Open the DDNet Wiki page for the map editor in a web browser.")
 REGISTER_QUICK_ACTION(
+	Exit,
+	"Exit",
+	[&]() { Exit(); },
+	ALWAYS_FALSE,
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"[Escape] Exit from the editor.")
+REGISTER_QUICK_ACTION(
 	BrushPicker,
 	"Brush picker",
 	[&]() { m_ShowPickerToggle = !m_ShowPickerToggle; },
@@ -236,38 +244,91 @@ REGISTER_QUICK_ACTION(
 REGISTER_QUICK_ACTION(
 	AddSoundLayer, "Add sound layer", [&]() { AddSoundLayer(); }, ALWAYS_FALSE, ALWAYS_FALSE, DEFAULT_BTN, "Create a new sound layer.")
 REGISTER_QUICK_ACTION(
+	NewMap,
+	"New map",
+	[&]() {
+		Reset();
+		AddDefaultMap();
+	},
+	ALWAYS_FALSE,
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"[Ctrl+N] Create a new map.")
+REGISTER_QUICK_ACTION(
+	Save,
+	"Save",
+	[&]() {
+		if(Map()->m_aFilename[0] != '\0' && Map()->m_ValidSaveFilename)
+		{
+			CallbackSaveMap(Map()->m_aFilename, IStorage::TYPE_SAVE, this);
+		}
+		else
+		{
+			m_FileBrowser.ShowFileDialog(IStorage::TYPE_SAVE, CFileBrowser::EFileType::MAP, "Save map", "Save", "maps", "", CallbackSaveMap, this);
+		}
+	},
+	ALWAYS_FALSE,
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"[Ctrl+S] Save the current map.")
+REGISTER_QUICK_ACTION(
 	SaveAs,
 	"Save as",
 	[&]() {
-		char aDefaultName[IO_MAX_PATH_LENGTH];
-		fs_split_file_extension(fs_filename(Map()->m_aFilename), aDefaultName, sizeof(aDefaultName));
-		m_FileBrowser.ShowFileDialog(IStorage::TYPE_SAVE, CFileBrowser::EFileType::MAP, "Save map", "Save as", "maps", aDefaultName, CallbackSaveMap, this);
+		m_FileBrowser.ShowFileDialog(IStorage::TYPE_SAVE, CFileBrowser::EFileType::MAP, "Save map", "Save as", "maps", Map()->m_aAutosaveName, CallbackSaveMap, this);
 	},
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
 	"[Ctrl+Shift+S] Save the current map under a new name.")
 REGISTER_QUICK_ACTION(
-	LoadCurrentMap,
-	"Load current map",
+	SaveCopy,
+	"Save copy",
 	[&]() {
-		if(HasUnsavedData())
-		{
-			if(!m_PopupEventWasActivated)
-			{
-				m_PopupEventType = POPEVENT_LOADCURRENT;
-				m_PopupEventActivated = true;
-			}
-		}
-		else
-		{
-			LoadCurrentMap();
-		}
+		m_FileBrowser.ShowFileDialog(IStorage::TYPE_SAVE, CFileBrowser::EFileType::MAP, "Save map", "Save copy", "maps", Map()->m_aAutosaveName, CallbackSaveCopyMap, this);
+	},
+	ALWAYS_FALSE,
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"[Ctrl+Shift+Alt+S] Save a copy of the current map under a new name.")
+REGISTER_QUICK_ACTION(
+	LoadMap,
+	"Load map",
+	[&]() {
+		m_FileBrowser.ShowFileDialog(IStorage::TYPE_ALL, CFileBrowser::EFileType::MAP, "Load map", "Load", "maps", "", CallbackOpenMap, this);
+	},
+	ALWAYS_FALSE,
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"[Ctrl+L] Open a map for editing.")
+REGISTER_QUICK_ACTION(
+	LoadIngameMap,
+	"Load ingame map",
+	[&]() {
+		LoadIngameMap();
 	},
 	[&]() -> bool { return Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK; },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
 	"[Ctrl+Shift+L] Open the current ingame map for editing.")
+REGISTER_QUICK_ACTION(
+	AppendMap,
+	"Append map",
+	[&]() {
+		m_FileBrowser.ShowFileDialog(IStorage::TYPE_ALL, CFileBrowser::EFileType::MAP, "Append map", "Append", "maps", "", CallbackAppendMap, this);
+	},
+	ALWAYS_FALSE,
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"[Ctrl+A] Open a map and add everything from that map to the current map.")
+REGISTER_QUICK_ACTION(
+	CloseMap,
+	"Close map",
+	[&]() { CloseMap(m_SelectedMap, true); },
+	ALWAYS_FALSE,
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"[Ctrl+F4] Close the current map.")
 REGISTER_QUICK_ACTION(
 	Envelopes,
 	"Envelopes",

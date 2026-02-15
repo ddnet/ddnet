@@ -127,8 +127,6 @@ class CEditor : public IEditor
 	CFontTyper m_FontTyper;
 	CQuadKnife m_QuadKnife;
 
-	bool m_EditorWasUsedBefore = false;
-
 	IGraphics::CTextureHandle m_EntitiesTexture;
 
 	IGraphics::CTextureHandle m_FrontTexture;
@@ -160,8 +158,8 @@ public:
 	CUi *Ui() { return &m_UI; }
 	CRenderMap *RenderMap() { return &m_RenderMap; }
 
-	CEditorMap *Map() { return &m_Map; }
-	const CEditorMap *Map() const { return &m_Map; }
+	CEditorMap *Map();
+	const CEditorMap *Map() const;
 	CMapView *MapView() { return &m_MapView; }
 	const CMapView *MapView() const { return &m_MapView; }
 	CQuadKnife *QuadKnife() { return &m_QuadKnife; }
@@ -193,7 +191,7 @@ public:
 #define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, button_color, description) m_QuickAction##name(text, description, callback, disabled, active, button_color),
 #include <game/editor/quick_actions.h>
 #undef REGISTER_QUICK_ACTION
-		m_Map(this)
+		m_Dialog(DIALOG_NONE)
 	{
 		m_EntitiesTexture.Invalidate();
 		m_FrontTexture.Invalidate();
@@ -203,11 +201,8 @@ public:
 		m_TuneTexture.Invalidate();
 
 		m_Mode = MODE_LAYERS;
-		m_Dialog = 0;
 
 		m_BrushColorEnabled = true;
-
-		m_aFilenamePendingLoad[0] = '\0';
 
 		m_PopupEventActivated = false;
 		m_PopupEventWasActivated = false;
@@ -262,7 +257,7 @@ public:
 	void OnWindowResize() override;
 	void OnClose() override;
 	void OnDialogClose();
-	bool HasUnsavedData() const override { return Map()->m_Modified; }
+	bool HasUnsavedData() const override;
 	void UpdateMentions() override { m_Mentions++; }
 	void ResetMentions() override { m_Mentions = 0; }
 	void OnIngameMoved() override { m_IngameMoved = true; }
@@ -287,7 +282,10 @@ public:
 	 */
 	float m_LastAutosaveUpdateTime = -1.0f;
 	void HandleAutosave();
+	std::deque<std::shared_ptr<CDataFileWriterFinishJob>> m_WriterFinishJobs;
 	void HandleWriterFinishJobs();
+	bool IsSaving(const char *pFilename) const;
+	void UpdateMapDisplayNames();
 
 	// TODO: The name of the ShowFileDialogError function is not accurate anymore, this is used for generic error messages.
 	//       Popups in UI should be shared_ptrs to make this even more generic.
@@ -299,11 +297,13 @@ public:
 	std::map<const char *, CUi::SMessagePopupContext *, CStringKeyComparator> m_PopupMessageContexts;
 	[[gnu::format(printf, 2, 3)]] void ShowFileDialogError(const char *pFormat, ...);
 
-	void Reset(bool CreateDefault = true);
+	void Reset();
+	void AddDefaultMap();
+	void CloseMap(size_t Index, bool Confirm);
 	bool Save(const char *pFilename) override;
 	bool Load(const char *pFilename, int StorageType) override;
 	bool HandleMapDrop(const char *pFilename, int StorageType) override;
-	void LoadCurrentMap();
+	void LoadIngameMap();
 	void Render();
 
 	void UpdateBrushPicker();
@@ -328,18 +328,10 @@ public:
 
 	bool m_BrushColorEnabled;
 
-	/**
-	 * File which is pending to be loaded by @link POPEVENT_LOADDROP @endlink.
-	 */
-	char m_aFilenamePendingLoad[IO_MAX_PATH_LENGTH] = "";
-
 	enum
 	{
 		POPEVENT_EXIT = 0,
-		POPEVENT_LOAD,
-		POPEVENT_LOADCURRENT,
-		POPEVENT_LOADDROP,
-		POPEVENT_NEW,
+		POPEVENT_CLOSE_MAP,
 		POPEVENT_LARGELAYER,
 		POPEVENT_PREVENTUNUSEDTILES,
 		POPEVENT_IMAGEDIV16,
@@ -447,13 +439,12 @@ public:
 
 	IGraphics::CTextureHandle GetEntitiesTexture();
 
+	std::unique_ptr<CEditorMap> m_pToolsMap;
 	std::shared_ptr<CLayerGroup> m_pBrush;
 	std::shared_ptr<CLayerTiles> m_pTilesetPicker;
 	std::shared_ptr<CLayerQuads> m_pQuadsetPicker;
 
 	const void *m_pUiGotContext = nullptr;
-
-	std::deque<std::shared_ptr<CDataFileWriterFinishJob>> m_WriterFinishJobs;
 
 	CMapSettingsBackend m_MapSettingsBackend;
 
@@ -491,6 +482,20 @@ public:
 	static CUi::EPopupMenuFunctionResult PopupMenuFile(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupMenuTools(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupMenuSettings(void *pContext, CUIRect View, bool Active);
+	class CPopupMapTab : public SPopupMenuId
+	{
+	public:
+		CEditor *m_pEditor;
+		size_t m_SelectedMap;
+		static CUi::EPopupMenuFunctionResult Render(void *pContext, CUIRect View, bool Active);
+
+	private:
+		const char m_CloseButtonId = 0;
+		const char m_CopyNameButtonId = 0;
+		const char m_CopyPathButtonId = 0;
+		const char m_ShowFileButtonId = 0;
+	};
+	CPopupMapTab m_PopupMapTab;
 	static CUi::EPopupMenuFunctionResult PopupGroup(void *pContext, CUIRect View, bool Active);
 	struct SLayerPopupContext : public SPopupMenuId
 	{
@@ -590,6 +595,11 @@ public:
 		};
 		CPoint m_aPoints[NUM_POINTS];
 	};
+
+	CScrollRegion m_MapTabsScrollRegion;
+	bool m_MapTabsRevealSelected = false;
+	void DoMapTabs(CUIRect MapTabs);
+
 	void DoToolbarLayers(CUIRect Toolbar);
 	void DoToolbarImages(CUIRect Toolbar);
 	void DoToolbarSounds(CUIRect Toolbar);
@@ -687,6 +697,7 @@ public:
 
 	void RenderMenubar(CUIRect Menubar);
 	void ShowHelp();
+	void Exit();
 
 	void DoAudioPreview(CUIRect View, const void *pPlayPauseButtonId, const void *pStopButtonId, const void *pSeekBarId, int SampleId);
 
@@ -717,7 +728,8 @@ public:
 	void AdjustBrushSpecialTiles(bool UseNextFree, int AdjustModifiers, int AdjustValue);
 
 private:
-	CEditorMap m_Map;
+	std::vector<std::unique_ptr<CEditorMap>> m_vpMaps;
+	size_t m_SelectedMap;
 
 	CEditorHistory &ActiveHistory();
 

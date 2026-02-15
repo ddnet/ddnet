@@ -68,8 +68,20 @@ public:
 	const CEditor *Editor() const { return m_pEditor; }
 	CEditor *Editor() { return m_pEditor; }
 
+	/**
+	 * Path and filename including extension within the storage system.
+	 */
 	char m_aFilename[IO_MAX_PATH_LENGTH];
+	/**
+	 * Unique name for displaying. Updated by the editor when open maps are changed to ensure it is unique.
+	 */
+	char m_aDisplayName[IO_MAX_PATH_LENGTH];
+	/**
+	 * Unique name for autosaving. Updated by the editor when open maps are changed to ensure it is unique.
+	 */
+	char m_aAutosaveName[IO_MAX_PATH_LENGTH];
 	bool m_ValidSaveFilename;
+	bool m_CloseOnSave;
 	/**
 	 * Map has unsaved changes for manual save.
 	 */
@@ -82,6 +94,10 @@ public:
 	float m_LastSaveTime;
 	void OnModify();
 	void ResetModifiedState();
+
+	// UI elements
+	char m_TabSelectButtonId;
+	char m_TabCloseButtonId;
 
 	std::vector<std::shared_ptr<CLayerGroup>> m_vpGroups;
 	std::vector<std::shared_ptr<CEditorImage>> m_vpImages;
@@ -159,7 +175,6 @@ public:
 	CEditorHistoryUiState m_EditorHistoryUiState;
 
 	// Housekeeping
-	void Clean();
 	void CreateDefault();
 	void CheckIntegrity();
 
