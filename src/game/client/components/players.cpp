@@ -820,7 +820,9 @@ void CPlayers::RenderPlayer(
 	}
 
 	// render the "shadow" tee
-	if(Local && ((g_Config.m_Debug && g_Config.m_ClUnpredictedShadow >= 0) || g_Config.m_ClUnpredictedShadow == 1))
+	bool Show = (Local && g_Config.m_ClUnpredictedShadow == 1) || (!Local && g_Config.m_ClUnpredictedShadow == 2) || g_Config.m_ClUnpredictedShadow == 3;
+	bool ShowDebug = Local && g_Config.m_Debug && g_Config.m_ClUnpredictedShadow != -1;
+	if(Show || ShowDebug)
 	{
 		vec2 ShadowPosition = Position;
 		if(ClientId >= 0)
@@ -829,7 +831,7 @@ void CPlayers::RenderPlayer(
 				vec2(GameClient()->m_Snap.m_aCharacters[ClientId].m_Cur.m_X, GameClient()->m_Snap.m_aCharacters[ClientId].m_Cur.m_Y),
 				Client()->IntraGameTick(g_Config.m_ClDummy));
 
-		RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, ShadowPosition, 0.5f); // render ghost
+		RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, ShadowPosition, g_Config.m_ClUnpredictedShadowAlpha / 100.f); // render ghost
 	}
 
 	RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position, Alpha);
