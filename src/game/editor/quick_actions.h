@@ -230,18 +230,7 @@ REGISTER_QUICK_ACTION(
 	LoadCurrentMap,
 	"Load current map",
 	[&]() {
-		if(HasUnsavedData())
-		{
-			if(!m_PopupEventWasActivated)
-			{
-				m_PopupEventType = POPEVENT_LOADCURRENT;
-				m_PopupEventActivated = true;
-			}
-		}
-		else
-		{
-			LoadCurrentMap();
-		}
+		LoadCurrentMap();
 	},
 	[&]() -> bool { return Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK; },
 	ALWAYS_FALSE,
