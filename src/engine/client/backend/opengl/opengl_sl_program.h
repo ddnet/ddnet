@@ -161,4 +161,14 @@ public:
 	int m_LocJumpIndex;
 };
 
+class CGLSLProgressSpinnerProgram : public CGLSLTWProgram
+{
+public:
+	int m_LocInnerRadius = -1;
+	int m_LocArcStart = -1;
+	int m_LocArcLen = -1;
+	int m_LocFilledColor = -1;
+	int m_LocUnfilledColor = -1;
+};
+
 #endif

@@ -479,6 +479,8 @@ public:
 	virtual void DrawRect4(float x, float y, float w, float h, ColorRGBA ColorTopLeft, ColorRGBA ColorTopRight, ColorRGBA ColorBottomLeft, ColorRGBA ColorBottomRight, int Corners, float Rounding) = 0;
 	virtual void DrawCircle(float CenterX, float CenterY, float Radius, int Segments) = 0;
 
+	virtual void RenderProgressSpinner(vec2 Center, float OuterRadius, float InnerRadius, float ArcStart, float ArcLen, ColorRGBA FilledColor, ColorRGBA UnfilledColor) = 0;
+
 	struct CColorVertex
 	{
 		int m_Index;
