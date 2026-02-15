@@ -1735,7 +1735,8 @@ bool CMenus::RenderHslaScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alp
 		pRect->HSplitTop(SizePerEntry, &Button, pRect);
 		pRect->HSplitTop(MarginPerEntry, nullptr, pRect);
 		Button.VSplitLeft(10.0f, nullptr, &Button);
-		Button.VSplitLeft(100.0f, &Label, &Button);
+		Button.VSplitLeft(130.0f, &Label, &Button);
+		Label.VSplitRight(5.0f, &Label, nullptr);
 
 		Button.Draw(ColorRGBA(0.15f, 0.15f, 0.15f, 1.0f), IGraphics::CORNER_ALL, 1.0f);
 
@@ -1743,7 +1744,13 @@ bool CMenus::RenderHslaScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alp
 		Button.Margin(2.0f, &Rail);
 
 		char aBuf[32];
-		str_format(aBuf, sizeof(aBuf), "%s: %03d", apLabels[i], round_to_int(Color[i] * 255.0f));
+
+		// Hue
+		if(i == 0)
+			str_format(aBuf, sizeof(aBuf), "%s: %.1f° (%d)", apLabels[i], Color[i] * 360.0f, round_to_int(Color[i] * 255.0f));
+		// Sat, Lht and Alpha
+		else
+			str_format(aBuf, sizeof(aBuf), "%s: %.1f%% (%d)", apLabels[i], Color[i] * 100.0f, round_to_int(Color[i] * 255.0f));
 		Ui()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_ML);
 
 		ColorRGBA HandleColor;
