@@ -1,6 +1,7 @@
 #include "connection.h"
 
 #include <base/math.h>
+#include <base/system.h> // TODO: replace with str.h after moving str_format
 
 #include <engine/console.h>
 

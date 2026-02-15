@@ -448,41 +448,6 @@ void aio_wait(ASYNCIO *aio);
 void aio_free(ASYNCIO *aio);
 
 /**
- * @defgroup Semaphore Semaphores
- *
- * @see Threads
- */
-
-#if defined(CONF_FAMILY_WINDOWS)
-typedef void *SEMAPHORE;
-#elif defined(CONF_PLATFORM_MACOS)
-#include <semaphore.h>
-typedef sem_t *SEMAPHORE;
-#elif defined(CONF_FAMILY_UNIX)
-#include <semaphore.h>
-typedef sem_t SEMAPHORE;
-#else
-#error not implemented on this platform
-#endif
-
-/**
- * @ingroup Semaphore
- */
-void sphore_init(SEMAPHORE *sem);
-/**
- * @ingroup Semaphore
- */
-void sphore_wait(SEMAPHORE *sem);
-/**
- * @ingroup Semaphore
- */
-void sphore_signal(SEMAPHORE *sem);
-/**
- * @ingroup Semaphore
- */
-void sphore_destroy(SEMAPHORE *sem);
-
-/**
  * @defgroup Network Networking
  */
 
