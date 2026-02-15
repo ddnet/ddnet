@@ -322,7 +322,12 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 	const ColorRGBA InnerColor = color_cast<ColorRGBA>(ColorHSLA(ColorIn).WithAlpha(Alpha));
 
 	float Ticks;
-	float TicksHead = Client()->GameTick(g_Config.m_ClDummy);
+	const int TickWrap = 9999;
+	// Avoid slow head animation caused by precision loss in servers with very high tick values.
+	// Make the wrap divisible by 3 so the animation's 3-tick cycle doesn't produce (in)visible jumps when the tick value wraps.
+	const int NormalizedGameTick = Client()->GameTick(g_Config.m_ClDummy) % TickWrap;
+	float TicksHead = (float)NormalizedGameTick;
+	
 	if(Type == LASERTYPE_DOOR)
 	{
 		Ticks = 1.0f;
