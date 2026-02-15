@@ -125,8 +125,6 @@ class CEditor : public IEditor, public IEnvelopeEval
 	CPrompt m_Prompt;
 	CFontTyper m_FontTyper;
 
-	bool m_EditorWasUsedBefore = false;
-
 	IGraphics::CTextureHandle m_EntitiesTexture;
 
 	IGraphics::CTextureHandle m_FrontTexture;
@@ -160,8 +158,8 @@ public:
 	CUi *Ui() { return &m_UI; }
 	CRenderMap *RenderMap() { return &m_RenderMap; }
 
-	CEditorMap *Map() { return &m_Map; }
-	const CEditorMap *Map() const { return &m_Map; }
+	CEditorMap *Map();
+	const CEditorMap *Map() const;
 	CMapView *MapView() { return &m_MapView; }
 	const CMapView *MapView() const { return &m_MapView; }
 	CLayerSelector *LayerSelector() { return &m_LayerSelector; }
@@ -193,8 +191,7 @@ public:
 #undef REGISTER_QUICK_ACTION
 		m_ZoomEnvelopeX(1.0f, 0.1f, 600.0f),
 		m_ZoomEnvelopeY(640.0f, 0.1f, 32000.0f),
-		m_MapSettingsCommandContext(m_MapSettingsBackend.NewContext(&m_SettingsCommandInput)),
-		m_Map(this)
+		m_MapSettingsCommandContext(m_MapSettingsBackend.NewContext(&m_SettingsCommandInput))
 	{
 		m_EntitiesTexture.Invalidate();
 		m_FrontTexture.Invalidate();
@@ -207,8 +204,6 @@ public:
 		m_Dialog = 0;
 
 		m_BrushColorEnabled = true;
-
-		m_aFilenamePendingLoad[0] = '\0';
 
 		m_PopupEventActivated = false;
 		m_PopupEventWasActivated = false;
@@ -330,7 +325,10 @@ public:
 	std::map<const char *, CUi::SMessagePopupContext *, CStringKeyComparator> m_PopupMessageContexts;
 	[[gnu::format(printf, 2, 3)]] void ShowFileDialogError(const char *pFormat, ...);
 
-	void Reset(bool CreateDefault = true);
+	void Reset();
+	void AddDefaultMap();
+	void CloseSelectedMap(bool Confirm);
+	void InvokeSave();
 	bool Save(const char *pFilename) override;
 	bool Load(const char *pFilename, int StorageType) override;
 	bool HandleMapDrop(const char *pFilename, int StorageType) override;
@@ -359,18 +357,10 @@ public:
 
 	bool m_BrushColorEnabled;
 
-	/**
-	 * File which is pending to be loaded by @link POPEVENT_LOADDROP @endlink.
-	 */
-	char m_aFilenamePendingLoad[IO_MAX_PATH_LENGTH] = "";
-
 	enum
 	{
 		POPEVENT_EXIT = 0,
-		POPEVENT_LOAD,
-		POPEVENT_LOADCURRENT,
-		POPEVENT_LOADDROP,
-		POPEVENT_NEW,
+		POPEVENT_CLOSE_MAP,
 		POPEVENT_LARGELAYER,
 		POPEVENT_PREVENTUNUSEDTILES,
 		POPEVENT_IMAGEDIV16,
@@ -497,6 +487,7 @@ public:
 
 	IGraphics::CTextureHandle GetEntitiesTexture();
 
+	std::unique_ptr<CEditorMap> m_pToolsMap;
 	std::shared_ptr<CLayerGroup> m_pBrush;
 	std::shared_ptr<CLayerTiles> m_pTilesetPicker;
 	std::shared_ptr<CLayerQuads> m_pQuadsetPicker;
@@ -654,6 +645,7 @@ public:
 		CPoint m_aPoints[NUM_POINTS];
 	};
 	void DoMapEditor(CUIRect View);
+	void DoMapTabs(CUIRect MapTabs);
 	void DoToolbarLayers(CUIRect Toolbar);
 	void DoToolbarImages(CUIRect Toolbar);
 	void DoToolbarSounds(CUIRect Toolbar);
@@ -773,7 +765,8 @@ public:
 	void AdjustBrushSpecialTiles(bool UseNextFree, int Adjust = 0);
 
 private:
-	CEditorMap m_Map;
+	std::vector<std::unique_ptr<CEditorMap>> m_vpMaps;
+	size_t m_SelectedMap;
 
 	CEditorHistory &ActiveHistory();
 

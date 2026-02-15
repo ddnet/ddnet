@@ -38,15 +38,8 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuFile(void *pContext, CUIRect Vie
 	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_NewMapButton, "New", 0, &Slot, BUTTONFLAG_LEFT, "[Ctrl+N] Create a new map."))
 	{
-		if(pEditor->HasUnsavedData())
-		{
-			pEditor->m_PopupEventType = POPEVENT_NEW;
-			pEditor->m_PopupEventActivated = true;
-		}
-		else
-		{
-			pEditor->Reset();
-		}
+		pEditor->Reset();
+		pEditor->AddDefaultMap();
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
 
@@ -54,13 +47,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuFile(void *pContext, CUIRect Vie
 	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_OpenButton, "Load", 0, &Slot, BUTTONFLAG_LEFT, "[Ctrl+L] Open a map for editing."))
 	{
-		if(pEditor->HasUnsavedData())
-		{
-			pEditor->m_PopupEventType = POPEVENT_LOAD;
-			pEditor->m_PopupEventActivated = true;
-		}
-		else
-			pEditor->m_FileBrowser.ShowFileDialog(IStorage::TYPE_ALL, CFileBrowser::EFileType::MAP, "Load map", "Load", "maps", "", CallbackOpenMap, pEditor);
+		pEditor->m_FileBrowser.ShowFileDialog(IStorage::TYPE_ALL, CFileBrowser::EFileType::MAP, "Load map", "Load", "maps", "", CallbackOpenMap, pEditor);
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
 
@@ -84,14 +71,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuFile(void *pContext, CUIRect Vie
 	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_SaveButton, "Save", 0, &Slot, BUTTONFLAG_LEFT, "[Ctrl+S] Save the current map."))
 	{
-		if(pEditor->Map()->m_aFilename[0] != '\0' && pEditor->Map()->m_ValidSaveFilename)
-		{
-			CallbackSaveMap(pEditor->Map()->m_aFilename, IStorage::TYPE_SAVE, pEditor);
-		}
-		else
-		{
-			pEditor->m_FileBrowser.ShowFileDialog(IStorage::TYPE_SAVE, CFileBrowser::EFileType::MAP, "Save map", "Save", "maps", "", CallbackSaveMap, pEditor);
-		}
+		pEditor->InvokeSave();
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
 
@@ -2025,15 +2005,11 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		pTitle = "Exit the editor";
 		pMessage = "The map contains unsaved data, you might want to save it before you exit the editor.\n\nContinue anyway?";
 	}
-	else if(pEditor->m_PopupEventType == POPEVENT_LOAD || pEditor->m_PopupEventType == POPEVENT_LOADCURRENT || pEditor->m_PopupEventType == POPEVENT_LOADDROP)
+	else if(pEditor->m_PopupEventType == POPEVENT_CLOSE_MAP)
 	{
-		pTitle = "Load map";
-		pMessage = "The map contains unsaved data, you might want to save it before you load a new map.\n\nContinue anyway?";
-	}
-	else if(pEditor->m_PopupEventType == POPEVENT_NEW)
-	{
-		pTitle = "New map";
-		pMessage = "The map contains unsaved data, you might want to save it before you create a new map.\n\nContinue anyway?";
+		// TODO: show filename is message
+		pTitle = "Save changes?";
+		pMessage = "Do you want to save your changes before closing this map?\n\nYour changes will be lost if you do not save them.";
 	}
 	else if(pEditor->m_PopupEventType == POPEVENT_LARGELAYER)
 	{
@@ -2145,14 +2121,14 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		static int s_CancelButton = 0;
 		if(pEditor->DoButton_Editor(&s_CancelButton, "Cancel", 0, &Button, BUTTONFLAG_LEFT, nullptr))
 		{
-			if(pEditor->m_PopupEventType == POPEVENT_LOADDROP)
-				pEditor->m_aFilenamePendingLoad[0] = 0;
-
-			else if(pEditor->m_PopupEventType == POPEVENT_TILEART_BIG_IMAGE || pEditor->m_PopupEventType == POPEVENT_TILEART_MANY_COLORS)
+			if(pEditor->m_PopupEventType == POPEVENT_TILEART_BIG_IMAGE || pEditor->m_PopupEventType == POPEVENT_TILEART_MANY_COLORS)
+			{
 				pEditor->m_TileartImageInfo.Free();
-
+			}
 			else if(pEditor->m_PopupEventType == POPEVENT_QUADART_BIG_IMAGE)
+			{
 				pEditor->m_QuadArtImageInfo.Free();
+			}
 
 			pEditor->m_PopupEventWasActivated = false;
 			return CUi::POPUP_CLOSE_CURRENT;
@@ -2164,31 +2140,20 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 
 	ButtonBar.VSplitRight(110.0f, &ButtonBar, &Button);
 	static int s_ConfirmButton = 0;
-	if(pEditor->DoButton_Editor(&s_ConfirmButton, "Confirm", 0, &Button, BUTTONFLAG_LEFT, nullptr) || (Active && pEditor->Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
+	const char *pConfirmLabel = pEditor->m_PopupEventType == POPEVENT_CLOSE_MAP ? "Save changes" : "Confirm";
+	const int ConfirmChecked = pEditor->m_PopupEventType == POPEVENT_CLOSE_MAP ? EditorButtonChecked::POSITIVE_ACTION : 0;
+	if(pEditor->DoButton_Editor(&s_ConfirmButton, pConfirmLabel, ConfirmChecked, &Button, BUTTONFLAG_LEFT, nullptr) ||
+		(Active && pEditor->Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
 	{
 		if(pEditor->m_PopupEventType == POPEVENT_EXIT)
 		{
 			pEditor->OnClose();
 			g_Config.m_ClEditor = 0;
 		}
-		else if(pEditor->m_PopupEventType == POPEVENT_LOAD)
+		else if(pEditor->m_PopupEventType == POPEVENT_CLOSE_MAP)
 		{
-			pEditor->m_FileBrowser.ShowFileDialog(IStorage::TYPE_ALL, CFileBrowser::EFileType::MAP, "Load map", "Load", "maps", "", CallbackOpenMap, pEditor);
-		}
-		else if(pEditor->m_PopupEventType == POPEVENT_LOADCURRENT)
-		{
-			pEditor->LoadCurrentMap();
-		}
-		else if(pEditor->m_PopupEventType == POPEVENT_LOADDROP)
-		{
-			int Result = pEditor->Load(pEditor->m_aFilenamePendingLoad, IStorage::TYPE_ALL_OR_ABSOLUTE);
-			if(!Result)
-				dbg_msg("editor", "editing passed map file '%s' failed", pEditor->m_aFilenamePendingLoad);
-			pEditor->m_aFilenamePendingLoad[0] = 0;
-		}
-		else if(pEditor->m_PopupEventType == POPEVENT_NEW)
-		{
-			pEditor->Reset();
+			pEditor->InvokeSave();
+			// TODO: actually close the map after saving, which might have been delayed due to the file browser being opened
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
 		{
@@ -2226,6 +2191,16 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		}
 		pEditor->m_PopupEventWasActivated = false;
 		return CUi::POPUP_CLOSE_CURRENT;
+	}
+
+	if(pEditor->m_PopupEventType == POPEVENT_CLOSE_MAP)
+	{
+		static int s_DiscardButton = 0;
+		ButtonBar.VMargin((ButtonBar.w - 110.0f) / 2.0f, &Button);
+		if(pEditor->DoButton_Editor(&s_DiscardButton, "Discard changes", EditorButtonChecked::DANGEROUS_ACTION, &Button, BUTTONFLAG_LEFT, nullptr))
+		{
+			pEditor->CloseSelectedMap(false);
+		}
 	}
 
 	return CUi::POPUP_KEEP_OPEN;
