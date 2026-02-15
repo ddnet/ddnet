@@ -49,27 +49,9 @@ CEditorMap::CEditorMap(CEditor *pEditor) :
 	m_MapSettingsCommandContext(pEditor->m_MapSettingsBackend.NewContextWithInput()),
 	m_pEditor(pEditor)
 {
-}
-
-void CEditorMap::OnModify()
-{
-	m_Modified = true;
-	m_ModifiedAuto = true;
-	m_LastModifiedTime = Editor()->Client()->GlobalTime();
-}
-
-void CEditorMap::ResetModifiedState()
-{
-	m_Modified = false;
-	m_ModifiedAuto = false;
-	m_LastModifiedTime = -1.0f;
-	m_LastSaveTime = Editor()->Client()->GlobalTime();
-}
-
-void CEditorMap::Clean()
-{
 	m_aFilename[0] = '\0';
 	m_ValidSaveFilename = false;
+	m_CloseOnSave = false;
 	ResetModifiedState();
 
 	m_vpGroups.clear();
@@ -118,6 +100,23 @@ void CEditorMap::Clean()
 	m_EnvelopeEditorState.Reset(Editor());
 	m_MapSettingsCommandContext.Reset();
 	m_FontTyperState.Reset();
+}
+
+void CEditorMap::OnModify()
+{
+	m_Modified = true;
+	m_ModifiedAuto = true;
+	m_LastModifiedTime = Editor()->Client()->GlobalTime();
+	// Stopped scheduled map closing if the map was modified
+	m_CloseOnSave = false;
+}
+
+void CEditorMap::ResetModifiedState()
+{
+	m_Modified = false;
+	m_ModifiedAuto = false;
+	m_LastModifiedTime = -1.0f;
+	m_LastSaveTime = Editor()->Client()->GlobalTime();
 }
 
 void CEditorMap::CreateDefault()

@@ -47,6 +47,7 @@
 #include <limits>
 #include <tuple>
 #include <type_traits>
+#include <unordered_map>
 
 static const char *VANILLA_IMAGES[] = {
 	"bg_cloud1",
@@ -148,6 +149,7 @@ bool CEditor::CallbackSaveMap(const char *pFilename, int StorageType, void *pUse
 		}
 		pEditor->Map()->m_ValidSaveFilename = true;
 		pEditor->Map()->m_Modified = false;
+		pEditor->UpdateMapDisplayNames();
 	}
 	else
 	{
@@ -344,6 +346,82 @@ void CEditor::DoAudioPreview(CUIRect View, const void *pPlayPauseButtonId, const
 
 		if(Inside && !Ui()->MouseButton(0))
 			Ui()->SetHotItem(pSeekBarId);
+	}
+}
+
+void CEditor::DoMapTabs(CUIRect MapTabs)
+{
+	// TODO: maybe do a drop-down menu of all maps on left side to make it easier when there are many tabs
+	// TODO: make the list scrollable in some way to deal with low widths and many open tabs, but we don't have horizontal scrolling UI components yet
+
+	size_t Index = 0;
+	std::optional<size_t> CloseIndex = std::nullopt;
+	for(const auto &pMap : m_vpMaps)
+	{
+		const float ButtonWidth = std::clamp(TextRender()->TextWidth(10.0f, pMap->m_aDisplayName) + 10.0f, 60.0f, 120.0f);
+
+		CUIRect MapButton, CloseButton;
+		MapTabs.VSplitLeft(ButtonWidth, &MapButton, &MapTabs);
+		MapTabs.VSplitLeft(18.0f, &CloseButton, &MapTabs);
+		MapTabs.VSplitLeft(2.0f, nullptr, &MapTabs);
+		if(DoButton_Ex(&pMap->m_TabSelectButtonId, pMap->m_aDisplayName, m_SelectedMap == Index, &MapButton, BUTTONFLAG_LEFT, pMap->m_aFilename, IGraphics::CORNER_L))
+		{
+			m_SelectedMap = Index;
+			Reset();
+		}
+
+		const bool IsSaving = std::any_of(std::begin(m_WriterFinishJobs), std::end(m_WriterFinishJobs), [&](const std::shared_ptr<CDataFileWriterFinishJob> &Job) {
+			return str_comp(pMap->m_aFilename, Job->RealFilename()) == 0;
+		});
+		if(IsSaving)
+		{
+			DoButton_Ex(&pMap->m_TabCloseButtonId, "", -1, &CloseButton, BUTTONFLAG_NONE, "This map is being saved.", IGraphics::CORNER_R);
+			Ui()->RenderProgressSpinner(CloseButton.Center(), 4.0f);
+		}
+		else
+		{
+			const bool ShowCloseIcon = !pMap->m_Modified || Ui()->HotItem() == &pMap->m_TabCloseButtonId;
+			if(DoButton_FontIcon(&pMap->m_TabCloseButtonId, ShowCloseIcon ? FontIcon::XMARK : FontIcon::CIRCLE, 0, &CloseButton, BUTTONFLAG_LEFT,
+				   pMap->m_Modified ? "Close the selected map. This map has unsaved changes." : "Close the selected map.", IGraphics::CORNER_R, ShowCloseIcon ? 9.0f : 6.0f))
+			{
+				CloseIndex = Index;
+			}
+		}
+		++Index;
+	}
+
+	if(CloseIndex.has_value())
+	{
+		CloseMap(CloseIndex.value(), true);
+	}
+
+	if(m_Dialog == DIALOG_NONE &&
+		CLineInput::GetActiveInput() == nullptr &&
+		Ui()->CheckActiveItem(nullptr))
+	{
+		// Close selected map with Ctrl+F4
+		if(!CloseIndex.has_value() &&
+			Input()->ModifierIsPressed() &&
+			Input()->KeyPress(KEY_F4))
+		{
+			CloseMap(m_SelectedMap, true);
+		}
+
+		// Switch between maps with Ctrl+Tab and Ctrl+Shift+Tab
+		if(m_vpMaps.size() > 1 &&
+			Input()->ModifierIsPressed() &&
+			Input()->KeyPress(KEY_TAB))
+		{
+			if(Input()->ShiftIsPressed())
+			{
+				m_SelectedMap = m_SelectedMap == 0 ? m_vpMaps.size() - 1 : m_SelectedMap - 1;
+			}
+			else
+			{
+				m_SelectedMap = m_SelectedMap == m_vpMaps.size() - 1 ? 0 : m_SelectedMap + 1;
+			}
+			Reset();
+		}
 	}
 }
 
@@ -3961,7 +4039,7 @@ void CEditor::RenderModebar(CUIRect View)
 	CUIRect Mentions, IngameMoved, ModeButtons, ModeButton;
 	View.HSplitTop(12.0f, &Mentions, &View);
 	View.HSplitTop(12.0f, &IngameMoved, &View);
-	View.HSplitTop(8.0f, nullptr, &ModeButtons);
+	View.HSplitBottom(22.0f, nullptr, &ModeButtons);
 	const float Width = m_ToolBoxWidth - 5.0f;
 	ModeButtons.VSplitLeft(Width, &ModeButtons, nullptr);
 	const float ButtonWidth = Width / 3;
@@ -4308,37 +4386,16 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 		Ui()->DoPopupMenu(&s_PopupMenuSettingsId, SettingsButton.x, SettingsButton.y + SettingsButton.h - 1.0f, 280.0f, 148.0f, this, PopupMenuSettings, PopupProperties);
 	}
 
-	CUIRect ChangedIndicator, Info, Help, Close;
+	CUIRect Info, Help, Close;
 	MenuBar.VSplitLeft(5.0f, nullptr, &MenuBar);
-	MenuBar.VSplitLeft(MenuBar.h, &ChangedIndicator, &MenuBar);
 	MenuBar.VSplitRight(15.0f, &MenuBar, &Close);
 	MenuBar.VSplitRight(5.0f, &MenuBar, nullptr);
 	MenuBar.VSplitRight(15.0f, &MenuBar, &Help);
-	MenuBar.VSplitRight(5.0f, &MenuBar, nullptr);
-	MenuBar.VSplitLeft(MenuBar.w * 0.6f, &MenuBar, &Info);
-	MenuBar.VSplitRight(5.0f, &MenuBar, nullptr);
-
-	if(Map()->m_Modified)
-	{
-		TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
-		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGNMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-		Ui()->DoLabel(&ChangedIndicator, FontIcon::CIRCLE, 8.0f, TEXTALIGN_MC);
-		TextRender()->SetRenderFlags(0);
-		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
-		static int s_ChangedIndicator;
-		DoButtonLogic(&s_ChangedIndicator, 0, &ChangedIndicator, BUTTONFLAG_NONE, "This map has unsaved changes."); // just for the tooltip, result unused
-	}
-
-	char aBuf[IO_MAX_PATH_LENGTH + 32];
-	str_format(aBuf, sizeof(aBuf), "File: %s", Map()->m_aFilename);
-	SLabelProperties Props;
-	Props.m_MaxWidth = MenuBar.w;
-	Props.m_EllipsisAtEnd = true;
-	Ui()->DoLabel(&MenuBar, aBuf, 10.0f, TEXTALIGN_ML, Props);
+	MenuBar.VSplitRight(5.0f, &Info, nullptr);
 
 	char aTimeStr[6];
 	str_timestamp_format(aTimeStr, sizeof(aTimeStr), "%H:%M");
-
+	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "X: %.1f, Y: %.1f, Z: %.1f, A: %.1f, G: %i  %s", Ui()->MouseWorldX() / 32.0f, Ui()->MouseWorldY() / 32.0f, MapView()->Zoom()->GetValue(), m_AnimateSpeed, MapView()->MapGrid()->Factor(), aTimeStr);
 	Ui()->DoLabel(&Info, aBuf, 10.0f, TEXTALIGN_MR);
 
@@ -4388,7 +4445,7 @@ void CEditor::Render()
 	if(m_GuiActive)
 	{
 		View.HSplitTop(16.0f, &MenuBar, &View);
-		View.HSplitTop(53.0f, &ToolBar, &View);
+		View.HSplitTop(78.0f, &ToolBar, &View);
 		View.VSplitLeft(m_ToolBoxWidth, &ToolBox, &View);
 
 		View.HSplitBottom(16.0f, &View, &StatusBar);
@@ -4459,12 +4516,18 @@ void CEditor::Render()
 	}
 
 	// do the toolbar
-	if(m_Mode == MODE_LAYERS)
-		DoToolbarLayers(ToolBar);
-	else if(m_Mode == MODE_IMAGES)
-		DoToolbarImages(ToolBar);
-	else if(m_Mode == MODE_SOUNDS)
-		DoToolbarSounds(ToolBar);
+	{
+		CUIRect MapTabs;
+		ToolBar.HSplitTop(20.0f, &MapTabs, &ToolBar);
+		ToolBar.HSplitTop(5.0f, nullptr, &ToolBar);
+		DoMapTabs(MapTabs);
+		if(m_Mode == MODE_LAYERS)
+			DoToolbarLayers(ToolBar);
+		else if(m_Mode == MODE_IMAGES)
+			DoToolbarImages(ToolBar);
+		else if(m_Mode == MODE_SOUNDS)
+			DoToolbarSounds(ToolBar);
+	}
 
 	if(m_Dialog == DIALOG_NONE)
 	{
@@ -4484,18 +4547,8 @@ void CEditor::Render()
 		// ctrl+n to create new map
 		if(Input()->KeyPress(KEY_N) && ModPressed)
 		{
-			if(HasUnsavedData())
-			{
-				if(!m_PopupEventWasActivated)
-				{
-					m_PopupEventType = POPEVENT_NEW;
-					m_PopupEventActivated = true;
-				}
-			}
-			else
-			{
-				Reset();
-			}
+			Reset();
+			AddDefaultMap();
 		}
 		// ctrl+o or ctrl+l to open
 		if((Input()->KeyPress(KEY_O) || Input()->KeyPress(KEY_L)) && ModPressed)
@@ -4509,27 +4562,14 @@ void CEditor::Render()
 			}
 			else
 			{
-				if(HasUnsavedData())
-				{
-					if(!m_PopupEventWasActivated)
-					{
-						m_PopupEventType = POPEVENT_LOAD;
-						m_PopupEventActivated = true;
-					}
-				}
-				else
-				{
-					m_FileBrowser.ShowFileDialog(IStorage::TYPE_ALL, CFileBrowser::EFileType::MAP, "Load map", "Load", "maps", "", CallbackOpenMap, this);
-				}
+				m_FileBrowser.ShowFileDialog(IStorage::TYPE_ALL, CFileBrowser::EFileType::MAP, "Load map", "Load", "maps", "", CallbackOpenMap, this);
 			}
 		}
 
 		// ctrl+shift+alt+s to save copy
 		if(Input()->KeyPress(KEY_S) && ModPressed && ShiftPressed && AltPressed)
 		{
-			char aDefaultName[IO_MAX_PATH_LENGTH];
-			fs_split_file_extension(fs_filename(Map()->m_aFilename), aDefaultName, sizeof(aDefaultName));
-			m_FileBrowser.ShowFileDialog(IStorage::TYPE_SAVE, CFileBrowser::EFileType::MAP, "Save map", "Save copy", "maps", aDefaultName, CallbackSaveCopyMap, this);
+			m_FileBrowser.ShowFileDialog(IStorage::TYPE_SAVE, CFileBrowser::EFileType::MAP, "Save map", "Save copy", "maps", Map()->m_aAutosaveName, CallbackSaveCopyMap, this);
 		}
 		// ctrl+shift+s to save as
 		else if(Input()->KeyPress(KEY_S) && ModPressed && ShiftPressed)
@@ -4539,14 +4579,7 @@ void CEditor::Render()
 		// ctrl+s to save
 		else if(Input()->KeyPress(KEY_S) && ModPressed)
 		{
-			if(Map()->m_aFilename[0] != '\0' && Map()->m_ValidSaveFilename)
-			{
-				CallbackSaveMap(Map()->m_aFilename, IStorage::TYPE_SAVE, this);
-			}
-			else
-			{
-				m_FileBrowser.ShowFileDialog(IStorage::TYPE_SAVE, CFileBrowser::EFileType::MAP, "Save map", "Save", "maps", "", CallbackSaveMap, this);
-			}
+			InvokeSave();
 		}
 	}
 
@@ -5068,22 +5101,15 @@ void CEditor::RenderIngameEntities(const CLayerGroup &Group, const CLayerTiles &
 	}
 }
 
-void CEditor::Reset(bool CreateDefault)
+void CEditor::Reset()
 {
 	Ui()->ClosePopupMenus();
-	Map()->Clean();
+	Ui()->SetActiveItem(nullptr);
 
 	for(CEditorComponent &Component : m_vComponents)
 		Component.OnReset();
 
 	m_ToolbarPreviewSound = -1;
-
-	// create default layers
-	if(CreateDefault)
-	{
-		m_EditorWasUsedBefore = true;
-		Map()->CreateDefault();
-	}
 
 	m_pContainerPanned = nullptr;
 	m_pContainerPannedLast = nullptr;
@@ -5092,6 +5118,68 @@ void CEditor::Reset(bool CreateDefault)
 	m_QuadEnvelopePointOperation = EQuadEnvelopePointOperation::NONE;
 
 	m_RenderLayersState.Reset();
+}
+
+void CEditor::AddDefaultMap()
+{
+	std::unique_ptr<CEditorMap> pNewMap = std::make_unique<CEditorMap>(this);
+	pNewMap->CreateDefault();
+	m_vpMaps.push_back(std::move(pNewMap));
+	m_SelectedMap = m_vpMaps.size() - 1;
+	UpdateMapDisplayNames();
+}
+
+void CEditor::CloseMap(size_t Index, bool Confirm)
+{
+	if(std::any_of(std::begin(m_WriterFinishJobs), std::end(m_WriterFinishJobs), [&](const std::shared_ptr<CDataFileWriterFinishJob> &Job) {
+		   return str_comp(m_vpMaps[Index]->m_aFilename, Job->RealFilename()) == 0;
+	   }))
+	{
+		return;
+	}
+
+	if(Confirm && m_vpMaps[Index]->m_Modified)
+	{
+		if(Index != m_SelectedMap)
+		{
+			m_SelectedMap = Index;
+			Reset();
+		}
+		m_PopupEventType = CEditor::POPEVENT_CLOSE_MAP;
+		m_PopupEventActivated = true;
+		return;
+	}
+
+	if(Index == m_SelectedMap)
+	{
+		Reset();
+	}
+
+	m_vpMaps.erase(m_vpMaps.begin() + Index);
+	if(m_vpMaps.empty())
+	{
+		AddDefaultMap();
+	}
+	else
+	{
+		UpdateMapDisplayNames();
+		if(m_SelectedMap > 0 && m_SelectedMap >= Index)
+		{
+			--m_SelectedMap;
+		}
+	}
+}
+
+void CEditor::InvokeSave()
+{
+	if(Map()->m_aFilename[0] != '\0' && Map()->m_ValidSaveFilename)
+	{
+		CallbackSaveMap(Map()->m_aFilename, IStorage::TYPE_SAVE, this);
+	}
+	else
+	{
+		m_FileBrowser.ShowFileDialog(IStorage::TYPE_SAVE, CFileBrowser::EFileType::MAP, "Save map", "Save", "maps", "", CallbackSaveMap, this);
+	}
 }
 
 IGraphics::CTextureHandle CEditor::GetFrontTexture()
@@ -5153,6 +5241,9 @@ void CEditor::Init()
 	});
 	m_RenderMap.Init(m_pGraphics, m_pTextRender);
 
+	Reset();
+	AddDefaultMap();
+
 	m_vComponents.emplace_back(m_MapView);
 	m_vComponents.emplace_back(m_EnvelopeEditor);
 	m_vComponents.emplace_back(m_MapSettingsBackend);
@@ -5169,17 +5260,24 @@ void CEditor::Init()
 	m_aCursorTextures[CURSOR_RESIZE_H] = Graphics()->LoadTexture("editor/cursor_resize.png", IStorage::TYPE_ALL);
 	m_aCursorTextures[CURSOR_RESIZE_V] = m_aCursorTextures[CURSOR_RESIZE_H];
 
-	m_pTilesetPicker = std::make_shared<CLayerTiles>(Map(), 16, 16);
+	// TODO: selected brush not rendered with correct images anymore, because it's in a separate map without the images now
+	// TODO: need to add the referenced images to the brush map too, then match images correctly when painting with the brush
+	m_pToolsMap = std::make_unique<CEditorMap>(this);
+
+	m_pTilesetPicker = std::make_shared<CLayerTiles>(m_pToolsMap.get(), 16, 16);
 	m_pTilesetPicker->MakePalette();
 	m_pTilesetPicker->m_Readonly = true;
 
-	m_pQuadsetPicker = std::make_shared<CLayerQuads>(Map());
+	m_pQuadsetPicker = std::make_shared<CLayerQuads>(m_pToolsMap.get());
 	m_pQuadsetPicker->NewQuad(0, 0, 64, 64);
 	m_pQuadsetPicker->m_Readonly = true;
 
-	m_pBrush = std::make_shared<CLayerGroup>(Map());
+	m_pBrush = std::make_shared<CLayerGroup>(m_pToolsMap.get());
+}
 
-	Reset(false);
+bool CEditor::HasUnsavedData() const
+{
+	return std::any_of(m_vpMaps.begin(), m_vpMaps.end(), [](const auto &pMap) { return pMap->m_Modified; });
 }
 
 void CEditor::HandleCursorMovement()
@@ -5324,33 +5422,45 @@ void CEditor::HandleAutosave()
 	m_LastAutosaveUpdateTime = Time;
 
 	if(g_Config.m_EdAutosaveInterval == 0)
-		return; // autosave disabled
-	if(!Map()->m_ModifiedAuto || Map()->m_LastModifiedTime < 0.0f)
-		return; // no unsaved changes
-
-	// Add time to autosave timer if the editor was disabled for more than 10 seconds,
-	// to prevent autosave from immediately activating when the editor is activated
-	// after being deactivated for some time.
-	if(LastAutosaveUpdateTime >= 0.0f && Time - LastAutosaveUpdateTime > 10.0f)
 	{
-		Map()->m_LastSaveTime += Time - LastAutosaveUpdateTime;
+		return; // autosave disabled
 	}
-
-	// Check if autosave timer has expired.
-	if(Map()->m_LastSaveTime >= Time || Time - Map()->m_LastSaveTime < 60 * g_Config.m_EdAutosaveInterval)
-		return;
-
-	// Wait for 5 seconds of no modification before saving, to prevent autosave
-	// from immediately activating when a map is first modified or while user is
-	// modifying the map, but don't delay the autosave for more than 1 minute.
-	if(Time - Map()->m_LastModifiedTime < 5.0f && Time - Map()->m_LastSaveTime < 60 * (g_Config.m_EdAutosaveInterval + 1))
-		return;
 
 	const auto &&ErrorHandler = [this](const char *pErrorMessage) {
 		ShowFileDialogError("%s", pErrorMessage);
 		log_error("editor/autosave", "%s", pErrorMessage);
 	};
-	Map()->PerformAutosave(ErrorHandler);
+	for(const auto &pMap : m_vpMaps)
+	{
+		if(!pMap->m_ModifiedAuto || pMap->m_LastModifiedTime < 0.0f)
+		{
+			continue; // no unsaved changes
+		}
+
+		// Add time to autosave timer if the editor was disabled for more than 10 seconds,
+		// to prevent autosave from immediately activating when the editor is activated
+		// after being deactivated for some time.
+		if(LastAutosaveUpdateTime >= 0.0f && Time - LastAutosaveUpdateTime > 10.0f)
+		{
+			pMap->m_LastSaveTime += Time - LastAutosaveUpdateTime;
+		}
+
+		// Check if autosave timer has expired.
+		if(pMap->m_LastSaveTime >= Time || Time - pMap->m_LastSaveTime < 60 * g_Config.m_EdAutosaveInterval)
+		{
+			continue;
+		}
+
+		// Wait for 5 seconds of no modification before saving, to prevent autosave
+		// from immediately activating when a map is first modified or while user is
+		// modifying the map, but don't delay the autosave for more than 1 minute.
+		if(Time - pMap->m_LastModifiedTime < 5.0f && Time - pMap->m_LastSaveTime < 60 * (g_Config.m_EdAutosaveInterval + 1))
+		{
+			continue;
+		}
+
+		pMap->PerformAutosave(ErrorHandler);
+	}
 }
 
 void CEditor::HandleWriterFinishJobs()
@@ -5370,6 +5480,19 @@ void CEditor::HandleWriterFinishJobs()
 		return;
 	}
 
+	auto MapIt = std::find_if(m_vpMaps.begin(), m_vpMaps.end(), [&](const std::unique_ptr<CEditorMap> &pMap) {
+		return str_comp(pMap->m_aFilename, pJob->RealFilename()) == 0;
+	});
+	if(MapIt != m_vpMaps.end())
+	{
+		const auto &pMap = *MapIt;
+		if(pMap->m_CloseOnSave)
+		{
+			dbg_assert(!pMap->m_Modified, "Map to be closed was modified, should be prevented in OnModify");
+			CloseMap(MapIt - m_vpMaps.begin(), false);
+		}
+	}
+
 	// send rcon.. if we can
 	if(Client()->RconAuthed() && g_Config.m_EdAutoMapReload)
 	{
@@ -5386,15 +5509,59 @@ void CEditor::HandleWriterFinishJobs()
 	}
 }
 
+void CEditor::UpdateMapDisplayNames()
+{
+	std::unordered_map<std::string, int> Occurrences;
+	for(const auto &pMap : m_vpMaps)
+	{
+		auto It = Occurrences.find(pMap->m_aFilename);
+		if(It == Occurrences.end())
+		{
+			Occurrences.emplace(pMap->m_aFilename, 1);
+		}
+		else
+		{
+			It->second++;
+		}
+	}
+	std::unordered_map<std::string, int> Counts;
+	for(const auto &pMap : m_vpMaps)
+	{
+		if(pMap->m_aFilename[0] == '\0')
+		{
+			str_copy(pMap->m_aDisplayName, "Unnamed");
+			str_copy(pMap->m_aAutosaveName, "unnamed");
+		}
+		else
+		{
+			fs_split_file_extension(fs_filename(pMap->m_aFilename), pMap->m_aDisplayName, sizeof(pMap->m_aDisplayName));
+			str_copy(pMap->m_aAutosaveName, pMap->m_aDisplayName);
+		}
+		if(Occurrences[pMap->m_aFilename] <= 1)
+		{
+			continue;
+		}
+
+		auto Count = Counts.find(pMap->m_aFilename);
+		if(Count == Counts.end())
+		{
+			Count = Counts.emplace(pMap->m_aFilename, 1).first;
+		}
+		else
+		{
+			Count->second++;
+		}
+		char aNum[16];
+		str_format(aNum, sizeof(aNum), " (%d)", Count->second);
+		str_append(pMap->m_aDisplayName, aNum);
+		str_format(aNum, sizeof(aNum), "_%02d", Count->second);
+		str_append(pMap->m_aAutosaveName, aNum);
+	}
+}
+
 void CEditor::OnUpdate()
 {
 	CUIElementBase::Init(Ui()); // update static pointer because game and editor use separate UI
-
-	if(!m_EditorWasUsedBefore)
-	{
-		m_EditorWasUsedBefore = true;
-		Reset();
-	}
 
 	m_pContainerPannedLast = m_pContainerPanned;
 
@@ -5445,8 +5612,14 @@ void CEditor::OnRender()
 	Ui()->SetMouseSlow(false);
 
 	// toggle gui
-	if(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_TAB))
+	if(m_Dialog == DIALOG_NONE &&
+		CLineInput::GetActiveInput() == nullptr &&
+		!Input()->ModifierIsPressed() &&
+		!Input()->ShiftIsPressed() &&
+		Input()->KeyPress(KEY_TAB))
+	{
 		m_GuiActive = !m_GuiActive;
+	}
 
 	if(Input()->KeyPress(KEY_F10))
 		m_ShowMousePointer = false;
@@ -5550,17 +5723,7 @@ bool CEditor::Save(const char *pFilename)
 bool CEditor::HandleMapDrop(const char *pFilename, int StorageType)
 {
 	OnDialogClose();
-	if(HasUnsavedData())
-	{
-		str_copy(m_aFilenamePendingLoad, pFilename);
-		m_PopupEventType = CEditor::POPEVENT_LOADDROP;
-		m_PopupEventActivated = true;
-		return true;
-	}
-	else
-	{
-		return Load(pFilename, IStorage::TYPE_ALL_OR_ABSOLUTE);
-	}
+	return Load(pFilename, StorageType);
 }
 
 bool CEditor::Load(const char *pFilename, int StorageType)
@@ -5571,15 +5734,32 @@ bool CEditor::Load(const char *pFilename, int StorageType)
 	};
 
 	Reset();
-	bool Result = Map()->Load(pFilename, StorageType, std::move(ErrorHandler));
+	std::unique_ptr<CEditorMap> pNewMap = std::make_unique<CEditorMap>(this);
+	const bool Result = pNewMap->Load(pFilename, StorageType, std::move(ErrorHandler));
 	if(Result)
 	{
+		m_vpMaps.push_back(std::move(pNewMap));
+		m_SelectedMap = m_vpMaps.size() - 1;
+		UpdateMapDisplayNames();
+
 		for(CEditorComponent &Component : m_vComponents)
 			Component.OnMapLoad();
 
 		log_info("editor/load", "Loaded map '%s'", Map()->m_aFilename);
 	}
 	return Result;
+}
+
+CEditorMap *CEditor::Map()
+{
+	dbg_assert(m_SelectedMap < m_vpMaps.size(), "Invalid m_SelectedMap: %" PRIzu, m_SelectedMap);
+	return m_vpMaps[m_SelectedMap].get();
+}
+
+const CEditorMap *CEditor::Map() const
+{
+	dbg_assert(m_SelectedMap < m_vpMaps.size(), "Invalid m_SelectedMap: %" PRIzu, m_SelectedMap);
+	return m_vpMaps[m_SelectedMap].get();
 }
 
 CEditorHistory &CEditor::ActiveHistory()
