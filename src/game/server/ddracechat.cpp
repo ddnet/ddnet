@@ -804,14 +804,9 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	int TargetClientId = -1;
 	if(pResult->NumArguments() == 1)
 	{
-		for(int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if(pSelf->m_apPlayers[i] && !str_comp(pName, pSelf->Server()->ClientName(i)))
-			{
-				TargetClientId = i;
-				break;
-			}
-		}
+		const CPlayer *pTmp = pSelf->GetPlayerByName(pName);
+		if(pTmp)
+			TargetClientId = pTmp->GetCid();
 	}
 	else
 	{
@@ -1175,21 +1170,13 @@ void CGameContext::ConInvite(IConsole::IResult *pResult, void *pUserData)
 	int Team = pController->Teams().m_Core.Team(pResult->m_ClientId);
 	if(Team != TEAM_FLOCK && pController->Teams().IsValidTeamNumber(Team))
 	{
-		int Target = -1;
-		for(int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if(!str_comp(pName, pSelf->Server()->ClientName(i)))
-			{
-				Target = i;
-				break;
-			}
-		}
-
-		if(Target < 0)
+		const CPlayer *pTarget = pSelf->GetPlayerByName(pName);
+		if(!pTarget)
 		{
 			log_info("chatresp", "Player not found");
 			return;
 		}
+		int Target = pTarget->GetCid();
 
 		if(pController->Teams().IsInvited(Team, Target))
 		{
@@ -1339,24 +1326,15 @@ void CGameContext::ConJoin(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientId(pResult->m_ClientId))
 		return;
 
-	int Target = -1;
 	const char *pName = pResult->GetString(0);
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if(!str_comp(pName, pSelf->Server()->ClientName(i)))
-		{
-			Target = i;
-			break;
-		}
-	}
-
-	if(Target == -1)
+	const CPlayer *pTarget = pSelf->GetPlayerByName(pName);
+	if(!pTarget)
 	{
 		log_info("chatresp", "Player not found");
 		return;
 	}
 
-	int Team = pSelf->GetDDRaceTeam(Target);
+	int Team = pSelf->GetDDRaceTeam(pTarget->GetCid());
 	if(pSelf->ProcessSpamProtection(pResult->m_ClientId, false))
 		return;
 
@@ -1546,13 +1524,11 @@ void CGameContext::ConSayTime(IConsole::IResult *pResult, void *pUserData)
 
 	if(pResult->NumArguments() > 0)
 	{
-		for(ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
-			if(str_comp(pResult->GetString(0), pSelf->Server()->ClientName(ClientId)) == 0)
-				break;
-
-		if(ClientId == MAX_CLIENTS)
+		const CPlayer *pTmp = pSelf->GetPlayerByName(pResult->GetString(0));
+		if(!pTmp)
 			return;
 
+		ClientId = pTmp->GetCid();
 		str_format(aBufName, sizeof(aBufName), "%s's", pSelf->Server()->ClientName(ClientId));
 	}
 	else
@@ -1815,23 +1791,13 @@ void CGameContext::ConTeleTo(IConsole::IResult *pResult, void *pUserData)
 	}
 	else
 	{
-		// Search for player with this name
-		int ClientId;
-		for(ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
-		{
-			if(str_comp(pResult->GetString(0), pSelf->Server()->ClientName(ClientId)) == 0)
-				break;
-		}
-		if(ClientId == MAX_CLIENTS)
+		const CPlayer *pDestPlayer = pSelf->GetPlayerByName(pResult->GetString(0));
+		if(!pDestPlayer)
 		{
 			pSelf->SendChatTarget(pCallingPlayer->GetCid(), "No player with this name found.");
 			return;
 		}
-
-		CPlayer *pDestPlayer = pSelf->m_apPlayers[ClientId];
-		if(!pDestPlayer)
-			return;
-		CCharacter *pDestCharacter = pDestPlayer->GetCharacter();
+		const CCharacter *pDestCharacter = pDestPlayer->GetCharacter();
 		if(!pDestCharacter)
 			return;
 
@@ -1954,21 +1920,13 @@ void CGameContext::ConTeleCursor(IConsole::IResult *pResult, void *pUserData)
 	}
 	else if(pResult->NumArguments() > 0)
 	{
-		int ClientId;
-		for(ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
-		{
-			if(str_comp(pResult->GetString(0), pSelf->Server()->ClientName(ClientId)) == 0)
-				break;
-		}
-		if(ClientId == MAX_CLIENTS)
+		const CPlayer *pPlayerTo = pSelf->GetPlayerByName(pResult->GetString(0));
+		if(!pPlayerTo)
 		{
 			pSelf->SendChatTarget(pPlayer->GetCid(), "No player with this name found.");
 			return;
 		}
-		CPlayer *pPlayerTo = pSelf->m_apPlayers[ClientId];
-		if(!pPlayerTo)
-			return;
-		CCharacter *pChrTo = pPlayerTo->GetCharacter();
+		const CCharacter *pChrTo = pPlayerTo->GetCharacter();
 		if(!pChrTo)
 			return;
 		Pos = pChrTo->m_Pos;

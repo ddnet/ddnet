@@ -896,17 +896,11 @@ bool CPlayer::IsPlaying() const
 
 void CPlayer::SpectatePlayerName(const char *pName)
 {
-	if(!pName)
+	const CPlayer *pPlayer = GameServer()->GetPlayerByName(pName);
+	if(!pPlayer)
 		return;
 
-	for(int i = 0; i < MAX_CLIENTS; ++i)
-	{
-		if(i != m_ClientId && Server()->ClientIngame(i) && !str_comp(pName, Server()->ClientName(i)))
-		{
-			SetSpectatorId(i);
-			return;
-		}
-	}
+	SetSpectatorId(pPlayer->GetCid());
 }
 
 void CPlayer::SetSpectatorId(int Id)
