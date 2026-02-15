@@ -39,6 +39,7 @@ public:
 	virtual IGraphics::CTextureHandle GetOverlayBottom() = 0;
 	virtual IGraphics::CTextureHandle GetOverlayTop() = 0;
 	virtual IGraphics::CTextureHandle GetOverlayCenter() = 0;
+	virtual IGraphics::CTextureHandle GetOverlayMiniCenter() = 0;
 };
 
 #endif
