@@ -415,11 +415,9 @@ jobs:
         # -G "Unix Makefiles" required due to https://gitlab.kitware.com/cmake/cmake/-/issues/16395
         emcmake cmake -H. -G "Unix Makefiles" -B build-emscripten-release -DCMAKE_BUILD_TYPE=Release -DVIDEORECORDER=OFF -DVULKAN=OFF -DSERVER=OFF -DTOOLS=OFF -DPREFER_BUNDLED_LIBS=ON
         cmake --build build-emscripten-release --target game-client -j$(nproc)
+        cmake --build build-emscripten-release --target package_default
         mkdir artifacts
-        mv build-emscripten-release/DDNet.data artifacts
-        mv build-emscripten-release/DDNet.js artifacts
-        mv build-emscripten-release/DDNet.wasm artifacts
-        cp other/emscripten/minimal.html artifacts/DDNet.html
+        mv build-emscripten-release/*-Emscripten.tar.xz artifacts
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
