@@ -9,6 +9,8 @@ void CEditorObject::OnInit(CEditor *pEditor)
 
 CEditor *CEditorObject::Editor() { return m_pEditor; }
 const CEditor *CEditorObject::Editor() const { return m_pEditor; }
+CEditorMap *CEditorObject::Map() { return m_pEditor->Map(); }
+const CEditorMap *CEditorObject::Map() const { return m_pEditor->Map(); }
 IInput *CEditorObject::Input() { return m_pEditor->Input(); }
 const IInput *CEditorObject::Input() const { return m_pEditor->Input(); }
 IClient *CEditorObject::Client() { return m_pEditor->Client(); }
