@@ -1,5 +1,6 @@
 #include "test.h"
 
+#include <base/sphore.h>
 #include <base/system.h>
 #include <base/thread.h>
 
