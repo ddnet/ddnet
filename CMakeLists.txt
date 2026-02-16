@@ -2585,6 +2585,8 @@ if(CLIENT)
     editor_ui.cpp
     editor_ui.h
     enums.h
+    envelope_editor.cpp
+    envelope_editor.h
     explanations.cpp
     explanations.h
     file_browser.cpp

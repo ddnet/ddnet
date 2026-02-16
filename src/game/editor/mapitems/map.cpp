@@ -91,6 +91,7 @@ void CEditorMap::Clean()
 	m_ShiftBy = 1;
 
 	Editor()->QuadKnife()->Deactivate();
+	m_EnvelopeEditorState.Reset(Editor());
 }
 
 void CEditorMap::CreateDefault()
