@@ -1345,7 +1345,7 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 	};
 
 	// some basic values
-	void *pId = &pQuad->m_aPoints[4]; // use pivot addr as id
+	const void *pId = &pQuad->m_aPoints[4]; // use pivot addr as id
 	static std::vector<std::vector<CPoint>> s_vvRotatePoints;
 	static int s_Operation = OP_NONE;
 	static vec2 s_MouseStart = vec2(0.0f, 0.0f);
