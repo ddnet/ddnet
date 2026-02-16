@@ -94,6 +94,7 @@ void CEditorMap::Clean()
 	m_MapGridState.Reset();
 	m_ProofModeState.Reset();
 	m_QuadKnifeState.Reset();
+	m_EnvelopeEditorState.Reset(Editor());
 }
 
 void CEditorMap::CreateDefault()
