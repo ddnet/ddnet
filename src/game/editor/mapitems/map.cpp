@@ -90,6 +90,8 @@ void CEditorMap::Clean()
 
 	m_ShiftBy = 1;
 
+	m_EnvelopeEditorState.Reset(Editor());
+
 	m_QuadKnife.m_Active = false;
 	m_QuadKnife.m_Count = 0;
 	m_QuadKnife.m_SelectedQuadIndex = -1;
