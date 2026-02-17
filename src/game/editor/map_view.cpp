@@ -27,7 +27,6 @@ void CMapView::OnInit(CEditor *pEditor)
 void CMapView::OnReset()
 {
 	m_ProofMode.OnReset();
-	m_MapGrid.OnReset();
 }
 
 void CMapView::OnMapLoad()
