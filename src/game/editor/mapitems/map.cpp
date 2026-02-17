@@ -90,6 +90,7 @@ void CEditorMap::Clean()
 
 	m_ShiftBy = 1;
 
+	m_MapViewState.Reset(Editor());
 	Editor()->QuadKnife()->Deactivate();
 	m_EnvelopeEditorState.Reset(Editor());
 }

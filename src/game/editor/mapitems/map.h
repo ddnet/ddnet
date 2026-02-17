@@ -12,6 +12,7 @@
 #include <game/editor/editor_server_settings.h>
 #include <game/editor/editor_trackers.h>
 #include <game/editor/envelope_editor.h>
+#include <game/editor/map_view.h>
 #include <game/editor/mapitems/envelope.h>
 #include <game/editor/mapitems/layer.h>
 #include <game/editor/quad_art.h>
@@ -159,6 +160,7 @@ public:
 	int m_ShiftBy;
 
 	// Component states
+	CMapView::CState m_MapViewState;
 	CQuadKnife::CState m_QuadKnifeState;
 	CEnvelopeEditor::CState m_EnvelopeEditorState;
 

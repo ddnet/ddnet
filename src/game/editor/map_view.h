@@ -13,6 +13,17 @@ class CLayerGroup;
 class CMapView : public CEditorComponent
 {
 public:
+	class CState
+	{
+	public:
+		CSmoothValue m_Zoom;
+		float m_WorldZoom;
+		vec2 m_WorldOffset;
+		vec2 m_EditorOffset;
+
+		void Reset(CEditor *pEditor);
+	};
+
 	void OnInit(CEditor *pEditor) override;
 	void OnReset() override;
 	void OnMapLoad() override;
@@ -53,14 +64,8 @@ public:
 	const CMapGrid *MapGrid() const;
 
 private:
-	CSmoothValue m_Zoom = CSmoothValue(200.0f, 10.0f, 2000.0f);
-	float m_WorldZoom;
-
 	CProofMode m_ProofMode;
 	CMapGrid m_MapGrid;
-
-	vec2 m_WorldOffset;
-	vec2 m_EditorOffset;
 };
 
 #endif
