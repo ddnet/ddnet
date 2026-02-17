@@ -16,6 +16,7 @@
 #include <game/editor/map_view.h>
 #include <game/editor/mapitems/envelope.h>
 #include <game/editor/mapitems/layer.h>
+#include <game/editor/proof_mode.h>
 
 #include <functional>
 #include <memory>
@@ -159,6 +160,7 @@ public:
 	// Component states
 	CMapView::CState m_MapViewState;
 	CMapGrid::CState m_MapGridState;
+	CProofMode::CState m_ProofModeState;
 	CEnvelopeEditor::CState m_EnvelopeEditorState;
 
 	// Quad knife
