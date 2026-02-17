@@ -1070,11 +1070,11 @@ void CGameContext::SendTuningParams(int ClientId, int Zone)
 			}
 			else
 			{
-				Msg.AddInt(pParams[i]);
+				Msg.AddInt(pParams[i]); // if everything is normal just send true tunings
 			}
 		}
 		else
-			Msg.AddInt(pParams[i]); // if everything is normal just send true tunings
+			Msg.AddInt(pParams[i]);
 	}
 	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
 }
