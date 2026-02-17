@@ -3,6 +3,10 @@
 
 #include "component.h"
 
+#include <base/vmath.h>
+
+#include <vector>
+
 class CProofMode : public CEditorComponent
 {
 public:
