@@ -256,7 +256,7 @@ void CPlayer::Tick()
 
 	m_TuneZoneOld = m_TuneZone; // determine needed tunings with viewpos
 	int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_ViewPos);
-	m_TuneZone = GameServer()->Collision()->IsTune(CurrentIndex);
+	m_TuneZone = m_pCharacter ? m_pCharacter->GetOverriddenTuneZone() : GameServer()->Collision()->IsTuneZoneTile(CurrentIndex);
 
 	if(m_TuneZone != m_TuneZoneOld) // don't send tunings all the time
 	{

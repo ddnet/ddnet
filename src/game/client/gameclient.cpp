@@ -3358,7 +3358,7 @@ void CGameClient::UpdateLocalTuning()
 			m_Snap.m_aCharacters[m_Snap.m_LocalClientId].m_HasExtendedData &&
 					m_Snap.m_aCharacters[m_Snap.m_LocalClientId].m_ExtendedData.m_TuneZoneOverride != TuneZone::OVERRIDE_NONE ?
 				m_Snap.m_aCharacters[m_Snap.m_LocalClientId].m_ExtendedData.m_TuneZoneOverride :
-				Collision()->IsTune(Collision()->GetMapIndex(LocalPos));
+				Collision()->IsTuneZoneTile(Collision()->GetMapIndex(LocalPos));
 
 		if(TuneZone != m_aLocalTuneZone[g_Config.m_ClDummy])
 		{
