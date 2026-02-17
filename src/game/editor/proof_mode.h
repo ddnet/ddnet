@@ -30,11 +30,11 @@ public:
 	void InitMenuBackgroundPositions();
 
 private:
-	enum EProofBorder
+	enum class EProofBorder
 	{
-		PROOF_BORDER_OFF,
-		PROOF_BORDER_INGAME,
-		PROOF_BORDER_MENU
+		OFF,
+		INGAME,
+		MENU,
 	};
 	EProofBorder m_ProofBorders;
 

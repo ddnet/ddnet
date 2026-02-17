@@ -14,7 +14,7 @@ void CProofMode::OnInit(CEditor *pEditor)
 
 void CProofMode::OnReset()
 {
-	m_ProofBorders = PROOF_BORDER_OFF;
+	m_ProofBorders = EProofBorder::OFF;
 	m_CurrentMenuProofIndex = 0;
 }
 
@@ -209,32 +209,32 @@ void CProofMode::RenderScreenSizes()
 
 bool CProofMode::IsEnabled() const
 {
-	return m_ProofBorders != PROOF_BORDER_OFF;
+	return m_ProofBorders != EProofBorder::OFF;
 }
 
 bool CProofMode::IsModeMenu() const
 {
-	return m_ProofBorders == PROOF_BORDER_MENU;
+	return m_ProofBorders == EProofBorder::MENU;
 }
 
 bool CProofMode::IsModeIngame() const
 {
-	return m_ProofBorders == PROOF_BORDER_INGAME;
+	return m_ProofBorders == EProofBorder::INGAME;
 }
 
 void CProofMode::Toggle()
 {
-	m_ProofBorders = m_ProofBorders == PROOF_BORDER_OFF ? PROOF_BORDER_INGAME : PROOF_BORDER_OFF;
+	m_ProofBorders = m_ProofBorders == EProofBorder::OFF ? EProofBorder::INGAME : EProofBorder::OFF;
 }
 
 void CProofMode::SetModeIngame()
 {
-	m_ProofBorders = PROOF_BORDER_INGAME;
+	m_ProofBorders = EProofBorder::INGAME;
 }
 
 void CProofMode::SetModeMenu()
 {
-	m_ProofBorders = PROOF_BORDER_MENU;
+	m_ProofBorders = EProofBorder::MENU;
 }
 
 int CProofMode::CurrentMenuProofIndex() const
