@@ -394,6 +394,7 @@ void CPlayers::RenderHookCollLine(
 	Alpha *= (float)g_Config.m_ClHookCollAlpha / 100;
 	if(Alpha <= 0.0f)
 		return;
+	ColorRGBA HookCollTipColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollTipColor, true));
 
 	Graphics()->TextureClear();
 	if(HookCollSize > 0)
@@ -424,12 +425,11 @@ void CPlayers::RenderHookCollLine(
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(HookCollColor.WithAlpha(Alpha));
 		Graphics()->QuadsDrawFreeform(vLineQuadSegments.data(), vLineQuadSegments.size());
-		if(HookTipLineSegment.has_value())
+		if(HookTipLineSegment.has_value() && HookCollTipColor.a > 0.0f)
 		{
 			vLineQuadSegments.clear();
 			ConvertLineSegments(HookTipLineSegment.value());
-			HookCollColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorTeeColl));
-			Graphics()->SetColor(HookCollColor.WithAlpha(Alpha));
+			Graphics()->SetColor(HookCollTipColor.WithMultipliedAlpha(Alpha));
 			Graphics()->QuadsDrawFreeform(vLineQuadSegments.data(), vLineQuadSegments.size());
 		}
 		Graphics()->QuadsEnd();
@@ -439,10 +439,9 @@ void CPlayers::RenderHookCollLine(
 		Graphics()->LinesBegin();
 		Graphics()->SetColor(HookCollColor.WithAlpha(Alpha));
 		Graphics()->LinesDraw(vLineSegments.data(), vLineSegments.size());
-		if(HookTipLineSegment.has_value())
+		if(HookTipLineSegment.has_value() && HookCollTipColor.a > 0.0f)
 		{
-			HookCollColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorTeeColl));
-			Graphics()->SetColor(HookCollColor.WithAlpha(Alpha));
+			Graphics()->SetColor(HookCollTipColor.WithMultipliedAlpha(Alpha));
 			Graphics()->LinesDraw(&HookTipLineSegment.value(), 1);
 		}
 		Graphics()->LinesEnd();
