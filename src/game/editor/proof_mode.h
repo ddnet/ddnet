@@ -21,7 +21,15 @@ public:
 	void Toggle();
 	void SetModeMenu();
 	void SetModeIngame();
+	int CurrentMenuProofIndex() const;
+	void SetCurrentMenuProofIndex(int MenuProofIndex);
+	const std::vector<vec2> &MenuBackgroundPositions() const;
+	vec2 CurrentMenuBackgroundPosition() const;
+	const char *MenuBackgroundPositionName(int MenuProofIndex) const;
+	const std::vector<int> &MenuBackgroundCollisions(int MenuProofIndex) const;
+	void InitMenuBackgroundPositions();
 
+private:
 	enum EProofBorder
 	{
 		PROOF_BORDER_OFF,
@@ -35,8 +43,7 @@ public:
 	std::vector<const char *> m_vpMenuBackgroundPositionNames;
 	std::vector<std::vector<int>> m_vMenuBackgroundCollisions;
 
-	void SetMenuBackgroundPositionNames();
-	void ResetMenuBackgroundPositions();
+	void InitMenuBackgroundPositionNames();
 };
 
 #endif
