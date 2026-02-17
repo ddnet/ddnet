@@ -46,7 +46,6 @@ CChat::CChat()
 {
 	m_Mode = MODE_NONE;
 
-	m_Input.SetClipboardLineCallback([this](const char *pStr) { SendChatQueued(pStr); });
 	m_Input.SetCalculateOffsetCallback([this]() { return m_IsInputCensored; });
 	m_Input.SetDisplayTextCallback([this](char *pStr, size_t NumChars) {
 		m_IsInputCensored = false;
