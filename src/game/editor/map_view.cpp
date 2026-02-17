@@ -24,11 +24,6 @@ void CMapView::OnInit(CEditor *pEditor)
 	InitSubComponents();
 }
 
-void CMapView::OnReset()
-{
-	m_ProofMode.OnReset();
-}
-
 void CMapView::OnMapLoad()
 {
 	m_ProofMode.OnMapLoad();

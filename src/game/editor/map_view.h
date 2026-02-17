@@ -25,7 +25,6 @@ public:
 	};
 
 	void OnInit(CEditor *pEditor) override;
-	void OnReset() override;
 	void OnMapLoad() override;
 
 	void ZoomMouseTarget(float ZoomFactor);

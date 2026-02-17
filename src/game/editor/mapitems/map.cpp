@@ -92,6 +92,7 @@ void CEditorMap::Clean()
 
 	m_MapViewState.Reset(Editor());
 	m_MapGridState.Reset();
+	m_ProofModeState.Reset();
 	Editor()->QuadKnife()->Deactivate();
 	m_EnvelopeEditorState.Reset(Editor());
 }

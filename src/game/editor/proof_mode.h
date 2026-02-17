@@ -10,8 +10,25 @@
 class CProofMode : public CEditorComponent
 {
 public:
+	enum class EProofBorder
+	{
+		OFF,
+		INGAME,
+		MENU,
+	};
+	class CState
+	{
+	public:
+		EProofBorder m_ProofBorders;
+		int m_CurrentMenuProofIndex;
+
+		std::vector<vec2> m_vMenuBackgroundPositions;
+		std::vector<std::vector<int>> m_vvMenuBackgroundCollisions;
+
+		void Reset();
+	};
+
 	void OnInit(CEditor *pEditor) override;
-	void OnReset() override;
 	void OnMapLoad() override;
 	void RenderScreenSizes();
 
@@ -30,18 +47,7 @@ public:
 	void InitMenuBackgroundPositions();
 
 private:
-	enum class EProofBorder
-	{
-		OFF,
-		INGAME,
-		MENU,
-	};
-	EProofBorder m_ProofBorders;
-
-	int m_CurrentMenuProofIndex;
-	std::vector<vec2> m_vMenuBackgroundPositions;
 	std::vector<const char *> m_vpMenuBackgroundPositionNames;
-	std::vector<std::vector<int>> m_vvMenuBackgroundCollisions;
 
 	void InitMenuBackgroundPositionNames();
 };
