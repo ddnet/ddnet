@@ -77,14 +77,14 @@ void CProofMode::InitMenuBackgroundPositions()
 		}
 	}
 
-	m_vMenuBackgroundCollisions.clear();
-	m_vMenuBackgroundCollisions.resize(m_vMenuBackgroundPositions.size());
+	m_vvMenuBackgroundCollisions.clear();
+	m_vvMenuBackgroundCollisions.resize(m_vMenuBackgroundPositions.size());
 	for(size_t i = 0; i < m_vMenuBackgroundPositions.size(); i++)
 	{
 		for(size_t j = i + 1; j < m_vMenuBackgroundPositions.size(); j++)
 		{
 			if(i != j && distance(m_vMenuBackgroundPositions[i], m_vMenuBackgroundPositions[j]) < 0.001f)
-				m_vMenuBackgroundCollisions.at(i).push_back(j);
+				m_vvMenuBackgroundCollisions.at(i).push_back(j);
 		}
 	}
 }
@@ -264,5 +264,5 @@ const char *CProofMode::MenuBackgroundPositionName(int MenuProofIndex) const
 
 const std::vector<int> &CProofMode::MenuBackgroundCollisions(int MenuProofIndex) const
 {
-	return m_vMenuBackgroundCollisions[MenuProofIndex];
+	return m_vvMenuBackgroundCollisions[MenuProofIndex];
 }

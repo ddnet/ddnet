@@ -41,7 +41,7 @@ private:
 	int m_CurrentMenuProofIndex;
 	std::vector<vec2> m_vMenuBackgroundPositions;
 	std::vector<const char *> m_vpMenuBackgroundPositionNames;
-	std::vector<std::vector<int>> m_vMenuBackgroundCollisions;
+	std::vector<std::vector<int>> m_vvMenuBackgroundCollisions;
 
 	void InitMenuBackgroundPositionNames();
 };
