@@ -1032,38 +1032,39 @@ void CGameContext::SendTuningParams(int ClientId, int Zone)
 
 	CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
 	int *pParams = (int *)&(m_aTuningList[Zone]);
+	CPlayer *pPlayer = m_apPlayers[ClientId];
 
 	for(int i = 0; i < CTuningParams::Num(); i++)
 	{
-		if(m_apPlayers[ClientId] && m_apPlayers[ClientId]->GetCharacter())
+		if(pPlayer && pPlayer->GetCharacter())
 		{
-			if((i == 30) // laser_damage is removed from 0.7
+			if((i == TUNE_OFFSET(m_LaserDamage)) // laser_damage is removed from 0.7
 				&& (Server()->IsSixup(ClientId)))
 			{
 				continue;
 			}
-			else if((i == 31) // collision
-				&& (m_apPlayers[ClientId]->GetCharacter()->NeededFaketuning() & FAKETUNE_SOLO || m_apPlayers[ClientId]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOCOLL))
+			else if((i == TUNE_OFFSET(m_PlayerCollision)) &&
+				(pPlayer->GetCharacter()->NeededFaketuning() & FAKETUNE_SOLO || pPlayer->GetCharacter()->NeededFaketuning() & FAKETUNE_NOCOLL))
 			{
 				Msg.AddInt(0);
 			}
-			else if((i == 32) // hooking
-				&& (m_apPlayers[ClientId]->GetCharacter()->NeededFaketuning() & FAKETUNE_SOLO || m_apPlayers[ClientId]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOHOOK))
+			else if((i == TUNE_OFFSET(m_PlayerHooking)) &&
+				(pPlayer->GetCharacter()->NeededFaketuning() & FAKETUNE_SOLO || pPlayer->GetCharacter()->NeededFaketuning() & FAKETUNE_NOHOOK))
 			{
 				Msg.AddInt(0);
 			}
-			else if((i == 3) // ground jump impulse
-				&& m_apPlayers[ClientId]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOJUMP)
+			else if((i == TUNE_OFFSET(m_GroundJumpImpulse)) &&
+				pPlayer->GetCharacter()->NeededFaketuning() & FAKETUNE_NOJUMP)
 			{
 				Msg.AddInt(0);
 			}
-			else if((i == 33) // jetpack
-				&& m_apPlayers[ClientId]->GetCharacter()->NeededFaketuning() & FAKETUNE_JETPACK)
+			else if((i == TUNE_OFFSET(m_JetpackStrength)) &&
+				pPlayer->GetCharacter()->NeededFaketuning() & FAKETUNE_JETPACK)
 			{
 				Msg.AddInt(0);
 			}
-			else if((i == 36) // hammer hit
-				&& m_apPlayers[ClientId]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOHAMMER)
+			else if((i == TUNE_OFFSET(m_HammerStrength)) &&
+				pPlayer->GetCharacter()->NeededFaketuning() & FAKETUNE_NOHAMMER)
 			{
 				Msg.AddInt(0);
 			}
