@@ -820,9 +820,7 @@ void CPlayers::RenderPlayer(
 	}
 
 	// render the "shadow" tee
-	bool Show = (Local && g_Config.m_ClUnpredictedShadow == 1) || (!Local && g_Config.m_ClUnpredictedShadow == 2) || g_Config.m_ClUnpredictedShadow == 3;
-	bool ShowDebug = Local && g_Config.m_Debug && g_Config.m_ClUnpredictedShadow != -1;
-	if(Show || ShowDebug)
+	if(g_Config.m_ClUnpredictedShadow == 3 || (Local && g_Config.m_ClUnpredictedShadow == 1) || (!Local && g_Config.m_ClUnpredictedShadow == 2))
 	{
 		vec2 ShadowPosition = Position;
 		if(ClientId >= 0)
