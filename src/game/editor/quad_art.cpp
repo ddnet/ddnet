@@ -168,32 +168,31 @@ bool CQuadArt::Create(std::shared_ptr<CLayerQuads> &pQuadLayer)
 	return true;
 }
 
-void CEditor::AddQuadArt(bool IgnoreHistory)
+void CEditorMap::AddQuadArt(CImageInfo &&Image, const CQuadArtParameters &Parameters, bool IgnoreHistory)
 {
 	char aQuadArtName[IO_MAX_PATH_LENGTH];
-	IStorage::StripPathAndExtension(m_QuadArtParameters.m_aFilename, aQuadArtName, sizeof(aQuadArtName));
+	IStorage::StripPathAndExtension(Parameters.m_aFilename, aQuadArtName, sizeof(aQuadArtName));
 
-	std::shared_ptr<CLayerGroup> pGroup = Map()->NewGroup();
+	std::shared_ptr<CLayerGroup> pGroup = NewGroup();
 	str_copy(pGroup->m_aName, aQuadArtName);
 	pGroup->m_UseClipping = true;
 	pGroup->m_ClipX = -1;
 	pGroup->m_ClipY = -1;
-	pGroup->m_ClipH = std::ceil(m_QuadArtImageInfo.m_Height * 1.f * m_QuadArtParameters.m_QuadPixelSize / m_QuadArtParameters.m_ImagePixelSize) + 2;
-	pGroup->m_ClipW = std::ceil(m_QuadArtImageInfo.m_Width * 1.f * m_QuadArtParameters.m_QuadPixelSize / m_QuadArtParameters.m_ImagePixelSize) + 2;
+	pGroup->m_ClipH = std::ceil(Image.m_Height * 1.f * Parameters.m_QuadPixelSize / Parameters.m_ImagePixelSize) + 2;
+	pGroup->m_ClipW = std::ceil(Image.m_Width * 1.f * Parameters.m_QuadPixelSize / Parameters.m_ImagePixelSize) + 2;
 
-	std::shared_ptr<CLayerQuads> pLayer = std::make_shared<CLayerQuads>(Map());
+	std::shared_ptr<CLayerQuads> pLayer = std::make_shared<CLayerQuads>(this);
 	str_copy(pLayer->m_aName, aQuadArtName);
 	pGroup->AddLayer(pLayer);
 	pLayer->m_Flags |= LAYERFLAG_DETAIL;
 
-	CQuadArt QuadArt(m_QuadArtParameters, std::move(m_QuadArtImageInfo));
+	CQuadArt QuadArt(Parameters, std::move(Image));
 	QuadArt.Create(pLayer);
 
 	if(!IgnoreHistory)
-		Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionQuadArt>(Map(), m_QuadArtParameters));
+		m_EditorHistory.RecordAction(std::make_shared<CEditorActionQuadArt>(this, Parameters));
 
-	Map()->OnModify();
-	OnDialogClose();
+	OnModify();
 }
 
 bool CEditor::CallbackAddQuadArt(const char *pFilepath, int StorageType, void *pUser)

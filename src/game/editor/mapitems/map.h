@@ -13,6 +13,7 @@
 #include <game/editor/editor_trackers.h>
 #include <game/editor/mapitems/envelope.h>
 #include <game/editor/mapitems/layer.h>
+#include <game/editor/quad_art.h>
 
 #include <functional>
 #include <memory>
@@ -265,6 +266,10 @@ public:
 	CSoundSource *SelectedSoundSource() const;
 
 	void PlaceBorderTiles();
+
+	void AddTileArt(CImageInfo &&Image, const char *pFilename, bool IgnoreHistory);
+
+	void AddQuadArt(CImageInfo &&Image, const CQuadArtParameters &Parameters, bool IgnoreHistory);
 
 private:
 	CEditor *m_pEditor;

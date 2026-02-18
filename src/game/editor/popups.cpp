@@ -2200,11 +2200,13 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_TILE_ART_MANY_COLORS)
 		{
-			pEditor->AddTileArt();
+			pEditor->Map()->AddTileArt(std::move(pEditor->m_TileArtImageInfo), pEditor->m_aTileArtFilename, false);
+			pEditor->OnDialogClose();
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_QUAD_ART_BIG_IMAGE)
 		{
-			pEditor->AddQuadArt();
+			pEditor->Map()->AddQuadArt(std::move(pEditor->m_QuadArtImageInfo), pEditor->m_QuadArtParameters, false);
+			pEditor->OnDialogClose();
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_REMOVE_USED_IMAGE)
 		{
@@ -3193,7 +3195,8 @@ CUi::EPopupMenuFunctionResult CEditor::PopupQuadArt(void *pContext, CUIRect View
 		}
 		else
 		{
-			pEditor->AddQuadArt();
+			pEditor->Map()->AddQuadArt(std::move(pEditor->m_QuadArtImageInfo), pEditor->m_QuadArtParameters, false);
+			pEditor->OnDialogClose();
 		}
 		return CUi::POPUP_CLOSE_CURRENT;
 	}

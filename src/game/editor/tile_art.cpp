@@ -138,36 +138,35 @@ static void SetTilelayerIndices(const std::shared_ptr<CLayerTiles> &pLayer, cons
 	}
 }
 
-void CEditor::AddTileArt(bool IgnoreHistory)
+void CEditorMap::AddTileArt(CImageInfo &&Image, const char *pFilename, bool IgnoreHistory)
 {
 	char aTileArtFilename[IO_MAX_PATH_LENGTH];
-	IStorage::StripPathAndExtension(m_aTileArtFilename, aTileArtFilename, sizeof(aTileArtFilename));
+	IStorage::StripPathAndExtension(pFilename, aTileArtFilename, sizeof(aTileArtFilename));
 
-	std::shared_ptr<CLayerGroup> pGroup = Map()->NewGroup();
+	std::shared_ptr<CLayerGroup> pGroup = NewGroup();
 	str_copy(pGroup->m_aName, aTileArtFilename);
 
-	int ImageCount = Map()->m_vpImages.size();
+	int ImageCount = m_vpImages.size();
 
-	auto vUniqueColors = GetUniqueColors(m_TileArtImageInfo);
+	auto vUniqueColors = GetUniqueColors(Image);
 	auto vaColorGroups = GroupColors(vUniqueColors);
 	auto vColorImages = ColorGroupsToImages(vaColorGroups);
 	char aImageName[IO_MAX_PATH_LENGTH];
 	for(size_t i = 0; i < vColorImages.size(); i++)
 	{
 		str_format(aImageName, sizeof(aImageName), "%s %" PRIzu, aTileArtFilename, i + 1);
-		std::shared_ptr<CLayerTiles> pLayer = AddLayerWithImage(Map(), pGroup, m_TileArtImageInfo.m_Width, m_TileArtImageInfo.m_Height, vColorImages[i], aImageName);
-		SetTilelayerIndices(pLayer, vaColorGroups[i], m_TileArtImageInfo);
+		std::shared_ptr<CLayerTiles> pLayer = AddLayerWithImage(this, pGroup, Image.m_Width, Image.m_Height, vColorImages[i], aImageName);
+		SetTilelayerIndices(pLayer, vaColorGroups[i], Image);
 	}
-	auto IndexMap = Map()->SortImages();
+	auto IndexMap = SortImages();
 
 	if(!IgnoreHistory)
 	{
-		Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileArt>(Map(), ImageCount, m_aTileArtFilename, IndexMap));
+		m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileArt>(this, ImageCount, pFilename, IndexMap));
 	}
 
-	m_TileArtImageInfo.Free();
-	Map()->OnModify();
-	OnDialogClose();
+	Image.Free();
+	OnModify();
 }
 
 void CEditor::TileArtCheckColors()
@@ -186,7 +185,10 @@ void CEditor::TileArtCheckColors()
 		m_PopupEventActivated = true;
 	}
 	else
-		AddTileArt();
+	{
+		Map()->AddTileArt(std::move(m_TileArtImageInfo), m_aTileArtFilename, false);
+		OnDialogClose();
+	}
 }
 
 bool CEditor::CallbackAddTileArt(const char *pFilepath, int StorageType, void *pUser)
