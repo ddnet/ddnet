@@ -1,6 +1,18 @@
-#include <base/str.h>
-#include <base/system.h>
+/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
+/* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include "str.h"
+
+#include "dbg.h"
+#include "detect.h"
+#include "math.h"
+#include "mem.h"
+
+#include <cctype>
+#include <charconv> // std::to_chars
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
 
 int str_copy(char *dst, const char *src, int dst_size)
@@ -41,6 +53,41 @@ int str_length(const char *str)
 {
 	return (int)strlen(str);
 }
+
+int str_format_v(char *buffer, int buffer_size, const char *format, va_list args)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	_vsprintf_p(buffer, buffer_size, format, args);
+	buffer[buffer_size - 1] = 0; /* assure null termination */
+#else
+	vsnprintf(buffer, buffer_size, format, args);
+	/* null termination is assured by definition of vsnprintf */
+#endif
+	return str_utf8_fix_truncation(buffer);
+}
+
+#if !defined(CONF_DEBUG)
+int str_format_int(char *buffer, size_t buffer_size, int value)
+{
+	buffer[0] = '\0'; // Fix false positive clang-analyzer-core.UndefinedBinaryOperatorResult when using result
+	auto result = std::to_chars(buffer, buffer + buffer_size - 1, value);
+	result.ptr[0] = '\0';
+	return result.ptr - buffer;
+}
+#endif
+
+#undef str_format
+int str_format(char *buffer, int buffer_size, const char *format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	int length = str_format_v(buffer, buffer_size, format, args);
+	va_end(args);
+	return length;
+}
+#if !defined(CONF_DEBUG)
+#define str_format str_format_opt
+#endif
 
 char str_uppercase(char c)
 {
@@ -1249,4 +1296,80 @@ size_t str_utf8_offset_chars_to_bytes(const char *str, size_t char_offset)
 			break;
 	}
 	return byte_offset;
+}
+
+int str_utf8_dist(const char *a, const char *b)
+{
+	int buf_len = 2 * (str_length(a) + 1 + str_length(b) + 1);
+	int *buf = (int *)calloc(buf_len, sizeof(*buf));
+	int result = str_utf8_dist_buffer(a, b, buf, buf_len);
+	free(buf);
+	return result;
+}
+
+static int str_to_utf32_unchecked(const char *str, int **out)
+{
+	int out_len = 0;
+	while((**out = str_utf8_decode(&str)))
+	{
+		(*out)++;
+		out_len++;
+	}
+	return out_len;
+}
+
+int str_utf8_dist_buffer(const char *a_utf8, const char *b_utf8, int *buf, int buf_len)
+{
+	int a_utf8_len = str_length(a_utf8);
+	int b_utf8_len = str_length(b_utf8);
+	int *a, *b; // UTF-32
+	int a_len, b_len; // UTF-32 length
+	dbg_assert(buf_len >= 2 * (a_utf8_len + 1 + b_utf8_len + 1), "buffer too small");
+	if(a_utf8_len > b_utf8_len)
+	{
+		const char *tmp2 = a_utf8;
+		a_utf8 = b_utf8;
+		b_utf8 = tmp2;
+	}
+	a = buf;
+	a_len = str_to_utf32_unchecked(a_utf8, &buf);
+	b = buf;
+	b_len = str_to_utf32_unchecked(b_utf8, &buf);
+	return str_utf32_dist_buffer(a, a_len, b, b_len, buf, buf_len - b_len - a_len);
+}
+
+int str_utf32_dist_buffer(const int *a, int a_len, const int *b, int b_len, int *buf, int buf_len)
+{
+	int i, j;
+	dbg_assert(buf_len >= (a_len + 1) + (b_len + 1), "buffer too small");
+	if(a_len > b_len)
+	{
+		int tmp1 = a_len;
+		const int *tmp2 = a;
+
+		a_len = b_len;
+		a = b;
+
+		b_len = tmp1;
+		b = tmp2;
+	}
+#define B(i, j) buf[((j) & 1) * (a_len + 1) + (i)]
+	for(i = 0; i <= a_len; i++)
+	{
+		B(i, 0) = i;
+	}
+	for(j = 1; j <= b_len; j++)
+	{
+		B(0, j) = j;
+		for(i = 1; i <= a_len; i++)
+		{
+			int subst = (a[i - 1] != b[j - 1]);
+			B(i, j) = minimum(
+				B(i - 1, j) + 1,
+				B(i, j - 1) + 1,
+				B(i - 1, j - 1) + subst);
+		}
+	}
+	return B(a_len, b_len);
+#undef B
 }

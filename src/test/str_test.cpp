@@ -1,4 +1,5 @@
-#include <base/system.h>
+#include <base/mem.h>
+#include <base/str.h>
 #include <base/windows.h>
 
 #include <engine/server/server.h>

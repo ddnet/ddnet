@@ -4,7 +4,8 @@
 #include "time.h"
 
 #include "dbg.h"
-#include "system.h" // TODO: replace with str.h after moving str_format
+#include "detect.h"
+#include "str.h"
 
 #include <cmath>
 #include <iomanip> // std::get_time

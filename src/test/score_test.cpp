@@ -1,5 +1,5 @@
 #include <base/detect.h>
-#include <base/system.h> // TODO: replace with str.h after moving str_format
+#include <base/str.h>
 #include <base/time.h>
 
 #include <engine/server/databases/connection.h>

@@ -1,9 +1,11 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include <base/dbg.h>
 #include <base/fs.h>
 #include <base/log.h>
-#include <base/system.h>
+#include <base/secure.h>
+#include <base/str.h>
 #include <base/types.h>
 #include <base/windows.h>
 
@@ -15,6 +17,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <cctype> // tolower
+#include <cstdio> // rename
+#include <cstdlib> // getenv
 #elif defined(CONF_FAMILY_WINDOWS)
 #include <io.h>
 #include <shlobj.h> // SHGetKnownFolderPath
