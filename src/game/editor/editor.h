@@ -10,7 +10,7 @@
 #include "font_typer.h"
 #include "layer_selector.h"
 #include "map_view.h"
-#include "quadart.h"
+#include "quad_art.h"
 #include "smooth_value.h"
 
 #include <base/bezier.h>
