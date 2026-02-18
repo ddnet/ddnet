@@ -2426,9 +2426,11 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		auto DoHookCollision = [this](const vec2 &Pos, const float &Length, const int &Size, const ColorRGBA &Color, const ColorRGBA &TipColor, const bool &Invert) {
 			ColorRGBA ColorModified = Color;
+			ColorRGBA TipColorModified = TipColor;
 			if(Invert)
 				ColorModified = color_invert(ColorModified);
 			ColorModified = ColorModified.WithAlpha((float)g_Config.m_ClHookCollAlpha / 100);
+			TipColorModified = TipColor.WithMultipliedAlpha((float)g_Config.m_ClHookCollAlpha / 100);
 			Graphics()->TextureClear();
 			if(Size > 0)
 			{
@@ -2439,7 +2441,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 				Graphics()->QuadsDrawTL(&QuadItem, 1);
 				if(TipColor.a > 0.0f)
 				{
-					Graphics()->SetColor(TipColor);
+					Graphics()->SetColor(TipColorModified);
 					IGraphics::CQuadItem TipQuadItem(Pos.x + Length, Pos.y - LineWidth, 15.f, LineWidth * 2.f);
 					Graphics()->QuadsDrawTL(&TipQuadItem, 1);
 				}
@@ -2453,7 +2455,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 				Graphics()->LinesDraw(&LineItem, 1);
 				if(TipColor.a > 0.0f)
 				{
-					Graphics()->SetColor(TipColor);
+					Graphics()->SetColor(TipColorModified);
 					IGraphics::CLineItem TipLineItem(Pos.x + Length, Pos.y, Pos.x + Length + 15.f, Pos.y);
 					Graphics()->LinesDraw(&TipLineItem, 1);
 				}
