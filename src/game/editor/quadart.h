@@ -1,5 +1,5 @@
-#ifndef GAME_EDITOR_QUADART_H
-#define GAME_EDITOR_QUADART_H
+#ifndef GAME_EDITOR_QUAD_ART_H
+#define GAME_EDITOR_QUAD_ART_H
 
 #include <base/types.h>
 

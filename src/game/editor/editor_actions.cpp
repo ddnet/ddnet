@@ -1314,14 +1314,14 @@ void CEditorActionTileArt::Undo()
 
 void CEditorActionTileArt::Redo()
 {
-	if(!Graphics()->LoadPng(Editor()->m_TileartImageInfo, m_aTileArtFile, IStorage::TYPE_ALL))
+	if(!Graphics()->LoadPng(Editor()->m_TileArtImageInfo, m_aTileArtFile, IStorage::TYPE_ALL))
 	{
 		Editor()->ShowFileDialogError("Failed to load image from file '%s'.", m_aTileArtFile);
 		return;
 	}
 
-	IStorage::StripPathAndExtension(m_aTileArtFile, Editor()->m_aTileartFilename, sizeof(Editor()->m_aTileartFilename));
-	Editor()->AddTileart(true);
+	IStorage::StripPathAndExtension(m_aTileArtFile, Editor()->m_aTileArtFilename, sizeof(Editor()->m_aTileArtFilename));
+	Editor()->AddTileArt(true);
 }
 
 // ---------------------------
@@ -1329,7 +1329,7 @@ void CEditorActionTileArt::Redo()
 CEditorActionQuadArt::CEditorActionQuadArt(CEditorMap *pMap, CQuadArtParameters Parameters) :
 	IEditorAction(pMap), m_Parameters(Parameters)
 {
-	str_copy(m_aDisplayText, "Create Quadart");
+	str_copy(m_aDisplayText, "Create quad art");
 }
 
 void CEditorActionQuadArt::Undo()
