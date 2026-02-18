@@ -1030,50 +1030,55 @@ void CGameContext::SendTuningParams(int ClientId, int Zone)
 
 	CheckPureTuning();
 
-	CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
-	int *pParams = (int *)&(m_aTuningList[Zone]);
+	dbg_assert(0 <= ClientId && ClientId < MAX_CLIENTS, "Invalid ClientId: %d", ClientId);
+	dbg_assert(m_apPlayers[ClientId], "client %d without player", ClientId);
 
+	CTuningParams Params = m_aTuningList[Zone];
+
+	CCharacter *pCharacter = m_apPlayers[ClientId]->GetCharacter();
+	int NeededFakeTuning = pCharacter ? pCharacter->NeededFaketuning() : 0;
+
+	if(NeededFakeTuning & FAKETUNE_SOLO)
+	{
+		Params.m_PlayerCollision = 0;
+		Params.m_PlayerHooking = 0;
+	}
+
+	if(NeededFakeTuning & FAKETUNE_NOCOLL)
+	{
+		Params.m_PlayerCollision = 0;
+	}
+
+	if(NeededFakeTuning & FAKETUNE_NOHOOK)
+	{
+		Params.m_PlayerHooking = 0;
+	}
+
+	if(NeededFakeTuning & FAKETUNE_NOJUMP)
+	{
+		Params.m_GroundJumpImpulse = 0;
+	}
+
+	if(NeededFakeTuning & FAKETUNE_JETPACK)
+	{
+		Params.m_JetpackStrength = 0;
+	}
+
+	if(NeededFakeTuning & FAKETUNE_NOHAMMER)
+	{
+		Params.m_HammerStrength = 0;
+	}
+
+	CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
+	const int *pParams = Params.NetworkArray();
 	for(int i = 0; i < CTuningParams::Num(); i++)
 	{
-		if(m_apPlayers[ClientId] && m_apPlayers[ClientId]->GetCharacter())
+		static_assert(offsetof(CTuningParams, m_LaserDamage) / sizeof(CTuneParam) == 30);
+		if(i == 30 && Server()->IsSixup(ClientId)) // laser_damage was removed in 0.7
 		{
-			if((i == 30) // laser_damage is removed from 0.7
-				&& (Server()->IsSixup(ClientId)))
-			{
-				continue;
-			}
-			else if((i == 31) // collision
-				&& (m_apPlayers[ClientId]->GetCharacter()->NeededFaketuning() & FAKETUNE_SOLO || m_apPlayers[ClientId]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOCOLL))
-			{
-				Msg.AddInt(0);
-			}
-			else if((i == 32) // hooking
-				&& (m_apPlayers[ClientId]->GetCharacter()->NeededFaketuning() & FAKETUNE_SOLO || m_apPlayers[ClientId]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOHOOK))
-			{
-				Msg.AddInt(0);
-			}
-			else if((i == 3) // ground jump impulse
-				&& m_apPlayers[ClientId]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOJUMP)
-			{
-				Msg.AddInt(0);
-			}
-			else if((i == 33) // jetpack
-				&& m_apPlayers[ClientId]->GetCharacter()->NeededFaketuning() & FAKETUNE_JETPACK)
-			{
-				Msg.AddInt(0);
-			}
-			else if((i == 36) // hammer hit
-				&& m_apPlayers[ClientId]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOHAMMER)
-			{
-				Msg.AddInt(0);
-			}
-			else
-			{
-				Msg.AddInt(pParams[i]);
-			}
+			continue;
 		}
-		else
-			Msg.AddInt(pParams[i]); // if everything is normal just send true tunings
+		Msg.AddInt(pParams[i]);
 	}
 	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
 }

@@ -59,6 +59,8 @@ public:
 	{
 		return sizeof(CTuningParams) / sizeof(int);
 	}
+	int *NetworkArray() { return (int *)this; }
+	const int *NetworkArray() const { return (const int *)this; }
 	bool Set(int Index, float Value);
 	bool Set(const char *pName, float Value);
 	bool Get(int Index, float *pValue) const;
