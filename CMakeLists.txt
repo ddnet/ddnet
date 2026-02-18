@@ -2581,8 +2581,8 @@ if(CLIENT)
     prompt.h
     proof_mode.cpp
     proof_mode.h
-    quadart.cpp
-    quadart.h
+    quad_art.cpp
+    quad_art.h
     quick_action.h
     quick_actions.cpp
     quick_actions.h
@@ -2590,7 +2590,7 @@ if(CLIENT)
     references.h
     smooth_value.cpp
     smooth_value.h
-    tileart.cpp
+    tile_art.cpp
   )
   set_src(GAME_MAP GLOB_RECURSE src/game/map
     envelope_extrema.cpp

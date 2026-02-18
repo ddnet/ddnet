@@ -198,21 +198,21 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuTools(void *pContext, CUIRect Vi
 		pEditor->Ui()->DoPopupMenu(&s_PopupGotoId, Slot.x, Slot.y + Slot.h, 120, 52, pEditor, PopupGoto);
 	}
 
-	static int s_TileartButton = 0;
+	static int s_TileArtButton = 0;
 	View.HSplitTop(2.0f, nullptr, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_TileartButton, "Add tileart", 0, &Slot, BUTTONFLAG_LEFT, "Generate tileart from image."))
+	if(pEditor->DoButton_MenuItem(&s_TileArtButton, "Add tile art", 0, &Slot, BUTTONFLAG_LEFT, "Generate tile art from image."))
 	{
-		pEditor->m_FileBrowser.ShowFileDialog(IStorage::TYPE_ALL, CFileBrowser::EFileType::IMAGE, "Add tileart", "Open", "mapres", "", CallbackAddTileart, pEditor);
+		pEditor->m_FileBrowser.ShowFileDialog(IStorage::TYPE_ALL, CFileBrowser::EFileType::IMAGE, "Add tile art", "Open", "mapres", "", CallbackAddTileArt, pEditor);
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
 
 	static int s_QuadArtButton = 0;
 	View.HSplitTop(2.0f, nullptr, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_QuadArtButton, "Add quadart", 0, &Slot, BUTTONFLAG_LEFT, "Generate quadart from image."))
+	if(pEditor->DoButton_MenuItem(&s_QuadArtButton, "Add quad art", 0, &Slot, BUTTONFLAG_LEFT, "Generate quad art from image."))
 	{
-		pEditor->m_FileBrowser.ShowFileDialog(IStorage::TYPE_ALL, CFileBrowser::EFileType::IMAGE, "Add quadart", "Open", "mapres", "", CallbackAddQuadArt, pEditor);
+		pEditor->m_FileBrowser.ShowFileDialog(IStorage::TYPE_ALL, CFileBrowser::EFileType::IMAGE, "Add quad art", "Open", "mapres", "", CallbackAddQuadArt, pEditor);
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
 
@@ -2067,22 +2067,22 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		pTitle = "Place border tiles";
 		pMessage = "This is going to overwrite any existing tiles around the edges of the layer.\n\nContinue?";
 	}
-	else if(pEditor->m_PopupEventType == POPEVENT_TILEART_BIG_IMAGE)
+	else if(pEditor->m_PopupEventType == POPEVENT_TILE_ART_BIG_IMAGE)
 	{
 		pTitle = "Big image";
-		pMessage = "The selected image is big. Converting it to tileart may take some time.\n\nContinue anyway?";
+		pMessage = "The selected image is big. Converting it to tile art may take some time.\n\nContinue anyway?";
 	}
-	else if(pEditor->m_PopupEventType == POPEVENT_TILEART_MANY_COLORS)
+	else if(pEditor->m_PopupEventType == POPEVENT_TILE_ART_MANY_COLORS)
 	{
 		pTitle = "Many colors";
 		pMessage = "The selected image contains many colors, which will lead to a big mapfile. You may want to consider reducing the number of colors.\n\nContinue anyway?";
 	}
-	else if(pEditor->m_PopupEventType == POPEVENT_TILEART_TOO_MANY_COLORS)
+	else if(pEditor->m_PopupEventType == POPEVENT_TILE_ART_TOO_MANY_COLORS)
 	{
 		pTitle = "Too many colors";
-		pMessage = "The client only supports 64 images but more would be needed to add the selected image as tileart.";
+		pMessage = "The client only supports 64 images but more would be needed to add the selected image as tile art.";
 	}
-	else if(pEditor->m_PopupEventType == POPEVENT_QUADART_BIG_IMAGE)
+	else if(pEditor->m_PopupEventType == POPEVENT_QUAD_ART_BIG_IMAGE)
 	{
 		pTitle = "Big image";
 		pMessage = "The selected image is really big. Expect performance issues!\n\nContinue anyway?";
@@ -2140,7 +2140,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		pEditor->m_PopupEventType != POPEVENT_IMAGEDIV16 &&
 		pEditor->m_PopupEventType != POPEVENT_IMAGE_MAX &&
 		pEditor->m_PopupEventType != POPEVENT_SOUND_MAX &&
-		pEditor->m_PopupEventType != POPEVENT_TILEART_TOO_MANY_COLORS)
+		pEditor->m_PopupEventType != POPEVENT_TILE_ART_TOO_MANY_COLORS)
 	{
 		static int s_CancelButton = 0;
 		if(pEditor->DoButton_Editor(&s_CancelButton, "Cancel", 0, &Button, BUTTONFLAG_LEFT, nullptr))
@@ -2148,10 +2148,10 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 			if(pEditor->m_PopupEventType == POPEVENT_LOADDROP)
 				pEditor->m_aFilenamePendingLoad[0] = 0;
 
-			else if(pEditor->m_PopupEventType == POPEVENT_TILEART_BIG_IMAGE || pEditor->m_PopupEventType == POPEVENT_TILEART_MANY_COLORS)
-				pEditor->m_TileartImageInfo.Free();
+			else if(pEditor->m_PopupEventType == POPEVENT_TILE_ART_BIG_IMAGE || pEditor->m_PopupEventType == POPEVENT_TILE_ART_MANY_COLORS)
+				pEditor->m_TileArtImageInfo.Free();
 
-			else if(pEditor->m_PopupEventType == POPEVENT_QUADART_BIG_IMAGE)
+			else if(pEditor->m_PopupEventType == POPEVENT_QUAD_ART_BIG_IMAGE)
 				pEditor->m_QuadArtImageInfo.Free();
 
 			pEditor->m_PopupEventWasActivated = false;
@@ -2194,15 +2194,15 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		{
 			pEditor->Map()->PlaceBorderTiles();
 		}
-		else if(pEditor->m_PopupEventType == POPEVENT_TILEART_BIG_IMAGE)
+		else if(pEditor->m_PopupEventType == POPEVENT_TILE_ART_BIG_IMAGE)
 		{
-			pEditor->TileartCheckColors();
+			pEditor->TileArtCheckColors();
 		}
-		else if(pEditor->m_PopupEventType == POPEVENT_TILEART_MANY_COLORS)
+		else if(pEditor->m_PopupEventType == POPEVENT_TILE_ART_MANY_COLORS)
 		{
-			pEditor->AddTileart();
+			pEditor->AddTileArt();
 		}
-		else if(pEditor->m_PopupEventType == POPEVENT_QUADART_BIG_IMAGE)
+		else if(pEditor->m_PopupEventType == POPEVENT_QUAD_ART_BIG_IMAGE)
 		{
 			pEditor->AddQuadArt();
 		}
@@ -3144,7 +3144,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupQuadArt(void *pContext, CUIRect View
 	// Title
 	CUIRect Label;
 	View.HSplitTop(20.0f, &Label, &View);
-	pEditor->Ui()->DoLabel(&Label, "Configure Quadart", 20.0f, TEXTALIGN_MC);
+	pEditor->Ui()->DoLabel(&Label, "Configure quad art", 20.0f, TEXTALIGN_MC);
 	View.HSplitTop(10.0f, nullptr, &View);
 
 	// Properties
@@ -3188,7 +3188,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupQuadArt(void *pContext, CUIRect View
 					   (pEditor->m_QuadArtImageInfo.m_Height / pEditor->m_QuadArtParameters.m_ImagePixelSize);
 		if(MaximumQuadNumber > MaximumQuadThreshold)
 		{
-			pEditor->m_PopupEventType = CEditor::POPEVENT_QUADART_BIG_IMAGE;
+			pEditor->m_PopupEventType = CEditor::POPEVENT_QUAD_ART_BIG_IMAGE;
 			pEditor->m_PopupEventActivated = true;
 		}
 		else

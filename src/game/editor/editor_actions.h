@@ -9,7 +9,7 @@
 #include <game/editor/mapitems/layer_tele.h>
 #include <game/editor/mapitems/layer_tiles.h>
 #include <game/editor/mapitems/layer_tune.h>
-#include <game/editor/quadart.h>
+#include <game/editor/quad_art.h>
 #include <game/mapitems.h>
 
 #include <memory>
