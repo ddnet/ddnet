@@ -9,6 +9,14 @@
 #define DEFAULT_BTN []() -> int { return -1; }
 
 REGISTER_QUICK_ACTION(
+	ShowHelp,
+	"Show help",
+	[&]() { ShowHelp(); },
+	ALWAYS_FALSE,
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"[F1] Open the DDNet Wiki page for the map editor in a web browser.")
+REGISTER_QUICK_ACTION(
 	ToggleGrid,
 	"Toggle grid",
 	[&]() { MapView()->MapGrid()->Toggle(); },
