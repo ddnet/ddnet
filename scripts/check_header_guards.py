@@ -13,27 +13,45 @@ EXCEPTIONS = [
 	"src/tools/config_common.h",
 ]
 
+def read_file(filename):
+	with open(filename, encoding="utf-8") as file:
+		return file.read()
 
 def check_file(filename):
 	if filename in EXCEPTIONS:
 		return False
-	error = False
-	with open(filename, encoding="utf-8") as file:
-		for line in file:
-			if line == "// This file can be included several times.\n":
-				break
-			if line[0] == "/" or line[0] == "*" or line[0] == "\r" or line[0] == "\n" or line[0] == "\t":
-				continue
-			header_guard = "#ifndef " + ("_".join(filename.split(PATH)[1].split("/"))[:-2]).upper() + "_H"
-			if line.startswith("#ifndef"):
-				if line[:-1] != header_guard:
-					error = True
-					print(f"Wrong header guard in {filename}, is: {line[:-1]}, should be: {header_guard}")
-			else:
-				error = True
-				print(f"Missing header guard in {filename}, should be: {header_guard}")
+	guard_name = ("_".join(filename.split(PATH)[1].split("/"))[:-2]).upper() + "_H"
+	header_guard = f"#ifndef {guard_name}"
+	footer1 = f"#endif // {guard_name}"
+	footer2 = "#endif"
+
+	lines = read_file(filename).splitlines()
+
+	# check header
+	for line in lines:
+		if line == "// This file can be included several times.":
+			# file does not need header/footer
+			return False
+		if line.startswith("//") or line.startswith("/*") or line.startswith("*/") or line.startswith("\t") or line == "":
+			continue
+		if line.startswith("#ifndef"):
+			if line != header_guard:
+				print(f"Wrong header guard in {filename}, is: {line}, should be: {header_guard}")
+				return True
 			break
-	return error
+		else:
+			print(f"Missing header guard in {filename}, should be: {header_guard}")
+			return True
+	else: # executed if the loop wasn't broken out of
+		print(f"Missing header guard in {filename}, file is empty?")
+		return True
+
+	# check footer
+	if lines[-1] != footer1 and lines[-1] != footer2:
+		print(f"Wrong footer in {filename}, is: {lines[-1]}, should be: {footer1}")
+		return True
+
+	return False
 
 
 def check_dir(directory):
