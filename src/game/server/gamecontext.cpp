@@ -11,6 +11,7 @@
 
 #include <antibot/antibot_data.h>
 
+#include <base/aio.h>
 #include <base/logger.h>
 #include <base/math.h>
 #include <base/system.h>
