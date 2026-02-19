@@ -19,27 +19,12 @@
 #include "types.h"
 
 #include <chrono>
-#include <cinttypes>
-#include <cstdarg>
 #include <cstdint>
-#include <cstring>
 #include <ctime>
 #include <functional>
 #include <mutex>
 #include <optional>
 #include <string>
-
-#ifdef __MINGW32__
-#undef PRId64
-#undef PRIu64
-#undef PRIX64
-#define PRId64 "I64d"
-#define PRIu64 "I64u"
-#define PRIX64 "I64X"
-#define PRIzu "Iu"
-#else
-#define PRIzu "zu"
-#endif
 
 #ifdef CONF_FAMILY_UNIX
 #include <sys/un.h>
@@ -591,124 +576,6 @@ void net_unix_close(UNIXSOCKET sock);
 #endif
 
 /**
- * String related functions.
- *
- * @defgroup Strings Strings
- */
-
-/**
- * Performs printf formatting into a buffer.
- *
- * @ingroup Strings
- *
- * @param buffer Pointer to the buffer to receive the formatted string.
- * @param buffer_size Size of the buffer.
- * @param format printf formatting string.
- * @param args The variable argument list.
- *
- * @return Length of written string, even if it has been truncated.
- *
- * @remark See the C manual for syntax for the printf formatting string.
- * @remark The strings are treated as null-terminated strings.
- * @remark Guarantees that buffer string will contain null-termination.
- */
-[[gnu::format(printf, 3, 0)]] int str_format_v(char *buffer, int buffer_size, const char *format, va_list args);
-
-/**
- * Performs printf formatting into a buffer.
- *
- * @ingroup Strings
- *
- * @param buffer Pointer to the buffer to receive the formatted string.
- * @param buffer_size Size of the buffer.
- * @param format printf formatting string.
- * @param ... Parameters for the formatting.
- *
- * @return Length of written string, even if it has been truncated.
- *
- * @remark See the C manual for syntax for the printf formatting string.
- * @remark The strings are treated as null-terminated strings.
- * @remark Guarantees that buffer string will contain null-termination.
- */
-[[gnu::format(printf, 3, 4)]] int str_format(char *buffer, int buffer_size, const char *format, ...);
-
-#if !defined(CONF_DEBUG)
-int str_format_int(char *buffer, size_t buffer_size, int value);
-
-template<typename... Args>
-int str_format_opt(char *buffer, int buffer_size, const char *format, Args... args)
-{
-	static_assert(sizeof...(args) > 0, "Use str_copy instead of str_format without format arguments");
-	return str_format(buffer, buffer_size, format, args...);
-}
-
-template<>
-inline int str_format_opt(char *buffer, int buffer_size, const char *format, int val) // NOLINT(readability-inconsistent-declaration-parameter-name)
-{
-	if(strcmp(format, "%d") == 0)
-	{
-		return str_format_int(buffer, buffer_size, val);
-	}
-	else
-	{
-		return str_format(buffer, buffer_size, format, val);
-	}
-}
-
-#define str_format str_format_opt
-#endif
-
-/**
- * Computes the edit distance between two strings.
- *
- * @param a First string for the edit distance.
- * @param b Second string for the edit distance.
- *
- * @return The edit distance between the both strings.
- *
- * @remark The strings are treated as null-terminated strings.
- */
-int str_utf8_dist(const char *a, const char *b);
-
-/**
- * Computes the edit distance between two strings, allows buffers
- * to be passed in.
- *
- * @ingroup Strings
- *
- * @param a First string for the edit distance.
- * @param b Second string for the edit distance.
- * @param buf Buffer for the function.
- * @param buf_len Length of the buffer, must be at least as long as
- *                twice the length of both strings combined plus two.
- *
- * @return The edit distance between the both strings.
- *
- * @remark The strings are treated as null-terminated strings.
- */
-int str_utf8_dist_buffer(const char *a, const char *b, int *buf, int buf_len);
-
-/**
- * Computes the edit distance between two strings, allows buffers
- * to be passed in.
- *
- * @ingroup Strings
- *
- * @param a First string for the edit distance.
- * @param a_len Length of the first string.
- * @param b Second string for the edit distance.
- * @param b_len Length of the second string.
- * @param buf Buffer for the function.
- * @param buf_len Length of the buffer, must be at least as long as
- *                the length of both strings combined plus two.
- *
- * @return The edit distance between the both strings.
- *
- * @remark The strings are treated as null-terminated strings.
- */
-int str_utf32_dist_buffer(const int *a, int a_len, const int *b, int b_len, int *buf, int buf_len);
-
-/**
  * Swaps the endianness of data. Each element is swapped individually by reversing its bytes.
  *
  * @param data Pointer to data to be swapped.
@@ -720,31 +587,6 @@ int str_utf32_dist_buffer(const int *a, int a_len, const int *b, int b_len, int 
 void swap_endian(void *data, unsigned elem_size, unsigned num);
 
 void net_stats(NETSTATS *stats);
-
-int str_utf8_to_skeleton(const char *str, int *buf, int buf_len);
-
-/**
- * Checks if two strings only differ by confusable characters.
- *
- * @ingroup Strings
- *
- * @param str1 String to compare.
- * @param str2 String to compare.
- *
- * @return `0` if the strings are confusables.
- */
-int str_utf8_comp_confusable(const char *str1, const char *str2);
-
-/**
- * Converts the given Unicode codepoint to lowercase (locale insensitive).
- *
- * @ingroup Strings
- *
- * @param code Unicode codepoint to convert.
- *
- * @return Lowercase codepoint, or the original codepoint if there is no lowercase version.
- */
-int str_utf8_tolower_codepoint(int code);
 
 /**
  * Packs 4 big endian bytes into an unsigned.

@@ -5,7 +5,8 @@
 
 #if defined(CONF_FAMILY_WINDOWS)
 
-#include "system.h"
+#include "dbg.h"
+#include "str.h"
 
 #include <shlobj.h> // SHChangeNotify
 #include <windows.h>

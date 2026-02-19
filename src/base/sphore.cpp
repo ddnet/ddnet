@@ -10,12 +10,14 @@
 
 #include <limits>
 #elif defined(CONF_PLATFORM_MACOS)
-#include "system.h" // TODO: replace with str.h after moving str_format
+#include "str.h"
+#include "system.h" // pid
 
 #include <fcntl.h> // O_* constants
 #include <sys/stat.h> // S_* constants
 #elif defined(CONF_FAMILY_UNIX)
-#include "system.h" // TODO: replace with str.h after moving str_format
+#include "str.h"
+#include "system.h" // pid
 #endif
 
 #if defined(CONF_FAMILY_WINDOWS)

@@ -3,7 +3,7 @@
 #include "jobs.h"
 
 #include <base/dbg.h>
-#include <base/system.h> // TODO: replace with str.h after moving str_format
+#include <base/str.h>
 #include <base/thread.h>
 
 #include <algorithm>
