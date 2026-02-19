@@ -1715,6 +1715,10 @@ int CGraphicsBackend_SDL_GL::WindowOpen()
 
 void CGraphicsBackend_SDL_GL::SetWindowGrab(bool Grab)
 {
+	// Works around https://github.com/libsdl-org/sdl2-compat/issues/578.
+	if(!m_pWindow)
+		return;
+
 	SDL_SetWindowGrab(m_pWindow, Grab ? SDL_TRUE : SDL_FALSE);
 }
 
