@@ -4,8 +4,11 @@
 #include <base/system.h>
 #include <base/types.h>
 
+#include <engine/console.h>
 #include <engine/engine.h>
 #include <engine/kernel.h>
+#include <engine/server.h>
+#include <engine/server/authmanager.h>
 #include <engine/server/databases/connection.h>
 #include <engine/server/databases/connection_pool.h>
 #include <engine/server/register.h>
@@ -13,6 +16,7 @@
 #include <engine/server/server_logger.h>
 #include <engine/shared/assertion_logger.h>
 #include <engine/shared/config.h>
+#include <engine/shared/console.h>
 
 #include <generated/protocol.h>
 
@@ -51,6 +55,32 @@ public:
 	CGameContext *GameServer()
 	{
 		return (CGameContext *)m_pGameServer;
+	}
+
+	void ConnectClient(int ClientId)
+	{
+		CServer::NewClientCallback(ClientId, m_pServer, false);
+
+		// TODO: call pServer->OnNetMsgClientVer() and pServer->OnNetmsgInfo() instead of patching state
+		m_pServer->m_aClients[ClientId].m_State = CServer::CClient::STATE_CONNECTING;
+
+		m_pServer->OnNetMsgReady(ClientId);
+		m_pServer->OnNetMsgEnterGame(ClientId);
+	}
+
+	void AuthRcon(int ClientId, const char *pRoleName)
+	{
+		m_pServer->m_aClients[ClientId].m_AuthKey = m_pServer->m_AuthManager.DefaultKey(pRoleName);
+		GameServer()->OnSetAuthed(ClientId, AUTHED_ADMIN);
+	}
+
+	void ExecRcon(int ClientId, const char *pCmd)
+	{
+		m_pServer->m_RconClientId = ClientId;
+		m_pServer->m_RconAuthLevel = m_pServer->GetAuthedState(ClientId);
+		GameServer()->Console()->ExecuteLineFlag("say yellow", CFGFLAG_SERVER, 0);
+		m_pServer->m_RconClientId = IServer::RCON_CID_SERV;
+		m_pServer->m_RconAuthLevel = AUTHED_ADMIN;
 	}
 
 	CTestGameWorld()
@@ -304,4 +334,25 @@ TEST_F(CTestGameWorld, CharacterEmote)
 	// /emote angry 3 chat command and frozen
 	pChr->Freeze(10);
 	ASSERT_EQ(pChr->DetermineEyeEmote(), EMOTE_ANGRY);
+}
+
+TEST_F(CTestGameWorld, ClientConnect)
+{
+	g_Config.m_SvTournamentMode = 1;
+	ConnectClient(0);
+	const CPlayer *pPlayer = GameServer()->m_apPlayers[0];
+	ASSERT_NE(pPlayer, nullptr);
+	EXPECT_EQ(pPlayer->GetTeam(), TEAM_SPECTATORS);
+
+	g_Config.m_SvTournamentMode = 0;
+	ConnectClient(1);
+	pPlayer = GameServer()->m_apPlayers[1];
+	ASSERT_NE(pPlayer, nullptr);
+	EXPECT_EQ(pPlayer->GetTeam(), TEAM_GAME);
+
+	EXPECT_EQ(GameServer()->Server()->IsRconAuthed(0), false);
+	AuthRcon(0, RoleName::ADMIN);
+	EXPECT_EQ(GameServer()->Server()->IsRconAuthed(0), true);
+
+	ExecRcon(0, "say yellow");
 }
