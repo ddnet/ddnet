@@ -21,26 +21,31 @@ def check_file(filename):
 	if filename in EXCEPTIONS:
 		return False
 	guard_name = ("_".join(filename.split(PATH)[1].split("/"))[:-2]).upper() + "_H"
-	header_guard = f"#ifndef {guard_name}"
+	header_guard_line1 = f"#ifndef {guard_name}"
+	header_guard_line2 = f"#define {guard_name}"
 	footer1 = f"#endif // {guard_name}"
 	footer2 = "#endif"
 
 	lines = read_file(filename).splitlines()
 
 	# check header
-	for line in lines:
+	for i, line in enumerate(lines):
 		if line == "// This file can be included several times.":
 			# file does not need header/footer
 			return False
 		if line.startswith("//") or line.startswith("/*") or line.startswith("*/") or line.startswith("\t") or line == "":
 			continue
 		if line.startswith("#ifndef"):
-			if line != header_guard:
-				print(f"Wrong header guard in {filename}, is: {line}, should be: {header_guard}")
+			if line != header_guard_line1:
+				print(f"Wrong header guard in {filename}, is: {line}, should be: {header_guard_line1}")
+				return True
+			next_line = lines[i + 1] if i + 1 < len(lines) else None
+			if next_line != header_guard_line2:
+				print(f"Wrong header guard in {filename}, is: {next_line}, should be: {header_guard_line2}")
 				return True
 			break
 		else:
-			print(f"Missing header guard in {filename}, should be: {header_guard}")
+			print(f"Missing header guard in {filename}, should be: {header_guard_line1}")
 			return True
 	else: # executed if the loop wasn't broken out of
 		print(f"Missing header guard in {filename}, file is empty?")
