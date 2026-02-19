@@ -40,4 +40,4 @@ public:
 	virtual bool OnEngineSimulateClientMessage(int *pClientId, void *pBuffer, int BufferSize, int *pOutSize, int *pFlags) = 0;
 };
 
-#endif //ENGINE_ANTIBOT_H
+#endif // ENGINE_ANTIBOT_H

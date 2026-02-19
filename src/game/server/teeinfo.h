@@ -26,4 +26,4 @@ public:
 	void ToSixup();
 };
 
-#endif //GAME_SERVER_TEEINFO_H
+#endif // GAME_SERVER_TEEINFO_H
