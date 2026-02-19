@@ -181,4 +181,4 @@ public:
 	int Finish(void *pSnapdata);
 };
 
-#endif // ENGINE_SNAPSHOT_H
+#endif // ENGINE_SHARED_SNAPSHOT_H
