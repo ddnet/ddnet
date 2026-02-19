@@ -1809,44 +1809,11 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		}
 		else if(Msg == NETMSG_READY)
 		{
-			if(m_aClients[ClientId].m_State == CClient::STATE_CONNECTING)
-			{
-				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "player is ready. ClientId=%d addr=<{%s}> secure=%s", ClientId, ClientAddrString(ClientId, true), m_NetServer.HasSecurityToken(ClientId) ? "yes" : "no");
-				Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
-
-				void *pPersistentData = nullptr;
-				if(m_aClients[ClientId].m_HasPersistentData)
-				{
-					pPersistentData = m_aClients[ClientId].m_pPersistentData;
-					m_aClients[ClientId].m_HasPersistentData = false;
-				}
-				m_aClients[ClientId].m_State = CClient::STATE_READY;
-				GameServer()->OnClientConnected(ClientId, pPersistentData);
-			}
-
-			SendConnectionReady(ClientId);
+			OnNetMsgReady(ClientId);
 		}
 		else if(Msg == NETMSG_ENTERGAME)
 		{
-			if(m_aClients[ClientId].m_State == CClient::STATE_READY && GameServer()->IsClientReady(ClientId))
-			{
-				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "player has entered the game. ClientId=%d addr=<{%s}> sixup=%d", ClientId, ClientAddrString(ClientId, true), IsSixup(ClientId));
-				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
-				m_aClients[ClientId].m_State = CClient::STATE_INGAME;
-				if(!IsSixup(ClientId))
-				{
-					SendServerInfo(ClientAddr(ClientId), -1, SERVERINFO_EXTENDED, false);
-				}
-				else
-				{
-					CMsgPacker ServerInfoMessage(protocol7::NETMSG_SERVERINFO, true, true);
-					GetServerInfoSixup(&ServerInfoMessage, false);
-					SendMsg(&ServerInfoMessage, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientId);
-				}
-				GameServer()->OnClientEnter(ClientId);
-			}
+			OnNetMsgEnterGame(ClientId);
 		}
 		else if(Msg == NETMSG_INPUT)
 		{
@@ -2122,6 +2089,59 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		// game message
 		GameServer()->OnMessage(Msg, &Unpacker, ClientId);
 	}
+}
+
+void CServer::OnNetMsgReady(int ClientId)
+{
+	if(m_aClients[ClientId].m_State == CClient::STATE_CONNECTING)
+	{
+		log_debug(
+			"server",
+			"player is ready. ClientId=%d addr=<{%s}> secure=%s",
+			ClientId,
+			ClientAddrString(ClientId, true),
+			m_NetServer.HasSecurityToken(ClientId) ? "yes" : "no");
+
+		void *pPersistentData = nullptr;
+		if(m_aClients[ClientId].m_HasPersistentData)
+		{
+			pPersistentData = m_aClients[ClientId].m_pPersistentData;
+			m_aClients[ClientId].m_HasPersistentData = false;
+		}
+		m_aClients[ClientId].m_State = CClient::STATE_READY;
+		GameServer()->OnClientConnected(ClientId, pPersistentData);
+	}
+
+	// Make rejoining session possible before timeout protection triggers
+	// https://github.com/ddnet/ddnet/pull/301
+	SendConnectionReady(ClientId);
+}
+
+void CServer::OnNetMsgEnterGame(int ClientId)
+{
+	if(m_aClients[ClientId].m_State != CClient::STATE_READY)
+		return;
+	if(!GameServer()->IsClientReady(ClientId))
+		return;
+
+	log_info(
+		"server",
+		"player has entered the game. ClientId=%d addr=<{%s}> sixup=%d",
+		ClientId,
+		ClientAddrString(ClientId, true),
+		IsSixup(ClientId));
+	m_aClients[ClientId].m_State = CClient::STATE_INGAME;
+	if(!IsSixup(ClientId))
+	{
+		SendServerInfo(ClientAddr(ClientId), -1, SERVERINFO_EXTENDED, false);
+	}
+	else
+	{
+		CMsgPacker ServerInfoMessage(protocol7::NETMSG_SERVERINFO, true, true);
+		GetServerInfoSixup(&ServerInfoMessage, false);
+		SendMsg(&ServerInfoMessage, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientId);
+	}
+	GameServer()->OnClientEnter(ClientId);
 }
 
 bool CServer::RateLimitServerInfoConnless()

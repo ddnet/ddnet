@@ -368,6 +368,8 @@ public:
 
 	bool CheckReservedSlotAuth(int ClientId, const char *pPassword);
 	void ProcessClientPacket(CNetChunk *pPacket);
+	void OnNetMsgReady(int ClientId);
+	void OnNetMsgEnterGame(int ClientId);
 
 	class CCache
 	{
