@@ -558,8 +558,6 @@ void CCharacterCore::Move()
 	else
 		m_LeftWall = true;
 
-	m_Vel.x = m_Vel.x * (1.0f / RampValue);
-
 	if(m_pWorld && (m_Super || (m_Tuning.m_PlayerCollision && !m_CollisionDisabled && !m_Solo)))
 	{
 		// check player collision
@@ -583,10 +581,54 @@ void CCharacterCore::Move()
 					if(D < PhysicalSize())
 					{
 						if(a > 0.0f)
-							m_Pos = LastPos;
+						{
+							// set to pos before collision with other tee
+							NewPos = LastPos;
+						}
 						else if(distance(NewPos, pCharCore->m_Pos) > D)
-							m_Pos = NewPos;
-						return;
+						{
+							// We are currently stuck in another tee. Just set our pos to NewPos
+							goto endmove;
+						}
+						else
+						{
+							// NaN-safty in move
+							// Is safe, if the distance is zero and the NaN is created by 0 / 0.0
+							// all values multiplied or checked stay NaN, so no new position is set
+							NewPos = m_Pos;
+							goto endmove;
+						}
+
+						if(m_pCollision->TestBox(NewPos, PhysicalSizeVec2()))
+						{
+							// Handle Tee getting Stuck by redoing collision check with walls alongside with player
+							// reset velocity / position
+							m_Vel = OldVel;
+							NewPos = m_Pos;
+							// check player collision
+							auto Collide = [this](vec2 CurPos) {
+								for(int pId = 0; pId < MAX_CLIENTS; pId++)
+								{
+									CCharacterCore *pCore = m_pWorld->m_apCharacters[pId];
+									if(!pCore || pCore == this)
+										continue;
+									if((!(pCore->m_Super || m_Super) && (m_Solo || pCore->m_Solo || pCore->m_CollisionDisabled || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, pId)))))
+										continue;
+									float Dist = distance(CurPos, pCore->m_Pos);
+									if(Dist < PhysicalSize())
+									{
+										return true;
+									}
+								}
+								return false;
+							};
+							m_pCollision->MoveBox(&NewPos, &m_Vel, PhysicalSizeVec2(),
+								vec2(m_Tuning.m_GroundElasticityX,
+									m_Tuning.m_GroundElasticityY),
+								&Grounded, Collide);
+						}
+
+						goto endmove;
 					}
 				}
 				LastPos = Pos;
@@ -594,6 +636,8 @@ void CCharacterCore::Move()
 		}
 	}
 
+endmove:
+	m_Vel.x = m_Vel.x * (1.0f / RampValue);
 	m_Pos = NewPos;
 }
 
