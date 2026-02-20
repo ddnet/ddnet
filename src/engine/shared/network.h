@@ -66,6 +66,12 @@ enum
 {
 	NET_MAX_PACKETSIZE = 1400,
 	NET_MAX_PAYLOAD = NET_MAX_PACKETSIZE - 6,
+	/**
+	 * The maximum size of a chunk within a connection-oriented packet.
+	 *
+	 * This is 1023 because the size is packed into 10 bits in the chunk header.
+	 */
+	NET_MAX_CHUNK_SIZE = 1023,
 	NET_MAX_CHUNKHEADERSIZE = 3,
 	NET_PACKETHEADERSIZE = 3,
 	NET_CONNLESS_EXTRA_SIZE = 4,
