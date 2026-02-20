@@ -107,6 +107,7 @@ option(HEADLESS_CLIENT "Build the client without graphics" OFF)
 option(CLIENT "Compile client" ON)
 option(SERVER "Compile server" ON)
 option(TOOLS "Compile tools" ON)
+option(CPP_LIB "Compile ddnet-cpp.so (C ABI plugin)" OFF)
 option(DOWNLOAD_GTEST "Download and compile GTest" ${AUTO_DEPENDENCIES_DEFAULT})
 option(STEAM "Build the Steam release version" OFF)
 option(DISCORD "Enable Discord rich presence support" OFF)
@@ -123,6 +124,11 @@ option(MACOS_CODESIGN "Whether to sign code when building the DMG on macOS" OFF)
 
 if(TARGET_OS STREQUAL "mac" AND DEFINED ENV{MACOS_APP_IDENTITY})
   set(MACOS_APP_IDENTITY "$ENV{MACOS_APP_IDENTITY}")
+endif()
+
+# Make every target in this build PIC-compatible when producing the .so
+if(CPP_LIB)
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
 if(TARGET_OS STREQUAL "emscripten")
@@ -3027,6 +3033,79 @@ if(TOOLS)
   add_custom_target(tools DEPENDS ${TARGETS_TOOLS})
 endif()
 add_custom_target(everything DEPENDS ${TARGETS_OWN})
+
+if(CPP_LIB)
+  set(TARGET_CPP_LIB ddnet-cpp)
+
+  add_library(${TARGET_CPP_LIB} SHARED
+    src/cbindings/ffi.cpp
+    src/cbindings/ddnet.cpp
+    src/cbindings/score.cpp
+    $<TARGET_OBJECTS:rust-bridge-shared>
+  )
+
+  target_compile_features(${TARGET_CPP_LIB} PUBLIC cxx_std_20)
+
+  # Hide everything by default; only DDN_EXPORT is visible
+  set_target_properties(${TARGET_CPP_LIB} PROPERTIES
+    OUTPUT_NAME "ddnet"
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN ON
+    POSITION_INDEPENDENT_CODE ON
+  )
+
+  target_include_directories(${TARGET_CPP_LIB}
+    PUBLIC  ${PROJECT_SOURCE_DIR}/src/cbindings
+    PRIVATE
+      ${PROJECT_SOURCE_DIR}/src
+      ${PROJECT_BINARY_DIR}/src
+  )
+
+  # ---- Add DDNet static/aggregate libs explicitly ----
+  # game-server-without-main is an OBJECT lib; its deps are not auto-linked.
+  set(_ddn_link_targets game-server-without-main)
+  foreach(t
+    ddnet_engine_shared engine-shared     # engine shared code (g_Config, etc.)
+    ddnet_game_shared   game-shared       # game shared code
+    ddnet_base          base              # base: str_copy/str_comp/dbg_assert_imp
+    rust_engine_shared
+    json
+  )
+    if(TARGET ${t})
+      list(APPEND _ddn_link_targets ${t})
+    endif()
+  endforeach()
+
+  # Circular refs exist between these archives: use a link group on ELF.
+  if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+    target_link_libraries(${TARGET_CPP_LIB}
+      "-Wl,--start-group" ${_ddn_link_targets} "-Wl,--end-group"
+    )
+  else()
+    target_link_libraries(${TARGET_CPP_LIB} ${_ddn_link_targets})
+  endif()
+
+  # Fail if unresolved / keep ELF tidy (ELF only)
+  if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+    target_link_options(${TARGET_CPP_LIB} PRIVATE
+      "-Wl,-z,defs"
+      "-Wl,--exclude-libs,ALL"
+    )
+  elseif(TARGET_OS STREQUAL "mac")
+    # Tighten macOS too
+    target_link_options(${TARGET_CPP_LIB} PRIVATE "-Wl,-undefined,error")
+  endif()
+
+  list(APPEND TARGETS_OWN ${TARGET_CPP_LIB})
+  list(APPEND TARGETS_LINK ${TARGET_CPP_LIB})
+
+  include(GNUInstallDirs)
+  install(TARGETS ${TARGET_CPP_LIB}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  )
+endif()
 
 ########################################################################
 # CHECKSUM
