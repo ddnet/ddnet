@@ -1065,9 +1065,19 @@ void CServer::DoSnapshot()
 			int DeltaTick = -1;
 			const CSnapshot *pDeltashot = CSnapshot::EmptySnapshot();
 			{
-				int DeltashotSize = m_aClients[i].m_Snapshots.Get(m_aClients[i].m_LastAckedSnapshot, nullptr, &pDeltashot, nullptr);
+				int DeltashotSize;
+				if(m_aClients[i].m_LastAckedSnapshot >= MIN_TICK)
+				{
+					DeltashotSize = m_aClients[i].m_Snapshots.Get(m_aClients[i].m_LastAckedSnapshot, nullptr, &pDeltashot, nullptr);
+				}
+				else
+				{
+					DeltashotSize = -1;
+				}
 				if(DeltashotSize >= 0)
+				{
 					DeltaTick = m_aClients[i].m_LastAckedSnapshot;
+				}
 				else
 				{
 					// no acked package found, force client to recover rate
@@ -1808,21 +1818,51 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		}
 		else if(Msg == NETMSG_INPUT)
 		{
+			if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0)
+			{
+				return;
+			}
+			if(m_aClients[ClientId].m_State != CClient::STATE_INGAME)
+			{
+				return;
+			}
+
 			const int LastAckedSnapshot = Unpacker.GetInt();
+			if(Unpacker.Error() ||
+				LastAckedSnapshot < -1 ||
+				LastAckedSnapshot > Tick())
+			{
+				return;
+			}
+
 			int IntendedTick = Unpacker.GetInt();
-			int Size = Unpacker.GetInt();
-			if(Unpacker.Error() || Size / 4 > MAX_INPUT_SIZE || IntendedTick < MIN_TICK || IntendedTick >= MAX_TICK)
+			if(Unpacker.Error() ||
+				IntendedTick < MIN_TICK ||
+				IntendedTick > MAX_TICK)
+			{
+				return;
+			}
+
+			const int Size = Unpacker.GetInt();
+			if(Unpacker.Error() ||
+				Size % (int)sizeof(int32_t) != 0 ||
+				Size / (int)sizeof(int32_t) < MIN_INPUT_SIZE ||
+				Size / (int)sizeof(int32_t) > MAX_INPUT_SIZE)
 			{
 				return;
 			}
 
 			m_aClients[ClientId].m_LastAckedSnapshot = LastAckedSnapshot;
-			if(m_aClients[ClientId].m_LastAckedSnapshot > 0)
+			if(m_aClients[ClientId].m_LastAckedSnapshot >= MIN_TICK)
+			{
 				m_aClients[ClientId].m_SnapRate = CClient::SNAPRATE_FULL;
 
-			int64_t TagTime;
-			if(m_aClients[ClientId].m_Snapshots.Get(m_aClients[ClientId].m_LastAckedSnapshot, &TagTime, nullptr, nullptr) >= 0)
-				m_aClients[ClientId].m_Latency = (int)(((time_get() - TagTime) * 1000) / time_freq());
+				int64_t TagTime;
+				if(m_aClients[ClientId].m_Snapshots.Get(m_aClients[ClientId].m_LastAckedSnapshot, &TagTime, nullptr, nullptr) >= 0)
+				{
+					m_aClients[ClientId].m_Latency = (int)(((time_get() - TagTime) * 1000) / time_freq());
+				}
+			}
 
 			// add message to report the input timing
 			// skip packets that are old
@@ -1835,17 +1875,13 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				Msgp.AddInt(TimeLeft);
 				SendMsg(&Msgp, 0, ClientId);
 			}
-
 			m_aClients[ClientId].m_LastInputTick = IntendedTick;
 
+			IntendedTick = std::max(IntendedTick, Tick() + 1);
+
 			CClient::CInput *pInput = &m_aClients[ClientId].m_aInputs[m_aClients[ClientId].m_CurrentInput];
-
-			if(IntendedTick <= Tick())
-				IntendedTick = Tick() + 1;
-
 			pInput->m_GameTick = IntendedTick;
-
-			for(int i = 0; i < Size / 4; i++)
+			for(int i = 0; i < Size / (int)sizeof(int32_t); i++)
 			{
 				pInput->m_aData[i] = Unpacker.GetInt();
 			}
@@ -1854,7 +1890,8 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				return;
 			}
 
-			if(g_Config.m_SvPreInput)
+			if(g_Config.m_SvPreInput &&
+				IntendedTick <= Tick() + 4 * TickSpeed() + 1)
 			{
 				// send preinputs of ClientId to valid clients
 				bool aPreInputClients[MAX_CLIENTS] = {};
@@ -1887,6 +1924,8 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					{
 						if(!aPreInputClients[Id])
 							continue;
+						if(m_aClients[Id].m_SnapRate != CClient::SNAPRATE_FULL)
+							continue;
 
 						SendPackMsg(&PreInput, MSGFLAG_FLUSH | MSGFLAG_NORECORD, Id);
 					}
@@ -1894,14 +1933,13 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			}
 
 			GameServer()->OnClientPrepareInput(ClientId, pInput->m_aData);
-			mem_copy(m_aClients[ClientId].m_LatestInput.m_aData, pInput->m_aData, MAX_INPUT_SIZE * sizeof(int));
+			mem_copy(m_aClients[ClientId].m_LatestInput.m_aData, pInput->m_aData, sizeof(m_aClients[ClientId].m_LatestInput.m_aData));
 
 			m_aClients[ClientId].m_CurrentInput++;
 			m_aClients[ClientId].m_CurrentInput %= 200;
 
 			// call the mod with the fresh input data
-			if(m_aClients[ClientId].m_State == CClient::STATE_INGAME)
-				GameServer()->OnClientDirectInput(ClientId, m_aClients[ClientId].m_LatestInput.m_aData);
+			GameServer()->OnClientDirectInput(ClientId, m_aClients[ClientId].m_LatestInput.m_aData);
 		}
 		else if(Msg == NETMSG_RCON_CMD)
 		{

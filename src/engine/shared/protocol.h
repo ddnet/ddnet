@@ -93,6 +93,15 @@ enum
 	MIN_TICK = 0,
 	MAX_TICK = 0x6FFFFFFF,
 
+	/**
+	 * The minimum size of inputs (in `int32_t`s) accepted by the server.
+	 *
+	 * Currently `10` because this has always been the minimum size of CNetObj_PlayerInput in all supported protocols.
+	 */
+	MIN_INPUT_SIZE = 10,
+	/**
+	 * The maximum size of inputs (in `int32_t`s) accepted by the server.
+	 */
 	MAX_INPUT_SIZE = 128,
 	MAX_SNAPSHOT_PACKSIZE = 900,
 
