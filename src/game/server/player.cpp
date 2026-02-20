@@ -953,9 +953,7 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 			GameServer()->m_LastMapVote = time_get();
 
 			char aCmd[256];
-			str_format(aCmd, sizeof(aCmd),
-				"sv_reset_file types/%s/flexreset.cfg; change_map \"%s\"",
-				Result.m_Data.m_MapVote.m_aServer, Result.m_Data.m_MapVote.m_aMap);
+			str_format(aCmd, sizeof(aCmd), "change_map \"%s\"", Result.m_Data.m_MapVote.m_aMap);
 
 			char aChatmsg[512];
 			str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s' (%s)",
