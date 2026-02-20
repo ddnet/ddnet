@@ -21,8 +21,10 @@ CControls::CControls()
 {
 	mem_zero(&m_aLastData, sizeof(m_aLastData));
 	std::fill(std::begin(m_aMousePos), std::end(m_aMousePos), vec2(0.0f, 0.0f));
+	std::fill(std::begin(m_aSnapAimTo45MousePos), std::end(m_aSnapAimTo45MousePos), vec2(0.0f, 0.0f));
 	std::fill(std::begin(m_aMousePosOnAction), std::end(m_aMousePosOnAction), vec2(0.0f, 0.0f));
 	std::fill(std::begin(m_aTargetPos), std::end(m_aTargetPos), vec2(0.0f, 0.0f));
+	std::fill(std::begin(m_aSnapAimTo45TargetPos), std::end(m_aSnapAimTo45TargetPos), vec2(0.0f, 0.0f));
 	std::fill(std::begin(m_aMouseInputType), std::end(m_aMouseInputType), EMouseInputType::ABSOLUTE);
 }
 
@@ -244,6 +246,13 @@ int CControls::SnapInput(int *pData)
 			m_aMousePosOnAction[g_Config.m_ClDummy] = vec2(0.0f, 0.0f);
 		}
 
+		if(g_Config.m_ClSnapAimTo45)
+		{
+			vec2 SnappedVec = snap_to_45(vec2(m_aInputData[g_Config.m_ClDummy].m_TargetX, m_aInputData[g_Config.m_ClDummy].m_TargetY));
+			m_aInputData[g_Config.m_ClDummy].m_TargetX = (int)SnappedVec.x;
+			m_aInputData[g_Config.m_ClDummy].m_TargetY = (int)SnappedVec.y;
+		}
+
 		if(!m_aInputData[g_Config.m_ClDummy].m_TargetX && !m_aInputData[g_Config.m_ClDummy].m_TargetY)
 		{
 			m_aInputData[g_Config.m_ClDummy].m_TargetX = 1;
@@ -362,6 +371,20 @@ void CControls::OnRender()
 		}
 	}
 
+	m_aSnapAimTo45MousePos[g_Config.m_ClDummy] = m_aMousePos[g_Config.m_ClDummy];
+
+	// render local player to snapped angles even if it doesn't align with mouse
+	if(g_Config.m_ClSnapAimTo45)
+	{
+		vec2 SnappedVec = snap_to_45(m_aMousePos[g_Config.m_ClDummy]);
+		m_aSnapAimTo45MousePos[g_Config.m_ClDummy] = SnappedVec;
+		// update actual mouse position if action taken
+		if(m_aInputData[g_Config.m_ClDummy].m_Fire % 2 != 0 || m_aInputData[g_Config.m_ClDummy].m_Hook)
+		{
+			m_aMousePos[g_Config.m_ClDummy] = SnappedVec;
+		}
+	}
+
 	// update target pos
 	if(GameClient()->m_Snap.m_pGameInfoObj && !GameClient()->m_Snap.m_SpecInfo.m_Active)
 	{
@@ -369,14 +392,17 @@ void CControls::OnRender()
 		vec2 DyncamOffsetDelta = GameClient()->m_Camera.m_DyncamTargetCameraOffset - GameClient()->m_Camera.m_aDyncamCurrentCameraOffset[g_Config.m_ClDummy];
 		float Zoom = GameClient()->m_Camera.m_Zoom;
 		m_aTargetPos[g_Config.m_ClDummy] = GameClient()->m_LocalCharacterPos + m_aMousePos[g_Config.m_ClDummy] - DyncamOffsetDelta + DyncamOffsetDelta / Zoom;
+		m_aSnapAimTo45TargetPos[g_Config.m_ClDummy] = GameClient()->m_LocalCharacterPos + m_aSnapAimTo45MousePos[g_Config.m_ClDummy] - DyncamOffsetDelta + DyncamOffsetDelta / Zoom;
 	}
 	else if(GameClient()->m_Snap.m_SpecInfo.m_Active && GameClient()->m_Snap.m_SpecInfo.m_UsePosition)
 	{
 		m_aTargetPos[g_Config.m_ClDummy] = GameClient()->m_Snap.m_SpecInfo.m_Position + m_aMousePos[g_Config.m_ClDummy];
+		m_aSnapAimTo45TargetPos[g_Config.m_ClDummy] = GameClient()->m_Snap.m_SpecInfo.m_Position + m_aSnapAimTo45MousePos[g_Config.m_ClDummy];
 	}
 	else
 	{
 		m_aTargetPos[g_Config.m_ClDummy] = m_aMousePos[g_Config.m_ClDummy];
+		m_aSnapAimTo45TargetPos[g_Config.m_ClDummy] = m_aSnapAimTo45MousePos[g_Config.m_ClDummy];
 	}
 }
 
