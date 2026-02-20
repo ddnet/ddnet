@@ -45,7 +45,7 @@ void CRaceDemo::GetPath(char *pBuf, int Size, int Time) const
 	str_sanitize_filename(aPlayerName);
 
 	if(Time < 0)
-		str_format(pBuf, Size, "%s/%s_tmp_%d.demo", ms_pRaceDemoDir, pMap, pid());
+		str_format(pBuf, Size, "%s/%s_tmp_%d.demo", ms_pRaceDemoDir, pMap, process_id());
 	else if(g_Config.m_ClDemoName)
 		str_format(pBuf, Size, "%s/%s_%d.%03d_%s.demo", ms_pRaceDemoDir, pMap, Time / 1000, Time % 1000, aPlayerName);
 	else

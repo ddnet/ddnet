@@ -494,7 +494,7 @@ unsigned bytes_be_to_uint(const unsigned char *bytes);
 void uint_to_bytes_be(unsigned char *bytes, unsigned value);
 
 /**
- * Shell, process management, OS specific functionality.
+ * Shell and OS specific functionality.
  *
  * @defgroup Shell Shell
  */

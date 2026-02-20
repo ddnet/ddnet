@@ -5,20 +5,26 @@
 #include "types.h"
 
 /**
+ * Process management.
+ *
+ * @defgroup Process Process
+ */
+
+/**
  * Returns the ID of the current process.
  *
- * @ingroup Shell
+ * @ingroup Process
  *
  * @return PID of the current process.
  */
-int pid();
+int process_id();
 
 #if !defined(CONF_PLATFORM_ANDROID)
 /**
- * Determines the initial window state when using @link shell_execute @endlink
+ * Determines the initial window state when using @link process_execute @endlink
  * to execute a process.
  *
- * @ingroup Shell
+ * @ingroup Process
  *
  * @remark Currently only supported on Windows.
  */
@@ -38,7 +44,7 @@ enum class EShellExecuteWindowState
 /**
  * Executes a given file.
  *
- * @ingroup Shell
+ * @ingroup Process
  *
  * @param file The file to execute.
  * @param window_state The window state how the process window should be shown.
@@ -47,30 +53,30 @@ enum class EShellExecuteWindowState
  *
  * @return Handle of the new process, or @link INVALID_PROCESS @endlink on error.
  */
-PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state, const char **arguments = nullptr, size_t num_arguments = 0);
+PROCESS process_execute(const char *file, EShellExecuteWindowState window_state, const char **arguments = nullptr, size_t num_arguments = 0);
 
 /**
  * Sends kill signal to a process.
  *
- * @ingroup Shell
+ * @ingroup Process
  *
  * @param process Handle of the process to kill.
  *
  * @return `1` on success, `0` on error.
  */
-int kill_process(PROCESS process);
+int process_kill(PROCESS process);
 
 /**
  * Checks if a process is alive.
  *
- * @ingroup Shell
+ * @ingroup Process
  *
  * @param process Handle/PID of the process.
  *
  * @return `true` if the process is currently running,
  * @return `false` if the process is not running (dead).
  */
-bool is_process_alive(PROCESS process);
+bool process_is_alive(PROCESS process);
 #endif // !defined(CONF_PLATFORM_ANDROID)
 
 #endif

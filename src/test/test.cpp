@@ -32,7 +32,7 @@ CTestInfo::CTestInfo()
 		}
 	}
 	str_format(m_aFilenamePrefix, sizeof(m_aFilenamePrefix), "%s.%s-%d",
-		aTestCaseName, pTestInfo->name(), pid());
+		aTestCaseName, pTestInfo->name(), process_id());
 	Filename(m_aFilename, sizeof(m_aFilename), ".tmp");
 }
 

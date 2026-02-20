@@ -107,26 +107,26 @@ typedef struct NETSTATS
 /**
  * A handle for a process.
  *
- * @ingroup Shell
+ * @ingroup Process
  */
 typedef void *PROCESS;
 /**
  * A handle that denotes an invalid process.
  *
- * @ingroup Shell
+ * @ingroup Process
  */
 constexpr PROCESS INVALID_PROCESS = nullptr; // NOLINT(misc-misplaced-const)
 #else
 /**
  * A handle for a process.
  *
- * @ingroup Shell
+ * @ingroup Process
  */
 typedef pid_t PROCESS;
 /**
  * A handle that denotes an invalid process.
  *
- * @ingroup Shell
+ * @ingroup Process
  */
 constexpr PROCESS INVALID_PROCESS = 0;
 #endif

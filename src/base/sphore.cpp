@@ -41,7 +41,7 @@ void sphore_destroy(SEMAPHORE *sem)
 void sphore_init(SEMAPHORE *sem)
 {
 	char aBuf[64];
-	str_format(aBuf, sizeof(aBuf), "/%d.%p", pid(), (void *)sem);
+	str_format(aBuf, sizeof(aBuf), "/%d.%p", process_id(), (void *)sem);
 	*sem = sem_open(aBuf, O_CREAT | O_EXCL, S_IRWXU | S_IRWXG, 0);
 	dbg_assert(*sem != SEM_FAILED, "sem_open failure, errno=%d, name='%s'", errno, aBuf);
 }
@@ -62,7 +62,7 @@ void sphore_destroy(SEMAPHORE *sem)
 {
 	dbg_assert(sem_close(*sem) == 0, "sem_close failure");
 	char aBuf[64];
-	str_format(aBuf, sizeof(aBuf), "/%d.%p", pid(), (void *)sem);
+	str_format(aBuf, sizeof(aBuf), "/%d.%p", process_id(), (void *)sem);
 	dbg_assert(sem_unlink(aBuf) == 0, "sem_unlink failure");
 }
 #elif defined(CONF_FAMILY_UNIX)

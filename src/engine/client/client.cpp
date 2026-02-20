@@ -4837,7 +4837,7 @@ int main(int argc, const char **argv)
 		char aBufName[IO_MAX_PATH_LENGTH];
 		char aDate[64];
 		str_timestamp(aDate, sizeof(aDate));
-		str_format(aBufName, sizeof(aBufName), "dumps/" GAME_NAME "_%s_crash_log_%s_%d_%s.RTP", CONF_PLATFORM_STRING, aDate, pid(), GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "");
+		str_format(aBufName, sizeof(aBufName), "dumps/" GAME_NAME "_%s_crash_log_%s_%d_%s.RTP", CONF_PLATFORM_STRING, aDate, process_id(), GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "");
 		pStorage->GetCompletePath(IStorage::TYPE_SAVE, aBufName, aBufPath, sizeof(aBufPath));
 		crashdump_init_if_available(aBufPath);
 	}
@@ -5024,7 +5024,7 @@ int main(int argc, const char **argv)
 #if defined(CONF_PLATFORM_ANDROID)
 		RestartAndroidApp();
 #else
-		shell_execute(aRestartBinaryPath, EShellExecuteWindowState::FOREGROUND);
+		process_execute(aRestartBinaryPath, EShellExecuteWindowState::FOREGROUND);
 #endif
 	}
 
