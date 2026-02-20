@@ -1703,22 +1703,13 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		// system message
 		if(Msg == NETMSG_CLIENTVER)
 		{
-			if(m_aClients[ClientId].m_State == CClient::STATE_PREAUTH)
-			{
-				CUuid *pConnectionId = (CUuid *)Unpacker.GetRaw(sizeof(*pConnectionId));
-				int DDNetVersion = Unpacker.GetInt();
-				const char *pDDNetVersionStr = Unpacker.GetString(CUnpacker::SANITIZE_CC);
-				if(Unpacker.Error() || DDNetVersion < 0)
-				{
-					return;
-				}
-				m_aClients[ClientId].m_ConnectionId = *pConnectionId;
-				m_aClients[ClientId].m_DDNetVersion = DDNetVersion;
-				str_copy(m_aClients[ClientId].m_aDDNetVersionStr, pDDNetVersionStr);
-				m_aClients[ClientId].m_DDNetVersionSettled = true;
-				m_aClients[ClientId].m_GotDDNetVersionPacket = true;
-				m_aClients[ClientId].m_State = CClient::STATE_AUTH;
-			}
+			CUuid *pConnectionId = (CUuid *)Unpacker.GetRaw(sizeof(*pConnectionId));
+			int DDNetVersion = Unpacker.GetInt();
+			const char *pDDNetVersionStr = Unpacker.GetString(CUnpacker::SANITIZE_CC);
+			if(Unpacker.Error())
+				return;
+
+			OnNetMsgClientVer(ClientId, pConnectionId, DDNetVersion, pDDNetVersionStr);
 		}
 		else if(Msg == NETMSG_INFO)
 		{
@@ -1996,6 +1987,21 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		// game message
 		GameServer()->OnMessage(Msg, &Unpacker, ClientId);
 	}
+}
+
+void CServer::OnNetMsgClientVer(int ClientId, CUuid *pConnectionId, int DDNetVersion, const char *pDDNetVersionStr)
+{
+	if(m_aClients[ClientId].m_State != CClient::STATE_PREAUTH)
+		return;
+	if(DDNetVersion < 0)
+		return;
+
+	m_aClients[ClientId].m_ConnectionId = *pConnectionId;
+	m_aClients[ClientId].m_DDNetVersion = DDNetVersion;
+	str_copy(m_aClients[ClientId].m_aDDNetVersionStr, pDDNetVersionStr);
+	m_aClients[ClientId].m_DDNetVersionSettled = true;
+	m_aClients[ClientId].m_GotDDNetVersionPacket = true;
+	m_aClients[ClientId].m_State = CClient::STATE_AUTH;
 }
 
 void CServer::OnNetMsgReady(int ClientId)
