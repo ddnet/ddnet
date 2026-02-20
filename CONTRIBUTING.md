@@ -380,3 +380,23 @@ Maintainers will update the translation files for releases based on the translat
 ## Commit messages
 
 Describe the change your contribution is making for the player/user instead of talking about what you did in a technical sense. Your PR messages will ideally be in a format that can directly be used in the [change log](https://ddnet.org/downloads/).
+
+## Audio Encoding
+
+Audio should be encoded at 48 kHz as that is the default mixing rate of the game.
+
+Audio has to be mono or dual channel (mono is prefered if there is no difference).
+
+For sound effects and small sound bites, [`.wv`](https://en.wikipedia.org/wiki/WavPack) should be used (not [`.wav`](https://en.wikipedia.org/wiki/WAV)). PCM signed 16-bit little endian must be used.
+
+Music can be [`.opus`](https://en.wikipedia.org/wiki/Opus_(audio_format)).
+
+Here are some [`ffmpeg`](https://ffmpeg.org/) commands to convert to these formats:
+
+```sh
+ffmpeg -i "input.mp3" -ar 48000 -ac 1 -c:a wavpack -sample_fmt s16 "output.wv"
+```
+
+```sh
+ffmpeg -i "input.mp3" -ar 48000 -ac 1 -c:a libopus -b:a 64k "output.opus"
+```
