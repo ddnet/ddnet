@@ -699,6 +699,11 @@ void CGameClient::OnReset()
 	m_MapBestTimeMillis = 0;
 	m_aMapDescription[0] = '\0';
 
+	for(auto &PlayerExtraInfo : m_aaPlayerExtraInfo)
+	{
+		PlayerExtraInfo[0] = '\0';
+	}
+
 	// m_MapBugs and m_aTuningList are reset in LoadMapSettings
 
 	m_LastShowDistanceZoom = 0.0f;
@@ -1235,6 +1240,14 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 	{
 		CNetMsg_Sv_MapInfo *pMsg = static_cast<CNetMsg_Sv_MapInfo *>(pRawMsg);
 		str_copy(m_aMapDescription, pMsg->m_pDescription);
+	}
+	else if(MsgId == NETMSGTYPE_SV_PLAYEREXTRAINFO)
+	{
+		CNetMsg_Sv_PlayerExtraInfo *pMsg = static_cast<CNetMsg_Sv_PlayerExtraInfo *>(pRawMsg);
+		if(pMsg->m_ClientId >= 0 && pMsg->m_ClientId < MAX_CLIENTS)
+		{
+			str_copy(m_aaPlayerExtraInfo[pMsg->m_ClientId], pMsg->m_pText);
+		}
 	}
 }
 
@@ -3215,6 +3228,16 @@ void CGameClient::SendKill() const
 		CMsgPacker MsgP(NETMSGTYPE_CL_KILL, false);
 		Client()->SendMsg(!g_Config.m_ClDummy, &MsgP, MSGFLAG_VITAL);
 	}
+}
+
+void CGameClient::RequestPlayerExtraInfo(int ClientId)
+{
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
+		return;
+
+	CNetMsg_Cl_RequestPlayerExtraInfo Msg;
+	Msg.m_ClientId = ClientId;
+	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
 }
 
 void CGameClient::SendReadyChange7()
