@@ -1,5 +1,7 @@
+#include <base/detect.h>
 #include <base/logger.h>
-#include <base/system.h>
+#include <base/process.h>
+#include <base/str.h>
 #include <base/windows.h>
 
 #include <engine/console.h>

@@ -3,6 +3,7 @@
 #include "ghost.h"
 
 #include <base/log.h>
+#include <base/process.h>
 
 #include <engine/ghost.h>
 #include <engine/shared/config.h>

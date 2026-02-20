@@ -5,6 +5,8 @@
 
 #if defined(CONF_PLATFORM_ANDROID)
 #include <android/android_main.h>
+#else
+#include <base/process.h>
 #endif
 
 bool CLocalServer::RunServer(const std::vector<const char *> &vpArguments)

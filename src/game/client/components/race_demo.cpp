@@ -2,7 +2,9 @@
 
 #include "race_demo.h"
 
-#include <base/system.h>
+#include <base/process.h>
+#include <base/str.h>
+#include <base/time.h>
 
 #include <engine/shared/config.h>
 #include <engine/storage.h>

@@ -1,7 +1,10 @@
 #include "test.h"
 
+#include <base/fs.h>
 #include <base/logger.h>
-#include <base/system.h>
+#include <base/process.h>
+#include <base/str.h>
+#include <base/system.h> // net_init, CCmdlineFix
 
 #include <engine/storage.h>
 
