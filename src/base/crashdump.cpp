@@ -1,3 +1,5 @@
+#include "crashdump.h"
+
 #include "detect.h"
 
 #if defined(CONF_CRASHDUMP)
@@ -6,7 +8,6 @@
 #else
 
 #include "log.h"
-#include "system.h"
 #include "windows.h"
 
 #include <windows.h>

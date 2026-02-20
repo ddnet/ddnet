@@ -7,6 +7,7 @@
 #include "friends.h"
 #include "serverbrowser.h"
 
+#include <base/crashdump.h>
 #include <base/hash.h>
 #include <base/hash_ctxt.h>
 #include <base/log.h>
