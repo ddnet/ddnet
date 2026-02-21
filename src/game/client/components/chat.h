@@ -143,17 +143,6 @@ class CChat : public CComponent
 
 	bool m_ServerSupportsCommandInfo;
 
-	static void ConSay(IConsole::IResult *pResult, void *pUserData);
-	static void ConSayTeam(IConsole::IResult *pResult, void *pUserData);
-	static void ConChat(IConsole::IResult *pResult, void *pUserData);
-	static void ConShowChat(IConsole::IResult *pResult, void *pUserData);
-	static void ConEcho(IConsole::IResult *pResult, void *pUserData);
-	static void ConClearChat(IConsole::IResult *pResult, void *pUserData);
-
-	static void ConchainChatOld(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-	static void ConchainChatFontSize(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-	static void ConchainChatWidth(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-
 	bool LineShouldHighlight(const char *pLine, const char *pName);
 	void StoreSave(const char *pText);
 

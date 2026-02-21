@@ -10,6 +10,7 @@
 #include <engine/storage.h>
 
 #include <memory>
+#include <functional>
 
 static constexpr ColorRGBA CONSOLE_DEFAULT_COLOR = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -104,6 +105,9 @@ public:
 	typedef bool (*FUnknownCommandCallback)(const char *pCommand, void *pUser); // returns true if the callback has handled the argument
 	typedef bool (*FCanUseCommandCallback)(int ClientId, const ICommandInfo *pCommand, void *pUser);
 
+	using FCommandCallbackNew = std::function<void(IResult &)>;
+	using FChainCommandCallbackNew = std::function<void(IResult &, const FCommandCallbackNew &)>;
+
 	static void EmptyPossibleCommandCallback(int Index, const char *pCmd, void *pUser) {}
 	static bool EmptyUnknownCommandCallback(const char *pCommand, void *pUser) { return false; }
 
@@ -114,11 +118,19 @@ public:
 	virtual int PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback = EmptyPossibleCommandCallback, void *pUser = nullptr) = 0;
 	virtual void ParseArguments(int NumArgs, const char **ppArguments) = 0;
 
+	/**
+	 * @deprecated Prefer using Register taking std::function
+	 */
 	virtual void Register(const char *pName, const char *pParams, int Flags, FCommandCallback pfnFunc, void *pUser, const char *pHelp) = 0;
+	virtual void Register(const char *pName, const char *pParams, const char *pHelp, int Flags, const FCommandCallbackNew &Callback) = 0;
 	virtual void RegisterTemp(const char *pName, const char *pParams, int Flags, const char *pHelp) = 0;
 	virtual void DeregisterTemp(const char *pName) = 0;
 	virtual void DeregisterTempAll() = 0;
+		/**
+	 * @deprecated Prefer using Register taking std::function
+	 */
 	virtual void Chain(const char *pName, FChainCommandCallback pfnChainFunc, void *pUser) = 0;
+	virtual void Chain(const char *pName, const FChainCommandCallbackNew &ChainCallback) = 0;
 	virtual void StoreCommands(bool Store) = 0;
 
 	virtual bool LineIsValid(const char *pStr) = 0;
