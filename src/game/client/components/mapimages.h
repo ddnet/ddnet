@@ -63,7 +63,6 @@ public:
 	IGraphics::CTextureHandle GetOverlayBottom() override;
 	IGraphics::CTextureHandle GetOverlayTop() override;
 	IGraphics::CTextureHandle GetOverlayCenter() override;
-	IGraphics::CTextureHandle GetOverlayMiniCenter() override;
 
 	void SetTextureScale(int Scale);
 	int GetTextureScale() const;
@@ -78,7 +77,6 @@ private:
 	IGraphics::CTextureHandle m_OverlayBottomTexture;
 	IGraphics::CTextureHandle m_OverlayTopTexture;
 	IGraphics::CTextureHandle m_OverlayCenterTexture;
-	IGraphics::CTextureHandle m_OverlayMiniCenterTexture;
 	int m_TextureScale;
 
 	static void ConchainClTextEntitiesSize(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);

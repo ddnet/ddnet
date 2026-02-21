@@ -353,11 +353,6 @@ IGraphics::CTextureHandle CMapImages::GetOverlayCenter()
 	return m_OverlayCenterTexture;
 }
 
-IGraphics::CTextureHandle CMapImages::GetOverlayMiniCenter()
-{
-	return m_OverlayMiniCenterTexture;
-}
-
 void CMapImages::ChangeEntitiesPath(const char *pPath)
 {
 	if(str_comp(pPath, "default") == 0)
@@ -403,7 +398,7 @@ void CMapImages::SetTextureScale(int Scale)
 		Graphics()->UnloadTexture(&m_OverlayBottomTexture);
 		Graphics()->UnloadTexture(&m_OverlayTopTexture);
 		Graphics()->UnloadTexture(&m_OverlayCenterTexture);
-		Graphics()->UnloadTexture(&m_OverlayMiniCenterTexture);
+
 		InitOverlayTextures();
 	}
 }
@@ -479,10 +474,5 @@ void CMapImages::InitOverlayTextures()
 	if(!m_OverlayCenterTexture.IsValid())
 	{
 		m_OverlayCenterTexture = UploadEntityLayerText(TextureSize, 64, TextureToVerticalCenterOffset);
-	}
-
-	if(!m_OverlayMiniCenterTexture.IsValid())
-	{
-		m_OverlayMiniCenterTexture = UploadEntityLayerText(TextureSize / 2, 64, 16 + TextureToVerticalCenterOffset);
 	}
 }

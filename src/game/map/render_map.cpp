@@ -1290,6 +1290,25 @@ void CRenderMap::RenderSwitchmap(CSwitchTile *pSwitchTile, int w, int h, float S
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
+static ColorRGBA s_aTuneNumberColors[256];
+static bool s_aTuneNumberColorCached[256] = {false};
+
+static ColorRGBA GetTuneNumberColor(unsigned char TuneNumber)
+{
+	if(!s_aTuneNumberColorCached[TuneNumber])
+	{
+		const float Lightness = 0.5f;
+		const float HueStep = 137.50776f / 360.0f;
+		float Hue = std::fmod((TuneNumber - 1) * HueStep, 1.0f);
+		if(Hue < 0.0f)
+			Hue += 1.0f;
+		s_aTuneNumberColors[TuneNumber] = color_cast<ColorRGBA>(ColorHSLA(Hue, 1.0f, Lightness));
+		s_aTuneNumberColorCached[TuneNumber] = true;
+	}
+
+	return s_aTuneNumberColors[TuneNumber];
+}
+
 void CRenderMap::RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, ColorRGBA Color, int RenderFlags)
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
@@ -1304,7 +1323,6 @@ void CRenderMap::RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, Colo
 		Graphics()->QuadsTex3DBegin();
 	else
 		Graphics()->QuadsBegin();
-	Graphics()->SetColor(Color);
 
 	int StartY = (int)(ScreenY0 / Scale) - 1;
 	int StartX = (int)(ScreenX0 / Scale) - 1;
@@ -1356,6 +1374,8 @@ void CRenderMap::RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, Colo
 
 				if(Render)
 				{
+					Graphics()->SetColor(GetTuneNumberColor(pTune[c].m_Number).Multiply(Color));
+
 					int tx = Index % 16;
 					int ty = Index / 16;
 					int Px0 = tx * (1024 / 16);

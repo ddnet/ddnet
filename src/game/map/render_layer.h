@@ -378,9 +378,7 @@ class CRenderLayerEntityTune final : public CRenderLayerEntityBase
 public:
 	CRenderLayerEntityTune(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap);
 	int GetDataIndex(unsigned int &TileSize) const override;
-	void Init() override;
 	void InitTileData() override;
-	void Unload() override;
 
 protected:
 	void RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params) override;
@@ -388,7 +386,6 @@ protected:
 	void GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const override;
 
 private:
-	std::optional<CRenderLayerTile::CTileLayerVisuals> m_VisualTuneNumber;
 	CTuneTile *m_pTuneTiles;
 };
 #endif
