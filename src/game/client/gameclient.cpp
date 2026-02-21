@@ -1013,18 +1013,21 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 	{
 		// unpack the new tuning
 		CTuningParams NewTuning;
-		int *pParams = (int *)&NewTuning;
 
 		// No jetpack on DDNet incompatible servers,
 		// jetpack strength will be received by tune params
 		NewTuning.m_JetpackStrength = 0;
 
-		for(unsigned i = 0; i < sizeof(CTuningParams) / sizeof(int); i++)
+		int *pParams = NewTuning.NetworkArray();
+		for(int i = 0; i < CTuningParams::Num(); i++)
 		{
-			// 31 is the magic number index of laser_damage
-			// which was removed in 0.7
-			// also in 0.6 it is unused so we just set it to 0
-			const int Value = (Client()->IsSixup() && i == 30) ? 0 : pUnpacker->GetInt();
+			static_assert(offsetof(CTuningParams, m_LaserDamage) / sizeof(CTuneParam) == 30);
+			if(i == 30 && Client()->IsSixup()) // laser_damage was removed in 0.7
+			{
+				continue;
+			}
+
+			const int Value = pUnpacker->GetInt();
 
 			// check for unpacking errors
 			if(pUnpacker->Error())
