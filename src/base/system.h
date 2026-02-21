@@ -494,19 +494,10 @@ unsigned bytes_be_to_uint(const unsigned char *bytes);
 void uint_to_bytes_be(unsigned char *bytes, unsigned value);
 
 /**
- * Shell, process management, OS specific functionality.
+ * Shell and OS specific functionality.
  *
  * @defgroup Shell Shell
  */
-
-/**
- * Returns the ID of the current process.
- *
- * @ingroup Shell
- *
- * @return PID of the current process.
- */
-int pid();
 
 /**
  * Fixes the command line arguments to be encoded in UTF-8 on all systems.
@@ -531,64 +522,6 @@ void cmdline_fix(int *argc, const char ***argv);
 void cmdline_free(int argc, const char **argv);
 
 #if !defined(CONF_PLATFORM_ANDROID)
-/**
- * Determines the initial window state when using @link shell_execute @endlink
- * to execute a process.
- *
- * @ingroup Shell
- *
- * @remark Currently only supported on Windows.
- */
-enum class EShellExecuteWindowState
-{
-	/**
-	 * The process window is opened in the foreground and activated.
-	 */
-	FOREGROUND,
-
-	/**
-	 * The process window is opened in the background without focus.
-	 */
-	BACKGROUND,
-};
-
-/**
- * Executes a given file.
- *
- * @ingroup Shell
- *
- * @param file The file to execute.
- * @param window_state The window state how the process window should be shown.
- * @param arguments Optional array of arguments to pass to the process.
- * @param num_arguments The number of arguments.
- *
- * @return Handle of the new process, or @link INVALID_PROCESS @endlink on error.
- */
-PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state, const char **arguments = nullptr, size_t num_arguments = 0);
-
-/**
- * Sends kill signal to a process.
- *
- * @ingroup Shell
- *
- * @param process Handle of the process to kill.
- *
- * @return `1` on success, `0` on error.
- */
-int kill_process(PROCESS process);
-
-/**
- * Checks if a process is alive.
- *
- * @ingroup Shell
- *
- * @param process Handle/PID of the process.
- *
- * @return `true` if the process is currently running,
- * @return `false` if the process is not running (dead).
- */
-bool is_process_alive(PROCESS process);
-
 /**
  * Opens a link in the browser.
  *

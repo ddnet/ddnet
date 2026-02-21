@@ -5,6 +5,8 @@
 
 #if defined(CONF_PLATFORM_ANDROID)
 #include <android/android_main.h>
+#else
+#include <base/process.h>
 #endif
 
 bool CLocalServer::RunServer(const std::vector<const char *> &vpArguments)
@@ -42,7 +44,7 @@ bool CLocalServer::RunServer(const std::vector<const char *> &vpArguments)
 	// No / in binary path means to search in $PATH, so it is expected that the file can't be opened. Just try executing anyway.
 	if(str_find(aBuf, "/") == nullptr || fs_is_file(aBuf))
 	{
-		m_Process = shell_execute(aBuf, EShellExecuteWindowState::BACKGROUND, vpArgumentsWithAuth.data(), vpArgumentsWithAuth.size());
+		m_Process = process_execute(aBuf, EShellExecuteWindowState::BACKGROUND, vpArgumentsWithAuth.data(), vpArgumentsWithAuth.size());
 		if(m_Process != INVALID_PROCESS)
 		{
 			GameClient()->m_Menus.ForceRefreshLanPage();
@@ -70,7 +72,7 @@ void CLocalServer::KillServer()
 	ExecuteAndroidServerCommand("shutdown");
 	GameClient()->m_Menus.ForceRefreshLanPage();
 #else
-	if(m_Process != INVALID_PROCESS && kill_process(m_Process))
+	if(m_Process != INVALID_PROCESS && process_kill(m_Process))
 	{
 		m_Process = INVALID_PROCESS;
 		GameClient()->m_Menus.ForceRefreshLanPage();
@@ -84,7 +86,7 @@ bool CLocalServer::IsServerRunning()
 #if defined(CONF_PLATFORM_ANDROID)
 	return IsAndroidServerRunning();
 #else
-	if(m_Process != INVALID_PROCESS && !is_process_alive(m_Process))
+	if(m_Process != INVALID_PROCESS && !process_is_alive(m_Process))
 	{
 		KillServer();
 	}

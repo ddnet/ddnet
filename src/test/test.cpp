@@ -1,7 +1,10 @@
 #include "test.h"
 
+#include <base/fs.h>
 #include <base/logger.h>
-#include <base/system.h>
+#include <base/process.h>
+#include <base/str.h>
+#include <base/system.h> // net_init, CCmdlineFix
 
 #include <engine/storage.h>
 
@@ -29,7 +32,7 @@ CTestInfo::CTestInfo()
 		}
 	}
 	str_format(m_aFilenamePrefix, sizeof(m_aFilenamePrefix), "%s.%s-%d",
-		aTestCaseName, pTestInfo->name(), pid());
+		aTestCaseName, pTestInfo->name(), process_id());
 	Filename(m_aFilename, sizeof(m_aFilename), ".tmp");
 }
 
