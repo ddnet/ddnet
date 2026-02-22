@@ -347,8 +347,6 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 			int PlayerTeam = pChr->Team();
 			if((GetPlayerChar(Owner) ? GetPlayerChar(Owner)->GrenadeHitDisabled() : !g_Config.m_SvHit) || NoDamage)
 			{
-				if(PlayerTeam == TEAM_SUPER)
-					continue;
 				if(!TeamMask.test(PlayerTeam))
 					continue;
 				TeamMask.reset(PlayerTeam);
@@ -443,9 +441,6 @@ void CGameContext::SnapSwitchers(int SnappingClient)
 
 	if(pPlayer && (pPlayer->GetTeam() == TEAM_SPECTATORS || pPlayer->IsPaused()) && pPlayer->SpectatorId() != SPEC_FREEVIEW && m_apPlayers[pPlayer->SpectatorId()] && m_apPlayers[pPlayer->SpectatorId()]->GetCharacter())
 		Team = m_apPlayers[pPlayer->SpectatorId()]->GetCharacter()->Team();
-
-	if(Team == TEAM_SUPER)
-		return;
 
 	int SentTeam = Team;
 	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
@@ -1096,9 +1091,9 @@ void CGameContext::OnPreTickTeehistorian()
 		else
 			m_TeeHistorian.RecordPlayerTeam(i, 0);
 	}
-	for(int i = 0; i < TEAM_SUPER; i++)
+	for(int TeamId = 0; TeamId < NUM_DDRACE_TEAMS; TeamId++)
 	{
-		m_TeeHistorian.RecordTeamPractice(i, m_pController->Teams().IsPractice(i));
+		m_TeeHistorian.RecordTeamPractice(TeamId, m_pController->Teams().IsPractice(TeamId));
 	}
 }
 
@@ -3467,8 +3462,6 @@ void CGameContext::ConHotReload(IConsole::IResult *pResult, void *pUserData)
 
 		// Save the team state
 		pSelf->m_aTeamMapping[i] = pSelf->GetDDRaceTeam(i);
-		if(pSelf->m_aTeamMapping[i] == TEAM_SUPER)
-			pSelf->m_aTeamMapping[i] = pChar->m_TeamBeforeSuper;
 
 		if(pSelf->m_apSavedTeams[pSelf->m_aTeamMapping[i]])
 			continue;
@@ -3963,7 +3956,6 @@ void CGameContext::RegisterDDRaceCommands()
 	Console()->Register("unninja", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnNinja, this, "Removes ninja from you");
 	Console()->Register("super", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConSuper, this, "Makes you super");
 	Console()->Register("unsuper", "", CFGFLAG_SERVER, ConUnSuper, this, "Removes super from you");
-	Console()->Register("invincible", "?i['0'|'1']", CFGFLAG_SERVER | CMDFLAG_TEST, ConToggleInvincible, this, "Toggles invincible mode");
 	Console()->Register("infinite_jump", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConEndlessJump, this, "Gives you infinite jump");
 	Console()->Register("uninfinite_jump", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnEndlessJump, this, "Removes infinite jump from you");
 	Console()->Register("endless_hook", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConEndlessHook, this, "Gives you endless hook");
@@ -4113,11 +4105,10 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("endless", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeEndlessHook, this, "Gives you endless hook");
 	Console()->Register("unendless", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeUnEndlessHook, this, "Removes endless hook from you");
 	Console()->Register("setswitch", "i[switch] ?i['0'|'1'] ?i[seconds]", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeSetSwitch, this, "Toggle or set the switch on or off for the specified time (or indefinitely by default)");
-	Console()->Register("invincible", "?i['0'|'1']", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeToggleInvincible, this, "Toggles invincible mode");
 	Console()->Register("collision", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeToggleCollision, this, "Toggles collision");
 	Console()->Register("hookcollision", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeToggleHookCollision, this, "Toggles hook collision");
 	Console()->Register("hitothers", "?s['all'|'hammer'|'shotgun'|'grenade'|'laser']", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeToggleHitOthers, this, "Toggles hit others");
-
+	Console()->Register("super", "?i['0'|'1']", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeToggleSuper, this, "Toggles super mode");
 	Console()->Register("kill", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConProtectedKill, this, "Kill yourself when kill-protected during a long game (use f1, kill for regular kill)");
 }
 

@@ -3941,13 +3941,6 @@ int CGameClient::SwitchStateTeam() const
 	return m_Teams.Team(m_Snap.m_LocalClientId);
 }
 
-bool CGameClient::IsLocalCharSuper() const
-{
-	if(m_Snap.m_LocalClientId < 0)
-		return false;
-	return m_aClients[m_Snap.m_LocalClientId].m_Super;
-}
-
 void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 {
 	if(m_GameSkinLoaded)

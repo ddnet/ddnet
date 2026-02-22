@@ -177,37 +177,12 @@ void CCharacter::SetSolo(bool Solo)
 
 void CCharacter::SetSuper(bool Super)
 {
-	// Disable invincible mode before activating super mode. Both modes active at the same time wouldn't necessarily break anything but it's not useful.
-	if(Super)
-		SetInvincible(false);
-
-	bool WasSuper = m_Core.m_Super;
+	m_Core.m_Invincible = Super;
 	m_Core.m_Super = Super;
-	if(Super && !WasSuper)
-	{
-		m_TeamBeforeSuper = Team();
-		char aError[512];
-		if(!Teams()->SetCharacterTeam(GetPlayer()->GetCid(), TEAM_SUPER, aError, sizeof(aError)))
-			log_error("character", "failed to set super: %s", aError);
-		m_DDRaceState = ERaceState::CHEATED;
-	}
-	else if(!Super && WasSuper)
-	{
-		Teams()->SetForceCharacterTeam(GetPlayer()->GetCid(), m_TeamBeforeSuper);
-	}
-}
-
-void CCharacter::SetInvincible(bool Invincible)
-{
-	// Disable super mode before activating invincible mode. Both modes active at the same time wouldn't necessarily break anything but it's not useful.
-	if(Invincible)
-		SetSuper(false);
-
-	m_Core.m_Invincible = Invincible;
-	if(Invincible)
+	if(Super)
 		Unfreeze();
 
-	SetEndlessJump(Invincible);
+	SetEndlessJump(Super);
 }
 
 void CCharacter::SetCollisionDisabled(bool CollisionDisabled)
@@ -1207,7 +1182,7 @@ bool CCharacter::CanSnapCharacter(int SnappingClient)
 		else if(pSnapPlayer->SpectatorId() == SPEC_FREEVIEW && !CanCollide(SnappingClient) && pSnapPlayer->m_SpecTeam && !SameTeam(SnappingClient))
 			return false;
 	}
-	else if(pSnapChar && !pSnapChar->m_Core.m_Super && !CanCollide(SnappingClient) && (pSnapPlayer->m_ShowOthers == SHOW_OTHERS_OFF || (pSnapPlayer->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM && !SameTeam(SnappingClient))))
+	else if(pSnapChar && !CanCollide(SnappingClient) && (pSnapPlayer->m_ShowOthers == SHOW_OTHERS_OFF || (pSnapPlayer->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM && !SameTeam(SnappingClient))))
 		return false;
 
 	return true;
@@ -1267,10 +1242,8 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacter->m_Flags = 0;
 	if(m_Core.m_Solo)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_SOLO;
-	if(m_Core.m_Super)
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_SUPER;
-	if(m_Core.m_Invincible)
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_INVINCIBLE;
+	if(IsSuper())
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_INVINCIBLE | CHARACTERFLAG_SUPER;
 	if(m_Core.m_EndlessHook)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_HOOK;
 	if(m_Core.m_CollisionDisabled || !GetTuning(m_TuneZone)->m_PlayerCollision)
@@ -1446,7 +1419,7 @@ void CCharacter::HandleSkippableTiles(int Index)
 		   Collision()->GetFrontCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH ||
 		   Collision()->GetFrontCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH ||
 		   Collision()->GetFrontCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH) &&
-		!m_Core.m_Super && !m_Core.m_Invincible && !(Team() && Teams()->TeeFinished(m_pPlayer->GetCid())))
+		!IsSuper() && !(Team() && Teams()->TeeFinished(m_pPlayer->GetCid())))
 	{
 		if(Teams()->IsPractice(Team()))
 		{
@@ -1562,7 +1535,7 @@ bool CCharacter::IsSwitchActiveCb(int Number, void *pUser)
 {
 	CCharacter *pThis = (CCharacter *)pUser;
 	auto &aSwitchers = pThis->Switchers();
-	return !aSwitchers.empty() && pThis->Team() != TEAM_SUPER && aSwitchers[Number].m_aStatus[pThis->Team()];
+	return !aSwitchers.empty() && aSwitchers[Number].m_aStatus[pThis->Team()];
 }
 
 void CCharacter::SetTimeCheckpoint(int TimeCheckpoint)
@@ -1622,7 +1595,7 @@ void CCharacter::HandleTiles(int Index)
 		return;
 
 	// freeze
-	if(((m_TileIndex == TILE_FREEZE) || (m_TileFIndex == TILE_FREEZE)) && !m_Core.m_Super && !m_Core.m_Invincible && !m_Core.m_DeepFrozen)
+	if(((m_TileIndex == TILE_FREEZE) || (m_TileFIndex == TILE_FREEZE)) && !IsSuper() && !m_Core.m_DeepFrozen)
 	{
 		Freeze();
 	}
@@ -1630,17 +1603,17 @@ void CCharacter::HandleTiles(int Index)
 		Unfreeze();
 
 	// deep freeze
-	if(((m_TileIndex == TILE_DFREEZE) || (m_TileFIndex == TILE_DFREEZE)) && !m_Core.m_Super && !m_Core.m_Invincible && !m_Core.m_DeepFrozen)
+	if(((m_TileIndex == TILE_DFREEZE) || (m_TileFIndex == TILE_DFREEZE)) && !IsSuper() && !m_Core.m_DeepFrozen)
 		m_Core.m_DeepFrozen = true;
-	else if(((m_TileIndex == TILE_DUNFREEZE) || (m_TileFIndex == TILE_DUNFREEZE)) && !m_Core.m_Super && !m_Core.m_Invincible && m_Core.m_DeepFrozen)
+	else if(((m_TileIndex == TILE_DUNFREEZE) || (m_TileFIndex == TILE_DUNFREEZE)) && !IsSuper() && m_Core.m_DeepFrozen)
 		m_Core.m_DeepFrozen = false;
 
 	// live freeze
-	if(((m_TileIndex == TILE_LFREEZE) || (m_TileFIndex == TILE_LFREEZE)) && !m_Core.m_Super && !m_Core.m_Invincible)
+	if(((m_TileIndex == TILE_LFREEZE) || (m_TileFIndex == TILE_LFREEZE)) && !IsSuper())
 	{
 		m_Core.m_LiveFrozen = true;
 	}
-	else if(((m_TileIndex == TILE_LUNFREEZE) || (m_TileFIndex == TILE_LUNFREEZE)) && !m_Core.m_Super && !m_Core.m_Invincible)
+	else if(((m_TileIndex == TILE_LUNFREEZE) || (m_TileFIndex == TILE_LUNFREEZE)) && !IsSuper())
 	{
 		m_Core.m_LiveFrozen = false;
 	}
@@ -1793,59 +1766,59 @@ void CCharacter::HandleTiles(int Index)
 	ApplyMoveRestrictions();
 
 	// handle switch tiles
-	if(Collision()->GetSwitchType(MapIndex) == TILE_SWITCHOPEN && Team() != TEAM_SUPER && Collision()->GetSwitchNumber(MapIndex) > 0)
+	if(Collision()->GetSwitchType(MapIndex) == TILE_SWITCHOPEN && Collision()->GetSwitchNumber(MapIndex) > 0)
 	{
 		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aStatus[Team()] = true;
 		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aEndTick[Team()] = 0;
 		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aType[Team()] = TILE_SWITCHOPEN;
 		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aLastUpdateTick[Team()] = Server()->Tick();
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_SWITCHTIMEDOPEN && Team() != TEAM_SUPER && Collision()->GetSwitchNumber(MapIndex) > 0)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_SWITCHTIMEDOPEN && Collision()->GetSwitchNumber(MapIndex) > 0)
 	{
 		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aStatus[Team()] = true;
 		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aEndTick[Team()] = Server()->Tick() + 1 + Collision()->GetSwitchDelay(MapIndex) * Server()->TickSpeed();
 		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aType[Team()] = TILE_SWITCHTIMEDOPEN;
 		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aLastUpdateTick[Team()] = Server()->Tick();
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_SWITCHTIMEDCLOSE && Team() != TEAM_SUPER && Collision()->GetSwitchNumber(MapIndex) > 0)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_SWITCHTIMEDCLOSE && Collision()->GetSwitchNumber(MapIndex) > 0)
 	{
 		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aStatus[Team()] = false;
 		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aEndTick[Team()] = Server()->Tick() + 1 + Collision()->GetSwitchDelay(MapIndex) * Server()->TickSpeed();
 		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aType[Team()] = TILE_SWITCHTIMEDCLOSE;
 		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aLastUpdateTick[Team()] = Server()->Tick();
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_SWITCHCLOSE && Team() != TEAM_SUPER && Collision()->GetSwitchNumber(MapIndex) > 0)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_SWITCHCLOSE && Collision()->GetSwitchNumber(MapIndex) > 0)
 	{
 		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aStatus[Team()] = false;
 		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aEndTick[Team()] = 0;
 		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aType[Team()] = TILE_SWITCHCLOSE;
 		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aLastUpdateTick[Team()] = Server()->Tick();
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_FREEZE && Team() != TEAM_SUPER && !m_Core.m_Invincible)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_FREEZE && !IsSuper())
 	{
 		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aStatus[Team()])
 		{
 			Freeze(Collision()->GetSwitchDelay(MapIndex));
 		}
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_DFREEZE && Team() != TEAM_SUPER && !m_Core.m_Invincible)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_DFREEZE && !IsSuper())
 	{
 		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aStatus[Team()])
 			m_Core.m_DeepFrozen = true;
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_DUNFREEZE && Team() != TEAM_SUPER && !m_Core.m_Invincible)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_DUNFREEZE && !IsSuper())
 	{
 		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aStatus[Team()])
 			m_Core.m_DeepFrozen = false;
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_LFREEZE && Team() != TEAM_SUPER && !m_Core.m_Invincible)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_LFREEZE && !IsSuper())
 	{
 		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aStatus[Team()])
 		{
 			m_Core.m_LiveFrozen = true;
 		}
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_LUNFREEZE && Team() != TEAM_SUPER && !m_Core.m_Invincible)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_LUNFREEZE && !IsSuper())
 	{
 		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aStatus[Team()])
 		{
@@ -1921,7 +1894,7 @@ void CCharacter::HandleTiles(int Index)
 
 		m_StartTime -= (Minutes * 60 + Seconds) * Server()->TickSpeed();
 
-		if((g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO || (Team != TEAM_FLOCK && !Teams()->TeamFlock(Team))) && Team != TEAM_SUPER)
+		if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO || (Team != TEAM_FLOCK && !Teams()->TeamFlock(Team)))
 		{
 			for(int i = 0; i < MAX_CLIENTS; i++)
 			{
@@ -1947,7 +1920,7 @@ void CCharacter::HandleTiles(int Index)
 		if(m_StartTime > Server()->Tick())
 			m_StartTime = Server()->Tick();
 
-		if((g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO || (Team != TEAM_FLOCK && !Teams()->TeamFlock(Team))) && Team != TEAM_SUPER)
+		if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO || (Team != TEAM_FLOCK && !Teams()->TeamFlock(Team)))
 		{
 			for(int i = 0; i < MAX_CLIENTS; i++)
 			{
@@ -1977,7 +1950,7 @@ void CCharacter::HandleTiles(int Index)
 	int z = Collision()->IsTeleport(MapIndex);
 	if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && z && !Collision()->TeleOuts(z - 1).empty())
 	{
-		if(m_Core.m_Super || m_Core.m_Invincible)
+		if(IsSuper())
 			return;
 		int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleOuts(z - 1).size());
 		m_Core.m_Pos = Collision()->TeleOuts(z - 1)[TeleOut];
@@ -1992,7 +1965,7 @@ void CCharacter::HandleTiles(int Index)
 	const int EvilTeleport = Collision()->IsEvilTeleport(MapIndex);
 	if(EvilTeleport && !Collision()->TeleOuts(EvilTeleport - 1).empty())
 	{
-		if(m_Core.m_Super || m_Core.m_Invincible)
+		if(IsSuper())
 			return;
 		int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleOuts(EvilTeleport - 1).size());
 		m_Core.m_Pos = Collision()->TeleOuts(EvilTeleport - 1)[TeleOut];
@@ -2014,7 +1987,7 @@ void CCharacter::HandleTiles(int Index)
 	}
 	if(Collision()->IsCheckEvilTeleport(MapIndex))
 	{
-		if(m_Core.m_Super || m_Core.m_Invincible)
+		if(IsSuper())
 			return;
 		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
 		for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
@@ -2051,7 +2024,7 @@ void CCharacter::HandleTiles(int Index)
 	}
 	if(Collision()->IsCheckTeleport(MapIndex))
 	{
-		if(m_Core.m_Super || m_Core.m_Invincible)
+		if(IsSuper())
 			return;
 		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
 		for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
@@ -2193,7 +2166,7 @@ void CCharacter::DDRaceTick()
 	if(m_Input.m_Direction != 0 || m_Input.m_Jump != 0)
 		m_LastMove = Server()->Tick();
 
-	if(m_Core.m_LiveFrozen && !m_Core.m_Super && !m_Core.m_Invincible)
+	if(m_Core.m_LiveFrozen && !IsSuper())
 	{
 		m_Input.m_Direction = 0;
 		m_Input.m_Jump = 0;
@@ -2250,12 +2223,12 @@ void CCharacter::DDRacePostCoreTick()
 {
 	m_Time = (float)(Server()->Tick() - m_StartTime) / ((float)Server()->TickSpeed());
 
-	if(m_Core.m_EndlessHook || (m_Core.m_Super && g_Config.m_SvEndlessSuperHook))
+	if(m_Core.m_EndlessHook)
 		m_Core.m_HookTick = 0;
 
 	m_FrozenLastTick = false;
 
-	if(m_Core.m_DeepFrozen && !m_Core.m_Super && !m_Core.m_Invincible)
+	if(m_Core.m_DeepFrozen && !IsSuper())
 		Freeze();
 
 	// following jump rules can be overridden by tiles, like Refill Jumps, Stopper and Wall Jump
@@ -2280,9 +2253,9 @@ void CCharacter::DDRacePostCoreTick()
 		m_Core.m_Jumped = 1;
 	}
 
-	if((m_Core.m_Super || m_Core.m_EndlessJump) && m_Core.m_Jumped > 1)
+	if(m_Core.m_EndlessJump && m_Core.m_Jumped > 1)
 	{
-		// Super players and players with infinite jumps always have light feet
+		// players with infinite jumps always have light feet
 		m_Core.m_Jumped = 1;
 	}
 
@@ -2327,7 +2300,7 @@ void CCharacter::DDRacePostCoreTick()
 
 bool CCharacter::Freeze(int Seconds)
 {
-	if(Seconds <= 0 || m_Core.m_Super || m_Core.m_Invincible || m_FreezeTime > Seconds * Server()->TickSpeed())
+	if(Seconds <= 0 || IsSuper() || m_FreezeTime > Seconds * Server()->TickSpeed())
 		return false;
 	if(m_FreezeTime == 0 || m_Core.m_FreezeStart < Server()->Tick() - Server()->TickSpeed())
 	{
@@ -2453,7 +2426,6 @@ void CCharacter::DDRaceInit()
 	for(bool &Set : m_SetSavePos)
 		Set = false;
 	m_LastBroadcast = 0;
-	m_TeamBeforeSuper = 0;
 	m_Core.m_Id = GetPlayer()->GetCid();
 	m_TeleCheckpoint = 0;
 	m_Core.m_EndlessHook = g_Config.m_SvEndlessDrag;
@@ -2500,7 +2472,7 @@ void CCharacter::DDRaceInit()
 
 void CCharacter::Rescue()
 {
-	if(m_SetSavePos[GetPlayer()->m_RescueMode] && !m_Core.m_Super && !m_Core.m_Invincible)
+	if(m_SetSavePos[GetPlayer()->m_RescueMode] && !IsSuper())
 	{
 		if(m_LastRescue + (int64_t)g_Config.m_SvRescueDelay * Server()->TickSpeed() > Server()->Tick() && !Teams()->IsPractice(Team()))
 		{

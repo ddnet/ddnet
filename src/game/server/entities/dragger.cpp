@@ -79,11 +79,6 @@ void CDragger::LookForPlayersToDrag()
 		CCharacter *pTarget = static_cast<CCharacter *>(apPlayersInRange[i]);
 		const int &TargetTeam = pTarget->Team();
 
-		// Do not create a dragger beam for super player
-		if(TargetTeam == TEAM_SUPER)
-		{
-			continue;
-		}
 		// If the dragger is disabled for the target's team, no dragger beam will be generated
 		if(m_Layer == LAYER_SWITCH && m_Number > 0 &&
 			!Switchers()[m_Number].m_aStatus[TargetTeam])

@@ -10,7 +10,6 @@ class CDraggerBeam;
  *
  * A dragger will only generate one dragger beam per team for the closest player for whom the following criteria are met:
  * - The player is within the dragger range (sv_dragger_range).
- * - The player is not a super player
  * - The dragger is activated
  * - The dragger beam to be generated is not blocked by laser stoppers (or solid blocks if IgnoreWalls is set to false)
  * With the exception of solo players, for whom a dragger beam is always generated, regardless of the rest of the team,
