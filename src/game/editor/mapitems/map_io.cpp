@@ -1236,17 +1236,7 @@ bool CEditorMap::PerformAutosave(const std::function<void(const char *pErrorMess
 	char aDate[20];
 	char aAutosavePath[IO_MAX_PATH_LENGTH];
 	str_timestamp(aDate, sizeof(aDate));
-	char aFilenameNoExt[IO_MAX_PATH_LENGTH];
-	if(m_aFilename[0] == '\0')
-	{
-		str_copy(aFilenameNoExt, "unnamed");
-	}
-	else
-	{
-		const char *pFilename = fs_filename(m_aFilename);
-		str_truncate(aFilenameNoExt, sizeof(aFilenameNoExt), pFilename, str_length(pFilename) - str_length(".map"));
-	}
-	str_format(aAutosavePath, sizeof(aAutosavePath), "maps/auto/%s_%s.map", aFilenameNoExt, aDate);
+	str_format(aAutosavePath, sizeof(aAutosavePath), "maps/auto/%s_%s.map", m_aAutosaveName, aDate);
 
 	m_LastSaveTime = Editor()->Client()->GlobalTime();
 	if(Save(aAutosavePath, ErrorHandler))
@@ -1256,7 +1246,7 @@ bool CEditorMap::PerformAutosave(const std::function<void(const char *pErrorMess
 		if(g_Config.m_EdAutosaveMax)
 		{
 			CFileCollection AutosavedMaps;
-			AutosavedMaps.Init(Editor()->Storage(), "maps/auto", aFilenameNoExt, ".map", g_Config.m_EdAutosaveMax);
+			AutosavedMaps.Init(Editor()->Storage(), "maps/auto", m_aAutosaveName, ".map", g_Config.m_EdAutosaveMax);
 		}
 		return true;
 	}

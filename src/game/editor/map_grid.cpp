@@ -7,7 +7,7 @@
 static constexpr int MIN_GRID_FACTOR = 1;
 static constexpr int MAX_GRID_FACTOR = 15;
 
-void CMapGrid::OnReset()
+void CMapGrid::CState::Reset()
 {
 	m_GridActive = false;
 	m_GridFactor = 1;
@@ -15,7 +15,7 @@ void CMapGrid::OnReset()
 
 void CMapGrid::OnRender(CUIRect View)
 {
-	if(!m_GridActive)
+	if(!IsEnabled())
 	{
 		return;
 	}
@@ -38,8 +38,8 @@ void CMapGrid::OnRender(CUIRect View)
 
 	const int XOffset = aGroupPoints[0] / LineDistance;
 	const int YOffset = aGroupPoints[1] / LineDistance;
-	const int XGridOffset = XOffset % m_GridFactor;
-	const int YGridOffset = YOffset % m_GridFactor;
+	const int XGridOffset = XOffset % Factor();
+	const int YGridOffset = YOffset % Factor();
 
 	const int NumColumns = (int)std::ceil((ScreenX1 - ScreenX0) / LineDistance) + 1;
 	const int NumRows = (int)std::ceil((ScreenY1 - ScreenY0) / LineDistance) + 1;
@@ -47,13 +47,13 @@ void CMapGrid::OnRender(CUIRect View)
 	Graphics()->TextureClear();
 
 	IGraphics::CLineItemBatch LineItemBatch;
-	if(m_GridFactor > 1)
+	if(Factor() > 1)
 	{
 		Graphics()->LinesBatchBegin(&LineItemBatch);
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.15f);
 		for(int y = 0; y < NumRows; y++)
 		{
-			if((y + YGridOffset) % m_GridFactor == 0)
+			if((y + YGridOffset) % Factor() == 0)
 			{
 				continue;
 			}
@@ -63,7 +63,7 @@ void CMapGrid::OnRender(CUIRect View)
 		}
 		for(int x = 0; x < NumColumns; x++)
 		{
-			if((x + XGridOffset) % m_GridFactor == 0)
+			if((x + XGridOffset) % Factor() == 0)
 			{
 				continue;
 			}
@@ -78,7 +78,7 @@ void CMapGrid::OnRender(CUIRect View)
 	Graphics()->SetColor(1.0f, 0.3f, 0.3f, 0.3f);
 	for(int y = 0; y < NumRows; y++)
 	{
-		if((y + YGridOffset) % m_GridFactor != 0)
+		if((y + YGridOffset) % Factor() != 0)
 		{
 			continue;
 		}
@@ -88,7 +88,7 @@ void CMapGrid::OnRender(CUIRect View)
 	}
 	for(int x = 0; x < NumColumns; x++)
 	{
-		if((x + XGridOffset) % m_GridFactor != 0)
+		if((x + XGridOffset) % Factor() != 0)
 		{
 			continue;
 		}
@@ -122,29 +122,29 @@ int CMapGrid::GridLineDistance() const
 
 void CMapGrid::SnapToGrid(vec2 &Position) const
 {
-	const int GridDistance = GridLineDistance() * m_GridFactor;
+	const int GridDistance = GridLineDistance() * Factor();
 	Position.x = (int)((Position.x + (Position.x >= 0 ? 1.0f : -1.0f) * GridDistance / 2) / GridDistance) * GridDistance;
 	Position.y = (int)((Position.y + (Position.y >= 0 ? 1.0f : -1.0f) * GridDistance / 2) / GridDistance) * GridDistance;
 }
 
 bool CMapGrid::IsEnabled() const
 {
-	return m_GridActive;
+	return Map()->m_MapGridState.m_GridActive;
 }
 
 void CMapGrid::Toggle()
 {
-	m_GridActive = !m_GridActive;
+	Map()->m_MapGridState.m_GridActive = !Map()->m_MapGridState.m_GridActive;
 }
 
 int CMapGrid::Factor() const
 {
-	return m_GridFactor;
+	return Map()->m_MapGridState.m_GridFactor;
 }
 
 void CMapGrid::SetFactor(int Factor)
 {
-	m_GridFactor = std::clamp(Factor, MIN_GRID_FACTOR, MAX_GRID_FACTOR);
+	Map()->m_MapGridState.m_GridFactor = std::clamp(Factor, MIN_GRID_FACTOR, MAX_GRID_FACTOR);
 }
 
 void CMapGrid::DoSettingsPopup(vec2 Position)

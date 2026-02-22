@@ -11,8 +11,12 @@
 #include <game/editor/editor_history.h>
 #include <game/editor/editor_server_settings.h>
 #include <game/editor/editor_trackers.h>
+#include <game/editor/envelope_editor.h>
+#include <game/editor/map_grid.h>
+#include <game/editor/map_view.h>
 #include <game/editor/mapitems/envelope.h>
 #include <game/editor/mapitems/layer.h>
+#include <game/editor/proof_mode.h>
 
 #include <functional>
 #include <memory>
@@ -75,7 +79,18 @@ public:
 	const CEditor *Editor() const { return m_pEditor; }
 	CEditor *Editor() { return m_pEditor; }
 
+	/**
+	 * Path and filename including extension within the storage system.
+	 */
 	char m_aFilename[IO_MAX_PATH_LENGTH];
+	/**
+	 * Unique name for displaying. Updated by the editor when open maps are changed to ensure it is unique.
+	 */
+	char m_aDisplayName[IO_MAX_PATH_LENGTH];
+	/**
+	 * Unique name for autosaving. Updated by the editor when open maps are changed to ensure it is unique.
+	 */
+	char m_aAutosaveName[IO_MAX_PATH_LENGTH];
 	bool m_ValidSaveFilename;
 	/**
 	 * Map has unsaved changes for manual save.
@@ -89,6 +104,10 @@ public:
 	float m_LastSaveTime;
 	void OnModify();
 	void ResetModifiedState();
+
+	// UI elements
+	char m_TabSelectButtonId;
+	char m_TabCloseButtonId;
 
 	std::vector<std::shared_ptr<CLayerGroup>> m_vpGroups;
 	std::vector<std::shared_ptr<CEditorImage>> m_vpImages;
@@ -152,6 +171,12 @@ public:
 	int m_SelectedSoundSource;
 
 	int m_ShiftBy;
+
+	// Component states
+	CMapView::CState m_MapViewState;
+	CMapGrid::CState m_MapGridState;
+	CProofMode::CState m_ProofModeState;
+	CEnvelopeEditor::CState m_EnvelopeEditorState;
 
 	// Quad knife
 	class CQuadKnife

@@ -38,15 +38,8 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuFile(void *pContext, CUIRect Vie
 	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_NewMapButton, "New", 0, &Slot, BUTTONFLAG_LEFT, "[Ctrl+N] Create a new map."))
 	{
-		if(pEditor->HasUnsavedData())
-		{
-			pEditor->m_PopupEventType = POPEVENT_NEW;
-			pEditor->m_PopupEventActivated = true;
-		}
-		else
-		{
-			pEditor->Reset();
-		}
+		pEditor->Reset();
+		pEditor->AddDefaultMap();
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
 
@@ -54,13 +47,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuFile(void *pContext, CUIRect Vie
 	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_OpenButton, "Load", 0, &Slot, BUTTONFLAG_LEFT, "[Ctrl+L] Open a map for editing."))
 	{
-		if(pEditor->HasUnsavedData())
-		{
-			pEditor->m_PopupEventType = POPEVENT_LOAD;
-			pEditor->m_PopupEventActivated = true;
-		}
-		else
-			pEditor->m_FileBrowser.ShowFileDialog(IStorage::TYPE_ALL, CFileBrowser::EFileType::MAP, "Load map", "Load", "maps", "", CallbackOpenMap, pEditor);
+		pEditor->m_FileBrowser.ShowFileDialog(IStorage::TYPE_ALL, CFileBrowser::EFileType::MAP, "Load map", "Load", "maps", "", CallbackOpenMap, pEditor);
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
 
@@ -84,14 +71,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuFile(void *pContext, CUIRect Vie
 	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_SaveButton, "Save", 0, &Slot, BUTTONFLAG_LEFT, "[Ctrl+S] Save the current map."))
 	{
-		if(pEditor->Map()->m_aFilename[0] != '\0' && pEditor->Map()->m_ValidSaveFilename)
-		{
-			CallbackSaveMap(pEditor->Map()->m_aFilename, IStorage::TYPE_SAVE, pEditor);
-		}
-		else
-		{
-			pEditor->m_FileBrowser.ShowFileDialog(IStorage::TYPE_SAVE, CFileBrowser::EFileType::MAP, "Save map", "Save", "maps", "", CallbackSaveMap, pEditor);
-		}
+		pEditor->InvokeSave();
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
 
@@ -107,9 +87,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuFile(void *pContext, CUIRect Vie
 	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_SaveCopyButton, "Save copy", 0, &Slot, BUTTONFLAG_LEFT, "[Ctrl+Shift+Alt+S] Save a copy of the current map under a new name."))
 	{
-		char aDefaultName[IO_MAX_PATH_LENGTH];
-		fs_split_file_extension(fs_filename(pEditor->Map()->m_aFilename), aDefaultName, sizeof(aDefaultName));
-		pEditor->m_FileBrowser.ShowFileDialog(IStorage::TYPE_SAVE, CFileBrowser::EFileType::MAP, "Save map", "Save copy", "maps", aDefaultName, CallbackSaveCopyMap, pEditor);
+		pEditor->m_FileBrowser.ShowFileDialog(IStorage::TYPE_SAVE, CFileBrowser::EFileType::MAP, "Save map", "Save copy", "maps", pEditor->Map()->m_aAutosaveName, CallbackSaveCopyMap, pEditor);
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
 
@@ -1399,289 +1377,6 @@ CUi::EPopupMenuFunctionResult CEditor::PopupPoint(void *pContext, CUIRect View, 
 	return CUi::POPUP_KEEP_OPEN;
 }
 
-CUi::EPopupMenuFunctionResult CEditor::PopupEnvPoint(void *pContext, CUIRect View, bool Active)
-{
-	CEditor *pEditor = static_cast<CEditor *>(pContext);
-	if(pEditor->Map()->m_SelectedEnvelope < 0 || pEditor->Map()->m_SelectedEnvelope >= (int)pEditor->Map()->m_vpEnvelopes.size())
-		return CUi::POPUP_CLOSE_CURRENT;
-
-	const float RowHeight = 12.0f;
-	CUIRect Row, Label, EditBox;
-
-	pEditor->m_ActiveEnvelopePreview = EEnvelopePreview::SELECTED;
-
-	std::shared_ptr<CEnvelope> pEnvelope = pEditor->Map()->m_vpEnvelopes[pEditor->Map()->m_SelectedEnvelope];
-
-	if(pEnvelope->GetChannels() == 4 && !pEditor->Map()->IsTangentSelected())
-	{
-		View.HSplitTop(RowHeight, &Row, &View);
-		View.HSplitTop(4.0f, nullptr, &View);
-		Row.VSplitLeft(60.0f, &Label, &Row);
-		Row.VSplitLeft(10.0f, nullptr, &EditBox);
-		pEditor->Ui()->DoLabel(&Label, "Color:", RowHeight - 2.0f, TEXTALIGN_ML);
-
-		const auto SelectedPoint = pEditor->Map()->m_vSelectedEnvelopePoints.front();
-		const int SelectedIndex = SelectedPoint.first;
-		auto *pValues = pEnvelope->m_vPoints[SelectedIndex].m_aValues;
-		const ColorRGBA Color = pEnvelope->m_vPoints[SelectedIndex].ColorValue();
-		const auto &&SetColor = [&](ColorRGBA NewColor) {
-			if(Color == NewColor && pEditor->m_ColorPickerPopupContext.m_State == EEditState::EDITING)
-				return;
-
-			static int s_Values[4];
-
-			if(pEditor->m_ColorPickerPopupContext.m_State == EEditState::START || pEditor->m_ColorPickerPopupContext.m_State == EEditState::ONE_GO)
-			{
-				for(int Channel = 0; Channel < 4; ++Channel)
-					s_Values[Channel] = pValues[Channel];
-			}
-
-			pEnvelope->m_vPoints[SelectedIndex].SetColorValue(NewColor);
-
-			if(pEditor->m_ColorPickerPopupContext.m_State == EEditState::END || pEditor->m_ColorPickerPopupContext.m_State == EEditState::ONE_GO)
-			{
-				std::vector<std::shared_ptr<IEditorAction>> vpActions(4);
-
-				for(int Channel = 0; Channel < 4; ++Channel)
-				{
-					vpActions[Channel] = std::make_shared<CEditorActionEnvelopeEditPoint>(pEditor->Map(), pEditor->Map()->m_SelectedEnvelope, SelectedIndex, Channel, CEditorActionEnvelopeEditPoint::EEditType::VALUE, s_Values[Channel], f2fx(NewColor[Channel]));
-				}
-
-				char aDisplay[256];
-				str_format(aDisplay, sizeof(aDisplay), "Edit color of point %d of envelope %d", SelectedIndex, pEditor->Map()->m_SelectedEnvelope);
-				pEditor->Map()->m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionBulk>(pEditor->Map(), vpActions, aDisplay));
-			}
-
-			pEditor->Map()->m_UpdateEnvPointInfo = true;
-			pEditor->Map()->OnModify();
-		};
-		static char s_ColorPickerButton;
-		pEditor->DoColorPickerButton(&s_ColorPickerButton, &EditBox, Color, SetColor);
-	}
-
-	static CLineInputNumber s_CurValueInput;
-	static CLineInputNumber s_CurTimeInput;
-
-	static float s_CurrentTime = 0;
-	static float s_CurrentValue = 0;
-
-	if(pEditor->Map()->m_UpdateEnvPointInfo)
-	{
-		pEditor->Map()->m_UpdateEnvPointInfo = false;
-
-		const auto &[CurrentTime, CurrentValue] = pEditor->Map()->SelectedEnvelopeTimeAndValue();
-
-		// update displayed text
-		s_CurValueInput.SetFloat(fx2f(CurrentValue));
-		s_CurTimeInput.SetFloat(CurrentTime.AsSeconds());
-
-		s_CurrentTime = s_CurTimeInput.GetFloat();
-		s_CurrentValue = s_CurValueInput.GetFloat();
-	}
-
-	View.HSplitTop(RowHeight, &Row, &View);
-	Row.VSplitLeft(60.0f, &Label, &Row);
-	Row.VSplitLeft(10.0f, nullptr, &EditBox);
-	pEditor->Ui()->DoLabel(&Label, "Value:", RowHeight - 2.0f, TEXTALIGN_ML);
-	pEditor->DoEditBox(&s_CurValueInput, &EditBox, RowHeight - 2.0f, IGraphics::CORNER_ALL, "The value of the selected envelope point.");
-
-	View.HSplitTop(4.0f, nullptr, &View);
-	View.HSplitTop(RowHeight, &Row, &View);
-	Row.VSplitLeft(60.0f, &Label, &Row);
-	Row.VSplitLeft(10.0f, nullptr, &EditBox);
-	pEditor->Ui()->DoLabel(&Label, "Time (in s):", RowHeight - 2.0f, TEXTALIGN_ML);
-	pEditor->DoEditBox(&s_CurTimeInput, &EditBox, RowHeight - 2.0f, IGraphics::CORNER_ALL, "The time of the selected envelope point.");
-
-	if(pEditor->Input()->KeyIsPressed(KEY_RETURN) || pEditor->Input()->KeyIsPressed(KEY_KP_ENTER))
-	{
-		float CurrentTime = s_CurTimeInput.GetFloat();
-		float CurrentValue = s_CurValueInput.GetFloat();
-		if(!(absolute(CurrentTime - s_CurrentTime) < 0.0001f && absolute(CurrentValue - s_CurrentValue) < 0.0001f))
-		{
-			const auto &[OldTime, OldValue] = pEditor->Map()->SelectedEnvelopeTimeAndValue();
-
-			if(pEditor->Map()->IsTangentInSelected())
-			{
-				auto [SelectedIndex, SelectedChannel] = pEditor->Map()->m_SelectedTangentInPoint;
-
-				pEditor->Map()->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionEditEnvelopePointValue>(pEditor->Map(), pEditor->Map()->m_SelectedEnvelope, SelectedIndex, SelectedChannel, CEditorActionEditEnvelopePointValue::EType::TANGENT_IN, OldTime, OldValue, CFixedTime::FromSeconds(CurrentTime), f2fx(CurrentValue)));
-				CurrentTime = (pEnvelope->m_vPoints[SelectedIndex].m_Time + pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aInTangentDeltaX[SelectedChannel]).AsSeconds();
-			}
-			else if(pEditor->Map()->IsTangentOutSelected())
-			{
-				auto [SelectedIndex, SelectedChannel] = pEditor->Map()->m_SelectedTangentOutPoint;
-
-				pEditor->Map()->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionEditEnvelopePointValue>(pEditor->Map(), pEditor->Map()->m_SelectedEnvelope, SelectedIndex, SelectedChannel, CEditorActionEditEnvelopePointValue::EType::TANGENT_OUT, OldTime, OldValue, CFixedTime::FromSeconds(CurrentTime), f2fx(CurrentValue)));
-				CurrentTime = (pEnvelope->m_vPoints[SelectedIndex].m_Time + pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aOutTangentDeltaX[SelectedChannel]).AsSeconds();
-			}
-			else
-			{
-				auto [SelectedIndex, SelectedChannel] = pEditor->Map()->m_vSelectedEnvelopePoints.front();
-				pEditor->Map()->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionEditEnvelopePointValue>(pEditor->Map(), pEditor->Map()->m_SelectedEnvelope, SelectedIndex, SelectedChannel, CEditorActionEditEnvelopePointValue::EType::POINT, OldTime, OldValue, CFixedTime::FromSeconds(CurrentTime), f2fx(CurrentValue)));
-
-				if(SelectedIndex != 0)
-				{
-					CurrentTime = pEnvelope->m_vPoints[SelectedIndex].m_Time.AsSeconds();
-				}
-				else
-				{
-					CurrentTime = 0.0f;
-					pEnvelope->m_vPoints[SelectedIndex].m_Time = CFixedTime(0);
-				}
-			}
-
-			s_CurTimeInput.SetFloat(CFixedTime::FromSeconds(CurrentTime).AsSeconds());
-			s_CurValueInput.SetFloat(fx2f(f2fx(CurrentValue)));
-
-			s_CurrentTime = s_CurTimeInput.GetFloat();
-			s_CurrentValue = s_CurValueInput.GetFloat();
-		}
-	}
-
-	View.HSplitTop(6.0f, nullptr, &View);
-	View.HSplitTop(RowHeight, &Row, &View);
-	static int s_DeleteButtonId = 0;
-	const char *pButtonText = pEditor->Map()->IsTangentSelected() ? "Reset" : "Delete";
-	const char *pTooltip = pEditor->Map()->IsTangentSelected() ? "Reset tangent point to default value." : "Delete current envelope point in all channels.";
-	if(pEditor->DoButton_Editor(&s_DeleteButtonId, pButtonText, 0, &Row, BUTTONFLAG_LEFT, pTooltip))
-	{
-		if(pEditor->Map()->IsTangentInSelected())
-		{
-			auto [SelectedIndex, SelectedChannel] = pEditor->Map()->m_SelectedTangentInPoint;
-			const auto &[OldTime, OldValue] = pEditor->Map()->SelectedEnvelopeTimeAndValue();
-			pEditor->Map()->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionResetEnvelopePointTangent>(pEditor->Map(), pEditor->Map()->m_SelectedEnvelope, SelectedIndex, SelectedChannel, true, OldTime, OldValue));
-		}
-		else if(pEditor->Map()->IsTangentOutSelected())
-		{
-			auto [SelectedIndex, SelectedChannel] = pEditor->Map()->m_SelectedTangentOutPoint;
-			const auto &[OldTime, OldValue] = pEditor->Map()->SelectedEnvelopeTimeAndValue();
-			pEditor->Map()->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionResetEnvelopePointTangent>(pEditor->Map(), pEditor->Map()->m_SelectedEnvelope, SelectedIndex, SelectedChannel, false, OldTime, OldValue));
-		}
-		else
-		{
-			auto [SelectedIndex, SelectedChannel] = pEditor->Map()->m_vSelectedEnvelopePoints.front();
-			pEditor->Map()->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionDeleteEnvelopePoint>(pEditor->Map(), pEditor->Map()->m_SelectedEnvelope, SelectedIndex));
-		}
-
-		return CUi::POPUP_CLOSE_CURRENT;
-	}
-
-	return CUi::POPUP_KEEP_OPEN;
-}
-
-CUi::EPopupMenuFunctionResult CEditor::PopupEnvPointMulti(void *pContext, CUIRect View, bool Active)
-{
-	CEditor *pEditor = static_cast<CEditor *>(pContext);
-	const float RowHeight = 12.0f;
-
-	static int s_CurveButtonId = 0;
-	CUIRect CurveButton;
-	View.HSplitTop(RowHeight, &CurveButton, &View);
-	if(pEditor->DoButton_Editor(&s_CurveButtonId, "Project onto", 0, &CurveButton, BUTTONFLAG_LEFT, "Project all selected envelopes onto the curve between the first and last selected envelope."))
-	{
-		static SPopupMenuId s_PopupCurveTypeId;
-		pEditor->Ui()->DoPopupMenu(&s_PopupCurveTypeId, pEditor->Ui()->MouseX(), pEditor->Ui()->MouseY(), 80, 80, pEditor, PopupEnvPointCurveType);
-	}
-
-	return CUi::POPUP_KEEP_OPEN;
-}
-
-CUi::EPopupMenuFunctionResult CEditor::PopupEnvPointCurveType(void *pContext, CUIRect View, bool Active)
-{
-	CEditor *pEditor = static_cast<CEditor *>(pContext);
-	const float RowHeight = 14.0f;
-
-	int CurveType = -1;
-
-	static int s_ButtonLinearId;
-	CUIRect ButtonLinear;
-	View.HSplitTop(RowHeight, &ButtonLinear, &View);
-	if(pEditor->DoButton_MenuItem(&s_ButtonLinearId, "Linear", 0, &ButtonLinear))
-		CurveType = CURVETYPE_LINEAR;
-
-	static int s_ButtonSlowId;
-	CUIRect ButtonSlow;
-	View.HSplitTop(RowHeight, &ButtonSlow, &View);
-	if(pEditor->DoButton_MenuItem(&s_ButtonSlowId, "Slow", 0, &ButtonSlow))
-		CurveType = CURVETYPE_SLOW;
-
-	static int s_ButtonFastId;
-	CUIRect ButtonFast;
-	View.HSplitTop(RowHeight, &ButtonFast, &View);
-	if(pEditor->DoButton_MenuItem(&s_ButtonFastId, "Fast", 0, &ButtonFast))
-		CurveType = CURVETYPE_FAST;
-
-	static int s_ButtonStepId;
-	CUIRect ButtonStep;
-	View.HSplitTop(RowHeight, &ButtonStep, &View);
-	if(pEditor->DoButton_MenuItem(&s_ButtonStepId, "Step", 0, &ButtonStep))
-		CurveType = CURVETYPE_STEP;
-
-	static int s_ButtonSmoothId;
-	CUIRect ButtonSmooth;
-	View.HSplitTop(RowHeight, &ButtonSmooth, &View);
-	if(pEditor->DoButton_MenuItem(&s_ButtonSmoothId, "Smooth", 0, &ButtonSmooth))
-		CurveType = CURVETYPE_SMOOTH;
-
-	std::vector<std::shared_ptr<IEditorAction>> vpActions;
-
-	if(CurveType >= 0)
-	{
-		std::shared_ptr<CEnvelope> pEnvelope = pEditor->Map()->m_vpEnvelopes.at(pEditor->Map()->m_SelectedEnvelope);
-
-		for(int c = 0; c < pEnvelope->GetChannels(); c++)
-		{
-			int FirstSelectedIndex = pEnvelope->m_vPoints.size();
-			int LastSelectedIndex = -1;
-			for(auto [SelectedIndex, SelectedChannel] : pEditor->Map()->m_vSelectedEnvelopePoints)
-			{
-				if(SelectedChannel == c)
-				{
-					FirstSelectedIndex = minimum(FirstSelectedIndex, SelectedIndex);
-					LastSelectedIndex = maximum(LastSelectedIndex, SelectedIndex);
-				}
-			}
-
-			if(FirstSelectedIndex < (int)pEnvelope->m_vPoints.size() && LastSelectedIndex >= 0 && FirstSelectedIndex != LastSelectedIndex)
-			{
-				CEnvPoint FirstPoint = pEnvelope->m_vPoints[FirstSelectedIndex];
-				CEnvPoint LastPoint = pEnvelope->m_vPoints[LastSelectedIndex];
-
-				CEnvelope HelperEnvelope(1);
-				HelperEnvelope.AddPoint(FirstPoint.m_Time, {FirstPoint.m_aValues[c], 0, 0, 0});
-				HelperEnvelope.AddPoint(LastPoint.m_Time, {LastPoint.m_aValues[c], 0, 0, 0});
-				HelperEnvelope.m_vPoints[0].m_Curvetype = CurveType;
-
-				for(auto [SelectedIndex, SelectedChannel] : pEditor->Map()->m_vSelectedEnvelopePoints)
-				{
-					if(SelectedChannel == c)
-					{
-						if(SelectedIndex != FirstSelectedIndex && SelectedIndex != LastSelectedIndex)
-						{
-							CEnvPoint &CurrentPoint = pEnvelope->m_vPoints[SelectedIndex];
-							ColorRGBA Channels = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
-							HelperEnvelope.Eval(CurrentPoint.m_Time.AsSeconds(), Channels, 1);
-							int PrevValue = CurrentPoint.m_aValues[c];
-							CurrentPoint.m_aValues[c] = f2fx(Channels.r);
-							vpActions.push_back(std::make_shared<CEditorActionEnvelopeEditPoint>(pEditor->Map(), pEditor->Map()->m_SelectedEnvelope, SelectedIndex, SelectedChannel, CEditorActionEnvelopeEditPoint::EEditType::VALUE, PrevValue, CurrentPoint.m_aValues[c]));
-						}
-					}
-				}
-			}
-		}
-
-		if(!vpActions.empty())
-		{
-			pEditor->Map()->m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionBulk>(pEditor->Map(), vpActions, "Project points"));
-		}
-
-		pEditor->Map()->OnModify();
-		return CUi::POPUP_CLOSE_CURRENT;
-	}
-
-	return CUi::POPUP_KEEP_OPEN;
-}
-
 static const auto &&gs_ModifyIndexDeleted = [](int DeletedIndex) {
 	return [DeletedIndex](int *pIndex) {
 		if(*pIndex == DeletedIndex)
@@ -2019,21 +1714,17 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 
 	const char *pTitle;
 	const char *pMessage;
-	char aMessageBuf[128];
+	char aMessageBuf[128 + IO_MAX_PATH_LENGTH];
 	if(pEditor->m_PopupEventType == POPEVENT_EXIT)
 	{
 		pTitle = "Exit the editor";
 		pMessage = "The map contains unsaved data, you might want to save it before you exit the editor.\n\nContinue anyway?";
 	}
-	else if(pEditor->m_PopupEventType == POPEVENT_LOAD || pEditor->m_PopupEventType == POPEVENT_LOADCURRENT || pEditor->m_PopupEventType == POPEVENT_LOADDROP)
+	else if(pEditor->m_PopupEventType == POPEVENT_CLOSE_MAP)
 	{
-		pTitle = "Load map";
-		pMessage = "The map contains unsaved data, you might want to save it before you load a new map.\n\nContinue anyway?";
-	}
-	else if(pEditor->m_PopupEventType == POPEVENT_NEW)
-	{
-		pTitle = "New map";
-		pMessage = "The map contains unsaved data, you might want to save it before you create a new map.\n\nContinue anyway?";
+		pTitle = "Save changes?";
+		str_format(aMessageBuf, sizeof(aMessageBuf), "Do you want to save your changes to '%s'?\n\nYour changes will be lost if you do not save them.", pEditor->Map()->m_aDisplayName);
+		pMessage = aMessageBuf;
 	}
 	else if(pEditor->m_PopupEventType == POPEVENT_LARGELAYER)
 	{
@@ -2145,14 +1836,14 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		static int s_CancelButton = 0;
 		if(pEditor->DoButton_Editor(&s_CancelButton, "Cancel", 0, &Button, BUTTONFLAG_LEFT, nullptr))
 		{
-			if(pEditor->m_PopupEventType == POPEVENT_LOADDROP)
-				pEditor->m_aFilenamePendingLoad[0] = 0;
-
-			else if(pEditor->m_PopupEventType == POPEVENT_TILE_ART_BIG_IMAGE || pEditor->m_PopupEventType == POPEVENT_TILE_ART_MANY_COLORS)
+			if(pEditor->m_PopupEventType == POPEVENT_TILE_ART_BIG_IMAGE || pEditor->m_PopupEventType == POPEVENT_TILE_ART_MANY_COLORS)
+			{
 				pEditor->m_TileArtImageInfo.Free();
-
+			}
 			else if(pEditor->m_PopupEventType == POPEVENT_QUAD_ART_BIG_IMAGE)
+			{
 				pEditor->m_QuadArtImageInfo.Free();
+			}
 
 			pEditor->m_PopupEventWasActivated = false;
 			return CUi::POPUP_CLOSE_CURRENT;
@@ -2164,31 +1855,20 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 
 	ButtonBar.VSplitRight(110.0f, &ButtonBar, &Button);
 	static int s_ConfirmButton = 0;
-	if(pEditor->DoButton_Editor(&s_ConfirmButton, "Confirm", 0, &Button, BUTTONFLAG_LEFT, nullptr) || (Active && pEditor->Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
+	const char *pConfirmLabel = pEditor->m_PopupEventType == POPEVENT_CLOSE_MAP ? "Save changes" : "Confirm";
+	const int ConfirmChecked = pEditor->m_PopupEventType == POPEVENT_CLOSE_MAP ? EditorButtonChecked::POSITIVE_ACTION : 0;
+	if(pEditor->DoButton_Editor(&s_ConfirmButton, pConfirmLabel, ConfirmChecked, &Button, BUTTONFLAG_LEFT, nullptr) ||
+		(Active && pEditor->Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
 	{
 		if(pEditor->m_PopupEventType == POPEVENT_EXIT)
 		{
 			pEditor->OnClose();
 			g_Config.m_ClEditor = 0;
 		}
-		else if(pEditor->m_PopupEventType == POPEVENT_LOAD)
+		else if(pEditor->m_PopupEventType == POPEVENT_CLOSE_MAP)
 		{
-			pEditor->m_FileBrowser.ShowFileDialog(IStorage::TYPE_ALL, CFileBrowser::EFileType::MAP, "Load map", "Load", "maps", "", CallbackOpenMap, pEditor);
-		}
-		else if(pEditor->m_PopupEventType == POPEVENT_LOADCURRENT)
-		{
-			pEditor->LoadCurrentMap();
-		}
-		else if(pEditor->m_PopupEventType == POPEVENT_LOADDROP)
-		{
-			int Result = pEditor->Load(pEditor->m_aFilenamePendingLoad, IStorage::TYPE_ALL_OR_ABSOLUTE);
-			if(!Result)
-				dbg_msg("editor", "editing passed map file '%s' failed", pEditor->m_aFilenamePendingLoad);
-			pEditor->m_aFilenamePendingLoad[0] = 0;
-		}
-		else if(pEditor->m_PopupEventType == POPEVENT_NEW)
-		{
-			pEditor->Reset();
+			pEditor->InvokeSave();
+			// TODO: actually close the map after saving, which might have been delayed due to the file browser being opened, also need to wait until writer is done or we might lose changes
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
 		{
@@ -2226,6 +1906,16 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		}
 		pEditor->m_PopupEventWasActivated = false;
 		return CUi::POPUP_CLOSE_CURRENT;
+	}
+
+	if(pEditor->m_PopupEventType == POPEVENT_CLOSE_MAP)
+	{
+		static int s_DiscardButton = 0;
+		ButtonBar.VMargin((ButtonBar.w - 110.0f) / 2.0f, &Button);
+		if(pEditor->DoButton_Editor(&s_DiscardButton, "Discard changes", EditorButtonChecked::DANGEROUS_ACTION, &Button, BUTTONFLAG_LEFT, nullptr))
+		{
+			pEditor->CloseSelectedMap(false);
+		}
 	}
 
 	return CUi::POPUP_KEEP_OPEN;
@@ -3071,47 +2761,6 @@ CUi::EPopupMenuFunctionResult CEditor::PopupAnimateSettings(void *pContext, CUIR
 	if(pEditor->DoEditBox(&s_SpeedInput, &EditBox, 10.0f, IGraphics::CORNER_NONE, "The animation speed."))
 	{
 		pEditor->m_AnimateSpeed = std::clamp(s_SpeedInput.GetFloat(), MIN_ANIM_SPEED, MAX_ANIM_SPEED);
-	}
-
-	return CUi::POPUP_KEEP_OPEN;
-}
-
-CUi::EPopupMenuFunctionResult CEditor::PopupEnvelopeCurvetype(void *pContext, CUIRect View, bool Active)
-{
-	CEditor *pEditor = static_cast<CEditor *>(pContext);
-
-	if(pEditor->Map()->m_SelectedEnvelope < 0 || pEditor->Map()->m_SelectedEnvelope >= (int)pEditor->Map()->m_vpEnvelopes.size())
-	{
-		return CUi::POPUP_CLOSE_CURRENT;
-	}
-	std::shared_ptr<CEnvelope> pEnvelope = pEditor->Map()->m_vpEnvelopes[pEditor->Map()->m_SelectedEnvelope];
-
-	if(pEditor->m_PopupEnvelopeSelectedPoint < 0 || pEditor->m_PopupEnvelopeSelectedPoint >= (int)pEnvelope->m_vPoints.size())
-	{
-		return CUi::POPUP_CLOSE_CURRENT;
-	}
-	CEnvPoint_runtime &SelectedPoint = pEnvelope->m_vPoints[pEditor->m_PopupEnvelopeSelectedPoint];
-
-	static const char *const TYPE_NAMES[NUM_CURVETYPES] = {"Step", "Linear", "Slow", "Fast", "Smooth", "Bezier"};
-	static char s_aButtonIds[NUM_CURVETYPES] = {0};
-
-	for(int Type = 0; Type < NUM_CURVETYPES; Type++)
-	{
-		CUIRect Button;
-		View.HSplitTop(14.0f, &Button, &View);
-
-		if(pEditor->DoButton_MenuItem(&s_aButtonIds[Type], TYPE_NAMES[Type], Type == SelectedPoint.m_Curvetype, &Button))
-		{
-			const int PrevCurve = SelectedPoint.m_Curvetype;
-			if(PrevCurve != Type)
-			{
-				SelectedPoint.m_Curvetype = Type;
-				pEditor->Map()->m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeEditPoint>(pEditor->Map(),
-					pEditor->Map()->m_SelectedEnvelope, pEditor->m_PopupEnvelopeSelectedPoint, 0, CEditorActionEnvelopeEditPoint::EEditType::CURVE_TYPE, PrevCurve, SelectedPoint.m_Curvetype));
-				pEditor->Map()->OnModify();
-				return CUi::POPUP_CLOSE_CURRENT;
-			}
-		}
 	}
 
 	return CUi::POPUP_KEEP_OPEN;
