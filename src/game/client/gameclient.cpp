@@ -952,6 +952,18 @@ bool CGameClient::IsTeamPlay() const
 	       (m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS) != 0;
 }
 
+bool CGameClient::IsWorldPaused() const
+{
+	return m_Snap.m_pGameInfoObj &&
+	       (m_Snap.m_pGameInfoObj->m_GameStateFlags & (GAMESTATEFLAG_GAMEOVER | GAMESTATEFLAG_PAUSED)) != 0;
+}
+
+bool CGameClient::IsDemoPlaybackPaused() const
+{
+	return Client()->State() == IClient::STATE_DEMOPLAYBACK &&
+	       DemoPlayer()->BaseInfo()->m_Paused;
+}
+
 bool CGameClient::AntiPingPlayers() const
 {
 	return g_Config.m_ClAntiPing &&
@@ -986,7 +998,7 @@ bool CGameClient::AntiPingGunfire() const
 bool CGameClient::Predict() const
 {
 	return g_Config.m_ClPredict &&
-	       (m_Snap.m_pGameInfoObj == nullptr || (m_Snap.m_pGameInfoObj->m_GameStateFlags & (GAMESTATEFLAG_GAMEOVER | GAMESTATEFLAG_PAUSED)) == 0) &&
+	       !IsWorldPaused() &&
 	       Client()->State() != IClient::STATE_DEMOPLAYBACK &&
 	       !m_Snap.m_SpecInfo.m_Active &&
 	       m_Snap.m_pLocalCharacter;
@@ -3634,7 +3646,7 @@ void CGameClient::UpdateSpectatorCursor()
 
 	const vec2 Target = vec2(CharInfo.m_ExtendedData.m_TargetX, CharInfo.m_ExtendedData.m_TargetY);
 
-	if(Client()->State() == IClient::STATE_DEMOPLAYBACK && DemoPlayer()->BaseInfo()->m_Paused)
+	if(IsDemoPlaybackPaused())
 	{
 		m_CursorInfo.m_CursorOwnerId = -1;
 		m_CursorInfo.m_NumSamples = 0;

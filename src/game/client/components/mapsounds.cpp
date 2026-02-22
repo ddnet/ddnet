@@ -136,7 +136,7 @@ void CMapSounds::OnRender()
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		return;
 
-	bool DemoPlayerPaused = Client()->State() == IClient::STATE_DEMOPLAYBACK && DemoPlayer()->BaseInfo()->m_Paused;
+	const bool DemoPlayerPaused = GameClient()->IsDemoPlaybackPaused();
 
 	// enqueue sounds
 	for(auto &Source : m_vSourceQueue)

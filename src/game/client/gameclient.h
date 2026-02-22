@@ -681,6 +681,8 @@ public:
 	int CurrentRaceTime() const;
 
 	bool IsTeamPlay() const;
+	bool IsWorldPaused() const;
+	bool IsDemoPlaybackPaused() const;
 
 	bool AntiPingPlayers() const;
 	bool AntiPingGrenade() const;

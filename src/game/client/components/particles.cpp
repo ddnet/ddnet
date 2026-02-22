@@ -41,16 +41,9 @@ void CParticles::OnReset()
 
 void CParticles::Add(int Group, CParticle *pPart, float TimePassed)
 {
-	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	if(GameClient()->IsWorldPaused() || GameClient()->IsDemoPlaybackPaused())
 	{
-		const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
-		if(pInfo->m_Paused)
-			return;
-	}
-	else
-	{
-		if(GameClient()->m_Snap.m_pGameInfoObj && GameClient()->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED)
-			return;
+		return;
 	}
 
 	if(m_FirstFree == -1)

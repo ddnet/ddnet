@@ -49,7 +49,7 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemId)
 		LocalPlayerInGame = GameClient()->m_aClients[GameClient()->m_Snap.m_pLocalInfo->m_ClientId].m_Team != TEAM_SPECTATORS;
 
 	static float s_LastGameTickTime = Client()->GameTickTime(g_Config.m_ClDummy);
-	if(GameClient()->m_Snap.m_pGameInfoObj && !(GameClient()->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED))
+	if(!GameClient()->IsWorldPaused() && !GameClient()->IsDemoPlaybackPaused())
 		s_LastGameTickTime = Client()->GameTickTime(g_Config.m_ClDummy);
 
 	bool IsOtherTeam = (pCurrent->m_ExtraInfo && pCurrent->m_Owner >= 0 && GameClient()->IsOtherTeam(pCurrent->m_Owner));
