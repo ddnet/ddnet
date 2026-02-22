@@ -590,12 +590,15 @@ void CPlayer::OnPredictedEarlyInput(const CNetObj_PlayerInput *pNewInput)
 	if(!m_pCharacter && m_Team != TEAM_SPECTATORS && (pNewInput->m_Fire & 1))
 		m_Spawning = true;
 
-	// skip the input if chat is active
-	if(m_PlayerFlags & PLAYERFLAG_CHATTING)
-		return;
-
-	if(m_pCharacter && !m_Paused && !(m_PlayerFlags & PLAYERFLAG_SPEC_CAM))
-		m_pCharacter->OnDirectInput(pNewInput);
+	if(m_pCharacter)
+	{
+		// Use last input to prevent new actions, but still call OnDirectInput
+		// so weapon handling (e.g. reload timer) stays consistent
+		if((m_PlayerFlags & PLAYERFLAG_CHATTING) || m_Paused || (m_PlayerFlags & PLAYERFLAG_SPEC_CAM))
+			m_pCharacter->OnDirectInput(&m_pCharacter->LatestInput());
+		else
+			m_pCharacter->OnDirectInput(pNewInput);
+	}
 }
 
 int CPlayer::GetClientVersion() const
