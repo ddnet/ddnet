@@ -131,6 +131,28 @@ Combine these appropriately.
 | `I` | Interfaces | `class IFavorites` |
 | `S` | ~~Structs (Use classes instead)~~ | ~~`struct STextContainerUsages`~~ |
 
+### Constants
+
+Constants should use UPPER_SNAKE_CASE.
+They should use `static constexpr` when internal linkage is wanted (in `.cpp` files)
+or `inline constexpr` when shared (in `.h` files)
+
+❌ Avoid:
+
+```cpp
+#define THE_NUMBER_ONE 1
+inline constexpr const char *gs_pHelloWorld = "Hello World";
+static constexpr int s_aSquares[] = {1, 4, 8, 16};
+```
+
+✅ Instead do:
+
+```cpp
+static constexpr int THE_NUMBER_ONE = 1;
+static constexpr const char *HELLO_WORLD = "Hello World";
+static constexpr int SQUARES[] = {1, 4, 8, 16};
+```
+
 ### Enumerations
 
 Both unscoped enums (`enum`) and scoped enums (`enum class`) should start with `E` and be CamelCase. The literals should use SCREAMING_SNAKE_CASE.
@@ -196,7 +218,7 @@ namespace ConfigFlag
 
 ### Using the C preprocessor should be avoided
 
-- Avoid `#define` directives for constants. Use `enum class` or `inline constexpr` instead.
+- Avoid `#define` directives for constants. See [style for constants](#for_constants).
   Only use `#define` directives if there is no other option (e.g. for conditional compilation).
 - Avoid function-like `#define` directives. If possible, extract code into functions or lambda expressions instead of macros.
    Only use function-like `#define` directives if there is no other, more readable option.
