@@ -946,23 +946,59 @@ int CGameClient::CurrentRaceTime() const
 	return (Client()->GameTick(g_Config.m_ClDummy) - m_LastRaceTick) / Client()->GameTickSpeed();
 }
 
+bool CGameClient::IsTeamPlay() const
+{
+	return m_Snap.m_pGameInfoObj &&
+	       (m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS) != 0;
+}
+
+bool CGameClient::AntiPingPlayers() const
+{
+	return g_Config.m_ClAntiPing &&
+	       g_Config.m_ClAntiPingPlayers &&
+	       !m_Snap.m_SpecInfo.m_Active &&
+	       Client()->State() != IClient::STATE_DEMOPLAYBACK;
+}
+
+bool CGameClient::AntiPingGrenade() const
+{
+	return g_Config.m_ClAntiPing &&
+	       g_Config.m_ClAntiPingGrenade &&
+	       !m_Snap.m_SpecInfo.m_Active &&
+	       Client()->State() != IClient::STATE_DEMOPLAYBACK;
+}
+
+bool CGameClient::AntiPingWeapons() const
+{
+	return g_Config.m_ClAntiPing &&
+	       g_Config.m_ClAntiPingWeapons &&
+	       !m_Snap.m_SpecInfo.m_Active &&
+	       Client()->State() != IClient::STATE_DEMOPLAYBACK;
+}
+
+bool CGameClient::AntiPingGunfire() const
+{
+	return AntiPingGrenade() &&
+	       AntiPingWeapons() &&
+	       g_Config.m_ClAntiPingGunfire;
+}
+
 bool CGameClient::Predict() const
 {
-	if(!g_Config.m_ClPredict)
-		return false;
+	return g_Config.m_ClPredict &&
+	       (m_Snap.m_pGameInfoObj == nullptr || (m_Snap.m_pGameInfoObj->m_GameStateFlags & (GAMESTATEFLAG_GAMEOVER | GAMESTATEFLAG_PAUSED)) == 0) &&
+	       Client()->State() != IClient::STATE_DEMOPLAYBACK &&
+	       !m_Snap.m_SpecInfo.m_Active &&
+	       m_Snap.m_pLocalCharacter;
+}
 
-	if(m_Snap.m_pGameInfoObj)
-	{
-		if(m_Snap.m_pGameInfoObj->m_GameStateFlags & (GAMESTATEFLAG_GAMEOVER | GAMESTATEFLAG_PAUSED))
-		{
-			return false;
-		}
-	}
-
-	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
-		return false;
-
-	return !m_Snap.m_SpecInfo.m_Active && m_Snap.m_pLocalCharacter;
+bool CGameClient::PredictDummy() const
+{
+	return g_Config.m_ClPredictDummy &&
+	       Client()->DummyConnected() &&
+	       m_Snap.m_LocalClientId >= 0 &&
+	       m_aLocalIds[!g_Config.m_ClDummy] >= 0 &&
+	       !m_aClients[m_aLocalIds[!g_Config.m_ClDummy]].m_Paused;
 }
 
 ColorRGBA CGameClient::GetDDTeamColor(int DDTeam, float Lightness) const
