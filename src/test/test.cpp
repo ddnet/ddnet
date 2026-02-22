@@ -2,10 +2,10 @@
 
 #include <base/fs.h>
 #include <base/logger.h>
+#include <base/net.h>
 #include <base/os.h>
 #include <base/process.h>
 #include <base/str.h>
-#include <base/system.h> // net_init
 
 #include <engine/storage.h>
 

@@ -3,7 +3,8 @@
 
 #include "host_lookup.h"
 
-#include <base/system.h>
+#include <base/net.h>
+#include <base/str.h>
 
 CHostLookup::CHostLookup() = default;
 

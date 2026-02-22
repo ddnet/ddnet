@@ -1,8 +1,12 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include "system.h"
 
+#include "net.h"
+
+#include "dbg.h"
 #include "log.h"
+#include "mem.h"
+#include "str.h"
 #include "windows.h"
 
 #include <chrono>
@@ -17,12 +21,16 @@
 #include <sys/time.h> // timeval
 #include <unistd.h> // close
 
-/* unix net includes */
+// UNIX net includes
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+
+#if defined(CONF_PLATFORM_SOLARIS)
+#include <sys/filio.h> // FIONBIO
+#endif
 
 #include <cerrno>
 #elif defined(CONF_FAMILY_WINDOWS)
@@ -31,10 +39,6 @@
 #include <ws2tcpip.h>
 #else
 #error NOT IMPLEMENTED
-#endif
-
-#if defined(CONF_PLATFORM_SOLARIS)
-#include <sys/filio.h>
 #endif
 
 static NETSTATS network_stats = {0};

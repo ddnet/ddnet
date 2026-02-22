@@ -1,5 +1,6 @@
 #include "netban.h"
 
+#include <base/io.h>
 #include <base/math.h>
 
 #include <engine/console.h>
