@@ -820,7 +820,7 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 
 							for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 							{
-								if(((pLayerSwitchTiles[i].m_Type > (ENTITY_CRAZY_SHOTGUN + ENTITY_OFFSET) && pLayerSwitchTiles[i].m_Type < (ENTITY_DRAGGER_WEAK + ENTITY_OFFSET)) || pLayerSwitchTiles[i].m_Type == (ENTITY_LASER_O_FAST + 1 + ENTITY_OFFSET)))
+								if(pLayerSwitchTiles[i].m_Type > (ENTITY_CRAZY_SHOTGUN + ENTITY_OFFSET) && pLayerSwitchTiles[i].m_Type < (ENTITY_DRAGGER_WEAK + ENTITY_OFFSET))
 									continue;
 								else if(pLayerSwitchTiles[i].m_Type >= (ENTITY_ARMOR_1 + ENTITY_OFFSET) && pLayerSwitchTiles[i].m_Type <= (ENTITY_DOOR + ENTITY_OFFSET))
 								{
