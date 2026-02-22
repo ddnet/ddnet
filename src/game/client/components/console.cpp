@@ -250,7 +250,9 @@ CGameConsole::CInstance::CInstance(int Type)
 		}
 	});
 
-	m_Input.SetClipboardLineCallback([this](const char *pStr) { ExecuteLine(pStr); });
+	m_Input.SetClipboardLineCallback([this](const char *pStr) {
+		ExecuteLinesFromString(pStr);
+	});
 
 	m_CurrentMatchIndex = -1;
 	m_aCurrentSearchString[0] = '\0';
@@ -451,6 +453,35 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 	}
 }
 
+void CGameConsole::CInstance::ExecuteLinesFromString(const char *pStr)
+{
+    const char *pLineStart = pStr;
+    const char *pIt = pStr;
+
+    while(*pIt)
+    {
+        if(*pIt == '\n' || *pIt == '\r')
+        {
+            if(pLineStart != pIt)
+            {
+                char LineBuffer[IConsole::CMDLINE_LENGTH];
+                int Len = minimum((int)(pIt - pLineStart), IConsole::CMDLINE_LENGTH - 1);
+                str_copy(LineBuffer, pLineStart, Len + 1);
+                ExecuteLine(LineBuffer);
+            }
+            while(*pIt == '\n' || *pIt == '\r') ++pIt;
+            pLineStart = pIt;
+        }
+        else
+        {
+            ++pIt;
+        }
+    }
+
+    if(pLineStart != pIt)
+        ExecuteLine(pLineStart);
+}
+
 void CGameConsole::CInstance::PossibleCommandsCompleteCallback(int Index, const char *pStr, void *pUser)
 {
 	CGameConsole::CInstance *pInstance = (CGameConsole::CInstance *)pUser;
@@ -539,8 +570,21 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 			{
 				if(!m_Input.IsEmpty() || (m_UsernameReq && !m_pGameConsole->Client()->RconAuthed() && !m_UserGot))
 				{
-					ExecuteLine(m_Input.GetString());
+					// Divide by \n and execute each line separately
+					std::string text = m_Input.GetString();
+					size_t start = 0;
+					size_t pos = text.find('\n');
+					while(pos != std::string::npos) {
+						ExecuteLine(text.substr(start, pos - start).c_str());
+						start = pos + 1;
+						pos = text.find('\n', start);
+					}
+					if(start < text.length()) {
+						ExecuteLine(text.substr(start).c_str());
+					}
+
 					m_Input.Clear();
+
 					m_pHistoryEntry = nullptr;
 				}
 			}
