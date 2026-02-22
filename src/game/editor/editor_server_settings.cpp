@@ -1084,6 +1084,8 @@ void CMapSettingsBackend::LoadAllMapSettings()
 	// Load list of commands
 	LoadCommand("tune", "s[tuning] f[value]", "Tune variable to value or show current value");
 	LoadCommand("tune_zone", "i[zone] s[tuning] f[value]", "Tune in zone a variable to value");
+	LoadCommand("env_trigger", "i[zone] s[trigger_type] i[env]", "Set a trigger type for an env in a trigger zone");
+	LoadCommand("tune_zone_env_trigger", "i[zone], i[envzone]", "Make a tune zone trigger an env zone");
 	LoadCommand("tune_zone_enter", "i[zone] r[message]", "Which message to display on zone enter; use 0 for normal area");
 	LoadCommand("tune_zone_leave", "i[zone] r[message]", "Which message to display on zone leave; use 0 for normal area");
 	LoadCommand("mapbug", "s[mapbug]", "Enable map compatibility mode using the specified bug (example: grenade-doubleexplosion@ddnet.tw)");
@@ -1175,6 +1177,8 @@ void CMapSettingsBackend::LoadConstraints()
 	Command("tune_zone_leave", 2).Unique(0);
 	Command("switch_open", 1).Unique(0);
 	Command("mapbug", 1).Unique(0);
+	Command("env_trigger", 3).Multiple(0);
+	Command("tune_zone_env_trigger", 2).Unique(0);
 }
 
 void CMapSettingsBackend::PossibleConfigVariableCallback(const SConfigVariable *pVariable, void *pUserData)
@@ -2160,6 +2164,7 @@ void CMapSettingsBackend::InitValueLoaders()
 	// Load the different possible values for some specific settings
 	RegisterLoader("tune", SValueLoader::LoadTuneValues);
 	RegisterLoader("tune_zone", SValueLoader::LoadTuneZoneValues);
+	RegisterLoader("env_trigger", SValueLoader::LoadEnvTriggerValues);
 	RegisterLoader("mapbug", SValueLoader::LoadMapBugs);
 }
 
@@ -2173,6 +2178,11 @@ void SValueLoader::LoadTuneZoneValues(const CSettingValuesBuilder &TuneZoneBuild
 {
 	// Add available tuning names to argument 1 of setting "tune_zone"
 	LoadArgumentTuneValues(TuneZoneBuilder.Argument(1));
+}
+
+void SValueLoader::LoadEnvTriggerValues(const CSettingValuesBuilder &EnvTriggerBuilder)
+{
+	LoadArgumentEnvTriggerValues(EnvTriggerBuilder.Argument(1));
 }
 
 void SValueLoader::LoadMapBugs(const CSettingValuesBuilder &BugBuilder)
@@ -2189,5 +2199,15 @@ void SValueLoader::LoadArgumentTuneValues(CArgumentValuesListBuilder &&ArgBuilde
 	for(int i = 0; i < CTuningParams::Num(); i++)
 	{
 		ArgBuilder.Add(CTuningParams::Name(i));
+	}
+}
+
+void SValueLoader::LoadArgumentEnvTriggerValues(CArgumentValuesListBuilder &&ArgBuilder)
+{
+	// Iterate through available env trigger types and add their name to the list
+	for(int EnvTypeId = 0; EnvTypeId < EEnvelopeTriggerType::NUM_ENV_TRIGGERS; EnvTypeId++)
+	{
+		EEnvelopeTriggerType EnvelopeType = static_cast<EEnvelopeTriggerType>(EnvTypeId);
+		ArgBuilder.Add(CEnvelopeTrigger::ConsoleName(EnvelopeType));
 	}
 }

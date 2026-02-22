@@ -172,6 +172,7 @@ private:
 
 	static bool IsSwitchActiveCb(int Number, void *pUser);
 	void HandleTiles(int Index);
+	void HandleEnvelopeTriggerTiles(int MapIndex);
 	void HandleSkippableTiles(int Index);
 	void DDRaceTick();
 	void DDRacePostCoreTick();
@@ -181,6 +182,9 @@ private:
 
 	int m_LastWeaponSwitchTick;
 	int m_LastTuneZoneTick;
+
+	// envelope animations
+	int m_LastEnvelopeTriggerZone;
 };
 
 #endif

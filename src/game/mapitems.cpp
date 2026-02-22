@@ -110,6 +110,8 @@ bool IsValidSwitchTile(int Index)
 		Index == TILE_SUBTRACT_TIME ||
 		Index == TILE_ALLOW_TELE_GUN ||
 		Index == TILE_ALLOW_BLUE_TELE_GUN ||
+		Index == TILE_ENV_TRIGGER ||
+		Index == TILE_ENV_RESET_STOP ||
 		(IsValidEntity(Index) && Index >= ENTITY_OFFSET + ENTITY_ARMOR_1));
 }
 

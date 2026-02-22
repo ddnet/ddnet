@@ -395,6 +395,13 @@ Objects = [
 	NetObjectEx("MapBestTime", "map-best-time@netobj.ddnet.org", [
 			NetIntRange("m_MapBestTimeSeconds", 'FinishTime::NOT_FINISHED_MILLIS', 'max_int'),
 			NetIntRange("m_MapBestTimeMillis", 0, 999),
+  ]),
+
+	# Envelope info for animations
+	NetObjectEx("EnvelopeTrigger", "envelope-trigger@netobj.ddnet.tw", [
+		NetTick("m_StartTick"),
+		NetIntAny("m_Type"),
+		NetIntRange("m_ClientId", -1, 'MAX_CLIENTS-1'),
 	]),
 
 	NetEventEx("MapSoundWorld:Common", "map-sound-world@netevent.ddnet.org", [
