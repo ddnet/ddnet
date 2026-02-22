@@ -720,8 +720,9 @@ void CHud::PrepareAmmoHealthAndArmorQuads()
 	Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
 }
 
-void CHud::RenderAmmoHealthAndArmor(const CNetObj_Character *pCharacter)
+void CHud::RenderAmmoHealthAndArmor(int ClientId)
 {
+	const CNetObj_Character *pCharacter = &GameClient()->m_Snap.m_aCharacters[ClientId].m_Cur;
 	if(!pCharacter)
 		return;
 
@@ -736,9 +737,10 @@ void CHud::RenderAmmoHealthAndArmor(const CNetObj_Character *pCharacter)
 		// 0.7 only
 		if(CurWeapon == WEAPON_NINJA)
 		{
-			if(!GameClient()->m_GameInfo.m_HudDDRace && Client()->IsSixup())
+			CCharacter *pWorldChar = GameClient()->m_GameWorld.GetCharacterById(ClientId);
+			if(!GameClient()->m_GameInfo.m_HudDDRace && Client()->IsSixup() && pWorldChar)
 			{
-				const int Max = g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000;
+				const int Max = pWorldChar->GetTuning(pWorldChar->GetOverriddenTuneZone())->m_NinjaDuration * Client()->GameTickSpeed() / 1000;
 				float NinjaProgress = std::clamp(pCharacter->m_AmmoCount - Client()->GameTick(g_Config.m_ClDummy), 0, Max) / (float)Max;
 				RenderNinjaBarPos(5 + 10 * 12, 5, 6.f, 24.f, NinjaProgress);
 			}
@@ -940,11 +942,15 @@ void CHud::RenderPlayerState(const int ClientId)
 		}
 		if(pCharacter->m_aWeapons[WEAPON_NINJA].m_Got)
 		{
-			const int Max = g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000;
-			float NinjaProgress = std::clamp(pCharacter->m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000 - Client()->GameTick(g_Config.m_ClDummy), 0, Max) / (float)Max;
-			if(NinjaProgress > 0.0f && GameClient()->m_Snap.m_aCharacters[ClientId].m_HasExtendedDisplayInfo)
+			CCharacter *pWorldChar = GameClient()->m_PredictedWorld.GetCharacterById(ClientId);
+			if(pWorldChar)
 			{
-				RenderNinjaBarPos(x, y - 12, 6.f, 24.f, NinjaProgress);
+				const int Max = pWorldChar->GetTuning(pWorldChar->GetOverriddenTuneZone())->m_NinjaDuration * Client()->GameTickSpeed() / 1000;
+				float NinjaProgress = std::clamp(pCharacter->m_Ninja.m_ActivationTick + static_cast<int>(pWorldChar->GetTuning(pWorldChar->GetOverriddenTuneZone())->m_NinjaDuration) * Client()->GameTickSpeed() / 1000 - Client()->GameTick(g_Config.m_ClDummy), 0, Max) / (float)Max;
+				if(NinjaProgress > 0.0f && GameClient()->m_Snap.m_aCharacters[ClientId].m_HasExtendedDisplayInfo)
+				{
+					RenderNinjaBarPos(x, y - 12, 6.f, 24.f, NinjaProgress);
+				}
 			}
 		}
 	}
@@ -1690,7 +1696,7 @@ void CHud::OnRender()
 		{
 			if(g_Config.m_ClShowhudHealthAmmo)
 			{
-				RenderAmmoHealthAndArmor(GameClient()->m_Snap.m_pLocalCharacter);
+				RenderAmmoHealthAndArmor(GameClient()->m_Snap.m_LocalClientId);
 			}
 			if(GameClient()->m_Snap.m_aCharacters[GameClient()->m_Snap.m_LocalClientId].m_HasExtendedData && g_Config.m_ClShowhudDDRace && GameClient()->m_GameInfo.m_HudDDRace)
 			{
@@ -1705,7 +1711,7 @@ void CHud::OnRender()
 			int SpectatorId = GameClient()->m_Snap.m_SpecInfo.m_SpectatorId;
 			if(SpectatorId != SPEC_FREEVIEW && g_Config.m_ClShowhudHealthAmmo)
 			{
-				RenderAmmoHealthAndArmor(&GameClient()->m_Snap.m_aCharacters[SpectatorId].m_Cur);
+				RenderAmmoHealthAndArmor(SpectatorId);
 			}
 			if(SpectatorId != SPEC_FREEVIEW &&
 				GameClient()->m_Snap.m_aCharacters[SpectatorId].m_HasExtendedData &&
