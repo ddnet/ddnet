@@ -968,6 +968,78 @@ void CCommandProcessorFragment_OpenGL::Cmd_Render(const CCommandBuffer::SCommand
 #endif
 }
 
+void CCommandProcessorFragment_OpenGL::Cmd_RenderProgressSpinner(const CCommandBuffer::SCommand_RenderProgressSpinner *pCommand)
+{
+#ifndef BACKEND_GL_MODERN_API
+	SetState(pCommand->m_State);
+
+	constexpr int NumSegments = 64;
+	constexpr int NumVertices = NumSegments * 2 * 3;
+
+	CCommandBuffer::SVertex aVertices[NumVertices];
+
+	float CenterX = pCommand->m_CenterX;
+	float CenterY = pCommand->m_CenterY;
+	float OuterR = pCommand->m_OuterRadius;
+	float InnerR = pCommand->m_InnerRadius;
+	float ArcStart = pCommand->m_ArcStart;
+	float ArcLen = pCommand->m_ArcLen;
+
+	auto MakeColor = [](ColorRGBA c) -> GL_SColor {
+		return GL_SColor{
+			(unsigned char)(c.r * 255.0f),
+			(unsigned char)(c.g * 255.0f),
+			(unsigned char)(c.b * 255.0f),
+			(unsigned char)(c.a * 255.0f)};
+	};
+
+	GL_SColor FilledColor = MakeColor(pCommand->m_FilledColor);
+	GL_SColor UnfilledColor = MakeColor(pCommand->m_UnfilledColor);
+
+	float AngleStep = 2.0f * pi / NumSegments;
+	float FilledEnd = ArcStart + ArcLen * 2.0f * pi;
+
+	int VertIdx = 0;
+	for(int i = 0; i < NumSegments; ++i)
+	{
+		float Angle1 = ArcStart + i * AngleStep;
+		float Angle2 = ArcStart + (i + 1) * AngleStep;
+
+		float SegMid = Angle1 + AngleStep * 0.5f;
+		bool Filled = (ArcLen >= 1.0f) || (ArcLen > 0.0f && SegMid < FilledEnd);
+		GL_SColor Color = Filled ? FilledColor : UnfilledColor;
+
+		float DirX1 = std::sin(Angle1);
+		float DirY1 = -std::cos(Angle1);
+		float DirX2 = std::sin(Angle2);
+		float DirY2 = -std::cos(Angle2);
+
+		const auto &&AddVertex = [&](float X, float Y, GL_SColor VertColor) {
+			aVertices[VertIdx].m_Pos = {X, Y};
+			aVertices[VertIdx].m_Tex = {0.0f, 0.0f};
+			aVertices[VertIdx].m_Color = VertColor;
+			VertIdx++;
+		};
+
+		AddVertex(CenterX + DirX1 * InnerR, CenterY + DirY1 * InnerR, Color);
+		AddVertex(CenterX + DirX2 * InnerR, CenterY + DirY2 * InnerR, Color);
+		AddVertex(CenterX + DirX1 * OuterR, CenterY + DirY1 * OuterR, Color);
+		AddVertex(CenterX + DirX1 * OuterR, CenterY + DirY1 * OuterR, Color);
+		AddVertex(CenterX + DirX2 * InnerR, CenterY + DirY2 * InnerR, Color);
+		AddVertex(CenterX + DirX2 * OuterR, CenterY + DirY2 * OuterR, Color);
+	}
+
+	glVertexPointer(2, GL_FLOAT, sizeof(CCommandBuffer::SVertex), (char *)aVertices);
+	glTexCoordPointer(2, GL_FLOAT, sizeof(CCommandBuffer::SVertex), (char *)aVertices + sizeof(float) * 2);
+	glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(CCommandBuffer::SVertex), (char *)aVertices + sizeof(float) * 4);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+
+	glDrawArrays(GL_TRIANGLES, 0, NumVertices);
+#endif
+}
+
 void CCommandProcessorFragment_OpenGL::Cmd_ReadPixel(const CCommandBuffer::SCommand_TrySwapAndReadPixel *pCommand)
 {
 	// get size of viewport
@@ -1096,6 +1168,7 @@ ERunCommandReturnTypes CCommandProcessorFragment_OpenGL::RunCommand(const CComma
 	case CCommandBuffer::CMD_RENDER_QUAD_CONTAINER: Cmd_RenderQuadContainer(static_cast<const CCommandBuffer::SCommand_RenderQuadContainer *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_RENDER_QUAD_CONTAINER_EX: Cmd_RenderQuadContainerEx(static_cast<const CCommandBuffer::SCommand_RenderQuadContainerEx *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_RENDER_QUAD_CONTAINER_SPRITE_MULTIPLE: Cmd_RenderQuadContainerAsSpriteMultiple(static_cast<const CCommandBuffer::SCommand_RenderQuadContainerAsSpriteMultiple *>(pBaseCommand)); break;
+	case CCommandBuffer::CMD_RENDER_PROGRESS_SPINNER: Cmd_RenderProgressSpinner(static_cast<const CCommandBuffer::SCommand_RenderProgressSpinner *>(pBaseCommand)); break;
 	default: return ERunCommandReturnTypes::RUN_COMMAND_COMMAND_UNHANDLED;
 	}
 

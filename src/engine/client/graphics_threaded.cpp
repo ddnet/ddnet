@@ -1919,6 +1919,26 @@ void CGraphics_Threaded::RenderQuadContainerAsSpriteMultiple(int ContainerIndex,
 	}
 }
 
+void CGraphics_Threaded::RenderProgressSpinner(vec2 Center, float OuterRadius, float InnerRadius, float ArcStart, float ArcLen, ColorRGBA FilledColor, ColorRGBA UnfilledColor)
+{
+	FlushVertices();
+
+	CCommandBuffer::SCommand_RenderProgressSpinner Cmd;
+	Cmd.m_State = m_State;
+	Cmd.m_CenterX = Center.x;
+	Cmd.m_CenterY = Center.y;
+	Cmd.m_OuterRadius = OuterRadius;
+	Cmd.m_InnerRadius = InnerRadius;
+	Cmd.m_ArcStart = ArcStart;
+	Cmd.m_ArcLen = ArcLen;
+	Cmd.m_FilledColor = FilledColor;
+	Cmd.m_UnfilledColor = UnfilledColor;
+
+	AddCmd(Cmd);
+
+	m_pCommandBuffer->AddRenderCalls(1);
+}
+
 void *CGraphics_Threaded::AllocCommandBufferData(size_t AllocSize)
 {
 	void *pData = m_pCommandBuffer->AllocData(AllocSize);

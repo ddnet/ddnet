@@ -283,7 +283,6 @@ struct SProgressSpinnerProperties
 {
 	float m_Progress = -1.0f; // between 0.0f and 1.0f, or negative for indeterminate progress
 	ColorRGBA m_Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-	int m_Segments = 64;
 };
 
 /**

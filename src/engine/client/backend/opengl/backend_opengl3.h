@@ -15,6 +15,7 @@
 class CGLSLPrimitiveExProgram;
 class CGLSLQuadProgram;
 class CGLSLSpriteMultipleProgram;
+class CGLSLProgressSpinnerProgram;
 class CGLSLTextProgram;
 
 #define MAX_STREAM_BUFFER_COUNT 10
@@ -38,6 +39,7 @@ protected:
 	CGLSLPrimitiveExProgram *m_pPrimitiveExProgramRotationless;
 	CGLSLPrimitiveExProgram *m_pPrimitiveExProgramTexturedRotationless;
 	CGLSLSpriteMultipleProgram *m_pSpriteProgramMultiple;
+	CGLSLProgressSpinnerProgram *m_pProgressSpinnerProgram;
 
 	TWGLuint m_LastProgramId;
 
@@ -111,6 +113,7 @@ protected:
 	void Cmd_RenderQuadContainer(const CCommandBuffer::SCommand_RenderQuadContainer *pCommand) override;
 	void Cmd_RenderQuadContainerEx(const CCommandBuffer::SCommand_RenderQuadContainerEx *pCommand) override;
 	void Cmd_RenderQuadContainerAsSpriteMultiple(const CCommandBuffer::SCommand_RenderQuadContainerAsSpriteMultiple *pCommand) override;
+	void Cmd_RenderProgressSpinner(const CCommandBuffer::SCommand_RenderProgressSpinner *pCommand) override;
 
 public:
 	CCommandProcessorFragment_OpenGL3_3() = default;
