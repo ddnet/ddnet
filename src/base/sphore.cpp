@@ -17,6 +17,8 @@
 #include <sys/stat.h> // S_* constants
 #elif defined(CONF_FAMILY_UNIX)
 #include "str.h"
+
+#include <cerrno>
 #endif
 
 #if defined(CONF_FAMILY_WINDOWS)
