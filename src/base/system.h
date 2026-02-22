@@ -580,20 +580,6 @@ bool os_version_str(char *version, size_t length);
 void os_locale_str(char *locale, size_t length);
 
 /**
- * @defgroup Crash-Dumping Crash Dumping
- */
-
-/**
- * Initializes the crash dumper and sets the filename to write the crash dump
- * to, if support for crash logging was compiled in. Otherwise does nothing.
- *
- * @ingroup Crash-Dumping
- *
- * @param log_file_path Absolute path to which crash log file should be written.
- */
-void crashdump_init_if_available(const char *log_file_path);
-
-/**
  * Fixes the command line arguments to be encoded in UTF-8 on all systems.
  * This is a RAII wrapper for @link cmdline_fix @endlink and @link cmdline_free @endlink.
  *
