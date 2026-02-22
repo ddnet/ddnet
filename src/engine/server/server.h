@@ -313,6 +313,7 @@ public:
 	void Ban(int ClientId, int Seconds, const char *pReason, bool VerbatimReason) override;
 	void ReconnectClient(int ClientId);
 	void RedirectClient(int ClientId, int Port) override;
+	void RedirectClient(int ClientId, const char *pAddr, const char *pPassword, CUuid SessionId, const char *pMetadata) override;
 
 	void DemoRecorder_HandleAutoStart() override;
 
@@ -357,6 +358,7 @@ public:
 
 	void SendRconType(int ClientId, bool UsernameReq);
 	void SendCapabilities(int ClientId);
+	void SendAllowOrigin(int ClientId);
 	void SendMap(int ClientId);
 	void SendMapData(int ClientId, int Chunk);
 	void SendMapReload(int ClientId);
@@ -395,6 +397,7 @@ public:
 	void OnNetMsgEnterGame(int ClientId);
 	void OnNetMsgRconCmd(int ClientId, const char *pCmd);
 	void OnNetMsgRconAuth(int ClientId, const char *pName, const char *pPw, bool SendRconCmds);
+	void OnNetMsgRedirectOrigin(int ClientId, const char *pOriginServerInfoAddr, CUuid *pSessionId, const char *pMetadata);
 
 	class CCache
 	{
