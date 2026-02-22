@@ -61,30 +61,9 @@ void CMenusStart::RenderStartMenu(CUIRect MainView)
 	ExtMenu.HSplitBottom(5.0f, &ExtMenu, nullptr); // little space
 	ExtMenu.HSplitBottom(20.0f, &ExtMenu, &Button);
 	static CButtonContainer s_TutorialButton;
-	static float s_JoinTutorialTime = 0.0f;
-	if(GameClient()->m_Menus.DoButton_Menu(&s_TutorialButton, Localize("Tutorial"), 0, &Button, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)) ||
-		(s_JoinTutorialTime != 0.0f && Client()->LocalTime() >= s_JoinTutorialTime))
+	if(GameClient()->m_Menus.DoButton_Menu(&s_TutorialButton, Localize("Tutorial"), 0, &Button, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
 	{
-		// Activate internet tab before joining tutorial to make sure the server info
-		// for the tutorial servers is available.
-		GameClient()->m_Menus.SetMenuPage(CMenus::PAGE_INTERNET);
-		GameClient()->m_Menus.RefreshBrowserTab(true);
-		const char *pAddr = ServerBrowser()->GetTutorialServer();
-		if(pAddr)
-		{
-			Client()->Connect(pAddr);
-			s_JoinTutorialTime = 0.0f;
-		}
-		else if(s_JoinTutorialTime == 0.0f)
-		{
-			dbg_msg("menus", "couldn't find tutorial server, retrying in 5 seconds");
-			s_JoinTutorialTime = Client()->LocalTime() + 5.0f;
-		}
-		else
-		{
-			Client()->AddWarning(SWarning(Localize("Can't find a Tutorial server")));
-			s_JoinTutorialTime = 0.0f;
-		}
+		GameClient()->m_Menus.JoinTutorial();
 	}
 
 	ExtMenu.HSplitBottom(5.0f, &ExtMenu, nullptr); // little space
