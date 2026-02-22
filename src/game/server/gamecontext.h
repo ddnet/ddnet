@@ -242,6 +242,7 @@ public:
 	void SendVoteSet(int ClientId);
 	void SendVoteStatus(int ClientId, int Total, int Yes, int No);
 	void AbortVoteKickOnDisconnect(int ClientId);
+	bool CanParticipateInVote(int ClientId);
 
 	int m_VoteCreator;
 	int m_VoteType;

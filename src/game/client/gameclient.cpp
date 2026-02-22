@@ -1077,6 +1077,11 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 				m_Chat.OnMessage(MsgId, pRawMsg);
 			}
 		}
+		// handle vote messages when dummy is on a different team
+		if(MsgId == NETMSGTYPE_SV_VOTESET || MsgId == NETMSGTYPE_SV_VOTESTATUS)
+		{
+			m_Voting.OnMessage(MsgId, pRawMsg);
+		}
 		return; // no need of all that stuff for the dummy
 	}
 
