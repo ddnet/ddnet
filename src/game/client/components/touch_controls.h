@@ -15,6 +15,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 class CJsonWriter;
@@ -539,22 +540,9 @@ private:
 	int m_JoystickPressCount = 0;
 
 	/**
-	 * The action that was last activated with direct touch input, which will determine the finger that will
-	 * be used to update the mouse position from direct touch input.
-	 */
-	int m_DirectTouchLastAction = ACTION_FIRE;
-
-	class CActionState
-	{
-	public:
-		bool m_Active = false;
-		IInput::CTouchFinger m_Finger;
-	};
-
-	/**
 	 * The states of the different actions for direct touch input.
 	 */
-	CActionState m_aDirectTouchActionStates[NUM_ACTIONS];
+	bool m_aDirectTouchActionStates[NUM_ACTIONS];
 
 	/**
 	 * These fingers were activating buttons that became invisible and were therefore deactivated. The fingers
@@ -584,6 +572,7 @@ private:
 	std::optional<EDirectTouchIngameMode> ParseDirectTouchIngameMode(const json_value *pModeValue);
 	std::optional<EDirectTouchSpectateMode> ParseDirectTouchSpectateMode(const json_value *pModeValue);
 	std::optional<ColorRGBA> ParseColor(const json_value *pColorValue, const char *pAttributeName, std::optional<ColorRGBA> DefaultColor) const;
+	std::optional<bool> ParseBoolean(const json_value *pBooleanValue, const char *pAttributeName, bool DefaultBoolean) const;
 	std::optional<CTouchButton> ParseButton(const json_value *pButtonObject);
 	std::unique_ptr<CTouchButtonBehavior> ParseBehavior(const json_value *pBehaviorObject);
 	std::unique_ptr<CPredefinedTouchButtonBehavior> ParsePredefinedBehavior(const json_value *pBehaviorObject);
@@ -612,7 +601,7 @@ private:
 	std::optional<IInput::CTouchFingerState> m_ActiveFingerState;
 	std::optional<IInput::CTouchFingerState> m_ZoomFingerState;
 	std::optional<IInput::CTouchFingerState> m_LongPressFingerState;
-	vec2 m_ZoomStartPos = vec2(0.0f, 0.0f);
+	vec2 m_ZoomStartPosEditor = vec2(0.0f, 0.0f);
 	vec2 m_AccumulatedDelta = vec2(0.0f, 0.0f);
 	std::vector<IInput::CTouchFingerState> m_vDeletedFingerState;
 	std::array<bool, (size_t)EButtonVisibility::NUM_VISIBILITIES> m_aVirtualVisibilities;
@@ -624,7 +613,17 @@ private:
 	CTouchButton *m_pSelectedButton = nullptr;
 
 	bool m_UnsavedChanges = false;
-	bool m_PreviewAllButtons = false;
+	bool m_PreviewAllButtons = false; // Only takes effect in editor.
+	bool m_HideAllButtons = false; // Only takes effect while not in editor and when m_ToggleGestureGame or Spec == true.
+
+	bool m_ZoomGestureGame = false;
+	bool m_ZoomGestureSpec = false;
+	bool m_ToggleGestureGame = false;
+	bool m_ToggleGestureSpec = false;
+
+	// Fingers that pressed at empty spaces from the beginning, used for gestures.
+	std::vector<IInput::CTouchFingerState> m_vFreeFingerStates;
+	std::optional<std::pair<vec2, vec2>> m_GestureLastPos;
 
 public:
 	CTouchButton *NewButton();
@@ -657,6 +656,14 @@ public:
 	std::vector<CTouchButton *> GetButtonsEditor();
 	bool PreviewAllButtons() const { return m_PreviewAllButtons; }
 	void SetPreviewAllButtons(bool Preview) { m_PreviewAllButtons = Preview; }
+	bool HasEnabledZoomGestureGame() const { return m_ZoomGestureGame; }
+	void SetZoomGestureGame(bool EnabledZoomGestureGame) { m_ZoomGestureGame = EnabledZoomGestureGame; }
+	bool HasEnabledZoomGestureSpec() const { return m_ZoomGestureSpec; }
+	void SetZoomGestureSpec(bool EnabledZoomGestureSpec) { m_ZoomGestureSpec = EnabledZoomGestureSpec; }
+	bool HasEnabledToggleGestureGame() const { return m_ToggleGestureGame; }
+	void SetToggleGestureGame(bool EnabledToggleGestureGame);
+	bool HasEnabledToggleGestureSpec() const { return m_ToggleGestureSpec; }
+	void SetToggleGestureSpec(bool EnabledToggleGestureSpec);
 
 	// Set the EPopupType and call
 	enum class EPopupType

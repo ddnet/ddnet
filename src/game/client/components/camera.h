@@ -45,7 +45,6 @@ private:
 	float m_ZoomSmoothingStart;
 	float m_ZoomSmoothingEnd;
 
-	void ScaleZoom(float Factor);
 	void ChangeZoom(float Target, int Smoothness, bool IsUser);
 	float ZoomProgress(float CurrentTime) const;
 
@@ -97,6 +96,7 @@ public:
 	void GotoTele(int Number, int Offset = -1);
 
 	void SetZoom(float Target, int Smoothness, bool IsUser);
+	void ScaleZoom(float Factor);
 	bool ZoomAllowed() const;
 
 	int Deadzone() const;
