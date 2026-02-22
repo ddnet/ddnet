@@ -8,6 +8,8 @@
 #include "math.h"
 #include "mem.h"
 
+#include <base/types.h>
+
 #include <cctype>
 #include <charconv> // std::to_chars
 #include <cstdarg>
@@ -380,6 +382,45 @@ int str_comp_num(const char *a, const char *b, int num)
 	return strncmp(a, b, num);
 }
 
+// full credit goes to
+// https://www.geeksforgeeks.org/dsa/wildcard-pattern-matching/
+bool str_match_wildcard(const char *pattern, const char *text, char wildcard)
+{
+	int n = str_length(text);
+	int m = str_length(pattern);
+	int i = 0, j = 0, startIndex = -1, match = 0;
+
+	while(i < n)
+	{
+		if(j < m && (pattern[j] == text[i]))
+		{
+			i++;
+			j++;
+		}
+		else if(j < m && pattern[j] == wildcard)
+		{
+			startIndex = j;
+			match = i;
+			j++;
+		}
+		else if(startIndex != -1)
+		{
+			j = startIndex + 1;
+			match++;
+			i = match;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	while(j < m && pattern[j] == wildcard)
+	{
+		j++;
+	}
+	return j == m;
+}
+
 const char *str_startswith_nocase(const char *str, const char *prefix)
 {
 	int prefixl = str_length(prefix);
@@ -523,6 +564,24 @@ int str_in_list(const char *list, const char *delim, const char *needle)
 	while(notfound && (tok = str_token_get(tok, delim, &len)))
 	{
 		notfound = needlelen != len || str_comp_num(tok, needle, len);
+		tok = tok + len;
+	}
+
+	return !notfound;
+}
+
+bool str_in_wildcard_list(const char *list, const char *delim, char wildcard, const char *needle)
+{
+	const char *tok = list;
+	int len = 0, notfound = 1;
+
+	while(notfound && (tok = str_token_get(tok, delim, &len)))
+	{
+		char buf[2048];
+		str_copy(buf, tok);
+		buf[len] = '\0';
+
+		notfound = !str_match_wildcard(buf, needle, wildcard);
 		tok = tok + len;
 	}
 
@@ -1372,4 +1431,24 @@ int str_utf32_dist_buffer(const int *a, int a_len, const int *b, int b_len, int 
 	}
 	return B(a_len, b_len);
 #undef B
+}
+
+bool str_is_allowed_origin(const char *pAllowedOrigins, const char *pOrigins)
+{
+	if(pAllowedOrigins[0] == '\0')
+		return false;
+	if(!str_comp(pAllowedOrigins, "*"))
+		return true;
+	if(pOrigins[0] == '\0')
+		return false;
+	const char *pStr = pOrigins;
+	char aOrigin[NETADDR_MAXSTRSIZE];
+	while((pStr = str_next_token(pStr, ",", aOrigin, sizeof(aOrigin))))
+	{
+		if(aOrigin[0] == '\0')
+			continue;
+		if(str_in_wildcard_list(pAllowedOrigins, ",", '*', aOrigin))
+			return true;
+	}
+	return false;
 }

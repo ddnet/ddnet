@@ -295,6 +295,7 @@ public:
 	void Ban(int ClientId, int Seconds, const char *pReason, bool VerbatimReason) override;
 	void ReconnectClient(int ClientId);
 	void RedirectClient(int ClientId, int Port) override;
+	void RedirectClient(int ClientId, const char *pAddr, const char *pPassword, CUuid SessionId) override;
 
 	void DemoRecorder_HandleAutoStart() override;
 
@@ -369,6 +370,7 @@ public:
 	bool CheckReservedSlotAuth(int ClientId, const char *pPassword);
 	void ProcessClientPacket(CNetChunk *pPacket);
 	void OnNetMsgClientVer(int ClientId, CUuid *pConnectionId, int DDNetVersion, const char *pDDNetVersionStr);
+	void OnNetMsgRedirectOrigin(int ClientId, const char *pOriginConnectionStr, const char *pOriginServerInfoAddr, CUuid *pSessionId);
 	void OnNetMsgReady(int ClientId);
 	void OnNetMsgEnterGame(int ClientId);
 	void OnNetMsgRconAuth(int ClientId, const char *pName, const char *pPw, bool SendRconCmds);

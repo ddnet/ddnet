@@ -14,8 +14,11 @@
 #include <base/math.h>
 #include <base/process.h>
 #include <base/str.h>
+#include <base/system.h>
+#include <base/types.h>
 #include <base/windows.h>
 
+#include <engine/client.h>
 #include <engine/config.h>
 #include <engine/console.h>
 #include <engine/discord.h>
@@ -57,6 +60,8 @@
 
 #include <game/localization.h>
 #include <game/version.h>
+
+#include <optional>
 
 #if defined(CONF_VIDEORECORDER)
 #include "video.h"
@@ -226,6 +231,16 @@ void CClient::SendInfo(int Conn)
 	Msg.AddString(GameClient()->NetVersion());
 	Msg.AddString(m_aPassword);
 	SendMsg(Conn, &Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH);
+
+	if(m_Redirect.has_value())
+	{
+		const CRedirectInfo *pRedirect = &m_Redirect.value();
+		CMsgPacker MsgOrigin(NETMSG_REDIRECT_ORIGIN, true);
+		MsgOrigin.AddString(pRedirect->OriginConnectionStr());
+		MsgOrigin.AddString(pRedirect->OriginServerInfoAddr());
+		MsgOrigin.AddRaw(pRedirect->SessionId().m_aData, sizeof(pRedirect->SessionId().m_aData));
+		SendMsg(Conn, &MsgOrigin, MSGFLAG_VITAL | MSGFLAG_FLUSH);
+	}
 }
 
 void CClient::SendEnterGame(int Conn)
@@ -1090,6 +1105,13 @@ void CClient::ResetSocket()
 			log_error("client", "%s", aError);
 	}
 }
+
+void CClient::FailedRedirect(const char *pReason)
+{
+	m_Redirect = std::nullopt;
+	DisconnectWithReason(pReason);
+}
+
 const char *CClient::PlayerName() const
 {
 	if(g_Config.m_PlayerName[0])
@@ -1574,7 +1596,35 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 	if(Sys)
 	{
 		// system message
-		if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_MAP_DETAILS)
+		if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_ALLOW_ORIGIN)
+		{
+			if(!m_Redirect.has_value())
+				return;
+			const char *pAllowedOrigin = Unpacker.GetString(CUnpacker::SANITIZE_CC | CUnpacker::SKIP_START_WHITESPACES);
+			if(Unpacker.Error())
+			{
+				FailedRedirect("unpack error");
+				return;
+			}
+
+			CRedirectInfo *pRedirect = &m_Redirect.value();
+
+			// prefer server info if available and only fallback to connection string
+			const char *pOrigin = pRedirect->OriginServerInfoAddr();
+			if(pOrigin[0] == '\0')
+				pOrigin = pRedirect->OriginConnectionStr();
+
+			if(!str_is_allowed_origin(pAllowedOrigin, pOrigin))
+			{
+				char aBuf[512];
+				str_format(aBuf, sizeof(aBuf), "redirects from '%s' not allowed", pOrigin);
+				FailedRedirect(aBuf);
+				return;
+			}
+
+			m_Redirect = std::nullopt;
+		}
+		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_MAP_DETAILS)
 		{
 			const char *pMap = Unpacker.GetString(CUnpacker::SANITIZE_CC | CUnpacker::SKIP_START_WHITESPACES);
 			SHA256_DIGEST *pMapSha256 = (SHA256_DIGEST *)Unpacker.GetRaw(sizeof(*pMapSha256));
@@ -1617,6 +1667,12 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		}
 		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_MAP_CHANGE)
 		{
+			if(m_Redirect.has_value())
+			{
+				FailedRedirect("target server accepts no redirects");
+				return;
+			}
+
 			if(m_CanReceiveServerCapabilities)
 			{
 				m_ServerCapabilities = GetServerCapabilities(0, 0, IsSixup());
@@ -1891,6 +1947,42 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				if(ServerAddress().port != RedirectPort)
 				{
 					// Only allow redirecting to the same port to reconnect. The dummy
+					// should not be connected to a different server than the main, as
+					// the client assumes that main and dummy use the same map.
+					return;
+				}
+				// Reset dummy connect time to allow immediate reconnect
+				m_LastDummyConnectTime = 0.0f;
+				DummyConnect();
+			}
+		}
+		else if(Msg == NETMSG_REDIRECT_ADDR)
+		{
+			const char *pAddress = Unpacker.GetString();
+			const char *pPassword = Unpacker.GetString();
+			CUuid *pSessionId = (CUuid *)Unpacker.GetRaw(sizeof(*pSessionId));
+			if(Unpacker.Error())
+				return;
+
+			if(Conn == CONN_MAIN)
+			{
+				CServerInfo CurrentServerInfo;
+				GetServerInfo(&CurrentServerInfo);
+				log_info("client", "addr %s", CurrentServerInfo.m_aAddress);
+
+				m_Redirect = CRedirectInfo(ConnectAddressString(), CurrentServerInfo.m_aAddress, *pSessionId);
+				Connect(pAddress, pPassword);
+			}
+			else
+			{
+				DummyDisconnect("redirect");
+
+				NETADDR Addr;
+				net_addr_from_str(&Addr, pAddress);
+
+				if(net_addr_comp(&Addr, &ServerAddress()))
+				{
+					// Only allow redirecting to the same port and ip to reconnect. The dummy
 					// should not be connected to a different server than the main, as
 					// the client assumes that main and dummy use the same map.
 					return;
