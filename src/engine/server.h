@@ -12,6 +12,7 @@
 
 #include <engine/shared/jsonwriter.h>
 #include <engine/shared/protocol.h>
+#include <engine/shared/uuid_manager.h>
 
 #include <generated/protocol.h>
 #include <generated/protocol7.h>
@@ -259,6 +260,7 @@ public:
 	virtual void Kick(int ClientId, const char *pReason) = 0;
 	virtual void Ban(int ClientId, int Seconds, const char *pReason, bool VerbatimReason) = 0;
 	virtual void RedirectClient(int ClientId, int Port) = 0;
+	virtual void RedirectClient(int ClientId, const char *pAddr, const char *pPassword, CUuid SessionId) = 0;
 	virtual void ChangeMap(const char *pMap) = 0;
 	virtual void ReloadMap() = 0;
 
