@@ -11,7 +11,7 @@
 #include <game/mapitems.h>
 
 #include <array>
-#include <chrono>
+#include <cmath>
 
 /************************
  * Render Buffer Helper *
@@ -1707,6 +1707,11 @@ int CRenderLayerEntityTune::GetDataIndex(unsigned int &TileSize) const
 void CRenderLayerEntityTune::InitTileData()
 {
 	m_pTuneTiles = GetData<CTuneTile>();
+}
+
+void CRenderLayerEntityTune::RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params)
+{
+	RenderTileLayerNoTileBuffer(Color, Params);
 }
 
 void CRenderLayerEntityTune::RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params)
