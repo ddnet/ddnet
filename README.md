@@ -12,7 +12,9 @@ You can get binary releases on the [DDNet website](https://ddnet.org/downloads/)
 
 - [Code Browser](https://ddnet.org/codebrowser/DDNet/)
 - [Source Code Documentation](https://codedoc.ddnet.org/) (very incomplete, only a few items are documented)
-- [Contributing Guide](CONTRIBUTING.md)
+- [Building Guide](`docs/BUILDING.md`)
+- [Debugging Guide](`docs/DEBUGGING.md`)
+- [Contributing Guide](`docs/CONTRIBUTING.md`)
 
 If you want to learn about the source code, you can check the [Development](https://wiki.ddnet.org/wiki/Development) article on the wiki.
 
@@ -104,6 +106,8 @@ brew install cmake ffmpeg freetype glew glslang googletest libpng molten-vk ninj
 
 If you don't want to use the system libraries, you can pass the `-DPREFER_BUNDLED_LIBS=ON` parameter to cmake.
 
+DDNet requires additional libraries, some of which are bundled for the most common platforms (Windows, Mac, Linux, all x86 and x86\_64) for convenience and the official builds. The bundled libraries for official builds are now in the ddnet-libs submodule. Note that when you build and develop locally, you should ideally use your system's package manager to install the dependencies, instead of relying on ddnet-libs submodule, which does not contain all dependencies anyway (e.g. openssl, vulkan). See the previous section for how to get the dependencies. Alternatively see our [Building Guide](docs/BUILDING.md) for how to disable some features and their dependencies (for example, `-DVULKAN=OFF` won't require Vulkan).
+
 ## Building on Linux and macOS
 
 To compile DDNet yourself, execute the following commands in the source root:
@@ -112,129 +116,6 @@ To compile DDNet yourself, execute the following commands in the source root:
 cmake -Bbuild -GNinja
 cmake --build build
 ```
-
-DDNet requires additional libraries, some of which are bundled for the most common platforms (Windows, Mac, Linux, all x86 and x86\_64) for convenience and the official builds. The bundled libraries for official builds are now in the ddnet-libs submodule. Note that when you build and develop locally, you should ideally use your system's package manager to install the dependencies, instead of relying on ddnet-libs submodule, which does not contain all dependencies anyway (e.g. openssl, vulkan). See the previous section for how to get the dependencies. Alternatively see the following build arguments for how to disable some features and their dependencies (`-DVULKAN=OFF` won't require Vulkan for example).
-
-The following is a non-exhaustive list of build arguments that can be passed to the `cmake` command-line tool in order to enable or disable options in build time:
-
-* **-DCMAKE_BUILD_TYPE=[Release|Debug|RelWithDebInfo|MinSizeRel]** <br>
-	An optional CMake variable for setting the build type. If not set, defaults to "Release" if `-DDEV=ON` is **not** used, and "Debug" if `-DDEV=ON` is used. See `CMAKE_BUILD_TYPE` in CMake Documentation for more information.
-
-* **-DPREFER_BUNDLED_LIBS=[ON|OFF]** <br>
-	Whether to prefer bundled libraries over system libraries. Setting to ON will make DDNet use third party libraries available in the `ddnet-libs` folder, which is the git-submodule target of the [ddnet-libs](https://github.com/ddnet/ddnet-libs) repository mentioned above -- Useful if you do not have those libraries installed and want to avoid building them. If set to OFF, will only use bundled libraries when system libraries are not found. Default value is OFF.
-
-* **-DWEBSOCKETS=[ON|OFF]** <br>
-	Whether to enable WebSocket support for server. Setting to ON requires the `libwebsockets-dev` library installed. Default value is OFF.
-
-* **-DMYSQL=[ON|OFF]** <br>
-	Whether to enable MySQL/MariaDB support for server. Requires at least MySQL 8.0 or MariaDB 10.2. Setting to ON requires the `libmariadb-dev-compat` library installed, which are also provided as bundled libraries for the common platforms. Default value is OFF.
-
-	Note that the bundled MySQL libraries might not work properly on your system. If you run into connection problems with the MySQL server, for example that it connects as root while you chose another user, make sure to install your system libraries for the MySQL client. Make sure that the CMake configuration summary says that it found MySQL libs that were not bundled (no "using bundled libs").
-
-* **-DTEST_MYSQL=[ON|OFF]** <br>
-	Whether to test MySQL/MariaDB support in GTest based tests. Default value is OFF.
-
-	Note that this requires a running MySQL/MariaDB database on localhost with this setup:
-
-```sql
-CREATE DATABASE ddnet;
-CREATE USER 'ddnet'@'localhost' IDENTIFIED BY 'thebestpassword';
-GRANT ALL PRIVILEGES ON ddnet.* TO 'ddnet'@'localhost';
-FLUSH PRIVILEGES;
-```
-
-* **-DAUTOUPDATE=[ON|OFF]** <br>
-	Whether to enable the autoupdater. Packagers may want to disable this for their packages. Default value is ON for Windows and Linux.
-
-* **-DCLIENT=[ON|OFF]** <br>
-	Whether to enable client compilation. If set to OFF, DDNet will not depend on Curl, Freetype, Ogg, Opus, Opusfile, and SDL2. Default value is ON.
-
-* **-DVIDEORECORDER=[ON|OFF]** <br>
-	Whether to add video recording support using FFmpeg to the client. Default value is ON.
-
-* **-DDOWNLOAD_GTEST=[ON|OFF]** <br>
-	Whether to download and compile GTest. Useful if GTest is not installed and, for Linux users, there is no suitable package providing it. Default value is OFF.
-
-* **-DDEV=[ON|OFF]** <br>
-	Whether to optimize for development, speeding up the compilation process a little. If enabled, don't generate stuff necessary for packaging. Setting to ON will set CMAKE\_BUILD\_TYPE to Debug by default. Default value is OFF.
-
-* **-DUPNP=[ON|OFF]** <br>
-	Whether to enable UPnP support for the server.
-	You need to install `libminiupnpc-dev` on Debian, `miniupnpc` on Arch Linux.
-	Default value is OFF.
-
-* **-DVULKAN=[ON|OFF]** <br>
-	Whether to enable the Vulkan graphics backend.
-	You need to install the [Vulkan SDK](https://vulkan.lunarg.com/sdk/home) and set the `VULKAN_SDK` environment flag accordingly.
-	Default value is ON for Linux, and OFF for Windows and macOS.
-
-* **-GNinja** <br>
-	Use the Ninja build system instead of Make. This automatically parallelizes the build and is generally faster. Compile with `ninja` instead of `make`. Install Ninja with `sudo apt install ninja-build` on Debian, `sudo pacman -S --needed ninja` on Arch Linux.
-
-* **-DCMAKE_CXX_LINK_FLAGS=[FLAGS]** <br>
-	Custom flags to set for compiler when linking.
-
-* **-DEXCEPTION_HANDLING=[ON|OFF]** <br>
-	Enable exception handling (only works with Windows as of now, uses DrMingw there). Default value is OFF.
-
-* **-DIPO=[ON|OFF]** <br>
-	Enable interprocedural optimizations, also known as Link Time Optimization (LTO). Default value is OFF.
-
-* **-DFUSE_LD=[OFF|LINKER]** <br>
-	Linker to use. Default value is OFF to try mold, lld, gold.
-
-* **-DSECURITY_COMPILER_FLAGS=[ON|OFF]** <br>
-	Whether to set security-relevant compiler flags like `-D_FORTIFY_SOURCE=2` and `-fstack-protector-all`. Default Value is ON.
-
-* **-DMACOS_CODESIGN=[ON|OFF]** <br>
-	Whether to sign code when building the DMG on macOS.
-
-## Running tests (Debian/Ubuntu)
-
-In order to run the tests, you need to install the following library `libgtest-dev`.
-
-This library isn't compiled, so you have to do it:
-```sh
-sudo apt install libgtest-dev
-cd /usr/src/gtest
-sudo cmake CMakeLists.txt
-sudo make
-
-# copy or symlink libgtest.a and libgtest_main.a to your /usr/lib folder
-sudo cp lib/*.a /usr/lib
-```
-
-To run the tests you can build the target `run_tests` using
-
-```sh
-cmake --build build --target run_tests`
-```
-
-## Code formatting
-
-We use clang-format 20 to format the C++ code of this project. Execute `scripts/fix_style.py` after changing the code to ensure code is formatted properly, a GitHub central style checker will do the same and prevent your change from being submitted.
-
-## Using AddressSanitizer + UndefinedBehaviourSanitizer or Valgrind's Memcheck
-
-ASan+UBSan and Memcheck are useful to find code problems more easily. Please use them to test your changes if you can.
-
-For ASan+UBSan compile with:
-
-```sh
-CC=clang CXX=clang++ CXXFLAGS="-fsanitize=address,undefined -fsanitize-recover=all -fno-omit-frame-pointer" CFLAGS="-fsanitize=address,undefined -fsanitize-recover=all -fno-omit-frame-pointer" cmake -DCMAKE_BUILD_TYPE=Debug -Bbuild -GNinja
-cmake --build build
-```
-
-and run with:
-
-```sh
-UBSAN_OPTIONS=suppressions=./ubsan.supp:log_path=./SAN:print_stacktrace=1:halt_on_errors=0 ASAN_OPTIONS=log_path=./SAN:print_stacktrace=1:check_initialization_order=1:detect_leaks=1:halt_on_errors=0:handle_abort=1 LSAN_OPTIONS=suppressions=./lsan.supp ./DDNet
-```
-
-Check the SAN.\* files afterwards. This finds more problems than memcheck, runs faster, but requires a modern GCC/Clang compiler.
-
-For valgrind's memcheck compile a normal Debug build and run with: `valgrind --tool=memcheck ./DDNet`
-Expect a large slow down.
 
 ## Building on Windows with the Visual Studio IDE
 
@@ -267,108 +148,6 @@ If you're using Visual Studio Code, you can use the [CMake Tools](https://market
 You can then open the project folder in Visual Studio Code and press `Ctrl+Shift+P` to open the command palette, then search for `CMake: Configure`.
 
 This will open up a prompt for you to select a kit, select your `Visual Studio` version and save it. You can now use the GUI (bottom left) to compile and build your project.
-
-## Cross-compiling on Linux to Windows x86/x86\_64
-
-Install MinGW cross-compilers of the form `i686-w64-mingw32-gcc` (32 bit) or
-`x86_64-w64-mingw32-gcc` (64 bit). This is probably the hard part. ;)
-
-Then add `-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/mingw64.toolchain` to the
-**initial** CMake command line.
-
-## Cross-compiling on Linux/Windows to Android
-
-Cross-compilation to Android is explained in a [separate guide](scripts/android/README.md).
-
-## Cross-compiling on Linux to WebAssembly via Emscripten
-
-Install Emscripten cross-compilers on a modern linux distro. Follow the [instructions to install the emsdk](https://emscripten.org/docs/getting_started/downloads.html). Installing Emscripten from the package manager (e.g. with `sudo apt install emscripten`) may not work, as building some libraries requires a more recent version of Emscripten than available via package manager.
-
-If you need to compile the ddnet-libs for WebAssembly, simply call
-
-```sh
-scripts/compile_libs/gen_libs.sh build-webasm-libs webasm
-```
-
-from the project's source directory. It will automatically create a directory called `ddnet-libs` in your build directory.
-You can then merge this directory with the one in the ddnet source directory:
-
-```sh
-find ddnet-libs -type d -name webasm -exec rm -r {} + -prune
-cp -r build-webasm-libs/ddnet-libs/. ddnet-libs/
-```
-
-Note that using Rust versions 1.90.0 - 1.93.0 does not work. Either use an older or newer version of Rust.
-Run `rustup target add wasm32-unknown-emscripten` to install the WASM target for compiling Rust.
-
-Create a new directory to build the client in.
-Then run `emcmake cmake .. -G "Unix Makefiles" -DVIDEORECORDER=OFF -DVULKAN=OFF -DSERVER=OFF -DTOOLS=OFF -DPREFER_BUNDLED_LIBS=ON` in your build directory to configure followed by `cmake --build . -j8` to build.
-For testing it is highly recommended to build in debug mode by also passing the argument `-DCMAKE_BUILD_TYPE=Debug` when invoking `emcmake cmake`, as this speeds up the build process and adds debug information as well as additional checks.
-Note that using the Ninja build system with Emscripten is not currently possible due to [CMake issue 16395](https://gitlab.kitware.com/cmake/cmake/-/issues/16395).
-
-To test the compiled code locally, just use `emrun --browser firefox DDNet.html`.
-
-To host the compiled .html file copy all `.data`, `.html`, `.js`, `.wasm` files to the web server.
-See `other/emscripten/minimal.html` for a minimal HTML example. You can also run `other/emscripten/server.py` to host a minimal server for testing using Python without needing to install Emscripten.
-
-Enable cross-origin policies when using a proper web server. Example for apache2 on Debian-based distros:
-
-```sh
-sudo a2enmod header
-
-# edit the apache2 config to allow .htaccess files
-sudo nano /etc/apache2/apache2.conf
-
-# set AllowOverride to All for your directory
-# then create a .htaccess file on the web server (where the .html is)
-# and add these lines
-Header add Cross-Origin-Embedder-Policy "require-corp"
-Header add Cross-Origin-Opener-Policy "same-origin"
-
-# now restart apache2
-sudo service apache2 restart
-```
-
-## Cross-compiling on Linux to macOS
-
-Install [osxcross](https://github.com/tpoechtrager/osxcross), then add
-`-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/darwin.toolchain` and
-`-DCMAKE_OSX_SYSROOT=/path/to/osxcross/target/SDK/MacOSX10.11.sdk/` to the
-**initial** CMake command line.
-
-Install `dmg` and `hfsplus` from
-[libdmg-hfsplus](https://github.com/mozilla/libdmg-hfsplus) and `newfs_hfs`
-from
-[diskdev\_cmds](http://pkgs.fedoraproject.org/repo/pkgs/hfsplus-tools/diskdev_cmds-540.1.linux3.tar.gz/0435afc389b919027b69616ad1b05709/diskdev_cmds-540.1.linux3.tar.gz)
-to unlock the `package_dmg` target that outputs a macOS disk image.
-
-## Importing the official DDNet Database
-
-```sh
-$ wget https://ddnet.org/stats/ddnet-sql.zip # (~2.5 GiB)
-$ unzip ddnet-sql.zip
-$ yay -S mariadb mysql-connector-c++
-$ sudo mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
-$ sudo systemctl start mariadb
-$ sudo mysqladmin -u root password 'PW'
-$ mysql -u root -p'PW'
-MariaDB [(none)]> create database teeworlds; create user 'teeworlds'@'localhost' identified by 'PW2'; grant all privileges on teeworlds.* to 'teeworlds'@'localhost'; flush privileges;
-# this takes a while, you can remove the KEYs in record_race.sql to trade performance in queries
-$ mysql -u teeworlds -p'PW2' teeworlds < ddnet-sql/record_*.sql
-
-$ cat mine.cfg
-sv_use_sql 1
-add_sqlserver r teeworlds record teeworlds "PW2" "localhost" "3306"
-add_sqlserver w teeworlds record teeworlds "PW2" "localhost" "3306"
-
-$ cmake -Bbuild -DMYSQL=ON -GNinja
-$ cmake --build build --target DDNet-Server
-$ build/DDNet-Server -f mine.cfg
-```
-
-<a href="https://repology.org/metapackage/ddnet/versions">
-	<img src="https://repology.org/badge/vertical-allrepos/ddnet.svg?header=" alt="Packaging status" align="right">
-</a>
 
 ## Installation from Repository
 
@@ -408,13 +187,21 @@ scoop bucket add games
 scoop install games/ddnet
 ```
 
+<a href="https://repology.org/metapackage/ddnet/versions">
+	<img src="https://repology.org/badge/vertical-allrepos/ddnet.svg?header=" alt="Packaging status" align="right">
+</a>
+
 ## Benchmarking
 
-DDNet is available in the [Phoronix Test Suite](https://openbenchmarking.org/test/pts/ddnet). If you have PTS installed you can easily benchmark DDNet on your own system like this:
+Detailed instructions can be found in [`docs/BUILDING-emscripten.md`](docs/BUILDING-emscripten.md).
 
-```sh
-phoronix-test-suite benchmark ddnet
-```
+## Working with the official DDNet Database
+
+Detailed instructions can be found in [`docs/DATABASE.md`](docs/DATABASE.md).
+
+## Debugging
+
+Detailed instructions can be found in [`docs/DEBUGGING.md`](docs/DEBUGGING.md).
 
 ## Better Git Blame
 
