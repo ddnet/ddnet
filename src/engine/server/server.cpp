@@ -10,6 +10,7 @@
 #include <base/logger.h>
 #include <base/math.h>
 #include <base/system.h>
+#include <base/types.h>
 
 #include <engine/config.h>
 #include <engine/console.h>
@@ -38,6 +39,7 @@
 #include <engine/shared/protocol_ex.h>
 #include <engine/shared/rust_version.h>
 #include <engine/shared/snapshot.h>
+#include <engine/shared/uuid_manager.h>
 #include <engine/storage.h>
 
 #include <game/version.h>
@@ -562,6 +564,38 @@ void CServer::RedirectClient(int ClientId, int Port)
 
 	CMsgPacker Msg(NETMSG_REDIRECT, true);
 	Msg.AddInt(Port);
+	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientId);
+
+	if(m_aClients[ClientId].m_State >= CClient::STATE_READY)
+	{
+		GameServer()->OnClientDrop(ClientId, "redirect");
+	}
+
+	m_aClients[ClientId].m_RedirectDropTime = time_get() + time_freq() * 10;
+	m_aClients[ClientId].m_State = CClient::STATE_REDIRECTED;
+}
+
+void CServer::RedirectClient(int ClientId, const char *pAddr, const char *pPassword, CUuid SessionId)
+{
+	dbg_assert(0 <= ClientId && ClientId < MAX_CLIENTS, "Invalid ClientId: %d", ClientId);
+	dbg_assert(m_aClients[ClientId].m_State != CClient::STATE_EMPTY, "Client slot empty: %d", ClientId);
+
+	bool SupportsRedirect = GetClientVersion(ClientId) >= VERSION_DDNET_REDIRECT_ADDR;
+
+	log_info("server", "redirecting client, cid=%d addr=%s supported=%d", ClientId, pAddr, SupportsRedirect);
+
+	if(!SupportsRedirect)
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "Redirect unsupported: please connect to %s", pAddr);
+		Kick(ClientId, aBuf);
+		return;
+	}
+
+	CMsgPacker Msg(NETMSG_REDIRECT_ADDR, true);
+	Msg.AddString(pAddr);
+	Msg.AddString(pPassword);
+	Msg.AddRaw(SessionId.m_aData, sizeof(SessionId.m_aData));
 	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientId);
 
 	if(m_aClients[ClientId].m_State >= CClient::STATE_READY)
@@ -1330,6 +1364,12 @@ void CServer::SendCapabilities(int ClientId)
 
 void CServer::SendMap(int ClientId)
 {
+	{
+		CMsgPacker Msg(NETMSG_ALLOW_ORIGIN, true);
+		Msg.AddString(g_Config.m_SvAllowedRedirectOrigins);
+		SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+	}
+
 	int MapType = IsSixup(ClientId) ? MAP_TYPE_SIXUP : MAP_TYPE_SIX;
 	{
 		CMsgPacker Msg(NETMSG_MAP_DETAILS, true);
@@ -1711,6 +1751,16 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 			OnNetMsgClientVer(ClientId, pConnectionId, DDNetVersion, pDDNetVersionStr);
 		}
+		else if(Msg == NETMSG_REDIRECT_ORIGIN)
+		{
+			const char *pOriginConnectionStr = Unpacker.GetString();
+			const char *pOriginServerInfoAddr = Unpacker.GetString();
+			CUuid *pSessionId = (CUuid *)Unpacker.GetRaw(sizeof(*pSessionId));
+			if(Unpacker.Error())
+				return;
+
+			OnNetMsgRedirectOrigin(ClientId, pOriginConnectionStr, pOriginServerInfoAddr, pSessionId);
+		}
 		else if(Msg == NETMSG_INFO)
 		{
 			if((m_aClients[ClientId].m_State == CClient::STATE_PREAUTH || m_aClients[ClientId].m_State == CClient::STATE_AUTH))
@@ -2002,6 +2052,13 @@ void CServer::OnNetMsgClientVer(int ClientId, CUuid *pConnectionId, int DDNetVer
 	m_aClients[ClientId].m_DDNetVersionSettled = true;
 	m_aClients[ClientId].m_GotDDNetVersionPacket = true;
 	m_aClients[ClientId].m_State = CClient::STATE_AUTH;
+}
+
+void CServer::OnNetMsgRedirectOrigin(int ClientId, const char *pOriginConnectionStr, const char *pOriginServerInfoAddr, CUuid *pSessionId)
+{
+	log_info("server", "cid=%d got redirected from '%s'", ClientId, pOriginServerInfoAddr);
+
+	// could check pOrigin against sv_allowed_redirect_origins but we trust the client to do that, lol
 }
 
 void CServer::OnNetMsgReady(int ClientId)

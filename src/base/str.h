@@ -413,6 +413,21 @@ int str_comp(const char *a, const char *b);
 int str_comp_num(const char *a, const char *b, int num);
 
 /**
+ * Checks if pValue matches pPattern where the pattern can contain a pWildcard
+ *
+ * @ingroup Strings
+ *
+ * @param pattern the pattern that can optionally contain wildcards
+ * @param text the value we match against
+ * @param wildcard the wildcard that can be used in the pattern to match anything
+ *
+ * @return true if the text is exactly the same as pattern or matched by wildcards
+ *
+ * @remark The strings are treated as null-terminated strings.
+ */
+bool str_match_wildcard(const char *pattern, const char *text, char wildcard);
+
+/**
  * Checks case insensitive whether the string begins with a certain prefix.
  *
  * @ingroup Strings
@@ -531,6 +546,8 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, int
  * @remark The strings are treated as null-terminated strings.
  */
 int str_in_list(const char *list, const char *delim, const char *needle);
+
+bool str_in_wildcard_list(const char *list, const char *delim, char wildcard, const char *needle);
 
 /**
  * @ingroup Strings
@@ -1022,5 +1039,18 @@ int str_utf8_comp_confusable(const char *str1, const char *str2);
  * @return Lowercase codepoint, or the original codepoint if there is no lowercase version.
  */
 int str_utf8_tolower_codepoint(int code);
+
+/**
+ * Checks if a host is in a list of allowed origins.
+ * This is used for redirects.
+ *
+ * @ingroup Strings
+ *
+ * @param pAllowedOrigins Comma-separated list of hosts with support for * as wildcard
+ * @param pOrigins Comma-separated list of origins to search in the list of allowed origins. At least one has to match.
+ *
+ * @return true if at least one of the pOrigins is in pAllowedOrigins
+ */
+bool str_is_allowed_origin(const char *pAllowedOrigins, const char *pOrigins);
 
 #endif

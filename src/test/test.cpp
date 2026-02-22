@@ -145,6 +145,7 @@ int main(int argc, const char **argv)
 	CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 	::testing::InitGoogleTest(&argc, const_cast<char **>(argv));
+	GTEST_FLAG_SET(death_test_style, "threadsafe");
 	net_init();
 	return RUN_ALL_TESTS();
 }

@@ -22,6 +22,7 @@
 #include <engine/shared/fifo.h>
 #include <engine/shared/http.h>
 #include <engine/shared/network.h>
+#include <engine/shared/uuid_manager.h>
 #include <engine/textrender.h>
 #include <engine/warning.h>
 
@@ -92,6 +93,37 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	CUuid m_ConnectionId = UUID_ZEROED;
 	bool m_Sixup;
+
+	class CRedirectInfo
+	{
+	public:
+		char m_aOriginConnectionStr[MAX_SERVER_ADDRESSES * NETADDR_MAXSTRSIZE] = "";
+		char m_aOriginServerInfoAddr[MAX_SERVER_ADDRESSES * NETADDR_MAXSTRSIZE] = "";
+		CUuid m_SessionId = UUID_ZEROED;
+
+		// This is the users set connection string it can contain all kinds of strings
+		// for example the connection string "yellow,ger1.ddnet.org:8307,fish"
+		// would successfully connect to ger1.ddnet.org:8307 and ignoring the yellow fish
+		// it is always set
+		const char *OriginConnectionStr() const { return m_aOriginConnectionStr; }
+
+		// This is only one address. It is the real network address of the server that
+		// sent the server info packet. It should at all times be a real value
+		// this is useful to understand which of the addresses in the connection string was used.
+		// The big caveat here is that it is not known to the client in the early connection process
+		// so if a client gets redirected on join this value will be unset (empty string)
+		const char *OriginServerInfoAddr() const { return m_aOriginServerInfoAddr; }
+
+		CUuid SessionId() const { return m_SessionId; }
+
+		CRedirectInfo(const char *pOriginConnectionStr, const char *pOriginServerInfoAddr, CUuid SessionId)
+		{
+			str_copy(m_aOriginConnectionStr, pOriginConnectionStr);
+			str_copy(m_aOriginServerInfoAddr, pOriginServerInfoAddr);
+			m_SessionId = SessionId;
+		}
+	};
+	std::optional<CRedirectInfo> m_Redirect;
 
 	bool m_HaveGlobalTcpAddr = false;
 	NETADDR m_GlobalTcpAddr = NETADDR_ZEROED;
@@ -365,6 +397,7 @@ public:
 	void Restart() override;
 	void Quit() override;
 	void ResetSocket();
+	void FailedRedirect(const char *pReason);
 
 	const char *PlayerName() const override;
 	const char *DummyName() override;
