@@ -841,8 +841,8 @@ void CMenus::Render()
 		}
 		else if(m_ShowStart)
 		{
-			// Start menu from menus_start.cpp
-			RenderStartMenu(Screen);
+			// RenderStartMenu(Screen);
+                           RenderBackground();
 		}
 		else
 		{
