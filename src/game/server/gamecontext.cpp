@@ -19,6 +19,7 @@
 #include <engine/console.h>
 #include <engine/engine.h>
 #include <engine/map.h>
+#include <engine/server/authmanager.h>
 #include <engine/server/server.h>
 #include <engine/shared/config.h>
 #include <engine/shared/datafile.h>
@@ -1971,11 +1972,11 @@ void CGameContext::TeehistorianRecordTeamFinish(int TeamId, int TimeTicks)
 	}
 }
 
-void CGameContext::TeehistorianRecordAuthLogin(int ClientId, int Level, const char *pAuthName)
+void CGameContext::TeehistorianRecordAuthLogin(int ClientId, const char *pRoleName, const char *pAuthName)
 {
 	if(m_TeeHistorianActive)
 	{
-		m_TeeHistorian.RecordAuthLogin(ClientId, Level, pAuthName);
+		m_TeeHistorian.RecordAuthLogin(ClientId, pRoleName, pAuthName);
 	}
 }
 
@@ -2526,9 +2527,7 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 		{
 			return;
 		}
-		int Authed = Server()->GetAuthedState(ClientId);
-		int KickedAuthed = Server()->GetAuthedState(KickId);
-		if(KickedAuthed > Authed)
+		if(!Server()->CanKick(ClientId, KickId))
 		{
 			SendChatTarget(ClientId, "You can't kick authorized players");
 			char aBufKick[128];
@@ -2606,9 +2605,7 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 			SendChatTarget(ClientId, "You can't move yourself to spectators");
 			return;
 		}
-		int Authed = Server()->GetAuthedState(ClientId);
-		int SpectateAuthed = Server()->GetAuthedState(SpectateId);
-		if(SpectateAuthed > Authed)
+		if(!Server()->CanKick(ClientId, SpectateId))
 		{
 			SendChatTarget(ClientId, "You can't move authorized players to spectators");
 			char aBufSpectate[128];
@@ -4760,24 +4757,25 @@ const char *CGameContext::NetVersion() const { return GAME_NETVERSION; }
 
 IGameServer *CreateGameServer() { return new CGameContext; }
 
-void CGameContext::OnSetAuthed(int ClientId, int Level)
+void CGameContext::OnSetAuthed(int ClientId, CRconRole *pRole)
 {
-	if(m_apPlayers[ClientId] && m_VoteCloseTime && Level != AUTHED_NO)
+	if(m_apPlayers[ClientId] && m_VoteCloseTime && pRole)
 	{
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "ban %s %d Banned by vote", Server()->ClientAddrString(ClientId, false), g_Config.m_SvVoteKickBantime);
-		if(!str_comp_nocase(m_aVoteCommand, aBuf) && (m_VoteCreator == -1 || Level > Server()->GetAuthedState(m_VoteCreator)))
+		CRconRole *pVoterRole = Server()->RoleOrNullptr(m_VoteCreator);
+		if(!str_comp_nocase(m_aVoteCommand, aBuf) && (!pVoterRole || !pVoterRole->CanKick(pRole)))
 		{
 			m_VoteEnforce = CGameContext::VOTE_ENFORCE_NO_ADMIN;
-			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", "Vote aborted by authorized login.");
+			log_info("game", "Vote aborted by authorized login.");
 		}
 	}
 
 	if(m_TeeHistorianActive)
 	{
-		if(Level != AUTHED_NO)
+		if(pRole)
 		{
-			m_TeeHistorian.RecordAuthLogin(ClientId, Level, Server()->GetAuthName(ClientId));
+			m_TeeHistorian.RecordAuthLogin(ClientId, pRole->Name(), Server()->GetAuthName(ClientId));
 		}
 		else
 		{

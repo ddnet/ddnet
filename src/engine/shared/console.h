@@ -15,7 +15,6 @@ class CConsole : public IConsole
 {
 	class CCommand : public ICommandInfo
 	{
-		EAccessLevel m_AccessLevel;
 		CCommand *m_pNext;
 
 	public:
@@ -35,8 +34,6 @@ class CConsole : public IConsole
 		const char *Help() const override { return m_pHelp; }
 		const char *Params() const override { return m_pParams; }
 		int Flags() const override { return m_Flags; }
-		EAccessLevel GetAccessLevel() const override { return m_AccessLevel; }
-		void SetAccessLevel(EAccessLevel AccessLevel);
 	};
 
 	class CChain
@@ -71,9 +68,6 @@ class CConsole : public IConsole
 	static void Con_Chain(IResult *pResult, void *pUserData);
 	static void Con_Echo(IResult *pResult, void *pUserData);
 	static void Con_Exec(IResult *pResult, void *pUserData);
-	static void ConCommandAccess(IResult *pResult, void *pUser);
-	static void ConCommandStatus(IConsole::IResult *pResult, void *pUser);
-	void PrintCommandList(EAccessLevel MinAccessLevel, int ExcludeFlagMask);
 
 	void ExecuteLineStroked(int Stroke, const char *pStr, int ClientId = IConsole::CLIENT_ID_UNSPECIFIED, bool InterpretSemicolons = true) override;
 
@@ -197,27 +191,11 @@ public:
 	void SetCanUseCommandCallback(FCanUseCommandCallback pfnCallback, void *pUser) override;
 	void InitChecksum(CChecksumData *pData) const override;
 
-	/**
-	 * Converts access level string to access level enum.
-	 *
-	 * @param pAccessLevel should be either "admin", "mod", "moderator", "helper" or "user".
-	 * @return `std::nullopt` on error otherwise one of the auth enums such as `EAccessLevel::ADMIN`.
-	 */
-	static std::optional<EAccessLevel> AccessLevelToEnum(const char *pAccessLevel);
-
-	/**
-	 * Converts access level enum to access level string.
-	 *
-	 * @param AccessLevel should be one of these: `EAccessLevel::ADMIN`, `EAccessLevel::MODERATOR`, `EAccessLevel::HELPER` or `EAccessLevel::USER`.
-	 * @return `nullptr` on error or access level string like "admin".
-	 */
-	static const char *AccessLevelToString(EAccessLevel AccessLevel);
-
 	static std::optional<ColorHSLA> ColorParse(const char *pStr, float DarkestLighting);
 
 	// DDRace
 
-	static void ConUserCommandStatus(IConsole::IResult *pResult, void *pUser);
+	static void ConCmdlistChat(IConsole::IResult *pResult, void *pUser);
 
 	bool Cheated() const override { return m_Cheated; }
 
