@@ -7,6 +7,7 @@
 #include "smooth_time.h"
 
 #include <base/hash.h>
+#include <base/net.h>
 #include <base/types.h>
 
 #include <engine/client.h>
@@ -22,6 +23,7 @@
 #include <engine/shared/demo.h>
 #include <engine/shared/fifo.h>
 #include <engine/shared/network.h>
+#include <engine/shared/uuid_manager.h>
 #include <engine/textrender.h>
 #include <engine/warning.h>
 
@@ -93,6 +95,29 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	CUuid m_ConnectionId = UUID_ZEROED;
 	bool m_Sixup;
+
+	class CRedirectInfo
+	{
+		char m_aOriginServerAddress[NETADDR_MAXSTRSIZE] = "";
+		char m_aOriginServerIpNoPort[NETADDR_MAXSTRSIZE] = "";
+		CUuid m_SessionId = UUID_ZEROED;
+		char m_aMetadata[8192] = "";
+
+	public:
+		const char *OriginServerAddress() const { return m_aOriginServerAddress; }
+		const char *OriginServerIpNoPort() const { return m_aOriginServerIpNoPort; }
+		CUuid SessionId() const { return m_SessionId; }
+		const char *Metadata() const { return m_aMetadata; }
+
+		CRedirectInfo(const NETADDR *pOrigin, CUuid SessionId, const char *pMetadata)
+		{
+			net_addr_str(pOrigin, m_aOriginServerAddress, sizeof(m_aOriginServerAddress), true);
+			net_addr_str(pOrigin, m_aOriginServerIpNoPort, sizeof(m_aOriginServerIpNoPort), false);
+			m_SessionId = SessionId;
+			str_copy(m_aMetadata, pMetadata);
+		}
+	};
+	std::optional<CRedirectInfo> m_Redirect;
 
 	bool m_HaveGlobalTcpAddr = false;
 	NETADDR m_GlobalTcpAddr = NETADDR_ZEROED;
@@ -375,6 +400,7 @@ public:
 #if defined(CONF_PLATFORM_IOS)
 	void RecreateBrokenSockets();
 #endif
+	void FailedRedirect(const char *pReason);
 
 	const char *PlayerName() const override;
 	const char *DummyName() override;

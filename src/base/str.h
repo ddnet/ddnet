@@ -1042,4 +1042,17 @@ int str_utf8_comp_confusable(const char *str1, const char *str2);
  */
 int str_utf8_tolower_codepoint(int code);
 
+/**
+ * Checks if a host is in a list of allowed origins.
+ * This is used for redirects.
+ *
+ * @ingroup Strings
+ *
+ * @param pAllowedOrigins Comma-separated list of hosts ("" is allow none and "*" is allow all)
+ * @param pOrigin Origin to search in the list of allowed origins. This has to be a ip address without port.
+ *
+ * @return true if the pOrigin is allowed by the pAllowedOrigins list
+ */
+bool str_is_allowed_origin(const char *pAllowedOrigins, const char *pOrigin);
+
 #endif
