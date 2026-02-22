@@ -59,6 +59,7 @@ public:
 	bool m_DebugRenderQuadClips;
 	bool m_DebugRenderClusterClips;
 	bool m_DebugRenderTileClips;
+	bool m_DebugRenderTileBorderClips;
 };
 
 class CRenderLayer : public CRenderComponent
@@ -140,6 +141,69 @@ private:
 	IGraphics::CTextureHandle m_TextureHandle;
 
 protected:
+	enum EBorderType
+	{
+		CORNER = 1,
+		RIGHT = 2,
+		LEFT = 4,
+		TOP = 8,
+		BOTTOM = 16,
+	};
+
+	class CTileVisual
+	{
+	public:
+		CTileVisual() :
+			m_IndexBufferByteOffset(0) {}
+
+	private:
+		offset_ptr32 m_IndexBufferByteOffset;
+
+	public:
+		bool DoDraw() const
+		{
+			return (m_IndexBufferByteOffset & 0x10000000) != 0;
+		}
+
+		void Draw(bool SetDraw)
+		{
+			m_IndexBufferByteOffset = (SetDraw ? 0x10000000 : (offset_ptr32)0) | (m_IndexBufferByteOffset & 0xEFFFFFFF);
+		}
+
+		offset_ptr IndexBufferByteOffset() const
+		{
+			return ((offset_ptr)(m_IndexBufferByteOffset & 0xEFFFFFFF) * 6 * sizeof(uint32_t));
+		}
+
+		void SetIndexBufferByteOffset(offset_ptr32 IndexBufferByteOff)
+		{
+			m_IndexBufferByteOffset = IndexBufferByteOff | (m_IndexBufferByteOffset & 0x10000000);
+		}
+
+		void AddIndexBufferByteOffset(offset_ptr32 IndexBufferByteOff)
+		{
+			m_IndexBufferByteOffset = ((m_IndexBufferByteOffset & 0xEFFFFFFF) + IndexBufferByteOff) | (m_IndexBufferByteOffset & 0x10000000);
+		}
+	};
+
+	class CTileLayerVisuals;
+	class CRenderTileLayerBorder : public CRenderComponent
+	{
+	public:
+		CRenderTileLayerBorder(vec2 Offset, int Type, CClipRegion ClipRegion, size_t Size);
+		void Draw(const CTileLayerVisuals *pVisual, const ColorRGBA &Color);
+		const int &GetType() const { return m_Type; }
+		bool Adjust();
+
+		std::vector<CTileVisual> m_vBorder;
+		CClipRegion m_BorderClip;
+
+	private:
+		vec2 m_Offset;
+		int m_Type;
+		int m_FrontOffset;
+	};
+
 	class CTileLayerVisuals : public CRenderComponent
 	{
 	public:
@@ -154,55 +218,10 @@ protected:
 		bool Init(unsigned int Width, unsigned int Height);
 		void Unload();
 
-		class CTileVisual
-		{
-		public:
-			CTileVisual() :
-				m_IndexBufferByteOffset(0) {}
-
-		private:
-			offset_ptr32 m_IndexBufferByteOffset;
-
-		public:
-			bool DoDraw() const
-			{
-				return (m_IndexBufferByteOffset & 0x10000000) != 0;
-			}
-
-			void Draw(bool SetDraw)
-			{
-				m_IndexBufferByteOffset = (SetDraw ? 0x10000000 : (offset_ptr32)0) | (m_IndexBufferByteOffset & 0xEFFFFFFF);
-			}
-
-			offset_ptr IndexBufferByteOffset() const
-			{
-				return ((offset_ptr)(m_IndexBufferByteOffset & 0xEFFFFFFF) * 6 * sizeof(uint32_t));
-			}
-
-			void SetIndexBufferByteOffset(offset_ptr32 IndexBufferByteOff)
-			{
-				m_IndexBufferByteOffset = IndexBufferByteOff | (m_IndexBufferByteOffset & 0x10000000);
-			}
-
-			void AddIndexBufferByteOffset(offset_ptr32 IndexBufferByteOff)
-			{
-				m_IndexBufferByteOffset = ((m_IndexBufferByteOffset & 0xEFFFFFFF) + IndexBufferByteOff) | (m_IndexBufferByteOffset & 0x10000000);
-			}
-		};
-
 		std::vector<CTileVisual> m_vTilesOfLayer;
-
-		CTileVisual m_BorderTopLeft;
-		CTileVisual m_BorderTopRight;
-		CTileVisual m_BorderBottomRight;
-		CTileVisual m_BorderBottomLeft;
+		std::vector<CRenderTileLayerBorder> m_vBorders;
 
 		CTileVisual m_BorderKillTile; // end of map kill tile -- game layer only
-
-		std::vector<CTileVisual> m_vBorderTop;
-		std::vector<CTileVisual> m_vBorderLeft;
-		std::vector<CTileVisual> m_vBorderRight;
-		std::vector<CTileVisual> m_vBorderBottom;
 
 		unsigned int m_Width;
 		unsigned int m_Height;
@@ -216,7 +235,7 @@ protected:
 	virtual void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params);
 
 	void RenderTileLayer(const ColorRGBA &Color, const CRenderLayerParams &Params, CTileLayerVisuals *pTileLayerVisuals = nullptr);
-	void RenderTileBorder(const ColorRGBA &Color, int BorderX0, int BorderY0, int BorderX1, int BorderY1, CTileLayerVisuals *pTileLayerVisuals);
+	void RenderTileBorder(const ColorRGBA &Color, const CRenderLayerParams &Params, CTileLayerVisuals *pTileLayerVisuals);
 	void RenderKillTileBorder(const ColorRGBA &Color);
 
 	std::optional<CRenderLayerTile::CTileLayerVisuals> m_VisualTiles;
