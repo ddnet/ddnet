@@ -37,6 +37,12 @@ public:
 		Maximum: Max\n \
 		Description: Desc */ \
 	int m_##Name;
+#define MACRO_CONFIG_INP(Name, ScriptName, Flags, Desc) \
+	/** Config variable: ScriptName\n \
+		Type: Input (Integer)\n \
+		Default: Def\n \
+		Description: Desc */ \
+	int m_##Name;
 #define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) \
 	/** Config variable: ScriptName\n \
 		Type: Color\n \
@@ -52,6 +58,7 @@ public:
 	char m_##Name[Len]; // Flawfinder: ignore
 #include "config_variables.h"
 #undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_INP
 #undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR
 };
@@ -66,6 +73,9 @@ namespace DefaultConfig
 #define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
 	/** Default value of the integer config variable 'ScriptName' (see CConfig::m_##Name). */ \
 	static constexpr int Name = Def;
+#define MACRO_CONFIG_INP(Name, ScriptName, Flags, Desc) \
+	/** Default value of the input config variable 'ScriptName' (see CConfig::m_##Name). */ \
+	static constexpr int Name = 0;
 #define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) \
 	/** Default value of the color config variable 'ScriptName' (see CConfig::m_##Name). */ \
 	static constexpr unsigned Name = Def;
@@ -74,6 +84,7 @@ namespace DefaultConfig
 	static constexpr const char *const Name = Def;
 #include "config_variables.h"
 #undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_INP
 #undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR
 }
@@ -112,6 +123,7 @@ struct SConfigVariable
 	enum EVariableType
 	{
 		VAR_INT,
+		VAR_INP,
 		VAR_COLOR,
 		VAR_STRING,
 	};
@@ -170,11 +182,27 @@ struct SIntConfigVariable : public SConfigVariable
 	static void CommandCallback(IConsole::IResult *pResult, void *pUserData);
 	void Register() override;
 	bool IsDefault() const override;
-	void Serialize(char *pOut, size_t Size, int Value) const;
-	void Serialize(char *pOut, size_t Size) const override;
 	void SetValue(int Value);
 	void ResetToDefault() override;
 	void ResetToOld() override;
+
+protected:
+	virtual void Serialize(char *pOut, size_t Size, int Value) const;
+	void Serialize(char *pOut, size_t Size) const override;
+};
+
+struct SInputConfigVariable : public SIntConfigVariable
+{
+	SInputConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, int *pVariable) :
+		SIntConfigVariable(pConsole, pScriptName, Type, Flags, pHelp, pVariable, 0, 0, 1)
+	{
+	}
+
+	~SInputConfigVariable() override = default;
+
+	static void CommandCallback(IConsole::IResult *pResult, void *pUserData);
+	void Register() override;
+	void Serialize(char *pOut, size_t Size, int Value) const override;
 };
 
 struct SColorConfigVariable : public SConfigVariable
