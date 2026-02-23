@@ -81,18 +81,22 @@ public:
 	 * Returns the state of the job.
 	 *
 	 * @remark Accessing jobs in any other way that with the base functions of `IJob`
-	 * is generally not thread-safe unless the job is in @link STATE_DONE @endlink
-	 * or has not been enqueued yet.
+	 * is generally not thread-safe unless the job is in `STATE_DONE` or has not been
+	 * enqueued yet.
 	 *
 	 * @return State of the job.
 	 */
 	EJobState State() const;
 
 	/**
-	 * Returns whether the job was completed, i.e. whether it's not still queued
-	 * or running.
+	 * Returns whether the job was completed or aborted, i.e. whether it's not still
+	 * queued or running.
 	 *
 	 * @return `true` if the job is done, `false` otherwise.
+	 *
+	 * @remark This function also considers aborted jobs to be done, but aborted jobs
+	 * may still be running until the cancelation is accepted. Ensure the job's state
+	 * is `STATE_DONE` before accessing any results of the job.
 	 */
 	bool Done() const;
 
