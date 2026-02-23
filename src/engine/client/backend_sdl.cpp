@@ -180,16 +180,25 @@ void CGraphicsBackend_Threaded::WaitForIdle()
 
 void CGraphicsBackend_Threaded::ProcessError(const SGfxErrorContainer &Error)
 {
-	std::string VerboseStr = "Graphics Assertion:";
+	m_FatalError = "";
 	for(const auto &ErrStr : Error.m_vErrors)
 	{
-		VerboseStr.append("\n");
+		if(!m_FatalError.empty())
+		{
+			m_FatalError.append("\n");
+		}
 		if(ErrStr.m_RequiresTranslation)
-			VerboseStr.append(m_TranslateFunc(ErrStr.m_Err.c_str(), ""));
+			m_FatalError.append(m_TranslateFunc(ErrStr.m_Err.c_str(), ""));
 		else
-			VerboseStr.append(ErrStr.m_Err);
+			m_FatalError.append(ErrStr.m_Err);
 	}
-	dbg_assert_failed("%s", VerboseStr.c_str());
+	std::string LogMessage = "Graphics Error:\n" + m_FatalError;
+	dbg_assert_failed("%s", LogMessage.c_str());
+}
+
+const char *CGraphicsBackend_Threaded::GetFatalError() const
+{
+	return m_FatalError.c_str();
 }
 
 bool CGraphicsBackend_Threaded::GetWarning(std::vector<std::string> &WarningStrings)

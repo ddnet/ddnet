@@ -2922,6 +2922,11 @@ const char *CGraphics_Threaded::GetRendererString()
 	return m_pBackend->GetRendererString();
 }
 
+const char *CGraphics_Threaded::GetFatalError() const
+{
+	return m_pBackend == nullptr ? "" : m_pBackend->GetFatalError();
+}
+
 TGLBackendReadPresentedImageData &CGraphics_Threaded::GetReadPresentedImageDataFuncUnsafe()
 {
 	return m_pBackend->GetReadPresentedImageDataFuncUnsafe();
