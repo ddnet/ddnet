@@ -12,7 +12,15 @@
 #include <vector>
 
 /**
+ * Jobs and job pool.
+ *
+ * @defgroup Jobs Jobs
+ */
+
+/**
  * A job which runs in a worker thread of a job pool.
+ *
+ * @ingroup Jobs
  *
  * @see CJobPool
  */
@@ -125,6 +133,8 @@ public:
 
 /**
  * A job pool which runs jobs in one or more worker threads.
+ *
+ * @ingroup Jobs
  *
  * @see IJob
  */
