@@ -5345,16 +5345,16 @@ void CClient::GetGpuInfoString(char (&aGpuInfo)[512])
 		str_format(aGpuInfo, std::size(aGpuInfo),
 			"Graphics backend: %s %d.%d.%d\n"
 			"GPU: %s - %s - %s\n"
-			"Texture: %" PRIu64 " MiB, "
-			"Buffer: %" PRIu64 " MiB, "
-			"Streamed: %" PRIu64 " MiB, "
-			"Staging: %" PRIu64 " MiB",
+			"Texture: %.2f MiB, "
+			"Buffer: %.2f MiB, "
+			"Streamed: %.2f MiB, "
+			"Staging: %.2f MiB",
 			g_Config.m_GfxBackend, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch,
 			m_pGraphics->GetVendorString(), m_pGraphics->GetRendererString(), m_pGraphics->GetVersionString(),
-			m_pGraphics->TextureMemoryUsage() / 1024 / 1024,
-			m_pGraphics->BufferMemoryUsage() / 1024 / 1024,
-			m_pGraphics->StreamedMemoryUsage() / 1024 / 1024,
-			m_pGraphics->StagingMemoryUsage() / 1024 / 1024);
+			m_pGraphics->TextureMemoryUsage() / 1024.0 / 1024.0,
+			m_pGraphics->BufferMemoryUsage() / 1024.0 / 1024.0,
+			m_pGraphics->StreamedMemoryUsage() / 1024.0 / 1024.0,
+			m_pGraphics->StagingMemoryUsage() / 1024.0 / 1024.0);
 	}
 }
 
