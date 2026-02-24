@@ -56,7 +56,7 @@ float CTuningParams::GetWeaponFireDelay(int Weapon) const
 {
 	switch(Weapon)
 	{
-	case WEAPON_HAMMER: return (float)m_HammerHitFireDelay / 1000.0f;
+	case WEAPON_HAMMER: return (float)m_HammerFireDelay / 1000.0f;
 	case WEAPON_GUN: return (float)m_GunFireDelay / 1000.0f;
 	case WEAPON_SHOTGUN: return (float)m_ShotgunFireDelay / 1000.0f;
 	case WEAPON_GRENADE: return (float)m_GrenadeFireDelay / 1000.0f;
