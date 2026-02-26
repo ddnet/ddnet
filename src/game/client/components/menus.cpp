@@ -931,6 +931,7 @@ void CMenus::Render()
 			}
 
 			RenderMenubar(TabBar, ClientState);
+}
 		}
 		break;
 
@@ -959,74 +960,113 @@ void CMenus::Render()
 	{
 		m_ShowStart = true;
 	}
-}
+// ============ НЕДОСТАЮЩИЕ ФУНКЦИИ МЕНЮ ============
 
-// Функция для AuraClient настроек
-void CMenus::RenderAuraClientSettings(CUIRect MainView)
+void CMenus::RenderLoading(const char *pTitle, const char *pMessage, int Percent)
 {
-	// Заголовок
-	CUIRect Section, Left, Right;
-	MainView.HSplitTop(20.0f, &Section, &MainView);
-	Ui()->DoLabel(&Section, "Aura Client Settings", 14.0f, TEXTALIGN_ML);
-
-	// Разделим на две колонки
-	MainView.VSplitMid(&Left, &Right);
-
-	// Левая колонка - настройки отображения
-	Left.HSplitTop(20.0f, &Section, &Left);
-	DoButton_CheckBox(&CAuraClient::m_UpdateFrozenSkin, "Update Frozen Skin", CAuraClient::m_UpdateFrozenSkin, &Section);
-
-	Left.HSplitTop(20.0f, &Section, &Left);
-	DoButton_CheckBox(&CAuraClient::m_ShowPingCircle, "Show Ping Circle", CAuraClient::m_ShowPingCircle, &Section);
-
-	Left.HSplitTop(20.0f, &Section, &Left);
-	DoButton_CheckBox(&CAuraClient::m_HideNameplatesSpec, "Hide Nameplates in Spec", CAuraClient::m_HideNameplatesSpec, &Section);
-
-	Left.HSplitTop(20.0f, &Section, &Left);
-	DoButton_CheckBox(&CAuraClient::m_ShowSkinNames, "Show Skin Names", CAuraClient::m_ShowSkinNames, &Section);
-
-	Left.HSplitTop(20.0f, &Section, &Left);
-	DoButton_CheckBox(&CAuraClient::m_FreezeStars, "Freeze Stars", CAuraClient::m_FreezeStars, &Section);
-
-	Left.HSplitTop(20.0f, &Section, &Left);
-	DoButton_CheckBox(&CAuraClient::m_ColorFrozenTees, "Color Frozen Tees", CAuraClient::m_ColorFrozenTees, &Section);
-
-	Left.HSplitTop(20.0f, &Section, &Left);
-	DoButton_CheckBox(&CAuraClient::m_HammerRotate, "Hammer Rotate", CAuraClient::m_HammerRotate, &Section);
-
-	// Правая колонка
-	Right.HSplitTop(20.0f, &Section, &Right);
-	DoButton_CheckBox(&CAuraClient::m_WhiteFeet, "White Feet", CAuraClient::m_WhiteFeet, &Section);
-
-	Right.HSplitTop(20.0f, &Section, &Right);
-	DoButton_CheckBox(&CAuraClient::m_HookHitGlow, "Hook Hit Glow", CAuraClient::m_HookHitGlow, &Section);
-
-	Right.HSplitTop(20.0f, &Section, &Right);
-	DoButton_CheckBox(&CAuraClient::m_ShowScreenCenter, "Show Screen Center", CAuraClient::m_ShowScreenCenter, &Section);
-
-	Right.HSplitTop(20.0f, &Section, &Right);
-	DoButton_CheckBox(&CAuraClient::m_ShowPosAngle, "Show Pos/Angle", CAuraClient::m_ShowPosAngle, &Section);
-
-	Right.HSplitTop(20.0f, &Section, &Right);
-	DoButton_CheckBox(&CAuraClient::m_ShowCursorSpec, "Show Cursor in Spectate", CAuraClient::m_ShowCursorSpec, &Section);
-
-	Right.HSplitTop(20.0f, &Section, &Right);
-	DoButton_CheckBox(&CAuraClient::m_ShowLastAlive, "Show Last Alive", CAuraClient::m_ShowLastAlive, &Section);
-
-	Right.HSplitTop(20.0f, &Section, &Right);
-	DoButton_CheckBox(&CAuraClient::m_RemovePredictionFrozen, "Remove Prediction Frozen", CAuraClient::m_RemovePredictionFrozen, &Section);
-
-	Right.HSplitTop(20.0f, &Section, &Right);
-	DoButton_CheckBox(&CAuraClient::m_ShowOutlines, "Show Outlines", CAuraClient::m_ShowOutlines, &Section);
-
-	Right.HSplitTop(20.0f, &Section, &Right);
-	DoButton_CheckBox(&CAuraClient::m_OutlinesOnlyEntities, "Outlines Only Entities", CAuraClient::m_OutlinesOnlyEntities, &Section);
-
-	Right.HSplitTop(20.0f, &Section, &Right);
-	DoButton_CheckBox(&CAuraClient::m_OutlineFreeze, "Outline Freeze", CAuraClient::m_OutlineFreeze, &Section);
-
-	Right.HSplitTop(20.0f, &Section, &Right);
-	DoButton_CheckBox(&CAuraClient::m_OutlineWalls, "Outline Walls", CAuraClient::m_OutlineWalls, &Section);
+    // Заглушка - просто рисуем фон
+    RenderBackground();
+    
+    CUIRect Screen = *Ui()->Screen();
+    CUIRect Label;
+    Screen.Margin(50.0f, &Label);
+    
+    if(pTitle)
+        Ui()->DoLabel(&Label, pTitle, 24.0f, TEXTALIGN_MC);
+    
+    if(pMessage)
+    {
+        Label.y += 40.0f;
+        Ui()->DoLabel(&Label, pMessage, 16.0f, TEXTALIGN_MC);
+    }
 }
 
-// ... остальные функции остаются без изменений
+void CMenus::FinishLoading()
+{
+    // Ничего не делаем
+}
+
+bool CMenus::CanDisplayWarning() const
+{
+    return true;
+}
+
+void CMenus::PopupWarning(const char *pTitle, const char *pMsg, const char *pButton, std::chrono::nanoseconds AutoHide)
+{
+    // Заглушка
+}
+
+void CMenus::SetActive(bool Active)
+{
+    m_MenuActive = Active;
+}
+
+void CMenus::SetMenuPage(int Page)
+{
+    m_MenuPage = Page;
+}
+
+void CMenus::RefreshBrowserTab(bool Force)
+{
+    // Заглушка
+}
+
+void CMenus::ShowQuitPopup()
+{
+    m_Popup = POPUP_QUIT;
+}
+
+void CMenus::SetShowStart(bool Show)
+{
+    m_ShowStart = Show;
+}
+
+void CMenus::PopupConfirm(const char *pTitle, const char *pMsg, const char *pButtonText, const char *pButtonTooltip, void (CMenus::*pfn)())
+{
+    // Заглушка
+}
+
+void CMenus::PopupMessage(const char *pTitle, const char *pMsg, const char *pButton, int AutoHide, void (CMenus::*pfn)())
+{
+    // Заглушка
+}
+
+void CMenus::RenderThemeSelection(CUIRect MainView)
+{
+    // Заглушка
+}
+
+void CMenus::UpdateMusicState()
+{
+    // Заглушка
+}
+
+const CMenuImage *CMenus::FindMenuImage(const char *pName)
+{
+    return nullptr;
+}
+
+void CMenus::RenderBackground()
+{
+    // Твой рендер фона
+    CUIRect Screen = *Ui()->Screen();
+    Screen.Draw(ColorRGBA(0.1f, 0.1f, 0.2f, 1.0f), IGraphics::CORNER_ALL, 0);
+}
+
+void CMenus::RenderPopupConnecting(CUIRect MainView)
+{
+    RenderBackground();
+    CUIRect Label;
+    MainView.Margin(50.0f, &Label);
+    Ui()->DoLabel(&Label, "Connecting...", 24.0f, TEXTALIGN_MC);
+}
+void CMenus::RenderPopupFullscreen(CUIRect MainView)
+{
+    RenderBackground();
+}
+
+void CMenus::RenderPopupLoading(CUIRect MainView)
+{
+    RenderBackground();
+}
+}
