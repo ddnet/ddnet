@@ -485,7 +485,7 @@ private:
 	PartsVector m_vpParts;
 	void RenderLine(CGameClient &This,
 		vec2 Pos, vec2 Size,
-		PartsVector::iterator Start, PartsVector::iterator End)
+		const PartsVector::iterator &Start, const PartsVector::iterator &End)
 	{
 		Pos.x -= Size.x / 2.0f;
 		for(auto PartIt = Start; PartIt != End; ++PartIt)
