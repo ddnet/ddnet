@@ -25,26 +25,43 @@ jobs:
         sudo apt-get install ddnet-tools shellcheck tidy pkg-config cmake graphviz ninja-build python3-clang -y
         rustup default stable
         pip3 install ruff
-        wget https://github.com/muttleyxd/clang-tools-static-binaries/releases/download/master-796e77c/clang-format-20_linux-amd64
-        echo "bbb30a777d075dfbe91aa146a1ea1fa0c1d4745efa9c5490ebf9f5a7a7dec679c22f1c6015d5c85cb5b5b22964d86ae65002f1d4145bfdd7f27022d981b58979  clang-format-20_linux-amd64" | sha512sum -c
-        mv clang-format-20_linux-amd64 ~/.local/bin/clang-format
-        chmod +x ~/.local/bin/clang-format
-        wget -O ~/.local/bin/shfmt https://github.com/mvdan/sh/releases/download/v3.8.0/shfmt_v3.8.0_linux_amd64
-        chmod +x ~/.local/bin/shfmt
-        wget --quiet -O doxygen.tar.gz https://www.doxygen.nl/files/doxygen-1.16.1.linux.bin.tar.gz
+
+    - name: Cache dependencies
+      id: cache-dependencies
+      uses: actions/cache@v4
+      with:
+        path: /home/runner/style-tools
+        key: style-${{ hashFiles('.github/style-tools.sha256') }}
+
+    - name: Install dependencies
+      if: steps.cache-dependencies.outputs.cache-hit != 'true'
+      run: |
+        mkdir -p /home/runner/style-tools
+        cp .github/style-tools.sha256 /home/runner/style-tools
+        cd /home/runner/style-tools
+        wget -O clang-format https://github.com/muttleyxd/clang-tools-static-binaries/releases/download/master-796e77c/clang-format-20_linux-amd64
+        wget -O doxygen.tar.gz https://www.doxygen.nl/files/doxygen-1.16.1.linux.bin.tar.gz
+        wget -O shfmt https://github.com/mvdan/sh/releases/download/v3.8.0/shfmt_v3.8.0_linux_amd64
+        sha256sum -c style-tools.sha256
+        chmod +x clang-format
+        chmod +x shfmt
         tar xf doxygen.tar.gz
-        mv doxygen-1.16.1/bin/doxygen ~/.local/bin
+        mv doxygen-1.16.1/bin/doxygen .
+        rm -f doxygen.tar.gz
+        rm -rf doxygen-1.16.1
 
     - name: Cache Rust dependencies
       uses: Swatinem/rust-cache@v2
 
     - name: Check code style (ClangFormat)
       run: |
+        export PATH=/home/runner/style-tools:$PATH
         clang-format -version
         scripts/fix_style.py --dry-run
 
     - name: Check documentation style (Doxygen)
       run: |
+        export PATH=/home/runner/style-tools:$PATH
         doxygen --version
         doxygen -q
         if [ -s docs/warn.log ]; then
@@ -55,10 +72,15 @@ jobs:
         fi
 
     - name: Shellcheck
-      run: find . -type f -name '*.sh' -print0 | xargs -0 shellcheck
+      run: |
+        shellcheck --version
+        find . -type f -name '*.sh' -print0 | xargs -0 shellcheck
 
     - name: Shell format (shfmt)
-      run: find . -type f -name '*.sh' -print0 | xargs -0 shfmt -d
+      run: |
+        export PATH=/home/runner/style-tools:$PATH
+        shfmt --version
+        find . -type f -name '*.sh' -print0 | xargs -0 shfmt -d
 
     - name: Check Python code style (ruff format)
       run: |
