@@ -19,20 +19,11 @@
 #include "types.h"
 
 #include <chrono>
-#include <cstdint>
-#include <ctime>
-#include <functional>
-#include <mutex>
-#include <optional>
+#include <cstddef>
 #include <string>
 
 #ifdef CONF_FAMILY_UNIX
-#include <sys/un.h>
-#endif
-
-#ifdef CONF_PLATFORM_LINUX
-#include <netinet/in.h>
-#include <sys/socket.h>
+#include <sys/un.h> // sockaddr_un
 #endif
 
 /**

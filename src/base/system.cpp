@@ -2,15 +2,11 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "system.h"
 
-#include "logger.h"
+#include "log.h"
 #include "windows.h"
 
-#include <atomic>
 #include <chrono>
-#include <cmath>
-#include <cstring>
 #include <iterator> // std::size
-#include <mutex>
 #include <string_view>
 
 #if defined(CONF_WEBSOCKETS)
@@ -18,8 +14,7 @@
 #endif
 
 #if defined(CONF_FAMILY_UNIX)
-#include <sys/stat.h>
-#include <sys/time.h>
+#include <sys/time.h> // timeval
 #include <unistd.h> // close
 
 /* unix net includes */
@@ -30,13 +25,10 @@
 #include <sys/socket.h>
 
 #include <cerrno>
-
 #elif defined(CONF_FAMILY_WINDOWS)
 #include <windows.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
-
-#include <cerrno>
 #else
 #error NOT IMPLEMENTED
 #endif
