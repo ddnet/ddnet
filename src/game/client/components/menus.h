@@ -160,7 +160,7 @@ protected:
 	};
 	std::vector<CMenuImage> m_vMenuImages;
 	static int MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser);
-	const CMenuImage *FindMenuImage(const char *pName);
+	// const CMenuImage *FindMenuImage(const char *pName);
 
 	// loading
 	class CLoadingState
