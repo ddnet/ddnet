@@ -124,31 +124,26 @@ int CMenus::DoButton_Toggle(const void *pId, int Checked, const CUIRect *pRect, 
 
 int CMenus::DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, const unsigned Flags, const char *pImageName, int Corners, float Rounding, float FontFactor, ColorRGBA Color)
 {
-	CUIRect Text = *pRect;
+    CUIRect Text = *pRect;
 
-	if(Checked)
-		Color = ColorRGBA(0.6f, 0.6f, 0.6f, 0.5f);
-	Color.a *= Ui()->ButtonColorMul(pButtonContainer);
+    if(Checked)
+        Color = ColorRGBA(0.6f, 0.6f, 0.6f, 0.5f);
+    Color.a *= Ui()->ButtonColorMul(pButtonContainer);
 
-	pRect->Draw(Color, Corners, Rounding);
+    pRect->Draw(Color, Corners, Rounding);
 
-	if(pImageName)
-	{
-		CUIRect Image;
-		pRect->VSplitRight(pRect->h * 4.0f, &Text, &Image);
+    if(pImageName)
+    {
+        CUIRect Image;
+        pRect->VSplitRight(pRect->h * 4.0f, &Text, &Image);
+        // изображение не обрабатываем
+    }
 
-		const void *pImage = FindMenuImage(pImageName);
-		if(pImage)
-		{
-			// заглушка
-		}
-	}
+    Text.HMargin(pRect->h >= 20.0f ? 2.0f : 1.0f, &Text);
+    Text.HMargin((Text.h * FontFactor) / 2.0f, &Text);
+    Ui()->DoLabel(&Text, pText, Text.h * CUi::ms_FontmodHeight, TEXTALIGN_MC);
 
-	Text.HMargin(pRect->h >= 20.0f ? 2.0f : 1.0f, &Text);
-	Text.HMargin((Text.h * FontFactor) / 2.0f, &Text);
-	Ui()->DoLabel(&Text, pText, Text.h * CUi::ms_FontmodHeight, TEXTALIGN_MC);
-
-	return Ui()->DoButtonLogic(pButtonContainer, Checked, pRect, Flags);
+    return Ui()->DoButtonLogic(pButtonContainer, Checked, pRect, Flags);
 }
 
 int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator, const ColorRGBA *pDefaultColor, const ColorRGBA *pActiveColor, const ColorRGBA *pHoverColor, float EdgeRounding, const CCommunityIcon *pCommunityIcon)
