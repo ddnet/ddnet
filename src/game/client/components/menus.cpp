@@ -135,20 +135,12 @@ int CMenus::DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText,
 	if(pImageName)
 	{
 		CUIRect Image;
-		pRect->VSplitRight(pRect->h * 4.0f, &Text, &Image); // always correct ratio for image
+		pRect->VSplitRight(pRect->h * 4.0f, &Text, &Image);
 
-		// render image
-		const CMenuImage *pImage = FindMenuImage(pImageName);
+		const void *pImage = FindMenuImage(pImageName);
 		if(pImage)
 		{
-			Graphics()->TextureSet(Ui()->HotItem() == pButtonContainer ? pImage->m_OrgTexture : pImage->m_GreyTexture);
-			Graphics()->WrapClamp();
-			Graphics()->QuadsBegin();
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-			IGraphics::CQuadItem QuadItem(Image.x, Image.y, Image.w, Image.h);
-			Graphics()->QuadsDrawTL(&QuadItem, 1);
-			Graphics()->QuadsEnd();
-			Graphics()->WrapNormal();
+			// заглушка
 		}
 	}
 
@@ -315,7 +307,6 @@ void CMenus::DoLaserPreview(const CUIRect *pRect, const ColorHSLA LaserOutlineCo
 	const ColorRGBA InnerColor = color_cast<ColorRGBA>(ColorHSLA(LaserInnerColor));
 	const float TicksHead = Client()->GlobalTime() * Client()->GameTickSpeed();
 
-	// TicksBody = 4.0 for less laser width for weapon alignment
 	GameClient()->m_Items.RenderLaser(From, Pos, OuterColor, InnerColor, 4.0f, TicksHead, LaserType);
 
 	switch(LaserType)
@@ -336,32 +327,8 @@ void CMenus::DoLaserPreview(const CUIRect *pRect, const ColorHSLA LaserOutlineCo
 		Graphics()->DrawSprite(Section.x + 30.0f, Section.y + Section.h / 2.0f, 60.0f);
 		Graphics()->QuadsEnd();
 		break;
-	case LASERTYPE_DRAGGER:
-	{
-		CTeeRenderInfo TeeRenderInfo;
-		TeeRenderInfo.Apply(GameClient()->m_Skins.Find(g_Config.m_ClPlayerSkin));
-		TeeRenderInfo.ApplyColors(g_Config.m_ClPlayerUseCustomColor, g_Config.m_ClPlayerColorBody, g_Config.m_ClPlayerColorFeet);
-		TeeRenderInfo.m_Size = 64.0f;
-		RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeRenderInfo, EMOTE_NORMAL, vec2(-1, 0), Pos);
-		break;
-	}
-	case LASERTYPE_FREEZE:
-	{
-		CTeeRenderInfo TeeRenderInfo;
-		if(g_Config.m_ClShowNinja)
-			TeeRenderInfo.Apply(GameClient()->m_Skins.Find("x_ninja"));
-		else
-			TeeRenderInfo.Apply(GameClient()->m_Skins.Find(g_Config.m_ClPlayerSkin));
-		TeeRenderInfo.m_TeeRenderFlags = TEE_EFFECT_FROZEN;
-		TeeRenderInfo.m_Size = 64.0f;
-		TeeRenderInfo.m_ColorBody = ColorRGBA(1, 1, 1);
-		TeeRenderInfo.m_ColorFeet = ColorRGBA(1, 1, 1);
-		RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeRenderInfo, EMOTE_PAIN, vec2(1, 0), From);
-		GameClient()->m_Effects.FreezingFlakes(From, vec2(32, 32), 1.0f);
-		break;
-	}
 	default:
-		GameClient()->m_Items.RenderLaser(From, From, OuterColor, InnerColor, 4.0f, TicksHead, LaserType);
+		break;
 	}
 }
 
@@ -510,8 +477,6 @@ void CMenus::RenderMenubar(CUIRect Box, IClient::EClientState ClientState)
 		dbg_assert_failed("Client state %d is invalid for RenderMenubar", ClientState);
 	}
 
-	// First render buttons aligned from right side so remaining
-	// width is known when rendering buttons from left side.
 	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGNMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 
@@ -645,14 +610,11 @@ void CMenus::RenderMenubar(CUIRect Box, IClient::EClientState ClientState)
 
 		size_t FavoriteCommunityIndex = 0;
 		static CButtonContainer s_aFavoriteCommunityButtons[5];
-		static_assert(std::size(s_aFavoriteCommunityButtons) == (size_t)PAGE_FAVORITE_COMMUNITY_5 - PAGE_FAVORITE_COMMUNITY_1 + 1);
-		static_assert(std::size(s_aFavoriteCommunityButtons) == (size_t)BIT_TAB_FAVORITE_COMMUNITY_5 - BIT_TAB_FAVORITE_COMMUNITY_1 + 1);
-		static_assert(std::size(s_aFavoriteCommunityButtons) == (size_t)IServerBrowser::TYPE_FAVORITE_COMMUNITY_5 - IServerBrowser::TYPE_FAVORITE_COMMUNITY_1 + 1);
 		for(const CCommunity *pCommunity : ServerBrowser()->FavoriteCommunities())
 		{
 			if(Box.w < BrowserButtonWidth)
 				break;
-				Box.VSplitLeft(BrowserButtonWidth, &Button, &Box);
+			Box.VSplitLeft(BrowserButtonWidth, &Button, &Box);
 			const int Page = PAGE_FAVORITE_COMMUNITY_1 + FavoriteCommunityIndex;
 			if(DoButton_MenuTab(&s_aFavoriteCommunityButtons[FavoriteCommunityIndex], FONT_ICON_ELLIPSIS, ActivePage == Page, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIT_TAB_FAVORITE_COMMUNITY_1 + FavoriteCommunityIndex], nullptr, nullptr, nullptr, 10.0f, m_CommunityIcons.Find(pCommunity->Id())))
 			{
@@ -673,7 +635,6 @@ void CMenus::RenderMenubar(CUIRect Box, IClient::EClientState ClientState)
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 
-		// online menus
 		Box.VSplitLeft(90.0f, &Button, &Box);
 		static CButtonContainer s_GameButton;
 		if(DoButton_MenuTab(&s_GameButton, Localize("Game"), ActivePage == PAGE_GAME, &Button, IGraphics::CORNER_TL))
@@ -763,8 +724,6 @@ void CMenus::Render()
 
 	if(ServerBrowser()->DDNetInfoAvailable())
 	{
-		// Initially add DDNet as favorite community and select its tab.
-		// This must be delayed until the DDNet info is available.
 		if(m_CreateDefaultFavoriteCommunities)
 		{
 			m_CreateDefaultFavoriteCommunities = false;
@@ -780,8 +739,6 @@ void CMenus::Render()
 		if(m_JoinTutorial && m_Popup == POPUP_NONE && !ServerBrowser()->IsGettingServerlist())
 		{
 			m_JoinTutorial = false;
-			// This is only reached on first launch, when the DDNet community tab has been created and
-			// activated by default, so the server info for the tutorial server should be available.
 			const char *pAddr = ServerBrowser()->GetTutorialServer();
 			if(pAddr)
 			{
@@ -790,8 +747,6 @@ void CMenus::Render()
 		}
 	}
 
-	// Determine the client state once before rendering because it can change
-	// while rendering which causes frames with broken user interface.
 	const IClient::EClientState ClientState = Client()->State();
 
 	if(ClientState == IClient::STATE_ONLINE || ClientState == IClient::STATE_DEMOPLAYBACK)
@@ -821,7 +776,6 @@ void CMenus::Render()
 	{
 	case IClient::STATE_QUITTING:
 	case IClient::STATE_RESTARTING:
-		// Render nothing except menu background. This should not happen for more than one frame.
 		return;
 
 	case IClient::STATE_CONNECTING:
@@ -948,13 +902,11 @@ void CMenus::Render()
 
 	Ui()->RenderPopupMenus();
 
-	// Prevent UI elements from being hovered while a key reader is active
 	if(GameClient()->m_KeyBinder.IsActive())
 	{
 		Ui()->SetHotItem(nullptr);
 	}
 
-	// Handle this escape hotkey after popup menus
 	if(!m_ShowStart && ClientState == IClient::STATE_OFFLINE && Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
 	{
 		m_ShowStart = true;
@@ -964,172 +916,161 @@ void CMenus::Render()
 // ============ AURACLIENT SETTINGS ============
 void CMenus::RenderAuraClientSettings(CUIRect MainView)
 {
-    // Заголовок
-    CUIRect Section, Left, Right;
-    MainView.HSplitTop(20.0f, &Section, &MainView);
-    Ui()->DoLabel(&Section, "Aura Client Settings", 14.0f, TEXTALIGN_ML);
+	CUIRect Section, Left, Right;
+	MainView.HSplitTop(20.0f, &Section, &MainView);
+	Ui()->DoLabel(&Section, "Aura Client Settings", 14.0f, TEXTALIGN_ML);
 
-    // Разделим на две колонки
-    MainView.VSplitMid(&Left, &Right);
+	MainView.VSplitMid(&Left, &Right);
 
-    // Левая колонка
-    Left.HSplitTop(20.0f, &Section, &Left);
-    DoButton_CheckBox(&CAuraClient::m_UpdateFrozenSkin, "Update Frozen Skin", CAuraClient::m_UpdateFrozenSkin, &Section);
+	Left.HSplitTop(20.0f, &Section, &Left);
+	DoButton_CheckBox(&CAuraClient::m_UpdateFrozenSkin, "Update Frozen Skin", CAuraClient::m_UpdateFrozenSkin, &Section);
 
-    Left.HSplitTop(20.0f, &Section, &Left);
-    DoButton_CheckBox(&CAuraClient::m_ShowPingCircle, "Show Ping Circle", CAuraClient::m_ShowPingCircle, &Section);
+	Left.HSplitTop(20.0f, &Section, &Left);
+	DoButton_CheckBox(&CAuraClient::m_ShowPingCircle, "Show Ping Circle", CAuraClient::m_ShowPingCircle, &Section);
 
-    Left.HSplitTop(20.0f, &Section, &Left);
-    DoButton_CheckBox(&CAuraClient::m_HideNameplatesSpec, "Hide Nameplates in Spec", CAuraClient::m_HideNameplatesSpec, &Section);
+	Left.HSplitTop(20.0f, &Section, &Left);
+	DoButton_CheckBox(&CAuraClient::m_HideNameplatesSpec, "Hide Nameplates in Spec", CAuraClient::m_HideNameplatesSpec, &Section);
 
-    Left.HSplitTop(20.0f, &Section, &Left);
-    DoButton_CheckBox(&CAuraClient::m_ShowSkinNames, "Show Skin Names", CAuraClient::m_ShowSkinNames, &Section);
+	Left.HSplitTop(20.0f, &Section, &Left);
+	DoButton_CheckBox(&CAuraClient::m_ShowSkinNames, "Show Skin Names", CAuraClient::m_ShowSkinNames, &Section);
 
-    Left.HSplitTop(20.0f, &Section, &Left);
-    DoButton_CheckBox(&CAuraClient::m_FreezeStars, "Freeze Stars", CAuraClient::m_FreezeStars, &Section);
+	Left.HSplitTop(20.0f, &Section, &Left);
+	DoButton_CheckBox(&CAuraClient::m_FreezeStars, "Freeze Stars", CAuraClient::m_FreezeStars, &Section);
 
-    Left.HSplitTop(20.0f, &Section, &Left);
-    DoButton_CheckBox(&CAuraClient::m_ColorFrozenTees, "Color Frozen Tees", CAuraClient::m_ColorFrozenTees, &Section);
+	Left.HSplitTop(20.0f, &Section, &Left);
+	DoButton_CheckBox(&CAuraClient::m_ColorFrozenTees, "Color Frozen Tees", CAuraClient::m_ColorFrozenTees, &Section);
 
-    Left.HSplitTop(20.0f, &Section, &Left);
-    DoButton_CheckBox(&CAuraClient::m_HammerRotate, "Hammer Rotate", CAuraClient::m_HammerRotate, &Section);
+	Left.HSplitTop(20.0f, &Section, &Left);
+	DoButton_CheckBox(&CAuraClient::m_HammerRotate, "Hammer Rotate", CAuraClient::m_HammerRotate, &Section);
 
-    // Правая колонка
-    Right.HSplitTop(20.0f, &Section, &Right);
-    DoButton_CheckBox(&CAuraClient::m_WhiteFeet, "White Feet", CAuraClient::m_WhiteFeet, &Section);
+	Right.HSplitTop(20.0f, &Section, &Right);
+	DoButton_CheckBox(&CAuraClient::m_WhiteFeet, "White Feet", CAuraClient::m_WhiteFeet, &Section);
 
-    Right.HSplitTop(20.0f, &Section, &Right);
-    DoButton_CheckBox(&CAuraClient::m_HookHitGlow, "Hook Hit Glow", CAuraClient::m_HookHitGlow, &Section);
+	Right.HSplitTop(20.0f, &Section, &Right);
+	DoButton_CheckBox(&CAuraClient::m_HookHitGlow, "Hook Hit Glow", CAuraClient::m_HookHitGlow, &Section);
 
-    Right.HSplitTop(20.0f, &Section, &Right);
-    DoButton_CheckBox(&CAuraClient::m_ShowScreenCenter, "Show Screen Center", CAuraClient::m_ShowScreenCenter, &Section);
+	Right.HSplitTop(20.0f, &Section, &Right);
+	DoButton_CheckBox(&CAuraClient::m_ShowScreenCenter, "Show Screen Center", CAuraClient::m_ShowScreenCenter, &Section);
 
-    Right.HSplitTop(20.0f, &Section, &Right);
-    DoButton_CheckBox(&CAuraClient::m_ShowPosAngle, "Show Pos/Angle", CAuraClient::m_ShowPosAngle, &Section);
+	Right.HSplitTop(20.0f, &Section, &Right);
+	DoButton_CheckBox(&CAuraClient::m_ShowPosAngle, "Show Pos/Angle", CAuraClient::m_ShowPosAngle, &Section);
 
-    Right.HSplitTop(20.0f, &Section, &Right);
-    DoButton_CheckBox(&CAuraClient::m_ShowCursorSpec, "Show Cursor in Spectate", CAuraClient::m_ShowCursorSpec, &Section);
+	Right.HSplitTop(20.0f, &Section, &Right);
+	DoButton_CheckBox(&CAuraClient::m_ShowCursorSpec, "Show Cursor in Spectate", CAuraClient::m_ShowCursorSpec, &Section);
 
-    Right.HSplitTop(20.0f, &Section, &Right);
-    DoButton_CheckBox(&CAuraClient::m_ShowLastAlive, "Show Last Alive", CAuraClient::m_ShowLastAlive, &Section);
+	Right.HSplitTop(20.0f, &Section, &Right);
+	DoButton_CheckBox(&CAuraClient::m_ShowLastAlive, "Show Last Alive", CAuraClient::m_ShowLastAlive, &Section);
 
-    Right.HSplitTop(20.0f, &Section, &Right);
-    DoButton_CheckBox(&CAuraClient::m_RemovePredictionFrozen, "Remove Prediction Frozen", CAuraClient::m_RemovePredictionFrozen, &Section);
+	Right.HSplitTop(20.0f, &Section, &Right);
+	DoButton_CheckBox(&CAuraClient::m_RemovePredictionFrozen, "Remove Prediction Frozen", CAuraClient::m_RemovePredictionFrozen, &Section);
 
-    Right.HSplitTop(20.0f, &Section, &Right);
-    DoButton_CheckBox(&CAuraClient::m_ShowOutlines, "Show Outlines", CAuraClient::m_ShowOutlines, &Section);
+	Right.HSplitTop(20.0f, &Section, &Right);
+	DoButton_CheckBox(&CAuraClient::m_ShowOutlines, "Show Outlines", CAuraClient::m_ShowOutlines, &Section);
 
-    Right.HSplitTop(20.0f, &Section, &Right);
-    DoButton_CheckBox(&CAuraClient::m_OutlinesOnlyEntities, "Outlines Only Entities", CAuraClient::m_OutlinesOnlyEntities, &Section);
+	Right.HSplitTop(20.0f, &Section, &Right);
+	DoButton_CheckBox(&CAuraClient::m_OutlinesOnlyEntities, "Outlines Only Entities", CAuraClient::m_OutlinesOnlyEntities, &Section);
 
-    Right.HSplitTop(20.0f, &Section, &Right);
-    DoButton_CheckBox(&CAuraClient::m_OutlineFreeze, "Outline Freeze", CAuraClient::m_OutlineFreeze, &Section);
+	Right.HSplitTop(20.0f, &Section, &Right);
+	DoButton_CheckBox(&CAuraClient::m_OutlineFreeze, "Outline Freeze", CAuraClient::m_OutlineFreeze, &Section);
 
-    Right.HSplitTop(20.0f, &Section, &Right);
-    DoButton_CheckBox(&CAuraClient::m_OutlineWalls, "Outline Walls", CAuraClient::m_OutlineWalls, &Section);
+	Right.HSplitTop(20.0f, &Section, &Right);
+	DoButton_CheckBox(&CAuraClient::m_OutlineWalls, "Outline Walls", CAuraClient::m_OutlineWalls, &Section);
 }
 
 // ============ MISSING MENU FUNCTIONS ============
 void CMenus::RenderLoading(const char *pTitle, const char *pMessage, int Percent)
 {
-    RenderBackground();
-    CUIRect Screen = *Ui()->Screen();
-    CUIRect Label;
-    Screen.Margin(50.0f, &Label);
-    if(pTitle)
-        Ui()->DoLabel(&Label, pTitle, 24.0f, TEXTALIGN_MC);
-    if(pMessage)
-    {
-        Label.y += 40.0f;
-        Ui()->DoLabel(&Label, pMessage, 16.0f, TEXTALIGN_MC);
-    }
+	RenderBackground();
+	CUIRect Screen = *Ui()->Screen();
+	CUIRect Label;
+	Screen.Margin(50.0f, &Label);
+	if(pTitle)
+		Ui()->DoLabel(&Label, pTitle, 24.0f, TEXTALIGN_MC);
+	if(pMessage)
+	{
+		Label.y += 40.0f;
+		Ui()->DoLabel(&Label, pMessage, 16.0f, TEXTALIGN_MC);
+	}
 }
 
 void CMenus::FinishLoading()
 {
-    // Ничего не делаем
 }
 
 bool CMenus::CanDisplayWarning() const
 {
-    return true;
+	return true;
 }
 
 void CMenus::PopupWarning(const char *pTitle, const char *pMsg, const char *pButton, std::chrono::nanoseconds AutoHide)
 {
-    // Заглушка
 }
 
 void CMenus::SetActive(bool Active)
 {
-    m_MenuActive = Active;
+	m_MenuActive = Active;
 }
 
 void CMenus::SetMenuPage(int Page)
 {
-    m_MenuPage = Page;
+	m_MenuPage = Page;
 }
 
 void CMenus::RefreshBrowserTab(bool Force)
 {
-    // Заглушка
 }
 
 void CMenus::ShowQuitPopup()
 {
-    m_Popup = POPUP_QUIT;
+	m_Popup = POPUP_QUIT;
 }
 
 void CMenus::SetShowStart(bool Show)
 {
-    m_ShowStart = Show;
+	m_ShowStart = Show;
 }
 
-void CMenus::PopupConfirm(const char *pTitle, const char *pMsg, const char *pButtonText, const char *pButtonTooltip, void (CMenus::*pfn)())
+void CMenus::PopupConfirm(const char *pTitle, const char *pMsg, const char *pButtonText, const char *pButtonTooltip, void (CMenus::*pfn)(), int AutoHide, void (CMenus::*pfn2)(), int AutoHide2)
 {
-    // Заглушка
 }
 
 void CMenus::PopupMessage(const char *pTitle, const char *pMsg, const char *pButton, int AutoHide, void (CMenus::*pfn)())
 {
-    // Заглушка
 }
 
 void CMenus::RenderThemeSelection(CUIRect MainView)
 {
-    // Заглушка
 }
 
 void CMenus::UpdateMusicState()
 {
-    // Заглушка
 }
 
-const CMenuImage *CMenus::FindMenuImage(const char *pName)
+const void *CMenus::FindMenuImage(const char *pName)
 {
-    return nullptr;
+	return nullptr;
 }
 
 void CMenus::RenderBackground()
 {
-    CUIRect Screen = *Ui()->Screen();
-    Screen.Draw(ColorRGBA(0.1f, 0.1f, 0.2f, 1.0f), IGraphics::CORNER_ALL, 0);
+	CUIRect Screen = *Ui()->Screen();
+	Screen.Draw(ColorRGBA(0.1f, 0.1f, 0.2f, 1.0f), IGraphics::CORNER_ALL, 0);
 }
 
 void CMenus::RenderPopupConnecting(CUIRect MainView)
 {
-    RenderBackground();
-    CUIRect Label;
-    MainView.Margin(50.0f, &Label);
-    Ui()->DoLabel(&Label, "Connecting...", 24.0f, TEXTALIGN_MC);
+	RenderBackground();
+	CUIRect Label;
+	MainView.Margin(50.0f, &Label);
+	Ui()->DoLabel(&Label, "Connecting...", 24.0f, TEXTALIGN_MC);
 }
 
 void CMenus::RenderPopupFullscreen(CUIRect MainView)
 {
-    RenderBackground();
+	RenderBackground();
 }
 
 void CMenus::RenderPopupLoading(CUIRect MainView)
 {
-    RenderBackground();
+	RenderBackground();
 }
