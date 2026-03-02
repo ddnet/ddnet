@@ -41,28 +41,6 @@ typedef struct sockaddr_un UNIXSOCKETADDR;
 #endif
 
 /**
- * Initiates network functionality.
- *
- * @ingroup Network-General
- *
- * @remark You must call this function before using any other network functions.
- */
-void net_init();
-
-/**
- * Looks up the ip of a hostname.
- *
- * @ingroup Network-General
- *
- * @param hostname Host name to look up.
- * @param addr The output address to write to.
- * @param types The type of IP that should be returned.
- *
- * @return `0` on success.
- */
-int net_host_lookup(const char *hostname, NETADDR *addr, int types);
-
-/**
  * Compares two network addresses.
  *
  * @ingroup Network-General
@@ -155,24 +133,26 @@ bool net_addr_is_local(const NETADDR *addr);
 int net_addr_from_str(NETADDR *addr, const char *string);
 
 /**
- * Make a socket not block on operations
+ * Looks up the ip of a hostname.
  *
  * @ingroup Network-General
  *
- * @param sock The socket to set the mode on.
+ * @param hostname Host name to look up.
+ * @param addr The output address to write to.
+ * @param types The type of IP that should be returned.
  *
- * @returns `0` on success.
+ * @return `0` on success.
  */
-int net_set_non_blocking(NETSOCKET sock);
+int net_host_lookup(const char *hostname, NETADDR *addr, int types);
 
 /**
- * Make a socket block on operations.
+ * Initiates network functionality.
  *
- * @param sock The socket to set the mode on.
+ * @ingroup Network-General
  *
- * @returns `0` on success.
+ * @remark You must call this function before using any other network functions.
  */
-int net_set_blocking(NETSOCKET sock);
+void net_init();
 
 /**
  * If a network operation failed, the error code.
@@ -191,6 +171,40 @@ int net_errno();
  * @returns The error code and string combined into one string.
  */
 std::string net_error_message();
+
+void net_stats(NETSTATS *stats);
+
+/**
+ * Determine a socket's type.
+ *
+ * @ingroup Network-General
+ *
+ * @param sock Socket whose type should be determined.
+ *
+ * @return The socket type, a bitset of `NETTYPE_IPV4`, `NETTYPE_IPV6`, `NETTYPE_WEBSOCKET_IPV4`
+ *         and `NETTYPE_WEBSOCKET_IPV6`, or `NETTYPE_INVALID` if the socket is invalid.
+ */
+int net_socket_type(NETSOCKET sock);
+
+/**
+ * Make a socket not block on operations
+ *
+ * @ingroup Network-General
+ *
+ * @param sock The socket to set the mode on.
+ *
+ * @returns `0` on success.
+ */
+int net_set_non_blocking(NETSOCKET sock);
+
+/**
+ * Make a socket block on operations.
+ *
+ * @param sock The socket to set the mode on.
+ *
+ * @returns `0` on success.
+ */
+int net_set_blocking(NETSOCKET sock);
 
 /**
  * Determines whether a network operation would block.
@@ -218,18 +232,6 @@ int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds);
  *
  * @ingroup Network
  */
-
-/**
- * Determine a socket's type.
- *
- * @ingroup Network-General
- *
- * @param sock Socket whose type should be determined.
- *
- * @return The socket type, a bitset of `NETTYPE_IPV4`, `NETTYPE_IPV6`, `NETTYPE_WEBSOCKET_IPV4`
- *         and `NETTYPE_WEBSOCKET_IPV6`, or `NETTYPE_INVALID` if the socket is invalid.
- */
-int net_socket_type(NETSOCKET sock);
 
 /**
  * Creates a UDP socket and binds it to a port.
@@ -429,9 +431,6 @@ void net_unix_set_addr(UNIXSOCKETADDR *addr, const char *path);
  * @param sock Socket to close.
  */
 void net_unix_close(UNIXSOCKET sock);
-
 #endif
-
-void net_stats(NETSTATS *stats);
 
 #endif

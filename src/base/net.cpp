@@ -59,9 +59,46 @@ typedef struct
 #endif
 } NETSOCKET_BUFFER;
 
-void net_buffer_init(NETSOCKET_BUFFER *buffer);
-void net_buffer_reinit(NETSOCKET_BUFFER *buffer);
-void net_buffer_simple(NETSOCKET_BUFFER *buffer, char **buf, int *size);
+void net_buffer_init(NETSOCKET_BUFFER *buffer)
+{
+#if defined(CONF_PLATFORM_LINUX)
+	buffer->pos = 0;
+	buffer->size = 0;
+	mem_zero(buffer->msgs, sizeof(buffer->msgs));
+	mem_zero(buffer->iovecs, sizeof(buffer->iovecs));
+	mem_zero(buffer->sockaddrs, sizeof(buffer->sockaddrs));
+	for(int i = 0; i < VLEN; ++i)
+	{
+		buffer->iovecs[i].iov_base = buffer->bufs[i];
+		buffer->iovecs[i].iov_len = PACKETSIZE;
+		buffer->msgs[i].msg_hdr.msg_iov = &(buffer->iovecs[i]);
+		buffer->msgs[i].msg_hdr.msg_iovlen = 1;
+		buffer->msgs[i].msg_hdr.msg_name = &(buffer->sockaddrs[i]);
+		buffer->msgs[i].msg_hdr.msg_namelen = sizeof(buffer->sockaddrs[i]);
+	}
+#endif
+}
+
+void net_buffer_reinit(NETSOCKET_BUFFER *buffer)
+{
+#if defined(CONF_PLATFORM_LINUX)
+	for(int i = 0; i < VLEN; i++)
+	{
+		buffer->msgs[i].msg_hdr.msg_namelen = sizeof(buffer->sockaddrs[i]);
+	}
+#endif
+}
+
+void net_buffer_simple(NETSOCKET_BUFFER *buffer, char **buf, int *size)
+{
+#if defined(CONF_PLATFORM_LINUX)
+	*buf = buffer->bufs[0];
+	*size = sizeof(buffer->bufs[0]);
+#else
+	*buf = buffer->buf;
+	*size = sizeof(buffer->buf);
+#endif
+}
 
 struct NETSOCKET_INTERNAL
 {
@@ -262,131 +299,6 @@ void net_addr_str(const NETADDR *addr, char *string, int max_length, bool add_po
 	{
 		dbg_assert_failed("unknown NETADDR type %d", addr->type);
 	}
-}
-
-static int priv_net_extract(const char *hostname, char *host, int max_host, int *port)
-{
-	*port = 0;
-	host[0] = 0;
-
-	if(hostname[0] == '[')
-	{
-		// ipv6 mode
-		int i;
-		for(i = 1; i < max_host && hostname[i] && hostname[i] != ']'; i++)
-			host[i - 1] = hostname[i];
-		host[i - 1] = 0;
-		if(hostname[i] != ']') // malformatted
-			return -1;
-
-		i++;
-		if(hostname[i] == ':')
-			*port = str_toint(hostname + i + 1);
-	}
-	else
-	{
-		// generic mode (ipv4, hostname etc)
-		int i;
-		for(i = 0; i < max_host - 1 && hostname[i] && hostname[i] != ':'; i++)
-			host[i] = hostname[i];
-		host[i] = 0;
-
-		if(hostname[i] == ':')
-			*port = str_toint(hostname + i + 1);
-	}
-
-	return 0;
-}
-
-static int net_host_lookup_fallback(const char *hostname, NETADDR *addr, int types, int port)
-{
-	if(str_comp_nocase(hostname, "localhost") == 0)
-	{
-		if(types == NETTYPE_IPV4)
-		{
-			dbg_assert(net_addr_from_str(addr, "127.0.0.1") == 0, "unreachable");
-			addr->port = port;
-			return 0;
-		}
-		else if(types == NETTYPE_IPV6)
-		{
-			dbg_assert(net_addr_from_str(addr, "[::1]") == 0, "unreachable");
-			addr->port = port;
-			return 0;
-		}
-		else
-		{
-			// TODO: return both IPv4 and IPv6 address
-			dbg_assert(net_addr_from_str(addr, "127.0.0.1") == 0, "unreachable");
-			addr->port = port;
-			return 0;
-		}
-	}
-	return -1;
-}
-
-static int net_host_lookup_impl(const char *hostname, NETADDR *addr, int types)
-{
-	char host[256];
-	int port = 0;
-	if(priv_net_extract(hostname, host, sizeof(host), &port))
-		return -1;
-
-	log_trace("host_lookup", "host='%s' port='%d' types='%d'", host, port, types);
-
-	struct addrinfo hints;
-	mem_zero(&hints, sizeof(hints));
-
-	if(types == NETTYPE_IPV4)
-		hints.ai_family = AF_INET;
-	else if(types == NETTYPE_IPV6)
-		hints.ai_family = AF_INET6;
-	else
-		hints.ai_family = AF_UNSPEC;
-
-	struct addrinfo *result = nullptr;
-	int e = getaddrinfo(host, nullptr, &hints, &result);
-	if(!result)
-	{
-		return net_host_lookup_fallback(hostname, addr, types, port);
-	}
-
-	if(e != 0)
-	{
-		freeaddrinfo(result);
-		return net_host_lookup_fallback(hostname, addr, types, port);
-	}
-
-	sockaddr_to_netaddr(result->ai_addr, result->ai_addrlen, addr);
-	addr->port = port;
-	freeaddrinfo(result);
-	return 0;
-}
-
-int net_host_lookup(const char *hostname, NETADDR *addr, int types)
-{
-	const char *ws_hostname = str_startswith(hostname, "ws://");
-	if(ws_hostname)
-	{
-		if((types & (NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6)) == 0)
-		{
-			return -1;
-		}
-		int result = net_host_lookup_impl(ws_hostname, addr, types & ~(NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6));
-		if(result == 0)
-		{
-			if(addr->type == NETTYPE_IPV4)
-			{
-				addr->type = NETTYPE_WEBSOCKET_IPV4;
-			}
-			else if(addr->type == NETTYPE_IPV6)
-			{
-				addr->type = NETTYPE_WEBSOCKET_IPV6;
-			}
-		}
-		return result;
-	}
-	return net_host_lookup_impl(hostname, addr, types & ~(NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6));
 }
 
 static int parse_int(int *out, const char **str)
@@ -590,6 +502,280 @@ int net_addr_from_str(NETADDR *addr, const char *string)
 	return 0;
 }
 
+static int priv_net_extract(const char *hostname, char *host, int max_host, int *port)
+{
+	*port = 0;
+	host[0] = 0;
+
+	if(hostname[0] == '[')
+	{
+		// ipv6 mode
+		int i;
+		for(i = 1; i < max_host && hostname[i] && hostname[i] != ']'; i++)
+			host[i - 1] = hostname[i];
+		host[i - 1] = 0;
+		if(hostname[i] != ']') // malformatted
+			return -1;
+
+		i++;
+		if(hostname[i] == ':')
+			*port = str_toint(hostname + i + 1);
+	}
+	else
+	{
+		// generic mode (ipv4, hostname etc)
+		int i;
+		for(i = 0; i < max_host - 1 && hostname[i] && hostname[i] != ':'; i++)
+			host[i] = hostname[i];
+		host[i] = 0;
+
+		if(hostname[i] == ':')
+			*port = str_toint(hostname + i + 1);
+	}
+
+	return 0;
+}
+
+static int net_host_lookup_fallback(const char *hostname, NETADDR *addr, int types, int port)
+{
+	if(str_comp_nocase(hostname, "localhost") == 0)
+	{
+		if(types == NETTYPE_IPV4)
+		{
+			dbg_assert(net_addr_from_str(addr, "127.0.0.1") == 0, "unreachable");
+			addr->port = port;
+			return 0;
+		}
+		else if(types == NETTYPE_IPV6)
+		{
+			dbg_assert(net_addr_from_str(addr, "[::1]") == 0, "unreachable");
+			addr->port = port;
+			return 0;
+		}
+		else
+		{
+			// TODO: return both IPv4 and IPv6 address
+			dbg_assert(net_addr_from_str(addr, "127.0.0.1") == 0, "unreachable");
+			addr->port = port;
+			return 0;
+		}
+	}
+	return -1;
+}
+
+static int net_host_lookup_impl(const char *hostname, NETADDR *addr, int types)
+{
+	char host[256];
+	int port = 0;
+	if(priv_net_extract(hostname, host, sizeof(host), &port))
+		return -1;
+
+	log_trace("host_lookup", "host='%s' port='%d' types='%d'", host, port, types);
+
+	struct addrinfo hints;
+	mem_zero(&hints, sizeof(hints));
+
+	if(types == NETTYPE_IPV4)
+		hints.ai_family = AF_INET;
+	else if(types == NETTYPE_IPV6)
+		hints.ai_family = AF_INET6;
+	else
+		hints.ai_family = AF_UNSPEC;
+
+	struct addrinfo *result = nullptr;
+	int e = getaddrinfo(host, nullptr, &hints, &result);
+	if(!result)
+	{
+		return net_host_lookup_fallback(hostname, addr, types, port);
+	}
+
+	if(e != 0)
+	{
+		freeaddrinfo(result);
+		return net_host_lookup_fallback(hostname, addr, types, port);
+	}
+
+	sockaddr_to_netaddr(result->ai_addr, result->ai_addrlen, addr);
+	addr->port = port;
+	freeaddrinfo(result);
+	return 0;
+}
+
+int net_host_lookup(const char *hostname, NETADDR *addr, int types)
+{
+	const char *ws_hostname = str_startswith(hostname, "ws://");
+	if(ws_hostname)
+	{
+		if((types & (NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6)) == 0)
+		{
+			return -1;
+		}
+		int result = net_host_lookup_impl(ws_hostname, addr, types & ~(NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6));
+		if(result == 0)
+		{
+			if(addr->type == NETTYPE_IPV4)
+			{
+				addr->type = NETTYPE_WEBSOCKET_IPV4;
+			}
+			else if(addr->type == NETTYPE_IPV6)
+			{
+				addr->type = NETTYPE_WEBSOCKET_IPV6;
+			}
+		}
+		return result;
+	}
+	return net_host_lookup_impl(hostname, addr, types & ~(NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6));
+}
+
+void net_init()
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	WSADATA wsa_data;
+	dbg_assert(WSAStartup(MAKEWORD(1, 1), &wsa_data) == 0, "WSAStartup failure");
+#endif
+#if defined(CONF_WEBSOCKETS)
+	websocket_init();
+#endif
+}
+
+int net_errno()
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	return WSAGetLastError();
+#else
+	return errno;
+#endif
+}
+
+std::string net_error_message()
+{
+	const int error = net_errno();
+#if defined(CONF_FAMILY_WINDOWS)
+	const std::string message = windows_format_system_message(error);
+	return std::to_string(error) + " '" + message + "'";
+#else
+	return std::to_string(error) + " '" + strerror(error) + "'";
+#endif
+}
+
+void net_stats(NETSTATS *stats_inout)
+{
+	*stats_inout = network_stats;
+}
+
+int net_socket_type(NETSOCKET sock)
+{
+	return sock->type;
+}
+
+static int net_set_blocking_impl(NETSOCKET sock, bool blocking)
+{
+	unsigned long mode = blocking ? 0 : 1;
+	const char *mode_str = blocking ? "blocking" : "non-blocking";
+	int sockets[] = {sock->ipv4sock, sock->ipv6sock};
+	const char *socket_str[] = {"IPv4", "IPv6"};
+
+	for(size_t i = 0; i < std::size(sockets); ++i)
+	{
+		if(sockets[i] >= 0)
+		{
+#if defined(CONF_FAMILY_WINDOWS)
+			if(ioctlsocket(sockets[i], FIONBIO, (unsigned long *)&mode) != NO_ERROR)
+			{
+				log_error("net", "Setting %s mode for %s socket failed (%s)", socket_str[i], mode_str, net_error_message().c_str());
+			}
+#else
+			if(ioctl(sockets[i], FIONBIO, (unsigned long *)&mode) == -1)
+			{
+				log_error("net", "Setting %s mode for %s socket failed (%s)", socket_str[i], mode_str, net_error_message().c_str());
+			}
+#endif
+		}
+	}
+
+	return 0;
+}
+
+int net_set_non_blocking(NETSOCKET sock)
+{
+	return net_set_blocking_impl(sock, false);
+}
+
+int net_set_blocking(NETSOCKET sock)
+{
+	return net_set_blocking_impl(sock, true);
+}
+
+int net_would_block()
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	return net_errno() == WSAEWOULDBLOCK;
+#else
+	return net_errno() == EWOULDBLOCK;
+#endif
+}
+
+int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds)
+{
+	const int64_t microseconds = std::chrono::duration_cast<std::chrono::microseconds>(nanoseconds).count();
+	dbg_assert(microseconds >= 0, "Negative wait duration %" PRId64 " not allowed", microseconds);
+
+	fd_set readfds;
+	FD_ZERO(&readfds);
+
+	int maxfd = -1;
+	if(sock->ipv4sock >= 0)
+	{
+		FD_SET(sock->ipv4sock, &readfds);
+		maxfd = sock->ipv4sock;
+	}
+	if(sock->ipv6sock >= 0)
+	{
+		FD_SET(sock->ipv6sock, &readfds);
+		maxfd = std::max(maxfd, sock->ipv6sock);
+	}
+#if defined(CONF_WEBSOCKETS)
+	if(sock->web_ipv4sock >= 0)
+	{
+		maxfd = std::max(maxfd, websocket_fd_set(sock->web_ipv4sock, &readfds));
+	}
+	if(sock->web_ipv6sock >= 0)
+	{
+		maxfd = std::max(maxfd, websocket_fd_set(sock->web_ipv6sock, &readfds));
+	}
+#endif
+	if(maxfd < 0)
+	{
+		return 0;
+	}
+
+	struct timeval tv;
+	tv.tv_sec = microseconds / 1000000;
+	tv.tv_usec = microseconds % 1000000;
+	// don't care about writefds and exceptfds
+	select(maxfd + 1, &readfds, nullptr, nullptr, &tv);
+
+	if(sock->ipv4sock >= 0 && FD_ISSET(sock->ipv4sock, &readfds))
+	{
+		return 1;
+	}
+	if(sock->ipv6sock >= 0 && FD_ISSET(sock->ipv6sock, &readfds))
+	{
+		return 1;
+	}
+#if defined(CONF_WEBSOCKETS)
+	if(sock->web_ipv4sock >= 0 && websocket_fd_get(sock->web_ipv4sock, &readfds))
+	{
+		return 1;
+	}
+	if(sock->web_ipv6sock >= 0 && websocket_fd_get(sock->web_ipv6sock, &readfds))
+	{
+		return 1;
+	}
+#endif
+	return 0;
+}
+
 static void priv_net_close_socket(int sock)
 {
 #if defined(CONF_FAMILY_WINDOWS)
@@ -704,11 +890,6 @@ static int priv_net_create_socket(int domain, int type, const NETADDR *bindaddr)
 	}
 
 	return sock;
-}
-
-int net_socket_type(NETSOCKET sock)
-{
-	return sock->type;
 }
 
 NETSOCKET net_udp_create(NETADDR bindaddr)
@@ -924,47 +1105,6 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 	return d;
 }
 
-void net_buffer_init(NETSOCKET_BUFFER *buffer)
-{
-#if defined(CONF_PLATFORM_LINUX)
-	buffer->pos = 0;
-	buffer->size = 0;
-	mem_zero(buffer->msgs, sizeof(buffer->msgs));
-	mem_zero(buffer->iovecs, sizeof(buffer->iovecs));
-	mem_zero(buffer->sockaddrs, sizeof(buffer->sockaddrs));
-	for(int i = 0; i < VLEN; ++i)
-	{
-		buffer->iovecs[i].iov_base = buffer->bufs[i];
-		buffer->iovecs[i].iov_len = PACKETSIZE;
-		buffer->msgs[i].msg_hdr.msg_iov = &(buffer->iovecs[i]);
-		buffer->msgs[i].msg_hdr.msg_iovlen = 1;
-		buffer->msgs[i].msg_hdr.msg_name = &(buffer->sockaddrs[i]);
-		buffer->msgs[i].msg_hdr.msg_namelen = sizeof(buffer->sockaddrs[i]);
-	}
-#endif
-}
-
-void net_buffer_reinit(NETSOCKET_BUFFER *buffer)
-{
-#if defined(CONF_PLATFORM_LINUX)
-	for(int i = 0; i < VLEN; i++)
-	{
-		buffer->msgs[i].msg_hdr.msg_namelen = sizeof(buffer->sockaddrs[i]);
-	}
-#endif
-}
-
-void net_buffer_simple(NETSOCKET_BUFFER *buffer, char **buf, int *size)
-{
-#if defined(CONF_PLATFORM_LINUX)
-	*buf = buffer->bufs[0];
-	*size = sizeof(buffer->bufs[0]);
-#else
-	*buf = buffer->buf;
-	*size = sizeof(buffer->buf);
-#endif
-}
-
 int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data)
 {
 	static const auto &&update_stats = [](int bytes) {
@@ -1109,44 +1249,6 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 	return sock;
 }
 
-static int net_set_blocking_impl(NETSOCKET sock, bool blocking)
-{
-	unsigned long mode = blocking ? 0 : 1;
-	const char *mode_str = blocking ? "blocking" : "non-blocking";
-	int sockets[] = {sock->ipv4sock, sock->ipv6sock};
-	const char *socket_str[] = {"IPv4", "IPv6"};
-
-	for(size_t i = 0; i < std::size(sockets); ++i)
-	{
-		if(sockets[i] >= 0)
-		{
-#if defined(CONF_FAMILY_WINDOWS)
-			if(ioctlsocket(sockets[i], FIONBIO, (unsigned long *)&mode) != NO_ERROR)
-			{
-				log_error("net", "Setting %s mode for %s socket failed (%s)", socket_str[i], mode_str, net_error_message().c_str());
-			}
-#else
-			if(ioctl(sockets[i], FIONBIO, (unsigned long *)&mode) == -1)
-			{
-				log_error("net", "Setting %s mode for %s socket failed (%s)", socket_str[i], mode_str, net_error_message().c_str());
-			}
-#endif
-		}
-	}
-
-	return 0;
-}
-
-int net_set_non_blocking(NETSOCKET sock)
-{
-	return net_set_blocking_impl(sock, false);
-}
-
-int net_set_blocking(NETSOCKET sock)
-{
-	return net_set_blocking_impl(sock, true);
-}
-
 int net_tcp_listen(NETSOCKET sock, int backlog)
 {
 	int err = -1;
@@ -1271,46 +1373,6 @@ void net_tcp_close(NETSOCKET sock)
 	priv_net_close_all_sockets(sock);
 }
 
-int net_errno()
-{
-#if defined(CONF_FAMILY_WINDOWS)
-	return WSAGetLastError();
-#else
-	return errno;
-#endif
-}
-
-std::string net_error_message()
-{
-	const int error = net_errno();
-#if defined(CONF_FAMILY_WINDOWS)
-	const std::string message = windows_format_system_message(error);
-	return std::to_string(error) + " '" + message + "'";
-#else
-	return std::to_string(error) + " '" + strerror(error) + "'";
-#endif
-}
-
-int net_would_block()
-{
-#if defined(CONF_FAMILY_WINDOWS)
-	return net_errno() == WSAEWOULDBLOCK;
-#else
-	return net_errno() == EWOULDBLOCK;
-#endif
-}
-
-void net_init()
-{
-#if defined(CONF_FAMILY_WINDOWS)
-	WSADATA wsa_data;
-	dbg_assert(WSAStartup(MAKEWORD(1, 1), &wsa_data) == 0, "WSAStartup failure");
-#endif
-#if defined(CONF_WEBSOCKETS)
-	websocket_init();
-#endif
-}
-
 #if defined(CONF_FAMILY_UNIX)
 UNIXSOCKET net_unix_create_unnamed()
 {
@@ -1334,69 +1396,3 @@ void net_unix_close(UNIXSOCKET sock)
 	close(sock);
 }
 #endif
-
-int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds)
-{
-	const int64_t microseconds = std::chrono::duration_cast<std::chrono::microseconds>(nanoseconds).count();
-	dbg_assert(microseconds >= 0, "Negative wait duration %" PRId64 " not allowed", microseconds);
-
-	fd_set readfds;
-	FD_ZERO(&readfds);
-
-	int maxfd = -1;
-	if(sock->ipv4sock >= 0)
-	{
-		FD_SET(sock->ipv4sock, &readfds);
-		maxfd = sock->ipv4sock;
-	}
-	if(sock->ipv6sock >= 0)
-	{
-		FD_SET(sock->ipv6sock, &readfds);
-		maxfd = std::max(maxfd, sock->ipv6sock);
-	}
-#if defined(CONF_WEBSOCKETS)
-	if(sock->web_ipv4sock >= 0)
-	{
-		maxfd = std::max(maxfd, websocket_fd_set(sock->web_ipv4sock, &readfds));
-	}
-	if(sock->web_ipv6sock >= 0)
-	{
-		maxfd = std::max(maxfd, websocket_fd_set(sock->web_ipv6sock, &readfds));
-	}
-#endif
-	if(maxfd < 0)
-	{
-		return 0;
-	}
-
-	struct timeval tv;
-	tv.tv_sec = microseconds / 1000000;
-	tv.tv_usec = microseconds % 1000000;
-	// don't care about writefds and exceptfds
-	select(maxfd + 1, &readfds, nullptr, nullptr, &tv);
-
-	if(sock->ipv4sock >= 0 && FD_ISSET(sock->ipv4sock, &readfds))
-	{
-		return 1;
-	}
-	if(sock->ipv6sock >= 0 && FD_ISSET(sock->ipv6sock, &readfds))
-	{
-		return 1;
-	}
-#if defined(CONF_WEBSOCKETS)
-	if(sock->web_ipv4sock >= 0 && websocket_fd_get(sock->web_ipv4sock, &readfds))
-	{
-		return 1;
-	}
-	if(sock->web_ipv6sock >= 0 && websocket_fd_get(sock->web_ipv6sock, &readfds))
-	{
-		return 1;
-	}
-#endif
-	return 0;
-}
-
-void net_stats(NETSTATS *stats_inout)
-{
-	*stats_inout = network_stats;
-}
