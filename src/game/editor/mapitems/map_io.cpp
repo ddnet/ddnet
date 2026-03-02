@@ -36,13 +36,31 @@ public:
 void CDataFileWriterFinishJob::Run()
 {
 	m_Writer.Finish();
+
+	if(!m_pStorage->RemoveFile(m_aRealFilename, IStorage::TYPE_SAVE))
+	{
+		str_format(m_aErrorMessage, sizeof(m_aErrorMessage), "Saving failed: Could not remove old map file '%s'.", m_aRealFilename);
+		log_error("editor/save", "%s", m_aErrorMessage);
+		return;
+	}
+
+	if(!m_pStorage->RenameFile(m_aTempFilename, m_aRealFilename, IStorage::TYPE_SAVE))
+	{
+		str_format(m_aErrorMessage, sizeof(m_aErrorMessage), "Saving failed: Could not move temporary map file '%s' to '%s'.", m_aTempFilename, m_aRealFilename);
+		log_error("editor/save", "%s", m_aErrorMessage);
+		return;
+	}
+
+	log_trace("editor/save", "Saved map to '%s'.", m_aRealFilename);
 }
 
-CDataFileWriterFinishJob::CDataFileWriterFinishJob(const char *pRealFilename, const char *pTempFilename, CDataFileWriter &&Writer) :
+CDataFileWriterFinishJob::CDataFileWriterFinishJob(IStorage *pStorage, const char *pRealFilename, const char *pTempFilename, CDataFileWriter &&Writer) :
+	m_pStorage(pStorage),
 	m_Writer(std::move(Writer))
 {
 	str_copy(m_aRealFilename, pRealFilename);
 	str_copy(m_aTempFilename, pTempFilename);
+	m_aErrorMessage[0] = '\0';
 }
 
 bool CEditorMap::Save(const char *pFilename, const FErrorHandler &ErrorHandler)
@@ -413,7 +431,7 @@ bool CEditorMap::Save(const char *pFilename, const FErrorHandler &ErrorHandler)
 	}
 
 	// finish the data file
-	std::shared_ptr<CDataFileWriterFinishJob> pWriterFinishJob = std::make_shared<CDataFileWriterFinishJob>(pFilename, aFilenameTmp, std::move(Writer));
+	std::shared_ptr<CDataFileWriterFinishJob> pWriterFinishJob = std::make_shared<CDataFileWriterFinishJob>(m_pEditor->Storage(), pFilename, aFilenameTmp, std::move(Writer));
 	m_pEditor->Engine()->AddJob(pWriterFinishJob);
 	m_pEditor->m_WriterFinishJobs.push_back(pWriterFinishJob);
 
