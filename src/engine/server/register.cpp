@@ -65,6 +65,8 @@ class CRegister : public IRegister
 			int m_NumTotalRequests GUARDED_BY(m_Lock) = 0;
 			int m_LatestResponseStatus GUARDED_BY(m_Lock) = STATUS_NONE;
 			int m_LatestResponseIndex GUARDED_BY(m_Lock) = -1;
+			bool m_JobRunning GUARDED_BY(m_Lock) = false;
+			int m_ConsecutiveFailures GUARDED_BY(m_Lock) = 0;
 		};
 
 		class CJob : public IJob
@@ -76,6 +78,7 @@ class CRegister : public IRegister
 			std::shared_ptr<CShared> m_pShared;
 			std::shared_ptr<CHttpRequest> m_pRegister;
 			IHttp *m_pHttp;
+			bool RunImpl();
 			void Run() override;
 
 		public:
@@ -316,20 +319,35 @@ void CRegister::CProtocol::SendRegister()
 	pRegister->FailOnErrorStatus(false);
 
 	int RequestIndex;
+	int ConsecutiveFailures;
 	{
 		const CLockScope LockScope(m_pShared->m_Lock);
+		if(m_pShared->m_JobRunning)
+		{
+			// A request is already in flight, don't pile up more tasks.
+			// Update() will retry once the active job completes.
+			log_debug(ProtocolToSystem(m_Protocol), "skipping register, request already in flight");
+			return;
+		}
 		if(m_pShared->m_LatestResponseStatus != STATUS_OK)
 		{
 			log_info(ProtocolToSystem(m_Protocol), "registering...");
 		}
 		RequestIndex = m_pShared->m_NumTotalRequests;
 		m_pShared->m_NumTotalRequests += 1;
+		// Mark job as active *before* AddJob so any concurrent SendRegister
+		// call (for instance from OnNewInfo) sees it immediately.
+		m_pShared->m_JobRunning = true;
+		ConsecutiveFailures = m_pShared->m_ConsecutiveFailures;
 	}
 	m_pParent->m_pEngine->AddJob(std::make_shared<CJob>(m_Protocol, m_pParent->m_ServerPort, RequestIndex, InfoSerial, m_pShared, std::move(pRegister), m_pParent->m_pHttp));
 	m_NewChallengeToken = false;
 
 	m_PrevRegister = Now;
-	m_NextRegister = Now + 15 * Freq;
+	// Exponential backoff based on consecutive failures:
+	// 0 failures: 15s, 1: 30s, 2: 60s, ..., >=5: 480s(8min).
+	int64_t BackoffFactor = 1LL << std::min(ConsecutiveFailures, 5);
+	m_NextRegister = Now + 15LL * BackoffFactor * Freq;
 }
 
 void CRegister::CProtocol::SendDeleteIfRegistered(bool Shutdown)
@@ -421,19 +439,29 @@ void CRegister::CProtocol::OnToken(const char *pToken)
 
 void CRegister::CProtocol::CJob::Run()
 {
+	const bool Success = RunImpl();
+	const CLockScope LockScope(m_pShared->m_Lock);
+	m_pShared->m_JobRunning = false;
+	if(Success)
+		m_pShared->m_ConsecutiveFailures = 0;
+	else
+		m_pShared->m_ConsecutiveFailures += 1;
+}
+
+bool CRegister::CProtocol::CJob::RunImpl()
+{
 	m_pHttp->Run(m_pRegister);
 	m_pRegister->Wait();
 	if(m_pRegister->State() != EHttpState::DONE)
 	{
-		// TODO: exponential backoff
 		log_error(ProtocolToSystem(m_Protocol), "error sending request to master");
-		return;
+		return false;
 	}
 	json_value *pJson = m_pRegister->ResultJson();
 	if(!pJson)
 	{
 		log_error(ProtocolToSystem(m_Protocol), "non-JSON response from master");
-		return;
+		return false;
 	}
 	const json_value &Json = *pJson;
 	const json_value &StatusString = Json["status"];
@@ -441,14 +469,14 @@ void CRegister::CProtocol::CJob::Run()
 	{
 		json_value_free(pJson);
 		log_error(ProtocolToSystem(m_Protocol), "invalid JSON response from master");
-		return;
+		return false;
 	}
 	int Status;
 	if(StatusFromString(&Status, StatusString))
 	{
 		log_error(ProtocolToSystem(m_Protocol), "invalid status from master: %s", (const char *)StatusString);
 		json_value_free(pJson);
-		return;
+		return false;
 	}
 	if(Status == STATUS_ERROR)
 	{
@@ -457,17 +485,17 @@ void CRegister::CProtocol::CJob::Run()
 		{
 			json_value_free(pJson);
 			log_error(ProtocolToSystem(m_Protocol), "invalid JSON error response from master");
-			return;
+			return false;
 		}
 		log_error(ProtocolToSystem(m_Protocol), "error response from master: %d: %s", m_pRegister->StatusCode(), (const char *)Message);
 		json_value_free(pJson);
-		return;
+		return false;
 	}
 	if(m_pRegister->StatusCode() >= 400)
 	{
 		log_error(ProtocolToSystem(m_Protocol), "non-success status code %d from master without error code", m_pRegister->StatusCode());
 		json_value_free(pJson);
-		return;
+		return false;
 	}
 	{
 		const CLockScope LockScope(m_pShared->m_Lock);
@@ -511,6 +539,7 @@ void CRegister::CProtocol::CJob::Run()
 			m_pShared->m_pGlobal->m_LatestSuccessfulInfoSerial -= 1;
 		}
 	}
+	return true;
 }
 
 CRegister::CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHttp *pHttp, int ServerPort, unsigned SixupSecurityToken) :
