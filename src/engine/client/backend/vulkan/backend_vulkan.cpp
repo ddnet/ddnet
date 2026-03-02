@@ -63,48 +63,33 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		return g_Config.m_DbgGfx == DEBUG_GFX_MODE_VERBOSE || g_Config.m_DbgGfx == DEBUG_GFX_MODE_ALL;
 	}
 
-	void VerboseAllocatedMemory(VkDeviceSize Size, size_t FrameImageIndex, EMemoryBlockUsage MemUsage) const
+	static const char *MemoryUsageName(EMemoryBlockUsage MemUsage)
 	{
-		const char *pUsage = "unknown";
 		switch(MemUsage)
 		{
 		case MEMORY_BLOCK_USAGE_TEXTURE:
-			pUsage = "texture";
-			break;
+			return "texture";
 		case MEMORY_BLOCK_USAGE_BUFFER:
-			pUsage = "buffer";
-			break;
+			return "buffer";
 		case MEMORY_BLOCK_USAGE_STREAM:
-			pUsage = "stream";
-			break;
+			return "stream";
 		case MEMORY_BLOCK_USAGE_STAGING:
-			pUsage = "staging buffer";
-			break;
-		default: break;
+			return "staging buffer";
+		default:
+			dbg_assert_failed("Invalid MemUsage: %d", (int)MemUsage);
 		}
-		dbg_msg("vulkan", "allocated chunk of memory with size: %" PRIzu " for frame %" PRIzu " (%s)", (size_t)Size, (size_t)m_CurImageIndex, pUsage);
+	}
+
+	void VerboseAllocatedMemory(VkDeviceSize Size, size_t FrameImageIndex, EMemoryBlockUsage MemUsage) const
+	{
+		log_debug("gfx/vulkan", "Allocated chunk of memory with size %" PRIzu " for frame %" PRIzu " (%s).",
+			(size_t)Size, (size_t)m_CurImageIndex, MemoryUsageName(MemUsage));
 	}
 
 	void VerboseDeallocatedMemory(VkDeviceSize Size, size_t FrameImageIndex, EMemoryBlockUsage MemUsage) const
 	{
-		const char *pUsage = "unknown";
-		switch(MemUsage)
-		{
-		case MEMORY_BLOCK_USAGE_TEXTURE:
-			pUsage = "texture";
-			break;
-		case MEMORY_BLOCK_USAGE_BUFFER:
-			pUsage = "buffer";
-			break;
-		case MEMORY_BLOCK_USAGE_STREAM:
-			pUsage = "stream";
-			break;
-		case MEMORY_BLOCK_USAGE_STAGING:
-			pUsage = "staging buffer";
-			break;
-		default: break;
-		}
-		dbg_msg("vulkan", "deallocated chunk of memory with size: %" PRIzu " for frame %" PRIzu " (%s)", (size_t)Size, (size_t)m_CurImageIndex, pUsage);
+		log_debug("gfx/vulkan", "Deallocated chunk of memory with size %" PRIzu " for frame %" PRIzu " (%s).",
+			(size_t)Size, (size_t)m_CurImageIndex, MemoryUsageName(MemUsage));
 	}
 
 	/************************
@@ -1130,9 +1115,9 @@ protected:
 		if(m_CanAssert)
 		{
 			if(pErrStrExtra != nullptr)
-				dbg_msg("vulkan", "vulkan error: %s: %s", pErr, pErrStrExtra);
+				log_error("gfx/vulkan", "%s: %s", pErr, pErrStrExtra);
 			else
-				dbg_msg("vulkan", "vulkan error: %s", pErr);
+				log_error("gfx/vulkan", "%s", pErr);
 			m_HasError = true;
 			m_Error.m_ErrorType = ErrType;
 		}
@@ -1155,7 +1140,7 @@ protected:
 	void SetWarning(EGfxWarningType WarningType, const char *pWarning)
 	{
 		std::unique_lock<std::mutex> Lock(m_ErrWarnMutex);
-		dbg_msg("vulkan", "vulkan warning: %s", pWarning);
+		log_warn("gfx/vulkan", "%s", pWarning);
 		if(std::find(m_Warning.m_vWarnings.begin(), m_Warning.m_vWarnings.end(), pWarning) == m_Warning.m_vWarnings.end())
 			m_Warning.m_vWarnings.emplace_back(pWarning);
 		m_Warning.m_WarningType = WarningType;
@@ -1167,62 +1152,60 @@ protected:
 		switch(CallResult)
 		{
 		case VK_ERROR_OUT_OF_HOST_MEMORY:
-			pCriticalError = "host ran out of memory";
-			dbg_msg("vulkan", "%s", pCriticalError);
+			pCriticalError = "Host ran out of memory.";
+			log_error("gfx/vulkan", "%s", pCriticalError);
 			break;
 		case VK_ERROR_OUT_OF_DEVICE_MEMORY:
-			pCriticalError = "device ran out of memory";
-			dbg_msg("vulkan", "%s", pCriticalError);
+			pCriticalError = "Device ran out of memory.";
+			log_error("gfx/vulkan", "%s", pCriticalError);
 			break;
 		case VK_ERROR_DEVICE_LOST:
-			pCriticalError = "device lost";
-			dbg_msg("vulkan", "%s", pCriticalError);
+			pCriticalError = "Device lost.";
+			log_error("gfx/vulkan", "%s", pCriticalError);
 			break;
 		case VK_ERROR_OUT_OF_DATE_KHR:
 		{
 			if(IsVerbose())
 			{
-				dbg_msg("vulkan", "queueing swap chain recreation because the current is out of date");
+				log_debug("gfx/vulkan", "Queueing swap chain recreation because the current is out of date.");
 			}
 			m_RecreateSwapChain = true;
 			break;
 		}
 		case VK_ERROR_SURFACE_LOST_KHR:
-			dbg_msg("vulkan", "surface lost");
+			log_error("gfx/vulkan", "Surface lost.");
 			break;
-		/*case VK_ERROR_FULL_SCREEN_EXCLUSIVE_MODE_LOST_EXT:
-			dbg_msg("vulkan", "fullscreen exclusive mode lost");
-			break;*/
 		case VK_ERROR_INCOMPATIBLE_DRIVER:
-			pCriticalError = "no compatible driver found. Vulkan 1.1 is required.";
-			dbg_msg("vulkan", "%s", pCriticalError);
+			pCriticalError = "No compatible driver found. Vulkan 1.1 is required.";
+			log_error("gfx/vulkan", "%s", pCriticalError);
 			break;
 		case VK_ERROR_INITIALIZATION_FAILED:
-			pCriticalError = "initialization failed for unknown reason.";
-			dbg_msg("vulkan", "%s", pCriticalError);
+			pCriticalError = "Initialization failed for unknown reason.";
+			log_error("gfx/vulkan", "%s", pCriticalError);
 			break;
 		case VK_ERROR_LAYER_NOT_PRESENT:
-			SetWarning(EGfxWarningType::GFX_WARNING_MISSING_EXTENSION, "One Vulkan layer was not present. (try to disable them)");
+			SetWarning(EGfxWarningType::GFX_WARNING_MISSING_EXTENSION, "At least one Vulkan layer was not present. (Try to disable them.)");
 			break;
 		case VK_ERROR_EXTENSION_NOT_PRESENT:
-			SetWarning(EGfxWarningType::GFX_WARNING_MISSING_EXTENSION, "One Vulkan extension was not present. (try to disable them)");
+			SetWarning(EGfxWarningType::GFX_WARNING_MISSING_EXTENSION, "At least one Vulkan extension was not present. (Try to disable them.)");
 			break;
 		case VK_ERROR_NATIVE_WINDOW_IN_USE_KHR:
-			dbg_msg("vulkan", "native window in use");
+			log_error("gfx/vulkan", "Native window in use.");
 			break;
 		case VK_SUCCESS:
 			break;
 		case VK_SUBOPTIMAL_KHR:
 			if(IsVerbose())
 			{
-				dbg_msg("vulkan", "queueing swap chain recreation because the current is sub optimal");
+				log_debug("gfx/vulkan", "Queueing swap chain recreation because the current is suboptimal.");
 			}
 			m_RecreateSwapChain = true;
 			break;
 		default:
-			m_ErrorHelper = "unknown error: ";
+			m_ErrorHelper = "Unknown error: ";
 			m_ErrorHelper.append(std::to_string(CallResult));
 			pCriticalError = m_ErrorHelper.c_str();
+			log_error("gfx/vulkan", "%s", pCriticalError);
 			break;
 		}
 
@@ -1535,11 +1518,11 @@ protected:
 		{
 			if(!UsesRGBALikeFormat)
 			{
-				dbg_msg("vulkan", "swap chain image was not in a RGBA like format.");
+				log_error("gfx/vulkan", "Swap chain image was not in an RGBA-like format.");
 			}
 			else
 			{
-				dbg_msg("vulkan", "swap chain image was not ready to be copied.");
+				log_error("gfx/vulkan", "Swap chain image was not ready to be copied.");
 			}
 			return false;
 		}
@@ -1559,7 +1542,7 @@ protected:
 		VkResult Res = vkAllocateMemory(m_VKDevice, pAllocateInfo, nullptr, pMemory);
 		if(Res != VK_SUCCESS)
 		{
-			dbg_msg("vulkan", "vulkan memory allocation failed, trying to recover.");
+			log_warn("gfx/vulkan", "Memory allocation failed, trying to recover.");
 			if(Res == VK_ERROR_OUT_OF_HOST_MEMORY || Res == VK_ERROR_OUT_OF_DEVICE_MEMORY)
 			{
 				// aggressively try to get more memory
@@ -1573,7 +1556,7 @@ protected:
 			}
 			if(Res != VK_SUCCESS)
 			{
-				dbg_msg("vulkan", "vulkan memory allocation failed.");
+				log_error("gfx/vulkan", "Memory allocation and recovery failed.");
 				return false;
 			}
 		}
@@ -2066,7 +2049,7 @@ protected:
 			m_pStagingMemoryUsage->store(m_pStagingMemoryUsage->load(std::memory_order_relaxed) - FreedMemory, std::memory_order_relaxed);
 			if(IsVerbose())
 			{
-				dbg_msg("vulkan", "deallocated chunks of memory with size: %" PRIzu " from all frames (staging buffer)", FreedMemory);
+				log_debug("gfx/vulkan", "Deallocated chunks of memory with size %" PRIzu " from all frames (staging buffer).", FreedMemory);
 			}
 		}
 		FreedMemory = 0;
@@ -2076,7 +2059,7 @@ protected:
 			m_pBufferMemoryUsage->store(m_pBufferMemoryUsage->load(std::memory_order_relaxed) - FreedMemory, std::memory_order_relaxed);
 			if(IsVerbose())
 			{
-				dbg_msg("vulkan", "deallocated chunks of memory with size: %" PRIzu " from all frames (buffer)", FreedMemory);
+				log_debug("gfx/vulkan", "Deallocated chunks of memory with size %" PRIzu " from all frames (buffer).", FreedMemory);
 			}
 		}
 		FreedMemory = 0;
@@ -2087,7 +2070,7 @@ protected:
 			m_pTextureMemoryUsage->store(m_pTextureMemoryUsage->load(std::memory_order_relaxed) - FreedMemory, std::memory_order_relaxed);
 			if(IsVerbose())
 			{
-				dbg_msg("vulkan", "deallocated chunks of memory with size: %" PRIzu " from all frames (texture)", FreedMemory);
+				log_debug("gfx/vulkan", "Deallocated chunks of memory with size %" PRIzu " from all frames (texture).", FreedMemory);
 			}
 		}
 	}
@@ -2339,7 +2322,7 @@ protected:
 			m_RecreateSwapChain = false;
 			if(IsVerbose())
 			{
-				dbg_msg("vulkan", "recreating swap chain requested by user (prepare frame).");
+				log_debug("gfx/vulkan", "Recreating swap chain requested by user (prepare frame).");
 			}
 			RecreateSwapChain();
 		}
@@ -2352,16 +2335,13 @@ protected:
 				m_RecreateSwapChain = false;
 				if(IsVerbose())
 				{
-					dbg_msg("vulkan", "recreating swap chain requested by acquire next image (prepare frame).");
+					log_debug("gfx/vulkan", "Recreating swap chain requested by acquire next image (prepare frame).");
 				}
 				RecreateSwapChain();
 				return PrepareFrame();
 			}
 			else
 			{
-				if(AcqResult != VK_SUBOPTIMAL_KHR)
-					dbg_msg("vulkan", "acquire next image failed %d", (int)AcqResult);
-
 				const char *pCritErrorMsg = CheckVulkanCriticalError(AcqResult);
 				if(pCritErrorMsg != nullptr)
 				{
@@ -2625,10 +2605,13 @@ protected:
 
 			if(ConvertWidth == 0 || (ConvertWidth % 16) != 0 || ConvertHeight == 0 || (ConvertHeight % 16) != 0)
 			{
-				dbg_msg("vulkan", "3D/2D array texture was resized");
 				int NewWidth = maximum<int>(HighestBit(ConvertWidth), 16);
 				int NewHeight = maximum<int>(HighestBit(ConvertHeight), 16);
 				uint8_t *pNewTexData = ResizeImage(pData, ConvertWidth, ConvertHeight, NewWidth, NewHeight, PixelSize);
+				if(IsVerbose())
+				{
+					log_debug("gfx/vulkan", "3D/2D array texture was resized. Slot=%d Size=(%d, %d) Resized=(%d, %d)", Slot, ConvertWidth, ConvertHeight, NewWidth, NewHeight);
+				}
 
 				ConvertWidth = NewWidth;
 				ConvertHeight = NewHeight;
@@ -2818,7 +2801,7 @@ protected:
 
 		if(vkCreateSampler(m_VKDevice, &SamplerInfo, nullptr, &CreatedSampler) != VK_SUCCESS)
 		{
-			dbg_msg("vulkan", "failed to create texture sampler!");
+			log_error("gfx/vulkan", "Failed to create texture sampler.");
 			return false;
 		}
 		return true;
@@ -2886,7 +2869,8 @@ protected:
 
 		if(vkCreateImage(m_VKDevice, &ImageInfo, nullptr, &Image) != VK_SUCCESS)
 		{
-			dbg_msg("vulkan", "failed to create image!");
+			log_error("gfx/vulkan", "Failed to create image.");
+			return false;
 		}
 
 		VkMemoryRequirements MemRequirements;
@@ -2989,7 +2973,7 @@ protected:
 		}
 		else
 		{
-			dbg_msg("vulkan", "unsupported layout transition!");
+			dbg_assert_failed("Unsupported layout transition. OldLayout=%d NewLayout=%d", (int)OldLayout, (int)NewLayout);
 		}
 
 		vkCmdPipelineBarrier(
@@ -3546,7 +3530,7 @@ public:
 		VkResult Res = vkEnumerateInstanceLayerProperties(&LayerCount, NULL);
 		if(Res != VK_SUCCESS)
 		{
-			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "Could not get vulkan layers.");
+			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "Could not get Vulkan layers.");
 			return false;
 		}
 
@@ -3554,7 +3538,7 @@ public:
 		Res = vkEnumerateInstanceLayerProperties(&LayerCount, vVKInstanceLayers.data());
 		if(Res != VK_SUCCESS)
 		{
-			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "Could not get vulkan layers.");
+			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "Could not get Vulkan layers.");
 			return false;
 		}
 
@@ -3672,23 +3656,57 @@ public:
 		return STWGraphicGpu::ETWGraphicsGpuType::GRAPHICS_GPU_TYPE_CPU;
 	}
 
-	// from: https://github.com/SaschaWillems/vulkan.gpuinfo.org/blob/5c3986798afc39d736b825bf8a5fbf92b8d9ed49/includes/functions.php#L364
-	const char *GetDriverVersion(char (&aBuff)[256], uint32_t DriverVersion, uint32_t VendorId)
+	static void GetVendorString(uint32_t VendorId, char *pVendorStr, size_t Size)
 	{
-		// NVIDIA
-		if(VendorId == 4318)
+		switch(VendorId)
 		{
-			str_format(aBuff, std::size(aBuff), "%d.%d.%d.%d",
+		case 0x1002:
+		case 0x1022:
+			str_copy(pVendorStr, "AMD", Size);
+			break;
+		case 0x1010:
+			str_copy(pVendorStr, "ImgTec", Size);
+			break;
+		case 0x106B:
+			str_copy(pVendorStr, "Apple", Size);
+			break;
+		case 0x10DE:
+			str_copy(pVendorStr, "NVIDIA", Size);
+			break;
+		case 0x13B5:
+			str_copy(pVendorStr, "ARM", Size);
+			break;
+		case 0x5143:
+			str_copy(pVendorStr, "Qualcomm", Size);
+			break;
+		case 0x8086:
+			str_copy(pVendorStr, "Intel", Size);
+			break;
+		case 0x10005:
+			str_copy(pVendorStr, "Mesa", Size);
+			break;
+		default:
+			log_warn("gfx/vulkan", "Unknown GPU vendor ID %08X.", VendorId);
+			str_format(pVendorStr, Size, "Unknown (%08X)", VendorId);
+			break;
+		}
+	}
+
+	// from: https://github.com/SaschaWillems/vulkan.gpuinfo.org/blob/5c3986798afc39d736b825bf8a5fbf92b8d9ed49/includes/functions.php#L364
+	void FormatDriverVersion(char (&aDriverVersion)[256], uint32_t DriverVersion, uint32_t VendorId)
+	{
+		if(VendorId == 0x10DE) // NVIDIA
+		{
+			str_format(aDriverVersion, std::size(aDriverVersion), "%d.%d.%d.%d",
 				(DriverVersion >> 22) & 0x3ff,
 				(DriverVersion >> 14) & 0x0ff,
 				(DriverVersion >> 6) & 0x0ff,
 				(DriverVersion) & 0x003f);
 		}
 #ifdef CONF_FAMILY_WINDOWS
-		// windows only
-		else if(VendorId == 0x8086)
+		else if(VendorId == 0x8086) // Windows with Intel only
 		{
-			str_format(aBuff, std::size(aBuff),
+			str_format(aDriverVersion, std::size(aDriverVersion),
 				"%d.%d",
 				(DriverVersion >> 14),
 				(DriverVersion) & 0x3fff);
@@ -3697,14 +3715,12 @@ public:
 		else
 		{
 			// Use Vulkan version conventions if vendor mapping is not available
-			str_format(aBuff, std::size(aBuff),
+			str_format(aDriverVersion, std::size(aDriverVersion),
 				"%d.%d.%d",
 				(DriverVersion >> 22),
 				(DriverVersion >> 12) & 0x3ff,
 				DriverVersion & 0xfff);
 		}
-
-		return aBuff;
 	}
 
 	[[nodiscard]] bool SelectGpu(char *pRendererName, char *pVendorName, char *pVersionName)
@@ -3718,7 +3734,7 @@ public:
 		}
 		if(DevicesCount == 0)
 		{
-			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "No vulkan compatible devices found.");
+			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "No Vulkan compatible devices found.");
 			return false;
 		}
 
@@ -3731,7 +3747,7 @@ public:
 		}
 		if(DevicesCount == 0)
 		{
-			SetWarning(EGfxWarningType::GFX_WARNING_TYPE_INIT_FAILED_MISSING_INTEGRATED_GPU_DRIVER, "No vulkan compatible devices found.");
+			SetWarning(EGfxWarningType::GFX_WARNING_TYPE_INIT_FAILED_MISSING_INTEGRATED_GPU_DRIVER, "No Vulkan compatible devices found.");
 			return false;
 		}
 		// make sure to use the correct amount of devices available
@@ -3795,7 +3811,7 @@ public:
 
 		if(m_pGpuList->m_vGpus.empty())
 		{
-			SetWarning(EGfxWarningType::GFX_WARNING_TYPE_INIT_FAILED_NO_DEVICE_WITH_REQUIRED_VERSION, "No devices with required vulkan version found.");
+			SetWarning(EGfxWarningType::GFX_WARNING_TYPE_INIT_FAILED_NO_DEVICE_WITH_REQUIRED_VERSION, "No devices with required Vulkan version found.");
 			return false;
 		}
 
@@ -3807,42 +3823,11 @@ public:
 			int DevApiPatch = (int)VK_API_VERSION_PATCH(DeviceProp.apiVersion);
 
 			str_copy(pRendererName, DeviceProp.deviceName, GPU_INFO_STRING_SIZE);
-			const char *pVendorNameStr = NULL;
-			switch(DeviceProp.vendorID)
-			{
-			case 0x1002:
-				pVendorNameStr = "AMD";
-				break;
-			case 0x1010:
-				pVendorNameStr = "ImgTec";
-				break;
-			case 0x106B:
-				pVendorNameStr = "Apple";
-				break;
-			case 0x10DE:
-				pVendorNameStr = "NVIDIA";
-				break;
-			case 0x13B5:
-				pVendorNameStr = "ARM";
-				break;
-			case 0x5143:
-				pVendorNameStr = "Qualcomm";
-				break;
-			case 0x8086:
-				pVendorNameStr = "INTEL";
-				break;
-			case 0x10005:
-				pVendorNameStr = "Mesa";
-				break;
-			default:
-				dbg_msg("vulkan", "unknown gpu vendor %u", DeviceProp.vendorID);
-				pVendorNameStr = "unknown";
-				break;
-			}
-
-			char aBuff[256];
-			str_copy(pVendorName, pVendorNameStr, GPU_INFO_STRING_SIZE);
-			str_format(pVersionName, GPU_INFO_STRING_SIZE, "Vulkan %d.%d.%d (driver: %s)", DevApiMajor, DevApiMinor, DevApiPatch, GetDriverVersion(aBuff, DeviceProp.driverVersion, DeviceProp.vendorID));
+			GetVendorString(DeviceProp.vendorID, pVendorName, GPU_INFO_STRING_SIZE);
+			char aDriverVersion[256];
+			FormatDriverVersion(aDriverVersion, DeviceProp.driverVersion, DeviceProp.vendorID);
+			str_format(pVersionName, GPU_INFO_STRING_SIZE, "Vulkan %d.%d.%d (driver: %s)",
+				DevApiMajor, DevApiMinor, DevApiPatch, aDriverVersion);
 
 			// get important device limits
 			m_NonCoherentMemAlignment = DeviceProp.limits.nonCoherentAtomSize;
@@ -3855,8 +3840,10 @@ public:
 
 			if(IsVerbose())
 			{
-				dbg_msg("vulkan", "device prop: non-coherent align: %" PRIzu ", optimal image copy align: %" PRIzu ", max texture size: %u, max sampler anisotropy: %u", (size_t)m_NonCoherentMemAlignment, (size_t)m_OptimalImageCopyMemAlignment, m_MaxTextureSize, m_MaxSamplerAnisotropy);
-				dbg_msg("vulkan", "device prop: min uniform align: %u, multi sample: %u", m_MinUniformAlign, (uint32_t)m_MaxMultiSample);
+				log_debug("gfx/vulkan", "Device prop: non-coherent align: %" PRIzu ", optimal image copy align: %" PRIzu ", max texture size: %u, max sampler anisotropy: %u",
+					(size_t)m_NonCoherentMemAlignment, (size_t)m_OptimalImageCopyMemAlignment, m_MaxTextureSize, m_MaxSamplerAnisotropy);
+				log_debug("gfx/vulkan", "Device prop: min uniform align: %u, multi sample: %u",
+					m_MinUniformAlign, (uint32_t)m_MaxMultiSample);
 			}
 		}
 
@@ -3866,7 +3853,7 @@ public:
 		vkGetPhysicalDeviceQueueFamilyProperties(CurDevice, &FamQueueCount, nullptr);
 		if(FamQueueCount == 0)
 		{
-			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "No vulkan queue family properties found.");
+			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "No Vulkan queue family properties found.");
 			return false;
 		}
 
@@ -3888,7 +3875,7 @@ public:
 
 		if(QueueNodeIndex == std::numeric_limits<uint32_t>::max())
 		{
-			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "No vulkan queue found that matches the requirements: graphics queue.");
+			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "No Vulkan queue found that matches the requirements: graphics queue.");
 			return false;
 		}
 
@@ -3963,8 +3950,8 @@ public:
 	{
 		if(!SDL_Vulkan_CreateSurface(pWindow, m_VKInstance, &m_VKPresentSurface))
 		{
-			dbg_msg("vulkan", "error from sdl: %s", SDL_GetError());
-			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "Creating a vulkan surface for the SDL window failed.");
+			log_error("gfx/vulkan", "Failed to create surface. SDL error: %s", SDL_GetError());
+			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "Creating a Vulkan surface for the SDL window failed.");
 			return false;
 		}
 
@@ -3972,7 +3959,7 @@ public:
 		vkGetPhysicalDeviceSurfaceSupportKHR(m_VKGPU, m_VKGraphicsQueueIndex, m_VKPresentSurface, &IsSupported);
 		if(!IsSupported)
 		{
-			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "The device surface does not support presenting the framebuffer to a screen. (maybe the wrong GPU was selected?)");
+			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "The device surface does not support presenting the framebuffer to a screen. Maybe the wrong GPU was selected?");
 			return false;
 		}
 
@@ -4007,7 +3994,7 @@ public:
 				return true;
 		}
 
-		dbg_msg("vulkan", "warning: requested presentation mode was not available. falling back to mailbox / fifo relaxed.");
+		log_warn("gfx/vulkan", "Requested presentation mode was not available. Falling back to mailbox / FIFO relaxed.");
 		VKIOMode = g_Config.m_GfxVsync ? VK_PRESENT_MODE_FIFO_RELAXED_KHR : VK_PRESENT_MODE_MAILBOX_KHR;
 		for(const auto &Mode : vPresentModeList)
 		{
@@ -4015,7 +4002,7 @@ public:
 				return true;
 		}
 
-		dbg_msg("vulkan", "warning: requested presentation mode was not available. using first available.");
+		log_warn("gfx/vulkan", "Requested presentation mode was not available. Using first available.");
 		if(PresentModeCount > 0)
 			VKIOMode = vPresentModeList[0];
 
@@ -4037,7 +4024,7 @@ public:
 		uint32_t ImgNumber = VKCapabilities.minImageCount + 1;
 		if(IsVerbose())
 		{
-			dbg_msg("vulkan", "minimal swap image count %u", VKCapabilities.minImageCount);
+			log_debug("gfx/vulkan", "Minimal swap image count: %u", VKCapabilities.minImageCount);
 		}
 		return (VKCapabilities.maxImageCount > 0 && ImgNumber > VKCapabilities.maxImageCount) ? VKCapabilities.maxImageCount : ImgNumber;
 	}
@@ -4126,14 +4113,14 @@ public:
 
 		if(Res == VK_INCOMPLETE)
 		{
-			dbg_msg("vulkan", "warning: not all surface formats are requestable with your current settings.");
+			log_warn("gfx/vulkan", "Not all surface formats are requestable with your current settings.");
 		}
 
 		if(vSurfFormatList.size() == 1 && vSurfFormatList[0].format == VK_FORMAT_UNDEFINED)
 		{
 			m_VKSurfFormat.format = VK_FORMAT_B8G8R8A8_UNORM;
 			m_VKSurfFormat.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
-			dbg_msg("vulkan", "warning: surface format was undefined. This can potentially cause bugs.");
+			log_warn("gfx/vulkan", "Surface format was undefined. This can potentially cause bugs.");
 			return true;
 		}
 
@@ -4151,7 +4138,7 @@ public:
 			}
 		}
 
-		dbg_msg("vulkan", "warning: surface format was not RGBA(or variants of it). This can potentially cause weird looking images(too bright etc.).");
+		log_warn("gfx/vulkan", "Surface format was not RGBA (or variants of it). This can potentially cause weird looking images (too bright etc.).");
 		m_VKSurfFormat = vSurfFormatList[0];
 		return true;
 	}
@@ -4261,11 +4248,11 @@ public:
 	{
 		if((MessageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) != 0)
 		{
-			dbg_msg("vulkan_debug", "validation error: %s", pCallbackData->pMessage);
+			log_error("gfx/vulkan", "Validation error: %s", pCallbackData->pMessage);
 		}
 		else
 		{
-			dbg_msg("vulkan_debug", "%s", pCallbackData->pMessage);
+			log_info("gfx/vulkan", "Validation info: %s", pCallbackData->pMessage);
 		}
 
 		return VK_FALSE;
@@ -4306,11 +4293,11 @@ public:
 		if(CreateDebugUtilsMessengerEXT(&CreateInfo, nullptr, &m_DebugMessenger) != VK_SUCCESS)
 		{
 			m_DebugMessenger = VK_NULL_HANDLE;
-			dbg_msg("vulkan", "didn't find vulkan debug layer.");
+			log_warn("gfx/vulkan", "Could not find Vulkan debug layer.");
 		}
 		else
 		{
-			dbg_msg("vulkan", "enabled vulkan debug context.");
+			log_info("gfx/vulkan", "Enabled Vulkan debug context.");
 		}
 #endif
 	}
@@ -5459,7 +5446,7 @@ public:
 			{
 				if(Texture.m_VKTextDescrSet.m_Descriptor != VK_NULL_HANDLE && IsVerbose())
 				{
-					dbg_msg("vulkan", "text textures not cleared over cmd.");
+					log_warn("gfx/vulkan", "Text textures were not cleared over command.");
 				}
 				DestroyTexture(Texture);
 			}
@@ -5555,7 +5542,7 @@ public:
 
 		if(IsVerbose())
 		{
-			dbg_msg("vulkan", "recreating swap chain.");
+			log_info("gfx/vulkan", "Recreating swap chain.");
 		}
 
 		VkSwapchainKHR OldSwapChain = VK_NULL_HANDLE;
@@ -5587,7 +5574,7 @@ public:
 
 		if(Ret != 0 && IsVerbose())
 		{
-			dbg_msg("vulkan", "recreating swap chain failed.");
+			log_warn("gfx/vulkan", "Recreating swap chain failed.");
 		}
 
 		return Ret;
@@ -5616,7 +5603,7 @@ public:
 
 			for(auto &VKLayer : vVKLayers)
 			{
-				dbg_msg("vulkan", "Validation layer: %s", VKLayer.c_str());
+				log_info("gfx/vulkan", "Validation layer: %s", VKLayer.c_str());
 			}
 		}
 
@@ -6866,7 +6853,7 @@ public:
 		{
 			if(IsVerbose())
 			{
-				dbg_msg("vulkan", "got resize event.");
+				log_debug("gfx/vulkan", "Got resize event.");
 			}
 			m_CanvasWidth = (uint32_t)pCommand->m_Width;
 			m_CanvasHeight = (uint32_t)pCommand->m_Height;
@@ -6900,7 +6887,7 @@ public:
 	{
 		if(IsVerbose())
 		{
-			dbg_msg("vulkan", "queueing swap chain recreation because vsync was changed");
+			log_info("gfx/vulkan", "Queueing swap chain recreation because V-Sync was changed.");
 		}
 		m_RecreateSwapChain = true;
 		*pCommand->m_pRetOk = true;
@@ -6912,7 +6899,7 @@ public:
 	{
 		if(IsVerbose())
 		{
-			dbg_msg("vulkan", "queueing swap chain recreation because multi sampling was changed");
+			log_info("gfx/vulkan", "Queueing swap chain recreation because multi sampling was changed.");
 		}
 		m_RecreateSwapChain = true;
 
@@ -7489,7 +7476,10 @@ public:
 
 	[[nodiscard]] bool Cmd_WindowCreateNtf(const CCommandBuffer::SCommand_WindowCreateNtf *pCommand)
 	{
-		log_debug("vulkan", "creating new surface.");
+		if(IsVerbose())
+		{
+			log_debug("gfx/vulkan", "Creating new surface.");
+		}
 		m_pWindow = SDL_GetWindowFromID(pCommand->m_WindowId);
 		if(m_RenderingPaused)
 		{
@@ -7510,7 +7500,10 @@ public:
 
 	[[nodiscard]] bool Cmd_WindowDestroyNtf(const CCommandBuffer::SCommand_WindowDestroyNtf *pCommand)
 	{
-		log_debug("vulkan", "surface got destroyed.");
+		if(IsVerbose())
+		{
+			log_debug("gfx/vulkan", "Surface got destroyed.");
+		}
 		if(!m_RenderingPaused)
 		{
 			if(!WaitFrame())
@@ -7654,7 +7647,7 @@ public:
 
 			if(IsVerbose() && BENCHMARK_RENDER_THREADS)
 			{
-				dbg_msg("vulkan", "render thread %" PRIzu " took %d ns to finish", ThreadIndex, (int)(time_get_nanoseconds() - ThreadRenderTime).count());
+				log_debug("gfx/vulkan", "Render thread %" PRIzu " took %" PRId64 " ns to finish.", ThreadIndex, (int64_t)(time_get_nanoseconds() - ThreadRenderTime).count());
 			}
 
 			pThread->m_IsRendering = false;
