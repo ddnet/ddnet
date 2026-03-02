@@ -73,8 +73,8 @@ std::optional<std::string> windows_wide_to_utf8(const wchar_t *wide_str);
 
 /**
  * This is a RAII wrapper to initialize/uninitialize the Windows COM library,
- * which may be necessary for using the @link open_file @endlink and
- * @link open_link @endlink functions.
+ * which may be necessary for using the @link os_open_file @endlink and
+ * @link os_open_link @endlink functions.
  * Must be used on every thread. It's automatically used on threads created
  * with @link thread_init @endlink. Pass `true` to the constructor on threads
  * that own a window (i.e. pump a message queue).

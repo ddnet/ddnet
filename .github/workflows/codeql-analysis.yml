@@ -48,9 +48,13 @@ jobs:
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
+      uses: github/codeql-action/init@v4
       with:
         languages: ${{ matrix.language }}
+        # Disable TRAP caching because this uses a lot of cache storage (>500 MiB) for each push to master
+        # and is mostly pointless because the cache key includes the commit hash. Hence, this cache could
+        # only be used for the scheduled runs that happen weekly.
+        trap-caching: false
         # If you wish to specify custom queries, you can do so here or in a config file.
         # By default, queries listed here will override any specified in a config file.
         # Prefix the list here with "+" to use these queries and those in the config file.
@@ -68,4 +72,4 @@ jobs:
        cmake --build . --config RelWithDebInfo --target everything
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
+      uses: github/codeql-action/analyze@v4

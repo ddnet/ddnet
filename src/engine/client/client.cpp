@@ -14,6 +14,7 @@
 #include <base/log.h>
 #include <base/logger.h>
 #include <base/math.h>
+#include <base/os.h>
 #include <base/process.h>
 #include <base/str.h>
 #include <base/windows.h>
@@ -5225,7 +5226,7 @@ static bool ViewLinkImpl(const char *pLink)
 	log_error("client", "Failed to open link '%s' (%s)", pLink, SDL_GetError());
 	return false;
 #else
-	if(open_link(pLink))
+	if(os_open_link(pLink))
 	{
 		return true;
 	}

@@ -159,20 +159,15 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 			size_t m_OffsetToAlign;
 			SMemoryHeapElement *m_pElementInHeap;
 			[[nodiscard]] bool operator>(const SMemoryHeapQueueElement &Other) const { return m_AllocationSize > Other.m_AllocationSize; }
-			struct SMemoryHeapQueueElementFind
+			// respects alignment requirements
+			constexpr bool CanFitAllocation(size_t AllocSize, size_t AllocAlignment) const
 			{
-				// respects alignment requirements
-				constexpr bool operator()(const SMemoryHeapQueueElement &Val, const std::pair<size_t, size_t> &Other) const
-				{
-					auto AllocSize = Other.first;
-					auto AllocAlignment = Other.second;
-					size_t ExtraSizeAlign = Val.m_OffsetInHeap % AllocAlignment;
-					if(ExtraSizeAlign != 0)
-						ExtraSizeAlign = AllocAlignment - ExtraSizeAlign;
-					size_t RealAllocSize = AllocSize + ExtraSizeAlign;
-					return Val.m_AllocationSize < RealAllocSize;
-				}
-			};
+				size_t ExtraSizeAlign = m_OffsetInHeap % AllocAlignment;
+				if(ExtraSizeAlign != 0)
+					ExtraSizeAlign = AllocAlignment - ExtraSizeAlign;
+				size_t RealAllocSize = AllocSize + ExtraSizeAlign;
+				return m_AllocationSize >= RealAllocSize;
+			}
 		};
 
 		typedef std::multiset<SMemoryHeapQueueElement, std::greater<>> TMemoryHeapQueue;
@@ -216,7 +211,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 			else
 			{
 				// check if there is enough space in this instance
-				if(SMemoryHeapQueueElement::SMemoryHeapQueueElementFind{}(*m_Elements.begin(), std::make_pair(AllocSize, AllocAlignment)))
+				if(!m_Elements.begin()->CanFitAllocation(AllocSize, AllocAlignment))
 				{
 					return false;
 				}
@@ -228,7 +223,15 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 					// find upper bound for a allocation size
 					auto Upper = m_Elements.upper_bound(FindAllocSize);
 					// then find the first entry that respects alignment, this is a linear search!
-					auto FoundEl = std::lower_bound(std::make_reverse_iterator(Upper), m_Elements.rend(), std::make_pair(AllocSize, AllocAlignment), SMemoryHeapQueueElement::SMemoryHeapQueueElementFind{});
+					auto FoundEl = m_Elements.rend();
+					for(auto AllocIterator = std::make_reverse_iterator(Upper); AllocIterator != m_Elements.rend(); ++AllocIterator)
+					{
+						if(AllocIterator->CanFitAllocation(AllocSize, AllocAlignment))
+						{
+							FoundEl = AllocIterator;
+							break;
+						}
+					}
 
 					auto TopEl = *FoundEl;
 					m_Elements.erase(TopEl.m_pElementInHeap->m_InQueue);

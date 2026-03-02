@@ -2035,6 +2035,8 @@ set_src(BASE GLOB_RECURSE src/base
   math.h
   mem.cpp
   mem.h
+  os.cpp
+  os.h
   process.cpp
   process.h
   rust.h

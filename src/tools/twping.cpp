@@ -1,4 +1,5 @@
 #include <base/logger.h>
+#include <base/os.h>
 #include <base/system.h>
 
 #include <engine/shared/masterserver.h>

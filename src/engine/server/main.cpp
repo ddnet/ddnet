@@ -1,6 +1,7 @@
 #include <base/crashdump.h>
 #include <base/detect.h>
 #include <base/logger.h>
+#include <base/os.h>
 #include <base/process.h>
 #include <base/str.h>
 #include <base/windows.h>

@@ -1,4 +1,5 @@
 #include <base/logger.h>
+#include <base/os.h>
 #include <base/system.h>
 
 int main(int argc, const char **argv)
