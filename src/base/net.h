@@ -19,23 +19,30 @@
  */
 
 /**
- * @defgroup Network-General General networking
+ * @defgroup Network-General General
  *
  * @ingroup Network
  */
 
 /**
- * @ingroup Network-General
+ * @defgroup Network-Address Addresses
+ *
+ * @ingroup Network
+ */
+
+/**
+ * @ingroup Network-Address
  */
 extern const NETADDR NETADDR_ZEROED;
 
 #ifdef CONF_FAMILY_UNIX
 /**
- * @ingroup Network-General
+ * @ingroup Network-Unix-Sockets
  */
 typedef int UNIXSOCKET;
+
 /**
- * @ingroup Network-General
+ * @ingroup Network-Unix-Sockets
  */
 typedef struct sockaddr_un UNIXSOCKETADDR;
 #endif
@@ -43,7 +50,7 @@ typedef struct sockaddr_un UNIXSOCKETADDR;
 /**
  * Compares two network addresses.
  *
- * @ingroup Network-General
+ * @ingroup Network-Address
  *
  * @param a Address to compare.
  * @param b Address to compare to.
@@ -57,7 +64,7 @@ int net_addr_comp(const NETADDR *a, const NETADDR *b);
 /**
  * Compares two network addresses ignoring port.
  *
- * @ingroup Network-General
+ * @ingroup Network-Address
  *
  * @param a Address to compare.
  * @param b Address to compare to.
@@ -71,7 +78,7 @@ int net_addr_comp_noport(const NETADDR *a, const NETADDR *b);
 /**
  * Turns a network address into a representative string.
  *
- * @ingroup Network-General
+ * @ingroup Network-Address
  *
  * @param addr Address to turn into a string.
  * @param string Buffer to fill with the string.
@@ -94,12 +101,12 @@ void net_addr_str(const NETADDR *addr, char *string, int max_length, bool add_po
  *   tw-0.6+udp://127.0.0.1
  *   tw-0.6+udp://127.0.0.1:8303
  *
- * @ingroup Network-General
+ * @ingroup Network-Address
  *
  * @param addr Address to fill in.
  * @param string String to parse.
- * @param host_buf Pointer to a buffer to write the host to
- *                 It will include the port if one is included in the url
+ * @param host_buf Pointer to a buffer to write the host to.
+ *                 It will include the port if one is included in the URL.
  *                 It can also be set to `nullptr` then it will be ignored.
  * @param host_buf_size Size of the host buffer or 0 if no host_buf pointer is given.
  *
@@ -112,7 +119,7 @@ int net_addr_from_url(NETADDR *addr, const char *string, char *host_buf, size_t 
 /**
  * Checks if an address is local.
  *
- * @ingroup Network-General
+ * @ingroup Network-Address
  *
  * @param addr Address to check.
  *
@@ -123,7 +130,7 @@ bool net_addr_is_local(const NETADDR *addr);
 /**
  * Turns string into a network address.
  *
- * @ingroup Network-General
+ * @ingroup Network-Address
  *
  * @param addr Address to fill in.
  * @param string String to parse.
@@ -133,9 +140,9 @@ bool net_addr_is_local(const NETADDR *addr);
 int net_addr_from_str(NETADDR *addr, const char *string);
 
 /**
- * Looks up the ip of a hostname.
+ * Looks up the IP of a hostname.
  *
- * @ingroup Network-General
+ * @ingroup Network-Address
  *
  * @param hostname Host name to look up.
  * @param addr The output address to write to.
@@ -146,7 +153,7 @@ int net_addr_from_str(NETADDR *addr, const char *string);
 int net_host_lookup(const char *hostname, NETADDR *addr, int types);
 
 /**
- * Initiates network functionality.
+ * Initializes network functionality.
  *
  * @ingroup Network-General
  *
@@ -172,6 +179,13 @@ int net_errno();
  */
 std::string net_error_message();
 
+/**
+ * Retrieve network statistics.
+ *
+ * @ingroup Network-General
+ *
+ * @param stats Network statistics to fill in.
+ */
 void net_stats(NETSTATS *stats);
 
 /**
@@ -187,11 +201,11 @@ void net_stats(NETSTATS *stats);
 int net_socket_type(NETSOCKET sock);
 
 /**
- * Make a socket not block on operations
+ * Make a socket not block on operations.
  *
  * @ingroup Network-General
  *
- * @param sock The socket to set the mode on.
+ * @param sock The socket to set non-blocking mode on.
  *
  * @returns `0` on success.
  */
@@ -200,7 +214,9 @@ int net_set_non_blocking(NETSOCKET sock);
 /**
  * Make a socket block on operations.
  *
- * @param sock The socket to set the mode on.
+ * @ingroup Network-General
+ *
+ * @param sock The socket to set blocking mode on.
  *
  * @returns `0` on success.
  */
@@ -228,7 +244,7 @@ int net_would_block();
 int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds);
 
 /**
- * @defgroup Network-UDP UDP Networking
+ * @defgroup Network-UDP UDP
  *
  * @ingroup Network
  */
@@ -281,7 +297,7 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data);
 void net_udp_close(NETSOCKET sock);
 
 /**
- * @defgroup Network-TCP TCP Networking
+ * @defgroup Network-TCP TCP
  *
  * @ingroup Network
  */
@@ -385,7 +401,7 @@ void net_tcp_close(NETSOCKET sock);
 
 #if defined(CONF_FAMILY_UNIX)
 /**
- * @defgroup Network-Unix-Sockets UNIX Socket Networking
+ * @defgroup Network-Unix-Sockets UNIX Sockets
  *
  * @ingroup Network
  */
