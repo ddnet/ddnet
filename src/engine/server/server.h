@@ -371,6 +371,7 @@ public:
 	void OnNetMsgClientVer(int ClientId, CUuid *pConnectionId, int DDNetVersion, const char *pDDNetVersionStr);
 	void OnNetMsgReady(int ClientId);
 	void OnNetMsgEnterGame(int ClientId);
+	void OnNetMsgRconCmd(int ClientId, const char *pCmd);
 	void OnNetMsgRconAuth(int ClientId, const char *pName, const char *pPw, bool SendRconCmds);
 
 	class CCache
