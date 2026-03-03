@@ -1907,33 +1907,9 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		{
 			const char *pCmd = Unpacker.GetString();
 			if(Unpacker.Error())
-			{
 				return;
-			}
-			if(!str_comp(pCmd, "crashmeplx"))
-			{
-				int Version = m_aClients[ClientId].m_DDNetVersion;
-				if(GameServer()->PlayerExists(ClientId) && Version < VERSION_DDNET_OLD)
-				{
-					m_aClients[ClientId].m_DDNetVersion = VERSION_DDNET_OLD;
-				}
-			}
-			else if(IsRconAuthed(ClientId))
-			{
-				if(GameServer()->PlayerExists(ClientId))
-				{
-					log_info("server", "ClientId=%d key='%s' rcon='%s'", ClientId, GetAuthName(ClientId), pCmd);
-					m_RconClientId = ClientId;
-					m_RconAuthLevel = GetAuthedState(ClientId);
-					{
-						CRconClientLogger Logger(this, ClientId);
-						CLogScope Scope(&Logger);
-						Console()->ExecuteLineFlag(pCmd, CFGFLAG_SERVER, ClientId);
-					}
-					m_RconClientId = IServer::RCON_CID_SERV;
-					m_RconAuthLevel = AUTHED_ADMIN;
-				}
-			}
+
+			OnNetMsgRconCmd(ClientId, pCmd);
 		}
 		else if(Msg == NETMSG_RCON_AUTH)
 		{
@@ -2055,6 +2031,34 @@ void CServer::OnNetMsgEnterGame(int ClientId)
 		SendMsg(&ServerInfoMessage, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientId);
 	}
 	GameServer()->OnClientEnter(ClientId);
+}
+
+void CServer::OnNetMsgRconCmd(int ClientId, const char *pCmd)
+{
+	if(!str_comp(pCmd, "crashmeplx"))
+	{
+		int Version = m_aClients[ClientId].m_DDNetVersion;
+		if(GameServer()->PlayerExists(ClientId) && Version < VERSION_DDNET_OLD)
+		{
+			m_aClients[ClientId].m_DDNetVersion = VERSION_DDNET_OLD;
+		}
+	}
+	else if(IsRconAuthed(ClientId))
+	{
+		if(GameServer()->PlayerExists(ClientId))
+		{
+			log_info("server", "ClientId=%d key='%s' rcon='%s'", ClientId, GetAuthName(ClientId), pCmd);
+			m_RconClientId = ClientId;
+			m_RconAuthLevel = GetAuthedState(ClientId);
+			{
+				CRconClientLogger Logger(this, ClientId);
+				CLogScope Scope(&Logger);
+				Console()->ExecuteLineFlag(pCmd, CFGFLAG_SERVER, ClientId);
+			}
+			m_RconClientId = IServer::RCON_CID_SERV;
+			m_RconAuthLevel = AUTHED_ADMIN;
+		}
+	}
 }
 
 void CServer::OnNetMsgRconAuth(int ClientId, const char *pName, const char *pPw, bool SendRconCmds)
