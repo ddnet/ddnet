@@ -194,7 +194,7 @@ scoop install games/ddnet
 
 ## Benchmarking
 
-Detailed instructions can be found in [`docs/BUILDING-emscripten.md`](docs/BUILDING-emscripten.md).
+Detailed instructions can be found in [`docs/BENCHMARKING.md`](docs/BENCHMARKING.md).
 
 ## Working with the official DDNet Database
 
