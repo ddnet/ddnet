@@ -208,6 +208,7 @@ Objects = [
 		NetIntRange("m_Armor", 0, 10),
 		# -1 is infinite ammo
 		NetIntRange("m_AmmoCount", -1, 10),
+		# -1 means "no weapon"
 		NetIntRange("m_Weapon", -1, 'NUM_WEAPONS-1'),
 		NetIntRange("m_Emote", 0, len(Emotes)),
 		NetIntRange("m_AttackTick", 0, 'max_int'),
