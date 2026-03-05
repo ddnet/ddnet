@@ -196,54 +196,51 @@ bool timestamp_from_str(const char *string, const char *format, time_t *timestam
 #pragma GCC diagnostic pop
 #endif
 
-int str_time(int64_t centisecs, int format, char *buffer, int buffer_size)
+int str_time(int64_t centisecs, ETimeFormat format, char *buffer, int buffer_size)
 {
+	dbg_assert(buffer_size > 0, "Invalid buffer size: %d", buffer_size);
+
 	const int sec = 100;
 	const int min = 60 * sec;
 	const int hour = 60 * min;
 	const int day = 24 * hour;
 
-	if(buffer_size <= 0)
-		return -1;
-
 	if(centisecs < 0)
 		centisecs = 0;
 
-	buffer[0] = 0;
-
 	switch(format)
 	{
-	case TIME_DAYS:
+	case ETimeFormat::DAYS:
 		if(centisecs >= day)
 			return str_format(buffer, buffer_size, "%" PRId64 "d %02" PRId64 ":%02" PRId64 ":%02" PRId64, centisecs / day,
 				(centisecs % day) / hour, (centisecs % hour) / min, (centisecs % min) / sec);
 		[[fallthrough]];
-	case TIME_HOURS:
+	case ETimeFormat::HOURS:
 		if(centisecs >= hour)
 			return str_format(buffer, buffer_size, "%02" PRId64 ":%02" PRId64 ":%02" PRId64, centisecs / hour,
 				(centisecs % hour) / min, (centisecs % min) / sec);
 		[[fallthrough]];
-	case TIME_MINS:
+	case ETimeFormat::MINS:
 		return str_format(buffer, buffer_size, "%02" PRId64 ":%02" PRId64, centisecs / min,
 			(centisecs % min) / sec);
-	case TIME_HOURS_CENTISECS:
+	case ETimeFormat::HOURS_CENTISECS:
 		if(centisecs >= hour)
 			return str_format(buffer, buffer_size, "%02" PRId64 ":%02" PRId64 ":%02" PRId64 ".%02" PRId64, centisecs / hour,
 				(centisecs % hour) / min, (centisecs % min) / sec, centisecs % sec);
 		[[fallthrough]];
-	case TIME_MINS_CENTISECS:
+	case ETimeFormat::MINS_CENTISECS:
 		if(centisecs >= min)
 			return str_format(buffer, buffer_size, "%02" PRId64 ":%02" PRId64 ".%02" PRId64, centisecs / min,
 				(centisecs % min) / sec, centisecs % sec);
 		[[fallthrough]];
-	case TIME_SECS_CENTISECS:
+	case ETimeFormat::SECS_CENTISECS:
 		return str_format(buffer, buffer_size, "%02" PRId64 ".%02" PRId64, (centisecs % min) / sec, centisecs % sec);
+	default:
+		dbg_assert_failed("Invalid time format: %d", (int)format);
 	}
-
-	return -1;
 }
 
-int str_time_float(float secs, int format, char *buffer, int buffer_size)
+int str_time_float(float secs, ETimeFormat format, char *buffer, int buffer_size)
 {
 	return str_time(static_cast<int64_t>(std::roundf(secs * 1000) / 10), format, buffer, buffer_size);
 }

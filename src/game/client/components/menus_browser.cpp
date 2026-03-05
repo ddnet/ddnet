@@ -1345,7 +1345,7 @@ void CMenus::RenderServerbrowserInfoScoreboard(CUIRect View, const CServerInfo *
 
 			if(Time.has_value())
 			{
-				str_time((int64_t)Time.value() * 100, TIME_HOURS, aTemp, sizeof(aTemp));
+				str_time((int64_t)Time.value() * 100, ETimeFormat::HOURS, aTemp, sizeof(aTemp));
 			}
 			else
 			{

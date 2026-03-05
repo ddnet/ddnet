@@ -177,14 +177,22 @@ void str_timestamp(char *buffer, int buffer_size);
 #define FORMAT_SPACE "%Y-%m-%d %H:%M:%S"
 #define FORMAT_NOSPACE "%Y-%m-%d_%H-%M-%S"
 
-enum
+/**
+ * Time formats for the `str_time` and `str_time_float` functions.
+ *
+ * @ingroup Timestamp
+ *
+ * @see str_time
+ * @see str_time_float
+ */
+enum class ETimeFormat
 {
-	TIME_DAYS,
-	TIME_HOURS,
-	TIME_MINS,
-	TIME_HOURS_CENTISECS,
-	TIME_MINS_CENTISECS,
-	TIME_SECS_CENTISECS,
+	DAYS,
+	HOURS,
+	MINS,
+	HOURS_CENTISECS,
+	MINS_CENTISECS,
+	SECS_CENTISECS,
 };
 
 /**
@@ -193,13 +201,13 @@ enum
  * @ingroup Timestamp
  *
  * @param centisecs Time in centiseconds.
- * @param format Format of the time string, see enum above, for example `TIME_DAYS`.
+ * @param format Format of the time string, see `ETimeFormat`.
  * @param buffer Pointer to a buffer that shall receive the timestamp string.
  * @param buffer_size Size of the buffer.
  *
- * @return Number of bytes written, `-1` on invalid format or `buffer_size <= 0`.
+ * @return Number of bytes written.
  */
-int str_time(int64_t centisecs, int format, char *buffer, int buffer_size);
+int str_time(int64_t centisecs, ETimeFormat format, char *buffer, int buffer_size);
 
 /**
  * Formats a time string.
@@ -207,14 +215,14 @@ int str_time(int64_t centisecs, int format, char *buffer, int buffer_size);
  * @ingroup Timestamp
  *
  * @param secs Time in seconds.
- * @param format Format of the time string, see enum above, for example `TIME_DAYS`.
+ * @param format Format of the time string, see `ETimeFormat`.
  * @param buffer Pointer to a buffer that shall receive the timestamp string.
  * @param buffer_size Size of the buffer.
  *
  * @remark The time is rounded to the nearest centisecond.
  *
- * @return Number of bytes written, `-1` on invalid format or `buffer_size <= 0`.
+ * @return Number of bytes written.
  */
-int str_time_float(float secs, int format, char *buffer, int buffer_size);
+int str_time_float(float secs, ETimeFormat format, char *buffer, int buffer_size);
 
 #endif

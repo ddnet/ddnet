@@ -108,7 +108,7 @@ bool CTeamrank::GetSqlTop5Team(IDbConnection *pSqlServer, bool *pEnd, char *pErr
 	{
 		bool Last = false;
 		float Time = pSqlServer->GetFloat(2);
-		str_time_float(Time, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
+		str_time_float(Time, ETimeFormat::HOURS_CENTISECS, aTime, sizeof(aTime));
 		int Rank = pSqlServer->GetInt(3);
 		int TeamSize = pSqlServer->GetInt(4);
 
@@ -449,7 +449,7 @@ bool CScoreWorker::MapInfo(IDbConnection *pSqlServer, const ISqlData *pGameData,
 		char aMedianString[60] = "\0";
 		if(Median > 0)
 		{
-			str_time((int64_t)Median * 100, TIME_HOURS, aBuf, sizeof(aBuf));
+			str_time((int64_t)Median * 100, ETimeFormat::HOURS, aBuf, sizeof(aBuf));
 			str_format(aMedianString, sizeof(aMedianString), " in %s median", aBuf);
 		}
 
@@ -468,7 +468,7 @@ bool CScoreWorker::MapInfo(IDbConnection *pSqlServer, const ISqlData *pGameData,
 		char aOwnFinishesString[40] = "\0";
 		if(OwnTime > 0)
 		{
-			str_time_float(OwnTime, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
+			str_time_float(OwnTime, ETimeFormat::HOURS_CENTISECS, aBuf, sizeof(aBuf));
 			str_format(aOwnFinishesString, sizeof(aOwnFinishesString),
 				", your time: %s", aBuf);
 		}
@@ -885,7 +885,7 @@ bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData
 	{
 		int Rank = pSqlServer->GetInt(1);
 		float Time = pSqlServer->GetFloat(2);
-		str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
+		str_time_float(Time, ETimeFormat::HOURS_CENTISECS, aBuf, sizeof(aBuf));
 
 		if(g_Config.m_SvHideScore)
 		{
@@ -973,7 +973,7 @@ bool CScoreWorker::ShowTeamRank(IDbConnection *pSqlServer, const ISqlData *pGame
 	if(!End)
 	{
 		float Time = pSqlServer->GetFloat(3);
-		str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
+		str_time_float(Time, ETimeFormat::HOURS_CENTISECS, aBuf, sizeof(aBuf));
 		int Rank = pSqlServer->GetInt(4);
 		// CEIL and FLOOR are not supported in SQLite
 		int BetterThanPercent = std::floor(100.0f - 100.0f * pSqlServer->GetFloat(5));
@@ -1063,7 +1063,7 @@ bool CScoreWorker::ShowTop(IDbConnection *pSqlServer, const ISqlData *pGameData,
 		char aName[MAX_NAME_LENGTH];
 		pSqlServer->GetString(1, aName, sizeof(aName));
 		float Time = pSqlServer->GetFloat(2);
-		str_time_float(Time, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
+		str_time_float(Time, ETimeFormat::HOURS_CENTISECS, aTime, sizeof(aTime));
 		int Rank = pSqlServer->GetInt(3);
 		str_format(pResult->m_Data.m_aaMessages[Line], sizeof(pResult->m_Data.m_aaMessages[Line]),
 			"%d. %s Time: %s", Rank, aName, aTime);
@@ -1098,7 +1098,7 @@ bool CScoreWorker::ShowTop(IDbConnection *pSqlServer, const ISqlData *pGameData,
 		char aName[MAX_NAME_LENGTH];
 		pSqlServer->GetString(1, aName, sizeof(aName));
 		float Time = pSqlServer->GetFloat(2);
-		str_time_float(Time, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
+		str_time_float(Time, ETimeFormat::HOURS_CENTISECS, aTime, sizeof(aTime));
 		int Rank = pSqlServer->GetInt(3);
 		str_format(pResult->m_Data.m_aaMessages[Line], sizeof(pResult->m_Data.m_aaMessages[Line]),
 			"%d. %s Time: %s", Rank, aName, aTime);
@@ -1257,7 +1257,7 @@ bool CScoreWorker::ShowPlayerTeamTop5(IDbConnection *pSqlServer, const ISqlData 
 		for(Line = 1; Line < 6; Line++) // print
 		{
 			float Time = pSqlServer->GetFloat(3);
-			str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
+			str_time_float(Time, ETimeFormat::HOURS_CENTISECS, aBuf, sizeof(aBuf));
 			int Rank = pSqlServer->GetInt(4);
 			CTeamrank Teamrank;
 			bool Last;
@@ -1365,7 +1365,7 @@ bool CScoreWorker::ShowTimes(IDbConnection *pSqlServer, const ISqlData *pGameDat
 	do
 	{
 		float Time = pSqlServer->GetFloat(1);
-		str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
+		str_time_float(Time, ETimeFormat::HOURS_CENTISECS, aBuf, sizeof(aBuf));
 		int Ago = pSqlServer->GetInt(2);
 		int Stamp = pSqlServer->GetInt(3);
 		char aServer[5];

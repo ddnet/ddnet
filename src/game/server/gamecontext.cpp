@@ -2703,7 +2703,7 @@ void CGameContext::OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int Clien
 		pPlayer->m_LastSetTeam = Server()->Tick();
 		int TimeLeft = (pPlayer->m_TeamChangeTick - Server()->Tick()) / Server()->TickSpeed();
 		char aTime[32];
-		str_time((int64_t)TimeLeft * 100, TIME_HOURS, aTime, sizeof(aTime));
+		str_time((int64_t)TimeLeft * 100, ETimeFormat::HOURS, aTime, sizeof(aTime));
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "Time to wait before changing team: %s", aTime);
 		SendBroadcast(aBuf, ClientId);

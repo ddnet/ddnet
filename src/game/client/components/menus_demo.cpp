@@ -447,9 +447,9 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 		// draw time
 		char aCurrentTime[32];
-		str_time((int64_t)CurrentTick / Client()->GameTickSpeed() * 100, TIME_HOURS, aCurrentTime, sizeof(aCurrentTime));
+		str_time((int64_t)CurrentTick / Client()->GameTickSpeed() * 100, ETimeFormat::HOURS, aCurrentTime, sizeof(aCurrentTime));
 		char aTotalTime[32];
-		str_time((int64_t)TotalTicks / Client()->GameTickSpeed() * 100, TIME_HOURS, aTotalTime, sizeof(aTotalTime));
+		str_time((int64_t)TotalTicks / Client()->GameTickSpeed() * 100, ETimeFormat::HOURS, aTotalTime, sizeof(aTotalTime));
 		char aSeekBarLabel[128];
 		str_format(aSeekBarLabel, sizeof(aSeekBarLabel), "%s / %s", aCurrentTime, aTotalTime);
 		Ui()->DoLabel(&SeekBar, aSeekBarLabel, SeekBar.h * 0.70f, TEXTALIGN_MC);
@@ -500,7 +500,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		{
 			const int HoveredTick = (int)(std::clamp((Ui()->MouseX() - SeekBar.x - Rounding) / (SeekBar.w - 2 * Rounding), 0.0f, 1.0f) * TotalTicks);
 			static char s_aHoveredTime[32];
-			str_time((int64_t)HoveredTick / Client()->GameTickSpeed() * 100, TIME_HOURS, s_aHoveredTime, sizeof(s_aHoveredTime));
+			str_time((int64_t)HoveredTick / Client()->GameTickSpeed() * 100, ETimeFormat::HOURS, s_aHoveredTime, sizeof(s_aHoveredTime));
 			GameClient()->m_Tooltips.DoToolTip(&s_SeekBarId, &SeekBar, s_aHoveredTime);
 		}
 	}
@@ -796,11 +796,11 @@ void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
 	const int64_t RealSliceBegin = g_Config.m_ClDemoSliceBegin == -1 ? 0 : (g_Config.m_ClDemoSliceBegin - pInfo->m_FirstTick);
 	const int64_t RealSliceEnd = (g_Config.m_ClDemoSliceEnd == -1 ? pInfo->m_LastTick : g_Config.m_ClDemoSliceEnd) - pInfo->m_FirstTick;
 	char aSliceBegin[32];
-	str_time(RealSliceBegin / Client()->GameTickSpeed() * 100, TIME_HOURS, aSliceBegin, sizeof(aSliceBegin));
+	str_time(RealSliceBegin / Client()->GameTickSpeed() * 100, ETimeFormat::HOURS, aSliceBegin, sizeof(aSliceBegin));
 	char aSliceEnd[32];
-	str_time(RealSliceEnd / Client()->GameTickSpeed() * 100, TIME_HOURS, aSliceEnd, sizeof(aSliceEnd));
+	str_time(RealSliceEnd / Client()->GameTickSpeed() * 100, ETimeFormat::HOURS, aSliceEnd, sizeof(aSliceEnd));
 	char aSliceLength[32];
-	str_time((RealSliceEnd - RealSliceBegin) / Client()->GameTickSpeed() * 100, TIME_HOURS, aSliceLength, sizeof(aSliceLength));
+	str_time((RealSliceEnd - RealSliceBegin) / Client()->GameTickSpeed() * 100, ETimeFormat::HOURS, aSliceLength, sizeof(aSliceLength));
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "%s: %s – %s", Localize("Cut interval"), aSliceBegin, aSliceEnd);
 	Ui()->DoLabel(&SliceInterval, aBuf, 18.0f, TEXTALIGN_ML);
@@ -1295,7 +1295,7 @@ void CMenus::RenderDemoBrowserList(CUIRect ListView, bool &WasListboxItemActivat
 			}
 			else if(Col.m_Id == COL_LENGTH && !pItem->m_IsDir && pItem->m_Valid)
 			{
-				str_time((int64_t)pItem->Length() * 100, TIME_HOURS, aBuf, sizeof(aBuf));
+				str_time((int64_t)pItem->Length() * 100, ETimeFormat::HOURS, aBuf, sizeof(aBuf));
 				Button.VMargin(4.0f, &Button);
 				Ui()->DoLabel(&Button, aBuf, 12.0f, TEXTALIGN_MR);
 			}
@@ -1390,7 +1390,7 @@ void CMenus::RenderDemoBrowserDetails(CUIRect DetailsView)
 	Ui()->DoLabel(&Right, Localize("Markers"), FontSize, TEXTALIGN_ML);
 	Contents.HSplitTop(18.0f, &Left, &Contents);
 	Left.VSplitLeft(Contents.w / 2.f + 30.f, &Left, &Right);
-	str_time((int64_t)pItem->Length() * 100, TIME_HOURS, aBuf, sizeof(aBuf));
+	str_time((int64_t)pItem->Length() * 100, ETimeFormat::HOURS, aBuf, sizeof(aBuf));
 	Ui()->DoLabel(&Left, aBuf, FontSize - 1.0f, TEXTALIGN_ML);
 	str_format(aBuf, sizeof(aBuf), "%d", pItem->NumMarkers());
 	Ui()->DoLabel(&Right, aBuf, FontSize - 1.0f, TEXTALIGN_ML);

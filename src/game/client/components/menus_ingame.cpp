@@ -1474,7 +1474,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 			else if(Id == COL_TIME)
 			{
 				char aBuf[64];
-				str_time(pGhost->m_Time / 10, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
+				str_time(pGhost->m_Time / 10, ETimeFormat::HOURS_CENTISECS, aBuf, sizeof(aBuf));
 				Ui()->DoLabel(&Button, aBuf, 12.0f, TEXTALIGN_ML);
 			}
 			else if(Id == COL_DATE)

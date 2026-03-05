@@ -810,7 +810,7 @@ void CScoreboard::RenderRecordingNotification(float x)
 		if(GameClient()->DemoRecorder(Recorder)->IsRecording())
 		{
 			char aTime[32];
-			str_time((int64_t)GameClient()->DemoRecorder(Recorder)->Length() * 100, TIME_HOURS, aTime, sizeof(aTime));
+			str_time((int64_t)GameClient()->DemoRecorder(Recorder)->Length() * 100, ETimeFormat::HOURS, aTime, sizeof(aTime));
 			str_append(aBuf, pName);
 			str_append(aBuf, " ");
 			str_append(aBuf, aTime);

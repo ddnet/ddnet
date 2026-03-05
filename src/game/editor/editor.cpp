@@ -309,9 +309,9 @@ void CEditor::DoAudioPreview(CUIRect View, const void *pPlayPauseButtonId, const
 
 		// draw time
 		char aCurrentTime[32];
-		str_time_float(CurrentTime, TIME_HOURS, aCurrentTime, sizeof(aCurrentTime));
+		str_time_float(CurrentTime, ETimeFormat::HOURS, aCurrentTime, sizeof(aCurrentTime));
 		char aTotalTime[32];
-		str_time_float(TotalTime, TIME_HOURS, aTotalTime, sizeof(aTotalTime));
+		str_time_float(TotalTime, ETimeFormat::HOURS, aTotalTime, sizeof(aTotalTime));
 		str_format(aBuffer, sizeof(aBuffer), "%s / %s", aCurrentTime, aTotalTime);
 		Ui()->DoLabel(&SeekBar, aBuffer, SeekBar.h * 0.70f, TEXTALIGN_MC);
 
