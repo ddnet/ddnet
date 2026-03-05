@@ -100,24 +100,24 @@ int time_houroftheday();
  *
  * @ingroup Time
  */
-enum ETimeSeason
+enum class ETimeSeason
 {
-	SEASON_SPRING = 0,
-	SEASON_SUMMER,
-	SEASON_AUTUMN,
-	SEASON_WINTER,
-	SEASON_EASTER,
-	SEASON_HALLOWEEN,
-	SEASON_XMAS,
-	SEASON_NEWYEAR
+	SPRING,
+	SUMMER,
+	AUTUMN,
+	WINTER,
+	EASTER,
+	HALLOWEEN,
+	XMAS,
+	NEWYEAR,
 };
 
 /**
- * Retrieves the current season of the year.
+ * Retrieves the current season or event of the year.
  *
  * @ingroup Time
  *
- * @return One of the SEASON_* enum literals.
+ * @return The current season or event, see `ETimeSeason`.
  */
 ETimeSeason time_season();
 

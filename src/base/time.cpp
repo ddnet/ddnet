@@ -116,19 +116,19 @@ ETimeSeason time_season()
 
 	if((time_info.tm_mon == 11 && time_info.tm_mday == 31) || (time_info.tm_mon == 0 && time_info.tm_mday == 1))
 	{
-		return SEASON_NEWYEAR;
+		return ETimeSeason::NEWYEAR;
 	}
 	else if(time_info.tm_mon == 11 && time_info.tm_mday >= 24 && time_info.tm_mday <= 26)
 	{
-		return SEASON_XMAS;
+		return ETimeSeason::XMAS;
 	}
 	else if((time_info.tm_mon == 9 && time_info.tm_mday == 31) || (time_info.tm_mon == 10 && time_info.tm_mday == 1))
 	{
-		return SEASON_HALLOWEEN;
+		return ETimeSeason::HALLOWEEN;
 	}
 	else if(time_iseasterday(time_data, time_info))
 	{
-		return SEASON_EASTER;
+		return ETimeSeason::EASTER;
 	}
 
 	switch(time_info.tm_mon)
@@ -136,19 +136,19 @@ ETimeSeason time_season()
 	case 11:
 	case 0:
 	case 1:
-		return SEASON_WINTER;
+		return ETimeSeason::WINTER;
 	case 2:
 	case 3:
 	case 4:
-		return SEASON_SPRING;
+		return ETimeSeason::SPRING;
 	case 5:
 	case 6:
 	case 7:
-		return SEASON_SUMMER;
+		return ETimeSeason::SUMMER;
 	case 8:
 	case 9:
 	case 10:
-		return SEASON_AUTUMN;
+		return ETimeSeason::AUTUMN;
 	default:
 		dbg_assert_failed("Invalid month: %d", time_info.tm_mon);
 	}

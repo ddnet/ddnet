@@ -186,26 +186,29 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 		const char *pMenuMap = g_Config.m_ClMenuMap;
 		if(str_comp(pMenuMap, "auto") == 0)
 		{
-			switch(time_season())
+			const ETimeSeason Season = time_season();
+			switch(Season)
 			{
-			case SEASON_SPRING:
-			case SEASON_EASTER:
+			case ETimeSeason::SPRING:
+			case ETimeSeason::EASTER:
 				pMenuMap = "heavens";
 				break;
-			case SEASON_SUMMER:
+			case ETimeSeason::SUMMER:
 				pMenuMap = "jungle";
 				break;
-			case SEASON_AUTUMN:
-			case SEASON_HALLOWEEN:
+			case ETimeSeason::AUTUMN:
+			case ETimeSeason::HALLOWEEN:
 				pMenuMap = "autumn";
 				break;
-			case SEASON_WINTER:
-			case SEASON_XMAS:
+			case ETimeSeason::WINTER:
+			case ETimeSeason::XMAS:
 				pMenuMap = "winter";
 				break;
-			case SEASON_NEWYEAR:
+			case ETimeSeason::NEWYEAR:
 				pMenuMap = "newyear";
 				break;
+			default:
+				dbg_assert_failed("Invalid season: %d", (int)Season);
 			}
 		}
 		else if(str_comp(pMenuMap, "rand") == 0)
