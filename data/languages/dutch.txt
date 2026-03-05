@@ -2169,10 +2169,10 @@ Could not get server list from master server
 == 
 
 Add clan
-== 
+== voeg clan toe
 
 Add friend
-== 
+== voeg friend toe
 
 [Demo playback]
 Live
@@ -2183,7 +2183,7 @@ Go to Live
 == 
 
 Map size
-== 
+== map groote
 
 Are you sure that you want to disconnect and play this demo?
 == 
@@ -2198,13 +2198,13 @@ Visibility
 == 
 
 Behavior
-== 
+== gedrag
 
 Delete button
 == 
 
 Are you sure that you want to delete this button?
-== 
+== weet je zeker dat je deze know wilt verwijderen?
 
 Duplicate
 == 
@@ -2222,7 +2222,7 @@ Width
 == 
 
 Height
-== 
+== hoogte
 
 Shape
 == 
@@ -2233,7 +2233,7 @@ Rectangle
 
 [Touch button shape]
 Circle
-== 
+== rondje
 
 [Touch button label type]
 Plain
@@ -2248,7 +2248,7 @@ Icon
 == 
 
 Behavior type
-== 
+== gedrag type
 
 [Touch button behavior]
 Bind

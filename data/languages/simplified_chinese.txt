@@ -665,7 +665,7 @@ AntiPing
 == 延迟补偿（AntiPing）
 
 Countries
-== 国家
+== 位置
 
 Reconnect in %d sec
 == %d 秒后重新连接
@@ -2118,7 +2118,7 @@ Renders your frame rate in the top right
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== 简体中文翻译由以下人员贡献：MK124, CarolVlCznYu, MC_TYH, Yangfl, Eki, Night_L, TsFreddie, Dan_cao, Momo, cheeser0613, By, Bamcane, Pioooooo, 豆腐渣, XCWQW1, Zerol Acqua
+== 简体中文翻译由以下人员贡献：MK124, CarolVlCznYu, MC_TYH, Yangfl, Eki, Night_L, TsFreddie, Dan_cao, Momo, cheeser0613, By, Bamcane, Pioooooo, 豆腐渣, XCWQW1, Zerol Acqua, 洛初
 
 Show spectator cursor
 == 显示旁观者光标
@@ -2520,91 +2520,91 @@ Mute emoticons
 == 屏蔽表情
 
 There's an unsaved change in the touch controls editor, you might want to save it.
-== 
+== 触控设置的更改尚未保存，你或需要保存。
 
 Start and connect to local server
-== 
+== 运行并连接到本地服务器
 
 Add clan
-== 
+== 添加战队
 
 Info
-== 
+== 信息
 
 Button browser
-== 
+== 按键浏览器
 
 You can select buttons directly in the list below, or long press on a touch button on the screen to select it. You can also move and resize buttons by touch.
-== 
+== 你可以直接在下方列表中选择按键，也可以长按屏幕来选择按键。你还可以直接移动按键位置或者调整按键大小。
 
 Preview visibilities
-== 
+== 预览可见度
 
 You can manage your touch controls settings on this page. Only changes that are saved will be available after restarting the client. You can share your touch controls with others by exporting them to the clipboard.\n\nYou can find more detailed information about the touch controls on the DDNet Wiki.
-== 
+== 你可以在此管理你的触控设置。更改只有在保存后才能在重启客户端后生效。你可以将设置导出到剪切板来和他人分享触控设置。\n\n你可以在DDNet Wiki找到更多关于触控的详细信息。
 
 Open DDNet Wiki
-== 
+== 打开 DDNet Wiki
 
 Buttons with this behavior execute console commands like regular key binds.
-== 
+== 具有此行为的按键会像键盘按键绑定一样执行控制台命令。
 
 Buttons with this behavior cycle between executing one of two or more specified commands.
-== 
+== 具有此行为的按键会循环执行多个指定命令中的一个。
 
 Buttons with this behavior execute some predefined actions.
-== 
+== 具有此行为的按键会执行部分预设动作。
 
 Opens the ingame menu immediately when released.
-== 
+== 松开时立刻打开游戏内菜单。
 
 The extra menu button which toggles visibility of buttons with "Extra Menu" visibilities. Also opens the ingame menu on long press.
-== 
+== 额外菜单按钮，用于切换所有具有“额外菜单”可见度的按钮的可见度。长按时也会打开游戏菜单。
 
 Opens the emoticon selector (this does not work with binds).
-== 
+== 打开表情选择器（不适用于按键绑定）。
 
 Opens the spectator menu (this does not work with binds).
-== 
+== 打开旁观菜单（不适用于按键绑定）。
 
 Swaps the active action (fire and hook) for direct touch input and virtual joysticks.
-== 
+== 切换触控输入和虚拟摇杆的当前动作（开火和钩索）。
 
 Uses the active action with the current aiming position.
-== 
+== 对瞄准位置执行当前动作。
 
 Virtual joystick which uses the active action.
-== 
+== 执行当前动作的虚拟摇杆。
 
 Virtual joystick which only aims without using an action.
-== 
+== 仅用于瞄准而不执行动作的虚拟摇杆。
 
 Virtual joystick which always uses fire.
-== 
+== 始终用于开火的虚拟摇杆。
 
 Virtual joystick which always uses hook.
-== 
+== 始终用于钩索的虚拟摇杆。
 
 Player is ingame, i.e. not spectating.
-== 
+== 玩家在游戏内（非旁观状态）。
 
 Zoom is allowed on this server.
-== 
+== 此服务器允许使用缩放。
 
 A vote is currently active.
-== 
+== 已有投票正在进行。
 
 Dummy is allowed on this server.
-== 
+== 此服务器允许使用分身。
 
 Dummy is currently connected.
-== 
+== 分身已连接。
 
 Player is currently authed in rcon.
-== 
+== 玩家已登入管理员。
 
 Demo player is currently active.
-== 
+== 回放播放器正在运行。
 
 The extra menu with the given number is activated.
-== 
+== 指定编号的额外菜单已激活。
