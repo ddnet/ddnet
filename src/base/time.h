@@ -100,24 +100,24 @@ int time_houroftheday();
  *
  * @ingroup Time
  */
-enum ETimeSeason
+enum class ETimeSeason
 {
-	SEASON_SPRING = 0,
-	SEASON_SUMMER,
-	SEASON_AUTUMN,
-	SEASON_WINTER,
-	SEASON_EASTER,
-	SEASON_HALLOWEEN,
-	SEASON_XMAS,
-	SEASON_NEWYEAR
+	SPRING,
+	SUMMER,
+	AUTUMN,
+	WINTER,
+	EASTER,
+	HALLOWEEN,
+	XMAS,
+	NEWYEAR,
 };
 
 /**
- * Retrieves the current season of the year.
+ * Retrieves the current season or event of the year.
  *
  * @ingroup Time
  *
- * @return One of the SEASON_* enum literals.
+ * @return The current season or event, see `ETimeSeason`.
  */
 ETimeSeason time_season();
 
@@ -141,6 +141,7 @@ void str_timestamp(char *buffer, int buffer_size);
  * @param buffer Pointer to a buffer that shall receive the timestamp string.
  * @param buffer_size Size of the buffer.
  * @param format Time formatting string. See https://cppreference.com/w/c/chrono/strftime.html for format description.
+ *               See `TimestampFormat` for common formats.
  *
  * @remark Guarantees that buffer string will contain null-termination.
  */
@@ -155,6 +156,7 @@ void str_timestamp(char *buffer, int buffer_size);
  * @param buffer Pointer to a buffer that shall receive the timestamp string.
  * @param buffer_size Size of the buffer.
  * @param format Time formatting string. See https://cppreference.com/w/c/chrono/strftime.html for format description.
+ *               See `TimestampFormat` for common formats.
  *
  * @remark Guarantees that buffer string will contain null-termination.
  */
@@ -166,25 +168,45 @@ void str_timestamp(char *buffer, int buffer_size);
  * @ingroup Timestamp
  *
  * @param string Pointer to the string to parse.
- * @param format The time format to use (for example `FORMAT_NOSPACE` below).
+ * @param format The time format to use. See `TimestampFormat` for common formats.
  * @param timestamp Pointer to the timestamp result.
  *
  * @return `true` on success, `false` if the string could not be parsed with the specified format.
  */
 [[gnu::format(strftime, 2, 0)]] bool timestamp_from_str(const char *string, const char *format, time_t *timestamp);
 
-#define FORMAT_TIME "%H:%M:%S"
-#define FORMAT_SPACE "%Y-%m-%d %H:%M:%S"
-#define FORMAT_NOSPACE "%Y-%m-%d_%H-%M-%S"
-
-enum
+/**
+ * Timestamp format strings for the `str_timestamp_format`, `str_timestamp_ex` and `timestamp_from_str` functions.
+ *
+ * @ingroup Timestamp
+ *
+ * @see str_timestamp_format
+ * @see str_timestamp_ex
+ * @see timestamp_from_str
+ */
+namespace TimestampFormat
 {
-	TIME_DAYS,
-	TIME_HOURS,
-	TIME_MINS,
-	TIME_HOURS_CENTISECS,
-	TIME_MINS_CENTISECS,
-	TIME_SECS_CENTISECS,
+	inline const char *const TIME = "%H:%M:%S";
+	inline const char *const SPACE = "%Y-%m-%d %H:%M:%S";
+	inline const char *const NOSPACE = "%Y-%m-%d_%H-%M-%S";
+}
+
+/**
+ * Time formats for the `str_time` and `str_time_float` functions.
+ *
+ * @ingroup Timestamp
+ *
+ * @see str_time
+ * @see str_time_float
+ */
+enum class ETimeFormat
+{
+	DAYS,
+	HOURS,
+	MINS,
+	HOURS_CENTISECS,
+	MINS_CENTISECS,
+	SECS_CENTISECS,
 };
 
 /**
@@ -193,13 +215,13 @@ enum
  * @ingroup Timestamp
  *
  * @param centisecs Time in centiseconds.
- * @param format Format of the time string, see enum above, for example `TIME_DAYS`.
+ * @param format Format of the time string, see `ETimeFormat`.
  * @param buffer Pointer to a buffer that shall receive the timestamp string.
  * @param buffer_size Size of the buffer.
  *
- * @return Number of bytes written, `-1` on invalid format or `buffer_size <= 0`.
+ * @return Number of bytes written.
  */
-int str_time(int64_t centisecs, int format, char *buffer, int buffer_size);
+int str_time(int64_t centisecs, ETimeFormat format, char *buffer, int buffer_size);
 
 /**
  * Formats a time string.
@@ -207,14 +229,14 @@ int str_time(int64_t centisecs, int format, char *buffer, int buffer_size);
  * @ingroup Timestamp
  *
  * @param secs Time in seconds.
- * @param format Format of the time string, see enum above, for example `TIME_DAYS`.
+ * @param format Format of the time string, see `ETimeFormat`.
  * @param buffer Pointer to a buffer that shall receive the timestamp string.
  * @param buffer_size Size of the buffer.
  *
  * @remark The time is rounded to the nearest centisecond.
  *
- * @return Number of bytes written, `-1` on invalid format or `buffer_size <= 0`.
+ * @return Number of bytes written.
  */
-int str_time_float(float secs, int format, char *buffer, int buffer_size);
+int str_time_float(float secs, ETimeFormat format, char *buffer, int buffer_size);
 
 #endif

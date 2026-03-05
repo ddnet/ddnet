@@ -204,7 +204,7 @@ void CGameTeams::OnCharacterFinish(int ClientId)
 			if(TimeTicks <= 0)
 				return;
 			char aTimestamp[TIMESTAMP_STR_LENGTH];
-			str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_SPACE); // 2019-04-02 19:41:58
+			str_timestamp_format(aTimestamp, sizeof(aTimestamp), TimestampFormat::SPACE); // 2019-04-02 19:41:58
 
 			OnFinish(pPlayer, TimeTicks, aTimestamp);
 		}
@@ -371,7 +371,7 @@ void CGameTeams::CheckTeamFinished(int Team)
 			}
 
 			char aTimestamp[TIMESTAMP_STR_LENGTH];
-			str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_SPACE); // 2019-04-02 19:41:58
+			str_timestamp_format(aTimestamp, sizeof(aTimestamp), TimestampFormat::SPACE); // 2019-04-02 19:41:58
 
 			for(unsigned int i = 0; i < PlayersCount; ++i)
 				OnFinish(apTeamPlayers[i], TimeTicks, aTimestamp);

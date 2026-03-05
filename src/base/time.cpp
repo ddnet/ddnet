@@ -116,19 +116,19 @@ ETimeSeason time_season()
 
 	if((time_info.tm_mon == 11 && time_info.tm_mday == 31) || (time_info.tm_mon == 0 && time_info.tm_mday == 1))
 	{
-		return SEASON_NEWYEAR;
+		return ETimeSeason::NEWYEAR;
 	}
 	else if(time_info.tm_mon == 11 && time_info.tm_mday >= 24 && time_info.tm_mday <= 26)
 	{
-		return SEASON_XMAS;
+		return ETimeSeason::XMAS;
 	}
 	else if((time_info.tm_mon == 9 && time_info.tm_mday == 31) || (time_info.tm_mon == 10 && time_info.tm_mday == 1))
 	{
-		return SEASON_HALLOWEEN;
+		return ETimeSeason::HALLOWEEN;
 	}
 	else if(time_iseasterday(time_data, time_info))
 	{
-		return SEASON_EASTER;
+		return ETimeSeason::EASTER;
 	}
 
 	switch(time_info.tm_mon)
@@ -136,19 +136,19 @@ ETimeSeason time_season()
 	case 11:
 	case 0:
 	case 1:
-		return SEASON_WINTER;
+		return ETimeSeason::WINTER;
 	case 2:
 	case 3:
 	case 4:
-		return SEASON_SPRING;
+		return ETimeSeason::SPRING;
 	case 5:
 	case 6:
 	case 7:
-		return SEASON_SUMMER;
+		return ETimeSeason::SUMMER;
 	case 8:
 	case 9:
 	case 10:
-		return SEASON_AUTUMN;
+		return ETimeSeason::AUTUMN;
 	default:
 		dbg_assert_failed("Invalid month: %d", time_info.tm_mon);
 	}
@@ -160,7 +160,7 @@ ETimeSeason time_season()
 #endif
 void str_timestamp(char *buffer, int buffer_size)
 {
-	str_timestamp_format(buffer, buffer_size, FORMAT_NOSPACE);
+	str_timestamp_format(buffer, buffer_size, TimestampFormat::NOSPACE);
 }
 
 void str_timestamp_format(char *buffer, int buffer_size, const char *format)
@@ -196,54 +196,51 @@ bool timestamp_from_str(const char *string, const char *format, time_t *timestam
 #pragma GCC diagnostic pop
 #endif
 
-int str_time(int64_t centisecs, int format, char *buffer, int buffer_size)
+int str_time(int64_t centisecs, ETimeFormat format, char *buffer, int buffer_size)
 {
+	dbg_assert(buffer_size > 0, "Invalid buffer size: %d", buffer_size);
+
 	const int sec = 100;
 	const int min = 60 * sec;
 	const int hour = 60 * min;
 	const int day = 24 * hour;
 
-	if(buffer_size <= 0)
-		return -1;
-
 	if(centisecs < 0)
 		centisecs = 0;
 
-	buffer[0] = 0;
-
 	switch(format)
 	{
-	case TIME_DAYS:
+	case ETimeFormat::DAYS:
 		if(centisecs >= day)
 			return str_format(buffer, buffer_size, "%" PRId64 "d %02" PRId64 ":%02" PRId64 ":%02" PRId64, centisecs / day,
 				(centisecs % day) / hour, (centisecs % hour) / min, (centisecs % min) / sec);
 		[[fallthrough]];
-	case TIME_HOURS:
+	case ETimeFormat::HOURS:
 		if(centisecs >= hour)
 			return str_format(buffer, buffer_size, "%02" PRId64 ":%02" PRId64 ":%02" PRId64, centisecs / hour,
 				(centisecs % hour) / min, (centisecs % min) / sec);
 		[[fallthrough]];
-	case TIME_MINS:
+	case ETimeFormat::MINS:
 		return str_format(buffer, buffer_size, "%02" PRId64 ":%02" PRId64, centisecs / min,
 			(centisecs % min) / sec);
-	case TIME_HOURS_CENTISECS:
+	case ETimeFormat::HOURS_CENTISECS:
 		if(centisecs >= hour)
 			return str_format(buffer, buffer_size, "%02" PRId64 ":%02" PRId64 ":%02" PRId64 ".%02" PRId64, centisecs / hour,
 				(centisecs % hour) / min, (centisecs % min) / sec, centisecs % sec);
 		[[fallthrough]];
-	case TIME_MINS_CENTISECS:
+	case ETimeFormat::MINS_CENTISECS:
 		if(centisecs >= min)
 			return str_format(buffer, buffer_size, "%02" PRId64 ":%02" PRId64 ".%02" PRId64, centisecs / min,
 				(centisecs % min) / sec, centisecs % sec);
 		[[fallthrough]];
-	case TIME_SECS_CENTISECS:
+	case ETimeFormat::SECS_CENTISECS:
 		return str_format(buffer, buffer_size, "%02" PRId64 ".%02" PRId64, (centisecs % min) / sec, centisecs % sec);
+	default:
+		dbg_assert_failed("Invalid time format: %d", (int)format);
 	}
-
-	return -1;
 }
 
-int str_time_float(float secs, int format, char *buffer, int buffer_size)
+int str_time_float(float secs, ETimeFormat format, char *buffer, int buffer_size)
 {
 	return str_time(static_cast<int64_t>(std::roundf(secs * 1000) / 10), format, buffer, buffer_size);
 }

@@ -95,7 +95,7 @@ void log_set_scope_logger(ILogger *logger)
 	Msg.m_Level = level;
 	Msg.m_HaveColor = have_color;
 	Msg.m_Color = color;
-	str_timestamp_format(Msg.m_aTimestamp, sizeof(Msg.m_aTimestamp), FORMAT_SPACE);
+	str_timestamp_format(Msg.m_aTimestamp, sizeof(Msg.m_aTimestamp), TimestampFormat::SPACE);
 	Msg.m_TimestampLength = str_length(Msg.m_aTimestamp);
 	str_copy(Msg.m_aSystem, sys);
 	Msg.m_SystemLength = str_length(Msg.m_aSystem);
