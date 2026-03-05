@@ -160,7 +160,7 @@ ETimeSeason time_season()
 #endif
 void str_timestamp(char *buffer, int buffer_size)
 {
-	str_timestamp_format(buffer, buffer_size, FORMAT_NOSPACE);
+	str_timestamp_format(buffer, buffer_size, TimestampFormat::NOSPACE);
 }
 
 void str_timestamp_format(char *buffer, int buffer_size, const char *format)

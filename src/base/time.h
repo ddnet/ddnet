@@ -141,6 +141,7 @@ void str_timestamp(char *buffer, int buffer_size);
  * @param buffer Pointer to a buffer that shall receive the timestamp string.
  * @param buffer_size Size of the buffer.
  * @param format Time formatting string. See https://cppreference.com/w/c/chrono/strftime.html for format description.
+ *               See `TimestampFormat` for common formats.
  *
  * @remark Guarantees that buffer string will contain null-termination.
  */
@@ -155,6 +156,7 @@ void str_timestamp(char *buffer, int buffer_size);
  * @param buffer Pointer to a buffer that shall receive the timestamp string.
  * @param buffer_size Size of the buffer.
  * @param format Time formatting string. See https://cppreference.com/w/c/chrono/strftime.html for format description.
+ *               See `TimestampFormat` for common formats.
  *
  * @remark Guarantees that buffer string will contain null-termination.
  */
@@ -166,16 +168,28 @@ void str_timestamp(char *buffer, int buffer_size);
  * @ingroup Timestamp
  *
  * @param string Pointer to the string to parse.
- * @param format The time format to use (for example `FORMAT_NOSPACE` below).
+ * @param format The time format to use. See `TimestampFormat` for common formats.
  * @param timestamp Pointer to the timestamp result.
  *
  * @return `true` on success, `false` if the string could not be parsed with the specified format.
  */
 [[gnu::format(strftime, 2, 0)]] bool timestamp_from_str(const char *string, const char *format, time_t *timestamp);
 
-#define FORMAT_TIME "%H:%M:%S"
-#define FORMAT_SPACE "%Y-%m-%d %H:%M:%S"
-#define FORMAT_NOSPACE "%Y-%m-%d_%H-%M-%S"
+/**
+ * Timestamp format strings for the `str_timestamp_format`, `str_timestamp_ex` and `timestamp_from_str` functions.
+ *
+ * @ingroup Timestamp
+ *
+ * @see str_timestamp_format
+ * @see str_timestamp_ex
+ * @see timestamp_from_str
+ */
+namespace TimestampFormat
+{
+	inline const char *const TIME = "%H:%M:%S";
+	inline const char *const SPACE = "%Y-%m-%d %H:%M:%S";
+	inline const char *const NOSPACE = "%Y-%m-%d_%H-%M-%S";
+}
 
 /**
  * Time formats for the `str_time` and `str_time_float` functions.

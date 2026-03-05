@@ -1480,7 +1480,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 			else if(Id == COL_DATE)
 			{
 				char aBuf[64];
-				str_timestamp_ex(pGhost->m_Date, aBuf, sizeof(aBuf), FORMAT_SPACE);
+				str_timestamp_ex(pGhost->m_Date, aBuf, sizeof(aBuf), TimestampFormat::SPACE);
 				Ui()->DoLabel(&Button, aBuf, 12.0f, TEXTALIGN_ML);
 			}
 		}
