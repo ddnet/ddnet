@@ -1127,9 +1127,6 @@ auto
 Tutorial
 == Titorial
 
-Can't find a Tutorial server
-== Non se puido atopar un servidor Titorial
-
 Choose default eyes when joining a server
 == Escolle os ollos predeterminados ao unirche a un servidor
 
@@ -1337,20 +1334,8 @@ Hook collision line
 Hook collision line opacity
 == Opacidade da liña de colisión do gancho
 
-Colors of the hook collision line, in case of a possible collision with:
-== Cores da liña de colisión do gancho, no posible caso de que choque con:
-
 Your movements are not taken into account when calculating the line colors
 == Os teus movementos non contan ao calcular as cores da liña
-
-Nothing hookable
-== Nada enganchable
-
-Something hookable
-== Algo enganchable
-
-A Tee
-== Un Tee
 
 Weapons
 == Armas
@@ -1457,9 +1442,6 @@ Could not initialize the given graphics backend, reverting to the default backen
 
 Open the directory that contains the demo files
 == Abrir o cartafol que contén os arquivos de demo
-
-Save power by lowering refresh rate (higher input latency)
-== Aforra enerxía ao reducir a frecuencia de actualización (maior latencia de entrada)
 
 Open the settings file
 == Abrir o arquivo de configuracións
@@ -1698,6 +1680,9 @@ Render complete
 Are you sure that you want to restart?
 == 
 
+Joining Tutorial server
+== 
+
 Save skin
 == 
 
@@ -1737,6 +1722,36 @@ Videos directory
 Video was saved to '%s'
 == 
 
+Could not get server list from master server
+== 
+
+There are no Tutorial servers available
+== 
+
+Please wait…
+== 
+
+Retrying…
+== 
+
+Error joining Tutorial server
+== 
+
+Could not find a Tutorial server. Check your internet connection.
+== 
+
+You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
+== 
+
+Could not find online Tutorial server.\nStarting and connecting to local server…
+== 
+
+Waiting for local server to stop…
+== 
+
+Waiting for local server to start…
+== 
+
 Error checking player name
 == 
 
@@ -1758,9 +1773,6 @@ No local servers found (ports %d-%d)
 Start and connect to local server
 == 
 
-Could not get server list from master server
-== 
-
 Example of usage
 == 
 
@@ -1768,6 +1780,15 @@ No login required
 == 
 
 Communities
+== 
+
+Error loading communities
+== 
+
+Click to remove this community from your favorites.
+== 
+
+Click to add this community to your favorites.
 == 
 
 No server selected
@@ -1881,9 +1902,6 @@ Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
 Dummy is not allowed on this server
-== 
-
-Please wait…
 == 
 
 Edit touch controls
@@ -2329,6 +2347,12 @@ The extra menu with the given number is activated.
 Hz
 == 
 
+Update Rate
+== 
+
+Save power by lowering update rate (higher input latency)
+== 
+
 Saves file
 == 
 
@@ -2488,6 +2512,25 @@ Width of your own hook collision line
 == 
 
 Width of others' hook collision line
+== 
+
+Colors of the hook collision line:
+== 
+
+[Hook collision line color]
+When nothing is hookable
+== 
+
+[Hook collision line color]
+When something is hookable
+== 
+
+[Hook collision line color]
+When a Tee is hookable
+== 
+
+[Hook collision line color]
+Hook collision line tip
 == 
 
 Preview 'Hook collisions' being pressed

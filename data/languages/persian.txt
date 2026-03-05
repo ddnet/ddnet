@@ -980,9 +980,6 @@ Loading ghost files
 Menu opened. Press Esc key again to close menu.
 == .ﺩﻮﺷ ﻪﺘﺴﺑ ﻮﻨﻣ ﺎﺗ ﺪﯿﻫﺩ ﺭﺎﺸﻓ ﺍﺭ Esc ﺪﯿﻠﮐ ﻩﺭﺎﺑﻭﺩ ﺪﺷ ﺯﺎﺑ ﻮﻨﻣ
 
-Save power by lowering refresh rate (higher input latency)
-== (ﺮﺗﻻﺎﺑ ﯼﺩﻭﺭﻭ ﺮﯿﺧﺄﺗ) ﯽﻧﺎﺳﺭﺯﻭﺮﺑ ﺥﺮﻧ ﺶﻫﺎﮐ ﺎﺑ ﯼﮊﺮﻧﺍ ﻑﺮﺼﻣ ﺭﺩ ﯽﯾﻮﺟ ﻪﻓﺮﺻ
-
 Settings file
 == ﺕﺎﻤﯿﻈﻨﺗ ﻞﯾﺎﻓ
 
@@ -1261,20 +1258,8 @@ Show other players' hook collision lines
 Hook collision line opacity
 == ﺏﻼﻗ ﺩﺭﻮﺧﺮﺑ ﻂﺧ ﺖﯿﻓﺎﻔﺷ
 
-Colors of the hook collision line, in case of a possible collision with:
-== :ﺎﺑ ﯽﻟﺎﻤﺘﺣﺍ ﺩﺭﻮﺧﺮﺑ ﺕﺭﻮﺻ ﺭﺩ ،ﺏﻼﻗ ﺩﺭﻮﺧﺮﺑ ﻂﺧ ﯼﺎﻫ ﮓﻧﺭ
-
 Your movements are not taken into account when calculating the line colors
 == ﺩﻮﺷ ﯽﻤﻧ ﻪﺘﻓﺮﮔ ﺮﻈﻧ ﺭﺩ ﻁﻮﻄﺧ ﮓﻧﺭ ﻪﺒﺳﺎﺤﻣ ﻡﺎﮕﻨﻫ ﺭﺩ ﺎﻤﺷ ﺕﺎﮐﺮﺣ
-
-Nothing hookable
-== ﺮﯾﺬﭘﺎﻧ ﺏﻼﻗ
-
-Something hookable
-== ﺮﯾﺬﭘ ﺏﻼﻗ
-
-A Tee
-== ﯽﺗ
 
 Normal Color
 == ﯽﻟﻮﻤﻌﻣ ﮓﻧﺭ
@@ -1407,9 +1392,6 @@ https://wiki.ddnet.org/
 
 Tutorial
 == ﺵﺯﻮﻣﺁ
-
-Can't find a Tutorial server
-== ﺪﺸﻧ ﺍﺪﯿﭘ ﯽﺷﺯﻮﻣﺁ ﺭﻭﺮﺳ
 
 Server executable not found, can't run server
 == ﺩﺮﮐ ﺍﺮﺟﺍ ﻥﺍﻮﺗ ﯽﻤﻧ ﺍﺭ ﺭﻭﺮﺳ ،ﺪﺸﻧ ﺍﺪﯿﭘ ﺭﻭﺮﺳ ﯽﯾﺍﺮﺟﺍ ﻞﯾﺎﻓ
@@ -2096,6 +2078,9 @@ Server could not be started
 Loading map
 == 
 
+Joining Tutorial server
+== 
+
 There's an unsaved change in the touch controls editor, you might want to save it.
 == 
 
@@ -2103,6 +2088,33 @@ This name cannot be used for files and folders
 == 
 
 You will be disconnected from the server.
+== 
+
+Could not get server list from master server
+== 
+
+There are no Tutorial servers available
+== 
+
+Retrying…
+== 
+
+Error joining Tutorial server
+== 
+
+Could not find a Tutorial server. Check your internet connection.
+== 
+
+You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
+== 
+
+Could not find online Tutorial server.\nStarting and connecting to local server…
+== 
+
+Waiting for local server to stop…
+== 
+
+Waiting for local server to start…
 == 
 
 Error checking player name
@@ -2114,7 +2126,13 @@ Could not check for existing player with your name. Check your internet connecti
 Start and connect to local server
 == 
 
-Could not get server list from master server
+Error loading communities
+== 
+
+Click to remove this community from your favorites.
+== 
+
+Click to add this community to your favorites.
 == 
 
 Add clan
@@ -2487,6 +2505,12 @@ Demo player is currently active.
 The extra menu with the given number is activated.
 == 
 
+Update Rate
+== 
+
+Save power by lowering update rate (higher input latency)
+== 
+
 Saves file
 == 
 
@@ -2574,6 +2598,25 @@ Preview player's name plate
 == 
 
 Preview dummy's name plate
+== 
+
+Colors of the hook collision line:
+== 
+
+[Hook collision line color]
+When nothing is hookable
+== 
+
+[Hook collision line color]
+When something is hookable
+== 
+
+[Hook collision line color]
+When a Tee is hookable
+== 
+
+[Hook collision line color]
+Hook collision line tip
 == 
 
 Dragger Outline Color

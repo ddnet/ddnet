@@ -1127,9 +1127,6 @@ auto
 Tutorial
 == 튜토리얼
 
-Can't find a Tutorial server
-== 튜토리얼 서버를 찾을 수 없음
-
 Choose default eyes when joining a server
 == 서버 입장 시의 기본 눈을 선택합니다.
 
@@ -1321,20 +1318,8 @@ Hook collision line
 Hook collision line opacity
 == 갈고리 보조선 불투명도
 
-Colors of the hook collision line, in case of a possible collision with:
-== 갈고리 보조선 색상:
-
 Your movements are not taken into account when calculating the line colors
 == 당신의 움직임은 색상 계산에 고려되지 않습니다.
-
-Nothing hookable
-== 갈고리 불가
-
-Something hookable
-== 갈고리 가능
-
-A Tee
-== Tee 대상
 
 Loading assets
 == 에셋 로딩 중
@@ -1459,9 +1444,6 @@ Are you sure that you want to delete the demo '%s'?
 
 Unable to delete the demo '%s'
 == 데모 '%s'을(를) 삭제할 수 없음
-
-Save power by lowering refresh rate (higher input latency)
-== 화면 주사율을 낮춰 전력 절약 (입력 지연 증가)
 
 Open the settings file
 == 설정 파일을 엽니다.
@@ -2608,3 +2590,64 @@ Demo player is currently active.
 
 The extra menu with the given number is activated.
 == 지정된 번호의 기타 메뉴가 활성화됐습니다.
+
+Joining Tutorial server
+== 
+
+There are no Tutorial servers available
+== 
+
+Retrying…
+== 
+
+Error joining Tutorial server
+== 
+
+Could not find a Tutorial server. Check your internet connection.
+== 
+
+You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
+== 
+
+Could not find online Tutorial server.\nStarting and connecting to local server…
+== 
+
+Waiting for local server to stop…
+== 
+
+Waiting for local server to start…
+== 
+
+Error loading communities
+== 
+
+Click to remove this community from your favorites.
+== 
+
+Click to add this community to your favorites.
+== 
+
+Update Rate
+== 
+
+Save power by lowering update rate (higher input latency)
+== 
+
+Colors of the hook collision line:
+== 
+
+[Hook collision line color]
+When nothing is hookable
+== 
+
+[Hook collision line color]
+When something is hookable
+== 
+
+[Hook collision line color]
+When a Tee is hookable
+== 
+
+[Hook collision line color]
+Hook collision line tip
+== 

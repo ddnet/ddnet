@@ -1151,9 +1151,6 @@ https://ddnet.org/discord
 Tutorial
 == Samouczek
 
-Can't find a Tutorial server
-== Nie można znaleźć serwera samouczkowego
-
 Super
 == Super
 
@@ -1494,9 +1491,6 @@ Deactivate all
 Menu opened. Press Esc key again to close menu.
 == Menu otwarte. Naciśnij przycisk Esc, aby zamknąć menu.
 
-Save power by lowering refresh rate (higher input latency)
-== Oszczędzaj energię, obniżając częstotliwość odświeżania (większe opóźnienie)
-
 Open the settings file
 == Otwórz plik z ustawieniami
 
@@ -1646,20 +1640,8 @@ Always show other players' hook collision lines
 Hook collision line opacity
 == Przezroczystość linii kolizji haka
 
-Colors of the hook collision line, in case of a possible collision with:
-== Kolor linii kolizji haka, w przypadku kolizji z:
-
 Your movements are not taken into account when calculating the line colors
 == Twoje ruchy nie są brane pod uwagę podczas obliczania kolorów linii
-
-Nothing hookable
-== Niczym możliwym do złapania
-
-Something hookable
-== Czymś możliwym do złapania
-
-A Tee
-== Graczem
 
 Show finish messages
 == Pokazuj wiadomości o ukończeniu
@@ -2537,6 +2519,66 @@ Button browser
 You can select buttons directly in the list below, or long press on a touch button on the screen to select it. You can also move and resize buttons by touch.
 == Możesz bezpośrednio wybrać przyciski w poniższej liście, lub przytrzymać przycisk dotykowy na ekranie, aby go zaznaczyć. Możesz również przemieścić i skalować przyciski poprzez dotyk.
 
+Opens the emoticon selector (this does not work with binds).
+== Otwiera koło emotikon (nie działa z bindami).
+
+Opens the spectator menu (this does not work with binds).
+== Otwiera menu obserwatora (nie działa z bindami).
+
+Zoom is allowed on this server.
+== Zoom jest dozwolony na tym serwerze.
+
+A vote is currently active.
+== Aktualnie trwa głosowanie.
+
+Dummy is allowed on this server.
+== Kukła jest dozwolona na tym serwerze.
+
+Dummy is currently connected.
+== Kukła jest już połączona.
+
+Player is currently authed in rcon.
+== Gracz jest zalogowany do rcon.
+
+Demo player is currently active.
+== Odtwarzacz demo jest włączony.
+
+Joining Tutorial server
+== 
+
+There are no Tutorial servers available
+== 
+
+Retrying…
+== 
+
+Error joining Tutorial server
+== 
+
+Could not find a Tutorial server. Check your internet connection.
+== 
+
+You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
+== 
+
+Could not find online Tutorial server.\nStarting and connecting to local server…
+== 
+
+Waiting for local server to stop…
+== 
+
+Waiting for local server to start…
+== 
+
+Error loading communities
+== 
+
+Click to remove this community from your favorites.
+== 
+
+Click to add this community to your favorites.
+== 
+
 Preview visibilities
 == 
 
@@ -2561,12 +2603,6 @@ Opens the ingame menu immediately when released.
 The extra menu button which toggles visibility of buttons with "Extra Menu" visibilities. Also opens the ingame menu on long press.
 == 
 
-Opens the emoticon selector (this does not work with binds).
-== Otwiera koło emotikon (nie działa z bindami).
-
-Opens the spectator menu (this does not work with binds).
-== Otwiera menu obserwatora (nie działa z bindami).
-
 Swaps the active action (fire and hook) for direct touch input and virtual joysticks.
 == 
 
@@ -2588,23 +2624,30 @@ Virtual joystick which always uses hook.
 Player is ingame, i.e. not spectating.
 == 
 
-Zoom is allowed on this server.
-== Zoom jest dozwolony na tym serwerze.
-
-A vote is currently active.
-== Aktualnie trwa głosowanie.
-
-Dummy is allowed on this server.
-== Kukła jest dozwolona na tym serwerze.
-
-Dummy is currently connected.
-== Kukła jest już połączona.
-
-Player is currently authed in rcon.
-== Gracz jest zalogowany do rcon.
-
-Demo player is currently active.
-== Odtwarzacz demo jest włączony.
-
 The extra menu with the given number is activated.
+== 
+
+Update Rate
+== 
+
+Save power by lowering update rate (higher input latency)
+== 
+
+Colors of the hook collision line:
+== 
+
+[Hook collision line color]
+When nothing is hookable
+== 
+
+[Hook collision line color]
+When something is hookable
+== 
+
+[Hook collision line color]
+When a Tee is hookable
+== 
+
+[Hook collision line color]
+Hook collision line tip
 == 

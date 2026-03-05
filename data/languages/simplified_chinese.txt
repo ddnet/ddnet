@@ -1136,9 +1136,6 @@ auto
 Tutorial
 == 教学
 
-Can't find a Tutorial server
-== 无法找到教学服务器
-
 Choose default eyes when joining a server
 == 进入服务器时的默认表情
 
@@ -1333,20 +1330,8 @@ Hook collision line
 Hook collision line opacity
 == 辅助线不透明度
 
-Colors of the hook collision line, in case of a possible collision with:
-== 辅助线颜色（当瞄准以下实体物时）：
-
 Your movements are not taken into account when calculating the line colors
 == 移动所造成的瞄准偏移将不计入考量
-
-Nothing hookable
-== 未瞄准任何实体物
-
-Something hookable
-== 可钩索的方块
-
-A Tee
-== 其他玩家
 
 Loading assets
 == 正在加载资源
@@ -1477,9 +1462,6 @@ Could not initialize the given graphics backend, reverting to the default backen
 
 Open the directory that contains the demo files
 == 打开存有回放文件的文件夹路径
-
-Save power by lowering refresh rate (higher input latency)
-== 省电模式（限制帧率上限以降低功耗但也将提高输入延迟）
 
 Open the settings file
 == 打开设置文件
@@ -2608,3 +2590,64 @@ Demo player is currently active.
 
 The extra menu with the given number is activated.
 == 指定编号的额外菜单已激活。
+
+Joining Tutorial server
+== 
+
+There are no Tutorial servers available
+== 
+
+Retrying…
+== 
+
+Error joining Tutorial server
+== 
+
+Could not find a Tutorial server. Check your internet connection.
+== 
+
+You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
+== 
+
+Could not find online Tutorial server.\nStarting and connecting to local server…
+== 
+
+Waiting for local server to stop…
+== 
+
+Waiting for local server to start…
+== 
+
+Error loading communities
+== 
+
+Click to remove this community from your favorites.
+== 
+
+Click to add this community to your favorites.
+== 
+
+Update Rate
+== 
+
+Save power by lowering update rate (higher input latency)
+== 
+
+Colors of the hook collision line:
+== 
+
+[Hook collision line color]
+When nothing is hookable
+== 
+
+[Hook collision line color]
+When something is hookable
+== 
+
+[Hook collision line color]
+When a Tee is hookable
+== 
+
+[Hook collision line color]
+Hook collision line tip
+== 

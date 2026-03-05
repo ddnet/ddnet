@@ -1157,6 +1157,9 @@ Render complete
 Are you sure that you want to restart?
 == 
 
+Joining Tutorial server
+== 
+
 Existing Player
 == 
 
@@ -1215,6 +1218,39 @@ Join Tutorial Server
 == 
 
 Skip Tutorial
+== 
+
+Getting server list from master server
+== 
+
+Could not get server list from master server
+== 
+
+There are no Tutorial servers available
+== 
+
+Please wait…
+== 
+
+Retrying…
+== 
+
+Error joining Tutorial server
+== 
+
+Could not find a Tutorial server. Check your internet connection.
+== 
+
+You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
+== 
+
+Could not find online Tutorial server.\nStarting and connecting to local server…
+== 
+
+Waiting for local server to stop…
+== 
+
+Waiting for local server to start…
 == 
 
 Cancel
@@ -1280,16 +1316,10 @@ SA
 CHN
 == 
 
-Getting server list from master server
-== 
-
 No local servers found (ports %d-%d)
 == 
 
 Start and connect to local server
-== 
-
-Could not get server list from master server
 == 
 
 Example of usage
@@ -1314,6 +1344,15 @@ No login required
 == 
 
 Communities
+== 
+
+Error loading communities
+== 
+
+Click to remove this community from your favorites.
+== 
+
+Click to add this community to your favorites.
 == 
 
 Copy info
@@ -1509,9 +1548,6 @@ Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
 Dummy is not allowed on this server
-== 
-
-Please wait…
 == 
 
 Edit touch controls
@@ -1972,7 +2008,10 @@ Skip the main menu
 Hz
 == 
 
-Save power by lowering refresh rate (higher input latency)
+Update Rate
+== 
+
+Save power by lowering update rate (higher input latency)
 == 
 
 Settings file
@@ -2274,19 +2313,26 @@ Width of others' hook collision line
 Hook collision line opacity
 == 
 
-Colors of the hook collision line, in case of a possible collision with:
+Colors of the hook collision line:
 == 
 
 Your movements are not taken into account when calculating the line colors
 == 
 
-Nothing hookable
+[Hook collision line color]
+When nothing is hookable
 == 
 
-Something hookable
+[Hook collision line color]
+When something is hookable
 == 
 
-A Tee
+[Hook collision line color]
+When a Tee is hookable
+== 
+
+[Hook collision line color]
+Hook collision line tip
 == 
 
 Preview 'Hook collisions' being pressed
@@ -2496,9 +2542,6 @@ https://wiki.ddnet.org/
 == 
 
 Tutorial
-== 
-
-Can't find a Tutorial server
 == 
 
 Website

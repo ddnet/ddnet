@@ -78,9 +78,6 @@ A folder with this name already exists
 A render command failed. Try to update your GPU drivers.
 == Помилка в команді відмальовування. Спробуйте оновити драйвери відеокарти.
 
-A Tee
-== тії
-
 Abort
 == Скасувати
 
@@ -291,9 +288,6 @@ Browser
 Call vote
 == Голосувати
 
-Can't find a Tutorial server
-== Не вдається знайти навчальний сервер
-
 Cancel
 == Скасувати
 
@@ -359,9 +353,6 @@ Close
 
 Close the demo player
 == Закрити програвач демо
-
-Colors of the hook collision line, in case of a possible collision with:
-== Кольори лінії зіткнення гака, в разі можливого зіткнення з:
 
 Communities
 == Спільноти
@@ -1215,9 +1206,6 @@ Normal message
 NOT CONNECTED
 == НЕ ПІД’ЄДНАНО
 
-Nothing hookable
-== нічим, за що можна зачепитися
-
 [friends (server browser)]
 Offline (%d)
 == Не в мережі (%d)
@@ -1473,9 +1461,6 @@ Save changes
 Save ghost
 == Зберігати привида
 
-Save power by lowering refresh rate (higher input latency)
-== Економити енергію шляхом зниження частоти кадрів (вища затримка введення)
-
 Save skin
 == Зберегти скін
 
@@ -1694,9 +1679,6 @@ Some map images could not be loaded. Check the local console for details.
 
 Some map sounds could not be loaded. Check the local console for details.
 == Не вдалося завантажити деякі звуки мапи. Див. локальну консоль для подробиць.
-
-Something hookable
-== чимось, за що можна зачепитися
 
 Sound
 == Звук
@@ -2608,3 +2590,64 @@ Demo player is currently active.
 
 The extra menu with the given number is activated.
 == Додаткове меню з вказаним номером активоване.
+
+Joining Tutorial server
+== 
+
+There are no Tutorial servers available
+== 
+
+Retrying…
+== 
+
+Error joining Tutorial server
+== 
+
+Could not find a Tutorial server. Check your internet connection.
+== 
+
+You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
+== 
+
+Could not find online Tutorial server.\nStarting and connecting to local server…
+== 
+
+Waiting for local server to stop…
+== 
+
+Waiting for local server to start…
+== 
+
+Error loading communities
+== 
+
+Click to remove this community from your favorites.
+== 
+
+Click to add this community to your favorites.
+== 
+
+Update Rate
+== 
+
+Save power by lowering update rate (higher input latency)
+== 
+
+Colors of the hook collision line:
+== 
+
+[Hook collision line color]
+When nothing is hookable
+== 
+
+[Hook collision line color]
+When something is hookable
+== 
+
+[Hook collision line color]
+When a Tee is hookable
+== 
+
+[Hook collision line color]
+Hook collision line tip
+== 

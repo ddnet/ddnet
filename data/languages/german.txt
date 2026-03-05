@@ -58,9 +58,6 @@ Clan
 Client
 == Client
 
-Colors of the hook collision line, in case of a possible collision with:
-== Die Farbe der Hakenkollisionslinie bei einer möglichen Kollision mit:
-
 Connecting to
 == Verbinden mit
 
@@ -1112,15 +1109,6 @@ Windowed borderless
 Desktop fullscreen
 == Desktop-Vollbild
 
-Nothing hookable
-== nichts hookbarem
-
-Something hookable
-== etwas hookbarem
-
-A Tee
-== einem Tee
-
 Are you sure that you want to disconnect and switch to a different server?
 == Bist du sicher, dass du die Verbindung trennen und zu einem anderen Server wechseln möchtest?
 
@@ -1162,9 +1150,6 @@ auto
 
 Tutorial
 == Tutorial
-
-Can't find a Tutorial server
-== Kein Tutorial-Server wurde gefunden
 
 Choose default eyes when joining a server
 == Standard-Augen beim Betreten eines Servers auswählen
@@ -1483,9 +1468,6 @@ Unregister protocol and file extensions
 
 Open the directory to add custom assets
 == Öffne den Ordner um eigene Ressourcen hinzuzufügen
-
-Save power by lowering refresh rate (higher input latency)
-== Spare Energie durch geringere Bildwiederholrate (höhere Inputverzögerung)
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
@@ -2519,10 +2501,46 @@ Unmute emoticons
 Mute emoticons
 == Emoticons stummschalten
 
+Joining Tutorial server
+== 
+
 There's an unsaved change in the touch controls editor, you might want to save it.
 == 
 
+There are no Tutorial servers available
+== 
+
+Retrying…
+== 
+
+Error joining Tutorial server
+== 
+
+Could not find a Tutorial server. Check your internet connection.
+== 
+
+You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
+== 
+
+Could not find online Tutorial server.\nStarting and connecting to local server…
+== 
+
+Waiting for local server to stop…
+== 
+
+Waiting for local server to start…
+== 
+
 Start and connect to local server
+== 
+
+Error loading communities
+== 
+
+Click to remove this community from your favorites.
+== 
+
+Click to add this community to your favorites.
 == 
 
 Add clan
@@ -2607,4 +2625,29 @@ Demo player is currently active.
 == 
 
 The extra menu with the given number is activated.
+== 
+
+Update Rate
+== 
+
+Save power by lowering update rate (higher input latency)
+== 
+
+Colors of the hook collision line:
+== 
+
+[Hook collision line color]
+When nothing is hookable
+== 
+
+[Hook collision line color]
+When something is hookable
+== 
+
+[Hook collision line color]
+When a Tee is hookable
+== 
+
+[Hook collision line color]
+Hook collision line tip
 == 

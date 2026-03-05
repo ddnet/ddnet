@@ -1130,9 +1130,6 @@ Chat command (e.g. showall 1)
 Tutorial
 == Tutorial
 
-Can't find a Tutorial server
-== Não foi possível encontrar o servidor de tutorial
-
 Choose default eyes when joining a server
 == Escolha os olhos padrões ao entrar em um servidor
 
@@ -1324,20 +1321,8 @@ Hook collision line
 Hook collision line opacity
 == Opacidade da linha de colisão do gancho
 
-Colors of the hook collision line, in case of a possible collision with:
-== Cores da linha de colisão do gancho, no caso de uma possível colisão com:
-
 Your movements are not taken into account when calculating the line colors
 == Seus movimentos não são levados em conta ao calcular as cores de linha
-
-Nothing hookable
-== Nada enganchável
-
-Something hookable
-== Alguma coisa enganchável
-
-A Tee
-== Um tee
 
 Loading assets
 == Carregando recursos
@@ -1468,9 +1453,6 @@ Could not initialize the given graphics backend, reverting to the default backen
 
 Open the directory that contains the demo files
 == Abre o diretório que contém os arquivos de demonstração
-
-Save power by lowering refresh rate (higher input latency)
-== Economiza energia diminuindo a taxa de atualização (maior latência de entrada)
 
 Open the settings file
 == Abre o arquivo de configurações
@@ -2608,3 +2590,64 @@ Demo player is currently active.
 
 The extra menu with the given number is activated.
 == O menu extra com o número fornecido está ativo.
+
+Joining Tutorial server
+== 
+
+There are no Tutorial servers available
+== 
+
+Retrying…
+== 
+
+Error joining Tutorial server
+== 
+
+Could not find a Tutorial server. Check your internet connection.
+== 
+
+You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
+== 
+
+Could not find online Tutorial server.\nStarting and connecting to local server…
+== 
+
+Waiting for local server to stop…
+== 
+
+Waiting for local server to start…
+== 
+
+Error loading communities
+== 
+
+Click to remove this community from your favorites.
+== 
+
+Click to add this community to your favorites.
+== 
+
+Update Rate
+== 
+
+Save power by lowering update rate (higher input latency)
+== 
+
+Colors of the hook collision line:
+== 
+
+[Hook collision line color]
+When nothing is hookable
+== 
+
+[Hook collision line color]
+When something is hookable
+== 
+
+[Hook collision line color]
+When a Tee is hookable
+== 
+
+[Hook collision line color]
+Hook collision line tip
+== 
