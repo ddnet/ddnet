@@ -7288,24 +7288,12 @@ void CEditor::HandleWriterFinishJobs()
 		return;
 	m_WriterFinishJobs.pop_front();
 
-	char aBuf[2 * IO_MAX_PATH_LENGTH + 128];
-	if(!Storage()->RemoveFile(pJob->GetRealFilename(), IStorage::TYPE_SAVE))
+	const char *pErrorMessage = pJob->ErrorMessage();
+	if(pErrorMessage[0] != '\0')
 	{
-		str_format(aBuf, sizeof(aBuf), "Saving failed: Could not remove old map file '%s'.", pJob->GetRealFilename());
-		ShowFileDialogError("%s", aBuf);
-		log_error("editor/save", "%s", aBuf);
+		ShowFileDialogError("%s", pErrorMessage);
 		return;
 	}
-
-	if(!Storage()->RenameFile(pJob->GetTempFilename(), pJob->GetRealFilename(), IStorage::TYPE_SAVE))
-	{
-		str_format(aBuf, sizeof(aBuf), "Saving failed: Could not move temporary map file '%s' to '%s'.", pJob->GetTempFilename(), pJob->GetRealFilename());
-		ShowFileDialogError("%s", aBuf);
-		log_error("editor/save", "%s", aBuf);
-		return;
-	}
-
-	log_trace("editor/save", "Saved map to '%s'.", pJob->GetRealFilename());
 
 	// send rcon.. if we can
 	if(Client()->RconAuthed() && g_Config.m_EdAutoMapReload)
@@ -7315,8 +7303,8 @@ void CEditor::HandleWriterFinishJobs()
 
 		if(net_addr_is_local(&Client()->ServerAddress()))
 		{
-			char aMapName[128];
-			IStorage::StripPathAndExtension(pJob->GetRealFilename(), aMapName, sizeof(aMapName));
+			char aMapName[MAX_MAP_LENGTH];
+			IStorage::StripPathAndExtension(pJob->RealFilename(), aMapName, sizeof(aMapName));
 			if(!str_comp(aMapName, CurrentServerInfo.m_aMap))
 				Client()->Rcon("hot_reload");
 		}
@@ -7470,8 +7458,12 @@ void CEditor::LoadCurrentMap()
 bool CEditor::Save(const char *pFilename)
 {
 	// Check if file with this name is already being saved at the moment
-	if(std::any_of(std::begin(m_WriterFinishJobs), std::end(m_WriterFinishJobs), [pFilename](const std::shared_ptr<CDataFileWriterFinishJob> &Job) { return str_comp(pFilename, Job->GetRealFilename()) == 0; }))
+	if(std::any_of(std::begin(m_WriterFinishJobs), std::end(m_WriterFinishJobs), [pFilename](const std::shared_ptr<CDataFileWriterFinishJob> &Job) {
+		   return str_comp(pFilename, Job->RealFilename()) == 0;
+	   }))
+	{
 		return false;
+	}
 
 	const auto &&ErrorHandler = [this](const char *pErrorMessage) {
 		ShowFileDialogError("%s", pErrorMessage);
