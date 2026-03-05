@@ -606,7 +606,9 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		Row.VSplitLeft(Width, &Button, &Row);
 		Button.VSplitLeft((Width - Button.h) / 4.0f, nullptr, &Button);
 		Button.VSplitLeft(Button.h, &Button, nullptr);
-		if(DoButton_Toggle(&s_aPlayerIds[Index][2], CurrentClient.m_Friend, &Button, true))
+		const int FriendState = GameClient()->Friends()->GetFriendState(CurrentClient.m_aName, CurrentClient.m_aClan);
+		const bool IsClanFriend = FriendState == IFriends::FRIEND_CLAN;
+		if(DoButton_Toggle(&s_aPlayerIds[Index][2], CurrentClient.m_Friend, &Button, !IsClanFriend))
 		{
 			if(CurrentClient.m_Friend)
 				GameClient()->Friends()->RemoveFriend(CurrentClient.m_aName, CurrentClient.m_aClan);
@@ -614,6 +616,12 @@ void CMenus::RenderPlayers(CUIRect MainView)
 				GameClient()->Friends()->AddFriend(CurrentClient.m_aName, CurrentClient.m_aClan);
 
 			GameClient()->Client()->ServerBrowserUpdate();
+		}
+		if(IsClanFriend)
+		{
+			if(Ui()->MouseHovered(&Button))
+				Ui()->SetHotItem(&s_aPlayerIds[Index][2]);
+			GameClient()->m_Tooltips.DoToolTip(&s_aPlayerIds[Index][2], &Button, Localize("Friend via clan"));
 		}
 	}
 
