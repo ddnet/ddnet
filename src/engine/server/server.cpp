@@ -296,13 +296,13 @@ const char *CServer::DnsblStateStr(EDnsblState State)
 	switch(State)
 	{
 	case EDnsblState::NONE:
-		return "n/a";
+		return "none";
 	case EDnsblState::PENDING:
 		return "pending";
 	case EDnsblState::BLACKLISTED:
-		return "black";
+		return "blacklisted";
 	case EDnsblState::WHITELISTED:
-		return "white";
+		return "whitelisted";
 	}
 
 	dbg_assert_failed("Invalid dnsbl State: %d", static_cast<int>(State));
@@ -2013,12 +2013,17 @@ void CServer::OnNetMsgEnterGame(int ClientId)
 	if(!GameServer()->IsClientReady(ClientId))
 		return;
 
+	const char *pProtocol = IsSixup(ClientId) ? "0.7" : "0.6";
+	const int Version = m_aClients[ClientId].m_DDNetVersion >= 0 ? m_aClients[ClientId].m_DDNetVersion : VERSION_VANILLA;
+	const char *pName = m_aClients[ClientId].m_aName[0] != '\0' ? m_aClients[ClientId].m_aName : "(connecting)";
 	log_info(
 		"server",
-		"player has entered the game. ClientId=%d addr=<{%s}> sixup=%d",
+		"player has entered the game. ClientId=%d name='%s' addr=<{%s}> protocol=%s version=%d",
 		ClientId,
+		pName,
 		ClientAddrString(ClientId, true),
-		IsSixup(ClientId));
+		pProtocol,
+		Version);
 	m_aClients[ClientId].m_State = CClient::STATE_INGAME;
 	if(!IsSixup(ClientId))
 	{

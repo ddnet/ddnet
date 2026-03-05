@@ -1865,6 +1865,18 @@ void CGameContext::OnClientDrop(int ClientId, const char *pReason)
 {
 	LogEvent("Disconnect", ClientId);
 
+	if(Server()->ClientIngame(ClientId))
+	{
+		const char *pLeaveReason = pReason != nullptr ? pReason : "";
+		log_info(
+			"server",
+			"player has left the game. ClientId=%d name='%s' addr=<{%s}> reason='%s'",
+			ClientId,
+			Server()->ClientName(ClientId),
+			Server()->ClientAddrString(ClientId, true),
+			pLeaveReason);
+	}
+
 	AbortVoteKickOnDisconnect(ClientId);
 	m_pController->OnPlayerDisconnect(m_apPlayers[ClientId], pReason);
 	delete m_apPlayers[ClientId];
@@ -1979,7 +1991,6 @@ bool CGameContext::OnClientDDNetVersionKnown(int ClientId)
 	IServer::CClientInfo Info;
 	dbg_assert(Server()->GetClientInfo(ClientId, &Info), "failed to get client info");
 	int ClientVersion = Info.m_DDNetVersion;
-	dbg_msg("ddnet", "cid=%d version=%d", ClientId, ClientVersion);
 
 	if(m_TeeHistorianActive)
 	{
