@@ -1,8 +1,10 @@
 #include "serverbrowser_http.h"
 
+#include <base/dbg.h>
 #include <base/lock.h>
 #include <base/log.h>
-#include <base/system.h>
+#include <base/net.h>
+#include <base/str.h>
 
 #include <engine/console.h>
 #include <engine/engine.h>

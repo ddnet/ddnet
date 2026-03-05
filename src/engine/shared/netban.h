@@ -1,7 +1,10 @@
 #ifndef ENGINE_SHARED_NETBAN_H
 #define ENGINE_SHARED_NETBAN_H
 
-#include <base/system.h>
+#include <base/mem.h>
+#include <base/net.h>
+#include <base/str.h>
+#include <base/time.h>
 
 #include <engine/console.h>
 

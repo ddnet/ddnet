@@ -1,6 +1,6 @@
 #include "test.h"
 
-#include <base/system.h>
+#include <base/net.h>
 
 #include <engine/client/serverbrowser_ping_cache.h>
 #include <engine/console.h>

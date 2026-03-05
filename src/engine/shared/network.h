@@ -6,6 +6,7 @@
 #include "ringbuffer.h"
 #include "stun.h"
 
+#include <base/net.h>
 #include <base/types.h>
 
 #include <array>

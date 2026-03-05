@@ -1,4 +1,6 @@
-#include <base/system.h>
+#include <base/dbg.h>
+#include <base/net.h>
+#include <base/str.h>
 
 #include <engine/shared/config.h>
 #include <engine/steam.h>
