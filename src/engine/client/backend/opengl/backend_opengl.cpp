@@ -974,7 +974,8 @@ void CCommandProcessorFragment_OpenGL::Cmd_RenderProgressSpinner(const CCommandB
 	SetState(pCommand->m_State);
 
 	constexpr int NumSegments = 64;
-	constexpr int NumVertices = NumSegments * 2 * 3;
+	// +1 segment for potential boundary split when progress is fractional
+	constexpr int NumVertices = (NumSegments + 1) * 2 * 3;
 
 	CCommandBuffer::SVertex aVertices[NumVertices];
 
@@ -1000,33 +1001,47 @@ void CCommandProcessorFragment_OpenGL::Cmd_RenderProgressSpinner(const CCommandB
 	float FilledEnd = ArcStart + ArcLen * 2.0f * pi;
 
 	int VertIdx = 0;
-	for(int i = 0; i < NumSegments; ++i)
-	{
-		float Angle1 = ArcStart + i * AngleStep;
-		float Angle2 = ArcStart + (i + 1) * AngleStep;
-
-		float SegMid = Angle1 + AngleStep * 0.5f;
-		bool Filled = (ArcLen >= 1.0f) || (ArcLen > 0.0f && SegMid < FilledEnd);
-		GL_SColor Color = Filled ? FilledColor : UnfilledColor;
-
-		float DirX1 = std::sin(Angle1);
-		float DirY1 = -std::cos(Angle1);
-		float DirX2 = std::sin(Angle2);
-		float DirY2 = -std::cos(Angle2);
-
-		const auto &&AddVertex = [&](float X, float Y, GL_SColor VertColor) {
-			aVertices[VertIdx].m_Pos = {X, Y};
-			aVertices[VertIdx].m_Tex = {0.0f, 0.0f};
-			aVertices[VertIdx].m_Color = VertColor;
-			VertIdx++;
-		};
-
+	const auto &&AddVertex = [&](float X, float Y, GL_SColor VertColor) {
+		aVertices[VertIdx].m_Pos = {X, Y};
+		aVertices[VertIdx].m_Tex = {0.0f, 0.0f};
+		aVertices[VertIdx].m_Color = VertColor;
+		VertIdx++;
+	};
+	const auto &&AddSegment = [&](float A1, float A2, GL_SColor Color) {
+		float DirX1 = std::sin(A1);
+		float DirY1 = -std::cos(A1);
+		float DirX2 = std::sin(A2);
+		float DirY2 = -std::cos(A2);
 		AddVertex(CenterX + DirX1 * InnerR, CenterY + DirY1 * InnerR, Color);
 		AddVertex(CenterX + DirX2 * InnerR, CenterY + DirY2 * InnerR, Color);
 		AddVertex(CenterX + DirX1 * OuterR, CenterY + DirY1 * OuterR, Color);
 		AddVertex(CenterX + DirX1 * OuterR, CenterY + DirY1 * OuterR, Color);
 		AddVertex(CenterX + DirX2 * InnerR, CenterY + DirY2 * InnerR, Color);
 		AddVertex(CenterX + DirX2 * OuterR, CenterY + DirY2 * OuterR, Color);
+	};
+	for(int i = 0; i < NumSegments; ++i)
+	{
+		float Angle1 = ArcStart + i * AngleStep;
+		float Angle2 = ArcStart + (i + 1) * AngleStep;
+
+		if(ArcLen >= 1.0f)
+		{
+			AddSegment(Angle1, Angle2, FilledColor);
+		}
+		else if(ArcLen <= 0.0f || Angle1 >= FilledEnd)
+		{
+			AddSegment(Angle1, Angle2, UnfilledColor);
+		}
+		else if(Angle2 <= FilledEnd)
+		{
+			AddSegment(Angle1, Angle2, FilledColor);
+		}
+		else
+		{
+			// Boundary segment: split at FilledEnd for precise progress representation
+			AddSegment(Angle1, FilledEnd, FilledColor);
+			AddSegment(FilledEnd, Angle2, UnfilledColor);
+		}
 	}
 
 	glVertexPointer(2, GL_FLOAT, sizeof(CCommandBuffer::SVertex), (char *)aVertices);
@@ -1036,7 +1051,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_RenderProgressSpinner(const CCommandB
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 
-	glDrawArrays(GL_TRIANGLES, 0, NumVertices);
+	glDrawArrays(GL_TRIANGLES, 0, VertIdx);
 #endif
 }
 
