@@ -1,3 +1,4 @@
+#include <base/net.h>
 #include <base/system.h>
 
 #include <engine/client.h>
