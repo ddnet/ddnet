@@ -68,7 +68,7 @@ Connection Problems…
 == 連線中斷…
 
 Console
-== 控制檯
+== 控制台
 
 Controls
 == 控制
@@ -314,7 +314,7 @@ Red team wins!
 == 紅隊勝利！
 
 Remote console
-== 遠端控制檯
+== 遠端控制台
 
 Remove
 == 移除
@@ -449,7 +449,7 @@ Version
 == 版本
 
 Vote command:
-== 投票命令：
+== 投票指令：
 
 Vote description:
 == 投票描述：
@@ -665,7 +665,7 @@ AntiPing
 == AntiPing
 
 Countries
-== 國家
+== 位置
 
 Reconnect in %d sec
 == %d 秒後重新連線
@@ -878,7 +878,7 @@ Toggle dyncam
 == 動態鏡頭開關
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDraceNetwork 是以到達地圖終點為目標，單人或組隊的線上合作遊戲。如果你是新手，你可以從有入門級地圖的 Novice 伺服器開 始。記得選擇 Ping 值低的伺服器。
+== DDraceNetwork 是以到達地圖終點為目標，單人或組隊的線上合作遊戲。如果你是新手，你可以從有入門級地圖的 Novice 伺服器開始。記得選擇 Ping 值低的伺服器。
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == 推薦在加入伺服器前，先將設定調整到符合你的習慣。
@@ -1095,7 +1095,7 @@ https://ddnet.org/discord
 == https://ddnet.org/discord
 
 Are you sure that you want to disconnect and switch to a different server?
-== 確定要中斷此伺服器并嘗試加入其他伺服器嗎？
+== 確定要中斷此伺服器並嘗試加入其他伺服器嗎？
 
 Settings file
 == 設定檔案
@@ -1156,9 +1156,6 @@ Quads are used for background decoration
 
 Tries to predict other entities to give a feel of low latency
 == 嘗試預測其他實體物以帶來低延遲的游玩體驗
-
-Can't find a Tutorial server
-== 無法找到教學伺服器
 
 Super
 == 無敵
@@ -1333,20 +1330,8 @@ Hook collision line
 Hook collision line opacity
 == 輔助線不透明度
 
-Colors of the hook collision line, in case of a possible collision with:
-== 輔助線顔色 (當瞄準以下實體物時)：
-
 Your movements are not taken into account when calculating the line colors
 == 移動所造成的瞄準偏移將不計入考量
-
-Nothing hookable
-== 未瞄準任何實體物
-
-Something hookable
-== 可鈎索的方塊
-
-A Tee
-== 其他玩家
 
 Loading assets
 == 正在載入材質
@@ -1477,9 +1462,6 @@ Could not initialize the given graphics backend, reverting to the default backen
 
 Open the directory that contains the demo files
 == 打開存有回放檔案的資料夾路徑
-
-Save power by lowering refresh rate (higher input latency)
-== 節能模式 (限制幀率上限以降低功耗但也將提高輸入延遲)
 
 Open the settings file
 == 打開設定檔案
@@ -1908,10 +1890,10 @@ Online friends (%d)
 == 在線好友（%d人）
 
 Add friends by entering their name below or by clicking their name in the player list.
-== 在下方輸入好友名稱或點擊玩家列表中的好友的名稱即可添加好友。
+== 在下方輸入好友名稱或點擊玩家列表中的好友的名稱即可新增好友。
 
 Add clanmates by entering their clan below and leaving the name blank.
-== 在下方輸入戰隊名並留空名稱即可添加戰隊。
+== 在下方輸入戰隊名並留空名稱即可新增戰隊。
 
 Edit touch controls
 == 編輯觸控設定
@@ -2229,7 +2211,7 @@ Layout
 == 按鍵佈局
 
 Visibility
-== 顯示狀態
+== 可見狀態
 
 Behavior
 == 按鍵功能
@@ -2351,7 +2333,7 @@ Inactive color
 == 按鍵未啟用時顏色
 
 Preview button visibility while the editor is active.
-== 在編輯器打開時預覽按鍵顯示狀態。
+== 在編輯器打開時預覽按鍵可見狀態。
 
 Show all buttons
 == 顯示所有按鍵
@@ -2363,13 +2345,13 @@ Discard
 == 放棄更改
 
 There is not enough space available for the button. Check its visibilities and size.
-== 按鍵可用空間不足。請檢查其顯示狀態與尺寸。
+== 按鍵可用空間不足。請檢查其可見狀態與尺寸。
 
 Selected button not visible
 == 所選按鍵不可見
 
 The selected button is not visible. Do you want to deselect it or edit its visibility?
-== 所選按鍵不可見。你要離開更改它，或編輯其顯示狀態？
+== 所選按鍵不可見。你要離開更改它，或編輯其可見狀態？
 
 Edit
 == 編輯
@@ -2408,7 +2390,7 @@ Dummy Connected
 
 [Touch button visibilities]
 Rcon Authed
-== 登入遠控檯
+== 登入管理員
 
 [Touch button visibilities]
 Demo Player
@@ -2520,91 +2502,152 @@ Mute emoticons
 == 隱藏表情
 
 There's an unsaved change in the touch controls editor, you might want to save it.
-== 
+== 觸控設定的更改尚未儲存，你或需要儲存。
 
 Start and connect to local server
-== 
+== 啟動並連線到本地伺服器
 
 Add clan
-== 
+== 新增戰隊
 
 Info
-== 
+== 資訊
 
 Button browser
-== 
+== 按鍵瀏覽
 
 You can select buttons directly in the list below, or long press on a touch button on the screen to select it. You can also move and resize buttons by touch.
-== 
+== 你可以直接在下方列表或長按螢幕，以選擇按鍵。你也可以直接移動或調整按键。
 
 Preview visibilities
-== 
+== 預覽可見狀態
 
 You can manage your touch controls settings on this page. Only changes that are saved will be available after restarting the client. You can share your touch controls with others by exporting them to the clipboard.\n\nYou can find more detailed information about the touch controls on the DDNet Wiki.
-== 
+== 在此管理觸控設定。只有已儲存的更改在重啟客戶端後可用。你可以另存到剪貼簿與他人分享觸控設定。\n\n你可以在DDNet Wiki上查看觸控詳情。
 
 Open DDNet Wiki
-== 
+== 打開DDNet Wiki
 
 Buttons with this behavior execute console commands like regular key binds.
-== 
+== 該按鍵功能執行控制台指令，如一般按鍵綁定。
 
 Buttons with this behavior cycle between executing one of two or more specified commands.
-== 
+== 該按鍵功能循環執行多個指定命令中的一個。
 
 Buttons with this behavior execute some predefined actions.
-== 
+== 該按鍵功能執行部分預設功能。
 
 Opens the ingame menu immediately when released.
-== 
+== 鬆開時立即打開遊戲内選單。
 
 The extra menu button which toggles visibility of buttons with "Extra Menu" visibilities. Also opens the ingame menu on long press.
-== 
+== 額外選單按鍵切換所有帶有 “額外選單” 可見狀態的按鍵。長按時會打開遊戲内選單。
 
 Opens the emoticon selector (this does not work with binds).
-== 
+== 打開表情選單。（不適用於按鍵綁定）
 
 Opens the spectator menu (this does not work with binds).
-== 
+== 打開旁觀選單。（不適用於按鍵綁定）
 
 Swaps the active action (fire and hook) for direct touch input and virtual joysticks.
-== 
+== 切換直接觸控輸入和虛擬搖桿的當前動作（開火與鉤索）。
 
 Uses the active action with the current aiming position.
-== 
+== 對瞄準位置執行當前動作。
 
 Virtual joystick which uses the active action.
-== 
+== 虛擬搖桿用以執行當前動作。
 
 Virtual joystick which only aims without using an action.
-== 
+== 虛擬搖桿用以瞄準。
 
 Virtual joystick which always uses fire.
-== 
+== 虛擬搖桿用以開火。
 
 Virtual joystick which always uses hook.
-== 
+== 虛擬搖桿用以鉤索。
 
 Player is ingame, i.e. not spectating.
-== 
+== 玩家處於遊戲中（非旁觀狀態）。
 
 Zoom is allowed on this server.
-== 
+== 該伺服器允許使用縮放。
 
 A vote is currently active.
-== 
+== 投票正在進行。
 
 Dummy is allowed on this server.
-== 
+== 該伺服器允許使用分身。
 
 Dummy is currently connected.
-== 
+== 分身已連線。
 
 Player is currently authed in rcon.
-== 
+== 玩家已登入管理員。
 
 Demo player is currently active.
-== 
+== 回放已開啟。
 
 The extra menu with the given number is activated.
+== 指定編號的額外選單已開啟。
+
+Joining Tutorial server
+== 
+
+There are no Tutorial servers available
+== 
+
+Retrying…
+== 
+
+Error joining Tutorial server
+== 
+
+Could not find a Tutorial server. Check your internet connection.
+== 
+
+You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
+== 
+
+Could not find online Tutorial server.\nStarting and connecting to local server…
+== 
+
+Waiting for local server to stop…
+== 
+
+Waiting for local server to start…
+== 
+
+Error loading communities
+== 
+
+Click to remove this community from your favorites.
+== 
+
+Click to add this community to your favorites.
+== 
+
+Update Rate
+== 
+
+Save power by lowering update rate (higher input latency)
+== 
+
+Colors of the hook collision line:
+== 
+
+[Hook collision line color]
+When nothing is hookable
+== 
+
+[Hook collision line color]
+When something is hookable
+== 
+
+[Hook collision line color]
+When a Tee is hookable
+== 
+
+[Hook collision line color]
+Hook collision line tip
 == 

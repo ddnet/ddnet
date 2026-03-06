@@ -1403,9 +1403,6 @@ Deactivate all
 Menu opened. Press Esc key again to close menu.
 == Valikko avattu. Paina Esc-näppäintä uudelleen sulkeaksesi valikon.
 
-Save power by lowering refresh rate (higher input latency)
-== Säästä virtaa alentamalla virkistystaajuutta (korkeampi viive syötteessä)
-
 Settings file
 == asetustiedosto
 
@@ -1630,20 +1627,8 @@ Hook collision line
 Hook collision line opacity
 == Koukku törmäysviivan läpinäkyvyys
 
-Colors of the hook collision line, in case of a possible collision with:
-== Koukun törmäysviivan värit mahdollisen törmäyksen tapauksessa:
-
 Your movements are not taken into account when calculating the line colors
 == Sinun liikkeitäsi ei oteta huomioon viivan värien laskennassa
-
-Nothing hookable
-== Ei mitään koukutettavaa
-
-Something hookable
-== Jotain koukutettavaa
-
-A Tee
-== Tee
 
 Show finish messages
 == Näytä maaliviiva viestit
@@ -1752,9 +1737,6 @@ Open the directory to add custom assets
 
 Tutorial
 == Tutoriali
-
-Can't find a Tutorial server
-== Ei voitu löytää Tutoriali palvelinta
 
 Server executable not found, can't run server
 == Serverin suoritettavaa tiedostoa ei löytynyt, palvelinta ei voitu käynnistää
@@ -1875,6 +1857,9 @@ Server could not be started
 Loading map
 == 
 
+Joining Tutorial server
+== 
+
 Save skin
 == 
 
@@ -1888,6 +1873,36 @@ This name cannot be used for files and folders
 == 
 
 You will be disconnected from the server.
+== 
+
+Could not get server list from master server
+== 
+
+There are no Tutorial servers available
+== 
+
+Please wait…
+== 
+
+Retrying…
+== 
+
+Error joining Tutorial server
+== 
+
+Could not find a Tutorial server. Check your internet connection.
+== 
+
+You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
+== 
+
+Could not find online Tutorial server.\nStarting and connecting to local server…
+== 
+
+Waiting for local server to stop…
+== 
+
+Waiting for local server to start…
 == 
 
 Error checking player name
@@ -1911,10 +1926,16 @@ No local servers found (ports %d-%d)
 Start and connect to local server
 == 
 
-Could not get server list from master server
+Example of usage
 == 
 
-Example of usage
+Error loading communities
+== 
+
+Click to remove this community from your favorites.
+== 
+
+Click to add this community to your favorites.
 == 
 
 Online friends (%d)
@@ -1950,9 +1971,6 @@ Are you sure that you want to disconnect and play this demo?
 == 
 
 Dummy is not allowed on this server
-== 
-
-Please wait…
 == 
 
 Edit touch controls
@@ -2386,6 +2404,12 @@ The extra menu with the given number is activated.
 Hz
 == 
 
+Update Rate
+== 
+
+Save power by lowering update rate (higher input latency)
+== 
+
 Saves file
 == 
 
@@ -2503,6 +2527,25 @@ Width of your own hook collision line
 == 
 
 Width of others' hook collision line
+== 
+
+Colors of the hook collision line:
+== 
+
+[Hook collision line color]
+When nothing is hookable
+== 
+
+[Hook collision line color]
+When something is hookable
+== 
+
+[Hook collision line color]
+When a Tee is hookable
+== 
+
+[Hook collision line color]
+Hook collision line tip
 == 
 
 Preview 'Hook collisions' being pressed

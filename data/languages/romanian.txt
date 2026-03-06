@@ -1244,9 +1244,6 @@ Hz
 Refresh Rate
 == Rata de refresh
 
-Save power by lowering refresh rate (higher input latency)
-== Economisește energie prin reducerea ratei de refresh (latență mai mare la intrări)
-
 Settings file
 == Fișier de setări
 
@@ -1639,20 +1636,8 @@ Width of others' hook collision line
 Hook collision line opacity
 == Opacitatea liniei de coliziune a cârligului
 
-Colors of the hook collision line, in case of a possible collision with:
-== Culorile liniei de coliziune a cârligului, în cazul unei posibile coliziuni cu:
-
 Your movements are not taken into account when calculating the line colors
 == Mișcările tale nu sunt luate în considerare la calcularea culorilor liniei
-
-Nothing hookable
-== Nimic agățabil
-
-Something hookable
-== Ceva agățabil
-
-A Tee
-== Un Tee
 
 Preview 'Hook collisions' being pressed
 == Previzualizare 'Coliziuni cârlig' în timpul apăsării
@@ -1854,9 +1839,6 @@ https://wiki.ddnet.org/
 
 Tutorial
 == Tutorial
-
-Can't find a Tutorial server
-== Nu se poate găsi un server de Tutorial
 
 Website
 == Website
@@ -2206,6 +2188,9 @@ Server could not be started
 Loading map
 == 
 
+Joining Tutorial server
+== 
+
 There's an unsaved change in the touch controls editor, you might want to save it.
 == 
 
@@ -2213,6 +2198,33 @@ This name cannot be used for files and folders
 == 
 
 You will be disconnected from the server.
+== 
+
+Could not get server list from master server
+== 
+
+There are no Tutorial servers available
+== 
+
+Retrying…
+== 
+
+Error joining Tutorial server
+== 
+
+Could not find a Tutorial server. Check your internet connection.
+== 
+
+You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
+== 
+
+Could not find online Tutorial server.\nStarting and connecting to local server…
+== 
+
+Waiting for local server to stop…
+== 
+
+Waiting for local server to start…
 == 
 
 Error checking player name
@@ -2224,7 +2236,13 @@ Could not check for existing player with your name. Check your internet connecti
 Start and connect to local server
 == 
 
-Could not get server list from master server
+Error loading communities
+== 
+
+Click to remove this community from your favorites.
+== 
+
+Click to add this community to your favorites.
 == 
 
 Add clan
@@ -2561,6 +2579,12 @@ Demo player is currently active.
 The extra menu with the given number is activated.
 == 
 
+Update Rate
+== 
+
+Save power by lowering update rate (higher input latency)
+== 
+
 This skin name cannot be used.
 == 
 
@@ -2580,6 +2604,25 @@ Chat background color
 == 
 
 Preview player's name plate
+== 
+
+Colors of the hook collision line:
+== 
+
+[Hook collision line color]
+When nothing is hookable
+== 
+
+[Hook collision line color]
+When something is hookable
+== 
+
+[Hook collision line color]
+When a Tee is hookable
+== 
+
+[Hook collision line color]
+Hook collision line tip
 == 
 
 Dragger Outline Color

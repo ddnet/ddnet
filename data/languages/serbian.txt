@@ -1264,20 +1264,8 @@ Hook collision line
 Hook collision line opacity
 == Providnost linije za dodir kuke
 
-Colors of the hook collision line, in case of a possible collision with:
-== Boje linije za dodir kuke,u slučaju da možeš da se zakačiš:
-
 Your movements are not taken into account when calculating the line colors
 == Vaši pokreti se ne uzimaju u obzir pri izračunavanju boja linija
-
-Nothing hookable
-== Ništa zakačivo
-
-Something hookable
-== Nešto zakačivo
-
-A Tee
-== Igrač
 
 Normal Color
 == Normalna boja
@@ -1326,9 +1314,6 @@ https://ddnet.org/discord
 
 Tutorial
 == Uvod
-
-Can't find a Tutorial server
-== Nemožemo pronaći uvodni server
 
 Loading race demo files
 == Učitavam trkačke demo fajlove
@@ -1499,9 +1484,6 @@ Unable to delete the folder '%s'. Make sure it's empty first.
 
 Menu opened. Press Esc key again to close menu.
 == Мени је отворен. Поново притисните тастер Esc да бисте затворили мени.
-
-Save power by lowering refresh rate (higher input latency)
-== Уштедите струју смањивањем стопе освежавања (већа улазна латенција)
 
 Open the settings file
 == Отворите датотеку са подешавањима
@@ -1758,6 +1740,9 @@ Render complete
 Are you sure that you want to restart?
 == 
 
+Joining Tutorial server
+== 
+
 Save skin
 == 
 
@@ -1785,6 +1770,36 @@ Videos directory
 Video was saved to '%s'
 == 
 
+Could not get server list from master server
+== 
+
+There are no Tutorial servers available
+== 
+
+Please wait…
+== 
+
+Retrying…
+== 
+
+Error joining Tutorial server
+== 
+
+Could not find a Tutorial server. Check your internet connection.
+== 
+
+You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
+== 
+
+Could not find online Tutorial server.\nStarting and connecting to local server…
+== 
+
+Waiting for local server to stop…
+== 
+
+Waiting for local server to start…
+== 
+
 Error checking player name
 == 
 
@@ -1806,9 +1821,6 @@ No local servers found (ports %d-%d)
 Start and connect to local server
 == 
 
-Could not get server list from master server
-== 
-
 Example of usage
 == 
 
@@ -1816,6 +1828,15 @@ No login required
 == 
 
 Communities
+== 
+
+Error loading communities
+== 
+
+Click to remove this community from your favorites.
+== 
+
+Click to add this community to your favorites.
 == 
 
 Online friends (%d)
@@ -1893,9 +1914,6 @@ Are you sure that you want to disconnect and play this demo?
 == 
 
 Dummy is not allowed on this server
-== 
-
-Please wait…
 == 
 
 Edit touch controls
@@ -2341,6 +2359,12 @@ The extra menu with the given number is activated.
 Hz
 == 
 
+Update Rate
+== 
+
+Save power by lowering update rate (higher input latency)
+== 
+
 Saves file
 == 
 
@@ -2497,6 +2521,25 @@ Width of your own hook collision line
 == 
 
 Width of others' hook collision line
+== 
+
+Colors of the hook collision line:
+== 
+
+[Hook collision line color]
+When nothing is hookable
+== 
+
+[Hook collision line color]
+When something is hookable
+== 
+
+[Hook collision line color]
+When a Tee is hookable
+== 
+
+[Hook collision line color]
+Hook collision line tip
 == 
 
 Preview 'Hook collisions' being pressed

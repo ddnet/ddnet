@@ -78,9 +78,6 @@ A folder with this name already exists
 A render command failed. Try to update your GPU drivers.
 == Помилка в команді відмальовування. Спробуйте оновити драйвери відеокарти.
 
-A Tee
-== тії
-
 Abort
 == Скасувати
 
@@ -291,9 +288,6 @@ Browser
 Call vote
 == Голосувати
 
-Can't find a Tutorial server
-== Не вдається знайти навчальний сервер
-
 Cancel
 == Скасувати
 
@@ -359,9 +353,6 @@ Close
 
 Close the demo player
 == Закрити програвач демо
-
-Colors of the hook collision line, in case of a possible collision with:
-== Кольори лінії зіткнення гака, в разі можливого зіткнення з:
 
 Communities
 == Спільноти
@@ -1215,9 +1206,6 @@ Normal message
 NOT CONNECTED
 == НЕ ПІД’ЄДНАНО
 
-Nothing hookable
-== нічим, за що можна зачепитися
-
 [friends (server browser)]
 Offline (%d)
 == Не в мережі (%d)
@@ -1473,9 +1461,6 @@ Save changes
 Save ghost
 == Зберігати привида
 
-Save power by lowering refresh rate (higher input latency)
-== Економити енергію шляхом зниження частоти кадрів (вища затримка введення)
-
 Save skin
 == Зберегти скін
 
@@ -1525,7 +1510,7 @@ Server filter
 == Фільтр серверів
 
 Server info
-== Інформація
+== Інформація про сервер
 
 Server not full
 == Неповний сервер
@@ -1694,9 +1679,6 @@ Some map images could not be loaded. Check the local console for details.
 
 Some map sounds could not be loaded. Check the local console for details.
 == Не вдалося завантажити деякі звуки мапи. Див. локальну консоль для подробиць.
-
-Something hookable
-== чимось, за що можна зачепитися
 
 Sound
 == Звук
@@ -2520,91 +2502,152 @@ Mute emoticons
 == Вимкнути емоції
 
 There's an unsaved change in the touch controls editor, you might want to save it.
-== 
+== У редакторі сенсорного управління є незбережена зміна, можливо, ви захочете її зберегти.
 
 Start and connect to local server
-== 
+== Запустити та підключитися до локального сервера
 
 Add clan
-== 
+== Додати клан
 
 Info
-== 
+== Інформація
 
 Button browser
-== 
+== Браузер кнопок
 
 You can select buttons directly in the list below, or long press on a touch button on the screen to select it. You can also move and resize buttons by touch.
-== 
+== Ви можете вибрати кнопки безпосередньо в списку нижче або натиснути і утримувати сенсорну кнопку на екрані, щоб вибрати її. Ви також можете переміщати та змінювати розмір кнопок за допомогою дотику.
 
 Preview visibilities
-== 
+== Попередній перегляд видимості
 
 You can manage your touch controls settings on this page. Only changes that are saved will be available after restarting the client. You can share your touch controls with others by exporting them to the clipboard.\n\nYou can find more detailed information about the touch controls on the DDNet Wiki.
-== 
+== На цій сторінці ви можете керувати налаштуваннями сенсорного керування. Після перезапуску клієнта будуть доступні лише збережені зміни. Ви можете поділитися налаштуваннями сенсорного керування з іншими, експортувавши їх у буфер обміну.\n\nБільш детальну інформацію про сенсорне керування ви можете знайти на DDNet Wiki.
 
 Open DDNet Wiki
-== 
+== Відкрити DDNet Wiki
 
 Buttons with this behavior execute console commands like regular key binds.
-== 
+== Кнопки з такою поведінкою виконують консольні команди, як звичайні комбінації клавіш.
 
 Buttons with this behavior cycle between executing one of two or more specified commands.
-== 
+== Кнопки з такою поведінкою циклічно виконують одну з двох або більше заданих команд.
 
 Buttons with this behavior execute some predefined actions.
-== 
+== Кнопки з такою поведінкою виконують деякі заздалегідь визначені дії.
 
 Opens the ingame menu immediately when released.
-== 
+== Відкриває ігрове меню відразу після відпускання.
 
 The extra menu button which toggles visibility of buttons with "Extra Menu" visibilities. Also opens the ingame menu on long press.
-== 
+== Додаткова кнопка меню, яка вмикає/вимикає видимість кнопок з назвою "Додаткове меню". При тривалому натисканні також відкриває ігрове меню.
 
 Opens the emoticon selector (this does not work with binds).
-== 
+== Відкриває вибір смайликів (це не працює з прив’язками клавіш).
 
 Opens the spectator menu (this does not work with binds).
-== 
+== Відкриває меню спостерігача (не працює з прив’язками клавіш).
 
 Swaps the active action (fire and hook) for direct touch input and virtual joysticks.
-== 
+== Замінює активну дію (постріл і хук) на прямий сенсорний ввід і віртуальні джойстики.
 
 Uses the active action with the current aiming position.
-== 
+== Використовує активну дію з поточним положенням прицілювання.
 
 Virtual joystick which uses the active action.
-== 
+== Віртуальний джойстик, який використовує активну дію.
 
 Virtual joystick which only aims without using an action.
-== 
+== Віртуальний джойстик, який тільки наводить, не виконуючи дій.
 
 Virtual joystick which always uses fire.
-== 
+== Віртуальний джойстик, який завжди використовує стрільбу.
 
 Virtual joystick which always uses hook.
-== 
+== Віртуальний джойстик, який завжди використовує хук.
 
 Player is ingame, i.e. not spectating.
-== 
+== Гравець у грі, тобто не в режимі спостереження.
 
 Zoom is allowed on this server.
-== 
+== На цьому сервері дозволено використовувати функцію масштабування.
 
 A vote is currently active.
-== 
+== Наразі триває голосування.
 
 Dummy is allowed on this server.
-== 
+== На цьому сервері дозволено використання даммі.
 
 Dummy is currently connected.
-== 
+== Даммі наразі підключений.
 
 Player is currently authed in rcon.
-== 
+== Гравець наразі авторизований в rcon.
 
 Demo player is currently active.
-== 
+== Демо-плеєр наразі активний.
 
 The extra menu with the given number is activated.
+== Додаткове меню з вказаним номером активоване.
+
+Joining Tutorial server
+== 
+
+There are no Tutorial servers available
+== 
+
+Retrying…
+== 
+
+Error joining Tutorial server
+== 
+
+Could not find a Tutorial server. Check your internet connection.
+== 
+
+You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
+== 
+
+Could not find online Tutorial server.\nStarting and connecting to local server…
+== 
+
+Waiting for local server to stop…
+== 
+
+Waiting for local server to start…
+== 
+
+Error loading communities
+== 
+
+Click to remove this community from your favorites.
+== 
+
+Click to add this community to your favorites.
+== 
+
+Update Rate
+== 
+
+Save power by lowering update rate (higher input latency)
+== 
+
+Colors of the hook collision line:
+== 
+
+[Hook collision line color]
+When nothing is hookable
+== 
+
+[Hook collision line color]
+When something is hookable
+== 
+
+[Hook collision line color]
+When a Tee is hookable
+== 
+
+[Hook collision line color]
+Hook collision line tip
 == 

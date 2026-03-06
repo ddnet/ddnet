@@ -436,9 +436,6 @@ Normal message
 Preview
 == Antaŭrigardo
 
-A Tee
-== Tejo
-
 DDNet %s is available:
 == DDNet %s estas disponebla:
 
@@ -1431,26 +1428,331 @@ Hook Strength
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Nekonata eraro. Provu ŝanĝi gfx_backend al OpenGL aŭ Vulkan en settings_ddnet.cfg en la agordara dosierujo kaj reprovu.
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== 
+== Ne eblis pravalorizi la donitan grafikan backend-on, revenas al la defaŭlta backend nun.
+
+Could not resolve connect address '%s'. See local console for details.
+== Ne eblis adrestrovi konektan adreson '%s'. Vidu lokan konzolon por detaloj.
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== La larĝo de teksturo %s ne estas dividebla per %d aŭ la alto ne estas dividebla per %d, kio povas kaŭzi grafikajn erarojn.
+
+"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
+== "%s" ne kongruas kun pnglite kaj ne povas esti ŝargita per malnovaj DDNet versioj:
+
+The format of texture %s is not RGBA which will cause visual bugs.
+== La formo de teksturo %s ne estas RGBA kiu kaŭzos grafikajn erarojn.
+
+Team save in progress. You'll be able to load with '/load %s'
+== Teama konservo farata. Vi eblos ŝargi ĝin per '/load %s'
+
+Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails
+== Teama konservo farata. Vi eblos ŝargi ĝin per '/load %s' se tio sukcesos aŭ per '/load %s' se tio malsukcesos
+
+Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue
+== Teamo sukcese konservita de %s. La datumbaza konekto fiaskis, uzado de generita konserva kodo anstataŭ por eviti koliziojn. Uzu '/load %s' por daŭrigi
+
+Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue
+== Teamo sukcese konservita de %s. La datumbaza konekto fiaskis, uzado de generita konserva kodo anstataŭ por eviti koliziojn. Uzi '/load %s' ĉe %s por daŭrigi
+
+Save failed!
+== Konservo malsukcesis!
+
+Lines %d - %d (%s)
+== Vicoj %d – %d (%s)
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== Cimspura reĝimo ŝaltita. Premu Ctrl+Shift+D por malŝalti cimspuran reĝimon.
+
+[Important alert message]
+Press Esc or Tab to dismiss…
+== Premu Esc aŭ Tab por fermi…
+
+Server alert
+== Servila averto
+
+Press a key…
+== Premu klavon…
+
+Some map sounds could not be loaded. Check the local console for details.
+== Kelkaj mapaj sonoj ne povis esti ŝargitaj. Kontrolu la lokan konzolon por detaloj.
+
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== Uzu klavon k por morti (rekomenci), q por paŭzi kaj spekti aliajn ludantojn. Vidu agordojn por aliaj klavkombinoj.
+
+Show others (own team only)
+== Montri aliulojn (nur via teamo)
+
+Show background quads
+== Montri fonajn quad-ojn
+
+Quads are used for background decoration
+== Quadoj estas uzataj por fona ornamado
+
+Default zoom
+== Defaŭlta zomo
+
+Background
+== Fono
+
+Regular background color
+== Ordinara fona koloro
+
+Entities background color
+== Fona koloro de entoj
+
+Use current map as background
+== Uzi nunan mapon kiel fono
+
+Miscellaneous
+== Aliaj
+
+New random timeout code
+== Nova hazarda tempolima kodo
+
+Chat command (e.g. showall 1)
+== Babileja komando (ekz. showall 1)
+
+Unregister protocol and file extensions
+== Malregistri protokolon kaj dosiersufikson
+
+DDNet Client updated!
+== DDNet-kliento ĝisdatigita!
+
+No updates available
+== Neniu ĝisdatigo disponebla
+
+Custom
+== Propra
+
+Are you sure that you want to delete '%s'?
+== Ĉu vi certas ke vi volas forigi '%s'?
+
+Delete skin
+== Forigi haŭton
+
+Unable to delete skin
+== Ne eblas forigi haŭton
+
+Emoticons
+== Emoĝioj
+
+Particles
+== Partikloj
+
+Hook collisions
+== Hokaj kolizioj
+
+Zoom in
+== Zomi
+
+Zoom out
+== Malzomi
+
+Toggle ghost
+== Baskuligi fantomon
+
+Shotgun
+== Kartoĉa fusilo
+
+Grenade
+== Grenadĵetilo
+
+Next weapon
+== Sekva batalilo
+
+Prev. weapon
+== Antaŭa batalilo
+
+Team chat
+== Teama babilejo
+
+Converse
+== Konversacii
+
+Chat command
+== Babileja komando
+
+Toggle dummy
+== Baskuligi pupon
+
+Dummy copy
+== Pupo kopii movojn
+
+Emoticon
+== Emoĝio
+
+Spectator mode
+== Spektanta reĝimo
+
+Spectate next
+== Spekti sekvan
+
+Spectate previous
+== Spekti antaŭan
+
+Screenshot
+== Ekrankopio
+
+Lock team
+== Ŝlosi teamon
+
+Show entities
+== Montri entojn
+
+Controller
+== Ludregilo
+
+Movement
+== Movado
+
+Voting
+== Balotado
+
+Ingame mouse sens.
+== Enluda musa sentemo
+
+UI mouse sens.
+== Enmenua musa sentemo
+
+Enable controller
+== Ŝalti ludregilon
+
+Ingame controller mode
+== Enluda ludregila reĝimo
+
+[Ingame controller mode]
+Relative
+== Relativa
+
+[Ingame controller mode]
+Absolute
+== Absoluta
+
+Ingame controller sens.
+== Enluda ludregila sentemo
+
+UI controller sens.
+== Enmenua ludregila sentemo
+
+No controller found. Plug in a controller.
+== Neniu ludregilo trovita. Konektu ludregilon.
+
+Axis
+== Akso
+
+Status
+== Stato
+
+Update failed! Check log…
+== Ĝisdatigo fiaskis! Kontrolu protokolon…
+
+Download
+== Elŝuti
+
+[Spectators]
+%d others…
+== %d aliaj…
+
+Score
+== Poentoj
+
+[Team and size]
+%d\n(%d/%d)
+== %d\n(%d/%d)
+
+Team %d (%d/%d)
+== Teamo %d (%d/%d)
+
+Manual
+== Permana
+
+Race
+== Vetkuro
+
+Red team wins!
+== Ruĝa teamo venkas!
+
+%s wins!
+== %s venkas!
+
+Blue team wins!
+== Blua teamo venkas!
+
+Draw!
+== Egalvenko!
+
+Game over
+== Fino de ludo
+
+Unmute
+== Malsilentigi
+
+Mute
+== Silentigi
+
+Unmute emoticons
+== Malsilentigi emoĝiojn
+
+Mute emoticons
+== Silentigi emoĝiojn
+
+[skins]
+Body
+== Korpo
+
+[skins]
+Marking
+== Marko
+
+[skins]
+Decoration
+== Ornamaĵo
+
+[skins]
+Hands
+== Manoj
+
+[skins]
+Feet
+== Piedoj
+
+[skins]
+Eyes
+== Okuloj
+
+Loading sound files
+== Ŝargado de sondosierojn
+
+Suicides
+== Sinmortigoj
+
+Ratio
+== Proporcio
+
+Grabs
+== Kaptoj
+
+Aim
+== Celado
+
+Active: Fire
+== Aktiva: Pafi
+
+Active: Hook
+== Aktiva: Hoki
+
+Moved ingame
+== Movis enlude
+
+https://wiki.ddnet.org/wiki/Mapping
+== https://wiki.ddnet.org/wiki/Mapping
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
-
-Could not resolve connect address '%s'. See local console for details.
-== 
-
-The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
-
-"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
-== 
-
-The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
 Why are you slowmo replaying to read this?
@@ -1465,44 +1767,13 @@ Initializing map logic
 Sending initial client info
 == 
 
-Team save in progress. You'll be able to load with '/load %s'
-== 
-
-Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails
-== 
-
-Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue
-== 
-
-Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue
-== 
-
-Save failed!
-== 
-
 Auto-sync player camera
 == 
 
 Match %d of %d
 == 
 
-Lines %d - %d (%s)
-== 
-
-Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== 
-
-[Important alert message]
-Press Esc or Tab to dismiss…
-== 
-
-Server alert
-== 
-
 Moderator alert
-== 
-
-Press a key…
 == 
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
@@ -1517,16 +1788,13 @@ Some map images could not be loaded. Check the local console for details.
 Uploading map data to GPU
 == 
 
-Some map sounds could not be loaded. Check the local console for details.
-== 
-
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == 
 
-Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+It's recommended that you check the settings to adjust them to your liking before joining a server.
 == 
 
-It's recommended that you check the settings to adjust them to your liking before joining a server.
+Joining Tutorial server
 == 
 
 Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
@@ -1545,6 +1813,33 @@ Show DDNet map finishes in server browser
 == 
 
 transmits your player name to info.ddnet.org
+== 
+
+Could not get server list from master server
+== 
+
+There are no Tutorial servers available
+== 
+
+Retrying…
+== 
+
+Error joining Tutorial server
+== 
+
+Could not find a Tutorial server. Check your internet connection.
+== 
+
+You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
+== 
+
+Could not find online Tutorial server.\nStarting and connecting to local server…
+== 
+
+Waiting for local server to stop…
+== 
+
+Waiting for local server to start…
 == 
 
 Could not check for existing player with your name. Check your internet connection.
@@ -1586,9 +1881,6 @@ No local servers found (ports %d-%d)
 Start and connect to local server
 == 
 
-Could not get server list from master server
-== 
-
 No login required
 == 
 
@@ -1599,6 +1891,15 @@ Filter connecting players
 == 
 
 Indicate map finish
+== 
+
+Error loading communities
+== 
+
+Click to remove this community from your favorites.
+== 
+
+Click to add this community to your favorites.
 == 
 
 Copy info
@@ -1953,7 +2254,10 @@ Smooth Dynamic Camera
 Switch weapon when out of ammo
 == 
 
-Save power by lowering refresh rate (higher input latency)
+Update Rate
+== 
+
+Save power by lowering update rate (higher input latency)
 == 
 
 Saves file
@@ -2140,16 +2444,26 @@ Width of others' hook collision line
 Hook collision line opacity
 == 
 
-Colors of the hook collision line, in case of a possible collision with:
+Colors of the hook collision line:
 == 
 
 Your movements are not taken into account when calculating the line colors
 == 
 
-Nothing hookable
+[Hook collision line color]
+When nothing is hookable
 == 
 
-Something hookable
+[Hook collision line color]
+When something is hookable
+== 
+
+[Hook collision line color]
+When a Tee is hookable
+== 
+
+[Hook collision line color]
+Hook collision line tip
 == 
 
 Preview 'Hook collisions' being pressed
@@ -2245,18 +2559,6 @@ Show text entities
 Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == 
 
-Show others (own team only)
-== 
-
-Show background quads
-== 
-
-Quads are used for background decoration
-== 
-
-Default zoom
-== 
-
 AntiPing
 == 
 
@@ -2275,61 +2577,13 @@ AntiPing: predict grenade paths
 AntiPing: prediction margin
 == 
 
-Background
-== 
-
-Regular background color
-== 
-
-Entities background color
-== 
-
-Use current map as background
-== 
-
 Show tiles layers from BG map
-== 
-
-Miscellaneous
-== 
-
-New random timeout code
 == 
 
 Run on join
 == 
 
-Chat command (e.g. showall 1)
-== 
-
-Unregister protocol and file extensions
-== 
-
-DDNet Client updated!
-== 
-
-No updates available
-== 
-
 Basic
-== 
-
-Custom
-== 
-
-Are you sure that you want to delete '%s'?
-== 
-
-Delete skin
-== 
-
-Unable to delete skin
-== 
-
-Emoticons
-== 
-
-Particles
 == 
 
 Extras
@@ -2344,76 +2598,16 @@ Assets directory
 Open the directory to add custom assets
 == 
 
-Hook collisions
-== 
-
-Zoom in
-== 
-
-Zoom out
-== 
-
 Toggle dyncam
 == 
 
-Toggle ghost
-== 
-
-Shotgun
-== 
-
-Grenade
-== 
-
-Next weapon
-== 
-
-Prev. weapon
-== 
-
-Team chat
-== 
-
-Converse
-== 
-
-Chat command
-== 
-
-Toggle dummy
-== 
-
-Dummy copy
-== 
-
 Hammerfly dummy
-== 
-
-Emoticon
-== 
-
-Spectator mode
-== 
-
-Spectate next
-== 
-
-Spectate previous
-== 
-
-Screenshot
 == 
 
 Scoreboard cursor
 == 
 
 Statboard
-== 
-
-Lock team
-== 
-
-Show entities
 == 
 
 Show HUD
@@ -2425,89 +2619,16 @@ Reset controls
 Are you sure that you want to reset the controls to their defaults?
 == 
 
-Controller
-== 
-
-Movement
-== 
-
-Voting
-== 
-
-Ingame mouse sens.
-== 
-
-UI mouse sens.
-== 
-
-Enable controller
-== 
-
-Ingame controller mode
-== 
-
-[Ingame controller mode]
-Relative
-== 
-
-[Ingame controller mode]
-Absolute
-== 
-
-Ingame controller sens.
-== 
-
-UI controller sens.
-== 
-
 Controller jitter tolerance
-== 
-
-No controller found. Plug in a controller.
-== 
-
-Axis
-== 
-
-Status
 == 
 
 Aim bind
 == 
 
-Can't find a Tutorial server
-== 
-
-Update failed! Check log…
-== 
-
-Download
-== 
-
 Loading race demo files
 == 
 
-[Spectators]
-%d others…
-== 
-
-Score
-== 
-
 Super
-== 
-
-[Team and size]
-%d\n(%d/%d)
-== 
-
-Team %d (%d/%d)
-== 
-
-Manual
-== 
-
-Race
 == 
 
 Auto
@@ -2516,67 +2637,7 @@ Auto
 Replay
 == 
 
-Red team wins!
-== 
-
-%s wins!
-== 
-
-Blue team wins!
-== 
-
-Draw!
-== 
-
-Game over
-== 
-
-Unmute
-== 
-
-Mute
-== 
-
-Unmute emoticons
-== 
-
-Mute emoticons
-== 
-
-[skins]
-Body
-== 
-
-[skins]
-Marking
-== 
-
-[skins]
-Decoration
-== 
-
-[skins]
-Hands
-== 
-
-[skins]
-Feet
-== 
-
-[skins]
-Eyes
-== 
-
-Loading sound files
-== 
-
 Frags
-== 
-
-Suicides
-== 
-
-Ratio
 == 
 
 Net
@@ -2589,22 +2650,4 @@ Spree
 == 
 
 Best
-== 
-
-Grabs
-== 
-
-Aim
-== 
-
-Active: Fire
-== 
-
-Active: Hook
-== 
-
-Moved ingame
-== 
-
-https://wiki.ddnet.org/wiki/Mapping
 == 

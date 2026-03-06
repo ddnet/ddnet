@@ -1041,7 +1041,7 @@ Dummy
 == Дамми
 
 Preview
-== Превью
+== Предпросмотр
 
 Background
 == Фон
@@ -1132,9 +1132,6 @@ Chat command (e.g. showall 1)
 
 Tutorial
 == Туториал
-
-Can't find a Tutorial server
-== Обучающий сервер не найден
 
 Position:
 == Позиция
@@ -1324,20 +1321,8 @@ Hook collision line
 Hook collision line opacity
 == Прозрачность линии
 
-Colors of the hook collision line, in case of a possible collision with:
-== Цвет линии коллизии крюка если
-
 Your movements are not taken into account when calculating the line colors
 == Ваше перемещение не учитывается при расчете цвета линии коллизии
-
-Nothing hookable
-== Невозможно зацепиться
-
-Something hookable
-== Можно зацепиться
-
-A Tee
-== Задевает игрока
 
 Loading assets
 == Загрузка ресурсов
@@ -1471,9 +1456,6 @@ Could not initialize the given graphics backend, reverting to the default backen
 
 Open the directory that contains the demo files
 == Открыть папку с демо записями
-
-Save power by lowering refresh rate (higher input latency)
-== Режим экономии энергии
 
 Open the settings file
 == Открытие файла настроек
@@ -2162,7 +2144,7 @@ Preview dummy's name plate
 == Просмотр дамми
 
 AntiPing: prediction margin
-== Антипинг: Предел предсказаний
+== Антипинг: Запас предсказания
 
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
@@ -2351,7 +2333,7 @@ Inactive color
 == Неактивный цвет
 
 Preview button visibility while the editor is active.
-== Предпросмотр видимости кнопки во время работы редактора.
+== Предпросмотр отображения кнопки во время работы редактора.
 
 Show all buttons
 == Показать все кнопки
@@ -2520,24 +2502,60 @@ Mute emoticons
 == Выключить эмоции
 
 There's an unsaved change in the touch controls editor, you might want to save it.
+== В настройках сенсорного управления есть несохраненные изменения, возможно, вы хотите их сохранить.
+
+Info
+== Информация
+
+Preview visibilities
+== Предпросмотр отображения
+
+Joining Tutorial server
+== 
+
+There are no Tutorial servers available
+== 
+
+Retrying…
+== 
+
+Error joining Tutorial server
+== 
+
+Could not find a Tutorial server. Check your internet connection.
+== 
+
+You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
+== 
+
+Could not find online Tutorial server.\nStarting and connecting to local server…
+== 
+
+Waiting for local server to stop…
+== 
+
+Waiting for local server to start…
 == 
 
 Start and connect to local server
 == 
 
-Add clan
+Error loading communities
 == 
 
-Info
+Click to remove this community from your favorites.
+== 
+
+Click to add this community to your favorites.
+== 
+
+Add clan
 == 
 
 Button browser
 == 
 
 You can select buttons directly in the list below, or long press on a touch button on the screen to select it. You can also move and resize buttons by touch.
-== 
-
-Preview visibilities
 == 
 
 You can manage your touch controls settings on this page. Only changes that are saved will be available after restarting the client. You can share your touch controls with others by exporting them to the clipboard.\n\nYou can find more detailed information about the touch controls on the DDNet Wiki.
@@ -2607,4 +2625,29 @@ Demo player is currently active.
 == 
 
 The extra menu with the given number is activated.
+== 
+
+Update Rate
+== 
+
+Save power by lowering update rate (higher input latency)
+== 
+
+Colors of the hook collision line:
+== 
+
+[Hook collision line color]
+When nothing is hookable
+== 
+
+[Hook collision line color]
+When something is hookable
+== 
+
+[Hook collision line color]
+When a Tee is hookable
+== 
+
+[Hook collision line color]
+Hook collision line tip
 == 
