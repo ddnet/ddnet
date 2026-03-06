@@ -5334,16 +5334,15 @@ void CClient::GetGpuInfoString(char (&aGpuInfo)[512])
 	if(m_pGraphics == nullptr || !m_pGraphics->IsBackendInitialized())
 	{
 		str_format(aGpuInfo, std::size(aGpuInfo),
-			"Graphics backend: %s %d.%d.%d\n"
+			"Configured graphics backend: %s %d.%d.%d\n"
 			"Graphics %s not yet initialized.",
 			g_Config.m_GfxBackend, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch,
 			m_pGraphics == nullptr ? "were" : "backend was");
 	}
 	else
 	{
-		// TODO: Even better would be if the backend could return its name and version, because the config variables can be outdated when the client was not restarted.
 		str_format(aGpuInfo, std::size(aGpuInfo),
-			"Graphics backend: %s %d.%d.%d\n"
+			"Configured graphics backend: %s %d.%d.%d\n"
 			"GPU: %s - %s - %s\n"
 			"Texture: %.2f MiB, "
 			"Buffer: %.2f MiB, "
