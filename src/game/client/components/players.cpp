@@ -472,6 +472,11 @@ void CPlayers::RenderHook(
 	if(ClientId >= 0)
 		Intra = GameClient()->m_aClients[ClientId].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
 
+	bool Local = GameClient()->m_Snap.m_LocalClientId == ClientId;
+
+	if(!Local && g_Config.m_ClAntipingShadow)
+		Intra = Client()->IntraGameTick(g_Config.m_ClDummy);
+
 	bool OtherTeam = GameClient()->IsOtherTeam(ClientId);
 	float Alpha = (OtherTeam || ClientId < 0) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
 	if(ClientId == -2) // ghost
@@ -480,7 +485,7 @@ void CPlayers::RenderHook(
 	RenderInfo.m_Size = 64.0f;
 
 	vec2 Position;
-	if(in_range(ClientId, MAX_CLIENTS - 1))
+	if(in_range(ClientId, MAX_CLIENTS - 1) && !(!Local && g_Config.m_ClAntipingShadow))
 		Position = GameClient()->m_aClients[ClientId].m_RenderPos;
 	else
 		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), Intra);
@@ -493,7 +498,7 @@ void CPlayers::RenderHook(
 	vec2 Pos = Position;
 	vec2 HookPos;
 
-	if(in_range(pPlayerChar->m_HookedPlayer, MAX_CLIENTS - 1))
+	if(in_range(pPlayerChar->m_HookedPlayer, MAX_CLIENTS - 1) && !(GameClient()->m_Snap.m_LocalClientId != pPlayerChar->m_HookedPlayer && g_Config.m_ClAntipingShadow))
 		HookPos = GameClient()->m_aClients[pPlayerChar->m_HookedPlayer].m_RenderPos;
 	else
 		HookPos = mix(vec2(Prev.m_HookX, Prev.m_HookY), vec2(Player.m_HookX, Player.m_HookY), Intra);
@@ -585,6 +590,14 @@ void CPlayers::RenderPlayer(
 	else
 		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), Intra);
 	vec2 Vel = mix(vec2(Prev.m_VelX / 256.0f, Prev.m_VelY / 256.0f), vec2(Player.m_VelX / 256.0f, Player.m_VelY / 256.0f), Intra);
+
+	vec2 PredPosition = Position;
+
+	if(!Local && g_Config.m_ClAntipingShadow)
+		Position = mix(
+			vec2(GameClient()->m_Snap.m_aCharacters[ClientId].m_Prev.m_X, GameClient()->m_Snap.m_aCharacters[ClientId].m_Prev.m_Y),
+			vec2(GameClient()->m_Snap.m_aCharacters[ClientId].m_Cur.m_X, GameClient()->m_Snap.m_aCharacters[ClientId].m_Cur.m_Y),
+			Client()->IntraGameTick(g_Config.m_ClDummy));
 
 	GameClient()->m_Flow.Add(Position, Vel * 100.0f, 10.0f);
 
@@ -832,7 +845,13 @@ void CPlayers::RenderPlayer(
 		RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, ShadowPosition, g_Config.m_ClUnpredictedShadowAlpha / 100.f); // render ghost
 	}
 
-	RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position, Alpha);
+	if(!Local && g_Config.m_ClAntipingShadow)
+	{
+		RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, PredPosition, g_Config.m_ClAntipingShadowAlpha * 0.01); // render ghost
+		RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position, Alpha);
+	}
+	else
+		RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position, Alpha);
 
 	float TeeAnimScale, TeeBaseSize;
 	CRenderTools::GetRenderTeeAnimScaleAndBaseSize(&RenderInfo, TeeAnimScale, TeeBaseSize);
@@ -990,7 +1009,11 @@ void CPlayers::OnRender()
 		{
 			continue;
 		}
-		RenderHook(&GameClient()->m_aClients[ClientId].m_RenderPrev, &GameClient()->m_aClients[ClientId].m_RenderCur, &aRenderInfo[ClientId], ClientId);
+
+		if(g_Config.m_ClAntipingShadow)
+			RenderHook(&GameClient()->m_Snap.m_aCharacters[ClientId].m_Prev, &GameClient()->m_Snap.m_aCharacters[ClientId].m_Cur, &aRenderInfo[ClientId], ClientId, Client()->IntraGameTick(g_Config.m_ClDummy));
+		else
+			RenderHook(&GameClient()->m_aClients[ClientId].m_RenderPrev, &GameClient()->m_aClients[ClientId].m_RenderCur, &aRenderInfo[ClientId], ClientId);
 	}
 	if(LocalClientId != -1 && IsPlayerInfoAvailable(LocalClientId))
 	{
