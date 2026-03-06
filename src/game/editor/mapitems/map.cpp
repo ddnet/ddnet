@@ -30,6 +30,27 @@ void CEditorMap::CMapInfo::Copy(const CMapInfo &Source)
 	str_copy(m_aLicense, Source.m_aLicense);
 }
 
+CEditorMap::CEditorMap(CEditor *pEditor) :
+	m_EditorHistory(this),
+	m_ServerSettingsHistory(this),
+	m_EnvelopeEditorHistory(this),
+	m_QuadTracker(this),
+	m_EnvOpTracker(this),
+	m_LayerGroupPropTracker(this),
+	m_LayerPropTracker(this),
+	m_LayerTilesCommonPropTracker(this),
+	m_LayerTilesPropTracker(this),
+	m_LayerQuadPropTracker(this),
+	m_LayerSoundsPropTracker(this),
+	m_SoundSourceOperationTracker(this),
+	m_SoundSourcePropTracker(this),
+	m_SoundSourceRectShapePropTracker(this),
+	m_SoundSourceCircleShapePropTracker(this),
+	m_MapSettingsCommandContext(pEditor->m_MapSettingsBackend.NewContextWithInput()),
+	m_pEditor(pEditor)
+{
+}
+
 void CEditorMap::OnModify()
 {
 	m_Modified = true;
@@ -95,6 +116,7 @@ void CEditorMap::Clean()
 	m_ProofModeState.Reset();
 	Editor()->QuadKnife()->Deactivate();
 	m_EnvelopeEditorState.Reset(Editor());
+	m_MapSettingsCommandContext.Reset();
 }
 
 void CEditorMap::CreateDefault()
