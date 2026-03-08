@@ -1,6 +1,7 @@
 #include "backend_opengl3.h"
 
 #include <base/detect.h>
+#include <base/log.h>
 
 #if defined(BACKEND_AS_OPENGL_ES) || !defined(CONF_BACKEND_OPENGL_ES)
 
@@ -662,10 +663,10 @@ void CCommandProcessorFragment_OpenGL3_3::TextureCreate(int Slot, int Width, int
 
 			if(ConvertWidth == 0 || (ConvertWidth % 16) != 0 || ConvertHeight == 0 || (ConvertHeight % 16) != 0)
 			{
-				dbg_msg("gfx", "3D/2D array texture was resized");
 				int NewWidth = maximum<int>(HighestBit(ConvertWidth), 16);
 				int NewHeight = maximum<int>(HighestBit(ConvertHeight), 16);
 				uint8_t *pNewTexData = ResizeImage(pTexData, ConvertWidth, ConvertHeight, NewWidth, NewHeight, GLFormatToPixelSize(GLFormat));
+				log_debug("gfx/opengl", "3D/2D array texture was resized");
 
 				ConvertWidth = NewWidth;
 				ConvertHeight = NewHeight;
