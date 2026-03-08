@@ -4088,7 +4088,6 @@ void CEditor::RenderSelectedImage(CUIRect View) const
 	View.w *= pSelectedImage->m_Width / Max;
 	View.h *= pSelectedImage->m_Height / Max;
 	Graphics()->TextureSet(pSelectedImage->m_Texture);
-	Graphics()->BlendNormal();
 	Graphics()->WrapClamp();
 	Graphics()->QuadsBegin();
 	IGraphics::CQuadItem QuadItem(View.x, View.y, View.w, View.h);

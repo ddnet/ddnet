@@ -597,7 +597,6 @@ void CLineInput::RenderCandidates()
 
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
-	Graphics()->BlendNormal();
 
 	// Draw window shadow
 	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.8f);
