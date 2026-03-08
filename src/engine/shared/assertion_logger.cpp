@@ -1,8 +1,12 @@
 #include "assertion_logger.h"
 
+#include <base/dbg.h>
+#include <base/io.h>
 #include <base/lock.h>
 #include <base/logger.h>
 #include <base/process.h>
+#include <base/str.h>
+#include <base/time.h>
 
 #include <engine/shared/ringbuffer.h>
 #include <engine/storage.h>

@@ -3,6 +3,7 @@
 #include "menus.h"
 
 #include <base/log.h>
+#include <base/time.h>
 
 #include <engine/engine.h>
 #include <engine/favorites.h>

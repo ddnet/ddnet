@@ -3,6 +3,9 @@
 
 #include "layer.h"
 
+#include <base/dbg.h>
+#include <base/mem.h>
+
 #include <game/editor/editor_trackers.h>
 #include <game/editor/enums.h>
 

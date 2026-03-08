@@ -3,6 +3,7 @@
 #include "render_map.h"
 
 #include <base/math.h>
+#include <base/str.h>
 
 #include <engine/graphics.h>
 #include <engine/map.h>

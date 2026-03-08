@@ -4,7 +4,7 @@
 #define ENGINE_CLIENT_SERVERBROWSER_H
 
 #include <base/hash.h>
-#include <base/system.h>
+#include <base/str.h>
 
 #include <engine/console.h>
 #include <engine/serverbrowser.h>

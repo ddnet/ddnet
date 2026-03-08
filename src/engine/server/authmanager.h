@@ -2,7 +2,7 @@
 #define ENGINE_SERVER_AUTHMANAGER_H
 
 #include <base/hash.h>
-#include <base/system.h>
+#include <base/str.h>
 
 #include <generated/protocol.h>
 

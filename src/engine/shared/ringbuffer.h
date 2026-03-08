@@ -3,8 +3,7 @@
 #ifndef ENGINE_SHARED_RINGBUFFER_H
 #define ENGINE_SHARED_RINGBUFFER_H
 
-#include <base/system.h>
-
+#include <cstdlib>
 #include <functional>
 
 class CRingBufferBase

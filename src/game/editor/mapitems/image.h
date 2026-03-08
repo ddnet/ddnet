@@ -1,6 +1,8 @@
 #ifndef GAME_EDITOR_MAPITEMS_IMAGE_H
 #define GAME_EDITOR_MAPITEMS_IMAGE_H
 
+#include <base/types.h>
+
 #include <engine/graphics.h>
 
 #include <game/editor/auto_map.h>

@@ -1,6 +1,7 @@
 #include "ghost.h"
 
 #include <base/bytes.h>
+#include <base/dbg.h>
 #include <base/io.h>
 #include <base/log.h>
 #include <base/mem.h>

@@ -9,6 +9,7 @@
 #include <antibot/antibot_data.h>
 
 #include <base/log.h>
+#include <base/time.h>
 
 #include <engine/antibot.h>
 #include <engine/shared/config.h>

@@ -8,7 +8,7 @@
 
 #include <engine/shared/ringbuffer.h>
 
-#include <cstddef>
+#include <cstdint>
 
 class IGraphics;
 class ITextRender;

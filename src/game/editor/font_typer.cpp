@@ -4,6 +4,7 @@
 
 #include <base/log.h>
 #include <base/str.h>
+#include <base/time.h>
 
 #include <engine/keys.h>
 

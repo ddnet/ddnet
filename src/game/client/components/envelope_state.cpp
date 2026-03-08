@@ -1,5 +1,7 @@
 #include "envelope_state.h"
 
+#include <base/time.h>
+
 #include <game/client/gameclient.h>
 #include <game/localization.h>
 

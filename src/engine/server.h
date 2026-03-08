@@ -6,9 +6,11 @@
 #include "kernel.h"
 #include "message.h"
 
+#include <base/dbg.h>
 #include <base/hash.h>
 #include <base/math.h>
-#include <base/system.h>
+#include <base/mem.h>
+#include <base/str.h>
 
 #include <engine/shared/jsonwriter.h>
 #include <engine/shared/protocol.h>

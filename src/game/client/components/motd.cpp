@@ -2,6 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "motd.h"
 
+#include <base/time.h>
+
 #include <engine/graphics.h>
 #include <engine/keys.h>
 #include <engine/shared/config.h>

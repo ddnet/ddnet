@@ -1,4 +1,6 @@
 #include <base/detect.h>
+#include <base/io.h>
+#include <base/time.h>
 
 #include <engine/external/json-parser/json.h>
 #include <engine/server.h>

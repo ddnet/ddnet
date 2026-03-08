@@ -7,6 +7,7 @@
 #include <base/log.h>
 #include <base/math.h>
 #include <base/sphore.h>
+#include <base/str.h>
 #include <base/thread.h>
 
 #include <engine/shared/config.h>

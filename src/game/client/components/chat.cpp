@@ -3,6 +3,9 @@
 
 #include "chat.h"
 
+#include <base/io.h>
+#include <base/time.h>
+
 #include <engine/editor.h>
 #include <engine/graphics.h>
 #include <engine/keys.h>

@@ -1,10 +1,13 @@
 #include "serverbrowser_http.h"
 
 #include <base/dbg.h>
+#include <base/io.h>
 #include <base/lock.h>
 #include <base/log.h>
 #include <base/net.h>
+#include <base/secure.h>
 #include <base/str.h>
+#include <base/time.h>
 
 #include <engine/console.h>
 #include <engine/engine.h>

@@ -1,5 +1,10 @@
 #include "local_server.h"
 
+#include <base/fs.h>
+#include <base/mem.h>
+#include <base/secure.h>
+#include <base/str.h>
+
 #include <game/client/gameclient.h>
 #include <game/localization.h>
 

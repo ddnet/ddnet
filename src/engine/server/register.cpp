@@ -2,6 +2,7 @@
 
 #include <base/lock.h>
 #include <base/log.h>
+#include <base/time.h>
 
 #include <engine/console.h>
 #include <engine/engine.h>

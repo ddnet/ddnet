@@ -1,8 +1,11 @@
 #ifndef ENGINE_SHARED_HTTP_H
 #define ENGINE_SHARED_HTTP_H
 
+#include <base/dbg.h>
 #include <base/hash_ctxt.h>
-#include <base/system.h>
+#include <base/mem.h>
+#include <base/str.h>
+#include <base/types.h>
 
 #include <engine/http.h>
 #include <engine/shared/jobs.h>
@@ -10,6 +13,7 @@
 #include <algorithm>
 #include <atomic>
 #include <condition_variable>
+#include <cstdlib>
 #include <deque>
 #include <mutex>
 #include <optional>
