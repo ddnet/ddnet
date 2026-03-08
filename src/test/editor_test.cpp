@@ -1,4 +1,4 @@
-#include <base/system.h>
+#include <base/str.h>
 
 #include <gtest/gtest.h>
 
@@ -78,13 +78,7 @@ bool IsValidEditorTooltip(const char *pTooltip, char *pErrorMsg, int ErrorMsgSiz
 void AssertTooltip(const char *pTooltip)
 {
 	char aError[512];
-	bool IsValid = IsValidEditorTooltip(pTooltip, aError, sizeof(aError));
-	if(!IsValid)
-	{
-		dbg_msg("test", "Invalid tooltip: %s", pTooltip);
-		dbg_msg("test", "ERROR: %s", aError);
-	}
-	EXPECT_TRUE(IsValid);
+	EXPECT_TRUE(IsValidEditorTooltip(pTooltip, aError, sizeof(aError))) << "Invalid tooltip: " << pTooltip << "\nError: " << aError;
 }
 
 TEST(Editor, QuickActionNames)
