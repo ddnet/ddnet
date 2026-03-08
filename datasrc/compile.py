@@ -144,7 +144,10 @@ def gen_network_source():
 	print("""\
 #include "protocol.h"
 
-#include <base/system.h>
+#include <base/dbg.h>
+#include <base/mem.h>
+#include <base/str.h>
+
 #include <engine/uuid.h>
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
