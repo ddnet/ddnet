@@ -2,7 +2,9 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "test.h"
 
-#include <base/system.h>
+#include <base/fs.h>
+#include <base/io.h>
+#include <base/str.h>
 
 #include <engine/shared/jsonwriter.h>
 

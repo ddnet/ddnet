@@ -1,6 +1,7 @@
 #include "test.h"
 
-#include <base/system.h>
+#include <base/fs.h>
+#include <base/io.h>
 
 #include <engine/shared/csv.h>
 

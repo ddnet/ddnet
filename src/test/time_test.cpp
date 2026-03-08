@@ -1,4 +1,3 @@
-#include <base/system.h>
 #include <base/time.h>
 
 #include <gtest/gtest.h>
