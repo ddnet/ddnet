@@ -1337,11 +1337,9 @@ void CMenus::RenderLanguageSettings(CUIRect MainView)
 	CreditsScroll.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_ALL, 5.0f);
 
 	static CScrollRegion s_CreditsScrollRegion;
-	vec2 ScrollOffset(0.0f, 0.0f);
 	CScrollRegionParams ScrollParams;
 	ScrollParams.m_ScrollUnit = CreditsFontSize;
-	s_CreditsScrollRegion.Begin(&CreditsScroll, &ScrollOffset, &ScrollParams);
-	CreditsScroll.y += ScrollOffset.y;
+	s_CreditsScrollRegion.Begin(&CreditsScroll, &ScrollParams);
 
 	CTextCursor Cursor;
 	Cursor.m_FontSize = CreditsFontSize;

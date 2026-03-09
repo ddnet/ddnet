@@ -590,13 +590,11 @@ void CEditor::RenderMapSettingsErrorDialog()
 		View.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 3.0f);
 
 		const float RowHeight = 18.0f;
+		const float EndY = List.y + List.h;
 		static CScrollRegion s_ScrollRegion;
-		vec2 ScrollOffset(0.0f, 0.0f);
 		CScrollRegionParams ScrollParams;
 		ScrollParams.m_ScrollUnit = 120.0f;
-		s_ScrollRegion.Begin(&List, &ScrollOffset, &ScrollParams);
-		const float EndY = List.y + List.h;
-		List.y += ScrollOffset.y;
+		s_ScrollRegion.Begin(&List, &ScrollParams);
 
 		List.HSplitTop(20.0f, nullptr, &List);
 

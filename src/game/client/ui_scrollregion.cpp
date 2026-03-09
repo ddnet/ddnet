@@ -33,7 +33,7 @@ void CScrollRegion::Reset()
 	m_Params = CScrollRegionParams();
 }
 
-void CScrollRegion::Begin(CUIRect *pClipRect, vec2 *pOutOffset, const CScrollRegionParams *pParams)
+void CScrollRegion::Begin(CUIRect *pClipRect, const CScrollRegionParams *pParams)
 {
 	if(pParams)
 		m_Params = *pParams;
@@ -70,7 +70,7 @@ void CScrollRegion::Begin(CUIRect *pClipRect, vec2 *pOutOffset, const CScrollReg
 
 	m_ClipRect = *pClipRect;
 	m_ContentH = 0.0f;
-	*pOutOffset = m_ContentScrollOff;
+	pClipRect->y += m_ContentScrollOff.y;
 }
 
 void CScrollRegion::End()

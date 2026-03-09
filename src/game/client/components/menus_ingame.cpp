@@ -822,11 +822,9 @@ void CMenus::RenderServerInfoMotd(CUIRect Motd)
 		return;
 
 	static CScrollRegion s_ScrollRegion;
-	vec2 ScrollOffset(0.0f, 0.0f);
 	CScrollRegionParams ScrollParams;
 	ScrollParams.m_ScrollUnit = 5 * MotdFontSize;
-	s_ScrollRegion.Begin(&Motd, &ScrollOffset, &ScrollParams);
-	Motd.y += ScrollOffset.y;
+	s_ScrollRegion.Begin(&Motd, &ScrollParams);
 
 	static float s_MotdHeight = 0.0f;
 	static int64_t s_MotdLastUpdateTime = -1;

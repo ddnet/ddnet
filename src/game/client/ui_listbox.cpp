@@ -103,14 +103,12 @@ void CListBox::DoStart(float RowHeight, int NumItems, int ItemsPerRow, int RowsP
 	}
 
 	// setup the scrollbar
-	vec2 ScrollOffset = vec2(0.0f, 0.0f);
 	CScrollRegionParams ScrollParams;
 	ScrollParams.m_ScrollbarWidth = ScrollbarWidthMax();
 	ScrollParams.m_ScrollbarMargin = ScrollbarMargin();
 	ScrollParams.m_ScrollUnit = (m_ListBoxRowHeight + m_AutoSpacing) * RowsPerScroll;
 	ScrollParams.m_Flags = ForceShowScrollbar ? CScrollRegionParams::FLAG_CONTENT_STATIC_WIDTH : 0;
-	m_ScrollRegion.Begin(&m_ListBoxView, &ScrollOffset, &ScrollParams);
-	m_ListBoxView.y += ScrollOffset.y;
+	m_ScrollRegion.Begin(&m_ListBoxView, &ScrollParams);
 }
 
 CListboxItem CListBox::DoNextRow()
