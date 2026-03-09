@@ -46,6 +46,7 @@ class CGraphicsBackend_Threaded : public IGraphicsBackend
 {
 private:
 	TTranslateFunc m_TranslateFunc;
+	std::string m_FatalError;
 	SGfxWarningContainer m_Warning;
 
 public:
@@ -94,6 +95,7 @@ private:
 #endif
 
 public:
+	const char *GetFatalError() const override;
 	bool GetWarning(std::vector<std::string> &WarningStrings) override;
 };
 

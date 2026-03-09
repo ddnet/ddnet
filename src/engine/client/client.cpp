@@ -3113,8 +3113,20 @@ void CClient::Run()
 		if(!Success)
 		{
 			log_error("client", "Failed to initialize the graphics (see details above)");
-			std::string Message = std::string("Failed to initialize the graphics. See details below.\n\n") + MemoryLogger.ConcatenatedLines();
-			ShowMessageBox({.m_pTitle = "Graphics Error", .m_pMessage = Message.c_str()});
+			const std::string Message = std::string(
+							    "Failed to initialize the graphics. See details below.\n\n"
+							    "For detailed troubleshooting instructions please read our Wiki:\n"
+							    "https://wiki.ddnet.org/wiki/GFX_Troubleshooting\n\n") +
+						    MemoryLogger.ConcatenatedLines();
+			const std::vector<IGraphics::CMessageBoxButton> vButtons = {
+				{.m_pLabel = "Show Wiki"},
+				{.m_pLabel = "OK", .m_Confirm = true, .m_Cancel = true},
+			};
+			const std::optional<int> MessageResult = ShowMessageBox({.m_pTitle = "Graphics Initialization Error", .m_pMessage = Message.c_str(), .m_vButtons = vButtons});
+			if(MessageResult && *MessageResult == 0)
+			{
+				ViewLink("https://wiki.ddnet.org/wiki/GFX_Troubleshooting");
+			}
 			return;
 		}
 	}
@@ -4745,22 +4757,58 @@ int main(int argc, const char **argv)
 	dbg_assert_set_handler([MainThreadId, pClient](const char *pMsg) {
 		if(MainThreadId != std::this_thread::get_id())
 			return;
+
+		const char *pGraphicsError = pClient->Graphics() == nullptr ? "" : pClient->Graphics()->GetFatalError();
+		const bool GotGraphicsError = pGraphicsError[0] != '\0';
+		const char *pTitle;
+		const char *pPreamble;
+		const char *pPostamble;
+		if(GotGraphicsError)
+		{
+			pTitle = "Graphics Error";
+			pPreamble =
+				"A graphics error occurred. Please see details and instructions below.\n\n";
+			pPostamble =
+				"For detailed troubleshooting instructions please read our Wiki:\n"
+				"https://wiki.ddnet.org/wiki/GFX_Troubleshooting\n\n"
+				"If this did not resolve the issue, please take a screenshot and report this error.\n"
+				"Please also share the assert log"
+#if defined(CONF_CRASHDUMP)
+				" and crash log"
+#endif
+				" found in the 'dumps' folder in your config directory.\n\n";
+			// This is more human readable and we don't care about the source location here,
+			// because all graphics assertions come from CGraphicsBackend_Threaded::ProcessError
+			// and the original message is also logged separately by the assertion system.
+			pMsg = pGraphicsError;
+		}
+		else
+		{
+			pTitle = "Assertion Error";
+			pPreamble =
+				"An assertion error occurred. Please take a screenshot and report this error.\n"
+				"Please also share the assert log"
+#if defined(CONF_CRASHDUMP)
+				" and crash log"
+#endif
+				" found in the 'dumps' folder in your config directory.\n\n";
+			pPostamble = "";
+		}
+
 		char aOsVersionString[128];
 		if(!os_version_str(aOsVersionString, sizeof(aOsVersionString)))
 		{
 			str_copy(aOsVersionString, "unknown");
 		}
+
 		char aGpuInfo[512];
 		pClient->GetGpuInfoString(aGpuInfo);
+
 		char aMessage[2048];
 		str_format(aMessage, sizeof(aMessage),
-			"An assertion error occurred. Please write down or take a screenshot of the following information and report this error.\n"
-			"Please also share the assert log"
-#if defined(CONF_CRASHDUMP)
-			" and crash log"
-#endif
-			" which you should find in the 'dumps' folder in your config directory.\n\n"
+			"%s"
 			"%s\n\n"
+			"%s"
 			"Platform: %s (%s)\n"
 			"Configuration: base"
 #if defined(CONF_AUTOUPDATE)
@@ -4785,7 +4833,9 @@ int main(int argc, const char **argv)
 			"Game version: %s %s %s\n"
 			"OS version: %s\n\n"
 			"%s", // GPU info
+			pPreamble,
 			pMsg,
+			pPostamble,
 			CONF_PLATFORM_STRING, CONF_ARCH_ENDIAN_STRING,
 			GAME_NAME, GAME_RELEASE_VERSION, GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "",
 			aOsVersionString,
@@ -4793,6 +4843,10 @@ int main(int argc, const char **argv)
 		// Also log all of this information to the assertion log file
 		log_error("assertion", "%s", aMessage);
 		std::vector<IGraphics::CMessageBoxButton> vButtons;
+		if(GotGraphicsError)
+		{
+			vButtons.push_back({.m_pLabel = "Show Wiki"});
+		}
 		// Storage may not have been initialized yet and viewing files is not supported on Android yet
 #if !defined(CONF_PLATFORM_ANDROID)
 		if(pClient->Storage() != nullptr)
@@ -4801,16 +4855,18 @@ int main(int argc, const char **argv)
 		}
 #endif
 		vButtons.push_back({.m_pLabel = "OK", .m_Confirm = true, .m_Cancel = true});
-		const std::optional<int> MessageResult = pClient->ShowMessageBox({.m_pTitle = "Assertion Error", .m_pMessage = aMessage, .m_vButtons = vButtons});
+		const std::optional<int> MessageResult = pClient->ShowMessageBox({.m_pTitle = pTitle, .m_pMessage = aMessage, .m_vButtons = vButtons});
+		if(GotGraphicsError && MessageResult && *MessageResult == 0)
+		{
+			pClient->ViewLink("https://wiki.ddnet.org/wiki/GFX_Troubleshooting");
+		}
 #if !defined(CONF_PLATFORM_ANDROID)
-		if(pClient->Storage() != nullptr && MessageResult && *MessageResult == 0)
+		if(pClient->Storage() != nullptr && MessageResult && *MessageResult == (GotGraphicsError ? 1 : 0))
 		{
 			char aDumpsPath[IO_MAX_PATH_LENGTH];
 			pClient->Storage()->GetCompletePath(IStorage::TYPE_SAVE, "dumps", aDumpsPath, sizeof(aDumpsPath));
 			pClient->ViewFile(aDumpsPath);
 		}
-#else
-		(void)MessageResult;
 #endif
 		// Client will crash due to assertion, don't call PerformAllCleanup in this inconsistent state
 	});
@@ -5343,27 +5399,26 @@ void CClient::GetGpuInfoString(char (&aGpuInfo)[512])
 	if(m_pGraphics == nullptr || !m_pGraphics->IsBackendInitialized())
 	{
 		str_format(aGpuInfo, std::size(aGpuInfo),
-			"Graphics backend: %s %d.%d.%d\n"
+			"Configured graphics backend: %s %d.%d.%d\n"
 			"Graphics %s not yet initialized.",
 			g_Config.m_GfxBackend, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch,
 			m_pGraphics == nullptr ? "were" : "backend was");
 	}
 	else
 	{
-		// TODO: Even better would be if the backend could return its name and version, because the config variables can be outdated when the client was not restarted.
 		str_format(aGpuInfo, std::size(aGpuInfo),
-			"Graphics backend: %s %d.%d.%d\n"
+			"Configured graphics backend: %s %d.%d.%d\n"
 			"GPU: %s - %s - %s\n"
-			"Texture: %" PRIu64 " MiB, "
-			"Buffer: %" PRIu64 " MiB, "
-			"Streamed: %" PRIu64 " MiB, "
-			"Staging: %" PRIu64 " MiB",
+			"Texture: %.2f MiB, "
+			"Buffer: %.2f MiB, "
+			"Streamed: %.2f MiB, "
+			"Staging: %.2f MiB",
 			g_Config.m_GfxBackend, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch,
 			m_pGraphics->GetVendorString(), m_pGraphics->GetRendererString(), m_pGraphics->GetVersionString(),
-			m_pGraphics->TextureMemoryUsage() / 1024 / 1024,
-			m_pGraphics->BufferMemoryUsage() / 1024 / 1024,
-			m_pGraphics->StreamedMemoryUsage() / 1024 / 1024,
-			m_pGraphics->StagingMemoryUsage() / 1024 / 1024);
+			m_pGraphics->TextureMemoryUsage() / 1024.0 / 1024.0,
+			m_pGraphics->BufferMemoryUsage() / 1024.0 / 1024.0,
+			m_pGraphics->StreamedMemoryUsage() / 1024.0 / 1024.0,
+			m_pGraphics->StagingMemoryUsage() / 1024.0 / 1024.0);
 	}
 }
 
