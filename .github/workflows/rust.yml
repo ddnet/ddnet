@@ -30,7 +30,7 @@ jobs:
       uses: actions/checkout@v4
     - name: Run cxxbridge
       run: |
-        cargo install cxxbridge-cmd@1.0.171
+        cargo install cxxbridge-cmd@1.0.71
         python scripts/generate_rust_bridge.py
         git diff --exit-code
 

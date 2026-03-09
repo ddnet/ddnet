@@ -27,7 +27,7 @@ def main():
 	p = argparse.ArgumentParser(description="Generate src/rust-bridge")
 	_args = p.parse_args()
 
-	cxxbridge = find_cxxbridge(version="1.0.194")
+	cxxbridge = find_cxxbridge(version="1.0.71")
 	for input_, output_prefix in FILES.items():
 		subprocess.check_call([
 			cxxbridge,
