@@ -89,22 +89,24 @@ CSnapshotDelta *CClient::SnapshotDelta()
 {
 	if(IsSixup())
 	{
-		return &m_SnapshotDeltaSixup;
+		return &*m_pSnapshotDeltaSixup;
 	}
-	return &m_SnapshotDelta;
+	return &*m_pSnapshotDelta;
 }
 
 CClient::CClient() :
-	m_DemoPlayer(&m_SnapshotDelta, &m_SnapshotDeltaSixup, true, [&]() { UpdateDemoIntraTimers(); }),
+	m_pSnapshotDelta(CSnapshotDelta_New()),
+	m_pSnapshotDeltaSixup(CSnapshotDelta_New()),
+	m_DemoPlayer(&*m_pSnapshotDelta, &*m_pSnapshotDeltaSixup, true, [&]() { UpdateDemoIntraTimers(); }),
 	m_InputtimeMarginGraph(128, 2, true),
 	m_aGametimeMarginGraphs{{128, 2, true}, {128, 2, true}},
 	m_FpsGraph(4096, 0, true)
 {
 	m_StateStartTime = time_get();
 	for(auto &DemoRecorder : m_aDemoRecorders)
-		DemoRecorder = CDemoRecorder(&m_SnapshotDelta);
+		DemoRecorder = CDemoRecorder(&*m_pSnapshotDelta);
 	for(auto &DemoRecorder : m_aDemoRecordersSixup)
-		DemoRecorder = CDemoRecorder(&m_SnapshotDeltaSixup);
+		DemoRecorder = CDemoRecorder(&*m_pSnapshotDeltaSixup);
 	m_LastRenderTime = time_get();
 	mem_zero(m_aInputs, sizeof(m_aInputs));
 	mem_zero(m_aapSnapshots, sizeof(m_aapSnapshots));
@@ -920,12 +922,12 @@ int CClient::SnapNumItems(int SnapId) const
 
 void CClient::SnapSetStaticsize(int ItemType, int Size)
 {
-	m_SnapshotDelta.SetStaticsize(ItemType, Size);
+	m_pSnapshotDelta->SetStaticsize(ItemType, Size);
 }
 
 void CClient::SnapSetStaticsize7(int ItemType, int Size)
 {
-	m_SnapshotDeltaSixup.SetStaticsize(ItemType, Size);
+	m_pSnapshotDeltaSixup->SetStaticsize(ItemType, Size);
 }
 
 void CClient::RenderDebug()
@@ -2090,7 +2092,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					}
 
 					// decompress snapshot
-					const void *pDeltaData = SnapshotDelta()->EmptyDelta();
+					const void *pDeltaData = SnapshotDelta()->EmptyDelta().data();
 					int DeltaSize = sizeof(int) * 3;
 
 					if(m_aSnapshotIncomingDataSize[Conn])
@@ -2105,7 +2107,12 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					}
 
 					// unpack delta
-					const int SnapSize = SnapshotDelta()->UnpackDelta(pDeltaShot, &TmpBuffer3, pDeltaData, DeltaSize);
+					// TODO: this needs alignment for
+					// `m_aChunkData` of 4, but this is not
+					// guaranteed. This is assumed above,
+					// too, anyway, in
+					// `CVariableInt::Decompress`.
+					const int SnapSize = SnapshotDelta()->UnpackDelta(*pDeltaShot, TmpBuffer3, rust::Slice((const int32_t *)pDeltaData, DeltaSize / sizeof(int32_t)));
 					if(SnapSize < 0)
 					{
 						dbg_msg("client", "delta unpack failed. error=%d", SnapSize);
@@ -2329,8 +2336,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 int CClient::UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshotBuffer *pTo)
 {
 	CUnpacker Unpacker;
-	CSnapshotBuilder Builder;
-	Builder.Init();
+	rust::Box<CSnapshotBuilder> pBuilder = CSnapshotBuilder_New();
+	pBuilder->Init(false);
 	CNetObjHandler *pNetObjHandler = GameClient()->GetNetObjHandler();
 
 	int Num = pFrom->NumItems();
@@ -2339,6 +2346,14 @@ int CClient::UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshotBuffer *pTo)
 		const CSnapshotItem *pFromItem = pFrom->GetItem(Index);
 		const int FromItemSize = pFrom->GetItemSize(Index);
 		const int ItemType = pFrom->GetItemType(Index);
+		if(ItemType <= 0)
+		{
+			// Don't add extended item type descriptions, they get
+			// added implicitly (== 0).
+			//
+			// Don't add items of unknown item types either (< 0).
+			continue;
+		}
 		const void *pData = pFromItem->Data();
 		Unpacker.Reset(pData, FromItemSize);
 
@@ -2351,7 +2366,7 @@ int CClient::UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshotBuffer *pTo)
 			continue;
 		}
 
-		void *pSecuredData = pNetObjHandler->SecureUnpackObj(ItemType, &Unpacker);
+		const void *pSecuredData = pNetObjHandler->SecureUnpackObj(ItemType, &Unpacker);
 		if(!pSecuredData)
 		{
 			if(g_Config.m_Debug && ItemType != UUID_UNKNOWN)
@@ -2364,13 +2379,13 @@ int CClient::UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshotBuffer *pTo)
 		}
 		const int ItemSize = pNetObjHandler->GetUnpackedObjSize(ItemType);
 
-		if(!Builder.NewItem(ItemType, pFromItem->Id(), pSecuredData, ItemSize))
+		if(!pBuilder->NewItem(ItemType, pFromItem->Id(), rust::Slice((const int32_t *)pSecuredData, ItemSize / sizeof(int32_t))))
 		{
 			return -4;
 		}
 	}
 
-	return Builder.Finish(pTo);
+	return pBuilder->Finish(*pTo);
 }
 
 void CClient::ResetMapDownload(bool ResetActive)
@@ -3055,7 +3070,7 @@ void CClient::InitInterfaces()
 	m_pNotifications = Kernel()->RequestInterface<INotifications>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
-	m_DemoEditor.Init(&m_SnapshotDelta, &m_SnapshotDeltaSixup, m_pConsole, m_pStorage);
+	m_DemoEditor.Init(&*m_pSnapshotDelta, &*m_pSnapshotDeltaSixup, m_pConsole, m_pStorage);
 
 	m_ServerBrowser.SetBaseInfo(&m_aNetClient[CONN_CONTACT], m_pGameClient->NetVersion());
 
@@ -3930,7 +3945,7 @@ void CClient::SaveReplay(const int Length, const char *pFilename)
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Saving replay...");
 
 		// Create a job to do this slicing in background because it can be a bit long depending on the file size
-		std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(GameClient()->NetVersion(), &m_SnapshotDelta, &m_SnapshotDeltaSixup, m_pStorage, pSrc, aFilename, StartTick, EndTick);
+		std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(GameClient()->NetVersion(), &*m_pSnapshotDelta, &*m_pSnapshotDeltaSixup, m_pStorage, pSrc, aFilename, StartTick, EndTick);
 		Engine()->AddJob(pDemoEditTask);
 		m_EditJobs.push_back(pDemoEditTask);
 

@@ -22,7 +22,7 @@
 #   Exceptions may be disabled later, adding noexcept is just noise
 
 HeaderFilterRegex: '.*'
-ExcludeHeaderFilterRegex: '(external/|generated/|include/|steam/steam_api_flat\.h)'
+ExcludeHeaderFilterRegex: '(external/|generated/|include/|rust-bridge/|steam/steam_api_flat\.h)'
 
 Checks: >
   -*,

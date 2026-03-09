@@ -341,8 +341,8 @@ void CDemoRecorder::RecordSnapshot(int Tick, const void *pData, int Size)
 		WriteTickMarker(Tick, false);
 
 		// create delta
-		char aDeltaData[CSnapshot::MAX_SIZE];
-		const int DeltaSize = m_pSnapshotDelta->CreateDelta(m_LastSnapshotData.AsSnapshot(), (CSnapshot *)pData, &aDeltaData);
+		int32_t aDeltaData[CSnapshot::MAX_SIZE / sizeof(int32_t)];
+		const int DeltaSize = m_pSnapshotDelta->CreateDelta(*m_LastSnapshotData.AsSnapshot(), *(CSnapshot *)pData, rust::Slice(aDeltaData, std::size(aDeltaData)));
 		if(DeltaSize)
 		{
 			// record delta
@@ -724,7 +724,10 @@ void CDemoPlayer::DoTick()
 		if(ChunkType == CHUNKTYPE_DELTA)
 		{
 			// process delta snapshot
-			DataSize = SnapshotDelta()->UnpackDelta(m_LastSnapshotData.AsSnapshot(), &m_Snapshot, m_aChunkData, DataSize);
+			// TODO: this needs alignment for `m_aChunkData` of 4,
+			// but this is not guaranteed. This is assumed above,
+			// too, anyway, in `CVariableInt::Decompress`.
+			DataSize = SnapshotDelta()->UnpackDelta(*m_LastSnapshotData.AsSnapshot(), m_Snapshot, rust::Slice<const int32_t>((const int *)m_aChunkData, DataSize / sizeof(int32_t)));
 
 			if(DataSize < 0)
 			{

@@ -8,8 +8,8 @@
 
 int CGameClient::TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrcSeven, int Conn, bool Dummy)
 {
-	CSnapshotBuilder Builder;
-	Builder.Init();
+	rust::Box<CSnapshotBuilder> pBuilder = CSnapshotBuilder_New();
+	pBuilder->Init(false);
 
 	float LocalTime = Client()->LocalTime();
 	int GameTick = Client()->GameTick(g_Config.m_ClDummy);
@@ -50,7 +50,7 @@ int CGameClient::TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrc
 			}
 			const int ItemSize = GetNetObjHandler()->GetUnpackedObjSize(ItemType);
 
-			Builder.NewItem(ItemType, pItem7->Id(), pRawObj, ItemSize);
+			pBuilder->NewItem(ItemType, pItem7->Id(), rust::Slice((const int32_t *)pRawObj, ItemSize / sizeof(int32_t)));
 			continue;
 		}
 
@@ -132,7 +132,7 @@ int CGameClient::TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrc
 		Info6.m_RoundNum = TranslationContext.m_MatchNum;
 		Info6.m_RoundCurrent = TranslationContext.m_MatchCurrent;
 
-		Builder.NewItem(NETOBJTYPE_GAMEINFO, 0, &Info6, sizeof(Info6));
+		pBuilder->NewItem(NETOBJTYPE_GAMEINFO, 0, Info6.AsSlice());
 	}
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -149,7 +149,7 @@ int CGameClient::TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrc
 		Info6.m_UseCustomColor = 0;
 		Info6.m_ColorBody = 0;
 		Info6.m_ColorFeet = 0;
-		Builder.NewItem(NETOBJTYPE_CLIENTINFO, i, &Info6, sizeof(Info6));
+		pBuilder->NewItem(NETOBJTYPE_CLIENTINFO, i, Info6.AsSlice());
 	}
 
 	bool NewGameData = false;
@@ -165,7 +165,7 @@ int CGameClient::TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrc
 			ItemType == protocol7::NETOBJTYPE_LASER ||
 			ItemType == protocol7::NETOBJTYPE_FLAG)
 		{
-			Builder.NewItem(ItemType, pItem7->Id(), pItem7->Data(), Size);
+			pBuilder->NewItem(ItemType, pItem7->Id(), rust::Slice((const int32_t *)pItem7->Data(), Size / sizeof(int32_t)));
 		}
 		else if(ItemType == protocol7::NETOBJTYPE_PICKUP)
 		{
@@ -174,7 +174,7 @@ int CGameClient::TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrc
 			Pickup6.m_X = pPickup7->m_X;
 			Pickup6.m_Y = pPickup7->m_Y;
 			PickupType_SevenToSix(pPickup7->m_Type, Pickup6.m_Type, Pickup6.m_Subtype);
-			Builder.NewItem(NETOBJTYPE_PICKUP, pItem7->Id(), &Pickup6, sizeof(Pickup6));
+			pBuilder->NewItem(NETOBJTYPE_PICKUP, pItem7->Id(), Pickup6.AsSlice());
 		}
 		else if(ItemType == protocol7::NETOBJTYPE_GAMEDATA)
 		{
@@ -226,7 +226,7 @@ int CGameClient::TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrc
 			Char6.m_Weapon = pChar7->m_Weapon;
 			Char6.m_Emote = pChar7->m_Emote;
 			Char6.m_AttackTick = pChar7->m_AttackTick;
-			Builder.NewItem(NETOBJTYPE_CHARACTER, pItem7->Id(), &Char6, sizeof(Char6));
+			pBuilder->NewItem(NETOBJTYPE_CHARACTER, pItem7->Id(), Char6.AsSlice());
 
 			if(pChar7->m_TriggeredEvents & protocol7::COREEVENTFLAG_HOOK_ATTACH_PLAYER)
 			{
@@ -234,7 +234,7 @@ int CGameClient::TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrc
 				Sound.m_X = pChar7->m_X;
 				Sound.m_Y = pChar7->m_Y;
 				Sound.m_SoundId = SOUND_HOOK_ATTACH_PLAYER;
-				Builder.NewItem(NETEVENTTYPE_SOUNDWORLD, pItem7->Id(), &Sound, sizeof(Sound));
+				pBuilder->NewItem(NETEVENTTYPE_SOUNDWORLD, pItem7->Id(), Sound.AsSlice());
 			}
 
 			if(TranslationContext.m_aLocalClientId[Conn] != pItem7->Id())
@@ -245,7 +245,7 @@ int CGameClient::TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrc
 					Sound.m_X = pChar7->m_X;
 					Sound.m_Y = pChar7->m_Y;
 					Sound.m_SoundId = SOUND_PLAYER_JUMP;
-					Builder.NewItem(NETEVENTTYPE_SOUNDWORLD, pItem7->Id(), &Sound, sizeof(Sound));
+					pBuilder->NewItem(NETEVENTTYPE_SOUNDWORLD, pItem7->Id(), Sound.AsSlice());
 				}
 				if(pChar7->m_TriggeredEvents & protocol7::COREEVENTFLAG_HOOK_ATTACH_GROUND)
 				{
@@ -253,7 +253,7 @@ int CGameClient::TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrc
 					Sound.m_X = pChar7->m_X;
 					Sound.m_Y = pChar7->m_Y;
 					Sound.m_SoundId = SOUND_HOOK_ATTACH_GROUND;
-					Builder.NewItem(NETEVENTTYPE_SOUNDWORLD, pItem7->Id(), &Sound, sizeof(Sound));
+					pBuilder->NewItem(NETEVENTTYPE_SOUNDWORLD, pItem7->Id(), Sound.AsSlice());
 				}
 				if(pChar7->m_TriggeredEvents & protocol7::COREEVENTFLAG_HOOK_HIT_NOHOOK)
 				{
@@ -261,7 +261,7 @@ int CGameClient::TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrc
 					Sound.m_X = pChar7->m_X;
 					Sound.m_Y = pChar7->m_Y;
 					Sound.m_SoundId = SOUND_HOOK_NOATTACH;
-					Builder.NewItem(NETEVENTTYPE_SOUNDWORLD, pItem7->Id(), &Sound, sizeof(Sound));
+					pBuilder->NewItem(NETEVENTTYPE_SOUNDWORLD, pItem7->Id(), Sound.AsSlice());
 				}
 			}
 		}
@@ -279,7 +279,7 @@ int CGameClient::TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrc
 			}
 			Info6.m_Score = pInfo7->m_Score;
 			Info6.m_Latency = pInfo7->m_Latency;
-			Builder.NewItem(NETOBJTYPE_PLAYERINFO, pItem7->Id(), &Info6, sizeof(Info6));
+			pBuilder->NewItem(NETOBJTYPE_PLAYERINFO, pItem7->Id(), Info6.AsSlice());
 		}
 		else if(ItemType == protocol7::NETOBJTYPE_SPECTATORINFO)
 		{
@@ -290,7 +290,7 @@ int CGameClient::TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrc
 				Spec6.m_SpectatorId = SPEC_FREEVIEW;
 			Spec6.m_X = pSpec7->m_X;
 			Spec6.m_Y = pSpec7->m_Y;
-			Builder.NewItem(NETOBJTYPE_SPECTATORINFO, pItem7->Id(), &Spec6, sizeof(Spec6));
+			pBuilder->NewItem(NETOBJTYPE_SPECTATORINFO, pItem7->Id(), Spec6.AsSlice());
 		}
 		else if(ItemType == protocol7::NETEVENTTYPE_EXPLOSION)
 		{
@@ -298,7 +298,7 @@ int CGameClient::TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrc
 			CNetEvent_Explosion Explosion6 = {};
 			Explosion6.m_X = pExplosion7->m_X;
 			Explosion6.m_Y = pExplosion7->m_Y;
-			Builder.NewItem(NETEVENTTYPE_EXPLOSION, pItem7->Id(), &Explosion6, sizeof(Explosion6));
+			pBuilder->NewItem(NETEVENTTYPE_EXPLOSION, pItem7->Id(), Explosion6.AsSlice());
 		}
 		else if(ItemType == protocol7::NETEVENTTYPE_SPAWN)
 		{
@@ -306,7 +306,7 @@ int CGameClient::TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrc
 			CNetEvent_Spawn Spawn6 = {};
 			Spawn6.m_X = pSpawn7->m_X;
 			Spawn6.m_Y = pSpawn7->m_Y;
-			Builder.NewItem(NETEVENTTYPE_SPAWN, pItem7->Id(), &Spawn6, sizeof(Spawn6));
+			pBuilder->NewItem(NETEVENTTYPE_SPAWN, pItem7->Id(), Spawn6.AsSlice());
 		}
 		else if(ItemType == protocol7::NETEVENTTYPE_HAMMERHIT)
 		{
@@ -314,7 +314,7 @@ int CGameClient::TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrc
 			CNetEvent_HammerHit HammerHit6 = {};
 			HammerHit6.m_X = pHammerHit7->m_X;
 			HammerHit6.m_Y = pHammerHit7->m_Y;
-			Builder.NewItem(NETEVENTTYPE_HAMMERHIT, pItem7->Id(), &HammerHit6, sizeof(HammerHit6));
+			pBuilder->NewItem(NETEVENTTYPE_HAMMERHIT, pItem7->Id(), HammerHit6.AsSlice());
 		}
 		else if(ItemType == protocol7::NETEVENTTYPE_DEATH)
 		{
@@ -323,7 +323,7 @@ int CGameClient::TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrc
 			Death6.m_X = pDeath7->m_X;
 			Death6.m_Y = pDeath7->m_Y;
 			Death6.m_ClientId = pDeath7->m_ClientId;
-			Builder.NewItem(NETEVENTTYPE_DEATH, pItem7->Id(), &Death6, sizeof(Death6));
+			pBuilder->NewItem(NETEVENTTYPE_DEATH, pItem7->Id(), Death6.AsSlice());
 		}
 		else if(ItemType == protocol7::NETEVENTTYPE_SOUNDWORLD)
 		{
@@ -332,7 +332,7 @@ int CGameClient::TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrc
 			SoundWorld6.m_X = pSoundWorld7->m_X;
 			SoundWorld6.m_Y = pSoundWorld7->m_Y;
 			SoundWorld6.m_SoundId = pSoundWorld7->m_SoundId;
-			Builder.NewItem(NETEVENTTYPE_SOUNDWORLD, pItem7->Id(), &SoundWorld6, sizeof(SoundWorld6));
+			pBuilder->NewItem(NETEVENTTYPE_SOUNDWORLD, pItem7->Id(), SoundWorld6.AsSlice());
 		}
 		else if(ItemType == protocol7::NETEVENTTYPE_DAMAGE)
 		{
@@ -375,7 +375,7 @@ int CGameClient::TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrc
 				// pItem7->Id() is reused that is technically wrong
 				// but the client implementation does not look at the ids
 				// and renders the damage indicators just fine
-				Builder.NewItem(NETEVENTTYPE_DAMAGEIND, pItem7->Id(), &Dmg6, sizeof(Dmg6));
+				pBuilder->NewItem(NETEVENTTYPE_DAMAGEIND, pItem7->Id(), Dmg6.AsSlice());
 			}
 		}
 		else if(ItemType == protocol7::NETOBJTYPE_DE_CLIENTINFO)
@@ -423,16 +423,35 @@ int CGameClient::TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrc
 		GameData.m_TeamscoreBlue = TranslationContext.m_TeamscoreBlue;
 		GameData.m_FlagCarrierRed = TranslationContext.m_FlagCarrierRed;
 		GameData.m_FlagCarrierBlue = TranslationContext.m_FlagCarrierBlue;
-		Builder.NewItem(NETOBJTYPE_GAMEDATA, 0, &GameData, sizeof(GameData));
+		pBuilder->NewItem(NETOBJTYPE_GAMEDATA, 0, GameData.AsSlice());
 	}
 
-	return Builder.FinishIfNoDroppedItems(pSnapDstSix);
+	return pBuilder->FinishIfNoDroppedItems(*pSnapDstSix);
 }
 
 int CGameClient::OnDemoRecSnap7(CSnapshot *pFrom, CSnapshotBuffer *pTo, int Conn)
 {
-	CSnapshotBuilder Builder;
-	Builder.Init7(pFrom);
+	rust::Box<CSnapshotBuilder> pBuilder = CSnapshotBuilder_New();
+	pBuilder->Init(false);
+
+	{
+		const int Num = pFrom->NumItems();
+		for(int i = 0; i < Num; i++)
+		{
+			const int ItemType = pFrom->GetItemType(i);
+			if(ItemType <= 0)
+			{
+				// Don't add extended item type descriptions, they get added
+				// implicitly (== 0).
+				//
+				// Don't add items of unknown item types either (< 0).
+				continue;
+			}
+			const CSnapshotItem *const pItem = pFrom->GetItem(i);
+			const size_t ItemDataLen = pFrom->GetItemSize(i) / sizeof(int32_t);
+			dbg_assert(pBuilder->NewItem(ItemType, pItem->Id(), rust::Slice(pItem->Data(), ItemDataLen)), "error re-inserting into snapshot");
+		}
+	}
 
 	// add client info
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -459,7 +478,7 @@ int CGameClient::OnDemoRecSnap7(CSnapshot *pFrom, CSnapshotBuffer *pTo, int Conn
 			ClientInfoObj.m_aSkinPartColors[Part] = m_aClients[i].m_aSixup[Conn].m_aSkinPartColors[Part];
 		}
 
-		Builder.NewItem(protocol7::NETOBJTYPE_DE_CLIENTINFO, i, &ClientInfoObj, sizeof(ClientInfoObj));
+		pBuilder->NewItem(protocol7::NETOBJTYPE_DE_CLIENTINFO, i, ClientInfoObj.AsSlice());
 	}
 
 	// add tuning
@@ -467,7 +486,7 @@ int CGameClient::OnDemoRecSnap7(CSnapshot *pFrom, CSnapshotBuffer *pTo, int Conn
 	{
 		protocol7::CNetObj_De_TuneParams TuneParams;
 		mem_copy(&TuneParams.m_aTuneParams, &m_aTuning[Conn], sizeof(TuneParams.m_aTuneParams));
-		Builder.NewItem(protocol7::NETOBJTYPE_DE_TUNEPARAMS, 0, &TuneParams, sizeof(TuneParams));
+		pBuilder->NewItem(protocol7::NETOBJTYPE_DE_TUNEPARAMS, 0, TuneParams.AsSlice());
 	}
 
 	// add game info
@@ -477,7 +496,7 @@ int CGameClient::OnDemoRecSnap7(CSnapshot *pFrom, CSnapshotBuffer *pTo, int Conn
 	GameInfo.m_TimeLimit = Client()->m_TranslationContext.m_TimeLimit;
 	GameInfo.m_MatchNum = Client()->m_TranslationContext.m_MatchNum;
 	GameInfo.m_MatchCurrent = Client()->m_TranslationContext.m_MatchCurrent;
-	Builder.NewItem(protocol7::NETOBJTYPE_DE_GAMEINFO, 0, &GameInfo, sizeof(GameInfo));
+	pBuilder->NewItem(protocol7::NETOBJTYPE_DE_GAMEINFO, 0, GameInfo.AsSlice());
 
-	return Builder.FinishIfNoDroppedItems(pTo);
+	return pBuilder->FinishIfNoDroppedItems(*pTo);
 }
