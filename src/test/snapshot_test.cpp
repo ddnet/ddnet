@@ -8,64 +8,64 @@
 
 TEST(Snapshot, CrcOneInt)
 {
-	CSnapshotBuilder Builder;
-	Builder.Init();
+	rust::Box<CSnapshotBuilder> pBuilder = CSnapshotBuilder_New();
+	pBuilder->Init(false);
 
 	CNetObj_Flag Flag;
 	Flag.m_X = 4;
 	Flag.m_Y = 0;
 	Flag.m_Team = 0;
-	ASSERT_TRUE(Builder.NewItem(NETOBJTYPE_FLAG, 0, &Flag, sizeof(Flag)));
+	ASSERT_TRUE(pBuilder->NewItem(NETOBJTYPE_FLAG, 0, Flag.AsSlice()));
 
 	CSnapshotBuffer Buffer;
-	Builder.Finish(&Buffer);
+	pBuilder->Finish(Buffer);
 	ASSERT_EQ(Buffer.AsSnapshot()->Crc(), 4);
 }
 
 TEST(Snapshot, CrcTwoInts)
 {
-	CSnapshotBuilder Builder;
-	Builder.Init();
+	rust::Box<CSnapshotBuilder> pBuilder = CSnapshotBuilder_New();
+	pBuilder->Init(false);
 
 	CNetObj_Flag Flag;
 	Flag.m_X = 1;
 	Flag.m_Y = 1;
 	Flag.m_Team = 0;
-	ASSERT_TRUE(Builder.NewItem(NETOBJTYPE_FLAG, 0, &Flag, sizeof(Flag)));
+	ASSERT_TRUE(pBuilder->NewItem(NETOBJTYPE_FLAG, 0, Flag.AsSlice()));
 
 	CSnapshotBuffer Buffer;
-	Builder.Finish(&Buffer);
+	pBuilder->Finish(Buffer);
 	ASSERT_EQ(Buffer.AsSnapshot()->Crc(), 2);
 }
 
 TEST(Snapshot, CrcBiggerInts)
 {
-	CSnapshotBuilder Builder;
-	Builder.Init();
+	rust::Box<CSnapshotBuilder> pBuilder = CSnapshotBuilder_New();
+	pBuilder->Init(false);
 
 	CNetObj_Flag Flag;
 	Flag.m_X = 99999999;
 	Flag.m_Y = 1;
 	Flag.m_Team = 1;
-	ASSERT_TRUE(Builder.NewItem(NETOBJTYPE_FLAG, 0, &Flag, sizeof(Flag)));
+	ASSERT_TRUE(pBuilder->NewItem(NETOBJTYPE_FLAG, 0, Flag.AsSlice()));
 
 	CSnapshotBuffer Buffer;
-	Builder.Finish(&Buffer);
+	pBuilder->Finish(Buffer);
 	ASSERT_EQ(Buffer.AsSnapshot()->Crc(), 100000001);
 }
 
 TEST(Snapshot, CrcOverflow)
 {
-	CSnapshotBuilder Builder;
-	Builder.Init();
+	rust::Box<CSnapshotBuilder> pBuilder = CSnapshotBuilder_New();
+	pBuilder->Init(false);
 
 	CNetObj_Flag Flag;
 	Flag.m_X = 0xFFFFFFFF;
 	Flag.m_Y = 1;
 	Flag.m_Team = 1;
-	ASSERT_TRUE(Builder.NewItem(NETOBJTYPE_FLAG, 0, &Flag, sizeof(Flag)));
+	ASSERT_TRUE(pBuilder->NewItem(NETOBJTYPE_FLAG, 0, Flag.AsSlice()));
 
 	CSnapshotBuffer Buffer;
-	Builder.Finish(&Buffer);
+	pBuilder->Finish(Buffer);
 	ASSERT_EQ(Buffer.AsSnapshot()->Crc(), 1);
 }
