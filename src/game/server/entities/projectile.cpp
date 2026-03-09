@@ -396,31 +396,26 @@ void CProjectile::Snap(int SnappingClient)
 
 	if(SnappingClientVersion >= VERSION_DDNET_ENTITY_NETOBJS)
 	{
-		CNetObj_DDNetProjectile *pDDNetProjectile = static_cast<CNetObj_DDNetProjectile *>(Server()->SnapNewItem(NETOBJTYPE_DDNETPROJECTILE, GetId(), sizeof(CNetObj_DDNetProjectile)));
-		if(!pDDNetProjectile)
-		{
-			return;
-		}
-		*pDDNetProjectile = NetInfo();
+		Server()->SnapNewItem(GetId(), NetInfo());
 	}
 	else if(SnappingClientVersion >= VERSION_DDNET_ANTIPING_PROJECTILE && NetIsInfoLegacyCompatible())
 	{
-		int Type = SnappingClientVersion < VERSION_DDNET_MSG_LEGACY ? (int)NETOBJTYPE_PROJECTILE : NETOBJTYPE_DDRACEPROJECTILE;
-		CNetObj_DDRaceProjectile *pProj = (CNetObj_DDRaceProjectile *)Server()->SnapNewItem(Type, GetId(), sizeof(DDRaceProjectile));
-		if(!pProj)
+		if(SnappingClientVersion >= VERSION_DDNET_MSG_LEGACY)
 		{
-			return;
+			Server()->SnapNewItem(GetId(), NetInfoLegacy());
 		}
-		*pProj = NetInfoLegacy();
+		else
+		{
+			CNetObj_DDRaceProjectile DDRaceProjectile = NetInfoLegacy();
+			CNetObj_Projectile Projectile = {};
+			static_assert(sizeof(DDRaceProjectile) == sizeof(Projectile));
+			mem_copy(&Projectile, &DDRaceProjectile, sizeof(Projectile));
+			Server()->SnapNewItem(GetId(), Projectile);
+		}
 	}
 	else
 	{
-		CNetObj_Projectile *pProj = Server()->SnapNewItem<CNetObj_Projectile>(GetId());
-		if(!pProj)
-		{
-			return;
-		}
-		*pProj = NetInfoVanilla();
+		Server()->SnapNewItem(GetId(), NetInfoVanilla());
 	}
 }
 

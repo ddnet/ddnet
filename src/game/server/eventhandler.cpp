@@ -60,9 +60,7 @@ void CEventHandler::Snap(int SnappingClient)
 				if(GameServer()->Server()->IsSixup(SnappingClient))
 					EventToSixup(&Type, &Size, &pData);
 
-				void *pItem = GameServer()->Server()->SnapNewItem(Type, i, Size);
-				if(pItem)
-					mem_copy(pItem, pData, Size);
+				GameServer()->Server()->SnapNewItem(Type, i, pData, Size);
 			}
 		}
 	}
