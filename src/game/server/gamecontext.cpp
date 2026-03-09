@@ -451,19 +451,17 @@ void CGameContext::SnapSwitchers(int SnappingClient)
 	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
 		SentTeam = 0;
 
-	CNetObj_SwitchState *pSwitchState = Server()->SnapNewItem<CNetObj_SwitchState>(SentTeam);
-	if(!pSwitchState)
-		return;
+	CNetObj_SwitchState SwitchState = {};
 
-	pSwitchState->m_HighestSwitchNumber = std::clamp((int)Switchers().size() - 1, 0, 255);
-	std::fill(std::begin(pSwitchState->m_aStatus), std::end(pSwitchState->m_aStatus), 0);
+	SwitchState.m_HighestSwitchNumber = std::clamp((int)Switchers().size() - 1, 0, 255);
+	std::fill(std::begin(SwitchState.m_aStatus), std::end(SwitchState.m_aStatus), 0);
 
 	std::vector<std::pair<int, int>> vEndTicks; // <EndTick, SwitchNumber>
 
-	for(int i = 0; i <= pSwitchState->m_HighestSwitchNumber; i++)
+	for(int i = 0; i <= SwitchState.m_HighestSwitchNumber; i++)
 	{
 		int Status = (int)Switchers()[i].m_aStatus[Team];
-		pSwitchState->m_aStatus[i / 32] |= (Status << (i % 32));
+		SwitchState.m_aStatus[i / 32] |= (Status << (i % 32));
 
 		int EndTick = Switchers()[i].m_aEndTick[Team];
 		if(EndTick > 0 && EndTick < Server()->Tick() + 3 * Server()->TickSpeed() && Switchers()[i].m_aLastUpdateTick[Team] < Server()->Tick())
@@ -474,100 +472,90 @@ void CGameContext::SnapSwitchers(int SnappingClient)
 	}
 
 	// send the endtick of switchers that are about to toggle back (up to four, prioritizing those with the earliest endticks)
-	std::fill(std::begin(pSwitchState->m_aSwitchNumbers), std::end(pSwitchState->m_aSwitchNumbers), 0);
-	std::fill(std::begin(pSwitchState->m_aEndTicks), std::end(pSwitchState->m_aEndTicks), 0);
+	std::fill(std::begin(SwitchState.m_aSwitchNumbers), std::end(SwitchState.m_aSwitchNumbers), 0);
+	std::fill(std::begin(SwitchState.m_aEndTicks), std::end(SwitchState.m_aEndTicks), 0);
 
 	std::sort(vEndTicks.begin(), vEndTicks.end());
-	const int NumTimedSwitchers = minimum((int)vEndTicks.size(), (int)std::size(pSwitchState->m_aEndTicks));
+	const int NumTimedSwitchers = minimum((int)vEndTicks.size(), (int)std::size(SwitchState.m_aEndTicks));
 
 	for(int i = 0; i < NumTimedSwitchers; i++)
 	{
-		pSwitchState->m_aSwitchNumbers[i] = vEndTicks[i].second;
-		pSwitchState->m_aEndTicks[i] = vEndTicks[i].first;
+		SwitchState.m_aSwitchNumbers[i] = vEndTicks[i].second;
+		SwitchState.m_aEndTicks[i] = vEndTicks[i].first;
 	}
+
+	Server()->SnapNewItem(SentTeam, SwitchState);
 }
 
-bool CGameContext::SnapLaserObject(const CSnapContext &Context, int SnapId, const vec2 &To, const vec2 &From, int StartTick, int Owner, int LaserType, int Subtype, int SwitchNumber) const
+void CGameContext::SnapLaserObject(const CSnapContext &Context, int SnapId, const vec2 &To, const vec2 &From, int StartTick, int Owner, int LaserType, int Subtype, int SwitchNumber) const
 {
 	if(Context.GetClientVersion() >= VERSION_DDNET_MULTI_LASER)
 	{
-		CNetObj_DDNetLaser *pObj = Server()->SnapNewItem<CNetObj_DDNetLaser>(SnapId);
-		if(!pObj)
-			return false;
-
-		pObj->m_ToX = (int)To.x;
-		pObj->m_ToY = (int)To.y;
-		pObj->m_FromX = (int)From.x;
-		pObj->m_FromY = (int)From.y;
-		pObj->m_StartTick = StartTick;
-		pObj->m_Owner = Owner;
-		pObj->m_Type = LaserType;
-		pObj->m_Subtype = Subtype;
-		pObj->m_SwitchNumber = SwitchNumber;
-		pObj->m_Flags = 0;
+		CNetObj_DDNetLaser Laser = {};
+		Laser.m_ToX = (int)To.x;
+		Laser.m_ToY = (int)To.y;
+		Laser.m_FromX = (int)From.x;
+		Laser.m_FromY = (int)From.y;
+		Laser.m_StartTick = StartTick;
+		Laser.m_Owner = Owner;
+		Laser.m_Type = LaserType;
+		Laser.m_Subtype = Subtype;
+		Laser.m_SwitchNumber = SwitchNumber;
+		Laser.m_Flags = 0;
+		Server()->SnapNewItem(SnapId, Laser);
 	}
 	else
 	{
-		CNetObj_Laser *pObj = Server()->SnapNewItem<CNetObj_Laser>(SnapId);
-		if(!pObj)
-			return false;
-
-		pObj->m_X = (int)To.x;
-		pObj->m_Y = (int)To.y;
-		pObj->m_FromX = (int)From.x;
-		pObj->m_FromY = (int)From.y;
-		pObj->m_StartTick = StartTick;
+		CNetObj_Laser Laser = {};
+		Laser.m_X = (int)To.x;
+		Laser.m_Y = (int)To.y;
+		Laser.m_FromX = (int)From.x;
+		Laser.m_FromY = (int)From.y;
+		Laser.m_StartTick = StartTick;
+		Server()->SnapNewItem(SnapId, Laser);
 	}
-
-	return true;
 }
 
-bool CGameContext::SnapPickup(const CSnapContext &Context, int SnapId, const vec2 &Pos, int Type, int SubType, int SwitchNumber, int Flags) const
+void CGameContext::SnapPickup(const CSnapContext &Context, int SnapId, const vec2 &Pos, int Type, int SubType, int SwitchNumber, int Flags) const
 {
 	if(Context.IsSixup())
 	{
-		protocol7::CNetObj_Pickup *pPickup = Server()->SnapNewItem<protocol7::CNetObj_Pickup>(SnapId);
-		if(!pPickup)
-			return false;
-
-		pPickup->m_X = (int)Pos.x;
-		pPickup->m_Y = (int)Pos.y;
-		pPickup->m_Type = PickupType_SixToSeven(Type, SubType);
+		protocol7::CNetObj_Pickup Pickup = {};
+		Pickup.m_X = (int)Pos.x;
+		Pickup.m_Y = (int)Pos.y;
+		Pickup.m_Type = PickupType_SixToSeven(Type, SubType);
+		Server()->SnapNewItem(SnapId, Pickup);
 	}
 	else if(Context.GetClientVersion() >= VERSION_DDNET_ENTITY_NETOBJS)
 	{
-		CNetObj_DDNetPickup *pPickup = Server()->SnapNewItem<CNetObj_DDNetPickup>(SnapId);
-		if(!pPickup)
-			return false;
-
-		pPickup->m_X = (int)Pos.x;
-		pPickup->m_Y = (int)Pos.y;
-		pPickup->m_Type = Type;
-		pPickup->m_Subtype = SubType;
-		pPickup->m_SwitchNumber = SwitchNumber;
-		pPickup->m_Flags = Flags;
+		CNetObj_DDNetPickup Pickup = {};
+		Pickup.m_X = (int)Pos.x;
+		Pickup.m_Y = (int)Pos.y;
+		Pickup.m_Type = Type;
+		Pickup.m_Subtype = SubType;
+		Pickup.m_SwitchNumber = SwitchNumber;
+		Pickup.m_Flags = Flags;
+		Server()->SnapNewItem(SnapId, Pickup);
 	}
 	else
 	{
-		CNetObj_Pickup *pPickup = Server()->SnapNewItem<CNetObj_Pickup>(SnapId);
-		if(!pPickup)
-			return false;
+		CNetObj_Pickup Pickup = {};
 
-		pPickup->m_X = (int)Pos.x;
-		pPickup->m_Y = (int)Pos.y;
+		Pickup.m_X = (int)Pos.x;
+		Pickup.m_Y = (int)Pos.y;
 
-		pPickup->m_Type = Type;
+		Pickup.m_Type = Type;
 		if(Context.GetClientVersion() < VERSION_DDNET_WEAPON_SHIELDS)
 		{
 			if(Type >= POWERUP_ARMOR_SHOTGUN && Type <= POWERUP_ARMOR_LASER)
 			{
-				pPickup->m_Type = POWERUP_ARMOR;
+				Pickup.m_Type = POWERUP_ARMOR;
 			}
 		}
-		pPickup->m_Subtype = SubType;
-	}
+		Pickup.m_Subtype = SubType;
 
-	return true;
+		Server()->SnapNewItem(SnapId, Pickup);
+	}
 }
 
 void CGameContext::CallVote(int ClientId, const char *pDesc, const char *pCmd, const char *pReason, const char *pChatmsg, const char *pSixupDesc)
