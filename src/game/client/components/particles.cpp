@@ -3,6 +3,7 @@
 #include "particles.h"
 
 #include <base/math.h>
+#include <base/time.h>
 
 #include <engine/demo.h>
 #include <engine/graphics.h>

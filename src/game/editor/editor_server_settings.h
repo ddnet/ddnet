@@ -4,6 +4,8 @@
 #include "component.h"
 #include "editor_ui.h"
 
+#include <base/str.h>
+
 #include <map>
 #include <string>
 #include <vector>

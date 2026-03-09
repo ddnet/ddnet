@@ -3,6 +3,8 @@
 
 #include "sounds.h"
 
+#include <base/time.h>
+
 #include <engine/engine.h>
 #include <engine/shared/config.h>
 #include <engine/sound.h>

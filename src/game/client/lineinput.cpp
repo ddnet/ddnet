@@ -4,6 +4,10 @@
 
 #include "ui.h"
 
+#include <base/dbg.h>
+#include <base/mem.h>
+#include <base/str.h>
+
 #include <engine/keys.h>
 #include <engine/shared/config.h>
 

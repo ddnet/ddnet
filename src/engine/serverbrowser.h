@@ -6,7 +6,7 @@
 #include "kernel.h"
 
 #include <base/hash.h>
-#include <base/system.h>
+#include <base/str.h>
 
 #include <engine/map.h>
 #include <engine/shared/protocol.h>

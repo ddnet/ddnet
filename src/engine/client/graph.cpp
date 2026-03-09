@@ -3,6 +3,9 @@
 
 #include "graph.h"
 
+#include <base/str.h>
+#include <base/time.h>
+
 #include <engine/graphics.h>
 #include <engine/textrender.h>
 

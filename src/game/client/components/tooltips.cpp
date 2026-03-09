@@ -1,5 +1,7 @@
 #include "tooltips.h"
 
+#include <base/time.h>
+
 #include <game/client/ui.h>
 
 CTooltips::CTooltips()

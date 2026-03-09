@@ -4,6 +4,7 @@
 #include "score.h"
 
 #include <base/log.h>
+#include <base/time.h>
 
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>

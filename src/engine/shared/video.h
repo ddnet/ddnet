@@ -1,8 +1,9 @@
 #ifndef ENGINE_SHARED_VIDEO_H
 #define ENGINE_SHARED_VIDEO_H
 
-#include <base/system.h>
+#include <base/time.h>
 
+#include <cstdint>
 #include <functional>
 
 typedef std::function<void(short *pFinalOut, unsigned Frames)> ISoundMixFunc;

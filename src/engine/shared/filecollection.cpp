@@ -4,6 +4,8 @@
 #include "filecollection.h"
 
 #include <base/math.h>
+#include <base/str.h>
+#include <base/time.h>
 
 #include <engine/storage.h>
 

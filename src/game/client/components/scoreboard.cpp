@@ -2,6 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "scoreboard.h"
 
+#include <base/time.h>
+
 #include <engine/console.h>
 #include <engine/demo.h>
 #include <engine/font_icons.h>

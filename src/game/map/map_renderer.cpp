@@ -1,5 +1,6 @@
 #include "map_renderer.h"
 
+#include <base/dbg.h>
 #include <base/log.h>
 
 #include <game/map/envelope_manager.h>

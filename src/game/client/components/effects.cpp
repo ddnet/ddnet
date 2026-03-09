@@ -3,6 +3,8 @@
 
 #include "effects.h"
 
+#include <base/time.h>
+
 #include <engine/demo.h>
 #include <engine/shared/config.h>
 

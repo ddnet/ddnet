@@ -1,3 +1,6 @@
+#include <base/io.h>
+#include <base/time.h>
+
 #include <engine/graphics.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/config.h>

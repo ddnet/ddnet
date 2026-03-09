@@ -1,6 +1,8 @@
 #include "auto_map.h"
 
+#include <base/io.h>
 #include <base/log.h>
+#include <base/str.h>
 
 #include <engine/shared/linereader.h>
 #include <engine/storage.h>

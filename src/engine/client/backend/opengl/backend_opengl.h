@@ -10,7 +10,7 @@
 #define ENGINE_CLIENT_BACKEND_OPENGL_BACKEND_OPENGL_H_AS_ES
 #endif
 
-#include <base/system.h>
+#include <base/dbg.h>
 
 #include <engine/client/backend/backend_base.h>
 #include <engine/client/graphics_defines.h>

@@ -3,8 +3,10 @@
 #ifndef GAME_ALLOC_H
 #define GAME_ALLOC_H
 
-#include <base/system.h>
+#include <base/dbg.h>
+#include <base/mem.h>
 
+#include <cstdlib>
 #include <new>
 
 #ifndef __has_feature

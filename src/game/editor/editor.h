@@ -14,6 +14,7 @@
 #include "smooth_value.h"
 
 #include <base/bezier.h>
+#include <base/fs.h>
 
 #include <engine/editor.h>
 #include <engine/graphics.h>

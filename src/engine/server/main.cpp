@@ -1,5 +1,6 @@
 #include <base/crashdump.h>
 #include <base/detect.h>
+#include <base/io.h>
 #include <base/logger.h>
 #include <base/os.h>
 #include <base/process.h>
@@ -26,6 +27,8 @@
 #if defined(CONF_FAMILY_WINDOWS)
 #include <windows.h>
 #elif defined(CONF_PLATFORM_ANDROID)
+#include <base/fs.h>
+
 #include <jni.h>
 #endif
 
