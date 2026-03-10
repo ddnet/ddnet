@@ -217,8 +217,12 @@ void CPlayers::RenderHookCollLine(
 	vec2 Position = GameClient()->m_aClients[ClientId].m_RenderPos;
 
 	static constexpr float HOOK_START_DISTANCE = CCharacterCore::PhysicalSize() * 1.5f;
-	float HookLength = (float)GameClient()->m_aClients[ClientId].m_Predicted.m_Tuning.m_HookLength;
-	float HookFireSpeed = (float)GameClient()->m_aClients[ClientId].m_Predicted.m_Tuning.m_HookFireSpeed;
+
+	// When the other player isn't predicted, we don't know their tunes.
+	// Use our own tunes instead. This is wrong, but a good heuristic.
+	const CCharacterCore &PlayerCore = GameClient()->m_aClients[ClientId].m_IsPredicted ? GameClient()->m_aClients[ClientId].m_Predicted : GameClient()->m_aClients[GameClient()->m_aLocalIds[g_Config.m_ClDummy]].m_Predicted;
+	float HookLength = PlayerCore.m_Tuning.m_HookLength;
+	float HookFireSpeed = PlayerCore.m_Tuning.m_HookFireSpeed;
 
 	// janky physics
 	if(HookLength < HOOK_START_DISTANCE || HookFireSpeed <= 0.0f)
