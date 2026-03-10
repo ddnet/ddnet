@@ -208,6 +208,9 @@ public:
 
 static int ExtractDemoChat(const char *pDemoFilePath, IStorage *pStorage)
 {
+	// This is almost certainly wrong, because the `CSnapshotDelta` needs
+	// to be aware of net object sizes. But it appears to work, so I'm not
+	// touching it. Maybe because we only look at net messages.
 	std::unique_ptr<CSnapshotDelta> pDemoSnapshotDelta = std::make_unique<CSnapshotDelta>();
 	std::unique_ptr<CSnapshotDelta> pDemoSnapshotDeltaSixup = std::make_unique<CSnapshotDelta>();
 	CDemoPlayer DemoPlayer(pDemoSnapshotDelta.get(), pDemoSnapshotDeltaSixup.get(), false);
