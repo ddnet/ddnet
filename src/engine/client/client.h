@@ -205,6 +205,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aaaDemorecSnapshotData[NUM_SNAPSHOT_TYPES][2][CSnapshot::MAX_SIZE];
 
 	CSnapshotDelta m_SnapshotDelta;
+	CSnapshotDelta m_SnapshotDeltaSixup;
+	CSnapshotDelta *SnapshotDelta();
 
 	std::deque<std::shared_ptr<CDemoEdit>> m_EditJobs;
 
