@@ -15,6 +15,8 @@
 
 typedef std::function<void()> TUpdateIntraTimesFunc;
 
+class CSnapshotDelta;
+
 class CDemoRecorder : public IDemoRecorder
 {
 	class IConsole *m_pConsole;
@@ -27,7 +29,7 @@ class CDemoRecorder : public IDemoRecorder
 	int m_FirstTick;
 
 	unsigned char m_aLastSnapshotData[CSnapshot::MAX_SIZE];
-	class CSnapshotDelta *m_pSnapshotDelta;
+	CSnapshotDelta *m_pSnapshotDelta;
 
 	int m_NumTimelineMarkers;
 	int m_aTimelineMarkers[MAX_TIMELINE_MARKERS];
@@ -41,7 +43,7 @@ class CDemoRecorder : public IDemoRecorder
 	void Write(int Type, const void *pData, int Size);
 
 public:
-	CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool NoMapData = false);
+	CDemoRecorder(CSnapshotDelta *pSnapshotDelta, bool NoMapData = false);
 	CDemoRecorder() = default;
 	~CDemoRecorder() override;
 
@@ -134,7 +136,7 @@ private:
 	unsigned char m_aSnapshot[CSnapshot::MAX_SIZE];
 	unsigned char m_aLastSnapshotData[CSnapshot::MAX_SIZE];
 	int m_LastSnapshotDataSize;
-	class CSnapshotDelta *m_pSnapshotDelta;
+	CSnapshotDelta *m_pSnapshotDelta;
 
 	bool m_UseVideo;
 #if defined(CONF_VIDEORECORDER)
@@ -162,11 +164,11 @@ private:
 	bool m_Sixup;
 
 public:
-	CDemoPlayer(class CSnapshotDelta *pSnapshotDelta, bool UseVideo);
-	CDemoPlayer(class CSnapshotDelta *pSnapshotDelta, bool UseVideo, TUpdateIntraTimesFunc &&UpdateIntraTimesFunc);
+	CDemoPlayer(CSnapshotDelta *pSnapshotDelta, bool UseVideo);
+	CDemoPlayer(CSnapshotDelta *pSnapshotDelta, bool UseVideo, TUpdateIntraTimesFunc &&UpdateIntraTimesFunc);
 	~CDemoPlayer() override;
 
-	void Construct(class CSnapshotDelta *pSnapshotDelta, bool UseVideo);
+	void Construct(CSnapshotDelta *pSnapshotDelta, bool UseVideo);
 
 	void SetListener(IListener *pListener);
 
@@ -202,10 +204,10 @@ class CDemoEditor : public IDemoEditor
 {
 	IConsole *m_pConsole;
 	IStorage *m_pStorage;
-	class CSnapshotDelta *m_pSnapshotDelta;
+	CSnapshotDelta *m_pSnapshotDelta;
 
 public:
-	virtual void Init(class CSnapshotDelta *pSnapshotDelta, class IConsole *pConsole, class IStorage *pStorage);
+	virtual void Init(CSnapshotDelta *pSnapshotDelta, class IConsole *pConsole, class IStorage *pStorage);
 	bool Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, DEMOFUNC_FILTER pfnFilter, void *pUser) override;
 };
 

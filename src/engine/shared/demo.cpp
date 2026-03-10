@@ -40,7 +40,7 @@ bool CDemoHeader::Valid() const
 	       mem_has_null(m_aTimestamp, sizeof(m_aTimestamp)) && str_utf8_check(m_aTimestamp);
 }
 
-CDemoRecorder::CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool NoMapData)
+CDemoRecorder::CDemoRecorder(CSnapshotDelta *pSnapshotDelta, bool NoMapData)
 {
 	m_File = nullptr;
 	m_aCurrentFilename[0] = '\0';
@@ -473,14 +473,14 @@ void CDemoRecorder::AddDemoMarker(int Tick)
 	}
 }
 
-CDemoPlayer::CDemoPlayer(class CSnapshotDelta *pSnapshotDelta, bool UseVideo, TUpdateIntraTimesFunc &&UpdateIntraTimesFunc)
+CDemoPlayer::CDemoPlayer(CSnapshotDelta *pSnapshotDelta, bool UseVideo, TUpdateIntraTimesFunc &&UpdateIntraTimesFunc)
 {
 	Construct(pSnapshotDelta, UseVideo);
 
 	m_UpdateIntraTimesFunc = UpdateIntraTimesFunc;
 }
 
-CDemoPlayer::CDemoPlayer(class CSnapshotDelta *pSnapshotDelta, bool UseVideo)
+CDemoPlayer::CDemoPlayer(CSnapshotDelta *pSnapshotDelta, bool UseVideo)
 {
 	Construct(pSnapshotDelta, UseVideo);
 }
@@ -490,7 +490,7 @@ CDemoPlayer::~CDemoPlayer()
 	dbg_assert(m_File == 0, "Demo player not stopped");
 }
 
-void CDemoPlayer::Construct(class CSnapshotDelta *pSnapshotDelta, bool UseVideo)
+void CDemoPlayer::Construct(CSnapshotDelta *pSnapshotDelta, bool UseVideo)
 {
 	m_File = nullptr;
 	m_SpeedIndex = DEMO_SPEED_INDEX_DEFAULT;
@@ -1407,7 +1407,7 @@ public:
 	}
 };
 
-void CDemoEditor::Init(class CSnapshotDelta *pSnapshotDelta, class IConsole *pConsole, class IStorage *pStorage)
+void CDemoEditor::Init(CSnapshotDelta *pSnapshotDelta, class IConsole *pConsole, class IStorage *pStorage)
 {
 	m_pSnapshotDelta = pSnapshotDelta;
 	m_pConsole = pConsole;
