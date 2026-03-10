@@ -512,15 +512,6 @@ public:
 	CMapSettingsBackend m_MapSettingsBackend;
 	CMapSettingsBackend::CContext m_MapSettingsCommandContext;
 
-	CImageInfo m_TileArtImageInfo;
-	void AddTileArt(bool IgnoreHistory = false);
-	char m_aTileArtFilename[IO_MAX_PATH_LENGTH];
-	void TileArtCheckColors();
-
-	CImageInfo m_QuadArtImageInfo;
-	CQuadArtParameters m_QuadArtParameters;
-	void AddQuadArt(bool IgnoreHistory = false);
-
 	// editor_ui.cpp
 	void UpdateTooltip(const void *pId, const CUIRect *pRect, const char *pToolTip);
 	ColorRGBA GetButtonColor(const void *pId, int Checked);
@@ -542,6 +533,15 @@ public:
 	int DoEditBoxDropdown(SEditBoxDropdownContext *pDropdown, CLineInput *pLineInput, const CUIRect *pEditBoxRect, int x, float MaxHeight, bool AutoWidth, const std::vector<T> &vData, const FDropdownRenderCallback<T> &pfnMatchCallback);
 	template<typename T>
 	int RenderEditBoxDropdown(SEditBoxDropdownContext *pDropdown, CUIRect View, CLineInput *pLineInput, int x, float MaxHeight, bool AutoWidth, const std::vector<T> &vData, const FDropdownRenderCallback<T> &pfnMatchCallback);
+
+	// For tile art popups
+	CImageInfo m_TileArtImageInfo;
+	char m_aTileArtFilename[IO_MAX_PATH_LENGTH];
+	void TileArtCheckColors();
+
+	// For quad art popups
+	CImageInfo m_QuadArtImageInfo;
+	CQuadArtParameters m_QuadArtParameters;
 
 	static CUi::EPopupMenuFunctionResult PopupMenuFile(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupMenuTools(void *pContext, CUIRect View, bool Active);

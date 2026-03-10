@@ -2200,11 +2200,13 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_TILE_ART_MANY_COLORS)
 		{
-			pEditor->AddTileArt();
+			pEditor->Map()->AddTileArt(std::move(pEditor->m_TileArtImageInfo), pEditor->m_aTileArtFilename, false);
+			pEditor->OnDialogClose();
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_QUAD_ART_BIG_IMAGE)
 		{
-			pEditor->AddQuadArt();
+			pEditor->Map()->AddQuadArt(std::move(pEditor->m_QuadArtImageInfo), pEditor->m_QuadArtParameters, false);
+			pEditor->OnDialogClose();
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_REMOVE_USED_IMAGE)
 		{
@@ -3112,90 +3114,6 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEnvelopeCurvetype(void *pContext, CU
 				return CUi::POPUP_CLOSE_CURRENT;
 			}
 		}
-	}
-
-	return CUi::POPUP_KEEP_OPEN;
-}
-
-CUi::EPopupMenuFunctionResult CEditor::PopupQuadArt(void *pContext, CUIRect View, bool Active)
-{
-	CEditor *pEditor = static_cast<CEditor *>(pContext);
-
-	enum
-	{
-		PROP_IMAGE_PIXELSIZE = 0,
-		PROP_QUAD_PIXELSIZE,
-		PROP_OPTIMIZE,
-		PROP_CENTRALIZE,
-		NUM_PROPS,
-	};
-
-	CProperty aProps[] = {
-		{"Image pixelsize", pEditor->m_QuadArtParameters.m_ImagePixelSize, PROPTYPE_INT, 1, 1024},
-		{"Quad pixelsize", pEditor->m_QuadArtParameters.m_QuadPixelSize, PROPTYPE_INT, 1, 1024},
-		{"Optimize", pEditor->m_QuadArtParameters.m_Optimize, PROPTYPE_BOOL, false, true},
-		{"Centralize", pEditor->m_QuadArtParameters.m_Centralize, PROPTYPE_BOOL, false, true},
-		{nullptr},
-	};
-
-	static int s_aIds[NUM_PROPS] = {0};
-	int NewVal = 0;
-
-	// Title
-	CUIRect Label;
-	View.HSplitTop(20.0f, &Label, &View);
-	pEditor->Ui()->DoLabel(&Label, "Configure quad art", 20.0f, TEXTALIGN_MC);
-	View.HSplitTop(10.0f, nullptr, &View);
-
-	// Properties
-	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
-
-	if(Prop == PROP_IMAGE_PIXELSIZE)
-	{
-		pEditor->m_QuadArtParameters.m_ImagePixelSize = NewVal;
-	}
-	else if(Prop == PROP_QUAD_PIXELSIZE)
-	{
-		pEditor->m_QuadArtParameters.m_QuadPixelSize = NewVal;
-	}
-	else if(Prop == PROP_OPTIMIZE)
-	{
-		pEditor->m_QuadArtParameters.m_Optimize = (bool)NewVal;
-	}
-	else if(Prop == PROP_CENTRALIZE)
-	{
-		pEditor->m_QuadArtParameters.m_Centralize = (bool)NewVal;
-	}
-
-	// Buttons
-	CUIRect BottomBar, Left, Right;
-	View.HSplitBottom(20.f, &View, &BottomBar);
-	BottomBar.VSplitLeft(110.f, &Left, &BottomBar);
-
-	static int s_Cancel;
-	if(pEditor->DoButton_Editor(&s_Cancel, "Cancel", 0, &Left, BUTTONFLAG_LEFT, nullptr))
-	{
-		pEditor->m_QuadArtImageInfo.Free();
-		return CUi::POPUP_CLOSE_CURRENT;
-	}
-
-	BottomBar.VSplitRight(110.f, &BottomBar, &Right);
-	static int s_Confirm;
-	constexpr int MaximumQuadThreshold = 100'000;
-	if(pEditor->DoButton_Editor(&s_Confirm, "Confirm", 0, &Right, BUTTONFLAG_LEFT, nullptr))
-	{
-		size_t MaximumQuadNumber = (pEditor->m_QuadArtImageInfo.m_Width / pEditor->m_QuadArtParameters.m_ImagePixelSize) *
-					   (pEditor->m_QuadArtImageInfo.m_Height / pEditor->m_QuadArtParameters.m_ImagePixelSize);
-		if(MaximumQuadNumber > MaximumQuadThreshold)
-		{
-			pEditor->m_PopupEventType = CEditor::POPEVENT_QUAD_ART_BIG_IMAGE;
-			pEditor->m_PopupEventActivated = true;
-		}
-		else
-		{
-			pEditor->AddQuadArt();
-		}
-		return CUi::POPUP_CLOSE_CURRENT;
 	}
 
 	return CUi::POPUP_KEEP_OPEN;

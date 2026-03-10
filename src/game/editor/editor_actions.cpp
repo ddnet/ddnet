@@ -1267,11 +1267,11 @@ void CEditorActionAppendMap::Redo()
 
 // ---------------------------
 
-CEditorActionTileArt::CEditorActionTileArt(CEditorMap *pMap, int PreviousImageCount, const char *pTileArtFile, std::vector<int> &vImageIndexMap) :
+CEditorActionTileArt::CEditorActionTileArt(CEditorMap *pMap, int PreviousImageCount, const char *pFilename, std::vector<int> &vImageIndexMap) :
 	IEditorAction(pMap), m_PreviousImageCount(PreviousImageCount), m_vImageIndexMap(vImageIndexMap)
 {
-	str_copy(m_aTileArtFile, pTileArtFile);
-	str_copy(m_aDisplayText, "Tile art");
+	str_copy(m_aFilename, pFilename);
+	str_copy(m_aDisplayText, "Add tile art");
 }
 
 void CEditorActionTileArt::Undo()
@@ -1314,22 +1314,21 @@ void CEditorActionTileArt::Undo()
 
 void CEditorActionTileArt::Redo()
 {
-	if(!Graphics()->LoadPng(Editor()->m_TileArtImageInfo, m_aTileArtFile, IStorage::TYPE_ALL))
+	CImageInfo Image;
+	if(!Graphics()->LoadPng(Image, m_aFilename, IStorage::TYPE_ALL))
 	{
-		Editor()->ShowFileDialogError("Failed to load image from file '%s'.", m_aTileArtFile);
+		Editor()->ShowFileDialogError("Failed to load image from file '%s'.", m_aFilename);
 		return;
 	}
-
-	IStorage::StripPathAndExtension(m_aTileArtFile, Editor()->m_aTileArtFilename, sizeof(Editor()->m_aTileArtFilename));
-	Editor()->AddTileArt(true);
+	Map()->AddTileArt(std::move(Image), m_aFilename, true);
 }
 
 // ---------------------------
 
-CEditorActionQuadArt::CEditorActionQuadArt(CEditorMap *pMap, CQuadArtParameters Parameters) :
+CEditorActionQuadArt::CEditorActionQuadArt(CEditorMap *pMap, const CQuadArtParameters &Parameters) :
 	IEditorAction(pMap), m_Parameters(Parameters)
 {
-	str_copy(m_aDisplayText, "Create quad art");
+	str_copy(m_aDisplayText, "Add quad art");
 }
 
 void CEditorActionQuadArt::Undo()
@@ -1340,15 +1339,13 @@ void CEditorActionQuadArt::Undo()
 
 void CEditorActionQuadArt::Redo()
 {
-	Editor()->m_QuadArtParameters = m_Parameters;
-	str_copy(Editor()->m_QuadArtParameters.m_aFilename, m_Parameters.m_aFilename, sizeof(Editor()->m_QuadArtParameters.m_aFilename));
-
-	if(!Graphics()->LoadPng(Editor()->m_QuadArtImageInfo, Editor()->m_QuadArtParameters.m_aFilename, IStorage::TYPE_ALL))
+	CImageInfo Image;
+	if(!Graphics()->LoadPng(Image, m_Parameters.m_aFilename, IStorage::TYPE_ALL))
 	{
-		Editor()->ShowFileDialogError("Failed to load image from file '%s'.", Editor()->m_QuadArtParameters.m_aFilename);
+		Editor()->ShowFileDialogError("Failed to load image from file '%s'.", m_Parameters.m_aFilename);
 		return;
 	}
-	Editor()->AddQuadArt(true);
+	Map()->AddQuadArt(std::move(Image), m_Parameters, true);
 }
 
 // ---------------------------------
