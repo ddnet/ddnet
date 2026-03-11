@@ -339,7 +339,7 @@ int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *p
 		int ix = round_to_int(Pos.x);
 		int iy = round_to_int(Pos.y);
 
-		if(CheckPoint(ix, iy))
+		if(CheckPoint(ix, iy) && !IsShootThrough(ix, iy))
 		{
 			if(pOutCollision)
 				*pOutCollision = Pos;
@@ -447,7 +447,7 @@ int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollisio
 			return TILE_TELEINWEAPON;
 		}
 
-		if(CheckPoint(ix, iy))
+		if(CheckPoint(ix, iy) && !IsShootThrough(ix, iy))
 		{
 			if(pOutCollision)
 				*pOutCollision = Pos;
@@ -635,6 +635,12 @@ bool CCollision::IsHookBlocker(int x, int y, vec2 Pos0, vec2 Pos1) const
 	if(m_pFront && m_pFront[Index].m_Index == TILE_THROUGH_DIR && ((m_pFront[Index].m_Flags == ROTATION_0 && Pos0.y < Pos1.y) || (m_pFront[Index].m_Flags == ROTATION_90 && Pos0.x > Pos1.x) || (m_pFront[Index].m_Flags == ROTATION_180 && Pos0.y > Pos1.y) || (m_pFront[Index].m_Flags == ROTATION_270 && Pos0.x < Pos1.x)))
 		return true;
 	return false;
+}
+
+bool CCollision::IsShootThrough(int x, int y) const
+{
+	const int Index = GetPureMapIndex(x, y);
+	return m_pFront && m_pFront[Index].m_Index == TILE_SHOOT_THROUGH;
 }
 
 int CCollision::IsWallJump(int Index) const

@@ -40,6 +40,7 @@ bool IsValidFrontTile(int Index)
 		Index == TILE_AIR ||
 		Index == TILE_DEATH ||
 		(Index >= TILE_NOLASER && Index <= TILE_THROUGH) ||
+		Index == TILE_SHOOT_THROUGH ||
 		Index == TILE_FREEZE ||
 		(Index >= TILE_UNFREEZE && Index <= TILE_DUNFREEZE) ||
 		(Index >= TILE_LFREEZE && Index <= TILE_LUNFREEZE) ||
