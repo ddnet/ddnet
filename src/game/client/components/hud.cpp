@@ -846,18 +846,7 @@ void CHud::RenderPlayerState(const int ClientId)
 		int AvailableJumpsToDisplay;
 		if(GameClient()->m_Snap.m_aCharacters[ClientId].m_HasExtendedDisplayInfo)
 		{
-			bool Grounded = false;
-			if(Collision()->CheckPoint(pPlayer->m_X + CCharacterCore::PhysicalSize() / 2,
-				   pPlayer->m_Y + CCharacterCore::PhysicalSize() / 2 + 5))
-			{
-				Grounded = true;
-			}
-			if(Collision()->CheckPoint(pPlayer->m_X - CCharacterCore::PhysicalSize() / 2,
-				   pPlayer->m_Y + CCharacterCore::PhysicalSize() / 2 + 5))
-			{
-				Grounded = true;
-			}
-
+			const bool Grounded = Collision()->IsOnGround(vec2(pPlayer->m_X, pPlayer->m_Y), CCharacterCore::PhysicalSize());
 			int UsedJumps = pCharacter->m_JumpedTotal;
 			if(pCharacter->m_Jumps > 1)
 			{
