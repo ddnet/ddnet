@@ -518,7 +518,7 @@ bool CCollision::TestBox(vec2 Pos, vec2 Size) const
 	return false;
 }
 
-void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elasticity, bool *pGrounded) const
+void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elasticity, bool *pGrounded, const std::function<bool(vec2)> &ShouldStop) const
 {
 	// do the move
 	vec2 Pos = *pInoutPos;
@@ -583,6 +583,12 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elast
 					NewPos.x = Pos.x;
 					Vel.x *= -ElasticityX;
 				}
+			}
+			if(ShouldStop && ShouldStop(NewPos))
+			{
+				// we have a collision with a Tee
+				// don't cancel velocity, just stop going further
+				break;
 			}
 
 			Pos = NewPos;
