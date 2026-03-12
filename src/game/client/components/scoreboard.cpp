@@ -2,6 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "scoreboard.h"
 
+#include <base/time.h>
+
 #include <engine/console.h>
 #include <engine/demo.h>
 #include <engine/graphics.h>
@@ -100,6 +102,13 @@ void CScoreboard::OnConsoleInit()
 void CScoreboard::OnInit()
 {
 	m_DeadTeeTexture = Graphics()->LoadTexture("deadtee.png", IStorage::TYPE_ALL);
+	for(auto &pElement : m_apPlayerUiElements)
+		pElement = Ui()->GetNewUIElement(NUM_SCORE_ELEMS);
+	m_pHeadlineUiElement = Ui()->GetNewUIElement(NUM_HEADLINE_ELEMS);
+	for(auto &pElement : m_apTitleUiElements)
+		pElement = Ui()->GetNewUIElement(NUM_TITLE_ELEMS);
+	for(auto &pElement : m_apTeamLabelUiElements)
+		pElement = Ui()->GetNewUIElement(1);
 }
 
 void CScoreboard::OnReset()
@@ -175,9 +184,8 @@ void CScoreboard::RenderTitle(CUIRect TitleLabel, int Team, const char *pTitle, 
 	Ui()->DoLabel(&TitleLabel, pTitle, TitleFontSize, Team == TEAM_RED ? TEXTALIGN_ML : TEXTALIGN_MR, Props);
 }
 
-void CScoreboard::RenderTitleScore(CUIRect ScoreLabel, int Team, float TitleFontSize)
+void CScoreboard::RenderTitleScore(CUIRect ScoreLabel, int Team, float TitleFontSize, CUIElement &TitleUiElement)
 {
-	// map best
 	char aScore[128] = "";
 	const CNetObj_GameInfo *pGameInfoObj = GameClient()->m_Snap.m_pGameInfoObj;
 	const bool TimeScore = GameClient()->m_GameInfo.m_TimeScore;
@@ -186,16 +194,24 @@ void CScoreboard::RenderTitleScore(CUIRect ScoreLabel, int Team, float TitleFont
 	{
 		if(GameClient()->m_MapBestTimeSeconds != FinishTime::UNSET)
 		{
-			Ui()->RenderTime(ScoreLabel,
-				TitleFontSize,
-				GameClient()->m_MapBestTimeSeconds,
-				GameClient()->m_MapBestTimeSeconds == FinishTime::NOT_FINISHED_MILLIS,
-				GameClient()->m_MapBestTimeMillis,
-				GameClient()->m_ReceivedDDNetPlayerFinishTimesMillis);
-			return;
+			bool NotFinished = GameClient()->m_MapBestTimeSeconds == FinishTime::NOT_FINISHED_MILLIS;
+			if(!NotFinished)
+			{
+				str_time(((int64_t)absolute(GameClient()->m_MapBestTimeSeconds)) * 100, TIME_HOURS, aScore, sizeof(aScore));
+				if(GameClient()->m_MapBestTimeMillis >= 0 && GameClient()->m_MapBestTimeSeconds < 60 * 60)
+				{
+					char aMillis[8];
+					int Millis = GameClient()->m_MapBestTimeMillis % 1000;
+					if(GameClient()->m_ReceivedDDNetPlayerFinishTimesMillis)
+						str_format(aMillis, sizeof(aMillis), ".%03d", Millis);
+					else
+						str_format(aMillis, sizeof(aMillis), ".%02d", (int)std::round(Millis / 10));
+					str_append(aScore, aMillis);
+				}
+			}
 		}
 	}
-	else if(GameClient()->IsTeamPlay()) // normal score
+	else if(GameClient()->IsTeamPlay())
 	{
 		const CNetObj_GameData *pGameDataObj = GameClient()->m_Snap.m_pGameDataObj;
 		if(pGameDataObj)
@@ -217,14 +233,13 @@ void CScoreboard::RenderTitleScore(CUIRect ScoreLabel, int Team, float TitleFont
 		}
 	}
 
-	const float ScoreTextWidth = aScore[0] != '\0' ? TextRender()->TextWidth(TitleFontSize, aScore, -1, -1.0f, 0) : 0.0f;
-	if(ScoreTextWidth != 0.0f)
+	if(aScore[0] != '\0')
 	{
-		Ui()->DoLabel(&ScoreLabel, aScore, TitleFontSize, Team == TEAM_RED ? TEXTALIGN_MR : TEXTALIGN_ML);
+		Ui()->DoLabelStreamed(*TitleUiElement.Rect(TITLE_ELEM_SCORE), &ScoreLabel, aScore, TitleFontSize, Team == TEAM_RED ? TEXTALIGN_MR : TEXTALIGN_ML);
 	}
 }
 
-void CScoreboard::RenderTitleBar(CUIRect TitleBar, int Team, const char *pTitle)
+void CScoreboard::RenderTitleBar(CUIRect TitleBar, int Team, const char *pTitle, CUIElement &TitleUiElement)
 {
 	dbg_assert(Team == TEAM_RED || Team == TEAM_BLUE, "Team invalid");
 
@@ -248,7 +263,7 @@ void CScoreboard::RenderTitleBar(CUIRect TitleBar, int Team, const char *pTitle)
 	}
 
 	RenderTitle(TitleLabel, Team, pTitle, TitleFontSize);
-	RenderTitleScore(ScoreLabel, Team, TitleFontSize);
+	RenderTitleScore(ScoreLabel, Team, TitleFontSize, TitleUiElement);
 }
 
 void CScoreboard::RenderGoals(CUIRect Goals)
@@ -522,14 +537,21 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 	const float HeadlineFontsize = 11.0f;
 	CUIRect Headline;
 	Scoreboard.HSplitTop(HeadlineFontsize * 2.0f, &Headline, &Scoreboard);
-	const float HeadlineY = Headline.y + Headline.h / 2.0f - HeadlineFontsize / 2.0f;
 	const char *pScore = UseTime ? Localize("Time") : Localize("Score");
-	TextRender()->Text(ScoreOffset + ScoreLength - TextRender()->TextWidth(HeadlineFontsize, pScore), HeadlineY, HeadlineFontsize, pScore);
-	TextRender()->Text(NameOffset, HeadlineY, HeadlineFontsize, Localize("Name"));
+
+	CUIRect ScoreHeadline = {ScoreOffset, Headline.y, ScoreLength, Headline.h};
+	Ui()->DoLabelStreamed(*m_pHeadlineUiElement->Rect(HEADLINE_ELEM_SCORE), &ScoreHeadline, pScore, HeadlineFontsize, TEXTALIGN_MR);
+
+	CUIRect NameHeadline = {NameOffset, Headline.y, NameLength, Headline.h};
+	Ui()->DoLabelStreamed(*m_pHeadlineUiElement->Rect(HEADLINE_ELEM_NAME), &NameHeadline, Localize("Name"), HeadlineFontsize, TEXTALIGN_ML);
+
 	const char *pClanLabel = Localize("Clan");
-	TextRender()->Text(ClanOffset + (ClanLength - TextRender()->TextWidth(HeadlineFontsize, pClanLabel)) / 2.0f, HeadlineY, HeadlineFontsize, pClanLabel);
+	CUIRect ClanHeadline = {ClanOffset, Headline.y, ClanLength, Headline.h};
+	Ui()->DoLabelStreamed(*m_pHeadlineUiElement->Rect(HEADLINE_ELEM_CLAN), &ClanHeadline, pClanLabel, HeadlineFontsize, TEXTALIGN_MC);
+
 	const char *pPingLabel = Localize("Ping");
-	TextRender()->Text(PingOffset + PingLength - TextRender()->TextWidth(HeadlineFontsize, pPingLabel), HeadlineY, HeadlineFontsize, pPingLabel);
+	CUIRect PingHeadline = {PingOffset, Headline.y, PingLength, Headline.h};
+	Ui()->DoLabelStreamed(*m_pHeadlineUiElement->Rect(HEADLINE_ELEM_PING), &PingHeadline, pPingLabel, HeadlineFontsize, TEXTALIGN_MR);
 
 	// render player entries
 	int CountRendered = 0;
@@ -619,7 +641,9 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 							str_format(aBuf, sizeof(aBuf), "%d", DDTeam);
 						else
 							str_format(aBuf, sizeof(aBuf), Localize("%d\n(%d/%d)", "Team and size"), DDTeam, CurrentDDTeamSize, MaxTeamSize);
-						TextRender()->Text(State.m_TeamStartX, maximum(State.m_TeamStartY + Row.h / 2.0f - TeamFontSize, State.m_TeamStartY + 1.5f /* padding top */), TeamFontSize, aBuf);
+						float TeamLabelY = maximum(State.m_TeamStartY + Row.h / 2.0f - TeamFontSize, State.m_TeamStartY + 1.5f /* padding top */);
+						CUIRect TeamLabelRect = {State.m_TeamStartX, TeamLabelY, Row.w, TeamFontSize * 2.0f};
+						Ui()->DoLabelStreamed(*m_apTeamLabelUiElements[pInfo->m_ClientId]->Rect(0), &TeamLabelRect, aBuf, TeamFontSize, TEXTALIGN_TL);
 					}
 					else
 					{
@@ -629,7 +653,8 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 							str_format(aBuf, sizeof(aBuf), Localize("Team %d (%d/%d)"), DDTeam, CurrentDDTeamSize, MaxTeamSize);
 						else
 							str_format(aBuf, sizeof(aBuf), Localize("Team %d"), DDTeam);
-						TextRender()->Text(Row.x + Row.w / 2.0f - TextRender()->TextWidth(TeamFontSize, aBuf) / 2.0f + 5.0f, Row.y + Row.h, TeamFontSize, aBuf);
+						CUIRect TeamLabelRect = {Row.x + 5.0f, Row.y + Row.h, Row.w, TeamFontSize * 2.0f};
+						Ui()->DoLabelStreamed(*m_apTeamLabelUiElements[pInfo->m_ClientId]->Rect(0), &TeamLabelRect, aBuf, TeamFontSize, TEXTALIGN_TC);
 					}
 
 					CurrentDDTeamSize = 0;
@@ -675,23 +700,49 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 			ScorePosition.y = Row.y;
 			ScorePosition.h = Row.h;
 
+			bool NotFinished = false;
+			aBuf[0] = '\0';
 			if(Race7)
 			{
-				Ui()->RenderTime(ScorePosition, FontSize, pInfo->m_Score / 1000, pInfo->m_Score == protocol7::FinishTime::NOT_FINISHED, pInfo->m_Score % 1000, true);
+				NotFinished = pInfo->m_Score == protocol7::FinishTime::NOT_FINISHED;
+				if(!NotFinished)
+				{
+					str_time(((int64_t)absolute(pInfo->m_Score / 1000)) * 100, TIME_HOURS, aBuf, sizeof(aBuf));
+					char aMillis[8];
+					str_format(aMillis, sizeof(aMillis), ".%03d", pInfo->m_Score % 1000);
+					str_append(aBuf, aMillis);
+				}
 			}
 			else if(MillisecondScore)
 			{
-				Ui()->RenderTime(ScorePosition, FontSize, ClientData.m_FinishTimeSeconds, ClientData.m_FinishTimeSeconds == FinishTime::NOT_FINISHED_MILLIS, ClientData.m_FinishTimeMillis, TrueMilliseconds);
+				NotFinished = ClientData.m_FinishTimeSeconds == FinishTime::NOT_FINISHED_MILLIS;
+				if(!NotFinished)
+				{
+					str_time(((int64_t)absolute(ClientData.m_FinishTimeSeconds)) * 100, TIME_HOURS, aBuf, sizeof(aBuf));
+					if(ClientData.m_FinishTimeMillis >= 0 && ClientData.m_FinishTimeSeconds < 60 * 60)
+					{
+						char aMillis[8];
+						int Millis = ClientData.m_FinishTimeMillis % 1000;
+						if(TrueMilliseconds)
+							str_format(aMillis, sizeof(aMillis), ".%03d", Millis);
+						else
+							str_format(aMillis, sizeof(aMillis), ".%02d", (int)std::round(Millis / 10));
+						str_append(aBuf, aMillis);
+					}
+				}
 			}
 			else if(TimeScore)
 			{
-				Ui()->RenderTime(ScorePosition, FontSize, pInfo->m_Score, pInfo->m_Score == FinishTime::NOT_FINISHED_TIMESCORE, -1, false);
+				NotFinished = pInfo->m_Score == FinishTime::NOT_FINISHED_TIMESCORE;
+				if(!NotFinished)
+					str_time(((int64_t)absolute(pInfo->m_Score)) * 100, TIME_HOURS, aBuf, sizeof(aBuf));
 			}
 			else
 			{
 				str_format(aBuf, sizeof(aBuf), "%d", std::clamp(pInfo->m_Score, -999, 99999));
-				TextRender()->Text(ScoreOffset + ScoreLength - TextRender()->TextWidth(FontSize, aBuf), ScorePosition.y + (Row.h - FontSize) / 2.0f, FontSize, aBuf);
 			}
+			if(!NotFinished && aBuf[0] != '\0')
+				Ui()->DoLabelStreamed(*m_apPlayerUiElements[pInfo->m_ClientId]->Rect(SCORE_ELEM_SCORE), &ScorePosition, aBuf, FontSize, TEXTALIGN_MR);
 
 			// CTF flag
 			if(pGameInfoObj && (pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS) &&
@@ -734,28 +785,31 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 
 			// name
 			{
-				CTextCursor Cursor;
-				Cursor.SetPosition(vec2(NameOffset, Row.y + (Row.h - FontSize) / 2.0f));
-				Cursor.m_FontSize = FontSize;
-				Cursor.m_Flags |= TEXTFLAG_ELLIPSIS_AT_END;
-				Cursor.m_LineWidth = NameLength;
 				if(ClientData.m_AuthLevel)
 				{
 					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAuthedPlayerColor)));
 				}
+				char aName[64];
+				aName[0] = '\0';
 				if(g_Config.m_ClShowIds)
 				{
 					char aClientId[16];
 					GameClient()->FormatClientId(pInfo->m_ClientId, aClientId, EClientIdFormat::INDENT_AUTO);
-					TextRender()->TextEx(&Cursor, aClientId);
+					str_append(aName, aClientId);
 				}
-				TextRender()->TextEx(&Cursor, ClientData.m_aName);
+				str_append(aName, ClientData.m_aName);
+				CUIRect NameRect = {NameOffset, Row.y, NameLength, Row.h};
+				SLabelProperties NameProps;
+				NameProps.m_MaxWidth = NameLength;
+				NameProps.m_EllipsisAtEnd = true;
+				Ui()->DoLabelStreamed(*m_apPlayerUiElements[pInfo->m_ClientId]->Rect(SCORE_ELEM_NAME), &NameRect, aName, FontSize, TEXTALIGN_ML, NameProps);
 
 				// ready / watching
 				if(Client()->IsSixup() && Client()->m_TranslationContext.m_aClients[pInfo->m_ClientId].m_PlayerFlags7 & protocol7::PLAYERFLAG_READY)
 				{
+					const float ReadyCursorX = m_apPlayerUiElements[pInfo->m_ClientId]->Rect(SCORE_ELEM_NAME)->m_Cursor.m_LongestLineWidth;
 					TextRender()->TextColor(0.1f, 1.0f, 0.1f, TextColor.a);
-					TextRender()->TextEx(&Cursor, "✓");
+					TextRender()->Text(NameOffset + ReadyCursorX, Row.y + (Row.h - FontSize) / 2.0f, FontSize, "✓");
 				}
 			}
 
@@ -769,12 +823,11 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 				{
 					TextRender()->TextColor(TextColor);
 				}
-				CTextCursor Cursor;
-				Cursor.SetPosition(vec2(ClanOffset + (ClanLength - minimum(TextRender()->TextWidth(FontSize, ClientData.m_aClan), ClanLength)) / 2.0f, Row.y + (Row.h - FontSize) / 2.0f));
-				Cursor.m_FontSize = FontSize;
-				Cursor.m_Flags |= TEXTFLAG_ELLIPSIS_AT_END;
-				Cursor.m_LineWidth = ClanLength;
-				TextRender()->TextEx(&Cursor, ClientData.m_aClan);
+				CUIRect ClanRect = {ClanOffset, Row.y, ClanLength, Row.h};
+				SLabelProperties ClanProps;
+				ClanProps.m_MaxWidth = ClanLength;
+				ClanProps.m_EllipsisAtEnd = true;
+				Ui()->DoLabelStreamed(*m_apPlayerUiElements[pInfo->m_ClientId]->Rect(SCORE_ELEM_CLAN), &ClanRect, ClientData.m_aClan, FontSize, TEXTALIGN_MC, ClanProps);
 			}
 
 			// country flag
@@ -791,7 +844,8 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 				TextRender()->TextColor(TextRender()->DefaultTextColor());
 			}
 			str_format(aBuf, sizeof(aBuf), "%d", std::clamp(pInfo->m_Latency, 0, 999));
-			TextRender()->Text(PingOffset + PingLength - TextRender()->TextWidth(FontSize, aBuf), Row.y + (Row.h - FontSize) / 2.0f, FontSize, aBuf);
+			CUIRect PingRect = {PingOffset, Row.y, PingLength, Row.h};
+			Ui()->DoLabelStreamed(*m_apPlayerUiElements[pInfo->m_ClientId]->Rect(SCORE_ELEM_PING), &PingRect, aBuf, FontSize, TEXTALIGN_MR);
 			TextRender()->TextColor(TextRender()->DefaultTextColor());
 
 			if(CountRendered == CountEnd)
@@ -936,8 +990,8 @@ void CScoreboard::OnRender()
 		RedScoreboard.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_B, 7.5f);
 		BlueScoreboard.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_B, 7.5f);
 
-		RenderTitleBar(RedTitle, TEAM_RED, pRedTeamName == nullptr ? Localize("Red team") : pRedTeamName);
-		RenderTitleBar(BlueTitle, TEAM_BLUE, pBlueTeamName == nullptr ? Localize("Blue team") : pBlueTeamName);
+		RenderTitleBar(RedTitle, TEAM_RED, pRedTeamName == nullptr ? Localize("Red team") : pRedTeamName, *m_apTitleUiElements[TEAM_RED]);
+		RenderTitleBar(BlueTitle, TEAM_BLUE, pBlueTeamName == nullptr ? Localize("Blue team") : pBlueTeamName, *m_apTitleUiElements[TEAM_BLUE]);
 		RenderScoreboard(RedScoreboard, TEAM_RED, 0, NumPlayers, RenderState);
 		RenderScoreboard(BlueScoreboard, TEAM_BLUE, 0, NumPlayers, RenderState);
 	}
@@ -957,7 +1011,7 @@ void CScoreboard::OnRender()
 
 		CUIRect Title;
 		Scoreboard.HSplitTop(TitleHeight, &Title, &Scoreboard);
-		RenderTitleBar(Title, TEAM_GAME, pTitle);
+		RenderTitleBar(Title, TEAM_GAME, pTitle, *m_apTitleUiElements[2]);
 
 		if(NumPlayers <= 16)
 		{

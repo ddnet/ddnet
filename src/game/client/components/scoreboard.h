@@ -10,6 +10,31 @@
 #include <game/client/ui.h>
 #include <game/client/ui_rect.h>
 
+enum
+{
+	SCORE_ELEM_SCORE = 0,
+	SCORE_ELEM_NAME,
+	SCORE_ELEM_CLAN,
+	SCORE_ELEM_PING,
+	NUM_SCORE_ELEMS
+};
+
+enum
+{
+	HEADLINE_ELEM_SCORE = 0,
+	HEADLINE_ELEM_NAME,
+	HEADLINE_ELEM_CLAN,
+	HEADLINE_ELEM_PING,
+	NUM_HEADLINE_ELEMS
+};
+
+enum
+{
+	TITLE_ELEM_SCORE = 0,
+	TITLE_ELEM_LABEL,
+	NUM_TITLE_ELEMS
+};
+
 class CScoreboard : public CComponent
 {
 	struct CScoreboardRenderState
@@ -22,9 +47,9 @@ class CScoreboard : public CComponent
 			m_TeamStartX(0), m_TeamStartY(0), m_CurrentDDTeamSize(0) {}
 	};
 
-	void RenderTitleScore(CUIRect ScoreLabel, int Team, float TitleFontSize);
+	void RenderTitleScore(CUIRect ScoreLabel, int Team, float TitleFontSize, CUIElement &TitleUiElement);
 	void RenderTitle(CUIRect TitleLabel, int Team, const char *pTitle, float TitleFontSize);
-	void RenderTitleBar(CUIRect TitleBar, int Team, const char *pTitle);
+	void RenderTitleBar(CUIRect TitleBar, int Team, const char *pTitle, CUIElement &TitleUiElement);
 	void RenderGoals(CUIRect Goals);
 	void RenderSpectators(CUIRect Spectators);
 	void RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart, int CountEnd, CScoreboardRenderState &State);
@@ -38,6 +63,11 @@ class CScoreboard : public CComponent
 	bool m_Active;
 
 	IGraphics::CTextureHandle m_DeadTeeTexture;
+
+	CUIElement *m_apPlayerUiElements[MAX_CLIENTS] = {};
+	CUIElement *m_pHeadlineUiElement = nullptr;
+	CUIElement *m_apTitleUiElements[3] = {};
+	CUIElement *m_apTeamLabelUiElements[MAX_CLIENTS] = {};
 
 	std::optional<vec2> m_LastMousePos;
 	bool m_MouseUnlocked = false;
