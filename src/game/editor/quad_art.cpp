@@ -190,7 +190,7 @@ void CEditorMap::AddQuadArt(CImageInfo &&Image, const CQuadArtParameters &Parame
 	QuadArt.Create(pLayer);
 
 	if(!IgnoreHistory)
-		m_EditorHistory.RecordAction(std::make_shared<CEditorActionQuadArt>(this, Parameters));
+		m_EditorHistory.RecordAction(std::make_shared<CEditorActionQuadArt>(this, pGroup));
 
 	OnModify();
 }
