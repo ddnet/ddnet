@@ -2592,62 +2592,62 @@ The extra menu with the given number is activated.
 == O menu extra com o número fornecido está ativo.
 
 Joining Tutorial server
-== 
+== Entrando em servidor de tutorial
 
 There are no Tutorial servers available
-== 
+== Não há servidor de tutorial disponível
 
 Retrying…
-== 
+== Tentando novamente…
 
 Error joining Tutorial server
-== 
+== Erro ao entrar em um servidor de tutorial
 
 Could not find a Tutorial server. Check your internet connection.
-== 
+== Não foi possível encontrar um servidor de tutorial. Confira sua conexão com a Internet.
 
 You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
-== 
+== Você está jogando em um servidor local porque nenhum servidor tutorial online foi encontrado.\n\nSeu registro será salvo apenas localmente.
 
 Could not find online Tutorial server.\nStarting and connecting to local server…
-== 
+== Não foi possível encontrar o servidor de tutorial online.\nIniciando e conectando ao servidor local…
 
 Waiting for local server to stop…
-== 
+== Aguardando o servidor local parar…
 
 Waiting for local server to start…
-== 
+== Aguardando o servidor local iniciar…
 
 Error loading communities
-== 
+== Erro ao carregar comunidades
 
 Click to remove this community from your favorites.
-== 
+== Clique para remover esta comunidade dos seus favoritos.
 
 Click to add this community to your favorites.
-== 
+== Clique para adicionar esta comunidade aos seus favoritos.
 
 Update Rate
-== 
+== Taxa de atualização
 
 Save power by lowering update rate (higher input latency)
-== 
+== Economize energia reduzindo a taxa de atualização (maior latência de entrada)
 
 Colors of the hook collision line:
-== 
+== Cores da linha de colisão do gancho:
 
 [Hook collision line color]
 When nothing is hookable
-== 
+== Quando nada pode ser enganchado
 
 [Hook collision line color]
 When something is hookable
-== 
+== Quando algo pode ser enganchado
 
 [Hook collision line color]
 When a Tee is hookable
-== 
+== Quando um Tee pode ser enganchado
 
 [Hook collision line color]
 Hook collision line tip
-== 
+== Dica da linha de colisão do gancho

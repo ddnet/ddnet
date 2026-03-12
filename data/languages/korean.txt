@@ -548,7 +548,7 @@ Are you sure that you want to disconnect your dummy?
 == 더미 연결을 해제하시겠습니까?
 
 Welcome to DDNet
-== DDNet에 오신 것을 환영합니다.
+== DDNet에 오신 것을 환영합니다
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork는 온라인 협동 게임으로, 당신과 당신의 Tee 동료들이 맵의 결승선에 도달하는 것이 목표입니다. 당신이 초보자라면 가장 난이도가 낮은 맵들로 구성된 Novice 서버에서 시작할 것을 권장합니다. 핑을 고려해 당신의 근처에 있는 서버를 선택하십시오.
@@ -1541,10 +1541,10 @@ Click to select server. Double click to join your friend.
 == 클릭해 서버를 선택합니다. 더블클릭해 친구가 있는 서버에 입장합니다.
 
 Click to remove this player from your friends list.
-== 클릭해 해당 플레이어를 친구 목록에서 제거합니다.
+== 클릭해 이 플레이어를 친구 목록에서 제거합니다.
 
 Click to remove this clan from your friends list.
-== 클릭해 해당 클랜을 친구 목록에서 제거합니다.
+== 클릭해 이 클랜을 친구 목록에서 제거합니다.
 
 Add friends by entering their name below or by clicking their name in the player list.
 == 아래에 이름을 입력하거나 플레이어 목록에서 이름을 클릭해 친구를 추가합니다.
@@ -2505,7 +2505,7 @@ There's an unsaved change in the touch controls editor, you might want to save i
 == 터치 조작 설정 편집기에 저장되지 않은 변경사항이 있습니다. 돌아가 해당 변경사항을 저장하실 수 있습니다.
 
 Start and connect to local server
-== 로컬 서버 열기 및 접속
+== 로컬 서버 시작 후 연결
 
 Add clan
 == 클랜 추가
@@ -2523,7 +2523,7 @@ Preview visibilities
 == 미리보기 표시
 
 You can manage your touch controls settings on this page. Only changes that are saved will be available after restarting the client. You can share your touch controls with others by exporting them to the clipboard.\n\nYou can find more detailed information about the touch controls on the DDNet Wiki.
-== 이 페이지에서 터치 조작 설정을 관리하실 수 있습니다. 클라이언트를 재시작한 후에는 저장된 변경사항만이 유지됩니다. 터치 조작을 클립보드로 내보내면 다른 사람에게 공유할 수 있습니다. \n\nDDNet 위키에서 터치 조작에 대한 더 자세한 정보를 찾으실 수 있습니다.
+== 이 페이지에서 터치 조작 설정을 관리하실 수 있습니다. 클라이언트를 재시작한 후에는 저장된 변경사항만이 유지됩니다. 터치 조작을 클립보드로 내보내면 다른 사람에게 공유할 수 있습니다.\n\nDDNet 위키에서 터치 조작에 대한 더 자세한 정보를 찾으실 수 있습니다.
 
 Open DDNet Wiki
 == DDNet 위키 열기
@@ -2592,62 +2592,62 @@ The extra menu with the given number is activated.
 == 지정된 번호의 기타 메뉴가 활성화됐습니다.
 
 Joining Tutorial server
-== 
+== 튜토리얼 서버에 입장 중
 
 There are no Tutorial servers available
-== 
+== 현재 접속이 가능한 튜토리얼 서버가 없습니다.
 
 Retrying…
-== 
+== 재시도 중…
 
 Error joining Tutorial server
-== 
+== 튜토리얼 서버 연결 오류
 
 Could not find a Tutorial server. Check your internet connection.
-== 
+== 튜토리얼 서버를 찾을 수 없습니다. 인터넷 연결 상태를 확인하십시오.
 
 You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
-== 
+== 현재 온라인 튜토리얼 서버가 발견되지 않아, 로컬 서버에서 플레이하고 있습니다.\n\n당신의 기록은 로컬 파일에만 저장될 것입니다.
 
 Could not find online Tutorial server.\nStarting and connecting to local server…
-== 
+== 온라인 튜토리얼 서버를 찾을 수 없습니다.\n로컬 서버 시작 및 연결 중…
 
 Waiting for local server to stop…
-== 
+== 로컬 서버 종료 대기 중…
 
 Waiting for local server to start…
-== 
+== 로컬 서버 시작 대기 중…
 
 Error loading communities
-== 
+== 커뮤니티 로딩 오류
 
 Click to remove this community from your favorites.
-== 
+== 클릭해 이 커뮤니티를 즐겨찾기에서 제거합니다.
 
 Click to add this community to your favorites.
-== 
+== 클릭해 이 커뮤니티를 즐겨찾기에 추가합니다.
 
 Update Rate
-== 
+== 업데이트 빈도
 
 Save power by lowering update rate (higher input latency)
-== 
+== 업데이트 빈도를 줄여 전력 절약 (입력 지연 시간 증가)
 
 Colors of the hook collision line:
-== 
+== 갈고리 보조선 색상:
 
 [Hook collision line color]
 When nothing is hookable
-== 
+== 갈고리 불가 시
 
 [Hook collision line color]
 When something is hookable
-== 
+== 갈고리 가능 시
 
 [Hook collision line color]
 When a Tee is hookable
-== 
+== Tee 대상 시
 
 [Hook collision line color]
 Hook collision line tip
-== 
+== 갈고리 끝부분

@@ -2592,62 +2592,62 @@ The extra menu with the given number is activated.
 == 指定编号的额外菜单已激活。
 
 Joining Tutorial server
-== 
+== 正在加入教程服务器
 
 There are no Tutorial servers available
-== 
+== 没有可用的教程服务器
 
 Retrying…
-== 
+== 正在重试…
 
 Error joining Tutorial server
-== 
+== 加入教程服务器失败
 
 Could not find a Tutorial server. Check your internet connection.
-== 
+== 未找到教程服务器。请检查你的网络连接。
 
 You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
-== 
+== 由于未找到在线教程服务器，你正在本地服务器游玩。\n\n你的记录只会被保存在本地。
 
 Could not find online Tutorial server.\nStarting and connecting to local server…
-== 
+== 未找到在线教程服务器。\n正在启动并加入本地服务器…
 
 Waiting for local server to stop…
-== 
+== 等待本地服务器关闭…
 
 Waiting for local server to start…
-== 
+== 等待本地服务器启动…
 
 Error loading communities
-== 
+== 加载社区失败
 
 Click to remove this community from your favorites.
-== 
+== 点击取消收藏社区。
 
 Click to add this community to your favorites.
-== 
+== 点击收藏社区。
 
 Update Rate
-== 
+== 客户端刷新率
 
 Save power by lowering update rate (higher input latency)
-== 
+== 降低刷新率以节约功耗（增加输入延迟）
 
 Colors of the hook collision line:
-== 
+== 钩索辅助线颜色：
 
 [Hook collision line color]
 When nothing is hookable
-== 
+== 没有可勾对象时
 
 [Hook collision line color]
 When something is hookable
-== 
+== 瞄准可勾方块时
 
 [Hook collision line color]
 When a Tee is hookable
-== 
+== 瞄准其他Tee时
 
 [Hook collision line color]
 Hook collision line tip
-== 
+== 钩索辅助线头

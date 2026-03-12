@@ -176,7 +176,7 @@ Has people playing
 == Hay gente jugando
 
 High Detail
-== Más detalles (HD)
+== Más Detalles
 
 Hook
 == Gancho
@@ -266,7 +266,7 @@ Player
 == Jugador
 
 Player country:
-== País del jugador
+== País del jugador:
 
 Players
 == Jugadores
@@ -317,7 +317,7 @@ Screenshot
 == Captura de pantalla
 
 Server address:
-== IP del servidor:
+== Dirección del servidor:
 
 Server info
 == Servidor
@@ -491,7 +491,7 @@ UI Color
 == Color de menú
 
 Alpha
-== Transp.
+== Transparencia
 
 LAN
 == LAN
@@ -626,7 +626,7 @@ Date
 == Fecha
 
 Fetch Info
-== Obtener info.
+== Obtener Información
 
 Connecting dummy
 == Conectando dummy
@@ -689,7 +689,7 @@ Zoom out
 == Alejar
 
 Default zoom
-== Zoom predeterm.
+== Zoom predeterminado
 
 Show others
 == Mostrar otros
@@ -716,7 +716,7 @@ Converse
 == Conversar
 
 Statboard
-== Statboard
+== Tabla de estadísticas
 
 Lock team
 == Bloquear equipo
@@ -815,7 +815,7 @@ Save ghost
 == Guardar fantasma
 
 Gameplay
-== Gameplay
+== Jugabilidad
 
 Overlay entities
 == Entidades superpuestas
@@ -1235,7 +1235,7 @@ Show player target angle
 == Mostrar el ángulo de la mira del jugador
 
 Adjust the opacity of entities belonging to other teams, such as tees and name plates
-== Ajusta la opacidad de entidades pertenecientes a otros equipos, como los tees y los nombres.
+== Ajusta la opacidad de entidades pertenecientes a otros equipos, como los tees y los nombres
 
 Opacity of freeze bars inside freeze
 == Opacidad de las barras de freeze dentro del freeze
@@ -1786,7 +1786,7 @@ Round %d/%d
 
 [Spectators]
 %d others…
-== otros %d
+== otros %d…
 
 [Team and size]
 %d\n(%d/%d)
@@ -1899,7 +1899,7 @@ Error saving touch controls
 == Error al guardar los controles táctiles
 
 Could not save touch controls to file. See local console for details.
-== No se pudieron guardar los controles táctiles. Revisa la consola local para más detalles
+== No se pudieron guardar los controles táctiles. Revisa la consola local para más detalles.
 
 Unsaved changes
 == Cambios sin guardar
@@ -2163,7 +2163,7 @@ Skin could not be found.
 == No se pudo encontrar la skin.
 
 No skins match your filter criteria
-== Ninguna skin coincide con tus criterios de filtro.
+== Ninguna skin coincide con tus criterios de filtro
 
 Preview player's name plate
 == Previsualizar el nombre del jugador
@@ -2208,7 +2208,7 @@ Save all changes before turning off the editor?
 == ¿Guardar todos los cambios antes de salir del editor?
 
 Layout
-== Órden
+== Orden
 
 Visibility
 == Visibilidad
@@ -2450,204 +2450,204 @@ Download
 == Descargar
 
 Team save in progress. You'll be able to load with '/load %s'
-== 
+== El save del equipo está en progreso. Podrás cargarlo con '/load %s'
 
 Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails
-== 
+== El save del equipo está en progreso. Podrás cargarlo con '/load %s' si es exitoso, o con '/load %s' si falla
 
 Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue
-== 
+== Save creado exitosamente por %s. La conexión a la base de datos falló, por lo que se ha generado un código nuevo para evitar colisiones. Utiliza '/load %s' para continuar
 
 Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue
-== 
+== Save creado exitosamente por %s. La conexión a la base de datos falló, por lo que se ha generado un código nuevo para evitar colisiones. Utiliza '/load %s' en %s para continuar
 
 Save failed!
-== 
+== ¡El save falló!
 
 [Important alert message]
 Press Esc or Tab to dismiss…
-== 
+== Presiona Esc o Tab para descartar…
 
 Server alert
-== 
+== Alerta de servidor
 
 Moderator alert
-== 
+== Alerta de moderador
 
 Joining Tutorial server
-== 
+== Entrando a un servidor de Tutorial
 
 There's an unsaved change in the touch controls editor, you might want to save it.
-== 
+== Hay un cambio sin guardar en el editor de controles táctiles, quizás quieras guardarlo.
 
 You will be disconnected from the server.
-== 
+== Serás desconectado del servidor.
 
 There are no Tutorial servers available
-== 
+== No hay servidores de Tutorial disponibles
 
 Retrying…
-== 
+== Reintentando…
 
 Error joining Tutorial server
-== 
+== Error al entrar al servidor de Tutorial
 
 Could not find a Tutorial server. Check your internet connection.
-== 
+== No se encontró un servidor de Tutorial. Revisa tu conexión a internet.
 
 You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
-== 
+== Estás jugando en un servidor local porque no hay servidores de Tutorial disponibles en línea.\n\nTus récords se guardarán solo de forma local.
 
 Could not find online Tutorial server.\nStarting and connecting to local server…
-== 
+== No se encontró un servidor de Tutorial en línea.\nIniciando y conectándose al servidor local…
 
 Waiting for local server to stop…
-== 
+== Esperando a que se detenga el servidor local…
 
 Waiting for local server to start…
-== 
+== Esperando a que se inicie le servidor local…
 
 Start and connect to local server
-== 
+== Iniciar y conectarse al servidor local
 
 Error loading communities
-== 
+== Error al cargar las comunidades
 
 Click to remove this community from your favorites.
-== 
+== Haz clic para quitar esta comunidad de tus favoritos.
 
 Click to add this community to your favorites.
-== 
+== Haz clic para agregar esta comunidad a tus favoritos.
 
 Add clan
-== 
+== Agregar clan
 
 Add friend
-== 
+== Agregar amigo
 
 Are you sure that you want to disconnect and play this demo?
-== 
+== ¿Estás seguro de que quieres desconectarte y reproducir esta demo?
 
 Info
-== 
+== Información
 
 Button browser
-== 
+== Navegador de botones
 
 You can select buttons directly in the list below, or long press on a touch button on the screen to select it. You can also move and resize buttons by touch.
-== 
+== Puedes seleccionar botones directamente de la lista de abajo, o mantener presionado un botón en la pantalla para seleccionarlo. También puedes tocarlos para moverlos y cambiar su tamaño.
 
 Preview visibilities
-== 
+== Vista previa de las visibilidades
 
 You can manage your touch controls settings on this page. Only changes that are saved will be available after restarting the client. You can share your touch controls with others by exporting them to the clipboard.\n\nYou can find more detailed information about the touch controls on the DDNet Wiki.
-== 
+== En esta página puedes gestionar tus botones táctiles. Los cambios únicamente guardados estarán disponibles al reiniciar el cliente. Puedes compartir tus controles con otras personas exportándolos al portapapeles.\n\nPodrás encontrar información más detallada sobre los controles táctiles en la Wiki de DDNet.
 
 Open DDNet Wiki
-== 
+== Abrir la Wiki de DDNet
 
 Buttons with this behavior execute console commands like regular key binds.
-== 
+== Los botones con este comportamiento ejecutan comandos de consola como una asignación de tecla normal.
 
 Buttons with this behavior cycle between executing one of two or more specified commands.
-== 
+== Los botones con este comportamiento alternan entre ejecutar uno de dos o más comandos especificados.
 
 Buttons with this behavior execute some predefined actions.
-== 
+== Los botones con este comportamiento ejecutan algunas acciones predeterminadas.
 
 Opens the ingame menu immediately when released.
-== 
+== Abre el menú del juego inmediatamente al soltarlo.
 
 The extra menu button which toggles visibility of buttons with "Extra Menu" visibilities. Also opens the ingame menu on long press.
-== 
+== El botón de menú extra, el cual alterna la visibilidad de botones con visibilidades de "Menú Extra". También abre el menú del juego al mantener presionado.
 
 Opens the emoticon selector (this does not work with binds).
-== 
+== Abre el selector de emoticonos (esto no funciona con binds).
 
 Opens the spectator menu (this does not work with binds).
-== 
+== Abre el menú de espectador (this does not work with binds).
 
 Swaps the active action (fire and hook) for direct touch input and virtual joysticks.
-== 
+== Intercambia la acción activa (disparo y gancho) para la entrada táctil directa y los joysticks virtuales.
 
 Uses the active action with the current aiming position.
-== 
+== Utiliza la acción activa con la posición de apuntado actual.
 
 Virtual joystick which uses the active action.
-== 
+== Joystick virtual que utiliza la acción activa.
 
 Virtual joystick which only aims without using an action.
-== 
+== Joystick virtual que sólo apunta sin usar una acción.
 
 Virtual joystick which always uses fire.
-== 
+== Joystick virtual que siempre usa disparo.
 
 Virtual joystick which always uses hook.
-== 
+== Joystick virtual que siempre usa gancho.
 
 Player is ingame, i.e. not spectating.
-== 
+== El jugador está jugando, es decir, no en espectador.
 
 Zoom is allowed on this server.
-== 
+== El zoom está permitido en este servidor.
 
 A vote is currently active.
-== 
+== Hay una votación en curso.
 
 Dummy is allowed on this server.
-== 
+== El dummy está permitido en este servidor.
 
 Dummy is currently connected.
-== 
+== El dummy está conectado.
 
 Player is currently authed in rcon.
-== 
+== El jugador está autenticado en la rcon.
 
 Demo player is currently active.
-== 
+== El reproductor de demos está activo.
 
 The extra menu with the given number is activated.
-== 
+== El menú extra con el número dado está activado.
 
 Update Rate
-== 
+== Tasa de actualización
 
 Save power by lowering update rate (higher input latency)
-== 
+== Ahorra energia reduciendo la tasa de actualización (mayor latencia de entrada)
 
 Colors of the hook collision line:
-== 
+== Colores de la línea de colisión del gancho:
 
 [Hook collision line color]
 When nothing is hookable
-== 
+== Cuando no hay nada enganchable
 
 [Hook collision line color]
 When something is hookable
-== 
+== Cuando hay algo enganchable
 
 [Hook collision line color]
 When a Tee is hookable
-== 
+== Cuando un Tee es enganchable
 
 [Hook collision line color]
 Hook collision line tip
-== 
+== Punta de la línea de colisión del gancho
 
 Show background quads
-== 
+== Mostrar quads del fondo
 
 Scoreboard cursor
-== 
+== Cursor del marcador
 
 Unmute
-== 
+== Desmutear
 
 Mute
-== 
+== Mutear
 
 Unmute emoticons
-== 
+== Desmutear emoticonos
 
 Mute emoticons
-== 
+== Mutear emoticonos
