@@ -30,7 +30,7 @@ class CDemoRecorder : public IDemoRecorder
 	int m_LastKeyFrame;
 	int m_FirstTick;
 
-	unsigned char m_aLastSnapshotData[CSnapshot::MAX_SIZE];
+	CSnapshotBuffer m_LastSnapshotData;
 	CSnapshotDelta *m_pSnapshotDelta;
 
 	int m_NumTimelineMarkers;
@@ -135,8 +135,8 @@ private:
 	unsigned char m_aChunkData[CSnapshot::MAX_SIZE];
 	// Storage for the full snapshot
 	// where the delta gets unpacked into.
-	unsigned char m_aSnapshot[CSnapshot::MAX_SIZE];
-	unsigned char m_aLastSnapshotData[CSnapshot::MAX_SIZE];
+	CSnapshotBuffer m_Snapshot;
+	CSnapshotBuffer m_LastSnapshotData;
 	int m_LastSnapshotDataSize;
 	CSnapshotDelta *m_pSnapshotDelta;
 	CSnapshotDelta *m_pSnapshotDeltaSixup;

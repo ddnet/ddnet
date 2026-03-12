@@ -19,11 +19,9 @@ TEST(Snapshot, CrcOneInt)
 	Flag.m_Team = 0;
 	mem_copy(pItem, &Flag, sizeof(Flag));
 
-	char aData[CSnapshot::MAX_SIZE];
-	CSnapshot *pSnapshot = (CSnapshot *)aData;
-	Builder.Finish(pSnapshot);
-
-	ASSERT_EQ(pSnapshot->Crc(), 4);
+	CSnapshotBuffer Buffer;
+	Builder.Finish(&Buffer);
+	ASSERT_EQ(Buffer.AsSnapshot()->Crc(), 4);
 }
 
 TEST(Snapshot, CrcTwoInts)
@@ -39,11 +37,9 @@ TEST(Snapshot, CrcTwoInts)
 	Flag.m_Team = 0;
 	mem_copy(pItem, &Flag, sizeof(Flag));
 
-	char aData[CSnapshot::MAX_SIZE];
-	CSnapshot *pSnapshot = (CSnapshot *)aData;
-	Builder.Finish(pSnapshot);
-
-	ASSERT_EQ(pSnapshot->Crc(), 2);
+	CSnapshotBuffer Buffer;
+	Builder.Finish(&Buffer);
+	ASSERT_EQ(Buffer.AsSnapshot()->Crc(), 2);
 }
 
 TEST(Snapshot, CrcBiggerInts)
@@ -59,11 +55,9 @@ TEST(Snapshot, CrcBiggerInts)
 	Flag.m_Team = 1;
 	mem_copy(pItem, &Flag, sizeof(Flag));
 
-	char aData[CSnapshot::MAX_SIZE];
-	CSnapshot *pSnapshot = (CSnapshot *)aData;
-	Builder.Finish(pSnapshot);
-
-	ASSERT_EQ(pSnapshot->Crc(), 100000001);
+	CSnapshotBuffer Buffer;
+	Builder.Finish(&Buffer);
+	ASSERT_EQ(Buffer.AsSnapshot()->Crc(), 100000001);
 }
 
 TEST(Snapshot, CrcOverflow)
@@ -79,9 +73,7 @@ TEST(Snapshot, CrcOverflow)
 	Flag.m_Team = 1;
 	mem_copy(pItem, &Flag, sizeof(Flag));
 
-	char aData[CSnapshot::MAX_SIZE];
-	CSnapshot *pSnapshot = (CSnapshot *)aData;
-	Builder.Finish(pSnapshot);
-
-	ASSERT_EQ(pSnapshot->Crc(), 1);
+	CSnapshotBuffer Buffer;
+	Builder.Finish(&Buffer);
+	ASSERT_EQ(Buffer.AsSnapshot()->Crc(), 1);
 }
