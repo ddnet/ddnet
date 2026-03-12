@@ -526,6 +526,7 @@ protected:
 	};
 	static CUi::EPopupMenuFunctionResult PopupCountrySelection(void *pContext, CUIRect View, bool Active);
 	void RenderServerbrowserInfo(CUIRect View);
+	std::vector<CUIElement *> m_vpScoreboardUiElements;
 	void RenderServerbrowserInfoScoreboard(CUIRect View, const CServerInfo *pSelectedServer);
 	void RenderServerbrowserFriends(CUIRect View);
 	void FriendlistOnUpdate();

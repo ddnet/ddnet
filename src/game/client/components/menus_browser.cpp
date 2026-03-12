@@ -1291,6 +1291,18 @@ void CMenus::RenderServerbrowserInfoScoreboard(CUIRect View, const CServerInfo *
 {
 	const float FontSize = 10.0f;
 
+	enum
+	{
+		UI_ELEM_SCORE = 0,
+		UI_ELEM_NAME_1,
+		UI_ELEM_NAME_2,
+		UI_ELEM_NAME_3,
+		UI_ELEM_CLAN_1,
+		UI_ELEM_CLAN_2,
+		UI_ELEM_CLAN_3,
+		NUM_UI_ELEMS,
+	};
+
 	static CListBox s_ListBox;
 	View.VSplitLeft(5.0f, nullptr, &View);
 	s_ListBox.DoAutoSpacing(2.0f);
@@ -1298,10 +1310,20 @@ void CMenus::RenderServerbrowserInfoScoreboard(CUIRect View, const CServerInfo *
 	s_ListBox.SetScrollbarMargin(5.0f);
 	s_ListBox.DoStart(25.0f, pSelectedServer->m_NumReceivedClients, 1, 3, -1, &View, false, IGraphics::CORNER_NONE, true);
 
+	if(m_vpScoreboardUiElements.size() < (size_t)pSelectedServer->m_NumReceivedClients)
+		m_vpScoreboardUiElements.resize(pSelectedServer->m_NumReceivedClients, nullptr);
+
 	for(int i = 0; i < pSelectedServer->m_NumReceivedClients; i++)
 	{
 		const CServerInfo::CClient &CurrentClient = pSelectedServer->m_aClients[i];
 		const CListboxItem Item = s_ListBox.DoNextItem(&CurrentClient);
+
+		if(m_vpScoreboardUiElements[i] == nullptr)
+		{
+			m_vpScoreboardUiElements[i] = Ui()->GetNewUIElement(NUM_UI_ELEMS);
+		}
+		CUIElement *pUiElement = m_vpScoreboardUiElements[i];
+
 		if(!Item.m_Visible)
 			continue;
 
@@ -1354,7 +1376,7 @@ void CMenus::RenderServerbrowserInfoScoreboard(CUIRect View, const CServerInfo *
 			}
 		}
 
-		Ui()->DoLabel(&Score, aTemp, FontSize, TEXTALIGN_ML);
+		Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_SCORE), &Score, aTemp, FontSize, TEXTALIGN_ML);
 
 		// render tee if available
 		if(CurrentClient.m_aSkin[0] != '\0')
@@ -1385,42 +1407,44 @@ void CMenus::RenderServerbrowserInfoScoreboard(CUIRect View, const CServerInfo *
 		}
 
 		// name
-		CTextCursor NameCursor;
-		NameCursor.SetPosition(vec2(Name.x, Name.y + (Name.h - (FontSize - 1.0f)) / 2.0f));
-		NameCursor.m_FontSize = FontSize - 1.0f;
-		NameCursor.m_Flags |= TEXTFLAG_STOP_AT_END;
-		NameCursor.m_LineWidth = Name.w;
-		const char *pName = CurrentClient.m_aName;
-		bool Printed = false;
-		if(g_Config.m_BrFilterString[0])
-			Printed = PrintHighlighted(pName, [&](const char *pFilteredStr, const int FilterLen) {
-				TextRender()->TextEx(&NameCursor, pName, (int)(pFilteredStr - pName));
-				TextRender()->TextColor(HIGHLIGHTED_TEXT_COLOR);
-				TextRender()->TextEx(&NameCursor, pFilteredStr, FilterLen);
-				TextRender()->TextColor(TextRender()->DefaultTextColor());
-				TextRender()->TextEx(&NameCursor, pFilteredStr + FilterLen, -1);
-			});
-		if(!Printed)
-			TextRender()->TextEx(&NameCursor, pName, -1);
+		{
+			SLabelProperties Props;
+			Props.m_MaxWidth = Name.w;
+			Props.m_StopAtEnd = true;
+			Props.m_EnableWidthCheck = false;
+			const char *pName = CurrentClient.m_aName;
+			bool Printed = false;
+			if(g_Config.m_BrFilterString[0])
+				Printed = PrintHighlighted(pName, [&](const char *pFilteredStr, const int FilterLen) {
+					Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME_1), &Name, pName, FontSize - 1.0f, TEXTALIGN_ML, Props, (int)(pFilteredStr - pName));
+					TextRender()->TextColor(HIGHLIGHTED_TEXT_COLOR);
+					Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME_2), &Name, pFilteredStr, FontSize - 1.0f, TEXTALIGN_ML, Props, FilterLen, &pUiElement->Rect(UI_ELEM_NAME_1)->m_Cursor);
+					TextRender()->TextColor(TextRender()->DefaultTextColor());
+					Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME_3), &Name, pFilteredStr + FilterLen, FontSize - 1.0f, TEXTALIGN_ML, Props, -1, &pUiElement->Rect(UI_ELEM_NAME_2)->m_Cursor);
+				});
+			if(!Printed)
+				Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME_1), &Name, pName, FontSize - 1.0f, TEXTALIGN_ML, Props);
+		}
 
 		// clan
-		CTextCursor ClanCursor;
-		ClanCursor.SetPosition(vec2(Clan.x, Clan.y + (Clan.h - (FontSize - 2.0f)) / 2.0f));
-		ClanCursor.m_FontSize = FontSize - 2.0f;
-		ClanCursor.m_Flags |= TEXTFLAG_STOP_AT_END;
-		ClanCursor.m_LineWidth = Clan.w;
-		const char *pClan = CurrentClient.m_aClan;
-		Printed = false;
-		if(g_Config.m_BrFilterString[0])
-			Printed = PrintHighlighted(pClan, [&](const char *pFilteredStr, const int FilterLen) {
-				TextRender()->TextEx(&ClanCursor, pClan, (int)(pFilteredStr - pClan));
-				TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1.0f);
-				TextRender()->TextEx(&ClanCursor, pFilteredStr, FilterLen);
-				TextRender()->TextColor(TextRender()->DefaultTextColor());
-				TextRender()->TextEx(&ClanCursor, pFilteredStr + FilterLen, -1);
-			});
-		if(!Printed)
-			TextRender()->TextEx(&ClanCursor, pClan, -1);
+		{
+			SLabelProperties Props;
+			Props.m_MaxWidth = Clan.w;
+			Props.m_StopAtEnd = true;
+			Props.m_EnableWidthCheck = false;
+			const char *pClan = CurrentClient.m_aClan;
+			bool Printed = false;
+			if(g_Config.m_BrFilterString[0])
+				Printed = PrintHighlighted(pClan, [&](const char *pFilteredStr, const int FilterLen) {
+					Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_CLAN_1), &Clan, pClan, FontSize - 2.0f, TEXTALIGN_ML, Props, (int)(pFilteredStr - pClan));
+					TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1.0f);
+					Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_CLAN_2), &Clan, pFilteredStr, FontSize - 2.0f, TEXTALIGN_ML, Props, FilterLen, &pUiElement->Rect(UI_ELEM_CLAN_1)->m_Cursor);
+					TextRender()->TextColor(TextRender()->DefaultTextColor());
+					Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_CLAN_3), &Clan, pFilteredStr + FilterLen, FontSize - 2.0f, TEXTALIGN_ML, Props, -1, &pUiElement->Rect(UI_ELEM_CLAN_2)->m_Cursor);
+				});
+			if(!Printed)
+				Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_CLAN_1), &Clan, pClan, FontSize - 2.0f, TEXTALIGN_ML, Props);
+		}
 
 		// flag
 		GameClient()->m_CountryFlags.Render(CurrentClient.m_Country, ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f), Flag.x, Flag.y, Flag.w, Flag.h);
