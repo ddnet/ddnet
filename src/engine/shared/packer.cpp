@@ -4,7 +4,8 @@
 
 #include "compression.h"
 
-#include <base/system.h>
+#include <base/mem.h>
+#include <base/str.h>
 
 CAbstractPacker::CAbstractPacker(unsigned char *pBuffer, size_t Size) :
 	m_pBuffer(pBuffer),

@@ -3,7 +3,7 @@
 #include "netban.h"
 #include "network.h"
 
-#include <base/system.h>
+#include <base/net.h>
 
 bool CNetConsole::Open(NETADDR BindAddr, CNetBan *pNetBan)
 {

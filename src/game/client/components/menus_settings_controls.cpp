@@ -3,7 +3,7 @@
 #include "menus_settings_controls.h"
 
 #include <base/math.h>
-#include <base/system.h>
+#include <base/str.h>
 
 #include <engine/font_icons.h>
 #include <engine/graphics.h>

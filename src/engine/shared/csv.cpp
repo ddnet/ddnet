@@ -1,6 +1,7 @@
 #include "csv.h"
 
-#include <base/system.h>
+#include <base/io.h>
+#include <base/str.h>
 
 void CsvWrite(IOHANDLE File, int NumColumns, const char *const *ppColumns)
 {

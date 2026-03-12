@@ -2,7 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "voting.h"
 
-#include <base/system.h>
+#include <base/str.h>
+#include <base/time.h>
 
 #include <engine/shared/config.h>
 #include <engine/textrender.h>

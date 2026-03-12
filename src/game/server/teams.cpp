@@ -6,7 +6,9 @@
 #include "score.h"
 #include "teehistorian.h"
 
-#include <base/system.h>
+#include <base/dbg.h>
+#include <base/str.h>
+#include <base/time.h>
 
 #include <engine/shared/config.h>
 

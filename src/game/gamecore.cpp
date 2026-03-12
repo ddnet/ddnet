@@ -6,7 +6,8 @@
 #include "mapitems.h"
 #include "teamscore.h"
 
-#include <base/system.h>
+#include <base/dbg.h>
+#include <base/str.h>
 
 #include <engine/shared/config.h>
 

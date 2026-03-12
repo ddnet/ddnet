@@ -4,7 +4,10 @@
 #include "save.h"
 #include "scoreworker.h"
 
-#include <base/system.h>
+#include <base/dbg.h>
+#include <base/io.h>
+#include <base/secure.h>
+#include <base/str.h>
 
 #include <engine/server.h>
 #include <engine/server/databases/connection_pool.h>

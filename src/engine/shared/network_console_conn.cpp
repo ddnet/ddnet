@@ -2,7 +2,9 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "network.h"
 
-#include <base/system.h>
+#include <base/mem.h>
+#include <base/net.h>
+#include <base/str.h>
 
 void CConsoleNetConnection::Reset()
 {

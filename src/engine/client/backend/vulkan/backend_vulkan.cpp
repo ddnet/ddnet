@@ -1,8 +1,11 @@
 #if defined(CONF_BACKEND_VULKAN)
 
+#include <base/dbg.h>
 #include <base/log.h>
 #include <base/math.h>
-#include <base/system.h>
+#include <base/mem.h>
+#include <base/str.h>
+#include <base/time.h>
 
 #include <engine/client/backend/backend_base.h>
 #include <engine/client/backend/vulkan/backend_vulkan.h>

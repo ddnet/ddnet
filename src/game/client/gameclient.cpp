@@ -43,9 +43,13 @@
 #include "race.h"
 #include "render.h"
 
+#include <base/dbg.h>
+#include <base/io.h>
 #include <base/log.h>
 #include <base/math.h>
-#include <base/system.h>
+#include <base/mem.h>
+#include <base/str.h>
+#include <base/time.h>
 #include <base/vmath.h>
 
 #include <engine/client/checksum.h>

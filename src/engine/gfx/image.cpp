@@ -1,6 +1,9 @@
-#include <base/system.h>
+#include <base/dbg.h>
+#include <base/mem.h>
 
 #include <engine/image.h>
+
+#include <cstdlib>
 
 CImageInfo::CImageInfo(CImageInfo &&Other)
 {

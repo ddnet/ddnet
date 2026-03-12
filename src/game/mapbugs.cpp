@@ -1,6 +1,7 @@
 #include "mapbugs.h"
 
-#include <base/system.h>
+#include <base/dbg.h>
+#include <base/str.h>
 
 struct CMapDescription
 {

@@ -1,7 +1,9 @@
 #include "image_loader.h"
 
+#include <base/dbg.h>
+#include <base/io.h>
 #include <base/log.h>
-#include <base/system.h>
+#include <base/mem.h>
 
 #include <png.h>
 

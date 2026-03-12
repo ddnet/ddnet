@@ -1,8 +1,9 @@
 #include "fifo.h"
 
 #include <base/log.h>
-#include <base/system.h>
+#include <base/str.h>
 #if defined(CONF_FAMILY_UNIX)
+#include <base/fs.h>
 
 #include <fcntl.h>
 #include <sys/stat.h>

@@ -2,8 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "map.h"
 
+#include <base/fs.h>
 #include <base/log.h>
-#include <base/system.h>
 
 #include <engine/storage.h>
 

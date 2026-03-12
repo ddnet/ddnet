@@ -4,7 +4,6 @@
 
 #include <base/detect.h>
 #include <base/log.h>
-#include <base/system.h>
 
 #include <string>
 

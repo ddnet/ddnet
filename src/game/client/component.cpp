@@ -2,7 +2,8 @@
 
 #include "gameclient.h"
 
-#include <base/system.h>
+#include <base/dbg.h>
+#include <base/time.h>
 
 void CComponentInterfaces::OnInterfacesInit(CGameClient *pClient)
 {

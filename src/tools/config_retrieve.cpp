@@ -1,4 +1,7 @@
-#include <base/system.h>
+#include <base/dbg.h>
+#include <base/fs.h>
+#include <base/io.h>
+#include <base/str.h>
 
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>

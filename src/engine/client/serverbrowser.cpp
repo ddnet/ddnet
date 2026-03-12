@@ -5,9 +5,13 @@
 #include "serverbrowser_http.h"
 #include "serverbrowser_ping_cache.h"
 
+#include <base/dbg.h>
 #include <base/hash_ctxt.h>
 #include <base/log.h>
-#include <base/system.h>
+#include <base/mem.h>
+#include <base/secure.h>
+#include <base/str.h>
+#include <base/time.h>
 
 #include <engine/console.h>
 #include <engine/engine.h>

@@ -1,6 +1,6 @@
 #include "protocolglue.h"
 
-#include <base/system.h>
+#include <base/dbg.h>
 
 #include <engine/shared/network.h>
 

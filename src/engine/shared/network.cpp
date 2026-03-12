@@ -6,7 +6,12 @@
 #include "huffman.h"
 
 #include <base/bytes.h>
-#include <base/system.h>
+#include <base/dbg.h>
+#include <base/io.h>
+#include <base/mem.h>
+#include <base/net.h>
+#include <base/secure.h>
+#include <base/time.h>
 #include <base/types.h>
 
 #include <engine/shared/protocolglue.h>

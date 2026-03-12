@@ -4,9 +4,10 @@
 #include "menus.h"
 #include "skins.h"
 
+#include <base/fs.h>
 #include <base/log.h>
 #include <base/math.h>
-#include <base/system.h>
+#include <base/str.h>
 
 #include <engine/font_icons.h>
 #include <engine/graphics.h>

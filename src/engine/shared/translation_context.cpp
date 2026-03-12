@@ -1,7 +1,5 @@
 #include "translation_context.h"
 
-#include <base/system.h>
-
 void CTranslationContext::Reset()
 {
 	m_ServerSettings.Reset();

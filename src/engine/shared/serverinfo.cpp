@@ -3,7 +3,8 @@
 #include "json.h"
 
 #include <base/math.h>
-#include <base/system.h>
+#include <base/mem.h>
+#include <base/str.h>
 
 #include <engine/external/json-parser/json.h>
 

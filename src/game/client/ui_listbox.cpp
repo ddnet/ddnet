@@ -2,7 +2,6 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "ui_listbox.h"
 
-#include <base/system.h>
 #include <base/vmath.h>
 
 #include <engine/config.h>

@@ -4,8 +4,10 @@
 
 #include "ui_scrollregion.h"
 
+#include <base/dbg.h>
 #include <base/math.h>
-#include <base/system.h>
+#include <base/str.h>
+#include <base/time.h>
 
 #include <engine/client.h>
 #include <engine/font_icons.h>

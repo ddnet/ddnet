@@ -1,6 +1,9 @@
 #include "stun.h"
 
-#include <base/system.h>
+#include <base/dbg.h>
+#include <base/mem.h>
+#include <base/secure.h>
+#include <base/types.h>
 
 // STUN header (from RFC 5389, section 6, figure 2):
 //

@@ -2,7 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "huffman.h"
 
-#include <base/system.h>
+#include <base/mem.h>
 
 #include <algorithm>
 

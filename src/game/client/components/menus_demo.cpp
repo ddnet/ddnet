@@ -4,9 +4,12 @@
 #include "maplayers.h"
 #include "menus.h"
 
+#include <base/fs.h>
 #include <base/hash.h>
+#include <base/io.h>
 #include <base/math.h>
-#include <base/system.h>
+#include <base/str.h>
+#include <base/time.h>
 
 #include <engine/client.h>
 #include <engine/demo.h>
