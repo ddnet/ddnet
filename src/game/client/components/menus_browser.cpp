@@ -66,41 +66,6 @@ static ColorRGBA GetPingTextColor(int Latency)
 	return color_cast<ColorRGBA>(ColorHSLA((300.0f - std::clamp(Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f));
 }
 
-static ColorRGBA GetGametypeTextColor(const char *pGametype)
-{
-	ColorHSLA HslaColor;
-	if(str_comp(pGametype, "DM") == 0 || str_comp(pGametype, "TDM") == 0 || str_comp(pGametype, "CTF") == 0 || str_comp(pGametype, "LMS") == 0 || str_comp(pGametype, "LTS") == 0)
-		HslaColor = ColorHSLA(0.33f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "catch"))
-		HslaColor = ColorHSLA(0.17f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "dm") || str_find_nocase(pGametype, "tdm") || str_find_nocase(pGametype, "ctf") || str_find_nocase(pGametype, "lms") || str_find_nocase(pGametype, "lts"))
-	{
-		if(pGametype[0] == 'i' || pGametype[0] == 'g')
-			HslaColor = ColorHSLA(0.0f, 1.0f, 0.75f);
-		else
-			HslaColor = ColorHSLA(0.40f, 1.0f, 0.75f);
-	}
-	else if(str_find_nocase(pGametype, "s-ddracex"))
-		HslaColor = ColorHSLA(1.0f, 1.0f, 0.7f);
-	else if(str_find_nocase(pGametype, "f-ddrace") || str_find_nocase(pGametype, "freeze"))
-		HslaColor = ColorHSLA(0.0f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "fng"))
-		HslaColor = ColorHSLA(0.83f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "gores"))
-		HslaColor = ColorHSLA(0.525f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "BW"))
-		HslaColor = ColorHSLA(0.05f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "ddracenet") || str_find_nocase(pGametype, "ddnet") || str_find_nocase(pGametype, "0xf"))
-		HslaColor = ColorHSLA(0.58f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "ddrace") || str_find_nocase(pGametype, "mkrace"))
-		HslaColor = ColorHSLA(0.75f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "race") || str_find_nocase(pGametype, "fastcap"))
-		HslaColor = ColorHSLA(0.46f, 1.0f, 0.75f);
-	else
-		HslaColor = ColorHSLA(1.0f, 1.0f, 1.0f);
-	return color_cast<ColorRGBA>(HslaColor);
-}
-
 void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemActivated)
 {
 	static CListBox s_ListBox;
@@ -411,7 +376,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 				Props.m_EnableWidthCheck = false;
 				if(g_Config.m_UiColorizeGametype)
 				{
-					TextRender()->TextColor(GetGametypeTextColor(pItem->m_aGameType));
+					TextRender()->TextColor(pItem->m_GametypeColor);
 				}
 				Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_GAMETYPE), &Button, pItem->m_aGameType, FontSize, TEXTALIGN_ML, Props);
 				TextRender()->TextColor(TextRender()->DefaultTextColor());
