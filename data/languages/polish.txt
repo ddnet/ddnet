@@ -2544,40 +2544,40 @@ Demo player is currently active.
 == Odtwarzacz demo jest włączony.
 
 Joining Tutorial server
-== 
+== Dołączanie do samouczka
 
 There are no Tutorial servers available
-== 
+== Aktualnie nie ma dostępnych serwerów z samouczkiem
 
 Retrying…
-== 
+== Ponawiam…
 
 Error joining Tutorial server
-== 
+== Wystąpił błąd podczas dołączania do samouczka
 
 Could not find a Tutorial server. Check your internet connection.
-== 
+== Nie znaleziono serwera. Sprawdź swoje połączenie internetowe.
 
 You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
-== 
+== Grasz na serwerze lokalnym, ponieważ żaden serwer z samouczkiem nie został znaleziony. \n\nTwój najlepszy czas zapisze się tylko lokalnie.
 
 Could not find online Tutorial server.\nStarting and connecting to local server…
-== 
+== Nie udało się znaleźć serwera z samouczkiem.\nUruchamianie serwera lokalnego…
 
 Waiting for local server to stop…
-== 
+== Oczekiwanie na zatrzymanie się serwera lokanlego…
 
 Waiting for local server to start…
-== 
+== Oczekiwanie na włączenie się serwera lokalnego…
 
 Error loading communities
-== 
+== Błąd ładowania społeczności
 
 Click to remove this community from your favorites.
-== 
+== Kliknij, aby usunąć tę społeczność z twoich ulubionych.
 
 Click to add this community to your favorites.
-== 
+== Kliknij, aby dodać tę społeczność do twoich ulubionych.
 
 Preview visibilities
 == 
@@ -2586,7 +2586,7 @@ You can manage your touch controls settings on this page. Only changes that are 
 == 
 
 Open DDNet Wiki
-== 
+== Otwórz wikipedie Ddnet
 
 Buttons with this behavior execute console commands like regular key binds.
 == 
@@ -2628,26 +2628,26 @@ The extra menu with the given number is activated.
 == 
 
 Update Rate
-== 
+== Częstotliwość aktualizowania
 
 Save power by lowering update rate (higher input latency)
-== 
+== Oszczędzaj energię, obniżajac częstotliwość aktualizowania (większe opóźnienie)
 
 Colors of the hook collision line:
-== 
+== Kolory linii kolizji:
 
 [Hook collision line color]
 When nothing is hookable
-== 
+== Kiedy nie możesz się niczego złapać
 
 [Hook collision line color]
 When something is hookable
-== 
+== Kiedy możesz się czegoś złapać
 
 [Hook collision line color]
 When a Tee is hookable
-== 
+== Kiedy możesz złapać Tee
 
 [Hook collision line color]
 Hook collision line tip
-== 
+== Końcówka linii

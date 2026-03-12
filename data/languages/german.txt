@@ -2502,152 +2502,152 @@ Mute emoticons
 == Emoticons stummschalten
 
 Joining Tutorial server
-== 
+== Verbinde mit Tutorial Server
 
 There's an unsaved change in the touch controls editor, you might want to save it.
-== 
+== Deine Berührungseingabe wurde noch nicht gespeichert, du möchtest sie vielleicht speichern.
 
 There are no Tutorial servers available
-== 
+== Es sind keine Tutorial Server verfügbar
 
 Retrying…
-== 
+== Neuer Versuch…
 
 Error joining Tutorial server
-== 
+== Fehler beim Verbinden mit Tutorial Server
 
 Could not find a Tutorial server. Check your internet connection.
-== 
+== Konnte keinen Tutorial Server finden. Bitte überprüfe deine Internetverbindung.
 
 You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
-== 
+== Du spielst auf einem lokalen Server, weil kein Tutorial Server gefunden werden konnte.\n\nDein Rekord wird nur lokal gespeichert.
 
 Could not find online Tutorial server.\nStarting and connecting to local server…
-== 
+== Konnte keinen Tutorial Server finden.\nStarte und verbinde mit einem lokalen Server…
 
 Waiting for local server to stop…
-== 
+== Warten auf Beenden des lokalen Servers…
 
 Waiting for local server to start…
-== 
+== Warte auf Start des lokalen Servers…
 
 Start and connect to local server
-== 
+== Starte und verbinde mit lokalem Server
 
 Error loading communities
-== 
+== Fehler beim Laden der Communities
 
 Click to remove this community from your favorites.
-== 
+== Klicke um Community von den Favoriten zu entfernen.
 
 Click to add this community to your favorites.
-== 
+== Klicke um Community zu den Favoriten hinzuzufügen.
 
 Add clan
-== 
+== Füge Clan hinzu
 
 Info
-== 
+== Info
 
 Button browser
-== 
+== Tasten Browser
 
 You can select buttons directly in the list below, or long press on a touch button on the screen to select it. You can also move and resize buttons by touch.
-== 
+== Du kannst Tasten direkt in der liste unten oder durch langes Pressen einer Taste auswählen. Du kannst auch die Taste bewegen und die Größe ändern.
 
 Preview visibilities
 == 
 
 You can manage your touch controls settings on this page. Only changes that are saved will be available after restarting the client. You can share your touch controls with others by exporting them to the clipboard.\n\nYou can find more detailed information about the touch controls on the DDNet Wiki.
-== 
+== Du kannst deine Tastensteuerung in dieser Seite einstellen. Nur Änderungen, die gespeichert werden, sind nach einem Neustart verfügbar. Du kannst deine Tastenkonfiguration mit anderen teilen, indem du sie ins Clipboard kopierst.\n\nDu kannst mehr Details über Touch-Tastensteuerung im DDNet Wiki finden.
 
 Open DDNet Wiki
-== 
+== Öffne DDNet Wiki
 
 Buttons with this behavior execute console commands like regular key binds.
-== 
+== Tasten mit diesem Verhalten führen Konsolenbefehle wie normale Tastenbinds aus.
 
 Buttons with this behavior cycle between executing one of two or more specified commands.
-== 
+== Tasten mit diesem Verhalten wechseln zwischen den spezifizierten Befehlen beim Ausführen.
 
 Buttons with this behavior execute some predefined actions.
-== 
+== Tasten mit diesem Verhalten führen vordefinierte Aktionen aus.
 
 Opens the ingame menu immediately when released.
-== 
+== Öffnet das Spielmenü direkt beim loslassen.
 
 The extra menu button which toggles visibility of buttons with "Extra Menu" visibilities. Also opens the ingame menu on long press.
 == 
 
 Opens the emoticon selector (this does not work with binds).
-== 
+== Öffnet das Emoticon-Menü (funktioniert nicht mit Binds).
 
 Opens the spectator menu (this does not work with binds).
-== 
+== Öffnet das Zuschauer Menü (funktioniert nicht mit Binds).
 
 Swaps the active action (fire and hook) for direct touch input and virtual joysticks.
-== 
+== Tauscht die aktive Aktion (Schießen und Hooken) für direkten Tasten-Input und virtuelle Joysticks.
 
 Uses the active action with the current aiming position.
-== 
+== Benutzt die aktive Aktion mit der aktuellen Fadenkreuz-Position
 
 Virtual joystick which uses the active action.
-== 
+== Virtueller Joystick, der die aktive Aktion benutzt.
 
 Virtual joystick which only aims without using an action.
-== 
+== Virtueller Joystick, der nur ohne eine Aktion anvisiert.
 
 Virtual joystick which always uses fire.
-== 
+== Virtueller Joystick, der immer Schießen benutzt.
 
 Virtual joystick which always uses hook.
-== 
+== Virtueller Joystick, der immer Hooken benutzt.
 
 Player is ingame, i.e. not spectating.
-== 
+== Spieler ist im Spiel und ist kein Zuschauer
 
 Zoom is allowed on this server.
-== 
+== Zoom ist auf dem Server erlaubt.
 
 A vote is currently active.
 == 
 
 Dummy is allowed on this server.
-== 
+== Dummies sind auf dem Server erlaubt.
 
 Dummy is currently connected.
-== 
+== Dummie ist aktuell verbunden.
 
 Player is currently authed in rcon.
-== 
+== Spieler ist aktuell mit rcon eingeloggt.
 
 Demo player is currently active.
-== 
+== Demo-Wiedergabe ist aktuell aktiv.
 
 The extra menu with the given number is activated.
-== 
+== Das Extra Menü mit der gegeben Nummer wurde aktiviert.
 
 Update Rate
 == 
 
 Save power by lowering update rate (higher input latency)
-== 
+== Spare Energie mit einer niedrigeren Aktualisierungs-Rate (höhere Input Latenz)
 
 Colors of the hook collision line:
-== 
+== Farben der Hook-Kollisions-Linie:
 
 [Hook collision line color]
 When nothing is hookable
-== 
+== Wenn nichts hookbar ist
 
 [Hook collision line color]
 When something is hookable
-== 
+== Wenn etwas hookbar ist
 
 [Hook collision line color]
 When a Tee is hookable
-== 
+== Wenn ein Tee hookbar ist
 
 [Hook collision line color]
 Hook collision line tip
-== 
+== Spitze der Hook-Kollisions-Linien

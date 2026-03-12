@@ -243,7 +243,7 @@ auto
 == автоматично
 
 Automatically create statboard csv
-== Автоматично зберігати статистику у файл CSV
+== Автоматично зберігати статистику у файл csv
 
 Automatically record demos
 == Автоматично записувати демо
@@ -267,7 +267,7 @@ Basic
 == Базовий
 
 Best
-== НКом
+== Найкращий
 
 Blue team
 == Сині
@@ -1745,7 +1745,7 @@ Sudden Death
 == Раптова смерть
 
 Suicides
-== СГ
+== Самогубства
 
 Super
 == Супер
@@ -2592,62 +2592,62 @@ The extra menu with the given number is activated.
 == Додаткове меню з вказаним номером активоване.
 
 Joining Tutorial server
-== 
+== Приєднання до навчального сервера
 
 There are no Tutorial servers available
-== 
+== Немає доступних навчальних серверів
 
 Retrying…
-== 
+== Повторна спроба…
 
 Error joining Tutorial server
-== 
+== Не вдалося підключитися до навчального сервера
 
 Could not find a Tutorial server. Check your internet connection.
-== 
+== Не вдалося знайти навчальний сервер. Перевірте підключення до Інтернету.
 
 You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
-== 
+== Ви граєте на локальному сервері, оскільки не вдалося знайти навчальний сервер.\n\nВаш результат буде збережено лише локально.
 
 Could not find online Tutorial server.\nStarting and connecting to local server…
-== 
+== Не вдалося знайти навчальний сервер.\nЗапуск і підключення до локального серверу…
 
 Waiting for local server to stop…
-== 
+== Очікування завершення роботи локального серверу…
 
 Waiting for local server to start…
-== 
+== Очікування запуску локального серверу…
 
 Error loading communities
-== 
+== Помилка завантаження спільнот
 
 Click to remove this community from your favorites.
-== 
+== Натисніть, щоб видалити цю спільноту з ваших улюблених.
 
 Click to add this community to your favorites.
-== 
+== Натисніть, щоб додати цю спільноту до ваших улюблених.
 
 Update Rate
-== 
+== Частота оновлення
 
 Save power by lowering update rate (higher input latency)
-== 
+== Економія енергії, зменшуючи частоту оновлення (збільшується затримка введення)
 
 Colors of the hook collision line:
-== 
+== Кольори лінії зіткнення хука:
 
 [Hook collision line color]
 When nothing is hookable
-== 
+== Коли нічого не можна хукнути
 
 [Hook collision line color]
 When something is hookable
-== 
+== Коли щось є хукабельним
 
 [Hook collision line color]
 When a Tee is hookable
-== 
+== Коли Тії можна хукнути
 
 [Hook collision line color]
 Hook collision line tip
-== 
+== Підказка для лінії зіткнення хука
