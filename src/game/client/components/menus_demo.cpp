@@ -1489,6 +1489,7 @@ void CMenus::RenderDemoBrowserButtons(CUIRect ButtonsView, bool WasListboxItemAc
 			DemolistOnUpdate(false);
 		}
 		SetIconMode(false);
+		GameClient()->m_Tooltips.DoToolTip(&s_RefreshButton, &RefreshButton, Localize("Refresh the demo list"));
 	}
 
 	// fetch info checkbox
@@ -1574,6 +1575,8 @@ void CMenus::RenderDemoBrowserButtons(CUIRect ButtonsView, bool WasListboxItemAc
 			}
 		}
 		SetIconMode(false);
+		const char *pPlayTooltip = m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir ? Localize("Open the selected folder") : Localize("Play the selected demo");
+		GameClient()->m_Tooltips.DoToolTip(&s_PlayButton, &PlayButton, pPlayTooltip);
 
 		if(m_aCurrentDemoFolder[0] != '\0')
 		{
@@ -1602,6 +1605,8 @@ void CMenus::RenderDemoBrowserButtons(CUIRect ButtonsView, bool WasListboxItemAc
 					Ui()->SetActiveItem(&m_DemoRenameInput);
 					return;
 				}
+				const char *pRenameTooltip = m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir ? Localize("Rename folder") : Localize("Rename demo");
+				GameClient()->m_Tooltips.DoToolTip(&s_RenameButton, &RenameButton, pRenameTooltip);
 
 				// delete button
 				static CButtonContainer s_DeleteButton;
@@ -1616,6 +1621,8 @@ void CMenus::RenderDemoBrowserButtons(CUIRect ButtonsView, bool WasListboxItemAc
 					PopupConfirm(m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir ? Localize("Delete folder") : Localize("Delete demo"), aBuf, Localize("Yes"), Localize("No"), m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir ? &CMenus::PopupConfirmDeleteFolder : &CMenus::PopupConfirmDeleteDemo);
 					return;
 				}
+				const char *pDeleteTooltip = m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir ? Localize("Delete folder") : Localize("Delete demo");
+				GameClient()->m_Tooltips.DoToolTip(&s_DeleteButton, &DeleteButton, pDeleteTooltip);
 				SetIconMode(false);
 			}
 
@@ -1640,6 +1647,7 @@ void CMenus::RenderDemoBrowserButtons(CUIRect ButtonsView, bool WasListboxItemAc
 					return;
 				}
 				SetIconMode(false);
+				GameClient()->m_Tooltips.DoToolTip(&s_RenderButton, &RenderButton, Localize("Render demo"));
 			}
 #endif
 		}
