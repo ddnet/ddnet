@@ -1,4 +1,4 @@
-PROJECT_NAME           = "DDraceNetwork Documentation"
+PROJECT_NAME           = "DDNet documentation"
 PROJECT_LOGO           = other/icons/DDNet_48x48x32.png
 OUTPUT_DIRECTORY       = docs
 BUILTIN_STL_SUPPORT    = YES
