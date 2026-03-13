@@ -1267,7 +1267,7 @@ void CMapSettingsBackend::CContext::UpdateFromString(const char *pStr)
 
 	// Get the command/setting
 	m_aCommand[0] = '\0';
-	while(pIterator && *pIterator != ' ' && *pIterator != '\0')
+	while(*pIterator != ' ' && *pIterator != '\0')
 		pIterator++;
 
 	str_copy(m_aCommand, aInputString, (pIterator - aInputString) + 1);
