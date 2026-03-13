@@ -322,6 +322,8 @@ int CCollision::GetTile(int x, int y) const
 
 	if(m_pTiles[Index].m_Index >= TILE_SOLID && m_pTiles[Index].m_Index <= TILE_NOLASER)
 		return m_pTiles[Index].m_Index;
+	if(m_pTiles[Index].m_Index == TILE_SOLID_STOPPER)
+		return m_pTiles[Index].m_Index;
 	return 0;
 }
 
@@ -339,7 +341,7 @@ int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *p
 		int ix = round_to_int(Pos.x);
 		int iy = round_to_int(Pos.y);
 
-		if(CheckPoint(ix, iy) && !IsShootThrough(ix, iy))
+		if(CheckPoint(ix, iy) && !IsSolidStopper(ix, iy))
 		{
 			if(pOutCollision)
 				*pOutCollision = Pos;
@@ -392,8 +394,15 @@ int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision,
 		int Hit = 0;
 		if(CheckPoint(ix, iy))
 		{
-			if(!IsThrough(ix, iy, dx, dy, Pos0, Pos1))
+			if(IsSolidStopper(ix, iy))
+			{
+				if(IsThrough(ix, iy, dx, dy, Pos0, Pos1))
+					Hit = TILE_NOHOOK;
+			}
+			else if(!IsThrough(ix, iy, dx, dy, Pos0, Pos1))
+			{
 				Hit = GetCollisionAt(ix, iy);
+			}
 		}
 		else if(IsHookBlocker(ix, iy, Pos0, Pos1))
 		{
@@ -447,7 +456,7 @@ int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollisio
 			return TILE_TELEINWEAPON;
 		}
 
-		if(CheckPoint(ix, iy) && !IsShootThrough(ix, iy))
+		if(CheckPoint(ix, iy) && !IsSolidStopper(ix, iy))
 		{
 			if(pOutCollision)
 				*pOutCollision = Pos;
@@ -608,7 +617,7 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elast
 int CCollision::IsSolid(int x, int y) const
 {
 	const int Index = GetTile(x, y);
-	return Index == TILE_SOLID || Index == TILE_NOHOOK;
+	return Index == TILE_SOLID || Index == TILE_NOHOOK || Index == TILE_SOLID_STOPPER;
 }
 
 bool CCollision::IsThrough(int x, int y, int OffsetX, int OffsetY, vec2 Pos0, vec2 Pos1) const
@@ -637,10 +646,10 @@ bool CCollision::IsHookBlocker(int x, int y, vec2 Pos0, vec2 Pos1) const
 	return false;
 }
 
-bool CCollision::IsShootThrough(int x, int y) const
+bool CCollision::IsSolidStopper(int x, int y) const
 {
 	const int Index = GetPureMapIndex(x, y);
-	return m_pFront && m_pFront[Index].m_Index == TILE_SHOOT_THROUGH;
+	return m_pTiles[Index].m_Index == TILE_SOLID_STOPPER;
 }
 
 int CCollision::IsWallJump(int Index) const

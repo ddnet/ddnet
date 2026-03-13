@@ -25,6 +25,7 @@ bool IsValidGameTile(int Index)
 		(Index >= TILE_REFILL_JUMPS && Index <= TILE_STOPA) ||
 		(Index >= TILE_CP && Index <= TILE_THROUGH_DIR) ||
 		(Index >= TILE_OLDLASER && Index <= TILE_UNLOCK_TEAM) ||
+		Index == TILE_SOLID_STOPPER ||
 		(Index >= TILE_NPC_DISABLE && Index <= TILE_NPH_DISABLE) ||
 		(Index >= TILE_TELE_GUN_ENABLE && Index <= TILE_TELE_GUN_DISABLE) ||
 		(Index >= TILE_TELE_GRENADE_ENABLE && Index <= TILE_TELE_GRENADE_DISABLE) ||
@@ -40,7 +41,6 @@ bool IsValidFrontTile(int Index)
 		Index == TILE_AIR ||
 		Index == TILE_DEATH ||
 		(Index >= TILE_NOLASER && Index <= TILE_THROUGH) ||
-		Index == TILE_SHOOT_THROUGH ||
 		Index == TILE_FREEZE ||
 		(Index >= TILE_UNFREEZE && Index <= TILE_DUNFREEZE) ||
 		(Index >= TILE_LFREEZE && Index <= TILE_LUNFREEZE) ||

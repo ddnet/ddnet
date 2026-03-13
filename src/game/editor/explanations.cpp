@@ -98,9 +98,9 @@ const char *CExplanations::ExplainDDNet(int Tile, int Layer)
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
 			return "HOOKTHROUGH: Shortcut for new hookthrough.";
 		break;
-	case TILE_SHOOT_THROUGH:
-		if(Layer == LAYER_FRONT)
-			return "SHOOTTHROUGH: Projectiles and lasers pass through this when combined with a collision tile.";
+	case TILE_SOLID_STOPPER:
+		if(Layer == LAYER_GAME)
+			return "SOLID STOPPER: Solid tile that projectiles, lasers, and hooks pass through. Combine with HOOKTHROUGH to stop hooks.";
 		break;
 	case TILE_THROUGH_ALL:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)

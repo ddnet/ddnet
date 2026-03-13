@@ -103,7 +103,7 @@ public:
 	int IsSolid(int x, int y) const;
 	bool IsThrough(int x, int y, int OffsetX, int OffsetY, vec2 Pos0, vec2 Pos1) const;
 	bool IsHookBlocker(int x, int y, vec2 Pos0, vec2 Pos1) const;
-	bool IsShootThrough(int x, int y) const;
+	bool IsSolidStopper(int x, int y) const;
 	int IsWallJump(int Index) const;
 	int IsNoLaser(int x, int y) const;
 	int IsFrontNoLaser(int x, int y) const;
