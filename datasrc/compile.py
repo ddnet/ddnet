@@ -21,7 +21,7 @@ def create_flags_table(names):
 	lines = []
 	lines += ["enum", "{"]
 	for i, name in enumerate(names):
-		lines += [f"\t{name} = 1<<{int(i)},"]
+		lines += [f"\t{name} = 1U<<{int(i)},"]
 	lines += ["};"]
 	return lines
 
