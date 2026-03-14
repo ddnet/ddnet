@@ -25,7 +25,7 @@ public:
 	int NumData() const override;
 
 	int GetItemSize(int Index) override;
-	void *GetItem(int Index, int *pType = nullptr, int *pId = nullptr) override;
+	void *GetItem(int Index, int *pType = nullptr, int *pId = nullptr, CUuid *pUuid = nullptr) override;
 	void GetType(int Type, int *pStart, int *pNum) override;
 	int FindItemIndex(int Type, int Id) override;
 	void *FindItem(int Type, int Id) override;
