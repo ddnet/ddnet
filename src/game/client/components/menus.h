@@ -610,10 +610,10 @@ protected:
 
 	static bool CompareFilenameAscending(const CMapListItem Lhs, const CMapListItem Rhs)
 	{
-		if(str_comp(Lhs.m_aFilename, "..") == 0)
-			return true;
 		if(str_comp(Rhs.m_aFilename, "..") == 0)
 			return false;
+		if(str_comp(Lhs.m_aFilename, "..") == 0)
+			return true;
 		if(Lhs.m_IsDirectory != Rhs.m_IsDirectory)
 			return Lhs.m_IsDirectory;
 		return str_comp_filenames(Lhs.m_aFilename, Rhs.m_aFilename) < 0;
