@@ -312,10 +312,10 @@ protected:
 
 		bool operator<(const CDemoItem &Other) const
 		{
-			if(!str_comp(m_aFilename, ".."))
-				return true;
 			if(!str_comp(Other.m_aFilename, ".."))
 				return false;
+			if(!str_comp(m_aFilename, ".."))
+				return true;
 			if(m_IsDir && !Other.m_IsDir)
 				return true;
 			if(!m_IsDir && Other.m_IsDir)
