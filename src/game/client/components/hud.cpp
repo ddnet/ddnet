@@ -509,22 +509,30 @@ void CHud::RenderScoreHud()
 
 void CHud::RenderWarmupTimer()
 {
-	// render warmup timer
-	if(GameClient()->m_Snap.m_pGameInfoObj->m_WarmupTimer > 0 && !(GameClient()->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_RACETIME))
+	if(GameClient()->m_Snap.m_pGameInfoObj->m_WarmupTimer <= 0 ||
+		(GameClient()->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_RACETIME) != 0)
 	{
-		char aBuf[256];
-		float FontSize = 20.0f;
-		float w = TextRender()->TextWidth(FontSize, Localize("Warmup"), -1, -1.0f);
-		TextRender()->Text(150 * Graphics()->ScreenAspect() + -w / 2, 50, FontSize, Localize("Warmup"), -1.0f);
-
-		int Seconds = GameClient()->m_Snap.m_pGameInfoObj->m_WarmupTimer / Client()->GameTickSpeed();
-		if(Seconds < 5)
-			str_format(aBuf, sizeof(aBuf), "%d.%d", Seconds, (GameClient()->m_Snap.m_pGameInfoObj->m_WarmupTimer * 10 / Client()->GameTickSpeed()) % 10);
-		else
-			str_format(aBuf, sizeof(aBuf), "%d", Seconds);
-		w = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f);
-		TextRender()->Text(150 * Graphics()->ScreenAspect() + -w / 2, 75, FontSize, aBuf, -1.0f);
+		return;
 	}
+
+	const float FontSize = 20.0f;
+	const char *pTitle = Localize("Warmup");
+	TextRender()->Text(150.0f * Graphics()->ScreenAspect() - TextRender()->TextWidth(FontSize, pTitle) / 2.0f, 50.0f, FontSize, pTitle);
+
+	const int Seconds = GameClient()->m_Snap.m_pGameInfoObj->m_WarmupTimer / Client()->GameTickSpeed();
+	char aWarmupTime[16];
+	float TextWidth;
+	if(Seconds < 5)
+	{
+		str_format(aWarmupTime, sizeof(aWarmupTime), "%d.%d", Seconds, (GameClient()->m_Snap.m_pGameInfoObj->m_WarmupTimer * 10 / Client()->GameTickSpeed()) % 10);
+		TextWidth = TextRender()->TextWidth(FontSize, "0.0"); // Calculate width with fixed string to avoid slight changes when using aWarmupTime
+	}
+	else
+	{
+		str_format(aWarmupTime, sizeof(aWarmupTime), "%d", Seconds);
+		TextWidth = TextRender()->TextWidth(FontSize, aWarmupTime);
+	}
+	TextRender()->Text(150.0f * Graphics()->ScreenAspect() - TextWidth / 2.0f, 75.0f, FontSize, aWarmupTime);
 }
 
 void CHud::RenderTextInfo()
