@@ -562,7 +562,6 @@ bool CRenderLayerTile::DoRender(const CRenderLayerParams &Params)
 
 void CRenderLayerTile::RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params)
 {
-	Graphics()->BlendNormal();
 	RenderTileLayer(Color, Params);
 }
 
@@ -1353,7 +1352,6 @@ void CRenderLayerQuads::Render(const CRenderLayerParams &Params)
 	float Alpha = Force ? 1.f : (100 - Params.m_EntityOverlayVal) / 100.0f;
 	if(!Graphics()->IsQuadBufferingEnabled() || !Params.m_TileAndQuadBuffering)
 	{
-		Graphics()->BlendNormal();
 		RenderMap()->ForceRenderQuads(m_pQuads, m_pLayerQuads->m_NumQuads, LAYERRENDERFLAG_TRANSPARENT, m_pEnvelopeManager->EnvelopeEval(), Alpha);
 	}
 	else
@@ -1425,7 +1423,6 @@ void CRenderLayerEntityGame::Init()
 
 void CRenderLayerEntityGame::RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params)
 {
-	Graphics()->BlendNormal();
 	if(Params.m_RenderTileBorder)
 		RenderKillTileBorder(Color.Multiply(GetDeathBorderColor()));
 	RenderTileLayer(Color, Params);
@@ -1499,7 +1496,6 @@ void CRenderLayerEntityTele::Unload()
 
 void CRenderLayerEntityTele::RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params)
 {
-	Graphics()->BlendNormal();
 	RenderTileLayer(Color, Params);
 	if(Params.m_RenderText)
 	{
@@ -1671,7 +1667,6 @@ void CRenderLayerEntitySwitch::GetTileData(unsigned char *pIndex, unsigned char 
 
 void CRenderLayerEntitySwitch::RenderTileLayerWithTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params)
 {
-	Graphics()->BlendNormal();
 	RenderTileLayer(Color, Params);
 	if(Params.m_RenderText)
 	{

@@ -311,7 +311,6 @@ void CParticles::RenderGroup(int Group)
 	{
 		int i = m_aFirstPart[Group];
 
-		Graphics()->BlendNormal();
 		Graphics()->WrapClamp();
 
 		while(i != -1)
@@ -347,6 +346,5 @@ void CParticles::RenderGroup(int Group)
 			i = m_aParticles[i].m_NextPart;
 		}
 		Graphics()->WrapNormal();
-		Graphics()->BlendNormal();
 	}
 }

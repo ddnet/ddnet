@@ -27,7 +27,6 @@ void CLayerSounds::Render(bool Tileset)
 {
 	// TODO: nice texture
 	Graphics()->TextureClear();
-	Graphics()->BlendNormal();
 	Graphics()->QuadsBegin();
 
 	// draw falloff distance
