@@ -30,9 +30,8 @@ jobs:
       uses: actions/checkout@v4
     - name: Run cxxbridge
       run: |
-        cargo install cxxbridge-cmd@1.0.171
-        cxxbridge src/engine/shared/rust_version.rs --output src/rust-bridge/engine/shared/rust_version.cpp --output src/rust-bridge/engine/shared/rust_version.h
-        cxxbridge src/engine/console.rs --output src/rust-bridge/cpp/console.cpp --output src/rust-bridge/cpp/console.h
+        cargo install cxxbridge-cmd@1.0.71
+        python scripts/generate_rust_bridge.py
         git diff --exit-code
 
   rustfmt:

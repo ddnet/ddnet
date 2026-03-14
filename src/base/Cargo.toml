@@ -10,7 +10,7 @@ license = "Zlib"
 path = "lib.rs"
 
 [dependencies]
-cxx = "1.0"
+cxx = "=1.0.71"
 
 [dev-dependencies]
 ddnet-test = { path = "../rust-bridge/test", features = ["link-test-libraries"] }
