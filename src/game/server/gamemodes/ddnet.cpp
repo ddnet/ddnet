@@ -2,6 +2,8 @@
 /* Based on Race mod stuff and tweaked by GreYFoX@GTi and others to fit our DDRace needs. */
 #include "ddnet.h"
 
+#include <base/time.h>
+
 #include <engine/server.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
@@ -157,7 +159,7 @@ IGameController::CFinishTime CGameControllerDDNet::SnapPlayerTime(int SnappingCl
 	if(BestTime.has_value() && (!g_Config.m_SvHideScore || SnappingClient == pPlayer->GetCid()))
 	{
 		// same as in str_time_float
-		int64_t TimeMilliseconds = static_cast<int64_t>(std::roundf(BestTime.value() * 1000.0f));
+		int64_t TimeMilliseconds = time_milliseconds_from_seconds(BestTime.value());
 		int Seconds = static_cast<int>(TimeMilliseconds / 1000);
 		int Millis = static_cast<int>(TimeMilliseconds % 1000);
 		return CFinishTime(Seconds, Millis);
@@ -170,7 +172,7 @@ IGameController::CFinishTime CGameControllerDDNet::SnapMapBestTime(int SnappingC
 	if(m_CurrentRecord.has_value() && !g_Config.m_SvHideScore)
 	{
 		// same as in str_time_float
-		int64_t TimeMilliseconds = static_cast<int64_t>(std::roundf(m_CurrentRecord.value() * 1000.0f));
+		int64_t TimeMilliseconds = time_milliseconds_from_seconds(m_CurrentRecord.value());
 		int Seconds = static_cast<int>(TimeMilliseconds / 1000);
 		int Millis = static_cast<int>(TimeMilliseconds % 1000);
 		return CFinishTime(Seconds, Millis);
