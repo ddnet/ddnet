@@ -18,6 +18,7 @@
 
 class CEditorMap;
 class IEditorEnvelopeReference;
+class CLayerGroup;
 
 class CEditorActionLayerBase : public IEditorAction
 {
@@ -367,13 +368,13 @@ private:
 class CEditorActionQuadArt : public IEditorAction
 {
 public:
-	CEditorActionQuadArt(CEditorMap *pMap, const CQuadArtParameters &Parameters);
+	CEditorActionQuadArt(CEditorMap *pMap, const std::shared_ptr<CLayerGroup> &pGroup);
 
 	void Undo() override;
 	void Redo() override;
 
 private:
-	CQuadArtParameters m_Parameters;
+	std::shared_ptr<CLayerGroup> m_pGroup;
 };
 
 // ----------------------
