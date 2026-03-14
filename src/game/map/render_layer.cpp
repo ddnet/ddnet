@@ -347,14 +347,6 @@ void CRenderLayerTile::RenderTileLayer(const ColorRGBA &Color, const CRenderLaye
 	{
 		RenderTileBorder(Color, ScreenRectX0, ScreenRectY0, ScreenRectX1, ScreenRectY1, &Visuals);
 	}
-
-	if(Params.m_DebugRenderTileClips && m_LayerClip.has_value())
-	{
-		const CClipRegion &Clip = m_LayerClip.value();
-		char aDebugText[32];
-		str_format(aDebugText, sizeof(aDebugText), "Group %d LayerId %d", m_GroupId, m_LayerId);
-		RenderMap()->RenderDebugClip(Clip.m_X, Clip.m_Y, Clip.m_Width, Clip.m_Height, ColorRGBA(1.0f, 0.5f, 0.0f, 1.0f), Params.m_Zoom, aDebugText);
-	}
 }
 
 void CRenderLayerTile::RenderTileBorder(const ColorRGBA &Color, int BorderX0, int BorderY0, int BorderX1, int BorderY1, CTileLayerVisuals *pTileLayerVisuals)
@@ -541,6 +533,14 @@ void CRenderLayerTile::Render(const CRenderLayerParams &Params)
 	else
 	{
 		RenderTileLayerNoTileBuffer(Color, Params);
+	}
+
+	if(Params.m_DebugRenderTileClips && m_LayerClip.has_value())
+	{
+		const CClipRegion &Clip = m_LayerClip.value();
+		char aDebugText[32];
+		str_format(aDebugText, sizeof(aDebugText), "Group %d LayerId %d", m_GroupId, m_LayerId);
+		RenderMap()->RenderDebugClip(Clip.m_X, Clip.m_Y, Clip.m_Width, Clip.m_Height, ColorRGBA(1.0f, 0.5f, 0.0f, 1.0f), Params.m_Zoom, aDebugText);
 	}
 }
 
