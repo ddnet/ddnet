@@ -196,6 +196,11 @@ bool timestamp_from_str(const char *string, const char *format, time_t *timestam
 #pragma GCC diagnostic pop
 #endif
 
+int64_t time_milliseconds_from_seconds(float seconds)
+{
+	return static_cast<int64_t>(std::round(static_cast<double>(seconds) * 1000.0));
+}
+
 int str_time(int64_t centisecs, ETimeFormat format, char *buffer, int buffer_size)
 {
 	dbg_assert(buffer_size > 0, "Invalid buffer size: %d", buffer_size);
@@ -242,5 +247,6 @@ int str_time(int64_t centisecs, ETimeFormat format, char *buffer, int buffer_siz
 
 int str_time_float(float secs, ETimeFormat format, char *buffer, int buffer_size)
 {
-	return str_time(static_cast<int64_t>(std::roundf(secs * 1000) / 10), format, buffer, buffer_size);
+	int64_t millis = time_milliseconds_from_seconds(secs);
+	return str_time(millis / 10, format, buffer, buffer_size);
 }
