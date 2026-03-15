@@ -964,6 +964,19 @@ bool CGameClient::IsDemoPlaybackPaused() const
 	       DemoPlayer()->BaseInfo()->m_Paused;
 }
 
+float CGameClient::GetAnimationPlaybackSpeed() const
+{
+	if(IsWorldPaused() || IsDemoPlaybackPaused())
+	{
+		return 0.0f;
+	}
+	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	{
+		return DemoPlayer()->BaseInfo()->m_Speed;
+	}
+	return 1.0f;
+}
+
 bool CGameClient::AntiPingPlayers() const
 {
 	return g_Config.m_ClAntiPing &&

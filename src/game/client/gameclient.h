@@ -683,6 +683,7 @@ public:
 	bool IsTeamPlay() const;
 	bool IsWorldPaused() const;
 	bool IsDemoPlaybackPaused() const;
+	float GetAnimationPlaybackSpeed() const;
 
 	bool AntiPingPlayers() const;
 	bool AntiPingGrenade() const;
