@@ -1036,7 +1036,22 @@ void CRenderLayerQuads::Init()
 		m_TextureHandle.Invalidate();
 
 	if(!Graphics()->IsQuadBufferingEnabled())
+	{
+		// create clip region for unbuffered backends
+		CQuadCluster QuadCluster;
+		QuadCluster.m_Grouped = false;
+		QuadCluster.m_StartIndex = 0;
+		QuadCluster.m_NumQuads = m_pLayerQuads->m_NumQuads;
+
+		// unused, because cluster is not grouped
+		QuadCluster.m_PosEnv = -1;
+		QuadCluster.m_PosEnvOffset = 0;
+		QuadCluster.m_ColorEnv = -1;
+		QuadCluster.m_ColorEnvOffset = 0;
+
+		CalculateClipping(QuadCluster);
 		return;
+	}
 
 	std::vector<CTmpQuad> vTmpQuads;
 	std::vector<CTmpQuadTextured> vTmpQuadsTextured;
