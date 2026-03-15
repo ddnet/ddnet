@@ -92,6 +92,9 @@ target
 /integration_test/*
 /source_date_epoch
 
+# Cache folder for scripts/parse_crashlog_drmingw.py
+/scripts/drmingw_symbols_cache
+
 # IDE project files
 .cache
 .cproject
