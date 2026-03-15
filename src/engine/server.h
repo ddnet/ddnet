@@ -83,7 +83,8 @@ public:
 	virtual int GetClientVersion(int ClientId) const = 0;
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientId) = 0;
 
-	template<class T, typename std::enable_if<!protocol7::is_sixup<T>::value, int>::type = 0>
+	template<class T>
+		requires(!protocol7::is_sixup<T>::value)
 	int SendPackMsg(const T *pMsg, int Flags, int ClientId)
 	{
 		int Result = 0;
@@ -100,7 +101,8 @@ public:
 		return Result;
 	}
 
-	template<class T, typename std::enable_if<protocol7::is_sixup<T>::value, int>::type = 1>
+	template<class T>
+		requires(protocol7::is_sixup<T>::value)
 	int SendPackMsg(const T *pMsg, int Flags, int ClientId)
 	{
 		int Result = 0;
