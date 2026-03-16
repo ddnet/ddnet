@@ -632,7 +632,7 @@ def client_can_connect(test_env):
 	server = test_env.server()
 	wait_for_startup([client, server])
 	client.command(f"connect localhost:{server.port}")
-	server.wait_for_log_prefix("server: player has entered the game", timeout=10)
+	server.wait_for_log_prefix("server: player has entered the game.", timeout=10)
 	server.exit()
 	client.wait_for_log_exact("client: offline error='Server shutdown'")
 	client.exit()
@@ -646,7 +646,7 @@ def client_can_connect_7(test_env):
 	server = test_env.server()
 	wait_for_startup([client, server])
 	client.command(f"connect tw-0.7+udp://localhost:{server.port}")
-	server.wait_for_log_prefix("server: player has entered the game", timeout=10)
+	server.wait_for_log_prefix("server: player has entered the game.", timeout=10)
 	server.exit()
 	client.wait_for_log_exact("client: offline error='Server shutdown'")
 	client.exit()
@@ -677,14 +677,14 @@ def smoke_test(test_env):
 	client1.command("debug 1")
 	client1.command("stdout_output_level 2; loglevel 2")
 	client1.command(f"connect localhost:{server.port}")
-	server.wait_for_log_prefix("server: player has entered the game", timeout=10)
+	server.wait_for_log_prefix("server: player has entered the game.", timeout=10)
 	client1.wait_for_log_exact("client: state change. last=2 current=3", timeout=15)
 	client1.command("stdout_output_level 0; loglevel 0")
 	client1.command("debug 0")
 	client1.command("record client1")
 
 	client2.command(f"connect localhost:{server.port}")
-	server.wait_for_log_prefix("server: player has entered the game", timeout=10)
+	server.wait_for_log_prefix("server: player has entered the game.", timeout=10)
 	for _ in range(5):
 		server.wait_for_log(
 			lambda l: l.line.startswith("chat: *** client1 finished in:") or l.line.startswith("chat: *** client2 finished in:"),
@@ -746,7 +746,7 @@ def smoke_test(test_env):
 	client1.command("rcon sv_map Tutorial")
 
 	for _ in range(2):
-		server.wait_for_log_prefix("server: player has entered the game", timeout=10)
+		server.wait_for_log_prefix("server: player has entered the game.", timeout=10)
 
 	client1.clear_events()
 	client2.clear_events()
