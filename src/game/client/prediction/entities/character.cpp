@@ -364,7 +364,10 @@ void CCharacter::FireWeapon()
 
 			pTarget->TakeDamage(Force, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
 				GetCid(), m_Core.m_ActiveWeapon);
-			pTarget->Unfreeze();
+			if(GameWorld()->m_WorldConfig.m_ConsistentUnfreeze)
+				pTarget->SetPendingUnfreeze();
+			else
+				pTarget->Unfreeze();
 
 			Hits++;
 		}
@@ -1193,6 +1196,14 @@ bool CCharacter::Unfreeze()
 	return false;
 }
 
+void CCharacter::ApplyPendingUnfreeze()
+{
+	if(!m_HasPendingUnfreeze)
+		return;
+	m_HasPendingUnfreeze = false;
+	Unfreeze();
+}
+
 void CCharacter::GiveWeapon(int Weapon, bool Remove)
 {
 	if(Weapon == WEAPON_NINJA)
@@ -1312,6 +1323,7 @@ void CCharacter::ResetPrediction()
 	m_Core.m_DeepFrozen = false;
 	m_Core.m_LiveFrozen = false;
 	m_FrozenLastTick = false;
+	m_HasPendingUnfreeze = false;
 	for(int w = 0; w < NUM_WEAPONS; w++)
 	{
 		SetWeaponGot(w, false);

@@ -83,7 +83,10 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	}
 	else if(m_Type == WEAPON_LASER)
 	{
-		pHit->Unfreeze();
+		if(GameWorld()->m_WorldConfig.m_ConsistentUnfreeze)
+			pHit->SetPendingUnfreeze();
+		else
+			pHit->Unfreeze();
 	}
 	return true;
 }

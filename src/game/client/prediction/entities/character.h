@@ -84,6 +84,9 @@ public:
 
 	bool m_LastRefillJumps;
 
+	void SetPendingUnfreeze() { m_HasPendingUnfreeze = true; }
+	void ApplyPendingUnfreeze();
+
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
 	int GetLastWeapon() const { return m_LastWeapon; }
 	void SetLastWeapon(int LastWeap) { m_LastWeapon = LastWeap; }
@@ -181,6 +184,8 @@ private:
 
 	int m_LastWeaponSwitchTick;
 	int m_LastTuneZoneTick;
+
+	bool m_HasPendingUnfreeze;
 };
 
 #endif

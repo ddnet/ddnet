@@ -117,6 +117,7 @@ public:
 	bool m_HudDDRace;
 
 	bool m_NoWeakHookAndBounce;
+	bool m_ConsistentUnfreeze;
 	bool m_NoSkinChangeForFrozen;
 
 	bool m_DDRaceTeam;

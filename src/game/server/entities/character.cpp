@@ -35,6 +35,7 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 	m_Armor = 0;
 	m_TriggeredEvents7 = 0;
 	m_StrongWeakId = 0;
+	m_HasPendingUnfreeze = false;
 
 	m_Input = LastInput;
 	// never initialize both to zero
@@ -69,6 +70,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 
 	m_TeleGunTeleport = false;
 	m_IsBlueTeleGunTeleport = false;
+	m_HasPendingUnfreeze = false;
 
 	m_pPlayer = pPlayer;
 	m_Pos = Pos;
@@ -538,7 +540,7 @@ void CCharacter::FireWeapon()
 			Temp -= pTarget->m_Core.m_Vel;
 			pTarget->TakeDamage((vec2(0.f, -1.0f) + Temp) * Strength, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
 				m_pPlayer->GetCid(), m_Core.m_ActiveWeapon);
-			pTarget->Unfreeze();
+			pTarget->SetPendingUnfreeze();
 
 			Antibot()->OnHammerHit(m_pPlayer->GetCid(), pTarget->GetPlayer()->GetCid());
 
@@ -1040,6 +1042,14 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 	m_Core.m_Vel = ClampVel(m_MoveRestrictions, Temp);
 
 	return true;
+}
+
+void CCharacter::ApplyPendingUnfreeze()
+{
+	if(!m_HasPendingUnfreeze)
+		return;
+	m_HasPendingUnfreeze = false;
+	Unfreeze();
 }
 
 void CCharacter::SendDeathMessageIfNotInLockedTeam(int Killer, int Weapon, int ModeSpecial)

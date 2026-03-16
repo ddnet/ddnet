@@ -1573,6 +1573,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_HudAmmo = true;
 	Info.m_HudDDRace = false;
 	Info.m_NoWeakHookAndBounce = false;
+	Info.m_ConsistentUnfreeze = false;
 	Info.m_NoSkinChangeForFrozen = false;
 	Info.m_DDRaceTeam = false;
 	Info.m_PredictEvents = Vanilla;
@@ -1642,6 +1643,10 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	if(Version >= 11)
 	{
 		Info.m_PredictEvents = Flags2 & GAMEINFOFLAG2_PREDICT_EVENTS;
+	}
+	if(Version >= 12)
+	{
+		Info.m_ConsistentUnfreeze = Flags2 & GAMEINFOFLAG2_CONSISTENT_UNFREEZE;
 	}
 
 	return Info;
@@ -3435,6 +3440,7 @@ void CGameClient::UpdatePrediction()
 	m_GameWorld.m_WorldConfig.m_PredictWeapons = AntiPingWeapons();
 	m_GameWorld.m_WorldConfig.m_BugDDRaceInput = m_GameInfo.m_BugDDRaceInput;
 	m_GameWorld.m_WorldConfig.m_NoWeakHookAndBounce = m_GameInfo.m_NoWeakHookAndBounce;
+	m_GameWorld.m_WorldConfig.m_ConsistentUnfreeze = m_GameInfo.m_ConsistentUnfreeze;
 	m_GameWorld.m_WorldConfig.m_PredictEvents = m_GameInfo.m_PredictEvents;
 
 	if(!m_Snap.m_pLocalCharacter)

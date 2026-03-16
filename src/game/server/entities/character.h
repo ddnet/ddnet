@@ -184,6 +184,8 @@ private:
 	void SendZoneMsgs();
 	IAntibot *Antibot();
 
+	bool m_HasPendingUnfreeze;
+
 	bool m_SetSavePos[NUM_RESCUEMODES];
 	CSaveTee m_RescueTee[NUM_RESCUEMODES];
 
@@ -234,6 +236,9 @@ public:
 	bool m_TeleGunTeleport;
 	bool m_IsBlueTeleGunTeleport;
 	int m_StrongWeakId;
+
+	void SetPendingUnfreeze() { m_HasPendingUnfreeze = true; }
+	void ApplyPendingUnfreeze();
 
 	int m_SpawnTick;
 	int m_WeaponChangeTick;
