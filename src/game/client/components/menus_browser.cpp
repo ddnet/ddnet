@@ -80,6 +80,8 @@ static ColorRGBA GetGametypeTextColor(const char *pGametype)
 		else
 			HslaColor = ColorHSLA(0.40f, 1.0f, 0.75f);
 	}
+	else if(str_find_nocase(pGametype, "s-ddracex"))
+		HslaColor = ColorHSLA(1.0f, 1.0f, 0.7f);
 	else if(str_find_nocase(pGametype, "f-ddrace") || str_find_nocase(pGametype, "freeze"))
 		HslaColor = ColorHSLA(0.0f, 1.0f, 0.75f);
 	else if(str_find_nocase(pGametype, "fng"))
@@ -94,8 +96,6 @@ static ColorRGBA GetGametypeTextColor(const char *pGametype)
 		HslaColor = ColorHSLA(0.75f, 1.0f, 0.75f);
 	else if(str_find_nocase(pGametype, "race") || str_find_nocase(pGametype, "fastcap"))
 		HslaColor = ColorHSLA(0.46f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "s-ddr"))
-		HslaColor = ColorHSLA(1.0f, 1.0f, 0.7f);
 	else
 		HslaColor = ColorHSLA(1.0f, 1.0f, 1.0f);
 	return color_cast<ColorRGBA>(HslaColor);
