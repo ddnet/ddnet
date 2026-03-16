@@ -154,11 +154,7 @@ void CPrompt::Render()
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
 	}
 
-	const int NewSelected = s_ListBox.DoEnd();
-	if(m_PromptSelectedIndex != NewSelected)
-	{
-		m_PromptSelectedIndex = NewSelected;
-	}
+	m_PromptSelectedIndex = s_ListBox.DoEnd();
 
 	if(s_ListBox.WasItemActivated())
 	{
