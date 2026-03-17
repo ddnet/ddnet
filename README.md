@@ -32,30 +32,6 @@ To clone this repository when you have the necessary libraries on your system al
 git clone --depth 1 https://github.com/ddnet/ddnet
 ```
 
-To clone this repository with external libraries and full history (~1 GiB):
-
-```sh
-git clone --recursive https://github.com/ddnet/ddnet
-```
-
-To clone this repository when you have the necessary libraries on your system already with full history (~450 MiB):
-
-```sh
-git clone https://github.com/ddnet/ddnet
-```
-
-To clone this repository since we moved the libraries to https://github.com/ddnet/ddnet-libs with history (~250 MiB):
-
-```sh
-git clone --shallow-exclude=included-libs https://github.com/ddnet/ddnet
-```
-
-To clone the libraries if you have previously cloned DDNet without them, or if you require the ddnet-libs history instead of a shallow clone:
-
-```sh
-git submodule update --init --recursive
-```
-
 ## Dependencies on Linux / macOS
 
 You can install the required libraries on your system, `touch CMakeLists.txt` and CMake will use the system-wide libraries by default. You can install all required dependencies and CMake on Debian or Ubuntu like this:
@@ -203,27 +179,3 @@ Detailed instructions can be found in [`docs/DATABASE.md`](docs/DATABASE.md).
 ## Debugging
 
 Detailed instructions can be found in [`docs/DEBUGGING.md`](docs/DEBUGGING.md).
-
-## Better Git Blame
-
-First, use a better tool than `git blame` itself, e.g. [`tig`](https://jonas.github.io/tig/). There's probably a good UI for Windows, too. Alternatively, use the GitHub UI, click "Blame" in any file view.
-
-For `tig`, use `tig blame path/to/file.cpp` to open the blame view, you can navigate with arrow keys or kj, press comma to go to the previous revision of the current line, q to quit.
-
-Only then you could also set up git to ignore specific formatting revisions:
-
-```sh
-git config blame.ignoreRevsFile formatting-revs.txt
-```
-
-## (Neo)Vim Syntax Highlighting for config files
-
-Copy the file detection and syntax files to your vim config folder:
-
-```sh
-# vim
-cp -R other/vim/* ~/.vim/
-
-# neovim
-cp -R other/vim/* ~/.config/nvim/
-```
