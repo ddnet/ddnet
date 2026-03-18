@@ -67,8 +67,6 @@ void CPickup::Tick()
 			case POWERUP_ARMOR_SHOTGUN:
 				if(!GameWorld()->m_WorldConfig.m_IsDDRace || !GameWorld()->m_WorldConfig.m_PredictDDRace)
 					continue;
-				if(pChr->Team() == TEAM_SUPER)
-					continue;
 				if(pChr->GetWeaponGot(WEAPON_SHOTGUN))
 				{
 					pChr->SetWeaponGot(WEAPON_SHOTGUN, false);
@@ -82,8 +80,6 @@ void CPickup::Tick()
 
 			case POWERUP_ARMOR_GRENADE:
 				if(!GameWorld()->m_WorldConfig.m_IsDDRace || !GameWorld()->m_WorldConfig.m_PredictDDRace)
-					continue;
-				if(pChr->Team() == TEAM_SUPER)
 					continue;
 				if(pChr->GetWeaponGot(WEAPON_GRENADE))
 				{
@@ -99,8 +95,6 @@ void CPickup::Tick()
 			case POWERUP_ARMOR_NINJA:
 				if(!GameWorld()->m_WorldConfig.m_IsDDRace || !GameWorld()->m_WorldConfig.m_PredictDDRace)
 					continue;
-				if(pChr->Team() == TEAM_SUPER)
-					continue;
 				pChr->SetNinjaActivationDir(vec2(0, 0));
 				pChr->SetNinjaActivationTick(-500);
 				pChr->SetNinjaCurrentMoveTime(0);
@@ -108,8 +102,6 @@ void CPickup::Tick()
 
 			case POWERUP_ARMOR_LASER:
 				if(!GameWorld()->m_WorldConfig.m_IsDDRace || !GameWorld()->m_WorldConfig.m_PredictDDRace)
-					continue;
-				if(pChr->Team() == TEAM_SUPER)
 					continue;
 				if(pChr->GetWeaponGot(WEAPON_LASER))
 				{

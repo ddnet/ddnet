@@ -1438,5 +1438,5 @@ bool CGameTeams::IsPractice(int Team)
 
 bool CGameTeams::IsValidTeamNumber(int Team) const
 {
-	return Team >= TEAM_FLOCK && Team < NUM_DDRACE_TEAMS - 1; // no TEAM_SUPER
+	return Team >= TEAM_FLOCK && Team < NUM_DDRACE_TEAMS;
 }

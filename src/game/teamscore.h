@@ -7,8 +7,7 @@
 enum
 {
 	TEAM_FLOCK = 0,
-	TEAM_SUPER = 64,
-	NUM_DDRACE_TEAMS = TEAM_SUPER + 1,
+	NUM_DDRACE_TEAMS = 64,
 };
 
 // do not change the values of the following enum
