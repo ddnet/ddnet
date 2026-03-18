@@ -632,7 +632,9 @@ def client_can_connect(test_env):
 	server = test_env.server()
 	wait_for_startup([client, server])
 	client.command(f"connect localhost:{server.port}")
-	server.wait_for_log_prefix("server: player has entered the game", timeout=10)
+	join = server.wait_for_log_prefix("server: player has entered the game", timeout=10).line
+	if "sixup=0" not in join:
+		raise AssertionError(f"sixup=0 not found in {join!r}")
 	server.exit()
 	client.wait_for_log_exact("client: offline error='Server shutdown'")
 	client.exit()
@@ -646,7 +648,9 @@ def client_can_connect_7(test_env):
 	server = test_env.server()
 	wait_for_startup([client, server])
 	client.command(f"connect tw-0.7+udp://localhost:{server.port}")
-	server.wait_for_log_prefix("server: player has entered the game", timeout=10)
+	join = server.wait_for_log_prefix("server: player has entered the game", timeout=10).line
+	if "sixup=1" not in join:
+		raise AssertionError(f"sixup=0 not found in {join!r}")
 	server.exit()
 	client.wait_for_log_exact("client: offline error='Server shutdown'")
 	client.exit()
