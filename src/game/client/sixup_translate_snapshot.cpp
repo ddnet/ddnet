@@ -119,10 +119,10 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 			Info6.m_WarmupTimer = TranslationContext.m_GameStateEndTick7 - GameTick;
 
 		// hack to port 0.7 race timer to ddnet warmup gametimer hack
-		int TimerClientId = std::clamp(TranslationContext.m_aLocalClientId[Conn], 0, (int)MAX_CLIENTS);
+		int TimerClientId = TranslationContext.m_aLocalClientId[Conn];
 		if(SpectatorId >= 0)
 			TimerClientId = SpectatorId;
-		const protocol7::CNetObj_PlayerInfoRace *pRaceInfo = TranslationContext.m_apPlayerInfosRace[TimerClientId];
+		const protocol7::CNetObj_PlayerInfoRace *pRaceInfo = TimerClientId == -1 ? nullptr : TranslationContext.m_apPlayerInfosRace[TimerClientId];
 		if(pRaceInfo)
 		{
 			Info6.m_WarmupTimer = -pRaceInfo->m_RaceStartTick;
