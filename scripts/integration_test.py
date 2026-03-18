@@ -399,13 +399,13 @@ class Runnable:
 					return event
 
 	def wait_for_log_prefix(self, prefix, timeout=1):
-		self.wait_for_log(lambda l: l.line.startswith(prefix), description=f"log line with prefix `{prefix}`", timeout=timeout)
+		return self.wait_for_log(lambda l: l.line.startswith(prefix), description=f"log line with prefix `{prefix}`", timeout=timeout)
 
 	def wait_for_log_suffix(self, suffix, timeout=1):
-		self.wait_for_log(lambda l: l.line.endswith(suffix), description=f"log line with suffix `{suffix}`", timeout=timeout)
+		return self.wait_for_log(lambda l: l.line.endswith(suffix), description=f"log line with suffix `{suffix}`", timeout=timeout)
 
 	def wait_for_log_exact(self, line, timeout=1):
-		self.wait_for_log(lambda l: l.line == line, description=f"log line exactly matching `{line}`", timeout=timeout)
+		return self.wait_for_log(lambda l: l.line == line, description=f"log line exactly matching `{line}`", timeout=timeout)
 
 	def wait_for_exit(self, timeout=10):
 		timeout_id = self.register_timeout(timeout, "exit")
@@ -632,7 +632,9 @@ def client_can_connect(test_env):
 	server = test_env.server()
 	wait_for_startup([client, server])
 	client.command(f"connect localhost:{server.port}")
-	server.wait_for_log_prefix("server: player has entered the game", timeout=10)
+	join = server.wait_for_log_prefix("server: player has entered the game", timeout=10).line
+	if "sixup=0" not in join:
+		raise AssertionError(f"sixup=0 not found in {join!r}")
 	server.exit()
 	client.wait_for_log_exact("client: offline error='Server shutdown'")
 	client.exit()
@@ -645,8 +647,10 @@ def client_can_connect_7(test_env):
 	client = test_env.client()
 	server = test_env.server()
 	wait_for_startup([client, server])
-	client.command(f"connect tw-0.7+udp://localhost:{server.port}")
-	server.wait_for_log_prefix("server: player has entered the game", timeout=10)
+	client.command(f"connect tw-0.7+udp://127.0.0.1:{server.port}") # FIXME(#11693): Work around missing domain support.
+	join = server.wait_for_log_prefix("server: player has entered the game", timeout=10).line
+	if "sixup=1" not in join:
+		raise AssertionError(f"sixup=0 not found in {join!r}")
 	server.exit()
 	client.wait_for_log_exact("client: offline error='Server shutdown'")
 	client.exit()
