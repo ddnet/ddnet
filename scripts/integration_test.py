@@ -399,13 +399,13 @@ class Runnable:
 					return event
 
 	def wait_for_log_prefix(self, prefix, timeout=1):
-		self.wait_for_log(lambda l: l.line.startswith(prefix), description=f"log line with prefix `{prefix}`", timeout=timeout)
+		return self.wait_for_log(lambda l: l.line.startswith(prefix), description=f"log line with prefix `{prefix}`", timeout=timeout)
 
 	def wait_for_log_suffix(self, suffix, timeout=1):
-		self.wait_for_log(lambda l: l.line.endswith(suffix), description=f"log line with suffix `{suffix}`", timeout=timeout)
+		return self.wait_for_log(lambda l: l.line.endswith(suffix), description=f"log line with suffix `{suffix}`", timeout=timeout)
 
 	def wait_for_log_exact(self, line, timeout=1):
-		self.wait_for_log(lambda l: l.line == line, description=f"log line exactly matching `{line}`", timeout=timeout)
+		return self.wait_for_log(lambda l: l.line == line, description=f"log line exactly matching `{line}`", timeout=timeout)
 
 	def wait_for_exit(self, timeout=10):
 		timeout_id = self.register_timeout(timeout, "exit")
