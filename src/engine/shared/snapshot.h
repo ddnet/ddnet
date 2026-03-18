@@ -3,9 +3,6 @@
 #ifndef ENGINE_SHARED_SNAPSHOT_H
 #define ENGINE_SHARED_SNAPSHOT_H
 
-#include <generated/protocol.h>
-#include <generated/protocol7.h>
-
 #include <cstddef>
 #include <cstdint>
 
