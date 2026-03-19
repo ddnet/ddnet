@@ -459,7 +459,7 @@ void CPlayers::RenderHook(
 	int ClientId,
 	float Intra)
 {
-	if(pPrevChar->m_HookState <= 0 || pPlayerChar->m_HookState <= 0)
+	if(pPlayerChar->m_HookState <= 0)
 		return;
 
 	CNetObj_Character Prev;
