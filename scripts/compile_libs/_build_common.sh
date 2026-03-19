@@ -130,6 +130,18 @@ export EMSCRIPTEN_WASM_CFLAGS="-pthread -O3 -g -s USE_PTHREADS=1"
 export EMSCRIPTEN_WASM_LDFLAGS="-pthread -O3 -g -s USE_PTHREADS=1 -s ASYNCIFY=1 -s WASM=1"
 export EMSCRIPTEN_EXTRA_RELEASE_CFLAGS="-g0"
 
+EMSCRIPTEN_CMAKE_WRAPPER="emcmake"
+EMSCRIPTEN_CC="emcc"
+EMSCRIPTEN_AR="emar"
+if [[ "${HOST_OS}" == "windows" ]]; then
+	EMSCRIPTEN_CMAKE_WRAPPER="${EMSCRIPTEN_CMAKE_WRAPPER}.bat"
+	EMSCRIPTEN_CC="${EMSCRIPTEN_CC}.bat"
+	EMSCRIPTEN_AR="${EMSCRIPTEN_AR}.bat"
+fi
+export EMSCRIPTEN_CMAKE_WRAPPER
+export EMSCRIPTEN_CC
+export EMSCRIPTEN_AR
+
 function cpu_count() {
 	if command -v nproc > /dev/null 2>&1; then
 		nproc
