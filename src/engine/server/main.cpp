@@ -128,13 +128,22 @@ int main(int argc, const char **argv)
 	pFutureAssertionLogger->Set(CreateAssertionLogger(pStorage, GAME_NAME));
 
 	{
-		char aBuf[IO_MAX_PATH_LENGTH];
+		char aTimestamp[20];
+		str_timestamp(aTimestamp, sizeof(aTimestamp));
+
 		char aBufName[IO_MAX_PATH_LENGTH];
-		char aDate[64];
-		str_timestamp(aDate, sizeof(aDate));
-		str_format(aBufName, sizeof(aBufName), "dumps/" GAME_NAME "-Server_%s_crash_log_%s_%d_%s.RTP", CONF_PLATFORM_STRING, aDate, process_id(), GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "");
-		pStorage->GetCompletePath(IStorage::TYPE_SAVE, aBufName, aBuf, sizeof(aBuf));
-		crashdump_init_if_available(aBuf);
+		str_format(aBufName, sizeof(aBufName), "dumps/%s-Server_%s_%s_%s_crash_log_%s_%d_%s.RTP",
+			GAME_NAME,
+			GAME_RELEASE_VERSION,
+			CONF_PLATFORM_STRING,
+			CONF_ARCH_STRING,
+			aTimestamp,
+			process_id(),
+			GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "");
+
+		char aBufPath[IO_MAX_PATH_LENGTH];
+		pStorage->GetCompletePath(IStorage::TYPE_SAVE, aBufName, aBufPath, sizeof(aBufPath));
+		crashdump_init_if_available(aBufPath);
 	}
 
 	IConsole *pConsole = CreateConsole(CFGFLAG_SERVER | CFGFLAG_ECON).release();
