@@ -1,6 +1,7 @@
 #include "test.h"
 
-#include <base/system.h>
+#include <base/mem.h>
+#include <base/str.h>
 
 #include <engine/shared/packer.h>
 

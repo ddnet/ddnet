@@ -1,4 +1,5 @@
-#include <base/system.h>
+#include <base/detect.h>
+#include <base/time.h>
 
 #include <gtest/gtest.h>
 

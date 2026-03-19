@@ -1,5 +1,3 @@
-#include <base/system.h>
-
 #include <engine/storage.h>
 
 #include <gtest/gtest.h>

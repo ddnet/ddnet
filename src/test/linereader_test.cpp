@@ -1,6 +1,8 @@
 #include "test.h"
 
-#include <base/system.h>
+#include <base/fs.h>
+#include <base/io.h>
+#include <base/str.h>
 
 #include <engine/shared/linereader.h>
 

@@ -15,7 +15,7 @@
 // Need to include wtypes.h before wincrypt.h because the latter is missing the former include
 #include <wincrypt.h>
 #else
-#include "system.h" // io_open etc.
+#include "io.h"
 #endif
 
 struct SECURE_RANDOM_DATA

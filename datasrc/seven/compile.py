@@ -174,7 +174,10 @@ def main():
 		lines = []
 
 		lines += ['#include "protocol7.h"']
-		lines += ['#include <base/system.h>']
+		lines += ['']
+		lines += ['#include <base/dbg.h>']
+		lines += ['#include <base/str.h>']
+		lines += ['']
 		lines += ['#include <engine/shared/packer.h>']
 		lines += ['#include <engine/shared/protocol.h>']
 		lines += ['#include <engine/shared/snapshot.h>']
