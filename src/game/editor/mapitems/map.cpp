@@ -117,6 +117,7 @@ void CEditorMap::Clean()
 	Editor()->QuadKnife()->Deactivate();
 	m_EnvelopeEditorState.Reset(Editor());
 	m_MapSettingsCommandContext.Reset();
+	m_FontTyperState.Reset();
 }
 
 void CEditorMap::CreateDefault()

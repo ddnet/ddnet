@@ -12,6 +12,7 @@
 #include <game/editor/editor_server_settings.h>
 #include <game/editor/editor_trackers.h>
 #include <game/editor/envelope_editor.h>
+#include <game/editor/font_typer.h>
 #include <game/editor/map_grid.h>
 #include <game/editor/map_view.h>
 #include <game/editor/mapitems/envelope.h>
@@ -150,6 +151,7 @@ public:
 	CQuadKnife::CState m_QuadKnifeState;
 	CEnvelopeEditor::CState m_EnvelopeEditorState;
 	CMapSettingsBackend::CContextWithInput m_MapSettingsCommandContext;
+	CFontTyper::CState m_FontTyperState;
 
 	// Housekeeping
 	void Clean();
