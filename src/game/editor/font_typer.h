@@ -17,31 +17,39 @@ class CLayerTiles;
 
 class CFontTyper : public CEditorComponent
 {
+public:
+	class CState
+	{
+	public:
+		bool m_Active;
+		ivec2 m_TextIndex;
+		int m_TextLineLen;
+		std::shared_ptr<CLayer> m_pLastLayer;
+		int m_TilesPlacedSinceActivate;
+
+		void Reset();
+	};
+
+	void OnInit(CEditor *pEditor) override;
+	bool OnInput(const IInput::CEvent &Event) override;
+	void Render();
+
+	bool IsActive() const;
+
+private:
 	enum
 	{
 		LETTER_OFFSET = 1,
 		NUMBER_OFFSET = 54,
 	};
-	ivec2 m_TextIndex = ivec2(0, 0);
-	int m_TextLineLen = 0;
-	bool m_Active = false;
 	std::chrono::nanoseconds m_CursorRenderTime;
 	IGraphics::CTextureHandle m_CursorTextTexture;
-	std::shared_ptr<CLayer> m_pLastLayer;
 	CUi::SConfirmPopupContext m_ConfirmActivatePopupContext;
-	int m_TilesPlacedSinceActivate = 0;
 
 	void SetCursor();
 	void TextModeOff();
 	void TextModeOn();
 	void SetTile(ivec2 Pos, unsigned char Index, const std::shared_ptr<CLayerTiles> &pLayer);
-
-public:
-	void Render();
-	bool OnInput(const IInput::CEvent &Event) override;
-	void OnInit(CEditor *pEditor) override;
-
-	bool IsActive() const { return m_Active; }
 };
 
 #endif
