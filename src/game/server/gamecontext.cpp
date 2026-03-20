@@ -311,6 +311,9 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 		pEvent->m_Y = (int)Pos.y;
 	}
 
+	if(NoDamage)
+		return;
+
 	// deal damage
 	CEntity *apEnts[MAX_CLIENTS];
 	float Radius = 135.0f;
@@ -336,7 +339,7 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 		if(!(int)Dmg)
 			continue;
 
-		if((GetPlayerChar(Owner) ? !GetPlayerChar(Owner)->GrenadeHitDisabled() : g_Config.m_SvHit) || NoDamage || Owner == pChr->GetPlayer()->GetCid())
+		if((GetPlayerChar(Owner) ? !GetPlayerChar(Owner)->GrenadeHitDisabled() : g_Config.m_SvHit) || Owner == pChr->GetPlayer()->GetCid())
 		{
 			if(Owner != -1 && pChr->IsAlive() && !pChr->CanCollide(Owner))
 				continue;
