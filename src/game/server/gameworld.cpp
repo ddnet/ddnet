@@ -120,7 +120,8 @@ void CGameWorld::Snap(int SnappingClient)
 	for(CEntity *pEnt = m_apFirstEntityTypes[ENTTYPE_CHARACTER]; pEnt;)
 	{
 		m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
-		pEnt->Snap(SnappingClient);
+		if(pEnt->GetId() >= 0)
+			pEnt->Snap(SnappingClient);
 		pEnt = m_pNextTraverseEntity;
 	}
 
@@ -132,7 +133,8 @@ void CGameWorld::Snap(int SnappingClient)
 		for(CEntity *pEnt = m_apFirstEntityTypes[i]; pEnt;)
 		{
 			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
-			pEnt->Snap(SnappingClient);
+			if(pEnt->GetId() >= 0)
+				pEnt->Snap(SnappingClient);
 			pEnt = m_pNextTraverseEntity;
 		}
 	}
