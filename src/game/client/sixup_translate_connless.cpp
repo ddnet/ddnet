@@ -8,8 +8,7 @@ void CClient::PreprocessConnlessPacket7(CNetChunk *pPacket)
 	{
 		CUnpacker Up;
 		Up.Reset((unsigned char *)pPacket->m_pData + sizeof(SERVERBROWSE_INFO), pPacket->m_DataSize - sizeof(SERVERBROWSE_INFO));
-		CServerInfo Info;
-		mem_zero(&Info, sizeof(CServerInfo));
+		CServerInfo Info = {};
 
 		auto GetString = [&Up](auto &Buf) {
 			str_copy(Buf, Up.GetString(CUnpacker::SANITIZE_CC | CUnpacker::SKIP_START_WHITESPACES));
