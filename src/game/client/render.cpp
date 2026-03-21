@@ -485,10 +485,16 @@ void CRenderTools::RenderTee7(const CAnimState *pAnim, const CTeeRenderInfo *pIn
 
 void CRenderTools::RenderTee6(const CAnimState *pAnim, const CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, float Alpha) const
 {
+	const CSkin::CSkinTextures *pSkinTextures = pInfo->m_CustomColoredSkin ? &pInfo->m_ColorableRenderSkin : &pInfo->m_OriginalRenderSkin;
+
+	if(pSkinTextures->m_TextureArray.IsValid())
+	{
+		RenderTee6Batched(pAnim, pInfo, Emote, Dir, Pos, Alpha);
+		return;
+	}
+
 	vec2 Direction = Dir;
 	vec2 Position = Pos;
-
-	const CSkin::CSkinTextures *pSkinTextures = pInfo->m_CustomColoredSkin ? &pInfo->m_ColorableRenderSkin : &pInfo->m_OriginalRenderSkin;
 
 	// first pass we draw the outline
 	// second pass we draw the filling
@@ -583,4 +589,120 @@ void CRenderTools::RenderTee6(const CAnimState *pAnim, const CTeeRenderInfo *pIn
 			Graphics()->RenderQuadContainerAsSprite(m_TeeQuadContainerIndex, QuadOffset, Position.x + pFoot->m_X * AnimScale, Position.y + pFoot->m_Y * AnimScale, w / 64.f, h / 32.f);
 		}
 	}
+}
+
+void CRenderTools::RenderTee6Batched(const CAnimState *pAnim, const CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, float Alpha) const
+{
+	const CSkin::CSkinTextures *pSkinTextures = pInfo->m_CustomColoredSkin ? &pInfo->m_ColorableRenderSkin : &pInfo->m_OriginalRenderSkin;
+
+	float AnimScale, BaseSize;
+	GetRenderTeeAnimScaleAndBaseSize(pInfo, AnimScale, BaseSize);
+
+	const vec2 BodyPos = Pos + vec2(pAnim->GetBody()->m_X, pAnim->GetBody()->m_Y) * AnimScale;
+	float BodyScale;
+	GetRenderTeeBodyScale(BaseSize, BodyScale);
+	const float BodySize = 64.0f * BodyScale;
+
+	const bool Indicate = !pInfo->m_GotAirJump && g_Config.m_ClAirjumpindicator;
+	const bool FlipFeet = Dir.x < 0 && pInfo->m_FeetFlipped;
+
+	// UV coordinates within each texture array layer.
+	// Each layer is body-sized (3x3 grid cells). Sprites smaller than
+	// the body occupy the top-left corner of their layer.
+	// Body/BodyOutline: 3x3 cells -> full layer
+	constexpr float BodyU1 = 1.0f;
+	constexpr float BodyV1 = 1.0f;
+	// Feet/FeetOutline: 2x1 cells in a 3x3-cell layer
+	constexpr float FeetU1 = 2.0f / 3.0f;
+	constexpr float FeetV1 = 1.0f / 3.0f;
+	// Eyes: 1x1 cells in a 3x3-cell layer
+	constexpr float EyeU1 = 1.0f / 3.0f;
+	constexpr float EyeV1 = 1.0f / 3.0f;
+
+	auto DrawFoot = [&](const CAnimKeyframe *pFoot, int Layer, float ColorScale) {
+		Graphics()->SetColor(pInfo->m_ColorFeet.r * ColorScale, pInfo->m_ColorFeet.g * ColorScale, pInfo->m_ColorFeet.b * ColorScale, Alpha);
+		Graphics()->QuadsSetRotation(pFoot->m_Angle * pi * 2);
+		if(FlipFeet)
+			Graphics()->QuadsSetSubsetFree(FeetU1, 0, 0, 0, 0, FeetV1, FeetU1, FeetV1, Layer);
+		else
+			Graphics()->QuadsSetSubsetFree(0, 0, FeetU1, 0, FeetU1, FeetV1, 0, FeetV1, Layer);
+		const float FootW = BaseSize;
+		const float FootH = BaseSize / 2;
+		IGraphics::CQuadItem Quad(Pos.x + pFoot->m_X * AnimScale - FootW / 2, Pos.y + pFoot->m_Y * AnimScale - FootH / 2, FootW, FootH);
+		Graphics()->QuadsTex3DDrawTL(&Quad, 1);
+	};
+
+	// Outline pass: back foot outline, body outline, front foot outline
+	Graphics()->TextureSet(pSkinTextures->m_TextureArray);
+	Graphics()->WrapClamp();
+	Graphics()->QuadsTex3DBegin();
+	{
+		DrawFoot(pAnim->GetBackFoot(), CSkin::SKIN_LAYER_FEET_OUTLINE, 1.0f);
+
+		// Body outline
+		Graphics()->SetColor(pInfo->m_ColorBody.r, pInfo->m_ColorBody.g, pInfo->m_ColorBody.b, Alpha);
+		Graphics()->QuadsSetRotation(pAnim->GetBody()->m_Angle * pi * 2);
+		Graphics()->QuadsSetSubsetFree(0, 0, BodyU1, 0, BodyU1, BodyV1, 0, BodyV1, CSkin::SKIN_LAYER_BODY_OUTLINE);
+		IGraphics::CQuadItem BodyOutlineQuad(BodyPos.x - BodySize / 2, BodyPos.y - BodySize / 2, BodySize, BodySize);
+		Graphics()->QuadsTex3DDrawTL(&BodyOutlineQuad, 1);
+
+		DrawFoot(pAnim->GetFrontFoot(), CSkin::SKIN_LAYER_FEET_OUTLINE, 1.0f);
+	}
+	Graphics()->QuadsTex3DEnd();
+
+	// Fill pass: back foot, body, eyes, front foot
+	Graphics()->QuadsTex3DBegin();
+	{
+		const float FeetColorScale = Indicate ? 0.5f : 1.0f;
+		DrawFoot(pAnim->GetBackFoot(), CSkin::SKIN_LAYER_FEET, FeetColorScale);
+
+		// Body fill
+		Graphics()->SetColor(pInfo->m_ColorBody.r, pInfo->m_ColorBody.g, pInfo->m_ColorBody.b, Alpha);
+		Graphics()->QuadsSetRotation(pAnim->GetBody()->m_Angle * pi * 2);
+		Graphics()->QuadsSetSubsetFree(0, 0, BodyU1, 0, BodyU1, BodyV1, 0, BodyV1, CSkin::SKIN_LAYER_BODY);
+		IGraphics::CQuadItem BodyFillQuad(BodyPos.x - BodySize / 2, BodyPos.y - BodySize / 2, BodySize, BodySize);
+		Graphics()->QuadsTex3DDrawTL(&BodyFillQuad, 1);
+
+		// Eyes
+		int TeeEye = 0;
+		switch(Emote)
+		{
+		case EMOTE_PAIN:
+			TeeEye = SPRITE_TEE_EYE_PAIN - SPRITE_TEE_EYE_NORMAL;
+			break;
+		case EMOTE_HAPPY:
+			TeeEye = SPRITE_TEE_EYE_HAPPY - SPRITE_TEE_EYE_NORMAL;
+			break;
+		case EMOTE_SURPRISE:
+			TeeEye = SPRITE_TEE_EYE_SURPRISE - SPRITE_TEE_EYE_NORMAL;
+			break;
+		case EMOTE_ANGRY:
+			TeeEye = SPRITE_TEE_EYE_ANGRY - SPRITE_TEE_EYE_NORMAL;
+			break;
+		default:
+			break;
+		}
+
+		const int EyeLayer = CSkin::SKIN_LAYER_EYE_NORMAL + TeeEye;
+		const float EyeScale = BaseSize * 0.40f;
+		const float EyeH = Emote == EMOTE_BLINK ? BaseSize * 0.15f : EyeScale;
+		const float EyeSeparation = (0.075f - 0.010f * absolute(Dir.x)) * BaseSize;
+		const vec2 EyeOffset = vec2(Dir.x * 0.125f, -0.05f + Dir.y * 0.10f) * BaseSize;
+
+		Graphics()->QuadsSetRotation(pAnim->GetBody()->m_Angle * pi * 2);
+
+		// Left eye
+		Graphics()->QuadsSetSubsetFree(0, 0, EyeU1, 0, EyeU1, EyeV1, 0, EyeV1, EyeLayer);
+		IGraphics::CQuadItem LeftEye(BodyPos.x - EyeSeparation + EyeOffset.x - EyeScale / 2, BodyPos.y + EyeOffset.y - EyeH / 2, EyeScale, EyeH);
+		Graphics()->QuadsTex3DDrawTL(&LeftEye, 1);
+
+		// Right eye (mirrored horizontally)
+		Graphics()->QuadsSetSubsetFree(EyeU1, 0, 0, 0, 0, EyeV1, EyeU1, EyeV1, EyeLayer);
+		IGraphics::CQuadItem RightEye(BodyPos.x + EyeSeparation + EyeOffset.x - EyeScale / 2, BodyPos.y + EyeOffset.y - EyeH / 2, EyeScale, EyeH);
+		Graphics()->QuadsTex3DDrawTL(&RightEye, 1);
+
+		DrawFoot(pAnim->GetFrontFoot(), CSkin::SKIN_LAYER_FEET, FeetColorScale);
+	}
+	Graphics()->QuadsTex3DEnd();
+	Graphics()->WrapNormal();
 }

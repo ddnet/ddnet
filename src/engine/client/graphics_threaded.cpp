@@ -394,7 +394,7 @@ void CGraphics_Threaded::LoadTextureAddWarning(size_t Width, size_t Height, int 
 	}
 }
 
-static CCommandBuffer::SCommand_Texture_Create LoadTextureCreateCommand(int TextureId, size_t Width, size_t Height, int Flags)
+static CCommandBuffer::SCommand_Texture_Create LoadTextureCreateCommand(int TextureId, size_t Width, size_t Height, int Flags, int GridSplitW, int GridSplitH)
 {
 	CCommandBuffer::SCommand_Texture_Create Cmd;
 	Cmd.m_Slot = TextureId;
@@ -409,6 +409,9 @@ static CCommandBuffer::SCommand_Texture_Create LoadTextureCreateCommand(int Text
 	if((Flags & IGraphics::TEXLOAD_NO_2D_TEXTURE) != 0)
 		Cmd.m_Flags |= TextureFlag::NO_2D_TEXTURE;
 
+	Cmd.m_GridSplitW = GridSplitW;
+	Cmd.m_GridSplitH = GridSplitH;
+
 	return Cmd;
 }
 
@@ -420,7 +423,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(const CImageInfo &I
 		return IGraphics::CTextureHandle();
 
 	IGraphics::CTextureHandle TextureHandle = FindFreeTextureIndex();
-	CCommandBuffer::SCommand_Texture_Create Cmd = LoadTextureCreateCommand(TextureHandle.Id(), Image.m_Width, Image.m_Height, Flags);
+	CCommandBuffer::SCommand_Texture_Create Cmd = LoadTextureCreateCommand(TextureHandle.Id(), Image.m_Width, Image.m_Height, Flags, 16, 16);
 
 	// Copy texture data and convert if necessary
 	uint8_t *pTmpData;
@@ -451,10 +454,31 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRawMove(CImageInfo &Ima
 		return IGraphics::CTextureHandle();
 
 	IGraphics::CTextureHandle TextureHandle = FindFreeTextureIndex();
-	CCommandBuffer::SCommand_Texture_Create Cmd = LoadTextureCreateCommand(TextureHandle.Id(), Image.m_Width, Image.m_Height, Flags);
+	CCommandBuffer::SCommand_Texture_Create Cmd = LoadTextureCreateCommand(TextureHandle.Id(), Image.m_Width, Image.m_Height, Flags, 16, 16);
 	Cmd.m_pData = Image.m_pData;
 	Image.m_pData = nullptr;
 	Image.Free();
+	AddCmd(Cmd);
+
+	return TextureHandle;
+}
+
+IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureArrayRaw(const CImageInfo &Image, int GridW, int GridH, const char *pTexName)
+{
+	if(Image.m_Width == 0 || Image.m_Height == 0)
+		return IGraphics::CTextureHandle();
+
+	const int Flags = TEXLOAD_TO_2D_ARRAY_TEXTURE | TEXLOAD_NO_2D_TEXTURE;
+	IGraphics::CTextureHandle TextureHandle = FindFreeTextureIndex();
+	CCommandBuffer::SCommand_Texture_Create Cmd = LoadTextureCreateCommand(TextureHandle.Id(), Image.m_Width, Image.m_Height, Flags, GridW, GridH);
+
+	uint8_t *pTmpData;
+	if(!ConvertToRgbaAlloc(pTmpData, Image))
+	{
+		log_warn("graphics", "Converted image '%s' to RGBA, consider making its file format RGBA.", pTexName ? pTexName : "(no name)");
+	}
+	Cmd.m_pData = pTmpData;
+
 	AddCmd(Cmd);
 
 	return TextureHandle;

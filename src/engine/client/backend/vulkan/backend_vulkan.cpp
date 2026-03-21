@@ -2532,7 +2532,9 @@ protected:
 		VkFormat Format,
 		VkFormat StoreFormat,
 		int Flags,
-		uint8_t *&pData)
+		uint8_t *&pData,
+		int GridSplitW,
+		int GridSplitH)
 	{
 		size_t ImageIndex = (size_t)Slot;
 		const size_t PixelSize = VulkanFormatToPixelSize(Format);
@@ -2603,10 +2605,10 @@ protected:
 			int ConvertWidth = Width;
 			int ConvertHeight = Height;
 
-			if(ConvertWidth == 0 || (ConvertWidth % 16) != 0 || ConvertHeight == 0 || (ConvertHeight % 16) != 0)
+			if(ConvertWidth == 0 || (ConvertWidth % GridSplitW) != 0 || ConvertHeight == 0 || (ConvertHeight % GridSplitH) != 0)
 			{
-				int NewWidth = maximum<int>(HighestBit(ConvertWidth), 16);
-				int NewHeight = maximum<int>(HighestBit(ConvertHeight), 16);
+				int NewWidth = maximum<int>(HighestBit(ConvertWidth), GridSplitW);
+				int NewHeight = maximum<int>(HighestBit(ConvertHeight), GridSplitH);
 				uint8_t *pNewTexData = ResizeImage(pData, ConvertWidth, ConvertHeight, NewWidth, NewHeight, PixelSize);
 				if(IsVerbose())
 				{
@@ -2622,7 +2624,7 @@ protected:
 
 			bool Needs3DTexDel = false;
 			uint8_t *pTexData3D = static_cast<uint8_t *>(malloc((size_t)PixelSize * ConvertWidth * ConvertHeight));
-			if(!Texture2DTo3D(pData, ConvertWidth, ConvertHeight, PixelSize, 16, 16, pTexData3D, Image3DWidth, Image3DHeight))
+			if(!Texture2DTo3D(pData, ConvertWidth, ConvertHeight, PixelSize, GridSplitW, GridSplitH, pTexData3D, Image3DWidth, Image3DHeight))
 			{
 				free(pTexData3D);
 				pTexData3D = nullptr;
@@ -2631,7 +2633,7 @@ protected:
 
 			if(pTexData3D != nullptr)
 			{
-				const size_t ImageDepth2DArray = (size_t)16 * 16;
+				const size_t ImageDepth2DArray = (size_t)GridSplitW * GridSplitH;
 				VkExtent3D ImgSize{(uint32_t)Image3DWidth, (uint32_t)Image3DHeight, 1};
 				if(RequiresMipMaps)
 				{
@@ -6657,7 +6659,7 @@ public:
 		int Flags = pCommand->m_Flags;
 		uint8_t *pData = pCommand->m_pData;
 
-		if(!CreateTextureCMD(Slot, Width, Height, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM, Flags, pData))
+		if(!CreateTextureCMD(Slot, Width, Height, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM, Flags, pData, pCommand->m_GridSplitW, pCommand->m_GridSplitH))
 			return false;
 
 		free(pData);
@@ -6675,9 +6677,9 @@ public:
 		uint8_t *pTmpData = pCommand->m_pTextData;
 		uint8_t *pTmpData2 = pCommand->m_pTextOutlineData;
 
-		if(!CreateTextureCMD(Slot, Width, Height, VK_FORMAT_R8_UNORM, VK_FORMAT_R8_UNORM, TextureFlag::NO_MIPMAPS, pTmpData))
+		if(!CreateTextureCMD(Slot, Width, Height, VK_FORMAT_R8_UNORM, VK_FORMAT_R8_UNORM, TextureFlag::NO_MIPMAPS, pTmpData, 16, 16))
 			return false;
-		if(!CreateTextureCMD(SlotOutline, Width, Height, VK_FORMAT_R8_UNORM, VK_FORMAT_R8_UNORM, TextureFlag::NO_MIPMAPS, pTmpData2))
+		if(!CreateTextureCMD(SlotOutline, Width, Height, VK_FORMAT_R8_UNORM, VK_FORMAT_R8_UNORM, TextureFlag::NO_MIPMAPS, pTmpData2, 16, 16))
 			return false;
 
 		if(!CreateNewTextDescriptorSets(Slot, SlotOutline))

@@ -17,6 +17,7 @@ void CSkin::CSkinTextures::Reset()
 	{
 		Eye = IGraphics::CTextureHandle();
 	}
+	m_TextureArray = IGraphics::CTextureHandle();
 }
 
 void CSkin::CSkinTextures::Unload(IGraphics *pGraphics)
@@ -31,6 +32,7 @@ void CSkin::CSkinTextures::Unload(IGraphics *pGraphics)
 	{
 		pGraphics->UnloadTexture(&Eye);
 	}
+	pGraphics->UnloadTexture(&m_TextureArray);
 }
 
 CSkin::CSkinMetricVariableInt::operator int() const

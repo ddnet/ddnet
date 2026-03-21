@@ -699,7 +699,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Destroy(const CCommandBuffer:
 	DestroyTexture(pCommand->m_Slot);
 }
 
-void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int Height, int GLFormat, int GLStoreFormat, int Flags, uint8_t *pTexData)
+void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int Height, int GLFormat, int GLStoreFormat, int Flags, uint8_t *pTexData, int GridSplitW, int GridSplitH)
 {
 #ifndef BACKEND_GL_MODERN_API
 
@@ -867,10 +867,10 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 			int ConvertWidth = Width;
 			int ConvertHeight = Height;
 
-			if(ConvertWidth == 0 || (ConvertWidth % 16) != 0 || ConvertHeight == 0 || (ConvertHeight % 16) != 0)
+			if(ConvertWidth == 0 || (ConvertWidth % GridSplitW) != 0 || ConvertHeight == 0 || (ConvertHeight % GridSplitH) != 0)
 			{
-				int NewWidth = maximum<int>(HighestBit(ConvertWidth), 16);
-				int NewHeight = maximum<int>(HighestBit(ConvertHeight), 16);
+				int NewWidth = maximum<int>(HighestBit(ConvertWidth), GridSplitW);
+				int NewHeight = maximum<int>(HighestBit(ConvertHeight), GridSplitH);
 				uint8_t *pNewTexData = ResizeImage(pTexData, ConvertWidth, ConvertHeight, NewWidth, NewHeight, GLFormatToPixelSize(GLFormat));
 				log_debug("gfx/opengl", "3D/2D array texture was resized");
 
@@ -881,9 +881,9 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 				pTexData = pNewTexData;
 			}
 
-			if(Texture2DTo3D(pTexData, ConvertWidth, ConvertHeight, PixelSize, 16, 16, pImageData3D, Image3DWidth, Image3DHeight))
+			if(Texture2DTo3D(pTexData, ConvertWidth, ConvertHeight, PixelSize, GridSplitW, GridSplitH, pImageData3D, Image3DWidth, Image3DHeight))
 			{
-				glTexImage3D(Target, 0, GLStoreFormat, Image3DWidth, Image3DHeight, 256, 0, GLFormat, GL_UNSIGNED_BYTE, pImageData3D);
+				glTexImage3D(Target, 0, GLStoreFormat, Image3DWidth, Image3DHeight, GridSplitW * GridSplitH, 0, GLFormat, GL_UNSIGNED_BYTE, pImageData3D);
 			}
 
 			free(pImageData3D);
@@ -909,7 +909,7 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 
 void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::SCommand_Texture_Create *pCommand)
 {
-	TextureCreate(pCommand->m_Slot, pCommand->m_Width, pCommand->m_Height, GL_RGBA, GL_RGBA, pCommand->m_Flags, pCommand->m_pData);
+	TextureCreate(pCommand->m_Slot, pCommand->m_Width, pCommand->m_Height, GL_RGBA, GL_RGBA, pCommand->m_Flags, pCommand->m_pData, pCommand->m_GridSplitW, pCommand->m_GridSplitH);
 }
 
 void CCommandProcessorFragment_OpenGL::Cmd_TextTexture_Update(const CCommandBuffer::SCommand_TextTexture_Update *pCommand)
@@ -925,8 +925,8 @@ void CCommandProcessorFragment_OpenGL::Cmd_TextTextures_Destroy(const CCommandBu
 
 void CCommandProcessorFragment_OpenGL::Cmd_TextTextures_Create(const CCommandBuffer::SCommand_TextTextures_Create *pCommand)
 {
-	TextureCreate(pCommand->m_Slot, pCommand->m_Width, pCommand->m_Height, GL_ALPHA, GL_ALPHA, TextureFlag::NO_MIPMAPS, pCommand->m_pTextData);
-	TextureCreate(pCommand->m_SlotOutline, pCommand->m_Width, pCommand->m_Height, GL_ALPHA, GL_ALPHA, TextureFlag::NO_MIPMAPS, pCommand->m_pTextOutlineData);
+	TextureCreate(pCommand->m_Slot, pCommand->m_Width, pCommand->m_Height, GL_ALPHA, GL_ALPHA, TextureFlag::NO_MIPMAPS, pCommand->m_pTextData, 16, 16);
+	TextureCreate(pCommand->m_SlotOutline, pCommand->m_Width, pCommand->m_Height, GL_ALPHA, GL_ALPHA, TextureFlag::NO_MIPMAPS, pCommand->m_pTextOutlineData, 16, 16);
 }
 
 void CCommandProcessorFragment_OpenGL::Cmd_Clear(const CCommandBuffer::SCommand_Clear *pCommand)

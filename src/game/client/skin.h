@@ -26,8 +26,27 @@ public:
 
 		IGraphics::CTextureHandle m_aEyes[6];
 
+		// Texture array for batched rendering (valid on modern backends only)
+		IGraphics::CTextureHandle m_TextureArray;
+
 		void Reset();
 		void Unload(IGraphics *pGraphics);
+	};
+
+	// Layer indices for skin texture arrays
+	enum
+	{
+		SKIN_LAYER_BODY = 0,
+		SKIN_LAYER_BODY_OUTLINE,
+		SKIN_LAYER_FEET,
+		SKIN_LAYER_FEET_OUTLINE,
+		SKIN_LAYER_EYE_NORMAL,
+		SKIN_LAYER_EYE_ANGRY,
+		SKIN_LAYER_EYE_PAIN,
+		SKIN_LAYER_EYE_HAPPY,
+		SKIN_LAYER_EYE_DEAD,
+		SKIN_LAYER_EYE_SURPRISE,
+		NUM_SKIN_LAYERS,
 	};
 
 	CSkinTextures m_OriginalSkin;

@@ -436,6 +436,67 @@ void CSkins::LoadSkinFinish(CSkinContainer *pSkinContainer, const CSkinLoadData 
 		Skin.m_ColorableSkin.m_aEyes[i] = Graphics()->LoadSpriteTexture(Data.m_InfoGrayscale, &g_pData->m_aSprites[SPRITE_TEE_EYE_NORMAL + i]);
 	}
 
+	// Build texture arrays for batched rendering on modern backends
+	if(Graphics()->Uses2DTextureArrays())
+	{
+		auto BuildSkinTextureArray = [&](const CImageInfo &SrcImage) -> IGraphics::CTextureHandle {
+			// Sprite layout: body is 3x3 grid cells (the largest), so each layer
+			// must be body-sized. We use a 5x2 grid = 10 layers.
+			constexpr int GridW = 5;
+			constexpr int GridH = 2;
+
+			const int GridX = g_pData->m_aSprites[SPRITE_TEE_BODY].m_pSet->m_Gridx;
+			const int GridY = g_pData->m_aSprites[SPRITE_TEE_BODY].m_pSet->m_Gridy;
+			const int CellW = SrcImage.m_Width / GridX;
+			const int CellH = SrcImage.m_Height / GridY;
+
+			// Body is the largest sprite and defines our layer size
+			const int LayerW = CellW * g_pData->m_aSprites[SPRITE_TEE_BODY].m_W;
+			const int LayerH = CellH * g_pData->m_aSprites[SPRITE_TEE_BODY].m_H;
+
+			CImageInfo SynImage;
+			SynImage.m_Width = LayerW * GridW;
+			SynImage.m_Height = LayerH * GridH;
+			SynImage.m_Format = CImageInfo::FORMAT_RGBA;
+			SynImage.m_pData = static_cast<uint8_t *>(calloc(1, SynImage.DataSize()));
+
+			// Blit a sprite into the synthetic image at the given layer index.
+			// Each sprite is placed at (0,0) within its layer cell.
+			auto BlitSprite = [&](int LayerIndex, int SpriteId) {
+				const CDataSprite *pSprite = &g_pData->m_aSprites[SpriteId];
+				const int SrcCellW = SrcImage.m_Width / pSprite->m_pSet->m_Gridx;
+				const int SrcCellH = SrcImage.m_Height / pSprite->m_pSet->m_Gridy;
+				const int SrcX = pSprite->m_X * SrcCellW;
+				const int SrcY = pSprite->m_Y * SrcCellH;
+				const int SrcW = pSprite->m_W * SrcCellW;
+				const int SrcH = pSprite->m_H * SrcCellH;
+
+				const int DstX = (LayerIndex % GridW) * LayerW;
+				const int DstY = (LayerIndex / GridW) * LayerH;
+
+				SynImage.CopyRectFrom(SrcImage, SrcX, SrcY, SrcW, SrcH, DstX, DstY);
+			};
+
+			BlitSprite(CSkin::SKIN_LAYER_BODY, SPRITE_TEE_BODY);
+			BlitSprite(CSkin::SKIN_LAYER_BODY_OUTLINE, SPRITE_TEE_BODY_OUTLINE);
+			BlitSprite(CSkin::SKIN_LAYER_FEET, SPRITE_TEE_FOOT);
+			BlitSprite(CSkin::SKIN_LAYER_FEET_OUTLINE, SPRITE_TEE_FOOT_OUTLINE);
+			BlitSprite(CSkin::SKIN_LAYER_EYE_NORMAL, SPRITE_TEE_EYE_NORMAL);
+			BlitSprite(CSkin::SKIN_LAYER_EYE_ANGRY, SPRITE_TEE_EYE_ANGRY);
+			BlitSprite(CSkin::SKIN_LAYER_EYE_PAIN, SPRITE_TEE_EYE_PAIN);
+			BlitSprite(CSkin::SKIN_LAYER_EYE_HAPPY, SPRITE_TEE_EYE_HAPPY);
+			BlitSprite(CSkin::SKIN_LAYER_EYE_DEAD, SPRITE_TEE_EYE_DEAD);
+			BlitSprite(CSkin::SKIN_LAYER_EYE_SURPRISE, SPRITE_TEE_EYE_SURPRISE);
+
+			IGraphics::CTextureHandle Handle = Graphics()->LoadTextureArrayRaw(SynImage, GridW, GridH, "skin-array");
+			free(SynImage.m_pData);
+			return Handle;
+		};
+
+		Skin.m_OriginalSkin.m_TextureArray = BuildSkinTextureArray(Data.m_Info);
+		Skin.m_ColorableSkin.m_TextureArray = BuildSkinTextureArray(Data.m_InfoGrayscale);
+	}
+
 	Skin.m_Metrics = Data.m_Metrics;
 	Skin.m_BloodColor = Data.m_BloodColor;
 

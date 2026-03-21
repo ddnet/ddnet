@@ -518,6 +518,10 @@ public:
 		int m_Flags;
 		// data must be in RGBA format
 		uint8_t *m_pData; // will be freed by the command processor
+
+		// grid split for 2D array / 3D textures (default 16x16 = 256 layers)
+		int m_GridSplitW = 16;
+		int m_GridSplitH = 16;
 	};
 
 	struct SCommand_Texture_Destroy : public SCommand
@@ -933,6 +937,7 @@ public:
 	void LoadTextureAddWarning(size_t Width, size_t Height, int Flags, const char *pTexName);
 	IGraphics::CTextureHandle LoadTextureRaw(const CImageInfo &Image, int Flags, const char *pTexName = nullptr) override;
 	IGraphics::CTextureHandle LoadTextureRawMove(CImageInfo &Image, int Flags, const char *pTexName = nullptr) override;
+	IGraphics::CTextureHandle LoadTextureArrayRaw(const CImageInfo &Image, int GridW, int GridH, const char *pTexName = nullptr) override;
 
 	bool LoadTextTextures(size_t Width, size_t Height, CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture, uint8_t *pTextData, uint8_t *pTextOutlineData) override;
 	bool UnloadTextTextures(CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture) override;
