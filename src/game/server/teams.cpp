@@ -261,13 +261,17 @@ void CGameTeams::Tick()
 	{
 		CCharacter *pChar = GameServer()->m_apPlayers[i] ? GameServer()->m_apPlayers[i]->GetCharacter() : nullptr;
 		int Team = m_Core.Team(i);
-		if(!pChar || m_aTeamState[Team] != ETeamState::STARTED || m_aTeamFlock[Team] || m_aTeeStarted[i] || m_aPractice[m_Core.Team(i)])
+		if(!pChar || m_aTeamState[Team] != ETeamState::STARTED || m_aTeamFlock[Team] || m_aTeeStarted[i] || m_aPractice[Team])
+		{
+			continue;
+		}
+		if(Team == TEAM_SUPER)
 		{
 			continue;
 		}
 		if((Now - pChar->m_StartTime) % Frequency == Remainder)
 		{
-			TeamHasWantedStartTime |= ((uint64_t)1) << m_Core.Team(i);
+			TeamHasWantedStartTime |= ((uint64_t)1) << Team;
 		}
 	}
 	TeamHasWantedStartTime &= ~(uint64_t)1;
@@ -275,7 +279,7 @@ void CGameTeams::Tick()
 	{
 		return;
 	}
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(int i = 1; i < TEAM_SUPER; i++)
 	{
 		if(((TeamHasWantedStartTime >> i) & 1) == 0)
 		{
