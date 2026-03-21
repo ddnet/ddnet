@@ -88,7 +88,7 @@ public:
 	IInterface *RequestInterfaceImpl(const char *pName) override
 	{
 		CInterfaceInfo *pInfo = FindInterfaceInfo(pName);
-		dbg_assert(pInfo != nullptr, "Interface not found");
+		dbg_assert(pInfo != nullptr, "Interface '%s' not found", pName);
 		return pInfo->m_pInterface;
 	}
 };
