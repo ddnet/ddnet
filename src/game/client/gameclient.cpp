@@ -3403,13 +3403,13 @@ void CGameClient::UpdateLocalTuning()
 				m_aExpectingTuningForZone[g_Config.m_ClDummy] = -1;
 				m_aExpectingTuningSince[g_Config.m_ClDummy] = 0;
 				m_aReceivedTuning[g_Config.m_ClDummy] = false;
-				dbg_msg("tunezone", "the tuning was missed");
+				log_debug("tunezone", "the tuning was missed");
 			}
 			else
 			{
 				// if we are expecting tuning and have not received one yet.
 				// do not update any tuning, so we don't apply it to the wrong tunezone.
-				dbg_msg("tunezone", "waiting for tuning for zone %d", m_aExpectingTuningForZone[g_Config.m_ClDummy]);
+				log_debug("tunezone", "waiting for tuning for zone %d", m_aExpectingTuningForZone[g_Config.m_ClDummy]);
 				m_aExpectingTuningSince[g_Config.m_ClDummy]++;
 			}
 		}
