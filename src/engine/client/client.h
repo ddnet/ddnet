@@ -285,6 +285,7 @@ public:
 	ISteam *Steam() { return m_pSteam; }
 	INotifications *Notifications() { return m_pNotifications; }
 	IStorage *Storage() { return m_pStorage; }
+	bool EditorActive() const { return m_EditorActive; }
 	IEngineTextRender *TextRender() { return m_pTextRender; }
 	IUpdater *Updater() { return m_pUpdater; }
 	IHttp *Http() { return &m_Http; }
@@ -429,6 +430,9 @@ public:
 	static void Con_DemoSpeed(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Minimize(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Ping(IConsole::IResult *pResult, void *pUserData);
+#if defined(CONF_DEBUG)
+	static void Con_DebugAssert(IConsole::IResult *pResult, void *pUserData);
+#endif
 	static void ConNetReset(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Screenshot(IConsole::IResult *pResult, void *pUserData);
 

@@ -3584,6 +3584,14 @@ void CClient::Con_Ping(IConsole::IResult *pResult, void *pUserData)
 	pSelf->m_PingStartTime = time_get();
 }
 
+#if defined(CONF_DEBUG)
+void CClient::Con_DebugAssert(IConsole::IResult *pResult, void *pUserData)
+{
+	const char *pMessage = pResult->NumArguments() > 0 ? pResult->GetString(0) : "Test assertion triggered by debug_assert command";
+	dbg_assert_failed("%s", pMessage);
+}
+#endif
+
 void CClient::ConNetReset(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
@@ -4489,6 +4497,9 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("connect", "r[host|ip]", CFGFLAG_CLIENT, Con_Connect, this, "Connect to the specified host/ip");
 	m_pConsole->Register("disconnect", "", CFGFLAG_CLIENT, Con_Disconnect, this, "Disconnect from the server");
 	m_pConsole->Register("ping", "", CFGFLAG_CLIENT, Con_Ping, this, "Ping the current server");
+#if defined(CONF_DEBUG)
+	m_pConsole->Register("debug_assert", "?r[message]", CFGFLAG_CLIENT, Con_DebugAssert, this, "Trigger a test assertion error dialog");
+#endif
 	m_pConsole->Register("screenshot", "", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_Screenshot, this, "Take a screenshot");
 	m_pConsole->Register("net_reset", "", CFGFLAG_CLIENT, ConNetReset, this, "Rebinds the client's listening address and port");
 
@@ -4804,7 +4815,51 @@ int main(int argc, const char **argv)
 		char aGpuInfo[512];
 		pClient->GetGpuInfoString(aGpuInfo);
 
-		char aMessage[2048];
+		// Determine client state string
+		const char *pStateStr;
+		if(pClient->EditorActive())
+		{
+			pStateStr = "Editor";
+		}
+		else
+		{
+			switch(pClient->State())
+			{
+			case IClient::STATE_OFFLINE: pStateStr = "Offline (main menu)"; break;
+			case IClient::STATE_CONNECTING: pStateStr = "Connecting"; break;
+			case IClient::STATE_LOADING: pStateStr = "Loading"; break;
+			case IClient::STATE_ONLINE: pStateStr = "Online (in-game)"; break;
+			case IClient::STATE_DEMOPLAYBACK: pStateStr = "Demo playback"; break;
+			case IClient::STATE_QUITTING: pStateStr = "Quitting"; break;
+			case IClient::STATE_RESTARTING: pStateStr = "Restarting"; break;
+			default: pStateStr = "Unknown"; break;
+			}
+		}
+
+		// Fullscreen mode string
+		const char *pWindowMode;
+		switch(g_Config.m_GfxFullscreen)
+		{
+		case 0: pWindowMode = "Windowed"; break;
+		case 1: pWindowMode = "Fullscreen"; break;
+		case 2: pWindowMode = "Desktop fullscreen"; break;
+		case 3: pWindowMode = "Windowed fullscreen"; break;
+		default: pWindowMode = "Unknown"; break;
+		}
+
+		// Uptime
+		const int UptimeTotal = (int)pClient->GlobalTime();
+		const int UptimeMinutes = UptimeTotal / 60;
+		const int UptimeSeconds = UptimeTotal % 60;
+
+		// Config directory path
+		char aConfigDir[IO_MAX_PATH_LENGTH] = "unknown";
+		if(pClient->Storage() != nullptr)
+		{
+			pClient->Storage()->GetCompletePath(IStorage::TYPE_SAVE, "", aConfigDir, sizeof(aConfigDir));
+		}
+
+		char aMessage[4096];
 		str_format(aMessage, sizeof(aMessage),
 			"%s"
 			"%s\n\n"
@@ -4831,7 +4886,10 @@ int main(int argc, const char **argv)
 #endif
 			"\n"
 			"Game version: %s %s %s\n"
-			"OS version: %s\n\n"
+			"OS version: %s\n"
+			"Client state: %s\n"
+			"Display: %dx%d (%s)\n"
+			"Uptime: %dm %ds\n\n"
 			"%s", // GPU info
 			pPreamble,
 			pMsg,
@@ -4839,7 +4897,34 @@ int main(int argc, const char **argv)
 			CONF_PLATFORM_STRING, CONF_ARCH_ENDIAN_STRING,
 			GAME_NAME, GAME_RELEASE_VERSION, GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "",
 			aOsVersionString,
+			pStateStr,
+			g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, pWindowMode,
+			UptimeMinutes, UptimeSeconds,
 			aGpuInfo);
+
+		// Append server info if connected (also when editor is open, as the player may still be connected)
+		if(pClient->State() == IClient::STATE_ONLINE)
+		{
+			CServerInfo CurrentServerInfo;
+			pClient->GetServerInfo(&CurrentServerInfo);
+			char aServerInfo[1024];
+			str_format(aServerInfo, sizeof(aServerInfo),
+				"\nServer: %s\n"
+				"Map: %s (%s)\n"
+				"Players: %d/%d",
+				CurrentServerInfo.m_aAddress,
+				CurrentServerInfo.m_aMap,
+				CurrentServerInfo.m_aGameType,
+				CurrentServerInfo.m_NumClients,
+				CurrentServerInfo.m_MaxClients);
+			str_append(aMessage, aServerInfo);
+		}
+
+		// Append config directory path
+		char aConfigInfo[IO_MAX_PATH_LENGTH + 32];
+		str_format(aConfigInfo, sizeof(aConfigInfo), "\n\nConfig directory: %s", aConfigDir);
+		str_append(aMessage, aConfigInfo);
+
 		// Also log all of this information to the assertion log file
 		log_error("assertion", "%s", aMessage);
 		std::vector<IGraphics::CMessageBoxButton> vButtons;
@@ -4854,6 +4939,12 @@ int main(int argc, const char **argv)
 			vButtons.push_back({.m_pLabel = "Show dumps"});
 		}
 #endif
+		int CopyButtonIndex = -1;
+		if(pClient->Input() != nullptr)
+		{
+			CopyButtonIndex = (int)vButtons.size();
+			vButtons.push_back({.m_pLabel = "Copy"});
+		}
 		vButtons.push_back({.m_pLabel = "OK", .m_Confirm = true, .m_Cancel = true});
 		const std::optional<int> MessageResult = pClient->ShowMessageBox({.m_pTitle = pTitle, .m_pMessage = aMessage, .m_vButtons = vButtons});
 		if(GotGraphicsError && MessageResult && *MessageResult == 0)
@@ -4868,6 +4959,10 @@ int main(int argc, const char **argv)
 			pClient->ViewFile(aDumpsPath);
 		}
 #endif
+		if(CopyButtonIndex >= 0 && MessageResult && *MessageResult == CopyButtonIndex)
+		{
+			pClient->Input()->SetClipboardText(aMessage);
+		}
 		// Client will crash due to assertion, don't call PerformAllCleanup in this inconsistent state
 	});
 
