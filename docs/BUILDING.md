@@ -97,8 +97,8 @@ to unlock the `package_dmg` target that outputs a macOS disk image.
 
 ## Cross-compiling on Linux/Windows to Android
 
-Detailed instructions can be found in [`docs/BUILDING-android.md`](docs/BUILDING-android.md).
+Detailed instructions can be found in [`docs/BUILDING-android.md`](/docs/BUILDING-android.md).
 
 ## Cross-compiling on Linux to WebAssembly via Emscripten
 
-Detailed instructions can be found in [`docs/BUILDING-emscripten.md`](docs/BUILDING-emscripten.md).
+Detailed instructions can be found in [`docs/BUILDING-emscripten.md`](/docs/BUILDING-emscripten.md).
