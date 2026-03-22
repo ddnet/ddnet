@@ -268,7 +268,11 @@ public:
 	bool LaserHitDisabled() const { return m_Core.m_LaserHitDisabled; }
 	bool GrenadeHitDisabled() const { return m_Core.m_GrenadeHitDisabled; }
 
-	void SetHammerHitDisabled(bool HammerHitDisabled) { m_Core.m_HammerHitDisabled = HammerHitDisabled; }
+	void SetHammerHitDisabled(bool HammerHitDisabled)
+	{
+		GiveWeapon(WEAPON_HAMMER, HammerHitDisabled);
+		m_Core.m_HammerHitDisabled = HammerHitDisabled;
+	}
 	void SetShotgunHitDisabled(bool ShotgunHitDisabled) { m_Core.m_ShotgunHitDisabled = ShotgunHitDisabled; }
 	void SetGrenadeHitDisabled(bool GrenadeHitDisabled) { m_Core.m_GrenadeHitDisabled = GrenadeHitDisabled; }
 	void SetLaserHitDisabled(bool LaserHitDisabled) { m_Core.m_LaserHitDisabled = LaserHitDisabled; }

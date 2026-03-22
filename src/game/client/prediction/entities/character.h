@@ -133,6 +133,12 @@ public:
 	bool LaserHitDisabled() const { return m_Core.m_LaserHitDisabled; }
 	bool GrenadeHitDisabled() const { return m_Core.m_GrenadeHitDisabled; }
 
+	void SetHammerHitDisabled(bool HammerHitDisabled)
+	{
+		GiveWeapon(WEAPON_HAMMER, HammerHitDisabled);
+		m_Core.m_HammerHitDisabled = HammerHitDisabled;
+	}
+
 	bool IsSuper() const { return m_Core.m_Super; }
 
 private:

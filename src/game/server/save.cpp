@@ -187,6 +187,8 @@ bool CSaveTee::Load(CCharacter *pChr, std::optional<int> Team)
 	pChr->m_Core.m_ShotgunHitDisabled = m_HitDisabledFlags & CSaveTee::SHOTGUN_HIT_DISABLED;
 	pChr->m_Core.m_GrenadeHitDisabled = m_HitDisabledFlags & CSaveTee::GRENADE_HIT_DISABLED;
 	pChr->m_Core.m_LaserHitDisabled = m_HitDisabledFlags & CSaveTee::LASER_HIT_DISABLED;
+	if(pChr->m_Core.m_HammerHitDisabled)
+		pChr->GiveWeapon(WEAPON_HAMMER, true);
 
 	pChr->m_TuneZone = m_TuneZone;
 	pChr->m_TuneZoneOld = m_TuneZoneOld;
