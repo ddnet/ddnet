@@ -663,6 +663,9 @@ void CPlayers::RenderPlayer(
 
 			if(Player.m_Weapon == WEAPON_HAMMER)
 			{
+				if(in_range(ClientId, 0, MAX_CLIENTS - 1) && GameClient()->m_aClients[ClientId].m_HammerHitDisabled)
+					Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha * 0.5f);
+
 				// static position for hammer
 				WeaponPosition = Position + vec2(State.GetAttach()->m_X, State.GetAttach()->m_Y);
 				WeaponPosition.y += g_pData->m_Weapons.m_aId[CurrentWeapon].m_Offsety;
