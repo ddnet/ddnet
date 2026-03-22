@@ -5,6 +5,7 @@ from datetime import datetime
 import lzma
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import tarfile
 import urllib.error
@@ -120,14 +121,23 @@ def download_symbols_executable(parsed_filename: ParsedFilename | None) -> Path:
 		print(f"Downloading symbols from {symbols_url}")
 		try:
 			urllib.request.urlretrieve(symbols_url, archive_path)
-		except urllib.error.HTTPError as e:
-			raise RuntimeError("Failed to download debug symbols. They are likely not available for this crash dump.\nCheck your internet connection and make sure the crash log has its original filename.") from e
+		except urllib.error.HTTPError as error:
+			raise RuntimeError("Failed to download debug symbols. They are likely not available for this crash dump.\nCheck your internet connection and make sure the crash log has its original filename.") from error
 		print(f"Extracting symbols to {symbols_folder_path.name}")
 		symbols_folder_path.mkdir()
-		with lzma.open(archive_path) as file:
-			with tarfile.open(fileobj=file) as tar:
-				tar.extractall(symbols_folder_path, filter="data")
-		archive_path.unlink()
+		try:
+			with lzma.open(archive_path) as file:
+				with tarfile.open(fileobj=file) as tar:
+					for executable in ["DDNet.exe", "DDNet-Server.exe"]:
+						tar.extract(executable, path=symbols_folder_path, filter="data")
+		except Exception as error:
+			shutil.rmtree(symbols_folder_path, ignore_errors=True)
+			raise RuntimeError("Failed to extract debug symbols. The debug symbols archive may be corrupted.\nPlease report this error if it persists.") from error
+		except BaseException as error:
+			shutil.rmtree(symbols_folder_path, ignore_errors=True)
+			raise error
+		finally:
+			archive_path.unlink()
 
 	executable_name = f"{parsed_filename.executable}.exe"
 	symbols_executable = symbols_folder_path / executable_name
@@ -206,7 +216,7 @@ def process_crash_log(crash_log: Path, executable: Path | None):
 			continue
 		line = stack_line_match.group(1)
 
-		# Detect if crash dump was created it debug mode, then print the lines following each stack line verbatim
+		# Detect if crash dump was created in debug mode, then print the lines following each stack line verbatim
 		# as the crash log already contains a readable stack trace with function names and source code.
 		if DEBUG_SYMBOL_PATTERN.search(line):
 			print_verbatim = True
