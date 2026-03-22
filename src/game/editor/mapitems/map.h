@@ -11,6 +11,7 @@
 #include <game/editor/editor_history.h>
 #include <game/editor/editor_server_settings.h>
 #include <game/editor/editor_trackers.h>
+#include <game/editor/editor_ui.h>
 #include <game/editor/envelope_editor.h>
 #include <game/editor/font_typer.h>
 #include <game/editor/map_grid.h>
@@ -152,6 +153,7 @@ public:
 	CEnvelopeEditor::CState m_EnvelopeEditorState;
 	CMapSettingsBackend::CContextWithInput m_MapSettingsCommandContext;
 	CFontTyper::CState m_FontTyperState;
+	CEditorUiElements m_EditorUiElements;
 
 	// Housekeeping
 	void Clean();

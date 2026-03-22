@@ -684,7 +684,6 @@ public:
 	class CRenderLayersState
 	{
 	public:
-		CScrollRegion m_ScrollRegion;
 		ELayerOperation m_Operation;
 		ELayerOperation m_PreviousOperation;
 		const void *m_pDraggedButton;
