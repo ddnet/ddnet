@@ -5,6 +5,7 @@
 #include <base/log.h>
 #include <base/system.h>
 
+#include <engine/shared/config.h>
 #include <engine/shared/network.h>
 #include <engine/shared/protocol.h>
 #include <engine/shared/ringbuffer.h>
@@ -215,6 +216,11 @@ static LEVEL websocket_level_to_loglevel(int level)
 
 static void websocket_log_callback(int level, const char *line)
 {
+	if((level == LLL_NOTICE || level == LLL_INFO) && !g_Config.m_DbgWebsockets)
+	{
+		return;
+	}
+
 	// Truncate duplicate timestamp from beginning and newline from end
 	char line_truncated[4096]; // Longest log line length
 	const char *line_time_end = str_find(line, "] ");
