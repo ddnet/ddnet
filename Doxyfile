@@ -24,6 +24,7 @@ PREDEFINED             = CONF_FAMILY_UNIX \
                          CONF_UPNP \
                          CONF_VIDEORECORDER \
                          CONF_ANTIBOT
+HAVE_DOT               = YES
 DOT_IMAGE_FORMAT       = svg
 INTERACTIVE_SVG        = YES
 DOT_GRAPH_MAX_NODES    = 200
