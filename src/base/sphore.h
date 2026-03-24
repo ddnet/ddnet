@@ -15,12 +15,21 @@
  */
 
 #if defined(CONF_FAMILY_WINDOWS)
+/**
+ * @ingroup Semaphore
+ */
 typedef void *SEMAPHORE;
 #elif defined(CONF_PLATFORM_MACOS)
 #include <semaphore.h>
+/**
+ * @ingroup Semaphore
+ */
 typedef sem_t *SEMAPHORE;
 #elif defined(CONF_FAMILY_UNIX)
 #include <semaphore.h>
+/**
+ * @ingroup Semaphore
+ */
 typedef sem_t SEMAPHORE;
 #else
 #error not implemented on this platform
@@ -46,6 +55,9 @@ void sphore_signal(SEMAPHORE *sem);
  */
 void sphore_destroy(SEMAPHORE *sem);
 
+/**
+ * @ingroup Semaphore
+ */
 class CSemaphore
 {
 	SEMAPHORE m_Sem;
