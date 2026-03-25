@@ -3053,13 +3053,11 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 	CUIRect UnscrolledLayersBox = LayersBox;
 
 	static CScrollRegion s_ScrollRegion;
-	vec2 ScrollOffset(0.0f, 0.0f);
 	CScrollRegionParams ScrollParams;
 	ScrollParams.m_ScrollbarWidth = 10.0f;
 	ScrollParams.m_ScrollbarMargin = 3.0f;
 	ScrollParams.m_ScrollUnit = RowHeight * 5.0f;
-	s_ScrollRegion.Begin(&LayersBox, &ScrollOffset, &ScrollParams);
-	LayersBox.y += ScrollOffset.y;
+	s_ScrollRegion.Begin(&LayersBox, &ScrollParams);
 
 	enum
 	{
@@ -3114,7 +3112,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		{
 			MaxDraggableValue += NumButtons * (RowHeight + 2.0f) + 5.0f;
 		}
-		MaxDraggableValue += ScrollOffset.y;
+		MaxDraggableValue += LayersBox.y - UnscrolledLayersBox.y;
 
 		if(s_Operation == OP_GROUP_DRAG)
 		{
@@ -3966,13 +3964,11 @@ void CEditor::RenderImagesList(CUIRect ToolBox)
 	const float RowHeight = 12.0f;
 
 	static CScrollRegion s_ScrollRegion;
-	vec2 ScrollOffset(0.0f, 0.0f);
 	CScrollRegionParams ScrollParams;
 	ScrollParams.m_ScrollbarWidth = 10.0f;
 	ScrollParams.m_ScrollbarMargin = 3.0f;
 	ScrollParams.m_ScrollUnit = RowHeight * 5;
-	s_ScrollRegion.Begin(&ToolBox, &ScrollOffset, &ScrollParams);
-	ToolBox.y += ScrollOffset.y;
+	s_ScrollRegion.Begin(&ToolBox, &ScrollParams);
 
 	bool ScrollToSelection = false;
 	if(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && !Map()->m_vpImages.empty())
@@ -4101,13 +4097,11 @@ void CEditor::RenderSounds(CUIRect ToolBox)
 	const float RowHeight = 12.0f;
 
 	static CScrollRegion s_ScrollRegion;
-	vec2 ScrollOffset(0.0f, 0.0f);
 	CScrollRegionParams ScrollParams;
 	ScrollParams.m_ScrollbarWidth = 10.0f;
 	ScrollParams.m_ScrollbarMargin = 3.0f;
 	ScrollParams.m_ScrollUnit = RowHeight * 5;
-	s_ScrollRegion.Begin(&ToolBox, &ScrollOffset, &ScrollParams);
-	ToolBox.y += ScrollOffset.y;
+	s_ScrollRegion.Begin(&ToolBox, &ScrollParams);
 
 	bool ScrollToSelection = false;
 	if(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && !Map()->m_vpSounds.empty())
