@@ -233,4 +233,67 @@ function _copy_sqlite3() {
 }
 copy_libs_for_arches _copy_sqlite3
 
+if [[ "$TARGET_PLATFORM" == "ios" ]]; then
+	function _create_ios_xcframework() {
+		local library_folder="$1"
+		local static_library="$2"
+
+		local ios_folder="${library_folder}/ios"
+		local device_library="${ios_folder}/libarm64/${static_library}"
+		local simulator_arm64_library="${ios_folder}/libsimarm64/${static_library}"
+		local simulator_x64_library="${ios_folder}/libsimx86_64/${static_library}"
+
+		if [[ ! -f "${device_library}" || ! -f "${simulator_arm64_library}" || ! -f "${simulator_x64_library}" ]]; then
+			log_error "ERROR: Missing iOS static library slices for ${static_library} in ${ios_folder}"
+			exit 1
+		fi
+
+		local simulator_universal_folder="${ios_folder}/simulator_universal"
+		local simulator_universal_library="${simulator_universal_folder}/${static_library}"
+		local xcframework_name="${static_library%.a}.xcframework"
+		local xcframework_path="${ios_folder}/${xcframework_name}"
+		local xcframework_info_plist="${xcframework_path}/Info.plist"
+
+		rm -rf "${simulator_universal_folder}" "${xcframework_path}"
+		mkdir -p "${simulator_universal_folder}"
+
+		lipo -create \
+			"${simulator_arm64_library}" \
+			"${simulator_x64_library}" \
+			-output "${simulator_universal_library}"
+
+		xcodebuild -create-xcframework \
+			-library "${device_library}" \
+			-library "${simulator_universal_library}" \
+			-output "${xcframework_path}" > /dev/null
+
+		plutil -convert json "$xcframework_info_plist" -o - |
+			jq '.AvailableLibraries |= sort_by(.LibraryIdentifier)' |
+			plutil -convert xml1 -o "$xcframework_info_plist" -
+
+		rm -rf "${simulator_universal_folder}"
+		log_info "Created ${xcframework_path}"
+	}
+	log_info_header "Creating iOS xcframeworks..."
+	_create_ios_xcframework "ddnet-libs/curl" "libcurl.a"
+	_create_ios_xcframework "ddnet-libs/freetype" "libfreetype.a"
+	_create_ios_xcframework "ddnet-libs/opus" "libogg.a"
+	_create_ios_xcframework "ddnet-libs/opus" "libopus.a"
+	_create_ios_xcframework "ddnet-libs/opus" "libopusfile.a"
+	_create_ios_xcframework "ddnet-libs/png" "libpng16.a"
+	_create_ios_xcframework "ddnet-libs/sdl" "libSDL2.a"
+	_create_ios_xcframework "ddnet-libs/sqlite3" "libsqlite3.a"
+
+	function _cleanup_ios_library() {
+		local library_folder="ddnet-libs/$1/ios"
+		rm -rf "${library_folder}/libarm64" "${library_folder}/libsimarm64" "${library_folder}/libsimx86_64"
+	}
+	_cleanup_ios_library curl
+	_cleanup_ios_library freetype
+	_cleanup_ios_library opus
+	_cleanup_ios_library png
+	_cleanup_ios_library sdl
+	_cleanup_ios_library sqlite3
+fi
+
 log_info "Done."
