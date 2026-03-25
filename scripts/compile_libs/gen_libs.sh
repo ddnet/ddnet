@@ -7,24 +7,26 @@ source "${SCRIPT_DIR}/_build_common.sh"
 
 if [ -z ${1+x} ]; then
 	log_error "ERROR: Specify the destination path where to run this script, please choose a path other than in the source directory"
-	log_error "Usage: scripts/compile_libs/gen_libs.sh <Build folder> <android/webasm>"
+	log_error "Usage: scripts/compile_libs/gen_libs.sh <Build folder> <android/ios/webasm>"
 	exit 1
 fi
 BUILD_FOLDER="$1"
 
 if [ -z ${2+x} ]; then
-	log_error "ERROR: Specify the target platform: android, webasm"
-	log_error "Usage: scripts/compile_libs/gen_libs.sh <Build folder> <android/webasm>"
+	log_error "ERROR: Specify the target platform: android, ios, webasm"
+	log_error "Usage: scripts/compile_libs/gen_libs.sh <Build folder> <android/ios/webasm>"
 	exit 1
 fi
 TARGET_PLATFORM="$2"
-if [[ "${TARGET_PLATFORM}" != "android" && "${TARGET_PLATFORM}" != "webasm" ]]; then
-	log_error "ERROR: Specify the target platform: android, webasm"
-	log_error "Usage: scripts/compile_libs/gen_libs.sh <Build folder> <android/webasm>"
+if [[ "${TARGET_PLATFORM}" != "android" && "${TARGET_PLATFORM}" != "ios" && "${TARGET_PLATFORM}" != "webasm" ]]; then
+	log_error "ERROR: Specify the target platform: android, ios, webasm"
+	log_error "Usage: scripts/compile_libs/gen_libs.sh <Build folder> <android/ios/webasm>"
 	exit 1
 fi
 if [[ "${TARGET_PLATFORM}" == "android" ]]; then
 	assert_android_ndk_found
+elif [[ "${TARGET_PLATFORM}" == "ios" ]]; then
+	assert_ios_sdk_found
 elif [[ "${TARGET_PLATFORM}" == "webasm" ]]; then
 	assert_emscripten_sdk_found
 fi
@@ -141,6 +143,10 @@ function copy_libs_for_arches() {
 		${1} "${ANDROID_ARM64_BUILD_FOLDER}" libarm64
 		${1} "${ANDROID_X86_BUILD_FOLDER}" lib32
 		${1} "${ANDROID_X64_BUILD_FOLDER}" lib64
+	elif [[ "${TARGET_PLATFORM}" == "ios" ]]; then
+		${1} "${IOS_DEVICE_BUILD_FOLDER}" libarm64
+		${1} "${IOS_SIM_ARM64_BUILD_FOLDER}" libsimarm64
+		${1} "${IOS_SIM_X64_BUILD_FOLDER}" libsimx86_64
 	elif [[ "${TARGET_PLATFORM}" == "webasm" ]]; then
 		${1} "${EMSCRIPTEN_WASM_BUILD_FOLDER}" libwasm
 	fi

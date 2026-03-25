@@ -16,6 +16,8 @@ function make_cmake() {
 	local cmake_wrapper=""
 	local cmake_targets=""
 
+	local ios_sdk_path=""
+
 	# Target platform settings
 	if [[ "${TARGET_PLATFORM}" == "android" ]]; then
 		local build_android_abi="${2}"
@@ -31,6 +33,16 @@ function make_cmake() {
 		cmake_arguments+=("-DCMAKE_ANDROID_ARCH_ABI=${build_android_abi}")
 		# Most required C and LD flags for Android are already specified by the toolchain file
 		build_extra_cflags="${ANDROID_EXTRA_RELEASE_CFLAGS}"
+	elif [[ "${TARGET_PLATFORM}" == "ios" ]]; then
+		local build_ios_sysroot="${3}"
+		local build_ios_arch="${4}"
+		ios_sdk_path="$(xcrun --sdk "${build_ios_sysroot}${IOS_SDK_VERSION}" --show-sdk-path)"
+		cmake_arguments+=("-DCMAKE_SYSTEM_NAME=iOS")
+		cmake_arguments+=("-DCMAKE_OSX_SYSROOT=${ios_sdk_path}")
+		cmake_arguments+=("-DCMAKE_OSX_ARCHITECTURES=${build_ios_arch}")
+		cmake_arguments+=("-DCMAKE_OSX_DEPLOYMENT_TARGET=${IOS_DEPLOYMENT_TARGET}")
+		cmake_arguments+=("-DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY")
+		build_extra_cflags="${IOS_COMMON_CFLAGS}"
 	elif [[ "${TARGET_PLATFORM}" == "webasm" ]]; then
 		cmake_wrapper="emcmake"
 		build_extra_cflags="${EMSCRIPTEN_WASM_CFLAGS} ${EMSCRIPTEN_EXTRA_RELEASE_CFLAGS}"
@@ -42,6 +54,8 @@ function make_cmake() {
 	build_extra_cflags="${build_extra_cflags} -fno-ident"
 	if [[ "${TARGET_PLATFORM}" == "android" ]]; then
 		build_extra_cflags="${build_extra_cflags} -ffile-prefix-map=${ANDROID_TOOLCHAIN_ROOT}=ANDROID_TOOLCHAIN_ROOT"
+	elif [[ "${TARGET_PLATFORM}" == "ios" ]]; then
+		build_extra_cflags="${build_extra_cflags} -ffile-prefix-map=${ios_sdk_path}=IOS_SDK_ROOT"
 	elif [[ "${TARGET_PLATFORM}" == "webasm" ]]; then
 		build_extra_cflags="${build_extra_cflags} -ffile-prefix-map=${EMSDK}=EMSDK"
 	fi
@@ -67,6 +81,12 @@ function make_cmake() {
 			cmake_arguments+=("-DOPENSSL_CRYPTO_LIBRARY=${ssl_path}/${build_folder}/libcrypto.a")
 			cmake_arguments+=("-DOPENSSL_SSL_LIBRARY=${ssl_path}/${build_folder}/libssl.a")
 			cmake_arguments+=("-DOPENSSL_INCLUDE_DIR=${ssl_path}/include")
+		elif [[ "${TARGET_PLATFORM}" == "ios" ]]; then
+			# Use Apple's native TLS stack on iOS for now. This is removed in curl 8.15 due to its inability to support TLS 1.3
+			# SecTrust is available in curl 8.17
+			cmake_arguments+=("-DCURL_ENABLE_SSL=ON")
+			cmake_arguments+=("-DCURL_USE_SECTRANSPORT=ON")
+			cmake_arguments+=("-DCURL_USE_OPENSSL=OFF")
 		elif [[ "${TARGET_PLATFORM}" == "webasm" ]]; then
 			# Compile without crypto because curl does not work with Emscripten at all,
 			# but we currently need curl to compile server and client.
@@ -147,6 +167,10 @@ function make_all_cmake() {
 		make_cmake "${ANDROID_ARM64_BUILD_FOLDER}" "${ANDROID_ARM64_ABI}"
 		make_cmake "${ANDROID_X86_BUILD_FOLDER}" "${ANDROID_X86_ABI}"
 		make_cmake "${ANDROID_X64_BUILD_FOLDER}" "${ANDROID_X64_ABI}"
+	elif [[ "${TARGET_PLATFORM}" == "ios" ]]; then
+		make_cmake "${IOS_DEVICE_BUILD_FOLDER}" "" "iphoneos" "${IOS_DEVICE_ARCH}"
+		make_cmake "${IOS_SIM_ARM64_BUILD_FOLDER}" "" "iphonesimulator" "${IOS_SIM_ARM64_ARCH}"
+		make_cmake "${IOS_SIM_X64_BUILD_FOLDER}" "" "iphonesimulator" "${IOS_SIM_X64_ARCH}"
 	elif [[ "${TARGET_PLATFORM}" == "webasm" ]]; then
 		make_cmake "${EMSCRIPTEN_WASM_BUILD_FOLDER}" ""
 	else
