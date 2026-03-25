@@ -82,7 +82,9 @@ function make_cmake() {
 		cmake_arguments+=("-DFT_REQUIRE_ZLIB=ON")
 		cmake_arguments+=("-DPNG_LIBRARY=${png_path}/${build_folder}/libpng.a")
 		cmake_arguments+=("-DPNG_PNG_INCLUDE_DIR=${png_path}${PATH_SEPARATOR}${png_path}/${build_folder}")
+		cmake_arguments+=("-DCMAKE_POLICY_VERSION_MINIMUM=3.5")
 	elif [[ "${TARGET_LIBRARY}" == "ogg" ]]; then
+		cmake_arguments+=("-DCMAKE_POLICY_VERSION_MINIMUM=3.5")
 		cmake_targets="--target ogg"
 	elif [[ "${TARGET_LIBRARY}" == "opus" ]]; then
 		cmake_targets="--target opus"
