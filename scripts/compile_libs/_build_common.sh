@@ -118,7 +118,17 @@ export EMSCRIPTEN_WASM_CFLAGS="-pthread -O3 -g -s USE_PTHREADS=1"
 export EMSCRIPTEN_WASM_LDFLAGS="-pthread -O3 -g -s USE_PTHREADS=1 -s ASYNCIFY=1 -s WASM=1"
 export EMSCRIPTEN_EXTRA_RELEASE_CFLAGS="-g0"
 
-BUILD_FLAGS="${BUILD_FLAGS:--j$(nproc)}"
+function cpu_count() {
+	if command -v nproc > /dev/null 2>&1; then
+		nproc
+	elif command -v sysctl > /dev/null 2>&1; then
+		sysctl -n hw.ncpu # fallback for macOS
+	else
+		echo 4
+	fi
+}
+
+BUILD_FLAGS="${BUILD_FLAGS:--j$(cpu_count)}"
 export BUILD_FLAGS
 
 # For reproducible builds, zero all timestamps. See https://reproducible-builds.org/docs/source-date-epoch/
