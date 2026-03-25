@@ -51,6 +51,16 @@ public:
 			const int FromItemSize = pFrom->GetItemSize(Index);
 			const int ItemType = pFrom->GetItemType(Index);
 			const void *pData = pFromItem->Data();
+
+			if(ItemType <= 0)
+			{
+				// Don't add extended item type descriptions, they get
+				// added implicitly (== 0).
+				//
+				// Don't add items of unknown item types either (< 0).
+				continue;
+			}
+
 			Unpacker.Reset(pData, FromItemSize);
 
 			void *pRawObj = NetObjHandler.SecureUnpackObj(ItemType, &Unpacker);
@@ -58,7 +68,7 @@ public:
 				continue;
 
 			const int ItemSize = NetObjHandler.GetUnpackedObjSize(ItemType);
-			void *pObj = Builder.NewItem(pFromItem->Type(), pFromItem->Id(), ItemSize);
+			void *pObj = Builder.NewItem(ItemType, pFromItem->Id(), ItemSize);
 			if(!pObj)
 				return -4;
 

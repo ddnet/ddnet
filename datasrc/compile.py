@@ -274,10 +274,8 @@ void CNetObjHandler::DebugDumpSnapshot(const CSnapshot *pSnap) const
 		const CSnapshotItem *pItem = pSnap->GetItem(i);
 		int Size = pSnap->GetItemSize(i);
 		int Type = pSnap->GetItemType(i);
-		const char *pName = GetObjName(pItem->Type());
-		if(Type > OFFSET_UUID && Type < g_UuidManager.NumUuids() + OFFSET_UUID)
-			pName = g_UuidManager.GetName(Type);
-		dbg_msg("snapshot", "\\t%s type=%d id=%d size=%d", pName, pItem->Type(), pItem->Id(), Size);
+		const char *pName = GetObjName(Type);
+		dbg_msg("snapshot", "\\t%s type=%d id=%d size=%d", pName, pItem->InternalType(), pItem->Id(), Size);
 		if(!DumpObj(Type, pItem->Data(), Size))
 			continue;
 
