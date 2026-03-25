@@ -26,16 +26,14 @@ static constexpr ColorRGBA HIGHLIGHTED_TEXT_COLOR = ColorRGBA(0.4f, 0.4f, 1.0f, 
 
 static ColorRGBA PlayerBackgroundColor(bool Friend, bool Clan, bool Afk, bool InSelectedServer, bool Inside)
 {
-	static const ColorRGBA COLORS[] = {ColorRGBA(0.5f, 1.0f, 0.5f), ColorRGBA(0.4f, 0.4f, 1.0f), ColorRGBA(0.75f, 0.75f, 0.75f)};
-	static const ColorRGBA COLORS_AFK[] = {ColorRGBA(1.0f, 1.0f, 0.5f), ColorRGBA(0.4f, 0.75f, 1.0f), ColorRGBA(0.6f, 0.6f, 0.6f)};
-	int i;
+	ColorRGBA Color;
 	if(Friend)
-		i = 0;
+		Color = Afk ? ColorRGBA(1.0f, 1.0f, 0.5f) : ColorRGBA(0.5f, 1.0f, 0.5f);
 	else if(Clan)
-		i = 1;
+		Color = Afk ? ColorRGBA(1.0f, 1.0f, 0.5f) : color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClFriendClanColor));
 	else
-		i = 2;
-	return (Afk ? COLORS_AFK[i] : COLORS[i]).WithAlpha(0.3f + (Inside ? 0.15f : 0.0f) + (InSelectedServer ? 0.12f : 0.0f));
+		Color = Afk ? ColorRGBA(0.6f, 0.6f, 0.6f) : ColorRGBA(0.75f, 0.75f, 0.75f);
+	return Color.WithAlpha(0.3f + (Inside ? 0.15f : 0.0f) + (InSelectedServer ? 0.12f : 0.0f));
 }
 
 template<size_t N>

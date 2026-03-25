@@ -346,10 +346,14 @@ void CScoreboard::RenderSpectators(CUIRect Spectators)
 			const char *pClanName = ClientData.m_aClan;
 			if(pClanName[0] != '\0')
 			{
-				if((GameClient()->m_aLocalIds[g_Config.m_ClDummy] >= 0 && str_comp(pClanName, GameClient()->m_aClients[GameClient()->m_aLocalIds[g_Config.m_ClDummy]].m_aClan) == 0) ||
-					GameClient()->Friends()->IsFriend("", pClanName, false))
+				if(GameClient()->m_aLocalIds[g_Config.m_ClDummy] >= 0 &&
+					str_comp(pClanName, GameClient()->m_aClients[GameClient()->m_aLocalIds[g_Config.m_ClDummy]].m_aClan) == 0)
 				{
 					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClSameClanColor)));
+				}
+				else if(GameClient()->Friends()->IsFriend("", pClanName, false))
+				{
+					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClFriendClanColor)));
 				}
 				else
 				{
@@ -763,10 +767,14 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 
 			// clan
 			{
-				if((GameClient()->m_aLocalIds[g_Config.m_ClDummy] >= 0 && str_comp(ClientData.m_aClan, GameClient()->m_aClients[GameClient()->m_aLocalIds[g_Config.m_ClDummy]].m_aClan) == 0) ||
-					GameClient()->Friends()->IsFriend("", ClientData.m_aClan, false))
+				if(GameClient()->m_aLocalIds[g_Config.m_ClDummy] >= 0 &&
+					str_comp(ClientData.m_aClan, GameClient()->m_aClients[GameClient()->m_aLocalIds[g_Config.m_ClDummy]].m_aClan) == 0)
 				{
 					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClSameClanColor)));
+				}
+				else if(GameClient()->Friends()->IsFriend("", ClientData.m_aClan, false))
+				{
+					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClFriendClanColor)));
 				}
 				else
 				{
