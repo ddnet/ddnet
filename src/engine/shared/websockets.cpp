@@ -65,19 +65,14 @@ static lws_context *websocket_context(int socket)
 	return context;
 }
 
-static int receive_chunk(context_data *ctx_data, per_session_data *pss, const void *in, size_t len)
+static void receive_chunk(context_data *ctx_data, per_session_data *pss, const void *in, size_t len)
 {
 	websocket_chunk *chunk = ctx_data->recv_buffer.Allocate(len + sizeof(websocket_chunk));
-	if(chunk == nullptr)
-	{
-		return 1;
-	}
-
+	dbg_assert(chunk != nullptr, "failed to allocate websocket receive buffer chunk of size %" PRIzu, len);
 	chunk->size = len;
 	chunk->read = 0;
 	chunk->addr = pss->addr;
 	mem_copy(&chunk->data[0], in, len);
-	return 0;
 }
 
 static void sockaddr_to_netaddr_websocket(const sockaddr *src, socklen_t src_len, NETADDR *dst)
@@ -186,7 +181,8 @@ static int websocket_protocol_callback(lws *wsi, enum lws_callback_reasons reaso
 	case LWS_CALLBACK_CLIENT_RECEIVE:
 		[[fallthrough]];
 	case LWS_CALLBACK_RECEIVE:
-		return receive_chunk(ctx_data, pss, in, len);
+		receive_chunk(ctx_data, pss, in, len);
+		return 0;
 
 	default:
 		return 0;
@@ -363,12 +359,8 @@ int websocket_send(int socket, const unsigned char *data, size_t size, const NET
 
 	const size_t chunk_size = size + sizeof(websocket_chunk) + LWS_SEND_BUFFER_PRE_PADDING + LWS_SEND_BUFFER_POST_PADDING;
 	websocket_chunk *chunk = pss->send_buffer.Allocate(chunk_size);
+	dbg_assert(chunk != nullptr, "failed to allocate websocket send buffer chunk of size %" PRIzu, size);
 	mem_zero(chunk, chunk_size);
-	if(chunk == nullptr)
-	{
-		return -1;
-	}
-
 	chunk->size = size;
 	chunk->read = 0;
 	chunk->addr = pss->addr;
