@@ -8,9 +8,9 @@ The `src` folder is structured into several folders as follows:
 
 - android: Platform-specific code for Android systems.
 - antibot: Antibot API integration.
-- base: Cross-platform abstraction layer. Contains many utility functions and abstracts most platform-specific code. Contains functions for string manipulation, filesystem, time, networking, threading, debugging, secure random etc.
+- base: Cross-platform abstraction layer. Contains many utility functions and abstracts most platform-specific code. Contains functions for string manipulation, IO, filesystem, time, networking, threading, debugging, secure random, hashes etc. Also contains general purpose types and functions for mathematics, 2D/3D/4D vectors, and colors.
 - engine: Game engine. Mostly implements non-gameplay related functionality like graphics, sound, input, higher-level networking etc.
-- game: Gameplay related code. Separated into client, server and editor.
+- game: Gameplay related code. Separated into client, server, map and editor.
 - macos: Platform-specific code for macOS systems.
 - masterping: Tool that collects game server info via an HTTP endpoint and aggregates them.
 - @ref mastersrv "mastersrv": The mastersrv maintains a list of all registered DDNet (and Teeworlds) servers.
@@ -18,6 +18,8 @@ The `src` folder is structured into several folders as follows:
 - steam: Steam API integration.
 - test: Unit tests.
 - tools: Additional tools for utility and testing.
+
+Refer to the list of <a href="topics.html">**Topics**</a> for a structured overview of all documented types and functions.
 
 # Documentation
 

@@ -11,7 +11,7 @@ Development discussions happen on #ddnet on Quakenet ([Webchat](http://webchat.q
 You can get binary releases on the [DDNet website](https://ddnet.org/downloads/), find it on [Steam](https://store.steampowered.com/app/412220/DDraceNetwork/) or [install from repository](#installation-from-repository).
 
 - [Code Browser](https://ddnet.org/codebrowser/DDNet/)
-- [Source Code Documentation](https://codedoc.ddnet.org/) (very incomplete, only a few items are documented)
+- [Source Code Documentation](https://codedoc.ddnet.org/)
 - [Building Guide](docs/BUILDING.md)
 - [Debugging Guide](docs/DEBUGGING.md)
 - [Contributing Guide](docs/CONTRIBUTING.md)
