@@ -40,6 +40,7 @@
 #include <chrono>
 #include <iterator>
 #include <limits>
+#include <tuple>
 #include <type_traits>
 
 static const char *VANILLA_IMAGES[] = {
@@ -6768,81 +6769,138 @@ void CEditor::RenderMousePointer()
 	}
 }
 
-void CEditor::RenderGameEntities(const std::shared_ptr<CLayerTiles> &pTiles)
+void CEditor::RenderIngameEntities(const CLayerGroup &Group, const CLayerTiles &TilesLayer)
 {
 	const CGameClient *pGameClient = (CGameClient *)Kernel()->RequestInterface<IGameClient>();
 	const float TileSize = 32.f;
 
-	for(int y = 0; y < pTiles->m_Height; y++)
+	const bool DDNetOrCustomEntities = std::find_if(std::begin(gs_apModEntitiesNames), std::end(gs_apModEntitiesNames),
+						   [&](const char *pEntitiesName) { return str_comp_nocase(m_SelectEntitiesImage.c_str(), pEntitiesName) == 0 &&
+											   str_comp_nocase(pEntitiesName, "ddnet") != 0; }) == std::end(gs_apModEntitiesNames);
+
+	const bool IsSwitch = TilesLayer.m_HasSwitch;
+	std::function<std::tuple<unsigned char, unsigned char>(int, int)> GetTile;
+	std::function<unsigned char(int, int)> GetIndexChecked;
+	if(IsSwitch)
 	{
-		for(int x = 0; x < pTiles->m_Width; x++)
+		const CLayerSwitch &SwitchLayer = static_cast<const CLayerSwitch &>(TilesLayer);
+		GetTile = [&](int x, int y) -> std::tuple<unsigned char, unsigned char> {
+			const CSwitchTile Tile = SwitchLayer.m_pSwitchTile[y * SwitchLayer.m_Width + x];
+			return {Tile.m_Type - ENTITY_OFFSET, Tile.m_Flags};
+		};
+		GetIndexChecked = [&](int x, int y) -> unsigned char {
+			if(x < 0 || y < 0 || x >= SwitchLayer.m_Width || y >= SwitchLayer.m_Height)
+			{
+				return 0;
+			}
+			return SwitchLayer.m_pSwitchTile[y * SwitchLayer.m_Width + x].m_Type - ENTITY_OFFSET;
+		};
+	}
+	else
+	{
+		GetTile = [&](int x, int y) -> std::tuple<unsigned char, unsigned char> {
+			const CTile Tile = TilesLayer.m_pTiles[y * TilesLayer.m_Width + x];
+			return {Tile.m_Index - ENTITY_OFFSET, Tile.m_Flags};
+		};
+		GetIndexChecked = [&](int x, int y) -> unsigned char {
+			if(x < 0 || y < 0 || x >= TilesLayer.m_Width || y >= TilesLayer.m_Height)
+			{
+				return 0;
+			}
+			return TilesLayer.m_pTiles[y * TilesLayer.m_Width + x].m_Index - ENTITY_OFFSET;
+		};
+	}
+
+	static const ivec2 DOOR_OFFSETS[] = {{1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}, {0, -1}, {1, -1}};
+	const ColorRGBA DoorOuterColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLaserDoorOutlineColor));
+	const ColorRGBA DoorInnerColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLaserDoorInnerColor));
+
+	float aPoints[4];
+	Group.Mapping(aPoints);
+	const int ExtraBorder = 9; // doors extend beyond the tile on which they are placed
+	const int StartX = std::max<int>(0, std::floor(aPoints[0] / TileSize) - ExtraBorder);
+	const int EndX = std::min<int>(TilesLayer.m_Width, std::ceil(aPoints[2] / TileSize) + ExtraBorder);
+	const int StartY = std::max<int>(0, std::floor(aPoints[1] / TileSize) - ExtraBorder);
+	const int EndY = std::min<int>(TilesLayer.m_Height, std::ceil(aPoints[3] / TileSize) + ExtraBorder);
+	for(int y = StartY; y < EndY; y++)
+	{
+		for(int x = StartX; x < EndX; x++)
 		{
-			const unsigned char Index = pTiles->m_pTiles[y * pTiles->m_Width + x].m_Index - ENTITY_OFFSET;
-			if(!((Index >= ENTITY_FLAGSTAND_RED && Index <= ENTITY_WEAPON_LASER) ||
-				   (Index >= ENTITY_ARMOR_SHOTGUN && Index <= ENTITY_ARMOR_LASER)))
-				continue;
+			const auto [Index, Flags] = GetTile(x, y);
 
-			const bool DDNetOrCustomEntities = std::find_if(std::begin(gs_apModEntitiesNames), std::end(gs_apModEntitiesNames),
-								   [&](const char *pEntitiesName) { return str_comp_nocase(m_SelectEntitiesImage.c_str(), pEntitiesName) == 0 &&
-													   str_comp_nocase(pEntitiesName, "ddnet") != 0; }) == std::end(gs_apModEntitiesNames);
+			if(Index == ENTITY_DOOR)
+			{
+				for(const ivec2 Offset : DOOR_OFFSETS)
+				{
+					const unsigned char IndexDoorLength = GetIndexChecked(x + Offset.x, y + Offset.y);
+					if(IndexDoorLength >= ENTITY_LASER_SHORT && IndexDoorLength <= ENTITY_LASER_LONG)
+					{
+						const int Length = (IndexDoorLength - ENTITY_LASER_SHORT + 1) * 3;
+						const vec2 Pos = vec2(x + 0.5f, y + 0.5f);
+						const vec2 To = Pos + normalize(vec2(Offset.x, Offset.y)) * Length;
+						pGameClient->m_Items.RenderLaser(To * TileSize, Pos * TileSize, DoorOuterColor, DoorInnerColor, 0.0f, 0.0f, LASERTYPE_DOOR);
+					}
+				}
+			}
+			else if((!IsSwitch && Index >= ENTITY_FLAGSTAND_RED && Index <= ENTITY_FLAGSTAND_BLUE) ||
+				(Index >= ENTITY_ARMOR_1 && Index <= ENTITY_WEAPON_LASER) ||
+				(DDNetOrCustomEntities && Index >= ENTITY_ARMOR_SHOTGUN && Index <= ENTITY_ARMOR_LASER))
+			{
+				vec2 Pos = vec2(x, y) * TileSize;
+				vec2 Scale;
+				int VisualSize;
 
-			vec2 Pos(x * TileSize, y * TileSize);
-			vec2 Scale;
-			int VisualSize;
-
-			if(Index == ENTITY_FLAGSTAND_RED)
-			{
-				Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpriteFlagRed);
-				Scale = vec2(42, 84);
-				VisualSize = 1;
-				Pos.y -= (Scale.y / 2.f) * 0.75f;
-			}
-			else if(Index == ENTITY_FLAGSTAND_BLUE)
-			{
-				Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpriteFlagBlue);
-				Scale = vec2(42, 84);
-				VisualSize = 1;
-				Pos.y -= (Scale.y / 2.f) * 0.75f;
-			}
-			else if(Index == ENTITY_ARMOR_1)
-			{
-				Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmor);
-				Graphics()->GetSpriteScale(SPRITE_PICKUP_HEALTH, Scale.x, Scale.y);
-				VisualSize = 64;
-			}
-			else if(Index == ENTITY_HEALTH_1)
-			{
-				Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupHealth);
-				Graphics()->GetSpriteScale(SPRITE_PICKUP_HEALTH, Scale.x, Scale.y);
-				VisualSize = 64;
-			}
-			else if(Index == ENTITY_WEAPON_SHOTGUN)
-			{
-				Graphics()->TextureSet(pGameClient->m_GameSkin.m_aSpritePickupWeapons[WEAPON_SHOTGUN]);
-				Graphics()->GetSpriteScale(SPRITE_PICKUP_SHOTGUN, Scale.x, Scale.y);
-				VisualSize = g_pData->m_Weapons.m_aId[WEAPON_SHOTGUN].m_VisualSize;
-			}
-			else if(Index == ENTITY_WEAPON_GRENADE)
-			{
-				Graphics()->TextureSet(pGameClient->m_GameSkin.m_aSpritePickupWeapons[WEAPON_GRENADE]);
-				Graphics()->GetSpriteScale(SPRITE_PICKUP_GRENADE, Scale.x, Scale.y);
-				VisualSize = g_pData->m_Weapons.m_aId[WEAPON_GRENADE].m_VisualSize;
-			}
-			else if(Index == ENTITY_WEAPON_LASER)
-			{
-				Graphics()->TextureSet(pGameClient->m_GameSkin.m_aSpritePickupWeapons[WEAPON_LASER]);
-				Graphics()->GetSpriteScale(SPRITE_PICKUP_LASER, Scale.x, Scale.y);
-				VisualSize = g_pData->m_Weapons.m_aId[WEAPON_LASER].m_VisualSize;
-			}
-			else if(Index == ENTITY_POWERUP_NINJA)
-			{
-				Graphics()->TextureSet(pGameClient->m_GameSkin.m_aSpritePickupWeapons[WEAPON_NINJA]);
-				Graphics()->GetSpriteScale(SPRITE_PICKUP_NINJA, Scale.x, Scale.y);
-				VisualSize = 128;
-			}
-			else if(DDNetOrCustomEntities)
-			{
-				if(Index == ENTITY_ARMOR_SHOTGUN)
+				if(Index == ENTITY_FLAGSTAND_RED)
+				{
+					Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpriteFlagRed);
+					Scale = vec2(42, 84);
+					VisualSize = 1;
+					Pos.y -= (Scale.y / 2.f) * 0.75f;
+				}
+				else if(Index == ENTITY_FLAGSTAND_BLUE)
+				{
+					Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpriteFlagBlue);
+					Scale = vec2(42, 84);
+					VisualSize = 1;
+					Pos.y -= (Scale.y / 2.f) * 0.75f;
+				}
+				else if(Index == ENTITY_ARMOR_1)
+				{
+					Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmor);
+					Graphics()->GetSpriteScale(SPRITE_PICKUP_HEALTH, Scale.x, Scale.y);
+					VisualSize = 64;
+				}
+				else if(Index == ENTITY_HEALTH_1)
+				{
+					Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupHealth);
+					Graphics()->GetSpriteScale(SPRITE_PICKUP_HEALTH, Scale.x, Scale.y);
+					VisualSize = 64;
+				}
+				else if(Index == ENTITY_WEAPON_SHOTGUN)
+				{
+					Graphics()->TextureSet(pGameClient->m_GameSkin.m_aSpritePickupWeapons[WEAPON_SHOTGUN]);
+					Graphics()->GetSpriteScale(SPRITE_PICKUP_SHOTGUN, Scale.x, Scale.y);
+					VisualSize = g_pData->m_Weapons.m_aId[WEAPON_SHOTGUN].m_VisualSize;
+				}
+				else if(Index == ENTITY_WEAPON_GRENADE)
+				{
+					Graphics()->TextureSet(pGameClient->m_GameSkin.m_aSpritePickupWeapons[WEAPON_GRENADE]);
+					Graphics()->GetSpriteScale(SPRITE_PICKUP_GRENADE, Scale.x, Scale.y);
+					VisualSize = g_pData->m_Weapons.m_aId[WEAPON_GRENADE].m_VisualSize;
+				}
+				else if(Index == ENTITY_POWERUP_NINJA)
+				{
+					Graphics()->TextureSet(pGameClient->m_GameSkin.m_aSpritePickupWeapons[WEAPON_NINJA]);
+					Graphics()->GetSpriteScale(SPRITE_PICKUP_NINJA, Scale.x, Scale.y);
+					VisualSize = 128;
+				}
+				else if(Index == ENTITY_WEAPON_LASER)
+				{
+					Graphics()->TextureSet(pGameClient->m_GameSkin.m_aSpritePickupWeapons[WEAPON_LASER]);
+					Graphics()->GetSpriteScale(SPRITE_PICKUP_LASER, Scale.x, Scale.y);
+					VisualSize = g_pData->m_Weapons.m_aId[WEAPON_LASER].m_VisualSize;
+				}
+				else if(Index == ENTITY_ARMOR_SHOTGUN)
 				{
 					Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmorShotgun);
 					Graphics()->GetSpriteScale(SPRITE_PICKUP_ARMOR_SHOTGUN, Scale.x, Scale.y);
@@ -6867,113 +6925,50 @@ void CEditor::RenderGameEntities(const std::shared_ptr<CLayerTiles> &pTiles)
 					VisualSize = 64;
 				}
 				else
-					continue;
-			}
-			else
-				continue;
-
-			Graphics()->QuadsBegin();
-
-			if(Index != ENTITY_FLAGSTAND_RED && Index != ENTITY_FLAGSTAND_BLUE)
-			{
-				const unsigned char Flags = pTiles->m_pTiles[y * pTiles->m_Width + x].m_Flags;
-
-				if(Flags & TILEFLAG_XFLIP)
-					Scale.x = -Scale.x;
-
-				if(Flags & TILEFLAG_YFLIP)
-					Scale.y = -Scale.y;
-
-				if(Flags & TILEFLAG_ROTATE)
 				{
-					Graphics()->QuadsSetRotation(90.f * (pi / 180));
+					dbg_assert_failed("Unhandled ingame entities index: %d", Index);
+				}
 
-					if(Index == ENTITY_POWERUP_NINJA)
+				Graphics()->QuadsBegin();
+
+				if(Index != ENTITY_FLAGSTAND_RED &&
+					Index != ENTITY_FLAGSTAND_BLUE)
+				{
+					if(Flags & TILEFLAG_XFLIP)
 					{
-						if(Flags & TILEFLAG_XFLIP)
-							Pos.y += 10.0f;
-						else
-							Pos.y -= 10.0f;
+						Scale.x = -Scale.x;
+					}
+
+					if(Flags & TILEFLAG_YFLIP)
+					{
+						Scale.y = -Scale.y;
+					}
+
+					if(Flags & TILEFLAG_ROTATE)
+					{
+						Graphics()->QuadsSetRotation(90.f * (pi / 180));
+
+						if(Index == ENTITY_POWERUP_NINJA)
+						{
+							Pos.y += (Flags & TILEFLAG_XFLIP) ? 10.0f : -10.0f;
+						}
+					}
+					else
+					{
+						if(Index == ENTITY_POWERUP_NINJA)
+						{
+							Pos.x += (Flags & TILEFLAG_XFLIP) ? 10.0f : -10.0f;
+						}
 					}
 				}
-				else
-				{
-					if(Index == ENTITY_POWERUP_NINJA)
-					{
-						if(Flags & TILEFLAG_XFLIP)
-							Pos.x += 10.0f;
-						else
-							Pos.x -= 10.0f;
-					}
-				}
-			}
 
-			Scale *= VisualSize;
-			Pos -= vec2((Scale.x - TileSize) / 2.f, (Scale.y - TileSize) / 2.f);
-			Pos += direction(Client()->GlobalTime() * 2.0f + x + y) * 2.5f;
+				Scale *= VisualSize;
+				Pos -= (Scale - vec2(TileSize, TileSize)) / 2.0f;
+				Pos += direction(Client()->GlobalTime() * 2.0f + x + y) * 2.5f;
 
-			IGraphics::CQuadItem Quad(Pos.x, Pos.y, Scale.x, Scale.y);
-			Graphics()->QuadsDrawTL(&Quad, 1);
-			Graphics()->QuadsEnd();
-		}
-	}
-}
-
-void CEditor::RenderSwitchEntities(const std::shared_ptr<CLayerTiles> &pTiles)
-{
-	const CGameClient *pGameClient = (CGameClient *)Kernel()->RequestInterface<IGameClient>();
-	const float TileSize = 32.f;
-
-	std::function<unsigned char(int, int, unsigned char &)> GetIndex;
-	if(pTiles->m_HasSwitch)
-	{
-		CLayerSwitch *pSwitchLayer = ((CLayerSwitch *)(pTiles.get()));
-		GetIndex = [pSwitchLayer](int y, int x, unsigned char &Number) -> unsigned char {
-			if(x < 0 || y < 0 || x >= pSwitchLayer->m_Width || y >= pSwitchLayer->m_Height)
-				return 0;
-			Number = pSwitchLayer->m_pSwitchTile[y * pSwitchLayer->m_Width + x].m_Number;
-			return pSwitchLayer->m_pSwitchTile[y * pSwitchLayer->m_Width + x].m_Type - ENTITY_OFFSET;
-		};
-	}
-	else
-	{
-		GetIndex = [pTiles](int y, int x, unsigned char &Number) -> unsigned char {
-			if(x < 0 || y < 0 || x >= pTiles->m_Width || y >= pTiles->m_Height)
-				return 0;
-			Number = 0;
-			return pTiles->m_pTiles[y * pTiles->m_Width + x].m_Index - ENTITY_OFFSET;
-		};
-	}
-
-	ivec2 aOffsets[] = {{1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}, {0, -1}, {1, -1}};
-
-	const ColorRGBA OuterColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLaserDoorOutlineColor));
-	const ColorRGBA InnerColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLaserDoorInnerColor));
-	const float TicksHead = Client()->GlobalTime() * Client()->GameTickSpeed();
-
-	for(int y = 0; y < pTiles->m_Height; y++)
-	{
-		for(int x = 0; x < pTiles->m_Width; x++)
-		{
-			unsigned char Number = 0;
-			const unsigned char Index = GetIndex(y, x, Number);
-
-			if(Index == ENTITY_DOOR)
-			{
-				for(size_t i = 0; i < sizeof(aOffsets) / sizeof(ivec2); ++i)
-				{
-					unsigned char NumberDoorLength = 0;
-					unsigned char IndexDoorLength = GetIndex(y + aOffsets[i].y, x + aOffsets[i].x, NumberDoorLength);
-					if(IndexDoorLength >= ENTITY_LASER_SHORT && IndexDoorLength <= ENTITY_LASER_LONG)
-					{
-						float XOff = std::cos(i * pi / 4.0f);
-						float YOff = std::sin(i * pi / 4.0f);
-						int Length = (IndexDoorLength - ENTITY_LASER_SHORT + 1) * 3;
-						vec2 Pos(x + 0.5f, y + 0.5f);
-						vec2 To(x + XOff * Length + 0.5f, y + YOff * Length + 0.5f);
-						pGameClient->m_Items.RenderLaser(To * TileSize, Pos * TileSize, OuterColor, InnerColor, 1.0f, TicksHead, (int)LASERTYPE_DOOR);
-					}
-				}
+				IGraphics::CQuadItem Quad(Pos.x, Pos.y, Scale.x, Scale.y);
+				Graphics()->QuadsDrawTL(&Quad, 1);
+				Graphics()->QuadsEnd();
 			}
 		}
 	}
