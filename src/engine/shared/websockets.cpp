@@ -136,6 +136,8 @@ static int websocket_protocol_callback(lws *wsi, enum lws_callback_reasons reaso
 		return 0;
 	}
 
+	case LWS_CALLBACK_CLIENT_CLOSED:
+		[[fallthrough]];
 	case LWS_CALLBACK_CLOSED:
 	{
 		char addr_str[NETADDR_MAXSTRSIZE];
@@ -144,6 +146,15 @@ static int websocket_protocol_callback(lws *wsi, enum lws_callback_reasons reaso
 
 		static const unsigned char CLOSE_PACKET[] = {0x10, 0x0e, 0x00, 0x04};
 		receive_chunk(ctx_data, pss, &CLOSE_PACKET, sizeof(CLOSE_PACKET));
+		return 0;
+	}
+
+	case LWS_CALLBACK_WSI_DESTROY:
+	{
+		if(pss == nullptr)
+		{
+			return 0;
+		}
 		pss->wsi = nullptr;
 		ctx_data->port_map.erase(pss->addr);
 		return 0;
