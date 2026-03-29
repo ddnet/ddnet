@@ -343,8 +343,7 @@ public:
 	void FreeDynamicPopupMenus();
 	void UpdateColorPipette();
 	void RenderMousePointer();
-	void RenderGameEntities(const std::shared_ptr<CLayerTiles> &pTiles);
-	void RenderSwitchEntities(const std::shared_ptr<CLayerTiles> &pTiles);
+	void RenderIngameEntities(const CLayerGroup &Group, const CLayerTiles &TilesLayer);
 
 	template<typename E>
 	SEditResult<E> DoPropertiesWithState(CUIRect *pToolbox, CProperty *pProps, int *pIds, int *pNewVal, const std::vector<ColorRGBA> &vColors = {});
