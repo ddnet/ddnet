@@ -1,13 +1,9 @@
 #ifndef ENGINE_CLIENT_UPDATER_H
 #define ENGINE_CLIENT_UPDATER_H
 
-#include <base/detect.h>
-#include <base/lock.h>
-
+#include <engine/client/http.h>
 #include <engine/updater.h>
-
-#include <forward_list>
-#include <memory>
+#include <map>
 #include <string>
 
 #define CLIENT_EXEC "DDNet"
@@ -26,9 +22,6 @@
 #define PLAT_NAME CONF_PLATFORM_STRING "-unsupported"
 #endif
 #else
-#if defined(AUTOUPDATE)
-#error Compiling with autoupdater on an unsupported platform
-#endif
 #define PLAT_EXT ""
 #define PLAT_NAME "unsupported-unsupported"
 #endif
@@ -39,8 +32,6 @@
 #define PLAT_CLIENT_EXEC CLIENT_EXEC PLAT_EXT
 #define PLAT_SERVER_EXEC SERVER_EXEC PLAT_EXT
 
-class CUpdaterFetchTask;
-
 class CUpdater : public IUpdater
 {
 	friend class CUpdaterFetchTask;
@@ -48,50 +39,45 @@ class CUpdater : public IUpdater
 	class IClient *m_pClient;
 	class IStorage *m_pStorage;
 	class IEngine *m_pEngine;
-	class CHttp *m_pHttp;
 
-	CLock m_Lock;
+	LOCK m_Lock;
 
-	EUpdaterState m_State GUARDED_BY(m_Lock);
+	int m_State;
 	char m_aStatus[256] GUARDED_BY(m_Lock);
 	int m_Percent GUARDED_BY(m_Lock);
+	char m_aLastFile[256];
 	char m_aClientExecTmp[64];
 	char m_aServerExecTmp[64];
-
-	std::forward_list<std::pair<std::string, bool>> m_FileJobs;
-	std::shared_ptr<CUpdaterFetchTask> m_pCurrentTask;
-	decltype(m_FileJobs)::iterator m_CurrentJob;
 
 	bool m_ClientUpdate;
 	bool m_ServerUpdate;
 
-	bool m_ClientFetched;
-	bool m_ServerFetched;
+	std::map<std::string, bool> m_FileJobs;
 
 	void AddFileJob(const char *pFile, bool Job);
-	void FetchFile(const char *pFile, const char *pDestPath = nullptr) REQUIRES(!m_Lock);
+	void FetchFile(const char *pFile, const char *pDestPath = 0);
 	bool MoveFile(const char *pFile);
 
-	void ParseUpdate() REQUIRES(!m_Lock);
-	void PerformUpdate() REQUIRES(!m_Lock);
-	void RunningUpdate() REQUIRES(!m_Lock);
-	void CommitUpdate() REQUIRES(!m_Lock);
+	void ParseUpdate();
+	void PerformUpdate();
+	void CommitUpdate();
 
 	bool ReplaceClient();
 	bool ReplaceServer();
 
-	void SetCurrentState(EUpdaterState NewState) REQUIRES(!m_Lock);
+	void SetCurrentState(int NewState);
 
 public:
 	CUpdater();
+	~CUpdater();
 
-	EUpdaterState GetCurrentState() override REQUIRES(!m_Lock);
-	void GetCurrentFile(char *pBuf, int BufSize) override REQUIRES(!m_Lock);
-	int GetCurrentPercent() override REQUIRES(!m_Lock);
+	int GetCurrentState();
+	void GetCurrentFile(char *pBuf, int BufSize);
+	int GetCurrentPercent();
 
-	void InitiateUpdate() REQUIRES(!m_Lock) override;
-	void Init(CHttp *pHttp);
-	void Update() REQUIRES(!m_Lock) override;
+	virtual void InitiateUpdate();
+	void Init();
+	virtual void Update();
 };
 
 #endif

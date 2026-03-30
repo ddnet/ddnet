@@ -1,8 +1,6 @@
 #include "tooltips.h"
 
-#include <base/time.h>
-
-#include <game/client/ui.h>
+#include <game/client/render.h>
 
 CTooltips::CTooltips()
 {
@@ -11,34 +9,35 @@ CTooltips::CTooltips()
 
 void CTooltips::OnReset()
 {
-	m_HoverTime = -1;
+	HoverTime = -1;
 	m_Tooltips.clear();
-	ClearActiveTooltip();
 }
 
 void CTooltips::SetActiveTooltip(CTooltip &Tooltip)
 {
+	if(m_ActiveTooltip.has_value())
+		return;
+
 	m_ActiveTooltip.emplace(Tooltip);
+	HoverTime = time_get();
 }
 
 inline void CTooltips::ClearActiveTooltip()
 {
 	m_ActiveTooltip.reset();
-	m_PreviousTooltip.reset();
 }
 
-void CTooltips::DoToolTip(const void *pId, const CUIRect *pNearRect, const char *pText, float WidthHint)
+void CTooltips::DoToolTip(const void *pID, const CUIRect *pNearRect, const char *pText, float WidthHint)
 {
-	uintptr_t Id = reinterpret_cast<uintptr_t>(pId);
-	const auto &[Entry, WasInserted] = m_Tooltips.emplace(Id, CTooltip{
-									  pId,
-									  *pNearRect,
-									  pText,
-									  WidthHint,
-									  false});
-	CTooltip &Tooltip = Entry->second;
+	uintptr_t ID = reinterpret_cast<uintptr_t>(pID);
+	const auto result = m_Tooltips.emplace(ID, CTooltip{
+							   *pNearRect,
+							   pText,
+							   WidthHint,
+							   false});
+	CTooltip &Tooltip = result.first->second;
 
-	if(!WasInserted)
+	if(!result.second)
 	{
 		Tooltip.m_Rect = *pNearRect; // update in case of window resize
 		Tooltip.m_pText = pText; // update in case of language change
@@ -46,7 +45,7 @@ void CTooltips::DoToolTip(const void *pId, const CUIRect *pNearRect, const char 
 
 	Tooltip.m_OnScreen = true;
 
-	if(Ui()->HotItem() == Tooltip.m_pId)
+	if(UI()->MouseInside(&Tooltip.m_Rect))
 	{
 		SetActiveTooltip(Tooltip);
 	}
@@ -58,93 +57,58 @@ void CTooltips::OnRender()
 	{
 		CTooltip &Tooltip = m_ActiveTooltip.value();
 
-		if(Ui()->HotItem() != Tooltip.m_pId || !Tooltip.m_Rect.Inside(Ui()->MousePos()))
+		if(!UI()->MouseInside(&Tooltip.m_Rect))
 		{
 			Tooltip.m_OnScreen = false;
 			ClearActiveTooltip();
 			return;
 		}
+
 		if(!Tooltip.m_OnScreen)
 			return;
 
-		// Reset hover time if a different tooltip is active.
-		// Only reset hover time when rendering, because multiple tooltips can be
-		// activated in the same frame, but only the last one should be rendered.
-		if(!m_PreviousTooltip.has_value() || m_PreviousTooltip.value().get().m_pText != Tooltip.m_pText)
-			m_HoverTime = time_get();
-		m_PreviousTooltip.emplace(Tooltip);
-
-		// Delay tooltip until 1 second passed. Start fade-in in the last 0.25 seconds.
-		constexpr float SecondsBeforeFadeIn = 0.75f;
-		const float SecondsSinceActivation = (time_get() - m_HoverTime) / (float)time_freq();
-		if(SecondsSinceActivation < SecondsBeforeFadeIn)
+		// Delay tooltip until 1 second passed.
+		if(HoverTime > time_get() - time_freq())
 			return;
-		constexpr float SecondsFadeIn = 0.25f;
-		const float AlphaFactor = SecondsSinceActivation < SecondsBeforeFadeIn + SecondsFadeIn ? (SecondsSinceActivation - SecondsBeforeFadeIn) / SecondsFadeIn : 1.0f;
 
-		constexpr float FontSize = 14.0f;
-		constexpr float Margin = 5.0f;
-		constexpr float Padding = 5.0f;
+		const float MARGIN = 5.0f;
 
-		const STextBoundingBox BoundingBox = TextRender()->TextBoundingBox(FontSize, Tooltip.m_pText, -1, Tooltip.m_WidthHint);
 		CUIRect Rect;
-		Rect.w = BoundingBox.m_W + 2 * Padding;
-		Rect.h = BoundingBox.m_H + 2 * Padding;
+		Rect.w = Tooltip.m_WidthHint;
+		if(Tooltip.m_WidthHint < 0.0f)
+			Rect.w = TextRender()->TextWidth(0, 14.0f, Tooltip.m_pText, -1, -1.0f) + 4.0f;
+		Rect.h = 30.0f;
 
-		const CUIRect *pScreen = Ui()->Screen();
-		Rect.w = minimum(Rect.w, pScreen->w - 2 * Margin);
-		Rect.h = minimum(Rect.h, pScreen->h - 2 * Margin);
+		CUIRect *pScreen = UI()->Screen();
 
 		// Try the top side.
-		if(Tooltip.m_Rect.y - Rect.h - Margin > pScreen->y)
+		if(Tooltip.m_Rect.y - Rect.h - MARGIN > pScreen->y)
 		{
-			Rect.x = std::clamp(Ui()->MouseX() - Rect.w / 2.0f, Margin, pScreen->w - Rect.w - Margin);
-			Rect.y = Tooltip.m_Rect.y - Rect.h - Margin;
+			Rect.x = clamp(UI()->MouseX() - Rect.w / 2.0f, MARGIN, pScreen->w - Rect.w - MARGIN);
+			Rect.y = Tooltip.m_Rect.y - Rect.h - MARGIN;
 		}
 		// Try the bottom side.
-		else if(Tooltip.m_Rect.y + Tooltip.m_Rect.h + Margin < pScreen->h)
+		else if(Tooltip.m_Rect.y + Tooltip.m_Rect.h + MARGIN < pScreen->h)
 		{
-			Rect.x = std::clamp(Ui()->MouseX() - Rect.w / 2.0f, Margin, pScreen->w - Rect.w - Margin);
-			Rect.y = Tooltip.m_Rect.y + Tooltip.m_Rect.h + Margin;
+			Rect.x = clamp(UI()->MouseX() - Rect.w / 2.0f, MARGIN, pScreen->w - Rect.w - MARGIN);
+			Rect.y = Tooltip.m_Rect.y + Tooltip.m_Rect.h + MARGIN;
 		}
 		// Try the right side.
-		else if(Tooltip.m_Rect.x + Tooltip.m_Rect.w + Margin + Rect.w < pScreen->w)
+		else if(Tooltip.m_Rect.x + Tooltip.m_Rect.w + MARGIN + Rect.w < pScreen->w)
 		{
-			Rect.x = Tooltip.m_Rect.x + Tooltip.m_Rect.w + Margin;
-			Rect.y = std::clamp(Ui()->MouseY() - Rect.h / 2.0f, Margin, pScreen->h - Rect.h - Margin);
+			Rect.x = Tooltip.m_Rect.x + Tooltip.m_Rect.w + MARGIN;
+			Rect.y = clamp(UI()->MouseY() - Rect.h / 2.0f, MARGIN, pScreen->h - Rect.h - MARGIN);
 		}
 		// Try the left side.
-		else if(Tooltip.m_Rect.x - Rect.w - Margin > pScreen->x)
+		else if(Tooltip.m_Rect.x - Rect.w - MARGIN > pScreen->x)
 		{
-			Rect.x = Tooltip.m_Rect.x - Rect.w - Margin;
-			Rect.y = std::clamp(Ui()->MouseY() - Rect.h / 2.0f, Margin, pScreen->h - Rect.h - Margin);
+			Rect.x = Tooltip.m_Rect.x - Rect.w - MARGIN;
+			Rect.y = clamp(UI()->MouseY() - Rect.h / 2.0f, MARGIN, pScreen->h - Rect.h - MARGIN);
 		}
 
-		Rect.Draw(ColorRGBA(0.2f, 0.2f, 0.2f, 0.8f * AlphaFactor), IGraphics::CORNER_ALL, Padding);
-		Rect.Margin(Padding, &Rect);
-
-		CTextCursor Cursor;
-		Cursor.SetPosition(Rect.TopLeft());
-		Cursor.m_FontSize = FontSize;
-		Cursor.m_LineWidth = Tooltip.m_WidthHint;
-
-		STextContainerIndex TextContainerIndex;
-		const unsigned OldRenderFlags = TextRender()->GetRenderFlags();
-		TextRender()->SetRenderFlags(OldRenderFlags | TEXT_RENDER_FLAG_ONE_TIME_USE);
-		TextRender()->CreateTextContainer(TextContainerIndex, &Cursor, Tooltip.m_pText);
-		TextRender()->SetRenderFlags(OldRenderFlags);
-
-		if(TextContainerIndex.Valid())
-		{
-			ColorRGBA TextColor = TextRender()->DefaultTextColor();
-			TextColor.a *= AlphaFactor;
-			ColorRGBA OutlineColor = TextRender()->DefaultTextOutlineColor();
-			OutlineColor.a *= AlphaFactor;
-			TextRender()->RenderTextContainer(TextContainerIndex, TextColor, OutlineColor);
-		}
-
-		TextRender()->DeleteTextContainer(TextContainerIndex);
-
+		RenderTools()->DrawUIRect(&Rect, ColorRGBA(0.2, 0.2, 0.2, 0.80f), CUI::CORNER_ALL, 5.0f);
+		Rect.Margin(2.0f, &Rect);
+		UI()->DoLabel(&Rect, Tooltip.m_pText, 14.0f, TEXTALIGN_LEFT);
 		Tooltip.m_OnScreen = false;
 	}
 }

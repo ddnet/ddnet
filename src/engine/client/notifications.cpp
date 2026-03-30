@@ -4,41 +4,32 @@
 
 #if defined(CONF_PLATFORM_MACOS)
 // Code is in src/macos/notification.mm.
-void NotificationsNotifyMacOsInternal(const char *pTitle, const char *pMessage);
-#elif defined(CONF_FAMILY_UNIX) && !defined(CONF_PLATFORM_ANDROID) && !defined(CONF_PLATFORM_HAIKU) && !defined(CONF_PLATFORM_EMSCRIPTEN)
+#elif defined(CONF_FAMILY_UNIX) && !defined(CONF_PLATFORM_ANDROID) && !defined(CONF_PLATFORM_HAIKU) && !defined(CONF_WEBASM)
 #include <libnotify/notify.h>
-#define NOTIFICATIONS_USE_LIBNOTIFY
-#endif
-
-void CNotifications::Init(const char *pAppname)
+void NotificationsInit()
 {
-#if defined(NOTIFICATIONS_USE_LIBNOTIFY)
-	notify_init(pAppname);
-#endif
+	notify_init("DDNet Client");
 }
-
-void CNotifications::Shutdown()
+void NotificationsUninit()
 {
-#if defined(NOTIFICATIONS_USE_LIBNOTIFY)
 	notify_uninit();
-#endif
 }
-
-void CNotifications::Notify(const char *pTitle, const char *pMessage)
+void NotificationsNotify(const char *pTitle, const char *pMessage)
 {
-#if defined(CONF_PLATFORM_MACOS)
-	NotificationsNotifyMacOsInternal(pTitle, pMessage);
-#elif defined(NOTIFICATIONS_USE_LIBNOTIFY)
 	NotifyNotification *pNotif = notify_notification_new(pTitle, pMessage, "ddnet");
-	if(pNotif)
-	{
-		notify_notification_show(pNotif, NULL);
-		g_object_unref(G_OBJECT(pNotif));
-	}
-#endif
+	notify_notification_show(pNotif, NULL);
+	g_object_unref(G_OBJECT(pNotif));
 }
-
-INotifications *CreateNotifications()
+#else
+void NotificationsInit()
 {
-	return new CNotifications();
 }
+void NotificationsUninit()
+{
+}
+void NotificationsNotify(const char *pTitle, const char *pMessage)
+{
+	(void)pTitle;
+	(void)pMessage;
+}
+#endif

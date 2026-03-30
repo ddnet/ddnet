@@ -11,23 +11,24 @@ enum
 	NUM_BUGS,
 };
 
-enum class EMapBugUpdate
+enum
 {
-	OK,
-	NOTFOUND,
-	OVERRIDDEN,
+	MAPBUGUPDATE_OK,
+	MAPBUGUPDATE_NOTFOUND,
+	MAPBUGUPDATE_OVERRIDDEN,
 };
 
 class CMapBugs
 {
-	void *m_pData = nullptr;
-	unsigned int m_Extra = 0;
+	friend CMapBugs GetMapBugs(const char *pName, int Size, SHA256_DIGEST Sha256);
+	void *m_pData;
+	unsigned int m_Extra;
 
 public:
-	static CMapBugs Create(const char *pName, int Size, SHA256_DIGEST Sha256);
 	bool Contains(int Bug) const;
-	EMapBugUpdate Update(const char *pBug);
+	int Update(const char *pBug);
 	void Dump() const;
 };
 
+CMapBugs GetMapBugs(const char *pName, int Size, SHA256_DIGEST Sha256);
 #endif // GAME_MAPBUGS_H

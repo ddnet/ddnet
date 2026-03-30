@@ -3,16 +3,15 @@
 
 struct SWarning
 {
-	SWarning() = default;
-	SWarning(const SWarning &Other);
-	SWarning(const char *pMsg);
-	SWarning(const char *pTitle, const char *pMsg);
-
-	SWarning &operator=(const SWarning &Other);
-
-	char m_aWarningTitle[128] = "";
-	char m_aWarningMsg[256] = "";
-	bool m_AutoHide = true;
+	SWarning() :
+		m_WasShown(false) {}
+	SWarning(const char *pMsg) :
+		m_WasShown(false)
+	{
+		str_copy(m_aWarningMsg, pMsg, sizeof(m_aWarningMsg));
+	}
+	char m_aWarningMsg[256];
+	bool m_WasShown;
 };
 
 #endif

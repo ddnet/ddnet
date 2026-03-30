@@ -1,27 +1,25 @@
 #include <base/system.h>
-
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
-
 #include <game/mapitems.h>
 
-static void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
+void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 {
-	CDataFileReader Reader;
-	if(!Reader.Open(pStorage, pMapName, IStorage::TYPE_ABSOLUTE))
+	CDataFileReader Map;
+	if(!Map.Open(pStorage, pMapName, IStorage::TYPE_ABSOLUTE))
 	{
 		dbg_msg("config_retrieve", "error opening map '%s'", pMapName);
 		return;
 	}
 	bool ConfigFound = false;
 	int Start, Num;
-	Reader.GetType(MAPITEMTYPE_INFO, &Start, &Num);
+	Map.GetType(MAPITEMTYPE_INFO, &Start, &Num);
 	for(int i = Start; i < Start + Num; i++)
 	{
-		int Id;
-		CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)Reader.GetItem(i, nullptr, &Id);
-		int ItemSize = Reader.GetItemSize(i);
-		if(!pItem || Id != 0)
+		int ItemID;
+		CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)Map.GetItem(i, 0, &ItemID);
+		int ItemSize = Map.GetItemSize(i);
+		if(!pItem || ItemID != 0)
 			continue;
 
 		if(ItemSize < (int)sizeof(CMapItemInfoSettings))
@@ -34,12 +32,11 @@ static void Process(IStorage *pStorage, const char *pMapName, const char *pConfi
 		if(!Config)
 		{
 			dbg_msg("config_retrieve", "error opening config for writing '%s'", pConfigName);
-			Reader.Close();
 			return;
 		}
 
-		int Size = Reader.GetDataSize(pItem->m_Settings);
-		char *pSettings = (char *)Reader.GetData(pItem->m_Settings);
+		int Size = Map.GetDataSize(pItem->m_Settings);
+		char *pSettings = (char *)Map.GetData(pItem->m_Settings);
 		char *pNext = pSettings;
 		while(pNext < pSettings + Size)
 		{
@@ -48,11 +45,11 @@ static void Process(IStorage *pStorage, const char *pMapName, const char *pConfi
 			io_write_newline(Config);
 			pNext += StrSize;
 		}
-		Reader.UnloadData(pItem->m_Settings);
+		Map.UnloadData(pItem->m_Settings);
 		io_close(Config);
 		break;
 	}
-	Reader.Close();
+	Map.Close();
 	if(!ConfigFound)
 	{
 		fs_remove(pConfigName);

@@ -1,8 +1,8 @@
 #include "sql_string_helpers.h"
 
 #include <base/system.h>
-
 #include <cmath>
+#include <cstring>
 
 void sqlstr::FuzzyString(char *pString, int Size)
 {
@@ -49,7 +49,7 @@ void sqlstr::AgoTimeToString(int AgoTime, char *pAgoString, int Size)
 	}
 
 	char aBuf[20];
-	const int aTimes[7] =
+	int aTimes[7] =
 		{
 			60 * 60 * 24 * 365,
 			60 * 60 * 24 * 30,
@@ -58,7 +58,7 @@ void sqlstr::AgoTimeToString(int AgoTime, char *pAgoString, int Size)
 			60 * 60,
 			60,
 			1};
-	const char aaNames[7][6] =
+	char aaNames[7][6] =
 		{
 			"year",
 			"month",
@@ -77,7 +77,7 @@ void sqlstr::AgoTimeToString(int AgoTime, char *pAgoString, int Size)
 	for(i = 0; i < 7; i++)
 	{
 		Seconds = aTimes[i];
-		str_copy(aName, aaNames[i]);
+		str_copy(aName, aaNames[i], sizeof(aName));
 
 		Count = std::floor((float)AgoTime / (float)Seconds);
 		if(Count != 0)
@@ -101,7 +101,7 @@ void sqlstr::AgoTimeToString(int AgoTime, char *pAgoString, int Size)
 		// getting second piece now
 		int Seconds2 = aTimes[i + 1];
 		char aName2[6];
-		str_copy(aName2, aaNames[i + 1]);
+		str_copy(aName2, aaNames[i + 1], sizeof(aName2));
 
 		// add second piece if it's greater than 0
 		int Count2 = std::floor((float)(AgoTime - (Seconds * Count)) / (float)Seconds2);

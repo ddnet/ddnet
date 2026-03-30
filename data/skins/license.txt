@@ -27,12 +27,8 @@ CC-BY-SA license
 bomb, kitty_bluekitty, kitty_bluestripe, kitty_brownbear, kitty_cammo,
 kitty_coala, kitty_default, kitty_limekitty, kitty_pinky, kitty_redbopp,
 kitty_redstripe, kitty_saddo, kitty_toptri, kitty_twinbop, kitty_twintri,
-kitty_warpaint:
+kitty_warpaint, kitty_x_ninja:
 Copyright Ravie
-CC0 license
-
-kitty_x_ninja:
-Copyright patwo.*
 CC0 license
 
 demonlimekitty, nanas, nersif:
@@ -43,5 +39,9 @@ wartee:
 Copyright Obst
 zlib license
 
+Aoe4legs:
+Copyright Aoe
+CC0 license
+
 All other skins:
-All content is released under CC-BY-SA 3.0 (https://creativecommons.org/licenses/by-sa/3.0/).
+All content is released under CC-BY-SA 3.0 (http://creativecommons.org/licenses/by-sa/3.0/).

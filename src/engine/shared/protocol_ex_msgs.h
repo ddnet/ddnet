@@ -8,21 +8,16 @@
 //
 // Example:
 //
-// 1) `i-unfreeze-you@ddnet.org`
+// 1) `i-unfreeze-you@ddnet.tw`
 // 2) `creeper@minetee`
 //
-// The first example applies if you own the `ddnet.org` domain, that is, if you
+// The first example applies if you own the `ddnet.tw` domain, that is, if you
 // are adding this message on behalf of the DDNet team.
 //
 // The second example shows how you could add a message if you don't own a
 // domain, but need a message for your minetee client/server.
 
 // This file can be included several times.
-
-#ifndef UUID
-// This helps IDEs properly syntax highlight the uses of the macro below.
-#define UUID(Id, Name)
-#endif
 
 UUID(NETMSG_WHATIS, "what-is@ddnet.tw")
 UUID(NETMSG_ITIS, "it-is@ddnet.tw")
@@ -37,11 +32,3 @@ UUID(NETMSG_PONGEX, "pong@ddnet.tw")
 UUID(NETMSG_CHECKSUM_REQUEST, "checksum-request@ddnet.tw")
 UUID(NETMSG_CHECKSUM_RESPONSE, "checksum-response@ddnet.tw")
 UUID(NETMSG_CHECKSUM_ERROR, "checksum-error@ddnet.tw")
-UUID(NETMSG_REDIRECT, "redirect@ddnet.org")
-UUID(NETMSG_RCON_CMD_GROUP_START, "rcon-cmd-group-start@ddnet.org")
-UUID(NETMSG_RCON_CMD_GROUP_END, "rcon-cmd-group-end@ddnet.org")
-UUID(NETMSG_MAP_RELOAD, "map-reload@ddnet.org")
-UUID(NETMSG_RECONNECT, "reconnect@ddnet.org")
-UUID(NETMSG_MAPLIST_ADD, "sv-maplist-add@ddnet.org")
-UUID(NETMSG_MAPLIST_GROUP_START, "sv-maplist-start@ddnet.org")
-UUID(NETMSG_MAPLIST_GROUP_END, "sv-maplist-end@ddnet.org")

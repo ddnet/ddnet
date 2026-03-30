@@ -1,9 +1,9 @@
-from .datatypes import Array, Float, Int, Pointer, String, Struct, TextureHandle
+from .datatypes import Array, Float, Int, Pointer, SampleHandle, String, Struct, TextureHandle
 
 class Sound(Struct):
 	def __init__(self, filename=""):
 		Struct.__init__(self, "CDataSound")
-		self.id = Int(0)
+		self.id = SampleHandle()
 		self.filename = String(filename)
 
 class SoundSet(Struct):

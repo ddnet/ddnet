@@ -3,30 +3,22 @@
 #ifndef ENGINE_SERVER_H
 #define ENGINE_SERVER_H
 
-#include "kernel.h"
-#include "message.h"
-
-#include <base/dbg.h>
-#include <base/hash.h>
-#include <base/math.h>
-#include <base/mem.h>
-#include <base/str.h>
-
-#include <engine/shared/jsonwriter.h>
-#include <engine/shared/protocol.h>
-
-#include <generated/protocol.h>
-#include <generated/protocol7.h>
-#include <generated/protocolglue.h>
-
-#include <array>
-#include <optional>
 #include <type_traits>
 
-struct CAntibotRoundData;
-class IMap;
+#include <base/hash.h>
+#include <base/math.h>
 
-// When recording a demo on the server, the ClientId -1 is used
+#include "kernel.h"
+#include "message.h"
+#include <engine/shared/protocol.h>
+#include <game/generated/protocol.h>
+#include <game/generated/protocol7.h>
+#include <game/generated/protocolglue.h>
+#include <game/version.h>
+
+struct CAntibotRoundData;
+
+// When recording a demo on the server, the ClientID -1 is used
 enum
 {
 	SERVER_DEMO_CLIENT = -1
@@ -34,9 +26,10 @@ enum
 
 class IServer : public IInterface
 {
-	MACRO_INTERFACE("server")
+	MACRO_INTERFACE("server", 0)
 protected:
 	int m_CurrentGameTick;
+	int m_TickSpeed;
 
 public:
 	/*
@@ -49,156 +42,133 @@ public:
 		bool m_GotDDNetVersion;
 		int m_DDNetVersion;
 		const char *m_pDDNetVersionStr;
-		const CUuid *m_pConnectionId;
+		const CUuid *m_pConnectionID;
 	};
 
 	int Tick() const { return m_CurrentGameTick; }
-	int TickSpeed() const { return SERVER_TICK_SPEED; }
+	int TickSpeed() const { return m_TickSpeed; }
 
 	virtual int Port() const = 0;
 	virtual int MaxClients() const = 0;
 	virtual int ClientCount() const = 0;
 	virtual int DistinctClientCount() const = 0;
-	virtual const char *ClientName(int ClientId) const = 0;
-	virtual const char *ClientClan(int ClientId) const = 0;
-	virtual int ClientCountry(int ClientId) const = 0;
-	virtual bool ClientSlotEmpty(int ClientId) const = 0;
-	virtual bool ClientIngame(int ClientId) const = 0;
-	virtual bool GetClientInfo(int ClientId, CClientInfo *pInfo) const = 0;
-	virtual void SetClientDDNetVersion(int ClientId, int DDNetVersion) = 0;
-	virtual const NETADDR *ClientAddr(int ClientId) const = 0;
-	virtual const std::array<char, NETADDR_MAXSTRSIZE> &ClientAddrStringImpl(int ClientId, bool IncludePort) const = 0;
-	const char *ClientAddrString(int ClientId, bool IncludePort) const { return ClientAddrStringImpl(ClientId, IncludePort).data(); }
+	virtual const char *ClientName(int ClientID) const = 0;
+	virtual const char *ClientClan(int ClientID) const = 0;
+	virtual int ClientCountry(int ClientID) const = 0;
+	virtual bool ClientIngame(int ClientID) const = 0;
+	virtual bool ClientAuthed(int ClientID) const = 0;
+	virtual int GetClientInfo(int ClientID, CClientInfo *pInfo) const = 0;
+	virtual void SetClientDDNetVersion(int ClientID, int DDNetVersion) = 0;
+	virtual void GetClientAddr(int ClientID, char *pAddrStr, int Size) const = 0;
 
-	/**
-	 * Returns the version of the client with the given client ID.
-	 *
-	 * @param ClientId the client Id, which must be between 0 and
-	 * MAX_CLIENTS - 1, or equal to SERVER_DEMO_CLIENT for server demos.
-	 *
-	 * @return The version of the client with the given client ID.
-	 * For server demos this is always the latest client version.
-	 * On errors, VERSION_NONE is returned.
-	 */
-	virtual int GetClientVersion(int ClientId) const = 0;
-	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientId) = 0;
+	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientID) = 0;
 
-	template<class T>
-		requires(!protocol7::is_sixup<T>::value)
-	int SendPackMsg(const T *pMsg, int Flags, int ClientId)
+	template<class T, typename std::enable_if<!protocol7::is_sixup<T>::value, int>::type = 0>
+	inline int SendPackMsg(T *pMsg, int Flags, int ClientID)
 	{
 		int Result = 0;
-		if(ClientId == -1)
+		T tmp;
+		if(ClientID == -1)
 		{
 			for(int i = 0; i < MaxClients(); i++)
 				if(ClientIngame(i))
-					Result = SendPackMsgTranslate(pMsg, Flags, i);
+				{
+					mem_copy(&tmp, pMsg, sizeof(T));
+					Result = SendPackMsgTranslate(&tmp, Flags, i);
+				}
 		}
 		else
 		{
-			Result = SendPackMsgTranslate(pMsg, Flags, ClientId);
+			mem_copy(&tmp, pMsg, sizeof(T));
+			Result = SendPackMsgTranslate(&tmp, Flags, ClientID);
 		}
 		return Result;
 	}
 
-	template<class T>
-		requires(protocol7::is_sixup<T>::value)
-	int SendPackMsg(const T *pMsg, int Flags, int ClientId)
+	template<class T, typename std::enable_if<protocol7::is_sixup<T>::value, int>::type = 1>
+	inline int SendPackMsg(T *pMsg, int Flags, int ClientID)
 	{
 		int Result = 0;
-		if(ClientId == -1)
+		if(ClientID == -1)
 		{
 			for(int i = 0; i < MaxClients(); i++)
 				if(ClientIngame(i) && IsSixup(i))
 					Result = SendPackMsgOne(pMsg, Flags, i);
 		}
-		else if(IsSixup(ClientId))
-			Result = SendPackMsgOne(pMsg, Flags, ClientId);
+		else if(IsSixup(ClientID))
+			Result = SendPackMsgOne(pMsg, Flags, ClientID);
 
 		return Result;
 	}
 
 	template<class T>
-	int SendPackMsgTranslate(const T *pMsg, int Flags, int ClientId)
+	int SendPackMsgTranslate(T *pMsg, int Flags, int ClientID)
 	{
-		return SendPackMsgOne(pMsg, Flags, ClientId);
+		return SendPackMsgOne(pMsg, Flags, ClientID);
 	}
 
-	int SendPackMsgTranslate(const CNetMsg_Sv_Emoticon *pMsg, int Flags, int ClientId)
+	int SendPackMsgTranslate(CNetMsg_Sv_Emoticon *pMsg, int Flags, int ClientID)
 	{
-		CNetMsg_Sv_Emoticon MsgCopy;
-		mem_copy(&MsgCopy, pMsg, sizeof(MsgCopy));
-		return Translate(MsgCopy.m_ClientId, ClientId) && SendPackMsgOne(&MsgCopy, Flags, ClientId);
+		return Translate(pMsg->m_ClientID, ClientID) && SendPackMsgOne(pMsg, Flags, ClientID);
 	}
 
-	int SendPackMsgTranslate(const CNetMsg_Sv_Chat *pMsg, int Flags, int ClientId)
-	{
-		CNetMsg_Sv_Chat MsgCopy;
-		mem_copy(&MsgCopy, pMsg, sizeof(MsgCopy));
+	char msgbuf[1000];
 
-		char aBuf[1000];
-		if(MsgCopy.m_ClientId >= 0 && !Translate(MsgCopy.m_ClientId, ClientId))
+	int SendPackMsgTranslate(CNetMsg_Sv_Chat *pMsg, int Flags, int ClientID)
+	{
+		if(pMsg->m_ClientID >= 0 && !Translate(pMsg->m_ClientID, ClientID))
 		{
-			str_format(aBuf, sizeof(aBuf), "%s: %s", ClientName(MsgCopy.m_ClientId), MsgCopy.m_pMessage);
-			MsgCopy.m_pMessage = aBuf;
-			MsgCopy.m_ClientId = VANILLA_MAX_CLIENTS - 1;
+			str_format(msgbuf, sizeof(msgbuf), "%s: %s", ClientName(pMsg->m_ClientID), pMsg->m_pMessage);
+			pMsg->m_pMessage = msgbuf;
+			pMsg->m_ClientID = VANILLA_MAX_CLIENTS - 1;
 		}
 
-		if(IsSixup(ClientId))
+		if(IsSixup(ClientID))
 		{
 			protocol7::CNetMsg_Sv_Chat Msg7;
-			Msg7.m_ClientId = MsgCopy.m_ClientId;
-			Msg7.m_pMessage = MsgCopy.m_pMessage;
-			Msg7.m_Mode = MsgCopy.m_Team > 0 ? protocol7::CHAT_TEAM : protocol7::CHAT_ALL;
-			Msg7.m_TargetId = -1;
-			return SendPackMsgOne(&Msg7, Flags, ClientId);
+			Msg7.m_ClientID = pMsg->m_ClientID;
+			Msg7.m_pMessage = pMsg->m_pMessage;
+			Msg7.m_Mode = pMsg->m_Team > 0 ? protocol7::CHAT_TEAM : protocol7::CHAT_ALL;
+			Msg7.m_TargetID = -1;
+			return SendPackMsgOne(&Msg7, Flags, ClientID);
 		}
 
-		return SendPackMsgOne(&MsgCopy, Flags, ClientId);
+		return SendPackMsgOne(pMsg, Flags, ClientID);
 	}
 
-	int SendPackMsgTranslate(const CNetMsg_Sv_KillMsg *pMsg, int Flags, int ClientId)
+	int SendPackMsgTranslate(CNetMsg_Sv_KillMsg *pMsg, int Flags, int ClientID)
 	{
-		CNetMsg_Sv_KillMsg MsgCopy;
-		mem_copy(&MsgCopy, pMsg, sizeof(MsgCopy));
-		if(!Translate(MsgCopy.m_Victim, ClientId))
+		if(!Translate(pMsg->m_Victim, ClientID))
 			return 0;
-		if(!Translate(MsgCopy.m_Killer, ClientId))
-			MsgCopy.m_Killer = MsgCopy.m_Victim;
-		return SendPackMsgOne(&MsgCopy, Flags, ClientId);
-	}
-
-	int SendPackMsgTranslate(const CNetMsg_Sv_RaceFinish *pMsg, int Flags, int ClientId)
-	{
-		if(IsSixup(ClientId))
-		{
-			protocol7::CNetMsg_Sv_RaceFinish Msg7;
-			Msg7.m_ClientId = pMsg->m_ClientId;
-			Msg7.m_Diff = pMsg->m_Diff;
-			Msg7.m_Time = pMsg->m_Time;
-			Msg7.m_RecordPersonal = pMsg->m_RecordPersonal;
-			Msg7.m_RecordServer = pMsg->m_RecordServer;
-			return SendPackMsgOne(&Msg7, Flags, ClientId);
-		}
-		return SendPackMsgOne(pMsg, Flags, ClientId);
+		if(!Translate(pMsg->m_Killer, ClientID))
+			pMsg->m_Killer = pMsg->m_Victim;
+		return SendPackMsgOne(pMsg, Flags, ClientID);
 	}
 
 	template<class T>
-	int SendPackMsgOne(const T *pMsg, int Flags, int ClientId)
+	int SendPackMsgOne(T *pMsg, int Flags, int ClientID)
 	{
-		dbg_assert(ClientId != -1, "SendPackMsgOne called with -1");
-		CMsgPacker Packer(T::ms_MsgId, false, protocol7::is_sixup<T>::value);
+		dbg_assert(ClientID != -1, "SendPackMsgOne called with -1");
+		CMsgPacker Packer(pMsg->MsgID(), false, protocol7::is_sixup<T>::value);
 
 		if(pMsg->Pack(&Packer))
 			return -1;
-		return SendMsg(&Packer, Flags, ClientId);
+		return SendMsg(&Packer, Flags, ClientID);
+	}
+
+	int GetClientVersion(int ClientID) const
+	{
+		CClientInfo Info;
+		GetClientInfo(ClientID, &Info);
+		return Info.m_DDNetVersion;
 	}
 
 	bool Translate(int &Target, int Client)
 	{
 		if(IsSixup(Client))
 			return true;
-		if(GetClientVersion(Client) >= VERSION_DDNET_OLD)
+		int ClientVersion = Client != SERVER_DEMO_CLIENT ? GetClientVersion(Client) : CLIENT_VERSIONNR;
+		if(ClientVersion >= VERSION_DDNET_OLD)
 			return true;
 		int *pMap = GetIdMap(Client);
 		bool Found = false;
@@ -218,9 +188,10 @@ public:
 	{
 		if(IsSixup(Client))
 			return true;
-		if(GetClientVersion(Client) >= VERSION_DDNET_OLD)
+		int ClientVersion = Client != SERVER_DEMO_CLIENT ? GetClientVersion(Client) : CLIENT_VERSIONNR;
+		if(ClientVersion >= VERSION_DDNET_OLD)
 			return true;
-		Target = std::clamp(Target, 0, VANILLA_MAX_CLIENTS - 1);
+		Target = clamp(Target, 0, VANILLA_MAX_CLIENTS - 1);
 		int *pMap = GetIdMap(Client);
 		if(pMap[Target] == -1)
 			return false;
@@ -228,24 +199,18 @@ public:
 		return true;
 	}
 
-	virtual bool WouldClientNameChange(int ClientId, const char *pNameRequest) = 0;
-	virtual bool WouldClientClanChange(int ClientId, const char *pClanRequest) = 0;
-	virtual void SetClientName(int ClientId, const char *pName) = 0;
-	virtual void SetClientClan(int ClientId, const char *pClan) = 0;
-	virtual void SetClientCountry(int ClientId, int Country) = 0;
-	virtual void SetClientScore(int ClientId, std::optional<int> Score) = 0;
-	virtual void SetClientFlags(int ClientId, int Flags) = 0;
+	virtual void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pSha256, int *pMapCrc) = 0;
 
-	virtual int SnapNewId() = 0;
-	virtual void SnapFreeId(int Id) = 0;
-	virtual void *SnapNewItem(int Type, int Id, int Size) = 0;
+	virtual bool WouldClientNameChange(int ClientID, const char *pNameRequest) = 0;
+	virtual void SetClientName(int ClientID, char const *pName) = 0;
+	virtual void SetClientClan(int ClientID, char const *pClan) = 0;
+	virtual void SetClientCountry(int ClientID, int Country) = 0;
+	virtual void SetClientScore(int ClientID, int Score) = 0;
+	virtual void SetClientFlags(int ClientID, int Flags) = 0;
 
-	template<typename T>
-	T *SnapNewItem(int Id)
-	{
-		const int Type = protocol7::is_sixup<T>::value ? -T::ms_MsgId : T::ms_MsgId;
-		return static_cast<T *>(SnapNewItem(Type, Id, sizeof(T)));
-	}
+	virtual int SnapNewID() = 0;
+	virtual void SnapFreeID(int ID) = 0;
+	virtual void *SnapNewItem(int Type, int ID, int Size) = 0;
 
 	virtual void SnapSetStaticsize(int ItemType, int Size) = 0;
 
@@ -254,81 +219,65 @@ public:
 		RCON_CID_SERV = -1,
 		RCON_CID_VOTE = -2,
 	};
-	virtual void SetRconCid(int ClientId) = 0;
-	virtual int GetAuthedState(int ClientId) const = 0;
-	virtual bool IsRconAuthed(int ClientId) const = 0;
-	virtual bool IsRconAuthedAdmin(int ClientId) const = 0;
-	virtual const char *GetAuthName(int ClientId) const = 0;
-	virtual bool HasAuthHidden(int ClientId) const = 0;
-	virtual void Kick(int ClientId, const char *pReason) = 0;
-	virtual void Ban(int ClientId, int Seconds, const char *pReason, bool VerbatimReason) = 0;
-	virtual void RedirectClient(int ClientId, int Port) = 0;
+	virtual void SetRconCID(int ClientID) = 0;
+	virtual int GetAuthedState(int ClientID) const = 0;
+	virtual const char *GetAuthName(int ClientID) const = 0;
+	virtual void Kick(int ClientID, const char *pReason) = 0;
+	virtual void Ban(int ClientID, int Seconds, const char *pReason) = 0;
 	virtual void ChangeMap(const char *pMap) = 0;
-	virtual void ReloadMap() = 0;
 
 	virtual void DemoRecorder_HandleAutoStart() = 0;
+	virtual bool DemoRecorder_IsRecording() = 0;
 
 	// DDRace
 
-	virtual void SaveDemo(int ClientId, float Time) = 0;
-	virtual void StartRecord(int ClientId) = 0;
-	virtual void StopRecord(int ClientId) = 0;
-	virtual bool IsRecording(int ClientId) = 0;
-	virtual void StopDemos() = 0;
+	virtual void SaveDemo(int ClientID, float Time) = 0;
+	virtual void StartRecord(int ClientID) = 0;
+	virtual void StopRecord(int ClientID) = 0;
+	virtual bool IsRecording(int ClientID) = 0;
 
-	virtual int *GetIdMap(int ClientId) = 0;
+	virtual void GetClientAddr(int ClientID, NETADDR *pAddr) const = 0;
 
-	virtual bool DnsblWhite(int ClientId) = 0;
-	virtual bool DnsblPending(int ClientId) = 0;
-	virtual bool DnsblBlack(int ClientId) = 0;
-	virtual const char *GetAnnouncementLine() = 0;
-	virtual bool ClientPrevIngame(int ClientId) = 0;
-	virtual const char *GetNetErrorString(int ClientId) = 0;
-	virtual void ResetNetErrorString(int ClientId) = 0;
-	virtual bool SetTimedOut(int ClientId, int OrigId) = 0;
-	virtual void SetTimeoutProtected(int ClientId) = 0;
+	virtual int *GetIdMap(int ClientID) = 0;
+
+	virtual bool DnsblWhite(int ClientID) = 0;
+	virtual bool DnsblPending(int ClientID) = 0;
+	virtual bool DnsblBlack(int ClientID) = 0;
+	virtual const char *GetAnnouncementLine(char const *FileName) = 0;
+	virtual bool ClientPrevIngame(int ClientID) = 0;
+	virtual const char *GetNetErrorString(int ClientID) = 0;
+	virtual void ResetNetErrorString(int ClientID) = 0;
+	virtual bool SetTimedOut(int ClientID, int OrigID) = 0;
+	virtual void SetTimeoutProtected(int ClientID) = 0;
 
 	virtual void SetErrorShutdown(const char *pReason) = 0;
 	virtual void ExpireServerInfo() = 0;
 
-	virtual void FillAntibot(CAntibotRoundData *pData) = 0;
+	virtual void SendMsgRaw(int ClientID, const void *pData, int Size, int Flags) = 0;
 
-	virtual void SendMsgRaw(int ClientId, const void *pData, int Size, int Flags) = 0;
+	virtual const char *GetMapName() const = 0;
 
-	virtual bool IsSixup(int ClientId) const = 0;
+	virtual bool IsSixup(int ClientID) const = 0;
 };
 
 class IGameServer : public IInterface
 {
-	MACRO_INTERFACE("gameserver")
+	MACRO_INTERFACE("gameserver", 0)
 protected:
 public:
-	// `pPersistentData` may be null if this is the first time `IGameServer`
-	// is instantiated.
-	virtual void OnInit(const void *pPersistentData) = 0;
+	virtual void OnInit() = 0;
 	virtual void OnConsoleInit() = 0;
-	// Returns `true` if map change accepted.
-	[[nodiscard]] virtual bool OnMapChange(char *pNewMapName, int MapNameSize) = 0;
-	// `pPersistentData` may be null if this is the last time `IGameServer`
-	// is destroyed.
-	virtual void OnShutdown(void *pPersistentData) = 0;
+	virtual void OnMapChange(char *pNewMapName, int MapNameSize) = 0;
+
+	// FullShutdown is true if the program is about to exit (not if the map is changed)
+	virtual void OnShutdown() = 0;
 
 	virtual void OnTick() = 0;
+	virtual void OnPreSnap() = 0;
+	virtual void OnSnap(int ClientID) = 0;
+	virtual void OnPostSnap() = 0;
 
-	// Snap for a specific client.
-	//
-	// GlobalSnap is true when sending snapshots to all clients,
-	// otherwise only forced high bandwidth clients would receive snap.
-	// RecordingDemo is true when this snapshot will be recorded to a demo.
-	virtual void OnSnap(int ClientId, bool GlobalSnap, bool RecordingDemo) = 0;
-
-	// Called after sending snapshots to all clients.
-	//
-	// Note if any client has force high bandwidth enabled,
-	// this will not be called when only sending snapshots to these clients.
-	virtual void OnPostGlobalSnap() = 0;
-
-	virtual void OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientId) = 0;
+	virtual void OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID) = 0;
 
 	// Called before map reload, for any data that the game wants to
 	// persist to the next map.
@@ -337,29 +286,24 @@ public:
 	//
 	// Returns whether the game should be supplied with the data when the
 	// client connects for the next map.
-	virtual bool OnClientDataPersist(int ClientId, void *pData) = 0;
+	virtual bool OnClientDataPersist(int ClientID, void *pData) = 0;
 
 	// Called when a client connects.
 	//
 	// If it is reconnecting to the game after a map change, the
 	// `pPersistentData` point is nonnull and contains the data the game
 	// previously stored.
-	virtual void OnClientConnected(int ClientId, void *pPersistentData) = 0;
+	virtual void OnClientConnected(int ClientID, void *pPersistentData) = 0;
 
-	virtual void OnClientEnter(int ClientId) = 0;
-	virtual void OnClientDrop(int ClientId, const char *pReason) = 0;
-	virtual void OnClientPrepareInput(int ClientId, void *pInput) = 0;
-	virtual void OnClientDirectInput(int ClientId, const void *pInput) = 0;
-	virtual void OnClientPredictedInput(int ClientId, const void *pInput) = 0;
-	virtual void OnClientPredictedEarlyInput(int ClientId, const void *pInput) = 0;
+	virtual void OnClientEnter(int ClientID) = 0;
+	virtual void OnClientDrop(int ClientID, const char *pReason) = 0;
+	virtual void OnClientDirectInput(int ClientID, void *pInput) = 0;
+	virtual void OnClientPredictedInput(int ClientID, void *pInput) = 0;
+	virtual void OnClientPredictedEarlyInput(int ClientID, void *pInput) = 0;
 
-	virtual void PreInputClients(int ClientId, bool *pClients) = 0;
+	virtual bool IsClientReady(int ClientID) const = 0;
+	virtual bool IsClientPlayer(int ClientID) const = 0;
 
-	virtual bool IsClientReady(int ClientId) const = 0;
-	virtual bool IsClientPlayer(int ClientId) const = 0;
-	virtual bool IsClientHighBandwidth(int ClientId) const = 0;
-
-	virtual int PersistentDataSize() const = 0;
 	virtual int PersistentClientDataSize() const = 0;
 
 	virtual CUuid GameUuid() const = 0;
@@ -367,36 +311,17 @@ public:
 	virtual const char *Version() const = 0;
 	virtual const char *NetVersion() const = 0;
 
-	virtual IMap *Map() = 0;
-	virtual const IMap *Map() const = 0;
-	virtual CNetObjHandler *GetNetObjHandler() = 0;
-	virtual protocol7::CNetObjHandler *GetNetObjHandler7() = 0;
-
 	// DDRace
 
 	virtual void OnPreTickTeehistorian() = 0;
 
-	virtual void OnSetAuthed(int ClientId, int Level) = 0;
-	virtual bool PlayerExists(int ClientId) const = 0;
+	virtual void OnSetAuthed(int ClientID, int Level) = 0;
+	virtual bool PlayerExists(int ClientID) const = 0;
 
-	virtual void TeehistorianRecordAntibot(const void *pData, int DataSize) = 0;
-	virtual void TeehistorianRecordPlayerJoin(int ClientId, bool Sixup) = 0;
-	virtual void TeehistorianRecordPlayerDrop(int ClientId, const char *pReason) = 0;
-	virtual void TeehistorianRecordPlayerRejoin(int ClientId) = 0;
-	virtual void TeehistorianRecordPlayerName(int ClientId, const char *pName) = 0;
-	virtual void TeehistorianRecordPlayerFinish(int ClientId, int TimeTicks) = 0;
-	virtual void TeehistorianRecordTeamFinish(int TeamId, int TimeTicks) = 0;
-	virtual void TeehistorianRecordAuthLogin(int ClientId, int Level, const char *pAuthName) = 0;
+	virtual void OnClientEngineJoin(int ClientID, bool Sixup) = 0;
+	virtual void OnClientEngineDrop(int ClientID, const char *pReason) = 0;
 
 	virtual void FillAntibot(CAntibotRoundData *pData) = 0;
-
-	/**
-	 * Used to report custom player info to the master server.
-	 *
-	 * @param pJsonWriter A pointer to a @link CJsonWriter @endlink to which the custom data will written.
-	 * @param ClientId The client ID.
-	 */
-	virtual void OnUpdatePlayerServerInfo(CJsonWriter *pJsonWriter, int ClientId) = 0;
 };
 
 extern IGameServer *CreateGameServer();

@@ -1,230 +1,253 @@
 #!/bin/bash
-set -e
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
-# shellcheck source=scripts/compile_libs/_build_common.sh
-source "${SCRIPT_DIR}/_build_common.sh"
-
-if [ -z ${1+x} ]; then
-	log_error "ERROR: Specify the destination path where to run this script, please choose a path other than in the source directory"
-	log_error "Usage: scripts/compile_libs/gen_libs.sh <Build folder> <android/webasm>"
+CURDIR="$PWD"
+if [ -z ${1+x} ]; then 
+	echo "Give a destination path where to run this script, please choose a path other than in the source directory"
 	exit 1
 fi
-BUILD_FOLDER="$1"
 
-if [ -z ${2+x} ]; then
-	log_error "ERROR: Specify the target platform: android, webasm"
-	log_error "Usage: scripts/compile_libs/gen_libs.sh <Build folder> <android/webasm>"
+if [ -z ${2+x} ]; then 
+	echo "Specify the target system"
 	exit 1
 fi
-TARGET_PLATFORM="$2"
-if [[ "${TARGET_PLATFORM}" != "android" && "${TARGET_PLATFORM}" != "webasm" ]]; then
-	log_error "ERROR: Specify the target platform: android, webasm"
-	log_error "Usage: scripts/compile_libs/gen_libs.sh <Build folder> <android/webasm>"
-	exit 1
-fi
-if [[ "${TARGET_PLATFORM}" == "android" ]]; then
-	assert_android_ndk_found
-elif [[ "${TARGET_PLATFORM}" == "webasm" ]]; then
-	assert_emscripten_sdk_found
+
+OS_NAME=$2
+ 
+COMPILEFLAGS="-fPIC"
+LINKFLAGS="-fPIC"
+if [[ "${OS_NAME}" == "webasm" ]]; then
+	COMPILEFLAGS="-pthread -O3 -g -s USE_PTHREADS=1"
+	LINKFLAGS="-pthread -O3 -g -s USE_PTHREADS=1 -s ASYNCIFY=1 -s WASM=1"
 fi
 
-mkdir -p "${BUILD_FOLDER}"
-cd "${BUILD_FOLDER}"
+if [[ "${OS_NAME}" == "android" ]]; then
+	OS_NAME_PATH="android"
+elif [[ "${OS_NAME}" == "windows" ]]; then
+	OS_NAME_PATH="windows"
+elif [[ "${OS_NAME}" == "linux" ]]; then
+	OS_NAME_PATH="linux"
+elif [[ "${OS_NAME}" == "webasm" ]]; then
+	OS_NAME_PATH="webasm"
+fi
+
+COMP_HAS_ARM32=0
+COMP_HAS_ARM64=0
+COMP_HAS_x86=0
+COMP_HAS_x64=0
+COMP_HAS_WEBASM=0
+
+if [[ "${OS_NAME}" == "android" ]]; then
+	COMP_HAS_ARM32=1
+	COMP_HAS_ARM64=1
+	COMP_HAS_x86=1
+	COMP_HAS_x64=1
+elif [[ "${OS_NAME}" == "linux" ]]; then
+	COMP_HAS_x64=1
+elif [[ "${OS_NAME}" == "windows" ]]; then
+	COMP_HAS_x86=1
+	COMP_HAS_x64=1
+elif [[ "${OS_NAME}" == "webasm" ]]; then
+	COMP_HAS_WEBASM=1
+fi
+
+mkdir -p "$1"
+cd "$1" || exit 1
 
 function build_cmake_lib() {
-	local library_dir="$1"
-	local git_url="$2"
-	# "branch" or "commit"
-	local clone_target_type="$3"
-	# name of the branch, or commit hash
-	local clone_target_reference="$4"
-	if [ ! -d "${library_dir}" ]; then
-		if [[ "${clone_target_type}" == "branch" ]]; then
-			git clone --single-branch --branch "${clone_target_reference}" "${git_url}" "${library_dir}"
-		elif [[ "${clone_target_type}" == "commit" ]]; then
-			git clone --no-checkout "${git_url}" "${library_dir}"
-			(
-				cd "${library_dir}"
-				git fetch origin "${clone_target_reference}"
-				git checkout "${clone_target_reference}"
-			)
-		fi
+	if [ ! -d "${1}" ]; then
+		git clone "${2}" "${1}"
 	fi
 	(
-		cd "${library_dir}"
-		"${SCRIPT_DIR}"/cmake_lib_compile.sh "${library_dir}" "$TARGET_PLATFORM"
+		cd "${1}" || exit 1
+		cp "${CURDIR}"/scripts/compile_libs/cmake_lib_compile.sh cmake_lib_compile.sh
+		./cmake_lib_compile.sh "$_ANDROID_ABI_LEVEL" "$OS_NAME" "$COMPILEFLAGS" "$LINKFLAGS"
 	)
 }
 
-function build_opusfile() {
-	local was_there_opusfile=1
-	if [ ! -d "opusfile" ]; then
-		git clone --single-branch --branch "v0.12" https://github.com/xiph/opusfile opusfile
-		was_there_opusfile=0
-	fi
-	(
-		cd opusfile
-		if [[ "$was_there_opusfile" == 0 ]]; then
-			./autogen.sh
-		fi
-		"${SCRIPT_DIR}"/make_lib_opusfile.sh "$TARGET_PLATFORM"
-	)
-}
-
-function build_sqlite3() {
-	if [ ! -d "sqlite3" ]; then
-		local sqlite_filename="sqlite-amalgamation-3460000"
-		local sqlite_archive_filename="${sqlite_filename}.zip"
-		wget --no-verbose "https://www.sqlite.org/2024/${sqlite_archive_filename}"
-		unzip -q "${sqlite_archive_filename}"
-		rm "${sqlite_archive_filename}"
-		mv "${sqlite_filename}" "sqlite3"
-	fi
-	(
-		cd sqlite3
-		"${SCRIPT_DIR}"/make_lib_sqlite3.sh "$TARGET_PLATFORM"
-	)
-}
+_ANDROID_ABI_LEVEL=24
 
 mkdir -p compile_libs
-cd compile_libs
+cd compile_libs || exit 1
 
-# BoringSSL
-if [[ "$TARGET_PLATFORM" == "android" ]]; then
-	log_info_header "Building BoringSSL..."
-	build_cmake_lib boringssl https://boringssl.googlesource.com/boringssl "commit" "a1b6110c3aae7654cd88128186ea826cc27535be"
+# start with openssl
+(
+	_WAS_THERE_SSLFILE=1
+	if [ ! -d "openssl" ]; then
+		git clone https://github.com/openssl/openssl openssl
+		_WAS_THERE_SSLFILE=0
+	fi
+	(
+		cd openssl || exit 1
+		if [[ "$_WAS_THERE_SSLFILE" == 0 ]]; then
+			./autogen.sh
+		fi
+		cp "${CURDIR}"/scripts/compile_libs/make_lib_openssl.sh make_lib_openssl.sh
+		./make_lib_openssl.sh "$_ANDROID_ABI_LEVEL" "$OS_NAME" "$COMPILEFLAGS" "$LINKFLAGS"
+	)
+)
+
+build_cmake_lib zlib https://github.com/madler/zlib
+build_cmake_lib png https://github.com/glennrp/libpng
+build_cmake_lib curl https://github.com/curl/curl
+build_cmake_lib freetype2 https://gitlab.freedesktop.org/freetype/freetype
+build_cmake_lib sdl https://github.com/libsdl-org/SDL
+build_cmake_lib ogg https://github.com/xiph/ogg
+build_cmake_lib opus https://github.com/xiph/opus
+
+(
+	_WAS_THERE_OPUSFILE=1
+	if [ ! -d "opusfile" ]; then
+		git clone https://github.com/xiph/opusfile opusfile
+		_WAS_THERE_OPUSFILE=0
+	fi
+	cd opusfile || exit 1
+	if [[ "$_WAS_THERE_OPUSFILE" == 0 ]]; then
+		./autogen.sh
+	fi
+	cp "${CURDIR}"/scripts/compile_libs/make_lib_opusfile.sh make_lib_opusfile.sh
+	./make_lib_opusfile.sh "$_ANDROID_ABI_LEVEL" "$OS_NAME" "$COMPILEFLAGS" "$LINKFLAGS"
+)
+
+# SQLite, just download and built by hand
+if [ ! -d "sqlite3" ]; then
+	wget https://www.sqlite.org/2021/sqlite-amalgamation-3360000.zip
+	7z e sqlite-amalgamation-3360000.zip -osqlite3
 fi
 
-# zlib (required to build libpng, curl and freetype for webasm)
-if [[ "$TARGET_PLATFORM" == "webasm" ]]; then
-	log_info_header "Building zlib..."
-	build_cmake_lib zlib https://github.com/madler/zlib "branch" "v1.3.1.2"
-fi
+(
+	cd sqlite3 || exit 1
+	cp "${CURDIR}"/scripts/compile_libs/make_lib_sqlite3.sh make_lib_sqlite3.sh
+	./make_lib_sqlite3.sh "$_ANDROID_ABI_LEVEL" "$OS_NAME" "$COMPILEFLAGS" "$LINKFLAGS"
+)
 
-# libpng (also required to build freetype)
-log_info_header "Building libpng..."
-build_cmake_lib png https://github.com/glennrp/libpng "branch" "v1.6.43"
-
-# curl
-log_info_header "Building curl..."
-build_cmake_lib curl https://github.com/curl/curl "branch" "curl-8_8_0"
-
-# freetype
-log_info_header "Building freetype..."
-build_cmake_lib freetype https://gitlab.freedesktop.org/freetype/freetype "branch" "VER-2-13-2"
-
-# SDL
-log_info_header "Building SDL..."
-build_cmake_lib sdl https://github.com/libsdl-org/SDL "branch" "release-2.32.10"
-
-# ogg, opus, opusfile
-log_info_header "Building ogg..."
-build_cmake_lib ogg https://github.com/xiph/ogg "branch" "v1.3.5"
-log_info_header "Building opus..."
-build_cmake_lib opus https://github.com/xiph/opus "branch" "v1.5.2"
-log_info_header "Building opusfile..."
-build_opusfile
-
-# sqlite3
-log_info_header "Building sqlite3..."
-build_sqlite3
-
-# Copy files into ddnet-libs structure
-log_info_header "Copying files into ddnet-libs structure..."
 cd ..
-mkdir -p ddnet-libs
 
-function copy_libs_for_arches() {
-	if [[ "${TARGET_PLATFORM}" == "android" ]]; then
-		${1} "${ANDROID_ARM_BUILD_FOLDER}" libarm
-		${1} "${ANDROID_ARM64_BUILD_FOLDER}" libarm64
-		${1} "${ANDROID_X86_BUILD_FOLDER}" lib32
-		${1} "${ANDROID_X64_BUILD_FOLDER}" lib64
-	elif [[ "${TARGET_PLATFORM}" == "webasm" ]]; then
-		${1} "${EMSCRIPTEN_WASM_BUILD_FOLDER}" libwasm
+function copy_arches_for_lib() {
+	if [[ "$COMP_HAS_ARM32" == "1" ]]; then
+		${1} arm arm
+	fi
+	if [[ "$COMP_HAS_ARM64" == "1" ]]; then
+		${1} arm64 arm64
+	fi
+	if [[ "$COMP_HAS_x86" == "1" ]]; then
+		${1} x86 32
+	fi
+	if [[ "$COMP_HAS_x64" == "1" ]]; then
+		${1} x86_64 64
+	fi
+	if [[ "$COMP_HAS_WEBASM" == "1" ]]; then
+		${1} wasm wasm
 	fi
 }
 
-if [[ "$TARGET_PLATFORM" == "android" ]]; then
-	function _copy_boringssl() {
-		local target_libs_folder="ddnet-libs/boringssl/$TARGET_PLATFORM/$2"
-		local target_include_folder="ddnet-libs/boringssl/include/$TARGET_PLATFORM"
-		mkdir -p "$target_libs_folder"
-		mkdir -p "$target_include_folder"
-		cp compile_libs/boringssl/"$1"/libcrypto.a "$target_libs_folder"/libcrypto.a
-		cp compile_libs/boringssl/"$1"/libssl.a "$target_libs_folder"/libssl.a
-		cp -R compile_libs/boringssl/include/openssl "$target_include_folder"
-	}
-	copy_libs_for_arches _copy_boringssl
-fi
-
-if [[ "$TARGET_PLATFORM" == "webasm" ]]; then
-	function _copy_zlib() {
-		local target_libs_folder="ddnet-libs/zlib/$TARGET_PLATFORM/$2"
-		local target_include_folder="ddnet-libs/zlib/include/$TARGET_PLATFORM"
-		mkdir -p "$target_libs_folder"
-		mkdir -p "$target_include_folder"
-		cp compile_libs/zlib/"$1"/libz.a "$target_libs_folder"/libz.a
-		cp -R compile_libs/zlib/*.h "$target_include_folder"
-		cp -R compile_libs/zlib/"$1"/*.h "$target_include_folder"
-	}
-	copy_libs_for_arches _copy_zlib
-fi
-
-function _copy_png() {
-	local target_libs_folder="ddnet-libs/png/$TARGET_PLATFORM/$2"
-	mkdir -p "$target_libs_folder"
-	cp compile_libs/png/"$1"/libpng16.a "$target_libs_folder"/libpng16.a
-}
-copy_libs_for_arches _copy_png
-
+mkdir ddnet-libs
 function _copy_curl() {
-	local target_libs_folder="ddnet-libs/curl/$TARGET_PLATFORM/$2"
-	mkdir -p "$target_libs_folder"
-	cp compile_libs/curl/"$1"/lib/libcurl.a "$target_libs_folder"/libcurl.a
+	mkdir -p ddnet-libs/curl/"$OS_NAME_PATH"/lib"$2"
+	cp compile_libs/curl/build_"$OS_NAME"_"$1"/lib/libcurl.a ddnet-libs/curl/"$OS_NAME_PATH"/lib"$2"/libcurl.a
 }
-copy_libs_for_arches _copy_curl
 
-function _copy_freetype() {
-	local target_libs_folder="ddnet-libs/freetype/$TARGET_PLATFORM/$2"
-	mkdir -p "$target_libs_folder"
-	cp compile_libs/freetype/"$1"/libfreetype.a "$target_libs_folder"/libfreetype.a
+copy_arches_for_lib _copy_curl
+
+mkdir ddnet-libs
+function _copy_freetype2() {
+	mkdir -p ddnet-libs/freetype/"$OS_NAME_PATH"/lib"$2"
+	cp compile_libs/freetype2/build_"$OS_NAME"_"$1"/libfreetype.a ddnet-libs/freetype/"$OS_NAME_PATH"/lib"$2"/libfreetype.a
 }
-copy_libs_for_arches _copy_freetype
 
+copy_arches_for_lib _copy_freetype2
+
+mkdir ddnet-libs
 function _copy_sdl() {
-	local target_libs_folder="ddnet-libs/sdl/$TARGET_PLATFORM/$2"
-	local target_include_folder="ddnet-libs/sdl/include/$TARGET_PLATFORM"
-	mkdir -p "$target_libs_folder"
-	mkdir -p "$target_include_folder"
-	cp compile_libs/sdl/"$1"/libSDL2.a "$target_libs_folder"/libSDL2.a
-	cp -R compile_libs/sdl/include/* "$target_include_folder"
+	mkdir -p ddnet-libs/sdl/"$OS_NAME_PATH"/lib"$2"
+	cp compile_libs/sdl/build_"$OS_NAME"_"$1"/libSDL2.a ddnet-libs/sdl/"$OS_NAME_PATH"/lib"$2"/libSDL2.a
+	cp compile_libs/sdl/build_"$OS_NAME"_"$1"/libSDL2main.a ddnet-libs/sdl/"$OS_NAME_PATH"/lib"$2"/libSDL2main.a
+	if [ ! -d "ddnet-libs/sdl/include/$OS_NAME_PATH" ]; then
+		mkdir -p ddnet-libs/sdl/include/"$OS_NAME_PATH"
+	fi
+	cp -R compile_libs/sdl/include/* ddnet-libs/sdl/include/"$OS_NAME_PATH"
 }
-copy_libs_for_arches _copy_sdl
 
-# Copy Java code from SDL2 Android project template
-if [[ "$TARGET_PLATFORM" == "android" ]]; then
-	target_java_folder="ddnet-libs/sdl/java"
-	rm -rf "$target_java_folder"
-	mkdir -p "$target_java_folder"
-	cp -R compile_libs/sdl/android-project/app/src/main/java/org "$target_java_folder"/
+copy_arches_for_lib _copy_sdl
+
+# copy java code from SDL2
+if [[ "$OS_NAME" == "android" ]]; then
+	rm -R ddnet-libs/sdl/java
+	mkdir -p ddnet-libs/sdl/java
+	cp -R compile_libs/sdl/android-project/app/src/main/java/org ddnet-libs/sdl/java/
 fi
 
+mkdir ddnet-libs
+function _copy_ogg() {
+	mkdir -p ddnet-libs/opus/"$OS_NAME_PATH"/lib"$2"
+	cp compile_libs/ogg/build_"$OS_NAME"_"$1"/libogg.a ddnet-libs/opus/"$OS_NAME_PATH"/lib"$2"/libogg.a
+}
+
+copy_arches_for_lib _copy_ogg
+
+mkdir ddnet-libs
 function _copy_opus() {
-	local target_libs_folder="ddnet-libs/opus/$TARGET_PLATFORM/$2"
-	mkdir -p "$target_libs_folder"
-	cp compile_libs/ogg/"$1"/libogg.a "$target_libs_folder"/libogg.a
-	cp compile_libs/opus/"$1"/libopus.a "$target_libs_folder"/libopus.a
-	cp compile_libs/opusfile/"$1"/libopusfile.a "$target_libs_folder"/libopusfile.a
+	mkdir -p ddnet-libs/opus/"$OS_NAME_PATH"/lib"$2"
+	cp compile_libs/opus/build_"$OS_NAME"_"$1"/libopus.a ddnet-libs/opus/"$OS_NAME_PATH"/lib"$2"/libopus.a
 }
-copy_libs_for_arches _copy_opus
 
+copy_arches_for_lib _copy_opus
+
+mkdir ddnet-libs
+function _copy_opusfile() {
+	mkdir -p ddnet-libs/opus/"$OS_NAME_PATH"/lib"$2"
+	cp compile_libs/opusfile/build_"$OS_NAME"_"$1"/libopusfile.a ddnet-libs/opus/"$OS_NAME_PATH"/lib"$2"/libopusfile.a
+}
+
+copy_arches_for_lib _copy_opusfile
+
+mkdir ddnet-libs
 function _copy_sqlite3() {
-	local target_libs_folder="ddnet-libs/sqlite3/$TARGET_PLATFORM/$2"
-	mkdir -p "$target_libs_folder"
-	cp compile_libs/sqlite3/"$1"/sqlite3.a "$target_libs_folder"/libsqlite3.a
+	mkdir -p ddnet-libs/sqlite3/"$OS_NAME_PATH"/lib"$2"
+	cp compile_libs/sqlite3/build_"$OS_NAME"_"$1"/sqlite3.a ddnet-libs/sqlite3/"$OS_NAME_PATH"/lib"$2"/libsqlite3.a
 }
-copy_libs_for_arches _copy_sqlite3
 
-log_info "Done."
+copy_arches_for_lib _copy_sqlite3
+
+mkdir ddnet-libs
+function _copy_openssl() {
+	mkdir -p ddnet-libs/openssl/"$OS_NAME_PATH"/lib"$2"
+	mkdir -p ddnet-libs/openssl/include
+	mkdir -p ddnet-libs/openssl/include/"$OS_NAME_PATH"
+	cp compile_libs/openssl/build_"$OS_NAME"_"$1"/libcrypto.a ddnet-libs/openssl/"$OS_NAME_PATH"/lib"$2"/libcrypto.a
+	cp compile_libs/openssl/build_"$OS_NAME"_"$1"/libssl.a ddnet-libs/openssl/"$OS_NAME_PATH"/lib"$2"/libssl.a
+	cp -R compile_libs/openssl/build_"$OS_NAME"_"$1"/include/* ddnet-libs/openssl/include/"$OS_NAME_PATH"
+	cp -R compile_libs/openssl/include/* ddnet-libs/openssl/include
+}
+
+copy_arches_for_lib _copy_openssl
+
+mkdir ddnet-libs
+function _copy_zlib() {
+	# copy headers
+	(
+		cd compile_libs/zlib || exit 1
+		find . -maxdepth 1 -iname '*.h' -print0 | while IFS= read -r -d $'\0' file; do
+			mkdir -p ../../ddnet-libs/zlib/include/"$(dirname "$file")"
+			cp "$file" ../../ddnet-libs/zlib/include/"$(dirname "$file")"
+		done
+
+		cd build_"$OS_NAME"_"$1" || exit 1
+		find . -maxdepth 1 -iname '*.h' -print0 | while IFS= read -r -d $'\0' file; do
+			mkdir -p ../../../ddnet-libs/zlib/include/"$OS_NAME_PATH"/"$(dirname "$file")"
+			cp "$file" ../../../ddnet-libs/zlib/include/"$OS_NAME_PATH"/"$(dirname "$file")"
+		done
+	)
+
+	mkdir -p ddnet-libs/zlib/"$OS_NAME_PATH"/lib"$2"
+	cp compile_libs/zlib/build_"$OS_NAME"_"$1"/libz.a ddnet-libs/zlib/"$OS_NAME_PATH"/lib"$2"/libz.a
+}
+
+copy_arches_for_lib _copy_zlib
+
+mkdir ddnet-libs
+function _copy_png() {
+	mkdir -p ddnet-libs/png/"$OS_NAME_PATH"/lib"$2"
+	cp compile_libs/png/build_"$OS_NAME"_"$1"/libpng16.a ddnet-libs/png/"$OS_NAME_PATH"/lib"$2"/libpng16.a
+}
+
+copy_arches_for_lib _copy_png

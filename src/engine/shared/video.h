@@ -1,19 +1,16 @@
 #ifndef ENGINE_SHARED_VIDEO_H
 #define ENGINE_SHARED_VIDEO_H
 
-#include <base/time.h>
+#include <base/system.h>
 
-#include <cstdint>
-#include <functional>
-
-typedef std::function<void(short *pFinalOut, unsigned Frames)> ISoundMixFunc;
+typedef void (*ISoundMixFunc)(short *pFinalOut, unsigned Frames);
 
 class IVideo
 {
 public:
-	virtual ~IVideo() = default;
+	virtual ~IVideo(){};
 
-	virtual bool Start() = 0;
+	virtual void Start() = 0;
 	virtual void Stop() = 0;
 	virtual void Pause(bool Pause) = 0;
 	virtual bool IsRecording() = 0;
@@ -21,7 +18,7 @@ public:
 	virtual void NextVideoFrame() = 0;
 	virtual void NextVideoFrameThread() = 0;
 
-	virtual void NextAudioFrame(ISoundMixFunc Mix) = 0;
+	virtual void NextAudioFrame(void (*Mix)(short *pFinalOut, unsigned Frames)) = 0;
 	virtual void NextAudioFrameTimeline(ISoundMixFunc Mix) = 0;
 
 	static IVideo *Current() { return ms_pCurrentVideo; }

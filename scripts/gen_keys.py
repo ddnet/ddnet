@@ -1,121 +1,75 @@
-#!/usr/bin/env python3
-
-key_first = 0
-key_last = 512
+# pylint: skip-file
+# generate keys.h file
+f = file("src/engine/keys.h", "w")
 
 keynames = []
-for i in range(key_first, key_last):
-	keynames += [f"&{int(i)}"]
+for i in range(0, 512):
+	keynames += ["&%d"%i]
 
-num_mouse_buttons = 9
-num_joystick_buttons = 24
-num_joystick_hats = 2
-num_joystick_axes = 12
+print >>f, "#ifndef ENGINE_KEYS_H"
+print >>f, "#define ENGINE_KEYS_H"
 
-# generate keys.h file
-with open("src/engine/keys.h", "w", encoding="utf-8") as f:
-	print("/* AUTO GENERATED! DO NOT EDIT MANUALLY! See scripts/gen_keys.py */", file=f)
-	print("", file=f)
-	print("#ifndef ENGINE_KEYS_H", file=f)
-	print("#define ENGINE_KEYS_H", file=f)
-	print("", file=f)
-	print("// KEY_EXECUTE already exists on Windows platforms", file=f)
-	print("#if defined(CONF_FAMILY_WINDOWS)", file=f)
-	print("#undef KEY_EXECUTE", file=f)
-	print("#endif", file=f)
-	print("", file=f)
-	print("// NOLINTBEGIN(misc-confusable-identifiers)", file=f)
-	print("enum EKey", file=f)
-	print("{", file=f)
+# KEY_EXECUTE already exists on windows platforms
+print >>f, "#if defined(CONF_FAMILY_WINDOWS)"
+print >>f, "   #undef KEY_EXECUTE"
+print >>f, "#endif"
 
-	next_id = 0
+print >>f, '/* AUTO GENERATED! DO NOT EDIT MANUALLY! */'
+print >>f, "enum"
+print >>f, "{"
 
-	def print_key(enum_name, readable_name, numeric_id=-1):
-		global next_id
-		if numeric_id == -1:
-			numeric_id = next_id
-		if numeric_id >= key_last:
-			raise RuntimeError("Too many keys, increase key_last")
-		print(f"\t{enum_name} = {int(numeric_id)},", file=f)
-		keynames[numeric_id] = readable_name
-		next_id = max(next_id, numeric_id + 1)
+print >>f, "\tKEY_FIRST = 0,"
 
-	with open("scripts/SDL_scancode.h", "r", encoding="utf-8") as scancodes_file:
-		for line in scancodes_file:
-			if "SDL_SCANCODE_" in line:
-				l = line.strip().split("=")
-				if len(l) == 2:
-					key = l[0].strip().replace("SDL_SCANCODE_", "KEY_")
-					value = int(l[1].split(",")[0].strip())
-					if key[0:2] == "/*":
-						continue
-					print_key(key, key.replace("KEY_", "").lower(), value)
+highestid = 0
+for line in open("scripts/SDL_scancode.h"):
+	l = line.strip().split("=")
+	if len(l) == 2 and "SDL_SCANCODE_" in line:
+		key = l[0].strip().replace("SDL_SCANCODE_", "KEY_")
+		value = int(l[1].split(",")[0].strip())
+		if key[0:2] == "/*":
+			continue
+		print >>f, "\t%s = %d,"%(key, value)
 
-	print("", file=f)
-	for i in range(1, num_mouse_buttons + 1):
-		print_key(f"KEY_MOUSE_{i}", f"mouse{i}")
-	print_key("KEY_MOUSE_WHEEL_UP", "mousewheelup")
-	print_key("KEY_MOUSE_WHEEL_DOWN", "mousewheeldown")
-	print_key("KEY_MOUSE_WHEEL_LEFT", "mousewheelleft")
-	print_key("KEY_MOUSE_WHEEL_RIGHT", "mousewheelright")
+		keynames[value] = key.replace("KEY_", "").lower()
 
-	print("", file=f)
-	for i in range(0, num_joystick_buttons):
-		print_key(f"KEY_JOYSTICK_BUTTON_{i}", f"joystick{i}")
+		if value > highestid:
+			highestid =value
 
-	print("", file=f)
-	for i in range(0, num_joystick_hats):
-		print_key(f"KEY_JOY_HAT{i}_UP", f"joy_hat{i}_up")
-		print_key(f"KEY_JOY_HAT{i}_DOWN", f"joy_hat{i}_down")
-		print_key(f"KEY_JOY_HAT{i}_LEFT", f"joy_hat{i}_left")
-		print_key(f"KEY_JOY_HAT{i}_RIGHT", f"joy_hat{i}_right")
+print >>f, "\tKEY_MOUSE_1 = %d,"%(highestid+1); keynames[highestid+1] = "mouse1"
+print >>f, "\tKEY_MOUSE_2 = %d,"%(highestid+2); keynames[highestid+2] = "mouse2"
+print >>f, "\tKEY_MOUSE_3 = %d,"%(highestid+3); keynames[highestid+3] = "mouse3"
+print >>f, "\tKEY_MOUSE_4 = %d,"%(highestid+4); keynames[highestid+4] = "mouse4"
+print >>f, "\tKEY_MOUSE_5 = %d,"%(highestid+5); keynames[highestid+5] = "mouse5"
+print >>f, "\tKEY_MOUSE_6 = %d,"%(highestid+6); keynames[highestid+6] = "mouse6"
+print >>f, "\tKEY_MOUSE_7 = %d,"%(highestid+7); keynames[highestid+7] = "mouse7"
+print >>f, "\tKEY_MOUSE_8 = %d,"%(highestid+8); keynames[highestid+8] = "mouse8"
+print >>f, "\tKEY_MOUSE_9 = %d,"%(highestid+9); keynames[highestid+9] = "mouse9"
+print >>f, "\tKEY_MOUSE_WHEEL_UP = %d,"%(highestid+10); keynames[highestid+10] = "mousewheelup"
+print >>f, "\tKEY_MOUSE_WHEEL_DOWN = %d,"%(highestid+11); keynames[highestid+11] = "mousewheeldown"
+print >>f, "\tKEY_MOUSE_WHEEL_LEFT = %d,"%(highestid+12); keynames[highestid+12] = "mousewheelleft"
+print >>f, "\tKEY_MOUSE_WHEEL_RIGHT = %d,"%(highestid+13); keynames[highestid+13] = "mousewheelright"
+print >>f, "\tKEY_LAST = 512,"
 
-	print("", file=f)
-	for i in range(0, num_joystick_axes):
-		print_key(f"KEY_JOY_AXIS_{i}_LEFT", f"joy_axis{i}_left")
-		print_key(f"KEY_JOY_AXIS_{i}_RIGHT", f"joy_axis{i}_right")
+print >>f, "};"
+print >>f, ""
+print >>f, "#endif"
 
-	print("", file=f)
-	print(f"\tKEY_FIRST = {key_first},", file=f)
-	print(f"\tKEY_LAST = {key_last},", file=f)
+# generate keynames.c file
+f = file("src/engine/client/keynames.h", "w")
+print >>f, '/* AUTO GENERATED! DO NOT EDIT MANUALLY! */'
+print >>f, ''
+print >>f, '#ifndef KEYS_INCLUDE'
+print >>f, '#error do not include this header!'
+print >>f, '#endif'
+print >>f, ''
+print >>f, "#include <string.h>"
+print >>f, ""
+print >>f, "const char g_aaKeyStrings[512][20] ="
+print >>f, "{"
+for n in keynames:
+	print >>f, '\t"%s",'%n
 
-	print("", file=f)
-	print(f"\tNUM_MOUSE_BUTTONS = {num_mouse_buttons},", file=f)
-	print(f"\tNUM_JOYSTICK_BUTTONS = {num_joystick_buttons},", file=f)
-	print("\tNUM_JOYSTICK_BUTTONS_PER_AXIS = KEY_JOY_AXIS_0_RIGHT - KEY_JOY_AXIS_0_LEFT + 1,", file=f)
-	print(f"\tNUM_JOYSTICK_AXES = {num_joystick_axes},", file=f)
-	print("\tNUM_JOYSTICK_BUTTONS_PER_HAT = KEY_JOY_HAT0_RIGHT - KEY_JOY_HAT0_UP + 1,", file=f)
-	print(f"\tNUM_JOYSTICK_HATS = {num_joystick_hats},", file=f)
+print >>f, "};"
+print >>f, ""
 
-	print("};", file=f)
-	print("// NOLINTEND(misc-confusable-identifiers)", file=f)
-	print("", file=f)
-	print("#endif", file=f)
-
-# generate keynames.cpp file
-with open("src/engine/client/keynames.cpp", "w", encoding="utf-8") as f:
-	print("/* AUTO GENERATED! DO NOT EDIT MANUALLY! See scripts/gen_keys.py */", file=f)
-	print("", file=f)
-	print('#include "keynames.h"', file=f)
-	print("", file=f)
-	print("/**", file=f)
-	print(" * Do not use directly! Use the @link IInput::KeyName @endlink function.", file=f)
-	print(" */", file=f)
-	print("extern const char g_aaKeyStrings[512][20] = {", file=f)
-	for n in keynames:
-		print(f'\t"{n}",', file=f)
-	print("};", file=f)
-
-# generate keynames.h file
-with open("src/engine/client/keynames.h", "w", encoding="utf-8") as f:
-	print("/* AUTO GENERATED! DO NOT EDIT MANUALLY! See scripts/gen_keys.py */", file=f)
-	print("", file=f)
-	print("#ifndef ENGINE_CLIENT_KEYNAMES_H", file=f)
-	print("#define ENGINE_CLIENT_KEYNAMES_H", file=f)
-	print("", file=f)
-	print("/**", file=f)
-	print(" * Do not use directly! Use the @link IInput::KeyName @endlink function.", file=f)
-	print(" */", file=f)
-	print("extern const char g_aaKeyStrings[512][20];", file=f)
-	print("", file=f)
-	print("#endif", file=f)
+f.close()

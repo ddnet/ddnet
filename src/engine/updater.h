@@ -5,11 +5,11 @@
 
 class IUpdater : public IInterface
 {
-	MACRO_INTERFACE("updater")
+	MACRO_INTERFACE("updater", 0)
 public:
-	enum EUpdaterState
+	enum
 	{
-		CLEAN,
+		CLEAN = 0,
 		GETTING_MANIFEST,
 		GOT_MANIFEST,
 		PARSING_UPDATE,
@@ -22,7 +22,7 @@ public:
 	virtual void Update() = 0;
 	virtual void InitiateUpdate() = 0;
 
-	virtual EUpdaterState GetCurrentState() = 0;
+	virtual int GetCurrentState() = 0;
 	virtual void GetCurrentFile(char *pBuf, int BufSize) = 0;
 	virtual int GetCurrentPercent() = 0;
 };

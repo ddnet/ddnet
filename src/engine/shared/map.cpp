@@ -1,142 +1,45 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "map.h"
-
-#include <base/log.h>
-#include <base/system.h>
-
 #include <engine/storage.h>
 
-#include <game/mapitems.h>
-
 CMap::CMap() = default;
-
-CMap::~CMap()
-{
-	Unload();
-}
-
-int CMap::GetDataSize(int Index) const
-{
-	return m_DataFile.GetDataSize(Index);
-}
 
 void *CMap::GetData(int Index)
 {
 	return m_DataFile.GetData(Index);
 }
-
+int CMap::GetDataSize(int Index)
+{
+	return m_DataFile.GetDataSize(Index);
+}
 void *CMap::GetDataSwapped(int Index)
 {
 	return m_DataFile.GetDataSwapped(Index);
 }
-
-const char *CMap::GetDataString(int Index)
-{
-	return m_DataFile.GetDataString(Index);
-}
-
 void CMap::UnloadData(int Index)
 {
 	m_DataFile.UnloadData(Index);
 }
-
-int CMap::NumData() const
+void *CMap::GetItem(int Index, int *pType, int *pID)
 {
-	return m_DataFile.NumData();
+	return m_DataFile.GetItem(Index, pType, pID);
 }
-
 int CMap::GetItemSize(int Index)
 {
 	return m_DataFile.GetItemSize(Index);
 }
-
-void *CMap::GetItem(int Index, int *pType, int *pId)
-{
-	return m_DataFile.GetItem(Index, pType, pId);
-}
-
 void CMap::GetType(int Type, int *pStart, int *pNum)
 {
 	m_DataFile.GetType(Type, pStart, pNum);
 }
-
-int CMap::FindItemIndex(int Type, int Id)
+void *CMap::FindItem(int Type, int ID)
 {
-	return m_DataFile.FindItemIndex(Type, Id);
+	return m_DataFile.FindItem(Type, ID);
 }
-
-void *CMap::FindItem(int Type, int Id)
-{
-	return m_DataFile.FindItem(Type, Id);
-}
-
-int CMap::NumItems() const
+int CMap::NumItems()
 {
 	return m_DataFile.NumItems();
-}
-
-bool CMap::Load(const char *pFullName, IStorage *pStorage, const char *pPath, int StorageType)
-{
-	// Ensure current datafile is not left in an inconsistent state if loading fails,
-	// by loading the new datafile separately first.
-	CDataFileReader NewDataFile;
-	if(!NewDataFile.Open(pFullName, pStorage, pPath, StorageType))
-		return false;
-
-	// Check version
-	const CMapItemVersion *pItem = (CMapItemVersion *)NewDataFile.FindItem(MAPITEMTYPE_VERSION, 0);
-	if(pItem == nullptr || pItem->m_Version != 1)
-	{
-		log_error("map/load", "Error: map version not supported.");
-		NewDataFile.Close();
-		return false;
-	}
-
-	// Replace compressed tile layers with uncompressed ones
-	int GroupsStart, GroupsNum, LayersStart, LayersNum;
-	NewDataFile.GetType(MAPITEMTYPE_GROUP, &GroupsStart, &GroupsNum);
-	NewDataFile.GetType(MAPITEMTYPE_LAYER, &LayersStart, &LayersNum);
-	for(int g = 0; g < GroupsNum; g++)
-	{
-		const CMapItemGroup *pGroup = static_cast<CMapItemGroup *>(NewDataFile.GetItem(GroupsStart + g));
-		for(int l = 0; l < pGroup->m_NumLayers; l++)
-		{
-			CMapItemLayer *pLayer = static_cast<CMapItemLayer *>(NewDataFile.GetItem(LayersStart + pGroup->m_StartLayer + l));
-			if(pLayer->m_Type == LAYERTYPE_TILES)
-			{
-				CMapItemLayerTilemap *pTilemap = reinterpret_cast<CMapItemLayerTilemap *>(pLayer);
-				if(pTilemap->m_Version >= CMapItemLayerTilemap::VERSION_TEEWORLDS_TILESKIP)
-				{
-					const size_t TilemapCount = (size_t)pTilemap->m_Width * pTilemap->m_Height;
-					const size_t TilemapSize = TilemapCount * sizeof(CTile);
-
-					if(((int)TilemapCount / pTilemap->m_Width != pTilemap->m_Height) || (TilemapSize / sizeof(CTile) != TilemapCount))
-					{
-						log_error("map/load", "map layer too big (%d * %d * %d causes an integer overflow)", pTilemap->m_Width, pTilemap->m_Height, (int)sizeof(CTile));
-						return false;
-					}
-					CTile *pTiles = static_cast<CTile *>(malloc(TilemapSize));
-					if(!pTiles)
-						return false;
-					ExtractTiles(pTiles, (size_t)pTilemap->m_Width * pTilemap->m_Height, static_cast<CTile *>(NewDataFile.GetData(pTilemap->m_Data)), NewDataFile.GetDataSize(pTilemap->m_Data) / sizeof(CTile));
-					NewDataFile.ReplaceData(pTilemap->m_Data, reinterpret_cast<char *>(pTiles), TilemapSize);
-				}
-			}
-		}
-	}
-
-	// Replace existing datafile with new datafile
-	m_DataFile.Close();
-	m_DataFile = std::move(NewDataFile);
-	return true;
-}
-
-bool CMap::Load(IStorage *pStorage, const char *pPath, int StorageType)
-{
-	char aFilename[IO_MAX_PATH_LENGTH];
-	fs_split_file_extension(fs_filename(pPath), aFilename, sizeof(aFilename));
-	return Load(aFilename, pStorage, pPath, StorageType);
 }
 
 void CMap::Unload()
@@ -144,65 +47,37 @@ void CMap::Unload()
 	m_DataFile.Close();
 }
 
-bool CMap::IsLoaded() const
+bool CMap::Load(const char *pMapName)
+{
+	IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
+	if(!pStorage)
+		return false;
+	return m_DataFile.Open(pStorage, pMapName, IStorage::TYPE_ALL);
+}
+
+bool CMap::IsLoaded()
 {
 	return m_DataFile.IsOpen();
 }
 
-IOHANDLE CMap::File() const
-{
-	return m_DataFile.File();
-}
-
-const char *CMap::FullName() const
-{
-	return m_DataFile.FullName();
-}
-
-const char *CMap::BaseName() const
-{
-	return m_DataFile.BaseName();
-}
-
-const char *CMap::Path() const
-{
-	return m_DataFile.Path();
-}
-
-SHA256_DIGEST CMap::Sha256() const
+SHA256_DIGEST CMap::Sha256()
 {
 	return m_DataFile.Sha256();
 }
 
-unsigned CMap::Crc() const
+unsigned CMap::Crc()
 {
 	return m_DataFile.Crc();
 }
 
-int CMap::Size() const
+int CMap::MapSize()
 {
-	return m_DataFile.Size();
+	return m_DataFile.MapSize();
 }
 
-void CMap::ExtractTiles(CTile *pDest, size_t DestSize, const CTile *pSrc, size_t SrcSize)
+IOHANDLE CMap::File()
 {
-	size_t DestIndex = 0;
-	size_t SrcIndex = 0;
-	while(DestIndex < DestSize && SrcIndex < SrcSize)
-	{
-		for(unsigned Counter = 0; Counter <= pSrc[SrcIndex].m_Skip && DestIndex < DestSize; Counter++)
-		{
-			pDest[DestIndex].m_Index = pSrc[SrcIndex].m_Index;
-			pDest[DestIndex].m_Flags = pSrc[SrcIndex].m_Flags;
-			pDest[DestIndex].m_Skip = 0;
-			pDest[DestIndex].m_Reserved = 0;
-			DestIndex++;
-		}
-		SrcIndex++;
-	}
+	return m_DataFile.File();
 }
 
-extern std::unique_ptr<IMap> CreateMap()
-{
-	return std::make_unique<CMap>();
-}
+extern IEngineMap *CreateEngineMap() { return new CMap; }

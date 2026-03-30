@@ -4,25 +4,43 @@
 #define ENGINE_ENGINE_H
 
 #include "kernel.h"
-
-#include <memory>
+#include <engine/shared/jobs.h>
 
 class CFutureLogger;
-class IJob;
 class ILogger;
+
+class CHostLookup : public IJob
+{
+private:
+	virtual void Run();
+
+public:
+	CHostLookup();
+	CHostLookup(const char *pHostname, int Nettype);
+
+	int m_Result;
+	char m_aHostname[128];
+	int m_Nettype;
+	NETADDR m_Addr;
+};
 
 class IEngine : public IInterface
 {
-	MACRO_INTERFACE("engine")
+	MACRO_INTERFACE("engine", 0)
+
+protected:
+	class CJobPool m_JobPool;
 
 public:
+	virtual ~IEngine() = default;
+
 	virtual void Init() = 0;
 	virtual void AddJob(std::shared_ptr<IJob> pJob) = 0;
-	virtual void ShutdownJobs() = 0;
-	virtual void SetAdditionalLogger(std::shared_ptr<ILogger> &&pLogger) = 0;
+	virtual void SetAdditionalLogger(std::unique_ptr<ILogger> &&pLogger) = 0;
+	static void RunJobBlocking(IJob *pJob);
 };
 
-extern IEngine *CreateEngine(const char *pAppname, std::shared_ptr<CFutureLogger> pFutureLogger);
-extern IEngine *CreateTestEngine(const char *pAppname);
+extern IEngine *CreateEngine(const char *pAppname, std::shared_ptr<CFutureLogger> pFutureLogger, int Jobs);
+extern IEngine *CreateTestEngine(const char *pAppname, int Jobs);
 
 #endif

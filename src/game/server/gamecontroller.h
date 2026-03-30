@@ -3,17 +3,8 @@
 #ifndef GAME_SERVER_GAMECONTROLLER_H
 #define GAME_SERVER_GAMECONTROLLER_H
 
-#include <base/dbg.h>
 #include <base/vmath.h>
-
 #include <engine/map.h>
-#include <engine/shared/protocol.h>
-
-#include <generated/protocol.h>
-
-#include <game/server/teams.h>
-
-struct CScoreLoadBestTimeResult;
 
 /*
 	Class: Game Controller
@@ -24,24 +15,12 @@ class IGameController
 {
 	friend class CSaveTeam; // need access to GameServer() and Server()
 
-protected:
-	enum ESpawnType
-	{
-		SPAWNTYPE_DEFAULT = 0,
-		SPAWNTYPE_RED,
-		SPAWNTYPE_BLUE,
-
-		NUM_SPAWNTYPES
-	};
-
-private:
-	std::vector<vec2> m_avSpawnPoints[NUM_SPAWNTYPES];
+	vec2 m_aaSpawnPoints[3][64];
+	int m_aNumSpawnPoints[3];
 
 	class CGameContext *m_pGameServer;
 	class CConfig *m_pConfig;
 	class IServer *m_pServer;
-
-	CGameTeams m_Teams;
 
 protected:
 	CGameContext *GameServer() const { return m_pGameServer; }
@@ -65,8 +44,8 @@ protected:
 		float m_Score;
 	};
 
-	float EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos, int ClientId);
-	void EvaluateSpawnType(CSpawnEval *pEval, ESpawnType SpawnType, int ClientId);
+	float EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos, int DDTeam);
+	void EvaluateSpawnType(CSpawnEval *pEval, int Type, int DDTeam);
 
 	void ResetGame();
 
@@ -80,6 +59,8 @@ protected:
 	int m_RoundCount;
 
 	int m_GameFlags;
+	int m_UnbalancedTick;
+	bool m_ForceBalanced;
 
 public:
 	const char *m_pGameType;
@@ -109,7 +90,6 @@ public:
 	virtual void OnCharacterSpawn(class CCharacter *pChr);
 
 	virtual void HandleCharacterTiles(class CCharacter *pChr, int MapIndex);
-	virtual void SetArmorProgress(CCharacter *pCharacter, int Progress) {}
 
 	/*
 		Function: OnEntity
@@ -123,105 +103,50 @@ public:
 		Returns:
 			bool?
 	*/
-	virtual bool OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number = 0);
+	virtual bool OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Number = 0);
 
 	virtual void OnPlayerConnect(class CPlayer *pPlayer);
 	virtual void OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason);
 
-	virtual void OnReset();
+	void OnReset();
 
 	// game
-	virtual void DoWarmup(int Seconds);
+	void DoWarmup(int Seconds);
 
-	void SetGamePaused(bool Paused);
-	bool IsGamePaused() const;
-	virtual void StartRound();
-	virtual void EndRound();
+	void StartRound();
+	void EndRound();
 	void ChangeMap(const char *pToMap);
+
+	bool IsFriendlyFire(int ClientID1, int ClientID2);
+
+	bool IsForceBalanced();
 
 	/*
 
 	*/
+	virtual bool CanBeMovedOnBalance(int ClientID);
+
 	virtual void Tick();
 
 	virtual void Snap(int SnappingClient);
 
-	/**
-	 * Sets the score value that will be shown in the scoreboard.
-	 *
-	 * @param SnappingClient Client ID of the player that will receive the snapshot.
-	 * @param pPlayer Player that is being snapped.
-	 *
-	 * @return the score value that will be included in the snapshot.
-	 */
-	virtual int SnapPlayerScore(int SnappingClient, CPlayer *pPlayer) { return 0; }
-
-	class CFinishTime
-	{
-	public:
-		CFinishTime(int Seconds, int Milliseconds) :
-			m_Seconds(Seconds), m_Milliseconds(Milliseconds)
-		{
-			dbg_assert(Seconds >= 0, "Invalid Seconds: %d", Seconds);
-			dbg_assert(Milliseconds >= 0 && Milliseconds < 1000, "Invalid Milliseconds: %d", Milliseconds);
-		}
-
-		int m_Seconds;
-		int m_Milliseconds;
-
-		static CFinishTime Unset() { return CFinishTime(FinishTime::UNSET); }
-		static CFinishTime NotFinished() { return CFinishTime(FinishTime::NOT_FINISHED_MILLIS); }
-
-	private:
-		CFinishTime(int Type)
-		{
-			m_Seconds = Type;
-			m_Milliseconds = 0;
-		}
-	};
-
-	/**
-	 * Returns the finish time value that will be shown in the scoreboard.
-	 *
-	 * @param SnappingClient Client ID of the player that will receive the snapshot.
-	 * @param pPlayer Player that is being snapped.
-	 *
-	 * @return The time split into seconds and the milliseconds remainder, use CFinishTime::Unset if you want the server to prefer scores.
-	 */
-	virtual CFinishTime SnapPlayerTime(int SnappingClient, CPlayer *pPlayer) { return CFinishTime::Unset(); }
-
-	/**
-	 * Snaps the current server record / best time of the current map.
-	 *
-	 * @param SnappingClient Client ID of the player that will receive the snapshot.
-	 *
-	 * @return The the map best time split into seconds and the milliseconds remainder, use CFinishTime::Unset if you want the server to prefer scores.
-	 */
-	virtual CFinishTime SnapMapBestTime(int SnappingClient) { return CFinishTime::Unset(); }
-
-	// spawn
-	virtual bool CanSpawn(int Team, vec2 *pOutPos, int ClientId);
+	//spawn
+	virtual bool CanSpawn(int Team, vec2 *pOutPos, int DDTeam);
 
 	virtual void DoTeamChange(class CPlayer *pPlayer, int Team, bool DoChatMsg = true);
-
-	int TileFlagsToPickupFlags(int TileFlags) const;
-
 	/*
 
 	*/
-	virtual bool IsValidTeam(int Team);
 	virtual const char *GetTeamName(int Team);
-	virtual int GetAutoTeam(int NotThisId);
-	virtual bool CanJoinTeam(int Team, int NotThisId, char *pErrorReason, int ErrorReasonSize);
+	virtual int GetAutoTeam(int NotThisID);
+	virtual bool CanJoinTeam(int Team, int NotThisID);
+	int ClampTeam(int Team);
 
-	CClientMask GetMaskForPlayerWorldEvent(int Asker, int ExceptID = -1);
+	virtual int64_t GetMaskForPlayerWorldEvent(int Asker, int ExceptID = -1);
 
-	bool IsTeamPlay() const { return m_GameFlags & GAMEFLAG_TEAMS; }
 	// DDRace
 
-	std::optional<float> m_CurrentRecord;
-	CGameTeams &Teams() { return m_Teams; }
-	std::shared_ptr<CScoreLoadBestTimeResult> m_pLoadBestTimeResult;
+	float m_CurrentRecord;
 };
 
 #endif

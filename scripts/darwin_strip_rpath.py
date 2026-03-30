@@ -2,7 +2,6 @@ import argparse
 import subprocess
 import re
 
-
 def split_cmds(lines):
 	cmds = []
 	current = []
@@ -17,13 +16,12 @@ def split_cmds(lines):
 
 	return cmds[1:]
 
-
 def main():
 	p = argparse.ArgumentParser(description="Strip LC_RPATH commands from executable")
 
-	p.add_argument("otool", help="Path to otool")
-	p.add_argument("install_name_tool", help="Path to install_name_tool")
-	p.add_argument("executable", metavar="EXECUTABLE", help="The executable to strip")
+	p.add_argument('otool', help="Path to otool")
+	p.add_argument('install_name_tool', help="Path to install_name_tool")
+	p.add_argument('executable', metavar="EXECUTABLE", help="The executable to strip")
 	args = p.parse_args()
 
 	otool = args.otool
@@ -41,6 +39,5 @@ def main():
 		print("\t" + path)
 		subprocess.check_call([install_name_tool, "-delete_rpath", path, executable])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
 	main()

@@ -1,269 +1,213 @@
+﻿##### authors #####
+# Created By : Quick
+# Translated by: younesdevil
+##### translated strings #####
+
 %ds left
 == %ds ﻩﺪﻧﺎﻣ ﯽﻗﺎﺑ
-
 %i minute left
 == %i ﻩﺪﻧﺎﻣ ﯽﻗﺎﺑ ﻪﻘﯿﻗﺩ
-
 %i minutes left
 == %i ﻩﺪﻧﺎﻣ ﯽﻗﺎﺑ ىﺎﻫ ﻪﻘﯿﻗﺩ
-
 %i second left
 == %i ﻩﺪﻧﺎﻣ ﯽﻗﺎﺑ ﻪﯿﻧﺎﺛ
-
 %i seconds left
 == %i ﻩﺪﻧﺎﻣ ﯽﻗﺎﺑ ىﺎﻫ ﻪﯿﻧﺎﺛ
-
 %s wins!
 == %s ﺪﺷ ﻩﺪﻧﺮﺑ!
-
+-Page %d-
+== ﻪﺤﻔﺻ- %d-
 Abort
 == ﻥﺩﺮﻛ ﺩﺭ
-
 Add
 == ﻥﺩﺮﻛ ﻪﻓﺎﺻﺍ
-
+Add Friend
+== ﺖﺳﻭﺩ ﻥﺩﺮﻛ ﻪﻓﺎﺻﺍ
 Address
 == ﺱﺭﺩﺁ
-
 All
 == ﻪﻤﻫ
-
+Are you sure that you want to delete the demo?
+== ؟ﺪﯿﻨﻛ ﻑﺬﺣ ﺍﺭ ﻮﻣﺩ ﻞﯾﺎﻓ ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﺎﯾﺁ
 Are you sure that you want to quit?
 == ؟ﺪﯾﻮﺷ ﺝﺭﺎﺧ ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﻪﻛ ﺪﯿﺘﺴﻫ ﻦﺌﻤﻄﻣ ﺎﯾﺁ
-
+Are you sure that you want to remove the player from your friends list?
+== ؟ﺪﯿﻨﻛ ﻑﺬﺣ ﺩﻮﺧ ﻥﺎﺘﺳﻭﺩ ﺖﺴﯿﻟ ﺯﺍ ﺍﺭ ﻦﻜﯾﺯﺎﺑ ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﺎﯾﺁ
 Automatically record demos
 == ﺭﺎﻛﺩﻮﺧ ﺕﺭﻮﺻ ﻪﺑ ﻮﻣﺩ ﻂﺒﺿ
-
 Automatically take game over screenshot
 == ﺭﺎﻛﺩﻮﺧ ﺕﺭﻮﺻ ﻪﺑ ىﺯﺎﺑ ﺯﺍ ﺲﻜﻋ ﻦﺘﻓﺮﮔ
-
 Blue team
 == ﯽﺑﺁ ﻢﯿﺗ
-
 Blue team wins!
 == ﺪﺷ ﻩﺪﻧﺮﺑ ﯽﺑﺁ ﻢﯿﺗ!
-
 Body
 == ﻥﺪﺑ
-
 Call vote
 == ﯽﺠﻨﺳﺮﻈﻧ
-
 Change settings
 == ﺕﺎﻤﯿﻈﻨﺗ ﺮﯿﯿﻐﺗ
-
 Chat
 == ﺖﭼ
-
 Clan
 == ﻦﻠﻛ
-
 Client
 == ﺖﻨﯾﻼﻛ
-
+Close
+== ﻦﺘﺴﺑ
+Connect
+== ﻥﺪﺷ ﻞﺻﻭ
 Connecting to
 == ﻪﺑ ﻥﺪﺷ ﻞﺻﻭ
-
-Connection Problems…
-== …ﺪﺷ ﻪﺟﺍﻮﻣ ﻞﻜﺸﻣ ﺎﺑ ﻁﺎﺒﺗﺭﺍ
-
+Connection Problems...
+== ...ﺪﺷ ﻪﺟﺍﻮﻣ ﻞﻜﺸﻣ ﺎﺑ ﻁﺎﺒﺗﺭﺍ
 Console
 == ﻝﻮﺴﻨﻛ
-
 Controls
 == ﺎﻫ ﻝﺮﺘﻨﻛ
-
 Count players only
 == ﺎﻫ ﻦﻜﯾﺯﺎﺑ ﺩﺍﺪﻌﺗ
-
 Current
 == ﯽﻠﻌﻓ
-
 Custom colors
 == ﻩﺍﻮﺨﻟﺩ ﮓﻧﺭ
-
 Delete
 == ﻥﺩﺮﻛ کﺎﭘ
-
 Delete demo
 == ﻮﻣﺩ ﻥﺩﺮﻛ کﺎﭘ
-
+Demo details
+== ﻮﻣﺩ ﺕﺎﯿﺋﺰﺟ
 Demofile: %s
 == %s :ﻮﻣﺩ ﻞﯾﺎﻓ
-
 Demos
 == ﺎﻫ ﻮﻣﺩ
-
 Disconnect
-== ﯼﺯﺎﺑ ﺯﺍ ﺝﻭﺮﺧ
-
+== ﻥﺪﺷ ﻊﻄﻗ
 Disconnected
 == ﺪﺷ ﻊﻄﻗ
-
 Downloading map
 == ﭗﻣ ﺖﻓﺎﯾﺭﺩ ﻝﺎﺣ ﺭﺩ
-
 Draw!
 == ىﻭﺎﺴﻣ!
-
 Dynamic Camera
 == کﺮﺤﺘﻣ ﻦﯿﺑﺭﻭﺩ
-
 Emoticon
 == ﺎﻫ ﻚﻠﻜﺷ
-
 Error
 == ﺎﻄﺧ
-
 Error loading demo
 == ﻮﻣﺩ ىﺭﺍﺬﮔﺭﺎﺑ ﺭﺩ ﺎﻄﺧ
-
 Favorite
 == ﺪﻨﻣ ﻪﻗﻼﻋ
-
 Favorites
 == ﺎﻫ ىﺪﻨﻣ ﻪﻗﻼﻋ
-
 Feet
 == ﺎﭘ
-
+Filter
+== ﺮﺘﻠﯿﻓ
 Fire
 == ﻚﯿﻠﺷ
-
 Folder
 == ﻪﺷﻮﭘ
-
 Force vote
 == ىﺭﺎﺒﺟﺍ ىﺍﺭ
-
 Free-View
 == ﺩﺍﺯﺁ-ﺪﯾﺩ
-
+Friends
+== ﻥﺎﺘﺳﻭﺩ
 Fullscreen
 == ﻞﻣﺎﻛ ى ﻪﺤﻔﺻ
-
 Game
 == ىﺯﺎﺑ
-
 Game info
 == ىﺯﺎﺑ ﺕﺎﻋﻼﻃﺍ
-
 Game over
 == ﺖﻓﺎﯾ ﻥﺎﯾﺎﭘ ىﺯﺎﺑ
-
 Game paused
 == ﺪﺷ ﻒﻗﻮﺘﻣ ىﺯﺎﺑ
-
 Game type
 == ىﺯﺎﺑ ﺖﻟﺎﺣ
-
 Game types:
 == ىﺯﺎﺑ ىﺎﻫ ﺖﻟﺎﺣ:
-
 General
 == ﯽﻣﻮﻤﻋ
-
 Graphics
 == ﻚﯿﻓﺍﺮﮔ
-
 Grenade
 == ﺯﺍﺪﻧﺍ ﺐﻤﺑ
-
 Hammer
 == ﺶﻜﭼ
-
 Has people playing
 == ﻦﻜﯾﺯﺎﺑ ىﺍﺭﺍﺩ ىﺎﻫﺭﻭﺮﺳ
-
 High Detail
 == ﻻﺎﺑ ﺖﯿﻔﯿﻛ
-
 Hook
-== ﺏﻼﻗ
-
+== ﺮﯿﺠﻧﺯ
 Invalid Demo
 == ﺖﺳﺍ ﺮﺒﺘﻌﻣﺎﻧ ﻮﻣﺩ
-
 Join blue
 == ﯽﺑﺁ ﻢﯿﺗ ﻪﺑ ﺩﻭﺭﻭ
-
 Join red
 == ﺰﻣﺮﻗ ﻢﯿﺗ ﻪﺑ ﺩﻭﺭﻭ
-
 Jump
 == ﺵﺮﭘ
-
 Kick player
 == ﻦﻜﯾﺯﺎﺑ ﻦﺘﺧﺍﺪﻧﺍ ﻥﻭﺮﯿﺑ
-
 Language
 == ﻥﺎﺑﺯ
-
 MOTD
 == ﺕﺎﺤﯿﺿﻮﺗ
-
 Map
 == ﭗﻣ
-
+Mouse sens.
+== ﺱﻮﻣ ﺖﯿﺳﺎﺴﺣ
 Move left
 == ﭗﭼ ﻪﺑ ﺖﻛﺮﺣ
-
 Move player to spectators
 == ﺎﺷﺎﻤﺗ ﺖﻟﺎﺣ ﻪﺑ ﻦﻜﯾﺯﺎﺑ ﻝﺎﻘﺘﻧﺍ
-
 Move right
 == ﺖﺳﺍﺭ ﻪﺑ ﺖﻛﺮﺣ
-
 Movement
 == ﺖﻛﺮﺣ
-
 Mute when not active
 == ﺖﺴﯿﻧ ﻝﺎﻌﻓ ﯽﺘﻗﻭ ﺍﺪﺼﯿﺑ
-
 Name
 == ﻢﺳﺍ
-
 Next weapon
 == ىﺪﻌﺑ ﻪﺤﻠﺳﺍ
-
 Nickname
 == ﺭﺎﻌﺘﺴﻣ ﻢﺳﺍ
-
 No
 == ﻪﻧ
-
 No password
 == ﺰﻣﺭ ﻥﻭﺪﺑ
-
 No servers found
 == ﺪﺸﻧ ﺖﻓﺎﯾ ىﺭﻭﺮﺳ
-
 No servers match your filter criteria
 == ﺪﺸﻧ ﺖﻓﺎﯾ ﺕﺎﺼﺨﺸﻣ ﻦﯾﺍ ﺎﺑ ىﺭﻭﺮﺳ
-
 Ok
 == ﻪﺷﺎﺑ
-
+Open
+== ﻥﺩﺮﻛﺯﺎﺑ
 Parent Folder
 == ﯽﻠﺻﺍ ﻪﺷﻮﭘ
-
 Password
-== ﺰﻣﺭ
-
+== ﺮﻣﺯ
 Password incorrect
 == ﺖﺳﺍ ﻩﺎﺒﺘﺷﺍ ﺰﻣﺭ
-
 Ping
 == ﮓﻨﯿﭘ
-
 Pistol
 == ﺮﯿﺗ ﺖﻔﻫ
+[Demo browser]
+Play
+== ﻥﺩﺮﻛ ىﺯﺎﺑ
 
 Successfully saved the replay!
 == !ﺪﺷ ﻩﺮﯿﺧﺫ ﺖﯿﻘﻓﻮﻣ ﺎﺑ ﺶﺨﭘﺯﺎﺑ
 
 Replay feature is disabled!
-== ﺖﺳﺍ ﻝﺎﻌﻓﺮﯿﻏ ﺶﺨﭘﺯﺎﺑ
+== ﺪﺷ ﻝﺎﻌﻓﺮﯿﻏ ﺶﺨﭘﺯﺎﺑ
 
 Warning
 == ﺭﺎﻄﺧﺍ
@@ -296,7 +240,7 @@ Server best:
 == ﺭﻭﺮﺳ ﻦﯾﺮﺘﻬﺑ
 
 Reset
-== ﺖﺴﯾﺭ
+== ﻥﺩﺮﮐ ﯽﻧﺎﺸﻧﺯﺎﺑ
 
 News
 == ﺭﺎﺒﺧﺍ
@@ -317,19 +261,19 @@ Browser
 == ﻮﺠﺘﺴﺟ
 
 Ghost
-== ﺡﻭﺭ ﺖﻟﺎﺣ
+== ﺡﻭﺭ
 
 Loading DDNet Client
-== ﺖﻨﯾﺪﯾﺩ ﺖﻨﯾﻼﮐ ﻥﺩﺮﮐ ﻩﺩﺎﻣﺁ ﻝﺎﺣﺭﺩ
+== DDNET Client ﯼﺭﺍﺬﮔﺭﺎﺑ
 
 Reconnect in %d sec
-== ﻪﯿﻧﺎﺛ %d ﺭﺩ ﻩﺭﺎﺑﻭﺩ ﻝﺎﺼﺗﺍ
+== ﻪﯿﻧﺎﺛ d% ﺭﺩ ﻩﺭﺎﺑﻭﺩ ﻝﺎﺼﺗﺍ
 
 Rename demo
 == ﻮﻣﺩ ﻡﺎﻧ ﺮﯿﯿﻐﺗ
 
 Render demo
-== ﻮﻣﺩ ﺭﺪﻧﺭ
+== ﻮﻣﺩ ﺝﺍﺮﺨﺘﺳﺍ
 
 Replace video
 == ﻮﯾﺪﯾﻭ ﻥﺩﺮﮐ ﻦﯾﺰﮕﯾﺎﺟ
@@ -351,15 +295,14 @@ Quit
 
 Are you sure that you want to disconnect?
 == ؟ﯽﻨﮐ ﻝﺎﺼﺗﺍ ﻊﻄﻗ ﯼﺍﻮﺨﯿﻣ ﯽﻨﺌﻌﻤﻄﻣ
-
 Disconnect Dummy
-== ﯽﻣﺍﺩ ﻥﺩﺮﮐ ﻊﻄﻗ
+== dummy ﻥﺩﺮﮐ ﻊﻄﻗ
 
 Are you sure that you want to disconnect your dummy?
-== ؟ﯽﻨﮐ ﻊﻄﻗ ﻭﺭ ﯽﻣﺍﺩ ﯼﺍﻮﺨﯿﻣ ﯽﻨﺌﻤﻄﻣ
+== ؟ﯽﻨﮐ ﻝﺎﺼﺗﺍ ﻊﻄﻗ ﻭﺭdumm ﯼﺍﻮﺨﯿﻣ ﯽﻨﺌﻌﻤﻄﻣ
 
 Welcome to DDNet
-== ﯼﺪﻣﺁ ﺵﻮﺧ ﺖﻨﯾﺪﯾﺩ ﻪﺑ
+== DDNet ﻪﺑ ﯼﺪﻣﻭﺍ ﺵﻮﺧ
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == ﺪﯿﻨﮐ ﻩﺩﺎﻔﺘﺳﺍ ﺪﻫﺪﯿﻣ ﺍﺭ ﮓﻨﯿﭘ ﻦﯾﺮﺗ ﻦﯿﯾﺎﭘ ﻪﮐ ﯼﺭﻭﺮﺳ ﺎﻤﺘﺣ ﻭ ﺪﯿﻨﮑﺑ ﻥﺩﺮﮐ ﯼﺯﺎﺑ ﻪﺑ ﻉﻭﺮﺷ Novice ﯼﺎﻫ ﺭﻭﺮﺳ ﺯﺍ ﺪﯾﺎﺑ ﺪﯿﺘﺴﻫ ﺩﺭﺍﻭ ﻩﺯﺎﺗ ﻪﮐ ﺎﻤﺷ.ﺖﺳﺍ ﻥﺎﯾﺎﭘ ﻂﺧ ﻪﺑ ﻉﻭﺮﺷ ﻂﺧ ﺯﺍ ﻥﺎﺘﻤﯿﺗ ﻭ ﺎﻤﺷ ﻥﺪﯿﺳﺭ ﻥﺁ ﻑﺪﻫ ﻪﮐ ﺖﺳﺍ ﯽﻤﯿﺗ ﻦﯾﻼﻧﺁ ﯼﺯﺎﺑ ﮏﯾ DDraceNetwork
@@ -368,7 +311,7 @@ Existing Player
 == ﺩﺭﺍﺩ ﺩﻮﺟﻭ ﻦﮑﯾﺯﺎﺑ
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== ؟ﯽﻨﮐ ﻩﺩﺎﻔﺘﺳﺍ ﻡﺎﻧ ﻦﯾﺍ ﺯﺍ  ﯼﺍﻮﺨﯿﻣ ﻢﻫ ﺯﻮﻨﻫ ('%2$d' ﺯﺎﯿﺘﻣﺍ )ﺖﺳﺍ ﻩﺪﺷ ﻩﺩﺎﻔﺘﺳﺍ '%1$s' ﻡﺎﻧ ﻦﯾﺍ
+== ؟ﯽﻨﮐ ﻩﺩﺎﻔﺘﺳﺍ ﻡﺎﻧ ﻦﯾﺍ ﺯﺍ  ﯼﺍﻮﺨﯿﻣ ﻢﻫ ﺯﻮﻨﻫ ('%d' ﺯﺎﯿﺘﻣﺍ )ﺖﺳﺍ ﻩﺪﺷ ﻩﺩﺎﻔﺘﺳﺍ '%s' ﻡﺎﻧ ﻦﯾﺍ
 
 Checking for existing player with your name
 == ﻡﺎﻧ ﻦﯾﺍ ﺎﺑ ﺩﻮﺟﻮﻣ ﻦﮑﯾﺯﺎﺑ ﯽﺳﺮﺑ ﻝﺎﺣﺭﺩ
@@ -376,8 +319,20 @@ Checking for existing player with your name
 Are you sure that you want to disconnect and switch to a different server?
 == ؟ﻪﮕﯾﺩ ﺭﻭﺮﺳ ﻪﺑ ﯼﺮﺑ ﻭ ﯽﻨﮐ ﻊﻄﻗ ﯼﺍﻮﺨﯿﻣ ﯽﻨﺌﻤﻄﻣ
 
+There's an unsaved map in the editor, you might want to save it before you quit the game.
+== ؟ﯽﻨﮐ ﻩﺮﯿﺧﺫ ﻮﻧﻭﺍ ﯼﺍﻮﺨﯿﻣ ﺝﻭﺮﺧ ﻞﺒﻗ ﯼﺩﺮﮑﻧ ﻩﺮﯿﺧﺫ ﻮﻧﻭﺍ ﻭ ﯼﺭﺍﺩ ﺖﺧﺎﺳ ﻝﺎﺣﺭﺩ ﻪﺸﻘﻧ ﻪﯾ
+
+Quit anyway?
+== ﻮﺷ ﺝﺭﺎﺧ ﻝﺎﺣﺮﻫ ﻪﺑ
+
 Yes
 == ﻪﻠﺑ
+
+Country / Region
+== ﻪﻘﻄﻨﻣ / ﺭﻮﺸﮐ
+
+Unable to delete the demo
+== ﺩﺭﺍﺪﻧ ﺩﻮﺟﻭ ﻮﻣﺩ ﻑﺬﺣ ﻥﺎﮑﻣﺍ
 
 Unable to rename the demo
 == ﺩﺭﺍﺪﻧ ﺩﻮﺟﻭ ﻮﻣﺩ ﻡﺎﻧ ﺮﯿﯿﻐﺗ ﻥﺎﮑﻣﺍ
@@ -385,8 +340,11 @@ Unable to rename the demo
 New name:
 == ﺪﯾﺪﺟ ﻢﺳﺍ
 
+Destination file already exist
+== ﺖﺳﺍ ﺩﻮﺟﻮﻣ ﻞﺒﻗ ﺯﺍ ﺪﺼﻘﻣ ﻞﯾﺎﻓ
+
 Show chat
-== ﺖﭼ ﺶﯾﺎﻤﻧ
+== ﺖﭼ ﻥﺩﺍﺩ ﻥﺎﺸﻧ
 
 Use sounds
 == ﺍﺪﺻ ﺯﺍ ﻩﺩﺎﻔﺘﺳﺍ
@@ -416,25 +374,34 @@ Search
 == ﻮﺠﺘﺴﺟ
 
 Exclude
-== ﺰﺟ ﻪﺑ
+== ﻥﺩﺮﮐ ﯽﻨﺜﺘﺴﻣ
 
 %d of %d servers
-== ﺎﻫ ﺭﻭﺮﺳ %d ﺯﺍ %d
+== ﺎﻫ ﺭﻭﺮﺳ d% ﺯﺍ d%
 
 %d of %d server
-== ﺭﻭﺮﺳ %d ﺯﺍ %d
+== ﺭﻭﺮﺳ d% ﺯﺍ d%
 
 %d players
-== ﻥﺎﻨﮑﯾﺯﺎﺑ %d
+== ﻥﺎﻨﮑﯾﺯﺎﺑ d%
 
 %d player
-== ﻦﮑﯾﺯﺎﺑ %d
+== ﻦﮑﯾﺯﺎﺑ d%
 
 Server address:
 == ﺭﻭﺮﺳ ﺱﺭﺩﺁ
 
+Refresh
+== ﻥﺩﺮﮐ ﻩﺯﺎﺗ
+
+Refreshing...
+== ... ﻥﺩﺮﮐ ﻩﺯﺎﺗ ﻝﺎﺣ ﺭﺩ
+
+Server filter
+== ﺭﻭﺮﺳ ﺮﺘﻠﯿﻓ
+
 Server not full
-== ﺪﺷﺎﺒﻧ ﺮﭘ ﺭﻭﺮﺳ
+== ﺖﺴﯿﻧ ﺮﭘ ﺭﻭﺮﺳ
 
 Show friends only
 == ﻩﺪﺑ ﻥﺎﺸﻧ ﺍﺭ ﻥﺎﺘﺳﻭﺩ ﻂﻘﻓ
@@ -446,7 +413,7 @@ Player country:
 == ﻦﮑﯾﺯﺎﺑ ﺭﻮﺸﮐ
 
 Filter connecting players
-== ﻝﺎﺼﺗﺍ ﻝﺎﺣﺭﺩ ﻥﺎﻨﮑﯾﺯﺎﺑ ﻥﺩﺮﮐ ﺮﺘﻠﯿﻓ
+== ﻦﮑﯾﺯﺎﺑ ﯼﺭﺍﺩ ﻂﻘﻓ ﻥﺩﺮﮐ ﺮﺘﻠﯿﻓ
 
 Indicate map finish
 == ﻪﺘﻓﺎﯾ ﻥﺎﯾﺎﭘ ﭗﻣ ﻥﺩﺍﺩ ﻥﺎﺸﻧ
@@ -461,7 +428,10 @@ Types
 == ﻉﺍﻮﻧﺍ
 
 Reset filter
-== ﺮﺘﻠﯿﻓ ﻥﺩﺮﮐ ﺖﺴﯾﺭ
+== ﺮﺘﻠﯿﻓ ﯽﻧﺎﺸﻧﺯﺎﺑ
+
+Server details
+== ﺭﻭﺮﺳ ﺕﺎﻋﻼﻃﺍ
 
 Scoreboard
 == ﺕﺍﺯﺎﯿﺘﻣﺍ ﯼﻮﻠﺑﺎﺗ
@@ -469,14 +439,44 @@ Scoreboard
 Remove
 == ﻥﺩﺮﮐ کﺎﭘ
 
+Info
+== ﺕﺎﻋﻼﻃﺍ
+
+Select a name
+== ﻡﺎﻧ ﮏﯾ ﺏﺎﺨﺘﻧﺍ
+
+Please use a different name
+== ﻦﮐ ﻩﺩﺎﻔﺘﺳﺍ ﺕﻭﺎﻔﺘﻣ ﻡﺎﻧ ﮏﯾ ﺯﺍ ﺎﻔﻄﻟ
+
 Remove chat
 == ﺖﭼ ﻥﺩﺮﮐ کﺎﭘ
+
+Created:
+== :ﻦﺘﺧﺎﺳ
+
+Type:
+== :ﻉﻮﻧ
+
+Length:
+== :ﻝﻮﻃ
+
+Version:
+== :ﻪﺨﺴﻧ
+
+Markers:
+== :ﻩﺪﻧﺯﺎﺳ
+
+Map:
+== :ﭗﻣ
+
+Size:
+== :ﻩﺯﺍﺪﻧﺍ
 
 Demo
 == ﻮﻣﺩ
 
 Markers
-== ﺎﻫ ﺮﮕﻧﺎﺸﻧ
+== ﻥﺎﮔﺪﻧﺯﺎﺳ
 
 Length
 == ﻝﻮﻃ
@@ -485,13 +485,16 @@ Date
 == ﺦﯾﺭﺎﺗ
 
 Demos directory
-== ﺎﻫﻮﻣﺩ ﻪﺷﻮﭘ
+== ﺎﻫﻮﻣﺩ ﯼﺎﻤﻨﻫﺍﺭ ﺖﺳﺮﻬﻓ
+
+Rename
+== ﻡﺎﻧ ﺮﯿﯿﻐﺗ
 
 Connect Dummy
-== ﯽﻣﺍﺩ ﻝﺎﺼﺗﺍ
+== dummy ﻝﺎﺼﺗﺍ
 
 Connecting dummy
-== ﯽﻣﺍﺩ ﻝﺎﺼﺗﺍ ﻝﺎﺣﺭﺩ
+== ﻝﺎﺼﺗﺍ ﻝﺎﺣﺭﺩ dummy
 
 Stop record
 == ﻂﺒﺿ ﻒﻗﻮﺗ
@@ -500,13 +503,16 @@ Record demo
 == ﻮﻣﺩ ﻂﺒﺿ
 
 Join game
-== ﯼﺯﺎﺑ ﻪﺑ ﺩﻭﺭﻭ
+== ﯼﺯﺎﺑ ﻪﺑ ﻦﺘﻓﺭ
 
 Kill
-== ﯽﺸﮐﺩﻮﺧ
+== ﻦﺘﺸﮐ
 
 Pause
-== ﺚﮑﻣ ﺖﻟﺎﺣ
+== ﻦﺘﺷﺍﺩ ﻪﮕﻧ
+
+Player options
+== ﻦﮑﯾﺯﺎﺑ ﺕﺎﻤﯿﻈﻨﺗ
 
 Player
 == ﻦﮑﯾﺯﺎﺑ
@@ -517,6 +523,9 @@ Version
 Score limit
 == ﺯﺎﯿﺘﻣﺍ ﺪﺣ
 
+Time limit
+== ﻥﺎﻣﺯ ﺪﺣ
+
 Vote description:
 == ﯼﺍﺭ ﺕﺎﺤﯿﺿﻮﺗ
 
@@ -525,6 +534,9 @@ Vote command:
 
 Time
 == ﻥﺎﻣﺯ
+
+Reload
+== ﻩﺭﺎﺑﻭﺩ ﯼﺮﯿﮔﺭﺎﺑ
 
 Deactivate
 == ﻥﺩﺮﮐ ﻝﺎﻌﻓﺮﯿﻏ
@@ -536,7 +548,7 @@ Save
 == ﻩﺮﯿﺧﺫ
 
 Smooth Dynamic Camera
-== ﻥﺍﻭﺭ کﺮﺤﺘﻣ ﻦﯿﺑﺭﻭﺩ
+== کﺮﺤﺘﻣ ﻦﯿﺑﺭﻭﺩ
 
 Switch weapon on pickup
 == ﻦﺘﺷﺍﺩﺮﺑ ﻡﺎﮕﻨﻫ ﻪﺤﻠﺳﺍ ﺮﯿﯿﻐﺗ
@@ -544,11 +556,14 @@ Switch weapon on pickup
 Switch weapon when out of ammo
 == ﺕﺎﻤﻬﻣ ﻥﺪﺷ ﻡﺎﻤﺗ ﻡﺎﮕﻨﻫ ﻪﺤﻠﺳﺍ ﺮﯿﯿﻐﺗ
 
+Reset wanted weapon on death
+== گﺮﻣ ﺯﺍ ﺪﻌﺑ ﻪﺤﻠﺳﺍ ﯽﻧﺎﺸﻧﺯﺎﺑ
+
 Show only chat messages from friends
-== ﻥﺎﺘﺳﻭﺩ ﺖﭼ ﺶﯾﺎﻤﻧ ﻂﻘﻓ
+== ﻩﺪﺑ ﻥﺎﺸﻧ ﺍﺭ ﻥﺎﺘﺳﻭﺩ ﺖﭼ ﻂﻘﻓ
 
 Skip the main menu
-== ﯽﻠﺻﺍ ىﻮﻨﻣ ﺯﺍ ﻥﺪﺷ ﺩﺭ
+== رد شدن از منوی اصلی
 
 Max demos
 == ﺎﻫﻮﻣﺩ ﺮﺜﮐﺍﺪﺣ
@@ -557,7 +572,13 @@ Max Screenshots
 == ﺎﻫ ﺕﺎﺷ ﻦﯾﺮﮑﺳﺍ ﺮﺜﮐﺍﺪﺣ
 
 Refresh Rate
-== ﯽﻧﺎﺳﺭﺯﻭﺮﺑ ﺥﺮﻧ
+== ﯼﺯﺎﺳ ﻩﺯﺎﺗ ﺥﺮﻧ
+
+Show console window
+== ﺯﺪﻨﯾﻭ ﻝﻮﺴﻨﮐ ﺶﯾﺎﻤﻧ
+
+Dummy settings
+== dummy ﺕﺎﻤﯿﻈﻨﺗ
 
 Your skin
 == ﺎﻤﺷ ﻦﯿﮑﺳﺍ
@@ -572,7 +593,7 @@ Skin prefix
 == ﻦﯿﮑﺳﺍ ﺪﻧﻮﺸﯿﭘ
 
 Skin Database
-== ﻦﯿﮑﺳﺍ ﺩﻮﻠﻧﺍﺩ
+== ﺎﻫ ﻦﯿﮑﺳﺍ
 
 Zoom in
 == ﯽﯾﺎﻤﻨﮔﺭﺰﺑ
@@ -584,16 +605,16 @@ Default zoom
 == ﺽﺮﻓ ﺶﯿﭘ ﯽﯾﺎﻤﻨﮔﺭﺰﺑ
 
 Show others
-== ﻥﺍﺮﮕﯾﺩ ﺶﯾﺎﻤﻧ
+== ﻥﺍﺮﮕﯾﺩ ﻥﺩﺍﺩ ﻥﺎﺸﻧ
 
 Show all
-== ﻪﻤﻫ ﺶﯾﺎﻤﻧ
+== ﻪﻤﻫ ﻥﺩﺍﺩ ﻥﺎﺸﻧ
 
 Toggle dyncam
 == کﺮﺤﺘﻣ ﻦﯿﺑﺭﻭﺩ ﺮﯿﯿﻐﺗ
 
 Toggle dummy
-== ﯽﻣﺍﺩ ﺮﯿﯿﻐﺗ
+== dummy ﺮﯿﯿﻐﺗ
 
 Shotgun
 == ﻥﺎﮕﺗﺎﺷ
@@ -620,10 +641,10 @@ Lock team
 == ﻢﯿﺗ ﻥﺩﺮﮐ ﻞﻔﻗ
 
 Show entities
-== ﺎﻫ ﺖﯾﺩﻮﺟﻮﻣ ﺶﯾﺎﻤﻧ
+== entities ﻥﺩﺍﺩ ﻥﺎﺸﻧ
 
 Show HUD
-== HUD ﺶﯾﺎﻤﻧ
+== HUD ﻥﺩﺍﺩ ﻥﺎﺸﻧ
 
 Chat command
 == ﺖﭼ ﺪﻨﻣﺎﮐ
@@ -632,13 +653,16 @@ Weapon
 == ﻪﺤﻠﺳﺍ
 
 Reset to defaults
-== ﺽﺮﻓ ﺶﯿﭘ ﺖﻟﺎﺣ ﻪﺑ ﺖﺴﯾﺭ
+== ﺽﺮﻔﺸﯿﭘ ﻪﺑ ﯽﻧﺎﺸﻧﺯﺎﺑ
 
 Voting
 == ﻥﺩﺍﺩ ﯼﺍﺭ
 
 Miscellaneous
 == ﻪﻗﺮﻔﺘﻣ
+
+Display Modes
+== ﻪﺤﻔﺻ ﺖﻟﺎﺣ
 
 Desktop fullscreen
 == ﻪﺤﻔﺻ ﻡﺎﻤﺗ
@@ -650,7 +674,7 @@ UI Color
 == ﺖﻨﯾﻼﮐ ﮓﻧﺭ
 
 Play background music
-== ﻪﻨﯿﻣﺯ ﺲﭘ ﮏﯾﺯﻮﻣ ﺶﺨﭘ
+== ﻪﻨﯿﻣﺯ ﺲﭘ ﮏﯾﺯﻮﻣ ﺶﺤﭘ
 
 Enable game sounds
 == ﯼﺯﺎﺑ ﯼﺍﺪﺻ ﻥﺩﻮﺑ ﻝﺎﻌﻓ
@@ -682,8 +706,20 @@ Background music volume
 Sound
 == ﺍﺪﺻ
 
+Use DDRace Scoreboard
+== DDRace ﺕﺍﺯﺎﯿﺘﻣﺍ ﯼﻮﻠﺑﺎﺗ ﺯﺍ ﻩﺩﺎﻔﺘﺳﺍ
+
+Show client IDs
+== ﺖﻨﯾﻼﮐ ﯼﺪﯾﺁ ﺶﯾﺎﻤﻧ
+
 Show score
 == ﺯﺎﯿﺘﻣﺍ ﺶﯾﺎﻤﻧ
+
+Show health + ammo
+== ﺕﺎﻤﻬﻣ+ﯽﺘﻣﻼﺳ ﺶﯾﺎﻤﻧ
+
+Hookable
+== کﻮﻫ ﻞﺑﺎﻗ
 
 Use old chat style
 == ﺖﭼ ﯽﻤﯾﺪﻗ ﻞﯾﺎﺘﺳﺍ ﺯﺍ ﻩﺩﺎﻔﺘﺳﺍ
@@ -715,7 +751,7 @@ Background
 Update now
 == ﻦﮐ ﯽﻧﺎﺳﺭﺯﻭﺮﺑ ﻥﻻﺍ ﻦﯿﻤﻫ
 
-Updating…
+Updating...
 == ﯽﻧﺎﺳﺭﺯﻭﺮﺑ ﻝﺎﺣﺭﺩ
 
 No updates available
@@ -750,10 +786,10 @@ Play
 == ﻥﺩﺮﮐ ﯼﺯﺎﺑ
 
 Downloading %s:
-== %s :ﺩﻮﻠﻧﺍﺩ ﻝﺎﺣﺭﺩ
+== s:%ﺩﻮﻠﻧﺍﺩ ﻝﺎﺣﺭﺩ
 
-Update failed! Check log…
-== … ﺪﯿﻨﮐ ﮏﭼ ﺍﺭ گﻻ!ﻖﻓﻮﻣﺎﻧ ﯽﻧﺎﺳﺭﺯﻭﺮﺑ
+Update failed! Check log...
+== ... ﺪﯿﻨﮐ ﮏﭼ ﺍﺭ گﻻ!ﻖﻓﻮﻣﺎﻧ ﯽﻧﺎﺳﺭﺯﻭﺮﺑ
 
 Restart
 == ﺩﺪﺠﻣ ﯼﺯﺍﺪﻧﺍ ﻩﺍﺭ
@@ -776,1878 +812,467 @@ Red team
 Follow
 == ﻥﺩﺮﮐ ﻝﺎﺒﻧﺩ
 
-[Graphics error]
-Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== .ﺪﯿﻨﮐ ﺵﻼﺗ ﻩﺭﺎﺑﻭﺩ ﻭ ﺪﯿﻫﺩ ﺮﯿﯿﻐﺗ Vulkan ﺎﯾ OpenGL ﻪﺑ ﺍﺭ gfx_backend ، settings_ddnet.cfg ﺭﺩ ،ﮓﯿﻔﻧﺎﮐ ﻪﺷﻮﭘ ﺭﺩ ﺪﯿﻨﮐ ﯽﻌﺳ. ﯼﺯﺍﺪﻧﺍ ﻩﺍﺭ ﻡﺎﮕﻨﻫ ﺭﺩ ﺎﻄﺧ
-
-[Graphics error]
-An error during command recording occurred. Try to update your GPU drivers.
-== .ﺪﯿﻨﮐ ﺖﯾﺪﭘﺁ ﺍﺭ ﮏﯿﻓﺍﺮﮔ ﯼﺎﻫ ﺭﻮﯾﺍﺭﺩ .ﻥﺎﻣﺮﻓ ﺩﺭﻮﮐﺭ ﻡﺎﮕﻨﻫ ﺭﺩ ﺎﻄﺧ
-
-[Graphics error]
-A render command failed. Try to update your GPU drivers.
-== .ﺪﯿﻨﮐ ﺖﯾﺪﭘﺁ ﺍﺭ ﮏﯿﻓﺍﺮﮔ ﯼﺎﻫ ﺭﻮﯾﺍﺭﺩ .ﺭﺪﻧﺭ ﺭﻮﺘﺳﺩ ﺭﺩ ﺎﻄﺧ
-
-[Graphics error]
-Submitting the render commands failed. Try to update your GPU drivers.
-== .ﺪﯿﻨﮐ ﺖﯾﺪﭘﺁ ﺍﺭ ﮏﯿﻓﺍﺮﮔ ﯼﺎﻫ ﺭﻮﯾﺍﺭﺩ .ﺭﺪﻧﺭ ﺕﺍﺭﻮﺘﺳﺩ ﻝﺎﺳﺭﺍ ﺭﺩ ﺎﻄﺧ
-
-[Graphics error]
-Failed to swap framebuffers. Try to update your GPU drivers.
-== .ﺪﯿﻨﮐ ﺖﯾﺪﭘﺁ ﺍﺭ ﮏﯿﻓﺍﺮﮔ ﯼﺎﻫ ﺭﻮﯾﺍﺭﺩ .ﺮﻓﺎﺑ ﻢﯾﺮﻓ ﺾﯾﻮﻌﺗ ﺭﺩ ﺎﻄﺧ
-
-[Graphics error]
-Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== .ﺪﯿﻨﮐ ﺵﻼﺗ ﻩﺭﺎﺑﻭﺩ ﻭ ﺪﯿﻫﺩ ﺮﯿﯿﻐﺗ Vulkan ﺎﯾ OpenGL ﻪﺑ ﺍﺭ gfx_backend ، settings_ddnet.cfg ﺭﺩ ،ﮓﯿﻔﻧﺎﮐ ﻪﺷﻮﭘ ﺭﺩ ﺪﯿﻨﮐ ﯽﻌﺳ .ﺺﺨﺸﻣﺎﻧ ﯼﺎﻄﺧ
-
-Preparing demo playback
-== ﻮﻣﺩ ﺶﺨﭘ ﯼﺯﺎﺳ ﻩﺩﺎﻣﺁ ﻝﺎﺣ ﺭﺩ
-
-Connected
-== ﻞﺼﺘﻣ
-
-Loading map file from storage
-== ﯼﺯﺎﺳ ﻩﺮﯿﺧﺫ ﺖﻤﺴﻗ ﺯﺍ ﭗﻣ ﻞﯾﺎﻓ ﯼﺮﯿﮔﺭﺎﺑ ﻝﺎﺣ ﺭﺩ
-
-Why are you slowmo replaying to read this?
-== ؟ﺪﯿﻨﮐ ﯽﻣ ﺶﺨﭘ ﻪﺘﺴﻫﺁ ﺐﻠﻄﻣ ﻦﯾﺍ ﻥﺪﻧﺍﻮﺧ ﯼﺍﺮﺑ ﺍﺮﭼ
-
-Initializing components
-== ﺎﻫ ﻪﻔﻟﻮﻣ ﻪﯿﻟﻭﺍ ﯽﻫﺩﺭﺍﺪﻘﻣ
-
-Initializing assets
-== ﺎﻫ ﯽﯾﺍﺭﺍﺩ ﻥﺩﺮﮐ ﻩﺩﺎﻣﺁ
-
-Sending initial client info
-== ﺖﻨﯾﻼﮐ ﻪﯿﻟﻭﺍ ﺕﺎﻋﻼﻃﺍ ﻝﺎﺳﺭﺍ
-
-Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== .ﺩﻮﺷ ﻝﺎﻌﻓﺮﯿﻏ ﯽﯾﺍﺩﺯ ﻝﺎﮑﺷﺍ ﺖﻟﺎﺣ ﺎﺗ ﺪﯿﻫﺩ ﺭﺎﺸﻓ ﺍﺭ Ctrl+Shift+D .ﺪﺷ ﻝﺎﻌﻓ ﯽﯾﺍﺩﺯ ﻝﺎﮑﺷﺍ ﺖﻟﺎﺣ
-
-Position:
-== ﺖﯿﻌﻗﻮﻣ
-
-Speed:
-== ﺖﻋﺮﺳ
-
-Angle:
-== ﻪﯾﻭﺍﺯ
-
-Personal best:
-== ﯽﺼﺨﺷ ﺩﺭﻮﮐﺭ ﻦﯾﺮﺘﻬﺑ
-
-Uploading map data to GPU
-== GPU ﺭﺩ ﭗﻣ ﺕﺎﻋﻼﻃﺍ ﯼﺭﺍﺬﮔﺭﺎﺑ
-
-The audio device couldn't be initialised.
-== .ﺩﻮﺷ ﯼﺯﺍﺪﻧﺍ ﻩﺍﺭ ﺪﻧﺍﻮﺗ ﯽﻤﻧ ﯽﺗﻮﺻ ﻩﺎﮕﺘﺳﺩ
-
-Trying to determine UDP connectivity…
-== UDP… ﻝﺎﺼﺗﺍ ﻦﯿﯿﻌﺗ ﯼﺍﺮﺑ ﺵﻼﺗ
-
-UDP seems to be filtered.
-== .ﺖﺳﺍ ﻩﺪﺷ ﺮﺘﻠﯿﻓ UDP ﺪﺳﺭ ﯽﻣ ﺮﻈﻧ ﻪﺑ
-
-UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== .ﺪﯿﻨﮐ ﻝﺎﻌﻓﺮﯿﻏ ﺍﺭ ﻪﮑﺒﺷ ﯼﺎﻫ ﻩﺪﻨﻫﺩ ﺏﺎﺘﺷ ﺎﯾ ﯽﺴﮐﻭﺮﭘ ،VPN .ﺪﻨﺘﺴﻫ ﺕﻭﺎﻔﺘﻣ TCP ﻭ UDP  ﯼﺎﻫ ﺱﺭﺩﺁ IP ﺪﺳﺭ ﯽﻣ ﺮﻈﻧ ﻪﺑ
-
-No answer from server yet.
-== .ﺖﺳﺍ ﻩﺪﺸﻧ ﺖﻓﺎﯾﺭﺩ ﺭﻭﺮﺳ ﺯﺍ ﯽﺨﺳﺎﭘ ﺯﻮﻨﻫ
-
-Getting game info
-== ﯼﺯﺎﺑ ﺕﺎﻋﻼﻃﺍ ﺖﻓﺎﯾﺭﺩ
-
-Requesting to join the game
-== ﯼﺯﺎﺑ ﻪﺑ ﻦﺘﺳﻮﯿﭘ ﯼﺍﺮﺑ ﺖﺳﺍﻮﺧﺭﺩ
-
-Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== ﺪﯿﻨﯿﺒﺑ ﺍﺭ ﺮﮕﯾﺩ ﯼﺎﻫﺪﯿﻠﮐ ﻪﺑ ﻁﻮﺑﺮﻣ ﺕﺎﻤﯿﻈﻨﺗ .ﺪﯿﻨﮐ ﻩﺩﺎﻔﺘﺳﺍ ﺮﮕﯾﺩ ﻥﺎﻨﮑﯾﺯﺎﺑ ﯼﺎﺷﺎﻤﺗ ﻭ ﺚﮑﻣ ﯼﺍﺮﺑ q ،(ﻩﺭﺎﺑﻭﺩ ﻉﻭﺮﺷ) ﯽﺸﮐﺩﻮﺧ ﯼﺍﺮﺑ k ﺪﯿﻠﮐ ﺯﺍ
-
-It's recommended that you check the settings to adjust them to your liking before joining a server.
-== .ﺪﯿﻨﮐ ﻢﯿﻈﻨﺗ ﺩﻮﺧ ﻞﯿﻣ ﻖﺑﺎﻄﻣ ﺍﺭ ﺎﻬﻧﺁ ﺎﺗ ﺪﯿﻨﮐ ﯽﺳﺭﺮﺑ ﺍﺭ ﺕﺎﻤﯿﻈﻨﺗ ،ﺭﻭﺮﺳ ﻪﺑ ﻦﺘﺳﻮﯿﭘ ﺯﺍ ﻞﺒﻗ ﺩﻮﺷ ﯽﻣ ﻪﯿﺻﻮﺗ
-
-Please enter your nickname below.
-== .ﺪﯿﻨﮐ ﺩﺭﺍﻭ ﺮﯾﺯ ﺭﺩ ﺍﺭ ﺩﻮﺧ ﺭﺎﻌﺘﺴﻣ ﻡﺎﻧ ﺎﻔﻄﻟ
-
-Cancel
-== ﻮﻐﻟ
-
-File '%s' already exists, do you want to overwrite it?
-== ؟ﺪﯿﻨﮐ ﯽﺴﯾﻮﻧﺯﺎﺑ ﺍﺭ ﻥﺁ ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﺎﯾﺁ ،ﺩﺭﺍﺩ ﺩﻮﺟﻭ ﻞﺒﻗ ﺯﺍ '%s' ﻞﯾﺎﻓ
-
-Join Tutorial Server
-== ﺪﯾﺪﻧﻮﯿﭙﺑ ﯽﺷﺯﻮﻣﺁ ﺭﻭﺮﺳ ﻪﺑ
-
-Skip Tutorial
-== ﺵﺯﻮﻣﺁ ﺯﺍ ﻥﺩﺮﮐ ﺭﺬﮔ
-
-transmits your player name to info.ddnet.org
-== ﺪﻨﮐ ﯽﻣ ﻞﻘﺘﻨﻣ info.ddnet.org ﻪﺑ ﺍﺭ ﺩﻮﺧ ﺭﺎﻌﺘﺴﻣ ﻡﺎﻧ
-
-The server is running a non-standard tuning on a pure game type.
-== .ﺖﺳﺍ ﺺﻟﺎﺧ ﯼﺯﺎﺑ ﻉﻮﻧ ﮏﯾ ﯼﻭﺭ ﺩﺭﺍﺪﻧﺎﺘﺳﺍ ﺮﯿﻏ ﻢﯿﻈﻨﺗ ﮏﯾ ﯼﺍﺮﺟﺍ ﻝﺎﺣ ﺭﺩ ﺭﻭﺮﺳ
-
-Loading menu images
-== ﻮﻨﻣ ﺮﯾﻭﺎﺼﺗ ﻥﺩﺮﮐ ﻩﺩﺎﻣﺁ ﻝﺎﺣ ﺭﺩ
-
-AFR
-== ﺎﻘﯾﺮﻓﺁ
-
-ASI
-== ﺎﯿﺳﺁ
-
-AUS
-== ﺎﯿﻟﺍﺮﺘﺳﺍ
-
-EUR
-== ﺎﭘﻭﺭﺍ
-
-NA
-== ﯽﻟﺎﻤﺷ ﯼﺎﮑﯾﺮﻣﺁ
-
-SA
-== ﯽﺑﻮﻨﺟ ىﺎﻜﯾﺮﻣﺁ
-
-CHN
-== ﻦﯿﭼ
-
-Leak IP
-== IP ﺖﺸﻧ
-
-Are you sure that you want to remove the player '%s' from your friends list?
-== ؟ﺪﯿﻨﮐ ﻑﺬﺣ ﺩﻮﺧ ﻥﺎﺘﺳﻭﺩ ﺖﺴﯿﻟ ﺯﺍ ﺍﺭ '%s' ﻦﮑﯾﺯﺎﺑ ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﻪﮐ ﺪﯿﺘﺴﻫ ﻦﺌﻤﻄﻣ ﺎﯾﺁ
-
-Are you sure that you want to remove the clan '%s' from your friends list?
-== ؟ﺪﯿﻨﮐ ﻑﺬﺣ ﺩﻮﺧ ﻥﺎﺘﺳﻭﺩ ﺖﺴﯿﻟ ﺯﺍ ﺍﺭ '%s' ﻦﻠﮐ ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﻪﮐ ﺪﯿﺘﺴﻫ ﻦﺌﻤﻄﻣ ﺎﯾﺁ
-
-Play the current demo
-== ﯽﻠﻌﻓ ﯼ ﻮﻣﺩ ﺶﺨﭘ
-
-Pause the current demo
-== ﺚﮑﻣ
-
-Stop the current demo
-== ﻒﻗﻮﺗ
-
-Go back one tick
-== ﺩﺮﮔﺮﺑ ﺐﻘﻋ ﻪﺑ ﮏﯿﺗ ﮏﯾ
-
-Go forward one tick
-== ﻭﺮﺑ ﻮﻠﺟ ﮏﯿﺗ ﮏﯾ
-
-Slow down the demo
-== ﻮﻣﺩ ﺖﻋﺮﺳ ﻥﺩﺮﮐ ﻢﮐ
-
-Speed up the demo
-== ﻮﻣﺩ ﺖﻋﺮﺳ ﻥﺩﺮﮐ ﺩﺎﯾﺯ
-
-Export cut as a separate demo
-== ﻦﻛ ﺭﺩﺎﺻ ﻪﻧﺎﮔﺍﺪﺟ ﻮﻣﺩ ﻚﯾ ﻥﺍﻮﻨﻋﻪﺑ ﺍﺭ ﺵﺮﺑ
-
-Go back one marker
-== ﺩﺮﮔﺮﺑ ﺐﻘﻋ ﻪﺑ ﺮﮕﻧﺎﺸﻧ ﮏﯾ
-
-Go forward one marker
-== ﻭﺮﺑ ﻮﻠﺟ ﻪﺑ ﺮﮕﻧﺎﺸﻧ ﮏﯾ
-
-Toggle keyboard shortcuts
-== ﺪﯿﻠﮐ ﻪﺤﻔﺻ ﺮﺒﻧﺎﯿﻣ ﯼﺎﻫﺪﯿﻠﮐ ﺮﯿﯿﻐﺗ
-
-Loading demo files
-== ﻮﻣﺩ ﯼﺎﻫ ﻞﯾﺎﻓ ﻥﺩﺮﮐ ﻩﺩﺎﻣﺁ ﻝﺎﺣ ﺭﺩ
-
-%.2f MiB
-== %.2f MiB
-
-%.2f KiB
-== %.2f KiB
-
-Fetch Info
-== ﺕﺎﻋﻼﻃﺍ ﯽﺸﮐﺍﻭ
-
-Open the directory that contains the demo files
-== ﺪﯿﻨﮐ ﺯﺎﺑ ﺍﺭ ﺖﺴﻫ ﻮﻣﺩ ﯼﺎﻫ ﻞﯾﺎﻓ ﻞﻣﺎﺷ ﻪﮐ ﯼﺍ ﻪﺷﻮﭘ
-
-Are you sure that you want to delete the demo '%s'?
-== ؟ﺪﯿﻨﮐ ﻑﺬﺣ ﺍﺭ '%s' ﻮﻣﺩ ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﻪﮐ ﺪﯿﺘﺴﻫ ﻦﺌﻤﻄﻣ ﺎﯾﺁ
-
-Unable to delete the demo '%s'
-== ﺩﺭﺍﺪﻧ ﺩﻮﺟﻭ '%s' ﻮﻣﺩ ﻑﺬﺣ ﻥﺎﮑﻣﺍ
-
-Loading ghost files
-== ﺡﻭﺭ ﯼﺎﻫ ﻞﯾﺎﻓ ﻥﺩﺮﮐ ﻩﺩﺎﻣﺁ ﻝﺎﺣ ﺭﺩ
-
-Menu opened. Press Esc key again to close menu.
-== .ﺩﻮﺷ ﻪﺘﺴﺑ ﻮﻨﻣ ﺎﺗ ﺪﯿﻫﺩ ﺭﺎﺸﻓ ﺍﺭ Esc ﺪﯿﻠﮐ ﻩﺭﺎﺑﻭﺩ ﺪﺷ ﺯﺎﺑ ﻮﻨﻣ
-
-Settings file
-== ﺕﺎﻤﯿﻈﻨﺗ ﻞﯾﺎﻓ
-
-Open the settings file
-== ﺕﺎﻤﯿﻈﻨﺗ ﻞﯾﺎﻓ ﻥﺩﺮﮐ ﺯﺎﺑ
-
-Config directory
-== ﮓﯿﻔﻧﺎﮐ ﻪﺷﻮﭘ
-
-Open the directory that contains the configuration and user files
-== ﺪﯿﻨﮐ ﺯﺎﺑ ﺍﺭ ﯼﺮﺑﺭﺎﮐ ﯼﺎﻫ ﻞﯾﺎﻓ ﻭ ﮓﯿﻔﻧﺎﮐ ﯼﻭﺎﺣ ﻪﺷﻮﭘ
-
-Themes directory
-== ﺎﻫ ﻢﺗ ﻪﺷﻮﭘ
-
-Open the directory to add custom themes
-== ﺪﯿﻨﮐ ﺯﺎﺑ ﯽﺷﺭﺎﻔﺳ ﯼﺎﻫ ﻢﺗ ﻥﺩﻭﺰﻓﺍ ﯼﺍﺮﺑ ﺍﺭ ﻪﺷﻮﭘ
-
-Automatically take statboard screenshot
-== ﺕﺎﻋﻼﻃﺍ ﻮﻠﺑﺎﺗ ﺯﺍ ﺭﺎﮐﺩﻮﺧ ﺕﺎﺷ ﻦﯾﺮﮑﺳﺍ
-
-Automatically create statboard csv
-== ﺕﺎﻋﻼﻃﺍ ﻮﻠﺑﺎﺗ ﺯﺍ csv ﺖﻣﺮﻓ ﺭﺎﮐﺩﻮﺧ ﺩﺎﺠﯾﺍ
-
-Max CSVs
-== ﺎﻫ csv ﺩﺍﺪﻌﺗ ﺮﺜﮐﺍﺪﺣ
-
-Loading skin files
-== ﻦﯿﮑﺳﺍ ﯼﺎﻫ ﻞﯾﺎﻓ ﻥﺩﺮﮐ ﻩﺩﺎﻣﺁ ﻝﺎﺣ ﺭﺩ
-
-Download community skins
-== ﻦﻤﺠﻧﺍ ﯼﺎﻫ ﻦﯿﮑﺳﺍ ﺩﻮﻠﻧﺍﺩ
-
-Vanilla skins only
-== ﯽﻠﯿﻧﺍﻭ  ﯼﺎﻫ ﻦﯿﮑﺳﺍ ﻂﻘﻓ
-
-Choose default eyes when joining a server
-== . ﺭﻭﺮﺳ ﻪﺑ ﻦﺘﺳﻮﯿﭘ ﻡﺎﮕﻨﻫ ﺽﺮﻓ ﺶﯿﭘ ﯼﺎﻫ ﻢﺸﭼ ﺏﺎﺨﺘﻧﺍ
-
-Skins directory
-== ﺎﻫ ﻦﯿﮑﺳﺍ ﻪﺷﻮﭘ
-
-Open the directory to add custom skins
-== ﻦﮐ ﺯﺎﺑ ﯽﺷﺭﺎﻔﺳ ﯼﺎﻫ ﻦﯿﮑﺳﺍ ﻥﺩﻭﺰﻓﺍ ﯼﺍﺮﺑ ﺍﺭ ﺎﻫ ﻦﯿﮑﺳﺍ ﯼ ﻪﺷﻮﭘ
-
-Hook collisions
-== ﺏﻼﻗ ﯼﺎﻫ ﺩﺭﻮﺧﺮﺑ
-
-Toggle ghost
-== ﺡﻭﺭ ﺖﻟﺎﺣ ﻥﺩﺮﮐ ﻦﺷﻭﺭ
-
-Dummy copy
-== ﯽﭙﮐ ﯽﻣﺍﺩ
-
-Hammerfly dummy
-== ﯽﻣﺍﺩ ﺶﮑﭼ ﺎﺑ ﺯﺍﻭﺮﭘ
-
-Spectate next
-== ﯼﺪﻌﺑ ﯼﺎﺷﺎﻤﺗ
-
-Spectate previous
-== ﯽﻠﺒﻗ ﯼﺎﺷﺎﻤﺗ
-
-Remote console
-== ﺭﻭﺩ ﻩﺍﺭ ﺯﺍ ﻝﻮﺴﻨﮐ
-
-Statboard
-== ﺕﺎﻋﻼﻃﺍ ﻮﻠﺑﺎﺗ
-
-Enable controller
-== ﻦﮐ ﻝﺎﻌﻓ ﺍﺭ ﺮﻟﺮﺘﻨﮐ
-
-[Ingame controller mode]
-Relative
-== ﯽﺒﺴﻧ [ﯼﺯﺎﺑ ﺮﻟﺮﺘﻨﮐ ﺖﻟﺎﺣ]
-
-[Ingame controller mode]
-Absolute
-== ﻖﻠﻄﻣ [ﯼﺯﺎﺑ ﺮﻟﺮﺘﻨﮐ ﺖﻟﺎﺣ]
-
-Ingame controller mode
-== ﯼﺯﺎﺑ ﺮﻟﺮﺘﻨﮐ ﺖﻟﺎﺣ
-
-Ingame controller sens.
-== ﯼﺯﺎﺑ ﺮﻟﺮﺘﻨﮐ ﺮﮕﺴﺣ
-
-UI controller sens.
-== ﯼﺮﺑﺭﺎﮐ ﻂﺑﺍﺭ ﺮﻟﺮﺘﻨﮐ ﺮﮕﺴﺣ
-
-Controller jitter tolerance
-== ﺮﻟﺮﺘﻨﮐ ﺵﺯﺮﻟ ﻞﻤﺤﺗ
-
-No controller found. Plug in a controller.
-== ﺪﯿﻨﮐ ﻞﺻﻭ ﺮﻟﺮﺘﻨﮐ ﮏﯾ .ﺪﺸﻧ ﺍﺪﯿﭘ ﯼﺮﻟﺮﺘﻨﮐ ﭻﯿﻫ
-
-Status
-== ﺖﯿﻌﺿﻭ
-
-Aim bind
-== ﻪﻧﻮﺸﻧ ﺪﻨﯾﺎﺑ
-
-Mouse
-== ﺱﻮﻣ
-
-Ingame mouse sens.
-== ﯼﺯﺎﺑ ﻞﺧﺍﺩ ﺱﻮﻣ ﺮﮕﺴﺣ
-
-UI mouse sens.
-== ﻮﻨﻣ ﺭﺩ ﺱﻮﻣ ﺮﮕﺴﺣ
-
-Controller
-== ﺮﻟﺮﺘﻨﮐ
-
-Reset controls
-== ﺎﻫ ﻝﺮﺘﻨﮐ ﻥﺩﺮﮐ ﺖﺴﯾﺭ
-
-Are you sure that you want to reset the controls to their defaults?
-== ؟ﺪﯿﻧﺍﺩﺮﮔﺯﺎﺑ ﺽﺮﻓ ﺶﯿﭘ ﺖﻟﺎﺣ ﻪﺑ ﺍﺭ ﺎﻫ ﻝﺮﺘﻨﮐ ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﻪﮐ ﺪﯿﺘﺴﻫ ﻦﺌﻤﻄﻣ ﺎﯾﺁ
-
-Dummy
-== ﯽﻣﺍﺩ
-
-Windowed
-== ﯼﺍ ﻩﺮﺠﻨﭘ
-
-Windowed borderless
-== ﻪﯿﺷﺎﺣ ﻥﻭﺪﺑ ﯼﺍ ﻩﺮﺠﻨﭘ
-
-Windowed fullscreen
-== ﻪﺤﻔﺻ ﻡﺎﻤﺗ ﯼﺍ ﻩﺮﺠﻨﭘ
-
-V-Sync
-== V-Sync
-
-may cause delay
-== ﺩﻮﺷ ﺮﯿﺧﺎﺗ ﺚﻋﺎﺑ ﺖﺳﺍ ﻦﮑﻤﻣ
-
-FSAA samples
-== FSAA ﯼﺎﻫ ﻪﻧﻮﻤﻧ
-
-Allows maps to render with more detail
-== ﺪﻧﻮﺷ ﺭﺪﻧﺭ ﺮﺘﺸﯿﺑ ﺕﺎﯿﺋﺰﺟ ﺎﺑ ﺎﺗ ﺪﻫﺩ ﯽﻣ ﻩﺯﺎﺟﺍ ﺎﻫ ﻪﺸﻘﻧ ﻪﺑ
-
-Renderer
-== ﻩﺪﻨﻨﮐ ﺭﺪﻧﺭ
-
-default
-== ﺽﺮﻓ ﺶﯿﭘ
-
-custom
-== ﯽﺷﺭﺎﻔﺳ
-
-auto
-== ﺭﺎﮐﺩﻮﺧ
-
-Enable long pain sound (used when shooting in freeze)
-== (ﺩﻮﺷ ﯽﻣ ﻩﺩﺎﻔﺘﺳﺍ ﺰﯾﺮﻓ ﺖﻟﺎﺣ ﺭﺩ ﮏﯿﻠﺷ ﻡﺎﮕﻨﻫ) ﺪﯿﻨﮐ ﻝﺎﻌﻓ ﺍﺭ ﯽﻧﻻﻮﻃ ﺩﺭﺩ ﯼﺍﺪﺻ
-
-Enable regular chat sound
-== ﯽﻟﻮﻤﻌﻣ ﺖﭼ ﯼﺍﺪﺻ ﻥﺩﻮﺑ ﻝﺎﻌﻓ
-
-Enable highlighted chat sound
-== ﻩﺪﺷ ﺖﯾﻼﯾﺎﻫ ﺖﭼ ﯼﺍﺪﺻ ﻥﺩﺮﮐ ﻦﺷﻭﺭ
-
-Appearance
-== ﺮﻫﺎﻇ
-
-DDNet
-== ﺖﻨﯾﺪﯾﺩ
-
-Assets
-== ﺎﻫ ﯽﯾﺍﺭﺍﺩ
-
-DDNet Client needs to be restarted to complete update!
-== !ﺩﻮﺷ ﺕﺭﺎﺘﺳﺍ ﯼﺭ ﺪﯾﺎﺑ ﯽﻧﺎﺳﺭﺯﻭﺭ‌ﻪﺑ ﻞﯿﻤﮑﺗ ﯼﺍﺮﺑ ﺖﻨﯾﺪﯾﺩ ﺖﻨﯾﻼﮐ
-
-You must restart the game for all settings to take effect.
-== .ﺪﯿﻨﮐ ﯼﺯﺍﺪﻧﺍ ﻩﺍﺭ ﺍﺩﺪﺠﻣ ﺍﺭ ﯼﺯﺎﺑ ﺪﯾﺎﺑ ﺕﺎﻤﯿﻈﻨﺗ ﯽﻣﺎﻤﺗ ﻝﺎﻤﻋﺍ ﯼﺍﺮﺑ
-
-Hue
-== ﮓﻧﺭ
-
-Sat.
-== ﮓﻧﺭ ﺕﺪﺷ
-
-Lht.
-== ﯽﯾﺎﻨﺷﻭﺭ ﺕﺪﺷ
-
-Alpha
-== ﺎﻔﻟﺁ
-
-HUD
-== HUD
-
-Name Plate
-== ﻡﺎﻧ کﻼﭘ
-
-Hook Collisions
-== ﺏﻼﻗ ﯼﺎﻫ ﺩﺭﻮﺧﺮﺑ
-
-Show health, shields and ammo
-== ﺕﺎﻤﻬﻣ ﻭ ﺮﭙﺳ ،ﯽﺘﻣﻼﺳ ﺶﯾﺎﻤﻧ
-
-Show name plates
-== ﻡﺎﻧ ﯼﺎﻫ کﻼﭘ ﺶﯾﺎﻤﻧ
-
-Show kill messages
-== ﻥﺩﺮﻣ ﯼﺎﻫ ﻡﺎﯿﭘ ﺶﯾﺎﻤﻧ
-
-Show votes window after voting
-== ﯼﺮﯿﮔ ﯼﺍﺭ ﺯﺍ ﺲﭘ ﺀﺍﺭﺁ ﻩﺮﺠﻨﭘ ﺶﯾﺎﻤﻧ
-
-DDRace HUD
-== DDRace HUD
-
-Show DDRace HUD
-== DDRace HUD ﺶﯾﺎﻤﻧ
-
-Show jumps indicator
-== ﺎﻫ ﺵﺮﭘ ﺮﮕﻧﺎﺸﻧ ﺶﯾﺎﻤﻧ
-
-Show dummy actions
-== ﯽﻣﺍﺩ ﯼﺎﻫ ﺖﮐﺮﺣ ﺶﯾﺎﻤﻧ
-
-Show player position
-== ﻦﮑﯾﺯﺎﺑ ﺖﯿﻌﻗﻮﻣ ﺶﯾﺎﻤﻧ
-
-Show player speed
-== ﻦﮑﯾﺯﺎﺑ ﺖﻋﺮﺳ ﺶﯾﺎﻤﻧ
-
-Show player target angle
-== ﻦﮑﯾﺯﺎﺑ ﻪﻧﻮﺸﻧ ﻪﯾﻭﺍﺯ ﺶﯾﺎﻤﻧ
-
-Show freeze bars
-== ﺰﯾﺮﻓ ﯼﺎﻫﺭﺍﻮﻧ ﺶﯾﺎﻤﻧ
-
-Opacity of freeze bars inside freeze
-== ﺰﯾﺮﻓ ﻞﺧﺍﺩ ﺰﯾﺮﻓ ﯼﺎﻫ ﻪﻠﯿﻣ ﯼﺭﺎﺗ
-
-Show names in chat in team colors
-== ﯽﻤﯿﺗ ﯼﺎﻫ ﮓﻧﺭ ﺎﺑ ﺖﭼ ﺭﺩ ﺎﻫ ﻡﺎﻧ ﺶﯾﺎﻤﻧ
-
-Highlighted message
-== ﻩﺪﺷ ﺖﯾﻼﯾﺎﻫ ﻡﺎﯿﭘ
-
-Team message
-== ﻢﯿﺗ ﻡﺎﯿﭘ
-
-Friend message
-== ﺖﺳﻭﺩ ﻡﺎﯿﭘ
-
-Normal message
-== ﯼﺩﺎﻋ ﻡﺎﯿﭘ
-
-Client message
-== ﺖﻨﯾﻼﮐ ﻡﺎﯿﭘ
-
-Name plates size
-== ﻢﺳﺍ کﻼﭘ ﻩﺯﺍﺪﻧﺍ
-
-Show clan above name plates
-== ﻢﺳﺍ ﯼﻻﺎﺑ ﺭﺩ ﻦﻠﮐ ﺶﯾﺎﻤﻧ
-
-Clan plates size
-== ﻦﻠﮐ ﯼﺎﻫ‌کﻼﭘ ﻩﺯﺍﺪﻧﺍ
-
-Use team colors for name plates
-== ﻡﺎﻧ کﻼﭘ ﯼﺍﺮﺑ ﯽﻤﯿﺗ ﯼﺎﻫ ﮓﻧﺭ ﺯﺍ ﻩﺩﺎﻔﺘﺳﺍ
-
-Hook collision line
-== ﺏﻼﻗ ﺩﺭﻮﺧﺮﺑ ﻂﺧ
-
-Show other players' hook collision lines
-== ﺮﮕﯾﺩ ﻥﺎﻨﮑﯾﺯﺎﺑ ﺏﻼﻗ ﺩﺭﻮﺧﺮﺑ ﻁﻮﻄﺧ ﺶﯾﺎﻤﻧ
-
-Hook collision line opacity
-== ﺏﻼﻗ ﺩﺭﻮﺧﺮﺑ ﻂﺧ ﺖﯿﻓﺎﻔﺷ
-
-Your movements are not taken into account when calculating the line colors
-== ﺩﻮﺷ ﯽﻤﻧ ﻪﺘﻓﺮﮔ ﺮﻈﻧ ﺭﺩ ﻁﻮﻄﺧ ﮓﻧﺭ ﻪﺒﺳﺎﺤﻣ ﻡﺎﮕﻨﻫ ﺭﺩ ﺎﻤﺷ ﺕﺎﮐﺮﺣ
-
-Normal Color
-== ﯽﻟﻮﻤﻌﻣ ﮓﻧﺭ
-
-Highlight Color
-== ﺖﯾﻼﯾﺎﻫ ﮓﻧﺭ
-
-Weapons
-== ﺎﻫ ﺡﻼﺳ
-
-Rifle Laser Outline Color
-== ﺭﺰﯿﻟ ﮓﻨﻔﺗ ﯽﻧﻭﺮﯿﺑ ﻂﺧ ﮓﻧﺭ
-
-Rifle Laser Inner Color
-== ﺭﺰﯿﻟ ﮓﻨﻔﺗ ﯽﻠﺧﺍﺩ ﮓﻧﺭ
-
-Shotgun Laser Outline Color
-== ﻥﺎﮕﺗﺎﺷ ﺭﺰﯿﻟ ﯽﻧﻭﺮﯿﺑ ﻂﺧ ﮓﻧﺭ
-
-Shotgun Laser Inner Color
-== ﻥﺎﮕﺗﺎﺷ ﺭﺰﯿﻟ ﯽﻠﺧﺍﺩ ﮓﻧﺭ
-
-Entities
-== ﺎﻫ ﺖﯾﺩﻮﺟﻮﻣ
-
-Door Laser Outline Color
-== ﺏﺭﺩ ﺭﺰﯿﻟ ﯽﻧﻭﺮﯿﺑ ﻂﺧ ﮓﻧﺭ
-
-Door Laser Inner Color
-== ﺏﺭﺩ ﺭﺰﯿﻟ ﯽﻠﺧﺍﺩ ﮓﻧﺭ
-
-Freeze Laser Outline Color
-== ﺰﯾﺮﻓ ﺭﺰﯿﻟ ﯽﻧﻭﺮﯿﺑ ﻂﺧ ﮓﻧﺭ
-
-Freeze Laser Inner Color
-== ﺰﯾﺮﻓ ﺭﺰﯿﻟ ﯽﻠﺧﺍﺩ ﮓﻧﺭ
-
-Set all to Rifle
-== ﯼﺭﺰﯿﻟ ﮓﻨﻔﺗ ﯼﻭﺭ ﻪﻤﻫ ﻢﯿﻈﻨﺗ
-
-Save the best demo of each race
-== ﻪﻘﺑﺎﺴﻣ ﺮﻫ ﻮﻣﺩ ﻦﯾﺮﺘﻬﺑ ﻩﺮﯿﺧﺫ
-
-Default length
-== ﺽﺮﻓ‌ﺶﯿﭘ ﻝﻮﻃ
-
-When you cross the start line, show a ghost tee replicating the movements of your best time
-== ﺪﻨﮐ ﯽﻣ ﺭﺍﺮﮑﺗ ﺍﺭ ﺎﻤﺷ ﻥﺎﻣﺯ ﻦﯾﺮﺘﻬﺑ ﺕﺎﮐﺮﺣ ﻪﮐ ﻩﺪﺑ ﺶﯾﺎﻤﻧ ﺍﺭ ﺡﻭﺭ ،ﺪﯿﻨﮐ ﯽﻣ ﺭﻮﺒﻋ ﻉﻭﺮﺷ ﻂﺧ ﺯﺍ ﻪﮐ ﯽﻣﺎﮕﻨﻫ
-
-Show ghost
-== ﺡﻭﺭ ﺶﯾﺎﻤﻧ
-
-Save ghost
-== ﺡﻭﺭ ﯼ ﻩﺮﯿﺧﺫ
-
-Overlay entities
-== ﺎﻫ ﺖﯾﺩﻮﺟﻮﻣ ﯽﻧﺎﺷﻮﭙﻤﻫ
-
-Show text entities
-== ﯽﻨﺘﻣ ﯼﺎﻫ ﺖﯾﺩﻮﺟﻮﻣ ﺶﯾﺎﻤﻧ
-
-Opacity
-== ﺖﯿﻓﺎﻔﺷ
-
-Adjust the opacity of entities belonging to other teams, such as tees and name plates
-== ﺎﻬﻧﺁ ﻢﺳﺍ ﻭ ﺎﻫ ﯽﺗ ﺪﻨﻧﺎﻣ ،ﺮﮕﯾﺩ ﯼﺎﻫ‌ﻢﯿﺗ ﻪﺑ ﻖﻠﻌﺘﻣ ﯼﺎﻫ‌ﺖﯾﺩﻮﺟﻮﻣ ﺖﯿﻓﺎﻔﺷ ﻢﯿﻈﻨﺗ
-
-Show others (own team only)
-== (ﯽﺼﺨﺷ ﻢﯿﺗ ﻂﻘﻓ) ﻥﺍﺮﮕﯾﺩ ﺶﯾﺎﻤﻧ
-
-Quads are used for background decoration
-== ﺩﻮﺷ ﯽﻣ ﻩﺩﺎﻔﺘﺳﺍ ﻪﻨﯿﻣﺯﺲﭘ ﻦﯿﯾﺰﺗ ﯼﺍﺮﺑ ﯽﯾﺎﺗﺭﺎﻬﭼ
-
-Tries to predict other entities to give a feel of low latency
-== ﺪﻨﮐ ﺩﺎﺠﯾﺍ ﺍﺭ ﻢﮐ ﺮﯿﺧﺎﺗ ﺱﺎﺴﺣﺍ ﺎﺗ ﺪﻨﮐ ﯽﻨﯿﺑ‌ﺶﯿﭘ ﺍﺭ ﺎﻫ‌ﺖﯾﺩﻮﺟﻮﻣ ﺮﯾﺎﺳ ﺪﻨﮐ‌ﯽﻣ ﯽﻌﺳ
-
-AntiPing: predict other players
-== ﻥﺎﻨﮑﯾﺯﺎﺑ ﺮﯾﺎﺳ ﯽﻨﯿﺑ ﺶﯿﭘ AntiPing:
-
-AntiPing: predict weapons
-== ﺡﻼﺳ ﯽﻨﯿﺑ ﺶﯿﭘ AntiPing:
-
-AntiPing: predict grenade paths
-== ﺎﻫ ﮏﺠﻧﺭﺎﻧ ﺮﯿﺴﻣ ﯽﻨﯿﺑ‌ﺶﯿﭘ AntiPing:
-
-Use current map as background
-== ﺪﯿﻨﮐ ﻩﺩﺎﻔﺘﺳﺍ ﻪﻨﯿﻣﺯ ﺲﭘ ﻥﺍﻮﻨﻋ ﻪﺑ ﯽﻠﻌﻓ ﻪﺸﻘﻧ ﺯﺍ
-
-Show tiles layers from BG map
-== BG ﭗﻣ ﺯﺍﺎﻫ ﯽﺷﺎﮐ ﯼﺎﻫ ﻪﯾﻻ ﺶﯾﺎﻤﻧ
-
-New random timeout code
-== ﺪﯾﺪﺟ ﯽﻓﺩﺎﺼﺗ ﺕﻭﺍﻢﯾﺎﺗ ﺪﮐ
-
-Run on join
-== ﻦﺘﺳﻮﯿﭘ ﺭﺩ ﺍﺮﺟﺍ
-
-Chat command (e.g. showall 1)
-== (showall ١ ﻝﺎﺜﻣ ﻥﺍﻮﻨﻋ ﻪﺑ) ﺖﭼ ﻥﺎﻣﺮﻓ
-
-DDNet %s is available:
-== :ﺖﺳﺍ ﺩﻮﺟﻮﻣ ﺖﻨﯾﺪﯾﺩ %s
-
-DDNet Client updated!
-== !ﺪﺷ ﺯﻭﺭ ﻪﺑ ﺖﻨﯾﺪﯾﺩ ﺖﻨﯾﻼﮐ
-
-Emoticons
-== ﺎﻫ ﮏﻠﮑﺷ
-
-Particles
-== ﺕﺍﺭﺫ
-
-Extras
-== ﯽﻓﺎﺿﺍ ﺩﺭﺍﻮﻣ
-
-Loading assets
-== ﺎﻫ ﯽﯾﺍﺭﺍﺩ ﻥﺩﺮﮐ ﻩﺩﺎﻣﺁ
-
-Assets directory
-== ﺎﻫ ﯽﯾﺍﺭﺍﺩ ﻪﺷﻮﭘ
-
-Open the directory to add custom assets
-== ﻦﮐ ﺯﺎﺑ ﯽﺷﺭﺎﻔﺳ ﯼﺎﻫ ﯽﯾﺍﺭﺍﺩ ﻥﺩﻭﺰﻓﺍ ﯼﺍﺮﺑ ﺍﺭ ﯽﯾﺍﺭﺍﺩ ﯼ ﻪﺷﻮﭘ
-
-https://ddnet.org/discord
-== https://ddnet.org/discord
-
-https://wiki.ddnet.org/
-== https://wiki.ddnet.org/
-
-Tutorial
-== ﺵﺯﻮﻣﺁ
-
-Server executable not found, can't run server
-== ﺩﺮﮐ ﺍﺮﺟﺍ ﻥﺍﻮﺗ ﯽﻤﻧ ﺍﺭ ﺭﻭﺮﺳ ،ﺪﺸﻧ ﺍﺪﯿﭘ ﺭﻭﺮﺳ ﯽﯾﺍﺮﺟﺍ ﻞﯾﺎﻓ
-
-DDNet %s is out!
-== !ﺪﺷ ﺮﺸﺘﻨﻣ %s ﺖﻨﯾﺪﯾﺩ
-
-Loading race demo files
-== ﻪﻘﺑﺎﺴﻣ ﯽﺸﯾﺎﻣﺯﺁ ﯼﺎﻫ ﻞﯾﺎﻓ ﻥﺩﺮﮐ ﻩﺩﺎﻣﺁ ﻝﺎﺣ ﺭﺩ
-
-Time limit: %d min
-== ﻪﻘﯿﻗﺩ %d :ﯽﻧﺎﻣﺯ ﺖﯾﺩﻭﺪﺤﻣ
-
-Super
-== ﺮﭘﻮﺳ
-
-Team %d
-== %d ﻢﯿﺗ
-
-Manual
-== ﯽﺘﺳﺩ
-
-Race
-== ﻪﻘﺑﺎﺴﻣ
-
-Auto
-== ﺭﺎﮐﺩﻮﺧ
-
-Loading sound files
-== ﯽﺗﻮﺻ ﯼﺎﻫ ﻞﯾﺎﻓ ﻥﺩﺮﮐ ﻩﺩﺎﻣﺁ ﻝﺎﺣ ﺭﺩ
-
-Frags
-== ﺎﻫ ﻪﺘﺸﮐ ﺩﺍﺪﻌﺗ
-
-Deaths
-== ﺎﻫ گﺮﻣ
-
-Suicides
-== ﺎﻫ ﯽﺸﮐﺩﻮﺧ
-
-Ratio
-== ﺖﺒﺴﻧ
-
-Net
-== ﺺﻟﺎﺧ
-
-Best
-== ﻦﯾﺮﺘﻬﺑ
-
-1 new mention
-== ﺪﯾﺪﺟ ﻦﺸﻨﻣ ١
-
-%d new mentions
-== ﺪﯾﺪﺟ ﻦﺸﻨﻣ %d
-
-9+ new mentions
-== ﺪﯾﺪﺟ ﯼﺎﻫ ﻦﺸﻨﻣ ٩+
-
-[Graphics error]
-Could not initialize the given graphics backend, reverting to the default backend now.
-== .ﺩﻮﺷﯽﻣ ﻩﺩﺍﺩ ﺖﺸﮔﺯﺎﺑ ﺽﺮﻓﺶﯿﭘ ﻂﺑﺍﺭ ﻪﺑ ﻥﻮﻨﻛﺍ ،ﺩﺮﻛ ﻩﺩﺎﻔﺘﺳﺍ ﻩﺪﺷ ﻩﺩﺍﺩ ﯽﻜﯿﻓﺍﺮﮔ ﻂﺑﺍﺭ ﺯﺍ ﻥﺍﻮﺗﯽﻤﻧ
-
-[Graphics error]
-Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== .ﺪﯾﺍ ﻩﺩﺮﻜﻧ ﺐﺼﻧ ﺍﺭ ﻚﯿﻓﺍﺮﮔ ﺕﺭﺎﻛ ﺭﻮﯾﺍﺭﺩ ﻪﻛ ﺖﺳﺍ ﻞﯿﻟﺩ ﻦﯾﺍ ﻪﺑ ًﻻﺎﻤﺘﺣﺍ ،ﺩﺮﻛ ﻪﯿﻟﻭﺍ ﯽﻫﺩﺭﺍﺪﻘﻣ ﺍﺭ ﻩﺪﺷ ﻩﺩﺍﺩ ﻚﯿﻓﺍﺮﮔ ﺪﻧﺍ ﻚﺑ ﻥﺍﻮﺗ ﯽﻤﻧ
-
-Could not resolve connect address '%s'. See local console for details.
-== .ﺪﯿﻨﻛ ﻪﻌﺟﺍﺮﻣ ﯽﻠﺤﻣ ﻝﻮﺴﻨﻛ ﻪﺑ ﺮﺘﺸﯿﺑ ﺕﺎﯿﺋﺰﺟ ىﺍﺮﺑ .ﺩﻮﺒﻧ ﻦﻜﻤﻣ '%s' ﺱﺭﺩﺁ ﻪﺑ ﻝﺎﺼﺗﺍ
-
-Connect address error
-== ﻝﺎﺼﺗﺍ ﺱﺭﺩﺁ ىﺎﻄﺧ
-
-Could not save downloaded map. Try manually deleting this file: %s
-== %s :ﺪﯿﻨﻛ ﻑﺬﺣ ﺍﺭ ﻞﯾﺎﻓ ﻦﯾﺍ ﯽﺘﺳﺩ ﺕﺭﻮﺻ ﻪﺑ ﺪﯿﻨﻛ ﯽﻌﺳ .ﺪﺸﻧ ﻩﺮﯿﺧﺫ ﻩﺪﺷ ﺩﻮﻠﻧﺍﺩ ﭗﻣ
-
-Could not connect dummy
-== ﺪﺸﻧ ﻞﺼﺘﻣ ﯽﻣﺍﺩ
-
-Error playing demo
-== ﻮﻣﺩ ﻥﺩﺮﻛ ﺍﺮﺟﺍ ﺭﺩ ﺎﻄﺧ
-
-Failed saving the replay!
-== !ﺩﻮﺑ ﻖﻓﻮﻣﺎﻧ ﺩﺪﺠﻣ ﺶﺨﭘ ﻥﺩﺮﻛ ﻩﺮﯿﺧﺫ
-
-Saving settings to '%s' failed
-== ﺪﺸﻧ ﻡﺎﺠﻧﺍ "%s" ﺭﺩ ﺕﺎﻤﯿﻈﻨﺗ ﻥﺩﺮﻛ ﻩﺮﯿﺧﺫ
-
-Error saving settings
-== ﺕﺎﻤﯿﻈﻨﺗ ﻥﺩﺮﻛ ﻩﺮﯿﺧﺫ ﺭﺩ ﺎﻄﺧ
-
-The format of texture %s is not RGBA which will cause visual bugs.
-== .ﺩﻮﺷ ﯽﻣ ىﺮﻫﺎﻇ  ﻝﺎﻜﺷﺍ ﺩﺎﺠﯾﺍ ﺚﻋﺎﺑ ﻪﻛ ﺖﺴﯿﻧ %s RGBA ﯽﻜﯿﻓﺍﺮﮔ ﺖﻟﺎﺣ ﺖﻣﺮﻓ
-
-Loading demo file from storage
-== ﻪﻈﻓﺎﺣ ﺯﺍ ﻮﻣﺩ ﻞﯾﺎﻓ ىﺮﯿﮔﺭﺎﺑ ﻝﺎﺣ ﺭﺩ
-
-Initializing map logic
-== ﭗﻣ ﻖﻄﻨﻣ ىﺯﺍﺪﻧﺍ ﻩﺍﺭ
-
-Quitting. Please wait…
-== …ﺪﯿﻨﻛﺮﺒﺻ ﺎﻔﻄﻟ .ﻥﺪﺷ ﺝﺭﺎﺧ ﻝﺎﺣ ﺭﺩ
-
-Restarting. Please wait…
-== ﺪﯿﻨﻛ ﺮﺒﺻ ﺎﻔﻄﻟ .ﺩﺪﺠﻣ ىﺯﺍﺪﻧﺍ ﻩﺍﺭ ﻝﺎﺣ ﺭﺩ
-
-Searching
-== ﻮﺟ ﻭ ﺖﺴﺟ ﻝﺎﺣ ﺭﺩ
-
-Enter Username
-== ﺪﯿﻨﻛ ﺩﺭﺍﻭ ﺍﺭ ىﺮﺑﺭﺎﻛ ﻡﺎﻧ
-
-Enter Password
-== ﺪﯿﻨﻛ ﺩﺭﺍﻭ ﺍﺭ ﺭﻮﺒﻋﺰﻣﺭ
-
-NOT CONNECTED
-== ﺪﺸﻧ ﻞﺼﺘﻣ
-
-Match %d of %d
-== %d ﺯﺍ %d ﻪﻘﺑﺎﺴﻣ
-
-No results
-== ﻪﺠﯿﺘﻧ ﻥﻭﺪﺑ
-
-Lines %d - %d (%s)
-== %d - %d (%s) ﻁﻮﻄﺧ
-
-Locked
-== ﺪﺷ ﻞﻔﻗ
-
-Following
-== ﻥﺩﺮﻛ ﻝﺎﺒﻧﺩ
-
-Loading commands…
-== …ﺕﺍﺭﻮﺘﺳﺩ ىﺮﯿﮔﺭﺎﺑ ﻝﺎﺣ ﺭﺩ
-
-Multi-View
-== ﯽﻧﺎﮕﻤﻫ-ﺪﯾﺩ
-
-[Spectating]
-Following %s
-== %s ﻥﺩﺮﻛ ﻝﺎﺒﻧﺩ
-
-Some map images could not be loaded. Check the local console for details.
-== .ﺪﯿﻨﻛ ﯽﺳﺭﺮﺑ ﺍﺭ ﯽﻠﺤﻣ ﻝﻮﺴﻨﻛ ،ﺕﺎﯿﺋﺰﺟ ىﺍﺮﺑ .ﺪﻧﺪﺸﻧ ىﺮﯿﮔﺭﺎﺑ ﭗﻣ ﺮﯾﻭﺎﺼﺗ ﺯﺍ ﯽﺧﺮ
-
-Some map sounds could not be loaded. Check the local console for details.
-== .ﺪﯿﻨﻛ ﯽﺳﺭﺮﺑ ﺍﺭ ﯽﻠﺤﻣ ﻝﻮﺴﻨﻛ ،ﺕﺎﯿﺋﺰﺟ ىﺍﺮﺑ .ﺪﻧﺪﺸﻧ ىﺮﯿﮔﺭﺎﺑ ﭗﻣ ىﺎﻫﺍﺪﺻ ﺯﺍ ﯽﺧﺮﺑ
-
-Loading menu themes
-== ﻮﻨﻣ ىﺎﻫ ﻢﺗ ىﺮﯿﮔﺭﺎﺑ ﻝﺎﺣ ﺭﺩ
-
-Press a key…
-== …ﺪﯿﻫﺩ ﺭﺎﺸﻓ ﺍﺭ ﺪﯿﻠﻛ ﻚﯾ
-
-Main menu
-== ﯽﻠﺻﺍ ىﻮﻨﻣ
-
-Rename folder
-== ﻪﺷﻮﭘ ﻡﺎﻧ ﺮﯿﯿﻐﺗ
-
-Render complete
-== ﺪﺷ ﻞﻣﺎﻛ ﺭﺪﻧﺭ
-
-Are you sure that you want to restart?
-== ؟ﺪﯿﻨﻛ ىﺯﺍﺪﻧﺍ ﻩﺍﺭ ﻩﺭﺎﺑﻭﺩ ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﻪﻛ ﺪﯿﺘﺴﻫ ﻦﺌﻤﻄﻣ ﺎﯾﺁ
-
-Save skin
-== ﻦﯿﻜﺳﺍ ﻩﺮﯿﺧﺫ
-
-Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== ﺯﺍ ﻡﺎﻧ ﻦﯾﺍ ﺎﺑ ﯽﻨﯿﻜﺳﺍ ﺮﮔﺍ ؟ﺪﯿﻨﻛ ﻩﺮﯿﺧﺫ ﺍﺭ ﺩﻮﺧ ﻦﯿﻜﺳﺍ ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﻪﻛ ﺪﯿﺘﺴﻫ ﻦﺌﻤﻄﻣ ﺎﯾﺁ .ﺪﺷ ﺪﻫﺍﻮﺧ ﻦﯾﺰﮕﯾﺎﺟ ،ﺪﺷﺎﺑ ﻪﺘﺷﺍﺩ ﺩﻮﺟﻭ ﻞﺒﻗ
-
-There's an unsaved map in the editor, you might want to save it.
-== .ﺪﯿﻨﻛ ﻩﺮﯿﺧﺫ ﺍﺭ ﻥﺁ ﺪﯿﻫﺍﻮﺨﺑ ﺖﺳﺍ ﻦﻜﻤﻣ ،ﺩﺭﺍﺩ ﺩﻮﺟﻭ ﺭﻮﺘﯾﺩﺍ ﺭﺩ ﻩﺪﺸﻧ ﻩﺮﯿﺧﺫ ﭗﻣ ﻚﯾ
-
-Continue anyway?
-== ؟ﺪﯿﻫﺩ ﻪﻣﺍﺩﺍ ﻝﺎﺣ ﺮﻫ ﻪﺑ
-
-A demo with this name already exists
-== ﺩﺭﺍﺩ ﺩﻮﺟﻭ ﻞﺒﻗ ﺯﺍ ﻡﺎﻧ ﻦﯾﺍ ﺎﺑ ﻮﻣﺩ ﻚﯾ
-
-A folder with this name already exists
-== ﺩﺭﺍﺩ ﺩﻮﺟﻭ ﻞﺒﻗ ﺯﺍ ﻡﺎﻧ ﻦﯾﺍ ﺎﺑ ﻪﺷﻮﭘ ﻚﯾ
-
-Unable to rename the folder
-== ﺖﺴﯿﻧ ﻦﻜﻤﻣ ﻪﺷﻮﭘ ﻡﺎﻧ ﺮﯿﯿﻐﺗ
-
-(paused)
-== (ﻩﺪﺷ ﺚﻜﻣ)
-
-Videos directory
-== ﺎﻫ ﻮﯾﺪﯾﻭ ﺖﺳﺮﻬﻓ
-
-Video was saved to '%s'
-== ﺪﺷ ﻩﺮﯿﺧﺫ "%s" ﺭﺩ ﻮﺋﺪﯾﻭ
-
-Unable to save the skin
-== ﺩﺭﺍﺪﻧ ﺩﻮﺟﻭ ﻦﯿﻜﺳﺍ ﻩﺮﯿﺧﺫ ﻥﺎﻜﻣﺍ
-
-Unable to save the skin with a reserved name
-== ﺩﺭﺍﺪﻧ ﺩﻮﺟﻭ ﻩﺪﺷ ﻭﺭﺯﺭ ﻡﺎﻧ ﺎﺑ ﻦﯿﻜﺳﺍ ﻩﺮﯿﺧﺫ ﻥﺎﻜﻣﺍ
-
-%d/%d KiB (%.1f KiB/s)
-== %d/%d KiB (%.1f KiB/s)
-
-No local servers found (ports %d-%d)
-== (%d-%d ﺕﺭﻮﭘ) ﺪﺸﻧ ﺖﻓﺎﯾ ﯽﻠﺤﻣ ﺭﻭﺮﺳ ﭻﯿﻫ
-
-Example of usage
-== ﺩﺮﺑﺭﺎﻛ ﻪﻧﻮﻤﻧ
-
-No login required
-== ﺪﺷﺎﺑ ﯽﻤﻧ ﺩﻭﺭﻭ ﻪﺑ ﺯﺎﯿﻧ
-
-Communities
-== ﻊﻣﺍﻮﺟ
-
-Copy info
-== ﺕﺎﻋﻼﻃﺍ ﯽﭙﻛ
-
-No server selected
-== ﺖﺳﺍ ﻩﺪﺸﻧ ﺏﺎﺨﺘﻧﺍ ىﺭﻭﺮﺳ ﭻﯿﻫ
-
-Online clanmates (%d)
-== (%d) ﻦﯾﻼﻧﺁ ىﺎﻫ ﯽﻨﻠﻛ ﻢﻫ
-
-[friends (server browser)]
-Offline (%d)
-== ﻥﺎﺘﺳﻭﺩ (%d) ﻦﯾﻼﻓﺁ
-
-Click to select server. Double click to join your friend.
-== .ﺪﯿﻨﻛ ﻚﯿﻠﻛ ﺭﺎﺑﻭﺩ ﺩﻮﺧ ﺖﺳﻭﺩ ﻪﺑ ﻦﺘﺳﻮﯿﭘ ىﺍﺮﺑ .ﺪﯿﻨﻛ ﻚﯿﻠﻛ ﺭﻭﺮﺳ ﺏﺎﺨﺘﻧﺍ ىﺍﺮﺑ
-
-Click to remove this player from your friends list.
-== .ﺪﯿﻨﻛ ﻚﯿﻠﻛ ﺩﻮﺧ ﻥﺎﺘﺳﻭﺩ ﺖﺴﯿﻟ ﺯﺍ ﻦﻜﯾﺯﺎﺑ ﻦﯾﺍ ﻑﺬﺣ ىﺍﺮﺑ
-
-Click to remove this clan from your friends list.
-== .ﺪﯿﻨﻛ ﻚﯿﻠﻛ ﺩﻮﺧ ﻥﺎﺘﺳﻭﺩ ﺖﺴﯿﻟ ﺯﺍ ﻦﻠﻛ ﻦﯾﺍ ﻑﺬﺣ ىﺍﺮﺑ
-
-Server filter
-== ﺭﻭﺮﺳ ﺮﺘﻠﯿﻓ
-
-Friends
-== ﻥﺎﺘﺳﻭﺩ
-
-Go back the specified duration
-== ﺪﯿﻧﺍﺩﺮﮔﺮﺑ ﺐﻘﻋ ﻪﺑ ﺍﺭ ﻩﺪﺷ ﺺﺨﺸﻣ ﻥﺎﻣﺯ ﺕﺪﻣ
-
-[Demo player duration]
-%s min.
-== ﻪﻘﯿﻗﺩ %s
-
-[Demo player duration]
-%s sec.
-== ﻪﯿﻧﺎﺛ %s
-
-Change the skip duration
-== ﻩﺪﺷ ﭗﯿﻜﺳﺍ ﻥﺎﻣﺯ ﺕﺪﻣ ﺮﯿﯿﻐﺗ
-
-Go forward the specified duration
-== ﻩﺪﺷ ﺺﺨﺸﻣ ﻥﺎﻣﺯ ﺕﺪﻣ ﻥﺩﺮﺑ ﻮﻠﺟ
-
-Mark the beginning of a cut (right click to reset)
-== (ﺪﯿﻨﻛ ﺖﺳﺍﺭ ﻚﯿﻠﻛ ﺩﺪﺠﻣ ﻢﯿﻈﻨﺗ ىﺍﺮﺑ) ﺪﯿﻧﺰﺑ ﺖﻣﻼﻋ ﺍﺭ ﺵﺮﺑ ﻚﯾ ﻉﻭﺮﺷ
-
-Mark the end of a cut (right click to reset)
-== (ﺪﯿﻨﻛ ﺖﺳﺍﺭ ﻚﯿﻠﻛ ﺩﺪﺠﻣ ﻢﯿﻈﻨﺗ ىﺍﺮﺑ) ﺪﯿﻧﺰﺑ ﺖﻣﻼﻋ ﺍﺭ ﺵﺮﺑ ﻚﯾ ىﺎﻬﺘﻧﺍ
-
-Close the demo player
-== ﺪﯾﺪﻨﺒﺑ ﺍﺭ ﻮﻣﺩ ﻩﺪﻨﻨﻛ ﺶﺨﭘ
-
-Export demo cut
-== ﻦﻛ ﺭﺩﺎﺻ ﺍﺭ ﻮﻣﺩ ﺵﺮﺑ
-
-Cut interval
-== ﺵﺮﺑ ﻪﻠﺻﺎﻓ
-
-Cut length
-== ﺵﺮﺑ ﻝﻮﻃ
-
-Render cut to video
-== ﻮﯾﺪﯾﻭ ﻪﺑ ﺵﺮﺑ ﺭﺪﻧﺭ
-
-Please use a different filename
-== ﺪﯿﻨﻛ ﻩﺩﺎﻔﺘﺳﺍ ىﺮﮕﯾﺩ ﻞﯾﺎﻓ ﻡﺎﻧ ﺯﺍ ﺎﻔﻄﻟ
-
-All combined
-== ﺪﯿﻨﻛ ﻩﺩﺎﻔﺘﺳﺍ ىﺮﮕﯾﺩ ﻞﯾﺎﻓ ﻡﺎﻧ ﺯﺍ ﺎﻔﻄﻟ
-
-No demo selected
-== ﺖﺳﺍ ﻩﺪﺸﻧ ﺏﺎﺨﺘﻧﺍ ىﺍ ﻮﻣﺩ ﭻﯿﻫ
-
-Folder Link
-== ﻪﺷﻮﭘ ﻚﻨﯿﻟ
-
-Created
-== ﺪﺷ ﺩﺎﺠﯾﺍ
-
-Netversion
-== ﺖﻧ ﻪﺨﺴﻧ
-
-[Demo details]
-map not included
-== ﺖﺳﺍ ﻩﺪﺸﻧ ﻩﺪﻧﺎﺠﻨﮔ ﭗﻣ
-
-Are you sure that you want to delete the folder '%s'?
-== ؟ﺪﯿﻨﻛ ﻑﺬﺣ ﺍﺭ '%s' ﻪﺷﻮﭘ ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﻪﻛ ﺪﯿﺘﺴﻫ ﻦﺌﻤﻄﻣ ﺎﯾﺁ
-
-Delete folder
-== ﻪﺷﻮﭘ ﻑﺬﺣ
-
-Unable to delete the folder '%s'. Make sure it's empty first.
-== .ﺖﺳﺍ ﯽﻟﺎﺧ ﻪﻛ ﺪﯾﻮﺷ ﻦﺌﻤﻄﻣ ﺍﺪﺘﺑﺍ .ﺖﺴﯿﻧ ﻦﻜﻤﻣ "%s" ﻪﺷﻮﭘ ﻑﺬﺣ
-
-Dummy is not allowed on this server
-== ﺖﺴﯿﻧ ﺯﺎﺠﻣ ﺭﻭﺮﺳ ﻦﯾﺍ ﺭﺩ ﯽﻣﺍﺩ
-
-Please wait…
-== ﺪﯿﻨﻛ ﺮﺒﺻ ﺎﻔﻄﻟ…
-
-Loading…
-== ىﺮﯿﮔﺭﺎﺑ ﻝﺎﺣ ﺭﺩ…
-
-Ghosts directory
-== ﯽﻠﺒﻗ ىﺎﻫ ﻥﺍﺭ ﺖﺴﯿﻟ ىﺭﻮﺘﻛﺮﯾﺍﺩﯽﻠﺒﻗ ىﺎﻫ ﻥﺍﺭ ﺖﺴﯿﻟ ىﺭﻮﺘﻛﺮﯾﺍﺩ
-
-Activate all
-== ﻪﻤﻫ ىﺯﺎﺳ ﻝﺎﻌﻓ
-
-Deactivate all
-== ﻪﻤﻫ ىﺯﺎﺳ ﻝﺎﻌﻓﺮﯿﻏ
-
-[Hertz]
-Hz
-== Hz
-
-Player info change cooldown
-== اطلاعات بازیکن تغییر زمان جریمه شده
-
-Create a random skin
-== ﯽﻓﺩﺎﺼﺗ ﻦﯿﻜﺳﺍ ﺖﺧﺎﺳ
-
-Axis
-== ﺭﻮﺤﻣ
-
-Graphics card
-== ﻚﯿﻓﺍﺮﮔ ﺕﺭﺎﻛ
-
-Tee
-== ﯽﺗ
-
-Info Messages
-== ﺎﻫ ﻡﺎﯿﭘ ﺕﺎﻋﻼﻃﺍ
-
-Show local time always
-== ﺖﭼ ﯽﮕﺸﯿﻤﻫ ﻥﺩﺍﺩ ﻥﺎﺸﻧ
-
-Show client IDs (scoreboard, chat, spectator)
-== (ﺮﮔﺎﺷﺎﻤﺗ ،ﺖﭼ ،ﺯﺎﯿﺘﻣﺍ) ﺖﻨﯾﻼﻛ ىﺎﻫ ﻪﺳﺎﻨﺷ ﺶﯾﺎﻤﻧ
-
-Always show chat
-== ﺖﭼ ﯽﮕﺸﯿﻤﻫ ﻥﺩﺍﺩ ﻥﺎﺸﻧ
-
-Show only chat messages from team members
-== ﺩﻮﺸﯿﻣ ﺖﻓﺎﯾﺭﺩ ﻢﯿﺗ ىﺎﻀﻋﺍ ﺯﺍ ﻪﻛ ﯽﯾﺎﻫ ﻡﺎﯿﭘ ﺶﯾﺎﻤﻧ
-
-Chat font size
-== ﺖﭼ ﺖﻧﻮﻓ ﻩﺯﺍﺪﻧﺍ
-
-Chat width
-== ﺖﭼ ﺽﺮﻋ
-
-Show hook strength icon indicator
-== کﻮﻫ ﺕﺭﺪﻗ ﺩﺪﻋ ﺮﮕﻧﺎﺸﻧ ﺶﯾﺎﻤﻧ
-
-Show hook strength number indicator
-== کﻮﻫ ﺕﺭﺪﻗ ﺩﺪﻋ ﺮﮕﻧﺎﺸﻧ ﺶﯾﺎﻤﻧ
-
-Authed name color in scoreboard
-== ﺯﺎﯿﺘﻣﺍ ىﻮﻠﺑﺎﺗ ﺭﺩ ﻩﺪﺷ ﺪﯿﯾﺎﺗ ﻡﺎﻧ ﮓﻧﺭ
-
-Same clan color in scoreboard
-== ﺯﺎﯿﺘﻣﺍ ىﻮﻠﺑﺎﺗ ﺭﺩ ﯽﻨﻠﻛ ﻢﻫ ﮓﻧﺭ
-
-Show own player's hook collision line
-== ﻦﻜﯾﺯﺎﺑ کﻮﻫ ﺭﺰﯿﻟ ﺶﯾﺎﻤﻧ
-
-Always show own player's hook collision line
-== ﻦﻜﯾﺯﺎﺑ کﻮﻫ ﺭﺰﯿﻟ ﯽﮕﺸﯿﻤﻫ ﺶﯾﺎﻤﻧ
-
-Always show other players' hook collision lines
-== ﺮﮕﯾﺩ ﻥﺎﻨﻜﯾﺯﺎﺑ کﻮﻫ ﺭﺰﯿﻟ ﯽﮕﺸﯿﻤﻫ ﺶﯾﺎﻤﻧ
-
-Show finish messages
-== ﭗﻣ ﻥﺎﯾﺎﭘ ىﺎﻫ ﻡﺎﯿﭘ ﺶﯾﺎﻤﻧ
-
-Enable ghost
-== ﺡﻭﺭ ﺖﻟﺎﺣ ىﺯﺎﺳ ﻝﺎﻌﻓ
-
-Only save improvements
-== ﺩﻮﺷ ﻩﺮﯿﺧﺫ ﺎﻫ ﺩﻮﺒﻬﺑ ﻂﻘﻓ
-
-Regular background color
-== ﻢﻈﻨﻣ ﻪﻨﯿﻣﺯ ﺲﭘ ﮓﻧﺭ
-
-Entities background color
-== ﺎﻫ ﺖﯾﺩﻮﺟﻮﻣ ﻪﻨﯿﻣﺯ ﺲﭘ ﮓﻧﺭ
-
-Unregister protocol and file extensions
-== ﺖﺳﺍ ﻩﺪﺸﻧ ﺖﺒﺛ ﻞﯾﺎﻓ ﺪﻧﻮﺴﭘ ﻭ ﻞﻜﺗﻭﺮﭘ
-
-Basic
-== ﻪﯾﺎﭘ
-
-Custom
-== ﯽﺷﺭﺎﻔﺳ
-
-Are you sure that you want to delete '%s'?
-== ؟ﺪﯿﻨﻛ ﻑﺬﺣ ﺍﺭ '%s' ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﻪﻛ ﺪﯿﺘﺴﻫ ﻦﺌﻤﻄﻣ ﺎﯾﺁ
-
-Delete skin
-== ﻦﯿﻜﺳﺍ ﻑﺬﺣ
-
-Unable to delete skin
-== ﺖﺴﯿﻧ ﻦﻜﻤﻣ ﻦﯿﻜﺳﺍ ﻑﺬﺣ
-
-Round %d/%d
-== %d/%d  ﺪﻧﺍﺭ
-
-[Spectators]
-%d others…
-== ﺮﮕﯾﺩ %d
-
-[Team and size]
-%d\n(%d/%d)
-== %d\n(%d/%d)
-
-Team %d (%d/%d)
-== %d (%d/%d) ﻢﯿﺗ
-
-[skins]
-Body
-== ﻥﺪﺑ
-
-[skins]
-Marking
-== ىﺭﺍﺬﮔ ﺖﻣﻼﻋ
-
-[skins]
-Decoration
-== ﻥﻮﯿﺳﺍﺭﻮﻛﺩ
-
-[skins]
-Hands
-== ﺎﻫ ﺖﺳﺩ
-
-[skins]
-Feet
-== ﺎﭘ
-
-[skins]
-Eyes
-== ﻢﺸﭼ
-
-FPM
-== FPM
-
-Spree
-== ﯽﻨﻜﺷ ﻥﻮﻧﺎﻗ
-
-Grabs
-== ﻥﺩﺯ ﮓﻨﭼ
-
-Moved ingame
-== ﺪﺷ ﻞﻘﺘﻨﻣ ىﺯﺎﺑ
+Saving ddnet-settings.cfg failed
+== 
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== ﺖﺳﺍ ﻦﻜﻤﻣ ﻪﻛ ،ﺖﺴﯿﻧ ﺐﺳﺎﻨﺘﻣ %s ﺎﺑ ﻥﺁ ﻉﺎﻔﺗﺭﺍ ﺎﯾ ﺖﺴﯿﻧ ﺐﺳﺎﻨﺘﻣ %d ﺎﺑ %d ﺮﭽﺴﻜﺗ ﺽﺮﻋ .ﺩﻮﺷ ىﺮﺼﺑ ىﺎﻫﮒﺎﺑ ﺩﺎﺠﯾﺍ ﺚﻋﺎﺑ ﺖﺳﺍ
-
-"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
-== ىﺭﺍﺬﮔﺭﺎﺑ ﺖﻧﺪﯾﺩ ﯽﻤﯾﺪﻗ ىﺎﻫﻪﺨﺴﻧ ﻂﺳﻮﺗ ﺪﻧﺍﻮﺗﯽﻤﻧ ﻭ ﺖﺴﯿﻧ ﺭﺎﮔﺯﺎﺳ pnglite ﺎﺑ "%s" .ﺩﻮﺷ
-
-Some fonts could not be loaded. Check the local console for details.
-== .ﺪﯿﻨﻛ ﯽﺳﺭﺮﺑ ﺍﺭ ﯽﻠﺤﻣ ﻝﻮﺴﻨﻛ ،ﺮﺘﺸﯿﺑ ﺕﺎﯿﺋﺰﺟ ىﺍﺮﺑ .ﺪﻧﺪﺸﻧ ىﺭﺍﺬﮔﺭﺎﺑ ﺎﻫﺖﻧﻮﻓ ﯽﺧﺮﺑ
-
-[Spectating Camera Mode Icon]
-AUTO
-== ﺭﺎﻛﺩﻮﺧ
-
-Online friends (%d)
-== (%d) ﻦﯾﻼﻧﺁ ﻥﺎﺘﺳﻭﺩ
-
-Add friends by entering their name below or by clicking their name in the player list.
-== ﺖﺴﯿﻟ ﺭﺩ ﻥﺎﺸﻣﺎﻧ ىﻭﺭ ﻚﯿﻠﻛ ﺎﯾ ﺮﯾﺯ ﺭﺩﺎﻛ ﺭﺩ ﻥﺎﺸﻣﺎﻧ ﻥﺩﺮﻛ ﺩﺭﺍﻭ ﺎﺑ ﺍﺭ ﺩﻮﺧ ﻥﺎﺘﺳﻭﺩ .ﺪﯿﻨﻛ ﻪﻓﺎﺿﺍ ﻥﺎﻨﻜﯾﺯﺎﺑ
-
-Add clanmates by entering their clan below and leaving the name blank.
-== ﻡﺎﻧ ﺶﺨﺑ ﻦﺘﺷﺍﺬﮔ ﯽﻟﺎﺧ ﻭ ﺮﯾﺯ ﺭﺩﺎﻛ ﺭﺩ ﻦﻠﻛ ﻡﺎﻧ ﻥﺩﺮﻛ ﺩﺭﺍﻭ ﺎﺑ ﺍﺭ ﺩﻮﺧ ىﺎﻫﯽﻨﻠﻛﻢﻫ .ﺪﯿﻨﻛ ﻪﻓﺎﺿﺍ
-
-Toggle auto camera
-== ﻦﻛ ﻝﺎﻌﻓﺮﯿﻏ/ﻝﺎﻌﻓ ﺍﺭ ﺭﺎﻛﺩﻮﺧ ﻦﯿﺑﺭﻭﺩ
-
-Edit touch controls
-== ﻦﻛ ﺶﯾﺍﺮﯾﻭ ﺍﺭ ﯽﺴﻤﻟ ىﺎﻫﻝﺮﺘﻨﻛ
-
-Close
-== ﻦﺘﺴﺑ
-
-Save changes
-== ﻦﻛ ﻩﺮﯿﺧﺫ ﺍﺭ ﺕﺍﺮﯿﯿﻐﺗ
-
-Error saving touch controls
-== ﯽﺴﻤﻟ ىﺎﻫﻝﺮﺘﻨﻛ ىﺯﺎﺳﻩﺮﯿﺧﺫ ﺭﺩ ﺎﻄﺧ
-
-Could not save touch controls to file. See local console for details.
-== ﺍﺭ ﯽﻠﺤﻣ ﻝﻮﺴﻨﻛ ،ﺮﺘﺸﯿﺑ ﺕﺎﯿﺋﺰﺟ ىﺍﺮﺑ .ﺖﺴﯿﻧ ﻞﯾﺎﻓ ﺭﺩ ﯽﺴﻤﻟ ىﺎﻫﻝﺮﺘﻨﻛ ﻩﺮﯿﺧﺫ ﻪﺑ ﺭﺩﺎﻗ .ﺪﯿﻨﻛ ﯽﺳﺭﺮﺑ
-
-Unsaved changes
-== ﻩﺪﺸﻧﻩﺮﯿﺧﺫ ﺕﺍﺮﯿﯿﻐﺗ
-
-Discard changes
-== ﺮﯿﮕﺑ ﻩﺪﯾﺩﺎﻧ ﺍﺭ ﺕﺍﺮﯿﯿﻐﺗ
-
-Are you sure that you want to discard the current changes to the touch controls?
-== ﺍﺭ ﯽﺴﻤﻟ ىﺎﻫﻝﺮﺘﻨﻛ ﺭﺩ ﯽﻠﻌﻓ ﺕﺍﺮﯿﯿﻐﺗ ﺪﯿﻫﺍﻮﺧ﯂ﻣ ﻪﻛ ﺪﯿﺘﺴﻫ ﻦﺌﻤﻄﻣ ﺎﯾﺁ ؟ﺪﯾﺮﯿﮕﺑ ﻩﺪﯾﺩﺎﻧ
-
-Are you sure that you want to reset the touch controls to default?
-== ؟ﯽﻧﺎﺸﻧﺯﺎﺑ ﺽﺮﻓﺶﯿﭘ ﺖﻟﺎﺣ ﻪﺑ ﺍﺭ ﯽﺴﻤﻟ ىﺎﻫﻝﺮﺘﻨﻛ ﺪﯿﻫﺍﻮﺧﯽﻣ ﻪﻛ ﺪﯿﺘﺴﻫ ﻦﺌﻤﻄﻣ ﺎﯾﺁ ؟ﺪﯿﻨﻛ
-
-Import from clipboard
-== ﺩﺭﻮﺑﭗﯿﻠﻛ ﺯﺍ ﻥﺩﺮﻛ ﺩﺭﺍﻭ
-
-Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
-== ؟ﺪﯿﻨﻛ ﺩﺭﺍﻭ ﺩﺭﻮﺑﭗﯿﻠﻛ ﺯﺍ ﺍﺭ ﯽﺴﻤﻟ ىﺎﻫﻝﺮﺘﻨﻛ ﺪﯿﻫﺍﻮﺧﯽﻣ ﻪﻛ ﺪﯿﺘﺴﻫ ﻦﺌﻤﻄﻣ ﺎﯾﺁ .ﺩﺮﻛ ﺪﻫﺍﻮﺧ ﯽﺴﯾﻮﻧﺯﺎﺑ ﺍﺭ ﺎﻤﺷ ﯽﻠﻌﻓ ﯽﺴﻤﻟ ىﺎﻫﻝﺮﺘﻨﻛ ﺭﺎﻛ ﻦﯾﺍ
-
-Export to clipboard
-== ﺩﺭﻮﺑﭗﯿﻠﻛ ﻪﺑ ﻥﺩﺮﻛ ﺭﺩﺎﺻ
-
-Direct touch input while ingame
-== ىﺯﺎﺑ ﻦﯿﺣ ﺭﺩ ﻢﯿﻘﺘﺴﻣ ﯽﺴﻤﻟ ىﺩﻭﺭﻭ
-
-[Direct touch input]
-Disabled
-== ﻝﺎﻌﻓﺮﯿﻏ
-
-[Direct touch input]
-Active action
-== ﻝﺎﻌﻓ ﻡﺍﺪﻗﺍ
-
-[Direct touch input]
-Aim
-== ىﺮﯿﮔﻑﺪﻫ
-
-[Direct touch input]
-Fire
-== ىﺯﺍﺪﻧﺍﺮﯿﺗ
-
-[Direct touch input]
-Hook
-== ﺏﻼﻗ
-
-Direct touch input while spectating
-== ىﺯﺎﺑ ىﺎﺷﺎﻤﺗ ﻦﯿﺣ ﺭﺩ ﻢﯿﻘﺘﺴﻣ ﯽﺴﻤﻟ ىﺩﻭﺭﻭ
-
-Error loading touch controls
-== ﯽﺴﻤﻟ ىﺎﻫﻝﺮﺘﻨﻛ ىﺭﺍﺬﮔﺭﺎﺑ ﺭﺩ ﺎﻄﺧ
-
-Could not load touch controls from file. See local console for details.
-== ﯽﻠﺤﻣ ﻝﻮﺴﻨﻛ ،ﺮﺘﺸﯿﺑ ﺕﺎﯿﺋﺰﺟ ىﺍﺮﺑ .ﺖﺴﯿﻧ ﻞﯾﺎﻓ ﺯﺍ ﯽﺴﻤﻟ ىﺎﻫﻝﺮﺘﻨﻛ ىﺭﺍﺬﮔﺭﺎﺑ ﻪﺑ ﺭﺩﺎﻗ .ﺪﯿﻨﻛ ﯽﺳﺭﺮﺑ ﺍﺭ
-
-Could not load default touch controls from file. See local console for details.
-== ﺕﺎﯿﺋﺰﺟ ىﺍﺮﺑ .ﺖﺴﯿﻧ ﻞﯾﺎﻓ ﺯﺍ ﺽﺮﻓﺶﯿﭘ ﯽﺴﻤﻟ ىﺎﻫﻝﺮﺘﻨﻛ ىﺭﺍﺬﮔﺭﺎﺑ ﻪﺑ ﺭﺩﺎﻗ .ﺪﯿﻨﻛ ﯽﺳﺭﺮﺑ ﺍﺭ ﯽﻠﺤﻣ ﻝﻮﺴﻨﻛ ،ﺮﺘﺸﯿﺑ
-
-Could not load touch controls from clipboard. See local console for details.
-== ﺕﺎﯿﺋﺰﺟ ىﺍﺮﺑ .ﺖﺴﯿﻧ ﺩﺭﻮﺑﭗﯿﻠﻛ ﺯﺍ ﯽﺴﻤﻟ ىﺎﻫﻝﺮﺘﻨﻛ ىﺭﺍﺬﮔﺭﺎﺑ ﻪﺑ ﺭﺩﺎﻗ .ﺪﯿﻨﻛ ﯽﺳﺭﺮﺑ ﺍﺭ ﯽﻠﺤﻣ ﻝﻮﺴﻨﻛ ،ﺮﺘﺸﯿﺑ
-
-Show client IDs in name plates
-== ﻡﺎﻧ کﻼﭘ ﺭﺩ ﺮﺑﺭﺎﻛ ىﺎﻫﻪﺳﺎﻨﺷ ﺶﯾﺎﻤﻧ
-
-Hook Strength
-== ﺏﻼﻗ ﺕﺭﺪﻗ
-
-Size of hook strength icon and number indicator
-== ىﺩﺪﻋ ﺮﮕﻧﺎﺸﻧ ﻭ ﺏﻼﻗ ﺕﺭﺪﻗ ﻥﻮﻜﯾﺁ ﻩﺯﺍﺪﻧﺍ
-
-Key Presses
-== ﺎﻫﻪﻤﻛﺩ ﺭﺎﺸﻓ
-
-Size of key press icons
-== ﺎﻫﻪﻤﻛﺩ ﺭﺎﺸﻓ ىﺎﻫﻥﻮﻜﯾﺁ ﻩﺯﺍﺪﻧﺍ
-
-Width of your own hook collision line
-== ﻥﺎﺗﺩﻮﺧ ﺏﻼﻗ ﺩﺭﻮﺧﺮﺑ ﻂﺧ ﺽﺮﻋ
-
-Width of others' hook collision line
-== ﻥﺍﺮﮕﯾﺩ ﺏﻼﻗ ﺩﺭﻮﺧﺮﺑ ﻂﺧ ﺽﺮﻋ
-
-Preview 'Hook collisions' being pressed
-== 'ﺎﻫﺏﻼﻗ ﺩﺭﻮﺧﺮﺑ' ﻥﺩﺍﺩ ﺭﺎﺸﻓ ﺶﯾﺎﻤﻧﺶﯿﭘ
-
-Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
-== ﺕﺎﻤﯿﻈﻨﺗ ﺭﺩ ﺍﺭ ﺎﻫﻥﻼﻋﺍ ﻩﺯﺎﺟﺍ ﻪﻛ ﺪﯾﻮﺷ ﻦﺌﻤﻄﻣ .ﺩﻮﺷ ىﺯﺍﺪﻧﺍﻩﺍﺭ ﺖﺴﻧﺍﻮﺘﻧ ﺭﻭﺮﺳ .ﺩﻮﺷ ﺍﺮﺟﺍ ﻪﻨﯿﻣﺯﺲﭘ ﺭﺩ ﺪﻧﺍﻮﺘﺑ ﺭﻭﺮﺳ ﺎﺗ ﺪﯾﺍﻩﺩﺮﻛ ﻝﺎﻌﻓ ﻪﻣﺎﻧﺮﺑ
-
-Aim
-== ىﺮﯿﮔﻑﺪﻫ
-
-Active: Fire
-== ىﺯﺍﺪﻧﺍﺮﯿﺗ :ﻝﺎﻌﻓ
-
-Active: Hook
-== ﺏﻼﻗ :ﻝﺎﻌﻓ
-
-[Translation credits: Add your own name here when you update translations]
-English translation by the DDNet Team
-== Persian translation by OneShadow, Quick, younesdevil, Player, ArAsH and Fàłłéñ
-
-[Graphics error]
-Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
-== 
-
-Press Ctrl+Shift+G to disable debug graphs.
-== 
-
-No demo with this filename exists
-== 
-
-Team save in progress. You'll be able to load with '/load %s'
-== 
-
-Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails
-== 
-
-Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue
-== 
-
-Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue
-== 
-
-Save failed!
-== 
-
-Auto-sync player camera
-== 
-
-[Auto camera]
-Disabled
-== 
-
-[Auto camera]
-Enabled
-== 
-
-[Auto camera]
-Unavailable for this player
-== 
-
-[Auto camera]
-Inactive
-== 
-
-[Auto camera]
-Active
-== 
-
-Loading maps…
-== 
-
-[Spectating]
-Following %d: %s
-== 
-
-[Important alert message]
-Press Esc or Tab to dismiss…
-== 
-
-Server alert
-== 
-
-Moderator alert
-== 
-
-Server could not be started
-== 
-
-Loading map
-== 
-
-Joining Tutorial server
-== 
-
-There's an unsaved change in the touch controls editor, you might want to save it.
-== 
-
-This name cannot be used for files and folders
-== 
-
-You will be disconnected from the server.
-== 
-
-Could not get server list from master server
-== 
-
-There are no Tutorial servers available
-== 
-
-Retrying…
-== 
-
-Error joining Tutorial server
-== 
-
-Could not find a Tutorial server. Check your internet connection.
-== 
-
-You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
-== 
-
-Could not find online Tutorial server.\nStarting and connecting to local server…
-== 
-
-Waiting for local server to stop…
-== 
-
-Waiting for local server to start…
-== 
-
-Error checking player name
-== 
-
-Could not check for existing player with your name. Check your internet connection.
-== 
-
-Start and connect to local server
-== 
-
-Error loading communities
-== 
-
-Click to remove this community from your favorites.
-== 
-
-Click to add this community to your favorites.
-== 
-
-Add clan
-== 
-
-Add friend
-== 
-
-[Demo playback]
-Live
 == 
 
-[Demo playback]
-Go to Live
+The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
-Map size
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 
 
-Are you sure that you want to disconnect and play this demo?
+Personal best:
 == 
 
-Save all changes before turning off the editor?
+The server is running a non-standard tuning on a pure game type.
 == 
 
-https://wiki.ddnet.org/wiki/Touch_controls
+The audio device couldn't be initialised.
 == 
 
-Community
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == 
 
-[Team status]
-forbidden
+It's recommended that you check the settings to adjust them to your liking before joining a server.
 == 
 
-[Team status]
-solo
+Please enter your nickname below.
 == 
 
-[Team status]
-allowed
+Join Tutorial Server
 == 
 
-[Team status]
-required
+Skip Tutorial
 == 
 
-Teams
+transmits your player name to info2.ddnet.tw
 == 
 
-[Team size]
-minimum
+AFR
 == 
 
-[Team size]
-maximum
+ASI
 == 
 
-Layout
+AUS
 == 
 
-Visibility
+EUR
 == 
 
-Behavior
+NA
 == 
 
-Delete button
+SA
 == 
 
-Are you sure that you want to delete this button?
+CHN
 == 
 
-Duplicate
+Leak IP
 == 
 
-Please save your changes before duplicating a button.
+%.2f MiB
 == 
 
-Deselect
+%.2f KiB
 == 
 
-You'll lose unsaved changes after deselecting.
+Crc:
 == 
 
-Width
+Netversion:
 == 
 
-Height
+Fetch Info
 == 
 
-Shape
+Render
 == 
 
-[Touch button shape]
-Rectangle
+Show name plates
 == 
 
-[Touch button shape]
-Circle
+Name plates size
 == 
 
-[Touch button label type]
-Plain
+Use team colors for name plates
 == 
 
-[Touch button label type]
-Localized
+Show clan above name plates
 == 
 
-[Touch button label type]
-Icon
+Clan plates size
 == 
 
-Behavior type
+Settings file
 == 
 
-[Touch button behavior]
-Bind
+Config directory
 == 
 
-[Touch button behavior]
-Bind Toggle
+Themes directory
 == 
 
-[Touch button behavior]
-Predefined
+Automatically take statboard screenshot
 == 
 
-Info
+Automatically create statboard csv
 == 
 
-Command
+Max CSVs
 == 
 
-Label
+Toggle to edit your dummy settings
 == 
 
-Label type
+Vanilla skins only
 == 
 
-Add command
+Choose default eyes when joining a server
 == 
 
-Delete command
+Skins
 == 
 
-[Touch button visibility preview]
-Included
+Skins directory
 == 
 
-[Touch button visibility preview]
-Excluded
+Hook collisions
 == 
 
-[Touch button visibility preview]
-Ignore
+Toggle ghost
 == 
 
-Button browser
+Dummy copy
 == 
 
-You can select buttons directly in the list below, or long press on a touch button on the screen to select it. You can also move and resize buttons by touch.
+Hammerfly dummy
 == 
 
-New button
+Spectate next
 == 
 
-Select button by touch
+Spectate previous
 == 
 
-No buttons match your filter criteria
+Remote console
 == 
 
-File
+Statboard
 == 
 
-Buttons
+UI mouse s.
 == 
 
-Active color
+Dummy
 == 
 
-Inactive color
+Windowed
 == 
 
-Preview visibilities
+Windowed borderless
 == 
 
-Preview button visibility while the editor is active.
+Windowed fullscreen
 == 
 
-Show all buttons
+V-Sync
 == 
 
-You can manage your touch controls settings on this page. Only changes that are saved will be available after restarting the client. You can share your touch controls with others by exporting them to the clipboard.\n\nYou can find more detailed information about the touch controls on the DDNet Wiki.
+may cause delay
 == 
 
-Open DDNet Wiki
+FSAA samples
 == 
 
-Save all changes before switching selected button?
+Allows maps to render with more detail
 == 
 
-Discard
+Use high DPI
 == 
 
-No space for button
+Renderer
 == 
 
-There is not enough space available for the button. Check its visibilities and size.
+default
 == 
 
-Selected button not visible
+custom
 == 
 
-The selected button is not visible. Do you want to deselect it or edit its visibility?
+Graphics cards
 == 
 
-Edit
+auto
 == 
 
-Width and height are required to be within the range from %d to %d.
+Enable long pain sound (used when shooting in freeze)
 == 
 
-Button position is outside of the screen.
+Enable regular chat sound
 == 
 
-The selected button is overlapping with other buttons.
+Enable highlighted chat sound
 == 
 
-Wrong button settings
+Threaded sound loading
 == 
 
-There is not enough space available to place another button.
+Sample rate
 == 
 
-[Touch button visibilities]
-Ingame
+HUD
 == 
 
-[Touch button visibilities]
-Zoom Allowed
+DDNet
 == 
 
-[Touch button visibilities]
-Vote Active
+Assets
 == 
 
-[Touch button visibilities]
-Dummy Allowed
+DDNet Client needs to be restarted to complete update!
 == 
 
-[Touch button visibilities]
-Dummy Connected
+You must restart the game for all settings to take effect.
 == 
 
-[Touch button visibilities]
-Rcon Authed
+Hue
 == 
 
-[Touch button visibilities]
-Demo Player
+Sat.
 == 
 
-[Touch button visibilities]
-Extra Menu
+Lht.
 == 
 
-[Predefined touch button behaviors]
-Ingame Menu
+Alpha
 == 
 
-[Predefined touch button behaviors]
-Extra Menu
+Show names in chat in team colors
 == 
 
-[Predefined touch button behaviors]
-Emoticon
+Show votes window after voting
 == 
 
-[Predefined touch button behaviors]
-Spectate
+Show kill messages
 == 
 
-[Predefined touch button behaviors]
-Swap Action
+Kill Messages
 == 
 
-[Predefined touch button behaviors]
-Use Action
+Kill Message Normal Color
 == 
 
-[Predefined touch button behaviors]
-Joystick Action
+Kill Message Highlight Color
 == 
 
-[Predefined touch button behaviors]
-Joystick Aim
+Laser Outline Color
 == 
 
-[Predefined touch button behaviors]
-Joystick Fire
+Laser Inner Color
 == 
 
-[Predefined touch button behaviors]
-Joystick Hook
+Hookline
 == 
 
-Buttons with this behavior execute console commands like regular key binds.
+No hit
 == 
 
-Buttons with this behavior cycle between executing one of two or more specified commands.
+Tee
 == 
 
-Buttons with this behavior execute some predefined actions.
+Highlighted message
 == 
 
-Opens the ingame menu immediately when released.
+Team message
 == 
 
-The extra menu button which toggles visibility of buttons with "Extra Menu" visibilities. Also opens the ingame menu on long press.
+Friend message
 == 
 
-Opens the emoticon selector (this does not work with binds).
+Normal message
 == 
 
-Opens the spectator menu (this does not work with binds).
+Client message
 == 
 
-Swaps the active action (fire and hook) for direct touch input and virtual joysticks.
+Save the best demo of each race
 == 
 
-Uses the active action with the current aiming position.
+Default length: %d
 == 
 
-Virtual joystick which uses the active action.
+When you cross the start line, show a ghost tee replicating the movements of your best time
 == 
 
-Virtual joystick which only aims without using an action.
+Show ghost
 == 
 
-Virtual joystick which always uses fire.
+Save ghost
 == 
 
-Virtual joystick which always uses hook.
+Overlay entities
 == 
 
-Player is ingame, i.e. not spectating.
+Show text entities
 == 
 
-Zoom is allowed on this server.
+Opacity
 == 
 
-A vote is currently active.
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
 == 
 
-Dummy is allowed on this server.
+Show others (own team only)
 == 
 
-Dummy is currently connected.
+Show quads
 == 
 
-Player is currently authed in rcon.
+Quads are used for background decoration
 == 
 
-Demo player is currently active.
+Tries to predict other entities to give a feel of low latency
 == 
 
-The extra menu with the given number is activated.
+AntiPing: predict other players
 == 
 
-Update Rate
+AntiPing: predict weapons
 == 
 
-Save power by lowering update rate (higher input latency)
+AntiPing: predict grenade paths
 == 
 
-Saves file
+Show other players' hook collision lines
 == 
 
-Open the saves file
+Show other players' key presses
 == 
 
-This skin name cannot be used.
+Show local player's key presses
 == 
 
-Skin could not be loaded due to an error. Check the local console for details.
+Old mouse mode
 == 
 
-Skin could not be found.
+Entities Background color
 == 
 
-No skins match your filter criteria
+Use current map as background
 == 
 
-Show FPS
+Show tiles layers from BG map
 == 
 
-Renders your frame rate in the top right
+Regular Background Color
 == 
 
-Show spectator cursor
+Try fast HTTP map download first
 == 
 
-Show number of spectators
+New random timeout code
 == 
 
-Censor profanity
+Run on join
 == 
 
-Chat background color
+Chat command (e.g. showall 1)
 == 
 
-[Show name plates]
-None
+DDNet %s is available:
 == 
 
-[Show name plates]
-Own
+DDNet Client updated!
 == 
 
-[Show name plates]
-Others
+Entities
 == 
 
-[Show name plates]
-All
+Emoticons
 == 
 
-Name plates offset
+Particles
 == 
 
-Show friend icon in name plates
+Assets directory
 == 
 
-Show client IDs on a separate line
+https://ddnet.tw/discord
 == 
 
-Client IDs size
+https://wiki.ddnet.tw/
 == 
 
-Show players' key presses
+Tutorial
 == 
 
-[Show players' key presses]
-None
+Can't find a Tutorial server
 == 
 
-[Show players' key presses]
-Own
+Server executable not found, can't run server
 == 
 
-[Show players' key presses]
-Others
+DDNet %s is out!
 == 
 
-[Show players' key presses]
-All
+Time limit: %d min
 == 
 
-Preview player's name plate
+Round
 == 
 
-Preview dummy's name plate
+Super
 == 
 
-Colors of the hook collision line:
+Team %d
 == 
 
-[Hook collision line color]
-When nothing is hookable
+Manual
 == 
 
-[Hook collision line color]
-When something is hookable
+Race
 == 
 
-[Hook collision line color]
-When a Tee is hookable
+Auto
 == 
 
-[Hook collision line color]
-Hook collision line tip
+Frags
 == 
 
-Dragger Outline Color
+Deaths
 == 
 
-Dragger Inner Color
+Suicides
 == 
 
-Show background quads
+Ratio
 == 
 
-AntiPing: prediction margin
+Net
 == 
 
-Scoreboard cursor
+FPM
 == 
 
-Download
+Spree
 == 
 
-Unmute
+Best
 == 
 
-Mute
+Grabs
 == 
 
-Unmute emoticons
+1 new mention
 == 
 
-Mute emoticons
+%d new mentions
 == 
 
-https://wiki.ddnet.org/wiki/Mapping
+9+ new mentions
 == 

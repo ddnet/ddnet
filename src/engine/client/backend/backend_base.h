@@ -1,20 +1,12 @@
 #ifndef ENGINE_CLIENT_BACKEND_BACKEND_BASE_H
 #define ENGINE_CLIENT_BACKEND_BACKEND_BASE_H
 
-#include <engine/client/graphics_threaded.h>
-#include <engine/graphics.h>
+#include "../backend_sdl.h"
+#include "engine/graphics.h"
 
-#include <SDL_video.h>
-
-#include <atomic>
-#include <cstddef>
-#include <cstdint>
-#include <string>
 #include <vector>
 
-struct SBackendCapabilities;
-
-enum EDebugGfxModes
+enum EDebugGFXModes
 {
 	DEBUG_GFX_MODE_NONE = 0,
 	DEBUG_GFX_MODE_MINIMUM,
@@ -23,82 +15,22 @@ enum EDebugGfxModes
 	DEBUG_GFX_MODE_ALL,
 };
 
-enum ERunCommandReturnTypes
-{
-	RUN_COMMAND_COMMAND_HANDLED = 0,
-	RUN_COMMAND_COMMAND_UNHANDLED,
-	RUN_COMMAND_COMMAND_WARNING,
-	RUN_COMMAND_COMMAND_ERROR,
-};
-
-enum EGfxErrorType
-{
-	GFX_ERROR_TYPE_NONE = 0,
-	GFX_ERROR_TYPE_INIT,
-	GFX_ERROR_TYPE_OUT_OF_MEMORY_IMAGE,
-	GFX_ERROR_TYPE_OUT_OF_MEMORY_BUFFER,
-	GFX_ERROR_TYPE_OUT_OF_MEMORY_STAGING,
-	GFX_ERROR_TYPE_RENDER_RECORDING,
-	GFX_ERROR_TYPE_RENDER_CMD_FAILED,
-	GFX_ERROR_TYPE_RENDER_SUBMIT_FAILED,
-	GFX_ERROR_TYPE_SWAP_FAILED,
-	GFX_ERROR_TYPE_UNKNOWN,
-};
-
-enum EGfxWarningType
-{
-	GFX_WARNING_TYPE_NONE = 0,
-	GFX_WARNING_TYPE_INIT_FAILED,
-	GFX_WARNING_TYPE_INIT_FAILED_MISSING_INTEGRATED_GPU_DRIVER,
-	GFX_WARNING_TYPE_INIT_FAILED_NO_DEVICE_WITH_REQUIRED_VERSION,
-	GFX_WARNING_LOW_ON_MEMORY,
-	GFX_WARNING_MISSING_EXTENSION,
-	GFX_WARNING_TYPE_UNKNOWN,
-};
-
-struct SGfxErrorContainer
-{
-	struct SError
-	{
-		bool m_RequiresTranslation;
-		std::string m_Err;
-
-		bool operator==(const SError &Other) const
-		{
-			return m_RequiresTranslation == Other.m_RequiresTranslation && m_Err == Other.m_Err;
-		}
-	};
-	EGfxErrorType m_ErrorType = EGfxErrorType::GFX_ERROR_TYPE_NONE;
-	std::vector<SError> m_vErrors;
-};
-
-struct SGfxWarningContainer
-{
-	EGfxWarningType m_WarningType = EGfxWarningType::GFX_WARNING_TYPE_NONE;
-	std::vector<std::string> m_vWarnings;
-};
-
 class CCommandProcessorFragment_GLBase
 {
 protected:
-	SGfxErrorContainer m_Error;
-	SGfxWarningContainer m_Warning;
+	static size_t TexFormatToImageColorChannelCount(int TexFormat);
+	static void *Resize(const unsigned char *pData, int Width, int Height, int NewWidth, int NewHeight, int BPP);
 
-	static bool Texture2DTo3D(uint8_t *pImageBuffer, int ImageWidth, int ImageHeight, size_t PixelSize, int SplitCountWidth, int SplitCountHeight, uint8_t *pTarget3DImageData, int &Target3DImageWidth, int &Target3DImageHeight);
+	static bool Texture2DTo3D(void *pImageBuffer, int ImageWidth, int ImageHeight, int ImageColorChannelCount, int SplitCountWidth, int SplitCountHeight, void *pTarget3DImageData, int &Target3DImageWidth, int &Target3DImageHeight);
 
-	virtual bool GetPresentedImageData(uint32_t &Width, uint32_t &Height, CImageInfo::EImageFormat &Format, std::vector<uint8_t> &vDstData) = 0;
+	virtual bool GetPresentedImageData(uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &DstData) = 0;
 
 public:
 	virtual ~CCommandProcessorFragment_GLBase() = default;
-	virtual ERunCommandReturnTypes RunCommand(const CCommandBuffer::SCommand *pBaseCommand) = 0;
+	virtual bool RunCommand(const CCommandBuffer::SCommand *pBaseCommand) = 0;
 
 	virtual void StartCommands(size_t CommandCount, size_t EstimatedRenderCallCount) {}
 	virtual void EndCommands() {}
-
-	const SGfxErrorContainer &GetError() { return m_Error; }
-	virtual void ErroneousCleanup() {}
-
-	const SGfxWarningContainer &GetWarning() { return m_Warning; }
 
 	enum
 	{
@@ -121,7 +53,7 @@ public:
 		char *m_pVersionString;
 		char *m_pRendererString;
 
-		TTwGraphicsGpuList *m_pGpuList;
+		TTWGraphicsGPUList *m_pGPUList;
 	};
 
 	struct SCommand_Init : public CCommandBuffer::SCommand
@@ -139,11 +71,11 @@ public:
 		std::atomic<uint64_t> *m_pStreamMemoryUsage;
 		std::atomic<uint64_t> *m_pStagingMemoryUsage;
 
-		TTwGraphicsGpuList *m_pGpuList;
+		TTWGraphicsGPUList *m_pGPUList;
 
 		TGLBackendReadPresentedImageData *m_pReadPresentedImageDataFunc;
 
-		SBackendCapabilities *m_pCapabilities;
+		SBackendCapabilites *m_pCapabilities;
 		int *m_pInitError;
 
 		const char **m_pErrStringPtr;

@@ -7,8 +7,8 @@
 enum
 {
 	TEAM_FLOCK = 0,
-	TEAM_SUPER = 64,
-	NUM_DDRACE_TEAMS = TEAM_SUPER + 1,
+	TEAM_SUPER = MAX_CLIENTS,
+	NUM_TEAMS = TEAM_SUPER + 1,
 	VANILLA_TEAM_SUPER = VANILLA_MAX_CLIENTS
 };
 
@@ -23,25 +23,34 @@ enum
 
 class CTeamsCore
 {
-	int m_aTeam[MAX_CLIENTS];
-	bool m_aIsSolo[MAX_CLIENTS];
+	int m_Team[MAX_CLIENTS];
+	bool m_IsSolo[MAX_CLIENTS];
 
 public:
 	bool m_IsDDRace16;
 
 	CTeamsCore();
 
-	bool SameTeam(int ClientId1, int ClientId2) const;
+	bool SameTeam(int ClientID1, int ClientID2) const;
 
-	bool CanKeepHook(int ClientId1, int ClientId2) const;
-	bool CanCollide(int ClientId1, int ClientId2) const;
+	bool CanKeepHook(int ClientID1, int ClientID2) const;
+	bool CanCollide(int ClientID1, int ClientID2) const;
 
-	int Team(int ClientId) const;
-	void Team(int ClientId, int Team);
+	int Team(int ClientID) const;
+	void Team(int ClientID, int Team);
 
 	void Reset();
-	void SetSolo(int ClientId, bool Value);
-	bool GetSolo(int ClientId) const;
+	void SetSolo(int ClientID, bool Value)
+	{
+		m_IsSolo[ClientID] = Value;
+	}
+
+	bool GetSolo(int ClientID) const
+	{
+		if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+			return false;
+		return m_IsSolo[ClientID];
+	}
 };
 
 #endif

@@ -6,22 +6,16 @@
 
 class IEditor : public IInterface
 {
-	MACRO_INTERFACE("editor")
+	MACRO_INTERFACE("editor", 0)
 public:
+	virtual ~IEditor() {}
 	virtual void Init() = 0;
-	virtual void OnUpdate() = 0;
-	virtual void OnRender() = 0;
-	virtual void OnActivate() = 0;
-	virtual void OnWindowResize() = 0;
-	virtual void OnClose() = 0;
+	virtual void UpdateAndRender() = 0;
 	virtual bool HasUnsavedData() const = 0;
-	virtual bool HandleMapDrop(const char *pFilename, int StorageType) = 0;
-	virtual bool Load(const char *pFilename, int StorageType) = 0;
-	virtual bool Save(const char *pFilename) = 0;
+	virtual int Load(const char *pFilename, int StorageType) = 0;
+	virtual int Save(const char *pFilename) = 0;
 	virtual void UpdateMentions() = 0;
 	virtual void ResetMentions() = 0;
-	virtual void OnIngameMoved() = 0;
-	virtual void ResetIngameMoved() = 0;
 };
 
 extern IEditor *CreateEditor();

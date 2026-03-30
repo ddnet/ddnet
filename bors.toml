@@ -1,0 +1,9 @@
+status = [
+  "build-cmake (ubuntu-latest)",
+  "build-cmake (ubuntu-20.04)",
+  "build-cmake (macOS-latest)",
+  "build-cmake (windows-latest)",
+  "check-clang-san",
+  "check-clang-tidy",
+  "check-style",
+]

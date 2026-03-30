@@ -2,26 +2,9 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_LOCALIZATION_H
 #define GAME_LOCALIZATION_H
+#include <base/tl/sorted_array.h>
 
 #include <engine/shared/memheap.h>
-
-#include <string>
-#include <vector>
-
-class CLanguage
-{
-public:
-	CLanguage() = default;
-	CLanguage(const char *pName, const char *pFilename, int Code, const std::vector<std::string> &vLanguageCodes) :
-		m_Name(pName), m_Filename(pFilename), m_CountryCode(Code), m_vLanguageCodes(vLanguageCodes) {}
-
-	std::string m_Name;
-	std::string m_Filename;
-	int m_CountryCode;
-	std::vector<std::string> m_vLanguageCodes;
-
-	bool operator<(const CLanguage &Other) const { return m_Name < Other.m_Name; }
-};
 
 class CLocalizationDatabase
 {
@@ -32,27 +15,22 @@ class CLocalizationDatabase
 		unsigned m_ContextHash;
 		const char *m_pReplacement;
 
-		CString() = default;
-		CString(unsigned Hash, unsigned ContextHash, const char *pReplacement) :
-			m_Hash(Hash), m_ContextHash(ContextHash), m_pReplacement(pReplacement)
-		{
-		}
-
 		bool operator<(const CString &Other) const { return m_Hash < Other.m_Hash || (m_Hash == Other.m_Hash && m_ContextHash < Other.m_ContextHash); }
 		bool operator<=(const CString &Other) const { return m_Hash < Other.m_Hash || (m_Hash == Other.m_Hash && m_ContextHash <= Other.m_ContextHash); }
 		bool operator==(const CString &Other) const { return m_Hash == Other.m_Hash && m_ContextHash == Other.m_ContextHash; }
 	};
 
-	std::vector<CLanguage> m_vLanguages;
-	std::vector<CString> m_vStrings;
+	sorted_array<CString> m_Strings;
 	CHeap m_StringsHeap;
+	int m_VersionCounter;
+	int m_CurrentVersion;
 
 public:
-	void LoadIndexfile(class IStorage *pStorage, class IConsole *pConsole);
-	const std::vector<CLanguage> &Languages() const { return m_vLanguages; }
-	void SelectDefaultLanguage(class IConsole *pConsole, char *pFilename, size_t Length) const;
+	CLocalizationDatabase();
 
 	bool Load(const char *pFilename, class IStorage *pStorage, class IConsole *pConsole);
+
+	int Version() const { return m_CurrentVersion; }
 
 	void AddString(const char *pOrgStr, const char *pNewStr, const char *pContext);
 	const char *FindString(unsigned Hash, unsigned ContextHash) const;
@@ -60,6 +38,26 @@ public:
 
 extern CLocalizationDatabase g_Localization;
 
-[[gnu::format_arg(1)]] extern const char *Localize(const char *pStr, const char *pContext = "");
+class CLocConstString
+{
+	const char *m_pDefaultStr;
+	const char *m_pCurrentStr;
+	unsigned m_Hash;
+	unsigned m_ContextHash;
+	int m_Version;
 
+public:
+	CLocConstString(const char *pStr, const char *pContext = "");
+	void Reload();
+
+	inline operator const char *()
+	{
+		if(m_Version != g_Localization.Version())
+			Reload();
+		return m_pCurrentStr;
+	}
+};
+
+extern const char *Localize(const char *pStr, const char *pContext = "")
+	GNUC_ATTRIBUTE((format_arg(1)));
 #endif

@@ -4,9 +4,6 @@
 #define ENGINE_SHARED_MEMHEAP_H
 
 #include <cstddef>
-#include <new>
-#include <utility>
-
 class CHeap
 {
 	struct CChunk
@@ -26,7 +23,7 @@ class CHeap
 	CChunk *m_pCurrent;
 
 	void Clear();
-	void NewChunk(size_t ChunkSize);
+	void NewChunk();
 	void *AllocateFromChunk(unsigned int Size, unsigned Alignment);
 
 public:
@@ -35,12 +32,5 @@ public:
 	void Reset();
 	void *Allocate(unsigned Size, unsigned Alignment = alignof(std::max_align_t));
 	const char *StoreString(const char *pSrc);
-
-	template<typename T, typename... TArgs>
-	T *Allocate(TArgs &&...Args)
-	{
-		return new(Allocate(sizeof(T), alignof(T))) T(std::forward<TArgs>(Args)...);
-	}
 };
-
 #endif

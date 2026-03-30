@@ -1,3 +1,14 @@
+﻿##### authors #####
+#originally created by:
+#	Feca
+#modified by:
+#	Boti.
+#	Cellegen
+#       bencie
+##### /authors #####
+
+##### translated strings #####
+
 %ds left
 == %ds van hátra
 
@@ -16,11 +27,17 @@
 %s wins!
 == %s nyert!
 
+-Page %d-
+== -oldal %d-
+
 Abort
 == Mégse
 
 Add
 == Hozzáadás
+
+Add Friend
+== Barát hozzáadása
 
 Address
 == Cím
@@ -28,8 +45,14 @@ Address
 All
 == Mindenki
 
+Are you sure that you want to delete the demo?
+== Biztos, hogy ki akarod törölni a demót?
+
 Are you sure that you want to quit?
 == Biztos, hogy ki akarsz lépni?
+
+Are you sure that you want to remove the player from your friends list?
+== Biztos vagy benne, hogy ki akarod törölni a játékost a barátok listájáról?
 
 Automatically record demos
 == Magától rögzítse a demókat
@@ -61,11 +84,17 @@ Clan
 Client
 == Kliens
 
-Connecting to
-== Csatlakozás…
+Close
+== Bezárás
 
-Connection Problems…
-== Csatlakozási problémák…
+Connect
+== Csatlakozás
+
+Connecting to
+== Csatlakozás...
+
+Connection Problems...
+== Csatlakozási problémák...
 
 Console
 == Konzol
@@ -88,6 +117,9 @@ Delete
 Delete demo
 == Demó törlése
 
+Demo details
+== Információk a demóról
+
 Demos
 == Demók
 
@@ -98,7 +130,7 @@ Disconnected
 == Lekapcsolódott
 
 Downloading map
-== Pálya letöltése…
+== Pálya letöltése...
 
 Draw!
 == Döntetlen!
@@ -124,6 +156,9 @@ Favorites
 Feet
 == Láb
 
+Filter
+== Szűrő
+
 Fire
 == Tűz
 
@@ -135,6 +170,9 @@ Force vote
 
 Free-View
 == Szabad nézet
+
+Friends
+== Barátok
 
 Fullscreen
 == Teljesképernyő
@@ -149,10 +187,10 @@ Game over
 == Játék vége
 
 Game type
-== Játékmód
+== Játék fajtája
 
 Game types:
-== Játékmódok:
+== Játék fajtái:
 
 General
 == Általános
@@ -199,6 +237,9 @@ MOTD
 Map
 == Pálya
 
+Mouse sens.
+== Egér érzékenység
+
 Move left
 == Balra lépés
 
@@ -238,6 +279,9 @@ No servers match your filter criteria
 Ok
 == Oké
 
+Open
+== Megnyit
+
 Parent Folder
 == Főmappa
 
@@ -253,11 +297,18 @@ Ping
 Pistol
 == Pisztoly
 
+[Demo browser]
+Play
+== Lejátszás
+
 Player
 == Játékos
 
+Player options
+== Játékos beállításai
+
 Players
-== Játékosok
+== Játékos
 
 Please balance teams!
 == Kérlek egyenlítsd ki a csapatokat!
@@ -277,6 +328,9 @@ Red team
 Red team wins!
 == A piros csapat nyert!
 
+Refresh
+== Újratöltés
+
 Remote console
 == Távoli konzol
 
@@ -286,11 +340,17 @@ Remove
 Remove friend
 == Barát eltávolítása
 
+Rename
+== Átnevezés
+
 Rename demo
 == Demó átnevezése
 
 Reset filter
 == Szűrő visszaállítása
+
+Sample rate
+== Mintavételi frekvencia
 
 Score
 == Pontszám
@@ -306,6 +366,12 @@ Screenshot
 
 Server address:
 == Szerver címe:
+
+Server details
+== Szerver részletei
+
+Server filter
+== Szerver szűrő
 
 Server info
 == Szerver infó
@@ -327,6 +393,9 @@ Show ingame HUD
 
 Show name plates
 == Név táblák mutatása
+
+Skins
+== Karakterek
 
 Sound
 == Hang
@@ -364,6 +433,12 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == A szerver egy nem szabványos hangolást futtat a tiszta játék típuson.
 
+There's an unsaved map in the editor, you might want to save it before you quit the game.
+== Van egy mentett térkép a szerkesztőben, talán elakarod menteni, mielőtt kilépnél a játékból.
+
+Time limit
+== Időhatár
+
 Time limit: %d min
 == Időhatár: %d perc
 
@@ -372,6 +447,9 @@ Try again
 
 Type
 == Típus
+
+Unable to delete the demo
+== Nem sikerült törölni a demót
 
 Unable to rename the demo
 == Nem sikerült átnevezni a demót
@@ -419,7 +497,7 @@ New name:
 == Új Név:
 
 Sat.
-== Telítettség
+== telítettség
 
 Internet
 == Internet
@@ -439,11 +517,26 @@ FSAA samples
 Sound volume
 == Hangerő
 
+Created:
+== Készült:
+
 Max Screenshots
 == Maximum Fotók
 
+Length:
+== Hossza:
+
 Laser
 == Lézer
+
+Netversion:
+== Netes verzió:
+
+Map:
+== Pálya:
+
+Info
+== Infó
 
 Miscellaneous
 == Egyéb
@@ -454,8 +547,23 @@ Record demo
 Your skin
 == Te Karaktered
 
+Size:
+== Méret:
+
 Reset to defaults
 == Visszaállítás alapértelmezettre
+
+Quit anyway?
+== Mindenképpen kilép?
+
+Display Modes
+== Kijelző módok
+
+Version:
+== Verzió:
+
+Round
+== Menet
 
 Lht.
 == Fényerősség
@@ -466,6 +574,9 @@ UI Color
 Hue
 == Színárnyalat
 
+Crc:
+== Crc:
+
 Alpha
 == Alpha
 
@@ -475,8 +586,17 @@ LAN
 Name plates size
 == Névtáblák mérete
 
+Type:
+== Típus:
+
+Dummy settings
+== Másolat Beállításai
+
 AntiPing
 == Antiping
+
+Show quads
+== Képek mutatása
 
 Map sound volume
 == Pálya hangereje
@@ -523,11 +643,14 @@ Spectate next
 Show names in chat in team colors
 == Csapatszínben jelennek meg a játékosok a chatben
 
+Select a name
+== Válassz nevet
+
 Enable team chat sound
 == Csapat chat hang engedélyezése
 
 Show other players' hook collision lines
-== Játékosok horog érintkező vonalainak mutatása
+== Játékosok horogvonalaik mutatása
 
 Deaths
 == Halálok
@@ -537,6 +660,12 @@ Enable game sounds
 
 DDNet Client needs to be restarted to complete update!
 == Újra kell indítani a DDNet Klienst a frissítés befejezéséhez!
+
+Please use a different name
+== Kérlek, válassz másik nevet
+
+Show console window
+== Konzol ablak mutatása
 
 Show others
 == Játékosok mutatása
@@ -550,6 +679,9 @@ Restart
 Game paused
 == Játék megállítva
 
+Old mouse mode
+== Régi egér mód
+
 Browser
 == Böngésző
 
@@ -557,7 +689,7 @@ Play background music
 == Háttérzene lejátszása
 
 Follow
-== Követés
+== Követni
 
 Reset
 == Alap
@@ -565,17 +697,20 @@ Reset
 Enable gun sound
 == Fegyverhang lejátszása
 
+Show health + ammo
+== Élet + lőszer mutatása
+
 Team message
 == Csapat üzenet
 
 Automatically create statboard csv
-== Magától készítsen CSV pontszámtáblát
+== Magától készítsen csv pontszámtáblát
 
 Save the best demo of each race
 == Mentse el a legjobb demót minden versenynél
 
 Show tiles layers from BG map
-== Blokkok mutatása a háttérben
+== Block-ok mutatása a háttérben
 
 Are you sure that you want to disconnect?
 == Biztos, hogy le akarsz csatlakozni?
@@ -592,11 +727,17 @@ Remove chat
 Check now
 == Nézd meg
 
+Reset wanted weapon on death
+== Újraéledéskor váltson az akart fegyverre
+
 Frags
 == Zászlók
 
 AntiPing: predict other players
-== Antiping: játékosok előre kiszámolása
+== Antiping: más játékosokra
+
+Show other players' key presses
+== Mutassa a játékosok mozgását nyilakkal
 
 Automatically take statboard screenshot
 == Automatikusan készítsen pontszám fényképet
@@ -610,11 +751,11 @@ Enable long pain sound (used when shooting in freeze)
 DDNet %s is available:
 == DDNet %s verzió elérhető
 
-Updating…
-== Frissítés…
+Updating...
+== Frissítés...
 
 Overlay entities
-== Entitás láthatósága
+== Entitás jelenése
 
 Messages
 == Üzenetek
@@ -664,6 +805,12 @@ Max CSVs
 Strict gametype filter
 == Szigorú játékmód szűrő
 
+Try fast HTTP map download first
+== Próbálja meg a gyors HTTP letöltést először
+
+Use DDRace Scoreboard
+== DDRace pontszámtábla használata
+
 Best
 == Legjobb
 
@@ -680,7 +827,7 @@ Search
 == Keresés
 
 Connecting dummy
-== Másolat válasza…
+== Másolat válasza...
 
 Clan plates size
 == Klán felirat mérete
@@ -698,10 +845,10 @@ Exclude
 == Kizárás
 
 Enable highlighted chat sound
-== Kiemelt chat hang lejátszása
+== kiemelt chat hang lejátszása
 
 AntiPing: predict weapons
-== Antiping: fegyverek előre kiszámolása
+== Antiping: fegyvereknél
 
 DDNet Client updated!
 == DDNet Kliens frissítve van!
@@ -713,7 +860,7 @@ Switch weapon when out of ammo
 == Fegyver váltása, ha elfogy a lőszer
 
 AntiPing: predict grenade paths
-== Antiping: gránátok útjainak előre kiszámolása
+== Antiping: gránátoknál
 
 Demo
 == Demó
@@ -725,13 +872,13 @@ Friend message
 == Baráti üzenet
 
 Fat skins (DDFat)
-== Nagy karakterek (DDFat)
+== Nagy skinek (DDFat)
 
 may cause delay
-== késleltetést okozhat
+== Késleltetést okozhat
 
 Unfinished map
-== Befejezetlen pálya
+== befejezetlen pálya
 
 Deactivate
 == Deaktiválás
@@ -739,8 +886,14 @@ Deactivate
 Welcome to DDNet
 == Üdvözlet a DDNet-en
 
+Threaded sound loading
+== Csavarmenetes hang betöltése
+
 Activate
 == Aktiválás
+
+UI mouse s.
+== UI egér sebesség
 
 File already exists, do you want to overwrite it?
 == A fájl már létezik, szeretné felülírni?
@@ -752,7 +905,7 @@ Save
 == Mentés
 
 Vanilla skins only
-== Csak alap karakterek
+== Csak vanilla skinek
 
 Date
 == Idő
@@ -760,11 +913,14 @@ Date
 Show DDNet map finishes in server browser
 == Mutassa a befejezett pályákat a keresőben
 
-transmits your player name to info.ddnet.org
-== továbbítja a játékosnevedet az info.ddnet.org oldalra
+transmits your player name to info2.ddnet.tw
+== továbbítja a játékosnevedet az info2.ddnet.tw oldalra
+
+Reload
+== újratöltés
 
 Hammerfly dummy
-== Másolat kalapácsolás
+== Másolat Kalapács
 
 Downloading %s:
 == Letöltés %s:
@@ -785,10 +941,10 @@ Video name:
 == Videó neve:
 
 Connect Dummy
-== Másolat Csatlakozása
+== Másolat Csatlakoztatása
 
 Disconnect Dummy
-== Másolat Lecsatlakozása
+== Másolat Lecsatlakoztatása
 
 Filter connecting players
 == Csatlakozók szűrése
@@ -817,6 +973,9 @@ Zoom in
 Show text entities
 == Textúrázott entitások
 
+Render
+== Render
+
 Show all
 == Mutasson mindent
 
@@ -838,8 +997,11 @@ Statboard
 Converse
 == Fordítás
 
-Update failed! Check log…
-== Frissítés sikertelen! nézd meg a log-ot…
+Use high DPI
+== Magas DPI használata
+
+Update failed! Check log...
+== Frissítés sikertelen! nézd meg a logot...
 
 Toggle dyncam
 == Dinamikus kamera
@@ -847,8 +1009,8 @@ Toggle dyncam
 %d new mentions
 == %d új értesítés
 
-Default length
-== Átlagos hossz
+Default length: %d
+== Átlagos hossz: %d
 
 Show HUD
 == HUD mutatása
@@ -856,20 +1018,26 @@ Show HUD
 Size
 == Méret
 
+Destination file already exist
+== A kiválasztott helynél ez létezik
+
 Server best:
 == Szerver legjobb:
+
+Markers:
+== Jelölések
 
 1 new mention
 == 1 új értesítés
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== A DDraceNetwork egy együttműködésen alapuló online játék, ahol a cél az, hogy te és a Tee csapatod elérje a célvonalat. Ha újonc vagy, a kezdő (Novice) szervereket ajánljuk, ahol a legegyszerűbb versenyeket tároljuk. Legkisebb ping választása alapján válassz egy szervert.
+== A DDraceNetwork együttműködésen alapuló online játékként tekinthető, ahol a cél az, hogy te és egy csapat Tee elérje a célvonalat. Ha újonc vagy, a kezdő (Novice) szervereket ajánljuk, ahol a legegyszerűbb versenyeket tároljuk. A lehető legkisebb ping választása alapján válassz egy szervert.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-== Ajánlott, hogy le ellenőrizd a beállításokat, hogy a kedvedre igazítsd őket, mielőtt csatlakoznál egy szerverhez. (Tipp: szűrők)
+== Ajánlott, hogy ellenőrizd a beállításokat, hogy a kedvedhez igazítsd őket, mielőtt csatlakoznál egy szerverhez. (Tipp: szűrők)
 
 Please enter your nickname below.
-== Kérjük írja le a becenevét lent.
+== Írja be lent a becenevét.
 
 9+ new mentions
 == 9+ új értesítés
@@ -896,25 +1064,31 @@ Length
 == Hossz
 
 Are you sure that you want to disconnect your dummy?
-== Biztos vagy benne, hogy a másolatod lecsatlakozzon?
+== Biztos, hogy kiakarod léptetni a másolatod?
+
+Saving ddnet-settings.cfg failed
+== Nem sikerült elmenteni ddnet-settings.cfg fájlt
 
 Warning
 == Figyelmeztetés
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== Debug mód bekapcsolva. Nyomd meg a Ctrl+Shift+D billentyűparancsot, hogy kikapcsold.
+== Debug mód bekapcsolva. nyomd meg a Ctrl+Shift+D billentyű kombinációt a kikapcsolásához
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== Használd a K gombot az újraéledéshez, Q betű a megfigyeléshez. Nézd meg a beállításokat a többi bind-ért.
+==  Használd a k gombot az újraéledéshez, q betű a megfigyeléshez. nézd meg a beállításokat a többi bindért.
 
 Existing Player
-== Létező játékos
+== Létező Játékos
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
 == A Neved '%s' már használva volt (%d ponttal). Biztosan szeretnéd használni?
 
 Checking for existing player with your name
-== Keresés létező játékos után a neveddel
+== Keresés már létező játékos után a neveddel
+
+Country / Region
+== Ország / Régió
 
 Speed
 == Sebesség
@@ -935,16 +1109,16 @@ Theme
 == %d játékos
 
 Demos directory
-== Demók helye
+== Demók Helye
 
 Smooth Dynamic Camera
-== Sima dinamikus kamera
+== Egyenletes dinamikus kamera
 
 Skip the main menu
 == Főmenü kihagyása
 
 Themes directory
-== Témák helye
+== Témák Helye
 
 Download skins
 == Karakterek letöltése
@@ -953,28 +1127,28 @@ Skin prefix
 == Karakter prefix
 
 Skin Database
-== Karakter adatbázis
+== Karakter Adatbázis
 
 Skins directory
-== Karakterek helye
+== Karakterek Helye
 
 Game sound volume
-== Játék hangerő
+== Játék Hangerő
 
 Chat sound volume
-== Chat hangerő
+== Chat Hangerő
 
 Background music volume
 == Háttérzene hangerő
 
 Assets
-== Galléria
+== Kinézet
 
 Use old chat style
 == Régi chat stílus használata
 
 Client message
-== Kliens üzenet
+== Kliens Üzenet
 
 Show others (own team only)
 == Mások mutatása (csak csapatok)
@@ -1023,19 +1197,22 @@ Race
 == Verseny
 
 Auto
-== Automatikus
+== Autómatikus
 
 Replay
 == Visszajátszás
 
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== A Struktúra Szélessége %s nem osztható %d al, vagy a magasság nem osztható %d al, ami vizuális hibákhoz vezethet.
+
 Getting server list from master server
-== Szerverlista lekérése a fő szerverekről
+== Szerverlista lekérése
 
 Leak IP
-== IP mutatása
+== IP Mutatása
 
 Chat command
-== Chat parancs
+== Chat Parancs
 
 Dummy
 == Másolat
@@ -1044,16 +1221,43 @@ Windowed
 == Ablak
 
 Windowed borderless
-== Keretnélküli ablak
+== Keretnélküli Ablak
 
 Desktop fullscreen
-== Asztalos teljesképernyő
+== Asztalos Teljesképernyő
+
+Show client IDs
+== Kliens ID-k Mutatása
+
+Laser Outline Color
+== Lézer Körvonal Szín
+
+Laser Inner Color
+== Lézer Belső Szín
+
+Hookline
+== Horogvonal
+
+No hit
+== Nincs Találat
+
+Hookable
+== Horgolható
+
+Tee
+== Játékos Találat
 
 Preview
 == Előnézet
 
 Background
 == Háttér
+
+Entities Background color
+== Entitás Háttér Szín
+
+Regular Background Color
+== Átlagos Háttér Szín
 
 Are you sure that you want to disconnect and switch to a different server?
 == Biztos, hogy kilépsz és váltasz egy másik szerverre?
@@ -1079,20 +1283,35 @@ SA
 CHN
 == KíNA
 
+Refreshing...
+== Frissítés...
+
+Kill Messages
+== Halálüzenetek
+
+Kill Message Normal Color
+== Halálüzenetek alap színe
+
+Kill Message Highlight Color
+== Halálüzenetek kiemelt színe
+
+Show local player's key presses
+== Saját mozgásod nyilakkal mutatása
+
 Discord
 == Discord
 
-https://ddnet.org/discord
-== https://ddnet.org/discord
+https://ddnet.tw/discord
+== https://ddnet.tw/discord
 
-https://wiki.ddnet.org/
-== https://wiki.ddnet.org/
+https://wiki.ddnet.tw/
+== https://wiki.ddnet.tw/
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== A %s textúra formátuma nem RGBA, ami vizuális hibákat okozhat. (Nem megfelelően lesz elosztva a kép színvilága.)
+== A %s textúra formátuma nem RGBA, ami vizuális hibákat okozhat.
 
 Join Tutorial Server
-== Belépés egy Bemutató szerverre
+== Belépés a Bemutató Szerverre
 
 Skip Tutorial
 == Bemutató átugrása
@@ -1104,19 +1323,22 @@ Config directory
 == Konfigurációs fájl helye
 
 Windowed fullscreen
-== Ablakos teljesképernyő
+== Ablakos Teljesképernyő
 
 Run on join
 == Futtatás belépéskor
 
 Chat command (e.g. showall 1)
-== Chat parancs (például: "showall 1")
+== Chat parancs (például showall 1)
+
+Toggle to edit your dummy settings
+== Átkapcsolás a másolatod beállításainak szerkesztéséhez
 
 Choose default eyes when joining a server
-== Alapértelmezett szemek kiválasztása, amikor egy szerverre csatlakozol.
+== Alapértelmezett szemek kiválasztása, amikor egy szerverre csatlakozol
 
 Allows maps to render with more detail
-== Engedélyezi, hogy a pályákat részletesebben jelenítse meg.
+== Engedélyezi, pályákat részletesebben jelenítse meg
 
 Renderer
 == Renderelő
@@ -1127,1527 +1349,35 @@ default
 custom
 == egyedi
 
+Graphics cards
+== Videókártyák
+
 auto
 == automatikus
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== Amikor elkezdesz egy versenyt, rekordjaid alapján replikál egy szellemet, ami a legjobb időd alapján mozdul.
+== Amikor átléped a rajtvonalat, mutat egy szellemjátákost amely megismétli a legjobb időd mozdulatait
 
 Opacity
 == Átlátszóság
 
-Adjust the opacity of entities belonging to other teams, such as tees and name plates
-== Más csapatokhoz tartozó entitások, mint például játékosok és névtáblák átláthatóságának beállítása.
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== Más csapatokhoz tartozó entitások átláthatóságának beállítása, például játékosok és névtáblák
 
 Quads are used for background decoration
-== A kép keretek háttérképként lesznek használva. (Egy csak olyan keretekre vonatkozik, aminek a para x és y tengelye 0.)
+== A quadok háttérdekorációért használhatóak
 
 Tries to predict other entities to give a feel of low latency
-== A kliens megpróbálja előre kiszámítani az entitásokat, hogy alacsony késleltetést produkáljon.
+== Megpróbálja megjósolni más entitásokat, hogy az alacsony késleltetés érzetét keltse
 
 Tutorial
 == Bemutató
+
+Can't find a Tutorial server
+== Nem található bemutató szerver
 
 Super
 == Szuper
 
 Team %d
 == Csapat %d
-
-Position:
-== Pozíció:
-
-Speed:
-== Sebesség:
-
-Angle:
-== Szög:
-
-Trying to determine UDP connectivity…
-== Próbáljuk meghatározni az UDP kapcsoltatot…
-
-UDP seems to be filtered.
-== Az UDP szűrve van.
-
-UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== Az UDP és a TCP IP címek különböznek. Próbáld meg kikapcsolni a VPN-ed, proxy-d, vagy hálózati gyorsítód.
-
-No answer from server yet.
-== Még nincs válasz a szervertől.
-
-Download community skins
-== Közösségi karakterek letöltése
-
-Enable controller
-== Kontroller használata
-
-[Ingame controller mode]
-Relative
-== Relatív
-
-[Ingame controller mode]
-Absolute
-== Abszolút
-
-Ingame controller mode
-== Játékbeli kontroller mód
-
-Ingame controller sens.
-== Játékbeli kontroller érzékenység
-
-UI controller sens.
-== UI kontroller érzékenység
-
-Controller jitter tolerance
-== Kontroller jitter tolerancia
-
-Status
-== Állapot
-
-Mouse
-== Egér
-
-Ingame mouse sens.
-== Játékbeli egér érzékenysége
-
-UI mouse sens.
-== UI egér érzékenysége
-
-Controller
-== Kontroller
-
-Show dummy actions
-== Másolat mozgásának mutatása
-
-Show player position
-== Játékos pozíciójának mutatása
-
-Show player speed
-== Játékos sebességének mutatása
-
-Show player target angle
-== Játékos célszögének mutatása
-
-Normal Color
-== Normális szín
-
-Highlight Color
-== Kiemelt szín
-
-Extras
-== Extrák
-
-Preparing demo playback
-== Demó visszajátszás előkészítése
-
-Connected
-== Csatlakozva
-
-Loading map file from storage
-== Pálya betöltése a tárolóban
-
-Initializing components
-== Komponensek inicializálása
-
-Initializing assets
-== Galléria inicializálása
-
-Initializing map logic
-== Pálya logika inicializálása
-
-Sending initial client info
-== Szükséges kliens infó küldése
-
-Uploading map data to GPU
-== Pálya feltöltése a GPU-ra
-
-Getting game info
-== Játék infó beszerzése
-
-Requesting to join the game
-== Kérvényezés játék csatlakozására
-
-Loading menu images
-== Menü képek betöltése
-
-Loading demo files
-== Demó filterek betöltése
-
-Loading ghost files
-== Szellem fájlok betöltése
-
-Loading skin files
-== Karakter fájlok betöltése
-
-Aim bind
-== Célzás bind
-
-Appearance
-== Kinézet
-
-Name Plate
-== Névtábla
-
-Hook Collisions
-== Horog érintkező
-
-Show health, shields and ammo
-== Mutassa az életet, a pajzsot és a töltényt
-
-DDRace HUD
-== DDRace HUD
-
-Show DDRace HUD
-== Mutassa a DDRace HUD-ot (Speciális HUD)
-
-Show jumps indicator
-== Ugrás indikátor mutatása
-
-Show freeze bars
-== Lefagyaztás töltő csík mutatása
-
-Opacity of freeze bars inside freeze
-== Láthatósága a töltő csíknak, mikor levan fagyaztva a Tee
-
-Hook collision line
-== Horog érintkező vonal indikátora
-
-Hook collision line opacity
-== Horog érintkező vonal láthatósága
-
-Your movements are not taken into account when calculating the line colors
-== A mozgásaid, illetve mások mozgása nem fogja befolyásolni a vonal színének kiszámítását.
-
-Loading assets
-== Galléria betöltése
-
-Loading race demo files
-== Verseny demó fájlok betöltése
-
-Loading sound files
-== Hang fájlok betöltése
-
-[Graphics error]
-Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== Probléma derült fel inicializálás közben. Változtasson a "gfx_backend" parancson "OpenGL"-re vagy "Vulkan"-ra a "settings_ddnet.cfg" fájlon és próbálja meg újra.
-
-[Graphics error]
-An error during command recording occurred. Try to update your GPU drivers.
-== Probléma derült fel felvétel közben. Próbálja felújítani a Videókártyája driver-ét.
-
-[Graphics error]
-A render command failed. Try to update your GPU drivers.
-== Probléma derült fel renderelés parancsa közben. Próbálja felújítani a Videókártyája driver-ét.
-
-[Graphics error]
-Submitting the render commands failed. Try to update your GPU drivers.
-== Probléma derült fel renderelési parancs végrehajtása közben. Próbálja felújítani a Videókártyája driver-ét.
-
-[Graphics error]
-Failed to swap framebuffers. Try to update your GPU drivers.
-== Probléma derült fel a framebuffer-nél. Nem sikerült framebuffer-t cserélni. Próbálja felújítani a Videókártyája driver-ét.
-
-[Graphics error]
-Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== Ismeretlen probléma derült fel. Változtasson a "gfx_backend" parancson "OpenGL"-re vagy "Vulkan"-ra a "settings_ddnet.cfg" fájlon és próbálja meg újra.
-
-[Graphics error]
-Could not initialize the given graphics backend, reverting to the default backend now.
-== Nem sikerült inicializálni a megadott Grafikai Renderer-re (OpenGL vagy Vulkan Renderer), az eredeti Grafikai Renderer-re lesz visszaállítva a Kliens.
-
-[Graphics error]
-Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== Nem sikerült inicializálni a megadott Grafikai Renderer-re (OpenGL vagy Vulkan Renderer), lehetőleg a Integrált Videókártyája driver-e nincs telepítve, vagy nem észlelhető driver rajta.
-
-Could not save downloaded map. Try manually deleting this file: %s
-== Nem sikerült elmenteni a letöltött pályát. Próbálja meg manuális módon kitörölni a fáljt: %s.
-
-Why are you slowmo replaying to read this?
-== Miért lassított módon rögzítesz, hogy elolvasd ezt?
-
-Cancel
-== Vissza
-
-File '%s' already exists, do you want to overwrite it?
-== A Fájl '%s' már létezik, szeretné felülírni a jelenlegi Fáljt?
-
-Copy info
-== Infó Másolása
-
-Are you sure that you want to remove the player '%s' from your friends list?
-== Biztos, hogy ki szeretnéd törölni '%s' Játékost a barátlistádból?
-
-Are you sure that you want to remove the clan '%s' from your friends list?
-== Biztos, hogy ki szeretnéd törölni '%s' Klánt a barátlistádból?
-
-Play the current demo
-== Jelenlegi Demó Lejátszása
-
-Pause the current demo
-== Jelenlegi Demó Szüneteltetése
-
-Stop the current demo
-== Jelenlegi Demó Megállítása
-
-Go back one tick
-== Előre menni egy képet
-
-Go forward one tick
-== Vissza menni egy képet
-
-Slow down the demo
-== Demó Lelassítása
-
-Speed up the demo
-== Demó Felgyorsítása
-
-Export cut as a separate demo
-== Exportáld a vágást, mint külön Demó
-
-Go back one marker
-== Előre menni egy jelőlésre
-
-Go forward one marker
-== Vissza menni egy jelőlésre
-
-Toggle keyboard shortcuts
-== Billentyűs parancsok váltása
-
-Open the directory that contains the demo files
-== Megnyitni a Demó Fáljlok helyét
-
-Are you sure that you want to delete the demo '%s'?
-== Biztos, hogy kiszeretnéd törölni a Demót: '%s'?
-
-Unable to delete the demo '%s'
-== Nem sikerült kitörölni a Demót: '%s'
-
-Menu opened. Press Esc key again to close menu.
-== Menű megnyitva. Az "Esc" gomb megnyomásával kilép a menüből.
-
-Open the settings file
-== Beállítások Fáljlának megnyitása
-
-Open the directory that contains the configuration and user files
-== Megnyitni a Konfigurációs és Felhasználói Fáljok helyét
-
-Open the directory to add custom themes
-== Megnyitni az egyedi témák helyét
-
-Create a random skin
-== Random Karakter csinálása
-
-Open the directory to add custom skins
-== Megnyitni az egyedi Karakterek helyét
-
-No controller found. Plug in a controller.
-== Nem található Kontroller. Csatlakoztasson egyet, vagy nézze meg, hogy észlelhető.
-
-Reset controls
-== Irányítások Visszaállítása
-
-Are you sure that you want to reset the controls to their defaults?
-== Biztos, hogy szeretnéd visszaállítani az irányítást az eredeti értékeire?
-
-Weapons
-== Fegyverek
-
-Rifle Laser Outline Color
-== Lézer Külső Színe
-
-Rifle Laser Inner Color
-== Lézer Belső Színe
-
-Shotgun Laser Outline Color
-== Sörétes puska Külső Színe
-
-Shotgun Laser Inner Color
-== Sörétes puska Belső Színe
-
-Door Laser Outline Color
-== Lézer ajtó Külső Színe
-
-Door Laser Inner Color
-== Lézer ajtó Belső Színe
-
-Freeze Laser Outline Color
-== Fagyasztó Lézer Külső Színe
-
-Freeze Laser Inner Color
-== Fagyasztó Lézer Belső Színe
-
-Set all to Rifle
-== Minden színt a Lézerhez igazodva
-
-Unregister protocol and file extensions
-== Törölje a protokoll és a fájlkiterjesztések regisztrációját
-
-Open the directory to add custom assets
-== Megnyitni az egyedi Képek helyét
-
-[Translation credits: Add your own name here when you update translations]
-English translation by the DDNet Team
-== Hungarian translation by Feca, Boti., Cellegen and bencie
-
-[Graphics error]
-Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
-== 
-
-Could not resolve connect address '%s'. See local console for details.
-== 
-
-Connect address error
-== 
-
-Press Ctrl+Shift+G to disable debug graphs.
-== 
-
-Could not connect dummy
-== 
-
-Error playing demo
-== 
-
-Failed saving the replay!
-== 
-
-Saving settings to '%s' failed
-== 
-
-Error saving settings
-== 
-
-No demo with this filename exists
-== 
-
-The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
-
-"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
-== 
-
-Loading demo file from storage
-== 
-
-Some fonts could not be loaded. Check the local console for details.
-== 
-
-Quitting. Please wait…
-== 
-
-Restarting. Please wait…
-== 
-
-Team save in progress. You'll be able to load with '/load %s'
-== 
-
-Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails
-== 
-
-Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue
-== 
-
-Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue
-== 
-
-Save failed!
-== 
-
-Auto-sync player camera
-== 
-
-[Auto camera]
-Disabled
-== 
-
-[Auto camera]
-Enabled
-== 
-
-[Auto camera]
-Unavailable for this player
-== 
-
-[Auto camera]
-Inactive
-== 
-
-[Auto camera]
-Active
-== 
-
-Searching
-== 
-
-Enter Username
-== 
-
-Enter Password
-== 
-
-NOT CONNECTED
-== 
-
-Match %d of %d
-== 
-
-No results
-== 
-
-Lines %d - %d (%s)
-== 
-
-Locked
-== 
-
-Following
-== 
-
-Loading commands…
-== 
-
-Loading maps…
-== 
-
-Multi-View
-== 
-
-[Spectating]
-Following %d: %s
-== 
-
-[Spectating]
-Following %s
-== 
-
-[Spectating Camera Mode Icon]
-AUTO
-== 
-
-[Important alert message]
-Press Esc or Tab to dismiss…
-== 
-
-Server alert
-== 
-
-Moderator alert
-== 
-
-Press a key…
-== 
-
-Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
-== 
-
-Server could not be started
-== 
-
-Some map images could not be loaded. Check the local console for details.
-== 
-
-Loading map
-== 
-
-Some map sounds could not be loaded. Check the local console for details.
-== 
-
-Loading menu themes
-== 
-
-Main menu
-== 
-
-Rename folder
-== 
-
-Render complete
-== 
-
-Are you sure that you want to restart?
-== 
-
-Joining Tutorial server
-== 
-
-Save skin
-== 
-
-Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== 
-
-There's an unsaved map in the editor, you might want to save it.
-== 
-
-Continue anyway?
-== 
-
-There's an unsaved change in the touch controls editor, you might want to save it.
-== 
-
-This name cannot be used for files and folders
-== 
-
-A demo with this name already exists
-== 
-
-A folder with this name already exists
-== 
-
-Unable to rename the folder
-== 
-
-(paused)
-== 
-
-You will be disconnected from the server.
-== 
-
-Videos directory
-== 
-
-Video was saved to '%s'
-== 
-
-Could not get server list from master server
-== 
-
-There are no Tutorial servers available
-== 
-
-Please wait…
-== 
-
-Retrying…
-== 
-
-Error joining Tutorial server
-== 
-
-Could not find a Tutorial server. Check your internet connection.
-== 
-
-You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
-== 
-
-Could not find online Tutorial server.\nStarting and connecting to local server…
-== 
-
-Waiting for local server to stop…
-== 
-
-Waiting for local server to start…
-== 
-
-Error checking player name
-== 
-
-Could not check for existing player with your name. Check your internet connection.
-== 
-
-Unable to save the skin with a reserved name
-== 
-
-Unable to save the skin
-== 
-
-%d/%d KiB (%.1f KiB/s)
-== 
-
-No local servers found (ports %d-%d)
-== 
-
-Start and connect to local server
-== 
-
-Example of usage
-== 
-
-No login required
-== 
-
-Communities
-== 
-
-Error loading communities
-== 
-
-Click to remove this community from your favorites.
-== 
-
-Click to add this community to your favorites.
-== 
-
-No server selected
-== 
-
-Online friends (%d)
-== 
-
-Online clanmates (%d)
-== 
-
-[friends (server browser)]
-Offline (%d)
-== 
-
-Click to select server. Double click to join your friend.
-== 
-
-Click to remove this player from your friends list.
-== 
-
-Click to remove this clan from your friends list.
-== 
-
-Add friends by entering their name below or by clicking their name in the player list.
-== 
-
-Add clanmates by entering their clan below and leaving the name blank.
-== 
-
-Add clan
-== 
-
-Add friend
-== 
-
-Server filter
-== 
-
-Friends
-== 
-
-[Demo playback]
-Live
-== 
-
-[Demo playback]
-Go to Live
-== 
-
-Go back the specified duration
-== 
-
-[Demo player duration]
-%s min.
-== 
-
-[Demo player duration]
-%s sec.
-== 
-
-Change the skip duration
-== 
-
-Go forward the specified duration
-== 
-
-Mark the beginning of a cut (right click to reset)
-== 
-
-Mark the end of a cut (right click to reset)
-== 
-
-Close the demo player
-== 
-
-Toggle auto camera
-== 
-
-Export demo cut
-== 
-
-Cut interval
-== 
-
-Cut length
-== 
-
-Render cut to video
-== 
-
-Please use a different filename
-== 
-
-All combined
-== 
-
-No demo selected
-== 
-
-Folder Link
-== 
-
-Created
-== 
-
-Netversion
-== 
-
-Map size
-== 
-
-[Demo details]
-map not included
-== 
-
-Are you sure that you want to disconnect and play this demo?
-== 
-
-Are you sure that you want to delete the folder '%s'?
-== 
-
-Delete folder
-== 
-
-Unable to delete the folder '%s'. Make sure it's empty first.
-== 
-
-Dummy is not allowed on this server
-== 
-
-Edit touch controls
-== 
-
-Unsaved changes
-== 
-
-Save all changes before turning off the editor?
-== 
-
-Close
-== 
-
-Error loading touch controls
-== 
-
-Could not load touch controls from file. See local console for details.
-== 
-
-Could not load default touch controls from file. See local console for details.
-== 
-
-Could not load touch controls from clipboard. See local console for details.
-== 
-
-https://wiki.ddnet.org/wiki/Touch_controls
-== 
-
-Community
-== 
-
-Round %d/%d
-== 
-
-[Team status]
-forbidden
-== 
-
-[Team status]
-solo
-== 
-
-[Team status]
-allowed
-== 
-
-[Team status]
-required
-== 
-
-Teams
-== 
-
-[Team size]
-minimum
-== 
-
-[Team size]
-maximum
-== 
-
-Loading…
-== 
-
-Ghosts directory
-== 
-
-Activate all
-== 
-
-Deactivate all
-== 
-
-Layout
-== 
-
-Visibility
-== 
-
-Behavior
-== 
-
-Save changes
-== 
-
-Discard changes
-== 
-
-Delete button
-== 
-
-Are you sure that you want to delete this button?
-== 
-
-Duplicate
-== 
-
-Please save your changes before duplicating a button.
-== 
-
-Deselect
-== 
-
-You'll lose unsaved changes after deselecting.
-== 
-
-Width
-== 
-
-Height
-== 
-
-Shape
-== 
-
-[Touch button shape]
-Rectangle
-== 
-
-[Touch button shape]
-Circle
-== 
-
-[Touch button label type]
-Plain
-== 
-
-[Touch button label type]
-Localized
-== 
-
-[Touch button label type]
-Icon
-== 
-
-Behavior type
-== 
-
-[Touch button behavior]
-Bind
-== 
-
-[Touch button behavior]
-Bind Toggle
-== 
-
-[Touch button behavior]
-Predefined
-== 
-
-Info
-== 
-
-Command
-== 
-
-Label
-== 
-
-Label type
-== 
-
-Add command
-== 
-
-Delete command
-== 
-
-[Touch button visibility preview]
-Included
-== 
-
-[Touch button visibility preview]
-Excluded
-== 
-
-[Touch button visibility preview]
-Ignore
-== 
-
-Button browser
-== 
-
-You can select buttons directly in the list below, or long press on a touch button on the screen to select it. You can also move and resize buttons by touch.
-== 
-
-New button
-== 
-
-Select button by touch
-== 
-
-No buttons match your filter criteria
-== 
-
-File
-== 
-
-Buttons
-== 
-
-Active color
-== 
-
-Inactive color
-== 
-
-Direct touch input while ingame
-== 
-
-[Direct touch input]
-Disabled
-== 
-
-[Direct touch input]
-Active action
-== 
-
-[Direct touch input]
-Aim
-== 
-
-[Direct touch input]
-Fire
-== 
-
-[Direct touch input]
-Hook
-== 
-
-Direct touch input while spectating
-== 
-
-Preview visibilities
-== 
-
-Preview button visibility while the editor is active.
-== 
-
-Show all buttons
-== 
-
-You can manage your touch controls settings on this page. Only changes that are saved will be available after restarting the client. You can share your touch controls with others by exporting them to the clipboard.\n\nYou can find more detailed information about the touch controls on the DDNet Wiki.
-== 
-
-Open DDNet Wiki
-== 
-
-Error saving touch controls
-== 
-
-Could not save touch controls to file. See local console for details.
-== 
-
-Are you sure that you want to discard the current changes to the touch controls?
-== 
-
-Are you sure that you want to reset the touch controls to default?
-== 
-
-Import from clipboard
-== 
-
-Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
-== 
-
-Export to clipboard
-== 
-
-Save all changes before switching selected button?
-== 
-
-Discard
-== 
-
-No space for button
-== 
-
-There is not enough space available for the button. Check its visibilities and size.
-== 
-
-Selected button not visible
-== 
-
-The selected button is not visible. Do you want to deselect it or edit its visibility?
-== 
-
-Edit
-== 
-
-Width and height are required to be within the range from %d to %d.
-== 
-
-Button position is outside of the screen.
-== 
-
-The selected button is overlapping with other buttons.
-== 
-
-Wrong button settings
-== 
-
-There is not enough space available to place another button.
-== 
-
-[Touch button visibilities]
-Ingame
-== 
-
-[Touch button visibilities]
-Zoom Allowed
-== 
-
-[Touch button visibilities]
-Vote Active
-== 
-
-[Touch button visibilities]
-Dummy Allowed
-== 
-
-[Touch button visibilities]
-Dummy Connected
-== 
-
-[Touch button visibilities]
-Rcon Authed
-== 
-
-[Touch button visibilities]
-Demo Player
-== 
-
-[Touch button visibilities]
-Extra Menu
-== 
-
-[Predefined touch button behaviors]
-Ingame Menu
-== 
-
-[Predefined touch button behaviors]
-Extra Menu
-== 
-
-[Predefined touch button behaviors]
-Emoticon
-== 
-
-[Predefined touch button behaviors]
-Spectate
-== 
-
-[Predefined touch button behaviors]
-Swap Action
-== 
-
-[Predefined touch button behaviors]
-Use Action
-== 
-
-[Predefined touch button behaviors]
-Joystick Action
-== 
-
-[Predefined touch button behaviors]
-Joystick Aim
-== 
-
-[Predefined touch button behaviors]
-Joystick Fire
-== 
-
-[Predefined touch button behaviors]
-Joystick Hook
-== 
-
-Buttons with this behavior execute console commands like regular key binds.
-== 
-
-Buttons with this behavior cycle between executing one of two or more specified commands.
-== 
-
-Buttons with this behavior execute some predefined actions.
-== 
-
-Opens the ingame menu immediately when released.
-== 
-
-The extra menu button which toggles visibility of buttons with "Extra Menu" visibilities. Also opens the ingame menu on long press.
-== 
-
-Opens the emoticon selector (this does not work with binds).
-== 
-
-Opens the spectator menu (this does not work with binds).
-== 
-
-Swaps the active action (fire and hook) for direct touch input and virtual joysticks.
-== 
-
-Uses the active action with the current aiming position.
-== 
-
-Virtual joystick which uses the active action.
-== 
-
-Virtual joystick which only aims without using an action.
-== 
-
-Virtual joystick which always uses fire.
-== 
-
-Virtual joystick which always uses hook.
-== 
-
-Player is ingame, i.e. not spectating.
-== 
-
-Zoom is allowed on this server.
-== 
-
-A vote is currently active.
-== 
-
-Dummy is allowed on this server.
-== 
-
-Dummy is currently connected.
-== 
-
-Player is currently authed in rcon.
-== 
-
-Demo player is currently active.
-== 
-
-The extra menu with the given number is activated.
-== 
-
-[Hertz]
-Hz
-== 
-
-Update Rate
-== 
-
-Save power by lowering update rate (higher input latency)
-== 
-
-Saves file
-== 
-
-Open the saves file
-== 
-
-Player info change cooldown
-== 
-
-This skin name cannot be used.
-== 
-
-Skin could not be loaded due to an error. Check the local console for details.
-== 
-
-Skin could not be found.
-== 
-
-No skins match your filter criteria
-== 
-
-Show FPS
-== 
-
-Renders your frame rate in the top right
-== 
-
-Graphics card
-== 
-
-Tee
-== 
-
-Info Messages
-== 
-
-Show local time always
-== 
-
-Show spectator cursor
-== 
-
-Authed name color in scoreboard
-== 
-
-Same clan color in scoreboard
-== 
-
-Show client IDs (scoreboard, chat, spectator)
-== 
-
-Show number of spectators
-== 
-
-Always show chat
-== 
-
-Show only chat messages from team members
-== 
-
-Censor profanity
-== 
-
-Chat font size
-== 
-
-Chat width
-== 
-
-Chat background color
-== 
-
-[Show name plates]
-None
-== 
-
-[Show name plates]
-Own
-== 
-
-[Show name plates]
-Others
-== 
-
-[Show name plates]
-All
-== 
-
-Name plates offset
-== 
-
-Show friend icon in name plates
-== 
-
-Show client IDs in name plates
-== 
-
-Show client IDs on a separate line
-== 
-
-Client IDs size
-== 
-
-Hook Strength
-== 
-
-Show hook strength icon indicator
-== 
-
-Show hook strength number indicator
-== 
-
-Size of hook strength icon and number indicator
-== 
-
-Key Presses
-== 
-
-Show players' key presses
-== 
-
-[Show players' key presses]
-None
-== 
-
-[Show players' key presses]
-Own
-== 
-
-[Show players' key presses]
-Others
-== 
-
-[Show players' key presses]
-All
-== 
-
-Size of key press icons
-== 
-
-Preview player's name plate
-== 
-
-Preview dummy's name plate
-== 
-
-Show own player's hook collision line
-== 
-
-Always show own player's hook collision line
-== 
-
-Always show other players' hook collision lines
-== 
-
-Width of your own hook collision line
-== 
-
-Width of others' hook collision line
-== 
-
-Colors of the hook collision line:
-== 
-
-[Hook collision line color]
-When nothing is hookable
-== 
-
-[Hook collision line color]
-When something is hookable
-== 
-
-[Hook collision line color]
-When a Tee is hookable
-== 
-
-[Hook collision line color]
-Hook collision line tip
-== 
-
-Preview 'Hook collisions' being pressed
-== 
-
-Show finish messages
-== 
-
-Dragger Outline Color
-== 
-
-Dragger Inner Color
-== 
-
-Enable ghost
-== 
-
-Only save improvements
-== 
-
-Show background quads
-== 
-
-AntiPing: prediction margin
-== 
-
-Regular background color
-== 
-
-Entities background color
-== 
-
-Basic
-== 
-
-Custom
-== 
-
-Are you sure that you want to delete '%s'?
-== 
-
-Delete skin
-== 
-
-Unable to delete skin
-== 
-
-Scoreboard cursor
-== 
-
-Axis
-== 
-
-Download
-== 
-
-[Spectators]
-%d others…
-== 
-
-[Team and size]
-%d\n(%d/%d)
-== 
-
-Team %d (%d/%d)
-== 
-
-Unmute
-== 
-
-Mute
-== 
-
-Unmute emoticons
-== 
-
-Mute emoticons
-== 
-
-[skins]
-Body
-== 
-
-[skins]
-Marking
-== 
-
-[skins]
-Decoration
-== 
-
-[skins]
-Hands
-== 
-
-[skins]
-Feet
-== 
-
-[skins]
-Eyes
-== 
-
-Aim
-== 
-
-Active: Fire
-== 
-
-Active: Hook
-== 
-
-Moved ingame
-== 
-
-https://wiki.ddnet.org/wiki/Mapping
-== 

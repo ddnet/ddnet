@@ -46,25 +46,24 @@
 #define PLATFORM_STRING "openbsd"
 #endif
 
+#if(defined(__LINUX__) || defined(__linux__) || defined(CONF_WEBASM)) && !defined(__ANDROID__)
+#define CONF_FAMILY_UNIX 1
+#define CONF_FAMILY_STRING "unix"
+#define CONF_PLATFORM_LINUX 1
+#define PLATFORM_STRING "linux"
+#define CONF_BACKEND_OPENGL_ES3 1
+#ifdef CONF_WEBASM
+// GLES only
+#define CONF_BACKEND_OPENGL_ES 1
+#endif
+#endif
+
 #if defined(__ANDROID__)
 #define CONF_FAMILY_UNIX 1
 #define CONF_FAMILY_STRING "unix"
 #define CONF_PLATFORM_ANDROID 1
 #define PLATFORM_STRING "android"
 #define CONF_BACKEND_OPENGL_ES 1
-#define CONF_BACKEND_OPENGL_ES3 1
-#elif defined(__EMSCRIPTEN__)
-#define CONF_FAMILY_UNIX 1
-#define CONF_FAMILY_STRING "unix"
-#define CONF_PLATFORM_EMSCRIPTEN 1
-#define PLATFORM_STRING "emscripten"
-#define CONF_BACKEND_OPENGL_ES3 1
-#define CONF_BACKEND_OPENGL_ES 1
-#elif defined(__LINUX__) || defined(__linux__)
-#define CONF_FAMILY_UNIX 1
-#define CONF_FAMILY_STRING "unix"
-#define CONF_PLATFORM_LINUX 1
-#define PLATFORM_STRING "linux"
 #define CONF_BACKEND_OPENGL_ES3 1
 #endif
 
@@ -164,23 +163,18 @@
 #define CONF_ARCH_ARM 1
 #define CONF_ARCH_STRING "arm"
 #define CONF_ARCH_ENDIAN_BIG 1
-#elif defined(__ARMEL__)
+#endif
+
+#if defined(__ARMEL__)
 #define CONF_ARCH_ARM 1
 #define CONF_ARCH_STRING "arm"
 #define CONF_ARCH_ENDIAN_LITTLE 1
-#elif defined(__aarch64__) || defined(__arm64__) || defined(__ARM_ARCH_ISA_A64)
-#define CONF_ARCH_ARM64 1
-#define CONF_ARCH_STRING "arm64"
-#if defined(__ARM_BIG_ENDIAN)
-#define CONF_ARCH_ENDIAN_BIG 1
-#else
-#define CONF_ARCH_ENDIAN_LITTLE 1
-#endif
 #endif
 
-#if defined(__EMSCRIPTEN__)
-#define CONF_ARCH_WASM 1
-#define CONF_ARCH_STRING "wasm32"
+#if defined(__aarch64__) || defined(__arm64__)
+#define CONF_ARCH_ARM64 1
+#define CONF_ARCH_STRING "arm64"
+#define CONF_ARCH_ENDIAN_LITTLE 1
 #endif
 
 #ifndef CONF_FAMILY_STRING
@@ -191,25 +185,14 @@
 #define PLATFORM_STRING "unknown"
 #endif
 
-#define STRINGIFY2(x) #x
-#define STRINGIFY(x) STRINGIFY2(x)
-
-#if defined(PLATFORM_SUFFIX)
-#define CONF_PLATFORM_STRING PLATFORM_STRING STRINGIFY(PLATFORM_SUFFIX)
-#else
-#define CONF_PLATFORM_STRING PLATFORM_STRING
+#ifndef PLATFORM_SUFFIX
+#define PLATFORM_SUFFIX ""
 #endif
+
+#define CONF_PLATFORM_STRING PLATFORM_STRING PLATFORM_SUFFIX
 
 #ifndef CONF_ARCH_STRING
 #define CONF_ARCH_STRING "unknown"
-#endif
-
-#if defined(CONF_ARCH_ENDIAN_LITTLE)
-#define CONF_ARCH_ENDIAN_STRING "little endian"
-#elif defined(CONF_ARCH_ENDIAN_BIG)
-#define CONF_ARCH_ENDIAN_STRING "big endian"
-#else
-#error "Unsupported endianness"
 #endif
 
 #endif

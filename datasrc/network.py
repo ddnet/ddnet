@@ -1,15 +1,16 @@
-from datatypes import Enum, Flags, NetArray, NetBool, NetEvent, NetEventEx, NetIntAny, NetTwIntString, NetIntRange
-from datatypes import NetMessage, NetMessageEx, NetObject, NetObjectEx, NetString, NetStringHalfStrict, NetStringStrict, NetTick
+# pylint: skip-file
+# See https://github.com/ddnet/ddnet/issues/3507
+
+from datatypes import Enum, Flags, NetBool, NetEvent, NetIntAny, NetIntRange, NetMessage, NetMessageEx, NetObject, NetObjectEx, NetString, NetStringHalfStrict, NetStringStrict, NetTick
 
 Emotes = ["NORMAL", "PAIN", "HAPPY", "SURPRISE", "ANGRY", "BLINK"]
-PlayerFlags = ["PLAYING", "IN_MENU", "CHATTING", "SCOREBOARD", "AIM", "SPEC_CAM", "INPUT_ABSOLUTE", "INPUT_MANUAL"]
+PlayerFlags = ["PLAYING", "IN_MENU", "CHATTING", "SCOREBOARD", "AIM"]
 GameFlags = ["TEAMS", "FLAGS"]
 GameStateFlags = ["GAMEOVER", "SUDDENDEATH", "PAUSED", "RACETIME"]
-CharacterFlags = ["SOLO", "JETPACK", "COLLISION_DISABLED", "ENDLESS_HOOK", "ENDLESS_JUMP", "SUPER",
-                  "HAMMER_HIT_DISABLED", "SHOTGUN_HIT_DISABLED", "GRENADE_HIT_DISABLED", "LASER_HIT_DISABLED", "HOOK_HIT_DISABLED",
+CharacterFlags = ["SOLO", "JETPACK", "NO_COLLISION", "ENDLESS_HOOK", "ENDLESS_JUMP", "SUPER",
+                  "NO_HAMMER_HIT", "NO_SHOTGUN_HIT", "NO_GRENADE_HIT", "NO_LASER_HIT", "NO_HOOK",
                   "TELEGUN_GUN", "TELEGUN_GRENADE", "TELEGUN_LASER",
-                  "WEAPON_HAMMER", "WEAPON_GUN", "WEAPON_SHOTGUN", "WEAPON_GRENADE", "WEAPON_LASER", "WEAPON_NINJA",
-				  "MOVEMENTS_DISABLED", "IN_FREEZE", "PRACTICE_MODE", "LOCK_MODE", "TEAM0_MODE", "INVINCIBLE"]
+                  "WEAPON_HAMMER", "WEAPON_GUN", "WEAPON_SHOTGUN", "WEAPON_GRENADE", "WEAPON_LASER", "WEAPON_NINJA", "NO_MOVEMENTS"]
 GameInfoFlags = [
 	"TIMESCORE", "GAMETYPE_RACE", "GAMETYPE_FASTCAP", "GAMETYPE_FNG",
 	"GAMETYPE_DDRACE", "GAMETYPE_DDNET", "GAMETYPE_BLOCK_WORLDS",
@@ -23,38 +24,23 @@ GameInfoFlags = [
 	# Full, use GameInfoFlags2 for more flags
 ]
 GameInfoFlags2 = [
-	"ALLOW_X_SKINS", "GAMETYPE_CITY", "GAMETYPE_FDDRACE", "ENTITIES_FDDRACE", "HUD_HEALTH_ARMOR", "HUD_AMMO",
-	"HUD_DDRACE", "NO_WEAK_HOOK", "NO_SKIN_CHANGE_FOR_FROZEN", "DDRACE_TEAM", "PREDICT_EVENTS"
+	"ALLOW_X_SKINS", "GAMETYPE_CITY", "GAMETYPE_FDDRACE", "ENTITIES_FDDRACE",
 ]
 ExPlayerFlags = ["AFK", "PAUSED", "SPEC"]
-LegacyProjectileFlags = [f"CLIENTID_BIT{i}" for i in range(8)] + [
+ProjectileFlags = ["CLIENTID_BIT{}".format(i) for i in range(8)] + [
 	"NO_OWNER", "IS_DDNET", "BOUNCE_HORIZONTAL", "BOUNCE_VERTICAL",
 	"EXPLOSIVE", "FREEZE",
 ]
-ProjectileFlags = [
-	"BOUNCE_HORIZONTAL", "BOUNCE_VERTICAL", "EXPLOSIVE", "FREEZE", "NORMALIZE_VEL",
-]
-LaserFlags = [
-	"NO_PREDICT",
-]
-
-PickupFlags = [
-	"XFLIP", "YFLIP", "ROTATE", "NO_PREDICT",
-]
-
-LaserTypes = ["RIFLE", "SHOTGUN", "DOOR", "FREEZE", "DRAGGER", "GUN", "PLASMA"]
-DraggerTypes = ["WEAK", "WEAK_NW", "NORMAL", "NORMAL_NW", "STRONG", "STRONG_NW"]
-GunTypes = ["UNFREEZE", "EXPLOSIVE", "FREEZE", "EXPFREEZE"]
-SaveStates = ["PENDING", "DONE", "FALLBACKFILE", "WARNING", "ERROR"]
 
 Emoticons = ["OOP", "EXCLAMATION", "HEARTS", "DROP", "DOTDOT", "MUSIC", "SORRY", "GHOST", "SUSHI", "SPLATTEE", "DEVILTEE", "ZOMG", "ZZZ", "WTF", "EYES", "QUESTION"]
 
 Powerups = ["HEALTH", "ARMOR", "WEAPON", "NINJA", "ARMOR_SHOTGUN", "ARMOR_GRENADE", "ARMOR_NINJA", "ARMOR_LASER"]
 Authed = ["NO", "HELPER", "MOD", "ADMIN"]
 EntityClasses = ["PROJECTILE", "DOOR", "DRAGGER_WEAK", "DRAGGER_NORMAL", "DRAGGER_STRONG", "GUN_NORMAL", "GUN_EXPLOSIVE", "GUN_FREEZE", "GUN_UNFREEZE", "LIGHT", "PICKUP"]
-Teams = ["ALL", "SPECTATORS", "RED", "BLUE", "WHISPER_SEND", "WHISPER_RECV"]
 
 RawHeader = '''
+
+#include <engine/message.h>
 #include <engine/shared/teehistorian_ex.h>
 
 enum
@@ -64,21 +50,27 @@ enum
 
 enum
 {
+	TEAM_SPECTATORS=-1,
+	TEAM_RED,
+	TEAM_BLUE,
+
 	FLAG_MISSING=-3,
 	FLAG_ATSTAND,
 	FLAG_TAKEN,
-};
 
-enum
-{
 	SPEC_FREEVIEW=-1,
 	SPEC_FOLLOW=-2,
 };
 
 enum
 {
-	GAMEINFO_CURVERSION=11,
+	GAMEINFO_CURVERSION=6,
 };
+'''
+
+RawSource = '''
+#include <engine/message.h>
+#include "protocol.h"
 '''
 
 Enums = [
@@ -87,11 +79,6 @@ Enums = [
 	Enum("EMOTICON", Emoticons),
 	Enum("AUTHED", Authed),
 	Enum("ENTITYCLASS", EntityClasses),
-	Enum("LASERTYPE", LaserTypes),
-	Enum("LASERDRAGGERTYPE", DraggerTypes),
-	Enum("LASERGUNTYPE", GunTypes),
-	Enum("TEAM", Teams, -2),
-	Enum("SAVESTATE", SaveStates),
 ]
 
 Flags = [
@@ -102,10 +89,7 @@ Flags = [
 	Flags("GAMEINFOFLAG", GameInfoFlags),
 	Flags("GAMEINFOFLAG2", GameInfoFlags2),
 	Flags("EXPLAYERFLAG", ExPlayerFlags),
-	Flags("LEGACYPROJECTILEFLAG", LegacyProjectileFlags),
 	Flags("PROJECTILEFLAG", ProjectileFlags),
-	Flags("LASERFLAG", LaserFlags),
-	Flags("PICKUPFLAG", PickupFlags),
 ]
 
 Objects = [
@@ -194,7 +178,7 @@ Objects = [
 		NetIntRange("m_Jumped", 0, 3),
 		NetIntRange("m_HookedPlayer", -1, 'MAX_CLIENTS-1'),
 		NetIntRange("m_HookState", -1, 5),
-		NetIntAny("m_HookTick"),
+		NetTick("m_HookTick"),
 
 		NetIntAny("m_HookX"),
 		NetIntAny("m_HookY"),
@@ -206,17 +190,15 @@ Objects = [
 		NetIntRange("m_PlayerFlags", 0, 256),
 		NetIntRange("m_Health", 0, 10),
 		NetIntRange("m_Armor", 0, 10),
-		# -1 is infinite ammo
-		NetIntRange("m_AmmoCount", -1, 10),
-		# -1 means "no weapon"
-		NetIntRange("m_Weapon", -1, 'NUM_WEAPONS-1'),
+		NetIntRange("m_AmmoCount", 0, 10),
+		NetIntRange("m_Weapon", 0, 'NUM_WEAPONS-1'),
 		NetIntRange("m_Emote", 0, len(Emotes)),
 		NetIntRange("m_AttackTick", 0, 'max_int'),
 	]),
 
 	NetObject("PlayerInfo", [
 		NetIntRange("m_Local", 0, 1),
-		NetIntRange("m_ClientId", 0, 'MAX_CLIENTS-1'),
+		NetIntRange("m_ClientID", 0, 'MAX_CLIENTS-1'),
 		NetIntRange("m_Team", 'TEAM_SPECTATORS', 'TEAM_BLUE'),
 
 		NetIntAny("m_Score"),
@@ -224,17 +206,27 @@ Objects = [
 	]),
 
 	NetObject("ClientInfo", [
-		NetTwIntString("m_aName", 16),
-		NetTwIntString("m_aClan", 12),
+		# 4*4 = 16 characters
+		NetIntAny("m_Name0"), NetIntAny("m_Name1"), NetIntAny("m_Name2"),
+		NetIntAny("m_Name3"),
+
+		# 4*3 = 12 characters
+		NetIntAny("m_Clan0"), NetIntAny("m_Clan1"), NetIntAny("m_Clan2"),
+
 		NetIntAny("m_Country"),
-		NetTwIntString("m_aSkin", 24),
+
+		# 4*6 = 24 characters
+		NetIntAny("m_Skin0"), NetIntAny("m_Skin1"), NetIntAny("m_Skin2"),
+		NetIntAny("m_Skin3"), NetIntAny("m_Skin4"), NetIntAny("m_Skin5"),
+
 		NetIntRange("m_UseCustomColor", 0, 1),
+
 		NetIntAny("m_ColorBody"),
 		NetIntAny("m_ColorFeet"),
 	]),
 
 	NetObject("SpectatorInfo", [
-		NetIntRange("m_SpectatorId", 'SPEC_FREEVIEW', 'MAX_CLIENTS-1'),
+		NetIntRange("m_SpectatorID", 'SPEC_FREEVIEW', 'MAX_CLIENTS-1'),
 		NetIntAny("m_X"),
 		NetIntAny("m_Y"),
 	]),
@@ -244,92 +236,33 @@ Objects = [
 	]),
 
 	NetObjectEx("DDNetCharacter", "character@netobj.ddnet.tw", [
-		NetIntAny("m_Flags", default=0),
-		NetTick("m_FreezeEnd", default=0),
-		NetIntRange("m_Jumps", -1, 255, default=2),
-		NetIntAny("m_TeleCheckpoint", default=-1),
-		NetIntRange("m_StrongWeakId", 0, 'MAX_CLIENTS-1', default=0),
-
-		# New data fields for jump display, freeze bar and ninja bar
-		# Default values indicate that these values should not be used
-		NetIntRange("m_JumpedTotal", -1, 255, default=-1),
-		NetTick("m_NinjaActivationTick", default=-1),
-		NetTick("m_FreezeStart", default=-1),
-		# New data fields for improved target accuracy
-		NetIntAny("m_TargetX", default=0),
-		NetIntAny("m_TargetY", default=0),
-		NetIntRange("m_TuneZoneOverride", 'TuneZone::OVERRIDE_NONE', 'TuneZone::NUM-1', default='TuneZone::OVERRIDE_NONE'),
-	], validate_size=False),
+		NetIntAny("m_Flags"),
+		NetTick("m_FreezeEnd"),
+		NetIntRange("m_Jumps", -1, 255),
+		NetIntAny("m_TeleCheckpoint"),
+		NetIntRange("m_StrongWeakID", 0, 'MAX_CLIENTS-1'),
+	]),
 
 	NetObjectEx("DDNetPlayer", "player@netobj.ddnet.tw", [
 		NetIntAny("m_Flags"),
 		NetIntRange("m_AuthLevel", "AUTHED_NO", "AUTHED_ADMIN"),
-		NetIntRange("m_FinishTimeSeconds", 'FinishTime::UNSET', 'max_int', default='FinishTime::UNSET'),
-		NetIntRange("m_FinishTimeMillis", 0, 999, default=0),
 	]),
 
 	NetObjectEx("GameInfoEx", "gameinfo@netobj.ddnet.tw", [
-		NetIntAny("m_Flags", default=0),
-		NetIntAny("m_Version", default=0),
-		NetIntAny("m_Flags2", default=0),
+		NetIntAny("m_Flags"),
+		NetIntAny("m_Version"),
+		NetIntAny("m_Flags2"),
 	], validate_size=False),
 
 	# The code assumes that this has the same in-memory representation as
 	# the Projectile net object.
-	NetObjectEx("DDRaceProjectile", "projectile@netobj.ddnet.tw", [
+	NetObjectEx("DDNetProjectile", "projectile@netobj.ddnet.tw", [
 		NetIntAny("m_X"),
 		NetIntAny("m_Y"),
 		NetIntAny("m_Angle"),
 		NetIntAny("m_Data"),
 		NetIntRange("m_Type", 0, 'NUM_WEAPONS-1'),
 		NetTick("m_StartTick"),
-	]),
-
-	NetObjectEx("DDNetLaser", "laser@netobj.ddnet.tw", [
-		NetIntAny("m_ToX"),
-		NetIntAny("m_ToY"),
-		NetIntAny("m_FromX"),
-		NetIntAny("m_FromY"),
-		NetTick("m_StartTick"),
-		NetIntRange("m_Owner", -1, 'MAX_CLIENTS-1'),
-		NetIntAny("m_Type"),
-		NetIntAny("m_SwitchNumber", default=-1),
-		NetIntAny("m_Subtype", default=-1),
-		NetIntAny("m_Flags", default=0),
-	]),
-
-	NetObjectEx("DDNetProjectile", "ddnet-projectile@netobj.ddnet.tw", [
-		NetIntAny("m_X"),
-		NetIntAny("m_Y"),
-		NetIntAny("m_VelX"),
-		NetIntAny("m_VelY"),
-		NetIntRange("m_Type", 0, 'NUM_WEAPONS-1'),
-		NetTick("m_StartTick"),
-		NetIntRange("m_Owner", -1, 'MAX_CLIENTS-1'),
-		NetIntAny("m_SwitchNumber"),
-		NetIntAny("m_TuneZone"),
-		NetIntAny("m_Flags"),
-	]),
-
-	NetObjectEx("DDNetPickup", "pickup@netobj.ddnet.tw", [
-		NetIntAny("m_X"),
-		NetIntAny("m_Y"),
-		NetIntRange("m_Type", 0, 'max_int'),
-		NetIntRange("m_Subtype", 0, 'max_int'),
-		NetIntAny("m_SwitchNumber"),
-		NetIntAny("m_Flags", default=0),
-	]),
-
-	NetObjectEx("DDNetSpectatorInfo", "spectator-info@netobj.ddnet.org", [
-		NetBool("m_HasCameraInfo"),
-		NetIntRange("m_Zoom", 0, 'max_int'),
-		NetIntRange("m_Deadzone", 0, 'max_int'),
-		NetIntRange("m_FollowFactor", 0, 'max_int'),
-		NetIntRange("m_SpectatorCount", 0, 'MAX_CLIENTS-1', default=0),
-	]),
-
-	NetObjectEx("SpectatorCount", "spectator-count@netobj.ddnet.org", [
-		NetIntRange("m_NumSpectators", 0, 'max_int'),
 	]),
 
 	## Events
@@ -344,26 +277,21 @@ Objects = [
 	NetEvent("Spawn:Common", []),
 	NetEvent("HammerHit:Common", []),
 
-
 	NetEvent("Death:Common", [
-		NetIntRange("m_ClientId", 0, 'MAX_CLIENTS-1'),
+		NetIntRange("m_ClientID", 0, 'MAX_CLIENTS-1'),
 	]),
 
 	NetEvent("SoundGlobal:Common", [ #TODO 0.7: remove me
-		NetIntRange("m_SoundId", 0, 'NUM_SOUNDS-1'),
+		NetIntRange("m_SoundID", 0, 'NUM_SOUNDS-1'),
 	]),
 
 	NetEvent("SoundWorld:Common", [
-		NetIntRange("m_SoundId", 0, 'NUM_SOUNDS-1'),
+		NetIntRange("m_SoundID", 0, 'NUM_SOUNDS-1'),
 	]),
 
 	NetEvent("DamageInd:Common", [
 		NetIntAny("m_Angle"),
 	]),
-
-	NetEventEx("Birthday:Common", "birthday@netevent.ddnet.org", []),
-
-	NetEventEx("Finish:Common", "finish@netevent.ddnet.org", []),
 
 	NetObjectEx("MyOwnEvent", "my-own-event@heinrich5991.de", [
 		NetIntAny("m_Test"),
@@ -376,29 +304,23 @@ Objects = [
 
 	# Switch state for a player team.
 	NetObjectEx("SwitchState", "switch-state@netobj.ddnet.tw", [
-		NetIntAny("m_HighestSwitchNumber", default=0),
+		NetIntRange("m_NumSwitchers", 0, 256),
 		# 256 switches / 32 bits = 8 int32
-		NetArray(NetIntAny("m_aStatus", default=0), 8),
-		# send the endtick of up to 4 timed switchers
-		NetArray(NetIntAny("m_aSwitchNumbers", default=0), 4),
-		NetArray(NetIntAny("m_aEndTicks", default=0), 4),
-	], validate_size=False),
+		NetIntAny("m_Status1"),
+		NetIntAny("m_Status2"),
+		NetIntAny("m_Status3"),
+		NetIntAny("m_Status4"),
+		NetIntAny("m_Status5"),
+		NetIntAny("m_Status6"),
+		NetIntAny("m_Status7"),
+		NetIntAny("m_Status8"),
+	]),
 
 	# Switch info for map items
 	NetObjectEx("EntityEx", "entity-ex@netobj.ddnet.tw", [
 		NetIntAny("m_SwitchNumber"),
 		NetIntAny("m_Layer"),
 		NetIntAny("m_EntityClass"),
-	]),
-
- 	# the current best time in the server
-	NetObjectEx("MapBestTime", "map-best-time@netobj.ddnet.org", [
-			NetIntRange("m_MapBestTimeSeconds", 'FinishTime::NOT_FINISHED_MILLIS', 'max_int'),
-			NetIntRange("m_MapBestTimeMillis", 0, 999),
-	]),
-
-	NetEventEx("MapSoundWorld:Common", "map-sound-world@netevent.ddnet.org", [
-		NetIntAny("m_SoundId"),
 	]),
 ]
 
@@ -415,23 +337,23 @@ Messages = [
 
 	NetMessage("Sv_Chat", [
 		NetIntRange("m_Team", -2, 3),
-		NetIntRange("m_ClientId", -1, 'MAX_CLIENTS-1'),
+		NetIntRange("m_ClientID", -1, 'MAX_CLIENTS-1'),
 		NetStringHalfStrict("m_pMessage"),
 	]),
 
 	NetMessage("Sv_KillMsg", [
 		NetIntRange("m_Killer", 0, 'MAX_CLIENTS-1'),
 		NetIntRange("m_Victim", 0, 'MAX_CLIENTS-1'),
-		NetIntRange("m_Weapon", 'WEAPON_GAME', 'NUM_WEAPONS-1'),
+		NetIntRange("m_Weapon", -3, 'NUM_WEAPONS-1'),
 		NetIntAny("m_ModeSpecial"),
 	]),
 
 	NetMessage("Sv_SoundGlobal", [
-		NetIntRange("m_SoundId", 0, 'NUM_SOUNDS-1'),
+		NetIntRange("m_SoundID", 0, 'NUM_SOUNDS-1'),
 	]),
 
 	NetMessage("Sv_TuneParams", []),
-	NetMessage("Unused", []),
+	NetMessage("Sv_ExtraProjectile", []),
 	NetMessage("Sv_ReadyToEnter", []),
 
 	NetMessage("Sv_WeaponPickup", [
@@ -439,7 +361,7 @@ Messages = [
 	]),
 
 	NetMessage("Sv_Emoticon", [
-		NetIntRange("m_ClientId", 0, 'MAX_CLIENTS-1'),
+		NetIntRange("m_ClientID", 0, 'MAX_CLIENTS-1'),
 		NetIntRange("m_Emoticon", 0, 'NUM_EMOTICONS-1'),
 	]),
 
@@ -464,7 +386,7 @@ Messages = [
 	]),
 
 	NetMessage("Sv_VoteSet", [
-		NetIntRange("m_Timeout", 0, 'max_int'),
+		NetIntRange("m_Timeout", 0, 60),
 		NetStringStrict("m_pDescription"),
 		NetStringStrict("m_pReason"),
 	]),
@@ -487,7 +409,7 @@ Messages = [
 	]),
 
 	NetMessage("Cl_SetSpectatorMode", [
-		NetIntRange("m_SpectatorId", 'SPEC_FREEVIEW', 'MAX_CLIENTS-1'),
+		NetIntRange("m_SpectatorID", 'SPEC_FREEVIEW', 'MAX_CLIENTS-1'),
 	]),
 
 	NetMessage("Cl_StartInfo", [
@@ -521,9 +443,9 @@ Messages = [
 	], teehistorian=False),
 
 	NetMessage("Cl_CallVote", [
-		NetStringStrict("m_pType"),
-		NetStringStrict("m_pValue"),
-		NetStringStrict("m_pReason"),
+		NetStringStrict("m_Type"),
+		NetStringStrict("m_Value"),
+		NetStringStrict("m_Reason"),
 	], teehistorian=False),
 
 	NetMessage("Cl_IsDDNetLegacy", []),
@@ -539,7 +461,7 @@ Messages = [
 		NetIntAny("m_PlayerTimeBest"),
 	]),
 
-	NetMessage("Unused2", []),
+	NetMessage("Unused", []),
 
 	NetMessage("Sv_TeamsStateLegacy", []),
 
@@ -547,7 +469,7 @@ Messages = [
 	NetMessage("Cl_ShowOthersLegacy", [
 		NetBool("m_Show"),
 	]),
-	# Can't add any NetMessages here!
+# Can't add any NetMessages here!
 
 	NetMessageEx("Sv_MyOwnMessage", "my-own-message@heinrich5991.de", [
 		NetIntAny("m_Test"),
@@ -562,12 +484,6 @@ Messages = [
 		NetIntRange("m_Show", 0, 2),
 	]),
 
-	NetMessageEx("Cl_CameraInfo", "camera-info@netmsg.ddnet.org", [
-		NetIntAny("m_Zoom"),
-		NetIntAny("m_Deadzone"),
-		NetIntAny("m_FollowFactor"),
-	]),
-
 	NetMessageEx("Sv_TeamsState", "teamsstate@netmsg.ddnet.tw", []),
 
 	NetMessageEx("Sv_DDRaceTime", "ddrace-time@netmsg.ddnet.tw", [
@@ -579,89 +495,5 @@ Messages = [
 	NetMessageEx("Sv_Record", "record@netmsg.ddnet.tw", [
 		NetIntAny("m_ServerTimeBest"),
 		NetIntAny("m_PlayerTimeBest"),
-	]),
-
-	NetMessageEx("Sv_KillMsgTeam", "killmsgteam@netmsg.ddnet.tw", [
-		NetIntRange("m_Team", 0, 'MAX_CLIENTS-1'),
-		NetIntRange("m_First", -1, 'MAX_CLIENTS-1'),
-	]),
-
-	NetMessageEx("Sv_YourVote", "yourvote@netmsg.ddnet.org", [
-		NetIntRange("m_Voted", -1, 1),
-	]),
-
-	NetMessageEx("Sv_RaceFinish", "racefinish@netmsg.ddnet.org", [
-		NetIntRange("m_ClientId", 0, 'MAX_CLIENTS-1'),
-		NetIntAny("m_Time"),
-		NetIntAny("m_Diff"),
-		NetBool("m_RecordPersonal"),
-		NetBool("m_RecordServer", default=False),
-	]),
-
-	NetMessageEx("Sv_CommandInfo", "commandinfo@netmsg.ddnet.org", [
-		NetStringStrict("m_pName"),
-		NetStringStrict("m_pArgsFormat"),
-		NetStringStrict("m_pHelpText")
-	]),
-
-	NetMessageEx("Sv_CommandInfoRemove", "commandinfo-remove@netmsg.ddnet.org", [
-		NetStringStrict("m_pName")
-	]),
-
-	NetMessageEx("Sv_VoteOptionGroupStart", "sv-vote-option-group-start@netmsg.ddnet.org", []),
-	NetMessageEx("Sv_VoteOptionGroupEnd", "sv-vote-option-group-end@netmsg.ddnet.org", []),
-
-	NetMessageEx("Sv_CommandInfoGroupStart", "sv-commandinfo-group-start@netmsg.ddnet.org", []),
-	NetMessageEx("Sv_CommandInfoGroupEnd", "sv-commandinfo-group-end@netmsg.ddnet.org", []),
-
-	NetMessageEx("Sv_ChangeInfoCooldown", "change-info-cooldown@netmsg.ddnet.org", [
-		NetTick("m_WaitUntil")
-	]),
-
-	NetMessageEx("Sv_MapSoundGlobal", "map-sound-global@netmsg.ddnet.org", [
-		NetIntAny("m_SoundId"),
-	]),
-
-	NetMessageEx("Sv_PreInput", "preinput@netmsg.ddnet.org", [
-		NetIntAny("m_Direction"),
-		NetIntAny("m_TargetX"),
-		NetIntAny("m_TargetY"),
-
-		NetIntAny("m_Jump"),
-		NetIntAny("m_Fire"),
-		NetIntAny("m_Hook"),
-		
-		NetIntAny("m_WantedWeapon"),
-		NetIntAny("m_NextWeapon"),
-		NetIntAny("m_PrevWeapon"),
-
-		NetIntRange("m_Owner", 0, 'MAX_CLIENTS-1'),
-		NetTick("m_IntendedTick"),
-	]),
-
-	NetMessageEx("Sv_SaveCode", "save-code@netmsg.ddnet.org", [
-		NetIntRange("m_State", 'SAVESTATE_PENDING', 'SAVESTATE_ERROR'),
-		NetStringStrict("m_pError"),
-		NetStringStrict("m_pSaveRequester"),
-		NetStringStrict("m_pServerName"),
-		NetStringStrict("m_pGeneratedCode"),
-		NetStringStrict("m_pCode"),
-		NetStringStrict("m_pTeamMembers"),
-    ]),
-
-	NetMessageEx("Sv_ServerAlert", "server-alert@netmsg.ddnet.org", [
-		NetString("m_pMessage"),
-	]),
-
-	NetMessageEx("Sv_ModeratorAlert", "moderator-alert@netmsg.ddnet.org", [
-		NetString("m_pMessage"),
-	]),
-
-	NetMessageEx("Cl_EnableSpectatorCount", "enable-spectator-count@netmsg.ddnet.org", [
-		NetBool("m_Enable"),
-	]),
-	
-	NetMessageEx("Sv_MapInfo", "map-info@netmsg.ddnet.org", [
-		NetString("m_pDescription"),
 	]),
 ]

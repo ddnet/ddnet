@@ -2,25 +2,14 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include "gameworld.h"
-
 #include "entities/character.h"
-#include "entities/door.h"
-#include "entities/dragger.h"
 #include "entities/laser.h"
 #include "entities/pickup.h"
-#include "entities/plasma.h"
 #include "entities/projectile.h"
 #include "entity.h"
-
-#include <engine/shared/config.h>
-
-#include <game/client/laser_data.h>
-#include <game/client/pickup_data.h>
-#include <game/client/projectile_data.h>
-#include <game/mapbugs.h>
-#include <game/mapitems.h>
-
 #include <algorithm>
+#include <engine/shared/config.h>
+#include <game/client/projectile_data.h>
 #include <utility>
 
 //////////////////////////////////////////////////
@@ -29,37 +18,33 @@
 CGameWorld::CGameWorld()
 {
 	for(auto &pFirstEntityType : m_apFirstEntityTypes)
-		pFirstEntityType = nullptr;
+		pFirstEntityType = 0;
 	for(auto &pCharacter : m_apCharacters)
-		pCharacter = nullptr;
-	m_pCollision = nullptr;
+		pCharacter = 0;
+	m_pCollision = 0;
 	m_GameTick = 0;
-	m_pParent = nullptr;
-	m_pChild = nullptr;
+	m_pParent = 0;
+	m_pChild = 0;
 }
 
 CGameWorld::~CGameWorld()
 {
-	Clear();
+	// delete all entities
+	for(auto &pFirstEntityType : m_apFirstEntityTypes)
+		while(pFirstEntityType)
+			delete pFirstEntityType;
 	if(m_pChild && m_pChild->m_pParent == this)
 	{
 		OnModified();
-		m_pChild->m_pParent = nullptr;
+		m_pChild->m_pParent = 0;
 	}
 	if(m_pParent && m_pParent->m_pChild == this)
-		m_pParent->m_pChild = nullptr;
-}
-
-void CGameWorld::Init(CCollision *pCollision, CTuningParams *pTuningList, const CMapBugs *pMapBugs)
-{
-	m_pCollision = pCollision;
-	m_pTuningList = pTuningList;
-	m_pMapBugs = pMapBugs;
+		m_pParent->m_pChild = 0;
 }
 
 CEntity *CGameWorld::FindFirst(int Type)
 {
-	return Type < 0 || Type >= NUM_ENTTYPES ? nullptr : m_apFirstEntityTypes[Type];
+	return Type < 0 || Type >= NUM_ENTTYPES ? 0 : m_apFirstEntityTypes[Type];
 }
 
 CEntity *CGameWorld::FindLast(int Type)
@@ -95,8 +80,8 @@ int CGameWorld::FindEntities(vec2 Pos, float Radius, CEntity **ppEnts, int Max, 
 void CGameWorld::InsertEntity(CEntity *pEnt, bool Last)
 {
 	pEnt->m_pGameWorld = this;
-	pEnt->m_pNextTypeEntity = nullptr;
-	pEnt->m_pPrevTypeEntity = nullptr;
+	pEnt->m_pNextTypeEntity = 0x0;
+	pEnt->m_pPrevTypeEntity = 0x0;
 
 	// insert it
 	if(!Last)
@@ -104,7 +89,7 @@ void CGameWorld::InsertEntity(CEntity *pEnt, bool Last)
 		if(m_apFirstEntityTypes[pEnt->m_ObjType])
 			m_apFirstEntityTypes[pEnt->m_ObjType]->m_pPrevTypeEntity = pEnt;
 		pEnt->m_pNextTypeEntity = m_apFirstEntityTypes[pEnt->m_ObjType];
-		pEnt->m_pPrevTypeEntity = nullptr;
+		pEnt->m_pPrevTypeEntity = 0x0;
 		m_apFirstEntityTypes[pEnt->m_ObjType] = pEnt;
 	}
 	else
@@ -120,17 +105,17 @@ void CGameWorld::InsertEntity(CEntity *pEnt, bool Last)
 		else
 			m_apFirstEntityTypes[pEnt->m_ObjType] = pEnt;
 		pEnt->m_pPrevTypeEntity = pLast;
-		pEnt->m_pNextTypeEntity = nullptr;
+		pEnt->m_pNextTypeEntity = 0x0;
 	}
 
 	if(pEnt->m_ObjType == ENTTYPE_CHARACTER)
 	{
 		auto *pChar = (CCharacter *)pEnt;
-		int Id = pChar->GetCid();
-		if(Id >= 0 && Id < MAX_CLIENTS)
+		int ID = pChar->GetCID();
+		if(ID >= 0 && ID < MAX_CLIENTS)
 		{
-			m_apCharacters[Id] = pChar;
-			m_Core.m_apCharacters[Id] = &pChar->m_Core;
+			m_apCharacters[ID] = pChar;
+			m_Core.m_apCharacters[ID] = pChar->Core();
 		}
 		pChar->SetCoreWorld(this);
 	}
@@ -154,31 +139,23 @@ void CGameWorld::RemoveEntity(CEntity *pEnt)
 	if(m_pNextTraverseEntity == pEnt)
 		m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 
-	pEnt->m_pNextTypeEntity = nullptr;
-	pEnt->m_pPrevTypeEntity = nullptr;
+	pEnt->m_pNextTypeEntity = 0;
+	pEnt->m_pPrevTypeEntity = 0;
 
-	if(pEnt->m_pParent)
+	if(pEnt->m_ObjType == ENTTYPE_CHARACTER)
 	{
-		if(m_IsValidCopy && m_pParent && m_pParent->m_pChild == this)
-			pEnt->m_pParent->m_DestroyTick = GameTick();
-		pEnt->m_pParent->m_pChild = nullptr;
-		pEnt->m_pParent = nullptr;
+		CCharacter *pChar = (CCharacter *)pEnt;
+		int ID = pChar->GetCID();
+		if(ID >= 0 && ID < MAX_CLIENTS)
+		{
+			m_apCharacters[ID] = 0;
+			m_Core.m_apCharacters[ID] = 0;
+		}
 	}
-	if(pEnt->m_pChild)
-	{
-		pEnt->m_pChild->m_pParent = nullptr;
-		pEnt->m_pChild = nullptr;
-	}
-}
 
-void CGameWorld::RemoveCharacter(CCharacter *pChar)
-{
-	int Id = pChar->GetCid();
-	if(Id >= 0 && Id < MAX_CLIENTS)
-	{
-		m_apCharacters[Id] = nullptr;
-		m_Core.m_apCharacters[Id] = nullptr;
-	}
+	if(m_IsValidCopy && m_pParent && m_pParent->m_pChild == this && pEnt->m_pParent)
+		pEnt->m_pParent->m_DestroyTick = GameTick();
+	pEnt->m_pParent = 0;
 }
 
 void CGameWorld::RemoveEntities()
@@ -190,107 +167,74 @@ void CGameWorld::RemoveEntities()
 			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 			if(pEnt->m_MarkedForDestroy)
 			{
+				RemoveEntity(pEnt);
 				pEnt->Destroy();
 			}
 			pEnt = m_pNextTraverseEntity;
 		}
 }
 
+bool distCompare(std::pair<float, int> a, std::pair<float, int> b)
+{
+	return (a.first < b.first);
+}
+
 void CGameWorld::Tick()
 {
 	// update all objects
-	for(int i = 0; i < NUM_ENTTYPES; i++)
-	{
-		// It's important to call PreTick() and Tick() after each other.
-		// If we call PreTick() before, and Tick() after other entities have been processed, it causes physics changes such as a stronger shotgun or grenade.
-		if(m_WorldConfig.m_NoWeakHookAndBounce && i == ENTTYPE_CHARACTER)
-		{
-			auto *pEnt = m_apFirstEntityTypes[i];
-			for(; pEnt;)
-			{
-				m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
-				((CCharacter *)pEnt)->PreTick();
-				pEnt = m_pNextTraverseEntity;
-			}
-		}
-
-		auto *pEnt = m_apFirstEntityTypes[i];
+	for(auto *pEnt : m_apFirstEntityTypes)
 		for(; pEnt;)
 		{
 			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 			pEnt->Tick();
 			pEnt = m_pNextTraverseEntity;
 		}
-	}
 
 	for(auto *pEnt : m_apFirstEntityTypes)
 		for(; pEnt;)
 		{
 			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
-			pEnt->TickDeferred();
+			pEnt->TickDefered();
 			pEnt->m_SnapTicks++;
 			pEnt = m_pNextTraverseEntity;
 		}
 
 	RemoveEntities();
 
-	// update switch state
-	for(auto &Switcher : Switchers())
-	{
-		for(int j = 0; j < NUM_DDRACE_TEAMS; ++j)
-		{
-			if(Switcher.m_aEndTick[j] <= GameTick() && Switcher.m_aType[j] == TILE_SWITCHTIMEDOPEN)
-			{
-				Switcher.m_aStatus[j] = false;
-				Switcher.m_aEndTick[j] = 0;
-				Switcher.m_aType[j] = TILE_SWITCHCLOSE;
-			}
-			else if(Switcher.m_aEndTick[j] <= GameTick() && Switcher.m_aType[j] == TILE_SWITCHTIMEDCLOSE)
-			{
-				Switcher.m_aStatus[j] = true;
-				Switcher.m_aEndTick[j] = 0;
-				Switcher.m_aType[j] = TILE_SWITCHOPEN;
-			}
-		}
-	}
-
 	OnModified();
 }
 
-CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, const CCharacter *pNotThis, int CollideWith, const CCharacter *pThisOnly)
+// TODO: should be more general
+CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, CCharacter *pNotThis, int CollideWith, class CCharacter *pThisOnly)
 {
-	return (CCharacter *)IntersectEntity(Pos0, Pos1, Radius, ENTTYPE_CHARACTER, NewPos, pNotThis, CollideWith, pThisOnly);
-}
-
-CEntity *CGameWorld::IntersectEntity(vec2 Pos0, vec2 Pos1, float Radius, int Type, vec2 &NewPos, const CEntity *pNotThis, int CollideWith, const CEntity *pThisOnly)
-{
+	// Find other players
 	float ClosestLen = distance(Pos0, Pos1) * 100.0f;
-	CEntity *pClosest = nullptr;
+	CCharacter *pClosest = 0;
 
-	CEntity *pEntity = FindFirst(Type);
-	for(; pEntity; pEntity = pEntity->TypeNext())
+	CCharacter *p = (CCharacter *)FindFirst(ENTTYPE_CHARACTER);
+	for(; p; p = (CCharacter *)p->TypeNext())
 	{
-		if(pEntity == pNotThis)
+		if(p == pNotThis)
 			continue;
 
-		if(pThisOnly && pEntity != pThisOnly)
+		if(pThisOnly && p != pThisOnly)
 			continue;
 
-		if(CollideWith != -1 && !pEntity->CanCollide(CollideWith))
+		if(CollideWith != -1 && !p->CanCollide(CollideWith))
 			continue;
 
 		vec2 IntersectPos;
-		if(closest_point_on_line(Pos0, Pos1, pEntity->m_Pos, IntersectPos))
+		if(closest_point_on_line(Pos0, Pos1, p->m_Pos, IntersectPos))
 		{
-			float Len = distance(pEntity->m_Pos, IntersectPos);
-			if(Len < pEntity->m_ProximityRadius + Radius)
+			float Len = distance(p->m_Pos, IntersectPos);
+			if(Len < p->m_ProximityRadius + Radius)
 			{
 				Len = distance(Pos0, IntersectPos);
 				if(Len < ClosestLen)
 				{
 					NewPos = IntersectPos;
 					ClosestLen = Len;
-					pClosest = pEntity;
+					pClosest = p;
 				}
 			}
 		}
@@ -299,9 +243,10 @@ CEntity *CGameWorld::IntersectEntity(vec2 Pos0, vec2 Pos1, float Radius, int Typ
 	return pClosest;
 }
 
-std::vector<CCharacter *> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, const CEntity *pNotThis)
+std::list<class CCharacter *> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, class CEntity *pNotThis)
 {
-	std::vector<CCharacter *> vpCharacters;
+	std::list<CCharacter *> listOfChars;
+
 	CCharacter *pChr = (CCharacter *)FindFirst(CGameWorld::ENTTYPE_CHARACTER);
 	for(; pChr; pChr = (CCharacter *)pChr->TypeNext())
 	{
@@ -314,89 +259,83 @@ std::vector<CCharacter *> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 Pos1
 			float Len = distance(pChr->m_Pos, IntersectPos);
 			if(Len < pChr->m_ProximityRadius + Radius)
 			{
-				vpCharacters.push_back(pChr);
+				listOfChars.push_back(pChr);
 			}
 		}
 	}
-	return vpCharacters;
+	return listOfChars;
 }
 
-void CGameWorld::ReleaseHooked(int ClientId)
+void CGameWorld::ReleaseHooked(int ClientID)
 {
 	CCharacter *pChr = (CCharacter *)CGameWorld::FindFirst(CGameWorld::ENTTYPE_CHARACTER);
 	for(; pChr; pChr = (CCharacter *)pChr->TypeNext())
 	{
-		if(pChr->Core()->HookedPlayer() == ClientId && !pChr->IsSuper())
+		CCharacterCore *Core = pChr->Core();
+		if(Core->m_HookedPlayer == ClientID)
 		{
-			pChr->ReleaseHook();
+			Core->m_HookedPlayer = -1;
+			Core->m_HookState = HOOK_RETRACTED;
+			Core->m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
 		}
 	}
 }
 
-CEntity *CGameWorld::GetEntity(int Id, int EntityType)
+CTuningParams *CGameWorld::Tuning()
 {
-	for(CEntity *pEnt = m_apFirstEntityTypes[EntityType]; pEnt; pEnt = pEnt->m_pNextTypeEntity)
-		if(pEnt->m_Id == Id)
-			return pEnt;
-	return nullptr;
+	return &m_Core.m_Tuning[g_Config.m_ClDummy];
 }
 
-void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, CClientMask Mask, int Id)
+CEntity *CGameWorld::GetEntity(int ID, int EntityType)
+{
+	for(CEntity *pEnt = m_apFirstEntityTypes[EntityType]; pEnt; pEnt = pEnt->m_pNextTypeEntity)
+		if(pEnt->m_ID == ID)
+			return pEnt;
+	return 0;
+}
+
+void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64_t Mask)
 {
 	if(Owner < 0 && m_WorldConfig.m_IsSolo && !(Weapon == WEAPON_SHOTGUN && m_WorldConfig.m_IsDDRace))
 		return;
-
-	if(m_WorldConfig.m_IsDDRace && m_WorldConfig.m_PredictDDRace)
-	{
-		// vanilla has different projectile physics
-		CreatePredictedExplosionEvent(Pos, Id);
-	}
 
 	// deal damage
 	CEntity *apEnts[MAX_CLIENTS];
 	float Radius = 135.0f;
 	float InnerRadius = 48.0f;
-	int Num = FindEntities(Pos, Radius, apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+	int Num = FindEntities(Pos, Radius, (CEntity **)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 	for(int i = 0; i < Num; i++)
 	{
-		auto *pChar = static_cast<CCharacter *>(apEnts[i]);
+		CCharacter *pChar = (CCharacter *)apEnts[i];
 		vec2 Diff = pChar->m_Pos - Pos;
 		vec2 ForceDir(0, 1);
 		float l = length(Diff);
 		if(l)
 			ForceDir = normalize(Diff);
-		l = 1 - std::clamp((l - InnerRadius) / (Radius - InnerRadius), 0.0f, 1.0f);
+		l = 1 - clamp((l - InnerRadius) / (Radius - InnerRadius), 0.0f, 1.0f);
 		float Strength;
-		if(Owner == -1 || !GetCharacterById(Owner))
-			Strength = GlobalTuning()->m_ExplosionStrength;
+		if(Owner == -1 || !GetCharacterByID(Owner))
+			Strength = Tuning()->m_ExplosionStrength;
 		else
-			Strength = GetCharacterById(Owner)->GetTuning(GetCharacterById(Owner)->GetOverriddenTuneZone())->m_ExplosionStrength;
+			Strength = GetCharacterByID(Owner)->Tuning()->m_ExplosionStrength;
 
 		float Dmg = Strength * l;
 		if((int)Dmg)
-			if((GetCharacterById(Owner) ? !GetCharacterById(Owner)->GrenadeHitDisabled() : g_Config.m_SvHit || NoDamage) || Owner == pChar->GetCid())
+			if((GetCharacterByID(Owner) ? !(GetCharacterByID(Owner)->m_Hit & CCharacter::DISABLE_HIT_GRENADE) : g_Config.m_SvHit || NoDamage) || Owner == pChar->GetCID())
 			{
-				if(Owner != -1 && !pChar->CanCollide(Owner))
+				if(Owner != -1 && pChar->IsAlive() && !pChar->CanCollide(Owner))
 					continue;
-				if(Owner == -1 && ActivatedTeam != -1 && pChar->Team() != ActivatedTeam)
+				if(Owner == -1 && ActivatedTeam != -1 && pChar->IsAlive() && pChar->Team() != ActivatedTeam)
 					continue;
 				pChar->TakeDamage(ForceDir * Dmg * 2, (int)Dmg, Owner, Weapon);
-				if(GetCharacterById(Owner) ? GetCharacterById(Owner)->GrenadeHitDisabled() : !g_Config.m_SvHit || NoDamage)
+				if(GetCharacterByID(Owner) ? GetCharacterByID(Owner)->m_Hit & CCharacter::DISABLE_HIT_GRENADE : !g_Config.m_SvHit || NoDamage)
 					break;
 			}
 	}
 }
 
-bool CGameWorld::IsLocalTeam(int OwnerId) const
+void CGameWorld::NetObjBegin()
 {
-	return OwnerId < 0 || m_Teams.CanCollide(m_LocalClientId, OwnerId);
-}
-
-void CGameWorld::NetObjBegin(CTeamsCore Teams, int LocalClientId)
-{
-	m_Teams = Teams;
-	m_LocalClientId = LocalClientId;
-
 	for(int i = 0; i < NUM_ENTTYPES; i++)
 		for(CEntity *pEnt = FindFirst(i); pEnt; pEnt = pEnt->TypeNext())
 		{
@@ -407,41 +346,40 @@ void CGameWorld::NetObjBegin(CTeamsCore Teams, int LocalClientId)
 	OnModified();
 }
 
-void CGameWorld::NetCharAdd(int ObjId, CNetObj_Character *pCharObj, CNetObj_DDNetCharacter *pExtended, int GameTeam, bool IsLocal)
+void CGameWorld::NetCharAdd(int ObjID, CNetObj_Character *pCharObj, CNetObj_DDNetCharacter *pExtended, int GameTeam, bool IsLocal)
 {
-	if(IsLocalTeam(ObjId))
+	CCharacter *pChar;
+	if((pChar = (CCharacter *)GetEntity(ObjID, ENTTYPE_CHARACTER)))
 	{
-		CCharacter *pChar;
-		if((pChar = (CCharacter *)GetEntity(ObjId, ENTTYPE_CHARACTER)))
+		pChar->Read(pCharObj, pExtended, IsLocal);
+		pChar->Keep();
+	}
+	else
+		pChar = new CCharacter(this, ObjID, pCharObj, pExtended);
+
+	if(pChar)
+		pChar->m_GameTeam = GameTeam;
+}
+
+void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const CNetObj_EntityEx *pDataEx)
+{
+	if((ObjType == NETOBJTYPE_PROJECTILE || ObjType == NETOBJTYPE_DDNETPROJECTILE) && m_WorldConfig.m_PredictWeapons)
+	{
+		CProjectileData Data;
+		if(ObjType == NETOBJTYPE_PROJECTILE)
 		{
-			pChar->Read(pCharObj, pExtended, IsLocal);
-			pChar->Keep();
+			Data = ExtractProjectileInfo((const CNetObj_Projectile *)pObjData, this);
 		}
 		else
 		{
-			pChar = new CCharacter(this, ObjId, pCharObj, pExtended);
-			InsertEntity(pChar);
+			Data = ExtractProjectileInfoDDNet((const CNetObj_DDNetProjectile *)pObjData, this);
 		}
+		CProjectile NetProj = CProjectile(this, ObjID, &Data, pDataEx);
 
-		if(pChar)
-			pChar->m_GameTeam = GameTeam;
-	}
-}
-
-void CGameWorld::NetObjAdd(int ObjId, int ObjType, const void *pObjData, const CNetObj_EntityEx *pDataEx)
-{
-	if((ObjType == NETOBJTYPE_PROJECTILE || ObjType == NETOBJTYPE_DDRACEPROJECTILE || ObjType == NETOBJTYPE_DDNETPROJECTILE) && m_WorldConfig.m_PredictWeapons)
-	{
-		CProjectileData Data = ExtractProjectileInfo(ObjType, pObjData, this, pDataEx);
-		if(!IsLocalTeam(Data.m_Owner))
+		if(NetProj.m_Type != WEAPON_SHOTGUN && fabs(length(NetProj.m_Direction) - 1.f) > 0.02f) // workaround to skip grenades on ball mod
 			return;
 
-		CProjectile NetProj = CProjectile(this, ObjId, &Data);
-
-		if(NetProj.m_Type != WEAPON_SHOTGUN && absolute(length(NetProj.m_Direction) - 1.f) > 0.02f) // workaround to skip grenades on ball mod
-			return;
-
-		if(CProjectile *pProj = (CProjectile *)GetEntity(ObjId, ENTTYPE_PROJECTILE))
+		if(CProjectile *pProj = (CProjectile *)GetEntity(ObjID, ENTTYPE_PROJECTILE))
 		{
 			if(NetProj.Match(pProj))
 			{
@@ -456,9 +394,9 @@ void CGameWorld::NetObjAdd(int ObjId, int ObjType, const void *pObjData, const C
 			// try to match the newly received (unrecognized) projectile with a locally fired one
 			for(CProjectile *pProj = (CProjectile *)FindFirst(CGameWorld::ENTTYPE_PROJECTILE); pProj; pProj = (CProjectile *)pProj->TypeNext())
 			{
-				if(pProj->m_Id == -1 && NetProj.Match(pProj))
+				if(pProj->m_ID == -1 && NetProj.Match(pProj))
 				{
-					pProj->m_Id = ObjId;
+					pProj->m_ID = ObjID;
 					pProj->Keep();
 					return;
 				}
@@ -466,10 +404,10 @@ void CGameWorld::NetObjAdd(int ObjId, int ObjType, const void *pObjData, const C
 			// otherwise try to determine its owner by checking if there is only one player nearby
 			if(NetProj.m_StartTick >= GameTick() - 4)
 			{
-				const vec2 NetPos = NetProj.m_Pos - normalize(NetProj.m_Direction) * CCharacterCore::PhysicalSize() * 0.75;
+				const vec2 NetPos = NetProj.m_Pos - normalize(NetProj.m_Direction) * 28.0 * 0.75;
 				const bool Prev = (GameTick() - NetProj.m_StartTick) > 1;
 				float First = 200.0f, Second = 200.0f;
-				CCharacter *pClosest = nullptr;
+				CCharacter *pClosest = 0;
 				for(CCharacter *pChar = (CCharacter *)FindFirst(ENTTYPE_CHARACTER); pChar; pChar = (CCharacter *)pChar->TypeNext())
 				{
 					float Dist = distance(Prev ? pChar->m_PrevPrevPos : pChar->m_PrevPos, NetPos);
@@ -482,19 +420,16 @@ void CGameWorld::NetObjAdd(int ObjId, int ObjType, const void *pObjData, const C
 						Second = Dist;
 				}
 				if(pClosest && maximum(First, 2.f) * 1.2f < Second)
-					NetProj.m_Owner = pClosest->m_Id;
+					NetProj.m_Owner = pClosest->m_ID;
 			}
 		}
 		CProjectile *pProj = new CProjectile(NetProj);
-		InsertEntity(pProj);
+		InsertEntity((CEntity *)pProj);
 	}
-	else if((ObjType == NETOBJTYPE_PICKUP || ObjType == NETOBJTYPE_DDNETPICKUP) && m_WorldConfig.m_PredictWeapons)
+	else if(ObjType == NETOBJTYPE_PICKUP && m_WorldConfig.m_PredictWeapons)
 	{
-		CPickupData Data = ExtractPickupInfo(ObjType, pObjData, pDataEx);
-		if(Data.m_Flags & PICKUPFLAG_NO_PREDICT)
-			return;
-		CPickup NetPickup = CPickup(this, ObjId, &Data);
-		if(CPickup *pPickup = (CPickup *)GetEntity(ObjId, ENTTYPE_PICKUP))
+		CPickup NetPickup = CPickup(this, ObjID, (CNetObj_Pickup *)pObjData, pDataEx);
+		if(CPickup *pPickup = (CPickup *)GetEntity(ObjID, ENTTYPE_PICKUP))
 		{
 			if(NetPickup.Match(pPickup))
 			{
@@ -506,102 +441,50 @@ void CGameWorld::NetObjAdd(int ObjId, int ObjType, const void *pObjData, const C
 		CEntity *pEnt = new CPickup(NetPickup);
 		InsertEntity(pEnt, true);
 	}
-	else if((ObjType == NETOBJTYPE_LASER || ObjType == NETOBJTYPE_DDNETLASER) && m_WorldConfig.m_PredictWeapons)
+	else if(ObjType == NETOBJTYPE_LASER && m_WorldConfig.m_PredictWeapons)
 	{
-		CLaserData Data = ExtractLaserInfo(ObjType, pObjData, this, pDataEx);
-		if(!IsLocalTeam(Data.m_Owner) || !Data.m_Predict)
+		CLaser NetLaser = CLaser(this, ObjID, (CNetObj_Laser *)pObjData);
+		CLaser *pMatching = 0;
+		if(CLaser *pLaser = dynamic_cast<CLaser *>(GetEntity(ObjID, ENTTYPE_LASER)))
+			if(NetLaser.Match(pLaser))
+				pMatching = pLaser;
+		if(!pMatching)
 		{
-			return;
-		}
-
-		if(Data.m_Type == LASERTYPE_RIFLE || Data.m_Type == LASERTYPE_SHOTGUN || Data.m_Type < 0)
-		{
-			CLaser NetLaser = CLaser(this, ObjId, &Data);
-			CLaser *pMatching = nullptr;
-			if(CLaser *pLaser = dynamic_cast<CLaser *>(GetEntity(ObjId, ENTTYPE_LASER)))
-				if(NetLaser.Match(pLaser))
+			for(CEntity *pEnt = FindFirst(CGameWorld::ENTTYPE_LASER); pEnt; pEnt = pEnt->TypeNext())
+			{
+				auto *const pLaser = dynamic_cast<CLaser *>(pEnt);
+				if(pLaser && pLaser->m_ID == -1 && NetLaser.Match(pLaser))
+				{
 					pMatching = pLaser;
-			if(!pMatching)
-			{
-				for(CEntity *pEnt = FindFirst(CGameWorld::ENTTYPE_LASER); pEnt; pEnt = pEnt->TypeNext())
-				{
-					auto *const pLaser = dynamic_cast<CLaser *>(pEnt);
-					if(pLaser && pLaser->m_Id == -1 && NetLaser.Match(pLaser))
-					{
-						pMatching = pLaser;
-						pMatching->m_Id = ObjId;
-						break;
-					}
-				}
-			}
-			if(pMatching)
-			{
-				pMatching->Keep();
-				if(distance(NetLaser.m_From, NetLaser.m_Pos) < distance(pMatching->m_From, pMatching->m_Pos) - 2.f)
-				{
-					// if the laser stopped earlier than predicted, set the energy to 0
-					pMatching->m_Energy = 0.f;
-					pMatching->m_Pos = NetLaser.m_Pos;
+					pMatching->m_ID = ObjID;
+					break;
 				}
 			}
 		}
-		else if(Data.m_Type == LASERTYPE_DRAGGER)
+		if(pMatching)
 		{
-			CDragger NetDragger = CDragger(this, ObjId, &Data);
-			if(NetDragger.GetStrength() > 0)
+			pMatching->Keep();
+			if(distance(NetLaser.m_From, NetLaser.m_Pos) < distance(pMatching->m_From, pMatching->m_Pos) - 2.f)
 			{
-				auto *pDragger = dynamic_cast<CDragger *>(GetEntity(ObjId, ENTTYPE_DRAGGER));
-				if(pDragger && NetDragger.Match(pDragger))
-				{
-					pDragger->Keep();
-					pDragger->Read(&Data);
-					return;
-				}
-				CEntity *pEnt = new CDragger(NetDragger);
-				InsertEntity(pEnt);
+				// if the laser stopped earlier than predicted, set the energy to 0
+				pMatching->m_Energy = 0.f;
+				pMatching->m_Pos = NetLaser.m_Pos;
 			}
-		}
-		else if(Data.m_Type == LASERTYPE_DOOR)
-		{
-			CDoor NetDoor = CDoor(this, ObjId, &Data);
-			auto *pDoor = dynamic_cast<CDoor *>(GetEntity(ObjId, ENTTYPE_DOOR));
-			if(pDoor && NetDoor.Match(pDoor))
-			{
-				pDoor->Keep();
-				pDoor->Read(&Data);
-				return;
-			}
-			CDoor *pEnt = new CDoor(NetDoor);
-			pEnt->ResetCollision();
-			InsertEntity(pEnt);
-		}
-		else if(Data.m_Type == LASERTYPE_PLASMA)
-		{
-			CPlasma NetPlasma = CPlasma(this, ObjId, &Data);
-			auto *pPlasma = dynamic_cast<CPlasma *>(GetEntity(ObjId, ENTTYPE_PLASMA));
-			if(pPlasma && NetPlasma.Match(pPlasma))
-			{
-				pPlasma->Keep();
-				pPlasma->Read(&Data);
-				return;
-			}
-			CPlasma *pEnt = new CPlasma(NetPlasma);
-			InsertEntity(pEnt);
 		}
 	}
 }
 
-void CGameWorld::NetObjEnd()
+void CGameWorld::NetObjEnd(int LocalID)
 {
 	// keep predicting hooked characters, based on hook position
 	for(int i = 0; i < MAX_CLIENTS; i++)
-		if(CCharacter *pChar = GetCharacterById(i))
+		if(CCharacter *pChar = GetCharacterByID(i))
 			if(!pChar->m_MarkedForDestroy)
-				if(CCharacter *pHookedChar = GetCharacterById(pChar->m_Core.HookedPlayer()))
+				if(CCharacter *pHookedChar = GetCharacterByID(pChar->m_Core.m_HookedPlayer))
 					if(pHookedChar->m_MarkedForDestroy)
 					{
 						pHookedChar->m_Pos = pHookedChar->m_Core.m_Pos = pChar->m_Core.m_HookPos;
-						pHookedChar->ResetVelocity();
+						pHookedChar->m_Core.m_Vel = vec2(0, 0);
 						mem_zero(&pHookedChar->m_SavedInput, sizeof(pHookedChar->m_SavedInput));
 						pHookedChar->m_SavedInput.m_TargetY = -1;
 						pHookedChar->m_KeepHooked = true;
@@ -612,16 +495,16 @@ void CGameWorld::NetObjEnd()
 	// Update character IDs and pointers
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		m_apCharacters[i] = nullptr;
-		m_Core.m_apCharacters[i] = nullptr;
+		m_apCharacters[i] = 0;
+		m_Core.m_apCharacters[i] = 0;
 	}
 	for(CCharacter *pChar = (CCharacter *)FindFirst(ENTTYPE_CHARACTER); pChar; pChar = (CCharacter *)pChar->TypeNext())
 	{
-		int Id = pChar->GetCid();
-		if(Id >= 0 && Id < MAX_CLIENTS)
+		int ID = pChar->GetCID();
+		if(ID >= 0 && ID < MAX_CLIENTS)
 		{
-			m_apCharacters[Id] = pChar;
-			m_Core.m_apCharacters[Id] = &pChar->m_Core;
+			m_apCharacters[ID] = pChar;
+			m_Core.m_apCharacters[ID] = pChar->Core();
 		}
 	}
 }
@@ -632,47 +515,46 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 		return;
 	m_IsValidCopy = false;
 	m_pParent = pFrom;
-	if(m_pParent->m_pChild && m_pParent->m_pChild != this)
+	if(m_pParent && m_pParent->m_pChild && m_pParent->m_pChild != this)
 		m_pParent->m_pChild->m_IsValidCopy = false;
 	pFrom->m_pChild = this;
 
 	m_GameTick = pFrom->m_GameTick;
+	m_GameTickSpeed = pFrom->m_GameTickSpeed;
 	m_pCollision = pFrom->m_pCollision;
 	m_WorldConfig = pFrom->m_WorldConfig;
+	for(int i = 0; i < 2; i++)
+	{
+		m_Core.m_Tuning[i] = pFrom->m_Core.m_Tuning[i];
+	}
 	m_pTuningList = pFrom->m_pTuningList;
-	m_pMapBugs = pFrom->m_pMapBugs;
 	m_Teams = pFrom->m_Teams;
-	m_Core.m_vSwitchers = pFrom->m_Core.m_vSwitchers;
-	m_PredictedEvents = pFrom->m_PredictedEvents;
 	// delete the previous entities
-	Clear();
+	for(auto &pFirstEntityType : m_apFirstEntityTypes)
+		while(pFirstEntityType)
+			delete pFirstEntityType;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		m_apCharacters[i] = nullptr;
-		m_Core.m_apCharacters[i] = nullptr;
+		m_apCharacters[i] = 0;
+		m_Core.m_apCharacters[i] = 0;
 	}
 	// copy and add the new entities
 	for(int Type = 0; Type < NUM_ENTTYPES; Type++)
 	{
 		for(CEntity *pEnt = pFrom->FindLast(Type); pEnt; pEnt = pEnt->TypePrev())
 		{
-			CEntity *pCopy = nullptr;
+			CEntity *pCopy = 0;
 			if(Type == ENTTYPE_PROJECTILE)
 				pCopy = new CProjectile(*((CProjectile *)pEnt));
 			else if(Type == ENTTYPE_LASER)
 				pCopy = new CLaser(*((CLaser *)pEnt));
-			else if(Type == ENTTYPE_DRAGGER)
-				pCopy = new CDragger(*((CDragger *)pEnt));
 			else if(Type == ENTTYPE_CHARACTER)
 				pCopy = new CCharacter(*((CCharacter *)pEnt));
 			else if(Type == ENTTYPE_PICKUP)
 				pCopy = new CPickup(*((CPickup *)pEnt));
-			else if(Type == ENTTYPE_PLASMA)
-				pCopy = new CPlasma(*((CPlasma *)pEnt));
 			if(pCopy)
 			{
 				pCopy->m_pParent = pEnt;
-				pEnt->m_pChild = pCopy;
 				this->InsertEntity(pCopy);
 			}
 		}
@@ -680,85 +562,44 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 	m_IsValidCopy = true;
 }
 
-CEntity *CGameWorld::FindMatch(int ObjId, int ObjType, const void *pObjData)
+CEntity *CGameWorld::FindMatch(int ObjID, int ObjType, const void *pObjData)
 {
+#define FindType(EntType, EntClass, ObjClass) \
+	{ \
+		CEntity *pEnt = GetEntity(ObjID, EntType); \
+		if(pEnt && EntClass(this, ObjID, (ObjClass *)pObjData).Match((EntClass *)pEnt)) \
+			return pEnt; \
+		return 0; \
+	}
 	switch(ObjType)
 	{
-	case NETOBJTYPE_CHARACTER:
-	{
-		CCharacter *pEnt = (CCharacter *)GetEntity(ObjId, ENTTYPE_CHARACTER);
-		if(pEnt && CCharacter(this, ObjId, (CNetObj_Character *)pObjData).Match(pEnt))
-		{
-			return pEnt;
-		}
-		return nullptr;
-	}
+	case NETOBJTYPE_CHARACTER: FindType(ENTTYPE_CHARACTER, CCharacter, CNetObj_Character);
 	case NETOBJTYPE_PROJECTILE:
-	case NETOBJTYPE_DDRACEPROJECTILE:
 	case NETOBJTYPE_DDNETPROJECTILE:
 	{
-		CProjectileData Data = ExtractProjectileInfo(ObjType, pObjData, this, nullptr);
-		CProjectile *pEnt = (CProjectile *)GetEntity(ObjId, ENTTYPE_PROJECTILE);
-		if(pEnt && CProjectile(this, ObjId, &Data).Match(pEnt))
+		CProjectileData Data;
+		if(ObjType == NETOBJTYPE_PROJECTILE)
+		{
+			Data = ExtractProjectileInfo((const CNetObj_Projectile *)pObjData, this);
+		}
+		else
+		{
+			Data = ExtractProjectileInfoDDNet((const CNetObj_DDNetProjectile *)pObjData, this);
+		}
+		CProjectile *pEnt = (CProjectile *)GetEntity(ObjID, ENTTYPE_PROJECTILE);
+		if(pEnt && CProjectile(this, ObjID, &Data).Match(pEnt))
 		{
 			return pEnt;
 		}
-		return nullptr;
+		return 0;
 	}
-	case NETOBJTYPE_LASER:
-	case NETOBJTYPE_DDNETLASER:
-	{
-		CLaserData Data = ExtractLaserInfo(ObjType, pObjData, this, nullptr);
-		if(Data.m_Type == LASERTYPE_RIFLE || Data.m_Type == LASERTYPE_SHOTGUN)
-		{
-			CLaser *pEnt = (CLaser *)GetEntity(ObjId, ENTTYPE_LASER);
-			if(pEnt && CLaser(this, ObjId, &Data).Match(pEnt))
-			{
-				return pEnt;
-			}
-		}
-		else if(Data.m_Type == LASERTYPE_DRAGGER)
-		{
-			CDragger *pEnt = (CDragger *)GetEntity(ObjId, ENTTYPE_DRAGGER);
-			if(pEnt && CDragger(this, ObjId, &Data).Match(pEnt))
-			{
-				return pEnt;
-			}
-		}
-		else if(Data.m_Type == LASERTYPE_DOOR)
-		{
-			CDoor *pEnt = (CDoor *)GetEntity(ObjId, ENTTYPE_DOOR);
-			if(pEnt && CDoor(this, ObjId, &Data).Match(pEnt))
-			{
-				return pEnt;
-			}
-		}
-		else if(Data.m_Type == LASERTYPE_PLASMA)
-		{
-			CPlasma *pEnt = (CPlasma *)GetEntity(ObjId, ENTTYPE_PLASMA);
-			if(pEnt && CPlasma(this, ObjId, &Data).Match(pEnt))
-			{
-				return pEnt;
-			}
-		}
-		return nullptr;
+	case NETOBJTYPE_LASER: FindType(ENTTYPE_LASER, CLaser, CNetObj_Laser);
+	case NETOBJTYPE_PICKUP: FindType(ENTTYPE_PICKUP, CPickup, CNetObj_Pickup);
 	}
-	case NETOBJTYPE_PICKUP:
-	case NETOBJTYPE_DDNETPICKUP:
-	{
-		CPickupData Data = ExtractPickupInfo(ObjType, pObjData, nullptr);
-		CPickup *pEnt = (CPickup *)GetEntity(ObjId, ENTTYPE_PICKUP);
-		if(pEnt && CPickup(this, ObjId, &Data).Match(pEnt))
-		{
-			return pEnt;
-		}
-		return nullptr;
-	}
-	}
-	return nullptr;
+	return 0;
 }
 
-void CGameWorld::OnModified() const
+void CGameWorld::OnModified()
 {
 	if(m_pChild)
 		m_pChild->m_IsValidCopy = false;
@@ -769,87 +610,5 @@ void CGameWorld::Clear()
 	// delete all entities
 	for(auto &pFirstEntityType : m_apFirstEntityTypes)
 		while(pFirstEntityType)
-			delete pFirstEntityType; // NOLINT(clang-analyzer-cplusplus.NewDelete)
-}
-
-bool CGameWorld::EmulateBug(int Bug) const
-{
-	return m_pMapBugs->Contains(Bug);
-}
-
-void CGameWorld::CreatePredictedEvent(const CPredictedEvent &NewEvent)
-{
-	if(!g_Config.m_ClPredictEvents || !m_WorldConfig.m_PredictEvents)
-		return;
-
-	// prediction is ran multiple times per tick, check if event already exists
-	const auto It = std::find_if(
-		m_PredictedEvents.begin(),
-		m_PredictedEvents.end(),
-		[NewEvent](const CPredictedEvent &Event) {
-			return Event.m_EventId == NewEvent.m_EventId && Event.m_ExtraInfo == NewEvent.m_ExtraInfo &&
-			       Event.m_Pos == NewEvent.m_Pos && Event.m_Id == NewEvent.m_Id && Event.m_Tick == NewEvent.m_Tick;
-		});
-
-	if(It == m_PredictedEvents.end())
-	{
-		m_PredictedEvents.push_back(NewEvent);
-	}
-}
-
-bool CGameWorld::CheckPredictedEventHandled(const CPredictedEvent &CheckEvent)
-{
-	// events could be delayed by ping, so don't check for exact tick match
-	// also received events don't have Id
-	auto It = std::find_if(
-		m_PredictedEvents.begin(),
-		m_PredictedEvents.end(),
-		[CheckEvent](const CPredictedEvent &Event) {
-			return Event.m_Handled == true && Event.m_EventId == CheckEvent.m_EventId &&
-			       Event.m_Pos == CheckEvent.m_Pos && Event.m_Tick <= CheckEvent.m_Tick && Event.m_ExtraInfo == CheckEvent.m_ExtraInfo;
-		});
-
-	if(It == m_PredictedEvents.end())
-	{
-		return false;
-	}
-
-	// remove the event after it has been confirmed played
-	m_PredictedEvents.erase(It);
-	return true;
-}
-
-void CGameWorld::CreatePredictedSound(vec2 Pos, int SoundId, int Id)
-{
-	if(!g_Config.m_SndEnable)
-		return;
-
-	CPredictedEvent Event(NETEVENTTYPE_SOUNDWORLD, Pos, Id, GameTick(), SoundId);
-	CreatePredictedEvent(Event);
-}
-
-void CGameWorld::CreatePredictedExplosionEvent(vec2 Pos, int Id)
-{
-	CPredictedEvent Event(NETEVENTTYPE_EXPLOSION, Pos, Id, GameTick());
-	CreatePredictedEvent(Event);
-}
-
-void CGameWorld::CreatePredictedHammerHitEvent(vec2 Pos, int Id)
-{
-	CPredictedEvent Event(NETEVENTTYPE_HAMMERHIT, Pos, Id, GameTick());
-	CreatePredictedEvent(Event);
-}
-
-void CGameWorld::CreatePredictedDamageIndEvent(vec2 Pos, float Angle, int Amount, int Id)
-{
-	float a = 3 * pi / 2 + Angle;
-	float s = a - pi / 3;
-	float e = a + pi / 3;
-	for(int i = 0; i < Amount; i++)
-	{
-		float f = mix(s, e, (i + 1) / (float)(Amount + 1));
-
-		CPredictedEvent Event(NETEVENTTYPE_DAMAGEIND, Pos, Id, GameTick(), (int)(f * 256.0f));
-		CreatePredictedEvent(Event);
-	}
+			delete pFirstEntityType;
 }

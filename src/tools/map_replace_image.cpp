@@ -2,74 +2,119 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.  */
 
 #include <base/logger.h>
-#include <base/os.h>
+#include <base/math.h>
 #include <base/system.h>
-
-#include <engine/gfx/image_loader.h>
+#include <engine/graphics.h>
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
-
 #include <game/mapitems.h>
 
+#include <pnglite.h>
 /*
 	Usage: map_replace_image <source map filepath> <dest map filepath> <current image name> <new image filepath>
 	Notes: map filepath must be relative to user default teeworlds folder
 		new image filepath must be absolute or relative to the current position
 */
 
-static CDataFileReader g_DataReader;
+CDataFileReader g_DataReader;
+CDataFileWriter g_DataWriter;
 
 // global new image data (set by ReplaceImageItem)
-static int g_NewNameId = -1;
-static char g_aNewName[128];
-static int g_NewDataId = -1;
-static int g_NewDataSize = 0;
-static void *g_pNewData = nullptr;
+int g_NewNameID = -1;
+char g_aNewName[128];
+int g_NewDataID = -1;
+int g_NewDataSize = 0;
+void *g_pNewData = 0;
 
-static void *ReplaceImageItem(int Index, CMapItemImage *pImgItem, const char *pImgName, const char *pImgFile, CMapItemImage *pNewImgItem)
+int LoadPNG(CImageInfo *pImg, const char *pFilename)
 {
-	const char *pName = g_DataReader.GetDataString(pImgItem->m_ImageName);
-	if(pName == nullptr || pName[0] == '\0')
+	png_t Png;
+
+	IOHANDLE File = io_open(pFilename, IOFLAG_READ);
+	if(!File)
 	{
-		dbg_msg("map_replace_image", "failed to load name of image %d", Index);
-		return pImgItem;
+		dbg_msg("map_replace_image", "failed to open file. filename='%s'", pFilename);
+		return 0;
+	}
+	int Error = png_open_read(&Png, 0, File);
+	if(Error != PNG_NO_ERROR)
+	{
+		dbg_msg("map_replace_image", "failed to open image file. filename='%s', pnglite: %s", pFilename, png_error_string(Error));
+		io_close(File);
+		return 0;
 	}
 
+	if(Png.depth != 8 || (Png.color_type != PNG_TRUECOLOR && Png.color_type != PNG_TRUECOLOR_ALPHA) || Png.width > (2 << 12) || Png.height > (2 << 12))
+	{
+		dbg_msg("map_replace_image", "invalid image format. filename='%s'", pFilename);
+		io_close(File);
+		return 0;
+	}
+
+	unsigned char *pBuffer = (unsigned char *)malloc((size_t)Png.width * Png.height * Png.bpp);
+	Error = png_get_data(&Png, pBuffer);
+	if(Error != PNG_NO_ERROR)
+	{
+		dbg_msg("map_replace_image", "failed to read image. filename='%s', pnglite: %s", pFilename, png_error_string(Error));
+		free(pBuffer);
+		io_close(File);
+		return 0;
+	}
+	io_close(File);
+
+	pImg->m_Width = Png.width;
+	pImg->m_Height = Png.height;
+	if(Png.color_type == PNG_TRUECOLOR)
+		pImg->m_Format = CImageInfo::FORMAT_RGB;
+	else if(Png.color_type == PNG_TRUECOLOR_ALPHA)
+		pImg->m_Format = CImageInfo::FORMAT_RGBA;
+	else
+	{
+		free(pBuffer);
+		return 0;
+	}
+	pImg->m_pData = pBuffer;
+	return 1;
+}
+
+void *ReplaceImageItem(void *pItem, int Type, const char *pImgName, const char *pImgFile, CMapItemImage *pNewImgItem)
+{
+	if(Type != MAPITEMTYPE_IMAGE)
+		return pItem;
+
+	CMapItemImage *pImgItem = (CMapItemImage *)pItem;
+	char *pName = (char *)g_DataReader.GetData(pImgItem->m_ImageName);
+
 	if(str_comp(pImgName, pName) != 0)
-		return pImgItem;
+		return pItem;
 
 	dbg_msg("map_replace_image", "found image '%s'", pImgName);
 
 	CImageInfo ImgInfo;
-	int PngliteIncompatible;
-	if(!CImageLoader::LoadPng(io_open(pImgName, IOFLAG_READ), pImgName, ImgInfo, PngliteIncompatible))
-		return nullptr;
-
-	if(ImgInfo.m_Format != CImageInfo::FORMAT_RGBA)
-	{
-		dbg_msg("map_replace_image", "ERROR: only RGBA PNG images are supported");
-		ImgInfo.Free();
-		return nullptr;
-	}
+	if(!LoadPNG(&ImgInfo, pImgFile))
+		return 0;
 
 	*pNewImgItem = *pImgItem;
 
 	pNewImgItem->m_Width = ImgInfo.m_Width;
 	pNewImgItem->m_Height = ImgInfo.m_Height;
+	int PixelSize = ImgInfo.m_Format == CImageInfo::FORMAT_RGB ? 3 : 4;
 
-	g_NewNameId = pImgItem->m_ImageName;
+	g_NewNameID = pImgItem->m_ImageName;
 	IStorage::StripPathAndExtension(pImgFile, g_aNewName, sizeof(g_aNewName));
-	g_NewDataId = pImgItem->m_ImageData;
+	g_NewDataID = pImgItem->m_ImageData;
 	g_pNewData = ImgInfo.m_pData;
-	g_NewDataSize = ImgInfo.DataSize();
+	g_NewDataSize = ImgInfo.m_Width * ImgInfo.m_Height * PixelSize;
 
 	return (void *)pNewImgItem;
 }
 
 int main(int argc, const char **argv)
 {
-	CCmdlineFix CmdlineFix(&argc, &argv);
+	cmdline_fix(&argc, &argv);
 	log_set_global_logger_default();
+
+	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_BASIC, argc, argv);
 
 	if(argc != 5)
 	{
@@ -80,76 +125,71 @@ int main(int argc, const char **argv)
 		return -1;
 	}
 
-	std::unique_ptr<IStorage> pStorage = std::unique_ptr<IStorage>(CreateStorage(IStorage::EInitializationType::BASIC, argc, argv));
 	if(!pStorage)
 	{
-		log_error("map_replace_image", "Error creating basic storage");
+		dbg_msg("map_replace_image", "error loading storage");
 		return -1;
 	}
 
-	const char *pSourceFilename = argv[1];
-	const char *pDestFilename = argv[2];
+	const char *pSourceFileName = argv[1];
+	const char *pDestFileName = argv[2];
 	const char *pImageName = argv[3];
 	const char *pImageFile = argv[4];
 
-	if(!g_DataReader.Open(pStorage.get(), pSourceFilename, IStorage::TYPE_ALL))
+	int ID = 0;
+	int Type = 0;
+	int Size = 0;
+	void *pItem = 0;
+	void *pData = 0;
+
+	if(!g_DataReader.Open(pStorage, pSourceFileName, IStorage::TYPE_ALL))
 	{
-		dbg_msg("map_replace_image", "failed to open source map. filename='%s'", pSourceFilename);
+		dbg_msg("map_replace_image", "failed to open source map. filename='%s'", pSourceFileName);
 		return -1;
 	}
 
-	CDataFileWriter Writer;
-	if(!Writer.Open(pStorage.get(), pDestFilename))
+	if(!g_DataWriter.Open(pStorage, pDestFileName))
 	{
-		dbg_msg("map_replace_image", "failed to open destination map. filename='%s'", pDestFilename);
+		dbg_msg("map_replace_image", "failed to open destination map. filename='%s'", pDestFileName);
 		return -1;
 	}
+
+	png_init(0, 0);
 
 	// add all items
 	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)
 	{
-		int Type, Id;
-		CUuid Uuid;
-		void *pItem = g_DataReader.GetItem(Index, &Type, &Id, &Uuid);
+		CMapItemImage NewImageItem;
+		pItem = g_DataReader.GetItem(Index, &Type, &ID);
+		Size = g_DataReader.GetItemSize(Index);
 
-		// Filter ITEMTYPE_EX items, they will be automatically added again.
+		// filter ITEMTYPE_EX items, they will be automatically added again
 		if(Type == ITEMTYPE_EX)
 		{
 			continue;
 		}
 
-		int Size = g_DataReader.GetItemSize(Index);
-
-		CMapItemImage NewImageItem;
-		if(Type == MAPITEMTYPE_IMAGE)
-		{
-			pItem = ReplaceImageItem(Index, (CMapItemImage *)pItem, pImageName, pImageFile, &NewImageItem);
-			if(!pItem)
-				return -1;
-			Size = sizeof(CMapItemImage);
-			NewImageItem.m_Version = 1;
-		}
-
-		Writer.AddItem(Type, Id, Size, pItem, &Uuid);
+		pItem = ReplaceImageItem(pItem, Type, pImageName, pImageFile, &NewImageItem);
+		if(!pItem)
+			return -1;
+		g_DataWriter.AddItem(Type, ID, Size, pItem);
 	}
 
-	if(g_NewDataId == -1)
+	if(g_NewDataID == -1)
 	{
-		dbg_msg("map_replace_image", "image '%s' not found on source map '%s'.", pImageName, pSourceFilename);
+		dbg_msg("map_replace_image", "image '%s' not found on source map '%s'.", pImageName, pSourceFileName);
 		return -1;
 	}
 
 	// add all data
 	for(int Index = 0; Index < g_DataReader.NumData(); Index++)
 	{
-		void *pData;
-		int Size;
-		if(Index == g_NewDataId)
+		if(Index == g_NewDataID)
 		{
 			pData = g_pNewData;
 			Size = g_NewDataSize;
 		}
-		else if(Index == g_NewNameId)
+		else if(Index == g_NewNameID)
 		{
 			pData = (void *)g_aNewName;
 			Size = str_length(g_aNewName) + 1;
@@ -160,12 +200,13 @@ int main(int argc, const char **argv)
 			Size = g_DataReader.GetDataSize(Index);
 		}
 
-		Writer.AddData(Size, pData);
+		g_DataWriter.AddData(Size, pData);
 	}
 
 	g_DataReader.Close();
-	Writer.Finish();
+	g_DataWriter.Finish();
 
 	dbg_msg("map_replace_image", "image '%s' replaced", pImageName);
+	cmdline_free(argc, argv);
 	return 0;
 }

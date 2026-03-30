@@ -4,25 +4,17 @@
 #define ENGINE_DEMO_H
 
 #include "kernel.h"
-
 #include <base/hash.h>
-
 #include <engine/map.h>
 #include <engine/shared/uuid_manager.h>
-
-#include <cstdint>
-#include <optional>
 
 enum
 {
 	MAX_TIMELINE_MARKERS = 64
 };
 
-static const unsigned char gs_aHeaderMarker[7] = {'T', 'W', 'D', 'E', 'M', 'O', 0};
-
-static constexpr double DEMO_SPEEDS[] = {0.1, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, 12.0, 16.0, 20.0, 24.0, 28.0, 32.0, 40.0, 48.0, 56.0, 64.0};
-static constexpr int DEMO_SPEED_INDEX_DEFAULT = 4;
-static_assert(DEMO_SPEEDS[DEMO_SPEED_INDEX_DEFAULT] == 1.0);
+constexpr int g_DemoSpeeds = 22;
+extern const double g_aSpeeds[g_DemoSpeeds];
 
 typedef bool (*DEMOFUNC_FILTER)(const void *pData, int DataSize, void *pUser);
 
@@ -37,39 +29,35 @@ struct CDemoHeader
 	unsigned char m_Version;
 	char m_aNetversion[64];
 	char m_aMapName[64];
-	unsigned char m_aMapSize[sizeof(int32_t)];
-	unsigned char m_aMapCrc[sizeof(int32_t)];
+	unsigned char m_aMapSize[4];
+	unsigned char m_aMapCrc[4];
 	char m_aType[8];
-	unsigned char m_aLength[sizeof(int32_t)];
+	unsigned char m_aLength[4];
 	char m_aTimestamp[20];
-
-	bool Valid() const;
 };
 
 struct CTimelineMarkers
 {
-	unsigned char m_aNumTimelineMarkers[sizeof(int32_t)];
-	unsigned char m_aTimelineMarkers[MAX_TIMELINE_MARKERS][sizeof(int32_t)];
+	unsigned char m_aNumTimelineMarkers[4];
+	unsigned char m_aTimelineMarkers[MAX_TIMELINE_MARKERS][4];
 };
 
 struct CMapInfo
 {
 	char m_aName[MAX_MAP_LENGTH];
-	std::optional<SHA256_DIGEST> m_Sha256;
-	unsigned m_Crc;
-	unsigned m_Size;
+	SHA256_DIGEST m_Sha256;
+	int m_Crc;
+	int m_Size;
 };
 
 class IDemoPlayer : public IInterface
 {
-	MACRO_INTERFACE("demoplayer")
+	MACRO_INTERFACE("demoplayer", 0)
 public:
 	class CInfo
 	{
 	public:
 		bool m_Paused;
-		bool m_LiveDemo;
-		bool m_LivePlayback;
 		float m_Speed;
 
 		int m_FirstTick;
@@ -80,50 +68,44 @@ public:
 		int m_aTimelineMarkers[MAX_TIMELINE_MARKERS];
 	};
 
-	enum ETickOffset
+	enum
 	{
-		TICK_CURRENT, // update the current tick again
-		TICK_PREVIOUS, // go to the previous tick
-		TICK_NEXT, // go to the next tick
+		DEMOTYPE_INVALID = 0,
+		DEMOTYPE_CLIENT,
+		DEMOTYPE_SERVER,
 	};
 
+	~IDemoPlayer() {}
 	virtual void SetSpeed(float Speed) = 0;
-	virtual void SetSpeedIndex(int SpeedIndex) = 0;
-	virtual void AdjustSpeedIndex(int Offset) = 0;
-	virtual bool SeekPercent(float Percent) = 0;
-	virtual bool SeekTime(float Seconds) = 0;
-	virtual bool SeekTick(ETickOffset TickOffset) = 0;
-	virtual bool SetPos(int WantedTick) = 0;
+	virtual void SetSpeedIndex(int Offset) = 0;
+	virtual int SeekPercent(float Percent) = 0;
+	virtual int SeekTime(float Seconds) = 0;
+	virtual int SetPos(int WantedTick) = 0;
 	virtual void Pause() = 0;
 	virtual void Unpause() = 0;
-	virtual const char *ErrorMessage() const = 0;
 	virtual bool IsPlaying() const = 0;
 	virtual const CInfo *BaseInfo() const = 0;
-	virtual void GetDemoName(char *pBuffer, size_t BufferSize) const = 0;
-	virtual bool GetDemoInfo(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo, IOHANDLE *pFile = nullptr, char *pErrorMessage = nullptr, size_t ErrorMessageSize = 0) const = 0;
+	virtual void GetDemoName(char *pBuffer, int BufferSize) const = 0;
+	virtual bool GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo) const = 0;
+	virtual int GetDemoType() const = 0;
 };
 
 class IDemoRecorder : public IInterface
 {
-	MACRO_INTERFACE("demorecorder")
+	MACRO_INTERFACE("demorecorder", 0)
 public:
-	enum class EStopMode
-	{
-		KEEP_FILE,
-		REMOVE_FILE,
-	};
-
+	~IDemoRecorder() {}
 	virtual bool IsRecording() const = 0;
-	virtual int Stop(IDemoRecorder::EStopMode Mode, const char *pTargetFilename = "") = 0;
+	virtual int Stop() = 0;
 	virtual int Length() const = 0;
-	virtual const char *CurrentFilename() const = 0;
+	virtual char *GetCurrentFilename() = 0;
 };
 
 class IDemoEditor : public IInterface
 {
-	MACRO_INTERFACE("demoeditor")
+	MACRO_INTERFACE("demoeditor", 0)
 public:
-	virtual bool Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, DEMOFUNC_FILTER pfnFilter, void *pUser) = 0;
+	virtual void Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, DEMOFUNC_FILTER pfnFilter, void *pUser) = 0;
 };
 
 #endif

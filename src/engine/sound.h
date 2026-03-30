@@ -3,22 +3,20 @@
 #ifndef ENGINE_SOUND_H
 #define ENGINE_SOUND_H
 
-#include <base/vmath.h>
+#include "kernel.h"
 
-#include <engine/kernel.h>
-#include <engine/storage.h>
+#include <engine/shared/video.h>
 
 class ISound : public IInterface
 {
-	MACRO_INTERFACE("sound")
+	MACRO_INTERFACE("sound", 0)
 public:
 	enum
 	{
 		FLAG_LOOP = 1 << 0,
 		FLAG_POS = 1 << 1,
 		FLAG_NO_PANNING = 1 << 2,
-		FLAG_PREVIEW = 1 << 3,
-		FLAG_ALL = FLAG_LOOP | FLAG_POS | FLAG_NO_PANNING | FLAG_PREVIEW,
+		FLAG_ALL = FLAG_LOOP | FLAG_POS | FLAG_NO_PANNING,
 	};
 
 	enum
@@ -30,7 +28,7 @@ public:
 	// unused
 	struct CSampleHandle
 	{
-		int m_SampleId;
+		int m_SampleID;
 	};
 
 	struct CVoiceShapeCircle
@@ -65,44 +63,38 @@ public:
 
 	virtual bool IsSoundEnabled() = 0;
 
-	virtual int LoadOpus(const char *pFilename, int StorageType = IStorage::TYPE_ALL) = 0;
-	virtual int LoadWV(const char *pFilename, int StorageType = IStorage::TYPE_ALL) = 0;
-	virtual int LoadOpusFromMem(const void *pData, unsigned DataSize, bool ForceLoad, const char *pContextName) = 0;
-	virtual int LoadWVFromMem(const void *pData, unsigned DataSize, bool ForceLoad, const char *pContextName) = 0;
-	virtual void UnloadSample(int SampleId) = 0;
+	virtual int LoadWV(const char *pFilename) = 0;
+	virtual int LoadOpus(const char *pFilename) = 0;
+	virtual int LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor = false) = 0;
+	virtual int LoadOpusFromMem(const void *pData, unsigned DataSize, bool FromEditor = false) = 0;
+	virtual void UnloadSample(int SampleID) = 0;
 
-	virtual float GetSampleTotalTime(int SampleId) = 0; // in s
-	virtual float GetSampleCurrentTime(int SampleId) = 0; // in s
-	virtual void SetSampleCurrentTime(int SampleId, float Time) = 0;
+	virtual float GetSampleDuration(int SampleID) = 0; // in s
 
-	virtual void SetChannel(int ChannelId, float Volume, float Panning) = 0;
-	virtual void SetListenerPosition(vec2 Position) = 0;
+	virtual void SetChannel(int ChannelID, float Volume, float Panning) = 0;
+	virtual void SetListenerPos(float x, float y) = 0;
 
 	virtual void SetVoiceVolume(CVoiceHandle Voice, float Volume) = 0;
 	virtual void SetVoiceFalloff(CVoiceHandle Voice, float Falloff) = 0;
-	virtual void SetVoicePosition(CVoiceHandle Voice, vec2 Position) = 0;
-	virtual void SetVoiceTimeOffset(CVoiceHandle Voice, float TimeOffset) = 0; // in s
+	virtual void SetVoiceLocation(CVoiceHandle Voice, float x, float y) = 0;
+	virtual void SetVoiceTimeOffset(CVoiceHandle Voice, float offset) = 0; // in s
 
 	virtual void SetVoiceCircle(CVoiceHandle Voice, float Radius) = 0;
 	virtual void SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height) = 0;
 
-	virtual CVoiceHandle PlayAt(int ChannelId, int SampleId, int Flags, float Volume, vec2 Position) = 0;
-	virtual CVoiceHandle Play(int ChannelId, int SampleId, int Flags, float Volume) = 0;
-	virtual void Pause(int SampleId) = 0;
-	virtual void Stop(int SampleId) = 0;
+	virtual CVoiceHandle PlayAt(int ChannelID, int SampleID, int Flags, float x, float y) = 0;
+	virtual CVoiceHandle Play(int ChannelID, int SampleID, int Flags) = 0;
+	virtual void Stop(int SampleID) = 0;
 	virtual void StopAll() = 0;
 	virtual void StopVoice(CVoiceHandle Voice) = 0;
-	virtual bool IsPlaying(int SampleId) = 0;
 
-	virtual int MixingRate() const = 0;
-	virtual void Mix(short *pFinalOut, unsigned Frames) = 0;
-
+	virtual ISoundMixFunc GetSoundMixFunc() = 0;
 	// useful for thread synchronization
 	virtual void PauseAudioDevice() = 0;
 	virtual void UnpauseAudioDevice() = 0;
 
 protected:
-	CVoiceHandle CreateVoiceHandle(int Index, int Age)
+	inline CVoiceHandle CreateVoiceHandle(int Index, int Age)
 	{
 		CVoiceHandle Voice;
 		Voice.m_Id = Index;
@@ -113,11 +105,11 @@ protected:
 
 class IEngineSound : public ISound
 {
-	MACRO_INTERFACE("enginesound")
+	MACRO_INTERFACE("enginesound", 0)
 public:
 	virtual int Init() = 0;
 	virtual int Update() = 0;
-	void Shutdown() override = 0;
+	virtual int Shutdown() = 0;
 };
 
 extern IEngineSound *CreateEngineSound();

@@ -1,66 +1,69 @@
-#include <base/log.h>
-#include <base/math.h>
 #include <base/system.h>
-
+#include <base/tl/array.h>
 #include <engine/shared/datafile.h>
 #include <engine/shared/linereader.h>
 #include <engine/storage.h>
-
 #include <game/mapitems.h>
 
-#include <vector>
-
-static void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
+void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 {
-	CLineReader LineReader;
-	if(!LineReader.OpenFile(pStorage->OpenFile(pConfigName, IOFLAG_READ, IStorage::TYPE_ABSOLUTE)))
+	IOHANDLE File = pStorage->OpenFile(pConfigName, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ABSOLUTE);
+	array<char *> aLines;
+	char *pSettings = NULL;
+	if(!File)
 	{
-		log_error("config_store", "Failed to import settings from '%s': could not open config for reading", pConfigName);
+		dbg_msg("config_store", "config '%s' not found", pConfigName);
 		return;
 	}
 
-	std::vector<const char *> vpLines;
+	CLineReader LineReader;
+	LineReader.Init(File);
+
+	char *pLine;
 	int TotalLength = 0;
-	while(const char *pLine = LineReader.Get())
+	while((pLine = LineReader.Get()))
 	{
-		vpLines.push_back(pLine);
-		TotalLength += str_length(pLine) + 1;
+		int Length = str_length(pLine) + 1;
+		char *pCopy = (char *)malloc(Length);
+		mem_copy(pCopy, pLine, Length);
+		aLines.add(pCopy);
+		TotalLength += Length;
+	}
+	io_close(File);
+
+	pSettings = (char *)malloc(maximum(1, TotalLength));
+	int Offset = 0;
+	for(int i = 0; i < aLines.size(); i++)
+	{
+		int Length = str_length(aLines[i]) + 1;
+		mem_copy(pSettings + Offset, aLines[i], Length);
+		Offset += Length;
+		free(aLines[i]);
 	}
 
 	CDataFileReader Reader;
-	if(!Reader.Open(pStorage, pMapName, IStorage::TYPE_ABSOLUTE))
-	{
-		log_error("config_store", "Failed to import settings from '%s': failed to open map '%s' for reading", pConfigName, pMapName);
-		return;
-	}
-
-	char *pSettings = (char *)malloc(maximum(1, TotalLength));
-	int Offset = 0;
-	for(const char *pLine : vpLines)
-	{
-		int Length = str_length(pLine) + 1;
-		mem_copy(pSettings + Offset, pLine, Length);
-		Offset += Length;
-	}
+	Reader.Open(pStorage, pMapName, IStorage::TYPE_ABSOLUTE);
 
 	CDataFileWriter Writer;
+	Writer.Init();
 
 	int SettingsIndex = Reader.NumData();
 	bool FoundInfo = false;
 	for(int i = 0; i < Reader.NumItems(); i++)
 	{
-		int Type, Id;
-		int *pItem = (int *)Reader.GetItem(i, &Type, &Id);
+		int TypeID;
+		int ItemID;
+		int *pData = (int *)Reader.GetItem(i, &TypeID, &ItemID);
 		int Size = Reader.GetItemSize(i);
 		CMapItemInfoSettings MapInfo;
-		if(Type == MAPITEMTYPE_INFO && Id == 0)
+		if(TypeID == MAPITEMTYPE_INFO && ItemID == 0)
 		{
 			FoundInfo = true;
-			CMapItemInfoSettings *pInfo = (CMapItemInfoSettings *)pItem;
+			CMapItemInfoSettings *pInfo = (CMapItemInfoSettings *)pData;
 			if(Size >= (int)sizeof(CMapItemInfoSettings))
 			{
 				MapInfo = *pInfo;
-				pItem = (int *)&MapInfo;
+				pData = (int *)&MapInfo;
 				Size = sizeof(MapInfo);
 				if(pInfo->m_Settings > -1)
 				{
@@ -69,7 +72,7 @@ static void Process(IStorage *pStorage, const char *pMapName, const char *pConfi
 					int DataSize = Reader.GetDataSize(SettingsIndex);
 					if(DataSize == TotalLength && mem_comp(pSettings, pMapSettings, DataSize) == 0)
 					{
-						log_info("config_store", "Configs coincide, not updating map");
+						dbg_msg("config_store", "configs coincide, not updating map");
 						free(pSettings);
 						return;
 					}
@@ -79,7 +82,7 @@ static void Process(IStorage *pStorage, const char *pMapName, const char *pConfi
 				{
 					MapInfo = *pInfo;
 					MapInfo.m_Settings = SettingsIndex;
-					pItem = (int *)&MapInfo;
+					pData = (int *)&MapInfo;
 					Size = sizeof(MapInfo);
 				}
 			}
@@ -87,11 +90,11 @@ static void Process(IStorage *pStorage, const char *pMapName, const char *pConfi
 			{
 				*(CMapItemInfo *)&MapInfo = *(CMapItemInfo *)pInfo;
 				MapInfo.m_Settings = SettingsIndex;
-				pItem = (int *)&MapInfo;
+				pData = (int *)&MapInfo;
 				Size = sizeof(MapInfo);
 			}
 		}
-		Writer.AddItem(Type, Id, Size, pItem);
+		Writer.AddItem(TypeID, ItemID, Size, pData);
 	}
 
 	if(!FoundInfo)
@@ -121,12 +124,12 @@ static void Process(IStorage *pStorage, const char *pMapName, const char *pConfi
 
 	free(pSettings);
 	Reader.Close();
-	if(!Writer.Open(pStorage, pMapName))
+	if(!Writer.OpenFile(pStorage, pMapName))
 	{
-		log_error("config_store", "Failed to import settings from '%s': failed to open map '%s' for writing", pConfigName, pMapName);
+		dbg_msg("config_store", "couldn't open map file '%s' for writing", pMapName);
 		return;
 	}
 	Writer.Finish();
-	log_info("config_store", "Imported settings from '%s' into '%s'", pConfigName, pMapName);
+	dbg_msg("config_store", "imported settings");
 }
 #include "config_common.h"

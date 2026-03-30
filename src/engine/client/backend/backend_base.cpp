@@ -1,13 +1,24 @@
 #include "backend_base.h"
+#include "engine/shared/image_manipulation.h"
 
-#include <base/system.h>
+size_t CCommandProcessorFragment_GLBase::TexFormatToImageColorChannelCount(int TexFormat)
+{
+	if(TexFormat == CCommandBuffer::TEXFORMAT_RGBA)
+		return 4;
+	return 4;
+}
 
-bool CCommandProcessorFragment_GLBase::Texture2DTo3D(uint8_t *pImageBuffer, int ImageWidth, int ImageHeight, size_t PixelSize, int SplitCountWidth, int SplitCountHeight, uint8_t *pTarget3DImageData, int &Target3DImageWidth, int &Target3DImageHeight)
+void *CCommandProcessorFragment_GLBase::Resize(const unsigned char *pData, int Width, int Height, int NewWidth, int NewHeight, int BPP)
+{
+	return ResizeImage((const uint8_t *)pData, Width, Height, NewWidth, NewHeight, BPP);
+}
+
+bool CCommandProcessorFragment_GLBase::Texture2DTo3D(void *pImageBuffer, int ImageWidth, int ImageHeight, int ImageColorChannelCount, int SplitCountWidth, int SplitCountHeight, void *pTarget3DImageData, int &Target3DImageWidth, int &Target3DImageHeight)
 {
 	Target3DImageWidth = ImageWidth / SplitCountWidth;
 	Target3DImageHeight = ImageHeight / SplitCountHeight;
 
-	const size_t FullImageWidth = (size_t)ImageWidth * PixelSize;
+	size_t FullImageWidth = (size_t)ImageWidth * ImageColorChannelCount;
 
 	for(int Y = 0; Y < SplitCountHeight; ++Y)
 	{
@@ -17,11 +28,11 @@ bool CCommandProcessorFragment_GLBase::Texture2DTo3D(uint8_t *pImageBuffer, int 
 			{
 				int DepthIndex = X + Y * SplitCountWidth;
 
-				size_t TargetImageFullWidth = (size_t)Target3DImageWidth * PixelSize;
-				size_t TargetImageFullSize = TargetImageFullWidth * Target3DImageHeight;
+				size_t TargetImageFullWidth = (size_t)Target3DImageWidth * ImageColorChannelCount;
+				size_t TargetImageFullSize = (size_t)TargetImageFullWidth * Target3DImageHeight;
 				ptrdiff_t ImageOffset = (ptrdiff_t)(((size_t)Y * FullImageWidth * (size_t)Target3DImageHeight) + ((size_t)Y3D * FullImageWidth) + ((size_t)X * TargetImageFullWidth));
 				ptrdiff_t TargetImageOffset = (ptrdiff_t)(TargetImageFullSize * (size_t)DepthIndex + ((size_t)Y3D * TargetImageFullWidth));
-				mem_copy(pTarget3DImageData + TargetImageOffset, pImageBuffer + ImageOffset, TargetImageFullWidth);
+				mem_copy(((uint8_t *)pTarget3DImageData) + TargetImageOffset, ((uint8_t *)pImageBuffer) + (ptrdiff_t)(ImageOffset), TargetImageFullWidth);
 			}
 		}
 	}

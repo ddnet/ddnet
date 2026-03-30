@@ -1,3 +1,17 @@
+##### authors #####
+#originally created by:
+#	Learath2
+#modified by:
+#	Learath2		2011-06-27 18:54:08
+#	Learath2		2011-08-21 00:12:50
+#	Learath2		2011-09-07 15:59:20
+#	Learath2		2012-01-01 22:54:29
+#	ardadem			2020-08-20 00:00:00
+#	ardadem			2020-08-22 00:00:00
+##### /authors #####
+
+##### translated strings #####
+
 %ds left
 == %ds kaldı
 
@@ -16,11 +30,17 @@
 %s wins!
 == %s kazandı!
 
+-Page %d-
+== -Sayfa %d-
+
 Abort
 == İptal
 
 Add
 == Ekle
+
+Add Friend
+== Arkadaş Ekle
 
 Address
 == Adres
@@ -28,14 +48,20 @@ Address
 All
 == Hepsi
 
+Are you sure that you want to delete the demo?
+== Demo dosyasını silmek istediğinize emin misiniz?
+
 Are you sure that you want to quit?
 == Çıkmak istediğinize emin misiniz?
+
+Are you sure that you want to remove the player from your friends list?
+== Bu oyuncuyu arkadaş listenizden kaldırmak istediğinize emin misiniz?
 
 Automatically record demos
 == Demoları otomatik olarak kaydet
 
 Automatically take game over screenshot
-== Oyun bittiğinde otomatik olarak ekran görüntüsü al
+== Otomatik olarak oyun bitişinde ekran görüntüsü al
 
 Blue team
 == Mavi takım
@@ -61,11 +87,17 @@ Clan
 Client
 == İstemci
 
+Close
+== Kapat
+
+Connect
+== Bağlan
+
 Connecting to
 == Bağlanılıyor
 
-Connection Problems…
-== Bağlantı Hataları…
+Connection Problems...
+== Bağlantı Hataları...
 
 Console
 == Konsol
@@ -87,6 +119,9 @@ Delete
 
 Delete demo
 == Demoyu sil
+
+Demo details
+== Demo ayrıntıları
 
 Demofile: %s
 == Demo dosyası: %s
@@ -110,7 +145,7 @@ Dynamic Camera
 == Dinamik Kamera
 
 Emoticon
-== İfade
+== Yüz ifadesi
 
 Error
 == Hata
@@ -127,17 +162,23 @@ Favorites
 Feet
 == Ayak
 
+Filter
+== Filtre
+
 Fire
 == Ateş
 
 Folder
-== Klasör
+== Dosya
 
 Force vote
 == Oylamayı zorla
 
 Free-View
 == Serbest Bakış
+
+Friends
+== Arkadaşlar
 
 Fullscreen
 == Tam ekran
@@ -149,7 +190,7 @@ Game info
 == Oyun bilgisi
 
 Game over
-== Oyun bitti
+== Oyun sonu
 
 Game type
 == Oyun türü
@@ -164,7 +205,7 @@ Graphics
 == Grafik
 
 Grenade
-== Bomba Atar
+== El bombası
 
 Hammer
 == Çekiç
@@ -197,10 +238,13 @@ Language
 == Dil
 
 MOTD
-== Sunucu mesajı
+== MOTD
 
 Map
 == Harita
+
+Mouse sens.
+== Mouse duyarlılığı
 
 Move left
 == Sola git
@@ -218,7 +262,7 @@ Mute when not active
 == Aktif değilken sessizleştir
 
 Name
-== İsim
+== Takma ad
 
 Next weapon
 == Sonraki silah
@@ -230,7 +274,7 @@ No
 == Hayır
 
 No password
-== Şifre yok
+== Şifresiz
 
 No servers found
 == Sunucu bulunamadı
@@ -240,6 +284,9 @@ No servers match your filter criteria
 
 Ok
 == Tamam
+
+Open
+== Aç
 
 Parent Folder
 == Üst dizin
@@ -256,14 +303,21 @@ Ping
 Pistol
 == Tabanca
 
+[Demo browser]
+Play
+== Oynat
+
 Play background music
-== Arka plan müziğini oynat
+== Arkaplan müziğini çal
 
 Player
 == Oyuncu
 
+Player options
+== Oyuncu ayarları
+
 Players
-== Oyuncular
+== Oyuncu
 
 Please balance teams!
 == Takımları dengeleyin!
@@ -283,20 +337,29 @@ Red team
 Red team wins!
 == Kırmızı takım kazandı!
 
+Refresh
+== Yenile
+
 Remote console
-== Uzak konsol
+== Uzak Konsol
 
 Remove
 == Çıkar
 
 Remove friend
-== Arkadaşı çıkar
+== Arkadaşı sil
+
+Rename
+== Yeniden isimlendir
 
 Rename demo
 == Demonun adını değiştir
 
 Reset filter
 == Filtreleri sıfırla
+
+Sample rate
+== Örnekleme hızı
 
 Score
 == Skor
@@ -305,7 +368,7 @@ Score limit
 == Skor limiti
 
 Scoreboard
-== Skor tablosu
+== Skor tahtası
 
 Screenshot
 == Ekran görüntüsü
@@ -313,8 +376,14 @@ Screenshot
 Server address:
 == Sunucu adresi:
 
+Server details
+== Sunucucu detayları
+
+Server filter
+== Filtreler
+
 Server info
-== Sunucu bilgisi
+== Hakkında
 
 Server not full
 == Sunucu dolu değil
@@ -333,6 +402,9 @@ Show ingame HUD
 
 Show name plates
 == Oyuncu isimlerini göster
+
+Skins
+== Skinler
 
 Sound
 == Ses
@@ -374,10 +446,16 @@ Team chat
 == Takım sohbeti
 
 The audio device couldn't be initialised.
-== Ses aygıtı başlatılamadı.
+== Ses donanımı başlatılamadı.
 
 The server is running a non-standard tuning on a pure game type.
 == Bu sunucu standart olmayan bir ayarı saf bir oyun türünde kullanıyor.
+
+There's an unsaved map in the editor, you might want to save it before you quit the game.
+== Editörde kaydedilmemiş bir harita var, kapatmadan önce kaydetmek isteyebilirsiniz.
+
+Time limit
+== Süre limiti
 
 Time limit: %d min
 == Süre limiti: %d dakika
@@ -387,6 +465,9 @@ Try again
 
 Type
 == Tür
+
+Unable to delete the demo
+== Demo silinemiyor
 
 Unable to rename the demo
 == Demonun ismi değiştirilemiyor
@@ -431,7 +512,7 @@ You must restart the game for all settings to take effect.
 == Bütün ayarların aktif olması için oyunu yeniden başlatmalısınız.
 
 New name:
-== Yeni isim:
+== Yeni isim :
 
 Sat.
 == Doygunluk
@@ -440,13 +521,13 @@ Miscellaneous
 == Çeşitli
 
 Internet
-== İnternet
+== Internet
 
 Max demos
 == Maksimum Demo Sayısı
 
 News
-== Haberler
+== Haber
 
 Join game
 == Oyuna katıl
@@ -457,11 +538,26 @@ FSAA samples
 Sound volume
 == Ses seviyesi
 
+Created:
+== Oluşturuldu:
+
 Max Screenshots
 == Maksimum Ekran Görüntüsü Sayısı
 
+Length:
+== Uzunluk:
+
 Laser
 == Lazer
+
+Netversion:
+== Netversion :
+
+Map:
+== Harita:
+
+Info
+== Bilgi
 
 Hue
 == Renk
@@ -472,14 +568,34 @@ Record demo
 Your skin
 == Sizin görünüşünüz
 
+Size:
+== Boyut:
+
+##### translated strings #####
+
 Reset to defaults
 == Varsayılanlara getir
+
+Quit anyway?
+== Çıkmak istediğinize emin misiniz?
+
+Display Modes
+== Çözünürlük
+
+Version:
+== Versiyon :
+
+Round
+== Raund
 
 Lht.
 == Parlaklık
 
 UI Color
 == Menü rengi
+
+Crc:
+== Crc:
 
 Alpha
 == Şeffaflık
@@ -489,6 +605,9 @@ LAN
 
 Name plates size
 == Boyut
+
+Type:
+== Tür:
 
 Successfully saved the replay!
 == Başarıyla kaydedildi!
@@ -515,13 +634,13 @@ Ghost
 == Hayalet
 
 Loading DDNet Client
-== DDNet İstemcisi Yükleniyor
+== DDNet Client yükleniyor
 
 Reconnect in %d sec
 == %d saniye içinde yeniden bağlanılacak
 
 Render demo
-== Demo'yu işle
+== Render demo
 
 Replace video
 == Video üzerine yaz
@@ -536,22 +655,25 @@ Disconnect Dummy
 == Dummy Ayrıl
 
 Are you sure that you want to disconnect your dummy?
-== Dummy'nin bağlantısını koparmak istediğinizden emin misiniz?
+== Dummy bağlantısını koparmak istediğinizden emin misiniz?
 
 Welcome to DDNet
-== DDNet'e hoş geldiniz
+== DDNet e hoşgeldiniz
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDRaceNetwork bitiş çizgisine en kısa sürede ulaşmayı amaçlayan oyunculardan oluşan, çevrim içi bir takım oyunudur. Çaylak olarak ilk önce kolay haritalardan yani Novice sunuculardan oynamaya başlamanı öneririz. Size uygun sunucuyu seçerken pinginizi dikkate alın.
+== DDRaceNetwork bitiş çizgisine en kısa sürede ulaşmayı amaçlayan oyunculardan oluşan, çevrimiçi bir takım oyunudur. Çaylak olarak ilk önce kolay haritalardan yani Novice sunuculardan oynamaya başlamanı öneririz. Herhangi bir sunucu seçmeden önce sana yakın olan sunucuyu seçmek için ping'i dikkate al.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== Ölmek (yeniden başlamak) için "k" tuşu, oyunu durdurup diğer oyuncuları izlemek için "q" tuşunu kullanabilirsin. Diğer kontrollere ayarlardan bakabilirsin.
+== İntihar etmek (yeniden başlamak) için k tuşu, oyunu durdurup diğer oyuncuları izlemek için q tuşunu kullanabilirsin. Diğer kontrollere ayarlardan bakabilirsin.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Sunuculara bağlanmadan önce ayarları kontrol edip kendine göre düzenlemeni öneriyoruz.
 
 Please enter your nickname below.
-== Lütfen takma adınızı girin.
+== Lütfen takma adı girin.
+
+Destination file already exist
+== Dosya hali hazırda mevcut
 
 Video name:
 == Video ismi:
@@ -559,8 +681,8 @@ Video name:
 Show DDNet map finishes in server browser
 == Tamamlanan DDNet haritalarını sunucu listesinde göster
 
-transmits your player name to info.ddnet.org
-== oyuncu adını info.ddnet.org ile paylaşır
+transmits your player name to info2.ddnet.tw
+== oyuncu adını info2.ddnet.tw ile paylaşır
 
 Search
 == Ara
@@ -569,7 +691,7 @@ Exclude
 == Hariç
 
 Player country:
-== Oyuncu ülkesi:
+== Oyuncu ülkesi
 
 Filter connecting players
 == Bağlanan oyuncuları sayma
@@ -592,11 +714,11 @@ DDNet %s is out!
 Downloading %s:
 == İndiriliyor %s:
 
-Update failed! Check log…
-== Güncelleme başarısız oldu! Günlük dosyasını kontrol edin…
+Update failed! Check log...
+== Güncelleme sırasında hata oluştu!
 
 DDNet Client updated!
-== DDNet İstemcisi güncellendi!
+== DDNet Client güncellendi!
 
 Update now
 == Güncelle
@@ -604,8 +726,17 @@ Update now
 Restart
 == Yeniden başlat
 
+Select a name
+== Takma ad seç
+
+Please use a different name
+== Lütfen farklı takma ad kullanın
+
 Remove chat
 == Sohbeti kaldır
+
+Markers:
+== İşaretler:
 
 %.2f MiB
 == %.2f MiB
@@ -628,11 +759,17 @@ Date
 Fetch Info
 == Bilgileri göster
 
+Render
+== Render
+
 Connecting dummy
 == Dummy bağlanıyor
 
 Connect Dummy
 == Dummy Katıl
+
+Reload
+== Yenile
 
 Deactivate
 == Devre dışı bırak
@@ -646,6 +783,9 @@ Save
 Switch weapon when out of ammo
 == Mermi kalmadığında silahı değiştir
 
+Reset wanted weapon on death
+== Ölünce varsayılan silahı kullan
+
 Show only chat messages from friends
 == Sadece arkadaşlardan gelen mesajları göster
 
@@ -653,22 +793,28 @@ Show clan above name plates
 == Oyuncu isimlerinin üstünde klanı göster
 
 Clan plates size
-== Klan etiket boyutu
+== Boyut
 
 Refresh Rate
 == Yenileme Hızı
 
+Show console window
+== Konsol penceresini göster
+
 Automatically take statboard screenshot
-== Otomatik olarak skor tablosunun ekran görüntüsü al
+== Otomatik olarak stat tahtası ekran görüntüsü al
 
 Automatically create statboard csv
-== Otomatik olarak skor tablosunu csv olarak oluştur
+== Otomatik olarak stat tahtası csv oluştur
 
 Max CSVs
-== Maksimum CSV sayısı
+== Max CSVs
+
+Dummy settings
+== Dummy ayarları
 
 Vanilla skins only
-== Sadece orijinal skinler
+== Sadece vanilla skinleri
 
 Fat skins (DDFat)
 == Şişko skinler (DDFat)
@@ -683,7 +829,7 @@ Pause
 == Durdur
 
 Kill
-== Öl
+== İntihar et
 
 Zoom in
 == Yakınlaştır
@@ -692,7 +838,7 @@ Zoom out
 == Uzaklaştır
 
 Default zoom
-== Varsayılan yakınlaştırma
+== Varsayılan zoom
 
 Show others
 == Diğerlerini göster
@@ -710,16 +856,16 @@ Toggle ghost
 == Hayaleti göster
 
 Dummy copy
-== Dummy kopyala
+== Dummy copy
 
 Hammerfly dummy
-== Çekiç uçuşu dummy
+== Hammerfly dummy
 
 Converse
 == Konuşma
 
 Statboard
-== Skor Tablosu
+== Stat tahtası
 
 Lock team
 == Takımı kilitle
@@ -730,11 +876,17 @@ Show entities
 Show HUD
 == Arayüzü göster
 
+UI mouse s.
+== Arayüzde mouse duy.
+
 may cause delay
 == gecikmelere sebep olabilir
 
 Screen
 == Ekran
+
+Use high DPI
+== Yüksek DPI kullan
 
 Enable game sounds
 == Oyun sesini etkinleştir
@@ -757,6 +909,9 @@ Enable team chat sound
 Enable highlighted chat sound
 == Vurgulanmış mesaj sesini etkinleştir
 
+Threaded sound loading
+== Threaded ses yükleme
+
 Map sound volume
 == Harita ses seviyesi
 
@@ -767,13 +922,19 @@ DDNet
 == DDNet
 
 DDNet Client needs to be restarted to complete update!
-== Güncellemenin tamamlanabilmesi için oyunun yeniden başlatılması lazım!
+== Güncellemenin tamamlanabilmesi için istemcinin yeniden başlatılması gerek!
+
+Use DDRace Scoreboard
+== DDRace Skor Tahtası kulan
 
 Show score
 == Skoru göster
 
+Show health + ammo
+== Can + mermi göster
+
 Show names in chat in team colors
-== Sohbette isimleri takım rengine göre ayır
+== Sohbetde isimleri takım rengiyle göster
 
 Show kill messages
 == Ölüm mesajlarını göster
@@ -808,8 +969,8 @@ Client message
 Save the best demo of each race
 == Her yarış için en iyi demoyu kaydet
 
-Default length
-== Varsayılan uzunluk
+Default length: %d
+== Uzunluk: %d
 
 Enable replays
 == Tekrar oynatmaları etkinleştir
@@ -833,7 +994,10 @@ Show text entities
 == Yazı yapılarını göster
 
 Show others (own team only)
-== Diğerlerini göster (sadece kendi takımını)
+== Diğerlerini göster (sadece kendi takımın)
+
+Show quads
+== Dörtgen yapıları göster
 
 AntiPing
 == AntiPing
@@ -850,14 +1014,23 @@ AntiPing: predict grenade paths
 Show other players' hook collision lines
 == Diğer oyuncuların kanca çizgisini göster
 
+Show other players' key presses
+== Diğer oyuncuların tuş basışlarını göster
+
+Old mouse mode
+== Eski mouse modu
+
 Show tiles layers from BG map
 == Yapı katmanlarını göster
+
+Try fast HTTP map download first
+== Önce HTTP üzerinden haritayı hızlı indirmeyi dene
 
 DDNet %s is available:
 == DDNet %s yayınlandı:
 
-Updating…
-== Güncelleniyor…
+Updating...
+== Güncelleniyor...
 
 No updates available
 == Güncelleme mevcut değil
@@ -875,7 +1048,7 @@ Follow
 == Takip et
 
 Frags
-== Parçalanma
+== Frags
 
 Deaths
 == Ölümler
@@ -899,7 +1072,7 @@ Best
 == En iyi
 
 Grabs
-== Yakalama
+== Grabs
 
 1 new mention
 == 1 yeni bildirim
@@ -922,1732 +1095,294 @@ Auto
 Replay
 == Yeniden oynatma
 
-https://wiki.ddnet.org/
-== https://wiki.ddnet.org/wiki/Main_Page/tr
-
-[Graphics error]
-Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== Başlatma başarısız oldu. Konfigürasyon klasöründeki settings_ddnet.cfg dosyasında gfx_backend ayarını OpenGL veya Vulkan olarak değiştirmeyi deneyin.
-
-[Graphics error]
-An error during command recording occurred. Try to update your GPU drivers.
-== Komut kaydı sırasında hata oluştu. GPU sürücülerini güncellemeyi deneyin.
-
-[Graphics error]
-A render command failed. Try to update your GPU drivers.
-== Render komutu başarısız oldu. GPU sürücülerini güncellemeyi deneyin.
-
-[Graphics error]
-Submitting the render commands failed. Try to update your GPU drivers.
-== Render komutları gönderilemedi. GPU sürücülerini güncellemeyi deneyin.
-
-[Graphics error]
-Failed to swap framebuffers. Try to update your GPU drivers.
-== Arabellek değiştirilemedi. GPU sürücülerini güncellemeyi deneyin.
-
-[Graphics error]
-Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== Bilinmeyen hata. Konfigürasyon klasöründeki settings_ddnet.cfg dosyasında gfx_backend ayarını OpenGL veya Vulkan olarak değiştirmeyi deneyin.
-
-[Graphics error]
-Could not initialize the given graphics backend, reverting to the default backend now.
-== Verilen grafik işleyicisi başlatılamadı, varsayılan ayarlara dönülüyor.
-
-[Graphics error]
-Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== Verilen grafik işleyicisi başlatılamadı, muhtemelen dahili ekran kartının sürücülerini yüklemediğinizden kaynaklanıyor.
-
-Could not save downloaded map. Try manually deleting this file: %s
-== İndirilen map kaydedilemedi. Bu dosyayı manuel olarak silmeyi deneyin: %s
+Saving ddnet-settings.cfg failed
+== 
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== %s dokusunun genişliği %d'ye veya yüksekliği %d'ye bölünmüyor, bu görsel hatalara neden olabilir.
+== 
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== %s dokusunun formatı RGBA değil, bu görsel hatalara neden olacak.
-
-Preparing demo playback
-== Demo oynatmaya hazırlanıyor
-
-Connected
-== Bağlanıldı
-
-Loading map file from storage
-== Harita dosyası yükleniyor
-
-Why are you slowmo replaying to read this?
-== Neden bunu okumak için ağır çekimde izliyorsunuz?
-
-Initializing components
-== Bileşenler başlatılıyor
-
-Initializing assets
-== Kaynaklar yükleniyor
-
-Initializing map logic
-== Harita içeriği yükleniyor
-
-Sending initial client info
-== İstemciye ilk bilgiler gönderiliyor
+== 
 
 Warning
-== Uyarı
-
-Quitting. Please wait…
-== Çıkılıyor. Lütfen bekleyin…
-
-Restarting. Please wait…
-== Yeniden başlatılıyor. Lütfen bekleyin…
+== 
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== Hata ayıklama modu etkinleştirildi. Devre dışı bırakmak için Ctrl+Shift+D tuşlarına basın.
-
-Position:
-== Pozisyon:
-
-Speed:
-== Hız:
-
-Angle:
-== Açı:
-
-Multi-View
-== Çoklu İzleme
-
-Team %d
-== Takım %d
-
-Uploading map data to GPU
-== Harita verisi GPU'ya yükleniyor
-
-Trying to determine UDP connectivity…
-== UDP bağlantısı belirlenmeye çalışılıyor…
-
-UDP seems to be filtered.
-== UDP filtrelenmiş görünüyor.
-
-UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== UDP ve TCP IP adresleri farklı görünüyor. Proxy, VPN veya ağ hızlandırıcılarını devre dışı bırakmayı deneyin.
-
-No answer from server yet.
-== Henüz sunucudan cevap alınamadı.
-
-Getting game info
-== Oyun bilgisi alınıyor
-
-Requesting to join the game
-== Oyuna girmeye çalışıyor
-
-Rename folder
-== Klasör ismini değiştir
+== 
 
 Existing Player
-== Var olan oyuncu
+== 
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== Takma adınız '%s' başkası tarafından kullanılıyor (%d puan). Yine de kullanmak istiyor musunuz?
+== 
 
 Checking for existing player with your name
-== Adınıza sahip diğer oyuncular aranıyor
-
-A demo with this name already exists
-== Bu ada sahip bir demo zaten var
-
-A folder with this name already exists
-== Bu ada sahip bir klasör zaten var
-
-Unable to rename the folder
-== Klasör yeniden adlandırılamıyor
-
-File '%s' already exists, do you want to overwrite it?
-== '%s' dosyası zaten var, üzerine yazmak istiyor musunuz?
-
-(paused)
-== (duraklatıldı)
-
-Speed
-== Hız
-
-Join Tutorial Server
-== Öğretici sunucuya gir
-
-Skip Tutorial
-== Öğreticiyi atla
-
-Theme
-== Tema
-
-Loading menu images
-== Menü resimleri yükleniyor
-
-AFR
-== AFR
-
-ASI
-== ASI
-
-AUS
-== AUS
-
-EUR
-== EUR
-
-NA
-== NA
-
-SA
-== SA
-
-CHN
-== CHN
-
-Getting server list from master server
-== Ana sunucudan sunucu listesi alınıyor
-
-%d of %d servers
-== %2$d sunucunun %1$d tanesi
-
-%d of %d server
-== %2$d sunucunun %1$d tanesi
-
-%d players
-== %d oyuncu
-
-%d player
-== %d oyuncu
+== 
 
 Are you sure that you want to disconnect and switch to a different server?
-== Bağlantınızı kesip başka bir sunucuya girmek istediğinizden emin misiniz?
+== 
 
-Copy info
-== Bilgiyi kopyala
+Country / Region
+== 
+
+Speed
+== 
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
+== 
+
+Theme
+== 
+
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Getting server list from master server
+== 
+
+%d of %d servers
+== 
+
+%d of %d server
+== 
+
+%d players
+== 
+
+%d player
+== 
+
+Refreshing...
+== 
 
 Leak IP
-== IP'yi sızdır
-
-No server selected
-== Sunucu seçilmedi
-
-Online clanmates (%d)
-== Çevrim içi klan arkadaşları (%d)
-
-[friends (server browser)]
-Offline (%d)
-== Çevrim dışı (%d)
-
-Click to select server. Double click to join your friend.
-== Sunucu seçmek için tıklayın. Arkadaşınıza katılmak için çift tıklayın.
-
-Click to remove this player from your friends list.
-== Bu oyuncuyu arkadaş listesinden silmek için tıkla.
-
-Click to remove this clan from your friends list.
-== Bu klanı arkadaş listesinden silmek için tıkla.
-
-Are you sure that you want to remove the player '%s' from your friends list?
-== '%s' oyuncusunu arkadaş listenizden silmek istediğinize emin misiniz?
-
-Are you sure that you want to remove the clan '%s' from your friends list?
-== '%s' klanını arkadaş listenizden silmek istediğinize emin misiniz?
-
-Play the current demo
-== Demoyu oynat
-
-Pause the current demo
-== Demoyu duraklat
-
-Stop the current demo
-== Demoyu durdur
-
-Go back one tick
-== Bir tık geri git
-
-Go forward one tick
-== Bir tık ileri git
-
-Slow down the demo
-== Demoyu yavaşlat
-
-Speed up the demo
-== Demoyu hızlandır
-
-Mark the beginning of a cut (right click to reset)
-== Bir kesitin başlangıcını işaretleyin (sıfırlamak için sağ tıkla)
-
-Mark the end of a cut (right click to reset)
-== Bir kesitin bitişini işaretleyin (sıfırlamak için sağ tıkla)
-
-Export cut as a separate demo
-== Kesiti ayrı bir demo olarak dışarı aktar
-
-Go back one marker
-== Bir işaret geri git
-
-Go forward one marker
-== Bir işaret ileri git
-
-Close the demo player
-== Demo oynatıcısını kapat
-
-Toggle keyboard shortcuts
-== Klavye kısayollarını kullan
-
-Export demo cut
-== Kesiti dışarı aktar
-
-Cut interval
-== Kesit aralığı
-
-Cut length
-== Kesit uzunluğu
-
-Loading demo files
-== Demo dosyaları yükleniyor
-
-All combined
-== Hepsi birlikte
-
-Folder Link
-== Klasör Linki
+== 
 
 Demos directory
-== Demo klasörü
-
-Open the directory that contains the demo files
-== Demo dosyalarını içeren klasörü aç
-
-Are you sure that you want to delete the folder '%s'?
-== '%s' klasörünü silmek istediğine emin misin?
-
-Are you sure that you want to delete the demo '%s'?
-== '%s' demosunu silmek istediğine emin misin?
-
-Delete folder
-== Klasörü sil
-
-Unable to delete the demo '%s'
-== '%s' demosu silinemiyor
-
-Unable to delete the folder '%s'. Make sure it's empty first.
-== '%s' klasörü silinemiyor. Önce boş olduğundan emin olun.
-
-Loading ghost files
-== Hayalet dosyaları yükleniyor
-
-Menu opened. Press Esc key again to close menu.
-== Menü açıldı. Menüyü kapatmak için Esc tuşuna tekrar basın.
+== 
 
 Smooth Dynamic Camera
-== Yumuşak dinamik kamera
+== 
 
 Skip the main menu
-== Ana menüyü atla
+== 
 
 Settings file
-== Ayarlar dosyası
-
-Open the settings file
-== Ayarlar dosyasını aç
+== 
 
 Config directory
-== Konfigürasyon klasörü
-
-Open the directory that contains the configuration and user files
-== Konfigürasyon ve kullanıcı dosyalarını içeren klasörü aç
+== 
 
 Themes directory
-== Tema klasörü
+== 
 
-Open the directory to add custom themes
-== Özel temalar eklemek için klasörü aç
-
-Loading skin files
-== Skin dosyaları yükleniyor
+Toggle to edit your dummy settings
+== 
 
 Download skins
-== Skinleri indir
-
-Download community skins
-== Topluluk skinlerini indir
+== 
 
 Choose default eyes when joining a server
-== Bir sunucuya girerken kullanılacak varsayılan gözleri seçin
-
-Create a random skin
-== Rastgele skin oluştur
+== 
 
 Skin Database
-== Skin Veri Tabanı
+== 
 
 Skins directory
-== Skin klasörü
-
-Open the directory to add custom skins
-== Özel skinler eklemek için klasörü açın
+== 
 
 Chat command
-== Sohbet komutu
-
-Enable controller
-== Kontrolcüyü etkinleştir
-
-Controller
-== Kontrolcü
-
-Ingame controller mode
-== Oyun içi kontrolcü modu
-
-[Ingame controller mode]
-Relative
-== Bağıl
-
-[Ingame controller mode]
-Absolute
-== Mutlak
-
-Ingame controller sens.
-== Oyun içi kontrolcü hassasiyeti.
-
-UI controller sens.
-== Arayüz kontrolcü hassasiyeti.
-
-Controller jitter tolerance
-== Kontrolcü titreşim toleransı
-
-No controller found. Plug in a controller.
-== Kontrolcü bulunamadı. Bir Kontrolcü bağlayın.
-
-Axis
-== Eksen
-
-Status
-== Durum
-
-Aim bind
-== Nişan alma
-
-Mouse
-== Fare
-
-Ingame mouse sens.
-== Oyun içi fare hassasiyeti.
-
-UI mouse sens.
-== Arayüz fare hassasiyeti.
-
-Reset controls
-== Kontrolleri sıfırla
-
-Are you sure that you want to reset the controls to their defaults?
-== Kontrolleri varsayılan değerlerine döndürmek istediğine emin misin?
-
-Cancel
-== İptal et
+== 
 
 Dummy
-== Dummy
+== 
 
 Windowed
-== Pencereli
+== 
 
 Windowed borderless
-== Kenarsız pencereli
+== 
 
 Windowed fullscreen
-== Pencereli tam ekran
+== 
 
 Desktop fullscreen
-== Masaüstü tam ekran
+== 
 
 Allows maps to render with more detail
-== Haritaların daha detaylı işlenmesini sağlar
+== 
 
 Renderer
-== İşleyici
+== 
 
 default
-== varsayılan
+== 
 
 custom
-== özel
+== 
 
-Graphics card
-== Ekran kartı
+Graphics cards
+== 
 
 auto
-== otomatik
+== 
 
 Game sound volume
-== Oyun ses seviyesi
+== 
 
 Chat sound volume
-== Sohbet ses seviyesi
+== 
 
 Background music volume
-== Arka plan müziği ses seviyesi
-
-Appearance
-== Görünüm
+== 
 
 Assets
-== Kaynaklar
+== 
 
-Name Plate
-== İsim Etiketi
+Show client IDs
+== 
 
-Hook Collisions
-== Kanca Kesişmeleri
+Kill Messages
+== 
 
-Show health, shields and ammo
-== Can, kalkan ve cephaneyi göster
+Kill Message Normal Color
+== 
 
-DDRace HUD
-== DDRace arayüzü
+Kill Message Highlight Color
+== 
 
-Show DDRace HUD
-== DDRace arayüzünü göster
+Laser Outline Color
+== 
 
-Show jumps indicator
-== Zıplama göstergesini aç
+Laser Inner Color
+== 
 
-Show dummy actions
-== Dummy aksiyonlarını göster
+Hookline
+== 
 
-Show player position
-== Oyuncu pozisyonunu göster
+No hit
+== 
 
-Show player speed
-== Oyuncu hızını göster
+Hookable
+== 
 
-Show player target angle
-== Oyuncu hedef açısını göster
-
-Show freeze bars
-== Freeze barını göster
-
-Opacity of freeze bars inside freeze
-== Freeze içerisindeyken freeze barının opaklığı
+Tee
+== 
 
 Use old chat style
-== Eski sohbet stilini kullan
+== 
 
 Preview
-== Ön izleme
-
-Hook collision line
-== Kanca çizgisi
-
-Hook collision line opacity
-== Kanca çizgisi opaklığı
-
-Your movements are not taken into account when calculating the line colors
-== Çizgi renkleri hesaplanırken hareketleriniz dikkate alınmaz
-
-Normal Color
-== Normal rengi
-
-Highlight Color
-== Vurgu rengi
-
-Weapons
-== Silahlar
-
-Rifle Laser Outline Color
-== Tüfeğin Lazer Dış Rengi
-
-Rifle Laser Inner Color
-== Tüfeğin Lazer İç Rengi
-
-Shotgun Laser Outline Color
-== Pompalı Tüfeğin Lazer Dış Rengi
-
-Shotgun Laser Inner Color
-== Pompalı Tüfeğin Lazer İç Rengi
-
-Entities
-== Yapılar
-
-Door Laser Outline Color
-== Kapının Lazer Dış Rengi
-
-Door Laser Inner Color
-== Kapının Lazer İç Rengi
-
-Freeze Laser Outline Color
-== Freeze Lazeri Dış Rengi
-
-Freeze Laser Inner Color
-== Freeze Lazeri İç Rengi
-
-Set all to Rifle
-== Hepsini tüfeğe göre ayarla
+== 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== Başlangıç çizgisini geçtiğinizde, en iyi sürenizin hareketlerini tekrarlayan bir hayalet tee göster
+== 
 
 Opacity
-== Opaklık
+== 
 
-Adjust the opacity of entities belonging to other teams, such as tees and name plates
-== Teeler ve isim etiketleri gibi diğer takımlara ait varlıkların opaklığını ayarlayın
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== 
 
 Quads are used for background decoration
-== Dörtgen yapılar arka plan dekorasyonu için kullanılır
+== 
 
 Tries to predict other entities to give a feel of low latency
-== Düşük gecikme hissi vermek için diğer varlıkları tahmin etmeye çalışır
+== 
+
+Show local player's key presses
+== 
 
 Background
-== Arka plan
+== 
+
+Entities Background color
+== 
 
 Use current map as background
-== Mevcut haritayı arka plan olarak kullan
+== 
+
+Regular Background Color
+== 
 
 Run on join
-== Katılınca çalıştır
+== 
 
 Chat command (e.g. showall 1)
-== Sohbet komutu (örn. showall 1)
+== 
 
-Unregister protocol and file extensions
-== Protokol ve dosya uzantılarının kaydını sil
+Entities
+== 
 
 Emoticons
-== İfadeler
+== 
 
 Particles
-== Parçacıklar
-
-Extras
-== Ekstralar
-
-Loading assets
-== Kaynaklar yükleniyor
+== 
 
 Assets directory
-== Kaynak klasörü
-
-Open the directory to add custom assets
-== Özel kaynak eklemek için klasörü açın
+== 
 
 Discord
-== Discord
+== 
 
-https://ddnet.org/discord
-== https://ddnet.org/discord
+https://ddnet.tw/discord
+== 
+
+https://wiki.ddnet.tw/
+== 
 
 Tutorial
-== Öğretici
+== 
+
+Can't find a Tutorial server
+== 
 
 Website
-== Web sitesi
+== 
 
 Settings
-== Ayarlar
+== 
 
 Stop server
-== Sunucuyu durdur
+== 
 
 Run server
-== Sunucuyu başlat
+== 
 
 Server executable not found, can't run server
-== Çalıştırılabilir sunucu bulunamadı, sunucu başlatılamıyor
+== 
 
 Editor
-== Editör
+== 
 
 [Start menu]
 Play
-== Oyna
-
-Loading race demo files
-== Yarış demo dosyaları yükleniyor
+== 
 
 Super
-== Süper
+== 
 
-Loading sound files
-== Ses dosyaları yükleniyor
-
-Moved ingame
-== Oyun içinde taşındın
-
-Go back the specified duration
-== Belirtilen süre kadar geri git
-
-[Demo player duration]
-%s min.
-== %s dk.
-
-[Demo player duration]
-%s sec.
-== %s sn.
-
-Change the skip duration
-== Atlanacak süreyi değiştir
-
-Go forward the specified duration
-== Belirtilen süre kadar ileri git
-
-Render cut to video
-== Kesiti videoya dönüştür
-
-Error playing demo
-== Demo oynatılırken hata oluştu
-
-Failed saving the replay!
-== Tekrar kaydedilemedi!
-
-Saving settings to '%s' failed
-== Ayarlar '%s' dosyasına kaydedilemedi
-
-Error saving settings
-== Ayarları kaydederken hata oluştu
-
-Searching
-== Aranıyor
-
-Enter Username
-== Kullanıcı adı girin
-
-Enter Password
-== Şifre girin
-
-NOT CONNECTED
-== BAĞLI DEĞİL
-
-Match %d of %d
-== %d/%d eşleşme
-
-No results
-== Sonuç yok
-
-Lines %d - %d (%s)
-== Satır %d - %d (%s)
-
-Locked
-== Sabit
-
-Following
-== Takipte
-
-Loading commands…
-== Komutlar yükleniyor…
-
-Some map images could not be loaded. Check the local console for details.
-== Bazı görseller yüklenemedi. Detaylar için konsolu kontrol edin.
-
-Some map sounds could not be loaded. Check the local console for details.
-== Bazı sesler yüklenemedi. Detaylar için konsolu kontrol edin.
-
-Loading menu themes
-== Temalar yükleniyor
-
-Press a key…
-== Bir tuşa basın…
-
-Main menu
-== Ana menü
-
-Render complete
-== Video işleme tamamlandı
-
-Are you sure that you want to restart?
-== Yeniden başlatmak istediğinizden eminmisiniz?
-
-There's an unsaved map in the editor, you might want to save it.
-== Editörde kaydedilmemiş bir harita var, kaydetmek isteyebilirsiniz.
-
-Continue anyway?
-== Yine de devam et?
-
-Videos directory
-== Video dizini
-
-Video was saved to '%s'
-== Video '%s' yoluna kaydedildi
-
-Communities
-== Topluluklar
-
-Server filter
-== Sunucu filtresi
-
-Friends
-== Arkadaşlar
-
-Please use a different filename
-== Farklı bir dosya adı kullanın
-
-No demo selected
-== Demo seçilmedi
-
-Created
-== Oluşturuldu
-
-Loading…
-== Yükleniyor…
-
-Ghosts directory
-== Hayalet dizini
-
-Activate all
-== Tümünü etkinleştir
-
-Deactivate all
-== Tümünü devre dışı bırak
-
-Info Messages
-== Bilgi Mesajları
-
-Show local time always
-== Yerel saati her zaman göster
-
-Chat font size
-== Yazı tipi büyüklüğü
-
-Chat width
-== Sohbet genişliği
-
-Authed name color in scoreboard
-== Skor tablosunda yetkili isim rengi
-
-Same clan color in scoreboard
-== Skor tablosunda aynı klan rengi
-
-Show finish messages
-== Bitirme mesajlarını göster
-
-Enable ghost
-== Hayaleti etkinleştir
-
-Only save improvements
-== Sadece iyileştirmeleri kaydet
-
-Regular background color
-== Normal arka plan rengi
-
-Entities background color
-== Yapı arka plan rengi
-
-Loading demo file from storage
-== Cihazdaki demo dosyası yükleniyor
-
-No login required
-== Giriş yapılmasına gerek yok
-
-Netversion
-== Netversion
-
-Player info change cooldown
-== Oyuncu bilgisini değiştirmek için bekleme süresi
-
-Always show chat
-== Sohbeti her zaman göster
-
-Show hook strength icon indicator
-== Kancanın güç göstergesini göster
-
-Show hook strength number indicator
-== Kancanın güç numarası göstergesini göster
-
-Show own player's hook collision line
-== Karakterinin kanca çarpışma çizgini göster
-
-Always show own player's hook collision line
-== Karakterinin her zaman kanca çarpışma çizgini göster
-
-Always show other players' hook collision lines
-== Diğerlerinin kanca çarpışma çizgini göster
-
-[Demo details]
-map not included
-== harita dahil edilmemiş
-
-%d/%d KiB (%.1f KiB/s)
-== %d/%d KiB (%.1f KiB/s)
-
-Tee
-== Tee
-
-Show only chat messages from team members
-== Sadece takım üyelerinin mesajlarını göster
-
-[Spectating]
-Following %s
-== İzleniyor %s
-
-Example of usage
-== Kullanım örneği
-
-Round %d/%d
-== Yuvarlak %d/%d
-
-[Spectators]
-%d others…
-== %d diğerleri…
-
-[Team and size]
-%d\n(%d/%d)
-== %d\n(%d/%d)
-
-Team %d (%d/%d)
-== Takım %d (%d/%d)
-
-https://wiki.ddnet.org/wiki/Mapping
-== https://wiki.ddnet.org/wiki/Mapping/tr
-
-Could not resolve connect address '%s'. See local console for details.
-== '%s' bağlantı adresi çözümlenemedi. Detaylar için yerel konsola bakın.
-
-Connect address error
-== Bağlantı adresi hatası
-
-Could not connect dummy
-== Dummy bağlanamadı
-
-Dummy is not allowed on this server
-== Bu sunucuda dummy izin verilmiyor
-
-Please wait…
-== Lütfen bekleyin…
-
-Show client IDs (scoreboard, chat, spectator)
-== İstemci ID'sini göster (skor tablosu, sohbet, izleyici)
-
-Are you sure that you want to delete '%s'?
-== '%s' bunu silmek istediğine emin misin?
-
-Delete skin
-== Skini sil
-
-Basic
-== Basit
-
-Custom
-== Özel
-
-Unable to delete skin
-== Skin silinemiyor
-
-Save skin
-== Skini kaydet
-
-Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== Skini kaydetmek istiyor musun? Bu isimde başka bir skin varsa, bu skin varolan skin yerine kaydedilecek.
-
-Unable to save the skin
-== Skin kaydedilemiyor
-
-Unable to save the skin with a reserved name
-== Skin kaydedilemiyor bu isimde zaten bir skin var
-
-No local servers found (ports %d-%d)
-== Yerel sunucu bulunamadı (bağlantı noktası %d-%d)
-
-[Hertz]
-Hz
-== Hz
-
-[skins]
-Body
-== Gövde
-
-[skins]
-Marking
-== İşaretleme
-
-[skins]
-Decoration
-== Dekorasyon
-
-[skins]
-Hands
-== El
-
-[skins]
-Feet
-== Ayak
-
-[skins]
-Eyes
-== Göz
-
-Some fonts could not be loaded. Check the local console for details.
-== Bazı fontlar yüklenemiyor. Detaylar için konsolu kontrol edin.
-
-Online friends (%d)
-== Çevrim içi arkadaşlar (%d)
-
-Add friends by entering their name below or by clicking their name in the player list.
-== Aşağıya isim girerek veya oyuncu listesinden isme tıklayarak arkadaş ekle.
-
-Add clanmates by entering their clan below and leaving the name blank.
-== Klan arkadaşlarınızı klanlarını aşağıya girerek ve isimlerini boş bırakarak ekleyin.
-
-Edit touch controls
-== Dokunmatik ayarlarını düzelt
-
-Close
-== Kapat
-
-Save changes
-== Değişiklikleri kaydet
-
-Error saving touch controls
-== Dokunmatik ayarları kaydedilirken bir hata oldu
-
-Could not save touch controls to file. See local console for details.
-== Dokunmatik ayarları dosyalara kaydedilemedi. Detaylar için yerel konsola bakın.
-
-Unsaved changes
-== Kaydedilmemiş değişiklikler
-
-Discard changes
-== Değişiklikleri iptal et
-
-Are you sure that you want to discard the current changes to the touch controls?
-== Dokunmatik ayarlarında ki değişiklikleri iptal etmek istediğinden emin misin?
-
-Are you sure that you want to reset the touch controls to default?
-== Dokunmatik ayarlarını varsayılan ayarlarına döndürmek istediğinden emin misin?
-
-Import from clipboard
-== Panodan içeri aktar
-
-Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
-== Dokunmatik ayarlarını panodan içeri aktarmak istediğine emin misin? Bu şu anki kontrollerin üzerine yazılacak.
-
-Export to clipboard
-== Panodan dışarı aktar
-
-Direct touch input while ingame
-== Oyun içindeyken doğrudan dokunmatik giriş
-
-[Direct touch input]
-Disabled
-== Devre dışı
-
-[Direct touch input]
-Active action
-== Aktif aksiyon
-
-[Direct touch input]
-Aim
-== Aim
-
-[Direct touch input]
-Fire
-== Ateş
-
-[Direct touch input]
-Hook
-== Kanca
-
-Direct touch input while spectating
-== Gezinme modundayken dokunarak doğrudan giriş
-
-Error loading touch controls
-== Dokunmatik ayarları yüklenirken bir hata oluştu
-
-Could not load touch controls from file. See local console for details.
-== Dokunmatik ayarları dosyalardan yüklenemedi. Detaylar için konsola bakın.
-
-Could not load default touch controls from file. See local console for details.
-== Varsayılan dokunmatik ayarları dosyalardan yüklenemedi. Detaylar için konsola bakın.
-
-Could not load touch controls from clipboard. See local console for details.
-== Dokunmatik ayarları panodan yüklenemedi. Detaylar için konsola bakın.
-
-Width of your own hook collision line
-== Kendi kanca çarpışma çizginizin kalınlığı
-
-Width of others' hook collision line
-== Başkalarının kancalarının çarpışma çizgisi kalınlığı
-
-Preview 'Hook collisions' being pressed
-== Ön izleme 'Kanca çarpışmaları' gösteriliyor
-
-Aim
-== Aim
-
-Active: Fire
-== Aktif: Ateş etme
-
-Active: Hook
-== Aktif: Kanca
-
-"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
-== "%s" pnglite ile uyumlu değil ve eski DDnet versiyonları tarafından yüklenemiyor:
-
-[Spectating Camera Mode Icon]
-AUTO
-== OTOMATİK
-
-Toggle auto camera
-== Otomatik kamerayı değiştir
-
-https://wiki.ddnet.org/wiki/Touch_controls
-== https://wiki.ddnet.org/wiki/Touch_controls
-
-Show client IDs in name plates
-== İstemci ID'sini isim kısmında göster
-
-Hook Strength
-== Kanca gücü
-
-Size of hook strength icon and number indicator
-== Kanca gücü simgesi ve sayı göstergesinin boyutu
-
-Key Presses
-== Tuş Basışları
-
-Size of key press icons
-== Tuşa basma simgesinin boyutu
-
-Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
-== Sunucu başlatılamıyor. Sunucunun arka planda çalışması için ayarlardan bildirim iznini açtığınıza emin olun.
-
-Auto-sync player camera
-== Oyuncu kamerasını otomatik senkronize et
-
-[Auto camera]
-Disabled
-== Devre dışı
-
-[Auto camera]
-Enabled
-== Etkin
-
-[Auto camera]
-Unavailable for this player
-== Bu oyuncu için kullanılamıyor
-
-[Auto camera]
-Inactive
-== Aktif değil
-
-[Auto camera]
-Active
-== Aktif
-
-Loading maps…
-== Harita yükleniyor…
-
-Community
-== Topluluk
-
-[Team status]
-forbidden
-== yasak
-
-[Team status]
-solo
-== solo
-
-[Team status]
-allowed
-== izin verildi
-
-[Team status]
-required
-== gerekli
-
-Teams
-== Takımlar
-
-[Team size]
-minimum
-== minimum
-
-[Team size]
-maximum
-== maksimum
-
-Saves file
-== Kayıt dosyası
-
-Open the saves file
-== Kayıt dosyasını aç
-
-Show FPS
-== FPS'i göster
-
-Renders your frame rate in the top right
-== Kare hızını sağ üstte gösterir
-
-[Translation credits: Add your own name here when you update translations]
-English translation by the DDNet Team
-== Türkçe çeviri Learath2, ardadem, h-kaan, eghwand, Gokturk ve WarHammer tarafından yapıldı
-
-Show spectator cursor
-== İzlenenin imlecini göster
-
-[Graphics error]
-Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
-== VRAM bitmiş. 'cl_skins_loaded_max' değerini daha düşük bir değere ayarlamayı veya özel varlıkları (kaplamalar, varlıklar vb.), özellikle de yüksek çözünürlüklü olanları kaldırmayı deneyin.
-
-No demo with this filename exists
-== Bu isimle bir demo bulunmuyor
-
-This name cannot be used for files and folders
-== Bu isim dosya ve klasörler için kullanılamıyor
-
-Map size
-== Harita boyutu
-
-This skin name cannot be used.
-== Bu skin adı kullanılamıyor.
-
-Skin could not be loaded due to an error. Check the local console for details.
-== Skin bir sebepten dolayı yüklenemiyor. Detay için yerel konsolu kontrol et.
-
-Skin could not be found.
-== Skin bulunamadı.
-
-No skins match your filter criteria
-== Kriterlerine uygun skinler bulunamadı
-
-Show number of spectators
-== İzleyici sayısını göster
-
-[Show name plates]
-None
-== Hiçbiri
-
-[Show name plates]
-Own
-== Kendi
-
-[Show name plates]
-Others
-== Diğer
-
-[Show name plates]
-All
-== Hepsi
-
-Name plates offset
-== Oyuncu isimleri çıkıntısı
-
-Show friend icon in name plates
-== Arkadaş ikonunu oyuncu isimlerinde göster
-
-Show client IDs on a separate line
-== İstemci ID'lerini ayrı satırda göster
-
-Client IDs size
-== İstemci ID boyutu
-
-Show players' key presses
-== Oyuncu tuş basımlarını göster
-
-[Show players' key presses]
-None
-== Hiçbiri
-
-[Show players' key presses]
-Own
-== Kendi
-
-[Show players' key presses]
-Others
-== Diğer
-
-[Show players' key presses]
-All
-== Hepsi
-
-Preview player's name plate
-== Oyuncu ismini ön izle
-
-Preview dummy's name plate
-== Dummy ismini ön izle
-
-Dragger Outline Color
-== Dragger Ana hat Rengi
-
-Dragger Inner Color
-== Dragger İç Rengi
-
-AntiPing: prediction margin
-== AntiPing: tahmin marjı
-
-[Spectating]
-Following %d: %s
-== İzleniyor %d: %s
-
-Loading map
-== Harita yükleniyor
-
-Error checking player name
-== Oyuncu adı kontrol edilirken hata oluştu
-
-Could not check for existing player with your name. Check your internet connection.
-== Adınıza sahip mevcut oyuncu olup olmadığı kontrol edilemedi. İnternet bağlantınızı kontrol edin.
-
-Press Ctrl+Shift+G to disable debug graphs.
-== Hata ayıklama grafiğini devre dışı bırakmak için Ctrl+Shift+G tuşlarına basın.
-
-Server could not be started
-== Sunucu başlatılamadı
-
-Could not get server list from master server
-== Ana sunucudan sunucu listesi alınamadı
-
-[Demo playback]
-Live
-== Canlı
-
-[Demo playback]
-Go to Live
-== Canlıya Geç
-
-Save all changes before turning off the editor?
-== Editör kapatılmadan önce tüm değişiklikler kaydedilsin mi?
-
-Layout
-== Düzen
-
-Visibility
-== Görünürlük
-
-Behavior
-== Davranış
-
-Delete button
-== Buton sil
-
-Are you sure that you want to delete this button?
-== Bu butonu silmek istediğine emin misin?
-
-Duplicate
-== Çoğalt
-
-Please save your changes before duplicating a button.
-== Bir butonu çoğaltmadan önce lütfen değişiklikleri kaydedin.
-
-No space for button
-== Buton için yeterli alan yok
-
-There is not enough space available to place another button.
-== Başka bir buton yerleştirmek için yeterli alan yok.
-
-Deselect
-== Seçimi iptal et
-
-You'll lose unsaved changes after deselecting.
-== Seçimi iptal ettikten sonra kaydedilmemiş değişiklikler kaybolacak.
-
-Width
-== Genişlik
-
-Height
-== Yükseklik
-
-Shape
-== Şekil
-
-[Touch button shape]
-Rectangle
-== Dikdörtgen
-
-[Touch button shape]
-Circle
-== Daire
-
-[Touch button label type]
-Plain
-== Düz
-
-[Touch button label type]
-Localized
-== Sabit
-
-[Touch button label type]
-Icon
-== Simge
-
-Behavior type
-== Davranış biçimi
-
-[Touch button behavior]
-Bind
-== Atama
-
-[Touch button behavior]
-Bind Toggle
-== Aç/Kapa
-
-[Touch button behavior]
-Predefined
-== Ön tanımlı
-
-Command
-== Komut
-
-Label
-== Başlık
-
-Label type
-== Başlık türü
-
-Add command
-== Komut ekle
-
-Delete command
-== Komut sil
-
-[Touch button visibility preview]
-Included
-== Dahil
-
-[Touch button visibility preview]
-Excluded
-== Hariç
-
-[Touch button visibility preview]
-Ignore
-== Yok say
-
-New button
-== Yeni buton
-
-Select button by touch
-== Butonu dokunarak seç
-
-No buttons match your filter criteria
-== Filtre kriterlerine uyan buton yok
-
-File
-== Dosya
-
-Buttons
-== Butonlar
-
-Active color
-== Aktif renk
-
-Inactive color
-== İnaktif renk
-
-Preview button visibility while the editor is active.
-== Editör aktifken önizleme butonunu göster.
-
-Show all buttons
-== Tüm butonları göster
-
-Save all changes before switching selected button?
-== Seçili butonu değiştirmeden önce tüm değişiklikler kaydedilsin mi?
-
-Discard
-== İptal et
-
-There is not enough space available for the button. Check its visibilities and size.
-== Buton için yeterli alan yok. Görünürlüğünü ve büyüklüğünü kontrol edin.
-
-Selected button not visible
-== Seçili buton görünmez
-
-The selected button is not visible. Do you want to deselect it or edit its visibility?
-== Seçili buton görünmez. Seçimi iptal etmek ya da görünürlüğünü değiştirmek ister misin?
-
-Edit
-== Düzenle
-
-Width and height are required to be within the range from %d to %d.
-== Genişlik ve yükseklik, %d ile %d aralığında olmalıdır.
-
-Button position is outside of the screen.
-== Buton pozisyonu ekranın dışında.
-
-The selected button is overlapping with other buttons.
-== Seçili buton diğer butonlarla çakışıyor.
-
-Wrong button settings
-== Hatalı buton ayarları
-
-[Touch button visibilities]
-Ingame
-== Oyun içi
-
-[Touch button visibilities]
-Zoom Allowed
-== Yakınlaştırma İzinli
-
-[Touch button visibilities]
-Vote Active
-== Oylama Aktif
-
-[Touch button visibilities]
-Dummy Allowed
-== Dummy İzinli
-
-[Touch button visibilities]
-Dummy Connected
-== Dummy bağlandı
-
-[Touch button visibilities]
-Rcon Authed
-== Rcon doğrulandı
-
-[Touch button visibilities]
-Demo Player
-== Demo Oynatıcı
-
-[Touch button visibilities]
-Extra Menu
-== Ekstra Menü
-
-[Predefined touch button behaviors]
-Ingame Menu
-== Oyun İçi Menü
-
-[Predefined touch button behaviors]
-Extra Menu
-== Ekstra Menü
-
-[Predefined touch button behaviors]
-Emoticon
-== İfade
-
-[Predefined touch button behaviors]
-Spectate
-== İzle
-
-[Predefined touch button behaviors]
-Swap Action
-== Eylemi Değiştir
-
-[Predefined touch button behaviors]
-Use Action
-== Eylemi Kullan
-
-[Predefined touch button behaviors]
-Joystick Action
-== Joystick Eylemi
-
-[Predefined touch button behaviors]
-Joystick Aim
-== Joystick Aim
-
-[Predefined touch button behaviors]
-Joystick Fire
-== Joystick Ateş
-
-[Predefined touch button behaviors]
-Joystick Hook
-== Joystick Kanca
-
-Chat background color
-== Sohbet arka plan rengi
-
-Censor profanity
-== Küfür Sansürü
-
-Download
-== İndir
-
-Team save in progress. You'll be able to load with '/load %s'
-== Takım kaydediliyor. '/load %s' ile yükleyebilirsiniz
-
-Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails
-== Takım kaydediliyor. Kayıt başarılı olursa '/load %s', başarısız olursa '/load %s' ile yükleyebilirsiniz
-
-Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue
-== Takım %s tarafından başarıyla kaydedildi. Veritabanı bağlantısı başarısız, çakışmayı önlemek için otomatik kayıt kodu kullanılıyor. Devam etmek için '/load %s' kullanın
-
-Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue
-== Takım %s tarafından başarıyla kaydedildi. Veritabanı bağlantısı başarısız, çakışmayı önlemek için otomatik kayıt kodu kullanılıyor. Devam etmek için '/load %s' komutunu %s sunucusunda kullanın
-
-Save failed!
-== Kayıt başarısız!
-
-[Important alert message]
-Press Esc or Tab to dismiss…
-== Kapatmak için Esc veya Tab basın…
-
-Server alert
-== Sunucu uyarısı
-
-Moderator alert
-== Moderatör uyarısı
-
-You will be disconnected from the server.
-== Sunucudan bağlantınız kesilecek.
-
-Are you sure that you want to disconnect and play this demo?
-== Bağlantıyı kesip bu demoyu oynatmak istediğinizden emin misiniz?
-
-Show background quads
-== Arka plan dörtgenlerini göster
-
-Scoreboard cursor
-== Skor tablosu imleci
-
-Add friend
-== Arkadaş ekle
-
-Unmute
-== Sessizi aç
-
-Mute
-== Sessize al
-
-Unmute emoticons
-== İfadeleri göster
-
-Mute emoticons
-== İfadeleri gizle
-
-There's an unsaved change in the touch controls editor, you might want to save it.
-== Dokunmatik ayarlarında kaydedilmemiş bir değişiklik var, kaydetmek isteyebilirsiniz.
-
-Start and connect to local server
-== Yerel sunucuyu başlat ve bağlan
-
-Add clan
-== Klan ekle
-
-Info
-== Bilgi
-
-Button browser
-== Buton tarayıcısı
-
-You can select buttons directly in the list below, or long press on a touch button on the screen to select it. You can also move and resize buttons by touch.
-== Butonları aşağıdaki listeden direkt seçebilirsiniz, ya da ekrandaki butona uzun basıp seçebilirsiniz. Ayrıca dokunarak butonların yerini değiştirebilir ve yeniden boyutlandırabilirsiniz.
-
-Preview visibilities
-== Görünürlüğü önizle
-
-You can manage your touch controls settings on this page. Only changes that are saved will be available after restarting the client. You can share your touch controls with others by exporting them to the clipboard.\n\nYou can find more detailed information about the touch controls on the DDNet Wiki.
-== Bu sayfada dokunmatik ayarlarını yönetebilirsiniz. Sadece kaydedilen değişiklikler istemciyi tekrar başlatınca geçerli olacak. Dokunmatik ayarlarınızı panoya kopyalayarak başkalarıyla paylaşabilirsiniz.\n\nDDNet Wiki'de dokunmatik kontrol ile ilgili daha detaylı bilgi edinebilirsiniz.
-
-Open DDNet Wiki
-== DDNet Wiki'yi aç
-
-Buttons with this behavior execute console commands like regular key binds.
-== Bu davranıştaki butonlar sıradan atamalar gibi konsol komutlarını çalıştırır.
-
-Buttons with this behavior cycle between executing one of two or more specified commands.
-== Bu davranışa sahip butonlar iki veya daha fazla belirlenmiş komuttan birini sırayla çalıştırır.
-
-Buttons with this behavior execute some predefined actions.
-== Bu davranışa sahip butonlar önceden belirlenmiş bazı eylemleri çalıştırır.
-
-Opens the ingame menu immediately when released.
-== Serbest bırakıldığında hemen oyun içi menüyü açar.
-
-The extra menu button which toggles visibility of buttons with "Extra Menu" visibilities. Also opens the ingame menu on long press.
-== "Ekstra Menü" görünürlüğüne sahip butonların görünürlüğünü değiştiren ekstra menü butonu. Ayrıca uzun basıldığında oyun içi menüyü açar.
-
-Opens the emoticon selector (this does not work with binds).
-== İfade seçiciyi açar (atamalarla çalışmaz).
-
-Opens the spectator menu (this does not work with binds).
-== İzleyici menüsünü açar (atamalarla çalışmaz).
-
-Swaps the active action (fire and hook) for direct touch input and virtual joysticks.
-== Aktif eylemi (ateş ve kanca) doğrudan dokunma girişi ve sanal kumanda ile değiştirir.
-
-Uses the active action with the current aiming position.
-== Aktif eylemi geçerli hedef konumuyla kullanır.
-
-Virtual joystick which uses the active action.
-== Aktif eylemi kullanan sanal kumanda.
-
-Virtual joystick which only aims without using an action.
-== Herhangi bir eylem kullanmadan hedef alan sanal kumanda.
-
-Virtual joystick which always uses fire.
-== Sürekli ateş eylemini kullanan sanal kumanda.
-
-Virtual joystick which always uses hook.
-== Sürekli kanca eylemini kullanan sanal kumanda.
-
-Player is ingame, i.e. not spectating.
-== Oyuncu oyunda, yani izleyicide değil.
-
-Zoom is allowed on this server.
-== Bu sunucuda yakınlaştırma serbest.
-
-A vote is currently active.
-== Şu an zaten bir oylama var.
-
-Dummy is allowed on this server.
-== Bu sunucuda dummy kullanmak serbest.
-
-Dummy is currently connected.
-== Dummy şu anda bağlı.
-
-Player is currently authed in rcon.
-== Oyuncu şu anda rcon'da doğrulandı.
-
-Demo player is currently active.
-== Demo oynatıcı şu anda aktif.
-
-The extra menu with the given number is activated.
-== Belirtilen sayıda ekstra menü aktif edildi.
-
-Joining Tutorial server
-== Öğretici sunucuya bağlanılıyor
-
-There are no Tutorial servers available
-== Erişilebilir Öğretici sunucu yok
-
-Retrying…
-== Tekrar deneniyor…
-
-Error joining Tutorial server
-== Öğretici sunucuya katılırken hata
-
-Could not find a Tutorial server. Check your internet connection.
-== Öğretici sunucu bulunamadı. İnternet bağlantınızı kontrol edin.
-
-You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
-== Çevrimiçi Öğretici sunucu bulunamadığı için yerel sunucuda oynuyorsunuz.\n\nRekorunuz sadece yerel olarak kaydedilecek.
-
-Could not find online Tutorial server.\nStarting and connecting to local server…
-== Çevrimiçi Öğretici sunucu bulunamadı.\nYerel sunucu başlatılıp bağlanılıyor…
-
-Waiting for local server to stop…
-== Yerel sunucunun kapanması bekleniyor…
-
-Waiting for local server to start…
-== Yerel sunucunun başlatılması bekleniyor…
-
-Error loading communities
-== Toplulukları yüklerken hata
-
-Click to remove this community from your favorites.
-== Bu topluluğu favorilerden çıkarmak için tıkla.
-
-Click to add this community to your favorites.
-== Bu topluluğu favorilere eklemek için tıkla.
-
-Update Rate
-== Yenileme Oranı
-
-Save power by lowering update rate (higher input latency)
-== Yenileme oranını düşürerek tasarruf et (daha fazla girdi gecikmesi)
-
-Colors of the hook collision line:
-== Kanca çizgisi renkleri:
-
-[Hook collision line color]
-When nothing is hookable
-== Hiçbir şey kancalanabilir olduğunda
-
-[Hook collision line color]
-When something is hookable
-== Kancalanabilir bir şey olduğunda
-
-[Hook collision line color]
-When a Tee is hookable
-== Bir Tee kancalanabilir olduğunda
-
-[Hook collision line color]
-Hook collision line tip
-== Kanca çizgisi ucu
+Team %d
+== 

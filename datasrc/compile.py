@@ -1,450 +1,67 @@
-import argparse
+import sys
+from datatypes import EmitDefinition, EmitTypeDeclaration
 import content
 import network
 
-from datatypes import EmitDefinition, EmitTypeDeclaration
-
-
-def create_enum_table(names, num, start=0):
+def create_enum_table(names, num):
 	lines = []
 	lines += ["enum", "{"]
-	if len(names) > 0 and start != 0:
-		lines += [f"\t{names[0]} = {start},"]
-		names = names[1:]
 	for name in names:
-		lines += [f"\t{name},"]
-	lines += [f"\t{num}", "};"]
+		lines += ["\t%s,"%name]
+	lines += ["\t%s" % num, "};"]
 	return lines
-
 
 def create_flags_table(names):
 	lines = []
 	lines += ["enum", "{"]
-	for i, name in enumerate(names):
-		lines += [f"\t{name} = 1U<<{int(i)},"]
+	i = 0
+	for name in names:
+		lines += ["\t%s = 1<<%d," % (name,i)]
+		i += 1
 	lines += ["};"]
 	return lines
-
 
 def EmitEnum(names, num):
 	print("enum")
 	print("{")
-	print(f"\t{names[0]}=0,")
+	print("\t%s=0," % names[0])
 	for name in names[1:]:
-		print(f"\t{name},")
-	print(f"\t{num}")
+		print("\t%s," % name)
+	print("\t%s" % num)
 	print("};")
-
 
 def EmitFlags(names):
 	print("enum")
 	print("{")
-	for i, name in enumerate(names):
-		print(f"\t{name} = 1<<{int(i)},")
+	i = 0
+	for name in names:
+		print("\t%s = 1<<%d," % (name,i))
+		i += 1
 	print("};")
 
+def main():
+	gen_network_header = "network_header" in sys.argv
+	gen_network_source = "network_source" in sys.argv
+	gen_client_content_header = "client_content_header" in sys.argv
+	gen_client_content_source = "client_content_source" in sys.argv
+	gen_server_content_header = "server_content_header" in sys.argv
+	gen_server_content_source = "server_content_source" in sys.argv
 
-def gen_network_header():
-	print("#ifndef GENERATED_PROTOCOL_H")
-	print("#define GENERATED_PROTOCOL_H")
-	print("class CUnpacker;")
-	print("#include <engine/message.h>")
-	print(network.RawHeader)
+	if gen_client_content_header:
+		print("#ifndef CLIENT_CONTENT_HEADER")
+		print("#define CLIENT_CONTENT_HEADER")
 
-	for e in network.Enums:
-		for line in create_enum_table([f"{e.name}_{v}" for v in e.values], f"NUM_{e.name}S", e.start):
-			print(line)
-		print("")
-
-	for e in network.Flags:
-		for line in create_flags_table([f"{e.name}_{v}" for v in e.values]):
-			print(line)
-		print("")
-
-	non_extended = [o for o in network.Objects if o.ex is None]
-	extended = [o for o in network.Objects if o.ex is not None]
-	for line in create_enum_table(["NETOBJTYPE_EX"] + [o.enum_name for o in non_extended], "NUM_NETOBJTYPES"):
-		print(line)
-	for line in create_enum_table(["__NETOBJTYPE_UUID_HELPER=OFFSET_GAME_UUID-1"] + [o.enum_name for o in extended], "OFFSET_NETMSGTYPE_UUID"):
-		print(line)
-	print("")
-
-	non_extended = [o for o in network.Messages if o.ex is None]
-	extended = [o for o in network.Messages if o.ex is not None]
-	for line in create_enum_table(["NETMSGTYPE_EX"] + [o.enum_name for o in non_extended], "NUM_NETMSGTYPES"):
-		print(line)
-	print("")
-	for line in create_enum_table(["__NETMSGTYPE_UUID_HELPER=OFFSET_NETMSGTYPE_UUID-1"] + [o.enum_name for o in extended], "OFFSET_MAPITEMTYPE_UUID"):
-		print(line)
-	print("")
-
-	for item in network.Objects + network.Messages:
-		for line in item.emit_declaration():
-			print(line)
-		print("")
-
-	EmitEnum([f"SOUND_{i.name.value.upper()}" for i in content.container.sounds.items], "NUM_SOUNDS")
-	EmitEnum([f"WEAPON_{i.name.value.upper()}" for i in content.container.weapons.id.items], "NUM_WEAPONS")
-
-	print("""
-enum
-{
-	WEAPON_GAME = -3, // team switching etc
-	WEAPON_SELF = -2, // console kill command
-	WEAPON_WORLD = -1, // death tiles etc
-};
-
-enum
-{
-	TEAM_GAME = TEAM_RED,
-};
-
-class CNetObjHandler
-{
-	const char *m_pMsgFailedOn;
-	const char *m_pObjFailedOn;
-	const char *m_pObjCorrectedOn;
-	char m_aUnpackedData[1024 * 2];
-	int m_NumObjCorrections;
-	int ClampInt(const char *pErrorMsg, int Value, int Min, int Max);
-
-	static const char *ms_apObjNames[];
-	static const char *ms_apExObjNames[];
-	static int ms_aObjSizes[];
-	static int ms_aUnpackedObjSizes[];
-	static int ms_aUnpackedExObjSizes[];
-	static const char *ms_apMsgNames[];
-	static const char *ms_apExMsgNames[];
-
-public:
-	CNetObjHandler();
-
-	void *SecureUnpackObj(int Type, CUnpacker *pUnpacker);
-	const char *GetObjName(int Type) const;
-	int GetObjSize(int Type) const;
-	int GetUnpackedObjSize(int Type) const;
-	int NumObjCorrections() const;
-	const char *CorrectedObjOn() const;
-	const char *FailedObjOn() const;
-
-	const char *GetMsgName(int Type) const;
-	void DebugDumpSnapshot(const class CSnapshot *pSnap) const;
-	int DumpObj(int Type, const void *pData, int Size) const;
-	void *SecureUnpackMsg(int Type, CUnpacker *pUnpacker);
-	bool TeeHistorianRecordMsg(int Type);
-	const char *FailedMsgOn() const;
-};
-	""")
-
-	print("#endif // GENERATED_PROTOCOL_H")
+	if gen_server_content_header:
+		print("#ifndef SERVER_CONTENT_HEADER")
+		print("#define SERVER_CONTENT_HEADER")
 
 
-def gen_network_source():
+	if gen_client_content_header or gen_server_content_header:
+		# print some includes
+		print('#include <engine/graphics.h>')
 
-	print("""\
-#include "protocol.h"
-
-#include <base/dbg.h>
-#include <base/mem.h>
-#include <base/str.h>
-
-#include <engine/uuid.h>
-#include <engine/shared/packer.h>
-#include <engine/shared/protocol.h>
-#include <engine/shared/uuid_manager.h>
-#include <engine/shared/snapshot.h>
-
-#include <game/gamecore.h>
-#include <game/mapitems_ex.h>
-
-CNetObjHandler::CNetObjHandler()
-{
-	m_pMsgFailedOn = "";
-	m_pObjFailedOn = "";
-	m_pObjCorrectedOn = "";
-	m_NumObjCorrections = 0;
-}
-
-int CNetObjHandler::NumObjCorrections() const { return m_NumObjCorrections; }
-const char *CNetObjHandler::CorrectedObjOn() const { return m_pObjCorrectedOn; }
-const char *CNetObjHandler::FailedObjOn() const { return m_pObjFailedOn; }
-const char *CNetObjHandler::FailedMsgOn() const { return m_pMsgFailedOn; }
-
-static const int max_int = 0x7fffffff;
-static const int min_int = 0x80000000;
-
-int CNetObjHandler::ClampInt(const char *pErrorMsg, int Value, int Min, int Max)
-{
-	if(Value < Min) { m_pObjCorrectedOn = pErrorMsg; m_NumObjCorrections++; return Min; }
-	if(Value > Max) { m_pObjCorrectedOn = pErrorMsg; m_NumObjCorrections++; return Max; }
-	return Value;
-}
-	""")
-
-	lines = []
-	lines += ["const char *CNetObjHandler::ms_apObjNames[] = {"]
-	lines += ['\t"EX/UUID",']
-	lines += [f'\t"{o.name}",' for o in network.Objects if o.ex is None]
-	lines += ['\t""', "};", ""]
-
-	lines += ["const char *CNetObjHandler::ms_apExObjNames[] = {"]
-	lines += ['\t"invalid",']
-	lines += [f'\t"{o.name}",' for o in network.Objects if o.ex is not None]
-	lines += ['\t""', "};", ""]
-
-	lines += ["int CNetObjHandler::ms_aObjSizes[] = {"]
-	lines += ["\t0,"]
-	lines += [f"\tsizeof({o.struct_name})," for o in network.Objects if o.ex is None]
-	lines += ["\t0", "};", ""]
-
-	lines += ["int CNetObjHandler::ms_aUnpackedObjSizes[] = {"]
-	lines += ["\t16,"]
-	lines += [f"\tsizeof({o.struct_name})," for o in network.Objects if o.ex is None]
-	lines += ["};", ""]
-
-	lines += ["int CNetObjHandler::ms_aUnpackedExObjSizes[] = {"]
-	lines += ["\t0,"]
-	lines += [f"\tsizeof({o.struct_name})," for o in network.Objects if o.ex is not None]
-	lines += ["};", ""]
-
-	lines += ["const char *CNetObjHandler::ms_apMsgNames[] = {"]
-	lines += ['\t"invalid",']
-	lines += [f'\t"{msg.name}",' for msg in network.Messages if msg.ex is None]
-	lines += ['\t""', "};", ""]
-
-	lines += ["const char *CNetObjHandler::ms_apExMsgNames[] = {"]
-	lines += ['\t"invalid",']
-	lines += [f'\t"{msg.name}",' for msg in network.Messages if msg.ex is not None]
-	lines += ['\t""', "};", ""]
-
-	for line in lines:
-		print(line)
-
-	print("""\
-const char *CNetObjHandler::GetObjName(int Type) const
-{
-	if(Type >= 0 && Type < NUM_NETOBJTYPES)
-	{
-		return ms_apObjNames[Type];
-	}
-	else if(Type > __NETOBJTYPE_UUID_HELPER && Type < OFFSET_NETMSGTYPE_UUID)
-	{
-		return ms_apExObjNames[Type - __NETOBJTYPE_UUID_HELPER];
-	}
-	return "(out of range)";
-}
-
-int CNetObjHandler::GetObjSize(int Type) const
-{
-	if(Type < 0 || Type >= NUM_NETOBJTYPES) return 0;
-	return ms_aObjSizes[Type];
-}
-
-int CNetObjHandler::GetUnpackedObjSize(int Type) const
-{
-	if(Type >= 0 && Type < NUM_NETOBJTYPES)
-	{
-		return ms_aUnpackedObjSizes[Type];
-	}
-	else if(Type > __NETOBJTYPE_UUID_HELPER && Type < OFFSET_NETMSGTYPE_UUID)
-	{
-		return ms_aUnpackedExObjSizes[Type - __NETOBJTYPE_UUID_HELPER];
-	}
-	return 0;
-}
-
-const char *CNetObjHandler::GetMsgName(int Type) const
-{
-	if(Type >= 0 && Type < NUM_NETMSGTYPES)
-	{
-		return ms_apMsgNames[Type];
-	}
-	else if(Type > __NETMSGTYPE_UUID_HELPER && Type < OFFSET_MAPITEMTYPE_UUID)
-	{
-		return ms_apExMsgNames[Type - __NETMSGTYPE_UUID_HELPER];
-	}
-	return "(out of range)";
-}
-
-void CNetObjHandler::DebugDumpSnapshot(const CSnapshot *pSnap) const
-{
-	dbg_msg("snapshot", "data_size=%d num_items=%d", pSnap->DataSize(), pSnap->NumItems());
-	for(int i = 0; i < pSnap->NumItems(); i++)
-	{
-		const CSnapshotItem *pItem = pSnap->GetItem(i);
-		int Size = pSnap->GetItemSize(i);
-		int Type = pSnap->GetItemType(i);
-		const char *pName = GetObjName(Type);
-		dbg_msg("snapshot", "\\t%s type=%d id=%d size=%d", pName, pItem->InternalType(), pItem->Id(), Size);
-		if(!DumpObj(Type, pItem->Data(), Size))
-			continue;
-
-		for(size_t b = 0; b < Size / sizeof(int32_t); b++)
-			dbg_msg("snapshot", "\\t\\t%3d %12d\\t%08x", (int)b, pItem->Data()[b], pItem->Data()[b]);
-	}
-}
-
-	""")
-
-	lines = []
-	lines += ["int CNetObjHandler::DumpObj(int Type, const void *pData, int Size) const"]
-	lines += ["{"]
-	lines += ["\tchar aRawData[512];"]
-	lines += ["\tchar aStr[128];"]
-	lines += ["\tint aInts[2] = {0x0, (int)0x80808080};"]
-	lines += ["\tswitch(Type)"]
-	lines += ["\t{"]
-
-	for item in network.Objects:
-		for line in item.emit_dump(network.Objects):
-			lines += ["\t" + line]
-		lines += ["\t"]
-	lines += ["\t}"]
-	lines += ["\treturn -1;"]
-	lines += ["};"]
-	lines += [""]
-	for line in lines:
-		print(line)
-
-	lines = []
-	lines += [
-		"""\
-void *CNetObjHandler::SecureUnpackObj(int Type, CUnpacker *pUnpacker)
-{
-	m_pObjFailedOn = 0;
-	switch(Type)
-	{
-	case NETOBJTYPE_EX:
-	{
-		const unsigned char *pPtr = pUnpacker->GetRaw(sizeof(CUuid));
-		if(pPtr != 0)
-		{
-			mem_copy(m_aUnpackedData, pPtr, sizeof(CUuid));
-		}
-		break;
-	}
-	"""
-	]
-
-	for item in network.Objects:
-		for line in item.emit_uncompressed_unpack_and_validate(network.Objects):
-			lines += ["\t" + line]
-		lines += ["\t"]
-
-	lines += [
-		"""\
-	default:
-		m_pObjFailedOn = "(type out of range)";
-		break;
-	}
-
-	if(pUnpacker->Error())
-		m_pObjFailedOn = "(unpack error)";
-
-	if(m_pObjFailedOn)
-		return 0;
-	m_pObjFailedOn = "";
-	return m_aUnpackedData;
-}
-	"""
-	]
-	for line in lines:
-		print(line)
-
-	lines = []
-	lines += [
-		"""\
-void *CNetObjHandler::SecureUnpackMsg(int Type, CUnpacker *pUnpacker)
-{
-	m_pMsgFailedOn = 0;
-	switch(Type)
-	{
-	"""
-	]
-
-	for item in network.Messages:
-		for line in item.emit_unpack_msg():
-			lines += ["\t" + line]
-		lines += ["\t"]
-
-	lines += [
-		"""\
-	default:
-		m_pMsgFailedOn = "(type out of range)";
-		break;
-	}
-
-	if(pUnpacker->Error())
-		m_pMsgFailedOn = "(unpack error)";
-
-	if(m_pMsgFailedOn)
-		return 0;
-	m_pMsgFailedOn = "";
-	return m_aUnpackedData;
-}
-	"""
-	]
-	for line in lines:
-		print(line)
-
-	lines = []
-	lines += [
-		"""\
-bool CNetObjHandler::TeeHistorianRecordMsg(int Type)
-{
-	switch(Type)
-	{
-	"""
-	]
-
-	empty = True
-	for msg in network.Messages:
-		if not msg.teehistorian:
-			lines += [f"\tcase {msg.enum_name}:"]
-			empty = False
-	if not empty:
-		lines += ["\t\treturn false;"]
-
-	lines += [
-		"""\
-	default:
-		return true;
-	}
-}
-	"""
-	]
-	for line in lines:
-		print(line)
-
-	lines = []
-	lines += [
-		"""\
-void RegisterGameUuids(CUuidManager *pManager)
-{
-	"""
-	]
-
-	for item in network.Objects + network.Messages:
-		if item.ex is not None:
-			lines += [f'\tpManager->RegisterName({item.enum_name}, "{item.ex}");']
-
-	lines += [
-		"""
-	RegisterMapItemTypeUuids(pManager);
-}
-	"""
-	]
-	for line in lines:
-		print(line)
-
-
-def gen_common_content_types_header():
-	# print some includes
-	print("#include <engine/graphics.h>")
-
-	# emit the type declarations
-	with open("datasrc/content.py", "rb") as content_file:
-		contentlines = content_file.readlines()
+		# emit the type declarations
+		contentlines = open("datasrc/content.py", "rb").readlines()
 		order = []
 		for line in contentlines:
 			line = line.strip()
@@ -453,72 +70,276 @@ def gen_common_content_types_header():
 		for name in order:
 			EmitTypeDeclaration(content.__dict__[name])
 
+		# the container pointer
+		print('extern CDataContainer *g_pData;')
 
-def gen_common_content_header():
-	# print some includes
-	print('#include "data_types.h"')
+		# enums
+		EmitEnum(["IMAGE_%s"%i.name.value.upper() for i in content.container.images.items], "NUM_IMAGES")
+		EmitEnum(["ANIM_%s"%i.name.value.upper() for i in content.container.animations.items], "NUM_ANIMS")
+		EmitEnum(["SPRITE_%s"%i.name.value.upper() for i in content.container.sprites.items], "NUM_SPRITES")
 
-	# the container pointer
-	print("extern CDataContainer *g_pData;")
+	if gen_client_content_source or gen_server_content_source:
+		if gen_client_content_source:
+			print('#include "client_data.h"')
+		if gen_server_content_source:
+			print('#include "server_data.h"')
+		EmitDefinition(content.container, "datacontainer")
+		print('CDataContainer *g_pData = &datacontainer;')
 
-	# enums
-	EmitEnum([f"IMAGE_{i.name.value.upper()}" for i in content.container.images.items], "NUM_IMAGES")
-	EmitEnum([f"ANIM_{i.name.value.upper()}" for i in content.container.animations.items], "NUM_ANIMS")
-	EmitEnum([f"SPRITE_{i.name.value.upper()}" for i in content.container.sprites.items], "NUM_SPRITES")
+# NETWORK
+	if gen_network_header:
+
+		print("#ifndef GAME_GENERATED_PROTOCOL_H")
+		print("#define GAME_GENERATED_PROTOCOL_H")
+		print("#include <engine/shared/protocol.h>")
+		print("#include <engine/message.h>")
+		print(network.RawHeader)
+
+		for e in network.Enums:
+			for l in create_enum_table(["%s_%s"%(e.name, v) for v in e.values], 'NUM_%sS'%e.name): # pylint: disable=E1101
+				print(l)
+			print("")
+
+		for e in network.Flags:
+			for l in create_flags_table(["%s_%s" % (e.name, v) for v in e.values]):
+				print(l)
+			print("")
+
+		non_extended = [o for o in network.Objects if o.ex is None]
+		extended = [o for o in network.Objects if o.ex is not None]
+		for l in create_enum_table(["NETOBJTYPE_EX"]+[o.enum_name for o in non_extended], "NUM_NETOBJTYPES"):
+			print(l)
+		for l in create_enum_table(["__NETOBJTYPE_UUID_HELPER=OFFSET_GAME_UUID-1"]+[o.enum_name for o in extended], "OFFSET_NETMSGTYPE_UUID"):
+			print(l)
+		print("")
+
+		non_extended = [o for o in network.Messages if o.ex is None]
+		extended = [o for o in network.Messages if o.ex is not None]
+		for l in create_enum_table(["NETMSGTYPE_EX"]+[o.enum_name for o in non_extended], "NUM_NETMSGTYPES"):
+			print(l)
+		print("")
+		for l in create_enum_table(["__NETMSGTYPE_UUID_HELPER=OFFSET_NETMSGTYPE_UUID-1"]+[o.enum_name for o in extended], "OFFSET_MAPITEMTYPE_UUID"):
+			print(l)
+		print("")
+
+		for item in network.Objects + network.Messages:
+			for line in item.emit_declaration():
+				print(line)
+			print("")
+
+		EmitEnum(["SOUND_%s"%i.name.value.upper() for i in content.container.sounds.items], "NUM_SOUNDS")
+		EmitEnum(["WEAPON_%s"%i.name.value.upper() for i in content.container.weapons.id.items], "NUM_WEAPONS")
+
+		print("""
+
+	class CNetObjHandler
+	{
+		const char *m_pMsgFailedOn;
+		const char *m_pObjCorrectedOn;
+		char m_aMsgData[1024];
+		int m_NumObjCorrections;
+		int ClampInt(const char *pErrorMsg, int Value, int Min, int Max);
+
+		static const char *ms_apObjNames[];
+		static int ms_aObjSizes[];
+		static const char *ms_apMsgNames[];
+
+	public:
+		CNetObjHandler();
+
+		int ValidateObj(int Type, void *pData, int Size);
+		const char *GetObjName(int Type) const;
+		int GetObjSize(int Type) const;
+		int NumObjCorrections() const;
+		const char *CorrectedObjOn() const;
+
+		const char *GetMsgName(int Type) const;
+		void *SecureUnpackMsg(int Type, CUnpacker *pUnpacker);
+		bool TeeHistorianRecordMsg(int Type);
+		const char *FailedMsgOn() const;
+	};
+
+	""")
+
+		print("#endif // GAME_GENERATED_PROTOCOL_H")
 
 
-def gen_common_content_source():
-	EmitDefinition(content.container, "datacontainer")
-	print("CDataContainer *g_pData = &datacontainer;")
+	if gen_network_source:
+		# create names
+		lines = []
+
+		lines += ['#include "protocol.h"']
+		lines += ['#include <engine/shared/protocol.h>']
+		lines += ['#include <engine/message.h>']
+		lines += ['#include <game/mapitems_ex.h>']
+
+		lines += ['CNetObjHandler::CNetObjHandler()']
+		lines += ['{']
+		lines += ['\tm_pMsgFailedOn = "";']
+		lines += ['\tm_pObjCorrectedOn = "";']
+		lines += ['\tm_NumObjCorrections = 0;']
+		lines += ['}']
+		lines += ['']
+		lines += ['int CNetObjHandler::NumObjCorrections() const { return m_NumObjCorrections; }']
+		lines += ['const char *CNetObjHandler::CorrectedObjOn() const { return m_pObjCorrectedOn; }']
+		lines += ['const char *CNetObjHandler::FailedMsgOn() const { return m_pMsgFailedOn; }']
+		lines += ['']
+		lines += ['']
+		lines += ['']
+		lines += ['']
+		lines += ['']
+
+		lines += ['static const int max_int = 0x7fffffff;']
+		lines += ['static const int min_int = 0x80000000;']
+
+		lines += ['int CNetObjHandler::ClampInt(const char *pErrorMsg, int Value, int Min, int Max)']
+		lines += ['{']
+		lines += ['\tif(Value < Min) { m_pObjCorrectedOn = pErrorMsg; m_NumObjCorrections++; return Min; }']
+		lines += ['\tif(Value > Max) { m_pObjCorrectedOn = pErrorMsg; m_NumObjCorrections++; return Max; }']
+		lines += ['\treturn Value;']
+		lines += ['}']
+
+		lines += ["const char *CNetObjHandler::ms_apObjNames[] = {"]
+		lines += ['\t"invalid",']
+		lines += ['\t"%s",' % o.name for o in network.Objects if o.ex is None]
+		lines += ['\t""', "};", ""]
+
+		lines += ["int CNetObjHandler::ms_aObjSizes[] = {"]
+		lines += ['\t0,']
+		lines += ['\tsizeof(%s),' % o.struct_name for o in network.Objects if o.ex is None]
+		lines += ['\t0', "};", ""]
 
 
-def gen_content_types_header():
-	print("#ifndef GENERATED_DATA_TYPES_H")
-	print("#define GENERATED_DATA_TYPES_H")
-	gen_common_content_types_header()
-	print("#endif")
+		lines += ['const char *CNetObjHandler::ms_apMsgNames[] = {']
+		lines += ['\t"invalid",']
+		for msg in network.Messages:
+			if msg.ex is None:
+				lines += ['\t"%s",' % msg.name]
+		lines += ['\t""']
+		lines += ['};']
+		lines += ['']
+
+		lines += ['const char *CNetObjHandler::GetObjName(int Type) const']
+		lines += ['{']
+		lines += ['\tif(Type < 0 || Type >= NUM_NETOBJTYPES) return "(out of range)";']
+		lines += ['\treturn ms_apObjNames[Type];']
+		lines += ['}']
+		lines += ['']
+
+		lines += ['int CNetObjHandler::GetObjSize(int Type) const']
+		lines += ['{']
+		lines += ['\tif(Type < 0 || Type >= NUM_NETOBJTYPES) return 0;']
+		lines += ['\treturn ms_aObjSizes[Type];']
+		lines += ['}']
+		lines += ['']
 
 
-def gen_client_content_header():
-	print("#ifndef GENERATED_CLIENT_DATA_H")
-	print("#define GENERATED_CLIENT_DATA_H")
-	gen_common_content_header()
-	print("#endif")
+		lines += ['const char *CNetObjHandler::GetMsgName(int Type) const']
+		lines += ['{']
+		lines += ['\tif(Type < 0 || Type >= NUM_NETMSGTYPES) return "(out of range)";']
+		lines += ['\treturn ms_apMsgNames[Type];']
+		lines += ['}']
+		lines += ['']
 
 
-def gen_client_content_source():
-	print('#include "client_data.h"')
-	gen_common_content_source()
+		for l in lines:
+			print(l)
+
+		# create validate tables
+			lines = []
+			lines += ['static int validate_invalid(void *data, int size) { return -1; }']
+			lines += ["typedef int(*VALIDATEFUNC)(void *data, int size);"]
+			lines += ["static VALIDATEFUNC validate_funcs[] = {"]
+			lines += ['\tvalidate_invalid,']
+			lines += ['\tvalidate_%s,' % o.name for o in network.Objects]
+			lines += ["\t0x0", "};", ""]
+
+			lines += ["int netobj_validate(int type, void *data, int size)"]
+			lines += ["{"]
+			lines += ["\tif(type < 0 || type >= NUM_NETOBJTYPES) return -1;"]
+			lines += ["\treturn validate_funcs[type](data, size);"]
+			lines += ["};", ""]
+
+		lines = []
+		lines += ['int CNetObjHandler::ValidateObj(int Type, void *pData, int Size)']
+		lines += ['{']
+		lines += ['\tswitch(Type)']
+		lines += ['\t{']
+		lines += ['\tcase NETOBJTYPE_EX:']
+		lines += ['\t{']
+		lines += ['\t\treturn 0;']
+		lines += ['\t}']
+
+		for item in network.Objects:
+			base_item = None
+			if item.base:
+				base_item = next(i for i in network.Objects if i.name == item.base)
+			for line in item.emit_validate(base_item):
+				lines += ["\t" + line]
+			lines += ['\t']
+		lines += ['\t}']
+		lines += ['\treturn -1;']
+		lines += ['}']
+		lines += ['']
+
+		lines += ['void *CNetObjHandler::SecureUnpackMsg(int Type, CUnpacker *pUnpacker)']
+		lines += ['{']
+		lines += ['\tm_pMsgFailedOn = 0;']
+		lines += ['\tswitch(Type)']
+		lines += ['\t{']
 
 
-def gen_server_content_header():
-	print("#ifndef GENERATED_SERVER_DATA_H")
-	print("#define GENERATED_SERVER_DATA_H")
-	gen_common_content_header()
-	print("#endif")
+		for item in network.Messages:
+			for line in item.emit_unpack():
+				lines += ["\t" + line]
+			lines += ['\t']
 
+		lines += ['\tdefault:']
+		lines += ['\t\tm_pMsgFailedOn = "(type out of range)";']
+		lines += ['\t\tbreak;']
+		lines += ['\t}']
+		lines += ['\t']
+		lines += ['\tif(pUnpacker->Error())']
+		lines += ['\t\tm_pMsgFailedOn = "(unpack error)";']
+		lines += ['\t']
+		lines += ['\tif(m_pMsgFailedOn)']
+		lines += ['\t\treturn 0;']
+		lines += ['\tm_pMsgFailedOn = "";']
+		lines += ['\treturn m_aMsgData;']
+		lines += ['}']
+		lines += ['']
 
-def gen_server_content_source():
-	print('#include "server_data.h"')
-	gen_common_content_source()
+		lines += ['bool CNetObjHandler::TeeHistorianRecordMsg(int Type)']
+		lines += ['{']
+		lines += ['\tswitch(Type)']
+		lines += ['\t{']
+		empty = True
+		for msg in network.Messages:
+			if not msg.teehistorian:
+				lines += ['\tcase %s:' % msg.enum_name]
+				empty = False
+		if not empty:
+			lines += ['\t\treturn false;']
+		lines += ['\tdefault:']
+		lines += ['\t\treturn true;']
+		lines += ['\t}']
+		lines += ['}']
+		lines += ['']
 
+		lines += ['void RegisterGameUuids(CUuidManager *pManager)']
+		lines += ['{']
 
-def main():
-	parser = argparse.ArgumentParser(description=("Generate C++ Source Files for the Teeworlds Network Protocol"))
-	FUNCTION_MAP = {
-		"network_header": gen_network_header,
-		"network_source": gen_network_source,
-		"content_types_header": gen_content_types_header,
-		"client_content_header": gen_client_content_header,
-		"client_content_source": gen_client_content_source,
-		"server_content_header": gen_server_content_header,
-		"server_content_source": gen_server_content_source,
-	}
+		for item in network.Objects + network.Messages:
+			if item.ex is not None:
+				lines += ['\tpManager->RegisterName(%s, "%s");' % (item.enum_name, item.ex)]
+		lines += ['\tRegisterMapItemTypeUuids(pManager);']
+		lines += ['}']
 
-	parser.add_argument("file_to_generate", choices=FUNCTION_MAP.keys())
-	args = parser.parse_args()
-	FUNCTION_MAP[args.file_to_generate]()
+		for l in lines:
+			print(l)
 
+	if gen_client_content_header or gen_server_content_header:
+		print("#endif")
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 	main()

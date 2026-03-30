@@ -1,28 +1,19 @@
-#include "aio.h"
-#include "color.h"
-#include "dbg.h"
 #include "logger.h"
-#include "str.h"
-#include "time.h"
-#include "windows.h"
+
+#include "color.h"
+#include "system.h"
 
 #include <atomic>
 #include <cstdio>
-#include <memory>
 
 #if defined(CONF_FAMILY_WINDOWS)
-#include <fcntl.h>
-#include <io.h>
+#define WIN32_LEAN_AND_MEAN
+#undef _WIN32_WINNT
+#define _WIN32_WINNT 0x0501 /* required for mingw to get getaddrinfo to work */
 #include <windows.h>
-#else
-#include "io.h"
-
-#include <unistd.h>
 #endif
 
-#if defined(CONF_PLATFORM_ANDROID)
-#include <android/log.h>
-#endif
+extern "C" {
 
 std::atomic<ILogger *> global_logger = nullptr;
 thread_local ILogger *scope_logger = nullptr;
@@ -33,16 +24,14 @@ void log_set_global_logger(ILogger *logger)
 	ILogger *null = nullptr;
 	if(!global_logger.compare_exchange_strong(null, logger, std::memory_order_acq_rel))
 	{
-		dbg_assert_failed("global logger has already been set and can only be set once");
+		dbg_assert(false, "global logger has already been set and can only be set once");
 	}
 	atexit(log_global_logger_finish);
 }
 
 void log_global_logger_finish()
 {
-	ILogger *logger = global_logger.load(std::memory_order_acquire);
-	if(logger)
-		logger->GlobalFinish();
+	global_logger.load(std::memory_order_acquire)->GlobalFinish();
 }
 
 void log_set_global_logger_default()
@@ -53,10 +42,7 @@ void log_set_global_logger_default()
 #else
 	logger = log_logger_stdout();
 #endif
-	if(logger)
-	{
-		log_set_global_logger(logger.release());
-	}
+	log_set_global_logger(logger.release());
 }
 
 ILogger *log_get_scope_logger()
@@ -77,7 +63,7 @@ void log_set_scope_logger(ILogger *logger)
 	}
 }
 
-[[gnu::format(printf, 5, 0)]] static void log_log_impl(LEVEL level, bool have_color, LOG_COLOR color, const char *sys, const char *fmt, va_list args)
+void log_log_impl(LEVEL level, bool have_color, LOG_COLOR color, const char *sys, const char *fmt, va_list args)
 {
 	// Make sure we're not logging recursively.
 	if(in_logger)
@@ -99,17 +85,29 @@ void log_set_scope_logger(ILogger *logger)
 	Msg.m_Level = level;
 	Msg.m_HaveColor = have_color;
 	Msg.m_Color = color;
-	str_timestamp_format(Msg.m_aTimestamp, sizeof(Msg.m_aTimestamp), TimestampFormat::SPACE);
+	str_timestamp_format(Msg.m_aTimestamp, sizeof(Msg.m_aTimestamp), FORMAT_SPACE);
 	Msg.m_TimestampLength = str_length(Msg.m_aTimestamp);
-	str_copy(Msg.m_aSystem, sys);
+	str_copy(Msg.m_aSystem, sys, sizeof(Msg.m_aSystem));
 	Msg.m_SystemLength = str_length(Msg.m_aSystem);
 
-	str_format(Msg.m_aLine, sizeof(Msg.m_aLine), "%s %c %s: ", Msg.m_aTimestamp, "EWIDT"[level], Msg.m_aSystem);
+	// TODO: Add level?
+	str_format(Msg.m_aLine, sizeof(Msg.m_aLine), "[%s][%s]: ", Msg.m_aTimestamp, Msg.m_aSystem);
 	Msg.m_LineMessageOffset = str_length(Msg.m_aLine);
 
 	char *pMessage = Msg.m_aLine + Msg.m_LineMessageOffset;
 	int MessageSize = sizeof(Msg.m_aLine) - Msg.m_LineMessageOffset;
-	str_format_v(pMessage, MessageSize, fmt, args);
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#endif
+#if defined(CONF_FAMILY_WINDOWS)
+	_vsnprintf(pMessage, MessageSize, fmt, args);
+#else
+	vsnprintf(pMessage, MessageSize, fmt, args);
+#endif
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 	Msg.m_LineLength = str_length(Msg.m_aLine);
 	scope_logger->Log(&Msg);
 	in_logger = false;
@@ -140,10 +138,6 @@ void log_log_color(LEVEL level, LOG_COLOR color, const char *sys, const char *fm
 	log_log_impl(level, true, color, sys, fmt, args);
 	va_end(args);
 }
-
-bool CLogFilter::Filters(const CLogMessage *pMessage)
-{
-	return pMessage->m_Level > m_MaxLevel.load(std::memory_order_relaxed);
 }
 
 #if defined(CONF_PLATFORM_ANDROID)
@@ -152,12 +146,8 @@ class CLoggerAndroid : public ILogger
 public:
 	void Log(const CLogMessage *pMessage) override
 	{
-		if(m_Filter.Filters(pMessage))
-		{
-			return;
-		}
 		int AndroidLevel;
-		switch(pMessage->m_Level)
+		switch(Level)
 		{
 		case LEVEL_TRACE: AndroidLevel = ANDROID_LOG_VERBOSE; break;
 		case LEVEL_DEBUG: AndroidLevel = ANDROID_LOG_DEBUG; break;
@@ -165,15 +155,12 @@ public:
 		case LEVEL_WARN: AndroidLevel = ANDROID_LOG_WARN; break;
 		case LEVEL_ERROR: AndroidLevel = ANDROID_LOG_ERROR; break;
 		}
-		char aTag[64];
-		str_copy(aTag, ANDROID_PACKAGE_NAME "/");
-		str_append(aTag, pMessage->m_aSystem);
-		__android_log_write(AndroidLevel, aTag, pMessage->Message());
+		__android_log_write(AndroidLevel, pMessage->m_aSystem, pMessage->Message());
 	}
 };
 std::unique_ptr<ILogger> log_logger_android()
 {
-	return std::make_unique<CLoggerAndroid>();
+	return std::unique_ptr<ILogger>(new CLoggerAndroid());
 }
 #else
 std::unique_ptr<ILogger> log_logger_android()
@@ -185,37 +172,32 @@ std::unique_ptr<ILogger> log_logger_android()
 
 class CLoggerCollection : public ILogger
 {
-	std::vector<std::shared_ptr<ILogger>> m_vpLoggers;
+	std::vector<std::shared_ptr<ILogger>> m_apLoggers;
 
 public:
-	CLoggerCollection(std::vector<std::shared_ptr<ILogger>> &&vpLoggers) :
-		m_vpLoggers(std::move(vpLoggers))
+	CLoggerCollection(std::vector<std::shared_ptr<ILogger>> &&apLoggers) :
+		m_apLoggers(std::move(apLoggers))
 	{
-		m_Filter.m_MaxLevel.store(LEVEL_TRACE, std::memory_order_relaxed);
 	}
 	void Log(const CLogMessage *pMessage) override
 	{
-		if(m_Filter.Filters(pMessage))
-		{
-			return;
-		}
-		for(auto &pLogger : m_vpLoggers)
+		for(auto &pLogger : m_apLoggers)
 		{
 			pLogger->Log(pMessage);
 		}
 	}
 	void GlobalFinish() override
 	{
-		for(auto &pLogger : m_vpLoggers)
+		for(auto &pLogger : m_apLoggers)
 		{
 			pLogger->GlobalFinish();
 		}
 	}
 };
 
-std::unique_ptr<ILogger> log_logger_collection(std::vector<std::shared_ptr<ILogger>> &&vpLoggers)
+std::unique_ptr<ILogger> log_logger_collection(std::vector<std::shared_ptr<ILogger>> &&loggers)
 {
-	return std::make_unique<CLoggerCollection>(std::move(vpLoggers));
+	return std::unique_ptr<ILogger>(new CLoggerCollection(std::move(loggers)));
 }
 
 class CLoggerAsync : public ILogger
@@ -233,32 +215,30 @@ public:
 	}
 	void Log(const CLogMessage *pMessage) override
 	{
-		if(m_Filter.Filters(pMessage))
-		{
-			return;
-		}
 		aio_lock(m_pAio);
-		if(m_AnsiTruecolor && pMessage->m_HaveColor)
+		if(m_AnsiTruecolor)
 		{
 			// https://en.wikipedia.org/w/index.php?title=ANSI_escape_code&oldid=1077146479#24-bit
 			char aAnsi[32];
-			str_format(aAnsi, sizeof(aAnsi),
-				"\x1b[38;2;%d;%d;%dm",
-				pMessage->m_Color.r,
-				pMessage->m_Color.g,
-				pMessage->m_Color.b);
+			if(pMessage->m_HaveColor)
+			{
+				str_format(aAnsi, sizeof(aAnsi),
+					"\x1b[38;2;%d;%d;%dm",
+					pMessage->m_Color.r,
+					pMessage->m_Color.g,
+					pMessage->m_Color.b);
+			}
+			else
+			{
+				str_copy(aAnsi, "\x1b[39m", sizeof(aAnsi));
+			}
 			aio_write_unlocked(m_pAio, aAnsi, str_length(aAnsi));
 		}
 		aio_write_unlocked(m_pAio, pMessage->m_aLine, pMessage->m_LineLength);
-		if(m_AnsiTruecolor && pMessage->m_HaveColor)
-		{
-			const char aResetColor[] = "\x1b[0m";
-			aio_write_unlocked(m_pAio, aResetColor, str_length(aResetColor)); // reset
-		}
 		aio_write_newline_unlocked(m_pAio);
 		aio_unlock(m_pAio);
 	}
-	~CLoggerAsync() override
+	~CLoggerAsync()
 	{
 		if(m_Close)
 		{
@@ -279,7 +259,7 @@ public:
 
 std::unique_ptr<ILogger> log_logger_file(IOHANDLE logfile)
 {
-	return std::make_unique<CLoggerAsync>(logfile, false, true);
+	return std::unique_ptr<ILogger>(new CLoggerAsync(logfile, false, true));
 }
 
 #if defined(CONF_FAMILY_WINDOWS)
@@ -291,99 +271,76 @@ static int color_hsv_to_windows_console_color(const ColorHSVA &Hsv)
 	if(s >= 0 && s <= 10)
 	{
 		if(v <= 150)
-			return FOREGROUND_INTENSITY;
-		return FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
+			return 8;
+		return 15;
 	}
-	if(h < 0)
-		return FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
-	else if(h < 15)
-		return FOREGROUND_RED | FOREGROUND_INTENSITY;
-	else if(h < 30)
-		return FOREGROUND_GREEN | FOREGROUND_RED;
-	else if(h < 60)
-		return FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
-	else if(h < 110)
-		return FOREGROUND_GREEN | FOREGROUND_INTENSITY;
-	else if(h < 140)
-		return FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
-	else if(h < 170)
-		return FOREGROUND_BLUE | FOREGROUND_INTENSITY;
-	else if(h < 195)
-		return FOREGROUND_BLUE | FOREGROUND_RED;
-	else if(h < 240)
-		return FOREGROUND_BLUE | FOREGROUND_RED | FOREGROUND_INTENSITY;
+	else if(h >= 0 && h < 15)
+		return 12;
+	else if(h >= 15 && h < 30)
+		return 6;
+	else if(h >= 30 && h < 60)
+		return 14;
+	else if(h >= 60 && h < 110)
+		return 10;
+	else if(h >= 110 && h < 140)
+		return 11;
+	else if(h >= 140 && h < 170)
+		return 9;
+	else if(h >= 170 && h < 195)
+		return 5;
+	else if(h >= 195 && h < 240)
+		return 13;
+	else if(h >= 240)
+		return 12;
 	else
-		return FOREGROUND_RED | FOREGROUND_INTENSITY;
+		return 15;
 }
 
 class CWindowsConsoleLogger : public ILogger
 {
-	HANDLE m_pConsole;
-	bool m_EnableColor;
-	int m_BackgroundColor;
-	int m_ForegroundColor;
-	CLock m_OutputLock;
-	bool m_Finished = false;
-
 public:
-	CWindowsConsoleLogger(HANDLE pConsole, bool EnableColor) :
-		m_pConsole(pConsole),
-		m_EnableColor(EnableColor)
+	void Log(const CLogMessage *pMessage) override
 	{
-		CONSOLE_SCREEN_BUFFER_INFO ConsoleInfo;
-		if(GetConsoleScreenBufferInfo(pConsole, &ConsoleInfo))
-		{
-			m_BackgroundColor = ConsoleInfo.wAttributes & (BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED | BACKGROUND_INTENSITY);
-			m_ForegroundColor = ConsoleInfo.wAttributes & (FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
-		}
-		else
-		{
-			m_BackgroundColor = 0;
-			m_ForegroundColor = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
-		}
-	}
-	void Log(const CLogMessage *pMessage) override REQUIRES(!m_OutputLock)
-	{
-		if(m_Filter.Filters(pMessage))
-		{
-			return;
-		}
-		const std::wstring WideMessage = windows_utf8_to_wide(pMessage->m_aLine);
+		wchar_t *pWide = (wchar_t *)malloc((pMessage->m_LineLength + 1) * sizeof(*pWide));
+		const char *p = pMessage->m_aLine;
+		int WLen = 0;
 
-		int Color = m_BackgroundColor;
-		if(m_EnableColor && pMessage->m_HaveColor)
-		{
-			const ColorRGBA Rgba(pMessage->m_Color.r / 255.0f, pMessage->m_Color.g / 255.0f, pMessage->m_Color.b / 255.0f);
-			Color |= color_hsv_to_windows_console_color(color_cast<ColorHSVA>(Rgba));
-		}
-		else
-			Color |= FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
+		mem_zero(pWide, pMessage->m_LineLength * sizeof(*pWide));
 
-		const CLockScope LockScope(m_OutputLock);
-		if(!m_Finished)
+		for(int Codepoint = 0; (Codepoint = str_utf8_decode(&p)); WLen++)
 		{
-			SetConsoleTextAttribute(m_pConsole, Color);
-			WriteConsoleW(m_pConsole, WideMessage.c_str(), WideMessage.length(), nullptr, nullptr);
-			WriteConsoleW(m_pConsole, L"\r\n", 2, nullptr, nullptr);
+			char aU16[4] = {0};
+
+			if(Codepoint < 0)
+			{
+				free(pWide);
+				return;
+			}
+
+			if(str_utf16le_encode(aU16, Codepoint) != 2)
+			{
+				free(pWide);
+				return;
+			}
+
+			mem_copy(&pWide[WLen], aU16, 2);
 		}
-	}
-	void GlobalFinish() override REQUIRES(!m_OutputLock)
-	{
-		// Restore original color
-		const CLockScope LockScope(m_OutputLock);
-		SetConsoleTextAttribute(m_pConsole, m_BackgroundColor | m_ForegroundColor);
-		m_Finished = true;
+		pWide[WLen] = '\n';
+		HANDLE pConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+		int Color = 15;
+		if(pMessage->m_HaveColor)
+		{
+			ColorRGBA Rgba(1.0, 1.0, 1.0, 1.0);
+			Rgba.r = pMessage->m_Color.r / 255.0;
+			Rgba.g = pMessage->m_Color.g / 255.0;
+			Rgba.b = pMessage->m_Color.b / 255.0;
+			Color = color_hsv_to_windows_console_color(color_cast<ColorHSVA>(Rgba));
+		}
+		SetConsoleTextAttribute(pConsole, Color);
+		WriteConsoleW(pConsole, pWide, WLen + 1, NULL, NULL);
+		free(pWide);
 	}
 };
-
-static IOHANDLE ConvertWindowsHandle(HANDLE pHandle, int OpenFlags)
-{
-	int FileDescriptor = _open_osfhandle(reinterpret_cast<intptr_t>(pHandle), OpenFlags);
-	dbg_assert(FileDescriptor != -1, "_open_osfhandle failure");
-	IOHANDLE FileStream = _wfdopen(FileDescriptor, L"w");
-	dbg_assert(FileStream != nullptr, "_wfdopen failure");
-	return FileStream;
-}
 #endif
 
 std::unique_ptr<ILogger> log_logger_stdout()
@@ -391,71 +348,9 @@ std::unique_ptr<ILogger> log_logger_stdout()
 #if !defined(CONF_FAMILY_WINDOWS)
 	// TODO: Only enable true color when COLORTERM contains "truecolor".
 	// https://github.com/termstandard/colors/tree/65bf0cd1ece7c15fa33a17c17528b02c99f1ae0b#checking-for-colorterm
-	const bool Colors = getenv("NO_COLOR") == nullptr && isatty(STDOUT_FILENO);
-	return std::make_unique<CLoggerAsync>(io_stdout(), Colors, false);
+	return std::unique_ptr<ILogger>(new CLoggerAsync(io_stdout(), getenv("NO_COLOR") == nullptr, false));
 #else
-	// If we currently have no stdout (console, file, pipe),
-	// try to attach to the console of the parent process.
-	if(GetFileType(GetStdHandle(STD_OUTPUT_HANDLE)) == FILE_TYPE_UNKNOWN)
-	{
-		AttachConsole(ATTACH_PARENT_PROCESS);
-	}
-
-	HANDLE pOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-	if(pOutput == nullptr)
-	{
-		// There is no console, file or pipe that we can output to.
-		return nullptr;
-	}
-	dbg_assert(pOutput != INVALID_HANDLE_VALUE, "GetStdHandle failure");
-
-	const DWORD OutputType = GetFileType(pOutput);
-	if(OutputType == FILE_TYPE_CHAR)
-	{
-		DWORD OldConsoleMode = 0;
-		if(!GetConsoleMode(pOutput, &OldConsoleMode))
-		{
-			// GetConsoleMode can fail with ERROR_INVALID_HANDLE when redirecting output to "nul",
-			// which is considered a character file but cannot be used as a console.
-			dbg_assert(GetLastError() == ERROR_INVALID_HANDLE, "GetConsoleMode failure");
-			return nullptr;
-		}
-
-		const bool Colors = _wgetenv(L"NO_COLOR") == nullptr;
-
-		// Try to enable virtual terminal processing in the Windows console.
-		// See https://learn.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences
-		if(!SetConsoleMode(pOutput, OldConsoleMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING | DISABLE_NEWLINE_AUTO_RETURN))
-		{
-			// Try to downgrade mode gracefully when failing to set both.
-			if(!SetConsoleMode(pOutput, OldConsoleMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING))
-			{
-				// Fallback to old, slower Windows logging API, when failing to enable virtual terminal processing.
-				return std::make_unique<CWindowsConsoleLogger>(pOutput, Colors);
-			}
-		}
-
-		// Virtual terminal processing was enabled successfully. We can
-		// use the async logger with ANSI escape codes for colors now.
-		// We need to set the output encoding to UTF-8 manually and
-		// convert the HANDLE to an IOHANDLE to use the async logger.
-		// We assume UTF-8 is available when virtual terminal processing is.
-		dbg_assert(SetConsoleOutputCP(CP_UTF8) != 0, "SetConsoleOutputCP failure");
-		return std::make_unique<CLoggerAsync>(ConvertWindowsHandle(pOutput, _O_TEXT), Colors, false);
-	}
-	else if(OutputType == FILE_TYPE_DISK || OutputType == FILE_TYPE_PIPE)
-	{
-		// Writing to a pipe works the same as writing to a file.
-		// We can use the async logger to write to files and pipes
-		// by converting the HANDLE to an IOHANDLE.
-		// For pipes there does not seem to be any way to determine
-		// whether the console supports ANSI escape codes.
-		return std::make_unique<CLoggerAsync>(ConvertWindowsHandle(pOutput, _O_APPEND), false, false);
-	}
-	else
-	{
-		dbg_assert_failed("GetFileType failure");
-	}
+	return std::unique_ptr<ILogger>(new CWindowsConsoleLogger());
 #endif
 }
 
@@ -465,17 +360,14 @@ class CLoggerWindowsDebugger : public ILogger
 public:
 	void Log(const CLogMessage *pMessage) override
 	{
-		if(m_Filter.Filters(pMessage))
-		{
-			return;
-		}
-		const std::wstring WideMessage = windows_utf8_to_wide(pMessage->m_aLine);
-		OutputDebugStringW(WideMessage.c_str());
+		WCHAR aWBuffer[4096];
+		MultiByteToWideChar(CP_UTF8, 0, pMessage->m_aLine, -1, aWBuffer, sizeof(aWBuffer) / sizeof(WCHAR));
+		OutputDebugStringW(aWBuffer);
 	}
 };
 std::unique_ptr<ILogger> log_logger_windows_debugger()
 {
-	return std::make_unique<CLoggerWindowsDebugger>();
+	return std::unique_ptr<ILogger>(new CLoggerWindowsDebugger());
 }
 #else
 std::unique_ptr<ILogger> log_logger_windows_debugger()
@@ -485,113 +377,42 @@ std::unique_ptr<ILogger> log_logger_windows_debugger()
 }
 #endif
 
-class CLoggerNoOp : public ILogger
+void CFutureLogger::Set(std::unique_ptr<ILogger> &&pLogger)
 {
-public:
-	void Log(const CLogMessage *pMessage) override
+	ILogger *null = nullptr;
+	m_PendingLock.lock();
+	ILogger *pLoggerRaw = pLogger.release();
+	if(!m_pLogger.compare_exchange_strong(null, pLoggerRaw, std::memory_order_acq_rel))
 	{
-		// no-op
+		dbg_assert(false, "future logger has already been set and can only be set once");
 	}
-};
-std::unique_ptr<ILogger> log_logger_noop()
-{
-	return std::make_unique<CLoggerNoOp>();
-}
-
-#ifdef __GNUC__
-// atomic_compare_exchange_strong_explicit is deprecated
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
-void CFutureLogger::Set(std::shared_ptr<ILogger> pLogger)
-{
-	const CLockScope LockScope(m_PendingLock);
-	std::shared_ptr<ILogger> pNullLogger;
-	if(!std::atomic_compare_exchange_strong_explicit(&m_pLogger, &pNullLogger, pLogger, std::memory_order_acq_rel, std::memory_order_acq_rel))
+	for(const auto &Pending : m_aPending)
 	{
-		dbg_assert_failed("future logger has already been set and can only be set once");
+		pLoggerRaw->Log(&Pending);
 	}
-	m_pLogger = std::move(pLogger);
-
-	for(const auto &Pending : m_vPending)
-	{
-		m_pLogger->Log(&Pending);
-	}
-	m_vPending.clear();
-	m_vPending.shrink_to_fit();
+	m_aPending.clear();
+	m_aPending.shrink_to_fit();
+	m_PendingLock.unlock();
 }
 
 void CFutureLogger::Log(const CLogMessage *pMessage)
 {
-	auto pLogger = std::atomic_load_explicit(&m_pLogger, std::memory_order_acquire);
+	ILogger *pLogger = m_pLogger.load(std::memory_order_acquire);
 	if(pLogger)
 	{
 		pLogger->Log(pMessage);
 		return;
 	}
-	const CLockScope LockScope(m_PendingLock);
-	pLogger = std::atomic_load_explicit(&m_pLogger, std::memory_order_relaxed);
-	if(pLogger)
-	{
-		pLogger->Log(pMessage);
-		return;
-	}
-	m_vPending.push_back(*pMessage);
+	m_PendingLock.lock();
+	m_aPending.push_back(*pMessage);
+	m_PendingLock.unlock();
 }
 
 void CFutureLogger::GlobalFinish()
 {
-	auto pLogger = std::atomic_load_explicit(&m_pLogger, std::memory_order_acquire);
+	ILogger *pLogger = m_pLogger.load(std::memory_order_acquire);
 	if(pLogger)
 	{
 		pLogger->GlobalFinish();
 	}
-}
-
-void CFutureLogger::OnFilterChange()
-{
-	auto pLogger = std::atomic_load_explicit(&m_pLogger, std::memory_order_acquire);
-	if(pLogger)
-	{
-		pLogger->SetFilter(m_Filter);
-	}
-}
-
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
-
-void CMemoryLogger::Log(const CLogMessage *pMessage)
-{
-	if(m_pParentLogger)
-	{
-		m_pParentLogger->Log(pMessage);
-	}
-	if(m_Filter.Filters(pMessage))
-	{
-		return;
-	}
-	const CLockScope LockScope(m_MessagesMutex);
-	m_vMessages.push_back(*pMessage);
-}
-
-std::vector<CLogMessage> CMemoryLogger::Lines()
-{
-	const CLockScope LockScope(m_MessagesMutex);
-	return m_vMessages;
-}
-
-std::string CMemoryLogger::ConcatenatedLines()
-{
-	const CLockScope LockScope(m_MessagesMutex);
-	std::string Result;
-	for(const CLogMessage &Message : m_vMessages)
-	{
-		if(!Result.empty())
-		{
-			Result += '\n';
-		}
-		Result += Message.m_aLine;
-	}
-	return Result;
 }

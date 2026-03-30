@@ -1,10 +1,11 @@
 #ifndef ENGINE_CLIENT_BACKEND_VULKAN_BACKEND_VULKAN_H
 #define ENGINE_CLIENT_BACKEND_VULKAN_BACKEND_VULKAN_H
 
-class CCommandProcessorFragment_GLBase;
+#include <base/detect.h>
+#include <engine/client/backend_sdl.h>
 
-static constexpr int BACKEND_VULKAN_VERSION_MAJOR = 1;
-static constexpr int BACKEND_VULKAN_VERSION_MINOR = 1;
+static constexpr int gs_BackendVulkanMajor = 1;
+static constexpr int gs_BackendVulkanMinor = 0;
 
 CCommandProcessorFragment_GLBase *CreateVulkanCommandProcessorFragment();
 

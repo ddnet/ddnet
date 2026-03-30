@@ -1,14 +1,13 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
-#include "door.h"
+#include <engine/shared/config.h>
+#include <game/generated/protocol.h>
+#include <game/server/gamecontext.h>
+#include <game/server/gamemodes/DDRace.h>
+#include <game/server/player.h>
+#include <game/version.h>
 
 #include "character.h"
-
-#include <generated/protocol.h>
-
-#include <game/mapitems.h>
-#include <game/server/gamecontext.h>
-#include <game/server/player.h>
-#include <game/teamscore.h>
+#include "door.h"
 
 CDoor::CDoor(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
 	int Number) :
@@ -17,32 +16,28 @@ CDoor::CDoor(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
 	m_Number = Number;
 	m_Pos = Pos;
 	m_Length = Length;
-	m_Direction = vec2(std::sin(Rotation), std::cos(Rotation));
+	m_Direction = vec2(sin(Rotation), cos(Rotation));
 	vec2 To = Pos + normalize(m_Direction) * m_Length;
 
-	GameServer()->Collision()->IntersectNoLaser(Pos, To, &this->m_To, nullptr);
+	GameServer()->Collision()->IntersectNoLaser(Pos, To, &this->m_To, 0);
 	ResetCollision();
 	GameWorld()->InsertEntity(this);
 }
 
 void CDoor::ResetCollision()
 {
-	if(GameServer()->Collision()->GetTile(m_Pos.x, m_Pos.y) || GameServer()->Collision()->GetFrontTile(m_Pos.x, m_Pos.y))
-		return;
-
 	for(int i = 0; i < m_Length - 1; i++)
 	{
-		vec2 CurrentPos = m_Pos + m_Direction * i;
-		if(GameServer()->Collision()->CheckPoint(CurrentPos))
+		vec2 CurrentPos(m_Pos.x + (m_Direction.x * i),
+			m_Pos.y + (m_Direction.y * i));
+		if(GameServer()->Collision()->CheckPoint(CurrentPos) || GameServer()->Collision()->GetTile(m_Pos.x, m_Pos.y) || GameServer()->Collision()->GetFTile(m_Pos.x, m_Pos.y))
 			break;
 		else
-			GameServer()->Collision()->SetDoorCollisionAt(CurrentPos.x, CurrentPos.y, TILE_STOPA, 0, m_Number);
+			GameServer()->Collision()->SetDCollisionAt(
+				m_Pos.x + (m_Direction.x * i),
+				m_Pos.y + (m_Direction.y * i), TILE_STOPA, 0 /*Flags*/,
+				m_Number);
 	}
-}
-
-void CDoor::Reset()
-{
-	m_MarkedForDestroy = true;
 }
 
 void CDoor::Snap(int SnappingClient)
@@ -50,34 +45,48 @@ void CDoor::Snap(int SnappingClient)
 	if(NetworkClipped(SnappingClient, m_Pos) && NetworkClipped(SnappingClient, m_To))
 		return;
 
-	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
+	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
+		NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
 
-	vec2 From;
-	int StartTick;
+	if(!pObj)
+		return;
 
-	if(SnappingClientVersion >= VERSION_DDNET_ENTITY_NETOBJS)
+	pObj->m_X = (int)m_Pos.x;
+	pObj->m_Y = (int)m_Pos.y;
+
+	int SnappingClientVersion = SnappingClient != SERVER_DEMO_CLIENT ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
+
+	CNetObj_EntityEx *pEntData = 0;
+	if(SnappingClientVersion >= VERSION_DDNET_SWITCH)
+		pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
+
+	if(pEntData)
 	{
-		From = m_To;
-		StartTick = -1;
+		pEntData->m_SwitchNumber = m_Number;
+		pEntData->m_Layer = m_Layer;
+		pEntData->m_EntityClass = ENTITYCLASS_DOOR;
+
+		pObj->m_FromX = (int)m_To.x;
+		pObj->m_FromY = (int)m_To.y;
+		pObj->m_StartTick = 0;
 	}
 	else
 	{
-		CCharacter *pChr = GameServer()->GetPlayerChar(SnappingClient);
+		CCharacter *Char = GameServer()->GetPlayerChar(SnappingClient);
 
-		if(SnappingClient != SERVER_DEMO_CLIENT && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == TEAM_SPECTATORS || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->SpectatorId() != SPEC_FREEVIEW)
-			pChr = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->SpectatorId());
+		if(SnappingClient != SERVER_DEMO_CLIENT && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == TEAM_SPECTATORS || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
+			Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
 
-		if(pChr && pChr->Team() != TEAM_SUPER && pChr->IsAlive() && !Switchers().empty() && Switchers()[m_Number].m_aStatus[pChr->Team()])
+		if(Char && Char->Team() != TEAM_SUPER && Char->IsAlive() && GameServer()->Collision()->m_NumSwitchers > 0 && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()])
 		{
-			From = m_To;
+			pObj->m_FromX = (int)m_To.x;
+			pObj->m_FromY = (int)m_To.y;
 		}
 		else
 		{
-			From = m_Pos;
+			pObj->m_FromX = (int)m_Pos.x;
+			pObj->m_FromY = (int)m_Pos.y;
 		}
-		StartTick = Server()->Tick();
+		pObj->m_StartTick = Server()->Tick();
 	}
-
-	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Server()->IsSixup(SnappingClient), SnappingClient), GetId(),
-		m_Pos, From, StartTick, -1, LASERTYPE_DOOR, 0, m_Number);
 }

@@ -26,7 +26,7 @@ private:
 		std::string m_DefineValue;
 	};
 
-	std::vector<SGLSLCompilerDefine> m_vDefines;
+	std::vector<SGLSLCompilerDefine> m_Defines;
 
 	int m_OpenGLVersionMajor;
 	int m_OpenGLVersionMinor;

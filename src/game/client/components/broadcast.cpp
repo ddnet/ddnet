@@ -1,79 +1,36 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include "broadcast.h"
-
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
+#include <game/generated/client_data.h>
+#include <game/generated/protocol.h>
 
-#include <generated/protocol.h>
+#include <game/client/gameclient.h>
 
-#include <game/client/components/important_alert.h>
 #include <game/client/components/motd.h>
 #include <game/client/components/scoreboard.h>
-#include <game/client/gameclient.h>
+
+#include "broadcast.h"
 
 void CBroadcast::OnReset()
 {
 	m_BroadcastTick = 0;
-	m_BroadcastRenderOffset = -1.0f;
-	TextRender()->DeleteTextContainer(m_TextContainerIndex);
-}
-
-void CBroadcast::OnWindowResize()
-{
-	m_BroadcastRenderOffset = -1.0f;
-	TextRender()->DeleteTextContainer(m_TextContainerIndex);
 }
 
 void CBroadcast::OnRender()
 {
-	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if(m_pClient->m_Scoreboard.Active() || m_pClient->m_Motd.IsActive() || !g_Config.m_ClShowBroadcasts)
 		return;
 
-	RenderServerBroadcast();
-}
+	Graphics()->MapScreen(0, 0, 300 * Graphics()->ScreenAspect(), 300);
 
-void CBroadcast::RenderServerBroadcast()
-{
-	if(GameClient()->m_Scoreboard.IsActive() ||
-		GameClient()->m_Motd.IsActive() ||
-		GameClient()->m_ImportantAlert.IsActive() ||
-		!g_Config.m_ClShowBroadcasts)
-	{
-		return;
-	}
-
-	const float SecondsRemaining = (m_BroadcastTick - Client()->GameTick(g_Config.m_ClDummy)) / (float)Client()->GameTickSpeed();
-	if(SecondsRemaining <= 0.0f)
-	{
-		TextRender()->DeleteTextContainer(m_TextContainerIndex);
-		return;
-	}
-
-	const float Height = 300.0f;
-	const float Width = Height * Graphics()->ScreenAspect();
-	Graphics()->MapScreen(0.0f, 0.0f, Width, Height);
-
-	if(m_BroadcastRenderOffset < 0.0f)
-		m_BroadcastRenderOffset = Width / 2.0f - TextRender()->TextWidth(12.0f, m_aBroadcastText, -1, Width) / 2.0f;
-
-	if(!m_TextContainerIndex.Valid())
+	if(Client()->GameTick(g_Config.m_ClDummy) < m_BroadcastTick)
 	{
 		CTextCursor Cursor;
-		Cursor.SetPosition(vec2(m_BroadcastRenderOffset, 40.0f));
-		Cursor.m_FontSize = 12.0f;
-		Cursor.m_LineWidth = Width;
-		TextRender()->CreateTextContainer(m_TextContainerIndex, &Cursor, m_aBroadcastText);
-	}
-	if(m_TextContainerIndex.Valid())
-	{
-		const float Alpha = SecondsRemaining >= 1.0f ? 1.0f : SecondsRemaining;
-		ColorRGBA TextColor = TextRender()->DefaultTextColor();
-		TextColor.a *= Alpha;
-		ColorRGBA OutlineColor = TextRender()->DefaultTextOutlineColor();
-		OutlineColor.a *= Alpha;
-		TextRender()->RenderTextContainer(m_TextContainerIndex, TextColor, OutlineColor);
+		TextRender()->SetCursor(&Cursor, m_BroadcastRenderOffset, 40.0f, 12.0f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
+		Cursor.m_LineWidth = 300 * Graphics()->ScreenAspect() - m_BroadcastRenderOffset;
+		TextRender()->TextEx(&Cursor, m_aBroadcastText, -1);
 	}
 }
 
@@ -81,27 +38,36 @@ void CBroadcast::OnMessage(int MsgType, void *pRawMsg)
 {
 	if(MsgType == NETMSGTYPE_SV_BROADCAST)
 	{
-		const CNetMsg_Sv_Broadcast *pMsg = (CNetMsg_Sv_Broadcast *)pRawMsg;
-		DoBroadcast(pMsg->m_pMessage);
-	}
-}
-
-void CBroadcast::DoBroadcast(const char *pText)
-{
-	str_copy(m_aBroadcastText, pText);
-	m_BroadcastTick = Client()->GameTick(g_Config.m_ClDummy) + Client()->GameTickSpeed() * 10;
-	m_BroadcastRenderOffset = -1.0f;
-	TextRender()->DeleteTextContainer(m_TextContainerIndex);
-
-	if(g_Config.m_ClPrintBroadcasts)
-	{
-		char aLine[sizeof(m_aBroadcastText)];
-		while((pText = str_next_token(pText, "\n", aLine, sizeof(aLine))))
+		CNetMsg_Sv_Broadcast *pMsg = (CNetMsg_Sv_Broadcast *)pRawMsg;
+		str_copy(m_aBroadcastText, pMsg->m_pMessage, sizeof(m_aBroadcastText));
+		CTextCursor Cursor;
+		TextRender()->SetCursor(&Cursor, 0, 0, 12.0f, TEXTFLAG_STOP_AT_END);
+		Cursor.m_LineWidth = 300 * Graphics()->ScreenAspect();
+		TextRender()->TextEx(&Cursor, m_aBroadcastText, -1);
+		m_BroadcastRenderOffset = 150 * Graphics()->ScreenAspect() - Cursor.m_X / 2;
+		m_BroadcastTick = Client()->GameTick(g_Config.m_ClDummy) + Client()->GameTickSpeed() * 10;
+		if(g_Config.m_ClPrintBroadcasts)
 		{
-			if(aLine[0] != '\0')
+			char aBuf[1024];
+			int i, ii;
+			for(i = 0, ii = 0; i < str_length(m_aBroadcastText); i++)
 			{
-				GameClient()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aLine, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
+				if(m_aBroadcastText[i] == '\n')
+				{
+					aBuf[ii] = '\0';
+					ii = 0;
+					if(aBuf[0])
+						m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aBuf, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
+				}
+				else
+				{
+					aBuf[ii] = m_aBroadcastText[i];
+					ii++;
+				}
 			}
+			aBuf[ii] = '\0';
+			if(aBuf[0])
+				m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aBuf, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
 		}
 	}
 }

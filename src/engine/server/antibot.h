@@ -2,7 +2,6 @@
 #define ENGINE_SERVER_ANTIBOT_H
 
 #include <antibot/antibot_data.h>
-
 #include <engine/antibot.h>
 
 class CAntibot : public IEngineAntibot
@@ -20,41 +19,39 @@ class CAntibot : public IEngineAntibot
 	bool m_Initialized;
 
 	void Update();
-	static void Kick(int ClientId, const char *pMessage, void *pUser);
+	static void Send(int ClientID, const void *pData, int Size, int Flags, void *pUser);
 	static void Log(const char *pMessage, void *pUser);
-	static void Report(int ClientId, const char *pMessage, void *pUser);
-	static void Send(int ClientId, const void *pData, int Size, int Flags, void *pUser);
-	static void Teehistorian(const void *pData, int Size, void *pUser);
+	static void Report(int ClientID, const char *pMessage, void *pUser);
 
 public:
 	CAntibot();
-	~CAntibot() override;
+	virtual ~CAntibot();
 
 	// Engine
-	void Init() override;
+	virtual void Init();
 
-	void OnEngineTick() override;
-	void OnEngineClientJoin(int ClientId) override;
-	void OnEngineClientDrop(int ClientId, const char *pReason) override;
-	bool OnEngineClientMessage(int ClientId, const void *pData, int Size, int Flags) override;
-	bool OnEngineServerMessage(int ClientId, const void *pData, int Size, int Flags) override;
-	bool OnEngineSimulateClientMessage(int *pClientId, void *pBuffer, int BufferSize, int *pOutSize, int *pFlags) override;
+	virtual void OnEngineTick();
+	virtual void OnEngineClientJoin(int ClientID, bool Sixup);
+	virtual void OnEngineClientDrop(int ClientID, const char *pReason);
+	virtual bool OnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags);
+	virtual bool OnEngineServerMessage(int ClientID, const void *pData, int Size, int Flags);
+	virtual bool OnEngineSimulateClientMessage(int *pClientID, void *pBuffer, int BufferSize, int *pOutSize, int *pFlags);
 
 	// Game
-	void RoundStart(class IGameServer *pGameServer) override;
-	void RoundEnd() override;
+	virtual void RoundStart(class IGameServer *pGameServer);
+	virtual void RoundEnd();
 
-	void OnPlayerInit(int ClientId) override;
-	void OnPlayerDestroy(int ClientId) override;
-	void OnSpawn(int ClientId) override;
-	void OnHammerFireReloading(int ClientId) override;
-	void OnHammerFire(int ClientId) override;
-	void OnHammerHit(int ClientId, int TargetId) override;
-	void OnDirectInput(int ClientId) override;
-	void OnCharacterTick(int ClientId) override;
-	void OnHookAttach(int ClientId, bool Player) override;
+	virtual void OnPlayerInit(int ClientID);
+	virtual void OnPlayerDestroy(int ClientID);
+	virtual void OnSpawn(int ClientID);
+	virtual void OnHammerFireReloading(int ClientID);
+	virtual void OnHammerFire(int ClientID);
+	virtual void OnHammerHit(int ClientID, int TargetID);
+	virtual void OnDirectInput(int ClientID);
+	virtual void OnCharacterTick(int ClientID);
+	virtual void OnHookAttach(int ClientID, bool Player);
 
-	void ConsoleCommand(const char *pCommand) override;
+	virtual void Dump();
 };
 
 extern IEngineAntibot *CreateEngineAntibot();

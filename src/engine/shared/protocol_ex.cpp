@@ -1,11 +1,8 @@
 #include "protocol_ex.h"
 
 #include "config.h"
+#include "protocol.h"
 #include "uuid_manager.h"
-
-#include <base/system.h>
-
-#include <engine/message.h>
 
 #include <new>
 
@@ -16,52 +13,52 @@ void RegisterUuids(CUuidManager *pManager)
 #undef UUID
 }
 
-int UnpackMessageId(int *pId, bool *pSys, CUuid *pUuid, CUnpacker *pUnpacker, CMsgPacker *pPacker)
+int UnpackMessageID(int *pID, bool *pSys, struct CUuid *pUuid, CUnpacker *pUnpacker, CMsgPacker *pPacker)
 {
-	*pId = 0;
+	*pID = 0;
 	*pSys = false;
 	mem_zero(pUuid, sizeof(*pUuid));
 
-	int MsgId = pUnpacker->GetInt();
+	int MsgID = pUnpacker->GetInt();
 
 	if(pUnpacker->Error())
 	{
 		return UNPACKMESSAGE_ERROR;
 	}
 
-	*pId = MsgId >> 1;
-	*pSys = MsgId & 1;
+	*pID = MsgID >> 1;
+	*pSys = MsgID & 1;
 
-	if(*pId < 0 || *pId >= OFFSET_UUID)
+	if(*pID < 0 || *pID >= OFFSET_UUID)
 	{
 		return UNPACKMESSAGE_ERROR;
 	}
 
-	if(*pId != 0) // NETMSG_EX, NETMSGTYPE_EX
+	if(*pID != 0) // NETMSG_EX, NETMSGTYPE_EX
 	{
 		return UNPACKMESSAGE_OK;
 	}
 
-	*pId = g_UuidManager.UnpackUuid(pUnpacker, pUuid);
+	*pID = g_UuidManager.UnpackUuid(pUnpacker, pUuid);
 
-	if(*pId == UUID_INVALID || *pId == UUID_UNKNOWN)
+	if(*pID == UUID_INVALID || *pID == UUID_UNKNOWN)
 	{
 		return UNPACKMESSAGE_ERROR;
 	}
 
 	if(*pSys)
 	{
-		switch(*pId)
+		switch(*pID)
 		{
 		case NETMSG_WHATIS:
 		{
 			CUuid Uuid2;
-			int Id2 = g_UuidManager.UnpackUuid(pUnpacker, &Uuid2);
-			if(Id2 == UUID_INVALID)
+			int ID2 = g_UuidManager.UnpackUuid(pUnpacker, &Uuid2);
+			if(ID2 == UUID_INVALID)
 			{
 				break;
 			}
-			if(Id2 == UUID_UNKNOWN)
+			if(ID2 == UUID_UNKNOWN)
 			{
 				new(pPacker) CMsgPacker(NETMSG_IDONTKNOW, true);
 				pPacker->AddRaw(&Uuid2, sizeof(Uuid2));
@@ -70,7 +67,7 @@ int UnpackMessageId(int *pId, bool *pSys, CUuid *pUuid, CUnpacker *pUnpacker, CM
 			{
 				new(pPacker) CMsgPacker(NETMSG_ITIS, true);
 				pPacker->AddRaw(&Uuid2, sizeof(Uuid2));
-				pPacker->AddString(g_UuidManager.GetName(Id2), 0);
+				pPacker->AddString(g_UuidManager.GetName(ID2), 0);
 			}
 			return UNPACKMESSAGE_ANSWER;
 		}

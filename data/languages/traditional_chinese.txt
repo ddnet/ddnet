@@ -1,20 +1,42 @@
+##### authors #####
+#originally created by:
+#	SiuFu
+#modified by:
+# 2020-08-19 TsFreddie
+# 2020-08-20 Dan_cao
+# 2020-11-12 TsFreddie
+# 2021-06-01 TsFreddie
+# 2021-11-19 cheeser0613
+# 2021-12-21 cheeser0613
+# 2022-02-07 cheeser0613
+# 2022-03-19 cheeser0613
+# 2022-03-22 cheeser0613
+# 2022-03-24 cheeser0613
+# 2022-05-14 cheeser0613
+##### /authors #####
+
+##### translated strings #####
+
 %ds left
-== 還剩 %d 秒
+== 還剩%d秒
 
 %i minute left
-== 還剩下 %i 分鐘
+== 還剩下%i分鐘
 
 %i minutes left
-== 還剩下 %i 分鐘
+== 還剩下%i分鐘
 
 %i second left
-== 還剩下 %i 秒鐘
+== 還剩下%i秒鐘
 
 %i seconds left
-== 還剩下 %i 秒鐘
+== 還剩下%i秒鐘
 
 %s wins!
-== %s 勝利！
+== %s勝利！
+
+-Page %d-
+== -第%d頁-
 
 Abort
 == 取消
@@ -22,14 +44,23 @@ Abort
 Add
 == 新增
 
+Add Friend
+== 新增好友
+
 Address
 == 地址
 
 All
 == 全部
 
+Are you sure that you want to delete the demo?
+== 你確定要刪除這個回放嗎？
+
 Are you sure that you want to quit?
-== 確定要退出嗎？
+== 你確定要退出嗎？
+
+Are you sure that you want to remove the player from your friends list?
+== 你確定要把這個玩家從好友列表中刪除嗎？
 
 Automatically record demos
 == 自動錄製回放
@@ -50,7 +81,7 @@ Call vote
 == 發起投票
 
 Change settings
-== 更改設定
+== 變更設定
 
 Chat
 == 聊天
@@ -61,14 +92,20 @@ Clan
 Client
 == 客戶端
 
+Close
+== 關閉
+
+Connect
+== 連線
+
 Connecting to
 == 正在連線到
 
-Connection Problems…
-== 連線中斷…
+Connection Problems...
+== 連線中斷...
 
 Console
-== 控制台
+== 控制檯
 
 Controls
 == 控制
@@ -87,6 +124,9 @@ Delete
 
 Delete demo
 == 刪除回放
+
+Demo details
+== 回放詳細資訊
 
 Demofile: %s
 == 回放檔案：%s
@@ -116,7 +156,7 @@ Error
 == 錯誤
 
 Error loading demo
-== 回放載入錯誤
+== 回放讀取錯誤
 
 Favorite
 == 收藏
@@ -126,6 +166,9 @@ Favorites
 
 Feet
 == 腳
+
+Filter
+== 過濾器
 
 Fire
 == 開火
@@ -138,6 +181,9 @@ Force vote
 
 Free-View
 == 自由視角
+
+Friends
+== 好友
 
 Fullscreen
 == 獨占全螢幕
@@ -208,6 +254,9 @@ MOTD
 Map
 == 地圖
 
+Mouse sens.
+== 滑鼠靈敏度
+
 Move left
 == 向左移動
 
@@ -241,6 +290,9 @@ Enable team chat sound
 Enable highlighted chat sound
 == 啟用被提及時的提示音
 
+Threaded sound loading
+== 啟用多執行緒音訊載入
+
 Name
 == 名稱
 
@@ -257,13 +309,16 @@ No password
 == 沒有密碼
 
 No servers found
-== 未檢測到任何伺服器
+== 找不到任何伺服器
 
 No servers match your filter criteria
-== 沒有伺服器符合設定的篩選條件
+== 沒有伺服器滿足設定的過濾條件
 
 Ok
 == 確定
+
+Open
+== 開啟
 
 Parent Folder
 == 上級目錄
@@ -280,6 +335,10 @@ Ping
 Pistol
 == 手槍
 
+[Demo browser]
+Play
+== 播放
+
 Play background music
 == 播放背景音樂
 
@@ -291,6 +350,9 @@ HUD
 
 Player country:
 == 玩家國家/地區：
+
+Player options
+== 玩家選項
 
 Players
 == 玩家
@@ -313,8 +375,11 @@ Red team
 Red team wins!
 == 紅隊勝利！
 
+Refresh
+== 重新整理
+
 Remote console
-== 遠端控制台
+== 遠端控制檯
 
 Remove
 == 移除
@@ -322,11 +387,17 @@ Remove
 Remove friend
 == 刪除好友
 
+Rename
+== 重新命名
+
 Rename demo
 == 重新命名回放
 
 Reset filter
-== 重置篩選
+== 重置過濾器
+
+Sample rate
+== 取樣率
 
 Score
 == 分數
@@ -343,6 +414,12 @@ Screenshot
 Server address:
 == 伺服器地址：
 
+Server details
+== 伺服器詳細資訊
+
+Server filter
+== 伺服器過濾器
+
 Server info
 == 伺服器資訊
 
@@ -353,7 +430,7 @@ Shotgun
 == 霰彈槍
 
 Show chat
-== 顯示聊天框
+== 顯示聊天
 
 Show friends only
 == 只顯示好友
@@ -365,7 +442,10 @@ Show name plates
 == 顯示暱稱
 
 Show only chat messages from friends
-== 只顯示好友聊天訊息
+== 只顯示好友訊息
+
+Skins
+== 外觀
 
 Sound
 == 聲音
@@ -392,7 +472,7 @@ Stop record
 == 停止錄製
 
 Strict gametype filter
-== 嚴格篩選遊戲模式
+== 嚴格過濾遊戲模式
 
 Sudden Death
 == 決勝
@@ -409,6 +489,9 @@ Show clan above name plates
 Clan plates size
 == 戰隊名稱大小
 
+Reset wanted weapon on death
+== 死亡後自動切換回預設武器
+
 Team
 == 隊伍
 
@@ -421,6 +504,12 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == 此伺服器執行著經過調整的非標準遊戲模式。
 
+There's an unsaved map in the editor, you might want to save it before you quit the game.
+== 編輯器中的地圖尚未儲存，建議您在退出遊戲之前返回編輯器進行儲存。
+
+Time limit
+== 規定時限
+
 Time limit: %d min
 == 規定時限：%d 分鐘
 
@@ -430,6 +519,9 @@ Try again
 Type
 == 模式
 
+Unable to delete the demo
+== 無法刪除這個回放
+
 Unable to rename the demo
 == 無法重新命名這個回放
 
@@ -437,10 +529,7 @@ Use sounds
 == 開啟聲音
 
 Use team colors for name plates
-== 用隊伍顏色顯示暱稱
-
-Show friend icon in name plates
-== 在暱稱中顯示好友圖示
+== 用隊伍顏色標註暱稱
 
 V-Sync
 == 垂直同步
@@ -449,7 +538,7 @@ Version
 == 版本
 
 Vote command:
-== 投票指令：
+== 投票命令：
 
 Vote description:
 == 投票描述：
@@ -506,7 +595,7 @@ Join game
 == 加入遊戲
 
 FSAA samples
-== 全屏抗鋸齒 (FSAA) 取樣倍數
+== 全屏抗鋸齒(FSAA)取樣倍數
 
 Sound volume
 == 音量
@@ -514,11 +603,29 @@ Sound volume
 Map sound volume
 == 地圖音效音量
 
+Created:
+== 建立時間：
+
 Max Screenshots
 == 最大截圖數
 
+Dummy settings
+== 分身設定
+
+Length:
+== 長度：
+
 Laser
-== 鐳射
+== 鐳射槍
+
+Netversion:
+== 通訊版本：
+
+Map:
+== 地圖：
+
+Info
+== 資訊
 
 Hue
 == 色調
@@ -529,17 +636,38 @@ Record demo
 Your skin
 == 你的外觀
 
+Size:
+== 大小：
+
 Reset to defaults
 == 恢復預設設定
 
+Quit anyway?
+== 無論如何都要退出嗎？
+
+Display Modes
+== 顯示模式
+
+Version:
+== 版本：
+
+Round
+== 回合
+
 Lht.
 == 亮度
+
+Show console window
+== 顯示控制檯視窗
 
 Automatically take statboard screenshot
 == 自動對統計板截圖
 
 UI Color
 == 介面顏色
+
+Crc:
+== Crc:
 
 Alpha
 == 透明度
@@ -550,11 +678,17 @@ LAN
 Name plates size
 == 暱稱大小
 
-Name plates offset
-== 暱稱距離
+Type:
+== 型別：
+
+Use DDRace Scoreboard
+== 使用 DDRace 計分板
 
 Show score
 == 顯示比分
+
+Show health + ammo
+== 顯示生命與彈藥
 
 Show names in chat in team colors
 == 以隊伍顏色顯示玩家暱稱
@@ -604,6 +738,9 @@ Overlay entities
 Show others
 == 顯示其他玩家
 
+Show quads
+== 顯示背景
+
 Default zoom
 == 預設縮放
 
@@ -619,8 +756,14 @@ AntiPing: predict grenade paths
 Show other players' hook collision lines
 == 顯示其他玩家的鉤索輔助線
 
+Show other players' key presses
+== 顯示其他玩家的按鍵
+
 Show tiles layers from BG map
 == 顯示實體層背景地圖的圖塊層
+
+Try fast HTTP map download first
+== 優先嚐試用HTTP高速下載地圖
 
 DDNet %s is available:
 == DDNet %s 現已可用：
@@ -628,8 +771,8 @@ DDNet %s is available:
 Update now
 == 現在更新
 
-Updating…
-== 更新中…
+Updating...
+== 更新中...
 
 DDNet Client updated!
 == DDNet 客戶端更新成功！
@@ -641,7 +784,7 @@ Check now
 == 檢查更新
 
 Loading DDNet Client
-== 正在載入 DDNet 客戶端
+== 載入 DDNet 客戶端中...
 
 Browser
 == 瀏覽
@@ -652,6 +795,9 @@ Connecting dummy
 Search
 == 搜尋
 
+UI mouse s.
+== 主頁面靈敏度
+
 Vanilla skins only
 == 只顯示原生外觀
 
@@ -661,11 +807,13 @@ Fat skins (DDFat)
 Ratio
 == F/D
 
+##### Ratio的演算法是擊殺除以死亡次數 #####
+
 AntiPing
 == AntiPing
 
 Countries
-== 位置
+== 國家
 
 Reconnect in %d sec
 == %d 秒後重新連線
@@ -676,11 +824,20 @@ Grabs
 DDNet
 == DDNet
 
+Select a name
+== 另存為
+
 Deaths
 == 死亡數
 
+Please use a different name
+== 請換一個不同的檔名
+
 Restart
 == 重新開始
+
+Old mouse mode
+== 舊版滑鼠模式
 
 Follow
 == 跟隨
@@ -718,8 +875,12 @@ Suicides
 Net
 == 淨擊殺
 
+##### Net的演算法是殺人+1被殺-1 #####
+
 FPM
 == 擊殺/分
+
+##### 得分速度就是效率FPM #####
 
 Spree
 == 連殺
@@ -766,8 +927,11 @@ Date
 Show DDNet map finishes in server browser
 == 在伺服器瀏覽器中顯示已完成的 DDNet 地圖
 
-transmits your player name to info.ddnet.org
-== 將會發送你的玩家名稱到 info.ddnet.org
+transmits your player name to info2.ddnet.tw
+== 將會發送您的玩家名稱到 info2.ddnet.tw
+
+Reload
+== 重新整理
 
 Enable replays
 == 啟用短時回放
@@ -808,14 +972,17 @@ Markers
 Filter connecting players
 == 過濾正在連線的玩家
 
+Markers:
+== 標記
+
 Zoom in
 == 視距放大
 
 1 new mention
 == 1 條新提及
 
-Update failed! Check log…
-== 更新失敗！請檢查日誌…
+Update failed! Check log...
+== 更新失敗！請檢查日誌...
 
 Pause
 == 暫停
@@ -856,8 +1023,8 @@ Show HUD
 Hammerfly dummy
 == 分身Hammerfly開關
 
-Default length
-== 預設長度
+Default length: %d
+== 預設長度: %d
 
 Toggle ghost
 == 影子記錄開關
@@ -878,7 +1045,7 @@ Toggle dyncam
 == 動態鏡頭開關
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDraceNetwork 是以到達地圖終點為目標，單人或組隊的線上合作遊戲。如果你是新手，你可以從有入門級地圖的 Novice 伺服器開始。記得選擇 Ping 值低的伺服器。
+== DDraceNetwork 是以到達地圖終點為目標，單人或組隊的線上合作遊戲。如果你是新手，你可以從有入門級地圖的 Novice 伺服器開 始。記得選擇 Ping 值低的伺服器。
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == 推薦在加入伺服器前，先將設定調整到符合你的習慣。
@@ -886,23 +1053,32 @@ It's recommended that you check the settings to adjust them to your liking befor
 Please enter your nickname below.
 == 請輸入你的暱稱。
 
+Render
+== 渲染
+
 Server best:
-== 伺服器最佳：
+== 伺服器最佳
 
 Learn
 == 教程Wiki
 
+Use high DPI
+== 使用高 DPI
+
 Personal best:
-== 個人最佳：
+== 個人最佳
 
 Render demo
 == 渲染回放
+
+Destination file already exist
+== 目標檔案已經存在
 
 Replace video
 == 替換影片
 
 Video name:
-== 影片名稱：
+== 影片名稱
 
 Connect Dummy
 == 連線分身
@@ -914,10 +1090,13 @@ Show others (own team only)
 == 顯示其他玩家 (僅同隊伍)
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 使用 K鍵 自殺以重新開始，使用 Q鍵 可以暫停以旁觀他人或檢視地圖。 請在設定中檢視其他按鍵。
+== 使用 k鍵 自殺以重新開始，使用 q鍵 可以暫停以旁觀他人或檢視地圖。 請在設定中檢視其他按鍵。
 
-https://wiki.ddnet.org/
-== https://wiki.ddnet.org/wiki/Main_Page/zh
+Country / Region
+== 國家/地區
+
+https://wiki.ddnet.tw/
+== https://docs.qq.com/doc/DWGFrV0xPRmVWVkla
 
 Warning
 == 警告
@@ -945,7 +1124,7 @@ Run server
 == 開啟伺服器
 
 Server executable not found, can't run server
-== 未檢測到伺服器的可執行檔案，無法開啟
+== 找不到伺服器的可執行檔案，無法開啟
 
 Editor
 == 編輯器
@@ -962,14 +1141,17 @@ Auto
 Replay
 == 回放
 
+Saving ddnet-settings.cfg failed
+== 配置檔案 ddnet-settings.cfg 儲存失敗
+
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== 偵錯模式已啟用。按下 Ctrl+Shift+D 關閉偵錯模式。
+== 偵錯模式已啟用。按 Ctrl+Shift+D 禁用偵錯模式。
 
 Existing Player
 == 玩家已存在
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== 你使用的暱稱 "%s" 在 DDNet 中有 %d 分的記錄，這可能代表這個暱稱已經被其他人使用過。確認要使用這個名字嗎？
+== 你使用的暱稱"%s"在DDNet中有%d分的記錄，這可能代表這個暱稱已經被其他人使用過。確認要使用這個名字嗎？
 
 Checking for existing player with your name
 == 正在查詢該暱稱的DDNet記錄
@@ -999,7 +1181,7 @@ Themes directory
 == 主題目錄
 
 Download skins
-== 下載官方外觀
+== 在線獲取外觀
 
 Skin Database
 == 外觀數據庫
@@ -1082,23 +1264,65 @@ Windowed borderless
 Desktop fullscreen
 == 無邊框全螢幕
 
+Show client IDs
+== 顯示客戶端ID
+
+Laser Outline Color
+== 鐳射線邊框顏色
+
+Laser Inner Color
+== 鐳射線顏色
+
+Hookline
+== 鉤索輔助線
+
+No hit
+== 沒有擊中
+
+Hookable
+== 可鉤牆壁
+
+Tee
+== 其他玩家
+
 Preview
 == 預覽
 
 Background
 == 背景
 
+Entities Background color
+== 實體層背景顏色
+
+Regular Background Color
+== 背景層背景顏色
+
 Discord
 == Discord
 
-https://ddnet.org/discord
-== https://ddnet.org/discord
+https://ddnet.tw/discord
+== https://ddnet.tw/discord
 
 Are you sure that you want to disconnect and switch to a different server?
-== 確定要中斷此伺服器並嘗試加入其他伺服器嗎？
+== 您確定要中斷此伺服器并嘗試加入其他伺服器嗎？
+
+Refreshing...
+== 正在重整...
+
+Kill Messages
+== 擊殺訊息
+
+Kill Message Normal Color
+== 其他玩家擊殺訊息顔色
+
+Kill Message Highlight Color
+== 玩家擊殺信息顔色
+
+Show local player's key presses
+== 顯示周圍玩家的按鍵輸入
 
 Settings file
-== 設定檔案
+== 設定文件
 
 Config directory
 == 配置目錄 (cfg)
@@ -1113,7 +1337,7 @@ Windowed fullscreen
 == 視窗化全螢幕
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 紋理檔案 %s 并非 RGBA 格式，這可能會導致顯示錯誤。
+== 紋理文件 %s 并非 RGBA 格式，這可能會導致顯示錯誤
 
 Join Tutorial Server
 == 加入教學伺服器
@@ -1130,11 +1354,17 @@ default
 custom
 == 自定義
 
+Graphics cards
+== 顯示卡
+
 auto
 == 自動
 
 Tutorial
 == 教學
+
+Toggle to edit your dummy settings
+== 編輯分身設定
 
 Choose default eyes when joining a server
 == 加入伺服器時的預設表情
@@ -1143,12 +1373,12 @@ Allows maps to render with more detail
 == 允許地圖渲染更多細節
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== 當越過起跑線時，游戲裏將有影子回放你的最佳成績
+== 當越過起跑綫時，游戲裏將有影子回放你的最佳成績
 
 Opacity
 == 不透明度
 
-Adjust the opacity of entities belonging to other teams, such as tees and name plates
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
 == 調整單人區域或其他隊伍中玩家的不透明度
 
 Quads are used for background decoration
@@ -1157,1497 +1387,11 @@ Quads are used for background decoration
 Tries to predict other entities to give a feel of low latency
 == 嘗試預測其他實體物以帶來低延遲的游玩體驗
 
+Can't find a Tutorial server
+== 無法找到教學伺服器
+
 Super
 == 無敵
 
 Team %d
 == 隊伍 %d
-
-Position:
-== 坐標：
-
-Speed:
-== 速度：
-
-Angle:
-== 角度：
-
-Trying to determine UDP connectivity…
-== 正在嘗試檢測 UDP 連接…
-
-UDP seems to be filtered.
-== UDP 疑似被過濾。
-
-UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== UDP 與 TCP 的 IP 地址并不相同。請嘗試屏蔽 VPN 、代理網路以及網路加速器。
-
-No answer from server yet.
-== 伺服器無響應。
-
-Download community skins
-== 下載社區外觀
-
-Enable controller
-== 啓用控制器
-
-[Ingame controller mode]
-Relative
-== 相對
-
-[Ingame controller mode]
-Absolute
-== 絕對
-
-Ingame controller mode
-== 游戲内控制器瞄準模式
-
-Ingame controller sens.
-== 搖桿靈敏度 (游戲)
-
-UI controller sens.
-== 搖桿靈敏度 (界面)
-
-Controller jitter tolerance
-== 搖桿錯位容錯
-
-Status
-== 狀態
-
-Aim bind
-== 操作軸綁定
-
-Mouse
-== 滑鼠
-
-Ingame mouse sens.
-== 滑鼠靈敏度 (游戲)
-
-UI mouse sens.
-== 滑鼠靈敏度 (界面)
-
-Controller
-== 控制器
-
-Show dummy actions
-== 顯示分身狀態
-
-Show freeze bars
-== 顯示解凍進度條
-
-Show player position
-== 顯示玩家坐標
-
-Show player speed
-== 顯示玩家速度
-
-Show player target angle
-== 顯示玩家瞄準角度
-
-Opacity of freeze bars inside freeze
-== 解凍進度條不透明度
-
-Normal Color
-== 非相關訊息顔色
-
-Highlight Color
-== 相關訊息顔色
-
-Extras
-== 其他
-
-Preparing demo playback
-== 正在準備回放
-
-Connected
-== 連接成功
-
-Loading map file from storage
-== 正在從硬盤中載入地圖檔案
-
-Why are you slowmo replaying to read this?
-== 你為什麽要慢速回放來看這句？
-
-Initializing components
-== 正在初始化游戲引擎
-
-Initializing assets
-== 正在初始化材質
-
-Initializing map logic
-== 正在初始化地圖邏輯
-
-Sending initial client info
-== 正在發送初始客戶端資訊
-
-Uploading map data to GPU
-== 正在將地圖數據傳輸至顯示卡
-
-Getting game info
-== 正在獲取游戲資訊
-
-Requesting to join the game
-== 正在請求加入游戲
-
-Loading menu images
-== 正在載入主選單圖片
-
-Loading demo files
-== 正在載入回放檔案
-
-Loading ghost files
-== 正在載入影子檔案
-
-Loading skin files
-== 正在載入外觀檔案
-
-Appearance
-== 游戲界面
-
-Name Plate
-== 匿稱板塊
-
-Hook Collisions
-== 瞄準輔助
-
-Show health, shields and ammo
-== 顯示生命、護甲與彈藥欄
-
-DDRace HUD
-== DDRace HUD
-
-Show DDRace HUD
-== 顯示 DDRace HUD
-
-Show jumps indicator
-== 顯示跳躍次數
-
-Show number of spectators
-== 顯示旁觀者人數
-
-Hook collision line
-== 鉤索輔助線
-
-Hook collision line opacity
-== 輔助線不透明度
-
-Your movements are not taken into account when calculating the line colors
-== 移動所造成的瞄準偏移將不計入考量
-
-Loading assets
-== 正在載入材質
-
-Loading race demo files
-== 正在載入回放檔案
-
-Loading sound files
-== 正在載入聲音檔案
-
-Play the current demo
-== 播放回放
-
-Pause the current demo
-== 暫停回放
-
-Stop the current demo
-== 結束回放
-
-Slow down the demo
-== 減慢播放速度
-
-Speed up the demo
-== 加快播放速度
-
-Export cut as a separate demo
-== 另存爲新回放檔案
-
-Toggle keyboard shortcuts
-== 啓用/禁用鍵盤快捷鍵
-
-Weapons
-== 武器
-
-Rifle Laser Outline Color
-== 鐳射槍彈道外框顔色
-
-Rifle Laser Inner Color
-== 鐳射槍彈道實心顔色
-
-Shotgun Laser Outline Color
-== 霰彈槍彈道外框顔色
-
-Shotgun Laser Inner Color
-== 霰彈槍彈道實心顔色
-
-Door Laser Outline Color
-== 鐳射門外框顔色
-
-Door Laser Inner Color
-== 鐳射門實心顔色
-
-Freeze Laser Outline Color
-== 凍結鐳射外框顔色
-
-Freeze Laser Inner Color
-== 凍結鐳射實心顔色
-
-Menu opened. Press Esc key again to close menu.
-== 選單已打開，再次按下 Esc 以關閉。
-
-Set all to Rifle
-== 統一為鐳射槍顔色
-
-Cancel
-== 取消
-
-File '%s' already exists, do you want to overwrite it?
-== 檔案名 "%s" 已經存在，是否要取代該檔案？
-
-Are you sure that you want to remove the player '%s' from your friends list?
-== 確定要將好友 "%s" 從你的好友列表中移除？
-
-Are you sure that you want to remove the clan '%s' from your friends list?
-== 確定要將戰隊 "%s" 從你的好友列表中移除？
-
-Go back one tick
-== 上一刻點
-
-Go forward one tick
-== 下一刻點
-
-Go back one marker
-== 返回上一個標記
-
-Go forward one marker
-== 跳至下一個標記
-
-Are you sure that you want to delete the demo '%s'?
-== 確定要刪除回放檔案 "%s" ？
-
-Unable to delete the demo '%s'
-== 無法刪除回放檔案 "%s"
-
-Reset controls
-== 恢復預設設定
-
-Are you sure that you want to reset the controls to their defaults?
-== 確定要將當前的控制恢復至預設設定？
-
-[Graphics error]
-Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 初始化失敗。請嘗試打開配置目錄中的設定檔案 (settings_ddnet.cfg) 并將 “gfx_backend” 設定為 “gfx_backend OpenGL” 或 “gfx_backend Vulkan” 再重試。
-
-[Graphics error]
-An error during command recording occurred. Try to update your GPU drivers.
-== 指令記錄期間檢測到錯誤。請嘗試更新顯示卡驅動程式。
-
-[Graphics error]
-A render command failed. Try to update your GPU drivers.
-== 渲染指令錯誤。請嘗試更新顯示卡驅動程式。
-
-[Graphics error]
-Submitting the render commands failed. Try to update your GPU drivers.
-== 渲染指令提交失敗。請嘗試更新顯示卡驅動程式。
-
-[Graphics error]
-Failed to swap framebuffers. Try to update your GPU drivers.
-== 幀緩存交替失敗。請嘗試更新顯示卡驅動程式。
-
-[Graphics error]
-Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 未知錯誤。請嘗試打開配置目錄中的設定檔案 (settings_ddnet.cfg) 并將 “gfx_backend” 設定為 “gfx_backend OpenGL” 或 “gfx_backend Vulkan” 再重試。
-
-[Graphics error]
-Could not initialize the given graphics backend, reverting to the default backend now.
-== 無法初始化當前配置的圖形後端，正在將配置回退至預設圖形後端。
-
-Open the directory that contains the demo files
-== 打開存有回放檔案的資料夾路徑
-
-Open the settings file
-== 打開設定檔案
-
-Open the directory that contains the configuration and user files
-== 打開存有配置檔案與用戶檔案的資料夾路徑
-
-Open the directory to add custom themes
-== 打開用以新增自定義主題的資料夾路徑
-
-Open the directory to add custom skins
-== 打開用以新增自定義外觀的資料夾路徑
-
-No controller found. Plug in a controller.
-== 未檢測到任何控制器。請嘗試重新連接控制器。
-
-Unregister protocol and file extensions
-== 解除連結與檔案類型關聯
-
-Open the directory to add custom assets
-== 打開用以新增自定義材質的資料夾路徑
-
-[Graphics error]
-Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 無法初始化當前配置的圖形後端，請檢查此電腦是否已安裝集成顯卡的驅動程式。
-
-Could not save downloaded map. Try manually deleting this file: %s
-== 地圖下載失敗，請嘗試手動刪除此檔案：%s
-
-Copy info
-== 複製伺服器資訊
-
-Create a random skin
-== 隨機創造外觀
-
-Online clanmates (%d)
-== 在線戰隊隊友 (%d)
-
-[friends (server browser)]
-Offline (%d)
-== 離線（%d）
-
-Click to select server. Double click to join your friend.
-== 點擊以選擇伺服器，雙擊以直接加入好友所在伺服器。
-
-Click to remove this player from your friends list.
-== 點擊以將此好友從好友列表中移除。
-
-Click to remove this clan from your friends list.
-== 點擊以將此戰隊從好友列表中移除。
-
-A demo with this name already exists
-== 已經存在同名回放
-
-No server selected
-== 未選擇伺服器
-
-Mark the beginning of a cut (right click to reset)
-== 標記裁切起點 (右鍵重置)
-
-Mark the end of a cut (right click to reset)
-== 標記裁切終點 (右鍵重置)
-
-Close the demo player
-== 關閉回放
-
-Export demo cut
-== 另存裁切部分
-
-Cut interval
-== 裁切區間
-
-Cut length
-== 裁切長度
-
-Axis
-== 軸
-
-Graphics card
-== 顯示卡
-
-Quitting. Please wait…
-== 正在退出，請稍等…
-
-Restarting. Please wait…
-== 正在重啟，請稍等…
-
-Multi-View
-== 多人同框視角
-
-Rename folder
-== 重新命名資料夾
-
-A folder with this name already exists
-== 已經存在同名資料夾
-
-Unable to rename the folder
-== 無法重新命名這個資料夾
-
-(paused)
-== (暫停)
-
-All combined
-== 全部檔案
-
-Folder Link
-== 資料夾連結
-
-Are you sure that you want to delete the folder '%s'?
-== 確定要刪除資料夾 "%s" ？
-
-Delete folder
-== 刪除資料夾
-
-Unable to delete the folder '%s'. Make sure it's empty first.
-== 無法刪除 "%s" ，請確保你已清空該資料夾。
-
-Moved ingame
-== 遊戲內移動
-
-Error playing demo
-== 回放播放錯誤
-
-Some map images could not be loaded. Check the local console for details.
-== 未能載入部分地圖圖片。檢查本機控制台以取得詳情。
-
-Some map sounds could not be loaded. Check the local console for details.
-== 未能載入部分地圖音效。檢查本機控制台以取得詳情。
-
-Loading menu themes
-== 正在載入主選單主題
-
-Render complete
-== 渲染完畢
-
-Videos directory
-== 影片目錄
-
-Video was saved to '%s'
-== 影片儲存至 "%s"
-
-Go back the specified duration
-== 倒轉指定時長
-
-[Demo player duration]
-%s min.
-== %s 分
-
-[Demo player duration]
-%s sec.
-== %s 秒
-
-Change the skip duration
-== 更改指定時長
-
-Go forward the specified duration
-== 快轉指定時長
-
-Render cut to video
-== 渲染裁切部分
-
-No demo selected
-== 未選擇回放
-
-Created
-== 建立日期
-
-Netversion
-== Netversion
-
-[Demo details]
-map not included
-== 未包含地圖
-
-Ghosts directory
-== 影子目錄
-
-Activate all
-== 全部啟用
-
-Deactivate all
-== 全部停用
-
-Enable ghost
-== 啟用影子
-
-Only save improvements
-== 只儲存更佳記錄
-
-Regular background color
-== 原圖層背景顏色
-
-Entities background color
-== 實體層背景顏色
-
-Saving settings to '%s' failed
-== 無法儲存設定至 "%s"
-
-Searching
-== 正在搜尋
-
-Enter Username
-== 輸入用戶名稱
-
-Enter Password
-== 輸入密碼
-
-NOT CONNECTED
-== 連線未成功
-
-Match %d of %d
-== 結果 %d / 總共 %d 則
-
-No results
-== 無結果
-
-Lines %d - %d (%s)
-== 行 %d - %d (%s)
-
-Locked
-== 鎖定
-
-Following
-== 當前
-
-Press a key…
-== 按任意鍵…
-
-Are you sure that you want to restart?
-== 確定要重新開始？
-
-There's an unsaved map in the editor, you might want to save it.
-== 編輯器中有尚未儲存的地圖，你或需要儲存。
-
-Continue anyway?
-== 仍要退出？
-
-Communities
-== 社區
-
-Please use a different filename
-== 請使用不同的檔案名
-
-Info Messages
-== 訊息
-
-Show local time always
-== 始終顯示本地時間
-
-Chat font size
-== 聊天字體大小
-
-Chat width
-== 聊天框寬度
-
-Authed name color in scoreboard
-== 管理權限人員名字計分板顯示顔色
-
-Same clan color in scoreboard
-== 相同戰隊計分板顯示顔色
-
-Show finish messages
-== 顯示完成訊息
-
-Failed saving the replay!
-== 儲存回放失敗！
-
-Error saving settings
-== 儲存設定錯誤
-
-Loading commands…
-== 正在載入指令…
-
-Main menu
-== 主選單
-
-Server filter
-== 伺服器篩選器
-
-Friends
-== 好友
-
-Loading…
-== 正在載入…
-
-Loading demo file from storage
-== 正在從硬盤中載入回放檔案
-
-No login required
-== 無需登入
-
-Player info change cooldown
-== 玩家資訊更改冷卻時間
-
-Always show chat
-== 始終顯示聊天框
-
-Show hook strength icon indicator
-== 顯示鉤索強度圖示
-
-Show hook strength number indicator
-== 顯示鉤索強度數值
-
-Show own player's hook collision line
-== 顯示自己的鉤索輔助線
-
-Always show own player's hook collision line
-== 始終顯示自己的鉤索輔助線
-
-Always show other players' hook collision lines
-== 始終顯示其他玩家的鉤索輔助線
-
-%d/%d KiB (%.1f KiB/s)
-== %d/%d KiB (%.1f KiB/s)
-
-Tee
-== Tee
-
-Show only chat messages from team members
-== 只顯示隊伍聊天訊息
-
-[Spectating]
-Following %s
-== 正在旁觀 %s
-
-Example of usage
-== 用途示例
-
-Round %d/%d
-== 輪次 %d/%d
-
-[Spectators]
-%d others…
-== %d 其他…
-
-[Team and size]
-%d\n(%d/%d)
-== %d\n(%d/%d)
-
-Team %d (%d/%d)
-== 隊伍 %d (%d/%d)
-
-https://wiki.ddnet.org/wiki/Mapping
-== https://wiki.ddnet.org/index.php?title=Mapping/zh&variant=zh-hant
-
-Could not resolve connect address '%s'. See local console for details.
-== 無法解析連線地址 "%s" 。檢查本機控制台以取得詳情。
-
-Connect address error
-== 連線地址錯誤
-
-Could not connect dummy
-== 無法連線分身
-
-Dummy is not allowed on this server
-== 此服務器禁止使用分身
-
-Please wait…
-== 請稍等…
-
-Show client IDs (scoreboard, chat, spectator)
-== 顯示客戶端 ID（計分板、聊天、旁觀者）
-
-Are you sure that you want to delete '%s'?
-== 確定要刪除 "%s" 嗎？
-
-Delete skin
-== 刪除外觀
-
-Basic
-== 基本
-
-Custom
-== 自定義
-
-Unable to delete skin
-== 無法刪除外觀
-
-Save skin
-== 儲存外觀
-
-Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== 確定要儲存外觀嗎？如果已存在同名外觀，將會被替換。
-
-Unable to save the skin
-== 無法儲存外觀
-
-Unable to save the skin with a reserved name
-== 無法儲存使用保留名稱的外觀
-
-No local servers found (ports %d-%d)
-== 未找到本地伺服器（端口 %d-%d）
-
-[Hertz]
-Hz
-== Hz
-
-[skins]
-Body
-== 身體
-
-[skins]
-Marking
-== 標記
-
-[skins]
-Decoration
-== 裝飾
-
-[skins]
-Hands
-== 手
-
-[skins]
-Feet
-== 腳
-
-[skins]
-Eyes
-== 眼睛
-
-Some fonts could not be loaded. Check the local console for details.
-== 未能載入部分字體。檢查本機控制台以取得詳情。
-
-Online friends (%d)
-== 在線好友（%d人）
-
-Add friends by entering their name below or by clicking their name in the player list.
-== 在下方輸入好友名稱或點擊玩家列表中的好友的名稱即可新增好友。
-
-Add clanmates by entering their clan below and leaving the name blank.
-== 在下方輸入戰隊名並留空名稱即可新增戰隊。
-
-Edit touch controls
-== 編輯觸控設定
-
-Close
-== 關閉
-
-Save changes
-== 儲存更改
-
-Error saving touch controls
-== 儲存觸控設定錯誤
-
-Could not save touch controls to file. See local console for details.
-== 無法將觸控設定儲存到文件。檢查本機控制台以取得詳情。
-
-Unsaved changes
-== 未儲存更改
-
-Discard changes
-== 放棄更改
-
-Are you sure that you want to discard the current changes to the touch controls?
-== 確定要放棄當前對觸控設定的更改嗎？
-
-Are you sure that you want to reset the touch controls to default?
-== 確定要將觸控設定重置為默認設定嗎？
-
-Import from clipboard
-== 從剪貼簿導入
-
-Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
-== 確定要從剪貼簿導入觸控設定嗎？這將覆蓋當前的觸控設定。
-
-Export to clipboard
-== 另存到剪貼簿
-
-Direct touch input while ingame
-== 遊戲時直接觸控操作
-
-[Direct touch input]
-Disabled
-== 禁用
-
-[Direct touch input]
-Active action
-== 當前行為
-
-[Direct touch input]
-Aim
-== 瞄準
-
-[Direct touch input]
-Fire
-== 開火
-
-[Direct touch input]
-Hook
-== 鉤索
-
-Direct touch input while spectating
-== 旁觀時直接觸控操作
-
-Error loading touch controls
-== 加載觸控設定錯誤
-
-Could not load touch controls from file. See local console for details.
-== 無法從文件加載觸控設定。檢查本機控制台以取得詳情。
-
-Could not load default touch controls from file. See local console for details.
-== 無法從文件加載默認觸控設定。檢查本機控制台以取得詳情。
-
-Could not load touch controls from clipboard. See local console for details.
-== 無法從剪貼簿加載觸控設定。檢查本機控制台以取得詳情。
-
-Width of your own hook collision line
-== 自己的鉤索輔助線寬度
-
-Width of others' hook collision line
-== 其他玩家的鉤索輔助線寬度
-
-Preview 'Hook collisions' being pressed
-== 預覽按下時的鉤索輔助線
-
-Aim
-== 瞄準
-
-Active: Fire
-== 當前：開火
-
-Active: Hook
-== 當前：鉤索
-
-"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
-== "%s" 與 pnglite 不兼容，無法被舊版本 DDNet 加載：
-
-[Spectating Camera Mode Icon]
-AUTO
-== 自動
-
-Toggle auto camera
-== 切換自動視角
-
-https://wiki.ddnet.org/wiki/Touch_controls
-== https://wiki.ddnet.org/index.php?title=Touch_controls/zh&variant=zh-hant
-
-Show client IDs in name plates
-== 顯示客戶端 ID
-
-Show client IDs on a separate line
-== 客户端 ID 換行顯示
-
-Client IDs size
-== 客户端 ID 大小
-
-Hook Strength
-== 鉤索強度
-
-Size of hook strength icon and number indicator
-== 鉤索強度圖示與數值的大小
-
-Key Presses
-== 按鍵顯示
-
-Show players' key presses
-== 顯示按鍵
-
-Size of key press icons
-== 按鍵顯示圖示大小
-
-Preview dummy's name plate
-== 預覽分身暱稱
-
-Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
-== 伺服器無法啟動。請確保在應用程式設定中授予通知權限，以便伺服器可以在後台運行。
-
-Auto-sync player camera
-== 自動同步玩家視角
-
-[Auto camera]
-Disabled
-== 已禁用
-
-[Auto camera]
-Enabled
-== 已啟用
-
-[Auto camera]
-Unavailable for this player
-== 此玩家不可用
-
-[Auto camera]
-Inactive
-== 未啟用
-
-[Auto camera]
-Active
-== 已啟用
-
-Loading maps…
-== 加載地圖中…
-
-Community
-== 社群
-
-[Team status]
-forbidden
-== 禁止
-
-[Team status]
-solo
-== 單人
-
-[Team status]
-allowed
-== 允許
-
-[Team status]
-required
-== 強制
-
-Teams
-== 組隊
-
-[Team size]
-minimum
-== 最小人數
-
-[Team size]
-maximum
-== 最大人數
-
-Saves file
-== 存檔密碼文件
-
-Open the saves file
-== 打開存檔密碼文件
-
-Show FPS
-== 顯示 FPS
-
-Renders your frame rate in the top right
-== 在右上角顯示幀率
-
-[Translation credits: Add your own name here when you update translations]
-English translation by the DDNet Team
-== 繁體中文翻譯由以下人員貢獻：SiuFu, TsFreddie, Dan_cao, cheeser0613, By, Pioooooo, 豆腐渣, XCWQW1, Bamcane, ZerolAcqua
-
-Show spectator cursor
-== 顯示旁觀者指標
-
-No demo with this filename exists
-== 此回放檔案不存在
-
-Map size
-== 地圖佔用空間
-
-[Show name plates]
-None
-== 禁用
-
-[Show name plates]
-Own
-== 自身
-
-[Show name plates]
-Others
-== 他人
-
-[Show name plates]
-All
-== 全部
-
-[Show players' key presses]
-None
-== 禁用
-
-[Show players' key presses]
-Own
-== 自身
-
-[Show players' key presses]
-Others
-== 他人
-
-[Show players' key presses]
-All
-== 全部
-
-AntiPing: prediction margin
-== AntiPing：預測容差
-
-[Graphics error]
-Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
-== 顯示記憶體不足。請嘗試將 'cl_skins_loaded_max' 調低，或移除自定義材質（如外觀、實體等），尤其是高解析度的資源。
-
-This name cannot be used for files and folders
-== 此名稱不能用於檔案和資料夾
-
-This skin name cannot be used.
-== 此外觀名稱不能使用。
-
-Skin could not be loaded due to an error. Check the local console for details.
-== 載入外觀時出錯。檢查本機控制台以取得詳情。
-
-Skin could not be found.
-== 未找到外觀。
-
-No skins match your filter criteria
-== 沒有外觀符合設定的篩選條件
-
-Preview player's name plate
-== 預覽玩家暱稱
-
-Dragger Outline Color
-== 光索外框顏色
-
-Dragger Inner Color
-== 光索實心顏色
-
-[Spectating]
-Following %d: %s
-== 正在旁觀 %d: %s
-
-Loading map
-== 加載地圖
-
-Error checking player name
-== 檢查玩家暱稱時出錯
-
-Could not check for existing player with your name. Check your internet connection.
-== 無法驗證是否已存在相同暱稱的玩家。請檢查你的網路連線。
-
-Press Ctrl+Shift+G to disable debug graphs.
-== 按下 Ctrl+Shift+G 關閉偵錯圖表。
-
-Server could not be started
-== 伺服器無法啟動
-
-Could not get server list from master server
-== 無法從主伺服器獲取伺服器列表
-
-[Demo playback]
-Live
-== 實時
-
-[Demo playback]
-Go to Live
-== 跳至實時
-
-Save all changes before turning off the editor?
-== 是否在關閉編輯器前儲存所有更改？
-
-Layout
-== 按鍵佈局
-
-Visibility
-== 可見狀態
-
-Behavior
-== 按鍵功能
-
-Delete button
-== 刪除按鍵
-
-Are you sure that you want to delete this button?
-== 確定要刪除該按鍵嗎？
-
-Duplicate
-== 複製
-
-Please save your changes before duplicating a button.
-== 請在複製按鍵前儲存或刪除。
-
-No space for button
-== 按鍵空間不足
-
-There is not enough space available to place another button.
-== 螢幕空間不足，無法放置新按鍵。
-
-Deselect
-== 離開更改
-
-You'll lose unsaved changes after deselecting.
-== 未儲存更改在離開後將會丟失。
-
-Width
-== 寬度
-
-Height
-== 高度
-
-Shape
-== 形狀
-
-[Touch button shape]
-Rectangle
-== 矩形
-
-[Touch button shape]
-Circle
-== 圓形
-
-[Touch button label type]
-Plain
-== 純文字
-
-[Touch button label type]
-Localized
-== 本地化文字
-
-[Touch button label type]
-Icon
-== 圖示
-
-Behavior type
-== 功能類型
-
-[Touch button behavior]
-Bind
-== 綁定
-
-[Touch button behavior]
-Bind Toggle
-== 綁定切換
-
-[Touch button behavior]
-Predefined
-== 預設功能
-
-Command
-== 指令
-
-Label
-== 標籤
-
-Label type
-== 標籤類型
-
-Add command
-== 新增指令
-
-Delete command
-== 刪除指令
-
-[Touch button visibility preview]
-Included
-== 顯示
-
-[Touch button visibility preview]
-Excluded
-== 隱藏
-
-[Touch button visibility preview]
-Ignore
-== 忽略
-
-New button
-== 新增按鍵
-
-Select button by touch
-== 在螢幕上選擇按键
-
-No buttons match your filter criteria
-== 沒有按键符合設定的篩選條件
-
-File
-== 檔案
-
-Buttons
-== 按鍵
-
-Active color
-== 按鍵啟用時顏色
-
-Inactive color
-== 按鍵未啟用時顏色
-
-Preview button visibility while the editor is active.
-== 在編輯器打開時預覽按鍵可見狀態。
-
-Show all buttons
-== 顯示所有按鍵
-
-Save all changes before switching selected button?
-== 是否在切換所選按鍵前儲存目前更改？
-
-Discard
-== 放棄更改
-
-There is not enough space available for the button. Check its visibilities and size.
-== 按鍵可用空間不足。請檢查其可見狀態與尺寸。
-
-Selected button not visible
-== 所選按鍵不可見
-
-The selected button is not visible. Do you want to deselect it or edit its visibility?
-== 所選按鍵不可見。你要離開更改它，或編輯其可見狀態？
-
-Edit
-== 編輯
-
-Width and height are required to be within the range from %d to %d.
-== 寬度與高度必須介於%d到%d的範圍內。
-
-Button position is outside of the screen.
-== 按鍵位置超出螢幕範圍。
-
-The selected button is overlapping with other buttons.
-== 所選按鍵與其它按鍵重疊。
-
-Wrong button settings
-== 按鍵設定錯誤
-
-[Touch button visibilities]
-Ingame
-== 在遊戲内時
-
-[Touch button visibilities]
-Zoom Allowed
-== 允許縮放時
-
-[Touch button visibilities]
-Vote Active
-== 投票進行時
-
-[Touch button visibilities]
-Dummy Allowed
-== 允許分身時
-
-[Touch button visibilities]
-Dummy Connected
-== 分身已連線
-
-[Touch button visibilities]
-Rcon Authed
-== 登入管理員
-
-[Touch button visibilities]
-Demo Player
-== 播放回放時
-
-[Touch button visibilities]
-Extra Menu
-== 額外選單
-
-[Predefined touch button behaviors]
-Ingame Menu
-== 遊戲内選單
-
-[Predefined touch button behaviors]
-Extra Menu
-== 額外選單
-
-[Predefined touch button behaviors]
-Emoticon
-== 表情選單
-
-[Predefined touch button behaviors]
-Spectate
-== 旁觀選單
-
-[Predefined touch button behaviors]
-Swap Action
-== 切換動作
-
-[Predefined touch button behaviors]
-Use Action
-== 執行動作
-
-[Predefined touch button behaviors]
-Joystick Action
-== 搖桿動作
-
-[Predefined touch button behaviors]
-Joystick Aim
-== 搖桿瞄準
-
-[Predefined touch button behaviors]
-Joystick Fire
-== 搖桿開火
-
-[Predefined touch button behaviors]
-Joystick Hook
-== 搖桿鉤索
-
-Chat background color
-== 聊天框背景顏色
-
-Censor profanity
-== 過濾不雅用語
-
-Download
-== 下載
-
-Team save in progress. You'll be able to load with '/load %s'
-== 隊伍正在存檔。成功後可使用 "/load %s" 載入存檔
-
-Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails
-== 隊伍正在存檔。成功後可使用 "/load %s" 載入存檔，若失敗可使用 "/load %s" 載入
-
-Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue
-== %s 已儲存隊伍進度。數據庫連線失敗，為免衝突，請改用生成的存檔代碼。以 "/load %s"載入存檔
-
-Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue
-== %s 已儲存隊伍進度。數據庫連線失敗，為免衝突，請改用生成的存檔代碼。在 %s 以 "/load %s"載入存檔
-
-Save failed!
-== 存檔失敗！
-
-[Important alert message]
-Press Esc or Tab to dismiss…
-== 按下 Esc 或 Tab 關閉…
-
-Server alert
-== 伺服器警告
-
-Moderator alert
-== 管理員警告
-
-You will be disconnected from the server.
-== 你將從伺服器斷開連線。
-
-Are you sure that you want to disconnect and play this demo?
-== 確定要斷開連線並播放此回放？
-
-Show background quads
-== 顯示背景貼圖
-
-Scoreboard cursor
-== 顯示計分板指標
-
-Add friend
-== 新增好友
-
-Unmute
-== 取消隱藏聊天
-
-Mute
-== 隱藏聊天
-
-Unmute emoticons
-== 取消隱藏表情
-
-Mute emoticons
-== 隱藏表情
-
-There's an unsaved change in the touch controls editor, you might want to save it.
-== 觸控設定的更改尚未儲存，你或需要儲存。
-
-Start and connect to local server
-== 啟動並連線到本地伺服器
-
-Add clan
-== 新增戰隊
-
-Info
-== 資訊
-
-Button browser
-== 按鍵瀏覽
-
-You can select buttons directly in the list below, or long press on a touch button on the screen to select it. You can also move and resize buttons by touch.
-== 你可以直接在下方列表或長按螢幕，以選擇按鍵。你也可以直接移動或調整按键。
-
-Preview visibilities
-== 預覽可見狀態
-
-You can manage your touch controls settings on this page. Only changes that are saved will be available after restarting the client. You can share your touch controls with others by exporting them to the clipboard.\n\nYou can find more detailed information about the touch controls on the DDNet Wiki.
-== 在此管理觸控設定。只有已儲存的更改在重啟客戶端後可用。你可以另存到剪貼簿與他人分享觸控設定。\n\n你可以在DDNet Wiki上查看觸控詳情。
-
-Open DDNet Wiki
-== 打開DDNet Wiki
-
-Buttons with this behavior execute console commands like regular key binds.
-== 該按鍵功能執行控制台指令，如一般按鍵綁定。
-
-Buttons with this behavior cycle between executing one of two or more specified commands.
-== 該按鍵功能循環執行多個指定命令中的一個。
-
-Buttons with this behavior execute some predefined actions.
-== 該按鍵功能執行部分預設功能。
-
-Opens the ingame menu immediately when released.
-== 鬆開時立即打開遊戲内選單。
-
-The extra menu button which toggles visibility of buttons with "Extra Menu" visibilities. Also opens the ingame menu on long press.
-== 額外選單按鍵切換所有帶有 “額外選單” 可見狀態的按鍵。長按時會打開遊戲内選單。
-
-Opens the emoticon selector (this does not work with binds).
-== 打開表情選單。（不適用於按鍵綁定）
-
-Opens the spectator menu (this does not work with binds).
-== 打開旁觀選單。（不適用於按鍵綁定）
-
-Swaps the active action (fire and hook) for direct touch input and virtual joysticks.
-== 切換直接觸控輸入和虛擬搖桿的當前動作（開火與鉤索）。
-
-Uses the active action with the current aiming position.
-== 對瞄準位置執行當前動作。
-
-Virtual joystick which uses the active action.
-== 虛擬搖桿用以執行當前動作。
-
-Virtual joystick which only aims without using an action.
-== 虛擬搖桿用以瞄準。
-
-Virtual joystick which always uses fire.
-== 虛擬搖桿用以開火。
-
-Virtual joystick which always uses hook.
-== 虛擬搖桿用以鉤索。
-
-Player is ingame, i.e. not spectating.
-== 玩家處於遊戲中（非旁觀狀態）。
-
-Zoom is allowed on this server.
-== 該伺服器允許使用縮放。
-
-A vote is currently active.
-== 投票正在進行。
-
-Dummy is allowed on this server.
-== 該伺服器允許使用分身。
-
-Dummy is currently connected.
-== 分身已連線。
-
-Player is currently authed in rcon.
-== 玩家已登入管理員。
-
-Demo player is currently active.
-== 回放已開啟。
-
-The extra menu with the given number is activated.
-== 指定編號的額外選單已開啟。
-
-Joining Tutorial server
-== 正在加入教學伺服器
-
-There are no Tutorial servers available
-== 沒有可用的教學伺服器
-
-Retrying…
-== 正在重試…
-
-Error joining Tutorial server
-== 加入教學伺服器失敗
-
-Could not find a Tutorial server. Check your internet connection.
-== 未找到教學伺服器。請檢查你的網路連線。
-
-You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
-== 由於未找到線上教學伺服器，你正在本地伺服器遊玩。\n\n你的記錄只會被保存在本地。
-
-Could not find online Tutorial server.\nStarting and connecting to local server…
-== 未找到線上教學伺服器。\n正在啟動並加入本地伺服器…
-
-Waiting for local server to stop…
-== 等待本地伺服器關閉…
-
-Waiting for local server to start…
-== 等待本地伺服器啟動…
-
-Error loading communities
-== 載入社群失敗
-
-Click to remove this community from your favorites.
-== 點擊取消收藏社群。
-
-Click to add this community to your favorites.
-== 點擊收藏社群。
-
-Update Rate
-== 用戶端刷新率
-
-Save power by lowering update rate (higher input latency)
-== 降低刷新率以節省電量（增加輸入延遲）
-
-Colors of the hook collision line:
-== 鉤索輔助線顏色：
-
-[Hook collision line color]
-When nothing is hookable
-== 未瞄準任何實體物
-
-[Hook collision line color]
-When something is hookable
-== 瞄準可鈎索的方塊
-
-[Hook collision line color]
-When a Tee is hookable
-== 瞄準其他Tee時
-
-[Hook collision line color]
-Hook collision line tip
-== 鉤索輔助線頭

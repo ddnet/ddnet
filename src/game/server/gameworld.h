@@ -3,13 +3,10 @@
 #ifndef GAME_SERVER_GAMEWORLD_H
 #define GAME_SERVER_GAMEWORLD_H
 
-#include "save.h"
-
 #include <game/gamecore.h>
 
-#include <vector>
+#include <list>
 
-class CCollision;
 class CEntity;
 class CCharacter;
 
@@ -41,7 +38,8 @@ private:
 	class CGameContext *m_pGameServer;
 	class CConfig *m_pConfig;
 	class IServer *m_pServer;
-	CTuningParams *m_pTuningList;
+
+	void UpdatePlayerMaps();
 
 public:
 	class CGameContext *GameServer() { return m_pGameServer; }
@@ -56,7 +54,6 @@ public:
 	~CGameWorld();
 
 	void SetGameServer(CGameContext *pGameServer);
-	void Init(CCollision *pCollision, CTuningParams *pTuningList);
 
 	CEntity *FindFirst(int Type);
 
@@ -77,41 +74,22 @@ public:
 	*/
 	int FindEntities(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int Type);
 
-	/**
-	 * Finds the CCharacter that intersects the line.
-	 *
-	 * @see IntersectEntity
-	 *
-	 * @param Pos0 Start position
-	 * @param Pos1 End position
-	 * @param Radius How far from the line the @link CCharacter @endlink is allowed to be
-	 * @param NewPos Intersection position
-	 * @param pNotThis Character to ignore intersecting with
-	 * @param CollideWith Only find entities that can collide with that Client Id (pass -1 to ignore this check)
-	 * @param pThisOnly Only search this specific character and ignore all others
-	 *
-	 * @return Pointer to the closest hit or `nullptr` if there is no intersection.
-	 */
-	CCharacter *IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, const CCharacter *pNotThis = nullptr, int CollideWith = -1, const CCharacter *pThisOnly = nullptr);
+	/*
+		Function: InterserctCharacters
+			Finds the CCharacters that intersects the line. // made for types lasers=1 and doors=0
 
-	/**
-	 * Finds the CEntity that intersects the line.
-	 *
-	 * @see IntersectCharacter
-	 *
-	 * @param Pos0 Start position
-	 * @param Pos1 End position
-	 * @param Radius How far from the line the @link CEntity @endlink is allowed to be
-	 * @param Type Type of the entity to intersect
-	 * @param NewPos Intersection position
-	 * @param pNotThis Entity to ignore intersecting with
-	 * @param CollideWith Only find entities that can collide with that Client Id (pass -1 to ignore this check)
-	 * @param pThisOnly Only search this specific entity and ignore all others
-	 *
-	 * @return Pointer to the closest hit or `nullptr` if there is no intersection.
-	 */
-	CEntity *IntersectEntity(vec2 Pos0, vec2 Pos1, float Radius, int Type, vec2 &NewPos, const CEntity *pNotThis = nullptr, int CollideWith = -1, const CEntity *pThisOnly = nullptr);
+		Arguments:
+			Pos0 - Start position
+			Pos1 - End position
+			Radius - How for from the line the CCharacter is allowed to be.
+			NewPos - Intersection position
+			pNotThis - Entity to ignore intersecting with
 
+		Returns:
+			Returns a pointer to the closest hit or NULL of there is no intersection.
+	*/
+	//class CCharacter *IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, class CEntity *pNotThis = 0);
+	class CCharacter *IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, class CCharacter *pNotThis = 0, int CollideWith = -1, class CCharacter *pThisOnly = 0);
 	/*
 		Function: ClosestCharacter
 			Finds the closest CCharacter to a specific point.
@@ -119,12 +97,12 @@ public:
 		Arguments:
 			Pos - The center position.
 			Radius - How far off the CCharacter is allowed to be
-			pNotThis - Entity to ignore
+			ppNotThis - Entity to ignore
 
 		Returns:
 			Returns a pointer to the closest CCharacter or NULL if no CCharacter is close enough.
 	*/
-	CCharacter *ClosestCharacter(vec2 Pos, float Radius, const CEntity *pNotThis);
+	class CCharacter *ClosestCharacter(vec2 Pos, float Radius, CEntity *ppNotThis);
 
 	/*
 		Function: InsertEntity
@@ -143,9 +121,6 @@ public:
 			pEntity - Entity to remove
 	*/
 	void RemoveEntity(CEntity *pEntity);
-
-	void RemoveEntitiesFromPlayer(int PlayerId);
-	void RemoveEntitiesFromPlayers(int PlayerIds[], int NumPlayers);
 
 	/*
 		Function: Snap
@@ -172,14 +147,8 @@ public:
 	*/
 	void SwapClients(int Client1, int Client2);
 
-	/*
-		Function: BlocksSave
-			Checks if any entity would block /save
-	*/
-	ESaveResult BlocksSave(int ClientId);
-
 	// DDRace
-	void ReleaseHooked(int ClientId);
+	void ReleaseHooked(int ClientID);
 
 	/*
 		Function: IntersectedCharacters
@@ -194,12 +163,7 @@ public:
 		Returns:
 			Returns list with all Characters on line.
 	*/
-	std::vector<CCharacter *> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, const CEntity *pNotThis = nullptr);
-
-	const CTuningParams *TuningList() const { return m_pTuningList; }
-	CTuningParams *TuningList() { return m_pTuningList; }
-	const CTuningParams *GetTuning(int i) const { return &TuningList()[i]; }
-	CTuningParams *GetTuning(int i) { return &TuningList()[i]; }
+	std::list<class CCharacter *> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, class CEntity *pNotThis = 0);
 };
 
 #endif

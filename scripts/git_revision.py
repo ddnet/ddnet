@@ -1,14 +1,17 @@
-import os
+import errno
 import subprocess
-
-git_hash = os.environ.get("DDNET_GIT_SHORTREV_HASH")
 try:
-	git_hash = git_hash or subprocess.check_output(["git", "rev-parse", "--short=16", "HEAD"], stderr=subprocess.DEVNULL).decode().strip()
-except (FileNotFoundError, subprocess.CalledProcessError):
-	pass
-if git_hash is not None:
-	definition = f'"{git_hash}"'
-else:
+	from subprocess import DEVNULL
+except ImportError:
+	import os
+	DEVNULL = open(os.devnull, 'wb')
+try:
+	git_hash = subprocess.check_output(["git", "rev-parse", "--short=16", "HEAD"], stderr=DEVNULL).decode().strip()
+	definition = '"{}"'.format(git_hash)
+except FileNotFoundError as e:
+	if e.errno != errno.ENOENT:
+		raise
 	definition = "0"
-print("#include <game/version.h>")
-print(f"const char *GIT_SHORTREV_HASH = {definition};")
+except subprocess.CalledProcessError:
+	definition = "0"
+print("const char *GIT_SHORTREV_HASH = {};".format(definition))

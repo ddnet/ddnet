@@ -10,10 +10,8 @@ from clang.cindex import CursorKind, LinkageKind, StorageClass, TypeKind
 try:
 	from tqdm import tqdm
 except ImportError:
-
 	def tqdm(it, *_args, **_kwargs):
 		return it
-
 
 def traverse_namespaced(root, filter_files=None, skip_namespaces=1, namespace=()):
 	if root.location.file is not None and root.location.file.name not in filter_files:
@@ -26,7 +24,6 @@ def traverse_namespaced(root, filter_files=None, skip_namespaces=1, namespace=()
 			namespace += (root.spelling,)
 	for node in root.get_children():
 		yield from traverse_namespaced(node, filter_files, skip_namespaces, namespace)
-
 
 INTERESTING_NODE_KINDS = {
 	CursorKind.CLASS_DECL: "class",
@@ -41,10 +38,8 @@ INTERESTING_NODE_KINDS = {
 	CursorKind.FUNCTION_DECL: "function",
 }
 
-
 def is_array_type(typ):
 	return typ.kind in (TypeKind.CONSTANTARRAY, TypeKind.DEPENDENTSIZEDARRAY, TypeKind.INCOMPLETEARRAY)
-
 
 def get_complex_type(typ):
 	if typ.spelling in ("IOHANDLE", "LOCK"):
@@ -55,7 +50,7 @@ def get_complex_type(typ):
 		return get_complex_type(typ.get_pointee())
 	if typ.kind == TypeKind.POINTER:
 		return "p" + get_complex_type(typ.get_pointee())
-	if is_array_type(typ):
+	if is_array_type(type):
 		return "a" + get_complex_type(typ.element_type)
 	if typ.kind == TypeKind.FUNCTIONPROTO:
 		return "fn"
@@ -69,7 +64,6 @@ def get_complex_type(typ):
 		if typ.get_declaration().spelling in "array sorted_array".split():
 			return "a" + get_complex_type(typ.get_template_argument_type(0))
 	return ""
-
 
 def is_static_member_definition_hack(node):
 	last_colons = False
@@ -85,36 +79,33 @@ def is_static_member_definition_hack(node):
 			return False
 	return False
 
-
 def is_const(typ):
 	if typ.is_const_qualified():
 		return True
-	if is_array_type(typ):
+	if is_array_type(type):
 		return is_const(typ.element_type)
 	return False
-
 
 class ParseError(RuntimeError):
 	pass
 
-
 def process_source_file(out, file, extra_args, break_on):
 	args = extra_args + ["-Isrc"]
 	if file.endswith(".c"):
-		header = f"{file[:-2]}.h"
+		header = "{}.h".format(file[:-2])
 	elif file.endswith(".cpp"):
-		header = f"{file[:-4]}.h"
+		header = "{}.h".format(file[:-4])
 	else:
-		raise ValueError(f"unrecognized source file: {file}")
+		raise ValueError("unrecognized source file: {}".format(file))
 
 	index = clang.cindex.Index.create()
 	unit = index.parse(file, args=args)
 	errors = list(unit.diagnostics)
 	if errors:
 		for error in errors:
-			print(f"{file}: {error.format()}", file=sys.stderr)
+			print("{}: {}".format(file, error.format()), file=sys.stderr)
 		print(args, file=sys.stderr)
-		raise ParseError(f"failed parsing {file}")
+		raise ParseError("failed parsing {}".format(file))
 
 	filter_files = frozenset([file, header])
 
@@ -151,7 +142,6 @@ def process_source_file(out, file, extra_args, break_on):
 			if node.spelling == break_on:
 				breakpoint()
 
-
 def main():
 	p = argparse.ArgumentParser(description="Extracts identifier data from a Teeworlds source file and its header, outputting the data as CSV to stdout")
 	p.add_argument("file", metavar="FILE", nargs="+", help="Source file to analyze")
@@ -174,7 +164,6 @@ def main():
 		except ParseError:
 			error = True
 	return int(error)
-
 
 if __name__ == "__main__":
 	sys.exit(main())

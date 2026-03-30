@@ -1,29 +1,29 @@
 #ifndef GAME_SERVER_TEEINFO_H
 #define GAME_SERVER_TEEINFO_H
 
-#include <engine/shared/protocol.h>
-
-#include <generated/protocol7.h>
-
 class CTeeInfo
 {
 public:
-	char m_aSkinName[MAX_SKIN_LENGTH] = "";
-	bool m_UseCustomColor = false;
+	constexpr static const float DARKEST_LGT_7 = 61 / 255.0f;
+
+	char m_SkinName[64] = {'\0'};
+	int m_UseCustomColor = 0;
 	int m_ColorBody = 0;
 	int m_ColorFeet = 0;
 
 	// 0.7
-	char m_aaSkinPartNames[protocol7::NUM_SKINPARTS][protocol7::MAX_SKIN_LENGTH] = {"", "", "", "", "", ""};
-	bool m_aUseCustomColors[protocol7::NUM_SKINPARTS] = {false, false, false, false, false, false};
-	int m_aSkinPartColors[protocol7::NUM_SKINPARTS] = {0, 0, 0, 0, 0, 0};
+	char m_apSkinPartNames[6][24] = {"", "", "", "", "", ""};
+	bool m_aUseCustomColors[6] = {false, false, false, false, false, false};
+	int m_aSkinPartColors[6] = {0, 0, 0, 0, 0, 0};
 
 	CTeeInfo() = default;
+
 	CTeeInfo(const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet);
-	CTeeInfo(const char *const apSkinPartNames[protocol7::NUM_SKINPARTS], const int aUseCustomColors[protocol7::NUM_SKINPARTS], const int aSkinPartColors[protocol7::NUM_SKINPARTS]);
+
+	// This constructor will assume all arrays are of length 6
+	CTeeInfo(const char *pSkinPartNames[6], int *pUseCustomColors, int *pSkinPartColors);
 
 	void FromSixup();
 	void ToSixup();
 };
-
-#endif // GAME_SERVER_TEEINFO_H
+#endif //GAME_SERVER_TEEINFO_H

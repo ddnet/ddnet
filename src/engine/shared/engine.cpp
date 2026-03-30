@@ -2,29 +2,39 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include <base/logger.h>
-#include <base/os.h>
 #include <base/system.h>
 
 #include <engine/console.h>
 #include <engine/engine.h>
 #include <engine/shared/config.h>
-#include <engine/shared/jobs.h>
 #include <engine/shared/network.h>
 #include <engine/storage.h>
 
-#include <thread>
+#include <engine/shared/assertion_logger.h>
+
+CHostLookup::CHostLookup() = default;
+
+CHostLookup::CHostLookup(const char *pHostname, int Nettype)
+{
+	str_copy(m_aHostname, pHostname, sizeof(m_aHostname));
+	m_Nettype = Nettype;
+}
+
+void CHostLookup::Run()
+{
+	m_Result = net_host_lookup(m_aHostname, &m_Addr, m_Nettype);
+}
 
 class CEngine : public IEngine
 {
+public:
 	IConsole *m_pConsole;
 	IStorage *m_pStorage;
-
 	bool m_Logging;
+
 	std::shared_ptr<CFutureLogger> m_pFutureLogger;
 
 	char m_aAppName[256];
-
-	CJobPool m_JobPool;
 
 	static void Con_DbgLognetwork(IConsole::IResult *pResult, void *pUserData)
 	{
@@ -48,42 +58,35 @@ class CEngine : public IEngine
 		}
 	}
 
-public:
-	CEngine(bool Test, const char *pAppname, std::shared_ptr<CFutureLogger> pFutureLogger) :
+	CEngine(bool Test, const char *pAppname, std::shared_ptr<CFutureLogger> pFutureLogger, int Jobs) :
 		m_pFutureLogger(std::move(pFutureLogger))
 	{
-		str_copy(m_aAppName, pAppname);
+		str_copy(m_aAppName, pAppname, std::size(m_aAppName));
 		if(!Test)
 		{
-			log_info("engine", "running on %s-%s-%s", CONF_FAMILY_STRING, CONF_PLATFORM_STRING, CONF_ARCH_STRING);
-			log_info("engine", "arch is %s", CONF_ARCH_ENDIAN_STRING);
-
-			char aVersionStr[128];
-			if(os_version_str(aVersionStr, sizeof(aVersionStr)))
-			{
-				log_info("engine", "operating system version: %s", aVersionStr);
-			}
+			//
+			dbg_msg("engine", "running on %s-%s-%s", CONF_FAMILY_STRING, CONF_PLATFORM_STRING, CONF_ARCH_STRING);
+#ifdef CONF_ARCH_ENDIAN_LITTLE
+			dbg_msg("engine", "arch is little endian");
+#elif defined(CONF_ARCH_ENDIAN_BIG)
+			dbg_msg("engine", "arch is big endian");
+#else
+			dbg_msg("engine", "unknown endian");
+#endif
 
 			// init the network
 			net_init();
 			CNetBase::Init();
 		}
 
-#if defined(CONF_PLATFORM_EMSCRIPTEN)
-		// Make sure we don't use more threads than allowed in total (see PTHREAD_POOL_SIZE in Emscripten.toolchain)
-		// otherwise starting more threads may lead to deadlocks as the threads will simply not start.
-		const size_t ThreadCount = 4;
-#else
-		const size_t ThreadCount = std::max(4, (int)std::thread::hardware_concurrency()) - 2;
-#endif
-		m_JobPool.Init(ThreadCount);
+		m_JobPool.Init(Jobs);
 
 		m_Logging = false;
 	}
 
 	~CEngine() override
 	{
-		CNetBase::CloseLog();
+		m_JobPool.Destroy();
 	}
 
 	void Init() override
@@ -94,24 +97,28 @@ public:
 		if(!m_pConsole || !m_pStorage)
 			return;
 
+		char aFullPath[IO_MAX_PATH_LENGTH];
+		m_pStorage->GetCompletePath(IStorage::TYPE_SAVE, "dumps/", aFullPath, sizeof(aFullPath));
 		m_pConsole->Register("dbg_lognetwork", "", CFGFLAG_SERVER | CFGFLAG_CLIENT, Con_DbgLognetwork, this, "Log the network");
 	}
 
 	void AddJob(std::shared_ptr<IJob> pJob) override
 	{
+		if(g_Config.m_Debug)
+			dbg_msg("engine", "job added");
 		m_JobPool.Add(std::move(pJob));
 	}
 
-	void ShutdownJobs() override
+	void SetAdditionalLogger(std::unique_ptr<ILogger> &&pLogger) override
 	{
-		m_JobPool.Shutdown();
-	}
-
-	void SetAdditionalLogger(std::shared_ptr<ILogger> &&pLogger) override
-	{
-		m_pFutureLogger->Set(pLogger);
+		m_pFutureLogger->Set(std::move(pLogger));
 	}
 };
 
-IEngine *CreateEngine(const char *pAppname, std::shared_ptr<CFutureLogger> pFutureLogger) { return new CEngine(false, pAppname, std::move(pFutureLogger)); }
-IEngine *CreateTestEngine(const char *pAppname) { return new CEngine(true, pAppname, nullptr); }
+void IEngine::RunJobBlocking(IJob *pJob)
+{
+	CJobPool::RunBlocking(pJob);
+}
+
+IEngine *CreateEngine(const char *pAppname, std::shared_ptr<CFutureLogger> pFutureLogger, int Jobs) { return new CEngine(false, pAppname, std::move(pFutureLogger), Jobs); }
+IEngine *CreateTestEngine(const char *pAppname, int Jobs) { return new CEngine(true, pAppname, nullptr, Jobs); }

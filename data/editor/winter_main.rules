@@ -1,0 +1,282 @@
+
+
+[Winter]
+
+Index 0
+Pos 0 0 INDEX 224 OR 225 OR 226 OR 227 OR 228 OR 229 OR 230 OR 248 OR 249 OR 250 OR 251 OR 252 OR 253 OR 254 OR 255
+
+Index 1
+
+NewRun
+
+#1tile height
+Index 115
+Pos 0 -1 EMPTY
+Pos 0 1 EMPTY
+
+#top
+Index 19
+Pos 0 -1 EMPTY
+Pos 0 1 FULL
+
+#left
+Index 2
+Pos -1 0 EMPTY
+Pos 1 0 FULL
+
+#right
+Index 2 XFLIP
+Pos -1 0 FULL
+Pos 1 0 EMPTY
+
+#bottom
+Index 97
+Pos 0 -1 FULL
+Pos 0 1 EMPTY
+
+
+#now map corners and links
+
+#Top corners
+#corner left	
+Index 16
+Pos -1 0 EMPTY
+Pos 0 -1 EMPTY
+Pos 0 1 FULL
+
+#corner right
+Index 20
+Pos 0 -1 EMPTY
+Pos 1 0 EMPTY
+Pos 0 1 FULL
+
+#inside corner left
+Index 3
+Pos 0 -1 FULL
+Pos 1 -1 EMPTY
+Pos 1 0 FULL
+Pos 1 1 FULL
+Pos 0 1 FULL
+
+#inside corner right
+Index 4
+Pos -1 0 FULL
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 0 1 FULL
+Pos -1 1 FULL
+
+
+#bottom corners
+#corner bottom right
+Index 100
+Pos 0 -1 FULL
+Pos 0 1 EMPTY
+Pos 1 0 EMPTY
+
+#corner bottom left
+Index 96
+Pos 0 -1 FULL
+Pos 0 1 EMPTY
+Pos -1 0 EMPTY
+
+#inside corner top right
+Index 8
+Pos -1 -1 FULL
+Pos 0 1 FULL
+Pos -1 0 FULL
+Pos -1 1 EMPTY
+
+#inside corner top left
+Index 7
+Pos 1 -1 FULL
+Pos 0 1 FULL
+Pos 1 0 FULL
+Pos 1 1 EMPTY
+
+
+#1tile height
+#left
+Index 112
+Pos 0 1 EMPTY
+Pos -1 0 EMPTY
+Pos 0 -1 EMPTY
+
+#right
+Index 116
+Pos 0 -1 EMPTY
+Pos 1 0 EMPTY
+Pos 0 1 EMPTY
+
+#one tile height link right
+Index 6
+Pos -1 -1 EMPTY
+Pos -1 0 FULL
+Pos 0 -1 FULL
+Pos -1 1 EMPTY
+
+#one tile height link left
+Index 5
+Pos 1 -1 EMPTY
+Pos 1 0 FULL
+Pos 0 -1 FULL
+Pos 1 1 EMPTY
+
+
+
+#add design elements
+NewRun
+
+#start placing the little snow and bottom design tiles to the left
+#snow
+Index 17
+Pos 0 0 INDEX 19
+Pos -1 0 INDEX 16 OR 3
+Pos 1 -1 EMPTY   #prevents bug with ID4
+
+#1tile snow
+Index 113
+Pos 0 0 INDEX 115
+Pos -1 0 INDEX 112 OR 5
+Pos 1 -1 EMPTY #prevents bug with ID 6
+
+#bottoms
+Index 98
+Pos 0 0 INDEX 97
+Pos -2 0 INDEX 96 OR 7
+
+
+#fill the rows with design elements
+NewRun
+NoLayerCopy  #updates the "Layer Copy" as soon as a tile gets changed by a rule afaik
+
+#snow
+Index 17
+Pos 0 0 INDEX 19
+Pos -3 0 INDEX 17
+Pos 1 -1 EMPTY  #prevents bug with ID4
+Index 18
+Pos 0 0 INDEX 19
+Pos -1 0 INDEX 17
+
+#1tile snow
+Index 113
+Pos 0 0 INDEX 115
+Pos -3 0 INDEX 113
+Pos 1 -1 EMPTY #prevents bug with ID 6
+Index 114
+Pos 0 0 INDEX 115
+Pos -1 0 INDEX 113
+
+#bottoms
+Index 98
+Pos 0 0 INDEX 97
+Pos -5 0 INDEX 98
+Index 99
+Pos 0 0 INDEX 97
+Pos -1 0 INDEX 98
+Index 102
+Pos 0 0 INDEX 97
+Pos -1 0 INDEX 99
+Index 103
+Pos 0 0 INDEX 97
+Pos -1 0 INDEX 102
+
+
+
+#fix top right corners
+NewRun
+
+Index 24
+Pos 0 0 INDEX 20
+Pos -1 0 INDEX 17
+
+Index 120
+Pos 0 0 INDEX 116
+Pos -1 0 INDEX 113
+
+
+
+
+
+
+
+
+[Winter dark]
+Index 177
+
+#right
+Index 178 XFLIP
+Pos 1 0 EMPTY
+
+#left
+Index 178
+Pos -1 0 EMPTY
+
+#corner bottom left
+Index 193
+Pos 0 1 EMPTY
+Pos -1 0 EMPTY
+
+#inside corner top right
+Index 180
+Pos 0 1 FULL
+Pos -1 0 FULL
+Pos -1 1 EMPTY
+
+#inside corner top left
+Index 179
+Pos 0 1 FULL
+Pos 1 0 FULL
+Pos 1 1 EMPTY
+
+#bottoms
+NewRun
+
+Index 194
+Pos 0 1 EMPTY
+Pos -1 0 INDEX 193 OR 179
+
+NoLayerCopy
+
+Index 194
+Pos 0 1 EMPTY
+Pos -5 0 INDEX 194
+
+Index 195
+Pos 0 1 EMPTY
+Pos -1 0 INDEX 194
+
+Index 196
+Pos 0 1 EMPTY
+Pos -1 0 INDEX 195
+
+Index 210
+Pos 0 1 EMPTY
+Pos -1 0 INDEX 196
+
+Index 211
+Pos 0 1 EMPTY
+Pos -1 0 INDEX 210
+
+
+#fix corners
+#corner bottom right
+Index 197
+Pos 0 1 EMPTY
+Pos 1 0 EMPTY
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

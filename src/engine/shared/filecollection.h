@@ -3,47 +3,40 @@
 #ifndef ENGINE_SHARED_FILECOLLECTION_H
 #define ENGINE_SHARED_FILECOLLECTION_H
 
-#include <base/str.h>
-#include <base/types.h>
+#include <engine/storage.h>
 
-#include <cstdint>
-#include <vector>
-
-class IStorage;
+#include <stddef.h>
 
 class CFileCollection
 {
 	enum
 	{
+		MAX_ENTRIES = 1001,
 		TIMESTAMP_LENGTH = 20, // _YYYY-MM-DD_HH-MM-SS
 	};
 
-	struct CFileEntry
-	{
-		time_t m_Timestamp;
-		char m_aFilename[IO_MAX_PATH_LENGTH];
-		CFileEntry(int64_t Timestamp, const char *pFilename)
-		{
-			m_Timestamp = Timestamp;
-			str_copy(m_aFilename, pFilename);
-		}
-	};
-
-	std::vector<CFileEntry> m_vFileEntries;
+	int64_t m_aTimestamps[MAX_ENTRIES];
+	int m_NumTimestamps;
+	int m_MaxEntries;
 	char m_aFileDesc[128];
 	int m_FileDescLength;
 	char m_aFileExt[32];
 	int m_FileExtLength;
 	char m_aPath[IO_MAX_PATH_LENGTH];
 	IStorage *m_pStorage;
+	int64_t m_Remove; // Timestamp we want to remove
 
-	bool ExtractTimestamp(const char *pTimestring, time_t *pTimestamp);
-	bool ParseFilename(const char *pFilename, time_t *pTimestamp);
+	bool IsFilenameValid(const char *pFilename);
+	int64_t ExtractTimestamp(const char *pTimestring);
+	void BuildTimestring(int64_t Timestamp, char *pTimestring);
+	int64_t GetTimestamp(const char *pFilename);
 
 public:
 	void Init(IStorage *pStorage, const char *pPath, const char *pFileDesc, const char *pFileExt, int MaxEntries);
+	void AddEntry(int64_t Timestamp);
 
 	static int FilelistCallback(const char *pFilename, int IsDir, int StorageType, void *pUser);
+	static int RemoveCallback(const char *pFilename, int IsDir, int StorageType, void *pUser);
 };
 
 #endif

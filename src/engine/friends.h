@@ -3,9 +3,9 @@
 #ifndef ENGINE_FRIENDS_H
 #define ENGINE_FRIENDS_H
 
-#include "kernel.h"
-
 #include <engine/shared/protocol.h>
+
+#include "kernel.h"
 
 struct CFriendInfo
 {
@@ -17,15 +17,16 @@ struct CFriendInfo
 
 class IFriends : public IInterface
 {
-	MACRO_INTERFACE("friends")
+	MACRO_INTERFACE("friends", 0)
 public:
 	enum
 	{
 		FRIEND_NO = 0,
 		FRIEND_CLAN,
 		FRIEND_PLAYER,
+
+		MAX_FRIENDS = 1024,
 	};
-	static constexpr auto MAX_FRIENDS = 4096;
 
 	virtual void Init(bool Foes = false) = 0;
 

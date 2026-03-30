@@ -1,16 +1,10 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "projectile.h"
-
-#include "character.h"
+#include <game/client/projectile_data.h>
+#include <game/generated/protocol.h>
 
 #include <engine/shared/config.h>
-
-#include <generated/protocol.h>
-
-#include <game/client/projectile_data.h>
-#include <game/collision.h>
-#include <game/mapitems.h>
 
 CProjectile::CProjectile(
 	CGameWorld *pGameWorld,
@@ -21,6 +15,7 @@ CProjectile::CProjectile(
 	int Span,
 	bool Freeze,
 	bool Explosive,
+	float Force,
 	int SoundImpact,
 	int Layer,
 	int Number) :
@@ -31,6 +26,7 @@ CProjectile::CProjectile(
 	m_Direction = Dir;
 	m_LifeSpan = Span;
 	m_Owner = Owner;
+	m_Force = Force;
 	m_SoundImpact = SoundImpact;
 	m_StartTick = GameWorld()->GameTick();
 	m_Explosive = Explosive;
@@ -80,46 +76,40 @@ void CProjectile::Tick()
 	vec2 ColPos;
 	vec2 NewPos;
 	int Collide = Collision()->IntersectLine(PrevPos, CurPos, &ColPos, &NewPos);
-	CCharacter *pOwnerChar = GameWorld()->GetCharacterById(m_Owner);
+	CCharacter *pOwnerChar = GameWorld()->GetCharacterByID(m_Owner);
 
 	CCharacter *pTargetChr = GameWorld()->IntersectCharacter(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pOwnerChar, m_Owner);
 
 	if(GameWorld()->m_WorldConfig.m_IsSolo && !(m_Type == WEAPON_SHOTGUN && GameWorld()->m_WorldConfig.m_IsDDRace))
-		pTargetChr = nullptr;
+		pTargetChr = 0;
 
 	if(m_LifeSpan > -1)
 		m_LifeSpan--;
 
-	bool IsWeaponCollide = false;
+	bool isWeaponCollide = false;
 	if(
 		pOwnerChar &&
 		pTargetChr &&
+		pOwnerChar->IsAlive() &&
+		pTargetChr->IsAlive() &&
 		!pTargetChr->CanCollide(m_Owner))
 	{
-		IsWeaponCollide = true;
+		isWeaponCollide = true;
 	}
 
-	if(((pTargetChr && (pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar)) || Collide || GameLayerClipped(CurPos)) && !IsWeaponCollide)
+	if(((pTargetChr && (pOwnerChar ? !(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_GRENADE) : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar)) || Collide || GameLayerClipped(CurPos)) && !isWeaponCollide)
 	{
-		if(m_Explosive && (!pTargetChr || (!m_Freeze || (m_Type == WEAPON_SHOTGUN && Collide))))
+		if(m_Explosive && (!pTargetChr || (pTargetChr && (!m_Freeze || (m_Type == WEAPON_SHOTGUN && Collide)))))
 		{
-			GameWorld()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()), CClientMask().set(), m_StartTick);
-			if(GameWorld()->m_WorldConfig.m_IsDDRace && GameWorld()->m_WorldConfig.m_PredictDDRace)
-			{
-				// vanilla has different projectile physics
-				GameWorld()->CreatePredictedSound(ColPos, m_SoundImpact, m_StartTick);
-			}
+			GameWorld()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()), -1LL);
 		}
 		else if(m_Freeze)
 		{
-			CEntity *apEnts[MAX_CLIENTS];
-			int Num = GameWorld()->FindEntities(CurPos, 1.0f, apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+			CCharacter *apEnts[MAX_CLIENTS];
+			int Num = GameWorld()->FindEntities(CurPos, 1.0f, (CEntity **)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 			for(int i = 0; i < Num; ++i)
-			{
-				auto *pChr = static_cast<CCharacter *>(apEnts[i]);
-				if(pChr && (m_Layer != LAYER_SWITCH || (m_Layer == LAYER_SWITCH && m_Number > 0 && m_Number < (int)Switchers().size() && Switchers()[m_Number].m_aStatus[pChr->Team()])))
-					pChr->Freeze();
-			}
+				if(apEnts[i] && (m_Layer != LAYER_SWITCH || (m_Layer == LAYER_SWITCH && m_Number > 0 && m_Number < Collision()->m_NumSwitchers + 1 && GameWorld()->Collision()->m_pSwitchers[m_Number].m_Status[apEnts[i]->Team()])))
+					apEnts[i]->Freeze();
 		}
 		if(Collide && m_Bouncing != 0)
 		{
@@ -129,16 +119,14 @@ void CProjectile::Tick()
 				m_Direction.x = -m_Direction.x;
 			else if(m_Bouncing == 2)
 				m_Direction.y = -m_Direction.y;
-			if(absolute(m_Direction.x) < 1e-6f)
+			if(fabs(m_Direction.x) < 1e-6f)
 				m_Direction.x = 0;
-			if(absolute(m_Direction.y) < 1e-6f)
+			if(fabs(m_Direction.y) < 1e-6f)
 				m_Direction.y = 0;
 			m_Pos += m_Direction;
 		}
 		else if(m_Type == WEAPON_GUN)
 		{
-			if(GameWorld()->m_WorldConfig.m_IsDDRace && GameWorld()->m_WorldConfig.m_PredictDDRace)
-				GameWorld()->CreatePredictedDamageIndEvent(CurPos, -std::atan2(m_Direction.x, m_Direction.y), 10, m_StartTick);
 			m_MarkedForDestroy = true;
 		}
 		else if(!m_Freeze)
@@ -149,10 +137,9 @@ void CProjectile::Tick()
 		if(m_Explosive)
 		{
 			if(m_Owner >= 0)
-				pOwnerChar = GameWorld()->GetCharacterById(m_Owner);
+				pOwnerChar = GameWorld()->GetCharacterByID(m_Owner);
 
-			GameWorld()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pOwnerChar ? -1 : pOwnerChar->Team()), CClientMask().set(), m_StartTick);
-			GameWorld()->CreatePredictedSound(ColPos, m_SoundImpact, m_StartTick);
+			GameWorld()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pOwnerChar ? -1 : pOwnerChar->Team()), -1LL);
 		}
 		m_MarkedForDestroy = true;
 	}
@@ -165,7 +152,7 @@ void CProjectile::SetBouncing(int Value)
 	m_Bouncing = Value;
 }
 
-CProjectile::CProjectile(CGameWorld *pGameWorld, int Id, const CProjectileData *pProj) :
+CProjectile::CProjectile(CGameWorld *pGameWorld, int ID, CProjectileData *pProj, const CNetObj_EntityEx *pEntEx) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
 {
 	m_Pos = pProj->m_StartPos;
@@ -182,7 +169,7 @@ CProjectile::CProjectile(CGameWorld *pGameWorld, int Id, const CProjectileData *
 		m_Owner = -1;
 		m_Bouncing = 0;
 		m_Freeze = false;
-		m_Explosive = (pProj->m_Type == WEAPON_GRENADE) && (absolute(1.0f - length(m_Direction)) < 0.015f);
+		m_Explosive = (pProj->m_Type == WEAPON_GRENADE) && (fabs(1.0f - length(m_Direction)) < 0.015f);
 	}
 	m_Type = pProj->m_Type;
 	m_StartTick = pProj->m_StartTick;
@@ -200,9 +187,15 @@ CProjectile::CProjectile(CGameWorld *pGameWorld, int Id, const CProjectileData *
 	else if(m_Type == WEAPON_SHOTGUN && !GameWorld()->m_WorldConfig.m_IsDDRace)
 		Lifetime = GetTuning(m_TuneZone)->m_ShotgunLifetime * GameWorld()->GameTickSpeed();
 	m_LifeSpan = Lifetime - (pGameWorld->GameTick() - m_StartTick);
-	m_Id = Id;
-	m_Number = pProj->m_SwitchNumber;
-	m_Layer = m_Number > 0 ? LAYER_SWITCH : LAYER_GAME;
+	m_ID = ID;
+	m_Layer = LAYER_GAME;
+	m_Number = 0;
+
+	if(pEntEx)
+	{
+		m_Layer = LAYER_SWITCH;
+		m_Number = pEntEx->m_SwitchNumber;
+	}
 }
 
 CProjectileData CProjectile::GetData() const
@@ -218,7 +211,6 @@ CProjectileData CProjectile::GetData() const
 	Result.m_Bouncing = m_Bouncing;
 	Result.m_Freeze = m_Freeze;
 	Result.m_TuneZone = m_TuneZone;
-	Result.m_SwitchNumber = m_Number;
 	return Result;
 }
 

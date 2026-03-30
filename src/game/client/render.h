@@ -3,125 +3,29 @@
 #ifndef GAME_CLIENT_RENDER_H
 #define GAME_CLIENT_RENDER_H
 
+#include "ui.h"
 #include <base/color.h>
 #include <base/vmath.h>
-
-#include <engine/client/enums.h>
-
-#include <generated/protocol.h>
-#include <generated/protocol7.h>
-
+#include <engine/graphics.h>
 #include <game/client/skin.h>
-#include <game/client/ui_rect.h>
-
-#include <functional>
-#include <memory>
-
-class CAnimState;
-class CSpeedupTile;
-class CSwitchTile;
-class CTeleTile;
-class CTile;
-class CTuneTile;
-class CEnvPoint;
-class CEnvPointBezier;
-class CEnvPointBezier_upstream;
-class CMapItemGroup;
-class CQuad;
-
-class CSkinDescriptor
-{
-public:
-	enum
-	{
-		FLAG_SIX = 1,
-		FLAG_SEVEN = 2,
-	};
-	unsigned m_Flags;
-
-	char m_aSkinName[MAX_SKIN_LENGTH];
-
-	class CSixup
-	{
-	public:
-		char m_aaSkinPartNames[protocol7::NUM_SKINPARTS][protocol7::MAX_SKIN_LENGTH];
-		bool m_BotDecoration;
-		bool m_XmasHat;
-
-		void Reset();
-		bool operator==(const CSixup &Other) const;
-		bool operator!=(const CSixup &Other) const { return !(*this == Other); }
-	};
-	CSixup m_aSixup[NUM_DUMMIES];
-
-	CSkinDescriptor();
-	void Reset();
-	bool IsValid() const;
-	bool operator==(const CSkinDescriptor &Other) const;
-	bool operator!=(const CSkinDescriptor &Other) const { return !(*this == Other); }
-};
+#include <game/mapitems.h>
 
 class CTeeRenderInfo
 {
 public:
 	CTeeRenderInfo()
 	{
-		Reset();
-	}
-
-	void Reset()
-	{
-		m_OriginalRenderSkin.Reset();
-		m_ColorableRenderSkin.Reset();
-		m_SkinMetrics.Reset();
-		m_CustomColoredSkin = false;
-		m_BloodColor = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-		m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-		m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+		m_ColorBody = ColorRGBA(1, 1, 1);
+		m_ColorFeet = ColorRGBA(1, 1, 1);
 		m_Size = 1.0f;
-		m_GotAirJump = true;
-		m_TeeRenderFlags = 0;
-		m_FeetFlipped = false;
+		m_GotAirJump = 1;
+		m_ShineDecoration = 0;
+	};
 
-		for(auto &Sixup : m_aSixup)
-			Sixup.Reset();
-	}
+	CSkin::SSkinTextures m_OriginalRenderSkin;
+	CSkin::SSkinTextures m_ColorableRenderSkin;
 
-	void Apply(const CSkin *pSkin)
-	{
-		m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-		m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-		m_BloodColor = pSkin->m_BloodColor;
-		m_SkinMetrics = pSkin->m_Metrics;
-	}
-
-	void ApplySkin(const CTeeRenderInfo &TeeRenderInfo)
-	{
-		m_OriginalRenderSkin = TeeRenderInfo.m_OriginalRenderSkin;
-		m_ColorableRenderSkin = TeeRenderInfo.m_ColorableRenderSkin;
-		m_BloodColor = TeeRenderInfo.m_BloodColor;
-		m_SkinMetrics = TeeRenderInfo.m_SkinMetrics;
-	}
-
-	void ApplyColors(bool CustomColoredSkin, int ColorBody, int ColorFeet)
-	{
-		m_CustomColoredSkin = CustomColoredSkin;
-		if(CustomColoredSkin)
-		{
-			m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(ColorBody).UnclampLighting(ColorHSLA::DARKEST_LGT));
-			m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(ColorFeet).UnclampLighting(ColorHSLA::DARKEST_LGT));
-		}
-		else
-		{
-			m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-			m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-		}
-	}
-
-	CSkin::CSkinTextures m_OriginalRenderSkin;
-	CSkin::CSkinTextures m_ColorableRenderSkin;
-
-	CSkin::CSkinMetrics m_SkinMetrics;
+	CSkin::SSkinMetrics m_SkinMetrics;
 
 	bool m_CustomColoredSkin;
 	ColorRGBA m_BloodColor;
@@ -129,115 +33,109 @@ public:
 	ColorRGBA m_ColorBody;
 	ColorRGBA m_ColorFeet;
 	float m_Size;
-	bool m_GotAirJump;
-	int m_TeeRenderFlags;
-	bool m_FeetFlipped;
-
-	bool Valid() const
-	{
-		return m_CustomColoredSkin ? m_ColorableRenderSkin.m_Body.IsValid() : m_OriginalRenderSkin.m_Body.IsValid();
-	}
-
-	class CSixup
-	{
-	public:
-		void Reset()
-		{
-			for(auto &Texture : m_aOriginalTextures)
-			{
-				Texture.Invalidate();
-			}
-			for(auto &Texture : m_aColorableTextures)
-			{
-				Texture.Invalidate();
-			}
-			std::fill(std::begin(m_aUseCustomColors), std::end(m_aUseCustomColors), false);
-			std::fill(std::begin(m_aColors), std::end(m_aColors), ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
-			m_BloodColor = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-			m_HatTexture.Invalidate();
-			m_BotTexture.Invalidate();
-			m_HatSpriteIndex = 0;
-			m_BotColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
-		}
-
-		IGraphics::CTextureHandle m_aOriginalTextures[protocol7::NUM_SKINPARTS];
-		IGraphics::CTextureHandle m_aColorableTextures[protocol7::NUM_SKINPARTS];
-		bool m_aUseCustomColors[protocol7::NUM_SKINPARTS];
-		ColorRGBA m_aColors[protocol7::NUM_SKINPARTS];
-		ColorRGBA m_BloodColor;
-		IGraphics::CTextureHandle m_HatTexture;
-		IGraphics::CTextureHandle m_BotTexture;
-		int m_HatSpriteIndex;
-		ColorRGBA m_BotColor;
-
-		const IGraphics::CTextureHandle &PartTexture(int Part) const
-		{
-			return (m_aUseCustomColors[Part] ? m_aColorableTextures : m_aOriginalTextures)[Part];
-		}
-	};
-
-	CSixup m_aSixup[NUM_DUMMIES];
+	int m_GotAirJump;
+	int m_ShineDecoration;
 };
 
-class CManagedTeeRenderInfo
-{
-	friend class CGameClient;
-	CTeeRenderInfo m_TeeRenderInfo;
-	CSkinDescriptor m_SkinDescriptor;
-	std::function<void()> m_RefreshCallback = nullptr;
-
-public:
-	CManagedTeeRenderInfo(const CTeeRenderInfo &TeeRenderInfo, const CSkinDescriptor &SkinDescriptor) :
-		m_TeeRenderInfo(TeeRenderInfo),
-		m_SkinDescriptor(SkinDescriptor)
-	{
-	}
-
-	CTeeRenderInfo &TeeRenderInfo() { return m_TeeRenderInfo; }
-	const CTeeRenderInfo &TeeRenderInfo() const { return m_TeeRenderInfo; }
-	const CSkinDescriptor &SkinDescriptor() const { return m_SkinDescriptor; }
-	void SetRefreshCallback(const std::function<void()> &RefreshCallback) { m_RefreshCallback = RefreshCallback; }
-};
-
-// Tee Render Flags
+// sprite renderings
 enum
 {
-	TEE_EFFECT_FROZEN = 1,
-	TEE_NO_WEAPON = 2,
-	TEE_EFFECT_SPARKLE = 4,
+	SPRITE_FLAG_FLIP_Y = 1,
+	SPRITE_FLAG_FLIP_X = 2,
+
+	LAYERRENDERFLAG_OPAQUE = 1,
+	LAYERRENDERFLAG_TRANSPARENT = 2,
+
+	TILERENDERFLAG_EXTEND = 4,
 };
+
+typedef void (*ENVELOPE_EVAL)(int TimeOffsetMillis, int Env, float *pChannels, void *pUser);
 
 class CRenderTools
 {
-	class IGraphics *m_pGraphics;
-	class ITextRender *m_pTextRender;
-
 	int m_TeeQuadContainerIndex;
 
-	static void GetRenderTeeBodyScale(float BaseSize, float &BodyScale);
-	static void GetRenderTeeFeetScale(float BaseSize, float &FeetScaleWidth, float &FeetScaleHeight);
-
-	void RenderTee6(const CAnimState *pAnim, const CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, float Alpha = 1.0f) const;
-	void RenderTee7(const CAnimState *pAnim, const CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, float Alpha = 1.0f) const;
+	void GetRenderTeeAnimScaleAndBaseSize(class CAnimState *pAnim, CTeeRenderInfo *pInfo, float &AnimScale, float &BaseSize);
+	void GetRenderTeeBodyScale(float BaseSize, float &BodyScale);
+	void GetRenderTeeFeetScale(float BaseSize, float &FeetScaleWidth, float &FeetScaleHeight);
 
 public:
+	class IGraphics *m_pGraphics;
+	class CUI *m_pUI;
+	class CGameClient *m_pGameClient;
+
 	class IGraphics *Graphics() const { return m_pGraphics; }
-	class ITextRender *TextRender() const { return m_pTextRender; }
+	class CUI *UI() const { return m_pUI; }
+	class CGameClient *GameClient() const { return m_pGameClient; }
 
-	void Init(class IGraphics *pGraphics, class ITextRender *pTextRender);
+	void Init(class IGraphics *pGraphics, class CUI *pUI, class CGameClient *pGameClient);
 
-	void RenderCursor(vec2 Center, float Size) const;
-	void RenderIcon(int ImageId, int SpriteId, const CUIRect *pRect, const ColorRGBA *pColor = nullptr) const;
+	//typedef struct SPRITE;
+
+	void SelectSprite(struct CDataSprite *pSprite, int Flags = 0, int sx = 0, int sy = 0);
+	void SelectSprite(int id, int Flags = 0, int sx = 0, int sy = 0);
+
+	void GetSpriteScale(client_data7::CDataSprite *pSprite, float &ScaleX, float &ScaleY);
+	void GetSpriteScale(struct CDataSprite *pSprite, float &ScaleX, float &ScaleY);
+	void GetSpriteScale(int id, float &ScaleX, float &ScaleY);
+	void GetSpriteScaleImpl(int Width, int Height, float &ScaleX, float &ScaleY);
+
+	void DrawSprite(float x, float y, float size);
+	void DrawSprite(float x, float y, float ScaledWidth, float ScaledHeight);
+	int QuadContainerAddSprite(int QuadContainerIndex, float x, float y, float size);
+	int QuadContainerAddSprite(int QuadContainerIndex, float size);
+	int QuadContainerAddSprite(int QuadContainerIndex, float Width, float Height);
+	int QuadContainerAddSprite(int QuadContainerIndex, float X, float Y, float Width, float Height);
+
+	// rects
+	void DrawRoundRect(float x, float y, float w, float h, float r);
+	void DrawRoundRectExt(float x, float y, float w, float h, float r, int Corners);
+	void DrawRoundRectExt4(float x, float y, float w, float h, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, float r, int Corners);
+
+	int CreateRoundRectQuadContainer(float x, float y, float w, float h, float r, int Corners);
+
+	void DrawUIElRect(CUIElement::SUIElementRect &ElUIRect, const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding);
+
+	void DrawUIRect(const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding);
+	void DrawUIRect4(const CUIRect *pRect, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, int Corners, float Rounding);
+	void DrawUIRect4NoRounding(const CUIRect *pRect, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight);
+
+	void DrawCircle(float x, float y, float r, int Segments);
 
 	// larger rendering methods
-	static void GetRenderTeeBodySize(const CAnimState *pAnim, const CTeeRenderInfo *pInfo, vec2 &BodyOffset, float &Width, float &Height);
-	static void GetRenderTeeFeetSize(const CAnimState *pAnim, const CTeeRenderInfo *pInfo, vec2 &FeetOffset, float &Width, float &Height);
-	static void GetRenderTeeAnimScaleAndBaseSize(const CTeeRenderInfo *pInfo, float &AnimScale, float &BaseSize);
+	void GetRenderTeeBodySize(class CAnimState *pAnim, CTeeRenderInfo *pInfo, vec2 &BodyOffset, float &Width, float &Height);
+	void GetRenderTeeFeetSize(class CAnimState *pAnim, CTeeRenderInfo *pInfo, vec2 &FeetOffset, float &Width, float &Height);
 
 	// returns the offset to use, to render the tee with @see RenderTee exactly in the mid
-	static void GetRenderTeeOffsetToRenderedTee(const CAnimState *pAnim, const CTeeRenderInfo *pInfo, vec2 &TeeOffsetToMid);
-	// object render methods
-	void RenderTee(const CAnimState *pAnim, const CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, float Alpha = 1.0f) const;
+	void GetRenderTeeOffsetToRenderedTee(class CAnimState *pAnim, CTeeRenderInfo *pInfo, vec2 &TeeOffsetToMid);
+	// object render methods (gc_render_obj.cpp)
+	void RenderTee(class CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, float Alpha = 1.0f);
+
+	// map render methods (gc_render_map.cpp)
+	static void RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Channels, int64_t TimeMicros, float *pResult);
+	void RenderQuads(CQuad *pQuads, int NumQuads, int Flags, ENVELOPE_EVAL pfnEval, void *pUser);
+	void ForceRenderQuads(CQuad *pQuads, int NumQuads, int Flags, ENVELOPE_EVAL pfnEval, void *pUser, float Alpha = 1.0f);
+	void RenderTilemap(CTile *pTiles, int w, int h, float Scale, ColorRGBA Color, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser, int ColorEnv, int ColorEnvOffset);
+
+	// render a rectangle made of IndexIn tiles, over a background made of IndexOut tiles
+	// the rectangle include all tiles in [RectX, RectX+RectW-1] x [RectY, RectY+RectH-1]
+	void RenderTileRectangle(int RectX, int RectY, int RectW, int RectH, unsigned char IndexIn, unsigned char IndexOut, float Scale, ColorRGBA Color, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser, int ColorEnv, int ColorEnvOffset);
+
+	// helpers
+	void CalcScreenParams(float Aspect, float Zoom, float *w, float *h);
+	void MapscreenToWorld(float CenterX, float CenterY, float ParallaxX, float ParallaxY,
+		float OffsetX, float OffsetY, float Aspect, float Zoom, float *pPoints);
+
+	// DDRace
+
+	void RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale, float Alpha = 1.0f);
+	void RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, float Scale, float Alpha = 1.0f);
+	void RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float Scale, float Alpha = 1.0f);
+	void RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale, float Alpha = 1.0f);
+	void RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
+	void RenderSpeedupmap(CSpeedupTile *pSpeedup, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
+	void RenderSwitchmap(CSwitchTile *pSwitch, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
+	void RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
 };
 
 #endif

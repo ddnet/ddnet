@@ -1,12 +1,8 @@
 #include "opengl_sl_program.h"
-
 #include "opengl_sl.h"
-
-#include <base/detect.h>
-#include <base/log.h>
 #include <base/system.h>
 
-#include <string>
+#include <base/detect.h>
 
 #if defined(BACKEND_AS_OPENGL_ES) || !defined(CONF_BACKEND_OPENGL_ES)
 
@@ -18,7 +14,7 @@
 
 void CGLSLProgram::CreateProgram()
 {
-	m_ProgramId = glCreateProgram();
+	m_ProgramID = glCreateProgram();
 }
 
 void CGLSLProgram::DeleteProgram()
@@ -26,75 +22,65 @@ void CGLSLProgram::DeleteProgram()
 	if(!m_IsLinked)
 		return;
 	m_IsLinked = false;
-	glDeleteProgram(m_ProgramId);
+	glDeleteProgram(m_ProgramID);
 }
 
-bool CGLSLProgram::AddShader(CGLSL *pShader) const
+bool CGLSLProgram::AddShader(CGLSL *pShader)
 {
 	if(pShader->IsLoaded())
 	{
-		glAttachShader(m_ProgramId, pShader->GetShaderId());
+		glAttachShader(m_ProgramID, pShader->GetShaderID());
 		return true;
 	}
 	return false;
 }
 
-void CGLSLProgram::DetachShader(CGLSL *pShader) const
+void CGLSLProgram::DetachShader(CGLSL *pShader)
 {
 	if(pShader->IsLoaded())
 	{
-		DetachShaderById(pShader->GetShaderId());
+		DetachShaderByID(pShader->GetShaderID());
 	}
 }
 
-void CGLSLProgram::DetachShaderById(TWGLuint ShaderId) const
+void CGLSLProgram::DetachShaderByID(TWGLuint ShaderID)
 {
-	glDetachShader(m_ProgramId, ShaderId);
+	glDetachShader(m_ProgramID, ShaderID);
 }
 
-bool CGLSLProgram::LinkProgram()
+void CGLSLProgram::LinkProgram()
 {
-	glLinkProgram(m_ProgramId);
-	TWGLint LinkStatus;
-	glGetProgramiv(m_ProgramId, GL_LINK_STATUS, &LinkStatus);
+	glLinkProgram(m_ProgramID);
+	int LinkStatus;
+	glGetProgramiv(m_ProgramID, GL_LINK_STATUS, &LinkStatus);
 	m_IsLinked = LinkStatus == GL_TRUE;
 	if(!m_IsLinked)
 	{
-		TWGLint LogLength = 0;
-		glGetProgramiv(m_ProgramId, GL_INFO_LOG_LENGTH, &LogLength);
-		if(LogLength > 0)
-		{
-			std::string Log(LogLength, '\0');
-			glGetProgramInfoLog(m_ProgramId, Log.size(), nullptr, &Log.front());
-			if(Log[Log.size() - 2] == '\n')
-			{
-				Log[Log.size() - 2] = '\0';
-			}
-			log_error("gfx/opengl/shader", "Failed to link shader program '%d'. The linker returned:\n%s", m_ProgramId, Log.c_str());
-		}
-		else
-		{
-			log_error("gfx/opengl/shader", "Failed to link shader program '%d'. The linker did not return an error.", m_ProgramId);
-		}
+		char sInfoLog[1024];
+		char sFinalMessage[1536];
+		int iLogLength;
+		glGetProgramInfoLog(m_ProgramID, 1024, &iLogLength, sInfoLog);
+		str_format(sFinalMessage, 1536, "Error! Shader program wasn't linked! The linker returned:\n\n%s", sInfoLog);
+		dbg_msg("glslprogram", "%s", sFinalMessage);
 	}
 
+	//detach all shaders attached to this program
 	DetachAllShaders();
-	return m_IsLinked;
 }
 
-void CGLSLProgram::DetachAllShaders() const
+void CGLSLProgram::DetachAllShaders()
 {
 	TWGLuint aShaders[100];
 	GLsizei ReturnedCount = 0;
 	while(true)
 	{
-		glGetAttachedShaders(m_ProgramId, 100, &ReturnedCount, aShaders);
+		glGetAttachedShaders(m_ProgramID, 100, &ReturnedCount, aShaders);
 
 		if(ReturnedCount > 0)
 		{
 			for(GLsizei i = 0; i < ReturnedCount; ++i)
 			{
-				DetachShaderById(aShaders[i]);
+				DetachShaderByID(aShaders[i]);
 			}
 		}
 
@@ -133,20 +119,20 @@ void CGLSLProgram::SetUniform(int Loc, const bool Value)
 	glUniform1i(Loc, (int)Value);
 }
 
-int CGLSLProgram::GetUniformLoc(const char *pName) const
+int CGLSLProgram::GetUniformLoc(const char *Name)
 {
-	return glGetUniformLocation(m_ProgramId, pName);
+	return glGetUniformLocation(m_ProgramID, Name);
 }
 
-void CGLSLProgram::UseProgram() const
+void CGLSLProgram::UseProgram()
 {
 	if(m_IsLinked)
-		glUseProgram(m_ProgramId);
+		glUseProgram(m_ProgramID);
 }
 
-TWGLuint CGLSLProgram::GetProgramId() const
+TWGLuint CGLSLProgram::GetProgramID()
 {
-	return m_ProgramId;
+	return m_ProgramID;
 }
 
 CGLSLProgram::CGLSLProgram()

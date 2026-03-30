@@ -3,23 +3,18 @@
 #ifndef GAME_SERVER_PLAYER_H
 #define GAME_SERVER_PLAYER_H
 
+#include "alloc.h"
+
+// this include should perhaps be removed
+#include "score.h"
 #include "teeinfo.h"
 
-#include <base/vmath.h>
-
-#include <engine/shared/protocol.h>
-
-#include <game/alloc.h>
-#include <game/server/save.h>
-
-#include <memory>
-#include <optional>
-
-class CCharacter;
-class CGameContext;
-class IServer;
-struct CNetObj_PlayerInput;
-struct CScorePlayerResult;
+enum
+{
+	WEAPON_GAME = -3, // team switching etc
+	WEAPON_SELF = -2, // console kill command
+	WEAPON_WORLD = -1, // death tiles etc
+};
 
 // player object
 class CPlayer
@@ -27,20 +22,17 @@ class CPlayer
 	MACRO_ALLOC_POOL_ID()
 
 public:
-	CPlayer(CGameContext *pGameServer, uint32_t UniqueClientId, int ClientId, int Team);
+	CPlayer(CGameContext *pGameServer, int ClientID, int Team);
 	~CPlayer();
 
 	void Reset();
 
 	void TryRespawn();
-
-	// mark respawning, with weak hook if WeakHook is true and strong otherwise
-	void Respawn(bool WeakHook = false);
+	void Respawn(bool WeakHook = false); // with WeakHook == true the character will be spawned after all calls of Tick from other Players
 	CCharacter *ForceSpawn(vec2 Pos); // required for loading savegames
 	void SetTeam(int Team, bool DoChatMsg = true);
 	int GetTeam() const { return m_Team; }
-	int GetCid() const { return m_ClientId; }
-	uint32_t GetUniqueCid() const { return m_UniqueClientId; }
+	int GetCID() const { return m_ClientID; }
 	int GetClientVersion() const;
 	bool SetTimerType(int TimerType);
 
@@ -52,14 +44,13 @@ public:
 	void Snap(int SnappingClient);
 	void FakeSnap();
 
-	void OnDirectInput(const CNetObj_PlayerInput *pNewInput);
-	void OnPredictedInput(const CNetObj_PlayerInput *pNewInput);
-	void OnPredictedEarlyInput(const CNetObj_PlayerInput *pNewInput);
+	void OnDirectInput(CNetObj_PlayerInput *NewInput);
+	void OnPredictedInput(CNetObj_PlayerInput *NewInput);
+	void OnPredictedEarlyInput(CNetObj_PlayerInput *NewInput);
 	void OnDisconnect();
 
-	void KillCharacter(int Weapon = WEAPON_GAME, bool SendKillMsg = true);
+	void KillCharacter(int Weapon = WEAPON_GAME);
 	CCharacter *GetCharacter();
-	const CCharacter *GetCharacter() const;
 
 	void SpectatePlayerName(const char *pName);
 
@@ -75,10 +66,8 @@ public:
 	// used for snapping to just update latency if the scoreboard is active
 	int m_aCurLatency[MAX_CLIENTS];
 
-	int m_SentSnaps = 0;
-
-	int SpectatorId() const { return m_SpectatorId; }
-	void SetSpectatorId(int Id);
+	// used for spectator mode
+	int m_SpectatorID;
 
 	bool m_IsReady;
 
@@ -93,9 +82,8 @@ public:
 	int m_LastSetSpectatorMode;
 	int m_LastChangeInfo;
 	int m_LastEmote;
-	int m_LastEmoteGlobal;
 	int m_LastKill;
-	int m_aLastCommands[4];
+	int m_LastCommands[4];
 	int m_LastCommandPos;
 	int m_LastWhisperTo;
 	int m_LastInvited;
@@ -106,9 +94,12 @@ public:
 
 	int m_DieTick;
 	int m_PreviousDieTick;
+	int m_Score;
 	int m_JoinTick;
+	bool m_ForceBalanced;
 	int m_LastActionTick;
 	int m_TeamChangeTick;
+	bool m_SentSemicolonTip;
 
 	// network latency calculations
 	struct
@@ -122,7 +113,6 @@ public:
 	} m_Latency;
 
 private:
-	const uint32_t m_UniqueClientId;
 	CCharacter *m_pCharacter;
 	int m_NumInputs;
 	CGameContext *m_pGameServer;
@@ -133,16 +123,12 @@ private:
 	//
 	bool m_Spawning;
 	bool m_WeakHookSpawn;
-	int m_ClientId;
+	int m_ClientID;
 	int m_Team;
-
-	// used for spectator mode
-	int m_SpectatorId;
 
 	int m_Paused;
 	int64_t m_ForcePauseTime;
 	int64_t m_LastPause;
-	bool m_Afk;
 
 	int m_DefEmote;
 	int m_OverrideEmote;
@@ -160,7 +146,7 @@ public:
 	enum
 	{
 		TIMERTYPE_DEFAULT = -1,
-		TIMERTYPE_GAMETIMER,
+		TIMERTYPE_GAMETIMER = 0,
 		TIMERTYPE_BROADCAST,
 		TIMERTYPE_GAMETIMER_AND_BROADCAST,
 		TIMERTYPE_SIXUP,
@@ -168,51 +154,32 @@ public:
 	};
 
 	bool m_DND;
-	bool m_Whispers;
 	int64_t m_FirstVoteTick;
 	char m_aTimeoutCode[64];
 
 	void ProcessPause();
 	int Pause(int State, bool Force);
 	int ForcePause(int Time);
-	int IsPaused() const;
-	bool CanSpec() const;
+	int IsPaused();
 
-	bool IsPlaying() const;
-	int64_t m_LastKickVote;
-	int64_t m_LastDDRaceTeamChange;
+	bool IsPlaying();
+	int64_t m_Last_KickVote;
+	int64_t m_Last_Team;
 	int m_ShowOthers;
 	bool m_ShowAll;
-	bool m_EnableSpectatorCount;
 	vec2 m_ShowDistance;
 	bool m_SpecTeam;
 	bool m_NinjaJetpack;
-
-	// camera info is used sparingly for converting aim target to absolute world coordinates
-	class CCameraInfo
-	{
-		friend class CPlayer;
-		bool m_HasCameraInfo;
-		float m_Zoom;
-		int m_Deadzone;
-		int m_FollowFactor;
-
-	public:
-		vec2 ConvertTargetToWorld(vec2 Position, vec2 Target) const;
-		void Write(const CNetMsg_Cl_CameraInfo *pMsg);
-		void Reset();
-	} m_CameraInfo;
+	bool m_Afk;
+	bool m_HasFinishScore;
 
 	int m_ChatScore;
 
 	bool m_Moderating;
 
+	bool AfkTimer(CNetObj_PlayerInput *pNewTarget); // returns true if kicked
 	void UpdatePlaytime();
-	void AfkTimer();
-	void SetAfk(bool Afk);
-	void SetInitialAfk(bool Afk);
-	bool IsAfk() const { return m_Afk; }
-
+	void AfkVoteTimer(CNetObj_PlayerInput *pNewTarget);
 	int64_t m_LastPlaytime;
 	int64_t m_LastEyeEmote;
 	int64_t m_LastBroadcast;
@@ -220,6 +187,12 @@ public:
 
 	CNetObj_PlayerInput *m_pLastTarget;
 	bool m_LastTargetInit;
+	/* 
+		afk timer's 1st warning after 50% of sv_max_afk_time
+		2nd warning after 90%
+		kick after reaching 100% of sv_max_afk_time
+	*/
+	bool m_SentAfkWarning[2];
 
 	bool m_EyeEmoteEnabled;
 	int m_TimerType;
@@ -229,20 +202,14 @@ public:
 	bool CanOverrideDefaultEmote() const;
 
 	bool m_FirstPacket;
-	int64_t m_LastSqlQuery;
+	int64_t m_LastSQLQuery;
 	void ProcessScoreResult(CScorePlayerResult &Result);
 	std::shared_ptr<CScorePlayerResult> m_ScoreQueryResult;
 	std::shared_ptr<CScorePlayerResult> m_ScoreFinishResult;
 	bool m_NotEligibleForFinish;
 	int64_t m_EligibleForFinishCheck;
 	bool m_VotedForPractice;
-	int m_SwapTargetsClientId; //Client ID of the swap target for the given player
-	bool m_BirthdayAnnounced;
-
-	int m_RescueMode;
-
-	CSaveTee m_LastTeleTee;
-	std::optional<CSaveTee> m_LastDeath;
+	int m_SwapTargetsClientID; //Client ID of the swap target for the given player
 };
 
 #endif

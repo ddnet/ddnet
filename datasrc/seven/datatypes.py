@@ -1,15 +1,10 @@
-def only(x):
-	if len(x) != 1:
-		raise ValueError
-	return list(x)[0]
-
 GlobalIdCounter = 0
-def GetId():
+def GetID():
 	global GlobalIdCounter
 	GlobalIdCounter += 1
 	return GlobalIdCounter
 def GetUID():
-	return f"x{int(GetId())}"
+	return "x%d"%GetID()
 
 def FixCasing(Str):
 	NewStr = ""
@@ -36,19 +31,19 @@ class BaseType:
 	def __init__(self, type_name):
 		self._type_name = type_name
 		self._target_name = "INVALID"
-		self._id = GetId() # this is used to remember what order the members have in structures etc
+		self._id = GetID() # this is used to remember what order the members have in structures etc
 
-	def Identifier(self):
+	def Identifyer(self):
 		return "x"+str(self._id)
 	def TargetName(self):
 		return self._target_name
 	def TypeName(self):
 		return self._type_name
-	def Id(self):
+	def ID(self):
 		return self._id
 
 	def EmitDeclaration(self, name):
-		return [f"{self.TypeName()} {FormatName(self.TypeName(), name)};"]
+		return ["%s %s;"%(self.TypeName(), FormatName(self.TypeName(), name))]
 	def EmitPreDefinition(self, target_name):
 		self._target_name = target_name
 		return []
@@ -65,12 +60,12 @@ class Struct(BaseType):
 		BaseType.__init__(self, type_name)
 	def Members(self):
 		def sorter(a):
-			return a.var.Id()
+			return a.var.ID()
 		m = []
-		for name, value in self.__dict__.items():
+		for name in self.__dict__:
 			if name[0] == "_":
 				continue
-			m += [MemberType(name, value)]
+			m += [MemberType(name, self.__dict__[name])]
 		m.sort(key = sorter)
 		return m
 
@@ -90,7 +85,7 @@ class Struct(BaseType):
 			lines += member.var.EmitPreDefinition(target_name+"."+member.name)
 		return lines
 	def EmitDefinition(self, _name):
-		lines = [f"/* {self.TargetName()} */ {{"]
+		lines = ["/* %s */ {" % self.TargetName()]
 		for member in self.Members():
 			lines += ["\t" + " ".join(member.var.EmitDefinition("")) + ","]
 		lines += ["}"]
@@ -103,32 +98,32 @@ class Array(BaseType):
 		self.items = []
 	def Add(self, instance):
 		if instance.TypeName() != self.type.TypeName():
-			raise ValueError("bah")
+			raise "bah"
 		self.items += [instance]
 	def EmitDeclaration(self, name):
-		return [f"int m_Num{FixCasing(name)};",
-			f"{self.TypeName()} *{FormatName('[]', name)};"]
+		return ["int m_Num%s;"%(FixCasing(name)),
+			"%s *%s;"%(self.TypeName(), FormatName("[]", name))]
 	def EmitPreDefinition(self, target_name):
 		BaseType.EmitPreDefinition(self, target_name)
 
 		lines = []
 		i = 0
 		for item in self.items:
-			lines += item.EmitPreDefinition(f"{self.Identifier()}[{int(i)}]")
+			lines += item.EmitPreDefinition("%s[%d]"%(self.Identifyer(), i))
 			i += 1
 
 		if self.items:
-			lines += [f"static {self.TypeName()} {self.Identifier()}[] = {{"]
+			lines += ["static %s %s[] = {"%(self.TypeName(), self.Identifyer())]
 			for item in self.items:
 				itemlines = item.EmitDefinition("")
 				lines += ["\t" + " ".join(itemlines).replace("\t", " ") + ","]
 			lines += ["};"]
 		else:
-			lines += [f"static {self.TypeName()} *{self.Identifier()} = nullptr;"]
+			lines += ["static %s *%s = 0;"%(self.TypeName(), self.Identifyer())]
 
 		return lines
 	def EmitDefinition(self, _name):
-		return [str(len(self.items))+","+self.Identifier()]
+		return [str(len(self.items))+","+self.Identifyer()]
 
 # Basic Types
 
@@ -139,7 +134,7 @@ class Int(BaseType):
 	def Set(self, value):
 		self.value = value
 	def EmitDefinition(self, _name):
-		return [f"{int(self.value)}"]
+		return ["%d"%self.value]
 		#return ["%d /* %s */"%(self.value, self._target_name)]
 
 class Float(BaseType):
@@ -149,7 +144,7 @@ class Float(BaseType):
 	def Set(self, value):
 		self.value = value
 	def EmitDefinition(self, _name):
-		return [f"{self.value:f}f"]
+		return ["%ff"%self.value]
 		#return ["%d /* %s */"%(self.value, self._target_name)]
 
 class String(BaseType):
@@ -163,7 +158,7 @@ class String(BaseType):
 
 class Pointer(BaseType):
 	def __init__(self, typ, target):
-		BaseType.__init__(self, f"{typ().TypeName()}*")
+		BaseType.__init__(self, "%s*"%typ().TypeName())
 		self.target = target
 	def Set(self, target):
 		self.target = target
@@ -191,7 +186,7 @@ def EmitTypeDeclaration(root):
 def EmitDefinition(root, name):
 	for l in root.EmitPreDefinition(name):
 		print(l)
-	print(f"static {root.TypeName()} {name} = ")
+	print("%s %s = " % (root.TypeName(), name))
 	for l in root.EmitDefinition(name):
 		print(l)
 	print(";")
@@ -215,54 +210,29 @@ class NetObject:
 	def __init__(self, name, variables):
 		l = name.split(":")
 		self.name = l[0]
-		self.base = None
-		self.base_struct_name = None
+		self.base = ""
 		if len(l) > 1:
 			self.base = l[1]
-			self.base_struct_name = f"CNetObj_{self.base}"
-		self.struct_name = f"CNetObj_{self.name}"
-		self.enum_name = f"NETOBJTYPE_{self.name.upper()}"
+		self.base_struct_name = "CNetObj_%s" % self.base
+		self.struct_name = "CNetObj_%s" % self.name
+		self.enum_name = "NETOBJTYPE_%s" % self.name.upper()
 		self.variables = variables
 	def emit_declaration(self):
-		if self.base is not None:
-			lines = [f"struct {self.struct_name} : public {self.base_struct_name}", "{"]
+		if self.base:
+			lines = ["struct %s : public %s"%(self.struct_name,self.base_struct_name), "{"]
 		else:
-			lines = [f"struct {self.struct_name}", "{"]
-		lines += ["\tusing is_sixup = char;"]
-		lines += [f"\tstatic constexpr int ms_MsgId = {self.enum_name};"]
+			lines = ["struct %s"%self.struct_name, "{"]
 		for v in self.variables:
 			lines += ["\t"+line for line in v.emit_declaration()]
 		lines += ["};"]
 		return lines
-	def members_from_this_and_parents(self, objects):
-		variables = self.variables
-		next_base_name = self.base
-		while next_base_name is not None:
-			base_item = only([i for i in objects if i.name == next_base_name])
-			variables = base_item.variables + variables
-			next_base_name = base_item.base
-		return variables
-	def emit_validate(self, objects):
-		lines = [f"case {self.enum_name}:"]
+	def emit_validate(self):
+		lines = ["case %s:" % self.enum_name]
 		lines += ["{"]
-		lines += [f"\t{self.struct_name} *pObj = ({self.struct_name} *)pData;"]
+		lines += ["\t%s *pObj = (%s *)pData;"%(self.struct_name, self.struct_name)]
 		lines += ["\tif(sizeof(*pObj) != Size) return -1;"]
-		variables = self.members_from_this_and_parents(objects)
-		for v in variables:
+		for v in self.variables:
 			lines += ["\t"+line for line in v.emit_validate()]
-		lines += ["\treturn 0;"]
-		lines += ["}"]
-		return lines
-	def emit_dump(self, objects):
-		lines = [f"case {self.enum_name}:"]
-		lines += ["{"]
-		lines += [f"\t{self.struct_name} *pObj = ({self.struct_name} *)pData;"]
-		lines += ["\tif(sizeof(*pObj) != Size) return -1;"]
-		variables = self.members_from_this_and_parents(objects)
-		offset = 0
-		for v in variables:
-			lines += ["\t"+line for line in v.emit_dump(offset)]
-			offset += 1
 		lines += ["\treturn 0;"]
 		lines += ["}"]
 		return lines
@@ -271,23 +241,21 @@ class NetObject:
 class NetEvent(NetObject):
 	def __init__(self, name, variables):
 		NetObject.__init__(self, name, variables)
-		if self.base is not None:
-			self.base_struct_name = f"CNetEvent_{self.base}"
-		self.struct_name = f"CNetEvent_{self.name}"
-		self.enum_name = f"NETEVENTTYPE_{self.name.upper()}"
+		self.base_struct_name = "CNetEvent_%s" % self.base
+		self.struct_name = "CNetEvent_%s" % self.name
+		self.enum_name = "NETEVENTTYPE_%s" % self.name.upper()
 
 class NetMessage(NetObject):
 	def __init__(self, name, variables):
 		NetObject.__init__(self, name, variables)
-		if self.base is not None:
-			self.base_struct_name = f"CNetMsg_{self.base}"
-		self.struct_name = f"CNetMsg_{self.name}"
-		self.enum_name = f"NETMSGTYPE_{self.name.upper()}"
+		self.base_struct_name = "CNetMsg_%s" % self.base
+		self.struct_name = "CNetMsg_%s" % self.name
+		self.enum_name = "NETMSGTYPE_%s" % self.name.upper()
 	def emit_unpack(self):
 		lines = []
-		lines += [f"case {self.enum_name}:"]
+		lines += ["case %s:" % self.enum_name]
 		lines += ["{"]
-		lines += [f"\t{self.struct_name} *pMsg = ({self.struct_name} *)m_aMsgData;"]
+		lines += ["\t%s *pMsg = (%s *)m_aMsgData;" % (self.struct_name, self.struct_name)]
 		lines += ["\t(void)pMsg;"]
 		for v in self.variables:
 			lines += ["\t"+line for line in v.emit_unpack()]
@@ -297,8 +265,10 @@ class NetMessage(NetObject):
 		return lines
 	def emit_declaration(self):
 		extra = []
+		extra += ["\tusing is_sixup = char;"]
+		extra += ["\tint MsgID() const { return %s; }" % self.enum_name]
 		extra += ["\t"]
-		extra += ["\tbool Pack(CMsgPacker *pPacker) const"]
+		extra += ["\tbool Pack(CMsgPacker *pPacker)"]
 		extra += ["\t{"]
 		#extra += ["\t\tmsg_pack_start(%s, flags);"%self.enum_name]
 		for v in self.variables:
@@ -326,37 +296,32 @@ class NetVariable:
 		return []
 	def emit_unpack_check(self):
 		return []
-	def emit_dump(self, offset):
-		return [f"str_format(aRawData, sizeof(aRawData), \"\\t\\t%3d %12d\\t%08x\", {offset}, ((const int *)pData)[{offset}], ((const int *)pData)[{offset}]);"]
 
 class NetString(NetVariable):
 	def emit_declaration(self):
-		return [f"const char *{self.name};"]
+		return ["const char *%s;"%self.name]
 	def emit_unpack(self):
-		return [f"pMsg->{self.name} = pUnpacker->GetString();"]
+		return ["pMsg->%s = pUnpacker->GetString();" % self.name]
 	def emit_pack(self):
-		return [f"pPacker->AddString({self.name}, -1);"]
+		return ["pPacker->AddString(%s, -1);" % self.name]
 
 class NetStringStrict(NetVariable):
 	def emit_declaration(self):
-		return [f"const char *{self.name};"]
+		return ["const char *%s;"%self.name]
 	def emit_unpack(self):
-		return [f"pMsg->{self.name} = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);"]
+		return ["pMsg->%s = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);" % self.name]
 	def emit_pack(self):
-		return [f"pPacker->AddString({self.name}, -1);"]
+		return ["pPacker->AddString(%s, -1);" % self.name]
 
 class NetIntAny(NetVariable):
 	def emit_declaration(self):
-		return [f"int {self.name};"]
+		return ["int %s;"%self.name]
 	def emit_unpack(self):
 		if self.default is None:
-			return [f"pMsg->{self.name} = pUnpacker->GetInt();"]
-		return [f"pMsg->{self.name} = pUnpacker->GetIntOrDefault({self.default});"]
+			return ["pMsg->%s = pUnpacker->GetInt();" % self.name]
+		return ["pMsg->%s = pUnpacker->GetIntOrDefault(%s);" % (self.name, self.default)]
 	def emit_pack(self):
-		return [f"pPacker->AddInt({self.name});"]
-	def emit_dump(self, offset):
-		return NetVariable(self.name).emit_dump(offset) + \
-			[f"dbg_msg(\"snapshot\", \"%s\\t{self.name}=%d\", aRawData, pObj->{self.name});"]
+		return ["pPacker->AddInt(%s);" % self.name]
 
 class NetIntRange(NetIntAny):
 	def __init__(self, name, min_val, max_val, default=None):
@@ -364,26 +329,9 @@ class NetIntRange(NetIntAny):
 		self.min = str(min_val)
 		self.max = str(max_val)
 	def emit_validate(self):
-		return [f"if(!CheckInt(\"{self.name}\", pObj->{self.name}, {self.min}, {self.max})) return -1;"]
+		return ["if(!CheckInt(\"%s\", pObj->%s, %s, %s)) return -1;"%(self.name, self.name, self.min, self.max)]
 	def emit_unpack_check(self):
-		return [f"if(!CheckInt(\"{self.name}\", pMsg->{self.name}, {self.min}, {self.max})) break;"]
-	def emit_dump(self, offset):
-		min_fmt=f"min={self.min}"
-		min_arg = ''
-		try:
-			int(self.min)
-		except ValueError:
-			min_fmt = f"min={self.min}(%d)"
-			min_arg = f", (int){self.min}"
-		max_fmt=f"max={self.max}"
-		max_arg = ''
-		try:
-			int(self.max)
-		except ValueError:
-			max_fmt = f"max={self.max}(%d)"
-			max_arg = f", (int){self.max}"
-		return NetVariable(self.name).emit_dump(offset) + \
-			[f"dbg_msg(\"snapshot\", \"%s\\t{self.name}=%d ({min_fmt} {max_fmt})\", aRawData, pObj->{self.name}{min_arg}{max_arg});"]
+		return ["if(!CheckInt(\"%s\", pMsg->%s, %s, %s)) break;"%(self.name, self.name, self.min, self.max)]
 
 class NetEnum(NetIntRange):
 	def __init__(self, name, enum):
@@ -393,18 +341,15 @@ class NetFlag(NetIntAny):
 	def __init__(self, name, flag):
 		NetIntAny.__init__(self, name)
 		if len(flag.values) > 0:
-			self.mask = f"{flag.name}_{flag.values[0]}"
+			self.mask = "%s_%s" % (flag.name, flag.values[0])
 			for i in flag.values[1:]:
-				self.mask += f"|{flag.name}_{i}"
+				self.mask += "|%s_%s" % (flag.name, i)
 		else:
 			self.mask = "0"
 	def emit_validate(self):
-		return [f"if(!CheckFlag(\"{self.name}\", pObj->{self.name}, {self.mask})) return -1;"]
+		return ["if(!CheckFlag(\"%s\", pObj->%s, %s)) return -1;"%(self.name, self.name, self.mask)]
 	def emit_unpack_check(self):
-		return [f"if(!CheckFlag(\"{self.name}\", pMsg->{self.name}, {self.mask})) break;"]
-	def emit_dump(self, offset):
-		return NetVariable(self.name).emit_dump(offset) + \
-			[f"dbg_msg(\"snapshot\", \"%s\\t{self.name}=%d (mask=%d)\", aRawData, pObj->{self.name}, {self.mask});"]
+		return ["if(!CheckFlag(\"%s\", pMsg->%s, %s)) break;"%(self.name, self.name, self.mask)]
 
 class NetBool(NetIntRange):
 	def __init__(self, name, default=None):
@@ -421,31 +366,31 @@ class NetArray(NetVariable):
 		self.base_name = var.name
 		self.var = var
 		self.size = size
-		self.name = self.base_name + f"[{int(self.size)}]"
+		self.name = self.base_name + "[%d]"%self.size
 	def emit_declaration(self):
 		self.var.name = self.name
 		return self.var.emit_declaration()
 	def emit_validate(self):
 		lines = []
 		for i in range(self.size):
-			self.var.name = self.base_name + f"[{int(i)}]"
+			self.var.name = self.base_name + "[%d]"%i
 			lines += self.var.emit_validate()
 		return lines
 	def emit_unpack(self):
 		lines = []
 		for i in range(self.size):
-			self.var.name = self.base_name + f"[{int(i)}]"
+			self.var.name = self.base_name + "[%d]"%i
 			lines += self.var.emit_unpack()
 		return lines
 	def emit_pack(self):
 		lines = []
 		for i in range(self.size):
-			self.var.name = self.base_name + f"[{int(i)}]"
+			self.var.name = self.base_name + "[%d]"%i
 			lines += self.var.emit_pack()
 		return lines
 	def emit_unpack_check(self):
 		lines = []
 		for i in range(self.size):
-			self.var.name = self.base_name + f"[{int(i)}]"
+			self.var.name = self.base_name + "[%d]"%i
 			lines += self.var.emit_unpack_check()
 		return lines

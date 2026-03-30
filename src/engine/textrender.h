@@ -5,41 +5,21 @@
 #include "kernel.h"
 
 #include <base/color.h>
-
 #include <engine/graphics.h>
-
-#include <cstdint>
-#include <memory>
+#include <stdint.h>
 
 enum
 {
-	TEXTFLAG_RENDER = 1 << 0,
-	TEXTFLAG_DISALLOW_NEWLINE = 1 << 1,
-	TEXTFLAG_STOP_AT_END = 1 << 2,
-	TEXTFLAG_ELLIPSIS_AT_END = 1 << 3,
+	TEXTFLAG_RENDER = 1,
+	TEXTFLAG_ALLOW_NEWLINE = 2,
+	TEXTFLAG_STOP_AT_END = 4
 };
 
 enum ETextAlignment
 {
-	TEXTALIGN_LEFT = 0,
+	TEXTALIGN_LEFT = 1 << 0,
 	TEXTALIGN_CENTER = 1 << 1,
 	TEXTALIGN_RIGHT = 1 << 2,
-	TEXTALIGN_TOP = 0, // this is also 0, so the default alignment is top-left
-	TEXTALIGN_MIDDLE = 1 << 3,
-	TEXTALIGN_BOTTOM = 1 << 4,
-
-	TEXTALIGN_TL = TEXTALIGN_TOP | TEXTALIGN_LEFT,
-	TEXTALIGN_TC = TEXTALIGN_TOP | TEXTALIGN_CENTER,
-	TEXTALIGN_TR = TEXTALIGN_TOP | TEXTALIGN_RIGHT,
-	TEXTALIGN_ML = TEXTALIGN_MIDDLE | TEXTALIGN_LEFT,
-	TEXTALIGN_MC = TEXTALIGN_MIDDLE | TEXTALIGN_CENTER,
-	TEXTALIGN_MR = TEXTALIGN_MIDDLE | TEXTALIGN_RIGHT,
-	TEXTALIGN_BL = TEXTALIGN_BOTTOM | TEXTALIGN_LEFT,
-	TEXTALIGN_BC = TEXTALIGN_BOTTOM | TEXTALIGN_CENTER,
-	TEXTALIGN_BR = TEXTALIGN_BOTTOM | TEXTALIGN_RIGHT,
-
-	TEXTALIGN_MASK_HORIZONTAL = TEXTALIGN_LEFT | TEXTALIGN_CENTER | TEXTALIGN_RIGHT,
-	TEXTALIGN_MASK_VERTICAL = TEXTALIGN_TOP | TEXTALIGN_MIDDLE | TEXTALIGN_BOTTOM,
 };
 
 enum ETextRenderFlags
@@ -47,7 +27,7 @@ enum ETextRenderFlags
 	TEXT_RENDER_FLAG_NO_X_BEARING = 1 << 0,
 	TEXT_RENDER_FLAG_NO_Y_BEARING = 1 << 1,
 	TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH = 1 << 2,
-	TEXT_RENDER_FLAG_NO_PIXEL_ALIGNMENT = 1 << 3,
+	TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT = 1 << 3,
 	TEXT_RENDER_FLAG_KERNING = 1 << 4,
 	TEXT_RENDER_FLAG_NO_OVERSIZE = 1 << 5,
 	TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING = 1 << 6,
@@ -57,11 +37,12 @@ enum ETextRenderFlags
 	TEXT_RENDER_FLAG_ONE_TIME_USE = 1 << 9,
 };
 
-enum class EFontPreset
+enum
 {
-	DEFAULT_FONT,
-	ICON_FONT,
+	TEXT_FONT_ICON_FONT = 0,
 };
+
+class CFont;
 
 enum ETextCursorSelectionMode
 {
@@ -83,176 +64,149 @@ enum ETextCursorCursorMode
 	TEXT_CURSOR_CURSOR_MODE_SET,
 };
 
-struct STextBoundingBox
-{
-	float m_X;
-	float m_Y;
-	float m_W;
-	float m_H;
-
-	float Right() const { return m_X + m_W; }
-	float Bottom() const { return m_Y + m_H; }
-	vec2 Size() const { return vec2(m_W, m_H); }
-	void MoveBy(vec2 Offset)
-	{
-		m_X += Offset.x;
-		m_Y += Offset.y;
-	}
-};
-
-// Allow to render multi colored text in one go without having to call TextEx() multiple times.
-// Needed to allow multi colored multi line texts
-struct STextColorSplit
-{
-	int m_CharIndex; // Which index within the text should the split occur
-	int m_Length; // How long is the split
-	ColorRGBA m_Color; // The color the text should be starting from m_CharIndex
-
-	STextColorSplit(int CharIndex, int Length, const ColorRGBA &Color) :
-		m_CharIndex(CharIndex), m_Length(Length), m_Color(Color) {}
-};
-
 class CTextCursor
 {
 public:
-	int m_Flags = TEXTFLAG_RENDER;
-	int m_LineCount = 1;
-	int m_GlyphCount = 0;
-	int m_CharCount = 0;
-	int m_MaxLines = 0;
+	int m_Flags;
+	int m_LineCount;
+	int m_GlyphCount;
+	int m_CharCount;
+	int m_MaxLines;
 
-	float m_StartX = 0.0f;
-	float m_StartY = 0.0f;
-	float m_LineWidth = -1.0f;
-	float m_X = 0.0f;
-	float m_Y = 0.0f;
-	float m_MaxCharacterHeight = 0.0f;
-	float m_LongestLineWidth = 0.0f;
+	float m_StartX;
+	float m_StartY;
+	float m_LineWidth;
+	float m_X, m_Y;
+	float m_MaxCharacterHeight;
 
-	float m_FontSize = 0.0f;
-	float m_AlignedFontSize = 0.0f;
-	float m_LineSpacing = 0.0f;
-	float m_AlignedLineSpacing = 0.0f;
+	float m_LongestLineWidth;
 
-	ETextCursorSelectionMode m_CalculateSelectionMode = TEXT_CURSOR_SELECTION_MODE_NONE;
-	float m_SelectionHeightFactor = 1.0f;
+	CFont *m_pFont;
+	float m_FontSize;
+	float m_AlignedFontSize;
 
-	// these coordinates are respected if selection mode is set to calculate @see ETextCursorSelectionMode
-	vec2 m_PressMouse = vec2(0.0f, 0.0f);
-	// these coordinates are respected if selection/cursor mode is set to calculate @see ETextCursorSelectionMode / @see ETextCursorCursorMode
-	vec2 m_ReleaseMouse = vec2(0.0f, 0.0f);
+	ETextCursorSelectionMode m_CalculateSelectionMode;
+
+	// these coordinates are repsected if selection mode is set to calculate @see ETextCursorSelectionMode
+	int m_PressMouseX;
+	int m_PressMouseY;
+	// these coordinates are repsected if selection/cursor mode is set to calculate @see ETextCursorSelectionMode / @see ETextCursorCursorMode
+	int m_ReleaseMouseX;
+	int m_ReleaseMouseY;
 
 	// note m_SelectionStart can be bigger than m_SelectionEnd, depending on how the mouse cursor was dragged
 	// also note, that these are the character offsets decoded
-	int m_SelectionStart = 0;
-	int m_SelectionEnd = 0;
+	int m_SelectionStart;
+	int m_SelectionEnd;
 
-	ETextCursorCursorMode m_CursorMode = TEXT_CURSOR_CURSOR_MODE_NONE;
-	bool m_ForceCursorRendering = false;
+	ETextCursorCursorMode m_CursorMode;
 	// note this is the decoded character offset
-	int m_CursorCharacter = -1;
-	vec2 m_CursorRenderedPosition = vec2(-1.0f, -1.0f);
-
-	/**
-	 * Whether the text was truncated with @link TEXTFLAG_STOP_AT_END @endlink or @link TEXTFLAG_ELLIPSIS_AT_END @endlink being set.
-	 */
-	bool m_Truncated = false;
-
-	// Color splits of the cursor to allow multicolored text
-	std::vector<STextColorSplit> m_vColorSplits;
-
-	float Height() const;
-	STextBoundingBox BoundingBox() const;
-	void SetPosition(vec2 Position);
+	int m_CursorCharacter;
 };
 
-struct STextContainerUsages
+struct STextRenderColor
 {
-	int m_Dummy = 0;
-};
+	STextRenderColor() {}
+	STextRenderColor(float r, float g, float b, float a)
+	{
+		Set(r, g, b, a);
+	}
+	STextRenderColor(const ColorRGBA &TextColorRGBA)
+	{
+		Set(TextColorRGBA.r, TextColorRGBA.g, TextColorRGBA.b, TextColorRGBA.a);
+	}
 
-struct STextContainerIndex
-{
-	int m_Index;
-	std::shared_ptr<STextContainerUsages> m_UseCount =
-		std::make_shared<STextContainerUsages>(STextContainerUsages());
+	void Set(float r, float g, float b, float a)
+	{
+		m_R = r;
+		m_G = g;
+		m_B = b;
+		m_A = a;
+	}
 
-	STextContainerIndex() { Reset(); }
-	bool Valid() const { return m_Index >= 0; }
-	void Reset() { m_Index = -1; }
-};
+	bool operator!=(const STextRenderColor &Other)
+	{
+		return m_R != Other.m_R || m_G != Other.m_G || m_B != Other.m_B || m_A != Other.m_A;
+	}
 
-struct STextSizeProperties
-{
-	float *m_pHeight = nullptr;
-	float *m_pAlignedFontSize = nullptr;
-	float *m_pMaxCharacterHeightInLine = nullptr;
-	int *m_pLineCount = nullptr;
+	operator ColorRGBA()
+	{
+		return ColorRGBA(m_R, m_G, m_B, m_A);
+	}
+
+	float m_R, m_G, m_B, m_A;
 };
 
 class ITextRender : public IInterface
 {
-	MACRO_INTERFACE("textrender")
+	MACRO_INTERFACE("textrender", 0)
 public:
-	virtual bool LoadFonts() = 0;
-	virtual void SetFontPreset(EFontPreset FontPreset) = 0;
-	virtual void SetFontLanguageVariant(const char *pLanguageFile) = 0;
+	virtual void SetCursor(CTextCursor *pCursor, float x, float y, float FontSize, int Flags) = 0;
+	virtual void MoveCursor(CTextCursor *pCursor, float x, float y) = 0;
+	virtual void SetCursorPosition(CTextCursor *pCursor, float x, float y) = 0;
 
-	virtual void SetRenderFlags(unsigned Flags) = 0;
-	virtual unsigned GetRenderFlags() const = 0;
+	virtual CFont *LoadFont(const char *pFilename, const unsigned char *pBuf, size_t Size) = 0;
+	virtual bool LoadFallbackFont(CFont *pFont, const char *pFilename, const unsigned char *pBuf, size_t Size) = 0;
+	virtual CFont *GetFont(int FontIndex) = 0;
+	virtual CFont *GetFont(const char *pFilename) = 0;
 
-	ColorRGBA DefaultTextColor() const { return ColorRGBA(1, 1, 1, 1); }
-	ColorRGBA DefaultTextOutlineColor() const { return ColorRGBA(0, 0, 0, 0.3f); }
-	ColorRGBA DefaultTextSelectionColor() const { return ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f); }
+	virtual void SetDefaultFont(CFont *pFont) = 0;
+	virtual void SetCurFont(CFont *pFont) = 0;
+
+	virtual void SetRenderFlags(unsigned int Flags) = 0;
+	virtual unsigned int GetRenderFlags() = 0;
+
+	ColorRGBA DefaultTextColor() { return ColorRGBA(1, 1, 1, 1); }
+	ColorRGBA DefaultTextOutlineColor() { return ColorRGBA(0, 0, 0, 0.3f); }
+	ColorRGBA DefaultSelectionColor() { return ColorRGBA(0, 0, 1.0f, 1.0f); }
 
 	//
-	virtual void TextEx(CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
-	virtual bool CreateTextContainer(STextContainerIndex &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
-	virtual void AppendTextContainer(STextContainerIndex TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
-	// either creates a new text container or appends to a existing one
-	virtual bool CreateOrAppendTextContainer(STextContainerIndex &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
+	virtual void TextEx(CTextCursor *pCursor, const char *pText, int Length) = 0;
+	virtual int CreateTextContainer(CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
+	virtual void AppendTextContainer(CTextCursor *pCursor, int TextContainerIndex, const char *pText, int Length = -1) = 0;
 	// just deletes and creates text container
-	virtual void RecreateTextContainer(STextContainerIndex &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
-	virtual void RecreateTextContainerSoft(STextContainerIndex &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
-	virtual void DeleteTextContainer(STextContainerIndex &TextContainerIndex) = 0;
+	virtual void RecreateTextContainer(CTextCursor *pCursor, int TextContainerIndex, const char *pText, int Length = -1) = 0;
+	virtual void RecreateTextContainerSoft(CTextCursor *pCursor, int TextContainerIndex, const char *pText, int Length = -1) = 0;
+	virtual void DeleteTextContainer(int TextContainerIndex) = 0;
 
-	virtual void UploadTextContainer(STextContainerIndex TextContainerIndex) = 0;
+	virtual void UploadTextContainer(int TextContainerIndex) = 0;
 
-	virtual void RenderTextContainer(STextContainerIndex TextContainerIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor) = 0;
-	virtual void RenderTextContainer(STextContainerIndex TextContainerIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor, float X, float Y) = 0;
+	virtual void RenderTextContainer(int TextContainerIndex, STextRenderColor *pTextColor, STextRenderColor *pTextOutlineColor) = 0;
+	virtual void RenderTextContainer(int TextContainerIndex, STextRenderColor *pTextColor, STextRenderColor *pTextOutlineColor, float X, float Y) = 0;
 
-	virtual STextBoundingBox GetBoundingBoxTextContainer(STextContainerIndex TextContainerIndex) = 0;
+	virtual void UploadEntityLayerText(void *pTexBuff, int ImageColorChannelCount, int TexWidth, int TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontHeight) = 0;
+	virtual int AdjustFontSize(const char *pText, int TextLength, int MaxSize, int MaxWidth) = 0;
+	virtual int CalculateTextWidth(const char *pText, int TextLength, int FontWidth, int FontHeight) = 0;
 
-	virtual void UploadEntityLayerText(const CImageInfo &TextImage, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize) = 0;
-	virtual int AdjustFontSize(const char *pText, int TextLength, int MaxSize, int MaxWidth) const = 0;
-	virtual float GetGlyphOffsetX(int FontSize, char TextCharacter) const = 0;
-	virtual int CalculateTextWidth(const char *pText, int TextLength, int FontWidth, int FontSize) const = 0;
+	virtual bool SelectionToUTF8OffSets(const char *pText, int SelStart, int SelEnd, int &OffUTF8Start, int &OffUTF8End) = 0;
+	virtual bool UTF8OffToDecodedOff(const char *pText, int UTF8Off, int &DecodedOff) = 0;
+	virtual bool DecodedOffToUTF8Off(const char *pText, int DecodedOff, int &UTF8Off) = 0;
 
 	// old foolish interface
 	virtual void TextColor(float r, float g, float b, float a) = 0;
-	virtual void TextColor(ColorRGBA Color) = 0;
+	virtual void TextColor(ColorRGBA rgb) = 0;
 	virtual void TextOutlineColor(float r, float g, float b, float a) = 0;
-	virtual void TextOutlineColor(ColorRGBA Color) = 0;
+	virtual void TextOutlineColor(ColorRGBA rgb) = 0;
 	virtual void TextSelectionColor(float r, float g, float b, float a) = 0;
-	virtual void TextSelectionColor(ColorRGBA Color) = 0;
-	virtual void Text(float x, float y, float Size, const char *pText, float LineWidth = -1.0f) = 0;
-	virtual float TextWidth(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0, const STextSizeProperties &TextSizeProps = {}) = 0;
-	virtual STextBoundingBox TextBoundingBox(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, float LineSpacing = 0.0f, int Flags = 0) = 0;
+	virtual void TextSelectionColor(ColorRGBA rgb) = 0;
+	virtual void Text(void *pFontSetV, float x, float y, float Size, const char *pText, float LineWidth) = 0;
+	virtual float TextWidth(void *pFontSetV, float Size, const char *pText, int StrLength, float LineWidth, float *pAlignedHeight = NULL, float *pMaxCharacterHeightInLine = NULL) = 0;
+	virtual int TextLineCount(void *pFontSetV, float Size, const char *pText, float LineWidth) = 0;
 
-	virtual ColorRGBA GetTextColor() const = 0;
-	virtual ColorRGBA GetTextOutlineColor() const = 0;
-	virtual ColorRGBA GetTextSelectionColor() const = 0;
+	virtual ColorRGBA GetTextColor() = 0;
+	virtual ColorRGBA GetTextOutlineColor() = 0;
+	virtual ColorRGBA GetTextSelectionColor() = 0;
 
-	virtual void OnPreWindowResize() = 0;
 	virtual void OnWindowResize() = 0;
+
+	virtual float GetGlyphOffsetX(int FontSize, char TextCharacter) = 0;
 };
 
 class IEngineTextRender : public ITextRender
 {
-	MACRO_INTERFACE("enginetextrender")
+	MACRO_INTERFACE("enginetextrender", 0)
 public:
 	virtual void Init() = 0;
-	void Shutdown() override = 0;
 };
 
 extern IEngineTextRender *CreateEngineTextRender();

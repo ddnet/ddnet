@@ -1,15 +1,12 @@
 #if defined(CONF_WEBSOCKETS)
 
-#include "websockets.h"
+#include <map>
+#include <stdlib.h>
+#include <string>
 
-#include <base/log.h>
-#include <base/system.h>
-
-#include <engine/shared/config.h>
-#include <engine/shared/network.h>
-#include <engine/shared/protocol.h>
-#include <engine/shared/ringbuffer.h>
-
+#include "base/system.h"
+#include "protocol.h"
+#include "ringbuffer.h"
 #if defined(CONF_FAMILY_UNIX)
 #include <arpa/inet.h>
 #elif defined(CONF_FAMILY_WINDOWS)
@@ -17,365 +14,275 @@
 #endif
 #include <libwebsockets.h>
 
-#include <cstdlib>
-#include <map>
-#include <string>
+#include "websockets.h"
 
-struct websocket_chunk
-{
-	size_t size;
-	size_t read;
-	NETADDR addr;
-	unsigned char data[0];
-};
+// not sure why would anyone need more than one but well...
+#define WS_CONTEXTS 4
+// ddnet client opens two connections for whatever reason
+#define WS_CLIENTS (MAX_CLIENTS * 2)
 
-// Client opens two connections for whatever reason
-typedef CStaticRingBuffer<websocket_chunk, (MAX_CLIENTS * 2) * NET_CONN_BUFFERSIZE,
+typedef CStaticRingBuffer<unsigned char, WS_CLIENTS * 4 * 1024,
 	CRingBufferBase::FLAG_RECYCLE>
 	TRecvBuffer;
-typedef CStaticRingBuffer<websocket_chunk, NET_CONN_BUFFERSIZE,
+typedef CStaticRingBuffer<unsigned char, 4 * 1024,
 	CRingBufferBase::FLAG_RECYCLE>
 	TSendBuffer;
 
+typedef struct
+{
+	size_t size;
+	size_t read;
+	sockaddr_in addr;
+	unsigned char data[0];
+} websocket_chunk;
+
 struct per_session_data
 {
-	lws *wsi;
-	NETADDR addr;
+	struct lws *wsi;
+	std::string addr_str;
+	sockaddr_in addr;
 	TSendBuffer send_buffer;
 };
 
 struct context_data
 {
-	char bindaddr_str[NETADDR_MAXSTRSIZE];
-	lws_context_creation_info creation_info;
 	lws_context *context;
-	std::map<NETADDR, per_session_data *> port_map;
+	std::map<std::string, per_session_data *> port_map;
 	TRecvBuffer recv_buffer;
 };
 
-// Client has main, dummy and contact connections with IPv4 and IPv6
-static context_data contexts[3 * 2];
-static std::map<lws_context *, context_data *> contexts_map;
-
-static lws_context *websocket_context(int socket)
+static int receive_chunk(context_data *ctx_data, struct per_session_data *pss,
+	void *in, size_t len)
 {
-	dbg_assert(socket >= 0 && socket < (int)std::size(contexts), "socket index invalid: %d", socket);
-	lws_context *context = contexts[socket].context;
-	dbg_assert(context != nullptr, "socket context not initialized: %d", socket);
-	return context;
-}
-
-static void receive_chunk(context_data *ctx_data, per_session_data *pss, const void *in, size_t len)
-{
-	websocket_chunk *chunk = ctx_data->recv_buffer.Allocate(len + sizeof(websocket_chunk));
-	dbg_assert(chunk != nullptr, "failed to allocate websocket receive buffer chunk of size %" PRIzu, len);
+	websocket_chunk *chunk = (websocket_chunk *)ctx_data->recv_buffer.Allocate(
+		len + sizeof(websocket_chunk));
+	if(chunk == 0)
+		return 1;
 	chunk->size = len;
 	chunk->read = 0;
-	chunk->addr = pss->addr;
-	mem_copy(&chunk->data[0], in, len);
+	memcpy(&chunk->addr, &pss->addr, sizeof(sockaddr_in));
+	memcpy(&chunk->data[0], in, len);
+	return 0;
 }
 
-static void sockaddr_to_netaddr_websocket(const sockaddr *src, socklen_t src_len, NETADDR *dst)
+static int websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
+	void *user, void *in, size_t len)
 {
-	*dst = NETADDR_ZEROED;
-	if(src->sa_family == AF_INET && src_len >= (socklen_t)sizeof(sockaddr_in))
-	{
-		const sockaddr_in *src_in = (const sockaddr_in *)src;
-		dst->type = NETTYPE_WEBSOCKET_IPV4;
-		dst->port = htons(src_in->sin_port);
-		static_assert(sizeof(dst->ip) >= sizeof(src_in->sin_addr.s_addr));
-		mem_copy(dst->ip, &src_in->sin_addr.s_addr, sizeof(src_in->sin_addr.s_addr));
-	}
-	else if(src->sa_family == AF_INET6 && src_len >= (socklen_t)sizeof(sockaddr_in6))
-	{
-		const sockaddr_in6 *src_in6 = (const sockaddr_in6 *)src;
-		dst->type = NETTYPE_WEBSOCKET_IPV6;
-		dst->port = htons(src_in6->sin6_port);
-		static_assert(sizeof(dst->ip) >= sizeof(src_in6->sin6_addr.s6_addr));
-		mem_copy(dst->ip, &src_in6->sin6_addr.s6_addr, sizeof(src_in6->sin6_addr.s6_addr));
-	}
-	else
-	{
-		log_warn("websockets", "Cannot convert sockaddr of family %d", src->sa_family);
-	}
-}
-
-static int websocket_protocol_callback(lws *wsi, enum lws_callback_reasons reason, void *user, void *in, size_t len)
-{
-	per_session_data *pss = (per_session_data *)user;
+	struct per_session_data *pss = (struct per_session_data *)user;
 	lws_context *context = lws_get_context(wsi);
-	context_data *ctx_data = contexts_map[context];
+	context_data *ctx_data = (context_data *)lws_context_user(context);
 	switch(reason)
 	{
 	case LWS_CALLBACK_WSI_CREATE:
-		if(pss == nullptr)
+		if(pss == NULL)
 		{
 			return 0;
 		}
-		[[fallthrough]];
+		/* FALLTHRU */
 	case LWS_CALLBACK_ESTABLISHED:
 	{
-		sockaddr_storage peersockaddr;
-		socklen_t peersockaddr_size = sizeof(peersockaddr);
-		getpeername(lws_get_socket_fd(wsi), (sockaddr *)&peersockaddr, &peersockaddr_size);
-		NETADDR addr;
-		sockaddr_to_netaddr_websocket((sockaddr *)&peersockaddr, peersockaddr_size, &addr);
-		if(addr.type == NETTYPE_INVALID)
-		{
-			return 0;
-		}
-
 		pss->wsi = wsi;
-		pss->addr = addr;
+		int fd = lws_get_socket_fd(wsi);
+		socklen_t addr_size = sizeof(pss->addr);
+		getpeername(fd, (struct sockaddr *)&pss->addr, &addr_size);
+		int orig_port = ntohs(pss->addr.sin_port);
 		pss->send_buffer.Init();
-		ctx_data->port_map[addr] = pss;
 
 		char addr_str[NETADDR_MAXSTRSIZE];
-		net_addr_str(&addr, addr_str, sizeof(addr_str), true);
-		log_trace("websockets", "Connection established with '%s'", addr_str);
-		return 0;
-	}
+		int ip_uint32 = pss->addr.sin_addr.s_addr;
+		str_format(addr_str, sizeof(addr_str), "%d.%d.%d.%d:%d", (ip_uint32)&0xff, (ip_uint32 >> 8) & 0xff, (ip_uint32 >> 16) & 0xff, (ip_uint32 >> 24) & 0xff, orig_port);
 
-	case LWS_CALLBACK_CLIENT_CLOSED:
-		[[fallthrough]];
+		dbg_msg("websockets", "connection established with %s", addr_str);
+
+		std::string addr_str_final;
+		addr_str_final.append(addr_str);
+
+		pss->addr_str = addr_str_final;
+		ctx_data->port_map[pss->addr_str] = pss;
+	}
+	break;
+
 	case LWS_CALLBACK_CLOSED:
 	{
-		char addr_str[NETADDR_MAXSTRSIZE];
-		net_addr_str(&pss->addr, addr_str, sizeof(addr_str), true);
-		log_trace("websockets", "Connection closed with '%s'", addr_str);
-
-		static const unsigned char CLOSE_PACKET[] = {0x10, 0x0e, 0x00, 0x04};
-		receive_chunk(ctx_data, pss, &CLOSE_PACKET, sizeof(CLOSE_PACKET));
-		return 0;
-	}
-
-	case LWS_CALLBACK_WSI_DESTROY:
-	{
-		if(pss == nullptr)
+		dbg_msg("websockets", "connection with addr string %s closed", pss->addr_str.c_str());
+		if(!pss->addr_str.empty())
 		{
-			return 0;
+			unsigned char close_packet[] = {0x10, 0x0e, 0x00, 0x04};
+			receive_chunk(ctx_data, pss, &close_packet, sizeof(close_packet));
+			pss->wsi = 0;
+			ctx_data->port_map.erase(pss->addr_str);
 		}
-		pss->wsi = nullptr;
-		ctx_data->port_map.erase(pss->addr);
-		return 0;
 	}
+	break;
 
 	case LWS_CALLBACK_CLIENT_WRITEABLE:
-		[[fallthrough]];
+		/* FALLTHRU */
 	case LWS_CALLBACK_SERVER_WRITEABLE:
 	{
-		websocket_chunk *chunk = pss->send_buffer.First();
-		if(chunk == nullptr)
-		{
-			return 0;
-		}
-
+		websocket_chunk *chunk = (websocket_chunk *)pss->send_buffer.First();
+		if(chunk == NULL)
+			break;
 		int chunk_len = chunk->size - chunk->read;
-		int n = lws_write(wsi, &chunk->data[LWS_SEND_BUFFER_PRE_PADDING + chunk->read], chunk->size - chunk->read, LWS_WRITE_BINARY);
+		int n =
+			lws_write(wsi, &chunk->data[LWS_SEND_BUFFER_PRE_PADDING + chunk->read],
+				chunk->size - chunk->read, LWS_WRITE_BINARY);
 		if(n < 0)
-		{
 			return 1;
-		}
-
 		if(n < chunk_len)
 		{
 			chunk->read += n;
 			lws_callback_on_writable(wsi);
-			return 0;
+			break;
 		}
-
 		pss->send_buffer.PopFirst();
 		lws_callback_on_writable(wsi);
-		return 0;
 	}
+	break;
 
 	case LWS_CALLBACK_CLIENT_RECEIVE:
-		[[fallthrough]];
+		/* FALLTHRU */
 	case LWS_CALLBACK_RECEIVE:
-		receive_chunk(ctx_data, pss, in, len);
-		return 0;
+		if(pss->addr_str.empty())
+			return -1;
+		if(receive_chunk(ctx_data, pss, in, len))
+			return 1;
+		break;
 
 	default:
-		return 0;
+		break;
 	}
+
+	return 0;
 }
 
-static const lws_protocols protocols[] = {
-	{"binary", websocket_protocol_callback, sizeof(per_session_data)},
-	{"base64", websocket_protocol_callback, sizeof(per_session_data)},
-	{nullptr, nullptr, 0}};
-
-static LEVEL websocket_level_to_loglevel(int level)
-{
-	switch(level)
+static struct lws_protocols protocols[] = {
 	{
-	case LLL_ERR:
-		return LEVEL_ERROR;
-	case LLL_WARN:
-		return LEVEL_WARN;
-	case LLL_NOTICE:
-	case LLL_INFO:
-		return LEVEL_DEBUG;
-	default:
-		dbg_assert_failed("invalid log level: %d", level);
-	}
-}
-
-static void websocket_log_callback(int level, const char *line)
-{
-	if((level == LLL_NOTICE || level == LLL_INFO) && !g_Config.m_DbgWebsockets)
+		"binary", /* name */
+		websocket_callback, /* callback */
+		sizeof(struct per_session_data) /* per_session_data_size */
+	},
 	{
-		return;
-	}
+		NULL, NULL, 0 /* End of list */
+	}};
 
-	// Truncate duplicate timestamp from beginning and newline from end
-	char line_truncated[4096]; // Longest log line length
-	const char *line_time_end = str_find(line, "] ");
-	dbg_assert(line_time_end != nullptr, "unexpected log format");
-	str_copy(line_truncated, line_time_end + 2);
-	const int length = str_length(line_truncated);
-	if(line_truncated[length - 1] == '\n')
-	{
-		line_truncated[length - 1] = '\0';
-	}
-	if(line_truncated[length - 2] == '\r')
-	{
-		line_truncated[length - 2] = '\0';
-	}
-	log_log(websocket_level_to_loglevel(level), "websockets", "%s", line_truncated);
-}
+static context_data contexts[WS_CONTEXTS];
 
-void websocket_init()
+int websocket_create(const char *addr, int port)
 {
-	lws_set_log_level(LLL_ERR | LLL_WARN | LLL_NOTICE | LLL_INFO, websocket_log_callback);
-}
+	struct lws_context_creation_info info;
+	memset(&info, 0, sizeof(info));
+	info.port = port;
+	info.iface = addr;
+	info.protocols = protocols;
+	info.gid = -1;
+	info.uid = -1;
 
-int websocket_create(const NETADDR *bindaddr)
-{
 	// find free context
 	int first_free = -1;
-	for(int i = 0; i < (int)std::size(contexts); i++)
+	for(int i = 0; i < WS_CONTEXTS; i++)
 	{
-		if(contexts[i].context == nullptr)
+		if(contexts[i].context == NULL)
 		{
 			first_free = i;
 			break;
 		}
 	}
 	if(first_free == -1)
-	{
-		log_error("websockets", "Failed to create websocket: no free contexts available");
 		return -1;
-	}
 
 	context_data *ctx_data = &contexts[first_free];
-	mem_zero(&ctx_data->creation_info, sizeof(ctx_data->creation_info));
-	ctx_data->creation_info.options = LWS_SERVER_OPTION_FAIL_UPON_UNABLE_TO_BIND;
-	if(bindaddr->type == NETTYPE_WEBSOCKET_IPV6)
-	{
-		// Set IPv6-only mode and socket option for IPv6 Websockets.
-		ctx_data->creation_info.options |= LWS_SERVER_OPTION_IPV6_V6ONLY_VALUE | LWS_SERVER_OPTION_IPV6_V6ONLY_MODIFY;
-	}
-	net_addr_str(bindaddr, ctx_data->bindaddr_str, sizeof(ctx_data->bindaddr_str), false);
-	if(ctx_data->bindaddr_str[0] == '[' && ctx_data->bindaddr_str[str_length(ctx_data->bindaddr_str) - 1] == ']')
-	{
-		// Bindaddr must not be enclosed in brackets for IPv6 Websockets.
-		ctx_data->bindaddr_str[str_length(ctx_data->bindaddr_str) - 1] = '\0';
-		mem_move(&ctx_data->bindaddr_str[0], &ctx_data->bindaddr_str[1], str_length(ctx_data->bindaddr_str) + 1);
-	}
-	ctx_data->creation_info.iface = ctx_data->bindaddr_str;
-	ctx_data->creation_info.port = bindaddr->port;
-	ctx_data->creation_info.protocols = protocols;
-	ctx_data->creation_info.gid = -1;
-	ctx_data->creation_info.uid = -1;
-	ctx_data->creation_info.user = ctx_data;
+	info.user = (void *)ctx_data;
 
-	ctx_data->context = lws_create_context(&ctx_data->creation_info);
-	if(ctx_data->context == nullptr)
+	ctx_data->context = lws_create_context(&info);
+	if(ctx_data->context == NULL)
 	{
 		return -1;
 	}
-	contexts_map[ctx_data->context] = ctx_data;
 	ctx_data->recv_buffer.Init();
 	return first_free;
 }
 
-void websocket_destroy(int socket)
+int websocket_destroy(int socket)
 {
-	lws_context *context = websocket_context(socket);
+	lws_context *context = contexts[socket].context;
+	if(context == NULL)
+		return -1;
 	lws_context_destroy(context);
-	contexts_map.erase(context);
-	contexts[socket].context = nullptr;
+	contexts[socket].context = NULL;
+	return 0;
 }
 
-int websocket_recv(int socket, unsigned char *data, size_t maxsize, NETADDR *addr)
+int websocket_recv(int socket, unsigned char *data, size_t maxsize,
+	struct sockaddr_in *sockaddrbuf, size_t fromLen)
 {
-	lws_context *context = websocket_context(socket);
-	const int service_result = lws_service(context, -1);
-	if(service_result < 0)
-	{
-		return service_result;
-	}
-
-	context_data *ctx_data = contexts_map[context];
-	websocket_chunk *chunk = ctx_data->recv_buffer.First();
-	if(chunk == nullptr)
-	{
+	lws_context *context = contexts[socket].context;
+	if(context == NULL)
+		return -1;
+	int n = lws_service(context, -1);
+	if(n < 0)
+		return n;
+	context_data *ctx_data = (context_data *)lws_context_user(context);
+	websocket_chunk *chunk = (websocket_chunk *)ctx_data->recv_buffer.First();
+	if(chunk == 0)
 		return 0;
-	}
-
 	if(maxsize >= chunk->size - chunk->read)
 	{
-		const int len = chunk->size - chunk->read;
-		mem_copy(data, &chunk->data[chunk->read], len);
-		*addr = chunk->addr;
+		int len = chunk->size - chunk->read;
+		memcpy(data, &chunk->data[chunk->read], len);
+		memcpy(sockaddrbuf, &chunk->addr, fromLen);
 		ctx_data->recv_buffer.PopFirst();
 		return len;
 	}
 	else
 	{
-		mem_copy(data, &chunk->data[chunk->read], maxsize);
-		*addr = chunk->addr;
+		memcpy(data, &chunk->data[chunk->read], maxsize);
+		memcpy(sockaddrbuf, &chunk->addr, fromLen);
 		chunk->read += maxsize;
 		return maxsize;
 	}
 }
 
-int websocket_send(int socket, const unsigned char *data, size_t size, const NETADDR *addr)
+int websocket_send(int socket, const unsigned char *data, size_t size,
+	const char *addr_str, int port)
 {
-	lws_context *context = websocket_context(socket);
-	context_data *ctx_data = contexts_map[context];
-	per_session_data *pss = ctx_data->port_map[*addr];
-	if(pss == nullptr)
+	lws_context *context = contexts[socket].context;
+	if(context == NULL)
 	{
-		char addr_str[NETADDR_MAXSTRSIZE];
-		net_addr_str(addr, addr_str, sizeof(addr_str), false);
-		lws_client_connect_info ccinfo = {0};
+		return -1;
+	}
+	context_data *ctx_data = (context_data *)lws_context_user(context);
+	char buf[100];
+	snprintf(buf, sizeof(buf), "%s:%d", addr_str, port);
+	std::string addr_str_with_port = std::string(buf);
+	struct per_session_data *pss = ctx_data->port_map[addr_str_with_port];
+	if(pss == NULL)
+	{
+		struct lws_client_connect_info ccinfo = {0};
 		ccinfo.context = context;
 		ccinfo.address = addr_str;
-		ccinfo.port = addr->port;
+		ccinfo.port = port;
 		ccinfo.protocol = protocols[0].name;
 		lws *wsi = lws_client_connect_via_info(&ccinfo);
-		if(wsi == nullptr)
+		if(wsi == NULL)
 		{
 			return -1;
 		}
 		lws_service(context, -1);
-		pss = ctx_data->port_map[*addr];
-		if(pss == nullptr)
+		pss = ctx_data->port_map[addr_str_with_port];
+		if(pss == NULL)
 		{
 			return -1;
 		}
 	}
-
-	const size_t chunk_size = size + sizeof(websocket_chunk) + LWS_SEND_BUFFER_PRE_PADDING + LWS_SEND_BUFFER_POST_PADDING;
-	websocket_chunk *chunk = pss->send_buffer.Allocate(chunk_size);
-	dbg_assert(chunk != nullptr, "failed to allocate websocket send buffer chunk of size %" PRIzu, size);
-	mem_zero(chunk, chunk_size);
+	websocket_chunk *chunk = (websocket_chunk *)pss->send_buffer.Allocate(
+		size + sizeof(websocket_chunk) + LWS_SEND_BUFFER_PRE_PADDING +
+		LWS_SEND_BUFFER_POST_PADDING);
+	if(chunk == NULL)
+		return -1;
 	chunk->size = size;
 	chunk->read = 0;
-	chunk->addr = pss->addr;
-	mem_copy(&chunk->data[LWS_SEND_BUFFER_PRE_PADDING], data, size);
+	memcpy(&chunk->addr, &pss->addr, sizeof(sockaddr_in));
+	memcpy(&chunk->data[LWS_SEND_BUFFER_PRE_PADDING], data, size);
 	lws_callback_on_writable(pss->wsi);
 	lws_service(context, -1);
 	return size;
@@ -383,42 +290,22 @@ int websocket_send(int socket, const unsigned char *data, size_t size, const NET
 
 int websocket_fd_set(int socket, fd_set *set)
 {
-	lws_context *context = websocket_context(socket);
+	lws_context *context = contexts[socket].context;
+	if(context == NULL)
+		return -1;
 	lws_service(context, -1);
-
-	context_data *ctx_data = contexts_map[context];
+	context_data *ctx_data = (context_data *)lws_context_user(context);
 	int max = 0;
-	for(const auto &[_, pss] : ctx_data->port_map)
+	for(auto const &x : ctx_data->port_map)
 	{
-		if(pss == nullptr)
-		{
+		if(x.second == NULL)
 			continue;
-		}
-		int fd = lws_get_socket_fd(pss->wsi);
-		max = std::max(fd, max);
+		int fd = lws_get_socket_fd(x.second->wsi);
+		if(fd > max)
+			max = fd;
 		FD_SET(fd, set);
 	}
 	return max;
-}
-
-int websocket_fd_get(int socket, fd_set *set)
-{
-	lws_context *context = websocket_context(socket);
-	lws_service(context, -1);
-
-	context_data *ctx_data = contexts_map[context];
-	for(const auto &[_, pss] : ctx_data->port_map)
-	{
-		if(pss == nullptr)
-		{
-			continue;
-		}
-		if(FD_ISSET(lws_get_socket_fd(pss->wsi), set))
-		{
-			return 1;
-		}
-	}
-	return 0;
 }
 
 #endif

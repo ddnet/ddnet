@@ -1,3 +1,14 @@
+##### authors #####
+#originally created by:
+#	ziltoide
+#modified by:
+#	ziltoide		2011-04-06 23:56:54
+#	ziltoide		2011-07-05 18:31:04
+#	Misse & Igrekyll	2021-07-07 18:01:51
+##### /authors #####
+
+##### translated strings #####
+
 %ds left
 == %ds jäljellä
 
@@ -16,11 +27,17 @@
 %s wins!
 == %s voitti!
 
+-Page %d-
+== -Sivu %d-
+
 Abort
 == Keskeytä
 
 Add
 == Lisää
+
+Add Friend
+== Lisää ystävä
 
 Address
 == Osoite
@@ -28,14 +45,20 @@ Address
 All
 == Kaikki
 
+Are you sure that you want to delete the demo?
+== Oletko varma, että haluat poistaa demon?
+
 Are you sure that you want to quit?
-== Oletko varma, että haluat lopettaa pelin?
+== Oletko varma, että haluat lopettaa?
+
+Are you sure that you want to remove the player from your friends list?
+== Oletko varma, että haluat poistaa pelaajan ystävälistaltasi?
 
 Automatically record demos
 == Nauhoita demot automaattisesti
 
 Automatically take game over screenshot
-== Ota pelin jälkeinen kuvankaappaus automaattisesti
+== Ota pelin jälkeinen kuvankaappaus autom.
 
 Blue team
 == Sininen joukkue
@@ -61,17 +84,23 @@ Clan
 Client
 == Asiakasohjelma
 
+Close
+== Sulje
+
+Connect
+== Yhdistä
+
 Connecting to
 == Yhdistetään
 
-Connection Problems…
-== Yhteysongelmia…
+Connection Problems...
+== Yhteysongelmia...
 
 Console
 == Konsoli
 
 Controls
-== Ohjaus
+== Kontrollit
 
 Count players only
 == Laske vain pelaajat
@@ -80,13 +109,16 @@ Current
 == Nykyinen
 
 Custom colors
-== Mukautetut värit
+== Omat värit
 
 Delete
 == Poista
 
 Delete demo
 == Poista demo
+
+Demo details
+== Demon tiedot
 
 Demofile: %s
 == Demotiedosto: %s
@@ -127,6 +159,9 @@ Favorites
 Feet
 == Jalat
 
+Filter
+== Suotimet
+
 Fire
 == Ammu
 
@@ -138,6 +173,9 @@ Force vote
 
 Free-View
 == Vapaa näkymä
+
+Friends
+== Ystävät
 
 Fullscreen
 == Koko näyttö
@@ -202,6 +240,9 @@ MOTD
 Map
 == Kenttä
 
+Mouse sens.
+== Hiiren herkkyys
+
 Move left
 == Liiku vasemmalle
 
@@ -241,6 +282,9 @@ No servers match your filter criteria
 Ok
 == Ok
 
+Open
+== Avaa
+
 Parent Folder
 == Yläkansio
 
@@ -256,6 +300,10 @@ Ping
 Pistol
 == Pistooli
 
+[Demo browser]
+Play
+== Toista
+
 Play background music
 == Soita taustamusiikki
 
@@ -264,6 +312,9 @@ Player
 
 Player country:
 == Pelaajan maa:
+
+Player options
+== Pelaajavalinnat
 
 Players
 == Pelaajat
@@ -286,6 +337,9 @@ Red team
 Red team wins!
 == Punainen joukkue voitti!
 
+Refresh
+== Päivitä
+
 Remote console
 == Etäkonsoli
 
@@ -295,11 +349,17 @@ Remove
 Remove friend
 == Poista ystävä
 
+Rename
+== Nimeä
+
 Rename demo
 == Uudelleennimeä demo
 
 Reset filter
 == Nollaa suotimet
+
+Sample rate
+== Näytteenottotaajuus
 
 Score
 == Pisteet
@@ -315,6 +375,12 @@ Screenshot
 
 Server address:
 == Palvelimen osoite:
+
+Server details
+== Palvelimen yksityiskohdat
+
+Server filter
+== Palvelinsuotimet
 
 Server info
 == Palvelintiedot
@@ -336,6 +402,9 @@ Show ingame HUD
 
 Show name plates
 == Näytä nimikyltit
+
+Skins
+== Ulkonäkö
 
 Sound
 == Äänet
@@ -382,6 +451,12 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == Tämä palvelin ajaa ei-standardeja virityksiä standardipelityypillä.
 
+There's an unsaved map in the editor, you might want to save it before you quit the game.
+== Editorissa on tallentamaton kenttä, saatat haluta tallentaa sen ennen kuin lopetat pelin.
+
+Time limit
+== Aikaraja
+
 Time limit: %d min
 == Aikaraja: %d min
 
@@ -390,6 +465,9 @@ Try again
 
 Type
 == Tyyppi
+
+Unable to delete the demo
+== Demon poistaminen ei onnistunut
 
 Unable to rename the demo
 == Demon nimeäminen ei onnistunut
@@ -460,11 +538,26 @@ FSAA samples
 Sound volume
 == Äänenvoimakkuus
 
+Created:
+== Luotu:
+
 Max Screenshots
 == Kuvankaappausmaksimi
 
+Length:
+== Pituus:
+
 Laser
 == Laser
+
+Netversion:
+== Yhteysversio:
+
+Map:
+== Kenttä:
+
+Info
+== Info
 
 Hue
 == Värisävy
@@ -475,14 +568,32 @@ Record demo
 Your skin
 == Sinun ulkonäkösi
 
+Size:
+== Koko:
+
 Reset to defaults
 == Palaa oletusasetuksiin
+
+Quit anyway?
+== Lopeta siitä huolimatta?
+
+Display Modes
+== Näyttötilat
+
+Version:
+== Versio:
+
+Round
+== Kierros
 
 Lht.
 == Valoisuus
 
 UI Color
 == Käyttöliittymäväri
+
+Crc:
+== Crc:
 
 Alpha
 == Alfa
@@ -493,8 +604,14 @@ LAN
 Name plates size
 == Nimikylttien koko
 
+Type:
+== Tyyppi:
+
 Successfully saved the replay!
 == Uudelleentoisto tallentui onnistuneesti!
+
+Saving ddnet-settings.cfg failed
+== ddnet-settings.cfg:n tallentaminen epäonnistui
 
 Replay feature is disabled!
 == Uudelleentoisto-ominaisuus on pois käytöstä!
@@ -545,10 +662,10 @@ Are you sure that you want to disconnect?
 == Oletko varma, että haluat katkaista yhteyden?
 
 Disconnect Dummy
-== Katk. nuken yhteys
+== Katk. dummyn yhteys
 
 Are you sure that you want to disconnect your dummy?
-== Oletko varma, että haluat katkaista nukkeesi yhteyden?
+== Oletko varma, että haluat katkaista dummysi yhteyden?
 
 Welcome to DDNet
 == Tervetuloa DDNet:iin
@@ -574,6 +691,12 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 Checking for existing player with your name
 == Tarkistetaan, onko nimesi jo käytössä
 
+Country / Region
+== Maa / Alue
+
+Destination file already exist
+== Kohdetiedosto on jo olemassa
+
 Speed
 == Vauhti
 
@@ -583,8 +706,8 @@ Video name:
 Show DDNet map finishes in server browser
 == Näytä DDNet kenttäläpäisyt palvelinselaimessa
 
-transmits your player name to info.ddnet.org
-== lähettää nimimerkkisi osoitteeseen info.ddnet.org
+transmits your player name to info2.ddnet.tw
+== lähettää nimimerkkisi osoitteeseen info2.ddnet.tw
 
 Theme
 == Teema
@@ -649,8 +772,17 @@ Types
 Leak IP
 == Vuoda IP
 
+Select a name
+== Valitse nimi
+
+Please use a different name
+== Ole hyvä ja käytä toista nimeä
+
 Remove chat
 == Poista chatti
+
+Markers:
+== Merkit:
 
 %.2f MiB
 == %.2f MiB
@@ -676,17 +808,23 @@ Fetch Info
 Demos directory
 == Demohakemisto
 
+Render
+== Renderöi
+
 Connecting dummy
-== Yhdistetään nukkea
+== Yhdistetään dummyä
 
 Connect Dummy
-== Yhdistä nukke
+== Yhdistä dummy
 
 Kill
 == Tapa
 
 Pause
 == Pysäytä
+
+Reload
+== Päivitä
 
 Deactivate
 == Deaktivoi
@@ -703,6 +841,9 @@ Smooth Dynamic Camera
 Switch weapon when out of ammo
 == Vaihda asetta ammusten loppuessa
 
+Reset wanted weapon on death
+== Palauta haluttu ase kuollessa
+
 Show only chat messages from friends
 == Näytä chattiviestit vain ystäviltä
 
@@ -718,8 +859,14 @@ Skip the main menu
 Refresh Rate
 == Virkistystaajuus
 
+Show console window
+== Näytä konsoli-ikkuna
+
 Themes directory
 == Teemahakemisto
+
+Dummy settings
+== Dummyn asetukset
 
 Download skins
 == Lataa ulkonäköjä
@@ -758,7 +905,7 @@ Toggle dyncam
 == Vaihda dynaaminen kamera
 
 Toggle dummy
-== Vaihda nukkeen
+== Vaihda dummy
 
 Toggle ghost
 == Vaihda haamu
@@ -772,8 +919,11 @@ Show HUD
 Chat command
 == Chattikomento
 
+UI mouse s.
+== Käyttöliittymän herkkyys
+
 Dummy
-== Nukke
+== Dummy
 
 Windowed
 == Ikkunoitu
@@ -789,6 +939,9 @@ may cause delay
 
 Screen
 == Näyttö
+
+Use high DPI
+== Käytä korkeaa DPI:tä
 
 Enable game sounds
 == Ota pelin äänet käyttöön
@@ -807,6 +960,9 @@ Enable team chat sound
 
 Enable highlighted chat sound
 == Ota korostetun chatin äänet käyttöön
+
+Threaded sound loading
+== Säikeistetty äänilataus
 
 Game sound volume
 == Pelin äänenvoimakkuus
@@ -829,8 +985,17 @@ DDNet
 DDNet Client needs to be restarted to complete update!
 == DDNet-asiakas täytyy käynnistää uudelleen latauksen viimeistelemiseksi
 
+Use DDRace Scoreboard
+== Käytä DDRacen tuloslistaa
+
+Show client IDs
+== Näytä asiakkaiden ID:t
+
 Show score
 == Näytä pistemäärä
+
+Show health + ammo
+== Näytä terveyspisteet + ammusmäärä
 
 Show names in chat in team colors
 == Näytä nimet chatissa joukkueiden väreissä
@@ -840,6 +1005,24 @@ Show kill messages
 
 Show votes window after voting
 == Näytä äänestysikkuna äänestämisen jälkeen
+
+Laser Outline Color
+== Laserin ulkoviivan väri
+
+Laser Inner Color
+== Laserin sisäväri
+
+Hookline
+== Koukkuviiva
+
+No hit
+== Ei osumaa
+
+Hookable
+== Koukutettava
+
+Tee
+== Tee
 
 Use old chat style
 == Käytä vanhaa chatin tyyliä
@@ -871,8 +1054,8 @@ Preview
 Save the best demo of each race
 == Tallenna jokaisen kentän paras demo
 
-Default length
-== Oletuspituus
+Default length: %d
+== Oletuspituus: %d
 
 Enable replays
 == Luo uudelleentoistoja
@@ -907,11 +1090,20 @@ AntiPing: predict grenade paths
 Show other players' hook collision lines
 == Näytä muiden pelaajien koukkujen törmaysviivat
 
+Show other players' key presses
+== Näytä muiden pelaajien näppäinpainallukset
+
+Old mouse mode
+== Vanha hiiritila
+
 Background
 == Tausta
 
 Use current map as background
 == Käytä nykyistä kenttää taustana
+
+Try fast HTTP map download first
+== Yritä nopeaa HTTP-kentänlatausta ensin
 
 DDNet %s is available:
 == DDNet %s on saatavilla:
@@ -919,8 +1111,8 @@ DDNet %s is available:
 Update now
 == Päivitä nyt
 
-Updating…
-== Päivitetään…
+Updating...
+== Päivitetään...
 
 DDNet Client updated!
 == DDNet-asiakas on päivitetty!
@@ -937,14 +1129,14 @@ Emoticons
 Discord
 == Discord
 
-https://ddnet.org/discord
-== https://ddnet.org/discord
+https://ddnet.tw/discord
+== https://ddnet.tw/discord
 
 Learn
 == Opi
 
-https://wiki.ddnet.org/
-== https://wiki.ddnet.org/
+https://wiki.ddnet.tw/
+== https://wiki.ddnet.tw/
 
 Website
 == Verkkosivu
@@ -971,8 +1163,8 @@ DDNet %s is out!
 Downloading %s:
 == Päivitetään %s:
 
-Update failed! Check log…
-== Päivitys epäonnistui! Katso loki…
+Update failed! Check log...
+== Päivitys epäonnistui! Katso loki...
 
 Restart
 == Uudelleenaloitus
@@ -1022,1632 +1214,170 @@ Best
 9+ new mentions
 == 9+ uutta mainintaa
 
-[Graphics error]
-Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== Epäonnistui alustuksen aikana. Yritä muuttaa gfx_backend arvoksi OpenGL tai Vulkan asetushakemistossa settings_ddnet.cfg ja yritä uudelleen.
-
-[Graphics error]
-An error during command recording occurred. Try to update your GPU drivers.
-== Komennon tallennuksen aikana tapahtui virhe. Yritä päivittää GPU-ajurit.
-
-[Graphics error]
-A render command failed. Try to update your GPU drivers.
-== Renderöintikomento epäonnistui. Yritä päivittää GPU-ajurit.
-
-[Graphics error]
-Submitting the render commands failed. Try to update your GPU drivers.
-== Renderöintikomentojen lähettäminen epäonnistui. Yritä päivittää GPU-ajurit.
-
-[Graphics error]
-Failed to swap framebuffers. Try to update your GPU drivers.
-== Framepuskureiden vaihto epäonnistui. Yritä päivittää GPU-ajurit.
-
-[Graphics error]
-Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== Tuntematon virhe. Yritä muuttaa gfx_backend arvoksi OpenGL tai Vulkan asetushakemistossa settings_ddnet.cfg ja yritä uudelleen.
-
-[Graphics error]
-Could not initialize the given graphics backend, reverting to the default backend now.
-== Annettua näytönohjainta ei voitu alustaa. Palataan nyt oletusarvoiseen taustajärjestelmään.
-
-[Graphics error]
-Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== Annettua näytönohjainta ei voitu alustaa, tämä johtuu luultavasti siitä, että et asentanut integroidun näytönohjaimen ohjainta.
-
-Could not save downloaded map. Try manually deleting this file: %s
-== Ei voitu tallentaa ladattua karttaa. Yritä poistaa tämä tiedosto manuaalisesti: %s
-
-Error playing demo
-== Virhe demoa toistaessa
-
-Failed saving the replay!
-== Toiston tallentaminen epäonnistui!
-
-Saving settings to '%s' failed
-== Asetusten tallentaminen '%s' epäonnistui
-
-Error saving settings
-== Virhe asetusten tallentamisessa
-
 The format of texture %s is not RGBA which will cause visual bugs.
-== Tekstuurin %s muoto ei ole RGBA, mikä aiheuttaa visuaalisia virheitä.
-
-Preparing demo playback
-== Valmistetaan demon toistoa
-
-Connected
-== Yhdistetty
-
-Loading map file from storage
-== Ladataan karttatiedostoa tallennustilasta
-
-Why are you slowmo replaying to read this?
-== Miksi hidastat toistoa lukeaksesi tätä?
-
-Initializing components
-== Komponenttien alustus
-
-Initializing assets
-== Resurssien alustaminen
-
-Initializing map logic
-== Karttalogiikkaa alustetaan
-
-Sending initial client info
-== Alkuasiakastietojen lähettäminen
-
-Quitting. Please wait…
-== Lopettaminen. Odota…
-
-Restarting. Please wait…
-== Käynnistetään uudelleen. Odota…
-
-Loading skin files
-== Ladataan skinin tiedostoja
-
-Searching
-== Etsitään
-
-Enter Username
-== Syötä käyttäjätunnus
-
-Enter Password
-== Syötä Salasana
-
-NOT CONNECTED
-== EI YHTEYTTÄ
-
-Match %d of %d
-== Yhdistä %d'n %d
-
-No results
-== Ei tuloksia
-
-Lines %d - %d (%s)
-== Rivit %d - %d (%s)
-
-Locked
-== Lukittu
-
-Following
-== Seurataan
-
-Loading commands…
-== Ladataan komentoja…
-
-Position:
-== Positio:
-
-Speed:
-== Vauhti:
-
-Angle:
-== Kulma:
-
-Multi-View
-== Moni-Näkymä
-
-Team %d
-== Joukkue %d
-
-Some map images could not be loaded. Check the local console for details.
-== Joitakin kartan kuvia ei voitu ladata. Tarkasta paikallinen konsoli yksityiskohtia varten.
-
-Uploading map data to GPU
-== Ladataan karttatietoja GPU:lle
-
-Some map sounds could not be loaded. Check the local console for details.
-== Joitakin kartan ääniä ei voitu ladata. Tarkasta paikallinen konsoli yksityiskohtia varten.
-
-Loading menu themes
-== Ladataan valikon teemoja
-
-Press a key…
-== Paina näppäintä…
-
-Main menu
-== Päävalikko
-
-Trying to determine UDP connectivity…
-== Yritetään selvittää UDP-yhteyden toimivuutta…
-
-UDP seems to be filtered.
-== UDP näyttää olevan suodatettu.
-
-UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== UDP ja TCP IP-osoitteet näyttävät eroavan. Yritä poistaa käytöstä VPN, välityspalvelin tai verkon nopeuttimia.
-
-No answer from server yet.
-== Ei vielä vastausta palvelimelta.
-
-Getting game info
-== Saadaan pelitietoja
-
-Requesting to join the game
-== Pyydetään liittymistä peliin
-
-Rename folder
-== Nimeä uudelleen kansio
-
-Render complete
-== Renderöinti valmis
-
-Are you sure that you want to restart?
-== Oletko varma, että haluat käynnistää uudelleen?
-
-There's an unsaved map in the editor, you might want to save it.
-== Editorissa on tallentamaton kartta, joten haluat ehkä tallentaa sen.
-
-Continue anyway?
-== Jatka silti?
-
-A demo with this name already exists
-== Demo tällä nimellä on jo olemassa
-
-A folder with this name already exists
-== Kansio tällä nimellä on jo olemassa
-
-Unable to rename the folder
-== Ei voitu nimetä kansiota uudelleen
-
-File '%s' already exists, do you want to overwrite it?
-== Tiedosto '%s' on jo olemassa, haluatko korvata sen?
-
-(paused)
-== (keskeytetty)
-
-Videos directory
-== Videoitten kansio
-
-Video was saved to '%s'
-== Video tallennettiin osoitteeseen '%s'
-
-Join Tutorial Server
-== Liity opetuspalvelimeen
-
-Skip Tutorial
-== Ohita Tutoriali
-
-Loading menu images
-== Ladataan valikon kuvia
+== 
 
 Are you sure that you want to disconnect and switch to a different server?
-== Oletko varma, että haluat katkaista yhteyden ja siirtyä toiseen palvelimeen?
+== 
 
-Communities
-== Yhteisöt
+Join Tutorial Server
+== 
 
-Copy info
-== Kopioi tiedot
+Skip Tutorial
+== 
 
-No server selected
-== Palvelinta ei ole valittu
-
-Online clanmates (%d)
-== Online klaanikaverit (%d)
-
-[friends (server browser)]
-Offline (%d)
-== Offline (%d)
-
-Click to select server. Double click to join your friend.
-== Klikkaa valitaksesi palvelimen. Kaksoisklikkaa liittyäksesi ystävään.
-
-Click to remove this player from your friends list.
-== Klikkaa poistaaksesi tämän pelaajan ystävälistaltasi.
-
-Click to remove this clan from your friends list.
-== Klikkaa poistaaksesi tämän klaanin ystävälistaltasi.
-
-Are you sure that you want to remove the player '%s' from your friends list?
-== Oletko varma että haluat poistaa pelaajan '%s' ystävälistaltasi?
-
-Are you sure that you want to remove the clan '%s' from your friends list?
-== Oletko varma että haluat poistaa klaanin '%s' ystävälistaltasi?
-
-Server filter
-== Palvelimen
-
-Friends
-== Ystävät
-
-Play the current demo
-== Pyöritä nykyistä demoa
-
-Pause the current demo
-== Tauota nykyinen demo
-
-Stop the current demo
-== Pysäytä nykyinen demo
-
-Go back the specified duration
-== Mene annetun ajan taaksepäin
-
-[Demo player duration]
-%s min.
-== %s min.
-
-[Demo player duration]
-%s sec.
-== %s sek.
-
-Change the skip duration
-== Vaihda hyppyajan kesto
-
-Go forward the specified duration
-== Mene annetun ajan eteenpäin
-
-Go back one tick
-== Mene yhden askelen taaksepäin
-
-Go forward one tick
-== Mene yhden askelen eteenpäin
-
-Go back one marker
-== Mene yhden merkin taaksepäin
-
-Go forward one marker
-== Mene yhden merkin eteenpäin
-
-Slow down the demo
-== Hidasta demoa
-
-Speed up the demo
-== Nopeuta demoa
-
-Mark the beginning of a cut (right click to reset)
-== Merkitse leikkauksen alku (oikea klikkaus nollaa)
-
-Mark the end of a cut (right click to reset)
-== Merkitse leikkauksen loppu (oikea klikkaus nollaa)
-
-Export cut as a separate demo
-== Vie leikkaus erillisenä demona
-
-Close the demo player
-== Sulje demo pelaaja
-
-Toggle keyboard shortcuts
-== Vaihda näppäimistön pikanäppäimet
-
-Export demo cut
-== Vie demoleikkaus
-
-Cut interval
-== Leikkauksen väliaika
-
-Cut length
-== Leikkauksen pituus
-
-Render cut to video
-== Renderöi leikkaus videoksi
-
-Please use a different filename
-== Käytä toista tiedostonimeä
-
-Loading demo files
-== Ladataan demo-tiedostoja
-
-All combined
-== Kaikki yhdistettynä
-
-No demo selected
-== Demoa ei valittu
-
-Folder Link
-== Kansio Linkki
-
-Created
-== Luotu
-
-Netversion
-== Netversio
-
-[Demo details]
-map not included
-== kartta ei sisälly
-
-Open the directory that contains the demo files
-== Avaa kansio joka sisältää demo-tiedostot
-
-Are you sure that you want to delete the folder '%s'?
-== Oletko varma että haluat poistaa kansion '%s'?
-
-Are you sure that you want to delete the demo '%s'?
-== Oletko varma että haluat poistaa demon '%s'?
-
-Delete folder
-== Poista kansio
-
-Unable to delete the demo '%s'
-== Ei voitu poistaa demoa '%s'
-
-Unable to delete the folder '%s'. Make sure it's empty first.
-== Ei voitu poistaa kansiota '%s'. Varmista että se on tyhjä ensin.
-
-Loading…
-== Ladataan…
-
-Loading ghost files
-== Ladataan aave-tiedostoja
-
-Ghosts directory
-== Aaveitten kansio
-
-Activate all
-== Aktivoi kaikki
-
-Deactivate all
-== Deaktivoi kaikki
-
-Menu opened. Press Esc key again to close menu.
-== Valikko avattu. Paina Esc-näppäintä uudelleen sulkeaksesi valikon.
+Refreshing...
+== 
 
 Settings file
-== asetustiedosto
-
-Open the settings file
-== Avaa asetustiedosto
+== 
 
 Config directory
-== Konfigurionti kansio
-
-Open the directory that contains the configuration and user files
-== Avaa kansio jossa ovat asetus- ja käyttäjätiedostot
-
-Open the directory to add custom themes
-== Avaa kansio mukautetuille teemoille
+== 
 
 Automatically take statboard screenshot
-== Automaattisesti ota tilastotaulun kuva
+== 
 
 Automatically create statboard csv
-== Automaattisesti luo tilastotaulu csv
+== 
 
 Max CSVs
-== Maksimi CSV:t
+== 
 
-Download community skins
-== Lataa yhteisön skinit
+Toggle to edit your dummy settings
+== 
 
 Fat skins (DDFat)
-== Lihavoidut ihonvärit (DDfat)
-
-Create a random skin
-== Luo satunnainen skinit
+== 
 
 Choose default eyes when joining a server
-== Valitse oletussilmät palvelimeen liittyessä
-
-Open the directory to add custom skins
-== Avaa kansio mukautetuille ihonväreille
-
-Loading demo file from storage
-== Ladataan demo-tiedosto tallennuksesta
-
-No login required
-== Kirjautumista ei vaadita
-
-Player info change cooldown
-== Pelaajan tiedon muutos viive
-
-Always show chat
-== Aina näytä chatti
-
-Show hook strength icon indicator
-== Näytä koukun voiman ikoniindikaattori
-
-Show hook strength number indicator
-== Näytä koukun voimanumeroindikaattori
-
-Show own player's hook collision line
-== Näytä oman pelaajan törmäysviiva
-
-Always show own player's hook collision line
-== Näytä aina oman pelaajan törmäysviiva
-
-Always show other players' hook collision lines
-== Näytä aina muiden pelaajien törmaysviivat
+== 
 
 Dummy copy
-== Nuken kopio
+== 
 
 Hammerfly dummy
-== Vasaralento nukella
-
-Statboard
-== Tilastotaulu
-
-Show entities
-== Näytä entiteetit
-
-Enable controller
-== Salli ohjain
-
-Controller
-== Ohjain
-
-Ingame controller mode
-== Pelissä ohjaimen tilatila
-
-[Ingame controller mode]
-Relative
-== Suhteellinen
-
-[Ingame controller mode]
-Absolute
-== Ehdoton
-
-Ingame controller sens.
-== Pelissä ohjaimen herkkyys
-
-UI controller sens.
-== Käyttöliittymässä
-
-Controller jitter tolerance
-== Ohjaimen häiriösieto
-
-No controller found. Plug in a controller.
-== Ohjainta ei löytynyt. Liitä ohjain.
-
-Axis
-== Akseli
-
-Status
-== Status
-
-Aim bind
-== Tähtäys sidonta
-
-Mouse
-== Hiiri
-
-Ingame mouse sens.
-== Pelissä hiiren herkkyys
-
-UI mouse sens.
-== Käyttöliittymän hiiren herkkyys
-
-Reset controls
-== Nollaa ohjaukset
-
-Are you sure that you want to reset the controls to their defaults?
-== Oletko varma että haluat palauttaa ohjaimet oletusasetuksiin?
-
-Cancel
-== Peruta
-
-Windowed fullscreen
-== Ikkuna koko näyttö
-
-Allows maps to render with more detail
-== Salli karttojen renderöitymisen enemmän yksityiskohtia
-
-Renderer
-== Renderöijä
-
-default
-== tavallinen
-
-custom
-== mukautettu
-
-Graphics card
-== Näytönohjain
-
-auto
-== automaattinen
-
-Enable long pain sound (used when shooting in freeze)
-== Salli pitkä kipuääni (käytetään jäädytyksessä ampumiseen)
-
-Appearance
-== Ulkomuoto
-
-Assets
-== Resurssit
-
-Name Plate
-== Nimi
-
-Hook Collisions
-== Koukun törmäykset
-
-Info Messages
-== Info viestit
-
-Show health, shields and ammo
-== Näytä elämät, kilvet ja ammukset
-
-Show local time always
-== Näytä paikallinen aika aina
-
-DDRace HUD
-== DDrace-HUD
-
-Show DDRace HUD
-== Näytä DDRace-HUD
-
-Show jumps indicator
-== Näytä hyppyjen mittari
-
-Show dummy actions
-== Näytä dummyn toiminnot
-
-Show player position
-== Näytä pelaajan sijainti
-
-Show player speed
-== Näytä pelaajan nopeus
-
-Show player target angle
-== Näytä pelaajan maalikulma
-
-Show freeze bars
-== Näytä jäätymispalkit
-
-Opacity of freeze bars inside freeze
-== Läpinäkyvyys jäätymisessä olevan pelaajan jäätymispalkkien sisällä
-
-Chat font size
-== Chatti kirjasinkoko
-
-Chat width
-== Chatin leveys
-
-Authed name color in scoreboard
-== Autentifikoidun käyttäjän nimen väri pistetaulukossa
-
-Same clan color in scoreboard
-== Saman klaanin väri pistetaulukossa
-
-Hook collision line
-== Koukku törmäysviiva
-
-Hook collision line opacity
-== Koukku törmäysviivan läpinäkyvyys
-
-Your movements are not taken into account when calculating the line colors
-== Sinun liikkeitäsi ei oteta huomioon viivan värien laskennassa
-
-Show finish messages
-== Näytä maaliviiva viestit
-
-Normal Color
-== Tavallinen väri
-
-Highlight Color
-== Korostus väri
-
-Weapons
-== Aseet
-
-Rifle Laser Outline Color
-== Kivärin laserin reunaviivan väri
-
-Rifle Laser Inner Color
-== Kivärin laserin sisäinen väri
-
-Shotgun Laser Outline Color
-== Haulikon laserin reunaviivan väri
-
-Shotgun Laser Inner Color
-== Haulikon laserin sisäinen väri
-
-Entities
-== Entiteetit
-
-Door Laser Outline Color
-== Oven laserin reunaviivan väri
-
-Door Laser Inner Color
-== Oven laserin sisäinen väri
-
-Freeze Laser Outline Color
-== Jäädytys laserin reunaviivan väri
-
-Freeze Laser Inner Color
-== Jäädytys laserin sisäinen väri
-
-Set all to Rifle
-== Aseta kaikki kivääriksi
-
-Enable ghost
-== Ota käyttöön aave
-
-When you cross the start line, show a ghost tee replicating the movements of your best time
-== Kun ylität maaliviivan, näytä aave-tee, joka toistaa parhaan aikasi liikkeet
-
-Opacity
-== Peittävyys
-
-Only save improvements
-== Tallenna vain parannukset
-
-Overlay entities
-== Päällys entiteetit
-
-Show text entities
-== Näytä teksti-entiteettejä
-
-Adjust the opacity of entities belonging to other teams, such as tees and name plates
-== Säädä muiden joukkueiden entiteettien, kuten teen ja nimilaattojen, läpinäkyvyyttä
-
-Quads are used for background decoration
-== Quadit ovat taustakoristelua varten
-
-Tries to predict other entities to give a feel of low latency
-== Yrittää ennustaa muiden entiteettien liikkeitä antamaan tuntuman pienestä viiveestä
-
-Regular background color
-== Tavallinen taustaväri
-
-Entities background color
-== Entiteettien taustaväri
-
-Show tiles layers from BG map
-== Näytä kartan taustakartan kerrokset
-
-New random timeout code
-== Uusi satunnainen timeout koodi
-
-Run on join
-== Käynnistä liittyessä palvelimeen
-
-Chat command (e.g. showall 1)
-== Chatti komento (esim. showall 1)
-
-Unregister protocol and file extensions
-== Rekisteröimätön protokolla ja tiedostopäätteet
-
-Particles
-== Partikkelit
-
-Extras
-== Lisä.
-
-Loading assets
-== Ladataan resursseja
-
-Assets directory
-== Resurssien kansio
-
-Open the directory to add custom assets
-== Avaa kansio johon voi lisätä omia resursseja
-
-Tutorial
-== Tutoriali
-
-Server executable not found, can't run server
-== Serverin suoritettavaa tiedostoa ei löytynyt, palvelinta ei voitu käynnistää
-
-Loading race demo files
-== Ladataan kilpailu demo tiedostoja
-
-Super
-== Super
-
-Auto
-== Automaattinen
-
-Loading sound files
-== Ladataan ääni tiedostoja
-
-Moved ingame
-== Liikui pelissä
-
-[Translation credits: Add your own name here when you update translations]
-English translation by the DDNet Team
-== Finnish translation by ziltoide, Misse, Igrekyll and ƤØŢĀŤ0Co
-
-[Graphics error]
-Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
-== 
-
-Could not resolve connect address '%s'. See local console for details.
-== 
-
-Connect address error
-== 
-
-Press Ctrl+Shift+G to disable debug graphs.
-== 
-
-Could not connect dummy
-== 
-
-No demo with this filename exists
-== 
-
-"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
-== 
-
-Some fonts could not be loaded. Check the local console for details.
-== 
-
-Team save in progress. You'll be able to load with '/load %s'
-== 
-
-Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails
-== 
-
-Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue
-== 
-
-Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue
-== 
-
-Save failed!
-== 
-
-Auto-sync player camera
-== 
-
-[Auto camera]
-Disabled
-== 
-
-[Auto camera]
-Enabled
-== 
-
-[Auto camera]
-Unavailable for this player
-== 
-
-[Auto camera]
-Inactive
-== 
-
-[Auto camera]
-Active
-== 
-
-Loading maps…
-== 
-
-[Spectating]
-Following %d: %s
-== 
-
-[Spectating]
-Following %s
-== 
-
-[Spectating Camera Mode Icon]
-AUTO
-== 
-
-[Important alert message]
-Press Esc or Tab to dismiss…
-== 
-
-Server alert
-== 
-
-Moderator alert
-== 
-
-Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
-== 
-
-Server could not be started
-== 
-
-Loading map
-== 
-
-Joining Tutorial server
-== 
-
-Save skin
-== 
-
-Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== 
-
-There's an unsaved change in the touch controls editor, you might want to save it.
-== 
-
-This name cannot be used for files and folders
-== 
-
-You will be disconnected from the server.
-== 
-
-Could not get server list from master server
-== 
-
-There are no Tutorial servers available
-== 
-
-Please wait…
-== 
-
-Retrying…
-== 
-
-Error joining Tutorial server
-== 
-
-Could not find a Tutorial server. Check your internet connection.
-== 
-
-You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
-== 
-
-Could not find online Tutorial server.\nStarting and connecting to local server…
-== 
-
-Waiting for local server to stop…
-== 
-
-Waiting for local server to start…
-== 
-
-Error checking player name
-== 
-
-Could not check for existing player with your name. Check your internet connection.
-== 
-
-Unable to save the skin with a reserved name
-== 
-
-Unable to save the skin
-== 
-
-%d/%d KiB (%.1f KiB/s)
-== 
-
-No local servers found (ports %d-%d)
-== 
-
-Start and connect to local server
-== 
-
-Example of usage
-== 
-
-Error loading communities
-== 
-
-Click to remove this community from your favorites.
-== 
-
-Click to add this community to your favorites.
-== 
-
-Online friends (%d)
-== 
-
-Add friends by entering their name below or by clicking their name in the player list.
-== 
-
-Add clanmates by entering their clan below and leaving the name blank.
-== 
-
-Add clan
-== 
-
-Add friend
-== 
-
-[Demo playback]
-Live
-== 
-
-[Demo playback]
-Go to Live
-== 
-
-Toggle auto camera
-== 
-
-Map size
-== 
-
-Are you sure that you want to disconnect and play this demo?
-== 
-
-Dummy is not allowed on this server
-== 
-
-Edit touch controls
-== 
-
-Unsaved changes
-== 
-
-Save all changes before turning off the editor?
-== 
-
-Close
-== 
-
-Error loading touch controls
-== 
-
-Could not load touch controls from file. See local console for details.
-== 
-
-Could not load default touch controls from file. See local console for details.
-== 
-
-Could not load touch controls from clipboard. See local console for details.
-== 
-
-https://wiki.ddnet.org/wiki/Touch_controls
-== 
-
-Community
-== 
-
-Round %d/%d
-== 
-
-[Team status]
-forbidden
-== 
-
-[Team status]
-solo
-== 
-
-[Team status]
-allowed
-== 
-
-[Team status]
-required
-== 
-
-Teams
-== 
-
-[Team size]
-minimum
-== 
-
-[Team size]
-maximum
-== 
-
-Layout
-== 
-
-Visibility
-== 
-
-Behavior
-== 
-
-Save changes
-== 
-
-Discard changes
-== 
-
-Delete button
-== 
-
-Are you sure that you want to delete this button?
-== 
-
-Duplicate
-== 
-
-Please save your changes before duplicating a button.
-== 
-
-Deselect
-== 
-
-You'll lose unsaved changes after deselecting.
-== 
-
-Width
-== 
-
-Height
-== 
-
-Shape
-== 
-
-[Touch button shape]
-Rectangle
-== 
-
-[Touch button shape]
-Circle
-== 
-
-[Touch button label type]
-Plain
-== 
-
-[Touch button label type]
-Localized
-== 
-
-[Touch button label type]
-Icon
-== 
-
-Behavior type
-== 
-
-[Touch button behavior]
-Bind
-== 
-
-[Touch button behavior]
-Bind Toggle
-== 
-
-[Touch button behavior]
-Predefined
-== 
-
-Info
-== 
-
-Command
-== 
-
-Label
-== 
-
-Label type
-== 
-
-Add command
-== 
-
-Delete command
-== 
-
-[Touch button visibility preview]
-Included
-== 
-
-[Touch button visibility preview]
-Excluded
-== 
-
-[Touch button visibility preview]
-Ignore
-== 
-
-Button browser
-== 
-
-You can select buttons directly in the list below, or long press on a touch button on the screen to select it. You can also move and resize buttons by touch.
-== 
-
-New button
-== 
-
-Select button by touch
-== 
-
-No buttons match your filter criteria
-== 
-
-File
-== 
-
-Buttons
-== 
-
-Active color
-== 
-
-Inactive color
-== 
-
-Direct touch input while ingame
-== 
-
-[Direct touch input]
-Disabled
-== 
-
-[Direct touch input]
-Active action
-== 
-
-[Direct touch input]
-Aim
-== 
-
-[Direct touch input]
-Fire
-== 
-
-[Direct touch input]
-Hook
-== 
-
-Direct touch input while spectating
-== 
-
-Preview visibilities
-== 
-
-Preview button visibility while the editor is active.
-== 
-
-Show all buttons
-== 
-
-You can manage your touch controls settings on this page. Only changes that are saved will be available after restarting the client. You can share your touch controls with others by exporting them to the clipboard.\n\nYou can find more detailed information about the touch controls on the DDNet Wiki.
-== 
-
-Open DDNet Wiki
-== 
-
-Error saving touch controls
-== 
-
-Could not save touch controls to file. See local console for details.
-== 
-
-Are you sure that you want to discard the current changes to the touch controls?
-== 
-
-Are you sure that you want to reset the touch controls to default?
-== 
-
-Import from clipboard
-== 
-
-Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
-== 
-
-Export to clipboard
-== 
-
-Save all changes before switching selected button?
-== 
-
-Discard
-== 
-
-No space for button
-== 
-
-There is not enough space available for the button. Check its visibilities and size.
-== 
-
-Selected button not visible
-== 
-
-The selected button is not visible. Do you want to deselect it or edit its visibility?
-== 
-
-Edit
-== 
-
-Width and height are required to be within the range from %d to %d.
-== 
-
-Button position is outside of the screen.
-== 
-
-The selected button is overlapping with other buttons.
-== 
-
-Wrong button settings
-== 
-
-There is not enough space available to place another button.
-== 
-
-[Touch button visibilities]
-Ingame
-== 
-
-[Touch button visibilities]
-Zoom Allowed
-== 
-
-[Touch button visibilities]
-Vote Active
-== 
-
-[Touch button visibilities]
-Dummy Allowed
-== 
-
-[Touch button visibilities]
-Dummy Connected
-== 
-
-[Touch button visibilities]
-Rcon Authed
-== 
-
-[Touch button visibilities]
-Demo Player
-== 
-
-[Touch button visibilities]
-Extra Menu
-== 
-
-[Predefined touch button behaviors]
-Ingame Menu
-== 
-
-[Predefined touch button behaviors]
-Extra Menu
-== 
-
-[Predefined touch button behaviors]
-Emoticon
-== 
-
-[Predefined touch button behaviors]
-Spectate
-== 
-
-[Predefined touch button behaviors]
-Swap Action
-== 
-
-[Predefined touch button behaviors]
-Use Action
-== 
-
-[Predefined touch button behaviors]
-Joystick Action
-== 
-
-[Predefined touch button behaviors]
-Joystick Aim
-== 
-
-[Predefined touch button behaviors]
-Joystick Fire
-== 
-
-[Predefined touch button behaviors]
-Joystick Hook
-== 
-
-Buttons with this behavior execute console commands like regular key binds.
-== 
-
-Buttons with this behavior cycle between executing one of two or more specified commands.
-== 
-
-Buttons with this behavior execute some predefined actions.
-== 
-
-Opens the ingame menu immediately when released.
-== 
-
-The extra menu button which toggles visibility of buttons with "Extra Menu" visibilities. Also opens the ingame menu on long press.
-== 
-
-Opens the emoticon selector (this does not work with binds).
-== 
-
-Opens the spectator menu (this does not work with binds).
-== 
-
-Swaps the active action (fire and hook) for direct touch input and virtual joysticks.
-== 
-
-Uses the active action with the current aiming position.
-== 
-
-Virtual joystick which uses the active action.
-== 
-
-Virtual joystick which only aims without using an action.
-== 
-
-Virtual joystick which always uses fire.
-== 
-
-Virtual joystick which always uses hook.
-== 
-
-Player is ingame, i.e. not spectating.
-== 
-
-Zoom is allowed on this server.
-== 
-
-A vote is currently active.
-== 
-
-Dummy is allowed on this server.
-== 
-
-Dummy is currently connected.
-== 
-
-Player is currently authed in rcon.
-== 
-
-Demo player is currently active.
-== 
-
-The extra menu with the given number is activated.
-== 
-
-[Hertz]
-Hz
-== 
-
-Update Rate
-== 
-
-Save power by lowering update rate (higher input latency)
-== 
-
-Saves file
-== 
-
-Open the saves file
-== 
-
-This skin name cannot be used.
-== 
-
-Skin could not be loaded due to an error. Check the local console for details.
-== 
-
-Skin could not be found.
-== 
-
-No skins match your filter criteria
-== 
-
-Show FPS
-== 
-
-Renders your frame rate in the top right
-== 
-
-Tee
-== 
-
-Show spectator cursor
-== 
-
-Show client IDs (scoreboard, chat, spectator)
-== 
-
-Show number of spectators
-== 
-
-Show only chat messages from team members
-== 
-
-Censor profanity
-== 
-
-Chat background color
-== 
-
-[Show name plates]
-None
-== 
-
-[Show name plates]
-Own
-== 
-
-[Show name plates]
-Others
-== 
-
-[Show name plates]
-All
-== 
-
-Name plates offset
-== 
-
-Show friend icon in name plates
-== 
-
-Show client IDs in name plates
-== 
-
-Show client IDs on a separate line
-== 
-
-Client IDs size
-== 
-
-Hook Strength
-== 
-
-Size of hook strength icon and number indicator
-== 
-
-Key Presses
-== 
-
-Show players' key presses
-== 
-
-[Show players' key presses]
-None
-== 
-
-[Show players' key presses]
-Own
-== 
-
-[Show players' key presses]
-Others
-== 
-
-[Show players' key presses]
-All
-== 
-
-Size of key press icons
-== 
-
-Preview player's name plate
-== 
-
-Preview dummy's name plate
-== 
-
-Width of your own hook collision line
-== 
-
-Width of others' hook collision line
-== 
-
-Colors of the hook collision line:
-== 
-
-[Hook collision line color]
-When nothing is hookable
-== 
-
-[Hook collision line color]
-When something is hookable
-== 
-
-[Hook collision line color]
-When a Tee is hookable
-== 
-
-[Hook collision line color]
-Hook collision line tip
-== 
-
-Preview 'Hook collisions' being pressed
-== 
-
-Dragger Outline Color
-== 
-
-Dragger Inner Color
-== 
-
-Show background quads
-== 
-
-AntiPing: prediction margin
-== 
-
-Basic
-== 
-
-Custom
-== 
-
-Are you sure that you want to delete '%s'?
-== 
-
-Delete skin
-== 
-
-Unable to delete skin
 == 
 
 Converse
 == 
 
-Scoreboard cursor
+Statboard
 == 
 
-Download
+Show entities
 == 
 
-[Spectators]
-%d others…
+Windowed fullscreen
 == 
 
-[Team and size]
-%d\n(%d/%d)
+Allows maps to render with more detail
 == 
 
-Team %d (%d/%d)
+Renderer
 == 
 
-Unmute
+default
 == 
 
-Mute
+custom
 == 
 
-Unmute emoticons
+Graphics cards
 == 
 
-Mute emoticons
+auto
 == 
 
-[skins]
-Body
+Enable long pain sound (used when shooting in freeze)
 == 
 
-[skins]
-Marking
+Assets
 == 
 
-[skins]
-Decoration
+Kill Messages
 == 
 
-[skins]
-Hands
+Kill Message Normal Color
 == 
 
-[skins]
-Feet
+Kill Message Highlight Color
 == 
 
-[skins]
-Eyes
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
+Overlay entities
+== 
+
+Show text entities
+== 
+
+Opacity
+== 
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== 
+
+Show quads
+== 
+
+Quads are used for background decoration
+== 
+
+Tries to predict other entities to give a feel of low latency
+== 
+
+Show local player's key presses
+== 
+
+Entities Background color
+== 
+
+Show tiles layers from BG map
+== 
+
+Regular Background Color
+== 
+
+New random timeout code
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
+== 
+
+Entities
+== 
+
+Particles
+== 
+
+Assets directory
+== 
+
+Tutorial
+== 
+
+Can't find a Tutorial server
+== 
+
+Server executable not found, can't run server
+== 
+
+Super
+== 
+
+Team %d
+== 
+
+Auto
 == 
 
 Spree
 == 
 
 Grabs
-== 
-
-Aim
-== 
-
-Active: Fire
-== 
-
-Active: Hook
-== 
-
-https://wiki.ddnet.org/wiki/Mapping
 == 

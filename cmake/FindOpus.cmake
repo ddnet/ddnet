@@ -24,7 +24,6 @@ find_package_handle_standard_args(Opus DEFAULT_MSG OPUS_INCLUDEDIR)
 mark_as_advanced(OPUS_INCLUDEDIR OPUS_LIBRARY)
 
 if(OPUS_FOUND)
-  is_bundled(OPUS_BUNDLED "${OPUS_LIBRARY}")
   set(OPUS_INCLUDE_DIRS ${OPUS_INCLUDEDIR})
   if(OPUS_LIBRARY)
     set(OPUS_LIBRARIES ${OPUS_LIBRARY})

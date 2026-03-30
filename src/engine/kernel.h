@@ -3,6 +3,8 @@
 #ifndef ENGINE_KERNEL_H
 #define ENGINE_KERNEL_H
 
+#include <base/system.h>
+
 class IKernel;
 class IInterface;
 
@@ -17,41 +19,39 @@ protected:
 
 public:
 	IInterface() :
-		m_pKernel(nullptr) {}
-	virtual void Shutdown() {}
-	virtual ~IInterface() = default;
+		m_pKernel(0) {}
+	virtual ~IInterface() {}
 };
 
-#define MACRO_INTERFACE(Name) \
+#define MACRO_INTERFACE(Name, ver) \
 public: \
 	static const char *InterfaceName() { return Name; } \
 \
 private:
 
-// This kernel class makes the structure very flat and basically singletons.
+// This kernel thingie makes the structure very flat and basiclly singletons.
 // I'm not sure if this is a good idea but it works for now.
 class IKernel
 {
 	// hide the implementation
-	virtual void RegisterInterfaceImpl(const char *pInterfaceName, IInterface *pInterface, bool Destroy) = 0;
-	virtual void ReregisterInterfaceImpl(const char *pInterfaceName, IInterface *pInterface) = 0;
-	virtual IInterface *RequestInterfaceImpl(const char *pInterfaceName) = 0;
+	virtual bool RegisterInterfaceImpl(const char *InterfaceName, IInterface *pInterface, bool Destroy) = 0;
+	virtual bool ReregisterInterfaceImpl(const char *InterfaceName, IInterface *pInterface) = 0;
+	virtual IInterface *RequestInterfaceImpl(const char *InterfaceName) = 0;
 
 public:
 	static IKernel *Create();
-	virtual void Shutdown() = 0;
-	virtual ~IKernel() = default;
+	virtual ~IKernel() {}
 
 	// templated access to handle pointer conversions and interface names
 	template<class TINTERFACE>
-	void RegisterInterface(TINTERFACE *pInterface, bool Destroy = true)
+	bool RegisterInterface(TINTERFACE *pInterface, bool Destroy = true)
 	{
-		RegisterInterfaceImpl(TINTERFACE::InterfaceName(), pInterface, Destroy);
+		return RegisterInterfaceImpl(TINTERFACE::InterfaceName(), pInterface, Destroy);
 	}
 	template<class TINTERFACE>
-	void ReregisterInterface(TINTERFACE *pInterface)
+	bool ReregisterInterface(TINTERFACE *pInterface)
 	{
-		ReregisterInterfaceImpl(TINTERFACE::InterfaceName(), pInterface);
+		return ReregisterInterfaceImpl(TINTERFACE::InterfaceName(), pInterface);
 	}
 
 	// Usage example:

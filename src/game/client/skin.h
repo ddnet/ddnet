@@ -1,20 +1,19 @@
+
 #ifndef GAME_CLIENT_SKIN_H
 #define GAME_CLIENT_SKIN_H
-
 #include <base/color.h>
-
+#include <base/tl/sorted_array.h>
+#include <base/vmath.h>
 #include <engine/graphics.h>
-#include <engine/shared/protocol.h>
+#include <limits>
 
 // do this better and nicer
-class CSkin
+struct CSkin
 {
-	char m_aName[MAX_SKIN_LENGTH];
+	bool m_IsVanilla;
 
-public:
-	class CSkinTextures
+	struct SSkinTextures
 	{
-	public:
 		IGraphics::CTextureHandle m_Body;
 		IGraphics::CTextureHandle m_BodyOutline;
 
@@ -24,79 +23,118 @@ public:
 		IGraphics::CTextureHandle m_Hands;
 		IGraphics::CTextureHandle m_HandsOutline;
 
-		IGraphics::CTextureHandle m_aEyes[6];
+		IGraphics::CTextureHandle m_Eyes[6];
 
-		void Reset();
-		void Unload(IGraphics *pGraphics);
+		void Reset()
+		{
+			m_Body = IGraphics::CTextureHandle();
+			m_BodyOutline = IGraphics::CTextureHandle();
+			m_Feet = IGraphics::CTextureHandle();
+			m_FeetOutline = IGraphics::CTextureHandle();
+			m_Hands = IGraphics::CTextureHandle();
+			m_HandsOutline = IGraphics::CTextureHandle();
+			for(auto &Eye : m_Eyes)
+				Eye = IGraphics::CTextureHandle();
+		}
 	};
 
-	CSkinTextures m_OriginalSkin;
-	CSkinTextures m_ColorableSkin;
+	SSkinTextures m_OriginalSkin;
+	SSkinTextures m_ColorableSkin;
+	char m_aName[24];
 	ColorRGBA m_BloodColor;
 
-	class CSkinMetricVariableInt
+	template<bool IsSizeType>
+	struct SSkinMetricVariableInt
 	{
-	public:
 		int m_Value;
+		operator int() { return m_Value; }
+		SSkinMetricVariableInt &operator=(int NewVal)
+		{
+			if(IsSizeType)
+				m_Value = maximum(m_Value, NewVal);
+			else
+				m_Value = minimum(m_Value, NewVal);
+			return *this;
+		}
 
-		operator int() const;
-		CSkinMetricVariableInt &operator=(int NewVal);
-		CSkinMetricVariableInt();
-		void Reset();
+		SSkinMetricVariableInt()
+		{
+			Reset();
+		}
+
+		void Reset()
+		{
+			if(IsSizeType)
+				m_Value = std::numeric_limits<int>::lowest();
+			else
+				m_Value = std::numeric_limits<int>::max();
+		}
 	};
 
-	class CSkinMetricVariableSize
+	struct SSkinMetricVariable
 	{
-	public:
-		int m_Value;
-
-		operator int() const;
-		CSkinMetricVariableSize &operator=(int NewVal);
-		CSkinMetricVariableSize();
-		void Reset();
-	};
-
-	class CSkinMetricVariable
-	{
-	public:
-		CSkinMetricVariableSize m_Width;
-		CSkinMetricVariableSize m_Height;
-		CSkinMetricVariableInt m_OffsetX;
-		CSkinMetricVariableInt m_OffsetY;
+		SSkinMetricVariableInt<true> m_Width;
+		SSkinMetricVariableInt<true> m_Height;
+		SSkinMetricVariableInt<false> m_OffsetX;
+		SSkinMetricVariableInt<false> m_OffsetY;
 
 		// these can be used to normalize the metrics
-		CSkinMetricVariableSize m_MaxWidth;
-		CSkinMetricVariableSize m_MaxHeight;
+		SSkinMetricVariableInt<true> m_MaxWidth;
+		SSkinMetricVariableInt<true> m_MaxHeight;
 
-		float WidthNormalized() const;
-		float HeightNormalized() const;
-		float OffsetXNormalized() const;
-		float OffsetYNormalized() const;
-		void Reset();
+		float WidthNormalized()
+		{
+			return (float)m_Width / (float)m_MaxWidth;
+		}
+
+		float HeightNormalized()
+		{
+			return (float)m_Height / (float)m_MaxHeight;
+		}
+
+		float OffsetXNormalized()
+		{
+			return (float)m_OffsetX / (float)m_MaxWidth;
+		}
+
+		float OffsetYNormalized()
+		{
+			return (float)m_OffsetY / (float)m_MaxHeight;
+		}
+
+		void Reset()
+		{
+			m_Width.Reset();
+			m_Height.Reset();
+			m_OffsetX.Reset();
+			m_OffsetY.Reset();
+			m_MaxWidth.Reset();
+			m_MaxHeight.Reset();
+		}
 	};
 
-	class CSkinMetrics
+	struct SSkinMetrics
 	{
-	public:
-		CSkinMetricVariable m_Body;
-		CSkinMetricVariable m_Feet;
+		SSkinMetricVariable m_Body;
+		SSkinMetricVariable m_Feet;
 
-		CSkinMetrics();
-		void Reset();
+		void Reset()
+		{
+			m_Body.Reset();
+			m_Feet.Reset();
+		}
+
+		SSkinMetrics()
+		{
+			Reset();
+		}
 	};
-	CSkinMetrics m_Metrics;
+	SSkinMetrics m_Metrics;
 
-	bool operator<(const CSkin &Other) const;
-	bool operator==(const CSkin &Other) const;
+	bool operator<(const CSkin &Other) const { return str_comp(m_aName, Other.m_aName) < 0; }
 
-	CSkin(const char *pName);
-	CSkin(CSkin &&) = default;
-	CSkin &operator=(CSkin &&) = default;
-
-	const char *GetName() const { return m_aName; }
-
-	static bool IsValidName(const char *pName);
-	static const char m_aSkinNameRestrictions[];
+	bool operator<(const char *pOther) const { return str_comp(m_aName, pOther) < 0; }
+	bool operator==(const char *pOther) const { return !str_comp(m_aName, pOther); }
 };
 
 #endif

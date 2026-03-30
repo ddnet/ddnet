@@ -1,6 +1,6 @@
 #ifndef GAME_MAPITEMS_EX_H
 #define GAME_MAPITEMS_EX_H
-#include <generated/protocol.h>
+#include <game/generated/protocol.h>
 
 enum
 {
@@ -11,18 +11,25 @@ enum
 	END_MAPITEMTYPES_UUID,
 };
 
-class CMapItemTest
+struct CMapItemTest
 {
-public:
+	enum
+	{
+		CURRENT_VERSION = 1
+	};
+
 	int m_Version;
 	int m_aFields[2];
 	int m_Field3;
 	int m_Field4;
 };
 
-class CMapItemAutoMapperConfig
+struct CMapItemAutoMapperConfig
 {
-public:
+	enum
+	{
+		CURRENT_VERSION = 1
+	};
 	enum
 	{
 		FLAG_AUTOMATIC = 1

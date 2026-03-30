@@ -1,16 +1,10 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "laser.h"
-
 #include "character.h"
+#include <game/generated/protocol.h>
 
 #include <engine/shared/config.h>
-
-#include <generated/protocol.h>
-
-#include <game/client/laser_data.h>
-#include <game/collision.h>
-#include <game/mapitems.h>
 
 CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
@@ -23,8 +17,9 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_Dir = Direction;
 	m_Bounces = 0;
 	m_EvalTick = 0;
+	m_TelePos = vec2(0, 0);
+	m_WasTele = false;
 	m_Type = Type;
-	m_ZeroEnergyBounceInLastTick = false;
 	m_TuneZone = GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
 	GameWorld()->InsertEntity(this);
 	DoBounce();
@@ -32,58 +27,36 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 
 bool CLaser::HitCharacter(vec2 From, vec2 To)
 {
-	static const vec2 StackedLaserShotgunBugSpeed = vec2(-2147483648.0f, -2147483648.0f);
 	vec2 At;
-	CCharacter *pOwnerChar = GameWorld()->GetCharacterById(m_Owner);
+	CCharacter *pOwnerChar = GameWorld()->GetCharacterByID(m_Owner);
 	CCharacter *pHit;
-	bool DontHitSelf = (g_Config.m_SvOldLaser || !GameWorld()->m_WorldConfig.m_IsDDRace) || (m_Bounces == 0);
+	bool DontHitSelf = (g_Config.m_SvOldLaser || !GameWorld()->m_WorldConfig.m_IsDDRace) || (m_Bounces == 0 && !m_WasTele);
 
-	if(pOwnerChar ? (!pOwnerChar->LaserHitDisabled() && m_Type == WEAPON_LASER) || (!pOwnerChar->ShotgunHitDisabled() && m_Type == WEAPON_SHOTGUN) : g_Config.m_SvHit)
-		pHit = GameWorld()->IntersectCharacter(m_Pos, To, 0.f, At, DontHitSelf ? pOwnerChar : nullptr, m_Owner);
+	if(pOwnerChar ? (!(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_LASER) && m_Type == WEAPON_LASER) || (!(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_SHOTGUN) && m_Type == WEAPON_SHOTGUN) : g_Config.m_SvHit)
+		pHit = GameWorld()->IntersectCharacter(m_Pos, To, 0.f, At, DontHitSelf ? pOwnerChar : 0, m_Owner);
 	else
-		pHit = GameWorld()->IntersectCharacter(m_Pos, To, 0.f, At, DontHitSelf ? pOwnerChar : nullptr, m_Owner, pOwnerChar);
+		pHit = GameWorld()->IntersectCharacter(m_Pos, To, 0.f, At, DontHitSelf ? pOwnerChar : 0, m_Owner, pOwnerChar);
 
-	if(!pHit || (pHit == pOwnerChar && g_Config.m_SvOldLaser) || (pHit != pOwnerChar && pOwnerChar ? (pOwnerChar->LaserHitDisabled() && m_Type == WEAPON_LASER) || (pOwnerChar->ShotgunHitDisabled() && m_Type == WEAPON_SHOTGUN) : !g_Config.m_SvHit))
+	if(!pHit || (pHit == pOwnerChar && g_Config.m_SvOldLaser) || (pHit != pOwnerChar && pOwnerChar ? (pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_LASER && m_Type == WEAPON_LASER) || (pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_SHOTGUN && m_Type == WEAPON_SHOTGUN) : !g_Config.m_SvHit))
 		return false;
 	m_From = From;
 	m_Pos = At;
 	m_Energy = -1;
 	if(m_Type == WEAPON_SHOTGUN)
 	{
-		float Strength = TuningList()[m_TuneZone].m_ShotgunStrength;
+		vec2 Temp;
 
-		const vec2 &HitPos = pHit->Core()->m_Pos;
-		if(!g_Config.m_SvOldLaser)
-		{
-			if(m_PrevPos != HitPos)
-			{
-				pHit->AddVelocity(normalize(m_PrevPos - HitPos) * Strength);
-			}
-			else
-			{
-				pHit->SetRawVelocity(StackedLaserShotgunBugSpeed);
-			}
-		}
-		else if(g_Config.m_SvOldLaser && pOwnerChar)
-		{
-			if(pOwnerChar->Core()->m_Pos != HitPos)
-			{
-				pHit->AddVelocity(normalize(pOwnerChar->Core()->m_Pos - HitPos) * Strength);
-			}
-			else
-			{
-				pHit->SetRawVelocity(StackedLaserShotgunBugSpeed);
-			}
-		}
+		float Strength = GetTuning(m_TuneZone)->m_ShotgunStrength;
+
+		if(g_Config.m_SvOldLaser && pOwnerChar)
+			Temp = pHit->Core()->m_Vel + normalize(pOwnerChar->Core()->m_Pos - pHit->Core()->m_Pos) * Strength;
 		else
-		{
-			// Re-apply move restrictions as a part of 'shotgun bug' reproduction
-			pHit->ApplyMoveRestrictions();
-		}
+			Temp = pHit->Core()->m_Vel + normalize(m_PrevPos - pHit->Core()->m_Pos) * Strength;
+		pHit->Core()->m_Vel = ClampVel(pHit->m_MoveRestrictions, Temp);
 	}
 	else if(m_Type == WEAPON_LASER)
 	{
-		pHit->Unfreeze();
+		pHit->UnFreeze();
 	}
 	return true;
 }
@@ -101,9 +74,18 @@ void CLaser::DoBounce()
 	vec2 Coltile;
 
 	int Res;
+	int z;
+
+	if(m_WasTele)
+	{
+		m_PrevPos = m_TelePos;
+		m_Pos = m_TelePos;
+		m_TelePos = vec2(0, 0);
+	}
+
 	vec2 To = m_Pos + m_Dir * m_Energy;
 
-	Res = Collision()->IntersectLineTeleWeapon(m_Pos, To, &Coltile, &To);
+	Res = Collision()->IntersectLineTeleWeapon(m_Pos, To, &Coltile, &To, &z);
 
 	if(Res)
 	{
@@ -122,7 +104,7 @@ void CLaser::DoBounce()
 				f = Collision()->GetTile(round_to_int(Coltile.x), round_to_int(Coltile.y));
 				Collision()->SetCollisionAt(round_to_int(Coltile.x), round_to_int(Coltile.y), TILE_SOLID);
 			}
-			Collision()->MovePoint(&TempPos, &TempDir, 1.0f, nullptr);
+			Collision()->MovePoint(&TempPos, &TempDir, 1.0f, 0);
 			if(Res == -1)
 			{
 				Collision()->SetCollisionAt(round_to_int(Coltile.x), round_to_int(Coltile.y), f);
@@ -132,24 +114,18 @@ void CLaser::DoBounce()
 
 			const float Distance = distance(m_From, m_Pos);
 			// Prevent infinite bounces
-			if(Distance == 0.0f && m_ZeroEnergyBounceInLastTick)
-			{
+			if(Distance == 0.0f)
 				m_Energy = -1;
-			}
 			else
-			{
 				m_Energy -= Distance + GetTuning(m_TuneZone)->m_LaserBounceCost;
-			}
-			m_ZeroEnergyBounceInLastTick = Distance == 0.0f;
 
 			m_Bounces++;
+			m_WasTele = false;
 
 			int BounceNum = GetTuning(m_TuneZone)->m_LaserBounceNum;
 
 			if(m_Bounces > BounceNum)
 				m_Energy = -1;
-
-			GameWorld()->CreatePredictedSound(m_Pos, SOUND_LASER_BOUNCE, m_Id);
 		}
 	}
 	else
@@ -179,11 +155,13 @@ void CLaser::Tick()
 	}
 }
 
-CLaser::CLaser(CGameWorld *pGameWorld, int Id, CLaserData *pLaser) :
+CLaser::CLaser(CGameWorld *pGameWorld, int ID, CNetObj_Laser *pLaser) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
 {
-	m_Pos = pLaser->m_To;
-	m_From = pLaser->m_From;
+	m_Pos.x = pLaser->m_X;
+	m_Pos.y = pLaser->m_Y;
+	m_From.x = pLaser->m_FromX;
+	m_From.y = pLaser->m_FromY;
 	m_EvalTick = pLaser->m_StartTick;
 	m_TuneZone = GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
 	m_Owner = -2;
@@ -196,9 +174,18 @@ CLaser::CLaser(CGameWorld *pGameWorld, int Id, CLaserData *pLaser) :
 		m_Dir = normalize(m_Dir);
 	else
 		m_Energy = 0;
-	m_Type = pLaser->m_Type == LASERTYPE_SHOTGUN ? WEAPON_SHOTGUN : WEAPON_LASER;
+	m_Type = WEAPON_LASER;
 	m_PrevPos = m_From;
-	m_Id = Id;
+	m_ID = ID;
+}
+
+void CLaser::FillInfo(CNetObj_Laser *pLaser)
+{
+	pLaser->m_X = (int)m_Pos.x;
+	pLaser->m_Y = (int)m_Pos.y;
+	pLaser->m_FromX = (int)m_From.x;
+	pLaser->m_FromY = (int)m_From.y;
+	pLaser->m_StartTick = m_EvalTick;
 }
 
 bool CLaser::Match(CLaser *pLaser)
@@ -211,21 +198,4 @@ bool CLaser::Match(CLaser *pLaser)
 	const vec2 OtherDiff = pLaser->m_Pos - pLaser->m_From;
 	const float DirError = distance(normalize(OtherDiff) * length(ThisDiff), ThisDiff);
 	return DirError <= 2.f;
-}
-
-CLaserData CLaser::GetData() const
-{
-	CLaserData Result;
-	Result.m_From.x = m_From.x;
-	Result.m_From.y = m_From.y;
-	Result.m_To.x = m_Pos.x;
-	Result.m_To.y = m_Pos.y;
-	Result.m_StartTick = m_EvalTick;
-	Result.m_ExtraInfo = true;
-	Result.m_Owner = m_Owner;
-	Result.m_Type = m_Type == WEAPON_SHOTGUN ? LASERTYPE_SHOTGUN : LASERTYPE_RIFLE;
-	Result.m_Subtype = -1;
-	Result.m_TuneZone = m_TuneZone;
-	Result.m_SwitchNumber = m_Number;
-	return Result;
 }

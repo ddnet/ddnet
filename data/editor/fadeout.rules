@@ -1,0 +1,86 @@
+[Fadeout]
+Index 6
+
+Index 7
+Pos 0 -1 FULL
+Pos -1 0 EMPTY
+Pos 0 1 FULL
+Pos 1 0 FULL
+Pos 1 -1 FULL
+Pos 1 1 FULL
+
+Index 7 XFLIP
+Pos 0 -1 FULL
+Pos -1 0 FULL
+Pos 0 1 FULL
+Pos 1 0 EMPTY
+Pos -1 -1 FULL
+Pos -1 1 FULL
+
+Index 8
+Pos 0 -1 EMPTY
+Pos -1 0 FULL
+Pos 0 1 FULL
+Pos 1 0 FULL
+Pos -1 1 FULL
+Pos 1 1 FULL
+
+Index 8 YFLIP
+Pos 0 -1 FULL
+Pos -1 0 FULL
+Pos 0 1 EMPTY
+Pos 1 0 FULL
+Pos -1 -1 FULL
+Pos 1 -1 FULL
+
+Index 9
+Pos 0 -1 FULL
+Pos -1 0 FULL
+Pos 0 1 FULL
+Pos 1 0 FULL
+Pos 1 1 EMPTY
+
+Index 9 YFLIP
+Pos 0 -1 FULL
+Pos -1 0 FULL
+Pos 0 1 FULL
+Pos 1 0 FULL
+Pos 1 -1 EMPTY
+
+Index 9 XFLIP
+Pos 0 -1 FULL
+Pos -1 0 FULL
+Pos 0 1 FULL
+Pos 1 0 FULL
+Pos -1 1 EMPTY
+
+Index 9 XFLIP YFLIP
+Pos 0 -1 FULL
+Pos -1 0 FULL
+Pos 0 1 FULL
+Pos 1 0 FULL
+Pos -1 -1 EMPTY
+
+Index 10
+Pos 0 -1 EMPTY
+Pos -1 0 EMPTY
+Pos 0 1 FULL
+Pos 1 0 FULL
+
+Index 10 XFLIP
+Pos 0 -1 EMPTY
+Pos -1 0 FULL
+Pos 0 1 FULL
+Pos 1 0 EMPTY
+
+Index 10 YFLIP
+Pos 0 -1 FULL
+Pos -1 0 EMPTY
+Pos 0 1 EMPTY
+Pos 1 0 FULL
+
+Index 10 XFLIP YFLIP
+Pos 0 -1 FULL
+Pos -1 0 FULL
+Pos 0 1 EMPTY
+Pos 1 0 EMPTY

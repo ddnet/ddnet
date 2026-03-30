@@ -1,15 +1,15 @@
 import sys
-from .datatypes import EmitDefinition
+from .datatypes import EmitDefinition, EmitTypeDeclaration
 from . import content
 from . import network
 
 def create_enum_table(names, num):
 	lines = []
 	lines += ["enum", "{"]
-	lines += [f"\t{names[0]}=0,"]
+	lines += ["\t%s=0,"%names[0]]
 	for name in names[1:]:
-		lines += [f"\t{name},"]
-	lines += [f"\t{num}", "};"]
+		lines += ["\t%s,"%name]
+	lines += ["\t%s" % num, "};"]
 	return lines
 
 def create_flags_table(names):
@@ -17,7 +17,7 @@ def create_flags_table(names):
 	lines += ["enum", "{"]
 	i = 0
 	for name in names:
-		lines += [f"\t{name} = 1<<{int(i)},"]
+		lines += ["\t%s = 1<<%d," % (name,i)]
 		i += 1
 	lines += ["};"]
 	return lines
@@ -25,10 +25,10 @@ def create_flags_table(names):
 def EmitEnum(names, num):
 	print("enum")
 	print("{")
-	print(f"\t{names[0]}=0,")
+	print("\t%s=0," % names[0])
 	for name in names[1:]:
-		print(f"\t{name},")
-	print(f"\t{num}")
+		print("\t%s," % name)
+	print("\t%s" % num)
 	print("};")
 
 def EmitFlags(names):
@@ -36,7 +36,7 @@ def EmitFlags(names):
 	print("{")
 	i = 0
 	for name in names:
-		print(f"\t{name} = 1<<{int(i)},")
+		print("\t%s = 1<<%d," % (name,i))
 		i += 1
 	print("};")
 
@@ -49,27 +49,37 @@ def main():
 	gen_server_content_source = "server_content_source" in sys.argv
 
 	if gen_client_content_header:
-		print("#ifndef GENERATED_CLIENT_DATA7_H")
-		print("#define GENERATED_CLIENT_DATA7_H")
+		print("#ifndef CLIENT_CONTENT7_HEADER")
+		print("#define CLIENT_CONTENT7_HEADER")
 
 	if gen_server_content_header:
-		print("#ifndef GENERATED_SERVER_DATA7_H")
-		print("#define GENERATED_SERVER_DATA7_H")
+		print("#ifndef SERVER_CONTENT7_HEADER")
+		print("#define SERVER_CONTENT7_HEADER")
 
 
 	if gen_client_content_header or gen_server_content_header:
 		# print some includes
 		print('#include <engine/graphics.h>')
-		print('#include "data_types.h"')
+		print('#include <engine/sound.h>')
 		print("namespace client_data7 {")
+
+		# emit the type declarations
+		contentlines = open("datasrc/content.py", "rb").readlines()
+		order = []
+		for line in contentlines:
+			line = line.strip()
+			if line[:6] == "class ".encode() and "(Struct)".encode() in line:
+				order += [line.split()[1].split("(".encode())[0].decode("ascii")]
+		for name in order:
+			EmitTypeDeclaration(content.__dict__[name])
 
 		# the container pointer
 		print('extern CDataContainer *g_pData;')
 
 		# enums
-		EmitEnum([f"IMAGE_{i.name.value.upper()}" for i in content.container.images.items], "NUM_IMAGES")
-		EmitEnum([f"ANIM_{i.name.value.upper()}" for i in content.container.animations.items], "NUM_ANIMS")
-		EmitEnum([f"SPRITE_{i.name.value.upper()}" for i in content.container.sprites.items], "NUM_SPRITES")
+		EmitEnum(["IMAGE_%s"%i.name.value.upper() for i in content.container.images.items], "NUM_IMAGES")
+		EmitEnum(["ANIM_%s"%i.name.value.upper() for i in content.container.animations.items], "NUM_ANIMS")
+		EmitEnum(["SPRITE_%s"%i.name.value.upper() for i in content.container.sprites.items], "NUM_SPRITES")
 
 	if gen_client_content_source or gen_server_content_source:
 		if gen_client_content_source:
@@ -84,21 +94,20 @@ def main():
 # NETWORK
 	if gen_network_header:
 
-		print("#ifndef GENERATED_PROTOCOL7_H")
-		print("#define GENERATED_PROTOCOL7_H")
-		print("class CUnpacker;")
-		print("class CSnapshot;")
+		print("#ifndef GAME_GENERATED_PROTOCOL7_H")
+		print("#define GAME_GENERATED_PROTOCOL7_H")
+		print("#include <engine/shared/protocol.h>")
 		print("#include <engine/message.h>")
 		print("namespace protocol7 {")
 		print(network.RawHeader)
 
 		for e in network.Enums:
-			for l in create_enum_table([f"{e.name}_{v}" for v in e.values], f'NUM_{e.name}S'):
+			for l in create_enum_table(["%s_%s"%(e.name, v) for v in e.values], 'NUM_%sS'%e.name):
 				print(l)
 			print("")
 
 		for e in network.Flags:
-			for l in create_flags_table([f"{e.name}_{v}" for v in e.values]):
+			for l in create_flags_table(["%s_%s" % (e.name, v) for v in e.values]):
 				print(l)
 			print("")
 
@@ -129,8 +138,8 @@ def main():
 				print(line)
 			print("")
 
-		EmitEnum([f"SOUND_{i.name.value.upper()}" for i in content.container.sounds.items], "NUM_SOUNDS")
-		EmitEnum([f"WEAPON_{i.name.value.upper()}" for i in content.container.weapons.id.items], "NUM_WEAPONS")
+		EmitEnum(["SOUND_%s"%i.name.value.upper() for i in content.container.sounds.items], "NUM_SOUNDS")
+		EmitEnum(["WEAPON_%s"%i.name.value.upper() for i in content.container.weapons.id.items], "NUM_WEAPONS")
 
 		print("""
 
@@ -151,8 +160,6 @@ def main():
 		CNetObjHandler();
 
 		int ValidateObj(int Type, const void *pData, int Size);
-		void DebugDumpSnapshot(const CSnapshot *pSnap) const;
-		int DumpObj(int Type, const void *pData, int Size) const;
 		const char *GetObjName(int Type) const;
 		int GetObjSize(int Type) const;
 		const char *FailedObjOn() const;
@@ -166,7 +173,7 @@ def main():
 	""")
 
 		print("}")
-		print("#endif // GENERATED_PROTOCOL7_H")
+		print("#endif // GAME_GENERATED_PROTOCOL7_H")
 
 
 	if gen_network_source:
@@ -174,13 +181,8 @@ def main():
 		lines = []
 
 		lines += ['#include "protocol7.h"']
-		lines += ['']
-		lines += ['#include <base/dbg.h>']
-		lines += ['#include <base/str.h>']
-		lines += ['']
-		lines += ['#include <engine/shared/packer.h>']
 		lines += ['#include <engine/shared/protocol.h>']
-		lines += ['#include <engine/shared/snapshot.h>']
+		lines += ['#include <engine/message.h>']
 
 		lines += ['namespace protocol7 {']
 
@@ -218,19 +220,19 @@ def main():
 
 		lines += ["const char *CNetObjHandler::ms_apObjNames[] = {"]
 		lines += ['\t"invalid",']
-		lines += [f'\t"{o.name}",' for o in network.Objects]
+		lines += ['\t"%s",' % o.name for o in network.Objects]
 		lines += ['\t""', "};", ""]
 
 		lines += ["int CNetObjHandler::ms_aObjSizes[] = {"]
 		lines += ['\t0,']
-		lines += [f'\tsizeof({o.struct_name}),' for o in network.Objects]
+		lines += ['\tsizeof(%s),' % o.struct_name for o in network.Objects]
 		lines += ['\t0', "};", ""]
 
 
 		lines += ['const char *CNetObjHandler::ms_apMsgNames[] = {']
 		lines += ['\t"invalid",']
 		for msg in network.Messages:
-			lines += [f'\t"{msg.name}",']
+			lines += ['\t"%s",' % msg.name]
 		lines += ['\t""']
 		lines += ['};']
 		lines += ['']
@@ -268,45 +270,7 @@ def main():
 		lines += ['\t{']
 
 		for item in network.Objects:
-			for line in item.emit_validate(network.Objects):
-				lines += ["\t" + line]
-			lines += ['\t']
-		lines += ['\t}']
-		lines += ['\treturn -1;']
-		lines += ['};']
-		lines += ['']
-
-		for l in lines:
-			print(l)
-
-		print("""\
-void CNetObjHandler::DebugDumpSnapshot(const ::CSnapshot *pSnap) const
-{
-	dbg_msg("snapshot", "data_size=%d num_items=%d", pSnap->DataSize(), pSnap->NumItems());
-	for(int i = 0; i < pSnap->NumItems(); i++)
-	{
-		const CSnapshotItem *pItem = pSnap->GetItem(i);
-		int Size = pSnap->GetItemSize(i);
-		int Type = pSnap->GetItemType(i);
-		const char *pName = GetObjName(Type);
-		dbg_msg("snapshot", "\\t%s type=%d id=%d size=%d", pName, pItem->InternalType(), pItem->Id(), Size);
-		if(!DumpObj(Type, pItem->Data(), Size))
-			continue;
-
-		for(size_t b = 0; b < Size / sizeof(int32_t); b++)
-			dbg_msg("snapshot", "\\t\\t%3d %12d\\t%08x", (int)b, pItem->Data()[b], pItem->Data()[b]);
-	}
-}\n""")
-
-		lines = []
-		lines += ['int CNetObjHandler::DumpObj(int Type, const void *pData, int Size) const']
-		lines += ['{']
-		lines += ["\tchar aRawData[512];"]
-		lines += ['\tswitch(Type)']
-		lines += ['\t{']
-
-		for item in network.Objects:
-			for line in item.emit_dump(network.Objects):
+			for line in item.emit_validate():
 				lines += ["\t" + line]
 			lines += ['\t']
 		lines += ['\t}']

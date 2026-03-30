@@ -1,17 +1,9 @@
 #ifndef ENGINE_SERVER_DATABASES_CONNECTION_H
 #define ENGINE_SERVER_DATABASES_CONNECTION_H
 
-#include "connection_pool.h"
-
-#include <engine/shared/protocol.h>
+#include <base/system.h>
 
 #include <memory>
-
-enum
-{
-	// MAX_NAME_LENGTH includes the size with \0, which is not necessary in SQL
-	MAX_NAME_LENGTH_SQL = MAX_NAME_LENGTH - 1,
-};
 
 class IConsole;
 
@@ -19,10 +11,16 @@ class IConsole;
 class IDbConnection
 {
 public:
-	IDbConnection(const char *pPrefix);
-	virtual ~IDbConnection() = default;
+	IDbConnection(const char *pPrefix)
+	{
+		str_copy(m_aPrefix, pPrefix, sizeof(m_aPrefix));
+	}
+	virtual ~IDbConnection() {}
 	IDbConnection &operator=(const IDbConnection &) = delete;
-	virtual void Print(IConsole *pConsole, const char *pMode) = 0;
+	virtual void Print(IConsole *pConsole, const char *Mode) = 0;
+
+	// copies the credentials, not the active connection
+	virtual IDbConnection *Copy() = 0;
 
 	// returns the database prefix
 	const char *GetPrefix() const { return m_aPrefix; }
@@ -46,14 +44,14 @@ public:
 
 	// tries to allocate the connection from the pool established
 	//
-	// returns true on success
+	// returns true on failure
 	virtual bool Connect(char *pError, int ErrorSize) = 0;
 	// has to be called to return the connection back to the pool
 	virtual void Disconnect() = 0;
 
 	// ? for Placeholders, connection has to be established, can overwrite previous prepared statements
 	//
-	// returns true on success
+	// returns true on failure
 	virtual bool PrepareStatement(const char *pStmt, char *pError, int ErrorSize) = 0;
 
 	// PrepareStatement has to be called beforehand,
@@ -62,7 +60,6 @@ public:
 	virtual void BindInt(int Idx, int Value) = 0;
 	virtual void BindInt64(int Idx, int64_t Value) = 0;
 	virtual void BindFloat(int Idx, float Value) = 0;
-	virtual void BindNull(int Idx) = 0;
 
 	// Print expanded sql statement
 	virtual void Print() = 0;
@@ -70,11 +67,11 @@ public:
 	// executes the query and returns if a result row exists and selects it
 	// when called multiple times the next row is selected
 	//
-	// returns true on success
+	// returns true on failure
 	virtual bool Step(bool *pEnd, char *pError, int ErrorSize) = 0;
 	// executes the query and returns the number of rows affected by the update/insert/delete
 	//
-	// returns true on success
+	// returns true on failure
 	virtual bool ExecuteUpdate(int *pNumUpdated, char *pError, int ErrorSize) = 0;
 
 	virtual bool IsNull(int Col) = 0;
@@ -93,19 +90,25 @@ private:
 	char m_aPrefix[64];
 
 protected:
-	void FormatCreateRace(char *aBuf, unsigned int BufferSize, bool Backup) const;
-	void FormatCreateTeamrace(char *aBuf, unsigned int BufferSize, const char *pIdType, bool Backup) const;
-	void FormatCreateMaps(char *aBuf, unsigned int BufferSize) const;
-	void FormatCreateSaves(char *aBuf, unsigned int BufferSize, bool Backup) const;
-	void FormatCreatePoints(char *aBuf, unsigned int BufferSize) const;
+	void FormatCreateRace(char *aBuf, unsigned int BufferSize);
+	void FormatCreateTeamrace(char *aBuf, unsigned int BufferSize, const char *pIdType);
+	void FormatCreateMaps(char *aBuf, unsigned int BufferSize);
+	void FormatCreateSaves(char *aBuf, unsigned int BufferSize);
+	void FormatCreatePoints(char *aBuf, unsigned int BufferSize);
 };
 
-bool MysqlAvailable();
 int MysqlInit();
 void MysqlUninit();
 
 std::unique_ptr<IDbConnection> CreateSqliteConnection(const char *pFilename, bool Setup);
 // Returns nullptr if MySQL support is not compiled in.
-std::unique_ptr<IDbConnection> CreateMysqlConnection(CMysqlConfig Config);
+std::unique_ptr<IDbConnection> CreateMysqlConnection(
+	const char *pDatabase,
+	const char *pPrefix,
+	const char *pUser,
+	const char *pPass,
+	const char *pIp,
+	int Port,
+	bool Setup);
 
 #endif // ENGINE_SERVER_DATABASES_CONNECTION_H

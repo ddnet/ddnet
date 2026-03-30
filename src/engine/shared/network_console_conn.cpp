@@ -1,12 +1,11 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "network.h"
-
 #include <base/system.h>
 
 void CConsoleNetConnection::Reset()
 {
-	m_State = EState::OFFLINE;
+	m_State = NET_CONNSTATE_OFFLINE;
 	mem_zero(&m_PeerAddr, sizeof(m_PeerAddr));
 	m_aErrorString[0] = 0;
 
@@ -26,24 +25,20 @@ void CConsoleNetConnection::Reset()
 #endif
 }
 
-int CConsoleNetConnection::Init(NETSOCKET Socket, const NETADDR *pAddr)
+void CConsoleNetConnection::Init(NETSOCKET Socket, const NETADDR *pAddr)
 {
 	Reset();
 
-	if(net_set_non_blocking(Socket) != 0)
-	{
-		return -1;
-	}
-
 	m_Socket = Socket;
+	net_set_non_blocking(m_Socket);
+
 	m_PeerAddr = *pAddr;
-	m_State = EState::ONLINE;
-	return 0;
+	m_State = NET_CONNSTATE_ONLINE;
 }
 
 void CConsoleNetConnection::Disconnect(const char *pReason)
 {
-	if(State() == EState::OFFLINE)
+	if(State() == NET_CONNSTATE_OFFLINE)
 		return;
 
 	if(pReason && pReason[0])
@@ -56,12 +51,12 @@ void CConsoleNetConnection::Disconnect(const char *pReason)
 
 int CConsoleNetConnection::Update()
 {
-	if(State() == EState::ONLINE)
+	if(State() == NET_CONNSTATE_ONLINE)
 	{
 		if((int)(sizeof(m_aBuffer)) <= m_BufferOffset)
 		{
-			m_State = EState::ERROR;
-			str_copy(m_aErrorString, "too weak connection (out of buffer)");
+			m_State = NET_CONNSTATE_ERROR;
+			str_copy(m_aErrorString, "too weak connection (out of buffer)", sizeof(m_aErrorString));
 			return -1;
 		}
 
@@ -76,14 +71,14 @@ int CConsoleNetConnection::Update()
 			if(net_would_block()) // no data received
 				return 0;
 
-			m_State = EState::ERROR;
-			str_copy(m_aErrorString, "connection failure");
+			m_State = NET_CONNSTATE_ERROR; // error
+			str_copy(m_aErrorString, "connection failure", sizeof(m_aErrorString));
 			return -1;
 		}
 		else
 		{
-			m_State = EState::ERROR;
-			str_copy(m_aErrorString, "remote end closed the connection");
+			m_State = NET_CONNSTATE_ERROR;
+			str_copy(m_aErrorString, "remote end closed the connection", sizeof(m_aErrorString));
 			return -1;
 		}
 	}
@@ -93,7 +88,7 @@ int CConsoleNetConnection::Update()
 
 int CConsoleNetConnection::Recv(char *pLine, int MaxLength)
 {
-	if(State() == EState::ONLINE)
+	if(State() == NET_CONNSTATE_ONLINE)
 	{
 		if(m_BufferOffset)
 		{
@@ -148,7 +143,7 @@ int CConsoleNetConnection::Recv(char *pLine, int MaxLength)
 			str_sanitize_cc(pLine);
 			mem_move(m_aBuffer, m_aBuffer + EndOffset, m_BufferOffset - EndOffset);
 			m_BufferOffset -= EndOffset;
-			return str_utf8_check(pLine);
+			return 1;
 		}
 	}
 	return 0;
@@ -156,7 +151,7 @@ int CConsoleNetConnection::Recv(char *pLine, int MaxLength)
 
 int CConsoleNetConnection::Send(const char *pLine)
 {
-	if(State() != EState::ONLINE)
+	if(State() != NET_CONNSTATE_ONLINE)
 		return -1;
 
 	char aBuf[1024];
@@ -173,8 +168,8 @@ int CConsoleNetConnection::Send(const char *pLine)
 		int Send = net_tcp_send(m_Socket, pData, Length);
 		if(Send < 0)
 		{
-			m_State = EState::ERROR;
-			str_copy(m_aErrorString, "failed to send packet");
+			m_State = NET_CONNSTATE_ERROR;
+			str_copy(m_aErrorString, "failed to send packet", sizeof(m_aErrorString));
 			return -1;
 		}
 

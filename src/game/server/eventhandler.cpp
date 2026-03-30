@@ -4,16 +4,14 @@
 
 #include "entity.h"
 #include "gamecontext.h"
-
-#include <base/system.h>
-#include <base/vmath.h>
+#include "player.h"
 
 //////////////////////////////////////////////////
 // Event handler
 //////////////////////////////////////////////////
 CEventHandler::CEventHandler()
 {
-	m_pGameServer = nullptr;
+	m_pGameServer = 0;
 	Clear();
 }
 
@@ -22,12 +20,12 @@ void CEventHandler::SetGameServer(CGameContext *pGameServer)
 	m_pGameServer = pGameServer;
 }
 
-void *CEventHandler::Create(int Type, int Size, CClientMask Mask)
+void *CEventHandler::Create(int Type, int Size, int64_t Mask)
 {
 	if(m_NumEvents == MAX_EVENTS)
-		return nullptr;
+		return 0;
 	if(m_CurrentOffset + Size >= MAX_DATASIZE)
-		return nullptr;
+		return 0;
 
 	void *p = &m_aData[m_CurrentOffset];
 	m_aOffsets[m_NumEvents] = m_CurrentOffset;
@@ -49,63 +47,57 @@ void CEventHandler::Snap(int SnappingClient)
 {
 	for(int i = 0; i < m_NumEvents; i++)
 	{
-		if(SnappingClient == SERVER_DEMO_CLIENT || m_aClientMasks[i].test(SnappingClient))
+		if(SnappingClient == SERVER_DEMO_CLIENT || CmaskIsSet(m_aClientMasks[i], SnappingClient))
 		{
-			CNetEvent_Common *pEvent = (CNetEvent_Common *)&m_aData[m_aOffsets[i]];
-			if(!NetworkClipped(GameServer(), SnappingClient, vec2(pEvent->m_X, pEvent->m_Y)))
+			CNetEvent_Common *ev = (CNetEvent_Common *)&m_aData[m_aOffsets[i]];
+			if(!NetworkClipped(GameServer(), SnappingClient, vec2(ev->m_X, ev->m_Y)))
 			{
 				int Type = m_aTypes[i];
 				int Size = m_aSizes[i];
-				const char *pData = &m_aData[m_aOffsets[i]];
+				const char *Data = &m_aData[m_aOffsets[i]];
 				if(GameServer()->Server()->IsSixup(SnappingClient))
-					EventToSixup(&Type, &Size, &pData);
+					EventToSixup(&Type, &Size, &Data);
 
-				void *pItem = GameServer()->Server()->SnapNewItem(Type, i, Size);
-				if(pItem)
-					mem_copy(pItem, pData, Size);
+				void *d = GameServer()->Server()->SnapNewItem(Type, i, Size);
+				if(d)
+					mem_copy(d, Data, Size);
 			}
 		}
 	}
 }
 
-void CEventHandler::EventToSixup(int *pType, int *pSize, const char **ppData)
+void CEventHandler::EventToSixup(int *Type, int *Size, const char **pData)
 {
 	static char s_aEventStore[128];
-	if(*pType == NETEVENTTYPE_DAMAGEIND)
+	if(*Type == NETEVENTTYPE_DAMAGEIND)
 	{
-		const CNetEvent_DamageInd *pEvent = (const CNetEvent_DamageInd *)(*ppData);
+		const CNetEvent_DamageInd *pEvent = (const CNetEvent_DamageInd *)(*pData);
 		protocol7::CNetEvent_Damage *pEvent7 = (protocol7::CNetEvent_Damage *)s_aEventStore;
-		*pType = -protocol7::NETEVENTTYPE_DAMAGE;
-		*pSize = sizeof(*pEvent7);
+		*Type = -protocol7::NETEVENTTYPE_DAMAGE;
+		*Size = sizeof(*pEvent7);
 
 		pEvent7->m_X = pEvent->m_X;
 		pEvent7->m_Y = pEvent->m_Y;
-
-		pEvent7->m_ClientId = 0;
-		pEvent7->m_Angle = 0;
 
 		// This will need some work, perhaps an event wrapper for damageind,
 		// a scan of the event array to merge multiple damageinds
 		// or a separate array of "damage ind" events that's added in while snapping
 		pEvent7->m_HealthAmount = 1;
 
-		pEvent7->m_ArmorAmount = 0;
-		pEvent7->m_Self = 0;
-
-		*ppData = s_aEventStore;
+		*pData = s_aEventStore;
 	}
-	else if(*pType == NETEVENTTYPE_SOUNDGLOBAL) // No more global sounds for the server
+	else if(*Type == NETEVENTTYPE_SOUNDGLOBAL) // No more global sounds for the server
 	{
-		const CNetEvent_SoundGlobal *pEvent = (const CNetEvent_SoundGlobal *)(*ppData);
+		const CNetEvent_SoundGlobal *pEvent = (const CNetEvent_SoundGlobal *)(*pData);
 		protocol7::CNetEvent_SoundWorld *pEvent7 = (protocol7::CNetEvent_SoundWorld *)s_aEventStore;
 
-		*pType = -protocol7::NETEVENTTYPE_SOUNDWORLD;
-		*pSize = sizeof(*pEvent7);
+		*Type = -protocol7::NETEVENTTYPE_SOUNDWORLD;
+		*Size = sizeof(*pEvent7);
 
-		pEvent7->m_SoundId = pEvent->m_SoundId;
+		pEvent7->m_SoundID = pEvent->m_SoundID;
 		pEvent7->m_X = pEvent->m_X;
 		pEvent7->m_Y = pEvent->m_Y;
 
-		*ppData = s_aEventStore;
+		*pData = s_aEventStore;
 	}
 }

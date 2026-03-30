@@ -1,182 +1,154 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #include "dragger.h"
-
-#include "character.h"
-#include "dragger_beam.h"
-
+#include <engine/config.h>
 #include <engine/server.h>
 #include <engine/shared/config.h>
-
-#include <generated/protocol.h>
-
-#include <game/mapitems.h>
+#include <game/generated/protocol.h>
 #include <game/server/gamecontext.h>
+#include <game/server/gamemodes/DDRace.h>
 #include <game/server/player.h>
 #include <game/server/teams.h>
+#include <game/version.h>
 
-CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool IgnoreWalls, int Layer, int Number) :
+#include "character.h"
+
+CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW,
+	int CaughtTeam, int Layer, int Number) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
 {
-	m_Core = vec2(0.0f, 0.0f);
-	m_Pos = Pos;
-	m_Strength = Strength;
-	m_IgnoreWalls = IgnoreWalls;
+	m_TargetID = -1;
 	m_Layer = Layer;
 	m_Number = Number;
+	m_Pos = Pos;
+	m_Strength = Strength;
 	m_EvalTick = Server()->Tick();
-
-	for(auto &TargetId : m_aTargetIdInTeam)
-	{
-		TargetId = -1;
-	}
-	std::fill(std::begin(m_apDraggerBeam), std::end(m_apDraggerBeam), nullptr);
+	m_NW = NW;
+	m_CaughtTeam = CaughtTeam;
 	GameWorld()->InsertEntity(this);
-}
 
-void CDragger::Tick()
-{
-	if(Server()->Tick() % (int)(Server()->TickSpeed() * 0.15f) == 0)
+	for(int &SoloID : m_SoloIDs)
 	{
-		m_EvalTick = Server()->Tick();
-		GameServer()->Collision()->MoverSpeed(m_Pos.x, m_Pos.y, &m_Core);
-		m_Pos += m_Core;
+		SoloID = -1;
+	}
 
-		// Adopt the new position for all outgoing laser beams
-		for(auto &DraggerBeam : m_apDraggerBeam)
-		{
-			if(DraggerBeam != nullptr)
-			{
-				DraggerBeam->SetPos(m_Pos);
-			}
-		}
-
-		LookForPlayersToDrag();
+	for(int &SoloEntID : m_SoloEntIDs)
+	{
+		SoloEntID = -1;
 	}
 }
 
-void CDragger::LookForPlayersToDrag()
+void CDragger::Move()
 {
-	// Create a list of players who are in the range of the dragger
-	CEntity *apPlayersInRange[MAX_CLIENTS];
-	std::fill(std::begin(apPlayersInRange), std::end(apPlayersInRange), nullptr);
-
-	int NumPlayersInRange = GameServer()->m_World.FindEntities(m_Pos,
-		g_Config.m_SvDraggerRange - CCharacterCore::PhysicalSize(),
-		apPlayersInRange, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
-
-	// The closest player (within range) in a team is selected as the target
-	int aClosestTargetIdInTeam[MAX_CLIENTS];
-	bool aCanStillBeTeamTarget[MAX_CLIENTS];
-	bool aIsTarget[MAX_CLIENTS];
-	int aMinDistInTeam[MAX_CLIENTS];
-	std::fill(std::begin(aCanStillBeTeamTarget), std::end(aCanStillBeTeamTarget), false);
-	std::fill(std::begin(aMinDistInTeam), std::end(aMinDistInTeam), 0);
-	std::fill(std::begin(aIsTarget), std::end(aIsTarget), false);
-	std::fill(std::begin(aClosestTargetIdInTeam), std::end(aClosestTargetIdInTeam), -1);
-
-	for(int i = 0; i < NumPlayersInRange; i++)
+	if(m_TargetID >= 0)
 	{
-		CCharacter *pTarget = static_cast<CCharacter *>(apPlayersInRange[i]);
-		const int &TargetTeam = pTarget->Team();
-
-		// Do not create a dragger beam for super player
-		if(TargetTeam == TEAM_SUPER)
+		CCharacter *pTarget = GameServer()->GetPlayerChar(m_TargetID);
+		if(!pTarget || pTarget->m_Super || pTarget->IsPaused() || (m_Layer == LAYER_SWITCH && m_Number && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pTarget->Team()]))
 		{
+			m_TargetID = -1;
+		}
+	}
+
+	CCharacter *TempEnts[MAX_CLIENTS];
+	mem_zero(TempEnts, sizeof(TempEnts));
+
+	for(int &SoloEntID : m_SoloEntIDs)
+	{
+		SoloEntID = -1;
+	}
+
+	int Num = GameServer()->m_World.FindEntities(m_Pos, g_Config.m_SvDraggerRange,
+		(CEntity **)TempEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+
+	int Id = -1;
+	int MinLen = 0;
+	CCharacter *Temp;
+	for(int i = 0; i < Num; i++)
+	{
+		Temp = TempEnts[i];
+		m_SoloEntIDs[i] = Temp->GetPlayer()->GetCID();
+		if(Temp->Team() != m_CaughtTeam)
+		{
+			m_SoloEntIDs[i] = -1;
 			continue;
 		}
-		// If the dragger is disabled for the target's team, no dragger beam will be generated
-		if(m_Layer == LAYER_SWITCH && m_Number > 0 &&
-			!Switchers()[m_Number].m_aStatus[TargetTeam])
+		if(m_Layer == LAYER_SWITCH && m_Number && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Temp->Team()])
 		{
+			m_SoloEntIDs[i] = -1;
 			continue;
 		}
+		int Res =
+			m_NW ?
+				GameServer()->Collision()->IntersectNoLaserNW(m_Pos, Temp->m_Pos, 0, 0) :
+				GameServer()->Collision()->IntersectNoLaser(m_Pos, Temp->m_Pos, 0, 0);
 
-		// Dragger beams can be created only for reachable, alive players
-		int IsReachable =
-			m_IgnoreWalls ?
-				!GameServer()->Collision()->IntersectNoLaserNoWalls(m_Pos, pTarget->m_Pos, nullptr, nullptr) :
-				!GameServer()->Collision()->IntersectNoLaser(m_Pos, pTarget->m_Pos, nullptr, nullptr);
-		if(IsReachable && pTarget->IsAlive())
+		if(Res == 0)
 		{
-			const int &TargetClientId = pTarget->GetPlayer()->GetCid();
-			// Solo players are dragged independently from the rest of the team
-			if(pTarget->Teams()->m_Core.GetSolo(TargetClientId))
+			int Len = length(Temp->m_Pos - m_Pos);
+			if(MinLen == 0 || MinLen > Len)
 			{
-				aIsTarget[TargetClientId] = true;
+				MinLen = Len;
+				Id = i;
 			}
-			else
-			{
-				int Distance = distance(pTarget->m_Pos, m_Pos);
-				if(aMinDistInTeam[TargetTeam] == 0 || aMinDistInTeam[TargetTeam] > Distance)
-				{
-					aMinDistInTeam[TargetTeam] = Distance;
-					aClosestTargetIdInTeam[TargetTeam] = TargetClientId;
-				}
-				aCanStillBeTeamTarget[TargetClientId] = true;
-			}
+
+			if(!Temp->Teams()->m_Core.GetSolo(Temp->GetPlayer()->GetCID()))
+				m_SoloEntIDs[i] = -1;
+		}
+		else
+		{
+			m_SoloEntIDs[i] = -1;
 		}
 	}
 
-	// Set the closest player for each team as a target if the team does not have a target player yet
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if((m_aTargetIdInTeam[i] != -1 && !aCanStillBeTeamTarget[m_aTargetIdInTeam[i]]) || m_aTargetIdInTeam[i] == -1)
-		{
-			m_aTargetIdInTeam[i] = aClosestTargetIdInTeam[i];
-		}
-		if(m_aTargetIdInTeam[i] != -1)
-		{
-			aIsTarget[m_aTargetIdInTeam[i]] = true;
-		}
-	}
+	if(m_TargetID < 0)
+		m_TargetID = Id != -1 ? TempEnts[Id]->GetPlayer()->GetCID() : -1;
 
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	if(m_TargetID >= 0)
 	{
-		// Create Dragger Beams which have not been created yet
-		if(aIsTarget[i] && m_apDraggerBeam[i] == nullptr)
+		const CCharacter *pTarget = GameServer()->GetPlayerChar(m_TargetID);
+		for(auto &SoloEntID : m_SoloEntIDs)
 		{
-			m_apDraggerBeam[i] = new CDraggerBeam(&GameServer()->m_World, this, m_Pos, m_Strength, m_IgnoreWalls, i, m_Layer, m_Number);
-			// The generated dragger beam is placed in the first position in the tick sequence and would therefore
-			// no longer be executed automatically in this tick. To execute the dragger beam nevertheless already
-			// this tick we call it manually (we do this to keep the old game logic)
-			m_apDraggerBeam[i]->Tick();
-		}
-		// Remove dragger beams that have not yet been deleted
-		else if(!aIsTarget[i] && m_apDraggerBeam[i] != nullptr)
-		{
-			m_apDraggerBeam[i]->Reset();
+			if(GameServer()->GetPlayerChar(SoloEntID) == pTarget)
+				SoloEntID = -1;
 		}
 	}
 }
 
-void CDragger::RemoveDraggerBeam(int ClientId)
+void CDragger::Drag()
 {
-	m_apDraggerBeam[ClientId] = nullptr;
-}
+	if(m_TargetID < 0)
+		return;
 
-bool CDragger::WillDraggerBeamUseDraggerId(int TargetClientId, int SnappingClientId)
-{
-	// For each snapping client, this must return true for at most one target (i.e. only one of the dragger beams),
-	// in which case the dragger itself must not be snapped
-	CCharacter *pTargetChar = GameServer()->GetPlayerChar(TargetClientId);
-	CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClientId);
-	if(pTargetChar && pSnapChar && m_apDraggerBeam[TargetClientId] != nullptr)
+	CCharacter *pTarget = GameServer()->GetPlayerChar(m_TargetID);
+
+	for(int i = -1; i < MAX_CLIENTS; i++)
 	{
-		const int SnapTeam = pSnapChar->Team();
-		const int TargetTeam = pTargetChar->Team();
-		if(SnapTeam == TargetTeam && SnapTeam < MAX_CLIENTS)
+		if(i >= 0)
+			pTarget = GameServer()->GetPlayerChar(m_SoloEntIDs[i]);
+
+		if(!pTarget)
+			continue;
+
+		int Res = 0;
+		if(!m_NW)
+			Res = GameServer()->Collision()->IntersectNoLaser(m_Pos,
+				pTarget->m_Pos, 0, 0);
+		else
+			Res = GameServer()->Collision()->IntersectNoLaserNW(m_Pos,
+				pTarget->m_Pos, 0, 0);
+		if(Res || length(m_Pos - pTarget->m_Pos) > g_Config.m_SvDraggerRange)
 		{
-			if(pSnapChar->Teams()->m_Core.GetSolo(SnappingClientId) || m_aTargetIdInTeam[SnapTeam] < 0)
-			{
-				return SnappingClientId == TargetClientId;
-			}
+			pTarget = 0;
+			if(i == -1)
+				m_TargetID = -1;
 			else
-			{
-				return m_aTargetIdInTeam[SnapTeam] == TargetClientId;
-			}
+				m_SoloEntIDs[i] = -1;
+		}
+		else if(length(m_Pos - pTarget->m_Pos) > 28)
+		{
+			vec2 Temp = pTarget->Core()->m_Vel + (normalize(m_Pos - pTarget->m_Pos) * m_Strength);
+			pTarget->Core()->m_Vel = ClampVel(pTarget->m_MoveRestrictions, Temp);
 		}
 	}
-	return false;
 }
 
 void CDragger::Reset()
@@ -184,61 +156,157 @@ void CDragger::Reset()
 	m_MarkedForDestroy = true;
 }
 
+void CDragger::Tick()
+{
+	if(((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.GetTeamState(m_CaughtTeam) == CGameTeams::TEAMSTATE_EMPTY)
+		return;
+	if(Server()->Tick() % int(Server()->TickSpeed() * 0.15f) == 0)
+	{
+		int Flags;
+		m_EvalTick = Server()->Tick();
+		int index = GameServer()->Collision()->IsMover(m_Pos.x, m_Pos.y,
+			&Flags);
+		if(index)
+		{
+			m_Core = GameServer()->Collision()->CpSpeed(index, Flags);
+		}
+		m_Pos += m_Core;
+		Move();
+	}
+	Drag();
+}
+
 void CDragger::Snap(int SnappingClient)
 {
-	// Only players with the dragger in their field of view or who want to see everything will receive the snap
-	if(NetworkClipped(SnappingClient))
+	if(((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.GetTeamState(m_CaughtTeam) == CGameTeams::TEAMSTATE_EMPTY)
 		return;
 
-	// Send the dragger in its resting position if the player would not otherwise see a dragger beam within its own team
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	if(NetworkClipped(SnappingClient, m_Pos))
+		return;
+
+	CCharacter *pChar = GameServer()->GetPlayerChar(SnappingClient);
+
+	if(SnappingClient != SERVER_DEMO_CLIENT && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == TEAM_SPECTATORS || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
+		pChar = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
+
+	if(pChar && pChar->Team() != m_CaughtTeam)
+		return;
+
+	int SnappingClientVersion = SnappingClient != SERVER_DEMO_CLIENT ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
+
+	CNetObj_EntityEx *pEntData = 0;
+	if(SnappingClientVersion >= VERSION_DDNET_SWITCH)
 	{
-		if(WillDraggerBeamUseDraggerId(i, SnappingClient))
+		pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
+		if(pEntData)
 		{
-			return;
+			pEntData->m_SwitchNumber = m_Number;
+			pEntData->m_Layer = m_Layer;
+			pEntData->m_EntityClass = clamp(ENTITYCLASS_DRAGGER_WEAK + round_to_int(m_Strength) - 1, (int)ENTITYCLASS_DRAGGER_WEAK, (int)ENTITYCLASS_DRAGGER_STRONG);
 		}
 	}
 
-	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
+	CCharacter *pTarget = m_TargetID < 0 ? 0 : GameServer()->GetPlayerChar(m_TargetID);
 
-	int Subtype = (m_IgnoreWalls ? 1 : 0) | (std::clamp(round_to_int(m_Strength - 1.f), 0, 2) << 1);
-
-	int StartTick;
-	if(SnappingClientVersion >= VERSION_DDNET_ENTITY_NETOBJS)
+	for(int &SoloID : m_SoloIDs)
 	{
-		StartTick = -1;
-	}
-	else
-	{
-		// Emulate turned off blinking dragger for old clients
-		CCharacter *pChar = GameServer()->GetPlayerChar(SnappingClient);
-		if(SnappingClient != SERVER_DEMO_CLIENT &&
-			(GameServer()->m_apPlayers[SnappingClient]->GetTeam() == TEAM_SPECTATORS ||
-				GameServer()->m_apPlayers[SnappingClient]->IsPaused()) &&
-			GameServer()->m_apPlayers[SnappingClient]->SpectatorId() != SPEC_FREEVIEW)
-			pChar = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->SpectatorId());
+		if(SoloID == -1)
+			break;
 
-		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
-		if(pChar && m_Layer == LAYER_SWITCH && m_Number > 0 &&
-			!Switchers()[m_Number].m_aStatus[pChar->Team()] && !Tick)
-			return;
-
-		StartTick = m_EvalTick;
-		if(StartTick < Server()->Tick() - 4)
-			StartTick = Server()->Tick() - 4;
-		else if(StartTick > Server()->Tick())
-			StartTick = Server()->Tick();
+		Server()->SnapFreeID(SoloID);
+		SoloID = -1;
 	}
 
-	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Server()->IsSixup(SnappingClient), SnappingClient), GetId(),
-		m_Pos, m_Pos, StartTick, -1, LASERTYPE_DRAGGER, Subtype, m_Number);
+	int pos = 0;
+
+	for(int i = -1; i < MAX_CLIENTS; i++)
+	{
+		if(i >= 0)
+		{
+			pTarget = GameServer()->GetPlayerChar(m_SoloEntIDs[i]);
+
+			if(!pTarget)
+				continue;
+		}
+
+		if(pTarget && NetworkClipped(SnappingClient, pTarget->m_Pos))
+			continue;
+
+		if(i != -1 || SnappingClientVersion < VERSION_DDNET_SWITCH)
+		{
+			int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
+			if(pChar && m_Layer == LAYER_SWITCH && m_Number && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChar->Team()] && (!Tick))
+				continue;
+		}
+
+		// send to spectators only active draggers and some inactive from team 0
+		if(!pChar && !pTarget && m_CaughtTeam != 0)
+			continue;
+
+		if(pChar && pTarget && pTarget->GetPlayer()->GetCID() != pChar->GetPlayer()->GetCID() && ((pChar->GetPlayer()->m_ShowOthers == SHOW_OTHERS_OFF && (pChar->Teams()->m_Core.GetSolo(SnappingClient) || pChar->Teams()->m_Core.GetSolo(pTarget->GetPlayer()->GetCID()))) || (pChar->GetPlayer()->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM && !pTarget->SameTeam(SnappingClient))))
+		{
+			continue;
+		}
+
+		CNetObj_Laser *obj;
+
+		if(i == -1)
+		{
+			obj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
+				NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
+		}
+		else
+		{
+			m_SoloIDs[pos] = Server()->SnapNewID();
+			obj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem( // TODO: Have to free IDs again?
+				NETOBJTYPE_LASER, m_SoloIDs[pos], sizeof(CNetObj_Laser)));
+			pos++;
+		}
+
+		if(!obj)
+			continue;
+		obj->m_X = (int)m_Pos.x;
+		obj->m_Y = (int)m_Pos.y;
+		if(pTarget)
+		{
+			obj->m_FromX = (int)pTarget->m_Pos.x;
+			obj->m_FromY = (int)pTarget->m_Pos.y;
+		}
+		else
+		{
+			obj->m_FromX = (int)m_Pos.x;
+			obj->m_FromY = (int)m_Pos.y;
+		}
+
+		if(pEntData && i == -1)
+		{
+			obj->m_StartTick = 0;
+		}
+		else
+		{
+			int StartTick = m_EvalTick;
+			if(StartTick < Server()->Tick() - 4)
+				StartTick = Server()->Tick() - 4;
+			else if(StartTick > Server()->Tick())
+				StartTick = Server()->Tick();
+			obj->m_StartTick = StartTick;
+		}
+	}
 }
 
-void CDragger::SwapClients(int Client1, int Client2)
+CDraggerTeam::CDraggerTeam(CGameWorld *pGameWorld, vec2 Pos, float Strength,
+	bool NW, int Layer, int Number)
 {
-	std::swap(m_apDraggerBeam[Client1], m_apDraggerBeam[Client2]);
-	for(int &TargetId : m_aTargetIdInTeam)
+	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
-		TargetId = TargetId == Client1 ? Client2 : (TargetId == Client2 ? Client1 : TargetId);
+		m_Draggers[i] = new CDragger(pGameWorld, Pos, Strength, NW, i, Layer, Number);
 	}
 }
+
+//CDraggerTeam::~CDraggerTeam()
+//{
+//	for (int i = 0; i < MAX_CLIENTS; ++i)
+//	{
+//		delete m_Draggers[i];
+//	}
+//}

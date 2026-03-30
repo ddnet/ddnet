@@ -3,25 +3,22 @@
 #ifndef GAME_SERVER_GAMECONTEXT_H
 #define GAME_SERVER_GAMECONTEXT_H
 
-#include "eventhandler.h"
-#include "gameworld.h"
-#include "teehistorian.h"
-
-#include <base/types.h>
-
+#include <engine/antibot.h>
 #include <engine/console.h>
 #include <engine/server.h>
 
-#include <generated/protocol.h>
-
-#include <game/collision.h>
 #include <game/layers.h>
 #include <game/mapbugs.h>
 #include <game/voting.h>
 
-#include <map>
+#include <base/tl/array.h>
+
+#include "eventhandler.h"
+//#include "gamecontroller.h"
+#include "gameworld.h"
+#include "teehistorian.h"
+
 #include <memory>
-#include <optional>
 #include <string>
 
 /*
@@ -30,7 +27,7 @@
 			Game World (GAMEWORLD::tick)
 				Reset world if requested (GAMEWORLD::reset)
 				All entities in the world (ENTITY::tick)
-				All entities in the world (ENTITY::tick_deferred)
+				All entities in the world (ENTITY::tick_defered)
 				Remove entities marked for deletion (GAMEWORLD::remove_entities)
 			Game Controller (GAMECONTROLLER::tick)
 			All players (CPlayer::tick)
@@ -46,85 +43,37 @@
 
 */
 
-class CCharacter;
-class IConfigManager;
+enum
+{
+	NUM_TUNEZONES = 256
+};
+
 class CConfig;
 class CHeap;
 class CPlayer;
 class CScore;
-class CUnpacker;
-class IAntibot;
+class IConsole;
 class IGameController;
-class IMap;
 class IEngine;
 class IStorage;
-struct CAntibotRoundData;
+struct CAntibotData;
 struct CScoreRandomMapResult;
-struct CScorePlayerResult;
-
-struct CSnapContext
-{
-	CSnapContext(int Version, bool Sixup, int ClientId) :
-		m_ClientVersion(Version), m_Sixup(Sixup), m_ClientId(ClientId)
-	{
-	}
-
-	int GetClientVersion() const { return m_ClientVersion; }
-	bool IsSixup() const { return m_Sixup; }
-	bool ClientId() const { return m_ClientId; }
-
-private:
-	int m_ClientVersion;
-	bool m_Sixup;
-	int m_ClientId;
-};
-
-class CMute
-{
-public:
-	int64_t m_Expire;
-	bool m_Initialized = false;
-	bool m_InitialDelay;
-	char m_aReason[128];
-	char m_aClientName[MAX_NAME_LENGTH];
-	bool m_NameKnown;
-
-	int SecondsLeft() const;
-};
-
-class CMutes
-{
-public:
-	CMutes(const char *pSystemName);
-
-	bool Mute(const NETADDR *pAddr, int Seconds, const char *pReason, const char *pClientName, bool InitialDelay);
-	void UnmuteIndex(int Index);
-	void UnmuteAddr(const NETADDR *pAddr);
-	void UnmuteExpired();
-	std::optional<CMute> IsMuted(const NETADDR *pAddr, bool RespectInitialDelay) const;
-	void Print(int Page) const;
-
-private:
-	const char *m_pSystemName;
-	std::map<NETADDR, CMute> m_Mutes;
-};
 
 class CGameContext : public IGameServer
 {
 	IServer *m_pServer;
-	IConfigManager *m_pConfigManager;
 	CConfig *m_pConfig;
 	IConsole *m_pConsole;
 	IEngine *m_pEngine;
 	IStorage *m_pStorage;
 	IAntibot *m_pAntibot;
-	std::unique_ptr<IMap> m_pMap;
 	CLayers m_Layers;
 	CCollision m_Collision;
 	protocol7::CNetObjHandler m_NetObjHandler7;
 	CNetObjHandler m_NetObjHandler;
-	CTuningParams m_aTuningList[TuneZone::NUM];
-	std::vector<std::string> m_vCensorlist;
+	CTuningParams m_Tuning;
+	CTuningParams m_aTuningList[NUM_TUNEZONES];
+	array<std::string> m_aCensorlist;
 
 	bool m_TeeHistorianActive;
 	CTeeHistorian m_TeeHistorian;
@@ -135,13 +84,13 @@ class CGameContext : public IGameServer
 
 	bool m_Resetting;
 
-	static void CommandCallback(int ClientId, int FlagMask, const char *pCmd, IConsole::IResult *pResult, void *pUser);
+	static void CommandCallback(int ClientID, int FlagMask, const char *pCmd, IConsole::IResult *pResult, void *pUser);
 	static void TeeHistorianWrite(const void *pData, int DataSize, void *pUser);
 
 	static void ConTuneParam(IConsole::IResult *pResult, void *pUserData);
 	static void ConToggleTuneParam(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneReset(IConsole::IResult *pResult, void *pUserData);
-	static void ConTunes(IConsole::IResult *pResult, void *pUserData);
+	static void ConTuneDump(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneZone(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneDumpZone(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneResetZone(IConsole::IResult *pResult, void *pUserData);
@@ -154,99 +103,66 @@ class CGameContext : public IGameServer
 	static void ConRandomMap(IConsole::IResult *pResult, void *pUserData);
 	static void ConRandomUnfinishedMap(IConsole::IResult *pResult, void *pUserData);
 	static void ConRestart(IConsole::IResult *pResult, void *pUserData);
-	static void ConServerAlert(IConsole::IResult *pResult, void *pUserData);
-	static void ConModAlert(IConsole::IResult *pResult, void *pUserData);
 	static void ConBroadcast(IConsole::IResult *pResult, void *pUserData);
 	static void ConSay(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetTeamAll(IConsole::IResult *pResult, void *pUserData);
-	static void ConHotReload(IConsole::IResult *pResult, void *pUserData);
 	static void ConAddVote(IConsole::IResult *pResult, void *pUserData);
 	static void ConRemoveVote(IConsole::IResult *pResult, void *pUserData);
 	static void ConForceVote(IConsole::IResult *pResult, void *pUserData);
 	static void ConClearVotes(IConsole::IResult *pResult, void *pUserData);
 	static void ConAddMapVotes(IConsole::IResult *pResult, void *pUserData);
 	static void ConVote(IConsole::IResult *pResult, void *pUserData);
-	static void ConVotes(IConsole::IResult *pResult, void *pUserData);
 	static void ConVoteNo(IConsole::IResult *pResult, void *pUserData);
 	static void ConDrySave(IConsole::IResult *pResult, void *pUserData);
 	static void ConDumpAntibot(IConsole::IResult *pResult, void *pUserData);
-	static void ConAntibot(IConsole::IResult *pResult, void *pUserData);
 	static void ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-	static void ConchainSettingUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-	static void ConchainPracticeByDefaultUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-	static void ConDumpLog(IConsole::IResult *pResult, void *pUserData);
 
+	void Construct(int Resetting);
+	void Destruct(int Resetting);
 	void AddVote(const char *pDescription, const char *pCommand);
 	static int MapScan(const char *pName, int IsDir, int DirType, void *pUserData);
-
-	struct CPersistentData
-	{
-		CUuid m_PrevGameUuid;
-	};
 
 	struct CPersistentClientData
 	{
 		bool m_IsSpectator;
-		bool m_IsAfk;
-		int m_LastWhisperTo;
 	};
 
 public:
 	IServer *Server() const { return m_pServer; }
-	IConfigManager *ConfigManager() const { return m_pConfigManager; }
 	CConfig *Config() { return m_pConfig; }
 	IConsole *Console() { return m_pConsole; }
 	IEngine *Engine() { return m_pEngine; }
 	IStorage *Storage() { return m_pStorage; }
-	IMap *Map() override { return m_pMap.get(); }
-	const IMap *Map() const override { return m_pMap.get(); }
 	CCollision *Collision() { return &m_Collision; }
-	CTuningParams *GlobalTuning() { return &m_aTuningList[0]; }
-	CTuningParams *TuningList() { return m_aTuningList; }
+	CTuningParams *Tuning() { return &m_Tuning; }
+	CTuningParams *TuningList() { return &m_aTuningList[0]; }
 	IAntibot *Antibot() { return m_pAntibot; }
 	CTeeHistorian *TeeHistorian() { return &m_TeeHistorian; }
 	bool TeeHistorianActive() const { return m_TeeHistorianActive; }
-	CNetObjHandler *GetNetObjHandler() override { return &m_NetObjHandler; }
-	protocol7::CNetObjHandler *GetNetObjHandler7() override { return &m_NetObjHandler7; }
 
-	CGameContext(bool Resetting = false);
-	~CGameContext() override;
+	CGameContext();
+	CGameContext(int Reset);
+	~CGameContext();
 
 	void Clear();
 
 	CEventHandler m_Events;
 	CPlayer *m_apPlayers[MAX_CLIENTS];
-	// keep last input to always apply when none is sent
-	CNetObj_PlayerInput m_aLastPlayerInput[MAX_CLIENTS];
-	bool m_aPlayerHasInput[MAX_CLIENTS];
-	CSaveTeam *m_apSavedTeams[MAX_CLIENTS];
-	CSaveHotReloadTee *m_apSavedTees[MAX_CLIENTS];
-	int m_aTeamMapping[MAX_CLIENTS];
-
-	// returns last input if available otherwise nulled PlayerInput object
-	// ClientId has to be valid
-	CNetObj_PlayerInput GetLastPlayerInput(int ClientId) const;
 
 	IGameController *m_pController;
 	CGameWorld m_World;
 
 	// helper functions
-	CCharacter *GetPlayerChar(int ClientId);
-	const CCharacter *GetPlayerChar(int ClientId) const;
-	const CPlayer *FindPlayerByName(const char *pName) const;
-	// Returns `nullptr` if no player is found.
-	CPlayer *FindPlayerByName(const char *pName);
-	std::optional<int> FindClientIdByName(const char *pName) const;
-	bool EmulateBug(int Bug) const;
-	std::vector<SSwitchers> &Switchers() { return m_World.m_Core.m_vSwitchers; }
+	class CCharacter *GetPlayerChar(int ClientID);
+	bool EmulateBug(int Bug);
 
 	// voting
 	void StartVote(const char *pDesc, const char *pCommand, const char *pReason, const char *pSixupDesc);
 	void EndVote();
-	void SendVoteSet(int ClientId);
-	void SendVoteStatus(int ClientId, int Total, int Yes, int No);
-	void AbortVoteKickOnDisconnect(int ClientId);
+	void SendVoteSet(int ClientID);
+	void SendVoteStatus(int ClientID, int Total, int Yes, int No);
+	void AbortVoteKickOnDisconnect(int ClientID);
 
 	int m_VoteCreator;
 	int m_VoteType;
@@ -259,11 +175,8 @@ public:
 	char m_aVoteReason[VOTE_REASON_LENGTH];
 	int m_NumVoteOptions;
 	int m_VoteEnforce;
-	char m_aaZoneEnterMsg[TuneZone::NUM][256]; // 0 is used for switching from or to area without tunings
-	char m_aaZoneLeaveMsg[TuneZone::NUM][256];
-
-	void CreateAllEntities(bool Initial);
-	CPlayer *CreatePlayer(int ClientId, int StartTeam, bool Afk, int LastWhisperTo);
+	char m_aaZoneEnterMsg[NUM_TUNEZONES][256]; // 0 is used for switching from or to area without tunings
+	char m_aaZoneLeaveMsg[NUM_TUNEZONES][256];
 
 	char m_aDeleteTempfile[128];
 	void DeleteTempfile();
@@ -273,202 +186,146 @@ public:
 		VOTE_ENFORCE_UNKNOWN = 0,
 		VOTE_ENFORCE_NO,
 		VOTE_ENFORCE_YES,
-		VOTE_ENFORCE_NO_ADMIN,
-		VOTE_ENFORCE_YES_ADMIN,
 		VOTE_ENFORCE_ABORT,
-		VOTE_ENFORCE_CANCEL,
 	};
 	CHeap *m_pVoteOptionHeap;
 	CVoteOptionServer *m_pVoteOptionFirst;
 	CVoteOptionServer *m_pVoteOptionLast;
 
 	// helper functions
-	void CreateDamageInd(vec2 Pos, float AngleMod, int Amount, CClientMask Mask = CClientMask().set());
-	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, CClientMask Mask = CClientMask().set());
-	void CreateHammerHit(vec2 Pos, CClientMask Mask = CClientMask().set());
-	void CreatePlayerSpawn(vec2 Pos, CClientMask Mask = CClientMask().set());
-	void CreateDeath(vec2 Pos, int ClientId, CClientMask Mask = CClientMask().set());
-	void CreateBirthdayEffect(vec2 Pos, CClientMask Mask = CClientMask().set());
-	void CreateFinishEffect(vec2 Pos, CClientMask Mask = CClientMask().set());
-	void CreateSound(vec2 Pos, int Sound, CClientMask Mask = CClientMask().set());
-	void CreateSoundGlobal(int Sound, int Target = -1) const;
-
-	void SnapSwitchers(int SnappingClient);
-	bool SnapLaserObject(const CSnapContext &Context, int SnapId, const vec2 &To, const vec2 &From, int StartTick, int Owner = -1, int LaserType = -1, int Subtype = -1, int SwitchNumber = -1) const;
-	bool SnapPickup(const CSnapContext &Context, int SnapId, const vec2 &Pos, int Type, int SubType, int SwitchNumber, int Flags) const;
+	void CreateDamageInd(vec2 Pos, float AngleMod, int Amount, int64_t Mask = -1);
+	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64_t Mask);
+	void CreateHammerHit(vec2 Pos, int64_t Mask = -1);
+	void CreatePlayerSpawn(vec2 Pos, int64_t Mask = -1);
+	void CreateDeath(vec2 Pos, int ClientID, int64_t Mask = -1);
+	void CreateSound(vec2 Pos, int Sound, int64_t Mask = -1);
+	void CreateSoundGlobal(int Sound, int Target = -1);
 
 	enum
 	{
-		FLAG_SIX = 1 << 0,
-		FLAG_SIXUP = 1 << 1,
+		CHAT_ALL = -2,
+		CHAT_SPEC = -1,
+		CHAT_RED = 0,
+		CHAT_BLUE = 1,
+		CHAT_WHISPER_SEND = 2,
+		CHAT_WHISPER_RECV = 3,
+
+		CHAT_SIX = 1 << 0,
+		CHAT_SIXUP = 1 << 1,
 	};
 
 	// network
-	void CallVote(int ClientId, const char *pDesc, const char *pCmd, const char *pReason, const char *pChatmsg, const char *pSixupDesc = nullptr);
-	void SendChatTarget(int To, const char *pText, int VersionFlags = FLAG_SIX | FLAG_SIXUP) const;
-	void SendChatTeam(int Team, const char *pText) const;
-	void SendChat(int ClientId, int Team, const char *pText, int SpamProtectionClientId = -1, int VersionFlags = FLAG_SIX | FLAG_SIXUP);
-	void SendStartWarning(int ClientId, const char *pMessage);
-	void SendEmoticon(int ClientId, int Emoticon, int TargetClientId) const;
-	void SendWeaponPickup(int ClientId, int Weapon) const;
-	void SendMotd(int ClientId) const;
-	void SendSettings(int ClientId) const;
-	void SendServerAlert(const char *pMessage);
-	void SendModeratorAlert(const char *pMessage, int ToClientId);
-	void SendBroadcast(const char *pText, int ClientId, bool IsImportant = true);
-	void SendSkinChange7(int ClientId);
+	void CallVote(int ClientID, const char *pDesc, const char *pCmd, const char *pReason, const char *pChatmsg, const char *pSixupDesc = 0);
+	void SendChatTarget(int To, const char *pText, int Flags = CHAT_SIX | CHAT_SIXUP);
+	void SendChatTeam(int Team, const char *pText);
+	void SendChat(int ClientID, int Team, const char *pText, int SpamProtectionClientID = -1, int Flags = CHAT_SIX | CHAT_SIXUP);
+	void SendStartWarning(int ClientID, const char *pMessage);
+	void SendEmoticon(int ClientID, int Emoticon);
+	void SendWeaponPickup(int ClientID, int Weapon);
+	void SendMotd(int ClientID);
+	void SendSettings(int ClientID);
+	void SendBroadcast(const char *pText, int ClientID, bool IsImportant = true);
 
-	void List(int ClientId, const char *pFilter);
+	void List(int ClientID, const char *filter);
 
 	//
 	void CheckPureTuning();
-	void SendTuningParams(int ClientId, int Zone = 0);
+	void SendTuningParams(int ClientID, int Zone = 0);
 
-	const CVoteOptionServer *GetVoteOption(int Index) const;
-	void ProgressVoteOptions(int ClientId);
+	struct CVoteOptionServer *GetVoteOption(int Index);
+	void ProgressVoteOptions(int ClientID);
 
 	//
 	void LoadMapSettings();
 
 	// engine events
-	void OnInit(const void *pPersistentData) override;
-	void OnConsoleInit() override;
-	void RegisterDDRaceCommands();
-	void RegisterChatCommands();
-	[[nodiscard]] bool OnMapChange(char *pNewMapName, int MapNameSize) override;
-	void OnShutdown(void *pPersistentData) override;
+	virtual void OnInit();
+	virtual void OnConsoleInit();
+	virtual void OnMapChange(char *pNewMapName, int MapNameSize);
+	virtual void OnShutdown();
 
-	void OnTick() override;
-	void OnSnap(int ClientId, bool GlobalSnap, bool RecordingDemo) override;
-	void OnPostGlobalSnap() override;
+	virtual void OnTick();
+	virtual void OnPreSnap();
+	virtual void OnSnap(int ClientID);
+	virtual void OnPostSnap();
 
-	void UpdatePlayerMaps();
-
-	void *PreProcessMsg(int *pMsgId, CUnpacker *pUnpacker, int ClientId);
+	void *PreProcessMsg(int *MsgID, CUnpacker *pUnpacker, int ClientID);
 	void CensorMessage(char *pCensoredMessage, const char *pMessage, int Size);
-	void OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientId) override;
-	void OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientId, const CUnpacker *pUnpacker);
-	void OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int ClientId);
-	void OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId);
-	void OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId);
-	void OnIsDDNetLegacyNetMessage(const CNetMsg_Cl_IsDDNetLegacy *pMsg, int ClientId, CUnpacker *pUnpacker);
-	void OnShowOthersLegacyNetMessage(const CNetMsg_Cl_ShowOthersLegacy *pMsg, int ClientId);
-	void OnShowOthersNetMessage(const CNetMsg_Cl_ShowOthers *pMsg, int ClientId);
-	void OnShowDistanceNetMessage(const CNetMsg_Cl_ShowDistance *pMsg, int ClientId);
-	void OnCameraInfoNetMessage(const CNetMsg_Cl_CameraInfo *pMsg, int ClientId);
-	void OnSetSpectatorModeNetMessage(const CNetMsg_Cl_SetSpectatorMode *pMsg, int ClientId);
-	void OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId);
-	void OnEmoticonNetMessage(const CNetMsg_Cl_Emoticon *pMsg, int ClientId);
-	void OnKillNetMessage(const CNetMsg_Cl_Kill *pMsg, int ClientId);
-	void OnEnableSpectatorCountNetMessage(const CNetMsg_Cl_EnableSpectatorCount *pMsg, int ClientId);
-	void OnStartInfoNetMessage(const CNetMsg_Cl_StartInfo *pMsg, int ClientId);
+	virtual void OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID);
 
-	bool OnClientDataPersist(int ClientId, void *pData) override;
-	void OnClientConnected(int ClientId, void *pData) override;
-	void OnClientEnter(int ClientId) override;
-	void OnClientDrop(int ClientId, const char *pReason) override;
-	void OnClientPrepareInput(int ClientId, void *pInput) override;
-	void OnClientDirectInput(int ClientId, const void *pInput) override;
-	void OnClientPredictedInput(int ClientId, const void *pInput) override;
-	void OnClientPredictedEarlyInput(int ClientId, const void *pInput) override;
+	virtual bool OnClientDataPersist(int ClientID, void *pData);
+	virtual void OnClientConnected(int ClientID, void *pData);
+	virtual void OnClientEnter(int ClientID);
+	virtual void OnClientDrop(int ClientID, const char *pReason);
+	virtual void OnClientDirectInput(int ClientID, void *pInput);
+	virtual void OnClientPredictedInput(int ClientID, void *pInput);
+	virtual void OnClientPredictedEarlyInput(int ClientID, void *pInput);
 
-	void PreInputClients(int ClientId, bool *pClients) override;
+	virtual void OnClientEngineJoin(int ClientID, bool Sixup);
+	virtual void OnClientEngineDrop(int ClientID, const char *pReason);
 
-	void TeehistorianRecordAntibot(const void *pData, int DataSize) override;
-	void TeehistorianRecordPlayerJoin(int ClientId, bool Sixup) override;
-	void TeehistorianRecordPlayerDrop(int ClientId, const char *pReason) override;
-	void TeehistorianRecordPlayerRejoin(int ClientId) override;
-	void TeehistorianRecordPlayerName(int ClientId, const char *pName) override;
-	void TeehistorianRecordPlayerFinish(int ClientId, int TimeTicks) override;
-	void TeehistorianRecordTeamFinish(int TeamId, int TimeTicks) override;
-	void TeehistorianRecordAuthLogin(int ClientId, int Level, const char *pAuthName) override;
+	virtual bool IsClientReady(int ClientID) const;
+	virtual bool IsClientPlayer(int ClientID) const;
+	virtual int PersistentClientDataSize() const { return sizeof(CPersistentClientData); }
 
-	bool IsClientReady(int ClientId) const override;
-	bool IsClientPlayer(int ClientId) const override;
-	// Whether the client is allowed to have high bandwidth.
-	bool IsClientHighBandwidth(int ClientId) const override;
-	int PersistentDataSize() const override { return sizeof(CPersistentData); }
-	int PersistentClientDataSize() const override { return sizeof(CPersistentClientData); }
-
-	CUuid GameUuid() const override;
-	const char *GameType() const override;
-	const char *Version() const override;
-	const char *NetVersion() const override;
+	virtual CUuid GameUuid() const;
+	virtual const char *GameType() const;
+	virtual const char *Version() const;
+	virtual const char *NetVersion() const;
 
 	// DDRace
-	void OnPreTickTeehistorian() override;
-	bool OnClientDDNetVersionKnown(int ClientId);
-	void FillAntibot(CAntibotRoundData *pData) override;
-	bool ProcessSpamProtection(int ClientId, bool RespectChatInitialDelay = true);
-	int GetDDRaceTeam(int ClientId) const;
+	void OnPreTickTeehistorian();
+	bool OnClientDDNetVersionKnown(int ClientID);
+	virtual void FillAntibot(CAntibotRoundData *pData);
+	int ProcessSpamProtection(int ClientID, bool RespectChatInitialDelay = true);
+	int GetDDRaceTeam(int ClientID);
 	// Describes the time when the first player joined the server.
 	int64_t m_NonEmptySince;
 	int64_t m_LastMapVote;
-	int GetClientVersion(int ClientId) const;
-	CClientMask ClientsMaskExcludeClientVersionAndHigher(int Version) const;
-	bool PlayerExists(int ClientId) const override { return m_apPlayers[ClientId]; }
+	int GetClientVersion(int ClientID) const;
+	bool PlayerExists(int ClientID) const { return m_apPlayers[ClientID]; }
 	// Returns true if someone is actively moderating.
 	bool PlayerModerating() const;
-	void ForceVote(bool Success);
+	void ForceVote(int EnforcerID, bool Success);
 
 	// Checks if player can vote and notify them about the reason
-	bool RateLimitPlayerVote(int ClientId);
-	bool RateLimitPlayerMapVote(int ClientId) const;
-
-	void OnUpdatePlayerServerInfo(CJsonWriter *pJsonWriter, int ClientId) override;
-	void ReadCensorList();
-
-	bool PracticeByDefault() const;
+	bool RateLimitPlayerVote(int ClientID);
+	bool RateLimitPlayerMapVote(int ClientID);
 
 	std::shared_ptr<CScoreRandomMapResult> m_SqlRandomMapResult;
 
-	// cached map info from database
-	std::shared_ptr<CScorePlayerResult> m_pLoadMapInfoResult;
-	char m_aMapInfoMessage[512];
-
 private:
-	// starting 1 to make 0 the special value "no client id"
-	uint32_t m_NextUniqueClientId = 1;
 	bool m_VoteWillPass;
-	CScore *m_pScore;
+	class CScore *m_pScore;
 
-	// DDRace Console Commands
+	//DDRace Console Commands
 
 	static void ConKillPlayer(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConNinja(IConsole::IResult *pResult, void *pUserData);
-	static void ConUnNinja(IConsole::IResult *pResult, void *pUserData);
 	static void ConEndlessHook(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnEndlessHook(IConsole::IResult *pResult, void *pUserData);
-	static void ConSolo(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnSolo(IConsole::IResult *pResult, void *pUserData);
-	static void ConFreeze(IConsole::IResult *pResult, void *pUserData);
-	static void ConUnfreeze(IConsole::IResult *pResult, void *pUserData);
-	static void ConDeep(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnDeep(IConsole::IResult *pResult, void *pUserData);
 	static void ConLiveFreeze(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnLiveFreeze(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnSuper(IConsole::IResult *pResult, void *pUserData);
 	static void ConSuper(IConsole::IResult *pResult, void *pUserData);
-	static void ConToggleInvincible(IConsole::IResult *pResult, void *pUserData);
 	static void ConShotgun(IConsole::IResult *pResult, void *pUserData);
 	static void ConGrenade(IConsole::IResult *pResult, void *pUserData);
 	static void ConLaser(IConsole::IResult *pResult, void *pUserData);
 	static void ConJetpack(IConsole::IResult *pResult, void *pUserData);
-	static void ConEndlessJump(IConsole::IResult *pResult, void *pUserData);
-	static void ConSetJumps(IConsole::IResult *pResult, void *pUserData);
 	static void ConWeapons(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnShotgun(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnGrenade(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnLaser(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnJetpack(IConsole::IResult *pResult, void *pUserData);
-	static void ConUnEndlessJump(IConsole::IResult *pResult, void *pUserData);
-	static void ConSetSwitch(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnWeapons(IConsole::IResult *pResult, void *pUserData);
 	static void ConAddWeapon(IConsole::IResult *pResult, void *pUserData);
 	static void ConRemoveWeapon(IConsole::IResult *pResult, void *pUserData);
+
 	void ModifyWeapons(IConsole::IResult *pResult, void *pUserData, int Weapon, bool Remove);
-	void MoveCharacter(int ClientId, int X, int Y, bool Raw = false);
+	void MoveCharacter(int ClientID, int X, int Y, bool Raw = false);
 	static void ConGoLeft(IConsole::IResult *pResult, void *pUserData);
 	static void ConGoRight(IConsole::IResult *pResult, void *pUserData);
 	static void ConGoUp(IConsole::IResult *pResult, void *pUserData);
@@ -497,31 +354,28 @@ private:
 	static void ConTimes(IConsole::IResult *pResult, void *pUserData);
 	static void ConPoints(IConsole::IResult *pResult, void *pUserData);
 	static void ConTopPoints(IConsole::IResult *pResult, void *pUserData);
-	static void ConTimeCP(IConsole::IResult *pResult, void *pUserData);
 
+	static void ConUTF8(IConsole::IResult *pResult, void *pUserData);
 	static void ConDND(IConsole::IResult *pResult, void *pUserData);
-	static void ConWhispers(IConsole::IResult *pResult, void *pUserData);
 	static void ConMapInfo(IConsole::IResult *pResult, void *pUserData);
 	static void ConTimeout(IConsole::IResult *pResult, void *pUserData);
 	static void ConPractice(IConsole::IResult *pResult, void *pUserData);
-	static void ConUnPractice(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeCmdList(IConsole::IResult *pResult, void *pUserData);
 	static void ConSwap(IConsole::IResult *pResult, void *pUserData);
-	static void ConCancelSwap(IConsole::IResult *pResult, void *pUserData);
 	static void ConSave(IConsole::IResult *pResult, void *pUserData);
 	static void ConLoad(IConsole::IResult *pResult, void *pUserData);
 	static void ConMap(IConsole::IResult *pResult, void *pUserData);
 	static void ConTeamRank(IConsole::IResult *pResult, void *pUserData);
 	static void ConRank(IConsole::IResult *pResult, void *pUserData);
-	static void ConTeam(IConsole::IResult *pResult, void *pUserData);
-	static void ConLock(IConsole::IResult *pResult, void *pUserData);
-	static void ConUnlock(IConsole::IResult *pResult, void *pUserData);
-	static void ConInvite(IConsole::IResult *pResult, void *pUserData);
-	static void ConJoin(IConsole::IResult *pResult, void *pUserData);
-	static void ConTeam0Mode(IConsole::IResult *pResult, void *pUserData);
+	static void ConBroadTime(IConsole::IResult *pResult, void *pUserData);
+	static void ConJoinTeam(IConsole::IResult *pResult, void *pUserData);
+	static void ConLockTeam(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnlockTeam(IConsole::IResult *pResult, void *pUserData);
+	static void ConInviteTeam(IConsole::IResult *pResult, void *pUserData);
+	static void ConMe(IConsole::IResult *pResult, void *pUserData);
 	static void ConWhisper(IConsole::IResult *pResult, void *pUserData);
 	static void ConConverse(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetEyeEmote(IConsole::IResult *pResult, void *pUserData);
+	static void ConToggleBroadcast(IConsole::IResult *pResult, void *pUserData);
 	static void ConEyeEmote(IConsole::IResult *pResult, void *pUserData);
 	static void ConShowOthers(IConsole::IResult *pResult, void *pUserData);
 	static void ConShowAll(IConsole::IResult *pResult, void *pUserData);
@@ -532,137 +386,87 @@ private:
 	static void ConTime(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetTimerType(IConsole::IResult *pResult, void *pUserData);
 	static void ConRescue(IConsole::IResult *pResult, void *pUserData);
-	static void ConRescueMode(IConsole::IResult *pResult, void *pUserData);
-	static void ConBack(IConsole::IResult *pResult, void *pUserData);
-	static void ConTeleTo(IConsole::IResult *pResult, void *pUserData);
-	static void ConTeleXY(IConsole::IResult *pResult, void *pUserData);
-	static void ConTeleCursor(IConsole::IResult *pResult, void *pUserData);
-	static void ConLastTele(IConsole::IResult *pResult, void *pUserData);
-
-	// Chat commands for practice mode
-	static void ConPracticeToTeleporter(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeToCheckTeleporter(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeUnSolo(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeSolo(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeUnDeep(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeDeep(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeUnLiveFreeze(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeLiveFreeze(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeShotgun(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeGrenade(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeLaser(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeJetpack(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeEndlessJump(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeSetJumps(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeWeapons(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeUnShotgun(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeUnGrenade(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeUnLaser(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeUnJetpack(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeUnEndlessJump(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeUnWeapons(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeNinja(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeUnNinja(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeEndlessHook(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeUnEndlessHook(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeSetSwitch(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeToggleInvincible(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeToggleCollision(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeToggleHookCollision(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeToggleHitOthers(IConsole::IResult *pResult, void *pUserData);
-
-	static void ConPracticeAddWeapon(IConsole::IResult *pResult, void *pUserData);
-	static void ConPracticeRemoveWeapon(IConsole::IResult *pResult, void *pUserData);
-
+	static void ConTele(IConsole::IResult *pResult, void *pUserData);
 	static void ConProtectedKill(IConsole::IResult *pResult, void *pUserData);
+
+	static void ConVoteMute(IConsole::IResult *pResult, void *pUserData);
+	static void ConVoteUnmute(IConsole::IResult *pResult, void *pUserData);
+	static void ConVoteMutes(IConsole::IResult *pResult, void *pUserData);
+	static void ConMute(IConsole::IResult *pResult, void *pUserData);
+	static void ConMuteID(IConsole::IResult *pResult, void *pUserData);
+	static void ConMuteIP(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnmute(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnmuteID(IConsole::IResult *pResult, void *pUserData);
+	static void ConMutes(IConsole::IResult *pResult, void *pUserData);
 	static void ConModerate(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConList(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetDDRTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConUninvite(IConsole::IResult *pResult, void *pUserData);
-
-	static void ConReloadCensorlist(IConsole::IResult *pResult, void *pUserData);
-
-	CCharacter *GetPracticeCharacter(IConsole::IResult *pResult);
-
-	CMutes m_Mutes;
-	CMutes m_VoteMutes;
-	void MuteWithMessage(const NETADDR *pAddr, int Seconds, const char *pReason, const char *pDisplayName);
-	void VoteMuteWithMessage(const NETADDR *pAddr, int Seconds, const char *pReason, const char *pDisplayName);
-
-	static void ConMute(IConsole::IResult *pResult, void *pUserData);
-	static void ConMuteId(IConsole::IResult *pResult, void *pUserData);
-	static void ConMuteIp(IConsole::IResult *pResult, void *pUserData);
-	static void ConUnmute(IConsole::IResult *pResult, void *pUserData);
-	static void ConUnmuteId(IConsole::IResult *pResult, void *pUserData);
-	static void ConUnmuteIp(IConsole::IResult *pResult, void *pUserData);
-	static void ConMutes(IConsole::IResult *pResult, void *pUserData);
-
-	static void ConVoteMute(IConsole::IResult *pResult, void *pUserData);
-	static void ConVoteMuteId(IConsole::IResult *pResult, void *pUserData);
-	static void ConVoteMuteIp(IConsole::IResult *pResult, void *pUserData);
-	static void ConVoteUnmute(IConsole::IResult *pResult, void *pUserData);
-	static void ConVoteUnmuteId(IConsole::IResult *pResult, void *pUserData);
-	static void ConVoteUnmuteIp(IConsole::IResult *pResult, void *pUserData);
-	static void ConVoteMutes(IConsole::IResult *pResult, void *pUserData);
-
-	void Whisper(int ClientId, char *pStr);
-	void WhisperId(int ClientId, int VictimId, const char *pMessage);
-	void Converse(int ClientId, char *pStr);
-	bool IsVersionBanned(int Version);
-	void UnlockTeam(int ClientId, int Team) const;
-	void AttemptJoinTeam(int ClientId, int Team);
+	static void ConFreezeHammer(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnFreezeHammer(IConsole::IResult *pResult, void *pUserData);
 
 	enum
 	{
-		MAX_LOG_SECONDS = 600,
-		MAX_LOGS = 512,
+		MAX_MUTES = 32,
+		MAX_VOTE_MUTES = 32,
 	};
-	struct CLog
+	struct CMute
 	{
-		int64_t m_Timestamp;
-		bool m_FromServer;
-		char m_aDescription[256 + 8];
-		int m_ClientVersion;
-		char m_aClientName[MAX_NAME_LENGTH];
-		char m_aClientAddrStr[NETADDR_MAXSTRSIZE];
+		NETADDR m_Addr;
+		int m_Expire;
+		char m_aReason[128];
+		bool m_InitialChatDelay;
 	};
-	CLog m_aLogs[MAX_LOGS];
-	int m_LatestLog;
 
-	void LogEvent(const char *Description, int ClientId);
+	CMute m_aMutes[MAX_MUTES];
+	int m_NumMutes;
+	CMute m_aVoteMutes[MAX_VOTE_MUTES];
+	int m_NumVoteMutes;
+	bool TryMute(const NETADDR *pAddr, int Secs, const char *pReason, bool InitialChatDelay);
+	void Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName, const char *pReason = "", bool InitialChatDelay = false);
+	bool TryVoteMute(const NETADDR *pAddr, int Secs);
+	bool VoteMute(const NETADDR *pAddr, int Secs, const char *pDisplayName, int AuthedID);
+	bool VoteUnmute(const NETADDR *pAddr, const char *pDisplayName, int AuthedID);
+	void Whisper(int ClientID, char *pStr);
+	void WhisperID(int ClientID, int VictimID, const char *pMessage);
+	void Converse(int ClientID, char *pStr);
+	bool IsVersionBanned(int Version);
+	void UnlockTeam(int ClientID, int Team);
 
 public:
 	CLayers *Layers() { return &m_Layers; }
-	CScore *Score() { return m_pScore; }
+	class CScore *Score() { return m_pScore; }
 
 	enum
 	{
+		VOTE_ENFORCE_NO_ADMIN = VOTE_ENFORCE_YES + 1,
+		VOTE_ENFORCE_YES_ADMIN,
+
 		VOTE_TYPE_UNKNOWN = 0,
 		VOTE_TYPE_OPTION,
 		VOTE_TYPE_KICK,
 		VOTE_TYPE_SPECTATE,
 	};
 	int m_VoteVictim;
+	int m_VoteEnforcer;
 
-	bool IsOptionVote() const { return m_VoteType == VOTE_TYPE_OPTION; }
-	bool IsKickVote() const { return m_VoteType == VOTE_TYPE_KICK; }
-	bool IsSpecVote() const { return m_VoteType == VOTE_TYPE_SPECTATE; }
+	inline bool IsOptionVote() const { return m_VoteType == VOTE_TYPE_OPTION; }
+	inline bool IsKickVote() const { return m_VoteType == VOTE_TYPE_KICK; }
+	inline bool IsSpecVote() const { return m_VoteType == VOTE_TYPE_SPECTATE; }
 
-	bool IsRunningVote(int ClientId) const;
-	bool IsRunningKickOrSpecVote(int ClientId) const;
-
-	void SendRecord(int ClientId);
-	void SendFinish(int ClientId, float Time, std::optional<float> PreviousBestTime);
-	void SendSaveCode(int Team, int TeamSize, int State, const char *pError, const char *pSaveRequester, const char *pServerName, const char *pGeneratedCode, const char *pCode);
-	void OnSetAuthed(int ClientId, int Level) override;
+	void SendRecord(int ClientID);
+	virtual void OnSetAuthed(int ClientID, int Level);
+	virtual bool PlayerCollision();
+	virtual bool PlayerHooking();
+	virtual float PlayerJetpack();
 
 	void ResetTuning();
 };
 
-static inline bool CheckClientId(int ClientId)
-{
-	return ClientId >= 0 && ClientId < MAX_CLIENTS;
-}
-
+inline int64_t CmaskAll() { return -1LL; }
+inline int64_t CmaskOne(int ClientID) { return 1LL << ClientID; }
+inline int64_t CmaskUnset(int64_t Mask, int ClientID) { return Mask ^ CmaskOne(ClientID); }
+inline int64_t CmaskAllExceptOne(int ClientID) { return CmaskUnset(CmaskAll(), ClientID); }
+inline bool CmaskIsSet(int64_t Mask, int ClientID) { return (Mask & CmaskOne(ClientID)) != 0; }
 #endif

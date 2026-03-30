@@ -3,18 +3,13 @@
 
 // This file can be included several times.
 
-#ifndef MACRO_TUNING_PARAM
-// This helps IDEs properly syntax highlight the uses of the macro below.
-#define MACRO_TUNING_PARAM(Name, ScriptName, Value, Description)
-#endif
-
 // physics tuning
 MACRO_TUNING_PARAM(GroundControlSpeed, ground_control_speed, 10.0f, "Max speed the tee can get on ground")
-MACRO_TUNING_PARAM(GroundControlAccel, ground_control_accel, 100.0f / (float)SERVER_TICK_SPEED, "Acceleration speed on the ground")
+MACRO_TUNING_PARAM(GroundControlAccel, ground_control_accel, 100.0f / TicksPerSecond, "Acceleration speed on the ground")
 MACRO_TUNING_PARAM(GroundFriction, ground_friction, 0.5f, "Friction on the ground")
 MACRO_TUNING_PARAM(GroundJumpImpulse, ground_jump_impulse, 13.2f, "Impulse when jumping on ground")
 MACRO_TUNING_PARAM(AirJumpImpulse, air_jump_impulse, 12.0f, "Impulse when jumping in air")
-MACRO_TUNING_PARAM(AirControlSpeed, air_control_speed, 250.0f / (float)SERVER_TICK_SPEED, "Max speed the tee can get in the air")
+MACRO_TUNING_PARAM(AirControlSpeed, air_control_speed, 250.0f / TicksPerSecond, "Max speed the tee can get in the air")
 MACRO_TUNING_PARAM(AirControlAccel, air_control_accel, 1.5f, "Acceleration speed in air")
 MACRO_TUNING_PARAM(AirFriction, air_friction, 0.95f, "Friction in the air")
 MACRO_TUNING_PARAM(HookLength, hook_length, 380.0f, "Length of the hook")
@@ -64,6 +59,3 @@ MACRO_TUNING_PARAM(GrenadeFireDelay, grenade_fire_delay, 500, "Delay of firing g
 MACRO_TUNING_PARAM(LaserFireDelay, laser_fire_delay, 800, "Delay of firing laser laser")
 MACRO_TUNING_PARAM(NinjaFireDelay, ninja_fire_delay, 800, "Delay of firing ninja")
 MACRO_TUNING_PARAM(HammerHitFireDelay, hammer_hit_fire_delay, 320, "Delay of hammering (when hitting another tee)")
-
-MACRO_TUNING_PARAM(GroundElasticityX, ground_elasticity_x, 0, "Wall elasticity")
-MACRO_TUNING_PARAM(GroundElasticityY, ground_elasticity_y, 0, "Ground/ceiling elasticity")

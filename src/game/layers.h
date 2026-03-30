@@ -3,22 +3,28 @@
 #ifndef GAME_LAYERS_H
 #define GAME_LAYERS_H
 
-class IMap;
-
-class CMapItemGroup;
-class CMapItemLayer;
-class CMapItemLayerTilemap;
+#include <engine/map.h>
+#include <game/mapitems.h>
 
 class CLayers
 {
+	int m_GroupsNum;
+	int m_GroupsStart;
+	int m_LayersNum;
+	int m_LayersStart;
+	CMapItemGroup *m_pGameGroup;
+	CMapItemLayerTilemap *m_pGameLayer;
+	class IMap *m_pMap;
+
+	void InitTilemapSkip();
+
 public:
 	CLayers();
-	void Init(IMap *pMap, bool GameOnly);
-	void Unload();
-
+	void Init(class IKernel *pKernel);
+	void InitBackground(class IMap *pMap);
 	int NumGroups() const { return m_GroupsNum; }
 	int NumLayers() const { return m_LayersNum; }
-	IMap *Map() const { return m_pMap; }
+	class IMap *Map() const { return m_pMap; }
 	CMapItemGroup *GameGroup() const { return m_pGameGroup; }
 	CMapItemLayerTilemap *GameLayer() const { return m_pGameLayer; }
 	CMapItemGroup *GetGroup(int Index) const;
@@ -33,22 +39,11 @@ public:
 	CMapItemLayerTilemap *TuneLayer() const { return m_pTuneLayer; }
 
 private:
-	int m_GroupsNum;
-	int m_GroupsStart;
-	int m_LayersNum;
-	int m_LayersStart;
-
-	CMapItemGroup *m_pGameGroup;
-	CMapItemLayerTilemap *m_pGameLayer;
-	IMap *m_pMap;
-
 	CMapItemLayerTilemap *m_pTeleLayer;
 	CMapItemLayerTilemap *m_pSpeedupLayer;
 	CMapItemLayerTilemap *m_pFrontLayer;
 	CMapItemLayerTilemap *m_pSwitchLayer;
 	CMapItemLayerTilemap *m_pTuneLayer;
-
-	void InitTilemapSkip();
 };
 
 #endif

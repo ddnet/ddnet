@@ -2,7 +2,6 @@ import argparse
 import csv
 import sys
 
-
 def check_name(kind, qualifiers, typ, name):
 	if kind == "variable":
 		return check_variable_name(qualifiers, typ, name)
@@ -18,9 +17,7 @@ def check_name(kind, qualifiers, typ, name):
 			return "must only contain uppercase letters, digits and underscores"
 	return None
 
-
-ALLOW = set(
-	"""
+ALLOW = set("""
 	dx dy
 	fx fy
 	mx my
@@ -30,9 +27,7 @@ ALLOW = set(
 	wx wy
 	x0 x1
 	y0 y1
-""".split()
-)
-
+""".split())
 
 def check_variable_name(qualifiers, typ, name):
 	if qualifiers == "" and typ == "" and name == "argc":
@@ -49,16 +44,15 @@ def check_variable_name(qualifiers, typ, name):
 		return None
 	prefix = "".join([qualifiers, "_" if qualifiers else "", typ])
 	if not name.startswith(prefix):
-		return f"should start with {prefix!r}"
+		return "should start with {!r}".format(prefix)
 	if name in ALLOW:
 		return None
-	name = name[len(prefix) :]
+	name = name[len(prefix):]
 	if not name[0].isupper():
 		if prefix:
-			return f"should start with an uppercase letter after the prefix {prefix!r}"
+			return "should start with an uppercase letter after the prefix {!r}".format(prefix)
 		return "should start with an uppercase letter"
 	return None
-
 
 def main():
 	p = argparse.ArgumentParser(description="Check identifiers (input via stdin in CSV format from extract_identifiers.py) for naming style in DDNet code")
@@ -71,9 +65,8 @@ def main():
 		error = check_name(i["kind"], i["qualifiers"], i["type"], i["name"])
 		if error:
 			unclean = True
-			print(f"{i['file']}:{i['line']}:{i['column']}: {i['name']}: {error}")
+			print("{}:{}:{}: {}: {}".format(i["file"], i["line"], i["column"], i["name"], error))
 	return unclean
-
 
 if __name__ == "__main__":
 	sys.exit(main())

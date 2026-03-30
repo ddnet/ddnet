@@ -1,14 +1,13 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include "particles.h"
-
 #include <base/math.h>
-#include <base/time.h>
-
 #include <engine/demo.h>
 #include <engine/graphics.h>
 
-#include <generated/client_data.h>
+#include "particles.h"
+#include <game/client/render.h>
+#include <game/gamecore.h>
+#include <game/generated/client_data.h>
 
 #include <game/client/gameclient.h>
 
@@ -16,9 +15,7 @@ CParticles::CParticles()
 {
 	OnReset();
 	m_RenderTrail.m_pParts = this;
-	m_RenderTrailExtra.m_pParts = this;
 	m_RenderExplosions.m_pParts = this;
-	m_RenderExtra.m_pParts = this;
 	m_RenderGeneral.m_pParts = this;
 }
 
@@ -49,7 +46,7 @@ void CParticles::Add(int Group, CParticle *pPart, float TimePassed)
 	}
 	else
 	{
-		if(GameClient()->m_Snap.m_pGameInfoObj && GameClient()->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED)
+		if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED)
 			return;
 	}
 
@@ -81,16 +78,17 @@ void CParticles::Update(float TimePassed)
 	if(TimePassed <= 0.0f)
 		return;
 
-	m_FrictionFraction += TimePassed;
+	static float FrictionFraction = 0;
+	FrictionFraction += TimePassed;
 
-	if(m_FrictionFraction > 2.0f) // safety measure
-		m_FrictionFraction = 0;
+	if(FrictionFraction > 2.0f) // safety messure
+		FrictionFraction = 0;
 
 	int FrictionCount = 0;
-	while(m_FrictionFraction > 0.05f)
+	while(FrictionFraction > 0.05f)
 	{
 		FrictionCount++;
-		m_FrictionFraction -= 0.05f;
+		FrictionFraction -= 0.05f;
 	}
 
 	for(int &FirstPart : m_aFirstPart)
@@ -99,6 +97,7 @@ void CParticles::Update(float TimePassed)
 		while(i != -1)
 		{
 			int Next = m_aParticles[i].m_NextPart;
+			//m_aParticles[i].vel += flow_get(m_aParticles[i].pos)*time_passed * m_aParticles[i].flow_affected;
 			m_aParticles[i].m_Vel.y += m_aParticles[i].m_Gravity * TimePassed;
 
 			for(int f = 0; f < FrictionCount; f++) // apply friction
@@ -106,14 +105,7 @@ void CParticles::Update(float TimePassed)
 
 			// move the point
 			vec2 Vel = m_aParticles[i].m_Vel * TimePassed;
-			if(m_aParticles[i].m_Collides)
-			{
-				Collision()->MovePoint(&m_aParticles[i].m_Pos, &Vel, random_float(0.1f, 1.0f), nullptr);
-			}
-			else
-			{
-				m_aParticles[i].m_Pos += Vel;
-			}
+			Collision()->MovePoint(&m_aParticles[i].m_Pos, &Vel, 0.1f + 0.9f * random_float(), NULL);
 			m_aParticles[i].m_Vel = Vel * (1.0f / TimePassed);
 
 			m_aParticles[i].m_Life += TimePassed;
@@ -146,25 +138,26 @@ void CParticles::Update(float TimePassed)
 
 void CParticles::OnRender()
 {
-	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if(Client()->State() < IClient::STATE_ONLINE)
 		return;
 
 	set_new_tick();
+	static int64_t LastTime = 0;
 	int64_t t = time();
 
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
 		if(!pInfo->m_Paused)
-			Update((float)((t - m_LastRenderTime) / (double)time_freq()) * pInfo->m_Speed);
+			Update((float)((t - LastTime) / (double)time_freq()) * pInfo->m_Speed);
 	}
 	else
 	{
-		if(GameClient()->m_Snap.m_pGameInfoObj && !(GameClient()->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED))
-			Update((float)((t - m_LastRenderTime) / (double)time_freq()));
+		if(m_pClient->m_Snap.m_pGameInfoObj && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED))
+			Update((float)((t - LastTime) / (double)time_freq()));
 	}
 
-	m_LastRenderTime = t;
+	LastTime = t;
 }
 
 void CParticles::OnInit()
@@ -177,19 +170,9 @@ void CParticles::OnInit()
 	for(int i = 0; i <= (SPRITE_PART9 - SPRITE_PART_SLICE); ++i)
 	{
 		Graphics()->QuadsSetSubset(0, 0, 1, 1);
-		Graphics()->QuadContainerAddSprite(m_ParticleQuadContainerIndex, 1.f);
+		RenderTools()->QuadContainerAddSprite(m_ParticleQuadContainerIndex, 1.f);
 	}
 	Graphics()->QuadContainerUpload(m_ParticleQuadContainerIndex);
-
-	m_ExtraParticleQuadContainerIndex = Graphics()->CreateQuadContainer(false);
-
-	for(int i = 0; i <= (SPRITE_PART_SPARKLE - SPRITE_PART_SNOWFLAKE); ++i)
-	{
-		Graphics()->QuadsSetSubset(0, 0, 1, 1);
-		Graphics()->QuadContainerAddSprite(m_ExtraParticleQuadContainerIndex, 1.f);
-	}
-
-	Graphics()->QuadContainerUpload(m_ExtraParticleQuadContainerIndex);
 }
 
 bool CParticles::ParticleIsVisibleOnScreen(const vec2 &CurPos, float CurSize)
@@ -198,7 +181,7 @@ bool CParticles::ParticleIsVisibleOnScreen(const vec2 &CurPos, float CurSize)
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 
 	// for simplicity assume the worst case rotation, that increases the bounding box around the particle by its diagonal
-	const float SqrtOf2 = std::sqrt(2);
+	const float SqrtOf2 = sqrtf(2);
 	CurSize = SqrtOf2 * CurSize;
 
 	// always uses the mid of the particle
@@ -209,16 +192,6 @@ bool CParticles::ParticleIsVisibleOnScreen(const vec2 &CurPos, float CurSize)
 
 void CParticles::RenderGroup(int Group)
 {
-	IGraphics::CTextureHandle *aParticles = GameClient()->m_ParticlesSkin.m_aSpriteParticles;
-	int FirstParticleOffset = SPRITE_PART_SLICE;
-	int ParticleQuadContainerIndex = m_ParticleQuadContainerIndex;
-	if(Group == GROUP_EXTRA || Group == GROUP_TRAIL_EXTRA)
-	{
-		aParticles = GameClient()->m_ExtrasSkin.m_aSpriteParticles;
-		FirstParticleOffset = SPRITE_PART_SNOWFLAKE;
-		ParticleQuadContainerIndex = m_ExtraParticleQuadContainerIndex;
-	}
-
 	// don't use the buffer methods here, else the old renderer gets many draw calls
 	if(Graphics()->IsQuadContainerBufferingEnabled())
 	{
@@ -229,27 +202,21 @@ void CParticles::RenderGroup(int Group)
 		int CurParticleRenderCount = 0;
 
 		// batching makes sense for stuff like ninja particles
-		ColorRGBA LastColor;
+		float LastColor[4];
 		int LastQuadOffset = 0;
 
 		if(i != -1)
 		{
-			float Alpha = m_aParticles[i].m_Color.a;
-			if(m_aParticles[i].m_UseAlphaFading)
-			{
-				float a = m_aParticles[i].m_Life / m_aParticles[i].m_LifeSpan;
-				Alpha = mix(m_aParticles[i].m_StartAlpha, m_aParticles[i].m_EndAlpha, a);
-			}
-			LastColor.r = m_aParticles[i].m_Color.r;
-			LastColor.g = m_aParticles[i].m_Color.g;
-			LastColor.b = m_aParticles[i].m_Color.b;
-			LastColor.a = Alpha;
+			LastColor[0] = m_aParticles[i].m_Color.r;
+			LastColor[1] = m_aParticles[i].m_Color.g;
+			LastColor[2] = m_aParticles[i].m_Color.b;
+			LastColor[3] = m_aParticles[i].m_Color.a;
 
 			Graphics()->SetColor(
 				m_aParticles[i].m_Color.r,
 				m_aParticles[i].m_Color.g,
 				m_aParticles[i].m_Color.b,
-				Alpha);
+				m_aParticles[i].m_Color.a);
 
 			LastQuadOffset = m_aParticles[i].m_Spr;
 		}
@@ -260,20 +227,14 @@ void CParticles::RenderGroup(int Group)
 			float a = m_aParticles[i].m_Life / m_aParticles[i].m_LifeSpan;
 			vec2 p = m_aParticles[i].m_Pos;
 			float Size = mix(m_aParticles[i].m_StartSize, m_aParticles[i].m_EndSize, a);
-			float Alpha = m_aParticles[i].m_Color.a;
-			if(m_aParticles[i].m_UseAlphaFading)
-			{
-				Alpha = mix(m_aParticles[i].m_StartAlpha, m_aParticles[i].m_EndAlpha, a);
-			}
 
 			// the current position, respecting the size, is inside the viewport, render it, else ignore
 			if(ParticleIsVisibleOnScreen(p, Size))
 			{
-				if((size_t)CurParticleRenderCount == GRAPHICS_MAX_PARTICLES_RENDER_COUNT || LastColor.r != m_aParticles[i].m_Color.r || LastColor.g != m_aParticles[i].m_Color.g || LastColor.b != m_aParticles[i].m_Color.b || LastColor.a != Alpha || LastQuadOffset != QuadOffset)
+				if((size_t)CurParticleRenderCount == gs_GraphicsMaxParticlesRenderCount || LastColor[0] != m_aParticles[i].m_Color.r || LastColor[1] != m_aParticles[i].m_Color.g || LastColor[2] != m_aParticles[i].m_Color.b || LastColor[3] != m_aParticles[i].m_Color.a || LastQuadOffset != QuadOffset)
 				{
-					dbg_assert(LastQuadOffset >= FirstParticleOffset, "Invalid particle offsets: %d < %d", LastQuadOffset, FirstParticleOffset);
-					Graphics()->TextureSet(aParticles[LastQuadOffset - FirstParticleOffset]);
-					Graphics()->RenderQuadContainerAsSpriteMultiple(ParticleQuadContainerIndex, LastQuadOffset - FirstParticleOffset, CurParticleRenderCount, s_aParticleRenderInfo);
+					Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_SpriteParticles[LastQuadOffset - SPRITE_PART_SLICE]);
+					Graphics()->RenderQuadContainerAsSpriteMultiple(m_ParticleQuadContainerIndex, LastQuadOffset, CurParticleRenderCount, s_aParticleRenderInfo);
 					CurParticleRenderCount = 0;
 					LastQuadOffset = QuadOffset;
 
@@ -281,16 +242,17 @@ void CParticles::RenderGroup(int Group)
 						m_aParticles[i].m_Color.r,
 						m_aParticles[i].m_Color.g,
 						m_aParticles[i].m_Color.b,
-						Alpha);
+						m_aParticles[i].m_Color.a);
 
-					LastColor.r = m_aParticles[i].m_Color.r;
-					LastColor.g = m_aParticles[i].m_Color.g;
-					LastColor.b = m_aParticles[i].m_Color.b;
-					LastColor.a = Alpha;
+					LastColor[0] = m_aParticles[i].m_Color.r;
+					LastColor[1] = m_aParticles[i].m_Color.g;
+					LastColor[2] = m_aParticles[i].m_Color.b;
+					LastColor[3] = m_aParticles[i].m_Color.a;
 				}
 
 				s_aParticleRenderInfo[CurParticleRenderCount].m_Pos[0] = p.x;
 				s_aParticleRenderInfo[CurParticleRenderCount].m_Pos[1] = p.y;
+
 				s_aParticleRenderInfo[CurParticleRenderCount].m_Scale = Size;
 				s_aParticleRenderInfo[CurParticleRenderCount].m_Rotation = m_aParticles[i].m_Rot;
 
@@ -300,17 +262,14 @@ void CParticles::RenderGroup(int Group)
 			i = m_aParticles[i].m_NextPart;
 		}
 
-		if(CurParticleRenderCount > 0)
-		{
-			dbg_assert(LastQuadOffset >= FirstParticleOffset, "Invalid particle offsets: %d < %d", LastQuadOffset, FirstParticleOffset);
-			Graphics()->TextureSet(aParticles[LastQuadOffset - FirstParticleOffset]);
-			Graphics()->RenderQuadContainerAsSpriteMultiple(ParticleQuadContainerIndex, LastQuadOffset - FirstParticleOffset, CurParticleRenderCount, s_aParticleRenderInfo);
-		}
+		Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_SpriteParticles[LastQuadOffset - SPRITE_PART_SLICE]);
+		Graphics()->RenderQuadContainerAsSpriteMultiple(m_ParticleQuadContainerIndex, LastQuadOffset, CurParticleRenderCount, s_aParticleRenderInfo);
 	}
 	else
 	{
 		int i = m_aFirstPart[Group];
 
+		Graphics()->BlendNormal();
 		Graphics()->WrapClamp();
 
 		while(i != -1)
@@ -318,16 +277,11 @@ void CParticles::RenderGroup(int Group)
 			float a = m_aParticles[i].m_Life / m_aParticles[i].m_LifeSpan;
 			vec2 p = m_aParticles[i].m_Pos;
 			float Size = mix(m_aParticles[i].m_StartSize, m_aParticles[i].m_EndSize, a);
-			float Alpha = m_aParticles[i].m_Color.a;
-			if(m_aParticles[i].m_UseAlphaFading)
-			{
-				Alpha = mix(m_aParticles[i].m_StartAlpha, m_aParticles[i].m_EndAlpha, a);
-			}
 
 			// the current position, respecting the size, is inside the viewport, render it, else ignore
 			if(ParticleIsVisibleOnScreen(p, Size))
 			{
-				Graphics()->TextureSet(aParticles[m_aParticles[i].m_Spr - FirstParticleOffset]);
+				Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_SpriteParticles[m_aParticles[i].m_Spr - SPRITE_PART_SLICE]);
 				Graphics()->QuadsBegin();
 
 				Graphics()->QuadsSetRotation(m_aParticles[i].m_Rot);
@@ -336,7 +290,7 @@ void CParticles::RenderGroup(int Group)
 					m_aParticles[i].m_Color.r,
 					m_aParticles[i].m_Color.g,
 					m_aParticles[i].m_Color.b,
-					Alpha);
+					m_aParticles[i].m_Color.a); // pow(a, 0.75f) *
 
 				IGraphics::CQuadItem QuadItem(p.x, p.y, Size, Size);
 				Graphics()->QuadsDraw(&QuadItem, 1);
@@ -346,5 +300,6 @@ void CParticles::RenderGroup(int Group)
 			i = m_aParticles[i].m_NextPart;
 		}
 		Graphics()->WrapNormal();
+		Graphics()->BlendNormal();
 	}
 }

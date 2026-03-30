@@ -1,11 +1,19 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=E0602
 from __future__ import unicode_literals
 import os.path
+import sys
 
-import plistlib
-def read_plist(path):
-	with open(path, 'rb') as f:
-		return plistlib.load(f)
+# Before Python 3.4, use biplist; afterwards, use plistlib
+if sys.version_info < (3, 4):
+	import biplist # pylint: disable=E0401
+	def read_plist(path):
+		return biplist.readPlist(path)
+else:
+	import plistlib # pylint: disable=E0401
+	def read_plist(path):
+		with open(path, 'rb') as f:
+			return plistlib.load(f)
 
 #
 # Example settings file for dmgbuild
@@ -44,7 +52,7 @@ def icon_from_app(app_path):
 # volume_name = 'DDNet'
 
 # Volume format (see hdiutil create -help)
-format = defines.get('format', 'UDBZ')
+format = defines.get('format', 'UDBZ') # pylint: disable=W0622
 
 # Compression level (if relevant)
 compression_level = 9

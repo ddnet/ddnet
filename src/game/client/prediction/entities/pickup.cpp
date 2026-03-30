@@ -1,47 +1,36 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "pickup.h"
-
 #include "character.h"
-
-#include <generated/protocol.h>
-
-#include <game/client/pickup_data.h>
-#include <game/collision.h>
-#include <game/mapitems.h>
-
-static constexpr int PICKUP_PHYSICS_RADIUS = 14;
+#include <game/generated/protocol.h>
 
 void CPickup::Tick()
 {
 	Move();
 	// Check if a player intersected us
-	CEntity *apEnts[MAX_CLIENTS];
-	int Num = GameWorld()->FindEntities(m_Pos, GetProximityRadius() + ms_CollisionExtraSize, apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+	CCharacter *apEnts[MAX_CLIENTS];
+	int Num = GameWorld()->FindEntities(m_Pos, 20.0f, (CEntity **)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 	for(int i = 0; i < Num; ++i)
 	{
-		auto *pChr = static_cast<CCharacter *>(apEnts[i]);
-		if(pChr)
+		CCharacter *pChr = apEnts[i];
+		if(pChr && pChr->IsAlive())
 		{
-			if(GameWorld()->m_WorldConfig.m_IsVanilla && distance(m_Pos, pChr->m_Pos) >= (GetProximityRadius() + ms_CollisionExtraSize) * 2) // pickup distance is shorter on vanilla due to using ClosestEntity
+			if(GameWorld()->m_WorldConfig.m_IsVanilla && distance(m_Pos, pChr->m_Pos) >= 20.0f * 2) // pickup distance is shorter on vanilla due to using ClosestEntity
 				continue;
-			if(m_Layer == LAYER_SWITCH && m_Number > 0 && m_Number < (int)Switchers().size() && !Switchers()[m_Number].m_aStatus[pChr->Team()])
+			if(m_Layer == LAYER_SWITCH && m_Number > 0 && m_Number < Collision()->m_NumSwitchers + 1 && !GameWorld()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()])
 				continue;
-			bool CreateSound = false;
+			bool sound = false;
 			// player picked us up, is someone was hooking us, let them go
 			switch(m_Type)
 			{
 			case POWERUP_HEALTH:
-				if(!GameWorld()->m_WorldConfig.m_PredictDDRace)
-					continue;
-				if(pChr->Freeze())
-					GameWorld()->CreatePredictedSound(m_Pos, SOUND_PICKUP_HEALTH, pChr->GetCid());
+				//pChr->Freeze();
 				break;
 
 			case POWERUP_ARMOR:
 				if(!GameWorld()->m_WorldConfig.m_IsDDRace || !GameWorld()->m_WorldConfig.m_PredictDDRace)
 					continue;
-				if(pChr->IsSuper())
+				if(pChr->m_Super)
 					continue;
 				for(int j = WEAPON_SHOTGUN; j < NUM_WEAPONS; j++)
 				{
@@ -49,17 +38,14 @@ void CPickup::Tick()
 					{
 						pChr->SetWeaponGot(j, false);
 						pChr->SetWeaponAmmo(j, 0);
-						CreateSound = true;
+						sound = true;
 					}
 				}
 				pChr->SetNinjaActivationDir(vec2(0, 0));
 				pChr->SetNinjaActivationTick(-500);
 				pChr->SetNinjaCurrentMoveTime(0);
-				if(CreateSound)
-				{
+				if(sound)
 					pChr->SetLastWeapon(WEAPON_GUN);
-					GameWorld()->CreatePredictedSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->GetCid());
-				}
 				if(pChr->GetActiveWeapon() >= WEAPON_SHOTGUN)
 					pChr->SetActiveWeapon(WEAPON_HAMMER);
 				break;
@@ -74,7 +60,6 @@ void CPickup::Tick()
 					pChr->SetWeaponGot(WEAPON_SHOTGUN, false);
 					pChr->SetWeaponAmmo(WEAPON_SHOTGUN, 0);
 					pChr->SetLastWeapon(WEAPON_GUN);
-					GameWorld()->CreatePredictedSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->GetCid());
 				}
 				if(pChr->GetActiveWeapon() == WEAPON_SHOTGUN)
 					pChr->SetActiveWeapon(WEAPON_HAMMER);
@@ -90,7 +75,6 @@ void CPickup::Tick()
 					pChr->SetWeaponGot(WEAPON_GRENADE, false);
 					pChr->SetWeaponAmmo(WEAPON_GRENADE, 0);
 					pChr->SetLastWeapon(WEAPON_GUN);
-					GameWorld()->CreatePredictedSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->GetCid());
 				}
 				if(pChr->GetActiveWeapon() == WEAPON_GRENADE)
 					pChr->SetActiveWeapon(WEAPON_HAMMER);
@@ -116,7 +100,6 @@ void CPickup::Tick()
 					pChr->SetWeaponGot(WEAPON_LASER, false);
 					pChr->SetWeaponAmmo(WEAPON_LASER, 0);
 					pChr->SetLastWeapon(WEAPON_GUN);
-					GameWorld()->CreatePredictedSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->GetCid());
 				}
 				if(pChr->GetActiveWeapon() == WEAPON_LASER)
 					pChr->SetActiveWeapon(WEAPON_HAMMER);
@@ -124,19 +107,7 @@ void CPickup::Tick()
 
 			case POWERUP_WEAPON:
 				if(m_Subtype >= 0 && m_Subtype < NUM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) != -1))
-				{
 					pChr->GiveWeapon(m_Subtype);
-
-					if(GameWorld()->m_WorldConfig.m_IsDDRace && GameWorld()->m_WorldConfig.m_PredictDDRace)
-					{
-						if(m_Subtype == WEAPON_GRENADE)
-							GameWorld()->CreatePredictedSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->GetCid());
-						else if(m_Subtype == WEAPON_SHOTGUN)
-							GameWorld()->CreatePredictedSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->GetCid());
-						else if(m_Subtype == WEAPON_LASER)
-							GameWorld()->CreatePredictedSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->GetCid());
-					}
-				}
 				break;
 
 			case POWERUP_NINJA:
@@ -155,28 +126,37 @@ void CPickup::Tick()
 
 void CPickup::Move()
 {
-	if(GameWorld()->GameTick() % (int)(GameWorld()->GameTickSpeed() * 0.15f) == 0)
+	if(GameWorld()->GameTick() % int(GameWorld()->GameTickSpeed() * 0.15f) == 0)
 	{
-		if(Collision()->MoverSpeed(m_Pos.x, m_Pos.y, &m_Core))
+		int Flags;
+		int index = Collision()->IsMover(m_Pos.x, m_Pos.y, &Flags);
+		if(index)
 		{
 			m_IsCoreActive = true;
+			m_Core = Collision()->CpSpeed(index, Flags);
 		}
 		m_Pos += m_Core;
 	}
 }
 
-CPickup::CPickup(CGameWorld *pGameWorld, int Id, const CPickupData *pPickup) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP, vec2(0, 0), PICKUP_PHYSICS_RADIUS)
+CPickup::CPickup(CGameWorld *pGameWorld, int ID, CNetObj_Pickup *pPickup, const CNetObj_EntityEx *pEntEx) :
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP)
 {
-	m_Pos = pPickup->m_Pos;
+	m_Pos.x = pPickup->m_X;
+	m_Pos.y = pPickup->m_Y;
 	m_Type = pPickup->m_Type;
 	m_Subtype = pPickup->m_Subtype;
 	m_Core = vec2(0.f, 0.f);
 	m_IsCoreActive = false;
-	m_Id = Id;
-	m_Number = pPickup->m_SwitchNumber;
-	m_Layer = m_Number > 0 ? LAYER_SWITCH : LAYER_GAME;
-	m_Flags = pPickup->m_Flags;
+	m_ID = ID;
+	m_Layer = LAYER_GAME;
+	m_Number = 0;
+
+	if(pEntEx)
+	{
+		m_Layer = pEntEx->m_Layer;
+		m_Number = pEntEx->m_SwitchNumber;
+	}
 }
 
 void CPickup::FillInfo(CNetObj_Pickup *pPickup)

@@ -3,7 +3,6 @@
 #ifndef GAME_CLIENT_COMPONENTS_FLOW_H
 #define GAME_CLIENT_COMPONENTS_FLOW_H
 #include <base/vmath.h>
-
 #include <game/client/component.h>
 
 class CFlow : public CComponent
@@ -23,7 +22,7 @@ class CFlow : public CComponent
 
 public:
 	CFlow();
-	int Sizeof() const override { return sizeof(*this); }
+	virtual int Sizeof() const override { return sizeof(*this); }
 
 	vec2 Get(vec2 Pos);
 	void Add(vec2 Pos, vec2 Vel, float Size);

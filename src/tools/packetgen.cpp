@@ -1,15 +1,13 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <base/io.h>
-#include <base/net.h>
-#include <base/os.h>
+#include <base/system.h>
 
 enum
 {
 	NUM_SOCKETS = 64
 };
 
-static void Run(NETADDR Dest)
+void Run(NETADDR Dest)
 {
 	NETSOCKET aSockets[NUM_SOCKETS];
 
@@ -35,8 +33,9 @@ static void Run(NETADDR Dest)
 
 int main(int argc, const char **argv)
 {
-	CCmdlineFix CmdlineFix(&argc, &argv);
+	cmdline_fix(&argc, &argv);
 	NETADDR Dest = {NETTYPE_IPV4, {127, 0, 0, 1}, 8303};
 	Run(Dest);
+	cmdline_free(argc, argv);
 	return 0;
 }

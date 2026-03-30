@@ -1,5 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <base/system.h>
+
 #include "ringbuffer.h"
 
 CRingBufferBase::CItem *CRingBufferBase::NextBlock(CItem *pItem)
@@ -44,32 +46,25 @@ CRingBufferBase::CItem *CRingBufferBase::MergeBack(CItem *pItem)
 
 void CRingBufferBase::Init(void *pMemory, int Size, int Flags)
 {
-	m_Size = Size / sizeof(CItem) * sizeof(CItem);
-	m_pBuffer = static_cast<CItem *>(pMemory);
-	m_Flags = Flags;
-	Clear();
-}
-
-void CRingBufferBase::Clear()
-{
-	m_pFirst = m_pBuffer;
-	m_pFirst->m_pPrev = nullptr;
-	m_pFirst->m_pNext = nullptr;
+	mem_zero(pMemory, Size);
+	m_Size = (Size) / sizeof(CItem) * sizeof(CItem);
+	m_pFirst = (CItem *)pMemory;
 	m_pFirst->m_Free = 1;
 	m_pFirst->m_Size = m_Size;
 	m_pLast = m_pFirst;
 	m_pProduce = m_pFirst;
 	m_pConsume = m_pFirst;
+	m_Flags = Flags;
 }
 
 void *CRingBufferBase::Allocate(int Size)
 {
 	int WantedSize = (Size + sizeof(CItem) + sizeof(CItem) - 1) / sizeof(CItem) * sizeof(CItem);
-	CItem *pBlock = nullptr;
+	CItem *pBlock = 0;
 
 	// check if we even can fit this block
 	if(WantedSize > m_Size)
-		return nullptr;
+		return 0;
 
 	while(true)
 	{
@@ -94,10 +89,10 @@ void *CRingBufferBase::Allocate(int Size)
 			if(m_Flags & FLAG_RECYCLE)
 			{
 				if(!PopFirst())
-					return nullptr;
+					return 0;
 			}
 			else
-				return nullptr;
+				return 0;
 		}
 	}
 
@@ -129,20 +124,10 @@ void *CRingBufferBase::Allocate(int Size)
 	return (void *)(pBlock + 1);
 }
 
-void CRingBufferBase::SetPopCallback(std::function<void(void *pCurrent)> PopCallback)
-{
-	m_PopCallback = std::move(PopCallback);
-}
-
 int CRingBufferBase::PopFirst()
 {
 	if(m_pConsume->m_Free)
 		return 0;
-
-	if(m_PopCallback)
-	{
-		m_PopCallback(m_pConsume + 1);
-	}
 
 	// set the free flag
 	m_pConsume->m_Free = 1;
@@ -172,7 +157,7 @@ void *CRingBufferBase::Prev(void *pCurrent)
 	{
 		pItem = PrevBlock(pItem);
 		if(pItem == m_pProduce)
-			return nullptr;
+			return 0;
 		if(!pItem->m_Free)
 			return pItem + 1;
 	}
@@ -186,7 +171,7 @@ void *CRingBufferBase::Next(void *pCurrent)
 	{
 		pItem = NextBlock(pItem);
 		if(pItem == m_pProduce)
-			return nullptr;
+			return 0;
 		if(!pItem->m_Free)
 			return pItem + 1;
 	}
@@ -195,7 +180,7 @@ void *CRingBufferBase::Next(void *pCurrent)
 void *CRingBufferBase::First()
 {
 	if(m_pConsume->m_Free)
-		return nullptr;
+		return 0;
 	return (void *)(m_pConsume + 1);
 }
 

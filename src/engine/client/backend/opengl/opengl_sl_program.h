@@ -1,5 +1,5 @@
 // This file can be included several times.
-#if (!defined(BACKEND_AS_OPENGL_ES) && !defined(ENGINE_CLIENT_BACKEND_OPENGL_OPENGL_SL_PROGRAM_H)) || \
+#if(!defined(BACKEND_AS_OPENGL_ES) && !defined(ENGINE_CLIENT_BACKEND_OPENGL_OPENGL_SL_PROGRAM_H)) || \
 	(defined(BACKEND_AS_OPENGL_ES) && !defined(ENGINE_CLIENT_BACKEND_OPENGL_OPENGL_SL_PROGRAM_H_AS_ES))
 
 #if !defined(BACKEND_AS_OPENGL_ES) && !defined(ENGINE_CLIENT_BACKEND_OPENGL_OPENGL_SL_PROGRAM_H)
@@ -10,8 +10,7 @@
 #define ENGINE_CLIENT_BACKEND_OPENGL_OPENGL_SL_PROGRAM_H_AS_ES
 #endif
 
-#include <base/color.h>
-#include <base/vmath.h>
+#include <base/detect.h>
 
 #include <engine/client/graphics_defines.h>
 
@@ -23,15 +22,15 @@ public:
 	void CreateProgram();
 	void DeleteProgram();
 
-	bool AddShader(CGLSL *pShader) const;
+	bool AddShader(CGLSL *pShader);
 
-	bool LinkProgram();
-	void UseProgram() const;
-	TWGLuint GetProgramId() const;
+	void LinkProgram();
+	void UseProgram();
+	TWGLuint GetProgramID();
 
-	void DetachShader(CGLSL *pShader) const;
-	void DetachShaderById(TWGLuint ShaderId) const;
-	void DetachAllShaders() const;
+	void DetachShader(CGLSL *pShader);
+	void DetachShaderByID(TWGLuint ShaderID);
+	void DetachAllShaders();
 
 	//Support various types
 	void SetUniformVec2(int Loc, int Count, const float *pValue);
@@ -42,13 +41,13 @@ public:
 	void SetUniform(int Loc, int Count, const float *pValues);
 
 	//for performance reason we do not use SetUniform with using strings... save the Locations of the variables instead
-	int GetUniformLoc(const char *pName) const;
+	int GetUniformLoc(const char *Name);
 
 	CGLSLProgram();
 	virtual ~CGLSLProgram();
 
 protected:
-	TWGLuint m_ProgramId;
+	TWGLuint m_ProgramID;
 	bool m_IsLinked;
 };
 
@@ -58,7 +57,7 @@ public:
 	CGLSLTWProgram() :
 		m_LocPos(-1), m_LocTextureSampler(-1), m_LastTextureSampler(-1), m_LastIsTextured(-1)
 	{
-		m_LastScreenTL = m_LastScreenBR = vec2(-1, -1);
+		m_LastScreen[0] = m_LastScreen[1] = m_LastScreen[2] = m_LastScreen[3] = -1.f;
 	}
 
 	int m_LocPos;
@@ -66,8 +65,7 @@ public:
 
 	int m_LastTextureSampler;
 	int m_LastIsTextured;
-	vec2 m_LastScreenTL;
-	vec2 m_LastScreenBR;
+	float m_LastScreen[4];
 };
 
 class CGLSLTextProgram : public CGLSLTWProgram
@@ -88,8 +86,8 @@ public:
 	int m_LocTextOutlineSampler;
 	int m_LocTextureSize;
 
-	ColorRGBA m_LastColor;
-	ColorRGBA m_LastOutlineColor;
+	float m_LastColor[4];
+	float m_LastOutlineColor[4];
 	int m_LastTextSampler;
 	int m_LastTextOutlineSampler;
 	int m_LastTextureSize;
@@ -107,8 +105,8 @@ public:
 
 	{
 		m_LastRotation = 0.f;
-		m_LastCenter = vec2(0, 0);
-		m_LastVerticesColor = ColorRGBA(-1, -1, -1, -1);
+		m_LastCenter[0] = m_LastCenter[1] = 0.f;
+		m_LastVertciesColor[0] = m_LastVertciesColor[1] = m_LastVertciesColor[2] = m_LastVertciesColor[3] = -1.f;
 	}
 
 	int m_LocRotation;
@@ -116,8 +114,8 @@ public:
 	int m_LocVertciesColor;
 
 	float m_LastRotation;
-	vec2 m_LastCenter;
-	ColorRGBA m_LastVerticesColor;
+	float m_LastCenter[2];
+	float m_LastVertciesColor[4];
 };
 
 class CGLSLSpriteMultipleProgram : public CGLSLTWProgram
@@ -126,16 +124,16 @@ public:
 	CGLSLSpriteMultipleProgram()
 
 	{
-		m_LastCenter = vec2(0, 0);
-		m_LastVerticesColor = ColorRGBA(-1, -1, -1, -1);
+		m_LastCenter[0] = m_LastCenter[1] = 0.f;
+		m_LastVertciesColor[0] = m_LastVertciesColor[1] = m_LastVertciesColor[2] = m_LastVertciesColor[3] = -1.f;
 	}
 
 	int m_LocRSP;
 	int m_LocCenter;
 	int m_LocVertciesColor;
 
-	vec2 m_LastCenter;
-	ColorRGBA m_LastVerticesColor;
+	float m_LastCenter[2];
+	float m_LastVertciesColor[4];
 };
 
 class CGLSLQuadProgram : public CGLSLTWProgram
@@ -156,7 +154,6 @@ public:
 	int m_LocColor;
 	int m_LocOffset;
 	int m_LocDir;
-	int m_LocScale = -1;
 	int m_LocNum;
 	int m_LocJumpIndex;
 };

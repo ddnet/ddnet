@@ -1,15 +1,15 @@
 #ifndef BASE_LOGGER_H
 #define BASE_LOGGER_H
 
-#include "lock.h"
 #include "log.h"
-
 #include <atomic>
 #include <memory>
-#include <string>
+#include <mutex>
 #include <vector>
 
-typedef void *IOHANDLE;
+extern "C" {
+
+typedef struct IOINTERNAL *IOHANDLE;
 
 /**
  * @ingroup Log
@@ -52,35 +52,10 @@ public:
 	}
 };
 
-class CLogFilter
-{
-public:
-	/**
-	 * The highest `LEVEL` that is still logged, -1 corresponds to no
-	 * printing at all.
-	 */
-	std::atomic_int m_MaxLevel{LEVEL_INFO};
-
-	bool Filters(const CLogMessage *pMessage);
-};
-
 class ILogger
 {
-protected:
-	CLogFilter m_Filter;
-
 public:
-	virtual ~ILogger() = default;
-
-	/**
-	 * Set a new filter. It's up to the logger implementation to actually
-	 * use the filter.
-	 */
-	void SetFilter(const CLogFilter &Filter)
-	{
-		m_Filter.m_MaxLevel.store(Filter.m_MaxLevel.load(std::memory_order_relaxed), std::memory_order_relaxed);
-		OnFilterChange();
-	}
+	virtual ~ILogger() {}
 
 	/**
 	 * Send the specified message to the logging backend.
@@ -104,10 +79,6 @@ public:
 	 * @see log_global_logger_finish
 	 */
 	virtual void GlobalFinish() {}
-	/**
-	 * Notifies the logger of a changed `m_Filter`.
-	 */
-	virtual void OnFilterChange() {}
 };
 
 /**
@@ -169,6 +140,7 @@ ILogger *log_get_scope_logger();
  * @see CLogScope
  */
 void log_set_scope_logger(ILogger *logger);
+}
 
 /**
  * @ingroup Log
@@ -184,7 +156,7 @@ std::unique_ptr<ILogger> log_logger_android();
  *
  * Logger combining a vector of other loggers.
  */
-std::unique_ptr<ILogger> log_logger_collection(std::vector<std::shared_ptr<ILogger>> &&vpLoggers);
+std::unique_ptr<ILogger> log_logger_collection(std::vector<std::shared_ptr<ILogger>> &&loggers);
 
 /**
  * @ingroup Log
@@ -214,62 +186,27 @@ std::unique_ptr<ILogger> log_logger_windows_debugger();
 /**
  * @ingroup Log
  *
- * Logger which discards all logs.
- */
-std::unique_ptr<ILogger> log_logger_noop();
-
-/**
- * @ingroup Log
- *
  * Logger that collects log messages in memory until it is replaced by another
  * logger.
  *
  * Useful when you want to set a global logger without all logging targets
  * being configured.
- *
- * This logger forwards `SetFilter` calls, `SetFilter` calls before a logger is
- * set have no effect.
  */
 class CFutureLogger : public ILogger
 {
 private:
-	std::shared_ptr<ILogger> m_pLogger;
-	std::vector<CLogMessage> m_vPending;
-	CLock m_PendingLock;
+	std::atomic<ILogger *> m_pLogger;
+	std::vector<CLogMessage> m_aPending;
+	std::mutex m_PendingLock;
 
 public:
 	/**
 	 * Replace the `CFutureLogger` instance with the given logger. It'll
 	 * receive all log messages sent to the `CFutureLogger` so far.
 	 */
-	void Set(std::shared_ptr<ILogger> pLogger) REQUIRES(!m_PendingLock);
-	void Log(const CLogMessage *pMessage) override REQUIRES(!m_PendingLock);
+	void Set(std::unique_ptr<ILogger> &&pLogger);
+	void Log(const CLogMessage *pMessage) override;
 	void GlobalFinish() override;
-	void OnFilterChange() override;
-};
-
-/**
- * @ingroup Log
- *
- * Logger that collects messages in memory. This is useful to collect the log
- * messages for a particular operation and show them in a user interface when
- * the operation failed. Use only temporarily with @link CLogScope @endlink
- * or it will result in excessive memory usage.
- *
- * Messages are also forwarded to the parent logger if it's set, regardless
- * of this logger's filter.
- */
-class CMemoryLogger : public ILogger
-{
-	ILogger *m_pParentLogger = nullptr;
-	std::vector<CLogMessage> m_vMessages GUARDED_BY(m_MessagesMutex);
-	CLock m_MessagesMutex;
-
-public:
-	void SetParent(ILogger *pParentLogger) { m_pParentLogger = pParentLogger; }
-	void Log(const CLogMessage *pMessage) override REQUIRES(!m_MessagesMutex);
-	std::vector<CLogMessage> Lines() REQUIRES(!m_MessagesMutex);
-	std::string ConcatenatedLines() REQUIRES(!m_MessagesMutex);
 };
 
 /**
@@ -293,8 +230,8 @@ public:
 	}
 	~CLogScope()
 	{
+		//dbg_assert(log_get_scope_logger() == new_scope_logger, "loggers weren't properly scoped");
 		log_set_scope_logger(old_scope_logger);
 	}
-	CLogScope(const CLogScope &) = delete;
 };
 #endif // BASE_LOGGER_H

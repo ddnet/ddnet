@@ -1,13 +1,13 @@
 #ifndef ENGINE_SERVER_UPNP_H
 #define ENGINE_SERVER_UPNP_H
 
-#include <base/types.h>
+#include <base/system.h>
 class CUPnP
 {
 	NETADDR m_Addr;
-	struct UPNPUrls *m_pUPnPUrls;
-	struct IGDdatas *m_pUPnPData;
-	struct UPNPDev *m_pUPnPDevice;
+	struct UPNPUrls *m_UPnPUrls;
+	struct IGDdatas *m_UPnPData;
+	struct UPNPDev *m_UPnPDevice;
 	bool m_Enabled;
 
 public:

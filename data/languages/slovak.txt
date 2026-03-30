@@ -1,20 +1,32 @@
+##### authors #####
+#originally created by:
+#	Limit and Petr
+#modified by:
+#	LimiT		2011-07-02 20:24:44
+##### /authors #####
+
+##### translated strings #####
+
 %ds left
-== zostáva %ds
+== Zostáva %ds
 
 %i minute left
-== %i zostávajúca minúta
+== Zostávajúce minúty: %i
 
 %i minutes left
-== %i zostávajúcich minút
+== Zostávajúce minúty: %i
 
 %i second left
-== %i zostávajúca sekunda
+== Zostávajúce sekundy: %i
 
 %i seconds left
-== %i zostávajúcich sekúnd
+== Zostávajúce sekundy: %i
 
 %s wins!
 == %s vyhráva!
+
+-Page %d-
+== -Strana %d-
 
 Abort
 == Zrušiť
@@ -22,26 +34,35 @@ Abort
 Add
 == Pridať
 
+Add Friend
+== Pridať Priateľa
+
 Address
 == Adresa
 
 All
 == Všetkým
 
+Are you sure that you want to delete the demo?
+== Určite chcete vymazať tento záznam?
+
 Are you sure that you want to quit?
-== Naozaj chcete ukončiť hru?
+== Ukončiť hru?
+
+Are you sure that you want to remove the player from your friends list?
+== Ste si istí, že chcete tohto hráča odstrániť zo zoznamu priateľov?
 
 Automatically record demos
 == Automaticky nahrávať záznamy
 
 Automatically take game over screenshot
-== Automaticky zaobstarať snímku obrazovky konca hry
+== Automaticky vyfotiť koniec kola
 
 Blue team
-== Modrý tím
+== Modrý tým
 
 Blue team wins!
-== Modrý tím vyhráva!
+== Modrý tým vyhráva!
 
 Body
 == Telo
@@ -61,11 +82,17 @@ Clan
 Client
 == Klient
 
+Close
+== Zavrieť
+
+Connect
+== Pripojiť
+
 Connecting to
 == Pripojujem sa k
 
-Connection Problems…
-== Problémy s pripojením…
+Connection Problems...
+== Problémy s pripojením...
 
 Console
 == Konzola
@@ -87,6 +114,9 @@ Delete
 
 Delete demo
 == Vymazať záznam
+
+Demo details
+== Detaily nahrávky
 
 Demofile: %s
 == Nahrávka: %s
@@ -110,7 +140,7 @@ Dynamic Camera
 == Dynamická kamera
 
 Emoticon
-== Emotikon
+== Smajlíci
 
 Error
 == Chyba
@@ -125,7 +155,10 @@ Favorites
 == Obľúbené
 
 Feet
-== Chodidlá
+== Nohy
+
+Filter
+== Filter
 
 Fire
 == Streľba
@@ -134,10 +167,13 @@ Folder
 == Zložka
 
 Force vote
-== Vynútiť hlasovanie
+== Zvoliť
 
 Free-View
 == Voľná Kamera
+
+Friends
+== Priatelia
 
 Fullscreen
 == Celá obrazovka
@@ -176,7 +212,7 @@ High Detail
 == Detaily
 
 Hook
-== Hák
+== Hook/Lano
 
 Invalid Demo
 == Neplatný Záznam
@@ -201,6 +237,9 @@ MOTD
 
 Map
 == Mapa
+
+Mouse sens.
+== Citlivosť myši
 
 Move left
 == Pohyb vľavo
@@ -239,7 +278,10 @@ No servers match your filter criteria
 == Žiadny server nezodpovedá zadaným kritériám
 
 Ok
-== Ok
+== OK
+
+Open
+== Otvoriť
 
 Parent Folder
 == Nadradený Priečinok
@@ -256,6 +298,10 @@ Ping
 Pistol
 == Pištoľ
 
+[Demo browser]
+Play
+== Prehrať
+
 Play background music
 == Prehrať hudbu na pozadí
 
@@ -265,11 +311,14 @@ Player
 Player country:
 == Filter krajín:
 
+Player options
+== Nastavenia hráča
+
 Players
 == Hráči
 
 Please balance teams!
-== Prosím vyrovnajte tímy!
+== Prosím vyrovnajte týmy!
 
 Prev. weapon
 == Predošlá zbraň
@@ -281,10 +330,13 @@ Reason:
 == Dôvod:
 
 Red team
-== Červený tím
+== Červený tým
 
 Red team wins!
-== Červený tím vyhráva!
+== Červený tým vyhráva!
+
+Refresh
+== Obnoviť
 
 Remote console
 == Vzdialená konzola
@@ -295,11 +347,17 @@ Remove
 Remove friend
 == Vymazať priateľa
 
+Rename
+== Premenovať
+
 Rename demo
 == Premenovať nahrávku
 
 Reset filter
 == Obnoviť filter
+
+Sample rate
+== Sample rate
 
 Score
 == Skóre
@@ -315,6 +373,12 @@ Screenshot
 
 Server address:
 == Adresa servera:
+
+Server details
+== Detaily servera
+
+Server filter
+== Filter serverov
 
 Server info
 == Informácie
@@ -336,6 +400,9 @@ Show ingame HUD
 
 Show name plates
 == Zobrazovať menovky
+
+Skins
+== Skiny
 
 Sound
 == Zvuk
@@ -371,16 +438,22 @@ Switch weapon on pickup
 == Nastavovať zdvíhanú zbraň ako aktuálnu
 
 Team
-== Tímu
+== Týmu
 
 Team chat
-== Tímový chat
+== Týmový chat
 
 The audio device couldn't be initialised.
 == Zvukové zariadenie nemohlo byť inicializované.
 
 The server is running a non-standard tuning on a pure game type.
 == Server používa neštandardné nastavenia na základnom hernom móde.
+
+There's an unsaved map in the editor, you might want to save it before you quit the game.
+== V editore máte neuloženú mapu, možno si ju chcete pred skončením hry uložiť.
+
+Time limit
+== Časový limit
 
 Time limit: %d min
 == Časový limit: %d min
@@ -391,6 +464,9 @@ Try again
 Type
 == Typ
 
+Unable to delete the demo
+== Nemôžem vymazať záznam
+
 Unable to rename the demo
 == Nahrávka sa nedá premenovať
 
@@ -398,7 +474,7 @@ Use sounds
 == Povoliť zvuky
 
 Use team colors for name plates
-== Zafarbiť menovky podľa farieb tímov
+== Zafarbiť menovky podľa farieb týmov
 
 V-Sync
 == V-Sync
@@ -433,6 +509,8 @@ Yes
 You must restart the game for all settings to take effect.
 == Zmeny sa prejavia po reštartovaní hry.
 
+##### needs translation #####
+
 New name:
 == Nové meno:
 
@@ -460,11 +538,26 @@ FSAA samples
 Sound volume
 == Hlasitosť
 
+Created:
+== Vytvorené:
+
 Max Screenshots
 == Maximum obrázkov
 
+Length:
+== Dĺžka:
+
 Laser
 == Laser
+
+Netversion:
+== Netversion:
+
+Map:
+== Mapa:
+
+Info
+== Info
 
 Hue
 == Hue
@@ -475,14 +568,32 @@ Record demo
 Your skin
 == Váš skin
 
+Size:
+== Veľkosť:
+
 Reset to defaults
 == Vrátiť na pôvodné
+
+Quit anyway?
+== Aj tak ukončiť?
+
+Display Modes
+== Možnosti zobrazenia
+
+Version:
+== Verzia:
+
+Round
+== Kolo
 
 Lht.
 == Lht.
 
 UI Color
 == Farba prostredia
+
+Crc:
+== Crc:
 
 Alpha
 == Alpha
@@ -493,2161 +604,780 @@ LAN
 Name plates size
 == Veľkosť menoviek
 
-[Graphics error]
-Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== Inicializácia zlyhala. Skúste zmeniť gfx_backend na OpenGL alebo Vulkan v settings_ddnet.cfg v adresári s konfiguráciou a skúste to znova.
-
-[Graphics error]
-An error during command recording occurred. Try to update your GPU drivers.
-== Pri nahrávaní príkazu došlo k chybe. Skúste aktualizovať ovládače GPU.
-
-[Graphics error]
-A render command failed. Try to update your GPU drivers.
-== Príkaz na vykreslenie zlyhal. Skúste aktualizovať ovládače GPU.
-
-[Graphics error]
-Submitting the render commands failed. Try to update your GPU drivers.
-== Odoslanie príkazov vykreslenia zlyhalo. Skúste aktualizovať ovládače GPU.
-
-[Graphics error]
-Failed to swap framebuffers. Try to update your GPU drivers.
-== Zámena framebufferov zlyhala. Skúste aktualizovať ovládače GPU.
-
-[Graphics error]
-Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== Neznáma chyba. Skúste zmeniť gfx_backend na OpenGL alebo Vulkan v settings_ddnet.cfg v adresári s konfiguráciou a skúste to znova.
-
-[Graphics error]
-Could not initialize the given graphics backend, reverting to the default backend now.
-== Nie je možné inicializovať daný grafický backend, vracia sa k východiskovému backendu.
-
-[Graphics error]
-Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== Nie je možné inicializovať daný grafický backend, pravdepodobne preto, že ste nenainštalovali ovládač integrovanej grafickej karty.
-
-Could not save downloaded map. Try manually deleting this file: %s
-== Stiahnutú mapu nie je možné uložiť. Skúste ručne zmazať tento súbor: %s
-
-Error playing demo
-== Chyba prehrávania záznamu
+Type:
+== Typ:
 
 Successfully saved the replay!
-== Záznam bol úspešne uložený!
+== 
 
-Failed saving the replay!
-== Uloženie záznamu zlyhalo!
-
-Saving settings to '%s' failed
-== Uloženie nastavenia do '%s' zlyhalo
-
-Error saving settings
-== Pri ukladaní nastavení došlo k chybe
+Saving ddnet-settings.cfg failed
+== 
 
 Replay feature is disabled!
-== Funkcia záznamov je zakázaná!
+== 
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== Šírka textúry %s nie je deliteľná %d alebo výška nie je deliteľná %d, čo môže spôsobiť vizuálne chyby.
+== 
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== Formát textúry %s nie je RGBA, čo spôsobí vizuálne chyby.
-
-Preparing demo playback
-== Príprava prehrávania záznamu
-
-Connected
-== Pripojené
-
-Loading map file from storage
-== Načítanie súboru mapy z úložiska
-
-Loading DDNet Client
-== Načítanie DDNet Klienta
-
-Why are you slowmo replaying to read this?
-== Prečo prehrávate pomaly kvôli tomuto?
-
-Initializing components
-== Inicializácia komponentov
-
-Initializing assets
-== Inicializácia aktív
-
-Initializing map logic
-== Inicializácia logiky mapy
-
-Sending initial client info
-== Odoslanie prvotných informácií o klientovi
+== 
 
 Warning
-== Varovanie
-
-Quitting. Please wait…
-== Ukončovanie. Prosím, čakajte…
-
-Restarting. Please wait…
-== Reštartovanie. Prosím, čakajte…
-
-Loading skin files
-== Načítanie skin súborov
-
-Searching
-== Hľadanie
-
-Enter Username
-== Zadajte užívateľské meno
-
-Enter Password
-== Zadajte heslo
-
-NOT CONNECTED
-== NEPRIPOJENÉ
-
-Match %d of %d
-== Zhoda %d z %d
-
-No results
-== Žiadne výsledky
-
-Lines %d - %d (%s)
-== Riadky %d – %d (%s)
-
-Locked
-== Zamknuté
-
-Following
-== Nasledovanie
-
-Loading commands…
-== Načítanie príkazov…
+== 
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== Režim ladenia povolený. Stlačením kláves Ctrl+Shift+D deaktivujte režim ladenia.
+== 
 
 Game paused
-== Hra pozastavená
-
-Position:
-== Pozícia:
-
-Speed:
-== Rýchlosť:
-
-Angle:
-== Uhol:
-
-Multi-View
-== Multi-Pohľad
+== 
 
 Server best:
-== Server rekord:
+== 
 
 Personal best:
-== Osobný rekord:
-
-Team %d
-== Tím %d
-
-Some map images could not be loaded. Check the local console for details.
-== Niektoré obrázky mapy sa nepodarilo načítať. Podrobnosti nájdete v miestnej konzole.
-
-Uploading map data to GPU
-== Nahrávanie dát máp do GPU
-
-Some map sounds could not be loaded. Check the local console for details.
-== Niektoré zvuky mapy nemožno načítať. Podrobnosti nájdete v miestnej konzole.
-
-Loading menu themes
-== Načítanie motívov menu
+== 
 
 Reset
-== Resetovať
-
-Press a key…
-== Stlač tlačidlo…
-
-Main menu
-== Hlavné menu
+== 
 
 Browser
-== Prehliadač
+== 
 
 Ghost
-== Duch
+== 
 
-Settings
-== Nastavenie
-
-Editor
-== Editor
-
-Trying to determine UDP connectivity…
-== Pokus o zistenie pripojenia UDP…
-
-UDP seems to be filtered.
-== Zdá sa, že UDP je filtrovaný.
-
-UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== IP adresy UDP a TCP sa zdajú byť odlišné. Skúste deaktivovať VPN, proxy alebo sieťové akcelerátory.
-
-No answer from server yet.
-== Zo servera zatiaľ žiadna odpoveď.
-
-Getting game info
-== Získavanie informácií o hre
-
-Requesting to join the game
-== Žiadosť o pripojenie do hry
+Loading DDNet Client
+== 
 
 Reconnect in %d sec
-== Opätovné pripojenie za %d sek
-
-Rename folder
-== Premenovať zložku
+== 
 
 Render demo
-== Vykresliť záznam
-
-Render complete
-== Vykreslenie dokončené
-
-Restart
-== Reštart
-
-Are you sure that you want to restart?
-== Naozaj chcete reštartovať hru?
-
-Welcome to DDNet
-== Vitajte na DDNete
-
-DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDraceNetwork je kooperatívna online hra, kde je cieľom pre vás a vašu skupinu dosiahnuť cieľovú čiaru mapy. Ako nováčik by ste mali začať na začínajúcich serveroch, ktoré hosťujú najjednoduchšie mapy. Zvážte ping a vyberte si server, ktorý je vám najbližšie.
-
-Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== Pomocou klávesy k sa zabijete (reštartujte), pomocou q pauznete a môžete sledovať ostatných hráčov. Otvorte nastavenie pre ďalšie klávesové skratky.
-
-It's recommended that you check the settings to adjust them to your liking before joining a server.
-== Pred pripojením k serveru sa odporúča skontrolovať nastavenia a upraviť ich podľa vašich predstáv.
-
-Please enter your nickname below.
-== Nižšie zadajte svoju prezývku.
-
-Existing Player
-== Existujúci hráč
-
-Your nickname '%s' is already used (%d points). Do you still want to use it?
-== Vaša prezývka '%s' je už použitá (%d bodov). Chcete ju aj napriek tomu používať?
-
-Checking for existing player with your name
-== Kontrola pre existujúceho hráča s vašim menom
-
-There's an unsaved map in the editor, you might want to save it.
-== V editore je neuložená mapa, možno ju budete chcieť uložiť.
-
-Continue anyway?
-== Napriek tomu pokračovať?
-
-A demo with this name already exists
-== Záznam s týmto názvom už existuje
-
-A folder with this name already exists
-== Zložka s týmto názvom už existuje
-
-Unable to rename the folder
-== Zložku nemožno premenovať
-
-File '%s' already exists, do you want to overwrite it?
-== Súbor '%s' už existuje, chcete ho prepísať?
+== 
 
 Replace video
-== Nahradiť video
-
-(paused)
-== (pozastavené)
-
-Speed
-== Rýchlosť
-
-Video name:
-== Názov videa:
-
-Videos directory
-== Adresár videí
-
-Video was saved to '%s'
-== Video bolo uložené do '%s'
-
-Join Tutorial Server
-== Pripojiť sa k výukovému serveru
-
-Skip Tutorial
-== Preskočiť výuku
-
-Show DDNet map finishes in server browser
-== Zobraziť dokončenie DDNet máp v prehliadači servera
-
-transmits your player name to info.ddnet.org
-== prenesie vaše meno hráča na info.ddnet.org
-
-Theme
-== Téma
-
-Loading menu images
-== Načítanie obrázkov menu
-
-AFR
-== AFR
-
-ASI
-== ASI
-
-AUS
-== AUS
-
-EUR
-== EUR
-
-NA
-== NA
-
-SA
-== SA
-
-CHN
-== CHN
-
-Getting server list from master server
-== Získavanie zoznamu serverov z hlavného servera
-
-Search
-== Hľadať
-
-Exclude
-== Vylúčiť
-
-%d of %d servers
-== %d z %d serverov
-
-%d of %d server
-== %d z %d servera
-
-%d players
-== %d hráčov
-
-%d player
-== %d hráč
-
-Are you sure that you want to disconnect and switch to a different server?
-== Naozaj sa chcete odpojiť a presunúť na iný server?
-
-Filter connecting players
-== Filtrovať pripájajúceho sa hráča
-
-Indicate map finish
-== Indikovať dokončenie mapy
-
-Unfinished map
-== Nedokončená mapa
-
-Countries
-== Krajina
-
-Types
-== Typy
-
-Communities
-== Komunity
-
-Copy info
-== Skopírovať info
-
-Leak IP
-== Zobraziť IP
-
-No server selected
-== Nie je vybraný žiadny server
-
-Online clanmates (%d)
-== Online členovia klanu (%d)
-
-[friends (server browser)]
-Offline (%d)
-== Offline (%d)
-
-Click to select server. Double click to join your friend.
-== Kliknutím vyberiete server. Dvojitým kliknutím sa pripojíte k priateľovi.
-
-Click to remove this player from your friends list.
-== Kliknutím odoberiete tohto hráča zo zoznamu priateľov.
-
-Click to remove this clan from your friends list.
-== Kliknutím odoberiete tento klan zo zoznamu priateľov.
-
-Are you sure that you want to remove the player '%s' from your friends list?
-== Naozaj chcete odstrániť hráča '%s' zo zoznamu priateľov?
-
-Are you sure that you want to remove the clan '%s' from your friends list?
-== Naozaj chcete odstrániť klan '%s' zo svojho zoznamu priateľov?
-
-Server filter
-== Filter servera
-
-Friends
-== Priatelia
-
-Play the current demo
-== Prehrať aktuálny záznam
-
-Pause the current demo
-== Pozastaviť aktuálny záznam
-
-Stop the current demo
-== Zastaviť aktuálny záznam
-
-Go back the specified duration
-== Vrátiť sa o zadanú dobu
-
-[Demo player duration]
-%s min.
-== %s min.
-
-[Demo player duration]
-%s sec.
-== %s sec.
-
-Change the skip duration
-== Zmeniť dobu preskočenia
-
-Go forward the specified duration
-== Vpred o zadanú dobu trvania
-
-Go back one tick
-== Vzad o jeden tick
-
-Go forward one tick
-== Vpred o jeden tick
-
-Go back one marker
-== Vzad o jeden marker
-
-Go forward one marker
-== Vpred o jeden marker
-
-Slow down the demo
-== Spomaliť záznam
-
-Speed up the demo
-== Zrýchliť záznam
-
-Mark the beginning of a cut (right click to reset)
-== Označiť začiatok rezu (pravý klik pre reset)
-
-Mark the end of a cut (right click to reset)
-== Označiť koniec rezu (pravý klik pre reset)
-
-Export cut as a separate demo
-== Exportovať rez ako samostatný záznam
-
-Close the demo player
-== Zavrieť prehrávač záznamov
-
-Toggle keyboard shortcuts
-== Prepnúť klávesové skratky
-
-Export demo cut
-== Exportovať rez záznamu
-
-Cut interval
-== Interval rezu
-
-Cut length
-== Dĺžka rezu
-
-Remove chat
-== Odobrať chat
-
-Render cut to video
-== Vykresliť rez do videa
-
-Please use a different filename
-== Použite prosím iný názov súboru
+== 
 
 File already exists, do you want to overwrite it?
-== Súbor už existuje, chcete ho prepísať?
-
-Loading demo files
-== Načítanie záznamov
-
-All combined
-== Všetko dohromady
-
-Demo
-== Záznam
-
-Length
-== Dĺžka
-
-Date
-== Dátum
-
-No demo selected
-== Nie je vybraný žiadny záznam
-
-Folder Link
-== Odkaz na zložku
-
-Created
-== Vytvorené
-
-Markers
-== Markery
-
-Netversion
-== Netversion
-
-Size
-== Veľkosť
-
-[Demo details]
-map not included
-== mapa nie je súčasťou
-
-%.2f MiB
-== %.2f MiB
-
-%.2f KiB
-== %.2f KiB
-
-Fetch Info
-== Načítať informácie
-
-Demos directory
-== Adresár záznamov
-
-Open the directory that contains the demo files
-== Otvorte adresár, ktorý obsahuje súbory so záznamami
-
-Are you sure that you want to delete the folder '%s'?
-== Naozaj chcete zmazať zložku '%s'?
-
-Are you sure that you want to delete the demo '%s'?
-== Naozaj chcete zmazať záznam '%s'?
-
-Delete folder
-== Zmazať zložku
-
-Unable to delete the demo '%s'
-== Nie je možné zmazať záznam '%s'
-
-Unable to delete the folder '%s'. Make sure it's empty first.
-== Nie je možné zmazať zložku '%s'. Najprv sa uistite, že je prázdna.
+== 
 
 Are you sure that you want to disconnect?
-== Naozaj sa chcete odpojiť?
-
-Connect Dummy
-== Pripojiť dummyho
-
-Connecting dummy
-== Pripájanie dummyho
+== 
 
 Disconnect Dummy
-== Odpojiť Dummyho
+== 
 
 Are you sure that you want to disconnect your dummy?
-== Naozaj chcete odpojiť svojho dummyho?
+== 
+
+Welcome to DDNet
+== 
+
+DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
+== 
+
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
+It's recommended that you check the settings to adjust them to your liking before joining a server.
+== 
+
+Please enter your nickname below.
+== 
+
+Existing Player
+== 
+
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== 
+
+Checking for existing player with your name
+== 
+
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Country / Region
+== 
+
+Destination file already exist
+== 
+
+Speed
+== 
+
+Video name:
+== 
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
+== 
+
+Show DDNet map finishes in server browser
+== 
+
+transmits your player name to info2.ddnet.tw
+== 
+
+Theme
+== 
+
+AFR
+== 
+
+ASI
+== 
+
+AUS
+== 
+
+EUR
+== 
+
+NA
+== 
+
+SA
+== 
+
+CHN
+== 
+
+Getting server list from master server
+== 
+
+Search
+== 
+
+Exclude
+== 
+
+%d of %d servers
+== 
+
+%d of %d server
+== 
+
+%d players
+== 
+
+%d player
+== 
+
+Refreshing...
+== 
+
+Filter connecting players
+== 
+
+Indicate map finish
+== 
+
+Unfinished map
+== 
+
+Countries
+== 
+
+Types
+== 
+
+Leak IP
+== 
+
+Select a name
+== 
+
+Please use a different name
+== 
+
+Remove chat
+== 
+
+Markers:
+== 
+
+%.2f MiB
+== 
+
+%.2f KiB
+== 
+
+Demo
+== 
+
+Markers
+== 
+
+Length
+== 
+
+Date
+== 
+
+Fetch Info
+== 
+
+Demos directory
+== 
+
+Render
+== 
+
+Connect Dummy
+== 
+
+Connecting dummy
+== 
 
 Kill
-== Zabiť
+== 
 
 Pause
-== Pauza
-
-Loading…
-== Načítanie…
-
-Loading ghost files
-== Načítanie súborov duchov
+== 
 
 Time
-== Čas
+== 
 
-Ghosts directory
-== Adresár duchov
-
-Activate all
-== Aktivovať všetko
-
-Deactivate all
-== Deaktivovať všetko
+Reload
+== 
 
 Deactivate
-== Deaktivovať
+== 
 
 Activate
-== Aktivovať
+== 
 
 Save
-== Uložiť
-
-Menu opened. Press Esc key again to close menu.
-== Ponuka otvorená. Stlačením klávesy Esc ponuku zatvorte.
+== 
 
 Smooth Dynamic Camera
-== Hladká dynamická kamera
+== 
 
 Switch weapon when out of ammo
-== Zmeniť zbraň keď vám dôjdu náboje
+== 
 
-Skip the main menu
-== Preskočiť hlavnú ponuku
-
-Refresh Rate
-== Obnovovacia frekvencia
-
-Settings file
-== Súbor s nastavením
-
-Open the settings file
-== Otvoriť súbor s nastavením
-
-Config directory
-== Adresár s konfiguráciou
-
-Open the directory that contains the configuration and user files
-== Otvoriť adresár, ktorý obsahuje konfiguračné a užívateľské súbory
-
-Themes directory
-== Adresár tém
-
-Open the directory to add custom themes
-== Pre pridanie vlastných motívov otvorte adresár
-
-Automatically take statboard screenshot
-== Automaticky zaobstarať snímku obrazovky statboardu
-
-Automatically create statboard csv
-== Automaticky vytvoriť statboard csv
-
-Max CSVs
-== Maximálny počet CSV
-
-Dummy
-== Dummy
-
-Download skins
-== Sťahovať skiny
-
-Download community skins
-== Sťahovať komunitné skiny
-
-Vanilla skins only
-== Iba vanilla skiny
-
-Fat skins (DDFat)
-== Tučné skiny (DDFat)
-
-Skin prefix
-== Skin predpona
-
-Create a random skin
-== Vytvoriť náhodný skin
-
-Choose default eyes when joining a server
-== Vybrať predvolené oči po pripojení k serveru
-
-Skin Database
-== Databáza skinov
-
-Skins directory
-== Adresár skinov
-
-Open the directory to add custom skins
-== Pre pridanie vlastných skinov otvorte adresár
-
-Hook collisions
-== Kolízia Háku
-
-Zoom in
-== Priblížiť
-
-Zoom out
-== Oddialiť
-
-Default zoom
-== Predvolené zväčšenie
-
-Show others
-== Ukázať ostatných
-
-Show all
-== Ukázať všetkých
-
-Toggle dyncam
-== Prepnúť dyncam
-
-Toggle ghost
-== Prepnúť ducha
-
-Converse
-== Konverzovať
-
-Chat command
-== Chat príkaz
-
-Toggle dummy
-== Prepnúť dummyho
-
-Dummy copy
-== Dummy kopírovať
-
-Hammerfly dummy
-== Dummy hammerfly
-
-Statboard
-== Statboard
-
-Lock team
-== Zamknúť tím
-
-Show entities
-== Zobraziť entity
-
-Show HUD
-== Zobraziť HUD
-
-Enable controller
-== Povoliť ovládač
-
-Controller
-== Ovládač
-
-Ingame controller mode
-== Režim ovládača v hre
-
-[Ingame controller mode]
-Relative
-== Relatívny
-
-[Ingame controller mode]
-Absolute
-== Absolútny
-
-Ingame controller sens.
-== Citlivosť ovládača v hre
-
-UI controller sens.
-== Citlivosť ovládača v menu
-
-Controller jitter tolerance
-== Tolerancia nervozity ovládača
-
-No controller found. Plug in a controller.
-== Nebol nájdený žiadny ovládač. Zapojte ovládač.
-
-Axis
-== Os
-
-Status
-== Status
-
-Aim bind
-== Bind mierenie
-
-Mouse
-== Myš
-
-Ingame mouse sens.
-== Citlivosť myši v hre
-
-UI mouse sens.
-== Citlivosť myši v menu
-
-Reset controls
-== Resetovať ovládanie
-
-Are you sure that you want to reset the controls to their defaults?
-== Naozaj chcete obnoviť predvolené nastavenia ovládania?
-
-Cancel
-== Zrušiť
-
-Windowed
-== V okne
-
-Windowed borderless
-== V okne bez okrajov
-
-Windowed fullscreen
-== Celá obrazovka v okne
-
-Desktop fullscreen
-== Celá obrazovka plochy
-
-Screen
-== Obrazovka
-
-may cause delay
-== môže spôsobiť oneskorenie
-
-Allows maps to render with more detail
-== Umožňuje vykresľovať mapy s väčšími detailmi
-
-Renderer
-== Renderer
-
-default
-== predvolené
-
-custom
-== vlastné
-
-Graphics card
-== Grafická karta
-
-auto
-== auto
-
-Enable game sounds
-== Povoliť zvuky hry
-
-Enable gun sound
-== Povoliť zvuk zbrane
-
-Enable long pain sound (used when shooting in freeze)
-== Povoliť zvuk dlhej bolesti (používa sa pri strieľaní v zmrazení)
-
-Enable server message sound
-== Povoliť zvuk správ servera
-
-Enable regular chat sound
-== Povoliť zvuk normálneho chatu
-
-Enable team chat sound
-== Povoliť zvuk tímového chatu
-
-Enable highlighted chat sound
-== Povoliť zvuk zvýraznenej správy
-
-Game sound volume
-== Hlasitosť zvuku hry
-
-Chat sound volume
-== Hlasitosť zvuku chatu
-
-Map sound volume
-== Hlasitosť zvuku mapy
-
-Background music volume
-== Hlasitosť hudby na pozadí
-
-Appearance
-== Vzhľad
-
-DDNet
-== DDNet
-
-Assets
-== Aktíva
-
-DDNet Client needs to be restarted to complete update!
-== Na dokončenie aktualizácie je nutné reštartovať klienta DDNet!
-
-HUD
-== HUD
-
-Name Plate
-== Menovka
-
-Hook Collisions
-== Kolízia Háku
-
-Info Messages
-== Informačné Správy
-
-Show health, shields and ammo
-== Zobraziť zdravie, štíty a muníciu
-
-Show score
-== Zobraziť skóre
-
-Show local time always
-== Vždy zobrazovať miestny čas
-
-Show votes window after voting
-== Zobraziť okno hlasovania po odhlasovaní
-
-DDRace HUD
-== DDRace HUD
-
-Show DDRace HUD
-== Zobraziť DDRace HUD
-
-Show jumps indicator
-== Zobraziť indikátor skoku
-
-Show dummy actions
-== Zobraziť akcie dummyho
-
-Show player position
-== Zobraziť pozíciu hráča
-
-Show player speed
-== Zobraziť rýchlosť hráča
-
-Show player target angle
-== Zobraziť cieľový uhol hráča
-
-Show freeze bars
-== Zobraziť freeze bary
-
-Opacity of freeze bars inside freeze
-== Nepriehľadnosť freeze barov vo vnútri freeze
-
-Show names in chat in team colors
-== Zobraziť mená v chate v tímových farbách
+Reset wanted weapon on death
+== 
 
 Show only chat messages from friends
-== Zobraziť iba správy od priateľov
-
-Use old chat style
-== Použiť starý štýl chatu
-
-Chat font size
-== Veľkosť písma chatu
-
-Chat width
-== Šírka chatu
-
-Messages
-== Správy
-
-System message
-== Systémová správa
-
-Highlighted message
-== Zvýraznená správa
-
-Team message
-== Tímová správa
-
-Friend message
-== Správa od priateľa
-
-Normal message
-== Normálna správa
-
-Client message
-== Správa klienta
-
-Preview
-== Náhľad
+== 
 
 Show clan above name plates
-== Ukázať klan nad menom
+== 
 
 Clan plates size
-== Veľkosť menoviek klanu
+== 
 
-Authed name color in scoreboard
-== Farba overeného hráča vo výsledkovej tabuľke
+Skip the main menu
+== 
 
-Same clan color in scoreboard
-== Farba rovnakého klanu vo výsledkovej tabuľke
+Refresh Rate
+== 
 
-Hook collision line
-== Čiara kolízie háku
+Show console window
+== 
 
-Show other players' hook collision lines
-== Zobraziť čiaru kolízie hákov ostatných hráčov
+Settings file
+== 
 
-Hook collision line opacity
-== Nepriehľadnosť čiary kolízie háku
+Config directory
+== 
 
-Your movements are not taken into account when calculating the line colors
-== Váš pohyb sa pri výpočte farieb čiar neberie do úvahy
+Themes directory
+== 
+
+Automatically take statboard screenshot
+== 
+
+Automatically create statboard csv
+== 
+
+Max CSVs
+== 
+
+Dummy settings
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Download skins
+== 
+
+Vanilla skins only
+== 
+
+Fat skins (DDFat)
+== 
+
+Skin prefix
+== 
+
+Choose default eyes when joining a server
+== 
+
+Skin Database
+== 
+
+Skins directory
+== 
+
+Hook collisions
+== 
+
+Zoom in
+== 
+
+Zoom out
+== 
+
+Default zoom
+== 
+
+Show others
+== 
+
+Show all
+== 
+
+Toggle dyncam
+== 
+
+Toggle dummy
+== 
+
+Toggle ghost
+== 
+
+Dummy copy
+== 
+
+Hammerfly dummy
+== 
+
+Converse
+== 
+
+Statboard
+== 
+
+Lock team
+== 
+
+Show entities
+== 
+
+Show HUD
+== 
+
+Chat command
+== 
+
+UI mouse s.
+== 
+
+Dummy
+== 
+
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Windowed fullscreen
+== 
+
+Desktop fullscreen
+== 
+
+may cause delay
+== 
+
+Screen
+== 
+
+Allows maps to render with more detail
+== 
+
+Use high DPI
+== 
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
+== 
+
+Enable game sounds
+== 
+
+Enable gun sound
+== 
+
+Enable long pain sound (used when shooting in freeze)
+== 
+
+Enable server message sound
+== 
+
+Enable regular chat sound
+== 
+
+Enable team chat sound
+== 
+
+Enable highlighted chat sound
+== 
+
+Threaded sound loading
+== 
+
+Game sound volume
+== 
+
+Chat sound volume
+== 
+
+Map sound volume
+== 
+
+Background music volume
+== 
+
+HUD
+== 
+
+DDNet
+== 
+
+Assets
+== 
+
+DDNet Client needs to be restarted to complete update!
+== 
+
+Use DDRace Scoreboard
+== 
+
+Show client IDs
+== 
+
+Show score
+== 
+
+Show health + ammo
+== 
+
+Show names in chat in team colors
+== 
+
+Show votes window after voting
+== 
 
 Show kill messages
-== Zobraziť správy o zabití
+== 
 
-Show finish messages
-== Zobraziť správy o dokončení
+Kill Messages
+== 
 
-Normal Color
-== Normálna Farba
+Kill Message Normal Color
+== 
 
-Highlight Color
-== Zvýraznená farba
+Kill Message Highlight Color
+== 
 
-Weapons
-== Zbrane
+Laser Outline Color
+== 
 
-Rifle Laser Outline Color
-== Vonkajšia Farba Lasera Pušky
+Laser Inner Color
+== 
 
-Rifle Laser Inner Color
-== Vnútorná Farba Lasera Pušky
+Hookline
+== 
 
-Shotgun Laser Outline Color
-== Vonkajšia Farba Lasera Brokovnice
+Size
+== 
 
-Shotgun Laser Inner Color
-== Vnútorná Farba Lasera Brokovnice
+No hit
+== 
 
-Entities
-== Entity
+Hookable
+== 
 
-Door Laser Outline Color
-== Vonkajšia Farba Lasera Dverí
+Tee
+== 
 
-Door Laser Inner Color
-== Vnútorná Farba Lasera Dverí
+Use old chat style
+== 
 
-Freeze Laser Outline Color
-== Vonkajšia Farba Freeze Lasera
+Messages
+== 
 
-Freeze Laser Inner Color
-== Vnútorná Farba Freeze Lasera
+System message
+== 
 
-Set all to Rifle
-== Nastaviť všetko podľa Pušky
+Highlighted message
+== 
+
+Team message
+== 
+
+Friend message
+== 
+
+Normal message
+== 
+
+Client message
+== 
+
+Preview
+== 
 
 Save the best demo of each race
-== Ukladať najlepší záznam každého závodu
+== 
 
 Enable replays
-== Povoliť záznamy
+== 
 
-Default length
-== Predvolená dĺžka
-
-Enable ghost
-== Povoliť ducha
+Default length: %d
+== 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== Po prekročení štartovej čiary ukázať ducha, ktorý kopíruje pohyby vášho najlepšieho času
+== 
 
 Show ghost
-== Ukázať ducha
-
-Opacity
-== Nepriehľadnosť
+== 
 
 Save ghost
-== Uložiť ducha
-
-Only save improvements
-== Ukladať iba vylepšenia
+== 
 
 Gameplay
-== Hrateľnosť
+== 
 
 Overlay entities
-== Prekrytie entít
+== 
 
 Show text entities
-== Zobraziť textové entity
+== 
 
-Adjust the opacity of entities belonging to other teams, such as tees and name plates
-== Nepriehľadnosť entít patriacich iným tímom ako sú hráči a menovky
+Opacity
+== 
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== 
 
 Show others (own team only)
-== Zobraziť ostatné (len vlastný tím)
+== 
+
+Show quads
+== 
 
 Quads are used for background decoration
-== Quads sa používajú na dekoráciu pozadia
+== 
 
 AntiPing
-== AntiPing
+== 
 
 Tries to predict other entities to give a feel of low latency
-== Snaží sa predpovedať iné entity, aby navodil pocit nízkej odozvy
+== 
 
 AntiPing: predict other players
-== AntiPing: predvídanie ostatných hráčov
+== 
 
 AntiPing: predict weapons
-== AntiPing: predvídanie zbraní
+== 
 
 AntiPing: predict grenade paths
-== AntiPing: predvídanie ciest granátov
+== 
+
+Show other players' hook collision lines
+== 
+
+Show other players' key presses
+== 
+
+Show local player's key presses
+== 
+
+Old mouse mode
+== 
 
 Background
-== Pozadie
+== 
 
-Regular background color
-== Bežná farba pozadia
-
-Entities background color
-== Farba pozadia entít
+Entities Background color
+== 
 
 Use current map as background
-== Použiť aktuálnu mapu ako pozadie
+== 
 
 Show tiles layers from BG map
-== Zobraziť vrstvy dlaždíc z BG mapy
+== 
+
+Regular Background Color
+== 
+
+Try fast HTTP map download first
+== 
 
 New random timeout code
-== Nový náhodný timeout kód
+== 
 
 Run on join
-== Spustiť po pripojení
+== 
 
 Chat command (e.g. showall 1)
-== Chat príkaz (napr. showall 1)
-
-Unregister protocol and file extensions
-== Odregistrovať protokol a prípony súborov
+== 
 
 DDNet %s is available:
-== DDNet %s je k dispozícii:
+== 
 
 Update now
-== Aktualizovať teraz
+== 
 
-Updating…
-== Aktualizácia…
+Updating...
+== 
 
 DDNet Client updated!
-== DDNet Klient aktualizovaný!
+== 
 
 No updates available
-== Nie sú k dispozícii žiadne aktualizácie
+== 
 
 Check now
-== Skontrolovať teraz
+== 
+
+Entities
+== 
 
 Emoticons
-== Emotikony
+== 
 
 Particles
-== Častice
-
-Extras
-== Extra
-
-Loading assets
-== Načítanie aktív
+== 
 
 Assets directory
-== Adresár aktív
-
-Open the directory to add custom assets
-== Pre pridanie vlastných aktív otvorte adresár
+== 
 
 Discord
-== Discord
+== 
 
-https://ddnet.org/discord
-== https://ddnet.org/discord
+https://ddnet.tw/discord
+== 
 
 Learn
-== Učiť sa
+== 
 
-https://wiki.ddnet.org/
-== https://wiki.ddnet.org/
+https://wiki.ddnet.tw/
+== 
 
 Tutorial
-== Výuka
+== 
+
+Can't find a Tutorial server
+== 
 
 Website
-== Web stránka
+== 
+
+Settings
+== 
 
 Stop server
-== Zastaviť server
+== 
 
 Run server
-== Spustiť server
+== 
 
 Server executable not found, can't run server
-== Spustiteľný súbor servera nebol nájdený, server sa nedá spustiť
+== 
+
+Editor
+== 
 
 [Start menu]
 Play
-== Hrať
+== 
 
 DDNet %s is out!
-== DDNet %s je vonku!
+== 
 
 Downloading %s:
-== Sťahovanie %s:
+== 
 
-Update failed! Check log…
-== Aktualizácia zlyhala! Skontrolujte log…
+Update failed! Check log...
+== 
 
-Loading race demo files
-== Načítanie záznamov závodov
+Restart
+== 
 
 Super
-== Super
+== 
+
+Team %d
+== 
 
 Manual
-== Manuál
+== 
 
 Race
-== Závod
+== 
 
 Auto
-== Auto
+== 
 
 Replay
-== Záznam
-
-Loading sound files
-== Načítanie zvukových súborov
+== 
 
 Follow
-== Nasledovať
+== 
 
 Frags
-== Fragy
+== 
 
 Deaths
-== Smrti
+== 
 
 Suicides
-== Samovraždy
+== 
 
 Ratio
-== Pomer
+== 
 
 Net
-== Net
+== 
 
 FPM
-== FPM
+== 
 
 Spree
-== Riadenie
+== 
 
 Best
-== Najlepšie
+== 
 
 Grabs
-== Chytenie
+== 
 
 1 new mention
-== 1 nová zmienka
+== 
 
 %d new mentions
-== %d nových zmienok
+== 
 
 9+ new mentions
-== 9+ nových zmienok
-
-Moved ingame
-== Presunutý v hre
-
-Loading demo file from storage
-== Načítanie súboru záznamu z úložiska
-
-No login required
-== Bez prihlásenia
-
-Player info change cooldown
-== Cooldown zmeny informácií o hráči
-
-Always show chat
-== Vždy zobraziť chat
-
-Show hook strength icon indicator
-== Zobraziť silu háku pomocou ikony
-
-Show hook strength number indicator
-== Zobraziť silu háku pomocou čísla
-
-Show own player's hook collision line
-== Zobraziť čiaru kolízie háku vlastného hráča
-
-Always show own player's hook collision line
-== Vždy zobraziť čiaru kolízie háku vlastného hráča
-
-Always show other players' hook collision lines
-== Vždy zobraziť čiaru kolízie hákov ostatných hráčov
-
-%d/%d KiB (%.1f KiB/s)
-== %d/%d KiB (%.1f KiB/s)
-
-Tee
-== Tee
-
-Show only chat messages from team members
-== Zobraziť iba správy od členov tímu
-
-Could not resolve connect address '%s'. See local console for details.
-== Nie je možné získať adresu na pripojenie '%s'. Podrobnosti nájdete v miestnej konzole.
-
-Connect address error
-== Chyba v adrese na pripojenie
-
-Could not connect dummy
-== Nepodarilo sa pripojiť dummyho
-
-[Spectating]
-Following %s
-== Sledujete %s
-
-Example of usage
-== Príklad použitia
-
-Dummy is not allowed on this server
-== Dummy nie je na tomto serveri povolený
-
-Please wait…
-== Čakajte prosím…
-
-Show client IDs (scoreboard, chat, spectator)
-== Zobraziť ID klientov (výsledková tabuľka, chat, divák)
-
-Are you sure that you want to delete '%s'?
-== Naozaj chcete zmazať '%s'?
-
-Delete skin
-== Odstrániť skin
-
-Basic
-== Základné
-
-Custom
-== Vlastné
-
-Unable to delete skin
-== Nedá sa odstrániť skin
-
-Round %d/%d
-== Kolo %d/%d
-
-[Spectators]
-%d others…
-== %d ďalších…
-
-[Team and size]
-%d\n(%d/%d)
-== %d\n(%d/%d)
-
-Team %d (%d/%d)
-== Tím %d (%d/%d)
-
-https://wiki.ddnet.org/wiki/Mapping
-== https://wiki.ddnet.org/wiki/Mapping
-
-Save skin
-== Uložiť skin
-
-Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== Naozaj chcete uložiť svoj skin? Ak skin s týmto názvom už existuje, bude nahradený.
-
-Unable to save the skin
-== Nie je možné uložiť skin
-
-Unable to save the skin with a reserved name
-== Nie je možné uložiť skin s rezervovaným názvom
-
-No local servers found (ports %d-%d)
-== Žiadny miestny server nenájdený (porty %d-%d)
-
-[Hertz]
-Hz
-== Hz
-
-[skins]
-Body
-== Telo
-
-[skins]
-Marking
-== Značenie
-
-[skins]
-Decoration
-== Dekorácia
-
-[skins]
-Hands
-== Ruky
-
-[skins]
-Feet
-== Chodidlá
-
-[skins]
-Eyes
-== Oči
-
-[Translation credits: Add your own name here when you update translations]
-English translation by the DDNet Team
-== Slovenský preklad od LimiT, Petr a dobrykafe
-
-[Graphics error]
-Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
-== Nedostatok VRAM. Skúste nastaviť 'cl_skins_loaded_max' na nižšiu hodnotu alebo odstrániť vlastné aktíva (skiny, entity, atď), najmä tie s vysokým rozlíšením.
-
-No demo with this filename exists
-== Neexistuje žiadny záznam s týmto názvom
-
-"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
-== "%s" nie je kompatibilný s pnglite a nemožno ho načítať starými DDNet verziami:
-
-Some fonts could not be loaded. Check the local console for details.
-== Niektoré písma nemohli byť načítané. Podrobnosti nájdete v miestnej konzole.
-
-Auto-sync player camera
-== Synchronizovať kameru hráča
-
-[Auto camera]
-Disabled
-== Zakázaná
-
-[Auto camera]
-Enabled
-== Povolená
-
-[Auto camera]
-Unavailable for this player
-== Nie je k dispozícii pre tohto hráča
-
-[Auto camera]
-Inactive
-== Neaktívna
-
-[Auto camera]
-Active
-== Aktívna
-
-Loading maps…
-== Načítanie máp…
-
-[Spectating]
-Following %d: %s
-== Sledujete %d: %s
-
-[Spectating Camera Mode Icon]
-AUTO
-== AUTO
-
-Loading map
-== Načítanie mapy
-
-This name cannot be used for files and folders
-== Tento názov nie je možné použiť pre súbory a priečinky
-
-Error checking player name
-== Chyba pri kontrole mena hráča
-
-Could not check for existing player with your name. Check your internet connection.
-== Nepodarilo sa vyhľadať existujúceho hráča s vašim menom. Skontrolujte pripojenie k internetu.
-
-Online friends (%d)
-== Online priatelia (%d)
-
-Add friends by entering their name below or by clicking their name in the player list.
-== Pridajte priateľov zadaním ich mena nižšie alebo kliknutím na ich meno v zozname hráčov.
-
-Add clanmates by entering their clan below and leaving the name blank.
-== Pridajte členov klanu zadaním ich klanu nižšie a ponechaním prázdneho mena.
-
-Toggle auto camera
-== Prepnúť automatickú kameru
-
-Map size
-== Veľkosť mapy
-
-Edit touch controls
-== Upraviť dotykové ovládanie
-
-Close
-== Zavrieť
-
-https://wiki.ddnet.org/wiki/Touch_controls
-== https://wiki.ddnet.org/wiki/Touch_controls
-
-Save changes
-== Uložiť zmeny
-
-Error saving touch controls
-== Chyba pri ukladaní dotykového ovládania
-
-Could not save touch controls to file. See local console for details.
-== Nepodarilo sa uložiť dotykové ovládanie do súboru. Podrobnosti nájdete v miestnej konzole.
-
-Unsaved changes
-== Neuložené zmeny
-
-Discard changes
-== Zahodiť zmeny
-
-Are you sure that you want to discard the current changes to the touch controls?
-== Naozaj chcete zahodiť aktuálne zmeny dotykového ovládania?
-
-Are you sure that you want to reset the touch controls to default?
-== Naozaj chcete resetovať dotykové ovládanie na predvolené nastavenie?
-
-Import from clipboard
-== Vložiť zo schránky
-
-Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
-== Naozaj chcete vložiť dotykové ovládanie zo schránky? Týmto sa prepíše vaše aktuálne dotykové ovládanie.
-
-Export to clipboard
-== Uložiť do schránky
-
-Direct touch input while ingame
-== Priamy dotykový vstup počas hry
-
-[Direct touch input]
-Disabled
-== Zakázaný
-
-[Direct touch input]
-Active action
-== Aktívna akcia
-
-[Direct touch input]
-Aim
-== Mierenie
-
-[Direct touch input]
-Fire
-== Streľba
-
-[Direct touch input]
-Hook
-== Hák
-
-Direct touch input while spectating
-== Priamy dotykový vstup počas sledovania
-
-Error loading touch controls
-== Chyba pri načítaní dotykového ovládania
-
-Could not load touch controls from file. See local console for details.
-== Nie je možné načítať dotykové ovládanie zo súboru. Podrobnosti nájdete v miestnej konzole.
-
-Could not load default touch controls from file. See local console for details.
-== Nie je možné načítať predvolené dotykové ovládanie zo súboru. Podrobnosti nájdete v miestnej konzole.
-
-Could not load touch controls from clipboard. See local console for details.
-== Nie je možné načítať dotykové ovládanie zo schránky. Podrobnosti nájdete v miestnej konzole.
-
-Community
-== Komunita
-
-[Team status]
-forbidden
-== zakázané
-
-[Team status]
-solo
-== sólo
-
-[Team status]
-allowed
-== povolené
-
-[Team status]
-required
-== požadované
-
-Teams
-== Tímy
-
-[Team size]
-minimum
-== minimálne
-
-[Team size]
-maximum
-== maximálne
-
-Saves file
-== Súbor s uloženými hrami
-
-Open the saves file
-== Otvoriť súbor s uloženými hrami
-
-This skin name cannot be used.
-== Tento názov skinu nie je možné použiť.
-
-Skin could not be loaded due to an error. Check the local console for details.
-== Skin sa nepodarilo načítať kvôli chybe. Podrobnosti nájdete v miestnej konzole.
-
-Skin could not be found.
-== Skin sa nepodarilo nájsť.
-
-No skins match your filter criteria
-== Žiadne skiny nezodpovedajú vašim kritériám filtra
-
-Show FPS
-== Ukázať FPS
-
-Renders your frame rate in the top right
-== Zobrazí snímkovú frekvenciu v pravom hornom rohu
-
-Show spectator cursor
-== Zobraziť kurzor pri sledovaní
-
-Show number of spectators
-== Zobraziť počet divákov
-
-[Show name plates]
-None
-== Žiadne
-
-[Show name plates]
-Own
-== Vlastné
-
-[Show name plates]
-Others
-== Ostatné
-
-[Show name plates]
-All
-== Všetky
-
-Name plates offset
-== Odsadenie menoviek
-
-Show friend icon in name plates
-== Zobraziť ikonu priateľa na menovkách
-
-Show client IDs in name plates
-== Zobraziť ID klientov na menovkách
-
-Show client IDs on a separate line
-== Zobraziť ID klientov na samostatnom riadku
-
-Client IDs size
-== Veľkosť ID klientov
-
-Hook Strength
-== Sila háku
-
-Size of hook strength icon and number indicator
-== Veľkosť ikony sily háku a číselného ukazovateľa
-
-Key Presses
-== Stlačenie kláves
-
-Show players' key presses
-== Zobraziť stlačené klávesy hráčov
-
-[Show players' key presses]
-None
-== Žiadne
-
-[Show players' key presses]
-Own
-== Vlastné
-
-[Show players' key presses]
-Others
-== Ostatné
-
-[Show players' key presses]
-All
-== Všetky
-
-Size of key press icons
-== Veľkosť ikon stlačení kláves
-
-Preview player's name plate
-== Náhľad menovky hráča
-
-Preview dummy's name plate
-== Náhľad menovky dummyho
-
-Width of your own hook collision line
-== Šírka vlastnej čiary kolízie háku
-
-Width of others' hook collision line
-== Šírka ostatných čiar kolízie háku
-
-Preview 'Hook collisions' being pressed
-== Náhľad stlačenia tlačidla 'Kolize háku'
-
-Dragger Outline Color
-== Vonkajšia Farba Ťahača
-
-Dragger Inner Color
-== Vnútorná Farba Ťahače
-
-AntiPing: prediction margin
-== AntiPing: marža predikcie
-
-Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
-== Server sa nepodarilo spustiť. Uistite sa, že ste v nastavení aplikácie povolili oznámenie, aby server mohol bežať na pozadí.
-
-Aim
-== Mierenie
-
-Active: Fire
-== Aktívne: Streľba
-
-Active: Hook
-== Aktívne: Hák
-
-Press Ctrl+Shift+G to disable debug graphs.
-== Stlačením Ctrl+Shift+G deaktivujete grafy ladenia.
-
-Server could not be started
-== Server sa nepodarilo spustiť
-
-Could not get server list from master server
-== Nepodarilo sa získať zoznam serverov z hlavného servera
-
-[Demo playback]
-Live
-== Naživo
-
-[Demo playback]
-Go to Live
-== Prejsť na živý prenos
-
-Save all changes before turning off the editor?
-== Uložiť všetky zmeny pred vypnutím editora?
-
-Layout
-== Rozloženie
-
-Visibility
-== Viditeľnosť
-
-Behavior
-== Správanie
-
-Delete button
-== Zmazať tlačidlo
-
-Are you sure that you want to delete this button?
-== Naozaj chcete toto tlačidlo zmazať?
-
-Duplicate
-== Duplikát
-
-Please save your changes before duplicating a button.
-== Pred duplikovaním tlačidla prosím uložte zmeny.
-
-No space for button
-== Nie je miesto pre tlačidlo
-
-There is not enough space available to place another button.
-== Nie je dostatok miesta na umiestnenie ďalšieho tlačidla.
-
-Deselect
-== Zrušiť výber
-
-You'll lose unsaved changes after deselecting.
-== Po zrušení výberu stratíte neuložené zmeny.
-
-Width
-== Šírka
-
-Height
-== Výška
-
-Shape
-== Tvar
-
-[Touch button shape]
-Rectangle
-== Obdĺžnik
-
-[Touch button shape]
-Circle
-== Kruh
-
-[Touch button label type]
-Plain
-== Jednoduchý
-
-[Touch button label type]
-Localized
-== Lokalizované
-
-[Touch button label type]
-Icon
-== Ikona
-
-Behavior type
-== Typ správania
-
-[Touch button behavior]
-Bind
-== Bind
-
-[Touch button behavior]
-Bind Toggle
-== Bind prepínač
-
-[Touch button behavior]
-Predefined
-== Preddefinované
-
-Command
-== Príkaz
-
-Label
-== Štítok
-
-Label type
-== Typ štítku
-
-Add command
-== Pridať príkaz
-
-Delete command
-== Zmazať príkaz
-
-[Touch button visibility preview]
-Included
-== Zahrnuté
-
-[Touch button visibility preview]
-Excluded
-== Vylúčené
-
-[Touch button visibility preview]
-Ignore
-== Ignorovať
-
-New button
-== Nové tlačidlo
-
-Select button by touch
-== Vyberte tlačidlo dotykom
-
-No buttons match your filter criteria
-== Žiadne tlačidlá nezodpovedajú vašim kritériám filtra
-
-File
-== Súbor
-
-Buttons
-== Tlačidlá
-
-Active color
-== Aktívna farba
-
-Inactive color
-== Neaktívna farba
-
-Preview button visibility while the editor is active.
-== Náhľad viditeľnosti tlačidla, keď je editor aktívny.
-
-Show all buttons
-== Zobraziť všetky tlačidlá
-
-Save all changes before switching selected button?
-== Uložiť všetky zmeny pred prepnutím vybraného tlačidla?
-
-Discard
-== Zahodiť
-
-There is not enough space available for the button. Check its visibilities and size.
-== Pre tlačidlo nie je dostatok miesta. Skontrolujte jeho viditeľnosť a veľkosť.
-
-Selected button not visible
-== Vybrané tlačidlo nie je viditeľné
-
-The selected button is not visible. Do you want to deselect it or edit its visibility?
-== Vybrané tlačidlo nie je viditeľné. Chcete jeho výber zrušiť alebo upraviť jeho viditeľnosť?
-
-Edit
-== Upraviť
-
-Width and height are required to be within the range from %d to %d.
-== Šírka a výška musí byť v rozsahu od %d do %d.
-
-Button position is outside of the screen.
-== Poloha tlačidla je mimo obrazovky.
-
-The selected button is overlapping with other buttons.
-== Vybrané tlačidlo sa prekrýva s inými tlačidlami.
-
-Wrong button settings
-== Zlé nastavenie tlačidiel
-
-[Touch button visibilities]
-Ingame
-== V hre
-
-[Touch button visibilities]
-Zoom Allowed
-== Priblíženie povolené
-
-[Touch button visibilities]
-Vote Active
-== Hlasovanie aktívne
-
-[Touch button visibilities]
-Dummy Allowed
-== Dummy povolený
-
-[Touch button visibilities]
-Dummy Connected
-== Dummy pripojený
-
-[Touch button visibilities]
-Rcon Authed
-== Rcon autorizovaný
-
-[Touch button visibilities]
-Demo Player
-== Prehrávač záznamov
-
-[Touch button visibilities]
-Extra Menu
-== Ďalšie menu
-
-[Predefined touch button behaviors]
-Ingame Menu
-== Menu v hre
-
-[Predefined touch button behaviors]
-Extra Menu
-== Ďalšie menu
-
-[Predefined touch button behaviors]
-Emoticon
-== Emotikon
-
-[Predefined touch button behaviors]
-Spectate
-== Pozorovať
-
-[Predefined touch button behaviors]
-Swap Action
-== Zameniť akciu
-
-[Predefined touch button behaviors]
-Use Action
-== Použiť akciu
-
-[Predefined touch button behaviors]
-Joystick Action
-== Joystick: Akcia
-
-[Predefined touch button behaviors]
-Joystick Aim
-== Joystick: Mierenie
-
-[Predefined touch button behaviors]
-Joystick Fire
-== Joystick: Streľba
-
-[Predefined touch button behaviors]
-Joystick Hook
-== Joystick: Hák
-
-Chat background color
-== Farba pozadia chatu
-
-Censor profanity
-== Cenzurovať nevhodné slová
-
-Download
-== Stiahnuť
-
-Team save in progress. You'll be able to load with '/load %s'
-== 
-
-Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails
-== 
-
-Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue
-== 
-
-Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue
-== 
-
-Save failed!
-== 
-
-[Important alert message]
-Press Esc or Tab to dismiss…
-== 
-
-Server alert
-== 
-
-Moderator alert
-== 
-
-Joining Tutorial server
-== 
-
-There's an unsaved change in the touch controls editor, you might want to save it.
-== 
-
-You will be disconnected from the server.
-== 
-
-There are no Tutorial servers available
-== 
-
-Retrying…
-== 
-
-Error joining Tutorial server
-== 
-
-Could not find a Tutorial server. Check your internet connection.
-== 
-
-You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
-== 
-
-Could not find online Tutorial server.\nStarting and connecting to local server…
-== 
-
-Waiting for local server to stop…
-== 
-
-Waiting for local server to start…
-== 
-
-Start and connect to local server
-== 
-
-Error loading communities
-== 
-
-Click to remove this community from your favorites.
-== 
-
-Click to add this community to your favorites.
-== 
-
-Add clan
-== 
-
-Add friend
-== 
-
-Are you sure that you want to disconnect and play this demo?
-== 
-
-Info
-== 
-
-Button browser
-== 
-
-You can select buttons directly in the list below, or long press on a touch button on the screen to select it. You can also move and resize buttons by touch.
-== 
-
-Preview visibilities
-== 
-
-You can manage your touch controls settings on this page. Only changes that are saved will be available after restarting the client. You can share your touch controls with others by exporting them to the clipboard.\n\nYou can find more detailed information about the touch controls on the DDNet Wiki.
-== 
-
-Open DDNet Wiki
-== 
-
-Buttons with this behavior execute console commands like regular key binds.
-== 
-
-Buttons with this behavior cycle between executing one of two or more specified commands.
-== 
-
-Buttons with this behavior execute some predefined actions.
-== 
-
-Opens the ingame menu immediately when released.
-== 
-
-The extra menu button which toggles visibility of buttons with "Extra Menu" visibilities. Also opens the ingame menu on long press.
-== 
-
-Opens the emoticon selector (this does not work with binds).
-== 
-
-Opens the spectator menu (this does not work with binds).
-== 
-
-Swaps the active action (fire and hook) for direct touch input and virtual joysticks.
-== 
-
-Uses the active action with the current aiming position.
-== 
-
-Virtual joystick which uses the active action.
-== 
-
-Virtual joystick which only aims without using an action.
-== 
-
-Virtual joystick which always uses fire.
-== 
-
-Virtual joystick which always uses hook.
-== 
-
-Player is ingame, i.e. not spectating.
-== 
-
-Zoom is allowed on this server.
-== 
-
-A vote is currently active.
-== 
-
-Dummy is allowed on this server.
-== 
-
-Dummy is currently connected.
-== 
-
-Player is currently authed in rcon.
-== 
-
-Demo player is currently active.
-== 
-
-The extra menu with the given number is activated.
-== 
-
-Update Rate
-== 
-
-Save power by lowering update rate (higher input latency)
-== 
-
-Colors of the hook collision line:
-== 
-
-[Hook collision line color]
-When nothing is hookable
-== 
-
-[Hook collision line color]
-When something is hookable
-== 
-
-[Hook collision line color]
-When a Tee is hookable
-== 
-
-[Hook collision line color]
-Hook collision line tip
-== 
-
-Show background quads
-== 
-
-Scoreboard cursor
-== 
-
-Unmute
-== 
-
-Mute
-== 
-
-Unmute emoticons
-== 
-
-Mute emoticons
 == 

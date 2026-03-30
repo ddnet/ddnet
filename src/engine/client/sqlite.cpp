@@ -1,5 +1,4 @@
 #include <base/system.h>
-
 #include <engine/console.h>
 #include <engine/sqlite.h>
 

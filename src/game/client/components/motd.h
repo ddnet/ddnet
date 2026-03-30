@@ -2,34 +2,24 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_MOTD_H
 #define GAME_CLIENT_COMPONENTS_MOTD_H
-
-#include <engine/shared/config.h>
-#include <engine/textrender.h>
-
 #include <game/client/component.h>
 
 class CMotd : public CComponent
 {
-	char m_aServerMotd[std::size(g_Config.m_SvMotd)];
+	// motd
 	int64_t m_ServerMotdTime;
-	int64_t m_ServerMotdUpdateTime;
-	int m_RectQuadContainer = -1;
-	STextContainerIndex m_TextContainerIndex;
 
 public:
-	CMotd();
-	int Sizeof() const override { return sizeof(*this); }
+	char m_aServerMotd[900];
 
-	const char *ServerMotd() const { return m_aServerMotd; }
-	int64_t ServerMotdUpdateTime() const { return m_ServerMotdUpdateTime; }
+	virtual int Sizeof() const override { return sizeof(*this); }
 	void Clear();
-	bool IsActive() const;
+	bool IsActive();
 
-	void OnRender() override;
-	void OnStateChange(int NewState, int OldState) override;
-	void OnWindowResize() override;
-	void OnMessage(int MsgType, void *pRawMsg) override;
-	bool OnInput(const IInput::CEvent &Event) override;
+	virtual void OnRender() override;
+	virtual void OnStateChange(int NewState, int OldState) override;
+	virtual void OnMessage(int MsgType, void *pRawMsg) override;
+	virtual bool OnInput(IInput::CEvent Event) override;
 };
 
 #endif

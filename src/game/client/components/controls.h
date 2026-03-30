@@ -2,62 +2,51 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_CONTROLS_H
 #define GAME_CLIENT_COMPONENTS_CONTROLS_H
-
+#include <SDL_joystick.h>
+#include <base/system.h>
 #include <base/vmath.h>
-
-#include <engine/client.h>
-#include <engine/console.h>
-
-#include <generated/protocol.h>
-
 #include <game/client/component.h>
+
+#include <game/generated/protocol.h>
 
 class CControls : public CComponent
 {
 public:
-	float GetMinMouseDistance() const;
-	float GetMaxMouseDistance() const;
+	vec2 m_MousePos[NUM_DUMMIES];
+	vec2 m_TargetPos[NUM_DUMMIES];
+	float m_OldMouseX;
+	float m_OldMouseY;
+	SDL_Joystick *m_pJoystick;
+	bool m_JoystickFirePressed;
+	bool m_JoystickRunPressed;
+	int64_t m_JoystickTapTime;
 
-	enum class EMouseInputType
-	{
-		ABSOLUTE,
-		RELATIVE,
-		AUTOMATED,
-	};
+	SDL_Joystick *m_pGamepad;
+	bool m_UsingGamepad;
 
-	vec2 m_aMousePos[NUM_DUMMIES];
-	vec2 m_aMousePosOnAction[NUM_DUMMIES];
-	vec2 m_aTargetPos[NUM_DUMMIES];
+	int m_AmmoCount[NUM_WEAPONS];
 
-	EMouseInputType m_aMouseInputType[NUM_DUMMIES];
-
-	int m_aAmmoCount[NUM_WEAPONS];
-
-	int64_t m_LastSendTime;
-	CNetObj_PlayerInput m_aInputData[NUM_DUMMIES];
-	CNetObj_PlayerInput m_aLastData[NUM_DUMMIES];
-	int m_aInputDirectionLeft[NUM_DUMMIES];
-	int m_aInputDirectionRight[NUM_DUMMIES];
-	int m_aShowHookColl[NUM_DUMMIES];
+	CNetObj_PlayerInput m_InputData[NUM_DUMMIES];
+	CNetObj_PlayerInput m_LastData[NUM_DUMMIES];
+	int m_InputDirectionLeft[NUM_DUMMIES];
+	int m_InputDirectionRight[NUM_DUMMIES];
+	int m_ShowHookColl[NUM_DUMMIES];
+	int m_LastDummy;
+	int m_OtherFire;
 
 	CControls();
-	int Sizeof() const override { return sizeof(*this); }
+	virtual int Sizeof() const override { return sizeof(*this); }
 
-	void OnReset() override;
-	void OnRender() override;
-	void OnMessage(int MsgType, void *pRawMsg) override;
-	bool OnCursorMove(float x, float y, IInput::ECursorType CursorType) override;
-	void OnConsoleInit() override;
+	virtual void OnReset() override;
+	virtual void OnRelease() override;
+	virtual void OnRender() override;
+	virtual void OnMessage(int MsgType, void *pRawMsg) override;
+	virtual bool OnMouseMove(float x, float y) override;
+	virtual void OnConsoleInit() override;
 	virtual void OnPlayerDeath();
 
 	int SnapInput(int *pData);
 	void ClampMousePos();
 	void ResetInput(int Dummy);
-
-private:
-	static void ConKeyInputState(IConsole::IResult *pResult, void *pUserData);
-	static void ConKeyInputCounter(IConsole::IResult *pResult, void *pUserData);
-	static void ConKeyInputSet(IConsole::IResult *pResult, void *pUserData);
-	static void ConKeyInputNextPrevWeapon(IConsole::IResult *pResult, void *pUserData);
 };
 #endif

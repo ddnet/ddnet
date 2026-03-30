@@ -1,16 +1,16 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "projectile.h"
-
-#include "character.h"
+#include <game/generated/protocol.h>
+#include <game/server/gamecontext.h>
+#include <game/server/gamemodes/DDRace.h>
+#include <game/server/player.h>
+#include <game/version.h>
 
 #include <engine/shared/config.h>
+#include <game/server/teams.h>
 
-#include <generated/protocol.h>
-
-#include <game/mapitems.h>
-#include <game/server/gamecontext.h>
-#include <game/server/gamemodes/ddnet.h>
+#include "character.h"
 
 CProjectile::CProjectile(
 	CGameWorld *pGameWorld,
@@ -21,8 +21,8 @@ CProjectile::CProjectile(
 	int Span,
 	bool Freeze,
 	bool Explosive,
+	float Force,
 	int SoundImpact,
-	vec2 InitDir,
 	int Layer,
 	int Number) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
@@ -32,6 +32,8 @@ CProjectile::CProjectile(
 	m_Direction = Dir;
 	m_LifeSpan = Span;
 	m_Owner = Owner;
+	m_Force = Force;
+	//m_Damage = Damage;
 	m_SoundImpact = SoundImpact;
 	m_StartTick = Server()->Tick();
 	m_Explosive = Explosive;
@@ -40,43 +42,66 @@ CProjectile::CProjectile(
 	m_Number = Number;
 	m_Freeze = Freeze;
 
-	m_InitDir = InitDir;
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	m_BelongsToPracticeTeam = pOwnerChar && pOwnerChar->Teams()->IsPractice(pOwnerChar->Team());
-	m_DDRaceTeam = m_Owner == -1 ? 0 : GameServer()->GetDDRaceTeam(m_Owner);
-	m_IsSolo = pOwnerChar && pOwnerChar->GetCore().m_Solo;
 
 	GameWorld()->InsertEntity(this);
 }
 
 void CProjectile::Reset()
 {
-	m_MarkedForDestroy = true;
+	if(m_LifeSpan > -2)
+		m_MarkedForDestroy = true;
 }
 
 vec2 CProjectile::GetPos(float Time)
 {
 	float Curvature = 0;
 	float Speed = 0;
-	CTuningParams *pTuning = GetTuning(m_TuneZone);
 
 	switch(m_Type)
 	{
 	case WEAPON_GRENADE:
-		Curvature = pTuning->m_GrenadeCurvature;
-		Speed = pTuning->m_GrenadeSpeed;
+		if(!m_TuneZone)
+		{
+			Curvature = GameServer()->Tuning()->m_GrenadeCurvature;
+			Speed = GameServer()->Tuning()->m_GrenadeSpeed;
+		}
+		else
+		{
+			Curvature = GameServer()->TuningList()[m_TuneZone].m_GrenadeCurvature;
+			Speed = GameServer()->TuningList()[m_TuneZone].m_GrenadeSpeed;
+		}
+
 		break;
 
 	case WEAPON_SHOTGUN:
-		Curvature = pTuning->m_ShotgunCurvature;
-		Speed = pTuning->m_ShotgunSpeed;
+		if(!m_TuneZone)
+		{
+			Curvature = GameServer()->Tuning()->m_ShotgunCurvature;
+			Speed = GameServer()->Tuning()->m_ShotgunSpeed;
+		}
+		else
+		{
+			Curvature = GameServer()->TuningList()[m_TuneZone].m_ShotgunCurvature;
+			Speed = GameServer()->TuningList()[m_TuneZone].m_ShotgunSpeed;
+		}
+
 		break;
 
 	case WEAPON_GUN:
-		Curvature = pTuning->m_GunCurvature;
-		Speed = pTuning->m_GunSpeed;
+		if(!m_TuneZone)
+		{
+			Curvature = GameServer()->Tuning()->m_GunCurvature;
+			Speed = GameServer()->Tuning()->m_GunSpeed;
+		}
+		else
+		{
+			Curvature = GameServer()->TuningList()[m_TuneZone].m_GunCurvature;
+			Speed = GameServer()->TuningList()[m_TuneZone].m_GunSpeed;
+		}
 		break;
 	}
 
@@ -92,20 +117,20 @@ void CProjectile::Tick()
 	vec2 ColPos;
 	vec2 NewPos;
 	int Collide = GameServer()->Collision()->IntersectLine(PrevPos, CurPos, &ColPos, &NewPos);
-	CCharacter *pOwnerChar = nullptr;
+	CCharacter *pOwnerChar = 0;
 
 	if(m_Owner >= 0)
 		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 
-	CCharacter *pTargetChr = nullptr;
+	CCharacter *pTargetChr = 0;
 
-	if(pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit)
+	if(pOwnerChar ? !(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_GRENADE) : g_Config.m_SvHit)
 		pTargetChr = GameServer()->m_World.IntersectCharacter(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pOwnerChar, m_Owner);
 
 	if(m_LifeSpan > -1)
 		m_LifeSpan--;
 
-	CClientMask TeamMask = CClientMask().set();
+	int64_t TeamMask = -1LL;
 	bool IsWeaponCollide = false;
 	if(
 		pOwnerChar &&
@@ -118,7 +143,7 @@ void CProjectile::Tick()
 	}
 	if(pOwnerChar && pOwnerChar->IsAlive())
 	{
-		TeamMask = pOwnerChar->TeamMask();
+		TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
 	}
 	else if(m_Owner >= 0 && (m_Type != WEAPON_GRENADE || g_Config.m_SvDestroyBulletsOnDeath || m_BelongsToPracticeTeam))
 	{
@@ -126,7 +151,7 @@ void CProjectile::Tick()
 		return;
 	}
 
-	if(((pTargetChr && (pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar)) || Collide || GameLayerClipped(CurPos)) && !IsWeaponCollide)
+	if(((pTargetChr && (pOwnerChar ? !(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_GRENADE) : g_Config.m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar)) || Collide || GameLayerClipped(CurPos)) && !IsWeaponCollide)
 	{
 		if(m_Explosive /*??*/ && (!pTargetChr || (pTargetChr && (!m_Freeze || (m_Type == WEAPON_SHOTGUN && Collide)))))
 		{
@@ -138,30 +163,25 @@ void CProjectile::Tick()
 			for(int i = 0; i < Number; i++)
 			{
 				GameServer()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),
-					(m_Owner != -1) ? TeamMask : CClientMask().set());
+					(m_Owner != -1) ? TeamMask : -1LL);
 				GameServer()->CreateSound(ColPos, m_SoundImpact,
-					(m_Owner != -1) ? TeamMask : CClientMask().set());
+					(m_Owner != -1) ? TeamMask : -1LL);
 			}
 		}
 		else if(m_Freeze)
 		{
-			CEntity *apEnts[MAX_CLIENTS];
-			int Num = GameWorld()->FindEntities(CurPos, 1.0f, apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+			CCharacter *apEnts[MAX_CLIENTS];
+			int Num = GameWorld()->FindEntities(CurPos, 1.0f, (CEntity **)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 			for(int i = 0; i < Num; ++i)
-			{
-				auto *pChr = static_cast<CCharacter *>(apEnts[i]);
-				if(pChr && (m_Layer != LAYER_SWITCH || (m_Layer == LAYER_SWITCH && m_Number > 0 && Switchers()[m_Number].m_aStatus[pChr->Team()])))
-					pChr->Freeze();
-			}
+				if(apEnts[i] && (m_Layer != LAYER_SWITCH || (m_Layer == LAYER_SWITCH && m_Number > 0 && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[apEnts[i]->Team()])))
+					apEnts[i]->Freeze();
 		}
-		else if(pTargetChr)
-			pTargetChr->TakeDamage(vec2(0, 0), 0, m_Owner, m_Type);
 
 		if(pOwnerChar && !GameLayerClipped(ColPos) &&
 			((m_Type == WEAPON_GRENADE && pOwnerChar->HasTelegunGrenade()) || (m_Type == WEAPON_GUN && pOwnerChar->HasTelegunGun())))
 		{
 			int MapIndex = GameServer()->Collision()->GetPureMapIndex(pTargetChr ? pTargetChr->m_Pos : ColPos);
-			int TileFIndex = GameServer()->Collision()->GetFrontTileIndex(MapIndex);
+			int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
 			bool IsSwitchTeleGun = GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_ALLOW_TELE_GUN;
 			bool IsBlueSwitchTeleGun = GameServer()->Collision()->GetSwitchType(MapIndex) == TILE_ALLOW_BLUE_TELE_GUN;
 
@@ -169,13 +189,13 @@ void CProjectile::Tick()
 			{
 				// Delay specifies which weapon the tile should work for.
 				// Delay = 0 means all.
-				int Delay = GameServer()->Collision()->GetSwitchDelay(MapIndex);
+				int delay = GameServer()->Collision()->GetSwitchDelay(MapIndex);
 
-				if(Delay == 1 && m_Type != WEAPON_GUN)
+				if(delay == 1 && m_Type != WEAPON_GUN)
 					IsSwitchTeleGun = IsBlueSwitchTeleGun = false;
-				if(Delay == 2 && m_Type != WEAPON_GRENADE)
+				if(delay == 2 && m_Type != WEAPON_GRENADE)
 					IsSwitchTeleGun = IsBlueSwitchTeleGun = false;
-				if(Delay == 3 && m_Type != WEAPON_LASER)
+				if(delay == 3 && m_Type != WEAPON_LASER)
 					IsSwitchTeleGun = IsBlueSwitchTeleGun = false;
 			}
 
@@ -206,15 +226,15 @@ void CProjectile::Tick()
 				m_Direction.x = -m_Direction.x;
 			else if(m_Bouncing == 2)
 				m_Direction.y = -m_Direction.y;
-			if(absolute(m_Direction.x) < 1e-6f)
+			if(fabs(m_Direction.x) < 1e-6f)
 				m_Direction.x = 0;
-			if(absolute(m_Direction.y) < 1e-6f)
+			if(fabs(m_Direction.y) < 1e-6f)
 				m_Direction.y = 0;
 			m_Pos += m_Direction;
 		}
 		else if(m_Type == WEAPON_GUN)
 		{
-			GameServer()->CreateDamageInd(CurPos, -std::atan2(m_Direction.x, m_Direction.y), 10, (m_Owner != -1) ? TeamMask : CClientMask().set());
+			GameServer()->CreateDamageInd(CurPos, -atan2(m_Direction.x, m_Direction.y), 10, (m_Owner != -1) ? TeamMask : -1LL);
 			m_MarkedForDestroy = true;
 			return;
 		}
@@ -234,16 +254,16 @@ void CProjectile::Tick()
 			if(m_Owner >= 0)
 				pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 
-			TeamMask = CClientMask().set();
+			TeamMask = -1LL;
 			if(pOwnerChar && pOwnerChar->IsAlive())
 			{
-				TeamMask = pOwnerChar->TeamMask();
+				TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
 			}
 
 			GameServer()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pOwnerChar ? -1 : pOwnerChar->Team()),
-				(m_Owner != -1) ? TeamMask : CClientMask().set());
+				(m_Owner != -1) ? TeamMask : -1LL);
 			GameServer()->CreateSound(ColPos, m_SoundImpact,
-				(m_Owner != -1) ? TeamMask : CClientMask().set());
+				(m_Owner != -1) ? TeamMask : -1LL);
 		}
 		m_MarkedForDestroy = true;
 		return;
@@ -255,10 +275,11 @@ void CProjectile::Tick()
 		z = GameServer()->Collision()->IsTeleport(x);
 	else
 		z = GameServer()->Collision()->IsTeleportWeapon(x);
-	if(z && !GameServer()->Collision()->TeleOuts(z - 1).empty())
+	CGameControllerDDRace *pControllerDDRace = (CGameControllerDDRace *)GameServer()->m_pController;
+	if(z && !pControllerDDRace->m_TeleOuts[z - 1].empty())
 	{
-		int TeleOut = GameServer()->m_World.m_Core.RandomOr0(GameServer()->Collision()->TeleOuts(z - 1).size());
-		m_Pos = GameServer()->Collision()->TeleOuts(z - 1)[TeleOut];
+		int TeleOut = GameServer()->m_World.m_Core.RandomOr0(pControllerDDRace->m_TeleOuts[z - 1].size());
+		m_Pos = pControllerDDRace->m_TeleOuts[z - 1][TeleOut];
 		m_StartTick = Server()->Tick();
 	}
 }
@@ -285,51 +306,52 @@ void CProjectile::Snap(int SnappingClient)
 	if(NetworkClipped(SnappingClient, GetPos(Ct)))
 		return;
 
-	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
-	if(SnappingClientVersion < VERSION_DDNET_ENTITY_NETOBJS)
+	if(m_LifeSpan == -2)
+	{
+		CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
+		if(!pEntData)
+			return;
+
+		pEntData->m_SwitchNumber = m_Number;
+		pEntData->m_Layer = m_Layer;
+		pEntData->m_EntityClass = ENTITYCLASS_PROJECTILE;
+	}
+
+	int SnappingClientVersion = SnappingClient != SERVER_DEMO_CLIENT ? GameServer()->GetClientVersion(SnappingClient) : CLIENT_VERSIONNR;
+	if(SnappingClientVersion < VERSION_DDNET_SWITCH)
 	{
 		CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
 		int Tick = (Server()->Tick() % Server()->TickSpeed()) % ((m_Explosive) ? 6 : 20);
-		if(pSnapChar && pSnapChar->IsAlive() && (m_Layer == LAYER_SWITCH && m_Number > 0 && !Switchers()[m_Number].m_aStatus[pSnapChar->Team()] && (!Tick)))
+		if(pSnapChar && pSnapChar->IsAlive() && (m_Layer == LAYER_SWITCH && m_Number > 0 && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pSnapChar->Team()] && (!Tick)))
 			return;
 	}
 
-	CCharacter *pOwnerChar = nullptr;
-	CClientMask TeamMask = CClientMask().set();
+	CCharacter *pOwnerChar = 0;
+	int64_t TeamMask = -1LL;
 
 	if(m_Owner >= 0)
 		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 
 	if(pOwnerChar && pOwnerChar->IsAlive())
-		TeamMask = pOwnerChar->TeamMask();
+		TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
 
-	if(SnappingClient != SERVER_DEMO_CLIENT && m_Owner != -1 && !TeamMask.test(SnappingClient))
+	if(SnappingClient != SERVER_DEMO_CLIENT && m_Owner != -1 && !CmaskIsSet(TeamMask, SnappingClient))
 		return;
 
-	CNetObj_DDRaceProjectile DDRaceProjectile;
-
-	if(SnappingClientVersion >= VERSION_DDNET_ENTITY_NETOBJS)
+	CNetObj_DDNetProjectile DDNetProjectile;
+	if(SnappingClientVersion >= VERSION_DDNET_ANTIPING_PROJECTILE && FillExtraInfo(&DDNetProjectile))
 	{
-		CNetObj_DDNetProjectile *pDDNetProjectile = static_cast<CNetObj_DDNetProjectile *>(Server()->SnapNewItem(NETOBJTYPE_DDNETPROJECTILE, GetId(), sizeof(CNetObj_DDNetProjectile)));
-		if(!pDDNetProjectile)
-		{
-			return;
-		}
-		FillExtraInfo(pDDNetProjectile);
-	}
-	else if(SnappingClientVersion >= VERSION_DDNET_ANTIPING_PROJECTILE && FillExtraInfoLegacy(&DDRaceProjectile))
-	{
-		int Type = SnappingClientVersion < VERSION_DDNET_MSG_LEGACY ? (int)NETOBJTYPE_PROJECTILE : NETOBJTYPE_DDRACEPROJECTILE;
-		void *pProj = Server()->SnapNewItem(Type, GetId(), sizeof(DDRaceProjectile));
+		int Type = SnappingClientVersion < VERSION_DDNET_MSG_LEGACY ? (int)NETOBJTYPE_PROJECTILE : NETOBJTYPE_DDNETPROJECTILE;
+		void *pProj = Server()->SnapNewItem(Type, GetID(), sizeof(DDNetProjectile));
 		if(!pProj)
 		{
 			return;
 		}
-		mem_copy(pProj, &DDRaceProjectile, sizeof(DDRaceProjectile));
+		mem_copy(pProj, &DDNetProjectile, sizeof(DDNetProjectile));
 	}
 	else
 	{
-		CNetObj_Projectile *pProj = Server()->SnapNewItem<CNetObj_Projectile>(GetId());
+		CNetObj_Projectile *pProj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, GetID(), sizeof(CNetObj_Projectile)));
 		if(!pProj)
 		{
 			return;
@@ -340,48 +362,39 @@ void CProjectile::Snap(int SnappingClient)
 
 void CProjectile::SwapClients(int Client1, int Client2)
 {
-	m_Owner = m_Owner == Client1 ? Client2 : (m_Owner == Client2 ? Client1 : m_Owner);
+	m_Owner = m_Owner == Client1 ? Client2 : m_Owner == Client2 ? Client1 : m_Owner;
 }
 
 // DDRace
-
-bool CProjectile::CanCollide(int ClientId)
-{
-	if(m_DDRaceTeam != GameServer()->GetDDRaceTeam(ClientId))
-		return false;
-	if(m_IsSolo)
-		return m_Owner == ClientId;
-	return true;
-}
 
 void CProjectile::SetBouncing(int Value)
 {
 	m_Bouncing = Value;
 }
 
-bool CProjectile::FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj)
+bool CProjectile::FillExtraInfo(CNetObj_DDNetProjectile *pProj)
 {
 	const int MaxPos = 0x7fffffff / 100;
-	if(absolute((int)m_Pos.y) + 1 >= MaxPos || absolute((int)m_Pos.x) + 1 >= MaxPos)
+	if(abs((int)m_Pos.y) + 1 >= MaxPos || abs((int)m_Pos.x) + 1 >= MaxPos)
 	{
 		//If the modified data would be too large to fit in an integer, send normal data instead
 		return false;
 	}
-	//Send additional/modified info, by modifying the fields of the netobj
-	float Angle = -std::atan2(m_Direction.x, m_Direction.y);
+	//Send additional/modified info, by modifiying the fields of the netobj
+	float Angle = -atan2f(m_Direction.x, m_Direction.y);
 
 	int Data = 0;
-	Data |= (absolute(m_Owner) & 255) << 0;
+	Data |= (abs(m_Owner) & 255) << 0;
 	if(m_Owner < 0)
-		Data |= LEGACYPROJECTILEFLAG_NO_OWNER;
+		Data |= PROJECTILEFLAG_NO_OWNER;
 	//This bit tells the client to use the extra info
-	Data |= LEGACYPROJECTILEFLAG_IS_DDNET;
-	// LEGACYPROJECTILEFLAG_BOUNCE_HORIZONTAL, LEGACYPROJECTILEFLAG_BOUNCE_VERTICAL
+	Data |= PROJECTILEFLAG_IS_DDNET;
+	// PROJECTILEFLAG_BOUNCE_HORIZONTAL, PROJECTILEFLAG_BOUNCE_VERTICAL
 	Data |= (m_Bouncing & 3) << 10;
 	if(m_Explosive)
-		Data |= LEGACYPROJECTILEFLAG_EXPLOSIVE;
+		Data |= PROJECTILEFLAG_EXPLOSIVE;
 	if(m_Freeze)
-		Data |= LEGACYPROJECTILEFLAG_FREEZE;
+		Data |= PROJECTILEFLAG_FREEZE;
 
 	pProj->m_X = (int)(m_Pos.x * 100.0f);
 	pProj->m_Y = (int)(m_Pos.y * 100.0f);
@@ -390,46 +403,4 @@ bool CProjectile::FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj)
 	pProj->m_StartTick = m_StartTick;
 	pProj->m_Type = m_Type;
 	return true;
-}
-
-void CProjectile::FillExtraInfo(CNetObj_DDNetProjectile *pProj)
-{
-	int Flags = 0;
-	if(m_Bouncing & 1)
-	{
-		Flags |= PROJECTILEFLAG_BOUNCE_HORIZONTAL;
-	}
-	if(m_Bouncing & 2)
-	{
-		Flags |= PROJECTILEFLAG_BOUNCE_VERTICAL;
-	}
-	if(m_Explosive)
-	{
-		Flags |= PROJECTILEFLAG_EXPLOSIVE;
-	}
-	if(m_Freeze)
-	{
-		Flags |= PROJECTILEFLAG_FREEZE;
-	}
-
-	if(m_Owner < 0)
-	{
-		pProj->m_VelX = round_to_int(m_Direction.x * 1e6f);
-		pProj->m_VelY = round_to_int(m_Direction.y * 1e6f);
-	}
-	else
-	{
-		pProj->m_VelX = round_to_int(m_InitDir.x);
-		pProj->m_VelY = round_to_int(m_InitDir.y);
-		Flags |= PROJECTILEFLAG_NORMALIZE_VEL;
-	}
-
-	pProj->m_X = round_to_int(m_Pos.x * 100.0f);
-	pProj->m_Y = round_to_int(m_Pos.y * 100.0f);
-	pProj->m_Type = m_Type;
-	pProj->m_StartTick = m_StartTick;
-	pProj->m_Owner = m_Owner;
-	pProj->m_Flags = Flags;
-	pProj->m_SwitchNumber = m_Number;
-	pProj->m_TuneZone = m_TuneZone;
 }

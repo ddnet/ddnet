@@ -1,13 +1,13 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include "friends.h"
-
 #include <base/math.h>
 #include <base/system.h>
 
 #include <engine/config.h>
 #include <engine/console.h>
 #include <engine/shared/config.h>
+
+#include "friends.h"
 
 CFriends::CFriends()
 {
@@ -113,8 +113,8 @@ void CFriends::AddFriend(const char *pName, const char *pClan)
 			return;
 	}
 
-	str_copy(m_aFriends[m_NumFriends].m_aName, pName);
-	str_copy(m_aFriends[m_NumFriends].m_aClan, pClan);
+	str_copy(m_aFriends[m_NumFriends].m_aName, pName, sizeof(m_aFriends[m_NumFriends].m_aName));
+	str_copy(m_aFriends[m_NumFriends].m_aClan, pClan, sizeof(m_aFriends[m_NumFriends].m_aClan));
 	m_aFriends[m_NumFriends].m_NameHash = NameHash;
 	m_aFriends[m_NumFriends].m_ClanHash = ClanHash;
 	++m_NumFriends;
@@ -166,15 +166,15 @@ void CFriends::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserDat
 	const char *pEnd = aBuf + sizeof(aBuf) - 4;
 	for(int i = 0; i < pSelf->m_NumFriends; ++i)
 	{
-		str_copy(aBuf, pSelf->m_Foes ? "add_foe " : "add_friend ");
+		str_copy(aBuf, pSelf->m_Foes ? "add_foe " : "add_friend ", sizeof(aBuf));
 
-		str_append(aBuf, "\"");
+		str_append(aBuf, "\"", sizeof(aBuf));
 		char *pDst = aBuf + str_length(aBuf);
 		str_escape(&pDst, pSelf->m_aFriends[i].m_aName, pEnd);
-		str_append(aBuf, "\" \"");
+		str_append(aBuf, "\" \"", sizeof(aBuf));
 		pDst = aBuf + str_length(aBuf);
 		str_escape(&pDst, pSelf->m_aFriends[i].m_aClan, pEnd);
-		str_append(aBuf, "\"");
+		str_append(aBuf, "\"", sizeof(aBuf));
 
 		pConfigManager->WriteLine(aBuf);
 	}

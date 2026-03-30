@@ -1,68 +1,89 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-
 #include <base/logger.h>
-#include <base/os.h>
+#include <base/math.h>
 #include <base/system.h>
+#include <engine/shared/image_manipulation.h>
+#include <pnglite.h>
 
-#include <engine/gfx/image_loader.h>
-#include <engine/gfx/image_manipulation.h>
-
-static bool DilateFile(const char *pFilename, bool DryRun)
+int DilateFile(const char *pFilename)
 {
-	CImageInfo Image;
-	int PngliteIncompatible;
-	if(!CImageLoader::LoadPng(io_open(pFilename, IOFLAG_READ), pFilename, Image, PngliteIncompatible))
-		return false;
+	png_t Png;
 
-	if(Image.m_Format != CImageInfo::FORMAT_RGBA)
+	png_init(0, 0);
+
+	IOHANDLE File = io_open(pFilename, IOFLAG_READ);
+	if(!File)
 	{
-		log_error("dilate", "ERROR: only RGBA PNG images are supported");
-		Image.Free();
-		return false;
+		dbg_msg("dilate", "failed to open file. filename='%s'", pFilename);
+		return 0;
+	}
+	int Error = png_open_read(&Png, 0, File);
+	if(Error != PNG_NO_ERROR)
+	{
+		dbg_msg("dilate", "failed to open image file. filename='%s', pnglite: %s", pFilename, png_error_string(Error));
+		io_close(File);
+		return 0;
 	}
 
-	if(DryRun)
+	if(Png.color_type != PNG_TRUECOLOR_ALPHA)
 	{
-		CImageInfo OldImage = Image.DeepCopy();
-		DilateImage(Image);
-		const bool EqualImages = Image.DataEquals(OldImage);
-		Image.Free();
-		OldImage.Free();
-		log_info("dilate", "'%s' is %sdilated", pFilename, EqualImages ? "" : "NOT ");
-		return EqualImages;
+		dbg_msg("dilate", "%s: not an RGBA image", pFilename);
+		return 1;
 	}
-	else
+
+	unsigned char *pBuffer = (unsigned char *)malloc((size_t)Png.width * Png.height * sizeof(unsigned char) * 4);
+
+	Error = png_get_data(&Png, pBuffer);
+	if(Error != PNG_NO_ERROR)
 	{
-		DilateImage(Image);
-		const bool SaveResult = CImageLoader::SavePng(io_open(pFilename, IOFLAG_WRITE), pFilename, Image);
-		Image.Free();
-		return SaveResult;
+		dbg_msg("map_convert_07", "failed to read image. filename='%s', pnglite: %s", pFilename, png_error_string(Error));
+		free(pBuffer);
+		io_close(File);
+		return 0;
 	}
+	io_close(File);
+
+	int w = Png.width;
+	int h = Png.height;
+
+	DilateImage(pBuffer, w, h, 4);
+
+	// save here
+	File = io_open(pFilename, IOFLAG_WRITE);
+	if(!File)
+	{
+		dbg_msg("dilate", "failed to open file. filename='%s'", pFilename);
+		free(pBuffer);
+		return 0;
+	}
+	Error = png_open_write(&Png, 0, File);
+	if(Error != PNG_NO_ERROR)
+	{
+		dbg_msg("dilate", "failed to open image file. filename='%s', pnglite: %s", pFilename, png_error_string(Error));
+		io_close(File);
+		return 0;
+	}
+	png_set_data(&Png, w, h, 8, PNG_TRUECOLOR_ALPHA, (unsigned char *)pBuffer);
+	io_close(File);
+
+	free(pBuffer);
+
+	return 0;
 }
 
 int main(int argc, const char **argv)
 {
-	CCmdlineFix CmdlineFix(&argc, &argv);
+	cmdline_fix(&argc, &argv);
 	log_set_global_logger_default();
-
 	if(argc == 1)
 	{
-		log_error("dilate", "Usage: %s [--dry-run] <image1.png> [<image2.png> ...]", argv[0]);
+		dbg_msg("usage", "%s FILE1 [ FILE2... ]", argv[0]);
 		return -1;
 	}
 
-	const bool DryRun = str_comp(argv[1], "--dry-run") == 0;
-	if(DryRun && argc < 3)
-	{
-		log_error("dilate", "Usage: %s [--dry-run] <image1.png> [<image2.png> ...]", argv[0]);
-		return -1;
-	}
-
-	bool Success = true;
-	for(int i = (DryRun ? 2 : 1); i < argc; i++)
-	{
-		Success &= DilateFile(argv[i], DryRun);
-	}
-	return Success ? 0 : -1;
+	for(int i = 1; i < argc; i++)
+		DilateFile(argv[i]);
+	cmdline_free(argc, argv);
+	return 0;
 }
