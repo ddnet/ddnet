@@ -264,6 +264,7 @@ public:
 		m_PreventUnusedTilesWasWarned = false;
 		m_AllowPlaceUnusedTiles = EUnusedEntities::NOT_ALLOWED;
 		m_BrushDrawDestructive = true;
+		m_BrushType = EBrushType::BRUSH;
 	}
 
 	class CHoverTile
@@ -403,6 +404,12 @@ public:
 	bool IsAllowPlaceUnusedTiles() const;
 
 	bool m_BrushDrawDestructive;
+	enum class EBrushType
+	{
+		BRUSH = 0,
+		BUCKET_FILL,
+	};
+	EBrushType m_BrushType;
 
 	int m_Mentions = 0;
 	bool m_IngameMoved = false;

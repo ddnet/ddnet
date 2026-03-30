@@ -557,6 +557,19 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 				for(auto &pLayer : m_pBrush->m_vpLayers)
 					pLayer->BrushRotate(s_RotationAmount / 360.0f * pi * 2);
 			}
+
+			ToolbarTop.VSplitLeft(5.0f, nullptr, &ToolbarTop);
+
+			// brush type buttons
+			ToolbarTop.VSplitLeft(20.0f, &Button, &ToolbarTop);
+			static int s_BrushTypeBrushButton = 0;
+			if(DoButton_FontIcon(&s_BrushTypeBrushButton, FontIcon::BRUSH, m_BrushType == EBrushType::BRUSH, &Button, BUTTONFLAG_LEFT, "Brush draw mode.", IGraphics::CORNER_L, 8.0f))
+				m_BrushType = EBrushType::BRUSH;
+
+			ToolbarTop.VSplitLeft(20.0f, &Button, &ToolbarTop);
+			static int s_BrushTypeBucketFillButton = 0;
+			if(DoButton_FontIcon(&s_BrushTypeBucketFillButton, FontIcon::FILL_DRIP, m_BrushType == EBrushType::BUCKET_FILL, &Button, BUTTONFLAG_LEFT, "Bucket fill mode.", IGraphics::CORNER_R, 8.0f))
+				m_BrushType = EBrushType::BUCKET_FILL;
 		}
 
 		// Color pipette and palette
@@ -2686,8 +2699,13 @@ void CEditor::DoMapEditor(CUIRect View)
 				{
 					Ui()->SetActiveItem(&m_MapEditorId);
 
+					std::shared_ptr<CLayerTiles> pTilesLayer = std::static_pointer_cast<CLayerTiles>(Map()->SelectedLayerType(0, LAYERTYPE_TILES));
+					const bool BucketFill = (m_BrushType == EBrushType::BUCKET_FILL || Input()->ShiftIsPressed()) && pTilesLayer != nullptr;
+
 					if(m_pBrush->IsEmpty())
 						s_Operation = OP_BRUSH_GRAB;
+					else if(BucketFill)
+						s_Operation = OP_BRUSH_PAINT;
 					else
 					{
 						s_Operation = OP_BRUSH_DRAW;
@@ -2701,10 +2719,6 @@ void CEditor::DoMapEditor(CUIRect View)
 								apEditLayers[k].second->BrushPlace(m_pBrush->m_vpLayers[BrushIndex].get(), vec2(wx, wy));
 						}
 					}
-
-					std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(Map()->SelectedLayerType(0, LAYERTYPE_TILES));
-					if(Input()->ShiftIsPressed() && pLayer)
-						s_Operation = OP_BRUSH_PAINT;
 				}
 
 				if(!m_pBrush->IsEmpty())
@@ -7195,7 +7209,7 @@ void CEditor::MouseAxisLock(vec2 &CursorRel)
 	if(Input()->AltIsPressed())
 	{
 		// only lock with the paint brush and inside editor map area to avoid duplicate Alt behavior
-		if(m_pBrush->IsEmpty() || Ui()->HotItem() != &m_MapEditorId)
+		if(m_pBrush->IsEmpty() || m_BrushType != EBrushType::BRUSH || Ui()->HotItem() != &m_MapEditorId)
 			return;
 
 		const vec2 CurrentWorldPos = vec2(Ui()->MouseWorldX(), Ui()->MouseWorldY()) / 32.0f;
