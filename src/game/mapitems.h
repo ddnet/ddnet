@@ -354,6 +354,11 @@ public:
 	unsigned char m_Flags;
 	unsigned char m_Skip;
 	unsigned char m_Reserved;
+
+	bool operator==(const CTile &Other) const
+	{
+		return m_Index == Other.m_Index && m_Flags == Other.m_Flags && m_Skip == Other.m_Skip;
+	}
 };
 
 class CMapItemInfo

@@ -759,6 +759,43 @@ static void Rotate(const CPoint *pCenter, CPoint *pPoint, float Rotation)
 	pPoint->y = (int)(x * std::sin(Rotation) + y * std::cos(Rotation) + pCenter->y);
 }
 
+static int FloodFillTiles(CLayerTiles *pLayer, int StartX, int StartY, const CTile &Replacement)
+{
+	if(StartX < 0 || StartX >= pLayer->m_Width || StartY < 0 || StartY >= pLayer->m_Height)
+		return 0;
+
+	const CTile Source = pLayer->GetTile(StartX, StartY);
+	if(Source == Replacement)
+		return 0;
+
+	std::deque<ivec2> q;
+	q.emplace_back(StartX, StartY);
+
+	int Filled = 0;
+	while(!q.empty())
+	{
+		const ivec2 Pos = q.back();
+		q.pop_back();
+
+		if(Pos.x < 0 || Pos.x >= pLayer->m_Width || Pos.y < 0 || Pos.y >= pLayer->m_Height)
+			continue;
+
+		const CTile Current = pLayer->GetTile(Pos.x, Pos.y);
+		if(!(Current == Source))
+			continue;
+
+		pLayer->SetTile(Pos.x, Pos.y, Replacement);
+		++Filled;
+
+		q.emplace_back(Pos.x - 1, Pos.y);
+		q.emplace_back(Pos.x + 1, Pos.y);
+		q.emplace_back(Pos.x, Pos.y - 1);
+		q.emplace_back(Pos.x, Pos.y + 1);
+	}
+
+	return Filled;
+}
+
 void CEditor::DoSoundSource(int LayerIndex, CSoundSource *pSource, int Index)
 {
 	static ESoundSourceOp s_Operation = ESoundSourceOp::NONE;
@@ -2603,6 +2640,15 @@ void CEditor::DoMapEditor(CUIRect View)
 					r.h = -r.h;
 				}
 
+				if((s_Operation == OP_BRUSH_GRAB || s_Operation == OP_BRUSH_PAINT) && m_BrushType == EBrushType::BUCKET_FILL && NumEditLayers > 0 && apEditLayers[0].second->m_Type == LAYERTYPE_TILES)
+				{
+					const float TileSize = 32.0f;
+					r.x = std::floor(s_StartWx / TileSize) * TileSize;
+					r.y = std::floor(s_StartWy / TileSize) * TileSize;
+					r.w = TileSize;
+					r.h = TileSize;
+				}
+
 				if(s_Operation == OP_BRUSH_DRAW)
 				{
 					if(!m_pBrush->IsEmpty())
@@ -2669,16 +2715,43 @@ void CEditor::DoMapEditor(CUIRect View)
 				{
 					if(!Ui()->MouseButton(0))
 					{
-						for(size_t k = 0; k < NumEditLayers; k++)
+						if(m_BrushType == EBrushType::BUCKET_FILL)
 						{
-							size_t BrushIndex = k;
-							if(m_pBrush->m_vpLayers.size() != NumEditLayers)
-								BrushIndex = 0;
-							std::shared_ptr<CLayer> pBrush = m_pBrush->IsEmpty() ? nullptr : m_pBrush->m_vpLayers[BrushIndex];
-							apEditLayers[k].second->FillSelection(m_pBrush->IsEmpty(), pBrush.get(), r);
+							if(NumEditLayers == 1 && !m_pBrush->IsEmpty() && apEditLayers[0].second->m_Type == LAYERTYPE_TILES && m_pBrush->m_vpLayers[0]->m_Type == LAYERTYPE_TILES)
+							{
+								std::shared_ptr<CLayerTiles> pTargetLayer = std::static_pointer_cast<CLayerTiles>(apEditLayers[0].second);
+								std::shared_ptr<CLayerTiles> pBrushLayer = std::static_pointer_cast<CLayerTiles>(m_pBrush->m_vpLayers[0]);
+
+								CIntRect TargetRect;
+								pTargetLayer->Convert(r, &TargetRect);
+								pTargetLayer->Clamp(&TargetRect);
+
+								if(TargetRect.w > 0 && TargetRect.h > 0)
+								{
+									const CTile TargetTile = pTargetLayer->GetTile(TargetRect.x, TargetRect.y);
+									const CTile SelectedTile = pBrushLayer->GetTile(0, 0);
+
+									if(!(TargetTile.m_Index == SelectedTile.m_Index && TargetTile.m_Flags == SelectedTile.m_Flags) && FloodFillTiles(pTargetLayer.get(), TargetRect.x, TargetRect.y, SelectedTile) > 0)
+									{
+										std::shared_ptr<IEditorAction> Action = std::make_shared<CEditorBrushDrawAction>(Map(), Map()->m_SelectedGroup);
+										Map()->m_EditorHistory.RecordAction(Action);
+									}
+								}
+							}
 						}
-						std::shared_ptr<IEditorAction> Action = std::make_shared<CEditorBrushDrawAction>(Map(), Map()->m_SelectedGroup);
-						Map()->m_EditorHistory.RecordAction(Action);
+						else
+						{
+							for(size_t k = 0; k < NumEditLayers; k++)
+							{
+								size_t BrushIndex = k;
+								if(m_pBrush->m_vpLayers.size() != NumEditLayers)
+									BrushIndex = 0;
+								std::shared_ptr<CLayer> pBrush = m_pBrush->IsEmpty() ? nullptr : m_pBrush->m_vpLayers[BrushIndex];
+								apEditLayers[k].second->FillSelection(m_pBrush->IsEmpty(), pBrush.get(), r);
+							}
+							std::shared_ptr<IEditorAction> Action = std::make_shared<CEditorBrushDrawAction>(Map(), Map()->m_SelectedGroup);
+							Map()->m_EditorHistory.RecordAction(Action);
+						}
 					}
 					else
 					{
