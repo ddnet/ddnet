@@ -89,8 +89,17 @@ using namespace std::chrono_literals;
 static constexpr ColorRGBA CLIENT_NETWORK_PRINT_COLOR = ColorRGBA(0.7f, 1, 0.7f, 1.0f);
 static constexpr ColorRGBA CLIENT_NETWORK_PRINT_ERROR_COLOR = ColorRGBA(1.0f, 0.25f, 0.25f, 1.0f);
 
+CSnapshotDelta *CClient::SnapshotDelta()
+{
+	if(IsSixup())
+	{
+		return &m_SnapshotDeltaSixup;
+	}
+	return &m_SnapshotDelta;
+}
+
 CClient::CClient() :
-	m_DemoPlayer(&m_SnapshotDelta, true, [&]() { UpdateDemoIntraTimers(); }),
+	m_DemoPlayer(&m_SnapshotDelta, &m_SnapshotDeltaSixup, true, [&]() { UpdateDemoIntraTimers(); }),
 	m_InputtimeMarginGraph(128, 2, true),
 	m_aGametimeMarginGraphs{{128, 2, true}, {128, 2, true}},
 	m_FpsGraph(4096, 0, true)
@@ -920,7 +929,7 @@ void CClient::SnapSetStaticsize(int ItemType, int Size)
 
 void CClient::SnapSetStaticsize7(int ItemType, int Size)
 {
-	m_SnapshotDelta.SetStaticsize7(ItemType, Size);
+	m_SnapshotDeltaSixup.SetStaticsize(ItemType, Size);
 }
 
 void CClient::RenderDebug()
@@ -996,7 +1005,7 @@ void CClient::RenderDebug()
 		Row++;
 		for(int i = 0; i < NUM_NETOBJTYPES; i++)
 		{
-			if(m_SnapshotDelta.GetDataRate(i))
+			if(SnapshotDelta()->GetDataRate(i))
 			{
 				str_format(
 					aBuffer,
@@ -1004,15 +1013,15 @@ void CClient::RenderDebug()
 					"%5d %20s: %8" PRIu64 " %8" PRIu64 " %8" PRIu64,
 					i,
 					GameClient()->GetItemName(i),
-					m_SnapshotDelta.GetDataRate(i) / 8, m_SnapshotDelta.GetDataUpdates(i),
-					(m_SnapshotDelta.GetDataRate(i) / m_SnapshotDelta.GetDataUpdates(i)) / 8);
+					SnapshotDelta()->GetDataRate(i) / 8, SnapshotDelta()->GetDataUpdates(i),
+					(SnapshotDelta()->GetDataRate(i) / SnapshotDelta()->GetDataUpdates(i)) / 8);
 				Graphics()->QuadsText(2, OffsetY + Row * 12, FontSize, aBuffer);
 				Row++;
 			}
 		}
 		for(int i = CSnapshot::MAX_TYPE; i > (CSnapshot::MAX_TYPE - 64); i--)
 		{
-			if(m_SnapshotDelta.GetDataRate(i) && m_aapSnapshots[g_Config.m_ClDummy][IClient::SNAP_CURRENT])
+			if(SnapshotDelta()->GetDataRate(i) && m_aapSnapshots[g_Config.m_ClDummy][IClient::SNAP_CURRENT])
 			{
 				const int Type = m_aapSnapshots[g_Config.m_ClDummy][IClient::SNAP_CURRENT]->m_pAltSnap->GetExternalItemType(i);
 				if(Type == UUID_INVALID)
@@ -1023,9 +1032,9 @@ void CClient::RenderDebug()
 						"%5d %20s: %8" PRIu64 " %8" PRIu64 " %8" PRIu64,
 						i,
 						"Unknown UUID",
-						m_SnapshotDelta.GetDataRate(i) / 8,
-						m_SnapshotDelta.GetDataUpdates(i),
-						(m_SnapshotDelta.GetDataRate(i) / m_SnapshotDelta.GetDataUpdates(i)) / 8);
+						SnapshotDelta()->GetDataRate(i) / 8,
+						SnapshotDelta()->GetDataUpdates(i),
+						(SnapshotDelta()->GetDataRate(i) / SnapshotDelta()->GetDataUpdates(i)) / 8);
 					Graphics()->QuadsText(2, OffsetY + Row * 12, FontSize, aBuffer);
 					Row++;
 				}
@@ -1037,9 +1046,9 @@ void CClient::RenderDebug()
 						"%5d %20s: %8" PRIu64 " %8" PRIu64 " %8" PRIu64,
 						Type,
 						GameClient()->GetItemName(Type),
-						m_SnapshotDelta.GetDataRate(i) / 8,
-						m_SnapshotDelta.GetDataUpdates(i),
-						(m_SnapshotDelta.GetDataRate(i) / m_SnapshotDelta.GetDataUpdates(i)) / 8);
+						SnapshotDelta()->GetDataRate(i) / 8,
+						SnapshotDelta()->GetDataUpdates(i),
+						(SnapshotDelta()->GetDataRate(i) / SnapshotDelta()->GetDataUpdates(i)) / 8);
 					Graphics()->QuadsText(2, OffsetY + Row * 12, FontSize, aBuffer);
 					Row++;
 				}
@@ -2056,8 +2065,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					(NumParts == CSnapshot::MAX_PARTS && m_aSnapshotParts[Conn] == std::numeric_limits<uint64_t>::max()))
 				{
 					unsigned char aTmpBuffer2[CSnapshot::MAX_SIZE];
-					unsigned char aTmpBuffer3[CSnapshot::MAX_SIZE];
-					CSnapshot *pTmpBuffer3 = (CSnapshot *)aTmpBuffer3; // Fix compiler warning for strict-aliasing
+					CSnapshotBuffer TmpBuffer3;
 
 					// reset snapshotting
 					m_aSnapshotParts[Conn] = 0;
@@ -2085,7 +2093,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					}
 
 					// decompress snapshot
-					const void *pDeltaData = m_SnapshotDelta.EmptyDelta();
+					const void *pDeltaData = SnapshotDelta()->EmptyDelta();
 					int DeltaSize = sizeof(int) * 3;
 
 					if(m_aSnapshotIncomingDataSize[Conn])
@@ -2100,22 +2108,22 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					}
 
 					// unpack delta
-					const int SnapSize = m_SnapshotDelta.UnpackDelta(pDeltaShot, pTmpBuffer3, pDeltaData, DeltaSize, IsSixup());
+					const int SnapSize = SnapshotDelta()->UnpackDelta(pDeltaShot, &TmpBuffer3, pDeltaData, DeltaSize);
 					if(SnapSize < 0)
 					{
 						dbg_msg("client", "delta unpack failed. error=%d", SnapSize);
 						return;
 					}
-					if(!pTmpBuffer3->IsValid(SnapSize))
+					if(!TmpBuffer3.AsSnapshot()->IsValid(SnapSize))
 					{
 						dbg_msg("client", "snapshot invalid. SnapSize=%d, DeltaSize=%d", SnapSize, DeltaSize);
 						return;
 					}
 
-					if(Msg != NETMSG_SNAPEMPTY && pTmpBuffer3->Crc() != Crc)
+					if(Msg != NETMSG_SNAPEMPTY && TmpBuffer3.AsSnapshot()->Crc() != Crc)
 					{
 						log_error("client", "snapshot crc error #%d - tick=%d wantedcrc=%d gotcrc=%d compressed_size=%d delta_tick=%d",
-							m_SnapCrcErrors, GameTick, Crc, pTmpBuffer3->Crc(), m_aSnapshotIncomingDataSize[Conn], DeltaTick);
+							m_SnapCrcErrors, GameTick, Crc, TmpBuffer3.AsSnapshot()->Crc(), m_aSnapshotIncomingDataSize[Conn], DeltaTick);
 
 						m_SnapCrcErrors++;
 						if(m_SnapCrcErrors > 10)
@@ -2143,19 +2151,17 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 
 					// create a verified and unpacked snapshot
 					int AltSnapSize = -1;
-					unsigned char aAltSnapBuffer[CSnapshot::MAX_SIZE];
-					CSnapshot *pAltSnapBuffer = (CSnapshot *)aAltSnapBuffer;
+					CSnapshotBuffer AltSnapBuffer;
 
 					if(IsSixup())
 					{
-						unsigned char aTmpTransSnapBuffer[CSnapshot::MAX_SIZE];
-						CSnapshot *pTmpTransSnapBuffer = (CSnapshot *)aTmpTransSnapBuffer;
-						mem_copy(pTmpTransSnapBuffer, pTmpBuffer3, CSnapshot::MAX_SIZE);
-						AltSnapSize = GameClient()->TranslateSnap(pAltSnapBuffer, pTmpTransSnapBuffer, Conn, Dummy);
+						CSnapshotBuffer TmpTransSnapBuffer;
+						mem_copy(&TmpTransSnapBuffer, &TmpBuffer3, sizeof(TmpTransSnapBuffer));
+						AltSnapSize = GameClient()->TranslateSnap(&AltSnapBuffer, TmpTransSnapBuffer.AsSnapshot(), Conn, Dummy);
 					}
 					else
 					{
-						AltSnapSize = UnpackAndValidateSnapshot(pTmpBuffer3, pAltSnapBuffer);
+						AltSnapSize = UnpackAndValidateSnapshot(TmpBuffer3.AsSnapshot(), &AltSnapBuffer);
 					}
 
 					if(AltSnapSize < 0)
@@ -2165,18 +2171,17 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					}
 
 					// add new
-					m_aSnapshotStorage[Conn].Add(GameTick, time_get(), SnapSize, pTmpBuffer3, AltSnapSize, pAltSnapBuffer);
+					m_aSnapshotStorage[Conn].Add(GameTick, time_get(), SnapSize, TmpBuffer3.AsSnapshot(), AltSnapSize, AltSnapBuffer.AsSnapshot());
 
 					if(!Dummy)
 					{
-						GameClient()->ProcessDemoSnapshot(pTmpBuffer3);
+						GameClient()->ProcessDemoSnapshot(TmpBuffer3.AsSnapshot());
 
-						unsigned char aSnapSeven[CSnapshot::MAX_SIZE];
-						CSnapshot *pSnapSeven = (CSnapshot *)aSnapSeven;
+						CSnapshotBuffer SnapSeven;
 						int DemoSnapSize = SnapSize;
 						if(IsSixup())
 						{
-							DemoSnapSize = GameClient()->OnDemoRecSnap7(pTmpBuffer3, pSnapSeven, Conn);
+							DemoSnapSize = GameClient()->OnDemoRecSnap7(TmpBuffer3.AsSnapshot(), &SnapSeven, Conn);
 							if(DemoSnapSize < 0)
 							{
 								dbg_msg("sixup", "demo snapshot failed. error=%d", DemoSnapSize);
@@ -2191,7 +2196,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 								if(DemoRecorder.IsRecording())
 								{
 									// write snapshot
-									DemoRecorder.RecordSnapshot(GameTick, IsSixup() ? pSnapSeven : pTmpBuffer3, DemoSnapSize);
+									DemoRecorder.RecordSnapshot(GameTick, IsSixup() ? SnapSeven.AsSnapshot() : TmpBuffer3.AsSnapshot(), DemoSnapSize);
 								}
 							}
 						}
@@ -2320,7 +2325,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 	}
 }
 
-int CClient::UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshot *pTo)
+int CClient::UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshotBuffer *pTo)
 {
 	CUnpacker Unpacker;
 	CSnapshotBuilder Builder;
@@ -2651,13 +2656,12 @@ void CClient::OnDemoPlayerSnapshot(void *pData, int Size)
 	m_aPrevGameTick[0] = pInfo->m_PreviousTick;
 
 	// create a verified and unpacked snapshot
-	unsigned char aAltSnapBuffer[CSnapshot::MAX_SIZE];
-	CSnapshot *pAltSnapBuffer = (CSnapshot *)aAltSnapBuffer;
+	CSnapshotBuffer AltSnapBuffer;
 	int AltSnapSize;
 
 	if(IsSixup())
 	{
-		AltSnapSize = GameClient()->TranslateSnap(pAltSnapBuffer, (CSnapshot *)pData, CONN_MAIN, false);
+		AltSnapSize = GameClient()->TranslateSnap(&AltSnapBuffer, (CSnapshot *)pData, CONN_MAIN, false);
 		if(AltSnapSize < 0)
 		{
 			dbg_msg("sixup", "failed to translate snapshot. error=%d", AltSnapSize);
@@ -2666,7 +2670,7 @@ void CClient::OnDemoPlayerSnapshot(void *pData, int Size)
 	}
 	else
 	{
-		AltSnapSize = UnpackAndValidateSnapshot((CSnapshot *)pData, pAltSnapBuffer);
+		AltSnapSize = UnpackAndValidateSnapshot((CSnapshot *)pData, &AltSnapBuffer);
 		if(AltSnapSize < 0)
 		{
 			dbg_msg("client", "unpack snapshot and validate failed. error=%d", AltSnapSize);
@@ -2677,7 +2681,7 @@ void CClient::OnDemoPlayerSnapshot(void *pData, int Size)
 	// handle snapshots after validation
 	std::swap(m_aapSnapshots[0][SNAP_PREV], m_aapSnapshots[0][SNAP_CURRENT]);
 	mem_copy(m_aapSnapshots[0][SNAP_CURRENT]->m_pSnap, pData, Size);
-	mem_copy(m_aapSnapshots[0][SNAP_CURRENT]->m_pAltSnap, pAltSnapBuffer, AltSnapSize);
+	mem_copy(m_aapSnapshots[0][SNAP_CURRENT]->m_pAltSnap, &AltSnapBuffer, AltSnapSize);
 
 	GameClient()->OnNewSnapshot();
 }
@@ -3052,7 +3056,7 @@ void CClient::InitInterfaces()
 	m_pNotifications = Kernel()->RequestInterface<INotifications>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
-	m_DemoEditor.Init(&m_SnapshotDelta, m_pConsole, m_pStorage);
+	m_DemoEditor.Init(&m_SnapshotDelta, &m_SnapshotDeltaSixup, m_pConsole, m_pStorage);
 
 	m_ServerBrowser.SetBaseInfo(&m_aNetClient[CONN_CONTACT], m_pGameClient->NetVersion());
 
@@ -3939,7 +3943,7 @@ void CClient::SaveReplay(const int Length, const char *pFilename)
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Saving replay...");
 
 		// Create a job to do this slicing in background because it can be a bit long depending on the file size
-		std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(GameClient()->NetVersion(), &m_SnapshotDelta, m_pStorage, pSrc, aFilename, StartTick, EndTick);
+		std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(GameClient()->NetVersion(), &m_SnapshotDelta, &m_SnapshotDeltaSixup, m_pStorage, pSrc, aFilename, StartTick, EndTick);
 		Engine()->AddJob(pDemoEditTask);
 		m_EditJobs.push_back(pDemoEditTask);
 
@@ -4011,13 +4015,13 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 	GameClient()->OnConnected();
 
 	// setup buffers
-	mem_zero(m_aaaDemorecSnapshotData, sizeof(m_aaaDemorecSnapshotData));
+	mem_zero(m_aaDemorecSnapshotData, sizeof(m_aaDemorecSnapshotData));
 
 	for(int SnapshotType = 0; SnapshotType < NUM_SNAPSHOT_TYPES; SnapshotType++)
 	{
 		m_aapSnapshots[0][SnapshotType] = &m_aDemorecSnapshotHolders[SnapshotType];
-		m_aapSnapshots[0][SnapshotType]->m_pSnap = (CSnapshot *)&m_aaaDemorecSnapshotData[SnapshotType][0];
-		m_aapSnapshots[0][SnapshotType]->m_pAltSnap = (CSnapshot *)&m_aaaDemorecSnapshotData[SnapshotType][1];
+		m_aapSnapshots[0][SnapshotType]->m_pSnap = m_aaDemorecSnapshotData[SnapshotType][0].AsSnapshot();
+		m_aapSnapshots[0][SnapshotType]->m_pAltSnap = m_aaDemorecSnapshotData[SnapshotType][1].AsSnapshot();
 		m_aapSnapshots[0][SnapshotType]->m_SnapSize = 0;
 		m_aapSnapshots[0][SnapshotType]->m_AltSnapSize = 0;
 		m_aapSnapshots[0][SnapshotType]->m_Tick = -1;

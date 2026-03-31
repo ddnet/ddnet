@@ -72,6 +72,15 @@ public:
 	static const CSnapshot *EmptySnapshot() { return &ms_EmptySnapshot; }
 };
 
+class alignas(int32_t) CSnapshotBuffer
+{
+public:
+	unsigned char m_aData[CSnapshot::MAX_SIZE];
+
+	CSnapshot *AsSnapshot() { return (CSnapshot *)m_aData; }
+	const CSnapshot *AsSnapshot() const { return (const CSnapshot *)m_aData; }
+};
+
 // CSnapshotDelta
 
 class CSnapshotDelta
@@ -92,7 +101,6 @@ private:
 		MAX_NETOBJSIZES = 64
 	};
 	short m_aItemSizes[MAX_NETOBJSIZES];
-	short m_aItemSizes7[MAX_NETOBJSIZES];
 	uint64_t m_aSnapshotDataRate[CSnapshot::MAX_TYPE + 1];
 	uint64_t m_aSnapshotDataUpdates[CSnapshot::MAX_TYPE + 1];
 	CData m_Empty;
@@ -106,10 +114,9 @@ public:
 	uint64_t GetDataRate(int Index) const { return m_aSnapshotDataRate[Index]; }
 	uint64_t GetDataUpdates(int Index) const { return m_aSnapshotDataUpdates[Index]; }
 	void SetStaticsize(int ItemType, size_t Size);
-	void SetStaticsize7(int ItemType, size_t Size);
 	const CData *EmptyDelta() const;
 	int CreateDelta(const CSnapshot *pFrom, const CSnapshot *pTo, void *pDstData);
-	int UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const void *pSrcData, int DataSize, bool Sixup);
+	int UnpackDelta(const CSnapshot *pFrom, CSnapshotBuffer *pTo, const void *pSrcData, int DataSize);
 	int DebugDumpDelta(const void *pSrcData, int DataSize);
 };
 
@@ -178,7 +185,7 @@ public:
 	CSnapshotItem *GetItem(int Index);
 	int *GetItemData(int Key);
 
-	int Finish(void *pSnapdata);
+	int Finish(CSnapshotBuffer *pBuffer);
 };
 
 #endif // ENGINE_SHARED_SNAPSHOT_H
