@@ -1234,16 +1234,15 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 void CMenus::RenderSettingsSound(CUIRect MainView)
 {
-	static int s_SndEnable = g_Config.m_SndEnable;
-
 	CUIRect Button;
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_SndEnable, Localize("Use sounds"), g_Config.m_SndEnable, &Button))
 	{
 		g_Config.m_SndEnable ^= 1;
 		UpdateMusicState();
-		m_NeedRestartSound = g_Config.m_SndEnable && !s_SndEnable;
 	}
+
+	m_NeedRestartSound = g_Config.m_SndEnable && !Sound()->IsSoundEnabled();
 
 	if(!g_Config.m_SndEnable)
 		return;
