@@ -8,6 +8,7 @@
 
 #include <engine/shared/ringbuffer.h>
 
+#include <cstddef>
 #include <cstdint>
 
 class IGraphics;
@@ -37,6 +38,17 @@ private:
 	void RenderDataLines(IGraphics *pGraphics, float x, float y, float w, float h);
 
 public:
+	struct SSummaryStats
+	{
+		size_t m_NumSamples = 0;
+		float m_Min = 0.0f;
+		float m_Avg = 0.0f;
+		float m_Deviation = 0.0f;
+		float m_Max = 0.0f;
+
+		bool IsValid() const { return m_NumSamples > 0; }
+	};
+
 	CGraph(int MaxEntries, int Precision, bool SummaryStats);
 
 	void Init(float Min, float Max);
@@ -44,6 +56,7 @@ public:
 	void SetMax(float Max);
 
 	void Scale(int64_t WantedTotalTime);
+	SSummaryStats SummaryStats(size_t MaxEntries) const;
 	void Add(float Value, ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 0.75f));
 	void InsertAt(int64_t Time, float Value, ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 0.75f));
 	void Render(IGraphics *pGraphics, ITextRender *pTextRender, float x, float y, float w, float h, const char *pDescription);

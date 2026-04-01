@@ -38,9 +38,13 @@ protected:
 	void *Allocate(int Size);
 
 	void *Prev(void *pCurrent);
+	const void *Prev(const void *pCurrent) const { return const_cast<CRingBufferBase *>(this)->Prev((void *)pCurrent); }
 	void *Next(void *pCurrent);
+	const void *Next(const void *pCurrent) const { return const_cast<CRingBufferBase *>(this)->Next((void *)pCurrent); }
 	void *First();
+	const void *First() const { return const_cast<CRingBufferBase *>(this)->First(); }
 	void *Last();
+	const void *Last() const { return const_cast<CRingBufferBase *>(this)->Last(); }
 
 	void Init(void *pMemory, int Size, int Flags);
 	int PopFirst();
@@ -71,9 +75,13 @@ public:
 	}
 
 	T *Prev(T *pCurrent) { return (T *)CRingBufferBase::Prev(pCurrent); }
+	const T *Prev(const T *pCurrent) const { return (const T *)CRingBufferBase::Prev(pCurrent); }
 	T *Next(T *pCurrent) { return (T *)CRingBufferBase::Next(pCurrent); }
+	const T *Next(const T *pCurrent) const { return (const T *)CRingBufferBase::Next(pCurrent); }
 	T *First() { return (T *)CRingBufferBase::First(); }
+	const T *First() const { return (const T *)CRingBufferBase::First(); }
 	T *Last() { return (T *)CRingBufferBase::Last(); }
+	const T *Last() const { return (const T *)CRingBufferBase::Last(); }
 };
 
 template<typename T, int TSIZE, int TFLAGS = 0>

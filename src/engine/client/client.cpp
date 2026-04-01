@@ -100,7 +100,7 @@ CSnapshotDelta *CClient::SnapshotDelta()
 
 IClient::SFrameTimeStats CClient::FrameTimeWindowStats(size_t NumFrames) const
 {
-	const CFrameTimeHistory::SStats Stats = m_FrameTimeHistory.GetStats(NumFrames);
+	const CGraph::SSummaryStats Stats = m_FrameTimeGraph.SummaryStats(NumFrames);
 	return {(int)Stats.m_NumSamples, Stats.m_Min, Stats.m_Avg, Stats.m_Deviation, Stats.m_Max};
 }
 
@@ -108,7 +108,8 @@ CClient::CClient() :
 	m_DemoPlayer(&m_SnapshotDelta, &m_SnapshotDeltaSixup, true, [&]() { UpdateDemoIntraTimers(); }),
 	m_InputtimeMarginGraph(128, 2, true),
 	m_aGametimeMarginGraphs{{128, 2, true}, {128, 2, true}},
-	m_FpsGraph(4096, 0, true)
+	m_FpsGraph(4096, 0, true),
+	m_FrameTimeGraph(4096, 2, true)
 {
 	m_StateStartTime = time_get();
 	for(auto &DemoRecorder : m_aDemoRecorder)
@@ -3202,6 +3203,7 @@ void CClient::Run()
 
 	//
 	m_FpsGraph.Init(0.0f, 120.0f);
+	m_FrameTimeGraph.Init(0.0f, 20.0f);
 
 	// never start with the editor
 	g_Config.m_ClEditor = 0;
@@ -3345,8 +3347,8 @@ void CClient::Run()
 			{
 				// update frametime
 				m_RenderFrameTime = (Now - m_LastRenderTime) / (float)time_freq();
-				m_FrameTimeHistory.Add(m_RenderFrameTime);
 				m_FpsGraph.Add(1.0f / m_RenderFrameTime);
+				m_FrameTimeGraph.Add(m_RenderFrameTime * 1000.0f);
 
 				if(m_BenchmarkFile)
 				{

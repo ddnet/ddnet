@@ -3131,11 +3131,13 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     windows_test.cpp
   )
   set(TESTS_EXTRA
-    src/engine/client/blocklist_driver.cpp
-    src/engine/client/blocklist_driver.h
-    src/engine/client/serverbrowser.cpp
-    src/engine/client/serverbrowser.h
-    src/engine/client/serverbrowser_http.cpp
+      src/engine/client/blocklist_driver.cpp
+      src/engine/client/blocklist_driver.h
+      src/engine/client/graph.cpp
+      src/engine/client/graph.h
+      src/engine/client/serverbrowser.cpp
+      src/engine/client/serverbrowser.h
+      src/engine/client/serverbrowser_http.cpp
     src/engine/client/serverbrowser_http.h
     src/engine/client/serverbrowser_ping_cache.cpp
     src/engine/client/serverbrowser_ping_cache.h

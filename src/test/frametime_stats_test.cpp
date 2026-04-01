@@ -1,26 +1,26 @@
-#include <engine/client.h>
+#include <engine/client/graph.h>
 
 #include <gtest/gtest.h>
 
 #include <cmath>
 
-TEST(FrameTimeHistory, EmptyWindow)
+TEST(GraphSummaryStats, EmptyWindow)
 {
-	CFrameTimeHistory History;
+	CGraph Graph(1000, 2, true);
 
-	const auto Stats = History.GetStats(360);
+	const auto Stats = Graph.SummaryStats(360);
 	EXPECT_FALSE(Stats.IsValid());
 	EXPECT_EQ(Stats.m_NumSamples, 0u);
 }
 
-TEST(FrameTimeHistory, PartialWindow)
+TEST(GraphSummaryStats, PartialWindow)
 {
-	CFrameTimeHistory History;
-	History.Add(0.001f);
-	History.Add(0.003f);
-	History.Add(0.002f);
+	CGraph Graph(1000, 2, true);
+	Graph.InsertAt(1, 0.001f);
+	Graph.InsertAt(2, 0.003f);
+	Graph.InsertAt(3, 0.002f);
 
-	const auto Stats = History.GetStats(360);
+	const auto Stats = Graph.SummaryStats(360);
 	ASSERT_TRUE(Stats.IsValid());
 	EXPECT_EQ(Stats.m_NumSamples, 3u);
 	EXPECT_FLOAT_EQ(Stats.m_Min, 0.001f);
@@ -29,15 +29,15 @@ TEST(FrameTimeHistory, PartialWindow)
 	EXPECT_FLOAT_EQ(Stats.m_Max, 0.003f);
 }
 
-TEST(FrameTimeHistory, Exact360FrameWindow)
+TEST(GraphSummaryStats, Exact360FrameWindow)
 {
-	CFrameTimeHistory History;
+	CGraph Graph(1000, 2, true);
 	for(int i = 1; i <= 360; ++i)
 	{
-		History.Add(i / 1000000.0f);
+		Graph.InsertAt(i, i / 1000000.0f);
 	}
 
-	const auto Stats = History.GetStats(360);
+	const auto Stats = Graph.SummaryStats(360);
 	ASSERT_TRUE(Stats.IsValid());
 	EXPECT_EQ(Stats.m_NumSamples, 360u);
 	EXPECT_FLOAT_EQ(Stats.m_Min, 0.000001f);
@@ -46,15 +46,15 @@ TEST(FrameTimeHistory, Exact360FrameWindow)
 	EXPECT_NEAR(Stats.m_Deviation, 0.0001039226f, 1e-6f);
 }
 
-TEST(FrameTimeHistory, Exact1000FrameWindow)
+TEST(GraphSummaryStats, Exact1000FrameWindow)
 {
-	CFrameTimeHistory History;
+	CGraph Graph(1000, 2, true);
 	for(int i = 1; i <= 1000; ++i)
 	{
-		History.Add(i / 1000000.0f);
+		Graph.InsertAt(i, i / 1000000.0f);
 	}
 
-	const auto Stats = History.GetStats(1000);
+	const auto Stats = Graph.SummaryStats(1000);
 	ASSERT_TRUE(Stats.IsValid());
 	EXPECT_EQ(Stats.m_NumSamples, 1000u);
 	EXPECT_FLOAT_EQ(Stats.m_Min, 0.000001f);
@@ -63,15 +63,15 @@ TEST(FrameTimeHistory, Exact1000FrameWindow)
 	EXPECT_NEAR(Stats.m_Deviation, 0.00028867499f, 1e-6f);
 }
 
-TEST(FrameTimeHistory, RolloverKeepsLatestSamples)
+TEST(GraphSummaryStats, RolloverKeepsLatestSamples)
 {
-	CFrameTimeHistory History;
+	CGraph Graph(1000, 2, true);
 	for(int i = 1; i <= 1200; ++i)
 	{
-		History.Add(i / 1000000.0f);
+		Graph.InsertAt(i, i / 1000000.0f);
 	}
 
-	const auto Stats360 = History.GetStats(360);
+	const auto Stats360 = Graph.SummaryStats(360);
 	ASSERT_TRUE(Stats360.IsValid());
 	EXPECT_EQ(Stats360.m_NumSamples, 360u);
 	EXPECT_FLOAT_EQ(Stats360.m_Min, 0.000841f);
@@ -79,7 +79,7 @@ TEST(FrameTimeHistory, RolloverKeepsLatestSamples)
 	EXPECT_NEAR(Stats360.m_Avg, 0.0010205f, 1e-6f);
 	EXPECT_NEAR(Stats360.m_Deviation, 0.0001039226f, 1e-6f);
 
-	const auto Stats1000 = History.GetStats(1000);
+	const auto Stats1000 = Graph.SummaryStats(1000);
 	ASSERT_TRUE(Stats1000.IsValid());
 	EXPECT_EQ(Stats1000.m_NumSamples, 1000u);
 	EXPECT_FLOAT_EQ(Stats1000.m_Min, 0.000201f);
@@ -88,25 +88,25 @@ TEST(FrameTimeHistory, RolloverKeepsLatestSamples)
 	EXPECT_NEAR(Stats1000.m_Deviation, 0.00028867499f, 1e-6f);
 }
 
-TEST(FrameTimeHistory, OldSpikeAgesOut)
+TEST(GraphSummaryStats, OldSpikeAgesOut)
 {
-	CFrameTimeHistory History;
-	History.Add(0.100f);
+	CGraph Graph(1000, 2, true);
+	Graph.InsertAt(1, 0.100f);
 	for(int i = 0; i < 999; ++i)
 	{
-		History.Add(0.001f);
+		Graph.InsertAt(i + 2, 0.001f);
 	}
 
-	const auto StatsWithSpike = History.GetStats(1000);
+	const auto StatsWithSpike = Graph.SummaryStats(1000);
 	ASSERT_TRUE(StatsWithSpike.IsValid());
 	EXPECT_FLOAT_EQ(StatsWithSpike.m_Min, 0.001f);
 	EXPECT_FLOAT_EQ(StatsWithSpike.m_Max, 0.100f);
 	EXPECT_NEAR(StatsWithSpike.m_Avg, 0.001099f, 1e-6f);
 	EXPECT_NEAR(StatsWithSpike.m_Deviation, 0.0031299679f, 1e-6f);
 
-	History.Add(0.002f);
+	Graph.InsertAt(1001, 0.002f);
 
-	const auto StatsWithoutSpike = History.GetStats(1000);
+	const auto StatsWithoutSpike = Graph.SummaryStats(1000);
 	ASSERT_TRUE(StatsWithoutSpike.IsValid());
 	EXPECT_FLOAT_EQ(StatsWithoutSpike.m_Min, 0.001f);
 	EXPECT_FLOAT_EQ(StatsWithoutSpike.m_Max, 0.002f);

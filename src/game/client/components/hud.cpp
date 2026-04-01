@@ -589,17 +589,37 @@ void CHud::RenderTextInfo()
 			const float StatsLineSpacing = 10.0f;
 			const ColorRGBA StatsColor = ColorRGBA(1.0f, 0.35f, 0.35f, 1.0f);
 			const float ColumnGap = 4.0f;
-			char aBuf[64];
-			const float FpsTextWidth = TextRender()->TextWidth(FpsFontSize, "FPS: 0000", -1, -1.0f);
-			const float LabelWidth = TextRender()->TextWidth(StatsFontSize, "1000 frames:", -1, -1.0f);
-			const float AvgWidth = TextRender()->TextWidth(StatsFontSize, "avg 000.00 ms +/- 000.00", -1, -1.0f);
-			const float MinWidth = TextRender()->TextWidth(StatsFontSize, "min 000.00 ms", -1, -1.0f);
-			const float MaxWidth = TextRender()->TextWidth(StatsFontSize, "max 000.00 ms", -1, -1.0f);
+			char aBuf[128];
+			const char *pFpsLabel = Localize("FPS", "Frametime overlay");
+			const char *pFramesLabel = Localize("frames:", "Frametime overlay");
+			const char *pAvgLabel = Localize("avg", "Frametime overlay");
+			const char *pMinLabel = Localize("min", "Frametime overlay");
+			const char *pMaxLabel = Localize("max", "Frametime overlay");
+
+			str_format(aBuf, sizeof(aBuf), "%s: %d", pFpsLabel, 1000);
+			const float FpsTextWidth = TextRender()->TextWidth(FpsFontSize, aBuf, -1, -1.0f);
+			str_format(aBuf, sizeof(aBuf), "%d %s", 1000, pFramesLabel);
+			const float LabelWidth = TextRender()->TextWidth(StatsFontSize, aBuf, -1, -1.0f);
+			str_format(aBuf, sizeof(aBuf), "%s %.2f ms +/- %.2f", pAvgLabel, 1000.0f, 1000.0f);
+			float AvgWidth = TextRender()->TextWidth(StatsFontSize, aBuf, -1, -1.0f);
+			str_format(aBuf, sizeof(aBuf), "%s - ms +/- -", pAvgLabel);
+			if(const float EmptyAvgWidth = TextRender()->TextWidth(StatsFontSize, aBuf, -1, -1.0f); EmptyAvgWidth > AvgWidth)
+				AvgWidth = EmptyAvgWidth;
+			str_format(aBuf, sizeof(aBuf), "%s %.2f ms", pMinLabel, 1000.0f);
+			float MinWidth = TextRender()->TextWidth(StatsFontSize, aBuf, -1, -1.0f);
+			str_format(aBuf, sizeof(aBuf), "%s - ms", pMinLabel);
+			if(const float EmptyMinWidth = TextRender()->TextWidth(StatsFontSize, aBuf, -1, -1.0f); EmptyMinWidth > MinWidth)
+				MinWidth = EmptyMinWidth;
+			str_format(aBuf, sizeof(aBuf), "%s %.2f ms", pMaxLabel, 1000.0f);
+			float MaxWidth = TextRender()->TextWidth(StatsFontSize, aBuf, -1, -1.0f);
+			str_format(aBuf, sizeof(aBuf), "%s - ms", pMaxLabel);
+			if(const float EmptyMaxWidth = TextRender()->TextWidth(StatsFontSize, aBuf, -1, -1.0f); EmptyMaxWidth > MaxWidth)
+				MaxWidth = EmptyMaxWidth;
 			const float SeparatorWidth = TextRender()->TextWidth(StatsFontSize, "|", -1, -1.0f);
 			const float StatsTextWidth = LabelWidth + ColumnGap + AvgWidth + ColumnGap + SeparatorWidth + ColumnGap + MinWidth + ColumnGap + SeparatorWidth + ColumnGap + MaxWidth;
 			const float StatsStartX = m_Width - RightMargin - StatsTextWidth;
 
-			str_format(aBuf, sizeof(aBuf), "FPS: %d", FramesPerSecond);
+			str_format(aBuf, sizeof(aBuf), "%s: %d", pFpsLabel, FramesPerSecond);
 			TextRender()->Text(m_Width - RightMargin - FpsTextWidth, TopMargin, FpsFontSize, aBuf, -1.0f);
 
 			const size_t aWindowSizes[2] = {360, 1000};
@@ -610,33 +630,36 @@ void CHud::RenderTextInfo()
 			{
 				const size_t WindowSize = aWindowSizes[WindowIndexOffset + i];
 				const IClient::SFrameTimeStats Stats = Client()->FrameTimeWindowStats(WindowSize);
-				const float y = TopMargin + 12.0f + StatsLineSpacing * i;
+				const float Y = TopMargin + 12.0f + StatsLineSpacing * i;
 				const float AvgX = StatsStartX + LabelWidth + ColumnGap;
 				const float Separator1X = AvgX + AvgWidth + ColumnGap;
 				const float MinX = Separator1X + SeparatorWidth + ColumnGap;
 				const float Separator2X = MinX + MinWidth + ColumnGap;
 				const float MaxX = Separator2X + SeparatorWidth + ColumnGap;
 
-				str_format(aBuf, sizeof(aBuf), "%d frames:", (int)WindowSize);
-				TextRender()->Text(StatsStartX, y, StatsFontSize, aBuf, -1.0f);
+				str_format(aBuf, sizeof(aBuf), "%d %s", Stats.m_NumSamples, pFramesLabel);
+				TextRender()->Text(StatsStartX, Y, StatsFontSize, aBuf, -1.0f);
 				if(Stats.IsValid())
 				{
-					str_format(aBuf, sizeof(aBuf), "avg %.2f ms +/- %.2f", Stats.m_Avg * 1000.0f, Stats.m_Deviation * 1000.0f);
-					TextRender()->Text(AvgX, y, StatsFontSize, aBuf, -1.0f);
-					TextRender()->Text(Separator1X, y, StatsFontSize, "|", -1.0f);
-					str_format(aBuf, sizeof(aBuf), "min %.2f ms", Stats.m_Min * 1000.0f);
-					TextRender()->Text(MinX, y, StatsFontSize, aBuf, -1.0f);
-					TextRender()->Text(Separator2X, y, StatsFontSize, "|", -1.0f);
-					str_format(aBuf, sizeof(aBuf), "max %.2f ms", Stats.m_Max * 1000.0f);
-					TextRender()->Text(MaxX, y, StatsFontSize, aBuf, -1.0f);
+					str_format(aBuf, sizeof(aBuf), "%s %.2f ms +/- %.2f", pAvgLabel, Stats.m_Avg, Stats.m_Deviation);
+					TextRender()->Text(AvgX, Y, StatsFontSize, aBuf, -1.0f);
+					TextRender()->Text(Separator1X, Y, StatsFontSize, "|", -1.0f);
+					str_format(aBuf, sizeof(aBuf), "%s %.2f ms", pMinLabel, Stats.m_Min);
+					TextRender()->Text(MinX, Y, StatsFontSize, aBuf, -1.0f);
+					TextRender()->Text(Separator2X, Y, StatsFontSize, "|", -1.0f);
+					str_format(aBuf, sizeof(aBuf), "%s %.2f ms", pMaxLabel, Stats.m_Max);
+					TextRender()->Text(MaxX, Y, StatsFontSize, aBuf, -1.0f);
 				}
 				else
 				{
-					TextRender()->Text(AvgX, y, StatsFontSize, "avg - ms +/- -", -1.0f);
-					TextRender()->Text(Separator1X, y, StatsFontSize, "|", -1.0f);
-					TextRender()->Text(MinX, y, StatsFontSize, "min - ms", -1.0f);
-					TextRender()->Text(Separator2X, y, StatsFontSize, "|", -1.0f);
-					TextRender()->Text(MaxX, y, StatsFontSize, "max - ms", -1.0f);
+					str_format(aBuf, sizeof(aBuf), "%s - ms +/- -", pAvgLabel);
+					TextRender()->Text(AvgX, Y, StatsFontSize, aBuf, -1.0f);
+					TextRender()->Text(Separator1X, Y, StatsFontSize, "|", -1.0f);
+					str_format(aBuf, sizeof(aBuf), "%s - ms", pMinLabel);
+					TextRender()->Text(MinX, Y, StatsFontSize, aBuf, -1.0f);
+					TextRender()->Text(Separator2X, Y, StatsFontSize, "|", -1.0f);
+					str_format(aBuf, sizeof(aBuf), "%s - ms", pMaxLabel);
+					TextRender()->Text(MaxX, Y, StatsFontSize, aBuf, -1.0f);
 				}
 			}
 			TextRender()->TextColor(TextRender()->DefaultTextColor());

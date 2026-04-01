@@ -192,7 +192,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	CGraph m_InputtimeMarginGraph;
 	CGraph m_aGametimeMarginGraphs[NUM_DUMMIES];
 	CGraph m_FpsGraph;
-	CFrameTimeHistory m_FrameTimeHistory;
+	CGraph m_FrameTimeGraph;
 
 	// the game snapshots are modifiable by the game
 	CSnapshotStorage m_aSnapshotStorage[NUM_DUMMIES];
