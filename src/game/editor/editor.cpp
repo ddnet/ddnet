@@ -6724,6 +6724,15 @@ void CEditor::RenderMousePointer()
 	if(!m_ShowMousePointer)
 		return;
 
+	if(m_MouseAxisLockState == EAxisLock::HORIZONTAL)
+	{
+		m_CursorType = CURSOR_RESIZE_H;
+	}
+	else if(m_MouseAxisLockState == EAxisLock::VERTICAL)
+	{
+		m_CursorType = CURSOR_RESIZE_V;
+	}
+
 	constexpr float CursorSize = 16.0f;
 
 	// Cursor
