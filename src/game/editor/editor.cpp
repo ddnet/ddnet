@@ -40,6 +40,7 @@
 #include <chrono>
 #include <iterator>
 #include <limits>
+#include <memory>
 #include <tuple>
 #include <type_traits>
 
@@ -559,17 +560,6 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 			}
 
 			ToolbarTop.VSplitLeft(5.0f, nullptr, &ToolbarTop);
-
-			// brush type buttons
-			ToolbarTop.VSplitLeft(20.0f, &Button, &ToolbarTop);
-			static int s_BrushTypeBrushButton = 0;
-			if(DoButton_FontIcon(&s_BrushTypeBrushButton, FontIcon::BRUSH, m_BrushType == EBrushType::BRUSH, &Button, BUTTONFLAG_LEFT, "Brush draw mode.", IGraphics::CORNER_L, 8.0f))
-				m_BrushType = EBrushType::BRUSH;
-
-			ToolbarTop.VSplitLeft(20.0f, &Button, &ToolbarTop);
-			static int s_BrushTypeBucketFillButton = 0;
-			if(DoButton_FontIcon(&s_BrushTypeBucketFillButton, FontIcon::FILL_DRIP, m_BrushType == EBrushType::BUCKET_FILL, &Button, BUTTONFLAG_LEFT, "Bucket fill mode.", IGraphics::CORNER_R, 8.0f))
-				m_BrushType = EBrushType::BUCKET_FILL;
 		}
 
 		// Color pipette and palette
@@ -708,6 +698,16 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 			if(DoButton_Editor(&s_BrushDrawModeButton, "Destructive", m_BrushDrawDestructive, &Button, BUTTONFLAG_LEFT, "[Ctrl+D] Toggle brush draw mode: preserve or override existing tiles.") ||
 				(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_D) && ModPressed && !ShiftPressed))
 				m_BrushDrawDestructive = !m_BrushDrawDestructive;
+			ToolbarBottom.VSplitLeft(5.0f, &Button, &ToolbarBottom);
+
+			ToolbarBottom.VSplitLeft(55.0f, &Button, &ToolbarBottom);
+			static int s_BucketFillButton = 0;
+			if(DoButton_Editor(&s_BucketFillButton, "Bucket", m_BrushBucketFill, &Button, BUTTONFLAG_LEFT, "[Ctrl+B] Toggle bucket fill mode."))
+			{
+				m_BrushBucketFill = !m_BrushBucketFill;
+				if(m_BrushBucketFill && Map()->m_vSelectedLayers.size() > 1)
+					Map()->SelectLayer(Map()->m_vSelectedLayers[0], Map()->m_SelectedGroup);
+			}
 			ToolbarBottom.VSplitLeft(5.0f, &Button, &ToolbarBottom);
 		}
 	}
@@ -2640,7 +2640,7 @@ void CEditor::DoMapEditor(CUIRect View)
 					r.h = -r.h;
 				}
 
-				if((s_Operation == OP_BRUSH_GRAB || s_Operation == OP_BRUSH_PAINT) && m_BrushType == EBrushType::BUCKET_FILL && NumEditLayers > 0 && apEditLayers[0].second->m_Type == LAYERTYPE_TILES)
+				if(m_BrushBucketFill)
 				{
 					const float TileSize = 32.0f;
 					r.x = std::floor(s_StartWx / TileSize) * TileSize;
@@ -2715,7 +2715,7 @@ void CEditor::DoMapEditor(CUIRect View)
 				{
 					if(!Ui()->MouseButton(0))
 					{
-						if(m_BrushType == EBrushType::BUCKET_FILL)
+						if(m_BrushBucketFill)
 						{
 							if(NumEditLayers == 1 && !m_pBrush->IsEmpty() && apEditLayers[0].second->m_Type == LAYERTYPE_TILES && m_pBrush->m_vpLayers[0]->m_Type == LAYERTYPE_TILES)
 							{
@@ -2772,12 +2772,9 @@ void CEditor::DoMapEditor(CUIRect View)
 				{
 					Ui()->SetActiveItem(&m_MapEditorId);
 
-					std::shared_ptr<CLayerTiles> pTilesLayer = std::static_pointer_cast<CLayerTiles>(Map()->SelectedLayerType(0, LAYERTYPE_TILES));
-					const bool BucketFill = (m_BrushType == EBrushType::BUCKET_FILL || Input()->ShiftIsPressed()) && pTilesLayer != nullptr;
-
 					if(m_pBrush->IsEmpty())
 						s_Operation = OP_BRUSH_GRAB;
-					else if(BucketFill)
+					else if (m_BrushBucketFill)
 						s_Operation = OP_BRUSH_PAINT;
 					else
 					{
@@ -2792,6 +2789,10 @@ void CEditor::DoMapEditor(CUIRect View)
 								apEditLayers[k].second->BrushPlace(m_pBrush->m_vpLayers[BrushIndex].get(), vec2(wx, wy));
 						}
 					}
+
+					std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(Map()->SelectedLayerType(0, LAYERTYPE_TILES));
+					if(Input()->ShiftIsPressed() && pLayer)
+						s_Operation = OP_BRUSH_PAINT;
 				}
 
 				if(!m_pBrush->IsEmpty())
@@ -7282,7 +7283,7 @@ void CEditor::MouseAxisLock(vec2 &CursorRel)
 	if(Input()->AltIsPressed())
 	{
 		// only lock with the paint brush and inside editor map area to avoid duplicate Alt behavior
-		if(m_pBrush->IsEmpty() || m_BrushType != EBrushType::BRUSH || Ui()->HotItem() != &m_MapEditorId)
+		if(m_pBrush->IsEmpty() || m_BrushBucketFill || Ui()->HotItem() != &m_MapEditorId)
 			return;
 
 		const vec2 CurrentWorldPos = vec2(Ui()->MouseWorldX(), Ui()->MouseWorldY()) / 32.0f;
