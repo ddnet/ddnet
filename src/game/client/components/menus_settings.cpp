@@ -1034,9 +1034,18 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_GfxHighDetail, &Button, Localize("Allows maps to render with more detail"));
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClShowfps, Localize("Show FPS"), g_Config.m_ClShowfps, &Button))
-		g_Config.m_ClShowfps ^= 1;
-	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClShowfps, &Button, Localize("Renders your frame rate in the top right"));
+	const char *apShowFpsModes[] = {
+		Localize("Off", "Show FPS mode"),
+		Localize("FPS", "Show FPS mode"),
+		Localize("FPS + Frametimes (last 360 frames)", "Show FPS mode"),
+		Localize("FPS + Frametimes (last 1000 frames)", "Show FPS mode"),
+		Localize("FPS + Frametimes (last 360 + 1000 frames)", "Show FPS mode"),
+	};
+	static CUi::SDropDownState s_ShowFpsDropDownState;
+	static CScrollRegion s_ShowFpsDropDownScrollRegion;
+	s_ShowFpsDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_ShowFpsDropDownScrollRegion;
+	g_Config.m_ClShowfps = Ui()->DoDropDown(&Button, g_Config.m_ClShowfps, apShowFpsModes, std::size(apShowFpsModes), s_ShowFpsDropDownState);
+	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClShowfps, &Button, Localize("Renders your frame rate in the top right, optionally with frametime stats over 360 and 1000 frames"));
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	str_copy(aBuf, " ");

@@ -3089,6 +3089,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     csv_test.cpp
     datafile_test.cpp
     editor_test.cpp
+    frametime_stats_test.cpp
     fs_test.cpp
     gameworld_test.cpp
     git_revision_test.cpp

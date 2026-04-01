@@ -459,7 +459,8 @@ void CInfoMessages::OnRender()
 		Showfps = 0;
 #endif
 	const float StartX = Width - 10.0f;
-	const float StartY = 30.0f + (Showfps ? 100.0f : 0.0f) + (g_Config.m_ClShowpred && Client()->State() != IClient::STATE_DEMOPLAYBACK ? 100.0f : 0.0f);
+	const float ShowFpsOffset = Showfps == 4 ? 150.0f : (Showfps >= 2 ? 125.0f : (Showfps ? 100.0f : 0.0f));
+	const float StartY = 30.0f + ShowFpsOffset + (g_Config.m_ClShowpred && Client()->State() != IClient::STATE_DEMOPLAYBACK ? 100.0f : 0.0f);
 
 	float y = StartY;
 	for(int i = 1; i <= MAX_INFOMSGS; i++)

@@ -27,6 +27,20 @@
 
 #include <cmath>
 
+namespace
+{
+float ShowFpsPredictionOffset(int Showfps)
+{
+	if(Showfps == 4)
+		return 40.0f;
+	if(Showfps >= 2)
+		return 30.0f;
+	if(Showfps == 1)
+		return 20.0f;
+	return 5.0f;
+}
+}
+
 CHud::CHud()
 {
 	m_FPSTextContainerIndex.Reset();
@@ -536,39 +550,104 @@ void CHud::RenderTextInfo()
 #endif
 	if(Showfps)
 	{
-		char aBuf[16];
 		const int FramesPerSecond = round_to_int(1.0f / Client()->FrameTimeAverage());
-		str_format(aBuf, sizeof(aBuf), "%d", FramesPerSecond);
-
-		static float s_TextWidth0 = TextRender()->TextWidth(12.f, "0", -1, -1.0f);
-		static float s_TextWidth00 = TextRender()->TextWidth(12.f, "00", -1, -1.0f);
-		static float s_TextWidth000 = TextRender()->TextWidth(12.f, "000", -1, -1.0f);
-		static float s_TextWidth0000 = TextRender()->TextWidth(12.f, "0000", -1, -1.0f);
-		static float s_TextWidth00000 = TextRender()->TextWidth(12.f, "00000", -1, -1.0f);
-		static const float s_aTextWidth[5] = {s_TextWidth0, s_TextWidth00, s_TextWidth000, s_TextWidth0000, s_TextWidth00000};
-
-		int DigitIndex = GetDigitsIndex(FramesPerSecond, 4);
-
-		CTextCursor Cursor;
-		Cursor.SetPosition(vec2(m_Width - 10 - s_aTextWidth[DigitIndex], 5));
-		Cursor.m_FontSize = 12.0f;
-		auto OldFlags = TextRender()->GetRenderFlags();
-		TextRender()->SetRenderFlags(OldFlags | TEXT_RENDER_FLAG_ONE_TIME_USE);
-		if(m_FPSTextContainerIndex.Valid())
-			TextRender()->RecreateTextContainerSoft(m_FPSTextContainerIndex, &Cursor, aBuf);
-		else
-			TextRender()->CreateTextContainer(m_FPSTextContainerIndex, &Cursor, "0");
-		TextRender()->SetRenderFlags(OldFlags);
-		if(m_FPSTextContainerIndex.Valid())
+		if(Showfps == 1)
 		{
-			TextRender()->RenderTextContainer(m_FPSTextContainerIndex, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor());
+			char aBuf[16];
+			str_format(aBuf, sizeof(aBuf), "%d", FramesPerSecond);
+
+			static float s_TextWidth0 = TextRender()->TextWidth(12.f, "0", -1, -1.0f);
+			static float s_TextWidth00 = TextRender()->TextWidth(12.f, "00", -1, -1.0f);
+			static float s_TextWidth000 = TextRender()->TextWidth(12.f, "000", -1, -1.0f);
+			static float s_TextWidth0000 = TextRender()->TextWidth(12.f, "0000", -1, -1.0f);
+			static float s_TextWidth00000 = TextRender()->TextWidth(12.f, "00000", -1, -1.0f);
+			static const float s_aTextWidth[5] = {s_TextWidth0, s_TextWidth00, s_TextWidth000, s_TextWidth0000, s_TextWidth00000};
+
+			int DigitIndex = GetDigitsIndex(FramesPerSecond, 4);
+
+			CTextCursor Cursor;
+			Cursor.SetPosition(vec2(m_Width - 10 - s_aTextWidth[DigitIndex], 5));
+			Cursor.m_FontSize = 12.0f;
+			auto OldFlags = TextRender()->GetRenderFlags();
+			TextRender()->SetRenderFlags(OldFlags | TEXT_RENDER_FLAG_ONE_TIME_USE);
+			if(m_FPSTextContainerIndex.Valid())
+				TextRender()->RecreateTextContainerSoft(m_FPSTextContainerIndex, &Cursor, aBuf);
+			else
+				TextRender()->CreateTextContainer(m_FPSTextContainerIndex, &Cursor, "0");
+			TextRender()->SetRenderFlags(OldFlags);
+			if(m_FPSTextContainerIndex.Valid())
+			{
+				TextRender()->RenderTextContainer(m_FPSTextContainerIndex, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor());
+			}
+		}
+		else
+		{
+			const float FpsFontSize = 12.0f;
+			const float StatsFontSize = 9.0f;
+			const float RightMargin = 10.0f;
+			const float TopMargin = 5.0f;
+			const float StatsLineSpacing = 10.0f;
+			const ColorRGBA StatsColor = ColorRGBA(1.0f, 0.35f, 0.35f, 1.0f);
+			const float ColumnGap = 4.0f;
+			char aBuf[64];
+			const float FpsTextWidth = TextRender()->TextWidth(FpsFontSize, "FPS: 0000", -1, -1.0f);
+			const float LabelWidth = TextRender()->TextWidth(StatsFontSize, "1000 frames:", -1, -1.0f);
+			const float AvgWidth = TextRender()->TextWidth(StatsFontSize, "avg 000.00 ms +/- 000.00", -1, -1.0f);
+			const float MinWidth = TextRender()->TextWidth(StatsFontSize, "min 000.00 ms", -1, -1.0f);
+			const float MaxWidth = TextRender()->TextWidth(StatsFontSize, "max 000.00 ms", -1, -1.0f);
+			const float SeparatorWidth = TextRender()->TextWidth(StatsFontSize, "|", -1, -1.0f);
+			const float StatsTextWidth = LabelWidth + ColumnGap + AvgWidth + ColumnGap + SeparatorWidth + ColumnGap + MinWidth + ColumnGap + SeparatorWidth + ColumnGap + MaxWidth;
+			const float StatsStartX = m_Width - RightMargin - StatsTextWidth;
+
+			str_format(aBuf, sizeof(aBuf), "FPS: %d", FramesPerSecond);
+			TextRender()->Text(m_Width - RightMargin - FpsTextWidth, TopMargin, FpsFontSize, aBuf, -1.0f);
+
+			const size_t aWindowSizes[2] = {360, 1000};
+			const int NumWindows = Showfps == 4 ? 2 : 1;
+			const int WindowIndexOffset = Showfps == 3 ? 1 : 0;
+			TextRender()->TextColor(StatsColor);
+			for(int i = 0; i < NumWindows; ++i)
+			{
+				const size_t WindowSize = aWindowSizes[WindowIndexOffset + i];
+				const IClient::SFrameTimeStats Stats = Client()->FrameTimeWindowStats(WindowSize);
+				const float y = TopMargin + 12.0f + StatsLineSpacing * i;
+				const float AvgX = StatsStartX + LabelWidth + ColumnGap;
+				const float Separator1X = AvgX + AvgWidth + ColumnGap;
+				const float MinX = Separator1X + SeparatorWidth + ColumnGap;
+				const float Separator2X = MinX + MinWidth + ColumnGap;
+				const float MaxX = Separator2X + SeparatorWidth + ColumnGap;
+
+				str_format(aBuf, sizeof(aBuf), "%d frames:", (int)WindowSize);
+				TextRender()->Text(StatsStartX, y, StatsFontSize, aBuf, -1.0f);
+				if(Stats.IsValid())
+				{
+					str_format(aBuf, sizeof(aBuf), "avg %.2f ms +/- %.2f", Stats.m_Avg * 1000.0f, Stats.m_Deviation * 1000.0f);
+					TextRender()->Text(AvgX, y, StatsFontSize, aBuf, -1.0f);
+					TextRender()->Text(Separator1X, y, StatsFontSize, "|", -1.0f);
+					str_format(aBuf, sizeof(aBuf), "min %.2f ms", Stats.m_Min * 1000.0f);
+					TextRender()->Text(MinX, y, StatsFontSize, aBuf, -1.0f);
+					TextRender()->Text(Separator2X, y, StatsFontSize, "|", -1.0f);
+					str_format(aBuf, sizeof(aBuf), "max %.2f ms", Stats.m_Max * 1000.0f);
+					TextRender()->Text(MaxX, y, StatsFontSize, aBuf, -1.0f);
+				}
+				else
+				{
+					TextRender()->Text(AvgX, y, StatsFontSize, "avg - ms +/- -", -1.0f);
+					TextRender()->Text(Separator1X, y, StatsFontSize, "|", -1.0f);
+					TextRender()->Text(MinX, y, StatsFontSize, "min - ms", -1.0f);
+					TextRender()->Text(Separator2X, y, StatsFontSize, "|", -1.0f);
+					TextRender()->Text(MaxX, y, StatsFontSize, "max - ms", -1.0f);
+				}
+			}
+			TextRender()->TextColor(TextRender()->DefaultTextColor());
 		}
 	}
 	if(g_Config.m_ClShowpred && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "%d", Client()->GetPredictionTime());
-		TextRender()->Text(m_Width - 10 - TextRender()->TextWidth(12, aBuf, -1, -1.0f), Showfps ? 20 : 5, 12, aBuf, -1.0f);
+		const float PredictionOffset = ShowFpsPredictionOffset(Showfps);
+		TextRender()->Text(m_Width - 10 - TextRender()->TextWidth(12, aBuf, -1, -1.0f), PredictionOffset, 12, aBuf, -1.0f);
 	}
 }
 

@@ -98,6 +98,12 @@ CSnapshotDelta *CClient::SnapshotDelta()
 	return &m_SnapshotDelta;
 }
 
+IClient::SFrameTimeStats CClient::FrameTimeWindowStats(size_t NumFrames) const
+{
+	const CFrameTimeHistory::SStats Stats = m_FrameTimeHistory.GetStats(NumFrames);
+	return {(int)Stats.m_NumSamples, Stats.m_Min, Stats.m_Avg, Stats.m_Deviation, Stats.m_Max};
+}
+
 CClient::CClient() :
 	m_DemoPlayer(&m_SnapshotDelta, &m_SnapshotDeltaSixup, true, [&]() { UpdateDemoIntraTimers(); }),
 	m_InputtimeMarginGraph(128, 2, true),
@@ -3339,6 +3345,7 @@ void CClient::Run()
 			{
 				// update frametime
 				m_RenderFrameTime = (Now - m_LastRenderTime) / (float)time_freq();
+				m_FrameTimeHistory.Add(m_RenderFrameTime);
 				m_FpsGraph.Add(1.0f / m_RenderFrameTime);
 
 				if(m_BenchmarkFile)

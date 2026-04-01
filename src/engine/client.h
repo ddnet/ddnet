@@ -15,6 +15,10 @@
 #include <generated/protocol.h>
 #include <generated/protocol7.h>
 
+#include <array>
+#include <cmath>
+#include <cstddef>
+#include <limits>
 #include <functional>
 #include <optional>
 
@@ -183,10 +187,23 @@ public:
 
 	// Render statistics.
 
+	class SFrameTimeStats
+	{
+	public:
+		int m_NumSamples = 0;
+		float m_Min = 0.0f;
+		float m_Avg = 0.0f;
+		float m_Deviation = 0.0f;
+		float m_Max = 0.0f;
+
+		bool IsValid() const { return m_NumSamples > 0; }
+	};
+
 	// Duration in seconds of the previous render cycle.
 	float RenderFrameTime() const { return m_RenderFrameTime; }
 	// Exponentially weighted average of frame times.
 	float FrameTimeAverage() const { return m_FrameTimeAverage; }
+	virtual SFrameTimeStats FrameTimeWindowStats(size_t NumFrames) const = 0;
 
 	// actions
 	virtual void Connect(const char *pAddress, const char *pPassword = nullptr) = 0;
@@ -425,6 +442,77 @@ public:
 	virtual void InitializeLanguage() = 0;
 
 	virtual void ForceUpdateConsoleRemoteCompletionSuggestions() = 0;
+};
+
+class CFrameTimeHistory
+{
+public:
+	static constexpr size_t MAX_SAMPLES = 1000;
+
+	class SStats
+	{
+	public:
+		size_t m_NumSamples = 0;
+		float m_Min = 0.0f;
+		float m_Avg = 0.0f;
+		float m_Deviation = 0.0f;
+		float m_Max = 0.0f;
+
+		bool IsValid() const
+		{
+			return m_NumSamples > 0;
+		}
+	};
+
+	void Add(float FrameTime)
+	{
+		m_aFrameTimes[m_NextIndex] = FrameTime;
+		m_NextIndex = (m_NextIndex + 1) % MAX_SAMPLES;
+		m_NumSamples = m_NumSamples < MAX_SAMPLES ? m_NumSamples + 1 : MAX_SAMPLES;
+	}
+
+	SStats GetStats(size_t WindowSize) const
+	{
+		const size_t NumSamples = WindowSize < m_NumSamples ? WindowSize : m_NumSamples;
+		if(NumSamples == 0)
+		{
+			return {};
+		}
+
+		const size_t StartIndex = (m_NextIndex + MAX_SAMPLES - NumSamples) % MAX_SAMPLES;
+		float Min = std::numeric_limits<float>::max();
+		float Max = std::numeric_limits<float>::lowest();
+		float Sum = 0.0f;
+		for(size_t i = 0; i < NumSamples; ++i)
+		{
+			const float FrameTime = m_aFrameTimes[(StartIndex + i) % MAX_SAMPLES];
+			if(FrameTime < Min)
+				Min = FrameTime;
+			if(FrameTime > Max)
+				Max = FrameTime;
+			Sum += FrameTime;
+		}
+		const float Avg = Sum / NumSamples;
+		float VarianceSum = 0.0f;
+		for(size_t i = 0; i < NumSamples; ++i)
+		{
+			const float FrameTime = m_aFrameTimes[(StartIndex + i) % MAX_SAMPLES];
+			const float Delta = FrameTime - Avg;
+			VarianceSum += Delta * Delta;
+		}
+
+		return {NumSamples, Min, Avg, std::sqrt(VarianceSum / NumSamples), Max};
+	}
+
+	size_t NumSamples() const
+	{
+		return m_NumSamples;
+	}
+
+private:
+	std::array<float, MAX_SAMPLES> m_aFrameTimes{};
+	size_t m_NextIndex = 0;
+	size_t m_NumSamples = 0;
 };
 
 extern IGameClient *CreateGameClient();
