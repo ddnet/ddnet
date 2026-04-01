@@ -29,16 +29,16 @@
 
 namespace
 {
-float ShowFpsPredictionOffset(int Showfps)
-{
-	if(Showfps == 4)
-		return 40.0f;
-	if(Showfps >= 2)
-		return 30.0f;
-	if(Showfps == 1)
-		return 20.0f;
-	return 5.0f;
-}
+	float ShowFpsPredictionOffset(int Showfps)
+	{
+		if(Showfps == 4)
+			return 40.0f;
+		if(Showfps >= 2)
+			return 30.0f;
+		if(Showfps == 1)
+			return 20.0f;
+		return 5.0f;
+	}
 }
 
 CHud::CHud()

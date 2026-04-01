@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef ENGINE_CLIENT_H
 #define ENGINE_CLIENT_H
+
 #include "graphics.h"
 #include "kernel.h"
 #include "message.h"
@@ -18,8 +19,8 @@
 #include <array>
 #include <cmath>
 #include <cstddef>
-#include <limits>
 #include <functional>
+#include <limits>
 #include <optional>
 
 #define CONNECTLINK_DOUBLE_SLASH "ddnet://"
