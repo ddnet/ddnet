@@ -21,6 +21,8 @@
 #define CONNECTLINK_DOUBLE_SLASH "ddnet://"
 #define CONNECTLINK_NO_SLASH "ddnet:"
 
+class CSnapshot;
+class CSnapshotBuffer;
 class IMap;
 struct SWarning;
 
@@ -416,9 +418,9 @@ public:
 	virtual int ClientVersion7() const = 0;
 
 	virtual void ApplySkin7InfoFromSnapObj(const protocol7::CNetObj_De_ClientInfo *pObj, int ClientId) = 0;
-	virtual int OnDemoRecSnap7(class CSnapshot *pFrom, class CSnapshot *pTo, int Conn) = 0;
-	virtual int TranslateSnap(class CSnapshot *pSnapDstSix, class CSnapshot *pSnapSrcSeven, int Conn, bool Dummy) = 0;
-	virtual void ProcessDemoSnapshot(class CSnapshot *pSnap) = 0;
+	virtual int OnDemoRecSnap7(CSnapshot *pFrom, CSnapshotBuffer *pTo, int Conn) = 0;
+	virtual int TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrcSeven, int Conn, bool Dummy) = 0;
+	virtual void ProcessDemoSnapshot(CSnapshot *pSnap) = 0;
 
 	virtual void InitializeLanguage() = 0;
 
