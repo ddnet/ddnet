@@ -16,6 +16,7 @@
 #include <game/layers.h>
 
 #include <algorithm>
+#include <unordered_set>
 
 void CVisuals::RenderLine(const CVisualItem &Item)
 {
@@ -46,9 +47,10 @@ void CVisuals::RenderLine(const CVisualItem &Item)
 	{
 		float Dt = Client()->RenderFrameTime();
 		float Omega = GetSpringOmega(pLine->m_Flags);
+		float Decay = expf(-Omega * Dt);
 		CSpringState &S = FindOrCreateSpring(Item.m_Id, From, To, 0);
-		From = SpringDamp(S.m_Pos, S.m_Vel, From, Dt, Omega);
-		To = SpringDamp(S.m_Pos2, S.m_Vel2, To, Dt, Omega);
+		From = SpringDamp(S.m_Pos, S.m_Vel, From, Dt, Omega, Decay);
+		To = SpringDamp(S.m_Pos2, S.m_Vel2, To, Dt, Omega, Decay);
 	}
 
 	int Width = pLine->m_Width;
@@ -160,8 +162,9 @@ void CVisuals::RenderCircle(const CVisualItem &Item)
 	{
 		float Dt = Client()->RenderFrameTime();
 		float Omega = GetSpringOmega(pCircle->m_Flags);
+		float Decay = expf(-Omega * Dt);
 		CSpringState &S = FindOrCreateSpring(Item.m_Id, vec2(CenterX, CenterY), vec2(0, 0), 0);
-		vec2 Result = SpringDamp(S.m_Pos, S.m_Vel, vec2(CenterX, CenterY), Dt, Omega);
+		vec2 Result = SpringDamp(S.m_Pos, S.m_Vel, vec2(CenterX, CenterY), Dt, Omega, Decay);
 		CenterX = Result.x;
 		CenterY = Result.y;
 	}
@@ -177,17 +180,7 @@ void CVisuals::RenderCircle(const CVisualItem &Item)
 	{
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(ColorRGBA::UnpackAlphaLast<ColorRGBA>(pCircle->m_Color));
-		for(int i = 0; i < Segments; i++)
-		{
-			float a1 = (float)i / Segments * 2.0f * pi;
-			float a2 = (float)(i + 1) / Segments * 2.0f * pi;
-			IGraphics::CFreeformItem Triangle(
-				CenterX, CenterY,
-				CenterX, CenterY,
-				CenterX + cosf(a1) * Radius, CenterY + sinf(a1) * Radius,
-				CenterX + cosf(a2) * Radius, CenterY + sinf(a2) * Radius);
-			Graphics()->QuadsDrawFreeform(&Triangle, 1);
-		}
+		Graphics()->DrawCircle(CenterX, CenterY, Radius, Segments);
 		Graphics()->QuadsEnd();
 	}
 	else
@@ -246,11 +239,12 @@ void CVisuals::RenderQuad(const CVisualItem &Item)
 	{
 		float Dt = Client()->RenderFrameTime();
 		float Omega = GetSpringOmega(pQuad->m_Flags);
+		float Decay = expf(-Omega * Dt);
 		CSpringState &S = FindOrCreateSpring(Item.m_Id, vec2(CenterX, CenterY), vec2(0, 0), AngleRad);
-		vec2 Result = SpringDamp(S.m_Pos, S.m_Vel, vec2(CenterX, CenterY), Dt, Omega);
+		vec2 Result = SpringDamp(S.m_Pos, S.m_Vel, vec2(CenterX, CenterY), Dt, Omega, Decay);
 		CenterX = Result.x;
 		CenterY = Result.y;
-		AngleRad = SpringDampAngle(S.m_Angle, S.m_AngleVel, AngleRad, Dt, Omega);
+		AngleRad = SpringDampAngle(S.m_Angle, S.m_AngleVel, AngleRad, Dt, Omega, Decay);
 	}
 
 	IGraphics::CTextureHandle QuadTex = GetImageTexture(pQuad->m_ImageIndex);
@@ -342,11 +336,12 @@ void CVisuals::RenderTile(const CVisualItem &Item)
 	{
 		float Dt = Client()->RenderFrameTime();
 		float Omega = GetSpringOmega(pTile->m_Flags);
+		float Decay = expf(-Omega * Dt);
 		CSpringState &S = FindOrCreateSpring(Item.m_Id, vec2(CenterX, CenterY), vec2(0, 0), AngleRad);
-		vec2 Result = SpringDamp(S.m_Pos, S.m_Vel, vec2(CenterX, CenterY), Dt, Omega);
+		vec2 Result = SpringDamp(S.m_Pos, S.m_Vel, vec2(CenterX, CenterY), Dt, Omega, Decay);
 		CenterX = Result.x;
 		CenterY = Result.y;
-		AngleRad = SpringDampAngle(S.m_Angle, S.m_AngleVel, AngleRad, Dt, Omega);
+		AngleRad = SpringDampAngle(S.m_Angle, S.m_AngleVel, AngleRad, Dt, Omega, Decay);
 	}
 
 	int Col = pTile->m_TileIndex % 16;
@@ -385,57 +380,47 @@ void CVisuals::RenderTile(const CVisualItem &Item)
 
 // Critically damped spring: smooth arrival at target without oscillation
 // Omega = natural frequency (higher = faster response)
-vec2 CVisuals::SpringDamp(vec2 &Pos, vec2 &Vel, vec2 Target, float Dt, float Omega)
+vec2 CVisuals::SpringDamp(vec2 &Pos, vec2 &Vel, vec2 Target, float Dt, float Omega, float Decay)
 {
-	float Exp = expf(-Omega * Dt);
 	vec2 Delta = Pos - Target;
-	Pos = Target + (Delta + (Vel + Delta * Omega) * Dt) * Exp;
-	Vel = (Vel - (Vel + Delta * Omega) * Omega * Dt) * Exp;
+	Pos = Target + (Delta + (Vel + Delta * Omega) * Dt) * Decay;
+	Vel = (Vel - (Vel + Delta * Omega) * Omega * Dt) * Decay;
 	return Pos;
 }
 
-float CVisuals::SpringDampAngle(float &Angle, float &Vel, float Target, float Dt, float Omega)
+float CVisuals::SpringDampAngle(float &Angle, float &Vel, float Target, float Dt, float Omega, float Decay)
 {
-	float Exp = expf(-Omega * Dt);
 	float Delta = Angle - Target;
-	Angle = Target + (Delta + (Vel + Delta * Omega) * Dt) * Exp;
-	Vel = (Vel - (Vel + Delta * Omega) * Omega * Dt) * Exp;
+	Angle = Target + (Delta + (Vel + Delta * Omega) * Dt) * Decay;
+	Vel = (Vel - (Vel + Delta * Omega) * Omega * Dt) * Decay;
 	return Angle;
 }
 
 CSpringState &CVisuals::FindOrCreateSpring(int SnapId, vec2 Pos, vec2 Pos2, float Angle)
 {
-	auto it = m_Springs.find(SnapId);
-	if(it == m_Springs.end())
+	auto [it, Inserted] = m_Springs.emplace(SnapId, CSpringState{});
+	if(Inserted)
 	{
-		CSpringState State;
-		State.m_Pos = Pos;
-		State.m_Vel = vec2(0, 0);
-		State.m_Pos2 = Pos2;
-		State.m_Vel2 = vec2(0, 0);
-		State.m_Angle = Angle;
-		State.m_AngleVel = 0;
-		m_Springs[SnapId] = State;
-		return m_Springs[SnapId];
+		it->second.m_Pos = Pos;
+		it->second.m_Vel = vec2(0, 0);
+		it->second.m_Pos2 = Pos2;
+		it->second.m_Vel2 = vec2(0, 0);
+		it->second.m_Angle = Angle;
+		it->second.m_AngleVel = 0;
 	}
 	return it->second;
 }
 
 void CVisuals::CleanupSprings()
 {
-	// Erase stale entries in-place instead of rebuilding the map
+	std::unordered_set<int> LiveIds;
+	LiveIds.reserve(m_vVisualItems.size());
+	for(const CVisualItem &Item : m_vVisualItems)
+		LiveIds.insert(Item.m_Id);
+
 	for(auto it = m_Springs.begin(); it != m_Springs.end();)
 	{
-		bool Found = false;
-		for(const CVisualItem &Item : m_vVisualItems)
-		{
-			if(Item.m_Id == it->first)
-			{
-				Found = true;
-				break;
-			}
-		}
-		if(!Found)
+		if(LiveIds.count(it->first) == 0)
 			it = m_Springs.erase(it);
 		else
 			++it;
@@ -612,11 +597,12 @@ void CVisuals::OnRender()
 	// Cleanup stale spring entries
 	CleanupSprings();
 
-	// Sort by render order for correct z-ordering
-	std::sort(m_vVisualItems.begin(), m_vVisualItems.end(),
-		[](const CVisualItem &a, const CVisualItem &b) {
-			return a.m_RenderOrder < b.m_RenderOrder;
-		});
+	// Sort by render order for correct z-ordering (skip if already sorted)
+	auto RenderOrderCmp = [](const CVisualItem &a, const CVisualItem &b) {
+		return a.m_RenderOrder < b.m_RenderOrder;
+	};
+	if(!std::is_sorted(m_vVisualItems.begin(), m_vVisualItems.end(), RenderOrderCmp))
+		std::sort(m_vVisualItems.begin(), m_vVisualItems.end(), RenderOrderCmp);
 
 	// Save current screen mapping
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;

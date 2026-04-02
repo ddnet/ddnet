@@ -39,8 +39,8 @@ class CVisuals : public CComponent
 
 	void ApplyGroupScreenMapping(int GroupIndex);
 
-	vec2 SpringDamp(vec2 &Pos, vec2 &Vel, vec2 Target, float Dt, float Omega);
-	float SpringDampAngle(float &Angle, float &Vel, float Target, float Dt, float Omega);
+	vec2 SpringDamp(vec2 &Pos, vec2 &Vel, vec2 Target, float Dt, float Omega, float Decay);
+	float SpringDampAngle(float &Angle, float &Vel, float Target, float Dt, float Omega, float Decay);
 	CSpringState &FindOrCreateSpring(int SnapId, vec2 Pos, vec2 Pos2, float Angle);
 	void CleanupSprings();
 
@@ -49,7 +49,7 @@ class CVisuals : public CComponent
 	std::vector<CVisualItem> m_vVisualItems;
 	std::unordered_map<int, CSpringState> m_Springs;
 	std::unordered_map<int, IGraphics::CTextureHandle> m_TexCache;
-	int m_GameGroupIndex;
+	int m_GameGroupIndex = -1;
 
 public:
 	int Sizeof() const override { return sizeof(*this); }
