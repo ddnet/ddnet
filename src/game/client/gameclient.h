@@ -67,6 +67,7 @@
 #include "components/statboard.h"
 #include "components/tooltips.h"
 #include "components/touch_controls.h"
+#include "components/visuals.h"
 #include "components/voting.h"
 
 #include <memory>
@@ -175,6 +176,7 @@ public:
 	CNamePlates m_NamePlates;
 	CFreezeBars m_FreezeBars;
 	CItems m_Items;
+	CVisuals m_Visuals;
 	CMapImages m_MapImages;
 
 	CMapLayers m_MapLayersBackground = CMapLayers{ERenderType::RENDERTYPE_BACKGROUND};
