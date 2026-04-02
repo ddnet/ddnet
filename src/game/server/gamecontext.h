@@ -296,6 +296,21 @@ public:
 	void SnapSwitchers(int SnappingClient);
 	bool SnapLaserObject(const CSnapContext &Context, int SnapId, const vec2 &To, const vec2 &From, int StartTick, int Owner = -1, int LaserType = -1, int Subtype = -1, int SwitchNumber = -1) const;
 	bool SnapPickup(const CSnapContext &Context, int SnapId, const vec2 &Pos, int Type, int SubType, int SwitchNumber, int Flags) const;
+	// Visual primitives — rendered client-side as lightweight geometric overlays.
+	//
+	// Color:       PackVisualColor(R, G, B, A) with 0-255 components.
+	// Width:       Line thickness or outline width in world units. Lines with Width<=1 use thin line mode.
+	// Flags:       Bitfield combining VISUALFLAG_* (SCREEN_SPACE, CAMERA_RELATIVE, FILLED)
+	//              with type-specific packing: PackLineFlags(), PackShapeFlags(),
+	//              PackSpringOmega(), PackCircleSegments(). See visual_primitives.h.
+	// RenderOrder: Controls which map group and Z-layer the visual renders in.
+	//              Use MakeRenderOrder(GroupIndex, LayerOffset, BehindEntities) or
+	//              RENDERORDER_DEFAULT (game group, after entities) /
+	//              RENDERORDER_BEHIND_PLAYERS (game group, before entities).
+	//              The group must share the same coordinate space (parallax/offset)
+	//              as the visual's world positions.
+	// Angle:       Fixed-point degrees: actual_degrees * 256 (e.g. 45° = 45*256 = 11520).
+	// ImageIndex:  Index into the map's image list (for textured quads/tiles). -1 = no texture.
 	bool SnapVisualLine(const CSnapContext &Context, int SnapId, const vec2 &From, const vec2 &To, int Color, int Width, int Flags, int RenderOrder) const;
 	bool SnapVisualCircle(const CSnapContext &Context, int SnapId, const vec2 &Pos, int Radius, int Color, int Width, int Flags, int RenderOrder) const;
 	bool SnapVisualQuad(const CSnapContext &Context, int SnapId, const vec2 &Pos, int W, int H, int Angle, int Color, int Width, int ImageIndex, int Flags, int RenderOrder) const;

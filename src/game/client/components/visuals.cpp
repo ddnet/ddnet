@@ -444,14 +444,28 @@ void CVisuals::RenderItem(const CVisualItem &Item)
 		RenderTile(Item);
 }
 
-// Render a contiguous range of items, batching Begin/End by (render mode, texture).
-// Items must be sorted by BatchKey within the range.
 void CVisuals::RenderBatchedItems(const CVisualItem *pItems, int NumItems)
 {
+	bool ScreenSpaceActive = false;
+	float SavedScreen[4] = {0};
+	Graphics()->GetScreen(&SavedScreen[0], &SavedScreen[1], &SavedScreen[2], &SavedScreen[3]);
+
 	int i = 0;
 	while(i < NumItems)
 	{
 		int BatchKey = pItems[i].m_BatchKey;
+		bool IsScreenSpace = (pItems[i].m_Flags & VISUALFLAG_SCREEN_SPACE) != 0;
+
+		if(IsScreenSpace && !ScreenSpaceActive)
+		{
+			Graphics()->MapScreen(0, 0, 300.0f * Graphics()->ScreenAspect(), 300.0f);
+			ScreenSpaceActive = true;
+		}
+		else if(!IsScreenSpace && ScreenSpaceActive)
+		{
+			Graphics()->MapScreen(SavedScreen[0], SavedScreen[1], SavedScreen[2], SavedScreen[3]);
+			ScreenSpaceActive = false;
+		}
 
 		if(BatchKey < 0)
 		{
@@ -475,7 +489,8 @@ void CVisuals::RenderBatchedItems(const CVisualItem *pItems, int NumItems)
 			Graphics()->QuadsBegin();
 		}
 
-		while(i < NumItems && pItems[i].m_BatchKey == BatchKey)
+		while(i < NumItems && pItems[i].m_BatchKey == BatchKey &&
+			((pItems[i].m_Flags & VISUALFLAG_SCREEN_SPACE) != 0) == IsScreenSpace)
 		{
 			RenderItem(pItems[i]);
 			i++;
@@ -486,6 +501,10 @@ void CVisuals::RenderBatchedItems(const CVisualItem *pItems, int NumItems)
 		else
 			Graphics()->QuadsEnd();
 	}
+
+	// Restore mapping if we ended in screen-space mode
+	if(ScreenSpaceActive)
+		Graphics()->MapScreen(SavedScreen[0], SavedScreen[1], SavedScreen[2], SavedScreen[3]);
 }
 
 // --- Texture cache ---
@@ -571,16 +590,18 @@ void CVisuals::OnRender()
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		return;
 	if(!g_Config.m_ClShowVisuals)
+	{
+		m_vVisualItems.clear();
 		return;
+	}
 
 	// Cache per-frame values to avoid repeated virtual calls
 	m_IntraGameTick = Client()->IntraGameTick(g_Config.m_ClDummy);
 	m_RenderFrameTime = Client()->RenderFrameTime();
 	m_CameraCenter = GameClient()->m_Camera.m_Center;
 
-	// Collect visual items, separating world-space from screen-space
+	// Collect all visual items (world-space and screen-space unified)
 	m_vVisualItems.clear();
-	m_vScreenItems.clear();
 
 	for(const CSnapEntities &Ent : GameClient()->SnapEntities())
 	{
@@ -600,38 +621,19 @@ void CVisuals::OnRender()
 		VisItem.m_RenderOrder = GetRenderOrderFromSnap(Item.m_Type, Item.m_pData);
 		VisItem.m_BatchKey = ComputeBatchKey(Item.m_Type, Item.m_pData);
 
-		if(VisItem.m_Flags & VISUALFLAG_SCREEN_SPACE)
-		{
-			VisItem.m_GroupIndex = -1;
-			m_vScreenItems.push_back(VisItem);
-		}
-		else
-		{
-			int GroupIndex = RenderOrderGroup(VisItem.m_RenderOrder);
-			if(GroupIndex == RENDERORDER_GROUP_GAME)
-				GroupIndex = m_GameGroupIndex;
-			VisItem.m_GroupIndex = GroupIndex;
-			m_vVisualItems.push_back(VisItem);
-		}
+		int GroupIndex = RenderOrderGroup(VisItem.m_RenderOrder);
+		if(GroupIndex == RENDERORDER_GROUP_GAME)
+			GroupIndex = m_GameGroupIndex;
+		VisItem.m_GroupIndex = GroupIndex;
+		m_vVisualItems.push_back(VisItem);
 	}
 
-	// Sort world-space items by (GroupIndex, RenderOrder, BatchKey)
-	// Enables O(log N) group lookup via binary search and minimizes draw state changes
+	// Sort by (GroupIndex, RenderOrder, BatchKey) for group lookup + draw batching
 	if(m_vVisualItems.size() > 1)
 	{
 		std::sort(m_vVisualItems.begin(), m_vVisualItems.end(), [](const CVisualItem &a, const CVisualItem &b) {
 			if(a.m_GroupIndex != b.m_GroupIndex)
 				return a.m_GroupIndex < b.m_GroupIndex;
-			if(a.m_RenderOrder != b.m_RenderOrder)
-				return a.m_RenderOrder < b.m_RenderOrder;
-			return a.m_BatchKey < b.m_BatchKey;
-		});
-	}
-
-	// Sort screen-space items by (RenderOrder, BatchKey)
-	if(m_vScreenItems.size() > 1)
-	{
-		std::sort(m_vScreenItems.begin(), m_vScreenItems.end(), [](const CVisualItem &a, const CVisualItem &b) {
 			if(a.m_RenderOrder != b.m_RenderOrder)
 				return a.m_RenderOrder < b.m_RenderOrder;
 			return a.m_BatchKey < b.m_BatchKey;
@@ -646,25 +648,7 @@ void CVisuals::OnRender()
 		if(it != m_Springs.end())
 			it->second.m_Generation = m_SpringGeneration;
 	}
-	for(const CVisualItem &Item : m_vScreenItems)
-	{
-		auto it = m_Springs.find(Item.m_Id);
-		if(it != m_Springs.end())
-			it->second.m_Generation = m_SpringGeneration;
-	}
 	CleanupSprings();
-
-	// Render screen-space visuals
-	if(!m_vScreenItems.empty())
-	{
-		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-		Graphics()->MapScreen(0, 0, 300.0f * Graphics()->ScreenAspect(), 300.0f);
-
-		RenderBatchedItems(m_vScreenItems.data(), (int)m_vScreenItems.size());
-
-		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
-	}
 }
 
 void CVisuals::RenderForGroup(int GroupId)

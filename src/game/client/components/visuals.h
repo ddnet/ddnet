@@ -48,8 +48,7 @@ class CVisuals : public CComponent
 
 	IGraphics::CTextureHandle GetImageTexture(int ImageIndex);
 
-	std::vector<CVisualItem> m_vVisualItems; // world-space, sorted by (GroupIndex, RenderOrder, BatchKey)
-	std::vector<CVisualItem> m_vScreenItems; // screen-space, sorted by (RenderOrder, BatchKey)
+	std::vector<CVisualItem> m_vVisualItems; // all items, sorted by (GroupIndex, RenderOrder, BatchKey)
 	std::unordered_map<int, CSpringState> m_Springs;
 	std::unordered_map<int, IGraphics::CTextureHandle> m_TexCache;
 	int m_GameGroupIndex = -1;
