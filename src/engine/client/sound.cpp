@@ -213,7 +213,7 @@ int CSound::Init()
 
 	if(SDL_InitSubSystem(SDL_INIT_AUDIO) < 0)
 	{
-		dbg_msg("sound", "unable to init SDL audio: %s", SDL_GetError());
+		log_error("sound", "Unable to init SDL audio: %s", SDL_GetError());
 		return -1;
 	}
 
@@ -229,11 +229,13 @@ int CSound::Init()
 	m_Device = SDL_OpenAudioDevice(nullptr, 0, &Format, &FormatOut, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE);
 	if(m_Device == 0)
 	{
-		dbg_msg("sound", "unable to open audio: %s", SDL_GetError());
+		log_error("sound", "Unable to open audio device: %s", SDL_GetError());
 		return -1;
 	}
 	else
-		dbg_msg("sound", "sound init successful using audio driver '%s'", SDL_GetCurrentAudioDriver());
+	{
+		log_info("sound", "Sound init successful using audio driver '%s'", SDL_GetCurrentAudioDriver());
+	}
 
 	m_MixingRate = FormatOut.freq;
 	m_MaxFrames = FormatOut.samples * 2;
