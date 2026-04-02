@@ -559,8 +559,6 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 				for(auto &pLayer : m_pBrush->m_vpLayers)
 					pLayer->BrushRotate(s_RotationAmount / 360.0f * pi * 2);
 			}
-
-			ToolbarTop.VSplitLeft(5.0f, nullptr, &ToolbarTop);
 		}
 
 		// Color pipette and palette
@@ -701,16 +699,20 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 				m_BrushDrawDestructive = !m_BrushDrawDestructive;
 			ToolbarBottom.VSplitLeft(5.0f, &Button, &ToolbarBottom);
 
-			ToolbarBottom.VSplitLeft(55.0f, &Button, &ToolbarBottom);
-			static int s_BucketFillButton = 0;
-			if(DoButton_Editor(&s_BucketFillButton, "Bucket", m_BrushBucketFill, &Button, BUTTONFLAG_LEFT, "[Ctrl+B] Toggle bucket fill mode.") ||
-				(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_B) && ModPressed && !ShiftPressed))
+			// Only show if tiles layer is selected
+			if (pLayer && pLayer->m_Type == LAYERTYPE_TILES)
 			{
-				m_BrushBucketFill = !m_BrushBucketFill;
-				if(m_BrushBucketFill && Map()->m_vSelectedLayers.size() > 1)
-					Map()->SelectLayer(Map()->m_vSelectedLayers[0], Map()->m_SelectedGroup);
+				ToolbarBottom.VSplitLeft(55.0f, &Button, &ToolbarBottom);
+				static int s_BucketFillButton = 0;
+				if(DoButton_Editor(&s_BucketFillButton, "Bucket", m_BrushBucketFill, &Button, BUTTONFLAG_LEFT, "[Ctrl+B] Toggle bucket fill mode.") ||
+					(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_B) && ModPressed && !ShiftPressed))
+				{
+					m_BrushBucketFill = !m_BrushBucketFill;
+					if(m_BrushBucketFill && Map()->m_vSelectedLayers.size() > 1)
+						Map()->SelectLayer(Map()->m_vSelectedLayers[0], Map()->m_SelectedGroup);
+				}
+				ToolbarBottom.VSplitLeft(5.0f, &Button, &ToolbarBottom);
 			}
-			ToolbarBottom.VSplitLeft(5.0f, &Button, &ToolbarBottom);
 		}
 	}
 }
@@ -759,43 +761,6 @@ static void Rotate(const CPoint *pCenter, CPoint *pPoint, float Rotation)
 	int y = pPoint->y - pCenter->y;
 	pPoint->x = (int)(x * std::cos(Rotation) - y * std::sin(Rotation) + pCenter->x);
 	pPoint->y = (int)(x * std::sin(Rotation) + y * std::cos(Rotation) + pCenter->y);
-}
-
-static int FloodFillTiles(CLayerTiles *pLayer, int StartX, int StartY, const CTile &Replacement)
-{
-	if(StartX < 0 || StartX >= pLayer->m_Width || StartY < 0 || StartY >= pLayer->m_Height)
-		return 0;
-
-	const CTile Source = pLayer->GetTile(StartX, StartY);
-	if(Source == Replacement)
-		return 0;
-
-	std::deque<ivec2> q;
-	q.emplace_back(StartX, StartY);
-
-	int Filled = 0;
-	while(!q.empty())
-	{
-		const ivec2 Pos = q.back();
-		q.pop_back();
-
-		if(Pos.x < 0 || Pos.x >= pLayer->m_Width || Pos.y < 0 || Pos.y >= pLayer->m_Height)
-			continue;
-
-		const CTile Current = pLayer->GetTile(Pos.x, Pos.y);
-		if(!(Current == Source))
-			continue;
-
-		pLayer->SetTile(Pos.x, Pos.y, Replacement);
-		++Filled;
-
-		q.emplace_back(Pos.x - 1, Pos.y);
-		q.emplace_back(Pos.x + 1, Pos.y);
-		q.emplace_back(Pos.x, Pos.y - 1);
-		q.emplace_back(Pos.x, Pos.y + 1);
-	}
-
-	return Filled;
 }
 
 void CEditor::DoSoundSource(int LayerIndex, CSoundSource *pSource, int Index)
@@ -2555,6 +2520,9 @@ void CEditor::DoMapEditor(CUIRect View)
 	{
 		Ui()->SetHotItem(&m_MapEditorId);
 
+		if(m_BrushBucketFill && NumEditLayers == 1 && apEditLayers[0].second->m_Type == LAYERTYPE_TILES)
+			m_CursorType = CURSOR_BUCKET;
+
 		// do global operations like pan and zoom
 		if(Ui()->CheckActiveItem(nullptr) && (Ui()->MouseButton(0) || Ui()->MouseButton(2)))
 		{
@@ -2746,10 +2714,9 @@ void CEditor::DoMapEditor(CUIRect View)
 									}
 									else
 									{
-										const CTile TargetTile = pTargetLayer->GetTile(TargetRect.x, TargetRect.y);
 										const CTile SelectedTile = pBrushLayer->GetTile(0, 0);
 
-										if(!(TargetTile.m_Index == SelectedTile.m_Index && TargetTile.m_Flags == SelectedTile.m_Flags) && FloodFillTiles(pTargetLayer.get(), TargetRect.x, TargetRect.y, SelectedTile) > 0)
+										if(pTargetLayer->FloodFill(TargetRect.x, TargetRect.y, SelectedTile) > 0)
 										{
 											std::shared_ptr<IEditorAction> Action = std::make_shared<CEditorBrushDrawAction>(Map(), Map()->m_SelectedGroup);
 											Map()->m_EditorHistory.RecordAction(Action);
@@ -6839,9 +6806,6 @@ void CEditor::RenderMousePointer()
 	{
 		m_CursorType = CURSOR_RESIZE_V;
 	}
-
-	if(m_BrushBucketFill)
-		m_CursorType = CURSOR_BUCKET;
 
 	constexpr float CursorSize = 16.0f;
 

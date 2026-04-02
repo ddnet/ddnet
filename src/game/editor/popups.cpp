@@ -2043,7 +2043,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 	else if(pEditor->m_PopupEventType == POPEVENT_BUCKET_FILL_LARGE_LAYER)
 	{
 		pTitle = "Large bucket fill";
-		pMessage = "Bucket fill on layers larger than 1000 tiles may be very slow and might freeze your game.";
+		pMessage = "Bucket fill on layers larger than 1000 tiles may be very slow and might freeze the editor.";
 	}
 	else if(pEditor->m_PopupEventType == POPEVENT_PREVENTUNUSEDTILES)
 	{

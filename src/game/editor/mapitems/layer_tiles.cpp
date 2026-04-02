@@ -506,6 +506,42 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 	return 1;
 }
 
+int CLayerTiles::FloodFill(int StartX, int StartY, const CTile &Replacement) {
+	if(StartX < 0 || StartX >= m_Width || StartY < 0 || StartY >= m_Height)
+		return 0;
+
+	const CTile Source = GetTile(StartX, StartY);
+	if(Source == Replacement)
+		return 0;
+
+	std::deque<ivec2> q;
+	q.emplace_back(StartX, StartY);
+
+	int Filled = 0;
+	while(!q.empty())
+	{
+		const ivec2 Pos = q.back();
+		q.pop_back();
+
+		if(Pos.x < 0 || Pos.x >= m_Width || Pos.y < 0 || Pos.y >= m_Height)
+			continue;
+
+		const CTile Current = GetTile(Pos.x, Pos.y);
+		if(!(Current == Source))
+			continue;
+
+		SetTile(Pos.x, Pos.y, Replacement);
+		++Filled;
+
+		q.emplace_back(Pos.x - 1, Pos.y);
+		q.emplace_back(Pos.x + 1, Pos.y);
+		q.emplace_back(Pos.x, Pos.y - 1);
+		q.emplace_back(Pos.x, Pos.y + 1);
+	}
+
+	return Filled;
+}
+
 void CLayerTiles::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 {
 	if(m_Readonly || (!Empty && pBrush->m_Type != LAYERTYPE_TILES))

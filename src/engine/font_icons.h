@@ -18,7 +18,6 @@ namespace FontIcon
 	inline const char *const BAN = "\uF05E";
 	inline const char *const BOOKMARK = "\uF02E";
 	inline const char *const BORDER_ALL = "\uF84C";
-	inline const char *const BRUSH = "\uF55D";
 	inline const char *const CAMERA = "\uF030";
 	inline const char *const CHEVRON_DOWN = "\uF078";
 	inline const char *const CHEVRON_LEFT = "\uF053";
