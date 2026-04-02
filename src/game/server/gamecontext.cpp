@@ -604,6 +604,89 @@ bool CGameContext::SnapPickup(const CSnapContext &Context, int SnapId, const vec
 	return true;
 }
 
+bool CGameContext::SnapVisualLine(const CSnapContext &Context, int SnapId, const vec2 &From, const vec2 &To, int Color, int Width, int Flags, int RenderOrder) const
+{
+	if(Context.GetClientVersion() < VERSION_DDNET_VISUAL_PRIMITIVES)
+		return true;
+
+	CNetObj_DDNetVisualLine *pObj = Server()->SnapNewItem<CNetObj_DDNetVisualLine>(SnapId);
+	if(!pObj)
+		return false;
+
+	pObj->m_FromX = (int)From.x;
+	pObj->m_FromY = (int)From.y;
+	pObj->m_ToX = (int)To.x;
+	pObj->m_ToY = (int)To.y;
+	pObj->m_Color = Color;
+	pObj->m_Width = Width;
+	pObj->m_Flags = Flags;
+	pObj->m_RenderOrder = RenderOrder;
+	return true;
+}
+
+bool CGameContext::SnapVisualCircle(const CSnapContext &Context, int SnapId, const vec2 &Pos, int Radius, int Color, int Width, int Flags, int RenderOrder) const
+{
+	if(Context.GetClientVersion() < VERSION_DDNET_VISUAL_PRIMITIVES)
+		return true;
+
+	CNetObj_DDNetVisualCircle *pObj = Server()->SnapNewItem<CNetObj_DDNetVisualCircle>(SnapId);
+	if(!pObj)
+		return false;
+
+	pObj->m_X = (int)Pos.x;
+	pObj->m_Y = (int)Pos.y;
+	pObj->m_Radius = Radius;
+	pObj->m_Color = Color;
+	pObj->m_Width = Width;
+	pObj->m_Flags = Flags;
+	pObj->m_RenderOrder = RenderOrder;
+	return true;
+}
+
+bool CGameContext::SnapVisualQuad(const CSnapContext &Context, int SnapId, const vec2 &Pos, int W, int H, int Angle, int Color, int Width, int ImageIndex, int Flags, int RenderOrder) const
+{
+	if(Context.GetClientVersion() < VERSION_DDNET_VISUAL_PRIMITIVES)
+		return true;
+
+	CNetObj_DDNetVisualQuad *pObj = Server()->SnapNewItem<CNetObj_DDNetVisualQuad>(SnapId);
+	if(!pObj)
+		return false;
+
+	pObj->m_X = (int)Pos.x;
+	pObj->m_Y = (int)Pos.y;
+	pObj->m_W = W;
+	pObj->m_H = H;
+	pObj->m_Angle = Angle;
+	pObj->m_Color = Color;
+	pObj->m_Width = Width;
+	pObj->m_ImageIndex = ImageIndex;
+	pObj->m_Flags = Flags;
+	pObj->m_RenderOrder = RenderOrder;
+	return true;
+}
+
+bool CGameContext::SnapVisualTile(const CSnapContext &Context, int SnapId, const vec2 &Pos, int W, int H, int Angle, int Color, int ImageIndex, int TileIndex, int Flags, int RenderOrder) const
+{
+	if(Context.GetClientVersion() < VERSION_DDNET_VISUAL_PRIMITIVES)
+		return true;
+
+	CNetObj_DDNetVisualTile *pObj = Server()->SnapNewItem<CNetObj_DDNetVisualTile>(SnapId);
+	if(!pObj)
+		return false;
+
+	pObj->m_X = (int)Pos.x;
+	pObj->m_Y = (int)Pos.y;
+	pObj->m_W = W;
+	pObj->m_H = H;
+	pObj->m_Angle = Angle;
+	pObj->m_Color = Color;
+	pObj->m_ImageIndex = ImageIndex;
+	pObj->m_TileIndex = TileIndex;
+	pObj->m_Flags = Flags;
+	pObj->m_RenderOrder = RenderOrder;
+	return true;
+}
+
 void CGameContext::CallVote(int ClientId, const char *pDesc, const char *pCmd, const char *pReason, const char *pChatmsg, const char *pSixupDesc)
 {
 	// check if a vote is already running

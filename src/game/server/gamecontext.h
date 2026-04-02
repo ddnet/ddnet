@@ -296,6 +296,10 @@ public:
 	void SnapSwitchers(int SnappingClient);
 	bool SnapLaserObject(const CSnapContext &Context, int SnapId, const vec2 &To, const vec2 &From, int StartTick, int Owner = -1, int LaserType = -1, int Subtype = -1, int SwitchNumber = -1) const;
 	bool SnapPickup(const CSnapContext &Context, int SnapId, const vec2 &Pos, int Type, int SubType, int SwitchNumber, int Flags) const;
+	bool SnapVisualLine(const CSnapContext &Context, int SnapId, const vec2 &From, const vec2 &To, int Color, int Width, int Flags, int RenderOrder) const;
+	bool SnapVisualCircle(const CSnapContext &Context, int SnapId, const vec2 &Pos, int Radius, int Color, int Width, int Flags, int RenderOrder) const;
+	bool SnapVisualQuad(const CSnapContext &Context, int SnapId, const vec2 &Pos, int W, int H, int Angle, int Color, int Width, int ImageIndex, int Flags, int RenderOrder) const;
+	bool SnapVisualTile(const CSnapContext &Context, int SnapId, const vec2 &Pos, int W, int H, int Angle, int Color, int ImageIndex, int TileIndex, int Flags, int RenderOrder) const;
 
 	enum
 	{
