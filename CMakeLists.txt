@@ -2842,6 +2842,14 @@ if(SERVER)
     entities/plasma.h
     entities/projectile.cpp
     entities/projectile.h
+    entities/visual_circle.cpp
+    entities/visual_circle.h
+    entities/visual_line.cpp
+    entities/visual_line.h
+    entities/visual_quad.cpp
+    entities/visual_quad.h
+    entities/visual_tile.cpp
+    entities/visual_tile.h
     entity.cpp
     entity.h
     eventhandler.cpp
