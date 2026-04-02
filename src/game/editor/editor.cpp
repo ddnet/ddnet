@@ -702,7 +702,8 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 
 			ToolbarBottom.VSplitLeft(55.0f, &Button, &ToolbarBottom);
 			static int s_BucketFillButton = 0;
-			if(DoButton_Editor(&s_BucketFillButton, "Bucket", m_BrushBucketFill, &Button, BUTTONFLAG_LEFT, "[Ctrl+B] Toggle bucket fill mode."))
+			if(DoButton_Editor(&s_BucketFillButton, "Bucket", m_BrushBucketFill, &Button, BUTTONFLAG_LEFT, "[Ctrl+B] Toggle bucket fill mode.") ||
+				(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_B) && ModPressed && !ShiftPressed))
 			{
 				m_BrushBucketFill = !m_BrushBucketFill;
 				if(m_BrushBucketFill && Map()->m_vSelectedLayers.size() > 1)
@@ -2774,7 +2775,7 @@ void CEditor::DoMapEditor(CUIRect View)
 
 					if(m_pBrush->IsEmpty())
 						s_Operation = OP_BRUSH_GRAB;
-					else if (m_BrushBucketFill)
+					else if(m_BrushBucketFill)
 						s_Operation = OP_BRUSH_PAINT;
 					else
 					{
@@ -6821,6 +6822,9 @@ void CEditor::RenderMousePointer()
 		m_CursorType = CURSOR_RESIZE_V;
 	}
 
+	if(m_BrushBucketFill)
+		m_CursorType = CURSOR_BUCKET;
+
 	constexpr float CursorSize = 16.0f;
 
 	// Cursor
@@ -7178,6 +7182,7 @@ void CEditor::Init()
 	m_aCursorTextures[CURSOR_NORMAL] = Graphics()->LoadTexture("editor/cursor.png", IStorage::TYPE_ALL);
 	m_aCursorTextures[CURSOR_RESIZE_H] = Graphics()->LoadTexture("editor/cursor_resize.png", IStorage::TYPE_ALL);
 	m_aCursorTextures[CURSOR_RESIZE_V] = m_aCursorTextures[CURSOR_RESIZE_H];
+	m_aCursorTextures[CURSOR_BUCKET] = Graphics()->LoadTexture("editor/cursor_bucket.png", IStorage::TYPE_ALL);
 
 	m_pTilesetPicker = std::make_shared<CLayerTiles>(Map(), 16, 16);
 	m_pTilesetPicker->MakePalette();

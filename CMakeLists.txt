@@ -1427,6 +1427,7 @@ set(EXPECTED_DATA
   editor/automap/winter_main.rules
   editor/checker.png
   editor/cursor.png
+  editor/cursor_bucket.png
   editor/cursor_resize.png
   editor/cursor_text.png
   editor/entities/DDNet.png
