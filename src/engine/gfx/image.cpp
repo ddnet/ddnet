@@ -38,7 +38,7 @@ size_t CImageInfo::PixelSize(EImageFormat Format)
 
 const char *CImageInfo::FormatName(EImageFormat Format)
 {
-	static const char *s_apNames[] = {"UNDEFINED", "RGBA", "RGB", "R", "RA"};
+	static const char *s_apNames[] = {"UNDEFINED", "RGB", "RGBA", "R", "RA"};
 	return s_apNames[(int)Format + 1];
 }
 
