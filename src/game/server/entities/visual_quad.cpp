@@ -35,7 +35,7 @@ void CVisualQuad::Tick()
 
 void CVisualQuad::Snap(int SnappingClient)
 {
-	if(NetworkClipped(SnappingClient))
+	if(!(m_VisualFlags & (VISUALFLAG_SCREEN_SPACE | VISUALFLAG_CAMERA_RELATIVE)) && NetworkClipped(SnappingClient))
 		return;
 	if(SnappingClient != SERVER_DEMO_CLIENT && !m_Mask.test(SnappingClient))
 		return;

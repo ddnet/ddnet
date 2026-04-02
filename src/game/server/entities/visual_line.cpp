@@ -33,7 +33,7 @@ void CVisualLine::Tick()
 
 void CVisualLine::Snap(int SnappingClient)
 {
-	if(NetworkClippedLine(SnappingClient, m_From, m_To))
+	if(!(m_VisualFlags & (VISUALFLAG_SCREEN_SPACE | VISUALFLAG_CAMERA_RELATIVE)) && NetworkClippedLine(SnappingClient, m_From, m_To))
 		return;
 	if(SnappingClient != SERVER_DEMO_CLIENT && !m_Mask.test(SnappingClient))
 		return;

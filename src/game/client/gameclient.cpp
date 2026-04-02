@@ -4816,7 +4816,7 @@ void CGameClient::SnapCollectEntities()
 		const IClient::CSnapItem Item = Client()->SnapGetItem(IClient::SNAP_CURRENT, Index);
 		if(Item.m_Type == NETOBJTYPE_ENTITYEX)
 			vItemEx.push_back({Item, nullptr});
-		else if(Item.m_Type == NETOBJTYPE_PICKUP || Item.m_Type == NETOBJTYPE_DDNETPICKUP || Item.m_Type == NETOBJTYPE_LASER || Item.m_Type == NETOBJTYPE_DDNETLASER || Item.m_Type == NETOBJTYPE_PROJECTILE || Item.m_Type == NETOBJTYPE_DDRACEPROJECTILE || Item.m_Type == NETOBJTYPE_DDNETPROJECTILE)
+		else if(Item.m_Type == NETOBJTYPE_PICKUP || Item.m_Type == NETOBJTYPE_DDNETPICKUP || Item.m_Type == NETOBJTYPE_LASER || Item.m_Type == NETOBJTYPE_DDNETLASER || Item.m_Type == NETOBJTYPE_PROJECTILE || Item.m_Type == NETOBJTYPE_DDRACEPROJECTILE || Item.m_Type == NETOBJTYPE_DDNETPROJECTILE || Item.m_Type == NETOBJTYPE_DDNETVISUALLINE || Item.m_Type == NETOBJTYPE_DDNETVISUALCIRCLE || Item.m_Type == NETOBJTYPE_DDNETVISUALQUAD || Item.m_Type == NETOBJTYPE_DDNETVISUALTILE)
 			vItemData.push_back({Item, nullptr});
 	}
 
