@@ -2225,6 +2225,7 @@ set_src(GAME_SHARED GLOB src/game
   teamscore.h
   tuning.h
   version.h
+  visual_primitives.h
   voting.h
 )
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "src/game/version.h")

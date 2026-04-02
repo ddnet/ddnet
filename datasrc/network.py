@@ -400,6 +400,54 @@ Objects = [
 	NetEventEx("MapSoundWorld:Common", "map-sound-world@netevent.ddnet.org", [
 		NetIntAny("m_SoundId"),
 	]),
+
+	## Visual primitives — server-controlled drawing
+	NetObjectEx("DDNetVisualLine", "visual-line@netobj.ddnet.tw", [
+		NetIntAny("m_FromX"),
+		NetIntAny("m_FromY"),
+		NetIntAny("m_ToX"),
+		NetIntAny("m_ToY"),
+		NetIntAny("m_Color"),
+		NetIntRange("m_Width", 0, 'max_int'),
+		NetIntAny("m_Flags", default=0),
+		NetIntAny("m_RenderOrder", default=0x7FFFFFFF),
+	]),
+
+	NetObjectEx("DDNetVisualCircle", "visual-circle@netobj.ddnet.tw", [
+		NetIntAny("m_X"),
+		NetIntAny("m_Y"),
+		NetIntRange("m_Radius", 0, 'max_int'),
+		NetIntAny("m_Color"),
+		NetIntRange("m_Width", 0, 'max_int'),
+		NetIntAny("m_Flags", default=0),
+		NetIntAny("m_RenderOrder", default=0x7FFFFFFF),
+	]),
+
+	NetObjectEx("DDNetVisualQuad", "visual-quad@netobj.ddnet.tw", [
+		NetIntAny("m_X"),
+		NetIntAny("m_Y"),
+		NetIntAny("m_W"),
+		NetIntAny("m_H"),
+		NetIntAny("m_Angle"),
+		NetIntAny("m_Color"),
+		NetIntRange("m_Width", 0, 'max_int'),
+		NetIntRange("m_ImageIndex", -1, 'max_int'),
+		NetIntAny("m_Flags", default=0),
+		NetIntAny("m_RenderOrder", default=0x7FFFFFFF),
+	]),
+
+	NetObjectEx("DDNetVisualTile", "visual-tile@netobj.ddnet.tw", [
+		NetIntAny("m_X"),
+		NetIntAny("m_Y"),
+		NetIntAny("m_W"),
+		NetIntAny("m_H"),
+		NetIntAny("m_Angle"),
+		NetIntAny("m_Color"),
+		NetIntRange("m_ImageIndex", 0, 'max_int'),
+		NetIntRange("m_TileIndex", 0, 255),
+		NetIntAny("m_Flags", default=0),
+		NetIntAny("m_RenderOrder", default=0x7FFFFFFF),
+	]),
 ]
 
 Messages = [
