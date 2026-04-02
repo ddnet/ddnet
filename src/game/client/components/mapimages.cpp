@@ -287,7 +287,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 			BuildImageInfo.m_Width = ImgInfo.m_Width;
 			BuildImageInfo.m_Height = ImgInfo.m_Height;
 			BuildImageInfo.m_Format = ImgInfo.m_Format;
-			BuildImageInfo.m_pData = static_cast<uint8_t *>(malloc(BuildImageInfo.DataSize()));
+			BuildImageInfo.Allocate();
 
 			// build game layer
 			for(int LayerType = 0; LayerType < MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT; ++LayerType)
@@ -413,7 +413,7 @@ IGraphics::CTextureHandle CMapImages::UploadEntityLayerText(int TextureSize, int
 	TextImage.m_Width = 1024;
 	TextImage.m_Height = 1024;
 	TextImage.m_Format = CImageInfo::FORMAT_RGBA;
-	TextImage.m_pData = static_cast<uint8_t *>(calloc(TextImage.DataSize(), sizeof(uint8_t)));
+	TextImage.AllocateFillZero();
 
 	UpdateEntityLayerText(TextImage, TextureSize, MaxWidth, YOffset, 0);
 	UpdateEntityLayerText(TextImage, TextureSize, MaxWidth, YOffset, 1);

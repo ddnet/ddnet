@@ -10,6 +10,9 @@
  */
 class CImageInfo
 {
+private:
+	bool m_IsAllocated = false;
+
 public:
 	/**
 	 * Defines the format of image data.
@@ -36,6 +39,21 @@ public:
 	CImageInfo(CImageInfo &&Other);
 
 	/**
+	 * Forbid copies.
+	 */
+	CImageInfo(const CImageInfo &) = delete;
+
+	/**
+	 * Forbid copies.
+	 */
+	CImageInfo &operator=(const CImageInfo &) = delete;
+
+	/**
+	 * Destructor, which automatically frees memory.
+	 */
+	~CImageInfo();
+
+	/**
 	 * Width of the image.
 	 */
 	size_t m_Width = 0;
@@ -56,6 +74,16 @@ public:
 	 * Pointer to the image data.
 	 */
 	uint8_t *m_pData = nullptr;
+
+	/**
+	 * Creates the image data, does not zero it.
+	 */
+	void Allocate();
+
+	/**
+	 * Creates the image data and fills it with zero.
+	 */
+	void AllocateFillZero();
 
 	/**
 	 * Frees the image data and clears all info.

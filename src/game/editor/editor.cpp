@@ -3765,10 +3765,7 @@ bool CEditor::ReplaceImage(const char *pFilename, int StorageType, bool CheckDup
 
 	std::shared_ptr<CEditorImage> pImg = Map()->SelectedImage();
 	pImg->CEditorImage::Free();
-	pImg->m_Width = ImgInfo.m_Width;
-	pImg->m_Height = ImgInfo.m_Height;
-	pImg->m_Format = ImgInfo.m_Format;
-	pImg->m_pData = ImgInfo.m_pData;
+	*pImg = std::move(ImgInfo);
 	str_copy(pImg->m_aName, aBuf);
 	pImg->m_External = IsVanillaImage(pImg->m_aName);
 
@@ -3823,10 +3820,8 @@ bool CEditor::AddImage(const char *pFilename, int StorageType, void *pUser)
 	}
 
 	std::shared_ptr<CEditorImage> pImg = std::make_shared<CEditorImage>(pEditor->Map());
-	pImg->m_Width = ImgInfo.m_Width;
-	pImg->m_Height = ImgInfo.m_Height;
-	pImg->m_Format = ImgInfo.m_Format;
-	pImg->m_pData = ImgInfo.m_pData;
+	*pImg = std::move(ImgInfo);
+
 	pImg->m_External = IsVanillaImage(aBuf);
 
 	ConvertToRgba(*pImg);
