@@ -11,6 +11,8 @@
 #include <base/math.h>
 #include <base/vmath.h>
 
+#include <game/layers.h>
+
 #include <algorithm>
 
 void CVisuals::SetColorFromPacked(int Color)
@@ -270,6 +272,72 @@ void CVisuals::RenderTile(const void *pData)
 	Graphics()->QuadsEnd();
 }
 
+static int GetRenderOrderFromSnap(int Type, const void *pData)
+{
+	if(Type == NETOBJTYPE_DDNETVISUALLINE)
+		return static_cast<const CNetObj_DDNetVisualLine *>(pData)->m_RenderOrder;
+	if(Type == NETOBJTYPE_DDNETVISUALCIRCLE)
+		return static_cast<const CNetObj_DDNetVisualCircle *>(pData)->m_RenderOrder;
+	if(Type == NETOBJTYPE_DDNETVISUALQUAD)
+		return static_cast<const CNetObj_DDNetVisualQuad *>(pData)->m_RenderOrder;
+	if(Type == NETOBJTYPE_DDNETVISUALTILE)
+		return static_cast<const CNetObj_DDNetVisualTile *>(pData)->m_RenderOrder;
+	return RENDERORDER_DEFAULT;
+}
+
+void CVisuals::RenderItem(const CVisualItem &Item)
+{
+	if(Item.m_Type == NETOBJTYPE_DDNETVISUALLINE)
+		RenderLine(Item.m_pData);
+	else if(Item.m_Type == NETOBJTYPE_DDNETVISUALCIRCLE)
+		RenderCircle(Item.m_pData);
+	else if(Item.m_Type == NETOBJTYPE_DDNETVISUALQUAD)
+		RenderQuad(Item.m_pData);
+	else if(Item.m_Type == NETOBJTYPE_DDNETVISUALTILE)
+		RenderTile(Item.m_pData);
+}
+
+void CVisuals::ApplyGroupScreenMapping(int GroupIndex)
+{
+	CLayers *pLayers = GameClient()->Layers();
+	if(!pLayers || GroupIndex < 0 || GroupIndex >= pLayers->NumGroups())
+		return;
+
+	CMapItemGroup *pGroup = pLayers->GetGroup(GroupIndex);
+	if(!pGroup)
+		return;
+
+	float Zoom = GameClient()->m_Camera.m_Zoom;
+	vec2 Center = GameClient()->m_Camera.m_Center;
+
+	int ParallaxZoom = std::clamp(maximum(pGroup->m_ParallaxX, pGroup->m_ParallaxY), 0, 100);
+	float aPoints[4];
+	Graphics()->MapScreenToWorld(Center.x, Center.y,
+		pGroup->m_ParallaxX, pGroup->m_ParallaxY, (float)ParallaxZoom,
+		pGroup->m_OffsetX, pGroup->m_OffsetY, Graphics()->ScreenAspect(),
+		Zoom, aPoints);
+	Graphics()->MapScreen(aPoints[0], aPoints[1], aPoints[2], aPoints[3]);
+}
+
+void CVisuals::OnMapLoad()
+{
+	// Find game group index
+	m_GameGroupIndex = -1;
+	CLayers *pLayers = GameClient()->Layers();
+	if(pLayers)
+	{
+		CMapItemGroup *pGameGroup = pLayers->GameGroup();
+		for(int i = 0; i < pLayers->NumGroups(); i++)
+		{
+			if(pLayers->GetGroup(i) == pGameGroup)
+			{
+				m_GameGroupIndex = i;
+				break;
+			}
+		}
+	}
+}
+
 void CVisuals::OnRender()
 {
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
@@ -277,18 +345,60 @@ void CVisuals::OnRender()
 	if(!g_Config.m_ClShowVisuals)
 		return;
 
+	// Collect visual items
+	m_vVisualItems.clear();
 	for(const CSnapEntities &Ent : GameClient()->SnapEntities())
 	{
 		const IClient::CSnapItem Item = Ent.m_Item;
-		const void *pData = Item.m_pData;
-
-		if(Item.m_Type == NETOBJTYPE_DDNETVISUALLINE)
-			RenderLine(pData);
-		else if(Item.m_Type == NETOBJTYPE_DDNETVISUALCIRCLE)
-			RenderCircle(pData);
-		else if(Item.m_Type == NETOBJTYPE_DDNETVISUALQUAD)
-			RenderQuad(pData);
-		else if(Item.m_Type == NETOBJTYPE_DDNETVISUALTILE)
-			RenderTile(pData);
+		if(Item.m_Type == NETOBJTYPE_DDNETVISUALLINE ||
+			Item.m_Type == NETOBJTYPE_DDNETVISUALCIRCLE ||
+			Item.m_Type == NETOBJTYPE_DDNETVISUALQUAD ||
+			Item.m_Type == NETOBJTYPE_DDNETVISUALTILE)
+		{
+			CVisualItem VisItem;
+			VisItem.m_Type = Item.m_Type;
+			VisItem.m_pData = Item.m_pData;
+			VisItem.m_RenderOrder = GetRenderOrderFromSnap(Item.m_Type, Item.m_pData);
+			m_vVisualItems.push_back(VisItem);
+		}
 	}
+
+	if(m_vVisualItems.empty())
+		return;
+
+	// Sort by render order for correct z-ordering
+	std::sort(m_vVisualItems.begin(), m_vVisualItems.end(),
+		[](const CVisualItem &a, const CVisualItem &b) {
+			return a.m_RenderOrder < b.m_RenderOrder;
+		});
+
+	// Save current screen mapping
+	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+
+	int PrevGroup = -2; // invalid sentinel
+	for(const CVisualItem &Item : m_vVisualItems)
+	{
+		int GroupIndex = RenderOrderGroup(Item.m_RenderOrder);
+
+		// Resolve game group alias
+		int ResolvedGroup = GroupIndex;
+		if(GroupIndex == RENDERORDER_GROUP_GAME)
+			ResolvedGroup = m_GameGroupIndex;
+
+		// Apply group's screen mapping when switching groups
+		if(ResolvedGroup != PrevGroup)
+		{
+			if(ResolvedGroup >= 0 && ResolvedGroup != m_GameGroupIndex)
+				ApplyGroupScreenMapping(ResolvedGroup);
+			else
+				Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+			PrevGroup = ResolvedGroup;
+		}
+
+		RenderItem(Item);
+	}
+
+	// Restore screen mapping
+	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
