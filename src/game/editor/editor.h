@@ -265,6 +265,7 @@ public:
 		m_AllowPlaceUnusedTiles = EUnusedEntities::NOT_ALLOWED;
 		m_BrushDrawDestructive = true;
 		m_BrushBucketFill = false;
+		m_BucketFillLargeLayerWasWarned = false;
 	}
 
 	class CHoverTile
@@ -373,6 +374,7 @@ public:
 		POPEVENT_LOADDROP,
 		POPEVENT_NEW,
 		POPEVENT_LARGELAYER,
+		POPEVENT_BUCKET_FILL_LARGE_LAYER,
 		POPEVENT_PREVENTUNUSEDTILES,
 		POPEVENT_IMAGEDIV16,
 		POPEVENT_IMAGE_MAX,
@@ -393,6 +395,7 @@ public:
 	int m_PopupEventWasActivated;
 	bool m_LargeLayerWasWarned;
 	bool m_PreventUnusedTilesWasWarned;
+	bool m_BucketFillLargeLayerWasWarned;
 
 	enum class EUnusedEntities
 	{

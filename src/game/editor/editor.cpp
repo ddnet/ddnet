@@ -8,6 +8,7 @@
 
 #include <base/color.h>
 #include <base/log.h>
+#include <base/str.h>
 #include <base/system.h>
 
 #include <engine/client.h>
@@ -2607,6 +2608,13 @@ void CEditor::DoMapEditor(CUIRect View)
 						str_copy(m_aTooltip, pExplanation);
 				}
 			}
+			else if(m_BrushBucketFill)
+			{
+				if (m_pBrush->IsEmpty())
+					str_copy(m_aTooltip, "Use left mouse button to select a tile to bucket fill with.");
+				else
+				 	str_copy(m_aTooltip, "Use left mouse button to bucket fill with the brush. Right click to clear the brush.");
+			}
 			else if(m_pBrush->IsEmpty() && Map()->SelectedLayerType(0, LAYERTYPE_QUADS) != nullptr)
 				str_copy(m_aTooltip, "Use left mouse button to drag and create a brush. Hold shift to select multiple quads. Press R to rotate selected quads. Use ctrl+right click to select layer.");
 			else if(m_pBrush->IsEmpty())
@@ -2729,13 +2737,23 @@ void CEditor::DoMapEditor(CUIRect View)
 
 								if(TargetRect.w > 0 && TargetRect.h > 0)
 								{
-									const CTile TargetTile = pTargetLayer->GetTile(TargetRect.x, TargetRect.y);
-									const CTile SelectedTile = pBrushLayer->GetTile(0, 0);
-
-									if(!(TargetTile.m_Index == SelectedTile.m_Index && TargetTile.m_Flags == SelectedTile.m_Flags) && FloodFillTiles(pTargetLayer.get(), TargetRect.x, TargetRect.y, SelectedTile) > 0)
+									// Warn if layer is too large for bucket fill
+									if((pTargetLayer->m_Width > 1000 || pTargetLayer->m_Height > 1000) && !m_BucketFillLargeLayerWasWarned)
 									{
-										std::shared_ptr<IEditorAction> Action = std::make_shared<CEditorBrushDrawAction>(Map(), Map()->m_SelectedGroup);
-										Map()->m_EditorHistory.RecordAction(Action);
+										m_PopupEventType = POPEVENT_BUCKET_FILL_LARGE_LAYER;
+										m_PopupEventActivated = true;
+										m_BucketFillLargeLayerWasWarned = true;
+									}
+									else
+									{
+										const CTile TargetTile = pTargetLayer->GetTile(TargetRect.x, TargetRect.y);
+										const CTile SelectedTile = pBrushLayer->GetTile(0, 0);
+
+										if(!(TargetTile.m_Index == SelectedTile.m_Index && TargetTile.m_Flags == SelectedTile.m_Flags) && FloodFillTiles(pTargetLayer.get(), TargetRect.x, TargetRect.y, SelectedTile) > 0)
+										{
+											std::shared_ptr<IEditorAction> Action = std::make_shared<CEditorBrushDrawAction>(Map(), Map()->m_SelectedGroup);
+											Map()->m_EditorHistory.RecordAction(Action);
+										}
 									}
 								}
 							}
