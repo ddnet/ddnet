@@ -44,6 +44,11 @@ void CMapLayers::OnMapLoad()
 	m_EnvEvaluator = CEnvelopeState(m_pLayers->Map(), m_OnlineOnly);
 	m_EnvEvaluator.OnInterfacesInit(GameClient());
 	m_MapRenderer.Load(m_Type, m_pLayers, m_pImages, &m_EnvEvaluator, FRenderCallbackOptional);
+
+	// Register visual primitives callback to render visuals after each group
+	m_MapRenderer.SetGroupRenderCallback([this](int GroupId, const CRenderLayerParams &Params) {
+		GameClient()->m_Visuals.RenderForGroup(GroupId);
+	});
 }
 
 void CMapLayers::OnRender()

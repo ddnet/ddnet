@@ -16,7 +16,8 @@
 #include <game/layers.h>
 
 #include <algorithm>
-#include <unordered_set>
+
+// --- Individual item rendering (geometry only, no Begin/End/TextureSet) ---
 
 void CVisuals::RenderLine(const CVisualItem &Item)
 {
@@ -25,44 +26,35 @@ void CVisuals::RenderLine(const CVisualItem &Item)
 	vec2 From(pLine->m_FromX, pLine->m_FromY);
 	vec2 To(pLine->m_ToX, pLine->m_ToY);
 
-	// Interpolate with previous snapshot
 	if(Item.m_pPrevData)
 	{
 		const CNetObj_DDNetVisualLine *pPrevLine = static_cast<const CNetObj_DDNetVisualLine *>(Item.m_pPrevData);
-		float Intra = Client()->IntraGameTick(g_Config.m_ClDummy);
-		From = mix(vec2(pPrevLine->m_FromX, pPrevLine->m_FromY), From, Intra);
-		To = mix(vec2(pPrevLine->m_ToX, pPrevLine->m_ToY), To, Intra);
+		From = mix(vec2(pPrevLine->m_FromX, pPrevLine->m_FromY), From, m_IntraGameTick);
+		To = mix(vec2(pPrevLine->m_ToX, pPrevLine->m_ToY), To, m_IntraGameTick);
 	}
 
-	// Camera-relative: offset by camera center
 	if(pLine->m_Flags & VISUALFLAG_CAMERA_RELATIVE)
 	{
-		vec2 CamCenter = GameClient()->m_Camera.m_Center;
-		From += CamCenter;
-		To += CamCenter;
+		From += m_CameraCenter;
+		To += m_CameraCenter;
 	}
 
-	// Spring damping for world-space visuals
 	if(!(pLine->m_Flags & (VISUALFLAG_SCREEN_SPACE | VISUALFLAG_CAMERA_RELATIVE)))
 	{
-		float Dt = Client()->RenderFrameTime();
 		float Omega = GetSpringOmega(pLine->m_Flags);
-		float Decay = expf(-Omega * Dt);
+		float Decay = expf(-Omega * m_RenderFrameTime);
 		CSpringState &S = FindOrCreateSpring(Item.m_Id, From, To, 0);
-		From = SpringDamp(S.m_Pos, S.m_Vel, From, Dt, Omega, Decay);
-		To = SpringDamp(S.m_Pos2, S.m_Vel2, To, Dt, Omega, Decay);
+		From = SpringDamp(S.m_Pos, S.m_Vel, From, m_RenderFrameTime, Omega, Decay);
+		To = SpringDamp(S.m_Pos2, S.m_Vel2, To, m_RenderFrameTime, Omega, Decay);
 	}
 
-	int Width = pLine->m_Width;
+	Graphics()->SetColor(ColorRGBA::UnpackAlphaLast<ColorRGBA>(pLine->m_Color));
 
+	int Width = pLine->m_Width;
 	if(Width <= 1)
 	{
-		Graphics()->TextureClear();
-		Graphics()->LinesBegin();
-		Graphics()->SetColor(ColorRGBA::UnpackAlphaLast<ColorRGBA>(pLine->m_Color));
 		IGraphics::CLineItem Line(From.x, From.y, To.x, To.y);
 		Graphics()->LinesDraw(&Line, 1);
-		Graphics()->LinesEnd();
 	}
 	else
 	{
@@ -74,10 +66,6 @@ void CVisuals::RenderLine(const CVisualItem &Item)
 			Dir = vec2(1.0f, 0.0f);
 
 		vec2 Perp = vec2(-Dir.y, Dir.x) * (Width / 2.0f);
-
-		Graphics()->TextureClear();
-		Graphics()->QuadsBegin();
-		Graphics()->SetColor(ColorRGBA::UnpackAlphaLast<ColorRGBA>(pLine->m_Color));
 
 		IGraphics::CFreeformItem Freeform(
 			From.x - Perp.x, From.y - Perp.y,
@@ -91,7 +79,6 @@ void CVisuals::RenderLine(const CVisualItem &Item)
 		{
 			float HalfWidth = Width / 2.0f;
 			int Segments = maximum(8, Width / 2);
-			// Start cap (semicircle behind From)
 			for(int i = 0; i < Segments; i++)
 			{
 				float a1 = pi / 2.0f + (float)i / Segments * pi;
@@ -101,7 +88,6 @@ void CVisuals::RenderLine(const CVisualItem &Item)
 				IGraphics::CFreeformItem CapItem(From.x, From.y, From.x, From.y, p1.x, p1.y, p2.x, p2.y);
 				Graphics()->QuadsDrawFreeform(&CapItem, 1);
 			}
-			// End cap (semicircle past To)
 			for(int i = 0; i < Segments; i++)
 			{
 				float a1 = -pi / 2.0f + (float)i / Segments * pi;
@@ -128,8 +114,6 @@ void CVisuals::RenderLine(const CVisualItem &Item)
 				To.x + Perp.x + Ext.x, To.y + Perp.y + Ext.y);
 			Graphics()->QuadsDrawFreeform(&EndCap, 1);
 		}
-
-		Graphics()->QuadsEnd();
 	}
 }
 
@@ -144,27 +128,23 @@ void CVisuals::RenderCircle(const CVisualItem &Item)
 	if(Item.m_pPrevData)
 	{
 		const CNetObj_DDNetVisualCircle *pPrevCircle = static_cast<const CNetObj_DDNetVisualCircle *>(Item.m_pPrevData);
-		float Intra = Client()->IntraGameTick(g_Config.m_ClDummy);
-		CenterX = mix((float)pPrevCircle->m_X, CenterX, Intra);
-		CenterY = mix((float)pPrevCircle->m_Y, CenterY, Intra);
-		Radius = mix((float)pPrevCircle->m_Radius, Radius, Intra);
+		CenterX = mix((float)pPrevCircle->m_X, CenterX, m_IntraGameTick);
+		CenterY = mix((float)pPrevCircle->m_Y, CenterY, m_IntraGameTick);
+		Radius = mix((float)pPrevCircle->m_Radius, Radius, m_IntraGameTick);
 	}
 
-	// Camera-relative: offset by camera center
 	if(pCircle->m_Flags & VISUALFLAG_CAMERA_RELATIVE)
 	{
-		CenterX += GameClient()->m_Camera.m_Center.x;
-		CenterY += GameClient()->m_Camera.m_Center.y;
+		CenterX += m_CameraCenter.x;
+		CenterY += m_CameraCenter.y;
 	}
 
-	// Spring damping for world-space visuals
 	if(!(pCircle->m_Flags & (VISUALFLAG_SCREEN_SPACE | VISUALFLAG_CAMERA_RELATIVE)))
 	{
-		float Dt = Client()->RenderFrameTime();
 		float Omega = GetSpringOmega(pCircle->m_Flags);
-		float Decay = expf(-Omega * Dt);
+		float Decay = expf(-Omega * m_RenderFrameTime);
 		CSpringState &S = FindOrCreateSpring(Item.m_Id, vec2(CenterX, CenterY), vec2(0, 0), 0);
-		vec2 Result = SpringDamp(S.m_Pos, S.m_Vel, vec2(CenterX, CenterY), Dt, Omega, Decay);
+		vec2 Result = SpringDamp(S.m_Pos, S.m_Vel, vec2(CenterX, CenterY), m_RenderFrameTime, Omega, Decay);
 		CenterX = Result.x;
 		CenterY = Result.y;
 	}
@@ -174,14 +154,11 @@ void CVisuals::RenderCircle(const CVisualItem &Item)
 	if(Segments == 0)
 		Segments = maximum(16, (int)(Radius / 4.0f));
 
-	Graphics()->TextureClear();
+	Graphics()->SetColor(ColorRGBA::UnpackAlphaLast<ColorRGBA>(pCircle->m_Color));
 
 	if(Filled)
 	{
-		Graphics()->QuadsBegin();
-		Graphics()->SetColor(ColorRGBA::UnpackAlphaLast<ColorRGBA>(pCircle->m_Color));
 		Graphics()->DrawCircle(CenterX, CenterY, Radius, Segments);
-		Graphics()->QuadsEnd();
 	}
 	else
 	{
@@ -189,8 +166,6 @@ void CVisuals::RenderCircle(const CVisualItem &Item)
 		float Inner = Radius - OutlineWidth / 2.0f;
 		float Outer = Radius + OutlineWidth / 2.0f;
 
-		Graphics()->QuadsBegin();
-		Graphics()->SetColor(ColorRGBA::UnpackAlphaLast<ColorRGBA>(pCircle->m_Color));
 		for(int i = 0; i < Segments; i++)
 		{
 			float a1 = (float)i / Segments * 2.0f * pi;
@@ -202,7 +177,6 @@ void CVisuals::RenderCircle(const CVisualItem &Item)
 				CenterX + cosf(a2) * Outer, CenterY + sinf(a2) * Outer);
 			Graphics()->QuadsDrawFreeform(&Ring, 1);
 		}
-		Graphics()->QuadsEnd();
 	}
 }
 
@@ -219,54 +193,45 @@ void CVisuals::RenderQuad(const CVisualItem &Item)
 	if(Item.m_pPrevData)
 	{
 		const CNetObj_DDNetVisualQuad *pPrevQuad = static_cast<const CNetObj_DDNetVisualQuad *>(Item.m_pPrevData);
-		float Intra = Client()->IntraGameTick(g_Config.m_ClDummy);
-		CenterX = mix((float)pPrevQuad->m_X, CenterX, Intra);
-		CenterY = mix((float)pPrevQuad->m_Y, CenterY, Intra);
-		HalfW = mix(pPrevQuad->m_W / 2.0f, HalfW, Intra);
-		HalfH = mix(pPrevQuad->m_H / 2.0f, HalfH, Intra);
-		AngleRad = mix((pPrevQuad->m_Angle / 256.0f) * (pi / 180.0f), AngleRad, Intra);
+		CenterX = mix((float)pPrevQuad->m_X, CenterX, m_IntraGameTick);
+		CenterY = mix((float)pPrevQuad->m_Y, CenterY, m_IntraGameTick);
+		HalfW = mix(pPrevQuad->m_W / 2.0f, HalfW, m_IntraGameTick);
+		HalfH = mix(pPrevQuad->m_H / 2.0f, HalfH, m_IntraGameTick);
+		AngleRad = mix((pPrevQuad->m_Angle / 256.0f) * (pi / 180.0f), AngleRad, m_IntraGameTick);
 	}
 
-	// Camera-relative: offset by camera center
 	if(pQuad->m_Flags & VISUALFLAG_CAMERA_RELATIVE)
 	{
-		CenterX += GameClient()->m_Camera.m_Center.x;
-		CenterY += GameClient()->m_Camera.m_Center.y;
+		CenterX += m_CameraCenter.x;
+		CenterY += m_CameraCenter.y;
 	}
 
-	// Spring damping for world-space visuals
 	if(!(pQuad->m_Flags & (VISUALFLAG_SCREEN_SPACE | VISUALFLAG_CAMERA_RELATIVE)))
 	{
-		float Dt = Client()->RenderFrameTime();
 		float Omega = GetSpringOmega(pQuad->m_Flags);
-		float Decay = expf(-Omega * Dt);
+		float Decay = expf(-Omega * m_RenderFrameTime);
 		CSpringState &S = FindOrCreateSpring(Item.m_Id, vec2(CenterX, CenterY), vec2(0, 0), AngleRad);
-		vec2 Result = SpringDamp(S.m_Pos, S.m_Vel, vec2(CenterX, CenterY), Dt, Omega, Decay);
+		vec2 Result = SpringDamp(S.m_Pos, S.m_Vel, vec2(CenterX, CenterY), m_RenderFrameTime, Omega, Decay);
 		CenterX = Result.x;
 		CenterY = Result.y;
-		AngleRad = SpringDampAngle(S.m_Angle, S.m_AngleVel, AngleRad, Dt, Omega, Decay);
+		AngleRad = SpringDampAngle(S.m_Angle, S.m_AngleVel, AngleRad, m_RenderFrameTime, Omega, Decay);
 	}
 
 	IGraphics::CTextureHandle QuadTex = GetImageTexture(pQuad->m_ImageIndex);
 	bool HasTexture = !QuadTex.IsNullTexture();
 	bool Filled = UnpackShapeFilled(pQuad->m_Flags) || HasTexture;
 
-	if(HasTexture)
-		Graphics()->TextureSet(QuadTex);
-	else
-		Graphics()->TextureClear();
+	Graphics()->SetColor(ColorRGBA::UnpackAlphaLast<ColorRGBA>(pQuad->m_Color));
 
 	if(Filled)
 	{
-		Graphics()->QuadsBegin();
-		Graphics()->SetColor(ColorRGBA::UnpackAlphaLast<ColorRGBA>(pQuad->m_Color));
+		// Reset UV subset after tiles that may have changed it within the same batch
+		if(HasTexture)
+			Graphics()->QuadsSetSubset(0, 0, 1, 1);
 		Graphics()->QuadsSetRotation(AngleRad);
-
 		IGraphics::CQuadItem QuadItem(CenterX - HalfW, CenterY - HalfH, HalfW * 2.0f, HalfH * 2.0f);
 		Graphics()->QuadsDrawTL(&QuadItem, 1);
-
 		Graphics()->QuadsSetRotation(0.0f);
-		Graphics()->QuadsEnd();
 	}
 	else
 	{
@@ -281,8 +246,6 @@ void CVisuals::RenderQuad(const CVisualItem &Item)
 			vec2(CenterX + (-HalfW) * Cos - (HalfH) * Sin, CenterY + (-HalfW) * Sin + (HalfH) * Cos),
 		};
 
-		Graphics()->QuadsBegin();
-		Graphics()->SetColor(ColorRGBA::UnpackAlphaLast<ColorRGBA>(pQuad->m_Color));
 		for(int i = 0; i < 4; i++)
 		{
 			vec2 A = Corners[i];
@@ -297,7 +260,6 @@ void CVisuals::RenderQuad(const CVisualItem &Item)
 				B.x + EdgePerp.x, B.y + EdgePerp.y);
 			Graphics()->QuadsDrawFreeform(&Edge, 1);
 		}
-		Graphics()->QuadsEnd();
 	}
 }
 
@@ -318,30 +280,26 @@ void CVisuals::RenderTile(const CVisualItem &Item)
 	if(Item.m_pPrevData)
 	{
 		const CNetObj_DDNetVisualTile *pPrevTile = static_cast<const CNetObj_DDNetVisualTile *>(Item.m_pPrevData);
-		float Intra = Client()->IntraGameTick(g_Config.m_ClDummy);
-		CenterX = mix((float)pPrevTile->m_X, CenterX, Intra);
-		CenterY = mix((float)pPrevTile->m_Y, CenterY, Intra);
-		AngleRad = mix((pPrevTile->m_Angle / 256.0f) * (pi / 180.0f), AngleRad, Intra);
+		CenterX = mix((float)pPrevTile->m_X, CenterX, m_IntraGameTick);
+		CenterY = mix((float)pPrevTile->m_Y, CenterY, m_IntraGameTick);
+		AngleRad = mix((pPrevTile->m_Angle / 256.0f) * (pi / 180.0f), AngleRad, m_IntraGameTick);
 	}
 
-	// Camera-relative: offset by camera center
 	if(pTile->m_Flags & VISUALFLAG_CAMERA_RELATIVE)
 	{
-		CenterX += GameClient()->m_Camera.m_Center.x;
-		CenterY += GameClient()->m_Camera.m_Center.y;
+		CenterX += m_CameraCenter.x;
+		CenterY += m_CameraCenter.y;
 	}
 
-	// Spring damping for world-space visuals
 	if(!(pTile->m_Flags & (VISUALFLAG_SCREEN_SPACE | VISUALFLAG_CAMERA_RELATIVE)))
 	{
-		float Dt = Client()->RenderFrameTime();
 		float Omega = GetSpringOmega(pTile->m_Flags);
-		float Decay = expf(-Omega * Dt);
+		float Decay = expf(-Omega * m_RenderFrameTime);
 		CSpringState &S = FindOrCreateSpring(Item.m_Id, vec2(CenterX, CenterY), vec2(0, 0), AngleRad);
-		vec2 Result = SpringDamp(S.m_Pos, S.m_Vel, vec2(CenterX, CenterY), Dt, Omega, Decay);
+		vec2 Result = SpringDamp(S.m_Pos, S.m_Vel, vec2(CenterX, CenterY), m_RenderFrameTime, Omega, Decay);
 		CenterX = Result.x;
 		CenterY = Result.y;
-		AngleRad = SpringDampAngle(S.m_Angle, S.m_AngleVel, AngleRad, Dt, Omega, Decay);
+		AngleRad = SpringDampAngle(S.m_Angle, S.m_AngleVel, AngleRad, m_RenderFrameTime, Omega, Decay);
 	}
 
 	int Col = pTile->m_TileIndex % 16;
@@ -357,9 +315,6 @@ void CVisuals::RenderTile(const CVisualItem &Item)
 	if(TileFlags & TILEFLAG_YFLIP)
 		std::swap(v0, v1);
 
-	Graphics()->TextureSet(TileTex);
-
-	Graphics()->QuadsBegin();
 	Graphics()->SetColor(ColorRGBA::UnpackAlphaLast<ColorRGBA>(pTile->m_Color));
 	Graphics()->QuadsSetSubset(u0, v0, u1, v1);
 
@@ -375,11 +330,10 @@ void CVisuals::RenderTile(const CVisualItem &Item)
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
 
 	Graphics()->QuadsSetRotation(0.0f);
-	Graphics()->QuadsEnd();
 }
 
-// Critically damped spring: smooth arrival at target without oscillation
-// Omega = natural frequency (higher = faster response)
+// --- Spring damping ---
+
 vec2 CVisuals::SpringDamp(vec2 &Pos, vec2 &Vel, vec2 Target, float Dt, float Omega, float Decay)
 {
 	vec2 Delta = Pos - Target;
@@ -408,24 +362,22 @@ CSpringState &CVisuals::FindOrCreateSpring(int SnapId, vec2 Pos, vec2 Pos2, floa
 		it->second.m_Angle = Angle;
 		it->second.m_AngleVel = 0;
 	}
+	it->second.m_Generation = m_SpringGeneration;
 	return it->second;
 }
 
 void CVisuals::CleanupSprings()
 {
-	std::unordered_set<int> LiveIds;
-	LiveIds.reserve(m_vVisualItems.size());
-	for(const CVisualItem &Item : m_vVisualItems)
-		LiveIds.insert(Item.m_Id);
-
 	for(auto it = m_Springs.begin(); it != m_Springs.end();)
 	{
-		if(LiveIds.count(it->first) == 0)
+		if(it->second.m_Generation != m_SpringGeneration)
 			it = m_Springs.erase(it);
 		else
 			++it;
 	}
 }
+
+// --- Snap data extraction helpers ---
 
 static int GetFlagsFromSnap(int Type, const void *pData)
 {
@@ -453,6 +405,33 @@ static int GetRenderOrderFromSnap(int Type, const void *pData)
 	return RENDERORDER_DEFAULT;
 }
 
+// Compute batch key for draw-call batching:
+//   <0 = lines mode (thin lines), 0 = quads no texture, >0 = quads with texture (imageIndex + 1)
+static int ComputeBatchKey(int Type, const void *pData)
+{
+	switch(Type)
+	{
+	case NETOBJTYPE_DDNETVISUALLINE:
+		return static_cast<const CNetObj_DDNetVisualLine *>(pData)->m_Width <= 1 ? -1 : 0;
+	case NETOBJTYPE_DDNETVISUALCIRCLE:
+		return 0;
+	case NETOBJTYPE_DDNETVISUALQUAD:
+	{
+		int Idx = static_cast<const CNetObj_DDNetVisualQuad *>(pData)->m_ImageIndex;
+		return Idx >= 0 ? Idx + 1 : 0;
+	}
+	case NETOBJTYPE_DDNETVISUALTILE:
+	{
+		int Idx = static_cast<const CNetObj_DDNetVisualTile *>(pData)->m_ImageIndex;
+		return Idx >= 0 ? Idx + 1 : 0;
+	}
+	default:
+		return 0;
+	}
+}
+
+// --- Rendering dispatch ---
+
 void CVisuals::RenderItem(const CVisualItem &Item)
 {
 	if(Item.m_Type == NETOBJTYPE_DDNETVISUALLINE)
@@ -465,34 +444,57 @@ void CVisuals::RenderItem(const CVisualItem &Item)
 		RenderTile(Item);
 }
 
-void CVisuals::ApplyGroupScreenMapping(int GroupIndex)
+// Render a contiguous range of items, batching Begin/End by (render mode, texture).
+// Items must be sorted by BatchKey within the range.
+void CVisuals::RenderBatchedItems(const CVisualItem *pItems, int NumItems)
 {
-	CLayers *pLayers = GameClient()->Layers();
-	if(!pLayers || GroupIndex < 0 || GroupIndex >= pLayers->NumGroups())
-		return;
+	int i = 0;
+	while(i < NumItems)
+	{
+		int BatchKey = pItems[i].m_BatchKey;
 
-	CMapItemGroup *pGroup = pLayers->GetGroup(GroupIndex);
-	if(!pGroup)
-		return;
+		if(BatchKey < 0)
+		{
+			Graphics()->TextureClear();
+			Graphics()->LinesBegin();
+		}
+		else
+		{
+			if(BatchKey > 0)
+			{
+				IGraphics::CTextureHandle Tex = GetImageTexture(BatchKey - 1);
+				if(!Tex.IsNullTexture())
+					Graphics()->TextureSet(Tex);
+				else
+					Graphics()->TextureClear();
+			}
+			else
+			{
+				Graphics()->TextureClear();
+			}
+			Graphics()->QuadsBegin();
+		}
 
-	float Zoom = GameClient()->m_Camera.m_Zoom;
-	vec2 Center = GameClient()->m_Camera.m_Center;
+		while(i < NumItems && pItems[i].m_BatchKey == BatchKey)
+		{
+			RenderItem(pItems[i]);
+			i++;
+		}
 
-	int ParallaxZoom = std::clamp(maximum(pGroup->m_ParallaxX, pGroup->m_ParallaxY), 0, 100);
-	float aPoints[4];
-	Graphics()->MapScreenToWorld(Center.x, Center.y,
-		pGroup->m_ParallaxX, pGroup->m_ParallaxY, (float)ParallaxZoom,
-		pGroup->m_OffsetX, pGroup->m_OffsetY, Graphics()->ScreenAspect(),
-		Zoom, aPoints);
-	Graphics()->MapScreen(aPoints[0], aPoints[1], aPoints[2], aPoints[3]);
+		if(BatchKey < 0)
+			Graphics()->LinesEnd();
+		else
+			Graphics()->QuadsEnd();
+	}
 }
+
+// --- Texture cache ---
 
 IGraphics::CTextureHandle CVisuals::GetImageTexture(int ImageIndex)
 {
 	if(ImageIndex < 0 || ImageIndex >= GameClient()->m_MapImages.Num())
 		return IGraphics::CTextureHandle();
 
-	// Check lazy cache first
 	auto it = m_TexCache.find(ImageIndex);
 	if(it != m_TexCache.end())
 		return it->second;
@@ -535,9 +537,10 @@ IGraphics::CTextureHandle CVisuals::GetImageTexture(int ImageIndex)
 	return Handle;
 }
 
+// --- Lifecycle ---
+
 void CVisuals::OnMapLoad()
 {
-	// Clear lazy-loaded texture cache
 	for(auto &[Index, Handle] : m_TexCache)
 	{
 		if(!Handle.IsNullTexture())
@@ -545,8 +548,8 @@ void CVisuals::OnMapLoad()
 	}
 	m_TexCache.clear();
 	m_Springs.clear();
+	m_SpringGeneration = 0;
 
-	// Find game group index
 	m_GameGroupIndex = -1;
 	CLayers *pLayers = GameClient()->Layers();
 	if(pLayers)
@@ -570,90 +573,112 @@ void CVisuals::OnRender()
 	if(!g_Config.m_ClShowVisuals)
 		return;
 
-	// Collect visual items
+	// Cache per-frame values to avoid repeated virtual calls
+	m_IntraGameTick = Client()->IntraGameTick(g_Config.m_ClDummy);
+	m_RenderFrameTime = Client()->RenderFrameTime();
+	m_CameraCenter = GameClient()->m_Camera.m_Center;
+
+	// Collect visual items, separating world-space from screen-space
 	m_vVisualItems.clear();
+	m_vScreenItems.clear();
+
 	for(const CSnapEntities &Ent : GameClient()->SnapEntities())
 	{
-		const IClient::CSnapItem Item = Ent.m_Item;
-		if(Item.m_Type == NETOBJTYPE_DDNETVISUALLINE ||
-			Item.m_Type == NETOBJTYPE_DDNETVISUALCIRCLE ||
-			Item.m_Type == NETOBJTYPE_DDNETVISUALQUAD ||
-			Item.m_Type == NETOBJTYPE_DDNETVISUALTILE)
+		const IClient::CSnapItem &Item = Ent.m_Item;
+		if(Item.m_Type != NETOBJTYPE_DDNETVISUALLINE &&
+			Item.m_Type != NETOBJTYPE_DDNETVISUALCIRCLE &&
+			Item.m_Type != NETOBJTYPE_DDNETVISUALQUAD &&
+			Item.m_Type != NETOBJTYPE_DDNETVISUALTILE)
+			continue;
+
+		CVisualItem VisItem;
+		VisItem.m_Type = Item.m_Type;
+		VisItem.m_Id = Item.m_Id;
+		VisItem.m_pData = Item.m_pData;
+		VisItem.m_pPrevData = Client()->SnapFindItem(IClient::SNAP_PREV, Item.m_Type, Item.m_Id);
+		VisItem.m_Flags = GetFlagsFromSnap(Item.m_Type, Item.m_pData);
+		VisItem.m_RenderOrder = GetRenderOrderFromSnap(Item.m_Type, Item.m_pData);
+		VisItem.m_BatchKey = ComputeBatchKey(Item.m_Type, Item.m_pData);
+
+		if(VisItem.m_Flags & VISUALFLAG_SCREEN_SPACE)
 		{
-			CVisualItem VisItem;
-			VisItem.m_Type = Item.m_Type;
-			VisItem.m_Id = Item.m_Id;
-			VisItem.m_pData = Item.m_pData;
-			VisItem.m_pPrevData = Client()->SnapFindItem(IClient::SNAP_PREV, Item.m_Type, Item.m_Id);
-			VisItem.m_RenderOrder = GetRenderOrderFromSnap(Item.m_Type, Item.m_pData);
-			VisItem.m_Flags = GetFlagsFromSnap(Item.m_Type, Item.m_pData);
+			VisItem.m_GroupIndex = -1;
+			m_vScreenItems.push_back(VisItem);
+		}
+		else
+		{
+			int GroupIndex = RenderOrderGroup(VisItem.m_RenderOrder);
+			if(GroupIndex == RENDERORDER_GROUP_GAME)
+				GroupIndex = m_GameGroupIndex;
+			VisItem.m_GroupIndex = GroupIndex;
 			m_vVisualItems.push_back(VisItem);
 		}
 	}
 
+	// Sort world-space items by (GroupIndex, RenderOrder, BatchKey)
+	// Enables O(log N) group lookup via binary search and minimizes draw state changes
+	if(m_vVisualItems.size() > 1)
+	{
+		std::sort(m_vVisualItems.begin(), m_vVisualItems.end(), [](const CVisualItem &a, const CVisualItem &b) {
+			if(a.m_GroupIndex != b.m_GroupIndex)
+				return a.m_GroupIndex < b.m_GroupIndex;
+			if(a.m_RenderOrder != b.m_RenderOrder)
+				return a.m_RenderOrder < b.m_RenderOrder;
+			return a.m_BatchKey < b.m_BatchKey;
+		});
+	}
+
+	// Sort screen-space items by (RenderOrder, BatchKey)
+	if(m_vScreenItems.size() > 1)
+	{
+		std::sort(m_vScreenItems.begin(), m_vScreenItems.end(), [](const CVisualItem &a, const CVisualItem &b) {
+			if(a.m_RenderOrder != b.m_RenderOrder)
+				return a.m_RenderOrder < b.m_RenderOrder;
+			return a.m_BatchKey < b.m_BatchKey;
+		});
+	}
+
+	// Generation-based spring cleanup (no per-frame allocation)
+	m_SpringGeneration++;
+	for(const CVisualItem &Item : m_vVisualItems)
+	{
+		auto it = m_Springs.find(Item.m_Id);
+		if(it != m_Springs.end())
+			it->second.m_Generation = m_SpringGeneration;
+	}
+	for(const CVisualItem &Item : m_vScreenItems)
+	{
+		auto it = m_Springs.find(Item.m_Id);
+		if(it != m_Springs.end())
+			it->second.m_Generation = m_SpringGeneration;
+	}
+	CleanupSprings();
+
+	// Render screen-space visuals
+	if(!m_vScreenItems.empty())
+	{
+		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+		Graphics()->MapScreen(0, 0, 300.0f * Graphics()->ScreenAspect(), 300.0f);
+
+		RenderBatchedItems(m_vScreenItems.data(), (int)m_vScreenItems.size());
+
+		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+	}
+}
+
+void CVisuals::RenderForGroup(int GroupId)
+{
 	if(m_vVisualItems.empty())
 		return;
 
-	// Cleanup stale spring entries
-	CleanupSprings();
+	// Binary search for the group's range in the sorted vector
+	auto begin = std::lower_bound(m_vVisualItems.begin(), m_vVisualItems.end(), GroupId,
+		[](const CVisualItem &Item, int Group) { return Item.m_GroupIndex < Group; });
+	auto end = std::upper_bound(begin, m_vVisualItems.end(), GroupId,
+		[](int Group, const CVisualItem &Item) { return Group < Item.m_GroupIndex; });
 
-	// Sort by render order for correct z-ordering (skip if already sorted)
-	auto RenderOrderCmp = [](const CVisualItem &a, const CVisualItem &b) {
-		return a.m_RenderOrder < b.m_RenderOrder;
-	};
-	if(!std::is_sorted(m_vVisualItems.begin(), m_vVisualItems.end(), RenderOrderCmp))
-		std::sort(m_vVisualItems.begin(), m_vVisualItems.end(), RenderOrderCmp);
-
-	// Save current screen mapping
-	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-
-	int PrevGroup = -2; // invalid sentinel
-	bool PrevScreenSpace = false;
-	for(const CVisualItem &Item : m_vVisualItems)
-	{
-		bool IsScreenSpace = (Item.m_Flags & VISUALFLAG_SCREEN_SPACE) != 0;
-
-		if(IsScreenSpace)
-		{
-			if(!PrevScreenSpace)
-			{
-				// Switch to fixed screen coordinates (same as HUD: height=300, width=300*aspect)
-				Graphics()->MapScreen(0, 0, 300.0f * Graphics()->ScreenAspect(), 300.0f);
-				PrevScreenSpace = true;
-				PrevGroup = -2;
-			}
-		}
-		else
-		{
-			if(PrevScreenSpace)
-			{
-				Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
-				PrevScreenSpace = false;
-				PrevGroup = -2;
-			}
-
-			int GroupIndex = RenderOrderGroup(Item.m_RenderOrder);
-
-			// Resolve game group alias
-			int ResolvedGroup = GroupIndex;
-			if(GroupIndex == RENDERORDER_GROUP_GAME)
-				ResolvedGroup = m_GameGroupIndex;
-
-			// Apply group's screen mapping when switching groups
-			if(ResolvedGroup != PrevGroup)
-			{
-				if(ResolvedGroup >= 0 && ResolvedGroup != m_GameGroupIndex)
-					ApplyGroupScreenMapping(ResolvedGroup);
-				else
-					Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
-				PrevGroup = ResolvedGroup;
-			}
-		}
-
-		RenderItem(Item);
-	}
-
-	// Restore screen mapping
-	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+	int Count = (int)(end - begin);
+	if(Count > 0)
+		RenderBatchedItems(&*begin, Count);
 }

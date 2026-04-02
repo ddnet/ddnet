@@ -146,10 +146,18 @@ void CMapRenderer::Render(const CRenderLayerParams &Params)
 	Graphics()->GetScreen(&ScreenXLeft, &ScreenYTop, &ScreenXRight, &ScreenYBottom);
 
 	bool DoRenderGroup = true;
+	int CurrentGroupId = -1;
 	for(auto &pRenderLayer : m_vpRenderLayers)
 	{
 		if(pRenderLayer->IsGroup())
+		{
+			// Call callback for the previous group (after all its layers rendered)
+			if(m_GroupRenderCallback && CurrentGroupId >= 0 && DoRenderGroup)
+				m_GroupRenderCallback(CurrentGroupId, Params);
+
+			CurrentGroupId = pRenderLayer->GetGroup();
 			DoRenderGroup = pRenderLayer->DoRender(Params);
+		}
 
 		if(!DoRenderGroup)
 			continue;
@@ -157,6 +165,10 @@ void CMapRenderer::Render(const CRenderLayerParams &Params)
 		if(pRenderLayer->DoRender(Params))
 			pRenderLayer->Render(Params);
 	}
+
+	// Callback for the last group
+	if(m_GroupRenderCallback && CurrentGroupId >= 0 && DoRenderGroup)
+		m_GroupRenderCallback(CurrentGroupId, Params);
 
 	// Reset clip from last group
 	Graphics()->ClipDisable();

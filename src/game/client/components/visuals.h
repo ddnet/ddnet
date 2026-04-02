@@ -17,6 +17,8 @@ struct CVisualItem
 	const void *m_pPrevData;
 	int m_RenderOrder;
 	int m_Flags;
+	int m_GroupIndex;
+	int m_BatchKey; // <0 = lines mode, 0 = quads no texture, >0 = quads textured (imageIndex + 1)
 };
 
 struct CSpringState
@@ -27,6 +29,7 @@ struct CSpringState
 	vec2 m_Vel2;
 	float m_Angle;
 	float m_AngleVel;
+	unsigned m_Generation;
 };
 
 class CVisuals : public CComponent
@@ -36,8 +39,7 @@ class CVisuals : public CComponent
 	void RenderQuad(const CVisualItem &Item);
 	void RenderTile(const CVisualItem &Item);
 	void RenderItem(const CVisualItem &Item);
-
-	void ApplyGroupScreenMapping(int GroupIndex);
+	void RenderBatchedItems(const CVisualItem *pItems, int NumItems);
 
 	vec2 SpringDamp(vec2 &Pos, vec2 &Vel, vec2 Target, float Dt, float Omega, float Decay);
 	float SpringDampAngle(float &Angle, float &Vel, float Target, float Dt, float Omega, float Decay);
@@ -46,15 +48,25 @@ class CVisuals : public CComponent
 
 	IGraphics::CTextureHandle GetImageTexture(int ImageIndex);
 
-	std::vector<CVisualItem> m_vVisualItems;
+	std::vector<CVisualItem> m_vVisualItems; // world-space, sorted by (GroupIndex, RenderOrder, BatchKey)
+	std::vector<CVisualItem> m_vScreenItems; // screen-space, sorted by (RenderOrder, BatchKey)
 	std::unordered_map<int, CSpringState> m_Springs;
 	std::unordered_map<int, IGraphics::CTextureHandle> m_TexCache;
 	int m_GameGroupIndex = -1;
+	unsigned m_SpringGeneration = 0;
+
+	// Per-frame cached values
+	float m_IntraGameTick = 0;
+	float m_RenderFrameTime = 0;
+	vec2 m_CameraCenter = vec2(0, 0);
 
 public:
 	int Sizeof() const override { return sizeof(*this); }
 	void OnRender() override;
 	void OnMapLoad() override;
+
+	// Called by CMapRenderer callback after each group's layers are rendered
+	void RenderForGroup(int GroupId);
 };
 
 #endif
