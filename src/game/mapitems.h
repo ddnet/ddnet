@@ -252,8 +252,8 @@ enum
 static constexpr size_t MAX_MAPIMAGES = 64;
 static constexpr size_t MAX_MAPSOUNDS = 64;
 
-typedef ivec2 CPoint; // 22.10 fixed point
-typedef ivec4 CColor;
+using CPoint = ivec2; // 22.10 fixed point
+using CColor = ivec4;
 
 class CFixedTime
 {
@@ -389,7 +389,7 @@ public:
 	int m_MustBe1;
 };
 
-typedef CMapItemImage_v1 CMapItemImage;
+using CMapItemImage = CMapItemImage_v1;
 
 class CMapItemGroup_v1
 {
@@ -551,7 +551,7 @@ public:
 	int m_Synchronized;
 };
 
-typedef CMapItemEnvelope_v2 CMapItemEnvelope;
+using CMapItemEnvelope = CMapItemEnvelope_v2;
 
 class CSoundShape
 {

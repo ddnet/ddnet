@@ -2,6 +2,6 @@
 #define ENGINE_RUST_H
 #include "console.h"
 
-typedef IConsole::IResult IConsole_IResult;
-typedef IConsole::FCommandCallback IConsole_FCommandCallback;
+using IConsole_IResult = IConsole::IResult;
+using IConsole_FCommandCallback = IConsole::FCommandCallback;
 #endif // ENGINE_RUST_H

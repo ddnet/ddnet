@@ -171,13 +171,13 @@ public:
 		CMD_COUNT,
 	};
 
-	typedef vec2 SPoint;
-	typedef vec2 STexCoord;
-	typedef GL_SColorf SColorf;
-	typedef GL_SColor SColor;
-	typedef GL_SVertex SVertex;
-	typedef GL_SVertexTex3D SVertexTex3D;
-	typedef GL_SVertexTex3DStream SVertexTex3DStream;
+	using SPoint = vec2;
+	using STexCoord = vec2;
+	using SColorf = GL_SColorf;
+	using SColor = GL_SColor;
+	using SVertex = GL_SVertex;
+	using SVertexTex3D = GL_SVertexTex3D;
+	using SVertexTex3DStream = GL_SVertexTex3DStream;
 
 	struct SCommand
 	{
@@ -1275,7 +1275,7 @@ public:
 	TGLBackendReadPresentedImageData &GetReadPresentedImageDataFuncUnsafe() override;
 };
 
-typedef std::function<const char *(const char *, const char *)> TTranslateFunc;
+using TTranslateFunc = std::function<const char *(const char *, const char *)>;
 extern IGraphicsBackend *CreateGraphicsBackend(TTranslateFunc &&TranslateFunc);
 
 #endif // ENGINE_CLIENT_GRAPHICS_THREADED_H

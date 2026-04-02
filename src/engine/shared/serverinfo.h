@@ -6,7 +6,8 @@
 #include <engine/map.h>
 #include <engine/serverbrowser.h>
 
-typedef struct _json_value json_value;
+struct _json_value;
+using json_value = _json_value;
 class CServerInfo;
 
 class CServerInfo2

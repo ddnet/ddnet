@@ -115,8 +115,8 @@ enum
 	NET_TOKENREQUEST_DATASIZE = 512,
 };
 
-typedef int SECURITY_TOKEN;
-typedef unsigned int TOKEN;
+using SECURITY_TOKEN = int;
+using TOKEN = unsigned int;
 
 SECURITY_TOKEN ToSecurityToken(const unsigned char *pData);
 void WriteSecurityToken(unsigned char *pData, SECURITY_TOKEN Token);
@@ -129,11 +129,11 @@ enum
 	NET_SECURITY_TOKEN_UNSUPPORTED = 0,
 };
 
-typedef int (*NETFUNC_DELCLIENT)(int ClientId, const char *pReason, void *pUser);
-typedef int (*NETFUNC_NEWCLIENT_CON)(int ClientId, void *pUser);
-typedef int (*NETFUNC_NEWCLIENT)(int ClientId, void *pUser, bool Sixup);
-typedef int (*NETFUNC_NEWCLIENT_NOAUTH)(int ClientId, void *pUser);
-typedef int (*NETFUNC_CLIENTREJOIN)(int ClientId, void *pUser);
+using NETFUNC_DELCLIENT = int (*)(int ClientId, const char *pReason, void *pUser);
+using NETFUNC_NEWCLIENT_CON = int (*)(int ClientId, void *pUser);
+using NETFUNC_NEWCLIENT = int (*)(int ClientId, void *pUser, bool Sixup);
+using NETFUNC_NEWCLIENT_NOAUTH = int (*)(int ClientId, void *pUser);
+using NETFUNC_CLIENTREJOIN = int (*)(int ClientId, void *pUser);
 
 struct CNetChunk
 {

@@ -11,9 +11,9 @@
 
 extern "C" {
 
-typedef uint64_t CSteamId;
-typedef int32_t HSteamPipe;
-typedef int32_t HSteamUser;
+using CSteamId = uint64_t;
+using HSteamPipe = int32_t;
+using HSteamUser = int32_t;
 
 struct CallbackMsg_t
 {

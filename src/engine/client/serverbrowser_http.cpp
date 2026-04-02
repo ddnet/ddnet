@@ -50,7 +50,7 @@ static int ClassifyAge(int AgeSeconds)
 class CChooseMaster
 {
 public:
-	typedef bool (*VALIDATOR)(json_value *pJson);
+	using VALIDATOR = bool (*)(json_value *pJson);
 
 	enum
 	{

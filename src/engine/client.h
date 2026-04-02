@@ -35,7 +35,7 @@ enum
 	RECORDER_MAX = 4,
 };
 
-typedef bool (*CLIENTFUNC_FILTER)(const void *pData, int DataSize, void *pUser);
+using CLIENTFUNC_FILTER = bool (*)(const void *pData, int DataSize, void *pUser);
 struct CChecksumData;
 
 class IClient : public IInterface
@@ -80,7 +80,7 @@ public:
 		LOADING_CALLBACK_DETAIL_MAP,
 		LOADING_CALLBACK_DETAIL_DEMO,
 	};
-	typedef std::function<void(ELoadingCallbackDetail Detail)> TLoadingCallback;
+	using TLoadingCallback = std::function<void(ELoadingCallbackDetail Detail)>;
 	CTranslationContext m_TranslationContext;
 
 protected:

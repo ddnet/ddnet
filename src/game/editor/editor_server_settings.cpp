@@ -1151,7 +1151,7 @@ void CMapSettingsBackend::LoadPossibleValues(const CSettingValuesBuilder &Builde
 	if(Iter == m_LoaderFunctions.end())
 		return;
 
-	(*Iter->second)(Builder);
+	Iter->second(Builder);
 }
 
 void CMapSettingsBackend::RegisterLoader(const char *pSettingName, const FLoaderFunction &pfnLoader)

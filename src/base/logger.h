@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-typedef void *IOHANDLE;
+using IOHANDLE = void *;
 
 /**
  * @ingroup Log

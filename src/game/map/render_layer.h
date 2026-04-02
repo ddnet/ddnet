@@ -27,7 +27,7 @@ class CMapItemLayerQuads;
 class IMap;
 class CMapImages;
 
-typedef std::function<void(const char *pCaption, const char *pContent, int IncreaseCounter)> FRenderUploadCallback;
+using FRenderUploadCallback = std::function<void(const char *pCaption, const char *pContent, int IncreaseCounter)>;
 
 constexpr int BorderRenderDistance = 201;
 

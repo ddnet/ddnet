@@ -18,19 +18,19 @@
 /**
  * @ingroup Semaphore
  */
-typedef void *SEMAPHORE;
+using SEMAPHORE = void *;
 #elif defined(CONF_PLATFORM_MACOS)
 #include <semaphore.h>
 /**
  * @ingroup Semaphore
  */
-typedef sem_t *SEMAPHORE;
+using SEMAPHORE = sem_t *;
 #elif defined(CONF_FAMILY_UNIX)
 #include <semaphore.h>
 /**
  * @ingroup Semaphore
  */
-typedef sem_t SEMAPHORE;
+using SEMAPHORE = sem_t;
 #else
 #error not implemented on this platform
 #endif

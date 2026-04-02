@@ -32,7 +32,7 @@ public:
 		HAT_OFFSET_SIDE = 2,
 	};
 
-	typedef std::function<void()> TSkinLoadedCallback;
+	using TSkinLoadedCallback = std::function<void()>;
 
 	class CSkinPart
 	{

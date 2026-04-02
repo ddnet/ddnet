@@ -206,7 +206,7 @@ protected:
 	CUIElement m_ConnectButton;
 
 	// generic popups
-	typedef void (CMenus::*FPopupButtonCallback)();
+	using FPopupButtonCallback = void (CMenus::*)();
 	void DefaultButtonCallback()
 	{
 		// do nothing

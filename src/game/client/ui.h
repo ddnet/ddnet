@@ -334,12 +334,12 @@ public:
 	 *
 	 * @return Value from the @link EPopupMenuFunctionResult @endlink enum.
 	 */
-	typedef EPopupMenuFunctionResult (*FPopupMenuFunction)(void *pContext, CUIRect View, bool Active);
+	using FPopupMenuFunction = EPopupMenuFunctionResult (*)(void *pContext, CUIRect View, bool Active);
 
 	/**
 	 * Callback that is called when one or more popups are closed.
 	 */
-	typedef std::function<void()> FPopupMenuClosedCallback;
+	using FPopupMenuClosedCallback = std::function<void()>;
 
 	/**
 	 * Represents the aggregated state of current touch events to control a user interface.

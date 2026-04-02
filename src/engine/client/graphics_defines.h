@@ -4,9 +4,9 @@
 #include <cstddef>
 #include <cstdint>
 
-typedef uint32_t TWGLuint;
-typedef int32_t TWGLint;
-typedef uint32_t TWGLenum;
-typedef uint8_t TWGLubyte;
+using TWGLuint = uint32_t;
+using TWGLint = int32_t;
+using TWGLenum = uint32_t;
+using TWGLubyte = uint8_t;
 
 #endif

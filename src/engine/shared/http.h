@@ -19,7 +19,8 @@
 #include <optional>
 #include <unordered_map>
 
-typedef struct _json_value json_value;
+struct _json_value;
+using json_value = _json_value;
 class IStorage;
 
 enum class EHttpState

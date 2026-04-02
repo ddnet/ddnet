@@ -39,12 +39,12 @@ extern const NETADDR NETADDR_ZEROED;
 /**
  * @ingroup Network-Unix-Sockets
  */
-typedef int UNIXSOCKET;
+using UNIXSOCKET = int;
 
 /**
  * @ingroup Network-Unix-Sockets
  */
-typedef struct sockaddr_un UNIXSOCKETADDR;
+using UNIXSOCKETADDR = sockaddr_un;
 #endif
 
 /**

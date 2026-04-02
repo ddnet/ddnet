@@ -163,6 +163,6 @@ namespace FinishTime
 	inline constexpr int UNSET = -2;
 }
 
-typedef std::bitset<MAX_CLIENTS> CClientMask;
+using CClientMask = std::bitset<MAX_CLIENTS>;
 
 #endif

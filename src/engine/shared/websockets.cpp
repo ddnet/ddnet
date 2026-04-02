@@ -30,12 +30,8 @@ struct websocket_chunk
 };
 
 // Client opens two connections for whatever reason
-typedef CStaticRingBuffer<websocket_chunk, (MAX_CLIENTS * 2) * NET_CONN_BUFFERSIZE,
-	CRingBufferBase::FLAG_RECYCLE>
-	TRecvBuffer;
-typedef CStaticRingBuffer<websocket_chunk, NET_CONN_BUFFERSIZE,
-	CRingBufferBase::FLAG_RECYCLE>
-	TSendBuffer;
+using TRecvBuffer = CStaticRingBuffer<websocket_chunk, (MAX_CLIENTS * 2) * NET_CONN_BUFFERSIZE, CRingBufferBase::FLAG_RECYCLE>;
+using TSendBuffer = CStaticRingBuffer<websocket_chunk, NET_CONN_BUFFERSIZE, CRingBufferBase::FLAG_RECYCLE>;
 
 struct per_session_data
 {

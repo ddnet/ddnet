@@ -97,12 +97,12 @@ public:
 		virtual EAccessLevel GetAccessLevel() const = 0;
 	};
 
-	typedef void (*FTeeHistorianCommandCallback)(int ClientId, int FlagMask, const char *pCmd, IResult *pResult, void *pUser);
-	typedef void (*FPossibleCallback)(int Index, const char *pCmd, void *pUser);
-	typedef void (*FCommandCallback)(IResult *pResult, void *pUserData);
-	typedef void (*FChainCommandCallback)(IResult *pResult, void *pUserData, FCommandCallback pfnCallback, void *pCallbackUserData);
-	typedef bool (*FUnknownCommandCallback)(const char *pCommand, void *pUser); // returns true if the callback has handled the argument
-	typedef bool (*FCanUseCommandCallback)(int ClientId, const ICommandInfo *pCommand, void *pUser);
+	using FTeeHistorianCommandCallback = void (*)(int ClientId, int FlagMask, const char *pCmd, IResult *pResult, void *pUser);
+	using FPossibleCallback = void (*)(int Index, const char *pCmd, void *pUser);
+	using FCommandCallback = void (*)(IResult *pResult, void *pUserData);
+	using FChainCommandCallback = void (*)(IResult *pResult, void *pUserData, FCommandCallback pfnCallback, void *pCallbackUserData);
+	using FUnknownCommandCallback = bool (*)(const char *pCommand, void *pUser); // returns true if the callback has handled the argument
+	using FCanUseCommandCallback = bool (*)(int ClientId, const ICommandInfo *pCommand, void *pUser);
 
 	static void EmptyPossibleCommandCallback(int Index, const char *pCmd, void *pUser) {}
 	static bool EmptyUnknownCommandCallback(const char *pCommand, void *pUser) { return false; }

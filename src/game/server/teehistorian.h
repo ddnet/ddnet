@@ -17,7 +17,7 @@ class CUuidManager;
 class CTeeHistorian
 {
 public:
-	typedef void (*WRITE_CALLBACK)(const void *pData, int DataSize, void *pUser);
+	using WRITE_CALLBACK = void (*)(const void *pData, int DataSize, void *pUser);
 
 	struct CGameInfo
 	{

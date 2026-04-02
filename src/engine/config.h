@@ -9,8 +9,8 @@ class IConfigManager : public IInterface
 {
 	MACRO_INTERFACE("config")
 public:
-	typedef void (*SAVECALLBACKFUNC)(IConfigManager *pConfig, void *pUserData);
-	typedef void (*POSSIBLECFGFUNC)(const struct SConfigVariable *, void *pUserData);
+	using SAVECALLBACKFUNC = void (*)(IConfigManager *pConfig, void *pUserData);
+	using POSSIBLECFGFUNC = void (*)(const struct SConfigVariable *, void *pUserData);
 
 	virtual void Init() = 0;
 	virtual void Reset(const char *pScriptName) = 0;

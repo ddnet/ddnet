@@ -196,7 +196,7 @@ void CAuthManager::UpdateKey(int Slot, const char *pPw, const char *pRoleName)
 	UpdateKeyHash(Slot, HashPassword(pPw, aSalt), aSalt, pRoleName);
 }
 
-void CAuthManager::ListKeys(FListCallback pfnListCallback, void *pUser)
+void CAuthManager::ListKeys(const FListCallback &pfnListCallback, void *pUser)
 {
 	for(auto &Key : m_vKeys)
 		pfnListCallback(Key.m_aIdent, Key.m_pRole->Name(), pUser);

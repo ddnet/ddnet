@@ -41,12 +41,13 @@
 #error NOT IMPLEMENTED
 #endif
 
-static NETSTATS network_stats = {0};
+static NETSTATS network_stats = {};
 
 #define VLEN 128
 #define PACKETSIZE 1400
-typedef struct
+class NETSOCKET_BUFFER
 {
+public:
 #ifdef CONF_PLATFORM_LINUX
 	int pos;
 	int size;
@@ -57,7 +58,7 @@ typedef struct
 #else
 	char buf[PACKETSIZE];
 #endif
-} NETSOCKET_BUFFER;
+};
 
 void net_buffer_init(NETSOCKET_BUFFER *buffer)
 {

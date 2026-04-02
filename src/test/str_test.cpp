@@ -10,7 +10,7 @@
 
 #include <limits>
 
-typedef void (*TStringArgumentFunction)(char *pStr);
+using TStringArgumentFunction = void (*)(char *pStr);
 template<TStringArgumentFunction Func>
 static void TestInplace(const char *pInput, const char *pOutput)
 {

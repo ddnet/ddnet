@@ -18,7 +18,8 @@
 #include <vector>
 
 class CJsonWriter;
-typedef struct _json_value json_value;
+struct _json_value;
+using json_value = _json_value;
 
 class CTouchControls : public CComponent
 {

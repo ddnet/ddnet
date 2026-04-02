@@ -16,7 +16,7 @@
 
 // MySQL >= 8.0.1 removed my_bool, 8.0.2 accidentally reintroduced it: https://bugs.mysql.com/bug.php?id=87337
 #if !defined(LIBMARIADB) && MYSQL_VERSION_ID >= 80001 && MYSQL_VERSION_ID != 80002
-typedef bool my_bool;
+using my_bool = bool;
 #endif
 
 enum

@@ -89,7 +89,7 @@ bool dbg_assert_has_failed();
  *
  * @see dbg_assert_set_handler
  */
-typedef std::function<void(const char *message)> DBG_ASSERT_HANDLER;
+using DBG_ASSERT_HANDLER = std::function<void(const char *message)>;
 
 /**
  * Sets a callback function that will be invoked before breaking into the

@@ -22,7 +22,7 @@ struct SHA256_CTX
 	uint32_t curlen;
 	unsigned char buf[64];
 };
-typedef md5_state_t MD5_CTX;
+using MD5_CTX = md5_state_t;
 #endif
 
 void sha256_init(SHA256_CTX *ctxt);

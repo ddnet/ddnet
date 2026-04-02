@@ -2447,7 +2447,7 @@ void CClient::ResetDDNetInfoTask()
 	}
 }
 
-typedef std::tuple<int, int, int> TVersion;
+using TVersion = std::tuple<int, int, int>;
 static const TVersion gs_InvalidVersion = std::make_tuple(-1, -1, -1);
 
 static TVersion ToVersion(char *pStr)

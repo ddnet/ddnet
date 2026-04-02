@@ -30,7 +30,7 @@
 
 class CSortWrap
 {
-	typedef bool (CServerBrowser::*SortFunc)(int, int) const;
+	using SortFunc = bool (CServerBrowser::*)(int, int) const;
 	SortFunc m_pfnSort;
 	CServerBrowser *m_pThis;
 

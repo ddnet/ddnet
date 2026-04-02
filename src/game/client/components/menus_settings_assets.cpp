@@ -15,7 +15,7 @@
 
 using namespace std::chrono_literals;
 
-typedef std::function<void()> TMenuAssetScanLoadedFunc;
+using TMenuAssetScanLoadedFunc = std::function<void()>;
 
 struct SMenuAssetScanUser
 {

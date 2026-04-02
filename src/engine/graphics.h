@@ -81,8 +81,8 @@ public:
 	uint32_t m_Format;
 };
 
-typedef vec2 GL_SPoint;
-typedef vec2 GL_STexCoord;
+using GL_SPoint = vec2;
+using GL_STexCoord = vec2;
 
 struct GL_STexCoord3D
 {
@@ -104,9 +104,9 @@ struct GL_STexCoord3D
 	float u, v, w;
 };
 
-typedef ColorRGBA GL_SColorf;
+using GL_SColorf = ColorRGBA;
 //use normalized color values
-typedef vector4_base<unsigned char> GL_SColor;
+using GL_SColor = vector4_base<unsigned char>;
 
 struct GL_SVertex
 {
@@ -175,12 +175,12 @@ struct STWGraphicGpu
 	STWGraphicGpuItem m_AutoGpu;
 };
 
-typedef STWGraphicGpu TTwGraphicsGpuList;
+using TTwGraphicsGpuList = STWGraphicGpu;
 
-typedef std::function<void()> WINDOW_RESIZE_FUNC;
-typedef std::function<void()> WINDOW_PROPS_CHANGED_FUNC;
+using WINDOW_RESIZE_FUNC = std::function<void()>;
+using WINDOW_PROPS_CHANGED_FUNC = std::function<void()>;
 
-typedef std::function<bool(uint32_t &Width, uint32_t &Height, CImageInfo::EImageFormat &Format, std::vector<uint8_t> &vDstData)> TGLBackendReadPresentedImageData;
+using TGLBackendReadPresentedImageData = std::function<bool(uint32_t &Width, uint32_t &Height, CImageInfo::EImageFormat &Format, std::vector<uint8_t> &vDstData)>;
 
 struct CDataSprite;
 

@@ -30,14 +30,14 @@ inline constexpr auto IO_MAX_PATH_LENGTH = 512;
  *
  * @ingroup File-IO
  */
-typedef void *IOHANDLE;
+using IOHANDLE = void *;
 
 /**
  * Wrapper for asynchronously writing to an @link IOHANDLE @endlink.
  *
  * @ingroup File-IO
  */
-typedef struct ASYNCIO ASYNCIO;
+struct ASYNCIO;
 
 /**
  * Callback function type for @link fs_listdir @endlink.
@@ -53,7 +53,7 @@ typedef struct ASYNCIO ASYNCIO;
  *
  * @see fs_listdir
  */
-typedef int (*FS_LISTDIR_CALLBACK)(const char *name, int is_dir, int dir_type, void *user);
+using FS_LISTDIR_CALLBACK = int (*)(const char *name, int is_dir, int dir_type, void *user);
 
 /**
  * Represents a file/folder entry for the @link FS_LISTDIR_CALLBACK_FILEINFO @endlink
@@ -94,7 +94,7 @@ public:
  *
  * @see fs_listdir_fileinfo
  */
-typedef int (*FS_LISTDIR_CALLBACK_FILEINFO)(const CFsFileInfo *info, int is_dir, int dir_type, void *user);
+using FS_LISTDIR_CALLBACK_FILEINFO = int (*)(const CFsFileInfo *info, int is_dir, int dir_type, void *user);
 
 /**
  * The maximum bytes necessary to encode one Unicode codepoint with UTF-8.
@@ -106,7 +106,8 @@ inline constexpr auto UTF8_BYTE_LENGTH = 4;
 /**
  * @ingroup Network-General
  */
-typedef struct NETSOCKET_INTERNAL *NETSOCKET;
+struct NETSOCKET_INTERNAL;
+using NETSOCKET = NETSOCKET_INTERNAL *;
 
 /**
  * @ingroup Network-General
@@ -164,8 +165,9 @@ inline constexpr auto NETADDR_MAXSTRSIZE = 1 + (8 * 4 + 7) + 1 + 1 + 5 + 1; // [
 /**
  * @ingroup Network-Address
  */
-typedef struct NETADDR
+class NETADDR
 {
+public:
 	unsigned int type;
 	unsigned char ip[16];
 	unsigned short port;
@@ -173,7 +175,7 @@ typedef struct NETADDR
 	bool operator==(const NETADDR &other) const;
 	bool operator!=(const NETADDR &other) const;
 	bool operator<(const NETADDR &other) const;
-} NETADDR;
+};
 
 /**
  * @ingroup Network-Address
@@ -187,13 +189,14 @@ struct std::hash<NETADDR>
 /**
  * @ingroup Network-General
  */
-typedef struct NETSTATS
+class NETSTATS
 {
+public:
 	uint64_t sent_packets;
 	uint64_t sent_bytes;
 	uint64_t recv_packets;
 	uint64_t recv_bytes;
-} NETSTATS;
+};
 
 #if defined(CONF_FAMILY_WINDOWS)
 /**
@@ -201,7 +204,7 @@ typedef struct NETSTATS
  *
  * @ingroup Process
  */
-typedef void *PROCESS;
+using PROCESS = void *;
 /**
  * A handle that denotes an invalid process.
  *
@@ -214,7 +217,7 @@ constexpr PROCESS INVALID_PROCESS = nullptr; // NOLINT(misc-misplaced-const)
  *
  * @ingroup Process
  */
-typedef pid_t PROCESS;
+using PROCESS = pid_t;
 /**
  * A handle that denotes an invalid process.
  *

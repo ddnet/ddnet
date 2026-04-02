@@ -24,7 +24,7 @@ static constexpr double DEMO_SPEEDS[] = {0.1, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2
 static constexpr int DEMO_SPEED_INDEX_DEFAULT = 4;
 static_assert(DEMO_SPEEDS[DEMO_SPEED_INDEX_DEFAULT] == 1.0);
 
-typedef bool (*DEMOFUNC_FILTER)(const void *pData, int DataSize, void *pUser);
+using DEMOFUNC_FILTER = bool (*)(const void *pData, int DataSize, void *pUser);
 
 // TODO: Properly extend demo format using uuids
 // "6be6da4a-cebd-380c-9b5b-1289c842d780"

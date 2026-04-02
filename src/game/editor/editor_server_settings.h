@@ -195,7 +195,7 @@ enum class ECollisionCheckResult
 
 class CMapSettingsBackend : public CEditorComponent
 {
-	typedef void (*FLoaderFunction)(const CSettingValuesBuilder &);
+	using FLoaderFunction = void (*)(const CSettingValuesBuilder &);
 
 public:
 	// General methods

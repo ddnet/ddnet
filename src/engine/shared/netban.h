@@ -108,7 +108,7 @@ protected:
 	class CBanPool
 	{
 	public:
-		typedef T CDataType;
+		using CDataType = T;
 
 		CBan<CDataType> *Add(const CDataType *pData, const CBanInfo *pInfo, const CNetHash *pNetHash);
 		int Remove(CBan<CDataType> *pBan);
@@ -147,10 +147,10 @@ protected:
 		void InsertUsed(CBan<CDataType> *pBan);
 	};
 
-	typedef CBanPool<NETADDR, 1> CBanAddrPool;
-	typedef CBanPool<CNetRange, 16> CBanRangePool;
-	typedef CBan<NETADDR> CBanAddr;
-	typedef CBan<CNetRange> CBanRange;
+	using CBanAddrPool = CBanPool<NETADDR, 1>;
+	using CBanRangePool = CBanPool<CNetRange, 16>;
+	using CBanAddr = CBan<NETADDR>;
+	using CBanRange = CBan<CNetRange>;
 
 	template<class T>
 	void MakeBanInfo(const CBan<T> *pBan, char *pBuf, unsigned BuffSize, int Type) const;

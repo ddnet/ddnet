@@ -6,6 +6,7 @@
 
 #include <generated/protocol.h>
 
+#include <functional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -71,7 +72,7 @@ private:
 public:
 	static const char *AuthLevelToRoleName(int AuthLevel);
 
-	typedef void (*FListCallback)(const char *pIdent, const char *pRoleName, void *pUser);
+	using FListCallback = void (*)(const char *pIdent, const char *pRoleName, void *pUser);
 
 	CAuthManager();
 
@@ -92,7 +93,7 @@ public:
 	bool IsValidIdent(const char *pIdent) const;
 	void UpdateKeyHash(int Slot, MD5_DIGEST Hash, const unsigned char *pSalt, const char *pRoleName);
 	void UpdateKey(int Slot, const char *pPw, const char *pRoleName);
-	void ListKeys(FListCallback pfnListCallback, void *pUser);
+	void ListKeys(const FListCallback &pfnListCallback, void *pUser);
 	void AddDefaultKey(const char *pRoleName, const char *pPw);
 	bool IsGenerated() const;
 	int NumNonDefaultKeys() const;

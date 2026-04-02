@@ -85,6 +85,7 @@ Checks: >
   modernize-use-override,
   modernize-use-transparent-functors,
   modernize-use-uncaught-exceptions,
+  modernize-use-using,
   readability-*,
   -readability-avoid-nested-conditional-operator,
   -readability-braces-around-statements,
@@ -141,9 +142,9 @@ CheckOptions:
   - key:             readability-identifier-naming.StructPrefix
     value:           S
   - key:             readability-identifier-naming.StructIgnoredRegexp
-    value:           '^((GL_S|[CI])[A-Z](_?[a-zA-Z0-9])*|_json_value|NETADDR)$'
+    value:           '^((GL_S|[CI])[A-Z](_?[a-zA-Z0-9])*|_json_value)$'
   - key:             readability-identifier-naming.ClassIgnoredRegexp
-    value:           '^([CI][A-Z](_?[a-zA-Z0-9])*)$'
+    value:           '^([CI][A-Z](_?[a-zA-Z0-9])*|NETADDR)$'
   - key:             readability-identifier-naming.ParameterCase
     value:           CamelCase
   - key:             readability-identifier-naming.ParameterIgnoredRegexp

@@ -13,7 +13,7 @@
 #include <functional>
 #include <vector>
 
-typedef std::function<void()> TUpdateIntraTimesFunc;
+using TUpdateIntraTimesFunc = std::function<void()>;
 
 class CSnapshotDelta;
 class IConsole;

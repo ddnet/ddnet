@@ -4,10 +4,10 @@
 #include <functional>
 #include <utility>
 
-typedef std::function<void()> FButtonClickCallback;
-typedef std::function<bool()> FButtonDisabledCallback;
-typedef std::function<bool()> FButtonActiveCallback;
-typedef std::function<int()> FButtonColorCallback;
+using FButtonClickCallback = std::function<void()>;
+using FButtonDisabledCallback = std::function<bool()>;
+using FButtonActiveCallback = std::function<bool()>;
+using FButtonColorCallback = std::function<int()>;
 
 class CQuickAction
 {

@@ -226,7 +226,7 @@ public:
 
 	CSkins();
 
-	typedef std::function<void()> TSkinLoadedCallback;
+	using TSkinLoadedCallback = std::function<void()>;
 
 	int Sizeof() const override { return sizeof(*this); }
 	void OnConsoleInit() override;

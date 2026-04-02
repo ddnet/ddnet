@@ -8,9 +8,9 @@
 #include <cstdint>
 #include <cstring>
 
-typedef uint32_t u32;
-typedef uint64_t u64;
-typedef SHA256_CTX sha256_state;
+using u32 = uint32_t;
+using u64 = uint64_t;
+using sha256_state = SHA256_CTX;
 
 static const u32 K[64] =
 	{

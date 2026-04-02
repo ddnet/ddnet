@@ -158,9 +158,9 @@ inline vector2_base<float> random_direction()
 	return direction(random_angle());
 }
 
-typedef vector2_base<float> vec2;
-typedef vector2_base<bool> bvec2;
-typedef vector2_base<int> ivec2;
+using vec2 = vector2_base<float>;
+using bvec2 = vector2_base<bool>;
+using ivec2 = vector2_base<int>;
 
 template<Numeric T>
 constexpr bool closest_point_on_line(vector2_base<T> line_pointA, vector2_base<T> line_pointB, vector2_base<T> target_point, vector2_base<T> &out_pos)
@@ -330,9 +330,9 @@ inline vector3_base<float> normalize(const vector3_base<float> &v)
 	return vector3_base<float>(v.x * l, v.y * l, v.z * l);
 }
 
-typedef vector3_base<float> vec3;
-typedef vector3_base<bool> bvec3;
-typedef vector3_base<int> ivec3;
+using vec3 = vector3_base<float>;
+using bvec3 = vector3_base<bool>;
+using ivec3 = vector3_base<int>;
 
 // ------------------------------------
 
@@ -424,9 +424,9 @@ public:
 	constexpr bool operator!=(const vector4_base &vec) const { return x != vec.x || y != vec.y || z != vec.z || w != vec.w; }
 };
 
-typedef vector4_base<float> vec4;
-typedef vector4_base<bool> bvec4;
-typedef vector4_base<int> ivec4;
-typedef vector4_base<uint8_t> ubvec4;
+using vec4 = vector4_base<float>;
+using bvec4 = vector4_base<bool>;
+using ivec4 = vector4_base<int>;
+using ubvec4 = vector4_base<uint8_t>;
 
 #endif

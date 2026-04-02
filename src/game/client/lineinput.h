@@ -32,9 +32,9 @@ public:
 		vec2 m_Offset = vec2(0.0f, 0.0f);
 	};
 
-	typedef std::function<void(const char *pLine)> FClipboardLineCallback;
-	typedef std::function<const char *(char *pCurrentText, size_t NumChars)> FDisplayTextCallback;
-	typedef std::function<bool()> FCalculateOffsetCallback;
+	using FClipboardLineCallback = std::function<void(const char *pLine)>;
+	using FDisplayTextCallback = std::function<const char *(char *pCurrentText, size_t NumChars)>;
+	using FCalculateOffsetCallback = std::function<bool()>;
 
 private:
 	static IClient *ms_pClient;

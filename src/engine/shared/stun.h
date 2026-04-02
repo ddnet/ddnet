@@ -2,7 +2,7 @@
 #define ENGINE_SHARED_STUN_H
 #include <cstddef>
 
-struct NETADDR;
+class NETADDR;
 
 class CStunData
 {

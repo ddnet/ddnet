@@ -22,7 +22,7 @@ public:
 		IMAGE,
 		SOUND,
 	};
-	typedef bool (*FFileDialogOpenCallback)(const char *pFilename, int StorageType, void *pUser);
+	using FFileDialogOpenCallback = bool (*)(const char *pFilename, int StorageType, void *pUser);
 
 	void ShowFileDialog(
 		int StorageType, EFileType FileType,
