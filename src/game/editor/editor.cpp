@@ -6788,35 +6788,37 @@ void CEditor::RenderIngameEntities(const CLayerGroup &Group, const CLayerTiles &
 											   str_comp_nocase(pEntitiesName, "ddnet") != 0; }) == std::end(gs_apModEntitiesNames);
 
 	const bool IsSwitch = TilesLayer.m_HasSwitch;
-	std::function<std::tuple<unsigned char, unsigned char>(int, int)> GetTile;
-	std::function<unsigned char(int, int)> GetIndexChecked;
+	std::function<std::tuple<unsigned char, unsigned char, unsigned char>(int, int)> GetTile;
+	std::function<std::tuple<unsigned char, unsigned char, unsigned char>(int, int)> GetIndexChecked;
 	if(IsSwitch)
 	{
 		const CLayerSwitch &SwitchLayer = static_cast<const CLayerSwitch &>(TilesLayer);
-		GetTile = [&](int x, int y) -> std::tuple<unsigned char, unsigned char> {
+		GetTile = [&](int x, int y) -> std::tuple<unsigned char, unsigned char, unsigned char> {
 			const CSwitchTile Tile = SwitchLayer.m_pSwitchTile[y * SwitchLayer.m_Width + x];
-			return {Tile.m_Type - ENTITY_OFFSET, Tile.m_Flags};
+			return {Tile.m_Type - ENTITY_OFFSET, Tile.m_Flags, Tile.m_Number};
 		};
-		GetIndexChecked = [&](int x, int y) -> unsigned char {
+		GetIndexChecked = [&](int x, int y) -> std::tuple<unsigned char, unsigned char, unsigned char> {
 			if(x < 0 || y < 0 || x >= SwitchLayer.m_Width || y >= SwitchLayer.m_Height)
 			{
-				return 0;
+				return {0, 0, 0};
 			}
-			return SwitchLayer.m_pSwitchTile[y * SwitchLayer.m_Width + x].m_Type - ENTITY_OFFSET;
+			const CSwitchTile &Tile = SwitchLayer.m_pSwitchTile[y * SwitchLayer.m_Width + x];
+			return {Tile.m_Type - ENTITY_OFFSET, Tile.m_Delay, Tile.m_Number};
 		};
 	}
 	else
 	{
-		GetTile = [&](int x, int y) -> std::tuple<unsigned char, unsigned char> {
+		GetTile = [&](int x, int y) -> std::tuple<unsigned char, unsigned char, unsigned char> {
 			const CTile Tile = TilesLayer.m_pTiles[y * TilesLayer.m_Width + x];
-			return {Tile.m_Index - ENTITY_OFFSET, Tile.m_Flags};
+			return {Tile.m_Index - ENTITY_OFFSET, Tile.m_Flags, 0};
 		};
-		GetIndexChecked = [&](int x, int y) -> unsigned char {
+		GetIndexChecked = [&](int x, int y) -> std::tuple<unsigned char, unsigned char, unsigned char> {
 			if(x < 0 || y < 0 || x >= TilesLayer.m_Width || y >= TilesLayer.m_Height)
 			{
-				return 0;
+				return {0, 0, 0};
 			}
-			return TilesLayer.m_pTiles[y * TilesLayer.m_Width + x].m_Index - ENTITY_OFFSET;
+			const CTile &Tile = TilesLayer.m_pTiles[y * TilesLayer.m_Width + x];
+			return {Tile.m_Index - ENTITY_OFFSET, 0, 0};
 		};
 	}
 
@@ -6835,16 +6837,30 @@ void CEditor::RenderIngameEntities(const CLayerGroup &Group, const CLayerTiles &
 	{
 		for(int x = StartX; x < EndX; x++)
 		{
-			const auto [Index, Flags] = GetTile(x, y);
+			const auto [Index, Flags, SwitchNumber] = GetTile(x, y);
 
 			if(Index == ENTITY_DOOR)
 			{
-				for(const ivec2 Offset : DOOR_OFFSETS)
+				for(size_t NeighborId = 0; NeighborId < sizeof(DOOR_OFFSETS) / sizeof(ivec2); ++NeighborId)
 				{
-					const unsigned char IndexDoorLength = GetIndexChecked(x + Offset.x, y + Offset.y);
-					if(IndexDoorLength >= ENTITY_LASER_SHORT && IndexDoorLength <= ENTITY_LASER_LONG)
+					const ivec2 Offset = DOOR_OFFSETS[NeighborId];
+					const auto [IndexDoorLength, DoorDelay, NumberLaserLen] = GetIndexChecked(x + Offset.x, y + Offset.y);
+					if((IndexDoorLength >= ENTITY_LASER_SHORT && IndexDoorLength <= ENTITY_LASER_LONG) || IndexDoorLength == ENTITY_LASER_LEN)
 					{
-						const int Length = (IndexDoorLength - ENTITY_LASER_SHORT + 1) * 3;
+						float Length;
+						if(IndexDoorLength == ENTITY_LASER_LEN)
+						{
+							if(SwitchNumber != NumberLaserLen)
+								continue;
+
+							Length = static_cast<float>(DoorDelay + 0.5f);
+
+							// handle diagonals
+							if(NeighborId % 2 == 1)
+								Length = std::sqrt(2.0f * Length * Length);
+						}
+						else
+							Length = (IndexDoorLength - ENTITY_LASER_SHORT + 1) * 3;
 						const vec2 Pos = vec2(x + 0.5f, y + 0.5f);
 						const vec2 To = Pos + normalize(vec2(Offset.x, Offset.y)) * Length;
 						pGameClient->m_Items.RenderLaser(To * TileSize, Pos * TileSize, DoorOuterColor, DoorInnerColor, 0.0f, 0.0f, LASERTYPE_DOOR);
