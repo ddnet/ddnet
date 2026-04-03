@@ -14,6 +14,10 @@ bool ConvertToRgba(CImageInfo &Image);
 
 // Changes the image data (not the format)
 void ConvertToGrayscale(const CImageInfo &Image);
+void ConvertToGrayscaleRect(const CImageInfo &Image, size_t StartX, size_t StartY, size_t Width, size_t Height);
+
+// Color a rectangle inside an image with hue and saturation
+void ColorizeWithHueRect(CImageInfo &Image, float Hue, float Sat, size_t StartX, size_t StartY, size_t Width, size_t Height);
 
 // These functions assume that the image data is 4 bytes per pixel RGBA
 void DilateImage(uint8_t *pImageBuff, int w, int h);

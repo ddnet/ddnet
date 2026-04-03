@@ -14,6 +14,7 @@ public:
 	const IGraphics *Graphics() const { return m_pGraphics; }
 	ITextRender *TextRender() { return m_pTextRender; }
 	CRenderMap *RenderMap() { return m_pRenderMap; }
+	const CRenderMap *RenderMap() const { return m_pRenderMap; }
 
 	void OnInit(IGraphics *pGraphics, ITextRender *pTextRender, CRenderMap *pRenderMap);
 	void OnInit(CRenderComponent *pRenderComponent);

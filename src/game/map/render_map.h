@@ -6,7 +6,9 @@
 #include <game/map/render_interfaces.h>
 #include <game/mapitems.h>
 
+#include <array>
 #include <chrono>
+#include <memory>
 
 enum
 {
@@ -51,6 +53,19 @@ public:
 class IGraphics;
 class ITextRender;
 
+class CTuneColorMapper
+{
+public:
+	CTuneColorMapper();
+	uint8_t TuneNumberToColorIndex(uint8_t TuneNumber);
+	ColorRGBA TuneColorIndexToColor(uint8_t TuneColorIndex) const;
+	void Reset();
+
+private:
+	std::array<uint8_t, 255> m_aTuneNumberToColorIndex;
+	uint8_t m_NextTuneNumberIndex = 0;
+};
+
 class CRenderMap
 {
 	IGraphics *m_pGraphics;
@@ -78,7 +93,7 @@ public:
 	void RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale, int OverlayRenderFlags, float Alpha = 1.0f);
 	void RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
 	void RenderSwitchmap(CSwitchTile *pSwitch, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
-	void RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, ColorRGBA Color, int RenderFlags);
+	void RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, ColorRGBA Color, int RenderFlags, CTuneColorMapper *pTuneColorMapper);
 
 	void RenderDebugClip(float ClipX, float ClipY, float ClipW, float ClipH, ColorRGBA Color, float Zoom, const char *pLabel);
 };
