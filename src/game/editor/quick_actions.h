@@ -179,7 +179,11 @@ REGISTER_QUICK_ACTION(
 REGISTER_QUICK_ACTION(
 	ToggleBucketBrush,
 	"Toggle bucket fill",
-	[&]() { m_BrushBucketFill = !m_BrushBucketFill; },
+	[&]() {
+		m_BrushBucketFill = !m_BrushBucketFill;
+		if(m_BrushBucketFill && Map()->m_vSelectedLayers.size() > 1)
+			Map()->SelectLayer(Map()->m_vSelectedLayers[0], Map()->m_SelectedGroup);
+	},
 	ALWAYS_FALSE,
 	[&]() -> bool { return m_BrushBucketFill; },
 	DEFAULT_BTN,

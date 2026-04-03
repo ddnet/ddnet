@@ -700,16 +700,13 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 			ToolbarBottom.VSplitLeft(5.0f, &Button, &ToolbarBottom);
 
 			// Only show if tiles layer is selected
-			if (pLayer && pLayer->m_Type == LAYERTYPE_TILES)
+			if(pLayer && pLayer->m_Type == LAYERTYPE_TILES)
 			{
-				ToolbarBottom.VSplitLeft(55.0f, &Button, &ToolbarBottom);
-				static int s_BucketFillButton = 0;
-				if(DoButton_Editor(&s_BucketFillButton, "Bucket", m_BrushBucketFill, &Button, BUTTONFLAG_LEFT, "[Ctrl+B] Toggle bucket fill mode.") ||
+				ToolbarBottom.VSplitLeft(25.0f, &Button, &ToolbarBottom);
+				if(DoButton_FontIcon(&m_QuickActionToggleBucketBrush, FontIcon::FILL_DRIP, m_QuickActionToggleBucketBrush.Active(), &Button, BUTTONFLAG_LEFT, m_QuickActionToggleBucketBrush.Description(), IGraphics::CORNER_ALL) ||
 					(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_B) && ModPressed && !ShiftPressed))
 				{
-					m_BrushBucketFill = !m_BrushBucketFill;
-					if(m_BrushBucketFill && Map()->m_vSelectedLayers.size() > 1)
-						Map()->SelectLayer(Map()->m_vSelectedLayers[0], Map()->m_SelectedGroup);
+					m_QuickActionToggleBucketBrush.Call();
 				}
 				ToolbarBottom.VSplitLeft(5.0f, &Button, &ToolbarBottom);
 			}
@@ -2578,10 +2575,10 @@ void CEditor::DoMapEditor(CUIRect View)
 			}
 			else if(m_BrushBucketFill)
 			{
-				if (m_pBrush->IsEmpty())
+				if(m_pBrush->IsEmpty())
 					str_copy(m_aTooltip, "Use left mouse button to select a tile to bucket fill with.");
 				else
-				 	str_copy(m_aTooltip, "Use left mouse button to bucket fill with the brush. Right click to clear the brush.");
+					str_copy(m_aTooltip, "Use left mouse button to bucket fill with the brush. Right click to clear the brush.");
 			}
 			else if(m_pBrush->IsEmpty() && Map()->SelectedLayerType(0, LAYERTYPE_QUADS) != nullptr)
 				str_copy(m_aTooltip, "Use left mouse button to drag and create a brush. Hold shift to select multiple quads. Press R to rotate selected quads. Use ctrl+right click to select layer.");
@@ -3330,7 +3327,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 					if(g != Map()->m_SelectedGroup)
 						Map()->SelectLayer(0, g);
 
-					if(Input()->ShiftIsPressed() && Map()->m_SelectedGroup == g)
+					if(Input()->ShiftIsPressed() && !m_BrushBucketFill && Map()->m_SelectedGroup == g)
 					{
 						Map()->m_vSelectedLayers.clear();
 						for(size_t i = 0; i < Map()->m_vpGroups[g]->m_vpLayers.size(); i++)
@@ -3527,7 +3524,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 					s_LayerPopupContext.m_pEditor = this;
 					if(Result == 1)
 					{
-						if(Input()->ShiftIsPressed() && Map()->m_SelectedGroup == g)
+						if(Input()->ShiftIsPressed() && !m_BrushBucketFill && Map()->m_SelectedGroup == g)
 						{
 							auto Position = std::find(Map()->m_vSelectedLayers.begin(), Map()->m_vSelectedLayers.end(), i);
 							if(Position != Map()->m_vSelectedLayers.end())
@@ -3713,7 +3710,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 
 	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE && !Ui()->IsPopupOpen() && CLineInput::GetActiveInput() == nullptr && s_Operation == OP_NONE)
 	{
-		if(Input()->ShiftIsPressed())
+		if(Input()->ShiftIsPressed() && !m_BrushBucketFill)
 		{
 			if(Map()->m_vSelectedLayers[Map()->m_vSelectedLayers.size() - 1] < (int)Map()->m_vpGroups[Map()->m_SelectedGroup]->m_vpLayers.size() - 1)
 				Map()->AddSelectedLayer(Map()->m_vSelectedLayers[Map()->m_vSelectedLayers.size() - 1] + 1);
@@ -3726,7 +3723,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 	}
 	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE && !Ui()->IsPopupOpen() && CLineInput::GetActiveInput() == nullptr && s_Operation == OP_NONE)
 	{
-		if(Input()->ShiftIsPressed())
+		if(Input()->ShiftIsPressed() && !m_BrushBucketFill)
 		{
 			if(Map()->m_vSelectedLayers[Map()->m_vSelectedLayers.size() - 1] > 0)
 				Map()->AddSelectedLayer(Map()->m_vSelectedLayers[Map()->m_vSelectedLayers.size() - 1] - 1);
