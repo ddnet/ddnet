@@ -144,8 +144,7 @@ bool IsValidEntity(int Index)
 {
 	Index -= ENTITY_OFFSET;
 	return (
-		(Index >= ENTITY_SPAWN && Index <= ENTITY_LASER_O_FAST) ||
-		(Index >= ENTITY_PLASMAE && Index <= ENTITY_ARMOR_LASER) ||
+		(Index >= ENTITY_SPAWN && Index <= ENTITY_ARMOR_LASER) ||
 		(Index >= ENTITY_DRAGGER_WEAK && Index <= ENTITY_DRAGGER_STRONG_NW) ||
 		Index == ENTITY_DOOR);
 }

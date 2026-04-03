@@ -186,15 +186,14 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 
 	const vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
 
+	constexpr ivec2 aOffsets[] = {{0, 1}, {1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}};
 	int aSides[8];
-	aSides[0] = GameServer()->Collision()->Entity(x, y + 1, Layer);
-	aSides[1] = GameServer()->Collision()->Entity(x + 1, y + 1, Layer);
-	aSides[2] = GameServer()->Collision()->Entity(x + 1, y, Layer);
-	aSides[3] = GameServer()->Collision()->Entity(x + 1, y - 1, Layer);
-	aSides[4] = GameServer()->Collision()->Entity(x, y - 1, Layer);
-	aSides[5] = GameServer()->Collision()->Entity(x - 1, y - 1, Layer);
-	aSides[6] = GameServer()->Collision()->Entity(x - 1, y, Layer);
-	aSides[7] = GameServer()->Collision()->Entity(x - 1, y + 1, Layer);
+	int aSideMapIndices[8];
+	for(int i = 0; i < 8; ++i)
+	{
+		aSides[i] = GameServer()->Collision()->Entity(x + aOffsets[i].x, y + aOffsets[i].y, Layer);
+		aSideMapIndices[i] = aSides[i] != 0 ? (y + aOffsets[i].y) * GameServer()->Collision()->GetWidth() + x + aOffsets[i].x : 0;
+	}
 
 	if(Index >= ENTITY_SPAWN && Index <= ENTITY_SPAWN_BLUE && Initial)
 	{
@@ -211,7 +210,28 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 					&GameServer()->m_World, //GameWorld
 					Pos, //Pos
 					pi / 4 * i, //Rotation
-					32 * 3 + 32 * (aSides[i] - ENTITY_LASER_SHORT) * 3, //Length
+					32 * (aSides[i] - ENTITY_LASER_SHORT + 1) * 3, //Length
+					Number //Number
+				);
+			}
+			else if(aSides[i] == ENTITY_LASER_LEN)
+			{
+				int NumberLaserLenTile = GameServer()->Collision()->GetSwitchNumber(aSideMapIndices[i]);
+				if(NumberLaserLenTile != Number)
+					continue;
+
+				int DoorLength = GameServer()->Collision()->GetSwitchDelay(aSideMapIndices[i]);
+				int PixelLength = 32 * DoorLength + 32 / 2;
+
+				// handle diagonals
+				if(i % 2 == 1)
+					PixelLength = static_cast<int>(std::floor(std::sqrt(2.0f * PixelLength * PixelLength)));
+
+				new CDoor(
+					&GameServer()->m_World, //GameWorld
+					Pos, //Pos
+					pi / 4 * i, //Rotation
+					PixelLength, //Length, make the minimum door length half a block
 					Number //Number
 				);
 			}
@@ -344,9 +364,14 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 
 		for(int i = 0; i < 8; i++)
 		{
-			if(aSides[i] >= ENTITY_LASER_SHORT && aSides[i] <= ENTITY_LASER_LONG)
+			if((aSides[i] >= ENTITY_LASER_SHORT && aSides[i] <= ENTITY_LASER_LONG) || aSides[i] == ENTITY_LASER_LEN)
 			{
-				CLight *pLight = new CLight(&GameServer()->m_World, Pos, pi / 4 * i, 32 * 3 + 32 * (aSides[i] - ENTITY_LASER_SHORT) * 3, Layer, Number);
+				int Length;
+				if(aSides[i] == ENTITY_LASER_LEN)
+					Length = 32 * GameServer()->Collision()->GetSwitchDelay(aSideMapIndices[i]) / 4;
+				else
+					Length = 32 * (aSides[i] - ENTITY_LASER_SHORT + 1) * 3;
+				CLight *pLight = new CLight(&GameServer()->m_World, Pos, pi / 4 * i, static_cast<int>(std::round(Length)), Layer, Number);
 				pLight->m_AngularSpeed = AngularSpeed;
 				if(aSides2[i] >= ENTITY_LASER_C_SLOW && aSides2[i] <= ENTITY_LASER_C_FAST)
 				{
