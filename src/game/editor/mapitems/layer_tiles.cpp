@@ -506,6 +506,75 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 	return 1;
 }
 
+int CLayerTiles::FloodFill(int StartX, int StartY, const CTile &Replacement)
+{
+	if(StartX < 0 || StartX >= m_Width || StartY < 0 || StartY >= m_Height)
+		return 0;
+
+	const CTile Source = GetTile(StartX, StartY);
+	if(Source == Replacement)
+		return 0;
+
+	std::vector<ivec2> Stack;
+	Stack.reserve(64);
+	Stack.emplace_back(StartX, StartY);
+
+	int Filled = 0;
+
+	while(!Stack.empty())
+	{
+		ivec2 Pos = Stack.back();
+		Stack.pop_back();
+
+		int x = Pos.x;
+		int y = Pos.y;
+
+		while(x >= 0 && GetTile(x, y) == Source)
+			x--;
+		x++;
+
+		bool SpanAbove = false;
+		bool SpanBelow = false;
+
+		while(x < m_Width && GetTile(x, y) == Source)
+		{
+			SetTile(x, y, Replacement);
+			Filled++;
+
+			if(y > 0)
+			{
+				bool AboveMatch = (GetTile(x, y - 1) == Source);
+				if(!SpanAbove && AboveMatch)
+				{
+					Stack.emplace_back(x, y - 1);
+					SpanAbove = true;
+				}
+				else if(SpanAbove && !AboveMatch)
+				{
+					SpanAbove = false;
+				}
+			}
+
+			if(y < m_Height - 1)
+			{
+				bool BelowMatch = GetTile(x, y + 1) == Source;
+				if(!SpanBelow && BelowMatch)
+				{
+					Stack.emplace_back(x, y + 1);
+					SpanBelow = true;
+				}
+				else if(SpanBelow && !BelowMatch)
+				{
+					SpanBelow = false;
+				}
+			}
+			x++;
+		}
+	}
+
+	return Filled;
+}
+
 void CLayerTiles::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 {
 	if(m_Readonly || (!Empty && pBrush->m_Type != LAYERTYPE_TILES))

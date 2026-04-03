@@ -8,6 +8,7 @@
 
 #include <base/color.h>
 #include <base/log.h>
+#include <base/str.h>
 #include <base/system.h>
 
 #include <engine/client.h>
@@ -40,6 +41,7 @@
 #include <chrono>
 #include <iterator>
 #include <limits>
+#include <memory>
 #include <tuple>
 #include <type_traits>
 
@@ -696,6 +698,18 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 				(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_D) && ModPressed && !ShiftPressed))
 				m_BrushDrawDestructive = !m_BrushDrawDestructive;
 			ToolbarBottom.VSplitLeft(5.0f, &Button, &ToolbarBottom);
+
+			// Only show if tiles layer is selected
+			if(pLayer && pLayer->m_Type == LAYERTYPE_TILES)
+			{
+				ToolbarBottom.VSplitLeft(25.0f, &Button, &ToolbarBottom);
+				if(DoButton_FontIcon(&m_QuickActionToggleBucketBrush, FontIcon::FILL_DRIP, m_QuickActionToggleBucketBrush.Active(), &Button, BUTTONFLAG_LEFT, m_QuickActionToggleBucketBrush.Description(), IGraphics::CORNER_ALL) ||
+					(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_B) && ModPressed && !ShiftPressed))
+				{
+					m_QuickActionToggleBucketBrush.Call();
+				}
+				ToolbarBottom.VSplitLeft(5.0f, &Button, &ToolbarBottom);
+			}
 		}
 	}
 }
@@ -2503,6 +2517,9 @@ void CEditor::DoMapEditor(CUIRect View)
 	{
 		Ui()->SetHotItem(&m_MapEditorId);
 
+		if(m_BrushBucketFill && NumEditLayers == 1 && apEditLayers[0].second->m_Type == LAYERTYPE_TILES)
+			m_CursorType = CURSOR_BUCKET;
+
 		// do global operations like pan and zoom
 		if(Ui()->CheckActiveItem(nullptr) && (Ui()->MouseButton(0) || Ui()->MouseButton(2)))
 		{
@@ -2556,6 +2573,13 @@ void CEditor::DoMapEditor(CUIRect View)
 						str_copy(m_aTooltip, pExplanation);
 				}
 			}
+			else if(m_BrushBucketFill)
+			{
+				if(m_pBrush->IsEmpty())
+					str_copy(m_aTooltip, "Use left mouse button to select a tile to bucket fill with.");
+				else
+					str_copy(m_aTooltip, "Use left mouse button to bucket fill with the brush. Right click to clear the brush.");
+			}
 			else if(m_pBrush->IsEmpty() && Map()->SelectedLayerType(0, LAYERTYPE_QUADS) != nullptr)
 				str_copy(m_aTooltip, "Use left mouse button to drag and create a brush. Hold shift to select multiple quads. Press R to rotate selected quads. Use ctrl+right click to select layer.");
 			else if(m_pBrush->IsEmpty())
@@ -2588,6 +2612,15 @@ void CEditor::DoMapEditor(CUIRect View)
 				{
 					r.y += r.h;
 					r.h = -r.h;
+				}
+
+				if(m_BrushBucketFill)
+				{
+					const float TileSize = 32.0f;
+					r.x = std::floor(s_StartWx / TileSize) * TileSize;
+					r.y = std::floor(s_StartWy / TileSize) * TileSize;
+					r.w = TileSize;
+					r.h = TileSize;
 				}
 
 				if(s_Operation == OP_BRUSH_DRAW)
@@ -2656,16 +2689,52 @@ void CEditor::DoMapEditor(CUIRect View)
 				{
 					if(!Ui()->MouseButton(0))
 					{
-						for(size_t k = 0; k < NumEditLayers; k++)
+						if(m_BrushBucketFill)
 						{
-							size_t BrushIndex = k;
-							if(m_pBrush->m_vpLayers.size() != NumEditLayers)
-								BrushIndex = 0;
-							std::shared_ptr<CLayer> pBrush = m_pBrush->IsEmpty() ? nullptr : m_pBrush->m_vpLayers[BrushIndex];
-							apEditLayers[k].second->FillSelection(m_pBrush->IsEmpty(), pBrush.get(), r);
+							if(NumEditLayers == 1 && !m_pBrush->IsEmpty() && apEditLayers[0].second->m_Type == LAYERTYPE_TILES && m_pBrush->m_vpLayers[0]->m_Type == LAYERTYPE_TILES)
+							{
+								std::shared_ptr<CLayerTiles> pTargetLayer = std::static_pointer_cast<CLayerTiles>(apEditLayers[0].second);
+								std::shared_ptr<CLayerTiles> pBrushLayer = std::static_pointer_cast<CLayerTiles>(m_pBrush->m_vpLayers[0]);
+
+								CIntRect TargetRect;
+								pTargetLayer->Convert(r, &TargetRect);
+								pTargetLayer->Clamp(&TargetRect);
+
+								if(TargetRect.w > 0 && TargetRect.h > 0)
+								{
+									// Warn if layer is too large for bucket fill
+									if((pTargetLayer->m_Width > 1000 || pTargetLayer->m_Height > 1000) && !m_BucketFillLargeLayerWasWarned)
+									{
+										m_PopupEventType = POPEVENT_BUCKET_FILL_LARGE_LAYER;
+										m_PopupEventActivated = true;
+										m_BucketFillLargeLayerWasWarned = true;
+									}
+									else
+									{
+										const CTile SelectedTile = pBrushLayer->GetTile(0, 0);
+
+										if(pTargetLayer->FloodFill(TargetRect.x, TargetRect.y, SelectedTile) > 0)
+										{
+											std::shared_ptr<IEditorAction> Action = std::make_shared<CEditorBrushDrawAction>(Map(), Map()->m_SelectedGroup);
+											Map()->m_EditorHistory.RecordAction(Action);
+										}
+									}
+								}
+							}
 						}
-						std::shared_ptr<IEditorAction> Action = std::make_shared<CEditorBrushDrawAction>(Map(), Map()->m_SelectedGroup);
-						Map()->m_EditorHistory.RecordAction(Action);
+						else
+						{
+							for(size_t k = 0; k < NumEditLayers; k++)
+							{
+								size_t BrushIndex = k;
+								if(m_pBrush->m_vpLayers.size() != NumEditLayers)
+									BrushIndex = 0;
+								std::shared_ptr<CLayer> pBrush = m_pBrush->IsEmpty() ? nullptr : m_pBrush->m_vpLayers[BrushIndex];
+								apEditLayers[k].second->FillSelection(m_pBrush->IsEmpty(), pBrush.get(), r);
+							}
+							std::shared_ptr<IEditorAction> Action = std::make_shared<CEditorBrushDrawAction>(Map(), Map()->m_SelectedGroup);
+							Map()->m_EditorHistory.RecordAction(Action);
+						}
 					}
 					else
 					{
@@ -2688,6 +2757,8 @@ void CEditor::DoMapEditor(CUIRect View)
 
 					if(m_pBrush->IsEmpty())
 						s_Operation = OP_BRUSH_GRAB;
+					else if(m_BrushBucketFill)
+						s_Operation = OP_BRUSH_PAINT;
 					else
 					{
 						s_Operation = OP_BRUSH_DRAW;
@@ -3258,7 +3329,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 					if(g != Map()->m_SelectedGroup)
 						Map()->SelectLayer(0, g);
 
-					if(Input()->ShiftIsPressed() && Map()->m_SelectedGroup == g)
+					if(Input()->ShiftIsPressed() && !m_BrushBucketFill && Map()->m_SelectedGroup == g)
 					{
 						Map()->m_vSelectedLayers.clear();
 						for(size_t i = 0; i < Map()->m_vpGroups[g]->m_vpLayers.size(); i++)
@@ -3453,7 +3524,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 					State.m_LayerPopupContext.m_pEditor = this;
 					if(Result == 1)
 					{
-						if(Input()->ShiftIsPressed() && Map()->m_SelectedGroup == g)
+						if(Input()->ShiftIsPressed() && !m_BrushBucketFill && Map()->m_SelectedGroup == g)
 						{
 							auto Position = std::find(Map()->m_vSelectedLayers.begin(), Map()->m_vSelectedLayers.end(), i);
 							if(Position != Map()->m_vSelectedLayers.end())
@@ -3636,7 +3707,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 
 	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE && !Ui()->IsPopupOpen() && CLineInput::GetActiveInput() == nullptr && State.m_Operation == ELayerOperation::NONE)
 	{
-		if(Input()->ShiftIsPressed())
+		if(Input()->ShiftIsPressed() && !m_BrushBucketFill)
 		{
 			if(Map()->m_vSelectedLayers[Map()->m_vSelectedLayers.size() - 1] < (int)Map()->m_vpGroups[Map()->m_SelectedGroup]->m_vpLayers.size() - 1)
 				Map()->AddSelectedLayer(Map()->m_vSelectedLayers[Map()->m_vSelectedLayers.size() - 1] + 1);
@@ -3649,7 +3720,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 	}
 	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE && !Ui()->IsPopupOpen() && CLineInput::GetActiveInput() == nullptr && State.m_Operation == ELayerOperation::NONE)
 	{
-		if(Input()->ShiftIsPressed())
+		if(Input()->ShiftIsPressed() && !m_BrushBucketFill)
 		{
 			if(Map()->m_vSelectedLayers[Map()->m_vSelectedLayers.size() - 1] > 0)
 				Map()->AddSelectedLayer(Map()->m_vSelectedLayers[Map()->m_vSelectedLayers.size() - 1] - 1);
@@ -7087,6 +7158,7 @@ void CEditor::Init()
 	m_aCursorTextures[CURSOR_NORMAL] = Graphics()->LoadTexture("editor/cursor.png", IStorage::TYPE_ALL);
 	m_aCursorTextures[CURSOR_RESIZE_H] = Graphics()->LoadTexture("editor/cursor_resize.png", IStorage::TYPE_ALL);
 	m_aCursorTextures[CURSOR_RESIZE_V] = m_aCursorTextures[CURSOR_RESIZE_H];
+	m_aCursorTextures[CURSOR_BUCKET] = Graphics()->LoadTexture("editor/cursor_bucket.png", IStorage::TYPE_ALL);
 
 	m_pTilesetPicker = std::make_shared<CLayerTiles>(Map(), 16, 16);
 	m_pTilesetPicker->MakePalette();
@@ -7201,7 +7273,7 @@ void CEditor::MouseAxisLock(vec2 &CursorRel)
 	if(Input()->AltIsPressed())
 	{
 		// only lock with the paint brush and inside editor map area to avoid duplicate Alt behavior
-		if(m_pBrush->IsEmpty() || Ui()->HotItem() != &m_MapEditorId)
+		if(m_pBrush->IsEmpty() || m_BrushBucketFill || Ui()->HotItem() != &m_MapEditorId)
 			return;
 
 		const vec2 CurrentWorldPos = vec2(Ui()->MouseWorldX(), Ui()->MouseWorldY()) / 32.0f;

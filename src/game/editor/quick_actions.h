@@ -177,6 +177,18 @@ REGISTER_QUICK_ACTION(
 	DEFAULT_BTN,
 	"Toggle proof borders. These borders represent the area that a player can see with default zoom.")
 REGISTER_QUICK_ACTION(
+	ToggleBucketBrush,
+	"Toggle bucket fill",
+	[&]() {
+		m_BrushBucketFill = !m_BrushBucketFill;
+		if(m_BrushBucketFill && Map()->m_vSelectedLayers.size() > 1)
+			Map()->SelectLayer(Map()->m_vSelectedLayers[0], Map()->m_SelectedGroup);
+	},
+	ALWAYS_FALSE,
+	[&]() -> bool { return m_BrushBucketFill; },
+	DEFAULT_BTN,
+	"Toggle bucket fill brush.")
+REGISTER_QUICK_ACTION(
 	AddTileLayer, "Add tile layer", [&]() { AddTileLayer(); }, ALWAYS_FALSE, ALWAYS_FALSE, DEFAULT_BTN, "Create a new tile layer.")
 REGISTER_QUICK_ACTION(
 	AddSwitchLayer,

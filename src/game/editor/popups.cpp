@@ -2040,6 +2040,11 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		pTitle = "Large layer";
 		pMessage = "You are trying to set the height or width of a layer to more than 1000 tiles. This is actually possible, but only rarely necessary. It may cause the editor to work slower and will result in a larger file size as well as higher memory usage for client and server.";
 	}
+	else if(pEditor->m_PopupEventType == POPEVENT_BUCKET_FILL_LARGE_LAYER)
+	{
+		pTitle = "Large bucket fill";
+		pMessage = "Bucket fill on layers larger than 1000 tiles may be very slow and might freeze the editor.";
+	}
 	else if(pEditor->m_PopupEventType == POPEVENT_PREVENTUNUSEDTILES)
 	{
 		pTitle = "Unused tiles disabled";

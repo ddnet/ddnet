@@ -133,6 +133,7 @@ public:
 	[[nodiscard]] virtual bool IsEmpty() const;
 	void BrushSelecting(CUIRect Rect) override;
 	int BrushGrab(CLayerGroup *pBrush, CUIRect Rect) override;
+	int FloodFill(int StartX, int StartY, const CTile &Replacement);
 	void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect) override;
 	void FillGameTiles(EGameTileOp Fill);
 	bool CanFillGameTiles() const;

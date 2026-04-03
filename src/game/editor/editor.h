@@ -264,6 +264,8 @@ public:
 		m_PreventUnusedTilesWasWarned = false;
 		m_AllowPlaceUnusedTiles = EUnusedEntities::NOT_ALLOWED;
 		m_BrushDrawDestructive = true;
+		m_BrushBucketFill = false;
+		m_BucketFillLargeLayerWasWarned = false;
 	}
 
 	class CHoverTile
@@ -372,6 +374,7 @@ public:
 		POPEVENT_LOADDROP,
 		POPEVENT_NEW,
 		POPEVENT_LARGELAYER,
+		POPEVENT_BUCKET_FILL_LARGE_LAYER,
 		POPEVENT_PREVENTUNUSEDTILES,
 		POPEVENT_IMAGEDIV16,
 		POPEVENT_IMAGE_MAX,
@@ -392,6 +395,7 @@ public:
 	int m_PopupEventWasActivated;
 	bool m_LargeLayerWasWarned;
 	bool m_PreventUnusedTilesWasWarned;
+	bool m_BucketFillLargeLayerWasWarned;
 
 	enum class EUnusedEntities
 	{
@@ -403,6 +407,7 @@ public:
 	bool IsAllowPlaceUnusedTiles() const;
 
 	bool m_BrushDrawDestructive;
+	bool m_BrushBucketFill;
 
 	int m_Mentions = 0;
 	bool m_IngameMoved = false;
@@ -490,6 +495,7 @@ public:
 		CURSOR_NORMAL,
 		CURSOR_RESIZE_V,
 		CURSOR_RESIZE_H,
+		CURSOR_BUCKET,
 		NUM_CURSORS
 	};
 	IGraphics::CTextureHandle m_aCursorTextures[ECursorType::NUM_CURSORS];
