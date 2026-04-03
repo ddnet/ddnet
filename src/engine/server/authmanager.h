@@ -14,41 +14,70 @@
 
 namespace RoleName
 {
-	inline const char *const ADMIN = "admin";
-	inline const char *const MODERATOR = "moderator";
-	inline const char *const HELPER = "helper";
+	constexpr const char *const ADMIN = "admin";
+	constexpr const char *const MODERATOR = "moderator";
+	constexpr const char *const HELPER = "helper";
 } // namespace RoleName
-
-namespace RoleRank
-{
-	static constexpr int ADMIN = AUTHED_ADMIN;
-	static constexpr int MODERATOR = AUTHED_MOD;
-	static constexpr int HELPER = AUTHED_HELPER;
-	static constexpr int NONE = AUTHED_NO;
-} // namespace RoleRank
 
 class CRconRole
 {
 	char m_aName[64];
-	int m_Rank = RoleRank::NONE;
+	bool m_IsAdmin = false;
+	bool m_HasReservedSlots = false;
+	bool m_CanTeleOthers = false;
+	std::vector<std::string> m_vRconCommands;
+	std::vector<CRconRole *> m_vpParents;
+	std::vector<CRconRole *> m_vpCanKick;
 
 public:
+	// inherit all command access from a parent role
+	void AddParent(CRconRole *pRole);
+
+	// delete parent inheritance and lose access to all parent inherited command access
+	void RemoveParent(CRconRole *pRole);
+
+	void AllowKick(CRconRole *pRole);
+	void DisallowKick(CRconRole *pRole);
+
+	bool CanKick(CRconRole *pRole) const;
+
+	// check if *pParent* is a direct parent of *this* role
+	bool IsParent(const CRconRole *pParent) const;
+
+	// check if *pAncestor* is a direct or indirect parent of *this* role
+	bool IsAncestor(const CRconRole *pAncestor) const;
+
 	// Name of the rcon role. For example "admin".
 	const char *Name() const { return m_aName; }
 
-	// The rank determines how powerful the role is
-	// compared to other roles.
-	// Higher rank means more power.
-	// Roles with lower rank can never kick roles with higher rank.
-	// Roles with higher rank can see commands executed by roles with lower rank
-	// but not vice versa.
-	int Rank() const { return m_Rank; }
+	bool HasReservedSlots() const;
+	bool CanTeleOthers() const;
 
-	CRconRole(const char *pName, int Rank) :
-		m_Rank(Rank)
+	void SetReservedSlots(bool Value) { m_HasReservedSlots = Value; }
+	void SetTeleOthers(bool Value) { m_CanTeleOthers = Value; }
+
+	// admin is the strongest role with full access
+	bool IsAdmin() const { return m_IsAdmin; }
+
+	CRconRole *InheritCommandAccessFrom(const char *pCommand);
+	bool CanUseRconCommandDirect(const char *pCommand);
+	bool CanUseRconCommand(const char *pCommand);
+	bool AllowCommand(const char *pCommand);
+	bool DisallowCommand(const char *pCommand);
+
+	void LogRconCommandAccess(int MaxLineLength);
+
+	CRconRole(const char *pName, bool IsAdmin) :
+		m_IsAdmin(IsAdmin)
 	{
 		str_copy(m_aName, pName);
 	}
+	CRconRole(const char *pName)
+	{
+		str_copy(m_aName, pName);
+	}
+
+	static bool IsValidName(const char *pName);
 };
 
 class CAuthManager
@@ -64,6 +93,7 @@ private:
 	};
 	std::vector<CKey> m_vKeys;
 	std::unordered_map<std::string, CRconRole> m_Roles;
+	CRconRole *m_pAdminRole = nullptr;
 
 	int m_aDefault[3];
 	bool m_Generated;
@@ -87,7 +117,7 @@ private:
 
 public:
 	int DefaultKey(const char *pRoleName) const;
-	int KeyLevel(int Slot) const;
+	CRconRole *KeyRole(int Slot) const;
 	const char *KeyIdent(int Slot) const;
 	bool IsValidIdent(const char *pIdent) const;
 	void UpdateKeyHash(int Slot, MD5_DIGEST Hash, const unsigned char *pSalt, const char *pRoleName);
@@ -97,7 +127,25 @@ public:
 	bool IsGenerated() const;
 	int NumNonDefaultKeys() const;
 	CRconRole *FindRole(const char *pName);
-	bool AddRole(const char *pName, int Rank);
+	CRconRole *AdminRole() const { return m_pAdminRole; }
+	bool AddRole(const char *pName);
+
+private:
+	bool AddAdminRole(const char *pName);
+	bool AddRoleImpl(const char *pName, bool IsAdmin);
+
+public:
+	bool CanRoleUseCommand(const char *pRoleName, const char *pCommand);
+	void GetRoleNames(char *pBuf, size_t BufSize);
+	bool RoleInherit(const char *pRoleName, const char *pChildRoleName);
+	bool RoleDeleteInherit(const char *pRoleName, const char *pParentRoleName);
+
+private:
+	bool IsDefaultRole(const char *pRoleName);
+
+public:
+	void UnsetReservedSlotsForAllRoles();
+	void UnsetTeleOthersForAllRoles();
 };
 
 #endif // ENGINE_SERVER_AUTHMANAGER_H
