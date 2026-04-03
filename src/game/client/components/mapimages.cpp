@@ -3,7 +3,9 @@
 #include "mapimages.h"
 
 #include <base/log.h>
+#include <base/math.h>
 
+#include <engine/gfx/image_manipulation.h>
 #include <engine/graphics.h>
 #include <engine/map.h>
 #include <engine/storage.h>
@@ -21,6 +23,7 @@ CMapImages::CMapImages()
 	m_Count = 0;
 	std::fill(std::begin(m_aEntitiesIsLoaded), std::end(m_aEntitiesIsLoaded), false);
 	m_SpeedupArrowIsLoaded = false;
+	m_TuneColorsIsLoaded = false;
 
 	str_copy(m_aEntitiesPath, "editor/entities_clear");
 
@@ -287,15 +290,24 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 			BuildImageInfo.m_Width = ImgInfo.m_Width;
 			BuildImageInfo.m_Height = ImgInfo.m_Height;
 			BuildImageInfo.m_Format = ImgInfo.m_Format;
-			BuildImageInfo.Allocate();
+			BuildImageInfo.AllocateFillZero(); // allocate already transparent image
+
+			// convert tune tile to gray
+			const size_t CopyWidth = ImgInfo.m_Width / 16;
+			const size_t CopyHeight = ImgInfo.m_Height / 16;
+			const size_t TuneTileX = static_cast<size_t>(TILE_TUNE % 16) * CopyWidth;
+			const size_t TuneTileY = static_cast<size_t>(TILE_TUNE / 16) * CopyHeight;
+
+			ConvertToGrayscaleRect(ImgInfo, TuneTileX, TuneTileY, CopyWidth, CopyHeight);
 
 			// build game layer
 			for(int LayerType = 0; LayerType < MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT; ++LayerType)
 			{
 				dbg_assert(!m_aaEntitiesTextures[(EntitiesModType * 2) + (int)EntitiesAreMasked][LayerType].IsValid(), "entities texture already loaded when it should not be");
 
-				// set everything transparent
-				mem_zero(BuildImageInfo.m_pData, BuildImageInfo.DataSize());
+				// reset everything transparent
+				if(LayerType > 0)
+					mem_zero(BuildImageInfo.m_pData, BuildImageInfo.DataSize());
 
 				for(int i = 0; i < 256; ++i)
 				{
@@ -307,8 +319,6 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 							TileIndex = 8;
 						}
 
-						const size_t CopyWidth = ImgInfo.m_Width / 16;
-						const size_t CopyHeight = ImgInfo.m_Height / 16;
 						const size_t OffsetX = (size_t)(TileIndex % 16) * CopyWidth;
 						const size_t OffsetY = (size_t)(TileIndex / 16) * CopyHeight;
 						BuildImageInfo.CopyRectFrom(ImgInfo, OffsetX, OffsetY, CopyWidth, CopyHeight, OffsetX, OffsetY);
@@ -319,6 +329,29 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 			}
 
 			BuildImageInfo.Free();
+
+			// build tune map from the tune tile
+			if(Graphics()->HasTextureArraysSupport())
+			{
+				CImageInfo TuneMapInfo;
+				TuneMapInfo.m_Width = ImgInfo.m_Width;
+				TuneMapInfo.m_Height = ImgInfo.m_Height;
+				TuneMapInfo.m_Format = ImgInfo.m_Format;
+				TuneMapInfo.AllocateFillZero();
+
+				for(int TileIndex = 1; TileIndex < 256; ++TileIndex)
+				{
+					size_t StartX = CopyWidth * (TileIndex % 16);
+					size_t StartY = CopyHeight * (TileIndex / 16);
+					TuneMapInfo.CopyRectFrom(ImgInfo, TuneTileX, TuneTileY, CopyWidth, CopyHeight, StartX, StartY);
+					float Hue = std::fmod((TileIndex - 1) * normalized_golden_angle, 1.0f);
+					ColorizeWithHueRect(TuneMapInfo, Hue, 1.0f, StartX, StartY, CopyWidth, CopyHeight);
+				}
+				m_TuneColorMapTexture = Graphics()->LoadTextureRaw(TuneMapInfo, TextureLoadFlag);
+				m_TuneColorsIsLoaded = true;
+				TuneMapInfo.Free();
+			}
+
 			ImgInfo.Free();
 		}
 	}
@@ -335,6 +368,24 @@ IGraphics::CTextureHandle CMapImages::GetSpeedupArrow()
 		m_SpeedupArrowIsLoaded = true;
 	}
 	return m_SpeedupArrowTexture;
+}
+
+IGraphics::CTextureHandle CMapImages::GetTuneColors()
+{
+	if(Graphics()->HasTextureArraysSupport())
+	{
+		if(!m_TuneColorsIsLoaded)
+		{
+			// load entities, this also loads the tune map
+			GetEntities(EMapImageEntityLayerType::MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH);
+			dbg_assert(m_TuneColorsIsLoaded, "Entities did not load the tune color map");
+		}
+		return m_TuneColorMapTexture;
+	}
+	else
+	{
+		return GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH);
+	}
 }
 
 IGraphics::CTextureHandle CMapImages::GetOverlayBottom()

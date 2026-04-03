@@ -6,7 +6,9 @@
 #include <game/map/render_interfaces.h>
 #include <game/mapitems.h>
 
+#include <array>
 #include <chrono>
+#include <memory>
 
 enum
 {
@@ -51,15 +53,30 @@ public:
 class IGraphics;
 class ITextRender;
 
+class CTuneColorMapper
+{
+public:
+	CTuneColorMapper();
+	ColorRGBA GetTuneIndexColor(uint8_t TuneColorIndex) const;
+	uint8_t GetTuneColorIndex(uint8_t TuneNumber);
+	void Reset();
+
+private:
+	std::array<uint8_t, 255> m_aTuneNumberToColorIndex;
+	uint8_t m_NextTuneNumberIndex = 0;
+};
+
 class CRenderMap
 {
 	IGraphics *m_pGraphics;
 	ITextRender *m_pTextRender;
+	std::shared_ptr<CTuneColorMapper> m_pTuneColorMapper;
 
 public:
 	void Init(IGraphics *pGraphics, ITextRender *pTextRender);
 	IGraphics *Graphics() { return m_pGraphics; }
 	ITextRender *TextRender() { return m_pTextRender; }
+	std::shared_ptr<CTuneColorMapper> TuneColorMapper() const { return m_pTuneColorMapper; }
 
 	// map render methods (render_map.cpp)
 	static void RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, std::chrono::nanoseconds TimeNanos, ColorRGBA &Result, size_t Channels);
