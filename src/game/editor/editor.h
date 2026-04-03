@@ -699,7 +699,35 @@ public:
 
 	static bool IsVanillaImage(const char *pImage);
 
+	enum class ELayerOperation
+	{
+		NONE,
+		CLICK,
+		LAYER_DRAG,
+		GROUP_DRAG,
+	};
+	class CRenderLayersState
+	{
+	public:
+		CScrollRegion m_ScrollRegion;
+		ELayerOperation m_Operation;
+		ELayerOperation m_PreviousOperation;
+		const void *m_pDraggedButton;
+		float m_InitialMouseY;
+		float m_InitialCutHeight;
+		bool m_ScrollToSelectionNext;
+		int m_InitialGroupIndex;
+		std::vector<int> m_vInitialLayerIndices;
+		const char m_AddGroupButtonId = 0;
+		const char m_CollapseAllButtonId = 0;
+		const SPopupMenuId m_PopupGroupId = {};
+		SLayerPopupContext m_LayerPopupContext;
+
+		void Reset();
+	};
+	CRenderLayersState m_RenderLayersState;
 	void RenderLayers(CUIRect LayersBox);
+
 	void RenderImagesList(CUIRect Toolbox);
 	void RenderSelectedImage(CUIRect View) const;
 	void RenderSounds(CUIRect Toolbox);

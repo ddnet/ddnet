@@ -3046,32 +3046,35 @@ bool CEditor::IsAllowPlaceUnusedTiles() const
 	return m_AllowPlaceUnusedTiles != EUnusedEntities::NOT_ALLOWED;
 }
 
+void CEditor::CRenderLayersState::Reset()
+{
+	m_ScrollRegion.Reset();
+	m_Operation = ELayerOperation::NONE;
+	m_PreviousOperation = ELayerOperation::NONE;
+	m_pDraggedButton = nullptr;
+	m_InitialMouseY = 0.0f;
+	m_InitialCutHeight = 0.0f;
+	m_ScrollToSelectionNext = false;
+	m_InitialGroupIndex = 0;
+	m_vInitialLayerIndices.clear();
+	m_LayerPopupContext = {};
+}
+
 void CEditor::RenderLayers(CUIRect LayersBox)
 {
+	CRenderLayersState &State = m_RenderLayersState;
+
 	const float RowHeight = 12.0f;
 	char aBuf[64];
 
 	CUIRect UnscrolledLayersBox = LayersBox;
 
-	static CScrollRegion s_ScrollRegion;
 	CScrollRegionParams ScrollParams;
 	ScrollParams.m_ScrollbarWidth = 10.0f;
 	ScrollParams.m_ScrollbarMargin = 3.0f;
 	ScrollParams.m_ScrollUnit = RowHeight * 5.0f;
-	s_ScrollRegion.Begin(&LayersBox, &ScrollParams);
+	State.m_ScrollRegion.Begin(&LayersBox, &ScrollParams);
 
-	enum
-	{
-		OP_NONE = 0,
-		OP_CLICK,
-		OP_LAYER_DRAG,
-		OP_GROUP_DRAG
-	};
-	static int s_Operation = OP_NONE;
-	static int s_PreviousOperation = OP_NONE;
-	static const void *s_pDraggedButton = nullptr;
-	static float s_InitialMouseY = 0;
-	static float s_InitialCutHeight = 0;
 	constexpr float MinDragDistance = 5.0f;
 	int GroupAfterDraggedLayer = -1;
 	int LayerAfterDraggedLayer = -1;
@@ -3082,14 +3085,14 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 	bool StartDragGroup = false;
 	std::vector<int> vButtonsPerGroup;
 
-	auto SetOperation = [](int Operation) {
-		if(Operation != s_Operation)
+	auto SetOperation = [&](ELayerOperation Operation) {
+		if(Operation != State.m_Operation)
 		{
-			s_PreviousOperation = s_Operation;
-			s_Operation = Operation;
-			if(Operation == OP_NONE)
+			State.m_PreviousOperation = State.m_Operation;
+			State.m_Operation = Operation;
+			if(Operation == ELayerOperation::NONE)
 			{
-				s_pDraggedButton = nullptr;
+				State.m_pDraggedButton = nullptr;
 			}
 		}
 	};
@@ -3100,12 +3103,12 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		vButtonsPerGroup.push_back(pGroup->m_vpLayers.size() + 1);
 	}
 
-	if(s_pDraggedButton != nullptr && Ui()->ActiveItem() != s_pDraggedButton)
+	if(State.m_pDraggedButton != nullptr && Ui()->ActiveItem() != State.m_pDraggedButton)
 	{
-		SetOperation(OP_NONE);
+		SetOperation(ELayerOperation::NONE);
 	}
 
-	if(s_Operation == OP_LAYER_DRAG || s_Operation == OP_GROUP_DRAG)
+	if(State.m_Operation == ELayerOperation::LAYER_DRAG || State.m_Operation == ELayerOperation::GROUP_DRAG)
 	{
 		float MinDraggableValue = UnscrolledLayersBox.y;
 		float MaxDraggableValue = MinDraggableValue;
@@ -3115,32 +3118,31 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		}
 		MaxDraggableValue += LayersBox.y - UnscrolledLayersBox.y;
 
-		if(s_Operation == OP_GROUP_DRAG)
+		if(State.m_Operation == ELayerOperation::GROUP_DRAG)
 		{
 			MaxDraggableValue -= vButtonsPerGroup[Map()->m_SelectedGroup] * (RowHeight + 2.0f) + 5.0f;
 		}
-		else if(s_Operation == OP_LAYER_DRAG)
+		else if(State.m_Operation == ELayerOperation::LAYER_DRAG)
 		{
 			MinDraggableValue += RowHeight + 2.0f;
 			MaxDraggableValue -= Map()->m_vSelectedLayers.size() * (RowHeight + 2.0f) + 5.0f;
 		}
 
-		UnscrolledLayersBox.HSplitTop(s_InitialCutHeight, nullptr, &UnscrolledLayersBox);
-		UnscrolledLayersBox.y -= s_InitialMouseY - Ui()->MouseY();
+		UnscrolledLayersBox.HSplitTop(State.m_InitialCutHeight, nullptr, &UnscrolledLayersBox);
+		UnscrolledLayersBox.y -= State.m_InitialMouseY - Ui()->MouseY();
 
 		UnscrolledLayersBox.y = std::clamp(UnscrolledLayersBox.y, MinDraggableValue, MaxDraggableValue);
 
 		UnscrolledLayersBox.w = LayersBox.w;
 	}
 
-	static bool s_ScrollToSelectionNext = false;
-	const bool ScrollToSelection = LayerSelector()->SelectByTile() || s_ScrollToSelectionNext;
-	s_ScrollToSelectionNext = false;
+	const bool ScrollToSelection = LayerSelector()->SelectByTile() || State.m_ScrollToSelectionNext;
+	State.m_ScrollToSelectionNext = false;
 
 	// render layers
 	for(int g = 0; g < (int)Map()->m_vpGroups.size(); g++)
 	{
-		if(s_Operation == OP_LAYER_DRAG && g > 0 && !DraggedPositionFound && Ui()->MouseY() < LayersBox.y + RowHeight / 2)
+		if(State.m_Operation == ELayerOperation::LAYER_DRAG && g > 0 && !DraggedPositionFound && Ui()->MouseY() < LayersBox.y + RowHeight / 2)
 		{
 			DraggedPositionFound = true;
 			GroupAfterDraggedLayer = g;
@@ -3149,11 +3151,11 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 
 			CUIRect Slot;
 			LayersBox.HSplitTop(Map()->m_vSelectedLayers.size() * (RowHeight + 2.0f), &Slot, &LayersBox);
-			s_ScrollRegion.AddRect(Slot);
+			State.m_ScrollRegion.AddRect(Slot);
 		}
 
 		CUIRect Slot, VisibleToggle;
-		if(s_Operation == OP_GROUP_DRAG)
+		if(State.m_Operation == ELayerOperation::GROUP_DRAG)
 		{
 			if(g == Map()->m_SelectedGroup)
 			{
@@ -3170,19 +3172,19 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 					LayersBox.HSplitTop(RowHeight + 7.0f, &TmpSlot, &LayersBox);
 				else
 					LayersBox.HSplitTop(vButtonsPerGroup[Map()->m_SelectedGroup] * (RowHeight + 2.0f) + 5.0f, &TmpSlot, &LayersBox);
-				s_ScrollRegion.AddRect(TmpSlot, false);
+				State.m_ScrollRegion.AddRect(TmpSlot, false);
 			}
 		}
-		if(s_Operation != OP_GROUP_DRAG || g != Map()->m_SelectedGroup)
+		if(State.m_Operation != ELayerOperation::GROUP_DRAG || g != Map()->m_SelectedGroup)
 		{
 			LayersBox.HSplitTop(RowHeight, &Slot, &LayersBox);
 
 			CUIRect TmpRect;
 			LayersBox.HSplitTop(2.0f, &TmpRect, &LayersBox);
-			s_ScrollRegion.AddRect(TmpRect);
+			State.m_ScrollRegion.AddRect(TmpRect);
 		}
 
-		if(s_ScrollRegion.AddRect(Slot))
+		if(State.m_ScrollRegion.AddRect(Slot))
 		{
 			Slot.VSplitLeft(15.0f, &VisibleToggle, &Slot);
 
@@ -3230,11 +3232,11 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 			if(int Result = DoButton_DraggableEx(Map()->m_vpGroups[g].get(), aBuf, g == Map()->m_SelectedGroup, &Slot, &Clicked, &Abrupted,
 				   BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT, Map()->m_vpGroups[g]->m_Collapse ? "Select group. Shift+left click to select all layers. Double click to expand." : "Select group. Shift+left click to select all layers. Double click to collapse.", IGraphics::CORNER_R))
 			{
-				if(s_Operation == OP_NONE)
+				if(State.m_Operation == ELayerOperation::NONE)
 				{
-					s_InitialMouseY = Ui()->MouseY();
-					s_InitialCutHeight = s_InitialMouseY - UnscrolledLayersBox.y;
-					SetOperation(OP_CLICK);
+					State.m_InitialMouseY = Ui()->MouseY();
+					State.m_InitialCutHeight = State.m_InitialMouseY - UnscrolledLayersBox.y;
+					SetOperation(ELayerOperation::CLICK);
 
 					if(g != Map()->m_SelectedGroup)
 						Map()->SelectLayer(0, g);
@@ -3242,16 +3244,16 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 
 				if(Abrupted)
 				{
-					SetOperation(OP_NONE);
+					SetOperation(ELayerOperation::NONE);
 				}
 
-				if(s_Operation == OP_CLICK && absolute(Ui()->MouseY() - s_InitialMouseY) > MinDragDistance)
+				if(State.m_Operation == ELayerOperation::CLICK && absolute(Ui()->MouseY() - State.m_InitialMouseY) > MinDragDistance)
 				{
 					StartDragGroup = true;
-					s_pDraggedButton = Map()->m_vpGroups[g].get();
+					State.m_pDraggedButton = Map()->m_vpGroups[g].get();
 				}
 
-				if(s_Operation == OP_CLICK && Clicked)
+				if(State.m_Operation == ELayerOperation::CLICK && Clicked)
 				{
 					if(g != Map()->m_SelectedGroup)
 						Map()->SelectLayer(0, g);
@@ -3267,22 +3269,21 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 
 					if(Result == 2)
 					{
-						static SPopupMenuId s_PopupGroupId;
-						Ui()->DoPopupMenu(&s_PopupGroupId, Ui()->MouseX(), Ui()->MouseY(), 145, 256, this, PopupGroup);
+						Ui()->DoPopupMenu(&State.m_PopupGroupId, Ui()->MouseX(), Ui()->MouseY(), 145, 256, this, PopupGroup);
 					}
 
 					if(!Map()->m_vpGroups[g]->m_vpLayers.empty() && Ui()->DoDoubleClickLogic(Map()->m_vpGroups[g].get()))
 						Map()->m_vpGroups[g]->m_Collapse ^= 1;
 
-					SetOperation(OP_NONE);
+					SetOperation(ELayerOperation::NONE);
 				}
 
-				if(s_Operation == OP_GROUP_DRAG && Clicked)
+				if(State.m_Operation == ELayerOperation::GROUP_DRAG && Clicked)
 					MoveGroup = true;
 			}
-			else if(s_pDraggedButton == Map()->m_vpGroups[g].get())
+			else if(State.m_pDraggedButton == Map()->m_vpGroups[g].get())
 			{
-				SetOperation(OP_NONE);
+				SetOperation(ELayerOperation::NONE);
 			}
 		}
 
@@ -3304,11 +3305,11 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 				}
 			}
 
-			if(s_Operation == OP_GROUP_DRAG && g == Map()->m_SelectedGroup)
+			if(State.m_Operation == ELayerOperation::GROUP_DRAG && g == Map()->m_SelectedGroup)
 			{
 				UnscrolledLayersBox.HSplitTop(RowHeight + 2.0f, &Slot, &UnscrolledLayersBox);
 			}
-			else if(s_Operation == OP_LAYER_DRAG)
+			else if(State.m_Operation == ELayerOperation::LAYER_DRAG)
 			{
 				if(IsLayerSelected)
 				{
@@ -3324,18 +3325,18 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 						for(size_t j = 0; j < Map()->m_vSelectedLayers.size(); j++)
 						{
 							LayersBox.HSplitTop(RowHeight + 2.0f, nullptr, &LayersBox);
-							s_ScrollRegion.AddRect(Slot);
+							State.m_ScrollRegion.AddRect(Slot);
 						}
 					}
 					LayersBox.HSplitTop(RowHeight + 2.0f, &Slot, &LayersBox);
-					if(!s_ScrollRegion.AddRect(Slot, ScrollToSelection && IsLayerSelected))
+					if(!State.m_ScrollRegion.AddRect(Slot, ScrollToSelection && IsLayerSelected))
 						continue;
 				}
 			}
 			else
 			{
 				LayersBox.HSplitTop(RowHeight + 2.0f, &Slot, &LayersBox);
-				if(!s_ScrollRegion.AddRect(Slot, ScrollToSelection && IsLayerSelected))
+				if(!State.m_ScrollRegion.AddRect(Slot, ScrollToSelection && IsLayerSelected))
 					continue;
 			}
 
@@ -3414,12 +3415,12 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 			if(int Result = DoButton_DraggableEx(Map()->m_vpGroups[g]->m_vpLayers[i].get(), aBuf, Checked, &Button, &Clicked, &Abrupted,
 				   BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT, "Select layer. Hold shift to select multiple.", IGraphics::CORNER_R))
 			{
-				if(s_Operation == OP_NONE)
+				if(State.m_Operation == ELayerOperation::NONE)
 				{
-					s_InitialMouseY = Ui()->MouseY();
-					s_InitialCutHeight = s_InitialMouseY - UnscrolledLayersBox.y;
+					State.m_InitialMouseY = Ui()->MouseY();
+					State.m_InitialCutHeight = State.m_InitialMouseY - UnscrolledLayersBox.y;
 
-					SetOperation(OP_CLICK);
+					SetOperation(ELayerOperation::CLICK);
 
 					if(!Input()->ShiftIsPressed() && !IsLayerSelected)
 					{
@@ -3429,10 +3430,10 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 
 				if(Abrupted)
 				{
-					SetOperation(OP_NONE);
+					SetOperation(ELayerOperation::NONE);
 				}
 
-				if(s_Operation == OP_CLICK && absolute(Ui()->MouseY() - s_InitialMouseY) > MinDragDistance)
+				if(State.m_Operation == ELayerOperation::CLICK && absolute(Ui()->MouseY() - State.m_InitialMouseY) > MinDragDistance)
 				{
 					bool EntitiesLayerSelected = false;
 					for(int k : Map()->m_vSelectedLayers)
@@ -3444,13 +3445,12 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 					if(!EntitiesLayerSelected)
 						StartDragLayer = true;
 
-					s_pDraggedButton = Map()->m_vpGroups[g]->m_vpLayers[i].get();
+					State.m_pDraggedButton = Map()->m_vpGroups[g]->m_vpLayers[i].get();
 				}
 
-				if(s_Operation == OP_CLICK && Clicked)
+				if(State.m_Operation == ELayerOperation::CLICK && Clicked)
 				{
-					static SLayerPopupContext s_LayerPopupContext = {};
-					s_LayerPopupContext.m_pEditor = this;
+					State.m_LayerPopupContext.m_pEditor = this;
 					if(Result == 1)
 					{
 						if(Input()->ShiftIsPressed() && Map()->m_SelectedGroup == g)
@@ -3468,8 +3468,8 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 					}
 					else if(Result == 2)
 					{
-						s_LayerPopupContext.m_vpLayers.clear();
-						s_LayerPopupContext.m_vLayerIndices.clear();
+						State.m_LayerPopupContext.m_vpLayers.clear();
+						State.m_LayerPopupContext.m_vLayerIndices.clear();
 
 						if(!IsLayerSelected)
 						{
@@ -3491,8 +3491,8 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 								int LayerIndex = Map()->m_vSelectedLayers[j];
 								if(Map()->m_vpGroups[Map()->m_SelectedGroup]->m_vpLayers[LayerIndex]->m_Type == LAYERTYPE_TILES)
 								{
-									s_LayerPopupContext.m_vpLayers.push_back(std::static_pointer_cast<CLayerTiles>(Map()->m_vpGroups[Map()->m_SelectedGroup]->m_vpLayers[Map()->m_vSelectedLayers[j]]));
-									s_LayerPopupContext.m_vLayerIndices.push_back(LayerIndex);
+									State.m_LayerPopupContext.m_vpLayers.push_back(std::static_pointer_cast<CLayerTiles>(Map()->m_vpGroups[Map()->m_SelectedGroup]->m_vpLayers[Map()->m_vSelectedLayers[j]]));
+									State.m_LayerPopupContext.m_vLayerIndices.push_back(LayerIndex);
 								}
 								else
 									AllTile = false;
@@ -3501,46 +3501,46 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 							// Don't allow editing if all selected layers are not tile layers
 							if(!AllTile)
 							{
-								s_LayerPopupContext.m_vpLayers.clear();
-								s_LayerPopupContext.m_vLayerIndices.clear();
+								State.m_LayerPopupContext.m_vpLayers.clear();
+								State.m_LayerPopupContext.m_vLayerIndices.clear();
 							}
 						}
 
-						Ui()->DoPopupMenu(&s_LayerPopupContext, Ui()->MouseX(), Ui()->MouseY(), 150, 300, &s_LayerPopupContext, PopupLayer);
+						Ui()->DoPopupMenu(&State.m_LayerPopupContext, Ui()->MouseX(), Ui()->MouseY(), 150, 300, &State.m_LayerPopupContext, PopupLayer);
 					}
 
-					SetOperation(OP_NONE);
+					SetOperation(ELayerOperation::NONE);
 				}
 
-				if(s_Operation == OP_LAYER_DRAG && Clicked)
+				if(State.m_Operation == ELayerOperation::LAYER_DRAG && Clicked)
 				{
 					MoveLayers = true;
 				}
 			}
-			else if(s_pDraggedButton == Map()->m_vpGroups[g]->m_vpLayers[i].get())
+			else if(State.m_pDraggedButton == Map()->m_vpGroups[g]->m_vpLayers[i].get())
 			{
-				SetOperation(OP_NONE);
+				SetOperation(ELayerOperation::NONE);
 			}
 		}
 
-		if(s_Operation != OP_GROUP_DRAG || g != Map()->m_SelectedGroup)
+		if(State.m_Operation != ELayerOperation::GROUP_DRAG || g != Map()->m_SelectedGroup)
 		{
 			LayersBox.HSplitTop(5.0f, &Slot, &LayersBox);
-			s_ScrollRegion.AddRect(Slot);
+			State.m_ScrollRegion.AddRect(Slot);
 		}
 	}
 
-	if(!DraggedPositionFound && s_Operation == OP_LAYER_DRAG)
+	if(!DraggedPositionFound && State.m_Operation == ELayerOperation::LAYER_DRAG)
 	{
 		GroupAfterDraggedLayer = Map()->m_vpGroups.size();
 		LayerAfterDraggedLayer = Map()->m_vpGroups[GroupAfterDraggedLayer - 1]->m_vpLayers.size();
 
 		CUIRect TmpSlot;
 		LayersBox.HSplitTop(Map()->m_vSelectedLayers.size() * (RowHeight + 2.0f), &TmpSlot, &LayersBox);
-		s_ScrollRegion.AddRect(TmpSlot);
+		State.m_ScrollRegion.AddRect(TmpSlot);
 	}
 
-	if(!DraggedPositionFound && s_Operation == OP_GROUP_DRAG)
+	if(!DraggedPositionFound && State.m_Operation == ELayerOperation::GROUP_DRAG)
 	{
 		GroupAfterDraggedLayer = Map()->m_vpGroups.size();
 
@@ -3549,7 +3549,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 			LayersBox.HSplitTop(RowHeight + 7.0f, &TmpSlot, &LayersBox);
 		else
 			LayersBox.HSplitTop(vButtonsPerGroup[Map()->m_SelectedGroup] * (RowHeight + 2.0f) + 5.0f, &TmpSlot, &LayersBox);
-		s_ScrollRegion.AddRect(TmpSlot, false);
+		State.m_ScrollRegion.AddRect(TmpSlot, false);
 	}
 
 	if(MoveLayers && 1 <= GroupAfterDraggedLayer && GroupAfterDraggedLayer <= (int)Map()->m_vpGroups.size())
@@ -3605,39 +3605,36 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		Map()->OnModify();
 	}
 
-	static int s_InitialGroupIndex;
-	static std::vector<int> s_vInitialLayerIndices;
-
 	if(MoveLayers || MoveGroup)
 	{
-		SetOperation(OP_NONE);
+		SetOperation(ELayerOperation::NONE);
 	}
 	if(StartDragLayer)
 	{
-		SetOperation(OP_LAYER_DRAG);
-		s_InitialGroupIndex = Map()->m_SelectedGroup;
-		s_vInitialLayerIndices = std::vector(Map()->m_vSelectedLayers);
+		SetOperation(ELayerOperation::LAYER_DRAG);
+		State.m_InitialGroupIndex = Map()->m_SelectedGroup;
+		State.m_vInitialLayerIndices = std::vector(Map()->m_vSelectedLayers);
 	}
 	if(StartDragGroup)
 	{
-		s_InitialGroupIndex = Map()->m_SelectedGroup;
-		SetOperation(OP_GROUP_DRAG);
+		State.m_InitialGroupIndex = Map()->m_SelectedGroup;
+		SetOperation(ELayerOperation::GROUP_DRAG);
 	}
 
-	if(s_Operation == OP_LAYER_DRAG || s_Operation == OP_GROUP_DRAG)
+	if(State.m_Operation == ELayerOperation::LAYER_DRAG || State.m_Operation == ELayerOperation::GROUP_DRAG)
 	{
-		if(s_pDraggedButton == nullptr)
+		if(State.m_pDraggedButton == nullptr)
 		{
-			SetOperation(OP_NONE);
+			SetOperation(ELayerOperation::NONE);
 		}
 		else
 		{
-			s_ScrollRegion.DoEdgeScrolling();
-			Ui()->SetActiveItem(s_pDraggedButton);
+			State.m_ScrollRegion.DoEdgeScrolling();
+			Ui()->SetActiveItem(State.m_pDraggedButton);
 		}
 	}
 
-	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE && !Ui()->IsPopupOpen() && CLineInput::GetActiveInput() == nullptr && s_Operation == OP_NONE)
+	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE && !Ui()->IsPopupOpen() && CLineInput::GetActiveInput() == nullptr && State.m_Operation == ELayerOperation::NONE)
 	{
 		if(Input()->ShiftIsPressed())
 		{
@@ -3648,9 +3645,9 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		{
 			Map()->SelectNextLayer();
 		}
-		s_ScrollToSelectionNext = true;
+		State.m_ScrollToSelectionNext = true;
 	}
-	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE && !Ui()->IsPopupOpen() && CLineInput::GetActiveInput() == nullptr && s_Operation == OP_NONE)
+	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE && !Ui()->IsPopupOpen() && CLineInput::GetActiveInput() == nullptr && State.m_Operation == ELayerOperation::NONE)
 	{
 		if(Input()->ShiftIsPressed())
 		{
@@ -3662,15 +3659,15 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 			Map()->SelectPreviousLayer();
 		}
 
-		s_ScrollToSelectionNext = true;
+		State.m_ScrollToSelectionNext = true;
 	}
 
 	CUIRect AddGroupButton, CollapseAllButton;
 	LayersBox.HSplitTop(RowHeight + 1.0f, &AddGroupButton, &LayersBox);
-	if(s_ScrollRegion.AddRect(AddGroupButton))
+	if(State.m_ScrollRegion.AddRect(AddGroupButton))
 	{
 		AddGroupButton.HSplitTop(RowHeight, &AddGroupButton, nullptr);
-		if(DoButton_Editor(&m_QuickActionAddGroup, m_QuickActionAddGroup.Label(), 0, &AddGroupButton, BUTTONFLAG_LEFT, m_QuickActionAddGroup.Description()))
+		if(DoButton_Editor(&State.m_AddGroupButtonId, m_QuickActionAddGroup.Label(), 0, &AddGroupButton, BUTTONFLAG_LEFT, m_QuickActionAddGroup.Description()))
 		{
 			m_QuickActionAddGroup.Call();
 		}
@@ -3678,7 +3675,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 
 	LayersBox.HSplitTop(5.0f, nullptr, &LayersBox);
 	LayersBox.HSplitTop(RowHeight + 1.0f, &CollapseAllButton, &LayersBox);
-	if(s_ScrollRegion.AddRect(CollapseAllButton))
+	if(State.m_ScrollRegion.AddRect(CollapseAllButton))
 	{
 		size_t TotalCollapsed = 0;
 		for(const auto &pGroup : Map()->m_vpGroups)
@@ -3692,8 +3689,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		const char *pActionText = TotalCollapsed == Map()->m_vpGroups.size() ? "Expand all" : "Collapse all";
 
 		CollapseAllButton.HSplitTop(RowHeight, &CollapseAllButton, nullptr);
-		static int s_CollapseAllButton = 0;
-		if(DoButton_Editor(&s_CollapseAllButton, pActionText, 0, &CollapseAllButton, BUTTONFLAG_LEFT, "Expand or collapse all groups."))
+		if(DoButton_Editor(&State.m_CollapseAllButtonId, pActionText, 0, &CollapseAllButton, BUTTONFLAG_LEFT, "Expand or collapse all groups."))
 		{
 			for(const auto &pGroup : Map()->m_vpGroups)
 			{
@@ -3705,35 +3701,35 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		}
 	}
 
-	s_ScrollRegion.End();
+	State.m_ScrollRegion.End();
 
-	if(s_Operation == OP_NONE)
+	if(State.m_Operation == ELayerOperation::NONE)
 	{
-		if(s_PreviousOperation == OP_GROUP_DRAG)
+		if(State.m_PreviousOperation == ELayerOperation::GROUP_DRAG)
 		{
-			s_PreviousOperation = OP_NONE;
-			Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionEditGroupProp>(Map(), Map()->m_SelectedGroup, EGroupProp::ORDER, s_InitialGroupIndex, Map()->m_SelectedGroup));
+			State.m_PreviousOperation = ELayerOperation::NONE;
+			Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionEditGroupProp>(Map(), Map()->m_SelectedGroup, EGroupProp::ORDER, State.m_InitialGroupIndex, Map()->m_SelectedGroup));
 		}
-		else if(s_PreviousOperation == OP_LAYER_DRAG)
+		else if(State.m_PreviousOperation == ELayerOperation::LAYER_DRAG)
 		{
-			if(s_InitialGroupIndex != Map()->m_SelectedGroup)
+			if(State.m_InitialGroupIndex != Map()->m_SelectedGroup)
 			{
-				Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionEditLayersGroupAndOrder>(Map(), s_InitialGroupIndex, s_vInitialLayerIndices, Map()->m_SelectedGroup, Map()->m_vSelectedLayers));
+				Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionEditLayersGroupAndOrder>(Map(), State.m_InitialGroupIndex, State.m_vInitialLayerIndices, Map()->m_SelectedGroup, Map()->m_vSelectedLayers));
 			}
 			else
 			{
 				std::vector<std::shared_ptr<IEditorAction>> vpActions;
 				std::vector<int> vLayerIndices = Map()->m_vSelectedLayers;
 				std::sort(vLayerIndices.begin(), vLayerIndices.end());
-				std::sort(s_vInitialLayerIndices.begin(), s_vInitialLayerIndices.end());
+				std::sort(State.m_vInitialLayerIndices.begin(), State.m_vInitialLayerIndices.end());
 				for(int k = 0; k < (int)vLayerIndices.size(); k++)
 				{
 					int LayerIndex = vLayerIndices[k];
-					vpActions.push_back(std::make_shared<CEditorActionEditLayerProp>(Map(), Map()->m_SelectedGroup, LayerIndex, ELayerProp::ORDER, s_vInitialLayerIndices[k], LayerIndex));
+					vpActions.push_back(std::make_shared<CEditorActionEditLayerProp>(Map(), Map()->m_SelectedGroup, LayerIndex, ELayerProp::ORDER, State.m_vInitialLayerIndices[k], LayerIndex));
 				}
 				Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionBulk>(Map(), vpActions, nullptr, true));
 			}
-			s_PreviousOperation = OP_NONE;
+			State.m_PreviousOperation = ELayerOperation::NONE;
 		}
 	}
 }
@@ -7009,6 +7005,7 @@ void CEditor::Reset(bool CreateDefault)
 	m_ResetZoomEnvelope = true;
 	m_SettingsCommandInput.Clear();
 	m_MapSettingsCommandContext.Reset();
+	m_RenderLayersState.Reset();
 }
 
 int CEditor::GetTextureUsageFlag() const
