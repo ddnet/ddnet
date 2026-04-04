@@ -17,6 +17,7 @@ public:
 
 	void SetRadius(int Radius) { m_Radius = Radius; }
 	void SetColor(int Color) { m_Color = Color; }
+	void SetFlags(int Flags) { m_VisualFlags = Flags; }
 
 private:
 	int m_Radius;

@@ -39,7 +39,7 @@ void CVisuals::RenderLine(const CVisualItem &Item)
 		To += m_CameraCenter;
 	}
 
-	if(!(pLine->m_Flags & (VISUALFLAG_SCREEN_SPACE | VISUALFLAG_CAMERA_RELATIVE)))
+	if(SpringEnabled(pLine->m_Flags))
 	{
 		float Omega = GetSpringOmega(pLine->m_Flags);
 		float Decay = expf(-Omega * m_RenderFrameTime);
@@ -139,7 +139,7 @@ void CVisuals::RenderCircle(const CVisualItem &Item)
 		CenterY += m_CameraCenter.y;
 	}
 
-	if(!(pCircle->m_Flags & (VISUALFLAG_SCREEN_SPACE | VISUALFLAG_CAMERA_RELATIVE)))
+	if(SpringEnabled(pCircle->m_Flags))
 	{
 		float Omega = GetSpringOmega(pCircle->m_Flags);
 		float Decay = expf(-Omega * m_RenderFrameTime);
@@ -149,20 +149,68 @@ void CVisuals::RenderCircle(const CVisualItem &Item)
 		CenterY = Result.y;
 	}
 
-	bool Filled = UnpackShapeFilled(pCircle->m_Flags);
-	int Segments = UnpackCircleSegments(pCircle->m_Flags);
-	if(Segments == 0)
-		Segments = maximum(16, (int)(Radius / 4.0f));
+	bool Filled = UnpackCircleFilled(pCircle->m_Flags);
+	int Style = UnpackCircleStyle(pCircle->m_Flags);
 
 	Graphics()->SetColor(ColorRGBA::UnpackAlphaLast<ColorRGBA>(pCircle->m_Color));
 
-	if(Filled)
+	if(Style == CIRCLESTYLE_RADIAL_PROGRESS)
 	{
-		Graphics()->DrawCircle(CenterX, CenterY, Radius, Segments);
+		float Progress = UnpackCircleProgress(pCircle->m_Flags) / 255.0f;
+		float ArcAngle = Progress * 2.0f * pi;
+		int Segments = maximum(16, (int)(Radius / 4.0f));
+		int ArcSegments = maximum(1, (int)(Segments * Progress));
+		// Start from top (-pi/2)
+		float StartAngle = -pi / 2.0f;
+
+		if(Filled)
+		{
+			// Pie: triangle fan from center
+			for(int i = 0; i < ArcSegments; i++)
+			{
+				float a1 = StartAngle + ArcAngle * (float)i / ArcSegments;
+				float a2 = StartAngle + ArcAngle * (float)(i + 1) / ArcSegments;
+				IGraphics::CFreeformItem Tri(
+					CenterX, CenterY,
+					CenterX, CenterY,
+					CenterX + cosf(a1) * Radius, CenterY + sinf(a1) * Radius,
+					CenterX + cosf(a2) * Radius, CenterY + sinf(a2) * Radius);
+				Graphics()->QuadsDrawFreeform(&Tri, 1);
+			}
+		}
+		else
+		{
+			// Arc: ring outline for the progress portion
+			float OutlineWidth = maximum(1.0f, (float)pCircle->m_Width);
+			float Inner = Radius - OutlineWidth / 2.0f;
+			float Outer = Radius + OutlineWidth / 2.0f;
+
+			for(int i = 0; i < ArcSegments; i++)
+			{
+				float a1 = StartAngle + ArcAngle * (float)i / ArcSegments;
+				float a2 = StartAngle + ArcAngle * (float)(i + 1) / ArcSegments;
+				IGraphics::CFreeformItem Ring(
+					CenterX + cosf(a1) * Inner, CenterY + sinf(a1) * Inner,
+					CenterX + cosf(a1) * Outer, CenterY + sinf(a1) * Outer,
+					CenterX + cosf(a2) * Inner, CenterY + sinf(a2) * Inner,
+					CenterX + cosf(a2) * Outer, CenterY + sinf(a2) * Outer);
+				Graphics()->QuadsDrawFreeform(&Ring, 1);
+			}
+		}
 	}
 	else
 	{
-		float OutlineWidth = maximum(1.0f, (float)pCircle->m_Width);
+		int Segments = UnpackCircleSegments(pCircle->m_Flags);
+		if(Segments == 0)
+			Segments = maximum(16, (int)(Radius / 4.0f));
+
+		if(Filled)
+		{
+			Graphics()->DrawCircle(CenterX, CenterY, Radius, Segments);
+		}
+		else
+		{
+			float OutlineWidth = maximum(1.0f, (float)pCircle->m_Width);
 		float Inner = Radius - OutlineWidth / 2.0f;
 		float Outer = Radius + OutlineWidth / 2.0f;
 
@@ -176,6 +224,7 @@ void CVisuals::RenderCircle(const CVisualItem &Item)
 				CenterX + cosf(a2) * Inner, CenterY + sinf(a2) * Inner,
 				CenterX + cosf(a2) * Outer, CenterY + sinf(a2) * Outer);
 			Graphics()->QuadsDrawFreeform(&Ring, 1);
+		}
 		}
 	}
 }
@@ -206,7 +255,7 @@ void CVisuals::RenderQuad(const CVisualItem &Item)
 		CenterY += m_CameraCenter.y;
 	}
 
-	if(!(pQuad->m_Flags & (VISUALFLAG_SCREEN_SPACE | VISUALFLAG_CAMERA_RELATIVE)))
+	if(SpringEnabled(pQuad->m_Flags))
 	{
 		float Omega = GetSpringOmega(pQuad->m_Flags);
 		float Decay = expf(-Omega * m_RenderFrameTime);
@@ -291,7 +340,7 @@ void CVisuals::RenderTile(const CVisualItem &Item)
 		CenterY += m_CameraCenter.y;
 	}
 
-	if(!(pTile->m_Flags & (VISUALFLAG_SCREEN_SPACE | VISUALFLAG_CAMERA_RELATIVE)))
+	if(SpringEnabled(pTile->m_Flags))
 	{
 		float Omega = GetSpringOmega(pTile->m_Flags);
 		float Decay = expf(-Omega * m_RenderFrameTime);
@@ -458,7 +507,7 @@ void CVisuals::RenderBatchedItems(const CVisualItem *pItems, int NumItems)
 
 		if(IsScreenSpace && !ScreenSpaceActive)
 		{
-			Graphics()->MapScreen(0, 0, 300.0f * Graphics()->ScreenAspect(), 300.0f);
+			Graphics()->MapScreen(0, 0, 1000.0f * Graphics()->ScreenAspect(), 1000.0f);
 			ScreenSpaceActive = true;
 		}
 		else if(!IsScreenSpace && ScreenSpaceActive)
@@ -616,8 +665,9 @@ void CVisuals::OnRender()
 		VisItem.m_Type = Item.m_Type;
 		VisItem.m_Id = Item.m_Id;
 		VisItem.m_pData = Item.m_pData;
-		VisItem.m_pPrevData = Client()->SnapFindItem(IClient::SNAP_PREV, Item.m_Type, Item.m_Id);
 		VisItem.m_Flags = GetFlagsFromSnap(Item.m_Type, Item.m_pData);
+		VisItem.m_pPrevData = (VisItem.m_Flags & VISUALFLAG_NO_INTERPOLATION) ? nullptr :
+			Client()->SnapFindItem(IClient::SNAP_PREV, Item.m_Type, Item.m_Id);
 		VisItem.m_RenderOrder = GetRenderOrderFromSnap(Item.m_Type, Item.m_pData);
 		VisItem.m_BatchKey = ComputeBatchKey(Item.m_Type, Item.m_pData);
 

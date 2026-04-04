@@ -4,48 +4,55 @@
 #define GAME_VISUAL_PRIMITIVES_H
 
 // =============================================================================
-// m_Flags bit layout
+// m_Flags bit layout (32 bits)
 //
 // DDNetVisualLine:
-//   bits 0-2:   Line cap (LINECAP_*)
-//   bits 3-5:   Line style (LINESTYLE_*)
+//   bits 0-1:   Line cap (LINECAP_*)
+//   bits 2-3:   Line style (LINESTYLE_*)
+//   bit  4:     VISUALFLAG_NO_INTERPOLATION
+//   bit  5:     Reserved
 //   bit  6:     VISUALFLAG_CAMERA_RELATIVE
 //   bit  7:     VISUALFLAG_SCREEN_SPACE
-//   bits 8-15:  Spring omega (0 = default 20, 1-255 = custom)
-//   bits 16-31: Reserved
+//   bits 8-12:  Spring omega (5b)
+//   bits 13-31: Reserved (19)
 //
 // DDNetVisualCircle:
 //   bit  0:     VISUALFLAG_FILLED
-//   bits 1-3:   Line style (LINESTYLE_*)
-//   bits 4-5:   Reserved
+//   bits 1-3:   Circle style (CIRCLESTYLE_*, includes RADIAL_PROGRESS)
+//   bit  4:     VISUALFLAG_NO_INTERPOLATION
+//   bit  5:     Reserved
 //   bit  6:     VISUALFLAG_CAMERA_RELATIVE
 //   bit  7:     VISUALFLAG_SCREEN_SPACE
-//   bits 8-15:  Spring omega
-//   bits 16-23: Circle segments (0 = auto, 1-255 = explicit)
-//   bits 24-31: Reserved
+//   bits 8-12:  Spring omega (5b)
+//   bits 13-15: Reserved (3)
+//   bits 16-23: Segments (style=SOLID..DASH_DOT) / Progress 0-255 (style=RADIAL_PROGRESS)
+//   bits 24-31: Reserved (8)
 //
 // DDNetVisualQuad:
 //   bit  0:     VISUALFLAG_FILLED
-//   bits 1-3:   Line style (LINESTYLE_*)
-//   bits 4-5:   Reserved
+//   bits 1-2:   Line style (LINESTYLE_*)
+//   bit  3:     Reserved
+//   bit  4:     VISUALFLAG_NO_INTERPOLATION
+//   bit  5:     Reserved
 //   bit  6:     VISUALFLAG_CAMERA_RELATIVE
 //   bit  7:     VISUALFLAG_SCREEN_SPACE
-//   bits 8-15:  Spring omega
-//   bits 16-31: Reserved
+//   bits 8-12:  Spring omega (5b)
+//   bits 13-31: Reserved (19)
 //
 // DDNetVisualTile:
 //   bit  0:     TILEFLAG_XFLIP
 //   bit  1:     TILEFLAG_YFLIP
 //   bit  2:     Reserved
 //   bit  3:     TILEFLAG_ROTATE
-//   bits 4-5:   Reserved
+//   bit  4:     VISUALFLAG_NO_INTERPOLATION
+//   bit  5:     Reserved
 //   bit  6:     VISUALFLAG_CAMERA_RELATIVE
 //   bit  7:     VISUALFLAG_SCREEN_SPACE
-//   bits 8-15:  Spring omega
-//   bits 16-31: Reserved
+//   bits 8-12:  Spring omega (5b)
+//   bits 13-31: Reserved (19)
 // =============================================================================
 
-// Line cap styles (bits 0-2 of m_Flags for DDNetVisualLine)
+// Line cap styles (bits 0-1 of m_Flags for DDNetVisualLine)
 enum
 {
 	LINECAP_BUTT = 0,
@@ -54,7 +61,7 @@ enum
 	NUM_LINECAPS,
 };
 
-// Line drawing styles (bits 3-5 of m_Flags for DDNetVisualLine, bits 1-3 for Circle/Quad)
+// Line/shape drawing styles (bits 2-3 for Line, bits 1-2 for Quad)
 enum
 {
 	LINESTYLE_SOLID = 0,
@@ -64,32 +71,58 @@ enum
 	NUM_LINESTYLES,
 };
 
-// Visual flags (individual bits)
+// Circle styles (bits 1-3 for Circle, 3 bits = 8 values)
+enum
+{
+	CIRCLESTYLE_SOLID = 0,
+	CIRCLESTYLE_DASHED,
+	CIRCLESTYLE_DOTTED,
+	CIRCLESTYLE_DASH_DOT,
+	CIRCLESTYLE_RADIAL_PROGRESS, // bits 16-23 = progress 0-255; FILLED=pie, !FILLED=arc
+	NUM_CIRCLESTYLES,
+};
+
+// Visual flags (individual bits, shared across all types)
 enum
 {
 	VISUALFLAG_FILLED = 1 << 0, // Circle/Quad: filled instead of outline
+	VISUALFLAG_NO_INTERPOLATION = 1 << 4, // All types: skip snap interpolation (use current snap only)
 	VISUALFLAG_CAMERA_RELATIVE = 1 << 6, // All types: coordinates in world units, relative to camera center
-	VISUALFLAG_SCREEN_SPACE = 1 << 7, // All types: coordinates in HUD space (height=300)
+	VISUALFLAG_SCREEN_SPACE = 1 << 7, // All types: screen-space coords (0-1000 = top/left to bottom/right, width scaled by aspect)
 };
 
-// Spring omega (bits 8-15 of m_Flags, all types): 0 = default (20), 1-255 = custom
-inline int PackSpringOmega(int Omega) { return (Omega & 0xFF) << 8; }
-inline int UnpackSpringOmega(int Flags) { return (Flags >> 8) & 0xFF; }
-inline float GetSpringOmega(int Flags) { int v = UnpackSpringOmega(Flags); return v == 0 ? 20.0f : (float)v; }
+// Spring omega (bits 8-12 of m_Flags, all types, 5 bits):
+//   0 = default (20), 1-30 = value * 8 (range 8-240), 31 = no spring
+enum { SPRING_OMEGA_NO_SPRING = 31 };
+inline int PackSpringOmega(int Omega) { return (Omega & 0x1F) << 8; }
+inline int UnpackSpringOmega(int Flags) { return (Flags >> 8) & 0x1F; }
+inline float GetSpringOmega(int Flags) { int v = UnpackSpringOmega(Flags); return v == 0 ? 20.0f : (float)(v * 8); }
+// Spring is disabled for camera-relative items and when omega == NO_SPRING
+inline bool SpringEnabled(int Flags) { return !(Flags & VISUALFLAG_CAMERA_RELATIVE) && UnpackSpringOmega(Flags) != SPRING_OMEGA_NO_SPRING; }
 
-// Circle segments (bits 16-23 of m_Flags, DDNetVisualCircle only): 0 = auto, 1-255 = explicit
-inline int PackCircleSegments(int Segments) { return (Segments & 0xFF) << 16; }
+// Circle segments / radial progress (bits 16-23, DDNetVisualCircle only):
+//   When style != RADIAL_PROGRESS: 0 = auto, 1-255 = explicit segment count
+//   When style == RADIAL_PROGRESS: 0-255 = progress (0% to 100%)
+inline int PackCircleSegments(int Value) { return (Value & 0xFF) << 16; }
 inline int UnpackCircleSegments(int Flags) { return (Flags >> 16) & 0xFF; }
+// When style == RADIAL_PROGRESS, same field holds progress 0-255
+inline int PackCircleProgress(int Progress) { return PackCircleSegments(Progress); }
+inline int UnpackCircleProgress(int Flags) { return UnpackCircleSegments(Flags); }
 
-// Helpers to pack/unpack m_Flags for DDNetVisualLine
-inline int PackLineFlags(int Cap, int Style) { return (Cap & 0x7) | ((Style & 0x7) << 3); }
-inline int UnpackLineCap(int Flags) { return Flags & 0x7; }
-inline int UnpackLineStyle(int Flags) { return (Flags >> 3) & 0x7; }
+// Helpers to pack/unpack m_Flags for DDNetVisualLine (cap: 2 bits, style: 2 bits)
+inline int PackLineFlags(int Cap, int Style) { return (Cap & 0x3) | ((Style & 0x3) << 2); }
+inline int UnpackLineCap(int Flags) { return Flags & 0x3; }
+inline int UnpackLineStyle(int Flags) { return (Flags >> 2) & 0x3; }
 
-// Helpers to pack/unpack m_Flags for DDNetVisualCircle/Quad
-inline int PackShapeFlags(bool Filled, int Style) { return (Filled ? VISUALFLAG_FILLED : 0) | ((Style & 0x7) << 1); }
+// Helpers to pack/unpack m_Flags for DDNetVisualCircle (filled: 1 bit, style: 3 bits at 1-3)
+inline int PackCircleFlags(bool Filled, int Style) { return (Filled ? VISUALFLAG_FILLED : 0) | ((Style & 0x7) << 1); }
+inline bool UnpackCircleFilled(int Flags) { return (Flags & VISUALFLAG_FILLED) != 0; }
+inline int UnpackCircleStyle(int Flags) { return (Flags >> 1) & 0x7; }
+
+// Helpers to pack/unpack m_Flags for DDNetVisualQuad (filled: 1 bit, style: 2 bits at 1-2)
+inline int PackShapeFlags(bool Filled, int Style) { return (Filled ? VISUALFLAG_FILLED : 0) | ((Style & 0x3) << 1); }
 inline bool UnpackShapeFilled(int Flags) { return (Flags & VISUALFLAG_FILLED) != 0; }
-inline int UnpackShapeStyle(int Flags) { return (Flags >> 1) & 0x7; }
+inline int UnpackShapeStyle(int Flags) { return (Flags >> 1) & 0x3; }
 
 // m_RenderOrder construction and extraction
 // bits 0-15:  group index (0xFFFF = game group)
