@@ -1349,12 +1349,13 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		{
 			const float ExtraTextFontSize = m_Popup == POPUP_FIRST_LAUNCH ? 16.0f : 20.0f;
 
+			static CButtonContainer s_ExtraTextLabel;
 			if(TopAlign)
-				Ui()->DoLabel(&ExtraText, pExtraText, ExtraTextFontSize, TEXTALIGN_TL, {.m_MaxWidth = ExtraText.w});
+				Ui()->DoSelectableLabel(&s_ExtraTextLabel, &ExtraText, pExtraText, ExtraTextFontSize, TEXTALIGN_TL, {.m_MaxWidth = ExtraText.w});
 			else if(TextRender()->TextWidth(ExtraTextFontSize, pExtraText) > ExtraText.w)
-				Ui()->DoLabel(&ExtraText, pExtraText, ExtraTextFontSize, TEXTALIGN_ML, {.m_MaxWidth = ExtraText.w});
+				Ui()->DoSelectableLabel(&s_ExtraTextLabel, &ExtraText, pExtraText, ExtraTextFontSize, TEXTALIGN_ML, {.m_MaxWidth = ExtraText.w});
 			else
-				Ui()->DoLabel(&ExtraText, pExtraText, ExtraTextFontSize, TEXTALIGN_MC);
+				Ui()->DoSelectableLabel(&s_ExtraTextLabel, &ExtraText, pExtraText, ExtraTextFontSize, TEXTALIGN_MC);
 		}
 	}
 

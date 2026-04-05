@@ -260,6 +260,11 @@ void CUi::Update(vec2 MouseWorldPos)
 		m_pHotScrollRegion = nullptr;
 	}
 
+	// Reset selectable label state when it was not rendered for a frame
+	if(!m_SelectableLabelState.m_Rendered)
+		m_SelectableLabelState.Reset();
+	m_SelectableLabelState.m_Rendered = false;
+
 	m_ProgressSpinnerOffset += Client()->RenderFrameTime() * 1.5f;
 	m_ProgressSpinnerOffset = std::fmod(m_ProgressSpinnerOffset, 1.0f);
 }
@@ -806,6 +811,101 @@ CLabelResult CUi::DoLabel(const CUIRect *pRect, const char *pText, float Size, i
 	Cursor.m_vColorSplits = LabelProps.m_vColorSplits;
 	Cursor.m_LineWidth = (float)LabelProps.m_MaxWidth;
 	TextRender()->TextEx(&Cursor, pText, -1);
+	return CLabelResult{.m_Truncated = Cursor.m_Truncated};
+}
+
+CLabelResult CUi::DoSelectableLabel(const void *pId, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps)
+{
+	const bool Inside = MouseHovered(pRect);
+	CSelectableLabelState *pState = &m_SelectableLabelState;
+	const bool IsOwner = pState->m_pActiveId == pId;
+	pState->m_Rendered = true;
+
+	CLineInput::SMouseSelection *pMouseSelection = &pState->m_MouseSelection;
+	if(CheckActiveItem(pId))
+	{
+		if(!MouseButton(0))
+		{
+			SetActiveItem(nullptr);
+			pMouseSelection->m_Selecting = false;
+		}
+	}
+	else if(HotItem() == pId)
+	{
+		if(MouseButton(0))
+		{
+			SetActiveItem(pId);
+			pMouseSelection->m_Selecting = true;
+			pMouseSelection->m_PressMouse = MousePos();
+			pState->m_pActiveId = pId;
+			pState->m_SelectionStart = 0;
+			pState->m_SelectionEnd = 0;
+		}
+	}
+
+	if(Inside && !MouseButton(0))
+		SetHotItem(pId);
+
+	if(pMouseSelection->m_Selecting)
+		pMouseSelection->m_ReleaseMouse = MousePos();
+
+	// Click outside clears selection, only for the label that owns it
+	if(!Inside && MouseButtonClicked(0) && !CheckActiveItem(pId) && IsOwner)
+		pState->Reset();
+
+	// DoLabel logic
+	const int Flags = GetFlagsForLabelProperties(LabelProps, nullptr);
+	const SCursorAndBoundingBox TextBounds = CalcFontSizeCursorHeightAndBoundingBox(TextRender(), pText, Flags, Size, pRect->w, LabelProps);
+	const vec2 CursorPos = CalcAlignedCursorPos(pRect, TextBounds.m_TextSize, Align, TextBounds.m_LineCount == 1 ? &TextBounds.m_BiggestCharacterHeight : nullptr);
+
+	CTextCursor Cursor;
+	Cursor.SetPosition(CursorPos);
+	Cursor.m_FontSize = Size;
+	Cursor.m_Flags |= Flags;
+	Cursor.m_vColorSplits = LabelProps.m_vColorSplits;
+	Cursor.m_LineWidth = (float)LabelProps.m_MaxWidth;
+
+	if(pMouseSelection->m_Selecting && IsOwner)
+	{
+		Cursor.m_CalculateSelectionMode = TEXT_CURSOR_SELECTION_MODE_CALCULATE;
+		Cursor.m_PressMouse = pMouseSelection->m_PressMouse;
+		Cursor.m_ReleaseMouse = pMouseSelection->m_ReleaseMouse;
+	}
+	else if(pState->HasSelection() && IsOwner)
+	{
+		Cursor.m_CalculateSelectionMode = TEXT_CURSOR_SELECTION_MODE_SET;
+		Cursor.m_SelectionStart = pState->m_SelectionStart;
+		Cursor.m_SelectionEnd = pState->m_SelectionEnd;
+	}
+
+	TextRender()->TextEx(&Cursor, pText, -1);
+
+	if(pMouseSelection->m_Selecting && IsOwner)
+	{
+		pState->m_SelectionStart = Cursor.m_SelectionStart;
+		pState->m_SelectionEnd = Cursor.m_SelectionEnd;
+	}
+
+	if((pState->HasSelection() && IsOwner) || Inside)
+	{
+		if(Input()->ModifierIsPressed() && Input()->KeyPress(KEY_A))
+		{
+			pState->m_pActiveId = pId;
+			pState->m_SelectionStart = 0;
+			pState->m_SelectionEnd = Cursor.m_GlyphCount;
+		}
+	}
+
+	if(pState->HasSelection() && IsOwner && Input()->ModifierIsPressed() && Input()->KeyPress(KEY_C))
+	{
+		const int Start = minimum(pState->m_SelectionStart, pState->m_SelectionEnd);
+		const int End = maximum(pState->m_SelectionStart, pState->m_SelectionEnd);
+		const size_t StartBytes = str_utf8_offset_chars_to_bytes(pText, Start);
+		const size_t EndBytes = str_utf8_offset_chars_to_bytes(pText, End);
+		std::string SelectedText(pText + StartBytes, EndBytes - StartBytes);
+		Input()->SetClipboardText(SelectedText.c_str());
+	}
+
 	return CLabelResult{.m_Truncated = Cursor.m_Truncated};
 }
 

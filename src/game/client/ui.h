@@ -383,6 +383,27 @@ private:
 	};
 	CDoubleClickState m_DoubleClickState;
 	const void *m_pLastEditingItem = nullptr;
+
+	class CSelectableLabelState
+	{
+	public:
+		CLineInput::SMouseSelection m_MouseSelection;
+		const void *m_pActiveId = nullptr;
+		bool m_Rendered = false;
+		int m_SelectionStart = 0;
+		int m_SelectionEnd = 0;
+
+		bool HasSelection() const { return m_SelectionStart != m_SelectionEnd; }
+		void Reset()
+		{
+			m_MouseSelection.m_Selecting = false;
+			m_pActiveId = nullptr;
+			m_SelectionStart = 0;
+			m_SelectionEnd = 0;
+		}
+	};
+	CSelectableLabelState m_SelectableLabelState;
+
 	const void *m_pLastActiveScrollbar = nullptr;
 	int m_ScrollbarValue = 0;
 	float m_ActiveScrollbarOffset = 0.0f;
@@ -589,6 +610,7 @@ public:
 
 	CLabelResult DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {}) const;
 	CLabelResult DoLabel_AutoLineSize(const char *pText, float FontSize, int Align, CUIRect *pRect, float LineSize, const SLabelProperties &LabelProps = {}) const;
+	CLabelResult DoSelectableLabel(const void *pId, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {});
 
 	void DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {}, int StrLen = -1, const CTextCursor *pReadCursor = nullptr) const;
 	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {}, int StrLen = -1, const CTextCursor *pReadCursor = nullptr) const;
