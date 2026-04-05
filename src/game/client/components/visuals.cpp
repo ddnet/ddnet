@@ -1,19 +1,18 @@
 #include "visuals.h"
 
-#include <engine/graphics.h>
-#include <engine/shared/config.h>
-
-#include <game/client/gameclient.h>
-#include <generated/protocol.h>
-#include <game/mapitems.h>
-#include <game/visual_primitives.h>
-
+#include <base/color.h>
 #include <base/math.h>
 #include <base/vmath.h>
 
-#include <base/color.h>
+#include <engine/graphics.h>
+#include <engine/shared/config.h>
 
+#include <generated/protocol.h>
+
+#include <game/client/gameclient.h>
 #include <game/layers.h>
+#include <game/mapitems.h>
+#include <game/visual_primitives.h>
 
 #include <algorithm>
 
@@ -211,20 +210,20 @@ void CVisuals::RenderCircle(const CVisualItem &Item)
 		else
 		{
 			float OutlineWidth = maximum(1.0f, (float)pCircle->m_Width);
-		float Inner = Radius - OutlineWidth / 2.0f;
-		float Outer = Radius + OutlineWidth / 2.0f;
+			float Inner = Radius - OutlineWidth / 2.0f;
+			float Outer = Radius + OutlineWidth / 2.0f;
 
-		for(int i = 0; i < Segments; i++)
-		{
-			float a1 = (float)i / Segments * 2.0f * pi;
-			float a2 = (float)(i + 1) / Segments * 2.0f * pi;
-			IGraphics::CFreeformItem Ring(
-				CenterX + cosf(a1) * Inner, CenterY + sinf(a1) * Inner,
-				CenterX + cosf(a1) * Outer, CenterY + sinf(a1) * Outer,
-				CenterX + cosf(a2) * Inner, CenterY + sinf(a2) * Inner,
-				CenterX + cosf(a2) * Outer, CenterY + sinf(a2) * Outer);
-			Graphics()->QuadsDrawFreeform(&Ring, 1);
-		}
+			for(int i = 0; i < Segments; i++)
+			{
+				float a1 = (float)i / Segments * 2.0f * pi;
+				float a2 = (float)(i + 1) / Segments * 2.0f * pi;
+				IGraphics::CFreeformItem Ring(
+					CenterX + cosf(a1) * Inner, CenterY + sinf(a1) * Inner,
+					CenterX + cosf(a1) * Outer, CenterY + sinf(a1) * Outer,
+					CenterX + cosf(a2) * Inner, CenterY + sinf(a2) * Inner,
+					CenterX + cosf(a2) * Outer, CenterY + sinf(a2) * Outer);
+				Graphics()->QuadsDrawFreeform(&Ring, 1);
+			}
 		}
 	}
 }
@@ -290,9 +289,9 @@ void CVisuals::RenderQuad(const CVisualItem &Item)
 
 		vec2 Corners[4] = {
 			vec2(CenterX + (-HalfW) * Cos - (-HalfH) * Sin, CenterY + (-HalfW) * Sin + (-HalfH) * Cos),
-			vec2(CenterX + (HalfW) * Cos - (-HalfH) * Sin, CenterY + (HalfW) * Sin + (-HalfH) * Cos),
-			vec2(CenterX + (HalfW) * Cos - (HalfH) * Sin, CenterY + (HalfW) * Sin + (HalfH) * Cos),
-			vec2(CenterX + (-HalfW) * Cos - (HalfH) * Sin, CenterY + (-HalfW) * Sin + (HalfH) * Cos),
+			vec2(CenterX + (HalfW)*Cos - (-HalfH) * Sin, CenterY + (HalfW)*Sin + (-HalfH) * Cos),
+			vec2(CenterX + (HalfW)*Cos - (HalfH)*Sin, CenterY + (HalfW)*Sin + (HalfH)*Cos),
+			vec2(CenterX + (-HalfW) * Cos - (HalfH)*Sin, CenterY + (-HalfW) * Sin + (HalfH)*Cos),
 		};
 
 		for(int i = 0; i < 4; i++)
@@ -667,7 +666,7 @@ void CVisuals::OnRender()
 		VisItem.m_pData = Item.m_pData;
 		VisItem.m_Flags = GetFlagsFromSnap(Item.m_Type, Item.m_pData);
 		VisItem.m_pPrevData = (VisItem.m_Flags & VISUALFLAG_NO_INTERPOLATION) ? nullptr :
-			Client()->SnapFindItem(IClient::SNAP_PREV, Item.m_Type, Item.m_Id);
+											Client()->SnapFindItem(IClient::SNAP_PREV, Item.m_Type, Item.m_Id);
 		VisItem.m_RenderOrder = GetRenderOrderFromSnap(Item.m_Type, Item.m_pData);
 		VisItem.m_BatchKey = ComputeBatchKey(Item.m_Type, Item.m_pData);
 

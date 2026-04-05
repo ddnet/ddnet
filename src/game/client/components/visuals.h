@@ -1,13 +1,14 @@
 #ifndef GAME_CLIENT_COMPONENTS_VISUALS_H
 #define GAME_CLIENT_COMPONENTS_VISUALS_H
 
-#include <unordered_map>
-#include <vector>
-
 #include <base/vmath.h>
+
 #include <engine/graphics.h>
 
 #include <game/client/component.h>
+
+#include <unordered_map>
+#include <vector>
 
 struct CVisualItem
 {

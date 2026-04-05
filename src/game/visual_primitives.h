@@ -93,10 +93,17 @@ enum
 
 // Spring omega (bits 8-12 of m_Flags, all types, 5 bits):
 //   0 = default (20), 1-30 = value * 8 (range 8-240), 31 = no spring
-enum { SPRING_OMEGA_NO_SPRING = 31 };
+enum
+{
+	SPRING_OMEGA_NO_SPRING = 31
+};
 inline int PackSpringOmega(int Omega) { return (Omega & 0x1F) << 8; }
 inline int UnpackSpringOmega(int Flags) { return (Flags >> 8) & 0x1F; }
-inline float GetSpringOmega(int Flags) { int v = UnpackSpringOmega(Flags); return v == 0 ? 20.0f : (float)(v * 8); }
+inline float GetSpringOmega(int Flags)
+{
+	int v = UnpackSpringOmega(Flags);
+	return v == 0 ? 20.0f : (float)(v * 8);
+}
 // Spring is disabled for camera-relative items and when omega == NO_SPRING
 inline bool SpringEnabled(int Flags) { return !(Flags & VISUALFLAG_CAMERA_RELATIVE) && UnpackSpringOmega(Flags) != SPRING_OMEGA_NO_SPRING; }
 
