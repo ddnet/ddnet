@@ -47,7 +47,7 @@ public:
 	bool Start() override REQUIRES(!m_WriteLock);
 	void Stop() override;
 	void Pause(bool Pause) override;
-	bool IsRecording() override { return m_Recording; }
+	bool IsRecording() const override { return m_Recording; }
 
 	void NextVideoFrame() override;
 	void NextVideoFrameThread() override;
