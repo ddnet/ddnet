@@ -1,6 +1,9 @@
 #include "teehistorian.h"
 
-#include <base/system.h>
+#include <base/dbg.h>
+#include <base/mem.h>
+#include <base/str.h>
+#include <base/time.h>
 
 #include <engine/shared/config.h>
 #include <engine/shared/json.h>

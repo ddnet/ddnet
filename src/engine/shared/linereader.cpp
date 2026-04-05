@@ -2,7 +2,11 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "linereader.h"
 
-#include <base/system.h>
+#include <base/dbg.h>
+#include <base/io.h>
+#include <base/str.h>
+
+#include <cstdlib>
 
 CLineReader::CLineReader()
 {

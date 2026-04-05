@@ -3,7 +3,9 @@
 
 #include "jsonwriter.h"
 
-#include <base/system.h>
+#include <base/dbg.h>
+#include <base/io.h>
+#include <base/str.h>
 
 static char EscapeJsonChar(char c)
 {

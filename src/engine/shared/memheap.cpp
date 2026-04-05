@@ -3,7 +3,7 @@
 #include "memheap.h"
 
 #include <base/math.h>
-#include <base/system.h>
+#include <base/str.h>
 
 #include <cstdint>
 #include <cstdlib>

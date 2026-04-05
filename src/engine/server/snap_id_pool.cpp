@@ -3,7 +3,8 @@
 
 #include "snap_id_pool.h"
 
-#include <base/system.h>
+#include <base/dbg.h>
+#include <base/time.h>
 
 CSnapIdPool::CSnapIdPool()
 {

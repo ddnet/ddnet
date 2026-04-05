@@ -3,7 +3,8 @@
 #include "friends.h"
 
 #include <base/math.h>
-#include <base/system.h>
+#include <base/mem.h>
+#include <base/str.h>
 
 #include <engine/config.h>
 #include <engine/console.h>

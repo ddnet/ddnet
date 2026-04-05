@@ -1,6 +1,6 @@
 #include "map.h"
 
-#include <base/system.h>
+#include <base/str.h>
 
 #include <game/editor/editor.h>
 #include <game/editor/editor_actions.h>

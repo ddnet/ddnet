@@ -2,7 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "compression.h"
 
-#include <base/system.h>
+#include <base/dbg.h>
 
 #include <iterator> // std::size
 

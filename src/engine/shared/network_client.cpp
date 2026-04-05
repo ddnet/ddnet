@@ -2,7 +2,10 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "network.h"
 
-#include <base/system.h>
+#include <base/dbg.h>
+#include <base/mem.h>
+#include <base/net.h>
+#include <base/time.h>
 #include <base/types.h>
 
 #include <engine/shared/protocol7.h>

@@ -1,5 +1,9 @@
+#include <base/dbg.h>
+#include <base/mem.h>
 #include <base/net.h>
-#include <base/system.h>
+#include <base/secure.h>
+#include <base/str.h>
+#include <base/time.h>
 
 #include <engine/client.h>
 #include <engine/discord.h>

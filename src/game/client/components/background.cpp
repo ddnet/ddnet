@@ -1,6 +1,6 @@
 #include "background.h"
 
-#include <base/system.h>
+#include <base/str.h>
 
 #include <engine/map.h>
 #include <engine/shared/config.h>

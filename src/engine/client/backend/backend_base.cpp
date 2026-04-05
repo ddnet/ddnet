@@ -1,6 +1,6 @@
 #include "backend_base.h"
 
-#include <base/system.h>
+#include <base/mem.h>
 
 bool CCommandProcessorFragment_GLBase::Texture2DTo3D(uint8_t *pImageBuffer, int ImageWidth, int ImageHeight, size_t PixelSize, int SplitCountWidth, int SplitCountHeight, uint8_t *pTarget3DImageData, int &Target3DImageWidth, int &Target3DImageHeight)
 {

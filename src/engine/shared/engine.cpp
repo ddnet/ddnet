@@ -1,9 +1,12 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include <base/io.h>
 #include <base/logger.h>
+#include <base/net.h>
 #include <base/os.h>
-#include <base/system.h>
+#include <base/str.h>
+#include <base/time.h>
 
 #include <engine/console.h>
 #include <engine/engine.h>

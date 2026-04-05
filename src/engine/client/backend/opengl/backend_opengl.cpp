@@ -1,8 +1,10 @@
 #include "backend_opengl.h"
 
+#include <base/dbg.h>
 #include <base/detect.h>
 #include <base/log.h>
-#include <base/system.h>
+#include <base/mem.h>
+#include <base/str.h>
 
 #include <engine/client/backend_sdl.h>
 #include <engine/graphics.h>

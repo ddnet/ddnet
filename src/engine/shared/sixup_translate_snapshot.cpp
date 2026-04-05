@@ -1,6 +1,7 @@
 #include "snapshot.h"
 
-#include <base/system.h>
+#include <base/dbg.h>
+#include <base/mem.h>
 
 void CSnapshotBuilder::Init7(const CSnapshot *pSnapshot)
 {

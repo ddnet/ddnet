@@ -1,7 +1,10 @@
 #include "scoreworker.h"
 
+#include <base/dbg.h>
 #include <base/log.h>
-#include <base/system.h>
+#include <base/mem.h>
+#include <base/str.h>
+#include <base/time.h>
 
 #include <engine/server/databases/connection.h>
 #include <engine/server/databases/connection_pool.h>

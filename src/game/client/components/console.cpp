@@ -3,11 +3,13 @@
 
 #include "console.h"
 
+#include <base/dbg.h>
+#include <base/io.h>
 #include <base/lock.h>
 #include <base/logger.h>
 #include <base/math.h>
 #include <base/str.h>
-#include <base/system.h>
+#include <base/time.h>
 
 #include <engine/console.h>
 #include <engine/engine.h>

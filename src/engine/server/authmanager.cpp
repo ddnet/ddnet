@@ -1,7 +1,10 @@
 #include "authmanager.h"
 
+#include <base/dbg.h>
 #include <base/hash_ctxt.h>
-#include <base/system.h>
+#include <base/mem.h>
+#include <base/secure.h>
+#include <base/str.h>
 
 #include <engine/shared/config.h>
 

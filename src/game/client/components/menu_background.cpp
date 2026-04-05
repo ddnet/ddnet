@@ -1,6 +1,8 @@
 #include "menu_background.h"
 
-#include <base/system.h>
+#include <base/dbg.h>
+#include <base/str.h>
+#include <base/time.h>
 
 #include <engine/graphics.h>
 #include <engine/map.h>

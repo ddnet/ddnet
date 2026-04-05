@@ -6,7 +6,7 @@
 #include "graph.h"
 
 #include <base/math.h>
-#include <base/system.h>
+#include <base/time.h>
 
 void CSmoothTime::Init(int64_t Target)
 {

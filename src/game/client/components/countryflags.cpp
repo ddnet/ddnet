@@ -2,9 +2,10 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "countryflags.h"
 
+#include <base/io.h>
 #include <base/log.h>
 #include <base/math.h>
-#include <base/system.h>
+#include <base/str.h>
 
 #include <engine/graphics.h>
 #include <engine/shared/config.h>

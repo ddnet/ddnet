@@ -2,7 +2,9 @@
 
 #include "connection.h"
 
-#include <base/system.h>
+#include <base/dbg.h>
+#include <base/mem.h>
+#include <base/str.h>
 #include <base/thread.h>
 
 #include <engine/console.h>

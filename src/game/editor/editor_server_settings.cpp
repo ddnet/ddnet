@@ -3,7 +3,8 @@
 #include "editor.h"
 
 #include <base/color.h>
-#include <base/system.h>
+#include <base/dbg.h>
+#include <base/str.h>
 
 #include <engine/font_icons.h>
 #include <engine/keys.h>

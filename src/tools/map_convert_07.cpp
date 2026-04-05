@@ -1,9 +1,12 @@
 /* (c) DDNet developers. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.  */
 
+#include <base/dbg.h>
+#include <base/fs.h>
+#include <base/io.h>
 #include <base/logger.h>
 #include <base/os.h>
-#include <base/system.h>
+#include <base/str.h>
 
 #include <engine/gfx/image_loader.h>
 #include <engine/shared/datafile.h>

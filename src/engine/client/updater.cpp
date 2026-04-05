@@ -1,6 +1,7 @@
 #include "updater.h"
 
-#include <base/system.h>
+#include <base/dbg.h>
+#include <base/str.h>
 
 #include <engine/client.h>
 #include <engine/engine.h>

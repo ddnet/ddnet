@@ -1,7 +1,10 @@
 #include "network.h"
 
+#include <base/dbg.h>
 #include <base/log.h>
-#include <base/system.h>
+#include <base/mem.h>
+#include <base/net.h>
+#include <base/time.h>
 
 #include <algorithm>
 

@@ -7,7 +7,10 @@
 #include "gamecontroller.h"
 #include "score.h"
 
-#include <base/system.h>
+#include <base/dbg.h>
+#include <base/mem.h>
+#include <base/str.h>
+#include <base/time.h>
 
 #include <engine/antibot.h>
 #include <engine/server.h>

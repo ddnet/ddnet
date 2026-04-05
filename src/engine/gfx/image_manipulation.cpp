@@ -1,7 +1,10 @@
 #include "image_manipulation.h"
 
+#include <base/dbg.h>
 #include <base/math.h>
-#include <base/system.h>
+#include <base/mem.h>
+
+#include <cstdlib>
 
 bool ConvertToRgba(uint8_t *pDest, const CImageInfo &SourceImage)
 {

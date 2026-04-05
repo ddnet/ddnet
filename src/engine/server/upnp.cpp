@@ -2,7 +2,8 @@
 
 #include "upnp.h"
 
-#include <base/system.h>
+#include <base/dbg.h>
+#include <base/str.h>
 
 #include <engine/shared/config.h>
 

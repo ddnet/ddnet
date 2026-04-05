@@ -1,6 +1,7 @@
 #include "glsl_shader_compiler.h"
 
-#include <base/system.h>
+#include <base/dbg.h>
+#include <base/str.h>
 
 #include <engine/graphics.h>
 

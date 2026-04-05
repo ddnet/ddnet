@@ -4,9 +4,12 @@
 #include "netban.h"
 #include "network.h"
 
+#include <base/dbg.h>
 #include <base/hash_ctxt.h>
 #include <base/math.h>
-#include <base/system.h>
+#include <base/net.h>
+#include <base/secure.h>
+#include <base/time.h>
 
 #include <engine/shared/compression.h>
 #include <engine/shared/packer.h>

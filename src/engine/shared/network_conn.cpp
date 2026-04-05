@@ -3,8 +3,12 @@
 #include "config.h"
 #include "network.h"
 
+#include <base/dbg.h>
 #include <base/log.h>
-#include <base/system.h>
+#include <base/mem.h>
+#include <base/secure.h>
+#include <base/str.h>
+#include <base/time.h>
 
 void CNetConnection::SetPeerAddr(const NETADDR *pAddr)
 {
