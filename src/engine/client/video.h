@@ -55,8 +55,6 @@ public:
 	void NextAudioFrame(ISoundMixFunc Mix) override;
 	void NextAudioFrameTimeline(ISoundMixFunc Mix) override;
 
-	static IVideo *Current() { return IVideo::ms_pCurrentVideo; }
-
 	static void Init();
 
 private:
