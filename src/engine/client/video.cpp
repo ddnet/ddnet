@@ -6,6 +6,7 @@
 #include <base/io.h>
 #include <base/log.h>
 #include <base/str.h>
+#include <base/time.h>
 
 #include <engine/graphics.h>
 #include <engine/shared/config.h>

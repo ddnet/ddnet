@@ -1,8 +1,6 @@
 #ifndef ENGINE_SHARED_VIDEO_H
 #define ENGINE_SHARED_VIDEO_H
 
-#include <base/time.h>
-
 #include <cstdint>
 #include <functional>
 
@@ -29,7 +27,6 @@ public:
 	static int64_t Time() { return ms_Time; }
 	static float LocalTime() { return ms_LocalTime; }
 	static void SetLocalStartTime(int64_t LocalStartTime) { ms_LocalStartTime = LocalStartTime; }
-	static void SetFPS(int FPS) { ms_TickTime = time_freq() / FPS; }
 
 protected:
 	static IVideo *ms_pCurrentVideo;
