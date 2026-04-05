@@ -116,7 +116,7 @@ class IUpdater *CComponentInterfaces::Updater() const
 int64_t CComponentInterfaces::time() const
 {
 #if defined(CONF_VIDEORECORDER)
-	return IVideo::Current() ? IVideo::Time() : time_get();
+	return IVideo::Current() ? IVideo::Current()->Time() : time_get();
 #else
 	return time_get();
 #endif
@@ -125,7 +125,7 @@ int64_t CComponentInterfaces::time() const
 float CComponentInterfaces::LocalTime() const
 {
 #if defined(CONF_VIDEORECORDER)
-	return IVideo::Current() ? IVideo::LocalTime() : Client()->LocalTime();
+	return IVideo::Current() ? IVideo::Current()->LocalTime() : Client()->LocalTime();
 #else
 	return Client()->LocalTime();
 #endif

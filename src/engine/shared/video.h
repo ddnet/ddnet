@@ -22,18 +22,14 @@ public:
 	virtual void NextAudioFrame(ISoundMixFunc Mix) = 0;
 	virtual void NextAudioFrameTimeline(ISoundMixFunc Mix) = 0;
 
-	static IVideo *Current() { return ms_pCurrentVideo; }
+	virtual int64_t Time() const = 0;
+	virtual float LocalTime() const = 0;
+	virtual void SetLocalStartTime(int64_t LocalStartTime) = 0;
 
-	static int64_t Time() { return ms_Time; }
-	static float LocalTime() { return ms_LocalTime; }
-	static void SetLocalStartTime(int64_t LocalStartTime) { ms_LocalStartTime = LocalStartTime; }
+	static IVideo *Current() { return ms_pCurrentVideo; }
 
 protected:
 	static IVideo *ms_pCurrentVideo;
-	static int64_t ms_Time;
-	static int64_t ms_LocalStartTime;
-	static float ms_LocalTime;
-	static int64_t ms_TickTime;
 };
 
 #endif
