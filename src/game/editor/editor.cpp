@@ -6299,7 +6299,13 @@ void CEditor::Render()
 	RenderBackground(View, m_CheckerTexture, 32.0f, 1.0f);
 
 	CUIRect MenuBar, ModeBar, ToolBar, StatusBar, ExtraEditor, ToolBox;
-	m_ShowPicker = Input()->KeyIsPressed(KEY_SPACE) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Map()->m_vSelectedLayers.size() == 1;
+	m_ShowPicker = m_Mode == MODE_LAYERS &&
+		       m_Dialog == DIALOG_NONE &&
+		       CLineInput::GetActiveInput() == nullptr &&
+		       Map()->m_vSelectedLayers.size() == 1 &&
+			   Map()->SelectedLayer(0) != nullptr &&
+			   (Map()->SelectedLayer(0)->m_Type == LAYERTYPE_TILES || Map()->SelectedLayer(0)->m_Type == LAYERTYPE_QUADS) &&
+		       Input()->KeyIsPressed(KEY_SPACE);
 
 	if(m_GuiActive)
 	{
