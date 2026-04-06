@@ -47,16 +47,7 @@ void log_global_logger_finish()
 
 void log_set_global_logger_default()
 {
-	std::unique_ptr<ILogger> logger;
-#if defined(CONF_PLATFORM_ANDROID)
-	logger = log_logger_android();
-#else
-	logger = log_logger_stdout();
-#endif
-	if(logger)
-	{
-		log_set_global_logger(logger.release());
-	}
+	log_set_global_logger(log_logger_default().release());
 }
 
 ILogger *log_get_scope_logger()
@@ -216,6 +207,16 @@ public:
 std::unique_ptr<ILogger> log_logger_collection(std::vector<std::shared_ptr<ILogger>> &&vpLoggers)
 {
 	return std::make_unique<CLoggerCollection>(std::move(vpLoggers));
+}
+
+std::unique_ptr<ILogger> log_logger_default()
+{
+#if defined(CONF_PLATFORM_ANDROID)
+	std::unique_ptr<ILogger> logger = log_logger_android();
+#else
+	std::unique_ptr<ILogger> logger = log_logger_stdout();
+#endif
+	return logger == nullptr ? log_logger_noop() : std::move(logger);
 }
 
 class CLoggerAsync : public ILogger

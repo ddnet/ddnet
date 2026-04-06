@@ -131,9 +131,10 @@ void log_set_global_logger(ILogger *logger);
  * threads.
  *
  * This is logging to stdout on most platforms and to the system log on
- * Android.
+ * Android. Discards log messages if stdout is not available.
  *
  * @see log_set_global_logger
+ * @see log_logger_default
  */
 void log_set_global_logger_default();
 
@@ -185,6 +186,14 @@ std::unique_ptr<ILogger> log_logger_android();
  * Logger combining a vector of other loggers.
  */
 std::unique_ptr<ILogger> log_logger_collection(std::vector<std::shared_ptr<ILogger>> &&vpLoggers);
+
+/**
+ * @ingroup Log
+ *
+ * Sane default logger. This is logging to stdout on most platforms and to the
+ * system log on Android. Discards log messages if stdout is not available.
+ */
+std::unique_ptr<ILogger> log_logger_default();
 
 /**
  * @ingroup Log
