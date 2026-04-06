@@ -11,6 +11,7 @@
 
 #include <gtest/gtest.h>
 
+#include <string>
 #include <vector>
 
 void RegisterGameUuids(CUuidManager *pManager);
@@ -160,25 +161,47 @@ protected:
 			io_close(File);
 		}
 
-		printf("pOutput = {");
-		size_t Start = 0; // skip over header;
+		// skip over header
+		size_t StartActual = 0;
 		for(size_t i = 0; i < m_vBuffer.size(); i++)
 		{
-			if(Start == 0)
+			if(m_vBuffer[i] == 0)
 			{
-				if(m_vBuffer[i] == 0)
-					Start = i + 1;
-				continue;
+				StartActual = i + 1;
+				break;
 			}
-			if((i - Start) % 10 == 0)
-				printf("\n\t");
-			else
-				printf(", ");
-			printf("0x%.2x", m_vBuffer[i]);
 		}
-		printf("\n}\n");
-		ASSERT_EQ(m_vBuffer.size(), OutputSize);
-		ASSERT_TRUE(mem_comp(m_vBuffer.data(), pOutput, OutputSize) == 0);
+		size_t StartExpected = 0;
+		for(size_t i = 0; i < OutputSize; i++)
+		{
+			if(pOutput[i] == 0)
+			{
+				StartExpected = i + 1;
+				break;
+			}
+		}
+
+		std::string OutputActualHex;
+		if(StartActual < m_vBuffer.size())
+		{
+			const size_t DataSize = m_vBuffer.size() - StartActual;
+			OutputActualHex.resize(6 * DataSize + 1);
+			str_hex_cstyle(OutputActualHex.data(), OutputActualHex.length(), &m_vBuffer[StartActual], DataSize, 10);
+		}
+		std::string OutputExpectedHex;
+		if(StartExpected < OutputSize)
+		{
+			const size_t DataSize = OutputSize - StartExpected;
+			OutputExpectedHex.resize(6 * DataSize + 1);
+			str_hex_cstyle(OutputExpectedHex.data(), OutputExpectedHex.length(), &pOutput[StartExpected], DataSize, 10);
+		}
+
+		ASSERT_EQ(StartActual, StartExpected) << "Header size mismatch. Actual " << StartActual << ", expected " << StartExpected << ".";
+		ASSERT_TRUE(mem_comp(m_vBuffer.data(), pOutput, StartExpected) == 0) << "Header mismatch. Check full output in .teehistorian files.";
+		ASSERT_EQ(m_vBuffer.size(), OutputSize) << "Output size mismatch. Actual " << m_vBuffer.size() << ", expected " << OutputSize << ".";
+		ASSERT_TRUE(mem_comp(m_vBuffer.data(), pOutput, OutputSize) == 0) << "Output mismatch. Actual m_vBuffer = {\n"
+										  << OutputActualHex.c_str() << "\n}\nExpected pOutput = {\n"
+										  << OutputExpectedHex.c_str() << "\n}";
 	}
 
 	void Tick(int Tick)
