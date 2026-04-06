@@ -336,6 +336,7 @@ public:
 	void LoadCurrentMap();
 	void Render();
 
+	void UpdateBrushPicker();
 	void RenderPressedKeys(CUIRect View);
 	void RenderSavingIndicator(CUIRect View);
 	void FreeDynamicPopupMenus();
@@ -474,7 +475,8 @@ public:
 	};
 	EQuadEnvelopePointOperation m_QuadEnvelopePointOperation = EQuadEnvelopePointOperation::NONE;
 
-	bool m_ShowPicker;
+	bool m_ShowPicker = false;
+	bool m_ShowPickerToggle = false;
 
 	// Color palette and pipette
 	ColorRGBA m_aSavedColors[8];

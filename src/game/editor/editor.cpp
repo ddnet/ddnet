@@ -608,6 +608,17 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 			ToolbarBottom.VSplitLeft(5.0f, nullptr, &ToolbarBottom);
 		}
 
+		// brush picker button
+		{
+			ToolbarBottom.VSplitLeft(25.0f, &Button, &ToolbarBottom);
+			const int Checked = m_QuickActionBrushPicker.Disabled() ? -1 : (m_ShowPicker ? 1 : 0);
+			if(DoButton_FontIcon(&m_QuickActionBrushPicker, FontIcon::BRUSH, Checked, &Button, BUTTONFLAG_LEFT, m_QuickActionBrushPicker.Description(), IGraphics::CORNER_ALL))
+			{
+				m_QuickActionBrushPicker.Call();
+			}
+			ToolbarBottom.VSplitLeft(5.0f, nullptr, &ToolbarBottom);
+		}
+
 		// tile manipulation
 		{
 			// do tele/tune/switch/speedup button
@@ -2415,6 +2426,8 @@ void CEditor::DoMapEditor(CUIRect View)
 
 			if(m_ShowTileInfo != SHOW_TILE_OFF)
 				m_pTilesetPicker->ShowInfo();
+
+			str_copy(m_aTooltip, "Click or drag left mouse button to create a brush. Hover individual tiles for explanation.");
 		}
 		else
 		{
@@ -2646,6 +2659,7 @@ void CEditor::DoMapEditor(CUIRect View)
 							if(Grabs == 0)
 								m_pBrush->Clear();
 
+							m_ShowPickerToggle = false; // Close the tile picker after grabbing brush if it was toggled open
 							Map()->DeselectQuads();
 							Map()->DeselectQuadPoints();
 						}
@@ -6298,15 +6312,9 @@ void CEditor::Render()
 	// render checker
 	RenderBackground(View, m_CheckerTexture, 32.0f, 1.0f);
 
-	CUIRect MenuBar, ModeBar, ToolBar, StatusBar, ExtraEditor, ToolBox;
-	m_ShowPicker = m_Mode == MODE_LAYERS &&
-		       m_Dialog == DIALOG_NONE &&
-		       CLineInput::GetActiveInput() == nullptr &&
-		       Map()->m_vSelectedLayers.size() == 1 &&
-			   Map()->SelectedLayer(0) != nullptr &&
-			   (Map()->SelectedLayer(0)->m_Type == LAYERTYPE_TILES || Map()->SelectedLayer(0)->m_Type == LAYERTYPE_QUADS) &&
-		       Input()->KeyIsPressed(KEY_SPACE);
+	UpdateBrushPicker();
 
+	CUIRect MenuBar, ModeBar, ToolBar, StatusBar, ExtraEditor, ToolBox;
 	if(m_GuiActive)
 	{
 		View.HSplitTop(16.0f, &MenuBar, &View);
@@ -6615,6 +6623,37 @@ void CEditor::Render()
 		RenderTooltip(TooltipRect);
 
 	RenderMousePointer();
+}
+
+void CEditor::UpdateBrushPicker()
+{
+	if(!m_QuickActionBrushPicker.Disabled() &&
+		m_Dialog == DIALOG_NONE &&
+		CLineInput::GetActiveInput() == nullptr)
+	{
+		if(Input()->ModifierIsPressed())
+		{
+			if(Input()->KeyPress(KEY_SPACE))
+			{
+				m_ShowPickerToggle = !m_ShowPickerToggle;
+			}
+			m_ShowPicker = m_ShowPickerToggle;
+		}
+		else
+		{
+			const bool SpacePressed = Input()->KeyIsPressed(KEY_SPACE);
+			m_ShowPicker = m_ShowPickerToggle || SpacePressed;
+			if(SpacePressed)
+			{
+				m_ShowPickerToggle = false;
+			}
+		}
+	}
+	else
+	{
+		m_ShowPicker = false;
+		m_ShowPickerToggle = false;
+	}
 }
 
 void CEditor::RenderPressedKeys(CUIRect View)
