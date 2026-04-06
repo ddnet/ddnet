@@ -2224,7 +2224,10 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						{
 							m_LocalStartTime = time_get();
 #if defined(CONF_VIDEORECORDER)
-							IVideo::SetLocalStartTime(m_LocalStartTime);
+							if(IVideo::Current())
+							{
+								IVideo::Current()->SetLocalStartTime(m_LocalStartTime);
+							}
 #endif
 						}
 						if(!Dummy)
@@ -3075,9 +3078,6 @@ void CClient::InitInterfaces()
 void CClient::Run()
 {
 	m_LocalStartTime = m_GlobalStartTime = time_get();
-#if defined(CONF_VIDEORECORDER)
-	IVideo::SetLocalStartTime(m_LocalStartTime);
-#endif
 	m_aSnapshotParts[0] = 0;
 	m_aSnapshotParts[1] = 0;
 
@@ -3721,7 +3721,7 @@ void CClient::StartVideo(const char *pFilename, bool WithTimestamp)
 	Graphics()->WaitForIdle();
 	// pause the sound device while creating the video instance
 	Sound()->PauseAudioDevice();
-	new CVideo(Graphics(), Sound(), Storage(), Graphics()->ScreenWidth(), Graphics()->ScreenHeight(), aFilename);
+	new CVideo(Graphics(), Sound(), Storage(), Graphics()->ScreenWidth(), Graphics()->ScreenHeight(), m_LocalStartTime, aFilename);
 	Sound()->UnpauseAudioDevice();
 	if(!IVideo::Current()->Start())
 	{

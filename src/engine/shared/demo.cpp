@@ -959,9 +959,9 @@ int64_t CDemoPlayer::Time()
 		if(!m_WasRecording)
 		{
 			m_WasRecording = true;
-			m_Info.m_LastUpdate = IVideo::Time();
+			m_Info.m_LastUpdate = IVideo::Current()->Time();
 		}
-		return IVideo::Time();
+		return IVideo::Current()->Time();
 	}
 	else
 	{
