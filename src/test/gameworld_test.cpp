@@ -104,10 +104,7 @@ public:
 		m_pServer->m_pPersistentData = malloc(GameServer()->PersistentDataSize());
 		EXPECT_NE(m_pServer->LoadMap("coverage"), 0);
 
-		if(!pServer->m_Http.Init(std::chrono::seconds{2}))
-		{
-			log_error("server", "Failed to initialize the HTTP client.");
-		}
+		EXPECT_TRUE(pServer->m_Http.Init(std::chrono::seconds{2})) << "Failed to initialize the HTTP client";
 
 		pServer->m_NetServer.SetCallbacks(
 			CServer::NewClientCallback,
