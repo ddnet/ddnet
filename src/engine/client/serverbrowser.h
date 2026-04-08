@@ -382,6 +382,7 @@ private:
 	bool SortCompareNumClients(int Index1, int Index2) const;
 	bool SortCompareNumFriends(int Index1, int Index2) const;
 	bool SortCompareNumPlayersAndPing(int Index1, int Index2) const;
+	bool SortCompareFavoritesNumPlayersAndPing(int Index1, int Index2) const;
 
 	//
 	void Filter();

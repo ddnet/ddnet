@@ -421,6 +421,17 @@ bool CServerBrowser::SortCompareNumPlayersAndPing(int Index1, int Index2) const
 		return pIndex1->m_Info.m_Latency > pIndex2->m_Info.m_Latency;
 }
 
+bool CServerBrowser::SortCompareFavoritesNumPlayersAndPing(int Index1, int Index2) const
+{
+	const CServerEntry *pIndex1 = m_vpServerlist[Index1];
+	const CServerEntry *pIndex2 = m_vpServerlist[Index2];
+	const bool IsFavorite1 = pIndex1->m_Info.m_Favorite != TRISTATE::NONE;
+	const bool IsFavorite2 = pIndex2->m_Info.m_Favorite != TRISTATE::NONE;
+	if(IsFavorite1 == IsFavorite2)
+		return SortCompareNumPlayersAndPing(Index1, Index2);
+	return IsFavorite1 && !IsFavorite2;
+}
+
 void CServerBrowser::Filter()
 {
 	m_NumSortedPlayers = 0;
@@ -660,6 +671,8 @@ void CServerBrowser::Sort()
 		std::stable_sort(m_vSortedServerlist.begin(), m_vSortedServerlist.end(), CSortWrap(this, &CServerBrowser::SortCompareNumPlayers));
 	else if(g_Config.m_BrSort == IServerBrowser::SORT_GAMETYPE)
 		std::stable_sort(m_vSortedServerlist.begin(), m_vSortedServerlist.end(), CSortWrap(this, &CServerBrowser::SortCompareGametype));
+	else if(g_Config.m_BrSort == IServerBrowser::SORT_FAVORITES)
+		std::stable_sort(m_vSortedServerlist.begin(), m_vSortedServerlist.end(), CSortWrap(this, &CServerBrowser::SortCompareFavoritesNumPlayersAndPing));
 
 	m_Sorthash = SortHash();
 }
