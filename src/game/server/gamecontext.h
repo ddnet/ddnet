@@ -137,6 +137,8 @@ class CGameContext : public IGameServer
 	static void CommandCallback(int ClientId, int FlagMask, const char *pCmd, IConsole::IResult *pResult, void *pUser);
 	static void TeeHistorianWrite(const void *pData, int DataSize, void *pUser);
 
+	static void ConEmpty(IConsole::IResult *pResult, void *pUserData) {}
+
 	static void ConTuneParam(IConsole::IResult *pResult, void *pUserData);
 	static void ConToggleTuneParam(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneReset(IConsole::IResult *pResult, void *pUserData);

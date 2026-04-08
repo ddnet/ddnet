@@ -137,6 +137,8 @@ public:
 	void StopAll() override REQUIRES(!m_SoundLock);
 	void StopVoice(CVoiceHandle Voice) override REQUIRES(!m_SoundLock);
 	bool IsPlaying(int SampleId) override REQUIRES(!m_SoundLock);
+	bool IsLooping(int SampleId) override REQUIRES(!m_SoundLock);
+	void SetLooping(int SampleId, bool Loop) override REQUIRES(!m_SoundLock);
 
 	int MixingRate() const override { return m_MixingRate; }
 	void Mix(short *pFinalOut, unsigned Frames) override REQUIRES(!m_SoundLock);

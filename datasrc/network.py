@@ -396,6 +396,13 @@ Objects = [
 			NetIntRange("m_MapBestTimeMillis", 0, 999),
 	]),
 
+	# Envelope info for animations
+	NetObjectEx("EnvelopeTrigger", "envelope-trigger@netobj.ddnet.org", [
+		NetTick("m_StartTick"),
+		NetIntAny("m_Type"),
+		NetIntRange("m_ClientId", -1, 'MAX_CLIENTS-1'),
+	]),
+
 	NetEventEx("MapSoundWorld:Common", "map-sound-world@netevent.ddnet.org", [
 		NetIntAny("m_SoundId"),
 	]),
