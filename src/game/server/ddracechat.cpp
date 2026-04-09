@@ -1009,8 +1009,7 @@ void CGameContext::ConLock(IConsole::IResult *pResult, void *pUserData)
 	int Team = pSelf->GetDDRaceTeam(pResult->m_ClientId);
 	if(!pSelf->m_pController->Teams().IsAllowLeaderCommands(pResult->m_ClientId, Team))
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-			"Only your team leader(s) can lock the team.");
+		log_info("chatresp", "Only your team leader(s) can lock the team.");
 		return;
 	}
 
@@ -1063,8 +1062,7 @@ void CGameContext::ConUnlock(IConsole::IResult *pResult, void *pUserData)
 		return;
 	if(!pSelf->m_pController->Teams().IsAllowLeaderCommands(pResult->m_ClientId, Team))
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-			"Only your team leader(s) can unlock the team.");
+		log_info("chatresp", "Only your team leader(s) can unlock the team.");
 		return;
 	}
 	if(pSelf->ProcessSpamProtection(pResult->m_ClientId, false))
@@ -1201,8 +1199,7 @@ void CGameContext::ConInvite(IConsole::IResult *pResult, void *pUserData)
 	int Team = pController->Teams().m_Core.Team(pResult->m_ClientId);
 	if(!pSelf->m_pController->Teams().IsAllowLeaderCommands(pResult->m_ClientId, Team))
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-			"Only your team leader(s) can invite other players.");
+		log_info("chatresp", "Only your team leader(s) can invite other players.");
 		return;
 	}
 	if(Team != TEAM_FLOCK && pController->Teams().IsValidTeamNumber(Team))
@@ -1270,10 +1267,7 @@ void CGameContext::ConTeam0Mode(IConsole::IResult *pResult, void *pUserData)
 	}
 	if(!pController->Teams().IsAllowLeaderCommands(pResult->m_ClientId, Team))
 	{
-		pSelf->Console()->Print(
-			IConsole::OUTPUT_LEVEL_STANDARD,
-			"chatresp",
-			"Only the team leader(s) can change the mode");
+		log_info("chatresp", "Only the team leader(s) can change the mode");
 		return;
 	}
 
@@ -2464,19 +2458,13 @@ void CGameContext::ConSetTeamLeader(IConsole::IResult *pResult, void *pUserData)
 
 	if(!Teams.IsValidTeamNumber(Team) || Team == TEAM_FLOCK)
 	{
-		pSelf->Console()->Print(
-			IConsole::OUTPUT_LEVEL_STANDARD,
-			"chatresp",
-			"You need to be in a team to set a team leader.");
+		log_info("chatresp", "You need to be in a team to set a team leader.");
 		return;
 	}
 
 	if(Teams.HasLeader(Team) && !Teams.IsTeamLeader(pPlayer->GetCid()))
 	{
-		pSelf->Console()->Print(
-			IConsole::OUTPUT_LEVEL_STANDARD,
-			"chatresp",
-			"Only your current leader(s) can promote a new team leader.");
+		log_info("chatresp", "Only your current leader(s) can promote a new team leader.");
 		return;
 	}
 	CPlayer *pPlayerToPromote = nullptr;
@@ -2487,39 +2475,23 @@ void CGameContext::ConSetTeamLeader(IConsole::IResult *pResult, void *pUserData)
 	}
 	else
 	{
-		for(int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if(pSelf->m_apPlayers[i] && !str_comp(pName, pSelf->Server()->ClientName(i)))
-			{
-				pPlayerToPromote = pSelf->m_apPlayers[i];
-				break;
-			}
-		}
+		pPlayerToPromote = pSelf->FindPlayerByName(pName);
 		if(pPlayerToPromote == nullptr)
 		{
-			pSelf->Console()->Print(
-				IConsole::OUTPUT_LEVEL_STANDARD,
-				"chatresp",
-				"Player not found");
+			log_info("chatresp", "Player not found");
 			return;
 		}
 
 		if(!Teams.m_Core.SameTeam(pResult->m_ClientId, pPlayerToPromote->GetCid()))
 		{
-			pSelf->Console()->Print(
-				IConsole::OUTPUT_LEVEL_STANDARD,
-				"chatresp",
-				"This player is not on your team.");
+			log_info("chatresp", "This player is not on your team.");
 			return;
 		}
 	}
 
 	if(Teams.IsTeamLeader(pPlayerToPromote->GetCid()))
 	{
-		pSelf->Console()->Print(
-			IConsole::OUTPUT_LEVEL_STANDARD,
-			"chatresp",
-			"This player is already a team leader.");
+		log_info("chatresp", "This player is already a team leader.");
 	}
 	else
 	{
