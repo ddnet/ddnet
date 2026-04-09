@@ -2652,8 +2652,10 @@ void CEditor::DoMapEditor(CUIRect View)
 					}
 					else
 					{
-						for(size_t k = 0; k < NumEditLayers; k++)
-							apEditLayers[k].second->BrushSelecting(r);
+						if(NumEditLayers > 0)
+						{
+							apEditLayers[0].second->BrushSelecting(r);
+						}
 						Ui()->MapScreen();
 					}
 				}
@@ -2674,8 +2676,10 @@ void CEditor::DoMapEditor(CUIRect View)
 					}
 					else
 					{
-						for(size_t k = 0; k < NumEditLayers; k++)
-							apEditLayers[k].second->BrushSelecting(r);
+						if(NumEditLayers > 0)
+						{
+							apEditLayers[0].second->BrushSelecting(r);
+						}
 						Ui()->MapScreen();
 					}
 				}
