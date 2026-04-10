@@ -1314,6 +1314,72 @@ void CGameContext::ConTeam0Mode(IConsole::IResult *pResult, void *pUserData)
 		}
 	}
 }
+void CGameContext::ConSetTeamLeader(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return;
+
+	if(pSelf->ProcessSpamProtection(pResult->m_ClientId, false))
+		return;
+
+	CGameTeams &Teams = pSelf->m_pController->Teams();
+
+	int Team = Teams.m_Core.Team(pResult->m_ClientId);
+
+	if(!Teams.IsValidTeamNumber(Team) || Team == TEAM_FLOCK)
+	{
+		log_info("chatresp", "You need to be in a team to set a team leader.");
+		return;
+	}
+
+	if(Teams.HasLeader(Team) && !Teams.IsTeamLeader(pPlayer->GetCid()))
+	{
+		log_info("chatresp", "Only your current leader(s) can promote a new team leader.");
+		return;
+	}
+	CPlayer *pPlayerToPromote = nullptr;
+	const char *pName = pResult->GetString(0);
+	if(pName[0] == '\0')
+	{
+		pPlayerToPromote = pPlayer;
+	}
+	else
+	{
+		pPlayerToPromote = pSelf->FindPlayerByName(pName);
+		if(pPlayerToPromote == nullptr)
+		{
+			log_info("chatresp", "Player not found");
+			return;
+		}
+
+		if(!Teams.m_Core.SameTeam(pResult->m_ClientId, pPlayerToPromote->GetCid()))
+		{
+			log_info("chatresp", "This player is not on your team.");
+			return;
+		}
+	}
+
+	if(Teams.IsTeamLeader(pPlayerToPromote->GetCid()))
+	{
+		log_info("chatresp", "This player is already a team leader.");
+	}
+	else
+	{
+		Teams.SetTeamLeader(pPlayerToPromote->GetCid(), true);
+
+		char aBuf[128];
+		if(pPlayerToPromote == pPlayer)
+			str_format(aBuf, sizeof(aBuf), "'%s' has promoted himself to the team leader.", pSelf->Server()->ClientName(pPlayerToPromote->GetCid()));
+		else
+			str_format(aBuf, sizeof(aBuf), "'%s' has been promoted to the team leader by '%s'.", pSelf->Server()->ClientName(pPlayerToPromote->GetCid()), pSelf->Server()->ClientName(pResult->m_ClientId));
+		pSelf->SendChatTeam(Team, aBuf);
+	}
+}
 
 void CGameContext::ConTeam(IConsole::IResult *pResult, void *pUserData)
 {
@@ -2437,71 +2503,4 @@ void CGameContext::ConTimeCP(IConsole::IResult *pResult, void *pUserData)
 
 	const char *pName = pResult->GetString(0);
 	pSelf->Score()->LoadPlayerTimeCp(pResult->m_ClientId, pName);
-}
-
-void CGameContext::ConSetTeamLeader(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientId(pResult->m_ClientId))
-		return;
-
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
-	if(!pPlayer)
-		return;
-
-	if(pSelf->ProcessSpamProtection(pResult->m_ClientId, false))
-		return;
-
-	CGameTeams &Teams = pSelf->m_pController->Teams();
-
-	int Team = Teams.m_Core.Team(pResult->m_ClientId);
-
-	if(!Teams.IsValidTeamNumber(Team) || Team == TEAM_FLOCK)
-	{
-		log_info("chatresp", "You need to be in a team to set a team leader.");
-		return;
-	}
-
-	if(Teams.HasLeader(Team) && !Teams.IsTeamLeader(pPlayer->GetCid()))
-	{
-		log_info("chatresp", "Only your current leader(s) can promote a new team leader.");
-		return;
-	}
-	CPlayer *pPlayerToPromote = nullptr;
-	const char *pName = pResult->GetString(0);
-	if(pName[0] == '\0')
-	{
-		pPlayerToPromote = pPlayer;
-	}
-	else
-	{
-		pPlayerToPromote = pSelf->FindPlayerByName(pName);
-		if(pPlayerToPromote == nullptr)
-		{
-			log_info("chatresp", "Player not found");
-			return;
-		}
-
-		if(!Teams.m_Core.SameTeam(pResult->m_ClientId, pPlayerToPromote->GetCid()))
-		{
-			log_info("chatresp", "This player is not on your team.");
-			return;
-		}
-	}
-
-	if(Teams.IsTeamLeader(pPlayerToPromote->GetCid()))
-	{
-		log_info("chatresp", "This player is already a team leader.");
-	}
-	else
-	{
-		Teams.SetTeamLeader(pPlayerToPromote->GetCid(), true);
-
-		char aBuf[128];
-		if(pPlayerToPromote == pPlayer)
-			str_format(aBuf, sizeof(aBuf), "'%s' has promoted himself to the team leader.", pSelf->Server()->ClientName(pPlayerToPromote->GetCid()));
-		else
-			str_format(aBuf, sizeof(aBuf), "'%s' has been promoted to the team leader by '%s'.", pSelf->Server()->ClientName(pPlayerToPromote->GetCid()), pSelf->Server()->ClientName(pResult->m_ClientId));
-		pSelf->SendChatTeam(Team, aBuf);
-	}
 }
