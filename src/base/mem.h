@@ -75,7 +75,7 @@ inline void mem_zero(T *block, size_t size)
 int mem_comp(const void *a, const void *b, size_t size);
 
 /**
- * Checks whether a block of memory contains null bytes.
+ * Checks whether a block of memory contains any null bytes.
  *
  * @ingroup Memory
  *
@@ -85,5 +85,17 @@ int mem_comp(const void *a, const void *b, size_t size);
  * @return `true` if the block has a null byte, `false` otherwise.
  */
 bool mem_has_null(const void *block, size_t size);
+
+/**
+ * Checks whether a block of memory contains exclusively null bytes.
+ *
+ * @ingroup Memory
+ *
+ * @param block Pointer to the block to check for nulls.
+ * @param size Size of the block.
+ *
+ * @return `true` if the block is all null bytes, `false` otherwise.
+ */
+bool mem_is_null(const void *block, size_t size);
 
 #endif

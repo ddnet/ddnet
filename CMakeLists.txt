@@ -834,6 +834,9 @@ if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
           # when MSVS adds new warnings.
           target_compile_options(${target} PRIVATE /w)
         endif()
+        # Do not apply clang-tidy to googletest targets.
+        set_property(TARGET ${target} PROPERTY C_CLANG_TIDY "")
+        set_property(TARGET ${target} PROPERTY CXX_CLANG_TIDY "")
       endforeach()
 
       set(GTEST_LIBRARIES gtest gmock)

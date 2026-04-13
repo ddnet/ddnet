@@ -30,3 +30,16 @@ bool mem_has_null(const void *block, size_t size)
 	}
 	return false;
 }
+
+bool mem_is_null(const void *block, size_t size)
+{
+	const unsigned char *bytes = (const unsigned char *)block;
+	for(size_t i = 0; i < size; i++)
+	{
+		if(bytes[i] != 0)
+		{
+			return false;
+		}
+	}
+	return true;
+}

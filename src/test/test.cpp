@@ -81,7 +81,7 @@ public:
 	std::vector<CTestInfoPath> *m_pvEntries;
 };
 
-int TestCollect(const char *pName, int IsDir, int Unused, void *pUser)
+static int TestCollect(const char *pName, int IsDir, int Unused, void *pUser)
 {
 	CTestCollectData *pData = (CTestCollectData *)pUser;
 
@@ -104,7 +104,7 @@ int TestCollect(const char *pName, int IsDir, int Unused, void *pUser)
 	return 0;
 }
 
-void TestDeleteTestStorageFiles(const char *pPath)
+static void TestDeleteTestStorageFiles(const char *pPath)
 {
 	std::vector<CTestInfoPath> vEntries;
 	CTestCollectData Data;

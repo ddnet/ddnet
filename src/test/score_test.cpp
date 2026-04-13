@@ -21,7 +21,7 @@ TEST(SQLite, Version)
 	ASSERT_GE(sqlite3_libversion_number(), 3025000) << "SQLite >= 3.25.0 required for Window functions";
 }
 
-struct Score : public testing::TestWithParam<IDbConnection *>
+struct Score : public testing::TestWithParam<IDbConnection *> // NOLINT(readability-identifier-naming)
 {
 	Score()
 	{
@@ -30,7 +30,7 @@ struct Score : public testing::TestWithParam<IDbConnection *>
 		InsertMap("Kobra 3", "Zerodin", "Novice", 5, 5);
 	}
 
-	~Score()
+	~Score() override
 	{
 		m_pConn->Disconnect();
 	}
@@ -55,9 +55,9 @@ struct Score : public testing::TestWithParam<IDbConnection *>
 
 	void LoadBestTime()
 	{
-		CSqlLoadBestTimeRequest loadBestTimeReq(std::make_shared<CScoreLoadBestTimeResult>());
-		str_copy(loadBestTimeReq.m_aMap, "Kobra 3");
-		ASSERT_TRUE(CScoreWorker::LoadBestTime(m_pConn, &loadBestTimeReq, m_aError, sizeof(m_aError))) << m_aError;
+		CSqlLoadBestTimeRequest LoadBestTimeReq(std::make_shared<CScoreLoadBestTimeResult>());
+		str_copy(LoadBestTimeReq.m_aMap, "Kobra 3");
+		ASSERT_TRUE(CScoreWorker::LoadBestTime(m_pConn, &LoadBestTimeReq, m_aError, sizeof(m_aError))) << m_aError;
 	}
 
 	void InsertMap(const char *pName, const char *pMapper, const char *pServer, int Points, int Stars)
@@ -115,7 +115,7 @@ struct Score : public testing::TestWithParam<IDbConnection *>
 	CSqlPlayerRequest m_PlayerRequest{m_pPlayerResult};
 };
 
-struct SingleScore : public Score
+struct SingleScore : public Score // NOLINT(readability-identifier-naming)
 {
 	SingleScore()
 	{
@@ -263,7 +263,7 @@ TEST_P(SingleScore, TimesDoesntExist)
 	ExpectLines(m_pPlayerResult, {"There are no times in the specified range"});
 }
 
-struct TeamScore : public Score
+struct TeamScore : public Score // NOLINT(readability-identifier-naming)
 {
 	void SetUp() override
 	{
@@ -273,22 +273,21 @@ struct TeamScore : public Score
 	void InsertTeamRank(float Time = 100.0)
 	{
 		str_copy(g_Config.m_SvSqlServerName, "USA");
-		CSqlTeamScoreData teamScoreData;
+		CSqlTeamScoreData TeamScoreData;
 		CSqlScoreData ScoreData(std::make_shared<CScorePlayerResult>());
-		str_copy(teamScoreData.m_aMap, "Kobra 3");
+		str_copy(TeamScoreData.m_aMap, "Kobra 3");
 		str_copy(ScoreData.m_aMap, "Kobra 3");
-		str_copy(teamScoreData.m_aGameUuid, "8d300ecf-5873-4297-bee5-95668fdff320");
+		str_copy(TeamScoreData.m_aGameUuid, "8d300ecf-5873-4297-bee5-95668fdff320");
 		str_copy(ScoreData.m_aGameUuid, "8d300ecf-5873-4297-bee5-95668fdff320");
-		teamScoreData.m_Size = 2;
-		str_copy(teamScoreData.m_aaNames[0], "nameless tee");
-		str_copy(teamScoreData.m_aaNames[1], "brainless tee");
-		teamScoreData.m_Time = Time;
+		TeamScoreData.m_Size = 2;
+		str_copy(TeamScoreData.m_aaNames[0], "nameless tee");
+		str_copy(TeamScoreData.m_aaNames[1], "brainless tee");
+		TeamScoreData.m_Time = Time;
 		ScoreData.m_Time = Time;
-		str_copy(teamScoreData.m_aTimestamp, "2021-11-24 19:24:08");
+		str_copy(TeamScoreData.m_aTimestamp, "2021-11-24 19:24:08");
 		str_copy(ScoreData.m_aTimestamp, "2021-11-24 19:24:08");
-		for(int i = 0; i < NUM_CHECKPOINTS; i++)
-			ScoreData.m_aCurrentTimeCp[i] = 0;
-		ASSERT_TRUE(CScoreWorker::SaveTeamScore(m_pConn, &teamScoreData, Write::NORMAL, m_aError, sizeof(m_aError))) << m_aError;
+		std::fill(std::begin(ScoreData.m_aCurrentTimeCp), std::end(ScoreData.m_aCurrentTimeCp), 0);
+		ASSERT_TRUE(CScoreWorker::SaveTeamScore(m_pConn, &TeamScoreData, Write::NORMAL, m_aError, sizeof(m_aError))) << m_aError;
 
 		str_copy(m_PlayerRequest.m_aMap, "Kobra 3");
 		str_copy(m_PlayerRequest.m_aRequestingPlayer, "brainless tee");
@@ -354,7 +353,7 @@ TEST_P(TeamScore, RankUpdates)
 			"---------------------------------"});
 }
 
-struct MapInfo : public Score
+struct MapInfo : public Score // NOLINT(readability-identifier-naming)
 {
 	MapInfo()
 	{
@@ -425,7 +424,7 @@ TEST_P(MapInfo, DoesntExit)
 	ExpectLines(m_pPlayerResult, {"No map like \"f\" found."});
 }
 
-struct MapVote : public Score
+struct MapVote : public Score // NOLINT(readability-identifier-naming)
 {
 	MapVote()
 	{
@@ -472,7 +471,7 @@ TEST_P(MapVote, DoesntExist)
 	ExpectLines(m_pPlayerResult, {"No map like \"f\" found. Try adding a '%' at the start if you don't know the first character. Example: /map %castle for \"Out of Castle\""});
 }
 
-struct Points : public Score
+struct Points : public Score // NOLINT(readability-identifier-naming)
 {
 	Points()
 	{
@@ -554,7 +553,7 @@ TEST_P(Points, EqualPointsTop)
 			"-------------------------------"});
 }
 
-struct RandomMap : public Score
+struct RandomMap : public Score // NOLINT(readability-identifier-naming)
 {
 	std::shared_ptr<CScoreRandomMapResult> m_pRandomMapResult{std::make_shared<CScoreRandomMapResult>(0)};
 	CSqlRandomMapRequest m_RandomMapRequest{m_pRandomMapResult};
@@ -626,7 +625,7 @@ TEST_P(RandomMap, UnfinishedDoesntExist)
 	EXPECT_STREQ(m_pRandomMapResult->m_aMessage, "nameless tee has no more unfinished maps on this server!");
 }
 
-auto g_pSqliteConn = CreateSqliteConnection(":memory:", true);
+static auto g_pSqliteConn = CreateSqliteConnection(":memory:", true);
 #if defined(CONF_TEST_MYSQL)
 CMysqlConfig gMysqlConfig{
 	"ddnet", // database
@@ -638,10 +637,10 @@ CMysqlConfig gMysqlConfig{
 	3306, // port
 	true, // setup
 };
-auto g_pMysqlConn = CreateMysqlConnection(gMysqlConfig);
+static auto g_pMysqlConn = CreateMysqlConnection(gMysqlConfig);
 #endif
 
-auto g_TestValues{
+static auto g_TestValues{
 	testing::Values(
 #if defined(CONF_TEST_MYSQL)
 		g_pMysqlConn.get(),

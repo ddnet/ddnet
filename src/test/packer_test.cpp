@@ -10,14 +10,14 @@
 // pExpected is nullptr if an error is expected
 static void ExpectAddString5(const char *pString, int Limit, bool AllowTruncation, const char *pExpected)
 {
-	static char ZEROS[CPacker::PACKER_BUFFER_SIZE] = {0};
-	static const int OFFSET = CPacker::PACKER_BUFFER_SIZE - 5;
+	constexpr static const char ZEROS[CPacker::PACKER_BUFFER_SIZE] = {0};
+	constexpr static const int OFFSET = CPacker::PACKER_BUFFER_SIZE - 5;
 	CPacker Packer;
 	Packer.Reset();
 	Packer.AddRaw(ZEROS, OFFSET);
 	Packer.AddString(pString, Limit, AllowTruncation);
 
-	EXPECT_EQ(pExpected == 0, Packer.Error()) << "for String='" << pString << "', Limit='" << Limit << "', AllowTruncation='" << AllowTruncation << "'";
+	EXPECT_EQ(pExpected == nullptr, Packer.Error()) << "for String='" << pString << "', Limit='" << Limit << "', AllowTruncation='" << AllowTruncation << "'";
 	if(pExpected)
 	{
 		// Include null termination.

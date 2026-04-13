@@ -5,7 +5,7 @@
 
 #include <cstdlib>
 
-class TimestampTest : public testing::Test
+class TimestampTest : public testing::Test // NOLINT(readability-identifier-naming)
 {
 protected:
 	void SetUp() override
