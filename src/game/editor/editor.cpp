@@ -254,7 +254,7 @@ bool CEditor::CallbackCustomEntities(const char *pFilename, int StorageType, voi
 	pEditor->m_PreventUnusedTilesWasWarned = false;
 
 	pEditor->Graphics()->UnloadTexture(&pEditor->m_EntitiesTexture);
-	pEditor->m_EntitiesTexture = pEditor->Graphics()->LoadTextureRawMove(ImgInfo, pEditor->GetTextureUsageFlag());
+	pEditor->m_EntitiesTexture = pEditor->Graphics()->LoadTextureRawMove(ImgInfo, pEditor->Graphics()->TextureLoadFlags());
 
 	pEditor->OnDialogClose();
 	return true;
@@ -3777,7 +3777,7 @@ bool CEditor::ReplaceImage(const char *pFilename, int StorageType, bool CheckDup
 	DilateImage(*pImg);
 
 	pImg->m_AutoMapper.Load(pImg->m_aName);
-	int TextureLoadFlag = Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+	int TextureLoadFlag = Graphics()->TextureLoadFlags();
 	if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)
 		TextureLoadFlag = 0;
 	pImg->m_Texture = Graphics()->LoadTextureRaw(*pImg, TextureLoadFlag, pFilename);
@@ -3831,7 +3831,7 @@ bool CEditor::AddImage(const char *pFilename, int StorageType, void *pUser)
 	ConvertToRgba(*pImg);
 	DilateImage(*pImg);
 
-	int TextureLoadFlag = pEditor->Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+	int TextureLoadFlag = pEditor->Graphics()->TextureLoadFlags();
 	if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)
 		TextureLoadFlag = 0;
 	pImg->m_Texture = pEditor->Graphics()->LoadTextureRaw(*pImg, TextureLoadFlag, pFilename);
@@ -7013,50 +7013,45 @@ void CEditor::Reset(bool CreateDefault)
 	m_RenderLayersState.Reset();
 }
 
-int CEditor::GetTextureUsageFlag() const
-{
-	return Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
-}
-
 IGraphics::CTextureHandle CEditor::GetFrontTexture()
 {
 	if(!m_FrontTexture.IsValid())
-		m_FrontTexture = Graphics()->LoadTexture("editor/front.png", IStorage::TYPE_ALL, GetTextureUsageFlag());
+		m_FrontTexture = Graphics()->LoadTexture("editor/front.png", IStorage::TYPE_ALL, Graphics()->TextureLoadFlags());
 	return m_FrontTexture;
 }
 
 IGraphics::CTextureHandle CEditor::GetTeleTexture()
 {
 	if(!m_TeleTexture.IsValid())
-		m_TeleTexture = Graphics()->LoadTexture("editor/tele.png", IStorage::TYPE_ALL, GetTextureUsageFlag());
+		m_TeleTexture = Graphics()->LoadTexture("editor/tele.png", IStorage::TYPE_ALL, Graphics()->TextureLoadFlags());
 	return m_TeleTexture;
 }
 
 IGraphics::CTextureHandle CEditor::GetSpeedupTexture()
 {
 	if(!m_SpeedupTexture.IsValid())
-		m_SpeedupTexture = Graphics()->LoadTexture("editor/speedup.png", IStorage::TYPE_ALL, GetTextureUsageFlag());
+		m_SpeedupTexture = Graphics()->LoadTexture("editor/speedup.png", IStorage::TYPE_ALL, Graphics()->TextureLoadFlags());
 	return m_SpeedupTexture;
 }
 
 IGraphics::CTextureHandle CEditor::GetSwitchTexture()
 {
 	if(!m_SwitchTexture.IsValid())
-		m_SwitchTexture = Graphics()->LoadTexture("editor/switch.png", IStorage::TYPE_ALL, GetTextureUsageFlag());
+		m_SwitchTexture = Graphics()->LoadTexture("editor/switch.png", IStorage::TYPE_ALL, Graphics()->TextureLoadFlags());
 	return m_SwitchTexture;
 }
 
 IGraphics::CTextureHandle CEditor::GetTuneTexture()
 {
 	if(!m_TuneTexture.IsValid())
-		m_TuneTexture = Graphics()->LoadTexture("editor/tune.png", IStorage::TYPE_ALL, GetTextureUsageFlag());
+		m_TuneTexture = Graphics()->LoadTexture("editor/tune.png", IStorage::TYPE_ALL, Graphics()->TextureLoadFlags());
 	return m_TuneTexture;
 }
 
 IGraphics::CTextureHandle CEditor::GetEntitiesTexture()
 {
 	if(!m_EntitiesTexture.IsValid())
-		m_EntitiesTexture = Graphics()->LoadTexture("editor/entities/DDNet.png", IStorage::TYPE_ALL, GetTextureUsageFlag());
+		m_EntitiesTexture = Graphics()->LoadTexture("editor/entities/DDNet.png", IStorage::TYPE_ALL, Graphics()->TextureLoadFlags());
 	return m_EntitiesTexture;
 }
 
