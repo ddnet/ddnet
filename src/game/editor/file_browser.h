@@ -29,7 +29,7 @@ public:
 		const char *pTitle, const char *pButtonText,
 		const char *pInitialPath, const char *pInitialFilename,
 		FFileDialogOpenCallback pfnOpenCallback, void *pOpenCallbackUser);
-	void OnRender(CUIRect _) override;
+	void Render();
 	bool IsValidSaveFilename() const;
 
 	void OnEditorClose();

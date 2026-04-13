@@ -9,7 +9,7 @@ class CMapGrid : public CEditorComponent
 {
 public:
 	void OnReset() override;
-	void OnRender(CUIRect View) override;
+	void Render();
 
 	void SnapToGrid(vec2 &Position) const;
 	int GridLineDistance() const;

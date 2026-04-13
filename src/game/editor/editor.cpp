@@ -2477,7 +2477,7 @@ void CEditor::DoMapEditor(CUIRect View)
 		}
 
 		MapView()->RenderGroupBorder();
-		MapView()->MapGrid()->OnRender(View);
+		MapView()->MapGrid()->Render();
 	}
 
 	const bool ShouldPan = Ui()->HotItem() == &m_MapEditorId && ((Input()->ModifierIsPressed() && Ui()->MouseButton(0)) || Ui()->MouseButton(2));
@@ -6582,8 +6582,9 @@ void CEditor::Render()
 		}
 	}
 
-	for(CEditorComponent &Component : m_vComponents)
-		Component.OnRender(View);
+	m_FileBrowser.Render();
+	m_Prompt.Render();
+	m_FontTyper.Render();
 
 	MapView()->UpdateZoom();
 

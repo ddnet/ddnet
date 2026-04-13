@@ -196,7 +196,7 @@ void CFontTyper::SetCursor()
 	m_CursorRenderTime = time_get_nanoseconds() - 501ms;
 }
 
-void CFontTyper::OnRender(CUIRect View)
+void CFontTyper::Render()
 {
 	if(m_ConfirmActivatePopupContext.m_Result == CUi::SConfirmPopupContext::CONFIRMED)
 	{
