@@ -166,7 +166,6 @@ public:
 		int m_Flags;
 		bool m_ShowIps;
 		bool m_DebugDummy;
-		bool m_ForceHighBandwidthOnSpectate;
 		NETADDR m_DebugDummyAddr;
 		std::array<char, NETADDR_MAXSTRSIZE> m_aDebugDummyAddrString;
 		std::array<char, NETADDR_MAXSTRSIZE> m_aDebugDummyAddrStringNoPort;
@@ -199,6 +198,8 @@ public:
 		std::shared_ptr<CHostLookup> m_pDnsblLookup;
 
 		bool m_Sixup;
+
+		bool m_HighBandwidth;
 
 		bool IncludedInServerInfo() const
 		{
@@ -438,7 +439,6 @@ public:
 	static void ConLogout(IConsole::IResult *pResult, void *pUser);
 	static void ConShowIps(IConsole::IResult *pResult, void *pUser);
 	static void ConHideAuthStatus(IConsole::IResult *pResult, void *pUser);
-	static void ConForceHighBandwidthOnSpectate(IConsole::IResult *pResult, void *pUser);
 
 	static void ConAuthAdd(IConsole::IResult *pResult, void *pUser);
 	static void ConAuthAddHashed(IConsole::IResult *pResult, void *pUser);
@@ -526,6 +526,9 @@ public:
 	void SetErrorShutdown(const char *pReason) override;
 
 	bool IsSixup(int ClientId) const override { return ClientId != SERVER_DEMO_CLIENT && m_aClients[ClientId].m_Sixup; }
+
+	void SetHighBandwidth(int ClientId, bool Value) override { m_aClients[ClientId].m_HighBandwidth = Value; }
+	bool GetHighBandwidth(int ClientId) override { return ClientId == SERVER_DEMO_CLIENT || m_aClients[ClientId].m_HighBandwidth; }
 
 	void SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr<ILogger> &&pStdoutLogger);
 

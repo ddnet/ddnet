@@ -4085,6 +4085,8 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("top5points", "?i[number]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTopPoints, this, "Shows five points of the global point ladder beginning with rank i (1 by default)");
 	Console()->Register("timecp", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTimeCP, this, "Set your checkpoints based on another player");
 
+	Console()->Register("highbandwidth", "?i['0'|'1']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConHighBandwidth, this, "Whether the bandwidth will be doubled (50 instead of 25 snapshots per second)");
+
 	Console()->Register("team", "?i[id]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTeam, this, "Lets you join team i (shows your team if left blank)");
 	Console()->Register("lock", "?i['0'|'1']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConLock, this, "Toggle team lock so no one else can join and so the team restarts when a player dies. /lock 0 to unlock, /lock 1 to lock");
 	Console()->Register("unlock", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConUnlock, this, "Unlock a team");
@@ -4662,11 +4664,8 @@ void CGameContext::LoadMapSettings()
 	Console()->ExecuteFile(aBuf, IConsole::CLIENT_ID_NO_GAME);
 }
 
-void CGameContext::OnSnap(int ClientId, bool GlobalSnap, bool RecordingDemo)
+void CGameContext::OnSnap(int ClientId, bool RecordingDemo)
 {
-	// sixup should only snap during global snap
-	dbg_assert(!Server()->IsSixup(ClientId) || GlobalSnap, "sixup should only snap during global snap");
-
 	// add tuning to demo
 	if(RecordingDemo && mem_comp(&CTuningParams::DEFAULT, &m_aTuningList[0], sizeof(CTuningParams)) != 0)
 	{
@@ -4689,22 +4688,18 @@ void CGameContext::OnSnap(int ClientId, bool GlobalSnap, bool RecordingDemo)
 		m_apPlayers[ClientId]->FakeSnap();
 
 	m_World.Snap(ClientId);
-
-	// events are only sent on global snapshots
-	if(GlobalSnap)
-	{
-		m_Events.Snap(ClientId);
-	}
+	m_Events.Snap(ClientId);
 }
 
-void CGameContext::OnPostGlobalSnap()
+void CGameContext::OnPostSnap()
 {
+	// Call m_Events.Clear() before PostSnap to switch the buffer
+	m_Events.Clear();
 	for(auto &pPlayer : m_apPlayers)
 	{
 		if(pPlayer && pPlayer->GetCharacter())
-			pPlayer->GetCharacter()->PostGlobalSnap();
+			pPlayer->GetCharacter()->PostSnap();
 	}
-	m_Events.Clear();
 }
 
 void CGameContext::UpdatePlayerMaps()
@@ -4776,13 +4771,6 @@ bool CGameContext::IsClientReady(int ClientId) const
 bool CGameContext::IsClientPlayer(int ClientId) const
 {
 	return m_apPlayers[ClientId] && m_apPlayers[ClientId]->GetTeam() != TEAM_SPECTATORS;
-}
-
-bool CGameContext::IsClientHighBandwidth(int ClientId) const
-{
-	// force high bandwidth is not supported for sixup
-	return m_apPlayers[ClientId] && !Server()->IsSixup(ClientId) && Server()->IsRconAuthed(ClientId) &&
-	       (m_apPlayers[ClientId]->GetTeam() == TEAM_SPECTATORS || m_apPlayers[ClientId]->IsPaused());
 }
 
 CUuid CGameContext::GameUuid() const { return m_GameUuid; }

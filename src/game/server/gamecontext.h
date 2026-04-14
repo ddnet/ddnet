@@ -339,8 +339,8 @@ public:
 	void OnShutdown(void *pPersistentData) override;
 
 	void OnTick() override;
-	void OnSnap(int ClientId, bool GlobalSnap, bool RecordingDemo) override;
-	void OnPostGlobalSnap() override;
+	void OnSnap(int ClientId, bool RecordingDemo) override;
+	void OnPostSnap() override;
 
 	void UpdatePlayerMaps();
 
@@ -385,8 +385,7 @@ public:
 
 	bool IsClientReady(int ClientId) const override;
 	bool IsClientPlayer(int ClientId) const override;
-	// Whether the client is allowed to have high bandwidth.
-	bool IsClientHighBandwidth(int ClientId) const override;
+
 	int PersistentDataSize() const override { return sizeof(CPersistentData); }
 	int PersistentClientDataSize() const override { return sizeof(CPersistentClientData); }
 
@@ -498,6 +497,8 @@ private:
 	static void ConPoints(IConsole::IResult *pResult, void *pUserData);
 	static void ConTopPoints(IConsole::IResult *pResult, void *pUserData);
 	static void ConTimeCP(IConsole::IResult *pResult, void *pUserData);
+
+	static void ConHighBandwidth(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConDND(IConsole::IResult *pResult, void *pUserData);
 	static void ConWhispers(IConsole::IResult *pResult, void *pUserData);
