@@ -14,7 +14,12 @@
 CEventHandler::CEventHandler()
 {
 	m_pGameServer = nullptr;
-	Clear();
+	m_CurrentBuffer = 0;
+	for(int i = 0; i < NUM_BUFFERS; i++)
+	{
+		m_NumEvents[i] = 0;
+		m_CurrentOffset[i] = 0;
+	}
 }
 
 void CEventHandler::SetGameServer(CGameContext *pGameServer)
@@ -24,43 +29,65 @@ void CEventHandler::SetGameServer(CGameContext *pGameServer)
 
 void *CEventHandler::Create(int Type, int Size, CClientMask Mask)
 {
-	if(m_NumEvents == MAX_EVENTS)
+	const int Cur = m_CurrentBuffer;
+	const int NumEvents = m_NumEvents[Cur];
+	if(NumEvents == MAX_EVENTS)
 		return nullptr;
-	if(m_CurrentOffset + Size >= MAX_DATASIZE)
+	if(m_CurrentOffset[Cur] + Size >= MAX_DATASIZE)
 		return nullptr;
 
-	void *p = &m_aData[m_CurrentOffset];
-	m_aOffsets[m_NumEvents] = m_CurrentOffset;
-	m_aTypes[m_NumEvents] = Type;
-	m_aSizes[m_NumEvents] = Size;
-	m_aClientMasks[m_NumEvents] = Mask;
-	m_CurrentOffset += Size;
-	m_NumEvents++;
+	void *p = &m_aData[Cur][m_CurrentOffset[Cur]];
+	m_aOffsets[Cur][NumEvents] = m_CurrentOffset[Cur];
+	m_aTypes[Cur][NumEvents] = Type;
+	m_aSizes[Cur][NumEvents] = Size;
+	m_aClientMasks[Cur][NumEvents] = Mask;
+	m_CurrentOffset[Cur] += Size;
+	m_NumEvents[Cur]++;
 	return p;
 }
 
 void CEventHandler::Clear()
 {
-	m_NumEvents = 0;
-	m_CurrentOffset = 0;
+	// Switch buffer, store previous events to send them to low bandwidth players
+	// without resending them to highbandwidth players
+	m_CurrentBuffer ^= 1;
+
+	// Reset new current buffer
+	m_NumEvents[m_CurrentBuffer] = 0;
+	m_CurrentOffset[m_CurrentBuffer] = 0;
 }
 
 void CEventHandler::Snap(int SnappingClient)
 {
-	for(int i = 0; i < m_NumEvents; i++)
+	const int Cur = m_CurrentBuffer;
+	const int Prev = Cur ^ 1;
+
+	SnapBuffer(SnappingClient, Cur);
+	if(!GameServer()->Server()->GetHighBandwidth(SnappingClient))
+		SnapBuffer(SnappingClient, Prev);
+}
+
+void CEventHandler::SnapBuffer(int SnappingClient, int Buf)
+{
+	for(int i = 0; i < m_NumEvents[Buf]; i++)
 	{
-		if(SnappingClient == SERVER_DEMO_CLIENT || m_aClientMasks[i].test(SnappingClient))
+		if(SnappingClient == SERVER_DEMO_CLIENT || m_aClientMasks[Buf][i].test(SnappingClient))
 		{
-			CNetEvent_Common *pEvent = (CNetEvent_Common *)&m_aData[m_aOffsets[i]];
+			const char *pData = &m_aData[Buf][m_aOffsets[Buf][i]];
+			CNetEvent_Common *pEvent = (CNetEvent_Common *)pData;
 			if(!NetworkClipped(GameServer(), SnappingClient, vec2(pEvent->m_X, pEvent->m_Y)))
 			{
-				int Type = m_aTypes[i];
-				int Size = m_aSizes[i];
-				const char *pData = &m_aData[m_aOffsets[i]];
+				int Type = m_aTypes[Buf][i];
+				int Size = m_aSizes[Buf][i];
 				if(GameServer()->Server()->IsSixup(SnappingClient))
 					EventToSixup(&Type, &Size, &pData);
 
-				GameServer()->Server()->SnapNewItem(Type, i, pData, Size);
+				// offset: dont overlap ids, start where m_CurrentBuffer stopped and append previously missed events
+				int SnapId = i;
+				if(Buf != m_CurrentBuffer)
+					SnapId += m_NumEvents[m_CurrentBuffer];
+
+				GameServer()->Server()->SnapNewItem(Type, SnapId, pData, Size);
 			}
 		}
 	}

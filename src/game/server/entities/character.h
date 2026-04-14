@@ -5,6 +5,7 @@
 
 #include <game/race_state.h>
 #include <game/server/entity.h>
+#include <game/server/eventhandler.h>
 #include <game/server/save.h>
 
 class CPlayer;
@@ -44,7 +45,7 @@ public:
 	void Snap(int SnappingClient) override;
 	void SwapClients(int Client1, int Client2) override;
 
-	void PostGlobalSnap();
+	void PostSnap();
 
 	bool CanSnapCharacter(int SnappingClient);
 	bool IsSnappingCharacterInView(int SnappingClientId);
@@ -157,7 +158,7 @@ private:
 
 	int m_Health;
 	int m_Armor;
-	int m_TriggeredEvents7;
+	int m_TriggeredEvents7[CEventHandler::NUM_BUFFERS];
 
 	// the player core for the physics
 	CCharacterCore m_Core;
