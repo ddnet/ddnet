@@ -15,6 +15,7 @@
 #include <engine/input.h>
 #include <engine/keys.h>
 #include <engine/shared/config.h>
+#include <engine/shared/protocol.h>
 
 #include <game/localization.h>
 
@@ -1574,15 +1575,26 @@ void CUi::RenderTime(CUIRect TimeRect, float FontSize, int Seconds, bool NotFini
 
 	char aBuf[128];
 
-	str_time(((int64_t)absolute(Seconds)) * 100, ETimeFormat::HOURS, aBuf, sizeof(aBuf));
-
 	// align in vertical middle
 	vec2 Cursor = TimeRect.TopLeft();
+
 	float TextHeight = 0.0f;
 	float SecondsMaxHeight = 0.0f;
 	STextSizeProperties TextSizeProps{};
 	TextSizeProps.m_pMaxCharacterHeightInLine = &SecondsMaxHeight;
 	TextSizeProps.m_pHeight = &TextHeight;
+
+	if(Seconds == FinishTime::SECRET)
+	{
+		str_format(aBuf, sizeof(aBuf), "%s", Localize("Secret"));
+		float TextWidth = std::min(TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f, 0, TextSizeProps), TimeRect.w);
+		Cursor.x += TimeRect.w - TextWidth; // align right
+		Cursor.y += ((TimeRect.h - SecondsMaxHeight) / 2.0f - (FontSize - SecondsMaxHeight));
+		TextRender()->Text(Cursor.x, Cursor.y, FontSize, aBuf);
+		return;
+	}
+
+	str_time(((int64_t)absolute(Seconds)) * 100, ETimeFormat::HOURS, aBuf, sizeof(aBuf));
 
 	float SecondsWidth = std::min(TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f, 0, TextSizeProps), TimeRect.w);
 	Cursor.x += TimeRect.w - SecondsWidth; // align right
