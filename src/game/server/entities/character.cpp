@@ -33,7 +33,8 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 {
 	m_Health = 0;
 	m_Armor = 0;
-	m_TriggeredEvents7 = 0;
+	for(auto &TriggeredEvents : m_TriggeredEvents7)
+		TriggeredEvents = 0;
 	m_StrongWeakId = 0;
 
 	m_Input = LastInput;
@@ -926,16 +927,17 @@ void CCharacter::TickDeferred()
 		if(Events & COREEVENT_HOOK_HIT_NOHOOK)
 			GameServer()->CreateSound(m_Pos, SOUND_HOOK_NOATTACH, TeamMaskExceptSelfAndSixup);
 
+		const int Buf = GameServer()->m_Events.CurrentBuffer();
 		if(Events & COREEVENT_GROUND_JUMP)
-			m_TriggeredEvents7 |= protocol7::COREEVENTFLAG_GROUND_JUMP;
+			m_TriggeredEvents7[Buf] |= protocol7::COREEVENTFLAG_GROUND_JUMP;
 		if(Events & COREEVENT_AIR_JUMP)
-			m_TriggeredEvents7 |= protocol7::COREEVENTFLAG_AIR_JUMP;
+			m_TriggeredEvents7[Buf] |= protocol7::COREEVENTFLAG_AIR_JUMP;
 		if(Events & COREEVENT_HOOK_ATTACH_PLAYER)
-			m_TriggeredEvents7 |= protocol7::COREEVENTFLAG_HOOK_ATTACH_PLAYER;
+			m_TriggeredEvents7[Buf] |= protocol7::COREEVENTFLAG_HOOK_ATTACH_PLAYER;
 		if(Events & COREEVENT_HOOK_ATTACH_GROUND)
-			m_TriggeredEvents7 |= protocol7::COREEVENTFLAG_HOOK_ATTACH_GROUND;
+			m_TriggeredEvents7[Buf] |= protocol7::COREEVENTFLAG_HOOK_ATTACH_GROUND;
 		if(Events & COREEVENT_HOOK_HIT_NOHOOK)
-			m_TriggeredEvents7 |= protocol7::COREEVENTFLAG_HOOK_HIT_NOHOOK;
+			m_TriggeredEvents7[Buf] |= protocol7::COREEVENTFLAG_HOOK_HIT_NOHOOK;
 	}
 
 	if(m_pPlayer->GetTeam() == TEAM_SPECTATORS)
@@ -1195,7 +1197,12 @@ void CCharacter::SnapCharacter(int SnappingClient, int MapId)
 
 		Character.m_Health = Health;
 		Character.m_Armor = Armor;
-		Character.m_TriggeredEvents = m_TriggeredEvents7;
+
+		const int Cur = GameServer()->m_Events.CurrentBuffer();
+		const int Prev = Cur ^ 1;
+		Character.m_TriggeredEvents = m_TriggeredEvents7[Cur];
+		if(!Server()->GetHighBandwidth(SnappingClient))
+			Character.m_TriggeredEvents |= m_TriggeredEvents7[Prev];
 
 		Server()->SnapNewItem(MapId, Character);
 	}
@@ -1371,9 +1378,9 @@ void CCharacter::Snap(int SnappingClient)
 	Server()->SnapNewItem(TranslatedId, DDNetCharacter);
 }
 
-void CCharacter::PostGlobalSnap()
+void CCharacter::PostSnap()
 {
-	m_TriggeredEvents7 = 0;
+	m_TriggeredEvents7[GameServer()->m_Events.CurrentBuffer()] = 0;
 }
 
 // DDRace

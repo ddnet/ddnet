@@ -696,6 +696,7 @@ void CGameClient::OnReset()
 	std::fill(std::begin(m_aDDRaceMsgSent), std::end(m_aDDRaceMsgSent), false);
 	std::fill(std::begin(m_aShowOthers), std::end(m_aShowOthers), SHOW_OTHERS_NOT_SET);
 	std::fill(std::begin(m_aEnableSpectatorCount), std::end(m_aEnableSpectatorCount), -1);
+	std::fill(std::begin(m_aHighBandwidth), std::end(m_aHighBandwidth), -1);
 	std::fill(std::begin(m_aLastUpdateTick), std::end(m_aLastUpdateTick), 0);
 
 	m_IsDummySwapping = false;
@@ -912,6 +913,7 @@ void CGameClient::OnDummyDisconnect()
 	m_aDDRaceMsgSent[1] = false;
 	m_aShowOthers[1] = SHOW_OTHERS_NOT_SET;
 	m_aEnableSpectatorCount[1] = -1;
+	m_aHighBandwidth[1] = -1;
 	m_aLastNewPredictedTick[1] = -1;
 }
 
@@ -2274,57 +2276,50 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 		Client()->SendMsgActive(&Msg, MSGFLAG_RECORD | MSGFLAG_NOSEND);
 	}
 
-	for(int i = 0; i < 2; i++)
+	for(int i = 0; i < NUM_DUMMIES; i++)
 	{
-		if(m_aDDRaceMsgSent[i] || !m_Snap.m_pLocalInfo)
-		{
-			continue;
-		}
 		if(i == IClient::CONN_DUMMY && !Client()->DummyConnected())
-		{
 			continue;
+
+		if(!m_aDDRaceMsgSent[i] && m_Snap.m_pLocalInfo)
+		{
+			CMsgPacker Msg(NETMSGTYPE_CL_ISDDNETLEGACY, false);
+			Msg.AddInt(DDNetVersion());
+			Client()->SendMsg(i, &Msg, MSGFLAG_VITAL);
+			m_aDDRaceMsgSent[i] = true;
 		}
-		CMsgPacker Msg(NETMSGTYPE_CL_ISDDNETLEGACY, false);
-		Msg.AddInt(DDNetVersion());
-		Client()->SendMsg(i, &Msg, MSGFLAG_VITAL);
-		m_aDDRaceMsgSent[i] = true;
-	}
 
-	if(m_Snap.m_SpecInfo.m_Active && m_MultiViewActivated)
-	{
-		// dont show other teams while spectating in multi view
-		CNetMsg_Cl_ShowOthers Msg;
-		Msg.m_Show = SHOW_OTHERS_ONLY_TEAM;
-		Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
+		if(m_aEnableSpectatorCount[i] == -1 || m_aEnableSpectatorCount[i] != g_Config.m_ClShowhudSpectatorCount)
+		{
+			CNetMsg_Cl_EnableSpectatorCount Msg;
+			Msg.m_Enable = g_Config.m_ClShowhudSpectatorCount;
+			Client()->SendPackMsg(i, &Msg, MSGFLAG_VITAL);
+			m_aEnableSpectatorCount[i] = g_Config.m_ClShowhudSpectatorCount;
+		}
 
-		// update state
-		m_aShowOthers[g_Config.m_ClDummy] = SHOW_OTHERS_ONLY_TEAM;
-	}
-	else if(m_aShowOthers[g_Config.m_ClDummy] == SHOW_OTHERS_NOT_SET || m_aShowOthers[g_Config.m_ClDummy] != g_Config.m_ClShowOthers)
-	{
+		if(m_aHighBandwidth[i] == -1 || m_aHighBandwidth[i] != g_Config.m_ClHighBandwidth)
+		{
+			CNetMsg_Cl_HighBandwidth Msg;
+			Msg.m_Enable = g_Config.m_ClHighBandwidth;
+			Client()->SendPackMsg(i, &Msg, MSGFLAG_VITAL);
+			m_aHighBandwidth[i] = g_Config.m_ClHighBandwidth;
+		}
+
+		if(m_Snap.m_SpecInfo.m_Active && m_MultiViewActivated && i == g_Config.m_ClDummy)
+		{
+			// dont show other teams while spectating in multi view
+			CNetMsg_Cl_ShowOthers Msg;
+			Msg.m_Show = SHOW_OTHERS_ONLY_TEAM;
+			Client()->SendPackMsg(i, &Msg, MSGFLAG_VITAL);
+			m_aShowOthers[i] = SHOW_OTHERS_ONLY_TEAM;
+		}
+		else if(m_aShowOthers[i] == SHOW_OTHERS_NOT_SET || m_aShowOthers[i] != g_Config.m_ClShowOthers)
 		{
 			CNetMsg_Cl_ShowOthers Msg;
 			Msg.m_Show = g_Config.m_ClShowOthers;
-			Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
+			Client()->SendPackMsg(i, &Msg, MSGFLAG_VITAL);
+			m_aShowOthers[i] = g_Config.m_ClShowOthers;
 		}
-
-		// update state
-		m_aShowOthers[g_Config.m_ClDummy] = g_Config.m_ClShowOthers;
-	}
-
-	if(m_aEnableSpectatorCount[0] == -1 || m_aEnableSpectatorCount[0] != g_Config.m_ClShowhudSpectatorCount)
-	{
-		CNetMsg_Cl_EnableSpectatorCount Msg;
-		Msg.m_Enable = g_Config.m_ClShowhudSpectatorCount;
-		Client()->SendPackMsg(0, &Msg, MSGFLAG_VITAL);
-		m_aEnableSpectatorCount[0] = g_Config.m_ClShowhudSpectatorCount;
-	}
-	if(Client()->DummyConnected() && (m_aEnableSpectatorCount[1] == -1 || m_aEnableSpectatorCount[1] != g_Config.m_ClShowhudSpectatorCount))
-	{
-		CNetMsg_Cl_EnableSpectatorCount Msg;
-		Msg.m_Enable = g_Config.m_ClShowhudSpectatorCount;
-		Client()->SendPackMsg(1, &Msg, MSGFLAG_VITAL);
-		m_aEnableSpectatorCount[1] = g_Config.m_ClShowhudSpectatorCount;
 	}
 
 	if(DummySwapped)

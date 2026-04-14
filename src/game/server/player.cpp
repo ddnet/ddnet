@@ -150,6 +150,8 @@ void CPlayer::Reset()
 	m_CameraInfo.Reset();
 	UpdateNetworkClipRadius();
 	std::fill(std::begin(m_aStrongWeakId), std::end(m_aStrongWeakId), 0);
+
+	Server()->SetHighBandwidth(m_ClientId, GameServer()->Config()->m_SvHighBandwidth);
 }
 
 static int PlayerFlags_SixToSeven(int Flags)
