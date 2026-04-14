@@ -2,7 +2,6 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "hud.h"
 
-#include "binds.h"
 #include "camera.h"
 #include "controls.h"
 #include "voting.h"
@@ -13,6 +12,7 @@
 #include <engine/font_icons.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
+#include <engine/shared/protocol.h>
 #include <engine/textrender.h>
 
 #include <generated/client_data.h>
@@ -340,7 +340,7 @@ void CHud::RenderScoreHud()
 					}
 				}
 			}
-			char aScore[2][16];
+			char aScore[2][16] = {{'\0'}, {'\0'}};
 			for(int t = 0; t < 2; ++t)
 			{
 				if(apPlayerInfo[t])
@@ -352,12 +352,15 @@ void CHud::RenderScoreHud()
 					else if(GameClient()->m_GameInfo.m_TimeScore)
 					{
 						CGameClient::CClientData &ClientData = GameClient()->m_aClients[apPlayerInfo[t]->m_ClientId];
-						if(GameClient()->m_ReceivedDDNetPlayerFinishTimes && ClientData.m_FinishTimeSeconds != FinishTime::NOT_FINISHED_MILLIS)
+						if(GameClient()->m_ReceivedDDNetPlayerFinishTimes)
 						{
-							int64_t TimeSeconds = static_cast<int64_t>(absolute(ClientData.m_FinishTimeSeconds));
-							int64_t TimeMillis = TimeSeconds * 1000 + (absolute(ClientData.m_FinishTimeMillis) % 1000);
+							if(ClientData.m_FinishTimeSeconds >= 0)
+							{
+								int64_t TimeSeconds = static_cast<int64_t>(absolute(ClientData.m_FinishTimeSeconds));
+								int64_t TimeMillis = TimeSeconds * 1000 + (absolute(ClientData.m_FinishTimeMillis) % 1000);
 
-							str_time(TimeMillis / 10, ETimeFormat::HOURS, aScore[t], sizeof(aScore[t]));
+								str_time(TimeMillis / 10, ETimeFormat::HOURS, aScore[t], sizeof(aScore[t]));
+							}
 						}
 						else if(apPlayerInfo[t]->m_Score != FinishTime::NOT_FINISHED_TIMESCORE)
 						{
@@ -1895,9 +1898,16 @@ void CHud::RenderRecord()
 		char aBuf[64];
 		TextRender()->Text(5, 75, 6, Localize("Server best:"), -1.0f);
 		char aTime[32];
-		int64_t TimeCentiseconds = static_cast<int64_t>(GameClient()->m_MapBestTimeSeconds) * 100 + static_cast<int64_t>(GameClient()->m_MapBestTimeMillis) / 10;
-		str_time(TimeCentiseconds, ETimeFormat::HOURS_CENTISECS, aTime, sizeof(aTime));
-		str_format(aBuf, sizeof(aBuf), "%s%s", GameClient()->m_MapBestTimeSeconds > 3600 ? "" : "   ", aTime);
+		if(GameClient()->m_MapBestTimeSeconds == FinishTime::SECRET)
+		{
+			str_format(aBuf, sizeof(aBuf), "%s", Localize("Secret"));
+		}
+		else
+		{
+			int64_t TimeCentiseconds = static_cast<int64_t>(GameClient()->m_MapBestTimeSeconds) * 100 + static_cast<int64_t>(GameClient()->m_MapBestTimeMillis) / 10;
+			str_time(TimeCentiseconds, ETimeFormat::HOURS_CENTISECS, aTime, sizeof(aTime));
+			str_format(aBuf, sizeof(aBuf), "%s%s", GameClient()->m_MapBestTimeSeconds > 3600 ? "" : "   ", aTime);
+		}
 		TextRender()->Text(53, 75, 6, aBuf, -1.0f);
 	}
 

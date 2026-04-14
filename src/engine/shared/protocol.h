@@ -157,6 +157,7 @@ enum
 	VERSION_DDNET_SAVE_CODE = 19060,
 	VERSION_DDNET_IMPORTANT_ALERT = 19060,
 	VERSION_DDNET_MAP_BESTTIME = 19070,
+	VERSION_DDNET_TIME_SECRET = 20000,
 };
 
 namespace TuneZone
@@ -170,6 +171,7 @@ namespace FinishTime
 	inline constexpr int NOT_FINISHED_TIMESCORE = -9999;
 	inline constexpr int NOT_FINISHED_MILLIS = -1;
 	inline constexpr int UNSET = -2;
+	inline constexpr int SECRET = -3;
 }
 
 typedef std::bitset<MAX_CLIENTS> CClientMask;
