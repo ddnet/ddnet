@@ -152,6 +152,8 @@ void CPlayer::Reset()
 	m_RescueMode = RESCUEMODE_AUTO;
 
 	m_CameraInfo.Reset();
+
+	Server()->SetHighBandwidth(m_ClientId, GameServer()->Config()->m_SvHighBandwidth);
 }
 
 static int PlayerFlags_SixToSeven(int Flags)

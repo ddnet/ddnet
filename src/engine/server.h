@@ -297,6 +297,9 @@ public:
 	virtual void SendMsgRaw(int ClientId, const void *pData, int Size, int Flags) = 0;
 
 	virtual bool IsSixup(int ClientId) const = 0;
+
+	virtual void SetHighBandwidth(int ClientId, bool Value) = 0;
+	virtual bool GetHighBandwidth(int ClientId) = 0;
 };
 
 class IGameServer : public IInterface
@@ -318,16 +321,11 @@ public:
 
 	// Snap for a specific client.
 	//
-	// GlobalSnap is true when sending snapshots to all clients,
-	// otherwise only forced high bandwidth clients would receive snap.
 	// RecordingDemo is true when this snapshot will be recorded to a demo.
-	virtual void OnSnap(int ClientId, bool GlobalSnap, bool RecordingDemo) = 0;
+	virtual void OnSnap(int ClientId, bool RecordingDemo) = 0;
 
 	// Called after sending snapshots to all clients.
-	//
-	// Note if any client has force high bandwidth enabled,
-	// this will not be called when only sending snapshots to these clients.
-	virtual void OnPostGlobalSnap() = 0;
+	virtual void OnPostSnap() = 0;
 
 	virtual void OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientId) = 0;
 
@@ -358,7 +356,6 @@ public:
 
 	virtual bool IsClientReady(int ClientId) const = 0;
 	virtual bool IsClientPlayer(int ClientId) const = 0;
-	virtual bool IsClientHighBandwidth(int ClientId) const = 0;
 
 	virtual int PersistentDataSize() const = 0;
 	virtual int PersistentClientDataSize() const = 0;
