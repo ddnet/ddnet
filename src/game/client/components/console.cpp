@@ -168,6 +168,11 @@ static int PossibleKeys(const char *pStr, IInput *pInput, IConsole::FPossibleCal
 	int Index = 0;
 	for(int Key = KEY_A; Key < KEY_JOY_AXIS_11_RIGHT; Key++)
 	{
+		if(Key == KEY_ESCAPE)
+		{
+			// Binding to Escape key is not supported
+			continue;
+		}
 		// Ignore unnamed keys starting with '&'
 		const char *pKeyName = pInput->KeyName(Key);
 		if(pKeyName[0] != '&' && str_find_nocase(pKeyName, pStr))

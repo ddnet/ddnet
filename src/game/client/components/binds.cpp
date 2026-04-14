@@ -428,7 +428,13 @@ CBindSlot CBinds::GetBindSlot(const char *pBindString) const
 		else
 			break;
 	}
-	return {Input()->FindKeyByName(ModifierMask == KeyModifier::NONE ? aMod : pKey + 1), ModifierMask};
+	int Key = Input()->FindKeyByName(ModifierMask == KeyModifier::NONE ? aMod : pKey + 1);
+	if(Key == KEY_ESCAPE)
+	{
+		// Binding to Escape key is not supported
+		Key = KEY_UNKNOWN;
+	}
+	return {Key, ModifierMask};
 }
 
 const char *CBinds::GetModifierName(int Modifier)
