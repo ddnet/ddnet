@@ -1858,261 +1858,6 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
-float CEditor::TriangleArea(vec2 A, vec2 B, vec2 C)
-{
-	return absolute(((B.x - A.x) * (C.y - A.y) - (C.x - A.x) * (B.y - A.y)) * 0.5f);
-}
-
-bool CEditor::IsInTriangle(vec2 Point, vec2 A, vec2 B, vec2 C)
-{
-	// Normalize to increase precision
-	vec2 Min(minimum(A.x, B.x, C.x), minimum(A.y, B.y, C.y));
-	vec2 Max(maximum(A.x, B.x, C.x), maximum(A.y, B.y, C.y));
-	vec2 Size(Max.x - Min.x, Max.y - Min.y);
-
-	if(Size.x < 0.0000001f || Size.y < 0.0000001f)
-		return false;
-
-	vec2 Normal(1.f / Size.x, 1.f / Size.y);
-
-	A = (A - Min) * Normal;
-	B = (B - Min) * Normal;
-	C = (C - Min) * Normal;
-	Point = (Point - Min) * Normal;
-
-	float Area = TriangleArea(A, B, C);
-	return Area > 0.f && absolute(TriangleArea(Point, A, B) + TriangleArea(Point, B, C) + TriangleArea(Point, C, A) - Area) < 0.000001f;
-}
-
-void CEditor::DoQuadKnife(int QuadIndex)
-{
-	if(m_Dialog != DIALOG_NONE || Ui()->IsPopupOpen())
-	{
-		return;
-	}
-
-	std::shared_ptr<CLayerQuads> pLayer = std::static_pointer_cast<CLayerQuads>(Map()->SelectedLayerType(0, LAYERTYPE_QUADS));
-	CQuad *pQuad = &pLayer->m_vQuads[QuadIndex];
-	CEditorMap::CQuadKnife &QuadKnife = Map()->m_QuadKnife;
-
-	const bool IgnoreGrid = Input()->AltIsPressed();
-	float SnapRadius = 4.f * m_MouseWorldScale;
-
-	vec2 Mouse = vec2(Ui()->MouseWorldX(), Ui()->MouseWorldY());
-	vec2 Point = Mouse;
-
-	vec2 v[4] = {
-		vec2(fx2f(pQuad->m_aPoints[0].x), fx2f(pQuad->m_aPoints[0].y)),
-		vec2(fx2f(pQuad->m_aPoints[1].x), fx2f(pQuad->m_aPoints[1].y)),
-		vec2(fx2f(pQuad->m_aPoints[3].x), fx2f(pQuad->m_aPoints[3].y)),
-		vec2(fx2f(pQuad->m_aPoints[2].x), fx2f(pQuad->m_aPoints[2].y))};
-
-	str_copy(m_aTooltip, "Left click inside the quad to select an area to slice. Hold alt to ignore grid. Right click to leave knife mode.");
-
-	if(Ui()->MouseButtonClicked(1))
-	{
-		QuadKnife.m_Active = false;
-		return;
-	}
-
-	// Handle snapping
-	if(MapView()->MapGrid()->IsEnabled() && !IgnoreGrid)
-	{
-		float CellSize = MapView()->MapGrid()->GridLineDistance();
-		vec2 OnGrid = Mouse;
-		MapView()->MapGrid()->SnapToGrid(OnGrid);
-
-		if(IsInTriangle(OnGrid, v[0], v[1], v[2]) || IsInTriangle(OnGrid, v[0], v[3], v[2]))
-			Point = OnGrid;
-		else
-		{
-			float MinDistance = -1.f;
-
-			for(int i = 0; i < 4; i++)
-			{
-				int j = (i + 1) % 4;
-				vec2 Min(minimum(v[i].x, v[j].x), minimum(v[i].y, v[j].y));
-				vec2 Max(maximum(v[i].x, v[j].x), maximum(v[i].y, v[j].y));
-
-				if(in_range(OnGrid.y, Min.y, Max.y) && Max.y - Min.y > 0.0000001f)
-				{
-					vec2 OnEdge(v[i].x + (OnGrid.y - v[i].y) / (v[j].y - v[i].y) * (v[j].x - v[i].x), OnGrid.y);
-					float Distance = absolute(OnGrid.x - OnEdge.x);
-
-					if(Distance < CellSize && (Distance < MinDistance || MinDistance < 0.f))
-					{
-						MinDistance = Distance;
-						Point = OnEdge;
-					}
-				}
-
-				if(in_range(OnGrid.x, Min.x, Max.x) && Max.x - Min.x > 0.0000001f)
-				{
-					vec2 OnEdge(OnGrid.x, v[i].y + (OnGrid.x - v[i].x) / (v[j].x - v[i].x) * (v[j].y - v[i].y));
-					float Distance = absolute(OnGrid.y - OnEdge.y);
-
-					if(Distance < CellSize && (Distance < MinDistance || MinDistance < 0.f))
-					{
-						MinDistance = Distance;
-						Point = OnEdge;
-					}
-				}
-			}
-		}
-	}
-	else
-	{
-		float MinDistance = -1.f;
-
-		// Try snapping to corners
-		for(const auto &x : v)
-		{
-			float Distance = distance(Mouse, x);
-
-			if(Distance <= SnapRadius && (Distance < MinDistance || MinDistance < 0.f))
-			{
-				MinDistance = Distance;
-				Point = x;
-			}
-		}
-
-		if(MinDistance < 0.f)
-		{
-			// Try snapping to edges
-			for(int i = 0; i < 4; i++)
-			{
-				int j = (i + 1) % 4;
-				vec2 s(v[j] - v[i]);
-
-				float t = ((Mouse.x - v[i].x) * s.x + (Mouse.y - v[i].y) * s.y) / (s.x * s.x + s.y * s.y);
-
-				if(in_range(t, 0.f, 1.f))
-				{
-					vec2 OnEdge = vec2((v[i].x + t * s.x), (v[i].y + t * s.y));
-					float Distance = distance(Mouse, OnEdge);
-
-					if(Distance <= SnapRadius && (Distance < MinDistance || MinDistance < 0.f))
-					{
-						MinDistance = Distance;
-						Point = OnEdge;
-					}
-				}
-			}
-		}
-	}
-
-	bool ValidPosition = IsInTriangle(Point, v[0], v[1], v[2]) || IsInTriangle(Point, v[0], v[3], v[2]);
-
-	if(Ui()->MouseButtonClicked(0) && ValidPosition)
-	{
-		QuadKnife.m_aPoints[QuadKnife.m_Count] = Point;
-		QuadKnife.m_Count++;
-	}
-
-	if(QuadKnife.m_Count == 4)
-	{
-		if(IsInTriangle(QuadKnife.m_aPoints[3], QuadKnife.m_aPoints[0], QuadKnife.m_aPoints[1], QuadKnife.m_aPoints[2]) ||
-			IsInTriangle(QuadKnife.m_aPoints[1], QuadKnife.m_aPoints[0], QuadKnife.m_aPoints[2], QuadKnife.m_aPoints[3]))
-		{
-			// Fix concave order
-			std::swap(QuadKnife.m_aPoints[0], QuadKnife.m_aPoints[3]);
-			std::swap(QuadKnife.m_aPoints[1], QuadKnife.m_aPoints[2]);
-		}
-
-		std::swap(QuadKnife.m_aPoints[2], QuadKnife.m_aPoints[3]);
-
-		CQuad *pResult = pLayer->NewQuad(64, 64, 64, 64);
-		pQuad = &pLayer->m_vQuads[QuadIndex];
-
-		for(int i = 0; i < 4; i++)
-		{
-			int t = IsInTriangle(QuadKnife.m_aPoints[i], v[0], v[3], v[2]) ? 2 : 1;
-
-			vec2 A = vec2(fx2f(pQuad->m_aPoints[0].x), fx2f(pQuad->m_aPoints[0].y));
-			vec2 B = vec2(fx2f(pQuad->m_aPoints[3].x), fx2f(pQuad->m_aPoints[3].y));
-			vec2 C = vec2(fx2f(pQuad->m_aPoints[t].x), fx2f(pQuad->m_aPoints[t].y));
-
-			float TriArea = TriangleArea(A, B, C);
-			float WeightA = TriangleArea(QuadKnife.m_aPoints[i], B, C) / TriArea;
-			float WeightB = TriangleArea(QuadKnife.m_aPoints[i], C, A) / TriArea;
-			float WeightC = TriangleArea(QuadKnife.m_aPoints[i], A, B) / TriArea;
-
-			pResult->m_aColors[i].r = (int)std::round(pQuad->m_aColors[0].r * WeightA + pQuad->m_aColors[3].r * WeightB + pQuad->m_aColors[t].r * WeightC);
-			pResult->m_aColors[i].g = (int)std::round(pQuad->m_aColors[0].g * WeightA + pQuad->m_aColors[3].g * WeightB + pQuad->m_aColors[t].g * WeightC);
-			pResult->m_aColors[i].b = (int)std::round(pQuad->m_aColors[0].b * WeightA + pQuad->m_aColors[3].b * WeightB + pQuad->m_aColors[t].b * WeightC);
-			pResult->m_aColors[i].a = (int)std::round(pQuad->m_aColors[0].a * WeightA + pQuad->m_aColors[3].a * WeightB + pQuad->m_aColors[t].a * WeightC);
-
-			pResult->m_aTexcoords[i].x = (int)std::round(pQuad->m_aTexcoords[0].x * WeightA + pQuad->m_aTexcoords[3].x * WeightB + pQuad->m_aTexcoords[t].x * WeightC);
-			pResult->m_aTexcoords[i].y = (int)std::round(pQuad->m_aTexcoords[0].y * WeightA + pQuad->m_aTexcoords[3].y * WeightB + pQuad->m_aTexcoords[t].y * WeightC);
-
-			pResult->m_aPoints[i].x = f2fx(QuadKnife.m_aPoints[i].x);
-			pResult->m_aPoints[i].y = f2fx(QuadKnife.m_aPoints[i].y);
-		}
-
-		pResult->m_aPoints[4].x = ((pResult->m_aPoints[0].x + pResult->m_aPoints[3].x) / 2 + (pResult->m_aPoints[1].x + pResult->m_aPoints[2].x) / 2) / 2;
-		pResult->m_aPoints[4].y = ((pResult->m_aPoints[0].y + pResult->m_aPoints[3].y) / 2 + (pResult->m_aPoints[1].y + pResult->m_aPoints[2].y) / 2) / 2;
-
-		QuadKnife.m_Count = 0;
-		Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorActionNewQuad>(Map(), Map()->m_SelectedGroup, Map()->m_vSelectedLayers[0]));
-	}
-
-	// Render
-	Graphics()->TextureClear();
-	Graphics()->LinesBegin();
-
-	IGraphics::CLineItem aEdges[] = {
-		IGraphics::CLineItem(v[0].x, v[0].y, v[1].x, v[1].y),
-		IGraphics::CLineItem(v[1].x, v[1].y, v[2].x, v[2].y),
-		IGraphics::CLineItem(v[2].x, v[2].y, v[3].x, v[3].y),
-		IGraphics::CLineItem(v[3].x, v[3].y, v[0].x, v[0].y)};
-
-	Graphics()->SetColor(1.f, 0.5f, 0.f, 1.f);
-	Graphics()->LinesDraw(aEdges, std::size(aEdges));
-
-	IGraphics::CLineItem aLines[4];
-	int LineCount = maximum(QuadKnife.m_Count - 1, 0);
-
-	for(int i = 0; i < LineCount; i++)
-		aLines[i] = IGraphics::CLineItem(QuadKnife.m_aPoints[i], QuadKnife.m_aPoints[i + 1]);
-
-	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
-	Graphics()->LinesDraw(aLines, LineCount);
-
-	if(ValidPosition)
-	{
-		if(QuadKnife.m_Count > 0)
-		{
-			IGraphics::CLineItem LineCurrent(Point, QuadKnife.m_aPoints[QuadKnife.m_Count - 1]);
-			Graphics()->LinesDraw(&LineCurrent, 1);
-		}
-
-		if(QuadKnife.m_Count == 3)
-		{
-			IGraphics::CLineItem LineClose(Point, QuadKnife.m_aPoints[0]);
-			Graphics()->LinesDraw(&LineClose, 1);
-		}
-	}
-
-	Graphics()->LinesEnd();
-	Graphics()->QuadsBegin();
-
-	IGraphics::CQuadItem aMarkers[4];
-
-	for(int i = 0; i < QuadKnife.m_Count; i++)
-		aMarkers[i] = IGraphics::CQuadItem(QuadKnife.m_aPoints[i].x, QuadKnife.m_aPoints[i].y, 5.f * m_MouseWorldScale, 5.f * m_MouseWorldScale);
-
-	Graphics()->SetColor(0.f, 0.f, 1.f, 1.f);
-	Graphics()->QuadsDraw(aMarkers, QuadKnife.m_Count);
-
-	if(ValidPosition)
-	{
-		IGraphics::CQuadItem MarkerCurrent(Point.x, Point.y, 5.f * m_MouseWorldScale, 5.f * m_MouseWorldScale);
-		Graphics()->QuadsDraw(&MarkerCurrent, 1);
-	}
-
-	Graphics()->QuadsEnd();
-}
-
 void CEditor::DoQuadEnvelopes(const CLayerQuads *pLayerQuads)
 {
 	const std::vector<CQuad> &vQuads = pLayerQuads->m_vQuads;
@@ -2691,7 +2436,7 @@ void CEditor::DoMapEditor(CUIRect View)
 					m_pBrush->Clear();
 				}
 
-				if(!Input()->ModifierIsPressed() && Ui()->MouseButton(0) && s_Operation == OP_NONE && !Map()->m_QuadKnife.m_Active)
+				if(!Input()->ModifierIsPressed() && Ui()->MouseButton(0) && s_Operation == OP_NONE && !m_QuadKnife.IsActive())
 				{
 					Ui()->SetActiveItem(&m_MapEditorId);
 
@@ -2769,9 +2514,9 @@ void CEditor::DoMapEditor(CUIRect View)
 						if(m_ActiveEnvelopePreview == EEnvelopePreview::NONE)
 							m_ActiveEnvelopePreview = EEnvelopePreview::ALL;
 
-						if(Map()->m_QuadKnife.m_Active)
+						if(QuadKnife()->IsActive())
 						{
-							DoQuadKnife(Map()->m_vSelectedQuads[Map()->m_QuadKnife.m_SelectedQuadIndex]);
+							QuadKnife()->DoSlice();
 						}
 						else
 						{
@@ -7085,6 +6830,7 @@ void CEditor::Init()
 	m_vComponents.emplace_back(m_FileBrowser);
 	m_vComponents.emplace_back(m_Prompt);
 	m_vComponents.emplace_back(m_FontTyper);
+	m_vComponents.emplace_back(m_QuadKnife);
 	for(CEditorComponent &Component : m_vComponents)
 		Component.OnInit(this);
 

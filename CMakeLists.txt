@@ -2601,6 +2601,8 @@ if(CLIENT)
     proof_mode.h
     quad_art.cpp
     quad_art.h
+    quad_knife.cpp
+    quad_knife.h
     quick_action.h
     quick_actions.cpp
     quick_actions.h

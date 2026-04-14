@@ -14,6 +14,7 @@
 #include <game/editor/mapitems/envelope.h>
 #include <game/editor/mapitems/layer.h>
 #include <game/editor/quad_art.h>
+#include <game/editor/quad_knife.h>
 
 #include <functional>
 #include <memory>
@@ -156,16 +157,8 @@ public:
 
 	int m_ShiftBy;
 
-	// Quad knife
-	class CQuadKnife
-	{
-	public:
-		bool m_Active;
-		int m_SelectedQuadIndex;
-		int m_Count;
-		vec2 m_aPoints[4];
-	};
-	CQuadKnife m_QuadKnife;
+	// Component states
+	CQuadKnife::CState m_QuadKnifeState;
 
 	// Housekeeping
 	void Clean();
