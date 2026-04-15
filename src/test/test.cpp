@@ -1,5 +1,6 @@
 #include "test.h"
 
+#include <base/dbg.h>
 #include <base/fs.h>
 #include <base/logger.h>
 #include <base/net.h>
@@ -12,6 +13,7 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <mutex>
 
 CTestInfo::CTestInfo()
 {
@@ -141,13 +143,118 @@ CTestInfo::~CTestInfo()
 	}
 }
 
+class CTestLogger : public ILogger
+{
+	friend class CTestLogListener;
+
+	std::unique_ptr<ILogger> m_pGlobalLogger;
+	std::unique_ptr<CMemoryLogger> m_pMemoryLogger;
+	std::mutex m_Lock;
+
+public:
+	CTestLogger(std::unique_ptr<ILogger> &&pGlobalLogger) :
+		m_pGlobalLogger(std::move(pGlobalLogger))
+	{
+	}
+
+	void Log(const CLogMessage *pMessage) override
+	{
+		if(m_Filter.Filters(pMessage))
+		{
+			return;
+		}
+		const std::unique_lock Lock(m_Lock);
+		if(m_pMemoryLogger != nullptr)
+		{
+			m_pMemoryLogger->Log(pMessage);
+		}
+		else
+		{
+			m_pGlobalLogger->Log(pMessage);
+		}
+	}
+
+	void GlobalFinish() override
+	{
+		dbg_assert(m_pMemoryLogger == nullptr, "Memory logger should be unset when test logger finishes");
+		m_pGlobalLogger->GlobalFinish();
+	}
+};
+
+class CTestLogListener : public testing::EmptyTestEventListener
+{
+	CTestLogger *m_pTestLogger;
+	bool m_CaptureOutput;
+
+public:
+	CTestLogListener(CTestLogger *pTestLogger, bool CaptureOutput) :
+		m_pTestLogger(pTestLogger),
+		m_CaptureOutput(CaptureOutput)
+	{
+	}
+
+	void OnTestStart(const testing::TestInfo &TestInfo) override
+	{
+		if(!m_CaptureOutput)
+		{
+			return;
+		}
+
+		const std::unique_lock Lock(m_pTestLogger->m_Lock);
+		m_pTestLogger->m_pMemoryLogger = std::make_unique<CMemoryLogger>();
+	}
+
+	void OnTestEnd(const testing::TestInfo &TestInfo) override
+	{
+		if(!m_CaptureOutput)
+		{
+			return;
+		}
+
+		const std::unique_lock Lock(m_pTestLogger->m_Lock);
+		if(TestInfo.result()->Failed())
+		{
+			for(const CLogMessage &Line : m_pTestLogger->m_pMemoryLogger->Lines())
+			{
+				m_pTestLogger->m_pGlobalLogger->Log(&Line);
+			}
+		}
+		m_pTestLogger->m_pMemoryLogger = nullptr;
+	}
+};
+
 int main(int argc, const char **argv)
 {
+	CTestLogger *pTestLogger = std::make_unique<CTestLogger>(log_logger_default()).release();
+	log_set_global_logger(pTestLogger);
+
 	CCmdlineFix CmdlineFix(&argc, &argv);
-	log_set_global_logger_default();
+
 	::testing::InitGoogleTest(&argc, const_cast<char **>(argv));
 	GTEST_FLAG_SET(death_test_style, "threadsafe");
+
+	bool CaptureOutput = true;
+	if(argc >= 2)
+	{
+		for(int Argument = 1; Argument < argc; ++Argument)
+		{
+			if(str_comp(argv[Argument], "--no-capture") == 0)
+			{
+				CaptureOutput = false;
+			}
+			else
+			{
+				log_error("testrunner", "Unknown argument: %s", argv[Argument]);
+				return -1;
+			}
+		}
+	}
+
+	testing::TestEventListeners &Listeners = testing::UnitTest::GetInstance()->listeners();
+	Listeners.Append(new CTestLogListener(pTestLogger, CaptureOutput));
+
 	net_init();
+
 	return RUN_ALL_TESTS();
 }
 
