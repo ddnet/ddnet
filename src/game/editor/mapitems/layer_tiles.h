@@ -161,6 +161,9 @@ public:
 	};
 	static CUi::EPopupMenuFunctionResult RenderCommonProperties(SCommonPropState &State, CEditorMap *pEditorMap, CUIRect *pToolbox, std::vector<std::shared_ptr<CLayerTiles>> &vpLayers, std::vector<int> &vLayerIndices);
 
+	bool IsEnvelopeUsed(int EnvelopeIndex) const override;
+	bool IsImageUsed(int ImageIndex) const override;
+
 	void ModifyImageIndex(const FIndexModifyFunction &IndexModifyFunction) override;
 	void ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction) override;
 

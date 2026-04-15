@@ -32,6 +32,10 @@ public:
 	virtual void Render(bool Tileset = false) {}
 	virtual CUi::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) { return CUi::POPUP_KEEP_OPEN; }
 
+	virtual bool IsEnvelopeUsed(int EnvelopeIndex) const { return false; }
+	virtual bool IsImageUsed(int ImageIndex) const { return false; }
+	virtual bool IsSoundUsed(int SoundIndex) const { return false; }
+
 	virtual void ModifyImageIndex(const FIndexModifyFunction &IndexModifyFunction) {}
 	virtual void ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction) {}
 	virtual void ModifySoundIndex(const FIndexModifyFunction &IndexModifyFunction) {}

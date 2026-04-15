@@ -186,6 +186,18 @@ CUi::EPopupMenuFunctionResult CLayerSounds::RenderProperties(CUIRect *pToolBox)
 	return CUi::POPUP_KEEP_OPEN;
 }
 
+bool CLayerSounds::IsEnvelopeUsed(int EnvelopeIndex) const
+{
+	return std::any_of(m_vSources.begin(), m_vSources.end(), [&](const auto &Source) {
+		return Source.m_PosEnv == EnvelopeIndex || Source.m_SoundEnv == EnvelopeIndex;
+	});
+}
+
+bool CLayerSounds::IsSoundUsed(int SoundIndex) const
+{
+	return m_Sound == SoundIndex;
+}
+
 void CLayerSounds::ModifySoundIndex(const FIndexModifyFunction &IndexModifyFunction)
 {
 	IndexModifyFunction(&m_Sound);

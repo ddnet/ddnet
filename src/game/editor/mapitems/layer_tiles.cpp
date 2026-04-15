@@ -1357,6 +1357,16 @@ void CLayerTiles::FlagModified(int x, int y, int w, int h)
 	}
 }
 
+bool CLayerTiles::IsEnvelopeUsed(int EnvelopeIndex) const
+{
+	return m_ColorEnv == EnvelopeIndex;
+}
+
+bool CLayerTiles::IsImageUsed(int ImageIndex) const
+{
+	return m_Image == ImageIndex;
+}
+
 void CLayerTiles::ModifyImageIndex(const FIndexModifyFunction &IndexModifyFunction)
 {
 	IndexModifyFunction(&m_Image);
