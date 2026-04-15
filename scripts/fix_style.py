@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
+import argparse
+import multiprocessing
 import os
 import subprocess
 import sys
-import argparse
+from concurrent.futures import ThreadPoolExecutor
 
 os.chdir(os.path.dirname(__file__) + "/..")
 
@@ -55,42 +57,66 @@ def find_clang_format(version):
 clang_format_bin = find_clang_format(20)
 
 
-def reformat(filenames):
+def format_or_warn(filenames, dry_run):
+	missing_newline = False
 	for filename in filenames:
-		with open(filename, "r+b") as f:
-			try:
-				f.seek(-1, os.SEEK_END)
-				if f.read(1) != b"\n":
-					f.write(b"\n")
-			except OSError:
-				f.seek(0)
-	subprocess.check_call([clang_format_bin, "-i"] + filenames)
+		try:
+			with open(filename, "rb+" if not dry_run else "rb") as file:
+				try:
+					file.seek(-1, os.SEEK_END)
+				except OSError:
+					continue
 
+				if file.read(1) == b"\n":
+					continue
 
-def warn(filenames):
-	clang = subprocess.call([clang_format_bin, "-Werror", "--dry-run"] + filenames)
-	newline = 0
-	for filename in filenames:
-		with open(filename, "rb") as f:
-			try:
-				f.seek(-1, os.SEEK_END)
-				if f.read(1) != b"\n":
-					print(filename + ": error: missing newline at EOF", file=sys.stderr)
-					newline = 1
-			except OSError:
-				f.seek(0)
-	return clang or newline
+				if dry_run:
+					print(f"{filename}: error: missing newline at EOF", file=sys.stderr)
+					missing_newline = True
+					continue
+
+				file.write(b"\n")
+		except OSError as e:
+			print(f"Error accessing {filename}: {e}", file=sys.stderr)
+			missing_newline = True
+
+	args = [clang_format_bin]
+	if dry_run:
+		args += ["-Werror", "--dry-run"]
+	else:
+		args += ["-i"]
+	args += filenames
+
+	subprocess.check_call(args)
+	proc = subprocess.run(args, capture_output=True)
+
+	if proc.stdout:
+		sys.stdout.buffer.write(proc.stdout)
+	if proc.stderr:
+		sys.stderr.buffer.write(proc.stderr)
+
+	return missing_newline or (proc.returncode != 0)
 
 
 def main():
 	p = argparse.ArgumentParser(description="Check and fix style of changed files")
 	p.add_argument("-n", "--dry-run", action="store_true", help="Don't fix, only warn")
+	p.add_argument("-j", "--jobs", type=int, default=0, help="Number of jobs")
 	args = p.parse_args()
+
 	filenames = filter_ignored(filter_cpp(recursive_file_list("src")))
-	if not args.dry_run:
-		reformat(filenames)
-	else:
-		sys.exit(warn(filenames))
+
+	max_cpu = multiprocessing.cpu_count()
+	if args.jobs > 0:
+		max_cpu = args.jobs
+
+	max_jobs = min(max_cpu, len(filenames))
+	chunks = [filenames[i::max_jobs] for i in range(max_jobs)]
+
+	with ThreadPoolExecutor(max_workers=max_jobs) as executor:
+		results = list(executor.map(lambda c: format_or_warn(c, args.dry_run), chunks))
+
+	sys.exit(1 if any(results) else 0)
 
 
 if __name__ == "__main__":
