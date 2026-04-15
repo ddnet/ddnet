@@ -37,7 +37,7 @@ class CFontTyper : public CEditorComponent
 	void SetTile(ivec2 Pos, unsigned char Index, const std::shared_ptr<CLayerTiles> &pLayer);
 
 public:
-	void OnRender(CUIRect View) override;
+	void Render();
 	bool OnInput(const IInput::CEvent &Event) override;
 	void OnInit(CEditor *pEditor) override;
 

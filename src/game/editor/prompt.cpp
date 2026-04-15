@@ -66,7 +66,7 @@ void CPrompt::OnInit(CEditor *pEditor)
 #undef REGISTER_QUICK_ACTION
 }
 
-void CPrompt::OnRender(CUIRect _)
+void CPrompt::Render()
 {
 	if(!IsActive())
 		return;
