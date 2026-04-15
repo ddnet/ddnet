@@ -136,8 +136,6 @@ class CEditor : public IEditor, public IEnvelopeEval
 	IGraphics::CTextureHandle m_SwitchTexture;
 	IGraphics::CTextureHandle m_TuneTexture;
 
-	int GetTextureUsageFlag() const;
-
 	enum EPreviewState
 	{
 		PREVIEW_UNLOADED,

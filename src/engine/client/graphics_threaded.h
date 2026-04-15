@@ -1265,6 +1265,7 @@ public:
 	bool IsTextBufferingEnabled() override { return m_GLTextBufferingEnabled; }
 	bool IsQuadContainerBufferingEnabled() override { return m_GLQuadContainerBufferingEnabled; }
 	bool Uses2DTextureArrays() override { return m_GLUses2DTextureArrays; }
+	int TextureLoadFlags() override { return Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE; }
 	bool HasTextureArraysSupport() override { return m_GLHasTextureArraysSupport; }
 
 	const char *GetVendorString() override;

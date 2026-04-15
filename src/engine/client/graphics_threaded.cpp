@@ -2474,9 +2474,8 @@ int CGraphics_Threaded::Init()
 		NullTextureInfo.m_Height = NullTextureDimension;
 		NullTextureInfo.m_Format = CImageInfo::FORMAT_RGBA;
 		NullTextureInfo.m_pData = aNullTextureData;
-		const int TextureLoadFlags = Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 		m_NullTexture.Invalidate();
-		m_NullTexture = LoadTextureRaw(NullTextureInfo, TextureLoadFlags, "null-texture");
+		m_NullTexture = LoadTextureRaw(NullTextureInfo, TextureLoadFlags(), "null-texture");
 		dbg_assert(m_NullTexture.IsNullTexture(), "Null texture invalid");
 	}
 

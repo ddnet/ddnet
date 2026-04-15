@@ -340,6 +340,7 @@ public:
 	virtual bool IsTextBufferingEnabled() = 0;
 	virtual bool IsQuadContainerBufferingEnabled() = 0;
 	virtual bool Uses2DTextureArrays() = 0;
+	virtual int TextureLoadFlags() = 0;
 	virtual bool HasTextureArraysSupport() = 0;
 
 	virtual const char *GetVendorString() = 0;

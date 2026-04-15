@@ -571,7 +571,7 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 				{
 					ConvertToRgba(*pImg);
 
-					int TextureLoadFlag = m_pEditor->Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+					int TextureLoadFlag = m_pEditor->Graphics()->TextureLoadFlags();
 					if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)
 						TextureLoadFlag = 0;
 					pImg->m_External = 1;
@@ -593,7 +593,7 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 				// copy image data
 				void *pData = pMap->GetData(pItem->m_ImageData);
 				mem_copy(pImg->m_pData, pData, pImg->DataSize());
-				int TextureLoadFlag = m_pEditor->Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+				int TextureLoadFlag = m_pEditor->Graphics()->TextureLoadFlags();
 				if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)
 					TextureLoadFlag = 0;
 				pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(*pImg, TextureLoadFlag, pImg->m_aName);
