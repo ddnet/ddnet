@@ -18,6 +18,8 @@ public:
 	void AnalyseTileFlags();
 	void Free();
 
+	CEditorImage &operator=(CImageInfo &&Other);
+
 	IGraphics::CTextureHandle m_Texture;
 	int m_External = 0;
 	char m_aName[IO_MAX_PATH_LENGTH] = "";

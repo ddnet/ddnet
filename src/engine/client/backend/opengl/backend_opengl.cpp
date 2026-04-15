@@ -9,6 +9,8 @@
 #include <engine/client/backend_sdl.h>
 #include <engine/graphics.h>
 
+#include <cstdint>
+
 #if defined(BACKEND_AS_OPENGL_ES) || !defined(CONF_BACKEND_OPENGL_ES)
 
 #include <engine/client/backend/glsl_shader_compiler.h>
@@ -1006,9 +1008,16 @@ void CCommandProcessorFragment_OpenGL::Cmd_Screenshot(const CCommandBuffer::SCom
 	int w = aViewport[2];
 	int h = aViewport[3];
 
-	// we allocate one more row to use when we are flipping the texture
-	unsigned char *pPixelData = (unsigned char *)malloc((size_t)w * (h + 1) * 4);
-	unsigned char *pTempRow = pPixelData + w * h * 4;
+	pCommand->m_pImage->m_Width = w;
+	pCommand->m_pImage->m_Height = h;
+	pCommand->m_pImage->m_Format = CImageInfo::FORMAT_RGBA;
+	pCommand->m_pImage->Allocate();
+
+	uint8_t *pPixelData = pCommand->m_pImage->m_pData;
+
+	// we create a tmp row to use when we are flipping the texture
+	std::vector<uint8_t> vTmpRow(w * 4);
+	uint8_t *pTempRow = vTmpRow.data();
 
 	// fetch the pixels
 	GLint Alignment;
@@ -1029,12 +1038,6 @@ void CCommandProcessorFragment_OpenGL::Cmd_Screenshot(const CCommandBuffer::SCom
 			pPixelData[(h - y - 1) * w * 4 + x * 4 + 3] = 255;
 		}
 	}
-
-	// fill in the information
-	pCommand->m_pImage->m_Width = w;
-	pCommand->m_pImage->m_Height = h;
-	pCommand->m_pImage->m_Format = CImageInfo::FORMAT_RGBA;
-	pCommand->m_pImage->m_pData = pPixelData;
 }
 
 CCommandProcessorFragment_OpenGL::CCommandProcessorFragment_OpenGL()

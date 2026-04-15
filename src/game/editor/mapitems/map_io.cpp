@@ -567,13 +567,8 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 				str_format(aBuf, sizeof(aBuf), "mapres/%s.png", pImg->m_aName);
 
 				// load external
-				CImageInfo ImgInfo;
-				if(m_pEditor->Graphics()->LoadPng(ImgInfo, aBuf, IStorage::TYPE_ALL))
+				if(m_pEditor->Graphics()->LoadPng(*pImg, aBuf, IStorage::TYPE_ALL))
 				{
-					pImg->m_Width = ImgInfo.m_Width;
-					pImg->m_Height = ImgInfo.m_Height;
-					pImg->m_Format = ImgInfo.m_Format;
-					pImg->m_pData = ImgInfo.m_pData;
 					ConvertToRgba(*pImg);
 
 					int TextureLoadFlag = m_pEditor->Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
@@ -593,12 +588,11 @@ bool CEditorMap::Load(const char *pFilename, int StorageType, const FErrorHandle
 				pImg->m_Width = pItem->m_Width;
 				pImg->m_Height = pItem->m_Height;
 				pImg->m_Format = CImageInfo::FORMAT_RGBA;
+				pImg->Allocate();
 
 				// copy image data
 				void *pData = pMap->GetData(pItem->m_ImageData);
-				const size_t DataSize = pImg->DataSize();
-				pImg->m_pData = static_cast<uint8_t *>(malloc(DataSize));
-				mem_copy(pImg->m_pData, pData, DataSize);
+				mem_copy(pImg->m_pData, pData, pImg->DataSize());
 				int TextureLoadFlag = m_pEditor->Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 				if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)
 					TextureLoadFlag = 0;

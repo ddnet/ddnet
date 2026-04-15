@@ -12,8 +12,6 @@ CEditorImage::CEditorImage(CEditorMap *pMap) :
 CEditorImage::~CEditorImage()
 {
 	Graphics()->UnloadTexture(&m_Texture);
-	free(m_pData);
-	m_pData = nullptr;
 }
 
 void CEditorImage::OnAttach(CEditorMap *pMap)
@@ -57,4 +55,11 @@ void CEditorImage::Free()
 	Graphics()->UnloadTexture(&m_Texture);
 	m_AutoMapper.Unload();
 	CImageInfo::Free();
+}
+
+CEditorImage &CEditorImage::operator=(CImageInfo &&Other)
+{
+	CImageInfo *pThis = this;
+	*pThis = std::move(Other);
+	return *this;
 }
