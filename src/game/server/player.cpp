@@ -318,17 +318,15 @@ void CPlayer::Snap(int SnappingClient)
 	if(!Server()->Translate(TranslatedId, SnappingClient))
 		return;
 
-	CNetObj_ClientInfo *pClientInfo = Server()->SnapNewItem<CNetObj_ClientInfo>(TranslatedId);
-	if(!pClientInfo)
-		return;
-
-	StrToInts(pClientInfo->m_aName, std::size(pClientInfo->m_aName), Server()->ClientName(m_ClientId));
-	StrToInts(pClientInfo->m_aClan, std::size(pClientInfo->m_aClan), Server()->ClientClan(m_ClientId));
-	pClientInfo->m_Country = Server()->ClientCountry(m_ClientId);
-	StrToInts(pClientInfo->m_aSkin, std::size(pClientInfo->m_aSkin), m_TeeInfos.m_aSkinName);
-	pClientInfo->m_UseCustomColor = m_TeeInfos.m_UseCustomColor;
-	pClientInfo->m_ColorBody = m_TeeInfos.m_ColorBody;
-	pClientInfo->m_ColorFeet = m_TeeInfos.m_ColorFeet;
+	CNetObj_ClientInfo ClientInfo = {};
+	StrToInts(ClientInfo.m_aName, std::size(ClientInfo.m_aName), Server()->ClientName(m_ClientId));
+	StrToInts(ClientInfo.m_aClan, std::size(ClientInfo.m_aClan), Server()->ClientClan(m_ClientId));
+	ClientInfo.m_Country = Server()->ClientCountry(m_ClientId);
+	StrToInts(ClientInfo.m_aSkin, std::size(ClientInfo.m_aSkin), m_TeeInfos.m_aSkinName);
+	ClientInfo.m_UseCustomColor = m_TeeInfos.m_UseCustomColor;
+	ClientInfo.m_ColorBody = m_TeeInfos.m_ColorBody;
+	ClientInfo.m_ColorFeet = m_TeeInfos.m_ColorFeet;
+	Server()->SnapNewItem(TranslatedId, ClientInfo);
 
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 	int Latency = SnappingClient == SERVER_DEMO_CLIENT ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aCurLatency[m_ClientId];
@@ -336,58 +334,50 @@ void CPlayer::Snap(int SnappingClient)
 
 	if(!Server()->IsSixup(SnappingClient))
 	{
-		CNetObj_PlayerInfo *pPlayerInfo = Server()->SnapNewItem<CNetObj_PlayerInfo>(TranslatedId);
-		if(!pPlayerInfo)
-			return;
-
-		pPlayerInfo->m_Latency = Latency;
-		pPlayerInfo->m_Score = Score;
-		pPlayerInfo->m_Local = (int)(m_ClientId == SnappingClient && (m_Paused != PAUSE_PAUSED || SnappingClientVersion >= VERSION_DDNET_OLD));
-		pPlayerInfo->m_ClientId = TranslatedId;
-		pPlayerInfo->m_Team = m_Team;
+		CNetObj_PlayerInfo PlayerInfo = {};
+		PlayerInfo.m_Latency = Latency;
+		PlayerInfo.m_Score = Score;
+		PlayerInfo.m_Local = (int)(m_ClientId == SnappingClient && (m_Paused != PAUSE_PAUSED || SnappingClientVersion >= VERSION_DDNET_OLD));
+		PlayerInfo.m_ClientId = TranslatedId;
+		PlayerInfo.m_Team = m_Team;
 		if(SnappingClientVersion < VERSION_DDNET_INDEPENDENT_SPECTATORS_TEAM)
 		{
 			// In older versions the SPECTATORS TEAM was also used if the own player is in PAUSE_PAUSED or if any player is in PAUSE_SPEC.
-			pPlayerInfo->m_Team = (m_Paused != PAUSE_PAUSED || m_ClientId != SnappingClient) && m_Paused < PAUSE_SPEC ? m_Team : TEAM_SPECTATORS;
+			PlayerInfo.m_Team = (m_Paused != PAUSE_PAUSED || m_ClientId != SnappingClient) && m_Paused < PAUSE_SPEC ? m_Team : TEAM_SPECTATORS;
 		}
+		Server()->SnapNewItem(TranslatedId, PlayerInfo);
 	}
 	else
 	{
-		protocol7::CNetObj_PlayerInfo *pPlayerInfo = Server()->SnapNewItem<protocol7::CNetObj_PlayerInfo>(TranslatedId);
-		if(!pPlayerInfo)
-			return;
-
-		pPlayerInfo->m_PlayerFlags = PlayerFlags_SixToSeven(m_PlayerFlags);
+		protocol7::CNetObj_PlayerInfo PlayerInfo = {};
+		PlayerInfo.m_PlayerFlags = PlayerFlags_SixToSeven(m_PlayerFlags);
 		if(SnappingClientVersion >= VERSION_DDRACE && (m_PlayerFlags & PLAYERFLAG_AIM))
-			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_AIM;
+			PlayerInfo.m_PlayerFlags |= protocol7::PLAYERFLAG_AIM;
 		if(Server()->IsRconAuthed(m_ClientId) && ((SnappingClient >= 0 && Server()->IsRconAuthed(SnappingClient)) || !Server()->HasAuthHidden(m_ClientId)))
-			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_ADMIN;
-		pPlayerInfo->m_Score = Score;
-		pPlayerInfo->m_Latency = Latency;
+			PlayerInfo.m_PlayerFlags |= protocol7::PLAYERFLAG_ADMIN;
+		PlayerInfo.m_Score = Score;
+		PlayerInfo.m_Latency = Latency;
+		Server()->SnapNewItem(TranslatedId, PlayerInfo);
 	}
 
 	if(m_ClientId == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused))
 	{
 		if(!Server()->IsSixup(SnappingClient))
 		{
-			CNetObj_SpectatorInfo *pSpectatorInfo = Server()->SnapNewItem<CNetObj_SpectatorInfo>(m_ClientId);
-			if(!pSpectatorInfo)
-				return;
-
-			pSpectatorInfo->m_SpectatorId = m_SpectatorId;
-			pSpectatorInfo->m_X = m_ViewPos.x;
-			pSpectatorInfo->m_Y = m_ViewPos.y;
+			CNetObj_SpectatorInfo SpectatorInfo = {};
+			SpectatorInfo.m_SpectatorId = m_SpectatorId;
+			SpectatorInfo.m_X = m_ViewPos.x;
+			SpectatorInfo.m_Y = m_ViewPos.y;
+			Server()->SnapNewItem(m_ClientId, SpectatorInfo);
 		}
 		else
 		{
-			protocol7::CNetObj_SpectatorInfo *pSpectatorInfo = Server()->SnapNewItem<protocol7::CNetObj_SpectatorInfo>(m_ClientId);
-			if(!pSpectatorInfo)
-				return;
-
-			pSpectatorInfo->m_SpecMode = m_SpectatorId == SPEC_FREEVIEW ? protocol7::SPEC_FREEVIEW : protocol7::SPEC_PLAYER;
-			pSpectatorInfo->m_SpectatorId = m_SpectatorId;
-			pSpectatorInfo->m_X = m_ViewPos.x;
-			pSpectatorInfo->m_Y = m_ViewPos.y;
+			protocol7::CNetObj_SpectatorInfo SpectatorInfo = {};
+			SpectatorInfo.m_SpecMode = m_SpectatorId == SPEC_FREEVIEW ? protocol7::SPEC_FREEVIEW : protocol7::SPEC_PLAYER;
+			SpectatorInfo.m_SpectatorId = m_SpectatorId;
+			SpectatorInfo.m_X = m_ViewPos.x;
+			SpectatorInfo.m_Y = m_ViewPos.y;
+			Server()->SnapNewItem(m_ClientId, SpectatorInfo);
 		}
 	}
 
@@ -399,22 +389,15 @@ void CPlayer::Snap(int SnappingClient)
 
 		if(pSpecPlayer)
 		{
-			CNetObj_DDNetSpectatorInfo *pDDNetSpectatorInfo = Server()->SnapNewItem<CNetObj_DDNetSpectatorInfo>(TranslatedId);
-			if(!pDDNetSpectatorInfo)
-				return;
-
-			pDDNetSpectatorInfo->m_HasCameraInfo = pSpecPlayer->m_CameraInfo.m_HasCameraInfo;
-			pDDNetSpectatorInfo->m_Zoom = pSpecPlayer->m_CameraInfo.m_Zoom * 1000.0f;
-			pDDNetSpectatorInfo->m_Deadzone = pSpecPlayer->m_CameraInfo.m_Deadzone;
-			pDDNetSpectatorInfo->m_FollowFactor = pSpecPlayer->m_CameraInfo.m_FollowFactor;
+			CNetObj_DDNetSpectatorInfo DDNetSpectatorInfo = {};
+			DDNetSpectatorInfo.m_HasCameraInfo = pSpecPlayer->m_CameraInfo.m_HasCameraInfo;
+			DDNetSpectatorInfo.m_Zoom = pSpecPlayer->m_CameraInfo.m_Zoom * 1000.0f;
+			DDNetSpectatorInfo.m_Deadzone = pSpecPlayer->m_CameraInfo.m_Deadzone;
+			DDNetSpectatorInfo.m_FollowFactor = pSpecPlayer->m_CameraInfo.m_FollowFactor;
 
 			if(pSpecPlayer->m_EnableSpectatorCount && SpectatingClient == TranslatedId && SnappingClient != SERVER_DEMO_CLIENT && m_Team != TEAM_SPECTATORS && !m_Paused)
 			{
-				CNetObj_SpectatorCount *pSpectatorCount = Server()->SnapNewItem<CNetObj_SpectatorCount>(0);
-				if(!pSpectatorCount)
-				{
-					return;
-				}
+				CNetObj_SpectatorCount SpectatorCountObj = {};
 				int SpectatorCount = 0;
 				for(auto &pPlayer : GameServer()->m_apPlayers)
 				{
@@ -438,40 +421,39 @@ void CPlayer::Snap(int SnappingClient)
 							SpectatorCount++;
 					}
 				}
-				pDDNetSpectatorInfo->m_SpectatorCount = SpectatorCount;
-				pSpectatorCount->m_NumSpectators = SpectatorCount;
+				DDNetSpectatorInfo.m_SpectatorCount = SpectatorCount;
+				SpectatorCountObj.m_NumSpectators = SpectatorCount;
+				Server()->SnapNewItem(0, SpectatorCountObj);
 			}
+			Server()->SnapNewItem(TranslatedId, DDNetSpectatorInfo);
 		}
 	}
 
-	CNetObj_DDNetPlayer *pDDNetPlayer = Server()->SnapNewItem<CNetObj_DDNetPlayer>(TranslatedId);
-	if(!pDDNetPlayer)
-		return;
-
+	CNetObj_DDNetPlayer DDNetPlayer = {};
 	if((SnappingClient >= 0 && Server()->IsRconAuthed(SnappingClient)) || !Server()->HasAuthHidden(m_ClientId))
-		pDDNetPlayer->m_AuthLevel = Server()->GetAuthedState(m_ClientId);
+		DDNetPlayer.m_AuthLevel = Server()->GetAuthedState(m_ClientId);
 	else
-		pDDNetPlayer->m_AuthLevel = AUTHED_NO;
+		DDNetPlayer.m_AuthLevel = AUTHED_NO;
 
-	pDDNetPlayer->m_Flags = 0;
+	DDNetPlayer.m_Flags = 0;
 	if(m_Afk)
-		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_AFK;
+		DDNetPlayer.m_Flags |= EXPLAYERFLAG_AFK;
 	if(m_Paused == PAUSE_SPEC)
-		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_SPEC;
+		DDNetPlayer.m_Flags |= EXPLAYERFLAG_SPEC;
 	if(m_Paused == PAUSE_PAUSED)
-		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_PAUSED;
+		DDNetPlayer.m_Flags |= EXPLAYERFLAG_PAUSED;
 
 	IGameController::CFinishTime PlayerTime = GameServer()->m_pController->SnapPlayerTime(SnappingClient, this);
-	pDDNetPlayer->m_FinishTimeSeconds = PlayerTime.m_Seconds;
-	pDDNetPlayer->m_FinishTimeMillis = PlayerTime.m_Milliseconds;
+	DDNetPlayer.m_FinishTimeSeconds = PlayerTime.m_Seconds;
+	DDNetPlayer.m_FinishTimeMillis = PlayerTime.m_Milliseconds;
+	Server()->SnapNewItem(TranslatedId, DDNetPlayer);
 
 	if(Server()->IsSixup(SnappingClient) && m_pCharacter && m_pCharacter->m_DDRaceState == ERaceState::STARTED &&
 		GameServer()->m_apPlayers[SnappingClient]->m_TimerType == TIMERTYPE_SIXUP)
 	{
-		protocol7::CNetObj_PlayerInfoRace *pRaceInfo = Server()->SnapNewItem<protocol7::CNetObj_PlayerInfoRace>(TranslatedId);
-		if(!pRaceInfo)
-			return;
-		pRaceInfo->m_RaceStartTick = m_pCharacter->m_StartTime;
+		protocol7::CNetObj_PlayerInfoRace RaceInfo = {};
+		RaceInfo.m_RaceStartTick = m_pCharacter->m_StartTime;
+		Server()->SnapNewItem(TranslatedId, RaceInfo);
 	}
 
 	bool ShowSpec = m_pCharacter && m_pCharacter->IsPaused() && m_pCharacter->CanSnapCharacter(SnappingClient);
@@ -484,12 +466,10 @@ void CPlayer::Snap(int SnappingClient)
 
 	if(ShowSpec)
 	{
-		CNetObj_SpecChar *pSpecChar = Server()->SnapNewItem<CNetObj_SpecChar>(TranslatedId);
-		if(!pSpecChar)
-			return;
-
-		pSpecChar->m_X = m_pCharacter->Core()->m_Pos.x;
-		pSpecChar->m_Y = m_pCharacter->Core()->m_Pos.y;
+		CNetObj_SpecChar SpecChar = {};
+		SpecChar.m_X = m_pCharacter->Core()->m_Pos.x;
+		SpecChar.m_Y = m_pCharacter->Core()->m_Pos.y;
+		Server()->SnapNewItem(TranslatedId, SpecChar);
 	}
 }
 
@@ -504,35 +484,28 @@ void CPlayer::FakeSnap()
 
 	int FakeId = VANILLA_MAX_CLIENTS - 1;
 
-	CNetObj_ClientInfo *pClientInfo = Server()->SnapNewItem<CNetObj_ClientInfo>(FakeId);
-
-	if(!pClientInfo)
-		return;
-
-	StrToInts(pClientInfo->m_aName, std::size(pClientInfo->m_aName), " ");
-	StrToInts(pClientInfo->m_aClan, std::size(pClientInfo->m_aClan), "");
-	StrToInts(pClientInfo->m_aSkin, std::size(pClientInfo->m_aSkin), "default");
+	CNetObj_ClientInfo ClientInfo = {};
+	StrToInts(ClientInfo.m_aName, std::size(ClientInfo.m_aName), " ");
+	StrToInts(ClientInfo.m_aClan, std::size(ClientInfo.m_aClan), "");
+	StrToInts(ClientInfo.m_aSkin, std::size(ClientInfo.m_aSkin), "default");
+	Server()->SnapNewItem(FakeId, ClientInfo);
 
 	if(m_Paused != PAUSE_PAUSED)
 		return;
 
-	CNetObj_PlayerInfo *pPlayerInfo = Server()->SnapNewItem<CNetObj_PlayerInfo>(FakeId);
-	if(!pPlayerInfo)
-		return;
+	CNetObj_PlayerInfo PlayerInfo = {};
+	PlayerInfo.m_Latency = m_Latency.m_Min;
+	PlayerInfo.m_Local = 1;
+	PlayerInfo.m_ClientId = FakeId;
+	PlayerInfo.m_Score = FinishTime::NOT_FINISHED_TIMESCORE;
+	PlayerInfo.m_Team = TEAM_SPECTATORS;
+	Server()->SnapNewItem(FakeId, PlayerInfo);
 
-	pPlayerInfo->m_Latency = m_Latency.m_Min;
-	pPlayerInfo->m_Local = 1;
-	pPlayerInfo->m_ClientId = FakeId;
-	pPlayerInfo->m_Score = FinishTime::NOT_FINISHED_TIMESCORE;
-	pPlayerInfo->m_Team = TEAM_SPECTATORS;
-
-	CNetObj_SpectatorInfo *pSpectatorInfo = Server()->SnapNewItem<CNetObj_SpectatorInfo>(FakeId);
-	if(!pSpectatorInfo)
-		return;
-
-	pSpectatorInfo->m_SpectatorId = m_SpectatorId;
-	pSpectatorInfo->m_X = m_ViewPos.x;
-	pSpectatorInfo->m_Y = m_ViewPos.y;
+	CNetObj_SpectatorInfo SpectatorInfo = {};
+	SpectatorInfo.m_SpectatorId = m_SpectatorId;
+	SpectatorInfo.m_X = m_ViewPos.x;
+	SpectatorInfo.m_Y = m_ViewPos.y;
+	Server()->SnapNewItem(FakeId, SpectatorInfo);
 }
 
 void CPlayer::OnDisconnect()

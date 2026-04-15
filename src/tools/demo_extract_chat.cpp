@@ -66,16 +66,15 @@ public:
 
 			Unpacker.Reset(pData, FromItemSize);
 
-			void *pRawObj = NetObjHandler.SecureUnpackObj(ItemType, &Unpacker);
-			if(!pRawObj)
+			void *pSecuredData = NetObjHandler.SecureUnpackObj(ItemType, &Unpacker);
+			if(!pSecuredData)
 				continue;
 
 			const int ItemSize = NetObjHandler.GetUnpackedObjSize(ItemType);
-			void *pObj = Builder.NewItem(ItemType, pFromItem->Id(), ItemSize);
-			if(!pObj)
+			if(!Builder.NewItem(ItemType, pFromItem->Id(), pSecuredData, ItemSize))
+			{
 				return -4;
-
-			mem_copy(pObj, pRawObj, ItemSize);
+			}
 		}
 
 		return Builder.Finish(pTo);

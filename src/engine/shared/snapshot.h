@@ -3,9 +3,6 @@
 #ifndef ENGINE_SHARED_SNAPSHOT_H
 #define ENGINE_SHARED_SNAPSHOT_H
 
-#include <generated/protocol.h>
-#include <generated/protocol7.h>
-
 #include <cstddef>
 #include <cstdint>
 
@@ -174,17 +171,20 @@ class CSnapshotBuilder
 	int GetTypeFromIndex(int Index) const;
 
 	bool m_Building = false;
+	bool m_HasDroppedItem = false;
 	bool m_Sixup = false;
 
 public:
 	void Init(bool Sixup = false);
 	void Init7(const CSnapshot *pSnapshot);
 
-	void *NewItem(int Type, int Id, int Size);
+	bool NewItem(int Type, int Id, const void *pData, int Size);
+	void *NewItemRaw(int Type, int Id, int Size);
 
 	CSnapshotItem *GetItem(int Index);
 	int *GetItemData(int Key);
 
+	int FinishIfNoDroppedItems(CSnapshotBuffer *pSnapData);
 	int Finish(CSnapshotBuffer *pBuffer);
 };
 

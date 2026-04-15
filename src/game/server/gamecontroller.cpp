@@ -597,23 +597,21 @@ void IGameController::Tick()
 
 void IGameController::Snap(int SnappingClient)
 {
-	CNetObj_GameInfo *pGameInfoObj = Server()->SnapNewItem<CNetObj_GameInfo>(0);
-	if(!pGameInfoObj)
-		return;
+	CNetObj_GameInfo GameInfo = {};
 
-	pGameInfoObj->m_GameFlags = GameFlags_ClampToSix(m_GameFlags);
-	pGameInfoObj->m_GameStateFlags = 0;
+	GameInfo.m_GameFlags = GameFlags_ClampToSix(m_GameFlags);
+	GameInfo.m_GameStateFlags = 0;
 	if(m_GameOverTick != -1)
-		pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_GAMEOVER;
+		GameInfo.m_GameStateFlags |= GAMESTATEFLAG_GAMEOVER;
 	if(m_SuddenDeath)
-		pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_SUDDENDEATH;
+		GameInfo.m_GameStateFlags |= GAMESTATEFLAG_SUDDENDEATH;
 	if(IsGamePaused())
-		pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_PAUSED;
-	pGameInfoObj->m_RoundStartTick = m_RoundStartTick;
-	pGameInfoObj->m_WarmupTimer = m_Warmup;
+		GameInfo.m_GameStateFlags |= GAMESTATEFLAG_PAUSED;
+	GameInfo.m_RoundStartTick = m_RoundStartTick;
+	GameInfo.m_WarmupTimer = m_Warmup;
 
-	pGameInfoObj->m_RoundNum = 0;
-	pGameInfoObj->m_RoundCurrent = m_RoundCount + 1;
+	GameInfo.m_RoundNum = 0;
+	GameInfo.m_RoundCurrent = m_RoundCount + 1;
 
 	CCharacter *pChr;
 	CPlayer *pPlayer = SnappingClient != SERVER_DEMO_CLIENT ? GameServer()->m_apPlayers[SnappingClient] : nullptr;
@@ -625,22 +623,20 @@ void IGameController::Snap(int SnappingClient)
 		{
 			if((pChr = pPlayer2->GetCharacter()) && pChr->m_DDRaceState == ERaceState::STARTED)
 			{
-				pGameInfoObj->m_WarmupTimer = -pChr->m_StartTime;
-				pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_RACETIME;
+				GameInfo.m_WarmupTimer = -pChr->m_StartTime;
+				GameInfo.m_GameStateFlags |= GAMESTATEFLAG_RACETIME;
 			}
 		}
 		else if((pChr = pPlayer->GetCharacter()) && pChr->m_DDRaceState == ERaceState::STARTED)
 		{
-			pGameInfoObj->m_WarmupTimer = -pChr->m_StartTime;
-			pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_RACETIME;
+			GameInfo.m_WarmupTimer = -pChr->m_StartTime;
+			GameInfo.m_GameStateFlags |= GAMESTATEFLAG_RACETIME;
 		}
 	}
+	Server()->SnapNewItem(0, GameInfo);
 
-	CNetObj_GameInfoEx *pGameInfoEx = Server()->SnapNewItem<CNetObj_GameInfoEx>(0);
-	if(!pGameInfoEx)
-		return;
-
-	pGameInfoEx->m_Flags =
+	CNetObj_GameInfoEx GameInfoEx = {};
+	GameInfoEx.m_Flags =
 		GAMEINFOFLAG_TIMESCORE |
 		GAMEINFOFLAG_GAMETYPE_RACE |
 		GAMEINFOFLAG_GAMETYPE_DDRACE |
@@ -658,52 +654,47 @@ void IGameController::Snap(int SnappingClient)
 		GAMEINFOFLAG_ENTITIES_DDRACE |
 		GAMEINFOFLAG_ENTITIES_RACE |
 		GAMEINFOFLAG_RACE;
-	pGameInfoEx->m_Flags2 = GAMEINFOFLAG2_HUD_DDRACE | GAMEINFOFLAG2_DDRACE_TEAM | GAMEINFOFLAG2_PREDICT_EVENTS;
+	GameInfoEx.m_Flags2 = GAMEINFOFLAG2_HUD_DDRACE | GAMEINFOFLAG2_DDRACE_TEAM | GAMEINFOFLAG2_PREDICT_EVENTS;
 	if(g_Config.m_SvNoWeakHook)
-		pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_NO_WEAK_HOOK;
-	pGameInfoEx->m_Version = GAMEINFO_CURVERSION;
+		GameInfoEx.m_Flags2 |= GAMEINFOFLAG2_NO_WEAK_HOOK;
+	GameInfoEx.m_Version = GAMEINFO_CURVERSION;
+	Server()->SnapNewItem(0, GameInfoEx);
 
 	if(Server()->IsSixup(SnappingClient))
 	{
-		protocol7::CNetObj_GameData *pGameData = Server()->SnapNewItem<protocol7::CNetObj_GameData>(0);
-		if(!pGameData)
-			return;
-
-		pGameData->m_GameStartTick = m_RoundStartTick;
-		pGameData->m_GameStateFlags = 0;
+		protocol7::CNetObj_GameData GameData = {};
+		GameData.m_GameStartTick = m_RoundStartTick;
+		GameData.m_GameStateFlags = 0;
 		if(m_GameOverTick != -1)
-			pGameData->m_GameStateFlags |= protocol7::GAMESTATEFLAG_GAMEOVER;
+			GameData.m_GameStateFlags |= protocol7::GAMESTATEFLAG_GAMEOVER;
 		if(m_SuddenDeath)
-			pGameData->m_GameStateFlags |= protocol7::GAMESTATEFLAG_SUDDENDEATH;
+			GameData.m_GameStateFlags |= protocol7::GAMESTATEFLAG_SUDDENDEATH;
 		if(IsGamePaused())
-			pGameData->m_GameStateFlags |= protocol7::GAMESTATEFLAG_PAUSED;
+			GameData.m_GameStateFlags |= protocol7::GAMESTATEFLAG_PAUSED;
+		GameData.m_GameStateEndTick = 0;
+		Server()->SnapNewItem(0, GameData);
 
-		pGameData->m_GameStateEndTick = 0;
-
-		protocol7::CNetObj_GameDataRace *pRaceData = Server()->SnapNewItem<protocol7::CNetObj_GameDataRace>(0);
-		if(!pRaceData)
-			return;
-
+		protocol7::CNetObj_GameDataRace RaceData = {};
 		CFinishTime MapTime = SnapMapBestTime(SnappingClient);
 		int BestTime = MapTime.m_Seconds > 0 ? MapTime.m_Seconds * 1000 + MapTime.m_Milliseconds : -1;
 
-		pRaceData->m_BestTime = BestTime;
-		pRaceData->m_Precision = 2;
-		pRaceData->m_RaceFlags = protocol7::RACEFLAG_KEEP_WANTED_WEAPON;
+		RaceData.m_BestTime = BestTime;
+		RaceData.m_Precision = 2;
+		RaceData.m_RaceFlags = protocol7::RACEFLAG_KEEP_WANTED_WEAPON;
+		Server()->SnapNewItem(0, RaceData);
 	}
 
 	GameServer()->SnapSwitchers(SnappingClient);
 
-	if(!Server()->IsSixup(SnappingClient) && GameServer()->GetClientVersion(SnappingClient) >= VERSION_DDNET_MAP_BESTTIME)
+	if(!Server()->IsSixup(SnappingClient))
 	{
 		CFinishTime MapTime = SnapMapBestTime(SnappingClient);
 		if(MapTime.m_Seconds != FinishTime::UNSET)
 		{
-			CNetObj_MapBestTime *pMapTimeMsg = Server()->SnapNewItem<CNetObj_MapBestTime>(0);
-			if(!pMapTimeMsg)
-				return;
-			pMapTimeMsg->m_MapBestTimeSeconds = MapTime.m_Seconds;
-			pMapTimeMsg->m_MapBestTimeMillis = MapTime.m_Milliseconds;
+			CNetObj_MapBestTime MapBestTime = {};
+			MapBestTime.m_MapBestTimeSeconds = MapTime.m_Seconds;
+			MapBestTime.m_MapBestTimeMillis = MapTime.m_Milliseconds;
+			Server()->SnapNewItem(0, MapBestTime);
 		}
 	}
 }

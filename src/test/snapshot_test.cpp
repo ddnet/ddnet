@@ -12,12 +12,10 @@ TEST(Snapshot, CrcOneInt)
 	Builder.Init();
 
 	CNetObj_Flag Flag;
-	void *pItem = Builder.NewItem(CNetObj_Flag::ms_MsgId, 0, sizeof(Flag));
-	ASSERT_FALSE(pItem == nullptr);
 	Flag.m_X = 4;
 	Flag.m_Y = 0;
 	Flag.m_Team = 0;
-	mem_copy(pItem, &Flag, sizeof(Flag));
+	ASSERT_TRUE(Builder.NewItem(NETOBJTYPE_FLAG, 0, &Flag, sizeof(Flag)));
 
 	CSnapshotBuffer Buffer;
 	Builder.Finish(&Buffer);
@@ -30,12 +28,10 @@ TEST(Snapshot, CrcTwoInts)
 	Builder.Init();
 
 	CNetObj_Flag Flag;
-	void *pItem = Builder.NewItem(CNetObj_Flag::ms_MsgId, 0, sizeof(Flag));
-	ASSERT_FALSE(pItem == nullptr);
 	Flag.m_X = 1;
 	Flag.m_Y = 1;
 	Flag.m_Team = 0;
-	mem_copy(pItem, &Flag, sizeof(Flag));
+	ASSERT_TRUE(Builder.NewItem(NETOBJTYPE_FLAG, 0, &Flag, sizeof(Flag)));
 
 	CSnapshotBuffer Buffer;
 	Builder.Finish(&Buffer);
@@ -48,12 +44,10 @@ TEST(Snapshot, CrcBiggerInts)
 	Builder.Init();
 
 	CNetObj_Flag Flag;
-	void *pItem = Builder.NewItem(CNetObj_Flag::ms_MsgId, 0, sizeof(Flag));
-	ASSERT_FALSE(pItem == nullptr);
 	Flag.m_X = 99999999;
 	Flag.m_Y = 1;
 	Flag.m_Team = 1;
-	mem_copy(pItem, &Flag, sizeof(Flag));
+	ASSERT_TRUE(Builder.NewItem(NETOBJTYPE_FLAG, 0, &Flag, sizeof(Flag)));
 
 	CSnapshotBuffer Buffer;
 	Builder.Finish(&Buffer);
@@ -66,12 +60,10 @@ TEST(Snapshot, CrcOverflow)
 	Builder.Init();
 
 	CNetObj_Flag Flag;
-	void *pItem = Builder.NewItem(CNetObj_Flag::ms_MsgId, 0, sizeof(Flag));
-	ASSERT_FALSE(pItem == nullptr);
 	Flag.m_X = 0xFFFFFFFF;
 	Flag.m_Y = 1;
 	Flag.m_Team = 1;
-	mem_copy(pItem, &Flag, sizeof(Flag));
+	ASSERT_TRUE(Builder.NewItem(NETOBJTYPE_FLAG, 0, &Flag, sizeof(Flag)));
 
 	CSnapshotBuffer Buffer;
 	Builder.Finish(&Buffer);
