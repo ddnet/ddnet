@@ -148,12 +148,19 @@ enum
 	VERSION_DDNET_SAVE_CODE = 19060,
 	VERSION_DDNET_IMPORTANT_ALERT = 19060,
 	VERSION_DDNET_MAP_BESTTIME = 19070,
+	VERSION_DDNET_TARGETSWITCH = 19080,
 };
 
 namespace TuneZone
 {
 	inline constexpr int OVERRIDE_NONE = -1;
 	inline constexpr int NUM = 256;
+};
+
+namespace TargetSwitch
+{
+	inline constexpr int MAX_TARGET_SWITCHES = 256;
+	inline constexpr int SWITCH_COOLDOWN_TICKS = 4;
 };
 
 namespace FinishTime

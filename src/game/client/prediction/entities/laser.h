@@ -24,7 +24,7 @@ public:
 	CLaserData GetData() const;
 
 protected:
-	bool HitCharacter(vec2 From, vec2 To);
+	bool HitFirstEntity(vec2 From, vec2 To);
 	void DoBounce();
 
 private:

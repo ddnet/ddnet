@@ -124,6 +124,9 @@ private:
 	int m_aHitObjects[MAX_CLIENTS];
 	int m_NumObjectsHit;
 
+	CEntity *m_apHitTargetSwitches[TargetSwitch::MAX_TARGET_SWITCHES];
+	int m_NumTargetSwitchesHit;
+
 	int m_LastWeapon;
 	int m_QueuedWeapon;
 
