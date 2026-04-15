@@ -19,6 +19,9 @@ public:
 
 	CUi::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
 
+	bool IsEnvelopeUsed(int EnvelopeIndex) const override;
+	bool IsSoundUsed(int SoundIndex) const override;
+
 	void ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction) override;
 	void ModifySoundIndex(const FIndexModifyFunction &IndexModifyFunction) override;
 

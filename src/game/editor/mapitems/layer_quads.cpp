@@ -226,6 +226,18 @@ CUi::EPopupMenuFunctionResult CLayerQuads::RenderProperties(CUIRect *pToolBox)
 	return CUi::POPUP_KEEP_OPEN;
 }
 
+bool CLayerQuads::IsEnvelopeUsed(int EnvelopeIndex) const
+{
+	return std::any_of(m_vQuads.begin(), m_vQuads.end(), [&](const auto &Quad) {
+		return Quad.m_PosEnv == EnvelopeIndex || Quad.m_ColorEnv == EnvelopeIndex;
+	});
+}
+
+bool CLayerQuads::IsImageUsed(int ImageIndex) const
+{
+	return m_Image == ImageIndex;
+}
+
 void CLayerQuads::ModifyImageIndex(const FIndexModifyFunction &IndexModifyFunction)
 {
 	IndexModifyFunction(&m_Image);

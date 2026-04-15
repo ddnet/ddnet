@@ -23,6 +23,9 @@ public:
 
 	CUi::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
 
+	bool IsEnvelopeUsed(int EnvelopeIndex) const override;
+	bool IsImageUsed(int ImageIndex) const override;
+
 	void ModifyImageIndex(const FIndexModifyFunction &IndexModifyFunction) override;
 	void ModifyEnvelopeIndex(const FIndexModifyFunction &IndexModifyFunction) override;
 
