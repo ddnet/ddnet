@@ -65,7 +65,7 @@ void CQuadKnife::DoSlice()
 	const bool IgnoreGrid = Editor()->Input()->AltIsPressed();
 	float SnapRadius = 4.f * Editor()->m_MouseWorldScale;
 
-	vec2 Mouse = vec2(Editor()->Ui()->MouseWorldX(), Editor()->Ui()->MouseWorldY());
+	vec2 Mouse = Editor()->Ui()->MouseWorldPos();
 	vec2 Point = Mouse;
 
 	vec2 v[4] = {
@@ -78,7 +78,7 @@ void CQuadKnife::DoSlice()
 
 	if(Editor()->Ui()->MouseButtonClicked(1))
 	{
-		Map()->m_QuadKnifeState.m_Active = false;
+		Deactivate();
 		return;
 	}
 
@@ -229,10 +229,10 @@ void CQuadKnife::DoSlice()
 	Graphics()->LinesBegin();
 
 	IGraphics::CLineItem aEdges[] = {
-		IGraphics::CLineItem(v[0].x, v[0].y, v[1].x, v[1].y),
-		IGraphics::CLineItem(v[1].x, v[1].y, v[2].x, v[2].y),
-		IGraphics::CLineItem(v[2].x, v[2].y, v[3].x, v[3].y),
-		IGraphics::CLineItem(v[3].x, v[3].y, v[0].x, v[0].y)};
+		IGraphics::CLineItem(v[0], v[1]),
+		IGraphics::CLineItem(v[1], v[2]),
+		IGraphics::CLineItem(v[2], v[3]),
+		IGraphics::CLineItem(v[3], v[0])};
 
 	Graphics()->SetColor(1.f, 0.5f, 0.f, 1.f);
 	Graphics()->LinesDraw(aEdges, std::size(aEdges));
