@@ -73,7 +73,6 @@ public:
 	virtual const char *GetBinaryPath(const char *pFilename, char *pBuffer, unsigned BufferSize) = 0;
 	virtual const char *GetBinaryPathAbsolute(const char *pFilename, char *pBuffer, unsigned BufferSize) = 0;
 
-	static void StripPathAndExtension(const char *pFilename, char *pBuffer, int BufferSize);
 	static const char *FormatTmpPath(char *aBuf, unsigned BufSize, const char *pPath);
 };
 

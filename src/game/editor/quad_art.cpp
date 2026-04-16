@@ -3,6 +3,9 @@
 #include "editor.h"
 #include "editor_actions.h"
 
+#include <base/fs.h>
+#include <base/str.h>
+
 #include <game/editor/mapitems/image.h>
 
 #include <algorithm>
@@ -171,7 +174,7 @@ bool CQuadArt::Create(std::shared_ptr<CLayerQuads> &pQuadLayer)
 void CEditorMap::AddQuadArt(CImageInfo &&Image, const CQuadArtParameters &Parameters, bool IgnoreHistory)
 {
 	char aQuadArtName[IO_MAX_PATH_LENGTH];
-	IStorage::StripPathAndExtension(Parameters.m_aFilename, aQuadArtName, sizeof(aQuadArtName));
+	fs_split_file_extension(fs_filename(Parameters.m_aFilename), aQuadArtName, sizeof(aQuadArtName));
 
 	std::shared_ptr<CLayerGroup> pGroup = NewGroup();
 	str_copy(pGroup->m_aName, aQuadArtName);

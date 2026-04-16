@@ -234,7 +234,7 @@ bool CEditor::CallbackCustomEntities(const char *pFilename, int StorageType, voi
 	CEditor *pEditor = (CEditor *)pUser;
 
 	char aBuf[IO_MAX_PATH_LENGTH];
-	IStorage::StripPathAndExtension(pFilename, aBuf, sizeof(aBuf));
+	fs_split_file_extension(fs_filename(pFilename), aBuf, sizeof(aBuf));
 
 	if(std::find(pEditor->m_vSelectEntitiesFiles.begin(), pEditor->m_vSelectEntitiesFiles.end(), std::string(aBuf)) != pEditor->m_vSelectEntitiesFiles.end())
 	{
@@ -3747,7 +3747,7 @@ bool CEditor::ReplaceImage(const char *pFilename, int StorageType, bool CheckDup
 {
 	// check if we have that image already
 	char aBuf[IO_MAX_PATH_LENGTH];
-	IStorage::StripPathAndExtension(pFilename, aBuf, sizeof(aBuf));
+	fs_split_file_extension(fs_filename(pFilename), aBuf, sizeof(aBuf));
 	if(CheckDuplicate)
 	{
 		for(const auto &pImage : Map()->m_vpImages)
@@ -3799,7 +3799,7 @@ bool CEditor::AddImage(const char *pFilename, int StorageType, void *pUser)
 
 	// check if we have that image already
 	char aBuf[IO_MAX_PATH_LENGTH];
-	IStorage::StripPathAndExtension(pFilename, aBuf, sizeof(aBuf));
+	fs_split_file_extension(fs_filename(pFilename), aBuf, sizeof(aBuf));
 	for(const auto &pImage : pEditor->Map()->m_vpImages)
 	{
 		if(!str_comp(pImage->m_aName, aBuf))
@@ -3850,7 +3850,7 @@ bool CEditor::AddSound(const char *pFilename, int StorageType, void *pUser)
 
 	// check if we have that sound already
 	char aBuf[IO_MAX_PATH_LENGTH];
-	IStorage::StripPathAndExtension(pFilename, aBuf, sizeof(aBuf));
+	fs_split_file_extension(fs_filename(pFilename), aBuf, sizeof(aBuf));
 	for(const auto &pSound : pEditor->Map()->m_vpSounds)
 	{
 		if(!str_comp(pSound->m_aName, aBuf))
@@ -3902,7 +3902,7 @@ bool CEditor::ReplaceSound(const char *pFilename, int StorageType, bool CheckDup
 {
 	// check if we have that sound already
 	char aBuf[IO_MAX_PATH_LENGTH];
-	IStorage::StripPathAndExtension(pFilename, aBuf, sizeof(aBuf));
+	fs_split_file_extension(fs_filename(pFilename), aBuf, sizeof(aBuf));
 	if(CheckDuplicate)
 	{
 		for(const auto &pSound : Map()->m_vpSounds)
@@ -7298,7 +7298,7 @@ void CEditor::HandleWriterFinishJobs()
 		if(net_addr_is_local(&Client()->ServerAddress()))
 		{
 			char aMapName[MAX_MAP_LENGTH];
-			IStorage::StripPathAndExtension(pJob->RealFilename(), aMapName, sizeof(aMapName));
+			fs_split_file_extension(fs_filename(pJob->RealFilename()), aMapName, sizeof(aMapName));
 			if(!str_comp(aMapName, CurrentServerInfo.m_aMap))
 				Client()->Rcon("hot_reload");
 		}

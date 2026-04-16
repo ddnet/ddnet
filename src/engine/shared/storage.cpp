@@ -911,28 +911,6 @@ public:
 	}
 };
 
-void IStorage::StripPathAndExtension(const char *pFilename, char *pBuffer, int BufferSize)
-{
-	const char *pFilenameEnd = pFilename + str_length(pFilename);
-	const char *pExtractedName = pFilename;
-	const char *pEnd = pFilenameEnd;
-	for(const char *pIter = pFilename; *pIter; pIter++)
-	{
-		if(*pIter == '/' || *pIter == '\\')
-		{
-			pExtractedName = pIter + 1;
-			pEnd = pFilenameEnd;
-		}
-		else if(*pIter == '.')
-		{
-			pEnd = pIter;
-		}
-	}
-
-	int Length = minimum(BufferSize, (int)(pEnd - pExtractedName + 1));
-	str_copy(pBuffer, pExtractedName, Length);
-}
-
 const char *IStorage::FormatTmpPath(char *aBuf, unsigned BufSize, const char *pPath)
 {
 	str_format(aBuf, BufSize, "%s.%d.tmp", pPath, process_id());

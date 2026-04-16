@@ -135,7 +135,7 @@ int main(int argc, const char **argv)
 	else
 	{
 		char aBuf[IO_MAX_PATH_LENGTH];
-		IStorage::StripPathAndExtension(pSourceFilename, aBuf, sizeof(aBuf));
+		fs_split_file_extension(fs_filename(pSourceFilename), aBuf, sizeof(aBuf));
 		str_format(aDestFilename, sizeof(aDestFilename), "data/maps7/%s.map", aBuf);
 		if(fs_makedir("data") != 0)
 		{

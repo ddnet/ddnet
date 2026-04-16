@@ -108,7 +108,7 @@ int main(int argc, const char **argv)
 	{
 		fs_makedir("out");
 		char aBuff[IO_MAX_PATH_LENGTH];
-		IStorage::StripPathAndExtension(argv[1], aBuff, sizeof(aBuff));
+		fs_split_file_extension(fs_filename(argv[1]), aBuff, sizeof(aBuff));
 		str_format(aFilename, sizeof(aFilename), "out/%s.map", aBuff);
 	}
 
