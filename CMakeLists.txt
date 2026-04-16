@@ -112,7 +112,7 @@ option(STEAM "Build the Steam release version" OFF)
 option(DISCORD "Enable Discord rich presence support" OFF)
 option(DISCORD_DYNAMIC "Enable discovering Discord rich presence libraries at runtime (Linux only)" OFF)
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
-option(DEV "Don't generate stuff necessary for packaging" OFF)
+option(DEV "Don't generate stuff necessary for packaging, don't strip absolute paths from debug info, enable additional assertions" OFF)
 option(VULKAN "Enable the vulkan backend" ${AUTO_VULKAN_BACKEND})
 
 option(EXCEPTION_HANDLING "Enable crashdumps (only works with Windows)" OFF)
@@ -301,11 +301,15 @@ if(NOT MSVC AND NOT HAIKU)
   # special characters will be displayed incorrectly on servers.
   add_cxx_compiler_flag_if_supported(OUR_FLAGS -fsigned-char)
 
+  # Support more sections in object files, because the limit is exceeded for some files in debug mode.
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS -Wa,-mbig-obj)
+
   # Don't insert timestamps into PEs to keep the build reproducible.
   if(TARGET_OS STREQUAL "windows")
     add_cxx_compiler_flag_if_supported(OUR_FLAGS_LINK -Wl,--no-insert-timestamp)
   endif()
 
+  # Strip absolute build paths from debug info. Prevent adding compiler name and version metadata.
   if(NOT CMAKE_BUILD_TYPE STREQUAL Debug AND NOT DEV)
     add_cxx_compiler_flag_if_supported(OUR_FLAGS -ffile-prefix-map=${CMAKE_SOURCE_DIR}=/${CMAKE_PROJECT_NAME})
     add_cxx_compiler_flag_if_supported(OUR_FLAGS -ffile-prefix-map=${PROJECT_BINARY_DIR}=/${CMAKE_PROJECT_NAME})
@@ -803,15 +807,27 @@ if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
         EXCLUDE_FROM_ALL
       )
 
-      if(MSVC)
-        foreach(target gtest gmock)
+      foreach(target gtest gmock)
+        # Enable additional assertions. See:
+        # - https://gcc.gnu.org/wiki/LibstdcxxDebugMode
+        # - https://releases.llvm.org/12.0.0/projects/libcxx/docs/DesignDocs/DebugMode.html
+        if(CMAKE_BUILD_TYPE STREQUAL Debug)
+          # Enable heavier checks that catch more errors.
+          target_compile_definitions(${target} PRIVATE _GLIBCXX_DEBUG) # This also enables _GLIBCXX_ASSERTIONS.
+          target_compile_definitions(${target} PRIVATE _LIBCPP_DEBUG=1)
+        else()
+          # Enable lighter checks that do not change the complexity of operations.
+          target_compile_definitions(${target} PRIVATE _GLIBCXX_ASSERTIONS)
+          target_compile_definitions(${target} PRIVATE _LIBCPP_DEBUG=0)
+        endif()
+        if(MSVC)
           set_property(TARGET ${target} PROPERTY MSVC_RUNTIME_LIBRARY MultiThreaded$<${DBG}:Debug>)
           # `/w` disables all warnings. This is needed because `gtest` enables
           # `/WX` (equivalent of `-Werror`) for some reason, breaking builds
           # when MSVS adds new warnings.
           target_compile_options(${target} PRIVATE /w)
-        endforeach()
-      endif()
+        endif()
+      endforeach()
 
       set(GTEST_LIBRARIES gtest gmock)
       set(GTEST_INCLUDE_DIRS)
@@ -3675,6 +3691,7 @@ foreach(target ${TARGETS})
     target_compile_options(${target} PRIVATE /GS) # Protect the stack pointer.
     target_compile_options(${target} PRIVATE /wd4996) # Use of non-_s functions.
     target_compile_options(${target} PRIVATE /utf-8) # Use UTF-8 for source files.
+    target_compile_options(${target} PRIVATE /bigobj) # Support more sections in object files, because the limit is exceeded for some files in debug mode.
     # Enable Edit & Continue (Hot Reload) support
     if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.25)
       set_property(TARGET ${target} PROPERTY MSVC_DEBUG_INFORMATION_FORMAT $<IF:$<CONFIG:Debug>,EditAndContinue,Embedded>)
@@ -3752,6 +3769,20 @@ foreach(target ${TARGETS_OWN})
   target_include_directories(${target} SYSTEM PRIVATE ${CURL_INCLUDE_DIRS} ${SQLite3_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS})
   target_compile_definitions(${target} PRIVATE GLEW_STATIC)
   target_compile_definitions(${target} PRIVATE _FILE_OFFSET_BITS=64) # Ensure off_t is 64 bit for ftello and fseeko functions
+
+  # Enable additional assertions. See:
+  # - https://gcc.gnu.org/wiki/LibstdcxxDebugMode
+  # - https://releases.llvm.org/12.0.0/projects/libcxx/docs/DesignDocs/DebugMode.html
+  if(CMAKE_BUILD_TYPE STREQUAL Debug)
+    # Enable heavier checks that catch more errors.
+    target_compile_definitions(${target} PRIVATE _GLIBCXX_DEBUG) # This also enables _GLIBCXX_ASSERTIONS.
+    target_compile_definitions(${target} PRIVATE _LIBCPP_DEBUG=1)
+  else()
+    # Enable lighter checks that do not change the complexity of operations.
+    target_compile_definitions(${target} PRIVATE _GLIBCXX_ASSERTIONS)
+    target_compile_definitions(${target} PRIVATE _LIBCPP_DEBUG=0)
+  endif()
+
   if(CRYPTO_FOUND)
     target_compile_definitions(${target} PRIVATE CONF_OPENSSL)
     target_include_directories(${target} SYSTEM PRIVATE ${CRYPTO_INCLUDE_DIRS})
