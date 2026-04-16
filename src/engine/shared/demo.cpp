@@ -1290,7 +1290,7 @@ void CDemoPlayer::Stop(const char *pErrorMessage)
 
 void CDemoPlayer::GetDemoName(char *pBuffer, size_t BufferSize) const
 {
-	IStorage::StripPathAndExtension(m_aFilename, pBuffer, BufferSize);
+	fs_split_file_extension(fs_filename(m_aFilename), pBuffer, BufferSize);
 }
 
 bool CDemoPlayer::GetDemoInfo(IStorage *pStorage, IConsole *pConsole, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo, IOHANDLE *pFile, char *pErrorMessage, size_t ErrorMessageSize) const

@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.  */
 
 #include <base/dbg.h>
+#include <base/fs.h>
 #include <base/io.h>
 #include <base/logger.h>
 #include <base/os.h>
@@ -60,7 +61,7 @@ static void *ReplaceImageItem(int Index, CMapItemImage *pImgItem, const char *pI
 	pNewImgItem->m_Height = ImgInfo.m_Height;
 
 	g_NewNameId = pImgItem->m_ImageName;
-	IStorage::StripPathAndExtension(pImgFile, g_aNewName, sizeof(g_aNewName));
+	fs_split_file_extension(fs_filename(pImgFile), g_aNewName, sizeof(g_aNewName));
 	g_NewDataId = pImgItem->m_ImageData;
 	g_pNewData = ImgInfo.m_pData;
 	g_NewDataSize = ImgInfo.DataSize();
