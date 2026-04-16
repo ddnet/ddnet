@@ -730,15 +730,10 @@ int CCollision::IsTeleportHook(int Index) const
 	return 0;
 }
 
-int CCollision::IsSpeedup(int Index) const
+bool CCollision::IsSpeedup(int Index) const
 {
-	if(Index < 0 || !m_pSpeedup)
-		return 0;
-
-	if(m_pSpeedup[Index].m_Force > 0)
-		return Index;
-
-	return 0;
+	dbg_assert(Index >= 0, "Invalid speedup index %d", Index);
+	return m_pSpeedup && m_pSpeedup[Index].m_Force > 0;
 }
 
 int CCollision::IsTune(int Index) const
