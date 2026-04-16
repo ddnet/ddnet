@@ -7523,8 +7523,21 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 	// If `Adjust` is 0 and `UseNextFree` is false, then update numbers of brush tiles to global values
 	// If true, then use the next free number instead
 
-	auto &&AdjustNumber = [Adjust](auto &Number, short Limit = 255) {
-		Number = ((Number + Adjust) - 1 + Limit) % Limit + 1;
+	dbg_assert(Adjust == -1 || Adjust == 0 || Adjust == 1, "Invalid Adjust: %d", Adjust);
+	auto &&AdjustNumber = [Adjust](auto &Number, int Min, int Max) {
+		const int NumberInt = Number + Adjust; // Cast to int so this does not overflow unsigned char for some tiles
+		if(NumberInt < Min)
+		{
+			Number = Max;
+		}
+		else if(NumberInt > Max)
+		{
+			Number = Min;
+		}
+		else
+		{
+			Number = NumberInt;
+		}
 	};
 
 	for(auto &pLayer : m_pBrush->m_vpLayers)
@@ -7556,7 +7569,7 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 							pTeleLayer->m_pTeleTile[i].m_Number = NextFreeTeleNumber;
 					}
 					else
-						AdjustNumber(pTeleLayer->m_pTeleTile[i].m_Number);
+						AdjustNumber(pTeleLayer->m_pTeleTile[i].m_Number, 1, 255);
 
 					if(!UseNextFree && Adjust == 0 && IsTeleTileNumberUsedAny(pTeleLayer->m_pTiles[i].m_Index))
 					{
@@ -7581,7 +7594,7 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 						if(!IsValidTuneTile(pTuneLayer->m_pTiles[i].m_Index) || !pTuneLayer->m_pTuneTile[i].m_Number)
 							continue;
 
-						AdjustNumber(pTuneLayer->m_pTuneTile[i].m_Number);
+						AdjustNumber(pTuneLayer->m_pTuneTile[i].m_Number, 1, 255);
 					}
 				}
 			}
@@ -7602,7 +7615,7 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 					if(UseNextFree)
 						pSwitchLayer->m_pSwitchTile[i].m_Number = NextFreeNumber;
 					else
-						AdjustNumber(pSwitchLayer->m_pSwitchTile[i].m_Number);
+						AdjustNumber(pSwitchLayer->m_pSwitchTile[i].m_Number, 1, 255);
 				}
 			}
 		}
@@ -7621,7 +7634,7 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 
 						if(Adjust != 0)
 						{
-							AdjustNumber(pSpeedupLayer->m_pSpeedupTile[i].m_Angle, 359);
+							AdjustNumber(pSpeedupLayer->m_pSpeedupTile[i].m_Angle, 0, 359);
 						}
 						else
 						{
