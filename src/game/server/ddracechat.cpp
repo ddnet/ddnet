@@ -2392,3 +2392,24 @@ void CGameContext::ConTimeCP(IConsole::IResult *pResult, void *pUserData)
 	const char *pName = pResult->GetString(0);
 	pSelf->Score()->LoadPlayerTimeCp(pResult->m_ClientId, pName);
 }
+
+void CGameContext::ConHighBandwidth(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int ClientId = pResult->m_ClientId;
+	if(!CheckClientId(ClientId))
+		return;
+	CPlayer *pPlayer = pSelf->m_apPlayers[ClientId];
+	if(!pPlayer)
+		return;
+
+	const bool Value = pResult->NumArguments() ? pResult->GetInteger(0) : !pSelf->Server()->GetHighBandwidth(ClientId);
+	if(pSelf->Server()->GetHighBandwidth(ClientId) == Value)
+		return;
+
+	pSelf->Server()->SetHighBandwidth(ClientId, Value);
+	if(Value)
+		pSelf->SendChatTarget(ClientId, "High Bandwidth mode enabled (full 50 snapshots instead of 25 per second)");
+	else
+		pSelf->SendChatTarget(ClientId, "High Bandwidth mode disabled");
+}
