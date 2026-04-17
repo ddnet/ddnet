@@ -22,6 +22,8 @@ public:
 	};
 	CKeyReaderResult DoKeyReader(CButtonContainer *pReaderButton, CButtonContainer *pClearButton, const CUIRect *pRect, const CBindSlot &CurrentBind, bool Activate);
 	bool IsActive() const;
+	bool HasPendingKeyReader() const { return m_pKeyReaderId != nullptr; }
+	bool AbortPendingKey();
 
 private:
 	const CButtonContainer *m_pKeyReaderId = nullptr;

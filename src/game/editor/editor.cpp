@@ -6608,6 +6608,7 @@ void CEditor::Render()
 	if(m_GuiActive)
 		RenderTooltip(TooltipRect);
 
+	Ui()->RenderBackButton();
 	RenderMousePointer();
 }
 
@@ -7070,6 +7071,14 @@ void CEditor::Init()
 	m_UI.SetPopupMenuClosedCallback([this]() {
 		m_PopupEventWasActivated = false;
 	});
+	m_UI.SetDispatchInputCallback([this](const IInput::CEvent &Event) {
+		for(CEditorComponent &Component : m_vComponents)
+		{
+			if(Component.OnInput(Event) && (Event.m_Flags & ~IInput::FLAG_RELEASE) != 0)
+				return;
+		}
+		m_UI.OnInput(Event);
+	});
 	m_RenderMap.Init(m_pGraphics, m_pTextRender);
 	m_ZoomEnvelopeX.OnInit(this);
 	m_ZoomEnvelopeY.OnInit(this);
@@ -7379,6 +7388,8 @@ void CEditor::OnRender()
 	Ui()->StartCheck();
 
 	Ui()->Update(m_MouseWorldPos);
+
+	Ui()->DoBackButton();
 
 	Render();
 
