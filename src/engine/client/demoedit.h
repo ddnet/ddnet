@@ -9,8 +9,8 @@ class IStorage;
 
 class CDemoEdit : public IJob
 {
-	CSnapshotDelta m_SnapshotDelta;
-	CSnapshotDelta m_SnapshotDeltaSixup;
+	rust::Box<CSnapshotDelta> m_pSnapshotDelta;
+	rust::Box<CSnapshotDelta> m_pSnapshotDeltaSixup;
 	IStorage *m_pStorage;
 
 	CDemoEditor m_DemoEditor;

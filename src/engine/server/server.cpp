@@ -230,13 +230,16 @@ void CServer::CClient::Reset()
 	m_RedirectDropTime = 0;
 }
 
-CServer::CServer()
+CServer::CServer() :
+	m_pSnapshotDelta(CSnapshotDelta_New()),
+	m_pSnapshotDeltaSixup(CSnapshotDelta_New()),
+	m_pSnapshotBuilder(CSnapshotBuilder_New())
 {
 	m_pConfig = &g_Config;
 	for(int i = 0; i < MAX_CLIENTS; i++)
-		m_aDemoRecorder[i] = CDemoRecorder(&m_SnapshotDelta, true);
-	m_aDemoRecorder[RECORDER_MANUAL] = CDemoRecorder(&m_SnapshotDelta, false);
-	m_aDemoRecorder[RECORDER_AUTO] = CDemoRecorder(&m_SnapshotDelta, false);
+		m_aDemoRecorder[i] = CDemoRecorder(&*m_pSnapshotDelta, true);
+	m_aDemoRecorder[RECORDER_MANUAL] = CDemoRecorder(&*m_pSnapshotDelta, false);
+	m_aDemoRecorder[RECORDER_AUTO] = CDemoRecorder(&*m_pSnapshotDelta, false);
 
 	m_pGameServer = nullptr;
 
@@ -1008,9 +1011,9 @@ void CServer::DoSnapshot()
 		CSnapshotBuffer Data;
 
 		// build snap and possibly add some messages
-		m_SnapshotBuilder.Init();
+		m_pSnapshotBuilder->Init(false);
 		GameServer()->OnSnap(-1, IsGlobalSnap, true);
-		int SnapshotSize = m_SnapshotBuilder.Finish(&Data);
+		int SnapshotSize = m_pSnapshotBuilder->Finish(Data);
 
 		// write snapshot
 		if(m_aDemoRecorder[RECORDER_MANUAL].IsRecording())
@@ -1039,14 +1042,14 @@ void CServer::DoSnapshot()
 			continue;
 
 		{
-			m_SnapshotBuilder.Init(m_aClients[i].m_Sixup);
+			m_pSnapshotBuilder->Init(m_aClients[i].m_Sixup);
 
 			// only snap events on global ticks
 			GameServer()->OnSnap(i, IsGlobalSnap, m_aDemoRecorder[i].IsRecording());
 
 			// finish snapshot
 			CSnapshotBuffer Data;
-			int SnapshotSize = m_SnapshotBuilder.Finish(&Data);
+			int SnapshotSize = m_pSnapshotBuilder->Finish(Data);
 
 			if(m_aDemoRecorder[i].IsRecording())
 			{
@@ -1079,9 +1082,9 @@ void CServer::DoSnapshot()
 			}
 
 			// create delta
-			CSnapshotDelta *const pSnapshotDelta = IsSixup(i) ? &m_SnapshotDeltaSixup : &m_SnapshotDelta;
-			char aDeltaData[CSnapshot::MAX_SIZE];
-			int DeltaSize = pSnapshotDelta->CreateDelta(pDeltashot, Data.AsSnapshot(), aDeltaData);
+			CSnapshotDelta *const pSnapshotDelta = IsSixup(i) ? &*m_pSnapshotDeltaSixup : &*m_pSnapshotDelta;
+			int32_t aDeltaData[CSnapshot::MAX_SIZE / sizeof(int32_t)];
+			int DeltaSize = pSnapshotDelta->CreateDelta(*pDeltashot, *Data.AsSnapshot(), rust::Slice(aDeltaData, std::size(aDeltaData)));
 
 			if(DeltaSize)
 			{
@@ -4466,19 +4469,19 @@ void CServer::SnapFreeId(int Id)
 	m_IdPool.FreeId(Id);
 }
 
-bool CServer::SnapNewItem(int Type, int Id, const void *pData, int Size)
+bool CServer::SnapNewItem(int Type, int Id, rust::Slice<const int32_t> Data)
 {
-	return m_SnapshotBuilder.NewItem(Type, Id, pData, Size);
+	return m_pSnapshotBuilder->NewItem(Type, Id, Data);
 }
 
 void CServer::SnapSetStaticsize(int ItemType, int Size)
 {
-	m_SnapshotDelta.SetStaticsize(ItemType, Size);
+	m_pSnapshotDelta->SetStaticsize(ItemType, Size);
 }
 
 void CServer::SnapSetStaticsize7(int ItemType, int Size)
 {
-	m_SnapshotDeltaSixup.SetStaticsize(ItemType, Size);
+	m_pSnapshotDeltaSixup->SetStaticsize(ItemType, Size);
 }
 
 CServer *CreateServer() { return new CServer(); }

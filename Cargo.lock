@@ -3,6 +3,18 @@
 version = 3
 
 [[package]]
+name = "arrayvec"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "23b62fc65de8e4e7f52534fb52b0f3ed04746ae267519eef2a83941e8085068b"
+
+[[package]]
+name = "byteorder"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
+
+[[package]]
 name = "cc"
 version = "1.2.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -37,7 +49,7 @@ checksum = "9d3a240a54f5526967ffae81fdcda1fc80564964220d90816960b2eae2eab7f4"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn",
+ "syn 1.0.98",
 ]
 
 [[package]]
@@ -66,11 +78,97 @@ dependencies = [
  "ddnet-base",
  "ddnet-engine",
  "ddnet-test",
+ "libtw2-common",
+ "libtw2-packer",
+ "libtw2-snapshot",
+ "libtw2-warn",
+ "uuid",
 ]
 
 [[package]]
 name = "ddnet-test"
 version = "0.0.1"
+
+[[package]]
+name = "libtw2-buffer"
+version = "0.0.1"
+source = "git+https://github.com/heinrich5991/libtw2#3a7f27ff256eab81f848af5abfd6c09a706b35ef"
+dependencies = [
+ "arrayvec",
+ "mac",
+]
+
+[[package]]
+name = "libtw2-common"
+version = "0.0.1"
+source = "git+https://github.com/heinrich5991/libtw2#3a7f27ff256eab81f848af5abfd6c09a706b35ef"
+dependencies = [
+ "arrayvec",
+ "zerocopy",
+]
+
+[[package]]
+name = "libtw2-gamenet-common"
+version = "0.0.1"
+source = "git+https://github.com/heinrich5991/libtw2#3a7f27ff256eab81f848af5abfd6c09a706b35ef"
+dependencies = [
+ "arrayvec",
+ "libtw2-buffer",
+ "libtw2-common",
+ "libtw2-packer",
+ "libtw2-warn",
+ "serde",
+ "serde_derive",
+ "uuid",
+ "zerocopy",
+]
+
+[[package]]
+name = "libtw2-gamenet-snap"
+version = "0.0.1"
+source = "git+https://github.com/heinrich5991/libtw2#3a7f27ff256eab81f848af5abfd6c09a706b35ef"
+dependencies = [
+ "libtw2-buffer",
+ "libtw2-common",
+ "libtw2-gamenet-common",
+ "libtw2-packer",
+ "libtw2-warn",
+]
+
+[[package]]
+name = "libtw2-packer"
+version = "0.0.1"
+source = "git+https://github.com/heinrich5991/libtw2#3a7f27ff256eab81f848af5abfd6c09a706b35ef"
+dependencies = [
+ "arrayvec",
+ "libtw2-buffer",
+ "libtw2-common",
+ "libtw2-warn",
+ "uuid",
+]
+
+[[package]]
+name = "libtw2-snapshot"
+version = "0.0.1"
+source = "git+https://github.com/heinrich5991/libtw2#3a7f27ff256eab81f848af5abfd6c09a706b35ef"
+dependencies = [
+ "libtw2-buffer",
+ "libtw2-common",
+ "libtw2-gamenet-common",
+ "libtw2-gamenet-snap",
+ "libtw2-packer",
+ "libtw2-warn",
+ "uuid",
+ "vec_map",
+]
+
+[[package]]
+name = "libtw2-warn"
+version = "0.0.1"
+source = "git+https://github.com/heinrich5991/libtw2#3a7f27ff256eab81f848af5abfd6c09a706b35ef"
+dependencies = [
+ "log 0.3.9",
+]
 
 [[package]]
 name = "link-cplusplus"
@@ -82,21 +180,71 @@ dependencies = [
 ]
 
 [[package]]
-name = "proc-macro2"
-version = "1.0.40"
+name = "log"
+version = "0.3.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dd96a1e8ed2596c337f8eae5f24924ec83f5ad5ab21ea8e455d3566c69fbcaf7"
+checksum = "e19e8d5c34a3e0e2223db8e060f9e8264aeeb5c5fc64a4ee9965c062211c024b"
+dependencies = [
+ "log 0.4.28",
+]
+
+[[package]]
+name = "log"
+version = "0.4.28"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "34080505efa8e45a4b816c349525ebe327ceaa8559756f0356cba97ef3bf7432"
+
+[[package]]
+name = "mac"
+version = "0.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1b1db08c0d0ddbb591e65f1da58d1cefccc94a2faa0c55bf979ce215a3e04d5e"
+
+[[package]]
+name = "proc-macro2"
+version = "1.0.103"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5ee95bc4ef87b8d5ba32e8b7714ccc834865276eab0aed5c9958d00ec45f49e8"
 dependencies = [
  "unicode-ident",
 ]
 
 [[package]]
 name = "quote"
-version = "1.0.20"
+version = "1.0.41"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3bcdf212e9776fbcb2d23ab029360416bb1706b1aea2d1a5ba002727cbcab804"
+checksum = "ce25767e7b499d1b604768e7cde645d14cc8584231ea6b295e9c9eb22c02e1d1"
 dependencies = [
  "proc-macro2",
+]
+
+[[package]]
+name = "serde"
+version = "1.0.228"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9a8e94ea7f378bd32cbbd37198a4a91436180c5bb472411e48b5ec2e2124ae9e"
+dependencies = [
+ "serde_core",
+]
+
+[[package]]
+name = "serde_core"
+version = "1.0.228"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "41d385c7d4ca58e59fc732af25c3983b67ac852c1a25000afe1175de458b67ad"
+dependencies = [
+ "serde_derive",
+]
+
+[[package]]
+name = "serde_derive"
+version = "1.0.228"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d540f220d3187173da220f885ab66608367b6574e925011a9353e4badda91d79"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.106",
 ]
 
 [[package]]
@@ -117,7 +265,54 @@ dependencies = [
 ]
 
 [[package]]
+name = "syn"
+version = "2.0.106"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ede7c438028d4436d71104916910f5bb611972c5cfd7f89b8300a8186e6fada6"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "unicode-ident",
+]
+
+[[package]]
 name = "unicode-ident"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5bd2fe26506023ed7b5e1e315add59d6f584c621d037f9368fea9cfb988f368c"
+
+[[package]]
+name = "uuid"
+version = "1.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "458f7a779bf54acc9f347480ac654f68407d3aab21269a6e3c9f922acd9e2da9"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "vec_map"
+version = "0.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f1bddf1187be692e79c5ffeab891132dfb0f236ed36a43c7ed39f1165ee20191"
+
+[[package]]
+name = "zerocopy"
+version = "0.7.35"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1b9b4fd18abc82b8136838da5d50bae7bdea537c574d8dc1a34ed098d6c166f0"
+dependencies = [
+ "byteorder",
+ "zerocopy-derive",
+]
+
+[[package]]
+name = "zerocopy-derive"
+version = "0.7.35"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fa4f8080344d4671fb4e831a13ad1e68092748387dfc4f55e356242fae12ce3e"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.106",
+]
