@@ -2292,12 +2292,12 @@ set(LIBS
   ${SQLite3_LIBRARIES}
   ${WEBSOCKETS_LIBRARIES}
   ${ZLIB_LIBRARIES}
+  # Add Rust part of our code.
+  rust_engine_shared
   ${PLATFORM_LIBS}
   # Add pthreads (on non-Windows) at the end, so that other libraries can depend
   # on it.
   ${CMAKE_THREAD_LIBS_INIT}
-  # Add Rust part of our code.
-  rust_engine_shared
 )
 
 # Targets
