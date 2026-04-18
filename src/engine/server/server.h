@@ -479,7 +479,7 @@ public:
 
 	void RegisterCommands();
 
-	int SnapNewId() override;
+	std::optional<int> SnapNewId() override;
 	void SnapFreeId(int Id) override;
 	bool SnapNewItem(int Type, int Id, rust::Slice<const int32_t> Data) override;
 	void SnapSetStaticsize(int ItemType, int Size) override;

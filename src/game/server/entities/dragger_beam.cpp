@@ -15,7 +15,7 @@
 
 CDraggerBeam::CDraggerBeam(CGameWorld *pGameWorld, CDragger *pDragger, vec2 Pos, float Strength, bool IgnoreWalls,
 	int ForClientId, int Layer, int Number) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER, true)
 {
 	m_pDragger = pDragger;
 	m_Pos = Pos;
@@ -128,13 +128,16 @@ void CDraggerBeam::Snap(int SnappingClient)
 		StartTick = -1;
 	}
 
-	int SnapObjId = GetId();
-	if(m_pDragger->WillDraggerBeamUseDraggerId(m_ForClientId, SnappingClient))
+	std::optional<int> SnapObjId = GetId();
+	if(m_pDragger->WillDraggerBeamUseDraggerId(m_ForClientId, SnappingClient) && m_pDragger->GetId().has_value())
 	{
 		SnapObjId = m_pDragger->GetId();
 	}
 
-	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Server()->IsSixup(SnappingClient), SnappingClient), SnapObjId,
+	if(!SnapObjId.has_value())
+		return;
+
+	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Server()->IsSixup(SnappingClient), SnappingClient), SnapObjId.value(),
 		TargetPos, m_Pos, StartTick, m_ForClientId, LASERTYPE_DRAGGER, Subtype, m_Number);
 }
 

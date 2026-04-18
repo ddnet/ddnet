@@ -4,6 +4,8 @@
 #ifndef ENGINE_SERVER_SNAP_ID_POOL_H
 #define ENGINE_SERVER_SNAP_ID_POOL_H
 
+#include <optional>
+
 class CSnapIdPool
 {
 	enum
@@ -40,7 +42,7 @@ public:
 
 	void Reset();
 	void RemoveFirstTimeout();
-	int NewId();
+	std::optional<int> NewId();
 	void TimeoutIds();
 	void FreeId(int Id);
 };
