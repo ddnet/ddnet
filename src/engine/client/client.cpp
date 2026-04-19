@@ -2327,15 +2327,6 @@ int CClient::UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshot *pTo)
 		const void *pData = pFromItem->Data();
 		Unpacker.Reset(pData, FromItemSize);
 
-		if(ItemType <= 0)
-		{
-			// Don't add extended item type descriptions, they get
-			// added implicitly (== 0).
-			//
-			// Don't add items of unknown item types either (< 0).
-			continue;
-		}
-
 		void *pRawObj = pNetObjHandler->SecureUnpackObj(ItemType, &Unpacker);
 		if(!pRawObj)
 		{
@@ -2349,7 +2340,7 @@ int CClient::UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshot *pTo)
 		}
 		const int ItemSize = pNetObjHandler->GetUnpackedObjSize(ItemType);
 
-		void *pObj = Builder.NewItem(ItemType, pFromItem->Id(), ItemSize);
+		void *pObj = Builder.NewItem(pFromItem->Type(), pFromItem->Id(), ItemSize);
 		if(!pObj)
 			return -4;
 

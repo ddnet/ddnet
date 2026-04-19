@@ -21,7 +21,7 @@ public:
 	int m_TypeAndId;
 
 	const int *Data() const { return (int *)(this + 1); }
-	int InternalType() const { return m_TypeAndId >> 16; }
+	int Type() const { return m_TypeAndId >> 16; }
 	int Id() const { return m_TypeAndId & 0xffff; }
 	int Key() const { return m_TypeAndId; }
 	void Invalidate() { m_TypeAndId = -1; }

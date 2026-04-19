@@ -35,7 +35,7 @@ int CSnapshot::GetItemSize(int Index) const
 
 int CSnapshot::GetItemType(int Index) const
 {
-	int InternalType = GetItem(Index)->InternalType();
+	int InternalType = GetItem(Index)->Type();
 	return GetExternalItemType(InternalType);
 }
 
@@ -49,7 +49,7 @@ int CSnapshot::GetExternalItemType(int InternalType) const
 	int TypeItemIndex = GetItemIndex(InternalType); // NETOBJTYPE_EX
 	if(TypeItemIndex == -1 || GetItemSize(TypeItemIndex) < (int)sizeof(CUuid))
 	{
-		return -1;
+		return InternalType;
 	}
 	const CSnapshotItem *pTypeItem = GetItem(TypeItemIndex);
 	CUuid Uuid;
@@ -89,7 +89,7 @@ const void *CSnapshot::FindItem(int Type, int Id) const
 		for(int i = 0; i < m_NumItems; i++)
 		{
 			const CSnapshotItem *pItem = GetItem(i);
-			if(pItem->InternalType() == 0 && pItem->Id() >= OFFSET_UUID_TYPE) // NETOBJTYPE_EX
+			if(pItem->Type() == 0 && pItem->Id() >= OFFSET_UUID_TYPE) // NETOBJTYPE_EX
 			{
 				if(mem_comp(pItem->Data(), aTypeUuidItem, sizeof(CUuid)) == 0)
 				{
@@ -130,7 +130,7 @@ void CSnapshot::DebugDump() const
 	{
 		const CSnapshotItem *pItem = GetItem(i);
 		int Size = GetItemSize(i);
-		dbg_msg("snapshot", "\ttype=%d id=%d", pItem->InternalType(), pItem->Id());
+		dbg_msg("snapshot", "\ttype=%d id=%d", pItem->Type(), pItem->Id());
 		for(size_t b = 0; b < Size / sizeof(int32_t); b++)
 			dbg_msg("snapshot", "\t\t%3d %12d\t%08x", (int)b, pItem->Data()[b], pItem->Data()[b]);
 	}
@@ -338,7 +338,7 @@ int CSnapshotDelta::CreateDelta(const CSnapshot *pFrom, const CSnapshot *pTo, vo
 		const int ItemSize = pTo->GetItemSize(i); // O(1) .. O(n)
 		const CSnapshotItem *pCurItem = pTo->GetItem(i); // O(1) .. O(n)
 		const int PastIndex = aPastIndices[i];
-		const bool IncludeSize = pCurItem->InternalType() >= MAX_NETOBJSIZES || !m_aItemSizes[pCurItem->InternalType()];
+		const bool IncludeSize = pCurItem->Type() >= MAX_NETOBJSIZES || !m_aItemSizes[pCurItem->Type()];
 
 		if(PastIndex != -1)
 		{
@@ -351,7 +351,7 @@ int CSnapshotDelta::CreateDelta(const CSnapshot *pFrom, const CSnapshot *pTo, vo
 
 			if(DiffItem(pPastItem->Data(), pCurItem->Data(), pItemDataDst, ItemSize / sizeof(int32_t)))
 			{
-				*pData++ = pCurItem->InternalType();
+				*pData++ = pCurItem->Type();
 				*pData++ = pCurItem->Id();
 				if(IncludeSize)
 					*pData++ = ItemSize / sizeof(int32_t);
@@ -361,7 +361,7 @@ int CSnapshotDelta::CreateDelta(const CSnapshot *pFrom, const CSnapshot *pTo, vo
 		}
 		else
 		{
-			*pData++ = pCurItem->InternalType();
+			*pData++ = pCurItem->Type();
 			*pData++ = pCurItem->Id();
 			if(IncludeSize)
 				*pData++ = ItemSize / sizeof(int32_t);
@@ -544,7 +544,7 @@ int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const vo
 
 		if(Keep)
 		{
-			void *pObj = Builder.NewItem(pFromItem->InternalType(), pFromItem->Id(), ItemSize);
+			void *pObj = Builder.NewItem(pFromItem->Type(), pFromItem->Id(), ItemSize);
 			if(!pObj)
 				return -301;
 

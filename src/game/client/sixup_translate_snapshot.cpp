@@ -26,17 +26,8 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 		const int Size = pSnapSrcSeven->GetItemSize(i);
 		const int ItemType = pSnapSrcSeven->GetItemType(i);
 
-		if(ItemType <= 0)
-		{
-			// Don't add extended item type descriptions, they get
-			// added implicitly (== 0).
-			//
-			// Don't add items of unknown item types either (< 0).
-			continue;
-		}
-
 		// ddnet ex snap items
-		if(ItemType >= OFFSET_UUID)
+		if((ItemType > __NETOBJTYPE_UUID_HELPER && ItemType < OFFSET_NETMSGTYPE_UUID) || pItem7->Type() == NETOBJTYPE_EX)
 		{
 			CUnpacker Unpacker;
 			Unpacker.Reset(pItem7->Data(), Size);
@@ -50,7 +41,7 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 			}
 			const int ItemSize = GetNetObjHandler()->GetUnpackedObjSize(ItemType);
 
-			void *pObj = Builder.NewItem(ItemType, pItem7->Id(), ItemSize);
+			void *pObj = Builder.NewItem(pItem7->Type(), pItem7->Id(), ItemSize);
 			if(!pObj)
 				return -17;
 
@@ -58,20 +49,23 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 			continue;
 		}
 
-		if(GetNetObjHandler7()->ValidateObj(ItemType, pItem7->Data(), Size) != 0)
+		if(GetNetObjHandler7()->ValidateObj(pItem7->Type(), pItem7->Data(), Size) != 0)
 		{
-			dbg_msg(
-				"sixup",
-				"invalidated index=%d type=%d (%s) size=%d id=%d",
-				i,
-				ItemType,
-				GetNetObjHandler7()->GetObjName(ItemType),
-				Size,
-				pItem7->Id());
+			if(pItem7->Type() > 0 && pItem7->Type() < CSnapshot::OFFSET_UUID_TYPE)
+			{
+				dbg_msg(
+					"sixup",
+					"invalidated index=%d type=%d (%s) size=%d id=%d",
+					i,
+					pItem7->Type(),
+					GetNetObjHandler7()->GetObjName(pItem7->Type()),
+					Size,
+					pItem7->Id());
+			}
 			pSnapSrcSeven->InvalidateItem(i);
 		}
 
-		if(ItemType == protocol7::NETOBJTYPE_PLAYERINFORACE)
+		if(pItem7->Type() == protocol7::NETOBJTYPE_PLAYERINFORACE)
 		{
 			const protocol7::CNetObj_PlayerInfoRace *pInfo = (const protocol7::CNetObj_PlayerInfoRace *)pItem7->Data();
 			int ClientId = pItem7->Id();
@@ -80,7 +74,7 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 				TranslationContext.m_apPlayerInfosRace[ClientId] = pInfo;
 			}
 		}
-		else if(ItemType == protocol7::NETOBJTYPE_SPECTATORINFO)
+		else if(pItem7->Type() == protocol7::NETOBJTYPE_SPECTATORINFO)
 		{
 			const protocol7::CNetObj_SpectatorInfo *pSpec7 = (const protocol7::CNetObj_SpectatorInfo *)pItem7->Data();
 			SpectatorId = pSpec7->m_SpectatorId;
@@ -169,21 +163,20 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 	for(int i = 0; i < pSnapSrcSeven->NumItems(); i++)
 	{
 		const CSnapshotItem *pItem7 = pSnapSrcSeven->GetItem(i);
-		const int ItemType = pSnapSrcSeven->GetItemType(i);
 		const int Size = pSnapSrcSeven->GetItemSize(i);
 		// the first few items are a full match
 		// no translation needed
-		if(ItemType == protocol7::NETOBJTYPE_PROJECTILE ||
-			ItemType == protocol7::NETOBJTYPE_LASER ||
-			ItemType == protocol7::NETOBJTYPE_FLAG)
+		if(pItem7->Type() == protocol7::NETOBJTYPE_PROJECTILE ||
+			pItem7->Type() == protocol7::NETOBJTYPE_LASER ||
+			pItem7->Type() == protocol7::NETOBJTYPE_FLAG)
 		{
-			void *pObj = Builder.NewItem(ItemType, pItem7->Id(), Size);
+			void *pObj = Builder.NewItem(pItem7->Type(), pItem7->Id(), Size);
 			if(!pObj)
 				return -4;
 
 			mem_copy(pObj, pItem7->Data(), Size);
 		}
-		else if(ItemType == protocol7::NETOBJTYPE_PICKUP)
+		else if(pItem7->Type() == protocol7::NETOBJTYPE_PICKUP)
 		{
 			void *pObj = Builder.NewItem(NETOBJTYPE_PICKUP, pItem7->Id(), sizeof(CNetObj_Pickup));
 			if(!pObj)
@@ -197,14 +190,14 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 
 			mem_copy(pObj, &Pickup6, sizeof(CNetObj_Pickup));
 		}
-		else if(ItemType == protocol7::NETOBJTYPE_GAMEDATA)
+		else if(pItem7->Type() == protocol7::NETOBJTYPE_GAMEDATA)
 		{
 			const protocol7::CNetObj_GameData *pGameData = (const protocol7::CNetObj_GameData *)pItem7->Data();
 			TranslationContext.m_GameStateFlags7 = pGameData->m_GameStateFlags;
 			TranslationContext.m_GameStartTick7 = pGameData->m_GameStartTick;
 			TranslationContext.m_GameStateEndTick7 = pGameData->m_GameStateEndTick;
 		}
-		else if(ItemType == protocol7::NETOBJTYPE_GAMEDATATEAM)
+		else if(pItem7->Type() == protocol7::NETOBJTYPE_GAMEDATATEAM)
 		{
 			// 0.7 added GameDataTeam and GameDataFlag
 			// both items merged together have all fields of the 0.6 GameData
@@ -216,7 +209,7 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 			TranslationContext.m_TeamscoreBlue = pTeam7->m_TeamscoreBlue;
 			NewGameData = true;
 		}
-		else if(ItemType == protocol7::NETOBJTYPE_GAMEDATAFLAG)
+		else if(pItem7->Type() == protocol7::NETOBJTYPE_GAMEDATAFLAG)
 		{
 			const protocol7::CNetObj_GameDataFlag *pFlag7 = (const protocol7::CNetObj_GameDataFlag *)pItem7->Data();
 
@@ -230,7 +223,7 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 			// pFlag7->m_FlagDropTickRed;
 			// pFlag7->m_FlagDropTickBlue;
 		}
-		else if(ItemType == protocol7::NETOBJTYPE_CHARACTER)
+		else if(pItem7->Type() == protocol7::NETOBJTYPE_CHARACTER)
 		{
 			void *pObj = Builder.NewItem(NETOBJTYPE_CHARACTER, pItem7->Id(), sizeof(CNetObj_Character));
 			if(!pObj)
@@ -307,7 +300,7 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 
 			mem_copy(pObj, &Char6, sizeof(CNetObj_Character));
 		}
-		else if(ItemType == protocol7::NETOBJTYPE_PLAYERINFO)
+		else if(pItem7->Type() == protocol7::NETOBJTYPE_PLAYERINFO)
 		{
 			void *pObj = Builder.NewItem(NETOBJTYPE_PLAYERINFO, pItem7->Id(), sizeof(CNetObj_PlayerInfo));
 			if(!pObj)
@@ -327,7 +320,7 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 			Info6.m_Latency = pInfo7->m_Latency;
 			mem_copy(pObj, &Info6, sizeof(CNetObj_PlayerInfo));
 		}
-		else if(ItemType == protocol7::NETOBJTYPE_SPECTATORINFO)
+		else if(pItem7->Type() == protocol7::NETOBJTYPE_SPECTATORINFO)
 		{
 			void *pObj = Builder.NewItem(NETOBJTYPE_SPECTATORINFO, pItem7->Id(), sizeof(CNetObj_SpectatorInfo));
 			if(!pObj)
@@ -342,7 +335,7 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 			Spec6.m_Y = pSpec7->m_Y;
 			mem_copy(pObj, &Spec6, sizeof(CNetObj_SpectatorInfo));
 		}
-		else if(ItemType == protocol7::NETEVENTTYPE_EXPLOSION)
+		else if(pItem7->Type() == protocol7::NETEVENTTYPE_EXPLOSION)
 		{
 			void *pEvent = Builder.NewItem(NETEVENTTYPE_EXPLOSION, pItem7->Id(), sizeof(CNetEvent_Explosion));
 			if(!pEvent)
@@ -354,7 +347,7 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 			Explosion6.m_Y = pExplosion7->m_Y;
 			mem_copy(pEvent, &Explosion6, sizeof(CNetEvent_Explosion));
 		}
-		else if(ItemType == protocol7::NETEVENTTYPE_SPAWN)
+		else if(pItem7->Type() == protocol7::NETEVENTTYPE_SPAWN)
 		{
 			void *pEvent = Builder.NewItem(NETEVENTTYPE_SPAWN, pItem7->Id(), sizeof(CNetEvent_Spawn));
 			if(!pEvent)
@@ -366,7 +359,7 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 			Spawn6.m_Y = pSpawn7->m_Y;
 			mem_copy(pEvent, &Spawn6, sizeof(CNetEvent_Spawn));
 		}
-		else if(ItemType == protocol7::NETEVENTTYPE_HAMMERHIT)
+		else if(pItem7->Type() == protocol7::NETEVENTTYPE_HAMMERHIT)
 		{
 			void *pEvent = Builder.NewItem(NETEVENTTYPE_HAMMERHIT, pItem7->Id(), sizeof(CNetEvent_HammerHit));
 			if(!pEvent)
@@ -378,7 +371,7 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 			HammerHit6.m_Y = pHammerHit7->m_Y;
 			mem_copy(pEvent, &HammerHit6, sizeof(CNetEvent_HammerHit));
 		}
-		else if(ItemType == protocol7::NETEVENTTYPE_DEATH)
+		else if(pItem7->Type() == protocol7::NETEVENTTYPE_DEATH)
 		{
 			void *pEvent = Builder.NewItem(NETEVENTTYPE_DEATH, pItem7->Id(), sizeof(CNetEvent_Death));
 			if(!pEvent)
@@ -391,7 +384,7 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 			Death6.m_ClientId = pDeath7->m_ClientId;
 			mem_copy(pEvent, &Death6, sizeof(CNetEvent_Death));
 		}
-		else if(ItemType == protocol7::NETEVENTTYPE_SOUNDWORLD)
+		else if(pItem7->Type() == protocol7::NETEVENTTYPE_SOUNDWORLD)
 		{
 			void *pEvent = Builder.NewItem(NETEVENTTYPE_SOUNDWORLD, pItem7->Id(), sizeof(CNetEvent_SoundWorld));
 			if(!pEvent)
@@ -404,7 +397,7 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 			SoundWorld6.m_SoundId = pSoundWorld7->m_SoundId;
 			mem_copy(pEvent, &SoundWorld6, sizeof(CNetEvent_SoundWorld));
 		}
-		else if(ItemType == protocol7::NETEVENTTYPE_DAMAGE)
+		else if(pItem7->Type() == protocol7::NETEVENTTYPE_DAMAGE)
 		{
 			// 0.7 introduced amount for damage indicators
 			// so for one 0.7 item we might create multiple 0.6 ones
@@ -452,7 +445,7 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 				mem_copy(pEvent, &Dmg6, sizeof(CNetEvent_DamageInd));
 			}
 		}
-		else if(ItemType == protocol7::NETOBJTYPE_DE_CLIENTINFO)
+		else if(pItem7->Type() == protocol7::NETOBJTYPE_DE_CLIENTINFO)
 		{
 			const protocol7::CNetObj_De_ClientInfo *pInfo = (const protocol7::CNetObj_De_ClientInfo *)pItem7->Data();
 
@@ -477,7 +470,7 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 
 			ApplySkin7InfoFromSnapObj(pInfo, ClientId);
 		}
-		else if(ItemType == protocol7::NETOBJTYPE_DE_GAMEINFO)
+		else if(pItem7->Type() == protocol7::NETOBJTYPE_DE_GAMEINFO)
 		{
 			const protocol7::CNetObj_De_GameInfo *pInfo = (const protocol7::CNetObj_De_GameInfo *)pItem7->Data();
 
