@@ -956,8 +956,7 @@ RECURSIVE              = YES
 
 EXCLUDE                = src/engine/external \
                          src/masterping/target \
-                         src/mastersrv/target \
-                         src/rust-bridge
+                         src/mastersrv/target
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded

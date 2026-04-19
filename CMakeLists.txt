@@ -859,26 +859,13 @@ set_glob(RUST_ENGINE_SHARED GLOB_RECURSE "rs;toml" src/engine/shared
   config.rs
   lib.rs
   rust_version.rs
-  snapshot/builder.rs
-  snapshot/delta.rs
-  snapshot/mod.rs
-  uuid_manager.rs
 )
 
 set_src(RUST_BRIDGE_SHARED GLOB_RECURSE src/rust-bridge
-  base/cxx.h
   cpp/console.cpp
   cpp/console.h
-  cpp/snapshot.cpp
-  cpp/snapshot.h
-  cpp/uuid_manager.cpp
-  cpp/uuid_manager.h
   engine/shared/rust_version.cpp
   engine/shared/rust_version.h
-  engine/shared/snapshot/builder.cpp
-  engine/shared/snapshot/builder.h
-  engine/shared/snapshot/delta.cpp
-  engine/shared/snapshot/delta.h
 )
 
 set_glob(RUST_MASTERSRV GLOB "rs;toml" src/mastersrv/src
@@ -890,7 +877,6 @@ set_glob(RUST_MASTERSRV GLOB "rs;toml" src/mastersrv/src
 )
 
 add_library(rust-bridge-shared EXCLUDE_FROM_ALL OBJECT ${RUST_BRIDGE_SHARED})
-add_dependencies(rust-bridge-shared generate_protocol)
 list(APPEND TARGETS_OWN rust-bridge-shared)
 
 if(TARGET_OS STREQUAL "android")
@@ -2182,6 +2168,7 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   ringbuffer.h
   serverinfo.cpp
   serverinfo.h
+  sixup_translate_snapshot.cpp
   snapshot.cpp
   snapshot.h
   storage.cpp
@@ -2275,8 +2262,6 @@ set(LIBS
   # Add pthreads (on non-Windows) at the end, so that other libraries can depend
   # on it.
   ${CMAKE_THREAD_LIBS_INIT}
-  # Add Rust part of our code.
-  rust_engine_shared
 )
 
 # Targets
@@ -2662,6 +2647,7 @@ if(CLIENT)
     ${VULKAN_LIBRARIES}
 
     ${TARGET_STEAMAPI}
+    rust_engine_shared
 
     ${PLATFORM_CLIENT_LIBS}
     ${LIBS}
@@ -2908,6 +2894,7 @@ if(SERVER)
     ${MINIUPNPC_LIBRARIES}
     ${MYSQL_LIBRARIES}
     ${TARGET_ANTIBOT}
+    rust_engine_shared
 
     ${LIBS}
   )
@@ -3036,7 +3023,6 @@ if(TOOLS)
         ${EXTRA_TOOL_SRC}
         $<TARGET_OBJECTS:engine-shared>
         $<TARGET_OBJECTS:game-shared>
-        $<TARGET_OBJECTS:rust-bridge-shared>
       )
       target_include_directories(${TOOL} SYSTEM PRIVATE ${TOOL_INCLUDE_DIRS})
       target_link_libraries(${TOOL} ${TOOL_LIBS})
@@ -3197,7 +3183,6 @@ list(APPEND TARGETS_OWN rust_test)
 list(APPEND TARGETS_LINK rust_test)
 
 set(RUST_TEST_LIBS ${LIBS} $<TARGET_FILE:rust_test>)
-list(REMOVE_ITEM RUST_TEST_LIBS "rust_engine_shared")
 list(REMOVE_ITEM RUST_TEST_LIBS "-pthread")
 add_custom_target(run_rust_tests
   COMMAND ${CMAKE_COMMAND} -E env "DDNET_TEST_LIBRARIES=${RUST_TEST_LIBS}" ${CARGO_TEST}

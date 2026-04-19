@@ -88,7 +88,6 @@ def main():
 		print("#define GENERATED_PROTOCOL7_H")
 		print("class CUnpacker;")
 		print("class CSnapshot;")
-		print("#include <base/cxx.h>")
 		print("#include <engine/message.h>")
 		print("namespace protocol7 {")
 		print(network.RawHeader)

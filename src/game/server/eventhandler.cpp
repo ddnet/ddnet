@@ -60,7 +60,7 @@ void CEventHandler::Snap(int SnappingClient)
 				if(GameServer()->Server()->IsSixup(SnappingClient))
 					EventToSixup(&Type, &Size, &pData);
 
-				GameServer()->Server()->SnapNewItem(Type, i, rust::Slice((const int32_t *)pData, Size / sizeof(int32_t)));
+				GameServer()->Server()->SnapNewItem(Type, i, pData, Size);
 			}
 		}
 	}

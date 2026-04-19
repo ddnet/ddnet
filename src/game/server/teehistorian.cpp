@@ -436,18 +436,6 @@ void CTeeHistorian::BeginInputs()
 	m_State = STATE_INPUTS;
 }
 
-template<class T>
-static rust::Slice<const int32_t> AsSlice(const T *pObject)
-{
-	return rust::Slice((const int32_t *)pObject, sizeof(*pObject) / sizeof(int32_t));
-}
-
-template<class T>
-static rust::Slice<int32_t> AsMutSlice(T *pObject)
-{
-	return rust::Slice((int32_t *)pObject, sizeof(*pObject) / sizeof(int32_t));
-}
-
 void CTeeHistorian::RecordPlayerInput(int ClientId, uint32_t UniqueClientId, const CNetObj_PlayerInput *pInput)
 {
 	CTeehistorianPacker Buffer;
@@ -464,7 +452,7 @@ void CTeeHistorian::RecordPlayerInput(int ClientId, uint32_t UniqueClientId, con
 		Buffer.Reset();
 
 		Buffer.AddInt(-TEEHISTORIAN_INPUT_DIFF);
-		CSnapshotDelta_DiffItem(AsSlice(&pPrev->m_Input), AsSlice(pInput), AsMutSlice(&DiffInput));
+		CSnapshotDelta::DiffItem((int *)&pPrev->m_Input, (int *)pInput, (int *)&DiffInput, sizeof(DiffInput) / sizeof(int32_t));
 		if(m_Debug)
 		{
 			const int *pData = (const int *)&DiffInput;

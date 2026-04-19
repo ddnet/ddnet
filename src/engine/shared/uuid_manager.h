@@ -1,7 +1,6 @@
 #ifndef ENGINE_SHARED_UUID_MANAGER_H
 #define ENGINE_SHARED_UUID_MANAGER_H
 
-#include <memory>
 #include <vector>
 
 enum
@@ -70,8 +69,5 @@ public:
 };
 
 extern CUuidManager g_UuidManager;
-
-std::unique_ptr<CUuidManager> CUuidManager_New();
-const CUuidManager &CUuidManager_Global();
 
 #endif // ENGINE_SHARED_UUID_MANAGER_H
