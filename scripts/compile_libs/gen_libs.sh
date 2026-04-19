@@ -7,24 +7,26 @@ source "${SCRIPT_DIR}/_build_common.sh"
 
 if [ -z ${1+x} ]; then
 	log_error "ERROR: Specify the destination path where to run this script, please choose a path other than in the source directory"
-	log_error "Usage: scripts/compile_libs/gen_libs.sh <Build folder> <android/webasm>"
+	log_error "Usage: scripts/compile_libs/gen_libs.sh <Build folder> <android/ios/webasm>"
 	exit 1
 fi
 BUILD_FOLDER="$1"
 
 if [ -z ${2+x} ]; then
-	log_error "ERROR: Specify the target platform: android, webasm"
-	log_error "Usage: scripts/compile_libs/gen_libs.sh <Build folder> <android/webasm>"
+	log_error "ERROR: Specify the target platform: android, ios, webasm"
+	log_error "Usage: scripts/compile_libs/gen_libs.sh <Build folder> <android/ios/webasm>"
 	exit 1
 fi
 TARGET_PLATFORM="$2"
-if [[ "${TARGET_PLATFORM}" != "android" && "${TARGET_PLATFORM}" != "webasm" ]]; then
-	log_error "ERROR: Specify the target platform: android, webasm"
-	log_error "Usage: scripts/compile_libs/gen_libs.sh <Build folder> <android/webasm>"
+if [[ "${TARGET_PLATFORM}" != "android" && "${TARGET_PLATFORM}" != "ios" && "${TARGET_PLATFORM}" != "webasm" ]]; then
+	log_error "ERROR: Specify the target platform: android, ios, webasm"
+	log_error "Usage: scripts/compile_libs/gen_libs.sh <Build folder> <android/ios/webasm>"
 	exit 1
 fi
 if [[ "${TARGET_PLATFORM}" == "android" ]]; then
 	assert_android_ndk_found
+elif [[ "${TARGET_PLATFORM}" == "ios" ]]; then
+	assert_ios_sdk_found
 elif [[ "${TARGET_PLATFORM}" == "webasm" ]]; then
 	assert_emscripten_sdk_found
 fi
@@ -141,6 +143,10 @@ function copy_libs_for_arches() {
 		${1} "${ANDROID_ARM64_BUILD_FOLDER}" libarm64
 		${1} "${ANDROID_X86_BUILD_FOLDER}" lib32
 		${1} "${ANDROID_X64_BUILD_FOLDER}" lib64
+	elif [[ "${TARGET_PLATFORM}" == "ios" ]]; then
+		${1} "${IOS_DEVICE_BUILD_FOLDER}" libarm64
+		${1} "${IOS_SIM_ARM64_BUILD_FOLDER}" libsimarm64
+		${1} "${IOS_SIM_X64_BUILD_FOLDER}" libsimx86_64
 	elif [[ "${TARGET_PLATFORM}" == "webasm" ]]; then
 		${1} "${EMSCRIPTEN_WASM_BUILD_FOLDER}" libwasm
 	fi
@@ -226,5 +232,68 @@ function _copy_sqlite3() {
 	cp compile_libs/sqlite3/"$1"/sqlite3.a "$target_libs_folder"/libsqlite3.a
 }
 copy_libs_for_arches _copy_sqlite3
+
+if [[ "$TARGET_PLATFORM" == "ios" ]]; then
+	function _create_ios_xcframework() {
+		local library_folder="$1"
+		local static_library="$2"
+
+		local ios_folder="${library_folder}/ios"
+		local device_library="${ios_folder}/libarm64/${static_library}"
+		local simulator_arm64_library="${ios_folder}/libsimarm64/${static_library}"
+		local simulator_x64_library="${ios_folder}/libsimx86_64/${static_library}"
+
+		if [[ ! -f "${device_library}" || ! -f "${simulator_arm64_library}" || ! -f "${simulator_x64_library}" ]]; then
+			log_error "ERROR: Missing iOS static library slices for ${static_library} in ${ios_folder}"
+			exit 1
+		fi
+
+		local simulator_universal_folder="${ios_folder}/simulator_universal"
+		local simulator_universal_library="${simulator_universal_folder}/${static_library}"
+		local xcframework_name="${static_library%.a}.xcframework"
+		local xcframework_path="${ios_folder}/${xcframework_name}"
+		local xcframework_info_plist="${xcframework_path}/Info.plist"
+
+		rm -rf "${simulator_universal_folder}" "${xcframework_path}"
+		mkdir -p "${simulator_universal_folder}"
+
+		lipo -create \
+			"${simulator_arm64_library}" \
+			"${simulator_x64_library}" \
+			-output "${simulator_universal_library}"
+
+		xcodebuild -create-xcframework \
+			-library "${device_library}" \
+			-library "${simulator_universal_library}" \
+			-output "${xcframework_path}" > /dev/null
+
+		plutil -convert json "$xcframework_info_plist" -o - |
+			jq '.AvailableLibraries |= sort_by(.LibraryIdentifier)' |
+			plutil -convert xml1 -o "$xcframework_info_plist" -
+
+		rm -rf "${simulator_universal_folder}"
+		log_info "Created ${xcframework_path}"
+	}
+	log_info_header "Creating iOS xcframeworks..."
+	_create_ios_xcframework "ddnet-libs/curl" "libcurl.a"
+	_create_ios_xcframework "ddnet-libs/freetype" "libfreetype.a"
+	_create_ios_xcframework "ddnet-libs/opus" "libogg.a"
+	_create_ios_xcframework "ddnet-libs/opus" "libopus.a"
+	_create_ios_xcframework "ddnet-libs/opus" "libopusfile.a"
+	_create_ios_xcframework "ddnet-libs/png" "libpng16.a"
+	_create_ios_xcframework "ddnet-libs/sdl" "libSDL2.a"
+	_create_ios_xcframework "ddnet-libs/sqlite3" "libsqlite3.a"
+
+	function _cleanup_ios_library() {
+		local library_folder="ddnet-libs/$1/ios"
+		rm -rf "${library_folder}/libarm64" "${library_folder}/libsimarm64" "${library_folder}/libsimx86_64"
+	}
+	_cleanup_ios_library curl
+	_cleanup_ios_library freetype
+	_cleanup_ios_library opus
+	_cleanup_ios_library png
+	_cleanup_ios_library sdl
+	_cleanup_ios_library sqlite3
+fi
 
 log_info "Done."

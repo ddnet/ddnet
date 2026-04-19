@@ -111,6 +111,18 @@ export ANDROID_X86_CFLAGS="${ANDROID_COMMON_CFLAGS}"
 export ANDROID_X64_CFLAGS="${ANDROID_COMMON_CFLAGS}"
 export ANDROID_EXTRA_RELEASE_CFLAGS="-g0"
 
+# iOS (device + simulator)
+export IOS_DEPLOYMENT_TARGET="${IOS_DEPLOYMENT_TARGET:-12.0}" # Some random working version
+export IOS_COMMON_CFLAGS="-O3 -DNDEBUG -g0"
+
+export IOS_DEVICE_ARCH="arm64"
+export IOS_SIM_ARM64_ARCH="arm64"
+export IOS_SIM_X64_ARCH="x86_64"
+
+export IOS_DEVICE_BUILD_FOLDER="build_ios_device"
+export IOS_SIM_ARM64_BUILD_FOLDER="build_ios_sim_arm64"
+export IOS_SIM_X64_BUILD_FOLDER="build_ios_sim_x86_64"
+
 export EMSCRIPTEN_WASM_BUILD_FOLDER="build_webasm_wasm"
 
 # Refer to https://emscripten.org/docs/tools_reference/settings_reference.html
@@ -118,15 +130,42 @@ export EMSCRIPTEN_WASM_CFLAGS="-pthread -O3 -g -s USE_PTHREADS=1"
 export EMSCRIPTEN_WASM_LDFLAGS="-pthread -O3 -g -s USE_PTHREADS=1 -s ASYNCIFY=1 -s WASM=1"
 export EMSCRIPTEN_EXTRA_RELEASE_CFLAGS="-g0"
 
-BUILD_FLAGS="${BUILD_FLAGS:--j$(nproc)}"
+function cpu_count() {
+	if command -v nproc > /dev/null 2>&1; then
+		nproc
+	elif command -v sysctl > /dev/null 2>&1; then
+		sysctl -n hw.ncpu # fallback for macOS
+	else
+		echo 4
+	fi
+}
+
+BUILD_FLAGS="${BUILD_FLAGS:--j$(cpu_count)}"
 export BUILD_FLAGS
 
 # For reproducible builds, zero all timestamps. See https://reproducible-builds.org/docs/source-date-epoch/
 export SOURCE_DATE_EPOCH=0
+# https://blog.conan.io/2019/09/02/Deterministic-builds-with-C-C++.html
+export ZERO_AR_DATE=1
 
 function assert_android_ndk_found() {
 	if [ $ANDROID_NDK_FOUND == 0 ]; then
 		log_error "ERROR: Android NDK was not found. Expected at this location: $ANDROID_HOME/ndk"
+		exit 1
+	fi
+}
+
+function assert_ios_sdk_found() {
+	if [[ "${HOST_OS}" != "darwin" ]]; then
+		log_error "ERROR: iOS builds require macOS."
+		exit 1
+	fi
+	if ! command -v xcrun > /dev/null 2>&1; then
+		log_error "ERROR: Xcode command line tools were not found. Install Xcode or the CLT."
+		exit 1
+	fi
+	if ! xcrun --sdk iphoneos --show-sdk-path > /dev/null 2>&1; then
+		log_error "ERROR: iOS SDK not found. Ensure Xcode is installed and selected."
 		exit 1
 	fi
 }

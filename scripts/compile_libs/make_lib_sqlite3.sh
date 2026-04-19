@@ -11,6 +11,8 @@ function make_sqlite3() {
 	local build_folder="${1}"
 	local build_android_triple="${2}"
 	local build_extra_cflags="${3}"
+	local build_ios_sdk="${4}"
+	local build_ios_arch="${5}"
 
 	log_info "Building to ${build_folder}..."
 	mkdir -p "${build_folder}"
@@ -25,12 +27,24 @@ function make_sqlite3() {
 		extra_arguments+=("-DSQLITE_ENABLE_MULTITHREADED_CHECKS=1")
 		extra_arguments+=("-DSQLITE_THREADSAFE=1")
 		extra_arguments+=("-DSQLITE_OMIT_LOAD_EXTENSION=1")
+
+		local ios_sdk_path=""
+
 		if [[ "${TARGET_PLATFORM}" == "android" ]]; then
 			cc="${ANDROID_TOOLCHAIN_ROOT}/bin/${build_android_triple}${ANDROID_API}-clang"
 			ar="${ANDROID_TOOLCHAIN_ROOT}/bin/llvm-ar"
 			# Android supports atomic writes
 			extra_arguments+=("-DSQLITE_ENABLE_ATOMIC_WRITE=1")
 			extra_arguments+=("-DSQLITE_ENABLE_BATCH_ATOMIC_WRITE=1")
+		elif [[ "${TARGET_PLATFORM}" == "ios" ]]; then
+			local ios_min_flag="-mios-version-min=${IOS_DEPLOYMENT_TARGET}"
+			if [[ "${build_ios_sdk}" == "iphonesimulator" ]]; then
+				ios_min_flag="-mios-simulator-version-min=${IOS_DEPLOYMENT_TARGET}"
+			fi
+			ios_sdk_path="$(xcrun --sdk "${build_ios_sdk}${IOS_SDK_VERSION}" --show-sdk-path)"
+			cc="$(xcrun --sdk "${ios_sdk_path}" --find clang)"
+			ar="$(xcrun --sdk "${ios_sdk_path}" --find ar)"
+			build_extra_cflags="${build_extra_cflags} -arch ${build_ios_arch} -isysroot ${ios_sdk_path} ${ios_min_flag}"
 		elif [[ "${TARGET_PLATFORM}" == "webasm" ]]; then
 			cc="emcc"
 			ar="emar"
@@ -41,6 +55,8 @@ function make_sqlite3() {
 		build_extra_cflags="${build_extra_cflags} -fno-ident"
 		if [[ "${TARGET_PLATFORM}" == "android" ]]; then
 			build_extra_cflags="${build_extra_cflags} -ffile-prefix-map=${ANDROID_TOOLCHAIN_ROOT}=ANDROID_TOOLCHAIN_ROOT"
+		elif [[ "${TARGET_PLATFORM}" == "ios" ]]; then
+			build_extra_cflags="${build_extra_cflags} -ffile-prefix-map=${ios_sdk_path}=IOS_SDK_ROOT"
 		elif [[ "${TARGET_PLATFORM}" == "webasm" ]]; then
 			build_extra_cflags="${build_extra_cflags} -ffile-prefix-map=${EMSDK}=EMSDK"
 		fi
@@ -69,6 +85,10 @@ function make_all_sqlite3() {
 		make_sqlite3 "${ANDROID_ARM64_BUILD_FOLDER}" "${ANDROID_ARM64_TRIPLE}" "${ANDROID_ARM64_CFLAGS} ${ANDROID_EXTRA_RELEASE_CFLAGS}"
 		make_sqlite3 "${ANDROID_X86_BUILD_FOLDER}" "${ANDROID_X86_TRIPLE}" "${ANDROID_X86_CFLAGS} ${ANDROID_EXTRA_RELEASE_CFLAGS}"
 		make_sqlite3 "${ANDROID_X64_BUILD_FOLDER}" "${ANDROID_X64_TRIPLE}" "${ANDROID_X64_CFLAGS} ${ANDROID_EXTRA_RELEASE_CFLAGS}"
+	elif [[ "${TARGET_PLATFORM}" == "ios" ]]; then
+		make_sqlite3 "${IOS_DEVICE_BUILD_FOLDER}" "" "${IOS_COMMON_CFLAGS}" "iphoneos" "${IOS_DEVICE_ARCH}"
+		make_sqlite3 "${IOS_SIM_ARM64_BUILD_FOLDER}" "" "${IOS_COMMON_CFLAGS}" "iphonesimulator" "${IOS_SIM_ARM64_ARCH}"
+		make_sqlite3 "${IOS_SIM_X64_BUILD_FOLDER}" "" "${IOS_COMMON_CFLAGS}" "iphonesimulator" "${IOS_SIM_X64_ARCH}"
 	elif [[ "${TARGET_PLATFORM}" == "webasm" ]]; then
 		make_sqlite3 "${EMSCRIPTEN_WASM_BUILD_FOLDER}" "" "${EMSCRIPTEN_WASM_CFLAGS} ${EMSCRIPTEN_EXTRA_RELEASE_CFLAGS}"
 	else
