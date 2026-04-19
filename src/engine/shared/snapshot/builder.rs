@@ -121,17 +121,23 @@ impl CSnapshotBuilder {
             Some(t) => t,
             None => return true, // dropping items from 0.7 snaps doesn't count as dropping
         };
-        let id: u16 = id.try_into().expect("id must fit into a 16-bit integer");
-        match self.builder.add_item(type_, id, data) {
-            Ok(()) => true,
-            Err(snap::BuilderError::DuplicateKey) => {
-                panic!("duplicate key in snapshot type={type_} id={id}");
-            }
-            Err(snap::BuilderError::TooLongSnap | snap::BuilderError::TooManyItems) => {
-                self.has_dropped_item = true;
-                false
-            }
+        let mut id: u16 = id.try_into().expect("id must fit into a 16-bit integer");
+        for _ in 0..128 {
+            return match self.builder.add_item(type_, id, data) {
+                Ok(()) => true,
+                Err(snap::BuilderError::DuplicateKey) => {
+                    // Work around #12070, try again with higher ID:
+                    id = id.wrapping_add(1);
+                    continue;
+                }
+                Err(snap::BuilderError::TooLongSnap | snap::BuilderError::TooManyItems) => {
+                    self.has_dropped_item = true;
+                    false
+                }
+            };
         }
+        // silently drop the item if there's no ID space
+        true
     }
 
     /// Finishes building the snapshot, erroring if any items were dropped.
