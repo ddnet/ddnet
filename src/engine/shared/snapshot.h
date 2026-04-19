@@ -8,6 +8,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <optional>
 
 // CSnapshot
 
@@ -176,7 +177,9 @@ public:
 	void *NewItem(int Type, int Id, int Size);
 
 	CSnapshotItem *GetItem(int Index);
-	int *GetItemData(int Key);
+	int GetItemSize(int Index) const;
+	int *GetItemData(int Index);
+	std::optional<int> FindItemIndexByKey(int Key);
 
 	int Finish(void *pSnapdata);
 };
