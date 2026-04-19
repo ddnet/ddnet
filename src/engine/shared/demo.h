@@ -163,12 +163,12 @@ private:
 	int64_t Time();
 	bool m_Sixup;
 
-	void Construct(CSnapshotDelta *pSnapshotDelta, bool UseVideo);
-
 public:
 	CDemoPlayer(CSnapshotDelta *pSnapshotDelta, bool UseVideo);
 	CDemoPlayer(CSnapshotDelta *pSnapshotDelta, bool UseVideo, TUpdateIntraTimesFunc &&UpdateIntraTimesFunc);
 	~CDemoPlayer() override;
+
+	void Construct(CSnapshotDelta *pSnapshotDelta, bool UseVideo);
 
 	void SetListener(IListener *pListener);
 

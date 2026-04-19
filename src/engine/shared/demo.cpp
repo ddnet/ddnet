@@ -473,20 +473,6 @@ void CDemoRecorder::AddDemoMarker(int Tick)
 	}
 }
 
-void CDemoPlayer::Construct(CSnapshotDelta *pSnapshotDelta, bool UseVideo)
-{
-	m_File = nullptr;
-	m_SpeedIndex = DEMO_SPEED_INDEX_DEFAULT;
-
-	m_pSnapshotDelta = pSnapshotDelta;
-	m_LastSnapshotDataSize = -1;
-	m_pListener = nullptr;
-	m_UseVideo = UseVideo;
-
-	m_aFilename[0] = '\0';
-	m_aErrorMessage[0] = '\0';
-}
-
 CDemoPlayer::CDemoPlayer(CSnapshotDelta *pSnapshotDelta, bool UseVideo, TUpdateIntraTimesFunc &&UpdateIntraTimesFunc)
 {
 	Construct(pSnapshotDelta, UseVideo);
@@ -502,6 +488,20 @@ CDemoPlayer::CDemoPlayer(CSnapshotDelta *pSnapshotDelta, bool UseVideo)
 CDemoPlayer::~CDemoPlayer()
 {
 	dbg_assert(m_File == 0, "Demo player not stopped");
+}
+
+void CDemoPlayer::Construct(CSnapshotDelta *pSnapshotDelta, bool UseVideo)
+{
+	m_File = nullptr;
+	m_SpeedIndex = DEMO_SPEED_INDEX_DEFAULT;
+
+	m_pSnapshotDelta = pSnapshotDelta;
+	m_LastSnapshotDataSize = -1;
+	m_pListener = nullptr;
+	m_UseVideo = UseVideo;
+
+	m_aFilename[0] = '\0';
+	m_aErrorMessage[0] = '\0';
 }
 
 void CDemoPlayer::SetListener(IListener *pListener)
