@@ -890,6 +890,15 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 				return false;
 		}
 	}
+	else if(!Sixup && !pMsg->m_System && pMsg->m_NoTranslate)
+	{
+		dbg_assert(MsgId >= 0 && MsgId < OFFSET_UUID, "Invalid no-translate message: %d", MsgId);
+		MsgId = Msg_SevenToSix(MsgId);
+		if(MsgId < 0)
+		{
+			return false;
+		}
+	}
 
 	if(MsgId < OFFSET_UUID)
 	{
@@ -951,32 +960,55 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientId)
 	}
 	else
 	{
-		CPacker Pack;
-		if(!RepackMsg(pMsg, Pack, m_aClients[ClientId].m_Sixup))
+		CPacker Pack6;
+		CPacker Pack7;
+		bool GotPack6 = false;
+		bool GotPack7 = false;
+		const bool Sixup = m_aClients[ClientId].m_Sixup;
+		const bool Record = (Flags & MSGFLAG_NORECORD) == 0 && (m_aDemoRecorder[ClientId].IsRecording() || m_aDemoRecorder[RECORDER_MANUAL].IsRecording() || m_aDemoRecorder[RECORDER_AUTO].IsRecording());
+		if(!Sixup || Record)
+		{
+			GotPack6 = RepackMsg(pMsg, Pack6, false);
+		}
+		if(Sixup)
+		{
+			GotPack7 = RepackMsg(pMsg, Pack7, true);
+		}
+		if(!GotPack6 && !GotPack7)
+		{
 			return -1;
+		}
 
-		Packet.m_ClientId = ClientId;
-		Packet.m_pData = Pack.Data();
-		Packet.m_DataSize = Pack.Size();
-
-		if(Antibot()->OnEngineServerMessage(ClientId, Packet.m_pData, Packet.m_DataSize, Flags))
+		const CPacker &SendPack = Sixup ? Pack7 : Pack6;
+		const bool GotSendPack = Sixup ? GotPack7 : GotPack6;
+		if(GotSendPack && Antibot()->OnEngineServerMessage(ClientId, SendPack.Data(), SendPack.Size(), Flags))
 		{
 			return 0;
 		}
 
 		// write message to demo recorders
-		if(!(Flags & MSGFLAG_NORECORD))
+		if(Record && GotPack6) // server only records 0.6 messages to demos
 		{
-			if(m_aDemoRecorder[ClientId].IsRecording())
-				m_aDemoRecorder[ClientId].RecordMessage(Pack.Data(), Pack.Size());
-			if(m_aDemoRecorder[RECORDER_MANUAL].IsRecording())
-				m_aDemoRecorder[RECORDER_MANUAL].RecordMessage(Pack.Data(), Pack.Size());
-			if(m_aDemoRecorder[RECORDER_AUTO].IsRecording())
-				m_aDemoRecorder[RECORDER_AUTO].RecordMessage(Pack.Data(), Pack.Size());
+			for(int Recorder : {ClientId, (int)RECORDER_MANUAL, (int)RECORDER_AUTO})
+			{
+				if(m_aDemoRecorder[Recorder].IsRecording())
+				{
+					m_aDemoRecorder[Recorder].RecordMessage(Pack6.Data(), Pack6.Size());
+				}
+			}
 		}
 
-		if(!(Flags & MSGFLAG_NOSEND))
+		if((Flags & MSGFLAG_NOSEND) == 0)
+		{
+			if(!GotSendPack)
+			{
+				return -1;
+			}
+			Packet.m_ClientId = ClientId;
+			Packet.m_pData = SendPack.Data();
+			Packet.m_DataSize = SendPack.Size();
 			m_NetServer.Send(&Packet);
+		}
 	}
 
 	return 0;
