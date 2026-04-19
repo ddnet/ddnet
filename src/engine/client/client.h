@@ -79,8 +79,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	CNetClient m_aNetClient[NUM_CONNS];
 	CDemoPlayer m_DemoPlayer;
-	CDemoRecorder m_aDemoRecorders[RECORDER_MAX];
-	CDemoRecorder m_aDemoRecordersSixup[RECORDER_MAX];
+	CDemoRecorder m_aDemoRecorder[RECORDER_MAX];
 	CDemoEditor m_DemoEditor;
 	CGhostRecorder m_GhostRecorder;
 	CGhostLoader m_GhostLoader;
@@ -480,7 +479,6 @@ public:
 	void DemoRecorder_UpdateReplayRecorder() override;
 	void DemoRecorder_AddDemoMarker(int Recorder);
 	IDemoRecorder *DemoRecorder(int Recorder) override;
-	CDemoRecorder (&DemoRecorders())[RECORDER_MAX];
 
 	void AutoScreenshot_Start() override;
 	void AutoStatScreenshot_Start() override;

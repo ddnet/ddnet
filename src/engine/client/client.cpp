@@ -101,10 +101,8 @@ CClient::CClient() :
 	m_FpsGraph(4096, 0, true)
 {
 	m_StateStartTime = time_get();
-	for(auto &DemoRecorder : m_aDemoRecorders)
+	for(auto &DemoRecorder : m_aDemoRecorder)
 		DemoRecorder = CDemoRecorder(&m_SnapshotDelta);
-	for(auto &DemoRecorder : m_aDemoRecordersSixup)
-		DemoRecorder = CDemoRecorder(&m_SnapshotDeltaSixup);
 	m_LastRenderTime = time_get();
 	mem_zero(m_aInputs, sizeof(m_aInputs));
 	mem_zero(m_aapSnapshots, sizeof(m_aapSnapshots));
@@ -200,13 +198,9 @@ int CClient::SendMsg(int Conn, CMsgPacker *pMsg, int Flags)
 
 	if((Flags & MSGFLAG_RECORD) && Conn == g_Config.m_ClDummy)
 	{
-		for(auto &DemoRecorder : DemoRecorders())
-		{
-			if(DemoRecorder.IsRecording())
-			{
-				DemoRecorder.RecordMessage(Packet.m_pData, Packet.m_DataSize);
-			}
-		}
+		for(auto &i : m_aDemoRecorder)
+			if(i.IsRecording())
+				i.RecordMessage(Packet.m_pData, Packet.m_DataSize);
 	}
 
 	if(!(Flags & MSGFLAG_NOSEND))
@@ -2188,7 +2182,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						if(DemoSnapSize >= 0)
 						{
 							// add snapshot to demo
-							for(auto &DemoRecorder : DemoRecorders())
+							for(auto &DemoRecorder : m_aDemoRecorder)
 							{
 								if(DemoRecorder.IsRecording())
 								{
@@ -2313,13 +2307,9 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		// game message
 		if(!Dummy)
 		{
-			for(auto &DemoRecorder : DemoRecorders())
-			{
+			for(auto &DemoRecorder : m_aDemoRecorder)
 				if(DemoRecorder.IsRecording())
-				{
 					DemoRecorder.RecordMessage(pPacket->m_pData, pPacket->m_DataSize);
-				}
-			}
 		}
 
 		GameClient()->OnMessage(Msg, &Unpacker, Conn, Dummy);
@@ -3024,6 +3014,7 @@ void CClient::Update()
 
 void CClient::RegisterInterfaces()
 {
+	Kernel()->RegisterInterface(static_cast<IDemoRecorder *>(&m_aDemoRecorder[RECORDER_MANUAL]), false);
 	Kernel()->RegisterInterface(static_cast<IDemoPlayer *>(&m_DemoPlayer), false);
 	Kernel()->RegisterInterface(static_cast<IGhostRecorder *>(&m_GhostRecorder), false);
 	Kernel()->RegisterInterface(static_cast<IGhostLoader *>(&m_GhostLoader), false);
@@ -3923,7 +3914,7 @@ void CClient::SaveReplay(const int Length, const char *pFilename)
 		DemoRecorder(RECORDER_REPLAYS)->Stop(IDemoRecorder::EStopMode::KEEP_FILE);
 
 		// Slice the demo to get only the last cl_replay_length seconds
-		const char *pSrc = DemoRecorder(RECORDER_REPLAYS)->CurrentFilename();
+		const char *pSrc = m_aDemoRecorder[RECORDER_REPLAYS].CurrentFilename();
 		const int EndTick = GameTick(g_Config.m_ClDummy);
 		const int StartTick = EndTick - Length * GameTickSpeed();
 
@@ -4081,7 +4072,7 @@ void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int 
 		str_format(aFilename, sizeof(aFilename), "demos/%s.demo", pFilename);
 	}
 
-	DemoRecorders()[Recorder].Start(
+	m_aDemoRecorder[Recorder].Start(
 		Storage(),
 		m_pConsole,
 		aFilename,
@@ -4135,21 +4126,12 @@ void CClient::DemoRecorder_UpdateReplayRecorder()
 
 void CClient::DemoRecorder_AddDemoMarker(int Recorder)
 {
-	DemoRecorders()[Recorder].AddDemoMarker();
+	m_aDemoRecorder[Recorder].AddDemoMarker();
 }
 
-CDemoRecorder (&CClient::DemoRecorders())[RECORDER_MAX]
+class IDemoRecorder *CClient::DemoRecorder(int Recorder)
 {
-	if(IsSixup())
-	{
-		return m_aDemoRecordersSixup;
-	}
-	return m_aDemoRecorders;
-}
-
-IDemoRecorder *CClient::DemoRecorder(int Recorder)
-{
-	return &DemoRecorders()[Recorder];
+	return &m_aDemoRecorder[Recorder];
 }
 
 void CClient::Con_Record(IConsole::IResult *pResult, void *pUserData)
@@ -4161,9 +4143,9 @@ void CClient::Con_Record(IConsole::IResult *pResult, void *pUserData)
 		log_error("demo_recorder", "Client is not online.");
 		return;
 	}
-	if(pSelf->DemoRecorder(RECORDER_MANUAL)->IsRecording())
+	if(pSelf->m_aDemoRecorder[RECORDER_MANUAL].IsRecording())
 	{
-		log_error("demo_recorder", "Demo recorder already recording to '%s'.", pSelf->DemoRecorder(RECORDER_MANUAL)->CurrentFilename());
+		log_error("demo_recorder", "Demo recorder already recording to '%s'.", pSelf->m_aDemoRecorder[RECORDER_MANUAL].CurrentFilename());
 		return;
 	}
 
@@ -5072,7 +5054,7 @@ void CClient::RaceRecord_Start(const char *pFilename)
 {
 	dbg_assert(State() == IClient::STATE_ONLINE, "Client must be online to record demo");
 
-	DemoRecorders()[RECORDER_RACE].Start(
+	m_aDemoRecorder[RECORDER_RACE].Start(
 		Storage(),
 		m_pConsole,
 		pFilename,
@@ -5090,15 +5072,15 @@ void CClient::RaceRecord_Start(const char *pFilename)
 
 void CClient::RaceRecord_Stop()
 {
-	if(DemoRecorder(RECORDER_RACE)->IsRecording())
+	if(m_aDemoRecorder[RECORDER_RACE].IsRecording())
 	{
-		DemoRecorder(RECORDER_RACE)->Stop(IDemoRecorder::EStopMode::KEEP_FILE);
+		m_aDemoRecorder[RECORDER_RACE].Stop(IDemoRecorder::EStopMode::KEEP_FILE);
 	}
 }
 
 bool CClient::RaceRecord_IsRecording()
 {
-	return DemoRecorder(RECORDER_RACE)->IsRecording();
+	return m_aDemoRecorder[RECORDER_RACE].IsRecording();
 }
 
 void CClient::RequestDDNetInfo()
