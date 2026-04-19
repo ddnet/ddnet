@@ -398,7 +398,7 @@ Time limit: %d min
 == Лимит времени: %d
 
 Try again
-== ОК
+== Попробовать снова
 
 Type
 == Тип
@@ -2511,143 +2511,143 @@ Preview visibilities
 == Предпросмотр отображения
 
 Joining Tutorial server
-== 
+== Подключение к обучающему серверу
 
 There are no Tutorial servers available
-== 
+== Обучающие сервера недоступны
 
 Retrying…
-== 
+== Повторная попытка…
 
 Error joining Tutorial server
-== 
+== Ошибка подключения к обучающему серверу
 
 Could not find a Tutorial server. Check your internet connection.
-== 
+== Не удалось найти обучающий сервер. Проверьте подключение к интернету.
 
 You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
-== 
+== Вы играете на локальном сервере, так как онлайн-обучающий сервер не найден.\n\nВаш рекорд будет сохранён только локально.
 
 Could not find online Tutorial server.\nStarting and connecting to local server…
-== 
+== Не удалось найти онлайн-обучающий сервер.\nЗапуск и подключение к локальному серверу…
 
 Waiting for local server to stop…
-== 
+== Ожидание остановки локального сервера…
 
 Waiting for local server to start…
-== 
+== Ожидание запуска локального сервера…
 
 Start and connect to local server
-== 
+== Запустить и подключиться к локальному серверу
 
 Error loading communities
-== 
+== Ошибка загрузки сообществ
 
 Click to remove this community from your favorites.
-== 
+== Нажмите, чтобы удалить это сообщество из избранного.
 
 Click to add this community to your favorites.
-== 
+== Нажмите, чтобы добавить это сообщество в избранное.
 
 Add clan
-== 
+== Добавить клан
 
 Button browser
-== 
+== Браузер кнопок
 
 You can select buttons directly in the list below, or long press on a touch button on the screen to select it. You can also move and resize buttons by touch.
-== 
+== Вы можете выбирать кнопки прямо в списке ниже или долго нажимать на кнопку на экране, чтобы выбрать её. Также можно перемещать и изменять размер кнопок с помощью сенсорного управления.
 
 You can manage your touch controls settings on this page. Only changes that are saved will be available after restarting the client. You can share your touch controls with others by exporting them to the clipboard.\n\nYou can find more detailed information about the touch controls on the DDNet Wiki.
-== 
+== На этой странице вы можете управлять настройками сенсорного управления. Только сохранённые изменения будут доступны после перезапуска клиента. Вы можете поделиться своими настройками сенсорного управления с другими, экспортировав их в буфер обмена. \n\nБолее подробную информацию о сенсорном управлении вы можете найти на DDNet Wiki.
 
 Open DDNet Wiki
-== 
+== Открыть DDNet Wiki
 
 Buttons with this behavior execute console commands like regular key binds.
-== 
+== Кнопки с этим поведением выполняют консольные команды так же, как обычные клавиши.
 
 Buttons with this behavior cycle between executing one of two or more specified commands.
-== 
+== Кнопки с этим поведением последовательно выполняют одну из двух или более заданных команд.
 
 Buttons with this behavior execute some predefined actions.
-== 
+== Кнопки с этим поведением выполняют заранее определённые действия.
 
 Opens the ingame menu immediately when released.
-== 
+== Немедленно открывает внутриигровое меню при отпускании.
 
 The extra menu button which toggles visibility of buttons with "Extra Menu" visibilities. Also opens the ingame menu on long press.
-== 
+== Дополнительная кнопка меню, которая переключает видимость кнопок с настройкой "Доп. меню". Также открывает внутриигровое меню при долгом нажатии.
 
 Opens the emoticon selector (this does not work with binds).
-== 
+== Открывает выбор эмодзи (не работает с биндами).
 
 Opens the spectator menu (this does not work with binds).
-== 
+== Открывает меню наблюдателя (не работает с биндами).
 
 Swaps the active action (fire and hook) for direct touch input and virtual joysticks.
-== 
+== Меняет активное действие (стрельба и крюк) для прямого сенсорного управления и виртуальных джойстиков.
 
 Uses the active action with the current aiming position.
-== 
+== Выполняет активное действие в направлении текущей прицельной позиции.
 
 Virtual joystick which uses the active action.
-== 
+== Виртуальный джойстик, использующий активное действие.
 
 Virtual joystick which only aims without using an action.
-== 
+== Виртуальный джойстик, который целится без выполнения действия.
 
 Virtual joystick which always uses fire.
-== 
+== Виртуальный джойстик, который всегда выполняет выстрел.
 
 Virtual joystick which always uses hook.
-== 
+== Виртуальный джойстик, который всегда использует крюк.
 
 Player is ingame, i.e. not spectating.
-== 
+== Игрок находится в игре, т.е. не наблюдает.
 
 Zoom is allowed on this server.
-== 
+== Масштабирование разрешено на этом сервере.
 
 A vote is currently active.
-== 
+== В данный момент идёт голосование.
 
 Dummy is allowed on this server.
-== 
+== Использование дамми разрешено на этом сервере.
 
 Dummy is currently connected.
-== 
+== Дамми сейчас подключён.
 
 Player is currently authed in rcon.
-== 
+== Игрок в данный момент авторизован в rcon.
 
 Demo player is currently active.
-== 
+== Воспроизведение демо сейчас активно.
 
 The extra menu with the given number is activated.
-== 
+== Дополнительное меню с указанным номером активно.
 
 Update Rate
-== 
+== Частота обновления
 
 Save power by lowering update rate (higher input latency)
-== 
+== Экономия энергии за счёт снижения частоты обновления (увеличивается задержка ввода)
 
 Colors of the hook collision line:
-== 
+== Цвета линии столкновения крюка:
 
 [Hook collision line color]
 When nothing is hookable
-== 
+== Когда нет за что зацепиться
 
 [Hook collision line color]
 When something is hookable
-== 
+== Когда есть за что зацепиться
 
 [Hook collision line color]
 When a Tee is hookable
-== 
+== Когда можно зацепить Тии
 
 [Hook collision line color]
 Hook collision line tip
-== 
+== Кончик линии столкновения крюка
