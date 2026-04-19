@@ -1076,9 +1076,8 @@ void CServer::DoSnapshot()
 			}
 
 			// create delta
-			CSnapshotDelta *const pSnapshotDelta = IsSixup(i) ? &m_SnapshotDeltaSixup : &m_SnapshotDelta;
 			char aDeltaData[CSnapshot::MAX_SIZE];
-			int DeltaSize = pSnapshotDelta->CreateDelta(pDeltashot, Data.AsSnapshot(), aDeltaData);
+			int DeltaSize = m_SnapshotDelta.CreateDelta(pDeltashot, Data.AsSnapshot(), aDeltaData);
 
 			if(DeltaSize)
 			{
@@ -4465,11 +4464,6 @@ void *CServer::SnapNewItem(int Type, int Id, int Size)
 void CServer::SnapSetStaticsize(int ItemType, int Size)
 {
 	m_SnapshotDelta.SetStaticsize(ItemType, Size);
-}
-
-void CServer::SnapSetStaticsize7(int ItemType, int Size)
-{
-	m_SnapshotDeltaSixup.SetStaticsize(ItemType, Size);
 }
 
 CServer *CreateServer() { return new CServer(); }
