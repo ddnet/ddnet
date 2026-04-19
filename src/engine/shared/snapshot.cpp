@@ -575,9 +575,20 @@ int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshotBuffer *pTo, co
 		const int Key = (Type << 16) | Id;
 
 		// create the item if needed
-		int *pNewData = Builder.GetItemData(Key);
-		if(!pNewData)
+		std::optional<int> ExistingIndex = Builder.FindItemIndexByKey(Key);
+		int *pNewData;
+		if(ExistingIndex)
+		{
+			if(ItemSize != Builder.GetItemSize(ExistingIndex.value()))
+			{
+				return -206;
+			}
+			pNewData = Builder.GetItemData(ExistingIndex.value());
+		}
+		else
+		{
 			pNewData = (int *)Builder.NewItemRaw(Type, Id, ItemSize);
+		}
 
 		if(!pNewData)
 			return -302;
@@ -585,6 +596,10 @@ int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshotBuffer *pTo, co
 		const int FromIndex = pFrom->GetItemIndex(Key);
 		if(FromIndex != -1)
 		{
+			if(pFrom->GetItemSize(FromIndex) != ItemSize)
+			{
+				return -207;
+			}
 			// we got an update so we need to apply the diff
 			UndiffItem(pFrom->GetItem(FromIndex)->Data(), pData, pNewData, ItemSize / sizeof(int32_t), &m_aSnapshotDataRate[Type]);
 		}
@@ -727,20 +742,34 @@ void CSnapshotBuilder::Init(bool Sixup)
 
 CSnapshotItem *CSnapshotBuilder::GetItem(int Index)
 {
+	dbg_assert(0 <= Index && Index < m_NumItems, "invalid item index");
 	return (CSnapshotItem *)&(m_aData[m_aOffsets[Index]]);
 }
 
-int *CSnapshotBuilder::GetItemData(int Key)
+int CSnapshotBuilder::GetItemSize(int Index) const
+{
+	dbg_assert(0 <= Index && Index < m_NumItems, "invalid item index");
+	int Start = m_aOffsets[Index];
+	int End = Index + 1 < m_NumItems ? m_aOffsets[Index + 1] : m_DataSize;
+	return (End - Start) - sizeof(CSnapshotItem);
+}
+
+int *CSnapshotBuilder::GetItemData(int Index)
+{
+	return GetItem(Index)->Data();
+}
+
+std::optional<int> CSnapshotBuilder::FindItemIndexByKey(int Key)
 {
 	for(int i = 0; i < m_NumItems; i++)
 	{
 		CSnapshotItem *pItem = GetItem(i);
 		if(pItem->Key() == Key)
 		{
-			return pItem->Data();
+			return i;
 		}
 	}
-	return nullptr;
+	return std::nullopt;
 }
 
 int CSnapshotBuilder::FinishIfNoDroppedItems(CSnapshotBuffer *pSnapData)

@@ -5,6 +5,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <optional>
 
 // CSnapshot
 
@@ -182,7 +183,9 @@ public:
 	void *NewItemRaw(int Type, int Id, int Size);
 
 	CSnapshotItem *GetItem(int Index);
-	int *GetItemData(int Key);
+	int GetItemSize(int Index) const;
+	int *GetItemData(int Index);
+	std::optional<int> FindItemIndexByKey(int Key);
 
 	int FinishIfNoDroppedItems(CSnapshotBuffer *pSnapData);
 	int Finish(CSnapshotBuffer *pBuffer);
