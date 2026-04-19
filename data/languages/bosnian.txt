@@ -1523,6 +1523,9 @@ Map size
 map not included
 == 
 
+Refresh the demo list
+== 
+
 Demos directory
 == 
 
@@ -1530,6 +1533,12 @@ Open the directory that contains the demo files
 == 
 
 Are you sure that you want to disconnect and play this demo?
+== 
+
+Open the selected folder
+== 
+
+Play the selected demo
 == 
 
 Are you sure that you want to delete the folder '%s'?
@@ -2410,13 +2419,16 @@ Show background quads
 Quads are used for background decoration
 == 
 
+Prediction margin
+== 
+
+Predict events (experimental)
+== 
+
 AntiPing
 == 
 
 Tries to predict other entities to give a feel of low latency
-== 
-
-AntiPing: prediction margin
 == 
 
 Background

@@ -2143,9 +2143,6 @@ All
 Preview dummy's name plate
 == Förhandsvisning av namnskylt för dummy
 
-AntiPing: prediction margin
-== AntiPing: prediction marginal
-
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
 == Slut på VRAM. Testa att sätta 'cl_skins_loaded_max' till ett lägre värde eller ta bort egna assets (skins, entities, etc.), speciellt dem med hög upplösning
@@ -2525,7 +2522,16 @@ Add clan
 Add friend
 == 
 
+Refresh the demo list
+== 
+
 Are you sure that you want to disconnect and play this demo?
+== 
+
+Open the selected folder
+== 
+
+Play the selected demo
 == 
 
 Info
@@ -2635,6 +2641,12 @@ Hook collision line tip
 == 
 
 Show background quads
+== 
+
+Prediction margin
+== 
+
+Predict events (experimental)
 == 
 
 Scoreboard cursor

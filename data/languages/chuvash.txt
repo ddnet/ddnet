@@ -1241,6 +1241,9 @@ Map size
 map not included
 == 
 
+Refresh the demo list
+== 
+
 Fetch Info
 == 
 
@@ -1251,6 +1254,12 @@ Open the directory that contains the demo files
 == 
 
 Are you sure that you want to disconnect and play this demo?
+== 
+
+Open the selected folder
+== 
+
+Play the selected demo
 == 
 
 Are you sure that you want to delete the folder '%s'?
@@ -2293,6 +2302,12 @@ Quads are used for background decoration
 Default zoom
 == 
 
+Prediction margin
+== 
+
+Predict events (experimental)
+== 
+
 AntiPing
 == 
 
@@ -2306,9 +2321,6 @@ AntiPing: predict weapons
 == 
 
 AntiPing: predict grenade paths
-== 
-
-AntiPing: prediction margin
 == 
 
 Background

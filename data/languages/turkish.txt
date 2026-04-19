@@ -2171,9 +2171,6 @@ Dragger Outline Color
 Dragger Inner Color
 == Dragger İç Rengi
 
-AntiPing: prediction margin
-== AntiPing: tahmin marjı
-
 [Spectating]
 Following %d: %s
 == İzleniyor %d: %s
@@ -2651,3 +2648,18 @@ When a Tee is hookable
 [Hook collision line color]
 Hook collision line tip
 == Kanca çizgisi ucu
+
+Refresh the demo list
+== 
+
+Open the selected folder
+== 
+
+Play the selected demo
+== 
+
+Prediction margin
+== 
+
+Predict events (experimental)
+== 

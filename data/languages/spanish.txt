@@ -2143,9 +2143,6 @@ All
 Preview dummy's name plate
 == Previsualizar el nombre del dummy
 
-AntiPing: prediction margin
-== AntiPing: margen de predicción
-
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
 == Memoria de video agotada. Intenta reducir el valor de 'cl_skins_loaded_max' o elimina recursos personalizados (skins, entidades, etc.), especialmente aquellos con alta resolución.
@@ -2651,3 +2648,18 @@ Unmute emoticons
 
 Mute emoticons
 == Mutear emoticonos
+
+Refresh the demo list
+== 
+
+Open the selected folder
+== 
+
+Play the selected demo
+== 
+
+Prediction margin
+== 
+
+Predict events (experimental)
+== 

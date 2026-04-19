@@ -2025,10 +2025,19 @@ Netversion
 map not included
 == 
 
+Refresh the demo list
+== 
+
 Fetch Info
 == 
 
 Are you sure that you want to disconnect and play this demo?
+== 
+
+Open the selected folder
+== 
+
+Play the selected demo
 == 
 
 Unable to delete the demo '%s'
@@ -2559,6 +2568,12 @@ Show text entities
 Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == 
 
+Prediction margin
+== 
+
+Predict events (experimental)
+== 
+
 AntiPing
 == 
 
@@ -2572,9 +2587,6 @@ AntiPing: predict weapons
 == 
 
 AntiPing: predict grenade paths
-== 
-
-AntiPing: prediction margin
 == 
 
 Show tiles layers from BG map

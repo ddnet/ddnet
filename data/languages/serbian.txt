@@ -1910,7 +1910,16 @@ Map size
 map not included
 == 
 
+Refresh the demo list
+== 
+
 Are you sure that you want to disconnect and play this demo?
+== 
+
+Open the selected folder
+== 
+
+Play the selected demo
 == 
 
 Dummy is not allowed on this server
@@ -2563,7 +2572,10 @@ Only save improvements
 Show background quads
 == 
 
-AntiPing: prediction margin
+Prediction margin
+== 
+
+Predict events (experimental)
 == 
 
 Regular background color

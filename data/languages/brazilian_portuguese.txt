@@ -2143,9 +2143,6 @@ All
 Preview dummy's name plate
 == Pré-visualizar placas de nome do dummy
 
-AntiPing: prediction margin
-== AntiPing: margem de previsão
-
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
 == Sem VRAM. Tente definir 'cl_skins_loaded_max' para um valor menor ou remova recursos personalizados (skins, entidades, etc.), especialmente aqueles com alta resolução.
@@ -2651,3 +2648,18 @@ When a Tee is hookable
 [Hook collision line color]
 Hook collision line tip
 == Dica da linha de colisão do gancho
+
+Refresh the demo list
+== 
+
+Open the selected folder
+== 
+
+Play the selected demo
+== 
+
+Prediction margin
+== 
+
+Predict events (experimental)
+== 

@@ -2092,9 +2092,6 @@ Width of others' hook collision line
 Preview 'Hook collisions' being pressed
 == Прадпрагляд пры націсканні 'Сутыкненні крука'
 
-AntiPing: prediction margin
-== АнтыПінг: мяжа прагназавання
-
 Basic
 == Асноўныя
 
@@ -2259,7 +2256,16 @@ Live
 Go to Live
 == 
 
+Refresh the demo list
+== 
+
 Are you sure that you want to disconnect and play this demo?
+== 
+
+Open the selected folder
+== 
+
+Play the selected demo
 == 
 
 Save all changes before turning off the editor?
@@ -2632,6 +2638,12 @@ Dragger Inner Color
 == 
 
 Show background quads
+== 
+
+Prediction margin
+== 
+
+Predict events (experimental)
 == 
 
 Scoreboard cursor

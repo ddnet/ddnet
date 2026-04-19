@@ -2203,7 +2203,16 @@ Go to Live
 Map size
 == 
 
+Refresh the demo list
+== 
+
 Are you sure that you want to disconnect and play this demo?
+== 
+
+Open the selected folder
+== 
+
+Play the selected demo
 == 
 
 Save all changes before turning off the editor?
@@ -2631,7 +2640,10 @@ Dragger Inner Color
 Show background quads
 == 
 
-AntiPing: prediction margin
+Prediction margin
+== 
+
+Predict events (experimental)
 == 
 
 Scoreboard cursor

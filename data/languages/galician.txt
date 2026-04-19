@@ -1889,7 +1889,16 @@ Map size
 map not included
 == 
 
+Refresh the demo list
+== 
+
 Are you sure that you want to disconnect and play this demo?
+== 
+
+Open the selected folder
+== 
+
+Play the selected demo
 == 
 
 Are you sure that you want to delete the folder '%s'?
@@ -2557,7 +2566,10 @@ Only save improvements
 Show background quads
 == 
 
-AntiPing: prediction margin
+Prediction margin
+== 
+
+Predict events (experimental)
 == 
 
 Regular background color
