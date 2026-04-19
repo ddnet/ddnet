@@ -6,7 +6,7 @@
 
 #include <game/client/gameclient.h>
 
-int CGameClient::TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrcSeven, int Conn, bool Dummy)
+int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven, int Conn, bool Dummy)
 {
 	CSnapshotBuilder Builder;
 	Builder.Init();
@@ -507,7 +507,7 @@ int CGameClient::TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrc
 	return Builder.Finish(pSnapDstSix);
 }
 
-int CGameClient::OnDemoRecSnap7(CSnapshot *pFrom, CSnapshotBuffer *pTo, int Conn)
+int CGameClient::OnDemoRecSnap7(CSnapshot *pFrom, CSnapshot *pTo, int Conn)
 {
 	CSnapshotBuilder Builder;
 	Builder.Init7(pFrom);

@@ -23,21 +23,21 @@ public:
 	};
 	CClientData m_aClients[MAX_CLIENTS];
 
-	CSnapshotBuffer m_aDemoSnapshotData[IClient::NUM_SNAPSHOT_TYPES];
+	char m_aaDemoSnapshotData[IClient::NUM_SNAPSHOT_TYPES][CSnapshot::MAX_SIZE];
 	CSnapshot *m_apAltSnapshots[IClient::NUM_SNAPSHOT_TYPES];
 
 	CClientSnapshotHandler() :
 		m_aClients()
 	{
-		mem_zero(m_aDemoSnapshotData, sizeof(m_aDemoSnapshotData));
+		mem_zero(m_aaDemoSnapshotData, sizeof(m_aaDemoSnapshotData));
 
 		for(int SnapshotType = 0; SnapshotType < IClient::NUM_SNAPSHOT_TYPES; SnapshotType++)
 		{
-			m_apAltSnapshots[SnapshotType] = m_aDemoSnapshotData[SnapshotType].AsSnapshot();
+			m_apAltSnapshots[SnapshotType] = (CSnapshot *)&m_aaDemoSnapshotData[SnapshotType];
 		}
 	}
 
-	int UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshotBuffer *pTo)
+	int UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshot *pTo)
 	{
 		CUnpacker Unpacker;
 		CSnapshotBuilder Builder;
@@ -119,13 +119,14 @@ public:
 
 	void OnDemoPlayerSnapshot(void *pData, int Size)
 	{
-		CSnapshotBuffer AltSnapBuffer;
-		const int AltSnapSize = UnpackAndValidateSnapshot((CSnapshot *)pData, &AltSnapBuffer);
+		unsigned char aAltSnapBuffer[CSnapshot::MAX_SIZE];
+		CSnapshot *pAltSnapBuffer = (CSnapshot *)aAltSnapBuffer;
+		const int AltSnapSize = UnpackAndValidateSnapshot((CSnapshot *)pData, pAltSnapBuffer);
 		if(AltSnapSize < 0)
 			return;
 
 		std::swap(m_apAltSnapshots[IClient::SNAP_PREV], m_apAltSnapshots[IClient::SNAP_CURRENT]);
-		mem_copy(m_apAltSnapshots[IClient::SNAP_CURRENT], AltSnapBuffer.AsSnapshot(), AltSnapSize);
+		mem_copy(m_apAltSnapshots[IClient::SNAP_CURRENT], pAltSnapBuffer, AltSnapSize);
 
 		OnNewSnapshot();
 	}

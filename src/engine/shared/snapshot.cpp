@@ -501,7 +501,7 @@ int CSnapshotDelta::DebugDumpDelta(const void *pSrcData, int DataSize)
 	return 0;
 }
 
-int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshotBuffer *pTo, const void *pSrcData, int DataSize)
+int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const void *pSrcData, int DataSize)
 {
 	CData *pDelta = (CData *)pSrcData;
 	int *pData = (int *)pDelta->m_aData;
@@ -743,14 +743,14 @@ int *CSnapshotBuilder::GetItemData(int Key)
 	return nullptr;
 }
 
-int CSnapshotBuilder::Finish(CSnapshotBuffer *pBuffer)
+int CSnapshotBuilder::Finish(void *pSnapData)
 {
 	dbg_assert(m_Building, "Snapshot builder is not building snapshot. Call `Finish` after `Init`.");
 	m_Building = false;
 
 	// flatten and make the snapshot
 	dbg_assert(m_NumItems <= CSnapshot::MAX_ITEMS, "Too many snap items");
-	CSnapshot *pSnap = pBuffer->AsSnapshot();
+	CSnapshot *pSnap = (CSnapshot *)pSnapData;
 	pSnap->m_DataSize = m_DataSize;
 	pSnap->m_NumItems = m_NumItems;
 	const size_t TotalSize = pSnap->TotalSize();

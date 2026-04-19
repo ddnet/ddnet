@@ -333,7 +333,7 @@ void CDemoRecorder::RecordSnapshot(int Tick, const void *pData, int Size)
 		Write(CHUNKTYPE_SNAPSHOT, pData, Size);
 
 		m_LastKeyFrame = Tick;
-		mem_copy(&m_LastSnapshotData, pData, Size);
+		mem_copy(m_aLastSnapshotData, pData, Size);
 	}
 	else
 	{
@@ -342,12 +342,12 @@ void CDemoRecorder::RecordSnapshot(int Tick, const void *pData, int Size)
 
 		// create delta
 		char aDeltaData[CSnapshot::MAX_SIZE + sizeof(int)];
-		const int DeltaSize = m_pSnapshotDelta->CreateDelta(m_LastSnapshotData.AsSnapshot(), (CSnapshot *)pData, &aDeltaData);
+		const int DeltaSize = m_pSnapshotDelta->CreateDelta((CSnapshot *)m_aLastSnapshotData, (CSnapshot *)pData, &aDeltaData);
 		if(DeltaSize)
 		{
 			// record delta
 			Write(CHUNKTYPE_DELTA, aDeltaData, DeltaSize);
-			mem_copy(&m_LastSnapshotData, pData, Size);
+			mem_copy(m_aLastSnapshotData, pData, Size);
 		}
 	}
 }
@@ -724,7 +724,8 @@ void CDemoPlayer::DoTick()
 		if(ChunkType == CHUNKTYPE_DELTA)
 		{
 			// process delta snapshot
-			DataSize = SnapshotDelta()->UnpackDelta(m_LastSnapshotData.AsSnapshot(), &m_Snapshot, m_aChunkData, DataSize);
+			CSnapshot *pNewsnap = (CSnapshot *)m_aSnapshot;
+			DataSize = SnapshotDelta()->UnpackDelta((CSnapshot *)m_aLastSnapshotData, pNewsnap, m_aChunkData, DataSize);
 
 			if(DataSize < 0)
 			{
@@ -735,7 +736,7 @@ void CDemoPlayer::DoTick()
 					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", aBuf);
 				}
 			}
-			else if(!m_Snapshot.AsSnapshot()->IsValid(DataSize))
+			else if(!pNewsnap->IsValid(DataSize))
 			{
 				if(m_pConsole)
 				{
@@ -747,10 +748,10 @@ void CDemoPlayer::DoTick()
 			else
 			{
 				if(m_pListener)
-					m_pListener->OnDemoPlayerSnapshot(m_Snapshot.AsSnapshot(), DataSize);
+					m_pListener->OnDemoPlayerSnapshot(m_aSnapshot, DataSize);
 
 				m_LastSnapshotDataSize = DataSize;
-				mem_copy(&m_LastSnapshotData, &m_Snapshot, DataSize);
+				mem_copy(m_aLastSnapshotData, m_aSnapshot, DataSize);
 				GotSnapshot = true;
 			}
 		}
@@ -772,7 +773,7 @@ void CDemoPlayer::DoTick()
 				GotSnapshot = true;
 
 				m_LastSnapshotDataSize = DataSize;
-				mem_copy(&m_LastSnapshotData, m_aChunkData, DataSize);
+				mem_copy(m_aLastSnapshotData, m_aChunkData, DataSize);
 				if(m_pListener)
 					m_pListener->OnDemoPlayerSnapshot(m_aChunkData, DataSize);
 			}
@@ -783,7 +784,7 @@ void CDemoPlayer::DoTick()
 			if(!GotSnapshot && m_pListener && m_LastSnapshotDataSize != -1)
 			{
 				GotSnapshot = true;
-				m_pListener->OnDemoPlayerSnapshot(&m_LastSnapshotData, m_LastSnapshotDataSize);
+				m_pListener->OnDemoPlayerSnapshot(m_aLastSnapshotData, m_LastSnapshotDataSize);
 			}
 
 			// check the remaining types

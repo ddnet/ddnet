@@ -1002,18 +1002,18 @@ void CServer::DoSnapshot()
 	if(m_aDemoRecorder[RECORDER_MANUAL].IsRecording() || m_aDemoRecorder[RECORDER_AUTO].IsRecording())
 	{
 		// create snapshot for demo recording
-		CSnapshotBuffer Data;
+		char aData[CSnapshot::MAX_SIZE];
 
 		// build snap and possibly add some messages
 		m_SnapshotBuilder.Init();
 		GameServer()->OnSnap(-1, IsGlobalSnap, true);
-		int SnapshotSize = m_SnapshotBuilder.Finish(&Data);
+		int SnapshotSize = m_SnapshotBuilder.Finish(aData);
 
 		// write snapshot
 		if(m_aDemoRecorder[RECORDER_MANUAL].IsRecording())
-			m_aDemoRecorder[RECORDER_MANUAL].RecordSnapshot(Tick(), Data.AsSnapshot(), SnapshotSize);
+			m_aDemoRecorder[RECORDER_MANUAL].RecordSnapshot(Tick(), aData, SnapshotSize);
 		if(m_aDemoRecorder[RECORDER_AUTO].IsRecording())
-			m_aDemoRecorder[RECORDER_AUTO].RecordSnapshot(Tick(), Data.AsSnapshot(), SnapshotSize);
+			m_aDemoRecorder[RECORDER_AUTO].RecordSnapshot(Tick(), aData, SnapshotSize);
 	}
 
 	// create snapshots for all clients
@@ -1042,23 +1042,24 @@ void CServer::DoSnapshot()
 			GameServer()->OnSnap(i, IsGlobalSnap, m_aDemoRecorder[i].IsRecording());
 
 			// finish snapshot
-			CSnapshotBuffer Data;
-			int SnapshotSize = m_SnapshotBuilder.Finish(&Data);
+			char aData[CSnapshot::MAX_SIZE];
+			CSnapshot *pData = (CSnapshot *)aData; // Fix compiler warning for strict-aliasing
+			int SnapshotSize = m_SnapshotBuilder.Finish(pData);
 
 			if(m_aDemoRecorder[i].IsRecording())
 			{
 				// write snapshot
-				m_aDemoRecorder[i].RecordSnapshot(Tick(), Data.AsSnapshot(), SnapshotSize);
+				m_aDemoRecorder[i].RecordSnapshot(Tick(), aData, SnapshotSize);
 			}
 
-			int Crc = Data.AsSnapshot()->Crc();
+			int Crc = pData->Crc();
 
 			// remove old snapshots
 			// keep 3 seconds worth of snapshots
 			m_aClients[i].m_Snapshots.PurgeUntil(m_CurrentGameTick - TickSpeed() * 3);
 
 			// save the snapshot
-			m_aClients[i].m_Snapshots.Add(m_CurrentGameTick, time_get(), SnapshotSize, Data.AsSnapshot(), 0, nullptr);
+			m_aClients[i].m_Snapshots.Add(m_CurrentGameTick, time_get(), SnapshotSize, pData, 0, nullptr);
 
 			// find snapshot that we can perform delta against
 			int DeltaTick = -1;
@@ -1077,7 +1078,7 @@ void CServer::DoSnapshot()
 
 			// create delta
 			char aDeltaData[CSnapshot::MAX_SIZE];
-			int DeltaSize = m_SnapshotDelta.CreateDelta(pDeltashot, Data.AsSnapshot(), aDeltaData);
+			int DeltaSize = m_SnapshotDelta.CreateDelta(pDeltashot, pData, aDeltaData);
 
 			if(DeltaSize)
 			{
