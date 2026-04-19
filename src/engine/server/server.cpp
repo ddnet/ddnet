@@ -4457,9 +4457,9 @@ void CServer::SnapFreeId(int Id)
 	m_IdPool.FreeId(Id);
 }
 
-bool CServer::SnapNewItem(int Type, int Id, const void *pData, int Size)
+void *CServer::SnapNewItem(int Type, int Id, int Size)
 {
-	return m_SnapshotBuilder.NewItem(Type, Id, pData, Size);
+	return m_SnapshotBuilder.NewItem(Type, Id, Size);
 }
 
 void CServer::SnapSetStaticsize(int ItemType, int Size)

@@ -1137,60 +1137,60 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 
 	if(!Server()->IsSixup(SnappingClient))
 	{
-		CNetObj_Character Character = {};
+		CNetObj_Character *pCharacter = Server()->SnapNewItem<CNetObj_Character>(Id);
+		if(!pCharacter)
+			return;
 
-		pCore->Write(&Character);
+		pCore->Write(pCharacter);
 
-		Character.m_Tick = Tick;
-		Character.m_Emote = Emote;
+		pCharacter->m_Tick = Tick;
+		pCharacter->m_Emote = Emote;
 
-		if(Character.m_HookedPlayer != -1)
+		if(pCharacter->m_HookedPlayer != -1)
 		{
-			if(!Server()->Translate(Character.m_HookedPlayer, SnappingClient))
-				Character.m_HookedPlayer = -1;
+			if(!Server()->Translate(pCharacter->m_HookedPlayer, SnappingClient))
+				pCharacter->m_HookedPlayer = -1;
 		}
 
-		Character.m_AttackTick = m_AttackTick;
-		Character.m_Direction = m_Input.m_Direction;
-		Character.m_Weapon = Weapon;
-		Character.m_AmmoCount = AmmoCount;
-		Character.m_Health = Health;
-		Character.m_Armor = Armor;
-		Character.m_PlayerFlags = GetPlayer()->m_PlayerFlags;
-
-		Server()->SnapNewItem(Id, Character);
+		pCharacter->m_AttackTick = m_AttackTick;
+		pCharacter->m_Direction = m_Input.m_Direction;
+		pCharacter->m_Weapon = Weapon;
+		pCharacter->m_AmmoCount = AmmoCount;
+		pCharacter->m_Health = Health;
+		pCharacter->m_Armor = Armor;
+		pCharacter->m_PlayerFlags = GetPlayer()->m_PlayerFlags;
 	}
 	else
 	{
-		protocol7::CNetObj_Character Character = {};
+		protocol7::CNetObj_Character *pCharacter = Server()->SnapNewItem<protocol7::CNetObj_Character>(Id);
+		if(!pCharacter)
+			return;
 
-		pCore->Write(reinterpret_cast<CNetObj_CharacterCore *>(static_cast<protocol7::CNetObj_CharacterCore *>(&Character)));
-		if(Character.m_Angle > (int)(pi * 256.0f))
+		pCore->Write(reinterpret_cast<CNetObj_CharacterCore *>(static_cast<protocol7::CNetObj_CharacterCore *>(pCharacter)));
+		if(pCharacter->m_Angle > (int)(pi * 256.0f))
 		{
-			Character.m_Angle -= (int)(2.0f * pi * 256.0f);
+			pCharacter->m_Angle -= (int)(2.0f * pi * 256.0f);
 		}
 
 		// m_HookTick can be negative when using the hook_duration tune, which 0.7 clients
 		// will consider invalid. https://github.com/ddnet/ddnet/issues/3915
-		Character.m_HookTick = maximum(0, Character.m_HookTick);
+		pCharacter->m_HookTick = maximum(0, pCharacter->m_HookTick);
 
-		Character.m_Tick = Tick;
-		Character.m_Emote = Emote;
-		Character.m_AttackTick = m_AttackTick;
-		Character.m_Direction = m_Input.m_Direction;
-		Character.m_Weapon = Weapon;
-		Character.m_AmmoCount = AmmoCount;
+		pCharacter->m_Tick = Tick;
+		pCharacter->m_Emote = Emote;
+		pCharacter->m_AttackTick = m_AttackTick;
+		pCharacter->m_Direction = m_Input.m_Direction;
+		pCharacter->m_Weapon = Weapon;
+		pCharacter->m_AmmoCount = AmmoCount;
 
 		if(m_FreezeTime > 0 || m_Core.m_DeepFrozen)
-			Character.m_AmmoCount = m_Core.m_FreezeStart + g_Config.m_SvFreezeDelay * Server()->TickSpeed();
+			pCharacter->m_AmmoCount = m_Core.m_FreezeStart + g_Config.m_SvFreezeDelay * Server()->TickSpeed();
 		else if(Weapon == WEAPON_NINJA)
-			Character.m_AmmoCount = m_Core.m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000;
+			pCharacter->m_AmmoCount = m_Core.m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000;
 
-		Character.m_Health = Health;
-		Character.m_Armor = Armor;
-		Character.m_TriggeredEvents = m_TriggeredEvents7;
-
-		Server()->SnapNewItem(Id, Character);
+		pCharacter->m_Health = Health;
+		pCharacter->m_Armor = Armor;
+		pCharacter->m_TriggeredEvents = m_TriggeredEvents7;
 	}
 }
 
@@ -1262,86 +1262,86 @@ void CCharacter::Snap(int SnappingClient)
 
 	SnapCharacter(SnappingClient, Id);
 
-	CNetObj_DDNetCharacter DDNetCharacter = {};
+	CNetObj_DDNetCharacter *pDDNetCharacter = Server()->SnapNewItem<CNetObj_DDNetCharacter>(Id);
+	if(!pDDNetCharacter)
+		return;
 
-	DDNetCharacter.m_Flags = 0;
+	pDDNetCharacter->m_Flags = 0;
 	if(m_Core.m_Solo)
-		DDNetCharacter.m_Flags |= CHARACTERFLAG_SOLO;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_SOLO;
 	if(m_Core.m_Super)
-		DDNetCharacter.m_Flags |= CHARACTERFLAG_SUPER;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_SUPER;
 	if(m_Core.m_Invincible)
-		DDNetCharacter.m_Flags |= CHARACTERFLAG_INVINCIBLE;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_INVINCIBLE;
 	if(m_Core.m_EndlessHook)
-		DDNetCharacter.m_Flags |= CHARACTERFLAG_ENDLESS_HOOK;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_HOOK;
 	if(m_Core.m_CollisionDisabled || !GetTuning(m_TuneZone)->m_PlayerCollision)
-		DDNetCharacter.m_Flags |= CHARACTERFLAG_COLLISION_DISABLED;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_COLLISION_DISABLED;
 	if(m_Core.m_HookHitDisabled || !GetTuning(m_TuneZone)->m_PlayerHooking)
-		DDNetCharacter.m_Flags |= CHARACTERFLAG_HOOK_HIT_DISABLED;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_HOOK_HIT_DISABLED;
 	if(m_Core.m_EndlessJump)
-		DDNetCharacter.m_Flags |= CHARACTERFLAG_ENDLESS_JUMP;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_JUMP;
 	if(m_Core.m_Jetpack)
-		DDNetCharacter.m_Flags |= CHARACTERFLAG_JETPACK;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_JETPACK;
 	if(m_Core.m_HammerHitDisabled)
-		DDNetCharacter.m_Flags |= CHARACTERFLAG_HAMMER_HIT_DISABLED;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_HAMMER_HIT_DISABLED;
 	if(m_Core.m_ShotgunHitDisabled)
-		DDNetCharacter.m_Flags |= CHARACTERFLAG_SHOTGUN_HIT_DISABLED;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_SHOTGUN_HIT_DISABLED;
 	if(m_Core.m_GrenadeHitDisabled)
-		DDNetCharacter.m_Flags |= CHARACTERFLAG_GRENADE_HIT_DISABLED;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_GRENADE_HIT_DISABLED;
 	if(m_Core.m_LaserHitDisabled)
-		DDNetCharacter.m_Flags |= CHARACTERFLAG_LASER_HIT_DISABLED;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_LASER_HIT_DISABLED;
 	if(m_Core.m_HasTelegunGun)
-		DDNetCharacter.m_Flags |= CHARACTERFLAG_TELEGUN_GUN;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_TELEGUN_GUN;
 	if(m_Core.m_HasTelegunGrenade)
-		DDNetCharacter.m_Flags |= CHARACTERFLAG_TELEGUN_GRENADE;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_TELEGUN_GRENADE;
 	if(m_Core.m_HasTelegunLaser)
-		DDNetCharacter.m_Flags |= CHARACTERFLAG_TELEGUN_LASER;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_TELEGUN_LASER;
 	if(m_Core.m_aWeapons[WEAPON_HAMMER].m_Got)
-		DDNetCharacter.m_Flags |= CHARACTERFLAG_WEAPON_HAMMER;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_HAMMER;
 	if(m_Core.m_aWeapons[WEAPON_GUN].m_Got)
-		DDNetCharacter.m_Flags |= CHARACTERFLAG_WEAPON_GUN;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_GUN;
 	if(m_Core.m_aWeapons[WEAPON_SHOTGUN].m_Got)
-		DDNetCharacter.m_Flags |= CHARACTERFLAG_WEAPON_SHOTGUN;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_SHOTGUN;
 	if(m_Core.m_aWeapons[WEAPON_GRENADE].m_Got)
-		DDNetCharacter.m_Flags |= CHARACTERFLAG_WEAPON_GRENADE;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_GRENADE;
 	if(m_Core.m_aWeapons[WEAPON_LASER].m_Got)
-		DDNetCharacter.m_Flags |= CHARACTERFLAG_WEAPON_LASER;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_LASER;
 	if(m_Core.m_ActiveWeapon == WEAPON_NINJA)
-		DDNetCharacter.m_Flags |= CHARACTERFLAG_WEAPON_NINJA;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_NINJA;
 	if(m_Core.m_LiveFrozen)
-		DDNetCharacter.m_Flags |= CHARACTERFLAG_MOVEMENTS_DISABLED;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_MOVEMENTS_DISABLED;
 
-	DDNetCharacter.m_FreezeEnd = m_Core.m_DeepFrozen ? -1 : (m_FreezeTime == 0 ? 0 : Server()->Tick() + m_FreezeTime);
-	DDNetCharacter.m_Jumps = m_Core.m_Jumps;
-	DDNetCharacter.m_TeleCheckpoint = m_TeleCheckpoint;
-	DDNetCharacter.m_StrongWeakId = m_StrongWeakId;
+	pDDNetCharacter->m_FreezeEnd = m_Core.m_DeepFrozen ? -1 : (m_FreezeTime == 0 ? 0 : Server()->Tick() + m_FreezeTime);
+	pDDNetCharacter->m_Jumps = m_Core.m_Jumps;
+	pDDNetCharacter->m_TeleCheckpoint = m_TeleCheckpoint;
+	pDDNetCharacter->m_StrongWeakId = m_StrongWeakId;
 
 	// Display Information
-	DDNetCharacter.m_JumpedTotal = m_Core.m_JumpedTotal;
-	DDNetCharacter.m_NinjaActivationTick = m_Core.m_Ninja.m_ActivationTick;
-	DDNetCharacter.m_FreezeStart = m_Core.m_FreezeStart;
+	pDDNetCharacter->m_JumpedTotal = m_Core.m_JumpedTotal;
+	pDDNetCharacter->m_NinjaActivationTick = m_Core.m_Ninja.m_ActivationTick;
+	pDDNetCharacter->m_FreezeStart = m_Core.m_FreezeStart;
 	if(m_Core.m_IsInFreeze)
 	{
-		DDNetCharacter.m_Flags |= CHARACTERFLAG_IN_FREEZE;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_IN_FREEZE;
 	}
 	if(Teams()->IsPractice(Team()))
 	{
-		DDNetCharacter.m_Flags |= CHARACTERFLAG_PRACTICE_MODE;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_PRACTICE_MODE;
 	}
 	if(Teams()->TeamLocked(Team()))
 	{
-		DDNetCharacter.m_Flags |= CHARACTERFLAG_LOCK_MODE;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_LOCK_MODE;
 	}
 	if(Teams()->TeamFlock(Team()))
 	{
-		DDNetCharacter.m_Flags |= CHARACTERFLAG_TEAM0_MODE;
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_TEAM0_MODE;
 	}
-	DDNetCharacter.m_TargetX = m_Core.m_Input.m_TargetX;
-	DDNetCharacter.m_TargetY = m_Core.m_Input.m_TargetY;
+	pDDNetCharacter->m_TargetX = m_Core.m_Input.m_TargetX;
+	pDDNetCharacter->m_TargetY = m_Core.m_Input.m_TargetY;
 
-	// OVERRIDE_NONE is the default value, the object is zeroed, so it would incorrectly become 0
-	DDNetCharacter.m_TuneZoneOverride = TuneZone::OVERRIDE_NONE;
-
-	Server()->SnapNewItem(Id, DDNetCharacter);
+	// OVERRIDE_NONE is the default value, SnapNewItem zeroes the object, so it would incorrectly become 0
+	pDDNetCharacter->m_TuneZoneOverride = TuneZone::OVERRIDE_NONE;
 }
 
 void CCharacter::PostGlobalSnap()

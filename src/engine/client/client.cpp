@@ -2341,8 +2341,8 @@ int CClient::UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshotBuffer *pTo)
 			continue;
 		}
 
-		void *pSecuredData = pNetObjHandler->SecureUnpackObj(ItemType, &Unpacker);
-		if(!pSecuredData)
+		void *pRawObj = pNetObjHandler->SecureUnpackObj(ItemType, &Unpacker);
+		if(!pRawObj)
 		{
 			if(g_Config.m_Debug && ItemType != UUID_UNKNOWN)
 			{
@@ -2354,10 +2354,11 @@ int CClient::UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshotBuffer *pTo)
 		}
 		const int ItemSize = pNetObjHandler->GetUnpackedObjSize(ItemType);
 
-		if(!Builder.NewItem(ItemType, pFromItem->Id(), pSecuredData, ItemSize))
-		{
+		void *pObj = Builder.NewItem(ItemType, pFromItem->Id(), ItemSize);
+		if(!pObj)
 			return -4;
-		}
+
+		mem_copy(pObj, pRawObj, ItemSize);
 	}
 
 	return Builder.Finish(pTo);

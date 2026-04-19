@@ -174,20 +174,17 @@ class CSnapshotBuilder
 	int GetTypeFromIndex(int Index) const;
 
 	bool m_Building = false;
-	bool m_HasDroppedItem = false;
 	bool m_Sixup = false;
 
 public:
 	void Init(bool Sixup = false);
 	void Init7(const CSnapshot *pSnapshot);
 
-	bool NewItem(int Type, int Id, const void *pData, int Size);
-	void *NewItemRaw(int Type, int Id, int Size);
+	void *NewItem(int Type, int Id, int Size);
 
 	CSnapshotItem *GetItem(int Index);
 	int *GetItemData(int Key);
 
-	int FinishIfNoDroppedItems(CSnapshotBuffer *pSnapData);
 	int Finish(CSnapshotBuffer *pBuffer);
 };
 

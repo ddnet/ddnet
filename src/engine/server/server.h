@@ -480,7 +480,7 @@ public:
 
 	int SnapNewId() override;
 	void SnapFreeId(int Id) override;
-	bool SnapNewItem(int Type, int Id, const void *pData, int Size) override;
+	void *SnapNewItem(int Type, int Id, int Size) override;
 	void SnapSetStaticsize(int ItemType, int Size) override;
 	void SnapSetStaticsize7(int ItemType, int Size) override;
 
