@@ -552,7 +552,7 @@ int CGameClient::OnDemoRecSnap7(CSnapshot *pFrom, CSnapshotBuffer *pTo, int Conn
 			return -2;
 
 		protocol7::CNetObj_De_TuneParams TuneParams;
-		mem_copy(&TuneParams.m_aTuneParams, &m_aTuning[Conn], sizeof(TuneParams.m_aTuneParams));
+		mem_copy(&TuneParams.m_aTuneParams, &m_aTuning[Conn], sizeof(TuneParams));
 		mem_copy(pItem, &TuneParams, sizeof(protocol7::CNetObj_De_TuneParams));
 	}
 
