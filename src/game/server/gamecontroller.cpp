@@ -686,7 +686,7 @@ void IGameController::Snap(int SnappingClient)
 
 	GameServer()->SnapSwitchers(SnappingClient);
 
-	if(!Server()->IsSixup(SnappingClient))
+	if(!Server()->IsSixup(SnappingClient) && GameServer()->GetClientVersion(SnappingClient) >= VERSION_DDNET_MAP_BESTTIME)
 	{
 		CFinishTime MapTime = SnapMapBestTime(SnappingClient);
 		if(MapTime.m_Seconds != FinishTime::UNSET)
