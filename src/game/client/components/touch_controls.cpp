@@ -26,6 +26,7 @@
 #include <game/localization.h>
 
 #include <algorithm>
+#include <cmath>
 #include <cstdlib>
 #include <functional>
 #include <iterator>
@@ -42,7 +43,9 @@ static constexpr const char *const ACTION_NAMES[] = {Localizable("Aim"), Localiz
 static constexpr const char *const ACTION_SWAP_NAMES[] = {/* unused */ "", Localizable("Active: Fire"), Localizable("Active: Hook")};
 static constexpr const char *const ACTION_COMMANDS[] = {/* unused */ "", "+fire", "+hook"};
 
+static constexpr float LONG_SLIDE_DISTANCE = 0.005f;
 static constexpr std::chrono::milliseconds LONG_TOUCH_DURATION = 500ms;
+static constexpr std::chrono::milliseconds MAXIMUM_TRIGGER_TIME = 100ms;
 static constexpr std::chrono::milliseconds BIND_REPEAT_INITIAL_DELAY = 250ms;
 static constexpr std::chrono::nanoseconds BIND_REPEAT_RATE = std::chrono::nanoseconds(1s) / 15;
 
@@ -245,9 +248,17 @@ bool CTouchControls::CTouchButton::IsInside(vec2 TouchPosition) const
 void CTouchControls::CTouchButton::UpdateVisibilityGame()
 {
 	const bool PrevVisibility = m_VisibilityCached;
-	m_VisibilityCached = std::all_of(m_vVisibilities.begin(), m_vVisibilities.end(), [&](CButtonVisibility Visibility) {
-		return m_pTouchControls->m_aVisibilityFunctions[(int)Visibility.m_Type].m_Function() == Visibility.m_Parity;
-	});
+	// Editor doesn't respect this variable.
+	if(m_pTouchControls->m_HideAllButtons && (m_pTouchControls->m_ToggleGestureGame || m_pTouchControls->m_ToggleGestureSpec))
+	{
+		m_VisibilityCached = false;
+	}
+	else
+	{
+		m_VisibilityCached = std::all_of(m_vVisibilities.begin(), m_vVisibilities.end(), [&](CButtonVisibility Visibility) {
+			return m_pTouchControls->m_aVisibilityFunctions[(int)Visibility.m_Type].m_Function() == Visibility.m_Parity;
+		});
+	}
 	if(m_VisibilityCached && !PrevVisibility)
 	{
 		m_VisibilityStartTime = time_get_nanoseconds();
@@ -1010,6 +1021,36 @@ void CTouchControls::UpdateButtonsGame(const std::vector<IInput::CTouchFingerSta
 			vRemainingTouchFingerStates.end());
 	}
 
+	if(!m_vFreeFingerStates.empty())
+	{
+		// Remove fingers that are not pressed anymore.
+		m_vFreeFingerStates.erase(
+			std::remove_if(m_vFreeFingerStates.begin(), m_vFreeFingerStates.end(), [&](IInput::CTouchFingerState &FreeFingerState) {
+				const auto TargetFingerState = std::find_if(vRemainingTouchFingerStates.begin(), vRemainingTouchFingerStates.end(), [&](const IInput::CTouchFingerState &TouchFingerState) {
+					return TouchFingerState.m_Finger == FreeFingerState.m_Finger;
+				});
+				return TargetFingerState == vRemainingTouchFingerStates.end();
+			}),
+			m_vFreeFingerStates.end());
+		// Update fingers that are still pressing.
+		for(auto &FreeFingerState : m_vFreeFingerStates)
+		{
+			const auto TargetFingerState = std::find_if(vRemainingTouchFingerStates.begin(), vRemainingTouchFingerStates.end(), [&](const IInput::CTouchFingerState &TouchFingerState) {
+				return TouchFingerState.m_Finger == FreeFingerState.m_Finger;
+			});
+			dbg_assert(TargetFingerState != vRemainingTouchFingerStates.end(), "Invalid fingerstate.");
+			FreeFingerState = *TargetFingerState;
+		}
+		// Free fingers shouldn't be used for activating buttons.
+		vRemainingTouchFingerStates.erase(
+			std::remove_if(vRemainingTouchFingerStates.begin(), vRemainingTouchFingerStates.end(), [&](const IInput::CTouchFingerState &TouchFingerState) {
+				return std::find_if(m_vFreeFingerStates.begin(), m_vFreeFingerStates.end(), [&](const IInput::CTouchFingerState &FreeFingerState) {
+					return TouchFingerState.m_Finger == FreeFingerState.m_Finger;
+				}) != m_vFreeFingerStates.end();
+			}),
+			vRemainingTouchFingerStates.end());
+	}
+
 	// Remove remaining finger states for fingers which are responsible for active actions
 	// and release action when the finger responsible for it is not pressed down anymore.
 	bool GotDirectFingerState = false; // Whether DirectFingerState is valid
@@ -1021,10 +1062,10 @@ void CTouchControls::UpdateButtonsGame(const std::vector<IInput::CTouchFingerSta
 			continue;
 		}
 
-		const auto ActiveFinger = std::find_if(vRemainingTouchFingerStates.begin(), vRemainingTouchFingerStates.end(), [&](const IInput::CTouchFingerState &TouchFingerState) {
+		const auto ActiveFinger = std::find_if(m_vFreeFingerStates.begin(), m_vFreeFingerStates.end(), [&](const IInput::CTouchFingerState &TouchFingerState) {
 			return TouchFingerState.m_Finger == m_aDirectTouchActionStates[Action].m_Finger;
 		});
-		if(ActiveFinger == vRemainingTouchFingerStates.end() || DirectTouchAction == NUM_ACTIONS)
+		if(ActiveFinger == m_vFreeFingerStates.end() || DirectTouchAction == NUM_ACTIONS)
 		{
 			m_aDirectTouchActionStates[Action].m_Active = false;
 			if(Action != ACTION_AIM)
@@ -1039,7 +1080,6 @@ void CTouchControls::UpdateButtonsGame(const std::vector<IInput::CTouchFingerSta
 				GotDirectFingerState = true;
 				DirectFingerState = *ActiveFinger;
 			}
-			vRemainingTouchFingerStates.erase(ActiveFinger);
 		}
 	}
 
@@ -1137,19 +1177,89 @@ void CTouchControls::UpdateButtonsGame(const std::vector<IInput::CTouchFingerSta
 		vRemainingTouchFingerStates.erase(ActiveFinger);
 	}
 
-	// TODO: Support standard gesture to zoom (enabled separately for ingame and spectator)
+	// The rest ones are free.
+	m_vFreeFingerStates.insert(m_vFreeFingerStates.end(),
+		std::make_move_iterator(vRemainingTouchFingerStates.begin()), std::make_move_iterator(vRemainingTouchFingerStates.end()));
+	vRemainingTouchFingerStates.clear();
 
-	// Activate action if there is an unhandled pressed down finger.
-	int ActivateAction = NUM_ACTIONS;
-	if(DirectTouchAction != NUM_ACTIONS && !vRemainingTouchFingerStates.empty() && !m_aDirectTouchActionStates[DirectTouchAction].m_Active)
+	if(m_vFreeFingerStates.size() >= 3 &&
+		((m_ToggleGestureSpec && GameClient()->m_Snap.m_SpecInfo.m_Active) ||
+			(m_ToggleGestureGame && !GameClient()->m_Snap.m_SpecInfo.m_Active) ||
+			(Client()->State() == IClient::STATE_DEMOPLAYBACK)))
 	{
-		GotDirectFingerState = true;
-		DirectFingerState = vRemainingTouchFingerStates[0];
-		vRemainingTouchFingerStates.erase(vRemainingTouchFingerStates.begin());
-		m_aDirectTouchActionStates[DirectTouchAction].m_Active = true;
-		m_aDirectTouchActionStates[DirectTouchAction].m_Finger = DirectFingerState.m_Finger;
-		m_DirectTouchLastAction = DirectTouchAction;
-		ActivateAction = DirectTouchAction;
+		// The FingerStates in this vector should be sorted in ascending order of press time.
+		for(unsigned Index = 0; Index < m_vFreeFingerStates.size() - 2; Index++)
+		{
+			if(m_vFreeFingerStates[Index + 2].m_PressTime - m_vFreeFingerStates[Index].m_PressTime <= MAXIMUM_TRIGGER_TIME)
+			{
+				// To prevent retrigger.
+				std::for_each(m_vFreeFingerStates.begin(), m_vFreeFingerStates.end(), [&](const IInput::CTouchFingerState TouchFingerState) {
+					m_vStaleFingers.emplace_back(TouchFingerState.m_Finger);
+				});
+				m_vFreeFingerStates.clear();
+				m_HideAllButtons = !m_HideAllButtons;
+				return;
+			}
+		}
+		// If not found, continue next.
+	}
+
+	// This feature is always enabled for demo player.
+	if(m_vFreeFingerStates.size() >= 2 &&
+		((m_ZoomGestureSpec && GameClient()->m_Snap.m_SpecInfo.m_Active) ||
+			(m_ZoomGestureGame && !GameClient()->m_Snap.m_SpecInfo.m_Active) ||
+			(Client()->State() == IClient::STATE_DEMOPLAYBACK)))
+	{
+		// Prevent large-scale zooming caused by finger alteration.
+		if(!m_GestureLastPos.has_value() || !m_GestureLastFingers.has_value() || m_GestureLastFingers.value() != std::make_pair(m_vFreeFingerStates[0].m_Finger, m_vFreeFingerStates[1].m_Finger))
+		{
+			// Init start pos, then wait for next time's m_Delta.
+			m_GestureLastPos = std::make_pair(m_vFreeFingerStates[0].m_Position, m_vFreeFingerStates[1].m_Position);
+			m_GestureLastFingers = std::make_pair(m_vFreeFingerStates[0].m_Finger, m_vFreeFingerStates[1].m_Finger);
+			return;
+		}
+		const float ZoomDelta = length(m_vFreeFingerStates[1].m_Position - m_vFreeFingerStates[0].m_Position) - length(m_GestureLastPos->second - m_GestureLastPos->first);
+		const float ZoomAmount = ZoomDelta * 20.0f;
+		GameClient()->m_Camera.ScaleZoom(CCamera::ZoomStepsToValue(ZoomAmount));
+		if(GameClient()->m_MultiViewActivated)
+			GameClient()->m_MultiViewPersonalZoom += ZoomAmount;
+		if(GameClient()->m_Snap.m_SpecInfo.m_Active || (Client()->State() == IClient::STATE_DEMOPLAYBACK))
+		{
+			vec2 WorldScreenSize;
+			vec2 Delta = ((m_vFreeFingerStates[1].m_Position + m_vFreeFingerStates[0].m_Position) - (m_GestureLastPos->second + m_GestureLastPos->first)) * 2.0f;
+			Graphics()->CalcScreenParams(Graphics()->ScreenAspect(), GameClient()->m_Camera.m_Zoom, &WorldScreenSize.x, &WorldScreenSize.y);
+			CControls &Controls = GameClient()->m_Controls;
+			Controls.m_aMousePos[g_Config.m_ClDummy] += -Delta * WorldScreenSize;
+			Controls.m_aMouseInputType[g_Config.m_ClDummy] = CControls::EMouseInputType::RELATIVE;
+			Controls.m_aMousePos[g_Config.m_ClDummy].x = std::clamp(Controls.m_aMousePos[g_Config.m_ClDummy].x, -201.0f * 32, (Collision()->GetWidth() + 201.0f) * 32.0f);
+			Controls.m_aMousePos[g_Config.m_ClDummy].y = std::clamp(Controls.m_aMousePos[g_Config.m_ClDummy].y, -201.0f * 32, (Collision()->GetHeight() + 201.0f) * 32.0f);
+		}
+		m_GestureLastPos = std::make_pair(m_vFreeFingerStates[0].m_Position, m_vFreeFingerStates[1].m_Position);
+		return;
+	}
+	m_GestureLastPos.reset();
+
+	// Activate action if there is an unhandled pressed down finger, which didn't trigger any direct action before.
+	int ActivateAction = NUM_ACTIONS;
+	if(DirectTouchAction != NUM_ACTIONS && !m_vFreeFingerStates.empty() && !m_aDirectTouchActionStates[DirectTouchAction].m_Active)
+	{
+		const auto UnusedFingerState = std::find_if(m_vFreeFingerStates.begin(), m_vFreeFingerStates.end(), [&](const IInput::CTouchFingerState &TouchFingerState) {
+			for(int Action = ACTION_AIM; Action < NUM_ACTIONS; ++Action)
+			{
+				if(m_aDirectTouchActionStates[Action].m_Active && m_aDirectTouchActionStates[Action].m_Finger == TouchFingerState.m_Finger)
+					return false;
+			}
+			return true;
+		});
+		if(UnusedFingerState != m_vFreeFingerStates.end())
+		{
+			GotDirectFingerState = true;
+			DirectFingerState = *UnusedFingerState;
+			m_aDirectTouchActionStates[DirectTouchAction].m_Active = true;
+			m_aDirectTouchActionStates[DirectTouchAction].m_Finger = DirectFingerState.m_Finger;
+			m_DirectTouchLastAction = DirectTouchAction;
+			ActivateAction = DirectTouchAction;
+		}
 	}
 
 	// Update mouse position based on the finger responsible for the last active action.
@@ -1265,6 +1375,38 @@ bool CTouchControls::ParseConfiguration(const void *pFileData, unsigned FileLeng
 		return false;
 	}
 
+	std::optional<bool> ParsedZoomGestureGame =
+		ParseBoolean(&(*pConfiguration)["zoom-gesture-ingame"], "zoom-gesture-ingame", false);
+	if(!ParsedZoomGestureGame.has_value())
+	{
+		json_value_free(pConfiguration);
+		return false;
+	}
+
+	std::optional<bool> ParsedZoomGestureSpec =
+		ParseBoolean(&(*pConfiguration)["zoom-gesture-spectate"], "zoom-gesture-spectate", true);
+	if(!ParsedZoomGestureSpec.has_value())
+	{
+		json_value_free(pConfiguration);
+		return false;
+	}
+
+	std::optional<bool> ParsedToggleGestureGame =
+		ParseBoolean(&(*pConfiguration)["toggle-visibility-gesture-game"], "toggle-visibility-gesture-game", false);
+	if(!ParsedToggleGestureGame.has_value())
+	{
+		json_value_free(pConfiguration);
+		return false;
+	}
+
+	std::optional<bool> ParsedToggleGestureSpec =
+		ParseBoolean(&(*pConfiguration)["toggle-visibility-gesture-spec"], "toggle-visibility-gesture-spec", true);
+	if(!ParsedToggleGestureSpec.has_value())
+	{
+		json_value_free(pConfiguration);
+		return false;
+	}
+
 	const json_value &TouchButtons = (*pConfiguration)["touch-buttons"];
 	if(TouchButtons.type != json_array)
 	{
@@ -1293,6 +1435,10 @@ bool CTouchControls::ParseConfiguration(const void *pFileData, unsigned FileLeng
 	m_DirectTouchSpectate = ParsedDirectTouchSpectate.value();
 	m_BackgroundColorInactive = ParsedBackgroundColorInactive.value();
 	m_BackgroundColorActive = ParsedBackgroundColorActive.value();
+	m_ZoomGestureGame = ParsedZoomGestureGame.value();
+	m_ZoomGestureSpec = ParsedZoomGestureSpec.value();
+	SetToggleGestureGame(ParsedToggleGestureGame.value());
+	SetToggleGestureSpec(ParsedToggleGestureSpec.value());
 
 	m_vTouchButtons = std::move(vParsedTouchButtons);
 	for(CTouchButton &TouchButton : m_vTouchButtons)
@@ -1390,6 +1536,21 @@ std::optional<ColorRGBA> CTouchControls::ParseColor(const json_value *pColorValu
 		return {};
 	}
 	return ParsedColor;
+}
+
+std::optional<bool> CTouchControls::ParseBoolean(const json_value *pBooleanValue, const char *pAttributeName, bool DefaultBoolean) const
+{
+	const json_value &Boolean = *pBooleanValue;
+	if(Boolean.type == json_none)
+	{
+		return DefaultBoolean;
+	}
+	if(Boolean.type != json_boolean)
+	{
+		log_error("touch_controls", "Failed to parse configuration: attribute '%s' must specify a boolean", pAttributeName);
+		return {};
+	}
+	return Boolean.u.boolean;
 }
 
 std::optional<CTouchControls::CTouchButton> CTouchControls::ParseButton(const json_value *pButtonObject)
@@ -1725,6 +1886,18 @@ void CTouchControls::WriteConfiguration(CJsonWriter *pWriter)
 	pWriter->WriteAttribute("background-color-active");
 	pWriter->WriteStrValue(aColor);
 
+	pWriter->WriteAttribute("zoom-gesture-ingame");
+	pWriter->WriteBoolValue(m_ZoomGestureGame);
+
+	pWriter->WriteAttribute("zoom-gesture-spectate");
+	pWriter->WriteBoolValue(m_ZoomGestureSpec);
+
+	pWriter->WriteAttribute("toggle-visibility-gesture-game");
+	pWriter->WriteBoolValue(m_ToggleGestureGame);
+
+	pWriter->WriteAttribute("toggle-visibility-gesture-spec");
+	pWriter->WriteBoolValue(m_ToggleGestureSpec);
+
 	pWriter->WriteAttribute("touch-buttons");
 	pWriter->BeginArray();
 	for(CTouchButton &TouchButton : m_vTouchButtons)
@@ -1797,7 +1970,7 @@ void CTouchControls::UpdateButtonsEditor(const std::vector<IInput::CTouchFingerS
 	{
 		m_AccumulatedDelta += (*m_LongPressFingerState).m_Delta;
 		// If slided, then delete.
-		if(length(m_AccumulatedDelta) > 0.005f)
+		if(length(m_AccumulatedDelta) > LONG_SLIDE_DISTANCE)
 		{
 			m_AccumulatedDelta = vec2(0.0f, 0.0f);
 			m_vDeletedFingerState.push_back(*m_LongPressFingerState);
@@ -1832,7 +2005,7 @@ void CTouchControls::UpdateButtonsEditor(const std::vector<IInput::CTouchFingerS
 	{
 		// If zoom finger is pressed now, reset the zoom startpos
 		if(!m_ZoomFingerState.has_value())
-			m_ZoomStartPos = m_ActiveFingerState.value().m_Position - vTouchFingerStates[1].m_Position;
+			m_ZoomStartPosEditor = m_ActiveFingerState.value().m_Position - vTouchFingerStates[1].m_Position;
 		m_ZoomFingerState = vTouchFingerStates[1];
 		m_PreventSaving = true;
 
@@ -1846,7 +2019,7 @@ void CTouchControls::UpdateButtonsEditor(const std::vector<IInput::CTouchFingerS
 	else
 	{
 		m_ZoomFingerState = std::nullopt;
-		m_ZoomStartPos = vec2(0.0f, 0.0f);
+		m_ZoomStartPosEditor = vec2(0.0f, 0.0f);
 		if(m_pSampleButton != nullptr && m_ShownRect.has_value())
 		{
 			m_pSampleButton->m_UnitRect.m_W = m_ShownRect->m_W;
@@ -1972,8 +2145,8 @@ void CTouchControls::UpdateButtonsEditor(const std::vector<IInput::CTouchFingerS
 		{
 			m_ShownRect = m_pSampleButton->m_UnitRect;
 			vec2 UnitWHDelta;
-			UnitWHDelta.x = (std::abs(m_ActiveFingerState.value().m_Position.x - m_ZoomFingerState.value().m_Position.x) - std::abs(m_ZoomStartPos.x)) * BUTTON_SIZE_SCALE;
-			UnitWHDelta.y = (std::abs(m_ActiveFingerState.value().m_Position.y - m_ZoomFingerState.value().m_Position.y) - std::abs(m_ZoomStartPos.y)) * BUTTON_SIZE_SCALE;
+			UnitWHDelta.x = (std::abs(m_ActiveFingerState.value().m_Position.x - m_ZoomFingerState.value().m_Position.x) - std::abs(m_ZoomStartPosEditor.x)) * BUTTON_SIZE_SCALE;
+			UnitWHDelta.y = (std::abs(m_ActiveFingerState.value().m_Position.y - m_ZoomFingerState.value().m_Position.y) - std::abs(m_ZoomStartPosEditor.y)) * BUTTON_SIZE_SCALE;
 			m_ShownRect->m_W = m_pSampleButton->m_UnitRect.m_W + UnitWHDelta.x;
 			m_ShownRect->m_H = m_pSampleButton->m_UnitRect.m_H + UnitWHDelta.y;
 			m_ShownRect->m_W = std::clamp(m_ShownRect->m_W, BUTTON_SIZE_MINIMUM, BUTTON_SIZE_MAXIMUM);
@@ -2515,6 +2688,22 @@ std::vector<CTouchControls::CTouchButton *> CTouchControls::GetButtonsEditor()
 		vpButtons.emplace_back(&TouchButton);
 	}
 	return vpButtons;
+}
+
+// When both gesture disabled, reset m_HideAllButtons.
+void CTouchControls::SetToggleGestureGame(bool EnabledToggleGestureGame)
+{
+	m_ToggleGestureGame = EnabledToggleGestureGame;
+	if(!m_ToggleGestureGame && !m_ToggleGestureSpec)
+		m_HideAllButtons = false;
+}
+
+// When gesture disabled, reset m_HideAllButtons.
+void CTouchControls::SetToggleGestureSpec(bool EnabledToggleGestureSpec)
+{
+	m_ToggleGestureSpec = EnabledToggleGestureSpec;
+	if(!m_ToggleGestureGame && !m_ToggleGestureSpec)
+		m_HideAllButtons = false;
 }
 
 float CTouchControls::CUnitRect::Distance(const CUnitRect &Other) const
