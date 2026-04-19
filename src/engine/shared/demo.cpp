@@ -341,7 +341,7 @@ void CDemoRecorder::RecordSnapshot(int Tick, const void *pData, int Size)
 		WriteTickMarker(Tick, false);
 
 		// create delta
-		char aDeltaData[CSnapshot::MAX_SIZE];
+		char aDeltaData[CSnapshot::MAX_SIZE + sizeof(int)];
 		const int DeltaSize = m_pSnapshotDelta->CreateDelta(m_LastSnapshotData.AsSnapshot(), (CSnapshot *)pData, &aDeltaData);
 		if(DeltaSize)
 		{
