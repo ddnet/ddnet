@@ -2143,9 +2143,6 @@ All
 Preview dummy's name plate
 == Previzualizați plăcuța de nume a manechinului
 
-AntiPing: prediction margin
-== AntiPing: marja de predicție
-
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
 == 
@@ -2259,7 +2256,16 @@ Live
 Go to Live
 == 
 
+Refresh the demo list
+== 
+
 Are you sure that you want to disconnect and play this demo?
+== 
+
+Open the selected folder
+== 
+
+Play the selected demo
 == 
 
 Save all changes before turning off the editor?
@@ -2632,6 +2638,12 @@ Dragger Inner Color
 == 
 
 Show background quads
+== 
+
+Prediction margin
+== 
+
+Predict events (experimental)
 == 
 
 Scoreboard cursor

@@ -1996,7 +1996,16 @@ Toggle auto camera
 Map size
 == 
 
+Refresh the demo list
+== 
+
 Are you sure that you want to disconnect and play this demo?
+== 
+
+Open the selected folder
+== 
+
+Play the selected demo
 == 
 
 Dummy is not allowed on this server
@@ -2580,7 +2589,10 @@ Dragger Inner Color
 Show background quads
 == 
 
-AntiPing: prediction margin
+Prediction margin
+== 
+
+Predict events (experimental)
 == 
 
 Basic

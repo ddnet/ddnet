@@ -2143,9 +2143,6 @@ Others
 All
 == 全体
 
-AntiPing: prediction margin
-== 延迟补偿：预测容差
-
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
 == 显存不足。请尝试将 'cl_skins_loaded_max' 设置为较低的值或移除自定义资源（皮肤、实体等），尤其是高分辨率的资源。
@@ -2651,3 +2648,18 @@ When a Tee is hookable
 [Hook collision line color]
 Hook collision line tip
 == 钩索辅助线头
+
+Refresh the demo list
+== 
+
+Open the selected folder
+== 
+
+Play the selected demo
+== 
+
+Prediction margin
+== 
+
+Predict events (experimental)
+== 

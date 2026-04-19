@@ -2171,9 +2171,6 @@ Dragger Outline Color
 Dragger Inner Color
 == Колір драггера
 
-AntiPing: prediction margin
-== AntiPing: допуск передбачення
-
 [Spectating]
 Following %d: %s
 == Спостерігає за %d: %s
@@ -2651,3 +2648,18 @@ When a Tee is hookable
 [Hook collision line color]
 Hook collision line tip
 == Підказка для лінії зіткнення хука
+
+Refresh the demo list
+== 
+
+Open the selected folder
+== 
+
+Play the selected demo
+== 
+
+Prediction margin
+== 
+
+Predict events (experimental)
+== 

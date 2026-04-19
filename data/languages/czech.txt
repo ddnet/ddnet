@@ -2172,9 +2172,6 @@ Dragger Outline Color
 Dragger Inner Color
 == Vnitřní Barva Tahače
 
-AntiPing: prediction margin
-== AntiPing: marže predikce
-
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
 == Server se nepodařilo spustit. Ujistěte se, že jste v nastavení aplikace povolili oznámení, aby server mohl běžet na pozadí.
 
@@ -2525,7 +2522,16 @@ Add clan
 Add friend
 == 
 
+Refresh the demo list
+== 
+
 Are you sure that you want to disconnect and play this demo?
+== 
+
+Open the selected folder
+== 
+
+Play the selected demo
 == 
 
 Info
@@ -2635,6 +2641,12 @@ Hook collision line tip
 == 
 
 Show background quads
+== 
+
+Prediction margin
+== 
+
+Predict events (experimental)
 == 
 
 Scoreboard cursor

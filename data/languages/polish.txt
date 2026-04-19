@@ -2143,9 +2143,6 @@ All
 Preview dummy's name plate
 == Podgląd plakietki kukły
 
-AntiPing: prediction margin
-== AntyPing: Margines przewidywania
-
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
 == Brak VRAM'u. Spróbuj ustawić 'cl_skins_loaded_max' na mniejszą wartość, lub usuń własne zasoby (skiny, entities, itd.), szczególnie te z wysoką rozdzielczością.
@@ -2579,53 +2576,14 @@ Click to remove this community from your favorites.
 Click to add this community to your favorites.
 == Kliknij, aby dodać tę społeczność do twoich ulubionych.
 
-Preview visibilities
-== 
-
-You can manage your touch controls settings on this page. Only changes that are saved will be available after restarting the client. You can share your touch controls with others by exporting them to the clipboard.\n\nYou can find more detailed information about the touch controls on the DDNet Wiki.
-== 
-
 Open DDNet Wiki
 == Otwórz wikipedie Ddnet
-
-Buttons with this behavior execute console commands like regular key binds.
-== 
-
-Buttons with this behavior cycle between executing one of two or more specified commands.
-== 
-
-Buttons with this behavior execute some predefined actions.
-== 
 
 Opens the ingame menu immediately when released.
 == Otwiera menu w grze natychmiast pod odciśnięciu.
 
-The extra menu button which toggles visibility of buttons with "Extra Menu" visibilities. Also opens the ingame menu on long press.
-== 
-
-Swaps the active action (fire and hook) for direct touch input and virtual joysticks.
-== 
-
-Uses the active action with the current aiming position.
-== 
-
-Virtual joystick which uses the active action.
-== 
-
-Virtual joystick which only aims without using an action.
-== 
-
-Virtual joystick which always uses fire.
-== 
-
-Virtual joystick which always uses hook.
-== 
-
 Player is ingame, i.e. not spectating.
 == Gracz w trakcie gry, tzn. nie obserwuje.
-
-The extra menu with the given number is activated.
-== 
 
 Update Rate
 == Częstotliwość aktualizowania
@@ -2651,3 +2609,57 @@ When a Tee is hookable
 [Hook collision line color]
 Hook collision line tip
 == Końcówka linii
+
+Refresh the demo list
+== 
+
+Open the selected folder
+== 
+
+Play the selected demo
+== 
+
+Preview visibilities
+== 
+
+You can manage your touch controls settings on this page. Only changes that are saved will be available after restarting the client. You can share your touch controls with others by exporting them to the clipboard.\n\nYou can find more detailed information about the touch controls on the DDNet Wiki.
+== 
+
+Buttons with this behavior execute console commands like regular key binds.
+== 
+
+Buttons with this behavior cycle between executing one of two or more specified commands.
+== 
+
+Buttons with this behavior execute some predefined actions.
+== 
+
+The extra menu button which toggles visibility of buttons with "Extra Menu" visibilities. Also opens the ingame menu on long press.
+== 
+
+Swaps the active action (fire and hook) for direct touch input and virtual joysticks.
+== 
+
+Uses the active action with the current aiming position.
+== 
+
+Virtual joystick which uses the active action.
+== 
+
+Virtual joystick which only aims without using an action.
+== 
+
+Virtual joystick which always uses fire.
+== 
+
+Virtual joystick which always uses hook.
+== 
+
+The extra menu with the given number is activated.
+== 
+
+Prediction margin
+== 
+
+Predict events (experimental)
+== 

@@ -2143,9 +2143,6 @@ All
 Preview dummy's name plate
 == Dummy-Spielernamen vorher zeigen
 
-AntiPing: prediction margin
-== Anti-Ping: Vorhersagespanne
-
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
 == VRAM ausgegangen. Versuch 'cl_skins_loaded_max' auf einen niedrigeren Wert zu setzen oder entferne eigene Ressourcen (Skins, Entitäten, usw.), insbesondere solche mit hoher Auflösung.
@@ -2555,9 +2552,6 @@ Button browser
 You can select buttons directly in the list below, or long press on a touch button on the screen to select it. You can also move and resize buttons by touch.
 == Du kannst Tasten direkt in der liste unten oder durch langes Pressen einer Taste auswählen. Du kannst auch die Taste bewegen und die Größe ändern.
 
-Preview visibilities
-== 
-
 You can manage your touch controls settings on this page. Only changes that are saved will be available after restarting the client. You can share your touch controls with others by exporting them to the clipboard.\n\nYou can find more detailed information about the touch controls on the DDNet Wiki.
 == Du kannst deine Tastensteuerung in dieser Seite einstellen. Nur Änderungen, die gespeichert werden, sind nach einem Neustart verfügbar. Du kannst deine Tastenkonfiguration mit anderen teilen, indem du sie ins Clipboard kopierst.\n\nDu kannst mehr Details über Touch-Tastensteuerung im DDNet Wiki finden.
 
@@ -2575,9 +2569,6 @@ Buttons with this behavior execute some predefined actions.
 
 Opens the ingame menu immediately when released.
 == Öffnet das Spielmenü direkt beim loslassen.
-
-The extra menu button which toggles visibility of buttons with "Extra Menu" visibilities. Also opens the ingame menu on long press.
-== 
 
 Opens the emoticon selector (this does not work with binds).
 == Öffnet das Emoticon-Menü (funktioniert nicht mit Binds).
@@ -2609,9 +2600,6 @@ Player is ingame, i.e. not spectating.
 Zoom is allowed on this server.
 == Zoom ist auf dem Server erlaubt.
 
-A vote is currently active.
-== 
-
 Dummy is allowed on this server.
 == Dummies sind auf dem Server erlaubt.
 
@@ -2626,9 +2614,6 @@ Demo player is currently active.
 
 The extra menu with the given number is activated.
 == Das Extra Menü mit der gegeben Nummer wurde aktiviert.
-
-Update Rate
-== 
 
 Save power by lowering update rate (higher input latency)
 == Spare Energie mit einer niedrigeren Aktualisierungs-Rate (höhere Input Latenz)
@@ -2651,3 +2636,30 @@ When a Tee is hookable
 [Hook collision line color]
 Hook collision line tip
 == Spitze der Hook-Kollisions-Linien
+
+Refresh the demo list
+== 
+
+Open the selected folder
+== 
+
+Play the selected demo
+== 
+
+Preview visibilities
+== 
+
+The extra menu button which toggles visibility of buttons with "Extra Menu" visibilities. Also opens the ingame menu on long press.
+== 
+
+A vote is currently active.
+== 
+
+Update Rate
+== 
+
+Prediction margin
+== 
+
+Predict events (experimental)
+== 
