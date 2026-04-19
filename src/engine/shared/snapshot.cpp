@@ -260,6 +260,7 @@ void CSnapshotDelta::UndiffItem(const int *pPast, const int *pDiff, int *pOut, i
 CSnapshotDelta::CSnapshotDelta()
 {
 	std::fill(std::begin(m_aItemSizes), std::end(m_aItemSizes), 0);
+	std::fill(std::begin(m_aItemSizes7), std::end(m_aItemSizes7), 0);
 	std::fill(std::begin(m_aSnapshotDataRate), std::end(m_aSnapshotDataRate), 0);
 	std::fill(std::begin(m_aSnapshotDataUpdates), std::end(m_aSnapshotDataUpdates), 0);
 	mem_zero(&m_Empty, sizeof(m_Empty));
@@ -268,6 +269,7 @@ CSnapshotDelta::CSnapshotDelta()
 CSnapshotDelta::CSnapshotDelta(const CSnapshotDelta &Old)
 {
 	mem_copy(m_aItemSizes, Old.m_aItemSizes, sizeof(m_aItemSizes));
+	mem_copy(m_aItemSizes7, Old.m_aItemSizes7, sizeof(m_aItemSizes7));
 	mem_copy(m_aSnapshotDataRate, Old.m_aSnapshotDataRate, sizeof(m_aSnapshotDataRate));
 	mem_copy(m_aSnapshotDataUpdates, Old.m_aSnapshotDataUpdates, sizeof(m_aSnapshotDataUpdates));
 	mem_zero(&m_Empty, sizeof(m_Empty));
@@ -278,6 +280,13 @@ void CSnapshotDelta::SetStaticsize(int ItemType, size_t Size)
 	dbg_assert(ItemType >= 0 && ItemType < MAX_NETOBJSIZES, "ItemType invalid");
 	dbg_assert(Size <= (size_t)std::numeric_limits<int16_t>::max(), "Size invalid");
 	m_aItemSizes[ItemType] = Size;
+}
+
+void CSnapshotDelta::SetStaticsize7(int ItemType, size_t Size)
+{
+	dbg_assert(ItemType >= 0 && ItemType < MAX_NETOBJSIZES, "ItemType invalid");
+	dbg_assert(Size <= (size_t)std::numeric_limits<int16_t>::max(), "Size invalid");
+	m_aItemSizes7[ItemType] = Size;
 }
 
 const CSnapshotDelta::CData *CSnapshotDelta::EmptyDelta() const
@@ -501,7 +510,7 @@ int CSnapshotDelta::DebugDumpDelta(const void *pSrcData, int DataSize)
 	return 0;
 }
 
-int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const void *pSrcData, int DataSize)
+int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const void *pSrcData, int DataSize, bool Sixup)
 {
 	CData *pDelta = (CData *)pSrcData;
 	int *pData = (int *)pDelta->m_aData;
@@ -559,8 +568,9 @@ int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const vo
 			return -203;
 
 		int ItemSize;
-		if(Type < MAX_NETOBJSIZES && m_aItemSizes[Type])
-			ItemSize = m_aItemSizes[Type];
+		const short *pItemSizes = Sixup ? m_aItemSizes7 : m_aItemSizes;
+		if(Type < MAX_NETOBJSIZES && pItemSizes[Type])
+			ItemSize = pItemSizes[Type];
 		else
 		{
 			if(pData + 1 > pEnd)

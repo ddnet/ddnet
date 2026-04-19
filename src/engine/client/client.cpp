@@ -85,17 +85,8 @@ using namespace std::chrono_literals;
 static constexpr ColorRGBA CLIENT_NETWORK_PRINT_COLOR = ColorRGBA(0.7f, 1, 0.7f, 1.0f);
 static constexpr ColorRGBA CLIENT_NETWORK_PRINT_ERROR_COLOR = ColorRGBA(1.0f, 0.25f, 0.25f, 1.0f);
 
-CSnapshotDelta *CClient::SnapshotDelta()
-{
-	if(IsSixup())
-	{
-		return &m_SnapshotDeltaSixup;
-	}
-	return &m_SnapshotDelta;
-}
-
 CClient::CClient() :
-	m_DemoPlayer(&m_SnapshotDelta, &m_SnapshotDeltaSixup, true, [&]() { UpdateDemoIntraTimers(); }),
+	m_DemoPlayer(&m_SnapshotDelta, true, [&]() { UpdateDemoIntraTimers(); }),
 	m_InputtimeMarginGraph(128, 2, true),
 	m_aGametimeMarginGraphs{{128, 2, true}, {128, 2, true}},
 	m_FpsGraph(4096, 0, true)
@@ -919,7 +910,7 @@ void CClient::SnapSetStaticsize(int ItemType, int Size)
 
 void CClient::SnapSetStaticsize7(int ItemType, int Size)
 {
-	m_SnapshotDeltaSixup.SetStaticsize(ItemType, Size);
+	m_SnapshotDelta.SetStaticsize7(ItemType, Size);
 }
 
 void CClient::RenderDebug()
@@ -995,7 +986,7 @@ void CClient::RenderDebug()
 		Row++;
 		for(int i = 0; i < NUM_NETOBJTYPES; i++)
 		{
-			if(SnapshotDelta()->GetDataRate(i))
+			if(m_SnapshotDelta.GetDataRate(i))
 			{
 				str_format(
 					aBuffer,
@@ -1003,15 +994,15 @@ void CClient::RenderDebug()
 					"%5d %20s: %8" PRIu64 " %8" PRIu64 " %8" PRIu64,
 					i,
 					GameClient()->GetItemName(i),
-					SnapshotDelta()->GetDataRate(i) / 8, SnapshotDelta()->GetDataUpdates(i),
-					(SnapshotDelta()->GetDataRate(i) / SnapshotDelta()->GetDataUpdates(i)) / 8);
+					m_SnapshotDelta.GetDataRate(i) / 8, m_SnapshotDelta.GetDataUpdates(i),
+					(m_SnapshotDelta.GetDataRate(i) / m_SnapshotDelta.GetDataUpdates(i)) / 8);
 				Graphics()->QuadsText(2, OffsetY + Row * 12, FontSize, aBuffer);
 				Row++;
 			}
 		}
 		for(int i = CSnapshot::MAX_TYPE; i > (CSnapshot::MAX_TYPE - 64); i--)
 		{
-			if(SnapshotDelta()->GetDataRate(i) && m_aapSnapshots[g_Config.m_ClDummy][IClient::SNAP_CURRENT])
+			if(m_SnapshotDelta.GetDataRate(i) && m_aapSnapshots[g_Config.m_ClDummy][IClient::SNAP_CURRENT])
 			{
 				const int Type = m_aapSnapshots[g_Config.m_ClDummy][IClient::SNAP_CURRENT]->m_pAltSnap->GetExternalItemType(i);
 				if(Type == UUID_INVALID)
@@ -1022,9 +1013,9 @@ void CClient::RenderDebug()
 						"%5d %20s: %8" PRIu64 " %8" PRIu64 " %8" PRIu64,
 						i,
 						"Unknown UUID",
-						SnapshotDelta()->GetDataRate(i) / 8,
-						SnapshotDelta()->GetDataUpdates(i),
-						(SnapshotDelta()->GetDataRate(i) / SnapshotDelta()->GetDataUpdates(i)) / 8);
+						m_SnapshotDelta.GetDataRate(i) / 8,
+						m_SnapshotDelta.GetDataUpdates(i),
+						(m_SnapshotDelta.GetDataRate(i) / m_SnapshotDelta.GetDataUpdates(i)) / 8);
 					Graphics()->QuadsText(2, OffsetY + Row * 12, FontSize, aBuffer);
 					Row++;
 				}
@@ -1036,9 +1027,9 @@ void CClient::RenderDebug()
 						"%5d %20s: %8" PRIu64 " %8" PRIu64 " %8" PRIu64,
 						Type,
 						GameClient()->GetItemName(Type),
-						SnapshotDelta()->GetDataRate(i) / 8,
-						SnapshotDelta()->GetDataUpdates(i),
-						(SnapshotDelta()->GetDataRate(i) / SnapshotDelta()->GetDataUpdates(i)) / 8);
+						m_SnapshotDelta.GetDataRate(i) / 8,
+						m_SnapshotDelta.GetDataUpdates(i),
+						(m_SnapshotDelta.GetDataRate(i) / m_SnapshotDelta.GetDataUpdates(i)) / 8);
 					Graphics()->QuadsText(2, OffsetY + Row * 12, FontSize, aBuffer);
 					Row++;
 				}
@@ -2085,7 +2076,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					}
 
 					// decompress snapshot
-					const void *pDeltaData = SnapshotDelta()->EmptyDelta();
+					const void *pDeltaData = m_SnapshotDelta.EmptyDelta();
 					int DeltaSize = sizeof(int) * 3;
 
 					if(m_aSnapshotIncomingDataSize[Conn])
@@ -2100,7 +2091,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					}
 
 					// unpack delta
-					const int SnapSize = SnapshotDelta()->UnpackDelta(pDeltaShot, pTmpBuffer3, pDeltaData, DeltaSize);
+					const int SnapSize = m_SnapshotDelta.UnpackDelta(pDeltaShot, pTmpBuffer3, pDeltaData, DeltaSize, IsSixup());
 					if(SnapSize < 0)
 					{
 						dbg_msg("client", "delta unpack failed. error=%d", SnapSize);
@@ -3052,7 +3043,7 @@ void CClient::InitInterfaces()
 	m_pNotifications = Kernel()->RequestInterface<INotifications>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
-	m_DemoEditor.Init(&m_SnapshotDelta, &m_SnapshotDeltaSixup, m_pConsole, m_pStorage);
+	m_DemoEditor.Init(&m_SnapshotDelta, m_pConsole, m_pStorage);
 
 	m_ServerBrowser.SetBaseInfo(&m_aNetClient[CONN_CONTACT], m_pGameClient->NetVersion());
 
@@ -3927,7 +3918,7 @@ void CClient::SaveReplay(const int Length, const char *pFilename)
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Saving replay...");
 
 		// Create a job to do this slicing in background because it can be a bit long depending on the file size
-		std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(GameClient()->NetVersion(), &m_SnapshotDelta, &m_SnapshotDeltaSixup, m_pStorage, pSrc, aFilename, StartTick, EndTick);
+		std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(GameClient()->NetVersion(), &m_SnapshotDelta, m_pStorage, pSrc, aFilename, StartTick, EndTick);
 		Engine()->AddJob(pDemoEditTask);
 		m_EditJobs.push_back(pDemoEditTask);
 

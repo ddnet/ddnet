@@ -10,7 +10,6 @@ class IStorage;
 class CDemoEdit : public IJob
 {
 	CSnapshotDelta m_SnapshotDelta;
-	CSnapshotDelta m_SnapshotDeltaSixup;
 	IStorage *m_pStorage;
 
 	CDemoEditor m_DemoEditor;
@@ -22,7 +21,7 @@ class CDemoEdit : public IJob
 	bool m_Success;
 
 public:
-	CDemoEdit(const char *pNetVersion, CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSnapshotDeltaSixup, IStorage *pStorage, const char *pDemo, const char *pDst, int StartTick, int EndTick);
+	CDemoEdit(const char *pNetVersion, CSnapshotDelta *pSnapshotDelta, IStorage *pStorage, const char *pDemo, const char *pDst, int StartTick, int EndTick);
 	void Run() override;
 	char *Destination() { return m_aDst; }
 	bool Success() const { return m_Success; }

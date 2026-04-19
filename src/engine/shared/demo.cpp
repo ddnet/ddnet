@@ -473,22 +473,12 @@ void CDemoRecorder::AddDemoMarker(int Tick)
 	}
 }
 
-CSnapshotDelta *CDemoPlayer::SnapshotDelta()
-{
-	if(IsSixup())
-	{
-		return m_pSnapshotDeltaSixup;
-	}
-	return m_pSnapshotDelta;
-}
-
-void CDemoPlayer::Construct(CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSnapshotDeltaSixup, bool UseVideo)
+void CDemoPlayer::Construct(CSnapshotDelta *pSnapshotDelta, bool UseVideo)
 {
 	m_File = nullptr;
 	m_SpeedIndex = DEMO_SPEED_INDEX_DEFAULT;
 
 	m_pSnapshotDelta = pSnapshotDelta;
-	m_pSnapshotDeltaSixup = pSnapshotDeltaSixup;
 	m_LastSnapshotDataSize = -1;
 	m_pListener = nullptr;
 	m_UseVideo = UseVideo;
@@ -497,16 +487,16 @@ void CDemoPlayer::Construct(CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSna
 	m_aErrorMessage[0] = '\0';
 }
 
-CDemoPlayer::CDemoPlayer(CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSnapshotDeltaSixup, bool UseVideo, TUpdateIntraTimesFunc &&UpdateIntraTimesFunc)
+CDemoPlayer::CDemoPlayer(CSnapshotDelta *pSnapshotDelta, bool UseVideo, TUpdateIntraTimesFunc &&UpdateIntraTimesFunc)
 {
-	Construct(pSnapshotDelta, pSnapshotDeltaSixup, UseVideo);
+	Construct(pSnapshotDelta, UseVideo);
 
 	m_UpdateIntraTimesFunc = UpdateIntraTimesFunc;
 }
 
-CDemoPlayer::CDemoPlayer(CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSnapshotDeltaSixup, bool UseVideo)
+CDemoPlayer::CDemoPlayer(CSnapshotDelta *pSnapshotDelta, bool UseVideo)
 {
-	Construct(pSnapshotDelta, pSnapshotDeltaSixup, UseVideo);
+	Construct(pSnapshotDelta, UseVideo);
 }
 
 CDemoPlayer::~CDemoPlayer()
@@ -727,7 +717,7 @@ void CDemoPlayer::DoTick()
 		{
 			// process delta snapshot
 			CSnapshot *pNewsnap = (CSnapshot *)m_aSnapshot;
-			DataSize = SnapshotDelta()->UnpackDelta((CSnapshot *)m_aLastSnapshotData, pNewsnap, m_aChunkData, DataSize);
+			DataSize = m_pSnapshotDelta->UnpackDelta((CSnapshot *)m_aLastSnapshotData, pNewsnap, m_aChunkData, DataSize, IsSixup());
 
 			if(DataSize < 0)
 			{
@@ -1417,17 +1407,16 @@ public:
 	}
 };
 
-void CDemoEditor::Init(CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSnapshotDeltaSixup, class IConsole *pConsole, class IStorage *pStorage)
+void CDemoEditor::Init(CSnapshotDelta *pSnapshotDelta, class IConsole *pConsole, class IStorage *pStorage)
 {
 	m_pSnapshotDelta = pSnapshotDelta;
-	m_pSnapshotDeltaSixup = pSnapshotDeltaSixup;
 	m_pConsole = pConsole;
 	m_pStorage = pStorage;
 }
 
 bool CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, DEMOFUNC_FILTER pfnFilter, void *pUser)
 {
-	CDemoPlayer DemoPlayer(m_pSnapshotDelta, m_pSnapshotDeltaSixup, false);
+	CDemoPlayer DemoPlayer(m_pSnapshotDelta, false);
 	if(DemoPlayer.Load(m_pStorage, m_pConsole, pDemo, IStorage::TYPE_ALL_OR_ABSOLUTE) == -1)
 		return false;
 

@@ -209,8 +209,7 @@ public:
 static int ExtractDemoChat(const char *pDemoFilePath, IStorage *pStorage)
 {
 	std::unique_ptr<CSnapshotDelta> pDemoSnapshotDelta = std::make_unique<CSnapshotDelta>();
-	std::unique_ptr<CSnapshotDelta> pDemoSnapshotDeltaSixup = std::make_unique<CSnapshotDelta>();
-	CDemoPlayer DemoPlayer(pDemoSnapshotDelta.get(), pDemoSnapshotDeltaSixup.get(), false);
+	CDemoPlayer DemoPlayer(pDemoSnapshotDelta.get(), false);
 
 	if(DemoPlayer.Load(pStorage, nullptr, pDemoFilePath, IStorage::TYPE_ALL_OR_ABSOLUTE) == -1)
 	{
