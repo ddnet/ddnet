@@ -2598,7 +2598,7 @@ Buttons with this behavior execute some predefined actions.
 == 
 
 Opens the ingame menu immediately when released.
-== 
+== Otwiera menu w grze natychmiast pod odciśnięciu.
 
 The extra menu button which toggles visibility of buttons with "Extra Menu" visibilities. Also opens the ingame menu on long press.
 == 
@@ -2622,7 +2622,7 @@ Virtual joystick which always uses hook.
 == 
 
 Player is ingame, i.e. not spectating.
-== 
+== Gracz w trakcie gry, tzn. nie obserwuje.
 
 The extra menu with the given number is activated.
 == 

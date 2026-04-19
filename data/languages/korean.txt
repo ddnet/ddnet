@@ -2650,4 +2650,4 @@ When a Tee is hookable
 
 [Hook collision line color]
 Hook collision line tip
-== 갈고리 끝부분
+== 갈고리 보조선 끝부분
