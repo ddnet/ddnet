@@ -205,9 +205,14 @@ public:
 	}
 };
 
-static int ExtractDemoChat(const char *pDemoFilePath, CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSnapshotDeltaSixup, IStorage *pStorage)
+static int ExtractDemoChat(const char *pDemoFilePath, IStorage *pStorage)
 {
-	CDemoPlayer DemoPlayer(pSnapshotDelta, pSnapshotDeltaSixup, false);
+	// This is almost certainly wrong, because the `CSnapshotDelta` needs
+	// to be aware of net object sizes. But it appears to work, so I'm not
+	// touching it. Maybe because we only look at net messages.
+	std::unique_ptr<CSnapshotDelta> pDemoSnapshotDelta = std::make_unique<CSnapshotDelta>();
+	std::unique_ptr<CSnapshotDelta> pDemoSnapshotDeltaSixup = std::make_unique<CSnapshotDelta>();
+	CDemoPlayer DemoPlayer(pDemoSnapshotDelta.get(), pDemoSnapshotDeltaSixup.get(), false);
 
 	if(DemoPlayer.Load(pStorage, nullptr, pDemoFilePath, IStorage::TYPE_ALL_OR_ABSOLUTE) == -1)
 	{
@@ -237,31 +242,6 @@ static int ExtractDemoChat(const char *pDemoFilePath, CSnapshotDelta *pSnapshotD
 	return 0;
 }
 
-static std::unique_ptr<CSnapshotDelta> CreateSnapshotDelta()
-{
-	std::unique_ptr<CSnapshotDelta> pResult = std::make_unique<CSnapshotDelta>();
-	CNetObjHandler NetObjHandler;
-	for(int i = 0; i < NUM_NETOBJTYPES; i++)
-	{
-		pResult->SetStaticsize(i, NetObjHandler.GetObjSize(i));
-	}
-	return pResult;
-}
-
-static std::unique_ptr<CSnapshotDelta> CreateSnapshotDeltaSixup()
-{
-	std::unique_ptr<CSnapshotDelta> pResult = std::make_unique<CSnapshotDelta>();
-	protocol7::CNetObjHandler NetObjHandler7;
-	// HACK: only set static size for items, which were available in the first 0.7 release
-	// so new items don't break the snapshot delta
-	static const int OLD_NUM_NETOBJTYPES = 23;
-	for(int i = 0; i < OLD_NUM_NETOBJTYPES; i++)
-	{
-		pResult->SetStaticsize(i, NetObjHandler7.GetObjSize(i));
-	}
-	return pResult;
-}
-
 int main(int argc, const char *argv[])
 {
 	// Create storage before setting logger to avoid log messages from storage creation
@@ -282,8 +262,5 @@ int main(int argc, const char *argv[])
 		return -1;
 	}
 
-	std::unique_ptr<CSnapshotDelta> pSnapshotDelta = CreateSnapshotDelta();
-	std::unique_ptr<CSnapshotDelta> pSnapshotDeltaSixup = CreateSnapshotDeltaSixup();
-
-	return ExtractDemoChat(argv[1], pSnapshotDelta.get(), pSnapshotDeltaSixup.get(), pStorage.get());
+	return ExtractDemoChat(argv[1], pStorage.get());
 }
