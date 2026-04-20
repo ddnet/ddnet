@@ -71,7 +71,7 @@ int CGhostRecorder::Start(const char *pFilename, const char *pMap, const SHA256_
 	Header.m_MapSha256 = MapSha256;
 	io_write(m_File, &Header, sizeof(Header));
 
-	m_LastItem.Reset();
+	m_LastItem = std::nullopt;
 	ResetBuffer();
 
 	log_info_color(LOG_COLOR_GHOST, "ghost_recorder", "Recording to '%s'", pFilename);
@@ -108,20 +108,23 @@ void CGhostRecorder::WriteData(int Type, const void *pData, size_t Size)
 		FlushChunk();
 	}
 
-	CGhostItem Data(Type);
+	CGhostItem Data;
 	mem_copy(Data.m_aData, pData, Size);
-	if(m_LastItem.m_Type == Data.m_Type)
+	Data.m_Size = Size;
+	Data.m_Type = Type;
+	if(m_LastItem.has_value() && m_LastItem.value().m_Type == Data.m_Type)
 	{
-		DiffItem((const uint32_t *)m_LastItem.m_aData, (const uint32_t *)Data.m_aData, (uint32_t *)m_pBufferPos, Size / sizeof(uint32_t));
+		dbg_assert(m_LastItem.value().m_Size == Data.m_Size, "Size mismatch between current and last item");
+		DiffItem((const uint32_t *)m_LastItem.value().m_aData, (const uint32_t *)Data.m_aData, (uint32_t *)m_pBufferPos, Data.m_Size / sizeof(uint32_t));
 	}
 	else
 	{
 		FlushChunk();
-		mem_copy(m_pBufferPos, Data.m_aData, Size);
+		mem_copy(m_pBufferPos, Data.m_aData, Data.m_Size);
 	}
 
 	m_LastItem = Data;
-	m_pBufferPos += Size;
+	m_pBufferPos += Data.m_Size;
 	m_BufferNumItems++;
 	if(m_BufferNumItems >= NUM_ITEMS_PER_CHUNK)
 	{
@@ -139,12 +142,13 @@ void CGhostRecorder::FlushChunk()
 		return;
 	}
 	dbg_assert(Size % sizeof(uint32_t) == 0, "Chunk size invalid");
+	dbg_assert(m_LastItem.has_value(), "Tried to flush chunk without last item");
 
 	Size = CVariableInt::Compress(m_aBuffer, Size, m_aBufferTemp, sizeof(m_aBufferTemp));
 	if(Size < 0)
 	{
 		log_info_color(LOG_COLOR_GHOST, "ghost_recorder", "Failed to write chunk to '%s': error during intpack compression", m_aFilename);
-		m_LastItem.Reset();
+		m_LastItem = std::nullopt;
 		ResetBuffer();
 		return;
 	}
@@ -153,13 +157,13 @@ void CGhostRecorder::FlushChunk()
 	if(Size < 0)
 	{
 		log_info_color(LOG_COLOR_GHOST, "ghost_recorder", "Failed to write chunk to '%s': error during network compression", m_aFilename);
-		m_LastItem.Reset();
+		m_LastItem = std::nullopt;
 		ResetBuffer();
 		return;
 	}
 
 	unsigned char aChunkHeader[4];
-	aChunkHeader[0] = m_LastItem.m_Type & 0xff;
+	aChunkHeader[0] = m_LastItem.value().m_Type & 0xff;
 	aChunkHeader[1] = m_BufferNumItems & 0xff;
 	aChunkHeader[2] = (Size >> 8) & 0xff;
 	aChunkHeader[3] = Size & 0xff;
@@ -167,7 +171,7 @@ void CGhostRecorder::FlushChunk()
 	io_write(m_File, aChunkHeader, sizeof(aChunkHeader));
 	io_write(m_File, m_aBuffer, Size);
 
-	m_LastItem.Reset();
+	m_LastItem = std::nullopt;
 	ResetBuffer();
 }
 
@@ -360,7 +364,7 @@ bool CGhostLoader::Load(const char *pFilename, const char *pMap, const SHA256_DI
 	str_copy(m_aFilename, pFilename);
 	m_Header = Header;
 	m_Info = m_Header.ToGhostInfo();
-	m_LastItem.Reset();
+	m_LastItem = std::nullopt;
 	ResetBuffer();
 	return true;
 }
@@ -369,7 +373,7 @@ bool CGhostLoader::ReadChunk(int *pType)
 {
 	if(m_Header.m_Version != 4)
 	{
-		m_LastItem.Reset();
+		m_LastItem = std::nullopt;
 	}
 	ResetBuffer();
 
@@ -419,7 +423,8 @@ bool CGhostLoader::ReadNextType(int *pType)
 
 	if(m_BufferCurItem != m_BufferPrevItem && m_BufferCurItem < m_BufferNumItems)
 	{
-		*pType = m_LastItem.m_Type;
+		dbg_assert(m_LastItem.has_value(), "Buffer contains items but last item is unset");
+		*pType = m_LastItem.value().m_Type;
 	}
 	else if(!ReadChunk(pType))
 	{
@@ -454,20 +459,24 @@ bool CGhostLoader::ReadData(int Type, void *pData, size_t Size)
 		return false;
 	}
 
-	CGhostItem Data(Type);
-	if(m_LastItem.m_Type == Data.m_Type)
+	CGhostItem Data;
+	Data.m_Size = Size;
+	Data.m_Type = Type;
+	if(m_LastItem.has_value())
 	{
-		UndiffItem((const uint32_t *)m_LastItem.m_aData, (const uint32_t *)m_pBufferPos, (uint32_t *)Data.m_aData, Size / sizeof(uint32_t));
+		dbg_assert(m_LastItem.value().m_Type == Data.m_Type, "Type mismatch between current and last item");
+		dbg_assert(m_LastItem.value().m_Size == Data.m_Size, "Size mismatch between current and last item");
+		UndiffItem((const uint32_t *)m_LastItem.value().m_aData, (const uint32_t *)m_pBufferPos, (uint32_t *)Data.m_aData, Data.m_Size / sizeof(uint32_t));
 	}
 	else
 	{
-		mem_copy(Data.m_aData, m_pBufferPos, Size);
+		mem_copy(Data.m_aData, m_pBufferPos, Data.m_Size);
 	}
 
-	mem_copy(pData, Data.m_aData, Size);
+	mem_copy(pData, Data.m_aData, Data.m_Size);
 
 	m_LastItem = Data;
-	m_pBufferPos += Size;
+	m_pBufferPos += Data.m_Size;
 	m_BufferCurItem++;
 	return true;
 }
