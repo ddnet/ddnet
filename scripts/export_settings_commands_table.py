@@ -126,18 +126,19 @@ def parse_tunings(lines):
 	return parsed_tunings
 
 
-def export_commands(parsed_commands):
+def export_commands(group_id, parsed_commands):
 	output = ['<div style="overflow-x: auto;"><table class="settingscommands">']
 	output.append("  <tr><th>Command</th><th>Arguments</th><th>Description</th></tr>")
 
 	for command in parsed_commands:
-		output.append(f"  <tr><td>{html.escape(command['name'])}</td><td>{html.escape(command['arguments'])}</td><td>{html.escape(command['description'])}</td></tr>")
+		name = html.escape(command['name'])
+		output.append(f'  <tr><td><a id="{group_id}-{name}" href="#{group_id}-{name}">{name}</a></td><td>{html.escape(command['arguments'])}</td><td>{html.escape(command['description'])}</td></tr>')
 
 	output.append("</table></div>")
 	return "\n".join(output)
 
 
-def export_settings(parsed_settings):
+def export_settings(group_id, parsed_settings):
 	def export_color_value(setting):
 		alpha = "CFGFLAG_COLALPHA" in setting["flags"]
 		if "CFGFLAG_COLLIGHT7" in setting["flags"]:
@@ -158,7 +159,8 @@ def export_settings(parsed_settings):
 	output.append("  <tr><th>Setting</th><th>Description</th><th>Default</th><th>Min</th><th>Max</th></tr>")
 
 	for setting in parsed_settings:
-		line = f"  <tr><td>{html.escape(setting['name'])}</td><td>{html.escape(setting['description'])}</td>"
+		name = html.escape(setting['name'])
+		line = f'  <tr><td><a id="{group_id}-{name}" href="#{group_id}-{name}">{name}</a></td><td>{html.escape(setting['description'])}</td>'
 		if setting["type"] == "string":
 			line = line + f"<td>{html.escape(setting['default'])}</td><td></td><td></td></tr>"
 		elif setting["type"] == "int":
@@ -178,15 +180,17 @@ def export_tunings(parsed_tunings):
 	output.append("  <tr><th>Tuning</th><th>Description</th><th>Default</th></tr>")
 
 	for tuning in parsed_tunings:
-		output.append(f"  <tr><td>{html.escape(tuning['name'])}</td><td>{html.escape(tuning['description'])}</td><td>{tuning['default']}</td></tr>")
+		name = html.escape(tuning['name'])
+		output.append(f'  <tr><td><a id="tuning-{name}" href="#tuning-{name}">{name}</a></td><td>{html.escape(tuning['description'])}</td><td>{tuning['default']}</td></tr>')
 
 	output.append("</table></div>")
 	return "\n".join(output)
 
 
 def export_block(title, content):
+	anchor = title.lower().replace(" ", "-")
 	print('<div class="block">')
-	print(f'<h2 id="{title.lower().replace(" ", "-")}">{title}</h2>')
+	print(f'<h2 id="{anchor}"><a href="#{anchor}">{title}</a></h2>')
 	print(content)
 	print("</div>")
 
@@ -205,37 +209,37 @@ def export_settings_commands_table():
 
 	export_block(
 		"Map Settings",
-		export_settings([setting for setting in settings if "CFGFLAG_SERVER" in setting["flags"] and "CFGFLAG_GAME" in setting["flags"]]) + "\n" + export_commands([command for command in commands if "CFGFLAG_SERVER" in command["flags"] and "CFGFLAG_GAME" in command["flags"]]),
+		export_settings("map", [setting for setting in settings if "CFGFLAG_SERVER" in setting["flags"] and "CFGFLAG_GAME" in setting["flags"]]) + "\n" + export_commands("map", [command for command in commands if "CFGFLAG_SERVER" in command["flags"] and "CFGFLAG_GAME" in command["flags"]]),
 	)
 
 	export_block(
 		"Server Settings",
-		export_settings([setting for setting in settings if "CFGFLAG_SERVER" in setting["flags"]]),
+		export_settings("server", [setting for setting in settings if "CFGFLAG_SERVER" in setting["flags"]]),
 	)
 
 	export_block(
 		"Econ Settings",
-		export_settings([setting for setting in settings if "CFGFLAG_ECON" in setting["flags"]]),
+		export_settings("econ", [setting for setting in settings if "CFGFLAG_ECON" in setting["flags"]]),
 	)
 
 	export_block(
 		"Server Commands",
-		export_commands([command for command in commands if "CFGFLAG_SERVER" in command["flags"] and "CFGFLAG_CHAT" not in command["flags"]]),
+		export_commands("server", [command for command in commands if "CFGFLAG_SERVER" in command["flags"] and "CFGFLAG_CHAT" not in command["flags"]]),
 	)
 
 	export_block(
 		"Chat Commands",
-		export_commands([command for command in commands if "CFGFLAG_SERVER" in command["flags"] and "CFGFLAG_CHAT" in command["flags"]]),
+		export_commands("chat", [command for command in commands if "CFGFLAG_SERVER" in command["flags"] and "CFGFLAG_CHAT" in command["flags"]]),
 	)
 
 	export_block(
 		"Client Settings",
-		export_settings([setting for setting in settings if "CFGFLAG_CLIENT" in setting["flags"]]),
+		export_settings("client", [setting for setting in settings if "CFGFLAG_CLIENT" in setting["flags"]]),
 	)
 
 	export_block(
 		"Client Commands",
-		export_commands([command for command in commands if "CFGFLAG_CLIENT" in command["flags"]]),
+		export_commands("client", [command for command in commands if "CFGFLAG_CLIENT" in command["flags"]]),
 	)
 
 	export_block(
