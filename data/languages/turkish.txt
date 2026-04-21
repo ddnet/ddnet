@@ -2330,7 +2330,7 @@ Inactive color
 == İnaktif renk
 
 Preview button visibility while the editor is active.
-== Editör aktifken önizleme butonunu göster.
+== Editör aktifken ön izleme butonunu göster.
 
 Show all buttons
 == Tüm butonları göster
@@ -2441,7 +2441,7 @@ Chat background color
 == Sohbet arka plan rengi
 
 Censor profanity
-== Küfür Sansürü
+== Küfür sansürü
 
 Download
 == İndir
@@ -2517,7 +2517,7 @@ You can select buttons directly in the list below, or long press on a touch butt
 == Butonları aşağıdaki listeden direkt seçebilirsiniz, ya da ekrandaki butona uzun basıp seçebilirsiniz. Ayrıca dokunarak butonların yerini değiştirebilir ve yeniden boyutlandırabilirsiniz.
 
 Preview visibilities
-== Görünürlüğü önizle
+== Görünürlüğü ön izle
 
 You can manage your touch controls settings on this page. Only changes that are saved will be available after restarting the client. You can share your touch controls with others by exporting them to the clipboard.\n\nYou can find more detailed information about the touch controls on the DDNet Wiki.
 == Bu sayfada dokunmatik ayarlarını yönetebilirsiniz. Sadece kaydedilen değişiklikler istemciyi tekrar başlatınca geçerli olacak. Dokunmatik ayarlarınızı panoya kopyalayarak başkalarıyla paylaşabilirsiniz.\n\nDDNet Wiki'de dokunmatik kontrol ile ilgili daha detaylı bilgi edinebilirsiniz.
@@ -2553,16 +2553,16 @@ Uses the active action with the current aiming position.
 == Aktif eylemi geçerli hedef konumuyla kullanır.
 
 Virtual joystick which uses the active action.
-== Aktif eylemi kullanan sanal kumanda.
+== Aktif eylemi kullanan sanal joystick.
 
 Virtual joystick which only aims without using an action.
-== Herhangi bir eylem kullanmadan hedef alan sanal kumanda.
+== Sadece nişan almak için kullanılan, herhangi bir eylem gerektirmeyen sanal joystick.
 
 Virtual joystick which always uses fire.
-== Sürekli ateş eylemini kullanan sanal kumanda.
+== Her zaman ateş etme işlevini kullanan sanal joystick.
 
 Virtual joystick which always uses hook.
-== Sürekli kanca eylemini kullanan sanal kumanda.
+== Her zaman kanca işlevini kullanan sanal joystick.
 
 Player is ingame, i.e. not spectating.
 == Oyuncu oyunda, yani izleyicide değil.
@@ -2592,7 +2592,7 @@ Joining Tutorial server
 == Öğretici sunucuya bağlanılıyor
 
 There are no Tutorial servers available
-== Erişilebilir Öğretici sunucu yok
+== Erişilebilir öğretici sunucu yok
 
 Retrying…
 == Tekrar deneniyor…
@@ -2604,10 +2604,10 @@ Could not find a Tutorial server. Check your internet connection.
 == Öğretici sunucu bulunamadı. İnternet bağlantınızı kontrol edin.
 
 You're playing on a local server because no online Tutorial server could be found.\n\nYour record will only be saved locally.
-== Çevrimiçi Öğretici sunucu bulunamadığı için yerel sunucuda oynuyorsunuz.\n\nRekorunuz sadece yerel olarak kaydedilecek.
+== Çevrim içi Öğretici sunucu bulunamadığı için yerel sunucuda oynuyorsunuz.\n\nRekorunuz sadece yerel olarak kaydedilecek.
 
 Could not find online Tutorial server.\nStarting and connecting to local server…
-== Çevrimiçi Öğretici sunucu bulunamadı.\nYerel sunucu başlatılıp bağlanılıyor…
+== Çevrim içi Öğretici sunucu bulunamadı.\nYerel sunucu başlatılıp bağlanılıyor…
 
 Waiting for local server to stop…
 == Yerel sunucunun kapanması bekleniyor…
@@ -2616,19 +2616,19 @@ Waiting for local server to start…
 == Yerel sunucunun başlatılması bekleniyor…
 
 Error loading communities
-== Toplulukları yüklerken hata
+== Topluluklar yüklenirken hata oluştu
 
 Click to remove this community from your favorites.
-== Bu topluluğu favorilerden çıkarmak için tıkla.
+== Bu topluluğu favorilerinden çıkarmak için tıkla.
 
 Click to add this community to your favorites.
-== Bu topluluğu favorilere eklemek için tıkla.
+== Bu topluluğu favorilerine eklemek için tıkla.
 
 Update Rate
-== Yenileme Oranı
+== Yenileme Hızı
 
 Save power by lowering update rate (higher input latency)
-== Yenileme oranını düşürerek tasarruf et (daha fazla girdi gecikmesi)
+== Yenileme hızı düşürerek tasarruf et (daha fazla girdi gecikmesi)
 
 Colors of the hook collision line:
 == Kanca çizgisi renkleri:
@@ -2650,16 +2650,16 @@ Hook collision line tip
 == Kanca çizgisi ucu
 
 Refresh the demo list
-== 
+== Demo listesini yenile
 
 Open the selected folder
-== 
+== Seçilen klasörü aç
 
 Play the selected demo
-== 
+== Seçilen demoyu oynat
 
 Prediction margin
-== 
+== Tahmin payı
 
 Predict events (experimental)
-== 
+== Olayları tahmin et (deneysel)
