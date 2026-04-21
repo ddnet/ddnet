@@ -6561,11 +6561,26 @@ void CEditor::Render()
 		}
 		if(!m_pBrush->IsEmpty())
 		{
-			const bool HasTeleTiles = std::any_of(m_pBrush->m_vpLayers.begin(), m_pBrush->m_vpLayers.end(), [](const auto &pLayer) {
-				return pLayer->m_Type == LAYERTYPE_TILES && std::static_pointer_cast<CLayerTiles>(pLayer)->m_HasTele;
-			});
-			if(HasTeleTiles)
-				str_copy(m_aTooltip, "Use shift+mouse wheel up/down to adjust the tele numbers. Use ctrl+f to change all tele numbers to the first unused number.");
+			bool HasTileAdjustLayer = false;
+			bool HasSpeedupLayer = false;
+			for(const auto &pLayer : m_pBrush->m_vpLayers)
+			{
+				if(pLayer->m_Type != LAYERTYPE_TILES)
+				{
+					continue;
+				}
+				std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
+				HasTileAdjustLayer |= pTiles->m_HasTele || pTiles->m_HasSwitch || pTiles->m_HasTune;
+				HasSpeedupLayer |= pTiles->m_HasSpeedup;
+			}
+			if(HasTileAdjustLayer)
+			{
+				str_copy(m_aTooltip, "Use Shift+Mouse wheel up/down to adjust the tile numbers. Use Ctrl+F to change all tile numbers to the first unused number.");
+			}
+			else if(HasSpeedupLayer)
+			{
+				str_copy(m_aTooltip, "Use Shift+Mouse wheel up/down to adjust the angle.");
+			}
 
 			if(Input()->ShiftIsPressed())
 			{
