@@ -7580,18 +7580,22 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 				}
 			}
 		}
-		else if(pLayerTiles->m_HasTune && !UseNextFree)
+		else if(pLayerTiles->m_HasTune && (!UseNextFree || Map()->m_pTuneLayer != nullptr))
 		{
+			const int NextFreeNumber = UseNextFree ? Map()->m_pTuneLayer->FindNextFreeNumber() : 0;
 			std::shared_ptr<CLayerTune> pTuneLayer = std::static_pointer_cast<CLayerTune>(pLayer);
 			for(int y = 0; y < pTuneLayer->m_Height; y++)
 			{
 				for(int x = 0; x < pTuneLayer->m_Width; x++)
 				{
 					int i = y * pTuneLayer->m_Width + x;
-					if(!IsValidTuneTile(pTuneLayer->m_pTiles[i].m_Index) || !pTuneLayer->m_pTuneTile[i].m_Number)
+					if(!IsValidTuneTile(pTuneLayer->m_pTiles[i].m_Index) || (!UseNextFree && !pTuneLayer->m_pTuneTile[i].m_Number))
 						continue;
 
-					AdjustNumber(pTuneLayer->m_pTuneTile[i].m_Number, 1, 255);
+					if(UseNextFree)
+						pTuneLayer->m_pTuneTile[i].m_Number = NextFreeNumber;
+					else
+						AdjustNumber(pTuneLayer->m_pTuneTile[i].m_Number, 1, 255);
 				}
 			}
 		}
