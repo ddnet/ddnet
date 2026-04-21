@@ -7580,21 +7580,18 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 				}
 			}
 		}
-		else if(pLayerTiles->m_HasTune)
+		else if(pLayerTiles->m_HasTune && !UseNextFree)
 		{
-			if(!UseNextFree)
+			std::shared_ptr<CLayerTune> pTuneLayer = std::static_pointer_cast<CLayerTune>(pLayer);
+			for(int y = 0; y < pTuneLayer->m_Height; y++)
 			{
-				std::shared_ptr<CLayerTune> pTuneLayer = std::static_pointer_cast<CLayerTune>(pLayer);
-				for(int y = 0; y < pTuneLayer->m_Height; y++)
+				for(int x = 0; x < pTuneLayer->m_Width; x++)
 				{
-					for(int x = 0; x < pTuneLayer->m_Width; x++)
-					{
-						int i = y * pTuneLayer->m_Width + x;
-						if(!IsValidTuneTile(pTuneLayer->m_pTiles[i].m_Index) || !pTuneLayer->m_pTuneTile[i].m_Number)
-							continue;
+					int i = y * pTuneLayer->m_Width + x;
+					if(!IsValidTuneTile(pTuneLayer->m_pTiles[i].m_Index) || !pTuneLayer->m_pTuneTile[i].m_Number)
+						continue;
 
-						AdjustNumber(pTuneLayer->m_pTuneTile[i].m_Number, 1, 255);
-					}
+					AdjustNumber(pTuneLayer->m_pTuneTile[i].m_Number, 1, 255);
 				}
 			}
 		}
@@ -7617,28 +7614,25 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 				}
 			}
 		}
-		else if(pLayerTiles->m_HasSpeedup)
+		else if(pLayerTiles->m_HasSpeedup && !UseNextFree)
 		{
-			if(!UseNextFree)
+			std::shared_ptr<CLayerSpeedup> pSpeedupLayer = std::static_pointer_cast<CLayerSpeedup>(pLayer);
+			for(int y = 0; y < pSpeedupLayer->m_Height; y++)
 			{
-				std::shared_ptr<CLayerSpeedup> pSpeedupLayer = std::static_pointer_cast<CLayerSpeedup>(pLayer);
-				for(int y = 0; y < pSpeedupLayer->m_Height; y++)
+				for(int x = 0; x < pSpeedupLayer->m_Width; x++)
 				{
-					for(int x = 0; x < pSpeedupLayer->m_Width; x++)
-					{
-						int i = y * pSpeedupLayer->m_Width + x;
-						if(!IsValidSpeedupTile(pSpeedupLayer->m_pTiles[i].m_Index))
-							continue;
+					int i = y * pSpeedupLayer->m_Width + x;
+					if(!IsValidSpeedupTile(pSpeedupLayer->m_pTiles[i].m_Index))
+						continue;
 
-						if(Adjust != 0)
-						{
-							AdjustNumber(pSpeedupLayer->m_pSpeedupTile[i].m_Angle, 0, 359);
-						}
-						else
-						{
-							pSpeedupLayer->m_pSpeedupTile[i].m_Angle = m_SpeedupAngle;
-							pSpeedupLayer->m_SpeedupAngle = m_SpeedupAngle;
-						}
+					if(Adjust != 0)
+					{
+						AdjustNumber(pSpeedupLayer->m_pSpeedupTile[i].m_Angle, 0, 359);
+					}
+					else
+					{
+						pSpeedupLayer->m_pSpeedupTile[i].m_Angle = m_SpeedupAngle;
+						pSpeedupLayer->m_SpeedupAngle = m_SpeedupAngle;
 					}
 				}
 			}
