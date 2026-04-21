@@ -7547,12 +7547,11 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 
 		std::shared_ptr<CLayerTiles> pLayerTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
 
-		if(pLayerTiles->m_HasTele)
+		if(pLayerTiles->m_HasTele && (!UseNextFree || Map()->m_pTeleLayer != nullptr))
 		{
-			int NextFreeTeleNumber = Map()->m_pTeleLayer->FindNextFreeNumber(false);
-			int NextFreeCPNumber = Map()->m_pTeleLayer->FindNextFreeNumber(true);
+			const int NextFreeTeleNumber = UseNextFree ? Map()->m_pTeleLayer->FindNextFreeNumber(false) : 0;
+			const int NextFreeCheckpointNumber = UseNextFree ? Map()->m_pTeleLayer->FindNextFreeNumber(true) : 0;
 			std::shared_ptr<CLayerTele> pTeleLayer = std::static_pointer_cast<CLayerTele>(pLayer);
-
 			for(int y = 0; y < pTeleLayer->m_Height; y++)
 			{
 				for(int x = 0; x < pTeleLayer->m_Width; x++)
@@ -7564,7 +7563,7 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 					if(UseNextFree)
 					{
 						if(IsTeleTileCheckpoint(pTeleLayer->m_pTiles[i].m_Index))
-							pTeleLayer->m_pTeleTile[i].m_Number = NextFreeCPNumber;
+							pTeleLayer->m_pTeleTile[i].m_Number = NextFreeCheckpointNumber;
 						else if(IsTeleTileNumberUsedAny(pTeleLayer->m_pTiles[i].m_Index))
 							pTeleLayer->m_pTeleTile[i].m_Number = NextFreeTeleNumber;
 					}
@@ -7599,11 +7598,10 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 				}
 			}
 		}
-		else if(pLayerTiles->m_HasSwitch)
+		else if(pLayerTiles->m_HasSwitch && (!UseNextFree || Map()->m_pSwitchLayer != nullptr))
 		{
-			int NextFreeNumber = Map()->m_pSwitchLayer->FindNextFreeNumber();
+			const int NextFreeNumber = UseNextFree ? Map()->m_pSwitchLayer->FindNextFreeNumber() : 0;
 			std::shared_ptr<CLayerSwitch> pSwitchLayer = std::static_pointer_cast<CLayerSwitch>(pLayer);
-
 			for(int y = 0; y < pSwitchLayer->m_Height; y++)
 			{
 				for(int x = 0; x < pSwitchLayer->m_Width; x++)
