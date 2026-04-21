@@ -1,3 +1,5 @@
+// Note: The values of some of these flags cannot be changed because they are recorded to Teehistorian files.
+
 /// Config variable that is saved when the client is closed.
 ///
 /// Has no effect on other commands.
@@ -13,8 +15,7 @@ pub const CFGFLAG_SERVER: i32 = 1 << 2;
 /// `IConsole::StoreCommands(false)` is called.
 pub const CFGFLAG_STORE: i32 = 1 << 3;
 
-/// Command that is available in the master server.
-pub const CFGFLAG_MASTER: i32 = 1 << 4;
+// 1 << 4 has been removed. Do not reuse this flag.
 
 /// Command that has something to do with the external console (econ).
 pub const CFGFLAG_ECON: i32 = 1 << 5;

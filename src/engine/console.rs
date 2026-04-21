@@ -387,7 +387,6 @@ mod ffi {
         /// - [`CFGFLAG_CLIENT`](../ddnet_engine_shared/constant.CFGFLAG_CLIENT.html)
         /// - [`CFGFLAG_SERVER`](../ddnet_engine_shared/constant.CFGFLAG_SERVER.html)
         /// - [`CFGFLAG_STORE`](../ddnet_engine_shared/constant.CFGFLAG_STORE.html)
-        /// - [`CFGFLAG_MASTER`](../ddnet_engine_shared/constant.CFGFLAG_MASTER.html)
         /// - [`CFGFLAG_ECON`](../ddnet_engine_shared/constant.CFGFLAG_ECON.html)
         /// - [`CMDFLAG_TEST`](../ddnet_engine_shared/constant.CMDFLAG_TEST.html)
         /// - [`CFGFLAG_CHAT`](../ddnet_engine_shared/constant.CFGFLAG_CHAT.html)
