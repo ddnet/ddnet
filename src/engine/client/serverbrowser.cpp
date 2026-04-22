@@ -456,12 +456,6 @@ void CServerBrowser::Filter()
 			Filtered = true;
 		else if(g_Config.m_BrFilterPw && Info.m_Flags & SERVER_FLAG_PASSWORD)
 			Filtered = true;
-		else if(g_Config.m_BrFilterServerAddress[0] && !str_find_nocase(Info.m_aAddress, g_Config.m_BrFilterServerAddress))
-			Filtered = true;
-		else if(g_Config.m_BrFilterGametypeStrict && g_Config.m_BrFilterGametype[0] && str_comp_nocase(Info.m_aGameType, g_Config.m_BrFilterGametype))
-			Filtered = true;
-		else if(!g_Config.m_BrFilterGametypeStrict && g_Config.m_BrFilterGametype[0] && !str_utf8_find_nocase(Info.m_aGameType, g_Config.m_BrFilterGametype))
-			Filtered = true;
 		else if(g_Config.m_BrFilterUnfinishedMap && Info.m_HasRank == CServerInfo::RANK_RANKED)
 			Filtered = true;
 		else if(g_Config.m_BrFilterLogin && Info.m_RequiresLogin)
@@ -547,6 +541,18 @@ void CServerBrowser::Filter()
 					if(MatchesFn(Info.m_aMap, aFilterStrTrimmed))
 					{
 						Info.m_QuickSearchHit |= IServerBrowser::QUICK_MAPNAME;
+					}
+
+					// match against game type
+					if(MatchesFn(Info.m_aGameType, aFilterStrTrimmed))
+					{
+						Info.m_QuickSearchHit |= IServerBrowser::QUICK_GAMETYPE;
+					}
+
+					// match against server address
+					if(MatchesFn(Info.m_aAddress, aFilterStrTrimmed))
+					{
+						Info.m_QuickSearchHit |= IServerBrowser::QUICK_ADDRESS;
 					}
 				}
 
@@ -637,7 +643,6 @@ int CServerBrowser::SortHash() const
 	i |= g_Config.m_BrFilterFriends << 7;
 	i |= g_Config.m_BrFilterPw << 8;
 	i |= g_Config.m_BrSortOrder << 9;
-	i |= g_Config.m_BrFilterGametypeStrict << 12;
 	i |= g_Config.m_BrFilterUnfinishedMap << 13;
 	i |= g_Config.m_BrFilterCountry << 14;
 	i |= g_Config.m_BrFilterConnectingPlayers << 15;

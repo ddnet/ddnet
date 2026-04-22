@@ -672,7 +672,6 @@ void CMenus::PopupConfirmSwitchServer()
 void CMenus::RenderServerbrowserFilters(CUIRect View)
 {
 	const float RowHeight = 18.0f;
-	const float FontSize = (RowHeight - 4.0f) * CUi::ms_FontmodHeight; // based on DoButton_CheckBox
 
 	View.Margin(5.0f, &View);
 
@@ -703,28 +702,6 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	View.HSplitTop(RowHeight, &Button, &View);
 	if(DoButton_CheckBox(&g_Config.m_BrFilterLogin, Localize("No login required"), g_Config.m_BrFilterLogin, &Button))
 		g_Config.m_BrFilterLogin ^= 1;
-
-	View.HSplitTop(RowHeight, &Button, &View);
-	if(DoButton_CheckBox(&g_Config.m_BrFilterGametypeStrict, Localize("Strict gametype filter"), g_Config.m_BrFilterGametypeStrict, &Button))
-		g_Config.m_BrFilterGametypeStrict ^= 1;
-
-	View.HSplitTop(3.0f, nullptr, &View);
-	View.HSplitTop(RowHeight, &Button, &View);
-	Ui()->DoLabel(&Button, Localize("Game types:"), FontSize, TEXTALIGN_ML);
-	Button.VSplitRight(60.0f, nullptr, &Button);
-	static CLineInput s_GametypeInput(g_Config.m_BrFilterGametype, sizeof(g_Config.m_BrFilterGametype));
-	if(Ui()->DoEditBox(&s_GametypeInput, &Button, FontSize))
-		Client()->ServerBrowserUpdate();
-
-	// server address
-	View.HSplitTop(6.0f, nullptr, &View);
-	View.HSplitTop(RowHeight, &Button, &View);
-	View.HSplitTop(6.0f, nullptr, &View);
-	Ui()->DoLabel(&Button, Localize("Server address:"), FontSize, TEXTALIGN_ML);
-	Button.VSplitRight(60.0f, nullptr, &Button);
-	static CLineInput s_FilterServerAddressInput(g_Config.m_BrFilterServerAddress, sizeof(g_Config.m_BrFilterServerAddress));
-	if(Ui()->DoEditBox(&s_FilterServerAddressInput, &Button, FontSize))
-		Client()->ServerBrowserUpdate();
 
 	// player country
 	{
@@ -837,10 +814,7 @@ void CMenus::ResetServerbrowserFilters()
 	g_Config.m_BrFilterCountry = 0;
 	g_Config.m_BrFilterCountryIndex = -1;
 	g_Config.m_BrFilterPw = 0;
-	g_Config.m_BrFilterGametype[0] = '\0';
-	g_Config.m_BrFilterGametypeStrict = 0;
 	g_Config.m_BrFilterConnectingPlayers = 1;
-	g_Config.m_BrFilterServerAddress[0] = '\0';
 	g_Config.m_BrFilterLogin = true;
 
 	if(g_Config.m_UiPage != PAGE_LAN)
