@@ -25,7 +25,7 @@ CProjectile::CProjectile(
 	vec2 InitDir,
 	int Layer,
 	int Number) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE, true)
 {
 	m_Type = Type;
 	m_Pos = Pos;
@@ -370,7 +370,7 @@ void CProjectile::Snap(int SnappingClient)
 {
 	float Ct = (Server()->Tick() - m_StartTick) / (float)Server()->TickSpeed();
 
-	if(NetworkClipped(SnappingClient, GetPos(Ct)))
+	if(NetworkClipped(SnappingClient, GetPos(Ct)) || !GetId().has_value())
 		return;
 
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
@@ -396,13 +396,13 @@ void CProjectile::Snap(int SnappingClient)
 
 	if(SnappingClientVersion >= VERSION_DDNET_ENTITY_NETOBJS)
 	{
-		Server()->SnapNewItem(GetId(), NetInfo());
+		Server()->SnapNewItem(GetId().value(), NetInfo());
 	}
 	else if(SnappingClientVersion >= VERSION_DDNET_ANTIPING_PROJECTILE && NetIsInfoLegacyCompatible())
 	{
 		if(SnappingClientVersion >= VERSION_DDNET_MSG_LEGACY)
 		{
-			Server()->SnapNewItem(GetId(), NetInfoLegacy());
+			Server()->SnapNewItem(GetId().value(), NetInfoLegacy());
 		}
 		else
 		{
@@ -410,12 +410,12 @@ void CProjectile::Snap(int SnappingClient)
 			CNetObj_Projectile Projectile = {};
 			static_assert(sizeof(DDRaceProjectile) == sizeof(Projectile));
 			mem_copy(&Projectile, &DDRaceProjectile, sizeof(Projectile));
-			Server()->SnapNewItem(GetId(), Projectile);
+			Server()->SnapNewItem(GetId().value(), Projectile);
 		}
 	}
 	else
 	{
-		Server()->SnapNewItem(GetId(), NetInfoVanilla());
+		Server()->SnapNewItem(GetId().value(), NetInfoVanilla());
 	}
 }
 
