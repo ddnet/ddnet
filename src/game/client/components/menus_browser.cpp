@@ -24,6 +24,57 @@
 #include <game/localization.h>
 
 static constexpr ColorRGBA HIGHLIGHTED_TEXT_COLOR = ColorRGBA(0.4f, 0.4f, 1.0f, 1.0f);
+static constexpr ColorRGBA FILTERED_TEXT_COLOR = ColorRGBA(0.8f, 0.9f, 1.0f, 1.0f);
+
+static std::vector<STextColorSplit> BuildFilterColorSplits(const char *pStr)
+{
+	static const char *const s_apKeys[] = {"map:", "type:", "addr:", "name:", "player:"};
+
+	std::vector<STextColorSplit> Splits;
+	const char *pCursor = pStr;
+	while(*pCursor != '\0')
+	{
+		// Skip separators
+		while(*pCursor != '\0')
+		{
+			const char *pNext = pCursor;
+			const int Code = str_utf8_decode(&pNext);
+			if(Code != ';' && !str_utf8_isspace(Code))
+				break;
+			pCursor = pNext;
+		}
+		if(*pCursor == '\0')
+			break;
+
+		// check a single token
+		const char *pTokenStart = pCursor;
+		bool InQuotes = false;
+		while(*pCursor != '\0')
+		{
+			const char *pNext = pCursor;
+			const int Code = str_utf8_decode(&pNext);
+			if(!InQuotes && (Code == ';' || str_utf8_isspace(Code)))
+				break;
+			if(Code == '"')
+				InQuotes = !InQuotes;
+			pCursor = pNext;
+		}
+		const int TokenLen = (int)(pCursor - pTokenStart);
+
+		for(const char *pKey : s_apKeys)
+		{
+			const int KeyLen = str_length(pKey);
+			if(TokenLen > KeyLen && str_comp_nocase_num(pTokenStart, pKey, KeyLen) == 0)
+			{
+				const int TokenOffset = (int)(pTokenStart - pStr);
+				Splits.emplace_back(TokenOffset, KeyLen, HIGHLIGHTED_TEXT_COLOR);
+				Splits.emplace_back(TokenOffset + KeyLen, TokenLen - KeyLen, FILTERED_TEXT_COLOR);
+				break;
+			}
+		}
+	}
+	return Splits;
+}
 
 static ColorRGBA PlayerBackgroundColor(bool Friend, bool Clan, bool Afk, bool InSelectedServer, bool Inside)
 {
@@ -509,8 +560,7 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 
 	CUIRect SearchInfoAndAddr, ServersAndConnect, ServersPlayersOnline, SearchAndInfo, ServerAddr, ConnectButtons;
 	StatusBox.VSplitRight(135.0f, &SearchInfoAndAddr, &ServersAndConnect);
-	if(SearchInfoAndAddr.w > 350.0f)
-		SearchInfoAndAddr.VSplitLeft(350.0f, &SearchInfoAndAddr, nullptr);
+	SearchInfoAndAddr.VSplitRight(maximum(0.0f, (SearchInfoAndAddr.w - 365.0f) * 0.4f), &SearchInfoAndAddr, nullptr);
 	SearchInfoAndAddr.HSplitTop(40.0f, &SearchAndInfo, &ServerAddr);
 	ServersAndConnect.HSplitTop(35.0f, &ServersPlayersOnline, &ConnectButtons);
 	ConnectButtons.HSplitTop(5.0f, nullptr, &ConnectButtons);
@@ -545,7 +595,7 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 			Ui()->SetActiveItem(&s_FilterInput);
 			s_FilterInput.SelectAll();
 		}
-		if(Ui()->DoClearableEditBox(&s_FilterInput, &QuickSearch, 12.0f))
+		if(Ui()->DoClearableEditBox(&s_FilterInput, &QuickSearch, 12.0f, IGraphics::CORNER_ALL, BuildFilterColorSplits(g_Config.m_BrFilterString)))
 			Client()->ServerBrowserUpdate();
 	}
 
@@ -574,7 +624,7 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 			Ui()->SetActiveItem(&s_ExcludeInput);
 			s_ExcludeInput.SelectAll();
 		}
-		if(Ui()->DoClearableEditBox(&s_ExcludeInput, &QuickExclude, 12.0f))
+		if(Ui()->DoClearableEditBox(&s_ExcludeInput, &QuickExclude, 12.0f, IGraphics::CORNER_ALL, BuildFilterColorSplits(g_Config.m_BrExcludeString)))
 			Client()->ServerBrowserUpdate();
 	}
 

@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "serverbrowser.h"
 
+#include "serverbrowser_filter.h"
 #include "serverbrowser_http.h"
 #include "serverbrowser_ping_cache.h"
 
@@ -44,14 +45,76 @@ public:
 	bool operator()(int a, int b) { return (g_Config.m_BrSortOrder ? (m_pThis->*m_pfnSort)(b, a) : (m_pThis->*m_pfnSort)(a, b)); }
 };
 
-static bool MatchesPart(const char *a, const char *b)
+serverbrowser_filter::SFilterToken serverbrowser_filter::ParseFilterToken(char *pToken)
 {
-	return str_utf8_find_nocase(a, b) != nullptr;
+	static const struct
+	{
+		const char *m_pPrefix;
+		EFilterField m_Field;
+	} s_aKeys[] = {
+		{"map:", EFilterField::MAP},
+		{"type:", EFilterField::TYPE},
+		{"addr:", EFilterField::ADDR},
+		{"name:", EFilterField::NAME},
+		{"player:", EFilterField::PLAYER},
+	};
+
+	SFilterToken Result;
+	Result.m_Field = EFilterField::ALL;
+	Result.m_Exact = false;
+
+	for(const auto &Key : s_aKeys)
+	{
+		const int PrefixLen = str_length(Key.m_pPrefix);
+		if(str_comp_nocase_num(pToken, Key.m_pPrefix, PrefixLen) == 0)
+		{
+			Result.m_Field = Key.m_Field;
+			pToken += PrefixLen;
+			break;
+		}
+	}
+
+	const int Len = str_length(pToken);
+	if(Len >= 2 && pToken[0] == '"' && pToken[Len - 1] == '"')
+	{
+		pToken[Len - 1] = '\0';
+		pToken += 1;
+		Result.m_Exact = true;
+	}
+
+	Result.m_pValue = pToken;
+	return Result;
 }
 
-static bool MatchesExactly(const char *a, const char *b)
+const char *serverbrowser_filter::NextWhitespaceToken(const char *pStr, char *pBuffer, int BufferSize)
 {
-	return str_comp(a, &b[1]) == 0;
+	pStr = str_utf8_skip_whitespaces(pStr);
+	if(*pStr == '\0')
+		return nullptr;
+
+	char *pOut = pBuffer;
+	char *pEnd = pBuffer + BufferSize - 1;
+	bool InQuotes = false;
+	while(*pStr != '\0' && pOut < pEnd)
+	{
+		const char *pNext = pStr;
+		const int Code = str_utf8_decode(&pNext);
+		if(!InQuotes && str_utf8_isspace(Code))
+			break;
+		if(Code == '"')
+			InQuotes = !InQuotes;
+		while(pStr < pNext && pOut < pEnd)
+			*pOut++ = *pStr++;
+	}
+	*pOut = '\0';
+	return pStr;
+}
+
+bool serverbrowser_filter::TokenMatches(const char *pField, const SFilterToken &Token)
+{
+	if(Token.m_Exact)
+		return str_comp(pField, Token.m_pValue) == 0;
+	return str_utf8_find_nocase(pField, Token.m_pValue) != nullptr;
 }
 
 static NETADDR CommunityAddressKey(const NETADDR &Addr)
@@ -494,114 +557,119 @@ void CServerBrowser::Filter()
 			{
 				Info.m_QuickSearchHit = 0;
 
-				const char *pStr = g_Config.m_BrFilterString;
-				char aFilterStr[sizeof(g_Config.m_BrFilterString)];
-				char aFilterStrTrimmed[sizeof(g_Config.m_BrFilterString)];
-				while((pStr = str_next_token(pStr, IServerBrowser::SEARCH_EXCLUDE_TOKEN, aFilterStr, sizeof(aFilterStr))))
-				{
-					str_copy(aFilterStrTrimmed, str_utf8_skip_whitespaces(aFilterStr));
-					str_utf8_trim_right(aFilterStrTrimmed);
-
-					if(aFilterStrTrimmed[0] == '\0')
+				// match fields <-> token & set QUICK bits
+				auto SearchTokenHits = [&Info](const serverbrowser_filter::SFilterToken &Token) -> int {
+					int Hits = 0;
+					if((Token.m_Field == serverbrowser_filter::EFilterField::ALL || Token.m_Field == serverbrowser_filter::EFilterField::NAME) && serverbrowser_filter::TokenMatches(Info.m_aName, Token))
+						Hits |= IServerBrowser::QUICK_SERVERNAME;
+					if(Token.m_Field == serverbrowser_filter::EFilterField::ALL || Token.m_Field == serverbrowser_filter::EFilterField::PLAYER)
 					{
-						continue;
-					}
-					auto MatchesFn = MatchesPart;
-					const int FilterLen = str_length(aFilterStrTrimmed);
-					if(aFilterStrTrimmed[0] == '"' && aFilterStrTrimmed[FilterLen - 1] == '"')
-					{
-						aFilterStrTrimmed[FilterLen - 1] = '\0';
-						MatchesFn = MatchesExactly;
-					}
-
-					// match against server name
-					if(MatchesFn(Info.m_aName, aFilterStrTrimmed))
-					{
-						Info.m_QuickSearchHit |= IServerBrowser::QUICK_SERVERNAME;
-					}
-
-					// match against players
-					for(int p = 0; p < minimum(Info.m_NumClients, (int)MAX_CLIENTS); p++)
-					{
-						if(MatchesFn(Info.m_aClients[p].m_aName, aFilterStrTrimmed) ||
-							MatchesFn(Info.m_aClients[p].m_aClan, aFilterStrTrimmed))
+						for(int p = 0; p < minimum(Info.m_NumClients, (int)MAX_CLIENTS); p++)
 						{
-							if(g_Config.m_BrFilterConnectingPlayers &&
-								str_comp(Info.m_aClients[p].m_aName, "(connecting)") == 0 &&
-								Info.m_aClients[p].m_aClan[0] == '\0')
+							if(serverbrowser_filter::TokenMatches(Info.m_aClients[p].m_aName, Token) ||
+								serverbrowser_filter::TokenMatches(Info.m_aClients[p].m_aClan, Token))
 							{
-								continue;
+								if(g_Config.m_BrFilterConnectingPlayers &&
+									str_comp(Info.m_aClients[p].m_aName, "(connecting)") == 0 &&
+									Info.m_aClients[p].m_aClan[0] == '\0')
+								{
+									continue;
+								}
+								Hits |= IServerBrowser::QUICK_PLAYER;
+								break;
 							}
-							Info.m_QuickSearchHit |= IServerBrowser::QUICK_PLAYER;
-							break;
 						}
 					}
+					if((Token.m_Field == serverbrowser_filter::EFilterField::ALL || Token.m_Field == serverbrowser_filter::EFilterField::MAP) && serverbrowser_filter::TokenMatches(Info.m_aMap, Token))
+						Hits |= IServerBrowser::QUICK_MAPNAME;
+					if((Token.m_Field == serverbrowser_filter::EFilterField::ALL || Token.m_Field == serverbrowser_filter::EFilterField::TYPE) && serverbrowser_filter::TokenMatches(Info.m_aGameType, Token))
+						Hits |= IServerBrowser::QUICK_GAMETYPE;
+					if((Token.m_Field == serverbrowser_filter::EFilterField::ALL || Token.m_Field == serverbrowser_filter::EFilterField::ADDR) && serverbrowser_filter::TokenMatches(Info.m_aAddress, Token))
+						Hits |= IServerBrowser::QUICK_ADDRESS;
+					return Hits;
+				};
 
-					// match against map
-					if(MatchesFn(Info.m_aMap, aFilterStrTrimmed))
+				bool AnyGroupMatched = false;
+				const char *pStr = g_Config.m_BrFilterString;
+				char aGroup[sizeof(g_Config.m_BrFilterString)];
+				while((pStr = str_next_token(pStr, IServerBrowser::SEARCH_EXCLUDE_TOKEN, aGroup, sizeof(aGroup))))
+				{
+					const char *pGroupCursor = aGroup;
+					char aTokenBuf[sizeof(g_Config.m_BrFilterString)];
+					bool GroupMatched = true;
+					bool GroupHasToken = false;
+					int GroupHits = 0;
+					while((pGroupCursor = serverbrowser_filter::NextWhitespaceToken(pGroupCursor, aTokenBuf, sizeof(aTokenBuf))))
 					{
-						Info.m_QuickSearchHit |= IServerBrowser::QUICK_MAPNAME;
+						const serverbrowser_filter::SFilterToken Token = serverbrowser_filter::ParseFilterToken(aTokenBuf);
+						if(Token.m_pValue[0] == '\0')
+							continue;
+						GroupHasToken = true;
+						const int TokenHits = SearchTokenHits(Token);
+						if(!TokenHits)
+						{
+							GroupMatched = false;
+							break;
+						}
+						GroupHits |= TokenHits;
 					}
-
-					// match against game type
-					if(MatchesFn(Info.m_aGameType, aFilterStrTrimmed))
+					if(GroupHasToken && GroupMatched)
 					{
-						Info.m_QuickSearchHit |= IServerBrowser::QUICK_GAMETYPE;
-					}
-
-					// match against server address
-					if(MatchesFn(Info.m_aAddress, aFilterStrTrimmed))
-					{
-						Info.m_QuickSearchHit |= IServerBrowser::QUICK_ADDRESS;
+						AnyGroupMatched = true;
+						Info.m_QuickSearchHit |= GroupHits;
 					}
 				}
 
-				if(!Info.m_QuickSearchHit)
+				if(!AnyGroupMatched)
 					Filtered = true;
 			}
 
 			if(!Filtered && g_Config.m_BrExcludeString[0] != '\0')
 			{
+				// unscoped exclude tokens only consider name/map/type
+				auto ExcludeTokenMatches = [&Info](const serverbrowser_filter::SFilterToken &Token) -> bool {
+					if((Token.m_Field == serverbrowser_filter::EFilterField::ALL || Token.m_Field == serverbrowser_filter::EFilterField::NAME) && serverbrowser_filter::TokenMatches(Info.m_aName, Token))
+						return true;
+					if((Token.m_Field == serverbrowser_filter::EFilterField::ALL || Token.m_Field == serverbrowser_filter::EFilterField::MAP) && serverbrowser_filter::TokenMatches(Info.m_aMap, Token))
+						return true;
+					if((Token.m_Field == serverbrowser_filter::EFilterField::ALL || Token.m_Field == serverbrowser_filter::EFilterField::TYPE) && serverbrowser_filter::TokenMatches(Info.m_aGameType, Token))
+						return true;
+					if(Token.m_Field == serverbrowser_filter::EFilterField::ADDR && serverbrowser_filter::TokenMatches(Info.m_aAddress, Token))
+						return true;
+					if(Token.m_Field == serverbrowser_filter::EFilterField::PLAYER)
+					{
+						for(int p = 0; p < minimum(Info.m_NumClients, (int)MAX_CLIENTS); p++)
+						{
+							if(serverbrowser_filter::TokenMatches(Info.m_aClients[p].m_aName, Token) ||
+								serverbrowser_filter::TokenMatches(Info.m_aClients[p].m_aClan, Token))
+								return true;
+						}
+					}
+					return false;
+				};
+
 				const char *pStr = g_Config.m_BrExcludeString;
-				char aExcludeStr[sizeof(g_Config.m_BrExcludeString)];
-				char aExcludeStrTrimmed[sizeof(g_Config.m_BrExcludeString)];
-				while((pStr = str_next_token(pStr, IServerBrowser::SEARCH_EXCLUDE_TOKEN, aExcludeStr, sizeof(aExcludeStr))))
+				char aGroup[sizeof(g_Config.m_BrExcludeString)];
+				while(!Filtered && (pStr = str_next_token(pStr, IServerBrowser::SEARCH_EXCLUDE_TOKEN, aGroup, sizeof(aGroup))))
 				{
-					str_copy(aExcludeStrTrimmed, str_utf8_skip_whitespaces(aExcludeStr));
-					str_utf8_trim_right(aExcludeStrTrimmed);
-
-					if(aExcludeStrTrimmed[0] == '\0')
+					const char *pGroupCursor = aGroup;
+					char aTokenBuf[sizeof(g_Config.m_BrExcludeString)];
+					bool GroupMatched = true;
+					bool GroupHasToken = false;
+					while((pGroupCursor = serverbrowser_filter::NextWhitespaceToken(pGroupCursor, aTokenBuf, sizeof(aTokenBuf))))
 					{
-						continue;
+						const serverbrowser_filter::SFilterToken Token = serverbrowser_filter::ParseFilterToken(aTokenBuf);
+						if(Token.m_pValue[0] == '\0')
+							continue;
+						GroupHasToken = true;
+						if(!ExcludeTokenMatches(Token))
+						{
+							GroupMatched = false;
+							break;
+						}
 					}
-					auto MatchesFn = MatchesPart;
-					const int FilterLen = str_length(aExcludeStrTrimmed);
-					if(aExcludeStrTrimmed[0] == '"' && aExcludeStrTrimmed[FilterLen - 1] == '"')
-					{
-						aExcludeStrTrimmed[FilterLen - 1] = '\0';
-						MatchesFn = MatchesExactly;
-					}
-
-					// match against server name
-					if(MatchesFn(Info.m_aName, aExcludeStrTrimmed))
-					{
+					if(GroupHasToken && GroupMatched)
 						Filtered = true;
-						break;
-					}
-
-					// match against map
-					if(MatchesFn(Info.m_aMap, aExcludeStrTrimmed))
-					{
-						Filtered = true;
-						break;
-					}
-
-					// match against gametype
-					if(MatchesFn(Info.m_aGameType, aExcludeStrTrimmed))
-					{
-						Filtered = true;
-						break;
-					}
 				}
 			}
 		}
