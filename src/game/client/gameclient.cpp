@@ -521,9 +521,14 @@ void CGameClient::OnDummySwap()
 		m_Controls.ResetInput(PlayerOrDummy);
 		m_Controls.m_aInputData[PlayerOrDummy].m_Hook = 0;
 	}
-	const int PrevDummyFire = m_DummyInput.m_Fire;
+	int PrevDummyFire = m_DummyInput.m_Fire;
 	m_DummyInput = m_Controls.m_aInputData[!g_Config.m_ClDummy];
+	// preserve existing behavior - old dummy, now player, should fire immediately upon swap
+	if((g_Config.m_ClDummyHammer & 1) == 1)
+		PrevDummyFire = (PrevDummyFire + 2) & INPUT_STATE_MASK;
 	m_Controls.m_aInputData[g_Config.m_ClDummy].m_Fire = PrevDummyFire;
+	g_Config.m_ClDummyHammer = (m_DummyInput.m_Fire & ~1 & INPUT_STATE_MASK) | (g_Config.m_ClDummyHammer & 1);
+	g_Config.m_ClDummyFire = (m_DummyInput.m_Fire & ~1 & INPUT_STATE_MASK) | (g_Config.m_ClDummyFire & 1);
 	m_IsDummySwapping = 1;
 }
 
@@ -538,14 +543,15 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 		return 0;
 	}
 
-	if(!g_Config.m_ClDummyHammer)
+	if((m_HammerInput.m_Fire & 1) != 0 && (g_Config.m_ClDummyHammer & 1) == 0)
 	{
-		if(m_DummyFire != 0)
-		{
-			m_DummyInput.m_Fire = (m_HammerInput.m_Fire + 1) & ~1;
-			m_DummyFire = 0;
-		}
-
+		m_HammerInput.m_Fire = (m_HammerInput.m_Fire + 1) & INPUT_STATE_MASK & ~1;
+		m_DummyInput.m_Fire = m_HammerInput.m_Fire;
+		g_Config.m_ClDummyHammer = m_DummyInput.m_Fire;
+		m_DummyFire = 0;
+	}
+	if(g_Config.m_ClDummyHammer == (m_DummyInput.m_Fire & ~1 & INPUT_STATE_MASK))
+	{
 		if(!Force && (!m_DummyInput.m_Direction && !m_DummyInput.m_Jump && !m_DummyInput.m_Hook))
 		{
 			return 0;
@@ -556,6 +562,22 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 	}
 	else
 	{
+		if(!g_Config.m_ClDummyCopyMoves)
+		{
+			// a `+toggle cl_dummy_fire 0 1` bind was pressed and released (or released and pressed)
+			// possibly a debounce issue, but the player will fire this tick
+			// we need to try to fire with the dummy in case the dummy will be unfrozen by the player
+			if(g_Config.m_ClDummyHammer != (m_DummyInput.m_Fire | 1))
+				m_DummyFire = 0;
+		}
+		else if(m_DummyInput.m_Fire == ((g_Config.m_ClDummyHammer + 2) & ~1 & INPUT_STATE_MASK))
+		{
+			// fire done "on the player" was just released
+			// ClDummyHammer should be caught up to keep correct state
+			g_Config.m_ClDummyHammer = (m_DummyInput.m_Fire & ~1 & INPUT_STATE_MASK) | (g_Config.m_ClDummyHammer & 1);
+			return 0;
+		}
+
 		if(m_DummyFire % 25 != 0)
 		{
 			m_DummyFire++;
@@ -563,7 +585,10 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 		}
 		m_DummyFire++;
 
-		m_HammerInput.m_Fire = (m_HammerInput.m_Fire + 1) | 1;
+		m_HammerInput.m_Fire = ((m_DummyInput.m_Fire + 1) & INPUT_STATE_MASK) | 1;
+		// supporting above conditions
+		m_DummyInput.m_Fire = m_HammerInput.m_Fire;
+		g_Config.m_ClDummyHammer = (m_DummyInput.m_Fire & ~1 & INPUT_STATE_MASK) | (g_Config.m_ClDummyHammer & 1);
 		m_HammerInput.m_WantedWeapon = WEAPON_HAMMER + 1;
 		if(!g_Config.m_ClDummyRestoreWeapon)
 		{
@@ -4845,7 +4870,13 @@ void CGameClient::DummyResetInput()
 		return;
 
 	if((m_DummyInput.m_Fire & 1) != 0)
-		m_DummyInput.m_Fire++;
+	{
+		m_DummyInput.m_Fire = (m_DummyInput.m_Fire + 1) & INPUT_STATE_MASK;
+		// matching existing behavior, ClDummyHammer is still active
+		// don't make it be a full input state wraparound of presses ahead
+		if((g_Config.m_ClDummyHammer & 1) != 0)
+			g_Config.m_ClDummyHammer = (g_Config.m_ClDummyHammer + 2) & INPUT_STATE_MASK;
+	}
 
 	m_Controls.ResetInput(!g_Config.m_ClDummy);
 	m_Controls.m_aInputData[!g_Config.m_ClDummy].m_Hook = 0;
