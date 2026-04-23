@@ -389,8 +389,13 @@ bool CGhostLoader::ReadChunk(int *pType)
 	ResetBuffer();
 
 	unsigned char aChunkHeader[4];
-	if(io_read(m_File, aChunkHeader, sizeof(aChunkHeader)) != sizeof(aChunkHeader))
+	const unsigned ReadHeaderSize = io_read(m_File, aChunkHeader, sizeof(aChunkHeader));
+	if(ReadHeaderSize != sizeof(aChunkHeader))
 	{
+		if(ReadHeaderSize != 0)
+		{
+			log_error_color(LOG_COLOR_GHOST, "ghost_loader", "Failed to read ghost file '%s': chunk header truncated", m_aFilename);
+		}
 		return false; // EOF
 	}
 
