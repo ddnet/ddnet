@@ -242,15 +242,31 @@ IOHANDLE CGhostLoader::ReadHeader(CGhostHeader &Header, const char *pFilename, c
 		return nullptr;
 	}
 
-	if(io_read(File, &Header, sizeof(Header)) != sizeof(Header))
+	if(io_read(File, &Header, sizeof(Header) - sizeof(SHA256_DIGEST)) != sizeof(Header) - sizeof(SHA256_DIGEST))
 	{
 		log_error_color(LOG_COLOR_GHOST, "ghost_loader", "Failed to read ghost file '%s': failed to read header", pFilename);
 		io_close(File);
 		return nullptr;
 	}
 
-	if(!ValidateHeader(Header, pFilename) ||
-		!CheckHeaderMap(Header, pFilename, pMap, MapSha256, MapCrc, LogMapMismatch))
+	if(!ValidateHeader(Header, pFilename))
+	{
+		io_close(File);
+		return nullptr;
+	}
+
+	if(Header.m_Version < 6)
+	{
+		mem_zero(&Header.m_MapSha256, sizeof(Header.m_MapSha256));
+	}
+	else if(io_read(File, &Header.m_MapSha256, sizeof(SHA256_DIGEST)) != sizeof(SHA256_DIGEST))
+	{
+		log_error_color(LOG_COLOR_GHOST, "ghost_loader", "Failed to read ghost file '%s': failed to read header map SHA256", pFilename);
+		io_close(File);
+		return nullptr;
+	}
+
+	if(!CheckHeaderMap(Header, pFilename, pMap, MapSha256, MapCrc, LogMapMismatch))
 	{
 		io_close(File);
 		return nullptr;
@@ -353,11 +369,6 @@ bool CGhostLoader::Load(const char *pFilename, const char *pMap, const SHA256_DI
 	if(!File)
 	{
 		return false;
-	}
-
-	if(Header.m_Version < 6)
-	{
-		io_skip(File, -(int)sizeof(SHA256_DIGEST));
 	}
 
 	m_File = File;
