@@ -49,11 +49,14 @@
 /**
  * Use the @link dbg_assert @endlink function instead!
  *
+ * This is also used from Rust, if you modify the signature, also look into
+ * src/base/dbg.rs.
+ *
  * @ingroup Debug
  *
  * @see dbg_assert
  */
-[[gnu::format(printf, 3, 4)]] [[noreturn]] void
+extern "C" [[gnu::format(printf, 3, 4)]] [[noreturn]] void
 dbg_assert_imp(const char *filename, int line, const char *fmt, ...);
 
 /**

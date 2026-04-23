@@ -1,9 +1,14 @@
+use crate::dbg_assert_imp;
 use std::cmp;
 use std::ffi::CStr;
+use std::ffi::CString;
 use std::fmt;
 use std::marker::PhantomData;
 use std::ops;
 use std::os::raw::c_char;
+use std::panic;
+#[allow(deprecated)] // MSRV (1.81): Use `PanicHookInfo` instead.
+use std::panic::PanicInfo;
 use std::ptr;
 use std::str;
 
@@ -265,4 +270,53 @@ macro_rules! s {
             ::std::ffi::CStr::from_bytes_with_nul(::std::concat!($str, "\0").as_bytes()).unwrap(),
         )
     };
+}
+
+// TODO (MSRV 1.91): Replace with built-in `PanicHookInfo::payload_as_str`.
+//
+// Adapted from that function.
+#[allow(deprecated)] // MSRV (1.81): Use `PanicHookInfo` instead.
+fn payload_as_str<'a>(panic_info: &'a PanicInfo) -> Option<&'a str> {
+    if let Some(s) = panic_info.payload().downcast_ref::<&str>() {
+        Some(s)
+    } else if let Some(s) = panic_info.payload().downcast_ref::<String>() {
+        Some(s)
+    } else {
+        None
+    }
+}
+
+// This function tries pretty hard not to panic, even for suspicious parameters.
+#[allow(deprecated)] // MSRV (1.81): Use `PanicHookInfo` instead.
+fn dbg_assert_panic_handler(panic_info: &PanicInfo) -> ! {
+    // TODO (MSRV 1.92): Use `file_as_c_str`.
+    let filename = panic_info.location().map(|l| l.file()).unwrap_or("unknown");
+    let line = panic_info.location().map(|l| l.line()).unwrap_or(0);
+    let message = payload_as_str(panic_info).unwrap_or("(non-string panic payload)");
+
+    let filename = CString::new(filename)
+        .ok()
+        .unwrap_or_else(|| CString::new("(invalid filename)").unwrap());
+    let message = CString::new(message).ok().unwrap_or_else(|| {
+        CString::new(format!(
+            "interior NULs in message: {}",
+            message.replace('\0', "<NUL>")
+        ))
+        .unwrap()
+    });
+    unsafe {
+        // Just cast the line number to `i32` and accept the overflow.
+        dbg_assert_imp(
+            filename.as_ptr(),
+            line as i32,
+            b"%s\0".as_ptr() as *const c_char,
+            message.as_ptr(),
+        );
+    }
+}
+
+/// Installs a panic handler for Rust that calls `dbg_assert_failed` on panic.
+#[no_mangle]
+pub extern "C" fn rust_panic_use_dbg_assert() {
+    panic::set_hook(Box::new(|info| dbg_assert_panic_handler(info)));
 }

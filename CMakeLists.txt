@@ -859,6 +859,7 @@ endif()
 set_glob(RUST_BASE GLOB_RECURSE "rs;toml" src/base
   Cargo.toml
   color.rs
+  dbg.rs
   lib.rs
   rust.rs
 )
