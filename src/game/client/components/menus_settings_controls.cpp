@@ -67,6 +67,7 @@ void CMenusSettingsControls::OnInterfacesInit(CGameClient *pClient)
 		{EBindOptionGroup::MOVEMENT, Localizable("Jump"), "+jump"},
 		{EBindOptionGroup::MOVEMENT, Localizable("Fire"), "+fire"},
 		{EBindOptionGroup::MOVEMENT, Localizable("Hook"), "+hook"},
+		{EBindOptionGroup::MOVEMENT, Localizable("Snap Aim"), "+toggle cl_snap_aim_to_45 1 0"},
 		{EBindOptionGroup::MOVEMENT, Localizable("Hook collisions"), "+showhookcoll"},
 		{EBindOptionGroup::MOVEMENT, Localizable("Pause"), "say /pause"},
 		{EBindOptionGroup::MOVEMENT, Localizable("Kill"), "kill"},
