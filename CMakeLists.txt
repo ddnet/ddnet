@@ -120,6 +120,11 @@ option(IPO "Enable interprocedural optimizations" OFF)
 option(FUSE_LD "Linker to use" OFF)
 option(SECURITY_COMPILER_FLAGS "Whether to set security-relevant compiler flags like -D_FORTIFY_SOURCE=2 and -fstack-protector-strong" ON)
 option(MACOS_CODESIGN "Whether to sign code when building the DMG on macOS" OFF)
+set(EXTERNAL_STEAM_API_DYLIB "" CACHE FILEPATH "Path to an external libsteam_api.dylib to package instead of the built stub")
+
+if(EXTERNAL_STEAM_API_DYLIB AND NOT EXISTS "${EXTERNAL_STEAM_API_DYLIB}")
+  message(FATAL_ERROR "EXTERNAL_STEAM_API_DYLIB does not exist: ${EXTERNAL_STEAM_API_DYLIB}")
+endif()
 
 if(TARGET_OS STREQUAL "mac" AND DEFINED ENV{MACOS_APP_IDENTITY})
   set(MACOS_APP_IDENTITY "$ENV{MACOS_APP_IDENTITY}")
@@ -3473,6 +3478,12 @@ if(CLIENT AND DMGBUILD_FOUND)
     list(APPEND TARGET_TOOLS_FILES $<TARGET_FILE:${target}>)
   endforeach()
 
+  if(EXTERNAL_STEAM_API_DYLIB)
+    set(STEAM_API_DYLIB_FOR_PACKAGE "${EXTERNAL_STEAM_API_DYLIB}")
+  else()
+    set(STEAM_API_DYLIB_FOR_PACKAGE "${PROJECT_BINARY_DIR}/libsteam_api.dylib")
+  endif()
+
   if(NOT MACOS_CODESIGN STREQUAL OFF)
     set(CODESIGN_COMMANDS
         COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/SDL2.framework
@@ -3524,7 +3535,7 @@ if(CLIENT AND DMGBUILD_FOUND)
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavutil.59.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libswresample.5.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libswscale.8.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/libsteam_api.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
+    COMMAND ${CMAKE_COMMAND} -E copy ${STEAM_API_DYLIB_FOR_PACKAGE} ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
     COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/darwin_strip_rpath.py ${CMAKE_OTOOL} ${CMAKE_INSTALL_NAME_TOOL} ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${CLIENT_EXECUTABLE}
     COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath @loader_path/../Frameworks ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${CLIENT_EXECUTABLE}
 
