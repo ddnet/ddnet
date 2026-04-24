@@ -29,13 +29,21 @@ void CClient::PreprocessConnlessPacket7(CNetChunk *pPacket)
 		Info.m_NumClients = Up.GetInt();
 		Info.m_MaxClients = Up.GetInt();
 
+		// Prevent memory allocation crashes from spoofed servers.
+		if(Info.m_NumClients < 0 || Info.m_NumClients > MAX_CLIENTS)
+		{
+			Info.m_NumClients = 0;
+		}
+
+		Info.m_vClients.resize(Info.m_NumClients);
+
 		for(int i = 0; i < Info.m_NumClients; i++)
 		{
-			GetString(Info.m_aClients[i].m_aName);
-			GetString(Info.m_aClients[i].m_aClan);
-			Info.m_aClients[i].m_Country = Up.GetInt();
-			Info.m_aClients[i].m_Score = Up.GetInt();
-			Info.m_aClients[i].m_Player = !(Up.GetInt() & 1);
+			GetString(Info.m_vClients[i].m_aName);
+			GetString(Info.m_vClients[i].m_aClan);
+			Info.m_vClients[i].m_Country = Up.GetInt();
+			Info.m_vClients[i].m_Score = Up.GetInt();
+			Info.m_vClients[i].m_Player = !(Up.GetInt() & 1);
 		}
 
 		const bool IsNotVanilla = Info.m_MaxPlayers > VANILLA_MAX_CLIENTS || Info.m_MaxClients > VANILLA_MAX_CLIENTS;
@@ -78,12 +86,12 @@ void CClient::PreprocessConnlessPacket7(CNetChunk *pPacket)
 
 		for(int i = 0; i < Info.m_NumClients; i++)
 		{
-			Packer.AddString(Info.m_aClients[i].m_aName);
-			Packer.AddString(Info.m_aClients[i].m_aClan);
+			Packer.AddString(Info.m_vClients[i].m_aName);
+			Packer.AddString(Info.m_vClients[i].m_aClan);
 
-			PutInt(Info.m_aClients[i].m_Country);
-			PutInt(Info.m_aClients[i].m_Score);
-			PutInt(Info.m_aClients[i].m_Player);
+			PutInt(Info.m_vClients[i].m_Country);
+			PutInt(Info.m_vClients[i].m_Score);
+			PutInt(Info.m_vClients[i].m_Player);
 
 			if(IsNotVanilla)
 			{

@@ -270,7 +270,7 @@ bool CServerInfo2::operator==(const CServerInfo2 &Other) const
 
 CServerInfo2::operator CServerInfo() const
 {
-	CServerInfo Result = {0};
+	CServerInfo Result{};
 	Result.m_MaxClients = m_MaxClients;
 	Result.m_NumClients = m_NumClients;
 	Result.m_MaxPlayers = m_MaxPlayers;
@@ -283,30 +283,36 @@ CServerInfo2::operator CServerInfo() const
 	str_copy(Result.m_aMap, m_aMapName);
 	str_copy(Result.m_aVersion, m_aVersion);
 
-	for(int i = 0; i < minimum(m_NumClients, (int)SERVERINFO_MAX_CLIENTS); i++)
+	int NumToCopy = minimum(m_NumClients, (int)SERVERINFO_MAX_CLIENTS);
+	Result.m_vClients.reserve(NumToCopy);
+	for(int i = 0; i < NumToCopy; i++)
 	{
-		str_copy(Result.m_aClients[i].m_aName, m_aClients[i].m_aName);
-		str_copy(Result.m_aClients[i].m_aClan, m_aClients[i].m_aClan);
-		Result.m_aClients[i].m_Country = m_aClients[i].m_Country;
-		Result.m_aClients[i].m_Score = m_aClients[i].m_Score;
-		Result.m_aClients[i].m_Player = m_aClients[i].m_IsPlayer;
-		Result.m_aClients[i].m_Afk = m_aClients[i].m_IsAfk;
+		CServerInfo::CClient Client{};
+
+		str_copy(Client.m_aName, m_aClients[i].m_aName);
+		str_copy(Client.m_aClan, m_aClients[i].m_aClan);
+		Client.m_Country = m_aClients[i].m_Country;
+		Client.m_Score = m_aClients[i].m_Score;
+		Client.m_Player = m_aClients[i].m_IsPlayer;
+		Client.m_Afk = m_aClients[i].m_IsAfk;
 
 		// 0.6 skin
-		str_copy(Result.m_aClients[i].m_aSkin, m_aClients[i].m_aSkin);
-		Result.m_aClients[i].m_CustomSkinColors = m_aClients[i].m_CustomSkinColors;
-		Result.m_aClients[i].m_CustomSkinColorBody = m_aClients[i].m_CustomSkinColorBody;
-		Result.m_aClients[i].m_CustomSkinColorFeet = m_aClients[i].m_CustomSkinColorFeet;
+		str_copy(Client.m_aSkin, m_aClients[i].m_aSkin);
+		Client.m_CustomSkinColors = m_aClients[i].m_CustomSkinColors;
+		Client.m_CustomSkinColorBody = m_aClients[i].m_CustomSkinColorBody;
+		Client.m_CustomSkinColorFeet = m_aClients[i].m_CustomSkinColorFeet;
+
 		// 0.7 skin
 		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 		{
-			str_copy(Result.m_aClients[i].m_aaSkin7[Part], m_aClients[i].m_aaSkin7[Part]);
-			Result.m_aClients[i].m_aUseCustomSkinColor7[Part] = m_aClients[i].m_aUseCustomSkinColor7[Part];
-			Result.m_aClients[i].m_aCustomSkinColor7[Part] = m_aClients[i].m_aCustomSkinColor7[Part];
+			str_copy(Client.m_aaSkin7[Part], m_aClients[i].m_aaSkin7[Part]);
+			Client.m_aUseCustomSkinColor7[Part] = m_aClients[i].m_aUseCustomSkinColor7[Part];
+			Client.m_aCustomSkinColor7[Part] = m_aClients[i].m_aCustomSkinColor7[Part];
 		}
+		Result.m_vClients.push_back(Client);
 	}
 
-	Result.m_NumReceivedClients = minimum(m_NumClients, (int)SERVERINFO_MAX_CLIENTS);
+	Result.m_NumReceivedClients = NumToCopy;
 	Result.m_Latency = -1;
 
 	return Result;
