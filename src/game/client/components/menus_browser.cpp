@@ -1279,7 +1279,7 @@ void CMenus::RenderServerbrowserInfoScoreboard(CUIRect View, const CServerInfo *
 
 	for(int i = 0; i < pSelectedServer->m_NumReceivedClients; i++)
 	{
-		const CServerInfo::CClient &CurrentClient = pSelectedServer->m_aClients[i];
+		const CServerInfo::CClient &CurrentClient = pSelectedServer->m_vClients[i];
 		const CListboxItem Item = s_ListBox.DoNextItem(&CurrentClient);
 		if(!Item.m_Visible)
 			continue;
@@ -1408,7 +1408,7 @@ void CMenus::RenderServerbrowserInfoScoreboard(CUIRect View, const CServerInfo *
 	const int NewSelected = s_ListBox.DoEnd();
 	if(s_ListBox.WasItemSelected())
 	{
-		const CServerInfo::CClient &SelectedClient = pSelectedServer->m_aClients[NewSelected];
+		const CServerInfo::CClient &SelectedClient = pSelectedServer->m_vClients[NewSelected];
 		if(SelectedClient.m_FriendState == IFriends::FRIEND_PLAYER)
 			GameClient()->Friends()->RemoveFriend(SelectedClient.m_aName, SelectedClient.m_aClan);
 		else
@@ -1454,7 +1454,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 
 		for(int ClientIndex = 0; ClientIndex < pEntry->m_NumClients; ++ClientIndex)
 		{
-			const CServerInfo::CClient &CurrentClient = pEntry->m_aClients[ClientIndex];
+			const CServerInfo::CClient &CurrentClient = pEntry->m_vClients[ClientIndex];
 			if(CurrentClient.m_FriendState == IFriends::FRIEND_NO)
 				continue;
 
