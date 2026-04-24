@@ -2650,16 +2650,16 @@ Hook collision line tip
 == Підказка для лінії зіткнення хука
 
 Refresh the demo list
-== 
+== Оновити список демо
 
 Open the selected folder
-== 
+== Відкрити вибрану папку
 
 Play the selected demo
-== 
+== Відтворити вибране демо
 
 Prediction margin
-== 
+== Буфер передбачення
 
 Predict events (experimental)
-== 
+== Передбачення подій (експериментально)

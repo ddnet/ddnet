@@ -2650,16 +2650,16 @@ Hook collision line tip
 == 鉤索輔助線頭
 
 Refresh the demo list
-== 
+== 重新整理回放列表
 
 Open the selected folder
-== 
+== 打開所選資料夾
 
 Play the selected demo
-== 
+== 播放所選回放
 
 Prediction margin
-== 
+== 預測容差
 
 Predict events (experimental)
-== 
+== 預測事件（實驗性）

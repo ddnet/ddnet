@@ -2650,16 +2650,16 @@ Hook collision line tip
 == Dica da linha de colisão do gancho
 
 Refresh the demo list
-== 
+== Atualizar a lista de demos
 
 Open the selected folder
-== 
+== Abrir a pasta selecionada
 
 Play the selected demo
-== 
+== Reproduzir a demo selecionada
 
 Prediction margin
-== 
+== Margem de predição
 
 Predict events (experimental)
-== 
+== Predizer eventos (experimental)
