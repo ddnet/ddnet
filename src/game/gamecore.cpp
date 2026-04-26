@@ -499,8 +499,21 @@ void CCharacterCore::TickDeferred()
 				{
 					if(Distance > PhysicalSize() * 1.50f)
 					{
-						float HookAccel = m_Tuning.m_HookDragAccel * (Distance / m_Tuning.m_HookLength);
-						float DragSpeed = m_Tuning.m_HookDragSpeed;
+						float HookAccel;
+						float DragSpeed;
+						
+						// checks if the HookPlayerDragAccel is default; if it is use HookDragAccel instead
+						if(m_Tuning.m_HookPlayerDragAccel != 0)
+							HookAccel = m_Tuning.m_HookDragAccel;
+						else
+							HookAccel = m_Tuning.m_HookPlayerDragAccel;
+						HookAccel *= (Distance / m_Tuning.m_HookLength);
+
+						// checks if the HookPlayerDragSpeed is default; if it is use HookDragSpeed instead
+						if(m_Tuning.m_HookPlayerDragSpeed != 0)
+							DragSpeed = m_Tuning.m_HookDragSpeed;
+						else
+							DragSpeed = m_Tuning.m_HookPlayerDragSpeed;
 
 						vec2 Temp;
 						// add force to the hooked player

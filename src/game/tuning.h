@@ -67,3 +67,6 @@ MACRO_TUNING_PARAM(HammerHitFireDelay, hammer_hit_fire_delay, 320, "Delay of ham
 
 MACRO_TUNING_PARAM(GroundElasticityX, ground_elasticity_x, 0, "Wall elasticity")
 MACRO_TUNING_PARAM(GroundElasticityY, ground_elasticity_y, 0, "Ground/ceiling elasticity")
+
+MACRO_TUNING_PARAM(HookPlayerDragAccel, hook_player_drag_accel, 0, "Acceleration when hook is stuck in a tee")
+MACRO_TUNING_PARAM(HookPlayerDragSpeed, hook_player_drag_speed, 0, "Drag speed of the hook when hooking a tee")
