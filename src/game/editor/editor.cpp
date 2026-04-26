@@ -4858,8 +4858,17 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			}
 		}
 
+		// toggle sync button
 		ToolBar.VSplitLeft(15.0f, nullptr, &ToolBar);
 		ToolBar.VSplitLeft(40.0f, &Button, &ToolBar);
+
+		static int s_SyncButton;
+		if(DoButton_Editor(&s_SyncButton, "Sync", pEnvelope->m_Synchronized, &Button, BUTTONFLAG_LEFT, "Synchronize envelope animation to server time."))
+		{
+			Map()->m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeEdit>(Map(), Map()->m_SelectedEnvelope, CEditorActionEnvelopeEdit::EEditType::SYNC, pEnvelope->m_Synchronized, !pEnvelope->m_Synchronized));
+			pEnvelope->m_Synchronized = !pEnvelope->m_Synchronized;
+			Map()->OnModify();
+		}
 
 		static int s_EnvelopeEditorId = 0;
 		static int s_EnvelopeEditorButtonUsed = -1;
