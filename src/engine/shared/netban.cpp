@@ -1,7 +1,9 @@
 #include "netban.h"
 
+#include <base/dbg.h>
 #include <base/io.h>
 #include <base/math.h>
+#include <base/str.h>
 
 #include <engine/console.h>
 #include <engine/shared/config.h>
@@ -224,6 +226,7 @@ int CNetBan::Ban(T *pBanPool, const typename T::CDataType *pData, int Seconds, c
 	CBanInfo Info = {0};
 	Info.m_Expires = Stamp;
 	Info.m_VerbatimReason = VerbatimReason;
+	dbg_assert(!str_has_cc(pReason), "Ban reason cannot contain control characters");
 	str_copy(Info.m_aReason, pReason);
 
 	// check if it already exists
@@ -594,11 +597,21 @@ void CNetBan::ConBansSave(IConsole::IResult *pResult, void *pUser)
 {
 	CNetBan *pThis = static_cast<CNetBan *>(pUser);
 
+	const char *pFilename = pResult->GetString(0);
+	if(!str_valid_filename(pFilename))
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "bans_save error (invalid filename)");
+		return;
+	}
+
+	char aPath[IO_MAX_PATH_LENGTH];
+	str_format(aPath, sizeof(aPath), "dumps/%s", pFilename);
+
 	char aBuf[256];
-	IOHANDLE File = pThis->Storage()->OpenFile(pResult->GetString(0), IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	IOHANDLE File = pThis->Storage()->OpenFile(aPath, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	if(!File)
 	{
-		str_format(aBuf, sizeof(aBuf), "failed to save banlist to '%s'", pResult->GetString(0));
+		str_format(aBuf, sizeof(aBuf), "failed to save banlist to '%s'", aPath);
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", aBuf);
 		return;
 	}
@@ -609,7 +622,12 @@ void CNetBan::ConBansSave(IConsole::IResult *pResult, void *pUser)
 	{
 		int Min = pBan->m_Info.m_Expires > -1 ? (pBan->m_Info.m_Expires - Now + 59) / 60 : -1;
 		net_addr_str(&pBan->m_Data, aAddrStr1, sizeof(aAddrStr1), false);
-		str_format(aBuf, sizeof(aBuf), "ban %s %i %s", aAddrStr1, Min, pBan->m_Info.m_aReason);
+
+		char aEscapedReason[256];
+		char *pDst = aEscapedReason;
+		str_escape(&pDst, pBan->m_Info.m_aReason, aEscapedReason + sizeof(aEscapedReason));
+
+		str_format(aBuf, sizeof(aBuf), "ban %s %i \"%s\"", aAddrStr1, Min, aEscapedReason);
 		io_write(File, aBuf, str_length(aBuf));
 		io_write_newline(File);
 	}
@@ -618,12 +636,17 @@ void CNetBan::ConBansSave(IConsole::IResult *pResult, void *pUser)
 		int Min = pBan->m_Info.m_Expires > -1 ? (pBan->m_Info.m_Expires - Now + 59) / 60 : -1;
 		net_addr_str(&pBan->m_Data.m_LB, aAddrStr1, sizeof(aAddrStr1), false);
 		net_addr_str(&pBan->m_Data.m_UB, aAddrStr2, sizeof(aAddrStr2), false);
-		str_format(aBuf, sizeof(aBuf), "ban_range %s %s %i %s", aAddrStr1, aAddrStr2, Min, pBan->m_Info.m_aReason);
+
+		char aEscapedReason[256];
+		char *pDst = aEscapedReason;
+		str_escape(&pDst, pBan->m_Info.m_aReason, aEscapedReason + sizeof(aEscapedReason));
+
+		str_format(aBuf, sizeof(aBuf), "ban_range %s %s %i \"%s\"", aAddrStr1, aAddrStr2, Min, aEscapedReason);
 		io_write(File, aBuf, str_length(aBuf));
 		io_write_newline(File);
 	}
 
 	io_close(File);
-	str_format(aBuf, sizeof(aBuf), "saved banlist to '%s'", pResult->GetString(0));
+	str_format(aBuf, sizeof(aBuf), "saved banlist to '%s'", aPath);
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", aBuf);
 }
