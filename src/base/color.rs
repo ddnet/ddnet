@@ -8,6 +8,7 @@
 /// # Examples
 ///
 /// ```
+/// # extern crate ddnet_test;
 /// use ddnet_base::ColorRGBA;
 ///
 /// let white = ColorRGBA { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
@@ -47,6 +48,7 @@ unsafe impl cxx::ExternType for ColorRGBA {
 /// # Examples
 ///
 /// ```
+/// # extern crate ddnet_test;
 /// use ddnet_base::ColorHSLA;
 ///
 /// let white = ColorHSLA { h: 0.0, s: 0.0, l: 1.0, a: 1.0 };

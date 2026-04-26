@@ -26,6 +26,7 @@ use std::str;
 /// # Examples
 ///
 /// ```
+/// # extern crate ddnet_test;
 /// use ddnet_base::UserPtr;
 ///
 /// struct CallbackData {
@@ -58,6 +59,7 @@ impl UserPtr {
     /// # Examples
     ///
     /// ```
+    /// # extern crate ddnet_test;
     /// use ddnet_base::UserPtr;
     ///
     /// // Can't do anything useful with this.
@@ -78,6 +80,7 @@ impl UserPtr {
     /// # Examples
     ///
     /// ```
+    /// # extern crate ddnet_test;
     /// use ddnet_base::UserPtr;
     ///
     /// let the_answer = 42;
@@ -102,6 +105,7 @@ impl UserPtr {
     /// # Examples
     ///
     /// ```
+    /// # extern crate ddnet_test;
     /// use ddnet_base::UserPtr;
     ///
     /// let mut seen_it = false;
@@ -144,6 +148,7 @@ impl<'a, T> From<&'a mut T> for UserPtr {
 /// # Examples
 ///
 /// ```
+/// # extern crate ddnet_test;
 /// # fn some_c_function(_: StrRef<'_>) {}
 /// use ddnet_base::StrRef;
 /// use ddnet_base::s;
@@ -184,12 +189,14 @@ impl<'a> StrRef<'a> {
     /// # Examples
     ///
     /// ```
+    /// # extern crate ddnet_test;
     /// use ddnet_base::s;
     ///
     /// let str1: &'static str = s!("static string").to_str();
     /// ```
     ///
     /// ```compile_fail
+    /// # extern crate ddnet_test;
     /// use ddnet_base::s;
     ///
     /// // Wrong lifetime.
@@ -257,6 +264,7 @@ impl ops::Deref for StrRef<'_> {
 /// # Examples
 ///
 /// ```
+/// # extern crate ddnet_test;
 /// use ddnet_base::StrRef;
 /// use ddnet_base::s;
 ///
