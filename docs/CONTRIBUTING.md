@@ -175,8 +175,7 @@ enum
 	CFGFLAG_CLIENT = 2,
 	CFGFLAG_SERVER = 4,
 	CFGFLAG_STORE = 8,
-	CFGFLAG_MASTER = 16,
-	CFGFLAG_ECON = 32,
+	CFGFLAG_ECON = 16,
 };
 ```
 
@@ -189,8 +188,7 @@ namespace ConfigFlag
 	inline constexpr uint32_t CLIENT = 1 << 1;
 	inline constexpr uint32_t SERVER = 1 << 2;
 	inline constexpr uint32_t STORE = 1 << 3;
-	inline constexpr uint32_t MASTER = 1 << 4;
-	inline constexpr uint32_t ECON = 1 << 5;
+	inline constexpr uint32_t ECON = 1 << 4;
 }
 ```
 
