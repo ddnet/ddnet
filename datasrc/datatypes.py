@@ -519,6 +519,90 @@ class NetIntRange(NetIntAny):
 		return NetVariable(self.name).emit_dump(offset) + [f'dbg_msg("snapshot", "%s\\t{self.name}=%d ({min_fmt} {max_fmt})", aRawData, pObj->{self.name}{min_arg}{max_arg});']
 
 
+class NetIntRangeExtra(NetIntRange):
+	def __init__(self, name, min_val, max_val, extra, *, default=None):
+		self.original_default = default
+		if isinstance(default, str):
+			if default not in extra.keys():
+				raise ValueError(f"Default value '{default}' is invalid")
+			default = extra[default]
+		NetIntRange.__init__(self, name, min_val, max_val, default=default)
+		if not isinstance(extra, dict):
+			raise ValueError("'extra' is not a dict")
+		self.extra_dict = extra
+
+		min_is_integer = isinstance(min_val, int)
+		max_is_integer = isinstance(max_val, int)
+
+		for extra_key, extra_value in self.extra_dict.items():
+			try:
+				int(extra_value)
+			except ValueError:
+				raise ValueError(f"Extra value '{extra_key}'={extra_value} needs to be an integer")
+
+			if min_is_integer and extra_value >= min_val and max_is_integer and extra_value <= max_val:
+				raise ValueError(f"Extra value '{extra_key}'={extra_value} is not allowed to be inside range [{min_val}, {max_val}]")
+			elif not max_is_integer and max_val == "max_int" and min_is_integer and extra_value >= min_val:
+				raise ValueError(f"Extra value '{extra_key}'={extra_value} is not allowed to be bigger than {min_val}]")
+			elif not min_is_integer and min_val == "min_int" and max_is_integer and extra_value <= max_val:
+				raise ValueError(f"Extra value '{extra_key}'={extra_value} is not allowed to be smaller than {max_val}]")
+			elif not max_is_integer and max_val == "max_int" and not min_is_integer and min_val == "min_int":
+				raise ValueError("There is no space for extra values, because the range is [min_int, max_int]")
+			# I can't validate other values here
+
+	def emit_validate_obj(self):
+		len_extra_dict = len(self.extra_dict.values())
+		extra_fmt_variable_name = f"aExtra{self.name[2:]}"
+		extra_dict_fmt = f"constexpr int {extra_fmt_variable_name}[] = {{"
+		for extra_index, extra_value in enumerate(self.extra_dict.values()):
+			if extra_index > 0:
+				extra_dict_fmt += ", "
+			extra_dict_fmt += f"{extra_value}"
+		extra_dict_fmt += "};"
+		extra_fmt_pointer_name = f"pExtra{self.name[2:]}"
+		validation = [extra_dict_fmt]
+		validation += [f"const int* {extra_fmt_pointer_name} = {extra_fmt_variable_name};"]
+		validation += [f'pData->{self.name} = ClampIntExtra("{self.name}", pData->{self.name}, {self.min}, {self.max}, {extra_fmt_pointer_name}, {len_extra_dict});']
+		return validation
+
+	def emit_unpack_msg_check(self):
+		unpack_check = [f"if(pData->{self.name} < {self.min} || pData->{self.name} > {self.max})\n{{"]
+		for extra_key, extra_value in self.extra_dict.items():
+			unpack_check += f"\tif(pData->{self.name} == {extra_value} /* {extra_key} */\n\t{{\n\t\tbreak;\n\t}}"
+
+		unpack_check += f'\tm_pMsgFailedOn = "{self.name}";\n\tbreak;\n}}'
+		return unpack_check
+
+	def emit_dump(self, offset):
+		min_fmt = f"min={self.min}"
+		min_arg = ""
+		try:
+			int(self.min)
+		except ValueError:
+			min_fmt = f"min={self.min}(%d)"
+			min_arg = f", (int){self.min}"
+
+		max_fmt = f"max={self.max}"
+		max_arg = ""
+		try:
+			int(self.max)
+		except ValueError:
+			max_fmt = f"max={self.max}(%d)"
+			max_arg = f", (int){self.max}"
+
+		default_fmt = f"default={self.original_default}"
+
+		extra_fmt_all = "extra={"
+		for index, (extra_key, extra_value) in enumerate(self.extra_dict.items()):
+			if index > 0:
+				extra_fmt_all += ", "
+			extra_fmt = f"{extra_key}={extra_value}"
+			extra_fmt_all += extra_fmt
+		extra_fmt_all += "}"
+
+		return NetVariable(self.name).emit_dump(offset) + [f'dbg_msg("snapshot", "%s\\t{self.name}=%d ({min_fmt} {max_fmt} {default_fmt} {extra_fmt_all})", aRawData, pObj->{self.name}{min_arg}{max_arg});']
+
+
 class NetBool(NetIntRange):
 	def __init__(self, name, *, default=None):
 		default = None if default is None else int(default)

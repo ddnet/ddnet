@@ -107,6 +107,7 @@ class CNetObjHandler
 	char m_aUnpackedData[1024 * 2];
 	int m_NumObjCorrections;
 	int ClampInt(const char *pErrorMsg, int Value, int Min, int Max);
+	int ClampIntExtra(const char *pErrorMsg, int Value, int Min, int Max, const int *pExtra, int NumExtra);
 
 	static const char *ms_apObjNames[];
 	static const char *ms_apExObjNames[];
@@ -178,6 +179,17 @@ int CNetObjHandler::ClampInt(const char *pErrorMsg, int Value, int Min, int Max)
 	if(Value < Min) { m_pObjCorrectedOn = pErrorMsg; m_NumObjCorrections++; return Min; }
 	if(Value > Max) { m_pObjCorrectedOn = pErrorMsg; m_NumObjCorrections++; return Max; }
 	return Value;
+}
+
+int CNetObjHandler::ClampIntExtra(const char *pErrorMsg, int Value, int Min, int Max, const int *pExtra, int NumExtra)
+{
+	// check extra values
+	for(int ExtraIndex = 0; ExtraIndex < NumExtra; ++ExtraIndex)
+	{
+		if(Value == pExtra[ExtraIndex])
+			return Value;
+	}
+	return ClampInt(pErrorMsg, Value, Min, Max);
 }
 	""")
 

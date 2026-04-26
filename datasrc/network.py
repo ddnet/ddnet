@@ -1,4 +1,4 @@
-from datatypes import Enum, Flags, NetArray, NetBool, NetEvent, NetEventEx, NetIntAny, NetTwIntString, NetIntRange
+from datatypes import Enum, Flags, NetArray, NetBool, NetEvent, NetEventEx, NetIntAny, NetTwIntString, NetIntRange, NetIntRangeExtra
 from datatypes import NetMessage, NetMessageEx, NetObject, NetObjectEx, NetString, NetStringHalfStrict, NetStringStrict, NetTick
 
 Emotes = ["NORMAL", "PAIN", "HAPPY", "SURPRISE", "ANGRY", "BLINK"]
@@ -264,7 +264,7 @@ Objects = [
 	NetObjectEx("DDNetPlayer", "player@netobj.ddnet.tw", [
 		NetIntAny("m_Flags"),
 		NetIntRange("m_AuthLevel", "AUTHED_NO", "AUTHED_ADMIN"),
-		NetIntRange("m_FinishTimeSeconds", 'FinishTime::UNSET', 'max_int', default='FinishTime::UNSET'),
+		NetIntRangeExtra("m_FinishTimeSeconds", 0, 'max_int', {'not_finished': -1, 'unset': -2}, default='unset'),
 		NetIntRange("m_FinishTimeMillis", 0, 999, default=0),
 	]),
 
