@@ -9,6 +9,7 @@
 #include <memory>
 
 class IStorage;
+struct CUuid;
 
 enum
 {
@@ -28,7 +29,7 @@ public:
 	virtual int NumData() const = 0;
 
 	virtual int GetItemSize(int Index) = 0;
-	virtual void *GetItem(int Index, int *pType = nullptr, int *pId = nullptr) = 0;
+	virtual void *GetItem(int Index, int *pType = nullptr, int *pId = nullptr, CUuid *pUuid = nullptr) = 0;
 	virtual void GetType(int Type, int *pStart, int *pNum) = 0;
 	virtual int FindItemIndex(int Type, int Id) = 0;
 	virtual void *FindItem(int Type, int Id) = 0;
