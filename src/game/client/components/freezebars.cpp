@@ -8,6 +8,11 @@ void CFreezeBars::RenderFreezeBar(const int ClientId)
 	const float FreezeBarHalfWidth = 32.0f;
 	const float FreezeBarHeight = 16.0f;
 
+	const bool LocalPredicted = ClientId == GameClient()->m_Snap.m_LocalClientId || (GameClient()->PredictDummy() && ClientId == GameClient()->m_aLocalIds[!g_Config.m_ClDummy]);
+	const CGameClient::CSnapState::CCharacterInfo &CharacterInfo = GameClient()->m_Snap.m_aCharacters[ClientId];
+	if(!LocalPredicted && CharacterInfo.m_HasExtendedData && CharacterInfo.m_ExtendedData.m_FreezeEnd <= 0)
+		return;
+
 	// pCharacter contains the predicted character for local players or the last snap for players who are spectated
 	CCharacterCore *pCharacter = &GameClient()->m_aClients[ClientId].m_Predicted;
 
