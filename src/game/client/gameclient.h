@@ -474,6 +474,7 @@ public:
 		int m_FreezeEnd;
 		bool m_DeepFrozen;
 		bool m_LiveFrozen;
+		bool m_PlayerHookpoint;
 
 		CCharacterCore m_Predicted;
 		CCharacterCore m_PrevPredicted;
@@ -852,6 +853,7 @@ public:
 		IGraphics::CTextureHandle m_SpriteHudNinjaBarEmpty;
 		IGraphics::CTextureHandle m_SpriteHudNinjaBarEmptyRight;
 		IGraphics::CTextureHandle m_SpriteHudHookHitDisabled;
+		IGraphics::CTextureHandle m_SpriteHudPlayerHookpoint;
 		IGraphics::CTextureHandle m_SpriteHudHammerHitDisabled;
 		IGraphics::CTextureHandle m_SpriteHudShotgunHitDisabled;
 		IGraphics::CTextureHandle m_SpriteHudGrenadeHitDisabled;

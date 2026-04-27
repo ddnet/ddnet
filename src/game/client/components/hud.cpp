@@ -813,6 +813,7 @@ void CHud::PreparePlayerStateQuads()
 	m_EndlessJumpOffset = Graphics()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 	m_EndlessHookOffset = Graphics()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 	m_JetpackOffset = Graphics()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
+	m_PlayerHookpointOffset = Graphics()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 	m_TeleportGrenadeOffset = Graphics()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 	m_TeleportGunOffset = Graphics()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 	m_TeleportLaserOffset = Graphics()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
@@ -974,6 +975,13 @@ void CHud::RenderPlayerState(const int ClientId)
 		HasCapabilities = true;
 		Graphics()->TextureSet(GameClient()->m_HudSkin.m_SpriteHudJetpack);
 		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_JetpackOffset, x, y);
+		x += 12;
+	}
+	if(pCharacter->m_PlayerHookpoint)
+	{
+		HasCapabilities = true;
+		Graphics()->TextureSet(GameClient()->m_HudSkin.m_SpriteHudPlayerHookpoint);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_PlayerHookpointOffset, x, y);
 		x += 12;
 	}
 	if(pCharacter->m_HasTelegunGun && pCharacter->m_aWeapons[WEAPON_GUN].m_Got)

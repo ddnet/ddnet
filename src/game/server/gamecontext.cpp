@@ -4140,6 +4140,7 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("invincible", "?i['0'|'1']", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeToggleInvincible, this, "Toggles invincible mode");
 	Console()->Register("collision", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeToggleCollision, this, "Toggles collision");
 	Console()->Register("hookcollision", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeToggleHookCollision, this, "Toggles hook collision");
+	Console()->Register("playerhookpoint", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeTogglePlayerHookpoint, this, "Toggles player hookpoint");
 	Console()->Register("hitothers", "?s['all'|'hammer'|'shotgun'|'grenade'|'laser']", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeToggleHitOthers, this, "Toggles hit others");
 
 	Console()->Register("kill", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConProtectedKill, this, "Kill yourself when kill-protected during a long game (use f1, kill for regular kill)");

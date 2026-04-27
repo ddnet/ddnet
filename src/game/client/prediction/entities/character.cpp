@@ -851,6 +851,16 @@ void CCharacter::HandleTiles(int Index)
 	{
 		m_Core.m_HookHitDisabled = false;
 	}
+	
+	// player hookpoint
+	if(((m_TileIndex == TILE_PHP_DISABLE) || (m_TileFIndex == TILE_PHP_DISABLE)) && m_Core.m_PlayerHookpoint)
+	{
+		m_Core.m_PlayerHookpoint = false;
+	}
+	else if(((m_TileIndex == TILE_PHP_ENABLE) || (m_TileFIndex == TILE_PHP_ENABLE)) && !m_Core.m_PlayerHookpoint)
+	{
+		m_Core.m_PlayerHookpoint = true;
+	}
 
 	// unlimited air jumps
 	if(((m_TileIndex == TILE_UNLIMITED_JUMPS_ENABLE) || (m_TileFIndex == TILE_UNLIMITED_JUMPS_ENABLE)) && !m_Core.m_EndlessJump)
@@ -1312,6 +1322,7 @@ void CCharacter::ResetPrediction()
 	m_Core.m_IsInFreeze = false;
 	m_Core.m_DeepFrozen = false;
 	m_Core.m_LiveFrozen = false;
+	m_Core.m_PlayerHookpoint = false;
 	m_FrozenLastTick = false;
 	for(int w = 0; w < NUM_WEAPONS; w++)
 	{
@@ -1430,6 +1441,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		SetSolo(!GetTuning(GetOverriddenTuneZone())->m_PlayerCollision && !GetTuning(GetOverriddenTuneZone())->m_PlayerHooking);
 		m_Core.m_CollisionDisabled = !GetTuning(GetOverriddenTuneZone())->m_PlayerCollision;
 		m_Core.m_HookHitDisabled = !GetTuning(GetOverriddenTuneZone())->m_PlayerHooking;
+		m_Core.m_PlayerHookpoint = GetTuning(GetOverriddenTuneZone())->m_PlayerHookpoint;
 
 		if(m_Core.m_HookTick != 0)
 			m_Core.m_EndlessHook = false;

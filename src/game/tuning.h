@@ -70,3 +70,4 @@ MACRO_TUNING_PARAM(GroundElasticityY, ground_elasticity_y, 0, "Ground/ceiling el
 
 MACRO_TUNING_PARAM(HookPlayerDragAccel, hook_player_drag_accel, 0, "Acceleration when hook is stuck in a tee")
 MACRO_TUNING_PARAM(HookPlayerDragSpeed, hook_player_drag_speed, 0, "Drag speed of the hook when hooking a tee")
+MACRO_TUNING_PARAM(PlayerHookpoint, player_hookpoint, 0, "Makes the hooked tee act as a block")

@@ -1937,6 +1937,7 @@ void CGameClient::OnNewSnapshot()
 					pClient->m_HookHitDisabled = pCharacterData->m_Flags & CHARACTERFLAG_HOOK_HIT_DISABLED;
 					pClient->m_Super = pCharacterData->m_Flags & CHARACTERFLAG_SUPER;
 					pClient->m_Invincible = pCharacterData->m_Flags & CHARACTERFLAG_INVINCIBLE;
+					pClient->m_PlayerHookpoint = pCharacterData->m_Flags & CHARACTERFLAG_PLAYER_HOOKPOINT;
 
 					// Endless
 					pClient->m_EndlessHook = pCharacterData->m_Flags & CHARACTERFLAG_ENDLESS_HOOK;
@@ -3029,6 +3030,7 @@ void CGameClient::CClientData::Reset()
 	m_FreezeEnd = 0;
 	m_DeepFrozen = false;
 	m_LiveFrozen = false;
+	m_PlayerHookpoint = false;
 
 	m_Predicted.Reset();
 	m_PrevPredicted.Reset();
@@ -4427,6 +4429,7 @@ void CGameClient::LoadHudSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudPracticeMode);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudLockMode);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudTeam0Mode);
+		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudPlayerHookpoint);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudDummyHammer);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudDummyCopy);
 		m_HudSkinLoaded = false;
@@ -4474,6 +4477,7 @@ void CGameClient::LoadHudSkin(const char *pPath, bool AsDir)
 		m_HudSkin.m_SpriteHudNinjaBarEmpty = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_NINJA_BAR_EMPTY]);
 		m_HudSkin.m_SpriteHudNinjaBarEmptyRight = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_NINJA_BAR_EMPTY_RIGHT]);
 		m_HudSkin.m_SpriteHudHookHitDisabled = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_HOOK_HIT_DISABLED]);
+		m_HudSkin.m_SpriteHudPlayerHookpoint = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_PLAYER_HOOKPOINT]);
 		m_HudSkin.m_SpriteHudHammerHitDisabled = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_HAMMER_HIT_DISABLED]);
 		m_HudSkin.m_SpriteHudShotgunHitDisabled = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_SHOTGUN_HIT_DISABLED]);
 		m_HudSkin.m_SpriteHudGrenadeHitDisabled = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_GRENADE_HIT_DISABLED]);
