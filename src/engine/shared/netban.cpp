@@ -281,7 +281,6 @@ void CNetBan::Init(IConsole *pConsole, IStorage *pStorage)
 	net_host_lookup("localhost", &m_LocalhostIpV4, NETTYPE_IPV4);
 	net_host_lookup("localhost", &m_LocalhostIpV6, NETTYPE_IPV6);
 
-	Console()->Register("ban", "s[ip|id] ?i[minutes] r[reason]", CFGFLAG_SERVER | CFGFLAG_STORE, ConBan, this, "Ban ip for x minutes for any reason");
 	Console()->Register("ban_range", "s[first ip] s[last ip] ?i[minutes] r[reason]", CFGFLAG_SERVER | CFGFLAG_STORE, ConBanRange, this, "Ban ip range for x minutes for any reason");
 	Console()->Register("unban", "s[ip|entry]", CFGFLAG_SERVER | CFGFLAG_STORE, ConUnban, this, "Unban ip/banlist entry");
 	Console()->Register("unban_range", "s[first ip] s[last ip]", CFGFLAG_SERVER | CFGFLAG_STORE, ConUnbanRange, this, "Unban ip range");
@@ -411,21 +410,6 @@ bool CNetBan::IsBanned(const NETADDR *pOrigAddr, char *pBuf, unsigned BufferSize
 	}
 
 	return false;
-}
-
-void CNetBan::ConBan(IConsole::IResult *pResult, void *pUser)
-{
-	CNetBan *pThis = static_cast<CNetBan *>(pUser);
-
-	const char *pStr = pResult->GetString(0);
-	int Minutes = pResult->NumArguments() > 1 ? std::clamp(pResult->GetInteger(1), 0, 525600) : 30;
-	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "No reason given";
-
-	NETADDR Addr;
-	if(net_addr_from_str(&Addr, pStr) == 0)
-		pThis->BanAddr(&Addr, Minutes * 60, pReason, false);
-	else
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (invalid network address)");
 }
 
 void CNetBan::ConBanRange(IConsole::IResult *pResult, void *pUser)
