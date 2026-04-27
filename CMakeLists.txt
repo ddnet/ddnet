@@ -1926,7 +1926,9 @@ set(COPY_FILES
   ${SSP_COPY_FILES}
 )
 if(TARGET_OS STREQUAL "emscripten")
+  list(APPEND COPY_FILES other/emscripten/background.png)
   list(APPEND COPY_FILES other/emscripten/index.html)
+  list(APPEND COPY_FILES other/icons/DDNet.ico)
 endif()
 file(COPY ${COPY_FILES} DESTINATION .)
 
