@@ -36,12 +36,27 @@ class CClipRegion
 public:
 	CClipRegion() = default;
 	CClipRegion(float X, float Y, float Width, float Height) :
-		m_X(X), m_Y(Y), m_Width(Width), m_Height(Height) {}
+		m_X(X), m_Y(Y), m_Width(Width), m_Height(Height), m_IsVisible(true) {}
 
 	float m_X;
 	float m_Y;
 	float m_Width;
 	float m_Height;
+	bool m_IsVisible;
+};
+
+class CScreen
+{
+public:
+	vec2 m_TopLeft;
+	vec2 m_BottomRight;
+
+	CScreen() :
+		m_TopLeft(), m_BottomRight() {}
+	bool operator!=(const CScreen &Other) const
+	{
+		return m_TopLeft != Other.m_TopLeft || m_BottomRight != Other.m_BottomRight;
+	}
 };
 
 class CRenderLayerParams
@@ -74,7 +89,7 @@ public:
 	virtual bool IsGroup() const { return false; }
 	virtual void Unload() = 0;
 
-	bool IsVisibleInClipRegion(const std::optional<CClipRegion> &ClipRegion) const;
+	bool IsVisibleInClipRegion(const std::optional<CClipRegion> &ClipRegion, const CRenderLayerParams &Params);
 	int GetGroup() const { return m_GroupId; }
 
 protected:
@@ -91,6 +106,7 @@ protected:
 	std::shared_ptr<CEnvelopeManager> m_pEnvelopeManager;
 	std::optional<FRenderUploadCallback> m_RenderUploadCallback;
 	std::optional<CClipRegion> m_LayerClip;
+	CScreen m_Screen;
 };
 
 class CRenderLayerGroup : public CRenderLayer

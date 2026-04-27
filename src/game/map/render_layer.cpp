@@ -204,20 +204,29 @@ void CRenderLayer::RenderLoading() const
 		(*m_RenderUploadCallback)(pLoadingTitle, pLoadingMessage, 0);
 }
 
-bool CRenderLayer::IsVisibleInClipRegion(const std::optional<CClipRegion> &ClipRegion) const
+bool CRenderLayer::IsVisibleInClipRegion(const std::optional<CClipRegion> &ClipRegion, const CRenderLayerParams &Params)
 {
 	// always show unclipped regions
 	if(!ClipRegion.has_value())
 		return true;
 
-	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 	float Left = ClipRegion->m_X;
 	float Top = ClipRegion->m_Y;
 	float Right = ClipRegion->m_X + ClipRegion->m_Width;
 	float Bottom = ClipRegion->m_Y + ClipRegion->m_Height;
 
-	return Right >= ScreenX0 && Left <= ScreenX1 && Bottom >= ScreenY0 && Top <= ScreenY1;
+	if(Right < m_Screen.m_TopLeft.x || Left > m_Screen.m_BottomRight.x || Bottom < m_Screen.m_TopLeft.y || Top > m_Screen.m_BottomRight.y)
+		return false;
+
+	// ignore a clip region if it's too small
+	if(m_Flags & LAYERFLAG_DETAIL && Params.m_RenderType != ERenderType::RENDERTYPE_FULL_DESIGN && Params.m_Zoom > 2.0f)
+	{
+		bool IsWideEnough = ClipRegion->m_Width * Graphics()->ScreenWidth() / (m_Screen.m_BottomRight.x - m_Screen.m_TopLeft.x) > g_Config.m_GfxZoomHideDetail;
+		bool IsHighEnough = ClipRegion->m_Height * Graphics()->ScreenHeight() / (m_Screen.m_BottomRight.y - m_Screen.m_TopLeft.y) > g_Config.m_GfxZoomHideDetail;
+		if(!IsHighEnough || !IsWideEnough)
+			return false;
+	}
+	return true;
 }
 
 /**************
@@ -297,15 +306,23 @@ void CRenderLayerTile::RenderTileLayer(const ColorRGBA &Color, const CRenderLaye
 	if(Visuals.m_BufferContainerIndex == -1)
 		return; // no visuals were created
 
-	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+	CScreen CurrentScreen;
+	Graphics()->GetScreen(&CurrentScreen.m_TopLeft.x, &CurrentScreen.m_TopLeft.y, &CurrentScreen.m_BottomRight.x, &CurrentScreen.m_BottomRight.y);
 
-	int ScreenRectY0 = std::floor(ScreenY0 / 32);
-	int ScreenRectX0 = std::floor(ScreenX0 / 32);
-	int ScreenRectY1 = std::ceil(ScreenY1 / 32);
-	int ScreenRectX1 = std::ceil(ScreenX1 / 32);
+	int ScreenRectY0 = std::floor(CurrentScreen.m_TopLeft.y / 32);
+	int ScreenRectX0 = std::floor(CurrentScreen.m_TopLeft.x / 32);
+	int ScreenRectY1 = std::ceil(CurrentScreen.m_BottomRight.y / 32);
+	int ScreenRectX1 = std::ceil(CurrentScreen.m_BottomRight.x / 32);
 
-	if(IsVisibleInClipRegion(m_LayerClip))
+	// update cached visibility check
+	if(CurrentScreen != m_Screen)
+	{
+		m_Screen = CurrentScreen;
+		if(m_LayerClip.has_value())
+			m_LayerClip.value().m_IsVisible = IsVisibleInClipRegion(m_LayerClip, Params);
+	}
+
+	if(!m_LayerClip.has_value() || m_LayerClip.value().m_IsVisible)
 	{
 		// create the indice buffers we want to draw -- reuse them
 		std::vector<char *> vpIndexOffsets;
@@ -942,7 +959,7 @@ void CRenderLayerQuads::RenderQuadLayer(float Alpha, const CRenderLayerParams &P
 
 	for(auto &QuadCluster : m_vQuadClusters)
 	{
-		if(!IsVisibleInClipRegion(QuadCluster.m_ClipRegion))
+		if(QuadCluster.m_ClipRegion.has_value() && !QuadCluster.m_ClipRegion.value().m_IsVisible)
 			continue;
 
 		if(!QuadCluster.m_Grouped)
@@ -1010,7 +1027,7 @@ void CRenderLayerQuads::RenderQuadLayer(float Alpha, const CRenderLayerParams &P
 	{
 		for(auto &QuadCluster : m_vQuadClusters)
 		{
-			if(!IsVisibleInClipRegion(QuadCluster.m_ClipRegion) || !QuadCluster.m_ClipRegion.has_value())
+			if(QuadCluster.m_ClipRegion.has_value() && !QuadCluster.m_ClipRegion.value().m_IsVisible)
 				continue;
 
 			char aDebugText[64];
@@ -1399,7 +1416,26 @@ bool CRenderLayerQuads::DoRender(const CRenderLayerParams &Params)
 			return false;
 	}
 
-	return IsVisibleInClipRegion(m_LayerClip);
+	// update cached visibility check
+	CScreen CurrentScreen;
+	Graphics()->GetScreen(&CurrentScreen.m_TopLeft.x, &CurrentScreen.m_TopLeft.y, &CurrentScreen.m_BottomRight.x, &CurrentScreen.m_BottomRight.y);
+	if(CurrentScreen != m_Screen)
+	{
+		m_Screen = CurrentScreen;
+		if(m_LayerClip.has_value())
+			m_LayerClip.value().m_IsVisible = IsVisibleInClipRegion(m_LayerClip, Params);
+
+		// update quad cluster visibility if the layer is visible
+		if(!m_LayerClip.has_value() || m_LayerClip.value().m_IsVisible)
+		{
+			for(auto &QuadCluster : m_vQuadClusters)
+			{
+				if(QuadCluster.m_ClipRegion.has_value())
+					QuadCluster.m_ClipRegion.value().m_IsVisible = IsVisibleInClipRegion(QuadCluster.m_ClipRegion, Params);
+			}
+		}
+	}
+	return !m_LayerClip.has_value() || m_LayerClip.value().m_IsVisible;
 }
 
 /****************
