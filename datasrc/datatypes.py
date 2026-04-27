@@ -1,3 +1,7 @@
+from abc import ABC, abstractmethod
+from typing import Optional, Union
+
+
 def only(x):
 	if len(x) != 1:
 		raise ValueError
@@ -499,7 +503,7 @@ class NetIntRange(NetIntAny):
 		return [f'pData->{self.name} = ClampInt("{self.name}", pData->{self.name}, {self.min}, {self.max});']
 
 	def emit_unpack_msg_check(self):
-		return [f'if(pData->{self.name} < {self.min} || pData->{self.name} > {self.max}) {{ m_pMsgFailedOn = "{self.name}"; break; }}']
+		return [f"if(pData->{self.name} < {self.min} || pData->{self.name} > {self.max})", "{", f'\tm_pMsgFailedOn = "{self.name}";', "\tbreak;", "}"]
 
 	def emit_dump(self, offset):
 		min_fmt = f"min={self.min}"
@@ -605,3 +609,193 @@ class NetTwIntString(NetArray):
 			result += NetVariable(self.var).emit_dump(offset + i)
 			result += [f'dbg_msg("snapshot", "%s\\t{self.base_name}[{int(i)}]=%d\\tIntToStr: %s", aRawData, pObj->{self.base_name}[{int(i)}], aStr);']
 		return result
+
+
+class NetIntCustomOption(ABC):
+	@abstractmethod
+	def is_valid(self) -> bool:
+		raise NotImplementedError
+
+	@abstractmethod
+	def is_contained_check(self, name) -> str:
+		raise NotImplementedError
+
+	@abstractmethod
+	def static_assert(self) -> list:
+		raise NotImplementedError
+
+	@abstractmethod
+	def get_dump(self) -> tuple[str, str]:
+		raise NotImplementedError
+
+	@abstractmethod
+	def get_clamped_value(self, name) -> str:
+		raise NotImplementedError
+
+
+class Constant(NetIntCustomOption):
+	def __init__(self, value: int, key: Optional[str] = None, description: Optional[str] = None):
+		if key is None:
+			key = str(value)
+		self.value = value
+		self.key = key
+		self.description = description
+
+	def is_valid(self):
+		return True
+
+	def is_contained_check(self, name) -> str:
+		return f"pData->{name} == {self.key}"
+
+	def static_assert(self):
+		if str(self.value) == self.key:
+			return []
+		return [f'static_assert({self.key} == {self.value}, "Value and key aren\'t equal");']
+
+	def get_dump(self):
+		if str(self.value) == self.key:
+			if self.description:
+				return f"{self.key}({self.description})", ""
+			return f"Const({self.key})", ""
+
+		return f"{self.key}({self.value})", ""
+
+	def get_clamped_value(self, name):
+		return f"pData->{name} = {self.key};"
+
+
+class Range(NetIntCustomOption):
+	def __init__(self, val_min: Union[int, str], val_max: Union[int, str]):
+		self.min = val_min
+		self.max = val_max
+		if not self.is_valid():
+			raise ValueError(f"Range [{self.min}, {self.max}] is not valid")
+
+	def is_valid(self):
+		if isinstance(self.min, int) and isinstance(self.max, int):
+			return self.max >= self.min
+		return True  # we don't know
+
+	def is_contained_check(self, name) -> str:
+		return f"(pData->{name} >= {self.min} && pData->{name} <= {self.max})"
+
+	def static_assert(self):
+		static_asserts = []
+		if not isinstance(self.min, int):
+			static_asserts += [f'static_assert((int){self.min} == {self.min}, "Value is not an integer");']
+		if not isinstance(self.max, int):
+			static_asserts += [f'static_assert((int){self.max} == {self.max}, "Value is not an integer");']
+		return static_asserts
+
+	def get_dump(self):
+		min_fmt = f"min={self.min}"
+		min_arg = ""
+		try:
+			int(self.min)
+		except ValueError:
+			min_fmt = f"min={self.min}(%d)"
+			min_arg = f", (int){self.min}"
+		max_fmt = f"max={self.max}"
+		max_arg = ""
+		try:
+			int(self.max)
+		except ValueError:
+			max_fmt = f"max={self.max}(%d)"
+			max_arg = f", (int){self.max}"
+
+		return f"[{min_fmt} {max_fmt}]", f"{min_arg}{max_arg}"
+
+	def get_clamped_value(self, name):
+		return f'pData->{name} = ClampInt("{name}", pData->{name}, {self.min}, {self.max});'
+
+
+class NetIntCustom(NetIntAny):
+	def __init__(self, name, values, default=None):
+		if not isinstance(values, list):
+			raise ValueError("'values' is not a list")
+		if len(values) == 0:
+			raise ValueError("'values' is not allowed to be empty")
+		for index, option in enumerate(values):
+			if not isinstance(option, NetIntCustomOption):
+				raise ValueError(f"Value #{index} needs to be of type 'NetIntCustomOptions'")
+			if not option.is_valid():
+				raise ValueError(f"Value #{index} of type {type(option)} is not valid, it's constructor should have failed?!")
+		super().__init__(name, default=default)
+		self.values = values
+
+	def emit_validate_obj(self):
+		# add some compile time validation
+		validation = []
+		for option in self.values:
+			validation += option.static_assert()
+
+		# validate content
+		bool_name = f"IsValid{self.name[2:]}"
+		bool_expression_list = [option.is_contained_check(self.name) for option in self.values]
+
+		# handle linebreaks
+		if len(bool_expression_list) > 2:
+			collapsed_expression = bool_expression_list[0]
+			for i in range(1, len(bool_expression_list)):
+				if i % 2 == 0:
+					collapsed_expression += f" ||\n\t{bool_expression_list[i]}"
+				else:
+					collapsed_expression += f" || {bool_expression_list[i]}"
+		else:
+			collapsed_expression = " || ".join(bool_expression_list)
+
+		validation += f"bool {bool_name} = {collapsed_expression};".split("\n")
+		validation += [f"if(!{bool_name})", "{"]
+		if self.default is not None:
+			validation += [f"\tpData->{self.name} = {self.default};"]
+		else:
+			validation += [f"\t{self.values[0].get_clamped_value(self.name)}"]
+		validation += ["}"]
+		return validation
+
+	def emit_unpack_msg_check(self):
+		bool_expression_list = [option.is_contained_check(self.name) for option in self.values]
+		collapsed_expression = ""
+
+		# handle linebreaks
+		if len(bool_expression_list) > 3:
+			collapsed_expression = bool_expression_list[0]
+			for i in range(1, len(bool_expression_list)):
+				if i % 3 == 0:
+					collapsed_expression += f" ||\n\t{bool_expression_list[i]}"
+				else:
+					collapsed_expression += f" || {bool_expression_list[i]}"
+		else:
+			collapsed_expression = " || ".join(bool_expression_list)
+
+		bool_expression = f"if(!({collapsed_expression}))".split("\n")
+		return bool_expression + ["{", f'\tm_pMsgFailedOn = "{self.name}";', "\tbreak;", "}"]
+
+	def emit_dump(self, offset):
+		contents = []
+		content_args = []
+		for option in self.values:
+			fmt, fmt_arg = option.get_dump()
+			contents.append(fmt)
+			content_args.append(fmt_arg)
+
+		content_args = "".join(content_args)
+		debug_message_part1 = f'dbg_msg("snapshot", "%s\\t{self.name}=%d (Contents=[{", ".join(contents)}])",'
+		debug_message_part2 = f"aRawData, pObj->{self.name}{content_args});"
+
+		# add line break(s) for extreme cases
+		max_line_length = 130
+		debug_message = []
+		if len(debug_message_part1) > max_line_length:
+			# rebuild message with linebreaks inside the message
+			debug_message += [f'dbg_msg("snapshot", "%s\\t{self.name}=%d (Contents=[ \\']
+			debug_message += [f"\t\t{info}, \\" for info in contents]
+			debug_message += ['\t])",', f"\t{debug_message_part2}"]
+		elif len(debug_message_part1) + len(debug_message_part2) > max_line_length:
+			# add a linebreak between arguments
+			debug_message = [debug_message_part1, f"\t{debug_message_part2}"]
+		else:
+			# all in one line
+			debug_message = [f"{debug_message_part1} {debug_message_part2}"]
+
+		return NetVariable(self.name).emit_dump(offset) + debug_message
