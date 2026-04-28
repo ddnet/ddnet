@@ -27,7 +27,6 @@ public:
 
 class CNameBans
 {
-	IConsole *m_pConsole = nullptr;
 	std::vector<CNameBan> m_vNameBans;
 
 	static void ConNameBan(IConsole::IResult *pResult, void *pUser);
