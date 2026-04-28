@@ -11,6 +11,7 @@ path = "lib.rs"
 
 [dependencies]
 cxx = "=1.0.71"
+libc = "0.2"
 
 [dev-dependencies]
 ddnet-test = { path = "../rust-bridge/test", features = ["link-test-libraries"] }
