@@ -4,6 +4,7 @@
 #include <engine/ghost.h>
 
 #include <cstdint>
+#include <optional>
 
 enum
 {
@@ -34,13 +35,8 @@ class CGhostItem
 {
 public:
 	alignas(uint32_t) unsigned char m_aData[MAX_ITEM_SIZE];
+	size_t m_Size;
 	int m_Type;
-
-	CGhostItem() :
-		m_Type(-1) {}
-	CGhostItem(int Type) :
-		m_Type(Type) {}
-	void Reset() { m_Type = -1; }
 };
 
 class CGhostRecorder : public IGhostRecorder
@@ -54,7 +50,7 @@ class CGhostRecorder : public IGhostRecorder
 	char *m_pBufferPos;
 	const char *m_pBufferEnd;
 	int m_BufferNumItems;
-	CGhostItem m_LastItem;
+	std::optional<CGhostItem> m_LastItem;
 
 	void ResetBuffer();
 	void FlushChunk();
@@ -87,7 +83,7 @@ class CGhostLoader : public IGhostLoader
 	int m_BufferNumItems;
 	int m_BufferCurItem;
 	int m_BufferPrevItem;
-	CGhostItem m_LastItem;
+	std::optional<CGhostItem> m_LastItem;
 
 	void ResetBuffer();
 	IOHANDLE ReadHeader(CGhostHeader &Header, const char *pFilename, const char *pMap, const SHA256_DIGEST &MapSha256, unsigned MapCrc, bool LogMapMismatch) const;
