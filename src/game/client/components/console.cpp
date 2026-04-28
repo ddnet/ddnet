@@ -1266,6 +1266,8 @@ void CGameConsole::OnRender()
 		if(pConsole->m_MouseIsPress && !m_TouchState.m_PrimaryPressed && !Input()->NativeMousePressed(1))
 		{
 			pConsole->m_MouseIsPress = false;
+			if(m_ConsoleState == CONSOLE_OPEN && pConsole->m_MousePress.y > ConsoleHeight + 1.0f && pConsole->m_MouseRelease.y > ConsoleHeight + 1.0f) // for border
+				Toggle(m_ConsoleType);
 		}
 		if(pConsole->m_MouseIsPress)
 		{
