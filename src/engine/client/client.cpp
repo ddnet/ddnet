@@ -102,7 +102,7 @@ CClient::CClient() :
 	m_pSnapshotDelta(CSnapshotDelta_New()),
 	m_pSnapshotDeltaSixup(CSnapshotDelta_New()),
 	m_DemoPlayer(&*m_pSnapshotDelta, &*m_pSnapshotDeltaSixup, true, [&]() { UpdateDemoIntraTimers(); }),
-	m_InputtimeMarginGraph(128, 2, true),
+	m_aInputtimeMarginGraphs{{128, 2, true}, {128, 2, true}},
 	m_aGametimeMarginGraphs{{128, 2, true}, {128, 2, true}},
 	m_FpsGraph(4096, 0, true)
 {
@@ -718,7 +718,7 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	m_aNetClient[CONN_MAIN].RefreshStun();
 	SetState(IClient::STATE_CONNECTING);
 
-	m_InputtimeMarginGraph.Init(-150.0f, 150.0f);
+	m_aInputtimeMarginGraphs[CONN_MAIN].Init(-150.0f, 150.0f);
 	m_aGametimeMarginGraphs[CONN_MAIN].Init(-150.0f, 150.0f);
 
 	GenerateTimeoutCodes(aConnectAddrs, NumConnectAddrs);
@@ -850,6 +850,7 @@ void CClient::DummyConnect()
 	else
 		m_aNetClient[CONN_DUMMY].Connect(m_aNetClient[CONN_MAIN].ServerAddress(), 1);
 
+	m_aInputtimeMarginGraphs[CONN_DUMMY].Init(-150.0f, 150.0f);
 	m_aGametimeMarginGraphs[CONN_DUMMY].Init(-150.0f, 150.0f);
 }
 
@@ -1084,8 +1085,8 @@ void CClient::RenderGraphs()
 
 	m_FpsGraph.Scale(time_freq());
 	m_FpsGraph.Render(Graphics(), TextRender(), GraphX, GraphSpacing * 5, GraphW, GraphH, "FPS");
-	m_InputtimeMarginGraph.Scale(5 * time_freq());
-	m_InputtimeMarginGraph.Render(Graphics(), TextRender(), GraphX, GraphSpacing * 6 + GraphH, GraphW, GraphH, "Prediction Margin");
+	m_aInputtimeMarginGraphs[g_Config.m_ClDummy].Scale(5 * time_freq());
+	m_aInputtimeMarginGraphs[g_Config.m_ClDummy].Render(Graphics(), TextRender(), GraphX, GraphSpacing * 6 + GraphH, GraphW, GraphH, "Prediction Margin");
 	m_aGametimeMarginGraphs[g_Config.m_ClDummy].Scale(5 * time_freq());
 	m_aGametimeMarginGraphs[g_Config.m_ClDummy].Render(Graphics(), TextRender(), GraphX, GraphSpacing * 7 + GraphH * 2, GraphW, GraphH, "Gametime Margin");
 }
@@ -2016,7 +2017,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			}
 
 			if(Target)
-				m_PredictedTime.Update(&m_InputtimeMarginGraph, Target, TimeLeft, CSmoothTime::ADJUSTDIRECTION_UP);
+				m_PredictedTime.Update(&m_aInputtimeMarginGraphs[Conn], Target, TimeLeft, CSmoothTime::ADJUSTDIRECTION_UP);
 		}
 		else if(Msg == NETMSG_SNAP || Msg == NETMSG_SNAPSINGLE || Msg == NETMSG_SNAPEMPTY)
 		{
