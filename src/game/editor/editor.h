@@ -125,6 +125,7 @@ class CEditor : public IEditor, public IEnvelopeEval
 	CFileBrowser m_FileBrowser;
 	CPrompt m_Prompt;
 	CFontTyper m_FontTyper;
+	CQuadKnife m_QuadKnife;
 
 	bool m_EditorWasUsedBefore = false;
 
@@ -163,6 +164,8 @@ public:
 	const CEditorMap *Map() const { return &m_Map; }
 	CMapView *MapView() { return &m_MapView; }
 	const CMapView *MapView() const { return &m_MapView; }
+	CQuadKnife *QuadKnife() { return &m_QuadKnife; }
+	const CQuadKnife *QuadKnife() const { return &m_QuadKnife; }
 	CLayerSelector *LayerSelector() { return &m_LayerSelector; }
 
 	void FillGameTiles(EGameTileOp FillTile) const;
@@ -624,10 +627,6 @@ public:
 	void DoQuadEnvPoint(const CQuad *pQuad, CEnvelope *pEnvelope, int QuadIndex, int PointIndex);
 	void DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int v);
 	void UpdateHotQuadPoint(const CLayerQuads *pLayer);
-
-	float TriangleArea(vec2 A, vec2 B, vec2 C);
-	bool IsInTriangle(vec2 Point, vec2 A, vec2 B, vec2 C);
-	void DoQuadKnife(int QuadIndex);
 
 	void DoSoundSource(int LayerIndex, CSoundSource *pSource, int Index);
 	void UpdateHotSoundSource(const CLayerSounds *pLayer);
