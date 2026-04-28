@@ -62,7 +62,6 @@ void CServerBan::InitServerBan(IConsole *pConsole, IStorage *pStorage, CServer *
 
 	m_pServer = pServer;
 
-	// overwrites base command, todo: improve this
 	Console()->Register("ban", "s[ip|id] ?i[minutes] r[reason]", CFGFLAG_SERVER | CFGFLAG_STORE, ConBanExt, this, "Ban player with ip/client id for x minutes for any reason");
 	Console()->Register("ban_region", "s[region] s[ip|id] ?i[minutes] r[reason]", CFGFLAG_SERVER | CFGFLAG_STORE, ConBanRegion, this, "Ban player in a region");
 	Console()->Register("ban_region_range", "s[region] s[first ip] s[last ip] ?i[minutes] r[reason]", CFGFLAG_SERVER | CFGFLAG_STORE, ConBanRegionRange, this, "Ban range in a region");
@@ -162,7 +161,13 @@ void CServerBan::ConBanExt(IConsole::IResult *pResult, void *pUser)
 			pThis->BanAddr(pThis->Server()->ClientAddr(ClientId), Minutes * 60, pReason, false);
 	}
 	else
-		ConBan(pResult, pUser);
+	{
+		NETADDR Addr;
+		if(net_addr_from_str(&Addr, pStr) == 0)
+			pThis->BanAddr(&Addr, Minutes * 60, pReason, false);
+		else
+			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (invalid network address)");
+	}
 }
 
 void CServerBan::ConBanRegion(IConsole::IResult *pResult, void *pUser)

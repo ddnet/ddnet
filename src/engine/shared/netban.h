@@ -189,7 +189,6 @@ public:
 	void UnbanAll();
 	bool IsBanned(const NETADDR *pOrigAddr, char *pBuf, unsigned BufferSize) const;
 
-	static void ConBan(class IConsole::IResult *pResult, void *pUser);
 	static void ConBanRange(class IConsole::IResult *pResult, void *pUser);
 	static void ConUnban(class IConsole::IResult *pResult, void *pUser);
 	static void ConUnbanRange(class IConsole::IResult *pResult, void *pUser);
