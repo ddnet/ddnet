@@ -23,7 +23,16 @@ public:
 	void RenderGroupBorder();
 	void RenderEditorMap();
 	void Render(CUIRect View);
+
 	void UpdateMouseWorld();
+	void ResetMouseDeltaWorld();
+	float MouseWorldScale() const;
+	vec2 MouseDeltaWorld() const;
+	float MouseDeltaWorldX() const;
+	float MouseDeltaWorldY() const;
+	vec2 MouseWorldPos() const;
+	float MouseWorldX() const;
+	float MouseWorldY() const;
 
 	bool IsFocused();
 	void Focus();
@@ -74,6 +83,11 @@ private:
 		PAN_EDITOR,
 	};
 	EState m_State;
+
+	float m_MouseWorldScale = 1.0f; // Mouse (i.e. UI) scale relative to the World (selected Group)
+	vec2 m_MouseWorldPos = vec2(0.0f, 0.0f);
+	vec2 m_MouseWorldNoParaPos = vec2(0.0f, 0.0f);
+	vec2 m_MouseDeltaWorld = vec2(0.0f, 0.0f);
 };
 
 #endif

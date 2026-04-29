@@ -425,10 +425,6 @@ public:
 	bool m_GuiActive;
 
 	bool m_PreviewZoom;
-	float m_MouseWorldScale = 1.0f; // Mouse (i.e. UI) scale relative to the World (selected Group)
-	vec2 m_MouseWorldPos = vec2(0.0f, 0.0f);
-	vec2 m_MouseWorldNoParaPos = vec2(0.0f, 0.0f);
-	vec2 m_MouseDeltaWorld = vec2(0.0f, 0.0f);
 	const void *m_pContainerPanned;
 	const void *m_pContainerPannedLast;
 

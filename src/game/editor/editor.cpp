@@ -772,7 +772,7 @@ void CEditor::DoSoundSource(int LayerIndex, CSoundSource *pSource, int Index)
 			Map()->m_SoundSourceOperationTracker.Begin(pSource, s_Operation, LayerIndex);
 		}
 
-		if(m_MouseDeltaWorld != vec2(0.0f, 0.0f))
+		if(MapView()->MouseDeltaWorld() != vec2(0.0f, 0.0f))
 		{
 			if(s_Operation == ESoundSourceOp::MOVE)
 			{
@@ -839,7 +839,7 @@ void CEditor::DoSoundSource(int LayerIndex, CSoundSource *pSource, int Index)
 		Graphics()->SetColor(0, 1, 0, 1);
 	}
 
-	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * m_MouseWorldScale, 5.0f * m_MouseWorldScale);
+	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * MapView()->MouseWorldScale(), 5.0f * MapView()->MouseWorldScale());
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
@@ -851,7 +851,7 @@ void CEditor::UpdateHotSoundSource(const CLayerSounds *pLayer)
 	const void *pMinSourceId = nullptr;
 
 	const auto UpdateMinimum = [&](vec2 Position, const void *pId) {
-		const float CurrDist = length_squared((Position - MouseWorld) / m_MouseWorldScale);
+		const float CurrDist = length_squared((Position - MouseWorld) / MapView()->MouseWorldScale());
 		if(CurrDist < MinDist)
 		{
 			MinDist = CurrDist;
@@ -899,17 +899,17 @@ void CEditor::DrawAxis(EAxis Axis, CPoint &OriginalPoint, CPoint &Point) const
 	Graphics()->SetColor(1, 0, 0.1f, 1);
 	if(Axis == EAxis::X)
 	{
-		IGraphics::CQuadItem Line(fx2f(OriginalPoint.x + Point.x) / 2.0f, fx2f(OriginalPoint.y), fx2f(Point.x - OriginalPoint.x), 1.0f * m_MouseWorldScale);
+		IGraphics::CQuadItem Line(fx2f(OriginalPoint.x + Point.x) / 2.0f, fx2f(OriginalPoint.y), fx2f(Point.x - OriginalPoint.x), 1.0f * MapView()->MouseWorldScale());
 		Graphics()->QuadsDraw(&Line, 1);
 	}
 	else if(Axis == EAxis::Y)
 	{
-		IGraphics::CQuadItem Line(fx2f(OriginalPoint.x), fx2f(OriginalPoint.y + Point.y) / 2.0f, 1.0f * m_MouseWorldScale, fx2f(Point.y - OriginalPoint.y));
+		IGraphics::CQuadItem Line(fx2f(OriginalPoint.x), fx2f(OriginalPoint.y + Point.y) / 2.0f, 1.0f * MapView()->MouseWorldScale(), fx2f(Point.y - OriginalPoint.y));
 		Graphics()->QuadsDraw(&Line, 1);
 	}
 
 	// Draw ghost of original point
-	IGraphics::CQuadItem QuadItem(fx2f(OriginalPoint.x), fx2f(OriginalPoint.y), 5.0f * m_MouseWorldScale, 5.0f * m_MouseWorldScale);
+	IGraphics::CQuadItem QuadItem(fx2f(OriginalPoint.x), fx2f(OriginalPoint.y), 5.0f * MapView()->MouseWorldScale(), 5.0f * MapView()->MouseWorldScale());
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
@@ -923,7 +923,7 @@ void CEditor::ComputePointAlignments(const std::shared_ptr<CLayerQuads> &pLayer,
 	bool GridEnabled = MapView()->MapGrid()->IsEnabled() && !Input()->AltIsPressed();
 
 	// Perform computation from the original position of this point
-	int Threshold = f2fx(maximum(5.0f, 10.0f * m_MouseWorldScale));
+	int Threshold = f2fx(maximum(5.0f, 10.0f * MapView()->MouseWorldScale()));
 	CPoint OrigPoint = m_QuadDragOriginalPoints.at(QuadIndex)[PointIndex];
 	// Get the "current" point by applying the offset
 	CPoint Point = OrigPoint + Offset;
@@ -1104,7 +1104,7 @@ void CEditor::ComputeAABBAlignments(const std::shared_ptr<CLayerQuads> &pLayer, 
 	// This method is a bit different than the point alignment in the way where instead of trying to align 1 point to all quads,
 	// we try to align 5 points to all quads, these 5 points being 5 points of an AABB.
 	// Otherwise, the concept is the same, we use the original position of the AABB to make the computations.
-	int Threshold = f2fx(maximum(5.0f, 10.0f * m_MouseWorldScale));
+	int Threshold = f2fx(maximum(5.0f, 10.0f * MapView()->MouseWorldScale()));
 	ivec2 SmallestDiff = ivec2(Threshold + 1, Threshold + 1);
 	std::vector<SAlignmentInfo> vAlignmentsX, vAlignmentsY;
 
@@ -1218,12 +1218,12 @@ void CEditor::DrawPointAlignments(const std::vector<SAlignmentInfo> &vAlignments
 		// We don't use IGraphics::CLineItem to draw because we don't want to stop QuadsBegin(), quads work just fine.
 		if(Alignment.m_Axis == EAxis::X)
 		{ // Alignment on X axis is same Y values but different X values
-			IGraphics::CQuadItem Line(fx2f(Alignment.m_AlignedPoint.x), fx2f(Alignment.m_AlignedPoint.y), fx2f(Alignment.m_X + Offset.x - Alignment.m_AlignedPoint.x), 1.0f * m_MouseWorldScale);
+			IGraphics::CQuadItem Line(fx2f(Alignment.m_AlignedPoint.x), fx2f(Alignment.m_AlignedPoint.y), fx2f(Alignment.m_X + Offset.x - Alignment.m_AlignedPoint.x), 1.0f * MapView()->MouseWorldScale());
 			Graphics()->QuadsDrawTL(&Line, 1);
 		}
 		else if(Alignment.m_Axis == EAxis::Y)
 		{ // Alignment on Y axis is same X values but different Y values
-			IGraphics::CQuadItem Line(fx2f(Alignment.m_AlignedPoint.x), fx2f(Alignment.m_AlignedPoint.y), 1.0f * m_MouseWorldScale, fx2f(Alignment.m_Y + Offset.y - Alignment.m_AlignedPoint.y));
+			IGraphics::CQuadItem Line(fx2f(Alignment.m_AlignedPoint.x), fx2f(Alignment.m_AlignedPoint.y), 1.0f * MapView()->MouseWorldScale(), fx2f(Alignment.m_Y + Offset.y - Alignment.m_AlignedPoint.y));
 			Graphics()->QuadsDrawTL(&Line, 1);
 		}
 	}
@@ -1241,15 +1241,15 @@ void CEditor::DrawAABB(const SAxisAlignedBoundingBox &AABB, ivec2 Offset) const
 
 	// We don't use IGraphics::CLineItem to draw because we don't want to stop QuadsBegin(), quads work just fine.
 	IGraphics::CQuadItem Lines[4] = {
-		{TL.x, TL.y, TR.x - TL.x, 1.0f * m_MouseWorldScale},
-		{TL.x, TL.y, 1.0f * m_MouseWorldScale, BL.y - TL.y},
-		{TR.x, TR.y, 1.0f * m_MouseWorldScale, BR.y - TR.y},
-		{BL.x, BL.y, BR.x - BL.x, 1.0f * m_MouseWorldScale},
+		{TL.x, TL.y, TR.x - TL.x, 1.0f * MapView()->MouseWorldScale()},
+		{TL.x, TL.y, 1.0f * MapView()->MouseWorldScale(), BL.y - TL.y},
+		{TR.x, TR.y, 1.0f * MapView()->MouseWorldScale(), BR.y - TR.y},
+		{BL.x, BL.y, BR.x - BL.x, 1.0f * MapView()->MouseWorldScale()},
 	};
 	Graphics()->SetColor(1, 0, 1, 1);
 	Graphics()->QuadsDrawTL(Lines, 4);
 
-	IGraphics::CQuadItem CenterQuad(Center.x, Center.y, 5.0f * m_MouseWorldScale, 5.0f * m_MouseWorldScale);
+	IGraphics::CQuadItem CenterQuad(Center.x, Center.y, 5.0f * MapView()->MouseWorldScale(), 5.0f * MapView()->MouseWorldScale());
 	Graphics()->QuadsDraw(&CenterQuad, 1);
 }
 
@@ -1380,13 +1380,13 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 	if(Map()->IsQuadSelected(Index))
 	{
 		Graphics()->SetColor(0, 0, 0, 1);
-		IGraphics::CQuadItem QuadItem(CenterX, CenterY, 7.0f * m_MouseWorldScale, 7.0f * m_MouseWorldScale);
+		IGraphics::CQuadItem QuadItem(CenterX, CenterY, 7.0f * MapView()->MouseWorldScale(), 7.0f * MapView()->MouseWorldScale());
 		Graphics()->QuadsDraw(&QuadItem, 1);
 	}
 
 	if(Ui()->CheckActiveItem(pId))
 	{
-		if(m_MouseDeltaWorld != vec2(0.0f, 0.0f))
+		if(MapView()->MouseDeltaWorld() != vec2(0.0f, 0.0f))
 		{
 			if(s_Operation == OP_SELECT)
 			{
@@ -1642,7 +1642,7 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 	else
 		Graphics()->SetColor(0, 1, 0, 1);
 
-	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * m_MouseWorldScale, 5.0f * m_MouseWorldScale);
+	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * MapView()->MouseWorldScale(), 5.0f * MapView()->MouseWorldScale());
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
@@ -1656,7 +1656,7 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 	if(Map()->IsQuadPointSelected(QuadIndex, V))
 	{
 		Graphics()->SetColor(0, 0, 0, 1);
-		IGraphics::CQuadItem QuadItem(Center.x, Center.y, 7.0f * m_MouseWorldScale, 7.0f * m_MouseWorldScale);
+		IGraphics::CQuadItem QuadItem(Center.x, Center.y, 7.0f * MapView()->MouseWorldScale(), 7.0f * MapView()->MouseWorldScale());
 		Graphics()->QuadsDraw(&QuadItem, 1);
 	}
 
@@ -1686,7 +1686,7 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 
 	if(Ui()->CheckActiveItem(pId))
 	{
-		if(m_MouseDeltaWorld != vec2(0.0f, 0.0f))
+		if(MapView()->MouseDeltaWorld() != vec2(0.0f, 0.0f))
 		{
 			if(s_Operation == OP_SELECT)
 			{
@@ -1754,11 +1754,11 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 							// 0,2;1,3 - line x
 							// 0,1;2,3 - line y
 
-							pSelectedQuad->m_aTexcoords[m].x += f2fx(m_MouseDeltaWorld.x * 0.001f);
-							pSelectedQuad->m_aTexcoords[(m + 2) % 4].x += f2fx(m_MouseDeltaWorld.x * 0.001f);
+							pSelectedQuad->m_aTexcoords[m].x += f2fx(MapView()->MouseDeltaWorldX() * 0.001f);
+							pSelectedQuad->m_aTexcoords[(m + 2) % 4].x += f2fx(MapView()->MouseDeltaWorldX() * 0.001f);
 
-							pSelectedQuad->m_aTexcoords[m].y += f2fx(m_MouseDeltaWorld.y * 0.001f);
-							pSelectedQuad->m_aTexcoords[m ^ 1].y += f2fx(m_MouseDeltaWorld.y * 0.001f);
+							pSelectedQuad->m_aTexcoords[m].y += f2fx(MapView()->MouseDeltaWorldY() * 0.001f);
+							pSelectedQuad->m_aTexcoords[m ^ 1].y += f2fx(MapView()->MouseDeltaWorldY() * 0.001f);
 						}
 					}
 				}
@@ -1853,7 +1853,7 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 	else
 		Graphics()->SetColor(1, 0, 0, 1);
 
-	IGraphics::CQuadItem QuadItem(Center.x, Center.y, 5.0f * m_MouseWorldScale, 5.0f * m_MouseWorldScale);
+	IGraphics::CQuadItem QuadItem(Center.x, Center.y, 5.0f * MapView()->MouseWorldScale(), 5.0f * MapView()->MouseWorldScale());
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
@@ -2024,7 +2024,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, CEnvelope *pEnvelope, int QuadI
 
 	if(Ui()->CheckActiveItem(pPoint) && Map()->m_CurrentQuadIndex == QuadIndex)
 	{
-		if(m_MouseDeltaWorld != vec2(0.0f, 0.0f))
+		if(MapView()->MouseDeltaWorld() != vec2(0.0f, 0.0f))
 		{
 			if(m_QuadEnvelopePointOperation == EQuadEnvelopePointOperation::MOVE)
 			{
@@ -2083,7 +2083,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, CEnvelope *pEnvelope, int QuadI
 		Graphics()->SetColor(ColorRGBA(0.0f, 1.0f, 1.0f, 1.0f));
 	}
 
-	IGraphics::CQuadItem QuadItem(Center.x, Center.y, 5.0f * m_MouseWorldScale, 5.0f * m_MouseWorldScale);
+	IGraphics::CQuadItem QuadItem(Center.x, Center.y, 5.0f * MapView()->MouseWorldScale(), 5.0f * MapView()->MouseWorldScale());
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
@@ -2095,7 +2095,7 @@ void CEditor::UpdateHotQuadPoint(const CLayerQuads *pLayer)
 	const void *pMinPointId = nullptr;
 
 	const auto UpdateMinimum = [&](vec2 Position, const void *pId) {
-		const float CurrDist = length_squared((Position - MouseWorld) / m_MouseWorldScale);
+		const float CurrDist = length_squared((Position - MouseWorld) / MapView()->MouseWorldScale());
 		if(CurrDist < MinDist)
 		{
 			MinDist = CurrDist;
@@ -6478,11 +6478,11 @@ void CEditor::OnRender()
 	m_pUiGotContext = nullptr;
 	Ui()->StartCheck();
 
-	Ui()->Update(m_MouseWorldPos);
+	Ui()->Update(MapView()->MouseWorldPos());
 
 	Render();
 
-	m_MouseDeltaWorld = vec2(0.0f, 0.0f);
+	MapView()->ResetMouseDeltaWorld();
 
 	if(Input()->KeyPress(KEY_F10))
 	{
