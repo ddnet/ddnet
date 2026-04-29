@@ -253,8 +253,8 @@ void CMapView::Render(CUIRect View)
 		MapGrid()->Render();
 	}
 
-	const bool ShouldPan = Ui()->HotItem() == &Editor()->m_MapEditorId && ((Input()->ModifierIsPressed() && Ui()->MouseButton(0)) || Ui()->MouseButton(2));
-	if(Editor()->m_pContainerPanned == &Editor()->m_MapEditorId)
+	const bool ShouldPan = Ui()->HotItem() == Editor()->MapView() && ((Input()->ModifierIsPressed() && Ui()->MouseButton(0)) || Ui()->MouseButton(2));
+	if(Editor()->m_pContainerPanned == Editor()->MapView())
 	{
 		// do panning
 		if(ShouldPan)
@@ -263,7 +263,7 @@ void CMapView::Render(CUIRect View)
 				s_Operation = OP_PAN_EDITOR;
 			else
 				s_Operation = OP_PAN_WORLD;
-			Ui()->SetActiveItem(&Editor()->m_MapEditorId);
+			Ui()->SetActiveItem(Editor()->MapView());
 		}
 		else
 			s_Operation = OP_NONE;
@@ -279,7 +279,7 @@ void CMapView::Render(CUIRect View)
 
 	if(Inside)
 	{
-		Ui()->SetHotItem(&Editor()->m_MapEditorId);
+		Ui()->SetHotItem(Editor()->MapView());
 
 		// do global operations like pan and zoom
 		if(Ui()->CheckActiveItem(nullptr) && (Ui()->MouseButton(0) || Ui()->MouseButton(2)))
@@ -288,11 +288,11 @@ void CMapView::Render(CUIRect View)
 			s_StartWy = wy;
 
 			if(ShouldPan && Editor()->m_pContainerPanned == nullptr)
-				Editor()->m_pContainerPanned = &Editor()->m_MapEditorId;
+				Editor()->m_pContainerPanned = Editor()->MapView();
 		}
 
 		// brush editing
-		if(Ui()->HotItem() == &Editor()->m_MapEditorId)
+		if(Ui()->HotItem() == Editor()->MapView())
 		{
 			if(Editor()->m_ShowPicker)
 			{
@@ -349,7 +349,7 @@ void CMapView::Render(CUIRect View)
 				str_copy(Editor()->m_aTooltip, "Use left mouse button to paint with the brush. Right click to clear the brush. Hold Alt to lock the mouse movement to a single axis.");
 			}
 
-			if(Ui()->CheckActiveItem(&Editor()->m_MapEditorId))
+			if(Ui()->CheckActiveItem(Editor()->MapView()))
 			{
 				CUIRect r;
 				r.x = s_StartWx;
@@ -466,7 +466,7 @@ void CMapView::Render(CUIRect View)
 
 				if(!Input()->ModifierIsPressed() && Ui()->MouseButton(0) && s_Operation == OP_NONE && !Editor()->QuadKnife()->IsActive())
 				{
-					Ui()->SetActiveItem(&Editor()->m_MapEditorId);
+					Ui()->SetActiveItem(Editor()->MapView());
 
 					if(Editor()->m_pBrush->IsEmpty())
 						s_Operation = OP_BRUSH_GRAB;
@@ -667,7 +667,7 @@ void CMapView::Render(CUIRect View)
 		}
 	}
 
-	if(Ui()->CheckActiveItem(&Editor()->m_MapEditorId) && Editor()->m_pContainerPanned == nullptr)
+	if(Ui()->CheckActiveItem(Editor()->MapView()) && Editor()->m_pContainerPanned == nullptr)
 	{
 		// release mouse
 		if(!Ui()->MouseButton(0))

@@ -431,7 +431,6 @@ public:
 	vec2 m_MouseDeltaWorld = vec2(0.0f, 0.0f);
 	const void *m_pContainerPanned;
 	const void *m_pContainerPannedLast;
-	char m_MapEditorId; // UI element ID for the main map editor
 
 	enum EShowTile
 	{

@@ -6301,7 +6301,7 @@ void CEditor::MouseAxisLock(vec2 &CursorRel)
 	if(Input()->AltIsPressed())
 	{
 		// only lock with the paint brush and inside editor map area to avoid duplicate Alt behavior
-		if(m_pBrush->IsEmpty() || Ui()->HotItem() != &m_MapEditorId)
+		if(m_pBrush->IsEmpty() || Ui()->HotItem() != MapView())
 			return;
 
 		const vec2 CurrentWorldPos = vec2(Ui()->MouseWorldX(), Ui()->MouseWorldY()) / 32.0f;
