@@ -910,6 +910,24 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 	return true;
 }
 
+int CServer::RecordServerDemo(CMsgPacker *pMsg)
+{
+	if(pMsg->m_System)
+		return 0;
+	if(!m_aDemoRecorder[RECORDER_MANUAL].IsRecording() && !m_aDemoRecorder[RECORDER_AUTO].IsRecording())
+		return 0;
+
+	CPacker Pack;
+	if(!RepackMsg(pMsg, Pack, false))
+		return -1;
+
+	if(m_aDemoRecorder[RECORDER_MANUAL].IsRecording())
+		m_aDemoRecorder[RECORDER_MANUAL].RecordMessage(Pack.Data(), Pack.Size());
+	if(m_aDemoRecorder[RECORDER_AUTO].IsRecording())
+		m_aDemoRecorder[RECORDER_AUTO].RecordMessage(Pack.Data(), Pack.Size());
+	return 0;
+}
+
 int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientId)
 {
 	CNetChunk Packet;
@@ -918,6 +936,13 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientId)
 		Packet.m_Flags |= NETSENDFLAG_VITAL;
 	if(Flags & MSGFLAG_FLUSH)
 		Packet.m_Flags |= NETSENDFLAG_FLUSH;
+
+	if(ClientId == SERVER_DEMO_CLIENT)
+	{
+		if(Flags & MSGFLAG_NORECORD)
+			return 0;
+		return RecordServerDemo(pMsg);
+	}
 
 	if(ClientId < 0)
 	{
@@ -930,9 +955,18 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientId)
 		// write message to demo recorders
 		if(!(Flags & MSGFLAG_NORECORD))
 		{
-			for(auto &Recorder : m_aDemoRecorder)
-				if(Recorder.IsRecording())
-					Recorder.RecordMessage(Pack6.Data(), Pack6.Size());
+			for(int i = 0; i < MAX_CLIENTS; ++i)
+			{
+				if(m_aDemoRecorder[i].IsRecording())
+					m_aDemoRecorder[i].RecordMessage(Pack6.Data(), Pack6.Size());
+			}
+			if(!pMsg->m_System)
+			{
+				if(m_aDemoRecorder[RECORDER_MANUAL].IsRecording())
+					m_aDemoRecorder[RECORDER_MANUAL].RecordMessage(Pack6.Data(), Pack6.Size());
+				if(m_aDemoRecorder[RECORDER_AUTO].IsRecording())
+					m_aDemoRecorder[RECORDER_AUTO].RecordMessage(Pack6.Data(), Pack6.Size());
+			}
 		}
 
 		if(!(Flags & MSGFLAG_NOSEND))
@@ -974,10 +1008,6 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientId)
 		{
 			if(m_aDemoRecorder[ClientId].IsRecording())
 				m_aDemoRecorder[ClientId].RecordMessage(Pack.Data(), Pack.Size());
-			if(m_aDemoRecorder[RECORDER_MANUAL].IsRecording())
-				m_aDemoRecorder[RECORDER_MANUAL].RecordMessage(Pack.Data(), Pack.Size());
-			if(m_aDemoRecorder[RECORDER_AUTO].IsRecording())
-				m_aDemoRecorder[RECORDER_AUTO].RecordMessage(Pack.Data(), Pack.Size());
 		}
 
 		if(!(Flags & MSGFLAG_NOSEND))
@@ -1113,7 +1143,7 @@ void CServer::DoSnapshot()
 						Msg.AddInt(Crc);
 						Msg.AddInt(Chunk);
 						Msg.AddRaw(&aCompData[n * MaxSize], Chunk);
-						SendMsg(&Msg, MSGFLAG_FLUSH, i);
+						SendMsg(&Msg, MSGFLAG_FLUSH | MSGFLAG_NORECORD, i);
 					}
 					else
 					{
@@ -1125,7 +1155,7 @@ void CServer::DoSnapshot()
 						Msg.AddInt(Crc);
 						Msg.AddInt(Chunk);
 						Msg.AddRaw(&aCompData[n * MaxSize], Chunk);
-						SendMsg(&Msg, MSGFLAG_FLUSH, i);
+						SendMsg(&Msg, MSGFLAG_FLUSH | MSGFLAG_NORECORD, i);
 					}
 				}
 			}
@@ -1134,7 +1164,7 @@ void CServer::DoSnapshot()
 				CMsgPacker Msg(NETMSG_SNAPEMPTY, true);
 				Msg.AddInt(m_CurrentGameTick);
 				Msg.AddInt(m_CurrentGameTick - DeltaTick);
-				SendMsg(&Msg, MSGFLAG_FLUSH, i);
+				SendMsg(&Msg, MSGFLAG_FLUSH | MSGFLAG_NORECORD, i);
 			}
 		}
 	}
@@ -1326,7 +1356,7 @@ void CServer::SendRconType(int ClientId, bool UsernameReq)
 {
 	CMsgPacker Msg(NETMSG_RCONTYPE, true);
 	Msg.AddInt(UsernameReq);
-	SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 }
 
 void CServer::SendCapabilities(int ClientId)
@@ -1334,7 +1364,7 @@ void CServer::SendCapabilities(int ClientId)
 	CMsgPacker Msg(NETMSG_CAPABILITIES, true);
 	Msg.AddInt(SERVERCAP_CURVERSION); // version
 	Msg.AddInt(SERVERCAPFLAG_DDNET | SERVERCAPFLAG_CHATTIMEOUTCODE | SERVERCAPFLAG_ANYPLAYERFLAG | SERVERCAPFLAG_PINGEX | SERVERCAPFLAG_ALLOWDUMMY | SERVERCAPFLAG_SYNCWEAPONINPUT); // flags
-	SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 }
 
 void CServer::SendMap(int ClientId)
@@ -1354,7 +1384,7 @@ void CServer::SendMap(int ClientId)
 		{
 			Msg.AddString("", 0);
 		}
-		SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+		SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 	}
 	{
 		CMsgPacker Msg(NETMSG_MAP_CHANGE, true);
@@ -1367,7 +1397,7 @@ void CServer::SendMap(int ClientId)
 			Msg.AddInt(NET_MAX_CHUNK_SIZE - 128);
 			Msg.AddRaw(m_aCurrentMapSha256[MapType].data, sizeof(m_aCurrentMapSha256[MapType].data));
 		}
-		SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientId);
+		SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH | MSGFLAG_NORECORD, ClientId);
 	}
 
 	m_aClients[ClientId].m_NextMapChunk = 0;
@@ -1399,7 +1429,7 @@ void CServer::SendMapData(int ClientId, int Chunk)
 		Msg.AddInt(ChunkSize);
 	}
 	Msg.AddRaw(&m_apCurrentMapData[MapType][Offset], ChunkSize);
-	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientId);
+	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH | MSGFLAG_NORECORD, ClientId);
 
 	if(Config()->m_Debug)
 	{
@@ -1412,20 +1442,20 @@ void CServer::SendMapData(int ClientId, int Chunk)
 void CServer::SendMapReload(int ClientId)
 {
 	CMsgPacker Msg(NETMSG_MAP_RELOAD, true);
-	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientId);
+	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH | MSGFLAG_NORECORD, ClientId);
 }
 
 void CServer::SendConnectionReady(int ClientId)
 {
 	CMsgPacker Msg(NETMSG_CON_READY, true);
-	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientId);
+	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH | MSGFLAG_NORECORD, ClientId);
 }
 
 void CServer::SendRconLine(int ClientId, const char *pLine)
 {
 	CMsgPacker Msg(NETMSG_RCON_LINE, true);
 	Msg.AddString(pLine, 512);
-	SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 }
 
 void CServer::SendRconLogLine(int ClientId, const CLogMessage *pMessage)
@@ -1455,27 +1485,27 @@ void CServer::SendRconCmdAdd(const IConsole::ICommandInfo *pCommandInfo, int Cli
 	Msg.AddString(pCommandInfo->Name(), IConsole::TEMPCMD_NAME_LENGTH);
 	Msg.AddString(pCommandInfo->Help(), IConsole::TEMPCMD_HELP_LENGTH);
 	Msg.AddString(pCommandInfo->Params(), IConsole::TEMPCMD_PARAMS_LENGTH);
-	SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 }
 
 void CServer::SendRconCmdRem(const IConsole::ICommandInfo *pCommandInfo, int ClientId)
 {
 	CMsgPacker Msg(NETMSG_RCON_CMD_REM, true);
 	Msg.AddString(pCommandInfo->Name(), IConsole::TEMPCMD_NAME_LENGTH);
-	SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 }
 
 void CServer::SendRconCmdGroupStart(int ClientId)
 {
 	CMsgPacker Msg(NETMSG_RCON_CMD_GROUP_START, true);
 	Msg.AddInt(NumRconCommands(ClientId));
-	SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 }
 
 void CServer::SendRconCmdGroupEnd(int ClientId)
 {
 	CMsgPacker Msg(NETMSG_RCON_CMD_GROUP_END, true);
-	SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 }
 
 int CServer::NumRconCommands(int ClientId)
@@ -1524,13 +1554,13 @@ void CServer::SendMaplistGroupStart(int ClientId)
 {
 	CMsgPacker Msg(NETMSG_MAPLIST_GROUP_START, true);
 	Msg.AddInt(m_vMaplistEntries.size());
-	SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 }
 
 void CServer::SendMaplistGroupEnd(int ClientId)
 {
 	CMsgPacker Msg(NETMSG_MAPLIST_GROUP_END, true);
-	SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 }
 
 void CServer::UpdateClientMaplistEntries(int ClientId)
@@ -1587,7 +1617,7 @@ void CServer::UpdateClientMaplistEntries(int ClientId)
 			}
 			++Client.m_MaplistEntryToSend;
 		}
-		SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+		SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 	}
 
 	if((size_t)Client.m_MaplistEntryToSend >= m_vMaplistEntries.size())
@@ -1686,7 +1716,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 	if(Result == UNPACKMESSAGE_ANSWER)
 	{
-		SendMsg(&Packer, MSGFLAG_VITAL, ClientId);
+		SendMsg(&Packer, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 	}
 
 	{
@@ -1801,7 +1831,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				CMsgPacker Msgp(NETMSG_INPUTTIMING, true);
 				Msgp.AddInt(IntendedTick);
 				Msgp.AddInt(TimeLeft);
-				SendMsg(&Msgp, 0, ClientId);
+				SendMsg(&Msgp, MSGFLAG_NORECORD, ClientId);
 			}
 
 			m_aClients[ClientId].m_LastInputTick = IntendedTick;
@@ -1897,7 +1927,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		{
 			CMsgPacker Msgp(NETMSG_PING_REPLY, true);
 			int Vital = (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 ? MSGFLAG_VITAL : 0;
-			SendMsg(&Msgp, MSGFLAG_FLUSH | Vital, ClientId);
+			SendMsg(&Msgp, MSGFLAG_FLUSH | Vital | MSGFLAG_NORECORD, ClientId);
 		}
 		else if(Msg == NETMSG_PINGEX)
 		{
@@ -1909,7 +1939,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			CMsgPacker Msgp(NETMSG_PONGEX, true);
 			Msgp.AddRaw(pId, sizeof(*pId));
 			int Vital = (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 ? MSGFLAG_VITAL : 0;
-			SendMsg(&Msgp, MSGFLAG_FLUSH | Vital, ClientId);
+			SendMsg(&Msgp, MSGFLAG_FLUSH | Vital | MSGFLAG_NORECORD, ClientId);
 		}
 		else
 		{
@@ -2043,7 +2073,7 @@ void CServer::OnNetMsgEnterGame(int ClientId)
 	{
 		CMsgPacker ServerInfoMessage(protocol7::NETMSG_SERVERINFO, true, true);
 		GetServerInfoSixup(&ServerInfoMessage, false);
-		SendMsg(&ServerInfoMessage, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientId);
+		SendMsg(&ServerInfoMessage, MSGFLAG_VITAL | MSGFLAG_FLUSH | MSGFLAG_NORECORD, ClientId);
 	}
 	GameServer()->OnClientEnter(ClientId);
 }
@@ -2799,7 +2829,7 @@ void CServer::UpdateServerInfo(bool Resend)
 				{
 					CMsgPacker ServerInfoMessage(protocol7::NETMSG_SERVERINFO, true, true);
 					GetServerInfoSixup(&ServerInfoMessage, false);
-					SendMsg(&ServerInfoMessage, MSGFLAG_VITAL | MSGFLAG_FLUSH, i);
+					SendMsg(&ServerInfoMessage, MSGFLAG_VITAL | MSGFLAG_FLUSH | MSGFLAG_NORECORD, i);
 				}
 			}
 		}
@@ -4198,12 +4228,12 @@ void CServer::LogoutClient(int ClientId, const char *pReason)
 		CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS, true);
 		Msg.AddInt(0); //authed
 		Msg.AddInt(0); //cmdlist
-		SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+		SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 	}
 	else
 	{
 		CMsgPacker Msg(protocol7::NETMSG_RCON_AUTH_OFF, true, true);
-		SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+		SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 	}
 
 	m_aClients[ClientId].m_AuthTries = 0;

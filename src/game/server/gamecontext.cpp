@@ -630,7 +630,7 @@ void CGameContext::SendChatTarget(int To, const char *pText, int VersionFlags) c
 	Msg.m_ClientId = -1;
 	Msg.m_pMessage = pText;
 
-	if(g_Config.m_SvDemoChat)
+	if(g_Config.m_SvDemoChat && To == -1)
 		Server()->SendPackMsg(&Msg, MSGFLAG_NOSEND, SERVER_DEMO_CLIENT);
 
 	if(To == -1)
@@ -817,7 +817,7 @@ void CGameContext::SendServerAlert(const char *pMessage)
 	//       otherwise the message is recorded multiple times.
 	CNetMsg_Sv_ServerAlert Msg;
 	Msg.m_pMessage = pMessage;
-	Server()->SendPackMsg(&Msg, MSGFLAG_NOSEND, 0);
+	Server()->SendPackMsg(&Msg, MSGFLAG_NOSEND, SERVER_DEMO_CLIENT);
 }
 
 void CGameContext::SendModeratorAlert(const char *pMessage, int ToClientId)

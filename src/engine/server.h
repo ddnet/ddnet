@@ -87,7 +87,17 @@ public:
 		requires(!protocol7::is_sixup<T>::value)
 	int SendPackMsg(const T *pMsg, int Flags, int ClientId)
 	{
+		if(ClientId == SERVER_DEMO_CLIENT)
+			return RecordServerDemoMsg(pMsg, Flags);
+
 		int Result = 0;
+		if(ClientId == -1)
+		{
+			Result = RecordServerDemoMsg(pMsg, Flags);
+			if(Result < 0)
+				return Result;
+		}
+
 		if(ClientId == -1)
 		{
 			for(int i = 0; i < MaxClients(); i++)
@@ -105,6 +115,10 @@ public:
 		requires(protocol7::is_sixup<T>::value)
 	int SendPackMsg(const T *pMsg, int Flags, int ClientId)
 	{
+		// Sixup messages are never recorded to server demos (0.6 format only).
+		if(ClientId == SERVER_DEMO_CLIENT)
+			return 0;
+
 		int Result = 0;
 		if(ClientId == -1)
 		{
@@ -116,6 +130,18 @@ public:
 			Result = SendPackMsgOne(pMsg, Flags, ClientId);
 
 		return Result;
+	}
+
+	template<class T>
+	int RecordServerDemoMsg(const T *pMsg, int Flags)
+	{
+		if(Flags & MSGFLAG_NORECORD)
+			return 0;
+
+		CMsgPacker Packer(T::ms_MsgId, false, protocol7::is_sixup<T>::value);
+		if(pMsg->Pack(&Packer))
+			return -1;
+		return RecordServerDemo(&Packer);
 	}
 
 	template<class T>
@@ -193,6 +219,8 @@ public:
 			return -1;
 		return SendMsg(&Packer, Flags, ClientId);
 	}
+
+	virtual int RecordServerDemo(CMsgPacker *pMsg) = 0;
 
 	bool Translate(int &Target, int Client)
 	{
