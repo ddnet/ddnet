@@ -6248,53 +6248,6 @@ void CEditor::Init()
 	Reset(false);
 }
 
-void CEditor::HandleCursorMovement()
-{
-	const vec2 UpdatedMousePos = Ui()->UpdatedMousePos();
-	const vec2 UpdatedMouseDelta = Ui()->UpdatedMouseDelta();
-
-	// fix correct world x and y
-	const std::shared_ptr<CLayerGroup> pGroup = Map()->SelectedGroup();
-	if(pGroup)
-	{
-		float aPoints[4];
-		pGroup->Mapping(aPoints);
-
-		float WorldWidth = aPoints[2] - aPoints[0];
-		float WorldHeight = aPoints[3] - aPoints[1];
-
-		m_MouseWorldScale = WorldWidth / Graphics()->WindowWidth();
-
-		m_MouseWorldPos.x = aPoints[0] + WorldWidth * (UpdatedMousePos.x / Graphics()->WindowWidth());
-		m_MouseWorldPos.y = aPoints[1] + WorldHeight * (UpdatedMousePos.y / Graphics()->WindowHeight());
-		m_MouseDeltaWorld.x = UpdatedMouseDelta.x * (WorldWidth / Graphics()->WindowWidth());
-		m_MouseDeltaWorld.y = UpdatedMouseDelta.y * (WorldHeight / Graphics()->WindowHeight());
-	}
-	else
-	{
-		m_MouseWorldPos = vec2(-1.0f, -1.0f);
-		m_MouseDeltaWorld = vec2(0.0f, 0.0f);
-	}
-
-	m_MouseWorldNoParaPos = vec2(-1.0f, -1.0f);
-	for(const std::shared_ptr<CLayerGroup> &pGameGroup : Map()->m_vpGroups)
-	{
-		if(!pGameGroup->m_GameGroup)
-			continue;
-
-		float aPoints[4];
-		pGameGroup->Mapping(aPoints);
-
-		float WorldWidth = aPoints[2] - aPoints[0];
-		float WorldHeight = aPoints[3] - aPoints[1];
-
-		m_MouseWorldNoParaPos.x = aPoints[0] + WorldWidth * (UpdatedMousePos.x / Graphics()->WindowWidth());
-		m_MouseWorldNoParaPos.y = aPoints[1] + WorldHeight * (UpdatedMousePos.y / Graphics()->WindowHeight());
-	}
-
-	OnMouseMove(UpdatedMousePos);
-}
-
 void CEditor::OnMouseMove(vec2 MousePos)
 {
 	m_vHoverTiles.clear();
@@ -6498,7 +6451,7 @@ void CEditor::OnUpdate()
 		Ui()->OnInput(Event);
 	});
 
-	HandleCursorMovement();
+	MapView()->UpdateMouseWorld();
 	HandleAutosave();
 	HandleWriterFinishJobs();
 
