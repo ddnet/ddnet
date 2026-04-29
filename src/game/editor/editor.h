@@ -650,7 +650,6 @@ public:
 		};
 		CPoint m_aPoints[NUM_POINTS];
 	};
-	void DoMapEditor(CUIRect View);
 	void DoToolbarLayers(CUIRect Toolbar);
 	void DoToolbarImages(CUIRect Toolbar);
 	void DoToolbarSounds(CUIRect Toolbar);
