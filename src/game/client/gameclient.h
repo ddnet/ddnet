@@ -685,7 +685,7 @@ public:
 	bool IsDemoPlaybackPaused() const;
 	float GetAnimationPlaybackSpeed() const;
 
-	bool AntiPingPlayers() const;
+	int AntiPingPlayers() const;
 	bool AntiPingGrenade() const;
 	bool AntiPingWeapons() const;
 	bool AntiPingGunfire() const;
