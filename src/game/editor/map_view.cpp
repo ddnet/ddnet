@@ -141,16 +141,6 @@ void CMapView::Render(CUIRect View)
 	static float s_StartWx = 0;
 	static float s_StartWy = 0;
 
-	enum
-	{
-		OP_NONE = 0,
-		OP_BRUSH_GRAB,
-		OP_BRUSH_DRAW,
-		OP_BRUSH_PAINT,
-		OP_PAN_WORLD,
-		OP_PAN_EDITOR,
-	};
-
 	// remap the screen so it can display the whole tileset
 	if(Editor()->m_ShowPicker)
 	{
@@ -210,8 +200,6 @@ void CMapView::Render(CUIRect View)
 		}
 	}
 
-	static int s_Operation = OP_NONE;
-
 	// draw layer borders
 	std::pair<int, std::shared_ptr<CLayer>> apEditLayers[128];
 	size_t NumEditLayers = 0;
@@ -260,20 +248,20 @@ void CMapView::Render(CUIRect View)
 		if(ShouldPan)
 		{
 			if(Input()->ShiftIsPressed())
-				s_Operation = OP_PAN_EDITOR;
+				m_State = EState::PAN_EDITOR;
 			else
-				s_Operation = OP_PAN_WORLD;
+				m_State = EState::PAN_WORLD;
 			Ui()->SetActiveItem(Editor()->MapView());
 		}
 		else
-			s_Operation = OP_NONE;
+			m_State = EState::NONE;
 
-		if(s_Operation == OP_PAN_WORLD)
+		if(m_State == EState::PAN_WORLD)
 			OffsetWorld(-Ui()->MouseDelta() * Editor()->m_MouseWorldScale);
-		else if(s_Operation == OP_PAN_EDITOR)
+		else if(m_State == EState::PAN_EDITOR)
 			OffsetEditor(-Ui()->MouseDelta() * Editor()->m_MouseWorldScale);
 
-		if(s_Operation == OP_NONE)
+		if(m_State == EState::NONE)
 			Editor()->m_pContainerPanned = nullptr;
 	}
 
@@ -368,7 +356,7 @@ void CMapView::Render(CUIRect View)
 					r.h = -r.h;
 				}
 
-				if(s_Operation == OP_BRUSH_DRAW)
+				if(m_State == EState::BRUSH_DRAW)
 				{
 					if(!Editor()->m_pBrush->IsEmpty())
 					{
@@ -394,7 +382,7 @@ void CMapView::Render(CUIRect View)
 						}
 					}
 				}
-				else if(s_Operation == OP_BRUSH_GRAB)
+				else if(m_State == EState::BRUSH_GRAB)
 				{
 					if(!Ui()->MouseButton(0))
 					{
@@ -432,7 +420,7 @@ void CMapView::Render(CUIRect View)
 						Ui()->MapScreen();
 					}
 				}
-				else if(s_Operation == OP_BRUSH_PAINT)
+				else if(m_State == EState::BRUSH_PAINT)
 				{
 					if(!Ui()->MouseButton(0))
 					{
@@ -464,15 +452,15 @@ void CMapView::Render(CUIRect View)
 					Editor()->m_pBrush->Clear();
 				}
 
-				if(!Input()->ModifierIsPressed() && Ui()->MouseButton(0) && s_Operation == OP_NONE && !Editor()->QuadKnife()->IsActive())
+				if(!Input()->ModifierIsPressed() && Ui()->MouseButton(0) && m_State == EState::NONE && !Editor()->QuadKnife()->IsActive())
 				{
 					Ui()->SetActiveItem(Editor()->MapView());
 
 					if(Editor()->m_pBrush->IsEmpty())
-						s_Operation = OP_BRUSH_GRAB;
+						m_State = EState::BRUSH_GRAB;
 					else
 					{
-						s_Operation = OP_BRUSH_DRAW;
+						m_State = EState::BRUSH_DRAW;
 						for(size_t k = 0; k < NumEditLayers; k++)
 						{
 							size_t BrushIndex = k;
@@ -486,7 +474,7 @@ void CMapView::Render(CUIRect View)
 
 					std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(Map()->SelectedLayerType(0, LAYERTYPE_TILES));
 					if(Input()->ShiftIsPressed() && pLayer)
-						s_Operation = OP_BRUSH_PAINT;
+						m_State = EState::BRUSH_PAINT;
 				}
 
 				if(!Editor()->m_pBrush->IsEmpty())
@@ -672,7 +660,7 @@ void CMapView::Render(CUIRect View)
 		// release mouse
 		if(!Ui()->MouseButton(0))
 		{
-			if(s_Operation == OP_BRUSH_DRAW)
+			if(m_State == EState::BRUSH_DRAW)
 			{
 				std::shared_ptr<IEditorAction> pAction = std::make_shared<CEditorBrushDrawAction>(Map(), Map()->m_SelectedGroup);
 
@@ -680,7 +668,7 @@ void CMapView::Render(CUIRect View)
 					Map()->m_EditorHistory.RecordAction(pAction);
 			}
 
-			s_Operation = OP_NONE;
+			m_State = EState::NONE;
 			Ui()->SetActiveItem(nullptr);
 		}
 	}

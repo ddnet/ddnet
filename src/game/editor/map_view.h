@@ -63,6 +63,17 @@ private:
 
 	vec2 m_WorldOffset;
 	vec2 m_EditorOffset;
+
+	enum class EState
+	{
+		NONE,
+		BRUSH_GRAB,
+		BRUSH_DRAW,
+		BRUSH_PAINT,
+		PAN_WORLD,
+		PAN_EDITOR,
+	};
+	EState m_State;
 };
 
 #endif
