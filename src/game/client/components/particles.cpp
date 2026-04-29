@@ -86,6 +86,12 @@ void CParticles::Update(float TimePassed)
 		m_FrictionFraction -= 0.05f;
 	}
 
+	float aRandomValues[16];
+	for(float &RandomValue : aRandomValues)
+	{
+		RandomValue = random_float(0.1f, 1.0f);
+	}
+
 	for(int &FirstPart : m_aFirstPart)
 	{
 		int i = FirstPart;
@@ -101,7 +107,7 @@ void CParticles::Update(float TimePassed)
 			vec2 Vel = m_aParticles[i].m_Vel * TimePassed;
 			if(m_aParticles[i].m_Collides)
 			{
-				Collision()->MovePoint(&m_aParticles[i].m_Pos, &Vel, random_float(0.1f, 1.0f), nullptr);
+				Collision()->MovePoint(&m_aParticles[i].m_Pos, &Vel, aRandomValues[i % 16], nullptr);
 			}
 			else
 			{
@@ -179,7 +185,7 @@ bool CParticles::ParticleIsVisibleOnScreen(const vec2 &CurPos, float CurSize)
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 
 	// for simplicity assume the worst case rotation, that increases the bounding box around the particle by its diagonal
-	const float SqrtOf2 = std::sqrt(2);
+	static const float SqrtOf2 = sqrt(2);
 	CurSize = SqrtOf2 * CurSize;
 
 	// always uses the mid of the particle
@@ -250,7 +256,8 @@ void CParticles::RenderGroup(int Group)
 			// the current position, respecting the size, is inside the viewport, render it, else ignore
 			if(ParticleIsVisibleOnScreen(p, Size))
 			{
-				if((size_t)CurParticleRenderCount == GRAPHICS_MAX_PARTICLES_RENDER_COUNT || LastColor.r != m_aParticles[i].m_Color.r || LastColor.g != m_aParticles[i].m_Color.g || LastColor.b != m_aParticles[i].m_Color.b || LastColor.a != Alpha || LastQuadOffset != QuadOffset)
+				bool ColorMismatch = LastColor.r != m_aParticles[i].m_Color.r || LastColor.g != m_aParticles[i].m_Color.g || LastColor.b != m_aParticles[i].m_Color.b || LastColor.a != Alpha;
+				if(ColorMismatch || (size_t)CurParticleRenderCount == GRAPHICS_MAX_PARTICLES_RENDER_COUNT || LastQuadOffset != QuadOffset)
 				{
 					dbg_assert(LastQuadOffset >= FirstParticleOffset, "Invalid particle offsets: %d < %d", LastQuadOffset, FirstParticleOffset);
 					Graphics()->TextureSet(aParticles[LastQuadOffset - FirstParticleOffset]);
@@ -258,16 +265,19 @@ void CParticles::RenderGroup(int Group)
 					CurParticleRenderCount = 0;
 					LastQuadOffset = QuadOffset;
 
-					Graphics()->SetColor(
-						m_aParticles[i].m_Color.r,
-						m_aParticles[i].m_Color.g,
-						m_aParticles[i].m_Color.b,
-						Alpha);
+					if(ColorMismatch)
+					{
+						Graphics()->SetColor(
+							m_aParticles[i].m_Color.r,
+							m_aParticles[i].m_Color.g,
+							m_aParticles[i].m_Color.b,
+							Alpha);
 
-					LastColor.r = m_aParticles[i].m_Color.r;
-					LastColor.g = m_aParticles[i].m_Color.g;
-					LastColor.b = m_aParticles[i].m_Color.b;
-					LastColor.a = Alpha;
+						LastColor.r = m_aParticles[i].m_Color.r;
+						LastColor.g = m_aParticles[i].m_Color.g;
+						LastColor.b = m_aParticles[i].m_Color.b;
+						LastColor.a = Alpha;
+					}
 				}
 
 				s_aParticleRenderInfo[CurParticleRenderCount].m_Pos[0] = p.x;
