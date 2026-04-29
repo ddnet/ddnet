@@ -114,7 +114,7 @@ void CEditorMap::Clean()
 	m_MapViewState.Reset(Editor());
 	m_MapGridState.Reset();
 	m_ProofModeState.Reset();
-	Editor()->QuadKnife()->Deactivate();
+	m_QuadKnifeState.Reset();
 	m_EnvelopeEditorState.Reset(Editor());
 	m_MapSettingsCommandContext.Reset();
 	m_FontTyperState.Reset();
@@ -359,7 +359,7 @@ void CEditorMap::SelectLayer(int LayerIndex, int GroupIndex)
 void CEditorMap::AddSelectedLayer(int LayerIndex)
 {
 	m_vSelectedLayers.push_back(LayerIndex);
-	Editor()->QuadKnife()->Deactivate();
+	m_QuadKnifeState.Reset();
 }
 
 void CEditorMap::SelectNextLayer()
