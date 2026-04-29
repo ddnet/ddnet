@@ -133,8 +133,8 @@ void CMapView::Render(CUIRect View)
 	const bool Inside = Ui()->MouseInside(&View);
 
 	// fetch mouse position
-	float wx = Ui()->MouseWorldX();
-	float wy = Ui()->MouseWorldY();
+	float wx = MouseWorldX();
+	float wy = MouseWorldY();
 	float mx = Ui()->MouseX();
 	float my = Ui()->MouseY();
 

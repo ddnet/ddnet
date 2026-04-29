@@ -65,7 +65,7 @@ void CQuadKnife::DoSlice()
 	const bool IgnoreGrid = Editor()->Input()->AltIsPressed();
 	float SnapRadius = 4.f * Editor()->MapView()->MouseWorldScale();
 
-	vec2 Mouse = Editor()->Ui()->MouseWorldPos();
+	vec2 Mouse = Editor()->MapView()->MouseWorldPos();
 	vec2 Point = Mouse;
 
 	vec2 v[4] = {
