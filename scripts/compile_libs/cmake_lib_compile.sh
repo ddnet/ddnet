@@ -44,7 +44,7 @@ function make_cmake() {
 		cmake_arguments+=("-DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY")
 		build_extra_cflags="${IOS_COMMON_CFLAGS}"
 	elif [[ "${TARGET_PLATFORM}" == "webasm" ]]; then
-		cmake_wrapper="emcmake"
+		cmake_wrapper="${EMSCRIPTEN_CMAKE_WRAPPER}"
 		build_extra_cflags="${EMSCRIPTEN_WASM_CFLAGS} ${EMSCRIPTEN_EXTRA_RELEASE_CFLAGS}"
 		build_extra_ldflags="${EMSCRIPTEN_WASM_LDFLAGS}"
 	fi

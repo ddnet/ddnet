@@ -46,8 +46,8 @@ function make_sqlite3() {
 			ar="$(xcrun --sdk "${ios_sdk_path}" --find ar)"
 			build_extra_cflags="${build_extra_cflags} -arch ${build_ios_arch} -isysroot ${ios_sdk_path} ${ios_min_flag}"
 		elif [[ "${TARGET_PLATFORM}" == "webasm" ]]; then
-			cc="emcc"
-			ar="emar"
+			cc="${EMSCRIPTEN_CC}"
+			ar="${EMSCRIPTEN_AR}"
 		fi
 
 		# Remove absolute build paths and compiler identification from binary
