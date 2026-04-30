@@ -9,6 +9,7 @@
 #include <engine/graphics.h>
 #include <engine/textrender.h>
 
+#include <cmath>
 #include <limits>
 
 CGraph::CGraph(int MaxEntries, int Precision, bool SummaryStats) :
@@ -128,6 +129,41 @@ void CGraph::Scale(int64_t WantedTotalTime)
 	{
 		m_Average /= NumValues;
 	}
+}
+
+CGraph::SSummaryStats CGraph::SummaryStats(size_t MaxEntries) const
+{
+	const CEntry *pEntry = m_Entries.Last();
+	if(pEntry == nullptr || MaxEntries == 0)
+	{
+		return {};
+	}
+
+	float Min = std::numeric_limits<float>::max();
+	float Max = std::numeric_limits<float>::lowest();
+	float Sum = 0.0f;
+	size_t NumSamples = 0;
+	for(; pEntry != nullptr && NumSamples < MaxEntries; pEntry = m_Entries.Prev(pEntry))
+	{
+		const float Value = pEntry->m_Value;
+		if(Value < Min)
+			Min = Value;
+		if(Value > Max)
+			Max = Value;
+		Sum += Value;
+		++NumSamples;
+	}
+
+	const float Avg = Sum / NumSamples;
+	float VarianceSum = 0.0f;
+	pEntry = m_Entries.Last();
+	for(size_t i = 0; pEntry != nullptr && i < NumSamples; pEntry = m_Entries.Prev(pEntry), ++i)
+	{
+		const float Delta = pEntry->m_Value - Avg;
+		VarianceSum += Delta * Delta;
+	}
+
+	return {NumSamples, Min, Avg, std::sqrt(VarianceSum / NumSamples), Max};
 }
 
 void CGraph::Add(float Value, ColorRGBA Color)

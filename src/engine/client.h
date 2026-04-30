@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef ENGINE_CLIENT_H
 #define ENGINE_CLIENT_H
+
 #include "graphics.h"
 #include "kernel.h"
 #include "message.h"
@@ -15,6 +16,7 @@
 #include <generated/protocol.h>
 #include <generated/protocol7.h>
 
+#include <cstddef>
 #include <functional>
 #include <optional>
 
@@ -183,10 +185,22 @@ public:
 
 	// Render statistics.
 
+	struct SFrameTimeStats
+	{
+		int m_NumSamples = 0;
+		float m_Min = 0.0f;
+		float m_Avg = 0.0f;
+		float m_Deviation = 0.0f;
+		float m_Max = 0.0f;
+
+		bool IsValid() const { return m_NumSamples > 0; }
+	};
+
 	// Duration in seconds of the previous render cycle.
 	float RenderFrameTime() const { return m_RenderFrameTime; }
 	// Exponentially weighted average of frame times.
 	float FrameTimeAverage() const { return m_FrameTimeAverage; }
+	virtual SFrameTimeStats FrameTimeWindowStats(size_t NumFrames) const = 0;
 
 	// actions
 	virtual void Connect(const char *pAddress, const char *pPassword = nullptr) = 0;

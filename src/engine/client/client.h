@@ -197,6 +197,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	CGraph m_InputtimeMarginGraph;
 	CGraph m_aGametimeMarginGraphs[NUM_DUMMIES];
 	CGraph m_FpsGraph;
+	CGraph m_FrameTimeGraph;
 
 	// the game snapshots are modifiable by the game
 	CSnapshotStorage m_aSnapshotStorage[NUM_DUMMIES];
@@ -355,6 +356,7 @@ public:
 	// ---
 
 	int GetPredictionTime() override;
+	SFrameTimeStats FrameTimeWindowStats(size_t NumFrames) const override;
 	CSnapItem SnapGetItem(int SnapId, int Index) const override;
 	int GetPredictionTick() override;
 	const void *SnapFindItem(int SnapId, int Type, int Id) const override;
