@@ -63,9 +63,9 @@ void CQuadKnife::DoSlice()
 	CQuad *pQuad = &pLayer->m_vQuads[QuadIndex];
 
 	const bool IgnoreGrid = Editor()->Input()->AltIsPressed();
-	float SnapRadius = 4.f * Editor()->m_MouseWorldScale;
+	float SnapRadius = 4.f * Editor()->MapView()->MouseWorldScale();
 
-	vec2 Mouse = Editor()->Ui()->MouseWorldPos();
+	vec2 Mouse = Editor()->MapView()->MouseWorldPos();
 	vec2 Point = Mouse;
 
 	vec2 v[4] = {
@@ -267,14 +267,14 @@ void CQuadKnife::DoSlice()
 	IGraphics::CQuadItem aMarkers[4];
 
 	for(int i = 0; i < Map()->m_QuadKnifeState.m_Count; i++)
-		aMarkers[i] = IGraphics::CQuadItem(Map()->m_QuadKnifeState.m_aPoints[i].x, Map()->m_QuadKnifeState.m_aPoints[i].y, 5.f * Editor()->m_MouseWorldScale, 5.f * Editor()->m_MouseWorldScale);
+		aMarkers[i] = IGraphics::CQuadItem(Map()->m_QuadKnifeState.m_aPoints[i].x, Map()->m_QuadKnifeState.m_aPoints[i].y, 5.f * Editor()->MapView()->MouseWorldScale(), 5.f * Editor()->MapView()->MouseWorldScale());
 
 	Graphics()->SetColor(0.f, 0.f, 1.f, 1.f);
 	Graphics()->QuadsDraw(aMarkers, Map()->m_QuadKnifeState.m_Count);
 
 	if(ValidPosition)
 	{
-		IGraphics::CQuadItem MarkerCurrent(Point.x, Point.y, 5.f * Editor()->m_MouseWorldScale, 5.f * Editor()->m_MouseWorldScale);
+		IGraphics::CQuadItem MarkerCurrent(Point.x, Point.y, 5.f * Editor()->MapView()->MouseWorldScale(), 5.f * Editor()->MapView()->MouseWorldScale());
 		Graphics()->QuadsDraw(&MarkerCurrent, 1);
 	}
 

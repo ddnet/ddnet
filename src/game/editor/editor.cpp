@@ -36,7 +36,6 @@
 #include <game/client/ui_listbox.h>
 #include <game/client/ui_scrollregion.h>
 #include <game/editor/editor_history.h>
-#include <game/editor/explanations.h>
 #include <game/editor/mapitems/image.h>
 #include <game/editor/mapitems/sound.h>
 #include <game/localization.h>
@@ -773,11 +772,11 @@ void CEditor::DoSoundSource(int LayerIndex, CSoundSource *pSource, int Index)
 			Map()->m_SoundSourceOperationTracker.Begin(pSource, s_Operation, LayerIndex);
 		}
 
-		if(m_MouseDeltaWorld != vec2(0.0f, 0.0f))
+		if(MapView()->MouseDeltaWorld() != vec2(0.0f, 0.0f))
 		{
 			if(s_Operation == ESoundSourceOp::MOVE)
 			{
-				vec2 Pos = Ui()->MouseWorldPos();
+				vec2 Pos = MapView()->MouseWorldPos();
 				if(MapView()->MapGrid()->IsEnabled() && !IgnoreGrid)
 				{
 					MapView()->MapGrid()->SnapToGrid(Pos);
@@ -840,19 +839,19 @@ void CEditor::DoSoundSource(int LayerIndex, CSoundSource *pSource, int Index)
 		Graphics()->SetColor(0, 1, 0, 1);
 	}
 
-	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * m_MouseWorldScale, 5.0f * m_MouseWorldScale);
+	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * MapView()->MouseWorldScale(), 5.0f * MapView()->MouseWorldScale());
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
 void CEditor::UpdateHotSoundSource(const CLayerSounds *pLayer)
 {
-	const vec2 MouseWorld = Ui()->MouseWorldPos();
+	const vec2 MouseWorld = MapView()->MouseWorldPos();
 
 	float MinDist = 500.0f;
 	const void *pMinSourceId = nullptr;
 
 	const auto UpdateMinimum = [&](vec2 Position, const void *pId) {
-		const float CurrDist = length_squared((Position - MouseWorld) / m_MouseWorldScale);
+		const float CurrDist = length_squared((Position - MouseWorld) / MapView()->MouseWorldScale());
 		if(CurrDist < MinDist)
 		{
 			MinDist = CurrDist;
@@ -900,17 +899,17 @@ void CEditor::DrawAxis(EAxis Axis, CPoint &OriginalPoint, CPoint &Point) const
 	Graphics()->SetColor(1, 0, 0.1f, 1);
 	if(Axis == EAxis::X)
 	{
-		IGraphics::CQuadItem Line(fx2f(OriginalPoint.x + Point.x) / 2.0f, fx2f(OriginalPoint.y), fx2f(Point.x - OriginalPoint.x), 1.0f * m_MouseWorldScale);
+		IGraphics::CQuadItem Line(fx2f(OriginalPoint.x + Point.x) / 2.0f, fx2f(OriginalPoint.y), fx2f(Point.x - OriginalPoint.x), 1.0f * MapView()->MouseWorldScale());
 		Graphics()->QuadsDraw(&Line, 1);
 	}
 	else if(Axis == EAxis::Y)
 	{
-		IGraphics::CQuadItem Line(fx2f(OriginalPoint.x), fx2f(OriginalPoint.y + Point.y) / 2.0f, 1.0f * m_MouseWorldScale, fx2f(Point.y - OriginalPoint.y));
+		IGraphics::CQuadItem Line(fx2f(OriginalPoint.x), fx2f(OriginalPoint.y + Point.y) / 2.0f, 1.0f * MapView()->MouseWorldScale(), fx2f(Point.y - OriginalPoint.y));
 		Graphics()->QuadsDraw(&Line, 1);
 	}
 
 	// Draw ghost of original point
-	IGraphics::CQuadItem QuadItem(fx2f(OriginalPoint.x), fx2f(OriginalPoint.y), 5.0f * m_MouseWorldScale, 5.0f * m_MouseWorldScale);
+	IGraphics::CQuadItem QuadItem(fx2f(OriginalPoint.x), fx2f(OriginalPoint.y), 5.0f * MapView()->MouseWorldScale(), 5.0f * MapView()->MouseWorldScale());
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
@@ -924,7 +923,7 @@ void CEditor::ComputePointAlignments(const std::shared_ptr<CLayerQuads> &pLayer,
 	bool GridEnabled = MapView()->MapGrid()->IsEnabled() && !Input()->AltIsPressed();
 
 	// Perform computation from the original position of this point
-	int Threshold = f2fx(maximum(5.0f, 10.0f * m_MouseWorldScale));
+	int Threshold = f2fx(maximum(5.0f, 10.0f * MapView()->MouseWorldScale()));
 	CPoint OrigPoint = m_QuadDragOriginalPoints.at(QuadIndex)[PointIndex];
 	// Get the "current" point by applying the offset
 	CPoint Point = OrigPoint + Offset;
@@ -1105,7 +1104,7 @@ void CEditor::ComputeAABBAlignments(const std::shared_ptr<CLayerQuads> &pLayer, 
 	// This method is a bit different than the point alignment in the way where instead of trying to align 1 point to all quads,
 	// we try to align 5 points to all quads, these 5 points being 5 points of an AABB.
 	// Otherwise, the concept is the same, we use the original position of the AABB to make the computations.
-	int Threshold = f2fx(maximum(5.0f, 10.0f * m_MouseWorldScale));
+	int Threshold = f2fx(maximum(5.0f, 10.0f * MapView()->MouseWorldScale()));
 	ivec2 SmallestDiff = ivec2(Threshold + 1, Threshold + 1);
 	std::vector<SAlignmentInfo> vAlignmentsX, vAlignmentsY;
 
@@ -1219,12 +1218,12 @@ void CEditor::DrawPointAlignments(const std::vector<SAlignmentInfo> &vAlignments
 		// We don't use IGraphics::CLineItem to draw because we don't want to stop QuadsBegin(), quads work just fine.
 		if(Alignment.m_Axis == EAxis::X)
 		{ // Alignment on X axis is same Y values but different X values
-			IGraphics::CQuadItem Line(fx2f(Alignment.m_AlignedPoint.x), fx2f(Alignment.m_AlignedPoint.y), fx2f(Alignment.m_X + Offset.x - Alignment.m_AlignedPoint.x), 1.0f * m_MouseWorldScale);
+			IGraphics::CQuadItem Line(fx2f(Alignment.m_AlignedPoint.x), fx2f(Alignment.m_AlignedPoint.y), fx2f(Alignment.m_X + Offset.x - Alignment.m_AlignedPoint.x), 1.0f * MapView()->MouseWorldScale());
 			Graphics()->QuadsDrawTL(&Line, 1);
 		}
 		else if(Alignment.m_Axis == EAxis::Y)
 		{ // Alignment on Y axis is same X values but different Y values
-			IGraphics::CQuadItem Line(fx2f(Alignment.m_AlignedPoint.x), fx2f(Alignment.m_AlignedPoint.y), 1.0f * m_MouseWorldScale, fx2f(Alignment.m_Y + Offset.y - Alignment.m_AlignedPoint.y));
+			IGraphics::CQuadItem Line(fx2f(Alignment.m_AlignedPoint.x), fx2f(Alignment.m_AlignedPoint.y), 1.0f * MapView()->MouseWorldScale(), fx2f(Alignment.m_Y + Offset.y - Alignment.m_AlignedPoint.y));
 			Graphics()->QuadsDrawTL(&Line, 1);
 		}
 	}
@@ -1242,15 +1241,15 @@ void CEditor::DrawAABB(const SAxisAlignedBoundingBox &AABB, ivec2 Offset) const
 
 	// We don't use IGraphics::CLineItem to draw because we don't want to stop QuadsBegin(), quads work just fine.
 	IGraphics::CQuadItem Lines[4] = {
-		{TL.x, TL.y, TR.x - TL.x, 1.0f * m_MouseWorldScale},
-		{TL.x, TL.y, 1.0f * m_MouseWorldScale, BL.y - TL.y},
-		{TR.x, TR.y, 1.0f * m_MouseWorldScale, BR.y - TR.y},
-		{BL.x, BL.y, BR.x - BL.x, 1.0f * m_MouseWorldScale},
+		{TL.x, TL.y, TR.x - TL.x, 1.0f * MapView()->MouseWorldScale()},
+		{TL.x, TL.y, 1.0f * MapView()->MouseWorldScale(), BL.y - TL.y},
+		{TR.x, TR.y, 1.0f * MapView()->MouseWorldScale(), BR.y - TR.y},
+		{BL.x, BL.y, BR.x - BL.x, 1.0f * MapView()->MouseWorldScale()},
 	};
 	Graphics()->SetColor(1, 0, 1, 1);
 	Graphics()->QuadsDrawTL(Lines, 4);
 
-	IGraphics::CQuadItem CenterQuad(Center.x, Center.y, 5.0f * m_MouseWorldScale, 5.0f * m_MouseWorldScale);
+	IGraphics::CQuadItem CenterQuad(Center.x, Center.y, 5.0f * MapView()->MouseWorldScale(), 5.0f * MapView()->MouseWorldScale());
 	Graphics()->QuadsDraw(&CenterQuad, 1);
 }
 
@@ -1369,7 +1368,7 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 	const bool IgnoreGrid = Input()->AltIsPressed();
 
 	auto &&GetDragOffset = [&]() -> ivec2 {
-		vec2 Pos = Ui()->MouseWorldPos();
+		vec2 Pos = MapView()->MouseWorldPos();
 		if(MapView()->MapGrid()->IsEnabled() && !IgnoreGrid)
 		{
 			MapView()->MapGrid()->SnapToGrid(Pos);
@@ -1381,13 +1380,13 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 	if(Map()->IsQuadSelected(Index))
 	{
 		Graphics()->SetColor(0, 0, 0, 1);
-		IGraphics::CQuadItem QuadItem(CenterX, CenterY, 7.0f * m_MouseWorldScale, 7.0f * m_MouseWorldScale);
+		IGraphics::CQuadItem QuadItem(CenterX, CenterY, 7.0f * MapView()->MouseWorldScale(), 7.0f * MapView()->MouseWorldScale());
 		Graphics()->QuadsDraw(&QuadItem, 1);
 	}
 
 	if(Ui()->CheckActiveItem(pId))
 	{
-		if(m_MouseDeltaWorld != vec2(0.0f, 0.0f))
+		if(MapView()->MouseDeltaWorld() != vec2(0.0f, 0.0f))
 		{
 			if(s_Operation == OP_SELECT)
 			{
@@ -1643,7 +1642,7 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 	else
 		Graphics()->SetColor(0, 1, 0, 1);
 
-	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * m_MouseWorldScale, 5.0f * m_MouseWorldScale);
+	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * MapView()->MouseWorldScale(), 5.0f * MapView()->MouseWorldScale());
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
@@ -1657,7 +1656,7 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 	if(Map()->IsQuadPointSelected(QuadIndex, V))
 	{
 		Graphics()->SetColor(0, 0, 0, 1);
-		IGraphics::CQuadItem QuadItem(Center.x, Center.y, 7.0f * m_MouseWorldScale, 7.0f * m_MouseWorldScale);
+		IGraphics::CQuadItem QuadItem(Center.x, Center.y, 7.0f * MapView()->MouseWorldScale(), 7.0f * MapView()->MouseWorldScale());
 		Graphics()->QuadsDraw(&QuadItem, 1);
 	}
 
@@ -1677,7 +1676,7 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 	static ivec2 s_LastOffset;
 
 	auto &&GetDragOffset = [&]() -> ivec2 {
-		vec2 Pos = Ui()->MouseWorldPos();
+		vec2 Pos = MapView()->MouseWorldPos();
 		if(MapView()->MapGrid()->IsEnabled() && !IgnoreGrid)
 		{
 			MapView()->MapGrid()->SnapToGrid(Pos);
@@ -1687,7 +1686,7 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 
 	if(Ui()->CheckActiveItem(pId))
 	{
-		if(m_MouseDeltaWorld != vec2(0.0f, 0.0f))
+		if(MapView()->MouseDeltaWorld() != vec2(0.0f, 0.0f))
 		{
 			if(s_Operation == OP_SELECT)
 			{
@@ -1755,11 +1754,11 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 							// 0,2;1,3 - line x
 							// 0,1;2,3 - line y
 
-							pSelectedQuad->m_aTexcoords[m].x += f2fx(m_MouseDeltaWorld.x * 0.001f);
-							pSelectedQuad->m_aTexcoords[(m + 2) % 4].x += f2fx(m_MouseDeltaWorld.x * 0.001f);
+							pSelectedQuad->m_aTexcoords[m].x += f2fx(MapView()->MouseDeltaWorldX() * 0.001f);
+							pSelectedQuad->m_aTexcoords[(m + 2) % 4].x += f2fx(MapView()->MouseDeltaWorldX() * 0.001f);
 
-							pSelectedQuad->m_aTexcoords[m].y += f2fx(m_MouseDeltaWorld.y * 0.001f);
-							pSelectedQuad->m_aTexcoords[m ^ 1].y += f2fx(m_MouseDeltaWorld.y * 0.001f);
+							pSelectedQuad->m_aTexcoords[m].y += f2fx(MapView()->MouseDeltaWorldY() * 0.001f);
+							pSelectedQuad->m_aTexcoords[m ^ 1].y += f2fx(MapView()->MouseDeltaWorldY() * 0.001f);
 						}
 					}
 				}
@@ -1854,7 +1853,7 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 	else
 		Graphics()->SetColor(1, 0, 0, 1);
 
-	IGraphics::CQuadItem QuadItem(Center.x, Center.y, 5.0f * m_MouseWorldScale, 5.0f * m_MouseWorldScale);
+	IGraphics::CQuadItem QuadItem(Center.x, Center.y, 5.0f * MapView()->MouseWorldScale(), 5.0f * MapView()->MouseWorldScale());
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
@@ -2025,11 +2024,11 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, CEnvelope *pEnvelope, int QuadI
 
 	if(Ui()->CheckActiveItem(pPoint) && Map()->m_CurrentQuadIndex == QuadIndex)
 	{
-		if(m_MouseDeltaWorld != vec2(0.0f, 0.0f))
+		if(MapView()->MouseDeltaWorld() != vec2(0.0f, 0.0f))
 		{
 			if(m_QuadEnvelopePointOperation == EQuadEnvelopePointOperation::MOVE)
 			{
-				vec2 Pos = Ui()->MouseWorldPos();
+				vec2 Pos = MapView()->MouseWorldPos();
 				if(MapView()->MapGrid()->IsEnabled() && !IgnoreGrid)
 				{
 					MapView()->MapGrid()->SnapToGrid(Pos);
@@ -2084,617 +2083,19 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, CEnvelope *pEnvelope, int QuadI
 		Graphics()->SetColor(ColorRGBA(0.0f, 1.0f, 1.0f, 1.0f));
 	}
 
-	IGraphics::CQuadItem QuadItem(Center.x, Center.y, 5.0f * m_MouseWorldScale, 5.0f * m_MouseWorldScale);
+	IGraphics::CQuadItem QuadItem(Center.x, Center.y, 5.0f * MapView()->MouseWorldScale(), 5.0f * MapView()->MouseWorldScale());
 	Graphics()->QuadsDraw(&QuadItem, 1);
-}
-
-void CEditor::DoMapEditor(CUIRect View)
-{
-	// render all good stuff
-	if(!m_ShowPicker)
-	{
-		MapView()->RenderEditorMap();
-	}
-	else
-	{
-		// fix aspect ratio of the image in the picker
-		float Max = minimum(View.w, View.h);
-		View.w = View.h = Max;
-	}
-
-	const bool Inside = Ui()->MouseInside(&View);
-
-	// fetch mouse position
-	float wx = Ui()->MouseWorldX();
-	float wy = Ui()->MouseWorldY();
-	float mx = Ui()->MouseX();
-	float my = Ui()->MouseY();
-
-	static float s_StartWx = 0;
-	static float s_StartWy = 0;
-
-	enum
-	{
-		OP_NONE = 0,
-		OP_BRUSH_GRAB,
-		OP_BRUSH_DRAW,
-		OP_BRUSH_PAINT,
-		OP_PAN_WORLD,
-		OP_PAN_EDITOR,
-	};
-
-	// remap the screen so it can display the whole tileset
-	if(m_ShowPicker)
-	{
-		CUIRect Screen = *Ui()->Screen();
-		float Size = 32.0f * 16.0f;
-		float w = Size * (Screen.w / View.w);
-		float h = Size * (Screen.h / View.h);
-		float x = -(View.x / Screen.w) * w;
-		float y = -(View.y / Screen.h) * h;
-		wx = x + w * mx / Screen.w;
-		wy = y + h * my / Screen.h;
-		std::shared_ptr<CLayerTiles> pTileLayer = std::static_pointer_cast<CLayerTiles>(Map()->SelectedLayerType(0, LAYERTYPE_TILES));
-		if(pTileLayer)
-		{
-			Graphics()->MapScreen(x, y, x + w, y + h);
-			m_pTilesetPicker->m_Image = pTileLayer->m_Image;
-			if(m_BrushColorEnabled)
-			{
-				m_pTilesetPicker->m_Color = pTileLayer->m_Color;
-				m_pTilesetPicker->m_Color.a = 255;
-			}
-			else
-			{
-				m_pTilesetPicker->m_Color = {255, 255, 255, 255};
-			}
-
-			m_pTilesetPicker->m_HasGame = pTileLayer->m_HasGame;
-			m_pTilesetPicker->m_HasTele = pTileLayer->m_HasTele;
-			m_pTilesetPicker->m_HasSpeedup = pTileLayer->m_HasSpeedup;
-			m_pTilesetPicker->m_HasFront = pTileLayer->m_HasFront;
-			m_pTilesetPicker->m_HasSwitch = pTileLayer->m_HasSwitch;
-			m_pTilesetPicker->m_HasTune = pTileLayer->m_HasTune;
-
-			m_pTilesetPicker->Render(true);
-
-			if(m_ShowTileInfo != SHOW_TILE_OFF)
-				m_pTilesetPicker->ShowInfo();
-		}
-		else
-		{
-			std::shared_ptr<CLayerQuads> pQuadLayer = std::static_pointer_cast<CLayerQuads>(Map()->SelectedLayerType(0, LAYERTYPE_QUADS));
-			if(pQuadLayer)
-			{
-				m_pQuadsetPicker->m_Image = pQuadLayer->m_Image;
-				m_pQuadsetPicker->m_vQuads[0].m_aPoints[0].x = f2fx(View.x);
-				m_pQuadsetPicker->m_vQuads[0].m_aPoints[0].y = f2fx(View.y);
-				m_pQuadsetPicker->m_vQuads[0].m_aPoints[1].x = f2fx((View.x + View.w));
-				m_pQuadsetPicker->m_vQuads[0].m_aPoints[1].y = f2fx(View.y);
-				m_pQuadsetPicker->m_vQuads[0].m_aPoints[2].x = f2fx(View.x);
-				m_pQuadsetPicker->m_vQuads[0].m_aPoints[2].y = f2fx((View.y + View.h));
-				m_pQuadsetPicker->m_vQuads[0].m_aPoints[3].x = f2fx((View.x + View.w));
-				m_pQuadsetPicker->m_vQuads[0].m_aPoints[3].y = f2fx((View.y + View.h));
-				m_pQuadsetPicker->m_vQuads[0].m_aPoints[4].x = f2fx((View.x + View.w / 2));
-				m_pQuadsetPicker->m_vQuads[0].m_aPoints[4].y = f2fx((View.y + View.h / 2));
-				m_pQuadsetPicker->Render();
-			}
-		}
-	}
-
-	static int s_Operation = OP_NONE;
-
-	// draw layer borders
-	std::pair<int, std::shared_ptr<CLayer>> apEditLayers[128];
-	size_t NumEditLayers = 0;
-
-	if(m_ShowPicker && Map()->SelectedLayer(0) && Map()->SelectedLayer(0)->m_Type == LAYERTYPE_TILES)
-	{
-		apEditLayers[0] = {0, m_pTilesetPicker};
-		NumEditLayers++;
-	}
-	else if(m_ShowPicker)
-	{
-		apEditLayers[0] = {0, m_pQuadsetPicker};
-		NumEditLayers++;
-	}
-	else
-	{
-		// pick a type of layers to edit, preferring Tiles layers.
-		int EditingType = -1;
-		for(size_t i = 0; i < Map()->m_vSelectedLayers.size(); i++)
-		{
-			std::shared_ptr<CLayer> pLayer = Map()->SelectedLayer(i);
-			if(pLayer && (EditingType == -1 || pLayer->m_Type == LAYERTYPE_TILES))
-			{
-				EditingType = pLayer->m_Type;
-				if(EditingType == LAYERTYPE_TILES)
-					break;
-			}
-		}
-		for(size_t i = 0; i < Map()->m_vSelectedLayers.size() && NumEditLayers < 128; i++)
-		{
-			apEditLayers[NumEditLayers] = {Map()->m_vSelectedLayers[i], Map()->SelectedLayerType(i, EditingType)};
-			if(apEditLayers[NumEditLayers].second)
-			{
-				NumEditLayers++;
-			}
-		}
-
-		MapView()->RenderGroupBorder();
-		MapView()->MapGrid()->Render();
-	}
-
-	const bool ShouldPan = Ui()->HotItem() == &m_MapEditorId && ((Input()->ModifierIsPressed() && Ui()->MouseButton(0)) || Ui()->MouseButton(2));
-	if(m_pContainerPanned == &m_MapEditorId)
-	{
-		// do panning
-		if(ShouldPan)
-		{
-			if(Input()->ShiftIsPressed())
-				s_Operation = OP_PAN_EDITOR;
-			else
-				s_Operation = OP_PAN_WORLD;
-			Ui()->SetActiveItem(&m_MapEditorId);
-		}
-		else
-			s_Operation = OP_NONE;
-
-		if(s_Operation == OP_PAN_WORLD)
-			MapView()->OffsetWorld(-Ui()->MouseDelta() * m_MouseWorldScale);
-		else if(s_Operation == OP_PAN_EDITOR)
-			MapView()->OffsetEditor(-Ui()->MouseDelta() * m_MouseWorldScale);
-
-		if(s_Operation == OP_NONE)
-			m_pContainerPanned = nullptr;
-	}
-
-	if(Inside)
-	{
-		Ui()->SetHotItem(&m_MapEditorId);
-
-		// do global operations like pan and zoom
-		if(Ui()->CheckActiveItem(nullptr) && (Ui()->MouseButton(0) || Ui()->MouseButton(2)))
-		{
-			s_StartWx = wx;
-			s_StartWy = wy;
-
-			if(ShouldPan && m_pContainerPanned == nullptr)
-				m_pContainerPanned = &m_MapEditorId;
-		}
-
-		// brush editing
-		if(Ui()->HotItem() == &m_MapEditorId)
-		{
-			if(m_ShowPicker)
-			{
-				std::shared_ptr<CLayer> pLayer = Map()->SelectedLayer(0);
-				int Layer;
-				if(pLayer == Map()->m_pGameLayer)
-					Layer = LAYER_GAME;
-				else if(pLayer == Map()->m_pFrontLayer)
-					Layer = LAYER_FRONT;
-				else if(pLayer == Map()->m_pSwitchLayer)
-					Layer = LAYER_SWITCH;
-				else if(pLayer == Map()->m_pTeleLayer)
-					Layer = LAYER_TELE;
-				else if(pLayer == Map()->m_pSpeedupLayer)
-					Layer = LAYER_SPEEDUP;
-				else if(pLayer == Map()->m_pTuneLayer)
-					Layer = LAYER_TUNE;
-				else
-					Layer = NUM_LAYERS;
-
-				CExplanations::EGametype ExplanationGametype;
-				if(m_SelectEntitiesImage == "DDNet")
-					ExplanationGametype = CExplanations::EGametype::DDNET;
-				else if(m_SelectEntitiesImage == "FNG")
-					ExplanationGametype = CExplanations::EGametype::FNG;
-				else if(m_SelectEntitiesImage == "Race")
-					ExplanationGametype = CExplanations::EGametype::RACE;
-				else if(m_SelectEntitiesImage == "Vanilla")
-					ExplanationGametype = CExplanations::EGametype::VANILLA;
-				else if(m_SelectEntitiesImage == "blockworlds")
-					ExplanationGametype = CExplanations::EGametype::BLOCKWORLDS;
-				else
-					ExplanationGametype = CExplanations::EGametype::NONE;
-
-				if(Layer != NUM_LAYERS)
-				{
-					const char *pExplanation = CExplanations::Explain(ExplanationGametype, (int)wx / 32 + (int)wy / 32 * 16, Layer);
-					if(pExplanation)
-						str_copy(m_aTooltip, pExplanation);
-				}
-			}
-			else if(m_pBrush->IsEmpty() && Map()->SelectedLayerType(0, LAYERTYPE_QUADS) != nullptr)
-				str_copy(m_aTooltip, "Use left mouse button to drag and create a brush. Hold shift to select multiple quads. Press R to rotate selected quads. Use ctrl+right click to select layer.");
-			else if(m_pBrush->IsEmpty())
-			{
-				if(g_Config.m_EdLayerSelector)
-					str_copy(m_aTooltip, "Use left mouse button to drag and create a brush. Use ctrl+right click to select layer of hovered tile.");
-				else
-					str_copy(m_aTooltip, "Use left mouse button to drag and create a brush.");
-			}
-			else
-			{
-				// Alt behavior handled in CEditor::MouseAxisLock
-				str_copy(m_aTooltip, "Use left mouse button to paint with the brush. Right click to clear the brush. Hold Alt to lock the mouse movement to a single axis.");
-			}
-
-			if(Ui()->CheckActiveItem(&m_MapEditorId))
-			{
-				CUIRect r;
-				r.x = s_StartWx;
-				r.y = s_StartWy;
-				r.w = wx - s_StartWx;
-				r.h = wy - s_StartWy;
-				if(r.w < 0)
-				{
-					r.x += r.w;
-					r.w = -r.w;
-				}
-
-				if(r.h < 0)
-				{
-					r.y += r.h;
-					r.h = -r.h;
-				}
-
-				if(s_Operation == OP_BRUSH_DRAW)
-				{
-					if(!m_pBrush->IsEmpty())
-					{
-						// draw with brush
-						for(size_t k = 0; k < NumEditLayers; k++)
-						{
-							size_t BrushIndex = k % m_pBrush->m_vpLayers.size();
-							if(apEditLayers[k].second->m_Type == m_pBrush->m_vpLayers[BrushIndex]->m_Type)
-							{
-								if(apEditLayers[k].second->m_Type == LAYERTYPE_TILES)
-								{
-									std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(apEditLayers[k].second);
-									std::shared_ptr<CLayerTiles> pBrushLayer = std::static_pointer_cast<CLayerTiles>(m_pBrush->m_vpLayers[BrushIndex]);
-
-									if((!pLayer->m_HasTele || pBrushLayer->m_HasTele) && (!pLayer->m_HasSpeedup || pBrushLayer->m_HasSpeedup) && (!pLayer->m_HasFront || pBrushLayer->m_HasFront) && (!pLayer->m_HasGame || pBrushLayer->m_HasGame) && (!pLayer->m_HasSwitch || pBrushLayer->m_HasSwitch) && (!pLayer->m_HasTune || pBrushLayer->m_HasTune))
-										pLayer->BrushDraw(pBrushLayer.get(), vec2(wx, wy));
-								}
-								else
-								{
-									apEditLayers[k].second->BrushDraw(m_pBrush->m_vpLayers[BrushIndex].get(), vec2(wx, wy));
-								}
-							}
-						}
-					}
-				}
-				else if(s_Operation == OP_BRUSH_GRAB)
-				{
-					if(!Ui()->MouseButton(0))
-					{
-						std::shared_ptr<CLayerQuads> pQuadLayer = std::static_pointer_cast<CLayerQuads>(Map()->SelectedLayerType(0, LAYERTYPE_QUADS));
-						if(Input()->ShiftIsPressed() && pQuadLayer)
-						{
-							Map()->DeselectQuads();
-							for(size_t i = 0; i < pQuadLayer->m_vQuads.size(); i++)
-							{
-								const CQuad &Quad = pQuadLayer->m_vQuads[i];
-								vec2 Position = vec2(fx2f(Quad.m_aPoints[4].x), fx2f(Quad.m_aPoints[4].y));
-								if(r.Inside(Position) && !Map()->IsQuadSelected(i))
-									Map()->ToggleSelectQuad(i);
-							}
-						}
-						else
-						{
-							// TODO: do all layers
-							int Grabs = 0;
-							for(size_t k = 0; k < NumEditLayers; k++)
-								Grabs += apEditLayers[k].second->BrushGrab(m_pBrush.get(), r);
-							if(Grabs == 0)
-								m_pBrush->Clear();
-
-							Map()->DeselectQuads();
-							Map()->DeselectQuadPoints();
-						}
-					}
-					else
-					{
-						if(NumEditLayers > 0)
-						{
-							apEditLayers[0].second->BrushSelecting(r);
-						}
-						Ui()->MapScreen();
-					}
-				}
-				else if(s_Operation == OP_BRUSH_PAINT)
-				{
-					if(!Ui()->MouseButton(0))
-					{
-						for(size_t k = 0; k < NumEditLayers; k++)
-						{
-							size_t BrushIndex = k;
-							if(m_pBrush->m_vpLayers.size() != NumEditLayers)
-								BrushIndex = 0;
-							std::shared_ptr<CLayer> pBrush = m_pBrush->IsEmpty() ? nullptr : m_pBrush->m_vpLayers[BrushIndex];
-							apEditLayers[k].second->FillSelection(m_pBrush->IsEmpty(), pBrush.get(), r);
-						}
-						std::shared_ptr<IEditorAction> Action = std::make_shared<CEditorBrushDrawAction>(Map(), Map()->m_SelectedGroup);
-						Map()->m_EditorHistory.RecordAction(Action);
-					}
-					else
-					{
-						if(NumEditLayers > 0)
-						{
-							apEditLayers[0].second->BrushSelecting(r);
-						}
-						Ui()->MapScreen();
-					}
-				}
-			}
-			else
-			{
-				if(Ui()->MouseButton(1))
-				{
-					m_pBrush->Clear();
-				}
-
-				if(!Input()->ModifierIsPressed() && Ui()->MouseButton(0) && s_Operation == OP_NONE && !m_QuadKnife.IsActive())
-				{
-					Ui()->SetActiveItem(&m_MapEditorId);
-
-					if(m_pBrush->IsEmpty())
-						s_Operation = OP_BRUSH_GRAB;
-					else
-					{
-						s_Operation = OP_BRUSH_DRAW;
-						for(size_t k = 0; k < NumEditLayers; k++)
-						{
-							size_t BrushIndex = k;
-							if(m_pBrush->m_vpLayers.size() != NumEditLayers)
-								BrushIndex = 0;
-
-							if(apEditLayers[k].second->m_Type == m_pBrush->m_vpLayers[BrushIndex]->m_Type)
-								apEditLayers[k].second->BrushPlace(m_pBrush->m_vpLayers[BrushIndex].get(), vec2(wx, wy));
-						}
-					}
-
-					std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(Map()->SelectedLayerType(0, LAYERTYPE_TILES));
-					if(Input()->ShiftIsPressed() && pLayer)
-						s_Operation = OP_BRUSH_PAINT;
-				}
-
-				if(!m_pBrush->IsEmpty())
-				{
-					m_pBrush->m_OffsetX = -(int)wx;
-					m_pBrush->m_OffsetY = -(int)wy;
-					for(const auto &pLayer : m_pBrush->m_vpLayers)
-					{
-						if(pLayer->m_Type == LAYERTYPE_TILES)
-						{
-							m_pBrush->m_OffsetX = -(int)(wx / 32.0f) * 32;
-							m_pBrush->m_OffsetY = -(int)(wy / 32.0f) * 32;
-							break;
-						}
-					}
-
-					std::shared_ptr<CLayerGroup> pGroup = Map()->SelectedGroup();
-					if(!m_ShowPicker && pGroup)
-					{
-						m_pBrush->m_OffsetX += pGroup->m_OffsetX;
-						m_pBrush->m_OffsetY += pGroup->m_OffsetY;
-						m_pBrush->m_ParallaxX = pGroup->m_ParallaxX;
-						m_pBrush->m_ParallaxY = pGroup->m_ParallaxY;
-						m_pBrush->Render();
-
-						CUIRect BorderRect;
-						BorderRect.x = 0.0f;
-						BorderRect.y = 0.0f;
-						m_pBrush->GetSize(&BorderRect.w, &BorderRect.h);
-						BorderRect.DrawOutline(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
-					}
-				}
-			}
-		}
-
-		// quad & sound editing
-		{
-			if(!m_ShowPicker && m_pBrush->IsEmpty())
-			{
-				// fetch layers
-				std::shared_ptr<CLayerGroup> pGroup = Map()->SelectedGroup();
-				if(pGroup)
-					pGroup->MapScreen();
-
-				for(size_t k = 0; k < NumEditLayers; k++)
-				{
-					auto &[LayerIndex, pEditLayer] = apEditLayers[k];
-
-					if(pEditLayer->m_Type == LAYERTYPE_QUADS)
-					{
-						std::shared_ptr<CLayerQuads> pLayer = std::static_pointer_cast<CLayerQuads>(pEditLayer);
-
-						if(m_ActiveEnvelopePreview == EEnvelopePreview::NONE)
-							m_ActiveEnvelopePreview = EEnvelopePreview::ALL;
-
-						if(QuadKnife()->IsActive())
-						{
-							QuadKnife()->DoSlice();
-						}
-						else
-						{
-							UpdateHotQuadPoint(pLayer.get());
-
-							Graphics()->TextureClear();
-							Graphics()->QuadsBegin();
-							for(size_t i = 0; i < pLayer->m_vQuads.size(); i++)
-							{
-								for(int v = 0; v < 4; v++)
-									DoQuadPoint(LayerIndex, pLayer, &pLayer->m_vQuads[i], i, v);
-
-								DoQuad(LayerIndex, pLayer, &pLayer->m_vQuads[i], i);
-							}
-							Graphics()->QuadsEnd();
-						}
-					}
-					else if(pEditLayer->m_Type == LAYERTYPE_SOUNDS)
-					{
-						std::shared_ptr<CLayerSounds> pLayer = std::static_pointer_cast<CLayerSounds>(pEditLayer);
-
-						UpdateHotSoundSource(pLayer.get());
-
-						Graphics()->TextureClear();
-						Graphics()->QuadsBegin();
-						for(size_t i = 0; i < pLayer->m_vSources.size(); i++)
-						{
-							DoSoundSource(LayerIndex, &pLayer->m_vSources[i], i);
-						}
-						Graphics()->QuadsEnd();
-					}
-				}
-
-				Ui()->MapScreen();
-			}
-		}
-
-		// menu proof selection
-		if(MapView()->ProofMode()->IsModeMenu() && !m_ShowPicker)
-		{
-			MapView()->ProofMode()->InitMenuBackgroundPositions();
-			const std::vector<vec2> &MenuBackgroundPositions = MapView()->ProofMode()->MenuBackgroundPositions();
-			for(int i = 0; i < (int)MenuBackgroundPositions.size(); i++)
-			{
-				vec2 Pos = MenuBackgroundPositions[i];
-				const void *pId = &MenuBackgroundPositions[i];
-				Pos += MapView()->GetWorldOffset() - MenuBackgroundPositions[MapView()->ProofMode()->CurrentMenuProofIndex()];
-				Pos.y -= 3.0f;
-
-				if(distance(Pos, m_MouseWorldNoParaPos) <= 20.0f)
-				{
-					Ui()->SetHotItem(pId);
-
-					if(i != MapView()->ProofMode()->CurrentMenuProofIndex() && Ui()->CheckActiveItem(pId))
-					{
-						if(!Ui()->MouseButton(0))
-						{
-							MapView()->ProofMode()->SetCurrentMenuProofIndex(i);
-							MapView()->SetWorldOffset(MenuBackgroundPositions[i]);
-							Ui()->SetActiveItem(nullptr);
-						}
-					}
-					else if(Ui()->HotItem() == pId)
-					{
-						char aTooltipPrefix[32] = "Switch proof position to";
-						if(i == MapView()->ProofMode()->CurrentMenuProofIndex())
-							str_copy(aTooltipPrefix, "Current proof position at");
-
-						char aNumBuf[8];
-						if(i < (TILE_TIME_CHECKPOINT_LAST - TILE_TIME_CHECKPOINT_FIRST))
-							str_format(aNumBuf, sizeof(aNumBuf), "#%d", i + 1);
-						else
-							aNumBuf[0] = '\0';
-
-						char aTooltipPositions[128];
-						str_format(aTooltipPositions, sizeof(aTooltipPositions), "%s %s", MapView()->ProofMode()->MenuBackgroundPositionName(i), aNumBuf);
-
-						for(int k : MapView()->ProofMode()->MenuBackgroundCollisions(i))
-						{
-							if(k == MapView()->ProofMode()->CurrentMenuProofIndex())
-								str_copy(aTooltipPrefix, "Current proof position at");
-
-							Pos = MenuBackgroundPositions[k];
-							Pos += MapView()->GetWorldOffset() - MenuBackgroundPositions[MapView()->ProofMode()->CurrentMenuProofIndex()];
-							Pos.y -= 3.0f;
-
-							if(distance(Pos, m_MouseWorldNoParaPos) > 20.0f)
-								continue;
-
-							if(i < (TILE_TIME_CHECKPOINT_LAST - TILE_TIME_CHECKPOINT_FIRST))
-								str_format(aNumBuf, sizeof(aNumBuf), "#%d", k + 1);
-							else
-								aNumBuf[0] = '\0';
-
-							char aTooltipPositionsCopy[128];
-							str_copy(aTooltipPositionsCopy, aTooltipPositions);
-							str_format(aTooltipPositions, sizeof(aTooltipPositions), "%s, %s %s", aTooltipPositionsCopy, MapView()->ProofMode()->MenuBackgroundPositionName(k), aNumBuf);
-						}
-						str_format(m_aTooltip, sizeof(m_aTooltip), "%s %s.", aTooltipPrefix, aTooltipPositions);
-
-						if(Ui()->MouseButton(0))
-							Ui()->SetActiveItem(pId);
-					}
-					break;
-				}
-			}
-		}
-
-		if(!Input()->ModifierIsPressed() && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr)
-		{
-			float PanSpeed = Input()->ShiftIsPressed() ? 200.0f : 64.0f;
-			if(Input()->KeyPress(KEY_A))
-				MapView()->OffsetWorld({-PanSpeed * m_MouseWorldScale, 0});
-			else if(Input()->KeyPress(KEY_D))
-				MapView()->OffsetWorld({PanSpeed * m_MouseWorldScale, 0});
-			if(Input()->KeyPress(KEY_W))
-				MapView()->OffsetWorld({0, -PanSpeed * m_MouseWorldScale});
-			else if(Input()->KeyPress(KEY_S))
-				MapView()->OffsetWorld({0, PanSpeed * m_MouseWorldScale});
-		}
-	}
-
-	if(Ui()->CheckActiveItem(&m_MapEditorId) && m_pContainerPanned == nullptr)
-	{
-		// release mouse
-		if(!Ui()->MouseButton(0))
-		{
-			if(s_Operation == OP_BRUSH_DRAW)
-			{
-				std::shared_ptr<IEditorAction> pAction = std::make_shared<CEditorBrushDrawAction>(Map(), Map()->m_SelectedGroup);
-
-				if(!pAction->IsEmpty()) // Avoid recording tile draw action when placing quads only
-					Map()->m_EditorHistory.RecordAction(pAction);
-			}
-
-			s_Operation = OP_NONE;
-			Ui()->SetActiveItem(nullptr);
-		}
-	}
-
-	if(!m_ShowPicker && Map()->SelectedGroup() && Map()->SelectedGroup()->m_UseClipping)
-	{
-		std::shared_ptr<CLayerGroup> pGameGroup = Map()->m_pGameGroup;
-		pGameGroup->MapScreen();
-
-		CUIRect ClipRect;
-		ClipRect.x = Map()->SelectedGroup()->m_ClipX;
-		ClipRect.y = Map()->SelectedGroup()->m_ClipY;
-		ClipRect.w = Map()->SelectedGroup()->m_ClipW;
-		ClipRect.h = Map()->SelectedGroup()->m_ClipH;
-		ClipRect.DrawOutline(ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f));
-	}
-
-	if(!m_ShowPicker)
-		MapView()->ProofMode()->RenderScreenSizes();
-
-	if(!m_ShowPicker && m_ShowEnvelopePreview && m_ActiveEnvelopePreview != EEnvelopePreview::NONE)
-	{
-		const std::shared_ptr<CLayer> pSelectedLayer = Map()->SelectedLayer(0);
-		if(pSelectedLayer != nullptr && pSelectedLayer->m_Type == LAYERTYPE_QUADS)
-		{
-			DoQuadEnvelopes(static_cast<const CLayerQuads *>(pSelectedLayer.get()));
-		}
-		m_ActiveEnvelopePreview = EEnvelopePreview::NONE;
-	}
-
-	Ui()->MapScreen();
 }
 
 void CEditor::UpdateHotQuadPoint(const CLayerQuads *pLayer)
 {
-	const vec2 MouseWorld = Ui()->MouseWorldPos();
+	const vec2 MouseWorld = MapView()->MouseWorldPos();
 
 	float MinDist = 500.0f;
 	const void *pMinPointId = nullptr;
 
 	const auto UpdateMinimum = [&](vec2 Position, const void *pId) {
-		const float CurrDist = length_squared((Position - MouseWorld) / m_MouseWorldScale);
+		const float CurrDist = length_squared((Position - MouseWorld) / MapView()->MouseWorldScale());
 		if(CurrDist < MinDist)
 		{
 			MinDist = CurrDist;
@@ -6000,7 +5401,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	char aTimeStr[6];
 	str_timestamp_format(aTimeStr, sizeof(aTimeStr), "%H:%M");
 
-	str_format(aBuf, sizeof(aBuf), "X: %.1f, Y: %.1f, Z: %.1f, A: %.1f, G: %i  %s", Ui()->MouseWorldX() / 32.0f, Ui()->MouseWorldY() / 32.0f, MapView()->Zoom()->GetValue(), m_AnimateSpeed, MapView()->MapGrid()->Factor(), aTimeStr);
+	str_format(aBuf, sizeof(aBuf), "X: %.1f, Y: %.1f, Z: %.1f, A: %.1f, G: %i  %s", MapView()->MouseWorldX() / 32.0f, MapView()->MouseWorldY() / 32.0f, MapView()->Zoom()->GetValue(), m_AnimateSpeed, MapView()->MapGrid()->Factor(), aTimeStr);
 	Ui()->DoLabel(&Info, aBuf, 10.0f, TEXTALIGN_MR);
 
 	static int s_HelpButton = 0;
@@ -6067,7 +5468,7 @@ void CEditor::Render()
 
 	//	a little hack for now
 	if(m_Mode == MODE_LAYERS)
-		DoMapEditor(View);
+		MapView()->Render(View);
 
 	if(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr)
 	{
@@ -6847,53 +6248,6 @@ void CEditor::Init()
 	Reset(false);
 }
 
-void CEditor::HandleCursorMovement()
-{
-	const vec2 UpdatedMousePos = Ui()->UpdatedMousePos();
-	const vec2 UpdatedMouseDelta = Ui()->UpdatedMouseDelta();
-
-	// fix correct world x and y
-	const std::shared_ptr<CLayerGroup> pGroup = Map()->SelectedGroup();
-	if(pGroup)
-	{
-		float aPoints[4];
-		pGroup->Mapping(aPoints);
-
-		float WorldWidth = aPoints[2] - aPoints[0];
-		float WorldHeight = aPoints[3] - aPoints[1];
-
-		m_MouseWorldScale = WorldWidth / Graphics()->WindowWidth();
-
-		m_MouseWorldPos.x = aPoints[0] + WorldWidth * (UpdatedMousePos.x / Graphics()->WindowWidth());
-		m_MouseWorldPos.y = aPoints[1] + WorldHeight * (UpdatedMousePos.y / Graphics()->WindowHeight());
-		m_MouseDeltaWorld.x = UpdatedMouseDelta.x * (WorldWidth / Graphics()->WindowWidth());
-		m_MouseDeltaWorld.y = UpdatedMouseDelta.y * (WorldHeight / Graphics()->WindowHeight());
-	}
-	else
-	{
-		m_MouseWorldPos = vec2(-1.0f, -1.0f);
-		m_MouseDeltaWorld = vec2(0.0f, 0.0f);
-	}
-
-	m_MouseWorldNoParaPos = vec2(-1.0f, -1.0f);
-	for(const std::shared_ptr<CLayerGroup> &pGameGroup : Map()->m_vpGroups)
-	{
-		if(!pGameGroup->m_GameGroup)
-			continue;
-
-		float aPoints[4];
-		pGameGroup->Mapping(aPoints);
-
-		float WorldWidth = aPoints[2] - aPoints[0];
-		float WorldHeight = aPoints[3] - aPoints[1];
-
-		m_MouseWorldNoParaPos.x = aPoints[0] + WorldWidth * (UpdatedMousePos.x / Graphics()->WindowWidth());
-		m_MouseWorldNoParaPos.y = aPoints[1] + WorldHeight * (UpdatedMousePos.y / Graphics()->WindowHeight());
-	}
-
-	OnMouseMove(UpdatedMousePos);
-}
-
 void CEditor::OnMouseMove(vec2 MousePos)
 {
 	m_vHoverTiles.clear();
@@ -6947,10 +6301,10 @@ void CEditor::MouseAxisLock(vec2 &CursorRel)
 	if(Input()->AltIsPressed())
 	{
 		// only lock with the paint brush and inside editor map area to avoid duplicate Alt behavior
-		if(m_pBrush->IsEmpty() || Ui()->HotItem() != &m_MapEditorId)
+		if(m_pBrush->IsEmpty() || Ui()->HotItem() != MapView())
 			return;
 
-		const vec2 CurrentWorldPos = vec2(Ui()->MouseWorldX(), Ui()->MouseWorldY()) / 32.0f;
+		const vec2 CurrentWorldPos = vec2(MapView()->MouseWorldX(), MapView()->MouseWorldY()) / 32.0f;
 
 		if(m_MouseAxisLockState == EAxisLock::START)
 		{
@@ -7097,7 +6451,7 @@ void CEditor::OnUpdate()
 		Ui()->OnInput(Event);
 	});
 
-	HandleCursorMovement();
+	MapView()->UpdateMouseWorld();
 	HandleAutosave();
 	HandleWriterFinishJobs();
 
@@ -7124,11 +6478,11 @@ void CEditor::OnRender()
 	m_pUiGotContext = nullptr;
 	Ui()->StartCheck();
 
-	Ui()->Update(m_MouseWorldPos);
+	Ui()->Update();
 
 	Render();
 
-	m_MouseDeltaWorld = vec2(0.0f, 0.0f);
+	MapView()->ResetMouseDeltaWorld();
 
 	if(Input()->KeyPress(KEY_F10))
 	{

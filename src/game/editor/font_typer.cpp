@@ -190,8 +190,8 @@ void CFontTyper::TextModeOff()
 
 void CFontTyper::SetCursor()
 {
-	m_TextIndex.x = (int)(Ui()->MouseWorldX() / 32);
-	m_TextIndex.y = (int)(Ui()->MouseWorldY() / 32);
+	m_TextIndex.x = (int)(Editor()->MapView()->MouseWorldX() / 32);
+	m_TextIndex.y = (int)(Editor()->MapView()->MouseWorldY() / 32);
 	m_TextLineLen = 0;
 	m_CursorRenderTime = time_get_nanoseconds() - 501ms;
 }

@@ -402,7 +402,6 @@ private:
 	vec2 m_UpdatedMouseDelta = vec2(0.0f, 0.0f); // in window screen space
 	vec2 m_MousePos = vec2(0.0f, 0.0f); // in gui space
 	vec2 m_MouseDelta = vec2(0.0f, 0.0f); // in gui space
-	vec2 m_MouseWorldPos = vec2(-1.0f, -1.0f); // in world space
 	unsigned m_UpdatedMouseButtons = 0;
 	unsigned m_MouseButtons = 0;
 	unsigned m_LastMouseButtons = 0;
@@ -492,7 +491,7 @@ public:
 
 	void SetEnabled(bool Enabled) { m_Enabled = Enabled; }
 	bool Enabled() const { return m_Enabled; }
-	void Update(vec2 MouseWorldPos = vec2(-1.0f, -1.0f));
+	void Update();
 	void DebugRender(float X, float Y);
 
 	vec2 MousePos() const { return m_MousePos; }
@@ -501,9 +500,6 @@ public:
 	vec2 MouseDelta() const { return m_MouseDelta; }
 	float MouseDeltaX() const { return m_MouseDelta.x; }
 	float MouseDeltaY() const { return m_MouseDelta.y; }
-	vec2 MouseWorldPos() const { return m_MouseWorldPos; }
-	float MouseWorldX() const { return m_MouseWorldPos.x; }
-	float MouseWorldY() const { return m_MouseWorldPos.y; }
 	vec2 UpdatedMousePos() const { return m_UpdatedMousePos; }
 	vec2 UpdatedMouseDelta() const { return m_UpdatedMouseDelta; }
 	int MouseButton(int Index) const { return (m_MouseButtons >> Index) & 1; }
