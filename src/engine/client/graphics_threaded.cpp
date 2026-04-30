@@ -28,6 +28,24 @@
 
 #include "graphics_threaded.h"
 
+#include <array>
+
+template<int N>
+static std::array<float, N + 1> MakeTrigTable(float (*MathFunc)(float))
+{
+	std::array<float, N + 1> aTable = {};
+	const float SegmentsAngle = pi / 2.0f / N;
+	for(int i = 0; i <= N; ++i)
+	{
+		aTable[i] = MathFunc(i * SegmentsAngle);
+	}
+	return aTable;
+}
+
+constexpr int s_CornerSegments = 8;
+static const std::array<float, s_CornerSegments + 1> s_aCos = MakeTrigTable<s_CornerSegments>(std::cos); // 1.0f, 0.980785f, 0.923880f, 0.831470f, 0.707107f, 0.555570f, 0.382683f, 0.195090f, 0.0f
+static const std::array<float, s_CornerSegments + 1> s_aSin = MakeTrigTable<s_CornerSegments>(std::sin); // 0.0f, 0.195090f, 0.382683f, 0.555570f, 0.707107f, 0.831470f, 0.923880f, 0.980785f, 1.0f
+
 class CSemaphore;
 
 static CVideoMode g_aFakeModes[] = {
@@ -1042,22 +1060,17 @@ void CGraphics_Threaded::QuadsText(float x, float y, float Size, const char *pTe
 
 void CGraphics_Threaded::DrawRectExt(float x, float y, float w, float h, float r, int Corners)
 {
-	const int NumSegments = 8;
-	const float SegmentsAngle = pi / 2 / NumSegments;
-	IGraphics::CFreeformItem aFreeform[NumSegments * 4];
+	IGraphics::CFreeformItem aFreeform[s_CornerSegments * 4];
 	size_t NumItems = 0;
 
-	for(int i = 0; i < NumSegments; i += 2)
+	for(int i = 0; i < s_CornerSegments; i += 2)
 	{
-		float a1 = i * SegmentsAngle;
-		float a2 = (i + 1) * SegmentsAngle;
-		float a3 = (i + 2) * SegmentsAngle;
-		float Ca1 = std::cos(a1);
-		float Ca2 = std::cos(a2);
-		float Ca3 = std::cos(a3);
-		float Sa1 = std::sin(a1);
-		float Sa2 = std::sin(a2);
-		float Sa3 = std::sin(a3);
+		float Ca1 = s_aCos[i];
+		float Ca2 = s_aCos[i + 1];
+		float Ca3 = s_aCos[i + 2];
+		float Sa1 = s_aSin[i];
+		float Sa2 = s_aSin[i + 1];
+		float Sa3 = s_aSin[i + 2];
 
 		if(Corners & CORNER_TL)
 			aFreeform[NumItems++] = IGraphics::CFreeformItem(
@@ -1119,19 +1132,14 @@ void CGraphics_Threaded::DrawRectExt4(float x, float y, float w, float h, ColorR
 		return;
 	}
 
-	const int NumSegments = 8;
-	const float SegmentsAngle = pi / 2 / NumSegments;
-	for(int i = 0; i < NumSegments; i += 2)
+	for(int i = 0; i < s_CornerSegments; i += 2)
 	{
-		float a1 = i * SegmentsAngle;
-		float a2 = (i + 1) * SegmentsAngle;
-		float a3 = (i + 2) * SegmentsAngle;
-		float Ca1 = std::cos(a1);
-		float Ca2 = std::cos(a2);
-		float Ca3 = std::cos(a3);
-		float Sa1 = std::sin(a1);
-		float Sa2 = std::sin(a2);
-		float Sa3 = std::sin(a3);
+		float Ca1 = s_aCos[i];
+		float Ca2 = s_aCos[i + 1];
+		float Ca3 = s_aCos[i + 2];
+		float Sa1 = s_aSin[i];
+		float Sa2 = s_aSin[i + 1];
+		float Sa3 = s_aSin[i + 2];
 
 		if(Corners & CORNER_TL)
 		{
@@ -1240,22 +1248,17 @@ int CGraphics_Threaded::CreateRectQuadContainer(float x, float y, float w, float
 		return ContainerIndex;
 	}
 
-	const int NumSegments = 8;
-	const float SegmentsAngle = pi / 2 / NumSegments;
-	IGraphics::CFreeformItem aFreeform[NumSegments * 4];
+	IGraphics::CFreeformItem aFreeform[s_CornerSegments * 4];
 	size_t NumItems = 0;
 
-	for(int i = 0; i < NumSegments; i += 2)
+	for(int i = 0; i < s_CornerSegments; i += 2)
 	{
-		float a1 = i * SegmentsAngle;
-		float a2 = (i + 1) * SegmentsAngle;
-		float a3 = (i + 2) * SegmentsAngle;
-		float Ca1 = std::cos(a1);
-		float Ca2 = std::cos(a2);
-		float Ca3 = std::cos(a3);
-		float Sa1 = std::sin(a1);
-		float Sa2 = std::sin(a2);
-		float Sa3 = std::sin(a3);
+		float Ca1 = s_aCos[i];
+		float Ca2 = s_aCos[i + 1];
+		float Ca3 = s_aCos[i + 2];
+		float Sa1 = s_aSin[i];
+		float Sa2 = s_aSin[i + 1];
+		float Sa3 = s_aSin[i + 2];
 
 		if(Corners & CORNER_TL)
 			aFreeform[NumItems++] = IGraphics::CFreeformItem(
