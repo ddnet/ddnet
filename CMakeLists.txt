@@ -2396,6 +2396,7 @@ if(CLIENT)
     notifications.h
     serverbrowser.cpp
     serverbrowser.h
+    serverbrowser_filter.h
     serverbrowser_http.cpp
     serverbrowser_http.h
     serverbrowser_ping_cache.cpp
@@ -3170,6 +3171,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     src/engine/client/blocklist_driver.h
     src/engine/client/serverbrowser.cpp
     src/engine/client/serverbrowser.h
+    src/engine/client/serverbrowser_filter.h
     src/engine/client/serverbrowser_http.cpp
     src/engine/client/serverbrowser_http.h
     src/engine/client/serverbrowser_ping_cache.cpp

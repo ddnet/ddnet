@@ -4583,10 +4583,7 @@ void CClient::RegisterCommands()
 	m_pConsole->Chain("br_filter_country", ConchainServerBrowserUpdate, this);
 	m_pConsole->Chain("br_filter_country_index", ConchainServerBrowserUpdate, this);
 	m_pConsole->Chain("br_filter_pw", ConchainServerBrowserUpdate, this);
-	m_pConsole->Chain("br_filter_gametype", ConchainServerBrowserUpdate, this);
-	m_pConsole->Chain("br_filter_gametype_strict", ConchainServerBrowserUpdate, this);
 	m_pConsole->Chain("br_filter_connecting_players", ConchainServerBrowserUpdate, this);
-	m_pConsole->Chain("br_filter_serveraddress", ConchainServerBrowserUpdate, this);
 	m_pConsole->Chain("br_filter_unfinished_map", ConchainServerBrowserUpdate, this);
 	m_pConsole->Chain("br_filter_login", ConchainServerBrowserUpdate, this);
 	m_pConsole->Chain("add_favorite", ConchainServerBrowserUpdate, this);
