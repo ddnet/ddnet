@@ -1871,9 +1871,11 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
 
 		ColorRGBA GreenDefault(0.78f, 1.0f, 0.8f, 1.0f);
-		static CButtonContainer s_AuthedColor, s_SameClanColor;
+		ColorRGBA BlueDefault(0.4f, 0.4f, 1.0f, 1.0f);
+		static CButtonContainer s_AuthedColor, s_SameClanColor, s_FriendClanColor;
 		DoLine_ColorPicker(&s_AuthedColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &LeftView, Localize("Authed name color in scoreboard"), &g_Config.m_ClAuthedPlayerColor, GreenDefault, false);
 		DoLine_ColorPicker(&s_SameClanColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &LeftView, Localize("Same clan color in scoreboard"), &g_Config.m_ClSameClanColor, GreenDefault, false);
+		DoLine_ColorPicker(&s_FriendClanColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &LeftView, Localize("Friendly Clan Color"), &g_Config.m_ClFriendClanColor, BlueDefault, false);
 
 		// ***** DDRace HUD ***** //
 		Ui()->DoLabel_AutoLineSize(Localize("DDRace HUD"), HeadlineFontSize,

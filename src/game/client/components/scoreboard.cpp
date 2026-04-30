@@ -7,6 +7,7 @@
 #include <engine/console.h>
 #include <engine/demo.h>
 #include <engine/font_icons.h>
+#include <engine/friends.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
@@ -347,9 +348,14 @@ void CScoreboard::RenderSpectators(CUIRect Spectators)
 			const char *pClanName = ClientData.m_aClan;
 			if(pClanName[0] != '\0')
 			{
-				if(GameClient()->m_aLocalIds[g_Config.m_ClDummy] >= 0 && str_comp(pClanName, GameClient()->m_aClients[GameClient()->m_aLocalIds[g_Config.m_ClDummy]].m_aClan) == 0)
+				if(GameClient()->m_aLocalIds[g_Config.m_ClDummy] >= 0 &&
+					str_comp(pClanName, GameClient()->m_aClients[GameClient()->m_aLocalIds[g_Config.m_ClDummy]].m_aClan) == 0)
 				{
 					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClSameClanColor)));
+				}
+				else if(GameClient()->Friends()->IsFriend("", pClanName, false))
+				{
+					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClFriendClanColor)));
 				}
 				else
 				{
@@ -764,9 +770,14 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 
 			// clan
 			{
-				if(GameClient()->m_aLocalIds[g_Config.m_ClDummy] >= 0 && str_comp(ClientData.m_aClan, GameClient()->m_aClients[GameClient()->m_aLocalIds[g_Config.m_ClDummy]].m_aClan) == 0)
+				if(GameClient()->m_aLocalIds[g_Config.m_ClDummy] >= 0 &&
+					str_comp(ClientData.m_aClan, GameClient()->m_aClients[GameClient()->m_aLocalIds[g_Config.m_ClDummy]].m_aClan) == 0)
 				{
 					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClSameClanColor)));
+				}
+				else if(GameClient()->Friends()->IsFriend("", ClientData.m_aClan, false))
+				{
+					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClFriendClanColor)));
 				}
 				else
 				{
@@ -1111,10 +1122,12 @@ CUi::EPopupMenuFunctionResult CScoreboard::CScoreboardPopupContext::Render(void 
 
 		Container.VSplitLeft(ActionSize, &Action, &Container);
 
+		const int FriendState = pScoreboard->GameClient()->Friends()->GetFriendState(Client.m_aName, Client.m_aClan);
+		const bool IsClanFriend = FriendState == IFriends::FRIEND_CLAN;
 		ColorRGBA FriendActionColor = Client.m_Friend ? ColorRGBA(0.95f, 0.3f, 0.3f, 0.85f * pUi->ButtonColorMul(&pPopupContext->m_FriendAction)) :
 								ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f * pUi->ButtonColorMul(&pPopupContext->m_FriendAction));
-		const char *pFriendActionIcon = pUi->HotItem() == &pPopupContext->m_FriendAction && Client.m_Friend ? FontIcon::HEART_CRACK : FontIcon::HEART;
-		if(pUi->DoButton_FontIcon(&pPopupContext->m_FriendAction, pFriendActionIcon, Client.m_Friend, &Action, BUTTONFLAG_LEFT, ActionCorners, true, FriendActionColor))
+		const char *pFriendActionIcon = pUi->HotItem() == &pPopupContext->m_FriendAction && Client.m_Friend && !IsClanFriend ? FontIcon::HEART_CRACK : FontIcon::HEART;
+		if(pUi->DoButton_FontIcon(&pPopupContext->m_FriendAction, pFriendActionIcon, Client.m_Friend, &Action, BUTTONFLAG_LEFT, ActionCorners, true, FriendActionColor) && !IsClanFriend)
 		{
 			if(Client.m_Friend)
 			{
@@ -1125,8 +1138,8 @@ CUi::EPopupMenuFunctionResult CScoreboard::CScoreboardPopupContext::Render(void 
 				pScoreboard->GameClient()->Friends()->AddFriend(Client.m_aName, Client.m_aClan);
 			}
 		}
-
-		pScoreboard->GameClient()->m_Tooltips.DoToolTip(&pPopupContext->m_FriendAction, &Action, Client.m_Friend ? Localize("Remove friend") : Localize("Add friend"));
+		const char *pFriendTooltip = IsClanFriend ? Localize("Friend via clan") : (Client.m_Friend ? Localize("Remove friend") : Localize("Add friend"));
+		pScoreboard->GameClient()->m_Tooltips.DoToolTip(&pPopupContext->m_FriendAction, &Action, pFriendTooltip);
 
 		Container.VSplitLeft(ActionSpacing, nullptr, &Container);
 		Container.VSplitLeft(ActionSize, &Action, &Container);
