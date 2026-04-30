@@ -65,6 +65,7 @@
 #include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
 #include <engine/shared/csv.h>
+#include <engine/shared/protocol.h>
 #include <engine/sound.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
@@ -2526,9 +2527,18 @@ std::function<bool(int, int, int, int)> CGameClient::GetScoreComparator(bool Tim
 	}
 
 	// long precise times, smallest value first, subsorting by milliseconds
-	auto CompareTimeMillis = [](int TimeSeconds1, int TimeSeconds2, int TimeMillis1, int TimeMillis2) {
-		TimeSeconds1 = TimeSeconds1 == FinishTime::NOT_FINISHED_MILLIS ? std::numeric_limits<int>::max() : TimeSeconds1;
-		TimeSeconds2 = TimeSeconds2 == FinishTime::NOT_FINISHED_MILLIS ? std::numeric_limits<int>::max() : TimeSeconds2;
+	auto CompareTimeMillis = [](int TimeSeconds1, int TimeSeconds2, int TimeMillis1, int TimeMillis2) -> bool {
+		auto HandleFinishTimeSpecialValues = [](int TimeSeconds) -> int {
+			// unfinished is last
+			if(TimeSeconds == FinishTime::NOT_FINISHED_MILLIS)
+				return std::numeric_limits<int>::max();
+			// secret is better than unfinished
+			else if(TimeSeconds == FinishTime::SECRET)
+				return std::numeric_limits<int>::max() - 1;
+			return TimeSeconds;
+		};
+		TimeSeconds1 = HandleFinishTimeSpecialValues(TimeSeconds1);
+		TimeSeconds2 = HandleFinishTimeSpecialValues(TimeSeconds2);
 		if(TimeSeconds1 == TimeSeconds2)
 			return TimeMillis1 < TimeMillis2;
 		return TimeSeconds1 < TimeSeconds2;

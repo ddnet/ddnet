@@ -156,8 +156,12 @@ int CGameControllerDDNet::SnapPlayerScore(int SnappingClient, CPlayer *pPlayer)
 IGameController::CFinishTime CGameControllerDDNet::SnapPlayerTime(int SnappingClient, CPlayer *pPlayer)
 {
 	std::optional<float> BestTime = GameServer()->Score()->PlayerData(pPlayer->GetCid())->m_BestTime;
-	if(BestTime.has_value() && (!g_Config.m_SvHideScore || SnappingClient == pPlayer->GetCid()))
+	bool HideScore = g_Config.m_SvHideScore && SnappingClient != pPlayer->GetCid();
+	if(BestTime.has_value())
 	{
+		if(HideScore)
+			return Server()->GetClientVersion(SnappingClient) < VERSION_DDNET_TIME_SECRET ? CFinishTime::NotFinished() : CFinishTime::Secret();
+
 		// same as in str_time_float
 		int64_t TimeMilliseconds = time_milliseconds_from_seconds(BestTime.value());
 		int Seconds = static_cast<int>(TimeMilliseconds / 1000);
@@ -169,8 +173,11 @@ IGameController::CFinishTime CGameControllerDDNet::SnapPlayerTime(int SnappingCl
 
 IGameController::CFinishTime CGameControllerDDNet::SnapMapBestTime(int SnappingClient)
 {
-	if(m_CurrentRecord.has_value() && !g_Config.m_SvHideScore)
+	if(m_CurrentRecord.has_value())
 	{
+		if(g_Config.m_SvHideScore)
+			return Server()->GetClientVersion(SnappingClient) < VERSION_DDNET_TIME_SECRET ? CFinishTime::NotFinished() : CFinishTime::Secret();
+
 		// same as in str_time_float
 		int64_t TimeMilliseconds = time_milliseconds_from_seconds(m_CurrentRecord.value());
 		int Seconds = static_cast<int>(TimeMilliseconds / 1000);
