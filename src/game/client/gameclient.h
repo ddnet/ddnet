@@ -584,6 +584,8 @@ public:
 	CRenderTools m_RenderTools;
 	CRenderMap m_RenderMap;
 
+	bool m_BackButtonHandledKeyBind = false;
+
 	void OnReset();
 
 	size_t ComponentCount() const { return m_vpAll.size(); }

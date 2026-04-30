@@ -2522,10 +2522,14 @@ void CMenus::OnRender()
 
 	Ui()->Update();
 
+	if(IsActive())
+		Ui()->DoBackButton();
+
 	Render();
 
 	if(IsActive())
 	{
+		Ui()->RenderBackButton();
 		RenderTools()->RenderCursor(Ui()->MousePos(), 24.0f);
 	}
 
