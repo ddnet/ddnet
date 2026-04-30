@@ -104,6 +104,7 @@ private:
 	int m_DeepFrozen;
 	int m_LiveFrozen;
 	int m_EndlessHook;
+	int m_PlayerHookpoint;
 	int m_DDRaceState;
 
 	int m_HitDisabledFlags;

@@ -181,6 +181,7 @@ void CCharacterCore::Reset()
 	m_IsInFreeze = false;
 	m_DeepFrozen = false;
 	m_LiveFrozen = false;
+	m_PlayerHookpoint = false;
 
 	// never initialize both to 0
 	m_Input.m_TargetX = 0;
@@ -499,18 +500,68 @@ void CCharacterCore::TickDeferred()
 				{
 					if(Distance > PhysicalSize() * 1.50f)
 					{
-						float HookAccel = m_Tuning.m_HookDragAccel * (Distance / m_Tuning.m_HookLength);
-						float DragSpeed = m_Tuning.m_HookDragSpeed;
+						float HookAccel;
+						float DragSpeed;
+						
+						// checks if the HookPlayerDragAccel is default; if it is use HookDragAccel instead
+						if(m_Tuning.m_HookPlayerDragAccel != 0)
+							HookAccel = m_Tuning.m_HookDragAccel;
+						else
+							HookAccel = m_Tuning.m_HookPlayerDragAccel;
+						if( !(m_PlayerHookpoint || m_Tuning.m_PlayerHookpoint) )
+							HookAccel *= (Distance / m_Tuning.m_HookLength);
 
-						vec2 Temp;
-						// add force to the hooked player
-						Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.x, HookAccel * Dir.x * 1.5f);
-						Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.y, HookAccel * Dir.y * 1.5f);
-						pCharCore->m_Vel = ClampVel(pCharCore->m_MoveRestrictions, Temp);
-						// add a little bit force to the guy who has the grip
-						Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.x, -HookAccel * Dir.x * 0.25f);
-						Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.y, -HookAccel * Dir.y * 0.25f);
-						m_Vel = ClampVel(m_MoveRestrictions, Temp);
+						// checks if the HookPlayerDragSpeed is default; if it is use HookDragSpeed instead
+						if(m_Tuning.m_HookPlayerDragSpeed != 0)
+							DragSpeed = m_Tuning.m_HookDragSpeed;
+						else
+							DragSpeed = m_Tuning.m_HookPlayerDragSpeed;
+
+						if ( !(m_PlayerHookpoint  || m_Tuning.m_PlayerHookpoint) )
+						{
+							vec2 Temp;
+							// add force to the hooked player
+							Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.x, HookAccel * Dir.x * 1.5f);
+							Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.y, HookAccel * Dir.y * 1.5f);
+							pCharCore->m_Vel = ClampVel(pCharCore->m_MoveRestrictions, Temp);
+							// add a little bit force to the guy who has the grip
+							Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.x, -HookAccel * Dir.x * 0.25f);
+							Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.y, -HookAccel * Dir.y * 0.25f);
+							m_Vel = ClampVel(m_MoveRestrictions, Temp);
+						}
+						else
+						{
+							// player hookpoint behaviour 
+
+							vec2 HookVel = normalize(m_HookPos - m_Pos) * HookAccel;
+							// the hook as more power to drag you up then down.
+							// this makes it easier to get on top of an platform
+							if(HookVel.y > 0)
+							{
+								HookVel.y *= 0.3f;
+							}
+
+							// the hook will boost it's power if the player wants to move
+							// in that direction. otherwise it will dampen everything abit
+							if((HookVel.x < 0 && m_Direction < 0) || (HookVel.x > 0 && m_Direction > 0))
+							{
+								HookVel.x *= 0.95f;
+							}
+							else
+							{
+								HookVel.x *= 0.75f;
+							}
+
+							vec2 NewVel = m_Vel + HookVel;
+
+							// check if we are under the legal limit for the hook
+							const float NewVelLength = length(NewVel);
+							if(NewVelLength < DragSpeed || NewVelLength < length(m_Vel))
+							{
+								m_Vel = NewVel; // no problem. apply
+							}
+						}
+
 					}
 				}
 			}
@@ -646,6 +697,7 @@ void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 	m_GrenadeHitDisabled = pObjDDNet->m_Flags & CHARACTERFLAG_GRENADE_HIT_DISABLED;
 	m_LaserHitDisabled = pObjDDNet->m_Flags & CHARACTERFLAG_LASER_HIT_DISABLED;
 	m_HookHitDisabled = pObjDDNet->m_Flags & CHARACTERFLAG_HOOK_HIT_DISABLED;
+	m_PlayerHookpoint = pObjDDNet->m_Flags & CHARACTERFLAG_PLAYER_HOOKPOINT;
 	m_Super = pObjDDNet->m_Flags & CHARACTERFLAG_SUPER;
 	m_Invincible = pObjDDNet->m_Flags & CHARACTERFLAG_INVINCIBLE;
 
