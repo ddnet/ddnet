@@ -3015,7 +3015,12 @@ void CGameContext::OnKillNetMessage(const CNetMsg_Cl_Kill *pMsg, int ClientId)
 	CCharacter *pChr = pPlayer->GetCharacter();
 	if(!pChr)
 		return;
-
+	int Team = GetDDRaceTeam(ClientId);
+	if(Team != TEAM_FLOCK && pChr->m_StartTime > 0 && m_pController->Teams().IsValidTeamNumber(Team) && !m_pController->Teams().IsAllowLeaderCommands(ClientId, Team))
+	{
+		SendChatTarget(ClientId, "Due to this team having a leader, only the leader can kill. If you really want to kill and be sent to team 0, type /kill");
+		return;
+	}
 	// Kill Protection
 	int CurrTime = (Server()->Tick() - pChr->m_StartTime) / Server()->TickSpeed();
 	if(g_Config.m_SvKillProtection != 0 && CurrTime >= (60 * g_Config.m_SvKillProtection) && pChr->m_DDRaceState == ERaceState::STARTED)
@@ -4088,6 +4093,7 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("invite", "r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInvite, this, "Invite a person to a locked team");
 	Console()->Register("join", "r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConJoin, this, "Join the team of the specified player");
 	Console()->Register("team0mode", "?i['0'|'1']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTeam0Mode, this, "Toggle team between team 0 and team mode. This mode will make your team behave like team 0.");
+	Console()->Register("teamleader", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConSetTeamLeader, this, "Set player as the team leader (defaults to you). When a team leader is set, rest of the team cannot use commands like /lock");
 
 	Console()->Register("showothers", "?i['0'|'1'|'2']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConShowOthers, this, "Whether to show players from other teams or not (off by default), optional i = 0 for off, i = 1 for on, i = 2 for own team only");
 	Console()->Register("showall", "?i['0'|'1']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConShowAll, this, "Whether to show players at any distance (off by default), optional i = 0 for off else for on");

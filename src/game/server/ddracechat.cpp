@@ -1007,6 +1007,11 @@ void CGameContext::ConLock(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	int Team = pSelf->GetDDRaceTeam(pResult->m_ClientId);
+	if(!pSelf->m_pController->Teams().IsAllowLeaderCommands(pResult->m_ClientId, Team))
+	{
+		log_info("chatresp", "Only your team leader(s) can lock the team.");
+		return;
+	}
 
 	bool Lock = pSelf->m_pController->Teams().TeamLocked(Team);
 
@@ -1055,7 +1060,11 @@ void CGameContext::ConUnlock(IConsole::IResult *pResult, void *pUserData)
 
 	if(Team == TEAM_FLOCK || !pSelf->m_pController->Teams().IsValidTeamNumber(Team))
 		return;
-
+	if(!pSelf->m_pController->Teams().IsAllowLeaderCommands(pResult->m_ClientId, Team))
+	{
+		log_info("chatresp", "Only your team leader(s) can unlock the team.");
+		return;
+	}
 	if(pSelf->ProcessSpamProtection(pResult->m_ClientId, false))
 		return;
 
@@ -1146,6 +1155,26 @@ void CGameContext::AttemptJoinTeam(int ClientId, int Team)
 
 		if(m_pController->Teams().TeamFlock(Team))
 			SendChatTarget(pPlayer->GetCid(), "Team 0 mode enabled for your team. This will make your team behave like team 0.");
+		if(!m_pController->Teams().IsAllowLeaderCommands(pPlayer->GetCid(), Team))
+		{
+			str_copy(aBuf, "", sizeof(aBuf));
+			int Leaders = 0;
+			for(int i = 0; i < MAX_CLIENTS; i++)
+			{
+				if(m_pController->Teams().IsAllowLeaderCommands(i, Team))
+				{
+					if(str_comp(aBuf, "") != 0)
+						str_append(aBuf, ", ");
+					str_append(aBuf, Server()->ClientName(i));
+					Leaders++;
+				}
+			}
+			if(Leaders > 1)
+				SendChatTarget(pPlayer->GetCid(), "Team leader mode is enabled for your team. These are your team leaders:");
+			else
+				SendChatTarget(pPlayer->GetCid(), "Team leader mode is enabled for your team. This is your team leader:");
+			SendChatTarget(pPlayer->GetCid(), aBuf);
+		}
 	}
 }
 
@@ -1168,6 +1197,11 @@ void CGameContext::ConInvite(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	int Team = pController->Teams().m_Core.Team(pResult->m_ClientId);
+	if(!pSelf->m_pController->Teams().IsAllowLeaderCommands(pResult->m_ClientId, Team))
+	{
+		log_info("chatresp", "Only your team leader(s) can invite other players.");
+		return;
+	}
 	if(Team != TEAM_FLOCK && pController->Teams().IsValidTeamNumber(Team))
 	{
 		int Target = pSelf->FindClientIdByName(pName).value_or(-1);
@@ -1231,6 +1265,11 @@ void CGameContext::ConTeam0Mode(IConsole::IResult *pResult, void *pUserData)
 		log_info("chatresp", "This team can't have the mode changed");
 		return;
 	}
+	if(!pController->Teams().IsAllowLeaderCommands(pResult->m_ClientId, Team))
+	{
+		log_info("chatresp", "Only the team leader(s) can change the mode");
+		return;
+	}
 
 	if(pController->Teams().GetTeamState(Team) != ETeamState::OPEN)
 	{
@@ -1273,6 +1312,72 @@ void CGameContext::ConTeam0Mode(IConsole::IResult *pResult, void *pUserData)
 			str_format(aBuf, sizeof(aBuf), "'%s' enabled team 0 mode. This will make your team behave like team 0.", pSelf->Server()->ClientName(pResult->m_ClientId));
 			pSelf->SendChatTeam(Team, aBuf);
 		}
+	}
+}
+void CGameContext::ConSetTeamLeader(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return;
+
+	if(pSelf->ProcessSpamProtection(pResult->m_ClientId, false))
+		return;
+
+	CGameTeams &Teams = pSelf->m_pController->Teams();
+
+	int Team = Teams.m_Core.Team(pResult->m_ClientId);
+
+	if(!Teams.IsValidTeamNumber(Team) || Team == TEAM_FLOCK)
+	{
+		log_info("chatresp", "You need to be in a team to set a team leader.");
+		return;
+	}
+
+	if(Teams.HasLeader(Team) && !Teams.IsTeamLeader(pPlayer->GetCid()))
+	{
+		log_info("chatresp", "Only your current leader(s) can promote a new team leader.");
+		return;
+	}
+	CPlayer *pPlayerToPromote = nullptr;
+	const char *pName = pResult->GetString(0);
+	if(pName[0] == '\0')
+	{
+		pPlayerToPromote = pPlayer;
+	}
+	else
+	{
+		pPlayerToPromote = pSelf->FindPlayerByName(pName);
+		if(pPlayerToPromote == nullptr)
+		{
+			log_info("chatresp", "Player not found");
+			return;
+		}
+
+		if(!Teams.m_Core.SameTeam(pResult->m_ClientId, pPlayerToPromote->GetCid()))
+		{
+			log_info("chatresp", "This player is not on your team.");
+			return;
+		}
+	}
+
+	if(Teams.IsTeamLeader(pPlayerToPromote->GetCid()))
+	{
+		log_info("chatresp", "This player is already a team leader.");
+	}
+	else
+	{
+		Teams.SetTeamLeader(pPlayerToPromote->GetCid(), true);
+
+		char aBuf[128];
+		if(pPlayerToPromote == pPlayer)
+			str_format(aBuf, sizeof(aBuf), "'%s' has promoted himself to the team leader.", pSelf->Server()->ClientName(pPlayerToPromote->GetCid()));
+		else
+			str_format(aBuf, sizeof(aBuf), "'%s' has been promoted to the team leader by '%s'.", pSelf->Server()->ClientName(pPlayerToPromote->GetCid()), pSelf->Server()->ClientName(pResult->m_ClientId));
+		pSelf->SendChatTeam(Team, aBuf);
 	}
 }
 
@@ -2328,6 +2433,13 @@ void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
 	CCharacter *pChr = pPlayer->GetCharacter();
 	if(!pChr)
 		return;
+	int Team = pSelf->GetDDRaceTeam(pResult->m_ClientId);
+	if(Team != TEAM_FLOCK && pSelf->m_pController->Teams().IsValidTeamNumber(Team) && pChr->m_StartTime > 0 && !pSelf->m_pController->Teams().IsAllowLeaderCommands(pResult->m_ClientId, Team))
+	{
+		pPlayer->KillCharacter(WEAPON_GAME);
+		pPlayer->Respawn();
+		return;
+	}
 
 	int CurrTime = (pSelf->Server()->Tick() - pChr->m_StartTime) / pSelf->Server()->TickSpeed();
 	if(g_Config.m_SvKillProtection != 0 && CurrTime >= (60 * g_Config.m_SvKillProtection) && pChr->m_DDRaceState == ERaceState::STARTED)
