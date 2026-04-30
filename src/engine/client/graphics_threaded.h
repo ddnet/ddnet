@@ -699,6 +699,7 @@ public:
 	virtual void SetWindowGrab(bool Grab) = 0;
 	// returns true, if the video mode changed
 	virtual bool ResizeWindow(int w, int h, int RefreshRate) = 0;
+	virtual void GetWindowSize(int &w, int &h) = 0;
 	virtual void GetViewportSize(int &w, int &h) = 0;
 	virtual void NotifyWindow() = 0;
 	virtual bool IsScreenKeyboardShown() = 0;

@@ -1770,6 +1770,11 @@ bool CGraphicsBackend_SDL_GL::ResizeWindow(int w, int h, int RefreshRate)
 	return false;
 }
 
+void CGraphicsBackend_SDL_GL::GetWindowSize(int &w, int &h)
+{
+	SDL_GetWindowSize(m_pWindow, &w, &h);
+}
+
 void CGraphicsBackend_SDL_GL::GetViewportSize(int &w, int &h)
 {
 	if(m_BackendType != EBackendType::BACKEND_TYPE_VULKAN)
