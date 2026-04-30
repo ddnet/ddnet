@@ -35,6 +35,7 @@ public:
 	// DDRace
 	virtual IGraphics::CTextureHandle GetEntities(EMapImageEntityLayerType EntityLayerType) = 0;
 	virtual IGraphics::CTextureHandle GetSpeedupArrow() = 0;
+	virtual IGraphics::CTextureHandle GetTuneColors() = 0;
 
 	virtual IGraphics::CTextureHandle GetOverlayBottom() = 0;
 	virtual IGraphics::CTextureHandle GetOverlayTop() = 0;

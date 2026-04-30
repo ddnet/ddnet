@@ -1,8 +1,11 @@
 #include "image_manipulation.h"
 
+#include <base/color.h>
 #include <base/dbg.h>
 #include <base/math.h>
 #include <base/mem.h>
+
+#include <engine/image.h>
 
 #include <cstdlib>
 
@@ -71,22 +74,73 @@ bool ConvertToRgba(CImageInfo &Image)
 	return false;
 }
 
+static inline void ConvertToGrayscalePixel(const CImageInfo &Image, size_t PixelIndex, size_t Step)
+{
+	const uint8_t R = Image.m_pData[PixelIndex * Step];
+	const uint8_t G = Image.m_pData[PixelIndex * Step + 1];
+	const uint8_t B = Image.m_pData[PixelIndex * Step + 2];
+	const uint8_t Luma = (uint8_t)(0.2126f * R + 0.7152f * G + 0.0722f * B);
+
+	Image.m_pData[PixelIndex * Step] = Luma;
+	Image.m_pData[PixelIndex * Step + 1] = Luma;
+	Image.m_pData[PixelIndex * Step + 2] = Luma;
+}
+
 void ConvertToGrayscale(const CImageInfo &Image)
 {
 	if(Image.m_Format == CImageInfo::FORMAT_R || Image.m_Format == CImageInfo::FORMAT_RA)
 		return;
 
 	const size_t Step = Image.PixelSize();
-	for(size_t i = 0; i < Image.m_Width * Image.m_Height; ++i)
+	for(size_t PixelIndex = 0; PixelIndex < Image.m_Width * Image.m_Height; ++PixelIndex)
 	{
-		const uint8_t R = Image.m_pData[i * Step];
-		const uint8_t G = Image.m_pData[i * Step + 1];
-		const uint8_t B = Image.m_pData[i * Step + 2];
-		const uint8_t Luma = (uint8_t)(0.2126f * R + 0.7152f * G + 0.0722f * B);
+		ConvertToGrayscalePixel(Image, PixelIndex, Step);
+	}
+}
 
-		Image.m_pData[i * Step] = Luma;
-		Image.m_pData[i * Step + 1] = Luma;
-		Image.m_pData[i * Step + 2] = Luma;
+void ConvertToGrayscaleRect(const CImageInfo &Image, size_t StartX, size_t StartY, size_t Width, size_t Height)
+{
+	if(Image.m_Format == CImageInfo::FORMAT_R || Image.m_Format == CImageInfo::FORMAT_RA)
+		return;
+
+	const size_t Step = Image.PixelSize();
+	for(size_t PixelY = StartY; PixelY < StartY + Height; ++PixelY)
+	{
+		for(size_t PixelX = StartX; PixelX < StartX + Width; ++PixelX)
+		{
+			const size_t PixelIndex = PixelY * Image.m_Width + PixelX;
+			ConvertToGrayscalePixel(Image, PixelIndex, Step);
+		}
+	}
+}
+
+void ColorizeWithHueRect(CImageInfo &Image, float Hue, float Sat, size_t StartX, size_t StartY, size_t Width, size_t Height)
+{
+	dbg_assert(Hue >= 0.0f && Hue <= 1.0f, "Invalid hue");
+	dbg_assert(Sat >= 0.0f && Sat <= 1.0f, "Invalid saturation");
+	dbg_assert(Image.m_Format == CImageInfo::FORMAT_RGB || Image.m_Format == CImageInfo::FORMAT_RGBA, "Invalid image format");
+	dbg_assert(StartX + Width <= Image.m_Width && StartY + Height <= Image.m_Height, "Image rect is out of range");
+
+	const size_t Step = Image.PixelSize();
+	for(size_t PixelY = StartY; PixelY < StartY + Height; ++PixelY)
+	{
+		for(size_t PixelX = StartX; PixelX < StartX + Width; ++PixelX)
+		{
+			const size_t PixelIndex = PixelY * Image.m_Width + PixelX;
+			uint8_t &R = Image.m_pData[PixelIndex * Step];
+			uint8_t &G = Image.m_pData[PixelIndex * Step + 1];
+			uint8_t &B = Image.m_pData[PixelIndex * Step + 2];
+
+			ColorRGBA PixelColor(R / 255.0f, G / 255.0f, B / 255.0f, 1.0f);
+			ColorHSLA PixelColorHSLA = color_cast<ColorHSLA>(PixelColor);
+			PixelColorHSLA.h = Hue;
+			PixelColorHSLA.s = Sat;
+			PixelColor = color_cast<ColorRGBA>(PixelColorHSLA);
+
+			R = static_cast<uint8_t>(PixelColor.r * 255.0f);
+			G = static_cast<uint8_t>(PixelColor.g * 255.0f);
+			B = static_cast<uint8_t>(PixelColor.b * 255.0f);
+		}
 	}
 }
 
