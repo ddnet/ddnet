@@ -488,7 +488,7 @@ void CServerBrowser::Filter()
 				// match against player country
 				for(int p = 0; p < minimum(Info.m_NumClients, (int)MAX_CLIENTS); p++)
 				{
-					if(Info.m_aClients[p].m_Country == g_Config.m_BrFilterCountryIndex)
+					if(Info.m_vClients[p].m_Country == g_Config.m_BrFilterCountryIndex)
 					{
 						Filtered = false;
 						break;
@@ -529,12 +529,12 @@ void CServerBrowser::Filter()
 					// match against players
 					for(int p = 0; p < minimum(Info.m_NumClients, (int)MAX_CLIENTS); p++)
 					{
-						if(MatchesFn(Info.m_aClients[p].m_aName, aFilterStrTrimmed) ||
-							MatchesFn(Info.m_aClients[p].m_aClan, aFilterStrTrimmed))
+						if(MatchesFn(Info.m_vClients[p].m_aName, aFilterStrTrimmed) ||
+							MatchesFn(Info.m_vClients[p].m_aClan, aFilterStrTrimmed))
 						{
 							if(g_Config.m_BrFilterConnectingPlayers &&
-								str_comp(Info.m_aClients[p].m_aName, "(connecting)") == 0 &&
-								Info.m_aClients[p].m_aClan[0] == '\0')
+								str_comp(Info.m_vClients[p].m_aName, "(connecting)") == 0 &&
+								Info.m_vClients[p].m_aClan[0] == '\0')
 							{
 								continue;
 							}
@@ -810,7 +810,7 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info) cons
 		}
 	};
 
-	std::sort(pEntry->m_Info.m_aClients, pEntry->m_Info.m_aClients + Info.m_NumReceivedClients, CPlayerScoreNameLess(pEntry->m_Info.m_ClientScoreKind));
+	std::sort(pEntry->m_Info.m_vClients.begin(), pEntry->m_Info.m_vClients.end(), CPlayerScoreNameLess(pEntry->m_Info.m_ClientScoreKind));
 
 	pEntry->m_GotInfo = 1;
 }
@@ -1653,7 +1653,7 @@ void CServerBrowser::UpdateServerFilteredPlayers(CServerInfo *pInfo) const
 	pInfo->m_NumFilteredPlayers = g_Config.m_BrFilterSpectators ? pInfo->m_NumPlayers : pInfo->m_NumClients;
 	if(g_Config.m_BrFilterConnectingPlayers)
 	{
-		for(const auto &Client : pInfo->m_aClients)
+		for(const auto &Client : pInfo->m_vClients)
 		{
 			if((!g_Config.m_BrFilterSpectators || Client.m_Player) && str_comp(Client.m_aName, "(connecting)") == 0 && Client.m_aClan[0] == '\0')
 				pInfo->m_NumFilteredPlayers--;
@@ -1667,9 +1667,9 @@ void CServerBrowser::UpdateServerFriends(CServerInfo *pInfo) const
 	pInfo->m_FriendNum = 0;
 	for(int ClientIndex = 0; ClientIndex < minimum(pInfo->m_NumReceivedClients, (int)MAX_CLIENTS); ClientIndex++)
 	{
-		pInfo->m_aClients[ClientIndex].m_FriendState = m_pFriends->GetFriendState(pInfo->m_aClients[ClientIndex].m_aName, pInfo->m_aClients[ClientIndex].m_aClan);
-		pInfo->m_FriendState = maximum(pInfo->m_FriendState, pInfo->m_aClients[ClientIndex].m_FriendState);
-		if(pInfo->m_aClients[ClientIndex].m_FriendState != IFriends::FRIEND_NO)
+		pInfo->m_vClients[ClientIndex].m_FriendState = m_pFriends->GetFriendState(pInfo->m_vClients[ClientIndex].m_aName, pInfo->m_vClients[ClientIndex].m_aClan);
+		pInfo->m_FriendState = maximum(pInfo->m_FriendState, pInfo->m_vClients[ClientIndex].m_FriendState);
+		if(pInfo->m_vClients[ClientIndex].m_FriendState != IFriends::FRIEND_NO)
 			pInfo->m_FriendNum++;
 	}
 }
