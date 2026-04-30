@@ -14,6 +14,15 @@
 
 using namespace std::chrono_literals;
 
+void CFontTyper::CState::Reset()
+{
+	m_Active = false;
+	m_TextIndex = ivec2(0, 0);
+	m_TextLineLen = 0;
+	m_pLastLayer = nullptr;
+	m_TilesPlacedSinceActivate = 0;
+}
+
 void CFontTyper::OnInit(CEditor *pEditor)
 {
 	CEditorComponent::OnInit(pEditor);
@@ -30,22 +39,24 @@ void CFontTyper::SetTile(ivec2 Pos, unsigned char Index, const std::shared_ptr<C
 		0, // reserved
 	};
 	pLayer->SetTile(Pos.x, Pos.y, Tile);
-	m_TilesPlacedSinceActivate++;
+	Map()->m_FontTyperState.m_TilesPlacedSinceActivate++;
 }
 
 bool CFontTyper::OnInput(const IInput::CEvent &Event)
 {
+	CState &State = Map()->m_FontTyperState;
+
 	std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(Map()->SelectedLayerType(0, LAYERTYPE_TILES));
 	if(!pLayer)
 	{
-		if(IsActive())
+		if(State.m_Active)
 			TextModeOff();
 		return false;
 	}
 	if(pLayer->m_Image == -1)
 		return false;
 
-	if(!IsActive())
+	if(!State.m_Active)
 	{
 		if(Event.m_Key == KEY_T && Input()->ModifierIsPressed() && !Ui()->IsPopupOpen() && Editor()->m_Dialog == DIALOG_NONE)
 		{
@@ -71,90 +82,90 @@ bool CFontTyper::OnInput(const IInput::CEvent &Event)
 	// letters
 	if(Event.m_Key >= KEY_A && Event.m_Key <= KEY_Z)
 	{
-		SetTile(m_TextIndex, Event.m_Key - KEY_A + LETTER_OFFSET, pLayer);
-		m_TextIndex.x++;
-		m_TextLineLen++;
+		SetTile(State.m_TextIndex, Event.m_Key - KEY_A + LETTER_OFFSET, pLayer);
+		State.m_TextIndex.x++;
+		State.m_TextLineLen++;
 	}
 	// numbers
 	if(Event.m_Key >= KEY_1 && Event.m_Key <= KEY_0)
 	{
-		SetTile(m_TextIndex, Event.m_Key - KEY_1 + NUMBER_OFFSET, pLayer);
-		m_TextIndex.x++;
-		m_TextLineLen++;
+		SetTile(State.m_TextIndex, Event.m_Key - KEY_1 + NUMBER_OFFSET, pLayer);
+		State.m_TextIndex.x++;
+		State.m_TextLineLen++;
 	}
 	if(Event.m_Key >= KEY_KP_1 && Event.m_Key <= KEY_KP_0)
 	{
-		SetTile(m_TextIndex, Event.m_Key - KEY_KP_1 + NUMBER_OFFSET, pLayer);
-		m_TextIndex.x++;
-		m_TextLineLen++;
+		SetTile(State.m_TextIndex, Event.m_Key - KEY_KP_1 + NUMBER_OFFSET, pLayer);
+		State.m_TextIndex.x++;
+		State.m_TextLineLen++;
 	}
 
 	// deletion
 	if(Event.m_Key == KEY_BACKSPACE)
 	{
-		m_TextIndex.x--;
-		m_TextLineLen--;
-		SetTile(m_TextIndex, 0, pLayer);
+		State.m_TextIndex.x--;
+		State.m_TextLineLen--;
+		SetTile(State.m_TextIndex, 0, pLayer);
 	}
 	// space
 	if(Event.m_Key == KEY_SPACE)
 	{
-		SetTile(m_TextIndex, 0, pLayer);
-		m_TextIndex.x++;
-		m_TextLineLen++;
+		SetTile(State.m_TextIndex, 0, pLayer);
+		State.m_TextIndex.x++;
+		State.m_TextLineLen++;
 	}
 	// newline
 	if(Event.m_Key == KEY_RETURN)
 	{
-		m_TextIndex.y++;
-		m_TextIndex.x -= m_TextLineLen;
-		m_TextLineLen = 0;
+		State.m_TextIndex.y++;
+		State.m_TextIndex.x -= State.m_TextLineLen;
+		State.m_TextLineLen = 0;
 	}
 	// arrow key navigation
 	if(Event.m_Key == KEY_LEFT)
 	{
-		m_TextIndex.x--;
-		m_TextLineLen--;
+		State.m_TextIndex.x--;
+		State.m_TextLineLen--;
 		if(Input()->KeyIsPressed(KEY_LCTRL))
 		{
-			while(pLayer->GetTile(m_TextIndex.x, m_TextIndex.y).m_Index)
+			while(pLayer->GetTile(State.m_TextIndex.x, State.m_TextIndex.y).m_Index)
 			{
-				if(m_TextIndex.x < 1 || m_TextIndex.x > pLayer->m_Width - 2)
+				if(State.m_TextIndex.x < 1 || State.m_TextIndex.x > pLayer->m_Width - 2)
 					break;
-				m_TextIndex.x--;
-				m_TextLineLen--;
+				State.m_TextIndex.x--;
+				State.m_TextLineLen--;
 			}
 		}
 	}
 	if(Event.m_Key == KEY_RIGHT)
 	{
-		m_TextIndex.x++;
-		m_TextLineLen++;
+		State.m_TextIndex.x++;
+		State.m_TextLineLen++;
 		if(Input()->KeyIsPressed(KEY_LCTRL))
 		{
-			while(pLayer->GetTile(m_TextIndex.x, m_TextIndex.y).m_Index)
+			while(pLayer->GetTile(State.m_TextIndex.x, State.m_TextIndex.y).m_Index)
 			{
-				if(m_TextIndex.x < 1 || m_TextIndex.x > pLayer->m_Width - 2)
+				if(State.m_TextIndex.x < 1 || State.m_TextIndex.x > pLayer->m_Width - 2)
 					break;
-				m_TextIndex.x++;
-				m_TextLineLen++;
+				State.m_TextIndex.x++;
+				State.m_TextLineLen++;
 			}
 		}
 	}
 	if(Event.m_Key == KEY_UP)
-		m_TextIndex.y--;
+		State.m_TextIndex.y--;
 	if(Event.m_Key == KEY_DOWN)
-		m_TextIndex.y++;
-	m_TextIndex.x = std::clamp(m_TextIndex.x, 0, pLayer->m_Width - 1);
-	m_TextIndex.y = std::clamp(m_TextIndex.y, 0, pLayer->m_Height - 1);
+		State.m_TextIndex.y++;
+	State.m_TextIndex.x = std::clamp(State.m_TextIndex.x, 0, pLayer->m_Width - 1);
+	State.m_TextIndex.y = std::clamp(State.m_TextIndex.y, 0, pLayer->m_Height - 1);
 	m_CursorRenderTime = time_get_nanoseconds() - 501ms;
 	float Dist = distance(
-		vec2(m_TextIndex.x, m_TextIndex.y),
+		vec2(State.m_TextIndex.x, State.m_TextIndex.y),
 		(Editor()->MapView()->GetWorldOffset() + Editor()->MapView()->GetEditorOffset()) / 32);
 	Dist /= Editor()->MapView()->GetWorldZoom();
 	if(Dist > 10.0f)
 	{
-		Editor()->MapView()->SetWorldOffset(vec2(m_TextIndex.x, m_TextIndex.y) * 32 - Editor()->MapView()->GetEditorOffset());
+		Editor()->MapView()->SetWorldOffset(vec2(State.m_TextIndex.x, State.m_TextIndex.y) * 32 - Editor()->MapView()->GetEditorOffset());
 	}
 
 	return false;
@@ -169,8 +180,8 @@ void CFontTyper::TextModeOn()
 		return;
 
 	SetCursor();
-	m_TilesPlacedSinceActivate = 0;
-	m_Active = true;
+	Map()->m_FontTyperState.m_TilesPlacedSinceActivate = 0;
+	Map()->m_FontTyperState.m_Active = true;
 	pLayer->m_KnownTextModeLayer = true;
 
 	// hack to not show picker when pressing space
@@ -181,23 +192,23 @@ void CFontTyper::TextModeOff()
 {
 	if(Editor()->m_Dialog == DIALOG_PSEUDO_FONT_TYPER)
 		Editor()->m_Dialog = DIALOG_NONE;
-	if(m_TilesPlacedSinceActivate)
+	if(Map()->m_FontTyperState.m_TilesPlacedSinceActivate)
 		Map()->m_EditorHistory.RecordAction(std::make_shared<CEditorBrushDrawAction>(Map(), Map()->m_SelectedGroup), "Font typer");
-	m_TilesPlacedSinceActivate = 0;
-	m_Active = false;
-	m_pLastLayer = nullptr;
+	Map()->m_FontTyperState.Reset();
 }
 
 void CFontTyper::SetCursor()
 {
-	m_TextIndex.x = (int)(Ui()->MouseWorldX() / 32);
-	m_TextIndex.y = (int)(Ui()->MouseWorldY() / 32);
-	m_TextLineLen = 0;
+	Map()->m_FontTyperState.m_TextIndex.x = (int)(Ui()->MouseWorldX() / 32);
+	Map()->m_FontTyperState.m_TextIndex.y = (int)(Ui()->MouseWorldY() / 32);
+	Map()->m_FontTyperState.m_TextLineLen = 0;
 	m_CursorRenderTime = time_get_nanoseconds() - 501ms;
 }
 
 void CFontTyper::Render()
 {
+	CState &State = Map()->m_FontTyperState;
+
 	if(m_ConfirmActivatePopupContext.m_Result == CUi::SConfirmPopupContext::CONFIRMED)
 	{
 		TextModeOn();
@@ -206,7 +217,7 @@ void CFontTyper::Render()
 	if(m_ConfirmActivatePopupContext.m_Result != CUi::SConfirmPopupContext::UNSET)
 		m_ConfirmActivatePopupContext.Reset();
 
-	if(!IsActive())
+	if(!State.m_Active)
 		return;
 
 	if(Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
@@ -218,10 +229,10 @@ void CFontTyper::Render()
 		return;
 
 	// exit if selected layer changes
-	if(m_pLastLayer && m_pLastLayer != pLayer)
+	if(State.m_pLastLayer && State.m_pLastLayer != pLayer)
 	{
 		TextModeOff();
-		m_pLastLayer = pLayer;
+		State.m_pLastLayer = pLayer;
 		return;
 	}
 	// exit if dialog or edit box pops up
@@ -230,9 +241,9 @@ void CFontTyper::Render()
 		TextModeOff();
 		return;
 	}
-	m_pLastLayer = pLayer;
-	m_TextIndex.x = std::clamp(m_TextIndex.x, 0, pLayer->m_Width - 1);
-	m_TextIndex.y = std::clamp(m_TextIndex.y, 0, pLayer->m_Height - 1);
+	State.m_pLastLayer = pLayer;
+	State.m_TextIndex.x = std::clamp(State.m_TextIndex.x, 0, pLayer->m_Width - 1);
+	State.m_TextIndex.y = std::clamp(State.m_TextIndex.y, 0, pLayer->m_Height - 1);
 
 	const auto CurTime = time_get_nanoseconds();
 	if((CurTime - m_CursorRenderTime) > 1s)
@@ -245,10 +256,15 @@ void CFontTyper::Render()
 		Graphics()->TextureSet(m_CursorTextTexture);
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(1, 1, 1, 1);
-		IGraphics::CQuadItem QuadItem(m_TextIndex.x * 32, m_TextIndex.y * 32, 32.0f, 32.0f);
+		IGraphics::CQuadItem QuadItem(State.m_TextIndex.x * 32, State.m_TextIndex.y * 32, 32.0f, 32.0f);
 		Graphics()->QuadsDrawTL(&QuadItem, 1);
 		Graphics()->QuadsEnd();
 		Graphics()->WrapNormal();
 		Ui()->MapScreen();
 	}
+}
+
+bool CFontTyper::IsActive() const
+{
+	return Map()->m_FontTyperState.m_Active;
 }

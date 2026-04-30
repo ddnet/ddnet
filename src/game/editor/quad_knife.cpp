@@ -3,6 +3,14 @@
 #include "editor.h"
 #include "editor_actions.h"
 
+void CQuadKnife::CState::Reset()
+{
+	m_Active = false;
+	m_Count = 0;
+	m_SelectedQuadIndex = -1;
+	std::fill(std::begin(m_aPoints), std::end(m_aPoints), vec2(0.0f, 0.0f));
+}
+
 bool CQuadKnife::IsActive() const
 {
 	return Map()->m_QuadKnifeState.m_Active;
@@ -17,12 +25,7 @@ void CQuadKnife::Activate(int SelectedQuad)
 
 void CQuadKnife::Deactivate()
 {
-	Map()->m_QuadKnifeState.m_Active = false;
-	Map()->m_QuadKnifeState.m_Count = 0;
-	Map()->m_QuadKnifeState.m_SelectedQuadIndex = -1;
-
-	auto &aPoints = Map()->m_QuadKnifeState.m_aPoints;
-	std::fill(std::begin(aPoints), std::end(aPoints), vec2(0.0f, 0.0f));
+	Map()->m_QuadKnifeState.Reset();
 }
 
 static float TriangleArea(vec2 A, vec2 B, vec2 C)

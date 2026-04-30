@@ -30,25 +30,28 @@ void CEditorMap::CMapInfo::Copy(const CMapInfo &Source)
 	str_copy(m_aLicense, Source.m_aLicense);
 }
 
-void CEditorMap::OnModify()
-{
-	m_Modified = true;
-	m_ModifiedAuto = true;
-	m_LastModifiedTime = Editor()->Client()->GlobalTime();
-}
-
-void CEditorMap::ResetModifiedState()
-{
-	m_Modified = false;
-	m_ModifiedAuto = false;
-	m_LastModifiedTime = -1.0f;
-	m_LastSaveTime = Editor()->Client()->GlobalTime();
-}
-
-void CEditorMap::Clean()
+CEditorMap::CEditorMap(CEditor *pEditor) :
+	m_EditorHistory(this),
+	m_ServerSettingsHistory(this),
+	m_EnvelopeEditorHistory(this),
+	m_QuadTracker(this),
+	m_EnvOpTracker(this),
+	m_LayerGroupPropTracker(this),
+	m_LayerPropTracker(this),
+	m_LayerTilesCommonPropTracker(this),
+	m_LayerTilesPropTracker(this),
+	m_LayerQuadPropTracker(this),
+	m_LayerSoundsPropTracker(this),
+	m_SoundSourceOperationTracker(this),
+	m_SoundSourcePropTracker(this),
+	m_SoundSourceRectShapePropTracker(this),
+	m_SoundSourceCircleShapePropTracker(this),
+	m_MapSettingsCommandContext(pEditor->m_MapSettingsBackend.NewContextWithInput()),
+	m_pEditor(pEditor)
 {
 	m_aFilename[0] = '\0';
 	m_ValidSaveFilename = false;
+	m_CloseOnSave = false;
 	ResetModifiedState();
 
 	m_vpGroups.clear();
@@ -90,7 +93,30 @@ void CEditorMap::Clean()
 
 	m_ShiftBy = 1;
 
-	Editor()->QuadKnife()->Deactivate();
+	m_MapViewState.Reset(Editor());
+	m_MapGridState.Reset();
+	m_ProofModeState.Reset();
+	m_QuadKnifeState.Reset();
+	m_EnvelopeEditorState.Reset(Editor());
+	m_MapSettingsCommandContext.Reset();
+	m_FontTyperState.Reset();
+}
+
+void CEditorMap::OnModify()
+{
+	m_Modified = true;
+	m_ModifiedAuto = true;
+	m_LastModifiedTime = Editor()->Client()->GlobalTime();
+	// Stopped scheduled map closing if the map was modified
+	m_CloseOnSave = false;
+}
+
+void CEditorMap::ResetModifiedState()
+{
+	m_Modified = false;
+	m_ModifiedAuto = false;
+	m_LastModifiedTime = -1.0f;
+	m_LastSaveTime = Editor()->Client()->GlobalTime();
 }
 
 void CEditorMap::CreateDefault()
@@ -332,7 +358,7 @@ void CEditorMap::SelectLayer(int LayerIndex, int GroupIndex)
 void CEditorMap::AddSelectedLayer(int LayerIndex)
 {
 	m_vSelectedLayers.push_back(LayerIndex);
-	Editor()->QuadKnife()->Deactivate();
+	m_QuadKnifeState.Reset();
 }
 
 void CEditorMap::SelectNextLayer()

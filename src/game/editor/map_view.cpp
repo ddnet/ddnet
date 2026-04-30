@@ -7,25 +7,21 @@
 
 #include <game/client/ui.h>
 
+void CMapView::CState::Reset(CEditor *pEditor)
+{
+	m_Zoom = CSmoothValue(200.0f, 10.0f, 2000.0f);
+	m_Zoom.OnInit(pEditor);
+	m_WorldZoom = 1.0f;
+	m_WorldOffset = vec2(0.0f, 0.0f);
+	m_EditorOffset = vec2(0.0f, 0.0f);
+}
+
 void CMapView::OnInit(CEditor *pEditor)
 {
 	CEditorComponent::OnInit(pEditor);
 	RegisterSubComponent(m_MapGrid);
 	RegisterSubComponent(m_ProofMode);
 	InitSubComponents();
-}
-
-void CMapView::OnReset()
-{
-	m_Zoom = CSmoothValue(200.0f, 10.0f, 2000.0f);
-	m_Zoom.OnInit(Editor());
-	m_WorldZoom = 1.0f;
-
-	SetWorldOffset({0, 0});
-	SetEditorOffset({0, 0});
-
-	m_ProofMode.OnReset();
-	m_MapGrid.OnReset();
 }
 
 void CMapView::OnMapLoad()
@@ -107,7 +103,7 @@ void CMapView::RenderEditorMap()
 	}
 
 	std::shared_ptr<CLayerTiles> pSelectedTilesLayer = std::static_pointer_cast<CLayerTiles>(Map()->SelectedLayerType(0, LAYERTYPE_TILES));
-	if(Editor()->m_ShowTileInfo != CEditor::SHOW_TILE_OFF && pSelectedTilesLayer && pSelectedTilesLayer->m_Visible && m_Zoom.GetValue() <= 300.0f)
+	if(Editor()->m_ShowTileInfo != CEditor::SHOW_TILE_OFF && pSelectedTilesLayer && pSelectedTilesLayer->m_Visible && Zoom()->GetValue() <= 300.0f)
 	{
 		Map()->SelectedGroup()->MapScreen();
 		pSelectedTilesLayer->ShowInfo();
@@ -117,12 +113,12 @@ void CMapView::RenderEditorMap()
 void CMapView::ResetZoom()
 {
 	SetEditorOffset({0, 0});
-	m_Zoom.SetValue(100.0f);
+	Zoom()->SetValue(100.0f);
 }
 
 float CMapView::ScaleLength(float Value) const
 {
-	return m_WorldZoom * Value;
+	return GetWorldZoom() * Value;
 }
 
 void CMapView::ZoomMouseTarget(float ZoomFactor)
@@ -132,7 +128,7 @@ void CMapView::ZoomMouseTarget(float ZoomFactor)
 	float aPoints[4];
 	Graphics()->MapScreenToWorld(
 		GetWorldOffset().x, GetWorldOffset().y,
-		100.0f, 100.0f, 100.0f, 0.0f, 0.0f, Graphics()->ScreenAspect(), m_WorldZoom, aPoints);
+		100.0f, 100.0f, 100.0f, 0.0f, 0.0f, Graphics()->ScreenAspect(), GetWorldZoom(), aPoints);
 
 	float WorldWidth = aPoints[2] - aPoints[0];
 	float WorldHeight = aPoints[3] - aPoints[1];
@@ -146,23 +142,23 @@ void CMapView::ZoomMouseTarget(float ZoomFactor)
 
 void CMapView::UpdateZoom()
 {
-	float OldLevel = m_Zoom.GetValue();
-	bool UpdatedZoom = m_Zoom.UpdateValue();
-	m_Zoom.SetValueRange(10.0f, g_Config.m_EdLimitMaxZoomLevel ? 2000.0f : std::numeric_limits<float>::max());
-	float NewLevel = m_Zoom.GetValue();
+	float OldLevel = Zoom()->GetValue();
+	bool UpdatedZoom = Zoom()->UpdateValue();
+	Zoom()->SetValueRange(10.0f, g_Config.m_EdLimitMaxZoomLevel ? 2000.0f : std::numeric_limits<float>::max());
+	float NewLevel = Zoom()->GetValue();
 	if(UpdatedZoom && g_Config.m_EdZoomTarget)
 		ZoomMouseTarget(NewLevel / OldLevel);
-	m_WorldZoom = NewLevel / 100.0f;
+	Map()->m_MapViewState.m_WorldZoom = NewLevel / 100.0f;
 }
 
 CSmoothValue *CMapView::Zoom()
 {
-	return &m_Zoom;
+	return &Map()->m_MapViewState.m_Zoom;
 }
 
 const CSmoothValue *CMapView::Zoom() const
 {
-	return &m_Zoom;
+	return &Map()->m_MapViewState.m_Zoom;
 }
 
 CProofMode *CMapView::ProofMode()
@@ -187,35 +183,35 @@ const CMapGrid *CMapView::MapGrid() const
 
 void CMapView::OffsetWorld(vec2 Offset)
 {
-	m_WorldOffset += Offset;
+	Map()->m_MapViewState.m_WorldOffset += Offset;
 }
 
 void CMapView::OffsetEditor(vec2 Offset)
 {
-	m_EditorOffset += Offset;
+	Map()->m_MapViewState.m_EditorOffset += Offset;
 }
 
 void CMapView::SetWorldOffset(vec2 WorldOffset)
 {
-	m_WorldOffset = WorldOffset;
+	Map()->m_MapViewState.m_WorldOffset = WorldOffset;
 }
 
 void CMapView::SetEditorOffset(vec2 EditorOffset)
 {
-	m_EditorOffset = EditorOffset;
+	Map()->m_MapViewState.m_EditorOffset = EditorOffset;
 }
 
 vec2 CMapView::GetWorldOffset() const
 {
-	return m_WorldOffset;
+	return Map()->m_MapViewState.m_WorldOffset;
 }
 
 vec2 CMapView::GetEditorOffset() const
 {
-	return m_EditorOffset;
+	return Map()->m_MapViewState.m_EditorOffset;
 }
 
 float CMapView::GetWorldZoom() const
 {
-	return m_WorldZoom;
+	return Map()->m_MapViewState.m_WorldZoom;
 }

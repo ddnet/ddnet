@@ -226,9 +226,7 @@ REGISTER_QUICK_ACTION(
 	SaveAs,
 	"Save as",
 	[&]() {
-		char aDefaultName[IO_MAX_PATH_LENGTH];
-		fs_split_file_extension(fs_filename(Map()->m_aFilename), aDefaultName, sizeof(aDefaultName));
-		m_FileBrowser.ShowFileDialog(IStorage::TYPE_SAVE, CFileBrowser::EFileType::MAP, "Save map", "Save as", "maps", aDefaultName, CallbackSaveMap, this);
+		m_FileBrowser.ShowFileDialog(IStorage::TYPE_SAVE, CFileBrowser::EFileType::MAP, "Save map", "Save as", "maps", Map()->m_aAutosaveName, CallbackSaveMap, this);
 	},
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
@@ -238,18 +236,7 @@ REGISTER_QUICK_ACTION(
 	LoadCurrentMap,
 	"Load current map",
 	[&]() {
-		if(HasUnsavedData())
-		{
-			if(!m_PopupEventWasActivated)
-			{
-				m_PopupEventType = POPEVENT_LOADCURRENT;
-				m_PopupEventActivated = true;
-			}
-		}
-		else
-		{
-			LoadCurrentMap();
-		}
+		LoadCurrentMap();
 	},
 	[&]() -> bool { return Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK; },
 	ALWAYS_FALSE,

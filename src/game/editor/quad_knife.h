@@ -13,6 +13,8 @@ public:
 		int m_SelectedQuadIndex;
 		int m_Count;
 		vec2 m_aPoints[4];
+
+		void Reset();
 	};
 
 	bool IsActive() const;
