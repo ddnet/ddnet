@@ -194,7 +194,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	bool m_DummyDeactivateOnReconnect = false;
 
 	// graphs
-	CGraph m_InputtimeMarginGraph;
+	CGraph m_aInputtimeMarginGraphs[NUM_DUMMIES];
 	CGraph m_aGametimeMarginGraphs[NUM_DUMMIES];
 	CGraph m_FpsGraph;
 
