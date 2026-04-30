@@ -1,3 +1,6 @@
+from abc import ABC, abstractmethod
+
+
 def only(x):
 	if len(x) != 1:
 		raise ValueError
@@ -606,3 +609,128 @@ class NetTwIntString(NetArray):
 			result += NetVariable(self.var).emit_dump(offset + i)
 			result += [f'dbg_msg("snapshot", "%s\\t{self.base_name}[{int(i)}]=%d\\tIntToStr: %s", aRawData, pObj->{self.base_name}[{int(i)}], aStr);']
 		return result
+
+
+class NetIntCustomOption(ABC):
+	@abstractmethod
+	def is_valid(self) -> bool:
+		return False
+
+	@abstractmethod
+	def is_contained_check(self, name) -> str:
+		return ""
+
+	@abstractmethod
+	def static_assert(self) -> list:
+		return []
+
+	@abstractmethod
+	def get_dump(self) -> tuple[str, str]:
+		"""
+		fmt, args
+		"""
+		return "", ""
+
+
+class Constant(NetIntCustomOption):
+	def __init__(self, value, key):
+		if not isinstance(value, int):
+			raise ValueError(f"Value {value} needs to be an integer")
+		if not isinstance(key, str):
+			raise ValueError(f"Key {key} needs to be a string")
+		self.value = value
+		self.key = key
+
+	def is_valid(self):
+		return True
+
+	def is_contained_check(self, name) -> str:
+		return f"pData->{name} == {self.key}"
+
+	def static_assert(self):
+		return [f'static_assert({self.key} == {self.value}, "Value and key aren\'t equal");']
+
+	def get_dump(self):
+		return f"Constant={self.key}({self.value})", ""
+
+
+class Range(NetIntCustomOption):
+	def __init__(self, val_min, val_max):
+		self.min = val_min
+		self.max = val_max
+
+	def is_valid(self):
+		if isinstance(self.min, int) and isinstance(self.max, int):
+			return self.max >= self.min
+		return True  # we don't know
+
+	def is_contained_check(self, name) -> str:
+		return f"(pData->{name} >= {self.min} && pData->{name} <= {self.max})"
+
+	def static_assert(self):
+		static_asserts = []
+		if not isinstance(self.min, int):
+			static_asserts += [f'static_assert((int){self.min} == {self.min}, "Value is not an integer");']
+		if not isinstance(self.max, int):
+			static_asserts += [f'static_assert((int){self.max} == {self.max}, "Value is not an integer");']
+		return static_asserts
+
+	def get_dump(self):
+		min_fmt = f"min={self.min}"
+		min_arg = ""
+		try:
+			int(self.min)
+		except ValueError:
+			min_fmt = f"min={self.min}(%d)"
+			min_arg = f", (int){self.min}"
+		max_fmt = f"max={self.max}"
+		max_arg = ""
+		try:
+			int(self.max)
+		except ValueError:
+			max_fmt = f"max={self.max}(%d)"
+			max_arg = f", (int){self.max}"
+
+		return f"Range=[{min_fmt} {max_fmt}]", f"{min_arg}{max_arg}"
+
+
+class NetIntCustom(NetIntAny):
+	def __init__(self, name, values, default=None):
+		if not isinstance(values, list):
+			raise ValueError("'values' is not a list")
+		for index, option in enumerate(values):
+			if not isinstance(option, NetIntCustomOption):
+				raise ValueError(f"Value #{index} needs to be of type 'NetIntCustomOptions'")
+			if not option.is_valid():
+				raise ValueError(f"Value #{index} of type {type(option)} is not valid")
+		NetIntAny.__init__(self, name, default=default)
+		self.values = values
+
+	def emit_validate_obj(self):
+		# add some compile time validation
+		validation = []
+		for option in self.values:
+			validation += option.static_assert()
+
+		# validate content
+		bool_name = f"IsValid{self.name[2:]}"
+		bool_expression = [option.is_contained_check(self.name) for option in self.values]
+		validation += [f"bool {bool_name} = " + " || ".join(bool_expression) + ";"]
+		validation += [f"if(!{bool_name})", "{", f"\tpData->{self.name} = {self.default};", "}"]
+
+		return validation
+
+	def emit_unpack_msg_check(self):
+		bool_expression = [option.is_contained_check(self.name) for option in self.values]
+		return [f'if({" || ".join(bool_expression)}) {{ m_pMsgFailedOn = "{self.name}"; break; }}']
+
+	def emit_dump(self, offset):
+		contents = []
+		content_args = []
+		for option in self.values:
+			fmt, fmt_arg = option.get_dump()
+			contents.append(fmt)
+			content_args.append(fmt_arg)
+		contents = ", ".join(contents)
+		content_args = "".join(content_args)
+		return NetVariable(self.name).emit_dump(offset) + [f'dbg_msg("snapshot", "%s\\t{self.name}=%d (Contents=[{contents}])", aRawData, pObj->{self.name}{content_args});']
