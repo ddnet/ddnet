@@ -6306,11 +6306,26 @@ void CEditor::Render()
 		}
 		if(!m_pBrush->IsEmpty())
 		{
-			const bool HasTeleTiles = std::any_of(m_pBrush->m_vpLayers.begin(), m_pBrush->m_vpLayers.end(), [](const auto &pLayer) {
-				return pLayer->m_Type == LAYERTYPE_TILES && std::static_pointer_cast<CLayerTiles>(pLayer)->m_HasTele;
-			});
-			if(HasTeleTiles)
-				str_copy(m_aTooltip, "Use shift+mouse wheel up/down to adjust the tele numbers. Use ctrl+f to change all tele numbers to the first unused number.");
+			bool HasTileAdjustLayer = false;
+			bool HasSpeedupLayer = false;
+			for(const auto &pLayer : m_pBrush->m_vpLayers)
+			{
+				if(pLayer->m_Type != LAYERTYPE_TILES)
+				{
+					continue;
+				}
+				std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
+				HasTileAdjustLayer |= pTiles->m_HasTele || pTiles->m_HasSwitch || pTiles->m_HasTune;
+				HasSpeedupLayer |= pTiles->m_HasSpeedup;
+			}
+			if(HasTileAdjustLayer)
+			{
+				str_copy(m_aTooltip, "Use Shift+Mouse wheel up/down to adjust the tile numbers. Use Ctrl+F to change all tile numbers to the first unused number.");
+			}
+			else if(HasSpeedupLayer)
+			{
+				str_copy(m_aTooltip, "Use Shift+Mouse wheel up/down to adjust the angle.");
+			}
 
 			if(Input()->ShiftIsPressed())
 			{
@@ -7293,12 +7308,11 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 
 		std::shared_ptr<CLayerTiles> pLayerTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
 
-		if(pLayerTiles->m_HasTele)
+		if(pLayerTiles->m_HasTele && (!UseNextFree || Map()->m_pTeleLayer != nullptr))
 		{
-			int NextFreeTeleNumber = Map()->m_pTeleLayer->FindNextFreeNumber(false);
-			int NextFreeCPNumber = Map()->m_pTeleLayer->FindNextFreeNumber(true);
+			const int NextFreeTeleNumber = UseNextFree ? Map()->m_pTeleLayer->FindNextFreeNumber(false) : 0;
+			const int NextFreeCheckpointNumber = UseNextFree ? Map()->m_pTeleLayer->FindNextFreeNumber(true) : 0;
 			std::shared_ptr<CLayerTele> pTeleLayer = std::static_pointer_cast<CLayerTele>(pLayer);
-
 			for(int y = 0; y < pTeleLayer->m_Height; y++)
 			{
 				for(int x = 0; x < pTeleLayer->m_Width; x++)
@@ -7310,7 +7324,7 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 					if(UseNextFree)
 					{
 						if(IsTeleTileCheckpoint(pTeleLayer->m_pTiles[i].m_Index))
-							pTeleLayer->m_pTeleTile[i].m_Number = NextFreeCPNumber;
+							pTeleLayer->m_pTeleTile[i].m_Number = NextFreeCheckpointNumber;
 						else if(IsTeleTileNumberUsedAny(pTeleLayer->m_pTiles[i].m_Index))
 							pTeleLayer->m_pTeleTile[i].m_Number = NextFreeTeleNumber;
 					}
@@ -7327,29 +7341,29 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 				}
 			}
 		}
-		else if(pLayerTiles->m_HasTune)
+		else if(pLayerTiles->m_HasTune && (!UseNextFree || Map()->m_pTuneLayer != nullptr))
 		{
-			if(!UseNextFree)
+			const int NextFreeNumber = UseNextFree ? Map()->m_pTuneLayer->FindNextFreeNumber() : 0;
+			std::shared_ptr<CLayerTune> pTuneLayer = std::static_pointer_cast<CLayerTune>(pLayer);
+			for(int y = 0; y < pTuneLayer->m_Height; y++)
 			{
-				std::shared_ptr<CLayerTune> pTuneLayer = std::static_pointer_cast<CLayerTune>(pLayer);
-				for(int y = 0; y < pTuneLayer->m_Height; y++)
+				for(int x = 0; x < pTuneLayer->m_Width; x++)
 				{
-					for(int x = 0; x < pTuneLayer->m_Width; x++)
-					{
-						int i = y * pTuneLayer->m_Width + x;
-						if(!IsValidTuneTile(pTuneLayer->m_pTiles[i].m_Index) || !pTuneLayer->m_pTuneTile[i].m_Number)
-							continue;
+					int i = y * pTuneLayer->m_Width + x;
+					if(!IsValidTuneTile(pTuneLayer->m_pTiles[i].m_Index) || (!UseNextFree && !pTuneLayer->m_pTuneTile[i].m_Number))
+						continue;
 
+					if(UseNextFree)
+						pTuneLayer->m_pTuneTile[i].m_Number = NextFreeNumber;
+					else
 						AdjustNumber(pTuneLayer->m_pTuneTile[i].m_Number, 1, 255);
-					}
 				}
 			}
 		}
-		else if(pLayerTiles->m_HasSwitch)
+		else if(pLayerTiles->m_HasSwitch && (!UseNextFree || Map()->m_pSwitchLayer != nullptr))
 		{
-			int NextFreeNumber = Map()->m_pSwitchLayer->FindNextFreeNumber();
+			const int NextFreeNumber = UseNextFree ? Map()->m_pSwitchLayer->FindNextFreeNumber() : 0;
 			std::shared_ptr<CLayerSwitch> pSwitchLayer = std::static_pointer_cast<CLayerSwitch>(pLayer);
-
 			for(int y = 0; y < pSwitchLayer->m_Height; y++)
 			{
 				for(int x = 0; x < pSwitchLayer->m_Width; x++)
@@ -7365,28 +7379,25 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 				}
 			}
 		}
-		else if(pLayerTiles->m_HasSpeedup)
+		else if(pLayerTiles->m_HasSpeedup && !UseNextFree)
 		{
-			if(!UseNextFree)
+			std::shared_ptr<CLayerSpeedup> pSpeedupLayer = std::static_pointer_cast<CLayerSpeedup>(pLayer);
+			for(int y = 0; y < pSpeedupLayer->m_Height; y++)
 			{
-				std::shared_ptr<CLayerSpeedup> pSpeedupLayer = std::static_pointer_cast<CLayerSpeedup>(pLayer);
-				for(int y = 0; y < pSpeedupLayer->m_Height; y++)
+				for(int x = 0; x < pSpeedupLayer->m_Width; x++)
 				{
-					for(int x = 0; x < pSpeedupLayer->m_Width; x++)
-					{
-						int i = y * pSpeedupLayer->m_Width + x;
-						if(!IsValidSpeedupTile(pSpeedupLayer->m_pTiles[i].m_Index))
-							continue;
+					int i = y * pSpeedupLayer->m_Width + x;
+					if(!IsValidSpeedupTile(pSpeedupLayer->m_pTiles[i].m_Index))
+						continue;
 
-						if(Adjust != 0)
-						{
-							AdjustNumber(pSpeedupLayer->m_pSpeedupTile[i].m_Angle, 0, 359);
-						}
-						else
-						{
-							pSpeedupLayer->m_pSpeedupTile[i].m_Angle = m_SpeedupAngle;
-							pSpeedupLayer->m_SpeedupAngle = m_SpeedupAngle;
-						}
+					if(Adjust != 0)
+					{
+						AdjustNumber(pSpeedupLayer->m_pSpeedupTile[i].m_Angle, 0, 359);
+					}
+					else
+					{
+						pSpeedupLayer->m_pSpeedupTile[i].m_Angle = m_SpeedupAngle;
+						pSpeedupLayer->m_SpeedupAngle = m_SpeedupAngle;
 					}
 				}
 			}
