@@ -120,6 +120,13 @@ CGameContext::CGameContext(bool Resetting) :
 	m_LatestLog = 0;
 	mem_zero(&m_aLogs, sizeof(m_aLogs));
 
+	str_copy(m_aVersionString, GAME_VERSION);
+	if(GIT_SHORTREV_HASH != nullptr)
+	{
+		str_append(m_aVersionString, " ");
+		str_append(m_aVersionString, GIT_SHORTREV_HASH);
+	}
+
 	if(!Resetting)
 	{
 		m_pMap = CreateMap();
@@ -4791,7 +4798,7 @@ const char *CGameContext::GameType() const
 	dbg_assert(m_pController->m_pGameType, "no gametype");
 	return m_pController->m_pGameType;
 }
-const char *CGameContext::Version() const { return GAME_VERSION; }
+const char *CGameContext::Version() const { return m_aVersionString; }
 const char *CGameContext::NetVersion() const { return GAME_NETVERSION; }
 
 IGameServer *CreateGameServer() { return new CGameContext; }
