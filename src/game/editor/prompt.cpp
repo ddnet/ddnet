@@ -42,9 +42,12 @@ void CPrompt::SetInactive()
 {
 	m_ResetFilterResults = true;
 	m_PromptInput.Clear();
+
 	if(Editor()->m_Dialog == DIALOG_QUICK_PROMPT)
 	{
 		Editor()->OnDialogClose();
+		m_PromptInput.Deactivate();
+		Ui()->SetActiveItem(nullptr);
 	}
 }
 
