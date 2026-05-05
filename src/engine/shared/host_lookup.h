@@ -18,7 +18,6 @@ private:
 	void Run() override;
 
 public:
-	CHostLookup();
 	CHostLookup(const char *pHostname, int Nettype);
 
 	int Result() const { return m_Result; }
