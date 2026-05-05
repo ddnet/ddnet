@@ -156,7 +156,7 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 				const json_value &SkinBodyColor = SkinObj["color_body"];
 				const json_value &SkinFeetColor = SkinObj["color_feet"];
 				// 0.6 skin
-				if(SkinName.type == json_string)
+				if(SkinName.type == json_string && !str_has_cc(SkinName.u.string.ptr))
 				{
 					HasSkin = true;
 					str_copy(pClient->m_aSkin, SkinName.u.string.ptr);
@@ -186,7 +186,7 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 						{
 							const json_value &SkinPartName = SkinPartObj["name"];
 							const json_value &SkinPartColor = SkinPartObj["color"];
-							if(SkinPartName.type == json_string)
+							if(SkinPartName.type == json_string && !str_has_cc(SkinPartName.u.string.ptr))
 							{
 								HasSkin = true;
 								str_copy(pClient->m_aaSkin7[Part], SkinPartName.u.string.ptr);
