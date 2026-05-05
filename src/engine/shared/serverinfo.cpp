@@ -251,7 +251,7 @@ bool CServerInfo2::operator==(const CServerInfo2 &Other) const
 	{
 		return false;
 	}
-	for(int i = 0; i < m_NumClients; i++)
+	for(int i = 0; i < minimum(m_NumClients, (int)SERVERINFO_MAX_CLIENTS); i++)
 	{
 		Unequal = false;
 		Unequal = Unequal || str_comp(m_aClients[i].m_aName, Other.m_aClients[i].m_aName) != 0;
