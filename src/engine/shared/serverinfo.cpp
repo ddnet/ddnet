@@ -126,7 +126,7 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 		const json_value &IsAfk = Client["afk"];
 		Error = false;
 		Error = Error || ClientName.type != json_string || str_has_cc(ClientName);
-		Error = Error || Clan.type != json_string || str_has_cc(ClientName);
+		Error = Error || Clan.type != json_string || str_has_cc(Clan);
 		Error = Error || Country.type != json_integer;
 		Error = Error || Score.type != json_integer;
 		Error = Error || IsPlayer.type != json_boolean;
