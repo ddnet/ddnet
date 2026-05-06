@@ -160,7 +160,7 @@ REGISTER_QUICK_ACTION(
 REGISTER_QUICK_ACTION(
 	ZoomOut,
 	"Zoom out",
-	[&]() { MapView()->Zoom()->ChangeValue(50.0f); },
+	[&]() { MapView()->Zoom()->ScaleValue(1.331f); },
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
@@ -168,7 +168,7 @@ REGISTER_QUICK_ACTION(
 REGISTER_QUICK_ACTION(
 	ZoomIn,
 	"Zoom in",
-	[&]() { MapView()->Zoom()->ChangeValue(-50.0f); },
+	[&]() { MapView()->Zoom()->ScaleValue(1.0f / 1.331f); },
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,

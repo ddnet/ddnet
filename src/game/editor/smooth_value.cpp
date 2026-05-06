@@ -32,10 +32,10 @@ void CSmoothValue::SetValue(float Target)
 	m_Smoothing = true;
 }
 
-void CSmoothValue::ChangeValue(float Amount)
+void CSmoothValue::ScaleValue(float Factor)
 {
 	const float CurrentTarget = m_Smoothing ? m_ValueSmoothingTarget : m_Value;
-	SetValue(CurrentTarget + Amount);
+	SetValue(CurrentTarget * Factor);
 }
 
 bool CSmoothValue::UpdateValue()
