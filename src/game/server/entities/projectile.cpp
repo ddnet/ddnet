@@ -360,9 +360,9 @@ CNetObj_DDNetProjectile CProjectile::NetInfo() const
 	Result.m_Type = m_Type;
 	Result.m_StartTick = m_StartTick;
 	Result.m_Owner = m_Owner;
-	Result.m_Flags = Flags;
 	Result.m_SwitchNumber = m_Number;
 	Result.m_TuneZone = m_TuneZone;
+	Result.m_Flags = Flags;
 	return Result;
 }
 
