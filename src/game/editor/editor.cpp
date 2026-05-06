@@ -1765,11 +1765,11 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 							// 0,2;1,3 - line x
 							// 0,1;2,3 - line y
 
-							pSelectedQuad->m_aTexcoords[m].x += f2fx(MapView()->MouseDeltaWorldX() * 0.001f);
-							pSelectedQuad->m_aTexcoords[(m + 2) % 4].x += f2fx(MapView()->MouseDeltaWorldX() * 0.001f);
+							pSelectedQuad->m_aTexcoords[m].x += f2fx(MapView()->MouseDeltaWorld().x * 0.001f);
+							pSelectedQuad->m_aTexcoords[(m + 2) % 4].x += f2fx(MapView()->MouseDeltaWorld().x * 0.001f);
 
-							pSelectedQuad->m_aTexcoords[m].y += f2fx(MapView()->MouseDeltaWorldY() * 0.001f);
-							pSelectedQuad->m_aTexcoords[m ^ 1].y += f2fx(MapView()->MouseDeltaWorldY() * 0.001f);
+							pSelectedQuad->m_aTexcoords[m].y += f2fx(MapView()->MouseDeltaWorld().y * 0.001f);
+							pSelectedQuad->m_aTexcoords[m ^ 1].y += f2fx(MapView()->MouseDeltaWorld().y * 0.001f);
 						}
 					}
 				}
@@ -3751,7 +3751,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	char aTimeStr[6];
 	str_timestamp_format(aTimeStr, sizeof(aTimeStr), "%H:%M");
 
-	str_format(aBuf, sizeof(aBuf), "X: %.1f, Y: %.1f, Z: %.1f, A: %.1f, G: %i  %s", MapView()->MouseWorldX() / 32.0f, MapView()->MouseWorldY() / 32.0f, MapView()->Zoom()->GetValue(), m_AnimateSpeed, MapView()->MapGrid()->Factor(), aTimeStr);
+	str_format(aBuf, sizeof(aBuf), "X: %.1f, Y: %.1f, Z: %.1f, A: %.1f, G: %i  %s", MapView()->MouseWorldPos().x / 32.0f, MapView()->MouseWorldPos().y / 32.0f, MapView()->Zoom()->GetValue(), m_AnimateSpeed, MapView()->MapGrid()->Factor(), aTimeStr);
 	Ui()->DoLabel(&Info, aBuf, 10.0f, TEXTALIGN_MR);
 
 	static int s_HelpButton = 0;
@@ -4702,7 +4702,7 @@ void CEditor::MouseAxisLock(vec2 &CursorRel)
 		if(m_pBrush->IsEmpty() || Ui()->HotItem() != MapView())
 			return;
 
-		const vec2 CurrentWorldPos = vec2(MapView()->MouseWorldX(), MapView()->MouseWorldY()) / 32.0f;
+		const vec2 CurrentWorldPos = MapView()->MouseWorldPos() / 32.0f;
 
 		if(m_MouseAxisLockState == EAxisLock::START)
 		{

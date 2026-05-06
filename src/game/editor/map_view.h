@@ -56,11 +56,7 @@ public:
 	void ResetMouseDeltaWorld();
 	float MouseWorldScale() const;
 	vec2 MouseDeltaWorld() const;
-	float MouseDeltaWorldX() const;
-	float MouseDeltaWorldY() const;
 	vec2 MouseWorldPos() const;
-	float MouseWorldX() const;
-	float MouseWorldY() const;
 	vec2 MouseWorldNoParaPos() const;
 
 	bool IsFocused();

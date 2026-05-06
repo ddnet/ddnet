@@ -139,8 +139,8 @@ void CMapView::Render(CUIRect View)
 	const bool Inside = Ui()->MouseInside(&View);
 
 	// fetch mouse position
-	float wx = MouseWorldX();
-	float wy = MouseWorldY();
+	float wx = MouseWorldPos().x;
+	float wy = MouseWorldPos().y;
 	float mx = Ui()->MouseX();
 	float my = Ui()->MouseY();
 
@@ -773,29 +773,9 @@ vec2 CMapView::MouseDeltaWorld() const
 	return Map()->m_MapViewState.m_MouseDeltaWorld;
 }
 
-float CMapView::MouseDeltaWorldX() const
-{
-	return Map()->m_MapViewState.m_MouseDeltaWorld.x;
-}
-
-float CMapView::MouseDeltaWorldY() const
-{
-	return Map()->m_MapViewState.m_MouseDeltaWorld.y;
-}
-
 vec2 CMapView::MouseWorldPos() const
 {
 	return Map()->m_MapViewState.m_MouseWorldPos;
-}
-
-float CMapView::MouseWorldX() const
-{
-	return Map()->m_MapViewState.m_MouseWorldPos.x;
-}
-
-float CMapView::MouseWorldY() const
-{
-	return Map()->m_MapViewState.m_MouseWorldPos.y;
 }
 
 vec2 CMapView::MouseWorldNoParaPos() const
