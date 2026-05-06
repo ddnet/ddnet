@@ -37,7 +37,7 @@ public:
 	float GetMaxValue() const;
 
 private:
-	float ZoomProgress(float CurrentTime) const;
+	float Progress(float CurrentTime) const;
 
 	bool m_Smoothing;
 	float m_Value;
