@@ -77,8 +77,6 @@ public:
 	int m_CanvasWidth, m_CanvasHeight;
 	int m_WindowWidth, m_WindowHeight;
 	int m_RefreshRate;
-	int m_Red, m_Green, m_Blue;
-	uint32_t m_Format;
 };
 
 typedef vec2 GL_SPoint;

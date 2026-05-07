@@ -1014,10 +1014,6 @@ static void DisplayToVideoMode(CVideoMode *pVMode, SDL_DisplayMode *pMode, float
 	pVMode->m_WindowWidth = pMode->w;
 	pVMode->m_WindowHeight = pMode->h;
 	pVMode->m_RefreshRate = RefreshRate;
-	pVMode->m_Red = SDL_BITSPERPIXEL(pMode->format);
-	pVMode->m_Green = SDL_BITSPERPIXEL(pMode->format);
-	pVMode->m_Blue = SDL_BITSPERPIXEL(pMode->format);
-	pVMode->m_Format = pMode->format;
 }
 
 void CGraphicsBackend_SDL_GL::GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenId)
