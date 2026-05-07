@@ -19,9 +19,9 @@ public:
 	void SetValue(float Target);
 
 	/**
-	 * Change the value by the given amount.
+	 * Scale the value by the given amount.
 	 */
-	void ChangeValue(float Amount);
+	void ScaleValue(float Factor);
 
 	/**
 	 * Set the value to the target instantly. If the value was changing the
@@ -37,7 +37,7 @@ public:
 	float GetMaxValue() const;
 
 private:
-	float ZoomProgress(float CurrentTime) const;
+	float Progress(float CurrentTime) const;
 
 	bool m_Smoothing;
 	float m_Value;

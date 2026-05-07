@@ -4477,9 +4477,9 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				if(DoButton_FontIcon(&s_ZoomOutButton, FontIcon::MINUS, 0, &Button, BUTTONFLAG_LEFT, "[NumPad-] Zoom out horizontally, hold shift to zoom vertically.", IGraphics::CORNER_R, 9.0f))
 				{
 					if(Input()->ShiftIsPressed())
-						m_ZoomEnvelopeY.ChangeValue(0.1f * m_ZoomEnvelopeY.GetValue());
+						m_ZoomEnvelopeY.ScaleValue(1.1f);
 					else
-						m_ZoomEnvelopeX.ChangeValue(0.1f * m_ZoomEnvelopeX.GetValue());
+						m_ZoomEnvelopeX.ScaleValue(1.1f);
 				}
 
 				ToolBar.VSplitRight(20.0f, &ToolBar, &Button);
@@ -4492,9 +4492,9 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				if(DoButton_FontIcon(&s_ZoomInButton, FontIcon::PLUS, 0, &Button, BUTTONFLAG_LEFT, "[NumPad+] Zoom in horizontally, hold shift to zoom vertically.", IGraphics::CORNER_L, 9.0f))
 				{
 					if(Input()->ShiftIsPressed())
-						m_ZoomEnvelopeY.ChangeValue(-0.1f * m_ZoomEnvelopeY.GetValue());
+						m_ZoomEnvelopeY.ScaleValue(1.0f / 1.1f);
 					else
-						m_ZoomEnvelopeX.ChangeValue(-0.1f * m_ZoomEnvelopeX.GetValue());
+						m_ZoomEnvelopeX.ScaleValue(1.0f / 1.1f);
 				}
 			}
 
@@ -4646,24 +4646,24 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			if(Input()->ShiftIsPressed())
 			{
 				if(Input()->KeyPress(KEY_KP_MINUS) && CLineInput::GetActiveInput() == nullptr)
-					m_ZoomEnvelopeY.ChangeValue(0.1f * m_ZoomEnvelopeY.GetValue());
+					m_ZoomEnvelopeY.ScaleValue(1.1f);
 				if(Input()->KeyPress(KEY_KP_PLUS) && CLineInput::GetActiveInput() == nullptr)
-					m_ZoomEnvelopeY.ChangeValue(-0.1f * m_ZoomEnvelopeY.GetValue());
+					m_ZoomEnvelopeY.ScaleValue(1.0f / 1.1f);
 				if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-					m_ZoomEnvelopeY.ChangeValue(0.1f * m_ZoomEnvelopeY.GetValue());
+					m_ZoomEnvelopeY.ScaleValue(1.1f);
 				if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-					m_ZoomEnvelopeY.ChangeValue(-0.1f * m_ZoomEnvelopeY.GetValue());
+					m_ZoomEnvelopeY.ScaleValue(1.0f / 1.1f);
 			}
 			else
 			{
 				if(Input()->KeyPress(KEY_KP_MINUS) && CLineInput::GetActiveInput() == nullptr)
-					m_ZoomEnvelopeX.ChangeValue(0.1f * m_ZoomEnvelopeX.GetValue());
+					m_ZoomEnvelopeX.ScaleValue(1.1f);
 				if(Input()->KeyPress(KEY_KP_PLUS) && CLineInput::GetActiveInput() == nullptr)
-					m_ZoomEnvelopeX.ChangeValue(-0.1f * m_ZoomEnvelopeX.GetValue());
+					m_ZoomEnvelopeX.ScaleValue(1.0f / 1.1f);
 				if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-					m_ZoomEnvelopeX.ChangeValue(0.1f * m_ZoomEnvelopeX.GetValue());
+					m_ZoomEnvelopeX.ScaleValue(1.1f);
 				if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-					m_ZoomEnvelopeX.ChangeValue(-0.1f * m_ZoomEnvelopeX.GetValue());
+					m_ZoomEnvelopeX.ScaleValue(1.0f / 1.1f);
 			}
 		}
 
@@ -6303,10 +6303,12 @@ void CEditor::Render()
 		// handle zoom hotkeys
 		if(CLineInput::GetActiveInput() == nullptr)
 		{
+			// one keypress should be equivalent to zooming
+			// three times using mousewheel: 1.1^3 = 1.331
 			if(Input()->KeyPress(KEY_KP_MINUS))
-				MapView()->Zoom()->ChangeValue(50.0f);
+				MapView()->Zoom()->ScaleValue(1.331f);
 			if(Input()->KeyPress(KEY_KP_PLUS))
-				MapView()->Zoom()->ChangeValue(-50.0f);
+				MapView()->Zoom()->ScaleValue(1.0f / 1.331f);
 			if(Input()->KeyPress(KEY_KP_MULTIPLY))
 				MapView()->ResetZoom();
 		}
@@ -6314,9 +6316,9 @@ void CEditor::Render()
 		if(m_pBrush->IsEmpty() || !Input()->ShiftIsPressed())
 		{
 			if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-				MapView()->Zoom()->ChangeValue(20.0f);
+				MapView()->Zoom()->ScaleValue(1.1f);
 			if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-				MapView()->Zoom()->ChangeValue(-20.0f);
+				MapView()->Zoom()->ScaleValue(1.0f / 1.1f);
 		}
 		if(!m_pBrush->IsEmpty())
 		{
