@@ -62,6 +62,7 @@ Checks: >
   -misc-include-cleaner,
   -misc-no-recursion,
   -misc-non-private-member-variables-in-classes,
+  -misc-predictable-rand,
   -misc-static-assert,
   -misc-unused-parameters,
   -misc-use-anonymous-namespace,
