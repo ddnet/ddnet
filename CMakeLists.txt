@@ -341,22 +341,22 @@ if(NOT MSVC AND NOT HAIKU)
     add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-format) # Don't warn about format strings in release mode since our `str_format` optimization is incompatible with it.
   endif()
   # tidy-alphabetical-start
+  add_c_compiler_flag_if_supported(OUR_FLAGS_DEP -Wno-implicit-function-declaration)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wclass-memaccess) # gcc
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-branches)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-cond)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wdynamic-class-memaccess) # clang
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wlogical-op)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-missing-field-initializers)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-nullability-completeness) # Mac OS build on github
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-psabi) # parameter passing for argument of type ‘__gnu_cxx::__normal_iterator<CCommandProcessorFragment_Vulkan::SMemoryBlock<1>*, std::vector<CCommandProcessorFragment_Vulkan::SMemoryBlock<1>, std::allocator<CCommandProcessorFragment_Vulkan::SMemoryBlock<1> > > >’ changed in GCC 7.1
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-unused-parameter)
-  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-missing-field-initializers)
-  add_c_compiler_flag_if_supported(OUR_FLAGS_DEP -Wno-implicit-function-declaration)
-  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-nullability-completeness) # Mac OS build on github
-  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-cond)
-  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-branches)
-  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wlogical-op)
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wrestrict)
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wshadow-all) # clang
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wshadow=global) # gcc
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wsuggest-override)
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wthread-safety)
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wthread-safety-negative)
-  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wsuggest-override)
-  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wdynamic-class-memaccess) # clang
-  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wclass-memaccess) # gcc
   add_linker_flag_if_supported(OUR_FLAGS_LINK -Wno-alloc-size-larger-than) # save.cpp with LTO
   # tidy-alphabetical-end
   # add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wdouble-promotion) # Many occurrences
@@ -1934,18 +1934,18 @@ foreach(datafile ${DATA})
 endforeach()
 set(COPY_FILES
   # tidy-alphabetical-start
+  ${CRASHDUMP_COPY_FILES}
   ${CURL_COPY_FILES}
+  ${DISCORDSDK_COPY_FILES}
+  ${FFMPEG_COPY_FILES}
   ${FREETYPE_COPY_FILES}
   ${OPUSFILE_COPY_FILES}
   ${PNG_COPY_FILES}
   ${SDL2_COPY_FILES}
   ${SQLite3_COPY_FILES}
-  ${FFMPEG_COPY_FILES}
-  ${WEBSOCKETS_COPY_FILES}
-  ${DISCORDSDK_COPY_FILES}
-  ${VULKAN_COPY_FILES}
-  ${CRASHDUMP_COPY_FILES}
   ${SSP_COPY_FILES}
+  ${VULKAN_COPY_FILES}
+  ${WEBSOCKETS_COPY_FILES}
   # tidy-alphabetical-end
 )
 if(TARGET_OS STREQUAL "emscripten")
@@ -1996,9 +1996,9 @@ function(generate_maps output_file script_parameter)
       > "${PROJECT_BINARY_DIR}/${output_file}"
     DEPENDS
       # tidy-alphabetical-start
-      datasrc/crosscompile.py
       datasrc/compile.py
       datasrc/content.py
+      datasrc/crosscompile.py
       datasrc/datatypes.py
       datasrc/network.py
       datasrc/seven/compile.py
@@ -2044,10 +2044,10 @@ generate_source("src/generated/server_data.h" "server_content_header")
 # tidy-alphabetical-end
 
 # tidy-alphabetical-start
-generate_source7("src/generated/protocol7.cpp" "network_source")
-generate_source7("src/generated/protocol7.h" "network_header")
 generate_source7("src/generated/client_data7.cpp" "client_content_source")
 generate_source7("src/generated/client_data7.h" "client_content_header")
+generate_source7("src/generated/protocol7.cpp" "network_source")
+generate_source7("src/generated/protocol7.h" "network_header")
 # tidy-alphabetical-end
 
 # tidy-alphabetical-start
@@ -2315,15 +2315,15 @@ set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "src/game/version
 # that doesn't link game.
 set(ENGINE_UUID_SHARED
   # tidy-alphabetical-start
-  src/generated/protocolglue_generated.cpp
-  src/generated/protocolglue.h
-  src/generated/protocol7.cpp
-  src/generated/protocol7.h
-  src/generated/protocol.cpp
-  src/generated/protocol.h
   src/game/mapitems_ex.cpp
   src/game/mapitems_ex.h
   src/game/mapitems_ex_types.h
+  src/generated/protocol.cpp
+  src/generated/protocol.h
+  src/generated/protocol7.cpp
+  src/generated/protocol7.h
+  src/generated/protocolglue.h
+  src/generated/protocolglue_generated.cpp
   # tidy-alphabetical-end
 )
 foreach(s ${GAME_SHARED})
@@ -2745,13 +2745,13 @@ if(CLIENT)
   # Libraries
   set(LIBS_CLIENT
     # tidy-alphabetical-start
+    ${FFMPEG_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${GLEW_LIBRARIES}
     ${PNG_LIBRARIES}
     ${SDL2_LIBRARIES}
-    ${WAVPACK_LIBRARIES}
-    ${FFMPEG_LIBRARIES}
     ${VULKAN_LIBRARIES}
+    ${WAVPACK_LIBRARIES}
     # tidy-alphabetical-end
 
     # Order of these three is important.
@@ -2834,6 +2834,8 @@ if(CLIENT)
 
   target_include_directories(game-client SYSTEM PRIVATE
     # tidy-alphabetical-start
+    ${DISCORDSDK_INCLUDE_DIRS}
+    ${FFMPEG_INCLUDE_DIRS}
     ${FREETYPE_INCLUDE_DIRS}
     ${GLEW_INCLUDE_DIRS}
     ${OGG_INCLUDE_DIRS}
@@ -2842,8 +2844,6 @@ if(CLIENT)
     ${PNG_INCLUDE_DIRS}
     ${SDL2_INCLUDE_DIRS}
     ${WAVPACK_INCLUDE_DIRS}
-    ${FFMPEG_INCLUDE_DIRS}
-    ${DISCORDSDK_INCLUDE_DIRS}
     # tidy-alphabetical-end
 
     ${VULKAN_INCLUDE_DIRS}
@@ -3281,9 +3281,9 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     ${TESTS}
     ${TESTS_EXTRA}
     # tidy-alphabetical-start
-    $<TARGET_OBJECTS:game-server-without-main>
     $<TARGET_OBJECTS:engine-gfx>
     $<TARGET_OBJECTS:engine-shared>
+    $<TARGET_OBJECTS:game-server-without-main>
     $<TARGET_OBJECTS:game-shared>
     $<TARGET_OBJECTS:rust-bridge-shared>
     # tidy-alphabetical-end
@@ -3635,13 +3635,13 @@ if(CLIENT AND DMGBUILD_FOUND)
     set(CODESIGN_COMMANDS
         # tidy-alphabetical-start
         COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/SDL2.framework
-        COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/libsteam_api.dylib
         COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/discord_game_sdk.dylib
-        COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/libfreetype.6.dylib
-        COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/libpng16.16.dylib
         COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/libavcodec.61.dylib
         COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/libavformat.61.dylib
         COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/libavutil.59.dylib
+        COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/libfreetype.6.dylib
+        COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/libpng16.16.dylib
+        COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/libsteam_api.dylib
         COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/libswresample.5.dylib
         COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/libswscale.8.dylib
         # tidy-alphabetical-end
@@ -3678,13 +3678,13 @@ if(CLIENT AND DMGBUILD_FOUND)
     COMMAND /bin/cp -a ${PROJECT_SOURCE_DIR}/ddnet-libs/sdl/${LIB_DIR}/SDL2.framework ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
     # tidy-alphabetical-start
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/discord/${LIB_DIR}/discord_game_sdk.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/freetype/${LIB_DIR}/libfreetype.6.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/png/${LIB_DIR}/libpng16.16.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavcodec.61.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavformat.61.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavutil.59.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libswresample.5.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libswscale.8.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/freetype/${LIB_DIR}/libfreetype.6.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/png/${LIB_DIR}/libpng16.16.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
     # tidy-alphabetical-end
     COMMAND ${CMAKE_COMMAND} -E copy ${STEAM_API_DYLIB_FOR_PACKAGE} ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
     COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/darwin_strip_rpath.py ${CMAKE_OTOOL} ${CMAKE_INSTALL_NAME_TOOL} ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${CLIENT_EXECUTABLE}
@@ -3829,13 +3829,13 @@ foreach(target ${TARGETS})
   if(MSVC)
     set_property(TARGET ${target} PROPERTY MSVC_RUNTIME_LIBRARY MultiThreaded$<${DBG}:Debug>) # Use static CRT
     # tidy-alphabetical-start
-    target_compile_options(${target} PRIVATE /Zc:__cplusplus) # Fixes the __cplusplus macro
-    target_compile_options(${target} PRIVATE /MP) # Use multiple cores
     target_compile_options(${target} PRIVATE /EHsc) # Only catch C++ exceptions with catch.
     target_compile_options(${target} PRIVATE /GS) # Protect the stack pointer.
-    target_compile_options(${target} PRIVATE /wd4996) # Use of non-_s functions.
-    target_compile_options(${target} PRIVATE /utf-8) # Use UTF-8 for source files.
+    target_compile_options(${target} PRIVATE /MP) # Use multiple cores
+    target_compile_options(${target} PRIVATE /Zc:__cplusplus) # Fixes the __cplusplus macro
     target_compile_options(${target} PRIVATE /bigobj) # Support more sections in object files, because the limit is exceeded for some files in debug mode.
+    target_compile_options(${target} PRIVATE /utf-8) # Use UTF-8 for source files.
+    target_compile_options(${target} PRIVATE /wd4996) # Use of non-_s functions.
     # tidy-alphabetical-end
     # Enable Edit & Continue (Hot Reload) support
     if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.25)
