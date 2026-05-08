@@ -334,28 +334,31 @@ if(NOT MSVC AND NOT HAIKU)
 
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wall)
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wextra)
-  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-psabi) # parameter passing for argument of type ‘__gnu_cxx::__normal_iterator<CCommandProcessorFragment_Vulkan::SMemoryBlock<1>*, std::vector<CCommandProcessorFragment_Vulkan::SMemoryBlock<1>, std::allocator<CCommandProcessorFragment_Vulkan::SMemoryBlock<1> > > >’ changed in GCC 7.1
-  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-unused-parameter)
-  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-missing-field-initializers)
+
   if(CMAKE_BUILD_TYPE STREQUAL Debug)
     add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wformat=2) # Warn about format strings.
   else()
     add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-format) # Don't warn about format strings in release mode since our `str_format` optimization is incompatible with it.
   endif()
+  # tidy-alphabetical-start
   add_c_compiler_flag_if_supported(OUR_FLAGS_DEP -Wno-implicit-function-declaration)
-  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-nullability-completeness) # Mac OS build on github
-  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-cond)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wclass-memaccess) # gcc
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-branches)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wduplicated-cond)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wdynamic-class-memaccess) # clang
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wlogical-op)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-missing-field-initializers)
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-nullability-completeness) # Mac OS build on github
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-psabi) # parameter passing for argument of type ‘__gnu_cxx::__normal_iterator<CCommandProcessorFragment_Vulkan::SMemoryBlock<1>*, std::vector<CCommandProcessorFragment_Vulkan::SMemoryBlock<1>, std::allocator<CCommandProcessorFragment_Vulkan::SMemoryBlock<1> > > >’ changed in GCC 7.1
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-unused-parameter)
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wrestrict)
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wshadow-all) # clang
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wshadow=global) # gcc
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wsuggest-override)
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wthread-safety)
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wthread-safety-negative)
-  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wsuggest-override)
-  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wdynamic-class-memaccess) # clang
-  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wclass-memaccess) # gcc
   add_linker_flag_if_supported(OUR_FLAGS_LINK -Wno-alloc-size-larger-than) # save.cpp with LTO
+  # tidy-alphabetical-end
   # add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wdouble-promotion) # Many occurrences
   # add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wnull-dereference) # Many occurrences
   # add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wuseless-cast) # TODO: Enable for C++ code except gtest
@@ -862,20 +865,25 @@ endif()
 ########################################################################
 
 set_glob(RUST_BASE GLOB_RECURSE "rs;toml" src/base
+  # tidy-alphabetical-start
   Cargo.toml
   color.rs
   dbg.rs
   lib.rs
   rust.rs
+  # tidy-alphabetical-end
 )
 
 set_glob(RUST_ENGINE_INTERFACE GLOB "rs;toml" src/engine
+  # tidy-alphabetical-start
   Cargo.toml
   console.rs
   lib.rs
+  # tidy-alphabetical-end
 )
 
 set_glob(RUST_ENGINE_SHARED GLOB_RECURSE "rs;toml" src/engine/shared
+  # tidy-alphabetical-start
   Cargo.toml
   build.rs
   config.rs
@@ -885,9 +893,11 @@ set_glob(RUST_ENGINE_SHARED GLOB_RECURSE "rs;toml" src/engine/shared
   snapshot/delta.rs
   snapshot/mod.rs
   uuid_manager.rs
+  # tidy-alphabetical-end
 )
 
 set_src(RUST_BRIDGE_SHARED GLOB_RECURSE src/rust-bridge
+  # tidy-alphabetical-start
   base/cxx.h
   cpp/console.cpp
   cpp/console.h
@@ -901,14 +911,17 @@ set_src(RUST_BRIDGE_SHARED GLOB_RECURSE src/rust-bridge
   engine/shared/snapshot/builder.h
   engine/shared/snapshot/delta.cpp
   engine/shared/snapshot/delta.h
+  # tidy-alphabetical-end
 )
 
 set_glob(RUST_MASTERSRV GLOB "rs;toml" src/mastersrv/src
+  # tidy-alphabetical-start
   addr.rs
   community_token.rs
   config.rs
   locations.rs
   main.rs
+  # tidy-alphabetical-end
 )
 
 add_library(rust-bridge-shared EXCLUDE_FROM_ALL OBJECT ${RUST_BRIDGE_SHARED})
@@ -1049,6 +1062,7 @@ endif()
 ########################################################################
 
 set(EXPECTED_DATA
+  # tidy-alphabetical-start
   announcement.txt
   arrow.png
   assets/entities/comfort/ddnet.png
@@ -1903,6 +1917,7 @@ set(EXPECTED_DATA
   themes/winter_night.map
   touch_controls.json
   wordlist.txt
+  # tidy-alphabetical-end
 )
 
 set_glob(DATA GLOB_RECURSE "cfg;frag;json;map;otf;png;rules;ttc;ttf;txt;vert;wv" data ${EXPECTED_DATA})
@@ -1918,18 +1933,20 @@ foreach(datafile ${DATA})
   file(COPY ${datafile} DESTINATION ${DESTINATION})
 endforeach()
 set(COPY_FILES
+  # tidy-alphabetical-start
+  ${CRASHDUMP_COPY_FILES}
   ${CURL_COPY_FILES}
+  ${DISCORDSDK_COPY_FILES}
+  ${FFMPEG_COPY_FILES}
   ${FREETYPE_COPY_FILES}
   ${OPUSFILE_COPY_FILES}
   ${PNG_COPY_FILES}
   ${SDL2_COPY_FILES}
   ${SQLite3_COPY_FILES}
-  ${FFMPEG_COPY_FILES}
-  ${WEBSOCKETS_COPY_FILES}
-  ${DISCORDSDK_COPY_FILES}
-  ${VULKAN_COPY_FILES}
-  ${CRASHDUMP_COPY_FILES}
   ${SSP_COPY_FILES}
+  ${VULKAN_COPY_FILES}
+  ${WEBSOCKETS_COPY_FILES}
+  # tidy-alphabetical-end
 )
 if(TARGET_OS STREQUAL "emscripten")
   list(APPEND COPY_FILES other/emscripten/index.html)
@@ -1948,10 +1965,12 @@ function(generate_source output_file script_parameter)
     COMMAND ${Python3_EXECUTABLE} datasrc/compile.py ${script_parameter}
       > "${PROJECT_BINARY_DIR}/${output_file}"
     DEPENDS
+      # tidy-alphabetical-start
       datasrc/compile.py
       datasrc/content.py
       datasrc/datatypes.py
       datasrc/network.py
+      # tidy-alphabetical-end
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   )
 endfunction()
@@ -1961,10 +1980,12 @@ function(generate_source7 output_file script_parameter)
     COMMAND ${Python3_EXECUTABLE} -m datasrc.seven.compile ${script_parameter}
       > "${PROJECT_BINARY_DIR}/${output_file}"
     DEPENDS
+      # tidy-alphabetical-start
       datasrc/seven/compile.py
       datasrc/seven/content.py
       datasrc/seven/datatypes.py
       datasrc/seven/network.py
+      # tidy-alphabetical-end
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   )
 endfunction()
@@ -1974,15 +1995,17 @@ function(generate_maps output_file script_parameter)
     COMMAND ${Python3_EXECUTABLE} datasrc/crosscompile.py ${script_parameter}
       > "${PROJECT_BINARY_DIR}/${output_file}"
     DEPENDS
-      datasrc/crosscompile.py
+      # tidy-alphabetical-start
       datasrc/compile.py
       datasrc/content.py
+      datasrc/crosscompile.py
       datasrc/datatypes.py
       datasrc/network.py
       datasrc/seven/compile.py
       datasrc/seven/content.py
       datasrc/seven/datatypes.py
       datasrc/seven/network.py
+      # tidy-alphabetical-end
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   )
 endfunction()
@@ -2010,6 +2033,7 @@ add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp
     ${GIT_REVISION_EXTRA_DEPS}
     scripts/git_revision.py
 )
+# tidy-alphabetical-start
 generate_source("src/generated/client_data.cpp" "client_content_source")
 generate_source("src/generated/client_data.h" "client_content_header")
 generate_source("src/generated/data_types.h" "content_types_header")
@@ -2017,14 +2041,19 @@ generate_source("src/generated/protocol.cpp" "network_source")
 generate_source("src/generated/protocol.h" "network_header")
 generate_source("src/generated/server_data.cpp" "server_content_source")
 generate_source("src/generated/server_data.h" "server_content_header")
+# tidy-alphabetical-end
 
-generate_source7("src/generated/protocol7.cpp" "network_source")
-generate_source7("src/generated/protocol7.h" "network_header")
+# tidy-alphabetical-start
 generate_source7("src/generated/client_data7.cpp" "client_content_source")
 generate_source7("src/generated/client_data7.h" "client_content_header")
+generate_source7("src/generated/protocol7.cpp" "network_source")
+generate_source7("src/generated/protocol7.h" "network_header")
+# tidy-alphabetical-end
 
+# tidy-alphabetical-start
 generate_maps("src/generated/protocolglue.h" "map_header")
 generate_maps("src/generated/protocolglue_generated.cpp" "map_source")
+# tidy-alphabetical-end
 
 add_custom_command(OUTPUT "src/generated/wordlist.h"
   COMMAND ${Python3_EXECUTABLE} scripts/wordlist.py > ${PROJECT_BINARY_DIR}/src/generated/wordlist.h
@@ -2035,9 +2064,18 @@ add_custom_command(OUTPUT "src/generated/wordlist.h"
 
 add_custom_target(generate_protocol
   DEPENDS
+    # tidy-alphabetical-start
     src/generated/protocol.h
     src/generated/protocol7.h
     src/generated/protocolglue.h
+    # tidy-alphabetical-end
+)
+
+add_custom_target(generate_content_types
+  DEPENDS
+    # tidy-alphabetical-start
+    src/generated/data_types.h
+    # tidy-alphabetical-end
 )
 
 ########################################################################
@@ -2046,6 +2084,7 @@ add_custom_target(generate_protocol
 
 # Sources
 set_src(BASE GLOB_RECURSE src/base
+  # tidy-alphabetical-start
   aio.cpp
   aio.h
   bezier.cpp
@@ -2104,8 +2143,10 @@ set_src(BASE GLOB_RECURSE src/base
   vmath.h
   windows.cpp
   windows.h
+  # tidy-alphabetical-end
 )
 set_src(ENGINE_INTERFACE GLOB src/engine
+  # tidy-alphabetical-start
   antibot.h
   client.h
   config.h
@@ -2139,8 +2180,10 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   updater.h
   uuid.h
   warning.h
+  # tidy-alphabetical-end
 )
 set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
+  # tidy-alphabetical-start
   assertion_logger.cpp
   assertion_logger.h
   compression.cpp
@@ -2225,15 +2268,19 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   video.h
   websockets.cpp
   websockets.h
+  # tidy-alphabetical-end
 )
 set_src(ENGINE_GFX GLOB src/engine/gfx
+  # tidy-alphabetical-start
   image.cpp
   image_loader.cpp
   image_loader.h
   image_manipulation.cpp
   image_manipulation.h
+  # tidy-alphabetical-end
 )
 set_src(GAME_SHARED GLOB src/game
+  # tidy-alphabetical-start
   alloc.h
   collision.cpp
   collision.h
@@ -2260,21 +2307,24 @@ set_src(GAME_SHARED GLOB src/game
   tuning.h
   version.h
   voting.h
+  # tidy-alphabetical-end
 )
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "src/game/version.h")
 
 # A bit hacky, but these are needed to register all the UUIDs, even for stuff
 # that doesn't link game.
 set(ENGINE_UUID_SHARED
-  src/generated/protocolglue_generated.cpp
-  src/generated/protocolglue.h
-  src/generated/protocol7.cpp
-  src/generated/protocol7.h
-  src/generated/protocol.cpp
-  src/generated/protocol.h
+  # tidy-alphabetical-start
   src/game/mapitems_ex.cpp
   src/game/mapitems_ex.h
   src/game/mapitems_ex_types.h
+  src/generated/protocol.cpp
+  src/generated/protocol.h
+  src/generated/protocol7.cpp
+  src/generated/protocol7.h
+  src/generated/protocolglue.h
+  src/generated/protocolglue_generated.cpp
+  # tidy-alphabetical-end
 )
 foreach(s ${GAME_SHARED})
   if(s MATCHES "mapitems_(ex.cpp|ex.h|ex_types.h)$")
@@ -2283,21 +2333,25 @@ foreach(s ${GAME_SHARED})
 endforeach()
 list(REMOVE_ITEM GAME_SHARED ${ENGINE_UUID_SHARED})
 set(GAME_GENERATED_SHARED
+  # tidy-alphabetical-start
   src/generated/data_types.h
   src/generated/git_revision.cpp
   src/generated/protocol.h
   src/generated/protocol7.h
   src/generated/protocolglue.h
+  # tidy-alphabetical-end
 )
 set(DEPS ${DEP_JSON} ${DEP_MD5} ${ZLIB_DEP})
 
 # Libraries
 set(LIBS
+  # tidy-alphabetical-start
   ${CRYPTO_LIBRARIES}
   ${CURL_LIBRARIES}
   ${SQLite3_LIBRARIES}
   ${WEBSOCKETS_LIBRARIES}
   ${ZLIB_LIBRARIES}
+  # tidy-alphabetical-end
   # Add Rust part of our code.
   rust_engine_shared
   ${PLATFORM_LIBS}
@@ -2311,8 +2365,10 @@ add_library(engine-gfx EXCLUDE_FROM_ALL OBJECT ${ENGINE_GFX})
 target_include_directories(engine-gfx PRIVATE ${PNG_INCLUDE_DIRS})
 add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_UUID_SHARED} ${BASE})
 add_library(game-shared EXCLUDE_FROM_ALL OBJECT ${GAME_SHARED} ${GAME_GENERATED_SHARED})
+# tidy-alphabetical-start
 add_dependencies(engine-shared generate_protocol)
 add_dependencies(game-shared generate_protocol)
+# tidy-alphabetical-end
 list(APPEND TARGETS_OWN engine-gfx engine-shared game-shared)
 
 if(DISCORD AND NOT DISCORD_DYNAMIC)
@@ -2330,8 +2386,10 @@ endif()
 if(CLIENT)
   # Sources
   set_src(STEAMAPI_SRC GLOB_RECURSE src/steam
+    # tidy-alphabetical-start
     steam_api_flat.h
     steam_api_stub.cpp
+    # tidy-alphabetical-end
   )
 
   if(STEAM OR TARGET_OS STREQUAL "windows" OR TARGET_OS STREQUAL "mac")
@@ -2344,6 +2402,7 @@ if(CLIENT)
   list(APPEND TARGETS_OWN ${TARGET_STEAMAPI})
 
   set_src(ENGINE_CLIENT GLOB_RECURSE src/engine/client
+    # tidy-alphabetical-start
     backend/backend_base.cpp
     backend/backend_base.h
     backend/glsl_shader_compiler.cpp
@@ -2413,8 +2472,10 @@ if(CLIENT)
     video.cpp
     video.h
     warning.cpp
+    # tidy-alphabetical-end
   )
   set_src(GAME_CLIENT GLOB_RECURSE src/game/client
+    # tidy-alphabetical-start
     animstate.cpp
     animstate.h
     component.cpp
@@ -2562,8 +2623,10 @@ if(CLIENT)
     ui_rect.h
     ui_scrollregion.cpp
     ui_scrollregion.h
+    # tidy-alphabetical-end
   )
   set_src(GAME_EDITOR GLOB_RECURSE src/game/editor
+    # tidy-alphabetical-start
     auto_map.cpp
     auto_map.h
     component.cpp
@@ -2648,8 +2711,10 @@ if(CLIENT)
     smooth_value.cpp
     smooth_value.h
     tile_art.cpp
+    # tidy-alphabetical-end
   )
   set_src(GAME_MAP GLOB_RECURSE src/game/map
+    # tidy-alphabetical-start
     envelope_extrema.cpp
     envelope_extrema.h
     envelope_manager.h
@@ -2662,13 +2727,16 @@ if(CLIENT)
     render_layer.h
     render_map.cpp
     render_map.h
+    # tidy-alphabetical-end
   )
   set(GAME_GENERATED_CLIENT
+    # tidy-alphabetical-start
     src/generated/checksum.cpp
     src/generated/client_data.cpp
     src/generated/client_data.h
     src/generated/client_data7.cpp
     src/generated/client_data7.h
+    # tidy-alphabetical-end
   )
   set(CLIENT_SRC ${ENGINE_CLIENT} ${PLATFORM_CLIENT} ${GAME_CLIENT} ${GAME_EDITOR} ${GAME_MAP} ${GAME_GENERATED_CLIENT})
 
@@ -2676,19 +2744,20 @@ if(CLIENT)
 
   # Libraries
   set(LIBS_CLIENT
+    # tidy-alphabetical-start
+    ${FFMPEG_LIBRARIES}
     ${FREETYPE_LIBRARIES}
     ${GLEW_LIBRARIES}
     ${PNG_LIBRARIES}
     ${SDL2_LIBRARIES}
+    ${VULKAN_LIBRARIES}
     ${WAVPACK_LIBRARIES}
-    ${FFMPEG_LIBRARIES}
+    # tidy-alphabetical-end
 
     # Order of these three is important.
     ${OPUSFILE_LIBRARIES}
     ${OPUS_LIBRARIES}
     ${OGG_LIBRARIES}
-
-    ${VULKAN_LIBRARIES}
 
     ${TARGET_STEAMAPI}
 
@@ -2731,10 +2800,12 @@ if(CLIENT)
       ${CLIENT_VERSIONINFO}
       ${CLIENT_MANIFEST}
       ${DEPS_CLIENT}
+      # tidy-alphabetical-start
       $<TARGET_OBJECTS:engine-gfx>
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
       $<TARGET_OBJECTS:rust-bridge-shared>
+      # tidy-alphabetical-end
     )
   else()
     add_executable(game-client WIN32
@@ -2743,12 +2814,15 @@ if(CLIENT)
       ${CLIENT_VERSIONINFO}
       ${CLIENT_MANIFEST}
       ${DEPS_CLIENT}
+      # tidy-alphabetical-start
       $<TARGET_OBJECTS:engine-gfx>
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
       $<TARGET_OBJECTS:rust-bridge-shared>
+      # tidy-alphabetical-end
     )
   endif()
+  add_dependencies(game-client generate_content_types)
   set_property(TARGET game-client
       PROPERTY OUTPUT_NAME ${CLIENT_EXECUTABLE}
   )
@@ -2759,6 +2833,9 @@ if(CLIENT)
   endif()
 
   target_include_directories(game-client SYSTEM PRIVATE
+    # tidy-alphabetical-start
+    ${DISCORDSDK_INCLUDE_DIRS}
+    ${FFMPEG_INCLUDE_DIRS}
     ${FREETYPE_INCLUDE_DIRS}
     ${GLEW_INCLUDE_DIRS}
     ${OGG_INCLUDE_DIRS}
@@ -2767,8 +2844,7 @@ if(CLIENT)
     ${PNG_INCLUDE_DIRS}
     ${SDL2_INCLUDE_DIRS}
     ${WAVPACK_INCLUDE_DIRS}
-    ${FFMPEG_INCLUDE_DIRS}
-    ${DISCORDSDK_INCLUDE_DIRS}
+    # tidy-alphabetical-end
 
     ${VULKAN_INCLUDE_DIRS}
 
@@ -2820,12 +2896,15 @@ endif()
 if(SERVER)
   # Sources
   set_src(ANTIBOT_SRC GLOB src/antibot
+    # tidy-alphabetical-start
     antibot_data.h
     antibot_interface.h
     antibot_null.cpp
+    # tidy-alphabetical-end
   )
 
   set_src(ENGINE_SERVER_WITHOUT_MAIN GLOB_RECURSE src/engine/server
+    # tidy-alphabetical-start
     antibot.cpp
     antibot.h
     authmanager.cpp
@@ -2851,11 +2930,13 @@ if(SERVER)
     sql_string_helpers.h
     upnp.cpp
     upnp.h
+    # tidy-alphabetical-end
   )
 
   list(REMOVE_ITEM ENGINE_SERVER_WITHOUT_MAIN "${PROJECT_SOURCE_DIR}/src/engine/server/main.cpp")
 
   set_src(GAME_SERVER GLOB_RECURSE src/game/server
+    # tidy-alphabetical-start
     ddracechat.cpp
     ddracecommands.cpp
     entities/character.cpp
@@ -2907,11 +2988,14 @@ if(SERVER)
     teehistorian.h
     teeinfo.cpp
     teeinfo.h
+    # tidy-alphabetical-end
   )
   set(GAME_GENERATED_SERVER
-    "src/generated/server_data.cpp"
-    "src/generated/server_data.h"
-    "src/generated/wordlist.h"
+    # tidy-alphabetical-start
+    src/generated/server_data.cpp
+    src/generated/server_data.h
+    src/generated/wordlist.h
+    # tidy-alphabetical-end
   )
   set(SERVER_SRC ${ENGINE_SERVER_WITHOUT_MAIN} ${GAME_SERVER} ${GAME_GENERATED_SERVER})
   if(TARGET_OS STREQUAL "windows")
@@ -2944,10 +3028,11 @@ if(SERVER)
   add_library(game-server-without-main OBJECT
       ${DEPS}
       ${SERVER_SRC}
-      $<TARGET_OBJECTS:engine-shared>
-      $<TARGET_OBJECTS:game-shared>
-      $<TARGET_OBJECTS:rust-bridge-shared>
   )
+  # tidy-alphabetical-start
+  add_dependencies(game-server-without-main generate_content_types)
+  add_dependencies(game-server-without-main generate_protocol)
+  # tidy-alphabetical-end
   set_property(TARGET game-server-without-main
       PROPERTY OUTPUT_NAME ${SERVER_EXECUTABLE}
   )
@@ -2959,13 +3044,15 @@ if(SERVER)
   if(TARGET_OS STREQUAL "android")
     add_library(game-server SHARED
       ${DEPS}
-      $<TARGET_OBJECTS:game-server-without-main>
       "${PROJECT_SOURCE_DIR}/src/engine/server/main.cpp"
       ${SERVER_ICON}
       ${SERVER_VERSIONINFO}
+      $<TARGET_OBJECTS:game-server-without-main>
+      # tidy-alphabetical-sort
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
       $<TARGET_OBJECTS:rust-bridge-shared>
+      # tidy-alphabetical-sort
     )
   else()
     add_executable(game-server
@@ -2974,9 +3061,11 @@ if(SERVER)
       ${SERVER_ICON}
       ${SERVER_VERSIONINFO}
       $<TARGET_OBJECTS:game-server-without-main>
+      # tidy-alphabetical-sort
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
       $<TARGET_OBJECTS:rust-bridge-shared>
+      # tidy-alphabetical-sort
     )
   endif()
   set_property(TARGET game-server
@@ -3018,6 +3107,7 @@ endif()
 if(TOOLS)
   set(TARGETS_TOOLS)
   set_src(TOOLS_SRC GLOB src/tools
+    # tidy-alphabetical-start
     config_common.h
     config_retrieve.cpp
     config_store.cpp
@@ -3039,6 +3129,7 @@ if(TOOLS)
     twping.cpp
     unicode_confusables.cpp
     uuid.cpp
+    # tidy-alphabetical-end
   )
   foreach(ABS_T ${TOOLS_SRC})
     file(RELATIVE_PATH T "${PROJECT_SOURCE_DIR}/src/tools/" ${ABS_T})
@@ -3063,9 +3154,11 @@ if(TOOLS)
         ${TOOL_DEPS}
         src/tools/${TOOL}.cpp
         ${EXTRA_TOOL_SRC}
+        # tidy-alphabetical-start
         $<TARGET_OBJECTS:engine-shared>
         $<TARGET_OBJECTS:game-shared>
         $<TARGET_OBJECTS:rust-bridge-shared>
+        # tidy-alphabetical-end
       )
       target_include_directories(${TOOL} SYSTEM PRIVATE ${TOOL_INCLUDE_DIRS})
       target_link_libraries(${TOOL} ${TOOL_LIBS})
@@ -3089,8 +3182,10 @@ if(DEV)
   set(CHECKSUM_SRC)
 endif()
 list(APPEND CHECKSUM_SRC
+  # tidy-alphabetical-start
   ${PROJECT_SOURCE_DIR}/CMakeLists.txt
   ${PROJECT_SOURCE_DIR}/scripts/checksum.py
+  # tidy-alphabetical-end
 )
 configure_file(cmake/checksummed_extra.txt checksummed_extra.txt)
 string(REPLACE ";" "\n" CHECKSUM_SRC_FILE "${CHECKSUM_SRC}")
@@ -3116,6 +3211,7 @@ add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/generated/checksum.cpp
 
 if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
   set_src(TESTS GLOB src/test
+    # tidy-alphabetical-start
     aio_test.cpp
     bezier_test.cpp
     blocklist_driver_test.cpp
@@ -3164,8 +3260,10 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     uuid_test.cpp
     vmath_test.cpp
     windows_test.cpp
+    # tidy-alphabetical-end
   )
   set(TESTS_EXTRA
+    # tidy-alphabetical-start
     src/engine/client/blocklist_driver.cpp
     src/engine/client/blocklist_driver.h
     src/engine/client/serverbrowser.cpp
@@ -3175,17 +3273,20 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     src/engine/client/serverbrowser_ping_cache.cpp
     src/engine/client/serverbrowser_ping_cache.h
     src/engine/client/sqlite.cpp
+    # tidy-alphabetical-end
   )
 
   set(TARGET_TESTRUNNER testrunner)
   add_executable(${TARGET_TESTRUNNER} EXCLUDE_FROM_ALL
     ${TESTS}
     ${TESTS_EXTRA}
-    $<TARGET_OBJECTS:game-server-without-main>
+    # tidy-alphabetical-start
     $<TARGET_OBJECTS:engine-gfx>
     $<TARGET_OBJECTS:engine-shared>
+    $<TARGET_OBJECTS:game-server-without-main>
     $<TARGET_OBJECTS:game-shared>
     $<TARGET_OBJECTS:rust-bridge-shared>
+    # tidy-alphabetical-end
     ${DEPS}
   )
   target_link_libraries(${TARGET_TESTRUNNER} ${PNG_LIBRARIES} ${GTEST_LIBRARIES} ${LIBS_SERVER})
@@ -3214,10 +3315,12 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
 endif()
 
 add_library(rust_test STATIC EXCLUDE_FROM_ALL
+  # tidy-alphabetical-start
   $<TARGET_OBJECTS:engine-gfx>
   $<TARGET_OBJECTS:engine-shared>
   $<TARGET_OBJECTS:game-shared>
   $<TARGET_OBJECTS:rust-bridge-shared>
+  # tidy-alphabetical-end
   ${DEPS}
 )
 
@@ -3361,6 +3464,7 @@ set(CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPA
 set(CPACK_ARCHIVE_PORTABLE_FILE_NAME ${CPACK_PACKAGE_FILE_NAME})
 set(CPACK_SOURCE_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-src)
 set(CPACK_SOURCE_FILES
+  # tidy-alphabetical-start
   CMakeLists.txt
   README.md
   cmake/
@@ -3376,6 +3480,7 @@ set(CPACK_SOURCE_FILES
   storage.cfg
   ubsan.supp
   valgrind.supp
+  # tidy-alphabetical-end
 )
 set(CPACK_SOURCE_IGNORE_FILES
   "\\\\.pyc$"
@@ -3395,6 +3500,7 @@ set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME ${PROJECT_NAME})
 
 if(TOOLS)
   set(TARGET_TOOLS
+    # tidy-alphabetical-start
     config_retrieve
     config_store
     demo_extract_chat
@@ -3402,6 +3508,7 @@ if(TOOLS)
     map_convert_07
     map_diff
     map_extract
+    # tidy-alphabetical-end
   )
 else()
   set(TARGET_TOOLS)
@@ -3494,6 +3601,7 @@ if(CLIENT AND DMGBUILD_FOUND)
 
   set(DMG_TMPDIR pack_${CPACK_PACKAGE_FILE_NAME}_dmg)
   set(DMG_MKDIRS
+    # tidy-alphabetical-start
     ${CLIENT_EXECUTABLE}.app
     ${CLIENT_EXECUTABLE}.app/Contents
     ${CLIENT_EXECUTABLE}.app/Contents/Frameworks
@@ -3505,6 +3613,7 @@ if(CLIENT AND DMGBUILD_FOUND)
     ${SERVER_EXECUTABLE}.app/Contents/Resources
     ${SERVER_EXECUTABLE}.app/Contents/Resources/data
     ${SERVER_EXECUTABLE}.app/Contents/Resources/data/mapres
+    # tidy-alphabetical-end
   )
   set(DMG_MKDIR_COMMANDS)
   foreach(dir ${DMG_MKDIRS})
@@ -3524,16 +3633,18 @@ if(CLIENT AND DMGBUILD_FOUND)
 
   if(NOT MACOS_CODESIGN STREQUAL OFF)
     set(CODESIGN_COMMANDS
+        # tidy-alphabetical-start
         COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/SDL2.framework
-        COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/libsteam_api.dylib
         COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/discord_game_sdk.dylib
-        COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/libfreetype.6.dylib
-        COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/libpng16.16.dylib
         COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/libavcodec.61.dylib
         COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/libavformat.61.dylib
         COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/libavutil.59.dylib
+        COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/libfreetype.6.dylib
+        COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/libpng16.16.dylib
+        COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/libsteam_api.dylib
         COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/libswresample.5.dylib
         COMMAND codesign --force --options runtime --timestamp --sign "${MACOS_APP_IDENTITY}" ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/libswscale.8.dylib
+        # tidy-alphabetical-end
     )
     foreach(target ${TARGET_TOOLS})
       list(APPEND CODESIGN_COMMANDS
@@ -3565,14 +3676,16 @@ if(CLIENT AND DMGBUILD_FOUND)
     COMMAND ${CMAKE_COMMAND} -E copy bundle/client/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/client/PkgInfo ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:game-client> ${TARGET_TOOLS_FILES} ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/
     COMMAND /bin/cp -a ${PROJECT_SOURCE_DIR}/ddnet-libs/sdl/${LIB_DIR}/SDL2.framework ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
+    # tidy-alphabetical-start
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/discord/${LIB_DIR}/discord_game_sdk.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/freetype/${LIB_DIR}/libfreetype.6.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/png/${LIB_DIR}/libpng16.16.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavcodec.61.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavformat.61.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavutil.59.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libswresample.5.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libswscale.8.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/freetype/${LIB_DIR}/libfreetype.6.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/png/${LIB_DIR}/libpng16.16.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
+    # tidy-alphabetical-end
     COMMAND ${CMAKE_COMMAND} -E copy ${STEAM_API_DYLIB_FOR_PACKAGE} ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
     COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/darwin_strip_rpath.py ${CMAKE_OTOOL} ${CMAKE_INSTALL_NAME_TOOL} ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${CLIENT_EXECUTABLE}
     COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath @loader_path/../Frameworks ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${CLIENT_EXECUTABLE}
@@ -3597,6 +3710,7 @@ if(CLIENT AND DMGBUILD_FOUND)
       game-server
       ${PROJECT_BINARY_DIR}/bundle/client/Info.plist
       ${PROJECT_BINARY_DIR}/bundle/server/Info.plist
+      # tidy-alphabetical-start
       data
       other/bundle/client/PkgInfo
       other/bundle/server/PkgInfo
@@ -3604,6 +3718,7 @@ if(CLIENT AND DMGBUILD_FOUND)
       other/dmgsettings.py
       other/icons/${CLIENT_EXECUTABLE}.icns
       other/icons/${SERVER_EXECUTABLE}.icns
+      # tidy-alphabetical-end
   )
   add_custom_target(package_dmg DEPENDS ${CPACK_PACKAGE_FILE_NAME}.dmg)
   list(APPEND PACKAGE_TARGETS package_dmg)
@@ -3713,13 +3828,15 @@ set(TARGETS ${TARGETS_OWN} ${TARGETS_DEP})
 foreach(target ${TARGETS})
   if(MSVC)
     set_property(TARGET ${target} PROPERTY MSVC_RUNTIME_LIBRARY MultiThreaded$<${DBG}:Debug>) # Use static CRT
-    target_compile_options(${target} PRIVATE /Zc:__cplusplus) # Fixes the __cplusplus macro
-    target_compile_options(${target} PRIVATE /MP) # Use multiple cores
+    # tidy-alphabetical-start
     target_compile_options(${target} PRIVATE /EHsc) # Only catch C++ exceptions with catch.
     target_compile_options(${target} PRIVATE /GS) # Protect the stack pointer.
-    target_compile_options(${target} PRIVATE /wd4996) # Use of non-_s functions.
-    target_compile_options(${target} PRIVATE /utf-8) # Use UTF-8 for source files.
+    target_compile_options(${target} PRIVATE /MP) # Use multiple cores
+    target_compile_options(${target} PRIVATE /Zc:__cplusplus) # Fixes the __cplusplus macro
     target_compile_options(${target} PRIVATE /bigobj) # Support more sections in object files, because the limit is exceeded for some files in debug mode.
+    target_compile_options(${target} PRIVATE /utf-8) # Use UTF-8 for source files.
+    target_compile_options(${target} PRIVATE /wd4996) # Use of non-_s functions.
+    # tidy-alphabetical-end
     # Enable Edit & Continue (Hot Reload) support
     if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.25)
       set_property(TARGET ${target} PROPERTY MSVC_DEBUG_INFORMATION_FORMAT $<IF:$<CONFIG:Debug>,EditAndContinue,Embedded>)
@@ -3770,10 +3887,12 @@ foreach(target ${TARGETS_OWN})
   set_property(TARGET ${target} PROPERTY CXX_EXTENSIONS OFF)
 
   if(MSVC)
+    # tidy-alphabetical-start
     target_compile_options(${target} PRIVATE /wd4244) # Possible loss of data (float -> int, int -> float, etc.).
     target_compile_options(${target} PRIVATE /wd4267) # Possible loss of data (size_t - int on win64).
     target_compile_options(${target} PRIVATE /wd4800) # Implicit conversion of int to bool.
     target_compile_options(${target} PRIVATE /wd5055) # C++20 operator deprecated between enumerations and floating-point types
+    # tidy-alphabetical-end
   endif()
   if(TARGET_OS STREQUAL "windows")
     # See https://learn.microsoft.com/en-us/windows/win32/winprog/using-the-windows-headers
