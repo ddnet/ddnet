@@ -84,7 +84,7 @@ jobs:
     - name: Check Python code style (ruff format)
       run: |
         ruff --version
-        ruff format
+        ruff format --check
 
     - name: Check Python code style (ruff check)
       run: |

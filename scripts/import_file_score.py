@@ -74,7 +74,7 @@ def main():
 		)
 		c.executemany(
 			"INSERT INTO record_race (Map, Name, Time, Server, " + "".join(f"cp{i + 1}, " for i in range(25)) + "GameId, DDNet7) " + f"VALUES ({','.join('?' * 31)})",
-			[(ddnet_map, r.name, float(r.time), "TEXT", *[float(c) for c in r.checkpoints], None, False) for ddnet_map, record in records.items() for r in record]
+			[(ddnet_map, r.name, float(r.time), "TEXT", *[float(c) for c in r.checkpoints], None, False) for ddnet_map, record in records.items() for r in record],
 		)
 		conn.commit()
 		conn.close()

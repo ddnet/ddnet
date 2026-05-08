@@ -31,16 +31,16 @@ C_HEADER_SET = {
 	"wchar",
 	"wctype",
 }
-C_HEADER_INCLUDE_PATTERN = re.compile(fr"#include\s+<({"|".join(C_HEADER_SET)})\.h>")
+C_HEADER_INCLUDE_PATTERN = re.compile(rf"#include\s+<({'|'.join(C_HEADER_SET)})\.h>")
 
 
-def get_cpp_header(c_header : str):
+def get_cpp_header(c_header: str):
 	if c_header == "complex":
 		return "complex"
 	return f"c{c_header}"
 
 
-def check_standard_headers_file(filename : Path):
+def check_standard_headers_file(filename: Path):
 	errors = False
 	with open(filename, encoding="utf-8") as f:
 		content = f.read()
@@ -48,13 +48,13 @@ def check_standard_headers_file(filename : Path):
 	if C_HEADER_INCLUDE_PATTERN.search(content):
 		# Check each C header individually to print an error message with the appropriate replacement C++ header
 		for c_header in C_HEADER_SET:
-			if re.search(fr"#include\s+<{c_header}\.h>", content):
+			if re.search(rf"#include\s+<{c_header}\.h>", content):
 				print(f"Error: '{filename}' includes C header '{c_header}.h'. Include the C++ header '{get_cpp_header(c_header)}' instead.")
 				errors += 1
 	return errors
 
 
-def check_standard_headers_directory(path : Path):
+def check_standard_headers_directory(path: Path):
 	errors = 0
 	for file in Path.iterdir(path):
 		if file.is_dir():
