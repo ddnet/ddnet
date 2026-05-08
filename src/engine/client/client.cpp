@@ -9,6 +9,7 @@
 
 #include <base/bytes.h>
 #include <base/crashdump.h>
+#include <base/dbg.h>
 #include <base/fs.h>
 #include <base/hash.h>
 #include <base/hash_ctxt.h>
@@ -16,6 +17,7 @@
 #include <base/log.h>
 #include <base/logger.h>
 #include <base/math.h>
+#include <base/mem.h>
 #include <base/os.h>
 #include <base/process.h>
 #include <base/secure.h>

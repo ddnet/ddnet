@@ -1,13 +1,17 @@
 #include "register.h"
 
+#include <base/dbg.h>
 #include <base/lock.h>
 #include <base/log.h>
+#include <base/mem.h>
+#include <base/str.h>
 #include <base/time.h>
 
 #include <engine/console.h>
 #include <engine/engine.h>
 #include <engine/shared/config.h>
 #include <engine/shared/http.h>
+#include <engine/shared/jobs.h>
 #include <engine/shared/json.h>
 #include <engine/shared/masterserver.h>
 #include <engine/shared/network.h>
