@@ -126,7 +126,7 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 		const json_value &IsAfk = Client["afk"];
 		Error = false;
 		Error = Error || ClientName.type != json_string || str_has_cc(ClientName);
-		Error = Error || Clan.type != json_string || str_has_cc(ClientName);
+		Error = Error || Clan.type != json_string || str_has_cc(Clan);
 		Error = Error || Country.type != json_integer;
 		Error = Error || Score.type != json_integer;
 		Error = Error || IsPlayer.type != json_boolean;
@@ -156,7 +156,7 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 				const json_value &SkinBodyColor = SkinObj["color_body"];
 				const json_value &SkinFeetColor = SkinObj["color_feet"];
 				// 0.6 skin
-				if(SkinName.type == json_string)
+				if(SkinName.type == json_string && !str_has_cc(SkinName.u.string.ptr))
 				{
 					HasSkin = true;
 					str_copy(pClient->m_aSkin, SkinName.u.string.ptr);
@@ -186,7 +186,7 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 						{
 							const json_value &SkinPartName = SkinPartObj["name"];
 							const json_value &SkinPartColor = SkinPartObj["color"];
-							if(SkinPartName.type == json_string)
+							if(SkinPartName.type == json_string && !str_has_cc(SkinPartName.u.string.ptr))
 							{
 								HasSkin = true;
 								str_copy(pClient->m_aaSkin7[Part], SkinPartName.u.string.ptr);
@@ -251,7 +251,7 @@ bool CServerInfo2::operator==(const CServerInfo2 &Other) const
 	{
 		return false;
 	}
-	for(int i = 0; i < m_NumClients; i++)
+	for(int i = 0; i < minimum(m_NumClients, (int)SERVERINFO_MAX_CLIENTS); i++)
 	{
 		Unequal = false;
 		Unequal = Unequal || str_comp(m_aClients[i].m_aName, Other.m_aClients[i].m_aName) != 0;

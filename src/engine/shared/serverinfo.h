@@ -50,7 +50,6 @@ public:
 	static bool FromJson(CServerInfo2 *pOut, const json_value *pJson);
 	static bool FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson);
 	bool Validate() const;
-	void ToJson(char *pBuffer, int BufferSize) const;
 
 	operator CServerInfo() const;
 };
