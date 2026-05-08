@@ -13,9 +13,11 @@ EXCEPTIONS = [
 	"src/tools/config_common.h",
 ]
 
+
 def read_file(filename):
 	with open(filename, encoding="utf-8") as file:
 		return file.read()
+
 
 def check_file(filename):
 	if filename in EXCEPTIONS:
@@ -47,7 +49,7 @@ def check_file(filename):
 		else:
 			print(f"Missing header guard in {filename}, should be: {header_guard_line1}")
 			return True
-	else: # executed if the loop wasn't broken out of
+	else:  # executed if the loop wasn't broken out of
 		print(f"Missing header guard in {filename}, file is empty?")
 		return True
 

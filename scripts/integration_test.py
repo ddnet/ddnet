@@ -518,10 +518,13 @@ class Mastersrv(Runnable):
 			communities_json_filename = f"{name}-communities.json"
 			with open(os.path.join(test_env.tmp_dir, communities_json_filename), "w", encoding="utf-8") as f:
 				f.write(communities_json)
-			config = config + f"""\
+			config = (
+				config
+				+ f"""\
 [communities]
 json = {communities_json_filename!r}
 """
+			)
 		if config is not None:
 			config_filename = f"{name}.toml"
 			with open(os.path.join(test_env.tmp_dir, config_filename), "w", encoding="utf-8") as f:
@@ -653,7 +656,7 @@ def client_can_connect_7(test_env):
 	client = test_env.client()
 	server = test_env.server()
 	wait_for_startup([client, server])
-	client.command(f"connect tw-0.7+udp://127.0.0.1:{server.port}") # FIXME(#11693): Work around missing domain support.
+	client.command(f"connect tw-0.7+udp://127.0.0.1:{server.port}")  # FIXME(#11693): Work around missing domain support.
 	join = server.wait_for_log_prefix("server: player has entered the game", timeout=10).line
 	if "sixup=1" not in join:
 		raise AssertionError(f"sixup=0 not found in {join!r}")
@@ -669,9 +672,9 @@ def client_can_connect_websockets(test_env):
 	client = test_env.client(["dbg_websockets 1", "stdout_output_level 1"])
 	server = test_env.server(["dbg_websockets 1", "stdout_output_level 1"])
 	wait_for_startup([client, server])
-	client.command(f"connect ws://127.0.0.1:{server.port}") # FIXME(#11693): Work around missing domain support.
-	server.wait_for_log_prefix("websockets: I: lws_handshake_server", timeout=15) # Connection established
-	client.wait_for_log_prefix("websockets: I: lws_http_client_socket_service", timeout=15) # Connection established
+	client.command(f"connect ws://127.0.0.1:{server.port}")  # FIXME(#11693): Work around missing domain support.
+	server.wait_for_log_prefix("websockets: I: lws_handshake_server", timeout=15)  # Connection established
+	client.wait_for_log_prefix("websockets: I: lws_http_client_socket_service", timeout=15)  # Connection established
 	join = server.wait_for_log_prefix("server: player has entered the game", timeout=5).line
 	if "sixup=0" not in join:
 		raise AssertionError(f"sixup=0 not found in {join!r}")
@@ -922,7 +925,7 @@ ddvc_6DnZq51fypqX9ldrEFCF9aJdpi6wjgh6YA = "ddnet"
 	if len(servers_json["servers"]) != 1 or servers_json["servers"][0]["info"]["map"]["name"] != "Tutorial" or len(servers_json["servers"][0]["addresses"]) != 1:
 		raise AssertionError(f"unexpected servers.json\n{servers_json}")
 	if servers_json["servers"][0]["community"] != "ddnet":
-		raise AssertionError(f"servers.json didn't have \"community\" key\n{servers_json}")
+		raise AssertionError(f'servers.json didn\'t have "community" key\n{servers_json}')
 	server.exit()
 	mastersrv.wait_for_log_prefix("mastersrv: successfully removed", timeout=5)
 	servers_json = mastersrv.servers_json()
