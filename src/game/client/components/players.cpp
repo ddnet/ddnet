@@ -4,6 +4,7 @@
 #include "players.h"
 
 #include <base/color.h>
+#include <base/dbg.h>
 #include <base/math.h>
 
 #include <engine/client/enums.h>

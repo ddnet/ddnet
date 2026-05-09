@@ -2,7 +2,9 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "controls.h"
 
+#include <base/dbg.h>
 #include <base/math.h>
+#include <base/mem.h>
 #include <base/time.h>
 #include <base/vmath.h>
 

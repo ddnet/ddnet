@@ -1,3 +1,5 @@
+#include <base/mem.h>
+
 #include <engine/shared/masterserver.h>
 
 #include <game/client/gameclient.h>

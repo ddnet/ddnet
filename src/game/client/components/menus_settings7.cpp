@@ -3,6 +3,7 @@
 #include "menus.h"
 #include "skins7.h"
 
+#include <base/dbg.h>
 #include <base/math.h>
 #include <base/str.h>
 

@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "menus.h"
 
+#include <base/dbg.h>
 #include <base/log.h>
 #include <base/time.h>
 

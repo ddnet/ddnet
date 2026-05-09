@@ -3,6 +3,7 @@
 #include "ghost.h"
 
 #include <base/log.h>
+#include <base/mem.h>
 #include <base/process.h>
 #include <base/time.h>
 

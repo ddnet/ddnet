@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "scoreboard.h"
 
+#include <base/dbg.h>
 #include <base/time.h>
 
 #include <engine/console.h>

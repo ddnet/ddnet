@@ -1,3 +1,6 @@
+#include <base/dbg.h>
+#include <base/mem.h>
+
 #include <engine/shared/protocolglue.h>
 #include <engine/shared/snapshot.h>
 #include <engine/shared/translation_context.h>
