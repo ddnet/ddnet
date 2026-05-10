@@ -195,7 +195,11 @@ src
 
 
 def filter_text(filenames):
-	return [filename for filename in filenames if os.path.splitext(filename)[1] in TEXT_EXTS]
+	def _is_text(filename):
+		base, ext = os.path.splitext(os.path.basename(filename))
+		return ext in TEXT_EXTS or (ext == "" and base.startswith("."))
+
+	return [filename for filename in filenames if _is_text(filename)]
 
 
 def main():
