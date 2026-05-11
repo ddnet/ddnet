@@ -3,6 +3,69 @@
 
 #include <engine/shared/json.h>
 
+static bool JsonValidateUtf8Recursive(const json_value *pValue)
+{
+	dbg_assert(pValue != nullptr, "JsonValidateUtf8Recursive: pValue must not be null");
+	switch(pValue->type)
+	{
+	case json_string:
+		return str_utf8_check(*pValue);
+	case json_array:
+		for(unsigned i = 0; i < pValue->u.array.length; i++)
+		{
+			if(!JsonValidateUtf8Recursive(&(*pValue)[i]))
+				return false;
+		}
+		return true;
+	case json_object:
+		for(unsigned i = 0; i < pValue->u.object.length; i++)
+		{
+			const char *pName = pValue->u.object.values[i].name;
+			if(!str_utf8_check(pName))
+				return false;
+			if(!JsonValidateUtf8Recursive(&(*pValue)[i]))
+				return false;
+		}
+		return true;
+	default:
+		return true;
+	}
+}
+
+json_value *JsonParse(const json_char *pJson, size_t Length)
+{
+	json_value *pValue = json_parse(pJson, Length);
+	if(pValue == nullptr)
+	{
+		return nullptr;
+	}
+	if(!JsonValidateUtf8Recursive(pValue))
+	{
+		json_value_free(pValue);
+		return nullptr;
+	}
+	return pValue;
+}
+
+json_value *JsonParseEx(json_settings *pSettings, const json_char *pJson, size_t Length, char *pError)
+{
+	json_value *pValue = json_parse_ex(pSettings, pJson, Length, pError);
+	if(pValue == nullptr)
+	{
+		return nullptr;
+	}
+	if(!JsonValidateUtf8Recursive(pValue))
+	{
+		if(pError)
+		{
+			str_copy(pError, "invalid utf-8 in string literal", json_error_max);
+		}
+		json_value_free(pValue);
+		return nullptr;
+	}
+	return pValue;
+}
+
 const struct _json_value *json_object_get(const json_value *pObject, const char *pIndex)
 {
 	unsigned int i;
@@ -63,6 +126,7 @@ static char EscapeJsonChar(char c)
 char *EscapeJson(char *pBuffer, int BufferSize, const char *pString)
 {
 	dbg_assert(BufferSize > 0, "can't null-terminate the string");
+	dbg_assert(str_utf8_check(pString), "invalid UTF-8 in string");
 	// Subtract the space for null termination early.
 	BufferSize--;
 

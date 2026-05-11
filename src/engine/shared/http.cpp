@@ -11,6 +11,7 @@
 
 #include <engine/external/json-parser/json.h>
 #include <engine/shared/config.h>
+#include <engine/shared/json.h>
 #include <engine/storage.h>
 
 #include <game/version.h>
@@ -554,7 +555,7 @@ json_value *CHttpRequest::ResultJson() const
 	unsigned char *pResult;
 	size_t ResultLength;
 	Result(&pResult, &ResultLength);
-	return json_parse((char *)pResult, ResultLength);
+	return JsonParse((char *)pResult, ResultLength);
 }
 
 const SHA256_DIGEST &CHttpRequest::ResultSha256() const

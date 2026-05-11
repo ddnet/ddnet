@@ -111,6 +111,8 @@ bool CJsonWriter::CanWriteDatatype()
 
 void CJsonWriter::WriteInternalEscaped(const char *pStr)
 {
+	dbg_assert(str_utf8_check(pStr), "CJsonWriter::WriteInternalEscaped: input must be valid UTF-8");
+
 	WriteInternal("\"");
 	int UnwrittenFrom = 0;
 	int Length = str_length(pStr);

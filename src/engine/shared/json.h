@@ -3,6 +3,9 @@
 
 #include <engine/external/json-parser/json.h>
 
+json_value *JsonParse(const json_char *pJson, size_t Length);
+json_value *JsonParseEx(json_settings *pSettings, const json_char *pJson, size_t Length, char *pError);
+
 const struct _json_value *json_object_get(const json_value *pObject, const char *pIndex);
 const struct _json_value *json_array_get(const json_value *pArray, int Index);
 int json_array_length(const json_value *pArray);
