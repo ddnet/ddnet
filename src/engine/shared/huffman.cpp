@@ -213,10 +213,10 @@ int CHuffman::Decompress(const void *pInput, int InputSize, void *pOutput, int O
 	dbg_assert(OutputSize > 0, "Invalid OutputSize: %d", OutputSize);
 
 	// setup buffer pointers
+	const unsigned char *pSrc = (const unsigned char *)pInput;
+	const unsigned char *pSrcEnd = pSrc + InputSize;
 	unsigned char *pDst = (unsigned char *)pOutput;
-	unsigned char *pSrc = (unsigned char *)pInput;
 	unsigned char *pDstEnd = pDst + OutputSize;
-	unsigned char *pSrcEnd = pSrc + InputSize;
 
 	unsigned Bits = 0;
 	unsigned Bitcount = 0;
