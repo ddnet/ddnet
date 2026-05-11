@@ -54,3 +54,28 @@ TEST(Huffman, CompressionCompatible)
 	ASSERT_EQ(Size, (int)sizeof(aExpected)) << "The compression is not compatible with older/other implementations anymore";
 	EXPECT_EQ(mem_comp(aCompressed, aExpected, Size), 0) << "The compression is not compatible with older/other implementations anymore";
 }
+
+TEST(Huffman, CompressionTruncated)
+{
+	CHuffman Huffman;
+	Huffman.Init();
+
+	unsigned char aInput[64];
+	unsigned char aCompressed[2048];
+
+	mem_zero(aInput, sizeof(aInput));
+	mem_zero(aCompressed, sizeof(aCompressed));
+
+	// compress 1-7 followed by a bunch of nullbytes
+	for(int i = 0; i < 8; i++)
+		aInput[i] = i;
+
+	for(size_t CompressedSize = 1; CompressedSize <= 14; ++CompressedSize)
+	{
+		EXPECT_EQ(Huffman.Compress(aInput, sizeof(aInput), aCompressed, CompressedSize), -1) << "Compression expected to fail with size " << CompressedSize;
+	}
+	for(size_t CompressedSize = 15; CompressedSize <= 20; ++CompressedSize)
+	{
+		EXPECT_EQ(Huffman.Compress(aInput, sizeof(aInput), aCompressed, CompressedSize), 15) << "Compression expected to succeed with size " << CompressedSize;
+	}
+}
