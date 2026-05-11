@@ -148,9 +148,9 @@ int CHuffman::Compress(const void *pInput, int InputSize, void *pOutput, int Out
 	{ \
 		while(Bitcount >= 8) \
 		{ \
-			*pDst++ = (unsigned char)(Bits & 0xff); \
 			if(pDst == pDstEnd) \
 				return -1; \
+			*pDst++ = (unsigned char)(Bits & 0xff); \
 			Bits >>= 8; \
 			Bitcount -= 8; \
 		} \
@@ -193,8 +193,13 @@ int CHuffman::Compress(const void *pInput, int InputSize, void *pOutput, int Out
 	HUFFMAN_MACRO_LOADSYMBOL(HUFFMAN_EOF_SYMBOL);
 	HUFFMAN_MACRO_WRITE();
 
-	// write out the last bits
-	*pDst++ = Bits;
+	// write out the last bits if we have any
+	if(Bitcount != 0)
+	{
+		if(pDst == pDstEnd)
+			return -1;
+		*pDst++ = Bits;
+	}
 
 	// return the size of the output
 	return (int)(pDst - (const unsigned char *)pOutput);
