@@ -176,6 +176,14 @@ public:
 
 	void GlobalFinish() override
 	{
+		if(dbg_assert_has_failed() && m_pMemoryLogger != nullptr)
+		{
+			for(const CLogMessage &Line : m_pMemoryLogger->Lines())
+			{
+				m_pGlobalLogger->Log(&Line);
+			}
+			m_pMemoryLogger = nullptr;
+		}
 		dbg_assert(m_pMemoryLogger == nullptr, "Memory logger should be unset when test logger finishes");
 		m_pGlobalLogger->GlobalFinish();
 	}
