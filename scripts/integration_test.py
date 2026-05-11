@@ -3,7 +3,8 @@ from collections import namedtuple
 from queue import Queue
 from threading import Thread
 from time import time
-from urllib.request import urlopen
+from urllib import request
+from urllib.request import Request, urlopen
 from uuid import uuid4, UUID
 import io
 import json
@@ -15,6 +16,19 @@ import subprocess
 import sys
 import tempfile
 import traceback
+
+
+def urlopen_anystatus(url):
+	# Adapted from https://stackoverflow.com/a/74844056:
+	class NonRaisingHttpErrorProcessor(request.HTTPErrorProcessor):
+		def https_response(self, request, response):
+			return response
+
+		def http_response(self, request, response):
+			return response
+
+	return request.build_opener(NonRaisingHttpErrorProcessor).open(url)
+
 
 # TODO: less strict default timeouts?
 
@@ -563,6 +577,9 @@ json = {communities_json_filename!r}
 	def wait_for_startup(self, timeout=5):
 		self.wait_for_log_prefix("warp::server: listening on http://[::]:", timeout=timeout)
 
+	def register_url(self):
+		return f"http://[::1]:{self.port}/ddnet/15/register"
+
 	def servers_json(self):
 		return json.loads(urlopen(f"http://[::1]:{self.port}/ddnet/15/test-servers.json").read())
 
@@ -933,6 +950,44 @@ ddvc_6DnZq51fypqX9ldrEFCF9aJdpi6wjgh6YA = "ddnet"
 		raise AssertionError(f"unexpected servers.json\n{servers_json}")
 	mastersrv.exit()
 	mastersrv.wait_for_exit()
+
+
+@test(requires_mastersrv=True)
+def mastersrv_smoke_test(test_env):
+	mastersrv = test_env.mastersrv()
+	wait_for_startup([mastersrv])
+
+	register_url = mastersrv.register_url()
+	register_headers = {
+		"Address": "tw-0.6+udp://connecting-address.invalid:12345",
+		"Secret": "4ab4bc03-5a3c-4a61-9ba0-24da6c4cfa89",
+		"Info-Serial": "0",
+		"Challenge-Secret": "623647f9-dd77-4b98-ac2b-2bff6b283be1",
+		"Content-Type": "application/json",
+	}
+
+	def test_register(http_status, status, message, server_info):
+		with urlopen_anystatus(
+			Request(
+				url=register_url,
+				headers=register_headers,
+				data=server_info,
+				method="POST",
+			)
+		) as response:
+			got_http_status, got_result = response.status, response.read().decode()
+
+		if http_status != got_http_status:
+			raise AssertionError(f"{message}: wanted HTTP status {http_status}, got {got_http_status} ({got_result})")
+
+		if json.loads(got_result)["status"] != status:
+			raise AssertionError(f"{message}: wanted status {status}, got {got_result}")
+
+	test_register(200, "need_challenge", "register should succeed", b"{}")
+	test_register(200, "need_challenge", "register should accept UTF-8", '{"test":"👩"}'.encode())
+	test_register(200, "need_challenge", "register should accept matched surrogates", b'{"test":"\\uD83D\\uDC69"}')
+	test_register(400, "error", "register should reject lone surrogates", b'{"test":"\\uD83D"}')
+	test_register(400, "error", "register should reject invalid UTF-8", b'{"test":"\xff"}')
 
 
 EXE_SUFFIX = ""
