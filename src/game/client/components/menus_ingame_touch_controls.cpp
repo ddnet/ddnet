@@ -1471,10 +1471,11 @@ std::string CMenusIngameTouchControls::CBehaviorElements::ParseLabel(const char 
 	char aJsonString[1048];
 	str_format(aJsonString, sizeof(aJsonString), "\"%s\"", pLabel);
 	json_value *pJsonLabel = json_parse_ex(&JsonSettings, aJsonString, str_length(aJsonString), aError);
-	if(pJsonLabel == nullptr || pJsonLabel->type != json_string)
+	if(pJsonLabel == nullptr)
 	{
 		return pLabel;
 	}
+	dbg_assert(pJsonLabel->type == json_string, "Parsed label must be string");
 	std::string ParsedString = pJsonLabel->u.string.ptr;
 	json_value_free(pJsonLabel);
 	return ParsedString;
