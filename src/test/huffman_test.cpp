@@ -47,11 +47,10 @@ TEST(Huffman, CompressionCompatible)
 	for(int i = 0; i < 8; i++)
 		aInput[i] = i;
 
-	int Size = Huffman.Compress(aInput, sizeof(aInput), aCompressed, sizeof(aCompressed));
+	const int Size = Huffman.Compress(aInput, sizeof(aInput), aCompressed, sizeof(aCompressed));
 
-	unsigned char aExpected[] = {0x51, 0x58, 0x78, 0x76, 0x1B, 0xB7, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x7F, 0xc5, 0x0D};
+	const unsigned char aExpected[] = {0x51, 0x58, 0x78, 0x76, 0x1B, 0xB7, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x7F, 0xc5, 0x0D};
 
-	int match = mem_comp(aCompressed, aExpected, Size);
-	EXPECT_EQ(match, 0) << "The compression is not compatible with older/other implementations anymore";
-	EXPECT_EQ(Size, 15);
+	ASSERT_EQ(Size, (int)sizeof(aExpected)) << "The compression is not compatible with older/other implementations anymore";
+	EXPECT_EQ(mem_comp(aCompressed, aExpected, Size), 0) << "The compression is not compatible with older/other implementations anymore";
 }
