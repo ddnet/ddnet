@@ -1190,7 +1190,7 @@ public:
 		// parse json data
 		json_settings JsonSettings{};
 		char aError[256];
-		json_value *pJsonData = json_parse_ex(&JsonSettings, static_cast<const json_char *>(pFileData), JsonFileSize, aError);
+		json_value *pJsonData = JsonParseEx(&JsonSettings, static_cast<const json_char *>(pFileData), JsonFileSize, aError);
 		free(pFileData);
 		if(pJsonData == nullptr)
 		{

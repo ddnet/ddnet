@@ -281,7 +281,7 @@ void CUpdater::ParseUpdate()
 	if(!m_pStorage->ReadFile(m_pStorage->GetBinaryPath("update/update.json", aPath, sizeof(aPath)), IStorage::TYPE_ABSOLUTE, &pBuf, &Length))
 		return;
 
-	json_value *pVersions = json_parse((json_char *)pBuf, Length);
+	json_value *pVersions = JsonParse((json_char *)pBuf, Length);
 	free(pBuf);
 
 	if(!pVersions || pVersions->type != json_array)

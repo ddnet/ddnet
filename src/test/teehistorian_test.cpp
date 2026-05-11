@@ -2,9 +2,9 @@
 #include <base/io.h>
 #include <base/time.h>
 
-#include <engine/external/json-parser/json.h>
 #include <engine/server.h>
 #include <engine/shared/config.h>
+#include <engine/shared/json.h>
 
 #include <game/gamecore.h>
 #include <game/server/teehistorian.h>
@@ -924,7 +924,7 @@ TEST_F(TeeHistorian, PrevGameUuid)
 	m_GameInfo.m_PrevGameUuid = PrevGameUuid;
 	Reset(&m_GameInfo);
 	Finish();
-	json_value *pJson = json_parse((const char *)m_vBuffer.data() + 16, -1);
+	json_value *pJson = JsonParse((const char *)m_vBuffer.data() + 16, -1);
 	ASSERT_TRUE(pJson);
 	const json_value &JsonPrevGameUuid = (*pJson)["prev_game_uuid"];
 	ASSERT_EQ(JsonPrevGameUuid.type, json_string);

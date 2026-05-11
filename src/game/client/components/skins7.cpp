@@ -16,6 +16,7 @@
 #include <engine/gfx/image_manipulation.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
+#include <engine/shared/json.h>
 #include <engine/shared/jsonwriter.h>
 #include <engine/shared/localization.h>
 #include <engine/shared/protocol7.h>
@@ -216,7 +217,7 @@ bool CSkins7::LoadSkin(const char *pName, int DirType)
 
 	json_settings JsonSettings{};
 	char aError[256];
-	json_value *pJsonData = json_parse_ex(&JsonSettings, static_cast<const json_char *>(pFileData), JsonFileSize, aError);
+	json_value *pJsonData = JsonParseEx(&JsonSettings, static_cast<const json_char *>(pFileData), JsonFileSize, aError);
 	free(pFileData);
 	if(pJsonData == nullptr)
 	{
