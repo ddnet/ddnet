@@ -11,17 +11,25 @@ TEST(Huffman, CompressionShouldNotChangeData)
 
 	unsigned char aInput[64];
 	unsigned char aCompressed[2048];
-
-	mem_zero(aInput, sizeof(aInput));
-	mem_zero(aCompressed, sizeof(aCompressed));
-
-	int Size = Huffman.Compress(aInput, sizeof(aInput), aCompressed, sizeof(aCompressed));
-
 	unsigned char aDecompressed[2048];
-	Huffman.Decompress(aCompressed, sizeof(aCompressed), aDecompressed, sizeof(aDecompressed));
 
-	int match = mem_comp(aInput, aDecompressed, Size);
-	EXPECT_EQ(match, 0);
+	for(int InputMod = 0x00; InputMod <= 0xFFFF; ++InputMod)
+	{
+		mem_zero(aInput, sizeof(aInput));
+		mem_zero(aCompressed, sizeof(aCompressed));
+		mem_zero(aDecompressed, sizeof(aDecompressed));
+		aInput[0] = InputMod & 0xFF;
+		aInput[1] = (InputMod >> 8) & 0xFF;
+
+		const int CompressedSize = Huffman.Compress(aInput, sizeof(aInput), aCompressed, sizeof(aCompressed));
+		const int MaxSize = InputMod <= 0xFF ? 12 : 14;
+		ASSERT_GE(CompressedSize, 10);
+		ASSERT_LE(CompressedSize, MaxSize);
+
+		const int UncompressedSize = Huffman.Decompress(aCompressed, CompressedSize, aDecompressed, sizeof(aDecompressed));
+		ASSERT_EQ(UncompressedSize, (int)sizeof(aInput));
+		EXPECT_EQ(mem_comp(aInput, aDecompressed, UncompressedSize), 0);
+	}
 }
 
 TEST(Huffman, CompressionCompatible)
