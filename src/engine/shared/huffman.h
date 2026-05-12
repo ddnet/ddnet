@@ -45,14 +45,11 @@ public:
 		Function: Init
 			Inits the compressor/decompressor.
 
-		Parameters:
-			pFrequencies - A pointer to an array of 256 entries of the frequencies of the bytes
-
 		Remarks:
 			- Does no allocation whatsoever.
 			- You don't have to call any cleanup functions when you are done with it.
 	*/
-	void Init(const unsigned *pFrequencies = ms_aFreqTable);
+	void Init();
 
 	/*
 		Function: Compress
