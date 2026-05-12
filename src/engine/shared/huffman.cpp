@@ -246,12 +246,20 @@ int CHuffman::Decompress(const void *pInput, int InputSize, void *pOutput, int O
 		if(pNode->m_NumBits)
 		{
 			// remove the bits for that symbol
+			if(Bitcount < pNode->m_NumBits)
+			{
+				return -1;
+			}
 			Bits >>= pNode->m_NumBits;
 			Bitcount -= pNode->m_NumBits;
 		}
 		else
 		{
 			// remove the bits that the lut checked up for us
+			if(Bitcount < HUFFMAN_LUTBITS)
+			{
+				return -1;
+			}
 			Bits >>= HUFFMAN_LUTBITS;
 			Bitcount -= HUFFMAN_LUTBITS;
 

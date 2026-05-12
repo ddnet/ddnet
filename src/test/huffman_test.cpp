@@ -79,3 +79,19 @@ TEST(Huffman, CompressionTruncated)
 		EXPECT_EQ(Huffman.Compress(aInput, sizeof(aInput), aCompressed, CompressedSize), 15) << "Compression expected to succeed with size " << CompressedSize;
 	}
 }
+
+TEST(Huffman, DecompressionTableLookupIntegerOverflow)
+{
+	CHuffman Huffman;
+	Huffman.Init();
+
+	// Test data found by fuzzing
+	const unsigned char aInput1[] = {0x1A};
+	const unsigned char aInput2[] = {0x62, 0x91, 0x62, 0xA9};
+	const unsigned char aInput3[] = {0x4C, 0x04, 0xFE, 0x00, 0x68};
+	unsigned char aUncompressed[2048];
+
+	EXPECT_EQ(Huffman.Decompress(aInput1, sizeof(aInput1), aUncompressed, sizeof(aUncompressed)), -1);
+	EXPECT_EQ(Huffman.Decompress(aInput2, sizeof(aInput2), aUncompressed, sizeof(aUncompressed)), -1);
+	EXPECT_EQ(Huffman.Decompress(aInput3, sizeof(aInput3), aUncompressed, sizeof(aUncompressed)), -1);
+}
