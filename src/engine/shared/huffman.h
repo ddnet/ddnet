@@ -17,8 +17,9 @@ class CHuffman
 		HUFFMAN_LUTMASK = (HUFFMAN_LUTSIZE - 1)
 	};
 
-	struct CNode
+	class CNode
 	{
+	public:
 		// symbol
 		unsigned m_Bits;
 		unsigned m_NumBits;
