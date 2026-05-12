@@ -38,7 +38,7 @@ class CHuffman
 	CNode *m_pStartNode;
 	int m_NumNodes;
 
-	void Setbits_r(CNode *pNode, int Bits, unsigned Depth);
+	void SetBitsRecursive(CNode *pNode, int Bits, unsigned Depth);
 	void ConstructTree(const unsigned *pFrequencies);
 
 public:
