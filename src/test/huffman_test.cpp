@@ -55,6 +55,32 @@ TEST(Huffman, CompressionCompatible)
 	EXPECT_EQ(mem_comp(aCompressed, aExpected, Size), 0) << "The compression is not compatible with older/other implementations anymore";
 }
 
+TEST(Huffman, CompressionTrailingNull)
+{
+	CHuffman Huffman;
+	Huffman.Init();
+
+	unsigned char aInput[64];
+	unsigned char aCompressed[2048];
+	unsigned char aDecompressed[2048];
+
+	mem_zero(aInput, sizeof(aInput));
+	mem_zero(aCompressed, sizeof(aCompressed));
+	mem_zero(aDecompressed, sizeof(aDecompressed));
+	aInput[0] = 0x15;
+
+	const int CompressedSize = Huffman.Compress(aInput, sizeof(aInput), aCompressed, sizeof(aCompressed));
+
+	const unsigned char aExpected[] = {0xBE, 0xFD, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x15, 0x37, 0x00};
+
+	ASSERT_EQ(CompressedSize, (int)sizeof(aExpected));
+	EXPECT_EQ(mem_comp(aCompressed, aExpected, CompressedSize), 0);
+
+	const int UncompressedSize = Huffman.Decompress(aCompressed, CompressedSize, aDecompressed, sizeof(aDecompressed));
+	ASSERT_EQ(UncompressedSize, (int)sizeof(aInput));
+	EXPECT_EQ(mem_comp(aInput, aDecompressed, UncompressedSize), 0);
+}
+
 TEST(Huffman, CompressionTruncated)
 {
 	CHuffman Huffman;
