@@ -113,7 +113,7 @@ void CPlayer::Reset()
 	GameServer()->Score()->PlayerData(m_ClientId)->Reset();
 
 	m_LastKickVote = 0;
-	m_LastDDRaceTeamChange = 0;
+	m_LastDDRaceTeamChange.reset();
 	m_ShowOthers = g_Config.m_SvShowOthersDefault;
 	m_ShowAll = g_Config.m_SvShowAllDefault;
 	m_EnableSpectatorCount = true;

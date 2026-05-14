@@ -1105,7 +1105,7 @@ void CGameContext::AttemptJoinTeam(int ClientId, int Team)
 	}
 
 	char aError[512];
-	if(pPlayer->m_LastDDRaceTeamChange + (int64_t)Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay > Server()->Tick())
+	if(pPlayer->m_LastDDRaceTeamChange.has_value() && pPlayer->m_LastDDRaceTeamChange.value() + (int64_t)Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay > Server()->Tick())
 	{
 		log_info("chatresp", "You can't change teams that fast!");
 	}

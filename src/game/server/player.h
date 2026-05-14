@@ -180,7 +180,7 @@ public:
 
 	bool IsPlaying() const;
 	int64_t m_LastKickVote;
-	int64_t m_LastDDRaceTeamChange;
+	std::optional<int64_t> m_LastDDRaceTeamChange;
 	int m_ShowOthers;
 	bool m_ShowAll;
 	bool m_EnableSpectatorCount;
