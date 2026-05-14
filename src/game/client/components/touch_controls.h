@@ -381,7 +381,6 @@ public:
 		CJoystickActionTouchButtonBehavior() :
 			CJoystickTouchButtonBehavior(BEHAVIOR_ID) {}
 
-		void Init(CTouchButton *pTouchButton) override;
 		int SelectedAction() const override;
 	};
 

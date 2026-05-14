@@ -5008,7 +5008,6 @@ void CGameClient::HandleMultiView()
 		else if(m_MultiView.m_SecondChance < Client()->LocalTime())
 		{
 			ResetMultiView();
-			return;
 		}
 		return;
 	}
@@ -5024,7 +5023,7 @@ void CGameClient::HandleMultiView()
 	// dont hide the position hud if its only one player
 	m_MultiViewShowHud = AmountPlayers == 1;
 	// get the average velocity
-	float AvgVel = std::clamp(SumVel / AmountPlayers ? SumVel / (float)AmountPlayers : 0.0f, 0.0f, 1000.0f);
+	float AvgVel = std::clamp(SumVel / AmountPlayers, 0.0f, 1000.0f);
 
 	if(m_MultiView.m_OldPersonalZoom == m_MultiViewPersonalZoom)
 		m_Camera.SetZoom(CalculateMultiViewZoom(MinPos, MaxPos, AvgVel), g_Config.m_ClMultiViewZoomSmoothness, false);

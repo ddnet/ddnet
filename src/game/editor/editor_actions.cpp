@@ -82,7 +82,6 @@ void CEditorBrushDrawAction::SetInfos()
 
 		if(pLayer->m_Type == LAYERTYPE_TILES)
 		{
-			std::shared_ptr<CLayerTiles> pLayerTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
 			auto Changes = Pair.second;
 			for(auto &Change : Changes)
 			{
@@ -759,8 +758,6 @@ CEditorActionEditGroupProp::CEditorActionEditGroupProp(CEditorMap *pMap, int Gro
 
 void CEditorActionEditGroupProp::Undo()
 {
-	auto pGroup = Map()->m_vpGroups[m_GroupIndex];
-
 	if(m_Prop == EGroupProp::ORDER)
 	{
 		Map()->m_SelectedGroup = Map()->MoveGroup(m_Current, m_Previous);
@@ -771,8 +768,6 @@ void CEditorActionEditGroupProp::Undo()
 
 void CEditorActionEditGroupProp::Redo()
 {
-	auto pGroup = Map()->m_vpGroups[m_GroupIndex];
-
 	if(m_Prop == EGroupProp::ORDER)
 	{
 		Map()->m_SelectedGroup = Map()->MoveGroup(m_Previous, m_Current);

@@ -2205,7 +2205,6 @@ static int s_AutoMapReferenceCurrent = -100;
 CUi::EPopupMenuFunctionResult CEditor::PopupSelectAutoMapReference(void *pContext, CUIRect View, bool Active)
 {
 	CEditor *pEditor = static_cast<CEditor *>(pContext);
-	std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(pEditor->Map()->SelectedLayer(0));
 
 	const float ButtonHeight = 12.0f;
 	const float ButtonMargin = 2.0f;
@@ -2242,7 +2241,6 @@ void CEditor::PopupSelectAutoMapReferenceInvoke(int Current, float x, float y)
 	static SPopupMenuId s_PopupSelectAutoMapReferenceId;
 	s_AutoMapReferenceSelected = -100;
 	s_AutoMapReferenceCurrent = Current;
-	std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(Map()->SelectedLayer(0));
 	// Width for buttons is 120, 15 is the scrollbar width, 2 is the margin between both.
 	Ui()->DoPopupMenu(&s_PopupSelectAutoMapReferenceId, x, y, 120.0f + 15.0f + 2.0f, 26.0f + 14.0f * std::size(AUTOMAP_REFERENCE_NAMES) + 1, this, PopupSelectAutoMapReference);
 }

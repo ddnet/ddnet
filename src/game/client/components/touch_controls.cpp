@@ -639,11 +639,6 @@ void CTouchControls::CJoystickTouchButtonBehavior::OnUpdate()
 }
 
 // Joystick that uses the active action.
-void CTouchControls::CJoystickActionTouchButtonBehavior::Init(CTouchButton *pTouchButton)
-{
-	CPredefinedTouchButtonBehavior::Init(pTouchButton);
-}
-
 int CTouchControls::CJoystickActionTouchButtonBehavior::SelectedAction() const
 {
 	return m_pTouchControls->m_ActionSelected;
