@@ -13,6 +13,16 @@ class CLayerGroup;
 class CMapView : public CEditorComponent
 {
 public:
+	enum class EActiveOp
+	{
+		NONE,
+		BRUSH_GRAB,
+		BRUSH_DRAW,
+		BRUSH_PAINT,
+		PAN_WORLD,
+		PAN_EDITOR,
+	};
+
 	class CState
 	{
 	public:
@@ -20,6 +30,8 @@ public:
 		float m_WorldZoom;
 		vec2 m_WorldOffset;
 		vec2 m_EditorOffset;
+
+		EActiveOp m_ActiveOp;
 
 		void Reset(CEditor *pEditor);
 	};
