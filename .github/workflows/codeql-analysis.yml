@@ -62,6 +62,11 @@ jobs:
 
     - name: Cache Rust dependencies
       uses: Swatinem/rust-cache@v2
+      with:
+          workspaces: |
+              src/mastersrv
+              src/masterping
+              ./
 
     - name: Build in release mode
       if: matrix.language == 'cpp'

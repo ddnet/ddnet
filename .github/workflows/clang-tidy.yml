@@ -31,6 +31,11 @@ jobs:
 
     - name: Cache Rust dependencies
       uses: Swatinem/rust-cache@v2
+      with:
+          workspaces: |
+              src/mastersrv
+              src/masterping
+              ./
 
     - name: Install Clang 20
       run: |

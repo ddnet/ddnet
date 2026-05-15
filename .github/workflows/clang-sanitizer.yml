@@ -34,6 +34,11 @@ jobs:
 
     - name: Cache Rust dependencies
       uses: Swatinem/rust-cache@v2
+      with:
+          workspaces: |
+              src/mastersrv
+              src/masterping
+              ./
 
     - name: Build with ASan and UBSan
       run: |

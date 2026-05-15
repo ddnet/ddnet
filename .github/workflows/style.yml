@@ -51,6 +51,11 @@ jobs:
 
     - name: Cache Rust dependencies
       uses: Swatinem/rust-cache@v2
+      with:
+          workspaces: |
+              src/mastersrv
+              src/masterping
+              ./
 
     - name: Check code style (ClangFormat)
       run: |
