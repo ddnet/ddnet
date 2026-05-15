@@ -33,6 +33,7 @@ public:
 
 	void RenderGroupBorder();
 	void RenderEditorMap();
+	void Render(CUIRect View);
 
 	bool IsFocused();
 	void Focus();

@@ -117,12 +117,12 @@ void CMapView::RenderEditorMap()
 	}
 }
 
-void CEditor::DoMapEditor(CUIRect View)
+void CMapView::Render(CUIRect View)
 {
 	// render all good stuff
-	if(!m_ShowPicker)
+	if(!Editor()->m_ShowPicker)
 	{
-		MapView()->RenderEditorMap();
+		RenderEditorMap();
 	}
 	else
 	{
@@ -153,7 +153,7 @@ void CEditor::DoMapEditor(CUIRect View)
 	};
 
 	// remap the screen so it can display the whole tileset
-	if(m_ShowPicker)
+	if(Editor()->m_ShowPicker)
 	{
 		CUIRect Screen = *Ui()->Screen();
 		float Size = 32.0f * 16.0f;
@@ -167,48 +167,48 @@ void CEditor::DoMapEditor(CUIRect View)
 		if(pTileLayer)
 		{
 			Graphics()->MapScreen(x, y, x + w, y + h);
-			m_pTilesetPicker->m_Image = pTileLayer->m_Image;
-			if(m_BrushColorEnabled)
+			Editor()->m_pTilesetPicker->m_Image = pTileLayer->m_Image;
+			if(Editor()->m_BrushColorEnabled)
 			{
-				m_pTilesetPicker->m_Color = pTileLayer->m_Color;
-				m_pTilesetPicker->m_Color.a = 255;
+				Editor()->m_pTilesetPicker->m_Color = pTileLayer->m_Color;
+				Editor()->m_pTilesetPicker->m_Color.a = 255;
 			}
 			else
 			{
-				m_pTilesetPicker->m_Color = {255, 255, 255, 255};
+				Editor()->m_pTilesetPicker->m_Color = {255, 255, 255, 255};
 			}
 
-			m_pTilesetPicker->m_HasGame = pTileLayer->m_HasGame;
-			m_pTilesetPicker->m_HasTele = pTileLayer->m_HasTele;
-			m_pTilesetPicker->m_HasSpeedup = pTileLayer->m_HasSpeedup;
-			m_pTilesetPicker->m_HasFront = pTileLayer->m_HasFront;
-			m_pTilesetPicker->m_HasSwitch = pTileLayer->m_HasSwitch;
-			m_pTilesetPicker->m_HasTune = pTileLayer->m_HasTune;
+			Editor()->m_pTilesetPicker->m_HasGame = pTileLayer->m_HasGame;
+			Editor()->m_pTilesetPicker->m_HasTele = pTileLayer->m_HasTele;
+			Editor()->m_pTilesetPicker->m_HasSpeedup = pTileLayer->m_HasSpeedup;
+			Editor()->m_pTilesetPicker->m_HasFront = pTileLayer->m_HasFront;
+			Editor()->m_pTilesetPicker->m_HasSwitch = pTileLayer->m_HasSwitch;
+			Editor()->m_pTilesetPicker->m_HasTune = pTileLayer->m_HasTune;
 
-			m_pTilesetPicker->Render(true);
+			Editor()->m_pTilesetPicker->Render(true);
 
-			if(m_ShowTileInfo != SHOW_TILE_OFF)
-				m_pTilesetPicker->ShowInfo();
+			if(Editor()->m_ShowTileInfo != CEditor::SHOW_TILE_OFF)
+				Editor()->m_pTilesetPicker->ShowInfo();
 
-			str_copy(m_aTooltip, "Click or drag left mouse button to create a brush. Hover individual tiles for explanation.");
+			str_copy(Editor()->m_aTooltip, "Click or drag left mouse button to create a brush. Hover individual tiles for explanation.");
 		}
 		else
 		{
 			std::shared_ptr<CLayerQuads> pQuadLayer = std::static_pointer_cast<CLayerQuads>(Map()->SelectedLayerType(0, LAYERTYPE_QUADS));
 			if(pQuadLayer)
 			{
-				m_pQuadsetPicker->m_Image = pQuadLayer->m_Image;
-				m_pQuadsetPicker->m_vQuads[0].m_aPoints[0].x = f2fx(View.x);
-				m_pQuadsetPicker->m_vQuads[0].m_aPoints[0].y = f2fx(View.y);
-				m_pQuadsetPicker->m_vQuads[0].m_aPoints[1].x = f2fx((View.x + View.w));
-				m_pQuadsetPicker->m_vQuads[0].m_aPoints[1].y = f2fx(View.y);
-				m_pQuadsetPicker->m_vQuads[0].m_aPoints[2].x = f2fx(View.x);
-				m_pQuadsetPicker->m_vQuads[0].m_aPoints[2].y = f2fx((View.y + View.h));
-				m_pQuadsetPicker->m_vQuads[0].m_aPoints[3].x = f2fx((View.x + View.w));
-				m_pQuadsetPicker->m_vQuads[0].m_aPoints[3].y = f2fx((View.y + View.h));
-				m_pQuadsetPicker->m_vQuads[0].m_aPoints[4].x = f2fx((View.x + View.w / 2));
-				m_pQuadsetPicker->m_vQuads[0].m_aPoints[4].y = f2fx((View.y + View.h / 2));
-				m_pQuadsetPicker->Render();
+				Editor()->m_pQuadsetPicker->m_Image = pQuadLayer->m_Image;
+				Editor()->m_pQuadsetPicker->m_vQuads[0].m_aPoints[0].x = f2fx(View.x);
+				Editor()->m_pQuadsetPicker->m_vQuads[0].m_aPoints[0].y = f2fx(View.y);
+				Editor()->m_pQuadsetPicker->m_vQuads[0].m_aPoints[1].x = f2fx((View.x + View.w));
+				Editor()->m_pQuadsetPicker->m_vQuads[0].m_aPoints[1].y = f2fx(View.y);
+				Editor()->m_pQuadsetPicker->m_vQuads[0].m_aPoints[2].x = f2fx(View.x);
+				Editor()->m_pQuadsetPicker->m_vQuads[0].m_aPoints[2].y = f2fx((View.y + View.h));
+				Editor()->m_pQuadsetPicker->m_vQuads[0].m_aPoints[3].x = f2fx((View.x + View.w));
+				Editor()->m_pQuadsetPicker->m_vQuads[0].m_aPoints[3].y = f2fx((View.y + View.h));
+				Editor()->m_pQuadsetPicker->m_vQuads[0].m_aPoints[4].x = f2fx((View.x + View.w / 2));
+				Editor()->m_pQuadsetPicker->m_vQuads[0].m_aPoints[4].y = f2fx((View.y + View.h / 2));
+				Editor()->m_pQuadsetPicker->Render();
 			}
 		}
 	}
@@ -219,14 +219,14 @@ void CEditor::DoMapEditor(CUIRect View)
 	std::pair<int, std::shared_ptr<CLayer>> apEditLayers[128];
 	size_t NumEditLayers = 0;
 
-	if(m_ShowPicker && Map()->SelectedLayer(0) && Map()->SelectedLayer(0)->m_Type == LAYERTYPE_TILES)
+	if(Editor()->m_ShowPicker && Map()->SelectedLayer(0) && Map()->SelectedLayer(0)->m_Type == LAYERTYPE_TILES)
 	{
-		apEditLayers[0] = {0, m_pTilesetPicker};
+		apEditLayers[0] = {0, Editor()->m_pTilesetPicker};
 		NumEditLayers++;
 	}
-	else if(m_ShowPicker)
+	else if(Editor()->m_ShowPicker)
 	{
-		apEditLayers[0] = {0, m_pQuadsetPicker};
+		apEditLayers[0] = {0, Editor()->m_pQuadsetPicker};
 		NumEditLayers++;
 	}
 	else
@@ -252,12 +252,12 @@ void CEditor::DoMapEditor(CUIRect View)
 			}
 		}
 
-		MapView()->RenderGroupBorder();
-		MapView()->MapGrid()->Render();
+		RenderGroupBorder();
+		MapGrid()->Render();
 	}
 
-	const bool ShouldPan = Ui()->HotItem() == &m_MapEditorId && ((Input()->ModifierIsPressed() && Ui()->MouseButton(0)) || Ui()->MouseButton(2));
-	if(m_pContainerPanned == &m_MapEditorId)
+	const bool ShouldPan = Ui()->HotItem() == &Editor()->m_MapEditorId && ((Input()->ModifierIsPressed() && Ui()->MouseButton(0)) || Ui()->MouseButton(2));
+	if(Editor()->m_pContainerPanned == &Editor()->m_MapEditorId)
 	{
 		// do panning
 		if(ShouldPan)
@@ -266,23 +266,23 @@ void CEditor::DoMapEditor(CUIRect View)
 				s_Operation = OP_PAN_EDITOR;
 			else
 				s_Operation = OP_PAN_WORLD;
-			Ui()->SetActiveItem(&m_MapEditorId);
+			Ui()->SetActiveItem(&Editor()->m_MapEditorId);
 		}
 		else
 			s_Operation = OP_NONE;
 
 		if(s_Operation == OP_PAN_WORLD)
-			MapView()->OffsetWorld(-Ui()->MouseDelta() * m_MouseWorldScale);
+			OffsetWorld(-Ui()->MouseDelta() * Editor()->m_MouseWorldScale);
 		else if(s_Operation == OP_PAN_EDITOR)
-			MapView()->OffsetEditor(-Ui()->MouseDelta() * m_MouseWorldScale);
+			OffsetEditor(-Ui()->MouseDelta() * Editor()->m_MouseWorldScale);
 
 		if(s_Operation == OP_NONE)
-			m_pContainerPanned = nullptr;
+			Editor()->m_pContainerPanned = nullptr;
 	}
 
 	if(Inside)
 	{
-		Ui()->SetHotItem(&m_MapEditorId);
+		Ui()->SetHotItem(&Editor()->m_MapEditorId);
 
 		// do global operations like pan and zoom
 		if(Ui()->CheckActiveItem(nullptr) && (Ui()->MouseButton(0) || Ui()->MouseButton(2)))
@@ -290,14 +290,14 @@ void CEditor::DoMapEditor(CUIRect View)
 			s_StartWx = wx;
 			s_StartWy = wy;
 
-			if(ShouldPan && m_pContainerPanned == nullptr)
-				m_pContainerPanned = &m_MapEditorId;
+			if(ShouldPan && Editor()->m_pContainerPanned == nullptr)
+				Editor()->m_pContainerPanned = &Editor()->m_MapEditorId;
 		}
 
 		// brush editing
-		if(Ui()->HotItem() == &m_MapEditorId)
+		if(Ui()->HotItem() == &Editor()->m_MapEditorId)
 		{
-			if(m_ShowPicker)
+			if(Editor()->m_ShowPicker)
 			{
 				std::shared_ptr<CLayer> pLayer = Map()->SelectedLayer(0);
 				int Layer;
@@ -317,15 +317,15 @@ void CEditor::DoMapEditor(CUIRect View)
 					Layer = NUM_LAYERS;
 
 				CExplanations::EGametype ExplanationGametype;
-				if(m_SelectEntitiesImage == "DDNet")
+				if(Editor()->m_SelectEntitiesImage == "DDNet")
 					ExplanationGametype = CExplanations::EGametype::DDNET;
-				else if(m_SelectEntitiesImage == "FNG")
+				else if(Editor()->m_SelectEntitiesImage == "FNG")
 					ExplanationGametype = CExplanations::EGametype::FNG;
-				else if(m_SelectEntitiesImage == "Race")
+				else if(Editor()->m_SelectEntitiesImage == "Race")
 					ExplanationGametype = CExplanations::EGametype::RACE;
-				else if(m_SelectEntitiesImage == "Vanilla")
+				else if(Editor()->m_SelectEntitiesImage == "Vanilla")
 					ExplanationGametype = CExplanations::EGametype::VANILLA;
-				else if(m_SelectEntitiesImage == "blockworlds")
+				else if(Editor()->m_SelectEntitiesImage == "blockworlds")
 					ExplanationGametype = CExplanations::EGametype::BLOCKWORLDS;
 				else
 					ExplanationGametype = CExplanations::EGametype::NONE;
@@ -334,25 +334,25 @@ void CEditor::DoMapEditor(CUIRect View)
 				{
 					const char *pExplanation = CExplanations::Explain(ExplanationGametype, (int)wx / 32 + (int)wy / 32 * 16, Layer);
 					if(pExplanation)
-						str_copy(m_aTooltip, pExplanation);
+						str_copy(Editor()->m_aTooltip, pExplanation);
 				}
 			}
-			else if(m_pBrush->IsEmpty() && Map()->SelectedLayerType(0, LAYERTYPE_QUADS) != nullptr)
-				str_copy(m_aTooltip, "Use left mouse button to drag and create a brush. Hold shift to select multiple quads. Press R to rotate selected quads. Use ctrl+right click to select layer.");
-			else if(m_pBrush->IsEmpty())
+			else if(Editor()->m_pBrush->IsEmpty() && Map()->SelectedLayerType(0, LAYERTYPE_QUADS) != nullptr)
+				str_copy(Editor()->m_aTooltip, "Use left mouse button to drag and create a brush. Hold shift to select multiple quads. Press R to rotate selected quads. Use ctrl+right click to select layer.");
+			else if(Editor()->m_pBrush->IsEmpty())
 			{
 				if(g_Config.m_EdLayerSelector)
-					str_copy(m_aTooltip, "Use left mouse button to drag and create a brush. Use ctrl+right click to select layer of hovered tile.");
+					str_copy(Editor()->m_aTooltip, "Use left mouse button to drag and create a brush. Use ctrl+right click to select layer of hovered tile.");
 				else
-					str_copy(m_aTooltip, "Use left mouse button to drag and create a brush.");
+					str_copy(Editor()->m_aTooltip, "Use left mouse button to drag and create a brush.");
 			}
 			else
 			{
 				// Alt behavior handled in CEditor::MouseAxisLock
-				str_copy(m_aTooltip, "Use left mouse button to paint with the brush. Right click to clear the brush. Hold Alt to lock the mouse movement to a single axis.");
+				str_copy(Editor()->m_aTooltip, "Use left mouse button to paint with the brush. Right click to clear the brush. Hold Alt to lock the mouse movement to a single axis.");
 			}
 
-			if(Ui()->CheckActiveItem(&m_MapEditorId))
+			if(Ui()->CheckActiveItem(&Editor()->m_MapEditorId))
 			{
 				CUIRect r;
 				r.x = s_StartWx;
@@ -373,25 +373,25 @@ void CEditor::DoMapEditor(CUIRect View)
 
 				if(s_Operation == OP_BRUSH_DRAW)
 				{
-					if(!m_pBrush->IsEmpty())
+					if(!Editor()->m_pBrush->IsEmpty())
 					{
 						// draw with brush
 						for(size_t k = 0; k < NumEditLayers; k++)
 						{
-							size_t BrushIndex = k % m_pBrush->m_vpLayers.size();
-							if(apEditLayers[k].second->m_Type == m_pBrush->m_vpLayers[BrushIndex]->m_Type)
+							size_t BrushIndex = k % Editor()->m_pBrush->m_vpLayers.size();
+							if(apEditLayers[k].second->m_Type == Editor()->m_pBrush->m_vpLayers[BrushIndex]->m_Type)
 							{
 								if(apEditLayers[k].second->m_Type == LAYERTYPE_TILES)
 								{
 									std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(apEditLayers[k].second);
-									std::shared_ptr<CLayerTiles> pBrushLayer = std::static_pointer_cast<CLayerTiles>(m_pBrush->m_vpLayers[BrushIndex]);
+									std::shared_ptr<CLayerTiles> pBrushLayer = std::static_pointer_cast<CLayerTiles>(Editor()->m_pBrush->m_vpLayers[BrushIndex]);
 
 									if((!pLayer->m_HasTele || pBrushLayer->m_HasTele) && (!pLayer->m_HasSpeedup || pBrushLayer->m_HasSpeedup) && (!pLayer->m_HasFront || pBrushLayer->m_HasFront) && (!pLayer->m_HasGame || pBrushLayer->m_HasGame) && (!pLayer->m_HasSwitch || pBrushLayer->m_HasSwitch) && (!pLayer->m_HasTune || pBrushLayer->m_HasTune))
 										pLayer->BrushDraw(pBrushLayer.get(), vec2(wx, wy));
 								}
 								else
 								{
-									apEditLayers[k].second->BrushDraw(m_pBrush->m_vpLayers[BrushIndex].get(), vec2(wx, wy));
+									apEditLayers[k].second->BrushDraw(Editor()->m_pBrush->m_vpLayers[BrushIndex].get(), vec2(wx, wy));
 								}
 							}
 						}
@@ -418,11 +418,11 @@ void CEditor::DoMapEditor(CUIRect View)
 							// TODO: do all layers
 							int Grabs = 0;
 							for(size_t k = 0; k < NumEditLayers; k++)
-								Grabs += apEditLayers[k].second->BrushGrab(m_pBrush.get(), r);
+								Grabs += apEditLayers[k].second->BrushGrab(Editor()->m_pBrush.get(), r);
 							if(Grabs == 0)
-								m_pBrush->Clear();
+								Editor()->m_pBrush->Clear();
 
-							m_ShowPickerToggle = false; // Close the tile picker after grabbing brush if it was toggled open
+							Editor()->m_ShowPickerToggle = false; // Close the tile picker after grabbing brush if it was toggled open
 							Map()->DeselectQuads();
 							Map()->DeselectQuadPoints();
 						}
@@ -443,10 +443,10 @@ void CEditor::DoMapEditor(CUIRect View)
 						for(size_t k = 0; k < NumEditLayers; k++)
 						{
 							size_t BrushIndex = k;
-							if(m_pBrush->m_vpLayers.size() != NumEditLayers)
+							if(Editor()->m_pBrush->m_vpLayers.size() != NumEditLayers)
 								BrushIndex = 0;
-							std::shared_ptr<CLayer> pBrush = m_pBrush->IsEmpty() ? nullptr : m_pBrush->m_vpLayers[BrushIndex];
-							apEditLayers[k].second->FillSelection(m_pBrush->IsEmpty(), pBrush.get(), r);
+							std::shared_ptr<CLayer> pBrush = Editor()->m_pBrush->IsEmpty() ? nullptr : Editor()->m_pBrush->m_vpLayers[BrushIndex];
+							apEditLayers[k].second->FillSelection(Editor()->m_pBrush->IsEmpty(), pBrush.get(), r);
 						}
 						std::shared_ptr<IEditorAction> Action = std::make_shared<CEditorBrushDrawAction>(Map(), Map()->m_SelectedGroup);
 						Map()->m_EditorHistory.RecordAction(Action);
@@ -465,14 +465,14 @@ void CEditor::DoMapEditor(CUIRect View)
 			{
 				if(Ui()->MouseButton(1))
 				{
-					m_pBrush->Clear();
+					Editor()->m_pBrush->Clear();
 				}
 
-				if(!Input()->ModifierIsPressed() && Ui()->MouseButton(0) && s_Operation == OP_NONE && !m_QuadKnife.IsActive())
+				if(!Input()->ModifierIsPressed() && Ui()->MouseButton(0) && s_Operation == OP_NONE && !Editor()->QuadKnife()->IsActive())
 				{
-					Ui()->SetActiveItem(&m_MapEditorId);
+					Ui()->SetActiveItem(&Editor()->m_MapEditorId);
 
-					if(m_pBrush->IsEmpty())
+					if(Editor()->m_pBrush->IsEmpty())
 						s_Operation = OP_BRUSH_GRAB;
 					else
 					{
@@ -480,11 +480,11 @@ void CEditor::DoMapEditor(CUIRect View)
 						for(size_t k = 0; k < NumEditLayers; k++)
 						{
 							size_t BrushIndex = k;
-							if(m_pBrush->m_vpLayers.size() != NumEditLayers)
+							if(Editor()->m_pBrush->m_vpLayers.size() != NumEditLayers)
 								BrushIndex = 0;
 
-							if(apEditLayers[k].second->m_Type == m_pBrush->m_vpLayers[BrushIndex]->m_Type)
-								apEditLayers[k].second->BrushPlace(m_pBrush->m_vpLayers[BrushIndex].get(), vec2(wx, wy));
+							if(apEditLayers[k].second->m_Type == Editor()->m_pBrush->m_vpLayers[BrushIndex]->m_Type)
+								apEditLayers[k].second->BrushPlace(Editor()->m_pBrush->m_vpLayers[BrushIndex].get(), vec2(wx, wy));
 						}
 					}
 
@@ -493,33 +493,33 @@ void CEditor::DoMapEditor(CUIRect View)
 						s_Operation = OP_BRUSH_PAINT;
 				}
 
-				if(!m_pBrush->IsEmpty())
+				if(!Editor()->m_pBrush->IsEmpty())
 				{
-					m_pBrush->m_OffsetX = -(int)wx;
-					m_pBrush->m_OffsetY = -(int)wy;
-					for(const auto &pLayer : m_pBrush->m_vpLayers)
+					Editor()->m_pBrush->m_OffsetX = -(int)wx;
+					Editor()->m_pBrush->m_OffsetY = -(int)wy;
+					for(const auto &pLayer : Editor()->m_pBrush->m_vpLayers)
 					{
 						if(pLayer->m_Type == LAYERTYPE_TILES)
 						{
-							m_pBrush->m_OffsetX = -(int)(wx / 32.0f) * 32;
-							m_pBrush->m_OffsetY = -(int)(wy / 32.0f) * 32;
+							Editor()->m_pBrush->m_OffsetX = -(int)(wx / 32.0f) * 32;
+							Editor()->m_pBrush->m_OffsetY = -(int)(wy / 32.0f) * 32;
 							break;
 						}
 					}
 
 					std::shared_ptr<CLayerGroup> pGroup = Map()->SelectedGroup();
-					if(!m_ShowPicker && pGroup)
+					if(!Editor()->m_ShowPicker && pGroup)
 					{
-						m_pBrush->m_OffsetX += pGroup->m_OffsetX;
-						m_pBrush->m_OffsetY += pGroup->m_OffsetY;
-						m_pBrush->m_ParallaxX = pGroup->m_ParallaxX;
-						m_pBrush->m_ParallaxY = pGroup->m_ParallaxY;
-						m_pBrush->Render();
+						Editor()->m_pBrush->m_OffsetX += pGroup->m_OffsetX;
+						Editor()->m_pBrush->m_OffsetY += pGroup->m_OffsetY;
+						Editor()->m_pBrush->m_ParallaxX = pGroup->m_ParallaxX;
+						Editor()->m_pBrush->m_ParallaxY = pGroup->m_ParallaxY;
+						Editor()->m_pBrush->Render();
 
 						CUIRect BorderRect;
 						BorderRect.x = 0.0f;
 						BorderRect.y = 0.0f;
-						m_pBrush->GetSize(&BorderRect.w, &BorderRect.h);
+						Editor()->m_pBrush->GetSize(&BorderRect.w, &BorderRect.h);
 						BorderRect.DrawOutline(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
 					}
 				}
@@ -528,7 +528,7 @@ void CEditor::DoMapEditor(CUIRect View)
 
 		// quad & sound editing
 		{
-			if(!m_ShowPicker && m_pBrush->IsEmpty())
+			if(!Editor()->m_ShowPicker && Editor()->m_pBrush->IsEmpty())
 			{
 				// fetch layers
 				std::shared_ptr<CLayerGroup> pGroup = Map()->SelectedGroup();
@@ -543,25 +543,25 @@ void CEditor::DoMapEditor(CUIRect View)
 					{
 						std::shared_ptr<CLayerQuads> pLayer = std::static_pointer_cast<CLayerQuads>(pEditLayer);
 
-						if(m_ActiveEnvelopePreview == EEnvelopePreview::NONE)
-							m_ActiveEnvelopePreview = EEnvelopePreview::ALL;
+						if(Editor()->m_ActiveEnvelopePreview == CEditor::EEnvelopePreview::NONE)
+							Editor()->m_ActiveEnvelopePreview = CEditor::EEnvelopePreview::ALL;
 
-						if(QuadKnife()->IsActive())
+						if(Editor()->QuadKnife()->IsActive())
 						{
-							QuadKnife()->DoSlice();
+							Editor()->QuadKnife()->DoSlice();
 						}
 						else
 						{
-							UpdateHotQuadPoint(pLayer.get());
+							Editor()->UpdateHotQuadPoint(pLayer.get());
 
 							Graphics()->TextureClear();
 							Graphics()->QuadsBegin();
 							for(size_t i = 0; i < pLayer->m_vQuads.size(); i++)
 							{
 								for(int v = 0; v < 4; v++)
-									DoQuadPoint(LayerIndex, pLayer, &pLayer->m_vQuads[i], i, v);
+									Editor()->DoQuadPoint(LayerIndex, pLayer, &pLayer->m_vQuads[i], i, v);
 
-								DoQuad(LayerIndex, pLayer, &pLayer->m_vQuads[i], i);
+								Editor()->DoQuad(LayerIndex, pLayer, &pLayer->m_vQuads[i], i);
 							}
 							Graphics()->QuadsEnd();
 						}
@@ -570,13 +570,13 @@ void CEditor::DoMapEditor(CUIRect View)
 					{
 						std::shared_ptr<CLayerSounds> pLayer = std::static_pointer_cast<CLayerSounds>(pEditLayer);
 
-						UpdateHotSoundSource(pLayer.get());
+						Editor()->UpdateHotSoundSource(pLayer.get());
 
 						Graphics()->TextureClear();
 						Graphics()->QuadsBegin();
 						for(size_t i = 0; i < pLayer->m_vSources.size(); i++)
 						{
-							DoSoundSource(LayerIndex, &pLayer->m_vSources[i], i);
+							Editor()->DoSoundSource(LayerIndex, &pLayer->m_vSources[i], i);
 						}
 						Graphics()->QuadsEnd();
 					}
@@ -587,34 +587,34 @@ void CEditor::DoMapEditor(CUIRect View)
 		}
 
 		// menu proof selection
-		if(MapView()->ProofMode()->IsModeMenu() && !m_ShowPicker)
+		if(ProofMode()->IsModeMenu() && !Editor()->m_ShowPicker)
 		{
-			MapView()->ProofMode()->InitMenuBackgroundPositions();
-			const std::vector<vec2> &MenuBackgroundPositions = MapView()->ProofMode()->MenuBackgroundPositions();
+			ProofMode()->InitMenuBackgroundPositions();
+			const std::vector<vec2> &MenuBackgroundPositions = ProofMode()->MenuBackgroundPositions();
 			for(int i = 0; i < (int)MenuBackgroundPositions.size(); i++)
 			{
 				vec2 Pos = MenuBackgroundPositions[i];
 				const void *pId = &MenuBackgroundPositions[i];
-				Pos += MapView()->GetWorldOffset() - MenuBackgroundPositions[MapView()->ProofMode()->CurrentMenuProofIndex()];
+				Pos += GetWorldOffset() - MenuBackgroundPositions[ProofMode()->CurrentMenuProofIndex()];
 				Pos.y -= 3.0f;
 
-				if(distance(Pos, m_MouseWorldNoParaPos) <= 20.0f)
+				if(distance(Pos, Editor()->m_MouseWorldNoParaPos) <= 20.0f)
 				{
 					Ui()->SetHotItem(pId);
 
-					if(i != MapView()->ProofMode()->CurrentMenuProofIndex() && Ui()->CheckActiveItem(pId))
+					if(i != ProofMode()->CurrentMenuProofIndex() && Ui()->CheckActiveItem(pId))
 					{
 						if(!Ui()->MouseButton(0))
 						{
-							MapView()->ProofMode()->SetCurrentMenuProofIndex(i);
-							MapView()->SetWorldOffset(MenuBackgroundPositions[i]);
+							ProofMode()->SetCurrentMenuProofIndex(i);
+							SetWorldOffset(MenuBackgroundPositions[i]);
 							Ui()->SetActiveItem(nullptr);
 						}
 					}
 					else if(Ui()->HotItem() == pId)
 					{
 						char aTooltipPrefix[32] = "Switch proof position to";
-						if(i == MapView()->ProofMode()->CurrentMenuProofIndex())
+						if(i == ProofMode()->CurrentMenuProofIndex())
 							str_copy(aTooltipPrefix, "Current proof position at");
 
 						char aNumBuf[8];
@@ -624,18 +624,18 @@ void CEditor::DoMapEditor(CUIRect View)
 							aNumBuf[0] = '\0';
 
 						char aTooltipPositions[128];
-						str_format(aTooltipPositions, sizeof(aTooltipPositions), "%s %s", MapView()->ProofMode()->MenuBackgroundPositionName(i), aNumBuf);
+						str_format(aTooltipPositions, sizeof(aTooltipPositions), "%s %s", ProofMode()->MenuBackgroundPositionName(i), aNumBuf);
 
-						for(int k : MapView()->ProofMode()->MenuBackgroundCollisions(i))
+						for(int k : ProofMode()->MenuBackgroundCollisions(i))
 						{
-							if(k == MapView()->ProofMode()->CurrentMenuProofIndex())
+							if(k == ProofMode()->CurrentMenuProofIndex())
 								str_copy(aTooltipPrefix, "Current proof position at");
 
 							Pos = MenuBackgroundPositions[k];
-							Pos += MapView()->GetWorldOffset() - MenuBackgroundPositions[MapView()->ProofMode()->CurrentMenuProofIndex()];
+							Pos += GetWorldOffset() - MenuBackgroundPositions[ProofMode()->CurrentMenuProofIndex()];
 							Pos.y -= 3.0f;
 
-							if(distance(Pos, m_MouseWorldNoParaPos) > 20.0f)
+							if(distance(Pos, Editor()->m_MouseWorldNoParaPos) > 20.0f)
 								continue;
 
 							if(i < (TILE_TIME_CHECKPOINT_LAST - TILE_TIME_CHECKPOINT_FIRST))
@@ -645,9 +645,9 @@ void CEditor::DoMapEditor(CUIRect View)
 
 							char aTooltipPositionsCopy[128];
 							str_copy(aTooltipPositionsCopy, aTooltipPositions);
-							str_format(aTooltipPositions, sizeof(aTooltipPositions), "%s, %s %s", aTooltipPositionsCopy, MapView()->ProofMode()->MenuBackgroundPositionName(k), aNumBuf);
+							str_format(aTooltipPositions, sizeof(aTooltipPositions), "%s, %s %s", aTooltipPositionsCopy, ProofMode()->MenuBackgroundPositionName(k), aNumBuf);
 						}
-						str_format(m_aTooltip, sizeof(m_aTooltip), "%s %s.", aTooltipPrefix, aTooltipPositions);
+						str_format(Editor()->m_aTooltip, sizeof(Editor()->m_aTooltip), "%s %s.", aTooltipPrefix, aTooltipPositions);
 
 						if(Ui()->MouseButton(0))
 							Ui()->SetActiveItem(pId);
@@ -657,21 +657,21 @@ void CEditor::DoMapEditor(CUIRect View)
 			}
 		}
 
-		if(!Input()->ModifierIsPressed() && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr)
+		if(!Input()->ModifierIsPressed() && Editor()->m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr)
 		{
 			float PanSpeed = Input()->ShiftIsPressed() ? 200.0f : 64.0f;
 			if(Input()->KeyPress(KEY_A))
-				MapView()->OffsetWorld({-PanSpeed * m_MouseWorldScale, 0});
+				OffsetWorld({-PanSpeed * Editor()->m_MouseWorldScale, 0});
 			else if(Input()->KeyPress(KEY_D))
-				MapView()->OffsetWorld({PanSpeed * m_MouseWorldScale, 0});
+				OffsetWorld({PanSpeed * Editor()->m_MouseWorldScale, 0});
 			if(Input()->KeyPress(KEY_W))
-				MapView()->OffsetWorld({0, -PanSpeed * m_MouseWorldScale});
+				OffsetWorld({0, -PanSpeed * Editor()->m_MouseWorldScale});
 			else if(Input()->KeyPress(KEY_S))
-				MapView()->OffsetWorld({0, PanSpeed * m_MouseWorldScale});
+				OffsetWorld({0, PanSpeed * Editor()->m_MouseWorldScale});
 		}
 	}
 
-	if(Ui()->CheckActiveItem(&m_MapEditorId) && m_pContainerPanned == nullptr)
+	if(Ui()->CheckActiveItem(&Editor()->m_MapEditorId) && Editor()->m_pContainerPanned == nullptr)
 	{
 		// release mouse
 		if(!Ui()->MouseButton(0))
@@ -689,7 +689,7 @@ void CEditor::DoMapEditor(CUIRect View)
 		}
 	}
 
-	if(!m_ShowPicker && Map()->SelectedGroup() && Map()->SelectedGroup()->m_UseClipping)
+	if(!Editor()->m_ShowPicker && Map()->SelectedGroup() && Map()->SelectedGroup()->m_UseClipping)
 	{
 		std::shared_ptr<CLayerGroup> pGameGroup = Map()->m_pGameGroup;
 		pGameGroup->MapScreen();
@@ -702,17 +702,17 @@ void CEditor::DoMapEditor(CUIRect View)
 		ClipRect.DrawOutline(ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f));
 	}
 
-	if(!m_ShowPicker)
-		MapView()->ProofMode()->RenderScreenSizes();
+	if(!Editor()->m_ShowPicker)
+		ProofMode()->RenderScreenSizes();
 
-	if(!m_ShowPicker && m_ShowEnvelopePreview && m_ActiveEnvelopePreview != EEnvelopePreview::NONE)
+	if(!Editor()->m_ShowPicker && Editor()->m_ShowEnvelopePreview && Editor()->m_ActiveEnvelopePreview != CEditor::EEnvelopePreview::NONE)
 	{
 		const std::shared_ptr<CLayer> pSelectedLayer = Map()->SelectedLayer(0);
 		if(pSelectedLayer != nullptr && pSelectedLayer->m_Type == LAYERTYPE_QUADS)
 		{
-			DoQuadEnvelopes(static_cast<const CLayerQuads *>(pSelectedLayer.get()));
+			Editor()->DoQuadEnvelopes(static_cast<const CLayerQuads *>(pSelectedLayer.get()));
 		}
-		m_ActiveEnvelopePreview = EEnvelopePreview::NONE;
+		Editor()->m_ActiveEnvelopePreview = CEditor::EEnvelopePreview::NONE;
 	}
 
 	Ui()->MapScreen();
