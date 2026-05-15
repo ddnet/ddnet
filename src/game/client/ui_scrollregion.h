@@ -52,36 +52,50 @@ struct CScrollRegionParams
 };
 
 /*
-Usage:
-	-- Initialization --
-	static CScrollRegion s_ScrollRegion;
-	vec2 ScrollOffset(0, 0);
-	s_ScrollRegion.Begin(&ScrollRegionRect, &ScrollOffset);
-	Content = ScrollRegionRect;
-	Content.y += ScrollOffset.y;
+Usage example:
 
-	-- "Register" your content rects --
+	// -- Layout --
+	CUIRect View = ...; // parent UI rect initialized elsewhere
+	CUIRect Content; // rect for scrollable content
+	View.HSplitTop(500.0f, &Content, &View); // split maximum size of scrollable content
+
+	// -- Initialization --
+	static CScrollRegion s_ScrollRegion;
+	s_ScrollRegion.Begin(&Content);
+	// Content rect is now offset by the scroll offset
+
+	// -- [Optional] Initialization with parameters --
+	static CScrollRegion s_ScrollRegion;
+	CScrollRegionParams ScrollParams;
+	ScrollParams.m_ScrollUnit = 3 * LineHeight;
+	s_ScrollRegion.Begin(&Content, &ScrollParams);
+	// Content rect is now offset by the scroll offset
+
+	// -- "Register" your content rects --
 	CUIRect Rect;
 	Content.HSplitTop(SomeValue, &Rect, &Content);
 	s_ScrollRegion.AddRect(Rect);
 
-	-- [Optional] Knowing if a rect is clipped --
+	// -- [Optional] Knowing if a rect is clipped --
 	s_ScrollRegion.RectClipped(Rect);
 
-	-- [Optional] Scroll to a rect (to the last added rect)--
-	...
+	// -- [Optional] Scroll to the last added rect --
 	s_ScrollRegion.AddRect(Rect);
 	s_ScrollRegion.ScrollHere(Option);
 
-	-- [Convenience] Add rect and check for visibility at the same time
+	// -- [Convenience] Add rect and check for visibility at the same time --
 	if(s_ScrollRegion.AddRect(Rect))
+	{
 		// The rect is visible (not clipped)
+	}
 
-	-- [Convenience] Add rect and scroll to it if it's selected
+	// -- [Convenience] Add rect and scroll to it if it's selected --
 	if(s_ScrollRegion.AddRect(Rect, ScrollToSelection && IsSelected))
+	{
 		// The rect is visible (not clipped)
+	}
 
-	-- End --
+	// -- End --
 	s_ScrollRegion.End();
 */
 
