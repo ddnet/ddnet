@@ -4849,7 +4849,7 @@ void CEditor::OnUpdate()
 		Ui()->OnInput(Event);
 	});
 
-	HandleCursorMovement();
+	MapView()->UpdateMouseWorld();
 	HandleAutosave();
 	HandleWriterFinishJobs();
 

@@ -34,6 +34,7 @@ public:
 	void RenderGroupBorder();
 	void RenderEditorMap();
 	void Render(CUIRect View);
+	void UpdateMouseWorld();
 
 	bool IsFocused();
 	void Focus();

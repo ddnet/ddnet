@@ -718,7 +718,7 @@ void CMapView::Render(CUIRect View)
 	Ui()->MapScreen();
 }
 
-void CEditor::HandleCursorMovement()
+void CMapView::UpdateMouseWorld()
 {
 	const vec2 UpdatedMousePos = Ui()->UpdatedMousePos();
 	const vec2 UpdatedMouseDelta = Ui()->UpdatedMouseDelta();
@@ -733,20 +733,20 @@ void CEditor::HandleCursorMovement()
 		float WorldWidth = aPoints[2] - aPoints[0];
 		float WorldHeight = aPoints[3] - aPoints[1];
 
-		m_MouseWorldScale = WorldWidth / Graphics()->WindowWidth();
+		Editor()->m_MouseWorldScale = WorldWidth / Graphics()->WindowWidth();
 
-		m_MouseWorldPos.x = aPoints[0] + WorldWidth * (UpdatedMousePos.x / Graphics()->WindowWidth());
-		m_MouseWorldPos.y = aPoints[1] + WorldHeight * (UpdatedMousePos.y / Graphics()->WindowHeight());
-		m_MouseDeltaWorld.x = UpdatedMouseDelta.x * (WorldWidth / Graphics()->WindowWidth());
-		m_MouseDeltaWorld.y = UpdatedMouseDelta.y * (WorldHeight / Graphics()->WindowHeight());
+		Editor()->m_MouseWorldPos.x = aPoints[0] + WorldWidth * (UpdatedMousePos.x / Graphics()->WindowWidth());
+		Editor()->m_MouseWorldPos.y = aPoints[1] + WorldHeight * (UpdatedMousePos.y / Graphics()->WindowHeight());
+		Editor()->m_MouseDeltaWorld.x = UpdatedMouseDelta.x * (WorldWidth / Graphics()->WindowWidth());
+		Editor()->m_MouseDeltaWorld.y = UpdatedMouseDelta.y * (WorldHeight / Graphics()->WindowHeight());
 	}
 	else
 	{
-		m_MouseWorldPos = vec2(-1.0f, -1.0f);
-		m_MouseDeltaWorld = vec2(0.0f, 0.0f);
+		Editor()->m_MouseWorldPos = vec2(-1.0f, -1.0f);
+		Editor()->m_MouseDeltaWorld = vec2(0.0f, 0.0f);
 	}
 
-	m_MouseWorldNoParaPos = vec2(-1.0f, -1.0f);
+	Editor()->m_MouseWorldNoParaPos = vec2(-1.0f, -1.0f);
 	for(const std::shared_ptr<CLayerGroup> &pGameGroup : Map()->m_vpGroups)
 	{
 		if(!pGameGroup->m_GameGroup)
@@ -758,11 +758,11 @@ void CEditor::HandleCursorMovement()
 		float WorldWidth = aPoints[2] - aPoints[0];
 		float WorldHeight = aPoints[3] - aPoints[1];
 
-		m_MouseWorldNoParaPos.x = aPoints[0] + WorldWidth * (UpdatedMousePos.x / Graphics()->WindowWidth());
-		m_MouseWorldNoParaPos.y = aPoints[1] + WorldHeight * (UpdatedMousePos.y / Graphics()->WindowHeight());
+		Editor()->m_MouseWorldNoParaPos.x = aPoints[0] + WorldWidth * (UpdatedMousePos.x / Graphics()->WindowWidth());
+		Editor()->m_MouseWorldNoParaPos.y = aPoints[1] + WorldHeight * (UpdatedMousePos.y / Graphics()->WindowHeight());
 	}
 
-	OnMouseMove(UpdatedMousePos);
+	Editor()->OnMouseMove(UpdatedMousePos);
 }
 
 void CMapView::ResetZoom()
