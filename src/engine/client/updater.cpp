@@ -302,8 +302,7 @@ void CUpdater::ParseUpdate()
 
 	if(!pVersions || pVersions->type != json_array)
 	{
-		if(pVersions)
-			json_value_free(pVersions);
+		json_value_free(pVersions);
 		return;
 	}
 
