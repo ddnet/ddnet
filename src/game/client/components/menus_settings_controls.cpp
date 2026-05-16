@@ -173,7 +173,7 @@ void CMenusSettingsControls::Render(CUIRect MainView)
 
 	CScrollRegionParams ScrollParams;
 	ScrollParams.m_ScrollUnit = 6.0f * BUTTON_HEIGHT;
-	ScrollParams.m_Flags = CScrollRegionParams::FLAG_CONTENT_STATIC_WIDTH;
+	ScrollParams.m_ForceShowScrollbar = true;
 	m_SettingsScrollRegion.Begin(&MainView, &ScrollParams);
 
 	CUIRect LeftColumn, RightColumn;

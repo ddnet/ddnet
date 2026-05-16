@@ -18,12 +18,7 @@ struct CScrollRegionParams
 	ColorRGBA m_SliderColor;
 	ColorRGBA m_SliderColorHover;
 	ColorRGBA m_SliderColorGrabbed;
-	unsigned m_Flags;
-
-	enum
-	{
-		FLAG_CONTENT_STATIC_WIDTH = 1 << 0,
-	};
+	bool m_ForceShowScrollbar;
 
 	CScrollRegionParams()
 	{
@@ -38,7 +33,7 @@ struct CScrollRegionParams
 		m_SliderColor = ColorRGBA(0.8f, 0.8f, 0.8f, 1.0f);
 		m_SliderColorHover = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 		m_SliderColorGrabbed = ColorRGBA(0.9f, 0.9f, 0.9f, 1.0f);
-		m_Flags = 0;
+		m_ForceShowScrollbar = false;
 	}
 
 	ColorRGBA SliderColor(bool Active, bool Hovered) const

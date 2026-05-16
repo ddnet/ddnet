@@ -38,9 +38,7 @@ void CScrollRegion::Begin(CUIRect *pClipRect, const CScrollRegionParams *pParams
 		m_Params = *pParams;
 
 	const bool ContentOverflows = m_ContentH > pClipRect->h;
-	const bool ForceShowScrollbar = m_Params.m_Flags & CScrollRegionParams::FLAG_CONTENT_STATIC_WIDTH;
-
-	const bool HasScrollBar = ContentOverflows || ForceShowScrollbar;
+	const bool HasScrollBar = ContentOverflows || m_Params.m_ForceShowScrollbar;
 	CUIRect ScrollBarBg;
 	pClipRect->VSplitRight(m_Params.m_ScrollbarWidth, HasScrollBar ? pClipRect : nullptr, &ScrollBarBg);
 	if(m_Params.m_ScrollbarNoMarginRight)
