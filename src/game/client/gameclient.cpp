@@ -1722,7 +1722,7 @@ void CGameClient::InvalidateSnapshot()
 	SnapCollectEntities();
 }
 
-void CGameClient::OnNewSnapshot()
+void CGameClient::OnNewSnapshot(bool DummySwapped)
 {
 	auto &&Evolve = [this](CNetObj_Character *pCharacter, int Tick) {
 		CWorldCore TempWorld;
@@ -2325,6 +2325,9 @@ void CGameClient::OnNewSnapshot()
 		Client()->SendPackMsg(1, &Msg, MSGFLAG_VITAL);
 		m_aEnableSpectatorCount[1] = g_Config.m_ClShowhudSpectatorCount;
 	}
+
+	if(DummySwapped)
+		m_Camera.UpdateCamera();
 
 	float ShowDistanceZoom = m_Camera.m_Zoom;
 	float Zoom = m_Camera.m_Zoom;
