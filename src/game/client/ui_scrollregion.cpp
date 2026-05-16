@@ -28,7 +28,7 @@ void CScrollRegion::Reset()
 
 	m_ClipRect = m_RailRect = m_LastAddedRect = CUIRect{0.0f, 0.0f, 0.0f, 0.0f};
 	m_SliderGrabPos = 0.0f;
-	m_ContentScrollOff = vec2(0.0f, 0.0f);
+	m_ContentScrollOffset = 0.0f;
 	m_Params = CScrollRegionParams();
 }
 
@@ -58,7 +58,7 @@ void CScrollRegion::Begin(CUIRect *pClipRect, const CScrollRegionParams *pParams
 			m_RailRect.Draw(m_Params.m_RailBgColor, IGraphics::CORNER_ALL, m_RailRect.w / 2.0f);
 	}
 	if(!ContentOverflows)
-		m_ContentScrollOff.y = 0.0f;
+		m_ContentScrollOffset = 0.0f;
 
 	if(m_Params.m_ClipBgColor.a > 0.0f)
 		pClipRect->Draw(m_Params.m_ClipBgColor, HasScrollBar ? IGraphics::CORNER_L : IGraphics::CORNER_ALL, 4.0f);
@@ -67,7 +67,7 @@ void CScrollRegion::Begin(CUIRect *pClipRect, const CScrollRegionParams *pParams
 
 	m_ClipRect = *pClipRect;
 	m_ContentSize = 0.0f;
-	pClipRect->y += m_ContentScrollOff.y;
+	pClipRect->y += m_ContentScrollOffset;
 }
 
 void CScrollRegion::End()
@@ -194,7 +194,7 @@ void CScrollRegion::End()
 	}
 
 	m_ScrollPos = std::clamp(m_ScrollPos, 0.0f, MaxScroll);
-	m_ContentScrollOff.y = -m_ScrollPos;
+	m_ContentScrollOffset = -m_ScrollPos;
 
 	Slider.Draw(m_Params.SliderColor(Grabbed, Ui()->HotItem() == pId), IGraphics::CORNER_ALL, Slider.w / 2.0f);
 }
@@ -202,7 +202,7 @@ void CScrollRegion::End()
 bool CScrollRegion::AddRect(const CUIRect &Rect, bool ShouldScrollHere)
 {
 	m_LastAddedRect = Rect;
-	m_ContentSize = maximum(Rect.y + Rect.h - (m_ClipRect.y + m_ContentScrollOff.y), m_ContentSize);
+	m_ContentSize = maximum(Rect.y + Rect.h - (m_ClipRect.y + m_ContentScrollOffset), m_ContentSize);
 	if(ShouldScrollHere)
 		ScrollHere();
 	return !RectClipped(Rect);
@@ -211,7 +211,7 @@ bool CScrollRegion::AddRect(const CUIRect &Rect, bool ShouldScrollHere)
 void CScrollRegion::ScrollHere(EScrollOption Option)
 {
 	const float MinHeight = minimum(m_ClipRect.h, m_LastAddedRect.h);
-	const float TopScroll = m_LastAddedRect.y - (m_ClipRect.y + m_ContentScrollOff.y);
+	const float TopScroll = m_LastAddedRect.y - (m_ClipRect.y + m_ContentScrollOffset);
 
 	switch(Option)
 	{
