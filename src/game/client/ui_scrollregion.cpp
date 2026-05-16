@@ -37,14 +37,25 @@ void CScrollRegion::Begin(CUIRect *pClipRect, const CScrollRegionParams *pParams
 	if(pParams)
 		m_Params = *pParams;
 
-	const bool ContentOverflows = m_ContentSize > pClipRect->h;
+	const bool ContentOverflows = m_Params.m_ScrollHorizontal ? m_ContentSize > pClipRect->w : m_ContentSize > pClipRect->h;
 	const bool HasScrollBar = ContentOverflows || m_Params.m_ForceShowScrollbar;
 	CUIRect ScrollBarBg;
-	pClipRect->VSplitRight(m_Params.m_ScrollbarThickness, HasScrollBar ? pClipRect : nullptr, &ScrollBarBg);
+	if(m_Params.m_ScrollHorizontal)
+		pClipRect->HSplitBottom(m_Params.m_ScrollbarThickness, HasScrollBar ? pClipRect : nullptr, &ScrollBarBg);
+	else
+		pClipRect->VSplitRight(m_Params.m_ScrollbarThickness, HasScrollBar ? pClipRect : nullptr, &ScrollBarBg);
 	if(m_Params.m_ScrollbarNoOuterMargin)
 	{
-		ScrollBarBg.HMargin(m_Params.m_ScrollbarMargin, &m_RailRect);
-		m_RailRect.VSplitLeft(m_Params.m_ScrollbarMargin, nullptr, &m_RailRect);
+		if(m_Params.m_ScrollHorizontal)
+		{
+			ScrollBarBg.VMargin(m_Params.m_ScrollbarMargin, &m_RailRect);
+			m_RailRect.HSplitTop(m_Params.m_ScrollbarMargin, nullptr, &m_RailRect);
+		}
+		else
+		{
+			ScrollBarBg.HMargin(m_Params.m_ScrollbarMargin, &m_RailRect);
+			m_RailRect.VSplitLeft(m_Params.m_ScrollbarMargin, nullptr, &m_RailRect);
+		}
 	}
 	else
 		ScrollBarBg.Margin(m_Params.m_ScrollbarMargin, &m_RailRect);
@@ -53,34 +64,51 @@ void CScrollRegion::Begin(CUIRect *pClipRect, const CScrollRegionParams *pParams
 	if(HasScrollBar)
 	{
 		if(m_Params.m_ScrollbarBgColor.a > 0.0f)
-			ScrollBarBg.Draw(m_Params.m_ScrollbarBgColor, IGraphics::CORNER_R, 4.0f);
+		{
+			int Corners = m_Params.m_ScrollHorizontal ? IGraphics::CORNER_B : IGraphics::CORNER_R;
+			ScrollBarBg.Draw(m_Params.m_ScrollbarBgColor, Corners, 4.0f);
+		}
 		if(m_Params.m_RailBgColor.a > 0.0f)
-			m_RailRect.Draw(m_Params.m_RailBgColor, IGraphics::CORNER_ALL, m_RailRect.w / 2.0f);
+		{
+			float Rounding = m_Params.m_ScrollHorizontal ? m_RailRect.h / 2.0f : m_RailRect.w / 2.0f;
+			m_RailRect.Draw(m_Params.m_RailBgColor, IGraphics::CORNER_ALL, Rounding);
+		}
 	}
 	if(!ContentOverflows)
 		m_ContentScrollOffset = 0.0f;
 
 	if(m_Params.m_ClipBgColor.a > 0.0f)
-		pClipRect->Draw(m_Params.m_ClipBgColor, HasScrollBar ? IGraphics::CORNER_L : IGraphics::CORNER_ALL, 4.0f);
+	{
+		int CornersPartial = m_Params.m_ScrollHorizontal ? IGraphics::CORNER_T : IGraphics::CORNER_L;
+		pClipRect->Draw(m_Params.m_ClipBgColor, HasScrollBar ? CornersPartial : IGraphics::CORNER_ALL, 4.0f);
+	}
 
 	Ui()->ClipEnable(pClipRect);
 
 	m_ClipRect = *pClipRect;
 	m_ContentSize = 0.0f;
-	pClipRect->y += m_ContentScrollOffset;
+	if(m_Params.m_ScrollHorizontal)
+		pClipRect->x += m_ContentScrollOffset;
+	else
+		pClipRect->y += m_ContentScrollOffset;
 }
 
 void CScrollRegion::End()
 {
 	Ui()->ClipDisable();
 
+	const float ClipSize = m_Params.m_ScrollHorizontal ? m_ClipRect.w : m_ClipRect.h;
+
 	// only show scrollbar if content overflows
-	if(m_ContentSize <= m_ClipRect.h)
+	if(m_ContentSize <= ClipSize)
 		return;
 
 	// scroll wheel
 	CUIRect RegionRect = m_ClipRect;
-	RegionRect.w += m_Params.m_ScrollbarThickness;
+	if(m_Params.m_ScrollHorizontal)
+		RegionRect.h += m_Params.m_ScrollbarThickness;
+	else
+		RegionRect.w += m_Params.m_ScrollbarThickness;
 
 	if(m_ScrollDirection != SCROLLRELATIVE_NONE || Ui()->HotScrollRegion() == this)
 	{
@@ -98,7 +126,7 @@ void CScrollRegion::End()
 		if(m_ScrollDirection != SCROLLRELATIVE_NONE)
 		{
 			const bool IsPageScroll = Input()->AltIsPressed();
-			const float ScrollUnit = IsPageScroll && !ProgrammaticScroll ? m_ClipRect.h : m_Params.m_ScrollUnit;
+			const float ScrollUnit = IsPageScroll && !ProgrammaticScroll ? ClipSize : m_Params.m_ScrollUnit;
 
 			m_AnimTimeMax = g_Config.m_UiSmoothScrollTime / 1000.0f;
 			m_AnimTime = m_AnimTimeMax;
@@ -114,13 +142,18 @@ void CScrollRegion::End()
 		Ui()->SetHotScrollRegion(this);
 	}
 
-	const float SliderHeight = maximum(m_Params.m_SliderMinSize, m_ClipRect.h / m_ContentSize * m_RailRect.h);
+	const float RailSize = m_Params.m_ScrollHorizontal ? m_RailRect.w : m_RailRect.h;
+	const float SliderSize = maximum(m_Params.m_SliderMinSize, ClipSize / m_ContentSize * RailSize);
 
 	CUIRect Slider = m_RailRect;
-	Slider.h = SliderHeight;
+	float &SliderPos = m_Params.m_ScrollHorizontal ? Slider.x : Slider.y;
+	if(m_Params.m_ScrollHorizontal)
+		Slider.w = SliderSize;
+	else
+		Slider.h = SliderSize;
 
-	const float MaxSlider = m_RailRect.h - SliderHeight;
-	const float MaxScroll = m_ContentSize - m_ClipRect.h;
+	const float MaxSlider = RailSize - SliderSize;
+	const float MaxScroll = m_ContentSize - ClipSize;
 
 	if(m_RequestScrollPos >= 0.0f)
 	{
@@ -149,18 +182,18 @@ void CScrollRegion::End()
 		m_ScrollPos = m_AnimTargetScrollPos;
 	}
 
-	Slider.y += m_ScrollPos / MaxScroll * MaxSlider;
+	SliderPos += m_ScrollPos / MaxScroll * MaxSlider;
 
 	bool Grabbed = false;
 	const void *pId = &m_ScrollPos;
 	const bool InsideSlider = Ui()->MouseHovered(&Slider);
 	const bool InsideRail = Ui()->MouseHovered(&m_RailRect);
 
+	float MousePos = m_Params.m_ScrollHorizontal ? Ui()->MouseX() : Ui()->MouseY();
 	if(Ui()->CheckActiveItem(pId) && Ui()->MouseButton(0))
 	{
-		float MouseY = Ui()->MouseY();
-		m_ScrollPos += (MouseY - (Slider.y + m_SliderGrabPos)) / MaxSlider * MaxScroll;
-		m_SliderGrabPos = std::clamp(m_SliderGrabPos, 0.0f, SliderHeight);
+		m_ScrollPos += (MousePos - (SliderPos + m_SliderGrabPos)) / MaxSlider * MaxScroll;
+		m_SliderGrabPos = std::clamp(m_SliderGrabPos, 0.0f, SliderSize);
 		m_AnimTargetScrollPos = m_ScrollPos;
 		m_AnimTime = 0.0f;
 		Grabbed = true;
@@ -173,17 +206,17 @@ void CScrollRegion::End()
 		if(!Ui()->CheckActiveItem(pId) && Ui()->MouseButtonClicked(0))
 		{
 			Ui()->SetActiveItem(pId);
-			m_SliderGrabPos = Ui()->MouseY() - Slider.y;
+			m_SliderGrabPos = MousePos - SliderPos;
 			m_AnimTargetScrollPos = m_ScrollPos;
 			m_AnimTime = 0.0f;
 		}
 	}
 	else if(InsideRail && Ui()->MouseButtonClicked(0))
 	{
-		m_ScrollPos += (Ui()->MouseY() - (Slider.y + Slider.h / 2.0f)) / MaxSlider * MaxScroll;
+		m_ScrollPos += (MousePos - (SliderPos + SliderSize / 2.0f)) / MaxSlider * MaxScroll;
 		Ui()->SetHotItem(pId);
 		Ui()->SetActiveItem(pId);
-		m_SliderGrabPos = Slider.h / 2.0f;
+		m_SliderGrabPos = SliderSize / 2.0f;
 		m_AnimTargetScrollPos = m_ScrollPos;
 		m_AnimTime = 0.0f;
 	}
@@ -196,13 +229,17 @@ void CScrollRegion::End()
 	m_ScrollPos = std::clamp(m_ScrollPos, 0.0f, MaxScroll);
 	m_ContentScrollOffset = -m_ScrollPos;
 
-	Slider.Draw(m_Params.SliderColor(Grabbed, Ui()->HotItem() == pId), IGraphics::CORNER_ALL, Slider.w / 2.0f);
+	float Rounding = m_Params.m_ScrollHorizontal ? Slider.h / 2.0f : Slider.w / 2.0f;
+	Slider.Draw(m_Params.SliderColor(Grabbed, Ui()->HotItem() == pId), IGraphics::CORNER_ALL, Rounding);
 }
 
 bool CScrollRegion::AddRect(const CUIRect &Rect, bool ShouldScrollHere)
 {
 	m_LastAddedRect = Rect;
-	m_ContentSize = maximum(Rect.y + Rect.h - (m_ClipRect.y + m_ContentScrollOffset), m_ContentSize);
+	if(m_Params.m_ScrollHorizontal)
+		m_ContentSize = maximum(std::ceil(Rect.x + Rect.w - (m_ClipRect.x + m_ContentScrollOffset)), m_ContentSize);
+	else
+		m_ContentSize = maximum(Rect.y + Rect.h - (m_ClipRect.y + m_ContentScrollOffset), m_ContentSize);
 	if(ShouldScrollHere)
 		ScrollHere();
 	return !RectClipped(Rect);
@@ -210,8 +247,12 @@ bool CScrollRegion::AddRect(const CUIRect &Rect, bool ShouldScrollHere)
 
 void CScrollRegion::ScrollHere(EScrollOption Option)
 {
-	const float MinHeight = minimum(m_ClipRect.h, m_LastAddedRect.h);
-	const float TopScroll = m_LastAddedRect.y - (m_ClipRect.y + m_ContentScrollOffset);
+	const float ClipPos = m_Params.m_ScrollHorizontal ? m_ClipRect.x : m_ClipRect.y;
+	const float ClipSize = m_Params.m_ScrollHorizontal ? m_ClipRect.w : m_ClipRect.h;
+	const float LastAddedPos = m_Params.m_ScrollHorizontal ? m_LastAddedRect.x : m_LastAddedRect.y;
+	const float LastAddedSize = m_Params.m_ScrollHorizontal ? m_LastAddedRect.w : m_LastAddedRect.h;
+	const float MinHeight = minimum(ClipSize, LastAddedSize);
+	const float TopScroll = LastAddedPos - (ClipPos + m_ContentScrollOffset);
 
 	switch(Option)
 	{
@@ -220,16 +261,16 @@ void CScrollRegion::ScrollHere(EScrollOption Option)
 		break;
 
 	case SCROLLHERE_BOTTOM:
-		m_RequestScrollPos = TopScroll - (m_ClipRect.h - MinHeight);
+		m_RequestScrollPos = TopScroll - (ClipSize - MinHeight);
 		break;
 
 	case SCROLLHERE_KEEP_IN_VIEW:
 	default:
-		const float DeltaY = m_LastAddedRect.y - m_ClipRect.y;
+		const float DeltaY = LastAddedPos - ClipPos;
 		if(DeltaY < 0)
 			m_RequestScrollPos = TopScroll;
-		else if(DeltaY > (m_ClipRect.h - MinHeight))
-			m_RequestScrollPos = TopScroll - (m_ClipRect.h - MinHeight);
+		else if(DeltaY > (ClipSize - MinHeight))
+			m_RequestScrollPos = TopScroll - (ClipSize - MinHeight);
 		break;
 	}
 }
@@ -242,7 +283,8 @@ void CScrollRegion::ScrollRelative(EScrollRelative Direction, float SpeedMultipl
 
 void CScrollRegion::ScrollRelativeDirect(float ScrollAmount)
 {
-	m_RequestScrollPos = std::clamp(m_ScrollPos + ScrollAmount, 0.0f, m_ContentSize - m_ClipRect.h);
+	const float ClipSize = m_Params.m_ScrollHorizontal ? m_ClipRect.w : m_ClipRect.h;
+	m_RequestScrollPos = std::clamp(m_ScrollPos + ScrollAmount, 0.0f, m_ContentSize - ClipSize);
 }
 
 void CScrollRegion::DoEdgeScrolling()
@@ -250,15 +292,18 @@ void CScrollRegion::DoEdgeScrolling()
 	if(!ScrollbarShown())
 		return;
 
+	const float ClipPos = m_Params.m_ScrollHorizontal ? m_ClipRect.x : m_ClipRect.y;
+	const float ClipSize = m_Params.m_ScrollHorizontal ? m_ClipRect.w : m_ClipRect.h;
 	const float ScrollBorderSize = 20.0f;
 	const float MaxScrollMultiplier = 2.0f;
 	const float ScrollSpeedFactor = MaxScrollMultiplier / ScrollBorderSize;
-	const float TopScrollPosition = m_ClipRect.y + ScrollBorderSize;
-	const float BottomScrollPosition = m_ClipRect.y + m_ClipRect.h - ScrollBorderSize;
-	if(Ui()->MouseY() < TopScrollPosition)
-		ScrollRelative(SCROLLRELATIVE_UP, minimum(MaxScrollMultiplier, (TopScrollPosition - Ui()->MouseY()) * ScrollSpeedFactor));
-	else if(Ui()->MouseY() > BottomScrollPosition)
-		ScrollRelative(SCROLLRELATIVE_DOWN, minimum(MaxScrollMultiplier, (Ui()->MouseY() - BottomScrollPosition) * ScrollSpeedFactor));
+	const float TopScrollPosition = ClipPos + ScrollBorderSize;
+	const float BottomScrollPosition = ClipPos + ClipSize - ScrollBorderSize;
+	const float MousePos = m_Params.m_ScrollHorizontal ? Ui()->MouseX() : Ui()->MouseY();
+	if(MousePos < TopScrollPosition)
+		ScrollRelative(SCROLLRELATIVE_UP, minimum(MaxScrollMultiplier, (TopScrollPosition - MousePos) * ScrollSpeedFactor));
+	else if(MousePos > BottomScrollPosition)
+		ScrollRelative(SCROLLRELATIVE_DOWN, minimum(MaxScrollMultiplier, (MousePos - BottomScrollPosition) * ScrollSpeedFactor));
 }
 
 bool CScrollRegion::RectClipped(const CUIRect &Rect) const
@@ -268,7 +313,7 @@ bool CScrollRegion::RectClipped(const CUIRect &Rect) const
 
 bool CScrollRegion::ScrollbarShown() const
 {
-	return m_ContentSize > m_ClipRect.h;
+	return m_Params.m_ScrollHorizontal ? m_ContentSize > m_ClipRect.w : m_ContentSize > m_ClipRect.h;
 }
 
 bool CScrollRegion::Animating() const

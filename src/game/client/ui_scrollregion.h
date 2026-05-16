@@ -19,6 +19,7 @@ struct CScrollRegionParams
 	ColorRGBA m_SliderColorHover;
 	ColorRGBA m_SliderColorGrabbed;
 	bool m_ForceShowScrollbar;
+	bool m_ScrollHorizontal;
 
 	CScrollRegionParams()
 	{
@@ -34,6 +35,7 @@ struct CScrollRegionParams
 		m_SliderColorHover = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 		m_SliderColorGrabbed = ColorRGBA(0.9f, 0.9f, 0.9f, 1.0f);
 		m_ForceShowScrollbar = false;
+		m_ScrollHorizontal = false;
 	}
 
 	ColorRGBA SliderColor(bool Active, bool Hovered) const
