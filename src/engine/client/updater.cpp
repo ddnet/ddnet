@@ -1,6 +1,5 @@
 #include "updater.h"
 
-#include <base/dbg.h>
 #include <base/fs.h>
 #include <base/log.h>
 #include <base/str.h>
@@ -258,7 +257,7 @@ void CUpdater::AddFileJob(const char *pFile, bool Job)
 
 bool CUpdater::ReplaceClient()
 {
-	dbg_msg("updater", "replacing " PLAT_CLIENT_EXEC);
+	log_debug("updater", "Replacing " PLAT_CLIENT_EXEC);
 	bool Success = true;
 	char aPath[IO_MAX_PATH_LENGTH];
 
@@ -276,7 +275,7 @@ bool CUpdater::ReplaceClient()
 
 bool CUpdater::ReplaceServer()
 {
-	dbg_msg("updater", "replacing " PLAT_SERVER_EXEC);
+	log_debug("updater", "Replacing " PLAT_SERVER_EXEC);
 	bool Success = true;
 	char aPath[IO_MAX_PATH_LENGTH];
 
@@ -381,7 +380,7 @@ void CUpdater::InitiateUpdate()
 void CUpdater::PerformUpdate()
 {
 	SetCurrentState(IUpdater::PARSING_UPDATE);
-	dbg_msg("updater", "parsing update.json");
+	log_debug("updater", "Parsing update.json");
 	ParseUpdate();
 	m_CurrentJob = m_FileJobs.begin();
 	SetCurrentState(IUpdater::DOWNLOADING);
