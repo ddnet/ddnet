@@ -1,6 +1,7 @@
 #include "updater.h"
 
 #include <base/dbg.h>
+#include <base/log.h>
 #include <base/str.h>
 
 #include <engine/client.h>
@@ -12,8 +13,12 @@
 
 #include <game/version.h>
 
-#include <cstdlib> // system
 #include <unordered_set>
+
+#if !defined(CONF_FAMILY_WINDOWS)
+#include <fcntl.h>
+#include <sys/stat.h>
+#endif
 
 using std::string;
 
@@ -84,6 +89,30 @@ static const char *GetUpdaterDestPath(char *pBuf, int BufSize, const char *pFile
 	str_format(pBuf, BufSize, "update/%s", pDestPath);
 	return pBuf;
 }
+
+#if !defined(CONF_FAMILY_WINDOWS)
+static bool SetExecutableBit(const char *pPath)
+{
+	const int FileDescriptor = open(pPath, O_RDWR);
+	if(FileDescriptor < 0)
+	{
+		log_error("updater", "Failed to open file descriptor to set executable bit of '%s'", pPath);
+		return false;
+	}
+	struct stat FileStats;
+	if(fstat(FileDescriptor, &FileStats) != 0)
+	{
+		log_error("updater", "Failed to determine file stats to set executable bit of '%s'", pPath);
+		return false;
+	}
+	if(fchmod(FileDescriptor, FileStats.st_mode | S_IXUSR | S_IXGRP | S_IXOTH) != 0)
+	{
+		log_error("updater", "Failed to set executable bit of '%s'", pPath);
+		return false;
+	}
+	return true;
+}
+#endif
 
 CUpdaterFetchTask::CUpdaterFetchTask(CUpdater *pUpdater, const char *pFile, const char *pDestPath) :
 	CHttpRequest(GetUpdaterUrl(m_aBuf, sizeof(m_aBuf), pFile)),
@@ -238,13 +267,7 @@ bool CUpdater::ReplaceClient()
 	Success &= m_pStorage->RenameBinaryFile(aPath, PLAT_CLIENT_EXEC);
 #if !defined(CONF_FAMILY_WINDOWS)
 	m_pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aPath, sizeof(aPath));
-	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "chmod +x %s", aPath);
-	if(system(aBuf))
-	{
-		dbg_msg("updater", "ERROR: failed to set client executable bit");
-		Success = false;
-	}
+	Success &= SetExecutableBit(aPath);
 #endif
 	return Success;
 }
@@ -262,13 +285,7 @@ bool CUpdater::ReplaceServer()
 	Success &= m_pStorage->RenameBinaryFile(aPath, PLAT_SERVER_EXEC);
 #if !defined(CONF_FAMILY_WINDOWS)
 	m_pStorage->GetBinaryPath(PLAT_SERVER_EXEC, aPath, sizeof(aPath));
-	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "chmod +x %s", aPath);
-	if(system(aBuf))
-	{
-		dbg_msg("updater", "ERROR: failed to set server executable bit");
-		Success = false;
-	}
+	Success &= SetExecutableBit(aPath);
 #endif
 	return Success;
 }
