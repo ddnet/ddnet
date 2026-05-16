@@ -223,7 +223,7 @@ bool CUpdater::MoveFile(const char *pFile)
 		return Success;
 #endif
 
-	if(!str_comp_nocase(pFile + Length - 4, ".dll") || !str_comp_nocase(pFile + Length - 4, ".ttf") || !str_comp_nocase(pFile + Length - 3, ".so"))
+	if(!str_comp_nocase(pFile + Length - 4, ".dll") || !str_comp_nocase(pFile + Length - 3, ".so"))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s.old", pFile);
 		m_pStorage->RenameBinaryFile(pFile, aBuf);
