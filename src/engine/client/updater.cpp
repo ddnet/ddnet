@@ -25,7 +25,6 @@ using std::string;
 class CUpdaterFetchTask : public CHttpRequest
 {
 	char m_aBuf[256];
-	char m_aBuf2[256];
 	CUpdater *m_pUpdater;
 
 	void OnProgress() override;
@@ -87,14 +86,13 @@ static const char *GetUpdaterUrl(char *pBuf, int BufSize, const char *pFile)
 	return pBuf;
 }
 
-static const char *GetUpdaterDestPath(char *pBuf, int BufSize, const char *pFile, const char *pDestPath)
+static void FormatUpdaterDestPath(char *pBuf, int BufSize, const char *pFile, const char *pDestPath)
 {
 	if(!pDestPath)
 	{
 		pDestPath = pFile;
 	}
 	str_format(pBuf, BufSize, "update/%s", pDestPath);
-	return pBuf;
 }
 
 #if !defined(CONF_FAMILY_WINDOWS)
@@ -125,7 +123,9 @@ CUpdaterFetchTask::CUpdaterFetchTask(CUpdater *pUpdater, const char *pFile, cons
 	CHttpRequest(GetUpdaterUrl(m_aBuf, sizeof(m_aBuf), pFile)),
 	m_pUpdater(pUpdater)
 {
-	WriteToFile(pUpdater->m_pStorage, GetUpdaterDestPath(m_aBuf2, sizeof(m_aBuf2), pFile, pDestPath), -2);
+	char aDestination[IO_MAX_PATH_LENGTH];
+	FormatUpdaterDestPath(aDestination, sizeof(aDestination), pFile, pDestPath);
+	WriteToFile(pUpdater->m_pStorage, aDestination, -2);
 }
 
 void CUpdaterFetchTask::OnProgress()
@@ -203,7 +203,7 @@ void CUpdater::FetchFile(const char *pFile, const char *pDestPath)
 
 bool CUpdater::MoveFile(const char *pFile)
 {
-	char aBuf[256];
+	char aBuf[IO_MAX_PATH_LENGTH];
 	bool Success = true;
 
 #if !defined(CONF_FAMILY_WINDOWS)
@@ -410,7 +410,7 @@ void CUpdater::RunningUpdate()
 			{
 #if defined(CONF_FAMILY_WINDOWS)
 				const size_t Length = str_length(pFile);
-				char aBuf[512];
+				char aBuf[IO_MAX_PATH_LENGTH];
 				str_copy(aBuf, pFile, sizeof(aBuf)); // SDL
 				str_copy(aBuf + Length - 4, "-" PLAT_NAME, sizeof(aBuf) - Length + 4); // -win32
 				str_append(aBuf, pFile + Length - 4); // .dll
@@ -422,7 +422,7 @@ void CUpdater::RunningUpdate()
 			{
 #if defined(CONF_PLATFORM_LINUX)
 				const size_t Length = str_length(pFile);
-				char aBuf[512];
+				char aBuf[IO_MAX_PATH_LENGTH];
 				str_copy(aBuf, pFile, sizeof(aBuf)); // libsteam_api
 				str_copy(aBuf + Length - 3, "-" PLAT_NAME, sizeof(aBuf) - Length + 3); // -linux-x86_64
 				str_append(aBuf, pFile + Length - 3); // .so
