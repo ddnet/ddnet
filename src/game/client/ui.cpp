@@ -1903,9 +1903,9 @@ CUi::EPopupMenuFunctionResult CUi::PopupSelection(void *pContext, CUIRect View, 
 	CScrollRegion *pScrollRegion = pSelectionPopup->m_pScrollRegion;
 
 	CScrollRegionParams ScrollParams;
-	ScrollParams.m_ScrollbarWidth = 10.0f;
+	ScrollParams.m_ScrollbarThickness = 10.0f;
 	ScrollParams.m_ScrollbarMargin = SPopupMenu::POPUP_MARGIN;
-	ScrollParams.m_ScrollbarNoMarginRight = true;
+	ScrollParams.m_ScrollbarNoOuterMargin = true;
 	ScrollParams.m_ScrollUnit = 3 * (pSelectionPopup->m_EntryHeight + pSelectionPopup->m_EntrySpacing);
 	pScrollRegion->Begin(&View, &ScrollParams);
 

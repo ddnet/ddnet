@@ -2236,7 +2236,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 	CUIRect UnscrolledLayersBox = LayersBox;
 
 	CScrollRegionParams ScrollParams;
-	ScrollParams.m_ScrollbarWidth = 10.0f;
+	ScrollParams.m_ScrollbarThickness = 10.0f;
 	ScrollParams.m_ScrollbarMargin = 3.0f;
 	ScrollParams.m_ScrollUnit = RowHeight * 5.0f;
 	State.m_ScrollRegion.Begin(&LayersBox, &ScrollParams);
@@ -3123,7 +3123,7 @@ void CEditor::RenderImagesList(CUIRect ToolBox)
 
 	static CScrollRegion s_ScrollRegion;
 	CScrollRegionParams ScrollParams;
-	ScrollParams.m_ScrollbarWidth = 10.0f;
+	ScrollParams.m_ScrollbarThickness = 10.0f;
 	ScrollParams.m_ScrollbarMargin = 3.0f;
 	ScrollParams.m_ScrollUnit = RowHeight * 5;
 	s_ScrollRegion.Begin(&ToolBox, &ScrollParams);
@@ -3256,7 +3256,7 @@ void CEditor::RenderSounds(CUIRect ToolBox)
 
 	static CScrollRegion s_ScrollRegion;
 	CScrollRegionParams ScrollParams;
-	ScrollParams.m_ScrollbarWidth = 10.0f;
+	ScrollParams.m_ScrollbarThickness = 10.0f;
 	ScrollParams.m_ScrollbarMargin = 3.0f;
 	ScrollParams.m_ScrollUnit = RowHeight * 5;
 	s_ScrollRegion.Begin(&ToolBox, &ScrollParams);
