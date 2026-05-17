@@ -149,6 +149,12 @@ public:
 	bool ScrollbarShown() const;
 	bool Animating() const;
 	bool Active() const;
+
+private:
+	void DoScrollInput();
+	void UpdateHotScrollRegion();
+	void AdvanceAnimation();
+	void DoSlider();
 };
 
 #endif
