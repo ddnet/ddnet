@@ -16,6 +16,11 @@ void CMapView::CState::Reset(CEditor *pEditor)
 	m_WorldZoom = 1.0f;
 	m_WorldOffset = vec2(0.0f, 0.0f);
 	m_EditorOffset = vec2(0.0f, 0.0f);
+	m_MouseWorldScale = 1.0f;
+	m_MouseWorldPos = vec2(0.0f, 0.0f);
+	m_MouseWorldNoParaPos = vec2(0.0f, 0.0f);
+	m_MouseDeltaWorld = vec2(0.0f, 0.0f);
+	m_ActiveOp = EActiveOp::NONE;
 }
 
 void CMapView::OnInit(CEditor *pEditor)
@@ -260,9 +265,9 @@ void CMapView::Render(CUIRect View)
 			Map()->m_MapViewState.m_ActiveOp = EActiveOp::NONE;
 
 		if(Map()->m_MapViewState.m_ActiveOp == EActiveOp::PAN_WORLD)
-			OffsetWorld(-Ui()->MouseDelta() * Editor()->m_MouseWorldScale);
+			OffsetWorld(-Ui()->MouseDelta() * MouseWorldScale());
 		else if(Map()->m_MapViewState.m_ActiveOp == EActiveOp::PAN_EDITOR)
-			OffsetEditor(-Ui()->MouseDelta() * Editor()->m_MouseWorldScale);
+			OffsetEditor(-Ui()->MouseDelta() * MouseWorldScale());
 
 		if(Map()->m_MapViewState.m_ActiveOp == EActiveOp::NONE)
 			Editor()->m_pContainerPanned = nullptr;
@@ -586,7 +591,7 @@ void CMapView::Render(CUIRect View)
 				Pos += GetWorldOffset() - MenuBackgroundPositions[ProofMode()->CurrentMenuProofIndex()];
 				Pos.y -= 3.0f;
 
-				if(distance(Pos, Editor()->m_MouseWorldNoParaPos) <= 20.0f)
+				if(distance(Pos, MouseWorldNoParaPos()) <= 20.0f)
 				{
 					Ui()->SetHotItem(pId);
 
@@ -623,7 +628,7 @@ void CMapView::Render(CUIRect View)
 							Pos += GetWorldOffset() - MenuBackgroundPositions[ProofMode()->CurrentMenuProofIndex()];
 							Pos.y -= 3.0f;
 
-							if(distance(Pos, Editor()->m_MouseWorldNoParaPos) > 20.0f)
+							if(distance(Pos, MouseWorldNoParaPos()) > 20.0f)
 								continue;
 
 							if(i < (TILE_TIME_CHECKPOINT_LAST - TILE_TIME_CHECKPOINT_FIRST))
@@ -649,13 +654,13 @@ void CMapView::Render(CUIRect View)
 		{
 			float PanSpeed = Input()->ShiftIsPressed() ? 200.0f : 64.0f;
 			if(Input()->KeyPress(KEY_A))
-				OffsetWorld({-PanSpeed * Editor()->m_MouseWorldScale, 0});
+				OffsetWorld({-PanSpeed * MouseWorldScale(), 0});
 			else if(Input()->KeyPress(KEY_D))
-				OffsetWorld({PanSpeed * Editor()->m_MouseWorldScale, 0});
+				OffsetWorld({PanSpeed * MouseWorldScale(), 0});
 			if(Input()->KeyPress(KEY_W))
-				OffsetWorld({0, -PanSpeed * Editor()->m_MouseWorldScale});
+				OffsetWorld({0, -PanSpeed * MouseWorldScale()});
 			else if(Input()->KeyPress(KEY_S))
-				OffsetWorld({0, PanSpeed * Editor()->m_MouseWorldScale});
+				OffsetWorld({0, PanSpeed * MouseWorldScale()});
 		}
 	}
 
@@ -721,20 +726,20 @@ void CMapView::UpdateMouseWorld()
 		float WorldWidth = aPoints[2] - aPoints[0];
 		float WorldHeight = aPoints[3] - aPoints[1];
 
-		Editor()->m_MouseWorldScale = WorldWidth / Graphics()->WindowWidth();
+		Map()->m_MapViewState.m_MouseWorldScale = WorldWidth / Graphics()->WindowWidth();
 
-		Editor()->m_MouseWorldPos.x = aPoints[0] + WorldWidth * (UpdatedMousePos.x / Graphics()->WindowWidth());
-		Editor()->m_MouseWorldPos.y = aPoints[1] + WorldHeight * (UpdatedMousePos.y / Graphics()->WindowHeight());
-		Editor()->m_MouseDeltaWorld.x = UpdatedMouseDelta.x * (WorldWidth / Graphics()->WindowWidth());
-		Editor()->m_MouseDeltaWorld.y = UpdatedMouseDelta.y * (WorldHeight / Graphics()->WindowHeight());
+		Map()->m_MapViewState.m_MouseWorldPos.x = aPoints[0] + WorldWidth * (UpdatedMousePos.x / Graphics()->WindowWidth());
+		Map()->m_MapViewState.m_MouseWorldPos.y = aPoints[1] + WorldHeight * (UpdatedMousePos.y / Graphics()->WindowHeight());
+		Map()->m_MapViewState.m_MouseDeltaWorld.x = UpdatedMouseDelta.x * (WorldWidth / Graphics()->WindowWidth());
+		Map()->m_MapViewState.m_MouseDeltaWorld.y = UpdatedMouseDelta.y * (WorldHeight / Graphics()->WindowHeight());
 	}
 	else
 	{
-		Editor()->m_MouseWorldPos = vec2(-1.0f, -1.0f);
-		Editor()->m_MouseDeltaWorld = vec2(0.0f, 0.0f);
+		Map()->m_MapViewState.m_MouseWorldPos = vec2(-1.0f, -1.0f);
+		Map()->m_MapViewState.m_MouseDeltaWorld = vec2(0.0f, 0.0f);
 	}
 
-	Editor()->m_MouseWorldNoParaPos = vec2(-1.0f, -1.0f);
+	Map()->m_MapViewState.m_MouseWorldNoParaPos = vec2(-1.0f, -1.0f);
 	for(const std::shared_ptr<CLayerGroup> &pGameGroup : Map()->m_vpGroups)
 	{
 		if(!pGameGroup->m_GameGroup)
@@ -746,11 +751,56 @@ void CMapView::UpdateMouseWorld()
 		float WorldWidth = aPoints[2] - aPoints[0];
 		float WorldHeight = aPoints[3] - aPoints[1];
 
-		Editor()->m_MouseWorldNoParaPos.x = aPoints[0] + WorldWidth * (UpdatedMousePos.x / Graphics()->WindowWidth());
-		Editor()->m_MouseWorldNoParaPos.y = aPoints[1] + WorldHeight * (UpdatedMousePos.y / Graphics()->WindowHeight());
+		Map()->m_MapViewState.m_MouseWorldNoParaPos.x = aPoints[0] + WorldWidth * (UpdatedMousePos.x / Graphics()->WindowWidth());
+		Map()->m_MapViewState.m_MouseWorldNoParaPos.y = aPoints[1] + WorldHeight * (UpdatedMousePos.y / Graphics()->WindowHeight());
 	}
 
 	Editor()->OnMouseMove(UpdatedMousePos);
+}
+
+void CMapView::ResetMouseDeltaWorld()
+{
+	Map()->m_MapViewState.m_MouseDeltaWorld = vec2(0.0f, 0.0f);
+}
+
+float CMapView::MouseWorldScale() const
+{
+	return Map()->m_MapViewState.m_MouseWorldScale;
+}
+
+vec2 CMapView::MouseDeltaWorld() const
+{
+	return Map()->m_MapViewState.m_MouseDeltaWorld;
+}
+
+float CMapView::MouseDeltaWorldX() const
+{
+	return Map()->m_MapViewState.m_MouseDeltaWorld.x;
+}
+
+float CMapView::MouseDeltaWorldY() const
+{
+	return Map()->m_MapViewState.m_MouseDeltaWorld.y;
+}
+
+vec2 CMapView::MouseWorldPos() const
+{
+	return Map()->m_MapViewState.m_MouseWorldPos;
+}
+
+float CMapView::MouseWorldX() const
+{
+	return Map()->m_MapViewState.m_MouseWorldPos.x;
+}
+
+float CMapView::MouseWorldY() const
+{
+	return Map()->m_MapViewState.m_MouseWorldPos.y;
+}
+
+vec2 CMapView::MouseWorldNoParaPos() const
+{
+	return Map()->m_MapViewState.m_MouseWorldNoParaPos;
 }
 
 void CMapView::ResetZoom()
