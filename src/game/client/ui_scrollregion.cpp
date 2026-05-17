@@ -38,13 +38,11 @@ void CScrollRegion::Begin(CUIRect *pClipRect, const CScrollRegionParams *pParams
 		m_Params = *pParams;
 	m_ClipRect = *pClipRect;
 
-	const bool ContentOverflows = m_Params.m_ScrollHorizontal ? m_ContentSize > m_ClipRect.w : m_ContentSize > m_ClipRect.h;
-	const bool HasScrollBar = ContentOverflows || m_Params.m_ForceShowScrollbar;
 	CUIRect ScrollBarBg;
 	if(m_Params.m_ScrollHorizontal)
-		m_ClipRect.HSplitBottom(m_Params.m_ScrollbarThickness, HasScrollBar ? &m_ClipRect : nullptr, &ScrollBarBg);
+		m_ClipRect.HSplitBottom(m_Params.m_ScrollbarThickness, ScrollbarShown() ? &m_ClipRect : nullptr, &ScrollBarBg);
 	else
-		m_ClipRect.VSplitRight(m_Params.m_ScrollbarThickness, HasScrollBar ? &m_ClipRect : nullptr, &ScrollBarBg);
+		m_ClipRect.VSplitRight(m_Params.m_ScrollbarThickness, ScrollbarShown() ? &m_ClipRect : nullptr, &ScrollBarBg);
 	if(m_Params.m_ScrollbarNoOuterMargin)
 	{
 		if(m_Params.m_ScrollHorizontal)
@@ -62,7 +60,7 @@ void CScrollRegion::Begin(CUIRect *pClipRect, const CScrollRegionParams *pParams
 		ScrollBarBg.Margin(m_Params.m_ScrollbarMargin, &m_RailRect);
 
 	// only show scrollbar if required
-	if(HasScrollBar)
+	if(ScrollbarShown())
 	{
 		if(m_Params.m_ScrollbarBgColor.a > 0.0f)
 		{
@@ -75,13 +73,13 @@ void CScrollRegion::Begin(CUIRect *pClipRect, const CScrollRegionParams *pParams
 			m_RailRect.Draw(m_Params.m_RailBgColor, IGraphics::CORNER_ALL, Rounding);
 		}
 	}
-	if(!ContentOverflows)
+	if(!ContentOverflows())
 		m_ContentScrollOffset = 0.0f;
 
 	if(m_Params.m_ClipBgColor.a > 0.0f)
 	{
 		int CornersPartial = m_Params.m_ScrollHorizontal ? IGraphics::CORNER_T : IGraphics::CORNER_L;
-		m_ClipRect.Draw(m_Params.m_ClipBgColor, HasScrollBar ? CornersPartial : IGraphics::CORNER_ALL, 4.0f);
+		m_ClipRect.Draw(m_Params.m_ClipBgColor, ScrollbarShown() ? CornersPartial : IGraphics::CORNER_ALL, 4.0f);
 	}
 
 	m_ContentSize = 0.0f;
@@ -101,7 +99,7 @@ void CScrollRegion::End()
 	const float ClipSize = m_Params.m_ScrollHorizontal ? m_ClipRect.w : m_ClipRect.h;
 
 	// only show scrollbar if content overflows
-	if(m_ContentSize <= ClipSize)
+	if(!ContentOverflows())
 		return;
 
 	// scroll wheel
