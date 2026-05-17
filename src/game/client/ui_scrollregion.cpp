@@ -102,13 +102,6 @@ void CScrollRegion::End()
 	if(!ContentOverflows())
 		return;
 
-	// scroll wheel
-	CUIRect RegionRect = m_ContentAreaRect;
-	if(m_Params.m_ScrollHorizontal)
-		RegionRect.h += m_Params.m_ScrollbarThickness;
-	else
-		RegionRect.w += m_Params.m_ScrollbarThickness;
-
 	if(m_ScrollDirection != SCROLLRELATIVE_NONE || Ui()->HotScrollRegion() == this)
 	{
 		bool ProgrammaticScroll = false;
@@ -135,6 +128,13 @@ void CScrollRegion::End()
 			m_ScrollSpeedMultiplier = 1.0f;
 		}
 	}
+
+	// scroll wheel
+	CUIRect RegionRect = m_ContentAreaRect;
+	if(m_Params.m_ScrollHorizontal)
+		RegionRect.h += m_Params.m_ScrollbarThickness;
+	else
+		RegionRect.w += m_Params.m_ScrollbarThickness;
 
 	if(Ui()->Enabled() && Ui()->MouseHovered(&RegionRect))
 	{
