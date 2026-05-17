@@ -151,6 +151,7 @@ public:
 	bool Active() const;
 
 private:
+	CUIRect SplitContentArea();
 	void DoScrollInput();
 	void UpdateHotScrollRegion();
 	void AdvanceAnimation();
