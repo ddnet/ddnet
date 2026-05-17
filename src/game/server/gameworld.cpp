@@ -297,6 +297,9 @@ CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, v
 
 CEntity *CGameWorld::IntersectEntity(vec2 Pos0, vec2 Pos1, float Radius, int Type, vec2 &NewPos, const CEntity *pNotThis, int CollideWith, const CEntity *pThisOnly)
 {
+	if(pNotThis == pThisOnly)
+		return nullptr;
+
 	float ClosestLen = distance(Pos0, Pos1) * 100.0f;
 	CEntity *pClosest = nullptr;
 
