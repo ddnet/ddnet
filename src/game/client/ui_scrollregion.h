@@ -146,6 +146,7 @@ public:
 	const CUIRect *ClipRect() const { return &m_ClipRect; }
 	void DoEdgeScrolling();
 	bool RectClipped(const CUIRect &Rect) const;
+	bool ContentOverflows() const;
 	bool ScrollbarShown() const;
 	bool Animating() const;
 	bool Active() const;
