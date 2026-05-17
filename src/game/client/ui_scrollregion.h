@@ -143,14 +143,12 @@ public:
 	void ScrollHere(EScrollOption Option = SCROLLHERE_KEEP_IN_VIEW);
 	void ScrollRelative(EScrollRelative Direction, float SpeedMultiplier = 1.0f);
 	void ScrollRelativeDirect(float ScrollAmount);
-	const CUIRect *ClipRect() const { return &m_ClipRect; }
 	void DoEdgeScrolling();
 	bool RectClipped(const CUIRect &Rect) const;
 	bool ContentOverflows() const;
 	bool ScrollbarShown() const;
 	bool Animating() const;
 	bool Active() const;
-	const CScrollRegionParams &Params() const { return m_Params; }
 };
 
 #endif
