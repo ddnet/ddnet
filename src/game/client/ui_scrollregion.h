@@ -152,6 +152,7 @@ public:
 
 private:
 	CUIRect SplitContentArea();
+	void DrawBackground(const CUIRect &ScrollbarBg);
 	void DoScrollInput();
 	void UpdateHotScrollRegion();
 	void AdvanceAnimation();

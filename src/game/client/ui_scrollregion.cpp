@@ -39,27 +39,8 @@ void CScrollRegion::Begin(CUIRect *pClipRect, const CScrollRegionParams *pParams
 	m_ContentAreaRect = *pClipRect;
 
 	CUIRect ScrollbarBg = SplitContentArea();
+	DrawBackground(ScrollbarBg);
 
-	// only show scrollbar if required
-	if(ScrollbarShown())
-	{
-		if(m_Params.m_ScrollbarBgColor.a > 0.0f)
-		{
-			int Corners = m_Params.m_ScrollHorizontal ? IGraphics::CORNER_B : IGraphics::CORNER_R;
-			ScrollbarBg.Draw(m_Params.m_ScrollbarBgColor, Corners, 4.0f);
-		}
-		if(m_Params.m_RailBgColor.a > 0.0f)
-		{
-			float Rounding = m_Params.m_ScrollHorizontal ? m_RailRect.h / 2.0f : m_RailRect.w / 2.0f;
-			m_RailRect.Draw(m_Params.m_RailBgColor, IGraphics::CORNER_ALL, Rounding);
-		}
-	}
-	if(m_Params.m_ClipBgColor.a > 0.0f)
-	{
-		int CornersPartial = m_Params.m_ScrollHorizontal ? IGraphics::CORNER_T : IGraphics::CORNER_L;
-		m_ContentAreaRect.Draw(m_Params.m_ClipBgColor, ScrollbarShown() ? CornersPartial : IGraphics::CORNER_ALL, 4.0f);
-	}
-	
 	if(!ContentOverflows())
 		m_ContentScrollOffset = 0.0f;
 	m_ContentSize = 0.0f;
@@ -208,6 +189,29 @@ CUIRect CScrollRegion::SplitContentArea()
 		ScrollbarBg.Margin(m_Params.m_ScrollbarMargin, &m_RailRect);
 
 	return ScrollbarBg;
+}
+
+void CScrollRegion::DrawBackground(const CUIRect &ScrollbarBg)
+{
+	// only show scrollbar if required
+	if(ScrollbarShown())
+	{
+		if(m_Params.m_ScrollbarBgColor.a > 0.0f)
+		{
+			int Corners = m_Params.m_ScrollHorizontal ? IGraphics::CORNER_B : IGraphics::CORNER_R;
+			ScrollbarBg.Draw(m_Params.m_ScrollbarBgColor, Corners, 4.0f);
+		}
+		if(m_Params.m_RailBgColor.a > 0.0f)
+		{
+			float Rounding = m_Params.m_ScrollHorizontal ? m_RailRect.h / 2.0f : m_RailRect.w / 2.0f;
+			m_RailRect.Draw(m_Params.m_RailBgColor, IGraphics::CORNER_ALL, Rounding);
+		}
+	}
+	if(m_Params.m_ClipBgColor.a > 0.0f)
+	{
+		int CornersPartial = m_Params.m_ScrollHorizontal ? IGraphics::CORNER_T : IGraphics::CORNER_L;
+		m_ContentAreaRect.Draw(m_Params.m_ClipBgColor, ScrollbarShown() ? CornersPartial : IGraphics::CORNER_ALL, 4.0f);
+	}
 }
 
 void CScrollRegion::DoScrollInput()
