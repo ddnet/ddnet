@@ -119,7 +119,7 @@ private:
 	float m_AnimInitScrollPos;
 	float m_AnimTargetScrollPos;
 
-	CUIRect m_ClipRect;
+	CUIRect m_ContentAreaRect;
 	CUIRect m_RailRect;
 	CUIRect m_LastAddedRect; // saved for ScrollHere()
 	float m_SliderGrabPos; // where did user grab the slider
