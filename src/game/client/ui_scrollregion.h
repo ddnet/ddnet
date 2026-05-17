@@ -151,6 +151,9 @@ public:
 	bool Active() const;
 
 private:
+	float ContentAreaPos() const;
+	float ContentAreaSize() const;
+	float MaxScroll() const;
 	CUIRect SplitContentArea();
 	void DrawBackground(const CUIRect &ScrollbarBg);
 	void DoScrollInput();
