@@ -427,13 +427,8 @@ public:
 	bool m_GuiActive;
 
 	bool m_PreviewZoom;
-	float m_MouseWorldScale = 1.0f; // Mouse (i.e. UI) scale relative to the World (selected Group)
-	vec2 m_MouseWorldPos = vec2(0.0f, 0.0f);
-	vec2 m_MouseWorldNoParaPos = vec2(0.0f, 0.0f);
-	vec2 m_MouseDeltaWorld = vec2(0.0f, 0.0f);
 	const void *m_pContainerPanned;
 	const void *m_pContainerPannedLast;
-	char m_MapEditorId; // UI element ID for the main map editor
 
 	enum EShowTile
 	{
@@ -652,7 +647,6 @@ public:
 		};
 		CPoint m_aPoints[NUM_POINTS];
 	};
-	void DoMapEditor(CUIRect View);
 	void DoToolbarLayers(CUIRect Toolbar);
 	void DoToolbarImages(CUIRect Toolbar);
 	void DoToolbarSounds(CUIRect Toolbar);

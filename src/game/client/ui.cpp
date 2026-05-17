@@ -182,7 +182,7 @@ void CUi::OnCursorMove(float X, float Y)
 	m_UpdatedMouseDelta += vec2(X, Y);
 }
 
-void CUi::Update(vec2 MouseWorldPos)
+void CUi::Update()
 {
 	const vec2 WindowSize = vec2(Graphics()->WindowWidth(), Graphics()->WindowHeight());
 	const CUIRect *pScreen = Screen();
@@ -237,7 +237,6 @@ void CUi::Update(vec2 MouseWorldPos)
 	m_MousePos = m_UpdatedMousePos * vec2(pScreen->w, pScreen->h) / WindowSize;
 	m_MouseDelta = m_UpdatedMouseDelta;
 	m_UpdatedMouseDelta = vec2(0.0f, 0.0f);
-	m_MouseWorldPos = MouseWorldPos;
 	m_LastMouseButtons = m_MouseButtons;
 	m_MouseButtons = m_UpdatedMouseButtons;
 	m_UpdatedMouseButtons = UpdatedMouseButtonsNext;

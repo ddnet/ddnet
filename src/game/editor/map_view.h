@@ -13,6 +13,16 @@ class CLayerGroup;
 class CMapView : public CEditorComponent
 {
 public:
+	enum class EActiveOp
+	{
+		NONE,
+		BRUSH_GRAB,
+		BRUSH_DRAW,
+		BRUSH_PAINT,
+		PAN_WORLD,
+		PAN_EDITOR,
+	};
+
 	class CState
 	{
 	public:
@@ -20,6 +30,13 @@ public:
 		float m_WorldZoom;
 		vec2 m_WorldOffset;
 		vec2 m_EditorOffset;
+
+		float m_MouseWorldScale; // Mouse (i.e. UI) scale relative to the World (selected Group)
+		vec2 m_MouseWorldPos;
+		vec2 m_MouseWorldNoParaPos;
+		vec2 m_MouseDeltaWorld;
+
+		EActiveOp m_ActiveOp;
 
 		void Reset(CEditor *pEditor);
 	};
@@ -33,6 +50,14 @@ public:
 
 	void RenderGroupBorder();
 	void RenderEditorMap();
+	void Render(CUIRect View);
+
+	void UpdateMouseWorld();
+	void ResetMouseDeltaWorld();
+	float MouseWorldScale() const;
+	vec2 MouseDeltaWorld() const;
+	vec2 MouseWorldPos() const;
+	vec2 MouseWorldNoParaPos() const;
 
 	bool IsFocused();
 	void Focus();
