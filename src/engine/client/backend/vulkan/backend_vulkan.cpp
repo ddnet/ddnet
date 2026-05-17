@@ -2600,9 +2600,6 @@ protected:
 
 		if(Requires2DTextureArray)
 		{
-			int Image3DWidth = Width;
-			int Image3DHeight = Height;
-
 			int ConvertWidth = Width;
 			int ConvertHeight = Height;
 
@@ -2623,6 +2620,7 @@ protected:
 				pData = pNewTexData;
 			}
 
+			int Image3DWidth, Image3DHeight;
 			bool Needs3DTexDel = false;
 			uint8_t *pTexData3D = static_cast<uint8_t *>(malloc((size_t)PixelSize * ConvertWidth * ConvertHeight));
 			if(!Texture2DTo3D(pData, ConvertWidth, ConvertHeight, PixelSize, 16, 16, pTexData3D, Image3DWidth, Image3DHeight))
