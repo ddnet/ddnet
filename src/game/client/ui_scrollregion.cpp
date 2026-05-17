@@ -54,15 +54,14 @@ void CScrollRegion::Begin(CUIRect *pClipRect, const CScrollRegionParams *pParams
 			m_RailRect.Draw(m_Params.m_RailBgColor, IGraphics::CORNER_ALL, Rounding);
 		}
 	}
-	if(!ContentOverflows())
-		m_ContentScrollOffset = 0.0f;
-
 	if(m_Params.m_ClipBgColor.a > 0.0f)
 	{
 		int CornersPartial = m_Params.m_ScrollHorizontal ? IGraphics::CORNER_T : IGraphics::CORNER_L;
 		m_ContentAreaRect.Draw(m_Params.m_ClipBgColor, ScrollbarShown() ? CornersPartial : IGraphics::CORNER_ALL, 4.0f);
 	}
-
+	
+	if(!ContentOverflows())
+		m_ContentScrollOffset = 0.0f;
 	m_ContentSize = 0.0f;
 
 	Ui()->ClipEnable(&m_ContentAreaRect);
