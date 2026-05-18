@@ -940,6 +940,7 @@ private:
 	float m_LastDeadzone;
 	float m_LastFollowFactor;
 	bool m_LastDummyConnected;
+	bool m_WasHooked;
 
 	void HandleMultiView();
 	bool IsMultiViewIdSet();

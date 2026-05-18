@@ -2412,6 +2412,51 @@ void CGameClient::OnNewSnapshot()
 	m_LastFollowFactor = FollowFactor;
 	m_LastDummyConnected = Client()->DummyConnected();
 
+	if(g_Config.m_ClFlashOnHook)
+	{
+		IEngineGraphics *pEngineGraphics = Kernel()->RequestInterface<IEngineGraphics>();
+		if(pEngineGraphics)
+		{
+			if(pEngineGraphics->WindowActive())
+			{
+				m_WasHooked = false;
+			}
+			else if(!m_WasHooked)
+			{
+				bool Hooked = false;
+				if(m_Snap.m_LocalClientId >= 0)
+				{
+					int MainId = m_aLocalIds[0];
+					int DummyId = Client()->DummyConnected() ? m_aLocalIds[1] : -1;
+					for(int i = 0; i < MAX_CLIENTS; i++)
+					{
+						if(i == MainId || (DummyId != -1 && i == DummyId))
+							continue;
+
+						if(!m_Snap.m_aCharacters[i].m_Active)
+							continue;
+
+						const CNetObj_Character *pChar = &m_Snap.m_aCharacters[i].m_Cur;
+						if(pChar->m_HookState > 0 && (pChar->m_HookedPlayer == MainId || (DummyId != -1 && pChar->m_HookedPlayer == DummyId)))
+						{
+							Hooked = true;
+							break;
+						}
+					}
+				}
+				if(Hooked)
+				{
+					Graphics()->NotifyWindow();
+					m_WasHooked = true;
+				}
+			}
+		}
+	}
+	else
+	{
+		m_WasHooked = false;
+	}
+
 	for(auto &pComponent : m_vpAll)
 		pComponent->OnNewSnapshot();
 
