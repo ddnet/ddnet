@@ -98,10 +98,10 @@ void CScrollRegion::ScrollHere(EScrollOption Option)
 
 	case SCROLLHERE_KEEP_IN_VIEW:
 	default:
-		const float DeltaY = LastAddedPos - ContentAreaPos();
-		if(DeltaY < 0)
+		const float DeltaPos = LastAddedPos - ContentAreaPos();
+		if(DeltaPos < 0)
 			m_RequestScrollPos = TopScroll;
-		else if(DeltaY > (ContentAreaSize() - MinHeight))
+		else if(DeltaPos > (ContentAreaSize() - MinHeight))
 			m_RequestScrollPos = TopScroll - (ContentAreaSize() - MinHeight);
 		break;
 	}
