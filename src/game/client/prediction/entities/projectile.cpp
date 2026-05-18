@@ -37,6 +37,7 @@ CProjectile::CProjectile(
 
 	m_Layer = Layer;
 	m_Number = Number;
+	m_Bouncing = 0;
 	m_Freeze = Freeze;
 
 	m_TuneZone = GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0;
