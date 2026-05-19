@@ -634,6 +634,21 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			Ui()->ClipDisable();
 		}
 
+		CUIRect InactiveRegionLeft{
+			View.x,
+			View.y,
+			std::max(0.0f, EnvelopeToScreenX(View, 0.0f) - View.x),
+			View.h,
+		};
+		CUIRect InactiveRegionRight{
+			EnvelopeToScreenX(View, pEnvelope->EndTime()),
+			View.y,
+			std::max(0.0f, View.x + View.w - EnvelopeToScreenX(View, pEnvelope->EndTime())),
+			View.h,
+		};
+		InactiveRegionLeft.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_NONE, 0.0f);
+		InactiveRegionRight.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_NONE, 0.0f);
+
 		// render tangents for bezier curves
 		{
 			Ui()->ClipEnable(&View);
