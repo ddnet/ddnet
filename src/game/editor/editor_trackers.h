@@ -62,6 +62,7 @@ enum class EEnvelopeEditorOp
 	DRAG_POINT_Y,
 	CONTEXT_MENU,
 	BOX_SELECT,
+	DRAG_TIME_BAR,
 	SCALE,
 };
 

@@ -16,6 +16,7 @@
 
 #include <game/editor/editor.h>
 #include <game/editor/editor_actions.h>
+#include <game/editor/editor_trackers.h>
 #include <game/editor/mapitems/envelope.h>
 #include <game/editor/mapitems/map.h>
 
@@ -536,6 +537,76 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			Ui()->ClipDisable();
 		}
 
+		// handle time bar
+		{
+			if(s_Operation == EEnvelopeEditorOp::NONE)
+			{
+				UpdateHotEnvelopeObject(View, pEnvelope.get(), s_ActiveChannels);
+			}
+
+			ColorRGBA BarColor;
+			if(Ui()->CheckActiveItem(&m_AnimateTime))
+			{
+				if(s_Operation == EEnvelopeEditorOp::SELECT)
+				{
+					float dx = s_MouseXStart - Ui()->MouseX();
+					float dy = s_MouseYStart - Ui()->MouseY();
+
+					if(dx * dx + dy * dy > 20.0f)
+						s_Operation = EEnvelopeEditorOp::DRAG_TIME_BAR;
+				}
+
+				if(s_Operation == EEnvelopeEditorOp::DRAG_TIME_BAR)
+				{
+					float DeltaX = ScreenToEnvelopeDX(View, Ui()->MouseDeltaX()) * (Input()->ModifierIsPressed() ? 0.05f : 1.0f);
+					m_AnimateTime += DeltaX / m_AnimateSpeed;
+					m_AnimateTime = std::max(m_AnimateTime, 0.0f);
+				}
+
+				if(!Ui()->MouseButton(0))
+				{
+					Ui()->SetActiveItem(nullptr);
+					s_Operation = EEnvelopeEditorOp::NONE;
+				}
+
+				BarColor = ColorRGBA(1.0f, 1.0f, 0.0f, 0.8f);
+				str_copy(m_aTooltip, "Timebar. Press left-click to drag. Hold ctrl to be more precise.");
+			}
+			else if(Ui()->HotItem() == &m_AnimateTime)
+			{
+				if(Ui()->MouseButton(0))
+				{
+					Ui()->SetActiveItem(&m_AnimateTime);
+					s_Operation = EEnvelopeEditorOp::SELECT;
+
+					s_MouseXStart = Ui()->MouseX();
+					s_MouseYStart = Ui()->MouseY();
+				}
+
+				BarColor = ColorRGBA(1.0f, 1.0f, 0.0f, 0.8f);
+				str_copy(m_aTooltip, "Timebar. Press left-click to drag. Hold ctrl to be more precise.");
+			}
+			else
+				BarColor = ColorRGBA(1.0f, 1.0f, 0.0f, 0.5f);
+
+			float Time = m_AnimateTime * m_AnimateSpeed;
+			const float BarWidth = 1.5f;
+			CUIRect TimeBar{
+				EnvelopeToScreenX(View, Time) - BarWidth / 2.0f,
+				View.y,
+				BarWidth,
+				View.h,
+			};
+			TimeBar.Draw(BarColor, IGraphics::CORNER_NONE, 0.0f);
+
+			if(Time > pEnvelope->EndTime())
+			{
+				float LoopedTime = std::fmod(Time, pEnvelope->EndTime());
+				TimeBar.x = EnvelopeToScreenX(View, LoopedTime) - BarWidth / 2.0f;
+				TimeBar.Draw(BarColor, IGraphics::CORNER_NONE, 0.0f);
+			}
+		}
+
 		{
 			using namespace std::chrono_literals;
 			CTimeStep UnitsPerLineX = 1ms;
@@ -756,7 +827,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 			if(s_Operation == EEnvelopeEditorOp::NONE)
 			{
-				UpdateHotEnvelopePoint(View, pEnvelope.get(), s_ActiveChannels);
+				UpdateHotEnvelopeObject(View, pEnvelope.get(), s_ActiveChannels);
 				if(!Ui()->MouseButton(0))
 					Map()->m_EnvOpTracker.Stop(false);
 			}
@@ -1529,7 +1600,7 @@ void CEditor::RenderEnvelopeEditorColorBar(CUIRect ColorBar, const std::shared_p
 	ColorBarBackground.DrawOutline(ColorRGBA(0.7f, 0.7f, 0.7f, 1.0f));
 }
 
-void CEditor::UpdateHotEnvelopePoint(const CUIRect &View, const CEnvelope *pEnvelope, int ActiveChannels)
+void CEditor::UpdateHotEnvelopeObject(const CUIRect &View, const CEnvelope *pEnvelope, int ActiveChannels)
 {
 	if(!Ui()->MouseInside(&View))
 		return;
@@ -1581,6 +1652,15 @@ void CEditor::UpdateHotEnvelopePoint(const CUIRect &View, const CEnvelope *pEnve
 	if(pMinPointId != nullptr)
 	{
 		Ui()->SetHotItem(pMinPointId);
+	}
+	else if(!m_Animate)
+	{
+		float Time = m_AnimateTime * m_AnimateSpeed;
+		float LoopedTime = std::fmod(Time, pEnvelope->EndTime());
+		if(absolute(EnvelopeToScreenX(View, Time) - MousePos.x) < 20.0f || absolute(EnvelopeToScreenX(View, LoopedTime) - MousePos.x) < 20.0f)
+		{
+			Ui()->SetHotItem(&m_AnimateTime);
+		}
 	}
 }
 
