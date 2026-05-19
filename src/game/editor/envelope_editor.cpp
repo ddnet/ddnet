@@ -580,8 +580,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 		// render lines
 		{
-			float EndTimeTotal = maximum(0.000001f, pEnvelope->EndTime());
-			float EndX = std::clamp(EnvelopeToScreenX(View, EndTimeTotal), View.x, View.x + View.w);
+			float EndX = View.x + View.w;
 			float StartX = std::clamp(View.x + View.w * m_OffsetEnvelopeX, View.x, View.x + View.w);
 
 			float EndTime = ScreenToEnvelopeX(View, EndX);
