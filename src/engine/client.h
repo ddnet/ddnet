@@ -380,7 +380,7 @@ public:
 	virtual void OnRconLine(const char *pLine) = 0;
 	virtual void OnInit() = 0;
 	virtual void InvalidateSnapshot() = 0;
-	virtual void OnNewSnapshot() = 0;
+	virtual void OnNewSnapshot(bool DummySwapped) = 0;
 	virtual void OnEnterGame() = 0;
 	virtual void OnShutdown() = 0;
 	virtual void OnRender() = 0;
