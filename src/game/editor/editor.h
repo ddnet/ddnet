@@ -231,9 +231,9 @@ public:
 		m_ShowTileInfo = SHOW_TILE_OFF;
 		m_ShowDetail = true;
 		m_Animate = false;
-		m_AnimateStart = 0;
-		m_AnimateTime = 0;
-		m_AnimateSpeed = 1;
+		m_AnimateStart = 0.0f;
+		m_AnimateTime = 0.0f;
+		m_AnimateSpeed = 1.0f;
 		m_AnimateUpdatePopup = false;
 
 		for(size_t i = 0; i < std::size(m_aSavedColors); ++i)
@@ -440,7 +440,7 @@ public:
 	bool m_ShowDetail;
 
 	bool m_Animate;
-	int64_t m_AnimateStart;
+	float m_AnimateStart;
 	float m_AnimateTime;
 	float m_AnimateSpeed;
 	bool m_AnimateUpdatePopup;
