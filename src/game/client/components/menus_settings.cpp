@@ -1330,7 +1330,7 @@ void CMenus::RenderLanguageSettings(CUIRect MainView)
 	const float CreditsMargin = 10.0f;
 
 	CUIRect List, CreditsScroll;
-	MainView.HSplitBottom(4.0f * CreditsFontSize + 2.0f * CreditsMargin + CScrollRegion::HEIGHT_MAGIC_FIX, &List, &CreditsScroll);
+	MainView.HSplitBottom(4.0f * CreditsFontSize + 2.0f * CreditsMargin, &List, &CreditsScroll);
 	List.HSplitBottom(5.0f, &List, nullptr);
 
 	RenderLanguageSelection(List);
