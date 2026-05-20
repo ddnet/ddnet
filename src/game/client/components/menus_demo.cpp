@@ -1008,6 +1008,21 @@ void CMenus::DemolistPopulate()
 		m_DemoPopulateStartTime = time_get_nanoseconds();
 		Storage()->ListDirectoryInfo(m_DemolistStorageType, m_aCurrentDemoFolder, DemolistFetchCallback, this);
 
+		// Make sure there is a demo item to navigate back to the parent folder, if the folder contents could not be enumerated.
+		if(m_vDemos.empty())
+		{
+			CDemoItem Item;
+			str_copy(Item.m_aFilename, "..");
+			str_copy(Item.m_aName, "../");
+			Item.m_Date = 0;
+			Item.m_InfosLoaded = false;
+			Item.m_Valid = false;
+			Item.m_IsDir = true;
+			Item.m_IsLink = false;
+			Item.m_StorageType = m_DemolistStorageType;
+			m_vDemos.push_back(Item);
+		}
+
 		if(g_Config.m_BrDemoFetchInfo)
 			FetchAllHeaders();
 
