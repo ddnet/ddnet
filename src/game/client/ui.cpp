@@ -501,7 +501,12 @@ void CUi::UpdateClipping()
 		const CUIRect *pRect = ClipArea();
 		const float XScale = Graphics()->ScreenWidth() / Screen()->w;
 		const float YScale = Graphics()->ScreenHeight() / Screen()->h;
-		Graphics()->ClipEnable((int)(pRect->x * XScale), (int)(pRect->y * YScale), (int)(pRect->w * XScale), (int)(pRect->h * YScale));
+
+		const float ScaledX = pRect->x * XScale;
+		const float ScaledY = pRect->y * YScale;
+		const float RoundX = std::round(ScaledX);
+		const float RoundY = std::round(ScaledY);
+		Graphics()->ClipEnable(RoundX, RoundY, std::round(pRect->w * XScale + (ScaledX - RoundX)), std::round(pRect->h * YScale + (ScaledY - RoundY)));
 	}
 	else
 	{
