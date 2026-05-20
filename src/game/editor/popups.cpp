@@ -2749,6 +2749,8 @@ CUi::EPopupMenuFunctionResult CEditor::PopupAnimateSettings(void *pContext, CUIR
 	View.HSplitBottom(12.0f, &View, &ButtonReset);
 	pEditor->Ui()->DoLabel(&Label, "Speed", 10.0f, TEXTALIGN_ML);
 
+	const float OldAnimateSpeed = pEditor->m_AnimateSpeed;
+
 	static char s_DecreaseButton;
 	if(pEditor->DoButton_FontIcon(&s_DecreaseButton, FontIcon::MINUS, 0, &ButtonDecrease, BUTTONFLAG_LEFT, "Decrease animation speed.", IGraphics::CORNER_L, 7.0f))
 	{
@@ -2786,6 +2788,11 @@ CUi::EPopupMenuFunctionResult CEditor::PopupAnimateSettings(void *pContext, CUIR
 	{
 		pEditor->m_AnimateSpeed = std::clamp(s_SpeedInput.GetFloat(), MIN_ANIM_SPEED, MAX_ANIM_SPEED);
 	}
+
+	// adjust start time to avoid jumps in animation
+	float AnimateSpeedRatio = OldAnimateSpeed / pEditor->m_AnimateSpeed;
+	float Time = pEditor->Client()->GlobalTime();
+	pEditor->m_AnimateStart = Time + (pEditor->m_AnimateStart - Time) * AnimateSpeedRatio;
 
 	return CUi::POPUP_KEEP_OPEN;
 }
