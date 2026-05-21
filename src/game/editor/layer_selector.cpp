@@ -96,10 +96,9 @@ void CLayerSelector::UpdateHoveredTiles()
 				continue;
 			if(y < 0 || y >= pTiles->m_Height)
 				continue;
-			CTile Tile = pTiles->GetTile(x, y);
-			if(Tile.m_Index)
-				m_vHoverTiles.emplace_back(
-					g, l, x, y, Tile);
+
+			if(pTiles->GetTile(x, y).m_Index > 0)
+				m_vHoverTiles.emplace_back(g, l);
 		}
 	}
 	Ui()->MapScreen();

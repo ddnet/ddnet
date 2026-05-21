@@ -3,25 +3,17 @@
 
 #include "component.h"
 
-#include <game/mapitems.h>
-
 class CHoverTile
 {
 public:
-	CHoverTile(int Group, int Layer, int x, int y, const CTile Tile) :
+	CHoverTile(int Group, int Layer) :
 		m_Group(Group),
-		m_Layer(Layer),
-		m_X(x),
-		m_Y(y),
-		m_Tile(Tile)
+		m_Layer(Layer)
 	{
 	}
 
 	int m_Group;
 	int m_Layer;
-	int m_X;
-	int m_Y;
-	const CTile m_Tile;
 };
 
 class CLayerSelector : public CEditorComponent
