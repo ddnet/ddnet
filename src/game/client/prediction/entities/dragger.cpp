@@ -50,7 +50,9 @@ void CDragger::LookForPlayersToDrag()
 			continue;
 		}
 		// If the dragger is disabled for the target's team, no dragger beam will be generated
-		if(m_Layer == LAYER_SWITCH && m_Number > 0 &&
+		if(m_Layer == LAYER_SWITCH &&
+			m_Number > 0 &&
+			m_Number < (int)Switchers().size() &&
 			!Switchers()[m_Number].m_aStatus[TargetTeam])
 		{
 			continue;
@@ -100,7 +102,9 @@ void CDragger::DraggerBeamTick()
 
 	if(GameWorld()->GameTick() % (int)(GameWorld()->GameTickSpeed() * 0.15f) == 0)
 	{
-		if(m_Layer == LAYER_SWITCH && m_Number > 0 &&
+		if(m_Layer == LAYER_SWITCH &&
+			m_Number > 0 &&
+			m_Number < (int)Switchers().size() &&
 			!Switchers()[m_Number].m_aStatus[pTarget->Team()])
 		{
 			DraggerBeamReset();
