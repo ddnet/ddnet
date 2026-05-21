@@ -54,3 +54,53 @@ bool CLayerSelector::SelectByTile()
 	}
 	return false;
 }
+
+void CEditor::OnMouseMove()
+{
+	const vec2 UpdatedMousePos = Ui()->UpdatedMousePos();
+
+	m_vHoverTiles.clear();
+	for(size_t g = 0; g < Map()->m_vpGroups.size(); g++)
+	{
+		const std::shared_ptr<CLayerGroup> pGroup = Map()->m_vpGroups[g];
+		for(size_t l = 0; l < pGroup->m_vpLayers.size(); l++)
+		{
+			const std::shared_ptr<CLayer> pLayer = pGroup->m_vpLayers[l];
+			int LayerType = pLayer->m_Type;
+			if(LayerType != LAYERTYPE_TILES &&
+				LayerType != LAYERTYPE_FRONT &&
+				LayerType != LAYERTYPE_TELE &&
+				LayerType != LAYERTYPE_SPEEDUP &&
+				LayerType != LAYERTYPE_SWITCH &&
+				LayerType != LAYERTYPE_TUNE)
+				continue;
+
+			std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
+			pGroup->MapScreen();
+			float aPoints[4];
+			pGroup->Mapping(aPoints);
+			float WorldWidth = aPoints[2] - aPoints[0];
+			float WorldHeight = aPoints[3] - aPoints[1];
+			CUIRect Rect;
+			Rect.x = aPoints[0] + WorldWidth * (UpdatedMousePos.x / Graphics()->WindowWidth());
+			Rect.y = aPoints[1] + WorldHeight * (UpdatedMousePos.y / Graphics()->WindowHeight());
+			Rect.w = 0;
+			Rect.h = 0;
+			CIntRect r;
+			pTiles->Convert(Rect, &r);
+			pTiles->Clamp(&r);
+			int x = r.x;
+			int y = r.y;
+
+			if(x < 0 || x >= pTiles->m_Width)
+				continue;
+			if(y < 0 || y >= pTiles->m_Height)
+				continue;
+			CTile Tile = pTiles->GetTile(x, y);
+			if(Tile.m_Index)
+				m_vHoverTiles.emplace_back(
+					g, l, x, y, Tile);
+		}
+	}
+	Ui()->MapScreen();
+}
