@@ -754,8 +754,6 @@ void CMapView::UpdateMouseWorld()
 		Map()->m_MapViewState.m_MouseWorldNoParaPos.x = aPoints[0] + WorldWidth * (UpdatedMousePos.x / Graphics()->WindowWidth());
 		Map()->m_MapViewState.m_MouseWorldNoParaPos.y = aPoints[1] + WorldHeight * (UpdatedMousePos.y / Graphics()->WindowHeight());
 	}
-
-	Editor()->OnMouseMove(UpdatedMousePos);
 }
 
 void CMapView::ResetMouseDeltaWorld()

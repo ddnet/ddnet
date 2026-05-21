@@ -267,27 +267,6 @@ public:
 		m_BrushDrawDestructive = true;
 	}
 
-	class CHoverTile
-	{
-	public:
-		CHoverTile(int Group, int Layer, int x, int y, const CTile Tile) :
-			m_Group(Group),
-			m_Layer(Layer),
-			m_X(x),
-			m_Y(y),
-			m_Tile(Tile)
-		{
-		}
-
-		int m_Group;
-		int m_Layer;
-		int m_X;
-		int m_Y;
-		const CTile m_Tile;
-	};
-	std::vector<CHoverTile> m_vHoverTiles;
-	const std::vector<CHoverTile> &HoverTiles() const { return m_vHoverTiles; }
-
 	void Init() override;
 	void OnUpdate() override;
 	void OnRender() override;
@@ -302,7 +281,6 @@ public:
 	void ResetIngameMoved() override { m_IngameMoved = false; }
 
 	void HandleCursorMovement();
-	void OnMouseMove(vec2 MousePos);
 	void MouseAxisLock(vec2 &CursorRel);
 	vec2 m_MouseAxisInitialPos = vec2(0.0f, 0.0f);
 	enum class EAxisLock
