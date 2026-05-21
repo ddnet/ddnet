@@ -4646,8 +4646,10 @@ void CEditor::Init()
 	Reset(false);
 }
 
-void CEditor::OnMouseMove(vec2 MousePos)
+void CEditor::OnMouseMove()
 {
+	const vec2 UpdatedMousePos = Ui()->UpdatedMousePos();
+
 	m_vHoverTiles.clear();
 	for(size_t g = 0; g < Map()->m_vpGroups.size(); g++)
 	{
@@ -4671,8 +4673,8 @@ void CEditor::OnMouseMove(vec2 MousePos)
 			float WorldWidth = aPoints[2] - aPoints[0];
 			float WorldHeight = aPoints[3] - aPoints[1];
 			CUIRect Rect;
-			Rect.x = aPoints[0] + WorldWidth * (MousePos.x / Graphics()->WindowWidth());
-			Rect.y = aPoints[1] + WorldHeight * (MousePos.y / Graphics()->WindowHeight());
+			Rect.x = aPoints[0] + WorldWidth * (UpdatedMousePos.x / Graphics()->WindowWidth());
+			Rect.y = aPoints[1] + WorldHeight * (UpdatedMousePos.y / Graphics()->WindowHeight());
 			Rect.w = 0;
 			Rect.h = 0;
 			CIntRect r;
@@ -4850,6 +4852,7 @@ void CEditor::OnUpdate()
 	});
 
 	MapView()->UpdateMouseWorld();
+	OnMouseMove();
 	HandleAutosave();
 	HandleWriterFinishJobs();
 
