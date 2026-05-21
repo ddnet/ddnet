@@ -4802,7 +4802,7 @@ void CEditor::OnUpdate()
 	});
 
 	MapView()->UpdateMouseWorld();
-	OnMouseMove();
+	LayerSelector()->UpdateHoveredTiles();
 	HandleAutosave();
 	HandleWriterFinishJobs();
 

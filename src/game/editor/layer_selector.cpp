@@ -25,7 +25,7 @@ bool CLayerSelector::SelectByTile()
 	int MatchedLayer = -1;
 	int Matches = 0;
 	bool IsFound = false;
-	for(const auto &HoverTile : Editor()->HoverTiles())
+	for(const auto &HoverTile : m_vHoverTiles)
 	{
 		if(!Map()->m_vpGroups[HoverTile.m_Group]->m_Visible ||
 			!Map()->m_vpGroups[HoverTile.m_Group]->m_vpLayers[HoverTile.m_Layer]->m_Visible)
@@ -55,7 +55,7 @@ bool CLayerSelector::SelectByTile()
 	return false;
 }
 
-void CEditor::OnMouseMove()
+void CLayerSelector::UpdateHoveredTiles()
 {
 	const vec2 UpdatedMousePos = Ui()->UpdatedMousePos();
 
