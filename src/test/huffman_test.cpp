@@ -4,6 +4,25 @@
 
 #include <gtest/gtest.h>
 
+TEST(Huffman, CompressionInputSizeZero)
+{
+	CHuffman Huffman;
+	Huffman.Init();
+
+	unsigned char aInput[64];
+	unsigned char aCompressed[2048];
+	unsigned char aDecompressed[2048];
+
+	const int CompressedSize = Huffman.Compress(aInput, 0, aCompressed, sizeof(aCompressed));
+	const unsigned char aExpected[] = {0x8A, 0x1B};
+
+	ASSERT_EQ(CompressedSize, (int)sizeof(aExpected));
+	EXPECT_EQ(mem_comp(aCompressed, aExpected, CompressedSize), 0);
+
+	const int UncompressedSize = Huffman.Decompress(aCompressed, CompressedSize, aDecompressed, sizeof(aDecompressed));
+	ASSERT_EQ(UncompressedSize, 0);
+}
+
 TEST(Huffman, CompressionShouldNotChangeData)
 {
 	CHuffman Huffman;
