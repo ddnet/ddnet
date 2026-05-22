@@ -115,12 +115,12 @@ def main():
 	template<typename... Ts> using void_t = typename make_void<Ts...>::type;
 
 	template<typename T, typename = void>
-	struct is_sixup {
+	struct is_seven {
 		constexpr static bool value = false;
 	};
 
 	template<typename T>
-	struct is_sixup<T, void_t<typename T::is_sixup>> {
+	struct is_seven<T, void_t<typename T::is_seven>> {
 		constexpr static bool value = true;
 	};
 	""")

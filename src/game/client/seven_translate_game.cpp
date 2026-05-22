@@ -87,17 +87,17 @@ void CGameClient::DoTeamChangeMessage7(const char *pName, int ClientId, int Team
 template<typename T>
 void CGameClient::ApplySkin7InfoFromGameMsg(const T *pMsg, int ClientId, int Conn)
 {
-	CClientData::CSixup &SixupData = m_aClients[ClientId].m_aSixup[Conn];
+	CClientData::CSeven &SevenData = m_aClients[ClientId].m_aSeven[Conn];
 
 	char *apSkinPartsPtr[protocol7::NUM_SKINPARTS];
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
-		str_utf8_copy_num(SixupData.m_aaSkinPartNames[Part], pMsg->m_apSkinPartNames[Part], sizeof(SixupData.m_aaSkinPartNames[Part]), protocol7::MAX_SKIN_LENGTH);
-		apSkinPartsPtr[Part] = SixupData.m_aaSkinPartNames[Part];
-		SixupData.m_aUseCustomColors[Part] = pMsg->m_aUseCustomColors[Part];
-		SixupData.m_aSkinPartColors[Part] = pMsg->m_aSkinPartColors[Part];
+		str_utf8_copy_num(SevenData.m_aaSkinPartNames[Part], pMsg->m_apSkinPartNames[Part], sizeof(SevenData.m_aaSkinPartNames[Part]), protocol7::MAX_SKIN_LENGTH);
+		apSkinPartsPtr[Part] = SevenData.m_aaSkinPartNames[Part];
+		SevenData.m_aUseCustomColors[Part] = pMsg->m_aUseCustomColors[Part];
+		SevenData.m_aSkinPartColors[Part] = pMsg->m_aSkinPartColors[Part];
 	}
-	m_Skins7.ValidateSkinParts(apSkinPartsPtr, SixupData.m_aUseCustomColors, SixupData.m_aSkinPartColors, m_pClient->m_TranslationContext.m_GameFlags);
+	m_Skins7.ValidateSkinParts(apSkinPartsPtr, SevenData.m_aUseCustomColors, SevenData.m_aSkinPartColors, m_pClient->m_TranslationContext.m_GameFlags);
 }
 
 void CGameClient::ApplySkin7InfoFromSnapObj(const protocol7::CNetObj_De_ClientInfo *pObj, int ClientId)
@@ -121,19 +121,19 @@ void CGameClient::ApplySkin7InfoFromSnapObj(const protocol7::CNetObj_De_ClientIn
 
 void CGameClient::CClientData::UpdateSkin7HatSprite(int Dummy)
 {
-	const CClientData::CSixup &SixupData = m_aSixup[Dummy];
-	CTeeRenderInfo::CSixup &SixupSkinInfo = m_pSkinInfo->TeeRenderInfo().m_aSixup[Dummy];
+	const CClientData::CSeven &SevenData = m_aSeven[Dummy];
+	CTeeRenderInfo::CSeven &SevenSkinInfo = m_pSkinInfo->TeeRenderInfo().m_aSeven[Dummy];
 
-	if(SixupSkinInfo.m_HatTexture.IsValid())
+	if(SevenSkinInfo.m_HatTexture.IsValid())
 	{
-		if(str_comp(SixupData.m_aaSkinPartNames[protocol7::SKINPART_BODY], "standard") != 0 ||
-			str_comp(SixupData.m_aaSkinPartNames[protocol7::SKINPART_DECORATION], "twinbopp") == 0)
+		if(str_comp(SevenData.m_aaSkinPartNames[protocol7::SKINPART_BODY], "standard") != 0 ||
+			str_comp(SevenData.m_aaSkinPartNames[protocol7::SKINPART_DECORATION], "twinbopp") == 0)
 		{
-			SixupSkinInfo.m_HatSpriteIndex = CSkins7::HAT_OFFSET_SIDE + (ClientId() % CSkins7::HAT_NUM);
+			SevenSkinInfo.m_HatSpriteIndex = CSkins7::HAT_OFFSET_SIDE + (ClientId() % CSkins7::HAT_NUM);
 		}
 		else
 		{
-			SixupSkinInfo.m_HatSpriteIndex = ClientId() % CSkins7::HAT_NUM;
+			SevenSkinInfo.m_HatSpriteIndex = ClientId() % CSkins7::HAT_NUM;
 		}
 	}
 }
@@ -155,24 +155,24 @@ void CGameClient::CClientData::UpdateSkin7BotDecoration(int Dummy)
 		ColorRGBA(0x74c7a3),
 	};
 
-	CTeeRenderInfo::CSixup &SixupSkinInfo = m_pSkinInfo->TeeRenderInfo().m_aSixup[Dummy];
+	CTeeRenderInfo::CSeven &SevenSkinInfo = m_pSkinInfo->TeeRenderInfo().m_aSeven[Dummy];
 
 	if((m_pGameClient->m_pClient->m_TranslationContext.m_aClients[ClientId()].m_PlayerFlags7 & protocol7::PLAYERFLAG_BOT) != 0)
 	{
-		if(!SixupSkinInfo.m_BotColor.a) // bot color has not been set; pick a random color once
+		if(!SevenSkinInfo.m_BotColor.a) // bot color has not been set; pick a random color once
 		{
-			SixupSkinInfo.m_BotColor = BOT_COLORS[rand() % std::size(BOT_COLORS)];
+			SevenSkinInfo.m_BotColor = BOT_COLORS[rand() % std::size(BOT_COLORS)];
 		}
 	}
 	else
 	{
-		SixupSkinInfo.m_BotColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+		SevenSkinInfo.m_BotColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
 	}
 }
 
 void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 {
-	if(!m_pClient->IsSixup())
+	if(!m_pClient->IsSeven())
 	{
 		return m_NetObjHandler.SecureUnpackMsg(*pMsgId, pUnpacker);
 	}
@@ -187,7 +187,7 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 				return pDDNetExMsg;
 		}
 
-		dbg_msg("sixup", "dropped weird message '%s' (%d), failed on '%s'", m_NetObjHandler7.GetMsgName(*pMsgId), *pMsgId, m_NetObjHandler7.FailedMsgOn());
+		dbg_msg("seven", "dropped weird message '%s' (%d), failed on '%s'", m_NetObjHandler7.GetMsgName(*pMsgId), *pMsgId, m_NetObjHandler7.FailedMsgOn());
 		return nullptr;
 	}
 	static char s_aRawMsg[1024];
@@ -331,7 +331,7 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 
 		if(pMsg7->m_ClientId < 0 || pMsg7->m_ClientId >= MAX_CLIENTS)
 		{
-			dbg_msg("sixup", "Sv_SkinChange got invalid ClientId: %d", pMsg7->m_ClientId);
+			dbg_msg("seven", "Sv_SkinChange got invalid ClientId: %d", pMsg7->m_ClientId);
 			return nullptr;
 		}
 
@@ -499,7 +499,7 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 		protocol7::CNetMsg_Sv_ClientDrop *pMsg7 = (protocol7::CNetMsg_Sv_ClientDrop *)pRawMsg;
 		if(pMsg7->m_ClientId < 0 || pMsg7->m_ClientId >= MAX_CLIENTS)
 		{
-			dbg_msg("sixup", "Sv_ClientDrop got invalid ClientId: %d", pMsg7->m_ClientId);
+			dbg_msg("seven", "Sv_ClientDrop got invalid ClientId: %d", pMsg7->m_ClientId);
 			return nullptr;
 		}
 		CTranslationContext::CClientData &Client = m_pClient->m_TranslationContext.m_aClients[pMsg7->m_ClientId];
@@ -525,7 +525,7 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 		protocol7::CNetMsg_Sv_ClientInfo *pMsg7 = (protocol7::CNetMsg_Sv_ClientInfo *)pRawMsg;
 		if(pMsg7->m_ClientId < 0 || pMsg7->m_ClientId >= MAX_CLIENTS)
 		{
-			dbg_msg("sixup", "Sv_ClientInfo got invalid ClientId: %d", pMsg7->m_ClientId);
+			dbg_msg("seven", "Sv_ClientInfo got invalid ClientId: %d", pMsg7->m_ClientId);
 			return nullptr;
 		}
 

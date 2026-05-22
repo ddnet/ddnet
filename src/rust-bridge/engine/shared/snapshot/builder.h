@@ -561,7 +561,7 @@ struct CSnapshotBuilder;
 #ifndef CXXBRIDGE1_STRUCT_CSnapshotBuilder
 #define CXXBRIDGE1_STRUCT_CSnapshotBuilder
 struct CSnapshotBuilder final : public ::rust::Opaque {
-  void Init(bool sixup) noexcept;
+  void Init(bool seven) noexcept;
   bool NewItem(::std::int32_t type_, ::std::int32_t id, ::rust::Slice<const ::std::int32_t> data) noexcept;
   ::std::int32_t FinishIfNoDroppedItems(::CSnapshotBuffer &buffer) noexcept;
   ::std::int32_t Finish(::CSnapshotBuffer &buffer) noexcept;

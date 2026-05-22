@@ -48,7 +48,7 @@ int CGameClient::TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrc
 			if(!pRawObj)
 			{
 				if(ItemType != UUID_UNKNOWN)
-					dbg_msg("sixup", "dropped weird ddnet ex object '%s' (%d), failed on '%s'", GetNetObjHandler()->GetObjName(ItemType), ItemType, GetNetObjHandler()->FailedObjOn());
+					dbg_msg("seven", "dropped weird ddnet ex object '%s' (%d), failed on '%s'", GetNetObjHandler()->GetObjName(ItemType), ItemType, GetNetObjHandler()->FailedObjOn());
 				continue;
 			}
 			const int ItemSize = GetNetObjHandler()->GetUnpackedObjSize(ItemType);
@@ -60,7 +60,7 @@ int CGameClient::TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrc
 		if(GetNetObjHandler7()->ValidateObj(ItemType, pItem7->Data(), Size) != 0)
 		{
 			dbg_msg(
-				"sixup",
+				"seven",
 				"invalidated index=%d type=%d (%s) size=%d id=%d",
 				i,
 				ItemType,
@@ -389,7 +389,7 @@ int CGameClient::TranslateSnap(CSnapshotBuffer *pSnapDstSix, CSnapshot *pSnapSrc
 
 			if(ClientId < 0 || ClientId >= MAX_CLIENTS)
 			{
-				dbg_msg("sixup", "De_ClientInfo got invalid ClientId: %d", ClientId);
+				dbg_msg("seven", "De_ClientInfo got invalid ClientId: %d", ClientId);
 				return -17;
 			}
 
@@ -476,9 +476,9 @@ int CGameClient::OnDemoRecSnap7(CSnapshot *pFrom, CSnapshotBuffer *pTo, int Conn
 			StrToInts(
 				ClientInfoObj.m_aaSkinPartNames[Part],
 				std::size(ClientInfoObj.m_aaSkinPartNames[Part]),
-				m_aClients[i].m_aSixup[Conn].m_aaSkinPartNames[Part]);
-			ClientInfoObj.m_aUseCustomColors[Part] = m_aClients[i].m_aSixup[Conn].m_aUseCustomColors[Part];
-			ClientInfoObj.m_aSkinPartColors[Part] = m_aClients[i].m_aSixup[Conn].m_aSkinPartColors[Part];
+				m_aClients[i].m_aSeven[Conn].m_aaSkinPartNames[Part]);
+			ClientInfoObj.m_aUseCustomColors[Part] = m_aClients[i].m_aSeven[Conn].m_aUseCustomColors[Part];
+			ClientInfoObj.m_aSkinPartColors[Part] = m_aClients[i].m_aSeven[Conn].m_aSkinPartColors[Part];
 		}
 
 		pBuilder->NewItem(protocol7::NETOBJTYPE_DE_CLIENTINFO, i, ClientInfoObj.AsSlice());

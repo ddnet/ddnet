@@ -57,8 +57,8 @@ void CEventHandler::Snap(int SnappingClient)
 				int Type = m_aTypes[i];
 				int Size = m_aSizes[i];
 				const char *pData = &m_aData[m_aOffsets[i]];
-				if(GameServer()->Server()->IsSixup(SnappingClient))
-					EventToSixup(&Type, &Size, &pData);
+				if(GameServer()->Server()->IsSeven(SnappingClient))
+					EventToSeven(&Type, &Size, &pData);
 
 				GameServer()->Server()->SnapNewItem(Type, i, rust::Slice((const int32_t *)pData, Size / sizeof(int32_t)));
 			}
@@ -66,7 +66,7 @@ void CEventHandler::Snap(int SnappingClient)
 	}
 }
 
-void CEventHandler::EventToSixup(int *pType, int *pSize, const char **ppData)
+void CEventHandler::EventToSeven(int *pType, int *pSize, const char **ppData)
 {
 	static char s_aEventStore[128];
 	if(*pType == NETEVENTTYPE_DAMAGEIND)

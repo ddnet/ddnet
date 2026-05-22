@@ -74,7 +74,7 @@ void CNetClient::ResetErrorString()
 	m_Connection.ResetErrorString();
 }
 
-int CNetClient::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken, bool Sixup)
+int CNetClient::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken, bool Seven)
 {
 	while(true)
 	{
@@ -98,9 +98,9 @@ int CNetClient::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken, bool Six
 
 		SECURITY_TOKEN Token;
 		*pResponseToken = NET_SECURITY_TOKEN_UNKNOWN;
-		if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvBuffer, Sixup, &Token, pResponseToken) == 0)
+		if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvBuffer, Seven, &Token, pResponseToken) == 0)
 		{
-			if(Sixup)
+			if(Seven)
 			{
 				Addr.type |= NETTYPE_TW7;
 			}
@@ -121,7 +121,7 @@ int CNetClient::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken, bool Six
 			else
 			{
 				const bool Control = (m_RecvBuffer.m_Flags & NET_PACKETFLAG_CONTROL) != 0;
-				if(Sixup &&
+				if(Seven &&
 					Control &&
 					m_RecvBuffer.m_DataSize >= 1 + (int)sizeof(SECURITY_TOKEN) &&
 					m_RecvBuffer.m_aChunkData[0] == protocol7::NET_CTRLMSG_TOKEN)

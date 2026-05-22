@@ -138,6 +138,6 @@ void CLight::Snap(int SnappingClient)
 			StartTick = Server()->Tick();
 	}
 
-	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Server()->IsSixup(SnappingClient), SnappingClient), GetId().value(),
+	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Server()->IsSeven(SnappingClient), SnappingClient), GetId().value(),
 		m_Pos, From, StartTick, -1, LASERTYPE_FREEZE, 0, m_Number);
 }

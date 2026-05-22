@@ -185,7 +185,7 @@ void CScoreboard::RenderTitleScore(CUIRect ScoreLabel, int Team, float TitleFont
 	char aScore[128] = "";
 	const CNetObj_GameInfo *pGameInfoObj = GameClient()->m_Snap.m_pGameInfoObj;
 	const bool TimeScore = GameClient()->m_GameInfo.m_TimeScore;
-	const bool Race7 = Client()->IsSixup() && pGameInfoObj && pGameInfoObj->m_GameFlags & protocol7::GAMEFLAG_RACE;
+	const bool Race7 = Client()->IsSeven() && pGameInfoObj && pGameInfoObj->m_GameFlags & protocol7::GAMEFLAG_RACE;
 	if(GameClient()->m_ReceivedDDNetPlayerFinishTimes || TimeScore || Race7)
 	{
 		if(GameClient()->m_MapBestTimeSeconds != FinishTime::UNSET)
@@ -444,7 +444,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 	const int NumPlayers = CountEnd - CountStart;
 	const bool LowScoreboardWidth = Scoreboard.w < 350.0f;
 
-	bool Race7 = Client()->IsSixup() && pGameInfoObj && pGameInfoObj->m_GameFlags & protocol7::GAMEFLAG_RACE;
+	bool Race7 = Client()->IsSeven() && pGameInfoObj && pGameInfoObj->m_GameFlags & protocol7::GAMEFLAG_RACE;
 
 	const bool UseTime = Race7 || TimeScore || MillisecondScore;
 
@@ -756,7 +756,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 				TextRender()->TextEx(&Cursor, ClientData.m_aName);
 
 				// ready / watching
-				if(Client()->IsSixup() && Client()->m_TranslationContext.m_aClients[pInfo->m_ClientId].m_PlayerFlags7 & protocol7::PLAYERFLAG_READY)
+				if(Client()->IsSeven() && Client()->m_TranslationContext.m_aClients[pInfo->m_ClientId].m_PlayerFlags7 & protocol7::PLAYERFLAG_READY)
 				{
 					TextRender()->TextColor(0.1f, 1.0f, 0.1f, TextColor.a);
 					TextRender()->TextEx(&Cursor, "✓");

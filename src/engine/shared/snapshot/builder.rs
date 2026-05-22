@@ -19,7 +19,7 @@ mod ffi {
         // TODO(cxx 1.0.164): #[Self = "CSnapshotBuilder"]
         #[allow(unused_must_use)]
         pub fn CSnapshotBuilder_New() -> Box<CSnapshotBuilder>;
-        pub fn Init(&mut self, sixup: bool);
+        pub fn Init(&mut self, seven: bool);
         pub fn NewItem(&mut self, type_: i32, id: i32, data: &[i32]) -> bool;
         pub fn FinishIfNoDroppedItems(&mut self, buffer: Pin<&mut CSnapshotBuffer>) -> i32;
         pub fn Finish(&mut self, buffer: Pin<&mut CSnapshotBuffer>) -> i32;
@@ -55,7 +55,7 @@ mod ffi {
 #[derive(Default)]
 pub struct CSnapshotBuilder {
     building: bool,
-    sixup: bool,
+    seven: bool,
     has_dropped_item: bool,
     snap_write_buffer: Vec<i32>,
     builder: Takeable<snap::Builder>,
@@ -75,7 +75,7 @@ pub fn CSnapshotBuilder_New() -> Box<CSnapshotBuilder> {
 impl CSnapshotBuilder {
     /// Starts building a snapshot.
     ///
-    /// `sixup` indicates whether the builder should do translation for a 0.7
+    /// `seven` indicates whether the builder should do translation for a 0.7
     /// client.
     ///
     /// See [`CSnapshotBuilder`] for a usage example.
@@ -84,11 +84,11 @@ impl CSnapshotBuilder {
     ///
     /// Panics if `Init` was previously called without a call to
     /// [`CSnapshotBuilder::Finish`]/[`CSnapshotBuilder::FinishIfNoDroppedItems`].
-    pub fn Init(&mut self, sixup: bool) {
+    pub fn Init(&mut self, seven: bool) {
         assert!(!self.building);
         *self = CSnapshotBuilder {
             building: true,
-            sixup,
+            seven,
             has_dropped_item: false,
             snap_write_buffer: mem::take(&mut self.snap_write_buffer),
             builder: Takeable::new(self.builder.take()),
@@ -117,7 +117,7 @@ impl CSnapshotBuilder {
     /// known UUID item type.
     pub fn NewItem(&mut self, type_: i32, id: i32, data: &[i32]) -> bool {
         assert!(self.building);
-        let type_ = match type_id_from_i32(self.sixup, type_) {
+        let type_ = match type_id_from_i32(self.seven, type_) {
             Some(t) => t,
             None => return true, // dropping items from 0.7 snaps doesn't count as dropping
         };

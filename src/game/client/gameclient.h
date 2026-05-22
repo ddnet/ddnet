@@ -526,7 +526,7 @@ public:
 
 		int ClientId() const { return m_ClientId; }
 
-		class CSixup
+		class CSeven
 		{
 		public:
 			void Reset();
@@ -537,7 +537,7 @@ public:
 		};
 
 		// 0.7 Skin
-		CSixup m_aSixup[NUM_DUMMIES];
+		CSeven m_aSeven[NUM_DUMMIES];
 	};
 
 	CClientData m_aClients[MAX_CLIENTS];
@@ -801,7 +801,7 @@ public:
 		IGraphics::CTextureHandle m_SpriteNinjaBarEmpty;
 		IGraphics::CTextureHandle m_SpriteNinjaBarEmptyRight;
 
-		bool IsSixup() const
+		bool IsSeven() const
 		{
 			return m_SpriteNinjaBarFullLeft.IsValid();
 		}

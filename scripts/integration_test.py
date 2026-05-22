@@ -659,8 +659,8 @@ def client_can_connect(test_env):
 	wait_for_startup([client, server])
 	client.command(f"connect localhost:{server.port}")
 	join = server.wait_for_log_prefix("server: player has entered the game", timeout=10).line
-	if "sixup=0" not in join:
-		raise AssertionError(f"sixup=0 not found in {join!r}")
+	if "seven=0" not in join:
+		raise AssertionError(f"seven=0 not found in {join!r}")
 	server.exit()
 	client.wait_for_log_exact("client: offline error='Server shutdown'")
 	client.exit()
@@ -675,8 +675,8 @@ def client_can_connect_7(test_env):
 	wait_for_startup([client, server])
 	client.command(f"connect tw-0.7+udp://127.0.0.1:{server.port}")  # FIXME(#11693): Work around missing domain support.
 	join = server.wait_for_log_prefix("server: player has entered the game", timeout=10).line
-	if "sixup=1" not in join:
-		raise AssertionError(f"sixup=0 not found in {join!r}")
+	if "seven=1" not in join:
+		raise AssertionError(f"seven=0 not found in {join!r}")
 	server.exit()
 	client.wait_for_log_exact("client: offline error='Server shutdown'")
 	client.exit()
@@ -693,8 +693,8 @@ def client_can_connect_websockets(test_env):
 	server.wait_for_log_prefix("websockets: I: lws_handshake_server", timeout=15)  # Connection established
 	client.wait_for_log_prefix("websockets: I: lws_http_client_socket_service", timeout=15)  # Connection established
 	join = server.wait_for_log_prefix("server: player has entered the game", timeout=5).line
-	if "sixup=0" not in join:
-		raise AssertionError(f"sixup=0 not found in {join!r}")
+	if "seven=0" not in join:
+		raise AssertionError(f"seven=0 not found in {join!r}")
 	server.exit()
 	client.wait_for_log_exact("client: offline error='Server shutdown'")
 	client.exit()

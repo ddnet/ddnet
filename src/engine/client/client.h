@@ -78,13 +78,13 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	IUpdater *m_pUpdater = nullptr;
 
 	rust::Box<CSnapshotDelta> m_pSnapshotDelta;
-	rust::Box<CSnapshotDelta> m_pSnapshotDeltaSixup;
+	rust::Box<CSnapshotDelta> m_pSnapshotDeltaSeven;
 	CSnapshotDelta *SnapshotDelta();
 
 	CNetClient m_aNetClient[NUM_CONNS];
 	CDemoPlayer m_DemoPlayer;
 	CDemoRecorder m_aDemoRecorders[RECORDER_MAX];
-	CDemoRecorder m_aDemoRecordersSixup[RECORDER_MAX];
+	CDemoRecorder m_aDemoRecordersSeven[RECORDER_MAX];
 	CDemoEditor m_DemoEditor;
 	CGhostRecorder m_GhostRecorder;
 	CGhostLoader m_GhostLoader;
@@ -96,7 +96,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aConnectAddressStr[MAX_SERVER_ADDRESSES * NETADDR_MAXSTRSIZE] = "";
 
 	CUuid m_ConnectionId = UUID_ZEROED;
-	bool m_Sixup;
+	bool m_Seven;
 
 	bool m_HaveGlobalTcpAddr = false;
 	NETADDR m_GlobalTcpAddr = NETADDR_ZEROED;
@@ -394,7 +394,7 @@ public:
 	void ResetDDNetInfoTask();
 	void LoadDDNetInfo();
 
-	bool IsSixup() const override { return m_Sixup; }
+	bool IsSeven() const override { return m_Seven; }
 
 	const NETADDR &ServerAddress() const override { return *m_aNetClient[CONN_MAIN].ServerAddress(); }
 	int ConnectNetTypes() const override;

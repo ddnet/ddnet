@@ -1347,7 +1347,7 @@ void CChat::SendChat(int Team, const char *pLine)
 
 	m_LastChatSend = time();
 
-	if(GameClient()->Client()->IsSixup())
+	if(GameClient()->Client()->IsSeven())
 	{
 		protocol7::CNetMsg_Cl_Say Msg7;
 		Msg7.m_Mode = Team == 1 ? protocol7::CHAT_TEAM : protocol7::CHAT_ALL;

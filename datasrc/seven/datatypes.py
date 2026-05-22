@@ -228,7 +228,7 @@ class NetObject:
 			lines = [f"struct {self.struct_name} : public {self.base_struct_name}", "{"]
 		else:
 			lines = [f"struct {self.struct_name}", "{"]
-		lines += ["\tusing is_sixup = char;"]
+		lines += ["\tusing is_seven = char;"]
 		lines += [f"\tstatic constexpr int ms_MsgId = {self.enum_name};"]
 		lines += ["\trust::Slice<const int32_t> AsSlice() const { return rust::Slice((const int32_t *)this, sizeof(*this) / sizeof(int32_t)); }"]
 		for v in self.variables:

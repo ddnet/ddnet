@@ -200,7 +200,7 @@ public:
 		EDnsblState m_DnsblState;
 		std::shared_ptr<CHostLookup> m_pDnsblLookup;
 
-		bool m_Sixup;
+		bool m_Seven;
 
 		bool IncludedInServerInfo() const
 		{
@@ -214,7 +214,7 @@ public:
 	int m_aIdMap[MAX_CLIENTS * VANILLA_MAX_CLIENTS];
 
 	rust::Box<CSnapshotDelta> m_pSnapshotDelta;
-	rust::Box<CSnapshotDelta> m_pSnapshotDeltaSixup;
+	rust::Box<CSnapshotDelta> m_pSnapshotDeltaSeven;
 	rust::Box<CSnapshotBuilder> m_pSnapshotBuilder;
 	CSnapIdPool m_IdPool;
 	CNetServer m_NetServer;
@@ -245,7 +245,7 @@ public:
 	enum
 	{
 		MAP_TYPE_SIX = 0,
-		MAP_TYPE_SIXUP,
+		MAP_TYPE_SEVEN,
 		NUM_MAP_TYPES
 	};
 
@@ -331,7 +331,7 @@ public:
 
 	void DoSnapshot();
 
-	static int NewClientCallback(int ClientId, void *pUser, bool Sixup);
+	static int NewClientCallback(int ClientId, void *pUser, bool Seven);
 	static int NewClientNoAuthCallback(int ClientId, void *pUser);
 	static int DelClientCallback(int ClientId, const char *pReason, void *pUser);
 
@@ -399,7 +399,7 @@ public:
 		void Clear();
 	};
 	CCache m_aServerInfoCache[3 * 2];
-	CCache m_aSixupServerInfoCache[2];
+	CCache m_aSevenServerInfoCache[2];
 	bool m_ServerInfoNeedsUpdate = false;
 	bool m_ServerInfoNeedsResend = false;
 
@@ -408,9 +408,9 @@ public:
 	void ExpireServerInfo() override;
 	void ExpireServerInfoAndQueueResend();
 	void CacheServerInfo(CCache *pCache, int Type, bool SendClients);
-	void CacheServerInfoSixup(CCache *pCache, bool SendClients, int MaxConsideredClients);
+	void CacheServerInfoSeven(CCache *pCache, bool SendClients, int MaxConsideredClients);
 	void SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool SendClients);
-	void GetServerInfoSixup(CPacker *pPacker, bool SendClients);
+	void GetServerInfoSeven(CPacker *pPacker, bool SendClients);
 	bool RateLimitServerInfoConnless();
 	void SendServerInfoConnless(const NETADDR *pAddr, int Token, int Type);
 	void UpdateRegisterServerInfo();
@@ -467,7 +467,7 @@ public:
 	static void ConchainRconModPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainRconHelperPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainMapUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-	static void ConchainSixupUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainSevenUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainRegisterCommunityTokenRedact(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainStdoutOutputLevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -526,7 +526,7 @@ public:
 	bool ErrorShutdown() const { return m_aErrorShutdownReason[0] != 0; }
 	void SetErrorShutdown(const char *pReason) override;
 
-	bool IsSixup(int ClientId) const override { return ClientId != SERVER_DEMO_CLIENT && m_aClients[ClientId].m_Sixup; }
+	bool IsSeven(int ClientId) const override { return ClientId != SERVER_DEMO_CLIENT && m_aClients[ClientId].m_Seven; }
 
 	void SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr<ILogger> &&pStdoutLogger);
 

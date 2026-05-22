@@ -39,13 +39,13 @@ int unsigned *CSkins7::ms_apColorVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS
 // TODO: uncomment
 // const float MIN_EYE_BODY_COLOR_DIST = 80.f; // between body and eyes (LAB color space)
 
-void CSkins7::CSkinPart::ApplyTo(CTeeRenderInfo::CSixup &SixupRenderInfo) const
+void CSkins7::CSkinPart::ApplyTo(CTeeRenderInfo::CSeven &SevenRenderInfo) const
 {
-	SixupRenderInfo.m_aOriginalTextures[m_Type] = m_OriginalTexture;
-	SixupRenderInfo.m_aColorableTextures[m_Type] = m_ColorableTexture;
+	SevenRenderInfo.m_aOriginalTextures[m_Type] = m_OriginalTexture;
+	SevenRenderInfo.m_aColorableTextures[m_Type] = m_ColorableTexture;
 	if(m_Type == protocol7::SKINPART_BODY)
 	{
-		SixupRenderInfo.m_BloodColor = m_BloodColor;
+		SevenRenderInfo.m_BloodColor = m_BloodColor;
 	}
 }
 
@@ -588,16 +588,16 @@ ColorRGBA CSkins7::GetColor(int Value, bool UseAlpha) const
 	return color_cast<ColorRGBA>(ColorHSLA(Value, UseAlpha).UnclampLighting(ColorHSLA::DARKEST_LGT7));
 }
 
-void CSkins7::ApplyColorTo(CTeeRenderInfo::CSixup &SixupRenderInfo, bool UseCustomColors, int Value, int Part) const
+void CSkins7::ApplyColorTo(CTeeRenderInfo::CSeven &SevenRenderInfo, bool UseCustomColors, int Value, int Part) const
 {
-	SixupRenderInfo.m_aUseCustomColors[Part] = UseCustomColors;
+	SevenRenderInfo.m_aUseCustomColors[Part] = UseCustomColors;
 	if(UseCustomColors)
 	{
-		SixupRenderInfo.m_aColors[Part] = GetColor(Value, Part == protocol7::SKINPART_MARKING);
+		SevenRenderInfo.m_aColors[Part] = GetColor(Value, Part == protocol7::SKINPART_MARKING);
 	}
 	else
 	{
-		SixupRenderInfo.m_aColors[Part] = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+		SevenRenderInfo.m_aColors[Part] = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 }
 

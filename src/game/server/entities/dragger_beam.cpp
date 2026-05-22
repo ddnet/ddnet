@@ -137,7 +137,7 @@ void CDraggerBeam::Snap(int SnappingClient)
 	if(!SnapObjId.has_value())
 		return;
 
-	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Server()->IsSixup(SnappingClient), SnappingClient), SnapObjId.value(),
+	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Server()->IsSeven(SnappingClient), SnappingClient), SnapObjId.value(),
 		TargetPos, m_Pos, StartTick, m_ForClientId, LASERTYPE_DRAGGER, Subtype, m_Number);
 }
 

@@ -358,13 +358,13 @@ static int parse_uint16(unsigned short *out, const char **str)
 
 int net_addr_from_url(NETADDR *addr, const char *string, char *host_buf, size_t host_buf_size)
 {
-	bool sixup = false;
+	bool seven = false;
 	mem_zero(addr, sizeof(*addr));
 	const char *str = str_startswith(string, "tw-0.6+udp://");
 	if(!str && (str = str_startswith(string, "tw-0.7+udp://")))
 	{
 		addr->type |= NETTYPE_TW7;
-		sixup = true;
+		seven = true;
 	}
 	if(!str)
 		return 1;
@@ -399,7 +399,7 @@ int net_addr_from_url(NETADDR *addr, const char *string, char *host_buf, size_t 
 	if(failure)
 		return failure;
 
-	if(sixup)
+	if(seven)
 		addr->type |= NETTYPE_TW7;
 
 	return failure;

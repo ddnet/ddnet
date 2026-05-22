@@ -146,7 +146,7 @@ class CRegister : public IRegister
 	char m_aServerInfo[32768];
 
 public:
-	CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHttp *pHttp, int ServerPort, unsigned SixupSecurityToken);
+	CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHttp *pHttp, int ServerPort, unsigned SevenSecurityToken);
 	void Update() override;
 	void OnConfigChange() override;
 	bool OnPacket(const CNetChunk *pPacket) override;
@@ -518,7 +518,7 @@ void CRegister::CProtocol::CJob::Run()
 	}
 }
 
-CRegister::CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHttp *pHttp, int ServerPort, unsigned SixupSecurityToken) :
+CRegister::CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHttp *pHttp, int ServerPort, unsigned SevenSecurityToken) :
 	m_pConfig(pConfig),
 	m_pConsole(pConsole),
 	m_pEngine(pEngine),
@@ -537,13 +537,13 @@ CRegister::CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHt
 	m_aVerifyPacketPrefix[HEADER_LEN + UUID_MAXSTRSIZE - 1] = ':';
 
 	// The DDNet code uses the `unsigned` security token in big-endian byte order.
-	str_format(m_aConnlessTokenHex, sizeof(m_aConnlessTokenHex), "%08x", SixupSecurityToken);
+	str_format(m_aConnlessTokenHex, sizeof(m_aConnlessTokenHex), "%08x", SevenSecurityToken);
 
 	m_pConsole->Chain("sv_register", ConchainOnConfigChange, this);
 	m_pConsole->Chain("sv_register_extra", ConchainOnConfigChange, this);
 	m_pConsole->Chain("sv_register_url", ConchainOnConfigChange, this);
 	m_pConsole->Chain("sv_register_community_token", ConchainOnConfigChange, this);
-	m_pConsole->Chain("sv_sixup", ConchainOnConfigChange, this);
+	m_pConsole->Chain("sv_seven", ConchainOnConfigChange, this);
 	m_pConsole->Chain("sv_ipv4only", ConchainOnConfigChange, this);
 }
 
@@ -636,7 +636,7 @@ void CRegister::OnConfigChange()
 			}
 		}
 	}
-	if(!m_pConfig->m_SvSixup)
+	if(!m_pConfig->m_SvSeven)
 	{
 		m_aProtocolEnabled[PROTOCOL_TW7_IPV6] = false;
 		m_aProtocolEnabled[PROTOCOL_TW7_IPV4] = false;
@@ -801,7 +801,7 @@ void CRegister::OnShutdown()
 	}
 }
 
-IRegister *CreateRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHttp *pHttp, int ServerPort, unsigned SixupSecurityToken)
+IRegister *CreateRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHttp *pHttp, int ServerPort, unsigned SevenSecurityToken)
 {
-	return new CRegister(pConfig, pConsole, pEngine, pHttp, ServerPort, SixupSecurityToken);
+	return new CRegister(pConfig, pConsole, pEngine, pHttp, ServerPort, SevenSecurityToken);
 }

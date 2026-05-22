@@ -209,9 +209,9 @@ public:
 	}
 };
 
-static int ExtractDemoChat(const char *pDemoFilePath, CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSnapshotDeltaSixup, IStorage *pStorage)
+static int ExtractDemoChat(const char *pDemoFilePath, CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSnapshotDeltaSeven, IStorage *pStorage)
 {
-	CDemoPlayer DemoPlayer(pSnapshotDelta, pSnapshotDeltaSixup, false);
+	CDemoPlayer DemoPlayer(pSnapshotDelta, pSnapshotDeltaSeven, false);
 
 	if(DemoPlayer.Load(pStorage, nullptr, pDemoFilePath, IStorage::TYPE_ALL_OR_ABSOLUTE) == -1)
 	{
@@ -252,7 +252,7 @@ static rust::Box<CSnapshotDelta> CreateSnapshotDelta()
 	return pResult;
 }
 
-static rust::Box<CSnapshotDelta> CreateSnapshotDeltaSixup()
+static rust::Box<CSnapshotDelta> CreateSnapshotDeltaSeven()
 {
 	rust::Box<CSnapshotDelta> pResult = CSnapshotDelta_New();
 	protocol7::CNetObjHandler NetObjHandler7;
@@ -287,7 +287,7 @@ int main(int argc, const char *argv[])
 	}
 
 	rust::Box<CSnapshotDelta> pSnapshotDelta = CreateSnapshotDelta();
-	rust::Box<CSnapshotDelta> pSnapshotDeltaSixup = CreateSnapshotDeltaSixup();
+	rust::Box<CSnapshotDelta> pSnapshotDeltaSeven = CreateSnapshotDeltaSeven();
 
-	return ExtractDemoChat(argv[1], &*pSnapshotDelta, &*pSnapshotDeltaSixup, pStorage.get());
+	return ExtractDemoChat(argv[1], &*pSnapshotDelta, &*pSnapshotDeltaSeven, pStorage.get());
 }

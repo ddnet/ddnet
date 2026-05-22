@@ -204,19 +204,19 @@ bool CNetServer::Connlimit(NETADDR Addr)
 	return false;
 }
 
-int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, bool VanillaAuth, bool Sixup, SECURITY_TOKEN Token)
+int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, bool VanillaAuth, bool Seven, SECURITY_TOKEN Token)
 {
-	if(Sixup && !g_Config.m_SvSixup)
+	if(Seven && !g_Config.m_SvSeven)
 	{
 		const char aMsg[] = "0.7 connections are not accepted at this time";
-		CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aMsg, sizeof(aMsg), SecurityToken, Sixup);
+		CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aMsg, sizeof(aMsg), SecurityToken, Seven);
 		return -1; // failed to add client?
 	}
 
 	if(Connlimit(Addr))
 	{
 		const char aMsg[] = "Too many connections in a short time";
-		CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aMsg, sizeof(aMsg), SecurityToken, Sixup);
+		CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aMsg, sizeof(aMsg), SecurityToken, Seven);
 		return -1; // failed to add client
 	}
 
@@ -225,7 +225,7 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, boo
 	{
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "Only %d players with the same IP are allowed", m_MaxClientsPerIp);
-		CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf) + 1, SecurityToken, Sixup);
+		CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf) + 1, SecurityToken, Seven);
 		return -1; // failed to add client
 	}
 
@@ -242,13 +242,13 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, boo
 	if(Slot == -1)
 	{
 		const char aFullMsg[] = "This server is full";
-		CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aFullMsg, sizeof(aFullMsg), SecurityToken, Sixup);
+		CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CLOSE, aFullMsg, sizeof(aFullMsg), SecurityToken, Seven);
 
 		return -1; // failed to add client
 	}
 
 	// init connection slot
-	m_aSlots[Slot].m_Connection.DirectInit(Addr, SecurityToken, Token, Sixup);
+	m_aSlots[Slot].m_Connection.DirectInit(Addr, SecurityToken, Token, Seven);
 
 	if(VanillaAuth)
 	{
@@ -267,7 +267,7 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, boo
 	if(VanillaAuth)
 		m_pfnNewClientNoAuth(Slot, m_pUser);
 	else
-		m_pfnNewClient(Slot, m_pUser, Sixup);
+		m_pfnNewClient(Slot, m_pUser, Seven);
 
 	return Slot; // done
 }
@@ -514,7 +514,7 @@ void CNetServer::OnTokenCtrlMsg(NETADDR &Addr, int ControlMsg, const CNetPacketC
 	}
 }
 
-int CNetServer::OnSixupCtrlMsg(NETADDR &Addr, CNetChunk *pChunk, int ControlMsg, const CNetPacketConstruct &Packet, SECURITY_TOKEN &ResponseToken, SECURITY_TOKEN Token)
+int CNetServer::OnSevenCtrlMsg(NETADDR &Addr, CNetChunk *pChunk, int ControlMsg, const CNetPacketConstruct &Packet, SECURITY_TOKEN &ResponseToken, SECURITY_TOKEN Token)
 {
 	if(Packet.m_DataSize < 1 + (int)sizeof(SECURITY_TOKEN) || ClientExists(Addr))
 		return 0; // silently ignore
@@ -525,7 +525,7 @@ int CNetServer::OnSixupCtrlMsg(NETADDR &Addr, CNetChunk *pChunk, int ControlMsg,
 	{
 		if(Packet.m_DataSize >= (int)NET_TOKENREQUEST_DATASIZE)
 		{
-			SendTokenSixup(Addr, ResponseToken);
+			SendTokenSeven(Addr, ResponseToken);
 			return 0;
 		}
 
@@ -612,7 +612,7 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 			continue;
 		}
 
-		// Check size and unpack packet flags early so we can determine the sixup
+		// Check size and unpack packet flags early so we can determine the seven
 		// state correctly for connection-oriented packets before unpacking them.
 		std::optional<int> Flags = CNetBase::UnpackPacketFlags(pData, Bytes);
 		if(!Flags)
@@ -622,12 +622,12 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 
 		SECURITY_TOKEN Token;
 		int Slot = (*Flags & NET_PACKETFLAG_CONNLESS) == 0 ? GetClientSlot(Addr) : -1;
-		bool Sixup = Slot != -1 && m_aSlots[Slot].m_Connection.m_Sixup;
-		if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvBuffer, Sixup, &Token, pResponseToken) == 0)
+		bool Seven = Slot != -1 && m_aSlots[Slot].m_Connection.m_Seven;
+		if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvBuffer, Seven, &Token, pResponseToken) == 0)
 		{
 			if(m_RecvBuffer.m_Flags & NET_PACKETFLAG_CONNLESS)
 			{
-				if(Sixup && Token != GetToken(Addr) && Token != GetGlobalToken())
+				if(Seven && Token != GetToken(Addr) && Token != GetGlobalToken())
 				{
 					continue;
 				}
@@ -666,10 +666,10 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 				}
 				else // connection not found, client that wants to connect
 				{
-					if(Sixup)
+					if(Seven)
 					{
 						// got 0.7 control msg
-						if(OnSixupCtrlMsg(Addr, pChunk, m_RecvBuffer.m_aChunkData[0], m_RecvBuffer, *pResponseToken, Token) == 1)
+						if(OnSevenCtrlMsg(Addr, pChunk, m_RecvBuffer.m_aChunkData[0], m_RecvBuffer, *pResponseToken, Token) == 1)
 							return 1;
 					}
 					else if(IsDDNetControlMsg(&m_RecvBuffer))
@@ -723,7 +723,7 @@ int CNetServer::Send(CNetChunk *pChunk)
 	return 0;
 }
 
-void CNetServer::SendTokenSixup(NETADDR &Addr, SECURITY_TOKEN Token)
+void CNetServer::SendTokenSeven(NETADDR &Addr, SECURITY_TOKEN Token)
 {
 	unsigned char aRequestTokenBuf[NET_TOKENREQUEST_DATASIZE] = {};
 	WriteSecurityToken(aRequestTokenBuf, GetToken(Addr));
@@ -743,7 +743,7 @@ bool CNetServer::HasErrored(int ClientId)
 
 void CNetServer::ResumeOldConnection(int ClientId, int OrigId)
 {
-	m_aSlots[ClientId].m_Connection.ResumeConnection(ClientAddr(OrigId), m_aSlots[OrigId].m_Connection.SeqSequence(), m_aSlots[OrigId].m_Connection.AckSequence(), m_aSlots[OrigId].m_Connection.SecurityToken(), m_aSlots[OrigId].m_Connection.ResendBuffer(), m_aSlots[OrigId].m_Connection.m_Sixup);
+	m_aSlots[ClientId].m_Connection.ResumeConnection(ClientAddr(OrigId), m_aSlots[OrigId].m_Connection.SeqSequence(), m_aSlots[OrigId].m_Connection.AckSequence(), m_aSlots[OrigId].m_Connection.SecurityToken(), m_aSlots[OrigId].m_Connection.ResendBuffer(), m_aSlots[OrigId].m_Connection.m_Seven);
 	m_aSlots[OrigId].m_Connection.Reset();
 }
 

@@ -572,8 +572,8 @@ CClientMask CGameTeams::TeamMask(int Team, int ExceptId, int Asker, int VersionF
 			continue; // Explicitly excluded
 		if(!GetPlayer(i))
 			continue; // Player doesn't exist
-		if(!((Server()->IsSixup(i) && (VersionFlags & CGameContext::FLAG_SIXUP)) ||
-			   (!Server()->IsSixup(i) && (VersionFlags & CGameContext::FLAG_SIX))))
+		if(!((Server()->IsSeven(i) && (VersionFlags & CGameContext::FLAG_SEVEN)) ||
+			   (!Server()->IsSeven(i) && (VersionFlags & CGameContext::FLAG_SIX))))
 			continue;
 
 		if(!(GetPlayer(i)->GetTeam() == TEAM_SPECTATORS || GetPlayer(i)->IsPaused()))
@@ -653,7 +653,7 @@ void CGameTeams::SendTeamsState(int ClientId)
 
 	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
 	int ClientVersion = m_pGameContext->m_apPlayers[ClientId]->GetClientVersion();
-	if(!Server()->IsSixup(ClientId) && VERSION_DDRACE < ClientVersion && ClientVersion < VERSION_DDNET_MSG_LEGACY)
+	if(!Server()->IsSeven(ClientId) && VERSION_DDRACE < ClientVersion && ClientVersion < VERSION_DDNET_MSG_LEGACY)
 	{
 		Server()->SendMsg(&MsgLegacy, MSGFLAG_VITAL, ClientId);
 	}

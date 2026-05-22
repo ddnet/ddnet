@@ -44,7 +44,7 @@ public:
 		IGraphics::CTextureHandle m_ColorableTexture;
 		ColorRGBA m_BloodColor;
 
-		void ApplyTo(CTeeRenderInfo::CSixup &SixupRenderInfo) const;
+		void ApplyTo(CTeeRenderInfo::CSeven &SevenRenderInfo) const;
 
 		bool operator<(const CSkinPart &Other) const;
 	};
@@ -85,7 +85,7 @@ public:
 	void RandomizeSkin(int Dummy) const;
 
 	ColorRGBA GetColor(int Value, bool UseAlpha) const;
-	void ApplyColorTo(CTeeRenderInfo::CSixup &SixupRenderInfo, bool UseCustomColors, int Value, int Part) const;
+	void ApplyColorTo(CTeeRenderInfo::CSeven &SevenRenderInfo, bool UseCustomColors, int Value, int Part) const;
 	ColorRGBA GetTeamColor(int UseCustomColors, int PartColor, int Team, int Part) const;
 
 	// returns true if everything was valid and nothing changed

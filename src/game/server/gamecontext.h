@@ -64,18 +64,18 @@ struct CScorePlayerResult;
 
 struct CSnapContext
 {
-	CSnapContext(int Version, bool Sixup, int ClientId) :
-		m_ClientVersion(Version), m_Sixup(Sixup), m_ClientId(ClientId)
+	CSnapContext(int Version, bool Seven, int ClientId) :
+		m_ClientVersion(Version), m_Seven(Seven), m_ClientId(ClientId)
 	{
 	}
 
 	int GetClientVersion() const { return m_ClientVersion; }
-	bool IsSixup() const { return m_Sixup; }
+	bool IsSeven() const { return m_Seven; }
 	bool ClientId() const { return m_ClientId; }
 
 private:
 	int m_ClientVersion;
-	bool m_Sixup;
+	bool m_Seven;
 	int m_ClientId;
 };
 
@@ -242,7 +242,7 @@ public:
 	std::vector<SSwitchers> &Switchers() { return m_World.m_Core.m_vSwitchers; }
 
 	// voting
-	void StartVote(const char *pDesc, const char *pCommand, const char *pReason, const char *pSixupDesc);
+	void StartVote(const char *pDesc, const char *pCommand, const char *pReason, const char *pSevenDesc);
 	void EndVote();
 	void SendVoteSet(int ClientId);
 	void SendVoteStatus(int ClientId, int Total, int Yes, int No);
@@ -254,7 +254,7 @@ public:
 	bool m_VoteUpdate;
 	int m_VotePos;
 	char m_aVoteDescription[VOTE_DESC_LENGTH];
-	char m_aSixupVoteDescription[VOTE_DESC_LENGTH];
+	char m_aSevenVoteDescription[VOTE_DESC_LENGTH];
 	char m_aVoteCommand[VOTE_CMD_LENGTH];
 	char m_aVoteReason[VOTE_REASON_LENGTH];
 	int m_NumVoteOptions;
@@ -300,14 +300,14 @@ public:
 	enum
 	{
 		FLAG_SIX = 1 << 0,
-		FLAG_SIXUP = 1 << 1,
+		FLAG_SEVEN = 1 << 1,
 	};
 
 	// network
-	void CallVote(int ClientId, const char *pDesc, const char *pCmd, const char *pReason, const char *pChatmsg, const char *pSixupDesc = nullptr);
-	void SendChatTarget(int To, const char *pText, int VersionFlags = FLAG_SIX | FLAG_SIXUP) const;
+	void CallVote(int ClientId, const char *pDesc, const char *pCmd, const char *pReason, const char *pChatmsg, const char *pSevenDesc = nullptr);
+	void SendChatTarget(int To, const char *pText, int VersionFlags = FLAG_SIX | FLAG_SEVEN) const;
 	void SendChatTeam(int Team, const char *pText) const;
-	void SendChat(int ClientId, int Team, const char *pText, int SpamProtectionClientId = -1, int VersionFlags = FLAG_SIX | FLAG_SIXUP);
+	void SendChat(int ClientId, int Team, const char *pText, int SpamProtectionClientId = -1, int VersionFlags = FLAG_SIX | FLAG_SEVEN);
 	void SendStartWarning(int ClientId, const char *pMessage);
 	void SendEmoticon(int ClientId, int Emoticon, int TargetClientId) const;
 	void SendWeaponPickup(int ClientId, int Weapon) const;
@@ -375,7 +375,7 @@ public:
 	void PreInputClients(int ClientId, bool *pClients) override;
 
 	void TeehistorianRecordAntibot(const void *pData, int DataSize) override;
-	void TeehistorianRecordPlayerJoin(int ClientId, bool Sixup) override;
+	void TeehistorianRecordPlayerJoin(int ClientId, bool Seven) override;
 	void TeehistorianRecordPlayerDrop(int ClientId, const char *pReason) override;
 	void TeehistorianRecordPlayerRejoin(int ClientId) override;
 	void TeehistorianRecordPlayerName(int ClientId, const char *pName) override;

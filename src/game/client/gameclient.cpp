@@ -862,7 +862,7 @@ void CGameClient::OnRender()
 	{
 		if(m_aCheckInfo[0] == 0)
 		{
-			if(m_pClient->IsSixup())
+			if(m_pClient->IsSeven())
 			{
 				if(!GotWantedSkin7(false))
 					SendSkinChange7(false);
@@ -894,7 +894,7 @@ void CGameClient::OnRender()
 		{
 			if(m_aCheckInfo[1] == 0)
 			{
-				if(m_pClient->IsSixup())
+				if(m_pClient->IsSeven())
 				{
 					if(!GotWantedSkin7(true))
 						SendSkinChange7(true);
@@ -1088,7 +1088,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		for(int i = 0; i < CTuningParams::Num(); i++)
 		{
 			static_assert(offsetof(CTuningParams, m_LaserDamage) / sizeof(CTuneParam) == 30);
-			if(i == 30 && Client()->IsSixup()) // laser_damage was removed in 0.7
+			if(i == 30 && Client()->IsSeven()) // laser_damage was removed in 0.7
 			{
 				continue;
 			}
@@ -1115,8 +1115,8 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 	if(!pRawMsg)
 	{
 		// the 0.7 version of this error message is printed on translation
-		// in sixup/translate_game.cpp
-		if(!Client()->IsSixup())
+		// in seven/translate_game.cpp
+		if(!Client()->IsSeven())
 		{
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "dropped weird message '%s' (%d), failed on '%s'", m_NetObjHandler.GetMsgName(MsgId), MsgId, m_NetObjHandler.FailedMsgOn());
@@ -1976,7 +1976,7 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 
 				// needed for 0.7 survival
 				// to auto spec players when dead
-				if(Client()->IsSixup())
+				if(Client()->IsSeven())
 					m_Snap.m_SpecInfo.m_Active = true;
 				m_Snap.m_SpecInfo.m_SpectatorId = m_Snap.m_pSpectatorInfo->m_SpectatorId;
 			}
@@ -2152,7 +2152,7 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 		if(m_Snap.m_LocalClientId == -1 && m_DemoSpecId == SPEC_FOLLOW)
 		{
 			// TODO: can this be done in the translation layer?
-			if(!Client()->IsSixup())
+			if(!Client()->IsSeven())
 				m_DemoSpecId = SPEC_FREEVIEW;
 		}
 		if(m_DemoSpecId != SPEC_FOLLOW)
@@ -2205,7 +2205,7 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 		});
 
 	bool TimeScore = m_GameInfo.m_TimeScore;
-	bool Race7 = Client()->IsSixup() && m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameFlags & protocol7::GAMEFLAG_RACE;
+	bool Race7 = Client()->IsSeven() && m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameFlags & protocol7::GAMEFLAG_RACE;
 
 	// sort player infos by score
 	mem_copy(m_Snap.m_apInfoByScore, m_Snap.m_apInfoByName, sizeof(m_Snap.m_apInfoByScore));
@@ -2910,11 +2910,11 @@ void CGameClient::CClientData::UpdateSkinInfo()
 		{
 			for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
 			{
-				const CClientData::CSixup &SixupData = m_aSixup[Dummy];
-				CTeeRenderInfo::CSixup &SixupSkinInfo = m_pSkinInfo->TeeRenderInfo().m_aSixup[Dummy];
+				const CClientData::CSeven &SevenData = m_aSeven[Dummy];
+				CTeeRenderInfo::CSeven &SevenSkinInfo = m_pSkinInfo->TeeRenderInfo().m_aSeven[Dummy];
 				for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 				{
-					m_pGameClient->m_Skins7.ApplyColorTo(SixupSkinInfo, SixupData.m_aUseCustomColors[Part], SixupData.m_aSkinPartColors[Part], Part);
+					m_pGameClient->m_Skins7.ApplyColorTo(SevenSkinInfo, SevenData.m_aUseCustomColors[Part], SevenData.m_aSkinPartColors[Part], Part);
 				}
 				UpdateSkin7HatSprite(Dummy);
 				UpdateSkin7BotDecoration(Dummy);
@@ -2952,9 +2952,9 @@ void CGameClient::CClientData::UpdateRenderInfo()
 	if(m_pGameClient->IsTeamPlay())
 	{
 		m_RenderInfo.m_CustomColoredSkin = true;
-		for(auto &Sixup : m_RenderInfo.m_aSixup)
+		for(auto &Seven : m_RenderInfo.m_aSeven)
 		{
-			std::fill(std::begin(Sixup.m_aUseCustomColors), std::end(Sixup.m_aUseCustomColors), true);
+			std::fill(std::begin(Seven.m_aUseCustomColors), std::end(Seven.m_aUseCustomColors), true);
 		}
 
 		if(m_Team >= TEAM_RED && m_Team <= TEAM_BLUE)
@@ -2964,22 +2964,22 @@ void CGameClient::CClientData::UpdateRenderInfo()
 			m_RenderInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(aTeamColors[m_Team]));
 
 			// 0.7
-			for(auto &Sixup : m_RenderInfo.m_aSixup)
+			for(auto &Seven : m_RenderInfo.m_aSeven)
 			{
-				const ColorRGBA aTeamColorsSixup[2] = {
+				const ColorRGBA aTeamColorsSeven[2] = {
 					ColorRGBA(0.753f, 0.318f, 0.318f, 1.0f),
 					ColorRGBA(0.318f, 0.471f, 0.753f, 1.0f)};
-				const ColorRGBA aMarkingColorsSixup[2] = {
+				const ColorRGBA aMarkingColorsSeven[2] = {
 					ColorRGBA(0.824f, 0.345f, 0.345f, 1.0f),
 					ColorRGBA(0.345f, 0.514f, 0.824f, 1.0f)};
-				float MarkingAlpha = Sixup.m_aColors[protocol7::SKINPART_MARKING].a;
-				for(auto &Color : Sixup.m_aColors)
+				float MarkingAlpha = Seven.m_aColors[protocol7::SKINPART_MARKING].a;
+				for(auto &Color : Seven.m_aColors)
 				{
-					Color = aTeamColorsSixup[m_Team];
+					Color = aTeamColorsSeven[m_Team];
 				}
 				if(MarkingAlpha > 0.1f)
 				{
-					Sixup.m_aColors[protocol7::SKINPART_MARKING] = aMarkingColorsSixup[m_Team];
+					Seven.m_aColors[protocol7::SKINPART_MARKING] = aMarkingColorsSeven[m_Team];
 				}
 			}
 		}
@@ -2987,9 +2987,9 @@ void CGameClient::CClientData::UpdateRenderInfo()
 		{
 			m_RenderInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(12829350));
 			m_RenderInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(12829350));
-			for(auto &Sixup : m_RenderInfo.m_aSixup)
+			for(auto &Seven : m_RenderInfo.m_aSeven)
 			{
-				for(auto &Color : Sixup.m_aColors)
+				for(auto &Color : Seven.m_aColors)
 				{
 					Color = color_cast<ColorRGBA>(ColorHSLA(12829350));
 				}
@@ -3078,7 +3078,7 @@ void CGameClient::CClientData::Reset()
 	m_SpecCharPresent = false;
 	m_SpecChar = vec2(0.0f, 0.0f);
 
-	for(auto &Info : m_aSixup)
+	for(auto &Info : m_aSeven)
 		Info.Reset();
 }
 
@@ -3099,17 +3099,17 @@ CSkinDescriptor CGameClient::CClientData::ToSkinDescriptor() const
 		{
 			for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 			{
-				str_copy(SkinDescriptor.m_aSixup[Dummy].m_aaSkinPartNames[Part], m_aSixup[Dummy].m_aaSkinPartNames[Part]);
+				str_copy(SkinDescriptor.m_aSeven[Dummy].m_aaSkinPartNames[Part], m_aSeven[Dummy].m_aaSkinPartNames[Part]);
 			}
-			SkinDescriptor.m_aSixup[Dummy].m_XmasHat = time_season() == ETimeSeason::XMAS;
-			SkinDescriptor.m_aSixup[Dummy].m_BotDecoration = (TranslatedClient.m_PlayerFlags7 & protocol7::PLAYERFLAG_BOT) != 0;
+			SkinDescriptor.m_aSeven[Dummy].m_XmasHat = time_season() == ETimeSeason::XMAS;
+			SkinDescriptor.m_aSeven[Dummy].m_BotDecoration = (TranslatedClient.m_PlayerFlags7 & protocol7::PLAYERFLAG_BOT) != 0;
 		}
 	}
 
 	return SkinDescriptor;
 }
 
-void CGameClient::CClientData::CSixup::Reset()
+void CGameClient::CClientData::CSeven::Reset()
 {
 	for(int i = 0; i < protocol7::NUM_SKINPARTS; ++i)
 	{
@@ -3182,11 +3182,11 @@ bool CGameClient::GotWantedSkin7(bool Dummy)
 
 	for(int SkinPart = 0; SkinPart < protocol7::NUM_SKINPARTS; SkinPart++)
 	{
-		if(str_comp(m_aClients[m_aLocalIds[(int)Dummy]].m_aSixup[g_Config.m_ClDummy].m_aaSkinPartNames[SkinPart], apSkinPartsPtr[SkinPart]))
+		if(str_comp(m_aClients[m_aLocalIds[(int)Dummy]].m_aSeven[g_Config.m_ClDummy].m_aaSkinPartNames[SkinPart], apSkinPartsPtr[SkinPart]))
 			return false;
-		if(m_aClients[m_aLocalIds[(int)Dummy]].m_aSixup[g_Config.m_ClDummy].m_aUseCustomColors[SkinPart] != aUCCVars[SkinPart])
+		if(m_aClients[m_aLocalIds[(int)Dummy]].m_aSeven[g_Config.m_ClDummy].m_aUseCustomColors[SkinPart] != aUCCVars[SkinPart])
 			return false;
-		if(m_aClients[m_aLocalIds[(int)Dummy]].m_aSixup[g_Config.m_ClDummy].m_aSkinPartColors[SkinPart] != aColorVars[SkinPart])
+		if(m_aClients[m_aLocalIds[(int)Dummy]].m_aSeven[g_Config.m_ClDummy].m_aSkinPartColors[SkinPart] != aColorVars[SkinPart])
 			return false;
 	}
 
@@ -3203,7 +3203,7 @@ bool CGameClient::GotWantedSkin7(bool Dummy)
 
 void CGameClient::SendInfo(bool Start)
 {
-	if(m_pClient->IsSixup())
+	if(m_pClient->IsSeven())
 	{
 		if(Start)
 			SendStartInfo7(false);
@@ -3245,7 +3245,7 @@ void CGameClient::SendInfo(bool Start)
 
 void CGameClient::SendDummyInfo(bool Start)
 {
-	if(m_pClient->IsSixup())
+	if(m_pClient->IsSeven())
 	{
 		if(Start)
 			SendStartInfo7(true);
@@ -3299,7 +3299,7 @@ void CGameClient::SendKill() const
 
 void CGameClient::SendReadyChange7()
 {
-	if(!Client()->IsSixup())
+	if(!Client()->IsSeven())
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", "Error you have to be connected to a 0.7 server to use ready_change");
 		return;
@@ -4120,7 +4120,7 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteFlagBlue);
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteFlagRed);
 
-		if(m_GameSkin.IsSixup())
+		if(m_GameSkin.IsSeven())
 		{
 			Graphics()->UnloadTexture(&m_GameSkin.m_SpriteNinjaBarFullLeft);
 			Graphics()->UnloadTexture(&m_GameSkin.m_SpriteNinjaBarFull);
@@ -4570,24 +4570,24 @@ void CGameClient::RefreshSkin(const std::shared_ptr<CManagedTeeRenderInfo> &pMan
 		{
 			for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 			{
-				m_Skins7.FindSkinPart(Part, SkinDescriptor.m_aSixup[Dummy].m_aaSkinPartNames[Part], true)->ApplyTo(TeeInfo.m_aSixup[Dummy]);
+				m_Skins7.FindSkinPart(Part, SkinDescriptor.m_aSeven[Dummy].m_aaSkinPartNames[Part], true)->ApplyTo(TeeInfo.m_aSeven[Dummy]);
 
-				if(SkinDescriptor.m_aSixup[Dummy].m_XmasHat)
+				if(SkinDescriptor.m_aSeven[Dummy].m_XmasHat)
 				{
-					TeeInfo.m_aSixup[Dummy].m_HatTexture = m_Skins7.XmasHatTexture();
+					TeeInfo.m_aSeven[Dummy].m_HatTexture = m_Skins7.XmasHatTexture();
 				}
 				else
 				{
-					TeeInfo.m_aSixup[Dummy].m_HatTexture.Invalidate();
+					TeeInfo.m_aSeven[Dummy].m_HatTexture.Invalidate();
 				}
 
-				if(SkinDescriptor.m_aSixup[Dummy].m_BotDecoration)
+				if(SkinDescriptor.m_aSeven[Dummy].m_BotDecoration)
 				{
-					TeeInfo.m_aSixup[Dummy].m_BotTexture = m_Skins7.BotDecorationTexture();
+					TeeInfo.m_aSeven[Dummy].m_BotTexture = m_Skins7.BotDecorationTexture();
 				}
 				else
 				{
-					TeeInfo.m_aSixup[Dummy].m_BotTexture.Invalidate();
+					TeeInfo.m_aSeven[Dummy].m_BotTexture.Invalidate();
 				}
 			}
 		}
