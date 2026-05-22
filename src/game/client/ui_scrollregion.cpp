@@ -113,9 +113,12 @@ void CScrollRegion::ScrollRelative(EScrollRelative Direction, float SpeedMultipl
 	m_ScrollSpeedMultiplier = SpeedMultiplier;
 }
 
-void CScrollRegion::ScrollRelativeDirect(float ScrollAmount)
+void CScrollRegion::ScrollRelativeDirect(vec2 ScrollAmount)
 {
-	m_RequestScrollPos = std::clamp(m_ScrollPos + ScrollAmount, 0.0f, m_ContentSize - ContentAreaSize());
+	if(m_Params.m_ScrollHorizontal)
+		m_RequestScrollPos = std::clamp(m_ScrollPos + ScrollAmount.x, 0.0f, m_ContentSize - ContentAreaSize());
+	else
+		m_RequestScrollPos = std::clamp(m_ScrollPos + ScrollAmount.y, 0.0f, m_ContentSize - ContentAreaSize());
 }
 
 void CScrollRegion::DoEdgeScrolling()
