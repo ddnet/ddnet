@@ -170,6 +170,27 @@ How to build the DDNet client for Android
 	Users can only update apps automatically if the same package name and signing key have been used,
 	else they must manually uninstall the old app.
 
+How to run the DDNet client in an emulator
+==========================================
+
+- 	Install an Android system image:
+	```shell
+	~/Android/Sdk/cmdline-tools/latest/bin/sdkmanager "system-images;android-36;default;<x86/x86_64/arm/arm64>"
+	```
+	Note that this should match your host CPU for best performance.
+-	Create a virtual device:
+	```shell
+	~/Android/Sdk/cmdline-tools/latest/bin/avdmanager create avd -n android36default -k "system-images;android-36;default;<x86/x86_64/arm/arm64>"
+	```
+-	Start the virtual device:
+	```shell
+	~/Android/Sdk/emulator/emulator -avd android36default -skin 1280x800 &
+	```
+-	Once the virtual device is running, load the APK onto it:
+	```shell
+	~/Android/Sdk/platform-tools/adb install build-android-debug/DDNet.apk
+	```
+
 Common problems and solutions
 =============================
 
