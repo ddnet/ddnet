@@ -44,7 +44,7 @@ public:
 	unsigned Crc() const override;
 	int Size() const override;
 
-	static void ExtractTiles(class CTile *pDest, size_t DestSize, const class CTile *pSrc, size_t SrcSize);
+	static bool ExtractTiles(class CTile *pDest, size_t DestSize, const class CTile *pSrc, size_t SrcSize);
 };
 
 #endif
