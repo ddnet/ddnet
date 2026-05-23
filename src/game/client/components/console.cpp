@@ -459,20 +459,6 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 	}
 }
 
-void CGameConsole::CInstance::PossibleCommandsCompleteCallback(int Index, const char *pStr, void *pUser)
-{
-	CGameConsole::CInstance *pInstance = (CGameConsole::CInstance *)pUser;
-	if(pInstance->m_CompletionChosen == Index)
-	{
-		char aBefore[IConsole::CMDLINE_LENGTH];
-		str_truncate(aBefore, sizeof(aBefore), pInstance->m_aCompletionBuffer, pInstance->m_CompletionCommandStart);
-		char aBuf[IConsole::CMDLINE_LENGTH];
-		str_format(aBuf, sizeof(aBuf), "%s%s%s", aBefore, pStr, pInstance->m_aCompletionBuffer + pInstance->m_CompletionCommandEnd);
-		pInstance->m_Input.Set(aBuf);
-		pInstance->m_Input.SetCursorOffset(str_length(pStr) + pInstance->m_CompletionCommandStart);
-	}
-}
-
 void CGameConsole::CInstance::GetCommand(const char *pInput, char (&aCmd)[IConsole::CMDLINE_LENGTH])
 {
 	char aInput[IConsole::CMDLINE_LENGTH];
@@ -498,22 +484,6 @@ static void StrCopyUntilSpace(char *pDest, size_t DestSize, const char *pSrc)
 {
 	const char *pSpace = str_find(pSrc, " ");
 	str_copy(pDest, pSrc, minimum<size_t>(pSpace ? pSpace - pSrc + 1 : 1, DestSize));
-}
-
-void CGameConsole::CInstance::PossibleArgumentsCompleteCallback(int Index, const char *pStr, void *pUser)
-{
-	CGameConsole::CInstance *pInstance = (CGameConsole::CInstance *)pUser;
-	if(pInstance->m_CompletionChosenArgument == Index)
-	{
-		// get command
-		char aBuf[IConsole::CMDLINE_LENGTH];
-		str_copy(aBuf, pInstance->GetString(), pInstance->m_CompletionArgumentPosition);
-		str_append(aBuf, " ");
-
-		// append argument
-		str_append(aBuf, pStr);
-		pInstance->m_Input.Set(aBuf);
-	}
 }
 
 bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
@@ -620,7 +590,12 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 						m_CompletionChosen = (m_CompletionChosen + Direction + CompletionEnumerationCount) % CompletionEnumerationCount;
 						m_CompletionArgumentPosition = 0;
 
-						PossibleCommandsCompleteCallback(m_CompletionChosen, m_vpCommandSuggestions[m_CompletionChosen], this);
+						char aBefore[IConsole::CMDLINE_LENGTH];
+						str_truncate(aBefore, sizeof(aBefore), m_aCompletionBuffer, m_CompletionCommandStart);
+						char aBuf[IConsole::CMDLINE_LENGTH];
+						str_format(aBuf, sizeof(aBuf), "%s%s%s", aBefore, m_vpCommandSuggestions[m_CompletionChosen], m_aCompletionBuffer + m_CompletionCommandEnd);
+						m_Input.Set(aBuf);
+						m_Input.SetCursorOffset(str_length(m_vpCommandSuggestions[m_CompletionChosen]) + m_CompletionCommandStart);
 					}
 					else if(m_CompletionChosen != -1)
 					{
@@ -639,7 +614,14 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 					m_CompletionChosenArgument = (m_CompletionChosenArgument + Direction + CompletionEnumerationCountArgs) % CompletionEnumerationCountArgs;
 					m_CompletionArgumentPosition = CompletionPos;
 
-					PossibleArgumentsCompleteCallback(m_CompletionChosenArgument, m_vpArgumentSuggestions[m_CompletionChosenArgument], this);
+					// get command
+					char aBuf[IConsole::CMDLINE_LENGTH];
+					str_copy(aBuf, GetString(), m_CompletionArgumentPosition);
+					str_append(aBuf, " ");
+
+					// append argument
+					str_append(aBuf, m_vpArgumentSuggestions[m_CompletionChosenArgument]);
+					m_Input.Set(aBuf);
 				}
 				else if(m_CompletionChosenArgument != -1)
 				{
