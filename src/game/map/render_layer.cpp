@@ -15,7 +15,7 @@
 #include <game/mapitems.h>
 
 #include <array>
-#include <chrono>
+#include <cmath>
 
 /************************
  * Render Buffer Helper *
@@ -1706,10 +1706,30 @@ void CRenderLayerEntitySwitch::RenderTileLayerNoTileBuffer(const ColorRGBA &Colo
 CRenderLayerEntityTune::CRenderLayerEntityTune(int GroupId, int LayerId, int Flags, CMapItemLayerTilemap *pLayerTilemap) :
 	CRenderLayerEntityBase(GroupId, LayerId, Flags, pLayerTilemap) {}
 
+IGraphics::CTextureHandle CRenderLayerEntityTune::GetTexture() const
+{
+	return m_pMapImages->GetTuneColors();
+}
+
 void CRenderLayerEntityTune::GetTileData(unsigned char *pIndex, unsigned char *pFlags, int *pAngleRotate, unsigned int x, unsigned int y, int CurOverlay) const
 {
-	*pIndex = m_pTuneTiles[y * m_pLayerTilemap->m_Width + x].m_Type;
+	const unsigned char Number = m_pTuneTiles[y * m_pLayerTilemap->m_Width + x].m_Number;
+	unsigned char Index = 0;
+
+	if(Number != 0)
+	{
+		// assign color index instead of tune number for higher color distance
+		Index = m_TuneColorMapper.TuneNumberToColorIndex(Number);
+	}
+
+	*pIndex = Index;
 	*pFlags = 0;
+}
+
+void CRenderLayerEntityTune::Init()
+{
+	m_TuneColorMapper.Reset();
+	CRenderLayerTile::Init();
 }
 
 int CRenderLayerEntityTune::GetDataIndex(unsigned int &TileSize) const
@@ -1726,7 +1746,7 @@ void CRenderLayerEntityTune::InitTileData()
 void CRenderLayerEntityTune::RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params)
 {
 	Graphics()->BlendNone();
-	RenderMap()->RenderTunemap(m_pTuneTiles, m_pLayerTilemap->m_Width, m_pLayerTilemap->m_Height, 32.0f, Color, (Params.m_RenderTileBorder ? TILERENDERFLAG_EXTEND : 0) | LAYERRENDERFLAG_OPAQUE);
+	RenderMap()->RenderTunemap(m_pTuneTiles, m_pLayerTilemap->m_Width, m_pLayerTilemap->m_Height, 32.0f, Color, (Params.m_RenderTileBorder ? TILERENDERFLAG_EXTEND : 0) | LAYERRENDERFLAG_OPAQUE, &m_TuneColorMapper);
 	Graphics()->BlendNormal();
-	RenderMap()->RenderTunemap(m_pTuneTiles, m_pLayerTilemap->m_Width, m_pLayerTilemap->m_Height, 32.0f, Color, (Params.m_RenderTileBorder ? TILERENDERFLAG_EXTEND : 0) | LAYERRENDERFLAG_TRANSPARENT);
+	RenderMap()->RenderTunemap(m_pTuneTiles, m_pLayerTilemap->m_Width, m_pLayerTilemap->m_Height, 32.0f, Color, (Params.m_RenderTileBorder ? TILERENDERFLAG_EXTEND : 0) | LAYERRENDERFLAG_TRANSPARENT, &m_TuneColorMapper);
 }
