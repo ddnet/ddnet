@@ -23,8 +23,9 @@
 	```sh
 	rustup target add wasm32-unknown-emscripten
 	```
--	Build the `ddnet-libs` via Emscripten. See below for instructions on how to compile them locally.
-	Alternatively, use the precompiled libraries from https://github.com/ddnet/ddnet-libs/.
+-	You need the `ddnet-libs` for Emscripten.
+	The easiest way is to use the precompiled libraries from https://github.com/ddnet/ddnet-libs/ by cloning the `ddnet-libs` submodule.
+	Alternatively, you can build the `ddnet-libs` for Emscripten yourself. See below for instructions on how to compile them locally.
 	The libraries can also be built by manually running the GitHub workflow [`build-libraries-emscripten`](https://github.com/ddnet/ddnet/blob/master/.github/workflows/build-libraries-emscripten.yml).
 -	Important note for reproducible builds: To make the build reproducible, you must use exactly the same versions of the emsdk and Rust.
 	Furthermore, exactly CMake version 3.22.1 must be used for configuring.
@@ -48,6 +49,8 @@
 	```sh
 	pacman -S autoconf-wrapper automake-wrapper libtool unzip
 	```
+-	Note that you need to clone the `ddnet-libs` submodule first, before you merge the self-build `ddnet-libs` with it.
+	Otherwise, the `ddnet-libs` folder will be missing common files shared between platforms (e.g., header files).
 -	There is a script to automatically download and build all libraries.
 	This requires an active internet connection and can take around 10-20 minutes:
 	```sh
