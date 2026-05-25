@@ -928,11 +928,41 @@ add_library(rust-bridge-shared EXCLUDE_FROM_ALL OBJECT ${RUST_BRIDGE_SHARED})
 add_dependencies(rust-bridge-shared generate_protocol)
 list(APPEND TARGETS_OWN rust-bridge-shared)
 
+set(RUSTFLAGS_LIST "")
+set(RUSTFLAGS_TEST_LIST "")
+# Strip absolute build paths from Rust debug info.
+if(NOT CMAKE_BUILD_TYPE STREQUAL Debug AND NOT DEV)
+  if(DEFINED ENV{CARGO_HOME})
+    set(CARGO_HOME "$ENV{CARGO_HOME}")
+  else()
+    set(CARGO_HOME "$ENV{HOME}/.cargo")
+  endif()
+  if(DEFINED ENV{RUSTUP_HOME})
+    set(RUSTUP_HOME "$ENV{RUSTUP_HOME}")
+  else()
+    set(RUSTUP_HOME "$ENV{HOME}/.rustup")
+  endif()
+  list(APPEND RUSTFLAGS_LIST
+    --remap-path-prefix=${CARGO_HOME}=/cargo
+    --remap-path-prefix=${RUSTUP_HOME}=/rustup
+    --remap-path-prefix=${CMAKE_SOURCE_DIR}=/${CMAKE_PROJECT_NAME}
+    --remap-path-prefix=${PROJECT_BINARY_DIR}=/${CMAKE_PROJECT_NAME}
+  )
+endif()
+if(MSVC)
+  list(APPEND RUSTFLAGS_TEST_LIST
+    -Ctarget-feature=+crt-static
+  )
+endif()
+string(JOIN " " RUSTFLAGS ${RUSTFLAGS_LIST})
+string(JOIN " " RUSTFLAGS_TEST ${RUSTFLAGS_LIST} ${RUSTFLAGS_TEST_LIST})
+
 if(TARGET_OS STREQUAL "android")
   set(CARGO_BUILD_DIR "${CARGO_NDK_TARGET}/")
   set(CARGO_BUILD
     ${CMAKE_COMMAND} -E env
     CARGO_TARGET_DIR=${PROJECT_BINARY_DIR}
+    RUSTFLAGS=${RUSTFLAGS}
     DDNET_TEST_NO_LINK=1
     ${RUST_CARGO} ndk
     --manifest-path "${PROJECT_SOURCE_DIR}/Cargo.toml"
@@ -944,6 +974,7 @@ if(TARGET_OS STREQUAL "android")
   set(CARGO_TEST
     ${CMAKE_COMMAND} -E env
     CARGO_TARGET_DIR=${PROJECT_BINARY_DIR}
+    RUSTFLAGS=${RUSTFLAGS_TEST}
     ${RUST_CARGO} ndk
     --target ${CARGO_NDK_TARGET}
     --platform ${CARGO_NDK_API}
@@ -955,6 +986,7 @@ else()
   set(CARGO_BUILD
     ${CMAKE_COMMAND} -E env
     CARGO_TARGET_DIR=${PROJECT_BINARY_DIR}
+    RUSTFLAGS=${RUSTFLAGS}
     DDNET_TEST_NO_LINK=1
     ${RUST_CARGO}
     build
@@ -964,6 +996,7 @@ else()
   set(CARGO_TEST
     ${CMAKE_COMMAND} -E env
     CARGO_TARGET_DIR=${PROJECT_BINARY_DIR}
+    RUSTFLAGS=${RUSTFLAGS_TEST}
     ${RUST_CARGO}
     test
     --locked
@@ -971,7 +1004,6 @@ else()
 endif()
 if(MSVC)
   list(INSERT CARGO_BUILD 0 ${CMAKE_COMMAND} -E env $<$<CONFIG:Debug>:CFLAGS=/MTd> $<$<CONFIG:Debug>:CXXFLAGS=/MTd>)
-  list(INSERT CARGO_TEST 0 ${CMAKE_COMMAND} -E env RUSTFLAGS=-Ctarget-feature=+crt-static)
 endif()
 if(RUST_NIGHTLY)
   list(APPEND CARGO_BUILD -Z build-std=std,panic_abort)
