@@ -95,9 +95,11 @@
 			};
 			window.onerror = function(message, url, line, column, error) {
 				appendOutput(message, true, "red");
-				if (error) {
+				if (error && error.stack) {
 					for (const line of error.stack.split("\n")) {
-						appendOutput(line, false, "red");
+						if (line.length > 0) {
+							appendOutput(line, false, "red");
+						}
 					}
 				}
 				// Force stop audio processing because the client does not do so when force quit on
