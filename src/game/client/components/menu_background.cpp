@@ -259,7 +259,7 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 
 		if(m_Loaded)
 		{
-			m_pLayers->Init(m_pMap, true);
+			m_pLayers->Init(m_pMap, true, true);
 
 			m_pImages->LoadBackground(m_pLayers, m_pMap);
 			CMapLayers::OnMapLoad();

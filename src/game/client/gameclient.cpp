@@ -585,7 +585,7 @@ void CGameClient::OnConnected()
 	const char *pLoadMapContent = Localize("Initializing map logic");
 	// render loading before skip is calculated
 	m_Menus.RenderLoading(pConnectCaption, pLoadMapContent, 0);
-	m_Layers.Init(Map(), false);
+	m_Layers.Init(Map(), false, true);
 	m_Collision.Init(Layers());
 	m_GameWorld.m_Core.InitSwitchers(m_Collision.m_HighestSwitchNumber);
 	m_GameWorld.m_PredictedEvents.clear();
