@@ -95,27 +95,30 @@ void CCollision::Init(class CLayers *pLayers)
 			m_pFront = static_cast<CTile *>(m_pLayers->Map()->GetData(m_pLayers->FrontLayer()->m_Front));
 	}
 
-	for(int i = 0; i < m_Width * m_Height; i++)
+	if(m_pSwitch)
 	{
-		int Index;
-		if(m_pSwitch)
+		for(int i = 0; i < m_Width * m_Height; i++)
 		{
 			if(m_pSwitch[i].m_Number > m_HighestSwitchNumber)
+			{
 				m_HighestSwitchNumber = m_pSwitch[i].m_Number;
+			}
 
-			if(m_pSwitch[i].m_Number)
-				m_pDoor[i].m_Number = m_pSwitch[i].m_Number;
-			else
-				m_pDoor[i].m_Number = 0;
+			m_pDoor[i].m_Number = m_pSwitch[i].m_Number;
 
-			Index = m_pSwitch[i].m_Type;
-
+			const unsigned char Index = m_pSwitch[i].m_Type;
 			if(Index <= TILE_NPH_ENABLE)
 			{
-				if((Index >= TILE_JUMP && Index <= TILE_SUBTRACT_TIME) || Index == TILE_ALLOW_TELE_GUN || Index == TILE_ALLOW_BLUE_TELE_GUN)
+				if((Index >= TILE_JUMP && Index <= TILE_SUBTRACT_TIME) ||
+					Index == TILE_ALLOW_TELE_GUN ||
+					Index == TILE_ALLOW_BLUE_TELE_GUN)
+				{
 					m_pSwitch[i].m_Type = Index;
+				}
 				else
+				{
 					m_pSwitch[i].m_Type = 0;
+				}
 			}
 		}
 	}
@@ -124,25 +127,26 @@ void CCollision::Init(class CLayers *pLayers)
 	{
 		for(int i = 0; i < m_Width * m_Height; i++)
 		{
-			int Number = m_pTele[i].m_Number;
-			int Type = m_pTele[i].m_Type;
-			if(Number > 0)
+			const unsigned char Number = m_pTele[i].m_Number;
+			const unsigned char Type = m_pTele[i].m_Type;
+			if(Number && Type)
 			{
+				const vec2 TelePos = vec2(i % m_Width * 32.0f + 16.0f, i / m_Width * 32.0f + 16.0f);
 				if(Type == TILE_TELEIN)
 				{
-					m_TeleIns[Number - 1].emplace_back(i % m_Width * 32.0f + 16.0f, i / m_Width * 32.0f + 16.0f);
+					m_TeleIns[Number - 1].push_back(TelePos);
 				}
 				else if(Type == TILE_TELEOUT)
 				{
-					m_TeleOuts[Number - 1].emplace_back(i % m_Width * 32.0f + 16.0f, i / m_Width * 32.0f + 16.0f);
+					m_TeleOuts[Number - 1].push_back(TelePos);
 				}
 				else if(Type == TILE_TELECHECKOUT)
 				{
-					m_TeleCheckOuts[Number - 1].emplace_back(i % m_Width * 32.0f + 16.0f, i / m_Width * 32.0f + 16.0f);
+					m_TeleCheckOuts[Number - 1].push_back(TelePos);
 				}
-				else if(Type)
+				else
 				{
-					m_TeleOthers[Number - 1].emplace_back(i % m_Width * 32.0f + 16.0f, i / m_Width * 32.0f + 16.0f);
+					m_TeleOthers[Number - 1].push_back(TelePos);
 				}
 			}
 		}
