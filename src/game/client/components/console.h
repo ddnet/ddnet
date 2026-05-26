@@ -112,6 +112,10 @@ class CGameConsole : public CComponent
 		void Reset();
 
 		void ExecuteLine(const char *pLine);
+		void ExecuteLinesFromString(const char *pStr);
+		/**
+		 * Execute each line separately
+		 */
 
 		bool OnInput(const IInput::CEvent &Event);
 		void PrintLine(const char *pLine, int Len, ColorRGBA PrintColor) REQUIRES(!m_BacklogPendingLock);
