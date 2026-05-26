@@ -302,7 +302,7 @@ int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void 
 		{
 			CDoorTile DoorTile;
 			GetDoorTile(ModMapIndex, &DoorTile);
-			if(in_range(DoorTile.m_Number, 0, m_HighestSwitchNumber) &&
+			if((int)DoorTile.m_Number <= m_HighestSwitchNumber &&
 				pfnSwitchActive(DoorTile.m_Number, pUser))
 			{
 				Restrictions |= ::GetMoveRestrictions(d, DoorTile.m_Index, DoorTile.m_Flags);
@@ -1087,7 +1087,7 @@ void CCollision::SetCollisionAt(float x, float y, int Index)
 	m_pTiles[Ny * m_Width + Nx].m_Index = Index;
 }
 
-void CCollision::SetDoorCollisionAt(float x, float y, int Type, int Flags, int Number)
+void CCollision::SetDoorCollisionAt(float x, float y, unsigned char Type, unsigned char Flags, unsigned char Number)
 {
 	if(!m_pDoor)
 		return;
