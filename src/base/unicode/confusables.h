@@ -9,7 +9,7 @@ struct DECOMP_SLICE
 enum
 {
 	NUM_DECOMP_LENGTHS = 8,
-	NUM_DECOMPS = 9770,
+	NUM_DECOMPS = 10093,
 };
 
 extern const uint8_t decomp_lengths[NUM_DECOMP_LENGTHS];

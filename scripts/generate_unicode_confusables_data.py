@@ -1,8 +1,8 @@
 # Needs UnicodeData.txt and confusables.txt in the current directory.
 #
 # Those can be obtained from unicode.org:
-# - http://www.unicode.org/Public/security/<VERSION>/confusables.txt
-# - http://www.unicode.org/Public/<VERSION>/ucd/UnicodeData.txt
+# - https://www.unicode.org/Public/<VERSION>/security/confusables.txt
+# - https://www.unicode.org/Public/<VERSION>/ucd/UnicodeData.txt
 #
 # If executed as a script, it will generate the contents of the files
 # python3 scripts/generate_unicode_confusables_data.py header > `src/base/unicode/confusables.h`,
