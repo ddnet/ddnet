@@ -67,7 +67,7 @@ void CBackground::LoadBackground()
 		}
 		else if(m_pMap->Load(g_Config.m_ClBackgroundEntities, Storage(), aBuf, IStorage::TYPE_ALL))
 		{
-			m_pLayers->Init(m_pMap, true);
+			m_pLayers->Init(m_pMap, true, true);
 			NeedImageLoading = true;
 			m_Loaded = true;
 		}

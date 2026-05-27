@@ -4184,7 +4184,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 		Server()->SnapSetStaticsize7(i, m_NetObjHandler7.GetObjSize(i));
 	}
 
-	m_Layers.Init(Map(), false);
+	m_Layers.Init(Map(), false, false);
 	m_Collision.Init(&m_Layers);
 	m_World.Init(&m_Collision, m_aTuningList);
 	m_MapBugs = CMapBugs::Create(Map()->BaseName(), Map()->Size(), Map()->Sha256());
