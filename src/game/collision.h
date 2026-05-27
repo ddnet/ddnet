@@ -28,7 +28,7 @@ enum
 
 vec2 ClampVel(int MoveRestriction, vec2 Vel);
 
-typedef bool (*CALLBACK_SWITCHACTIVE)(int Number, void *pUser);
+typedef bool (*CALLBACK_SWITCHACTIVE)(unsigned char Number, void *pUser);
 struct CAntibotMapData;
 
 class CCollision

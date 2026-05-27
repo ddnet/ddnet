@@ -729,7 +729,7 @@ void CCharacterCore::SetTeamsCore(CTeamsCore *pTeams)
 	m_pTeams = pTeams;
 }
 
-bool CCharacterCore::IsSwitchActiveCb(int Number, void *pUser)
+bool CCharacterCore::IsSwitchActiveCb(unsigned char Number, void *pUser)
 {
 	CCharacterCore *pThis = (CCharacterCore *)pUser;
 	if(pThis->m_pWorld && !pThis->m_pWorld->m_vSwitchers.empty())

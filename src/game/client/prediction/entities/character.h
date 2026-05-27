@@ -170,7 +170,7 @@ private:
 
 	// DDRace
 
-	static bool IsSwitchActiveCb(int Number, void *pUser);
+	static bool IsSwitchActiveCb(unsigned char Number, void *pUser);
 	void HandleTiles(int Index);
 	void HandleSkippableTiles(int Index);
 	void DDRaceTick();
