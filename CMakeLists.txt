@@ -1512,6 +1512,7 @@ set(EXPECTED_DATA
   gui_icons.png
   gui_logo.png
   hud.png
+  languages/README.txt
   languages/arabic.txt
   languages/azerbaijani.txt
   languages/belarusian.txt
