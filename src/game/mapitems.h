@@ -661,7 +661,7 @@ class CDoorTile
 public:
 	unsigned char m_Index;
 	unsigned char m_Flags;
-	int m_Number;
+	unsigned char m_Number;
 };
 
 class CTuneTile
