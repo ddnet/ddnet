@@ -585,6 +585,12 @@ else()
   set(VULKAN_INCLUDE_DIRS)
 endif()
 
+find_program(CLANG_FORMAT_BIN clang-format OPTIONAL)
+if(CLANG_FORMAT_BIN)
+  execute_process(COMMAND ${CLANG_FORMAT_BIN} --version OUTPUT_VARIABLE CLANG_FORMAT_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
+  set(CLANG_FORMAT_FOUND true)
+endif()
+
 message(STATUS "******** ${CMAKE_PROJECT_NAME} ********")
 set(TARGET "Target OS: ${TARGET_OS} ${CMAKE_SYSTEM_PROCESSOR}")
 if(TARGET_OS STREQUAL "mac")
@@ -780,6 +786,12 @@ else()
   else()
     set(PLATFORM_LIBS)
   endif()
+endif()
+
+message(STATUS "Optional:")
+show_dependency_status("clang-format" CLANG_FORMAT)
+if(CLANG_FORMAT_FOUND)
+  message(STATUS "clang-format version '${CLANG_FORMAT_VERSION}'")
 endif()
 
 ########################################################################
@@ -1962,9 +1974,16 @@ file(COPY ${COPY_DIRS} DESTINATION .)
 ########################################################################
 
 function(generate_source output_file script_parameter)
+  if(CLANG_FORMAT_BIN)
+    set(FORMAT_COMMAND
+      COMMAND ${CLANG_FORMAT_BIN} -i --verbose "${PROJECT_BINARY_DIR}/${output_file}"
+    )
+  endif()
+
   add_custom_command(OUTPUT ${output_file}
     COMMAND ${Python3_EXECUTABLE} datasrc/compile.py ${script_parameter}
       > "${PROJECT_BINARY_DIR}/${output_file}"
+    ${FORMAT_COMMAND}
     DEPENDS
       # tidy-alphabetical-start
       datasrc/compile.py
