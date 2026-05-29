@@ -92,6 +92,7 @@ MACRO_CONFIG_INT(ClShowpred, cl_showpred, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE
 MACRO_CONFIG_INT(ClEyeWheel, cl_eye_wheel, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show eye wheel along together with emotes")
 MACRO_CONFIG_INT(ClEyeDuration, cl_eye_duration, 999999, 1, 999999, CFGFLAG_CLIENT | CFGFLAG_SAVE, "How long the eyes emotes last")
 MACRO_CONFIG_INT(ClFreezeStars, cl_freeze_stars, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show old star particles for frozen tees")
+MACRO_CONFIG_INT(ClFlashOnHook, cl_flash_on_hook, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Flash taskbar when hooked by another player while alt-tabbed")
 
 MACRO_CONFIG_INT(ClSpecCursor, cl_spec_cursor, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Enable the cursor of spectating player if available")
 MACRO_CONFIG_INT(ClSpecAutoSync, cl_spec_auto_sync, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Automatically synchronize with spectating players's camera setting if available (0 = disable, 1 = enable on reset zoom)")
@@ -789,4 +790,3 @@ MACRO_CONFIG_INT(ClVideoRecorderFPS, cl_video_recorder_fps, 60, 1, 1000, CFGFLAG
 /*
  * Add config variables for mods below this comment to avoid merge conflicts.
  */
-MACRO_CONFIG_INT(ClFlashOnHook, cl_flash_on_hook, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Flash taskbar when hooked by another player while alt-tabbed")
