@@ -14,3 +14,7 @@ panic = "abort"
 [profile.release]
 lto = "thin"
 panic = "abort"
+
+[profile.relwithdebinfo]
+inherits = "release"
+debug = true
