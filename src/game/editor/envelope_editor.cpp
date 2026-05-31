@@ -361,14 +361,14 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 		ToolBar.VSplitLeft(15.0f, &Button, &ToolBar);
 
-		static const char *s_aapNames[4][CEnvPoint::MAX_CHANNELS] = {
+		static const char *const CHANNEL_NAMES[CEnvPoint::MAX_CHANNELS][CEnvPoint::MAX_CHANNELS] = {
 			{"V", "", "", ""},
 			{"", "", "", ""},
 			{"X", "Y", "R", ""},
 			{"R", "G", "B", "A"},
 		};
 
-		static const char *s_aapDescriptions[4][CEnvPoint::MAX_CHANNELS] = {
+		static const char *const CHANNEL_DESCRIPTIONS[CEnvPoint::MAX_CHANNELS][CEnvPoint::MAX_CHANNELS] = {
 			{"Volume of the envelope.", "", "", ""},
 			{"", "", "", ""},
 			{"X-axis of the envelope.", "Y-axis of the envelope.", "Rotation of the envelope.", ""},
@@ -391,7 +391,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				else if(i == pEnvelope->GetChannels() - 1)
 					Corners = IGraphics::CORNER_R;
 
-				if(DoButton_Env(&s_aChannelButtons[i], s_aapNames[pEnvelope->GetChannels() - 1][i], s_ActiveChannels & Bit, &Button, s_aapDescriptions[pEnvelope->GetChannels() - 1][i], aColors[i], Corners))
+				if(DoButton_Env(&s_aChannelButtons[i], CHANNEL_NAMES[pEnvelope->GetChannels() - 1][i], s_ActiveChannels & Bit, &Button, CHANNEL_DESCRIPTIONS[pEnvelope->GetChannels() - 1][i], aColors[i], Corners))
 					s_ActiveChannels ^= Bit;
 			}
 		}
@@ -495,8 +495,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 		{
 			float UnitsPerLineY = 0.001f;
-			static const float s_aUnitPerLineOptionsY[] = {0.005f, 0.01f, 0.025f, 0.05f, 0.1f, 0.25f, 0.5f, 1.0f, 2.0f, 4.0f, 8.0f, 16.0f, 32.0f, 2 * 32.0f, 5 * 32.0f, 10 * 32.0f, 20 * 32.0f, 50 * 32.0f, 100 * 32.0f};
-			for(float Value : s_aUnitPerLineOptionsY)
+			static const float UNIT_PER_LINE_OPTIONS_Y[] = {0.005f, 0.01f, 0.025f, 0.05f, 0.1f, 0.25f, 0.5f, 1.0f, 2.0f, 4.0f, 8.0f, 16.0f, 32.0f, 2 * 32.0f, 5 * 32.0f, 10 * 32.0f, 20 * 32.0f, 50 * 32.0f, 100 * 32.0f};
+			for(float Value : UNIT_PER_LINE_OPTIONS_Y)
 			{
 				if(Value / m_ZoomEnvelopeY.GetValue() * View.h < 40.0f)
 					UnitsPerLineY = Value;
@@ -612,8 +612,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		{
 			using namespace std::chrono_literals;
 			CTimeStep UnitsPerLineX = 1ms;
-			static const CTimeStep s_aUnitPerLineOptionsX[] = {5ms, 10ms, 25ms, 50ms, 100ms, 250ms, 500ms, 1s, 2s, 5s, 10s, 15s, 30s, 1min};
-			for(CTimeStep Value : s_aUnitPerLineOptionsX)
+			static const CTimeStep UNIT_PER_LINE_OPTIONS_X[] = {5ms, 10ms, 25ms, 50ms, 100ms, 250ms, 500ms, 1s, 2s, 5s, 10s, 15s, 30s, 1min};
+			for(CTimeStep Value : UNIT_PER_LINE_OPTIONS_X)
 			{
 				if(Value.AsSeconds() / m_ZoomEnvelopeX.GetValue() * View.w < 160.0f)
 					UnitsPerLineX = Value;
