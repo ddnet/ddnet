@@ -2363,7 +2363,7 @@ CTouchControls::CUnitRect CTouchControls::FindSizeWH(std::vector<CUnitRect> vVis
 	}
 	vVisibleButtonRects.resize(Write);
 
-	int64_t Delta = LLONG_MAX;
+	int64_t Delta = std::numeric_limits<int64_t>::max();
 	CUnitRect Result = MyRect;
 	auto CalculateDelta = [&](int64_t NewHeight, int64_t NewWidth) -> int64_t {
 		return (MyRect.m_H - NewHeight) * (MyRect.m_H - NewHeight) + (MyRect.m_W - NewWidth) * (MyRect.m_W - NewWidth);
