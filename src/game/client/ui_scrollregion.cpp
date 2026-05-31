@@ -319,51 +319,25 @@ void CScrollRegion::DoSlider()
 
 	SliderPos += m_ScrollPos / MaxScroll() * MaxSlider;
 
-	bool Grabbed = false;
 	const void *pId = &m_ScrollPos;
-	const bool InsideSlider = Ui()->MouseHovered(&Slider);
-	const bool InsideRail = Ui()->MouseHovered(&m_RailRect);
-
-	float MousePos = m_Params.m_ScrollHorizontal ? Ui()->MouseX() : Ui()->MouseY();
-	if(Ui()->CheckActiveItem(pId) && Ui()->MouseButton(0))
+	const float MousePos = m_Params.m_ScrollHorizontal ? Ui()->MouseX() : Ui()->MouseY();
+	const bool WasActive = Ui()->ActiveItem() == pId;
+	Ui()->DoButtonLogic(pId, 0, &m_RailRect, BUTTONFLAG_LEFT); // Result ignored, we only care about the button becoming and being active
+	if(Ui()->CheckActiveItem(pId))
 	{
-		m_ScrollPos += (MousePos - (SliderPos + m_SliderGrabPos)) / MaxSlider * MaxScroll();
-		m_SliderGrabPos = std::clamp(m_SliderGrabPos, 0.0f, SliderSize);
-		m_AnimTargetScrollPos = m_ScrollPos;
-		m_AnimTime = 0.0f;
-		Grabbed = true;
-	}
-	else if(InsideSlider)
-	{
-		if(!Ui()->MouseButton(0))
-			Ui()->SetHotItem(pId);
-
-		if(!Ui()->CheckActiveItem(pId) && Ui()->MouseButtonClicked(0))
+		if(!WasActive)
 		{
-			Ui()->SetActiveItem(pId);
-			m_SliderGrabPos = MousePos - SliderPos;
-			m_AnimTargetScrollPos = m_ScrollPos;
-			m_AnimTime = 0.0f;
+			m_SliderGrabPos = Ui()->MouseHovered(&Slider) ? (MousePos - SliderPos) : (SliderSize / 2.0f);
+			m_SliderGrabPos = std::clamp(m_SliderGrabPos, 0.0f, SliderSize);
 		}
-	}
-	else if(InsideRail && Ui()->MouseButtonClicked(0))
-	{
-		m_ScrollPos += (MousePos - (SliderPos + SliderSize / 2.0f)) / MaxSlider * MaxScroll();
-		Ui()->SetHotItem(pId);
-		Ui()->SetActiveItem(pId);
-		m_SliderGrabPos = SliderSize / 2.0f;
+		m_ScrollPos += (MousePos - (SliderPos + m_SliderGrabPos)) / MaxSlider * MaxScroll();
 		m_AnimTargetScrollPos = m_ScrollPos;
 		m_AnimTime = 0.0f;
-	}
-
-	if(Ui()->CheckActiveItem(pId) && !Ui()->MouseButton(0))
-	{
-		Ui()->SetActiveItem(nullptr);
 	}
 
 	m_ScrollPos = std::clamp(m_ScrollPos, 0.0f, MaxScroll());
 	m_ContentScrollOffset = -m_ScrollPos;
 
-	float Rounding = m_Params.m_ScrollHorizontal ? Slider.h / 2.0f : Slider.w / 2.0f;
-	Slider.Draw(m_Params.SliderColor(Grabbed, Ui()->HotItem() == pId), IGraphics::CORNER_ALL, Rounding);
+	const float Rounding = m_Params.m_ScrollHorizontal ? Slider.h / 2.0f : Slider.w / 2.0f;
+	Slider.Draw(m_Params.SliderColor(Ui()->CheckActiveItem(pId), Ui()->HotItem() == pId), IGraphics::CORNER_ALL, Rounding);
 }
