@@ -605,21 +605,14 @@ void CClient::GenerateTimeoutSeed()
 
 void CClient::GenerateTimeoutCodes(const NETADDR *pAddrs, int NumAddrs)
 {
-	if(g_Config.m_ClTimeoutSeed[0])
+	if(g_Config.m_ClTimeoutSeed[0] == '\0')
 	{
-		for(int i = 0; i < 2; i++)
-		{
-			GenerateTimeoutCode(m_aTimeoutCodes[i], sizeof(m_aTimeoutCodes[i]), g_Config.m_ClTimeoutSeed, pAddrs, NumAddrs, i);
-
-			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "timeout code '%s' (%s)", m_aTimeoutCodes[i], i == 0 ? "normal" : "dummy");
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", aBuf);
-		}
+		GenerateTimeoutSeed();
 	}
-	else
+	for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
 	{
-		str_copy(m_aTimeoutCodes[0], g_Config.m_ClTimeoutCode);
-		str_copy(m_aTimeoutCodes[1], g_Config.m_ClDummyTimeoutCode);
+		GenerateTimeoutCode(m_aTimeoutCodes[Dummy], sizeof(m_aTimeoutCodes[Dummy]), g_Config.m_ClTimeoutSeed, pAddrs, NumAddrs, Dummy);
+		log_debug("client", "timeout code '%s' (%s)", m_aTimeoutCodes[Dummy], Dummy == 0 ? "normal" : "dummy");
 	}
 }
 

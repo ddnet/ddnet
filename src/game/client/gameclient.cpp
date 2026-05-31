@@ -280,20 +280,6 @@ void CGameClient::OnConsoleInit()
 	Console()->Chain("cl_menu_map", ConchainMenuMap, this);
 }
 
-static void GenerateTimeoutCode(char *pTimeoutCode)
-{
-	if(pTimeoutCode[0] == '\0' || str_comp(pTimeoutCode, "hGuEYnfxicsXGwFq") == 0)
-	{
-		for(unsigned int i = 0; i < 16; i++)
-		{
-			if(rand() % 2)
-				pTimeoutCode[i] = (char)((rand() % ('z' - 'a' + 1)) + 'a');
-			else
-				pTimeoutCode[i] = (char)((rand() % ('Z' - 'A' + 1)) + 'A');
-		}
-	}
-}
-
 void CGameClient::InitializeLanguage()
 {
 	// set the language
@@ -430,9 +416,6 @@ void CGameClient::OnInit()
 
 	// Set free binds to DDRace binds if it's active
 	m_Binds.SetDDRaceBinds(true);
-
-	GenerateTimeoutCode(g_Config.m_ClTimeoutCode);
-	GenerateTimeoutCode(g_Config.m_ClDummyTimeoutCode);
 
 	// Aggressively try to grab window again since some Windows users report
 	// window not being focused after starting client.
