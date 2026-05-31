@@ -179,7 +179,7 @@ void CInput::ConchainJoystickGuidChanged(IConsole::IResult *pResult, void *pUser
 
 float CInput::GetJoystickDeadzone()
 {
-	return minimum(g_Config.m_InpControllerTolerance / 50.0f, 0.995f);
+	return std::min(g_Config.m_InpControllerTolerance / 50.0f, 0.995f);
 }
 
 CInput::CJoystick::CJoystick(CInput *pInput, int Index, SDL_Joystick *pDelegate)
@@ -248,7 +248,7 @@ bool CInput::CJoystick::Relative(float *pX, float *pY)
 	const float DeadZone = Input()->GetJoystickDeadzone();
 	if(Len > DeadZone)
 	{
-		const float Factor = 2500.0f * Input()->GetUpdateTime() * maximum((Len - DeadZone) / (1.0f - DeadZone), 0.001f) / Len;
+		const float Factor = 2500.0f * Input()->GetUpdateTime() * std::max((Len - DeadZone) / (1.0f - DeadZone), 0.001f) / Len;
 		*pX = RawJoystickPos.x * Factor;
 		*pY = RawJoystickPos.y * Factor;
 		return true;

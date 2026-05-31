@@ -1,6 +1,5 @@
 #include <base/io.h>
 #include <base/log.h>
-#include <base/math.h>
 #include <base/mem.h>
 #include <base/str.h>
 
@@ -10,6 +9,7 @@
 
 #include <game/mapitems.h>
 
+#include <algorithm>
 #include <vector>
 
 static void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
@@ -36,7 +36,7 @@ static void Process(IStorage *pStorage, const char *pMapName, const char *pConfi
 		return;
 	}
 
-	char *pSettings = (char *)malloc(maximum(1, TotalLength));
+	char *pSettings = (char *)malloc(std::max(1, TotalLength));
 	int Offset = 0;
 	for(const char *pLine : vpLines)
 	{

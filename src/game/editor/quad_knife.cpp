@@ -36,8 +36,8 @@ static float TriangleArea(vec2 A, vec2 B, vec2 C)
 static bool IsInTriangle(vec2 Point, vec2 A, vec2 B, vec2 C)
 {
 	// Normalize to increase precision
-	vec2 Min(minimum(A.x, B.x, C.x), minimum(A.y, B.y, C.y));
-	vec2 Max(maximum(A.x, B.x, C.x), maximum(A.y, B.y, C.y));
+	vec2 Min(std::min({A.x, B.x, C.x}), std::min({A.y, B.y, C.y}));
+	vec2 Max(std::max({A.x, B.x, C.x}), std::max({A.y, B.y, C.y}));
 	vec2 Size(Max.x - Min.x, Max.y - Min.y);
 
 	if(Size.x < 0.0000001f || Size.y < 0.0000001f)
@@ -101,8 +101,8 @@ void CQuadKnife::DoSlice()
 			for(int i = 0; i < 4; i++)
 			{
 				int j = (i + 1) % 4;
-				vec2 Min(minimum(v[i].x, v[j].x), minimum(v[i].y, v[j].y));
-				vec2 Max(maximum(v[i].x, v[j].x), maximum(v[i].y, v[j].y));
+				vec2 Min(std::min(v[i].x, v[j].x), std::min(v[i].y, v[j].y));
+				vec2 Max(std::max(v[i].x, v[j].x), std::max(v[i].y, v[j].y));
 
 				if(in_range(OnGrid.y, Min.y, Max.y) && Max.y - Min.y > 0.0000001f)
 				{
@@ -241,7 +241,7 @@ void CQuadKnife::DoSlice()
 	Graphics()->LinesDraw(aEdges, std::size(aEdges));
 
 	IGraphics::CLineItem aLines[4];
-	int LineCount = maximum(Map()->m_QuadKnifeState.m_Count - 1, 0);
+	int LineCount = std::max(Map()->m_QuadKnifeState.m_Count - 1, 0);
 
 	for(int i = 0; i < LineCount; i++)
 		aLines[i] = IGraphics::CLineItem(Map()->m_QuadKnifeState.m_aPoints[i], Map()->m_QuadKnifeState.m_aPoints[i + 1]);

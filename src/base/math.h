@@ -3,10 +3,10 @@
 #ifndef BASE_MATH_H
 #define BASE_MATH_H
 
-#include <algorithm>
 #include <cmath>
 #include <concepts>
 #include <cstdlib>
+#include <limits>
 
 template<typename T>
 concept Numeric = std::integral<T> || std::floating_point<T>;
@@ -134,26 +134,6 @@ public:
 	}
 };
 
-template<Numeric T>
-constexpr T minimum(T a, T b)
-{
-	return std::min(a, b);
-}
-template<Numeric T>
-constexpr T minimum(T a, T b, T c)
-{
-	return std::min(std::min(a, b), c);
-}
-template<Numeric T>
-constexpr T maximum(T a, T b)
-{
-	return std::max(a, b);
-}
-template<Numeric T>
-constexpr T maximum(T a, T b, T c)
-{
-	return std::max(std::max(a, b), c);
-}
 template<typename T>
 constexpr T absolute(T a)
 {

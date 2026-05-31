@@ -234,7 +234,7 @@ void CInfoMessages::OnTeamKillMessage(const CNetMsg_Sv_KillMsgTeam *pMsg)
 	std::stable_sort(vStrongWeakSorted.begin(), vStrongWeakSorted.end(), [](auto &Left, auto &Right) { return Left.second > Right.second; });
 
 	CInfoMsg Kill = CreateInfoMsg(TYPE_KILL);
-	Kill.m_TeamSize = minimum<int>(vStrongWeakSorted.size(), MAX_KILLMSG_TEAM_MEMBERS);
+	Kill.m_TeamSize = std::min((int)vStrongWeakSorted.size(), (int)MAX_KILLMSG_TEAM_MEMBERS);
 
 	Kill.m_VictimDDTeam = pMsg->m_Team;
 	for(int i = 0; i < Kill.m_TeamSize; i++)

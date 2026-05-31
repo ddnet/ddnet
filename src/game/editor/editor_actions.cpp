@@ -713,7 +713,7 @@ void CEditorActionGroup::Undo()
 	{
 		// Undo: delete the group
 		Map()->DeleteGroup(m_GroupIndex);
-		Map()->m_SelectedGroup = maximum(0, m_GroupIndex - 1);
+		Map()->m_SelectedGroup = std::max(0, m_GroupIndex - 1);
 	}
 
 	Map()->OnModify();
@@ -731,7 +731,7 @@ void CEditorActionGroup::Redo()
 	{
 		// Redo: delete the group
 		Map()->DeleteGroup(m_GroupIndex);
-		Map()->m_SelectedGroup = maximum(0, m_GroupIndex - 1);
+		Map()->m_SelectedGroup = std::max(0, m_GroupIndex - 1);
 	}
 
 	Map()->OnModify();

@@ -4,7 +4,6 @@
 #include <base/fs.h>
 #include <base/io.h>
 #include <base/log.h>
-#include <base/math.h>
 #include <base/mem.h>
 #include <base/str.h>
 #include <base/thread.h>
@@ -16,6 +15,7 @@
 
 #include <game/version.h>
 
+#include <algorithm>
 #include <limits>
 
 #if !defined(CONF_FAMILY_WINDOWS)
@@ -330,7 +330,7 @@ size_t CHttpRequest::OnData(char *pData, size_t DataSize)
 
 	if(m_WriteToMemory)
 	{
-		size_t NewBufferSize = maximum((size_t)1024, m_BufferSize);
+		size_t NewBufferSize = std::max((size_t)1024, m_BufferSize);
 		while(m_ResponseLength + DataSize > NewBufferSize)
 		{
 			NewBufferSize *= 2;

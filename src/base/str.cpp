@@ -5,9 +5,9 @@
 
 #include "dbg.h"
 #include "detect.h"
-#include "math.h"
 #include "mem.h"
 
+#include <algorithm>
 #include <cctype>
 #include <charconv> // std::to_chars
 #include <cstdarg>
@@ -1359,10 +1359,11 @@ int str_utf32_dist_buffer(const int *a, int a_len, const int *b, int b_len, int 
 		for(i = 1; i <= a_len; i++)
 		{
 			int subst = (a[i - 1] != b[j - 1]);
-			B(i, j) = minimum(
+			B(i, j) = std::min({
 				B(i - 1, j) + 1,
 				B(i, j - 1) + 1,
-				B(i - 1, j - 1) + subst);
+				B(i - 1, j - 1) + subst,
+			});
 		}
 	}
 	return B(a_len, b_len);

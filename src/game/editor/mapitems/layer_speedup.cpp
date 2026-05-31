@@ -34,8 +34,8 @@ void CLayerSpeedup::Resize(int NewW, int NewH)
 	mem_zero(pNewSpeedupData, (size_t)NewW * NewH * sizeof(CSpeedupTile));
 
 	// copy old data
-	for(int y = 0; y < minimum(NewH, m_Height); y++)
-		mem_copy(&pNewSpeedupData[y * NewW], &m_pSpeedupTile[y * m_Width], minimum(m_Width, NewW) * sizeof(CSpeedupTile));
+	for(int y = 0; y < std::min(NewH, m_Height); y++)
+		mem_copy(&pNewSpeedupData[y * NewW], &m_pSpeedupTile[y * m_Width], std::min(m_Width, NewW) * sizeof(CSpeedupTile));
 
 	// replace old
 	delete[] m_pSpeedupTile;

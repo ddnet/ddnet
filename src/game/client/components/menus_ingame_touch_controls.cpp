@@ -2,7 +2,6 @@
 
 #include <base/color.h>
 #include <base/dbg.h>
-#include <base/math.h>
 #include <base/str.h>
 
 #include <engine/external/json-parser/json.h>
@@ -1261,9 +1260,9 @@ void CMenusIngameTouchControls::CacheAllSettingsFromTarget(CTouchControls::CTouc
 			auto *pTargetBehavior = static_cast<CTouchControls::CBindToggleTouchButtonBehavior *>(pTargetButton->m_pBehavior.get());
 			auto TargetCommands = pTargetBehavior->GetCommand();
 			// Can't use resize here :(
-			while(m_vBehaviorElements.size() > maximum<size_t>(TargetCommands.size(), 2))
+			while(m_vBehaviorElements.size() > std::max(TargetCommands.size(), (size_t)2))
 				m_vBehaviorElements.pop_back();
-			while(m_vBehaviorElements.size() < maximum<size_t>(TargetCommands.size(), 2))
+			while(m_vBehaviorElements.size() < std::max(TargetCommands.size(), (size_t)2))
 				m_vBehaviorElements.emplace_back(std::make_unique<CBehaviorElements>());
 			for(unsigned CommandIndex = 0; CommandIndex < TargetCommands.size(); CommandIndex++)
 			{

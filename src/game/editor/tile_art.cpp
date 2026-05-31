@@ -58,7 +58,7 @@ static std::vector<std::array<ColorRGBA, NumTiles>> GroupColors(const std::vecto
 	for(size_t i = 0; i < vColors.size(); i += NumTiles - 1)
 	{
 		auto &Group = vaColorGroups.emplace_back();
-		std::copy_n(vColors.begin() + i, std::min<size_t>(NumTiles - 1, vColors.size() - i), Group.begin() + 1);
+		std::copy_n(vColors.begin() + i, std::min((size_t)NumTiles - 1, vColors.size() - i), Group.begin() + 1);
 	}
 
 	return vaColorGroups;

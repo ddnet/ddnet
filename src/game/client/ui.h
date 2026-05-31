@@ -76,7 +76,7 @@ private:
 public:
 	CLogarithmicScrollbarScale(int MinAdjustment)
 	{
-		m_MinAdjustment = maximum(MinAdjustment, 1); // must be at least 1 to support Min == 0 with logarithm
+		m_MinAdjustment = std::max(MinAdjustment, 1); // must be at least 1 to support Min == 0 with logarithm
 	}
 	float ToRelative(int AbsoluteValue, int Min, int Max) const override
 	{

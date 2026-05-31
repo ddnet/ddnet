@@ -218,7 +218,7 @@ void CRenderTools::GetRenderTeeOffsetToRenderedTee(const CAnimState *pAnim, cons
 	const CAnimKeyframe *pFoot = pAnim->GetFrontFoot();
 	FeetPos = vec2(pFoot->m_X * AnimScale, pFoot->m_Y * AnimScale);
 	pFoot = pAnim->GetBackFoot();
-	FeetPos = vec2(FeetPos.x, maximum(FeetPos.y, pFoot->m_Y * AnimScale));
+	FeetPos = vec2(FeetPos.x, std::max(FeetPos.y, pFoot->m_Y * AnimScale));
 
 	vec2 BodyOffset;
 	float BodyWidth, BodyHeight;
@@ -239,7 +239,7 @@ void CRenderTools::GetRenderTeeOffsetToRenderedTee(const CAnimState *pAnim, cons
 	float MaxY = MinY + BodyHeight;
 	// if the body is smaller than the total feet offset, use feet
 	// since feet are smaller in height, respect the assumed relative position
-	MaxY = maximum(MaxY, (-16.0f * AssumedScale + FeetPos.y) + FeetOffset.y + FeetHeight);
+	MaxY = std::max(MaxY, (-16.0f * AssumedScale + FeetPos.y) + FeetOffset.y + FeetHeight);
 
 	// now we got the full rendered size
 	float FullHeight = (MaxY - MinY);

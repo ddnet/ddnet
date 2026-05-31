@@ -1,7 +1,6 @@
 #include "connection.h"
 
 #include <base/dbg.h>
-#include <base/math.h>
 #include <base/mem.h>
 #include <base/str.h>
 
@@ -9,6 +8,7 @@
 
 #include <sqlite3.h>
 
+#include <algorithm>
 #include <atomic>
 
 class CSqliteConnection : public IDbConnection
@@ -342,7 +342,7 @@ void CSqliteConnection::GetString(int Col, char *pBuffer, int BufferSize)
 int CSqliteConnection::GetBlob(int Col, unsigned char *pBuffer, int BufferSize)
 {
 	int Size = sqlite3_column_bytes(m_pStmt, Col - 1);
-	Size = minimum(Size, BufferSize);
+	Size = std::min(Size, BufferSize);
 	mem_copy(pBuffer, sqlite3_column_blob(m_pStmt, Col - 1), Size);
 	return Size;
 }
