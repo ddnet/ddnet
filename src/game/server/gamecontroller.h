@@ -202,7 +202,7 @@ public:
 	// spawn
 	virtual bool CanSpawn(int Team, vec2 *pOutPos, int ClientId);
 
-	virtual void DoTeamChange(class CPlayer *pPlayer, int Team, bool DoChatMsg = true);
+	virtual void DoTeamChange(class CPlayer *pPlayer, int Team);
 
 	int TileFlagsToPickupFlags(int TileFlags) const;
 
