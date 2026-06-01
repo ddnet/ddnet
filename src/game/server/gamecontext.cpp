@@ -3474,7 +3474,7 @@ void CGameContext::ConSetTeamAll(IConsole::IResult *pResult, void *pUserData)
 
 	for(auto &pPlayer : pSelf->m_apPlayers)
 		if(pPlayer)
-			pSelf->m_pController->DoTeamChange(pPlayer, Team, false);
+			pSelf->m_pController->DoTeamChange(pPlayer, Team);
 }
 
 void CGameContext::ConHotReload(IConsole::IResult *pResult, void *pUserData)

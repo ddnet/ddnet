@@ -746,7 +746,7 @@ CClientMask IGameController::GetMaskForPlayerWorldEvent(int Asker, int ExceptId)
 	return Teams().TeamMask(GameServer()->GetDDRaceTeam(Asker), ExceptId, Asker);
 }
 
-void IGameController::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
+void IGameController::DoTeamChange(CPlayer *pPlayer, int Team)
 {
 	if(!IsValidTeam(Team))
 		return;
@@ -758,13 +758,6 @@ void IGameController::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
 	int ClientId = pPlayer->GetCid();
 
 	char aBuf[128];
-	DoChatMsg = false;
-	if(DoChatMsg)
-	{
-		str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(ClientId), GameServer()->m_pController->GetTeamName(Team));
-		GameServer()->SendChat(-1, TEAM_ALL, aBuf);
-	}
-
 	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' m_Team=%d", ClientId, Server()->ClientName(ClientId), Team);
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
