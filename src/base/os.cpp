@@ -13,7 +13,7 @@
 #include "io.h"
 
 #include <sys/utsname.h> // uname, utsname
-#include <unistd.h> // execlp, fork
+#include <unistd.h> // _exit, execlp, fork
 
 #if defined(CONF_PLATFORM_MACOS)
 #include <CoreFoundation/CoreFoundation.h>
@@ -108,12 +108,18 @@ int os_open_link(const char *link)
 #elif defined(CONF_PLATFORM_LINUX)
 	const int pid = fork();
 	if(pid == 0)
+	{
 		execlp("xdg-open", "xdg-open", link, nullptr);
+		_exit(1);
+	}
 	return pid > 0;
 #elif defined(CONF_FAMILY_UNIX)
 	const int pid = fork();
 	if(pid == 0)
+	{
 		execlp("open", "open", link, nullptr);
+		_exit(1);
+	}
 	return pid > 0;
 #endif
 }
