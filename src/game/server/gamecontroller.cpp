@@ -59,7 +59,7 @@ void IGameController::DoActivityCheck()
 				case 0:
 				{
 					// move player to spectator
-					DoTeamChange(GameServer()->m_apPlayers[i], TEAM_SPECTATORS);
+					DoTeamChange(GameServer()->m_apPlayers[i], TEAM_SPECTATORS, true);
 				}
 				break;
 				case 1:
@@ -72,7 +72,7 @@ void IGameController::DoActivityCheck()
 					if(Spectators >= g_Config.m_SvSpectatorSlots)
 						Server()->Kick(i, "Kicked for inactivity");
 					else
-						DoTeamChange(GameServer()->m_apPlayers[i], TEAM_SPECTATORS);
+						DoTeamChange(GameServer()->m_apPlayers[i], TEAM_SPECTATORS, true);
 				}
 				break;
 				case 2:
@@ -746,7 +746,7 @@ CClientMask IGameController::GetMaskForPlayerWorldEvent(int Asker, int ExceptId)
 	return Teams().TeamMask(GameServer()->GetDDRaceTeam(Asker), ExceptId, Asker);
 }
 
-void IGameController::DoTeamChange(CPlayer *pPlayer, int Team)
+void IGameController::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
 {
 	if(!IsValidTeam(Team))
 		return;
@@ -758,6 +758,12 @@ void IGameController::DoTeamChange(CPlayer *pPlayer, int Team)
 	int ClientId = pPlayer->GetCid();
 
 	char aBuf[128];
+	if(DoChatMsg)
+	{
+		str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(ClientId), GameServer()->m_pController->GetTeamName(Team));
+		GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+	}
+
 	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' m_Team=%d", ClientId, Server()->ClientName(ClientId), Team);
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 

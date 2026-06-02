@@ -234,7 +234,7 @@ void CGameControllerDDNet::Tick()
 	Teams().Tick();
 }
 
-void CGameControllerDDNet::DoTeamChange(class CPlayer *pPlayer, int Team)
+void CGameControllerDDNet::DoTeamChange(class CPlayer *pPlayer, int Team, bool DoChatMsg)
 {
 	if(!IsValidTeam(Team))
 		return;
@@ -257,5 +257,5 @@ void CGameControllerDDNet::DoTeamChange(class CPlayer *pPlayer, int Team)
 		}
 	}
 
-	IGameController::DoTeamChange(pPlayer, Team);
+	IGameController::DoTeamChange(pPlayer, Team, /* Suppress chat message */ false);
 }

@@ -27,6 +27,6 @@ public:
 
 	void Tick() override;
 
-	void DoTeamChange(class CPlayer *pPlayer, int Team) override;
+	void DoTeamChange(class CPlayer *pPlayer, int Team, bool DoChatMsg) override;
 };
 #endif // GAME_SERVER_GAMEMODES_DDNET_H
