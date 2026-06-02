@@ -1086,11 +1086,8 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 	}
 
 	// use ninja graphic for old clients if player is frozen
-	if(m_Core.m_DeepFrozen || m_FreezeTime > 0 || m_Core.m_LiveFrozen)
-	{
-		if((m_Core.m_DeepFrozen || m_FreezeTime > 0) && SnappingClientVersion < VERSION_DDNET_NEW_HUD)
-			Weapon = WEAPON_NINJA;
-	}
+	if((m_Core.m_DeepFrozen || m_FreezeTime > 0) && SnappingClientVersion < VERSION_DDNET_NEW_HUD)
+		Weapon = WEAPON_NINJA;
 
 	// solo, collision, jetpack and ninjajetpack prediction
 	if(m_pPlayer->GetCid() == SnappingClient)
