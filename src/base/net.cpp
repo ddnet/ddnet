@@ -682,12 +682,12 @@ static int net_set_blocking_impl(NETSOCKET sock, bool blocking)
 		if(sockets[i] >= 0)
 		{
 #if defined(CONF_FAMILY_WINDOWS)
-			if(ioctlsocket(sockets[i], FIONBIO, (unsigned long *)&mode) != NO_ERROR)
+			if(ioctlsocket(sockets[i], FIONBIO, &mode) != NO_ERROR)
 			{
 				log_error("net", "Setting %s mode for %s socket failed (%s)", socket_str[i], mode_str, net_error_message().c_str());
 			}
 #else
-			if(ioctl(sockets[i], FIONBIO, (unsigned long *)&mode) == -1)
+			if(ioctl(sockets[i], FIONBIO, &mode) == -1)
 			{
 				log_error("net", "Setting %s mode for %s socket failed (%s)", socket_str[i], mode_str, net_error_message().c_str());
 			}
