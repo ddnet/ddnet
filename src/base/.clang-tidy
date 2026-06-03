@@ -1,1 +1,4 @@
-Checks: '-readability-identifier-naming'
+Checks: >
+  -readability-duplicate-include,
+  -readability-identifier-naming,
+  -modernize-deprecated-headers,
