@@ -10,8 +10,8 @@
 #include <cstdarg>
 #include <cstdlib>
 
-std::atomic_bool dbg_assert_failing = false;
-DBG_ASSERT_HANDLER dbg_assert_handler;
+static std::atomic_bool dbg_assert_failing = false;
+static DBG_ASSERT_HANDLER dbg_assert_handler;
 
 bool dbg_assert_has_failed()
 {

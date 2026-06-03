@@ -63,7 +63,7 @@ static tm time_localtime_threadlocal(time_t *time_data)
 	tm *time = localtime(time_data);
 #else
 	// Thread-local buffer for the result of localtime_r
-	thread_local tm time_info_buf;
+	thread_local tm time_info_buf; // NOLINT(misc-use-internal-linkage) // TODO: remove NOLINT when updating clang-tidy version
 	tm *time = localtime_r(time_data, &time_info_buf);
 #endif
 	dbg_assert(time != nullptr, "Failed to get local time for time data %" PRId64, (int64_t)time_data);
