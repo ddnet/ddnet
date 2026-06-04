@@ -36,8 +36,9 @@ Requirements for building for Android on Linux
 	```shell
 	brew install coreutils
 	```
--	Build the `ddnet-libs` for Android. See below for instructions on how to compile them locally.
-	Alternatively, use the precompiled libraries from https://github.com/ddnet/ddnet-libs/.
+-	You need the `ddnet-libs` for Android.
+	The easiest way is to use the precompiled libraries from https://github.com/ddnet/ddnet-libs/ by cloning the `ddnet-libs` submodule.
+	Alternatively, you can build the `ddnet-libs` for Android yourself. See below for instructions on how to compile them locally.
 	The libraries can also be built by manually running the GitHub workflow [`build-libraries-android`](https://github.com/ddnet/ddnet/blob/master/.github/workflows/build-libraries-android.yml).
 -	Important note for reproducible builds: To make the build reproducible, you must use exactly the same versions of the Android SDK components and Rust.
 	Furthermore, exactly CMake version 3.22.1 must be used for configuring.
@@ -66,8 +67,9 @@ Requirements for building for Android on Windows using MSYS2
 	```shell
 	pacman -S coreutils
 	```
--	Build the `ddnet-libs` for Android. See below for instructions on how to compile them locally.
-	Alternatively, use the precompiled libraries from https://github.com/ddnet/ddnet-libs/.
+-	You need the `ddnet-libs` for Android.
+	The easiest way is to use the precompiled libraries from https://github.com/ddnet/ddnet-libs/ by cloning the `ddnet-libs` submodule.
+	Alternatively, you can build the `ddnet-libs` for Android yourself. See below for instructions on how to compile them locally.
 	The libraries can also be build by manually running the GitHub workflow [`build-libraries-android`](https://github.com/ddnet/ddnet/blob/master/.github/workflows/build-libraries-android.yml).
 -	Set the `ANDROID_HOME` environment variable to override the location where the Android SDK will be installed, e.g. `C:/Android/SDK`. Make sure to only use forward slashes and no spaces in the path.
 -	Install either Android Studio (which includes an SDK manager GUI) from https://developer.android.com/studio or the standalone command-line tools (which include the `sdkmanager` tool) from https://developer.android.com/studio/#command-line-tools-only.
@@ -97,6 +99,8 @@ How to locally build the `ddnet-libs` for Android
 	```shell
 	pacman -S autoconf-wrapper automake-wrapper libtool unzip
 	```
+-	Note that you need to clone the `ddnet-libs` submodule first, before you merge the self-build `ddnet-libs` with it.
+	Otherwise, the `ddnet-libs` folder will be missing common files shared between platforms (e.g., header files).
 -	There is a script to automatically download and build all libraries.
 	This requires an active internet connection and can take around 10-20 minutes:
 	```shell
@@ -194,10 +198,10 @@ How to run the DDNet client in an emulator
 Common problems and solutions
 =============================
 
--	If the Gradle build fails with errors messages indicating bugs relating to files in the Gradle cache, try to clear the Gradle cache by deleting the contents of the folder `~/.gradle/caches` (`%USERPROFILE%/.gradle/caches` on Windows).
+-	If the Gradle build fails with error messages indicating bugs relating to files in the Gradle cache, try to clear the Gradle cache by deleting the contents of the folder `~/.gradle/caches` (`%USERPROFILE%/.gradle/caches` on Windows).
 	If that did not fix it, also delete the `.gradle` folder *in the build folder* and reboot your system to restart the Gradle daemon.
 -	The Gradle build may show a message that the JDK version could not be determined but this can safely be ignored.
--	The Gradle build will fail with errors messages indicating an unsupported class file version if a different version of the JDK is used than specified in `build.gradle`.
+-	The Gradle build will fail with error messages indicating an unsupported class file version if a different version of the JDK is used than specified in `build.gradle`.
 	When incrementing the supported JDK version, the Gradle version also has to be incremented according to https://docs.gradle.org/current/userguide/compatibility.html.
 	If you have multiple JDKs installed, you can set the JDK version for Gradle using the property `org.gradle.java.home` in the `gradle.properties` file in your Gradle home directory.
 
