@@ -24,9 +24,9 @@
 #include <android/log.h>
 #endif
 
-std::atomic<ILogger *> global_logger = nullptr;
-thread_local ILogger *scope_logger = nullptr;
-thread_local bool in_logger = false;
+static std::atomic<ILogger *> global_logger = nullptr;
+thread_local ILogger *scope_logger = nullptr; // NOLINT(misc-use-internal-linkage) // TODO: remove NOLINT when updating clang-tidy version
+thread_local bool in_logger = false; // NOLINT(misc-use-internal-linkage) // TODO: remove NOLINT when updating clang-tidy version
 
 void log_set_global_logger(ILogger *logger)
 {

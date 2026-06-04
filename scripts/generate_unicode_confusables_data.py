@@ -6,7 +6,7 @@
 #
 # If executed as a script, it will generate the contents of the files
 # python3 scripts/generate_unicode_confusables_data.py header > `src/base/unicode/confusables.h`,
-# python3 scripts/generate_unicode_confusables_data.py data > `src/base/unicode/confusables_data.h`.
+# python3 scripts/generate_unicode_confusables_data.py data > `src/base/unicode/confusables_data.cpp`.
 
 import sys
 import unicode
@@ -78,9 +78,7 @@ struct DECOMP_SLICE
 
 def gen_data(decompositions, decomposition_set, decomposition_offsets, len_set):
 	print("""\
-#ifndef CONFUSABLES_DATA
-#error "This file should only be included in `confusables.cpp`"
-#endif
+#include "confusables.h"
 """)
 
 	print("const uint8_t decomp_lengths[NUM_DECOMP_LENGTHS] = {")

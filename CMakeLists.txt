@@ -2147,7 +2147,7 @@ set_src(BASE GLOB_RECURSE src/base
   types.h
   unicode/confusables.cpp
   unicode/confusables.h
-  unicode/confusables_data.h
+  unicode/confusables_data.cpp
   unicode/tolower.cpp
   unicode/tolower_data.cpp
   unicode/tolower_data.h

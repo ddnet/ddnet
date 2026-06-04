@@ -59,7 +59,7 @@ typedef struct
 #endif
 } NETSOCKET_BUFFER;
 
-void net_buffer_init(NETSOCKET_BUFFER *buffer)
+static void net_buffer_init(NETSOCKET_BUFFER *buffer)
 {
 #if defined(CONF_PLATFORM_LINUX)
 	buffer->pos = 0;
@@ -79,17 +79,18 @@ void net_buffer_init(NETSOCKET_BUFFER *buffer)
 #endif
 }
 
-void net_buffer_reinit(NETSOCKET_BUFFER *buffer)
-{
 #if defined(CONF_PLATFORM_LINUX)
+static void net_buffer_reinit(NETSOCKET_BUFFER *buffer)
+{
 	for(int i = 0; i < VLEN; i++)
 	{
 		buffer->msgs[i].msg_hdr.msg_namelen = sizeof(buffer->sockaddrs[i]);
 	}
-#endif
 }
+#endif
 
-void net_buffer_simple(NETSOCKET_BUFFER *buffer, char **buf, int *size)
+#if defined(CONF_WEBSOCKETS)
+static void net_buffer_simple(NETSOCKET_BUFFER *buffer, char **buf, int *size)
 {
 #if defined(CONF_PLATFORM_LINUX)
 	*buf = buffer->bufs[0];
@@ -99,6 +100,7 @@ void net_buffer_simple(NETSOCKET_BUFFER *buffer, char **buf, int *size)
 	*size = sizeof(buffer->buf);
 #endif
 }
+#endif
 
 struct NETSOCKET_INTERNAL
 {
@@ -205,7 +207,7 @@ int net_addr_comp_noport(const NETADDR *a, const NETADDR *b)
 	return mem_comp(a->ip, b->ip, sizeof(a->ip));
 }
 
-void net_addr_str_v6(const unsigned short ip[8], int port, char *buffer, int buffer_size)
+static void net_addr_str_v6(const unsigned short ip[8], int port, char *buffer, int buffer_size)
 {
 	int longest_seq_len = 0;
 	int longest_seq_start = -1;
@@ -680,12 +682,12 @@ static int net_set_blocking_impl(NETSOCKET sock, bool blocking)
 		if(sockets[i] >= 0)
 		{
 #if defined(CONF_FAMILY_WINDOWS)
-			if(ioctlsocket(sockets[i], FIONBIO, (unsigned long *)&mode) != NO_ERROR)
+			if(ioctlsocket(sockets[i], FIONBIO, &mode) != NO_ERROR)
 			{
 				log_error("net", "Setting %s mode for %s socket failed (%s)", socket_str[i], mode_str, net_error_message().c_str());
 			}
 #else
-			if(ioctl(sockets[i], FIONBIO, (unsigned long *)&mode) == -1)
+			if(ioctl(sockets[i], FIONBIO, &mode) == -1)
 			{
 				log_error("net", "Setting %s mode for %s socket failed (%s)", socket_str[i], mode_str, net_error_message().c_str());
 			}

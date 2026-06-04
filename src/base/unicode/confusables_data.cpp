@@ -1,6 +1,4 @@
-#ifndef CONFUSABLES_DATA
-#error "This file should only be included in `confusables.cpp`"
-#endif
+#include "confusables.h"
 
 const uint8_t decomp_lengths[NUM_DECOMP_LENGTHS] = {
 	0,

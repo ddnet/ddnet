@@ -1,1 +1,5 @@
-Checks: '-readability-identifier-naming'
+InheritParentConfig: true
+Checks: >
+  -readability-duplicate-include,
+  -readability-identifier-naming,
+  -modernize-deprecated-headers,
