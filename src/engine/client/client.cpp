@@ -2464,10 +2464,7 @@ void CClient::FinishMapDownload()
 {
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "download complete, loading map");
 
-	bool FileSuccess = true;
-	FileSuccess &= Storage()->RemoveFile(m_aMapdownloadFilename, IStorage::TYPE_SAVE);
-	FileSuccess &= Storage()->RenameFile(m_aMapdownloadFilenameTemp, m_aMapdownloadFilename, IStorage::TYPE_SAVE);
-	if(!FileSuccess)
+	if(!Storage()->RenameFile(m_aMapdownloadFilenameTemp, m_aMapdownloadFilename, IStorage::TYPE_SAVE))
 	{
 		char aError[128 + IO_MAX_PATH_LENGTH];
 		str_format(aError, sizeof(aError), Localize("Could not save downloaded map. Try manually deleting this file: %s"), m_aMapdownloadFilename);

@@ -347,8 +347,7 @@ TEST(Filesystem, RenameOpenFileDeleteTarget)
 
 	EXPECT_TRUE(fs_is_file(Info.m_aFilename));
 	EXPECT_TRUE(fs_is_file(aNewFilename));
-	EXPECT_FALSE(fs_remove(aNewFilename)); // Target file must be deleted else rename fails on Windows when target file has open handle.
-	EXPECT_FALSE(fs_rename(Info.m_aFilename, aNewFilename));
+	EXPECT_FALSE(fs_rename(Info.m_aFilename, aNewFilename)); // Renaming can overwrite the existing target file even if it has open handles.
 	EXPECT_FALSE(fs_is_file(Info.m_aFilename));
 	EXPECT_TRUE(fs_is_file(aNewFilename));
 
