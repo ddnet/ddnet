@@ -180,13 +180,15 @@ class CGameContext : public IGameServer
 	void AddVote(const char *pDescription, const char *pCommand);
 	static int MapScan(const char *pName, int IsDir, int DirType, void *pUserData);
 
-	struct CPersistentData
+	class CPersistentData
 	{
+	public:
 		CUuid m_PrevGameUuid;
 	};
 
-	struct CPersistentClientData
+	class CPersistentClientData
 	{
+	public:
 		bool m_IsSpectator;
 		bool m_IsAfk;
 		int m_LastWhisperTo;
