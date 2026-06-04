@@ -887,7 +887,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 									else if(Map()->m_vSelectedEnvelopePoints.size() > 1)
 									{
 										static SPopupMenuId s_PopupEnvPointMultiId;
-										Ui()->DoPopupMenu(&s_PopupEnvPointMultiId, Ui()->MouseX(), Ui()->MouseY(), 80, 22, this, PopupEnvPointMulti);
+										Ui()->DoPopupMenu(&s_PopupEnvPointMultiId, Ui()->MouseX(), Ui()->MouseY(), 100, 22, this, PopupEnvPointMulti);
 									}
 									Ui()->SetActiveItem(nullptr);
 									s_Operation = EEnvelopeEditorOp::NONE;
@@ -1858,7 +1858,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEnvPointMulti(void *pContext, CUIRec
 	static int s_CurveButtonId = 0;
 	CUIRect CurveButton;
 	View.HSplitTop(RowHeight, &CurveButton, &View);
-	if(pEditor->DoButton_Editor(&s_CurveButtonId, "Project onto", 0, &CurveButton, BUTTONFLAG_LEFT, "Project all selected envelopes onto the curve between the first and last selected envelope."))
+	if(pEditor->DoButton_MenuItem(&s_CurveButtonId, "Project onto", 0, &CurveButton, BUTTONFLAG_LEFT, "Project all selected envelopes onto the curve between the first and last selected envelope."))
 	{
 		static SPopupMenuId s_PopupCurveTypeId;
 		pEditor->Ui()->DoPopupMenu(&s_PopupCurveTypeId, pEditor->Ui()->MouseX(), pEditor->Ui()->MouseY(), 80, 80, pEditor, PopupEnvPointCurveType);
