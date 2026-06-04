@@ -42,13 +42,6 @@ void CDataFileWriterFinishJob::Run()
 {
 	m_Writer.Finish();
 
-	if(!m_pStorage->RemoveFile(m_aRealFilename, IStorage::TYPE_SAVE))
-	{
-		str_format(m_aErrorMessage, sizeof(m_aErrorMessage), "Saving failed: Could not remove old map file '%s'.", m_aRealFilename);
-		log_error("editor/save", "%s", m_aErrorMessage);
-		return;
-	}
-
 	if(!m_pStorage->RenameFile(m_aTempFilename, m_aRealFilename, IStorage::TYPE_SAVE))
 	{
 		str_format(m_aErrorMessage, sizeof(m_aErrorMessage), "Saving failed: Could not move temporary map file '%s' to '%s'.", m_aTempFilename, m_aRealFilename);
