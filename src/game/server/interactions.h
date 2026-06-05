@@ -14,7 +14,7 @@ class CInteractions
 	bool IsSolo(const CGameContext *pGameServer, int ClientId) const;
 	int GetDDRaceTeam(const CGameContext *pGameServer, int ClientId) const;
 
-	int m_OwnerId = 0;
+	int m_OwnerId = -1;
 	uint32_t m_UniqueOwnerId = 0;
 	bool m_OwnerAlive = false;
 	int m_DDRaceTeam = 0;
@@ -35,6 +35,7 @@ public:
 	bool CanHit(const CGameContext *pGameServer, int ClientId) const;
 	CClientMask CanSeeMask(const CGameContext *pGameServer) const;
 	CClientMask CanHitMask(const CGameContext *pGameServer) const;
+	const CCharacter *OwnerCharacter(const CGameContext *pGameServer) const;
 };
 
 #endif

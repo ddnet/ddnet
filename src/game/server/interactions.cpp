@@ -170,3 +170,13 @@ CClientMask CInteractions::CanHitMask(const CGameContext *pGameServer) const
 	}
 	return Mask;
 }
+
+const CCharacter *CInteractions::OwnerCharacter(const CGameContext *pGameServer) const
+{
+	const CCharacter *pChr = pGameServer->GetPlayerChar(m_OwnerId);
+	if(!pChr)
+		return nullptr;
+	if(pChr->GetPlayer()->GetUniqueCid() != m_UniqueOwnerId)
+		return nullptr;
+	return pChr;
+}

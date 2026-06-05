@@ -7,6 +7,7 @@
 #include <game/server/entity.h>
 #include <game/server/save.h>
 
+class CPlayer;
 class CGameTeams;
 class CGameWorld;
 class IAntibot;
@@ -99,7 +100,8 @@ public:
 	int NeededFaketuning() const { return m_NeededFaketuning; }
 	bool IsAlive() const { return m_Alive; }
 	bool IsPaused() const { return m_Paused; }
-	class CPlayer *GetPlayer() { return m_pPlayer; }
+	CPlayer *GetPlayer() { return m_pPlayer; }
+	const CPlayer *GetPlayer() const { return m_pPlayer; }
 	CClientMask TeamMask();
 
 	void SetPosition(const vec2 &Position);
