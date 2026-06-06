@@ -3,6 +3,7 @@
 
 #include "editor_action.h"
 
+#include <game/client/ui_listbox.h>
 #include <game/editor/map_object.h>
 
 #include <deque>
@@ -43,6 +44,26 @@ public:
 private:
 	std::vector<std::shared_ptr<IEditorAction>> m_vpBulkActions;
 	bool m_IsBulk = false;
+};
+
+enum class EHistoryType
+{
+	EDITOR,
+	ENVELOPE,
+	SERVER_SETTINGS,
+};
+
+class CEditorHistoryUiState
+{
+public:
+	EHistoryType m_HistoryType = EHistoryType::EDITOR;
+	CListBox m_ListBox;
+	int m_SelectedActionIndex = 0;
+	const char m_EditorHistoryButtonId = 0;
+	const char m_EnvelopeEditorHistoryButtonId = 0;
+	const char m_ServerSettingsHistoryButtonId = 0;
+	const char m_DeleteButtonId = 0;
+	const char m_BaseActionButtonId = 0;
 };
 
 #endif
