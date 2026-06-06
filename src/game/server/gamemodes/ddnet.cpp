@@ -127,7 +127,7 @@ int CGameControllerDDNet::SnapPlayerScore(int SnappingClient, CPlayer *pPlayer)
 	bool HideScore = g_Config.m_SvHideScore && SnappingClient != pPlayer->GetCid();
 	std::optional<float> Score = GameServer()->Score()->PlayerData(pPlayer->GetCid())->m_BestTime;
 
-	if(Server()->IsSixup(SnappingClient))
+	if(Server()->IsSeven(SnappingClient))
 	{
 		if(!Score.has_value() || HideScore)
 			return protocol7::FinishTime::NOT_FINISHED;

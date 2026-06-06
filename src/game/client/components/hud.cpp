@@ -343,7 +343,7 @@ void CHud::RenderScoreHud()
 			{
 				if(apPlayerInfo[t])
 				{
-					if(Client()->IsSixup() && GameClient()->m_Snap.m_pGameInfoObj->m_GameFlags & protocol7::GAMEFLAG_RACE)
+					if(Client()->IsSeven() && GameClient()->m_Snap.m_pGameInfoObj->m_GameFlags & protocol7::GAMEFLAG_RACE)
 						str_time((int64_t)absolute(apPlayerInfo[t]->m_Score) / 10, ETimeFormat::MINS_CENTISECS, aScore[t], sizeof(aScore[t]));
 					else if(GameClient()->m_GameInfo.m_TimeScore)
 					{
@@ -734,8 +734,8 @@ void CHud::RenderAmmoHealthAndArmor(const CNetObj_Character *pCharacter)
 	if(!pCharacter)
 		return;
 
-	bool IsSixupGameSkin = GameClient()->m_GameSkin.IsSixup();
-	int QuadOffsetSixup = (IsSixupGameSkin ? 10 : 0);
+	bool IsSevenGameSkin = GameClient()->m_GameSkin.IsSeven();
+	int QuadOffsetSeven = (IsSevenGameSkin ? 10 : 0);
 
 	if(GameClient()->m_GameInfo.m_HudAmmo)
 	{
@@ -745,7 +745,7 @@ void CHud::RenderAmmoHealthAndArmor(const CNetObj_Character *pCharacter)
 		// 0.7 only
 		if(CurWeapon == WEAPON_NINJA)
 		{
-			if(!GameClient()->m_GameInfo.m_HudDDRace && Client()->IsSixup())
+			if(!GameClient()->m_GameInfo.m_HudDDRace && Client()->IsSeven())
 			{
 				const int Max = g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000;
 				float NinjaProgress = std::clamp(pCharacter->m_AmmoCount - Client()->GameTick(g_Config.m_ClDummy), 0, Max) / (float)Max;
@@ -757,11 +757,11 @@ void CHud::RenderAmmoHealthAndArmor(const CNetObj_Character *pCharacter)
 			Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteWeaponProjectiles[CurWeapon]);
 			if(AmmoOffsetY > 0)
 			{
-				Graphics()->RenderQuadContainerEx(m_HudQuadContainerIndex, m_aAmmoOffset[CurWeapon] + QuadOffsetSixup, std::clamp(pCharacter->m_AmmoCount, 0, 10), 0, AmmoOffsetY);
+				Graphics()->RenderQuadContainerEx(m_HudQuadContainerIndex, m_aAmmoOffset[CurWeapon] + QuadOffsetSeven, std::clamp(pCharacter->m_AmmoCount, 0, 10), 0, AmmoOffsetY);
 			}
 			else
 			{
-				Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_aAmmoOffset[CurWeapon] + QuadOffsetSixup, std::clamp(pCharacter->m_AmmoCount, 0, 10));
+				Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_aAmmoOffset[CurWeapon] + QuadOffsetSeven, std::clamp(pCharacter->m_AmmoCount, 0, 10));
 			}
 		}
 	}
@@ -770,15 +770,15 @@ void CHud::RenderAmmoHealthAndArmor(const CNetObj_Character *pCharacter)
 	{
 		// health display
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteHealthFull);
-		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_HealthOffset + QuadOffsetSixup, minimum(pCharacter->m_Health, 10));
+		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_HealthOffset + QuadOffsetSeven, minimum(pCharacter->m_Health, 10));
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteHealthEmpty);
-		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_EmptyHealthOffset + QuadOffsetSixup + minimum(pCharacter->m_Health, 10), 10 - minimum(pCharacter->m_Health, 10));
+		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_EmptyHealthOffset + QuadOffsetSeven + minimum(pCharacter->m_Health, 10), 10 - minimum(pCharacter->m_Health, 10));
 
 		// armor display
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteArmorFull);
-		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_ArmorOffset + QuadOffsetSixup, minimum(pCharacter->m_Armor, 10));
+		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_ArmorOffset + QuadOffsetSeven, minimum(pCharacter->m_Armor, 10));
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteArmorEmpty);
-		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_ArmorOffset + QuadOffsetSixup + minimum(pCharacter->m_Armor, 10), 10 - minimum(pCharacter->m_Armor, 10));
+		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_ArmorOffset + QuadOffsetSeven + minimum(pCharacter->m_Armor, 10), 10 - minimum(pCharacter->m_Armor, 10));
 	}
 }
 
@@ -1256,7 +1256,7 @@ void CHud::RenderSpectatorCount()
 	}
 
 	int Count = 0;
-	if(Client()->IsSixup())
+	if(Client()->IsSeven())
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{

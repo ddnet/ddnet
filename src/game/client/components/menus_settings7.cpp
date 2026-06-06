@@ -115,8 +115,8 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 	OwnSkinInfo.m_Size = 50.0f;
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
-		GameClient()->m_Skins7.FindSkinPart(Part, apSkinPartsPtr[Part], false)->ApplyTo(OwnSkinInfo.m_aSixup[g_Config.m_ClDummy]);
-		GameClient()->m_Skins7.ApplyColorTo(OwnSkinInfo.m_aSixup[g_Config.m_ClDummy], aUCCVars[Part], aColorVars[Part], Part);
+		GameClient()->m_Skins7.FindSkinPart(Part, apSkinPartsPtr[Part], false)->ApplyTo(OwnSkinInfo.m_aSeven[g_Config.m_ClDummy]);
+		GameClient()->m_Skins7.ApplyColorTo(OwnSkinInfo.m_aSeven[g_Config.m_ClDummy], aUCCVars[Part], aColorVars[Part], Part);
 	}
 
 	char aBuf[128 + IO_MAX_PATH_LENGTH];
@@ -155,19 +155,19 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 	TeamSkinInfo.m_Size = OwnSkinInfo.m_Size;
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
-		GameClient()->m_Skins7.FindSkinPart(Part, apSkinPartsPtr[Part], false)->ApplyTo(TeamSkinInfo.m_aSixup[g_Config.m_ClDummy]);
-		TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aUseCustomColors[Part] = aUCCVars[Part];
+		GameClient()->m_Skins7.FindSkinPart(Part, apSkinPartsPtr[Part], false)->ApplyTo(TeamSkinInfo.m_aSeven[g_Config.m_ClDummy]);
+		TeamSkinInfo.m_aSeven[g_Config.m_ClDummy].m_aUseCustomColors[Part] = aUCCVars[Part];
 	}
 
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
-		TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = GameClient()->m_Skins7.GetTeamColor(aUCCVars[Part], aColorVars[Part], TEAM_RED, Part);
+		TeamSkinInfo.m_aSeven[g_Config.m_ClDummy].m_aColors[Part] = GameClient()->m_Skins7.GetTeamColor(aUCCVars[Part], aColorVars[Part], TEAM_RED, Part);
 	}
 	RenderTools()->RenderTee(CAnimState::GetIdle(), &TeamSkinInfo, 0, vec2(1, 0), RedTeamSkinPreview.Center() + OffsetToMid);
 
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
-		TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = GameClient()->m_Skins7.GetTeamColor(aUCCVars[Part], aColorVars[Part], TEAM_BLUE, Part);
+		TeamSkinInfo.m_aSeven[g_Config.m_ClDummy].m_aColors[Part] = GameClient()->m_Skins7.GetTeamColor(aUCCVars[Part], aColorVars[Part], TEAM_BLUE, Part);
 	}
 	RenderTools()->RenderTee(CAnimState::GetIdle(), &TeamSkinInfo, 0, vec2(-1, 0), BlueTeamSkinPreview.Center() + OffsetToMid);
 
@@ -350,8 +350,8 @@ void CMenus::RenderSkinSelection7(CUIRect MainView)
 		CTeeRenderInfo Info;
 		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 		{
-			pSkin->m_apParts[Part]->ApplyTo(Info.m_aSixup[g_Config.m_ClDummy]);
-			GameClient()->m_Skins7.ApplyColorTo(Info.m_aSixup[g_Config.m_ClDummy], pSkin->m_aUseCustomColors[Part], pSkin->m_aPartColors[Part], Part);
+			pSkin->m_apParts[Part]->ApplyTo(Info.m_aSeven[g_Config.m_ClDummy]);
+			GameClient()->m_Skins7.ApplyColorTo(Info.m_aSeven[g_Config.m_ClDummy], pSkin->m_aUseCustomColors[Part], pSkin->m_aPartColors[Part], Part);
 		}
 		Info.m_Size = 50.0f;
 
@@ -432,8 +432,8 @@ void CMenus::RenderSkinPartSelection7(CUIRect MainView)
 		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 		{
 			const CSkins7::CSkinPart *pPreviewPart = (m_TeePartSelected == Part ? pPart : GameClient()->m_Skins7.FindSkinPart(Part, CSkins7::ms_apSkinVariables[(int)m_Dummy][Part], false));
-			pPreviewPart->ApplyTo(Info.m_aSixup[g_Config.m_ClDummy]);
-			GameClient()->m_Skins7.ApplyColorTo(Info.m_aSixup[g_Config.m_ClDummy], *CSkins7::ms_apUCCVariables[(int)m_Dummy][Part], *CSkins7::ms_apColorVariables[(int)m_Dummy][Part], Part);
+			pPreviewPart->ApplyTo(Info.m_aSeven[g_Config.m_ClDummy]);
+			GameClient()->m_Skins7.ApplyColorTo(Info.m_aSeven[g_Config.m_ClDummy], *CSkins7::ms_apUCCVariables[(int)m_Dummy][Part], *CSkins7::ms_apColorVariables[(int)m_Dummy][Part], Part);
 		}
 		Info.m_Size = 50.0f;
 

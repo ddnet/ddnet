@@ -571,7 +571,7 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 
 	const char *pTimeout = pResult->NumArguments() > 0 ? pResult->GetString(0) : pPlayer->m_aTimeoutCode;
 
-	if(!pSelf->Server()->IsSixup(pResult->m_ClientId))
+	if(!pSelf->Server()->IsSeven(pResult->m_ClientId))
 	{
 		for(int i = 0; i < pSelf->Server()->MaxClients(); i++)
 		{
@@ -1643,7 +1643,7 @@ void CGameContext::ConSetTimerType(IConsole::IResult *pResult, void *pUserData)
 			pSelf->SendBroadcast("", pResult->m_ClientId);
 	}
 
-	if(pPlayer->m_TimerType <= CPlayer::TIMERTYPE_SIXUP && pPlayer->m_TimerType >= CPlayer::TIMERTYPE_GAMETIMER)
+	if(pPlayer->m_TimerType <= CPlayer::TIMERTYPE_SEVEN && pPlayer->m_TimerType >= CPlayer::TIMERTYPE_GAMETIMER)
 		str_format(aBuf, sizeof(aBuf), "Timer is displayed in %s", s_aaMsg[pPlayer->m_TimerType]);
 	else if(pPlayer->m_TimerType == CPlayer::TIMERTYPE_NONE)
 		str_copy(aBuf, "Timer isn't displayed.");

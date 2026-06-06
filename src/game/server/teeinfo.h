@@ -22,8 +22,8 @@ public:
 	CTeeInfo(const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet);
 	CTeeInfo(const char *const apSkinPartNames[protocol7::NUM_SKINPARTS], const int aUseCustomColors[protocol7::NUM_SKINPARTS], const int aSkinPartColors[protocol7::NUM_SKINPARTS]);
 
-	void FromSixup();
-	void ToSixup();
+	void FromSeven();
+	void ToSeven();
 };
 
 #endif // GAME_SERVER_TEEINFO_H

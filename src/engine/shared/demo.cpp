@@ -479,20 +479,20 @@ void CDemoRecorder::AddDemoMarker(int Tick)
 
 CSnapshotDelta *CDemoPlayer::SnapshotDelta()
 {
-	if(IsSixup())
+	if(IsSeven())
 	{
-		return m_pSnapshotDeltaSixup;
+		return m_pSnapshotDeltaSeven;
 	}
 	return m_pSnapshotDelta;
 }
 
-void CDemoPlayer::Construct(CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSnapshotDeltaSixup, bool UseVideo)
+void CDemoPlayer::Construct(CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSnapshotDeltaSeven, bool UseVideo)
 {
 	m_File = nullptr;
 	m_SpeedIndex = DEMO_SPEED_INDEX_DEFAULT;
 
 	m_pSnapshotDelta = pSnapshotDelta;
-	m_pSnapshotDeltaSixup = pSnapshotDeltaSixup;
+	m_pSnapshotDeltaSeven = pSnapshotDeltaSeven;
 	m_LastSnapshotDataSize = -1;
 	m_pListener = nullptr;
 	m_UseVideo = UseVideo;
@@ -501,16 +501,16 @@ void CDemoPlayer::Construct(CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSna
 	m_aErrorMessage[0] = '\0';
 }
 
-CDemoPlayer::CDemoPlayer(CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSnapshotDeltaSixup, bool UseVideo, TUpdateIntraTimesFunc &&UpdateIntraTimesFunc)
+CDemoPlayer::CDemoPlayer(CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSnapshotDeltaSeven, bool UseVideo, TUpdateIntraTimesFunc &&UpdateIntraTimesFunc)
 {
-	Construct(pSnapshotDelta, pSnapshotDeltaSixup, UseVideo);
+	Construct(pSnapshotDelta, pSnapshotDeltaSeven, UseVideo);
 
 	m_UpdateIntraTimesFunc = UpdateIntraTimesFunc;
 }
 
-CDemoPlayer::CDemoPlayer(CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSnapshotDeltaSixup, bool UseVideo)
+CDemoPlayer::CDemoPlayer(CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSnapshotDeltaSeven, bool UseVideo)
 {
-	Construct(pSnapshotDelta, pSnapshotDeltaSixup, UseVideo);
+	Construct(pSnapshotDelta, pSnapshotDeltaSeven, UseVideo);
 }
 
 CDemoPlayer::~CDemoPlayer()
@@ -859,7 +859,7 @@ int CDemoPlayer::Load(IStorage *pStorage, IConsole *pConsole, const char *pFilen
 		str_copy(m_aFilename, "");
 		return -1;
 	}
-	m_Sixup = str_startswith(m_Info.m_Header.m_aNetversion, "0.7");
+	m_Seven = str_startswith(m_Info.m_Header.m_aNetversion, "0.7");
 
 	// save byte offset of map for later use
 	m_MapOffset = io_tell(m_File);
@@ -1423,17 +1423,17 @@ public:
 	}
 };
 
-void CDemoEditor::Init(CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSnapshotDeltaSixup, IConsole *pConsole, IStorage *pStorage)
+void CDemoEditor::Init(CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSnapshotDeltaSeven, IConsole *pConsole, IStorage *pStorage)
 {
 	m_pSnapshotDelta = pSnapshotDelta;
-	m_pSnapshotDeltaSixup = pSnapshotDeltaSixup;
+	m_pSnapshotDeltaSeven = pSnapshotDeltaSeven;
 	m_pConsole = pConsole;
 	m_pStorage = pStorage;
 }
 
 bool CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, DEMOFUNC_FILTER pfnFilter, void *pUser)
 {
-	CDemoPlayer DemoPlayer(m_pSnapshotDelta, m_pSnapshotDeltaSixup, false);
+	CDemoPlayer DemoPlayer(m_pSnapshotDelta, m_pSnapshotDeltaSeven, false);
 	if(DemoPlayer.Load(m_pStorage, m_pConsole, pDemo, IStorage::TYPE_ALL_OR_ABSOLUTE) == -1)
 		return false;
 

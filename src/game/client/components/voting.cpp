@@ -32,7 +32,7 @@ void CVoting::ConVote(IConsole::IResult *pResult, void *pUserData)
 
 void CVoting::Callvote(const char *pType, const char *pValue, const char *pReason)
 {
-	if(Client()->IsSixup())
+	if(Client()->IsSeven())
 	{
 		protocol7::CNetMsg_Cl_CallVote Msg;
 		Msg.m_pType = pType;

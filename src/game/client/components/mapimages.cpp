@@ -136,7 +136,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 		{
 			char aPath[IO_MAX_PATH_LENGTH];
 			bool Translated = false;
-			if(Client()->IsSixup())
+			if(Client()->IsSeven())
 			{
 				Translated =
 					!str_comp(pName, "grass_doodads") ||

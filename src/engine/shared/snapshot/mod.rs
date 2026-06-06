@@ -52,9 +52,9 @@ pub const SNAPSHOT_MAX_ITEMS: usize = 1024;
 /// Maximum size of a snapshot in its serialized form.
 pub const SNAPSHOT_MAX_SIZE: usize = 65536; // 64 KiB
 
-fn type_id_from_i32(sixup: bool, mut type_: i32) -> Option<TypeId> {
+fn type_id_from_i32(seven: bool, mut type_: i32) -> Option<TypeId> {
     if type_ < OFFSET_UUID {
-        if sixup {
+        if seven {
             if type_ >= 0 {
                 type_ = ffi::Obj_SixToSeven(type_);
                 if type_ < 0 {

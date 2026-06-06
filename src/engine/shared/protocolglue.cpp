@@ -107,7 +107,7 @@ void PickupType_SevenToSix(int Type7, int &Type6, int &SubType6)
 		Type6 = POWERUP_NINJA;
 		break;
 	default:
-		// dbg_msg("sixup", "ERROR: failed to translate weapon=%d to 0.6", Type7);
+		// dbg_msg("seven", "ERROR: failed to translate weapon=%d to 0.6", Type7);
 		break;
 	}
 }

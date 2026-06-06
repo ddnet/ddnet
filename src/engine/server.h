@@ -84,7 +84,7 @@ public:
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientId) = 0;
 
 	template<class T>
-		requires(!protocol7::is_sixup<T>::value)
+		requires(!protocol7::is_seven<T>::value)
 	int SendPackMsg(const T *pMsg, int Flags, int ClientId)
 	{
 		int Result = 0;
@@ -102,17 +102,17 @@ public:
 	}
 
 	template<class T>
-		requires(protocol7::is_sixup<T>::value)
+		requires(protocol7::is_seven<T>::value)
 	int SendPackMsg(const T *pMsg, int Flags, int ClientId)
 	{
 		int Result = 0;
 		if(ClientId == -1)
 		{
 			for(int i = 0; i < MaxClients(); i++)
-				if(ClientIngame(i) && IsSixup(i))
+				if(ClientIngame(i) && IsSeven(i))
 					Result = SendPackMsgOne(pMsg, Flags, i);
 		}
-		else if(IsSixup(ClientId))
+		else if(IsSeven(ClientId))
 			Result = SendPackMsgOne(pMsg, Flags, ClientId);
 
 		return Result;
@@ -144,7 +144,7 @@ public:
 			MsgCopy.m_ClientId = VANILLA_MAX_CLIENTS - 1;
 		}
 
-		if(IsSixup(ClientId))
+		if(IsSeven(ClientId))
 		{
 			protocol7::CNetMsg_Sv_Chat Msg7;
 			Msg7.m_ClientId = MsgCopy.m_ClientId;
@@ -170,7 +170,7 @@ public:
 
 	int SendPackMsgTranslate(const CNetMsg_Sv_RaceFinish *pMsg, int Flags, int ClientId)
 	{
-		if(IsSixup(ClientId))
+		if(IsSeven(ClientId))
 		{
 			protocol7::CNetMsg_Sv_RaceFinish Msg7;
 			Msg7.m_ClientId = pMsg->m_ClientId;
@@ -187,7 +187,7 @@ public:
 	int SendPackMsgOne(const T *pMsg, int Flags, int ClientId)
 	{
 		dbg_assert(ClientId != -1, "SendPackMsgOne called with -1");
-		CMsgPacker Packer(T::ms_MsgId, false, protocol7::is_sixup<T>::value);
+		CMsgPacker Packer(T::ms_MsgId, false, protocol7::is_seven<T>::value);
 
 		if(pMsg->Pack(&Packer))
 			return -1;
@@ -196,7 +196,7 @@ public:
 
 	bool Translate(int &Target, int Client)
 	{
-		if(IsSixup(Client))
+		if(IsSeven(Client))
 			return true;
 		if(GetClientVersion(Client) >= VERSION_DDNET_OLD)
 			return true;
@@ -216,7 +216,7 @@ public:
 
 	bool ReverseTranslate(int &Target, int Client)
 	{
-		if(IsSixup(Client))
+		if(IsSeven(Client))
 			return true;
 		if(GetClientVersion(Client) >= VERSION_DDNET_OLD)
 			return true;
@@ -243,7 +243,7 @@ public:
 	template<typename T>
 	bool SnapNewItem(int Id, const T &Data)
 	{
-		const int Type = protocol7::is_sixup<T>::value ? -T::ms_MsgId : T::ms_MsgId;
+		const int Type = protocol7::is_seven<T>::value ? -T::ms_MsgId : T::ms_MsgId;
 		return SnapNewItem(Type, Id, Data.AsSlice());
 	}
 
@@ -296,7 +296,7 @@ public:
 
 	virtual void SendMsgRaw(int ClientId, const void *pData, int Size, int Flags) = 0;
 
-	virtual bool IsSixup(int ClientId) const = 0;
+	virtual bool IsSeven(int ClientId) const = 0;
 };
 
 class IGameServer : public IInterface
@@ -381,7 +381,7 @@ public:
 	virtual bool PlayerExists(int ClientId) const = 0;
 
 	virtual void TeehistorianRecordAntibot(const void *pData, int DataSize) = 0;
-	virtual void TeehistorianRecordPlayerJoin(int ClientId, bool Sixup) = 0;
+	virtual void TeehistorianRecordPlayerJoin(int ClientId, bool Seven) = 0;
 	virtual void TeehistorianRecordPlayerDrop(int ClientId, const char *pReason) = 0;
 	virtual void TeehistorianRecordPlayerRejoin(int ClientId) = 0;
 	virtual void TeehistorianRecordPlayerName(int ClientId, const char *pName) = 0;

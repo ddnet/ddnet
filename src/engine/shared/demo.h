@@ -139,7 +139,7 @@ private:
 	CSnapshotBuffer m_LastSnapshotData;
 	int m_LastSnapshotDataSize;
 	CSnapshotDelta *m_pSnapshotDelta;
-	CSnapshotDelta *m_pSnapshotDeltaSixup;
+	CSnapshotDelta *m_pSnapshotDeltaSeven;
 
 	bool m_UseVideo;
 #if defined(CONF_VIDEORECORDER)
@@ -164,14 +164,14 @@ private:
 	void UpdateTimes();
 
 	int64_t Time();
-	bool m_Sixup;
+	bool m_Seven;
 
 	CSnapshotDelta *SnapshotDelta();
-	void Construct(CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSnapshotDeltaSixup, bool UseVideo);
+	void Construct(CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSnapshotDeltaSeven, bool UseVideo);
 
 public:
-	CDemoPlayer(CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSnapshotDeltaSixup, bool UseVideo);
-	CDemoPlayer(CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSnapshotDeltaSixup, bool UseVideo, TUpdateIntraTimesFunc &&UpdateIntraTimesFunc);
+	CDemoPlayer(CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSnapshotDeltaSeven, bool UseVideo);
+	CDemoPlayer(CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSnapshotDeltaSeven, bool UseVideo, TUpdateIntraTimesFunc &&UpdateIntraTimesFunc);
 	~CDemoPlayer() override;
 
 	void SetListener(IListener *pListener);
@@ -197,7 +197,7 @@ public:
 	const char *ErrorMessage() const override { return m_aErrorMessage; }
 
 	void Update(bool RealTime = true);
-	bool IsSixup() const { return m_Sixup; }
+	bool IsSeven() const { return m_Seven; }
 
 	const CPlaybackInfo *Info() const { return &m_Info; }
 	bool IsPlaying() const override { return m_File != nullptr; }
@@ -209,10 +209,10 @@ class CDemoEditor : public IDemoEditor
 	IConsole *m_pConsole;
 	IStorage *m_pStorage;
 	CSnapshotDelta *m_pSnapshotDelta;
-	CSnapshotDelta *m_pSnapshotDeltaSixup;
+	CSnapshotDelta *m_pSnapshotDeltaSeven;
 
 public:
-	virtual void Init(CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSnapshotDeltaSixup, IConsole *pConsole, IStorage *pStorage);
+	virtual void Init(CSnapshotDelta *pSnapshotDelta, CSnapshotDelta *pSnapshotDeltaSeven, IConsole *pConsole, IStorage *pStorage);
 	bool Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, DEMOFUNC_FILTER pfnFilter, void *pUser) override;
 };
 

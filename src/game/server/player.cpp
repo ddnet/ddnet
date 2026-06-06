@@ -71,8 +71,8 @@ void CPlayer::Reset()
 	m_ChatScore = 0;
 	m_Moderating = false;
 	m_EyeEmoteEnabled = true;
-	if(Server()->IsSixup(m_ClientId))
-		m_TimerType = TIMERTYPE_SIXUP;
+	if(Server()->IsSeven(m_ClientId))
+		m_TimerType = TIMERTYPE_SEVEN;
 	else
 		m_TimerType = (g_Config.m_SvDefaultTimerType == TIMERTYPE_GAMETIMER || g_Config.m_SvDefaultTimerType == TIMERTYPE_GAMETIMER_AND_BROADCAST) ? TIMERTYPE_BROADCAST : g_Config.m_SvDefaultTimerType;
 
@@ -332,7 +332,7 @@ void CPlayer::Snap(int SnappingClient)
 	int Latency = SnappingClient == SERVER_DEMO_CLIENT ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aCurLatency[m_ClientId];
 	int Score = GameServer()->m_pController->SnapPlayerScore(SnappingClient, this);
 
-	if(!Server()->IsSixup(SnappingClient))
+	if(!Server()->IsSeven(SnappingClient))
 	{
 		CNetObj_PlayerInfo PlayerInfo = {};
 		PlayerInfo.m_Latency = Latency;
@@ -362,7 +362,7 @@ void CPlayer::Snap(int SnappingClient)
 
 	if(m_ClientId == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused))
 	{
-		if(!Server()->IsSixup(SnappingClient))
+		if(!Server()->IsSeven(SnappingClient))
 		{
 			CNetObj_SpectatorInfo SpectatorInfo = {};
 			SpectatorInfo.m_SpectatorId = m_SpectatorId;
@@ -448,8 +448,8 @@ void CPlayer::Snap(int SnappingClient)
 	DDNetPlayer.m_FinishTimeMillis = PlayerTime.m_Milliseconds;
 	Server()->SnapNewItem(TranslatedId, DDNetPlayer);
 
-	if(Server()->IsSixup(SnappingClient) && m_pCharacter && m_pCharacter->m_DDRaceState == ERaceState::STARTED &&
-		GameServer()->m_apPlayers[SnappingClient]->m_TimerType == TIMERTYPE_SIXUP)
+	if(Server()->IsSeven(SnappingClient) && m_pCharacter && m_pCharacter->m_DDRaceState == ERaceState::STARTED &&
+		GameServer()->m_apPlayers[SnappingClient]->m_TimerType == TIMERTYPE_SEVEN)
 	{
 		protocol7::CNetObj_PlayerInfoRace RaceInfo = {};
 		RaceInfo.m_RaceStartTick = m_pCharacter->m_StartTime;
@@ -479,7 +479,7 @@ void CPlayer::FakeSnap()
 	if(GetClientVersion() >= VERSION_DDNET_OLD)
 		return;
 
-	if(Server()->IsSixup(m_ClientId))
+	if(Server()->IsSeven(m_ClientId))
 		return;
 
 	int FakeId = VANILLA_MAX_CLIENTS - 1;
@@ -655,17 +655,17 @@ bool CPlayer::SetTimerType(int TimerType)
 {
 	if(TimerType == TIMERTYPE_DEFAULT)
 	{
-		if(Server()->IsSixup(m_ClientId))
-			m_TimerType = TIMERTYPE_SIXUP;
+		if(Server()->IsSeven(m_ClientId))
+			m_TimerType = TIMERTYPE_SEVEN;
 		else
 			SetTimerType(g_Config.m_SvDefaultTimerType);
 
 		return true;
 	}
 
-	if(Server()->IsSixup(m_ClientId))
+	if(Server()->IsSeven(m_ClientId))
 	{
-		if(TimerType == TIMERTYPE_SIXUP || TimerType == TIMERTYPE_NONE)
+		if(TimerType == TIMERTYPE_SEVEN || TimerType == TIMERTYPE_NONE)
 		{
 			m_TimerType = TimerType;
 			return true;
@@ -833,7 +833,7 @@ int CPlayer::Pause(int State, bool Force)
 		m_Paused = State;
 		m_LastPause = Server()->Tick();
 
-		// Sixup needs a teamchange
+		// Seven needs a teamchange
 		protocol7::CNetMsg_Sv_Team Msg;
 		Msg.m_ClientId = m_ClientId;
 		Msg.m_CooldownTick = Server()->Tick();

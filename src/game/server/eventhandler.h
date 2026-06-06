@@ -42,7 +42,7 @@ public:
 	void Clear();
 	void Snap(int SnappingClient);
 
-	void EventToSixup(int *pType, int *pSize, const char **ppData);
+	void EventToSeven(int *pType, int *pSize, const char **ppData);
 };
 
 #endif

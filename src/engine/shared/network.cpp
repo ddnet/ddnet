@@ -61,7 +61,7 @@ bool CPacketChunkUnpacker::UnpackNextChunk(CNetChunk *pChunk)
 		unsigned char *pData = m_Data.m_aChunkData;
 
 		// TODO: add checking here so we don't read too far
-		const int HeaderSplit = m_pConnection->m_Sixup ? 6 : 4;
+		const int HeaderSplit = m_pConnection->m_Seven ? 6 : 4;
 		for(int i = 0; i < m_CurrentChunk; i++)
 		{
 			CNetChunkHeader SkippedHeader;
@@ -174,7 +174,7 @@ void CNetBase::SendPacketConnlessWithToken7(NETSOCKET Socket, NETADDR *pAddr, co
 	net_udp_send(Socket, pAddr, aBuffer, DataSize + DATA_OFFSET);
 }
 
-void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken, bool Sixup)
+void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken, bool Seven)
 {
 	dbg_assert(IsValidConnectionOrientedPacket(pPacket), "Invalid packet to send. Flags=%d Ack=%d NumChunks=%d Size=%d",
 		pPacket->m_Flags, pPacket->m_Ack, pPacket->m_NumChunks, pPacket->m_DataSize);
@@ -193,7 +193,7 @@ void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct 
 	}
 
 	int HeaderSize = NET_PACKETHEADERSIZE;
-	if(Sixup)
+	if(Seven)
 	{
 		HeaderSize += sizeof(SecurityToken);
 		WriteSecurityToken(aBuffer + 3, SecurityToken);
@@ -227,7 +227,7 @@ void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct 
 		mem_copy(&aBuffer[HeaderSize], pPacket->m_aChunkData, pPacket->m_DataSize);
 	}
 
-	if(Sixup)
+	if(Seven)
 	{
 		pPacket->m_Flags = PacketFlags_SixToSeven(pPacket->m_Flags);
 	}
@@ -263,7 +263,7 @@ std::optional<int> CNetBase::UnpackPacketFlags(unsigned char *pBuffer, int Size)
 }
 
 // TODO: rename this function
-int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool &Sixup, SECURITY_TOKEN *pSecurityToken, SECURITY_TOKEN *pResponseToken)
+int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool &Seven, SECURITY_TOKEN *pSecurityToken, SECURITY_TOKEN *pResponseToken)
 {
 	std::optional<int> Flags = UnpackPacketFlags(pBuffer, Size);
 	if(!Flags)
@@ -286,14 +286,14 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 
 	if(pPacket->m_Flags & NET_PACKETFLAG_CONNLESS)
 	{
-		Sixup = (pBuffer[0] & 0x3) == 1;
-		if(Sixup && (pSecurityToken == nullptr || pResponseToken == nullptr))
+		Seven = (pBuffer[0] & 0x3) == 1;
+		if(Seven && (pSecurityToken == nullptr || pResponseToken == nullptr))
 			return -1;
-		int Offset = Sixup ? 9 : 6;
+		int Offset = Seven ? 9 : 6;
 		if(Size < Offset)
 			return -1;
 
-		if(Sixup)
+		if(Seven)
 		{
 			*pSecurityToken = ToSecurityToken(pBuffer + 1);
 			*pResponseToken = ToSecurityToken(pBuffer + 5);
@@ -305,7 +305,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 		pPacket->m_DataSize = Size - Offset;
 		mem_copy(pPacket->m_aChunkData, pBuffer + Offset, pPacket->m_DataSize);
 
-		if(!Sixup && mem_comp(pBuffer, NET_HEADER_EXTENDED, sizeof(NET_HEADER_EXTENDED)) == 0)
+		if(!Seven && mem_comp(pBuffer, NET_HEADER_EXTENDED, sizeof(NET_HEADER_EXTENDED)) == 0)
 		{
 			pPacket->m_Flags |= NET_PACKETFLAG_EXTENDED;
 			mem_copy(pPacket->m_aExtraData, pBuffer + sizeof(NET_HEADER_EXTENDED), sizeof(pPacket->m_aExtraData));
@@ -314,10 +314,10 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 	else
 	{
 		if(pPacket->m_Flags & NET_PACKETFLAG_UNUSED)
-			Sixup = true;
-		if(Sixup && pSecurityToken == nullptr)
+			Seven = true;
+		if(Seven && pSecurityToken == nullptr)
 			return -1;
-		int DataStart = Sixup ? 7 : NET_PACKETHEADERSIZE;
+		int DataStart = Seven ? 7 : NET_PACKETHEADERSIZE;
 		if(Size < DataStart)
 			return -1;
 
@@ -325,7 +325,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 		pPacket->m_NumChunks = pBuffer[2];
 		pPacket->m_DataSize = Size - DataStart;
 
-		if(Sixup)
+		if(Seven)
 		{
 			pPacket->m_Flags = PacketFlags_SevenToSix(pPacket->m_Flags);
 			*pSecurityToken = ToSecurityToken(pBuffer + 3);
@@ -355,7 +355,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 	{
 		if(pPacket->m_DataSize >= 1 + (int)sizeof(SECURITY_TOKEN)) // control byte + token
 		{
-			if(pPacket->m_aChunkData[0] == NET_CTRLMSG_CONNECT || (Sixup && pPacket->m_aChunkData[0] == protocol7::NET_CTRLMSG_TOKEN))
+			if(pPacket->m_aChunkData[0] == NET_CTRLMSG_CONNECT || (Seven && pPacket->m_aChunkData[0] == protocol7::NET_CTRLMSG_TOKEN))
 			{
 				*pResponseToken = ToSecurityToken(&pPacket->m_aChunkData[1]);
 			}
@@ -376,7 +376,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 	return 0;
 }
 
-void CNetBase::SendControlMsg(NETSOCKET Socket, NETADDR *pAddr, int Ack, int ControlMsg, const void *pExtra, int ExtraSize, SECURITY_TOKEN SecurityToken, bool Sixup)
+void CNetBase::SendControlMsg(NETSOCKET Socket, NETADDR *pAddr, int Ack, int ControlMsg, const void *pExtra, int ExtraSize, SECURITY_TOKEN SecurityToken, bool Seven)
 {
 	CNetPacketConstruct Construct;
 	Construct.m_Flags = NET_PACKETFLAG_CONTROL;
@@ -387,7 +387,7 @@ void CNetBase::SendControlMsg(NETSOCKET Socket, NETADDR *pAddr, int Ack, int Con
 	if(pExtra)
 		mem_copy(&Construct.m_aChunkData[1], pExtra, ExtraSize);
 
-	CNetBase::SendPacket(Socket, pAddr, &Construct, SecurityToken, Sixup);
+	CNetBase::SendPacket(Socket, pAddr, &Construct, SecurityToken, Seven);
 }
 
 void CNetBase::SendControlMsgWithToken7(NETSOCKET Socket, NETADDR *pAddr, TOKEN Token, int Ack, int ControlMsg, TOKEN MyToken, bool Extended)

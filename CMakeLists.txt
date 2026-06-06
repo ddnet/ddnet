@@ -2470,7 +2470,7 @@ if(CLIENT)
     serverbrowser_http.h
     serverbrowser_ping_cache.cpp
     serverbrowser_ping_cache.h
-    sixup_translate_system.cpp
+    seven_translate_system.cpp
     smooth_time.cpp
     smooth_time.h
     sound.cpp
@@ -2621,9 +2621,9 @@ if(CLIENT)
     race.h
     render.cpp
     render.h
-    sixup_translate_connless.cpp
-    sixup_translate_game.cpp
-    sixup_translate_snapshot.cpp
+    seven_translate_connless.cpp
+    seven_translate_game.cpp
+    seven_translate_snapshot.cpp
     skin.cpp
     skin.h
     ui.cpp

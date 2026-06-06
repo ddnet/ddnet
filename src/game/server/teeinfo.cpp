@@ -51,7 +51,7 @@ CTeeInfo::CTeeInfo(const char *const apSkinPartNames[protocol7::NUM_SKINPARTS], 
 	}
 }
 
-void CTeeInfo::ToSixup()
+void CTeeInfo::ToSeven()
 {
 	// reset to default skin
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
@@ -93,7 +93,7 @@ void CTeeInfo::ToSixup()
 	}
 }
 
-void CTeeInfo::FromSixup()
+void CTeeInfo::FromSeven()
 {
 	// reset to default skin
 	str_copy(m_aSkinName, "default");

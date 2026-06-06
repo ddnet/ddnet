@@ -97,17 +97,17 @@ static constexpr ColorRGBA CLIENT_NETWORK_PRINT_ERROR_COLOR = ColorRGBA(1.0f, 0.
 
 CSnapshotDelta *CClient::SnapshotDelta()
 {
-	if(IsSixup())
+	if(IsSeven())
 	{
-		return &*m_pSnapshotDeltaSixup;
+		return &*m_pSnapshotDeltaSeven;
 	}
 	return &*m_pSnapshotDelta;
 }
 
 CClient::CClient() :
 	m_pSnapshotDelta(CSnapshotDelta_New()),
-	m_pSnapshotDeltaSixup(CSnapshotDelta_New()),
-	m_DemoPlayer(&*m_pSnapshotDelta, &*m_pSnapshotDeltaSixup, true, [&]() { UpdateDemoIntraTimers(); }),
+	m_pSnapshotDeltaSeven(CSnapshotDelta_New()),
+	m_DemoPlayer(&*m_pSnapshotDelta, &*m_pSnapshotDeltaSeven, true, [&]() { UpdateDemoIntraTimers(); }),
 	m_aInputtimeMarginGraphs{{128, 2, true}, {128, 2, true}},
 	m_aGametimeMarginGraphs{{128, 2, true}, {128, 2, true}},
 	m_FpsGraph(4096, 0, true)
@@ -115,8 +115,8 @@ CClient::CClient() :
 	m_StateStartTime = time_get();
 	for(auto &DemoRecorder : m_aDemoRecorders)
 		DemoRecorder = CDemoRecorder(&*m_pSnapshotDelta);
-	for(auto &DemoRecorder : m_aDemoRecordersSixup)
-		DemoRecorder = CDemoRecorder(&*m_pSnapshotDeltaSixup);
+	for(auto &DemoRecorder : m_aDemoRecordersSeven)
+		DemoRecorder = CDemoRecorder(&*m_pSnapshotDeltaSeven);
 	m_LastRenderTime = time_get();
 	mem_zero(m_aInputs, sizeof(m_aInputs));
 	mem_zero(m_aapSnapshots, sizeof(m_aapSnapshots));
@@ -129,16 +129,16 @@ CClient::CClient() :
 		GameTime.Init(0);
 	m_PredictedTime.Init(0);
 
-	m_Sixup = false;
+	m_Seven = false;
 }
 
 // ----- send functions -----
-static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup)
+static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Seven)
 {
 	int MsgId = pMsg->m_MsgId;
 	Packer.Reset();
 
-	if(Sixup && !pMsg->m_NoTranslate)
+	if(Seven && !pMsg->m_NoTranslate)
 	{
 		if(pMsg->m_System)
 		{
@@ -197,7 +197,7 @@ int CClient::SendMsg(int Conn, CMsgPacker *pMsg, int Flags)
 
 	// repack message (inefficient)
 	CPacker Pack;
-	if(!RepackMsg(pMsg, Pack, IsSixup()))
+	if(!RepackMsg(pMsg, Pack, IsSeven()))
 		return 0;
 
 	mem_zero(&Packet, sizeof(CNetChunk));
@@ -242,7 +242,7 @@ void CClient::SendInfo(int Conn)
 	MsgVer.AddString(GameClient()->DDNetVersionStr());
 	SendMsg(Conn, &MsgVer, MSGFLAG_VITAL);
 
-	if(IsSixup())
+	if(IsSeven())
 	{
 		CMsgPacker Msg(NETMSG_INFO, true);
 		Msg.AddString(GAME_NETVERSION7, 128);
@@ -274,7 +274,7 @@ void CClient::SendMapRequest()
 {
 	dbg_assert(!m_MapdownloadFileTemp, "Map download already in progress");
 	m_MapdownloadFileTemp = Storage()->OpenFile(m_aMapdownloadFilenameTemp, IOFLAG_WRITE, IStorage::TYPE_SAVE);
-	if(IsSixup())
+	if(IsSeven())
 	{
 		CMsgPacker MsgP(protocol7::NETMSG_REQUEST_MAP_DATA, true, true);
 		SendMsg(CONN_MAIN, &MsgP, MSGFLAG_VITAL | MSGFLAG_FLUSH);
@@ -297,7 +297,7 @@ void CClient::RconAuth(const char *pName, const char *pPassword, bool Dummy)
 	if(pPassword != m_aRconPassword)
 		str_copy(m_aRconPassword, pPassword);
 
-	if(IsSixup())
+	if(IsSeven())
 	{
 		CMsgPacker Msg7(protocol7::NETMSG_RCON_AUTH, true, true);
 		Msg7.AddString(pPassword);
@@ -379,7 +379,7 @@ void CClient::SendInput()
 			for(int k = 0; k < Size / 4; k++)
 			{
 				static const int FlagsOffset = offsetof(CNetObj_PlayerInput, m_PlayerFlags) / sizeof(int);
-				if(k == FlagsOffset && IsSixup())
+				if(k == FlagsOffset && IsSeven())
 				{
 					int PlayerFlags = m_aInputs[i][m_aCurrentInput[i]].m_aData[k];
 					Msg.AddInt(PlayerFlags_SixToSeven(PlayerFlags));
@@ -561,7 +561,7 @@ void CClient::OnPostConnect(int Conn)
 		str_append(aBufMsg, ";");
 		str_append(aBufMsg, g_Config.m_ClRunOnJoin);
 	}
-	if(IsSixup())
+	if(IsSeven())
 	{
 		protocol7::CNetMsg_Cl_Say Msg7;
 		Msg7.m_Mode = protocol7::CHAT_ALL;
@@ -645,13 +645,13 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	mem_zero(aConnectAddrs, sizeof(aConnectAddrs));
 	const char *pNextAddr = pAddress;
 	char aBuffer[128];
-	bool OnlySixup = true;
+	bool OnlySeven = true;
 	while((pNextAddr = str_next_token(pNextAddr, ",", aBuffer, sizeof(aBuffer))))
 	{
 		NETADDR NextAddr;
 		char aHost[128];
 		const int UrlParseResult = net_addr_from_url(&NextAddr, aBuffer, aHost, sizeof(aHost));
-		bool Sixup = NextAddr.type & NETTYPE_TW7;
+		bool Seven = NextAddr.type & NETTYPE_TW7;
 		if(UrlParseResult > 0)
 			str_copy(aHost, aBuffer);
 
@@ -669,10 +669,10 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 		{
 			NextAddr.port = 8303;
 		}
-		if(Sixup)
+		if(Seven)
 			NextAddr.type |= NETTYPE_TW7;
 		else
-			OnlySixup = false;
+			OnlySeven = false;
 
 		char aNextAddr[NETADDR_MAXSTRSIZE];
 		net_addr_str(&NextAddr, aNextAddr, sizeof(aNextAddr), true);
@@ -713,8 +713,8 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 
 	m_CanReceiveServerCapabilities = true;
 
-	m_Sixup = OnlySixup;
-	if(m_Sixup)
+	m_Seven = OnlySeven;
+	if(m_Seven)
 	{
 		m_aNetClient[CONN_MAIN].Connect7(aConnectAddrs, NumConnectAddrs);
 	}
@@ -785,7 +785,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 
 	// 0.7
 	m_TranslationContext.Reset();
-	m_Sixup = false;
+	m_Seven = false;
 }
 
 void CClient::Disconnect()
@@ -851,7 +851,7 @@ void CClient::DummyConnect()
 
 	m_DummyConnecting = true;
 	// connect to the server
-	if(IsSixup())
+	if(IsSeven())
 		m_aNetClient[CONN_DUMMY].Connect7(m_aNetClient[CONN_MAIN].ServerAddress(), 1);
 	else
 		m_aNetClient[CONN_DUMMY].Connect(m_aNetClient[CONN_MAIN].ServerAddress(), 1);
@@ -944,7 +944,7 @@ void CClient::SnapSetStaticsize(int ItemType, int Size)
 
 void CClient::SnapSetStaticsize7(int ItemType, int Size)
 {
-	m_pSnapshotDeltaSixup->SetStaticsize(ItemType, Size);
+	m_pSnapshotDeltaSeven->SetStaticsize(ItemType, Size);
 }
 
 void CClient::RenderDebug()
@@ -1552,7 +1552,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 #undef GET_INT
 }
 
-static CServerCapabilities GetServerCapabilities(int Version, int Flags, bool Sixup)
+static CServerCapabilities GetServerCapabilities(int Version, int Flags, bool Seven)
 {
 	CServerCapabilities Result;
 	bool DDNet = false;
@@ -1561,7 +1561,7 @@ static CServerCapabilities GetServerCapabilities(int Version, int Flags, bool Si
 		DDNet = Flags & SERVERCAPFLAG_DDNET;
 	}
 	Result.m_ChatTimeoutCode = DDNet;
-	Result.m_AnyPlayerFlag = !Sixup;
+	Result.m_AnyPlayerFlag = !Seven;
 	Result.m_PingEx = false;
 	Result.m_AllowDummy = true;
 	Result.m_SyncWeaponInput = false;
@@ -1611,7 +1611,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 
 	// allocates the memory for the translated data
 	CPacker Packer6;
-	if(IsSixup())
+	if(IsSeven())
 	{
 		bool IsExMsg = false;
 		int Success = !TranslateSysMsg(&Msg, Sys, &Unpacker, &Packer6, pPacket, &IsExMsg);
@@ -1663,7 +1663,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			{
 				return;
 			}
-			m_ServerCapabilities = GetServerCapabilities(Version, Flags, IsSixup());
+			m_ServerCapabilities = GetServerCapabilities(Version, Flags, IsSeven());
 			m_CanReceiveServerCapabilities = false;
 			m_ServerSentCapabilities = true;
 		}
@@ -1671,7 +1671,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		{
 			if(m_CanReceiveServerCapabilities)
 			{
-				m_ServerCapabilities = GetServerCapabilities(0, 0, IsSixup());
+				m_ServerCapabilities = GetServerCapabilities(0, 0, IsSeven());
 				m_CanReceiveServerCapabilities = false;
 			}
 			std::optional<CMapDetails> MapDetails = std::nullopt;
@@ -1766,7 +1766,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			int Chunk = -1;
 			int Size = -1;
 
-			if(IsSixup())
+			if(IsSeven())
 			{
 				MapCRC = m_MapdownloadCrc;
 				Chunk = m_MapdownloadChunk;
@@ -1790,7 +1790,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 
 			m_MapdownloadAmount += Size;
 
-			if(IsSixup())
+			if(IsSeven())
 				Last = m_MapdownloadAmount == m_TranslationContext.m_MapdownloadTotalsize;
 
 			if(Last)
@@ -1807,7 +1807,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				// request new chunk
 				m_MapdownloadChunk++;
 
-				if(IsSixup() && (m_MapdownloadChunk % m_TranslationContext.m_MapDownloadChunksPerRequest == 0))
+				if(IsSeven() && (m_MapdownloadChunk % m_TranslationContext.m_MapDownloadChunksPerRequest == 0))
 				{
 					CMsgPacker MsgP(protocol7::NETMSG_REQUEST_MAP_DATA, true, true);
 					SendMsg(CONN_MAIN, &MsgP, MSGFLAG_VITAL | MSGFLAG_FLUSH);
@@ -2194,7 +2194,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					int AltSnapSize = -1;
 					CSnapshotBuffer AltSnapBuffer;
 
-					if(IsSixup())
+					if(IsSeven())
 					{
 						CSnapshotBuffer TmpTransSnapBuffer;
 						mem_copy(&TmpTransSnapBuffer, &TmpBuffer3, sizeof(TmpTransSnapBuffer));
@@ -2220,12 +2220,12 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 
 						CSnapshotBuffer SnapSeven;
 						int DemoSnapSize = SnapSize;
-						if(IsSixup())
+						if(IsSeven())
 						{
 							DemoSnapSize = GameClient()->OnDemoRecSnap7(TmpBuffer3.AsSnapshot(), &SnapSeven, Conn);
 							if(DemoSnapSize < 0)
 							{
-								dbg_msg("sixup", "demo snapshot failed. error=%d", DemoSnapSize);
+								dbg_msg("seven", "demo snapshot failed. error=%d", DemoSnapSize);
 							}
 						}
 
@@ -2237,7 +2237,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 								if(DemoRecorder.IsRecording())
 								{
 									// write snapshot
-									DemoRecorder.RecordSnapshot(GameTick, IsSixup() ? SnapSeven.AsSnapshot() : TmpBuffer3.AsSnapshot(), DemoSnapSize);
+									DemoRecorder.RecordSnapshot(GameTick, IsSeven() ? SnapSeven.AsSnapshot() : TmpBuffer3.AsSnapshot(), DemoSnapSize);
 								}
 							}
 						}
@@ -2682,7 +2682,7 @@ void CClient::PumpNetwork()
 	SECURITY_TOKEN ResponseToken;
 	for(int Conn = 0; Conn < NUM_CONNS; Conn++)
 	{
-		while(m_aNetClient[Conn].Recv(&Packet, &ResponseToken, IsSixup()))
+		while(m_aNetClient[Conn].Recv(&Packet, &ResponseToken, IsSeven()))
 		{
 			if(Packet.m_ClientId == -1)
 			{
@@ -2711,12 +2711,12 @@ void CClient::OnDemoPlayerSnapshot(void *pData, int Size)
 	CSnapshotBuffer AltSnapBuffer;
 	int AltSnapSize;
 
-	if(IsSixup())
+	if(IsSeven())
 	{
 		AltSnapSize = GameClient()->TranslateSnap(&AltSnapBuffer, (CSnapshot *)pData, CONN_MAIN, false);
 		if(AltSnapSize < 0)
 		{
-			dbg_msg("sixup", "failed to translate snapshot. error=%d", AltSnapSize);
+			dbg_msg("seven", "failed to translate snapshot. error=%d", AltSnapSize);
 			return;
 		}
 	}
@@ -3107,7 +3107,7 @@ void CClient::InitInterfaces()
 	m_pNotifications = Kernel()->RequestInterface<INotifications>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
-	m_DemoEditor.Init(&*m_pSnapshotDelta, &*m_pSnapshotDeltaSixup, m_pConsole, m_pStorage);
+	m_DemoEditor.Init(&*m_pSnapshotDelta, &*m_pSnapshotDeltaSeven, m_pConsole, m_pStorage);
 
 	m_ServerBrowser.SetBaseInfo(&m_aNetClient[CONN_CONTACT], m_pGameClient->NetVersion());
 
@@ -3991,7 +3991,7 @@ void CClient::SaveReplay(const int Length, const char *pFilename)
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Saving replay...");
 
 		// Create a job to do this slicing in background because it can be a bit long depending on the file size
-		std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(GameClient()->NetVersion(), &*m_pSnapshotDelta, &*m_pSnapshotDeltaSixup, m_pStorage, pSrc, aFilename, StartTick, EndTick);
+		std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(GameClient()->NetVersion(), &*m_pSnapshotDelta, &*m_pSnapshotDeltaSeven, m_pStorage, pSrc, aFilename, StartTick, EndTick);
 		Engine()->AddJob(pDemoEditTask);
 		m_EditJobs.push_back(pDemoEditTask);
 
@@ -4030,7 +4030,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 		return m_DemoPlayer.ErrorMessage();
 	}
 
-	m_Sixup = m_DemoPlayer.IsSixup();
+	m_Seven = m_DemoPlayer.IsSeven();
 
 	// load map
 	const CMapInfo *pMapInfo = m_DemoPlayer.GetMapInfo();
@@ -4146,7 +4146,7 @@ void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int 
 		Storage(),
 		m_pConsole,
 		aFilename,
-		IsSixup() ? GameClient()->NetVersion7() : GameClient()->NetVersion(),
+		IsSeven() ? GameClient()->NetVersion7() : GameClient()->NetVersion(),
 		GameClient()->Map()->BaseName(),
 		GameClient()->Map()->Sha256(),
 		GameClient()->Map()->Crc(),
@@ -4201,9 +4201,9 @@ void CClient::DemoRecorder_AddDemoMarker(int Recorder)
 
 CDemoRecorder (&CClient::DemoRecorders())[RECORDER_MAX]
 {
-	if(IsSixup())
+	if(IsSeven())
 	{
-		return m_aDemoRecordersSixup;
+		return m_aDemoRecordersSeven;
 	}
 	return m_aDemoRecorders;
 }
@@ -5211,7 +5211,7 @@ void CClient::RaceRecord_Start(const char *pFilename)
 		Storage(),
 		m_pConsole,
 		pFilename,
-		IsSixup() ? GameClient()->NetVersion7() : GameClient()->NetVersion(),
+		IsSeven() ? GameClient()->NetVersion7() : GameClient()->NetVersion(),
 		GameClient()->Map()->BaseName(),
 		GameClient()->Map()->Sha256(),
 		GameClient()->Map()->Crc(),

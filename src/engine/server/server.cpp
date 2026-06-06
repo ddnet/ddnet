@@ -237,7 +237,7 @@ void CServer::CClient::Reset()
 
 CServer::CServer() :
 	m_pSnapshotDelta(CSnapshotDelta_New()),
-	m_pSnapshotDeltaSixup(CSnapshotDelta_New()),
+	m_pSnapshotDeltaSeven(CSnapshotDelta_New()),
 	m_pSnapshotBuilder(CSnapshotBuilder_New())
 {
 	m_pConfig = &g_Config;
@@ -604,7 +604,7 @@ int CServer::Init()
 		Client.m_DebugDummy = false;
 		Client.m_AuthKey = -1;
 		Client.m_Latency = 0;
-		Client.m_Sixup = false;
+		Client.m_Seven = false;
 		Client.m_RedirectDropTime = 0;
 	}
 
@@ -859,12 +859,12 @@ int CServer::GetClientVersion(int ClientId) const
 	return VERSION_NONE;
 }
 
-static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup)
+static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Seven)
 {
 	int MsgId = pMsg->m_MsgId;
 	Packer.Reset();
 
-	if(Sixup && !pMsg->m_NoTranslate)
+	if(Seven && !pMsg->m_NoTranslate)
 	{
 		if(pMsg->m_System)
 		{
@@ -941,7 +941,7 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientId)
 			{
 				if(m_aClients[i].m_State == CClient::STATE_INGAME)
 				{
-					CPacker *pPack = m_aClients[i].m_Sixup ? &Pack7 : &Pack6;
+					CPacker *pPack = m_aClients[i].m_Seven ? &Pack7 : &Pack6;
 					Packet.m_pData = pPack->Data();
 					Packet.m_DataSize = pPack->Size();
 					Packet.m_ClientId = i;
@@ -957,7 +957,7 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientId)
 	else
 	{
 		CPacker Pack;
-		if(!RepackMsg(pMsg, Pack, m_aClients[ClientId].m_Sixup))
+		if(!RepackMsg(pMsg, Pack, m_aClients[ClientId].m_Seven))
 			return -1;
 
 		Packet.m_ClientId = ClientId;
@@ -1047,7 +1047,7 @@ void CServer::DoSnapshot()
 			continue;
 
 		{
-			m_pSnapshotBuilder->Init(m_aClients[i].m_Sixup);
+			m_pSnapshotBuilder->Init(m_aClients[i].m_Seven);
 
 			// only snap events on global ticks
 			GameServer()->OnSnap(i, IsGlobalSnap, m_aDemoRecorder[i].IsRecording());
@@ -1097,7 +1097,7 @@ void CServer::DoSnapshot()
 			}
 
 			// create delta
-			CSnapshotDelta *const pSnapshotDelta = IsSixup(i) ? &*m_pSnapshotDeltaSixup : &*m_pSnapshotDelta;
+			CSnapshotDelta *const pSnapshotDelta = IsSeven(i) ? &*m_pSnapshotDeltaSeven : &*m_pSnapshotDelta;
 			int32_t aDeltaData[CSnapshot::MAX_SIZE / sizeof(int32_t)];
 			int DeltaSize = pSnapshotDelta->CreateDelta(*pDeltashot, *Data.AsSnapshot(), rust::Slice(aDeltaData, std::size(aDeltaData)));
 
@@ -1211,7 +1211,7 @@ int CServer::NewClientNoAuthCallback(int ClientId, void *pUser)
 	return 0;
 }
 
-int CServer::NewClientCallback(int ClientId, void *pUser, bool Sixup)
+int CServer::NewClientCallback(int ClientId, void *pUser, bool Seven)
 {
 	CServer *pThis = (CServer *)pUser;
 	pThis->m_aClients[ClientId].m_State = CClient::STATE_PREAUTH;
@@ -1233,9 +1233,9 @@ int CServer::NewClientCallback(int ClientId, void *pUser, bool Sixup)
 	pThis->m_aClients[ClientId].m_GotDDNetVersionPacket = false;
 	pThis->m_aClients[ClientId].m_DDNetVersionSettled = false;
 	pThis->m_aClients[ClientId].Reset();
-	pThis->m_aClients[ClientId].m_Sixup = Sixup;
+	pThis->m_aClients[ClientId].m_Seven = Seven;
 
-	pThis->GameServer()->TeehistorianRecordPlayerJoin(ClientId, Sixup);
+	pThis->GameServer()->TeehistorianRecordPlayerJoin(ClientId, Seven);
 	pThis->Antibot()->OnEngineClientJoin(ClientId);
 
 #if defined(CONF_FAMILY_UNIX)
@@ -1320,7 +1320,7 @@ int CServer::DelClientCallback(int ClientId, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientId].m_ForceHighBandwidthOnSpectate = false;
 	pThis->m_aPrevStates[ClientId] = CClient::STATE_EMPTY;
 	pThis->m_aClients[ClientId].m_Snapshots.PurgeAll();
-	pThis->m_aClients[ClientId].m_Sixup = false;
+	pThis->m_aClients[ClientId].m_Seven = false;
 	pThis->m_aClients[ClientId].m_RedirectDropTime = 0;
 	pThis->m_aClients[ClientId].m_HasPersistentData = false;
 
@@ -1349,7 +1349,7 @@ void CServer::SendCapabilities(int ClientId)
 
 void CServer::SendMap(int ClientId)
 {
-	int MapType = IsSixup(ClientId) ? MAP_TYPE_SIXUP : MAP_TYPE_SIX;
+	int MapType = IsSeven(ClientId) ? MAP_TYPE_SEVEN : MAP_TYPE_SIX;
 	{
 		CMsgPacker Msg(NETMSG_MAP_DETAILS, true);
 		Msg.AddString(GameServer()->Map()->BaseName(), 0);
@@ -1371,7 +1371,7 @@ void CServer::SendMap(int ClientId)
 		Msg.AddString(GameServer()->Map()->BaseName(), 0);
 		Msg.AddInt(m_aCurrentMapCrc[MapType]);
 		Msg.AddInt(m_aCurrentMapSize[MapType]);
-		if(MapType == MAP_TYPE_SIXUP)
+		if(MapType == MAP_TYPE_SEVEN)
 		{
 			Msg.AddInt(Config()->m_SvMapWindow);
 			Msg.AddInt(NET_MAX_CHUNK_SIZE - 128);
@@ -1385,7 +1385,7 @@ void CServer::SendMap(int ClientId)
 
 void CServer::SendMapData(int ClientId, int Chunk)
 {
-	int MapType = IsSixup(ClientId) ? MAP_TYPE_SIXUP : MAP_TYPE_SIX;
+	int MapType = IsSeven(ClientId) ? MAP_TYPE_SEVEN : MAP_TYPE_SIX;
 	unsigned int ChunkSize = NET_MAX_CHUNK_SIZE - 128;
 	unsigned int Offset = Chunk * ChunkSize;
 	int Last = 0;
@@ -1548,7 +1548,7 @@ void CServer::UpdateClientMaplistEntries(int ClientId)
 	CClient &Client = m_aClients[ClientId];
 	if(Client.m_State != CClient::STATE_INGAME ||
 		!IsRconAuthed(ClientId) ||
-		Client.m_Sixup ||
+		Client.m_Seven ||
 		Client.m_pRconCmdToSend != nullptr || // wait for command sending
 		Client.m_MaplistEntryToSend == CClient::MAPLIST_DISABLED ||
 		Client.m_MaplistEntryToSend == CClient::MAPLIST_DONE)
@@ -1607,7 +1607,7 @@ void CServer::UpdateClientMaplistEntries(int ClientId)
 	}
 }
 
-static inline int MsgFromSixup(int Msg, bool System)
+static inline int MsgFromSeven(int Msg, bool System)
 {
 	if(System)
 	{
@@ -1670,7 +1670,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		return;
 	}
 
-	if(m_aClients[ClientId].m_Sixup && (Msg = MsgFromSixup(Msg, Sys)) < 0)
+	if(m_aClients[ClientId].m_Seven && (Msg = MsgFromSeven(Msg, Sys)) < 0)
 	{
 		return;
 	}
@@ -1746,7 +1746,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			if(m_aClients[ClientId].m_State < CClient::STATE_CONNECTING)
 				return;
 
-			if(m_aClients[ClientId].m_Sixup)
+			if(m_aClients[ClientId].m_Seven)
 			{
 				for(int i = 0; i < Config()->m_SvMapWindow; i++)
 				{
@@ -1920,11 +1920,11 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		else if(Msg == NETMSG_RCON_AUTH)
 		{
 			const char *pName = "";
-			if(!IsSixup(ClientId))
+			if(!IsSeven(ClientId))
 				pName = Unpacker.GetString(CUnpacker::SANITIZE_CC); // login name, now used
 			const char *pPw = Unpacker.GetString(CUnpacker::SANITIZE_CC);
 			bool SendRconCmds = true;
-			if(!IsSixup(ClientId))
+			if(!IsSeven(ClientId))
 				SendRconCmds = Unpacker.GetInt() != 0;
 			if(Unpacker.Error())
 				return;
@@ -2068,19 +2068,19 @@ void CServer::OnNetMsgEnterGame(int ClientId)
 
 	log_info(
 		"server",
-		"player has entered the game. ClientId=%d addr=<{%s}> sixup=%d",
+		"player has entered the game. ClientId=%d addr=<{%s}> seven=%d",
 		ClientId,
 		ClientAddrString(ClientId, true),
-		IsSixup(ClientId));
+		IsSeven(ClientId));
 	m_aClients[ClientId].m_State = CClient::STATE_INGAME;
-	if(!IsSixup(ClientId))
+	if(!IsSeven(ClientId))
 	{
 		SendServerInfo(ClientAddr(ClientId), -1, SERVERINFO_EXTENDED, false);
 	}
 	else
 	{
 		CMsgPacker ServerInfoMessage(protocol7::NETMSG_SERVERINFO, true, true);
-		GetServerInfoSixup(&ServerInfoMessage, false);
+		GetServerInfoSeven(&ServerInfoMessage, false);
 		SendMsg(&ServerInfoMessage, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientId);
 	}
 	GameServer()->OnClientEnter(ClientId);
@@ -2139,7 +2139,7 @@ void CServer::OnNetMsgRconAuth(int ClientId, const char *pName, const char *pPw,
 	{
 		if(GetAuthedState(ClientId) != AuthLevel)
 		{
-			if(!IsSixup(ClientId))
+			if(!IsSeven(ClientId))
 			{
 				CMsgPacker Msgp(NETMSG_RCON_AUTH_STATUS, true);
 				Msgp.AddInt(1); //authed
@@ -2486,7 +2486,7 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 #undef ADD_INT
 }
 
-void CServer::CacheServerInfoSixup(CCache *pCache, bool SendClients, int MaxConsideredClients)
+void CServer::CacheServerInfoSeven(CCache *pCache, bool SendClients, int MaxConsideredClients)
 {
 	pCache->Clear();
 
@@ -2563,7 +2563,7 @@ void CServer::CacheServerInfoSixup(CCache *pCache, bool SendClients, int MaxCons
 						// Server info is too large for a packet. Only include as many clients as fit.
 						// We need to ensure that the client counts match, otherwise the 0.7 client
 						// will ignore the info, so we repack but only consider the first i clients.
-						CacheServerInfoSixup(pCache, true, i);
+						CacheServerInfoSeven(pCache, true, i);
 						return;
 					}
 				}
@@ -2632,9 +2632,9 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool Sen
 	}
 }
 
-void CServer::GetServerInfoSixup(CPacker *pPacker, bool SendClients)
+void CServer::GetServerInfoSeven(CPacker *pPacker, bool SendClients)
 {
-	CCache::CCacheChunk &FirstChunk = m_aSixupServerInfoCache[SendClients].m_vCache.front();
+	CCache::CCacheChunk &FirstChunk = m_aSevenServerInfoCache[SendClients].m_vCache.front();
 	pPacker->AddRaw(FirstChunk.m_vData.data(), FirstChunk.m_vData.size());
 }
 
@@ -2654,7 +2654,7 @@ void CServer::FillAntibot(CAntibotRoundData *pData)
 			static_assert(std::size((CAntibotPlayerData{}).m_aAddress) >= NETADDR_MAXSTRSIZE);
 			static_assert(std::is_same_v<decltype(CServer{}.ClientAddrStringImpl(ClientId, true)), const std::array<char, NETADDR_MAXSTRSIZE> &>);
 			mem_copy(pPlayer->m_aAddress, ClientAddrStringImpl(ClientId, true).data(), NETADDR_MAXSTRSIZE);
-			pPlayer->m_Sixup = m_aClients[ClientId].m_Sixup;
+			pPlayer->m_Seven = m_aClients[ClientId].m_Seven;
 			pPlayer->m_DnsblNone = m_aClients[ClientId].m_DnsblState == EDnsblState::NONE;
 			pPlayer->m_DnsblPending = m_aClients[ClientId].m_DnsblState == EDnsblState::PENDING;
 			pPlayer->m_DnsblBlacklisted = m_aClients[ClientId].m_DnsblState == EDnsblState::BLACKLISTED;
@@ -2823,7 +2823,7 @@ void CServer::UpdateServerInfo(bool Resend)
 			CacheServerInfo(&m_aServerInfoCache[i * 2 + j], i, j);
 
 	for(int i = 0; i < 2; i++)
-		CacheServerInfoSixup(&m_aSixupServerInfoCache[i], i, MAX_CLIENTS);
+		CacheServerInfoSeven(&m_aSevenServerInfoCache[i], i, MAX_CLIENTS);
 
 	if(Resend)
 	{
@@ -2831,12 +2831,12 @@ void CServer::UpdateServerInfo(bool Resend)
 		{
 			if(m_aClients[i].m_State != CClient::STATE_EMPTY)
 			{
-				if(!IsSixup(i))
+				if(!IsSeven(i))
 					SendServerInfo(ClientAddr(i), -1, SERVERINFO_INGAME, false);
 				else
 				{
 					CMsgPacker ServerInfoMessage(protocol7::NETMSG_SERVERINFO, true, true);
-					GetServerInfoSixup(&ServerInfoMessage, false);
+					GetServerInfoSeven(&ServerInfoMessage, false);
 					SendMsg(&ServerInfoMessage, MSGFLAG_VITAL | MSGFLAG_FLUSH, i);
 				}
 			}
@@ -2884,7 +2884,7 @@ void CServer::PumpNetwork(bool PacketWaiting)
 					{
 						Type = SERVERINFO_64_LEGACY;
 					}
-					if(Type == SERVERINFO_VANILLA && ResponseToken != NET_SECURITY_TOKEN_UNKNOWN && Config()->m_SvSixup)
+					if(Type == SERVERINFO_VANILLA && ResponseToken != NET_SECURITY_TOKEN_UNKNOWN && Config()->m_SvSeven)
 					{
 						CUnpacker Unpacker;
 						Unpacker.Reset((unsigned char *)Packet.m_pData + sizeof(SERVERBROWSE_GETINFO), Packet.m_DataSize - sizeof(SERVERBROWSE_GETINFO));
@@ -2898,7 +2898,7 @@ void CServer::PumpNetwork(bool PacketWaiting)
 						Packer.Reset();
 						Packer.AddRaw(SERVERBROWSE_INFO, sizeof(SERVERBROWSE_INFO));
 						Packer.AddInt(SrvBrwsToken);
-						GetServerInfoSixup(&Packer, RateLimitServerInfoConnless());
+						GetServerInfoSeven(&Packer, RateLimitServerInfoConnless());
 						CNetBase::SendPacketConnlessWithToken7(m_NetServer.Socket(), &Packet.m_Address, Packer.Data(), Packer.Size(), ResponseToken, m_NetServer.GetToken(Packet.m_Address));
 					}
 					else if(Type != -1)
@@ -3012,37 +3012,37 @@ int CServer::LoadMap(const char *pMapName)
 		m_aMapDownloadUrl[0] = '\0';
 	}
 
-	// load sixup version of the map
-	if(Config()->m_SvSixup)
+	// load seven version of the map
+	if(Config()->m_SvSeven)
 	{
 		str_format(aBuf, sizeof(aBuf), "maps7/%s.map", pMapName);
 		void *pData;
-		if(!Storage()->ReadFile(aBuf, IStorage::TYPE_ALL, &pData, &m_aCurrentMapSize[MAP_TYPE_SIXUP]))
+		if(!Storage()->ReadFile(aBuf, IStorage::TYPE_ALL, &pData, &m_aCurrentMapSize[MAP_TYPE_SEVEN]))
 		{
-			Config()->m_SvSixup = 0;
+			Config()->m_SvSeven = 0;
 			if(m_pRegister)
 			{
 				m_pRegister->OnConfigChange();
 			}
-			log_error("sixup", "couldn't load map %s", aBuf);
-			log_info("sixup", "disabling 0.7 compatibility");
+			log_error("seven", "couldn't load map %s", aBuf);
+			log_info("seven", "disabling 0.7 compatibility");
 		}
 		else
 		{
-			free(m_apCurrentMapData[MAP_TYPE_SIXUP]);
-			m_apCurrentMapData[MAP_TYPE_SIXUP] = (unsigned char *)pData;
+			free(m_apCurrentMapData[MAP_TYPE_SEVEN]);
+			m_apCurrentMapData[MAP_TYPE_SEVEN] = (unsigned char *)pData;
 
-			m_aCurrentMapSha256[MAP_TYPE_SIXUP] = sha256(m_apCurrentMapData[MAP_TYPE_SIXUP], m_aCurrentMapSize[MAP_TYPE_SIXUP]);
-			m_aCurrentMapCrc[MAP_TYPE_SIXUP] = crc32(0, m_apCurrentMapData[MAP_TYPE_SIXUP], m_aCurrentMapSize[MAP_TYPE_SIXUP]);
-			sha256_str(m_aCurrentMapSha256[MAP_TYPE_SIXUP], aSha256, sizeof(aSha256));
+			m_aCurrentMapSha256[MAP_TYPE_SEVEN] = sha256(m_apCurrentMapData[MAP_TYPE_SEVEN], m_aCurrentMapSize[MAP_TYPE_SEVEN]);
+			m_aCurrentMapCrc[MAP_TYPE_SEVEN] = crc32(0, m_apCurrentMapData[MAP_TYPE_SEVEN], m_aCurrentMapSize[MAP_TYPE_SEVEN]);
+			sha256_str(m_aCurrentMapSha256[MAP_TYPE_SEVEN], aSha256, sizeof(aSha256));
 			str_format(aBufMsg, sizeof(aBufMsg), "%s sha256 is %s", aBuf, aSha256);
-			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "sixup", aBufMsg);
+			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "seven", aBufMsg);
 		}
 	}
-	if(!Config()->m_SvSixup)
+	if(!Config()->m_SvSeven)
 	{
-		free(m_apCurrentMapData[MAP_TYPE_SIXUP]);
-		m_apCurrentMapData[MAP_TYPE_SIXUP] = nullptr;
+		free(m_apCurrentMapData[MAP_TYPE_SEVEN]);
+		m_apCurrentMapData[MAP_TYPE_SEVEN] = nullptr;
 	}
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -3301,8 +3301,8 @@ int CServer::Run()
 
 						// When doing a map change, a new Teehistorian file is created. For players that are already
 						// on the server, no PlayerJoin event is produced in Teehistorian from the network engine.
-						// Record PlayerJoin events here to record the Sixup version and player join event.
-						GameServer()->TeehistorianRecordPlayerJoin(ClientId, Client.m_Sixup);
+						// Record PlayerJoin events here to record the Seven version and player join event.
+						GameServer()->TeehistorianRecordPlayerJoin(ClientId, Client.m_Seven);
 
 						// Record the players auth state aswell if needed.
 						// This was recorded in AuthInit in the past.
@@ -3608,7 +3608,7 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 			}
 
 			const char *pClientPrefix = "";
-			if(pThis->m_aClients[i].m_Sixup)
+			if(pThis->m_aClients[i].m_Seven)
 			{
 				pClientPrefix = "0.7:";
 			}
@@ -4232,7 +4232,7 @@ void CServer::ConchainCommandAccessUpdate(IConsole::IResult *pResult, void *pUse
 
 void CServer::LogoutClient(int ClientId, const char *pReason)
 {
-	if(!IsSixup(ClientId))
+	if(!IsSeven(ClientId))
 	{
 		CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS, true);
 		Msg.AddInt(0); //authed
@@ -4335,13 +4335,13 @@ void CServer::ConchainMapUpdate(IConsole::IResult *pResult, void *pUserData, ICo
 	}
 }
 
-void CServer::ConchainSixupUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+void CServer::ConchainSevenUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
 	CServer *pThis = static_cast<CServer *>(pUserData);
 	if(pResult->NumArguments() >= 1 && pThis->GameServer()->Map()->IsLoaded())
 	{
-		pThis->m_MapReload |= (pThis->m_apCurrentMapData[MAP_TYPE_SIXUP] != nullptr) != (pResult->GetInteger(0) != 0);
+		pThis->m_MapReload |= (pThis->m_apCurrentMapData[MAP_TYPE_SEVEN] != nullptr) != (pResult->GetInteger(0) != 0);
 	}
 }
 
@@ -4481,7 +4481,7 @@ void CServer::RegisterCommands()
 	Console()->Chain("sv_rcon_mod_password", ConchainRconModPasswordChange, this);
 	Console()->Chain("sv_rcon_helper_password", ConchainRconHelperPasswordChange, this);
 	Console()->Chain("sv_map", ConchainMapUpdate, this);
-	Console()->Chain("sv_sixup", ConchainSixupUpdate, this);
+	Console()->Chain("sv_seven", ConchainSevenUpdate, this);
 	Console()->Chain("sv_register_community_token", ConchainRegisterCommunityTokenRedact, nullptr);
 
 	Console()->Chain("loglevel", ConchainLoglevel, this);
@@ -4524,7 +4524,7 @@ void CServer::SnapSetStaticsize(int ItemType, int Size)
 
 void CServer::SnapSetStaticsize7(int ItemType, int Size)
 {
-	m_pSnapshotDeltaSixup->SetStaticsize(ItemType, Size);
+	m_pSnapshotDeltaSeven->SetStaticsize(ItemType, Size);
 }
 
 CServer *CreateServer() { return new CServer(); }
@@ -4671,7 +4671,7 @@ bool CServer::SetTimedOut(int ClientId, int OrigId)
 
 	m_NetServer.ResumeOldConnection(ClientId, OrigId);
 
-	m_aClients[ClientId].m_Sixup = m_aClients[OrigId].m_Sixup;
+	m_aClients[ClientId].m_Seven = m_aClients[OrigId].m_Seven;
 
 	DelClientCallback(OrigId, "Timeout Protection used", this);
 	m_aClients[ClientId].m_AuthKey = -1;

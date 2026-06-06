@@ -171,7 +171,7 @@ void CPickup::Snap(int SnappingClient)
 		return;
 
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
-	bool Sixup = Server()->IsSixup(SnappingClient);
+	bool Seven = Server()->IsSeven(SnappingClient);
 
 	if(SnappingClientVersion < VERSION_DDNET_ENTITY_NETOBJS)
 	{
@@ -185,7 +185,7 @@ void CPickup::Snap(int SnappingClient)
 			return;
 	}
 
-	GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup, SnappingClient), GetId().value(), m_Pos, m_Type, m_Subtype, m_Number, m_Flags);
+	GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Seven, SnappingClient), GetId().value(), m_Pos, m_Type, m_Subtype, m_Number, m_Flags);
 }
 
 void CPickup::Move()

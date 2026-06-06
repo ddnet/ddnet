@@ -896,23 +896,23 @@ void CCharacter::TickDeferred()
 		int Events = m_Core.m_TriggeredEvents;
 		int CID = m_pPlayer->GetCid();
 
-		// Some sounds are triggered client-side for the acting player (or for all players on Sixup)
+		// Some sounds are triggered client-side for the acting player (or for all players on Seven)
 		// so we need to avoid duplicating them
-		CClientMask TeamMaskExceptSelfAndSixup = Teams()->TeamMask(Team(), CID, CID, CGameContext::FLAG_SIX);
-		// Some are triggered client-side but only on Sixup
-		CClientMask TeamMaskExceptSixup = Teams()->TeamMask(Team(), -1, CID, CGameContext::FLAG_SIX);
+		CClientMask TeamMaskExceptSelfAndSeven = Teams()->TeamMask(Team(), CID, CID, CGameContext::FLAG_SIX);
+		// Some are triggered client-side but only on Seven
+		CClientMask TeamMaskExceptSeven = Teams()->TeamMask(Team(), -1, CID, CGameContext::FLAG_SIX);
 
 		if(Events & COREEVENT_GROUND_JUMP)
-			GameServer()->CreateSound(m_Pos, SOUND_PLAYER_JUMP, TeamMaskExceptSelfAndSixup);
+			GameServer()->CreateSound(m_Pos, SOUND_PLAYER_JUMP, TeamMaskExceptSelfAndSeven);
 
 		if(Events & COREEVENT_HOOK_ATTACH_PLAYER)
-			GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, TeamMaskExceptSixup);
+			GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, TeamMaskExceptSeven);
 
 		if(Events & COREEVENT_HOOK_ATTACH_GROUND)
-			GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_GROUND, TeamMaskExceptSelfAndSixup);
+			GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_GROUND, TeamMaskExceptSelfAndSeven);
 
 		if(Events & COREEVENT_HOOK_HIT_NOHOOK)
-			GameServer()->CreateSound(m_Pos, SOUND_HOOK_NOATTACH, TeamMaskExceptSelfAndSixup);
+			GameServer()->CreateSound(m_Pos, SOUND_HOOK_NOATTACH, TeamMaskExceptSelfAndSeven);
 
 		if(Events & COREEVENT_GROUND_JUMP)
 			m_TriggeredEvents7 |= protocol7::COREEVENTFLAG_GROUND_JUMP;
@@ -1130,7 +1130,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 		AmmoCount = (m_FreezeTime == 0) ? m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo : 0;
 	}
 
-	if(!Server()->IsSixup(SnappingClient))
+	if(!Server()->IsSeven(SnappingClient))
 	{
 		CNetObj_Character Character = {};
 
@@ -1410,7 +1410,7 @@ void CCharacter::HandleBroadcast()
 {
 	CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCid());
 
-	if(m_DDRaceState == ERaceState::STARTED && m_pPlayer->GetClientVersion() == VERSION_VANILLA && !Server()->IsSixup(m_pPlayer->GetCid()) &&
+	if(m_DDRaceState == ERaceState::STARTED && m_pPlayer->GetClientVersion() == VERSION_VANILLA && !Server()->IsSeven(m_pPlayer->GetCid()) &&
 		m_LastTimeCpBroadcasted != m_LastTimeCp && m_LastTimeCp > -1 &&
 		m_TimeCpBroadcastEndTick > Server()->Tick() && pData->m_BestTime && pData->m_aBestTimeCp[m_LastTimeCp] != 0)
 	{
@@ -1569,12 +1569,12 @@ void CCharacter::SetTimeCheckpoint(int TimeCheckpoint)
 		m_LastTimeCp = TimeCheckpoint;
 		m_aCurrentTimeCp[m_LastTimeCp] = m_Time;
 		m_TimeCpBroadcastEndTick = Server()->Tick() + Server()->TickSpeed() * 2;
-		if(m_pPlayer->GetClientVersion() >= VERSION_DDRACE || Server()->IsSixup(m_pPlayer->GetCid()))
+		if(m_pPlayer->GetClientVersion() >= VERSION_DDRACE || Server()->IsSeven(m_pPlayer->GetCid()))
 		{
 			CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCid());
 			if(pData->m_aBestTimeCp[m_LastTimeCp] != 0.0f)
 			{
-				if(Server()->IsSixup(m_pPlayer->GetCid()))
+				if(Server()->IsSeven(m_pPlayer->GetCid()))
 				{
 					protocol7::CNetMsg_Sv_Checkpoint Msg;
 					float Diff = (m_aCurrentTimeCp[m_LastTimeCp] - pData->m_aBestTimeCp[m_LastTimeCp]) * 1000;

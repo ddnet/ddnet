@@ -41,7 +41,7 @@ public:
 
 	char m_aSkinName[MAX_SKIN_LENGTH];
 
-	class CSixup
+	class CSeven
 	{
 	public:
 		char m_aaSkinPartNames[protocol7::NUM_SKINPARTS][protocol7::MAX_SKIN_LENGTH];
@@ -49,10 +49,10 @@ public:
 		bool m_XmasHat;
 
 		void Reset();
-		bool operator==(const CSixup &Other) const;
-		bool operator!=(const CSixup &Other) const { return !(*this == Other); }
+		bool operator==(const CSeven &Other) const;
+		bool operator!=(const CSeven &Other) const { return !(*this == Other); }
 	};
-	CSixup m_aSixup[NUM_DUMMIES];
+	CSeven m_aSeven[NUM_DUMMIES];
 
 	CSkinDescriptor();
 	void Reset();
@@ -83,8 +83,8 @@ public:
 		m_TeeRenderFlags = 0;
 		m_FeetFlipped = false;
 
-		for(auto &Sixup : m_aSixup)
-			Sixup.Reset();
+		for(auto &Seven : m_aSeven)
+			Seven.Reset();
 	}
 
 	void Apply(const CSkin *pSkin)
@@ -138,7 +138,7 @@ public:
 		return m_CustomColoredSkin ? m_ColorableRenderSkin.m_Body.IsValid() : m_OriginalRenderSkin.m_Body.IsValid();
 	}
 
-	class CSixup
+	class CSeven
 	{
 	public:
 		void Reset()
@@ -176,7 +176,7 @@ public:
 		}
 	};
 
-	CSixup m_aSixup[NUM_DUMMIES];
+	CSeven m_aSeven[NUM_DUMMIES];
 };
 
 class CManagedTeeRenderInfo

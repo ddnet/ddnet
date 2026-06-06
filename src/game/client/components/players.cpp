@@ -53,7 +53,7 @@ void CPlayers::RenderHand(const CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir,
 {
 	const vec2 HandPos = CalculateHandPosition(CenterPos, Dir, PostRotOffset);
 	const float HandAngle = CalculateHandAngle(Dir, AngleOffset);
-	if(pInfo->m_aSixup[g_Config.m_ClDummy].PartTexture(protocol7::SKINPART_HANDS).IsValid())
+	if(pInfo->m_aSeven[g_Config.m_ClDummy].PartTexture(protocol7::SKINPART_HANDS).IsValid())
 	{
 		RenderHand7(pInfo, HandPos, HandAngle, Alpha);
 	}
@@ -70,9 +70,9 @@ void CPlayers::RenderHand7(const CTeeRenderInfo *pInfo, vec2 HandPos, float Hand
 	IGraphics::CQuadItem QuadOutline(HandPos.x, HandPos.y, 2 * BaseSize, 2 * BaseSize);
 	IGraphics::CQuadItem QuadHand = QuadOutline;
 
-	Graphics()->TextureSet(pInfo->m_aSixup[g_Config.m_ClDummy].PartTexture(protocol7::SKINPART_HANDS));
+	Graphics()->TextureSet(pInfo->m_aSeven[g_Config.m_ClDummy].PartTexture(protocol7::SKINPART_HANDS));
 	Graphics()->QuadsBegin();
-	Graphics()->SetColor(pInfo->m_aSixup[g_Config.m_ClDummy].m_aColors[protocol7::SKINPART_HANDS].WithAlpha(Alpha));
+	Graphics()->SetColor(pInfo->m_aSeven[g_Config.m_ClDummy].m_aColors[protocol7::SKINPART_HANDS].WithAlpha(Alpha));
 	Graphics()->QuadsSetRotation(HandAngle);
 	Graphics()->SelectSprite7(client_data7::SPRITE_TEE_HAND_OUTLINE);
 	Graphics()->QuadsDraw(&QuadOutline, 1);
@@ -950,7 +950,7 @@ void CPlayers::OnRender()
 		if((GameClient()->m_aClients[i].m_RenderCur.m_Weapon == WEAPON_NINJA || (Frozen && !GameClient()->m_GameInfo.m_NoSkinChangeForFrozen)) && g_Config.m_ClShowNinja)
 		{
 			// change the skin for the player to the ninja
-			aRenderInfo[i].m_aSixup[g_Config.m_ClDummy].Reset();
+			aRenderInfo[i].m_aSeven[g_Config.m_ClDummy].Reset();
 			aRenderInfo[i].ApplySkin(NinjaTeeRenderInfo()->TeeRenderInfo());
 			aRenderInfo[i].m_CustomColoredSkin = IsTeamPlay;
 			if(!IsTeamPlay)

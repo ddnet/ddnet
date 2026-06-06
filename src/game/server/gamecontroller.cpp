@@ -411,7 +411,7 @@ void IGameController::OnPlayerConnect(CPlayer *pPlayer)
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 	}
 
-	if(Server()->IsSixup(ClientId))
+	if(Server()->IsSeven(ClientId))
 	{
 		{
 			protocol7::CNetMsg_Sv_GameInfo Msg;
@@ -660,7 +660,7 @@ void IGameController::Snap(int SnappingClient)
 	GameInfoEx.m_Version = GAMEINFO_CURVERSION;
 	Server()->SnapNewItem(0, GameInfoEx);
 
-	if(Server()->IsSixup(SnappingClient))
+	if(Server()->IsSeven(SnappingClient))
 	{
 		protocol7::CNetObj_GameData GameData = {};
 		GameData.m_GameStartTick = m_RoundStartTick;
@@ -686,7 +686,7 @@ void IGameController::Snap(int SnappingClient)
 
 	GameServer()->SnapSwitchers(SnappingClient);
 
-	if(!Server()->IsSixup(SnappingClient))
+	if(!Server()->IsSeven(SnappingClient))
 	{
 		CFinishTime MapTime = SnapMapBestTime(SnappingClient);
 		if(MapTime.m_Seconds != FinishTime::UNSET)

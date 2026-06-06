@@ -307,7 +307,7 @@ public:
 	int64_t ReconnectTime() const { return m_ReconnectTime; }
 	void SetReconnectTime(int64_t ReconnectTime) { m_ReconnectTime = ReconnectTime; }
 
-	virtual bool IsSixup() const = 0;
+	virtual bool IsSeven() const = 0;
 
 	virtual void RaceRecord_Start(const char *pFilename) = 0;
 	virtual void RaceRecord_Stop() = 0;

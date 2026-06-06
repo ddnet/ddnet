@@ -108,7 +108,7 @@ int CClient::TranslateSysMsg(int *pMsgId, bool System, CUnpacker *pUnpacker, CPa
 	}
 	else if(*pMsgId < OFFSET_UUID)
 	{
-		dbg_msg("sixup", "drop unknown sys msg=%d", *pMsgId);
+		dbg_msg("seven", "drop unknown sys msg=%d", *pMsgId);
 		return -1;
 	}
 

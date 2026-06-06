@@ -23,7 +23,7 @@ struct CAntibotMapData
 struct CAntibotPlayerData
 {
 	char m_aAddress[64];
-	bool m_Sixup;
+	bool m_Seven;
 	bool m_DnsblNone;
 	bool m_DnsblPending;
 	bool m_DnsblBlacklisted;
