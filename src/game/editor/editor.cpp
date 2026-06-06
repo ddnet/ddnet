@@ -3970,6 +3970,7 @@ void CEditor::Render()
 	if(m_GuiActive)
 		RenderTooltip(TooltipRect);
 
+	Ui()->RenderBackButton();
 	RenderMousePointer();
 }
 
@@ -4463,6 +4464,9 @@ void CEditor::Init()
 	m_UI.SetPopupMenuClosedCallback([this]() {
 		m_PopupEventWasActivated = false;
 	});
+	m_UI.SetDispatchInputCallback([this](const IInput::CEvent &Event) {
+		OnInput(Event);
+	});
 	m_RenderMap.Init(m_pGraphics, m_pTextRender);
 	m_ZoomEnvelopeX.OnInit(this);
 	m_ZoomEnvelopeY.OnInit(this);
@@ -4628,26 +4632,7 @@ void CEditor::OnUpdate()
 
 	// handle key presses
 	Input()->ConsumeEvents([&](const IInput::CEvent &Event) {
-		if(m_Dialog == DIALOG_NONE &&
-			CLineInput::GetActiveInput() == nullptr &&
-			Event.m_Key == KEY_F1)
-		{
-			if((Event.m_Flags & IInput::FLAG_PRESS) != 0 &&
-				(Event.m_Flags & IInput::FLAG_REPEAT) == 0)
-			{
-				m_QuickActionShowHelp.Call();
-			}
-			return;
-		}
-
-		for(CEditorComponent &Component : m_vComponents)
-		{
-			// Events with flag `FLAG_RELEASE` must always be forwarded to all components so keys being
-			// released can be handled in all components also after some components have been disabled.
-			if(Component.OnInput(Event) && (Event.m_Flags & ~IInput::FLAG_RELEASE) != 0)
-				return;
-		}
-		Ui()->OnInput(Event);
+		OnInput(Event);
 	});
 
 	MapView()->UpdateMouseWorld();
@@ -4657,6 +4642,27 @@ void CEditor::OnUpdate()
 
 	for(CEditorComponent &Component : m_vComponents)
 		Component.OnUpdate();
+}
+
+void CEditor::OnInput(const IInput::CEvent &Event)
+{
+	if(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Event.m_Key == KEY_F1)
+	{
+		if((Event.m_Flags & IInput::FLAG_PRESS) != 0 && (Event.m_Flags & IInput::FLAG_REPEAT) == 0)
+		{
+			m_QuickActionShowHelp.Call();
+		}
+		return;
+	}
+
+	for(CEditorComponent &Component : m_vComponents)
+	{
+		// Events with flag `FLAG_RELEASE` must always be forwarded to all components so keys being
+		// released can be handled in all components also after some components have been disabled.
+		if(Component.OnInput(Event) && (Event.m_Flags & ~IInput::FLAG_RELEASE) != 0)
+			return;
+	}
+	Ui()->OnInput(Event);
 }
 
 void CEditor::OnRender()
@@ -4679,6 +4685,8 @@ void CEditor::OnRender()
 	Ui()->StartCheck();
 
 	Ui()->Update();
+
+	Ui()->DoBackButton();
 
 	Render();
 
