@@ -97,7 +97,7 @@ int TestCollect(const char *pName, int IsDir, int Unused, void *pUser)
 	if(Path.m_IsDirectory)
 	{
 		CTestCollectData DataRecursive;
-		str_copy(DataRecursive.m_aCurrentDir, Path.m_aData, sizeof(DataRecursive.m_aCurrentDir));
+		str_copy(DataRecursive.m_aCurrentDir, Path.m_aData);
 		DataRecursive.m_pvEntries = pData->m_pvEntries;
 		fs_listdir(DataRecursive.m_aCurrentDir, TestCollect, 0, &DataRecursive);
 	}
@@ -108,13 +108,13 @@ void TestDeleteTestStorageFiles(const char *pPath)
 {
 	std::vector<CTestInfoPath> vEntries;
 	CTestCollectData Data;
-	str_copy(Data.m_aCurrentDir, pPath, sizeof(Data.m_aCurrentDir));
+	str_copy(Data.m_aCurrentDir, pPath);
 	Data.m_pvEntries = &vEntries;
 	fs_listdir(Data.m_aCurrentDir, TestCollect, 0, &Data);
 
 	CTestInfoPath Path;
 	Path.m_IsDirectory = true;
-	str_copy(Path.m_aData, Data.m_aCurrentDir, sizeof(Path.m_aData));
+	str_copy(Path.m_aData, Data.m_aCurrentDir);
 	vEntries.push_back(Path);
 
 	// Sorts directories after files.

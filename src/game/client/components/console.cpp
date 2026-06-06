@@ -352,12 +352,12 @@ void CGameConsole::CInstance::UpdateCompletionSuggestions()
 	char aOldCommand[IConsole::CMDLINE_LENGTH];
 	aOldCommand[0] = '\0';
 	if(m_CompletionChosen != -1 && (size_t)m_CompletionChosen < m_vpCommandSuggestions.size())
-		str_copy(aOldCommand, m_vpCommandSuggestions[m_CompletionChosen], sizeof(aOldCommand));
+		str_copy(aOldCommand, m_vpCommandSuggestions[m_CompletionChosen]);
 
 	char aOldArgument[IConsole::CMDLINE_LENGTH];
 	aOldArgument[0] = '\0';
 	if(m_CompletionChosenArgument != -1 && (size_t)m_CompletionChosenArgument < m_vpArgumentSuggestions.size())
-		str_copy(aOldArgument, m_vpArgumentSuggestions[m_CompletionChosenArgument], sizeof(aOldArgument));
+		str_copy(aOldArgument, m_vpArgumentSuggestions[m_CompletionChosenArgument]);
 
 	m_vpCommandSuggestions.clear();
 	m_vpArgumentSuggestions.clear();
@@ -477,7 +477,7 @@ void CGameConsole::CInstance::GetCommand(const char *pInput, char (&aCmd)[IConso
 	}
 	m_CompletionCommandStart = str_skip_whitespaces_const(aInput + m_CompletionCommandStart) - aInput;
 
-	str_copy(aCmd, aInput + m_CompletionCommandStart, sizeof(aCmd));
+	str_copy(aCmd, aInput + m_CompletionCommandStart);
 }
 
 static void StrCopyUntilSpace(char *pDest, size_t DestSize, const char *pSrc)

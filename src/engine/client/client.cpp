@@ -1374,7 +1374,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 	CUnpacker Up;
 	Up.Reset(pData, DataSize);
 
-#define GET_STRING(array) str_copy(array, Up.GetString(CUnpacker::SANITIZE_CC | CUnpacker::SKIP_START_WHITESPACES), sizeof(array))
+#define GET_STRING(array) str_copy(array, Up.GetString(CUnpacker::SANITIZE_CC | CUnpacker::SKIP_START_WHITESPACES))
 #define GET_INT(integer) (integer) = str_toint(Up.GetString())
 
 	int Token;
@@ -4343,7 +4343,7 @@ int CClient::HandleChecksum(int Conn, CUuid Uuid, CUnpacker *pUnpacker)
 #define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Flags, Desc) \
 	if(CHECKSUM_RECORD(Flags)) \
 	{ \
-		str_copy(m_Checksum.m_Data.m_Config.m_##Name, g_Config.m_##Name, sizeof(m_Checksum.m_Data.m_Config.m_##Name)); \
+		str_copy(m_Checksum.m_Data.m_Config.m_##Name, g_Config.m_##Name); \
 	}
 #include <engine/shared/config_variables.h>
 #undef CHECKSUM_RECORD

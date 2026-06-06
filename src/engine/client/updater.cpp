@@ -408,7 +408,7 @@ void CUpdater::RunningUpdate()
 #if defined(CONF_FAMILY_WINDOWS)
 				const size_t Length = str_length(pFile);
 				char aBuf[IO_MAX_PATH_LENGTH];
-				str_copy(aBuf, pFile, sizeof(aBuf)); // SDL
+				str_copy(aBuf, pFile); // SDL
 				str_copy(aBuf + Length - 4, "-" PLAT_NAME, sizeof(aBuf) - Length + 4); // -win32
 				str_append(aBuf, pFile + Length - 4); // .dll
 				FetchFile(aBuf, pFile);
@@ -420,7 +420,7 @@ void CUpdater::RunningUpdate()
 #if defined(CONF_PLATFORM_LINUX)
 				const size_t Length = str_length(pFile);
 				char aBuf[IO_MAX_PATH_LENGTH];
-				str_copy(aBuf, pFile, sizeof(aBuf)); // libsteam_api
+				str_copy(aBuf, pFile); // libsteam_api
 				str_copy(aBuf + Length - 3, "-" PLAT_NAME, sizeof(aBuf) - Length + 3); // -linux-x86_64
 				str_append(aBuf, pFile + Length - 3); // .so
 				FetchFile(aBuf, pFile);
