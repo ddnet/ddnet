@@ -3756,7 +3756,7 @@ void CGameContext::ConAddMapVotes(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	char aPath[IO_MAX_PATH_LENGTH] = "maps/";
-	str_append(aPath, pDirectory, sizeof(aPath));
+	str_append(aPath, pDirectory);
 	pSelf->Storage()->ListDirectory(IStorage::TYPE_ALL, aPath, MapScan, &vMapList);
 	std::sort(vMapList.begin(), vMapList.end(), CMapNameItem::CompareFilenameAscending);
 
@@ -3784,8 +3784,8 @@ void CGameContext::ConAddMapVotes(IConsole::IResult *pResult, void *pUserData)
 		}
 		else if(Item.m_IsDirectory)
 		{
-			str_append(aDirectory, "/", sizeof(aDirectory));
-			str_append(aDirectory, aOptionEscaped, sizeof(aDirectory));
+			str_append(aDirectory, "/");
+			str_append(aDirectory, aOptionEscaped);
 
 			str_format(aCommand, sizeof(aCommand), "clear_votes; add_map_votes \"%s\"", aDirectory);
 		}

@@ -992,7 +992,7 @@ void CMenus::DemolistPopulate()
 				CDemoItem Item;
 				str_copy(Item.m_aFilename, "demos");
 				Storage()->GetCompletePath(StorageType, "demos", Item.m_aName, sizeof(Item.m_aName));
-				str_append(Item.m_aName, "/", sizeof(Item.m_aName));
+				str_append(Item.m_aName, "/");
 				Item.m_InfosLoaded = false;
 				Item.m_Valid = false;
 				Item.m_Date = 0;

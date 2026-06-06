@@ -3008,7 +3008,7 @@ CUi::EPopupMenuFunctionResult CMenus::PopupMapPicker(void *pContext, CUIRect Vie
 		char aLabelText[IO_MAX_PATH_LENGTH];
 		str_copy(aLabelText, Map.m_aFilename);
 		if(Map.m_IsDirectory)
-			str_append(aLabelText, "/", sizeof(aLabelText));
+			str_append(aLabelText, "/");
 
 		const char *pIconType;
 		if(!Map.m_IsDirectory)
@@ -3046,8 +3046,8 @@ CUi::EPopupMenuFunctionResult CMenus::PopupMapPicker(void *pContext, CUIRect Vie
 			}
 			else
 			{
-				str_append(pPopupContext->m_aCurrentMapFolder, "/", sizeof(pPopupContext->m_aCurrentMapFolder));
-				str_append(pPopupContext->m_aCurrentMapFolder, SelectedItem.m_aFilename, sizeof(pPopupContext->m_aCurrentMapFolder));
+				str_append(pPopupContext->m_aCurrentMapFolder, "/");
+				str_append(pPopupContext->m_aCurrentMapFolder, SelectedItem.m_aFilename);
 			}
 			pPopupContext->MapListPopulate();
 		}
