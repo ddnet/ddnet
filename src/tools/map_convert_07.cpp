@@ -130,7 +130,7 @@ int main(int argc, const char **argv)
 
 	if(argc == 3)
 	{
-		str_copy(aDestFilename, argv[2], sizeof(aDestFilename));
+		str_copy(aDestFilename, argv[2]);
 	}
 	else
 	{

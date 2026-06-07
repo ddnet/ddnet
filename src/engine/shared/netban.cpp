@@ -569,7 +569,7 @@ void CNetBan::ConBansFind(IConsole::IResult *pResult, void *pUser)
 	if(Found)
 		str_format(aMsg, sizeof(aMsg), "%i ban records found.", Found);
 	else
-		str_copy(aMsg, "No ban records found.", sizeof(aMsg));
+		str_copy(aMsg, "No ban records found.");
 
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", aMsg);
 }
