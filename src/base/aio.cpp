@@ -8,8 +8,8 @@
 
 #include <cstdlib>
 
-#define ASYNC_BUFSIZE (8 * 1024)
-#define ASYNC_LOCAL_BUFSIZE (64 * 1024)
+static constexpr size_t ASYNC_BUFSIZE = 8 * 1024;
+static constexpr size_t ASYNC_LOCAL_BUFSIZE = 64 * 1024;
 
 enum class EAsyncIoFinishState : unsigned char
 {
