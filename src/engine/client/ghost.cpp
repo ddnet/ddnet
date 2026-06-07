@@ -189,7 +189,7 @@ void CGhostRecorder::Stop(int Ticks, int Time)
 		FlushChunk();
 
 		// write number of ticks and time
-		io_seek(m_File, offsetof(CGhostHeader, m_aNumTicks), IOSEEK_START);
+		io_seek(m_File, offsetof(CGhostHeader, m_aNumTicks), EIoSeekOrigin::START);
 
 		unsigned char aNumTicks[sizeof(int32_t)];
 		uint_to_bytes_be(aNumTicks, Ticks);

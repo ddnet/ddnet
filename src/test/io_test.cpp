@@ -100,13 +100,13 @@ TEST(Io, SeekTellSkip)
 	IOHANDLE File = io_open(Info.m_aFilename, IOFLAG_WRITE);
 	ASSERT_TRUE(File);
 	EXPECT_EQ(io_write(File, pWritten1, WrittenLength1), WrittenLength1);
-	EXPECT_FALSE(io_seek(File, -10, IOSEEK_CUR));
+	EXPECT_FALSE(io_seek(File, -10, EIoSeekOrigin::CURRENT));
 	EXPECT_EQ(io_write(File, pWritten2, WrittenLength2), WrittenLength2);
-	EXPECT_FALSE(io_seek(File, 2, IOSEEK_START));
+	EXPECT_FALSE(io_seek(File, 2, EIoSeekOrigin::START));
 	EXPECT_EQ(io_write(File, pWritten3, WrittenLength3), WrittenLength3);
 	EXPECT_FALSE(io_skip(File, 1));
 	EXPECT_EQ(io_write(File, pWritten4, WrittenLength4), WrittenLength4);
-	EXPECT_FALSE(io_seek(File, 0, IOSEEK_END));
+	EXPECT_FALSE(io_seek(File, 0, EIoSeekOrigin::END));
 	EXPECT_EQ(io_write(File, pWritten5, WrittenLength5), WrittenLength5);
 	EXPECT_FALSE(io_close(File));
 
@@ -114,16 +114,16 @@ TEST(Io, SeekTellSkip)
 	ASSERT_TRUE(File);
 	EXPECT_EQ(io_read(File, aBuf, sizeof(aBuf)), ExpectedLength);
 	EXPECT_EQ(mem_comp(aBuf, pExpectedResult, ExpectedLength), 0);
-	EXPECT_FALSE(io_seek(File, -13, IOSEEK_CUR));
+	EXPECT_FALSE(io_seek(File, -13, EIoSeekOrigin::CURRENT));
 	EXPECT_EQ(io_read(File, aBuf, WrittenLength2), WrittenLength2);
 	EXPECT_EQ(mem_comp(aBuf, pWritten2, WrittenLength2), 0);
-	EXPECT_FALSE(io_seek(File, 2, IOSEEK_START));
+	EXPECT_FALSE(io_seek(File, 2, EIoSeekOrigin::START));
 	EXPECT_EQ(io_read(File, aBuf, WrittenLength3), WrittenLength3);
 	EXPECT_EQ(mem_comp(aBuf, pWritten3, WrittenLength3), 0);
 	EXPECT_FALSE(io_skip(File, 1));
 	EXPECT_EQ(io_read(File, aBuf, WrittenLength4), WrittenLength4);
 	EXPECT_EQ(mem_comp(aBuf, pWritten4, WrittenLength4), 0);
-	EXPECT_FALSE(io_seek(File, -3, IOSEEK_END));
+	EXPECT_FALSE(io_seek(File, -3, EIoSeekOrigin::END));
 	EXPECT_EQ(io_read(File, aBuf, WrittenLength5), WrittenLength5);
 	EXPECT_EQ(mem_comp(aBuf, pWritten5, WrittenLength5), 0);
 	EXPECT_FALSE(io_close(File));

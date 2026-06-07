@@ -232,7 +232,7 @@ public:
 				return nullptr;
 			}
 			unsigned ActualDataSize = 0;
-			if(io_seek(m_File, m_DataStartOffset + m_Info.m_pDataOffsets[Index], IOSEEK_START) == 0)
+			if(io_seek(m_File, m_DataStartOffset + m_Info.m_pDataOffsets[Index], EIoSeekOrigin::START) == 0)
 			{
 				ActualDataSize = io_read(m_File, pCompressedData, DataSize);
 			}
@@ -278,7 +278,7 @@ public:
 				return nullptr;
 			}
 			unsigned ActualDataSize = 0;
-			if(io_seek(m_File, m_DataStartOffset + m_Info.m_pDataOffsets[Index], IOSEEK_START) == 0)
+			if(io_seek(m_File, m_DataStartOffset + m_Info.m_pDataOffsets[Index], EIoSeekOrigin::START) == 0)
 			{
 				ActualDataSize = io_read(m_File, m_ppDataPtrs[Index], DataSize);
 			}
@@ -482,7 +482,7 @@ bool CDataFileReader::Open(const char *pFullName, IStorage *pStorage, const char
 			sha256_update(&Sha256Ctxt, aBuffer, Bytes);
 		}
 		Sha256 = sha256_finish(&Sha256Ctxt);
-		if(io_seek(File, 0, IOSEEK_START) != 0)
+		if(io_seek(File, 0, EIoSeekOrigin::START) != 0)
 		{
 			io_close(File);
 			log_error("datafile", "could not seek to start after calculating hashes");

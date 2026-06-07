@@ -91,7 +91,7 @@ int CDemoRecorder::Start(IStorage *pStorage, IConsole *pConsole, const char *pFi
 	bool CloseMapFile = false;
 
 	if(MapFile)
-		io_seek(MapFile, 0, IOSEEK_START);
+		io_seek(MapFile, 0, EIoSeekOrigin::START);
 
 	char aSha256[SHA256_MAXSTRSIZE];
 	sha256_str(Sha256, aSha256, sizeof(aSha256));
@@ -201,7 +201,7 @@ int CDemoRecorder::Start(IStorage *pStorage, IConsole *pConsole, const char *pFi
 		if(CloseMapFile)
 			io_close(MapFile);
 		else
-			io_seek(MapFile, 0, IOSEEK_START);
+			io_seek(MapFile, 0, EIoSeekOrigin::START);
 	}
 
 	m_LastKeyFrame = -1;
@@ -378,13 +378,13 @@ int CDemoRecorder::Stop(IDemoRecorder::EStopMode Mode, const char *pTargetFilena
 	if(Mode == IDemoRecorder::EStopMode::KEEP_FILE)
 	{
 		// add the demo length to the header
-		io_seek(m_File, offsetof(CDemoHeader, m_aLength), IOSEEK_START);
+		io_seek(m_File, offsetof(CDemoHeader, m_aLength), EIoSeekOrigin::START);
 		unsigned char aLength[sizeof(int32_t)];
 		uint_to_bytes_be(aLength, Length());
 		io_write(m_File, aLength, sizeof(aLength));
 
 		// add the timeline markers to the header
-		io_seek(m_File, sizeof(CDemoHeader) + offsetof(CTimelineMarkers, m_aNumTimelineMarkers), IOSEEK_START);
+		io_seek(m_File, sizeof(CDemoHeader) + offsetof(CTimelineMarkers, m_aNumTimelineMarkers), EIoSeekOrigin::START);
 		unsigned char aNumMarkers[sizeof(int32_t)];
 		uint_to_bytes_be(aNumMarkers, m_NumTimelineMarkers);
 		io_write(m_File, aNumMarkers, sizeof(aNumMarkers));
@@ -597,7 +597,7 @@ CDemoPlayer::EScanFileResult CDemoPlayer::ScanFile()
 	}
 
 	const auto &ResetToStartPosition = [&](EScanFileResult Result) -> EScanFileResult {
-		if(io_seek(m_File, StartPos, IOSEEK_START) != 0)
+		if(io_seek(m_File, StartPos, EIoSeekOrigin::START) != 0)
 		{
 			m_vKeyFrames.clear();
 			return EScanFileResult::ERROR_UNRECOVERABLE;
@@ -608,7 +608,7 @@ CDemoPlayer::EScanFileResult CDemoPlayer::ScanFile()
 	int ChunkTick = -1;
 	if(!m_vKeyFrames.empty())
 	{
-		if(io_seek(m_File, m_vKeyFrames.back().m_Filepos, IOSEEK_START) != 0)
+		if(io_seek(m_File, m_vKeyFrames.back().m_Filepos, EIoSeekOrigin::START) != 0)
 		{
 			return ResetToStartPosition(EScanFileResult::ERROR_RECOVERABLE);
 		}
@@ -902,11 +902,11 @@ unsigned char *CDemoPlayer::GetMapData(IStorage *pStorage)
 		return nullptr;
 
 	const int64_t CurSeek = io_tell(m_File);
-	if(CurSeek < 0 || io_seek(m_File, m_MapOffset, IOSEEK_START) != 0)
+	if(CurSeek < 0 || io_seek(m_File, m_MapOffset, EIoSeekOrigin::START) != 0)
 		return nullptr;
 	unsigned char *pMapData = (unsigned char *)malloc(m_MapInfo.m_Size);
 	if(io_read(m_File, pMapData, m_MapInfo.m_Size) != m_MapInfo.m_Size ||
-		io_seek(m_File, CurSeek, IOSEEK_START) != 0)
+		io_seek(m_File, CurSeek, EIoSeekOrigin::START) != 0)
 	{
 		free(pMapData);
 		return nullptr;
@@ -1090,7 +1090,7 @@ bool CDemoPlayer::SetPos(int WantedTick)
 		m_Info.m_Info.m_CurrentTick < m_vKeyFrames[KeyFrame].m_Tick || // we are before the wanted KeyFrame OR
 		(KeyFrame != m_vKeyFrames.size() - 1 && m_Info.m_Info.m_CurrentTick >= m_vKeyFrames[KeyFrame + 1].m_Tick)) // we are after the wanted KeyFrame
 	{
-		if(io_seek(m_File, m_vKeyFrames[KeyFrame].m_Filepos, IOSEEK_START) != 0)
+		if(io_seek(m_File, m_vKeyFrames[KeyFrame].m_Filepos, EIoSeekOrigin::START) != 0)
 		{
 			Stop("Error seeking keyframe position");
 			return false;
@@ -1368,7 +1368,7 @@ bool CDemoPlayer::GetDemoInfo(IStorage *pStorage, IConsole *pConsole, const char
 			{
 				pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", "Demo version incremented, but not by DDNet");
 			}
-			if(io_seek(File, -(int64_t)ExtensionUuidSize, IOSEEK_CUR) != 0)
+			if(io_seek(File, -(int64_t)ExtensionUuidSize, EIoSeekOrigin::CURRENT) != 0)
 			{
 				if(pErrorMessage != nullptr)
 					str_copy(pErrorMessage, "Error rewinding SHA256 extension UUID", ErrorMessageSize);
