@@ -21,7 +21,7 @@ static void Expect(int NumColumns, const char *const *ppColumns, const char *pEx
 	ASSERT_TRUE(File);
 	int Read = io_read(File, aBuf, sizeof(aBuf));
 	io_close(File);
-	fs_remove(Info.m_aFilename);
+	EXPECT_FALSE(fs_remove(Info.m_aFilename));
 
 	ASSERT_TRUE(Read >= 1);
 	Read -= 1;

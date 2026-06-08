@@ -3042,7 +3042,7 @@ CUi::EPopupMenuFunctionResult CMenus::PopupMapPicker(void *pContext, CUIRect Vie
 		{
 			if(!str_comp(SelectedItem.m_aFilename, ".."))
 			{
-				fs_parent_dir(pPopupContext->m_aCurrentMapFolder);
+				dbg_assert(fs_parent_dir(pPopupContext->m_aCurrentMapFolder) == 0, "Parent folder item selected but there is no parent folder");
 			}
 			else
 			{

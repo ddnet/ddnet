@@ -428,11 +428,11 @@ void CHttpRequest::OnCompletionInternal(void *pHandle, unsigned int Result)
 
 		if(State == EHttpState::ERROR || State == EHttpState::ABORTED)
 		{
-			fs_remove(m_aDestAbsoluteTmp);
+			(void)fs_remove(m_aDestAbsoluteTmp);
 		}
 		else if(m_IfModifiedSince >= 0 && m_StatusCode == 304) // 304 Not Modified
 		{
-			fs_remove(m_aDestAbsoluteTmp);
+			(void)fs_remove(m_aDestAbsoluteTmp);
 			if(m_WriteToMemory)
 			{
 				free(m_pBuffer);
@@ -464,7 +464,7 @@ void CHttpRequest::OnCompletionInternal(void *pHandle, unsigned int Result)
 			{
 				log_error("http", "i/o error, cannot move file: %s", m_aDest);
 				State = EHttpState::ERROR;
-				fs_remove(m_aDestAbsoluteTmp);
+				(void)fs_remove(m_aDestAbsoluteTmp);
 			}
 		}
 	}
@@ -488,20 +488,20 @@ void CHttpRequest::OnValidation(bool Success)
 	{
 		if(m_IfModifiedSince >= 0 && m_StatusCode == 304) // 304 Not Modified
 		{
-			fs_remove(m_aDestAbsoluteTmp);
+			(void)fs_remove(m_aDestAbsoluteTmp);
 			return;
 		}
 		if(fs_rename(m_aDestAbsoluteTmp, m_aDestAbsolute))
 		{
 			log_error("http", "i/o error, cannot move file: %s", m_aDest);
 			m_State = EHttpState::ERROR;
-			fs_remove(m_aDestAbsoluteTmp);
+			(void)fs_remove(m_aDestAbsoluteTmp);
 		}
 	}
 	else
 	{
 		m_State = EHttpState::ERROR;
-		fs_remove(m_aDestAbsoluteTmp);
+		(void)fs_remove(m_aDestAbsoluteTmp);
 	}
 }
 

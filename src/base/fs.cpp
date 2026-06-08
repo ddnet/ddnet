@@ -232,7 +232,10 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
 		}
 		str_copy(buffer + length, entry->d_name, sizeof(buffer) - length);
 		time_t created = -1, modified = -1;
-		fs_file_time(buffer, &created, &modified);
+		if(fs_file_time(buffer, &created, &modified) != 0)
+		{
+			log_warn("filesystem", "Failed to determine file time of '%s'", buffer);
+		}
 
 		CFsFileInfo info;
 		info.m_pName = entry->d_name;
