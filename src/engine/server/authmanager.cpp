@@ -73,7 +73,7 @@ void CAuthManager::Init()
 	if(g_Config.m_SvRconHelperPassword[0])
 		NumDefaultKeys++;
 
-	auto It = std::find_if(m_vKeys.begin(), m_vKeys.end(), [](CKey Key) { return str_comp(Key.m_aIdent, DEFAULT_SAVED_RCON_USER) == 0; });
+	auto It = std::find_if(m_vKeys.begin(), m_vKeys.end(), [](const CKey &Key) { return str_comp(Key.m_aIdent, DEFAULT_SAVED_RCON_USER) == 0; });
 	if(It != m_vKeys.end())
 		NumDefaultKeys++;
 
