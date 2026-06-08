@@ -223,7 +223,7 @@ bool CMysqlConnection::ConnectImpl()
 {
 	if(m_HaveConnection)
 	{
-		if(m_pStmt && mysql_stmt_free_result(m_pStmt.get()))
+		if(m_pStmt && mysql_stmt_field_count(m_pStmt.get()) > 0 && mysql_stmt_free_result(m_pStmt.get()))
 		{
 			StoreErrorStmt("free_result");
 			dbg_msg("mysql", "can't free last result %s", m_aErrorDetail);
