@@ -6,6 +6,7 @@
 #include <engine/shared/protocol.h>
 
 #include <memory>
+#include <optional>
 
 enum
 {
@@ -85,6 +86,9 @@ public:
 	virtual void GetString(int Col, char *pBuffer, int BufferSize) = 0;
 	// returns number of bytes read into the buffer
 	virtual int GetBlob(int Col, unsigned char *pBuffer, int BufferSize) = 0;
+	std::optional<float> GetOptionalFloat(int Col);
+	std::optional<int> GetOptionalInt(int Col);
+	std::optional<int64_t> GetOptionalInt64(int Col);
 
 	// SQL statements, that can't be abstracted, has side effects to the result
 	virtual bool AddPoints(const char *pPlayer, int Points, char *pError, int ErrorSize) = 0;

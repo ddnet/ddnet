@@ -436,10 +436,10 @@ bool CScoreWorker::MapInfo(IDbConnection *pSqlServer, const ISqlData *pGameData,
 		int Stars = pSqlServer->GetInt(5);
 		int Finishes = pSqlServer->GetInt(6);
 		int Finishers = pSqlServer->GetInt(7);
-		float Median = !pSqlServer->IsNull(8) ? pSqlServer->GetInt(8) : -1.0f;
+		float Median = pSqlServer->GetOptionalFloat(8).value_or(-1.0f);
 		int Stamp = pSqlServer->GetInt(9);
 		int Ago = pSqlServer->GetInt(10);
-		float OwnTime = !pSqlServer->IsNull(11) ? pSqlServer->GetFloat(11) : -1.0f;
+		float OwnTime = pSqlServer->GetOptionalFloat(11).value_or(-1.0f);
 
 		char aAgoString[40] = "\0";
 		char aReleasedString[60] = "\0";
