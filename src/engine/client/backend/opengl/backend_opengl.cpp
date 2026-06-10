@@ -319,13 +319,16 @@ bool CCommandProcessorFragment_OpenGL::InitOpenGL(const SCommand_Init *pCommand)
 	};
 
 	const char *pVendorString = (const char *)glGetString(GL_VENDOR);
+	dbg_assert(pVendorString != nullptr, "glGetString(GL_VENDOR) failure");
 	log_info("gfx/opengl", "Vendor string: %s", pVendorString);
 
 	// check what this context can do
 	const char *pVersionString = (const char *)glGetString(GL_VERSION);
+	dbg_assert(pVersionString != nullptr, "glGetString(GL_VERSION) failure");
 	log_info("gfx/opengl", "Version string: %s", pVersionString);
 
 	const char *pRendererString = (const char *)glGetString(GL_RENDERER);
+	dbg_assert(pRendererString != nullptr, "glGetString(GL_RENDERER) failure");
 
 	str_copy(pCommand->m_pVendorString, pVendorString, GPU_INFO_STRING_SIZE);
 	str_copy(pCommand->m_pVersionString, pVersionString, GPU_INFO_STRING_SIZE);
