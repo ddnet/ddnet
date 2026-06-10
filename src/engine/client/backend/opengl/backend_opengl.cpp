@@ -167,57 +167,54 @@ void CCommandProcessorFragment_OpenGL::SetState(const CCommandBuffer::SState &St
 
 static void ParseVersionString(EBackendType BackendType, const char *pStr, int &VersionMajor, int &VersionMinor, int &VersionPatch)
 {
-	if(pStr)
+	// if backend is GLES, it starts with "OpenGL ES " or OpenGL ES-CM for older contexts, rest is the same
+	if(BackendType == BACKEND_TYPE_OPENGL_ES)
 	{
-		// if backend is GLES, it starts with "OpenGL ES " or OpenGL ES-CM for older contexts, rest is the same
-		if(BackendType == BACKEND_TYPE_OPENGL_ES)
-		{
-			int StrLenGLES = str_length("OpenGL ES ");
-			int StrLenGLESCM = str_length("OpenGL ES-CM ");
-			if(str_comp_num(pStr, "OpenGL ES ", StrLenGLES) == 0)
-				pStr += StrLenGLES;
-			else if(str_comp_num(pStr, "OpenGL ES-CM ", StrLenGLESCM) == 0)
-				pStr += StrLenGLESCM;
-		}
-
-		char aCurNumberStr[32];
-		size_t CurNumberStrLen = 0;
-		size_t TotalNumbersPassed = 0;
-		int aNumbers[3] = {0};
-		bool LastWasNumber = false;
-		while(*pStr && TotalNumbersPassed < 3)
-		{
-			if(str_isnum(*pStr))
-			{
-				aCurNumberStr[CurNumberStrLen++] = (char)*pStr;
-				LastWasNumber = true;
-			}
-			else if(LastWasNumber && (*pStr == '.' || *pStr == ' '))
-			{
-				if(CurNumberStrLen > 0)
-				{
-					aCurNumberStr[CurNumberStrLen] = 0;
-					aNumbers[TotalNumbersPassed++] = str_toint(aCurNumberStr);
-					CurNumberStrLen = 0;
-				}
-
-				LastWasNumber = false;
-
-				if(*pStr != '.')
-					break;
-			}
-			else
-			{
-				break;
-			}
-
-			++pStr;
-		}
-
-		VersionMajor = aNumbers[0];
-		VersionMinor = aNumbers[1];
-		VersionPatch = aNumbers[2];
+		int StrLenGLES = str_length("OpenGL ES ");
+		int StrLenGLESCM = str_length("OpenGL ES-CM ");
+		if(str_comp_num(pStr, "OpenGL ES ", StrLenGLES) == 0)
+			pStr += StrLenGLES;
+		else if(str_comp_num(pStr, "OpenGL ES-CM ", StrLenGLESCM) == 0)
+			pStr += StrLenGLESCM;
 	}
+
+	char aCurNumberStr[32];
+	size_t CurNumberStrLen = 0;
+	size_t TotalNumbersPassed = 0;
+	int aNumbers[3] = {0};
+	bool LastWasNumber = false;
+	while(*pStr && TotalNumbersPassed < 3)
+	{
+		if(str_isnum(*pStr))
+		{
+			aCurNumberStr[CurNumberStrLen++] = (char)*pStr;
+			LastWasNumber = true;
+		}
+		else if(LastWasNumber && (*pStr == '.' || *pStr == ' '))
+		{
+			if(CurNumberStrLen > 0)
+			{
+				aCurNumberStr[CurNumberStrLen] = 0;
+				aNumbers[TotalNumbersPassed++] = str_toint(aCurNumberStr);
+				CurNumberStrLen = 0;
+			}
+
+			LastWasNumber = false;
+
+			if(*pStr != '.')
+				break;
+		}
+		else
+		{
+			break;
+		}
+
+		++pStr;
+	}
+
+	VersionMajor = aNumbers[0];
+	VersionMinor = aNumbers[1];
+	VersionPatch = aNumbers[2];
 }
 
 #ifndef BACKEND_AS_OPENGL_ES
