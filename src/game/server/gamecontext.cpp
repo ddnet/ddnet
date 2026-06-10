@@ -2378,7 +2378,7 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientId, con
 				CLogScope Scope(&Logger);
 				Console()->ExecuteLine(pMsg->m_pMessage + 1, ClientId, false);
 			}
-			// m_apPlayers[ClientId] can be NULL, if the player used a
+			// m_apPlayers[ClientId] can be nullptr, if the player used a
 			// timeout code and replaced another client.
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "%d used %s", ClientId, pMsg->m_pMessage);

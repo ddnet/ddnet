@@ -28,7 +28,7 @@ void CUPnP::Open(NETADDR Address)
 		char aPort[6];
 		int Error;
 
-		m_pUPnPDevice = upnpDiscover(2000, NULL, NULL, 0, 0, 2, &Error);
+		m_pUPnPDevice = upnpDiscover(2000, nullptr, nullptr, 0, 0, 2, &Error);
 
 #if MINIUPNPC_API_VERSION > 17
 		char aWanAddr[64];
@@ -47,7 +47,7 @@ void CUPnP::Open(NETADDR Address)
 			Error = UPNP_AddPortMapping(m_pUPnPUrls->controlURL, m_pUPnPData->first.servicetype,
 				aPort, aPort, aLanAddr,
 				"DDNet Server " GAME_RELEASE_VERSION,
-				"UDP", NULL, "0");
+				"UDP", nullptr, "0");
 
 			if(Error)
 				dbg_msg("upnp", "failed to map port, error: %s", strupnperror(Error));
@@ -67,7 +67,7 @@ void CUPnP::Shutdown()
 		{
 			char aPort[6];
 			str_format(aPort, sizeof(aPort), "%d", m_Addr.port);
-			int Error = UPNP_DeletePortMapping(m_pUPnPUrls->controlURL, m_pUPnPData->first.servicetype, aPort, "UDP", NULL);
+			int Error = UPNP_DeletePortMapping(m_pUPnPUrls->controlURL, m_pUPnPData->first.servicetype, aPort, "UDP", nullptr);
 
 			if(Error != 0)
 			{
@@ -78,8 +78,8 @@ void CUPnP::Shutdown()
 		}
 		free(m_pUPnPUrls);
 		free(m_pUPnPData);
-		m_pUPnPUrls = NULL;
-		m_pUPnPData = NULL;
+		m_pUPnPUrls = nullptr;
+		m_pUPnPData = nullptr;
 	}
 }
 

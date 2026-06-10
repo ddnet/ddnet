@@ -45,10 +45,10 @@ TEST(BlocklistDriver, Invalid)
 	int Major, Minor, Patch;
 	bool WarningReq = false;
 #ifdef CONF_FAMILY_WINDOWS
-	EXPECT_STREQ(ParseBlocklistDriverVersions("AMD", "Build 25.20.100.7810", Major, Minor, Patch, WarningReq), NULL);
-	EXPECT_STREQ(ParseBlocklistDriverVersions("NVIDIA", "Build 26.20.100.7799", Major, Minor, Patch, WarningReq), NULL);
+	EXPECT_STREQ(ParseBlocklistDriverVersions("AMD", "Build 25.20.100.7810", Major, Minor, Patch, WarningReq), nullptr);
+	EXPECT_STREQ(ParseBlocklistDriverVersions("NVIDIA", "Build 26.20.100.7799", Major, Minor, Patch, WarningReq), nullptr);
 #else
-	EXPECT_STREQ(ParseBlocklistDriverVersions("Intel", "Build 26.20.100.7985", Major, Minor, Patch, WarningReq), NULL);
-	EXPECT_STREQ(ParseBlocklistDriverVersions("Intel", "Build 26.20.100.7799", Major, Minor, Patch, WarningReq), NULL);
+	EXPECT_STREQ(ParseBlocklistDriverVersions("Intel", "Build 26.20.100.7985", Major, Minor, Patch, WarningReq), nullptr);
+	EXPECT_STREQ(ParseBlocklistDriverVersions("Intel", "Build 26.20.100.7799", Major, Minor, Patch, WarningReq), nullptr);
 #endif
 }

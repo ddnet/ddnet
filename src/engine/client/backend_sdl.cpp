@@ -283,7 +283,7 @@ void CCommandProcessorFragment_SDL::Cmd_WindowDestroyNtf(const CCommandBuffer::S
 	// Unbind the graphic context from the window, so it does not get destroyed
 #ifdef CONF_PLATFORM_ANDROID
 	if(m_GLContext)
-		SDL_GL_MakeCurrent(NULL, NULL);
+		SDL_GL_MakeCurrent(nullptr, nullptr);
 #endif
 }
 

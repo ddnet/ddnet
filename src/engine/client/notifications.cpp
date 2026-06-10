@@ -32,7 +32,7 @@ void CNotifications::Notify(const char *pTitle, const char *pMessage)
 	NotifyNotification *pNotif = notify_notification_new(pTitle, pMessage, "ddnet");
 	if(pNotif)
 	{
-		notify_notification_show(pNotif, NULL);
+		notify_notification_show(pNotif, nullptr);
 		g_object_unref(G_OBJECT(pNotif));
 	}
 #endif

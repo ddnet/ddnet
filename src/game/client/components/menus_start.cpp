@@ -234,7 +234,7 @@ void CMenusStart::RenderStartMenu(CUIRect MainView)
 		VersionUpdate.VSplitRight(10.0f, &VersionUpdate, nullptr);
 
 		static CButtonContainer s_DownloadButton;
-		if(GameClient()->m_Menus.DoButton_Menu(&s_DownloadButton, Localize("Download"), 0, &DownloadButton, BUTTONFLAG_LEFT, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
+		if(GameClient()->m_Menus.DoButton_Menu(&s_DownloadButton, Localize("Download"), 0, &DownloadButton, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
 		{
 			Client()->ViewLink("https://ddnet.org/downloads/");
 		}

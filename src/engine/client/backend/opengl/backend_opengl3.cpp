@@ -417,7 +417,7 @@ bool CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 		glEnableVertexAttribArray(1);
 		glEnableVertexAttribArray(2);
 
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(CCommandBuffer::SVertex), 0);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(CCommandBuffer::SVertex), nullptr);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(CCommandBuffer::SVertex), (void *)(sizeof(float) * 2));
 		glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(CCommandBuffer::SVertex), (void *)(sizeof(float) * 4));
 
@@ -430,7 +430,7 @@ bool CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
 
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(CCommandBuffer::SVertexTex3DStream), 0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(CCommandBuffer::SVertexTex3DStream), nullptr);
 	glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(CCommandBuffer::SVertexTex3DStream), (void *)(sizeof(float) * 2));
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(CCommandBuffer::SVertexTex3DStream), (void *)(sizeof(float) * 2 + sizeof(unsigned char) * 4));
 
@@ -792,7 +792,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Render(const CCommandBuffer::SComm
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferId);
 			m_aLastIndexBufferBound[m_LastStreamBuffer] = m_QuadDrawIndexBufferId;
 		}
-		glDrawElements(GL_TRIANGLES, pCommand->m_PrimCount * 6, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, pCommand->m_PrimCount * 6, GL_UNSIGNED_INT, nullptr);
 		break;
 	default:
 		dbg_assert_failed("Invalid primitive type: %d", (int)pCommand->m_PrimType);
@@ -821,7 +821,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderTex3D(const CCommandBuffer::
 		break;
 	case EPrimitiveType::QUADS:
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadDrawIndexBufferId);
-		glDrawElements(GL_TRIANGLES, pCommand->m_PrimCount * 6, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, pCommand->m_PrimCount * 6, GL_UNSIGNED_INT, nullptr);
 		break;
 	default:
 		dbg_assert_failed("Invalid primitive type: %d", (int)pCommand->m_PrimType);
@@ -871,7 +871,7 @@ void CCommandProcessorFragment_OpenGL3_3::AppendIndices(unsigned int NewIndicesC
 	glGenBuffers(1, &NewIndexBufferId);
 	glBindBuffer(BUFFER_INIT_INDEX_TARGET, NewIndexBufferId);
 	constexpr GLsizeiptr Size = sizeof(unsigned int);
-	glBufferData(BUFFER_INIT_INDEX_TARGET, (GLsizeiptr)NewIndicesCount * Size, NULL, GL_STATIC_DRAW);
+	glBufferData(BUFFER_INIT_INDEX_TARGET, (GLsizeiptr)NewIndicesCount * Size, nullptr, GL_STATIC_DRAW);
 	glCopyBufferSubData(GL_COPY_READ_BUFFER, BUFFER_INIT_INDEX_TARGET, 0, 0, (GLsizeiptr)m_CurrentIndicesInBuffer * Size);
 	glBufferSubData(BUFFER_INIT_INDEX_TARGET, (GLsizeiptr)m_CurrentIndicesInBuffer * Size, (GLsizeiptr)AddCount * Size, pIndices);
 	glBindBuffer(BUFFER_INIT_INDEX_TARGET, 0);
@@ -1044,7 +1044,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderBorderTile(const CCommandBuf
 	if(BufferContainer.m_VertArrayId == 0)
 		return;
 
-	CGLSLTileProgram *pProgram = NULL;
+	CGLSLTileProgram *pProgram = nullptr;
 	if(IsTexturedState(pCommand->m_State))
 		pProgram = m_pBorderTileProgramTextured;
 	else
@@ -1082,7 +1082,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderTileLayer(const CCommandBuff
 		return; // nothing to draw
 	}
 
-	CGLSLTileProgram *pProgram = NULL;
+	CGLSLTileProgram *pProgram = nullptr;
 	if(IsTexturedState(pCommand->m_State))
 	{
 		pProgram = m_pTileProgramTextured;
@@ -1123,7 +1123,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderQuadLayer(const CCommandBuff
 		return; // nothing to draw
 	}
 
-	CGLSLQuadProgram *pProgram = NULL;
+	CGLSLQuadProgram *pProgram = nullptr;
 	if(Grouped)
 	{
 		if(IsTexturedState(pCommand->m_State))
@@ -1247,7 +1247,7 @@ void CCommandProcessorFragment_OpenGL3_3::RenderText(const CCommandBuffer::SStat
 		m_pTextProgram->m_LastColor = TextColor;
 	}
 
-	glDrawElements(GL_TRIANGLES, DrawNum, GL_UNSIGNED_INT, (void *)(0));
+	glDrawElements(GL_TRIANGLES, DrawNum, GL_UNSIGNED_INT, nullptr);
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_RenderText(const CCommandBuffer::SCommand_RenderText *pCommand)
