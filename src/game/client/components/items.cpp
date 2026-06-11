@@ -460,6 +460,10 @@ void CItems::OnRender()
 
 	bool UsePredicted = GameClient()->Predict() && GameClient()->AntiPingGunfire();
 	auto &aSwitchers = GameClient()->Switchers();
+
+	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+
 	if(UsePredicted)
 	{
 		for(auto *pProj = (CProjectile *)GameClient()->m_PrevPredictedWorld.FindFirst(CGameWorld::ENTTYPE_PROJECTILE); pProj; pProj = (CProjectile *)pProj->NextEntity())
@@ -468,6 +472,8 @@ void CItems::OnRender()
 				continue;
 
 			CProjectileData Data = pProj->GetData();
+			if(!Data.IsVisible(ScreenX0, ScreenY0, ScreenX1, ScreenY1, true))
+				continue;
 			RenderProjectile(&Data, pProj->GetId());
 		}
 		for(CEntity *pEnt = GameClient()->m_PrevPredictedWorld.FindFirst(CGameWorld::ENTTYPE_LASER); pEnt; pEnt = pEnt->NextEntity())
@@ -476,6 +482,8 @@ void CItems::OnRender()
 			if(!pLaser || pLaser->GetOwner() < 0 || !GameClient()->m_aClients[pLaser->GetOwner()].m_IsPredictedLocal)
 				continue;
 			CLaserData Data = pLaser->GetData();
+			if(!Data.IsVisible(ScreenX0, ScreenY0, ScreenX1, ScreenY1, true))
+				continue;
 			RenderLaser(&Data, true);
 		}
 		for(auto *pPickup = (CPickup *)GameClient()->m_PrevPredictedWorld.FindFirst(CGameWorld::ENTTYPE_PICKUP); pPickup; pPickup = (CPickup *)pPickup->NextEntity())
@@ -505,6 +513,8 @@ void CItems::OnRender()
 		if(Item.m_Type == NETOBJTYPE_PROJECTILE || Item.m_Type == NETOBJTYPE_DDRACEPROJECTILE || Item.m_Type == NETOBJTYPE_DDNETPROJECTILE)
 		{
 			CProjectileData Data = ExtractProjectileInfo(Item.m_Type, pData, &GameClient()->m_GameWorld, pEntEx);
+			if(!Data.IsVisible(ScreenX0, ScreenY0, ScreenX1, ScreenY1, false))
+				continue;
 			bool Inactive = !IsSuper && Data.m_SwitchNumber > 0 && Data.m_SwitchNumber < (int)aSwitchers.size() && !aSwitchers[Data.m_SwitchNumber].m_aStatus[SwitcherTeam];
 			if(Inactive && (Data.m_Explosive ? BlinkingProjEx : BlinkingProj))
 				continue;
@@ -531,6 +541,8 @@ void CItems::OnRender()
 		else if(Item.m_Type == NETOBJTYPE_PICKUP || Item.m_Type == NETOBJTYPE_DDNETPICKUP)
 		{
 			CPickupData Data = ExtractPickupInfo(Item.m_Type, pData, pEntEx);
+			if(!Data.IsVisible(ScreenX0, ScreenY0, ScreenX1, ScreenY1, false))
+				continue;
 			bool Inactive = !IsSuper && Data.m_SwitchNumber > 0 && Data.m_SwitchNumber < (int)aSwitchers.size() && !aSwitchers[Data.m_SwitchNumber].m_aStatus[SwitcherTeam];
 
 			if(Inactive && BlinkingPickup)
@@ -555,6 +567,8 @@ void CItems::OnRender()
 			}
 
 			CLaserData Data = ExtractLaserInfo(Item.m_Type, pData, &GameClient()->m_GameWorld, pEntEx);
+			if(!Data.IsVisible(ScreenX0, ScreenY0, ScreenX1, ScreenY1, false))
+				continue;
 			bool Inactive = !IsSuper && Data.m_SwitchNumber > 0 && Data.m_SwitchNumber < (int)aSwitchers.size() && !aSwitchers[Data.m_SwitchNumber].m_aStatus[SwitcherTeam];
 
 			bool IsEntBlink = false;

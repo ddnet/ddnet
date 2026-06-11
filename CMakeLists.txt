@@ -2591,6 +2591,7 @@ if(CLIENT)
     components/voting.h
     gameclient.cpp
     gameclient.h
+    item_data.h
     laser_data.cpp
     laser_data.h
     lineinput.cpp

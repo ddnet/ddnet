@@ -3,13 +3,15 @@
 #ifndef GAME_CLIENT_LASER_DATA_H
 #define GAME_CLIENT_LASER_DATA_H
 
+#include "item_data.h"
+
 #include <base/vmath.h>
 
 struct CNetObj_Laser;
 struct CNetObj_DDNetLaser;
 struct CNetObj_EntityEx;
 
-class CLaserData
+class CLaserData : public IItemData
 {
 public:
 	vec2 m_From;
@@ -21,9 +23,11 @@ public:
 	int m_Type;
 	int m_SwitchNumber;
 	int m_Subtype;
-	bool m_Predict;
+	bool m_Predict = false;
 	// TuneZone is introduced locally
 	int m_TuneZone;
+
+	bool IsVisible(float ScreenX0, float ScreenY0, float ScreenX1, float ScreenY1, bool IsPredicted) const override;
 };
 
 CLaserData ExtractLaserInfo(int NetObjType, const void *pData, class CGameWorld *pGameWorld, const CNetObj_EntityEx *pEntEx);
