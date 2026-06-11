@@ -36,6 +36,8 @@ static void Run(NETADDR Dest)
 int main(int argc, const char **argv)
 {
 	CCmdlineFix CmdlineFix(&argc, &argv);
+	net_init();
+
 	NETADDR Dest = {NETTYPE_IPV4, {127, 0, 0, 1}, 8303};
 	Run(Dest);
 	return 0;
