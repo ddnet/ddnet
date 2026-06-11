@@ -1768,6 +1768,12 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 
 			if(IsSixup())
 			{
+				if(m_TranslationContext.m_MapdownloadTotalsize <= 0 ||
+					m_TranslationContext.m_MapDownloadChunkSize <= 0 ||
+					m_TranslationContext.m_MapDownloadChunksPerRequest <= 0)
+				{
+					return;
+				}
 				MapCRC = m_MapdownloadCrc;
 				Chunk = m_MapdownloadChunk;
 				Size = minimum(m_TranslationContext.m_MapDownloadChunkSize, m_TranslationContext.m_MapdownloadTotalsize - m_MapdownloadAmount);
