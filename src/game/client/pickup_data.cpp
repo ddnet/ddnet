@@ -18,7 +18,7 @@ CPickupData ExtractPickupInfo(int NetObjType, const void *pData, const CNetObj_E
 
 	CNetObj_Pickup *pPickup = (CNetObj_Pickup *)pData;
 
-	CPickupData Result = {vec2(0, 0)};
+	CPickupData Result;
 
 	Result.m_Pos.x = pPickup->m_X;
 	Result.m_Pos.y = pPickup->m_Y;
@@ -31,7 +31,7 @@ CPickupData ExtractPickupInfo(int NetObjType, const void *pData, const CNetObj_E
 
 CPickupData ExtractPickupInfoDDNet(const CNetObj_DDNetPickup *pPickup)
 {
-	CPickupData Result = {vec2(0, 0)};
+	CPickupData Result;
 
 	Result.m_Pos.x = pPickup->m_X;
 	Result.m_Pos.y = pPickup->m_Y;

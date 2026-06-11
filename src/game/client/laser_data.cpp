@@ -12,7 +12,7 @@
 
 CLaserData ExtractLaserInfo(int NetObjType, const void *pData, CGameWorld *pGameWorld, const CNetObj_EntityEx *pEntEx)
 {
-	CLaserData Result = {vec2(0, 0)};
+	CLaserData Result;
 
 	if(NetObjType == NETOBJTYPE_DDNETLASER)
 	{
@@ -62,7 +62,7 @@ CLaserData ExtractLaserInfo(int NetObjType, const void *pData, CGameWorld *pGame
 
 CLaserData ExtractLaserInfoDDNet(const CNetObj_DDNetLaser *pLaser, CGameWorld *pGameWorld)
 {
-	CLaserData Result = {vec2(0, 0)};
+	CLaserData Result;
 	Result.m_From.x = pLaser->m_FromX;
 	Result.m_From.y = pLaser->m_FromY;
 	Result.m_To.x = pLaser->m_ToX;
