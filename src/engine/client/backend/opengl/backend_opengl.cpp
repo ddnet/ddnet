@@ -183,10 +183,16 @@ static void ParseVersionString(EBackendType BackendType, const char *pStr, int &
 	size_t TotalNumbersPassed = 0;
 	int aNumbers[3] = {0};
 	bool LastWasNumber = false;
+	bool Error = false;
 	while(*pStr && TotalNumbersPassed < 3)
 	{
 		if(str_isnum(*pStr))
 		{
+			if(CurNumberStrLen >= std::size(aCurNumberStr) - 1)
+			{
+				Error = true;
+				break;
+			}
 			aCurNumberStr[CurNumberStrLen++] = (char)*pStr;
 			LastWasNumber = true;
 		}
@@ -212,9 +218,21 @@ static void ParseVersionString(EBackendType BackendType, const char *pStr, int &
 		++pStr;
 	}
 
-	VersionMajor = aNumbers[0];
-	VersionMinor = aNumbers[1];
-	VersionPatch = aNumbers[2];
+	if(Error || TotalNumbersPassed == 0)
+	{
+		// Use the newest supported OpenGL version if the version string could not be parsed.
+		// We assume that the format was changed in a future driver that supports all OpenGL
+		// capabilities that we use.
+		VersionMajor = 3;
+		VersionMinor = BackendType == BACKEND_TYPE_OPENGL_ES ? 0 : 3;
+		VersionPatch = 0;
+	}
+	else
+	{
+		VersionMajor = aNumbers[0];
+		VersionMinor = aNumbers[1];
+		VersionPatch = aNumbers[2];
+	}
 }
 
 #ifndef BACKEND_AS_OPENGL_ES
