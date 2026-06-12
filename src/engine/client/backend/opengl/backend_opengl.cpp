@@ -178,13 +178,13 @@ static void ParseVersionString(EBackendType BackendType, const char *pStr, int &
 		}
 	}
 
-	char aCurNumberStr[32];
+	char aCurNumberStr[10];
 	size_t CurNumberStrLen = 0;
 	size_t TotalNumbersPassed = 0;
 	int aNumbers[3] = {0};
 	bool LastWasNumber = false;
 	bool Error = false;
-	while(*pStr && TotalNumbersPassed < 3)
+	while(true)
 	{
 		if(str_isnum(*pStr))
 		{
@@ -193,28 +193,25 @@ static void ParseVersionString(EBackendType BackendType, const char *pStr, int &
 				Error = true;
 				break;
 			}
-			aCurNumberStr[CurNumberStrLen++] = (char)*pStr;
+			aCurNumberStr[CurNumberStrLen++] = *pStr;
 			LastWasNumber = true;
 		}
-		else if(LastWasNumber && (*pStr == '.' || *pStr == ' '))
+		else if(LastWasNumber && (*pStr == '.' || *pStr == ' ' || *pStr == '\0'))
 		{
-			if(CurNumberStrLen > 0)
-			{
-				aCurNumberStr[CurNumberStrLen] = 0;
-				aNumbers[TotalNumbersPassed++] = str_toint(aCurNumberStr);
-				CurNumberStrLen = 0;
-			}
-
+			aCurNumberStr[CurNumberStrLen] = '\0';
+			aNumbers[TotalNumbersPassed] = str_toint(aCurNumberStr);
+			CurNumberStrLen = 0;
+			TotalNumbersPassed++;
 			LastWasNumber = false;
-
-			if(*pStr != '.')
+			if(TotalNumbersPassed == std::size(aNumbers) || *pStr != '.')
+			{
 				break;
+			}
 		}
 		else
 		{
 			break;
 		}
-
 		++pStr;
 	}
 
