@@ -195,6 +195,34 @@ void CGameContext::TeeHistorianWrite(const void *pData, int DataSize, void *pUse
 	aio_write(pSelf->m_pTeeHistorianFile, pData, DataSize);
 }
 
+std::optional<std::vector<int>> CGameContext::ClientsForVictim(int ClientId, const char *pVictim, void *pUser)
+{
+	CGameContext *pSelf = (CGameContext *)pUser;
+	std::vector<int> vClientIds;
+
+	if(!str_comp(pVictim, "me"))
+	{
+		vClientIds.emplace_back(ClientId);
+	}
+	else if(!str_comp(pVictim, "all"))
+	{
+		const int MaxClients = pSelf->Server()->MaxClients();
+		for(int i = 0; i < MaxClients; i++)
+		{
+			if(!pSelf->Server()->ClientIngame(i))
+				continue;
+
+			vClientIds.emplace_back(i);
+		}
+	}
+	else
+	{
+		return std::nullopt;
+	}
+
+	return std::make_optional(std::move(vClientIds));
+}
+
 void CGameContext::CommandCallback(int ClientId, int FlagMask, const char *pCmd, IConsole::IResult *pResult, void *pUser)
 {
 	CGameContext *pSelf = (CGameContext *)pUser;
@@ -4162,6 +4190,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 	m_Events.SetGameServer(this);
 
 	m_GameUuid = RandomUuid();
+	Console()->SetGetVictimsCommandCallback(ClientsForVictim, this);
 	Console()->SetTeeHistorianCommandCallback(CommandCallback, this);
 
 	uint64_t aSeed[2];

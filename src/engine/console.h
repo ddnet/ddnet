@@ -10,6 +10,8 @@
 #include <engine/storage.h>
 
 #include <memory>
+#include <optional>
+#include <vector>
 
 static constexpr ColorRGBA CONSOLE_DEFAULT_COLOR = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -97,6 +99,7 @@ public:
 		virtual EAccessLevel GetAccessLevel() const = 0;
 	};
 
+	typedef std::optional<std::vector<int>> (*FGetVictimsCommandCallback)(int ClientId, const char *pVictim, void *pUser);
 	typedef void (*FTeeHistorianCommandCallback)(int ClientId, int FlagMask, const char *pCmd, IResult *pResult, void *pUser);
 	typedef void (*FPossibleCallback)(int Index, const char *pCmd, void *pUser);
 	typedef void (*FCommandCallback)(IResult *pResult, void *pUserData);
@@ -134,6 +137,7 @@ public:
 	 * - They do not require a pointer to `IConsole` to be used.
 	 */
 	virtual void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = CONSOLE_DEFAULT_COLOR) const = 0;
+	virtual void SetGetVictimsCommandCallback(FGetVictimsCommandCallback pfnCallback, void *pUser) = 0;
 	virtual void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser) = 0;
 	virtual void SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, void *pUser) = 0;
 	virtual void SetCanUseCommandCallback(FCanUseCommandCallback pfnCallback, void *pUser) = 0;
