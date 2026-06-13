@@ -592,6 +592,7 @@ struct CSnapshotBuilder;
 #ifndef CXXBRIDGE1_STRUCT_CSnapshotBuilder
 #define CXXBRIDGE1_STRUCT_CSnapshotBuilder
 struct CSnapshotBuilder final : public ::rust::Opaque {
+  static ::rust::Box<::CSnapshotBuilder> New() noexcept;
   void Init(bool sixup) noexcept;
   bool NewItem(::std::int32_t type_, ::std::int32_t id, ::rust::Slice<::std::int32_t const> data) noexcept;
   ::std::int32_t FinishIfNoDroppedItems(::CSnapshotBuffer &buffer) noexcept;
@@ -611,7 +612,7 @@ extern "C" {
 ::std::size_t cxxbridge1$194$CSnapshotBuilder$operator$sizeof() noexcept;
 ::std::size_t cxxbridge1$194$CSnapshotBuilder$operator$alignof() noexcept;
 
-::CSnapshotBuilder *cxxbridge1$194$CSnapshotBuilder_New() noexcept;
+::CSnapshotBuilder *cxxbridge1$194$CSnapshotBuilder$New() noexcept;
 
 void cxxbridge1$194$CSnapshotBuilder$Init(::CSnapshotBuilder &self, bool sixup) noexcept;
 
@@ -630,8 +631,8 @@ bool cxxbridge1$194$CSnapshotBuilder$NewItem(::CSnapshotBuilder &self, ::std::in
   return cxxbridge1$194$CSnapshotBuilder$operator$alignof();
 }
 
-::rust::Box<::CSnapshotBuilder> CSnapshotBuilder_New() noexcept {
-  return ::rust::Box<::CSnapshotBuilder>::from_raw(cxxbridge1$194$CSnapshotBuilder_New());
+::rust::Box<::CSnapshotBuilder> CSnapshotBuilder::New() noexcept {
+  return ::rust::Box<::CSnapshotBuilder>::from_raw(cxxbridge1$194$CSnapshotBuilder$New());
 }
 
 void CSnapshotBuilder::Init(bool sixup) noexcept {

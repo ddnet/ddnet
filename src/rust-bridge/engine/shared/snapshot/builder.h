@@ -13,11 +13,6 @@
 #include <ranges>
 #endif
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdollar-in-identifier-extension"
-#endif // __clang__
-
 namespace rust {
 inline namespace cxxbridge1 {
 // #include "rust/cxx.h"
@@ -591,6 +586,7 @@ struct CSnapshotBuilder;
 #ifndef CXXBRIDGE1_STRUCT_CSnapshotBuilder
 #define CXXBRIDGE1_STRUCT_CSnapshotBuilder
 struct CSnapshotBuilder final : public ::rust::Opaque {
+  static ::rust::Box<::CSnapshotBuilder> New() noexcept;
   void Init(bool sixup) noexcept;
   bool NewItem(::std::int32_t type_, ::std::int32_t id, ::rust::Slice<::std::int32_t const> data) noexcept;
   ::std::int32_t FinishIfNoDroppedItems(::CSnapshotBuffer &buffer) noexcept;
@@ -605,9 +601,3 @@ private:
   };
 };
 #endif // CXXBRIDGE1_STRUCT_CSnapshotBuilder
-
-::rust::Box<::CSnapshotBuilder> CSnapshotBuilder_New() noexcept;
-
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif // __clang__

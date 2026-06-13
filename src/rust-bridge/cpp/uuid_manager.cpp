@@ -128,14 +128,14 @@ void cxxbridge1$194$CUuidManager$DebugDump(::CUuidManager const &self) noexcept 
   (self.*DebugDump$)();
 }
 
-::CUuidManager *cxxbridge1$194$CUuidManager_New() noexcept {
-  ::std::unique_ptr<::CUuidManager> (*CUuidManager_New$)() = ::CUuidManager_New;
-  return CUuidManager_New$().release();
+::CUuidManager *cxxbridge1$194$CUuidManager$New() noexcept {
+  ::std::unique_ptr<::CUuidManager> (*New$)() = &::CUuidManager::New;
+  return New$().release();
 }
 
-::CUuidManager const *cxxbridge1$194$CUuidManager_Global() noexcept {
-  ::CUuidManager const &(*CUuidManager_Global$)() = ::CUuidManager_Global;
-  return &CUuidManager_Global$();
+::CUuidManager const *cxxbridge1$194$CUuidManager$Global() noexcept {
+  ::CUuidManager const &(*Global$)() = &::CUuidManager::Global;
+  return &Global$();
 }
 
 static_assert(::rust::detail::is_complete<::std::remove_extent<::CUuidManager>::type>::value, "definition of `::CUuidManager` is required");

@@ -438,9 +438,9 @@ using CSnapshot = ::CSnapshot;
 using CSnapshotBuffer = ::CSnapshotBuffer;
 
 extern "C" {
-::CSnapshotBuffer *cxxbridge1$194$CSnapshotBuffer_New() noexcept {
-  ::std::unique_ptr<::CSnapshotBuffer> (*CSnapshotBuffer_New$)() = ::CSnapshotBuffer_New;
-  return CSnapshotBuffer_New$().release();
+::CSnapshotBuffer *cxxbridge1$194$CSnapshotBuffer$New() noexcept {
+  ::std::unique_ptr<::CSnapshotBuffer> (*New$)() = &::CSnapshotBuffer::New;
+  return New$().release();
 }
 
 void cxxbridge1$194$CSnapshot$AsSlice(::CSnapshot const &self, ::rust::Slice<::std::int32_t const> *return$) noexcept {

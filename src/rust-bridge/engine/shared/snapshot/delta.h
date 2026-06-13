@@ -13,11 +13,6 @@
 #include <ranges>
 #endif
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdollar-in-identifier-extension"
-#endif // __clang__
-
 namespace rust {
 inline namespace cxxbridge1 {
 // #include "rust/cxx.h"
@@ -591,6 +586,20 @@ struct CSnapshotDelta;
 #ifndef CXXBRIDGE1_STRUCT_CSnapshotDelta
 #define CXXBRIDGE1_STRUCT_CSnapshotDelta
 struct CSnapshotDelta final : public ::rust::Opaque {
+  static void DiffItem(::rust::Slice<::std::int32_t const> past, ::rust::Slice<::std::int32_t const> current, ::rust::Slice<::std::int32_t > out) noexcept;
+
+  // Create a new snapshot delta.
+  //
+  // # Example
+  //
+  // ```
+  // # extern crate ddnet_test;
+  // use ddnet_engine_shared::CSnapshotDelta;
+  //
+  // let delta = CSnapshotDelta::New();
+  // ```
+  static ::rust::Box<::CSnapshotDelta> New() noexcept;
+
   ::rust::Box<::CSnapshotDelta> Clone() noexcept;
   ::std::uint64_t GetDataRate(::std::int32_t type_) const noexcept;
   ::std::uint64_t GetDataUpdates(::std::int32_t type_) const noexcept;
@@ -608,21 +617,3 @@ private:
   };
 };
 #endif // CXXBRIDGE1_STRUCT_CSnapshotDelta
-
-void CSnapshotDelta_DiffItem(::rust::Slice<::std::int32_t const> past, ::rust::Slice<::std::int32_t const> current, ::rust::Slice<::std::int32_t > out) noexcept;
-
-// Create a new snapshot delta.
-//
-// # Example
-//
-// ```
-// # extern crate ddnet_test;
-// use ddnet_engine_shared::CSnapshotDelta_New;
-//
-// let delta = CSnapshotDelta_New();
-// ```
-::rust::Box<::CSnapshotDelta> CSnapshotDelta_New() noexcept;
-
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif // __clang__

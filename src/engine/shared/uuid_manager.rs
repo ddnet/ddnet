@@ -22,8 +22,6 @@ unsafe impl cxx::ExternType for CUuid {
 pub const OFFSET_UUID: i32 = 1 << 16;
 
 pub use self::ffi::CUuidManager;
-pub use self::ffi::CUuidManager_Global;
-pub use self::ffi::CUuidManager_New;
 pub use self::ffi::CalculateUuid;
 pub use self::ffi::RandomUuid;
 
@@ -81,13 +79,13 @@ mod ffi {
         /// # extern crate ddnet_test;
         /// # use ddnet_base::s;
         /// # use ddnet_engine_shared::CUuid;
-        /// # use ddnet_engine_shared::CUuidManager_New;
+        /// # use ddnet_engine_shared::CUuidManager;
         /// # use ddnet_engine_shared::CalculateUuid;
         /// # use ddnet_engine_shared::OFFSET_UUID;
         /// const EXAMPLE: i32 = OFFSET_UUID;
         /// let example_uuid: CUuid = CalculateUuid(s!("example@ddnet.org"));
         ///
-        /// let mut uuid_manager = CUuidManager_New();
+        /// let mut uuid_manager = CUuidManager::New();
         /// uuid_manager.pin_mut().RegisterName(EXAMPLE, s!("example@ddnet.org"));
         /// assert_eq!(uuid_manager.GetUuid(EXAMPLE), example_uuid);
         /// assert_eq!(uuid_manager.GetName(EXAMPLE), "example@ddnet.org");
@@ -115,8 +113,8 @@ mod ffi {
         /// # extern crate ddnet_test;
         /// # use ddnet_base::s;
         /// # use ddnet_engine_shared::CUuid;
-        /// # use ddnet_engine_shared::CUuidManager_Global;
-        /// let uuid_manager = CUuidManager_Global();
+        /// # use ddnet_engine_shared::CUuidManager;
+        /// let uuid_manager = CUuidManager::Global();
         /// let uuid: CUuid = "76ce455b-f9eb-3a48-add7-e04b941d045c".parse().unwrap();
         /// let uuid_id = uuid_manager.LookupUuid(uuid);
         /// assert_ne!(uuid_id, -1);
@@ -133,8 +131,8 @@ mod ffi {
         /// ```
         /// # extern crate ddnet_test;
         /// # use ddnet_base::s;
-        /// # use ddnet_engine_shared::CUuidManager_Global;
-        /// let uuid_manager = CUuidManager_Global();
+        /// # use ddnet_engine_shared::CUuidManager;
+        /// let uuid_manager = CUuidManager::Global();
         /// assert!(uuid_manager.NumUuids() > 1);
         /// ```
         pub fn NumUuids(self: &CUuidManager) -> i32;
@@ -144,8 +142,8 @@ mod ffi {
         /// ```
         /// # extern crate ddnet_test;
         /// # use ddnet_base::s;
-        /// # use ddnet_engine_shared::CUuidManager_Global;
-        /// let uuid_manager = CUuidManager_Global();
+        /// # use ddnet_engine_shared::CUuidManager;
+        /// let uuid_manager = CUuidManager::Global();
         /// uuid_manager.DebugDump();
         /// ```
         pub fn DebugDump(self: &CUuidManager);
@@ -155,25 +153,25 @@ mod ffi {
         /// ```
         /// # extern crate ddnet_test;
         /// # use ddnet_base::s;
-        /// # use ddnet_engine_shared::CUuidManager_New;
+        /// # use ddnet_engine_shared::CUuidManager;
         /// # use ddnet_engine_shared::OFFSET_UUID;
-        /// let uuid_manager = CUuidManager_New();
+        /// let uuid_manager = CUuidManager::New();
         /// assert_eq!(uuid_manager.NumUuids(), 0);
         /// ```
-        // TODO(cxx 1.0.164): #[Self = "CUuidManager"]
-        pub fn CUuidManager_New() -> UniquePtr<CUuidManager>;
+        #[Self = "CUuidManager"]
+        pub fn New() -> UniquePtr<CUuidManager>;
 
         /// Get the global UUID manager with all extension UUIDs known the program.
         ///
         /// ```
         /// # extern crate ddnet_test;
         /// # use ddnet_base::s;
-        /// # use ddnet_engine_shared::CUuidManager_Global;
-        /// let uuid_manager = CUuidManager_Global();
+        /// # use ddnet_engine_shared::CUuidManager;
+        /// let uuid_manager = CUuidManager::Global();
         /// assert!(uuid_manager.NumUuids() > 1);
         /// ```
-        // TODO(cxx 1.0.164): #[Self = "CUuidManager"]
-        pub fn CUuidManager_Global() -> &'static CUuidManager;
+        #[Self = "CUuidManager"]
+        pub fn Global() -> &'static CUuidManager;
     }
 }
 

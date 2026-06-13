@@ -613,6 +613,20 @@ struct CSnapshotDelta;
 #ifndef CXXBRIDGE1_STRUCT_CSnapshotDelta
 #define CXXBRIDGE1_STRUCT_CSnapshotDelta
 struct CSnapshotDelta final : public ::rust::Opaque {
+  static void DiffItem(::rust::Slice<::std::int32_t const> past, ::rust::Slice<::std::int32_t const> current, ::rust::Slice<::std::int32_t > out) noexcept;
+
+  // Create a new snapshot delta.
+  //
+  // # Example
+  //
+  // ```
+  // # extern crate ddnet_test;
+  // use ddnet_engine_shared::CSnapshotDelta;
+  //
+  // let delta = CSnapshotDelta::New();
+  // ```
+  static ::rust::Box<::CSnapshotDelta> New() noexcept;
+
   ::rust::Box<::CSnapshotDelta> Clone() noexcept;
   ::std::uint64_t GetDataRate(::std::int32_t type_) const noexcept;
   ::std::uint64_t GetDataUpdates(::std::int32_t type_) const noexcept;
@@ -635,9 +649,9 @@ extern "C" {
 ::std::size_t cxxbridge1$194$CSnapshotDelta$operator$sizeof() noexcept;
 ::std::size_t cxxbridge1$194$CSnapshotDelta$operator$alignof() noexcept;
 
-void cxxbridge1$194$CSnapshotDelta_DiffItem(::rust::Slice<::std::int32_t const> past, ::rust::Slice<::std::int32_t const> current, ::rust::Slice<::std::int32_t > out) noexcept;
+void cxxbridge1$194$CSnapshotDelta$DiffItem(::rust::Slice<::std::int32_t const> past, ::rust::Slice<::std::int32_t const> current, ::rust::Slice<::std::int32_t > out) noexcept;
 
-::CSnapshotDelta *cxxbridge1$194$CSnapshotDelta_New() noexcept;
+::CSnapshotDelta *cxxbridge1$194$CSnapshotDelta$New() noexcept;
 
 ::CSnapshotDelta *cxxbridge1$194$CSnapshotDelta$Clone(::CSnapshotDelta &self) noexcept;
 
@@ -662,22 +676,12 @@ void cxxbridge1$194$CSnapshotDelta$SetStaticsize(::CSnapshotDelta &self, ::std::
   return cxxbridge1$194$CSnapshotDelta$operator$alignof();
 }
 
-void CSnapshotDelta_DiffItem(::rust::Slice<::std::int32_t const> past, ::rust::Slice<::std::int32_t const> current, ::rust::Slice<::std::int32_t > out) noexcept {
-  cxxbridge1$194$CSnapshotDelta_DiffItem(past, current, out);
+void CSnapshotDelta::DiffItem(::rust::Slice<::std::int32_t const> past, ::rust::Slice<::std::int32_t const> current, ::rust::Slice<::std::int32_t > out) noexcept {
+  cxxbridge1$194$CSnapshotDelta$DiffItem(past, current, out);
 }
 
-// Create a new snapshot delta.
-//
-// # Example
-//
-// ```
-// # extern crate ddnet_test;
-// use ddnet_engine_shared::CSnapshotDelta_New;
-//
-// let delta = CSnapshotDelta_New();
-// ```
-::rust::Box<::CSnapshotDelta> CSnapshotDelta_New() noexcept {
-  return ::rust::Box<::CSnapshotDelta>::from_raw(cxxbridge1$194$CSnapshotDelta_New());
+::rust::Box<::CSnapshotDelta> CSnapshotDelta::New() noexcept {
+  return ::rust::Box<::CSnapshotDelta>::from_raw(cxxbridge1$194$CSnapshotDelta$New());
 }
 
 ::rust::Box<::CSnapshotDelta> CSnapshotDelta::Clone() noexcept {
