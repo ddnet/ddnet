@@ -2321,7 +2321,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupTele(void *pContext, CUIRect View, b
 			if(TeleNumber != -1)
 			{
 				pEditor->m_TeleNumber = TeleNumber;
-				pEditor->AdjustBrushSpecialTiles(false);
+				pEditor->AdjustBrushSpecialTiles(false, 0, 0);
 			}
 		}
 
@@ -2333,7 +2333,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupTele(void *pContext, CUIRect View, b
 			if(CheckpointNumber != -1)
 			{
 				pEditor->m_TeleCheckpointNumber = CheckpointNumber;
-				pEditor->AdjustBrushSpecialTiles(false);
+				pEditor->AdjustBrushSpecialTiles(false, 0, 0);
 			}
 		}
 
@@ -2361,12 +2361,12 @@ CUi::EPopupMenuFunctionResult CEditor::PopupTele(void *pContext, CUIRect View, b
 		if(Prop == PROP_TELE)
 		{
 			pEditor->m_TeleNumber = (NewVal - 1 + 255) % 255 + 1;
-			pEditor->AdjustBrushSpecialTiles(false);
+			pEditor->AdjustBrushSpecialTiles(false, 0, 0);
 		}
 		else if(Prop == PROP_TELE_CP)
 		{
 			pEditor->m_TeleCheckpointNumber = (NewVal - 1 + 255) % 255 + 1;
-			pEditor->AdjustBrushSpecialTiles(false);
+			pEditor->AdjustBrushSpecialTiles(false, 0, 0);
 		}
 		else if(Prop == PROP_TELE_VIEW)
 			pEditor->m_ViewTeleNumber = (NewVal - 1 + 255) % 255 + 1;
@@ -2422,7 +2422,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSpeedup(void *pContext, CUIRect View
 	else if(Prop == PROP_ANGLE)
 	{
 		pEditor->m_SpeedupAngle = std::clamp(NewVal, 0, 359);
-		pEditor->AdjustBrushSpecialTiles(false);
+		pEditor->AdjustBrushSpecialTiles(false, 0, 0);
 	}
 
 	return CUi::POPUP_KEEP_OPEN;
