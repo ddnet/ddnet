@@ -9,10 +9,10 @@ class ISteam : public IInterface
 {
 	MACRO_INTERFACE("steam")
 public:
-	// Returns NULL if the name cannot be determined.
+	// Returns nullptr if the name cannot be determined.
 	virtual const char *GetPlayerName() = 0;
 
-	// Returns NULL if the no server needs to be joined.
+	// Returns nullptr if the no server needs to be joined.
 	// Can change while the game is running.
 	virtual const NETADDR *GetConnectAddress() = 0;
 	virtual void ClearConnectAddress() = 0;

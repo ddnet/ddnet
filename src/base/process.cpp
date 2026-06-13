@@ -77,7 +77,7 @@ PROCESS process_execute(const char *file, EShellExecuteWindowState window_state,
 	{
 		argv[i + 1] = (char *)arguments[i];
 	}
-	argv[num_arguments + 1] = NULL;
+	argv[num_arguments + 1] = nullptr;
 	pid = fork();
 	if(pid == -1)
 	{

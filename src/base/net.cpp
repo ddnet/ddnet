@@ -1121,7 +1121,7 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data)
 		if(sock->buffer.pos >= sock->buffer.size)
 		{
 			net_buffer_reinit(&sock->buffer);
-			sock->buffer.size = recvmmsg(sock->ipv4sock, sock->buffer.msgs, VLEN, 0, NULL);
+			sock->buffer.size = recvmmsg(sock->ipv4sock, sock->buffer.msgs, VLEN, 0, nullptr);
 			sock->buffer.pos = 0;
 		}
 	}
@@ -1131,7 +1131,7 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data)
 		if(sock->buffer.pos >= sock->buffer.size)
 		{
 			net_buffer_reinit(&sock->buffer);
-			sock->buffer.size = recvmmsg(sock->ipv6sock, sock->buffer.msgs, VLEN, 0, NULL);
+			sock->buffer.size = recvmmsg(sock->ipv6sock, sock->buffer.msgs, VLEN, 0, nullptr);
 			sock->buffer.pos = 0;
 		}
 	}

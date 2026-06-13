@@ -103,7 +103,7 @@ bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char 
 
 	const TWGLuint ShaderId = glCreateShader(Type);
 
-	glShaderSource(ShaderId, vLines.size(), ShaderCode, NULL);
+	glShaderSource(ShaderId, vLines.size(), ShaderCode, nullptr);
 	glCompileShader(ShaderId);
 
 	delete[] ShaderCode;

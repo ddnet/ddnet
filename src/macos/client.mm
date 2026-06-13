@@ -28,7 +28,7 @@ int main(int argc, const char **argv)
 
 	if(FinderLaunch)
 	{
-		const char *apArgv[2] = { argv[0], NULL };
+		const char *apArgv[2] = { argv[0], nullptr };
 		return TWMain(1, apArgv);
 	}
 	else

@@ -258,8 +258,8 @@ TEST(Str, Utf8CompNocase)
 {
 	EXPECT_TRUE(str_utf8_comp_nocase("ÖlÜ", "ölü") == 0);
 	EXPECT_TRUE(str_utf8_comp_nocase("ÜlÖ", "ölü") > 0); // ü > ö
-	EXPECT_TRUE(str_utf8_comp_nocase("ÖlÜ", "ölüa") < 0); // NULL < a
-	EXPECT_TRUE(str_utf8_comp_nocase("ölüa", "ÖlÜ") > 0); // a < NULL
+	EXPECT_TRUE(str_utf8_comp_nocase("ÖlÜ", "ölüa") < 0); // \0 < a
+	EXPECT_TRUE(str_utf8_comp_nocase("ölüa", "ÖlÜ") > 0); // a < \0
 
 #if (CHAR_MIN < 0)
 	const char a[2] = {CHAR_MIN, 0};

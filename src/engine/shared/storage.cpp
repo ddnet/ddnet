@@ -297,7 +297,7 @@ public:
 		// 3) check for usable path in argv[0]
 		{
 #ifdef CONF_PLATFORM_HAIKU
-			pArgv0 = realpath(pArgv0, NULL);
+			pArgv0 = realpath(pArgv0, nullptr);
 #endif
 			unsigned int Pos = ~0U;
 			for(unsigned i = 0; pArgv0[i]; i++)

@@ -7,7 +7,7 @@
 
 #include <gtest/gtest.h>
 
-// pExpected is NULL if an error is expected
+// pExpected is nullptr if an error is expected
 static void ExpectAddString5(const char *pString, int Limit, bool AllowTruncation, const char *pExpected)
 {
 	static char ZEROS[CPacker::PACKER_BUFFER_SIZE] = {0};

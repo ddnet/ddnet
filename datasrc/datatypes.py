@@ -145,7 +145,7 @@ class Array(BaseType):
 				lines += ["\t" + " ".join(itemlines).replace("\t", " ") + ","]
 			lines += ["};"]
 		else:
-			lines += [f"static {self.TypeName()} *{self.Identifier()} = 0;"]
+			lines += [f"static {self.TypeName()} *{self.Identifier()} = nullptr;"]
 
 		return lines
 
