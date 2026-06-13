@@ -181,11 +181,28 @@ public:
 
 int CSkins7::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
-	if(IsDir || !str_endswith(pName, ".json"))
+	if(IsDir)
+	{
 		return 0;
+	}
+
+	const char *pSuffix = str_endswith(pName, ".json");
+	if(pSuffix == nullptr)
+	{
+		return 0;
+	}
+
+	char aSkinName[IO_MAX_PATH_LENGTH];
+	str_truncate(aSkinName, sizeof(aSkinName), pName, pSuffix - pName);
+	if(str_length(aSkinName) >= (int)sizeof(CSkin().m_aName) || !str_valid_filename(aSkinName))
+	{
+		log_error("skins7", "Skin name is not valid: %s", aSkinName);
+		log_error("skins7", "Skin names must be valid filenames shorter than %d characters.", (int)sizeof(CSkin().m_aName));
+		return 0;
+	}
 
 	CSkinScanData *pScanData = static_cast<CSkinScanData *>(pUser);
-	pScanData->m_pThis->LoadSkin(pName, DirType);
+	pScanData->m_pThis->LoadSkin(aSkinName, DirType);
 	pScanData->m_SkinLoadedCallback();
 	return 0;
 }
@@ -193,7 +210,7 @@ int CSkins7::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 bool CSkins7::LoadSkin(const char *pName, int DirType)
 {
 	char aFilename[IO_MAX_PATH_LENGTH];
-	str_format(aFilename, sizeof(aFilename), SKINS_DIR "/%s", pName);
+	str_format(aFilename, sizeof(aFilename), SKINS_DIR "/%s.json", pName);
 	void *pFileData;
 	unsigned JsonFileSize;
 	if(!Storage()->ReadFile(aFilename, DirType, &pFileData, &JsonFileSize))
@@ -203,7 +220,7 @@ bool CSkins7::LoadSkin(const char *pName, int DirType)
 	}
 
 	CSkin Skin;
-	str_copy(Skin.m_aName, pName, 1 + str_length(pName) - str_length(".json"));
+	str_copy(Skin.m_aName, pName);
 	const bool SpecialSkin = IsSpecialSkin(Skin.m_aName);
 	Skin.m_Flags = 0;
 	if(SpecialSkin)
