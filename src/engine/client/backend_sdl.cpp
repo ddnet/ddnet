@@ -1658,7 +1658,7 @@ void CGraphicsBackend_SDL_GL::SetWindowParams(int FullscreenMode, bool IsBorderl
 	}
 }
 
-bool CGraphicsBackend_SDL_GL::SetWindowScreen(int Index, bool MoveToCenter)
+bool CGraphicsBackend_SDL_GL::SetWindowScreen(int Index, bool MoveToCenter, ivec2 *pDesktopSize)
 {
 	if(Index < 0 || Index >= m_NumScreens)
 	{
@@ -1686,10 +1686,10 @@ bool CGraphicsBackend_SDL_GL::SetWindowScreen(int Index, bool MoveToCenter)
 			SDL_WINDOWPOS_UNDEFINED_DISPLAY(Index));
 	}
 
-	return UpdateDisplayMode(Index);
+	return UpdateDisplayMode(Index, pDesktopSize);
 }
 
-bool CGraphicsBackend_SDL_GL::UpdateDisplayMode(int Index)
+bool CGraphicsBackend_SDL_GL::UpdateDisplayMode(int Index, ivec2 *pDesktopSize)
 {
 	SDL_DisplayMode DisplayMode;
 	if(SDL_GetDesktopDisplayMode(Index, &DisplayMode) < 0)
@@ -1699,8 +1699,8 @@ bool CGraphicsBackend_SDL_GL::UpdateDisplayMode(int Index)
 	}
 
 	g_Config.m_GfxScreen = Index;
-	g_Config.m_GfxDesktopWidth = DisplayMode.w;
-	g_Config.m_GfxDesktopHeight = DisplayMode.h;
+	pDesktopSize->x = DisplayMode.w;
+	pDesktopSize->y = DisplayMode.h;
 	return true;
 }
 

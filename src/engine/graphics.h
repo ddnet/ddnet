@@ -190,6 +190,7 @@ protected:
 	int m_ScreenHeight;
 	int m_ScreenRefreshRate;
 	float m_ScreenHiDPIScale;
+	ivec2 m_DesktopSize;
 
 public:
 	enum
