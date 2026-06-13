@@ -7,8 +7,7 @@ use std::marker::PhantomData;
 use std::ops;
 use std::os::raw::c_char;
 use std::panic;
-#[allow(deprecated)] // MSRV (1.81): Use `PanicHookInfo` instead.
-use std::panic::PanicInfo;
+use std::panic::PanicHookInfo;
 use std::ptr;
 use std::str;
 
@@ -283,8 +282,7 @@ macro_rules! s {
 // TODO (MSRV 1.91): Replace with built-in `PanicHookInfo::payload_as_str`.
 //
 // Adapted from that function.
-#[allow(deprecated)] // MSRV (1.81): Use `PanicHookInfo` instead.
-fn payload_as_str<'a>(panic_info: &'a PanicInfo) -> Option<&'a str> {
+fn payload_as_str<'a>(panic_info: &'a PanicHookInfo) -> Option<&'a str> {
     if let Some(s) = panic_info.payload().downcast_ref::<&str>() {
         Some(s)
     } else if let Some(s) = panic_info.payload().downcast_ref::<String>() {
@@ -295,8 +293,7 @@ fn payload_as_str<'a>(panic_info: &'a PanicInfo) -> Option<&'a str> {
 }
 
 // This function tries pretty hard not to panic, even for suspicious parameters.
-#[allow(deprecated)] // MSRV (1.81): Use `PanicHookInfo` instead.
-fn dbg_assert_panic_handler(panic_info: &PanicInfo) -> ! {
+fn dbg_assert_panic_handler(panic_info: &PanicHookInfo) -> ! {
     // TODO (MSRV 1.92): Use `file_as_c_str`.
     let filename = panic_info.location().map(|l| l.file()).unwrap_or("unknown");
     let line = panic_info.location().map(|l| l.line()).unwrap_or(0);
