@@ -8,7 +8,7 @@
 
 TEST(Snapshot, CrcOneInt)
 {
-	rust::Box<CSnapshotBuilder> pBuilder = CSnapshotBuilder_New();
+	rust::Box<CSnapshotBuilder> pBuilder = CSnapshotBuilder::New();
 	pBuilder->Init(false);
 
 	CNetObj_Flag Flag;
@@ -24,7 +24,7 @@ TEST(Snapshot, CrcOneInt)
 
 TEST(Snapshot, CrcTwoInts)
 {
-	rust::Box<CSnapshotBuilder> pBuilder = CSnapshotBuilder_New();
+	rust::Box<CSnapshotBuilder> pBuilder = CSnapshotBuilder::New();
 	pBuilder->Init(false);
 
 	CNetObj_Flag Flag;
@@ -40,7 +40,7 @@ TEST(Snapshot, CrcTwoInts)
 
 TEST(Snapshot, CrcBiggerInts)
 {
-	rust::Box<CSnapshotBuilder> pBuilder = CSnapshotBuilder_New();
+	rust::Box<CSnapshotBuilder> pBuilder = CSnapshotBuilder::New();
 	pBuilder->Init(false);
 
 	CNetObj_Flag Flag;
@@ -56,7 +56,7 @@ TEST(Snapshot, CrcBiggerInts)
 
 TEST(Snapshot, CrcOverflow)
 {
-	rust::Box<CSnapshotBuilder> pBuilder = CSnapshotBuilder_New();
+	rust::Box<CSnapshotBuilder> pBuilder = CSnapshotBuilder::New();
 	pBuilder->Init(false);
 
 	CNetObj_Flag Flag;

@@ -1,4 +1,4 @@
-use crate::CUuidManager_Global;
+use crate::CUuidManager;
 use crate::OFFSET_UUID;
 use libtw2_snapshot::format::TypeId;
 
@@ -9,7 +9,6 @@ pub use self::builder::*;
 pub use self::delta::*;
 pub use self::ffi::CSnapshot;
 pub use self::ffi::CSnapshotBuffer;
-pub use self::ffi::CSnapshotBuffer_New;
 
 #[cxx::bridge]
 mod ffi {
@@ -27,11 +26,11 @@ mod ffi {
         /// It can be viewed as a slice of `i32`.
         type CSnapshotBuffer;
 
-        // TODO(cxx 1.0.164): #[Self = "CSnapshotBuffer"]
         /// Create a new [`CSnapshotBuffer`].
         ///
         /// See [`CSnapshotBuilder`] for an example.
-        pub fn CSnapshotBuffer_New() -> UniquePtr<CSnapshotBuffer>;
+        #[Self = "CSnapshotBuffer"]
+        pub fn New() -> UniquePtr<CSnapshotBuffer>;
 
         /// View the snapshot as its serialized form.
         fn AsSlice(self: &CSnapshot) -> &[i32];
@@ -68,6 +67,6 @@ fn type_id_from_i32(sixup: bool, mut type_: i32) -> Option<TypeId> {
             type_.try_into().expect("type id must be positive"),
         ))
     } else {
-        Some(TypeId::Uuid(CUuidManager_Global().GetUuid(type_).into()))
+        Some(TypeId::Uuid(CUuidManager::Global().GetUuid(type_).into()))
     }
 }

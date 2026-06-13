@@ -79,9 +79,9 @@ public:
 	CSnapshot *AsSnapshot() { return (CSnapshot *)m_aData; }
 	const CSnapshot *AsSnapshot() const { return (const CSnapshot *)m_aData; }
 	rust::Slice<int32_t> AsMutSlice() { return rust::Slice((int32_t *)m_aData, sizeof(m_aData) / sizeof(int32_t)); }
-};
 
-std::unique_ptr<CSnapshotBuffer> CSnapshotBuffer_New();
+	static std::unique_ptr<CSnapshotBuffer> New();
+};
 
 // CSnapshotStorage
 

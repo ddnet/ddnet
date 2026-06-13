@@ -10,6 +10,16 @@
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
+#if __cplusplus >= 202002L
+#include <ranges>
+#endif
+
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wmissing-declarations"
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wdollar-in-identifier-extension"
+#endif // __clang__
+#endif // __GNUC__
 
 namespace rust {
 inline namespace cxxbridge1 {
@@ -43,8 +53,8 @@ template <>
 struct copy_assignable_if<false> {
   copy_assignable_if() noexcept = default;
   copy_assignable_if(const copy_assignable_if &) noexcept = default;
-  copy_assignable_if &operator=(const copy_assignable_if &) &noexcept = delete;
-  copy_assignable_if &operator=(copy_assignable_if &&) &noexcept = default;
+  copy_assignable_if &operator=(const copy_assignable_if &) & noexcept = delete;
+  copy_assignable_if &operator=(copy_assignable_if &&) & noexcept = default;
 };
 } // namespace detail
 
@@ -57,8 +67,11 @@ public:
   Slice() noexcept;
   Slice(T *, std::size_t count) noexcept;
 
-  Slice &operator=(const Slice<T> &) &noexcept = default;
-  Slice &operator=(Slice<T> &&) &noexcept = default;
+  template <typename C>
+  explicit Slice(C &c) : Slice(c.data(), c.size()) {}
+
+  Slice &operator=(const Slice<T> &) & noexcept = default;
+  Slice &operator=(Slice<T> &&) & noexcept = default;
 
   T *data() const noexcept;
   std::size_t size() const noexcept;
@@ -90,10 +103,20 @@ private:
   std::array<std::uintptr_t, 2> repr;
 };
 
+#ifdef __cpp_deduction_guides
+template <typename C>
+explicit Slice(C &c)
+    -> Slice<std::remove_reference_t<decltype(*std::declval<C>().data())>>;
+#endif // __cpp_deduction_guides
+
 template <typename T>
 class Slice<T>::iterator final {
 public:
+#if __cplusplus >= 202002L
+  using iterator_category = std::contiguous_iterator_tag;
+#else
   using iterator_category = std::random_access_iterator_tag;
+#endif
   using value_type = T;
   using difference_type = std::ptrdiff_t;
   using pointer = typename std::add_pointer<T>::type;
@@ -111,6 +134,9 @@ public:
   iterator &operator+=(difference_type) noexcept;
   iterator &operator-=(difference_type) noexcept;
   iterator operator+(difference_type) const noexcept;
+  friend inline iterator operator+(difference_type lhs, iterator rhs) noexcept {
+    return rhs + lhs;
+  }
   iterator operator-(difference_type) const noexcept;
   difference_type operator-(const iterator &) const noexcept;
 
@@ -126,6 +152,11 @@ private:
   void *pos;
   std::size_t stride;
 };
+
+#if __cplusplus >= 202002L
+static_assert(std::ranges::contiguous_range<rust::Slice<const uint8_t>>);
+static_assert(std::contiguous_iterator<rust::Slice<const uint8_t>::iterator>);
+#endif
 
 template <typename T>
 Slice<T>::Slice() noexcept {
@@ -269,7 +300,8 @@ typename Slice<T>::iterator::difference_type
 Slice<T>::iterator::operator-(const iterator &other) const noexcept {
   auto diff = std::distance(static_cast<char *>(other.pos),
                             static_cast<char *>(this->pos));
-  return diff / this->stride;
+  return diff / static_cast<typename Slice<T>::iterator::difference_type>(
+                    this->stride);
 }
 
 template <typename T>
@@ -392,22 +424,9 @@ std::size_t align_of() {
 #endif // CXXBRIDGE1_LAYOUT
 
 namespace {
-namespace repr {
-using Fat = ::std::array<::std::uintptr_t, 2>;
-} // namespace repr
-
-template <typename T>
-class impl<Slice<T>> final {
-public:
-  static repr::Fat repr(Slice<T> slice) noexcept {
-    return slice.repr;
-  }
-};
-
 template <bool> struct deleter_if {
   template <typename T> void operator()(T *) {}
 };
-
 template <> struct deleter_if<true> {
   template <typename T> void operator()(T *ptr) { ptr->~T(); }
 };
@@ -419,39 +438,39 @@ using CSnapshot = ::CSnapshot;
 using CSnapshotBuffer = ::CSnapshotBuffer;
 
 extern "C" {
-::CSnapshotBuffer *cxxbridge1$CSnapshotBuffer_New() noexcept {
-  ::std::unique_ptr<::CSnapshotBuffer> (*CSnapshotBuffer_New$)() = ::CSnapshotBuffer_New;
-  return CSnapshotBuffer_New$().release();
+::CSnapshotBuffer *cxxbridge1$194$CSnapshotBuffer$New() noexcept {
+  ::std::unique_ptr<::CSnapshotBuffer> (*New$)() = &::CSnapshotBuffer::New;
+  return New$().release();
 }
 
-::rust::repr::Fat cxxbridge1$CSnapshot$AsSlice(const ::CSnapshot &self) noexcept {
-  ::rust::Slice<const ::std::int32_t> (::CSnapshot::*AsSlice$)() const = &::CSnapshot::AsSlice;
-  return ::rust::impl<::rust::Slice<const ::std::int32_t>>::repr((self.*AsSlice$)());
+void cxxbridge1$194$CSnapshot$AsSlice(::CSnapshot const &self, ::rust::Slice<::std::int32_t const> *return$) noexcept {
+  ::rust::Slice<::std::int32_t const> (::CSnapshot::*AsSlice$)() const = &::CSnapshot::AsSlice;
+  new (return$) ::rust::Slice<::std::int32_t const>((self.*AsSlice$)());
 }
 
-::rust::repr::Fat cxxbridge1$CSnapshotBuffer$AsMutSlice(::CSnapshotBuffer &self) noexcept {
-  ::rust::Slice<::std::int32_t> (::CSnapshotBuffer::*AsMutSlice$)() = &::CSnapshotBuffer::AsMutSlice;
-  return ::rust::impl<::rust::Slice<::std::int32_t>>::repr((self.*AsMutSlice$)());
+void cxxbridge1$194$CSnapshotBuffer$AsMutSlice(::CSnapshotBuffer &self, ::rust::Slice<::std::int32_t > *return$) noexcept {
+  ::rust::Slice<::std::int32_t > (::CSnapshotBuffer::*AsMutSlice$)() = &::CSnapshotBuffer::AsMutSlice;
+  new (return$) ::rust::Slice<::std::int32_t >((self.*AsMutSlice$)());
 }
 
-::std::int32_t cxxbridge1$Obj_SixToSeven(::std::int32_t type_) noexcept {
+::std::int32_t cxxbridge1$194$Obj_SixToSeven(::std::int32_t type_) noexcept {
   ::std::int32_t (*Obj_SixToSeven$)(::std::int32_t) = ::Obj_SixToSeven;
   return Obj_SixToSeven$(type_);
 }
 
-static_assert(::rust::detail::is_complete<::CSnapshotBuffer>::value, "definition of CSnapshotBuffer is required");
+static_assert(::rust::detail::is_complete<::std::remove_extent<::CSnapshotBuffer>::type>::value, "definition of `::CSnapshotBuffer` is required");
 static_assert(sizeof(::std::unique_ptr<::CSnapshotBuffer>) == sizeof(void *), "");
 static_assert(alignof(::std::unique_ptr<::CSnapshotBuffer>) == alignof(void *), "");
 void cxxbridge1$unique_ptr$CSnapshotBuffer$null(::std::unique_ptr<::CSnapshotBuffer> *ptr) noexcept {
   ::new (ptr) ::std::unique_ptr<::CSnapshotBuffer>();
 }
-void cxxbridge1$unique_ptr$CSnapshotBuffer$raw(::std::unique_ptr<::CSnapshotBuffer> *ptr, ::CSnapshotBuffer *raw) noexcept {
+void cxxbridge1$unique_ptr$CSnapshotBuffer$raw(::std::unique_ptr<::CSnapshotBuffer> *ptr, ::std::unique_ptr<::CSnapshotBuffer>::pointer raw) noexcept {
   ::new (ptr) ::std::unique_ptr<::CSnapshotBuffer>(raw);
 }
-const ::CSnapshotBuffer *cxxbridge1$unique_ptr$CSnapshotBuffer$get(const ::std::unique_ptr<::CSnapshotBuffer>& ptr) noexcept {
+::std::unique_ptr<::CSnapshotBuffer>::element_type const *cxxbridge1$unique_ptr$CSnapshotBuffer$get(::std::unique_ptr<::CSnapshotBuffer> const &ptr) noexcept {
   return ptr.get();
 }
-::CSnapshotBuffer *cxxbridge1$unique_ptr$CSnapshotBuffer$release(::std::unique_ptr<::CSnapshotBuffer>& ptr) noexcept {
+::std::unique_ptr<::CSnapshotBuffer>::pointer cxxbridge1$unique_ptr$CSnapshotBuffer$release(::std::unique_ptr<::CSnapshotBuffer> &ptr) noexcept {
   return ptr.release();
 }
 void cxxbridge1$unique_ptr$CSnapshotBuffer$drop(::std::unique_ptr<::CSnapshotBuffer> *ptr) noexcept {

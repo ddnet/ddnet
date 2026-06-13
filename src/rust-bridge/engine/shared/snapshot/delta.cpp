@@ -8,6 +8,16 @@
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
+#if __cplusplus >= 202002L
+#include <ranges>
+#endif
+
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wmissing-declarations"
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wdollar-in-identifier-extension"
+#endif // __clang__
+#endif // __GNUC__
 
 namespace rust {
 inline namespace cxxbridge1 {
@@ -39,8 +49,8 @@ template <>
 struct copy_assignable_if<false> {
   copy_assignable_if() noexcept = default;
   copy_assignable_if(const copy_assignable_if &) noexcept = default;
-  copy_assignable_if &operator=(const copy_assignable_if &) &noexcept = delete;
-  copy_assignable_if &operator=(copy_assignable_if &&) &noexcept = default;
+  copy_assignable_if &operator=(const copy_assignable_if &) & noexcept = delete;
+  copy_assignable_if &operator=(copy_assignable_if &&) & noexcept = default;
 };
 } // namespace detail
 
@@ -53,8 +63,11 @@ public:
   Slice() noexcept;
   Slice(T *, std::size_t count) noexcept;
 
-  Slice &operator=(const Slice<T> &) &noexcept = default;
-  Slice &operator=(Slice<T> &&) &noexcept = default;
+  template <typename C>
+  explicit Slice(C &c) : Slice(c.data(), c.size()) {}
+
+  Slice &operator=(const Slice<T> &) & noexcept = default;
+  Slice &operator=(Slice<T> &&) & noexcept = default;
 
   T *data() const noexcept;
   std::size_t size() const noexcept;
@@ -86,10 +99,20 @@ private:
   std::array<std::uintptr_t, 2> repr;
 };
 
+#ifdef __cpp_deduction_guides
+template <typename C>
+explicit Slice(C &c)
+    -> Slice<std::remove_reference_t<decltype(*std::declval<C>().data())>>;
+#endif // __cpp_deduction_guides
+
 template <typename T>
 class Slice<T>::iterator final {
 public:
+#if __cplusplus >= 202002L
+  using iterator_category = std::contiguous_iterator_tag;
+#else
   using iterator_category = std::random_access_iterator_tag;
+#endif
   using value_type = T;
   using difference_type = std::ptrdiff_t;
   using pointer = typename std::add_pointer<T>::type;
@@ -107,6 +130,9 @@ public:
   iterator &operator+=(difference_type) noexcept;
   iterator &operator-=(difference_type) noexcept;
   iterator operator+(difference_type) const noexcept;
+  friend inline iterator operator+(difference_type lhs, iterator rhs) noexcept {
+    return rhs + lhs;
+  }
   iterator operator-(difference_type) const noexcept;
   difference_type operator-(const iterator &) const noexcept;
 
@@ -122,6 +148,11 @@ private:
   void *pos;
   std::size_t stride;
 };
+
+#if __cplusplus >= 202002L
+static_assert(std::ranges::contiguous_range<rust::Slice<const uint8_t>>);
+static_assert(std::contiguous_iterator<rust::Slice<const uint8_t>::iterator>);
+#endif
 
 template <typename T>
 Slice<T>::Slice() noexcept {
@@ -265,7 +296,8 @@ typename Slice<T>::iterator::difference_type
 Slice<T>::iterator::operator-(const iterator &other) const noexcept {
   auto diff = std::distance(static_cast<char *>(other.pos),
                             static_cast<char *>(this->pos));
-  return diff / this->stride;
+  return diff / static_cast<typename Slice<T>::iterator::difference_type>(
+                    this->stride);
 }
 
 template <typename T>
@@ -336,7 +368,7 @@ public:
   explicit Box(const T &);
   explicit Box(T &&);
 
-  Box &operator=(Box &&) &noexcept;
+  Box &operator=(Box &&) & noexcept;
 
   const T *operator->() const noexcept;
   const T &operator*() const noexcept;
@@ -412,7 +444,7 @@ Box<T>::~Box() noexcept {
 }
 
 template <typename T>
-Box<T> &Box<T>::operator=(Box &&other) &noexcept {
+Box<T> &Box<T>::operator=(Box &&other) & noexcept {
   if (this->ptr) {
     this->drop();
   }
@@ -558,11 +590,11 @@ class Slice<T>::uninit {};
 template <typename T>
 inline Slice<T>::Slice(uninit) noexcept {}
 
-namespace {
 namespace repr {
 using Fat = ::std::array<::std::uintptr_t, 2>;
 } // namespace repr
 
+namespace {
 template <typename T>
 class impl<Slice<T>> final {
 public:
@@ -581,13 +613,27 @@ struct CSnapshotDelta;
 #ifndef CXXBRIDGE1_STRUCT_CSnapshotDelta
 #define CXXBRIDGE1_STRUCT_CSnapshotDelta
 struct CSnapshotDelta final : public ::rust::Opaque {
+  static void DiffItem(::rust::Slice<::std::int32_t const> past, ::rust::Slice<::std::int32_t const> current, ::rust::Slice<::std::int32_t > out) noexcept;
+
+  // Create a new snapshot delta.
+  //
+  // # Example
+  //
+  // ```
+  // # extern crate ddnet_test;
+  // use ddnet_engine_shared::CSnapshotDelta;
+  //
+  // let delta = CSnapshotDelta::New();
+  // ```
+  static ::rust::Box<::CSnapshotDelta> New() noexcept;
+
   ::rust::Box<::CSnapshotDelta> Clone() noexcept;
   ::std::uint64_t GetDataRate(::std::int32_t type_) const noexcept;
   ::std::uint64_t GetDataUpdates(::std::int32_t type_) const noexcept;
   void SetStaticsize(::std::int32_t type_, ::std::size_t size) noexcept;
-  ::rust::Slice<const ::std::int32_t> EmptyDelta() const noexcept;
-  ::std::int32_t CreateDelta(const ::CSnapshot &from, const ::CSnapshot &to, ::rust::Slice<::std::int32_t> delta) noexcept;
-  ::std::int32_t UnpackDelta(const ::CSnapshot &from, ::CSnapshotBuffer &to, ::rust::Slice<const ::std::int32_t> delta) noexcept;
+  ::rust::Slice<::std::int32_t const> EmptyDelta() const noexcept;
+  ::std::int32_t CreateDelta(::CSnapshot const &from, ::CSnapshot const &to, ::rust::Slice<::std::int32_t > delta) noexcept;
+  ::std::int32_t UnpackDelta(::CSnapshot const &from, ::CSnapshotBuffer &to, ::rust::Slice<::std::int32_t const> delta) noexcept;
   ~CSnapshotDelta() = delete;
 
 private:
@@ -600,80 +646,70 @@ private:
 #endif // CXXBRIDGE1_STRUCT_CSnapshotDelta
 
 extern "C" {
-::std::size_t cxxbridge1$CSnapshotDelta$operator$sizeof() noexcept;
-::std::size_t cxxbridge1$CSnapshotDelta$operator$alignof() noexcept;
+::std::size_t cxxbridge1$194$CSnapshotDelta$operator$sizeof() noexcept;
+::std::size_t cxxbridge1$194$CSnapshotDelta$operator$alignof() noexcept;
 
-void cxxbridge1$CSnapshotDelta_DiffItem(::rust::Slice<const ::std::int32_t> past, ::rust::Slice<const ::std::int32_t> current, ::rust::Slice<::std::int32_t> out) noexcept;
+void cxxbridge1$194$CSnapshotDelta$DiffItem(::rust::Slice<::std::int32_t const> past, ::rust::Slice<::std::int32_t const> current, ::rust::Slice<::std::int32_t > out) noexcept;
 
-::CSnapshotDelta *cxxbridge1$CSnapshotDelta_New() noexcept;
+::CSnapshotDelta *cxxbridge1$194$CSnapshotDelta$New() noexcept;
 
-::CSnapshotDelta *cxxbridge1$CSnapshotDelta$Clone(::CSnapshotDelta &self) noexcept;
+::CSnapshotDelta *cxxbridge1$194$CSnapshotDelta$Clone(::CSnapshotDelta &self) noexcept;
 
-::std::uint64_t cxxbridge1$CSnapshotDelta$GetDataRate(const ::CSnapshotDelta &self, ::std::int32_t type_) noexcept;
+::std::uint64_t cxxbridge1$194$CSnapshotDelta$GetDataRate(::CSnapshotDelta const &self, ::std::int32_t type_) noexcept;
 
-::std::uint64_t cxxbridge1$CSnapshotDelta$GetDataUpdates(const ::CSnapshotDelta &self, ::std::int32_t type_) noexcept;
+::std::uint64_t cxxbridge1$194$CSnapshotDelta$GetDataUpdates(::CSnapshotDelta const &self, ::std::int32_t type_) noexcept;
 
-void cxxbridge1$CSnapshotDelta$SetStaticsize(::CSnapshotDelta &self, ::std::int32_t type_, ::std::size_t size) noexcept;
+void cxxbridge1$194$CSnapshotDelta$SetStaticsize(::CSnapshotDelta &self, ::std::int32_t type_, ::std::size_t size) noexcept;
 
-::rust::repr::Fat cxxbridge1$CSnapshotDelta$EmptyDelta(const ::CSnapshotDelta &self) noexcept;
+::rust::repr::Fat cxxbridge1$194$CSnapshotDelta$EmptyDelta(::CSnapshotDelta const &self) noexcept;
 
-::std::int32_t cxxbridge1$CSnapshotDelta$CreateDelta(::CSnapshotDelta &self, const ::CSnapshot &from, const ::CSnapshot &to, ::rust::Slice<::std::int32_t> delta) noexcept;
+::std::int32_t cxxbridge1$194$CSnapshotDelta$CreateDelta(::CSnapshotDelta &self, ::CSnapshot const &from, ::CSnapshot const &to, ::rust::Slice<::std::int32_t > delta) noexcept;
 
-::std::int32_t cxxbridge1$CSnapshotDelta$UnpackDelta(::CSnapshotDelta &self, const ::CSnapshot &from, ::CSnapshotBuffer &to, ::rust::Slice<const ::std::int32_t> delta) noexcept;
+::std::int32_t cxxbridge1$194$CSnapshotDelta$UnpackDelta(::CSnapshotDelta &self, ::CSnapshot const &from, ::CSnapshotBuffer &to, ::rust::Slice<::std::int32_t const> delta) noexcept;
 } // extern "C"
 
 ::std::size_t CSnapshotDelta::layout::size() noexcept {
-  return cxxbridge1$CSnapshotDelta$operator$sizeof();
+  return cxxbridge1$194$CSnapshotDelta$operator$sizeof();
 }
 
 ::std::size_t CSnapshotDelta::layout::align() noexcept {
-  return cxxbridge1$CSnapshotDelta$operator$alignof();
+  return cxxbridge1$194$CSnapshotDelta$operator$alignof();
 }
 
-void CSnapshotDelta_DiffItem(::rust::Slice<const ::std::int32_t> past, ::rust::Slice<const ::std::int32_t> current, ::rust::Slice<::std::int32_t> out) noexcept {
-  cxxbridge1$CSnapshotDelta_DiffItem(past, current, out);
+void CSnapshotDelta::DiffItem(::rust::Slice<::std::int32_t const> past, ::rust::Slice<::std::int32_t const> current, ::rust::Slice<::std::int32_t > out) noexcept {
+  cxxbridge1$194$CSnapshotDelta$DiffItem(past, current, out);
 }
 
-// Create a new snapshot delta.
-//
-// # Example
-//
-// ```
-// # extern crate ddnet_test;
-// use ddnet_engine_shared::CSnapshotDelta_New;
-//
-// let delta = CSnapshotDelta_New();
-// ```
-::rust::Box<::CSnapshotDelta> CSnapshotDelta_New() noexcept {
-  return ::rust::Box<::CSnapshotDelta>::from_raw(cxxbridge1$CSnapshotDelta_New());
+::rust::Box<::CSnapshotDelta> CSnapshotDelta::New() noexcept {
+  return ::rust::Box<::CSnapshotDelta>::from_raw(cxxbridge1$194$CSnapshotDelta$New());
 }
 
 ::rust::Box<::CSnapshotDelta> CSnapshotDelta::Clone() noexcept {
-  return ::rust::Box<::CSnapshotDelta>::from_raw(cxxbridge1$CSnapshotDelta$Clone(*this));
+  return ::rust::Box<::CSnapshotDelta>::from_raw(cxxbridge1$194$CSnapshotDelta$Clone(*this));
 }
 
 ::std::uint64_t CSnapshotDelta::GetDataRate(::std::int32_t type_) const noexcept {
-  return cxxbridge1$CSnapshotDelta$GetDataRate(*this, type_);
+  return cxxbridge1$194$CSnapshotDelta$GetDataRate(*this, type_);
 }
 
 ::std::uint64_t CSnapshotDelta::GetDataUpdates(::std::int32_t type_) const noexcept {
-  return cxxbridge1$CSnapshotDelta$GetDataUpdates(*this, type_);
+  return cxxbridge1$194$CSnapshotDelta$GetDataUpdates(*this, type_);
 }
 
 void CSnapshotDelta::SetStaticsize(::std::int32_t type_, ::std::size_t size) noexcept {
-  cxxbridge1$CSnapshotDelta$SetStaticsize(*this, type_, size);
+  cxxbridge1$194$CSnapshotDelta$SetStaticsize(*this, type_, size);
 }
 
-::rust::Slice<const ::std::int32_t> CSnapshotDelta::EmptyDelta() const noexcept {
-  return ::rust::impl<::rust::Slice<const ::std::int32_t>>::slice(cxxbridge1$CSnapshotDelta$EmptyDelta(*this));
+::rust::Slice<::std::int32_t const> CSnapshotDelta::EmptyDelta() const noexcept {
+  return ::rust::impl<::rust::Slice<::std::int32_t const>>::slice(cxxbridge1$194$CSnapshotDelta$EmptyDelta(*this));
 }
 
-::std::int32_t CSnapshotDelta::CreateDelta(const ::CSnapshot &from, const ::CSnapshot &to, ::rust::Slice<::std::int32_t> delta) noexcept {
-  return cxxbridge1$CSnapshotDelta$CreateDelta(*this, from, to, delta);
+::std::int32_t CSnapshotDelta::CreateDelta(::CSnapshot const &from, ::CSnapshot const &to, ::rust::Slice<::std::int32_t > delta) noexcept {
+  return cxxbridge1$194$CSnapshotDelta$CreateDelta(*this, from, to, delta);
 }
 
-::std::int32_t CSnapshotDelta::UnpackDelta(const ::CSnapshot &from, ::CSnapshotBuffer &to, ::rust::Slice<const ::std::int32_t> delta) noexcept {
-  return cxxbridge1$CSnapshotDelta$UnpackDelta(*this, from, to, delta);
+::std::int32_t CSnapshotDelta::UnpackDelta(::CSnapshot const &from, ::CSnapshotBuffer &to, ::rust::Slice<::std::int32_t const> delta) noexcept {
+  return cxxbridge1$194$CSnapshotDelta$UnpackDelta(*this, from, to, delta);
 }
 
 extern "C" {

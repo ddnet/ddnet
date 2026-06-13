@@ -7,6 +7,13 @@
 #include <type_traits>
 #include <utility>
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wmissing-declarations"
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wdollar-in-identifier-extension"
+#endif // __clang__
+#endif // __GNUC__
+
 namespace rust {
 inline namespace cxxbridge1 {
 // #include "rust/cxx.h"
@@ -64,7 +71,6 @@ namespace {
 template <bool> struct deleter_if {
   template <typename T> void operator()(T *) {}
 };
-
 template <> struct deleter_if<true> {
   template <typename T> void operator()(T *ptr) { ptr->~T(); }
 };
@@ -82,69 +88,69 @@ static_assert(
     "type CUuid should be trivially move constructible and trivially destructible in C++ to be used as an argument of `LookupUuid` or return value of `RandomUuid`, `CalculateUuid`, `GetUuid` in Rust");
 
 extern "C" {
-void cxxbridge1$RandomUuid(::CUuid *return$) noexcept {
+void cxxbridge1$194$RandomUuid(::CUuid *return$) noexcept {
   ::CUuid (*RandomUuid$)() = ::RandomUuid;
   new (return$) ::CUuid(RandomUuid$());
 }
 
-void cxxbridge1$CalculateUuid(::StrRef *name, ::CUuid *return$) noexcept {
+void cxxbridge1$194$CalculateUuid(::StrRef *name, ::CUuid *return$) noexcept {
   ::CUuid (*CalculateUuid$)(::StrRef) = ::CalculateUuid;
   new (return$) ::CUuid(CalculateUuid$(::std::move(*name)));
 }
 
-void cxxbridge1$CUuidManager$RegisterName(::CUuidManager &self, ::std::int32_t id, ::StrRef *name) noexcept {
+void cxxbridge1$194$CUuidManager$RegisterName(::CUuidManager &self, ::std::int32_t id, ::StrRef *name) noexcept {
   void (::CUuidManager::*RegisterName$)(::std::int32_t, ::StrRef) = &::CUuidManager::RegisterName;
   (self.*RegisterName$)(id, ::std::move(*name));
 }
 
-void cxxbridge1$CUuidManager$GetUuid(const ::CUuidManager &self, ::std::int32_t id, ::CUuid *return$) noexcept {
+void cxxbridge1$194$CUuidManager$GetUuid(::CUuidManager const &self, ::std::int32_t id, ::CUuid *return$) noexcept {
   ::CUuid (::CUuidManager::*GetUuid$)(::std::int32_t) const = &::CUuidManager::GetUuid;
   new (return$) ::CUuid((self.*GetUuid$)(id));
 }
 
-void cxxbridge1$CUuidManager$GetName(const ::CUuidManager &self, ::std::int32_t id, ::StrRef *return$) noexcept {
+void cxxbridge1$194$CUuidManager$GetName(::CUuidManager const &self, ::std::int32_t id, ::StrRef *return$) noexcept {
   ::StrRef (::CUuidManager::*GetName$)(::std::int32_t) const = &::CUuidManager::GetName;
   new (return$) ::StrRef((self.*GetName$)(id));
 }
 
-::std::int32_t cxxbridge1$CUuidManager$LookupUuid(const ::CUuidManager &self, ::CUuid *uuid) noexcept {
+::std::int32_t cxxbridge1$194$CUuidManager$LookupUuid(::CUuidManager const &self, ::CUuid *uuid) noexcept {
   ::std::int32_t (::CUuidManager::*LookupUuid$)(::CUuid) const = &::CUuidManager::LookupUuid;
   return (self.*LookupUuid$)(::std::move(*uuid));
 }
 
-::std::int32_t cxxbridge1$CUuidManager$NumUuids(const ::CUuidManager &self) noexcept {
+::std::int32_t cxxbridge1$194$CUuidManager$NumUuids(::CUuidManager const &self) noexcept {
   ::std::int32_t (::CUuidManager::*NumUuids$)() const = &::CUuidManager::NumUuids;
   return (self.*NumUuids$)();
 }
 
-void cxxbridge1$CUuidManager$DebugDump(const ::CUuidManager &self) noexcept {
+void cxxbridge1$194$CUuidManager$DebugDump(::CUuidManager const &self) noexcept {
   void (::CUuidManager::*DebugDump$)() const = &::CUuidManager::DebugDump;
   (self.*DebugDump$)();
 }
 
-::CUuidManager *cxxbridge1$CUuidManager_New() noexcept {
-  ::std::unique_ptr<::CUuidManager> (*CUuidManager_New$)() = ::CUuidManager_New;
-  return CUuidManager_New$().release();
+::CUuidManager *cxxbridge1$194$CUuidManager$New() noexcept {
+  ::std::unique_ptr<::CUuidManager> (*New$)() = &::CUuidManager::New;
+  return New$().release();
 }
 
-const ::CUuidManager *cxxbridge1$CUuidManager_Global() noexcept {
-  const ::CUuidManager &(*CUuidManager_Global$)() = ::CUuidManager_Global;
-  return &CUuidManager_Global$();
+::CUuidManager const *cxxbridge1$194$CUuidManager$Global() noexcept {
+  ::CUuidManager const &(*Global$)() = &::CUuidManager::Global;
+  return &Global$();
 }
 
-static_assert(::rust::detail::is_complete<::CUuidManager>::value, "definition of CUuidManager is required");
+static_assert(::rust::detail::is_complete<::std::remove_extent<::CUuidManager>::type>::value, "definition of `::CUuidManager` is required");
 static_assert(sizeof(::std::unique_ptr<::CUuidManager>) == sizeof(void *), "");
 static_assert(alignof(::std::unique_ptr<::CUuidManager>) == alignof(void *), "");
 void cxxbridge1$unique_ptr$CUuidManager$null(::std::unique_ptr<::CUuidManager> *ptr) noexcept {
   ::new (ptr) ::std::unique_ptr<::CUuidManager>();
 }
-void cxxbridge1$unique_ptr$CUuidManager$raw(::std::unique_ptr<::CUuidManager> *ptr, ::CUuidManager *raw) noexcept {
+void cxxbridge1$unique_ptr$CUuidManager$raw(::std::unique_ptr<::CUuidManager> *ptr, ::std::unique_ptr<::CUuidManager>::pointer raw) noexcept {
   ::new (ptr) ::std::unique_ptr<::CUuidManager>(raw);
 }
-const ::CUuidManager *cxxbridge1$unique_ptr$CUuidManager$get(const ::std::unique_ptr<::CUuidManager>& ptr) noexcept {
+::std::unique_ptr<::CUuidManager>::element_type const *cxxbridge1$unique_ptr$CUuidManager$get(::std::unique_ptr<::CUuidManager> const &ptr) noexcept {
   return ptr.get();
 }
-::CUuidManager *cxxbridge1$unique_ptr$CUuidManager$release(::std::unique_ptr<::CUuidManager>& ptr) noexcept {
+::std::unique_ptr<::CUuidManager>::pointer cxxbridge1$unique_ptr$CUuidManager$release(::std::unique_ptr<::CUuidManager> &ptr) noexcept {
   return ptr.release();
 }
 void cxxbridge1$unique_ptr$CUuidManager$drop(::std::unique_ptr<::CUuidManager> *ptr) noexcept {

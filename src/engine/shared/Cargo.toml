@@ -2,7 +2,7 @@
 name = "ddnet-engine-shared"
 version = "0.0.1"
 edition = "2021"
-rust-version = "1.63"
+rust-version = "1.85"
 publish = false
 license = "Zlib"
 
@@ -14,7 +14,7 @@ path = "lib.rs"
 ddnet-base = { path = "../../base" }
 ddnet-engine = { path = ".." }
 
-cxx = "=1.0.71"
+cxx = "=1.0.194"
 libtw2-common = { git = "https://github.com/heinrich5991/libtw2" }
 libtw2-packer = { git = "https://github.com/heinrich5991/libtw2" }
 libtw2-snapshot = { git = "https://github.com/heinrich5991/libtw2" }

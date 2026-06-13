@@ -43,7 +43,7 @@ public:
 	int UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshotBuffer *pTo)
 	{
 		CUnpacker Unpacker;
-		rust::Box<CSnapshotBuilder> pBuilder = CSnapshotBuilder_New();
+		rust::Box<CSnapshotBuilder> pBuilder = CSnapshotBuilder::New();
 		pBuilder->Init(false);
 		CNetObjHandler NetObjHandler;
 
@@ -243,7 +243,7 @@ static int ExtractDemoChat(const char *pDemoFilePath, CSnapshotDelta *pSnapshotD
 
 static rust::Box<CSnapshotDelta> CreateSnapshotDelta()
 {
-	rust::Box<CSnapshotDelta> pResult = CSnapshotDelta_New();
+	rust::Box<CSnapshotDelta> pResult = CSnapshotDelta::New();
 	CNetObjHandler NetObjHandler;
 	for(int i = 0; i < NUM_NETOBJTYPES; i++)
 	{
@@ -254,7 +254,7 @@ static rust::Box<CSnapshotDelta> CreateSnapshotDelta()
 
 static rust::Box<CSnapshotDelta> CreateSnapshotDeltaSixup()
 {
-	rust::Box<CSnapshotDelta> pResult = CSnapshotDelta_New();
+	rust::Box<CSnapshotDelta> pResult = CSnapshotDelta::New();
 	protocol7::CNetObjHandler NetObjHandler7;
 	// HACK: only set static size for items, which were available in the first 0.7 release
 	// so new items don't break the snapshot delta

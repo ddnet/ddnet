@@ -170,7 +170,7 @@ bool CSnapshot::IsValid(size_t ActualSize) const
 
 // CSnapshotBuffer
 
-std::unique_ptr<CSnapshotBuffer> CSnapshotBuffer_New()
+std::unique_ptr<CSnapshotBuffer> CSnapshotBuffer::New()
 {
 	return std::make_unique<CSnapshotBuffer>();
 }

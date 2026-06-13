@@ -8,7 +8,6 @@ use libtw2_warn as warn;
 use std::mem;
 use std::pin::Pin;
 
-#[allow(unused_must_use)] // in generated code for CSnapshotDelta_New
 #[cxx::bridge]
 mod ffi {
     extern "C++" {
@@ -20,20 +19,20 @@ mod ffi {
     extern "Rust" {
         type CSnapshotDelta;
 
-        // TODO(cxx 1.0.164): #[Self = "CSnapshotDelta"]
-        pub fn CSnapshotDelta_DiffItem(past: &[i32], current: &[i32], out: &mut [i32]);
+        #[Self = "CSnapshotDelta"]
+        pub fn DiffItem(past: &[i32], current: &[i32], out: &mut [i32]);
         /// Create a new snapshot delta.
         ///
         /// # Example
         ///
         /// ```
         /// # extern crate ddnet_test;
-        /// use ddnet_engine_shared::CSnapshotDelta_New;
+        /// use ddnet_engine_shared::CSnapshotDelta;
         ///
-        /// let delta = CSnapshotDelta_New();
+        /// let delta = CSnapshotDelta::New();
         /// ```
-        // TODO(cxx 1.0.164): #[Self = "CSnapshotDelta"]
-        pub fn CSnapshotDelta_New() -> Box<CSnapshotDelta>;
+        #[Self = "CSnapshotDelta"]
+        pub fn New() -> Box<CSnapshotDelta>;
         pub fn Clone(&mut self) -> Box<CSnapshotDelta>;
         pub fn GetDataRate(&self, type_: i32) -> u64;
         pub fn GetDataUpdates(&self, type_: i32) -> u64;
@@ -71,48 +70,48 @@ struct Buffer {
     write: Vec<i32>,
 }
 
-/// Diffs two snapshot items of the same size using the Teeworlds snapshot
-/// delta algorithm.
-///
-/// # Panics
-///
-/// Panics if any of the passed slices differ in length.
-///
-/// # Example
-///
-/// ```
-/// # extern crate ddnet_test;
-/// use ddnet_engine_shared::CSnapshotDelta_DiffItem;
-///
-/// let past = [123];
-/// let current = [456];
-/// let mut result = [0];
-///
-/// CSnapshotDelta_DiffItem(&past, &current, &mut result);
-/// ```
-pub fn CSnapshotDelta_DiffItem(past: &[i32], current: &[i32], out: &mut [i32]) {
-    snap_format::create_item_delta(Some(past), current, out)
-        .expect("can't have `past` and `out` of different sizes")
-}
-
-/// Creates a new [`CSnapshotDelta`].
-///
-/// It still needs to be fed with static item sizes
-/// ([`CSnapshotDelta::SetStaticsize`]).
-///
-/// # Example
-///
-/// ```
-/// # extern crate ddnet_test;
-/// use ddnet_engine_shared::CSnapshotDelta_New;
-///
-/// let delta = CSnapshotDelta_New();
-/// ```
-pub fn CSnapshotDelta_New() -> Box<CSnapshotDelta> {
-    Box::new(CSnapshotDelta::default())
-}
-
 impl CSnapshotDelta {
+    /// Diffs two snapshot items of the same size using the Teeworlds snapshot
+    /// delta algorithm.
+    ///
+    /// # Panics
+    ///
+    /// Panics if any of the passed slices differ in length.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # extern crate ddnet_test;
+    /// use ddnet_engine_shared::CSnapshotDelta;
+    ///
+    /// let past = [123];
+    /// let current = [456];
+    /// let mut result = [0];
+    ///
+    /// CSnapshotDelta::DiffItem(&past, &current, &mut result);
+    /// ```
+    pub fn DiffItem(past: &[i32], current: &[i32], out: &mut [i32]) {
+        snap_format::create_item_delta(Some(past), current, out)
+            .expect("can't have `past` and `out` of different sizes")
+    }
+
+    /// Creates a new [`CSnapshotDelta`].
+    ///
+    /// It still needs to be fed with static item sizes
+    /// ([`CSnapshotDelta::SetStaticsize`]).
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # extern crate ddnet_test;
+    /// use ddnet_engine_shared::CSnapshotDelta;
+    ///
+    /// let delta = CSnapshotDelta::New();
+    /// ```
+    pub fn New() -> Box<CSnapshotDelta> {
+        Box::new(CSnapshotDelta::default())
+    }
+
     /// Creates a new [`CSnapshotDelta`] from an existing one.
     pub fn Clone(&self) -> Box<CSnapshotDelta> {
         Box::new(self.clone())
@@ -152,9 +151,9 @@ impl CSnapshotDelta {
     ///
     /// ```
     /// # extern crate ddnet_test;
-    /// use ddnet_engine_shared::CSnapshotDelta_New;
+    /// use ddnet_engine_shared::CSnapshotDelta;
     ///
-    /// let mut delta = CSnapshotDelta_New();
+    /// let mut delta = CSnapshotDelta::New();
     /// delta.SetStaticsize(0, 0); // no known size
     /// delta.SetStaticsize(1, 40); // NETOBJTYPE_PLAYERINPUT, a snapshot object, for whatever reason
     /// ```
@@ -178,9 +177,9 @@ impl CSnapshotDelta {
     ///
     /// ```
     /// # extern crate ddnet_test;
-    /// use ddnet_engine_shared::CSnapshotDelta_New;
+    /// use ddnet_engine_shared::CSnapshotDelta;
     ///
-    /// let delta = CSnapshotDelta_New();
+    /// let delta = CSnapshotDelta::New();
     /// assert_eq!(delta.EmptyDelta(), &[0, 0, 0]);
     /// ```
     pub fn EmptyDelta(&self) -> &[i32] {

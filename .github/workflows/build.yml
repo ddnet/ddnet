@@ -69,7 +69,7 @@ jobs:
         curl -LO https://github.com/Kitware/CMake/releases/download/v3.13.4/cmake-3.13.4-Linux-x86_64.tar.gz
         sudo tar --strip-components 1 -C /usr -xf cmake-3.13.4-Linux-x86_64.tar.gz
         # Our minimum supported Rust version (MSRV)
-        rustup default 1.63.0
+        rustup default 1.85.0
         sudo rm -rf /var/lib/mysql/ /var/run/mysqld
         sudo mkdir /var/lib/mysql/ /var/run/mysqld/
         sudo chown mysql:mysql /var/lib/mysql/ /var/run/mysqld/
