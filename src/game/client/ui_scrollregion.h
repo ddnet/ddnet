@@ -7,10 +7,10 @@
 
 struct CScrollRegionParams
 {
-	float m_ScrollbarWidth;
+	float m_ScrollbarThickness;
 	float m_ScrollbarMargin;
-	bool m_ScrollbarNoMarginRight;
-	float m_SliderMinHeight;
+	bool m_ScrollbarNoOuterMargin;
+	float m_SliderMinSize;
 	float m_ScrollUnit;
 	ColorRGBA m_ClipBgColor;
 	ColorRGBA m_ScrollbarBgColor;
@@ -18,19 +18,15 @@ struct CScrollRegionParams
 	ColorRGBA m_SliderColor;
 	ColorRGBA m_SliderColorHover;
 	ColorRGBA m_SliderColorGrabbed;
-	unsigned m_Flags;
-
-	enum
-	{
-		FLAG_CONTENT_STATIC_WIDTH = 1 << 0,
-	};
+	bool m_ForceShowScrollbar;
+	bool m_ScrollHorizontal;
 
 	CScrollRegionParams()
 	{
-		m_ScrollbarWidth = 20.0f;
+		m_ScrollbarThickness = 20.0f;
 		m_ScrollbarMargin = 5.0f;
-		m_ScrollbarNoMarginRight = false;
-		m_SliderMinHeight = 25.0f;
+		m_ScrollbarNoOuterMargin = false;
+		m_SliderMinSize = 25.0f;
 		m_ScrollUnit = 10.0f;
 		m_ClipBgColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
 		m_ScrollbarBgColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
@@ -38,7 +34,8 @@ struct CScrollRegionParams
 		m_SliderColor = ColorRGBA(0.8f, 0.8f, 0.8f, 1.0f);
 		m_SliderColorHover = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 		m_SliderColorGrabbed = ColorRGBA(0.9f, 0.9f, 0.9f, 1.0f);
-		m_Flags = 0;
+		m_ForceShowScrollbar = false;
+		m_ScrollHorizontal = false;
 	}
 
 	ColorRGBA SliderColor(bool Active, bool Hovered) const
@@ -111,22 +108,22 @@ public:
 	};
 
 private:
-	float m_ScrollY;
-	float m_ContentH;
-	float m_RequestScrollY; // [0, ContentHeight]
+	float m_ScrollPos;
+	float m_ContentSize;
+	float m_RequestScrollPos; // [0, ContentSize]
 	EScrollRelative m_ScrollDirection;
 	float m_ScrollSpeedMultiplier;
 
 	float m_AnimTimeMax;
 	float m_AnimTime;
-	float m_AnimInitScrollY;
-	float m_AnimTargetScrollY;
+	float m_AnimInitScrollPos;
+	float m_AnimTargetScrollPos;
 
-	CUIRect m_ClipRect;
+	CUIRect m_ContentAreaRect;
 	CUIRect m_RailRect;
 	CUIRect m_LastAddedRect; // saved for ScrollHere()
 	float m_SliderGrabPos; // where did user grab the slider
-	vec2 m_ContentScrollOff;
+	float m_ContentScrollOffset;
 	CScrollRegionParams m_Params;
 
 public:
@@ -145,14 +142,24 @@ public:
 	bool AddRect(const CUIRect &Rect, bool ShouldScrollHere = false); // returns true if the added rect is visible (not clipped)
 	void ScrollHere(EScrollOption Option = SCROLLHERE_KEEP_IN_VIEW);
 	void ScrollRelative(EScrollRelative Direction, float SpeedMultiplier = 1.0f);
-	void ScrollRelativeDirect(float ScrollAmount);
-	const CUIRect *ClipRect() const { return &m_ClipRect; }
+	void ScrollRelativeDirect(vec2 ScrollAmount);
 	void DoEdgeScrolling();
 	bool RectClipped(const CUIRect &Rect) const;
+	bool ContentOverflows() const;
 	bool ScrollbarShown() const;
 	bool Animating() const;
 	bool Active() const;
-	const CScrollRegionParams &Params() const { return m_Params; }
+
+private:
+	float ContentAreaPos() const;
+	float ContentAreaSize() const;
+	float MaxScroll() const;
+	CUIRect SplitContentArea();
+	void DrawBackground(const CUIRect &ScrollbarBg);
+	void DoScrollInput();
+	void UpdateHotScrollRegion();
+	void AdvanceAnimation();
+	void DoSlider();
 };
 
 #endif

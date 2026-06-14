@@ -216,7 +216,7 @@ void CUi::Update()
 			{
 				if(m_pHotScrollRegion != nullptr)
 				{
-					m_pHotScrollRegion->ScrollRelativeDirect(-m_TouchState.m_ScrollAmount.y * pScreen->h);
+					m_pHotScrollRegion->ScrollRelativeDirect(-m_TouchState.m_ScrollAmount * pScreen->Size());
 				}
 				m_TouchState.m_ScrollAmount = vec2(0.0f, 0.0f);
 			}
@@ -372,6 +372,13 @@ void CUi::UpdateTouchState(CTouchState &State) const
 			{
 				// Accumulate average delta of the two fingers
 				State.m_ScrollAmount.y += (Delta0.y + Delta1.y) / 2.0f;
+			}
+			else if(absolute(Delta0.x) > DirectionThreshold * absolute(Delta0.y) && // Horizontal scrolling (x-delta must be larger than y-delta)
+				absolute(Delta1.x) > DirectionThreshold * absolute(Delta1.y) &&
+				Delta0.x * Delta1.x > 0.0f) // Same x direction required
+			{
+				// Accumulate average delta of the two fingers
+				State.m_ScrollAmount.x += (Delta0.x + Delta1.x) / 2.0f;
 			}
 		}
 	}
@@ -2000,9 +2007,9 @@ CUi::EPopupMenuFunctionResult CUi::PopupSelection(void *pContext, CUIRect View, 
 	CScrollRegion *pScrollRegion = pSelectionPopup->m_pScrollRegion;
 
 	CScrollRegionParams ScrollParams;
-	ScrollParams.m_ScrollbarWidth = 10.0f;
+	ScrollParams.m_ScrollbarThickness = 10.0f;
 	ScrollParams.m_ScrollbarMargin = SPopupMenu::POPUP_MARGIN;
-	ScrollParams.m_ScrollbarNoMarginRight = true;
+	ScrollParams.m_ScrollbarNoOuterMargin = true;
 	ScrollParams.m_ScrollUnit = 3 * (pSelectionPopup->m_EntryHeight + pSelectionPopup->m_EntrySpacing);
 	pScrollRegion->Begin(&View, &ScrollParams);
 
