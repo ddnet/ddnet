@@ -526,22 +526,19 @@ void CClient::EnterGame(int Conn)
 
 void CClient::OnPostConnect(int Conn)
 {
-	if(!m_ServerCapabilities.m_ChatTimeoutCode)
-		return;
+	const int CmdLen = 256; // Keep buffer big, for ClRunOnJoin
+	char aCmdBufs[3][CmdLen] = {};
+	int NumCmds = 0;
 
-	char aBufMsg[256];
-	if(!g_Config.m_ClRunOnJoin[0] && !g_Config.m_ClDummyDefaultEyes && !g_Config.m_ClPlayerDefaultEyes)
-		str_format(aBufMsg, sizeof(aBufMsg), "/timeout %s", m_aTimeoutCodes[Conn]);
-	else
-		str_format(aBufMsg, sizeof(aBufMsg), "/mc;timeout %s", m_aTimeoutCodes[Conn]);
-
-	if(g_Config.m_ClDummyDefaultEyes || g_Config.m_ClPlayerDefaultEyes)
+	if(m_ServerCapabilities.m_ChatTimeoutCode)
 	{
-		int Emote = Conn == CONN_DUMMY ? g_Config.m_ClDummyDefaultEyes : g_Config.m_ClPlayerDefaultEyes;
-
+		str_format(aCmdBufs[NumCmds++], CmdLen, "timeout %s", m_aTimeoutCodes[Conn]);
+	}
+	if(m_ServerCapabilities.m_ChatEmote)
+	{
+		const int Emote = Conn == CONN_DUMMY ? g_Config.m_ClDummyDefaultEyes : g_Config.m_ClPlayerDefaultEyes;
 		if(Emote != EMOTE_NORMAL)
 		{
-			char aBuf[32];
 			static const char *s_EMOTE_NAMES[] = {
 				"pain",
 				"happy",
@@ -551,16 +548,32 @@ void CClient::OnPostConnect(int Conn)
 			};
 			static_assert(std::size(s_EMOTE_NAMES) == NUM_EMOTES - 1, "The size of EMOTE_NAMES must match NUM_EMOTES - 1");
 
-			str_append(aBufMsg, ";");
-			str_format(aBuf, sizeof(aBuf), "emote %s %d", s_EMOTE_NAMES[Emote - 1], g_Config.m_ClEyeDuration);
-			str_append(aBufMsg, aBuf);
+			str_format(aCmdBufs[NumCmds++], CmdLen, "emote %s %d", s_EMOTE_NAMES[Emote - 1], g_Config.m_ClEyeDuration);
 		}
 	}
-	if(g_Config.m_ClRunOnJoin[0])
+	if(m_ServerCapabilities.m_ChatRunOnJoin && g_Config.m_ClRunOnJoin[0])
 	{
-		str_append(aBufMsg, ";");
-		str_append(aBufMsg, g_Config.m_ClRunOnJoin);
+		str_copy(aCmdBufs[NumCmds++], g_Config.m_ClRunOnJoin, CmdLen);
 	}
+
+	if(NumCmds == 0)
+		return;
+
+	char aBufMsg[256];
+	if(NumCmds == 1)
+	{
+		str_format(aBufMsg, sizeof(aBufMsg), "/%s", aCmdBufs[0]);
+	}
+	else
+	{
+		str_copy(aBufMsg, "/mc", sizeof(aBufMsg));
+		for(int i = 0; i < NumCmds; i++)
+		{
+			str_append(aBufMsg, ";");
+			str_append(aBufMsg, aCmdBufs[i]);
+		}
+	}
+
 	if(IsSixup())
 	{
 		protocol7::CNetMsg_Cl_Say Msg7;
@@ -1565,9 +1578,13 @@ static CServerCapabilities GetServerCapabilities(int Version, int Flags, bool Si
 	Result.m_PingEx = false;
 	Result.m_AllowDummy = true;
 	Result.m_SyncWeaponInput = false;
+	Result.m_ChatEmote = DDNet;
+	Result.m_ChatRunOnJoin = DDNet;
 	if(Version >= 1)
 	{
 		Result.m_ChatTimeoutCode = Flags & SERVERCAPFLAG_CHATTIMEOUTCODE;
+		Result.m_ChatEmote = Result.m_ChatTimeoutCode;
+		Result.m_ChatRunOnJoin = Result.m_ChatTimeoutCode;
 	}
 	if(Version >= 2)
 	{
@@ -1584,6 +1601,11 @@ static CServerCapabilities GetServerCapabilities(int Version, int Flags, bool Si
 	if(Version >= 5)
 	{
 		Result.m_SyncWeaponInput = Flags & SERVERCAPFLAG_SYNCWEAPONINPUT;
+	}
+	if(Version >= 6)
+	{
+		Result.m_ChatEmote = Flags & SERVERCAPFLAG_CHATEMOTE;
+		Result.m_ChatRunOnJoin = Flags & SERVERCAPFLAG_CHATRUNONJOIN;
 	}
 	return Result;
 }

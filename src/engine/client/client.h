@@ -54,6 +54,8 @@ public:
 	bool m_PingEx = false;
 	bool m_AllowDummy = false;
 	bool m_SyncWeaponInput = false;
+	bool m_ChatEmote = false;
+	bool m_ChatRunOnJoin = false;
 };
 
 class CClient : public IClient, public CDemoPlayer::IListener
