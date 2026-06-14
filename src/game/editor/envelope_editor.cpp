@@ -569,6 +569,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 					s_Operation = EEnvelopeEditorOp::NONE;
 				}
 
+				m_ActiveEnvelopePreview = EEnvelopePreview::SELECTED;
 				BarColor = ColorRGBA(1.0f, 1.0f, 0.0f, 0.8f);
 				str_copy(m_aTooltip, "Timebar. Press left-click to drag. Hold ctrl to be more precise.");
 			}
@@ -583,6 +584,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 					s_MouseYStart = Ui()->MouseY();
 				}
 
+				m_ActiveEnvelopePreview = EEnvelopePreview::SELECTED;
 				BarColor = ColorRGBA(1.0f, 1.0f, 0.0f, 0.8f);
 				str_copy(m_aTooltip, "Timebar. Press left-click to drag. Hold ctrl to be more precise.");
 			}
