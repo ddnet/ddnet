@@ -167,53 +167,65 @@ void CCommandProcessorFragment_OpenGL::SetState(const CCommandBuffer::SState &St
 
 static void ParseVersionString(EBackendType BackendType, const char *pStr, int &VersionMajor, int &VersionMinor, int &VersionPatch)
 {
-	if(pStr)
+	// If the backend is GLES, the version string starts with `OpenGL ES ` or `OpenGL ES-CM ` for older contexts, rest is the same.
+	if(BackendType == BACKEND_TYPE_OPENGL_ES)
 	{
-		// if backend is GLES, it starts with "OpenGL ES " or OpenGL ES-CM for older contexts, rest is the same
-		if(BackendType == BACKEND_TYPE_OPENGL_ES)
+		const char *pSkippedPrefix;
+		if((pSkippedPrefix = str_startswith(pStr, "OpenGL ES ")) != nullptr ||
+			(pSkippedPrefix = str_startswith(pStr, "OpenGL ES-CM ")) != nullptr)
 		{
-			int StrLenGLES = str_length("OpenGL ES ");
-			int StrLenGLESCM = str_length("OpenGL ES-CM ");
-			if(str_comp_num(pStr, "OpenGL ES ", StrLenGLES) == 0)
-				pStr += StrLenGLES;
-			else if(str_comp_num(pStr, "OpenGL ES-CM ", StrLenGLESCM) == 0)
-				pStr += StrLenGLESCM;
+			pStr = pSkippedPrefix;
 		}
+	}
 
-		char aCurNumberStr[32];
-		size_t CurNumberStrLen = 0;
-		size_t TotalNumbersPassed = 0;
-		int aNumbers[3] = {0};
-		bool LastWasNumber = false;
-		while(*pStr && TotalNumbersPassed < 3)
+	char aCurNumberStr[10];
+	size_t CurNumberStrLen = 0;
+	size_t TotalNumbersPassed = 0;
+	int aNumbers[3] = {0};
+	bool LastWasNumber = false;
+	bool Error = false;
+	while(true)
+	{
+		if(str_isnum(*pStr))
 		{
-			if(str_isnum(*pStr))
+			if(CurNumberStrLen >= std::size(aCurNumberStr) - 1)
 			{
-				aCurNumberStr[CurNumberStrLen++] = (char)*pStr;
-				LastWasNumber = true;
+				Error = true;
+				break;
 			}
-			else if(LastWasNumber && (*pStr == '.' || *pStr == ' '))
-			{
-				if(CurNumberStrLen > 0)
-				{
-					aCurNumberStr[CurNumberStrLen] = 0;
-					aNumbers[TotalNumbersPassed++] = str_toint(aCurNumberStr);
-					CurNumberStrLen = 0;
-				}
-
-				LastWasNumber = false;
-
-				if(*pStr != '.')
-					break;
-			}
-			else
+			aCurNumberStr[CurNumberStrLen++] = *pStr;
+			LastWasNumber = true;
+		}
+		else if(LastWasNumber && (*pStr == '.' || *pStr == ' ' || *pStr == '\0'))
+		{
+			aCurNumberStr[CurNumberStrLen] = '\0';
+			aNumbers[TotalNumbersPassed] = str_toint(aCurNumberStr);
+			CurNumberStrLen = 0;
+			TotalNumbersPassed++;
+			LastWasNumber = false;
+			if(TotalNumbersPassed == std::size(aNumbers) || *pStr != '.')
 			{
 				break;
 			}
-
-			++pStr;
 		}
+		else
+		{
+			break;
+		}
+		++pStr;
+	}
 
+	if(Error || TotalNumbersPassed == 0)
+	{
+		// Use the newest supported OpenGL version if the version string could not be parsed.
+		// We assume that the format was changed in a future driver that supports all OpenGL
+		// capabilities that we use.
+		VersionMajor = 3;
+		VersionMinor = BackendType == BACKEND_TYPE_OPENGL_ES ? 0 : 3;
+		VersionPatch = 0;
+	}
+	else
+	{
 		VersionMajor = aNumbers[0];
 		VersionMinor = aNumbers[1];
 		VersionPatch = aNumbers[2];
@@ -319,13 +331,16 @@ bool CCommandProcessorFragment_OpenGL::InitOpenGL(const SCommand_Init *pCommand)
 	};
 
 	const char *pVendorString = (const char *)glGetString(GL_VENDOR);
+	dbg_assert(pVendorString != nullptr, "glGetString(GL_VENDOR) failure");
 	log_info("gfx/opengl", "Vendor string: %s", pVendorString);
 
 	// check what this context can do
 	const char *pVersionString = (const char *)glGetString(GL_VERSION);
+	dbg_assert(pVersionString != nullptr, "glGetString(GL_VERSION) failure");
 	log_info("gfx/opengl", "Version string: %s", pVersionString);
 
 	const char *pRendererString = (const char *)glGetString(GL_RENDERER);
+	dbg_assert(pRendererString != nullptr, "glGetString(GL_RENDERER) failure");
 
 	str_copy(pCommand->m_pVendorString, pVendorString, GPU_INFO_STRING_SIZE);
 	str_copy(pCommand->m_pVersionString, pVersionString, GPU_INFO_STRING_SIZE);
