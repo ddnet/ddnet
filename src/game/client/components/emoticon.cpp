@@ -15,7 +15,7 @@
 
 CEmoticon::CEmoticon()
 {
-	OnReset();
+	CEmoticon::OnReset();
 }
 
 void CEmoticon::ConKeyEmoticon(IConsole::IResult *pResult, void *pUserData)

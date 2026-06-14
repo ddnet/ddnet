@@ -142,7 +142,7 @@ void CSpectator::ConMultiView(IConsole::IResult *pResult, void *pUserData)
 CSpectator::CSpectator()
 {
 	m_SelectorMouse = vec2(0.0f, 0.0f);
-	OnReset();
+	CSpectator::OnReset();
 }
 
 void CSpectator::OnConsoleInit()
