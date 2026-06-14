@@ -3,13 +3,10 @@
 
 #include <cstddef> // size_t
 
-enum
-{
-	SHA256_DIGEST_LENGTH = 256 / 8,
-	SHA256_MAXSTRSIZE = 2 * SHA256_DIGEST_LENGTH + 1,
-	MD5_DIGEST_LENGTH = 128 / 8,
-	MD5_MAXSTRSIZE = 2 * MD5_DIGEST_LENGTH + 1,
-};
+static constexpr size_t SHA256_DIGEST_LENGTH = 256 / 8;
+static constexpr size_t SHA256_MAXSTRSIZE = 2 * SHA256_DIGEST_LENGTH + 1;
+static constexpr size_t MD5_DIGEST_LENGTH = 128 / 8;
+static constexpr size_t MD5_MAXSTRSIZE = 2 * MD5_DIGEST_LENGTH + 1;
 
 struct SHA256_DIGEST
 {
