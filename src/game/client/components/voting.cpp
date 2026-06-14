@@ -155,7 +155,7 @@ int CVoting::SecondsLeft() const
 CVoting::CVoting()
 {
 	ClearOptions();
-	OnReset();
+	CVoting::OnReset();
 }
 
 void CVoting::AddOption(const char *pDescription)

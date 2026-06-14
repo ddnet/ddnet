@@ -6,7 +6,7 @@
 
 CTooltips::CTooltips()
 {
-	OnReset();
+	CTooltips::OnReset();
 }
 
 void CTooltips::OnReset()

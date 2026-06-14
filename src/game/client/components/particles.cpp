@@ -15,7 +15,7 @@
 
 CParticles::CParticles()
 {
-	OnReset();
+	CParticles::OnReset();
 	m_RenderTrail.m_pParts = this;
 	m_RenderTrailExtra.m_pParts = this;
 	m_RenderExplosions.m_pParts = this;
