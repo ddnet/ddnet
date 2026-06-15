@@ -96,6 +96,7 @@ Checks: >
   -readability-function-size,
   -readability-identifier-length,
   -readability-implicit-bool-conversion,
+  -readability-inconsistent-ifelse-braces,
   -readability-isolate-declaration,
   -readability-magic-numbers,
   -readability-math-missing-parentheses,
