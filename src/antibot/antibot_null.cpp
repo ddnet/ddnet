@@ -20,7 +20,7 @@ void AntibotInit(CAntibotData *pCallbackData)
 void AntibotRoundStart(CAntibotRoundData *pRoundData) {}
 void AntibotRoundEnd(void) {}
 void AntibotUpdateData(void) {}
-void AntibotDestroy(void) { g_pData = 0; }
+void AntibotDestroy(void) { g_pData = nullptr; }
 void AntibotConsoleCommand(const char *pCommand)
 {
 	if(strcmp(pCommand, "dump") == 0)
