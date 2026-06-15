@@ -23,6 +23,7 @@
 #include <map>
 #include <string>
 
+// NOLINTBEGIN(readability-identifier-naming)
 struct websocket_chunk
 {
 	size_t size;
@@ -352,7 +353,7 @@ int websocket_send(int socket, const unsigned char *data, size_t size, const NET
 	{
 		char addr_str[NETADDR_MAXSTRSIZE];
 		net_addr_str(addr, addr_str, sizeof(addr_str), false);
-		lws_client_connect_info ccinfo = {0};
+		lws_client_connect_info ccinfo = {};
 		ccinfo.context = context;
 		ccinfo.address = addr_str;
 		ccinfo.port = addr->port;
@@ -422,5 +423,6 @@ int websocket_fd_get(int socket, fd_set *set)
 	}
 	return 0;
 }
+// NOLINTEND(readability-identifier-naming)
 
 #endif

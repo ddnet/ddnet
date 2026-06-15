@@ -485,13 +485,13 @@ bool CSound::DecodeWV(CSample &Sample, const void *pData, unsigned DataSize, con
 	char aError[100];
 
 #if defined(CONF_WAVPACK_OPEN_FILE_INPUT_EX)
-	WavpackStreamReader Callback = {0};
+	WavpackStreamReader Callback = {};
 	Callback.can_seek = ReturnFalse;
 	Callback.get_length = GetLength;
 	Callback.get_pos = GetPos;
 	Callback.push_back_byte = PushBackByte;
 	Callback.read_bytes = ReadData;
-	WavpackContext *pContext = WavpackOpenFileInputEx(&Callback, (void *)1, 0, aError, 0, 0);
+	WavpackContext *pContext = WavpackOpenFileInputEx(&Callback, (void *)1, nullptr, aError, 0, 0);
 #else
 	WavpackContext *pContext = WavpackOpenFileInput(ReadDataOld, aError);
 #endif
