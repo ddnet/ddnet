@@ -419,7 +419,7 @@ void CMysqlConnection::BindFloat(int Idx, float Value)
 	MYSQL_BIND *pParam = &m_vStmtParameters[Idx];
 	pParam->buffer_type = MYSQL_TYPE_FLOAT;
 	pParam->buffer = &m_vStmtParameterExtras[Idx].f;
-	pParam->buffer_length = sizeof(m_vStmtParameterExtras[Idx].i);
+	pParam->buffer_length = sizeof(m_vStmtParameterExtras[Idx].f);
 	pParam->length = nullptr;
 	pParam->is_null = nullptr;
 	pParam->is_unsigned = false;
