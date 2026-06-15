@@ -81,13 +81,13 @@ int CGraphics_Threaded::QuadContainerAddSprite(int QuadContainerIndex, float x, 
 
 int CGraphics_Threaded::QuadContainerAddSprite(int QuadContainerIndex, float Size)
 {
-	IGraphics::CQuadItem QuadItem(-(Size) / 2.f, -(Size) / 2.f, (Size), (Size));
+	IGraphics::CQuadItem QuadItem(-Size / 2.f, -Size / 2.f, Size, Size);
 	return QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
 }
 
 int CGraphics_Threaded::QuadContainerAddSprite(int QuadContainerIndex, float Width, float Height)
 {
-	IGraphics::CQuadItem QuadItem(-(Width) / 2.f, -(Height) / 2.f, (Width), (Height));
+	IGraphics::CQuadItem QuadItem(-Width / 2.f, -Height / 2.f, Width, Height);
 	return QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
 }
 
