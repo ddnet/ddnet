@@ -744,7 +744,9 @@ void CGameClient::UpdatePositions()
 				// don't use predicted
 			}
 			else
+			{
 				m_LocalCharacterPos = mix(m_PredictedPrevChar.m_Pos, m_PredictedChar.m_Pos, Client()->PredIntraGameTick(g_Config.m_ClDummy));
+			}
 		}
 		else
 		{
@@ -1193,7 +1195,9 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		{
 			const int Team = pUnpacker->GetInt();
 			if(!pUnpacker->Error() && Team >= TEAM_FLOCK && Team < NUM_DDRACE_TEAMS)
+			{
 				m_Teams.Team(i, Team);
+			}
 			else
 			{
 				m_Teams.Team(i, 0);
@@ -1227,7 +1231,9 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 
 			// if everyone of a team killed, we have no ids to spectate anymore, so we disable multi view
 			if(!IsMultiViewIdSet())
+			{
 				ResetMultiView();
+			}
 			else
 			{
 				// the "main" tee killed, search a new one
@@ -1848,7 +1854,9 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 							m_aStats[pInfo->m_ClientId].JoinGame(Client()->GameTick(g_Config.m_ClDummy));
 					}
 					else if(m_aStats[pInfo->m_ClientId].IsActive())
+					{
 						m_aStats[pInfo->m_ClientId].JoinSpec(Client()->GameTick(g_Config.m_ClDummy));
+					}
 				}
 			}
 			else if(Item.m_Type == NETOBJTYPE_DDNETPLAYER)
@@ -2030,14 +2038,18 @@ void CGameClient::OnNewSnapshot(bool DummySwapped)
 						m_aFlagDropTick[TEAM_RED] = Client()->GameTick(g_Config.m_ClDummy);
 				}
 				else
+				{
 					m_aFlagDropTick[TEAM_RED] = 0;
+				}
 				if(m_Snap.m_pGameDataObj->m_FlagCarrierBlue == FLAG_TAKEN)
 				{
 					if(m_aFlagDropTick[TEAM_BLUE] == 0)
 						m_aFlagDropTick[TEAM_BLUE] = Client()->GameTick(g_Config.m_ClDummy);
 				}
 				else
+				{
 					m_aFlagDropTick[TEAM_BLUE] = 0;
+				}
 				if(m_LastFlagCarrierRed == FLAG_ATSTAND && m_Snap.m_pGameDataObj->m_FlagCarrierRed >= 0)
 					OnFlagGrab(TEAM_RED);
 				else if(m_LastFlagCarrierBlue == FLAG_ATSTAND && m_Snap.m_pGameDataObj->m_FlagCarrierBlue >= 0)
@@ -2837,7 +2849,9 @@ void CGameClient::OnPredict()
 			m_aLastActive[i] = true;
 		}
 		else
+		{
 			m_aLastActive[i] = false;
+		}
 	}
 
 	if(g_Config.m_Debug && g_Config.m_ClPredict && m_PredictedTick == Client()->PredGameTick(g_Config.m_ClDummy))
@@ -3991,9 +4005,13 @@ bool CGameClient::IsOtherTeam(int ClientId) const
 	bool Local = m_Snap.m_LocalClientId == ClientId;
 
 	if(m_Snap.m_LocalClientId < 0)
+	{
 		return false;
+	}
 	else if((m_Snap.m_SpecInfo.m_Active && m_Snap.m_SpecInfo.m_SpectatorId == SPEC_FREEVIEW) || ClientId < 0)
+	{
 		return false;
+	}
 	else if(m_Snap.m_SpecInfo.m_Active && m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW)
 	{
 		if(m_Teams.Team(ClientId) == TEAM_SUPER || m_Teams.Team(m_Snap.m_SpecInfo.m_SpectatorId) == TEAM_SUPER)
@@ -4001,7 +4019,9 @@ bool CGameClient::IsOtherTeam(int ClientId) const
 		return m_Teams.Team(ClientId) != m_Teams.Team(m_Snap.m_SpecInfo.m_SpectatorId);
 	}
 	else if((m_aClients[m_Snap.m_LocalClientId].m_Solo || m_aClients[ClientId].m_Solo) && !Local)
+	{
 		return true;
+	}
 
 	if(m_Teams.Team(ClientId) == TEAM_SUPER || m_Teams.Team(m_Snap.m_LocalClientId) == TEAM_SUPER)
 		return false;
@@ -4787,7 +4807,9 @@ void CGameClient::ConchainMenuMap(IConsole::IResult *pResult, void *pUserData, I
 		}
 	}
 	else
+	{
 		pfnCallback(pResult, pCallbackUserData);
+	}
 }
 
 void CGameClient::DummyResetInput()

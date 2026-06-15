@@ -267,7 +267,9 @@ int CNetBan::Unban(T *pBanPool, const typename T::CDataType *pData)
 		return 0;
 	}
 	else
+	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "unban failed (invalid entry)");
+	}
 	return -1;
 }
 
@@ -434,7 +436,9 @@ void CNetBan::ConUnban(IConsole::IResult *pResult, void *pUser)
 
 	const char *pStr = pResult->GetString(0);
 	if(str_isallnum(pStr))
+	{
 		pThis->UnbanByIndex(str_toint(pStr));
+	}
 	else
 	{
 		NETADDR Addr;

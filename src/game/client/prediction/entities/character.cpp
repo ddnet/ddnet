@@ -360,7 +360,9 @@ void CCharacter::FireWeapon()
 				}
 			}
 			else
+			{
 				Force *= Strength;
+			}
 
 			pTarget->TakeDamage(Force, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
 				GetCid(), m_Core.m_ActiveWeapon);
@@ -723,7 +725,9 @@ void CCharacter::HandleSkippableTiles(int Index)
 						TempVel += Direction * SpeedLeft;
 				}
 				else
+				{
 					TempVel += Direction * Force;
+				}
 
 				m_Core.m_Vel = ClampVel(m_MoveRestrictions, TempVel);
 			}
@@ -1152,8 +1156,10 @@ void CCharacter::DDRacePostCoreTick()
 	// handle Anti-Skip tiles
 	std::vector<int> vIndices = Collision()->GetMapIndices(m_PrevPos, m_Pos);
 	if(!vIndices.empty())
+	{
 		for(int Index : vIndices)
 			HandleTiles(Index);
+	}
 	else
 	{
 		HandleTiles(CurrentIndex);
@@ -1359,10 +1365,14 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 				m_FreezeTime = maximum(1, pExtended->m_FreezeEnd - GameWorld()->GameTick());
 			}
 			else if(pExtended->m_FreezeEnd == -1)
+			{
 				m_Core.m_DeepFrozen = true;
+			}
 		}
 		else
+		{
 			Unfreeze();
+		}
 
 		m_Core.ReadDDNet(pExtended);
 
@@ -1379,7 +1389,9 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		if(pChar->m_Weapon != m_Core.m_ActiveWeapon)
 		{
 			if(pChar->m_Weapon == WEAPON_NINJA)
+			{
 				m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo = 0;
+			}
 			else
 			{
 				if(m_Core.m_ActiveWeapon == WEAPON_NINJA)
@@ -1421,7 +1433,9 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 					m_Core.m_Jumps = m_Core.m_JumpedTotal + 1;
 			}
 			else if(m_Core.m_Jumps < 2)
+			{
 				m_Core.m_Jumps = m_Core.m_JumpedTotal + 2;
+			}
 			if(GetTuning(GetOverriddenTuneZone())->m_AirJumpImpulse == 0)
 			{
 				m_Core.m_Jumps = 0;

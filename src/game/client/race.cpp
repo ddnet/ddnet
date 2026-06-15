@@ -74,7 +74,9 @@ int CRaceHelper::TimeFromStr(const char *pStr)
 		return str_toint(pStr) * 60 * 1000 + SecondsTime;
 	}
 	else
+	{
 		return TimeFromSecondsStr(pStr);
+	}
 }
 
 int CRaceHelper::TimeFromFinishMessage(const char *pStr, char *pNameBuf, int NameBufSize)

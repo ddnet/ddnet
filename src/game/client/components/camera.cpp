@@ -354,7 +354,9 @@ void CCamera::OnRender()
 		m_ForceFreeview = false;
 	}
 	else
+	{
 		m_ForceFreeviewPos = m_Center;
+	}
 
 	const int SpecId = GameClient()->m_Snap.m_SpecInfo.m_SpectatorId;
 

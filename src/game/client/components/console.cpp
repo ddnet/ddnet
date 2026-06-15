@@ -545,7 +545,9 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 						m_pHistoryEntry = pTest;
 				}
 				else
+				{
 					m_pHistoryEntry = m_History.Last();
+				}
 
 				if(m_pHistoryEntry)
 					m_Input.Set(m_pHistoryEntry);
@@ -746,7 +748,9 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 				m_pCommandParams = pCommand->Params();
 			}
 			else
+			{
 				m_IsCommand = false;
+			}
 		}
 	}
 
@@ -1123,7 +1127,9 @@ void CGameConsole::Prompt(char (&aPrompt)[32])
 				str_format(aPrompt, sizeof(aPrompt), "%s> ", Localize("Enter Password"));
 		}
 		else
+		{
 			str_format(aPrompt, sizeof(aPrompt), "%s> ", Localize("NOT CONNECTED"));
+		}
 	}
 	else
 	{
@@ -1606,7 +1612,9 @@ bool CGameConsole::OnInput(const IInput::CEvent &Event)
 		return false;
 
 	if(Event.m_Key == KEY_ESCAPE && (Event.m_Flags & IInput::FLAG_PRESS) && !CurrentConsole()->m_Searching)
+	{
 		Toggle(m_ConsoleType);
+	}
 	else if(!CurrentConsole()->OnInput(Event))
 	{
 		if(GameClient()->Input()->ModifierIsPressed() && Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_C)

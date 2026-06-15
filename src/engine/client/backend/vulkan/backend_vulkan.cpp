@@ -432,7 +432,9 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 								break;
 						}
 						else
+						{
 							++HeapIterator;
+						}
 					}
 				}
 			}
@@ -3625,7 +3627,9 @@ public:
 			return false;
 		}
 		else if(Res == VK_ERROR_LAYER_NOT_PRESENT || Res == VK_ERROR_EXTENSION_NOT_PRESENT)
+		{
 			TryAgain = true;
+		}
 
 		if(TryAgain && TryDebugExtensions)
 			return CreateVulkanInstance(vVKLayers, vVKExtensions, false);
@@ -4188,7 +4192,9 @@ public:
 			return false;
 		}
 		else if(SwapchainCreateRes == VK_ERROR_NATIVE_WINDOW_IN_USE_KHR)
+		{
 			return false;
+		}
 
 		return true;
 	}
@@ -7524,7 +7530,9 @@ public:
 
 		m_ThreadCount = g_Config.m_GfxRenderThreadCount;
 		if(m_ThreadCount <= 1)
+		{
 			m_ThreadCount = 1;
+		}
 		else
 		{
 			m_ThreadCount = std::clamp<decltype(m_ThreadCount)>(m_ThreadCount, 3, std::max<decltype(m_ThreadCount)>(3, std::thread::hardware_concurrency()));

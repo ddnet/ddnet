@@ -751,7 +751,9 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 			Data.m_HookStrongWeakId = Other.m_ExtendedData.m_StrongWeakId;
 			Data.m_ShowHookStrongWeakId = g_Config.m_Debug || g_Config.m_ClNamePlatesStrong == 2;
 			if(SelectedId == pPlayerInfo->m_ClientId)
+			{
 				Data.m_ShowHookStrongWeak = Data.m_ShowHookStrongWeakId;
+			}
 			else
 			{
 				Data.m_HookStrongWeakState = SelectedStrongWeakId > Other.m_ExtendedData.m_StrongWeakId ? EHookStrongWeakState::STRONG : EHookStrongWeakState::WEAK;

@@ -298,7 +298,9 @@ int CMenus::DoButton_CheckBox_Common(const void *pId, const char *pText, const c
 		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 	}
 	else
+	{
 		Ui()->DoLabel(&Box, pBoxText, Box.h * CUi::ms_FontmodHeight, TEXTALIGN_MC);
+	}
 
 	TextRender()->SetRenderFlags(0);
 	Ui()->DoLabel(&Label, pText, Box.h * CUi::ms_FontmodHeight, TEXTALIGN_ML);
@@ -2464,7 +2466,9 @@ void CMenus::OnStateChange(int NewState, int OldState)
 				Ui()->SetActiveItem(&m_PasswordInput);
 			}
 			else
+			{
 				m_Popup = POPUP_DISCONNECTED;
+			}
 		}
 	}
 	else if(NewState == IClient::STATE_LOADING)

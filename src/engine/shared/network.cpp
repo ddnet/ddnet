@@ -463,7 +463,9 @@ void CNetBase::OpenLog(IOHANDLE DataLogSent, IOHANDLE DataLogRecv)
 		dbg_msg("network", "logging sent packages");
 	}
 	else
+	{
 		dbg_msg("network", "failed to start logging sent packages");
+	}
 
 	if(DataLogRecv)
 	{
@@ -471,7 +473,9 @@ void CNetBase::OpenLog(IOHANDLE DataLogSent, IOHANDLE DataLogRecv)
 		dbg_msg("network", "logging recv packages");
 	}
 	else
+	{
 		dbg_msg("network", "failed to start logging recv packages");
+	}
 }
 
 void CNetBase::CloseLog()

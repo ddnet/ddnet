@@ -2832,7 +2832,9 @@ void CServer::UpdateServerInfo(bool Resend)
 			if(m_aClients[i].m_State != CClient::STATE_EMPTY)
 			{
 				if(!IsSixup(i))
+				{
 					SendServerInfo(ClientAddr(i), -1, SERVERINFO_INGAME, false);
+				}
 				else
 				{
 					CMsgPacker ServerInfoMessage(protocol7::NETMSG_SERVERINFO, true, true);
@@ -2877,7 +2879,9 @@ void CServer::PumpNetwork(bool PacketWaiting)
 							ExtraToken = (Packet.m_aExtraData[0] << 8) | Packet.m_aExtraData[1];
 						}
 						else
+						{
 							Type = SERVERINFO_VANILLA;
+						}
 					}
 					else if(Packet.m_DataSize >= (int)sizeof(SERVERBROWSE_GETINFO_64_LEGACY) + 1 &&
 						mem_comp(Packet.m_pData, SERVERBROWSE_GETINFO_64_LEGACY, sizeof(SERVERBROWSE_GETINFO_64_LEGACY)) == 0)
@@ -3558,7 +3562,9 @@ void CServer::ConKick(IConsole::IResult *pResult, void *pUser)
 		((CServer *)pUser)->Kick(pResult->GetInteger(0), aBuf);
 	}
 	else
+	{
 		((CServer *)pUser)->Kick(pResult->GetInteger(0), "Kicked by console");
+	}
 }
 
 void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
@@ -3698,7 +3704,9 @@ void CServer::ConAuthAdd(IConsole::IResult *pResult, void *pUser)
 
 	bool NeedUpdate = !pManager->NumNonDefaultKeys();
 	if(pManager->AddKey(pIdent, pPw, pLevel) < 0)
+	{
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident already exists");
+	}
 	else
 	{
 		if(NeedUpdate)
@@ -3749,7 +3757,9 @@ void CServer::ConAuthAddHashed(IConsole::IResult *pResult, void *pUser)
 	bool NeedUpdate = !pManager->NumNonDefaultKeys();
 
 	if(pManager->AddKeyHash(pIdent, Hash, aSalt, pLevel) < 0)
+	{
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident already exists");
+	}
 	else
 	{
 		if(NeedUpdate)
@@ -4112,9 +4122,13 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 	CMysqlConfig Config;
 	bool Write;
 	if(str_comp_nocase(pResult->GetString(0), "r") == 0)
+	{
 		Write = false;
+	}
 	else if(str_comp_nocase(pResult->GetString(0), "w") == 0)
+	{
 		Write = true;
+	}
 	else
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "choose either 'r' for SqlReadServer or 'w' for SqlWriteServer");
@@ -4227,7 +4241,9 @@ void CServer::ConchainCommandAccessUpdate(IConsole::IResult *pResult, void *pUse
 		}
 	}
 	else
+	{
 		pfnCallback(pResult, pCallbackUserData);
+	}
 }
 
 void CServer::LogoutClient(int ClientId, const char *pReason)

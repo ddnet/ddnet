@@ -600,7 +600,9 @@ bool CCommandProcessorFragment_OpenGL::InitOpenGL(const SCommand_Init *pCommand)
 		return true;
 	}
 	else
+	{
 		return false;
+	}
 }
 
 bool CCommandProcessorFragment_OpenGL::Cmd_Init(const SCommand_Init *pCommand)
@@ -1816,7 +1818,9 @@ void CCommandProcessorFragment_OpenGL2::Cmd_RenderTex3D(const CCommandBuffer::SC
 			pProgram = m_pPrimitive3DProgramTextured;
 		}
 		else
+		{
 			pProgram = m_pPrimitive3DProgram;
+		}
 
 		UseProgram(pProgram);
 
@@ -2076,7 +2080,9 @@ void CCommandProcessorFragment_OpenGL2::Cmd_RenderTileLayer(const CCommandBuffer
 		pProgram = m_pTileProgramTextured;
 	}
 	else
+	{
 		pProgram = m_pTileProgram;
+	}
 
 	UseProgram(pProgram);
 

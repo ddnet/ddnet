@@ -254,9 +254,13 @@ void CPlayers::RenderHookCollLine(
 				vLineSegments.emplace_back(StartPos, aIntersections[1]);
 		}
 		else if(NumIntersections == 1)
+		{
 			vLineSegments.emplace_back(StartPos, aIntersections[0]);
+		}
 		else
+		{
 			vLineSegments.emplace_back(StartPos, HitPos);
+		}
 	};
 
 	// simulate the hook into the future
@@ -618,7 +622,9 @@ void CPlayers::RenderPlayer(
 	State.Set(&g_pData->m_aAnimations[ANIM_BASE], 0.0f);
 
 	if(InAir)
+	{
 		State.Add(&g_pData->m_aAnimations[ANIM_INAIR], 0.0f, 1.0f); // TODO: some sort of time here
+	}
 	else if(Stationary)
 	{
 		if(Inactive)
@@ -627,7 +633,9 @@ void CPlayers::RenderPlayer(
 			RenderInfo.m_FeetFlipped = true;
 		}
 		else
+		{
 			State.Add(&g_pData->m_aAnimations[ANIM_IDLE], 0.0f, 1.0f); // TODO: some sort of time here
+		}
 	}
 	else if(!WantOtherDir)
 	{
@@ -682,7 +690,9 @@ void CPlayers::RenderPlayer(
 						Graphics()->QuadsSetRotation(-pi / 2.0f + State.GetAttach()->m_Angle * pi * 2.0f);
 				}
 				else
+				{
 					Graphics()->QuadsSetRotation(Direction.x < 0.0f ? 100.0f : 500.0f);
+				}
 
 				Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, WeaponPosition.x, WeaponPosition.y);
 			}
@@ -1101,7 +1111,9 @@ void CPlayers::OnInit()
 					Graphics()->GetSpriteScaleImpl(96, 64, ScaleX, ScaleY);
 				}
 				else
+				{
 					Graphics()->GetSpriteScale(g_pData->m_Weapons.m_aId[i].m_aSpriteMuzzles[n], ScaleX, ScaleY);
+				}
 			}
 
 			float SWidth = (g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleX) * (4.0f / 3.0f);
