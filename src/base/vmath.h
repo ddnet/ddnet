@@ -176,7 +176,9 @@ constexpr bool closest_point_on_line(vector2_base<T> line_pointA, vector2_base<T
 		return true;
 	}
 	else
+	{
 		return false;
+	}
 }
 
 constexpr int intersect_line_circle(const vec2 LineStart, const vec2 LineEnd, const vec2 CircleCenter, float Radius, vec2 aIntersections[2])

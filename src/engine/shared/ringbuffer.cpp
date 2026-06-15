@@ -77,7 +77,9 @@ void *CRingBufferBase::Allocate(int Size)
 		if(m_pProduce->m_Free)
 		{
 			if(m_pProduce->m_Size >= WantedSize)
+			{
 				pBlock = m_pProduce;
+			}
 			else
 			{
 				// wrap around to try to find a block
@@ -87,7 +89,9 @@ void *CRingBufferBase::Allocate(int Size)
 		}
 
 		if(pBlock)
+		{
 			break;
+		}
 		else
 		{
 			// we have no block, check our policy and see what todo
@@ -97,7 +101,9 @@ void *CRingBufferBase::Allocate(int Size)
 					return nullptr;
 			}
 			else
+			{
 				return nullptr;
+			}
 		}
 	}
 

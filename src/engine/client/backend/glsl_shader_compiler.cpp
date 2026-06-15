@@ -221,7 +221,9 @@ void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EGLSLSha
 								break;
 							}
 							else
+							{
 								Line.append(1, *pBuff);
+							}
 							++pBuff;
 						}
 
@@ -243,6 +245,8 @@ void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EGLSLSha
 			}
 		}
 		else
+		{
 			Line = pReadLine;
+		}
 	}
 }

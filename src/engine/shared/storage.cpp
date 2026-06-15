@@ -895,7 +895,9 @@ public:
 			}
 		}
 		else
+		{
 			str_copy(pBuffer, aBinaryPath, BufferSize);
+		}
 		return pBuffer;
 	}
 

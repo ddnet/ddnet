@@ -121,7 +121,9 @@ void CMotd::OnMessage(int MsgType, void *pRawMsg)
 				i++; // skip the 'n'
 			}
 			else
+			{
 				m_aServerMotd[k] = pMsgStr[i];
+			}
 
 			// print the line to the console when receiving the newline character
 			if(g_Config.m_ClPrintMotd && m_aServerMotd[k] == '\n')

@@ -454,7 +454,9 @@ bool CConsole::LineIsValid(const char *pStr)
 					break;
 				}
 				else if(*pEnd == '#') // comment, no need to do anything more
+				{
 					break;
+				}
 			}
 
 			pEnd++;
@@ -512,7 +514,9 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 					break;
 				}
 				else if(*pEnd == '#') // comment, no need to do anything more
+				{
 					break;
+				}
 			}
 
 			pEnd++;
@@ -802,7 +806,9 @@ void CConsole::ConCommandAccess(IResult *pResult, void *pUser)
 		}
 	}
 	else
+	{
 		str_format(aBuf, sizeof(aBuf), "No such command: '%s'.", pResult->GetString(0));
+	}
 
 	pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }

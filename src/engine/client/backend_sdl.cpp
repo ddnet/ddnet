@@ -754,11 +754,17 @@ EBackendType CGraphicsBackend_SDL_GL::DetectBackend()
 #if defined(CONF_BACKEND_VULKAN)
 	const char *pEnvDriver = SDL_getenv("DDNET_DRIVER");
 	if(pEnvDriver && str_comp_nocase(pEnvDriver, "GLES") == 0)
+	{
 		RetBackendType = BACKEND_TYPE_OPENGL_ES;
+	}
 	else if(pEnvDriver && str_comp_nocase(pEnvDriver, "Vulkan") == 0)
+	{
 		RetBackendType = BACKEND_TYPE_VULKAN;
+	}
 	else if(pEnvDriver && str_comp_nocase(pEnvDriver, "OpenGL") == 0)
+	{
 		RetBackendType = BACKEND_TYPE_OPENGL;
+	}
 	else if(pEnvDriver == nullptr)
 	{
 		// load the config backend
@@ -1382,7 +1388,9 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 			SDL_Vulkan_GetDrawableSize(m_pWindow, pCurrentWidth, pCurrentHeight);
 	}
 	else
+	{
 		SDL_GetWindowSize(m_pWindow, pCurrentWidth, pCurrentHeight);
+	}
 	SDL_GetWindowSize(m_pWindow, pWidth, pHeight);
 
 	if(IsOpenGLFamilyBackend)

@@ -199,7 +199,9 @@ CUIRect CScrollRegion::SplitContentArea()
 		}
 	}
 	else
+	{
 		ScrollbarBg.Margin(m_Params.m_ScrollbarMargin, &m_RailRect);
+	}
 
 	return ScrollbarBg;
 }

@@ -78,7 +78,9 @@ int CFriends::GetFriendState(const char *pName, const char *pClan) const
 		if((g_Config.m_ClFriendsIgnoreClan && m_aFriends[i].m_aName[0]) || (m_aFriends[i].m_ClanHash == ClanHash && !str_comp(m_aFriends[i].m_aClan, pClan)))
 		{
 			if(m_aFriends[i].m_aName[0] == 0)
+			{
 				Result = FRIEND_CLAN;
+			}
 			else if(m_aFriends[i].m_NameHash == NameHash && !str_comp(m_aFriends[i].m_aName, pName))
 			{
 				Result = FRIEND_PLAYER;

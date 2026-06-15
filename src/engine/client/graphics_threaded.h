@@ -1165,7 +1165,9 @@ public:
 			PrimCount = NumVerts / 3;
 		}
 		else
+		{
 			return;
+		}
 
 		Command.m_pVertices = (decltype(Command.m_pVertices))AllocCommandBufferData(VertSize * NumVerts);
 		Command.m_State = m_State;
