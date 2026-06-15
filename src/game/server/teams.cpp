@@ -11,6 +11,7 @@
 #include <base/time.h>
 
 #include <engine/shared/config.h>
+#include <engine/shared/protocol.h>
 
 #include <game/mapitems.h>
 #include <game/server/entities/character.h>
@@ -645,14 +646,58 @@ void CGameTeams::SendTeamsState(int ClientId)
 	CMsgPacker Msg(NETMSGTYPE_SV_TEAMSSTATE);
 	CMsgPacker MsgLegacy(NETMSGTYPE_SV_TEAMSSTATELEGACY);
 
+	int ClientVersion = GameServer()->GetClientVersion(ClientId);
+	bool PlayerMappingRequired = ClientVersion < VERSION_DDNET_128_PLAYERS;
+
 	for(unsigned i = 0; i < MAX_CLIENTS; i++)
 	{
-		Msg.AddInt(m_Core.Team(i));
-		MsgLegacy.AddInt(m_Core.Team(i));
+		if(PlayerMappingRequired)
+		{
+			if(i >= LEGACY_MAX_CLIENTS)
+				break;
+
+			// see others selector
+			CPlayerMapping::ESeeOthersInd Indicator = GameServer()->m_PlayerMapping.SeeOthersInd(ClientId, i);
+			if(Indicator != CPlayerMapping::ESeeOthersInd::NONE)
+			{
+				// Team colors (49 and 28) are random and used for see-others feature (+spectate) to cycle the player map
+				int Team = -1;
+				if(Indicator == CPlayerMapping::ESeeOthersInd::BUTTON)
+					Team = 49;
+				else if(Indicator == CPlayerMapping::ESeeOthersInd::PLAYER)
+					Team = 28;
+
+				if(Team != -1)
+				{
+					Msg.AddInt(Team);
+					MsgLegacy.AddInt(Team);
+					continue;
+				}
+			}
+		}
+
+		int Team = 0;
+		int TranslatedId = i;
+		if(Server()->ReverseTranslate(TranslatedId, ClientId))
+		{
+			Team = m_Core.Team(TranslatedId);
+			if(ClientVersion < VERSION_DDNET_128_TEAMS)
+			{
+				// If player is not reserved, dont highlight his team. Causes mismatch between dummy and main when playermapping is active.
+				bool DontHighlightTeam = PlayerMappingRequired && !GameServer()->m_PlayerMapping.ReserveTeamSlots(Team);
+				if(DontHighlightTeam)
+					Team = 0;
+				else if(Team == TEAM_SUPER)
+					Team = LEGACY_MAX_CLIENTS; // legacy team super
+				else if(Team >= LEGACY_MAX_CLIENTS)
+					Team = 0;
+			}
+		}
+		Msg.AddInt(Team);
+		MsgLegacy.AddInt(Team);
 	}
 
 	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
-	int ClientVersion = m_pGameContext->m_apPlayers[ClientId]->GetClientVersion();
 	if(!Server()->IsSixup(ClientId) && VERSION_DDRACE < ClientVersion && ClientVersion < VERSION_DDNET_MSG_LEGACY)
 	{
 		Server()->SendMsg(&MsgLegacy, MSGFLAG_VITAL, ClientId);
