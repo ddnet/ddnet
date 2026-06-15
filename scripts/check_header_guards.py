@@ -23,6 +23,7 @@ def check_file(filename):
 	if filename in EXCEPTIONS:
 		return False
 	guard_name = ("_".join(filename.split(PATH)[1].split("/"))[:-2]).upper() + "_H"
+	guard_name = guard_name.replace("-", "_")
 	header_guard_line1 = f"#ifndef {guard_name}"
 	header_guard_line2 = f"#define {guard_name}"
 	footer1 = f"#endif // {guard_name}"
