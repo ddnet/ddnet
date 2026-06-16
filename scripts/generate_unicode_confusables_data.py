@@ -55,6 +55,7 @@ def generate_decompositions():
 
 def gen_header(decompositions, len_set):
 	print("""\
+#include <cstddef>
 #include <cstdint>
 
 struct DECOMP_SLICE
@@ -63,13 +64,9 @@ struct DECOMP_SLICE
 \tuint16_t length : 3;
 };
 """)
-	print("enum")
-	print("{")
-	print(f"\tNUM_DECOMP_LENGTHS = {len(len_set)},")
-	print(f"\tNUM_DECOMPS = {len(decompositions)},")
-	print("};")
+	print(f"static constexpr size_t NUM_DECOMP_LENGTHS = {len(len_set)};")
+	print(f"static constexpr size_t NUM_DECOMPS = {len(decompositions)};")
 	print()
-
 	print("extern const uint8_t decomp_lengths[NUM_DECOMP_LENGTHS];")
 	print("extern const int32_t decomp_chars[NUM_DECOMPS];")
 	print("extern const struct DECOMP_SLICE decomp_slices[NUM_DECOMPS];")

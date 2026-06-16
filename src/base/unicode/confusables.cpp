@@ -6,8 +6,7 @@
 
 static int str_utf8_skeleton(int ch, const int **skeleton, int *skeleton_len)
 {
-	int i;
-	for(i = 0; i < NUM_DECOMPS; i++)
+	for(size_t i = 0; i < NUM_DECOMPS; i++)
 	{
 		if(ch == decomp_chars[i])
 		{
