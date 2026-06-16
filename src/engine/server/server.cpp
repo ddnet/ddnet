@@ -616,7 +616,7 @@ int CServer::Init()
 	return 0;
 }
 
-bool CServer::StrHideIps(const char *pInput, char *pOutputWithIps, int OutputWithIpsSize, char *pOutputWithoutIps, int OutputWithoutIpsSize)
+bool CServer::StrHideIps(const char *pInput, char *pOutputWithIps, size_t OutputWithIpsSize, char *pOutputWithoutIps, size_t OutputWithoutIpsSize)
 {
 	const char *pStart = str_find(pInput, "<{");
 	const char *pEnd = pStart == nullptr ? nullptr : str_find(pStart + 2, "}>");
@@ -630,11 +630,11 @@ bool CServer::StrHideIps(const char *pInput, char *pOutputWithIps, int OutputWit
 		return false;
 	}
 
-	str_append(pOutputWithIps, pInput, minimum<size_t>(pStart - pInput + 1, OutputWithIpsSize));
-	str_append(pOutputWithIps, pStart + 2, minimum<size_t>(pEnd - pInput - 1, OutputWithIpsSize));
+	str_append(pOutputWithIps, pInput, std::min((size_t)(pStart - pInput + 1), OutputWithIpsSize));
+	str_append(pOutputWithIps, pStart + 2, std::min((size_t)(pEnd - pInput - 1), OutputWithIpsSize));
 	str_append(pOutputWithIps, pEnd + 2, OutputWithIpsSize);
 
-	str_append(pOutputWithoutIps, pInput, minimum<size_t>(pStart - pInput + 1, OutputWithoutIpsSize));
+	str_append(pOutputWithoutIps, pInput, std::min((size_t)(pStart - pInput + 1), OutputWithoutIpsSize));
 	str_append(pOutputWithoutIps, "XXX", OutputWithoutIpsSize);
 	str_append(pOutputWithoutIps, pEnd + 2, OutputWithoutIpsSize);
 	return true;
