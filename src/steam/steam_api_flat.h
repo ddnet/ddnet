@@ -15,25 +15,25 @@ typedef uint64_t CSteamId;
 typedef int32_t HSteamPipe;
 typedef int32_t HSteamUser;
 
-struct CallbackMsg_t
+struct SCallbackMsg_t
 {
-	HSteamUser m_hSteamUser;
-	int m_iCallback;
-	unsigned char *m_pubParam;
-	int m_cubParam;
+	HSteamUser m_HSteamUser;
+	int m_ICallback;
+	unsigned char *m_pPubParam;
+	int m_CubParam;
 };
 
-struct GameRichPresenceJoinRequested_t
+struct SGameRichPresenceJoinRequested_t
 {
 	enum
 	{
 		k_iCallback = 337
 	};
-	CSteamId m_steamIdFriend;
+	CSteamId m_SteamIdFriend;
 	char m_aRGCHConnect[256];
 };
 
-struct NewUrlLaunchParameters_t
+struct SNewUrlLaunchParameters_t
 {
 	enum
 	{
@@ -51,7 +51,7 @@ STEAMAPI void SteamAPI_Shutdown();
 
 STEAMAPI void SteamAPI_ManualDispatch_Init();
 STEAMAPI void SteamAPI_ManualDispatch_FreeLastCallback(HSteamPipe SteamPipe);
-STEAMAPI bool SteamAPI_ManualDispatch_GetNextCallback(HSteamPipe SteamPipe, CallbackMsg_t *pCallbackMsg);
+STEAMAPI bool SteamAPI_ManualDispatch_GetNextCallback(HSteamPipe SteamPipe, SCallbackMsg_t *pCallbackMsg);
 STEAMAPI void SteamAPI_ManualDispatch_RunFrame(HSteamPipe SteamPipe);
 
 STEAMAPI ISteamApps *SteamAPI_SteamApps_v008();

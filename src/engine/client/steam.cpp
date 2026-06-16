@@ -62,7 +62,7 @@ public:
 		ParseConnectString(aConnect);
 	}
 
-	void OnGameRichPresenceJoinRequested(GameRichPresenceJoinRequested_t *pEvent)
+	void OnGameRichPresenceJoinRequested(SGameRichPresenceJoinRequested_t *pEvent)
 	{
 		ParseConnectString(pEvent->m_aRGCHConnect);
 	}
@@ -91,21 +91,21 @@ public:
 	void Update() override
 	{
 		SteamAPI_ManualDispatch_RunFrame(m_SteamPipe);
-		CallbackMsg_t Callback;
+		SCallbackMsg_t Callback;
 		while(SteamAPI_ManualDispatch_GetNextCallback(m_SteamPipe, &Callback))
 		{
-			switch(Callback.m_iCallback)
+			switch(Callback.m_ICallback)
 			{
-			case NewUrlLaunchParameters_t::k_iCallback:
+			case SNewUrlLaunchParameters_t::k_iCallback:
 				ReadLaunchCommandLine();
 				break;
-			case GameRichPresenceJoinRequested_t::k_iCallback:
-				OnGameRichPresenceJoinRequested((GameRichPresenceJoinRequested_t *)Callback.m_pubParam);
+			case SGameRichPresenceJoinRequested_t::k_iCallback:
+				OnGameRichPresenceJoinRequested((SGameRichPresenceJoinRequested_t *)Callback.m_pPubParam);
 				break;
 			default:
 				if(g_Config.m_Debug)
 				{
-					dbg_msg("steam/dbg", "unhandled callback id=%d", Callback.m_iCallback);
+					dbg_msg("steam/dbg", "unhandled callback id=%d", Callback.m_ICallback);
 				}
 			}
 			SteamAPI_ManualDispatch_FreeLastCallback(m_SteamPipe);
