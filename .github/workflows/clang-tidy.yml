@@ -21,7 +21,25 @@ jobs:
     - name: Prepare Linux
       run: |
         sudo apt-get update -y
-        sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev libglew-dev -y
+        sudo apt-get install \
+          cmake \
+          libavcodec-dev \
+          libavformat-dev \
+          libavutil-dev \
+          libfreetype6-dev \
+          libglew-dev \
+          libmariadb-dev \
+          libminiupnpc-dev \
+          libnotify-dev \
+          libsdl2-dev \
+          libsqlite3-dev \
+          libswresample-dev \
+          libswscale-dev \
+          libwebsockets-dev \
+          libx264-dev \
+          ninja-build \
+          pkg-config \
+          -y
 
     - name: Install Vulkan SDK
       uses: humbletim/install-vulkan-sdk@v1.2
@@ -56,5 +74,14 @@ jobs:
           -DCMAKE_CXX_CLANG_TIDY="clang-tidy-20;-warnings-as-errors=*" \
           -DCMAKE_C_CLANG_TIDY="clang-tidy-20;-warnings-as-errors=*" \
           -DCMAKE_BUILD_TYPE=Debug \
+          -DANTIBOT=ON \
+          -DAUTOUPDATE=ON \
+          -DDISCORD=ON \
+          -DMYSQL=ON \
+          -DSTEAM=ON \
+          -DUPNP=ON \
+          -DVIDEORECORDER=ON \
+          -DVULKAN=ON \
+          -DWEBSOCKETS=ON \
           -Werror=dev ..
         cmake --build . --config Debug --target everything -- -k 0
