@@ -779,16 +779,18 @@ void CHud::RenderAmmoHealthAndArmor(const CNetObj_Character *pCharacter)
 	if(GameClient()->m_GameInfo.m_HudHealthArmor)
 	{
 		// health display
+		const int DisplayHealth = std::min(pCharacter->m_Health, 10);
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteHealthFull);
-		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_HealthOffset + QuadOffsetSixup, minimum(pCharacter->m_Health, 10));
+		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_HealthOffset + QuadOffsetSixup, DisplayHealth);
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteHealthEmpty);
-		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_EmptyHealthOffset + QuadOffsetSixup + minimum(pCharacter->m_Health, 10), 10 - minimum(pCharacter->m_Health, 10));
+		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_EmptyHealthOffset + QuadOffsetSixup + DisplayHealth, 10 - DisplayHealth);
 
 		// armor display
+		const int DisplayArmor = std::min(pCharacter->m_Armor, 10);
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteArmorFull);
-		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_ArmorOffset + QuadOffsetSixup, minimum(pCharacter->m_Armor, 10));
+		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_ArmorOffset + QuadOffsetSixup, DisplayArmor);
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteArmorEmpty);
-		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_ArmorOffset + QuadOffsetSixup + minimum(pCharacter->m_Armor, 10), 10 - minimum(pCharacter->m_Armor, 10));
+		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_ArmorOffset + QuadOffsetSixup + DisplayArmor, 10 - DisplayArmor);
 	}
 }
 
