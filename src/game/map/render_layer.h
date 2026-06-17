@@ -19,6 +19,7 @@ using offset_ptr32 = unsigned int;
 
 #include <memory>
 #include <optional>
+#include <variant>
 #include <vector>
 
 class CMapLayers;
@@ -59,6 +60,7 @@ public:
 	bool m_DebugRenderQuadClips;
 	bool m_DebugRenderClusterClips;
 	bool m_DebugRenderTileClips;
+	bool m_DebugRenderTileBorderClips;
 };
 
 class CRenderLayer : public CRenderComponent
@@ -140,6 +142,218 @@ private:
 	IGraphics::CTextureHandle m_TextureHandle;
 
 protected:
+	enum EBorderType
+	{
+		CORNER = 1,
+		RIGHT = 2,
+		LEFT = 4,
+		TOP = 8,
+		BOTTOM = 16,
+	};
+
+	class CTileVisual
+	{
+	public:
+		CTileVisual() :
+			m_IndexBufferByteOffset(0) {}
+
+	private:
+		offset_ptr32 m_IndexBufferByteOffset;
+
+	public:
+		bool DoDraw() const
+		{
+			return (m_IndexBufferByteOffset & 0x10000000) != 0;
+		}
+
+		void Draw(bool SetDraw)
+		{
+			m_IndexBufferByteOffset = (SetDraw ? 0x10000000 : (offset_ptr32)0) | (m_IndexBufferByteOffset & 0xEFFFFFFF);
+		}
+
+		offset_ptr IndexBufferByteOffset() const
+		{
+			return ((offset_ptr)(m_IndexBufferByteOffset & 0xEFFFFFFF) * 6 * sizeof(uint32_t));
+		}
+
+		void SetIndexBufferByteOffset(offset_ptr32 IndexBufferByteOff)
+		{
+			m_IndexBufferByteOffset = IndexBufferByteOff | (m_IndexBufferByteOffset & 0x10000000);
+		}
+
+		void AddIndexBufferByteOffset(offset_ptr32 IndexBufferByteOff)
+		{
+			m_IndexBufferByteOffset = ((m_IndexBufferByteOffset & 0xEFFFFFFF) + IndexBufferByteOff) | (m_IndexBufferByteOffset & 0x10000000);
+		}
+	};
+
+	class CTileLayerVisuals;
+
+	/*class IRenderTileLayerBorder : public CRenderComponent
+	{
+	public:
+		IRenderTileLayerBorder(CClipRegion &ClipRegion) :
+			m_BorderClip(ClipRegion) {}
+		virtual ~IRenderTileLayerBorder() = default;
+		virtual void Draw(const CTileLayerVisuals *pVisual, const ColorRGBA &Color, float ScreenX0, float ScreenY0, float ScreenX1, float ScreenY1) = 0;
+		virtual constexpr int GetType() = 0;
+		virtual bool Adjust() = 0;
+
+		std::vector<CTileVisual> m_vBorder;
+		CClipRegion m_BorderClip;
+	};*/
+
+	template<int Type>
+	class CRenderTileLayerBorder : public CRenderComponent
+	{
+	public:
+		CRenderTileLayerBorder(vec2 Offset, CClipRegion ClipRegion, size_t Size) :
+			m_BorderClip(ClipRegion), m_Offset(Offset)
+		{
+			m_vBorder.resize(Size);
+			m_FrontOffset = 0;
+		}
+
+		constexpr int GetType() { return Type; }
+
+		void Draw(const CTileLayerVisuals *pVisual, const ColorRGBA &Color, float ScreenX0, float ScreenY0, float ScreenX1, float ScreenY1)
+		{
+			float BorderX = 0, BorderY = 0;
+			if constexpr(Type & EBorderType::TOP)
+			{
+				if(ScreenY0 >= m_BorderClip.m_Y + m_BorderClip.m_Height)
+					return;
+				BorderY = m_BorderClip.m_Y + m_BorderClip.m_Height;
+			}
+			else if constexpr(Type & EBorderType::BOTTOM)
+			{
+				if(ScreenY1 <= m_BorderClip.m_Y)
+					return;
+				BorderY = m_BorderClip.m_Y;
+			}
+
+			if constexpr(Type & EBorderType::LEFT)
+			{
+				if(ScreenX0 >= m_BorderClip.m_X + m_BorderClip.m_Width)
+					return;
+				BorderX = m_BorderClip.m_X + m_BorderClip.m_Width;
+			}
+
+			else if constexpr(Type & EBorderType::RIGHT)
+			{
+				if(ScreenX1 <= m_BorderClip.m_X)
+					return;
+				BorderX = m_BorderClip.m_X;
+			}
+
+			// calculate how many tiles are needed to be drawn
+			auto GetNumTiles = [](int Border, int TileOffset) -> float {
+				// add an extra tile, for mouse movements
+				return std::ceil(Border / 32.0f) - TileOffset + 1;
+			};
+
+			vec2 NumTiles(1.0f, 1.0f);
+			if constexpr(Type & EBorderType::TOP)
+				NumTiles.y = GetNumTiles(BorderY - ScreenY0, 0);
+			else if constexpr(Type & EBorderType::BOTTOM)
+				NumTiles.y = -GetNumTiles(BorderY - ScreenY1, pVisual->m_Height);
+			if constexpr(Type & EBorderType::LEFT)
+				NumTiles.x = GetNumTiles(BorderX - ScreenX0, 0);
+			else if constexpr(Type & EBorderType::RIGHT)
+				NumTiles.x = -GetNumTiles(BorderX - ScreenX1, pVisual->m_Width);
+
+			if constexpr((Type & EBorderType::CORNER) != 0)
+			{
+				// corners only have one tile, which always is drawn
+				offset_ptr_size pOffset = (offset_ptr_size)m_vBorder.data()->IndexBufferByteOffset();
+				Graphics()->RenderBorderTiles(pVisual->m_BufferContainerIndex, Color, pOffset, m_Offset, NumTiles, 1u);
+				return;
+			}
+
+			constexpr bool IsHorizontal = ((Type & (EBorderType::TOP | EBorderType::BOTTOM)) != 0);
+
+			float StartScreen = IsHorizontal ? ScreenX0 : ScreenY0;
+			float EndScreen = IsHorizontal ? ScreenX1 : ScreenY1;
+			int StartIndex = (int)std::floor(StartScreen / 32.0f);
+			int EndIndex = (int)std::ceil(EndScreen / 32.0f);
+
+			// we deleted the front objects, because they contained no draws
+			StartIndex -= m_FrontOffset;
+			EndIndex -= m_FrontOffset;
+
+			if(StartIndex >= (int)m_vBorder.size() || EndIndex < 0)
+				return;
+
+			StartIndex = std::max(StartIndex, 0);
+			EndIndex = std::min(EndIndex, (int)m_vBorder.size() - 1);
+
+			// probably impossible but safe
+			if(EndIndex < StartIndex)
+				return;
+
+			const CTileVisual &StartVisual = m_vBorder[StartIndex];
+			const CTileVisual &EndVisual = m_vBorder[EndIndex];
+
+			unsigned int DrawNum = ((EndVisual.IndexBufferByteOffset() - StartVisual.IndexBufferByteOffset()) / (sizeof(unsigned int) * 6)) + (EndVisual.DoDraw() ? 1lu : 0lu);
+			offset_ptr_size pOffset = (offset_ptr_size)StartVisual.IndexBufferByteOffset();
+			Graphics()->RenderBorderTiles(pVisual->m_BufferContainerIndex, Color, pOffset, m_Offset, NumTiles, DrawNum);
+		}
+
+		bool Adjust()
+		{
+			// remove empty tiles from the back of the border
+			while(!m_vBorder.empty() && !m_vBorder.back().DoDraw())
+			{
+				m_vBorder.pop_back();
+			}
+
+			// no tiles left
+			if(m_vBorder.empty())
+				return false;
+
+			// corners need no clip region adjustment
+			if constexpr(Type & EBorderType::CORNER)
+				return true;
+
+			// adjust clip region
+			// TODO in theory we can remove the first TileId-1 tiles, but this is not trivial
+			int FirstDrawId;
+			for(FirstDrawId = 0; FirstDrawId < (int)m_vBorder.size(); ++FirstDrawId)
+			{
+				if(m_vBorder[FirstDrawId].DoDraw())
+					break;
+			}
+
+			// this is guaranteed to have draws, since we 'pop_back-ed' the back above
+			int LastDrawId = m_vBorder.size() - 1;
+			if constexpr(Type & (EBorderType::TOP | EBorderType::BOTTOM))
+			{
+				m_BorderClip.m_X += FirstDrawId * 32.0f;
+				m_BorderClip.m_Width = (LastDrawId - FirstDrawId + 1) * 32.0f;
+			}
+			else
+			{
+				m_BorderClip.m_Y += FirstDrawId * 32.0f;
+				m_BorderClip.m_Height = (LastDrawId - FirstDrawId + 1) * 32.0f;
+			}
+
+			// remove empty front indices
+			if(FirstDrawId > 0)
+			{
+				m_vBorder.erase(m_vBorder.begin(), m_vBorder.begin() + FirstDrawId - 1);
+			}
+			m_FrontOffset = FirstDrawId;
+			return true;
+		}
+
+		std::vector<CTileVisual> m_vBorder;
+		CClipRegion m_BorderClip;
+
+	private:
+		vec2 m_Offset;
+		int m_FrontOffset;
+	};
+
 	class CTileLayerVisuals : public CRenderComponent
 	{
 	public:
@@ -154,55 +368,19 @@ protected:
 		bool Init(unsigned int Width, unsigned int Height);
 		void Unload();
 
-		class CTileVisual
-		{
-		public:
-			CTileVisual() :
-				m_IndexBufferByteOffset(0) {}
-
-		private:
-			offset_ptr32 m_IndexBufferByteOffset;
-
-		public:
-			bool DoDraw() const
-			{
-				return (m_IndexBufferByteOffset & 0x10000000) != 0;
-			}
-
-			void Draw(bool SetDraw)
-			{
-				m_IndexBufferByteOffset = (SetDraw ? 0x10000000 : (offset_ptr32)0) | (m_IndexBufferByteOffset & 0xEFFFFFFF);
-			}
-
-			offset_ptr IndexBufferByteOffset() const
-			{
-				return ((offset_ptr)(m_IndexBufferByteOffset & 0xEFFFFFFF) * 6 * sizeof(uint32_t));
-			}
-
-			void SetIndexBufferByteOffset(offset_ptr32 IndexBufferByteOff)
-			{
-				m_IndexBufferByteOffset = IndexBufferByteOff | (m_IndexBufferByteOffset & 0x10000000);
-			}
-
-			void AddIndexBufferByteOffset(offset_ptr32 IndexBufferByteOff)
-			{
-				m_IndexBufferByteOffset = ((m_IndexBufferByteOffset & 0xEFFFFFFF) + IndexBufferByteOff) | (m_IndexBufferByteOffset & 0x10000000);
-			}
-		};
-
 		std::vector<CTileVisual> m_vTilesOfLayer;
-
-		CTileVisual m_BorderTopLeft;
-		CTileVisual m_BorderTopRight;
-		CTileVisual m_BorderBottomRight;
-		CTileVisual m_BorderBottomLeft;
+		std::vector<std::variant<
+			CRenderTileLayerBorder<EBorderType::CORNER | EBorderType::LEFT | EBorderType::TOP>,
+			CRenderTileLayerBorder<EBorderType::CORNER | EBorderType::RIGHT | EBorderType::TOP>,
+			CRenderTileLayerBorder<EBorderType::CORNER | EBorderType::LEFT | EBorderType::BOTTOM>,
+			CRenderTileLayerBorder<EBorderType::CORNER | EBorderType::RIGHT | EBorderType::BOTTOM>,
+			CRenderTileLayerBorder<EBorderType::TOP>,
+			CRenderTileLayerBorder<EBorderType::BOTTOM>,
+			CRenderTileLayerBorder<EBorderType::LEFT>,
+			CRenderTileLayerBorder<EBorderType::RIGHT>>>
+			m_vBorders;
 
 		CTileVisual m_BorderKillTile; // end of map kill tile -- game layer only
-
-		std::vector<CTileVisual> m_vBorderTop;
-		std::vector<CTileVisual> m_vBorderLeft;
-		std::vector<CTileVisual> m_vBorderRight;
-		std::vector<CTileVisual> m_vBorderBottom;
 
 		unsigned int m_Width;
 		unsigned int m_Height;
@@ -216,7 +394,7 @@ protected:
 	virtual void RenderTileLayerNoTileBuffer(const ColorRGBA &Color, const CRenderLayerParams &Params);
 
 	void RenderTileLayer(const ColorRGBA &Color, const CRenderLayerParams &Params, CTileLayerVisuals *pTileLayerVisuals = nullptr);
-	void RenderTileBorder(const ColorRGBA &Color, int BorderX0, int BorderY0, int BorderX1, int BorderY1, CTileLayerVisuals *pTileLayerVisuals);
+	void RenderTileBorder(const ColorRGBA &Color, const CRenderLayerParams &Params, CTileLayerVisuals *pTileLayerVisuals);
 	void RenderKillTileBorder(const ColorRGBA &Color);
 
 	std::optional<CRenderLayerTile::CTileLayerVisuals> m_VisualTiles;
