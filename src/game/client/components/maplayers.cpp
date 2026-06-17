@@ -60,6 +60,7 @@ void CMapLayers::OnRender()
 	m_Params.m_DebugRenderQuadClips = g_Config.m_DbgRenderQuadClips;
 	m_Params.m_DebugRenderClusterClips = g_Config.m_DbgRenderClusterClips;
 	m_Params.m_DebugRenderTileClips = g_Config.m_DbgRenderTileClips;
+	m_Params.m_DebugRenderTileBorderClips = g_Config.m_DbgRenderTileBorderClips;
 
 	m_MapRenderer.Render(m_Params);
 }
