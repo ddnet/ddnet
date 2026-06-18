@@ -22,6 +22,7 @@ public:
 	};
 	explicit CEnvelope(EType Type);
 	explicit CEnvelope(int NumChannels);
+	CEnvelope(const CEnvelope &Other);
 
 	std::pair<float, float> GetValueRange(int ChannelMask);
 	void Eval(float Time, ColorRGBA &Result, size_t Channels);

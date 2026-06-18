@@ -196,6 +196,30 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 		if(Map()->m_SelectedEnvelope >= 0)
 		{
+			ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
+			ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
+
+			static int s_CopyEnvelopeButton = 0;
+			if(DoButton_FontIcon(&s_CopyEnvelopeButton, FontIcon::COPY, 0, &Button, BUTTONFLAG_LEFT, "Copy the selected envelope.", IGraphics::CORNER_ALL, 9.0f))
+			{
+				const auto &pSource = Map()->m_vpEnvelopes[Map()->m_SelectedEnvelope];
+				m_pEnvelopeClipboard = std::make_shared<CEnvelope>(*pSource);
+			}
+		}
+
+		ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
+		ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
+
+		static int s_PasteEnvelopeButton = 0;
+		if(DoButton_FontIcon(&s_PasteEnvelopeButton, FontIcon::PASTE, m_pEnvelopeClipboard ? 0 : -1, &Button, BUTTONFLAG_LEFT, "Paste copied envelope.", IGraphics::CORNER_ALL, 9.0f))
+		{
+			Map()->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionEnvelopeAdd>(Map(), std::make_shared<CEnvelope>(*m_pEnvelopeClipboard)));
+			pEnvelope = Map()->m_vpEnvelopes[Map()->m_SelectedEnvelope];
+			CurrentEnvelopeSwitched = true;
+		}
+
+		if(Map()->m_SelectedEnvelope >= 0)
+		{
 			// Delete button
 			ToolBar.VSplitRight(10.0f, &ToolBar, nullptr);
 			ToolBar.VSplitRight(25.0f, &ToolBar, &Button);

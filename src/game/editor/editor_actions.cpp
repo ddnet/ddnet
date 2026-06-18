@@ -12,6 +12,8 @@
 #include <game/editor/mapitems/layer_sounds.h>
 #include <game/editor/mapitems/map.h>
 
+#include <utility>
+
 CEditorBrushDrawAction::CEditorBrushDrawAction(CEditorMap *pMap, int Group) :
 	IEditorAction(pMap), m_Group(Group)
 {
@@ -1459,6 +1461,15 @@ CEditorActionEnvelopeAdd::CEditorActionEnvelopeAdd(CEditorMap *pMap, CEnvelope::
 	m_PreviousSelectedEnvelope = Map()->m_SelectedEnvelope;
 }
 
+CEditorActionEnvelopeAdd::CEditorActionEnvelopeAdd(CEditorMap *pMap, std::shared_ptr<CEnvelope> pEnvelope) :
+	IEditorAction(pMap),
+	m_EnvelopeType(pEnvelope->Type()),
+	m_pEnvelope(std::move(pEnvelope))
+{
+	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Paste envelope");
+	m_PreviousSelectedEnvelope = Map()->m_SelectedEnvelope;
+}
+
 void CEditorActionEnvelopeAdd::Undo()
 {
 	// Undo is removing the envelope, which was added at the back of the list
@@ -1470,7 +1481,15 @@ void CEditorActionEnvelopeAdd::Undo()
 void CEditorActionEnvelopeAdd::Redo()
 {
 	// Redo is adding a new envelope at the back of the list
-	Map()->NewEnvelope(m_EnvelopeType);
+	if(m_pEnvelope)
+	{
+		Map()->OnModify();
+		Map()->m_vpEnvelopes.push_back(m_pEnvelope);
+	}
+	else
+	{
+		Map()->NewEnvelope(m_EnvelopeType);
+	}
 	Map()->m_SelectedEnvelope = Map()->m_vpEnvelopes.size() - 1;
 }
 

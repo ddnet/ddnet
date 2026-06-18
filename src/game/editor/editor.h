@@ -136,6 +136,7 @@ class CEditor : public IEditor, public IEnvelopeEval
 	IGraphics::CTextureHandle m_SpeedupTexture;
 	IGraphics::CTextureHandle m_SwitchTexture;
 	IGraphics::CTextureHandle m_TuneTexture;
+	std::shared_ptr<CEnvelope> m_pEnvelopeClipboard;
 
 	enum EPreviewState
 	{
