@@ -399,13 +399,21 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 
 		ToolbarTop.VSplitLeft(5.0f, nullptr, &ToolbarTop);
 
-		// animation button
+		// animation buttons
 		ToolbarTop.VSplitLeft(25.0f, &Button, &ToolbarTop);
-		static char s_AnimateButton;
-		if(DoButton_FontIcon(&s_AnimateButton, FontIcon::CIRCLE_PLAY, m_Animate, &Button, BUTTONFLAG_LEFT, "[Ctrl+M] Toggle animation.", IGraphics::CORNER_L) ||
+		static char s_JumpStartButton = 0;
+		if(DoButton_FontIcon(&s_JumpStartButton, FontIcon::BACKWARD_STEP, false, &Button, BUTTONFLAG_LEFT, "Jump to beginning of animation.", IGraphics::CORNER_L))
+		{
+			m_AnimateTime = 0;
+			m_Animate = false;
+		}
+
+		ToolbarTop.VSplitLeft(25.0f, &Button, &ToolbarTop);
+		static char s_AnimateButton = 0;
+		if(DoButton_FontIcon(&s_AnimateButton, m_Animate ? FontIcon::PAUSE : FontIcon::PLAY, m_Animate, &Button, BUTTONFLAG_LEFT, "[Ctrl+M] Toggle animation.", IGraphics::CORNER_NONE) ||
 			(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_M) && ModPressed))
 		{
-			m_AnimateStart = Client()->GlobalTime();
+			m_AnimateStart = Client()->GlobalTime() - m_AnimateTime;
 			m_Animate = !m_Animate;
 		}
 
@@ -3600,7 +3608,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	char aTimeStr[6];
 	str_timestamp_format(aTimeStr, sizeof(aTimeStr), "%H:%M");
 
-	str_format(aBuf, sizeof(aBuf), "X: %.1f, Y: %.1f, Z: %.1f, A: %.1f, G: %i  %s", MapView()->MouseWorldPos().x / 32.0f, MapView()->MouseWorldPos().y / 32.0f, MapView()->Zoom()->GetValue(), m_AnimateSpeed, MapView()->MapGrid()->Factor(), aTimeStr);
+	str_format(aBuf, sizeof(aBuf), "X: %.1f, Y: %.1f, Z: %.1f, T: %.1f, A: %.1f, G: %i  %s", MapView()->MouseWorldPos().x / 32.0f, MapView()->MouseWorldPos().y / 32.0f, MapView()->Zoom()->GetValue(), m_AnimateTime * m_AnimateSpeed, m_AnimateSpeed, MapView()->MapGrid()->Factor(), aTimeStr);
 	Ui()->DoLabel(&Info, aBuf, 10.0f, TEXTALIGN_MR);
 
 	static int s_HelpButton = 0;
@@ -4402,6 +4410,9 @@ void CEditor::Reset(bool CreateDefault)
 	m_ActiveEnvelopePreview = EEnvelopePreview::NONE;
 	m_QuadEnvelopePointOperation = EQuadEnvelopePointOperation::NONE;
 
+	m_AnimateTime = 0;
+	m_Animate = false;
+
 	m_ResetZoomEnvelope = true;
 	m_SettingsCommandInput.Clear();
 	m_MapSettingsCommandContext.Reset();
@@ -4679,8 +4690,6 @@ void CEditor::OnRender()
 
 	if(m_Animate)
 		m_AnimateTime = Client()->GlobalTime() - m_AnimateStart;
-	else
-		m_AnimateTime = 0;
 
 	m_pUiGotContext = nullptr;
 	Ui()->StartCheck();

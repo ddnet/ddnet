@@ -2793,6 +2793,10 @@ CUi::EPopupMenuFunctionResult CEditor::PopupAnimateSettings(void *pContext, CUIR
 	float AnimateSpeedRatio = OldAnimateSpeed / pEditor->m_AnimateSpeed;
 	float Time = pEditor->Client()->GlobalTime();
 	pEditor->m_AnimateStart = Time + (pEditor->m_AnimateStart - Time) * AnimateSpeedRatio;
+	if(!pEditor->m_Animate)
+	{
+		pEditor->m_AnimateTime *= AnimateSpeedRatio;
+	}
 
 	return CUi::POPUP_KEEP_OPEN;
 }

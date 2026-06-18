@@ -16,6 +16,7 @@
 
 #include <game/editor/editor.h>
 #include <game/editor/editor_actions.h>
+#include <game/editor/editor_trackers.h>
 #include <game/editor/mapitems/envelope.h>
 #include <game/editor/mapitems/map.h>
 
@@ -536,6 +537,78 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			Ui()->ClipDisable();
 		}
 
+		// handle time bar
+		{
+			if(s_Operation == EEnvelopeEditorOp::NONE)
+			{
+				UpdateHotEnvelopeObject(View, pEnvelope.get(), s_ActiveChannels);
+			}
+
+			ColorRGBA BarColor;
+			if(Ui()->CheckActiveItem(&m_AnimateTime))
+			{
+				if(s_Operation == EEnvelopeEditorOp::SELECT)
+				{
+					float dx = s_MouseXStart - Ui()->MouseX();
+					float dy = s_MouseYStart - Ui()->MouseY();
+
+					if(dx * dx + dy * dy > 20.0f)
+						s_Operation = EEnvelopeEditorOp::DRAG_TIME_BAR;
+				}
+
+				if(s_Operation == EEnvelopeEditorOp::DRAG_TIME_BAR)
+				{
+					float DeltaX = ScreenToEnvelopeDX(View, Ui()->MouseDeltaX()) * (Input()->ModifierIsPressed() ? 0.05f : 1.0f);
+					m_AnimateTime += DeltaX / m_AnimateSpeed;
+					m_AnimateTime = std::max(m_AnimateTime, 0.0f);
+				}
+
+				if(!Ui()->MouseButton(0))
+				{
+					Ui()->SetActiveItem(nullptr);
+					s_Operation = EEnvelopeEditorOp::NONE;
+				}
+
+				m_ActiveEnvelopePreview = EEnvelopePreview::SELECTED;
+				BarColor = ColorRGBA(1.0f, 1.0f, 0.0f, 0.8f);
+				str_copy(m_aTooltip, "Timebar. Press left-click to drag. Hold ctrl to be more precise.");
+			}
+			else if(Ui()->HotItem() == &m_AnimateTime)
+			{
+				if(Ui()->MouseButton(0))
+				{
+					Ui()->SetActiveItem(&m_AnimateTime);
+					s_Operation = EEnvelopeEditorOp::SELECT;
+
+					s_MouseXStart = Ui()->MouseX();
+					s_MouseYStart = Ui()->MouseY();
+				}
+
+				m_ActiveEnvelopePreview = EEnvelopePreview::SELECTED;
+				BarColor = ColorRGBA(1.0f, 1.0f, 0.0f, 0.8f);
+				str_copy(m_aTooltip, "Timebar. Press left-click to drag. Hold ctrl to be more precise.");
+			}
+			else
+				BarColor = ColorRGBA(1.0f, 1.0f, 0.0f, 0.5f);
+
+			float Time = m_AnimateTime * m_AnimateSpeed;
+			const float BarWidth = 1.5f;
+			CUIRect TimeBar{
+				EnvelopeToScreenX(View, Time) - BarWidth / 2.0f,
+				View.y,
+				BarWidth,
+				View.h,
+			};
+			TimeBar.Draw(BarColor, IGraphics::CORNER_NONE, 0.0f);
+
+			if(Time > pEnvelope->EndTime())
+			{
+				float LoopedTime = std::fmod(Time, pEnvelope->EndTime());
+				TimeBar.x = EnvelopeToScreenX(View, LoopedTime) - BarWidth / 2.0f;
+				TimeBar.Draw(BarColor, IGraphics::CORNER_NONE, 0.0f);
+			}
+		}
+
 		{
 			using namespace std::chrono_literals;
 			CTimeStep UnitsPerLineX = 1ms;
@@ -578,60 +651,9 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			Ui()->ClipDisable();
 		}
 
-		// render tangents for bezier curves
-		{
-			Ui()->ClipEnable(&View);
-			Graphics()->TextureClear();
-			Graphics()->LinesBegin();
-			for(int c = 0; c < pEnvelope->GetChannels(); c++)
-			{
-				if(!(s_ActiveChannels & (1 << c)))
-					continue;
-
-				for(int i = 0; i < (int)pEnvelope->m_vPoints.size(); i++)
-				{
-					float PosX = EnvelopeToScreenX(View, pEnvelope->m_vPoints[i].m_Time.AsSeconds());
-					float PosY = EnvelopeToScreenY(View, fx2f(pEnvelope->m_vPoints[i].m_aValues[c]));
-
-					// Out-Tangent
-					if(i < (int)pEnvelope->m_vPoints.size() - 1 && pEnvelope->m_vPoints[i].m_Curvetype == CURVETYPE_BEZIER)
-					{
-						float TangentX = EnvelopeToScreenX(View, (pEnvelope->m_vPoints[i].m_Time + pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c]).AsSeconds());
-						float TangentY = EnvelopeToScreenY(View, fx2f(pEnvelope->m_vPoints[i].m_aValues[c] + pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaY[c]));
-
-						if(Map()->IsTangentOutPointSelected(i, c))
-							Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
-						else
-							Graphics()->SetColor(aColors[c].r, aColors[c].g, aColors[c].b, 0.4f);
-
-						IGraphics::CLineItem LineItem(TangentX, TangentY, PosX, PosY);
-						Graphics()->LinesDraw(&LineItem, 1);
-					}
-
-					// In-Tangent
-					if(i > 0 && pEnvelope->m_vPoints[i - 1].m_Curvetype == CURVETYPE_BEZIER)
-					{
-						float TangentX = EnvelopeToScreenX(View, (pEnvelope->m_vPoints[i].m_Time + pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c]).AsSeconds());
-						float TangentY = EnvelopeToScreenY(View, fx2f(pEnvelope->m_vPoints[i].m_aValues[c] + pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaY[c]));
-
-						if(Map()->IsTangentInPointSelected(i, c))
-							Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
-						else
-							Graphics()->SetColor(aColors[c].r, aColors[c].g, aColors[c].b, 0.4f);
-
-						IGraphics::CLineItem LineItem(TangentX, TangentY, PosX, PosY);
-						Graphics()->LinesDraw(&LineItem, 1);
-					}
-				}
-			}
-			Graphics()->LinesEnd();
-			Ui()->ClipDisable();
-		}
-
 		// render lines
 		{
-			float EndTimeTotal = maximum(0.000001f, pEnvelope->EndTime());
-			float EndX = std::clamp(EnvelopeToScreenX(View, EndTimeTotal), View.x, View.x + View.w);
+			float EndX = View.x + View.w;
 			float StartX = std::clamp(View.x + View.w * m_OffsetEnvelopeX, View.x, View.x + View.w);
 
 			float EndTime = ScreenToEnvelopeX(View, EndX);
@@ -681,6 +703,71 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				}
 				Graphics()->LinesBatchEnd(&LineItemBatch);
 			}
+			Ui()->ClipDisable();
+		}
+
+		CUIRect InactiveRegionLeft{
+			View.x,
+			View.y,
+			std::max(0.0f, EnvelopeToScreenX(View, 0.0f) - View.x),
+			View.h,
+		};
+		CUIRect InactiveRegionRight{
+			EnvelopeToScreenX(View, pEnvelope->EndTime()),
+			View.y,
+			std::max(0.0f, View.x + View.w - EnvelopeToScreenX(View, pEnvelope->EndTime())),
+			View.h,
+		};
+		InactiveRegionLeft.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_NONE, 0.0f);
+		InactiveRegionRight.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_NONE, 0.0f);
+
+		// render tangents for bezier curves
+		{
+			Ui()->ClipEnable(&View);
+			Graphics()->TextureClear();
+			Graphics()->LinesBegin();
+			for(int c = 0; c < pEnvelope->GetChannels(); c++)
+			{
+				if(!(s_ActiveChannels & (1 << c)))
+					continue;
+
+				for(int i = 0; i < (int)pEnvelope->m_vPoints.size(); i++)
+				{
+					float PosX = EnvelopeToScreenX(View, pEnvelope->m_vPoints[i].m_Time.AsSeconds());
+					float PosY = EnvelopeToScreenY(View, fx2f(pEnvelope->m_vPoints[i].m_aValues[c]));
+
+					// Out-Tangent
+					if(i < (int)pEnvelope->m_vPoints.size() - 1 && pEnvelope->m_vPoints[i].m_Curvetype == CURVETYPE_BEZIER)
+					{
+						float TangentX = EnvelopeToScreenX(View, (pEnvelope->m_vPoints[i].m_Time + pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c]).AsSeconds());
+						float TangentY = EnvelopeToScreenY(View, fx2f(pEnvelope->m_vPoints[i].m_aValues[c] + pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaY[c]));
+
+						if(Map()->IsTangentOutPointSelected(i, c))
+							Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
+						else
+							Graphics()->SetColor(aColors[c].r, aColors[c].g, aColors[c].b, 0.4f);
+
+						IGraphics::CLineItem LineItem(TangentX, TangentY, PosX, PosY);
+						Graphics()->LinesDraw(&LineItem, 1);
+					}
+
+					// In-Tangent
+					if(i > 0 && pEnvelope->m_vPoints[i - 1].m_Curvetype == CURVETYPE_BEZIER)
+					{
+						float TangentX = EnvelopeToScreenX(View, (pEnvelope->m_vPoints[i].m_Time + pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c]).AsSeconds());
+						float TangentY = EnvelopeToScreenY(View, fx2f(pEnvelope->m_vPoints[i].m_aValues[c] + pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaY[c]));
+
+						if(Map()->IsTangentInPointSelected(i, c))
+							Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
+						else
+							Graphics()->SetColor(aColors[c].r, aColors[c].g, aColors[c].b, 0.4f);
+
+						IGraphics::CLineItem LineItem(TangentX, TangentY, PosX, PosY);
+						Graphics()->LinesDraw(&LineItem, 1);
+					}
+				}
+			}
+			Graphics()->LinesEnd();
 			Ui()->ClipDisable();
 		}
 
@@ -742,7 +829,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 			if(s_Operation == EEnvelopeEditorOp::NONE)
 			{
-				UpdateHotEnvelopePoint(View, pEnvelope.get(), s_ActiveChannels);
+				UpdateHotEnvelopeObject(View, pEnvelope.get(), s_ActiveChannels);
 				if(!Ui()->MouseButton(0))
 					Map()->m_EnvOpTracker.Stop(false);
 			}
@@ -1515,7 +1602,7 @@ void CEditor::RenderEnvelopeEditorColorBar(CUIRect ColorBar, const std::shared_p
 	ColorBarBackground.DrawOutline(ColorRGBA(0.7f, 0.7f, 0.7f, 1.0f));
 }
 
-void CEditor::UpdateHotEnvelopePoint(const CUIRect &View, const CEnvelope *pEnvelope, int ActiveChannels)
+void CEditor::UpdateHotEnvelopeObject(const CUIRect &View, const CEnvelope *pEnvelope, int ActiveChannels)
 {
 	if(!Ui()->MouseInside(&View))
 		return;
@@ -1567,6 +1654,15 @@ void CEditor::UpdateHotEnvelopePoint(const CUIRect &View, const CEnvelope *pEnve
 	if(pMinPointId != nullptr)
 	{
 		Ui()->SetHotItem(pMinPointId);
+	}
+	else if(!m_Animate)
+	{
+		float Time = m_AnimateTime * m_AnimateSpeed;
+		float LoopedTime = std::fmod(Time, pEnvelope->EndTime());
+		if(absolute(EnvelopeToScreenX(View, Time) - MousePos.x) < 20.0f || absolute(EnvelopeToScreenX(View, LoopedTime) - MousePos.x) < 20.0f)
+		{
+			Ui()->SetHotItem(&m_AnimateTime);
+		}
 	}
 }
 
