@@ -257,6 +257,9 @@ private:
 
 	static void ConTuneParam(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneZone(IConsole::IResult *pResult, void *pUserData);
+	static void ConEnvelopeTrigger(IConsole::IResult *pResult, void *pUserData);
+	static void ConTuneZoneEnvelopeTrigger(IConsole::IResult *pResult, void *pUserData);
+	static void ConEnvelopeTriggerSpawn(IConsole::IResult *pResult, void *pUserData);
 	static void ConMapbug(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConchainMenuMap(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);

@@ -648,8 +648,13 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 	m_Teams = pFrom->m_Teams;
 	m_Core.m_vSwitchers = pFrom->m_Core.m_vSwitchers;
 	m_PredictedEvents = pFrom->m_PredictedEvents;
-	// delete the previous entities
+
+	// delete the previous entities and envelope triggers
 	Clear();
+	m_EnvelopeTriggerList = pFrom->m_EnvelopeTriggerList;
+	m_vEnvelopeTriggerstate = pFrom->m_vEnvelopeTriggerstate;
+	m_TuneZoneToEnvelopeZone = pFrom->m_TuneZoneToEnvelopeZone;
+
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		m_apCharacters[i] = nullptr;
@@ -770,6 +775,11 @@ void CGameWorld::OnModified() const
 
 void CGameWorld::Clear()
 {
+	// remove envelope trigger zones
+	m_EnvelopeTriggerList.clear();
+	m_vEnvelopeTriggerstate.clear();
+	m_TuneZoneToEnvelopeZone.clear();
+
 	// delete all entities
 	for(auto &pFirstEntityType : m_apFirstEntityTypes)
 		while(pFirstEntityType)

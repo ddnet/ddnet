@@ -19,11 +19,13 @@ enum ERenderType
 	RENDERTYPE_FULL_DESIGN,
 };
 
+using FEnvelopeEvalCallback = std::function<void(bool IsDefault, bool IsLooping, bool IsPlaying, bool Reset)>;
+
 class IEnvelopeEval
 {
 public:
 	virtual ~IEnvelopeEval() = default;
-	virtual void EnvelopeEval(int TimeOffsetMillis, int EnvelopeIndex, ColorRGBA &Result, size_t Channels) = 0;
+	virtual void EnvelopeEval(int TimeOffsetMillis, int EnvelopeIndex, ColorRGBA &Result, size_t Channels, FEnvelopeEvalCallback Callback = {}) = 0;
 };
 
 class IMapImages

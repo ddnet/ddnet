@@ -173,6 +173,9 @@ struct SValueLoader
 {
 	static void LoadTuneValues(const CSettingValuesBuilder &TuneBuilder);
 	static void LoadTuneZoneValues(const CSettingValuesBuilder &TuneZoneBuilder);
+	static void LoadEnvelopeTriggerValues(const CSettingValuesBuilder &EnvelopeTriggerBuilder);
+	static void LoadEnvelopeTriggerSpawnValues(const CSettingValuesBuilder &EnvelopeTriggerSpawnBuilder);
+	static void LoadArgumentEnvelopeTriggerValues(CArgumentValuesListBuilder &&ArgBuilder);
 	static void LoadMapBugs(const CSettingValuesBuilder &BugBuilder);
 	static void LoadArgumentTuneValues(CArgumentValuesListBuilder &&ArgBuilder);
 };
